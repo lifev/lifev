@@ -10,6 +10,15 @@
 #include "GetPot.hpp"
 #include "ensight7Writer.hpp"
 
+LifeV::Real fZero(const LifeV::Real& t,
+                  const LifeV::Real& x,
+                  const LifeV::Real& y,
+                  const LifeV::Real& z,
+                  const LifeV::ID& i)
+{
+    return 0.;
+}
+
 int main(int argc, char** argv)
 {
     using namespace LifeV;
@@ -24,19 +33,21 @@ int main(int argc, char** argv)
     // ********* Boundary conditions definition for fluid *************************
     BCFunctionBase u_wall(u1);
     BCFunctionBase u_inflow(u2);
-    BCHandler BCh_u(4, BCHandler::HINT_BC_ONLY_ESSENTIAL);
+    BCFunctionBase f_zero(fZero);
+    BCHandler BCh_u;
 
     BCh_u.addBC("Wall",   3, Essential, Full, u_wall,  3);  // non-permeable Wall - no-slip condition
     BCh_u.addBC("Wall-inflow",   4, Essential, Full, u_wall,  3);
     BCh_u.addBC("Wall-outflow",   5, Essential, Full, u_wall,  3);
 
     BCh_u.addBC("InFlow", 1, Essential,   Full, u_inflow, 3); // Velocity profile
+    BCh_u.addBC("OutFlow", 2, Natural, Full, f_zero, 3); // free outflow
 
 // ********** Boundary conditions definitions for mass transport ***************
     BCFunctionBase c_inflow(c1);
 //  BCFunctionMixte c_wall(alpha,beta);   // Permeability boundary condition
     BCFunctionBase c_wall(cw);              // Concentration boundary condition
-    BCHandler BCh_c(4);
+    BCHandler BCh_c;
 
 //  BCh_c.addBC("C-Wall",   3, Mixte, Scalar, c_wall);  // Permeability boundary condition
 //  BCh_c.addBC("C-Wall-inflow",   4, Mixte, Scalar, c_wall);
@@ -47,6 +58,7 @@ int main(int argc, char** argv)
     BCh_c.addBC("C-Wall-outflow",   5, Essential, Scalar, c_wall);
 
     BCh_c.addBC("C-InFlow", 1, Essential,  Scalar, c_inflow); // Concentration profile
+    BCh_c.addBC("C-OutFlow", 2, Natural, Full, f_zero, 3); // free outflow
 
 // *********** Fluid class: ns *************************************************
     NavierStokesSolverPC< RegionMesh3D<LinearTetra> >
