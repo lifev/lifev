@@ -22,5 +22,4 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-
-SUBDIRS		= data official development
+SUBDIRS		= mesh

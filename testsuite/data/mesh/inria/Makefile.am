@@ -22,5 +22,4 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-
-SUBDIRS		= data official development
+dist_pkgdata_DATA	=  cube_384.mesh cube_6007.mesh cylhexa.mesh cyltetra.mesh
