@@ -1,0 +1,65 @@
+
+\chapter{Generalities}
+\label{cha:generalities}
+
+\section{Scope of the document}
+\label{sec:scope-document}
+
+This is a ``working document'' meant to drive the development of the
+software library \thelibrary. It is an informal document. All the
+people involved in the library development (from now on called the
+\emph{authors}) are supposed to freely contribute to its writing.
+
+The major objectives of this document is manifold:
+\begin{enumerate}
+\item Set up a set of rules regarding program development, coding rules
+  and standards, which must be followed by the software developers;
+\item Provide the architectural design for the libraries and classes
+  to be developed, with a special stress on public interfaces;
+\item Provide a subtask subdivision for the work to be done and a
+  (possibly accurate) \emph{scheduling}.
+\end{enumerate}
+
+\section{Language and nomenclature convection} 
+\label{sec:lang-nomencl-conv}
+
+Because of many practical reasons, the document will be written in
+English, or at least the best English the authors can manage.
+
+We will use \texttt{typesetting font style} to indicate parts of
+actual computer code or name of variables, types, etc..
+\textbf{Boldface} is used to mark portion containing rules which
+should be followed during program development and \emph{emphasised}
+text to indicate important concepts and nomenclature.
+ 
+\section{Software Management} 
+\label{sec:software-management}
+
+Being this software the result of the work of many people working in a
+(hopefully) coordinated fashion, some rules for software management
+must be set and agreed upon.
+
+A related problem is how to allow for the most ample discussion
+between the authors and, at the same time, coordinate  software
+production.
+
+The idea is that, while software development will be subdivided into
+subtask, whose responsibility will be assigned to a specific person,
+or group of persons working together, all major decisions should be
+collectively discussed. Since the authors operates far away from each
+other, we need to held regular meetings and use extensively Web means
+such as e-mails. Luca Formaggia may also make stop-overs at Verona or
+Milan on Mondays, when stronger coordination with the Italian part of
+the team is needed.
+   
+
+\subsection{Some conventions}
+\label{sec:some-conventions}
+
+The software source, its documentation and all related documents (this
+one included) will be kept in a repository under revision control
+using CVS\footnote{CVS stands for Concurrent Version System}.  
+
+CVS keywords like \verb!Id! and \verb!Log! should not be included in source files,
+they cause many unnecessary conflicts at update/commit time. Use 
+\verb!cvs log! to get the information given by \verb!Id! or \verb!Log!.

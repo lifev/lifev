@@ -25,9 +25,9 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .tex .pdf
 
-TEX_SRC	= docfe.tex jfg.tex Specifications.tex
-NOTEX_SRC	= docfe jfg Specifications 
-PDF		= docfe.pdf jfg.pdf Specifications.pdf
+TEX_SRC	= docfe.tex jfg.tex lifev-dev.tex
+NOTEX_SRC	= docfe jfg lifev-dev 
+PDF		= docfe.pdf jfg.pdf lifev-dev.pdf
 
 all: $(PDF)
 
@@ -48,5 +48,5 @@ EXTRA_DIST = $(TEX_SRC) $(IMAGES_SRC) life.bib
 
 MOSTLYCLEANFILES	= docfe.log docfe.aux docfe.pdf docfe.blg docfe.bbl \
 			  jfg.log jfg.aux jfg.pdf jfg.blg jfg.bbl \
-			  Specifications.log Specifications.glo Specifications.idx Specifications.aux Specifications.out \
-                          Specifications.pdf Specifications.toc Specifications.lof Specifications.lot Specifications.blg Specifications.bbl 
+			  lifev-dev.log lifev-dev.glo lifev-dev.idx lifev-dev.aux lifev-dev.out \
+                          lifev-dev.pdf lifev-dev.toc lifev-dev.lof lifev-dev.lot lifev-dev.blg lifev-dev.bbl 

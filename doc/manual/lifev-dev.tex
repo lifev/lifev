@@ -1,0 +1,51 @@
+\documentclass[a4paper,report]{lifestyle}
+
+
+\RCS $Revision: 1.1 $ 
+\RCS $Date: 2004-03-08 10:03:38 $ 
+\RCS $State: Exp $
+
+\newcommand{\thelibrary}{\textsl{LIFE V}}
+
+\title{\HUGE LifeV Developer Manual}
+\author{\raggedright L. Formaggia\\
+J.-F. Gerbeau\\
+C. Prud'homme}
+\date{\lifedraftdate}
+
+\makeindex
+\makeglossary
+
+\pagestyle{fancy}
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\listoffigures
+
+\listoftables
+
+\include{lifev-dev_generalities}
+\include{lifev-dev_conventions}
+\include{lifev-dev_overview}
+
+\bibliographystyle{plain}
+\bibliography{life}
+
+\printindex
+
+\end{document} 
+
+%
+%%%%%%%%%%%%% Some Settings for emacs and auc-TeX
+% Local Variables:
+% TeX-master: t
+% TeX-command-default: "PDFLaTeX"
+% TeX-parse-self: t
+% TeX-auto-save: t
+% TeX-auto-regexp-list: TeX-auto-full-regexp-list
+% eval: (ispell-change-dictionary "american")
+% End:
+%

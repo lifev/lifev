@@ -1,0 +1,46 @@
+[General]
+img_extIsRegExp=false
+img_extensions=.eps .pdf .dvi .ps .fig .gif .jpg .png
+masterDocument=
+name=lifev-dev
+pkg_extIsRegExp=false
+pkg_extensions=.cls .sty .dtx
+src_extIsRegExp=false
+src_extensions=.tex .ltx .bib .mp
+
+[Tool/MakeIndex/Default]
+options='%S.idx'
+
+[Tools]
+MakeIndex=Default
+QuickBuild=PDFLaTeX+ViewPDF
+
+[item:Specifications.tex]
+archive=true
+encoding=ISO 8859-1
+highlight=LaTeX-Kile
+open=true
+
+[item:lifev-dev.kilepr]
+archive=true
+encoding=
+highlight=
+open=false
+
+[item:lifev-dev_conventions.tex]
+archive=true
+encoding=ISO 8859-1
+highlight=LaTeX-Kile
+open=true
+
+[item:lifev-dev_generalities.tex]
+archive=true
+encoding=ISO 8859-1
+highlight=LaTeX-Kile
+open=true
+
+[item:lifev-dev_overview.tex]
+archive=true
+encoding=
+highlight=
+open=false
