@@ -307,18 +307,18 @@ NavierStokesHandler<Mesh>::postProcess() {
       break;
     } 
  
+    // postprocess data file for GMV
     wr_gmv_ascii("test."+name+".inp",_mesh, _dim_u,_u.giveVec(), _p.giveVec());
 
-    //wr_medit_ascii_scalar("press."+name+".bb",_p.giveVec(),_p.size());
-    //wr_medit_ascii_scalar("vel_x."+name+".bb",_u.giveVec(),_mesh.numVertices());
-    //wr_medit_ascii_scalar("vel_y."+name+".bb",_u.giveVec() + _dim_u,_mesh.numVertices());
-    //wr_medit_ascii_scalar("vel_z."+name+".bb",_u.giveVec() + 2*_dim_u,_mesh.numVertices());
-    // wr_medit_ascii_vector("veloc."+name+".bb",_u.giveVec(),_mesh.numVertices(),_dim_u);
-    //system(("ln -s "+_mesh_file+" press."+name+".mesh").data());
-    //system(("ln -s "+_mesh_file+" vel_x."+name+".mesh").data());
-    //system(("ln -s "+_mesh_file+" vel_y."+name+".mesh").data());
-    //system(("ln -s "+_mesh_file+" vel_z."+name+".mesh").data());
-    // system(("ln -s "+_mesh_file+" veloc."+name+".mesh").data());
+    // postprocess data file for medit
+    wr_medit_ascii_scalar("press."+name+".bb",_p.giveVec(),_p.size());
+    wr_medit_ascii_scalar("vel_x."+name+".bb",_u.giveVec(),_mesh.numVertices());
+    wr_medit_ascii_scalar("vel_y."+name+".bb",_u.giveVec() + _dim_u,_mesh.numVertices());
+    wr_medit_ascii_scalar("vel_z."+name+".bb",_u.giveVec() + 2*_dim_u,_mesh.numVertices());
+    system(("ln -s "+_mesh_dir+_mesh_file+" press."+name+".mesh").data());
+    system(("ln -s "+_mesh_dir+_mesh_file+" vel_x."+name+".mesh").data());
+    system(("ln -s "+_mesh_dir+_mesh_file+" vel_y."+name+".mesh").data());
+    system(("ln -s "+_mesh_dir+_mesh_file+" vel_z."+name+".mesh").data());
   }
 }
 
