@@ -22,7 +22,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 /**
-   \file importMesh.hpp
+   \file importer.hpp
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
    \date 2004-11-06
  */
@@ -34,39 +34,77 @@
 
 namespace LifeV
 {
+
+/**
+  \enum MeshFormat
+*/
 enum MeshFormat {
-    MESHPP,
+    MESHPP, 
     INRIA,
     GMSH,
     NETGEN
 };
+
+/**
+  \class importer
+  
+  import mesh data formats into Life mesh data structure.
+  
+  \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+*/
 class importer
 {
 public:
 
+    /**
+     * default constructor. use GMSH as default mesh format
+     */
     importer()
         :
         _M_filename(),
         _M_format(GMSH)
         {}
+        
+    /**
+     * constructor
+     * @param filename mesh filename to import
+     * @param format format of the file
+     */
     importer( std::string const& filename,  MeshFormat const& format )
         :
         _M_filename( filename ),
         _M_format( format )
         {}
 
+    /**
+     * set the file name 
+     * @param __filename 
+     */
     void setFilename( std::string const& __filename ) {
         _M_filename = __filename;
     }
 
+    /**
+     * set the format of the mesh file
+     * @param __format  format
+     */
     void setFormat( MeshFormat const& __format ) {
         _M_format = __format;
     }
 
-    //! import mesh with tetrahedras
+    /**
+     * import mesh with tetrahedras
+     * @param mesh mesh data structure to fill in
+     * @param regionFlag marker for the region to load
+     */
     void import( RegionMesh3D<LinearTetra> & mesh, EntityFlag regionFlag );
 
-    //! import mesh with hexahedras
+    
+    /**
+     * import mesh with hexahedras
+     * @param mesh mesh data structure to fill in
+     * @param regionFlag marker for the region to load
+     */
     void import( RegionMesh3D<LinearHexa> & mesh, EntityFlag regionFlag );
 
 private:
