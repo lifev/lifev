@@ -49,7 +49,6 @@ void fixedPoint::eval(Vector& dispNew, Vector& velo, const Vector& disp, int sta
     M_fluid.updateMesh(M_time);
     M_fluid.iterate(M_time);
 
-    M_solid.BC_solid().showMe();
     M_solid.setRecur(0);
     M_solid.iterate();
 
@@ -72,7 +71,7 @@ void fixedPoint::evalResidual(Vector &res, const Vector& disp, int iter)
     if (status) std::cout << " [NEW TIME STEP] ";
     std::cout << std::endl;
     eval(M_dispStruct, M_velo, disp, status);
-    res = disp - M_dispStruct;
+    res = M_dispStruct - disp;
 }
 
 
