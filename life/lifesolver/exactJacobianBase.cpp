@@ -331,12 +331,12 @@ void my_matvecJacobianEJ(double *z, double *Jz, AZ_MATRIX* J, int proc_config[])
         {
             Vector da(dim);
             double dt   = my_data->M_pFS->fluid().timestep();
-            double dti2 = 1.0/( dt * dt);
+            double dti2 = 1.0/( dt*dt);
 
             da = - my_data->M_pFS->fluid().density()*dti2*zSolid;
 
-            my_data->M_pFS->getQuasiNewton()->setDacc(da);
-            my_data->M_pFS->getQuasiNewton()->solveReducedLinearFluid();
+            my_data->M_pFS->getReducedLinFluid()->setDacc(da);
+            my_data->M_pFS->getReducedLinFluid()->solveReducedLinearFluid();
             my_data->M_pFS->solveLinearSolid();
         }
         for (int i=0; i <(int)dim; ++i)

@@ -224,7 +224,7 @@ void  steklovPoincare::solveJac(Vector &muk,
         break;
         case NEWTON:
             // Dirichlet-Neumann preconditioner
-            invSfSsPrime(_res, 0.001, muS);
+            invSfSsPrime(_res, _linearRelTol, muS);
             break;
         case NO_PRECONDITIONER:
         default:
@@ -471,14 +471,14 @@ void my_matvecSfSsPrime(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
 
             da = - dti2*my_data->M_pFS->fluid().density()*my_data->M_pFS->DDNprecond(zSolid);
 
-            my_data->M_pFS->getQuasiNewton()->setDacc(da);
-            my_data->M_pFS->getQuasiNewton()->solveReducedLinearFluid();
+            my_data->M_pFS->getReducedLinFluid()->setDacc(da);
+            my_data->M_pFS->getReducedLinFluid()->solveReducedLinearFluid();
 
             my_data->M_pFS->solid().d() = my_data->M_pFS->DDNprecond(zSolid);
             my_data->M_pFS->solveLinearSolid();
 
             my_data->M_pFS->setResidualS(my_data->M_pFS->solid().residual());
-            my_data->M_pFS->setResidualF(my_data->M_pFS->getQuasiNewton()->residual());
+            my_data->M_pFS->setResidualF(my_data->M_pFS->getReducedLinFluid()->residual());
         }
 
         my_data->M_pFS->getResidualFSIOnSolid(jz);

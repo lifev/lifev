@@ -165,7 +165,7 @@ public:
     dof_interface_type& dofMeshToFluid() { return M_dofMeshToFluid; }
     dof_interface_type const& dofMeshToFluid() const { return M_dofMeshToFluid; }
 
-    quasi_newton_type getQuasiNewton(){return M_reducedLinFluid;}
+    quasi_newton_type getReducedLinFluid(){return M_reducedLinFluid;}
 
     UInt reducedFluid(){return M_reducedFluid;}
 
