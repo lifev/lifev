@@ -22,7 +22,9 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-dist_pkgdata_DATA	=  cube_384.mesh cube_6007.mesh cylhexa.mesh cyltetra.mesh
+dist_pkgdata_DATA	=  cube_384.mesh   cyltetra.mesh                   flowatch-short-0-percent.mesh  vessel2x4x20.mesh\
+cube_6007.mesh  flowatch-fine-0-percent.mesh    tube2x4x20.mesh                vessel_curve20.mesh\
+cylhexa.mesh    flowatch-medium-0-percent.mesh  tube_curve20.mesh
 
 check-local:
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\
