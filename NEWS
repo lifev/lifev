@@ -34,9 +34,10 @@ New in 0.5.0:
 [testsuite]
 * Added test for 3D/0D coupling (AM)
 * Moved files of test_darcy in lifesolver (VM, CP)
-  ** hex and tet tests 
+  ** hex and tet tests
   ** tensor and scalar diffusion tests
 * Removed test_darcytetra (VM)
+* oned solver can solve 2 coupled tubes (VM)
 * Centralized all FSI tests in test_fsi (GF)
 
 Bugs fixed in 0.4.0:
