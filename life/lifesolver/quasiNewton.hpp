@@ -50,10 +50,11 @@ class quasiNewton{
 
 public:
 
-//    typedef boost::shared_ptr<NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> > > fluid_type;
 
     //! constructor
-    quasiNewton(fluid_type _fluid, operFS* const _op);
+    quasiNewton(operFS* const _op,
+                fluid_type _fluid,
+                solid_type _solid);
 
     //! bondary conditions setup
 
@@ -67,7 +68,7 @@ public:
     void setDacc(Vector const &_vec){M_dacc = _vec;}
     Vector& minusdp() {return M_minusdp;}
 
-    const Vector& residual() {return M_residual_dp;}
+    const Vector& residual();
     void evalResidual();
 
     void setLinearSolver (GetPot const &_data_file);
@@ -79,6 +80,9 @@ private:
 
     //! pointer to fluid
     fluid_type       M_fluid;
+
+    //!pointer to solid
+    solid_type       M_solid;
 
     //! BC for pressure
     bchandler_type   M_BCh_dp;
@@ -132,6 +136,9 @@ private:
 
     //! computed matrix C?
     bool             M_computedC;
+
+    //! computed residual ?
+    bool             M_computedResidual;
 };
 }
 
