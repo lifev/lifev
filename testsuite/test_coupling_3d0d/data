@@ -16,12 +16,13 @@ endtime         = 0.002             # endtime --> two steps for testing purposes
 
 [../discretization]
 mesh_dir  = ../data/mesh/inria/  # the directory where the mesh file is
-mesh_file =  cyltetra.mesh       #hexa8x8.mesh     # mesh file
+mesh_file =  cyltetra.mesh       # hexa8x8.mesh     # mesh file
 timestep  = 0.001                # timestep
 
 
 [../miscellaneous]
 verbose         = 1
+coupStrategy    = 2              # coupling strategy : 1 -> mean pressure; 2 -> Flow ratex
 
 [../aztec_i]
 output          = warnings #all_res
