@@ -17,7 +17,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 /*!
-  \file oneDModelSolver.hpp
+  \file tridiagMatrix.hpp
   \author Vincent Martin
   \date 07/2004
   \version 1.0
@@ -40,7 +40,7 @@
 /*! 
   \class TriDiagMatrix
 
-   This class contains a class for tridiagonal matrices.
+   A class for tridiagonal matrices.
 
 */
 template< class R >
