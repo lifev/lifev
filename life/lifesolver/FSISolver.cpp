@@ -76,7 +76,7 @@ FSISolver::FSISolver( GetPot const& data_file,
     this->setFSIOperator( M_method );
 
     M_oper->setPreconditioner( precond );
-    Debug( 6220 ) << "FSISolver::FSISolver starts\n";
+    Debug( 6220 ) << "FSISolver::FSISolver ends\n";
 }
 void
 FSISolver::setFSIOperator( std::string const& __op )
@@ -107,6 +107,7 @@ FSISolver::setFSIOperator( std::string const& __op )
 
     M_oper->setBC( M_BCh_u, M_BCh_d, M_BCh_mesh );
     M_oper->setup();
+    Debug( 6220 ) << "FSISolver::setFSIOperator done\n";
 }
 void
 FSISolver::iterate( Real time )
