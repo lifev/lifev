@@ -4,7 +4,7 @@
 #-------------------------------------------------
 
 [boundcond]
-test_case	= 4	# test case for boundary conditions
+test_case	= 9999	# test case for boundary conditions
 
 [parameters]
 alphaCor	= 3.0		# coriolis coeff
@@ -21,9 +21,9 @@ timestep = 1e-4		# timestep
 mesh_file	= cylhexa.mesh	# mesh file name
 mesh_dir	= ../data/mesh/inria
 		# the directory where the mesh file is
-x_left	= 0.
+x_left	= 30.
 x_right	= 60.
-nb_elem	= 60	#   number of elements
+nb_elem	= 30	#   number of elements
 
 [miscellaneous]
 post_dir = ./Post                 # the directory for postprocessing files

@@ -64,6 +64,15 @@ Real DataOneDModel::endtime() const
   return _M_time_end;
 }
 
+Real DataOneDModel::xLeft() const
+{
+  return _M_x_left;
+}
+Real DataOneDModel::xRight() const
+{
+  return _M_x_right;
+}
+
 void DataOneDModel::showMeData(std::ostream& c) const
 {
   c << "\n*** Values for data [boundcond]\n";

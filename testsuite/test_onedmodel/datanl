@@ -4,7 +4,7 @@
 #-------------------------------------------------
 
 [boundcond]
-test_case	= 4	# test case for boundary conditions
+test_case	= 999	# test case for boundary conditions
 
 [parameters]
 alphaCor	= 3.0		# coriolis coeff
@@ -14,16 +14,16 @@ Kr	= 6.0		# friction parameter (source term)
 
 [time]
 timebeg	 = 0.0		# inittime
-timeend	 = 1.		# endtime
-timestep = 1e-4		# timestep		
+timeend	 = 0.3		# endtime
+timestep = 1e-4		# timestep
 
 [discretization]
 mesh_file	= cylhexa.mesh	# mesh file name
-mesh_dir	= ../data/mesh/inria 
+mesh_dir	= ../data/mesh/inria
 		# the directory where the mesh file is
 x_left	= 0.
-x_right	= 60.
-nb_elem	= 60	#   number of elements 
+x_right	= 30.
+nb_elem	= 30	#   number of elements
 
 [miscellaneous]
 post_dir = ./Post                 # the directory for postprocessing files
@@ -32,7 +32,7 @@ post_proc_format = medit          # vtk or medit
 show_graceplot = 1                # 0: no grace plot, 1: show grace plots
 
 
-[aztec]  
+[aztec]
 solver = cg  #cg , gmres, cgs, tfqmr, bicgstab, slu, symmlq, fixed_pt, lu
 precond = dom_decomp
 subdomain_solve = icc

@@ -52,6 +52,10 @@ public:
   Real inittime() const;
   Real endtime()  const;
 
+  // return the two extremal points
+  Real xLeft() const;
+  Real xRight() const;
+
   const std::string PostDirectory() const {return _M_post_dir;};
 
   //! Output

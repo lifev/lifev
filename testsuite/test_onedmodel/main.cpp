@@ -35,10 +35,10 @@ int main(int argc, char** argv)
   const char* data_file_name = command_line.follow("data", 2, "-f","--file");
   GetPot data_file(data_file_name);
 
-  OneDNonLinModelParam onedparamNL(data_file_name);
+  OneDNonLinModelParam onedparamNL(data_file);
   onedparamNL.initParam(4e6);
 
-  LinearSimpleParam onedparamLin(data_file_name);
+  LinearSimpleParam onedparamLin(data_file);
 
   std::cout << "======\n\tNon Linear model " << std::endl;
   onedparamNL.showMeData(std::cout);
@@ -47,8 +47,8 @@ int main(int argc, char** argv)
   onedparamLin.showMeData(std::cout);
   std::cout << "-----------------------------" << std::endl;
 
-  //  OneDModelSolver onedm(data_file_name, onedparamLin);
-  OneDModelSolver onedm(data_file_name, onedparamNL);
+  //  OneDModelSolver onedm(data_file, onedparamLin);
+  OneDModelSolver onedm(data_file, onedparamNL);
 
   onedm.showMeData();
   //  onedm.showMeHandler(cout, 6);
