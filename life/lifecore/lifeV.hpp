@@ -29,6 +29,10 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
   it must be includes in all translation units.
 */
 
+
+
+
+#if 0
 #include <boost/mpl/multiplies.hpp>
 #include <boost/mpl/list.hpp>
 #include <boost/mpl/lower_bound.hpp>
@@ -40,6 +44,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/deref.hpp>
 #include <boost/mpl/begin_end.hpp>
+#endif
 
 # ifndef __cplusplus
 # error You must use C++ for LifeV
@@ -202,7 +207,7 @@ typedef double Real;
 
 namespace mpl = boost::mpl;
 
-
+#if 0
 /*! \namespace detail
   \internal
 */
@@ -287,7 +292,24 @@ typedef uint8_type dim_type;
 //! Indices (starting from 0)
 typedef size_t size_type;
 
+#else
+//! Generic integer data
+typedef int Int;
+//! generic unsigned integer (used mainly for addressing)
+typedef unsigned int UInt;
+typedef unsigned short USInt;
 
+//! IDs (which starts ALWAYS from 1)
+typedef unsigned int id_type;
+typedef id_type ID;
+
+//! dimension type
+typedef unsigned short dim_type;
+
+//! Indices (starting from 0)
+typedef size_t size_type;
+
+#endif
 
 // typedef for indices
 
