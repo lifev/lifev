@@ -1,5 +1,19 @@
 # -*- readme-debian -*-
 
+Bugs fixed in 0.5.0:
+====================
+[configure]
+* Fixed umfpack check when umfpack is not installed (CP)
+
+New in 0.5.0:
+=============
+[lifefem]
+* Added discontinuous finite element(discontinuous galerkin) (DADP)
+
+[testsuite]
+* Added test for 3D/0D coupling (AM)
+
+
 Bugs fixed in 0.4.0:
 ====================
 [all]
@@ -146,4 +160,4 @@ New in 0.1.0pre3:
 * fixed some bugs and miscompilation in a few places
 
 
- -- Christophe Prud'homme <prudhomm@mit.edu>, Tue Oct  5 15:33:07 2004
+ -- Christophe Prud'homme <prudhomm@debian.org>, Wed Oct  6 21:05:44 2004
