@@ -31,7 +31,7 @@ const size_t UNKNOWN = size_t( -1 );
  *
  *                          Quadrature Rules on segments
  *
- *=======================================================================*/ 
+ *=======================================================================*/
 //! total number of quadrature rules on segments
 const size_t NB_QUAD_RULE_SEG = 3;
 //! id of the quadrature rules on segments
@@ -89,13 +89,13 @@ const SetOfQuadRule allQuadRuleSeg( quad_rule_seg, NB_QUAD_RULE_SEG );
  *
  *                     Quadrature Rules 2D on triangles
  *
- *=======================================================================*/ 
+ *=======================================================================*/
 //! total number of quadrature rules in 2D on triangle
-#define NB_QUAD_RULE_TRIA 3 
+#define NB_QUAD_RULE_TRIA 3
 //! id of the quadrature rules on triangles
 #define QUAD_RULE_TRIA_1PT     1
 #define QUAD_RULE_TRIA_3PT     2
-#define QUAD_RULE_TRIA_4PT     3 
+#define QUAD_RULE_TRIA_4PT     3
 //----------------------------------------------------------------------
 
 static const QuadPoint pt_tria_1pt[ 1 ] =
@@ -149,13 +149,13 @@ const SetOfQuadRule allQuadRuleTria( quad_rule_tria, NB_QUAD_RULE_TRIA );
  *
  *                     Quadrature Rules 2D on quadrangles
  *
- *=======================================================================*/ 
+ *=======================================================================*/
 //! total number of quadrature rules in 2D on quadrangle
-#define NB_QUAD_RULE_QUAD 3 
+#define NB_QUAD_RULE_QUAD 3
 //! id of the quadrature rules on quadrangles
 #define QUAD_RULE_QUAD_1PT     1
 #define QUAD_RULE_QUAD_4PT     2
-#define QUAD_RULE_QUAD_9PT     3 
+#define QUAD_RULE_QUAD_9PT     3
 //----------------------------------------------------------------------
 
 static const QuadPoint pt_quad_1pt[ 1 ] =
@@ -210,15 +210,15 @@ const SetOfQuadRule allQuadRuleQuad( quad_rule_quad, NB_QUAD_RULE_QUAD );
  *
  *                     Quadrature Rules 3D on tetraedras
  *
- *=======================================================================*/ 
+ *=======================================================================*/
 //! total number of quadrature rules in 3D on tetraedra
-#define NB_QUAD_RULE_TETRA 5 
+#define NB_QUAD_RULE_TETRA 5
 //! id of the quadrature rules on tetraedra
 #define QUAD_RULE_TETRA_1PT     1
 #define QUAD_RULE_TETRA_4PT     2
 #define QUAD_RULE_TETRA_5PT     3
 #define QUAD_RULE_TETRA_15PT    4
-#define QUAD_RULE_TETRA_64PT    5 
+#define QUAD_RULE_TETRA_64PT    5
 //----------------------------------------------------------------------
 
 static const QuadPoint pt_tetra_1pt[ 1 ] =
@@ -447,12 +447,12 @@ const SetOfQuadRule allQuadRuleTetra( quad_rule_tetra, NB_QUAD_RULE_TETRA );
  *
  *                     Quadrature Rules 3D on hexaedras
  *
- *=======================================================================*/ 
+ *=======================================================================*/
 //! total number of quadrature rules in 3D on hexa
-#define NB_QUAD_RULE_HEXA 2 
+#define NB_QUAD_RULE_HEXA 2
 //! id of the quadrature rules on quadrangles
 #define QUAD_RULE_HEXA_1PT     1
-#define QUAD_RULE_HEXA_8PT     2 
+#define QUAD_RULE_HEXA_8PT     2
 //----------------------------------------------------------------------
 
 static const QuadPoint pt_hexa_1pt[ 1 ] =
@@ -571,7 +571,7 @@ Real der2fct3_11_P2_1D( cRRef x, cRRef , cRRef )
 //
 //======================================================================
 /*
- 
+
                            |\
                            | \
                            | 1\
@@ -1212,7 +1212,7 @@ Real der2fct9_22_Q2_2D( cRRef x, cRRef y, cRRef )
 //======================================================================
 /*
                 4
-               / .  
+               / .
               /  \.3
              /  . \\
             / .    \\
@@ -2644,7 +2644,7 @@ Real der2fct11_33_P2tilde_3D( cRRef x, cRRef y, cRRef z )
      | .     | /
      |.      |/
      |_______|
- 
+
 */
 Real fct1_Q0_3D( cRRef x, cRRef y, cRRef z )
 {
@@ -3109,7 +3109,7 @@ Real der2fct8_33_Q1_3D( cRRef x, cRRef y, cRRef z )
 //
 //======================================================================
 /*
- 
+
                       8-------7
                      /.      /|
       / .     / |
@@ -3119,14 +3119,14 @@ Real der2fct8_33_Q1_3D( cRRef x, cRRef y, cRRef z )
      | .     | /
      |.      |/
      1_______2
- 
+
    face 1: 1,4,3,2
    face 2: 1,5,8,4
    face 3: 1,2,6,5
    face 4: 2,3,7,6
    face 5: 3,4,8,7
    face 6: 5,6,7,8
- 
+
 */
 
 Real fct1_RT0_1_3D( cRRef x, cRRef y, cRRef z )
@@ -3239,27 +3239,27 @@ Real fct6_DIV_RT0_3D( cRRef x, cRRef y, cRRef z )
 //======================================================================
 
 /*
-  
+
                 4
-               / .  
+               / .
               /  \.3
              /  . \\
             / .    \\
            /.       \!
          1 ----------2
- 
+
 SEE basisElSh.cc   for the ORIENTATION CONVENTIONS
    point 1: 0, 0, 0
    point 2: 1, 0, 0
    point 3: 0, 1, 0
    point 4: 0, 0, 1
- 
-   face 1: 2, 3, 4 
-   face 2: 1, 4, 3 
-   face 3: 1, 2, 4 
-   face 4: 1, 3, 2 
- 
- 
+
+   face 1: 2, 3, 4
+   face 2: 1, 4, 3
+   face 3: 1, 2, 4
+   face 4: 1, 3, 2
+
+
 */
 
 Real fct3_RT0_1_3D_TETRA( cRRef x, cRRef y, cRRef z )
@@ -3363,7 +3363,7 @@ const RefFE feSegP2( "Lagrange P2 on a segment", FE_P2_1D, LINE, 1, 1, 0, 0, 3, 
 //
 //======================================================================
 /*
- 
+
                            |\
                            | \
                            | 1\
@@ -3464,9 +3464,9 @@ const RefFE feQuadQ2( "Lagrange Q2 on a quadrangle", FE_Q2_2D, QUAD, 1, 1, 1, 0,
 //
 //======================================================================
 /*
-                    
-               / .  
-              /  \. 
+
+               / .
+              /  \.
              /  . \\
             / . 1  \\
            /.       \!
@@ -3557,8 +3557,8 @@ const RefFE feTetraP2tilde( "Lagrange P2tilde on a tetraedra", FE_P2tilde_3D,
 //
 //======================================================================
 /*
-                      ________
-                     /.      /|
+        ________
+       /.      /|
       / .     / |
      /_______/  |
      |  .  1 |  |
@@ -3577,8 +3577,8 @@ const RefFE feHexaQ0( "Lagrange Q0 on a hexaedra", FE_Q0_3D, HEXA, 0, 0, 0, 1, 1
 //
 //======================================================================
 /*
-                      8-------7
-                     /.      /|
+        8-------7
+       /.      /|
       / .     / |
      5_______6  |
      |  .    |  |
@@ -3597,9 +3597,9 @@ const RefFE feHexaQ1( "Lagrange Q1 on a hexaedra", FE_Q1_3D, HEXA, 1, 0, 0, 0, 8
 //
 //======================================================================
 /*
- 
-                      8-------7
-                     /.      /|
+
+        8-------7
+       /.      /|
       / .     / |
      5_______6  |
      |  .    |  |
@@ -3607,14 +3607,14 @@ const RefFE feHexaQ1( "Lagrange Q1 on a hexaedra", FE_Q1_3D, HEXA, 1, 0, 0, 0, 8
      | .     | /
      |.      |/
      1_______2
- 
+
    face 1: 1,4,3,2
    face 2: 1,5,8,4
    face 3: 1,2,6,5
    face 4: 2,3,7,6
    face 5: 3,4,8,7
    face 6: 5,6,7,8
- 
+
 */
 const RefHdivFE feHexaRT0( "RT0 on a hexaedra", FE_RT0_HEXA_3D, HEXA, 0, 0, 1, 0, 6, 3,
                            fct_RT0_3D, fct_DIV_RT0_3D, refcoor_RT0_3D,
@@ -3663,9 +3663,9 @@ const GeoMap geoBilinearHexa( "Bilinear mapping on an hexaedra", HEXA, 8, 3,
 //
 //======================================================================
 /*!
- 
-                      8-------7
-                     /.      /|
+
+        8-------7
+       /.      /|
       / .     / |
      5_______6  |
      |  .    |  |
@@ -3673,15 +3673,15 @@ const GeoMap geoBilinearHexa( "Bilinear mapping on an hexaedra", HEXA, 8, 3,
      | .     | /
      |.      |/
      1_______2
- 
+
    face 1: 1,4,3,2
    face 2: 1,5,8,4
    face 3: 1,2,6,5
    face 4: 2,3,7,6
    face 5: 3,4,8,7
    face 6: 5,6,7,8
- 
- 
+
+
 */
 
 // N.B. : the hybrid classes and arrays depend on the quadrature rules,
@@ -3751,9 +3751,9 @@ const RefHybridFE feHexaRT0VdotNHyb( NB_BDFE_HYB_HEXA, HybRT0HexaVdotNList, "Hyb
 //
 //======================================================================
 /*!
- 
-                      8-------7
-                     /.      /|
+
+        8-------7
+       /.      /|
       / .     / |
      5_______6  |
      |  .    |  |
@@ -3761,7 +3761,7 @@ const RefHybridFE feHexaRT0VdotNHyb( NB_BDFE_HYB_HEXA, HybRT0HexaVdotNList, "Hyb
      | .     | /
      |.      |/
      1_______2
- 
+
 SEE basisElSh.cc   for the ORIENTATION CONVENTIONS
    point 1: 0, 0, 0
    point 2: 1, 0, 0
@@ -3771,15 +3771,15 @@ SEE basisElSh.cc   for the ORIENTATION CONVENTIONS
    point 6: 1, 0, 1
    point 7: 1, 1, 1
    point 8: 1, 0, 1
- 
+
    face 1: 1,4,3,2
    face 2: 1,5,8,4
    face 3: 1,2,6,5
    face 4: 2,3,7,6
    face 5: 3,4,8,7
    face 6: 5,6,7,8
- 
- 
+
+
 */
 static const StaticBdFE BdFE_RT1_HYB_1( feQuadQ1, geoBilinearQuad, quadRuleQuad4pt,
                                         refcoor_HYB_HEXA_FACE_1, 0 );
@@ -3842,7 +3842,7 @@ const RefHybridFE feHexaRT1VdotNHyb( NB_BDFE_HYB_HEXA, HybRT1HexaVdotNList, "Hyb
 //
 //======================================================================
 /*!
- 
+
                 4
                / .
               /  \.3
@@ -3850,20 +3850,20 @@ const RefHybridFE feHexaRT1VdotNHyb( NB_BDFE_HYB_HEXA, HybRT1HexaVdotNList, "Hyb
             / .    \\
            /.       \!
          1 ----------2
- 
+
 SEE basisElSh.cc   for the ORIENTATION CONVENTIONS
    point 1: 0, 0, 0
    point 2: 1, 0, 0
    point 3: 0, 1, 0
    point 4: 0, 0, 1
- 
+
    face 1: 1, 3, 2
    face 2: 1, 2, 4
    face 3: 2, 3, 4
    face 4: 1, 4, 3
- 
- 
-*/ 
+
+
+*/
 // N.B. : the hybrid classes and arrays depend on the quadrature rules,
 //        geometrical mappings and other reference elements :
 //        thus they must be defined AFTER the definitions of quadrule, geomap, refFE...
