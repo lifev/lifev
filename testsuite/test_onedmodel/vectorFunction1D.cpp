@@ -197,6 +197,58 @@ Real NonLinearFluxFun1D::diff2(const Real& _A, const Real& _Q,
   ERROR_MSG("Flux's second differential function has only 8 components.");
 }
 
+/*! Total pressure (used for interface conditions)
+  Pt = P + rho/2 * (Q/A)^2
+*/
+Real NonLinearFluxFun1D::
+totalPressure(const Real& _A, const Real& _Q, 
+	      const UInt& indz) const
+{
+    Real Area0, beta0, beta1, rho, totpress;
+
+    Area0 = _M_oneDParam.Area0(indz);
+    beta0 = _M_oneDParam.Beta0(indz);
+    beta1 = _M_oneDParam.Beta1(indz);
+    rho   = _M_oneDParam.DensityRho();
+
+    Real vel = _Q / _A;
+
+    totpress = beta0 * ( pow( _A / Area0, beta1 ) - 1 ) 
+      + rho * vel * vel;
+    
+}
+
+/*! Derivative of Total pressure (used for interface conditions)
+  dPt/dU_ii = dP/dU_ii + rho/2 * d(Q/A)^2/dU_ii
+*/
+Real NonLinearFluxFun1D::
+totalPressureDiff( const Real& _A, const Real& _Q, 
+		   const ID& ii, 
+		   const UInt& indz) const
+{
+    Real rho   = _M_oneDParam.DensityRho();
+    Real vel = _Q / _A;
+    
+    if( ii == 1 ) { //! dPt/dA
+      Real dPtdA;
+      
+      Real Area0 = _M_oneDParam.Area0(indz);
+      Real beta0 = _M_oneDParam.Beta0(indz);
+      Real beta1 = _M_oneDParam.Beta1(indz);
+
+      Real AoverA0POWbeta1 = std::pow( _A / Area0, beta1 );
+
+      dPtdA = (   beta0 * beta1 * AoverA0POWbeta1
+		- rho * vel * vel ) / _A;
+
+      return dPtdA;
+    }
+    if( ii == 2 ) { //! dPt/dQ
+      return ( rho * vel / _A );
+    }
+    
+    ERROR_MSG("Total pressure's differential function has only 2 components.");
+}
 
 //---------------------------------------------
 //! SOURCE FUNCTION AND DERIVATIVES

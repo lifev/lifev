@@ -56,16 +56,17 @@ void computeInterface2TubesValues( const Vec2D& Un_alpha_bd,
 void f_jac( const Vec2D& Un_alpha_bd,
             const Vec2D& Un_alpha_int,
             const Edge1D& edge_alpha,
-            const NonLinearFluxFun1D&   flux_alpha,
-            const NonLinearSourceFun1D& source_alpha,
+            const NonLinearFluxFun1D&   fluxFun_alpha,
+            const NonLinearSourceFun1D& sourceFun_alpha,
             const Vec2D& Un_beta_bd,
             const Vec2D& Un_beta_int,
             const Edge1D& edge_beta,
-            const NonLinearFluxFun1D&   flux_beta,
-            const NonLinearSourceFun1D& source_beta,
+            const NonLinearFluxFun1D&   fluxFun_beta,
+            const NonLinearSourceFun1D& sourceFun_beta,
             const Real& time_step,
-            Vec2D& bcDir_alpha,
-            Vec2D& bcDir_beta
+            const Vector<Real>& x,
+            Vector<Real>& f,
+            Matrix<Real>& jac
             );
 
 //! 2D dot product
@@ -244,20 +245,53 @@ int main(int argc, char** argv)
 void computeInterface2TubesValues( const Vec2D& Un_alpha_bd,
                                    const Vec2D& Un_alpha_int,
                                    const Edge1D& edge_alpha,
-                                   const NonLinearFluxFun1D&   flux_alpha,
-                                   const NonLinearSourceFun1D& source_alpha,
+                                   const NonLinearFluxFun1D&   fluxFun_alpha,
+                                   const NonLinearSourceFun1D& sourceFun_alpha,
                                    const Vec2D& Un_beta_bd,
                                    const Vec2D& Un_beta_int,
                                    const Edge1D& edge_beta,
-                                   const NonLinearFluxFun1D&   flux_beta,
-                                   const NonLinearSourceFun1D& source_beta,
+                                   const NonLinearFluxFun1D&   fluxFun_beta,
+                                   const NonLinearSourceFun1D& sourceFun_beta,
                                    const Real& time_step,
                                    Vec2D& bcDir_alpha,
                                    Vec2D& bcDir_beta
                                    )
 {
-    int a =0;
-    a++;
+    //! unknown of non linear equation f(x) = 0
+    Vector<Real> x(4);
+    //! non linear function f
+    Vector<Real> f(4);
+    //! jacobian of the non linear function
+    Matrix<Real> jac(4,4);
+
+    x[0] = Un_alpha_bd.first;
+    x[1] = Un_alpha_bd.second;
+    x[2] = Un_beta_bd.first;
+    x[3] = Un_beta_bd.second;
+ 
+    //! lapack variable
+    int INFO[1] = {0};
+    int NBRHS[1] = {1};//  nb columns of the rhs := 1.
+    int NBU[1] = {4};
+
+    //! newton raphson iteration
+    for ( UInt iter = 0 ; iter < 100 ; iter ++) {
+        //! compute f(x) and its jacobian df(x)
+        f_jac( Un_alpha_bd, Un_alpha_int, edge_alpha, fluxFun_alpha, sourceFun_alpha,
+	       Un_beta_bd, Un_beta_int, edge_beta, fluxFun_beta, sourceFun_beta,
+	       time_step, x, f, jac);
+	
+	//   jac <- L and Lt where L Lt is the Cholesky factorization of df(x)
+        dpotrf_("L", NBU, jac , NBU , INFO );
+        ASSERT_PRE(!INFO[0],"Lapack factorization of jacobian matrix is not achieved.");
+
+        // Compute f <-  ( df(x)^{-1} f(x) ) (solve triangular system)
+        dtrtrs_("L", "N", "N", NBU, NBRHS, jac, NBU, f, NBU, INFO);
+        ASSERT_PRE(!INFO[0],"Lapack Computation y = df(x)^{-1} f(x)  is not achieved.");
+
+	x += - f;
+    }
+
 }
 
 void f_jac( const Vec2D& Un_alpha_bd,
@@ -271,9 +305,9 @@ void f_jac( const Vec2D& Un_alpha_bd,
             const NonLinearFluxFun1D&   fluxFun_beta,
             const NonLinearSourceFun1D& sourceFun_beta,
             const Real& time_step,
-            Real* f,
-            Real* jac,
-            Real* x
+            const Vector<Real>& x,
+            Vector<Real>& f,
+            Matrix<Real>& jac
             )
 {
      //! eigen values of the jacobian diffFlux (= dF/dU)
@@ -294,8 +328,38 @@ void f_jac( const Vec2D& Un_alpha_bd,
 
     int verbose = 2;
 
+    Real A_alpha = x[0];
+    Real Q_alpha = x[1];
+    Real A_beta  = x[2];
+    Real Q_beta  = x[3];
 
-   // *******************************************************
+    // *******************************************************
+    //! Continuity of the flux
+    // *******************************************************
+    f(0) = Q_beta - Q_alpha;
+    //! Jacobian
+    jac( 0, 0 ) =  0.; //!< df0/dA_alpha
+    jac( 0, 1 ) = -1.; //!< df0/dQ_alpha
+    jac( 0, 2 ) =  0.; //!< df0/dA_beta
+    jac( 0, 3 ) =  1.; //!< df0/dQ_beta
+
+    // *******************************************************
+    //! Continuity of the total pressure
+    // *******************************************************
+    f(1) = (   fluxFun_beta.totalPressure(  A_beta,  Q_beta,  leftDof ) 
+	     - fluxFun_alpha.totalPressure( A_alpha, Q_alpha, rightDof ) );
+    //! Jacobian
+    //!df1/dA_alpha:
+    jac( 1, 0 ) = fluxFun_alpha.totalPressureDiff(A_alpha, Q_alpha, 1, rightDof );
+    //!df1/dQ_alpha:
+    jac( 1, 1 ) = fluxFun_alpha.totalPressureDiff(A_alpha, Q_alpha, 2, rightDof );
+    //!df1/dA_beta:
+    jac( 1, 2 ) = fluxFun_beta.totalPressureDiff( A_beta,  Q_beta,  1, leftDof );
+    //!df1/dQ_beta:
+    jac( 1, 3 ) = fluxFun_beta.totalPressureDiff( A_beta,  Q_beta,  2, leftDof );
+    
+
+    // *******************************************************
     //! ALPHA : right compatibility condition (for tube alpha)
     // *******************************************************
     //-------------------------------------
@@ -345,13 +409,18 @@ void f_jac( const Vec2D& Un_alpha_bd,
     //! rhsBC1 = rhsBC1 - deltaT * left_eigvec1 dot qlSource(tn, z = charact_pt1)
     rhsBC1 -= time_step * dot( left_eigvec1 , qlSource );
 
-    //! return f[2]: left_eigvec1 dot (A_alpha_n+1, Q_alpha_n+1)
-    f[2] = left_eigvec1.first * x[0] + left_eigvec1.second * x[1] - rhsBC1;
+    //! return f(2): left_eigvec1 dot (A_alpha_n+1, Q_alpha_n+1)
+    f(2) = left_eigvec1.first * A_alpha + left_eigvec1.second * Q_alpha - rhsBC1;
+    //! Jacobian
+    jac( 2, 0 ) =  left_eigvec1.first; //!< df2/dA_alpha
+    jac( 2, 1 ) =  left_eigvec1.second;//!< df2/dQ_alpha
+    jac( 2, 2 ) =  0.; //!< df2/dA_beta
+    jac( 2, 3 ) =  0.; //!< df2/dQ_beta
 
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  
-   // *******************************************************
+    // *******************************************************
     //! BETA : left compatibility condition (for tube beta).
     // *******************************************************
     //-------------------------------------
@@ -402,8 +471,14 @@ void f_jac( const Vec2D& Un_alpha_bd,
     //! rhsBC2 = rhsBC2 - deltaT * left_eigvec2 dot qlSource(tn, z = charact_pt2)
     rhsBC2 -= time_step * dot( left_eigvec2 , qlSource );
 
-    //! return f[3]: left_eigvec2 dot (A_beta_n+1, Q_beta_n+1)
-    f[3] = left_eigvec2.first * x[2] + left_eigvec2.second * x[3] - rhsBC2;
+    //! return f(3): left_eigvec2 dot (A_beta_n+1, Q_beta_n+1)
+    f(3) = left_eigvec2.first * A_beta + left_eigvec2.second * Q_beta - rhsBC2;
+    //! Jacobian
+    jac( 3, 0 ) =  0.; //!< df3/dA_alpha
+    jac( 3, 1 ) =  0.; //!< df3/dQ_alpha
+    jac( 3, 2 ) =  left_eigvec2.first; //!< df3/dA_beta
+    jac( 3, 3 ) =  left_eigvec2.second;//!< df3/dQ_beta
+
 
 }
 
