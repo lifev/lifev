@@ -249,8 +249,8 @@ public:
     friend class BCHandler;
 
     //! iterator type in the identifiers list
-    typedef std::set<Identifier_Base*, identifierComp>::iterator IDIterator0;
-    typedef std::vector<Identifier_Base*>::iterator IDIterator;
+    typedef std::set<IdentifierBase*, identifierComp>::iterator IDIterator0;
+    typedef std::vector<IdentifierBase*>::iterator IDIterator;
 
 
     /**
@@ -448,7 +448,7 @@ public:
 
     //! Returns a pointer  to the i-th elements in the (finalised) list
     //! (counting from 1 ' a la FORTRAN')
-    const Identifier_Base* operator() ( const ID& i ) const;
+    const IdentifierBase* operator() ( const ID& i ) const;
 
 
     //! Overloading function operator by calling the
@@ -464,10 +464,10 @@ public:
 
     //! Returns a pointer to the i-th elements in the (finalised) list
     //! (counting from 0 ' a la C')
-    const Identifier_Base* operator[] ( const Index_t& i ) const;
+    const IdentifierBase* operator[] ( const Index_t& i ) const;
 
     //! Add a new indentifier in the list
-    void addIdentifier( Identifier_Base* );
+    void addIdentifier( IdentifierBase* );
 
     //! Returns the liste size
     UInt list_size() const;
@@ -515,11 +515,10 @@ private:
 
     //! set of pointers to identifiers allowing the user to get hold the DOF
     //! to which the BC applies
-    std::set
-        <Identifier_Base*, identifierComp> list0;
+    std::set<IdentifierBase*, identifierComp> list0;
 
     //! container for id's when the list is finalised
-    std::vector<Identifier_Base*> _idList;
+    std::vector<IdentifierBase*> _idList;
 
     //! true, when idlist updated
     bool _finalised;
@@ -809,12 +808,12 @@ void BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                             // Why kind of data ?
                             if ( where->dataVector() )
                             { // With data vector
-                                where->addIdentifier( new Identifier_Base( gDof ) ); // We only need the dof number
+                                where->addIdentifier( new IdentifierBase( gDof ) ); // We only need the dof number
                             }
                             else
                             { // With user defined functions
                                 feBd.coorMap( x, y, z, feBd.refFE.xi( lDof - 1 ), feBd.refFE.eta( lDof - 1 ) );
-                                where->addIdentifier( new Identifier_Essential( gDof, x, y, z ) );
+                                where->addIdentifier( new IdentifierEssential( gDof, x, y, z ) );
                             }
                             break;
                         case Natural:
@@ -823,7 +822,7 @@ void BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                                 switch ( where->pointerToBCVector() ->type() )
                                 {
                                 case 0:  // if the BC is a function or a vector which values don't need to be integrated
-                                    where->addIdentifier( new Identifier_Natural( gDof ) );
+                                    where->addIdentifier( new IdentifierNatural( gDof ) );
                                     break;
                                 case 1:  // if the BC is a vector of values to be integrated
                                     break;
@@ -836,7 +835,7 @@ void BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                             // Why kind of data ?
                             // vincent please check again for your Mixte-FE it doesn't work for Q1
                             //       if ( where->dataVector()  ) { // With data vector
-                            //        where->addIdentifier( new Identifier_Natural(gDof) );
+                            //        where->addIdentifier( new IdentifierNatural(gDof) );
                             //       }
                             break;
                         default:
@@ -889,12 +888,12 @@ void BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                             // Why kind of data ?
                             if ( where->dataVector() )
                             { // With data vector
-                                where->addIdentifier( new Identifier_Base( gDof ) );
+                                where->addIdentifier( new IdentifierBase( gDof ) );
                             }
                             else
                             { // With user defined functions
                                 feBd.coorMap( x, y, z, feBd.refFE.xi( lDof - 1 ), feBd.refFE.eta( lDof - 1 ) );
-                                where->addIdentifier( new Identifier_Essential( gDof, x, y, z ) );
+                                where->addIdentifier( new IdentifierEssential( gDof, x, y, z ) );
                             }
                             break;
                         case Natural:
@@ -904,7 +903,7 @@ void BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                                 switch ( where->pointerToBCVector() ->type() )
                                 {
                                 case 0:  // if the BC is a function or a vector which values don't need to be integrated
-                                    where->addIdentifier( new Identifier_Natural( gDof ) );
+                                    where->addIdentifier( new IdentifierNatural( gDof ) );
                                     break;
                                 case 1:  // if the BC is a vector of values to be integrated
                                     break;
@@ -917,7 +916,7 @@ void BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                             // Why kind of data ?
                             if ( where->dataVector() )
                             { // With data vector
-                                where->addIdentifier( new Identifier_Natural( gDof ) );
+                                where->addIdentifier( new IdentifierNatural( gDof ) );
                             }
                             break;
                         default:
@@ -959,12 +958,12 @@ void BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                     // Why kind of data ?
                     if ( where->dataVector() )
                     { // With data vector
-                        where->addIdentifier( new Identifier_Base( gDof ) );
+                        where->addIdentifier( new IdentifierBase( gDof ) );
                     }
                     else
                     { // With user defined functions
                         feBd.coorMap( x, y, z, feBd.refFE.xi( lDof - 1 ), feBd.refFE.eta( lDof - 1 ) );
-                        where->addIdentifier( new Identifier_Essential( gDof, x, y, z ) );
+                        where->addIdentifier( new IdentifierEssential( gDof, x, y, z ) );
                     }
                 }
                 break;
@@ -981,7 +980,7 @@ void BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                         {
                             lDof = nDofFE + nDofFV + l; // local Dof
                             gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iFaEl - 1 ) * nDofpF + l ); // global Dof
-                            where->addIdentifier( new Identifier_Natural( gDof ) );
+                            where->addIdentifier( new IdentifierNatural( gDof ) );
                         }
                         break;
                     case 1:  // if the BC is a vector of values to be integrated
@@ -992,7 +991,7 @@ void BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                             gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iFaEl - 1 ) * nDofpF + l ); // global Dof
                             bdltg( lDof ) = gDof; // local to global on this face
                         }
-                        where->addIdentifier( new Identifier_Natural( ibF, bdltg ) );
+                        where->addIdentifier( new IdentifierNatural( ibF, bdltg ) );
                         break;
                     default:
                         ERROR_MSG( "This BCVector type is not yet implemented" );
@@ -1007,7 +1006,7 @@ void BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                         gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iFaEl - 1 ) * nDofpF + l ); // global Dof
                         bdltg( lDof ) = gDof; // local to global on this face
                     }
-                    where->addIdentifier( new Identifier_Natural( ibF, bdltg ) );
+                    where->addIdentifier( new IdentifierNatural( ibF, bdltg ) );
                 }
                 break;
             case Mixte:
@@ -1017,7 +1016,7 @@ void BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                 //   for (ID l=1; l<=nDofpF; ++l) {
                 //     lDof = nDofFE + nDofFV + l; // local Dof
                 //     gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + (iFaEl-1)*nDofpF + l); // global Dof
-                //     where->addIdentifier( new Identifier_Natural(gDof) );
+                //     where->addIdentifier( new IdentifierNatural(gDof) );
                 //   }
                 // }
                 // else {
@@ -1028,7 +1027,7 @@ void BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                     gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iFaEl - 1 ) * nDofpF + l ); // global Dof
                     bdltg( lDof ) = gDof; // local to global on this face
                 }
-                where->addIdentifier( new Identifier_Natural( ibF, bdltg ) );
+                where->addIdentifier( new IdentifierNatural( ibF, bdltg ) );
                 // }
                 break;
             default:

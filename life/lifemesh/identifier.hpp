@@ -15,19 +15,19 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*!
   \file identifier.h
   \brief Classes for identifiers
   \version 1.0
   \author M.A. Fernandez & Luca Formaggia
   \date 07/2002
- 
+
   This classes hold a identifier that allow us to impose a specific boundary condition.
   Each type of boundary condition needs a specic information on the boundary. Thus, the
   key is to use inheritance by adding, to the base class, the information requested for
   imposing the BC.
- 
+
 */
 
 #ifndef __IDENTIFIER_HH__
@@ -41,21 +41,21 @@
 namespace LifeV
 {
 
-//============ Identifier_Base ==============
+//============ IdentifierBase ==============
 
 /*!
- 
- \class Identifier_Base
- 
+
+ \class IdentifierBase
+
  Base class holding Dof identifiers for implementing BC
- 
+
  \todo The data funcitions given by the user must have the following declaration
  Real g(const Real& time, const Real& x, const Real& y, const Real& z, const ID& icomp)
  We can use inheritance to hold specific boundary condition data. See, for instance,
  Mixte boundary conditions.
-*/ 
+*/
 //! Declaration of the base class holding DOF identifiers for implementing BC
-class Identifier_Base
+class IdentifierBase
 {
 public:
 
@@ -63,7 +63,7 @@ public:
     /*!
       \param i ussualy the id of the Dof, id of a boundary face, etc...
     */
-    Identifier_Base( ID const & i ) : _id( i )
+    IdentifierBase( ID const & i ) : _id( i )
     {}
     ;
 
@@ -89,39 +89,39 @@ protected:
 };
 
 /*!
- 
+
  \class identifierComp
- 
+
  Functor for ordering operations (requested in set STL container)
- 
+
 */
 class identifierComp
 {
 public:
-    bool operator() ( const Identifier_Base* i1, const Identifier_Base* i2 ) const
+    bool operator() ( const IdentifierBase* i1, const IdentifierBase* i2 ) const
     {
         return ( i1->id() < i2->id() );
     }
 };
 
 //! Overloading == operator for identifiers
-inline bool operator==( const Identifier_Base& a, const Identifier_Base& b )
+inline bool operator==( const IdentifierBase& a, const IdentifierBase& b )
 {
     return a.id() == b.id();
 }
 
 
-//============ Identifier_Essential ==============
+//============ IdentifierEssential ==============
 /*!
- 
- \class Identifier_Essential
- 
+
+ \class IdentifierEssential
+
  Class holding the Dof identifier and coordinates for implementing Essential BC
- 
+
  \todo A Essential boundary condition requests the number of the Dof (in a scalar sense) and the
  coordiantes of associated node. This information is updated in Dof::bdUpdate method
 */
-class Identifier_Essential: public Identifier_Base
+class IdentifierEssential: public IdentifierBase
 {
 public:
 
@@ -132,7 +132,7 @@ public:
       \param y y-coordinate of the node where this BC applies
       \param z z-coordinate of the node where this BC applies
     */
-    Identifier_Essential( const ID& id, const Real& x, const Real& y, const Real& z ) : Identifier_Base( id )
+    IdentifierEssential( const ID& id, const Real& x, const Real& y, const Real& z ) : IdentifierBase( id )
     {
         _x = x;
         _y = y;
@@ -159,20 +159,20 @@ private:
 };
 
 
-//============ Identifier_Natural ==============
+//============ IdentifierNatural ==============
 
 /*!
- 
- \class Identifier_Natural
- 
+
+ \class IdentifierNatural
+
  Class holding the Dof identifier and the bdLocalToGlobal information for implementing
  Natural and Mixte boundary conditions
- 
+
  \todo Natural or Mixte boundary conditions requests the number of the boundary face number
  where they apply and the bdLocalToGlobal map on this face. This information is updated
  in Dof::bdUpdate method
 */
-class Identifier_Natural: public Identifier_Base
+class IdentifierNatural: public IdentifierBase
 {
 public:
 
@@ -181,13 +181,13 @@ public:
       \param i the number of the boundary face
       \param bdltg a SimpleVect holding the bdLocalToGlobal map on this face
     */
-    Identifier_Natural( const ID& i, const SimpleVect<ID>& bdltg );
+    IdentifierNatural( const ID& i, const SimpleVect<ID>& bdltg );
 
     //! Constructor when a vector data is provided
     /*!
       \param i the number of the dof
     */
-    Identifier_Natural( const ID& i );
+    IdentifierNatural( const ID& i );
 
 
     //! Return the global Dof corresponding tho the i-th local Dof in the face

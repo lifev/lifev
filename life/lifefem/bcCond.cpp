@@ -300,14 +300,14 @@ BCBase::~BCBase()
     case Essential:
         // Deleting identifiers
         for ( IDIterator i = _idList.begin();i != _idList.end();++i )
-            delete static_cast<Identifier_Essential*>( *i );
+            delete static_cast<IdentifierEssential*>( *i );
 
         break;
     case Natural:
     case Mixte:
         for ( IDIterator i = _idList.begin();i != _idList.end();++i )
             // Deleting identifiers
-            delete static_cast<Identifier_Natural*>( *i );
+            delete static_cast<IdentifierNatural*>( *i );
         break;
     }
 
@@ -526,14 +526,14 @@ Real BCBase::mixteCoef() const
 
 //! Returns a pointer  to the i-th elements in the (finalised) list
 //! (counting from 1 ' a la FORTRAN')
-const Identifier_Base* BCBase::operator() ( const ID& i ) const
+const IdentifierBase* BCBase::operator() ( const ID& i ) const
 {
     return this->operator[] ( i-1 );
 }
 
 //! Returns a pointer to the i-th elements in the (finalised) list
 //! (counting from 0 ' a la C')
-const Identifier_Base* BCBase::operator[] ( const Index_t& i ) const
+const IdentifierBase* BCBase::operator[] ( const Index_t& i ) const
 {
     ASSERT_PRE( _finalised, "BC List should be finalised before being accessed" );
     ASSERT_BD( i >= 0 && i < _idList.size() );
@@ -542,7 +542,7 @@ const Identifier_Base* BCBase::operator[] ( const Index_t& i ) const
 
 
 //! Add a new identifier to the preliminary list of Identifiers
-void BCBase::addIdentifier( Identifier_Base* iden )
+void BCBase::addIdentifier( IdentifierBase* iden )
 {
     list0.insert( iden );
 }
@@ -587,7 +587,7 @@ std::ostream& BCBase::showMe( bool verbose, std::ostream & out ) const
     {
         unsigned int count( 0 ), lines( 10 );
         out << "IDs in list";
-        for ( std::vector<Identifier_Base*>::const_iterator i = _idList.begin(); i != _idList.end(); i++ )
+        for ( std::vector<IdentifierBase*>::const_iterator i = _idList.begin(); i != _idList.end(); i++ )
         {
             if ( count++ % lines == 0 )
             {
