@@ -194,7 +194,6 @@ ConvDiffReactSolverPC( const GetPot& data_file, const RefFE& refFE_c, const Quad
         if ( _stationary )
         {
             mass( ( -_react ), _elmatMR_c, _fe_c );
-            abort();
         }
         else
         {
