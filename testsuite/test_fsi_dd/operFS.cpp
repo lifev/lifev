@@ -476,7 +476,7 @@ void  operFS::solveJac(Vector &muk,
     switch(precChoice)
     {
         case 0:
-            // Dirichlet-Neumann preconditioner
+            // Neumann-Dirichlet preconditioner
             invSfPrime(_res, _linearRelTol, muk);
             break;
         case 1:
@@ -484,13 +484,26 @@ void  operFS::solveJac(Vector &muk,
             invSsPrime(_res, _linearRelTol, muk);
             break;
         case 2:
-            // Dirichlet-Neumann preconditioner
-        {
+            // Neumann-Neumann preconditioner
+	{
             Vector muF(_res.size());
             Vector muS(_res.size());
 
             invSfPrime(_res, _linearRelTol, muF);
             invSsPrime(_res, _linearRelTol, muS);
+
+	    // indeed, Here we should call Aitken (a different instance than 
+	    // the one defined in nonLinRichardson) and 
+	    // we should replace the defaultOmega for he nonLinRichardson
+            // to -1, such that there is no relaxation at all there.
+	    //
+	    // Maybe we have to define precChoice as Memeber -> M_precChoice
+	    // and get the choice as input parameter with the constructor
+	    // and add a memeber 
+	    // generalizedAitken aitkDN(...) (DN for Dirichlet Neumann)
+	    // then 
+	    //
+	    // muk = aitkDN.computeDeltaLambda( sol, muS, muF );
 
             muk = muS + muF;
         }
