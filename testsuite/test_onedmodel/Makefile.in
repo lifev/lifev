@@ -251,7 +251,7 @@ AM_CPPFLAGS = -DNO_BLASLAPACK
 AM_CXXFLAGS = -DTHREEDIM -gstabs
 LDADD = $(life_libs)
 INCLUDES = $(all_includes)
-noinst_HEADERS = dataOneDModel.hpp basicOneDMesh.hpp \
+noinst_HEADERS = dataOneDModel.hpp basicOneDMesh.hpp dofOneD.hpp \
 		 oneDModelHandler.hpp oneDModelSolver.hpp \
 		 ud_functions.hpp 
 

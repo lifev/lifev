@@ -27,7 +27,7 @@ AM_CPPFLAGS	= -DNO_BLASLAPACK
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
 check_PROGRAMS = test_onedmodel
-noinst_HEADERS = dataOneDModel.hpp basicOneDMesh.hpp \
+noinst_HEADERS = dataOneDModel.hpp basicOneDMesh.hpp dofOneD.hpp \
 		 oneDModelHandler.hpp oneDModelSolver.hpp \
 		 ud_functions.hpp 
 test_onedmodel_SOURCES = dataOneDModel.cpp  basicOneDMesh.cpp\
