@@ -17,7 +17,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 /*!
-  \file lifeV.hpp
+  \file life.hpp
 
   LifeV main header file
 
@@ -45,7 +45,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <boost/mpl/int.hpp>
 #include <boost/mpl/identity.hpp>
 #include <boost/mpl/base.hpp>
-#include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/deref.hpp>
 #include <boost/mpl/begin_end.hpp>
 
@@ -123,6 +122,9 @@ typedef double scalar_type;
 // \warning should test here the boost version
 //
 #if LIFEV_IS_VERSION(0,9,0)
+
+// only available in boost 1.32
+#include <boost/mpl/eval_if.hpp>
 
 /*! \namespace detail
   \internal
