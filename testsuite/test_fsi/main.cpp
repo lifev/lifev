@@ -24,8 +24,8 @@
 
 #include <life/lifesolver/FSISolver.hpp>
 
-#include "ud_functions.hpp"
-
+//#include "ud_functions.hpp"
+#include "boundaryConditions.hpp"
 
 
 class Problem
@@ -46,32 +46,33 @@ public:
             using namespace LifeV;
             // Boundary conditions for the harmonic extension of the
             // interface solid displacement
-            Debug( 10000 ) << "Boundary condition for the harmonic extension\n";
-            BCFunctionBase bcf(fZero);
-            FSISolver::bchandler_type BCh_mesh( new BCHandler );
-            BCh_mesh->addBC("Top",       3, Essential, Full, bcf,   3);
-            BCh_mesh->addBC("Base",      2, Essential, Full, bcf,   3);
-            BCh_mesh->addBC("Edges",    20, Essential, Full, bcf,   3);
+//             Debug( 10000 ) << "Boundary condition for the harmonic extension\n";
+//             BCFunctionBase bcf(fZero);
+//             FSISolver::bchandler_type BCh_mesh( new BCHandler );
+//             BCh_mesh->addBC("Top",       3, Essential, Full, bcf,   3);
+//             BCh_mesh->addBC("Base",      2, Essential, Full, bcf,   3);
+//             BCh_mesh->addBC("Edges",    20, Essential, Full, bcf,   3);
 
-            // Boundary conditions for the fluid velocity
-            Debug( 10000 ) << "Boundary condition for the fluid\n";
-            BCFunctionBase in_flow(u2);
-            FSISolver::bchandler_type BCh_u( new BCHandler );
-            BCh_u->addBC("InFlow",  2,  Natural,   Full, in_flow, 3);
-            BCh_u->addBC("Edges",  20, Essential, Full, bcf,      3);
+//             // Boundary conditions for the fluid velocity
+//             Debug( 10000 ) << "Boundary condition for the fluid\n";
+//             BCFunctionBase in_flow(u2);
+//             FSISolver::bchandler_type BCh_u( new BCHandler );
+//             BCh_u->addBC("InFlow",  2,  Natural,   Full, in_flow, 3);
+//             BCh_u->addBC("Edges",  20, Essential, Full, bcf,      3);
 
-            // Boundary conditions for the solid displacement
-            Debug( 10000 ) << "Boundary condition for the solid\n";
-            FSISolver::bchandler_type BCh_d( new BCHandler );
-            BCh_d->addBC("Top",       3, Essential, Full, bcf,  3);
-            BCh_d->addBC("Base",      2, Essential, Full, bcf,  3);
+//             // Boundary conditions for the solid displacement
+//             Debug( 10000 ) << "Boundary condition for the solid\n";
+//             FSISolver::bchandler_type BCh_d( new BCHandler );
+//             BCh_d->addBC("Top",       3, Essential, Full, bcf,  3);
+//             BCh_d->addBC("Base",      2, Essential, Full, bcf,  3);
 
             Debug( 10000 ) << "creating FSISolver with operator :  " << _oper << "\n";
-            _M_fsi = fsi_solver_ptr(  new FSISolver( data_file, BCh_u, BCh_d, BCh_mesh, _oper ) );
+            _M_fsi = fsi_solver_ptr(  new FSISolver( data_file, BCh_u(), BCh_d(), BCh_mesh(), _oper ) );
             _M_fsi->setSourceTerms( fZero, fZero );
 
             int restart = data_file("problem/restart",0);
             _M_Tstart = 0.;
+
             if (restart)
             {
                 std::string velFName  = data_file("fluid/miscellaneous/velname"  ,"vel");
@@ -81,7 +82,7 @@ public:
                 std::string velSName  = data_file("solid/miscellaneous/velname"  ,"velw");
                 _M_Tstart             = data_file("problem/Tstart"   ,0.);
                 std::cout << "Starting time = " << _M_Tstart << std::endl;
-                _M_fsi->initialize(velFName, pressName, velwName, depName, velSName);
+                _M_fsi->initialize(velFName, pressName, velwName, depName, velSName, _M_Tstart);
             }
             else
             {
@@ -100,8 +101,11 @@ public:
         {
             boost::timer _overall_timer;
 
+            if (_M_Tstart != 0.) _M_Tstart -= dt;
+
             int _i = 1;
-            for (double time=_M_Tstart + dt; time <= _M_Tstart + T; time += dt, ++_i)
+
+            for (double time=_M_Tstart + dt; time <= T; time += dt, ++_i)
             {
                 boost::timer _timer;
 
@@ -125,19 +129,19 @@ struct FSIChecker
 {
     FSIChecker( GetPot const& _data_file ):
         data_file( _data_file ),
-        oper( _data_file( "problem/method", "steklovPoincare" ) ),
-        prec( ( LifeV::Preconditioner )_data_file( "problem/precond", LifeV::NEUMANN_NEUMANN ) )
+        oper     ( _data_file( "problem/method", "steklovPoincare" ) ),
+        prec     ( ( LifeV::Preconditioner )_data_file( "problem/precond", LifeV::NEUMANN_NEUMANN ) )
         {}
+
     FSIChecker( GetPot const& _data_file,
                 std::string _oper,
                 LifeV::Preconditioner _prec = LifeV::NO_PRECONDITIONER ):
         data_file( _data_file ),
-        oper( _oper ),
-//        prec( _prec )
-        prec( ( LifeV::Preconditioner )_data_file( "problem/precond", LifeV::NEUMANN_NEUMANN ) )
+        oper     ( _oper ),
+        prec     ( ( LifeV::Preconditioner )_data_file( "problem/precond", LifeV::NEUMANN_NEUMANN ) )
         {}
-    void
-    operator()()
+
+    void operator()()
         {
             boost::shared_ptr<Problem> fsip;
 
@@ -157,11 +161,13 @@ struct FSIChecker
             disp = fsip->fsiSolver()->operFSI()->displacementOnInterface();
         }
 
-    GetPot data_file;
-    std::string oper;
+    GetPot                data_file;
+    std::string           oper;
     LifeV::Preconditioner prec;
-    LifeV::Vector disp;
+    LifeV::Vector         disp;
 };
+
+
 int main(int argc, char** argv)
 {
     GetPot command_line(argc,argv);
