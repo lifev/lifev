@@ -43,50 +43,53 @@ int main( int argc, char** argv )
 
     // Reading from data file
     //
-    GetPot command_line( argc, argv );
-    const char* data_file_name = command_line.follow( "data", 2, "-f",
-                                                      "--file" );
-    GetPot data_file( data_file_name );
+    GetPot commandLine( argc, argv );
+    const char* dataFileName = commandLine.follow( "data", 2, "-f", "--file" );
+    GetPot dataFile( dataFileName );
 
     // Number of boundary conditions for the fluid velocity,
     // solid displacement, and fluid mesh motion
     //
-    BCHandler BCh( 1 );
+    BCHandler bcH( 1 );
 
     NavierStokesSolverIP< RegionMesh3D<LinearTetra> >
-        fluid( data_file, feTetraP1, quadRuleTetra4pt, quadRuleTria3pt, BCh );
+        fluid( dataFile, feTetraP1, quadRuleTetra4pt, quadRuleTria3pt, bcH );
     //fluid.showMe();
 
     // Boundary conditions for the fluid velocity
     //vector<ID> icomp( 1 );
     //icomp[0] = 1;
-    BCFunctionBase u_wall( uexact );
+    BCFunctionBase uWall( uexact );
     // BCFunctionBase bcf( fZero );
-    BCh.addBC( "Wall", 1, Essential, Full, u_wall, 3 );
-    //BCh.addBC( "Wall", 2, Essential, Component, bcf, icomp );
+    bcH.addBC( "Wall", 1, Essential, Full, uWall, 3 );
+    //bcH.addBC( "Wall", 2, Essential, Component, bcf, icomp );
     //BCFunctionBase bcf( afZero );
-    //BCFunctionBase in_flow( u2 );
-    //BCh.addBC( "Wall", 1, Essential, Full, bcf, 3 );
-    //BCh.addBC( "InFlow", 2, Natural, Full, in_flow, 3 );
-    //BCh.addBC( "Edges", 20, Essential, Full, bcf, 3 );
+    //BCFunctionBase inFlow( u2 );
+    //bcH.addBC( "Wall", 1, Essential, Full, bcf, 3 );
+    //bcH.addBC( "InFlow", 2, Natural, Full, inFlow, 3 );
+    //bcH.addBC( "Edges", 20, Essential, Full, bcf, 3 );
 
-    //BCh.showMe();
+    //bcH.showMe();
 
-    if ( data_file( "fluid/miscellaneous/steady", 1 ) != 0 )
+    if ( dataFile( "fluid/miscellaneous/steady", 1 ) != 0 )
     {
         // Picard-Aitken iterations: steady version
         //
 
-        Real abstol = data_file( "fluid/picard/abstol", 1.e6 );
-        Real reltol = data_file( "fluid/picard/reltol", 0.0 );
-        int maxiter = data_file( "fluid/picard/maxiter", 300 );
-        int method = data_file( "fluid/picard/method", 1 ); // 1=Aitken
-        Real omega  = data_file( "fluid/picard/omega", 0 );
+        Real abstol = dataFile( "fluid/picard/abstol", 1.e6 );
+        Real reltol = dataFile( "fluid/picard/reltol", 0.0 );
+        int maxiter = dataFile( "fluid/picard/maxiter", 300 );
+        int method = dataFile( "fluid/picard/method", 1 ); // 1=Aitken
+        Real omega  = dataFile( "fluid/picard/omega", 0 );
 
-        UInt dim_u = fluid.uDof().numTotalDof();
+        UInt lVec = nDimensions * fluid.uDof().numTotalDof();
 
-        Vector fx1( 3*dim_u ), fx0( 3*dim_u ), gx1( 3*dim_u ), gx0( 3*dim_u );
-        Vector x1( 3*dim_u ), x0( 3*dim_u );
+        Vector fx1( lVec );
+        Vector fx0( lVec );
+        Vector gx1( lVec );
+        Vector gx0( lVec );
+        Vector x1( lVec );
+        Vector x0( lVec );
 
         fx1 = 0.0;
         fx0 = 0.0;
@@ -96,7 +99,7 @@ int main( int argc, char** argv )
         x0  = 0.0;
 
         // Compute right hand side
-        fluid.initialize( u0 );
+        fluid.initialize( xexact );
         fluid.timeAdvance( f, 0.0 );
 
         int  status = picard( &fluid, maxnorm, fx1, fx0, gx1, gx0,
@@ -112,6 +115,10 @@ int main( int argc, char** argv )
             // std::cout << "End of time "<< time << std::endl;
             std::cout << "Number of inner iterations       : " << maxiter
                       << std::endl;
+            std::cout << "      - L2 pressure error = "
+                      << fluid.pErrorL2(pexact, 0.) << std::endl;
+            std::cout << "      - L2 velocity error = "
+                      << fluid.uErrorL2(uexact, 0.) << std::endl;
             fluid.postProcess();
         }
     }
@@ -122,29 +129,34 @@ int main( int argc, char** argv )
         // Initialization
 
         Real dt = fluid.timestep();
-        Real startT = fluid.inittime();
-        Real T = fluid.endtime();
-        // fluid is initialized in constructor
+        Real t0 = fluid.inittime();
+        Real tFinal = fluid.endtime();
+        fluid.initialize( xexact, t0, dt );
 
         // Temporal loop
 
-        for ( Real time = startT+dt ; time <= T; time+=dt )
+        for ( Real time = t0+dt ; time <= tFinal; time+=dt )
         {
             fluid.timeAdvance( f, time );
             fluid.iterate( time );
+
+            std::cout << "      - L2 pressure error = "
+                      << fluid.pErrorL2(pexact, time) << std::endl;
+            std::cout << "      - L2 velocity error = "
+                      << fluid.uErrorL2(uexact, time) << std::endl;
 
             // save result on file
             std::ostringstream indexout;
             indexout << ( time*100 );
             std::string voutname;
             voutname = "fluid.res"+indexout.str();
-            std::fstream Resfile( voutname.c_str(),
-                                 std::ios::out | std::ios::binary );
-            Resfile.write( ( char* )&fluid.u()( 1 ),
-                          fluid.u().size()*sizeof( double ) );
-            Resfile.write( ( char* )&fluid.p()( 1 ),
-                          fluid.p().size()*sizeof( double ) );
-            Resfile.close();
+            std::fstream resFile( voutname.c_str(),
+                                  std::ios::out | std::ios::binary );
+            resFile.write( ( char* )&fluid.u()( 1 ),
+                           fluid.u().size()*sizeof( double ) );
+            resFile.write( ( char* )&fluid.p()( 1 ),
+                           fluid.p().size()*sizeof( double ) );
+            resFile.close();
 
             fluid.postProcess();
         }
