@@ -27,7 +27,7 @@ INCLUDES 	= -I$(top_srcdir)/life/lifecore  -I$(top_srcdir)/life/lifearray -I$(to
              -I$(top_srcdir)/life/lifemesh -I$(top_srcdir)/life/lifefem -I$(top_srcdir)/life/lifefilters 
 
 include_HEADERS	= ElasticStructureHandler.hpp NavierStokesAleHandler.hpp \
-                NavierStokesAleSolverPC.hpp NavierStokesHandler.hpp \
+                NavierStokesAleSolverPC.hpp NavierStokesHandler.hpp NavierStokesWithFlux.hpp \
                 NavierStokesSolverPC.hpp VenantKirchhofSolver.hpp dataElasticStructure.hpp \
                 dataNavierStokes.hpp dataSimplifiedStructure.hpp simplifiedStructure.hpp \
                 convDiffReactHandler.hpp convDiffReactSolverPC.hpp dataConvDiffReact.hpp \
