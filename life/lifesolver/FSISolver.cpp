@@ -57,41 +57,26 @@ FSISolver::FSISolver( GetPot const& data_file,
     out_res ("res")
 
 {
+    Debug( 6220 ) << "FSISolver::FSISolver starts\n";
+
     M_disp   = ZeroVector( M_disp.size() );
     M_velo   = ZeroVector( M_velo.size() );
 
+    Debug( 6220 ) << "FSISolver::M_disp: " << M_disp.size() << "\n";
+    Debug( 6220 ) << "FSISolver::M_velo: " << M_velo.size() << "\n";
+
     OperFSPreconditioner precond  = ( OperFSPreconditioner )data_file("problem/precond"   , DIRICHLET_NEUMANN );
 
-    //========================================================================================
-    // FLUID AND SOLID SOLVERS
-    //========================================================================================
-    //
-    // The NavierStokes ALE solver
-    //
-
-    // Outputs
-    this->showMe();
-
-    std::cout << std::endl;
-    std::cout << "Fluid/Structure interactions";
-    std::cout << std::scientific;
+    Debug( 6220 ) << "FSISolver::preconditioner: " << precond << "\n";
 
     if (  !__oper.empty() )
     {
         M_method = __oper;
-        this->setFSIOperator( __oper );
     }
-    else
-        this->setFSIOperator( M_method );
+    this->setFSIOperator( M_method );
 
     M_oper->setPreconditioner( precond );
-
-    M_BCh_u->showMe();
-    M_BCh_d->showMe();
-    M_BCh_mesh->showMe();
-
-    M_solid->showMe();
-    M_fluid->showMe();
+    Debug( 6220 ) << "FSISolver::FSISolver starts\n";
 }
 void
 FSISolver::setFSIOperator( std::string const& __op )
