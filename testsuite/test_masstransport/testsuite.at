@@ -1,0 +1,78 @@
+AT_SETUP([test_masstransport])
+AT_KEYWORDS([masstransport])
+AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#   Data file for NavierStokes and Masstransport 
+#-------------------------------------------------
+
+
+
+[fluid]
+
+[./physics]
+density         = 1.0               # density
+viscosity       = 0.035             # viscosity
+inittime        = 0.00              # inittime
+endtime         = 0.10              # endtime
+
+
+[../discretization]
+mesh_dir  = ../data/mesh/inria/  # the directory where the mesh file is
+mesh_file = cyltetra.mesh     # mesh file
+timestep  = 0.1              # timestep
+
+
+[../miscellaneous]
+verbose         = 3
+
+[../aztec_i]
+output          = warnings #all_res
+max_iter        = 1550
+poly_ord        = 5
+kspace          = 40
+precond         = dom_decomp
+tol             = 1.00e-6
+drop            = 1.00e-4
+ilut_fill       = 1.5
+
+[../aztec_ii]
+conv            = rhs
+max_iter        = 50
+poly_ord        = 5
+kspace          = 40
+tol             = 1.00e-6
+drop            = 1.00e-4
+ilut_fill       = 2.5
+
+
+[../aztec_s]
+output          = warnings
+conv            = rhs
+max_iter        = 5000
+poly_ord        = 5
+kspace          = 40
+tol             = 1.00e-3
+drop            = 1.00e-3
+
+[../../masstransport]
+
+[./physics]
+diffusivity     = 2.87e-7           # diffusivity
+
+# Till now we compute fluid and mastransport on the same mesh
+[../discretization]
+mesh_dir  = ../data/mesh/inria/  # the directory where the mesh file is
+mesh_file = cyltetra.mesh     # mesh file
+
+[../aztec_o]
+output          = warnings #all_res
+max_iter        = 1550
+poly_ord        = 5
+kspace          = 40
+precond         = dom_decomp
+tol             = 1.00e-6
+drop            = 1.00e-4
+ilut_fill       = 1.5
+]])
+AT_CHECK([$top_builddir/testsuite/test_masstransport/test_masstransport],[0],[ignore],[ignore])
+AT_CLEANUP

@@ -1,0 +1,4 @@
+AT_SETUP([test_mesh])
+AT_KEYWORDS([mesh])
+AT_CHECK([$top_builddir/testsuite/test_mesh/test_mesh],[0],[ignore],[ignore])
+AT_CLEANUP

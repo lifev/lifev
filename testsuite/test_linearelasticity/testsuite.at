@@ -1,0 +1,43 @@
+AT_SETUP([test_linearelasticity])
+AT_KEYWORDS([linearelasticity])
+AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file for Fluid Structure Solver 
+#-------------------------------------------------
+
+
+[solid]
+
+[./physics]
+density   = 1.2               # density
+young     = 3.0E6
+poisson   = 0.3
+endtime   = 2.0
+
+[../discretization]
+mesh_dir  = ../data/mesh/inria/     # the directory where the mesh file is
+mesh_file = vessel2x4x20.mesh # mesh file
+timestep  = 0.01                   # timestep
+
+[../miscellaneous]
+factor    = 1
+verbose   = 1
+
+
+[../newton]
+maxiter = 1
+reltol  = 1.e-8
+
+
+[../aztec]
+output          = all_res
+max_iter        = 100
+poly_ord        = 5
+kspace          = 40
+precond         = dom_decomp
+drop            = 1.00e-4
+ilut_fill       = 4
+tol             = 1.e-16
+]])
+AT_CHECK([$top_builddir/testsuite/test_linearelasticity/test_linearelasticity],[0],[ignore],[ignore])
+AT_CLEANUP

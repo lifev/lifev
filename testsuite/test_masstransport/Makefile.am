@@ -29,4 +29,4 @@ noinst_HEADERS = ud_functions.hpp
 test_mass_SOURCES = main.cpp 
 EXTRA_DIST = data 
 
-TESTS=test_mass
+

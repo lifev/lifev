@@ -1,0 +1,4 @@
+AT_SETUP([test_essentialbc])
+AT_KEYWORDS([essentialbc])
+AT_CHECK([$top_builddir/testsuite/test_essentialbc/test_essentialbc],[0],[ignore],[ignore])
+AT_CLEANUP

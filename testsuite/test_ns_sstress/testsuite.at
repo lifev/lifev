@@ -1,0 +1,59 @@
+AT_SETUP([test_ns_sstress])
+AT_KEYWORDS([ns sstress])
+AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#        Data file for NavierStokes ACT PC
+#-------------------------------------------------
+
+
+
+[fluid]
+
+[./physics]
+density         = 1.0               # density
+viscosity       = 0.035             # viscosity
+endtime         = 0.02              # endtime --> two time steps for testing purposes
+
+
+[../discretization]
+mesh_dir  = ../data/mesh/mesh++/ # the directory where the mesh file is
+mesh_file = carotide.m++         # mesh file
+mesh_type = .m++                 # mesh type
+timestep  = 0.01                 # timestep
+order_bdf = 1                    # order of the time integration scheme
+
+[../miscellaneous]
+verbose         = 3
+
+[../aztec_i]
+output          = warnings #all_res
+max_iter        = 1550
+poly_ord        = 5
+kspace          = 40
+precond         = dom_decomp
+tol             = 1.00e-9
+drop            = 1.00e-6
+ilut_fill       = 1.5
+
+[../aztec_ii]
+output          = warnings #all_res
+conv            = rhs
+max_iter        = 1550
+poly_ord        = 5
+kspace          = 40
+tol             = 1.00e-9
+drop            = 1.00e-6
+ilut_fill       = 1.5
+
+
+[../aztec_s]
+output          = warnings
+conv            = rhs
+max_iter        = 2000
+poly_ord        = 5
+kspace          = 40
+tol             = 1.00e-9
+drop            = 1.00e-6
+]])
+AT_CHECK([$top_builddir/testsuite/test_ns_sstress/test_ns_sstress],[0],[ignore],[ignore])
+AT_CLEANUP

@@ -24,10 +24,10 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-TESTS           = testBDF
+
 
 check_PROGRAMS  = testBDF 
-noinst_HEADERS  = ud_functions.hpp 
+check_HEADERS  = ud_functions.hpp 
 testBDF_SOURCES = main.cpp 
 EXTRA_DIST      = data 
 

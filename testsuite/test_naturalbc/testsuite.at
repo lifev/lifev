@@ -1,0 +1,4 @@
+AT_SETUP([test_naturalbc])
+AT_KEYWORDS([naturalbc])
+AT_CHECK([$top_builddir/testsuite/test_naturalbc/test_naturalbc],[0],[ignore],[ignore])
+AT_CLEANUP

@@ -29,7 +29,7 @@ INCLUDES		= $(all_includes)
 test: $(TESTINGS)
 
 
-all-local:
+check-local:
 	if test "$(top_srcdir)" != "$(top_builddir)"; then\
      extra_dist=$(EXTRA_DIST);\
 	 if test ! -z $$extra_dist; then \

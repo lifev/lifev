@@ -1,0 +1,33 @@
+AT_INIT([lifev testsuite])
+
+# mesh tests
+AT_BANNER([life/lifemesh testsuite ...])
+m4_include([test_mesh/testsuite.at])
+
+# matrix tests
+AT_BANNER([life/lifealg testsuite ...])
+m4_include([test_matrix/testsuite.at])
+m4_include([test_essentialbc/testsuite.at])
+m4_include([test_naturalbc/testsuite.at])
+
+# fem tests
+AT_BANNER([life/lifefem testsuite ...])
+m4_include([test_p2/testsuite.at])
+m4_include([test_q1/testsuite.at])
+m4_include([test_fe/testsuite.at])
+m4_include([test_mixte/testsuite.at])
+
+# solver tests
+AT_BANNER([life/lifesolver testsuite ...])
+m4_include([test_darcy/testsuite.at])
+m4_include([test_linearelasticity/testsuite.at])
+m4_include([test_bdf/testsuite.at])
+m4_include([test_ns_bdf/testsuite.at])
+m4_include([test_ns_cyl/testsuite.at])
+m4_include([test_ns_ipstab/testsuite.at])
+m4_include([test_ns_sstress/testsuite.at])
+m4_include([test_masstransport/testsuite.at])
+m4_include([test_fsi_newton/testsuite.at])
+m4_include([test_fsi_picard/testsuite.at])
+m4_include([test_onedmodel/testsuite.at])
+

@@ -1,0 +1,4 @@
+AT_SETUP([test_q1])
+AT_KEYWORDS([q1])
+AT_CHECK([$top_builddir/testsuite/test_q1/test_q1],[0],[ignore],[ignore])
+AT_CLEANUP

@@ -1,0 +1,4 @@
+AT_SETUP([test_bdf])
+AT_KEYWORDS([bdf])
+AT_CHECK([$top_builddir/testsuite/test_bdf/test_bdf],[0],[ignore],[ignore])
+AT_CLEANUP

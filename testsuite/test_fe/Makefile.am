@@ -24,7 +24,7 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 SUBDIRS         =  
 
-TESTS		= test_fe
+
 
 check_PROGRAMS 	= test_fe 
 

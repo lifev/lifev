@@ -29,4 +29,4 @@ noinst_HEADERS  = ud_functions.hpp
 testcyl_SOURCES = main.cpp
 EXTRA_DIST      = data
 
-TESTS           = testcyl
+

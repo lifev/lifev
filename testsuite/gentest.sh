@@ -26,6 +26,23 @@
 # DESCRIP-END.
 #
 
-sed "s/test_essentialbc/$1/g" test_essentialbc_comp.qmt > $1_comp.qmt
-sed "s/test_essentialbc/$1/g" test_essentialbc_exec.qmt > $1_exec.qmt
-sed "s/test_essentialbc/$1/g" test_essentialbc_resu.qmt > $1_resu.qmt
+for i in test_*
+do
+  if test -d $i; then
+      cp /dev/null  $i/testsuite.at
+      keywords=`echo $i | awk 'BEGIN{FS="_"}{for(i=2;i<=NF;++i) print $i;}'|xargs echo -n`
+      echo -n "generating $i/testsuite.at with keywords=$keywords..."
+      echo "AT_SETUP([$i])" >> $i/testsuite.at
+      echo "AT_KEYWORDS([$keywords])" >> $i/testsuite.at
+      if test -f $i/data; then
+	  datafile=`cat $i/data`
+	  cat >> $i/testsuite.at <<EOF
+AT_DATA([data],[[$datafile
+]])
+EOF
+      fi
+      echo "AT_CHECK([\$top_builddir/testsuite/$i/$i],[0],[ignore],[ignore])" >> $i/testsuite.at
+      echo "AT_CLEANUP" >> $i/testsuite.at
+      echo "done."
+  fi
+done

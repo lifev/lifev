@@ -33,9 +33,51 @@ SUBDIRS		= data  \
 		  test_fsi_newton test_fsi_picard \
 		  test_masstransport test_ns_ipstab
 
-check-qmtest: 
-	qmtest -D $(srcdir) run
-	qmtest -D $(srcdir) summarize
+TESTSUITES=$(srcdir)/test_bdf/testsuite.at \
+$(srcdir)/test_darcy/testsuite.at \
+$(srcdir)/test_essentialbc/testsuite.at \
+$(srcdir)/test_fe/testsuite.at \
+$(srcdir)/test_fsi_newton/testsuite.at \
+$(srcdir)/test_fsi_picard/testsuite.at \
+$(srcdir)/test_linearelasticity/testsuite.at \
+$(srcdir)/test_masstransport/testsuite.at \
+$(srcdir)/test_matrix/testsuite.at \
+$(srcdir)/test_mesh/testsuite.at \
+$(srcdir)/test_mixte/testsuite.at \
+$(srcdir)/test_naturalbc/testsuite.at \
+$(srcdir)/test_ns_bdf/testsuite.at \
+$(srcdir)/test_ns_cyl/testsuite.at \
+$(srcdir)/test_ns_ipstab/testsuite.at \
+$(srcdir)/test_ns_sstress/testsuite.at \
+$(srcdir)/test_onedmodel/testsuite.at \
+$(srcdir)/test_p2/testsuite.at \
+$(srcdir)/test_postproc/testsuite.at \
+$(srcdir)/test_q1/testsuite.at 
+
+
+$(srcdir)/package.m4: $(top_srcdir)/configure.in.in
+	{									   \
+	echo '# Signature of the current package.'; \
+	echo 'm4_define([AT_PACKAGE_NAME],		[@PACKAGE_NAME@])'; \
+	echo 'm4_define([AT_PACKAGE_TARNAME],	[@PACKAGE_TARNAME@])'; \
+	echo 'm4_define([AT_PACKAGE_VERSION],	[@PACKAGE_VERSION@])'; \
+	echo 'm4_define([AT_PACKAGE_STRING],	[@PACKAGE_STRING@])'; \
+	echo 'm4_define([AT_PACKAGE_BUGREPORT], [@PACKAGE_BUGREPORT@])'; \
+	} >$(srcdir)/package.m4
+
+
+EXTRA_DIST = testsuite.at testsuite
+
+TESTSUITE = $(srcdir)/testsuite
+check-local: atconfig atlocal  $(TESTSUITE)
+	$(SHELL) $(TESTSUITE)
+
+AUTOM4TE    = autom4te
+AUTOTEST = $(AUTOM4TE) --language=autotest
+$(TESTSUITE): $(srcdir)/testsuite.at $(srcdir)/package.m4 $(TESTSUITES)
+	$(AUTOTEST) -I $(srcdir) $@.at -o $@.tmp
+	mv $@.tmp $@
+
 
 
 include $(top_srcdir)/admin/Doxyfile.am

@@ -1,0 +1,33 @@
+AT_SETUP([test_darcy])
+AT_KEYWORDS([darcy])
+AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#          Data file for a Darcy problem
+#-------------------------------------------------
+
+[physics]
+test_case       = 1                 # in particular for b.c. condition
+mesh_file       = cylhexa.mesh      #
+diffusion_type  = 0                 # 0: scalar diffusion, 1: tensor diffusion
+diffusion_function = 0  # select a user function
+diffusion_scalar  = 1.  # scalar diffusion coefficient
+diffusion_tensor  = '1. 0. 0.  0. 1. 0  0. 0. 1.' # diffusion tensor
+
+[linearsolver] 
+theLinearSolver   = 0    # 0: Aztec, 1: UMFPack (UMFPack not implemented yet)
+
+[miscellaneous]
+mesh_dir = ../data/mesh/inria # the directory where the mesh file is
+post_dir = ./                 # the directory for postprocessing files
+verbose = 1
+post_proc_format = medit          # vtk or medit
+
+[aztec]  
+solver = cg  #cg , gmres, cgs, tfqmr, bicgstab, slu, symmlq, fixed_pt, lu
+precond = dom_decomp
+subdomain_solve = icc
+output = warnings    #warnings , none , all, all_res, last
+tol = 1e-6
+]])
+AT_CHECK([$top_builddir/testsuite/test_darcy/test_darcy],[0],[ignore],[ignore])
+AT_CLEANUP

@@ -1,0 +1,4 @@
+AT_SETUP([test_mixte])
+AT_KEYWORDS([mixte])
+AT_CHECK([$top_builddir/testsuite/test_mixte/test_mixte],[0],[ignore],[ignore])
+AT_CLEANUP

@@ -1,0 +1,4 @@
+AT_SETUP([test_postproc])
+AT_KEYWORDS([postproc])
+AT_CHECK([$top_builddir/testsuite/test_postproc/test_postproc],[0],[ignore],[ignore])
+AT_CLEANUP
