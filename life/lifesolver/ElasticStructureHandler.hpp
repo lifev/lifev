@@ -99,6 +99,11 @@ public:
     virtual ~ElasticStructureHandler()
     {}
 
+    //! getters and setters
+
+    CurrentBdFE & feBd(){return _feBd;}
+    Dof         & dof() {return _dof;}
+
 protected:
 
     //! Reference FE
@@ -169,7 +174,7 @@ ElasticStructureHandler( const GetPot& data_file, const RefFE& refFE,
 
 // Returns the displacement vector
 template <typename Mesh>
-PhysVectUnknown<Vector>&
+PhysVectUnknown<Vector> &
 ElasticStructureHandler<Mesh>::d()
 {
     return _d;
@@ -178,7 +183,7 @@ ElasticStructureHandler<Mesh>::d()
 
 // Returns the velocity vector
 template <typename Mesh>
-PhysVectUnknown<Vector>&
+PhysVectUnknown<Vector> &
 ElasticStructureHandler<Mesh>::w()
 {
     return _w;

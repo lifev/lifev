@@ -88,12 +88,18 @@ public:
     //! Output
     void showMe( std::ostream& c = std::cout ) const;
 
-    //! BCHandler getter
+    //! getters
+
+    //! BCHandler getter and setter
 
     BCHandler const & BC_solid() const {return _BCh;}
-
+    void setBCSolid(const BCHandler &_BCd) {_BCh = _BCd;} 
     //! residual getter
     Vector& residual() {return _residual_d;}
+
+    //! recur setter
+
+    void setRecur(UInt recur) {_recur = recur;}
 
     //! friends classes related to the newton solver
     template <class Fct, class Vector, class Real, class Norm>
@@ -107,6 +113,13 @@ public:
                                   Real& lambda, int iter );
 
     void updateJac( Vector& sol, int iter );
+
+    //! solves the tangent problem for newton iterations
+    void solveJac( Vector& step, const Vector& res, double& linear_rel_tol );
+
+    //! solves the tangent problem with custom BC
+    void solveJac( Vector& step, const Vector& res, double& linear_rel_tol, BCHandler &_BCd );
+
 
 private:
 
@@ -163,12 +176,6 @@ private:
     void evalResidual( Vector&res, const Vector& sol, int iter );
 
     //! updates the tangent matrix for newton iterations
-
-    //! solves the tangent problem for newton iterations
-    void solveJac( Vector& step, const Vector& res, double& linear_rel_tol );
-
-    //! solves the tangent problem with custom BC
-    void solveJac( Vector& step, const Vector& res, double& linear_rel_tol, BCHandler &_BCd );
 
     //! files for lists of iterations and residuals per timestep
     std::ofstream _out_iter;
@@ -411,7 +418,6 @@ evalResidual( Vector&res, const Vector& sol, int iter )
 
     std::cout << "O-    Computing residual... ";
 
-
     Chrono chrono;
     chrono.start();
 
@@ -475,7 +481,6 @@ evalResidual( Vector&res, const Vector& sol, int iter )
 
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
-
 }
 
 
@@ -691,6 +696,8 @@ solveJac(Vector& step, const Vector& res, double& linear_rel_tol, BCHandler &_BC
 
     AZ_matrix_destroy( &J );
     AZ_precond_destroy( &prec_J );
+
+    bcManageMatrix( _J, _mesh, this->_dof, _BCh, _feBd, tgv );
 
 }
 }
