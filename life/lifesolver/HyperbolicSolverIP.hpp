@@ -579,8 +579,9 @@ namespace LifeV {
         Chrono __chrono;
         __chrono.start();
 
-        // Set initial time and time step
+        // Set initial time, current time and time step
         _M_t0 = t0;
+        _M_t = t0;
         _M_delta_t = delta_t;
 
         // Initialize bdf
@@ -624,6 +625,8 @@ namespace LifeV {
     template<typename MeshType>
     void HyperbolicSolverIP<MeshType>::timeAdvance() {
         Chrono __chrono;
+
+        if ( _M_t != _M_t0 ) _M_bdf.shift_right(_M_u);
 
         if(_M_verbose) std::cout << "** HSIP ** Computing problem matrix" << std::endl;
 
@@ -671,8 +674,6 @@ namespace LifeV {
 
         __chrono.stop();
         _M_monitored_times[4] = __chrono.diff();
-
-        _M_bdf.shift_right(_M_u);
 
         _M_t += _M_delta_t;
     }
