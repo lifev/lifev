@@ -473,17 +473,16 @@ void my_matvec(double *p, double *ap, AZ_MATRIX * Amat, int proc_config[])
   A_i->data_org[AZ_name]= DATA_NAME_AZTEC;
   options_i[AZ_keep_info]=1; // keep information
 
-  double p1[A_i->data_org[AZ_N_internal]+A_i->data_org[AZ_N_border]+
-	   A_i->data_org[AZ_N_external]];
-  double p2[A_i->data_org[AZ_N_internal]+A_i->data_org[AZ_N_border]];
-  // initialize p2:
-  for (UInt i=0; i < A_i->data_org[AZ_N_internal]+A_i->data_org[AZ_N_border];i++) p2[i]= 0.0;
+  std::vector<double> p1(A_i->data_org[AZ_N_internal]+A_i->data_org[AZ_N_border]+A_i->data_org[AZ_N_external]);
+  std::vector<double> p2(A_i->data_org[AZ_N_internal]+A_i->data_org[AZ_N_border]);
+  p1.assign( p1.size(), 0.0 );  
+  p2.assign( p1.size(), 0.0 );
 
   // product trD*p:
   operMatVec(p1, *(my_data->_trD), p);
 
   // solve the system C*p2= p1 with AZTEC.
-  AZ_iterate(p2, p1, options_i, params_i, status_i,
+  AZ_iterate( &p2.front(), &p1.front(), options_i, params_i, status_i,
 	     proc_config_i, A_i, prec_i, NULL);
   
   //return to zero recursion level for AZTEC memory manager
@@ -498,7 +497,7 @@ void my_matvec(double *p, double *ap, AZ_MATRIX * Amat, int proc_config[])
     (*(my_data->_vec))[i]= p2[i];
 
   // product p=D*p2:
-  operMatVec(ap, *my_data.D(), p2);
+  operMatVec(ap, *my_data.D(), &p2.front());
 
   if (my_data->_fullEssential)
     ap[dim-1]=p[dim-1]; // diagonalisation of the last row.
@@ -580,18 +579,16 @@ void my_matvec(double *p, double *ap, AZ_MATRIX * Amat, int proc_config[])
   options_i[AZ_keep_info]=1; // keep information
 
 
-  double p1[dim_u];
-  double p2[dim_u];
+  std::vector<double> p1( dim_u );
+  std::vector<double> p2( dim_u );
+  p1.assign( dim_u, 0.0 );
+  p2.assign( dim_u, 0.0 );
 
   // product trD*p:
-  operMatVec(p1, *(my_data->_trD), p); 
+  operMatVec( &p1.front(), *(my_data->_trD), p); 
 
-  // initializing p2
-  for (int i=0; i<(int)dim_u;++i)
-    p2[i]=0.0;
-  
   // solve the system C*p2= p1 with AZTEC.
-  AZ_iterate(p2, p1, options_i, params_i, status_i,proc_config_i, A_i, prec_i, NULL);
+  AZ_iterate( &p2.front(), &p1.front(), options_i, params_i, status_i,proc_config_i, A_i, prec_i, NULL);
 
  
 
@@ -602,16 +599,17 @@ void my_matvec(double *p, double *ap, AZ_MATRIX * Amat, int proc_config[])
   // Result p2 is saved and will be used to correct the velocity
   // in the step (iii) of algebraic factorization
   for (UInt i=0; i< dim_u; i++)
-    (*(my_data->_vec))[i]= p2[i];
+      (*(my_data->_vec))[i]= p2[i];
 
   // product p=D*p2:
-  operMatVec(ap, *(my_data->_D), p2);
+  operMatVec(ap, *(my_data->_D), &p2.front());
 
   if ( my_data->_fullEssential ) {
     const UInt dim  = my_data->_trD->Patt()->nCols(); 
     ap[dim-1]=p[dim-1]; // diagonalisation of the last row.
   }
 
+  
 }
 
 ////////////////////////
@@ -645,12 +643,13 @@ void my_matvec_block(double *p, double *ap, AZ_MATRIX * Amat,
   // introduction of vectors
   const UInt dim2 = my_data->_trD->Patt()->nRows();
 
-  double p1[dim2], p2[dim2];
-  // initialize p2:
-  for (UInt i=0; i < dim2; i++) p2[i]=0.0;
+  std::vector<double> p1( dim2 );
+  std::vector<double> p2( dim2 );
+  p1.assign( dim2, 0.0 );
+  p2.assign( dim2, 0.0 );
 
   // product trD*p:
-  operMatVec(p1, *(my_data->_trD), p);
+  operMatVec( &p1.front(), *(my_data->_trD), p);
 
   // product C^(-1)*p1= p2:
   // solve the system C*p2= p1 with AZTEC.
@@ -726,11 +725,11 @@ void my_matvec_block(double *p, double *ap, AZ_MATRIX * Amat,
   options_i[AZ_keep_info]=1; // keep information
 
   //for each block
-  AZ_iterate(p2, p1, options_i, params_i, status_i,
+  AZ_iterate( &p2.front(), &p1.front(), options_i, params_i, status_i,
 	     proc_config_i, C1, prec_C1, NULL);
-  AZ_iterate(p2+N_eq_i, p1+N_eq_i, options_i, params_i,
+  AZ_iterate( &p2.front()+N_eq_i, &p1.front()+N_eq_i, options_i, params_i,
 	     status_i, proc_config_i, C2, prec_C2, NULL);
-  AZ_iterate(p2+2*N_eq_i, p1+2*N_eq_i, options_i,
+  AZ_iterate( &p2.front()+2*N_eq_i, &p1.front()+2*N_eq_i, options_i,
 	     params_i, status_i, proc_config_i, C3, prec_C3, NULL);
 
   //return to zero recursion level for AZTEC memory manager
@@ -750,7 +749,7 @@ void my_matvec_block(double *p, double *ap, AZ_MATRIX * Amat,
     (*(my_data->_vec))[i]= p2[i];
 
   // product p=D*p2:
-  operMatVec( ap, *(my_data->_D), p2);
+  operMatVec( ap, *(my_data->_D), &p2.front());
 
   if ( my_data->_fullEssential ) {
     const UInt dim  = my_data->_trD->Patt()->nCols();
@@ -786,13 +785,13 @@ void my_approxmatvec(double *p, double *ap, AZ_MATRIX * Amat, int proc_config[])
   // introduction of vectors
   UInt dim2 = my_data->_trD->Patt()->nRows();
  
-  double p1[dim2];
+  std::vector<double> p1(dim2);
 
   // product p1= H^{-1}*trD * p :
-  operMatVec(p1, *(my_data->_HinvDtr), p);
+  operMatVec( &p1.front(), *(my_data->_HinvDtr), p);
 
   // product D*p1 :
-  operMatVec(ap, *(my_data->_D), p1);
+  operMatVec(ap, *(my_data->_D), &p1.front());
 
  
   if(my_data->_fullEssential) {
