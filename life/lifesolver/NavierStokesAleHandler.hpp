@@ -31,6 +31,8 @@
 #define _NAVIERSTOKESALEHANDLER_H_
 #include <life/lifesolver/NavierStokesHandler.hpp>
 #include <life/lifefem/meshMotion.hpp>
+#include <life/lifecore/life.hpp>
+#include <boost/function.hpp>
 
 namespace LifeV
 {
@@ -51,6 +53,8 @@ class NavierStokesAleHandler:
 public:
 
     typedef typename NavierStokesHandler<Mesh>::source_type source_type;
+
+    typedef typename NavierStokesHandler<Mesh>::Function Function;
 
     //! Constructor
     /*!
@@ -94,6 +98,20 @@ public:
 
     void updateDispVelo();
 
+    //! Sets initial condition for the velocity (here the initial time is 0.0)
+    void initialize( const Function& u0 );
+
+    //! Sets initial condition for the velocity and the pressure
+    //! (incremental approach): the initial time is t0, the time step dt
+    void initialize( const Function& u0, const Function& p0, Real t0, Real dt);
+
+    //! Sets initial condition for the velocity and the pressure from file
+    void initialize( const std::string & vname );
+
+    //! Sets initial condition for the velocity and the pressure
+    //! from medit file
+    void initialize( const std::string& velName,
+                     const std::string& pressName);
     //! Postprocessing
     void postProcess();
 
@@ -208,6 +226,109 @@ updateDispVelo()
     std::cout << " max norm dwInterp = " << norm_inf( _dwInterp ) << std::endl;
 }
 
+template <typename Mesh>
+void
+NavierStokesAleHandler<Mesh>::initialize( const Function& u0 )
+{
+    NavierStokesHandler<Mesh>::initialize(u0);
+}
+
+
+template <typename Mesh>
+void
+NavierStokesAleHandler<Mesh>::initialize( const Function& u0, const Function& p0,
+                                          Real t0, Real dt )
+{
+    NavierStokesHandler<Mesh>::initialize(u0, p0, t0, dt);
+}
+
+template <typename Mesh>
+void
+NavierStokesAleHandler<Mesh>::initialize(  const std::string & vname )
+{
+     NavierStokesHandler<Mesh>::initialize( vname );
+}
+
+
+
+//! Initialize the fluid with a solution file
+//! written in MEDIT format
+template <typename Mesh>
+void
+NavierStokesAleHandler<Mesh>::initialize( const std::string& velName,
+                                          const std::string& pressName)
+{
+    std::cout "  F- restarting ... " << std::endl
+    NavierStokesHandler<Mesh>::initialize( velName, pressName);
+
+    UInt nnode = _mesh.pointList.size();
+
+    std::string filenamep = pressName;
+    std::string ext       = ".mesh";
+
+    filenamep.insert(filenamep.end(), ext.begin(), ext.end());
+
+    std::cout << "    F - Reading INRIA fluid mesh file   (" << filenamep << ")"
+              << ":" << std::endl;
+
+    std::ifstream file(filenamep.c_str(), std::ios::in);
+
+    if (!file)
+    {
+        std::cout << "    F- initialize: Reading file " << filenamep
+                  << " impossible" << std::endl;
+        exit(1);
+    }
+
+    std::string sdummy;
+    UInt        ns;
+
+    file >> sdummy >> sdummy;
+    file >> sdummy >> sdummy;
+    file >> sdummy;
+    file >> ns;
+
+    if (ns != nnode)
+    {
+        std::cout << "     F- initialize: non-matching grids " << ns << " != " << nnode << std::endl;
+        exit(1);
+    }
+
+    PhysVectUnknown<Vector> disp(nnode);
+
+//    double x,y,z;
+    UInt   idummy;
+    UInt   inode;
+
+    for (inode = 0; inode < nnode; ++inode)
+    {
+        file >> disp[inode + 0*nnode]
+             >> disp[inode + 1*nnode]
+             >> disp[inode + 2*nnode]
+             >> idummy;
+
+//        std::cout << disp[inode + 0*nnode] << " " << disp[inode + 1*nnode] << " "  << disp[inode + 2*nnode] << std::endl; 
+//         std::cout << _mesh.pointList[inode].coordinate(0) << " "
+//                   << _mesh.pointList[inode].coordinate(1) << " "
+//                   << _mesh.pointList[inode].coordinate(2) << std::endl;
+
+        disp[inode + 0*nnode] -= _mesh.pointList[inode].coordinate(1);
+        disp[inode + 1*nnode] -= _mesh.pointList[inode].coordinate(2);
+        disp[inode + 2*nnode] -= _mesh.pointList[inode].coordinate(3);
+
+    }
+
+    file.close();
+
+    _mesh.moveMesh(disp);
+
+
+
+
+}
+
+
+
 
 // Postprocessing pressure
 template <typename Mesh>
@@ -239,9 +360,9 @@ NavierStokesAleHandler<Mesh>::postProcess()
 
 
         wr_medit_ascii_scalar( "press." + name + ".bb", _p.giveVec(), _p.size() );
-        wr_medit_ascii_scalar( "velF_x." + name + ".bb", _u.giveVec(), _mesh.numVertices() );
-        wr_medit_ascii_scalar( "velF_y." + name + ".bb", _u.giveVec() + _dim_u, _mesh.numVertices() );
-        wr_medit_ascii_scalar( "velF_z." + name + ".bb", _u.giveVec() + 2 * _dim_u, _mesh.numVertices() );
+        wr_medit_ascii_scalar( "vel_x." + name + ".bb", _u.giveVec(), _mesh.numVertices() );
+        wr_medit_ascii_scalar( "vel_y." + name + ".bb", _u.giveVec() + _dim_u, _mesh.numVertices() );
+        wr_medit_ascii_scalar( "vel_z." + name + ".bb", _u.giveVec() + 2 * _dim_u, _mesh.numVertices() );
         //   wr_medit_ascii_scalar("velw_x."+name+".bb",_w.giveVec(),_mesh.numVertices());
         // wr_medit_ascii_scalar("velw_y."+name+".bb",_w.giveVec() + _mesh.numVertices(),_mesh.numVertices());
         //wr_medit_ascii_scalar("velw_z."+name+".bb",_w.giveVec() + 2*_mesh.numVertices(),_mesh.numVertices());
@@ -250,9 +371,9 @@ NavierStokesAleHandler<Mesh>::postProcess()
         //wr_medit_ascii("press."+name+".mesh", _mesh);
         wr_medit_ascii( "press." + name + ".mesh", _mesh, _disp, 12 );
         // wr_medit_ascii_vector("veloc."+name+".bb",_u.giveVec(),_mesh.numVertices(),_dim_u);
-        system( ( "ln -s press." + name + ".mesh velF_x." + name + ".mesh" ).data() );
-        system( ( "ln -s press." + name + ".mesh velF_y." + name + ".mesh" ).data() );
-        system( ( "ln -s press." + name + ".mesh velF_z." + name + ".mesh" ).data() );
+        system( ( "ln -s press." + name + ".mesh vel_x." + name + ".mesh" ).data() );
+        system( ( "ln -s press." + name + ".mesh vel_y." + name + ".mesh" ).data() );
+        system( ( "ln -s press." + name + ".mesh vel_z." + name + ".mesh" ).data() );
         //system(("ln -s press."+name+".mesh velw_x."+name+".mesh").data());
         //system(("ln -s press."+name+".mesh velw_y."+name+".mesh").data());
         //system(("ln -s press."+name+".mesh velw_z."+name+".mesh").data());
