@@ -15,10 +15,10 @@ mesh_faces  = all
 delta_t     = .02
 t0          = .0
 T           = .06
-order       = 2
+order       = 1
 
 [../ipstab]
-gamma       = .0625
+gamma       = 1e-4
 
 [../solver]
 solver_name     = aztec
