@@ -45,6 +45,8 @@
 #include <life/lifearray/vecUnknown.hpp>
 #include <life/lifearray/sparseArray.hpp>
 
+#include <boost/numeric/ublas/matrix_sparse.hpp>
+
 class GetPot;
 
 namespace LifeV
@@ -228,6 +230,17 @@ public:
      */
     void setMatrix( const MSRMatr<value_type>& m );
 
+    //! set matrix from boost matrix
+    void setMatrix( const boost::numeric::ublas::compressed_matrix<double, boost::numeric::ublas::row_major>& m )
+        {
+        _M_tempPattern.reset( 0 );
+        _M_tempMatrix.reset( 0 );
+        setMatrix( m.size1(),
+                   &(m.index1_data()[0]),
+                   &(m.index2_data()[0]),
+                   &(m.value_data()[0]) );
+        }
+    
     void setMatrixTranspose( uint, const uint*, const uint*, const double* );
     /*!
       \brief Sets the relative, absolute, divergence, and maximum iteration
@@ -254,11 +267,11 @@ public:
 
     /*!
       \brief set the null space of the matrix to be solved for
-      
+
       \param nullSpace orthonormal basis of the null space
     */
     void setNullSpace( const std::vector<const Vector*>& nullSpace );
-    
+
     //! get the petsc preconditioner
     PC & preconditioner();
 
