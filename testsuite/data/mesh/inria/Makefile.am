@@ -20,7 +20,7 @@
 #  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
+SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 dist_pkgdata_DATA = cube_384.mesh cube_6007.mesh cylhexa.mesh cyltetra.mesh\
 		    piece-of-tube-wall-tetra.mesh hexa16x16.mesh hexa2x2.mesh\
@@ -28,7 +28,8 @@ dist_pkgdata_DATA = cube_384.mesh cube_6007.mesh cylhexa.mesh cyltetra.mesh\
 		    tube_curve20.mesh vessel2x4x20.mesh vessel2x4x20_10cm.mesh\
 		    vessel_curve20.mesh hexahexa10x10x10.mesh\
                     tube20.mesh vessel20.mesh \
-            piece-of-tube.mesh piece-of-tube-wall.mesh hexa1x1.mesh tube.mesh vessel.mesh
+            piece-of-tube.mesh piece-of-tube-wall.mesh hexa1x1.mesh tube.mesh vessel.mesh \
+            heart13628.mesh heart1959.mesh
 
 check-local:
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\
