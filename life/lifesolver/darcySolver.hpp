@@ -1023,7 +1023,7 @@ void DarcySolver<Mesh>::postProcessEnsight()
     projectVelocityQ1( nodalVel );
 
     Real time = 0.01; // needed for the index of the result-files
-    outensight7Mesh3D( this->_mesh, u_q1, p_q1,time );
+    outensight7Mesh3D( this->_mesh, nodalVel, nodalPres,time );
 
 }
 
