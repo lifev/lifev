@@ -98,6 +98,7 @@ public:
         _M_p_nso( _M_solver->pDof().numTotalDof() ),
         _M_Qno( 0 ),
         _M_vec_lambda( _M_solver->uDof().numTotalDof() ),
+        _M_lambda( 0 ),
         _M_source( default_source_term() )
         {
             Debug( 6010 ) << "constructor from a NavierStokes solver\n";
@@ -111,6 +112,7 @@ public:
         _M_p_nso( __nswf._M_p_nso ),
         _M_Qno( __nswf._M_Qno ),
         _M_vec_lambda( __nswf._M_vec_lambda ),
+        _M_lambda( __nswf._M_lambda ),
         _M_source( __nswf._M_source )
         {
             Debug( 6010 ) << "copy constructor\n";
@@ -150,6 +152,11 @@ public:
     Real timestep() const { return _M_solver->timestep();}
     Real inittime() const { return _M_solver->inittime();}
     Real endtime() const { return _M_solver->endtime();}
+
+    Real pressure() const
+        {
+            return _M_lambda;
+        }
     //@}
 
     /** @name  Mutators
@@ -225,6 +232,8 @@ private:
     //! lagrange multiplier to impose flux
     Vector _M_vec_lambda;
 
+    Real _M_lambda;
+
     source_type _M_source;
 };
 
@@ -257,7 +266,7 @@ NavierStokesWithFlux<NSSolver>::initialize( const Function& u0, const Function& 
 
     Real startT = _M_solver->inittime();
     Real time=startT+dt;
-    _M_solver->timeAdvance( f, time ); 
+    _M_solver->timeAdvance( f, time );
     _M_solver->iterate( time );
 
     // Store the solutions of NSo
@@ -326,7 +335,8 @@ NavierStokesWithFlux<NSSolver>::iterate( const Real& time )
     }
     Real y = absr0/_M_Qno;
     Real z = v*y;
-    Real lambda=lambda0+z;
+
+    _M_lambda=lambda0+z;
 
     // update the velocity and the pressure
     _M_solver->u()-=z * _M_u_nso;
@@ -340,9 +350,9 @@ NavierStokesWithFlux<NSSolver>::iterate( const Real& time )
      //compute the flux of NS: the definitive one
      //
      Qn=_M_solver->flux(_M_fluxes.begin()->first);
-     std::cout << "imposed flux" << " " << Q << "\n"; 
+     std::cout << "imposed flux" << " " << Q << "\n";
      std::cout << "numerical flux" << " " << Qn << "\n";
-    
+
 
 }
 }

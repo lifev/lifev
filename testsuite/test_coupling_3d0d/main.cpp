@@ -23,20 +23,37 @@
 #include "ud_functions.hpp"
 #include "GetPot.hpp"
 #include "zeroDModelSolver.hpp"
-#include "NavierStokesWithFlux_new_mine.hpp"
+#include "NavierStokesWithFlux_new.hpp"
 
+namespace LifeV
+{
+class flux_adaptor
+{
+public:
 
+    flux_adaptor( double __Q )
+        :
+        _M_Q( __Q )
+        {}
 
+    Real operator()( Real /*time*/ )
+        {
+            return _M_Q;
+        }
+private:
+    Real _M_Q;
+};
+}
 /**
-    This test couples the Navier-Stokes equations (3D Model) with a lumped parameter model 
-    (0D Model - electric network). 
+    This test couples the Navier-Stokes equations (3D Model) with a lumped parameter model
+    (0D Model - electric network).
     Two couple strategies ares used:
 
-        Mean pressure : the 3D Model gives the flux information to the 0D Model wereas 
+        Mean pressure : the 3D Model gives the flux information to the 0D Model wereas
                         the 0D Model passes the pressure to the 3D.
 
 	Flow rate     : the 3D Model gives the pressure information to the 0D Model wereas
-                        the 0D Model passes the flux to the 3D.		
+                        the 0D Model passes the flux to the 3D.
 
 */
 
@@ -59,8 +76,8 @@ int main(int argc, char** argv)
     //
     typedef NavierStokesSolverPC< RegionMesh3D<LinearTetra> > NS;
     boost::shared_ptr<NS> ns( new NS (data_file, feTetraP1bubble, feTetraP1,
-				      quadRuleTetra15pt,quadRuleTria3pt, 
-				      quadRuleTetra5pt, quadRuleTria3pt, BCh_u) );
+                                      quadRuleTetra15pt,quadRuleTria3pt,
+                                      quadRuleTetra5pt, quadRuleTria3pt, BCh_u) );
     ns->showMe();
 
 
@@ -111,47 +128,47 @@ int main(int argc, char** argv)
     //
     if (network.isMeanPressProb()){
 
-      BCh_u.addBC("InFlow", 1, Natural,  Full, bcvec , 3);
-      Real Q;
+        BCh_u.addBC("InFlow", 1, Natural,  Full, bcvec , 3);
+        Real Q;
 
-      for (Real time=startT+dt ; time <= T; time+=dt)
-	{
-	  
-	  Q = ns->flux(1);
-	  // pressure coming from the 0D Model
-	  vec_press = ScalarVector( vec_press.size(), -network.getPressureFromQ(time,Q) );
-	  
-	  ns->timeAdvance(f,time);
-	  ns->iterate(time);
-	  
-	  ns->postProcess();
-	}  
+        for (Real time=startT+dt ; time <= T; time+=dt)
+        {
+
+            Q = ns->flux(1);
+            // pressure coming from the 0D Model
+            vec_press = ScalarVector( vec_press.size(), -network.getPressureFromQ(time,Q) );
+
+            ns->timeAdvance(f,time);
+            ns->iterate(time);
+
+            ns->postProcess();
+        }
     } else {
 
-      BCFunctionBase in_flow(uo);
-      BCh_u.addBC("InFlow", 1, Natural,   Full, in_flow, 3);
+        BCFunctionBase in_flow(uo);
+        BCh_u.addBC("InFlow", 1, Natural,   Full, in_flow, 3);
 
-      Real deltaP;
-      Real Qaux;
+        Real deltaP;
+        Real Qaux;
 
-      NavierStokesWithFlux<NS> ns_with_flux(ns);
+        NavierStokesWithFlux<NS> ns_with_flux(ns);
 
-      ns_with_flux.setFlux( 1, 0. );
-      ns_with_flux.setSourceTerm( f );
-      ns_with_flux.initialize(u0,p0,0.0,dt);
-      
-      for (Real time=startT+dt ; time <= T; time+=dt){
-	
-	deltaP = ns_with_flux.pressure();
-	
-	ns_with_flux.setFlux(1, network.getQFromPressure(time, deltaP)); // network.getQFromPressure(time, deltaP) );
+        ns_with_flux.setFlux( 1, flux_adaptor( 0 ) );
+        ns_with_flux.setSourceTerm( f );
+        ns_with_flux.initialize(u0,p0,0.0,dt);
 
-        ns_with_flux.timeAdvance( f, time );
-        ns_with_flux.iterate( time );
-        
-	ns->postProcess();
-	
-      }
+        for (Real time=startT+dt ; time <= T; time+=dt){
+
+            deltaP = ns_with_flux.pressure();
+
+            ns_with_flux.setFlux(1, flux_adaptor( network.getQFromPressure(time, deltaP) ) );
+
+            ns_with_flux.timeAdvance( f, time );
+            ns_with_flux.iterate( time );
+
+            ns->postProcess();
+
+        }
     }
 
     outfile.open("res_Q.m", std::ios::app);
