@@ -40,7 +40,7 @@ quasiNewton::quasiNewton(fluid_type       _fluid,
     M_feBd(M_refFE.boundaryFE(), getGeoMap(_fluid->mesh()  ).boundaryMap(),M_bdQr),
     M_elmatC(M_fe.nbNode, 1, 1),
     M_dp(M_dim),
-    M_residual_dp(_fluid->uDof().numTotalDof()),
+    M_residual_dp(3*_fluid->uDof().numTotalDof()),
     M_f(M_dim),
     M_computedC(false)
 {
@@ -102,8 +102,8 @@ void quasiNewton::evalResidual()
 
     int iBC = M_BCh_dp->getBCbyName("Wall");
 
-    UInt nDofF    = M_fluid->feBd_u().nbNode;
-    UInt totalDof = M_fluid->uDof().numTotalDof();
+    UInt nDofF    = M_feBd.nbNode;
+    UInt totalDof = M_dof.numTotalDof();
 
     const IdentifierNatural* pId;
     ID ibF, icDof, gDof;
@@ -121,7 +121,7 @@ void quasiNewton::evalResidual()
         ibF = pId->id();
 
         // Updating face stuff
-        M_fluid->feBd_u().updateMeasNormalQuadPt( M_fluid->mesh().boundaryFace( ibF ) );
+        M_feBd.updateMeasNormalQuadPt( M_fluid->mesh().boundaryFace( ibF ) );
 
         // Loop on total Dof per Face
         for ( ID l = 1; l <= nDofF; ++l )
@@ -134,12 +134,12 @@ void quasiNewton::evalResidual()
                 icDof = gDof + ic * totalDof;
 
                 // Loop on quadrature points
-                for ( int iq = 0; iq < M_fluid->feBd_u().nbQuadPt; ++iq )
+                for ( int iq = 0; iq < M_feBd.nbQuadPt; ++iq )
                 {
                     // Adding right hand side contribution
-                    M_residual_dp[ icDof - 1 ] -= M_dp[ gDof ] * M_fluid->feBd_u().phi( int( l - 1 ), iq )
-                        * M_fluid->feBd_u().normal( int( ic ), iq )
-                        * M_fluid->feBd_u().weightMeas( iq );
+                    M_residual_dp[ icDof - 1 ] += M_dp[ gDof ] * M_feBd.phi( int( l - 1 ), iq )
+                        * M_feBd.normal( int( ic ), iq )
+                        * M_feBd.weightMeas( iq );
                 }
             }
         }
