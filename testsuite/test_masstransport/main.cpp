@@ -80,8 +80,6 @@ int main(int argc, char** argv)
      cdr.initialize(c0,0.0,dt);
   }
 
-  PhysVectUnknown<Vector> uc(3*cdr.c().size());
-
 // ************ Temporal loop **************************************************
   for (Real time=startT+dt ; time <= T; time+=dt) {
 
@@ -90,14 +88,9 @@ int main(int argc, char** argv)
 
      cdr.timeAdvance(fc,time);
 
-// TODO: Projection between fluid and concentration grid (velocity must be given
-//       on concentration nodes)
+     cdr.getvel(ns.mesh(),ns.u(),BCh_u,time);
 
-    for (UInt j=0; j<3; j++){
-       for(UInt i=1; i<= cdr.c().size(); i++){
-	  uc(i+j*cdr.c().size())=ns.u()(i+j*ns.u().size()/3);}}
-
-    cdr.iterate(time, uc);
+     cdr.iterate(time);
 
 // ************* saving result on file *****************************************
     ostringstream indexout;
