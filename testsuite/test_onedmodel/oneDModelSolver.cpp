@@ -70,11 +70,8 @@ OneDModelSolver::OneDModelSolver(const GetPot& data_file,
     _M_diffSrc22(_M_nb_elem),
     //! mass matrix (to be inverted)
     _M_massMatrix(_M_dimDof),
-    _M_cholFactorMassMatrix(_M_dimDof),
-    _M_choleskySlv(),
     _M_factorMassMatrix(_M_dimDof),
-    _M_massupdiag2( _M_dimDof - 2 ),
-    _M_massipiv( _M_dimDof ),
+    _M_tridiagSlv(_M_dimDof),
     //! matrices used to build the rhs
     _M_massMatrixDiffSrc11(_M_dimDof),
     _M_massMatrixDiffSrc12(_M_dimDof),
@@ -109,8 +106,8 @@ OneDModelSolver::OneDModelSolver(const GetPot& data_file,
 
     //! Matrices initialization
     _M_massMatrix.zero();
+    // _M_factorMassMatrix.zero();
     _M_factorMassMatrix.zero();
-    _M_cholFactorMassMatrix.zero();
 
     _M_gradMatrix.zero();
 
@@ -143,58 +140,13 @@ OneDModelSolver::OneDModelSolver(const GetPot& data_file,
 
     } //! end loop on elements
 
-    /*
-    //---------------------------
-    //! test of cholesky solver
-    TriDiagCholesky< Real, TriDiagMatrix<Real>, Vector > slv_chol;
-
-    TriDiagMatrix<Real> fact_mat(_M_dimDof);
-    fact_mat= _M_massMatrix;
-    Vector x( _M_dimDof );
-    Vector b( _M_dimDof );
-    for( Int ii = 0 ; ii < _M_dimDof ; ii ++ ) {
-        b( ii ) = ii;
-    }
-
-    std::cout << "b \n" << b << std::endl;
-    std::cout << "\n befor facto " << std::endl;
-    fact_mat.showMe( std::cout , 4 );
-    slv_chol.CholeskyFactor( fact_mat );
-    std::cout << "\n after facto " << std::endl;
-    fact_mat.showMe( std::cout , 4 );
-    slv_chol.CholeskySolve( fact_mat, b);
-    std::cout << "sol \n" << b << std::endl;
-    //---------------------------
-    */
-
-    /* 
-    //! unsymmetric treatment
-    //! Dirichlet boundary conditions set in matrices
-    _updateBCDirichletMatrix( _M_massMatrix );
-
-    //! usefull ??????
-    //    _updateBCDirichletMatrix( _M_gradMatrix );
-
-
     _M_factorMassMatrix = _M_massMatrix;
-    //! factorization of the mass matrix
-    _factorizeMassMatrix();
-    */
 
-    _M_cholFactorMassMatrix = _M_massMatrix;
     //! Dirichlet boundary conditions set in the mass matrix
-    _updateBCDirichletMatrix( _M_cholFactorMassMatrix );
+    _updateBCDirichletMatrix( _M_factorMassMatrix );
 
-    //! factorization of the mass matrix
-    _M_choleskySlv.CholeskyFactor( _M_cholFactorMassMatrix );
-
-
-    /*
-      std::cout << "\n\n\tMass matrix " << std::endl;
-      _M_massMatrix.showMe( std::cout , _M_verbose );
-      std::cout << "\n\n\tGradient matrix " << std::endl;
-      _M_gradMatrix.showMe( std::cout , _M_verbose );
-    */
+    //! cholesky or lapack lu factorization of the mass matrix
+    _M_tridiagSlv.Factor( _M_factorMassMatrix );
 
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
@@ -365,89 +317,7 @@ _assemble_matrices(const UInt& ii, const UInt& jj )
 */
 void OneDModelSolver::_updateMatrices()
 {
-    /*
-    //! speed test
-    std::cout << "\no-  updating the matrices... ";
-    Chrono chrono;
-
-    //---------------------------------------------------------------------------------------
-    chrono.start();
-    std::cout << "o-loop over the matrices DERIVQUADPOINT update... ";
-    //! Elementary computation and matrix assembling
-    //! Loop on elements
-    for(UInt iedge = 1; iedge <= _M_mesh.numEdges(); iedge++){
-
-    //! update the current element
-    _M_fe.updateFirstDerivQuadPt(_M_mesh.edgeList(iedge));
-    //  std::cout << _M_fe.currentId() << std::endl;
-
-    } //! end loop on elements
-
-    chrono.stop();
-    std::cout << "done in " << chrono.diff() << " s." << std::endl;
-    //---------------------------------------------------------------------------------------
-
-    //---------------------------------------------------------------------------------------
-    chrono.start();
-    std::cout << "o-loop over the matrices COEFFICIENT update... ";
-    //! Elementary computation and matrix assembling
-    //! Loop on elements
-    for(UInt iedge = 1; iedge <= _M_mesh.numEdges(); iedge++){
-    for(UInt ii = 1; ii <= 2; ii ++) {
-    for(UInt jj = 1; jj <= 2; jj ++) {
-
-	//! update the _M_coeff*
-	_updateMatrixCoefficients( ii , jj, iedge);
-
-    }
-    }
-    } //! end loop on elements
-
-    chrono.stop();
-    std::cout << "done in " << chrono.diff() << " s." << std::endl;
-    //---------------------------------------------------------------------------------------
-
-    //---------------------------------------------------------------------------------------
-    chrono.start();
-    std::cout << "o-loop over the matrices ELEMENT MATRIX update... ";
-
-    //! Elementary computation and matrix assembling
-    //! Loop on elements
-    for(UInt iedge = 1; iedge <= _M_mesh.numEdges(); iedge++){
-    for(UInt ii = 1; ii <= 2; ii ++) {
-    for(UInt jj = 1; jj <= 2; jj ++) {
-	//! update the _M_elmat*
-	_updateElemMatrices();
-    }
-    }
-    } //! end loop on elements
-
-    chrono.stop();
-    std::cout << "done in " << chrono.diff() << " s." << std::endl;
-    //---------------------------------------------------------------------------------------
-
-    //---------------------------------------------------------------------------------------
-    chrono.start();
-    std::cout << "o-loop over the matrices ASSEMBLE... ";
-
-    //! Elementary computation and matrix assembling
-    //! Loop on elements
-    for(UInt iedge = 1; iedge <= _M_mesh.numEdges(); iedge++){
-    for(UInt ii = 1; ii <= 2; ii ++) {
-    for(UInt jj = 1; jj <= 2; jj ++) {
-	//! assemble the global matrices
-	_assemble_matrices( ii, jj );
-    }
-    }
-    } //! end loop on elements
-
-    chrono.stop();
-    std::cout << "done in " << chrono.diff() << " s." << std::endl;
-    //---------------------------------------------------------------------------------------
-    */
-
-
-    //---------------------------------------------------------------------------------------
+    //--------------------------------------------------------
     // Chrono chrono;
     // chrono.start();
     // std::cout << "o-loop over the matrices INIT... ";
@@ -511,7 +381,7 @@ void OneDModelSolver::_updateMatrices()
     */
 
     /*
-    //! usefull ??????
+    //! useless ??????
     //! taking into account the dirichlet bc
     _updateBCDirichletMatrix( _M_massMatrixDiffSrc11 );
     _updateBCDirichletMatrix( _M_massMatrixDiffSrc12 );
@@ -602,8 +472,7 @@ _updateBCDirichletVector()
     //! second row modified (for symmetry)
     _M_rhs1( firstDof + 1 ) += - _M_massMatrix.LowDiag()( firstDof ) * _M_bcDirLeft.first;
     _M_rhs2( firstDof + 1 ) += - _M_massMatrix.LowDiag()( firstDof ) * _M_bcDirLeft.second;
-   
-    
+
     //! last row modified (Dirichlet)
     _M_rhs1( lastDof ) = _M_bcDirRight.first;
     _M_rhs2( lastDof ) = _M_bcDirRight.second;
@@ -1785,69 +1654,6 @@ void OneDModelSolver::_updateSourceDer()
     }
 }
 
-/*! LU factorize with lapack _M_factorMassMatrix
-  SUBROUTINE DGTTRF( N, DL, D, DU, DU2, IPIV, INFO )
-  BEWARE: it modifies _M_factorMassMatrix!
-*/
-void OneDModelSolver::_factorizeMassMatrix()
-{
-    int INFO = 0;
-    int OrderMat =_M_factorMassMatrix.OrderMatrix();
-
-    //! solve with lapack (for tridiagonal matrices)
-    dgttrf_( &OrderMat, _M_factorMassMatrix.LowDiag(), _M_factorMassMatrix.Diag(),
-             _M_factorMassMatrix.UpDiag(), _M_massupdiag2, _M_massipiv, &INFO);
-    ASSERT_PRE(!INFO,"Lapack factorization of tridiagonal matrix not achieved.");
-}
-/*! lapack LU solve AFTER FACTORIZATION of _M_factorMassMatrix
-  SUBROUTINE DGTTRS( TRANS, N, NRHS, DL, D, DU, DU2, IPIV, B, LDB, INFO )
-
-  *  TRANS   (input) CHARACTER
-  *          Specifies the form of the system of equations.
-  *          = 'N':  A * X = B  (No transpose)
-  *          = 'T':  A'* X = B  (Transpose)
-  *          = 'C':  A'* X = B  (Conjugate transpose = Transpose)
-
-*/
-void OneDModelSolver::_solveMassMatrix( ScalUnknown<Vector>& vec )
-{
-    int INFO = 0;
-    int NBRHS = 1;//  nb columns of the vec := 1.
-    int OrderMat = _M_factorMassMatrix.OrderMatrix();
-
-    ASSERT_PRE( OrderMat == (int)vec.size() ,
-                "The right-hand side must have the same dimensions as the tridiag matrix.");
-
-    //! solve with lapack (for tridiagonal matrices)
-    dgttrs_( "N", &OrderMat, &NBRHS, _M_factorMassMatrix.LowDiag(), _M_factorMassMatrix.Diag(),
-             _M_factorMassMatrix.UpDiag(), _M_massupdiag2, _M_massipiv,
-             vec.giveVec(), &OrderMat, &INFO);
-    ASSERT_PRE(!INFO,"Lapack solve of tridiagonal matrix not achieved.");
-
-}
-
-/*! direct LU solve with lapack _M_factorMassMatrix
-  (use it once as it changes the matrix !)
-  SUBROUTINE DGTSV( N, NRHS, DL, D, DU, B, LDB, INFO )
-*/
-void OneDModelSolver::_directsolveMassMatrix( ScalUnknown<Vector>& vec )
-{
-    int INFO = 0;
-    int NBRHS = 1;//  nb columns of the vec := 1.
-    int OrderMat = _M_factorMassMatrix.OrderMatrix();
-
-    ASSERT_PRE( OrderMat == (int)vec.size() ,
-                "The right-hand side must have the same dimensions as the tridiag matrix.");
-
-    //! solve with lapack (for tridiagonal matrices)
-    dgtsv_( &OrderMat, &NBRHS, _M_factorMassMatrix.LowDiag(), _M_factorMassMatrix.Diag(),
-            _M_factorMassMatrix.UpDiag(),
-            vec.giveVec(), &OrderMat, &INFO);
-    ASSERT_PRE(!INFO,"Lapack solve of tridiagonal matrix not achieved.");
-
-}
-
-
 // ! Initialize with constant initial conditions concentration
 void OneDModelSolver::initialize(const Real& u10, const Real& u20)
 {
@@ -2014,21 +1820,12 @@ void OneDModelSolver::iterate( const Real& time_val , const int& count)
     Chrono chrono;
     chrono.start();
 
-    /*
-    //! lu
+    //! cholesky or lapack lu solve
     //! solve the system: rhs1 = massFactor^{-1} * rhs1
-    _solveMassMatrix( _M_rhs1 );
+    _M_tridiagSlv.Solve( _M_factorMassMatrix, _M_rhs1 );
 
     //! solve the system: rhs2 = massFactor^{-1} * rhs2
-    _solveMassMatrix( _M_rhs2 );
-    */
-
-    //! cholesky solve
-    //! solve the system: rhs1 = massFactor^{-1} * rhs1
-    _M_choleskySlv.CholeskySolve( _M_cholFactorMassMatrix, _M_rhs1 );
-
-    //! solve the system: rhs2 = massFactor^{-1} * rhs2
-    _M_choleskySlv.CholeskySolve( _M_cholFactorMassMatrix, _M_rhs2 );
+    _M_tridiagSlv.Solve( _M_factorMassMatrix, _M_rhs2 );
 
     //! update the solution for the next time step
     _M_U1_thistime = _M_rhs1;

@@ -27,10 +27,14 @@
    \date 2004-11-10
  */
 
+#ifndef __TRIDIAGLU_H_
+#define __TRIDIAGLU_H_
+
 
 #include <lifeV.hpp>
-#include <cmath>
 #include <tab.hpp>
+#include <clapack.h>
+
 
 namespace LifeV
 {
@@ -53,17 +57,19 @@ private:
     Tab1d _M_massupdiag2; //!< second upper diagonal (used by lapack) (size _M_order-2)
     Tab1dInt  _M_massipiv;   //!< indices of pivot in the lapack LU (size _M_order)
 
+    bool _M_isFactorized;
 public:
     //! constructor
     TriDiagLU( UInt __size ):
         _M_order( __size ),
         _M_massupdiag2( _M_order - 2 ),
-        _M_massipiv( _M_order )
+        _M_massipiv( _M_order ),
+        _M_isFactorized( false )
     {};
 
-    void LUFactor( TriDiagMat const& __mat );
+    void Factor( TriDiagMat & __mat );
 
-    void LUSolve( TriDiagMat const& __mat, TriDiagVect& __x );
+    void Solve( TriDiagMat const& __mat, TriDiagVect& __x );
 
 };
 
@@ -75,20 +81,43 @@ public:
   @  A_diag_up(n-1): upper diagonale
   @  A_diag_low(n-1): lower diagonale
 
-  -  LUFactor:  LU factorization
+  \param TriDiagMat & __mat : tridiagonal matrix
+
+  LU factorize with lapack _M_factorMassMatrix
+  SUBROUTINE DGTTRF( N, DL, D, DU, DU2, IPIV, INFO )
 */
 template < class R , class TriDiagMat, class TriDiagVect >
 void TriDiagLU<R, TriDiagMat, TriDiagVect>::
+Factor( TriDiagMat & __mat )
+{
+    int INFO = 0;
+    int OrderMat = __mat.OrderMatrix();
 
-/*!
-  LAPACK LU solve (AFTER FACTORIZATION) for a tridiagonal
-  matrix A [n x n] defined through:
+    ASSERT_PRE( !_M_isFactorized, "Lapack factorization already performed!");
+
+    //! solve with lapack (for tridiagonal matrices)
+    dgttrf_( &OrderMat, __mat.LowDiag(), __mat.Diag(),
+             __mat.UpDiag(), & _M_massupdiag2(0), & _M_massipiv(0), &INFO);
+    ASSERT_PRE(!INFO,"Lapack factorization of tridiagonal matrix not achieved.");
+
+    _M_isFactorized = true;
+}
+
+/*! lapack LU solve AFTER FACTORIZATION of __mat
+  SUBROUTINE DGTTRS( TRANS, N, NRHS, DL, D, DU, DU2, IPIV, B, LDB, INFO )
+
+  *  TRANS   (input) CHARACTER
+  *          Specifies the form of the system of equations.
+  *          = 'N':  A * X = B  (No transpose)
+  *          = 'T':  A'* X = B  (Transpose)
+  *          = 'C':  A'* X = B  (Conjugate transpose = Transpose)
+
+  tridiagonal matrix A [n x n] defined through:
   @  A_diag(n):       main diagonal
-  @  A_diag_sup(n-1): upper diagonale
-  @  A_diag_low(n-1): lower diagonale
+  @  A_diag_sup(n-1): upper diagonal
+  @  A_diag_low(n-1): lower diagonal
 
-  \param TriDiagMat const& __mat : factorized symmetric
-         tridiagonal matrix (only the upper part is used)
+  \param TriDiagMat const& __mat : factorized tridiagonal matrix
   \param TriDiagVect& __x : input : right hand side
                             output: solution
      solve __x = __mat^{-1} * __x
@@ -96,6 +125,24 @@ void TriDiagLU<R, TriDiagMat, TriDiagVect>::
 */
 template < class R , class TriDiagMat, class TriDiagVect >
 void TriDiagLU<R, TriDiagMat, TriDiagVect>::
+Solve( TriDiagMat const& __mat, TriDiagVect& __x )
+{
+    int INFO = 0;
+    int NBRHS = 1;//  nb columns of the vec := 1.
+    int OrderMat = __mat.OrderMatrix();
+
+    ASSERT_PRE( _M_isFactorized, "Lapack factorization must be performed before!");
+
+    ASSERT_PRE( OrderMat == (int) __x.size() ,
+                "The right-hand side must have the same dimensions as the tridiag matrix.");
+
+    //! solve with lapack (for tridiagonal matrices)
+    dgttrs_( "N", &OrderMat, &NBRHS, __mat.LowDiag(), __mat.Diag(),
+             __mat.UpDiag(), & _M_massupdiag2(0), & _M_massipiv(0),
+             & __x(0), &OrderMat, &INFO);
+    ASSERT_PRE(!INFO,"Lapack solve of tridiagonal matrix not achieved.");
+
+}
 
 }
 

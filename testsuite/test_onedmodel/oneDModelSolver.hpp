@@ -113,8 +113,6 @@ diffSrc(U) = sum_{i+1/2 in elements} 1/2 { dS/dU(U_i) + dS/dU(U_i+1) } 1_{i+1/2}
 
 #include <string>
 
-#include <clapack.h>
-
 #include <oneDModelHandler.hpp>
 #include <elemMat.hpp>
 #include <elemVec.hpp>
@@ -125,6 +123,7 @@ diffSrc(U) = sum_{i+1/2 in elements} 1/2 { dS/dU(U_i) + dS/dU(U_i+1) } 1_{i+1/2}
 
 #include <tridiagMatrix.hpp>
 #include <triDiagCholesky.hpp>
+#include <triDiagLU.hpp>
 #include <oneDNonLinModelParam.hpp>
 #include <vectorFunction1D.hpp>
 
@@ -221,10 +220,10 @@ public:
 
 private:
 
+    //!@{  TO BE Templatized !!
     //! the parameters
     const OneDNonLinModelParam& _M_oneDParam;
     // const LinearSimpleParam& _M_oneDParam;
-
 
     //! the flux function
     NonLinearFluxFun1D _M_fluxFun;
@@ -236,6 +235,7 @@ private:
     //! the source function
     LinearSimpleSourceFun1D _M_sourceFun ;
     */
+    //!@} end of TO BE Templatized !!
 
     const UInt _M_leftNodeId;
     const UInt _M_leftInternalNodeId;
@@ -264,9 +264,6 @@ private:
     ScalUnknown<Vector> _M_U1_thistime;
     ScalUnknown<Vector> _M_U2_thistime;
 
-    //! Exact solution
-    // ScalUnknown<Vector> _M_U_exact;
-
     //! Right hand sides of the linear system i: "mass * _M_Ui = _M_rhsi"
     ScalUnknown<Vector> _M_rhs1;
     ScalUnknown<Vector> _M_rhs2;
@@ -294,16 +291,16 @@ private:
     //! tridiagonal mass matrix
     TriDiagMatrix<Real> _M_massMatrix;
 
-    //! cholesky factorized tridiagonal mass matrix
-    TriDiagMatrix<Real> _M_cholFactorMassMatrix;
-    //! cholesky factorization
-    TriDiagCholesky< Real, TriDiagMatrix<Real>, Vector > _M_choleskySlv;
-
-    //! lapack LU factorized tridiagonal mass matrix
+    //! factorized tridiagonal mass matrix
     TriDiagMatrix<Real> _M_factorMassMatrix;
-    //! vectors used by lapack for factorization:
-    KN<Real> _M_massupdiag2; //!< second upper diagonal (used by lapack) (size _M_order-2)
-    KN<int>  _M_massipiv;   //!< indices of pivot in the lapack LU (size _M_order)
+
+    //!@{  TO BE Templatized !!
+    //! cholesky factorization
+    TriDiagCholesky< Real, TriDiagMatrix<Real>, Vector > _M_tridiagSlv;
+    //! lapack LU factorization
+    // TriDiagLU< Real, TriDiagMatrix<Real>, Vector > _M_tridiagSlv;
+    //!@} end of  TO BE Templatized !!
+   
 
     //! tridiagonal mass matrices multiplied by diffSrcij
     TriDiagMatrix<Real> _M_massMatrixDiffSrc11;
@@ -411,17 +408,6 @@ private:
     //! call _updateSource and update the P0 derivative of source vector from U: 
     //! _M_diffSrcij = dS_h/dU(Un) i,j=1,2
     void _updateSourceDer();
-
-    //! lapack LU factorization for tridiag matrices
-    //! (modifies _M_factorMassMatrix, _M_massupdiag2 and _M_massipiv.)
-    void _factorizeMassMatrix();
-    //! lapack LU solve for tridiag matrices (AFTER factorization)
-    void _solveMassMatrix( ScalUnknown<Vector>& vec );
-
-    //! direct lapack LU solve for tridiag matrices
-    //! quite useless as you can call it only once!
-    //! REMOVE it some day... (just an example)
-    void _directsolveMassMatrix( ScalUnknown<Vector>& vec );
 
 };
 }

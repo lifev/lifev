@@ -28,8 +28,8 @@
  */
 
 
-#ifndef _TRIDIAGCHOLESKY_H_
-#define _TRIDIAGCHOLESKY_H_
+#ifndef __TRIDIAGCHOLESKY_H_
+#define __TRIDIAGCHOLESKY_H_
 
 #include <lifeV.hpp>
 #include <cmath>
@@ -47,12 +47,15 @@ namespace LifeV
 template < class R , class TriDiagMat, class TriDiagVect >
 class TriDiagCholesky
 {
+private:
+    bool _M_isFactorized;
 public:
-    TriDiagCholesky() {};
+    TriDiagCholesky( UInt __unused ):
+        _M_isFactorized( false ) {};
 
-    void CholeskyFactor( TriDiagMat & __mat );
+    void Factor( TriDiagMat & __mat );
 
-    void CholeskySolve( TriDiagMat const& __mat,
+    void Solve( TriDiagMat const& __mat,
                         TriDiagVect& __x );
 
 };
@@ -68,8 +71,10 @@ public:
 */
 template < class R , class TriDiagMat, class TriDiagVect >
 void TriDiagCholesky<R, TriDiagMat, TriDiagVect>::
-CholeskyFactor( TriDiagMat & __mat )
+Factor( TriDiagMat & __mat )
 {
+    ASSERT_PRE( !_M_isFactorized, "Cholesky factorization already performed!");
+
     KN<R> & m_diag = __mat.Diag();
     KN<R> & m_updiag = __mat.UpDiag();
 
@@ -79,6 +84,7 @@ CholeskyFactor( TriDiagMat & __mat )
         m_updiag( ii - 1 ) = val_ud;
         m_diag( ii ) = std::sqrt( m_diag(ii) - val_ud * val_ud );
     }
+    _M_isFactorized = true;
 }
 
 /*!
@@ -104,9 +110,11 @@ CholeskyFactor( TriDiagMat & __mat )
 */
 template < class R , class TriDiagMat, class TriDiagVect >
 void TriDiagCholesky<R, TriDiagMat, TriDiagVect>::
-CholeskySolve( TriDiagMat const& __mat,
+Solve( TriDiagMat const& __mat,
                TriDiagVect& __x )
 {
+    ASSERT_PRE( _M_isFactorized, "Cholesky factorization must be performed before!");
+
     KN<R> const& m_diag = __mat.Diag();
     KN<R> const& m_updiag = __mat.UpDiag();
 
