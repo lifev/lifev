@@ -35,7 +35,7 @@ SUBDIRS		= data  \
 	      test_masstransport test_mass_coupling test_ns_ipstab \
               test_coupling_3d0d \
               test_fhn \
-	      lifesolver
+	      lifesolver lifefem
 
 TESTSUITES=$(srcdir)/lifecore/testsuite.at \
 $(srcdir)/lifearray/testsuite.at \
