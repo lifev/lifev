@@ -39,9 +39,14 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #define L_STOKES 0
 #define L_NAVIER_STOKES 1
 
-#define L_NS2F_PROBLEM L_STOKES
+#define L_NS2F_PROBLEM L_NAVIER_STOKES
 
-#define L_DEBUG_MODE 1
+#define L_PRESSURE_MATRIX 0
+#define L_YOSIDA 1
+
+#define L_NS2F_SOLVER L_YOSIDA
+
+#define L_DEBUG_MODE 0
 
 #include <fstream>
 
@@ -66,11 +71,13 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <life/lifealg/SolverUMFPACK.hpp>
 
 #include <life/lifesolver/AFSolvers.hpp>
-
+#include <life/lifealg/PressureMatrixSolver.hpp>
 
 #include <life/lifesolver/LevelSetSolver.hpp>
 
 #include <life/lifearray/boostmatrix.hpp>
+
+namespace ublas = boost::numeric::ublas;
 
 namespace LifeV {
     /*!
@@ -100,10 +107,10 @@ namespace LifeV {
         typedef typename NavierStokesHandler<mesh_type, data_type>::Function function_type;
         typedef typename NavierStokesHandler<mesh_type, data_type>::source_type source_type;
 
-        typedef BoostMatrix<boost::numeric::ublas::row_major> matrix_type_C;
-        typedef BoostMatrix<boost::numeric::ublas::row_major> matrix_type_M;
-        typedef BoostMatrix<boost::numeric::ublas::row_major> matrix_type_D;
-        typedef BoostMatrix<boost::numeric::ublas::column_major> matrix_type_G;
+        typedef BoostMatrix<ublas::row_major> matrix_type_C;
+        typedef BoostMatrix<ublas::row_major> matrix_type_M;
+        typedef BoostMatrix<ublas::row_major> matrix_type_D;
+        typedef BoostMatrix<ublas::column_major> matrix_type_G;
         typedef DiagonalBoostMatrix matrix_type_M_L;
 
 #if L_NS2F_LINEAR_SOLVER_U == L_NS2F_PETSC
@@ -118,12 +125,19 @@ namespace LifeV {
         typedef SolverUMFPACK linear_solver_p_type;
 #endif
 
+#if L_NS2F_SOLVER == L_YOSIDA
         typedef Yosida<matrix_type_M_L,
                        matrix_type_C,
                        matrix_type_D,
                        matrix_type_G,
                        linear_solver_u_type,
                        linear_solver_p_type> solver_type;
+#elif L_NS2F_SOLVER == L_PRESSURE_MATRIX
+        typedef PressureMatrixSolver<matrix_type_C,
+                                     matrix_type_D,
+                                     matrix_type_G,
+                                     linear_solver_u_type> solver_type;
+#endif
         //@}
 
         /** @name Constructors
@@ -346,7 +360,11 @@ namespace LifeV {
         _M_beta_fct(0),
         _M_constant_pressure( _dim_p ),
         _M_lsfunction(_M_lss.lsfunction()),
+#if L_NS2F_SOLVER == L_YOSIDA
         _M_solver(_M_M_L_w, _M_C, _M_D, _M_G, _M_data_file, "navier-stokes/yosida", _M_solver_u, _M_solver_p)
+#elif L_NS2F_SOLVER == L_PRESSURE_MATRIX
+        _M_solver(_M_C, _M_D, _M_G, _M_data_file, "navier-stokes/pmm")
+#endif
     {
         if(_M_verbose)
             std::cout << "[NSSolver2FluidsMixed::constructor] Using boost matrix" << std::endl;
@@ -355,6 +373,12 @@ namespace LifeV {
         _M_solver_u.setOptionsFromGetPot(_M_data_file, "navier-stokes/yosida/solver-u");
 #elif L_NS2F_LINEAR_SOLVER_U == L_NS2F_UMFPACK
         std::cout << "[NSSolver2FluidsMixed::constructor] Using UMFPACK linear solver for u" << std::endl;
+#endif
+
+#if L_NS2F_SOLVER == L_YOSIDA
+        std::cout << "[NSSolver2FluidsMixed::constructor] Using Yosida method to advance in time" << std::endl;
+#elif L_NS2F_SOLVER == L_PRESSURE_MATRIX
+        std::cout << "[NSSolver2FluidsMixed::constructor] Using PMM method to advance in time" << std::endl;
 #endif
 
 #if L_NS2F_LINEAR_SOLVER_P == L_NS2F_PETSC
@@ -392,6 +416,8 @@ namespace LifeV {
             betaVec = _bdf.bdf_u().extrap();
 
         // LSH and RHS initialization
+        if(_M_verbose)
+            std::cout << "[NSSolver2FluidsMixed::advance_NS] Initializing matrices and vectors" << std::endl;
         _M_M.zeros();
         _M_C.zeros();
         _M_D.zeros();
@@ -418,6 +444,7 @@ namespace LifeV {
         for(UInt iVol = 1; iVol <= _mesh.numVolumes(); iVol++) {
             __chrono.start();
 
+            // Do proper element updates
             fe_u().updateFirstDeriv( _mesh.volumeList( iVol ) );
             fe_p().updateFirstDeriv( _mesh.volumeList( iVol ) );
             _M_lss.fe().updateJac( _mesh.volumeList( iVol ) );
@@ -437,18 +464,22 @@ namespace LifeV {
                 UInt iglo = _M_lss.dof().localToGlobal(element_id, node_id + 1) - 1;
                 _M_elvec_lss.vec()[ node_id ] = _M_lsfunction[ iglo ];
             }
-
-            // Compute local contributions
-            element_id = _fe_u.currentId();
-            
+         
             // Stiffness strain
             stiff_strain_2f(2. * viscosity(fluid1), 2. * viscosity(fluid2), _M_elvec_lss, _M_lss.fe(), _M_elmat_C, fe_u());
 
             // Mass
-            for(UInt iComp = 0; iComp < nbCompU; iComp++)
-                mass_2f(density(fluid1), density(fluid2), _M_elvec_lss, _M_lss.fe(), _M_elmat_M, fe_u(), iComp, iComp);
+            Real bdf_coeff = _bdf.bdf_u().coeff_der( 0 ) / _dt;
+            for(UInt iComp = 0; iComp < nbCompU; iComp++) {
+                lumped_mass_2f(density(fluid1), density(fluid2), _M_elvec_lss, _M_lss.fe(), _M_elmat_M, fe_u(), iComp, iComp);
+                lumped_mass_2f(bdf_coeff * density(fluid1), bdf_coeff * density(fluid2), _M_elvec_lss, _M_lss.fe(),
+                               _M_elmat_C, fe_u(), iComp, iComp);
+            }
 
 #if L_NS2F_PROBLEM == L_NAVIER_STOKES
+            // Compute local contributions
+            element_id = _fe_u.currentId();
+   
             //  Extract the vector of local velocity dofs
             for(UInt node_id = 0; node_id < (UInt)fe_u().nbNode; node_id++) {
                 for(UInt comp_id = 0; comp_id < nbCompU; comp_id++) {
@@ -465,7 +496,7 @@ namespace LifeV {
 
             // Assemble all contributions
             for(UInt iComp = 0; iComp < nbCompU; iComp++) {
-                // Assembling u-u block
+                // Assemble diagonal block
                 __chrono.start();
                 for(UInt jComp = 0; jComp < nbCompU; jComp++) {
                     assemb_mat(_M_C, _M_elmat_C, fe_u(), uDof(), iComp, jComp);
@@ -473,13 +504,13 @@ namespace LifeV {
                 }
                 __chrono.stop(); __cumul2 += __chrono.diff();
 
-                // Off-diagonal blocks
+                // Compute off-diagonal blocks
                 __chrono.start();
                 grad(iComp, 1.0, _M_elmat_G, fe_u(), fe_p(), iComp, 0);
                 __chrono.stop();
                 __cumul1 += __chrono.diff();
 
-                // Assembling
+                // Assemble off-diagonal blocks
                 __chrono.start();
                 assemb_mat_mixed(_M_G, _M_elmat_G, fe_u(), fe_p(), uDof(), pDof(), iComp, 0);
                 __chrono.stop();
@@ -493,24 +524,26 @@ namespace LifeV {
 
         } // loop over volumes
 
-        // Lump mass matrix
-        _M_M_L.lumpRowSum(_M_M);
-        _M_M_L_w = ( _bdf.bdf_u().coeff_der(0) / _dt ) *_M_M_L;
-        
-        // Add unsteady contribution
-        _M_C += _M_M_L_w;
-
         if(_M_verbose) {
-            std::cout << "[NSSolver2FluidsMixed::advance_NS] Elementary constributions computation : "
+            std::cout << "[NSSolver2FluidsMixed::advance_NS] Elementary contributions computation : "
                       << __cumul1 << " s" << std::endl;
             std::cout << "[NSSolver2FluidsMixed::advance_NS] Diagonal block assembling: "
                       << __cumul2 << " s" << std::endl;
             std::cout << "[NSSolver2FluidsMixed::advance_NS] Off-diagonal block assembling: "
                       << __cumul3 << " s" << std::endl;
-        }
+        }  
+
+        // Lump mass matrix
+        _M_M_L.lumpRowSum(_M_M);
+        _M_M_L_w = ( _bdf.bdf_u().coeff_der(0) / _dt ) *_M_M_L;
 
         // Add RHS terms stemming from the time derivative
         _M_rhs_u += prod( _M_M_L, _bdf.bdf_u().time_der(_dt) );
+
+#if L_DEBUG_MODE
+        _M_C.spy( "./results/spyCbeforebc" );
+        _M_G.spy( "./results/spyGbeforebc" );
+#endif
 
         // Apply boundary conditions
         if(_M_verbose)
@@ -551,6 +584,10 @@ namespace LifeV {
         if(_M_verbose)
             std::cout << "[NSSolver2FluidsMixed::advance_NS] Solving the system" << std::endl;
         _M_solver.solve(_u, _p, _M_rhs_u, _M_rhs_p);
+
+#if L_NS2F_SOLVER == L_PRESSURE_MATRIX
+        std::cout << _M_solver << std::endl;
+#endif
 
         // Update bdf
         _bdf.bdf_u().shift_right(_u);
