@@ -184,9 +184,9 @@ class KN_: public  ShapeOfArray {
 protected:
   R *v;
 public:
-  int N() const {return n;}
-  int size() const{return step?n*step:n;}
-  operator R *() const {return v;}
+  int N() const {return this->n;}
+  int size() const{return this->step?N()*this->step:N();}
+  operator R *() const {return this->v;}
   KN_(const KN_<R> & u) :ShapeOfArray(u),v(u.v){}
   KN_(const KN_<R> & U,const SubArray & sa)  : ShapeOfArray(U,sa),v(U.v + U.index(sa.start)) {}
 
@@ -275,7 +275,7 @@ class KNM_: public KN_<R> {
   ShapeOfArray shapei;
   ShapeOfArray shapej;
   public:
-  int IsVector1() const  {  return (shapei.n*shapej.n) ==  n ;}
+  int IsVector1() const  {  return (shapei.n*shapej.n) ==  this->n ;}
   int N() const {return shapei.n;}
   int M() const {return shapej.n;}
   int size() const { return shapei.n*shapej.n;}
@@ -293,10 +293,10 @@ class KNM_: public KN_<R> {
 
   KNM_(const KN_<R> &u,const ShapeOfArray & si,const ShapeOfArray & sj,int offset=0)
              : KN_<R>(&u[offset],si.last()+sj.last()+1,u.step),shapei(si),shapej(sj)
-             {K_assert( offset>=0 && n+ (v-(R*)u) <= u.n);}
+             {K_assert( offset>=0 && this->n+ (this->v-(R*)u) <= u.n);}
   KNM_(const KN_<R> &u,const ShapeOfArray & si,const ShapeOfArray & sj,int offset,int nnext)
              : KN_<R>(&u[offset],si.last()+sj.last()+1,u.step,nnext),shapei(si),shapej(sj)
-             {K_assert( offset>=0 && n+ (v-(R*)u) <= u.n);}
+             {K_assert( offset>=0 && this->n+ (this->v-(R*)u) <= u.n);}
 
   KNM_(KNM_<R> U,const SubArray & si,const SubArray & sj)
              :KN_<R>(U,SubArray(U.ij(si.len1(),sj.len1())+1,U.ij(si.start,sj.start))),
@@ -316,30 +316,30 @@ class KNM_: public KN_<R> {
   int indexij(int i,int j)        const
             { return index(shapei.index(i)+shapej.index(j));}
   R & operator()(int i,int j)     const
-            { return v[indexij(i,j)];}
+            { return this->v[indexij(i,j)];}
   //Alain (28/06/02): version for unsigned int.
   unsigned int indexij(unsigned int i,unsigned int j)    const
             { return index(shapei.index(i)+shapej.index(j));}
   R & operator()(unsigned int i,unsigned int j)   const
-            { return v[indexij(i,j)];}
+            { return this->v[indexij(i,j)];}
   //Alain (18/10/02): version for long unsigned int.
   long unsigned int indexij(long unsigned int i,long unsigned int j)    const
             { return index(shapei.index(i)+shapej.index(j));}
   R & operator()(long unsigned int i,long unsigned int j)   const
-            { return v[indexij(i,j)];}
+            { return this->v[indexij(i,j)];}
   //
 
   KN_<R> operator()(const char,int j    )  const   // une colonne j  ('.',j)
-            { return KN_<R>(&v[index(shapej.index(j))],shapei*step);}
+            { return KN_<R>(&this->v[index(shapej.index(j))],shapei*this->step);}
   KN_<R> operator()(int i    ,const char)  const   // une ligne i  (i,'.')
-            { return KN_<R>(&v[index(shapei.index(i))],shapej*step);}
+            { return KN_<R>(&this->v[index(shapei.index(i))],shapej*this->step);}
   KN_<R> operator()(const char,const char)  const   // tous
             { return *this;}
 
   // Alain (21/11/01) : modification of t(), constructor
   // KNM_<R>(*this,shapej,shapei,v) was not defined.
   KNM_<R> t() const
-    { return KNM_<R>(v,*this,shapej,shapei);}
+    { return KNM_<R>(this->v,*this,shapej,shapei);}
 
   const KNM_& operator =(const KNM_<const_R> & u) ;
   const KNM_& operator =(const_R a)               ;
@@ -353,10 +353,10 @@ class KNM_: public KN_<R> {
   const KNM_& operator/=(const KNM_<const_R> & u) ;
 
 private:
-  KNM_& operator++() {v += next;return *this;} // ++U
-  KNM_& operator--() {v -= next;return *this;} // ++U
-  KNM_  operator++(int ){KNM_<R> old=*this;v = v +next;return old;} // U++
-  KNM_  operator--(int ){KNM_<R> old=*this;v = v -next;return old;} // U--
+  KNM_& operator++() {this->v += this->next;return *this;} // ++U
+  KNM_& operator--() {this->v -= this->next;return *this;} // ++U
+  KNM_  operator++(int ){KNM_<R> old=*this;this->v = this->v + this->next;return old;} // U++
+  KNM_  operator--(int ){KNM_<R> old=*this;this->v = this->v - this->next;return old;} // U--
 
 
  friend class KN_<R>;
@@ -380,7 +380,7 @@ class KNMK_: public KN_<R> {
   ShapeOfArray shapej;
   ShapeOfArray shapek;
   public:
-  int IsVector1() const {  return (shapei.n*shapej.n*shapek.n) == n ;}
+  int IsVector1() const {  return (shapei.n*shapej.n*shapek.n) == this->n ;}
   int N() const {return shapei.n;}
   int M() const {return shapej.n;}
   int K() const {return shapek.n;}
@@ -414,7 +414,7 @@ class KNMK_: public KN_<R> {
   int indexijk(int i,int j,int k) const
               {return index(shapei.index(i)+shapej.index(j)+shapek.index(k));}
 
-  R & operator()(int i,int j,int k)   const   {return v[indexijk(i,j,k)];}
+  R & operator()(int i,int j,int k)   const   {return this->v[indexijk(i,j,k)];}
 
 //  pas de tableau suivant
  KN_<R>  operator()(const char ,int j,int k)  const  { // le tableau (.,j,k)
@@ -473,7 +473,7 @@ class KNMKL_: public KN_<R> {
   ShapeOfArray shapek;
   ShapeOfArray shapel;
   public:
-  int IsVector1() const {  return (shapei.n*shapej.n*shapek.n*shapel.n) == n ;}
+  int IsVector1() const {  return (shapei.n*shapej.n*shapek.n*shapel.n) == this->n ;}
   int N() const {return shapei.n;}
   int M() const {return shapej.n;}
   int K() const {return shapek.n;}
@@ -507,7 +507,7 @@ class KNMKL_: public KN_<R> {
   int indexijk(int i,int j,int k,int l) const
               {return index(shapei.index(i)+shapej.index(j)+shapek.index(k)+shapel.index(l));}
 
-  R & operator()(int i,int j,int k,int l)   const   {return v[indexijk(i,j,k,l)];}
+  R & operator()(int i,int j,int k,int l)   const   {return this->v[indexijk(i,j,k,l)];}
 
 //  pas de tableau suivant
  KN_<R>  operator()(const char ,int j,int k, int l)  const  { // le tableau (.,j,k,l)
@@ -586,21 +586,25 @@ class KN :public KN_<R> { public:
  // explicit  KN(const R & u):KN_<R>(new R(uu),1,0) {}
   KN(const int nn) : KN_<R>(new R[nn],nn)         {}
   KN(const int nn,R (*f)(int i) ) : KN_<R>(new R[nn],nn)
-        {for(int i=0;i<n;i++) v[i]=f(i);}
+        {for(int i=0;i<this->n;i++) this->v[i]=f(i);}
   KN(const int nn,const  R & a) : KN_<R>(new R[nn],nn)
         { KN_<R>::operator=(a);}
   KN(const int nn,int s,const  R  a) : KN_<R>(new R[nn],nn,s)
         { KN_<R>::operator=(a);}
   template<class S>  KN(const KN_<S> & s):KN_<R>(new R[s.n],s.n)
-        {for (int i=0;i<n;i++) v[i] = s[i];}
+        {for (int i=0;i<this->n;i++) this->v[i] = s[i];}
   template<class S>  KN(const KN_<S> & s,R (*f)(S )):KN_<R>(new R[s.n],s.n)
-        {for (int i=0;i<n;i++) v[i] = f(s[i]);}
+        {for (int i=0;i<this->n;i++) this->v[i] = f(s[i]);}
   explicit KN(const KN<R> & u):KN_<R>(new R[u.n],u.n)
         { KN_<R>::operator=(u);}
   explicit KN(const KN_<R> & u):KN_<R>(new R[u.n],u.n)
         { KN_<R>::operator=(u);}
 
-  ~KN(){delete [] v;}
+  ~KN()
+        {
+            // should use boost::shared_ptr
+            delete [] this->v;
+        }
 
   const KN& operator =(const_R a)
         { KN_<R>::operator= (a);return *this;}
@@ -686,7 +690,7 @@ class KNM: public KNM_<R>{ public:
   KNM(const int n,const int m)
         :KNM_<R>(new R[n*m],n,m)
 	{
-	    assert( v != 0 );
+	    assert( this->v != 0 );
 	}
 
   /* Alain (28/06/02): I remove the explicit statment for allowing implicit
@@ -705,7 +709,7 @@ class KNM: public KNM_<R>{ public:
         :KNM_<R>(new R[u.size()],u.N(),u.M())
         { KNM_<R>::operator=(u);}
 
-  ~KNM(){delete [] v;}
+  ~KNM(){delete [] this->v;}
 
   const KNM& operator=(const KNM_<const_R> & u)
         { KNM_<R>::operator=(u);return *this;}
@@ -757,7 +761,7 @@ class KNMK: public KNMK_<R>{ public:
      :KNMK_<R>(new R[u.size()],u.N(),u.M(),u.K())
      { KNMK_<R>::operator=(u);}
 
-  ~KNMK(){delete [] v;}
+  ~KNMK(){delete [] this->v;}
 
   KNMK& operator=(const KNMK_<const_R> & u)
      { KN_<R>::operator=(u);return *this;}
@@ -810,7 +814,7 @@ class KNMKL: public KNMKL_<R>{ public:
      :KNMKL_<R>(new R[u.size()],u.N(),u.M(),u.K(),u.L())
      { KNMKL_<R>::operator=(u);}
 
-  ~KNMKL(){delete [] v;}
+  ~KNMKL(){delete [] this->v;}
 
   KNMKL& operator=(const KNMKL_<const_R> & u)
      { KN_<R>::operator=(u);return *this;}
