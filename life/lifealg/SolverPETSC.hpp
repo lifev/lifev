@@ -177,7 +177,7 @@ public:
     void setMatrix( uint, const uint*, const uint*, const double* );
 
     template<typename Matrix>
-    void SolverPETSC::setMatrix( Matrix m ) {
+    void SolverPETSC::setMatrix( Matrix& m ) {
         setMatrix(m.Patt()->nRows(), m.Patt()->giveRawCSR_ia(),
                   m.Patt()->giveRawCSR_ja(), m.giveRawCSR_value());
     }
