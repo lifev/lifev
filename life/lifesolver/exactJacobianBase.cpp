@@ -25,23 +25,23 @@ namespace LifeV
 {
 
 Real fzeroEJ(const Real& t,
-           const Real& x,
-           const Real& y,
-           const Real& z,
-           const ID& i)
+             const Real& x,
+             const Real& y,
+             const Real& z,
+             const ID& i)
 {return 0.0;}
 
-exactJacobian::exactJacobian(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
-                             VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
-                             GetPot    &_dataFile,
-                             BCHandler &BCh_u,
-                             BCHandler &BCh_d,
-                             BCHandler &BCh_mesh):
-    operFS(fluid, solid, _dataFile, BCh_u, BCh_d, BCh_mesh),
+exactJacobian::exactJacobian( fluid_type& fluid,
+                              solid_type& solid,
+                              GetPot    &_dataFile,
+                              BCHandler &BCh_u,
+                              BCHandler &BCh_d,
+                              BCHandler &BCh_mesh):
+    super(fluid, solid, _dataFile, BCh_u, BCh_d, BCh_mesh),
     M_BCh_du (0, BCHandler::HINT_BC_ONLY_ESSENTIAL),
     M_BCh_dz (),
-    M_dz     (3*M_solid.dDof().numTotalDof()),
-    M_rhs_dz (3*M_solid.dDof().numTotalDof()),
+    M_dz     (3*M_solid->dDof().numTotalDof()),
+    M_rhs_dz (3*M_solid->dDof().numTotalDof()),
     M_dataJacobian(this)
 {
     setUpBC();
@@ -51,6 +51,17 @@ exactJacobian::~exactJacobian()
 {}
 
 
+void
+exactJacobian::setup()
+{
+    // call operFS setup()
+    super::setup();
+
+    M_dz.resize(3*M_solid->dDof().numTotalDof());
+    M_rhs_dz.resize(3*M_solid->dDof().numTotalDof());
+
+    setUpBC();
+}
 //
 // Residual computation
 //
@@ -61,13 +72,13 @@ void exactJacobian::eval(const Vector &_disp,
     if(_status) M_nbEval = 0; // new time step
     M_nbEval++ ;
 
-    this->M_solid.d() = _disp;
+    this->M_solid->d() = _disp;
 
-    this->M_fluid.updateMesh(time());
-    this->M_fluid.iterate   (time());
+    this->M_fluid->updateMesh(time());
+    this->M_fluid->iterate   (time());
 
-    this->M_solid.setRecur(0);
-    this->M_solid.iterate();
+    this->M_solid->setRecur(0);
+    this->M_solid->iterate();
 
 }
 
@@ -86,16 +97,16 @@ void exactJacobian::evalResidual(Vector &_res,
 
     eval(_disp, status);
 
-    M_dispStruct = this->M_solid.d();
-    M_velo       = this->M_solid.w();
+    M_dispStruct = this->M_solid->d();
+    M_velo       = this->M_solid->w();
 
     std::cout << "                ::: norm(disp     ) = " << norm_inf(_disp)  << std::endl;
     std::cout << "                ::: norm(dispNew  ) = " << norm_inf(M_dispStruct) << std::endl;
     std::cout << "                ::: norm(velo     ) = " << norm_inf(M_velo) << std::endl;
 
-    std::cout << "Max ResidualF   = " << norm_inf(M_fluid.residual())
+    std::cout << "Max ResidualF   = " << norm_inf(M_fluid->residual())
               << std::endl;
-    std::cout << "Max ResidualS   = " << norm_inf(M_solid.residual())
+    std::cout << "Max ResidualS   = " << norm_inf(M_solid->residual())
               << std::endl;
 
     _res = _disp - M_dispStruct;
@@ -111,8 +122,8 @@ void exactJacobian::setUpBC()
 {
     std::cout << "Boundary Conditions setup ... ";
 
-    UInt dim_solid = this->M_solid.dDof().numTotalDof();
-    UInt dim_fluid = this->M_fluid.uDof().numTotalDof();
+    UInt dim_solid = this->M_solid->dDof().numTotalDof();
+    UInt dim_fluid = this->M_fluid->uDof().numTotalDof();
 
     //========================================================================================
     //  DATA INTERFACING BETWEEN BOTH SOLVERS
@@ -120,19 +131,19 @@ void exactJacobian::setUpBC()
     //
     // Passing data from the fluid to the structure: fluid load at the interface
     //
-    BCVectorInterface g_wall(this->M_fluid.residual(),
+    BCVectorInterface g_wall(this->M_fluid->residual(),
                              dim_fluid,
                              M_dofFluidToStructure);
     //
     // Passing data from structure to the fluid mesh: motion of the fluid domain
     //
-    BCVectorInterface displ(this->M_solid.d(),
+    BCVectorInterface displ(this->M_solid->d(),
                             dim_solid,
                             M_dofStructureToFluidMesh);
     //
     // Passing data from structure to the fluid: solid velocity at the interface velocity
     //
-    BCVectorInterface u_wall(this->M_fluid.wInterpolated(),
+    BCVectorInterface u_wall(this->M_fluid->wInterpolated(),
                              dim_fluid,
                              M_dofMeshToFluid);
     //========================================================================================
@@ -148,11 +159,11 @@ void exactJacobian::setUpBC()
     // Boundary conditions for the solid displacement
     M_BCh_d.addBC("Interface", 1, Natural,   Full, g_wall, 3);
 
-    BCVectorInterface du_wall(M_fluid.dwInterpolated(), dim_fluid, M_dofMeshToFluid);
+    BCVectorInterface du_wall(M_fluid->dwInterpolated(), dim_fluid, M_dofMeshToFluid);
 
     // Passing data from fluid to the structure: du -> dz
     //
-    BCVectorInterface dg_wall(M_fluid.residual(), dim_fluid, M_dofFluidToStructure);
+    BCVectorInterface dg_wall(M_fluid->residual(), dim_fluid, M_dofFluidToStructure);
 
     // Boundary conditions for du
     M_BCh_du.addBC("Wall",   1,  Essential, Full, du_wall,  3);
@@ -227,7 +238,7 @@ void  exactJacobian::solveJac(Vector         &_muk,
 
 void  exactJacobian::solveLinearFluid()
 {
-    this->M_fluid.iterateLin(time(), M_BCh_du);
+    this->M_fluid->iterateLin(time(), M_BCh_du);
 }
 
 
@@ -240,28 +251,28 @@ void  exactJacobian::solveLinearSolid()
     M_dz     = ZeroVector( M_dz.size() );
 
     if ( !M_BCh_dz.bdUpdateDone() )
-        M_BCh_dz.bdUpdate(this->M_solid.mesh(),
-                          this->M_solid.feBd(),
-                          this->M_solid.dof());
+        M_BCh_dz.bdUpdate(this->M_solid->mesh(),
+                          this->M_solid->feBd(),
+                          this->M_solid->dof());
 
     bcManageVector(M_rhs_dz,
-                   this->M_solid.mesh(),
-                   this->M_solid.dof(),
+                   this->M_solid->mesh(),
+                   this->M_solid->dof(),
                    M_BCh_dz,
-                   this->M_solid.feBd(),
+                   this->M_solid->feBd(),
                    1., 1.);
 
     Real tol       = 1.e-10;
 
-    this->M_solid.setRecur(1);
-    this->M_solid.solveJac(M_dz, M_rhs_dz, tol);
+    this->M_solid->setRecur(1);
+    this->M_solid->solveJac(M_dz, M_rhs_dz, tol);
 }
 
 
 void my_matvecJacobianEJ(double *z, double *Jz, AZ_MATRIX* J, int proc_config[])
 {
     // Extraction of data from J
-    dataJacobianEJ* my_data = static_cast< dataJacobianEJ* >(AZ_get_matvec_data(J));
+    exactJacobian::dataJacobian* my_data = static_cast< exactJacobian::dataJacobian* >(AZ_get_matvec_data(J));
 
     UInt dim = my_data->M_pFS->dz().size();
 
@@ -287,6 +298,15 @@ void my_matvecJacobianEJ(double *z, double *Jz, AZ_MATRIX* J, int proc_config[])
     }
     std::cout << " ***** norm (Jz)= " << AZ_gvector_norm(dim,-1,Jz,proc_config)
               << std::endl << std::endl;
+}
+
+//
+// add steklovPoincare to factory
+//
+namespace
+{
+operFS* createEJ(){ return new exactJacobian(); }
+static bool reg = FSIFactory::instance().registerProduct( "exactJacobian", &createEJ );
 }
 
 }

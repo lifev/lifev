@@ -23,12 +23,13 @@ namespace LifeV
 {
 // Constructors
 
-operFS::operFS(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
-               VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
-               GetPot    &data_file,
-               BCHandler &BCh_u,
-               BCHandler &BCh_d,
-               BCHandler &BCh_mesh):
+operFS::operFS( fluid_type& fluid,
+                solid_type& solid,
+                GetPot    &data_file,
+                BCHandler &BCh_u,
+                BCHandler &BCh_d,
+                BCHandler &BCh_mesh)
+    :
     M_BCh_u       (BCh_u),
     M_BCh_d       (BCh_d),
     M_BCh_mesh    (BCh_mesh),
@@ -48,43 +49,43 @@ operFS::operFS(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
     M_fluid(fluid),
     M_solid(solid),
     M_dofFluidToStructure(feTetraP1,
-                          M_solid.dDof(),
+                          M_solid->dDof(),
                           feTetraP1bubble,
-                          M_fluid.uDof()),
+                          M_fluid->uDof()),
     M_dofStructureToSolid(feTetraP1,
-                          M_solid.dDof(),
+                          M_solid->dDof(),
                           feTetraP1,
-                          M_solid.dDof()),
-    M_dofStructureToFluidMesh(M_fluid.mesh().getRefFE(),
-                              M_fluid.dofMesh(),
+                          M_solid->dDof()),
+    M_dofStructureToFluidMesh(M_fluid->mesh().getRefFE(),
+                              M_fluid->dofMesh(),
                               feTetraP1,
-                              M_solid.dDof()),
+                              M_solid->dDof()),
     M_dofMeshToFluid(feTetraP1bubble,
-                     M_fluid.uDof(),
+                     M_fluid->uDof(),
                      feTetraP1bubble,
-                     M_fluid.uDof()),
-    M_dispStruct  ( 3*M_solid.dDof().numTotalDof() ),
-    M_velo        ( 3*M_solid.dDof().numTotalDof() ),
+                     M_fluid->uDof()),
+    M_dispStruct  ( 3*M_solid->dDof().numTotalDof() ),
+    M_velo        ( 3*M_solid->dDof().numTotalDof() ),
     M_nbEval      (0)
 {
-    M_dofFluidToStructure.update(M_solid.mesh(),
+    M_dofFluidToStructure.update(M_solid->mesh(),
                                  1,
-                                 M_fluid.mesh(),
+                                 M_fluid->mesh(),
                                  1,
                                  0.);
-    M_dofStructureToSolid.update(M_solid.mesh(),
+    M_dofStructureToSolid.update(M_solid->mesh(),
                                1,
-                               M_solid.mesh(),
+                               M_solid->mesh(),
                                1,
                                0.);
-    M_dofStructureToFluidMesh.update(M_fluid.mesh(),
+    M_dofStructureToFluidMesh.update(M_fluid->mesh(),
                                      1,
-                                     M_solid.mesh(),
+                                     M_solid->mesh(),
                                      1,
                                      0.0);
-    M_dofMeshToFluid.update(M_fluid.mesh(),
+    M_dofMeshToFluid.update(M_fluid->mesh(),
                             1,
-                            M_fluid.mesh(),
+                            M_fluid->mesh(),
                             1,
                             0.0);
     M_solverAztec.setOptionsFromGetPot(data_file,"jacobian/aztec");
@@ -97,6 +98,50 @@ operFS::~operFS()
 }
 
 //
+void
+operFS::setup()
+{
+    if ( M_solid && M_fluid )
+    {
+        M_dofFluidToStructure.setup(feTetraP1,M_solid->dDof(),feTetraP1bubble,M_fluid->uDof());
+        M_dofFluidToStructure.update(M_solid->mesh(),
+                                     1,
+                                     M_fluid->mesh(),
+                                     1,
+                                     0.);
+        M_dofStructureToSolid.setup(feTetraP1,M_solid->dDof(),feTetraP1,M_solid->dDof());
+        M_dofStructureToSolid.update(M_solid->mesh(),
+                                     1,
+                                     M_solid->mesh(),
+                                     1,
+                                     0.);
+
+        M_dofStructureToFluidMesh.setup(M_fluid->mesh().getRefFE(),M_fluid->dofMesh(),feTetraP1,M_solid->dDof());
+        M_dofStructureToFluidMesh.update(M_fluid->mesh(),
+                                         1,
+                                         M_solid->mesh(),
+                                         1,
+                                         0.0);
+
+        M_dofMeshToFluid.setup(feTetraP1bubble,M_fluid->uDof(),feTetraP1bubble,M_fluid->uDof());
+        M_dofMeshToFluid.update(M_fluid->mesh(),
+                                1,
+                                M_fluid->mesh(),
+                                1,
+                                0.0);
+    }
+}
+//
+
+void
+operFS::setDataFromGetPot( GetPot const& data_file )
+{
+    M_solverAztec.setOptionsFromGetPot(data_file,"jacobian/aztec");
+    M_method  = data_file("problem/method" ,0);
+}
+
+
+//
 
 void  operFS::updateJac(Vector& sol,int iter)
 {
@@ -107,21 +152,21 @@ void  operFS::updateJac(Vector& sol,int iter)
 
 void operFS::displacementOnInterface()
 {
-    UInt iBCf = M_fluid.BC_fluid().getBCbyName("Interface");
-    UInt iBCd = M_solid.BC_solid().getBCbyName("Interface");
+    UInt iBCf = M_fluid->BC_fluid().getBCbyName("Interface");
+    UInt iBCd = M_solid->BC_solid().getBCbyName("Interface");
 
-    BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[iBCf];
-    BCBase const &BC_solidInterface = M_solid.BC_solid()[iBCd];
+    BCBase const &BC_fluidInterface = M_fluid->BC_fluid()[iBCf];
+    BCBase const &BC_solidInterface = M_solid->BC_solid()[iBCd];
 
     UInt nDofInterface = BC_fluidInterface.list_size();
 
     UInt nDimF = BC_fluidInterface.numberOfComponents();
     UInt nDimS = BC_solidInterface.numberOfComponents();
 
-    UInt totalDofFluid = M_fluid.getDisplacement().size()/ nDimF;
-    UInt totalDofSolid = M_solid.d().size()/ nDimS;
+    UInt totalDofFluid = M_fluid->getDisplacement().size()/ nDimF;
+    UInt totalDofSolid = M_solid->d().size()/ nDimS;
 
-    Vector dispOnInterface(M_solid.d().size());
+    Vector dispOnInterface(M_solid->d().size());
     dispOnInterface = ZeroVector(dispOnInterface.size());
 
     for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)
@@ -139,8 +184,8 @@ void operFS::displacementOnInterface()
         for (UInt jDim = 0; jDim < nDimF; ++jDim)
         {
             dispOnInterface[IDsolid - 1 + jDim*totalDofSolid] =
-                M_solid.d()              [IDsolid - 1 + jDim*totalDofSolid] -
-                M_fluid.getDisplacement()[IDfluid - 1 + jDim*totalDofFluid];
+                M_solid->d()              [IDsolid - 1 + jDim*totalDofSolid] -
+                M_fluid->getDisplacement()[IDfluid - 1 + jDim*totalDofFluid];
         }
     }
 

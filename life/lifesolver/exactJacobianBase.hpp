@@ -28,29 +28,35 @@ namespace LifeV
 
 class exactJacobian;
 
-class dataJacobianEJ {
 
- public:
-
-  dataJacobianEJ(exactJacobian* oper):
-    M_pFS(oper){}
-
-    exactJacobian* M_pFS;
-
-};
 
 
 class exactJacobian : public operFS
 {
 public:
 
+    typedef operFS super;
+    typedef super::fluid_type fluid_type;
+    typedef super::solid_type solid_type;
+
+    // default constructor
+    exactJacobian()
+        :
+        super(),
+        M_BCh_du (0, BCHandler::HINT_BC_ONLY_ESSENTIAL),
+        M_BCh_dz (),
+        M_dz     (),
+        M_rhs_dz (),
+        M_dataJacobian(this)
+        {}
+
     // constructors
-    exactJacobian(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
-                  VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
-                  GetPot &_dataFile,
-                  BCHandler &BCh_u,
-                  BCHandler &BCh_d,
-                  BCHandler &BCh_mesh);
+    exactJacobian( fluid_type& fluid,
+                   solid_type& solid,
+                   GetPot &_dataFile,
+                   BCHandler &BCh_u,
+                   BCHandler &BCh_d,
+                   BCHandler &BCh_mesh);
 
     // destructor
     ~exactJacobian();
@@ -69,7 +75,25 @@ public:
 
     void setUpBC();
 
+    void setup();
+
     Vector dz() {return M_dz;}
+
+    struct dataJacobian
+    {
+
+        dataJacobian()
+            :
+            M_pFS( 0 )
+            {}
+
+        dataJacobian(exactJacobian* oper)
+            :
+            M_pFS(oper){}
+
+        exactJacobian* M_pFS;
+
+    };
 
 private:
 
@@ -82,17 +106,17 @@ private:
     void eval        (const Vector &_disp,
                       const int     _status);
 
-    dataJacobianEJ            M_dataJacobian;
+    dataJacobian            M_dataJacobian;
 };
 
 
 void my_matvecJacobianEJ(double *z, double *Jz, AZ_MATRIX* J, int proc_config[]);
 
 Real fzeroEJ(const Real& t,
-           const Real& x,
-           const Real& y,
-           const Real& z,
-           const ID& i);
+             const Real& x,
+             const Real& y,
+             const Real& z,
+             const ID& i);
 
 
 }

@@ -26,26 +26,22 @@
 namespace LifeV
 {
 
-class steklovPoincare;
-class DataJacobianSP {
-
- public:
-
-  DataJacobianSP(steklovPoincare* oper):
-    M_pFS(oper){}
-
-  steklovPoincare* M_pFS;
-
-};
-
-
 class steklovPoincare : public operFS
 {
 public:
 
+    typedef operFS super;
+    typedef super::fluid_type fluid_type;
+    typedef super::solid_type solid_type;
+    // default constructor
+    steklovPoincare()
+        :
+        super()
+        {}
+
     // constructors
-    steklovPoincare(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
-                    VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
+    steklovPoincare(fluid_type& fluid,
+                    solid_type& solid,
                     GetPot    &_dataFile,
                     BCHandler &BCh_u,
                     BCHandler &BCh_d,
@@ -68,7 +64,6 @@ public:
     void solveLinearSolid();
 
     void setUpBC();
-    void setPrecond(int prec){M_precond = prec;}
 
     //setters and getters
 
@@ -78,6 +73,21 @@ public:
     void setResidualFSI(double *_res);
     void setResidualFSI(const Vector _res);
 
+    void setup();
+
+    struct DataJacobian
+    {
+        DataJacobian()
+            :
+            M_pFS(0)
+            {}
+        DataJacobian(steklovPoincare* oper)
+            :
+            M_pFS(oper)
+            {}
+
+        steklovPoincare* M_pFS;
+    };
 
 private:
 
@@ -90,8 +100,6 @@ private:
     PhysVectUnknown<Vector> M_residualS;
     PhysVectUnknown<Vector> M_residualF;
     PhysVectUnknown<Vector> M_residualFSI;
-
-    UInt                    M_precond;
 
     Real                    M_defOmega;
     Real                    M_defOmegaS;
@@ -133,7 +141,7 @@ private:
                              const std::string &_BCName,
                              Vector            &_vec2);
 
-    DataJacobianSP            M_dataJacobian;
+    DataJacobian            M_dataJacobian;
 };
 
 Real fzeroSP(const Real& t,
@@ -145,6 +153,8 @@ void my_matvecSfSsPrime(double *z,
                         double *Jz,
                         AZ_MATRIX* J,
                         int proc_config[]);
+
+
 }
 
 #endif

@@ -23,12 +23,12 @@
 
 namespace LifeV
 {
-fixedPoint::fixedPoint(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
-                       VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
-                       GetPot &_dataFile,
-                       BCHandler &BCh_u,
-                       BCHandler &BCh_d,
-                       BCHandler &BCh_mesh):
+fixedPoint::fixedPoint( fluid_type& fluid,
+                        solid_type& solid,
+                        GetPot &_dataFile,
+                        BCHandler &BCh_u,
+                        BCHandler &BCh_d,
+                        BCHandler &BCh_mesh):
     operFS(fluid, solid, _dataFile, BCh_u, BCh_d, BCh_mesh)
 {
     M_defOmega =  _dataFile("problem/defOmega",0.01);
@@ -40,22 +40,30 @@ fixedPoint::fixedPoint(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >&
 fixedPoint::~fixedPoint()
 {}
 
+void
+fixedPoint::setup()
+{
+    // call operFS setup()
+    super::setup();
+
+    setUpBC();
+}
 
 void fixedPoint::eval(Vector& dispNew, Vector& velo, const Vector& disp, int status)
 {
     if(status) M_nbEval = 0; // new time step
     M_nbEval++ ;
 
-    M_solid.d() = disp;
+    M_solid->d() = disp;
 
-    M_fluid.updateMesh(M_time);
-    M_fluid.iterate(M_time);
+    M_fluid->updateMesh(M_time);
+    M_fluid->iterate(M_time);
 
-    M_solid.setRecur(0);
-    M_solid.iterate();
+    M_solid->setRecur(0);
+    M_solid->iterate();
 
-    dispNew = M_solid.d();
-    velo    = M_solid.w();
+    dispNew = M_solid->d();
+    velo    = M_solid->w();
 
     std::cout << "                ::: norm(disp     ) = " << norm_inf(disp) << std::endl;
     std::cout << "                ::: norm(dispNew  ) = " << norm_inf(dispNew) << std::endl;
@@ -87,8 +95,8 @@ void fixedPoint::setUpBC()
 {
     std::cout << "Boundary Conditions setup ... ";
 
-    UInt dim_solid = this->M_solid.dDof().numTotalDof();
-    UInt dim_fluid = this->M_fluid.uDof().numTotalDof();
+    UInt dim_solid = this->M_solid->dDof().numTotalDof();
+    UInt dim_fluid = this->M_fluid->uDof().numTotalDof();
 
     //========================================================================================
     //  DATA INTERFACING BETWEEN BOTH SOLVERS
@@ -96,19 +104,19 @@ void fixedPoint::setUpBC()
     //
     // Passing data from the fluid to the structure: fluid load at the interface
     //
-    BCVectorInterface g_wall(this->M_fluid.residual(),
+    BCVectorInterface g_wall(this->M_fluid->residual(),
                              dim_fluid,
                              M_dofFluidToStructure);
     //
     // Passing data from structure to the fluid mesh: motion of the fluid domain
     //
-    BCVectorInterface displ(this->M_solid.d(),
+    BCVectorInterface displ(this->M_solid->d(),
                             dim_solid,
                             M_dofStructureToFluidMesh);
     //
     // Passing data from structure to the fluid: solid velocity at the interface velocity
     //
-    BCVectorInterface u_wall(this->M_fluid.wInterpolated(),
+    BCVectorInterface u_wall(this->M_fluid->wInterpolated(),
                              dim_fluid,
                              M_dofMeshToFluid);
     //========================================================================================
@@ -136,5 +144,13 @@ void  fixedPoint::solveJac(Vector        &_muk,
     _muk = _res;
 }
 
+//
+// add fixedPoint to factory
+//
+namespace
+{
+operFS* createFP(){ return new fixedPoint(); }
+static bool reg = FSIFactory::instance().registerProduct( "fixedPoint", &createFP );
+}
 
 }

@@ -30,13 +30,22 @@ class fixedPoint : public operFS
 {
 public:
 
+    typedef operFS super;
+    typedef super::fluid_type fluid_type;
+    typedef super::solid_type solid_type;
+    // default constructor
+    fixedPoint()
+        :
+        super()
+        {}
+
     // constructors
-    fixedPoint(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
-               VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
-               GetPot    &_dataFile,
-               BCHandler &BCh_u,
-               BCHandler &BCh_d,
-               BCHandler &BCh_mesh);
+    fixedPoint( fluid_type& fluid,
+                solid_type& solid,
+                GetPot    &_dataFile,
+                BCHandler &BCh_u,
+                BCHandler &BCh_d,
+                BCHandler &BCh_mesh);
 
     // destructor
     ~fixedPoint();
@@ -53,6 +62,8 @@ public:
     void setUpBC     ();
 
     Real   defOmega() {return M_defOmega;}
+
+    void setup();
 
 private:
 

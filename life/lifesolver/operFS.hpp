@@ -17,6 +17,9 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include <factory.hpp>
+#include <singleton.hpp>
+
 #include "dofInterface3Dto3D.hpp"
 #include "NavierStokesAleSolverPC.hpp"
 #include "VenantKirchhofSolver.hpp"
@@ -35,92 +38,124 @@ namespace LifeV
 //
 // Fluid-Structure operator Class
 //
-    class operFS {
+typedef enum OperFSPreconditioner
+{
+    NEUMANN_DIRICHLET = 0,
+    DIRICHLET_NEUMANN,
+    NEUMANN_NEUMANN
+};
+class operFS {
 
-    public:
-        typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID
-                                       & )> function_type;
-        // constructors
+public:
 
-        operFS(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
-               VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
-               GetPot    &data_file,
-               BCHandler &BCh_u,
-               BCHandler &BCh_d,
-               BCHandler &BCh_mesh);
+    typedef boost::shared_ptr<NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> > > fluid_type;
+    typedef boost::shared_ptr<VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> > > solid_type;
 
-        // destructor
+    typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID
+                                   & )> function_type;
+    // constructors
+    operFS()
+        :
+        M_BCh_u(),
+        M_BCh_d(),
+        M_BCh_mesh(),
+        M_fluid(),
+        M_solid()
+        {}
 
-        virtual ~operFS();
+    operFS(fluid_type & fluid,
+           solid_type &solid,
+           GetPot    &data_file,
+           BCHandler &BCh_u,
+           BCHandler &BCh_d,
+           BCHandler &BCh_mesh);
 
-        // virtual memeber functions
+    // destructor
 
-        virtual void evalResidual(Vector &res,
-                                  const Vector &_disp,
-                                  const int     _iter) = 0;
+    virtual ~operFS();
 
-        virtual void solveJac (Vector &_muk,
-                               const Vector &_res,
-                               const double  _linearRelTol) = 0;
+    // virtual memeber functions
 
-        // member functions
+    virtual void evalResidual(Vector &res,
+                              const Vector &_disp,
+                              const int     _iter) = 0;
 
-        virtual void setUpBC() = 0;
+    virtual void solveJac (Vector &_muk,
+                           const Vector &_res,
+                           const double  _linearRelTol) = 0;
 
-        void updateJac (Vector& sol,
-                        int     iter);
+    // member functions
 
-        void solveLinearFluid();
+    virtual void setUpBC() = 0;
 
-        void solveLinearSolid();
+    void updateJac (Vector& sol,
+                    int     iter);
 
-        // mutators and setters
+    void solveLinearFluid();
 
-        UInt   const & nbEval()      const
-            {return M_nbEval;}
+    void solveLinearSolid();
 
-        NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >
-        &fluid() {return M_fluid;}
+    // mutators and setters
 
-        VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >
-        &solid() {return M_solid;}
+    UInt   const & nbEval()      const
+        {return M_nbEval;}
 
-        void setTime(const Real &time) {M_time = time;};
-        Real time() {return M_time;};
+    fluid_type::value_type& fluid() {return *M_fluid;}
 
-        void displacementOnInterface();
+    solid_type::value_type& solid() {return *M_solid;}
 
-    protected:
+    void setPreconditioner( OperFSPreconditioner __p ) { M_precond = __p; }
+    OperFSPreconditioner preconditioner() const { return M_precond; }
 
-        BCHandler               &M_BCh_u;
-        BCHandler               &M_BCh_d;
-        BCHandler               &M_BCh_mesh;
+    void setTime(const Real &time) {M_time = time;};
+    Real time() {return M_time;};
 
-        NavierStokesAleSolverPC
-        < RegionMesh3D_ALE<LinearTetra> > &M_fluid;
+    void displacementOnInterface();
 
-        VenantKirchhofSolver
-        < RegionMesh3D_ALE<LinearTetra> > &M_solid;
+    void setFluid( fluid_type const& fluid ){ M_fluid = fluid;}
+    void setSolid( solid_type const& solid ){ M_solid = solid;}
 
-        DofInterface3Dto3D      M_dofFluidToStructure;
-        DofInterface3Dto3D      M_dofStructureToSolid;
-        DofInterface3Dto3D      M_dofStructureToFluidMesh;
-        DofInterface3Dto3D      M_dofMeshToFluid;
+    virtual void setDataFromGetPot( GetPot const& data );
 
-        Vector                  M_dispStruct;
-        Vector                  M_velo;
+    void setBC( BCHandler const& bc_u,  BCHandler const& bc_d, BCHandler const& bc_m )
+        {
+            M_BCh_u = bc_u;
+            M_BCh_d = bc_d;
+            M_BCh_mesh = bc_m;
+        }
 
-        SolverAztec             M_solverAztec;
+    virtual void setup();
 
-        Real                    M_time;
+protected:
 
-        UInt                    M_nbEval;
-    private:
+    BCHandler               M_BCh_u;
+    BCHandler               M_BCh_d;
+    BCHandler               M_BCh_mesh;
+
+    fluid_type              M_fluid;
+    solid_type              M_solid;
+
+    DofInterface3Dto3D      M_dofFluidToStructure;
+    DofInterface3Dto3D      M_dofStructureToSolid;
+    DofInterface3Dto3D      M_dofStructureToFluidMesh;
+    DofInterface3Dto3D      M_dofMeshToFluid;
+
+    Vector                  M_dispStruct;
+    Vector                  M_velo;
+
+    SolverAztec             M_solverAztec;
+
+    Real                    M_time;
+
+    UInt                    M_nbEval;
+
+private:
 
 
-        UInt                    M_method;
-        UInt                    M_precond;
-    };
-
+    UInt                    M_method;
+    OperFSPreconditioner    M_precond;
+};
+typedef boost::shared_ptr<operFS> oper_fsi_ptr;
+typedef singleton<factory<operFS,  std::string> > FSIFactory;
 }
 #endif

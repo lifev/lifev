@@ -24,30 +24,30 @@
 namespace LifeV
 {
 Real fzeroSP(const Real& t,
-           const Real& x,
-           const Real& y,
-           const Real& z,
-           const ID& i)
+             const Real& x,
+             const Real& y,
+             const Real& z,
+             const ID& i)
 {return 0.0;}
 
-steklovPoincare::steklovPoincare(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
-                                 VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
-                                 GetPot &_dataFile,
-                                 BCHandler &BCh_u,
-                                 BCHandler &BCh_d,
-                                 BCHandler &BCh_mesh):
+steklovPoincare::steklovPoincare( fluid_type& fluid,
+                                  solid_type& solid,
+                                  GetPot &_dataFile,
+                                  BCHandler &BCh_u,
+                                  BCHandler &BCh_d,
+                                  BCHandler &BCh_mesh):
     operFS(fluid, solid, _dataFile, BCh_u, BCh_d, BCh_mesh),
     M_BCh_du      (),
     M_BCh_dz      (),
-    M_dz          ( 3*M_solid.dDof().numTotalDof() ),
-    M_rhs_dz      ( 3*M_solid.dDof().numTotalDof() ),
-    M_residualS   ( M_solid.dDof().numTotalDof() ),
-    M_residualF   ( M_fluid.uDof().numTotalDof() ),
-    M_residualFSI ( M_fluid.uDof().numTotalDof() ),
-    M_aitkFS      ( 3*M_solid.dDof().numTotalDof() ),
+    M_dz          ( 3*M_solid->dDof().numTotalDof() ),
+    M_rhs_dz      ( 3*M_solid->dDof().numTotalDof() ),
+    M_residualS   ( M_solid->dDof().numTotalDof() ),
+    M_residualF   ( M_fluid->uDof().numTotalDof() ),
+    M_residualFSI ( M_fluid->uDof().numTotalDof() ),
+    M_aitkFS      ( 3*M_solid->dDof().numTotalDof() ),
     M_dataJacobian(this)
 {
-    M_precond   = _dataFile("problem/precond"  , 1);
+    this->setPreconditioner(  ( OperFSPreconditioner )_dataFile("problem/precond"  , DIRICHLET_NEUMANN ) );
 
     M_defOmegaS = _dataFile("problem/defOmegaS",0.005);
     M_defOmegaF = _dataFile("problem/defOmegaF",0.005);
@@ -55,7 +55,7 @@ steklovPoincare::steklovPoincare(NavierStokesAleSolverPC< RegionMesh3D_ALE<Linea
 
     // for the NN case, aitken is inside the step
     // computation routine
-//     if (M_precond == 2)
+//     if (this->preconditioner() == 2)
 //     {
 //         M_defOmega  = -1.;
 //         M_defOmegaS = _dataFile("problem/defOmegaS",0.005);
@@ -74,7 +74,22 @@ steklovPoincare::steklovPoincare(NavierStokesAleSolverPC< RegionMesh3D_ALE<Linea
 steklovPoincare::~steklovPoincare()
 {}
 
+void
+steklovPoincare::setup()
+{
+    // call operFS setup()
+    super::setup();
 
+    M_dz.resize( 3*M_solid->dDof().numTotalDof() );
+    M_rhs_dz.resize( 3*M_solid->dDof().numTotalDof() );
+    M_residualS.resize( M_solid->dDof().numTotalDof() );
+    M_residualF.resize( M_fluid->uDof().numTotalDof() );
+    M_residualFSI.resize( M_fluid->uDof().numTotalDof() );
+
+    M_aitkFS.setup( 3*M_solid->dDof().numTotalDof() );
+
+    setUpBC();
+}
 //
 // Residual computation
 //
@@ -87,27 +102,27 @@ void steklovPoincare::eval(const Vector& disp,
     if(status) M_nbEval = 0; // new time step
     M_nbEval++;
 
-//    M_solid.d() = setDispOnInterface(disp);
+//    M_solid->d() = setDispOnInterface(disp);
 
 //     transferOnInterface(disp,
-//                         M_solid.BC_solid(),
+//                         M_solid->BC_solid(),
 //                         "Interface",
-//                         M_solid.d());
+//                         M_solid->d());
 
-    M_solid.d() = disp;
+    M_solid->d() = disp;
 
-    M_fluid.updateMesh(M_time);
-    M_fluid.iterate   (M_time);
+    M_fluid->updateMesh(M_time);
+    M_fluid->iterate   (M_time);
 
-    M_solid.setRecur(0);
-    M_solid.iterate();
-//    M_solid.solveLin(dispNew, disp, 1.e-8);
-//    M_solid.postProcess();
-//    M_fluid.postProcess();
+    M_solid->setRecur(0);
+    M_solid->iterate();
+//    M_solid->solveLin(dispNew, disp, 1.e-8);
+//    M_solid->postProcess();
+//    M_fluid->postProcess();
 
-    dispNew = M_solid.d();
-    //M_solid.d() = dispNew;
-    velo    = M_solid.w();
+    dispNew = M_solid->d();
+    //M_solid->d() = dispNew;
+    velo    = M_solid->w();
 
     std::cout << "                ::: norm(disp     ) = "
               << norm_2(disp) << std::endl;
@@ -131,8 +146,8 @@ void steklovPoincare::evalResidual(Vector &res,
 
     eval(disp, status, M_dispStruct, M_velo);
 
-    M_residualS = M_solid.residual();
-    M_residualF = M_fluid.residual();
+    M_residualS = M_solid->residual();
+    M_residualF = M_fluid->residual();
 
     computeResidualFSI();
     res = getResidualFSIOnSolid();
@@ -164,8 +179,8 @@ void steklovPoincare::setUpBC()
 {
     std::cout << "Boundary Conditions setup ... ";
 
-    UInt dim_solid = this->M_solid.dDof().numTotalDof();
-    UInt dim_fluid = this->M_fluid.uDof().numTotalDof();
+    UInt dim_solid = this->M_solid->dDof().numTotalDof();
+    UInt dim_fluid = this->M_fluid->uDof().numTotalDof();
 
     //========================================================================================
     //  DATA INTERFACING BETWEEN BOTH SOLVERS
@@ -176,25 +191,25 @@ void steklovPoincare::setUpBC()
     //
     // Passing data from the fluid to the structure: fluid load at the interface
     //
-    BCVectorInterface g_wall(this->M_fluid.residual(),
+    BCVectorInterface g_wall(this->M_fluid->residual(),
                              dim_fluid,
                              M_dofFluidToStructure);
     //
     // Passing data from structure to the solid mesh: motion of the solid domain
     //
-    BCVectorInterface d_wall(this->M_solid.d(),
+    BCVectorInterface d_wall(this->M_solid->d(),
                              dim_solid,
                              M_dofStructureToSolid);
     //
     // Passing data from structure to the fluid mesh: motion of the fluid domain
     //
-    BCVectorInterface displ(this->M_solid.d(),
+    BCVectorInterface displ(this->M_solid->d(),
                             dim_solid,
                             M_dofStructureToFluidMesh);
     //
     // Passing data from structure to the fluid: solid velocity at the interface velocity
     //
-    BCVectorInterface u_wall(this->M_fluid.wInterpolated(),
+    BCVectorInterface u_wall(this->M_fluid->wInterpolated(),
                              dim_fluid,
                              M_dofMeshToFluid);
     //========================================================================================
@@ -253,17 +268,17 @@ void  steklovPoincare::solveJac(Vector &muk,
     Vector muF(_res.size());
     Vector muS(_res.size());
 
-    switch(M_precond)
+    switch(this->preconditioner())
     {
-        case 0:
+        case NEUMANN_DIRICHLET:
             // Neumann-Dirichlet preconditioner
             invSfPrime(-1*_res, _linearRelTol, muF);
             break;
-        case 1:
+        case DIRICHLET_NEUMANN:
             // Dirichlet-Neumann preconditioner
             invSsPrime(-1*_res, _linearRelTol, muS);
             break;
-        case 2:
+        case NEUMANN_NEUMANN:
             // Neumann-Neumann preconditioner
         {
             invSsPrime(-1*_res, _linearRelTol, muS);
@@ -303,7 +318,7 @@ void  steklovPoincare::solveJac(Vector &muk,
 
 void steklovPoincare::solveLinearFluid()
 {
-    this->M_fluid.iterateLin(time(), M_BCh_du);
+    this->M_fluid->iterateLin(time(), M_BCh_du);
 }
 
 //
@@ -314,23 +329,23 @@ void steklovPoincare::solveLinearSolid()
     M_dz     = ZeroVector( M_dz.size() );
 
     if ( !M_BCh_dz.bdUpdateDone() )
-        M_BCh_dz.bdUpdate(this->M_solid.mesh(),
-                          this->M_solid.feBd(),
-                          this->M_solid.dof());
+        M_BCh_dz.bdUpdate(this->M_solid->mesh(),
+                          this->M_solid->feBd(),
+                          this->M_solid->dof());
 
     bcManageVector(M_rhs_dz,
-                   this->M_solid.mesh(),
-                   this->M_solid.dof(),
+                   this->M_solid->mesh(),
+                   this->M_solid->dof(),
                    M_BCh_dz,
-                   this->M_solid.feBd(),
+                   this->M_solid->feBd(),
                    1., 1.);
 
     Real tol       = 1.e-10;
 
     std::cout << "rhs_dz norm = " << norm_inf(M_rhs_dz) << std::endl;
-    this->M_solid.setRecur(1);
-    this->M_solid.updateJac(M_dz, 0);
-    this->M_solid.solveJac(M_dz, M_rhs_dz, tol, M_BCh_dz);
+    this->M_solid->setRecur(1);
+    this->M_solid->updateJac(M_dz, 0);
+    this->M_solid->solveJac(M_dz, M_rhs_dz, tol, M_BCh_dz);
     std::cout << "dz norm     = " << norm_inf(M_dz) << std::endl;
 }
 
@@ -347,15 +362,15 @@ void  steklovPoincare::invSfPrime(const Vector& res,
 {
     setResidualFSI(res);
 
-    M_solid.d() = ZeroVector(M_solid.d().size());
+    M_solid->d() = ZeroVector(M_solid->d().size());
     std::cout << "norm_inf residual FSI = " << norm_inf(M_residualFSI);
-    this->M_fluid.updateDispVelo();
+    this->M_fluid->updateDispVelo();
     solveLinearFluid();
 
-    Vector deltaLambda = this->M_fluid.getDeltaLambda();
+    Vector deltaLambda = this->M_fluid->getDeltaLambda();
 
     transferOnInterface(deltaLambda,
-                        M_fluid.BC_fluid(),
+                        M_fluid->BC_fluid(),
                         "Interface",
                         step);
     std::cout << "norm_2 deltaLambda = " << norm_2(deltaLambda) << std::endl;
@@ -381,7 +396,7 @@ void  steklovPoincare::invSsPrime(const Vector& res,
 //    step = M_dz;
 
     transferOnInterface(M_dz,
-                        M_solid.BC_solid(),
+                        M_solid->BC_solid(),
                         "Interface",
                         step);
 
@@ -420,7 +435,7 @@ void steklovPoincare::invSfSsPrime(const Vector& res,
 void my_matvecSfSsPrime(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
 {
     // Extraction of data from J
-    DataJacobianSP* my_data = static_cast< DataJacobianSP* >(AZ_get_matvec_data(J));
+    steklovPoincare::DataJacobian* my_data = static_cast< steklovPoincare::DataJacobian* >(AZ_get_matvec_data(J));
 
     UInt dim = my_data->M_pFS->dz().size();
 
@@ -458,11 +473,11 @@ void steklovPoincare::computeResidualFSI()
 {
     M_residualFSI = ZeroVector( M_residualFSI.size() );
 
-    UInt iBCf = M_fluid.BC_fluid().getBCbyName("Interface");
-    UInt iBCd = M_solid.BC_solid().getBCbyName("Interface");
+    UInt iBCf = M_fluid->BC_fluid().getBCbyName("Interface");
+    UInt iBCd = M_solid->BC_solid().getBCbyName("Interface");
 
-    BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[iBCf];
-    BCBase const &BC_solidInterface = M_solid.BC_solid()[iBCd];
+    BCBase const &BC_fluidInterface = M_fluid->BC_fluid()[iBCf];
+    BCBase const &BC_solidInterface = M_solid->BC_solid()[iBCd];
 
     UInt nDofInterface = BC_fluidInterface.list_size();
 
@@ -495,11 +510,11 @@ void steklovPoincare::computeResidualFSI()
 
 void steklovPoincare::setResidualFSI(double *_res)
 {
-    UInt iBCf = M_fluid.BC_fluid().getBCbyName("Interface");
-    UInt iBCd = M_solid.BC_solid().getBCbyName("Interface");
+    UInt iBCf = M_fluid->BC_fluid().getBCbyName("Interface");
+    UInt iBCd = M_solid->BC_solid().getBCbyName("Interface");
 
-    BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[iBCf];
-    BCBase const &BC_solidInterface = M_solid.BC_solid()[iBCd];
+    BCBase const &BC_fluidInterface = M_fluid->BC_fluid()[iBCf];
+    BCBase const &BC_solidInterface = M_solid->BC_solid()[iBCd];
 
     UInt nDofInterface = BC_fluidInterface.list_size();
 
@@ -530,11 +545,11 @@ void steklovPoincare::setResidualFSI(double *_res)
 
 void steklovPoincare::setResidualFSI(const Vector _res)
 {
-    UInt iBCf = M_fluid.BC_fluid().getBCbyName("Interface");
-    UInt iBCd = M_solid.BC_solid().getBCbyName("Interface");
+    UInt iBCf = M_fluid->BC_fluid().getBCbyName("Interface");
+    UInt iBCd = M_solid->BC_solid().getBCbyName("Interface");
 
-    BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[iBCf];
-    BCBase const &BC_solidInterface = M_solid.BC_solid()[iBCd];
+    BCBase const &BC_fluidInterface = M_fluid->BC_fluid()[iBCf];
+    BCBase const &BC_solidInterface = M_solid->BC_solid()[iBCd];
 
     UInt nDofInterface = BC_fluidInterface.list_size();
 
@@ -569,8 +584,8 @@ Vector steklovPoincare::getResidualFSIOnSolid()
     Vector vec = M_residualS;
     vec = ZeroVector( vec.size() );
 
-    BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[0];
-    BCBase const &BC_solidInterface = M_solid.BC_solid()[0];
+    BCBase const &BC_fluidInterface = M_fluid->BC_fluid()[0];
+    BCBase const &BC_solidInterface = M_solid->BC_solid()[0];
 
     UInt nDofInterface = BC_fluidInterface.list_size();
 
@@ -609,8 +624,8 @@ Vector steklovPoincare::getSolidInterfaceOnFluid(Vector &_vec)
 {
     Vector vec(M_residualF.size());
 
-    BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[0];
-    BCBase const &BC_solidInterface = M_solid.BC_solid()[0];
+    BCBase const &BC_fluidInterface = M_fluid->BC_fluid()[0];
+    BCBase const &BC_solidInterface = M_solid->BC_solid()[0];
 
     UInt nDofInterface = BC_fluidInterface.list_size();
 
@@ -646,8 +661,8 @@ Vector steklovPoincare::getFluidInterfaceOnSolid(Vector &_vec)
 {
     Vector vec(M_residualS.size());
 
-    BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[0];
-    BCBase const &BC_solidInterface = M_solid.BC_solid()[0];
+    BCBase const &BC_fluidInterface = M_fluid->BC_fluid()[0];
+    BCBase const &BC_solidInterface = M_solid->BC_solid()[0];
 
     UInt nDofInterface = BC_fluidInterface.list_size();
 
@@ -715,4 +730,12 @@ void steklovPoincare::transferOnInterface(const Vector      &_vec1,
     }
 }
 
+//
+// add steklovPoincare to factory
+//
+namespace
+{
+operFS* createSP(){ return new steklovPoincare(); }
+static bool reg = FSIFactory::instance().registerProduct( "steklovPoincare", &createSP );
+}
 }
