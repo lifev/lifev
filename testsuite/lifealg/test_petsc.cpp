@@ -41,10 +41,11 @@
 
 #include <debug.hpp>
 
+using boost::unit_test_framework::test_suite;
+
+
 #if defined(HAVE_PETSC_H)
 #include <SolverPETSC.hpp>
-
-using boost::unit_test_framework::test_suite;
 
 void petsc_manager()
 {
