@@ -141,7 +141,8 @@ public:
   }
 
   /*!
-    minimal update: we just identify the id of the current element
+    minimal update: we just identify the id of the current element and
+    of the geometrical points
   */
   template<class GEOELE>
   void update(const GEOELE& geoele)
@@ -154,6 +155,11 @@ public:
     _hasMass = false;
 #endif
     _currentId = geoele.id();
+    for(int i=0;i<nbGeoNode;i++){
+      point(i,0) = geoele.point(i+1).x();
+      point(i,1) = geoele.point(i+1).y();
+      point(i,2) = geoele.point(i+1).z();
+    }
   }
   /*!
     compute the arrays detJac, weightDet, jacobian on
