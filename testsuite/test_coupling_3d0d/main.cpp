@@ -33,7 +33,7 @@ namespace LifeV
 struct toEnsight
 {
     void
-    operator()( uint __it,
+    operator()( Real __time,
                 RegionMesh3D<LinearTetra> const& __mesh,
                 PhysVectUnknown<Vector> const& __u,
                 ScalUnknown<Vector> const& __p,
@@ -42,7 +42,7 @@ struct toEnsight
             std::cout << "============================================================\n"
                       << "Call ensight writer here to save the data \n"
                       << "============================================================\n";
-            outensight7Mesh3D( __mesh, __u, __p, __it/100 );
+            outensight7Mesh3D( __mesh, __u, __p, __time );
         }
 };
 struct toMedit
@@ -53,17 +53,17 @@ struct toMedit
         {
         }
     void
-    operator()( uint __it,
+    operator()( Real __time,
                 RegionMesh3D<LinearTetra> const& __mesh,
                 PhysVectUnknown<Vector> const& __u,
                 ScalUnknown<Vector> const& __p,
                 Real __flux ) const
         {
             std::cout << "============================================================\n"
-                      << "Call medit writer here to save the data \n"
+                      << "Call medit writer here to save the data at time: " << __time << "\n"
                       << "============================================================\n";
             std::ostringstream name;
-            name <<  __it;
+            name <<  __time*1000;
             int __dim_u = __u.size()/__u.nbcomp();
             // postprocess data file for medit
             wr_medit_ascii_scalar( "press." + name.str() + ".bb", __p.giveVec(), __p.size() );
@@ -137,6 +137,7 @@ int main(int argc, char** argv)
                                       quadRuleTetra15pt,quadRuleTria3pt,
                                       quadRuleTetra5pt, quadRuleTria3pt, BCh_u) );
     ns->showMe();
+    ns->setSourceTerm( f );
 
 
     // BC Definition
@@ -185,65 +186,63 @@ int main(int argc, char** argv)
     // Temporal loop
     //
     switch(strategy)
-      {
-      case 1:
-	{
-        std::cout << "Mean Pressure problem \n";
-        std::cout <<" -----------------------------------------------\n";
+    {
+        case 1:
+        {
+            std::cout << "Mean Pressure problem \n";
+            std::cout <<" -----------------------------------------------\n";
 
-        BCh_u.addBC("InFlow", 1, Natural,  Full, bcvec , 3);
-        Real Q;
+            BCh_u.addBC("InFlow", 1, Natural,  Full, bcvec , 3);
+            Real Q;
 
-        for (Real time=startT+dt ; time <= T; time+=dt)
-	  {
+            for (Real time=startT+dt ; time <= T; time+=dt)
+            {
 
-            Q = ns->flux(1);
-            // pressure coming from the 0D Model
-            vec_press = ScalarVector( vec_press.size(), -network.getPressureFromQ(time,Q) );
+                Q = ns->flux(1);
+                // pressure coming from the 0D Model
+                vec_press = ScalarVector( vec_press.size(), -network.getPressureFromQ(time,Q) );
 
-            ns->timeAdvance(f,time);
-            ns->iterate(time);
+                ns->timeAdvance(f,time);
+                ns->iterate(time);
 
-            ns->postProcess();
-	  }
-	}
-	break;
+                ns->postProcess();
+            }
+        }
+        break;
 
-      case 2:
-	{
-	std::cout << "Flow Rate problem \n";
-	std::cout <<" -----------------------------------------------\n";
+        case 2:
+        {
+            std::cout << "Flow Rate problem \n";
+            std::cout <<" -----------------------------------------------\n";
 
-	BCFunctionBase in_flow(uo);
-	BCh_u.addBC("InFlow", 1, Natural,   Full, in_flow, 3);
+            BCFunctionBase in_flow(uo);
+            BCh_u.addBC("InFlow", 1, Natural,   Full, in_flow, 3);
 
-	Real deltaP;
+            Real deltaP;
 
-	NavierStokesWithFlux<NS> ns_with_flux(ns);
-	ns_with_flux.setFlux( 1, flux_adaptor( 0 ) );
-	ns_with_flux.setSourceTerm( f );
-	ns_with_flux.initialize(u0,p0,0.0,dt);
+            NavierStokesWithFlux<NS> ns_with_flux(ns);
+            ns_with_flux.setFlux( 1, flux_adaptor( 0 ) );
+            ns_with_flux.initialize(u0,p0,0.0,dt);
 
-	toEnsight EnsightFilter;
-	ns_with_flux.doOnIterationFinish( EnsightFilter  );
-	toMedit MeditFilter( data_file );
-	ns_with_flux.doOnIterationFinish( MeditFilter  );
+            toEnsight EnsightFilter;
+            ns_with_flux.doOnIterationFinish( EnsightFilter  );
+            toMedit MeditFilter( data_file );
+            ns_with_flux.doOnIterationFinish( MeditFilter  );
 
-	for (Real time=startT+dt ; time <= T; time+=dt){
+            for (Real time=startT+dt ; time <= T; time+=dt){
 
-	  deltaP = ns_with_flux.pressure();
+                deltaP = ns_with_flux.pressure();
 
-	  ns_with_flux.setFlux(1, flux_adaptor( network.getQFromPressure(time, deltaP) ) );
+                ns_with_flux.setFlux(1, flux_adaptor( network.getQFromPressure(time, deltaP) ) );
 
-	  ns_with_flux.timeAdvance( f, time );
-	  ns_with_flux.iterate( time );
-	}
-	}
-	break;
+                ns_with_flux.iterate( time );
+            }
+        }
+        break;
 
-      default:
-        ERROR_MSG("No coupling strategy defined \n");
-      }
+        default:
+            ERROR_MSG("No coupling strategy defined \n");
+    }
 
     outfile.open("res_Q.m", std::ios::app);
     outfile << "    ]; " << std::endl;
