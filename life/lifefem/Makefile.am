@@ -30,18 +30,18 @@ INCLUDES 	= -I$(top_srcdir)/life/lifecore -I$(top_srcdir)/life/lifearray -I$(top
 include_HEADERS		= Operator01.hpp assemb.hpp bcCond.hpp bcVector.hpp bdf.hpp bdfNS.hpp \
 bc_manage.hpp currentBdFE.hpp currentFE.hpp currentHdivFE.hpp \
 dof.hpp dofInterface3Dto2D.hpp dofInterface3Dto3D.hpp dofInterfaceBase.hpp \
-dofInterfaceHandler.hpp elemMat.hpp elemOper.hpp elemOper_ext.hpp \
-elemVec.hpp geoMap.hpp localDofPattern.hpp meshMotion.hpp quadRule.hpp \
+dofInterfaceHandler.hpp  elemOper.hpp elemOper_ext.hpp \
+ geoMap.hpp localDofPattern.hpp meshMotion.hpp quadRule.hpp \
 refEle.hpp refFE.hpp refHdivFE.hpp refHybridFE.hpp \
-sobolevNorms.hpp staticBdFE.hpp 
+sobolevNorms.hpp staticBdFE.hpp regionMesh3D_ALE.hpp v2elemVec.hpp values.hpp
 
 lib_LTLIBRARIES		= liblifefem.la
 liblifefem_la_SOURCES	= assemb.cpp bcCond.cpp bcVector.cpp bdf.cpp bdfNS.cpp currentBdFE.cpp  \
 currentFE.cpp currentHdivFE.cpp defQuadRuleFE.cpp dof.cpp \
 dofInterface3Dto2D.cpp dofInterface3Dto3D.cpp dofInterfaceBase.cpp dofInterfaceHandler.cpp \
-elemMat.cpp elemOper.cpp elemVec.cpp geoMap.cpp \
+ elemOper.cpp  geoMap.cpp \
 localDofPattern.cpp meshMotion.cpp quadRule.cpp refEle.cpp refFE.cpp \
-refHdivFE.cpp refHybridFE.cpp staticBdFE.cpp 
+refHdivFE.cpp refHybridFE.cpp staticBdFE.cpp regionMesh3D_ALE.cpp v2elemVec.cpp
 
 
 liblifefem_la_LIBADD	= ../lifemesh/liblifemesh.la ../lifealg/liblifealg.la 

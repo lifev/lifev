@@ -19,18 +19,19 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
+SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .cc
 
 SUBDIRS		= . testsuite
 
 INCLUDES 	= -I$(top_srcdir)/life/lifecore 
 
 include_HEADERS	= RNM.hpp RNM_op.hpp RNM_opc.hpp RNM_tpl.hpp tab.hpp \
-		  vecUnknown.cpp vecUnknown.hpp variables.hpp \
-		  SimpleVect.hpp
+		  vecUnknown.cpp vecUnknown.hpp variables.hpp pattern.hpp \
+		  SimpleVect.hpp elemMat.hpp elemVec.hpp sparseArray.hpp
 
-#lib_LTLIBRARIES	= lifearray.la
+lib_LTLIBRARIES	= liblifearray.la
 
-#lifearray_la_SOURCES	= dummy.cpp
+liblifearray_la_SOURCES	= elemMat.cpp elemVec.cpp pattern.cpp sparseArray.cpp
 
+liblifearray_la_LIBADD	= ../lifecore/liblifecore.la
 include $(top_srcdir)/admin/Doxyfile.am

@@ -48,21 +48,15 @@
 /  stored under a MixedPattern format. 30/04/02.                             /
 /                                                                            /
 /---------------------------------------------------------------------------*/
-#ifndef _MIXED_VALUES_HH
-#define _MIXED_VALUES_HH
-#include "lifeV.hpp"
-#include "elemMat.hpp"
-#include "elemVec.hpp"
-
+#ifndef _SPARSE_ARRAY_HH
+#define _SPARSE_ARRAY_HH
 #ifndef OFFSET
 #define OFFSET 0 // for the Fortran vs C numbering
 #endif
-
+#include "lifeV.hpp"
 #ifndef _LIFEV_HH_ 
 //more correct version
 typedef size_t  UInt;
-//original version
-//typedef unsigned int UInt;
 typedef vector<UInt>::iterator UIIter;
 #endif
 #include <fstream>
@@ -71,14 +65,12 @@ typedef vector<UInt>::iterator UIIter;
 #include<string>
 #include<utility>
 #include "pattern.hpp"
-#include "dof.hpp"
-
 #ifndef _VEC_UNKNOWN_HH
 #include "vecUnknown.hpp"
 #endif
 
 //more correct version
-typedef std::vector<INDEX_T> Container;
+typedef vector<INDEX_T> Container;
 typedef Container::iterator ContIter;
 //original version
 //typedef vector<UInt> Container;
@@ -104,36 +96,31 @@ template<typename PatternType, typename DataType>
 class CSRMatr
 {
 public:
-    CSRMatr(); // default constructor : NULL pattern
-    // 
-    // Note that the constructors MUST be based on an existing pattern
-    //
-    CSRMatr(const PatternType &ex_pattern);
-    CSRMatr(const PatternType &ex_pattern, const std::vector<DataType> &ex_value);
-    CSRMatr(const CSRMatr<PatternType,DataType> &RightHandCSR);
-    
-    //! \return the pattern (const version)
-    PatternType const* Patt() const {return _Patt;};
-    //! \return the pattern 
-    PatternType *      Patt()       {return _Patt;};
-    
-    std::vector<DataType> & value()  {return _value;};
-    DataType * giveRawCSR_value() {return &(_values.front());}    
+  CSRMatr(); // default constructor : NULL pattern
+  // 
+  // Note that the constructors MUST be based on an existing pattern
+  //
+  CSRMatr(const PatternType &ex_pattern);
+  CSRMatr(const PatternType &ex_pattern, const vector<DataType> &ex_value);
+  CSRMatr(const CSRMatr<PatternType,DataType> &RightHandCSR);
+  const PatternType * Patt() const {return _Patt;};
+  vector<DataType> & value()  {return _value;};
+  DataType * giveRawCSR_value() {return &(_values.front());}    
 
-    CSRMatr& operator= (const CSRMatr<PatternType,DataType> &RhCsr  );// Warning: the two matrices will point to the same pattern
-    void set_mat(UInt where, DataType loc_val);
-    void set_mat(UInt row, UInt col, DataType loc_val);
-    void set_mat_inc(UInt row, UInt col, DataType loc_val);
-    DataType get_value(UInt i, UInt j)
-	{ return _value[_Patt->locate_index(i,j).first];};
+  CSRMatr& operator= (const CSRMatr<PatternType,DataType> &RhCsr  );// Warning: the two matrices will point to the same pattern
+  void set_mat(UInt where, DataType loc_val);
+  void set_mat(UInt row, UInt col, DataType loc_val);
+  void set_mat_inc(UInt row, UInt col, DataType loc_val);
+  DataType get_value(UInt i, UInt j)
+  { return _value[_Patt->locate_index(i,j).first];};
 
-    void ShowMe();
-    void spy(string  const &filename);
+  void ShowMe();
+  void spy(string  const &filename);
 
 private:
-    std::vector<DataType> _value;
-    PatternType *_Patt; // I want to link the values to a pattern, NOT to change the pattern itself  (which is const)
-    //     static const DataType _DefaultValue = 0; 
+  vector<DataType> _value;
+  const PatternType *_Patt; // I want to link the values to a pattern, NOT to change the pattern itself  (which is const)
+  //     static const DataType _DefaultValue = 0; 
 };
  
 ////////////////////////////////////////////////////////////////
@@ -147,98 +134,93 @@ template<typename DataType>
 class CSRMatr<CSRPatt,DataType>
 {
 public:
-    CSRMatr(); //!< default constructor : NULL pattern
-    // 
-    // Note that the constructors MUST be based on an existing pattern
-    //
-    CSRMatr(const CSRPatt &ex_pattern);
-    //! Version for DataType=Tab2d
-    CSRMatr(const CSRPatt &ex_pattern, UInt const nr, UInt const nc);
-    CSRMatr(const CSRPatt &ex_pattern, const std::vector<DataType> &ex_value);
-    CSRMatr(const CSRMatr<CSRPatt,DataType> &RightHandCSR);
-    
-    //! \return the pattern (const version)
-    CSRPatt const* Patt() const {return _Patt;};
-    //! \return the pattern 
-    CSRPatt *      Patt()       {return _Patt;};
+  CSRMatr(); //!< default constructor : NULL pattern
+  // 
+  // Note that the constructors MUST be based on an existing pattern
+  //
+  CSRMatr(const CSRPatt &ex_pattern);
+  //! Version for DataType=Tab2d
+  CSRMatr(const CSRPatt &ex_pattern, UInt const nr, UInt const nc);
+  CSRMatr(const CSRPatt &ex_pattern, const vector<DataType> &ex_value);
+  CSRMatr(const CSRMatr<CSRPatt,DataType> &RightHandCSR);
+  const CSRPatt * Patt() const {return _Patt;};
+  const vector<DataType> & value() const {return _value;};
+  vector<DataType> & value()  {return _value;};
+  DataType * giveRawCSR_value() {return &(_value.front());}    
 
-    const std::vector<DataType> & value() const {return _value;};
-    std::vector<DataType> & value()  {return _value;};
-    DataType * giveRawCSR_value() {return &(_value.front());}    
+  CSRMatr& operator= (const CSRMatr<CSRPatt,DataType> &RhCsr  );
+  // Warning: the two matrices will point to the same pattern
 
-    CSRMatr& operator= (const CSRMatr<CSRPatt,DataType> &RhCsr  );
-    // Warning: the two matrices will point to the same pattern
+  //! Matrix-vector product
+  Vector operator*(const Vector &v) const;
+  //! Version for block matrices
+  VectorBlock operator*(const VectorBlock &v) const;
+  //! Version for C pointer vector. BEWARE: no check on bounds done !
+  template <typename DataT>
+  friend void operMatVec(DataT * const mv,
+			 const CSRMatr<CSRPatt,DataT> &Mat,
+			 const DataT *v);
 
-    //! Matrix-vector product
-    Vector operator*(const Vector &v) const;
-    //! Version for block matrices
-    VectorBlock operator*(const VectorBlock &v) const;
-    //! Version for C pointer vector. BEWARE: no check on bounds done !
-    template <typename DataT>
-    friend void operMatVec(DataT * const mv,
-			   const CSRMatr<CSRPatt,DataT> &Mat,
-			   const DataT *v);
+  //! necessary for IML++ library: transpose-matrix by vector product
+  Vector trans_mult(const Vector &v) const;
+  //! version for block matrices
+  VectorBlock trans_mult(const VectorBlock &v);
 
-    //! necessary for IML++ library: transpose-matrix by vector product
-    Vector trans_mult(const Vector &v) const;
-    //! version for block matrices
-    VectorBlock trans_mult(const VectorBlock &v);
+  //! assign a row to zero. Remark, zero might be defined for any DataType
+  void zero_row(UInt const row);
 
-    //! assign a row to zero. Remark, zero might be defined for any DataType
-    void zero_row(UInt const row);
+  //! diagonalize a row r and rhs for Dirichlet BC treatment
+  void diagonalize(UInt const r, DataType const coeff, Vector &b,
+		   DataType datum);
+  //! diagonalize the row r of the matrix only (cf diagonalize for taking into
+  //! account the rhs of the linear system as well)
+  void diagonalize_row(UInt const r, DataType const coeff);
 
-    //! diagonalize a row r and rhs for Dirichlet BC treatment
-    void diagonalize(UInt const r, DataType const coeff, Vector &b,
-		     DataType datum);
-    //! diagonalize the row r of the matrix only (cf diagonalize for taking into
-    //! account the rhs of the linear system as well)
-    void diagonalize_row(UInt const r, DataType const coeff);
+  // Determina la matrice lampata per P1
+  vector<DataType> MassDiagP1() const;
+  // Realizza l'inversa di una matrice diagonale e la moltiplica per un'altra matrice
+  friend void MultInvDiag(const vector<Real> &Diag, 
+			  const CSRMatr<CSRPatt,Real> &Mat,
+			  CSRMatr<CSRPatt,Real> &ans);
 
-    // Determina la matrice lampata per P1
-    vector<DataType> MassDiagP1() const;
-    // Realizza l'inversa di una matrice diagonale e la moltiplica per un'altra matrice
-    friend void MultInvDiag(const std::vector<Real> &Diag, 
-			    const CSRMatr<CSRPatt,Real> &Mat,
-			    CSRMatr<CSRPatt,Real> &ans);
+  void set_mat(UInt row, UInt col, DataType loc_val);
+  void set_mat_inc(UInt row, UInt col, DataType loc_val);
+  DataType get_value(UInt i, UInt j)
+  { return _value[_Patt->locate_index(i,j).first];};
+  const DataType get_value(UInt i, UInt j) const
+  { return _value[_Patt->locate_index(i,j).first];};
 
-    void set_mat(UInt row, UInt col, DataType loc_val);
-    void set_mat_inc(UInt row, UInt col, DataType loc_val);
-    DataType get_value(UInt i, UInt j)
-	{ return _value[_Patt->locate_index(i,j).first];};
-    const DataType get_value(UInt i, UInt j) const
-	{ return _value[_Patt->locate_index(i,j).first];};
+  void ShowMe();
+  void spy(string  const &filename);
 
-    void ShowMe();
-    void spy(string  const &filename);
+  //!column-concatenation of two blocks of CSRMatr
+  /*  friend CSRMatr<CSRPatt,double>
+      colUnify(const CSRMatr<CSRPatt,double> &Mat1,
+      const CSRMatr<CSRPatt,double> &Mat2);*/
+  //version without using static : the one to keep (13/12/01)
+  friend void
+  colUnify(CSRMatr<CSRPatt,double> &ans, const CSRMatr<CSRPatt,double> &Mat1,
+	   const CSRMatr<CSRPatt,double> &Mat2);
 
-    //!column-concatenation of two blocks of CSRMatr
-    /*  friend CSRMatr<CSRPatt,double>
-	colUnify(const CSRMatr<CSRPatt,double> &Mat1,
-	const CSRMatr<CSRPatt,double> &Mat2);*/
-    //version without using static : the one to keep (13/12/01)
-    friend void
-    colUnify(CSRMatr<CSRPatt,double> &ans, const CSRMatr<CSRPatt,double> &Mat1,
-	     const CSRMatr<CSRPatt,double> &Mat2);
-
-    //!row-concatenation of two blocks of CSRMatr (without using static)
-    friend void
+  //!row-concatenation of two blocks of CSRMatr (without using static)
+  friend void
     rowUnify(CSRMatr<CSRPatt,double> &ans, const CSRMatr<CSRPatt,double> &Mat1,
 	     const CSRMatr<CSRPatt,double> &Mat2);
 
-    //!set to zero the row trD and the corresponding column=row for D
-    template<typename VectorType>
+  //!set to zero the row trD and the corresponding column=row for D
+  template<typename VectorType>
     friend void
     zero_row_col(UInt const row, CSRMatr<CSRPatt,double> &trD,
 		 CSRMatr<CSRPatt,double> &D, VectorType &bp,
 		 DataType const datum);
 
-    //! set to zero the matrix;
-    void zeros();
+  //! set to zero the matrix;
+  void zeros();
 
-private:
-    std::vector<DataType> _value;
-    CSRPatt *_Patt; // I want to link the values to a pattern, NOT to change the pattern itself  (which is const)
-    //  static const DataType _DefaultValue = 0; 
+ private:
+  vector<DataType> _value;
+  const CSRPatt *_Patt; // I want to link the values to a pattern, NOT to change the pattern itself  (which is const)
+  //  static const DataType _DefaultValue = 0; 
 };
 
 ////////////////////////////////////////////////////////////////
@@ -256,19 +238,19 @@ public:
   // Note that the constructors MUST be based on an existing pattern
   //
   VBRMatr(const VBRPatt &ex_pattern);
-  VBRMatr(const VBRPatt& ex_pattern, const std::vector<DataType> &ex_value);
+  VBRMatr(const VBRPatt& ex_pattern, const vector<DataType> &ex_value);
   VBRMatr(const VBRMatr<DataType> &RightHandVBR):
     _Patt(RightHandVBR.Patt()), _value(RightHandVBR.value()){}
   
   const VBRPatt *Patt() const {return _Patt;}
-  std::vector<DataType> value() const {return _value;}
+  vector<DataType> value() const {return _value;}
   DataType* giveRaw_value() {return &(_value.front());} // give the
   // value vector in Raw format (suitable for C)
 
   VBRMatr& operator=(const VBRMatr<DataType> &RhVbr);// Warning: the
   // two matrices will point to the same pattern
 
-  std::vector<DataType>  operator*(const std::vector<DataType> &v) const; //Matrix-vector product
+  vector<DataType>  operator*(const vector<DataType> &v) const; //Matrix-vector product
   //Matrix vector product for IML++ (uses the Vector class)
   Vector operator*(const Vector &v) const;
   //necessary for IML++ library: transpose-matrix by vector product
@@ -282,8 +264,8 @@ public:
   void set_mat(UInt row, UInt col, DataType loc_val);
   void set_mat_inc(UInt row, UInt col, DataType loc_val);
   // version for block operation
-  void set_mat(UInt row, UInt col, std::vector<DataType> &loc_block);
-  void set_mat_inc(UInt row, UInt col, std::vector<DataType> &loc_block);
+  void set_mat(UInt row, UInt col, vector<DataType> &loc_block);
+  void set_mat_inc(UInt row, UInt col, vector<DataType> &loc_block);
 
   DataType& get_value(UInt i, UInt j)
   { return _value[_Patt->locate_index(i,j).first];};
@@ -295,7 +277,7 @@ public:
   //  void diagonalize ( UInt const r, DataType const coeff, vector<DataType> &b, DataType datum);   
  
 private:
-  std::vector<DataType> _value;
+  vector<DataType> _value;
   const VBRPatt *_Patt; // I want to link the values to a pattern, NOT
   // changing the pattern itself  (which is const)
   //  static const DataType _DefaultValue = 0; 
@@ -318,7 +300,7 @@ public:
   MSRMatr(const MSRPatt &ex_pattern);
   // Alain : constructor from CSR pattern
   MSRMatr(const CSRPatt &ex_pattern);
-  MSRMatr(const MSRPatt* ex_pattern, const std::vector<DataType> &ex_value);
+  MSRMatr(const MSRPatt* ex_pattern, const vector<DataType> &ex_value);
   MSRMatr(const MSRMatr<DataType> &RightHandMSR);
   MSRMatr(const MSRPatt &ex_pattern,const CSRMatr<CSRPatt,DataType> &RightHandCSR);
   // CSR_values -> MSR_values
@@ -333,20 +315,20 @@ public:
 
   const MSRPatt * Patt() const {return _Patt;};
 
-  const std::vector<DataType> & value() const {return _value;};
-  std::vector<DataType> & value()  {return _value;};
+  const vector<DataType> & value() const {return _value;};
+  vector<DataType> & value()  {return _value;};
 
   DataType * giveRaw_value() {return &(_value.front());} // give the value vector in Raw format (suitable for C)
   DataType const * giveRaw_value() const {return &(_value.front());} // give the value vector in Raw format (suitable for C)
 
   // Determina la matrice lampata P1
-  std::vector<DataType> MassDiagP1() const;
+  vector<DataType> MassDiagP1() const;
   // Realizza l'inversa di una matrice diagonale e la moltiplica per un'altra matrice
-  friend void MultInvDiag(const std::vector<Real> &Diag,
+  friend void MultInvDiag(const vector<Real> &Diag,
 			  const MSRMatr<Real> &Mat, MSRMatr<Real> &ans);
 
   //! give the diagonal of an MSR matrix
-  std::vector<DataType> giveDiag() const;
+  vector<DataType> giveDiag() const;
 
   MSRMatr & operator= (const MSRMatr<DataType> &RhMsr);// Warning: the two matrices will point to the same pattern
   void set_mat(UInt where, DataType loc_val);
@@ -359,10 +341,10 @@ public:
   void ShowMe();
   void spy(string  const &filename);
   void diagonalize_row ( UInt const r, DataType const coeff);   
-  void diagonalize ( UInt const r, DataType const coeff, std::vector<DataType> &b, DataType datum);   
+  void diagonalize ( UInt const r, DataType const coeff, vector<DataType> &b, DataType datum);   
   //Version for the type Vector
   void diagonalize( UInt const r, DataType const coeff, Vector &b, DataType datum);   
-  std::vector<DataType>  operator* (const std::vector<DataType> &v) const; //Matrix-vector product
+  vector<DataType>  operator* (const vector<DataType> &v) const; //Matrix-vector product
   //Matrix-vector product for the class Vector (useful for IML++)
   Vector operator*(const Vector &v) const;
   //! Version for C pointer vector. BEWARE: no check on bounds done !
@@ -383,7 +365,7 @@ public:
   void zeros();
  
 private:
-  std::vector<DataType> _value;
+  vector<DataType> _value;
   const MSRPatt *_Patt; // I want to link the values to a pattern, NOT to change the pattern itself  (which is const)
   //     static const DataType _DefaultValue = 0; 
 };
@@ -415,11 +397,11 @@ public:
   //! gives the pattern pointer.
   const MixedPattern<BRows, BCols, PatternType> * Patt() const {return _Patt;}
   //! points to the values vector array.
-  std::vector<DataType> * bValues() const {return _bValues;}
+  vector<DataType> * bValues() const {return _bValues;}
   //! The container of block (i,j).
   //! BEWARE: no check is done on the array size.
-  const std::vector<DataType> & bValues(UInt i,UInt j) const {return _bValues[i][j];}
-  std::vector<DataType> & bValues(UInt i,UInt j) {return _bValues[i][j];}
+  const vector<DataType> & bValues(UInt i,UInt j) const {return _bValues[i][j];}
+  vector<DataType> & bValues(UInt i,UInt j) {return _bValues[i][j];}
   //! give the block (i,j) value vector in Raw format (suitable for C)
   DataType * giveRaw_value(UInt i, UInt j)
   {return &(_bValues[i][j].front());}
@@ -428,14 +410,14 @@ public:
   {return &(_bValues[i][j].front());}
 
   //! Determines the lumped diagonal of P1 mass matrix.
-  std::vector<DataType> MassDiagP1() const;
+  vector<DataType> MassDiagP1() const;
   //! Inverts the diagonal matrix Diag and mulitply it by the matrix Mat.
   template<UInt BR, UInt BC, typename PattType>
-  friend void MultInvDiag(const std::vector<Real> &Diag,
+  friend void MultInvDiag(const vector<Real> &Diag,
 			  const MixedMatr<BR,BC,PattType,Real> &Mat,
 			  MixedMatr<BR,BC,PattType,Real> &ans);
   //! Gives the diagonal of a block matrix.
-  std::vector<DataType> giveDiag() const;
+  vector<DataType> giveDiag() const;
 
   //! Warning: the two matrices will point to the same pattern.
   MixedMatr & operator= (const MixedMatr<BRows,BCols,PatternType,DataType>
@@ -468,13 +450,13 @@ public:
   //! assign a row to zero. Remark, zero might be defined for any DataType
   void zero_row(UInt const row);
   //! Assigns matrix diagonal element (r,r) to coeff, other elts
-  //! of row r to zero, and std::vector b element b(r) to coeff*datum.
+  //! of row r to zero, and vector b element b(r) to coeff*datum.
   template< typename VectorType >
     void diagonalize( UInt const row, DataType const coeff, VectorType &b,
 		      DataType datum);
 
   //! Matrix-vector product.
-  std::vector<DataType>  operator*(const std::vector<DataType> &v) const;
+  vector<DataType>  operator*(const vector<DataType> &v) const;
   //! Version for type Vector.
   Vector operator*(const Vector &v) const;
   //! Version for C pointer vector. BEWARE: no check on bounds done !
@@ -493,7 +475,7 @@ private:
   const MixedPattern<BRows, BCols, PatternType> * _Patt;
   //! An array of values vector: there is one vector of values for
   //! each block.
-  std::vector<DataType> _bValues[BRows][BCols];
+  vector<DataType> _bValues[BRows][BCols];
 
 };
 
@@ -793,46 +775,6 @@ public:
   Tab1d & diagBlock(UInt i) {return _diag.numBlock(i);}
 };
 
-/*---------------------------------------------------------------------------------/
- / I M P L E M E N T A T I O N S                                                    /
- /---------------------------------------------------------------------------------*/ 
-template<typename FE1,typename GeoMap,typename MatrixType>
-void assemble_first(MatrixType& M,ElemMat& elmat,
-		    const FE1& fe1,const GeoMap& geo,const Dof& dof) 
-{
-  if(elmat.nBlockRow()!=1 || elmat.nBlockCol() != 1){
-    cout << "assemble for vector elem mat not yet implemented\n";
-    exit(1);
-  }
-  Tab2dView mat=elmat.block(0,0);
-  int i,j;
-  UInt ig,jg,eleID=geo.currentID();
-  for(UInt k=0 ; k<FE1::nbPattern ; k++){
-    i = FE1::patternFirst(k);
-    j = FE1::patternSecond(k);
-    ig = dof.localToGlobal(eleID,i+1)-1;  // damned 1-base vs 0-base !
-    jg = dof.localToGlobal(eleID,j+1)-1;  // damned 1-base vs 0-base !
-    M.set_mat_inc(ig,jg,mat(i,j));
-  }
-};
-
-template<typename Vector,typename FE1,typename GeoMap>
-void assemble_vec(Vector& V,ElemVec& elvec,const FE1& fe1,const GeoMap& geo,
-		  const Dof& dof) 
-{
-  if(elvec.nBlockRow()!=1){
-    cout << "assemble for vector elem vec not yet implemented\n";
-    exit(1);
-  }
-  Tab1dView vec=elvec.block(0);
-  UInt i;
-  UInt ig,eleID=geo.currentID();
-  for(i=0 ; i<FE1::nbNode ; i++){
-    ig = dof.localToGlobal(eleID,i+1) - 1;
-    V[ig] += vec(i);
-  }
-};
-
 
 //-------------------------------------------------------------------------------------------------------
 // CSR - VALUES
@@ -923,7 +865,7 @@ template<typename DataType>
 CSRMatr<CSRPatt,DataType>::
 CSRMatr(const CSRPatt &ex_pattern)
 {
-  _Patt = const_cast<CSRPatt*>(&ex_pattern);
+  _Patt = &ex_pattern;
   _value.resize(ex_pattern.nNz());
 }
 //version for Datatype=Tab2d
@@ -938,7 +880,7 @@ CSRMatr(const CSRPatt &ex_pattern, const vector<DataType> &ex_value)
 {
   _value.reserve(ex_pattern.nNz()); // in case of block matrix, there is
   // no default constructor for class KNM
-  _Patt = const_cast<CSRPatt*>(&ex_pattern);
+  _Patt = &ex_pattern;
   ASSERT( _Patt->nNz() == ex_value.size(),
 	  "Error in CSR Matrix Values LifeV"); 
   // Warning: if PatternType = CSRPattSymm => _ja.size() != _nnz.===> remember: _ja.size() = (_nnz+_nrows)/2

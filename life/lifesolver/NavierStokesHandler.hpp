@@ -30,11 +30,12 @@
 #define _NAVIERSTOKESHANDLER_H_
 
 
-#include "dataNavierStokes.hpp"
-#include "dataAztec.hpp"
+#include "lifeV.hpp"
 #include "refFE.hpp"
 #include "dof.hpp"
-#include "lifeV.hpp"
+#include "geoMap.hpp"
+#include "dataNavierStokes.hpp"
+#include "dataAztec.hpp"
 #include "medit_wrtrs.hpp"
 #include "bcCond.hpp"
 #include "bdfNS.hpp"
@@ -215,9 +216,9 @@ NavierStokesHandler(const GetPot& data_file,  const RefFE& refFE_u,
      _bdQr_u(bdQr_u),
      _Qr_p(Qr_p),
      _bdQr_p(bdQr_p),
-     _fe_u(_refFE_u,_mesh.getGeoMap(),_Qr_u),
-     _feBd_u(_refFE_u.boundaryFE(),_mesh.getGeoMap().boundaryMap(),_bdQr_u),
-     _fe_p(_refFE_p,_mesh.getGeoMap(),_Qr_p),
+     _fe_u(_refFE_u,getGeoMap(_mesh),_Qr_u),
+     _feBd_u(_refFE_u.boundaryFE(),getGeoMap(_mesh).boundaryMap(),_bdQr_u),
+     _fe_p(_refFE_p,getGeoMap(_mesh),_Qr_p),
      _u(_dim_u),
      _p(_dim_p),
      _BCh_u(BCh_u),

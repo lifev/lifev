@@ -21,16 +21,15 @@
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .cc
 
 # CP temporary to make it compile
-#INCLUDES 	= -I$(top_srcdir)/life/lifecore -I$(top_srcdir)/life/lifearray 
-INCLUDES 	= -I$(top_srcdir)/life/lifecore -I$(top_srcdir)/life/lifearray -I$(top_srcdir)/life/lifefem
+INCLUDES 	= -I$(top_srcdir)/life/lifecore -I$(top_srcdir)/life/lifearray 
 
-include_HEADERS		= bareItems.hpp basisElSh.hpp dataMesh.hpp geo0D.hpp \
-geoElement.hpp geoND.hpp identifier.hpp markers.hpp mesh_util.hpp mesh_util_base.hpp\
-markers_base.hpp meshEntity.hpp readMesh2D.hpp readMesh3D.hpp regionMesh2D.hpp \
+include_HEADERS		= dataMesh.hpp geo0D.hpp \
+geoElement.hpp geoND.hpp identifier.hpp markers.hpp  mesh_util_base.hpp\
+markers_base.hpp meshEntity.hpp  regionMesh2D.hpp \
 regionMesh3D.hpp 
 lib_LTLIBRARIES		= liblifemesh.la
-liblifemesh_la_SOURCES	= bareItems.cpp basisElSh.cpp geo0D.cpp identifier.cpp \
-markers_base.cpp readMesh3D.cpp regionMesh3D.cpp mesh_util.cpp mesh_util_base.cpp
+liblifemesh_la_SOURCES	= geo0D.cpp identifier.cpp \
+markers_base.cpp  mesh_util_base.cpp regionMesh3D.cpp
 
 liblifemesh_la_LIBADD	= ../lifecore/liblifecore.la
 

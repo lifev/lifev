@@ -18,8 +18,8 @@
 */
 /*! file regionMesh3D.h
   \brief The mesh classes interfaces
-  \version $Revision: 1.4 $ Luca Formaggia
-  \version $Revision: 1.4 $ Miguel Fernandez
+  \version $Revision: 1.5 $ Luca Formaggia
+  \version $Revision: 1.5 $ Miguel Fernandez
 
   Introduces the RegionMesh3D class
 */
@@ -42,12 +42,7 @@
 
 #include "SimpleVect.hpp"  /* stl wrap of vector class template.
 			    It supports numbering from one*/
-//! Modif Miguel:11/2002
 #include "basisElSh.hpp"
-#include "refFE.hpp"
-#include "geoMap.hpp"
-#include "quadRule.hpp"
-
 /* ---------------------------------------------------------------------
    RegionMesh 3D
    -----------------------------------------------------------------------*/
@@ -174,17 +169,6 @@ public:
     Utilities to implement mesh movement
   */
 
-  //@{
-  /*! Get the reference RefFE object associated to this mesh.
-  It is necessary when implementing mesh movement routines based on
-  harmonic reconstruction, in order to build the finite element discretisation.
-  */
-  const RefFE& getRefFE() const; 
-  /*! Get the reference GeoMaop object associated to this mesh.
-  It is necessary when implementing mesh movement routines based on
-  harmonic reconstruction, in order to build the finite element discretisation.
-  */
-  const GeoMap& getGeoMap() const;
   /*! Move the mesh according to a given displacement stored in disp.
     Disp is a 3*numPoints() vectore whcih stores the x-displacement first, then the y-displacements etc.
     The VECTOR object must have a size() and a standard [] addressing operator.
@@ -660,14 +644,14 @@ RegionMesh3D<GEOSHAPE,MC>::RegionMesh3D(ID id):
 template<typename GEOSHAPE, typename MC>
 RegionMesh3D<GEOSHAPE,MC>::RegionMesh3D(RegionMesh3D<GEOSHAPE,MC> const & m)
 {
-ASSERT(true, "Copy Costructor Not Yet Implemented for RegionMesh3d") ; 
+ASSERT0(true, "Copy Costructor Not Yet Implemented for RegionMesh3D") ; 
 }
 
 template<typename GEOSHAPE, typename MC>
 RegionMesh3D<GEOSHAPE,MC>
 RegionMesh3D<GEOSHAPE,MC>::operator=(RegionMesh3D<GEOSHAPE,MC> const & m)
 {
-ASSERT(true, "Assignement Operator  Yet Not Implemented for RegionMesh3d") ; 
+ASSERT0(true, "Assignement Operator  Yet Not Implemented for RegionMesh3d") ; 
 }
 
 template<typename GEOSHAPE, typename MC>
@@ -675,48 +659,6 @@ RegionMesh3D<GEOSHAPE,MC>::~RegionMesh3D()
 {}
 
 
-//! Modif Miguel:11/2002 
-//!< Get the reference RefFE object associated to the mes
-template<typename GEOSHAPE, typename MC>
-const RefFE& RegionMesh3D<GEOSHAPE,MC>::getRefFE() const {
-  switch(ElementShape::Shape) {
-  case HEXA: 
-    if (ElementShape::numPoints == 8)
-      return feHexaQ1;
-    else 
-      ERROR_MSG("Finite Element not implement for the mesh motion");
-    break;
-  case TETRA: 
-    if (ElementShape::numPoints == 4)
-      return feTetraP1;
-    else
-      ERROR_MSG("Finite Element not implement for the mesh motion");
-    break;
-  default:
-    ERROR_MSG("Finite Element not implement for the mesh motion");
-  }
-} 
-
-//!< Get the reference GeoMap object  associated to the mesh
-template<typename GEOSHAPE, typename MC>
-const GeoMap& RegionMesh3D<GEOSHAPE,MC>::getGeoMap() const {
-  switch(ElementShape::Shape) {
-  case HEXA: 
-    if (ElementShape::numPoints == 8)
-      return geoBilinearHexa;
-    else 
-      ERROR_MSG("Finite Element not implement for the mesh motion");
-    break;
-  case TETRA: 
-    if (ElementShape::numPoints == 4)
-      return geoLinearTetra;
-    else
-      ERROR_MSG("Finite Element not implement for the mesh motion");
-    break;
-  default:
-    ERROR_MSG("Finite Element not implement for the mesh motion");
-  }
-} 
 
 //!< Move the mesh from a given displacement
 template<typename GEOSHAPE, typename MC>

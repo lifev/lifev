@@ -12,11 +12,12 @@
 #define _CONVDIFFREACTHANDLER_H_
 
 
+#include "lifeV.hpp"
 #include "dataConvDiffReact.hpp"
+#include "geoMap.hpp"
 #include "dataAztec.hpp"
 #include "refFE.hpp"
 #include "dof.hpp"
-#include "lifeV.hpp"
 #include "medit_wrtrs.hpp"
 #include "bcCond.hpp"
 #include "bdf.hpp"
@@ -144,8 +145,8 @@ ConvDiffReactHandler(const GetPot& data_file,  const RefFE& refFE_c,
      _dim_c(_dof_c.numTotalDof()),
      _Qr_c(Qr_c),
      _bdQr_c(bdQr_c),
-     _fe_c(_refFE_c,_mesh.getGeoMap(),_Qr_c),
-     _feBd_c(_refFE_c.boundaryFE(),_mesh.getGeoMap().boundaryMap(),_bdQr_c),
+     _fe_c(_refFE_c,getGeoMap(_mesh),_Qr_c),
+     _feBd_c(_refFE_c.boundaryFE(),getGeoMap(_mesh).boundaryMap(),_bdQr_c),
      _c(_dim_c),
      _h(_mesh.numVolumes()),
      _BCh_c(BCh_c),

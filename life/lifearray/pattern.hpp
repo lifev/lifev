@@ -18,7 +18,7 @@
 */
 /*----------------------------------------------------------------------*
 |           
-| $Header: /cvsroot/lifev/lifev/life/lifealg/Attic/pattern.hpp,v 1.1 2004-03-30 16:20:22 prudhomm Exp $ 
+| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.1 2004-05-27 14:14:16 lformaggia Exp $ 
 |
 |
 | #Version  0.1 Experimental   07/7/00. Luca Formaggia & Alessandro Veneziani  |
@@ -210,6 +210,9 @@ public:
   Index_t * giveRawCSR_ia() {return &(_ia.front());}; //!< Give ia (in a raw form)
   Index_t * giveRawCSR_ja() {return &(_ja.front());}; //!< Give ja (in a raw form)
   Index_t * giveRawCSR_jaT() {return &(_jaT.front());}; //!< Give jaT (in a raw form)
+  Index_t const * giveRawCSR_ia() const {return &(_ia.front());}; //!< Give ia (in a raw form)
+  Index_t const * giveRawCSR_ja() const {return &(_ja.front());}; //!< Give ja (in a raw form)
+  Index_t const * giveRawCSR_jaT() const {return &(_jaT.front());}; //!< Give jaT (in a raw form)
   Container & give_ia() {return _ia;}; //!< Give ia (as container)
   Container & give_ja() {return _ja;};//!< Give ja (as container)
   Container & give_jaT() {return _jaT;};//!< Give jaT (as container)

@@ -24,7 +24,7 @@ SUBDIRS		= . testsuite
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-INCLUDES 	= -I$(top_srcdir)/life/lifecore -I$(top_srcdir)/life/lifearray -I$(top_srcdir)/life/lifefem -I$(top_srcdir)/life/lifemesh
+INCLUDES 	= -I$(top_srcdir)/life/lifecore  -I$(top_srcdir)/life/lifearray 
 #INCLUDES 	= -I$(top_srcdir)/life/lifecore -I$(top_srcdir)/life/lifearray 
 
 if HAVE_PETSC
@@ -32,12 +32,16 @@ PETSC_SRCS	= SolverPETSC.cpp
 PETSC_HDRS	= SolverPETSC.hpp
 endif
 
-include_HEADERS = algebraic_facto.hpp dataAztec.hpp dataNewton.hpp inexactLU.hpp linesearch_cubic.hpp linesearch_parabolic.hpp mixed_pattern.hpp newton.hpp pattern.hpp picard.hpp saddlePointCG.hpp  values.hpp $(PETSC_HDRS)
+include_HEADERS	= algebraic_facto.hpp dataAztec.hpp dataNewton.hpp inexactLU.hpp \
+linesearch_cubic.hpp linesearch_parabolic.hpp mixed_pattern.hpp newton.hpp \
+picard.hpp saddlePointCG.hpp $(PETSC_HDRS)
+
 
 lib_LTLIBRARIES	= liblifealg.la
 
-liblifealg_la_SOURCES = dataAztec.cpp dataNewton.cpp pattern.cpp values.cpp $(PETSC_SRCS)
+liblifealg_la_SOURCES	= dataAztec.cpp dataNewton.cpp $(PETSC_SRCS)
 
-liblifealg_la_LIBADD	=  ../lifecore/liblifecore.la $(petsc_libs) $(aztec_libs)
-
+liblifealg_la_LIBADD	= ../lifecore/liblifecore.la ../lifearray/liblifearray.la $(petsc_libs) $(aztec_libs)
 include $(top_srcdir)/admin/Doxyfile.am
+
+

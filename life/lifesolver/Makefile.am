@@ -22,6 +22,9 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
+INCLUDES 	= -I$(top_srcdir)/life/lifecore  -I$(top_srcdir)/life/lifearray -I$(top_srcdir)/life/lifealg \
+             -I$(top_srcdir)/life/lifemesh -I$(top_srcdir)/life/lifefem 
+
 include_HEADERS	= ElasticStructureHandler.hpp NavierStokesAleHandler.hpp NavierStokesAleSolverPC.hpp NavierStokesHandler.hpp \
 NavierStokesHandler_miguel.hpp NavierStokesSolverPC.hpp VenantKirchhofSolver.hpp dataElasticStructure.hpp \
 dataNavierStokes.hpp dataSimplifiedStructure.hpp simplifiedStructure.hpp convDiffReactHandler.hpp convDiffReactSolverPC.hpp dataConvDiffReact.hpp

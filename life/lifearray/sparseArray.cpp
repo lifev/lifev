@@ -16,7 +16,7 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#include "values.hpp"
+#include "sparseArray.hpp"
 
 
 //Realizza l'inversa di una matrice diagonale e la moltiplica per un'altra matrice
@@ -39,7 +39,7 @@ void MultInvDiag(const vector<Real> &Diag,
 CSRMatr<CSRPatt,Tab2d>::
 CSRMatr(const CSRPatt &ex_pattern, UInt const nr, UInt const nc)
 {
-  _Patt = const_cast<CSRPatt *>(&ex_pattern);
+  _Patt = &ex_pattern;
   Tab2d mzero(nr,nc);
   mzero= 0.;
   _value.resize(ex_pattern.nNz(), mzero);

@@ -20,7 +20,7 @@
 /*! Contains the basic element shapes, to be used by Geometric and Finite
   Elements 
 
-  $Header: /cvsroot/lifev/lifev/life/lifemesh/basisElSh.hpp,v 1.4 2004-03-30 12:26:39 prudhomm Exp $
+  $Header: /cvsroot/lifev/lifev/life/lifecore/Attic/basisElSh.hpp,v 1.1 2004-05-27 14:14:16 lformaggia Exp $
 
  \version 0.0 Experimental   19/8/99. Luca Formaggia
 
