@@ -1,0 +1,67 @@
+Welcome to the lifeV library. This library is a joint effort of several people
+
+The main developers are 
+
+Miguel Fernadez
+Luca Formaggia
+Alain Gauthier
+Jean Federich Gerbeau
+Alessandro Veneziani
+
+Many others have contributed to some parts
+
+In the Software/src directory you have all the sources
+
+
+WHAT TO DO
+
+** To create DoxyGen documentation:
+
+run doxygen in the Root directory (where you have found this file). The doc is in the Doxygen directory. Beware that this directory will NOT be stored in the CVS repository.
+
+** To compile
+
+Go into the Software directory
+
+run
+
+source get_lifeVdir
+
+or
+
+.  get_lifeVdir
+
+This will set the LifeV_dir environment variable.
+
+Look for the place where a recent release of g++ is installed (version 3 is better)
+
+run
+
+source get_g++_install <full-path-of-g++>
+
+or 
+
+get_g++_install <full-path-of-g++>
+
+FOr example
+
+get_g++_install /opt/gcc-3.2/bin/g++
+
+This will set some useful variables for compilation.
+
+Check that the MACHINE environment variable is set to a useful value, such
+
+Linux
+
+run
+
+make clean
+make
+
+
+
+
+#$Log: README,v $
+#Revision 1.1  2002-10-08 16:26:33  cvs
+#*** empty log message ***
+#

@@ -5,7 +5,7 @@
 #---------------------------------------------------------------------------
 PROJECT_NAME           = "Life V"
 PROJECT_NUMBER         = 1
-OUTPUT_DIRECTORY       = 
+OUTPUT_DIRECTORY       = Doxygen 
 OUTPUT_LANGUAGE        = English
 EXTRACT_ALL            = YES
 EXTRACT_PRIVATE        = YES
@@ -52,15 +52,14 @@ WARN_LOGFILE           = doxy.log
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = ../Software/include/
+INPUT                  = Software/src/
 FILE_PATTERNS          = *.cc \
                          *.h \
                          *.hh \
                          *.CC \
                          *.H
 RECURSIVE              = YES
-EXCLUDE                = ../Sofware/include/fe_old \
-                         ../Software/include/Alain
+EXCLUDE                =
 EXCLUDE_PATTERNS       = */CVS/* \
                          */Attic/* \
                          */old/* \
