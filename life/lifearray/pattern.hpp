@@ -1,24 +1,24 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 /*----------------------------------------------------------------------*
-|           
-| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.2 2004-06-09 09:25:38 fernandez Exp $ 
+|
+| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.3 2004-06-22 13:49:41 prudhomm Exp $
 |
 |
 | #Version  0.1 Experimental   07/7/00. Luca Formaggia & Alessandro Veneziani  |
@@ -41,15 +41,15 @@
 |
 |
 *----------------------------------------------------------------------*/
-#ifndef PATTERN_OFFSET 
+#ifndef PATTERN_OFFSET
 #define PATTERN_OFFSET 0 // for the Fortran (PATTERN_OFFET=1) vs C (PATTERN_OFFET=0) numbering
 #endif
 #ifndef _PATTERN_HH
 #define _PATTERN_HH
 #include "lifeV.hpp"
-#ifndef _LIFEV_HH_ 
+#ifndef _LIFEV_HH_
 //more correct version
-typedef size_t  UInt;
+typedef uint UInt;
 typedef UInt ID;
 typedef vector<UInt>::iterator UIIter;
 #endif
@@ -103,16 +103,16 @@ class BasePattern :public PatternDefs
     This is the building block for the Pattern classes.
   */
 public:
-   
+
   BasePattern();
-  BasePattern(UInt ex_nnz, UInt ex_nrow, UInt ex_ncol); //!< Here I give the n. of non zeros and matrix dimensions.  
+  BasePattern(UInt ex_nnz, UInt ex_nrow, UInt ex_ncol); //!< Here I give the n. of non zeros and matrix dimensions.
   BasePattern(class CSRPatt const &RightHandCSRP);
 
   inline UInt nRows() const; //!< Numer of Rows
   inline UInt nCols() const; //!< Number of Columns
   inline UInt nNz() const;   //!< Total nnz
-  
-  inline bool isEmpty() const; //!< Empty pattern   
+
+  inline bool isEmpty() const; //!< Empty pattern
 
   bool diagFirst()const {return _diagfirst;}; //!< Diagonal is the first item furnished by  the raw pattern data
 
@@ -125,12 +125,12 @@ public:
   //! If nbcomp > 1, it reproduces the pattern for (nbcomp X nbcomp) blocks
   template<typename DOF1>
   bool setpatt(DOF1 const & dof1, DynPattern & dynpatt,
-	       UInt const nbcomp = 1); 
-  
+	       UInt const nbcomp = 1);
+
   // Miguel 12/2003: new version handling paterns comming from IP stabilization
   template<typename DOF, typename MESH>
   bool setpatt(const DOF& dof, const MESH& mesh, DynPattern & dynpatt,
-	       UInt const nbcomp); 
+	       UInt const nbcomp);
 
   //! Version for mixed patterns
   //! It builds the dynamic pattern. It is the standard routine for a
@@ -139,8 +139,8 @@ public:
   //! See the documentation in the implementation part for more details
   template<typename DOF1, typename DOF2>
   bool setpatt(DOF1 const & dof1, DOF2 const & dof2, DynPattern & dynpatt,
-	       UInt const bRows= 1, UInt const bCols= 1); 
-  
+	       UInt const bRows= 1, UInt const bCols= 1);
+
    static const UInt _defaultsize = 0; // MUST BE 0
 
   UInt _nnz;
@@ -164,7 +164,7 @@ class CSRPatt:
 {
 public:
 
-  CSRPatt(); 
+  CSRPatt();
   CSRPatt(UInt ex_nnz, UInt ex_nrow, UInt ex_ncol);
 
   //! Constructor where I give the raw data from the exterior TODO: As it
@@ -186,12 +186,12 @@ public:
   template<typename DOF>
     bool buildPattern(DOF const  & dof, const UInt nbcomp);
   //! Constructors for two DOF (in general non-square matrix)
-  //! This constructors are required if we want to use the pattern in a  
+  //! This constructors are required if we want to use the pattern in a
   //! Mixed_Pattern. It may be useful also stand alone. Look at the documentation of
   //! buildpatt<DOF1,DOF2> to have details.
   template<typename DOF1,typename DOF2>
     CSRPatt(DOF1 const  & dof1,DOF2 const  & dof2,
-	    UInt const bRows= 1, UInt const bCols= 1); 
+	    UInt const bRows= 1, UInt const bCols= 1);
 
   template<typename DOF1,typename DOF2>
     bool buildPattern(DOF1 const& dof1,DOF2 const  & dof2,
@@ -210,7 +210,7 @@ public:
   CSRPatt & operator= (const CSRPatt&  RhCsr);
 
   //! Methods that returns row data in different fashions.
-  Container  ia() const {return _ia;}; 
+  Container  ia() const {return _ia;};
   Container  ja() const {return _ja;};
   Container  jaT() const {return _jaT;};
   Index_t * giveRawCSR_ia() {return &(_ia.front());}; //!< Give ia (in a raw form)
@@ -227,9 +227,9 @@ public:
   Container const & give_jaT() const {return _jaT;};//!< Give jaT (as container)
 
   inline pair<UInt,UInt> giveMinMax() const; //!< Min and Max elements in a row.
-  inline UInt nbNeighbours(ID const d)const; //!< N of neighbours of the DOF numbeered d . BEWARE d is INCLUDED!   
+  inline UInt nbNeighbours(ID const d)const; //!< N of neighbours of the DOF numbeered d . BEWARE d is INCLUDED!
   inline ID neighbour(ID const i,ID const d) const;//!< the i-th (start from 1) neighbour of dof d. The first is d itself
-  inline void neighbours(ID const d, Container & start) const;//!< put neighbours of dof d in a list 
+  inline void neighbours(ID const d, Container & start) const;//!< put neighbours of dof d in a list
 
   //! The forllowing template function extracts a row (useful to implement A*b), returning two sequences:
   //! One with the column numbering (coldata) of one with the corresponding offsets in the vector holding
@@ -247,7 +247,7 @@ public:
   //! of indices or of ID's (degree of freedoms identifiers)
   inline pair<Diff_t,bool> locate_dof(ID const i,ID const j) const; //!< Locate position of DOF ID couple (i,j)
   inline pair<Diff_t,bool> locate_index(Index_t const i,Index_t const j) const;//!< Locate position of index couple (i,j)
-  
+
   void showMe(bool const verbose=false,ostream& c=cout) const ; //!< pattern visualization
   void spy(string const & filname="matrice.m") const; //!< pattern visualization a la Matlab
 
@@ -280,7 +280,7 @@ protected:
 ///
 ///      V B R Pattern
 /// It holds a CSR pattern of variable size blocks
-/// 
+///
 //////////////////////////////////////////////////
 
 class VBRPatt: public CSRPatt
@@ -290,7 +290,7 @@ class VBRPatt: public CSRPatt
          entry in each block row.
    _ja : contains the block column indices of the block pattern.
 
-   BEWARE : the interpretation of _nnz, _nrows and _ncols of the class 
+   BEWARE : the interpretation of _nnz, _nrows and _ncols of the class
    BasePattern is valid for the BLOCK pattern, that is
    _nnz : number of non zero BLOCKS,
    _nrows : number of BLOCK rows,
@@ -396,10 +396,10 @@ class VBRPatt: public CSRPatt
   // ALAIN : using locate routines member of class CSRPatt gives
   // information on the block position (element (1,1) of the block).
 
-  //! pattern visualization  
+  //! pattern visualization
   void showMe(bool const verbose=false,ostream& c=cout) const ;
   void spy(string const & filname="matrice.m") const; //!< pattern visualization
-                                                     //!< a la Matlab 
+                                                     //!< a la Matlab
 
  private:
   Container _indx; //!< _indx(i) points to the location in the pattern
@@ -418,7 +418,7 @@ class VBRPatt: public CSRPatt
 ///
 ///      C S R Symmetric Pattern
 /// It holds only the upper triangular part
-/// 
+///
 //////////////////////////////////////////////////
 
 class CSRPattSymm:
@@ -434,16 +434,16 @@ class CSRPattSymm:
 
   template<typename DOF>
   bool buildPattern(DOF const  & dof);  // Pattern builder
-  
-  Container  ia() const {return _ia;}; 
-  Container  ja() const {return _ja;};    
+
+  Container  ia() const {return _ia;};
+  Container  ja() const {return _ja;};
   Index_t * giveRawCSR_ia() {return &(_ia.front());}; // Give ia (in a raw form)
   Index_t * giveRawCSR_ja() {return &(_ja.front());}; // Give ja (in a raw form)
   Container & give_ia() {return _ia;}; // Give ia (as container)
   Container & give_ja() {return _ja;};// Give ja (as container)
   inline pair<UInt,UInt> giveMinMax() const;
 
-  // DO NOt use them (are very inefficient) 
+  // DO NOt use them (are very inefficient)
   UInt nbNeighbours(ID const d)const;
   ID neighbour(ID const i,ID const d)const ;
   void neighbours(ID const d, Container & start) const;
@@ -456,8 +456,8 @@ class CSRPattSymm:
 
   void showMe(bool verbose=false,ostream& c=cout) const; // pattern visualization
   void spy(string const & filname="matrice.m") const; //pattern visualization a la Matlab
-  
-  
+
+
   // DOF are ALWAYS numbered a la Fortran: the following definition set the correct numbering
   // as a funtion of current numbering (specified by PATTERN_OFFET)
 
@@ -465,8 +465,8 @@ protected:
   Diff_t _row_off(Index_t i)const {// Row offset for row index i
     return _i2o(_ia[_i2o(i)]);}
   pair<Diff_t,bool> locate_pattern(Index_t const i,Index_t const j) const;
-  bool isThere(Index_t i,Index_t j) const; 
-  
+  bool isThere(Index_t i,Index_t j) const;
+
  private:
   Container _ia;
   Container _ja;
@@ -493,12 +493,12 @@ class MSRPatt:
   template<typename DOF> MSRPatt(DOF const  & dof, UInt const nbcomp=1);
 
   // Miguel 12/2003: new version handling patterns comming from IP stabilization
-  template<typename DOF, typename MESH> 
+  template<typename DOF, typename MESH>
     MSRPatt(const  DOF& dof, const MESH& mesh, const UInt nbcomp);
 
   template<typename DOF>
     bool buildPattern(DOF const  & dof, UInt const nbcomp);
-  
+
   // Miguel 12/2003: new version handling patterns comming from IP stabilization
   template<typename DOF, typename MESH>
     bool buildPattern(const  DOF& dof, const MESH& mesh, const UInt nbcomp);
@@ -534,13 +534,13 @@ class MSRPatt:
   Diff_t _row_off(Index_t i)const {// Row offset for row index i
     return _i2o(_bindx[_i2o(i)]);}
   pair<Diff_t,bool> locate_pattern(Index_t const i,Index_t const j) const;
-  inline bool isThere(Index_t i,Index_t j)const ; // superata dalla locate 
-  
+  inline bool isThere(Index_t i,Index_t j)const ; // superata dalla locate
+
  private:
-  Container _bindx; 
+  Container _bindx;
   Container _ybind; // WARNING: AV January 2001: it helps in reading the matrix by columns ;
-  // a counterpart of ybind should be added also to the CSR format 
-  // ybind should facilitate also the locate_pattern subroutines                     
+  // a counterpart of ybind should be added also to the CSR format
+  // ybind should facilitate also the locate_pattern subroutines
   // IT IS BASED ON THE ASSUMPTION THAT THE PATTERN IS SYMMETRIC
 };
 
@@ -558,7 +558,7 @@ class MSRPatt:
   $\forall K$ and $i,j\in K$, the support of $\phi_i^1\vert_K$ and
   $\phi_j^2\vert_K$ has non-null intersection. In other words, the local
   matrix has a  full pattern.
-  The pattern follows the rule of numbering 
+  The pattern follows the rule of numbering
   */
 template<typename FE1, typename FE2>
 class MixedLocalPattern: public PatternDefs
@@ -567,7 +567,7 @@ public:
   UInt nRows() const;
   UInt nCols() const;
   UInt nbPattern() const;
-  Diff_t patternFirst(Diff_t const i) const; //Numbering from 0 
+  Diff_t patternFirst(Diff_t const i) const; //Numbering from 0
   Diff_t patternSecond(Diff_t const i) const; //Numbering from 0
 };
 ///////////////////////////////////////////////////
@@ -593,7 +593,7 @@ class
 MixedPattern : public PatternDefs
 {
 public:
-  
+
   MixedPattern();
 
   // Miguel 11/02: I want to construct a diagonal pattern
@@ -607,9 +607,9 @@ public:
   void makeDiagPattern(PATTERN & ex_patt);
 
   inline pair<Diff_t,Diff_t> nBlocks() const; // Number of blocks (rows and columns)
-  
+
   inline UInt nRows(Diff_t const m, Diff_t const n) const; // Number of rows in block (m,n)
-  inline UInt nCols(Diff_t const m, Diff_t const n) const; 
+  inline UInt nCols(Diff_t const m, Diff_t const n) const;
   inline UInt nNz(Diff_t m, Diff_t n) const; // Non zeros on Block (m,n)
   inline UInt nRows() const; // Global number of rows
   inline UInt nCols() const; // Global number of cols.
@@ -631,28 +631,28 @@ public:
 
   inline       PATTERN * block_ptr(Diff_t const m, Diff_t const n); // Pointer to a a local pattern
   inline const PATTERN * block_ptr(Diff_t const m, Diff_t const n) const; // Pointer to a a local pattern
-  
+
   inline pair<Diff_t,Diff_t> blockOffset(Diff_t const m, Diff_t const n) const;// The row/col offsets of the block
-  pair<Diff_t,Diff_t> locateElBlock(Index_t const i_g, Index_t const j_g) const; 
+  pair<Diff_t,Diff_t> locateElBlock(Index_t const i_g, Index_t const j_g) const;
   //  Gives the block numbering corresponding to the  GLOBAL matrix index (i_g,j_g) Returns
   // (BROWS,BCOLS) if element not found
-  pair<Diff_t,Diff_t> locateDofBlock(ID const di_g, ID const dj_g) const; 
-  // Give the block correponding to a THE GLOBAL DOF (di_g,dj_g) 
+  pair<Diff_t,Diff_t> locateDofBlock(ID const di_g, ID const dj_g) const;
+  // Give the block correponding to a THE GLOBAL DOF (di_g,dj_g)
   // Returns (BROWS,BCOLS) if dofs not found
 
-  // local/global numbering in the block, given global numbering. It can be applied to indices and IDs. 
-  // I rely on implicit conversion ID->Index_t if Index_t != ID 
+  // local/global numbering in the block, given global numbering. It can be applied to indices and IDs.
+  // I rely on implicit conversion ID->Index_t if Index_t != ID
   // LUCA: If that does not work I will do a template function pair<A,A>localNumber<T>(Diff_t,Diff_t,T,T) and the
   // necessary specialisations.
-  inline pair<ID,ID> localNumber(Diff_t const m, Diff_t const n, ID const i_g, ID const j_g) const; 
-  inline pair<ID,ID> globalNumber(Diff_t const m, Diff_t const n, ID const i, ID const j) const; 
+  inline pair<ID,ID> localNumber(Diff_t const m, Diff_t const n, ID const i_g, ID const j_g) const;
+  inline pair<ID,ID> globalNumber(Diff_t const m, Diff_t const n, ID const i, ID const j) const;
 
   // Returns position in matrix  corrspondinf to a  DOF (local numbering)  in a block
-  pair<Diff_t,bool> locateDof(Diff_t const m, Diff_t const n, ID const di, ID const dj) const; 
+  pair<Diff_t,bool> locateDof(Diff_t const m, Diff_t const n, ID const di, ID const dj) const;
 
   // Returns position in matrix corrspondinf to element (i,j) in a block (local numbering)
-  pair<Diff_t,bool> locateIndex(Diff_t const m, Diff_t const n, Index_t const i, Index_t const j)const ; 
-  
+  pair<Diff_t,bool> locateIndex(Diff_t const m, Diff_t const n, Index_t const i, Index_t const j)const ;
+
   // I can set the size of a block without linking the block to a pattern (I may have a matrix of ZEROS!)
   // To that purpose I use the following:
   void buildZeroPattern(Diff_t const m, Diff_t const n,UInt const nrows, UInt const ncols);
@@ -666,26 +666,26 @@ public:
 
   // if two blocks have the same pattern i may avoid repeating it by linking
  // the two block. The "from" block MUST have already been set  to a local pattern.
-  void linkBlocks(Diff_t const m_from, Diff_t const n_from, Diff_t const m_to, Diff_t const n_to); 
+  void linkBlocks(Diff_t const m_from, Diff_t const n_from, Diff_t const m_to, Diff_t const n_to);
 
   // Use with extreme care. Itdoes not delete if block is linked (viewer paradigm).
-  void deleteBlock(Diff_t const m, Diff_t const n); 
-  
+  void deleteBlock(Diff_t const m, Diff_t const n);
+
   // Checking and probing..
 // This is true if a block is set but not linked to a pattern (zero matrix)
-  inline bool isZero(Diff_t const m, Diff_t const n) const; 
+  inline bool isZero(Diff_t const m, Diff_t const n) const;
 
   // Tre is a block has been set to a  local pattern
   inline bool isSet(Diff_t const m, Diff_t const n) const;
   void showMe( bool verbose=false, ostream & c=cout) const;
   // Tests if offsets are  consistent with that of a global matrix
-  bool check(bool verbose=false, ostream & c=cout) const; 
+  bool check(bool verbose=false, ostream & c=cout) const;
 
 protected:
-  
+
 private:
   void resetOffset(Diff_t const m=0, Diff_t const n=0);
-  
+
 
   PATTERN * _blocks[BROWS][BCOLS];
   bool _linked[BROWS][BCOLS]; // indicates whether a block is actually a link to another block
@@ -693,7 +693,7 @@ private:
   UInt _coloff[BROWS][BCOLS];// cols offset
   UInt _nrows[BROWS][BCOLS]; // rows in block
   UInt _ncols[BROWS][BCOLS]; // cols in block
-  
+
 };
 
 
@@ -796,16 +796,16 @@ bool BasePattern::setpatt(DOF1 const & dof1, DynPattern & dynpattern,
 			  UInt const nbcomp){
 
 // The loop is on the elements rather than on the volumes:
-// it should work also in 2D 
+// it should work also in 2D
   Diff_t ig,jg;
 
   for (UInt el=1; el<= dof1.numElements(); el++){
 // We do not store the diagonal
 // So inner loop starts from nbDiag:
 // indeed the first nbDiag entries of patternFirst
-// and patternSecond involve diagonal guys 
+// and patternSecond involve diagonal guys
 
-   for (int l=dof1.fe.nbDiag(); l<dof1.fe.nbPattern(); ++l){      
+   for (int l=dof1.fe.nbDiag(); l<dof1.fe.nbPattern(); ++l){
       ID i  = dof1.fe.patternFirst(l)+1;
       ID j  = dof1.fe.patternSecond(l)+1;
 
@@ -825,24 +825,24 @@ bool BasePattern::setpatt(DOF1 const & dof1, DynPattern & dynpattern,
 //
 // Miguel 12/2003
 //
-template<typename DOF, typename MESH> 
+template<typename DOF, typename MESH>
   bool BasePattern::setpatt(const DOF& dof, const MESH& mesh, DynPattern & dynpattern,
 			    UInt const nbcomp){
 
-  
+
   Diff_t ig,jg;
   UInt idF, iElAd1, iElAd2, iFaEl1, iFaEl2;
 
   for (UInt el=1; el<= dof.numElements(); el++){
-   
+
     // standard neighboors
     //
-    for (int l=dof.fe.nbDiag(); l<dof.fe.nbPattern(); ++l){      
+    for (int l=dof.fe.nbDiag(); l<dof.fe.nbPattern(); ++l){
       ID i  = dof.fe.patternFirst(l)+1;
       ID j  = dof.fe.patternSecond(l)+1;
-      
-      ig = dof.localToGlobal(el,i)-1; 
-      jg = dof.localToGlobal(el,j)-1;   
+
+      ig = dof.localToGlobal(el,i)-1;
+      jg = dof.localToGlobal(el,j)-1;
       dynpattern.insert(setBareEdge(ig, jg));
     }
   }
@@ -860,7 +860,7 @@ template<typename DOF, typename MESH>
 	     2,5,6,9};
   UInt* a;
   UInt iop,jop,nop; // number of oposite dof
- 
+
   if ( dof.fe.nbLocalDof == 4) {
     a = p1; // P1 FE
     nop = 1;
@@ -869,28 +869,28 @@ template<typename DOF, typename MESH>
     a = p2; // P2 FE
     nop = 4;
   }
-  else 
+  else
     ERROR_MSG("Sorry, IP stabilization only works for P1 or P2 FEM");
 
   //
   // non-standard neighboors
   //
-  for (idF=mesh.numBFaces()+1; idF<=mesh.numFaces(); ++idF){      
-  
-    iElAd1 = mesh.face(idF).ad_first(); 
-    iFaEl1 = mesh.face(idF).pos_first(); 	
-    iElAd2 = mesh.face(idF).ad_second(); 
-    iFaEl2 = mesh.face(idF).pos_second(); 
+  for (idF=mesh.numBFaces()+1; idF<=mesh.numFaces(); ++idF){
+
+    iElAd1 = mesh.face(idF).ad_first();
+    iFaEl1 = mesh.face(idF).pos_first();
+    iElAd2 = mesh.face(idF).ad_second();
+    iFaEl2 = mesh.face(idF).pos_second();
     for (iop=1; iop <= nop ; ++iop) {
-      ig = dof.localToGlobal(iElAd1,a[(iFaEl1-1)*nop+iop-1])-1; 
+      ig = dof.localToGlobal(iElAd1,a[(iFaEl1-1)*nop+iop-1])-1;
       for (jop=1; jop <= nop ; ++jop) {
 	jg = dof.localToGlobal(iElAd2,a[(iFaEl2-1)*nop+jop-1])-1;
 	dynpattern.insert(setBareEdge(ig, jg));
       }
     }
-  }   
+  }
   _nrows = nbcomp*dof.numTotalDof();
-  _ncols = _nrows; 
+  _ncols = _nrows;
   _nnz = nbcomp*nbcomp*( dof.numTotalDof() + 2*( dynpattern.size() ) );
 
   return true;
@@ -901,9 +901,9 @@ template<typename DOF, typename MESH>
 
 template<typename DOF1, typename DOF2>
 bool
-  BasePattern::setpatt(DOF1 const & dof1, DOF2 const & dof2, 
+  BasePattern::setpatt(DOF1 const & dof1, DOF2 const & dof2,
 		       DynPattern & dynpatt, UInt const bRows, UInt const bCols){
- 
+
   UInt nelem=dof1.numElements();
   UInt ig,jg;
   BareEdge _be;
@@ -911,12 +911,12 @@ bool
     for (int l1 =0; l1 <  dof1.fe.nbLocalDof; ++l1){
       UInt i = dof1.fe.patternFirst(l1)+1; // row
       for (int l2 =0; l2 <  dof2.fe.nbLocalDof; ++l2){
-      
+
 	UInt j = dof2.fe.patternSecond(l2)+1; //cols
 
 	ig=dof1.localToGlobal(el,i)-1; // I store with numering 0 always and then I correct
 	jg=dof2.localToGlobal(el,j)-1;
-      
+
 	_be.first=ig;
 	_be.second=jg;
 	dynpatt.insert(_be);
@@ -929,7 +929,7 @@ bool
 
   return true;
 }
-  
+
 ////////////////////////////////////////////////////////////////////////
 //
 // C S R Pattern
@@ -952,29 +952,29 @@ bool CSRPatt::buildPattern(DOF1 const & dof1, UInt const nbcomp)
 
   // This is the real constuctor.
   // It builds a FE type pattern from A SINGLE FE DOF, in CSR format;
-  // I change to the actual index (i.e. I take into account of 
+  // I change to the actual index (i.e. I take into account of
   // PatternOffset) only at the end.
-  
+
   DynPattern dynpatt;
-  
+
   bool built = setpatt(dof1, dynpatt, nbcomp);
-  
+
   if (! built) {
     _filled=false;
     return built;
   }
-  
+
   Diff_t ig,jg,cur;
-  
+
   // I use a modified version of CSR (compatible with the standard one), where:
-  // 1) ia is dimensioned nrows+1, so that I do not have to treat the 
+  // 1) ia is dimensioned nrows+1, so that I do not have to treat the
   // last term in a special way
   // 2) The entries in ja are sorted so that the first entry for each row is the
   //    diagonal term and the other entries are in ascending order.
   //
   _ia.resize(_nrows+1,nbcomp); // "nbcomp" stands for the diagonal terms of all blocks
   // Count
-  
+
   for (DynPattern::iterator d=dynpatt.begin(); d !=dynpatt.end(); ++d){
     ig=d->first;
     jg=d->second;
@@ -1001,7 +1001,7 @@ bool CSRPatt::buildPattern(DOF1 const & dof1, UInt const nbcomp)
   // Count entries BY ACCUMULATING
   for (ig=1; ig <_nrows; ++ig) _ia[ig]+=_ia[ig-1];
   // >>>>  Now _ia[i] should point to the first available position in _ja <<<
-  
+
   _ja.resize(_nnz);
   _jaT.resize(_nnz);
 
@@ -1026,13 +1026,13 @@ bool CSRPatt::buildPattern(DOF1 const & dof1, UInt const nbcomp)
 	  _ja[_ia[ig+icomp*offset]++]=ig+jcomp*offset;
 	}
 
-      // Now the rest. The pattern is symmetric, but traditionally the CSR Pattern no (see CSRPattSymm) 
+      // Now the rest. The pattern is symmetric, but traditionally the CSR Pattern no (see CSRPattSymm)
       for (DynPattern::iterator d=dynpatt.begin(); d !=dynpatt.end(); ++d){
 	ig=d->first + icomp*offset;
 	jg=d->second + jcomp*offset;
 	_jaT[_ia[ig]] = _ia[jg];
 	_jaT[_ia[jg]] = _ia[ig];
-	_ja[_ia[ig]++] = jg; 
+	_ja[_ia[ig]++] = jg;
 	_ja[_ia[jg]++] = ig;
       }
     }
@@ -1041,7 +1041,7 @@ bool CSRPatt::buildPattern(DOF1 const & dof1, UInt const nbcomp)
   // shift right 1 position and set _ia[0]
   rotate(_ia.begin(),_ia.end()-1,_ia.end());
   _ia[0]=0;
-  
+
   for (ig=0; ig <_nrows; ++ig){
     // We now sort the off diagonal entries
     jg=_ia[ig]+1; // I want the diagonal first!
@@ -1054,10 +1054,10 @@ bool CSRPatt::buildPattern(DOF1 const & dof1, UInt const nbcomp)
     for (Container::iterator ip=_ja.begin(); ip != _ja.end(); ++ip) *ip+=PatternOffset;
     for (Container::iterator ip=_jaT.begin(); ip != _jaT.end(); ++ip) *ip+=PatternOffset;
   }
-  
+
   _filled=true;
   _diagfirst=true;
-  
+
   dynpatt.clear(); // Non sono sicuro che serva....
 
   return built;
@@ -1075,18 +1075,18 @@ template<typename DOF1,typename DOF2>
 bool CSRPatt::buildPattern(DOF1 const & dof1, DOF2 const & dof2,
 			   UInt const bRows, UInt const bCols){
   Diff_t ig,jg,cur;
-  
+
   // ASSERT that the num of elements are the same in the 2 dof: we are talking of
   // the same mesh, aren't we?
   ASSERT_PRE(dof1.numElements()==dof2.numElements(), "Cannot run buildpattern on DOFs of different meshes");
-  
+
   DynPattern dynpatt;
-  
+
   bool built=setpatt(dof1,dof2,dynpatt,bRows,bCols);
   if(!built)return built;
 
   _ia.resize(_nrows+1,0);
-  
+
   // The dynamic pattern now contains all (i,j) since the
   // matrix may be non-diagonal
   for (DynPattern::iterator d=dynpatt.begin(); d !=dynpatt.end(); ++d){
@@ -1114,7 +1114,7 @@ bool CSRPatt::buildPattern(DOF1 const & dof1, DOF2 const & dof2,
   // >>>>  Now _ia[i] should point to the first available position in _ja <<<
 
   _ja.resize(_nnz);
-  
+
   //for each component
   for (icomp=0; icomp < bRows; icomp++){
     for (jcomp=0; jcomp < bCols; jcomp++){
@@ -1122,7 +1122,7 @@ bool CSRPatt::buildPattern(DOF1 const & dof1, DOF2 const & dof2,
       for (DynPattern::iterator d=dynpatt.begin(); d !=dynpatt.end(); ++d){
 	ig=d->first + icomp*row_offset;
 	jg=d->second + jcomp*col_offset;
-	_ja[_ia[ig]++] = jg; 
+	_ja[_ia[ig]++] = jg;
       }
     }
   }
@@ -1148,22 +1148,22 @@ bool CSRPatt::buildPattern(DOF1 const & dof1, DOF2 const & dof2,
   return true;
 }
 
-inline 
+inline
 UInt CSRPatt::nbNeighbours(ID const d) const {
   ASSERT_BD(d>0 && d<=_nrows);
   ASSERT_PRE(_filled, "Cannot access an empty pattern");
   return _ia[d]-_ia[d-1];
 }
 
-inline 
+inline
 ID CSRPatt::neighbour(ID const i, ID const d) const {
   ASSERT_BD(d>0 && d<=_nrows);
   ASSERT_BD(i>0);
   ASSERT_PRE(_filled, "Cannot access an empty pattern");
   return _i2d(_ja[_i2o(_ia[d-1]) +_d2o(i)]);
-}; 
+};
 
-inline 
+inline
 void CSRPatt::neighbours(ID const d, Container & neigs) const{
   ASSERT_BD(d>0 && d<=_nrows);
   ASSERT_PRE(_filled, "Cannot access an empty pattern");
@@ -1172,7 +1172,7 @@ void CSRPatt::neighbours(ID const d, Container & neigs) const{
   neigs.resize(nbNeighbours(d),0);// copy wants a sequence!
   copy(start1,start1+nbNeighbours(d),neigs.begin());
   _i2d(neigs);// trasform to DOF ID's
-}; 
+};
 
 template <typename Iter>
 inline
@@ -1192,7 +1192,7 @@ bool CSRPatt::isThere(Index_t const i, Index_t const j) const {
   ASSERT_BD(i>=PatternOffset && i<static_cast<Index_t>(_nrows)+PatternOffset);
   ASSERT_BD(j>=PatternOffset && j<static_cast<Index_t>(_ncols)+PatternOffset);
   if (! _filled ) return false;
-  
+
   Container::const_iterator start=_ja.begin()+_row_off(i);
   if (*start == j)return  true; // Diagonal term
   return binary_search(++start, _ja.begin()+_row_off(i+1), j);
@@ -1206,18 +1206,18 @@ bool CSRPatt::isThere(Index_t const i, Index_t const j) const {
 inline
 pair<PatternDefs::Diff_t,bool>
 CSRPatt::locate_index(Index_t const i,Index_t const j) const {
-  return locate_pattern(i,j); 
+  return locate_pattern(i,j);
 }
 
 inline
 pair<PatternDefs::Diff_t,bool>
 CSRPatt::locate_dof(ID const i,ID const j) const {
-    return locate_pattern(_d2i(i),_d2i(j)); 
+    return locate_pattern(_d2i(i),_d2i(j));
 }
 
 
 inline
-pair<UInt,UInt> 
+pair<UInt,UInt>
 CSRPatt::giveMinMax() const {
   Container::const_iterator current;
   UInt curr_min=_ncols;
@@ -1227,10 +1227,10 @@ CSRPatt::giveMinMax() const {
     curr_min=min(curr_min,loc_col);
     curr_max=max(curr_max,loc_col);
     //if (loc_col < curr_min) curr_min=loc_col;
-      //if (loc_col > curr_max) curr_max=loc_col; 
+      //if (loc_col > curr_max) curr_max=loc_col;
   }
   return make_pair(curr_min,curr_max);
-} 
+}
 
 // Version for the construction two patterns: patt and its transpose one,
 // in addition an other Container for the access to
@@ -1246,9 +1246,9 @@ void buildPattTpatt(DOF1 const& dof1, DOF2 const  & dof2,
   // ASSERT that the num of elements are the same in the 2 dof:
   // we are talking of the same mesh, aren't we?
   ASSERT_PRE(dof1.numElements()==dof2.numElements(), "Cannot run buildpattern on DOFs of different meshes");
-  
+
   PatternDefs::DynPattern dynpatt;
-  
+
   bool built= Patt.setpatt(dof1,dof2,dynpatt,bRows,bCols);
   ASSERT(built, "Cannot build pattern");
   // instead of using setpatt, Tpatt is directly given as the transpose of
@@ -1310,7 +1310,7 @@ void buildPattTpatt(DOF1 const& dof1, DOF2 const  & dof2,
 
   Patt._jaT.resize(Patt._nnz);
   Tpatt._jaT.resize(Tpatt._nnz);
-  
+
   //for each component
   for (icomp=0; icomp < bRows; icomp++){
     for (jcomp=0; jcomp < bCols; jcomp++){
@@ -1320,7 +1320,7 @@ void buildPattTpatt(DOF1 const& dof1, DOF2 const  & dof2,
 	jg=d->second + jcomp*col_offset;
 	Patt._jaT[Patt._ia[ig]] = Tpatt._ia[jg];
 	Tpatt._jaT[Tpatt._ia[jg]] = Patt._ia[ig];
-	Patt._ja[Patt._ia[ig]++] = jg; 
+	Patt._ja[Patt._ia[ig]++] = jg;
 	Tpatt._ja[Tpatt._ia[jg]++] = ig;
       }
     }
@@ -1331,7 +1331,7 @@ void buildPattTpatt(DOF1 const& dof1, DOF2 const  & dof2,
   Patt._ia[0]=0;
   rotate(Tpatt._ia.begin(),Tpatt._ia.end()-1,Tpatt._ia.end());
   Tpatt._ia[0]=0;
-  
+
   for (ig=0; ig <Patt._nrows; ++ig){
     // We now sort all entries
     jg=Patt._ia[ig];
@@ -1444,7 +1444,7 @@ inline UInt VBRPatt::row(Diff_t const row,  Container & coldata, Container & pos
 
 template<typename DOF1>
 CSRPattSymm::CSRPattSymm(DOF1 const & dof1) {
-  DynPattern dynpatt; 
+  DynPattern dynpatt;
   bool built = buildPattern(dof1);
   ASSERT_PRE(built,"Error in CSRSymm Pattern construction from DOF object");
 }
@@ -1452,26 +1452,26 @@ CSRPattSymm::CSRPattSymm(DOF1 const & dof1) {
 
 template<typename DOF1>
 bool CSRPattSymm::buildPattern(DOF1 const & dof1){
-  
-  DynPattern dynpatt; 
+
+  DynPattern dynpatt;
   bool built = setpatt(dof1,dynpatt);
   if (! built) {
     _filled=false;
     return built;
   }
-  
+
   UInt ig,jg,cur;
   UInt nnz_symm = _nrows + dynpatt.size(); // actual size of _ja when exploiting the symmetry:
-  
+
   ////////////////////////////////////// Please, observe that nnz_symm = (_nnz-_nrows)/2
-  
+
   // I use a modified version of CSR (compatible with the standard one), where:
-  // 1) ia is dimensioned nrows+1, so that I do not have to treat the 
+  // 1) ia is dimensioned nrows+1, so that I do not have to treat the
   // last term in a special way
   // 2) The entries in ja are sorted so that the first entry for each row is the
   //    diagonal term and the other entries are in ascending order.
   //
-  _ia.resize(_nrows+1,Index_t(1)); // "Index_t(1)" stands for the diagonal terms 
+  _ia.resize(_nrows+1,Index_t(1)); // "Index_t(1)" stands for the diagonal terms
   //  Container temp(_nrows+1,Index_t(1));
   // Count
   for (DynPattern::iterator d=dynpatt.begin(); d !=dynpatt.end(); ++d){
@@ -1481,7 +1481,7 @@ bool CSRPattSymm::buildPattern(DOF1 const & dof1){
     //    ++temp[ig];
     //    ++temp[jg];
   }
-  
+
   // shift right 1 position and set _ia[0]
   rotate(_ia.begin(),_ia.end()-1,_ia.end());
   _ia[0]=0;
@@ -1489,40 +1489,40 @@ bool CSRPattSymm::buildPattern(DOF1 const & dof1){
   for (ig=1; ig <_nrows; ++ig){
     _ia[ig]+=_ia[ig-1];
   }
-  
+
   // >>>>  Now _ia[i] should point to the first available position in _ja <<<
   _ja.resize(nnz_symm);
-  
+
   // We put the diagonal first
-  for (ig=0; ig <_nrows; ++ig) _ja[_ia[ig]++]=ig;  
-  
-  
+  for (ig=0; ig <_nrows; ++ig) _ja[_ia[ig]++]=ig;
+
+
   // >>>>  Now _ia[i] should point to the first available position in _ja <<<
-  // Now the rest. The pattern is symmetric 
+  // Now the rest. The pattern is symmetric
   for (DynPattern::iterator d=dynpatt.begin(); d !=dynpatt.end(); ++d){
     ig=d->first;
     jg=d->second;
-    _ja[_ia[ig]++]=jg; 
+    _ja[_ia[ig]++]=jg;
   }
-  
+
   // shift right 1 position and set _ia[0]
   rotate(_ia.begin(),_ia.end()-1,_ia.end());
   _ia[0]=0;
-  
-  
+
+
   for (ig=0; ig <_nrows; ++ig){
     // We now sort the off diagonal entries
     jg=_ia[ig]; // I am storing the upper diagonal terms: it is safe starting from the diagonal
     cur = _ia[ig+1];
     sort(_ja.begin()+jg,_ja.begin()+cur);
   }
-  
+
   // Now I take account of the PatternOffset
   if ( PatternOffset != 0){
     for (Container::iterator ip=_ia.begin(); ip != _ia.end(); ++ip) *ip+=PatternOffset;
     for (Container::iterator ip=_ja.begin(); ip != _ja.end(); ++ip) *ip+=PatternOffset;
   }
-  
+
   _filled=true;
   _diagfirst=true;
   dynpatt.clear(); // Non sono sicuro che serva....
@@ -1542,7 +1542,7 @@ CSRPattSymm::locate_dof(ID const i,ID const j) const {
 }
 
 inline
-pair<UInt,UInt> 
+pair<UInt,UInt>
 CSRPattSymm::giveMinMax() const
 {
   vector<UInt> accumulate(max(_nrows,_ncols),0);// just to be sure!!!
@@ -1551,7 +1551,7 @@ CSRPattSymm::giveMinMax() const
   for (row=0;row<_nrows;++row){
     ++accumulate[row]; // diagonal
     for (Index_t j=_ia[row]+1;j< _ia[row+1];++j){
-      // off-diagonal	   
+      // off-diagonal
       col=_i2o(_ja[j]);
       ++accumulate[row];
       ++accumulate[col];
@@ -1568,8 +1568,8 @@ UInt
 CSRPattSymm::row(Diff_t const row, Iter  coldata, Iter position) const{
   // extracts a row (useful to implement A*b)
   // to make things faster no controls are made!!!
-  // REMEMBER Only upper trangular part estracted since we have a 
-  // symmetric matrix. TO BE CHANGED IF WE HAVE THE WHOLE Matrix 
+  // REMEMBER Only upper trangular part estracted since we have a
+  // symmetric matrix. TO BE CHANGED IF WE HAVE THE WHOLE Matrix
   // (with symmetric pattern)
   Container::const_iterator start=_ja.begin()+_i2o(_ia[row]);
   Container::const_iterator end=_ja.begin()+_i2o(_ia[row+1]);
@@ -1586,7 +1586,7 @@ CSRPattSymm::row(Diff_t const row, Iter  coldata, Iter position) const{
 ////////////////////////////////////////////////////////////////////////
 
 template<typename DOF1>
-MSRPatt::MSRPatt(DOF1 const & dof1, UInt const nbcomp) 
+MSRPatt::MSRPatt(DOF1 const & dof1, UInt const nbcomp)
 {
   bool built;
   built = buildPattern(dof1, nbcomp);
@@ -1596,7 +1596,7 @@ MSRPatt::MSRPatt(DOF1 const & dof1, UInt const nbcomp)
 // Miguel 12/2003
 //
 template<typename DOF, typename MESH>
-MSRPatt::MSRPatt(const DOF& dof, const MESH& mesh, const UInt nbcomp) 
+MSRPatt::MSRPatt(const DOF& dof, const MESH& mesh, const UInt nbcomp)
 {
   bool built;
   built = buildPattern(dof, mesh, nbcomp);
@@ -1606,20 +1606,20 @@ MSRPatt::MSRPatt(const DOF& dof, const MESH& mesh, const UInt nbcomp)
 
 template<typename DOF1>
 bool MSRPatt::buildPattern(DOF1 const & dof1, UInt const nbcomp){
-  
-  DynPattern  dynpatt; 
-  bool built = setpatt(dof1,dynpatt, nbcomp); 
+
+  DynPattern  dynpatt;
+  bool built = setpatt(dof1,dynpatt, nbcomp);
   if(!built)return false;
   Index_t ig,jg,cur;
-  
-  _bindx.resize(_nnz+1,0);  
-  _ybind.resize(_nnz-_nrows,0);  
+
+  _bindx.resize(_nnz+1,0);
+  _ybind.resize(_nnz-_nrows,0);
 
   // Count
   for (DynPattern::iterator d=dynpatt.begin(); d !=dynpatt.end(); ++d){
     ig=d->first;
     jg=d->second;
-    _bindx[ig]+= nbcomp; 
+    _bindx[ig]+= nbcomp;
     _bindx[jg]+= nbcomp;
   }
 
@@ -1648,7 +1648,7 @@ bool MSRPatt::buildPattern(DOF1 const & dof1, UInt const nbcomp){
   for (ig=1; ig <static_cast<Index_t>(_nrows)+1; ++ig)
     _bindx[ig]+=_bindx[ig-1];
 
-  
+
   // for each component
   for (icomp=0; icomp< nbcomp; icomp++){
     for (jcomp=0; jcomp< nbcomp; jcomp++){
@@ -1664,29 +1664,29 @@ bool MSRPatt::buildPattern(DOF1 const & dof1, UInt const nbcomp){
 	ig=d->first+icomp*offset;
 	jg=d->second+jcomp*offset;
 	_ybind[_bindx[ig]-_nrows-1]=_bindx[jg];
-	_ybind[_bindx[jg]-_nrows-1]=_bindx[ig]; 
+	_ybind[_bindx[jg]-_nrows-1]=_bindx[ig];
 	_bindx[_bindx[ig]++]=jg;
 	_bindx[_bindx[jg]++]=ig;
       }
     }
   }
-  
+
   // shift right 1 position
   rotate(_bindx.begin(),_bindx.begin()+_nrows,_bindx.begin()+_nrows+1);
   _bindx[0]=_nrows+1;
 
-  
-  
+
+
   for (ig=0; ig <static_cast<Index_t>(_nrows); ++ig){
     // We now sort the off diagonal entries
-    jg=_bindx[ig]; 
+    jg=_bindx[ig];
     cur = _bindx[ig+1];
     sort(_bindx.begin()+jg,_bindx.begin()+cur);
   }
-  
+
   // do we need it 'a la Fortran?'
   if (PatternOffset != 0) for (Container::iterator ip=_bindx.begin();ip!=_bindx.end();++ip)*ip+=PatternOffset;
-  
+
   dynpatt.clear(); // Non sono sicuro che serva....
   _diagfirst=true;// default for MSR
   _filled=true;
@@ -1701,25 +1701,25 @@ bool MSRPatt::buildPattern(DOF1 const & dof1, UInt const nbcomp){
 template<typename DOF, typename MESH>
 bool MSRPatt::buildPattern(const DOF&  dof, const MESH& mesh, const UInt nbcomp){
 
-  
-  DynPattern  dynpatt; 
-  bool built = setpatt(dof,mesh,dynpatt, nbcomp); 
+
+  DynPattern  dynpatt;
+  bool built = setpatt(dof,mesh,dynpatt, nbcomp);
   if(!built)return false;
   Index_t ig,jg,cur;
-  
-  _bindx.resize(_nnz+1,0);  
-  _ybind.resize(_nnz-_nrows,0);  
+
+  _bindx.resize(_nnz+1,0);
+  _ybind.resize(_nnz-_nrows,0);
 
   // Count
   for (DynPattern::iterator d=dynpatt.begin(); d !=dynpatt.end(); ++d){
     ig=d->first;
     jg=d->second;
-    _bindx[ig]+= nbcomp; 
+    _bindx[ig]+= nbcomp;
     _bindx[jg]+= nbcomp;
   }
 
   //other components
-  
+
   Diff_t offset= dof.numTotalDof();
   UInt icomp, jcomp;
 
@@ -1744,7 +1744,7 @@ bool MSRPatt::buildPattern(const DOF&  dof, const MESH& mesh, const UInt nbcomp)
   for (ig=1; ig <static_cast<Index_t>(_nrows)+1; ++ig)
     _bindx[ig]+=_bindx[ig-1];
 
-  
+
   // for each component
   for (icomp=0; icomp< nbcomp; icomp++){
     for (jcomp=0; jcomp< nbcomp; jcomp++){
@@ -1760,36 +1760,36 @@ bool MSRPatt::buildPattern(const DOF&  dof, const MESH& mesh, const UInt nbcomp)
 	ig=d->first+icomp*offset;
 	jg=d->second+jcomp*offset;
 	_ybind[_bindx[ig]-_nrows-1]=_bindx[jg];
-	_ybind[_bindx[jg]-_nrows-1]=_bindx[ig]; 
+	_ybind[_bindx[jg]-_nrows-1]=_bindx[ig];
 	_bindx[_bindx[ig]++]=jg;
 	_bindx[_bindx[jg]++]=ig;
       }
     }
   }
-  
+
   // shift right 1 position
   rotate(_bindx.begin(),_bindx.begin()+_nrows,_bindx.begin()+_nrows+1);
   _bindx[0]=_nrows+1;
 
-  
-  
+
+
   for (ig=0; ig <static_cast<Index_t>(_nrows); ++ig){
     // We now sort the off diagonal entries
-    jg=_bindx[ig]; 
+    jg=_bindx[ig];
     cur = _bindx[ig+1];
     sort(_bindx.begin()+jg,_bindx.begin()+cur);
   }
-  
+
   // do we need it 'a la Fortran?'
   if (PatternOffset != 0) for (Container::iterator ip=_bindx.begin();ip!=_bindx.end();++ip)*ip+=PatternOffset;
-  
+
   dynpatt.clear(); // Non sono sicuro che serva....
   _diagfirst=true;// default for MSR
   _filled=true;
 
 
-  
-  /*  
+
+  /*
   Container::iterator debut = _bindx.begin();
 
   for (UInt i = 0; i < _nrows; ++i)
@@ -1797,11 +1797,11 @@ bool MSRPatt::buildPattern(const DOF&  dof, const MESH& mesh, const UInt nbcomp)
       UInt begin = *(debut+i);
       UInt end   = *(debut+i+1);
       cout << i+1 << " : ";
-      for (UInt pos = begin; pos < end; ++pos) 
+      for (UInt pos = begin; pos < end; ++pos)
 	cout << _bindx[pos]+1 << ", ";
       cout << endl;
     }
-  
+
   //cout << "patern OK\n"<< endl;
   // exit(1);
   */
@@ -1855,18 +1855,18 @@ bool MSRPatt::isThere(Index_t i,Index_t j)const
 
 inline
 pair<PatternDefs::Diff_t,bool>
-MSRPatt:: locate_index(Index_t const i,Index_t const j) const{ 
-  return locate_pattern(i,j); 
+MSRPatt:: locate_index(Index_t const i,Index_t const j) const{
+  return locate_pattern(i,j);
 }
 
 inline
 pair<PatternDefs::Diff_t,bool>
-MSRPatt:: locate_dof(ID const i,ID const j) const{ 
+MSRPatt:: locate_dof(ID const i,ID const j) const{
   return locate_pattern(_d2i(i),_d2i(j));
 }
 
 inline
-pair<UInt,UInt> 
+pair<UInt,UInt>
 MSRPatt::giveMinMax()const{
   Container::const_iterator current;
   UInt curr_min=_ncols;
@@ -1875,10 +1875,10 @@ MSRPatt::giveMinMax()const{
     {
       UInt loc_col = *current - *(current-1);
       if (loc_col < curr_min) curr_min=loc_col;
-      if (loc_col > curr_max) curr_max=loc_col; 
+      if (loc_col > curr_max) curr_max=loc_col;
     }
   return make_pair(curr_min+1,curr_max+1); // Adding the diagonal term
-} 
+}
 
 
 // Construction of a diagonal block matrix. Done by A. Gilardi.
@@ -1912,7 +1912,7 @@ MixedPattern()
 // Miguel 11/02: I want to construct a diagonal pattern
 // in the initialisation list, so I need a constructor which makes the pattern
 // construct and link to an external pattern (type = "diag") (Alain: type="full")
-template <UInt BROWS, UInt BCOLS, typename PATTERN> 
+template <UInt BROWS, UInt BCOLS, typename PATTERN>
 MixedPattern<BROWS,BCOLS,PATTERN>::MixedPattern(PATTERN & ex_patt, const string& type) {
 
   if (type == "full" ) {
@@ -1945,7 +1945,7 @@ MixedPattern<BROWS,BCOLS,PATTERN>::MixedPattern(PATTERN & ex_patt, const string&
   }
   else
     ERROR_MSG("This type of construction is not allowed");
-} 
+}
 
 
 template
@@ -2092,8 +2092,8 @@ UInt
 MixedPattern<BROWS,BCOLS,PATTERN>::row(Diff_t const m, Diff_t const n,Diff_t const nrow, Iter  coldata, Iter position) const{
   // extracts a row (useful to implement A*b)
   // to make things faster no controls are made!!!
-  // REMEMBER Only upper trangular part estracted since we have a 
-  // symmetric matrix. TO BE CHANGED IF WE HAVE THE WHOLE Matrix 
+  // REMEMBER Only upper trangular part estracted since we have a
+  // symmetric matrix. TO BE CHANGED IF WE HAVE THE WHOLE Matrix
   // (with symmetric pattern)
   return _blocks[m][n]!=0?_blocks[m][n]->row(nrow,coldata,position):0;
 }
@@ -2128,7 +2128,7 @@ MixedPattern<BROWS,BCOLS,PATTERN>::neighbour(ID const i_g, ID const d_g) const /
   // Get local numbering of dof
   UInt m=_b.first;
   UInt _d=d_g-_rowoff[m][0];
-  
+
   // In which block does i_g fall?
   // I remember that all high level interfaces use the convention of having numbering from 1
   // So i_g and d_g have always numbering from 1
@@ -2141,7 +2141,7 @@ MixedPattern<BROWS,BCOLS,PATTERN>::neighbour(ID const i_g, ID const d_g) const /
   for (n=0; n<BCOLS; n++){
     _last=_first+nbNeighbours(m,n,_d);
     if(i_g >_first && i_g <= _last){
-      _i=i_g-_first;// local numbering 
+      _i=i_g-_first;// local numbering
       break;
     }
     _first=_last;
@@ -2163,7 +2163,7 @@ MixedPattern<BROWS,BCOLS,PATTERN>::neighbours(ID const d_g,Container & neighs) c
   // Get local numbering of dof
   UInt m=b.first;
   UInt _d=d_g-_rowoff[m][0];
-  
+
   // In which block does i_g fall?
   // I remember that all high level interfaces use the convention of having numbering from 1
   // So i_g and d_g have always numbering from 1
@@ -2204,7 +2204,7 @@ row(Diff_t const nrow, Iter  coldata, Iter position) const{
       _count+=many;
     }
   }
-  
+
   return _count;
 }
 
@@ -2269,7 +2269,7 @@ locateDofBlock(ID const i_g, ID const j_g) const
   UInt n=0;
   UInt _itest=_d2o(i_g);
   UInt _jtest=_d2o(j_g);
-  
+
   while(m<BROWS &&(_itest <_rowoff[m][0] || _itest >=_rowoff[m][0]+ _nrows[m][n])) ++m;
   while(n<BCOLS &&(_jtest <_coloff[0][n] || _jtest >=_coloff[0][n]+ _ncols[m][n])) ++n;
   return make_pair(m,n);
@@ -2324,7 +2324,7 @@ MixedPattern<BROWS,BCOLS,PATTERN>::
 buildZeroPattern(Diff_t const m, Diff_t const n,UInt const nrows, UInt const ncols){
   _nrows[m][n]=nrows;
   _ncols[m][n]=ncols;
-  resetOffset(m,n);  
+  resetOffset(m,n);
 }
 
 template
@@ -2341,22 +2341,22 @@ linkBlockToPattern(UInt const m, UInt const n,PATTERN & pattern){
   ASSERT_PRE( m<BROWS && m>=0, " Invalid block row address");
   ASSERT_PRE( n<BCOLS && n>=0, " Invalid block column address");
   if(_blocks[m][n]!=0 && !_linked[m][n]) delete _blocks[m][n];
-  
+
   _blocks[m][n]=&pattern;
   _nrows[m][n]=pattern.nRows();
   _ncols[m][n]=pattern.nCols();
   _linked[m][n]=true;
-  resetOffset(m,n);  
+  resetOffset(m,n);
 }
 
 template <UInt BROWS, UInt BCOLS, typename PATTERN>
-template <typename DOF1, typename DOF2> 
+template <typename DOF1, typename DOF2>
 PATTERN * MixedPattern<BROWS,BCOLS,PATTERN>::buildBlock(Diff_t m, Diff_t n, DOF1 dof1, DOF2 dof2){
   ASSERT_PRE( m<BROWS && m>=0, " Invalid block row address");
   ASSERT_PRE( n<BCOLS && n>=0, " Invalid block column address");
-  
+
   if(_blocks[m][n]!=0 && !_linked[m][n]) delete _blocks[m][n];
-  
+
   _blocks[m][n]=new PATTERN(dof1,dof2);
   _nrows[m][n]=_blocks[m][n]->nRows();
   _ncols[m][n]=_blocks[m][n]->nCols();
@@ -2366,18 +2366,18 @@ PATTERN * MixedPattern<BROWS,BCOLS,PATTERN>::buildBlock(Diff_t m, Diff_t n, DOF1
 }
 
 template <UInt BROWS, UInt BCOLS, typename PATTERN>
-template <typename DOF1> 
+template <typename DOF1>
 PATTERN * MixedPattern<BROWS,BCOLS,PATTERN>::buildBlock(Diff_t m, Diff_t n, DOF1 dof1){
   ASSERT_PRE( m<BROWS && m>=0, " Invalid block row address");
   ASSERT_PRE( n<BCOLS && n>=0, " Invalid block column address");
-  
+
   if(_blocks[m][n]!=0 && !_linked[m][n]) delete _blocks[m][n];
-  
+
   _blocks[m][n]=new PATTERN(dof1);
   _nrows[m][n]=_blocks[m][n]->nRows();
   _ncols[m][n]=_blocks[m][n]->nCols();
   _linked[m][n]=false;
-  resetOffset(m,n);  
+  resetOffset(m,n);
   return _blocks[m][n];
 }
 
@@ -2398,7 +2398,7 @@ linkBlocks(Diff_t const m_from, Diff_t const n_from, Diff_t const m_to, Diff_t c
   _nrows[m_to][n_to]=_nrows[m_from][n_from];
   _ncols[m_to][n_to]=_ncols[m_from][n_from];
   _linked[m_to][n_to]=true;
-  resetOffset(m,n);  
+  resetOffset(m,n);
 }
 
 
@@ -2448,11 +2448,11 @@ MixedPattern<BROWS,BCOLS,PATTERN>::resetOffset(Diff_t const m, Diff_t const n) /
   UInt _n=n;
 
   while( _m<BROWS && _n <BCOLS){
-    
+
     for (UInt i=_m+1; i<BROWS; i++){
       _rowoff[i][_n]=_rowoff[i-1][_n]+_nrows[i-1][_n];
     }
-    
+
     for (UInt i=_n+1; i<BCOLS; i++){
       _coloff[_m][i]=_coloff[_m][i-1]+_ncols[_m][i-1];
     }
@@ -2467,7 +2467,7 @@ template
 bool
 MixedPattern<BROWS,BCOLS,PATTERN>::check(bool verbose, ostream & c) const{
   bool ok=true;
-  
+
   for (Diff_t m=0; m<BROWS; m++){
     for (Diff_t n=0; n<BCOLS; n++){
       ok=ok && _rowoff[m][n]==_rowoff[m][n-1] &&_coloff[m][n]==_coloff[m-1][n];
@@ -2536,7 +2536,7 @@ MixedPattern<BROWS,BCOLS,PATTERN>::showMe(bool verbose, ostream & c) const{
   }
   if(verbose){
     c<<endl<< "Mixed pattern: single block info"<<endl;
-    
+
     for (Diff_t m=0; m<BROWS; m++){
       for (Diff_t n=0; n<BCOLS; n++){
 	c<<"("<<m<<", "<<n<<") ->  " <<endl;
@@ -2569,10 +2569,10 @@ public:
   UInt patternSecond(UInt m, UInt n, UInt i);
   static
   UInt nbPattern(UInt m, UInt n);
-  static 
+  static
   UInt patternFirst11(const UInt i)
   {return FE1::patternFirst(i);}
-  static 
+  static
   UInt patternFirst22(const UInt i)
   {return FE2::patternFirst(i);}
   static
@@ -2581,11 +2581,11 @@ public:
   static
   UInt patternSecond22(const UInt i)
   {return FE2::patternSecond(i);}
-  
+
   static
   UInt patternFirst12(const UInt i)
   {return i/FE2::nbNode;}
-  
+
   static
   UInt patternSecond12(const UInt i)
   {return i % FE2::nbNode;}
