@@ -224,15 +224,15 @@ ElasticStructureHandler<Mesh>::postProcess()
 
         switch ( index.str().size() )
         {
-        case 1:
-            name = "00" + index.str();
-            break;
-        case 2:
-            name = "0" + index.str();
-            break;
-        case 3:
-            name = index.str();
-            break;
+            case 1:
+                name = "00" + index.str();
+                break;
+            case 2:
+                name = "0" + index.str();
+                break;
+            case 3:
+                name = index.str();
+                break;
         }
 
         namedef = "defor." + name + ".mesh";
@@ -381,6 +381,7 @@ ElasticStructureHandler<Mesh>::initialize( const Function& d0, const Function& w
     }
 }
 
+
 // Sets the initial condition
 template <typename Mesh>
 void
@@ -392,14 +393,16 @@ ElasticStructureHandler<Mesh>::initialize( const std::string& depName )
         _fe.updateJac( this->_mesh.volume( iElem ) );
     }
 
-    std::string dummy;
+    std::string sdummy;
+    std::string ext;
     int nsx, nsy, nsz;
     int ndim;
 
     int nDof = _d.nbcomp();
 
-    std::string filenamex = velName;
-    filenamex.insert(filenamex.end(), "_x.bb");
+    std::string filenamex = depName;
+    ext = "_x.bb";
+    filenamex.insert(filenamex.end(), ext.begin(), ext.end());
 
     std::cout << "Reading INRIA solid file   (" << filenamex << ")"
               << ":" << std::endl;
@@ -423,8 +426,9 @@ ElasticStructureHandler<Mesh>::initialize( const std::string& depName )
 
     filex.close();
 
-    std::string filenamey = velName;
-    filenamey.insert(filenamey.end(), "_y.bb");
+    std::string filenamey = depName;
+    ext = "_y.bb";
+    filenamey.insert(filenamey.end(), ext.begin(), ext.end());
 
     std::cout << "Reading INRIA solid file   (" << filenamey << ")"
               << ":" << std::endl;
@@ -448,10 +452,11 @@ ElasticStructureHandler<Mesh>::initialize( const std::string& depName )
 
     filey.close();
 
-    std::string filenamez = velName;
-    filenamez.insert(filenamez.end(), "_z.bb");
+    std::string filenamez = depName;
+    ext = "_z.bb";
+    filenamez.insert(filenamez.end(), ext.begin(), ext.end());
 
-    std::cout << "Reading INRIA solid mesh file   (" << filenamez << ")"
+    std::cout << "Reading INRIA solid file   (" << filenamez << ")"
               << ":" << std::endl;
 
     std::ifstream filez(filenamez.c_str(), std::ios::in);
