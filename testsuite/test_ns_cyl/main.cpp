@@ -89,7 +89,7 @@ int main(int argc, char** argv)
     Resfile.close();
 
  
-    ns.postProcessPressure();
+    ns.postProcess();
   }
   
   return 0;

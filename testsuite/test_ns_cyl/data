@@ -21,10 +21,10 @@ timestep  = 0.01               # timestep
 
 
 [../miscellaneous]
-verbose         = 3
+verbose         = 1
 
 [../aztec_i]
-output          = all_res
+output          = warnings #all_res
 max_iter        = 1550
 poly_ord        = 5
 kspace          = 40
@@ -45,9 +45,10 @@ ilut_fill       = 1.5
 
 
 [../aztec_s]
-output          = all_res
+output          = warnings #all_res
 conv            = rhs
 poly_ord        = 5
+max_iter        = 1550
 kspace          = 40
 tol             = 1.00e-6
 drop            = 1.00e-4
