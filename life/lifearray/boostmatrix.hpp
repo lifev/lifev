@@ -33,6 +33,7 @@
 #include <fstream>
 
 #include <boost/numeric/ublas/matrix_sparse.hpp>
+#include <boost/lambda/lambda.hpp>
 
 #include <pattern.hpp>
 #include <tab.hpp>
@@ -51,10 +52,55 @@ class BoostMatrix
     : public boost::numeric::ublas::compressed_matrix<double, storage_scheme>
 {
 public:
-    //! Constructor from any pattern that derives from BasePattern
-    BoostMatrix( const BasePattern& pattern )
+    //! Constructor from a pattern object
+
+    template<typename PatternType>
+    BoostMatrix( const PatternType& pattern )
         : boost::numeric::ublas::compressed_matrix<double, storage_scheme>
-        ( pattern.nRows(), pattern.nCols(), pattern.nNz() ) { }
+    ( pattern.nRows(), pattern.nCols() ) {
+        UInt __nnz = pattern.nNz();
+
+        // Save current non-zero entries of the matrix in the vector val
+
+        boost::numeric::ublas::unbounded_array<double> __val( __nnz );
+
+        std::for_each( __val.begin(), __val.end(), boost::lambda::_1 = 0.0 );
+        std::copy( this->value_data().begin(), this->value_data().end(), __val.begin() );
+
+        // Make room for non-zero elements
+
+        this->reserve( __nnz, false );
+
+        // Fill matrix from pattern
+
+        UInt  __max_nnz_per_line = 0;
+        UInt __nnz_entry = 0;
+
+        this->filled1() = 1;
+        this->filled2() = 0;
+
+        for( UInt __row = 0; __row < this->size1(); __row++ ) {
+            this->index1_data()[__row] = __nnz_entry;
+            ++( this->filled1() );
+
+            UInt __nnz_line = 0;
+
+            // Find number of non-zero entries in __row and fill the matrix with
+            // old values
+
+            for( UInt __col = 0; __col < this->size2(); __col++) {
+                if( pattern.isThere( __row, __col ) ) {
+                    this->index2_data()[__nnz_entry] = __col;
+                    ++( this->filled2() );
+                    this->value_data()[__nnz_entry] = __val[__nnz_entry];
+                    ++__nnz_entry;
+                    ++__nnz_line;
+                }
+                __max_nnz_per_line = std::max( __nnz_line, __max_nnz_per_line );
+            }
+        }
+        this->index1_data()[this->size1()] = this->non_zeros();
+    }
 
     //! equivalent of += for assembly. WARNING: slow
     void set_mat_inc( typename BoostMatrix::size_type i,
@@ -95,6 +141,15 @@ public:
                 erase( iRow, iCol );
             }
         }
+
+    /** Set all elements in a row to zero
+     *  @param iRow row to diagonalize
+     */
+    void zero_row( typename BoostMatrix::size_type iRow) {
+        for (typename BoostMatrix::size_type iCol = 0; iCol < size2(); ++iCol) {
+            this->erase(iRow, iCol);
+        }
+    }
 
     /** Diagonalization of row r of the system. Done by setting A(r,r) = coeff,
      *  A(r,j) = 0 and A(j,r) = 0 for j!=r, and suitably correcting the right
