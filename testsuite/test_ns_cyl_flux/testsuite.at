@@ -25,7 +25,7 @@
 # \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
 # \date 2004-08-29
 # 
-AT_SETUP([test_ns_cyl_flux])
+AT_SETUP([test_new])
 AT_KEYWORDS([ns cyl flux])
 AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 #-------------------------------------------------
@@ -82,5 +82,5 @@ kspace          = 40
 tol             = 1.00e-6
 drop            = 1.00e-4
 ]])
-AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria//cyltetra.mesh &&  $top_builddir/testsuite/test_ns_cyl_flux/test_ns_cyl_flux],[0],[ignore],[ignore])
+AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria//cyltetra.mesh &&  $top_builddir/testsuite/test_ns_cyl_flux/test_new],[0],[ignore],[ignore])
 AT_CLEANUP
