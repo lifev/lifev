@@ -420,8 +420,6 @@ getcoord(RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u){
 
   for(UInt i=0; i < _mesh.numVertices(); i++){
 
-    cout << i << endl;
-
     x[0]=_mesh.point(i+1).x();
     y[0]=_mesh.point(i+1).y();
     z[0]=_mesh.point(i+1).z();
@@ -435,7 +433,6 @@ getcoord(RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u){
 
       switch( BCh_u[l].type() ) {
       case Essential:
-	cout << "Dirichlet boundary point" << endl;
 	localcoord.b[0]=(Real)l;
 	localcoord.b[1]=(Real)l;
 	localcoord.b[2]=(Real)l;
@@ -444,7 +441,6 @@ getcoord(RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u){
 	_u_to_c.push_back(localcoord);
 	break;
       default:
-	cout << "Neumann boundary point" << endl;
 	 for(Int found = 0;found == 0;){
 	    vid = iv -> id();
 	    Real volume[umesh.numLocalFaces()],minvolume=100.0;
@@ -504,7 +500,6 @@ getcoord(RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u){
 	       localcoord.ele=vid;
 	       _u_to_c.push_back(localcoord);}
 	    else{
-	       cout << "Punkt liegt ausserhalb des Gebietes" << endl;
 	       localcoord.b[0]=1.0-b1-b2-b3;
 	       localcoord.b[1]=b1;
 	       localcoord.b[2]=b2;
@@ -516,7 +511,6 @@ getcoord(RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u){
       }
     }
     else{
-      cout << "Inner point" << endl;
        for(Int found = 0;found == 0;){
 	  vid = iv -> id();
 	  Real volume[umesh.numLocalFaces()],minvolume=100.0;
@@ -583,7 +577,6 @@ getcoord(RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u){
 		localcoord.ele=vid;
 		_u_to_c.push_back(localcoord);
 	     }
-	     cout << 1.0-b1-b2-b3 << ", " << b1 << ", " << b2 << ", " << b3 << endl;
 	  }
        }
     }

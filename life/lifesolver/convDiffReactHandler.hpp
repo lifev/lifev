@@ -76,6 +76,9 @@ public DataConvDiffReact<Mesh> {
   //! Returns the concentration vector
   ScalUnknown<Vector>& c();
 
+  //! Returns the velocity on the concentration nodes
+  PhysVectUnknown<Vector>& u_c();
+
   //! Returns the concentration Dof 
   const Dof& cDof() const;
 
@@ -110,6 +113,10 @@ public DataConvDiffReact<Mesh> {
   //! The concenration
   ScalUnknown<Vector> _c;
 
+  //! velocity vector on the concentration nodes
+  PhysVectUnknown<Vector> _u_c;
+
+
   //! Structure to hold the interpolation values of concentration nodes in the velocity grid
   struct intpolcoord{Real b[4]; ID ele;};
   vector<intpolcoord> _u_to_c;
@@ -143,6 +150,7 @@ ConvDiffReactHandler(const GetPot& data_file,  const RefFE& refFE_c,
      _fe_c(_refFE_c,getGeoMap(_mesh),_Qr_c),
      _feBd_c(_refFE_c.boundaryFE(),getGeoMap(_mesh).boundaryMap(),_bdQr_c),
      _c(_dim_c),
+     _u_c(_dim_c),
      _BCh_c(BCh_c),
      _bdf(_order_bdf) {}
 
@@ -152,6 +160,13 @@ template<typename Mesh> ScalUnknown<Vector>&
 ConvDiffReactHandler<Mesh>::c() {
   return _c;
 }
+
+// Returns the velocity
+template<typename Mesh> PhysVectUnknown<Vector>& 
+ConvDiffReactHandler<Mesh>::u_c() {
+  return _u_c;
+}
+
 
 // Returns the concentration Dof 
 template<typename Mesh> const Dof& 
