@@ -38,6 +38,7 @@ dofInterfaceHandler.hpp \
 elemOper.hpp elemOper_ext.hpp elemOper2Fluids.hpp \
 geoMap.hpp localDofPattern.hpp meshMotion.hpp quadRule.hpp \
 refEle.hpp refFE.hpp refHdivFE.hpp refHybridFE.hpp \
+subelements.hpp \
 sobolevNorms.hpp staticBdFE.hpp regionMesh3D_ALE.hpp v2elemVec.hpp values.hpp \
 refEleDG.hpp geoMapDG.hpp refFEDG.hpp \
 currentFEDG.hpp currentBdDG.hpp currentBFDG.hpp currentIFDG.hpp \
