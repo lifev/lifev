@@ -35,15 +35,17 @@ steklovPoincare::steklovPoincare():
     super(),
     M_BCh_du( new BCHandler ),
     M_BCh_dz( new BCHandler ),
+    M_BCh_dp( new BCHandler ),
     M_BCh_du_inv( new BCHandler ),
     M_BCh_dz_inv( new BCHandler ),
-    M_BCh_dp( new BCHandler ),
+    M_BCh_dp_inv( new BCHandler ),
     M_dzSolid(),
     M_dzFluid(),
     M_rhs_dz(),
     M_residualS(),
     M_residualF(),
     M_residualFSI(),
+    M_strongResidualFSI(),
     M_defOmega( 0.005 ),
     M_defOmegaS( 0.005 ),
     M_defOmegaF( 0.005 ),
@@ -91,8 +93,8 @@ steklovPoincare::setup()
     M_residualS.resize( M_solid->dDof().numTotalDof() );
     M_residualF.resize( M_fluid->uDof().numTotalDof() );
     M_residualFSI.resize( M_fluid->uDof().numTotalDof() );
+    M_strongResidualFSI.resize( M_fluid->uDof().numTotalDof() );
 
-    std::cout << "residual fluid size = " << M_residualF.size() << std::endl;
     M_aitkFS.setup( 3*M_solid->dDof().numTotalDof() );
 
     M_reducedLinFluid.reset(new reducedLinFluid(this, M_fluid, M_solid));
@@ -150,11 +152,15 @@ void steklovPoincare::evalResidual(Vector       &res,
     computeResidualFSI();
     res = getResidualFSIOnSolid();
 
+    computeStrongResidualFSI();
+
     std::cout << "max ResidualF   = " << norm_inf(M_residualF)
               << std::endl;
     std::cout << "max ResidualS   = " << norm_inf(M_residualS)
               << std::endl;
     std::cout << "max ResidualFSI = " << norm_inf(M_residualFSI)
+              << std::endl;
+    std::cout << "max ResidualFSI = " << norm_inf(M_strongResidualFSI)
               << std::endl;
 
 //    M_solid->postProcess();
@@ -248,6 +254,8 @@ void  steklovPoincare::solveJac(Vector &muk,
     {
         muk = muS;
     }
+
+    M_reducedLinFluid->setComputedMatrix(false);
 }
 
 
@@ -290,7 +298,7 @@ void steklovPoincare::solveLinearSolid()
     this->M_solid->updateJac(M_dzSolid, 0);
     this->M_solid->solveLin(M_dzSolid, M_rhs_dz, tol, *M_BCh_dz);
     Debug(6215) << "dz norm       = " << norm_inf(M_dzSolid) << "\n";
-    Debug(6215) << "residual norm = " << norm_inf(M_solid->residual()) << "\n";
+    std::cout << "S-  norm_inf residual = " << norm_inf(M_solid->residual()) << "\n";
 }
 
 
@@ -442,6 +450,8 @@ void my_matvecSfSsPrime(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
     std::cout << " ***** norm (z)  = " << xnorm << std::endl<< std::endl;
 
     Vector jz(dim);
+    jz = ZeroVector(dim);
+
     Vector zSolid(dim);
 
     for (int ii = 0; ii < (int) dim; ++ii)
@@ -472,21 +482,21 @@ void my_matvecSfSsPrime(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
             double dt = my_data->M_pFS->fluid().timestep();
             double dti2 = 1.0/(dt*dt) ;
 
-            da = - dti2*my_data->M_pFS->fluid().density()*my_data->M_pFS->DDNprecond(zSolid);
+            Vector zSolidPrec = my_data->M_pFS->DDNprecond(zSolid);
+
+            da = - dti2*my_data->M_pFS->fluid().density()*zSolidPrec;
 
             my_data->M_pFS->getReducedLinFluid()->setDacc(da);
             my_data->M_pFS->getReducedLinFluid()->solveReducedLinearFluid();
 
-            my_data->M_pFS->solid().d() = my_data->M_pFS->DDNprecond(zSolid);
+            my_data->M_pFS->solid().d() = zSolidPrec;
             my_data->M_pFS->solveLinearSolid();
 
             my_data->M_pFS->setResidualS(my_data->M_pFS->solid().residual());
             my_data->M_pFS->setResidualF(my_data->M_pFS->getReducedLinFluid()->residual());
         }
 
-        std::cout << "retrieving residual on FS interface ..." << std::flush;
         my_data->M_pFS->getResidualFSIOnSolid(jz);
-        std::cout << "ok." << std::endl;
 
         for (int i = 0; i < (int) dim; ++i)
             Jz[i] =  jz[i];
@@ -628,13 +638,22 @@ void steklovPoincare::setBC()
     BCVectorInterface da_wall(M_reducedLinFluid->dacc(),
                               dim_solid,
                               M_dofStructureToReducedFluid,
-                              2); // type  = 2
+                              2); // type 2
     M_BCh_dp->addBC("Wall",        1, Natural,   Scalar, da_wall);
     M_BCh_dp->addBC("Wall_Edges", 20, Essential, Scalar, bcf);
     M_BCh_dp->addBC("InFlow",      2, Essential, Scalar, bcf);
     M_BCh_dp->addBC("OutFlow",     3, Essential, Scalar, bcf);
 
+    BCVectorInterface dr_wall(M_strongResidualFSI,
+                              dim_fluid,
+                              M_dofReducedFluidToStructure);
+    M_BCh_dp_inv->addBC("Wall",        1, Essential, Scalar, dr_wall);
+    M_BCh_dp_inv->addBC("Wall_Edges", 20, Essential, Scalar, bcf);
+    M_BCh_dp_inv->addBC("InFlow",      2, Essential, Scalar, bcf);
+    M_BCh_dp_inv->addBC("OutFlow",     3, Essential, Scalar, bcf);
+
     M_reducedLinFluid->setUpBC(M_BCh_dp);
+
 }
 
 
@@ -700,6 +719,81 @@ void steklovPoincare::setInterfaceNewtonBC()
 //
 // Interface operators
 //
+
+
+void steklovPoincare::computeStrongResidualFSI()
+{
+
+    Chrono chrono;
+    std::cout << "  SP- Computing strong residual ... ";
+    MSRPatt         fullPattern( M_fluid->uDof(), nDimensions );
+    ElemMat         elMassMatrix( M_fluid->fe_u().nbNode, nDimensions, nDimensions ); //velocity mass
+    MSRMatr<double> massMatrix(fullPattern);
+
+    massMatrix.zeros();
+
+    for ( UInt i = 1; i <= M_fluid->mesh().numVolumes(); ++i )
+    {
+        M_fluid->fe_u().updateFirstDerivQuadPt( M_fluid->mesh().volumeList( i ) );
+        elMassMatrix.zero();
+        mass( 1., elMassMatrix, M_fluid->fe_u(), 0, 0, nDimensions );
+        for ( UInt ic = 0; ic < nDimensions; ++ic )
+        {
+            assemb_mat( massMatrix, elMassMatrix,
+                        M_fluid->fe_u(), M_fluid->uDof(),
+                        ic, ic );
+        }
+    }
+
+    // AZTEC specifications for the second system
+    int    *data_org;     // data organisation for J
+    int    proc_config[AZ_PROC_SIZE];  // Processor information:
+    int    options[AZ_OPTIONS_SIZE];   // Array used to select solver options.
+    double params[AZ_PARAMS_SIZE];     // User selected solver paramters.
+    double status[AZ_STATUS_SIZE];     // Information returned from AZ_solve()
+
+    int *update,                   // vector elements updated on this node.
+        *external;                // vector elements needed by this node.
+    int *update_index;            // ordering of update[] and external[]
+    int *extern_index;            // locally on this processor.
+    int N_update;                 // # of unknowns updated on this node
+
+    AZ_set_proc_config(proc_config, AZ_NOT_MPI);
+
+    // data_org assigned "by hands": no parallel computation is performed
+    UInt dim_res = M_residualFSI.size();
+
+    // Recovering AZTEC defaults options and params
+    AZ_defaults(options,params);
+
+    // Fixed Aztec options for this linear system
+    options[AZ_solver]     = AZ_gmres;
+    options[AZ_output]     = AZ_none;
+    options[AZ_poly_ord]   = 5;
+    options[AZ_kspace]     = 40;
+    options[AZ_precond]    = AZ_dom_decomp;
+    options[AZ_conv]       = AZ_rhs;
+
+    params[AZ_tol]         = 1.e-8;
+    params[ AZ_drop ]      = 1.00e-4;
+    params[ AZ_ilut_fill ] = 5;
+
+    AZ_read_update( &N_update, &update, proc_config, dim_res, 1, AZ_linear );
+    AZ_transform( proc_config, &external, ( int * ) fullPattern.giveRaw_bindx(),
+                  massMatrix.giveRaw_value(),
+                  update, &update_index, &extern_index, &data_org, N_update,
+                  NULL, NULL, NULL, NULL,
+                  AZ_MSR_MATRIX );
+
+    AZ_solve( M_strongResidualFSI.giveVec(), M_residualFSI.giveVec(),
+              options, params, NULL,
+              ( int * ) fullPattern.giveRaw_bindx(), NULL, NULL, NULL,
+              massMatrix.giveRaw_value(),
+              data_org, status, proc_config );
+
+    chrono.stop();
+    std::cout << "done in " << chrono.diff() << " s." << std::endl;
+}
 
 
 

@@ -105,11 +105,11 @@ private:
 
     bchandler_type          M_BCh_du;
     bchandler_type          M_BCh_dz;
+    bchandler_type          M_BCh_dp;
 
     bchandler_type          M_BCh_du_inv;
     bchandler_type          M_BCh_dz_inv;
-
-    bchandler_type          M_BCh_dp;
+    bchandler_type          M_BCh_dp_inv;
 
     Vector                  M_dzSolid;
     Vector                  M_dzFluid;
@@ -119,6 +119,8 @@ private:
     PhysVectUnknown<Vector> M_residualS;
     PhysVectUnknown<Vector> M_residualF;
     PhysVectUnknown<Vector> M_residualFSI;
+    //! FS strong residual
+    PhysVectUnknown<Vector> M_strongResidualFSI;
 
     Real                    M_defOmega;
     Real                    M_defOmegaS;
@@ -153,7 +155,7 @@ private:
     void setInterfaceNewtonBC();
 
     void computeResidualFSI();
-
+    void computeStrongResidualFSI();
 
 
     DataJacobian            M_dataJacobian;
@@ -169,7 +171,6 @@ void my_matvecSfSsPrime(double *z,
                         double *Jz,
                         AZ_MATRIX* J,
                         int proc_config[]);
-
 }
 
 #endif

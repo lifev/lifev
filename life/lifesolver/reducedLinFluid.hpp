@@ -63,11 +63,15 @@ public:
     void setUpBC(bchandler_type _BCh_dp);
 
     //! jacobian computation
+
     void solveReducedLinearFluid();
+    void solveInvReducedLinearFluid();
 
 
     const Vector& dacc()    {return M_dacc;}
     void setDacc(Vector const &_vec){M_dacc = _vec;}
+    void setComputedMatrix(bool pred){M_computedC = pred;}
+
     Vector& minusdp() {return M_minusdp;}
 
     const Vector& residual();
@@ -88,9 +92,11 @@ private:
 
     //! BC for pressure
     bchandler_type   M_BCh_dp;
+    bchandler_type   M_BCh_dp_inv;
 
     //! linearized acceleration
     Vector           M_dacc;
+
 
     //
     // laplacian stuff

@@ -28,6 +28,7 @@ reducedLinFluid::reducedLinFluid(FSIOperator* const _op,
     M_fluid( _fluid ),
     M_solid( _solid ),
     M_BCh_dp( new BCHandler ),
+    M_BCh_dp_inv( new BCHandler ),
     M_dacc( M_solid->dDof().numTotalDof() ),
     M_refFE( M_fluid->refFEp() ),
     M_Qr( quadRuleTetra4pt ),
@@ -50,7 +51,7 @@ reducedLinFluid::reducedLinFluid(FSIOperator* const _op,
 
 void reducedLinFluid::setUpBC(bchandler_type _BCh_dp)
 {
-    M_BCh_dp = _BCh_dp;
+    M_BCh_dp_inv = _BCh_dp;
 }
 
 
@@ -65,8 +66,10 @@ const Vector& reducedLinFluid::residual()
     if (!M_computedResidual)
         evalResidual();
 
+    std::cout << "residual_dp size = " << M_residual_dp.size() << std::endl;
     return M_residual_dp;
 }
+
 
 void reducedLinFluid::solveReducedLinearFluid()
 {
@@ -86,14 +89,14 @@ void reducedLinFluid::solveReducedLinearFluid()
             assemb_mat(M_CAux, M_elmatC, M_fe, M_dof, 0, 0);
         }
 
-        M_BCh_dp->bdUpdate(M_fluid->mesh(), M_feBd, M_dof);
+        M_BCh_dp_inv->bdUpdate(M_fluid->mesh(), M_feBd, M_dof);
         M_computedC = true;
     }
 
     M_C = M_CAux;
     M_f = ZeroVector( M_f.size() );
 
-    bcManage(M_C, M_f, M_fluid->mesh(), M_dof, *M_BCh_dp, M_feBd, 1.0, M_FSIOperator->time());
+    bcManage(M_C, M_f, M_fluid->mesh(), M_dof, *M_BCh_dp_inv, M_feBd, 1.0, M_FSIOperator->time());
 
     M_linearSolver.setRecursionLevel( 1 );
     M_dp = ZeroVector( M_dp.size() );
@@ -102,6 +105,13 @@ void reducedLinFluid::solveReducedLinearFluid()
 
     M_computedResidual = false;
     M_minusdp = -1.0*M_dp;
+}
+
+
+void reducedLinFluid::solveInvReducedLinearFluid()
+{
+    
+
 }
 
 
