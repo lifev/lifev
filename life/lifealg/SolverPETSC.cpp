@@ -36,7 +36,7 @@ extern "C"
 #include <petsc.h>
 #include <petscksp.h>
 #include <petscvec.h>
-#define PETSC_KSPSOLVE_OLD_INTERFACE 1
+#define PETSC_KSPSOLVE_OLD_INTERFACE 0
 #endif /* HAVE_PETSC_H */
 };
 
