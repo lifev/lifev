@@ -79,7 +79,7 @@ namespace LifeV
 
             boost::numeric::ublas::unbounded_array<double> __val( __nnz );
 
-            std::for_each( __val.begin(), __val.end(), boost::lambda::_1 = 1 );
+            std::for_each( __val.begin(), __val.end(), boost::lambda::_1 = 0.0 );
             std::copy( this->value_data().begin(), this->value_data().end(), __val.begin() );
 
             // Make room for non-zero elements
