@@ -206,6 +206,13 @@ public:
 
     //@}
 
+    int setStrategy( int setstrategy)    
+        {
+	  flag_strategy=setstrategy;
+          return flag_strategy; 
+        }
+
+
     /** @name  Methods
      */
     //@{
@@ -223,13 +230,9 @@ public:
 
     void initialize( const Function& u0, const Function& p0, Real t0, Real dt );
 
-    void initialize_inexact( const Function& u0, const Function& p0, Real t0, Real dt );
-
     void timeAdvance( source_type const& __source, const Real& __time );
 
     void iterate( const Real& time );
-
-    void iterate_inexact( const Real& time );
 
     //@}
 
@@ -296,8 +299,8 @@ private:
 
     Real _M_lambda;
 
+    int flag_strategy;
     //std::ofstream outfile;
-
 };
 
 template<typename NSSolver>
@@ -310,29 +313,12 @@ NavierStokesWithFlux<NSSolver>::initialize( const Function& u0, const Function& 
             initialize_one_flux(u0,p0,t0,dt);
             break;
         case 2:
+	  if (flag_strategy==0){  
             initialize_two_fluxes(u0,p0,t0,dt);
-            break;
-        default:
-            std::ostringstream __ex;
-            __ex << "The number of flux is invalid it is : " << _M_fluxes.size() << "\n"
-                 << "you have to specify either one flux or two fluxes for this algorithm to work\n"
-                 << "using the setFlux( label, flux ) member function\n";
-            throw std::logic_error( __ex.str() );
-            break;
-    }
-}
-
-template<typename NSSolver>
-void
-NavierStokesWithFlux<NSSolver>::initialize_inexact( const Function& u0, const Function& p0, Real t0, Real dt )
-{
-    switch ( _M_fluxes.size() )
-    {
-        case 1:
-            initialize_one_flux(u0,p0,t0,dt);
-            break;
-        case 2:
+	  }
+          if (flag_strategy==1){  
             initialize_two_fluxes_inexact(u0,p0,t0,dt);
+	  }
             break;
         default:
             std::ostringstream __ex;
@@ -472,30 +458,12 @@ NavierStokesWithFlux<NSSolver>::iterate( const Real& time )
             iterate_one_flux( time );
         break;
         case 2:
+          if (flag_strategy==0){  
             iterate_two_fluxes( time );
-            break;
-        default:
-            std::ostringstream __ex;
-            __ex << "The number of flux is invalid it is : " << _M_fluxes.size() << "\n"
-                 << "you have to specify either one flux or two fluxes for this algorithm to work\n"
-                 << "using the setFlux( label, flux ) member function\n";
-            throw std::logic_error( __ex.str() );
-            break;
-    }
-}
-
-template<typename NSSolver>
-void
-NavierStokesWithFlux<NSSolver>::iterate_inexact( const Real& time )
-{
-    switch ( _M_fluxes.size() )
-    {
-        case 1:
-            timeAdvance( _M_solver->sourceTerm(), time );
-            iterate_one_flux( time );
-        break;
-        case 2:
+	  }
+          if (flag_strategy==1){  
             iterate_two_fluxes_inexact( time );
+	  }
             break;
         default:
             std::ostringstream __ex;
@@ -511,6 +479,8 @@ template<typename NSSolver>
 void
 NavierStokesWithFlux<NSSolver>::iterate_one_flux( const Real& time )
 {
+    std::cout << "start NS time" << " " << time << "\n";
+
     // update the left hand side and solve the system at time \c time
     Real Q=_M_fluxes.begin()->second( time );
     Real lambda0 = -Q;
@@ -555,12 +525,15 @@ NavierStokesWithFlux<NSSolver>::iterate_one_flux( const Real& time )
                                 _M_solver->u(),
                                 _M_solver->p(),
                                 1 );
+     // Save the final solutions
+     // 
+     _M_solver->postProcess();
+
      //compute the flux of NS: the definitive one
      //
      Qn=_M_solver->flux(_M_fluxes.begin()->first);
      Debug( 6020 ) << "imposed flux" << " " << Q << "\n";
      Debug( 6020 ) << "numerical flux" << " " << Qn << "\n";
-
 
 }
 
