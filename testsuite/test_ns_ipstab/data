@@ -19,7 +19,7 @@ timestep   = 1.0          # timestep
 
 [../miscellaneous]
 verbose   = 1
-steady    = 0
+steady    = 1
 
 [../aztec]
 solver    = gmres
