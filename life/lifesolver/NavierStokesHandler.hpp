@@ -84,7 +84,7 @@ public DataNavierStokes<Mesh> {
   void initialize(const Function& u0, const Function& p0, Real t0, Real dt); 
 
   //! Sets initial condition for the velocity and the pressure from file
-  void initialize(const string & vname);
+  void initialize(const std::string & vname);
 
   //! Update the right  hand side  for time advancing   
   /*! 
@@ -469,10 +469,10 @@ NavierStokesHandler<Mesh>::initialize(const Function& u0, const Function& p0, Re
 
 // ! Initialize when initial values for the velocity and the pressure are read from file (M. Prosi)
 template<typename Mesh> void 
-NavierStokesHandler<Mesh>::initialize(const string & vname) {
+NavierStokesHandler<Mesh>::initialize(const std::string & vname) {
   
     fstream resfile(vname.c_str(),ios::in | ios::binary);
-    if (resfile.fail()) {cerr<<" Error in initialization: File not found or locked"<<endl; abort();}
+    if (resfile.fail()) {std::cerr<<" Error in initialization: File not found or locked"<<std::endl; abort();}
     resfile.read((char*)&_u(1),_u.size()*sizeof(double));
     resfile.read((char*)&_p(1),_p.size()*sizeof(double));
     resfile.close();
