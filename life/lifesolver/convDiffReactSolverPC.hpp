@@ -4,7 +4,7 @@
   \date 03/2004
   \version 1.0
 
-  \brief This file contains a solver class for the Convection-Diffusion-Reaction equation 
+  \brief This file contains a solver class for the Convection-Diffusion-Reaction equation
 */
 
 #ifndef _CONVDIFFREACTSOLVERPC_H_
@@ -26,7 +26,7 @@
 #include "openDX_wrtrs.hpp"
 #include <string>
 
-/*! 
+/*!
   \class convDiffReactSolverPC
 
    This class implements a solver for the Convection-Diffusion-Reaction equation
@@ -35,12 +35,12 @@
 template<typename Mesh>
 class ConvDiffReactSolverPC:
 public ConvDiffReactHandler<Mesh> {
- 
- public:
-  
-  typedef  typename  ConvDiffReactHandler<Mesh>::Function Function; 
 
-  //! Constructor 
+ public:
+
+  typedef  typename  ConvDiffReactHandler<Mesh>::Function Function;
+
+  //! Constructor
   /*!
     \param data_file GetPot data file
     \param refFE_c reference FE for the concentration
@@ -51,9 +51,9 @@ public ConvDiffReactHandler<Mesh> {
   ConvDiffReactSolverPC(const GetPot& data_file, const RefFE& refFE_c, const QuadRule& Qr_c,
 	    const QuadRule& bdQr_c, BC_Handler& BCh_c);
 
-  //! Update the right  hand side  for time advancing 
-  /*! 
-    \param source volumic source  
+  //! Update the right  hand side  for time advancing
+  /*!
+    \param source volumic source
     \param time present time
   */
   void timeAdvance(const Function source, const Real& time);
@@ -64,10 +64,10 @@ public ConvDiffReactHandler<Mesh> {
   //! Projection of the velocity on grid of concentration discretization
   template <typename RegionMesh3D>
   void getvel(RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u, const Real& time);
- 
-  //! Calculate the local coordinates of concentration gridpoints in the 
-  //! velocity grid (is needed for the Projection)     
-  template <typename RegionMesh3D> 
+
+  //! Calculate the local coordinates of concentration gridpoints in the
+  //! velocity grid (is needed for the Projection)
+  template <typename RegionMesh3D>
   void getcoord(RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u);
 
   //! Calculate the volume of a tetrahedra given by its corner nodes
@@ -77,22 +77,27 @@ public ConvDiffReactHandler<Mesh> {
   //! interpolation coefficents (1-b1-b2-b3, b1, b2, b3)
   int test(Real x[4], Real y[4], Real z[4], Real & xp, Real & yp, Real & zp, Real & b1, Real & b2, Real & b3);
 
+protected:
+
+   // inherited from parent class
+   typedef typename ConvDiffReactHandler<Mesh>::intpolcoord intpolcoord;
+
  private:
 
   //! Pattern of M
   MSRPatt _pattM;
-  
+
   //! Matrix C:  1/dt*Cmass + D*Cstiff operator (+ r*Cmass ... reaction Term TODO !!!)
   MSRMatr<double> _DR;
- 
+
   //! Matrix C:  1/dt*Cmass + D*Cstiff operator + Convective_transport term (+ r*Cmass ... reaction Term TODO !!!)
   MSRMatr<double> _CDR;
 
   //! Matrix C_u: Cmass
   MSRMatr<double> _M_c;
- 
+
   //! Elementary matrices and vectors
-  ElemMat _elmatC; //Concentration stiffnes 
+  ElemMat _elmatC; //Concentration stiffnes
   ElemMat _elmatM_c; //Concentration mass
   ElemVec _elvec; // Elementary right hand side
   ElemVec _elvec_u; // Elementary velocity for convection term
@@ -111,32 +116,32 @@ public ConvDiffReactHandler<Mesh> {
 //
 template<typename Mesh> ConvDiffReactSolverPC<Mesh>::
 ConvDiffReactSolverPC(const GetPot& data_file, const RefFE& refFE_c, const QuadRule& Qr_c,
-		      const QuadRule& bdQr_c, BC_Handler& BCh_c):  
+		      const QuadRule& bdQr_c, BC_Handler& BCh_c):
   ConvDiffReactHandler<Mesh>(data_file,refFE_c,Qr_c, bdQr_c, BCh_c),
      _pattM(_dof_c),
      _DR(_pattM),
      _CDR(_pattM),
      _M_c(_pattM),
-     _elmatC(_fe_c.nbNode,1,1), 
+     _elmatC(_fe_c.nbNode,1,1),
      _elmatM_c(_fe_c.nbNode,1,1),
-     _elvec(_fe_c.nbNode,1), 
+     _elvec(_fe_c.nbNode,1),
      _elvec_u(_fe_c.nbNode,nDimensions),
      _f_c(_dim_c),
      _u_c(_dim_c),
      _dataAztec_o(data_file,"masstransport/aztec_o"){
-  
+
   cout << endl;
-  cout << "O-  Concentration unknowns: " << _dim_c     << endl; 
-  cout << "O-  Computing mass and stiffness matrices... ";  
-    
+  cout << "O-  Concentration unknowns: " << _dim_c     << endl;
+  cout << "O-  Computing mass and stiffness matrices... ";
+
   Chrono chrono;
   chrono.start();
 
-  // Matrices initialization 
+  // Matrices initialization
   _DR.zeros();
   _CDR.zeros();
   _M_c.zeros();
-  
+
   //inverse of dt:
   Real dti=1./_dt;
 
@@ -144,19 +149,19 @@ ConvDiffReactSolverPC(const GetPot& data_file, const RefFE& refFE_c, const QuadR
   // Coefficient of the mass term at time t^{n+1}
   Real first_coeff = _bdf.coeff_der(0);
   cout << endl;
-  cout << "Bdf CDR first coeff " << first_coeff << endl; 
+  cout << "Bdf CDR first coeff " << first_coeff << endl;
 
   _bdf.showMe();
 
-  // Elementary computation and matrix assembling  
+  // Elementary computation and matrix assembling
 
   for(UInt i = 1; i <= _mesh.numVolumes(); i++){          // Loop on elements
 
     _fe_c.updateFirstDerivQuadPt(_mesh.volumeList(i));
-    
+
     _elmatC.zero();
     _elmatM_c.zero();
- 
+
     stiff(_diffusivity,_elmatC,_fe_c);
 //    _elmatC.showMe();
     mass(first_coeff*dti,_elmatM_c,_fe_c);
@@ -164,22 +169,22 @@ ConvDiffReactSolverPC(const GetPot& data_file, const RefFE& refFE_c, const QuadR
 
     // stiffness + mass
     _elmatC.mat() += _elmatM_c.mat();
-    
-    
+
+
     // stiffness
     assemb_mat(_DR,_elmatC,_fe_c,_dof_c);
-      
+
     // mass
     assemb_mat(_M_c,_elmatM_c,_fe_c,_dof_c);
-     
+
   }
-   
+
   chrono.stop();
   cout << "done in " << chrono.diff() << " s." << endl;
 
 }
 
-template<typename Mesh>  
+template<typename Mesh>
 void ConvDiffReactSolverPC<Mesh>::
 timeAdvance(const Function source, const Real& time) {
 
@@ -197,17 +202,17 @@ timeAdvance(const Function source, const Real& time) {
      _fe_c.update(_mesh.volumeList(i));
 
       compute_vec(source,_elvec,_fe_c,time,0); // compute local vector
-      assemb_vec(_f_c,_elvec,_fe_c,_dof_c,0); // assemble local vector into global one       
+      assemb_vec(_f_c,_elvec,_fe_c,_dof_c,0); // assemble local vector into global one
   }
 
-  // ******************************************************* 
+  // *******************************************************
   _f_c += _M_c*_bdf.time_der(); //_M_u is the mass matrix divided by the time step
   chrono.stop();
   cout << "done in " << chrono.diff() << " s." << endl;
 }
 
 
-template<typename Mesh>  
+template<typename Mesh>
 void ConvDiffReactSolverPC<Mesh>::
 iterate(const Real& time) {
 
@@ -223,12 +228,12 @@ iterate(const Real& time) {
 
   cout << "  o-  Diffusion-Reaction matrix was copied in " << chrono.diff() << "s." << endl;
   cout << "  o-  Updating convective transport... ";
- 
+
   chrono.start();
 
   // loop on volumes
   for(UInt i=1; i<=_mesh.numVolumes(); ++i){
-  
+
     _fe_c.updateFirstDeriv(_mesh.volumeList(i)); // as updateFirstDer
 
     _elmatC.zero();
@@ -241,7 +246,7 @@ iterate(const Real& time) {
     for (UInt k=0 ; k<(UInt)_fe_c.nbNode ; k++){
        UInt  iloc = _fe_c.patternFirst(k);
        for (UInt ic=0; ic<nc_u; ++ic){
-	  UInt ig=_dof_c.localToGlobal(eleID,iloc+1)-1+ic*_dim_c;     
+	  UInt ig=_dof_c.localToGlobal(eleID,iloc+1)-1+ic*_dim_c;
 	  _elvec_u[iloc+ic*_fe_c.nbNode] = _u_c(ig);
        }
      }
@@ -280,7 +285,7 @@ iterate(const Real& time) {
       else {
 	 if(Pe_loc > 3.0)
 	    coef_stab=1.0;
-	 else	
+	 else
 	    coef_stab=Pe_loc/3.0;}
 
 // ******************************* STREAMLINEUPWIND ****************************
@@ -295,12 +300,12 @@ iterate(const Real& time) {
   cout << "done in " << chrono.diff() << "s." << endl;
 
   // for BC treatment (done at each time-step)
-  Real tgv=1.e02; 
+  Real tgv=1.e02;
 
   cout << "  o-  Applying boundary conditions... ";
-  chrono.start(); 
+  chrono.start();
   // BC manage for the concentration
-  if ( !_BCh_c.bdUpdateDone() )  
+  if ( !_BCh_c.bdUpdateDone() )
     _BCh_c.bdUpdate(_mesh, _feBd_c, _dof_c);
   bc_manage(_CDR, _f_c, _mesh, _dof_c, _BCh_c, _feBd_c, tgv, time);
   chrono.stop();
@@ -308,50 +313,50 @@ iterate(const Real& time) {
   cout << "done in " << chrono.diff() << "s." << endl;
 
 
-  int    proc_config_o[AZ_PROC_SIZE];// Processor information:                 
-  //  proc_config[AZ_node] = node name      
-  //  proc_config[AZ_N_procs] = # of nodes  
-  int    options_o[AZ_OPTIONS_SIZE]; // Array used to select solver options.     
-  double params_o[AZ_PARAMS_SIZE];   // User selected solver paramters.          
-  int    *data_org_o;                // Array to specify data layout   
+  int    proc_config_o[AZ_PROC_SIZE];// Processor information:
+  //  proc_config[AZ_node] = node name
+  //  proc_config[AZ_N_procs] = # of nodes
+  int    options_o[AZ_OPTIONS_SIZE]; // Array used to select solver options.
+  double params_o[AZ_PARAMS_SIZE];   // User selected solver paramters.
+  int    *data_org_o;                // Array to specify data layout
   double status_o[AZ_STATUS_SIZE];   // Information returned from AZ_solve()
-                                   // indicating success or failure.           
-  // altre dichiarazioni per AZTEC  
-  int    *update_o,                  // vector elements updated on this node. 
-         *external_o;                // vector elements needed by this node.    
-  int    *update_index_o;            // ordering of update[] and external[]     
-  int    *extern_index_o;            // locally on this processor.              
-  //  int    *bindx;                 // Sparse matrix to be solved is stored    
-  //  double *val;                   // in these MSR arrays.                    
-  int    N_update_o;                 // # of unknowns updated on this node      
+                                   // indicating success or failure.
+  // altre dichiarazioni per AZTEC
+  int    *update_o,                  // vector elements updated on this node.
+         *external_o;                // vector elements needed by this node.
+  int    *update_index_o;            // ordering of update[] and external[]
+  int    *extern_index_o;            // locally on this processor.
+  //  int    *bindx;                 // Sparse matrix to be solved is stored
+  //  double *val;                   // in these MSR arrays.
+  int    N_update_o;                 // # of unknowns updated on this node
 
   AZ_set_proc_config(proc_config_o, AZ_NOT_MPI );
 
     AZ_read_update(&N_update_o, &update_o, proc_config_o, _dim_c, 1, AZ_linear);
     AZ_defaults(options_o,params_o);
     _dataAztec_o.aztecOptionsFromDataFile(options_o,params_o);
-    AZ_transform(proc_config_o, &external_o, 
-	       (int *)_pattM.giveRaw_bindx(), _CDR.giveRaw_value(), 
+    AZ_transform(proc_config_o, &external_o,
+	       (int *)_pattM.giveRaw_bindx(), _CDR.giveRaw_value(),
 	       update_o, &update_index_o,
 	       &extern_index_o, &data_org_o, N_update_o, NULL, NULL, NULL, NULL,
 	       AZ_MSR_MATRIX);
-  
+
     chrono.start();
 //    init_options_c(options_o,params_o);
-  
-    AZ_solve(_c.giveVec(),_f_c.giveVec(), options_o, params_o, NULL, 
-	   (int *)_pattM.giveRaw_bindx(), NULL, NULL, NULL, 
+
+    AZ_solve(_c.giveVec(),_f_c.giveVec(), options_o, params_o, NULL,
+	   (int *)_pattM.giveRaw_bindx(), NULL, NULL, NULL,
 	   _CDR.giveRaw_value(), data_org_o,status_o, proc_config_o);
   //
     chrono.stop();
     cout << "*** Solution (Concentration) computed in " << chrono.diff() << "s." << endl;
   _bdf.shift_right(_c);
-  
+
 }
 
 
 
-template<typename Mesh> template<typename RegionMesh3D>  
+template<typename Mesh> template<typename RegionMesh3D>
 void ConvDiffReactSolverPC<Mesh>::
 getvel(RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u, const Real& time){
 
@@ -370,7 +375,7 @@ getvel(RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u, con
       Real zp=_mesh.point(i+1).z();
       for (ID jj=0; jj<3; ++jj)
 	_u_c(i+jj*_u_c.size()/3)=BCh_u[(int)_u_to_c[i].b[0]](time,xp,yp,zp,BCh_u[(int)_u_to_c[i].b[0]].component(jj+1));
-      
+
     }
     else{
     // Velocity interpolation
@@ -395,7 +400,7 @@ getvel(RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u, con
 
 }
 
-template<typename Mesh> template<typename RegionMesh3D>  
+template<typename Mesh> template<typename RegionMesh3D>
 void ConvDiffReactSolverPC<Mesh>::
 getcoord(RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u){
 
@@ -412,7 +417,7 @@ getcoord(RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u){
   LinearTetra ele;
 
   SimpleVect<GeoElement3D<LinearTetra> >::iterator iv = umesh.volumeList.begin();
- 
+
   for(UInt i=0; i < _mesh.numVertices(); i++){
 
     cout << i << endl;
@@ -443,7 +448,7 @@ getcoord(RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u){
 	 for(Int found = 0;found == 0;){
 	    vid = iv -> id();
 	    Real volume[umesh.numLocalFaces()],minvolume=100.0;
-	    UInt jk;
+	    UInt jk = UInt( -1 ); // initialized to max UInt+1 (trick for debugging if needed )
 	    for(UInt jj=1; jj <= umesh.numLocalFaces();jj++){
 	       i1=ele.fToP(jj,1);
 	       i2=ele.fToP(jj,2);
@@ -452,7 +457,7 @@ getcoord(RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u){
 	       i1=(iv->point(i1)).id();
 	       i2=(iv->point(i2)).id();
 	       i3=(iv->point(i3)).id();
-	
+
 	       x[1]=umesh.point(i1).x();
 	       x[2]=umesh.point(i2).x();
 	       x[3]=umesh.point(i3).x();
@@ -515,7 +520,7 @@ getcoord(RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u){
        for(Int found = 0;found == 0;){
 	  vid = iv -> id();
 	  Real volume[umesh.numLocalFaces()],minvolume=100.0;
-	  UInt jk;
+	  UInt jk = UInt( -1 );
 	  for(UInt jj=1; jj <= umesh.numLocalFaces();jj++){
 	     i1=ele.fToP(jj,1);
 	     i2=ele.fToP(jj,2);
@@ -524,7 +529,7 @@ getcoord(RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u){
 	     i1=(iv->point(i1)).id();
 	     i2=(iv->point(i2)).id();
 	     i3=(iv->point(i3)).id();
-	
+
 	     x[1]=umesh.point(i1).x();
 	     x[2]=umesh.point(i2).x();
 	     x[3]=umesh.point(i3).x();
@@ -587,7 +592,7 @@ getcoord(RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u){
 
   chrono.stop();
   cout << " Calculation of the projection coordinates " << chrono.diff() << "s." << endl;
- 
+
 }
 
 template<typename Mesh>
