@@ -34,6 +34,48 @@
 
 namespace LifeV
 {
+SolverUMFPACK::SolverUMFPACK()
+    :
+    _M_nrows( 0 ),
+    _M_ia( 0 ),
+    _M_ja( 0 ),
+    _M_v( 0 ),
+    _M_matrix_reset( true ),
+    _M_matrix_values_reset( true ),
+    _M_symbolic( 0 ),
+    _M_numeric( 0 ),
+    _M_Control( new double[UMFPACK_CONTROL] ),
+    _M_Info( new double[UMFPACK_INFO] )
+{
+    ::umfpack_dl_defaults( _M_Control.get() );
+    _M_Control[UMFPACK_PRL] = 6;
+    _M_Control [UMFPACK_STRATEGY] = UMFPACK_STRATEGY_UNSYMMETRIC;
+}
+SolverUMFPACK::SolverUMFPACK( SolverUMFPACK const & umfpackSolver )
+    :
+    _M_nrows( umfpackSolver._M_nrows ),
+    _M_ia( umfpackSolver._M_ia ),
+    _M_ja( umfpackSolver._M_ja ),
+    _M_v( umfpackSolver._M_v ),
+    _M_matrix_reset( umfpackSolver._M_matrix_reset ),
+    _M_matrix_values_reset( umfpackSolver._M_matrix_values_reset ),
+    _M_symbolic( 0 ),
+    _M_numeric( 0 ),
+    _M_Control( umfpackSolver._M_Control ),
+    _M_Info( umfpackSolver._M_Info )
+{
+
+}
+SolverUMFPACK::~SolverUMFPACK()
+{
+    if ( _M_numeric )
+        ::umfpack_dl_free_numeric( &_M_numeric );
+
+    if ( _M_symbolic )
+        ::umfpack_dl_free_symbolic( &_M_symbolic );
+
+}
+
 void
 SolverUMFPACK::reportInfo()
 {
@@ -43,6 +85,29 @@ void
 SolverUMFPACK::reportStatus( int status )
 {
     umfpack_dl_report_status( _M_Control.get(), status);
+}
+void
+SolverUMFPACK::solve( array_type& __X, array_type const& __B )
+{
+
+    prepareSolve();
+
+    Debug(5100) << "[SSolverUMFPACK:;solve] solve A x = b using UMFPACK version " << UMFPACK_VERSION << "\n";
+    int status = umfpack_dl_solve( UMFPACK_A,
+                                   _M_ia,
+                                   _M_ja,
+                                   _M_v,
+                                   boost::addressof( __X[0] ),
+                                   boost::addressof( __B[0] ),
+                                   _M_numeric,
+                                   _M_Control.get(),
+                                   _M_Info.get() );
+    if (status != UMFPACK_OK)
+    {
+        reportInfo();
+        reportStatus( status );
+        Error() << "[SSolverUMFPACK::solve] solve failed\n";
+    }
 }
 void SolverUMFPACK::prepareSolve()
 {
