@@ -34,8 +34,7 @@ namespace LifeV
 {
 FSISolver::FSISolver( GetPot const& data_file,
                       bchandler_type& __bcu, bchandler_type& __bcd, bchandler_type& __bchext,
-                      std::string __oper )
-    :
+                      std::string __oper ):
     M_BCh_u( __bcu ),
     M_BCh_d( __bcd ),
     M_BCh_mesh( __bchext ),
@@ -76,6 +75,7 @@ FSISolver::FSISolver( GetPot const& data_file,
 
     this->setFSIOperator( M_method );
 
+    M_oper->setDataFromGetPot( data_file );
     M_oper->setPreconditioner( precond );
 
     M_oper->setUpBC();
