@@ -93,8 +93,15 @@ init_unit_test_suite( int argc, char** argv )
 
     return test;
 }
+#elif defined(HAVE_BOOST_TEST)
+test_suite*
+init_unit_test_suite( int argc, char** argv )
+{
+    test_suite* test= BOOST_TEST_SUITE( "UMFPACK Unit Test" );
+    return test;
+}
 #else
-int main (void)
+int main()
 {
     return EXIT_SUCCESS;
 }

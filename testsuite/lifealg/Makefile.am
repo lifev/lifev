@@ -32,10 +32,13 @@ check_LTLIBRARIES	= liblifealg_testsuite.la
 liblifealg_testsuite_la_SOURCES	= MatrixTest.cpp
 liblifealg_testsuite_la_LIBADD	= $(top_builddir)/life/lifealg/liblifealg.la 
 
-check_PROGRAMS	= test_petsc test_linearsolvers 
+check_PROGRAMS	= test_petsc test_linearsolvers test_umfpack
 
 test_petsc_SOURCES	= test_petsc.cpp
 test_petsc_LDADD    = $(life_libs) $(boost_test_lib)
+
+test_umfpack_SOURCES	= test_umfpack.cpp
+test_umfpack_LDADD    = $(life_libs) $(boost_test_lib)
 
 test_linearsolvers_SOURCES	= test_linearsolvers.cpp
 test_linearsolvers_LDADD	= liblifealg_testsuite.la $(umfpack_libs)
