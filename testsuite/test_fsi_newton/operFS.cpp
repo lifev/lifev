@@ -59,6 +59,9 @@ void operFS::eval(Vector& dispNew, Vector& velo, const Vector& disp, int status)
   cout << "                ::: norm(dispNew  ) = " << maxnorm(dispNew) << endl;
   cout << "                ::: norm(velo     ) = " << maxnorm(velo) << endl;
 
+  _fluid.postProcess();
+  _solid.postProcess();
+  
 }
 
 
