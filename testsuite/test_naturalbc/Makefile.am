@@ -22,7 +22,7 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-include $(top_srcdir)/testsuite/official/Makefile.testsuite
+include $(top_srcdir)/testsuite/Makefile.testsuite
 
 noinst_HEADERS		= main.hpp ud_functions.hpp 
 

@@ -24,9 +24,5 @@
 AM_CXXFLAGS		= -DTHREEDIM -gstabs
 LDADD			= $(life_libs)
 
-TestProgram		= $(top_srcdir)/official/bin/make_test
-
 test: $(TESTINGS)
 
-$(TESTINGS):
-	$(TestProgram) $(subst .test,,$@)  $(subst .test,_sample.out,$@)
