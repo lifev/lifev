@@ -1,0 +1,108 @@
+Dear LifeV-ists,
+
+Christope Prud'homme and I have continued the discussion we started last
+September on the re-organisation of the LifeV software.
+
+We want to discuss with you the main ideas and the way we intend to
+proceed.
+
+We want to reorganize the Library in order to achieve (at least) the
+following goals:
+
+1) A more standard type of directory structure (details will follow in a
+next message), with a better separation between the core library, the
+additional libraries, the contributed libraries and the external
+packages; 
+
+2) More standard tool for building the library (autoconf
+based);
+ 
+3) Better organisation of testings;
+ 
+4) Support for development environment (e.g. kdevelop) so to ease the
+work for the people that will use the library on on short-time projects,
+typically students, but not only!
+
+5) Enucleate the interface towards external libraries so that it may be
+simpler to change them, if needed.
+
+In order to do so, we will follow the following strategy (see annexed
+picture).
+
+A) We will create a new branch of LifeV with the new organisation,
+starting from the present situation in the CVS repository. This branch
+will be transparent to all but Christophe and I. Not because we do not
+trust you folks, but because it is better if only a limited number of
+people work on it, as to avoid making a real mess;
+
+B) In the meantime, all developers could continue working on the current
+branch, committing all changes that have already been planned. READ
+CAREFULLY THE FINAL PART OF THIS MAIL, WHICH CONCERNS THIS CRUCIAL
+POINT.
+
+C) Everytime a commit is made we will replicate the changes in the new
+branch, testing it.
+
+D) When all planned commits are finished, the new branch will merge with
+the old one (this practically means that the old one will disappear from
+sight and all of us will start using the new organization). At this
+point the current situation will become a stable release, and we will
+plan the features we want to add to the library towards the next stable
+release.
+
+E) A development branch will be made where all the planned new features
+will be added. Work on the stable release will be LIMITED TO bugfixes.
+
+
+** IMPORTANT PART ***
+
+Concerning the point B above, we need to gather from you some
+information concerning the features/bugfixes you have added already (or
+are going to add soon) to your local version of the library; and you
+have not yet committed into the CVS repository. This is necessary in
+order to organize the activity in points B) and C) above and foresee a
+reasonable date for the issue of the stable release (point D).
+
+You should tell us what are the modifications you have made in your
+local version (or are going to make) and when you plan to commit them
+into the repository.
+
+In particular we need to know
+
+-Feature added/bugfix: (brief description of the improvements/bugfixes.
+For example: Classes for backward difference schemes.).
+
+-Impact on library: (are you just adding new files or you have modified
+existing ones, and if so are the modifications major ones?)
+
+-Expected commit time: when do you think to be able to commit the
+changes?
+
+If you made several changes concerning different features you may split
+the commit in different 'self-containg' pieces.
+
+This information is essential for us to plan our work, so please answer
+as quickly and accurately as you can!
+
+
+OTHER OPEN ISSUES
+
+* Licence: we need to chose the licens. I would go for GPL, However
+Aztec is not under GPL, and probably neither KRM.
+
+* Rules: we have to set up clearer rules for software managemet. We will
+make a first proposal for discussion.
+
+ONE LAST THING
+
+We have changed the CVS interface so that you will receive the name of
+the author of the commit together with the first 50 lines of the
+difference between the committed file and the previuos version.
+
+We are setting up two mailing lists, one for LifeV developers and one
+for the general users.
+ 
+Regards,
+
+Christophe and Luca
+

@@ -1,0 +1,152 @@
+\documentclass[a4paper,10pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{verbatim}
+\usepackage[english]{babel}
+\usepackage{epsfig}
+
+% writing layout
+\setlength{\textwidth}{16.5cm}
+\setlength{\textheight}{21.0cm}
+\setlength{\unitlength}{1pt}
+\setlength{\oddsidemargin}{-0.5cm}
+\setlength{\topmargin}{-1cm}
+% \setlength{\topmargin}{-1.5in}
+\setlength{\parskip}{2ex}
+
+\newcommand{\pst}[1]{\texttt{#1}}
+
+\newcounter{rem}
+\newenvironment{rem}{\noindent {\bf Remark~\refstepcounter{rem}\therem~--}\ }{{\footnotesize $\blacksquare$} \par}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{Commenting the C++ library LifeV with DOXYGEN}
+
+\author{Alain Gauthier}
+
+\begin{document}
+
+\maketitle
+
+The program development documentation rules of the library LifeV have been
+defined in the reference document. Here an indication is given on how
+those commenting rules could be followed under DOXYGEN framework. This
+framework can be easily adopted from any already commented peace of code.
+Developing a DOXYGEN documentation consists indeed in placing keywords
+in the code comments which are interpreted as DOXYGEN commands.
+
+Instead of using DOXYGEN in a sophisticated way, it could be suitable
+to use it in a simple systematic way in order to insure that all parts
+of the library are well commented. So only the simplest way to generate
+the library documentation is presented here.
+
+In the following documentations are presented for files, classes, and
+functions.
+
+\section{File documentation}
+
+In any file (.h or .cc) of the library, a comment block at the beginning
+of the file should contain the following information (for a file named
+``filename''):
+
+\begin{verbatim}
+/*!
+  \file filename
+
+  \brief brief description of the file purpose.
+
+  \version 1.0 (might be given by CVS...) Date
+
+  \author your name.
+
+  More detailed description of the file purpose (if necessary).
+
+  \todo remarks reminding important things to do.
+
+*/
+\end{verbatim}
+
+\section{Class documentation}
+
+All members of a class are documented as well as methods and friend
+functions. The comments are done like in a standard situation except that
+key characters like ``!'' or ``!$<$'' are employed just after the beginning
+of a comment line or a comment block. The second key character refers to
+the description of a class member which is preceding instead of the first key
+character which describe a class member which is following.
+
+There are different possibilities to write comments at the
+level of class declaration as shown in the following example:
+
+\begin{verbatim}
+//! A test class.
+/*!
+  A more elaborate class description.
+
+  \todo an eventual comment on work which has to be done...
+*/
+
+class Test:
+{
+ public:
+  typedef unsigned int UInt; //!< description of the typedef...
+
+  //! A constructor.
+  //! few details..
+  Test();
+
+  //! A destructor.
+  /*!
+    A more elaborate destructor description...
+  */
+  ~Test();
+
+  //! A normal member description
+  /*!
+    \param a1 the first argument, an integer.
+    \param a2 the second argument, a real.
+    \return the eventual member result.
+  */
+  void testMe(int a1, real a2);
+
+ private:
+  ObjetType _objet; //!< description of the private member...
+};
+\end{verbatim}
+
+\section{Function documentation}
+
+The principle is the same as for class member function documentation.
+Keywords like \texttt{$\backslash$param} and \texttt{$\backslash$return} allow
+to enhance the role of inputs and outputs arguments.
+A function declaration documentation can be structured as following:
+
+\begin{verbatim}
+/*!
+  \brief fun description
+
+  A more elaborate fun description.
+
+  \param a1 first argument description
+  \param a2 second argument description
+  ...
+  \param an n-th argument description
+
+  \return description of eventual fun output
+
+  \todo an eventual comment on work which has to be done...
+*/
+TypeOutput fun(type1 a1, type2 a2, ...,type n);
+\end{verbatim}
+
+\section{Examples in the library LifeV}
+
+Two examples taken
+from the library LifeV (files algebraic\_facto.h and bareitems.h) of
+{\it html} documentation generated using DOXYGEN are presented in the
+following pages.
+
+\end{document}
