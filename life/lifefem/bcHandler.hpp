@@ -371,6 +371,8 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
     UInt iElAd, iVeEl, iFaEl, iEdEl;
     ID lDof, gDof;
     Real x, y, z;
+    
+    std::set<EntityFlag> notFoundMarkers;
 
     // ===================================================
     // Loop on boundary faces
@@ -402,6 +404,10 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                 {
                     whereList.push_back( where );
                     ++where;
+                }
+                if ( whereList.size() == 0 )
+                {
+                    notFoundMarkers.insert(marker);
                 }
 
                 // Loop number of Dof per vertex
@@ -485,6 +491,10 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                     whereList.push_back( where );
                     ++where;
                 }
+                if ( whereList.size() == 0 )
+                {
+                    notFoundMarkers.insert(marker);
+                }
 
                 // Loop number of Dof per edge
                 for ( ID l = 1; l <= nDofpE; ++l )
@@ -559,6 +569,10 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
         {
             whereList.push_back( where );
             ++where;
+        }
+        if ( whereList.size() == 0 )
+        {
+            notFoundMarkers.insert(marker);
         }
 
         // Adding identifier
@@ -654,6 +668,20 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
         }
     }
 
+    if( notFoundMarkers.size() > 0 )
+    {
+        std::cerr <<
+            "WARNING -- BCHandler::bdUpdate()\n" <<
+            "  boundary degrees of freedom with the following markers\n" <<
+            "  have no boundary condition set: ";
+        for( std::set<EntityFlag>::iterator it = notFoundMarkers.begin();
+             it != notFoundMarkers.end(); ++it )
+        {
+            std::cerr << *it << " ";
+        }
+        std::cerr << std::endl;
+    }
+
     whereList.clear();
     // ============================================================================
     // There is no more identifiers to add to the boundary conditions
@@ -665,7 +693,9 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
     }
 
     M_bdUpdateDone = true;
-}
-}
+} // bdUpdate
+
+} // namespace LifeV
+
 #endif /* __BCHandler_H */
 

@@ -235,13 +235,13 @@ bool BCHandler::hasOnlyEssential() const
         {
             std::ostringstream __ex;
             __ex << "BCHandler::hasOnlyEssential(): state is not consistent:"
-                 << "\nflag from constructor says    " << storedOnlyEssential
+                 << "\nhint from constructor says    " << storedOnlyEssential
                  << "\nadded boundary conditions say " << listOnlyEssential;
             std::cerr << std::endl << "Throwing exception:\n"
                       << __ex.str() << std::endl;
             throw std::logic_error( __ex.str() );
         }
-        return listOnlyEssential;
+        return storedOnlyEssential;
     }
 }
 
