@@ -25,7 +25,8 @@ INCLUDES 	= -I$(top_srcdir)/life/lifecore
 
 include_HEADERS	= RNM.hpp RNM_op.hpp RNM_opc.hpp RNM_tpl.hpp tab.hpp \
 		  vecUnknown.hpp variables.hpp pattern.hpp \
-		  SimpleVect.hpp elemMat.hpp elemVec.hpp sparseArray.hpp \
+		  SimpleVect.hpp elemMat.hpp elemVec.hpp \
+          sparseArray.hpp CSRMatrix.hpp MSRMatrix.hpp VBRMatrix.hpp MixedMatrix.hpp \
 		  tridiagMatrix.hpp 
 
 lib_LTLIBRARIES	= liblifearray.la

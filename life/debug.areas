@@ -11,5 +11,3 @@
 6100 -- LifeV::DarcySolver
 7000 -- LifeV::solver
 10000 -- testsuite
-10010 -- test_naturalbc
-10010 -- test_essentialbc
