@@ -65,9 +65,9 @@ namespace LifeV
 
 */
 
-template <typename Mesh>
+template <typename Mesh, typename DataType = DataNavierStokes<Mesh> >
 class NavierStokesHandler:
-            public DataNavierStokes<Mesh>
+            public DataType
 {
 
 public:
@@ -76,6 +76,8 @@ public:
                                  const Real&, const ID& );
     typedef boost::function<Real ( Real const&, Real const&, Real const&,
                                    Real const&, ID const& )> source_type;
+
+    typedef Mesh mesh_type;
 
     //! type used for flux computations (see FacesOnSections)
     typedef __gnu_cxx::slist< std::pair< ID, SimpleVect< ID > > > face_dof_type;
@@ -137,6 +139,9 @@ public:
     //! Update convective term, bc treatment and solve the linearized ns system
     virtual void iterate( const Real& time ) = 0;
 
+    //! returns the mesh
+    mesh_type& mesh() { return _mesh;}
+
     //! returns the BCHandler
     BCHandler& bcHandler()
         {
@@ -166,7 +171,10 @@ public:
     CurrentFE&   fe_u()   {return _fe_u;}
     CurrentBdFE& feBd_u() {return _feBd_u;}
 
-//! Postprocessing
+    //! returns the current FE for the pressure p
+    CurrentFE& fe_p() {return _fe_p;}
+
+    //! Postprocessing
     void postProcess();
 
 
@@ -384,13 +392,13 @@ protected:
 
 
 // Constructor
-template <typename Mesh>
-NavierStokesHandler<Mesh>::
+template <typename Mesh, typename DataType>
+NavierStokesHandler<Mesh, DataType>::
 NavierStokesHandler( const GetPot& data_file, const RefFE& refFE_u,
                      const RefFE& refFE_p, const QuadRule& Qr_u,
                      const QuadRule& bdQr_u, const QuadRule& Qr_p,
                      const QuadRule& bdQr_p, BCHandler& BCh_u ) :
-    DataNavierStokes<Mesh>( data_file ),
+    DataType( data_file ),
     _refFE_u( refFE_u ),
     _refFE_p( refFE_p ),
     _dof_u( this->_mesh, _refFE_u ),
@@ -465,79 +473,79 @@ NavierStokesHandler( const GetPot& data_file, const RefFE& refFE_u,
 
 
 // Returns the velocity vector
-template <typename Mesh>
+template <typename Mesh, typename DataType>
 PhysVectUnknown<Vector>&
-NavierStokesHandler<Mesh>::u()
+NavierStokesHandler<Mesh, DataType>::u()
 {
     return _u;
 }
 
 // Returns the pressure
-template <typename Mesh>
+template <typename Mesh, typename DataType>
 ScalUnknown<Vector>&
-NavierStokesHandler<Mesh>::p()
+NavierStokesHandler<Mesh, DataType>::p()
 {
     return _p;
 }
 
 // Returns the velocity Dof
-template <typename Mesh>
+template <typename Mesh, typename DataType>
 const Dof&
-NavierStokesHandler<Mesh>::uDof() const
+NavierStokesHandler<Mesh, DataType>::uDof() const
 {
     return _dof_u;
 }
 
 // Returns the pressure Dof
-template <typename Mesh>
+template <typename Mesh, typename DataType>
 const Dof&
-NavierStokesHandler<Mesh>::pDof() const
+NavierStokesHandler<Mesh, DataType>::pDof() const
 {
     return _dof_p;
 }
 
 // Returns the BDF Time Advancing stuff
-template <typename Mesh>
+template <typename Mesh, typename DataType>
 const BdfNS&
-NavierStokesHandler<Mesh>::bdf() const
+NavierStokesHandler<Mesh, DataType>::bdf() const
 {
     return _bdf;
 }
 
 // Returns the Post Processing structure
-template <typename Mesh>
+template <typename Mesh, typename DataType>
 PostProc<Mesh>&
-NavierStokesHandler<Mesh>::post_proc()
+NavierStokesHandler<Mesh, DataType>::post_proc()
 {
     return _ns_post_proc;
 }
 
 // Set up of post processing structures
-template <typename Mesh>
+template <typename Mesh, typename DataType>
 void
-NavierStokesHandler<Mesh>::post_proc_set_area()
+NavierStokesHandler<Mesh, DataType>::post_proc_set_area()
 {
     _ns_post_proc.set_area( _feBd_u, _dof_u );
 }
 
-template <typename Mesh>
+template <typename Mesh, typename DataType>
 void
-NavierStokesHandler<Mesh>::post_proc_set_normal()
+NavierStokesHandler<Mesh, DataType>::post_proc_set_normal()
 {
     _ns_post_proc.set_normal( _feBd_u, _dof_u );
 }
 
-template <typename Mesh>
+template <typename Mesh, typename DataType>
 void
-NavierStokesHandler<Mesh>::post_proc_set_phi()
+NavierStokesHandler<Mesh, DataType>::post_proc_set_phi()
 {
     _ns_post_proc.set_phi( _feBd_u, _dof_u );
 }
 
 // Postprocessing
-template <typename Mesh>
+template <typename Mesh, typename DataType>
 void
-NavierStokesHandler<Mesh>::postProcess()
+NavierStokesHandler<Mesh, DataType>::postProcess()
 {
     std::ostringstream index;
     std::string name;
@@ -589,9 +597,9 @@ NavierStokesHandler<Mesh>::postProcess()
 
 // Writing (DX)
 //! Write the solution in DX format
-template <typename Mesh>
+template <typename Mesh, typename DataType>
 void
-NavierStokesHandler<Mesh>::dx_write_sol( std::string const& file_sol,
+NavierStokesHandler<Mesh, DataType>::dx_write_sol( std::string const& file_sol,
                                          std::string const& fe_type_vel,
                                          std::string const& fe_type_pre )
 {
@@ -609,9 +617,9 @@ NavierStokesHandler<Mesh>::dx_write_sol( std::string const& file_sol,
 
 // Set the initial condition
 //! Initialize when only initial conditions on the velocity are given
-template <typename Mesh>
+template <typename Mesh, typename DataType>
 void
-NavierStokesHandler<Mesh>::initialize( const Function& u0 )
+NavierStokesHandler<Mesh, DataType>::initialize( const Function& u0 )
 {
 
     // Initialize pressure
@@ -634,9 +642,9 @@ NavierStokesHandler<Mesh>::initialize( const Function& u0 )
 //! Initialize when  initial conditions both on the velocity and the pressure
 //! (for incremental schemes) are given
 //! Useful for test cases when the analytical solution is known
-template <typename Mesh>
+template <typename Mesh, typename DataType>
 void
-NavierStokesHandler<Mesh>::initialize( const Function& u0, const Function& p0,
+NavierStokesHandler<Mesh, DataType>::initialize( const Function& u0, const Function& p0,
                                        Real t0, Real dt )
 {
 
@@ -663,9 +671,9 @@ NavierStokesHandler<Mesh>::initialize( const Function& u0, const Function& p0,
 
 //! Initialize when initial values for the velocity and the pressure are read
 //! from file (M. Prosi)
-template <typename Mesh>
+template <typename Mesh, typename DataType>
 void
-NavierStokesHandler<Mesh>::initialize( const std::string & vname )
+NavierStokesHandler<Mesh, DataType>::initialize( const std::string & vname )
 {
 
     std::fstream resfile( vname.c_str(), std::ios::in | std::ios::binary );
@@ -689,9 +697,9 @@ NavierStokesHandler<Mesh>::initialize( const std::string & vname )
 
 //! Initialize the fluid with a solution file
 //! written in MEDIT format
-template <typename Mesh>
+template <typename Mesh, typename DataType>
 void
-NavierStokesHandler<Mesh>::initialize( const std::string& velName,
+NavierStokesHandler<Mesh, DataType>::initialize( const std::string& velName,
                                        const std::string& pressName)
 {
     std::string sdummy;
@@ -813,9 +821,9 @@ NavierStokesHandler<Mesh>::initialize( const std::string& velName,
     (To do something faster, call once FacesOnFlag and store the
     connectivity... see ex. with FacesOnSection)
 */
-template <typename Mesh>
+template <typename Mesh, typename DataType>
 Real
-NavierStokesHandler<Mesh>::flux( const EntityFlag& flag )
+NavierStokesHandler<Mesh, DataType>::flux( const EntityFlag& flag )
 {
     face_dof_type faces_on_flag;
     FacesOnFlag( flag, _refFE_u, faces_on_flag ); //! reconstruct all the connectivity
@@ -834,9 +842,9 @@ NavierStokesHandler<Mesh>::flux( const EntityFlag& flag )
    second: vector of size nDofF (nb of dof per face).
    contains the local (in the face) to global dof.
 */
-template <typename Mesh>
+template <typename Mesh, typename DataType>
 void
-NavierStokesHandler<Mesh>::FacesOnFlag( const EntityFlag& __flag ,
+NavierStokesHandler<Mesh, DataType>::FacesOnFlag( const EntityFlag& __flag ,
                                         const RefFE& __reffe,
                                         face_dof_type & __faces_on_flag )
 {
@@ -899,9 +907,9 @@ NavierStokesHandler<Mesh>::FacesOnFlag( const EntityFlag& __flag ,
 
    This function is VERY mesh dependent!! Use it with caution.
 */
-template <typename Mesh>
+template <typename Mesh, typename DataType>
 void
-NavierStokesHandler<Mesh>::FacesOnSection( const Real&  __z_section,
+NavierStokesHandler<Mesh, DataType>::FacesOnSection( const Real&  __z_section,
                                            face_dof_type & __faces_on_section_u,
                                            face_dof_type & __faces_on_section_p,
                                            const Real& __tolerance_section ,
@@ -974,9 +982,9 @@ NavierStokesHandler<Mesh>::FacesOnSection( const Real&  __z_section,
     On output it contains the local (in the face) to global dof.
     \param __reffe : reference fe.
 */
-template <typename Mesh>
+template <typename Mesh, typename DataType>
 void
-NavierStokesHandler<Mesh>::_updateDofFaces( face_dof_type & __faces_on_section,
+NavierStokesHandler<Mesh, DataType>::_updateDofFaces( face_dof_type & __faces_on_section,
                                             const RefFE& __reffe )
 {
     typedef typename Mesh::VolumeShape GeoShape;
@@ -1103,9 +1111,9 @@ NavierStokesHandler<Mesh>::_updateDofFaces( face_dof_type & __faces_on_section,
    \param nb_edge_polygon : nb of edges of the polygon for the formula
 
  */
-template <typename Mesh>
+template <typename Mesh, typename DataType>
 Real
-NavierStokesHandler<Mesh>::AreaCylindric( const std::pair<ID, ID> & __point_on_boundary,
+NavierStokesHandler<Mesh, DataType>::AreaCylindric( const std::pair<ID, ID> & __point_on_boundary,
                                           const int & __nb_edge_polygon )
 {
     ID iglobface = __point_on_boundary.first;
@@ -1125,9 +1133,9 @@ NavierStokesHandler<Mesh>::AreaCylindric( const std::pair<ID, ID> & __point_on_b
   contains the local (in the face) to global dof.
   \param modify_sign_normal : if == true, the computed flux is positive if (u \dot z) is positive
 */
-template <typename Mesh>
+template <typename Mesh, typename DataType>
 std::pair< Real, Real >
-NavierStokesHandler<Mesh>::AreaAndFlux( const face_dof_type & __faces_on_section_u,
+NavierStokesHandler<Mesh, DataType>::AreaAndFlux( const face_dof_type & __faces_on_section_u,
                                         const bool & modify_sign_normal )
 {
     typedef typename Mesh::FaceShape GeoBShape;
@@ -1216,9 +1224,9 @@ NavierStokesHandler<Mesh>::AreaAndFlux( const face_dof_type & __faces_on_section
   second: vector of size nDofF (nb of dof per face)
   contains the local (in the face) to global dof.
 */
-template <typename Mesh>
+template <typename Mesh, typename DataType>
 Real
-NavierStokesHandler<Mesh>::MeanPressure( const face_dof_type & __faces_on_section_p )
+NavierStokesHandler<Mesh, DataType>::MeanPressure( const face_dof_type & __faces_on_section_p )
 {
     typedef typename Mesh::FaceShape GeoBShape;
 
@@ -1281,8 +1289,8 @@ NavierStokesHandler<Mesh>::MeanPressure( const face_dof_type & __faces_on_sectio
 /*! compute the mean Pressures, Areas and Fluxes for all sections and write them on a file
     in the plotmtv format
 */
-template <typename Mesh>
-void NavierStokesHandler<Mesh>::PostProcessPressureAreaAndFlux( const Real & __time )
+template <typename Mesh, typename DataType>
+void NavierStokesHandler<Mesh, DataType>::PostProcessPressureAreaAndFlux( const Real & __time )
 {
     if ( computeMeanValuesPerSection() != 1 )
         ERROR_MSG("This function is disabled, if you don't ask to compute the Mean Values. (in data file)");
@@ -1313,9 +1321,9 @@ void NavierStokesHandler<Mesh>::PostProcessPressureAreaAndFlux( const Real & __t
 }
 
 
-template<typename Mesh>
-void NavierStokesHandler<Mesh>::uInterpolate( const Function& uFct,
-                                              Vector& uVect, Real time )
+template <typename Mesh, typename DataType>
+void NavierStokesHandler<Mesh, DataType>::uInterpolate( const Function& uFct,
+                                                        Vector& uVect, Real time )
 {
     typedef typename Mesh::VolumeShape GeoShape; // Element shape
 
@@ -1454,8 +1462,8 @@ void NavierStokesHandler<Mesh>::uInterpolate( const Function& uFct,
     }
 }
 
-template<typename Mesh>
-Real NavierStokesHandler<Mesh>::pErrorL2( const Function& pexact,
+template <typename Mesh, typename DataType>
+Real NavierStokesHandler<Mesh, DataType>::pErrorL2( const Function& pexact,
                                           Real time,
                                           Real* relError )
 {
@@ -1485,8 +1493,8 @@ Real NavierStokesHandler<Mesh>::pErrorL2( const Function& pexact,
     return absError;
 }
 
-template<typename Mesh>
-Real NavierStokesHandler<Mesh>::uErrorL2( const Function& uexact,
+template <typename Mesh, typename DataType>
+Real NavierStokesHandler<Mesh, DataType>::uErrorL2( const Function& uexact,
                                           Real time,
                                           Real* relError )
 {
