@@ -18,7 +18,7 @@
 */
 /*----------------------------------------------------------------------*
 |          
-| $Header: /cvsroot/lifev/lifev/life/lifecore/Attic/mixed_pattern.hpp,v 1.3 2004-03-30 12:25:40 prudhomm Exp $ 
+| $Header: /cvsroot/lifev/lifev/life/lifealg/Attic/mixed_pattern.hpp,v 1.1 2004-03-30 16:20:22 prudhomm Exp $ 
 |
 |
 | #Version  0.0 Experimental   19/6/00. Luca Formaggia                  |

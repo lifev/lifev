@@ -23,4 +23,9 @@
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
 include_HEADERS	= cblas.h clapack.h \
-		  inexactLU.hpp picard.hpp saddlePointCG.hpp 
+		  inexactLU.hpp picard.hpp saddlePointCG.hpp \
+		  pattern.hpp mixed_pattern.hpp
+
+lib_LTLIBRARIES	= liblifealg.la
+
+liblifealg_la_SOURCES	= pattern.cpp

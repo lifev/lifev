@@ -18,7 +18,7 @@
 */
 /*----------------------------------------------------------------------*
 |           
-| $Header: /cvsroot/lifev/lifev/life/lifecore/Attic/pattern.hpp,v 1.4 2004-03-30 12:25:40 prudhomm Exp $ 
+| $Header: /cvsroot/lifev/lifev/life/lifealg/Attic/pattern.hpp,v 1.1 2004-03-30 16:20:22 prudhomm Exp $ 
 |
 |
 | #Version  0.1 Experimental   07/7/00. Luca Formaggia & Alessandro Veneziani  |
