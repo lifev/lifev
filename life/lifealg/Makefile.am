@@ -22,10 +22,15 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-include_HEADERS	= cblas.h clapack.h \
-		  inexactLU.hpp picard.hpp saddlePointCG.hpp \
-		  pattern.hpp mixed_pattern.hpp
+INCLUDES 	= -I$(top_srcdir)/life/lifecore -I$(top_srcdir)/life/lifearray
+
+include_HEADERS	= algebraic_facto.hpp dataAztec.hpp dataNewton.hpp inexactLU.hpp \
+linesearch_cubic.hpp linesearch_parabolic.hpp mixed_pattern.hpp newton.hpp \
+pattern.hpp picard.hpp saddlePointCG.hpp  \
+values.hpp 
 
 lib_LTLIBRARIES	= liblifealg.la
 
-liblifealg_la_SOURCES	= pattern.cpp
+liblifealg_la_SOURCES	= dataAztec.cpp dataNewton.cpp pattern.cpp values.cpp 
+
+liblifealg_la_LIBADD	= ../lifecore/liblifecore.la $(aztec_libs)

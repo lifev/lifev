@@ -21,9 +21,12 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
+INCLUDES 	= -I$(top_srcdir)/life/lifecore 
 
-include_HEADERS	= RNM.hpp RNM_op.hpp RNM_opc.hpp RNM_tpl.hpp
+include_HEADERS	= RNM.hpp RNM_op.hpp RNM_opc.hpp RNM_tpl.hpp tab.hpp \
+		  vecUnknown.cpp vecUnknown.hpp variables.hpp
+		  SimpleVect.hpp
 
-lib_LTLIBRARIES	= lifearray.la
+#lib_LTLIBRARIES	= lifearray.la
 
-lifearray_la_SOURCES	= dummy.cpp
+#lifearray_la_SOURCES	= dummy.cpp

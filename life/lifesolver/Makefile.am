@@ -22,8 +22,10 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-include_HEADERS	= 
+include_HEADERS	= ElasticStructureHandler.hpp NavierStokesAleHandler.hpp NavierStokesAleSolverPC.hpp NavierStokesHandler.hpp \
+NavierStokesHandler_miguel.hpp NavierStokesSolverPC.hpp VenantKirchhofSolver.hpp dataElasticStructure.hpp \
+dataNavierStokes.hpp dataSimplifiedStructure.hpp simplifiedStructure.hpp 
 
-lib_LTLIBRARIES	= lifesolver.la
+#lib_LTLIBRARIES	= lifesolver.la
 
-lifesolver_la_SOURCES	= 
+#lifesolver_la_SOURCES	= 
