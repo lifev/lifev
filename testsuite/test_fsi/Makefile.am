@@ -26,7 +26,7 @@ include $(top_srcdir)/testsuite/Makefile.testsuite
 
 check_HEADERS = ud_functions.hpp 
 
-check_PROGRAMS = test_fsi_dd
-test_fsi_dd_SOURCES = main.cpp ud_functions.cpp  
+check_PROGRAMS = test_fsi
+test_fsi_SOURCES = main.cpp ud_functions.cpp  
 
 EXTRA_DIST = data testsuite.at 
