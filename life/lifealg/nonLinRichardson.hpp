@@ -119,6 +119,7 @@ int nonLinRichardson( Vector& sol,
         normResOld = normRes;
         normRes = norm( residual );
 
+        //f.solid().updateJac( sol, iter );
         f.solvePrec(residual, linearRelTol, muk);
         step = aitken.computeDeltaLambda( sol, muk );
 
