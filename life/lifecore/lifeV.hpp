@@ -73,10 +73,10 @@ ERROR_MSG(A <<std::endl <<  "Invariant Error " << "in file " << __FILE__  \
 ERROR_MSG("Array bound error " << "in file " << __FILE__  \
 	  << " line " << __LINE__) ;
 
-// switch all debugging on if TEST_ALL is set
-
-
-#ifdef  TEST_ALL
+//
+// switch all debugging on if LIFEV_CHECK_ALL is set
+//
+#ifdef  LIFEV_CHECK_ALL
 #define CHECK_KN
 #define TEST_PRE
 #define TEST_POS
@@ -84,7 +84,7 @@ ERROR_MSG("Array bound error " << "in file " << __FILE__  \
 #define TEST_BOUNDS
 #define NOINLINE
 #undef  NDEBUG
-#endif
+#endif /* LIFEV_CHECK_ALL */
 
 #ifdef NDEBUG
 #define ASSERT(X,A)
