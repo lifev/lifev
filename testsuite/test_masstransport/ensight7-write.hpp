@@ -123,7 +123,8 @@ bool outensight7Mesh3D(RegionMesh3D & mesh, PhysVectUnknown<Vector> & u, ScalUnk
 
   File3.close();
 
-  cout << "Gitter hinausgeschrieben" << endl;
+  cout << "output in ensight7 format" << endl;
+  cout << "geometry file is test.geo" << endl;
 
 // read pressure von acsii-file ./Post/presQ1.bb and convert it into ensight7 binary format
 
@@ -163,7 +164,7 @@ bool outensight7Mesh3D(RegionMesh3D & mesh, PhysVectUnknown<Vector> & u, ScalUnk
 
   std::fstream File4(name.c_str(),ios::out | ios::binary);
 
-  strcpy(buffer,"pressure distribution timestep ");
+  strcpy(buffer,"concentration distribution timestep ");
   File4.write((char*)&buffer,sizeof(buffer));
 
   File4.write((char*)&pressure.front(),p.size()*sizeof(float)); 
@@ -178,6 +179,9 @@ bool outensight7Mesh3D(RegionMesh3D & mesh, PhysVectUnknown<Vector> & u, ScalUnk
   File5.write((char*)&velocity.front(),3*velocity.size()*sizeof(float)); 
 
   File5.close();
+
+  cout << "result files are velocity.res*** and pressure.res*** " << endl;
+
   return true;
   
 }
