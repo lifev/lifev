@@ -199,6 +199,31 @@ NavierStokesSolverIP( const GetPot& dataFile,
     M_divBetaUv = dataFile( "fluid/discretization/div_beta_u_v", 0);
     M_diagonalize = dataFile( "fluid/discretization/diagonalize", 1.);
 
+    // check mesh for elements with all nodes on the boundary
+    UInt nLocalFaces = _mesh.numLocalFaces();
+    UInt nFixedTets = 0;
+    for ( UInt iVol = 1; iVol <= _mesh.numVolumes(); iVol++ )
+    {
+        UInt nBoundaryFaces = 0;
+        for ( UInt iLocalFace=1; iLocalFace<=nLocalFaces; ++iLocalFace )
+        {
+            if ( _mesh.isBoundaryFace( _mesh.localFaceId( iVol, iLocalFace )))
+            {
+                ++nBoundaryFaces;
+            }
+        }
+        if ( nBoundaryFaces > 1 )
+        {
+            ++nFixedTets;
+        }
+    }
+    if ( nFixedTets > 0 )
+    {
+        std::cerr << "WARNING: " << nFixedTets << " of " << _mesh.numVolumes()
+                  << " tetrahedrons have all nodes on the boundary."
+                  << std::endl;
+    }
+
 #if USE_AZTEC_SOLVER
     M_linearSolver.setOptionsFromGetPot( dataFile, "fluid/aztec" );
 #else
