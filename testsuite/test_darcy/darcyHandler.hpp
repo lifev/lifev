@@ -32,6 +32,7 @@
 #include "assemb.hpp"
 #include "vtk_wrtrs.hpp"
 #include "user_fct.hpp"
+#include "user_diffusion.hpp"
 
 /*
   \brief Basic objects for a Darcy solver using Mixed Hybrid finite elements
@@ -106,8 +107,18 @@ public:
   RegionMesh3D<LinearHexa> mesh; // the mesh
   int nb_bc;                //!< number of boundary conditions
   BC_Handler bc;            //!< boundary conditions handler
-  BCFunction_Base bc_fct1;  //!< a boundary conditions function
-  BCFunction_Base bc_fct2;  //!< a boundary conditions function
+
+  //! boundary conditions functions
+  //! on a cube one might use them as follows:
+  BCFunction_Base bc_fct1;  //!< low  X
+  BCFunction_Base bc_fct2;  //!< high X
+  BCFunction_Base bc_fct3;  //!< low  Y
+  BCFunction_Base bc_fct4;  //!< high Y
+  BCFunction_Base bc_fct5;  //!< low  Z
+  BCFunction_Base bc_fct6;  //!< high Z
+
+  BCFunction_Mixte bc_fct_rob;  //!< a mixte (or Robin) bc function
+
 public:
   DarcyHandler(const GetPot& data_file);
 };

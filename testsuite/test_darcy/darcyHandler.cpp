@@ -77,6 +77,7 @@ DarcyHandler::DarcyHandler(const GetPot& data_file):
     bc.addBC("Inlet",      1, Natural,   Scalar, bc_fct1); 
     bc.addBC("Outlet",  3, Natural, Scalar, bc_fct2); 
     break;
+
   case 2:
     /*
       Dirichlet condition (on p) at inlet (ref 1) and outlet (ref 3)
@@ -89,9 +90,49 @@ DarcyHandler::DarcyHandler(const GetPot& data_file):
     bc.addBC("Inlet",      1, Essential,   Scalar, bc_fct1); 
     bc.addBC("Outlet",  3, Essential, Scalar, bc_fct2); 
     break;
+
+  case 3:
+    /*
+      Robin condition (dp/dq + alpha p = 1, alpha=1) at inlet (ref 1) 
+      and Dirichlet (p=-1) at outlet (ref 3)
+      example of mesh: cylhexa.mesh
+    */      
+    bc_fct_rob.setFunctions_Mixte(g1, mixte_coeff); //! Robin coeff = 1.
+    bc_fct2.setFunction(g3);
+    nb_bc = 2;
+    bc.setNumber(nb_bc);
+    bc.addBC("Inlet",   1,     Mixte, Scalar, bc_fct_rob); 
+    bc.addBC("Outlet",  3, Essential, Scalar, bc_fct2); 
+    break;
+
+  case 33:
+    /* 
+      Analytical solution defined in user_fct
+
+      example of mesh: hexahexa10x10x10.mesh
+
+    */
+    bc_fct1.setFunction(zero); //!< low   X
+    bc_fct2.setFunction(zero); //!< high  X
+    bc_fct3.setFunction(zero); //!< low   Y
+    bc_fct4.setFunction(zero); //!< high  Y
+    bc_fct5.setFunction(zero); //!< low   Z
+    bc_fct6.setFunction(zero); //!< high  Z
+
+    nb_bc = 6;
+    bc.setNumber(nb_bc);
+    
+    bc.addBC("Analytical, real BC",    1, Essential,   Scalar, bc_fct1); 
+    bc.addBC("Analytical, real BC",    2, Essential,   Scalar, bc_fct2);
+    bc.addBC("Analytical, real BC",    3, Essential,   Scalar, bc_fct3);
+    bc.addBC("Analytical, real BC",    4, Essential,   Scalar, bc_fct4);
+    bc.addBC("Analytical, real BC",    5, Essential,   Scalar, bc_fct5);
+    bc.addBC("Analytical, real BC",    6, Essential,   Scalar, bc_fct6);
+    
+    break;  
+
   default:
-    cerr << "Unknown test case\n";
-    exit(1);
+    ERROR_MSG("Unknown test case");
   }
   // update the dof with the b.c.
   bc.bdUpdate(mesh, feBd, tpdof);
