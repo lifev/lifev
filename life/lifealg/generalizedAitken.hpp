@@ -173,24 +173,24 @@ namespace LifeV
             
             if (det != 0.) //! eq. (12) page 8
             {
-                omegaF = (a22*b1 - a21*b2)/det;
-                omegaS = (a11*b2 - a21*b1)/det; // !
+                omegaF = -(a22*b1 - a21*b2)/det;
+                omegaS = -(a11*b2 - a21*b1)/det; // !
             }
             else if (a22 == 0) 
             {
                 omegaS = 0.;
-                omegaF = b1/a11;
+                omegaF = -b1/a11;
             }
             else if (a11 == 0)
             {
-                omegaS = b2/a22;
+                omegaS = -b2/a22;
                 omegaF = 0.;
             }
 
             std::cout << "generalizedAitken: omegaS = " << omegaS
                       << " omegaF = " << omegaF << std::endl;
                 
-            deltaLambda = (-omegaF)*_muF + (-omegaS)*_muS;
+            deltaLambda = omegaF*_muF + omegaS*_muS;
             
             M_lambda    = _lambda;
             M_muF       = _muF;
@@ -204,7 +204,7 @@ namespace LifeV
 
             M_firstCall = false;
             
-            deltaLambda = - M_defOmegaF*_muF - M_defOmegaS*_muS ;
+            deltaLambda = M_defOmegaF*_muF + M_defOmegaS*_muS ;
             
             std::cout << "generalizedAitken: omegaS = "  << M_defOmegaS
                       << " omegaF = " << M_defOmegaF << std::endl;
@@ -245,8 +245,9 @@ namespace LifeV
             
             M_lambda = _lambda;
             M_muS    = _mu;
-            
-            deltaLambda = - omega/norm*_mu;
+
+            omega    = - omega/norm ;
+            deltaLambda = omega*_mu;
             
             std::cout << "generalizedAitken: omega = "  << omega << std::endl;
 
@@ -255,7 +256,7 @@ namespace LifeV
         {
             M_firstCall = false;
 
-            deltaLambda = - M_defOmegaS*_mu;
+            deltaLambda = M_defOmegaS*_mu;
             
             std::cout << "generalizedAitken: omega = "  << M_defOmegaS << std::endl;
 
