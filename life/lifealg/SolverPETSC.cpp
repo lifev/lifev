@@ -216,6 +216,8 @@ SolverPETSC::solve( array_type& __X, array_type const& __B, MatStructure  __ptyp
 
     KSPSetOperators( _M_p->__ksp, _M_p->__A, _M_p->__A, __ptype  ); //CHKERRQ(__ierr);
 
+    KSPSetInitialGuessNonzero(_M_p->__ksp, PETSC_TRUE);
+        
     PetscInt           its = 0;
 #if PETSC_KSPSOLVE_OLD_INTERFACE
     KSPSetRhs(_M_p->__ksp,__b);
@@ -320,6 +322,7 @@ PETSCforSingleton::PETSCforSingleton(const GetPot& dataFile,
 
     // build up vector of options
     getpot::StringVector petscOpts;
+    petscOpts.push_back("LifeV::SolverPETSC");
     for(getpot::StringVector::const_iterator it=vars.begin();
         it!=vars.end(); ++it) {
         std::string::size_type p = it->find(section+"/");
@@ -346,7 +349,7 @@ PETSCforSingleton::PETSCforSingleton(const GetPot& dataFile,
 
     // initialize petsc
     PetscInitialize(&_argc, &_argv, 0, 0);
-    
+
 }
 
 PETSCforSingleton::~PETSCforSingleton() {
@@ -354,7 +357,7 @@ PETSCforSingleton::~PETSCforSingleton() {
     for(int i=0; i<_argc; ++i) {
         delete[] _argv[i];
     }
-    delete[] _argv;  
+    delete[] _argv;
 }
 
 }
