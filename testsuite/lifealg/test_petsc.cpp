@@ -31,20 +31,16 @@
 
 #include <lifeconfig.h>
 
-#if defined(HAVE_BOOST_TEST)
+#if defined(HAVE_BOOST_TEST) && defined(HAVE_PETSC_H)
 
 // Boost.Test
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>
 #include <boost/bind.hpp>
 
-
 #include <debug.hpp>
-#include <SolverAztec.hpp>
 
-#if defined(HAVE_PETSC_H)
 #include <SolverPETSC.hpp>
-#endif /* HAVE_PETSC_H */
 
 using boost::unit_test_framework::test_suite;
 
