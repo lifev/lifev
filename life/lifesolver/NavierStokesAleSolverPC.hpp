@@ -373,11 +373,13 @@ iterate() {
       for (UInt ic=0; ic<nc_u; ++ic){     
 	UInt ig=_dof_u.localToGlobal(i,iloc+1)-1+ic*_dim_u;       
 	_elvec[iloc+ic*_fe_u.nbNode] = _rho*(_un(ig)-_wInterp(ig)); 
+	_w_loc[iloc+ic*_fe_u.nbNode] = _wInterp(ig);
       }
     }
 
     // ALE term: 0.5 div (u^n-w) u v
-    mass_divw(0.5,_elvec,_elmatC,_fe_u,0,0,nc_u);
+    mass_divw(-_rho,_w_loc,_elmatC,_fe_u,0,0,nc_u);
+
 
     // loop on velocity components
     for(UInt ic=0;ic<nc_u;ic++){
