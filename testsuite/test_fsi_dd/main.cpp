@@ -139,7 +139,7 @@ int main(int argc, char** argv)
 
 
     //========================================================================================
-    //  COUPLED FSI OPERATOR
+    //  COUPLED FSI LINEARIZED OPERATORS
     //========================================================================================
     //
     //
@@ -148,19 +148,21 @@ int main(int argc, char** argv)
 
     operFS oper(fluid, solid, BCh_du, BCh_dz);
 
-    // Passing data from structure to the fluid: z -> du
+    // Passing the residue to the linearized fluid: \sigma -> du
+    //
+    // rem: for now: no fluid.dwInterpolated(). 
+    //      In the future this could be relevant
+
+    BCVector_Interface du_wall(oper.residualFSI(), dim_fluid, dofMeshToFluid);
+
+    // Passing the residue to the linearized structure: \sigma -> dz
     //
 
-    BCVector_Interface du_wall(fluid.dwInterpolated(), dim_fluid, dofMeshToFluid);
-
-    // Passing data from fluid to the structure: du -> dz
-    //
-
-    BCVector_Interface dg_wall(fluid.residual(), dim_fluid, dofFluidToStructure);
+    BCVector_Interface dg_wall(oper.residualFSI(), dim_fluid, dofFluidToStructure);
 
     // Boundary conditions for du
 
-    BCh_du.addBC("Wall",   1,  Essential, Full, du_wall,  3);
+    BCh_du.addBC("Wall",   1,  Natural, Full, du_wall,  3);
     BCh_du.addBC("Edges",  20, Essential, Full, bcf,      3);
 
 

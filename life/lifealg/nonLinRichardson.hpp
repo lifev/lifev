@@ -16,9 +16,8 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-
-#ifndef _NONLINRICHARDSON_HPP
-#define _NONLINRICHARDSON_HPP
+#ifndef _NONLINRICHARDSON_H
+#define _NONLINRICHARDSON_H
 
 #include <algorithm> // for min and max
 #include "linesearch_parabolic.hpp"
@@ -27,137 +26,158 @@
 
 namespace LifeV
 {
-    template<class Fct,class Vector,class Real, class Norm>
-    int nonLinRichardson(Vector&     sol,
-                         Fct&        f,
-                         Norm&       norm,
-                         Real        abstol,
-                         Real        reltol,
-                         int&        maxit,
-                         Real        eta_max,
-                         int         linesearch=0,
-                         std::ofstream&   out_res,
-                         const Real& time,
-                         const Real  omega)
-    {
-        /*
-          sol            :  the solution
-          maxit          :  input: maximum iterations, output: nb of iterations
-          abstol, reltol :  the stoping criteria is abstol+reltol*norm(residual_0),
-          eta_max        :  Maximum error tolerance for residual in linear solver.
+template<class Fct,class Vector,class Real, class Norm>
+int nonLinRichardson(Vector& sol,Fct& f,Norm& norm,Real abstol,Real reltol,int& maxit,
+	   Real eta_max,int linesearch=0, std::ofstream& out_res, const Real& time,
+	   const Real omega)
+{
+  /*
+    sol            :  the solution
+    maxit          :  input: maximum iterations, output: nb of iterations
+    abstol, reltol :  the stoping criteria is abstol+reltol*norm(residual_0),
+    eta_max        :  Maximum error tolerance for residual in linear solver.
+                      The linear solver terminates when the relative
+		      linear residual is smaller than eta*| f(sol) |.
+		      The value linear_rel_tol send for the relative tolerance
+		      to the linear solver is therefore eta. eta is determined
+		      by the modified Eisenstat-Walker formula if etamax > 0.
+		      If eta_max < 0, then eta = |etamax| for the entire
+		      iteration (e.g. etamax = -1e-6 ensures that the linear
+		      tolerance would be always 1e-6). Default value = 0.9
+    linesearch     :  for now consider only the case linesearch=0 
+                      (coded but not theoretically analysed)
+    omega          :  default relaxation parameter to be passed to Aitken.
+                      if omega is negative, then its absolute value is
+		      taken as constant relaxation parameter
+  */
 
-          The linear solver terminates when the relative
-          linear residual is smaller than eta*| f(sol) |.
+  /*
+    max_increase_res: maximum number of successive increases in residual
+                      before failure is reported
+  */
+  const int max_increase_res=5;
+  /*
+     Parameters for the linear solver, gamma: Default value = 0.9
+  */
+  const Real gamma   = 0.9;
+  //----------------------------------------------------------------------
+  Real linres;
 
-          The value linear_rel_tol send for the relative tolerance
-          to the linear solver is therefore eta. eta is determined
-          by the modified Eisenstat-Walker formula if etamax > 0.
+  int iter=0,increase_res=0;
+  Vector residual=sol,step=sol;
+  step=0.;
+  Real  normResOld=1,lambda,slope;
+  f.evalResidual(residual,sol,iter);
+  Real normRes = norm(residual),normStep=0,
+    stop_tol = abstol + reltol*normRes,
+    ratio;
+  Real eta_old,eta_new,linear_rel_tol=fabs(eta_max);
+  generalizedAitken<Vector,Real> aitk(sol.size(),omega);
+  //
+  std::cout << "------------------------------------------------------------------"
+       << std::endl;
+  std::cout << "    NonLinRichardson 0: residual=" << normRes << ", stoping tolerance = "
+       << stop_tol << std::endl;
+  std::cout << "------------------------------------------------------------------"
+       << std::endl;
 
-          linesearch     :  for now consider only the case linesearch=0
-          (coded but not theoretically analysed)
+  out_res << time << "    " << iter << "   " << normRes << std::endl;
 
-          omega          :  default relaxation parameter to be passed to Aitken.
-          if omega is negative, then its absolute value is
-          taken as constant relaxation parameter
-        */
+  while( normRes > stop_tol && iter < maxit){
+    iter++;
+    ratio = normRes / normResOld;
+    normResOld = normRes;
+    normRes = norm(residual);
+    f.updatePrec(sol,iter);
+    linres = linear_rel_tol;
+    f.solvePrec(step,-1.*residual,linres); // residual = f(sol)
+    /*
+      linres contains the relative linear tolerance achieved by the
+      linear solver, i.e linear_rel_tol = | -f(sol) - P step | / |-f(sol)|
+    */
+    step = aitk.computeDeltaLambda(sol,step);
 
-        /*
-          max_increase_res: maximum number of successive increases in residual
-          before failure is reported
-        */
-//        const int max_increase_res = 5;
-        /*
-          Parameters for the linear solver, gamma: Default value = 0.9
-        */
-//        const Real gamma   = 0.9;
 
-//----------------------------------------------------------------------
-
-        Real linres = 1.e-3;
-
-        int    iter         = 0;
-
-        int    nDofFS       = sol.size();
-
-        Vector residual     = sol;
-        Vector step         = sol;
-
-        PhysVectUnknown<Vector> muS(f.solid().dDof().numTotalDof());
-        PhysVectUnknown<Vector> muF(f.fluid().uDof().numTotalDof());
-
-        muS                 = -2.;
-        muF                 = -1.;
-        step                = 0.;
-
-        Real   normResOld   = 1;
-
-        Real   omegaS       = omega;
-        Real   omegaF       = omega;
-
-        f.evalResidual(sol, iter, residual);
-
-        Real normRes        = norm(residual);
-        Real stop_tol       = abstol + reltol*normRes;
-        Real linear_rel_tol = fabs(eta_max);
-
-        generalizedAitken<Vector,Real> aitken(nDofFS, omegaS, omegaF);
-
-//
-
-        out_res << time << "    " << iter << "   " << normRes << std::endl;
-        
-
-        while( normRes > stop_tol && iter < maxit)
-        {
-
-            std::cout << std::endl;
-            std::cout << "------------------------------------------------------------------" << std::endl;
-            std::cout << "  NonLinRichardson: residual = " << normRes
-                      << ", stoping tolerance = "          << stop_tol << std::endl;
-            std::cout << "------------------------------------------------------------------" << std::endl;
-            std::cout << std::endl;
-            
-            iter++;
-
-            normResOld = normRes;
-            normRes    = norm(residual);
-
-//            muS        = residual;
-            
-            step       = aitken.computeDeltaLambda(sol, residual);
-
-            std::cout << "Step norm = " << norm(step) << std::endl;
-
-            out_res << "Step norm = " << norm(step) << std::endl;
-            
-            muS        = f.residualS();
-            muF        = f.residualF();
-
-            sol       += step;
-            
-            f.evalResidual(sol, iter, residual);
-
-            out_res << " Res norm = " << norm(residual) << std::endl;
-            
-            normRes    = norm(residual);
-
-        }
-
-        if(normRes > stop_tol)
-        {
-            std::cout << "!!! NonLinRichardson: convergence fails" << std::endl;
-            maxit = iter;
-            return 1;
-        }
-
-        std::cout << "--- NonLinRichardson: convergence in " << iter << " iterations\n\n";
-
-        maxit = iter;
-
-        return 0;
+    slope = normRes*normRes*(linres*linres - 1);
+    std::cout << "### slope = " << slope << std::endl;
+    /*
+      slope denotes the quantity f^T J step, which is generally used by
+      line search algorithms. This formula comes form Brown & Saad (1990),
+      formula (3.4). BE CAREFUL: it assumes that the linear solver is GMRES,
+      with zero as initial guess (in particular it does not work with restart
+      gmres, see formula (3.7) and (3.9) of Brown & Saad (1990))
+    */
+    lambda = 1.;
+    //
+    // -- line search
+    //
+    switch(linesearch){
+    case 0:// no linesearch
+      sol += step;
+      f.evalResidual(residual,sol,iter);
+      normRes = norm(residual);
+      break;
+    case 1:
+      lineSearch_parab(f,norm,residual,sol,step,normRes,lambda,iter);
+      break;
+    case 2: // recommended
+      lineSearch_cubic(f,norm,residual,sol,step,normRes,lambda,slope,iter);
+      break;
+    default:
+      std::cout << "Unknown linesearch \n";
+      exit(1);
     }
-}
+    //
+    //-- end of line search
+    //
+    normStep = lambda*norm(step);
+    ratio = normRes/normResOld;
+    if(ratio > 1){
+      increase_res ++;
+      std::cout << "!!! NonLinRichardson warning: increase in residual \n";
+      if(increase_res == max_increase_res){
+	std::cout << "!!! NonLinRichardson:" << max_increase_res
+	     << " consecutive increases in residual" << std::endl;
+	maxit = iter;
+	return 1;
+      }
+    } else {
+      increase_res=0;
+    }
+    std::cout << "------------------------------------------------------------------"
+	 << std::endl;
+    std::cout << "    NonLinRichardson " << iter << ": residual=" << normRes << ",  step="
+	 << normStep << std::endl;
+    std::cout << "------------------------------------------------------------------"
+	 << std::endl;
 
+    out_res << time << "    " << iter << "   " << normRes << std::endl;
+
+    //
+    //-- forcing term computation (Eisenstat-Walker)
+    //
+    if (eta_max>0){
+      eta_old=linear_rel_tol;
+      eta_new=gamma*ratio*ratio;
+      if(gamma*eta_old*eta_old>.1) eta_new=max(eta_new,gamma*eta_old*eta_old);
+      linear_rel_tol=std::min<Real>(eta_new,eta_max);
+      linear_rel_tol=std::min<Real>(eta_max,max(linear_rel_tol,.5*stop_tol/normRes));
+      std::cout <<"    NonLinRichardson: forcing term eta = " << linear_rel_tol << std::endl;
+    }
+    //
+    //-- end of forcing term computation
+    //
+  }
+  if(normRes > stop_tol){
+    std::cout << "!!! NonLinRichardson: convergence fails" << std::endl;
+    maxit = iter;
+    return 1;
+  }
+  std::cout << "--- NonLinRichardson: convergence in " << iter << " iterations\n\n";
+  maxit = iter;
+  return 0;
+}
+}
 #endif
 
 

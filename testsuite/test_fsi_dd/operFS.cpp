@@ -102,9 +102,9 @@ namespace LifeV
 //
 // Residual evaluation
 //
-    void operFS::evalResidual(Vector &disp,
-                              int iter,
-                              Vector &res)
+  void operFS::evalResidual(Vector &disp,
+                            Vector &res,
+                            int iter)
     {
         int status = 0;
 
@@ -165,7 +165,36 @@ namespace LifeV
 
         std::cout << "done in " << chrono.diff() << " s." << std::endl;
     }
+ 
 
+    void  operFS::solvePrec(Vector& step,
+			    const Vector& res,
+			    double& linear_rel_tol)
+    {
+      Real omega(0.1);
+      generalizedAitken<Vector,Real> aitk(res.size(),omega);
+
+      UInt precChoice(1);
+
+
+      if (precChoice==0) {
+	// Dirichlet-Neumann preconditioner
+	invSfPrime(step, res, linear_rel_tol);
+      } else if (precChoice==1) {
+	// Dirichlet-Neumann preconditioner
+	invSfPrime(step, res, linear_rel_tol);
+      } else  if (precChoice==2) {
+	// Dirichlet-Neumann preconditioner
+	Vector mu_f(res.size()), mu_s(res.size());
+	invSfPrime(mu_f, res, linear_rel_tol);
+	invSsPrime(mu_s, res, linear_rel_tol);
+	step=aitk.computeDeltaLambda(mu_f,mu_s);
+      } else {
+	// Newton preconditioner
+	invSfSsPrime(step, res, linear_rel_tol);
+      }
+
+    }
 
 //
 
@@ -194,6 +223,81 @@ namespace LifeV
     }
 
 
+    void  operFS::invSfPrime(Vector& step,
+			       const Vector& res,
+			       double& linear_rel_tol)
+    {
+      // step = S'_f^{-1} \cdot res
+
+      
+
+    }
+
+    void  operFS::invSsPrime(Vector& step,
+			       const Vector& res,
+			       double& linear_rel_tol)
+    {
+      // step  = S'_s^{-1} \cdot res
+
+
+    }
+
+    void  operFS::invSfSsPrime(Vector& step,
+			    const Vector& res,
+			    double& linear_rel_tol)
+    {
+      
+ // AZTEC specifications for the second system
+  int    data_org[AZ_COMM_SIZE];   // data organisation for J
+  int    proc_config[AZ_PROC_SIZE];  // Processor information:
+  int    options[AZ_OPTIONS_SIZE];   // Array used to select solver options.
+  double params[AZ_PARAMS_SIZE];     // User selected solver paramters.
+  double status[AZ_STATUS_SIZE];     // Information returned from AZ_solve()
+
+  AZ_set_proc_config(proc_config, AZ_NOT_MPI);
+
+  // data_org assigned "by hands": no parallel computation is performed
+  UInt dim_res = res.size();
+  data_org[AZ_N_internal]= dim_res;
+  data_org[AZ_N_border]= 0;
+  data_org[AZ_N_external]= 0;
+  data_org[AZ_N_neigh]= 0;
+
+ // Recovering AZTEC defaults options and params
+  AZ_defaults(options,params);
+
+  // Fixed Aztec options for this linear system
+  options[AZ_solver]   = AZ_gmres;
+  options[AZ_output]   = 1;
+  options[AZ_poly_ord] = 5;
+  options[AZ_kspace]   = 40;
+  options[AZ_conv]     = AZ_rhs;
+  params[AZ_tol]       = linear_rel_tol;
+
+  //AZTEC matrix for the jacobian
+  AZ_MATRIX *J;
+  J = AZ_matrix_create(dim_res);
+
+  // data containing the matrices C, D, trD and H as pointers
+  // are passed through A_ii and pILU_ii:
+  AZ_set_MATFREE(J, &M_dataJacobian, my_matvecJacobian);
+
+  std::cout << "  o-  Solving Jacobian system... ";
+  Chrono chrono;
+
+  for (UInt i=0;i<dim_res; ++i)
+    step[i]=0.0;
+
+  chrono.start();
+  AZ_iterate(&step[0], &res[0], options, params, status, proc_config, J, NULL, NULL);
+  chrono.stop();
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
+
+
+  AZ_matrix_destroy(&J);
+}
+
+
     void my_matvecJacobian(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
     {
         // Extraction of data from J
@@ -212,9 +316,17 @@ namespace LifeV
             for (int i=0; i <(int)dim; ++i)
                 my_data->M_pFS->solid().d()[i] =  z[i];
 
+	    // Here we have to replace steps 
+	    //               S'_s^{-1}\circ S'_f  z
+	    // by
+	    //               S'_s \cdot z  +  S'_f \cdot z
+
             my_data->M_pFS->fluid().updateDispVelo();
             my_data->M_pFS->solveLinearFluid();
             my_data->M_pFS->solveLinearSolid();
+
+	    // Here we have to get rid of z[i]
+	    // Jz = to the computations just above.
 
             for (int i = 0; i < (int) dim; ++i)
                 Jz[i] =  z[i] - my_data->M_pFS->dz()[i];

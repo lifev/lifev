@@ -22,6 +22,7 @@
 #include "vectorNorms.hpp"
 #include "regionMesh3D_ALE.hpp"
 #include "SolverAztec.hpp"
+#include "generalizedAitken.hpp"
 
 #ifndef _OPERFS
 #define _OPERFS
@@ -69,13 +70,17 @@ namespace LifeV
                            Vector &veloStruct);
         
         void evalResidual (Vector &sol,
-                           int    iter,
-                           Vector &res);
+                           Vector &res,
+                           int    iter);
             
         void updatePrec   (Vector& sol,
                            int     iter);
 
         void solvePrec    (Vector &);
+
+        void  operFS::solvePrec(Vector &,
+				const Vector &,
+				double &);
 
         void solveLinearFluid();
 
@@ -92,6 +97,7 @@ namespace LifeV
 
         PhysVectUnknown<Vector> const & residualS() const {return M_residualS;};
         PhysVectUnknown<Vector> const & residualF() const {return M_residualF;};
+        PhysVectUnknown<Vector> & residualFSI()  {return M_residualFSI;};
         
         NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >
         &fluid() {return M_fluid;};
@@ -121,7 +127,6 @@ namespace LifeV
 
         PhysVectUnknown<Vector>       M_residualS;
         PhysVectUnknown<Vector>       M_residualF;
-
         PhysVectUnknown<Vector>       M_residualFSI;
         
         UInt         M_nbEval;
@@ -130,8 +135,23 @@ namespace LifeV
         BC_Handler&  M_BCh_dz;
 
         DataJacobian M_dataJacobian;
+      
+      
+        void  operFS::invSfPrime(Vector &,
+				 const Vector &,
+				 double &);
+        void  operFS::invSsPrime(Vector &,
+				 const Vector &,
+				 double &);
+        void  operFS::invSfSsPrime(Vector &,
+				   const Vector &,
+				   double &);
+
     };
 
-    void my_matvecJacobian(double *z, double *Jz, AZ_MATRIX* J, int proc_config[]);
+        void my_matvecJacobian(double *z,
+			       double *Jz,
+			       AZ_MATRIX* J,
+			       int proc_config[]);
 }
 #endif
