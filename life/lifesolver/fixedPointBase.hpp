@@ -43,13 +43,6 @@ public:
     // constructors
     fixedPoint();
 
-    fixedPoint( fluid_type& fluid,
-                solid_type& solid,
-                GetPot    &_dataFile,
-                bchandler_type &BCh_u,
-                bchandler_type &BCh_d,
-                bchandler_type &BCh_mesh);
-
     // destructor
     ~fixedPoint();
 

@@ -96,12 +96,12 @@ public:
         M_precond( NO_PRECONDITIONER )
         {}
 
-    operFS(fluid_type     &fluid,
-           solid_type     &solid,
-           GetPot         &data_file,
-           bchandler_type &BCh_u,
-           bchandler_type &BCh_d,
-           bchandler_type &BCh_mesh);
+//     operFS(fluid_type     &fluid,
+//            solid_type     &solid,
+//            GetPot         &data_file,
+//            bchandler_type &BCh_u,
+//            bchandler_type &BCh_d,
+//            bchandler_type &BCh_mesh);
 
     // destructor
 
@@ -176,6 +176,7 @@ protected:
     bchandler_type          M_BCh_u;
     bchandler_type          M_BCh_d;
     bchandler_type          M_BCh_mesh;
+
 
     fluid_type              M_fluid;
     solid_type              M_solid;

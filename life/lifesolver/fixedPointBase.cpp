@@ -31,19 +31,6 @@ fixedPoint::fixedPoint():
     M_aitkFS.setDefault( M_defOmega );
 }
 
-fixedPoint::fixedPoint( fluid_type& fluid,
-                        solid_type& solid,
-                        GetPot &_dataFile,
-                        bchandler_type &BCh_u,
-                        bchandler_type &BCh_d,
-                        bchandler_type &BCh_mesh):
-    operFS(fluid, solid, _dataFile, BCh_u, BCh_d, BCh_mesh)
-{
-    M_defOmega =  _dataFile("problem/defOmega",0.001);
-    std::cout << "Default aikten start value = " << M_defOmega
-              << std::endl;
-}
-
 
 fixedPoint::~fixedPoint()
 {}
@@ -57,7 +44,7 @@ fixedPoint::setDataFromGetPot( GetPot const& data )
 
     M_defOmega = data("problem/defOmega", 0.001);
 
-    Debug( 6205 ) << "steklovPoincare::setDataFromGetPot(GetPot) OmegaS = " << M_defOmega << "\n";
+    Debug( 6205 ) << "fixedPoint::setDataFromGetPot(GetPot) OmegaS = " << M_defOmega << "\n";
 
     M_aitkFS.setDefault(M_defOmega, 0.001);
 }
