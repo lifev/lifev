@@ -15,16 +15,16 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*!
   \file bdf.h
   \author A. Veneziani
   \date 04/2003
   \version 1.0
- 
+
   \brief File containing a class for an easy handling of different order time
   discretizations/extrapolations BDF based
- 
+
 */
 #ifndef _BDF_H
 #define _BDF_H
@@ -44,36 +44,36 @@ typedef Real ( *Funct ) ( const Real&, const Real&, const Real&, const Real&,
 /*!
   \class Bdf
   \brief Backward differencing formula time discretization
-  
+
   A differential equation of the form
-  
+
   \f$ M u' = A u + f \f$
-  
+
   is discretized in time as
-  
+
   \f$ M p'(t_{k+1}) = A u_{k+1} + f_{k+1} \f$
-  
+
   where p denotes the polynomial of order n in t that interpolates
   (t_i,u_i) for i = k-n+1,...,k+1.
-  
+
   The approximative time derivative \f$ p'(t_{k+1}) \f$ is a linear
   combination of state vectors u_i:
-  
+
   \f$ p'(t_{k+1}) = \frac{1}{\Delta t} (\alpha_0 u_{k+1} - \sum_{i=0}^n \alpha_i u_{k+1-i} )\f$
-  
+
   Thus we have
-  
-  \f$ \frac{\alpha_0}{\Delta t} M u_{k+1} = A u_{k+1} + f + \bar{p} \f$
-  
+
+  \f$ \frac{\alpha_0}{\Delta t} M u_{k+1} = A u_{k+1} + f + M \bar{p} \f$
+
   with
-  
+
   \f$ \bar{p} = \frac{1}{\Delta t} \sum_{i=1}^n \alpha_i u_{k+1-i} \f$
-  
+
   This class stores the n last state vectors in order to be able to
   calculate \f$ \bar{p} \f$. It also provides alpha_i
   and can extrapolate the the new state from the n last states with a
   polynomial of order n-1:
-  
+
   \f$ u_{k+1} \approx \sum_{i=0}^{n-1} \beta_i u_{k-i} \f$
 */
 class Bdf
