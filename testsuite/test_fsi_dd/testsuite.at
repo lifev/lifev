@@ -1,0 +1,122 @@
+# -*- mode: m4 -*-
+#
+#  This file is part of the LifeV library
+#
+#  Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+#       Date: 2004-08-29
+#
+#  Copyright (C) 2004 EPFL, INRIA and Politechnico di Milano
+#
+#  This library is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU Lesser General Public
+#  License as published by the Free Software Foundation; either
+#  version 2.1 of the License, or (at your option) any later version.
+#
+#  This library is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#  Lesser General Public License for more details.
+#
+#  You should have received a copy of the GNU Lesser General Public
+#  License along with this library; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+# \file testsuite.at
+# \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+# \date 2004-08-29
+# 
+AT_SETUP([test_fsi_newton])
+AT_KEYWORDS([fsi newton])
+AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file for Fluid Structure Solver 
+#-------------------------------------------------
+
+[fluid]
+
+[./physics]
+endtime   = 0.001             # endtime
+density   = 1.0               # density
+viscosity = 0.03              # viscosity
+
+
+[../discretization]
+mesh_dir = ./
+mesh_file = tube_curve20.mesh  # mesh file
+timestep  = 0.001              # timestep
+
+[../miscellaneous]
+verbose   = 1
+
+
+[solid]
+
+[./physics]
+density   = 1.2               # density
+young     = 3.0E6
+poisson   = 0.3
+endtime   = 0.001
+
+[../discretization]
+mesh_dir = ./
+mesh_file = vessel_curve20.mesh  # mesh file
+timestep  = 0.001             # timestep
+
+[../miscellaneous]
+factor    = 10
+verbose   = 1
+
+
+[../newton]
+maxiter = 1
+abstol  = 1.e-8
+linesearch = 0
+
+
+[../aztec]
+output          = none #all_res
+max_iter        = 300
+poly_ord        = 5
+kspace          = 40
+precond         = dom_decomp
+drop            = 1.00e-4
+ilut_fill       = 2
+tol             = 1.e-16
+
+
+[fluid]
+
+[./aztec_i]
+output          = all_res
+max_iter        = 1550
+poly_ord        = 5
+kspace          = 40
+precond         = dom_decomp
+tol             = 1.00e-6
+drop            = 1.00e-4
+ilut_fill       = 1.5
+
+[../aztec_ii]
+output          = all_res
+conv            = rhs
+max_iter        = 1550
+poly_ord        = 5
+kspace          = 40
+tol             = 1.00e-6
+drop            = 1.00e-4
+ilut_fill       = 1.5
+
+
+[../aztec_s]
+output          = none
+conv            = rhs
+poly_ord        = 5
+kspace          = 40
+tol             = 1.00e-6
+drop            = 1.00e-4
+]])
+AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria/tube_curve20.mesh &&
+          ln -sf $top_builddir/testsuite/data/mesh/inria/vessel_curve20.mesh &&
+          $top_builddir/testsuite/test_fsi_dd/test_fsi_dd],[0],[ignore],[ignore])
+AT_CLEANUP([out_res_solid iter num_iter out_iter_solid res])
+
