@@ -156,6 +156,7 @@ void operFS::setResidualFSI(const Vector _res)
         ID IDsolid = BCVInterface->
             dofInterface().getInterfaceDof(IDfluid);
 
+//        std::cout << IDsolid << "->" << IDfluid << std::endl;
         for (UInt jDim = 0; jDim < nDimF; ++jDim)
         {
             M_residualFSI[IDfluid - 1 + jDim*totalDofFluid] =
@@ -288,6 +289,9 @@ Vector operFS::getFluidInterfaceOnSolid(Vector    &_vec,
     Vector vec(M_residualF.size());
     vec = 0;
 
+//     for (UInt iBC = 1;
+
+
     BCBase const &BC_fluidInterface = _BCh[0];
     BCBase const &BC_solidInterface = M_fluid.BC_fluid()[0];
 
@@ -317,6 +321,57 @@ Vector operFS::getFluidInterfaceOnSolid(Vector    &_vec,
 
     return vec;
 }
+void operFS::transferOnInterface(const Vector      &_vec1,
+                                 const BCHandler   &_BC,
+                                 const std::string &_BCName,
+                                 Vector            &_vec2)
+{
+    int iBC = -1;
+    for (UInt jBC = 0; jBC < _BC.size(); jBC++)
+        if (_BC[jBC].name() == _BCName) iBC = jBC;
+    if (iBC == -1)
+    {
+        std::cout << _BCName << " not found on BC ";
+        return;
+    }
+
+    std::cout << "iBC " << _BCName << " = " << iBC << std::endl;
+    std::cout << std::endl;
+    // we know the BC number for each mesh, let's swap
+
+    BCBase const &BCInterface = _BC[(UInt) iBC];
+
+    UInt nDofInterface = BCInterface.list_size();
+
+    std::cout << "nDofInterface = " << nDofInterface << std::endl;
+
+    UInt nDim = BCInterface.numberOfComponents();
+
+    UInt totalDof1 = _vec1.size()/ nDim;
+    UInt totalDof2 = _vec2.size()/ nDim;
+
+    for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)
+    {
+        ID ID1 = BCInterface(iBC)->id();
+
+        BCVectorInterface const *BCVInterface =
+            static_cast <BCVectorInterface const *>
+            (BCInterface.pointerToBCVector());
+
+        ID ID2 = BCVInterface->
+            dofInterface().getInterfaceDof(ID1);
+
+//        std::cout << "ID1 = " << ID1 << " ID2 = " << ID2 << std::endl;
+        for (UInt jDim = 0; jDim < nDim; ++jDim)
+        {
+            _vec2[ID2 - 1 + jDim*totalDof2] =
+                _vec1[ID1 - 1 + jDim*totalDof1];
+        }
+    }
+}
+
+
+
 //
 // Residual evaluation
 //
@@ -410,6 +465,14 @@ void  operFS::solveJac(Vector &muk,
 {
     UInt precChoice = 0;
 
+
+//     Vector mup = muk;
+//     invSfPrime(_res, _linearRelTol, muk);
+//     invSsPrime(_res, _linearRelTol, mup);
+
+//     for (int ii = 0; ii < muk.size(); ii++)
+//         std::cout << muk[ii] << " " << mup[ii] << std::endl;
+
     switch(precChoice)
     {
         case 0:
@@ -482,23 +545,39 @@ void  operFS::invSfPrime(const Vector& res,
 {
     // step = S'_f^{-1} \cdot res
 
-    setResidualFSI(res);
-//    this->M_fluid.updateDispVelo();
+    setResidualFSI(-1*res);
+//     transferOnInterface(res,
+//                          M_BCh_dz,
+//                          "Interface",
+//                          M_residualFSI);
+    this->M_fluid.updateDispVelo();
 //    M_residualFSI = 0.;
     solveLinearFluid();
 
-
     Vector deltaLambda = this->M_fluid.getDeltaLambda();
+//      for (int ii = 0; ii < deltaLambda.size(); ++ii)
+//          std::cout << deltaLambda[ii] << std::endl;
+    Vector deltaL = deltaLambda;
+    deltaL = 0.;
+    transferOnInterface(deltaLambda,
+                        M_BCh_du,
+                        "Wall",
+//                         M_fluid.BC_fluid(),
+//                         "Interface",
+                        deltaL);
 
-    deltaLambda = getFluidInterfaceOnSolid(deltaLambda,
-                                           M_BCh_du);
-//     for (int ii = 0; ii < M_residualFSI.size(); ++ii)
-//         std::cout << M_residualFSI[ii] << " "
-//               << this->M_fluid.residual()[ii] << " "
-//               << deltaLambda[ii] << std::endl;
     std::cout << "deltaLambda norm = " << maxnorm(deltaLambda) << std::endl;
     std::cout << "ResidualFSI norm = " << maxnorm(M_residualFSI) << std::endl;
-    step = getFluidInterfaceOnSolid(deltaLambda);
+
+    transferOnInterface(deltaL,
+                        M_fluid.BC_fluid(),
+                        "Interface",
+                        step);
+
+//     for (int ii = 0; ii < M_residualFSI.size(); ++ii)
+//         std::cout << M_residualFSI[ii] << " "
+//                   << deltaLambda[ii] << " "
+//                   << deltaL[ii] << std::endl;
     std::cout << "deltaLambda step = " << maxnorm(step) << std::endl;
 }
 
@@ -517,6 +596,10 @@ void  operFS::invSsPrime(const Vector& res,
     solveLinearSolid();
 
     step = setDispOnInterface(M_dz);
+
+//     for (int ii = 0; ii < step.size(); ++ii)
+//         std::cout << step[ii] << std::endl;
+
 //      for (int i = 0; i < (int) M_dz.size(); ++i)
 //          step[i] = dz()[i];
 

@@ -112,8 +112,8 @@ int main(int argc, char** argv)
                                1,
                                0.);
     BCVectorInterface g_wall(fluid.residual(),
-                              dim_fluid,
-                              dofFluidToStructure);
+                             dim_fluid,
+                             dofFluidToStructure);
     //
     // Passing data from structure to the solid mesh: motion of the solid domain
     //
