@@ -119,7 +119,10 @@ public:
     //! checking if BC are set
     const bool setSolidBC() const {return M_setBC;}
     //! set the fluid BCs
-    void setSolidBC(BCHandler &BCh_solid){_BCh = BCh_solid; M_setBC = true;}
+    void setSolidBC(BCHandler &BCh_solid)
+        {M_BCh_solid = &BCh_solid; M_setBC = true;}
+    BCHandler& BCh_solid() {return *M_BCh_solid;}
+
 protected:
 
     //! Reference FE
@@ -150,8 +153,6 @@ protected:
     //! The velocity
     PhysVectUnknown<Vector> _w;
 
-    //! The BC handler
-    BCHandler& _BCh;
 
     //! The actual time
     Real _time;
@@ -160,6 +161,9 @@ protected:
     UInt _count;
 
 private:
+
+    //! The BC handler
+    BCHandler *M_BCh_solid;
 
     bool M_setBC;
     void readUnknown( const std::string       &name,
@@ -193,9 +197,9 @@ ElasticStructureHandler( const GetPot&   data_file,
     _d( _dim ),
     _dRhs( _dim ),
     _w( _dim ),
-    _BCh( BCh ),
     _time( 0 ),
-    _count( 0 )
+    _count( 0 ),
+    M_BCh_solid( &BCh )
 {}
 
 template <typename Mesh>
