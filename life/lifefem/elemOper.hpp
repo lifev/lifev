@@ -59,6 +59,8 @@ void stiff( Real coef, Real ( *fct ) ( Real, Real, Real ), ElemMat& elmat,
             const CurrentFE& fe, int iblock, int jblock );
 void stiff( Real coef, ElemMat& elmat, const CurrentFE& fe,
             int iblock, int jblock, int nb );
+void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
+            int iblock, int jblock, int nb );
 
 
 
