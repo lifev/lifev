@@ -1,4 +1,4 @@
-# -*- mode: m4 -*-
+# -*- mode: makefile -*-
 #
 #  This file is part of the LifeV library
 #
@@ -21,10 +21,6 @@
 #  License along with this library; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# \file (>>>FILE<<<)
-# \author (>>>USER_NAME<<<) <(>>>AUTHOR<<<)>
-# \date (>>>ISO_DATE<<<)
-# 
 (>>>POINT<<<)
 >>>TEMPLATE-DEFINITION-SECTION<<<
 ("ORG" "Your Organization: " "" "" "EPFL, INRIA, Politecnico di Milano")

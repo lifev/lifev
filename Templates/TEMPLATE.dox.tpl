@@ -27,6 +27,6 @@
    \date (>>>ISO_DATE<<<)
    \version 1.0
 */
-(>>>MARK<<<)
+(>>>POINT<<<)
 >>>TEMPLATE-DEFINITION-SECTION<<<
 ("ORG" "Your Organization: " "" "" "EPFL, INRIA, Politecnico di Milano")

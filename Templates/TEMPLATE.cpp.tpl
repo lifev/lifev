@@ -26,6 +26,6 @@
    \author (>>>USER_NAME<<<) <(>>>AUTHOR<<<)>
    \date (>>>ISO_DATE<<<)
  */
-(>>>MARK<<<)
+(>>>POINT<<<)
 >>>TEMPLATE-DEFINITION-SECTION<<<
 ("ORG" "Your Organization: " "" "" "EPFL, INRIA, Politecnico di Milano")
