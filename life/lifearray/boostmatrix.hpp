@@ -35,7 +35,6 @@
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <boost/lambda/lambda.hpp>
 
-#include <life/lifefem/pattern.hpp>
 #include <life/lifearray/tab.hpp>
 
 namespace LifeV
@@ -73,7 +72,7 @@ public:
 
         // Fill matrix from pattern
 
-        UInt  __max_nnz_per_line = 0;
+        //UInt  __max_nnz_per_line = 0;
         UInt __nnz_entry = 0;
 
         this->filled1() = 1;
@@ -96,13 +95,13 @@ public:
                     ++__nnz_entry;
                     ++__nnz_line;
                 }
-                __max_nnz_per_line = std::max( __nnz_line, __max_nnz_per_line );
+                //__max_nnz_per_line = std::max( __nnz_line, __max_nnz_per_line );
             }
         }
         this->index1_data()[this->size1()] = this->non_zeros();
     }
 
-    //! equivalent of += for assembly. WARNING: slow
+    //! equivalent of += for assembly.
     void set_mat_inc( typename BoostMatrix::size_type i,
                       typename BoostMatrix::size_type j, double inc )
         {
@@ -123,33 +122,26 @@ public:
 
     /** Diagonalization of row r of the system. Done by setting A(r,r) = coeff,
      *  A(r,j) = 0 for j!=r.
-     *  @param iRow row to diagonalize
+     *  @param r row to diagonalize
      *  @param coeff value to set the diagonal entry A(r,r) to
      *  @param b right hand side vector to be corrected
      *  @param datum value to set the fix the solution entry x(r) at
      */
-    void diagonalize_row( typename BoostMatrix::size_type iRow, double coeff )
+    void diagonalize_row( typename BoostMatrix::size_type r, double coeff )
         {
-            for ( typename BoostMatrix::size_type iCol=0; iCol<iRow; ++iCol )
-            {
-                erase( iRow, iCol );
-            }
-            operator()( iRow, iRow ) = coeff;
-            for ( typename BoostMatrix::size_type iCol=iRow+1;
-                  iCol<size2(); ++iCol )
-            {
-                erase( iRow, iCol );
-            }
+            zero_row( r );
+            operator()( r, r ) = coeff;
         }
 
     /** Set all elements in a row to zero
      *  @param iRow row to diagonalize
      */
-    void zero_row( typename BoostMatrix::size_type iRow) {
-        for (typename BoostMatrix::size_type iCol = 0; iCol < size2(); ++iCol) {
-            this->erase(iRow, iCol);
+    void zero_row( typename BoostMatrix::size_type iRow )
+        {
+            typename BoostMatrix::iterator1 row = begin1();
+            for ( UInt i=0; i<r; ++i, ++row );
+            std::for_each( row.begin(), row.end(), boost::lambda::_1 = 0.0 );
         }
-    }
 
     /** Diagonalization of row r of the system. Done by setting A(r,r) = coeff,
      *  A(r,j) = 0 and A(j,r) = 0 for j!=r, and suitably correcting the right
@@ -162,30 +154,59 @@ public:
     void diagonalize( typename BoostMatrix::size_type r,
                       double coeff, Vector &b, double datum )
         {
-            for ( UInt j = 0; j < size2(); ++j )
+            zero_row( r );
+            typename BoostMatrix::iterator2 col = begin2();
+            for ( UInt i=0; i<r; ++i, ++col );
+            for ( typename BoostMatrix::iterator1 iRow = col.begin();
+                  iRow != col.end(); ++iRow )
             {
-                erase( r, j ); // A(r,j) = 0
+                b[ iRow.index1() ] -= *iRow * datum;
+                *iRow = 0;
             }
-            for ( UInt i = 0; i < size1(); ++i )
-            {
-                b[ i ] -= operator()( i, r ) * datum;
-                erase( i, r ); // A(i,r) = 0
-            }
-
             operator()( r, r ) = coeff; // A(r,r) = coeff
             b[ r ] = coeff * datum; // correct right hand side for row r
         }
 
-    //! save matrix to file. Should be matlab format, but is not yet.
-    //! Matlab format can be achieved though.
+    //! Dump matrix to file in Matlab format and spy
     void spy( std::string const &filename )
         {
-            std::ofstream file_out( filename.c_str() );
-            ASSERT( file_out,
-                    "ERROR in BoostMatrix::spy(): File " << filename <<
+            std::string name = filename;
+            std::string separator = " , ";
+
+            // check on the file name
+            int i = filename.find( "." );
+
+            if ( i <= 0 )
+                name = filename + ".m";
+            else
+            {
+                if ( ( unsigned int ) i != filename.size() - 2 ||
+                     filename[ i + 1 ] != 'm' )
+                {
+                    std::cerr << "Wrong file name ";
+                    name = filename + ".m";
+                }
+            }
+
+            std::ofstream file_out( name.c_str() );
+            ASSERT( file_out, "[BoostMatrix::spy] ERROR: File " << filename <<
                     " cannot be opened for writing.");
-            file_out << *this << std::endl;
+
+            file_out << "S = [ ";
+            for ( typename BoostMatrix::iterator1 i1=begin1();
+                  i1!=end1(); ++i1 )
+            {
+                for ( typename BoostMatrix::iterator2 i2=i1.begin();
+                      i2!=i1.end(); ++i2 )
+                    file_out << i2.index1() + 1 << separator
+                             << i2.index2() + 1 << separator
+                             << *i2  << std::endl;
+            }
+            file_out << "];" << std::endl;
+            file_out << "I=S(:,1); J=S(:,2); S=S(:,3);" << std::endl;
+            file_out << "A=sparse(I,J,S); spy(A);" << std::endl;
         }
+
 }; // class BoostMatrix
 
 } // namespace LifeV
