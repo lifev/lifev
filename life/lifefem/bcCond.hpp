@@ -701,9 +701,10 @@ void BC_Handler::bdUpdate(Mesh& mesh, CurrentBdFE& feBd, const Dof& dof) {
 	    case Natural:
 	    case Mixte:
 	      // Why kind of data ?
-	      if ( where->dataVector()  ) { // With data vector
-	      	where->addIdentifier( new Identifier_Natural(gDof) );
-	      }
+              // vincent please check again for your Mixte-FE it doesn't work for Q1
+//	      if ( where->dataVector()  ) { // With data vector         
+//	      	where->addIdentifier( new Identifier_Natural(gDof) );   
+//	      }
 	      break;
 	    default:
 	      ERROR_MSG("This boundary condition type is not yet implemented");
@@ -804,14 +805,15 @@ void BC_Handler::bdUpdate(Mesh& mesh, CurrentBdFE& feBd, const Dof& dof) {
       case Natural:
       case Mixte:
 	// Why kind of data ?
-	if ( where->dataVector()  ) { // With data vector
-	  for (ID l=1; l<=nDofpF; ++l) {
-	    lDof = nDofFE + nDofFV + l; // local Dof
-	    gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + (iFaEl-1)*nDofpF + l); // global Dof
-	    where->addIdentifier( new Identifier_Natural(gDof) );
-	  }
-	}
-	else {
+        // vincent please check again for your Mixte-FE it doesn't work for Q1
+//	if ( where->dataVector()  ) { // With data vector
+//	  for (ID l=1; l<=nDofpF; ++l) {
+//	    lDof = nDofFE + nDofFV + l; // local Dof
+//	    gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + (iFaEl-1)*nDofpF + l); // global Dof
+//	    where->addIdentifier( new Identifier_Natural(gDof) );
+//	  }
+//	}
+//	else {
 	  // Loop on number of Dof per face
 	  for (ID l=1; l<=nDofpF; ++l) {
 	    lDof = nDofFE + nDofFV + l; // local Dof
@@ -819,7 +821,7 @@ void BC_Handler::bdUpdate(Mesh& mesh, CurrentBdFE& feBd, const Dof& dof) {
 	    bdltg( lDof ) =  gDof; // local to global on this face
 	  }
 	  where->addIdentifier( new Identifier_Natural(ibF,bdltg) );
-	}
+//	}
 	break;
       default:
 	ERROR_MSG("This boundary condition type is not yet implemented");
