@@ -1,3 +1,10 @@
+New in 0.1.0pre4:
+* life libraries should be std:: clean. no more using namespace std::
+  it is a very bad programming pratic in the long run
+* use Quality Management Test tool qmtest for the testsuite
+* moved testsuite/official/* and testsuite/development/* in testsuite
+
+
 New in 0.1.0pre3:
 * new architecture using the autotools from the GNU
 * new standard directory layout
