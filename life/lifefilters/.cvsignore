@@ -1,1 +1,7 @@
+.deps
+.libs
+Makefile
 Makefile.in
+liblifefilters.la
+medit_wrtrs.lo
+vtk_wrtrs.lo

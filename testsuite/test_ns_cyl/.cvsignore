@@ -1,3 +1,5 @@
 
 .depend
+.deps
+Makefile
 Makefile.in

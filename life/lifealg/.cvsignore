@@ -1,1 +1,10 @@
+.deps
+.libs
+Makefile
 Makefile.in
+SolverPETSC.lo
+dataAztec.lo
+dataNewton.lo
+liblifealg.la
+pattern.lo
+values.lo

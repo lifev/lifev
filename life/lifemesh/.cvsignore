@@ -1,1 +1,14 @@
+.deps
+.libs
+Makefile
 Makefile.in
+bareItems.lo
+basisElSh.lo
+geo0D.lo
+identifier.lo
+liblifemesh.la
+markers_base.lo
+mesh_util.lo
+mesh_util_base.lo
+readMesh3D.lo
+regionMesh3D.lo

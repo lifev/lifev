@@ -1,3 +1,5 @@
  
 .depend TestLogFile LogFile
+.deps
+Makefile
 Makefile.in

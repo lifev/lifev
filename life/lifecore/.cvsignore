@@ -1,1 +1,11 @@
+.deps
+.libs
+GetPot.lo
+Makefile
 Makefile.in
+dataString.lo
+dataTime.lo
+liblifecore.la
+subDomainNeighbors.lo
+switch.lo
+util_string.lo
