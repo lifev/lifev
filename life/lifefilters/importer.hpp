@@ -30,7 +30,7 @@
 #define __importer_H 1
 
 #include <life/lifemesh/regionMesh3D.hpp>
-
+#include <life/lifemesh/regionMesh2D.hpp>
 
 namespace LifeV
 {
@@ -107,6 +107,21 @@ public:
      */
     void import( RegionMesh3D<LinearHexa> & mesh, EntityFlag regionFlag );
 
+    /**
+     * import mesh with triangles
+     * @param mesh mesh data structure to fill in
+     * @param regionFlag marker for the region to load
+     */
+    void import( RegionMesh2D<LinearTriangle> & mesh, EntityFlag regionFlag );
+
+    
+    /**
+     * import mesh with quadrangles
+     * @param mesh mesh data structure to fill in
+     * @param regionFlag marker for the region to load
+     */
+    void import( RegionMesh2D<LinearQuad> & mesh, EntityFlag regionFlag );
+    
 private:
 
     //! name of the file to import
