@@ -30,12 +30,12 @@ $(top_srcdir)/configure.in: $(top_srcdir)/subdirs $(top_srcdir)/configure.files 
 
 
 EXTRA_DIST = configure.in.in configure.in.bot  configure.in.mid subdirs configure.files\
-             Mainpage.dox BUGS #Makefile.headers
+             Mainpage.dox BUGS Makefile.headers
 
 MAINTAINERCLEANFILES = configure.files subdirs
 
 
-SUBDIRS = admin doc life testsuite 
+SUBDIRS = admin doc life testsuite tools
 
 include $(top_srcdir)/admin/Doxyfile.am
 

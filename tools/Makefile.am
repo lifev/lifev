@@ -3,7 +3,7 @@
 #  This file is part of the LifeV library
 #
 #  Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-#       Date: 2005-02-21
+#       Date: 2005-02-24
 #
 #  Copyright (C) 2005 EPFL
 #
@@ -22,15 +22,6 @@
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-bin_PROGRAMS = inspect
+SUBDIRS = inspect
 
-noinst_HEADERS  = copyright_check.hpp inspector.hpp long_name_check.hpp\
-crlf_check.hpp license_check.hpp minmax_check.hpp\
-cvs_iterator.hpp link_check.hpp tab_check.hpp
-
-inspect_SOURCES = inspect.cpp \
-copyright_check.cpp license_check.cpp minmax_check.cpp\
-crlf_check.cpp tab_check.cpp\
-long_name_check.cpp 
-inspect_LDADD   =  $(boost_filesystem_lib) $(boost_regex_lib) $(boost_prg_exec_monitor)
-
+nodist_EXTRA_SCRIPTS    = update-headers fix-tabs fix-include
