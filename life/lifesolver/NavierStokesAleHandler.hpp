@@ -306,7 +306,6 @@ NavierStokesAleHandler<Mesh>::initialize( const std::string& velName,
 
     PhysVectUnknown<Vector> disp(nnode);
 
-//    double x,y,z;
     UInt   idummy;
     UInt   inode;
 
@@ -317,10 +316,9 @@ NavierStokesAleHandler<Mesh>::initialize( const std::string& velName,
              >> disp[inode + 2*nnode]
              >> idummy;
 
-        disp[inode + 0*nnode] = (disp[inode + 0*nnode] - _mesh.pointList[inode].coordinate(1))/_factor;
-        disp[inode + 1*nnode] = (disp[inode + 1*nnode] - _mesh.pointList[inode].coordinate(2))/_factor;
-        disp[inode + 2*nnode] = (disp[inode + 2*nnode] - _mesh.pointList[inode].coordinate(3))/_factor;
-
+        _disp[inode + 0*nnode] = (disp[inode + 0*nnode] - _mesh.pointList(inode + 1).x())/_factor;
+        _disp[inode + 1*nnode] = (disp[inode + 1*nnode] - _mesh.pointList(inode + 1).y())/_factor;
+        _disp[inode + 2*nnode] = (disp[inode + 2*nnode] - _mesh.pointList(inode + 1).z())/_factor;
     }
 
     file.close();
@@ -331,9 +329,9 @@ NavierStokesAleHandler<Mesh>::initialize( const std::string& velName,
 
     //now we must compute the "old" displacement
 
-    _dispOld = disp - _w*_dt;
+    _dispOld = _disp - _w*_dt;
 
-    _mesh.moveMesh(disp);
+    _mesh.moveMesh(_disp);
 
 }
 
@@ -493,6 +491,10 @@ NavierStokesAleHandler<Mesh>::postProcess()
 
 
         wr_medit_ascii_scalar( "press." + name + ".bb", _p.giveVec(), _p.size() );
+
+//         wr_medit_ascii_scalar( "disp_x." + name + ".bb", _disp.giveVec(), this->_mesh.numVertices() );
+//         wr_medit_ascii_scalar( "disp_y." + name + ".bb", _disp.giveVec() + _dim_u, this->_mesh.numVertices() );
+//         wr_medit_ascii_scalar( "disp_z." + name + ".bb", _disp.giveVec() + 2 * _dim_u, this->_mesh.numVertices() );
 
         wr_medit_ascii_scalar( "vel_x." + name + ".bb", _u.giveVec(), _mesh.numVertices() );
         wr_medit_ascii_scalar( "vel_y." + name + ".bb", _u.giveVec() + _dim_u, _mesh.numVertices() );
