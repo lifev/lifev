@@ -35,8 +35,6 @@ EXTRA_DIST = configure.in.in configure.in.bot  configure.in.mid subdirs configur
 MAINTAINERCLEANFILES = configure.files subdirs
 
 
-#SUBDIRS = admin doc life testsuite tools
-SUBDIRS = $(TOPSUBDIRS)
 
 include $(top_srcdir)/admin/Doxyfile.am
 
@@ -105,3 +103,5 @@ report:
        echo "tools/inspect/inspect has not been built";\
        echo "consider typing: cd tools/inspect && make";\
 	fi
+#SUBDIRS = admin doc life testsuite tools
+SUBDIRS = admin $(TOPSUBDIRS)
