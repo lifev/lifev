@@ -4,34 +4,34 @@
 #-------------------------------------------------
 
 [boundcond]
-test_case	= 2	# test case for boundary conditions
+test_case	= 1	# test case for boundary conditions
 
 [parameters]
 # flux matrix for the linear test case
-flux11	= -3.
-flux12	= 0.
-flux21	= 0.
-flux22	= -2.
+flux11	= -1.
+flux12	= 12.
+flux21	= -1.
+flux22	= 6.
 #eigenvalues of the flux matrix for the linear test case
-celer1	= -3.		# celerity (1rst comp)
-celer2	= -2.		# celerity (2nd comp)
+celer1	= 2.		# celerity (1rst comp)
+celer2	= 3.		# celerity (2nd comp)
 #left eigenvectors of the flux matrix for the linear test case
 left_eigvec11 = 1.
-left_eigvec12 = 0.
-left_eigvec21 = 0.
-left_eigvec22 = 1.
+left_eigvec12 = -3.
+left_eigvec21 = -1.
+left_eigvec22 = 4.
 # source function for the linear test case
 source10	= 1.
 source20	= 2.
-source11	= 0.1
+source11	= 0.
 source12	= 0.
 source21	= 0.
-source22	= 0.5
+source22	= 0.
 
 [time]
 timebeg	 = 0.0		# inittime
 timeend	 = 6.0		# endtime
-timestep = 0.01		# timestep		
+timestep = 0.001		# timestep		
 
 [discretization]
 mesh_file	= cylhexa.mesh	# mesh file name

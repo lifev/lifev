@@ -4,34 +4,18 @@
 #-------------------------------------------------
 
 [boundcond]
-test_case	= 2	# test case for boundary conditions
+test_case	= 13	# test case for boundary conditions
 
 [parameters]
-# flux matrix for the linear test case
-flux11	= -3.
-flux12	= 0.
-flux21	= 0.
-flux22	= -2.
-#eigenvalues of the flux matrix for the linear test case
-celer1	= -3.		# celerity (1rst comp)
-celer2	= -2.		# celerity (2nd comp)
-#left eigenvectors of the flux matrix for the linear test case
-left_eigvec11 = 1.
-left_eigvec12 = 0.
-left_eigvec21 = 0.
-left_eigvec22 = 1.
-# source function for the linear test case
-source10	= 1.
-source20	= 2.
-source11	= 0.1
-source12	= 0.
-source21	= 0.
-source22	= 0.5
+alphaCor	= 3.0		# coriolis coeff
+beta0	= 4.0		# pressure law factor
+beta1	= 5.5		# pressure law exponent
+Kr	= 6.0		# friction parameter (source term)
 
 [time]
 timebeg	 = 0.0		# inittime
-timeend	 = 6.0		# endtime
-timestep = 0.01		# timestep		
+timeend	 = 1.0		# endtime
+timestep = 0.05		# timestep		
 
 [discretization]
 mesh_file	= cylhexa.mesh	# mesh file name
@@ -39,13 +23,13 @@ mesh_dir	= ../data/mesh/inria
 		# the directory where the mesh file is
 x_left	= 0.
 x_right	= 10.
-nb_elem	= 100	#   number of elements 
+nb_elem	= 10	#   number of elements 
 
 [miscellaneous]
 post_dir = ./Post                 # the directory for postprocessing files
 verbose = 5
 post_proc_format = medit          # vtk or medit
-show_graceplot = 1                # 0: no grace plot, 1: show grace plots
+show_graceplot = 0                # 0: no grace plot, 1: show grace plots
 
 
 [aztec]  

@@ -28,11 +28,15 @@ include $(top_srcdir)/testsuite/Makefile.testsuite
 
 check_PROGRAMS = test_onedmodel
 noinst_HEADERS = dataOneDModel.hpp basicOneDMesh.hpp dofOneD.hpp \
+		 oneDNonLinModelParam.hpp vectorFunction1D.hpp \
 		 oneDModelHandler.hpp oneDModelSolver.hpp \
-		 ud_functions.hpp gracePlot.hpp
+		 ud_functions.hpp gracePlot.hpp 
+
 test_onedmodel_SOURCES = dataOneDModel.cpp  basicOneDMesh.cpp \
-			oneDModelHandler.cpp oneDModelSolver.cpp main.cpp\
-			gracePlot.cpp 
+			 oneDNonLinModelParam.cpp vectorFunction1D.cpp \
+			 oneDModelHandler.cpp oneDModelSolver.cpp \
+			 main.cpp gracePlot.cpp 
+
 test_onedmodel_LDADD    = $(grace_libs) $(life_libs)
 
 EXTRA_DIST = data testsuite.at 
