@@ -28,7 +28,7 @@
 
 #include "NavierStokesSolverPC.hpp"
 #include "zeroDModelSolver.hpp"
-#include "NavierStokesWithFlux_new.hpp"
+#include "NavierStokesWithFlux.hpp"
 
 
 #ifndef _C3D0D
