@@ -57,8 +57,8 @@ namespace LifeV
 
         operFS(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
                VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
-               BCHandler& BCh_du, BCHandler& BCh_dz);
-//               GetPot &data_file);
+               BCHandler& BCh_du, BCHandler& BCh_dz,
+               GetPot &data_file);
 
         // destructor
 
@@ -79,8 +79,8 @@ namespace LifeV
 
         void solvePrec      (Vector &);
 
-        Vector solvePrec      (const Vector &,
-                               double);
+        Vector solvePrec    (const Vector &,
+                             double);
 
         void solveLinearFluid();
 
@@ -105,8 +105,9 @@ namespace LifeV
 
         Vector getResidualFSIOnSolid();
 
-//         PhysVectUnknown<Vector> const & residualS() const
-//             {return M_residualS;}
+        Vector getSolidInterfaceOnFluid(Vector &_vec);
+        Vector getFluidInterfaceOnSolid(Vector &_vec);
+
         PhysVectUnknown<Vector> & residualS()             {return M_residualS;}
         PhysVectUnknown<Vector> const & residualF() const {return M_residualF;}
         PhysVectUnknown<Vector> & residualFSI()           {return M_residualFSI;}
@@ -130,6 +131,7 @@ namespace LifeV
         Vector                  M_dispStruct;
 
         Real                    M_time;
+        Real                    M_linearRelTol;
 
         SolverAztec             M_solverAztec;
 
@@ -143,23 +145,15 @@ namespace LifeV
 
         UInt                    M_nbEval;
 
-        BCHandler&             M_BCh_du;
-        BCHandler&             M_BCh_dz;
+        BCHandler&              M_BCh_du;
+        BCHandler&              M_BCh_dz;
 
         DataJacobian            M_dataJacobian;
 
+        Vector  invSfPrime  (const Vector &res);
+        Vector  invSsPrime  (const Vector &res);
 
-        void  invSfPrime  (const Vector &res,
-                           double       linear_rel_tol,
-                           Vector       &step);
-
-        void  invSsPrime  (const Vector &res,
-                           double       linear_rel_tol,
-                           Vector       &step);
-
-        void  invSfSsPrime(const Vector &res,
-                           double       linear_rel_tol,
-                           Vector       &step);
+        Vector  invSfSsPrime(const Vector &res);
     };
 
 

@@ -27,8 +27,8 @@ namespace LifeV
 operFS::operFS(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
                VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
                BCHandler &BCh_du,
-               BCHandler &BCh_dz):
-//                   GetPot     &data_file):
+               BCHandler &BCh_dz,
+               GetPot     &data_file):
     M_fluid       (fluid),
     M_solid       (solid),
     M_dispStruct  ( 3*M_solid.dDof().numTotalDof() ),
@@ -43,7 +43,7 @@ operFS::operFS(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
     M_BCh_dz      (BCh_dz),
     M_dataJacobian(this)
 {
-//        M_solverAztec.setOptionsFromGetPot(data_file,"jacobian/aztec");
+    M_solverAztec.setOptionsFromGetPot(data_file,"jacobian/aztec");
 }
 
 // Destructor
@@ -201,6 +201,79 @@ Vector operFS::getResidualFSIOnSolid()
     return vec;
 }
 
+Vector operFS::getSolidInterfaceOnFluid(Vector &_vec)
+{
+    Vector vec(M_residualF.size());
+
+    BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[0];
+    BCBase const &BC_solidInterface = M_solid.BC_solid()[0];
+
+    UInt nDofInterface = BC_fluidInterface.list_size();
+
+    UInt nDimF = BC_fluidInterface.numberOfComponents();
+    UInt nDimS = BC_solidInterface.numberOfComponents();
+
+    UInt totalDofFluid = M_residualF.size()/ nDimF;
+    UInt totalDofSolid = M_residualS.size()/ nDimS;
+
+    for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)
+    {
+        ID IDfluid = BC_fluidInterface(iBC)->id();
+
+        BCVectorInterface const *BCVInterface =
+            static_cast <BCVectorInterface const *>
+            (BC_fluidInterface.pointerToBCVector());
+
+        ID IDsolid = BCVInterface->
+            dofInterface().getInterfaceDof(IDfluid);
+
+        for (UInt jDim = 0; jDim < nDimF; ++jDim)
+        {
+            vec[IDfluid - 1 + jDim*totalDofSolid] =
+                _vec[IDsolid - 1 + jDim*totalDofSolid];
+}
+    }
+
+    return vec;
+}
+
+
+Vector operFS::getFluidInterfaceOnSolid(Vector &_vec)
+{
+    Vector vec(M_residualS.size());
+
+    BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[0];
+    BCBase const &BC_solidInterface = M_solid.BC_solid()[0];
+
+    UInt nDofInterface = BC_fluidInterface.list_size();
+
+    UInt nDimF = BC_fluidInterface.numberOfComponents();
+    UInt nDimS = BC_solidInterface.numberOfComponents();
+
+    UInt totalDofFluid = M_residualF.size()/ nDimF;
+    UInt totalDofSolid = M_residualS.size()/ nDimS;
+
+    for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)
+    {
+        ID IDfluid = BC_fluidInterface(iBC)->id();
+
+        BCVectorInterface const *BCVInterface =
+            static_cast <BCVectorInterface const *>
+            (BC_fluidInterface.pointerToBCVector());
+
+        ID IDsolid = BCVInterface->
+            dofInterface().getInterfaceDof(IDfluid);
+
+        for (UInt jDim = 0; jDim < nDimF; ++jDim)
+        {
+            vec[IDsolid - 1 + jDim*totalDofSolid] =
+                _vec[IDfluid - 1 + jDim*totalDofSolid];
+}
+    }
+
+    return vec;
+}
+
 //
 // Residual evaluation
 //
@@ -224,7 +297,6 @@ void operFS::eval(const Vector& disp,
 
     M_fluid.updateMesh(M_time);
     M_fluid.iterate   (M_time);
-
 
     dispNew = M_solid.d();
     velo    = M_solid.w();
@@ -286,8 +358,6 @@ void  operFS::solvePrec(Vector &_uBarS)
 
     UInt dim = _uBarS.size();
 
-    std::cout << "  o-  Solving the preconditionned system... ";
-    Chrono chrono;
 
     for (int ii = 0; ii < (int) dim; ++ii)
         solid().d()[ii] =  _uBarS[ii];
@@ -299,9 +369,6 @@ void  operFS::solvePrec(Vector &_uBarS)
     for (int i = 0; i < (int) dim; ++i)
         _uBarS[i] =  dz()[i] - _uBarS[i];
 
-    chrono.stop();
-
-    std::cout << "done in " << chrono.diff() << " s." << std::endl;
 }
 
 //
@@ -315,16 +382,23 @@ Vector  operFS::solvePrec(const Vector  &_res,
 {
     Vector muk(_res.size());
 
-    UInt precChoice = 1;
+    M_linearRelTol = _linearRelTol;
+
+    UInt precChoice = 0;
+
+    std::cout << "  o-  Solving the preconditionned system... ";
+
+    Chrono chrono;
+
     switch(precChoice)
     {
         case 0:
             // Dirichlet-Neumann preconditioner
-            invSfPrime(_res, _linearRelTol, muk);
+            muk = invSfPrime(_res);
             break;
         case 1:
             // Dirichlet-Neumann preconditioner
-            invSsPrime(_res, _linearRelTol, muk);
+            muk = invSsPrime(_res);
             break;
         case 2:
             // Dirichlet-Neumann preconditioner
@@ -332,16 +406,20 @@ Vector  operFS::solvePrec(const Vector  &_res,
             Vector muF(_res.size());
             Vector muS(_res.size());
 
-            invSfPrime(_res, _linearRelTol, muF);
-            invSsPrime(_res, _linearRelTol, muS);
+            muF = invSfPrime(_res);
+            muS = invSsPrime(_res);
 
             muk = muS + muF;
         }
         break;
         default:
             // Newton preconditioner
-            invSfSsPrime(_res, _linearRelTol, muk);
+            muk = invSfSsPrime(_res);
     }
+
+    chrono.stop();
+
+    std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
     return muk;
 }
@@ -357,6 +435,7 @@ void  operFS::solveLinearFluid()
 
 void  operFS::solveLinearSolid()
 {
+
     M_rhs_dz = 0.;
     M_dz     = 0.;
 
@@ -369,13 +448,11 @@ void  operFS::solveLinearSolid()
 
     Real tol       = 1.e-10;
 
+    M_BCh_dz.showMe(true, std::cout);
     std::cout << "rhs_dz norm = " << maxnorm(M_rhs_dz) << std::endl;
     M_solid._recur = 1;
     M_solid.solveJac(M_dz, M_rhs_dz, tol, M_BCh_dz);
     std::cout << "dz norm     = " << maxnorm(M_dz) << std::endl;
-
-//     for (UInt ii = 0; ii < M_rhs_dz.size(); ++ii)
-//         std::cout << M_rhs_dz[ii] << " " << M_dz[ii] << std::endl;
 }
 
 
@@ -385,13 +462,17 @@ void  operFS::solveLinearSolid()
 //
 
 
-void  operFS::invSfPrime(const Vector& res,
-                         double linear_rel_tol,
-                         Vector& step)
+Vector operFS::invSfPrime(const Vector& _res)
 {
-    // step = S'_f^{-1} \cdot res
+    Vector step(_res.size());
 
+    setResidualFSI(_res);
+    solveLinearFluid();
 
+    Vector deltaLambda = M_fluid.getDeltaLambda();
+
+    step = getFluidInterfaceOnSolid(deltaLambda);
+    return step;
 }
 
 
@@ -401,17 +482,17 @@ void  operFS::invSfPrime(const Vector& res,
 
 
 
-void  operFS::invSsPrime(const Vector& res,
-                         double linear_rel_tol,
-                         Vector& step)
+Vector operFS::invSsPrime(const Vector& _res)
 {
-    setResidualFSI(res);
+    Vector step(_res.size());
+
+    setResidualFSI(_res);
     solveLinearSolid();
 
-     for (int i = 0; i < (int) M_dz.size(); ++i)
-         step[i] = dz()[i];
+    for (int i = 0; i < (int) M_dz.size(); ++i)
+        step[i] = dz()[i];
 
-     return;
+    return step;
 }
 
 
@@ -420,58 +501,30 @@ void  operFS::invSsPrime(const Vector& res,
 //
 
 
-void  operFS::invSfSsPrime(const Vector& res,
-                           double linear_rel_tol,
-                           Vector& step)
+Vector operFS::invSfSsPrime(const Vector& _res)
 {
-    // AZTEC specifications for the second system
-    int    data_org[AZ_COMM_SIZE];   // data organisation for J
-    int    proc_config[AZ_PROC_SIZE];  // Processor information:
-    int    options[AZ_OPTIONS_SIZE];   // Array used to select solver options.
-    double params[AZ_PARAMS_SIZE];     // User selected solver paramters.
-    double status[AZ_STATUS_SIZE];     // Information returned from AZ_solve()
+    UInt dimRes = _res.size();
+    Vector step(dimRes);
 
-    AZ_set_proc_config(proc_config, AZ_NOT_MPI);
+    M_solverAztec.setTolerance(M_linearRelTol);
 
-    // data_org assigned "by hands": no parallel computation is performed
-    UInt dim_res = res.size();
-    data_org[AZ_N_internal]= dim_res;
-    data_org[AZ_N_border]= 0;
-    data_org[AZ_N_external]= 0;
-    data_org[AZ_N_neigh]= 0;
-
-    // Recovering AZTEC defaults options and params
-    AZ_defaults(options,params);
-
-    // Fixed Aztec options for this linear system
-    options[AZ_solver]   = AZ_gmres;
-    options[AZ_output]   = 1;
-    options[AZ_poly_ord] = 5;
-    options[AZ_kspace]   = 40;
-    options[AZ_conv]     = AZ_rhs;
-    params[AZ_tol]       = linear_rel_tol;
-
-    //AZTEC matrix for the jacobian
-    AZ_MATRIX *J;
-    J = AZ_matrix_create(dim_res);
-
-    // data containing the matrices C, D, trD and H as pointers
-    // are passed through A_ii and pILU_ii:
-    AZ_set_MATFREE(J, &M_dataJacobian, my_matvecSfSsPrime);
+    M_solverAztec.setMatrixFree(dimRes,
+                             &M_dataJacobian,
+                             my_matvecSfSsPrime);
 
     std::cout << "  o-  Solving Jacobian system... ";
     Chrono chrono;
 
-    for (UInt i=0;i<dim_res; ++i)
+    for (UInt i=0;i<dimRes; ++i)
         step[i]=0.0;
 
     chrono.start();
-    AZ_iterate(&step[0], &res[0], options, params, status, proc_config, J, NULL, NULL);
+    M_solverAztec.solve(step, _res);
     chrono.stop();
+
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
-
-    AZ_matrix_destroy(&J);
+    return step;
 }
 
 

@@ -99,6 +99,7 @@ public:
     BCHandler const & BC_fluid() const {return _mesh_BCh;}
 
     Vector& residual();
+    Vector  getDeltaLambda() {return _dt*_du;}
 
 private:
 
