@@ -210,7 +210,7 @@ computeDeltaLambda( const Vector &_lambda,
 
         Real det ( a22 * a11 - a21 * a21 );
 
-        if ( std::fabs(det) > 1E-8 )  //! eq. (12) page 8
+        if ( std::fabs(det) > 1E-18 )  //! eq. (12) page 8
         {
             omegaF = -( a22 * b1 - a21 * b2 ) / det;
             omegaS = -( a11 * b2 - a21 * b1 ) / det; // !
