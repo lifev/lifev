@@ -87,16 +87,19 @@ int main(int argc, char** argv)
     //========================================================================================
     //  DATA INTERFACING BETWEEN BOTH SOLVERS
     //========================================================================================
+
     //
     // Passing data from the fluid to the structure: fluid load at the interface
     //
+    
     DofInterface3Dto3D dofFluidToStructure(feTetraP1, solid.dDof(), feTetraP1bubble, fluid.uDof());
     dofFluidToStructure.update(solid.mesh(), 1, fluid.mesh(), 1, 0.0);
     BCVector_Interface g_wall(fluid.residual(), dim_fluid, dofFluidToStructure);
 
-
+    //
     // Passing data from structure to the fluid mesh: motion of the fluid domain
     //
+    
     DofInterface3Dto3D dofStructureToFluidMesh(fluid.mesh().getRefFE(), fluid.dofMesh(),
                                                feTetraP1, solid.dDof());
     dofStructureToFluidMesh.update(fluid.mesh(), 1, solid.mesh(), 1, 0.0);
@@ -143,7 +146,7 @@ int main(int argc, char** argv)
     BC_Handler BCh_du(2);
     BC_Handler BCh_dz(3);
 
-    operFS oper(fluid, solid, BCh_du, BCh_dz);
+    operFS oper(fluid, solid, BCh_du, BCh_dz, data_file);
 
     // Passing data from structure to the fluid: z -> du
     //
