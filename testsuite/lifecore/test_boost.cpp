@@ -60,7 +60,7 @@ double f2( double t, double x , double y, double z, LifeV::ID const& i)
 void
 test_function()
 {
-    const ulong TGV = 100000001;
+    const ulong TGV = 10000001;
     std::ofstream __out( "bench.txt" );
     __out.precision( 8 );
     for ( ulong N = 10;N < TGV;N*=10 )
