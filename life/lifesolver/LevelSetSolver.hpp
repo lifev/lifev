@@ -30,7 +30,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #ifndef _LEVELSETSOLVER_HPP_
 #define _LEVELSETSOLVER_HPP_
 
-#define DEBUG_REINI
+#define LSS_DEBUG_REINI 1
+
+#include <algorithm>
 
 #include <life/lifearray/tab.hpp>
 
@@ -158,7 +160,7 @@ namespace LifeV {
                 if (! projection_is_on_face) {
                     d = pointToPointDistance(P, point(1));
                     for(int iP = 2; iP <= 3; iP++)
-                        d = std::min( d, pointToPointDistance(P, point(iP)) );
+                        d = std::min<Real>( d, pointToPointDistance(P, point(iP)) );
                 }
 
                 return d;
@@ -290,11 +292,12 @@ namespace LifeV {
 
         //! reinitialize the interface using direct method
         void directReinitialization() {
-            std::cout << "starting to build the interface" << std::endl;
             build_interface();
-#ifdef DEBUG_REINI
-            std::cout << "Found " << _M_face_list.size() << " faces" << std::endl;
-            std::cout << "DEBUG MESSAGE: reinitializing the interface" << std::endl;
+            if(_M_verbose) {
+                std::cout << "** LSS ** " << _M_face_list.size() << " faces" << std::endl;
+                std::cout << "** LSS ** Reinitializing the interface" << std::endl;
+            }
+#if LSS_DEBUG_REINI
             exportToMatlab("./results/before.m");
 #endif
             for(UInt iP = 1; iP <= _M_mesh.numPoints(); iP++) {
@@ -304,12 +307,12 @@ namespace LifeV {
                 Real d = _M_face_list.begin()->pointToFaceDistance(P);
 
                 for(face_list_iterator faces_it = _M_face_list.begin(); faces_it != _M_face_list.end(); faces_it++)
-                    d = std::min(d, faces_it->pointToFaceDistance(P));
+                    d = std::min<Real>(d, faces_it->pointToFaceDistance(P));
 
 
                 _M_u[iP - 1] = signum(_M_u[iP - 1]) * d;
             }
-#ifdef DEBUG_REINI
+#if LSS_DEBUG_REINI
             build_interface();
             exportToMatlab("./results/after.m");
 #endif
