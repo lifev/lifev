@@ -45,7 +45,10 @@ class exactJacobian : public operFS
 public:
 
     // constructors
-    exactJacobian(GetPot &_dataFile);
+    exactJacobian(GetPot &_dataFile,
+                  BCHandler &BCh_u,
+                  BCHandler &BCh_d,
+                  BCHandler &BCh_mesh);
 
     // destructor
     ~exactJacobian();
@@ -62,8 +65,7 @@ public:
     void solveLinearFluid();
     void solveLinearSolid();
 
-    void setUpBC(function_type _bcf,
-                 function_type _vel);
+    void setUpBC();
 
     Vector dz() {return M_dz;}
 
@@ -80,6 +82,13 @@ private:
 
 
 void my_matvecJacobianEJ(double *z, double *Jz, AZ_MATRIX* J, int proc_config[]);
+
+Real fzeroEJ(const Real& t,
+           const Real& x,
+           const Real& y,
+           const Real& z,
+           const ID& i);
+
 
 }
 

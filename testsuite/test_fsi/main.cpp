@@ -49,15 +49,19 @@ int main(int argc, char** argv)
     const char* data_file_name = command_line.follow("data", 2, "-f","--file");
     GetPot data_file(data_file_name);
 
+    // Number of boundary conditions for the fluid velocity,
+    // solid displacement, and fluid mesh motion
+    //
 
-    //========================================================================================
-    //  TEMPORAL LOOP
-    //========================================================================================
+    BCHandler BCh_u;
+    BCHandler BCh_d;
+    BCHandler BCh_mesh;
 
     UInt method   = data_file("problem/method"    , 0);
     UInt maxpf    = data_file("problem/maxSubIter", 300);
     UInt precond  = data_file("problem/precond"   , 1);
     Real defOmega = data_file("problem/defOmega"  , 0.01);
+
 
     std::cout << std::endl;
     std::cout << "Fluid/Structure interactions";
@@ -69,14 +73,20 @@ int main(int argc, char** argv)
             std::cout << "--------------------------------------------------"
                       << std::endl;
             std::cout << std::endl;
-            p_oper.reset(new fixedPoint(data_file));
+            p_oper.reset(new fixedPoint(data_file,
+                                        BCh_u,
+                                        BCh_d,
+                                        BCh_mesh));
             break;
         case 1:
             std::cout << " -- SteklovPoincare method" << std::endl;
             std::cout << "------------------------------------------------------"
                       << std::endl;
             std::cout << std::endl;
-            p_oper.reset(new steklovPoincare(data_file));
+            p_oper.reset(new steklovPoincare(data_file,
+                                             BCh_u,
+                                             BCh_d,
+                                             BCh_mesh));
             if (precond == 2) defOmega = -1.;
             break;
         case 2:
@@ -84,13 +94,79 @@ int main(int argc, char** argv)
             std::cout << "----------------------------------------------------"
                       << std::endl;
             std::cout << std::endl;
-            p_oper.reset(new exactJacobian(data_file));
+            p_oper.reset(new exactJacobian(data_file,
+                                           BCh_u,
+                                           BCh_d,
+                                           BCh_mesh));
             break;
         default:
-            p_oper.reset(new steklovPoincare(data_file));
+            p_oper.reset(new steklovPoincare(data_file,
+                                             BCh_u,
+                                             BCh_d,
+                                             BCh_mesh));
     }
 
     operFS &oper = *p_oper;
+
+    UInt dim_solid = oper.solid().dDof().numTotalDof();
+    UInt dim_fluid = oper.fluid().uDof().numTotalDof();
+
+
+    //========================================================================================
+    //  DATA INTERFACING BETWEEN BOTH SOLVERS
+    //========================================================================================
+    //
+    // Passing data from the fluid to the structure: fluid load at the interface
+    //
+    DofInterface3Dto3D dofFluidToStructure(feTetraP1, oper.solid().dDof(), feTetraP1bubble, oper.fluid().uDof());
+    dofFluidToStructure.update(oper.solid().mesh(), 1, oper.fluid().mesh(), 1, 0.0);
+    BCVectorInterface g_wall(oper.fluid().residual(), dim_fluid, dofFluidToStructure);
+
+
+    // Passing data from structure to the fluid mesh: motion of the fluid domain
+    //
+    DofInterface3Dto3D dofStructureToFluidMesh(oper.fluid().mesh().getRefFE(), oper.fluid().dofMesh(),
+                                               feTetraP1, oper.solid().dDof());
+    dofStructureToFluidMesh.update(oper.fluid().mesh(), 1, oper.solid().mesh(), 1, 0.0);
+    BCVectorInterface displ(oper.solid().d(), dim_solid, dofStructureToFluidMesh);
+
+
+
+    // Passing data from structure to the fluid: solid velocity at the interface velocity
+    //
+    DofInterface3Dto3D dofMeshToFluid(feTetraP1bubble, oper.fluid().uDof(), feTetraP1bubble, oper.fluid().uDof() );
+    dofMeshToFluid.update(oper.fluid().mesh(), 1, oper.fluid().mesh(), 1, 0.0);
+    BCVectorInterface u_wall(oper.fluid().wInterpolated(), dim_fluid,dofMeshToFluid);
+
+    //========================================================================================
+    //  BOUNDARY CONDITIONS
+    //========================================================================================
+    //
+    // Boundary conditions for the harmonic extension of the
+    // interface solid displacement
+    BCFunctionBase bcf(fZero);
+//    BCh_mesh.addBC("Interface", 1, Essential, Full, displ, 3);
+    BCh_mesh.addBC("Top",       3, Essential, Full, bcf,   3);
+    BCh_mesh.addBC("Base",      2, Essential, Full, bcf,   3);
+    BCh_mesh.addBC("Edges",    20, Essential, Full, bcf,   3);
+
+    // Boundary conditions for the fluid velocity
+    BCFunctionBase in_flow(u2);
+    BCh_u.addBC("Wall",   1,  Essential, Full, u_wall,  3);
+    BCh_u.addBC("InFlow", 2,  Natural,   Full, in_flow, 3);
+    BCh_u.addBC("Edges",  20, Essential, Full, bcf,     3);
+
+    // Boundary conditions for the solid displacement
+//    BCh_d.addBC("Interface", 1, Natural, Full, g_wall, 3);
+    BCh_d.addBC("Top",       3, Essential, Full, bcf,  3);
+    BCh_d.addBC("Base",      2, Essential, Full, bcf,  3);
+
+
+    //========================================================================================
+    //  TEMPORAL LOOP
+    //========================================================================================
+
+
 
     oper.fluid().showMe();
     oper.solid().showMe();
@@ -99,18 +175,14 @@ int main(int argc, char** argv)
     Real T      = oper.fluid().endtime();
 
     Real abstol = 1.e-7;
-    Real reltol = 1.e-3;
+    Real reltol = 0.;
     Real etamax = 1.e-3;
-
     int status;
     int maxiter;
     int linesearch = 0;
 
     std::ofstream nout("num_iter");
     ASSERT(nout,"Error: Output file cannot be opened.");
-
-    UInt dim_solid = oper.solid().dDof().numTotalDof();
-    UInt dim_fluid = oper.fluid().uDof().numTotalDof();
 
     Vector disp(3*dim_solid);
     disp   = ZeroVector( disp.size() );
@@ -121,7 +193,6 @@ int main(int argc, char** argv)
     std::ofstream out_iter("iter");
     std::ofstream out_res ("res");
 
-    oper.setUpBC(fZero, u2);
 
     oper.fluid().initialize(u0);
     oper.solid().initialize(d0,w0);
@@ -129,6 +200,9 @@ int main(int argc, char** argv)
     //
     // Temporal loop
     //
+
+    Chrono chrono;
+    chrono.start();
 
     for (Real time=dt; time <= T; time+=dt)
     {
@@ -178,6 +252,9 @@ int main(int argc, char** argv)
         }
     }
 
+    chrono.stop();
+    out_res << "Total computation time = " << chrono.diff()
+            << std::endl;
     return 0;
 }
 

@@ -23,12 +23,24 @@
 
 namespace LifeV
 {
-exactJacobian::exactJacobian(GetPot &_dataFile):
-    operFS(_dataFile),
+
+Real fzeroEJ(const Real& t,
+           const Real& x,
+           const Real& y,
+           const Real& z,
+           const ID& i)
+{return 0.0;}
+
+exactJacobian::exactJacobian(GetPot    &_dataFile,
+                             BCHandler &BCh_u,
+                             BCHandler &BCh_d,
+                             BCHandler &BCh_mesh):
+    operFS(_dataFile, BCh_u, BCh_d, BCh_mesh),
     M_dz     (3*M_solid.dDof().numTotalDof()),
     M_rhs_dz (3*M_solid.dDof().numTotalDof()),
     M_dataJacobian(this)
 {
+    setUpBC();
 }
 
 exactJacobian::~exactJacobian()
@@ -50,13 +62,9 @@ void exactJacobian::eval(const Vector &_disp,
     this->M_fluid.updateMesh(time());
     this->M_fluid.iterate   (time());
 
-    this->M_fluid.postProcess();
-
-
     this->M_solid.setRecur(0);
     this->M_solid.iterate();
 
-    this->M_solid.postProcess();
 }
 
 
@@ -95,8 +103,7 @@ void exactJacobian::evalResidual(Vector &_res,
 //
 
 
-void exactJacobian::setUpBC(function_type _bcf,
-                            function_type _vel)
+void exactJacobian::setUpBC()
 {
     std::cout << "Boundary Conditions setup ... ";
 
@@ -128,25 +135,14 @@ void exactJacobian::setUpBC(function_type _bcf,
     //  BOUNDARY CONDITIONS
     //========================================================================================
 
+    BCFunctionBase bcf(fzeroEJ);
+
     // Boundary conditions for the harmonic extension of the
     // interface solid displacement
-    BCFunctionBase bcf(_bcf);
     M_BCh_mesh.addBC("Interface", 1, Essential, Full, displ, 3);
-    M_BCh_mesh.addBC("Top",       3, Essential, Full, bcf,   3);
-    M_BCh_mesh.addBC("Base",      2, Essential, Full, bcf,   3);
-    M_BCh_mesh.addBC("Edges",    20, Essential, Full, bcf,   3);
-
-
-    // Boundary conditions for the fluid velocity
-    BCFunctionBase in_flow(_vel);
-    M_BCh_u.addBC("Wall",   1,  Essential, Full, u_wall,  3);
-    M_BCh_u.addBC("InFlow", 2,  Natural,   Full, in_flow, 3);
-    M_BCh_u.addBC("Edges",  20, Essential, Full, bcf,     3);
 
     // Boundary conditions for the solid displacement
     M_BCh_d.addBC("Interface", 1, Natural,   Full, g_wall, 3);
-    M_BCh_d.addBC("Top",       3, Essential, Full, bcf,    3);
-    M_BCh_d.addBC("Base",      2, Essential, Full, bcf,    3);
 
     BCVectorInterface du_wall(M_fluid.dwInterpolated(), dim_fluid, M_dofMeshToFluid);
 
@@ -253,10 +249,8 @@ void  exactJacobian::solveLinearSolid()
 
     Real tol       = 1.e-10;
 
-    std::cout << "rhs_dz norm = " << norm_inf(M_rhs_dz) << std::endl;
     this->M_solid.setRecur(1);
     this->M_solid.solveJac(M_dz, M_rhs_dz, tol);
-    std::cout << "dz norm     = " << norm_inf(M_dz) << std::endl;
 }
 
 

@@ -31,7 +31,10 @@ class fixedPoint : public operFS
 public:
 
     // constructors
-    fixedPoint(GetPot &_dataFile);
+    fixedPoint(GetPot    &_dataFile,
+               BCHandler &BCh_u,
+               BCHandler &BCh_d,
+               BCHandler &BCh_mesh);
 
     // destructor
     ~fixedPoint();
@@ -41,12 +44,11 @@ public:
     void evalResidual(Vector       &_res,
                       const Vector &_disp,
                       const int     _iter);
-    void solveJac   (Vector       &_muk,
-                     const Vector &_res,
-                     const double  _linearRelTol);
+    void solveJac    (Vector       &_muk,
+                      const Vector &_res,
+                      const double  _linearRelTol);
 
-    void setUpBC     (function_type _bcf,
-                      function_type _vel);
+    void setUpBC     ();
 
     Real   defOmega() {return M_defOmega;}
 

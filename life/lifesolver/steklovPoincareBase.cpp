@@ -23,8 +23,18 @@
 
 namespace LifeV
 {
-steklovPoincare::steklovPoincare(GetPot &_dataFile):
-    operFS(_dataFile),
+Real fzeroSP(const Real& t,
+           const Real& x,
+           const Real& y,
+           const Real& z,
+           const ID& i)
+{return 0.0;}
+
+steklovPoincare::steklovPoincare(GetPot &_dataFile,
+                                 BCHandler &BCh_u,
+                                 BCHandler &BCh_d,
+                                 BCHandler &BCh_mesh):
+    operFS(_dataFile, BCh_u, BCh_d, BCh_mesh),
     M_dz          ( 3*M_solid.dDof().numTotalDof() ),
     M_rhs_dz      ( 3*M_solid.dDof().numTotalDof() ),
     M_residualS   ( M_solid.dDof().numTotalDof() ),
@@ -50,7 +60,7 @@ steklovPoincare::steklovPoincare(GetPot &_dataFile):
         std::cout << "Default aikten start value = " << M_defOmega
                   << std::endl;
     }
-//    setUpBC();
+    setUpBC();
 }
 
 steklovPoincare::~steklovPoincare()
@@ -69,26 +79,32 @@ void steklovPoincare::eval(const Vector& disp,
     if(status) M_nbEval = 0; // new time step
     M_nbEval++;
 
-    M_solid.d() = setDispOnInterface(disp);
+//    M_solid.d() = setDispOnInterface(disp);
+
+    transferOnInterface(disp,
+                        M_solid.BC_solid(),
+                        "Interface",
+                        M_solid.d());
 
     M_fluid.updateMesh(M_time);
     M_fluid.iterate   (M_time);
 
     M_solid.setRecur(0);
     M_solid.iterate();
-
+//    M_solid.solveLin(dispNew, disp, 1.e-8);
 //    M_solid.postProcess();
 //    M_fluid.postProcess();
 
     dispNew = M_solid.d();
+    //M_solid.d() = dispNew;
     velo    = M_solid.w();
 
     std::cout << "                ::: norm(disp     ) = "
-              << norm_inf(disp) << std::endl;
+              << norm_2(disp) << std::endl;
     std::cout << "                ::: norm(dispNew  ) = "
-              << norm_inf(dispNew) << std::endl;
+              << norm_2(dispNew) << std::endl;
     std::cout << "                ::: norm(velo     ) = "
-              << norm_inf(velo) << std::endl;
+              << norm_2(velo) << std::endl;
 }
 
 void steklovPoincare::evalResidual(Vector &res,
@@ -109,6 +125,7 @@ void steklovPoincare::evalResidual(Vector &res,
     M_residualF = M_fluid.residual();
 
     computeResidualFSI();
+
     res = getResidualFSIOnSolid();
 
     std::cout << "Max ResidualF   = " << norm_inf(M_residualF)
@@ -118,12 +135,12 @@ void steklovPoincare::evalResidual(Vector &res,
     std::cout << "Max ResidualFSI = " << norm_inf(M_residualFSI)
               << std::endl;
 
-    M_dispStruct = setDispOnInterface(disp);
+//     M_dispStruct = setDispOnInterface(disp);
 
 //    M_residualS = M_solid.residual();
 //     Vector muk = disp;
 //     muk = ZeroVector( muk.size() );
-//     invSsPrime(-1*M_residualS, 1e-08, muk);
+//     invSsPrime(M_residualS, 1e-08, muk);
 //     std::cout << "Norm_max d_disp = " << norm_inf(disp - muk) << std::endl;
 //      muk = ZeroVector( muk.size() );
 //       invSfPrime(M_residualF, 1e-08, muk);
@@ -135,8 +152,9 @@ void steklovPoincare::evalResidual(Vector &res,
 //
 
 
-void steklovPoincare::setUpBC(function_type _bcf,
-                              function_type _vel)
+// void steklovPoincare::setUpBC(function_type _bcf,
+//                               function_type _vel)
+void steklovPoincare::setUpBC()
 {
     std::cout << "Boundary Conditions setup ... ";
 
@@ -146,6 +164,8 @@ void steklovPoincare::setUpBC(function_type _bcf,
     //========================================================================================
     //  DATA INTERFACING BETWEEN BOTH SOLVERS
     //========================================================================================
+
+    BCFunctionBase bcf(fzeroSP);
 
     //
     // Passing data from the fluid to the structure: fluid load at the interface
@@ -177,23 +197,14 @@ void steklovPoincare::setUpBC(function_type _bcf,
 
     // Boundary conditions for the harmonic extension of the
     // interface solid displacement
-    BCFunctionBase bcf(_bcf);
+
+    std::cout << "BCh_mesh" << std::endl;
     M_BCh_mesh.addBC("Interface", 1, Essential, Full, displ, 3);
-    M_BCh_mesh.addBC("Top",       3, Essential, Full, bcf,   3);
-    M_BCh_mesh.addBC("Base",      2, Essential, Full, bcf,   3);
-    M_BCh_mesh.addBC("Edges",    20, Essential, Full, bcf,   3);
-
-
-    // Boundary conditions for the fluid velocity
-    BCFunctionBase in_flow(_vel);
-    M_BCh_u.addBC("Wall",   1,  Essential, Full, u_wall,  3);
-    M_BCh_u.addBC("InFlow", 2,  Natural,   Full, in_flow, 3);
-    M_BCh_u.addBC("Edges",  20, Essential, Full, bcf,     3);
 
     // Boundary conditions for the solid displacement
+
+    std::cout << "BCh_d" << std::endl;
     M_BCh_d.addBC("Interface", 1, Essential, Full, d_wall, 3);
-    M_BCh_d.addBC("Top",       3, Essential, Full, bcf,  3);
-    M_BCh_d.addBC("Base",      2, Essential, Full, bcf,  3);
 
     //========================================================================================
     //  COUPLED FSI LINEARIZED OPERATORS
@@ -211,17 +222,19 @@ void steklovPoincare::setUpBC(function_type _bcf,
     BCVectorInterface dg_wall(M_residualFSI,
                               dim_fluid,
                               M_dofFluidToStructure);
+
     // Boundary conditions for du
 
+    std::cout << "BCh_du" << std::endl;
     M_BCh_du.addBC("Wall",   1,  Natural  , Full, du_wall,  3);
     M_BCh_du.addBC("Edges",  20, Essential, Full, bcf,      3);
 
     // Boundary conditions for dz
 
+    std::cout << "BCh_dz" << std::endl;
     M_BCh_dz.addBC("Interface", 1, Natural  , Full, dg_wall, 3);
     M_BCh_dz.addBC("Top",       3, Essential, Full, bcf,     3);
     M_BCh_dz.addBC("Base",      2, Essential, Full, bcf,     3);
-
     std::cout << "ok." << std::endl;
 }
 
@@ -269,7 +282,7 @@ void  steklovPoincare::solveJac(Vector &muk,
             // then
             //
 //            muk = M_aitkFS.computeDeltaLambda(getResidualFSIOnSolid(), muS, muF );
-            muk = M_aitkFS.computeDeltaLambda(M_dispStruct, muS, muF );
+            muk = M_aitkFS.computeDeltaLambda(M_dispStruct, muS, 0.*muF );
             // muk = muS + muF;
             // muk = .9*muS + .1*muF;
 
@@ -311,11 +324,9 @@ void steklovPoincare::solveLinearSolid()
 
     Real tol       = 1.e-10;
 
-    std::cout << "rhs_dz norm = " << norm_inf(M_rhs_dz) << std::endl;
     this->M_solid.setRecur(1);
     this->M_solid.updateJac(M_dz, 0);
     this->M_solid.solveJac(M_dz, M_rhs_dz, tol, M_BCh_dz);
-    std::cout << "dz norm     = " << norm_inf(M_dz) << std::endl;
 }
 
 
@@ -354,11 +365,17 @@ void  steklovPoincare::invSsPrime(const Vector& res,
                                   double linear_rel_tol,
                                   Vector& step)
 {
-    setResidualFSI(res);
+//    setResidualFSI(res);
     solveLinearSolid();
 
-    step = setDispOnInterface(M_dz);
+//    step = setDispOnInterface(M_dz);
 
+    step = M_dz;
+
+    transferOnInterface(M_dz,
+                        M_solid.BC_solid(),
+                        "Interface",
+                        step);
 //     for (int ii = 0; ii < step.size(); ++ii)
 //         std::cout << step[ii] << std::endl;
 
@@ -438,8 +455,11 @@ void steklovPoincare::computeResidualFSI()
 {
     M_residualFSI = ZeroVector( M_residualFSI.size() );
 
-    BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[0];
-    BCBase const &BC_solidInterface = M_solid.BC_solid()[0];
+    UInt iBCf = M_fluid.BC_fluid().getBCbyName("Interface");
+    UInt iBCd = M_solid.BC_solid().getBCbyName("Interface");
+
+    BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[iBCf];
+    BCBase const &BC_solidInterface = M_solid.BC_solid()[iBCd];
 
     UInt nDofInterface = BC_fluidInterface.list_size();
 
@@ -463,7 +483,7 @@ void steklovPoincare::computeResidualFSI()
         for (UInt jDim = 0; jDim < nDimF; ++jDim)
         {
             M_residualFSI[IDfluid - 1 + jDim*totalDofFluid] =
-                M_residualF[IDfluid - 1 + jDim*totalDofFluid] +
+                M_residualF[IDfluid - 1 + jDim*totalDofFluid] -
                 M_residualS[IDsolid - 1 + jDim*totalDofSolid];
         }
     }
@@ -472,8 +492,11 @@ void steklovPoincare::computeResidualFSI()
 
 void steklovPoincare::setResidualFSI(double *_res)
 {
-    BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[0];
-    BCBase const &BC_solidInterface = M_solid.BC_solid()[0];
+    UInt iBCf = M_fluid.BC_fluid().getBCbyName("Interface");
+    UInt iBCd = M_solid.BC_solid().getBCbyName("Interface");
+
+    BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[iBCf];
+    BCBase const &BC_solidInterface = M_solid.BC_solid()[iBCd];
 
     UInt nDofInterface = BC_fluidInterface.list_size();
 
@@ -504,8 +527,11 @@ void steklovPoincare::setResidualFSI(double *_res)
 
 void steklovPoincare::setResidualFSI(const Vector _res)
 {
-    BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[0];
-    BCBase const &BC_solidInterface = M_solid.BC_solid()[0];
+    UInt iBCf = M_fluid.BC_fluid().getBCbyName("Interface");
+    UInt iBCd = M_solid.BC_solid().getBCbyName("Interface");
+
+    BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[iBCf];
+    BCBase const &BC_solidInterface = M_solid.BC_solid()[iBCd];
 
     UInt nDofInterface = BC_fluidInterface.list_size();
 
@@ -565,7 +591,7 @@ Vector steklovPoincare::getResidualFSIOnSolid()
         for (UInt jDim = 0; jDim < nDimF; ++jDim)
         {
             vec[IDsolid - 1 + jDim*totalDofSolid] =
-                M_residualF[IDfluid - 1 + jDim*totalDofFluid] +
+                M_residualF[IDfluid - 1 + jDim*totalDofFluid] -
                 M_residualS[IDsolid - 1 + jDim*totalDofSolid];
         }
     }
@@ -646,61 +672,12 @@ Vector steklovPoincare::getFluidInterfaceOnSolid(Vector &_vec)
     return vec;
 }
 
-
-Vector steklovPoincare::setDispOnInterface(const Vector &_disp)
-{
-    Vector vec( ZeroVector( _disp.size() ) );
-
-    BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[0];
-    BCBase const &BC_solidInterface = M_solid.BC_solid()[0];
-
-    UInt nDofInterface = BC_fluidInterface.list_size();
-
-    UInt nDimF = BC_fluidInterface.numberOfComponents();
-    UInt nDimS = BC_solidInterface.numberOfComponents();
-
-    UInt totalDofFluid = M_residualF.size()/ nDimF;
-    UInt totalDofSolid = M_residualS.size()/ nDimS;
-
-    for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)
-    {
-        ID IDfluid = BC_fluidInterface(iBC)->id();
-
-        BCVectorInterface const *BCVInterface =
-            static_cast <BCVectorInterface const *>
-            (BC_fluidInterface.pointerToBCVector());
-
-        ID IDsolid = BCVInterface->
-            dofInterface().getInterfaceDof(IDfluid);
-
-        for (UInt jDim = 0; jDim < nDimF; ++jDim)
-        {
-            vec[IDsolid - 1 + jDim*totalDofSolid] =
-                _disp[IDsolid - 1 + jDim*totalDofSolid];
-        }
-    }
-
-    return vec;
-}
-
-
 void steklovPoincare::transferOnInterface(const Vector      &_vec1,
                                           const BCHandler   &_BC,
                                           const std::string &_BCName,
                                           Vector            &_vec2)
 {
-    int iBC = -1;
-    for (UInt jBC = 0; jBC < _BC.size(); jBC++)
-        if (_BC[jBC].name() == _BCName) iBC = jBC;
-    if (iBC == -1)
-    {
-        std::cout << _BCName << " not found on BC ";
-        return;
-    }
-
-//     std::cout << "iBC " << _BCName << " = " << iBC << std::endl;
-//     std::cout << std::endl;
-    // we know the BC number for each mesh, let's swap
+    int iBC = _BC.getBCbyName(_BCName);
 
     BCBase const &BCInterface = _BC[(UInt) iBC];
 

@@ -23,12 +23,16 @@
 
 namespace LifeV
 {
-fixedPoint::fixedPoint(GetPot &_dataFile):
-    operFS(_dataFile)
+fixedPoint::fixedPoint(GetPot &_dataFile,
+                       BCHandler &BCh_u,
+                       BCHandler &BCh_d,
+                       BCHandler &BCh_mesh):
+    operFS(_dataFile, BCh_u, BCh_d, BCh_mesh)
 {
     M_defOmega =  _dataFile("problem/defOmega",0.01);
     std::cout << "Default aikten start value = " << M_defOmega
               << std::endl;
+    setUpBC();
 }
 
 fixedPoint::~fixedPoint()
@@ -45,6 +49,7 @@ void fixedPoint::eval(Vector& dispNew, Vector& velo, const Vector& disp, int sta
     M_fluid.updateMesh(M_time);
     M_fluid.iterate(M_time);
 
+    M_solid.BC_solid().showMe();
     M_solid.setRecur(0);
     M_solid.iterate();
 
@@ -66,7 +71,7 @@ void fixedPoint::evalResidual(Vector &res, const Vector& disp, int iter)
     std::cout << "*** Residual computation g(x_" << iter <<" )";
     if (status) std::cout << " [NEW TIME STEP] ";
     std::cout << std::endl;
-    eval(M_dispStruct,M_velo,disp,status);
+    eval(M_dispStruct, M_velo, disp, status);
     res = disp - M_dispStruct;
 }
 
@@ -77,8 +82,7 @@ void fixedPoint::evalResidual(Vector &res, const Vector& disp, int iter)
 //
 
 
-void fixedPoint::setUpBC(function_type _bcf,
-                         function_type _vel)
+void fixedPoint::setUpBC()
 {
     std::cout << "Boundary Conditions setup ... ";
 
@@ -112,23 +116,10 @@ void fixedPoint::setUpBC(function_type _bcf,
 
     // Boundary conditions for the harmonic extension of the
     // interface solid displacement
-    BCFunctionBase bcf(_bcf);
     M_BCh_mesh.addBC("Interface", 1, Essential, Full, displ, 3);
-    M_BCh_mesh.addBC("Top",       3, Essential, Full, bcf,   3);
-    M_BCh_mesh.addBC("Base",      2, Essential, Full, bcf,   3);
-    M_BCh_mesh.addBC("Edges",    20, Essential, Full, bcf,   3);
-
-
-    // Boundary conditions for the fluid velocity
-    BCFunctionBase in_flow(_vel);
-    M_BCh_u.addBC("Wall",   1,  Essential, Full, u_wall,  3);
-    M_BCh_u.addBC("InFlow", 2,  Natural,   Full, in_flow, 3);
-    M_BCh_u.addBC("Edges",  20, Essential, Full, bcf,     3);
 
     // Boundary conditions for the solid displacement
     M_BCh_d.addBC("Interface", 1, Natural, Full, g_wall, 3);
-    M_BCh_d.addBC("Top",       3, Essential, Full, bcf,  3);
-    M_BCh_d.addBC("Base",      2, Essential, Full, bcf,  3);
 }
 
 
@@ -137,9 +128,9 @@ void fixedPoint::setUpBC(function_type _bcf,
 //
 
 
-void  fixedPoint::solveJac(Vector         &_muk,
+void  fixedPoint::solveJac(Vector        &_muk,
                            const Vector  &_res,
-                            const double   _linearRelTol)
+                           const double   _linearRelTol)
 {
     _muk = _res;
 }

@@ -42,7 +42,10 @@ namespace LifeV
                                        & )> function_type;
         // constructors
 
-        operFS(GetPot &data_file);
+        operFS(GetPot    &data_file,
+               BCHandler &BCh_u,
+               BCHandler &BCh_d,
+               BCHandler &BCh_mesh);
 
         // destructor
 
@@ -60,8 +63,7 @@ namespace LifeV
 
         // member functions
 
-        virtual void setUpBC(function_type _bcf,
-                             function_type _vel) = 0;
+        virtual void setUpBC() = 0;
 
         void updateJac (Vector& sol,
                         int     iter);
@@ -86,9 +88,9 @@ namespace LifeV
 
     protected:
 
-        BCHandler               M_BCh_u;
-        BCHandler               M_BCh_d;
-        BCHandler               M_BCh_mesh;
+        BCHandler               &M_BCh_u;
+        BCHandler               &M_BCh_d;
+        BCHandler               &M_BCh_mesh;
 
         BCHandler               M_BCh_du;
         BCHandler               M_BCh_dz;

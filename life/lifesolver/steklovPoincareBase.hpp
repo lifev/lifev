@@ -44,7 +44,10 @@ class steklovPoincare : public operFS
 public:
 
     // constructors
-    steklovPoincare(GetPot &_dataFile);
+    steklovPoincare(GetPot    &_dataFile,
+                    BCHandler &BCh_u,
+                    BCHandler &BCh_d,
+                    BCHandler &BCh_mesh);
 
     // destructor
     ~steklovPoincare();
@@ -62,8 +65,7 @@ public:
     void solveLinearFluid();
     void solveLinearSolid();
 
-    void setUpBC(function_type _bcf,
-                 function_type _vel);
+    void setUpBC();
 
 
     //setters and getters
@@ -120,7 +122,6 @@ private:
 
     Vector getSolidInterfaceOnFluid(Vector &_vec);
     Vector getFluidInterfaceOnSolid(Vector &_vec);
-    Vector setDispOnInterface(const Vector &_disp);
 
     void transferOnInterface(const Vector      &_vec1,
                              const BCHandler   &_BC,
@@ -129,7 +130,11 @@ private:
 
     DataJacobianSP            M_dataJacobian;
 };
-
+Real fzeroSP(const Real& t,
+             const Real& x,
+             const Real& y,
+             const Real& z,
+             const ID& i);
 void my_matvecSfSsPrime(double *z,
                         double *Jz,
                         AZ_MATRIX* J,
