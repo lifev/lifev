@@ -15,7 +15,7 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*!
   \file NavierStokesSolverPC.h
   \author M.A. Fernandez and A. Gauthier
@@ -24,8 +24,8 @@
   \author A. Veneziani
   \date 05/2003
   \version 1.1
- 
- 
+
+
   \brief This file contains a NavierStokes solver class which implements a semi-implicit scheme with an exact factorization.
          Preconditioning of the Schur Complement is done by an algebraic Chorin-Temam pressure-corrected preconditioner
          Added a class for handling high order discretization schemes (A. Veneziani)
@@ -54,10 +54,10 @@ namespace LifeV
 {
 /*!
   \class NavierStokesSolverPC
- 
+
   This class implements an NavierStokes solver via exact factorization. Preconditioning of the
   Schur Complement is done by an algebraic Chorin-Temam pressure-corrected preconditioner
- 
+
 */
 template <typename Mesh>
 class NavierStokesSolverPC:
@@ -81,7 +81,7 @@ public:
       \param ord_bdf order of the Bdf time advancing scheme + incremental for the pressure
     */
     NavierStokesSolverPC( const GetPot& data_file, const RefFE& refFE_u, const RefFE& refFE_p, const QuadRule& Qr_u,
-                          const QuadRule& bdQr_u, const QuadRule& Qr_p, const QuadRule& bdQr_p, BC_Handler& BCh_u );
+                          const QuadRule& bdQr_u, const QuadRule& Qr_p, const QuadRule& bdQr_p, BCHandler& BCh_u );
 
     //! Update the right  hand side  for time advancing
     /*!
@@ -193,7 +193,7 @@ private:
 template <typename Mesh>
 NavierStokesSolverPC<Mesh>::
 NavierStokesSolverPC( const GetPot& data_file, const RefFE& refFE_u, const RefFE& refFE_p, const QuadRule& Qr_u,
-                      const QuadRule& bdQr_u, const QuadRule& Qr_p, const QuadRule& bdQr_p, BC_Handler& BCh_u ) :
+                      const QuadRule& bdQr_u, const QuadRule& Qr_p, const QuadRule& bdQr_p, BCHandler& BCh_u ) :
         NavierStokesHandler<Mesh>( data_file, refFE_u, refFE_p, Qr_u, bdQr_u, Qr_p, bdQr_p, BCh_u ),
         _pattC_block( this->_dof_u ),
         _pattC( _pattC_block, "diag" ),

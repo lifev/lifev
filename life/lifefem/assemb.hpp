@@ -15,7 +15,7 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /* --------------------------------------------------------------------------*
 /                                                                            /
 /      ...                                                                   /
@@ -287,13 +287,13 @@ assemble_symm_block_diagonal( Oper oper, const RegionMesh& mesh, CurrentFE& fe, 
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-template<typename OperDG, typename OperDGIF, typename OperDGBF, 
-	 typename DOF, typename DOFBYFACE, 
+template<typename OperDG, typename OperDGIF, typename OperDGBF,
+	 typename DOF, typename DOFBYFACE,
 	 typename RegionMesh, typename UsrSourceFct,
 	 typename Matrix, typename Vector>
-  void assemble_DG(OperDG operDG, OperDGIF operDGIF, OperDGBF operDGBF, 
-		   const RegionMesh& mesh, 
-		   const BC_Handler& BCh,
+  void assemble_DG(OperDG operDG, OperDGIF operDGIF, OperDGBF operDGBF,
+		   const RegionMesh& mesh,
+		   const BCHandler& BCh,
 		   CurrentFEDG& feDG, CurrentIFDG& feIFDG, CurrentBFDG& feBFDG,
 		   const DOF& dof, const DOFBYFACE& dofbyface,
 		   const UsrSourceFct& source_fct,
@@ -330,7 +330,7 @@ template<typename OperDG, typename OperDGIF, typename OperDGBF,
       assemb_vec_DG(b, elvec, feDG, dof, ic);
     }
   }
-  
+
   // Assembling boundary faces contributions (boundary faces are stored first)
   for(i = 1; i <= mesh.numBFaces(); ++i){
     iAd = (UInt)mesh.faceList(i).ad_first();
@@ -357,14 +357,14 @@ template<typename OperDG, typename OperDGIF, typename OperDGBF,
 
     }
   }
-  
+
   // Assembling internal faces contributions
   for(i = mesh.numBFaces() + 1; i <= mesh.numFaces(); ++i){
     iAd = (UInt)mesh.faceList(i).ad_first();
     iOp = (UInt)mesh.faceList(i).ad_second();
 
     feIFDG.updateMeasNormalQuadPtFirstDerivAd(mesh.faceList(i), mesh.volumeList(iAd));
-    feIFDG.updateMeasNormalQuadPtFirstDerivOp(mesh.faceList(i), mesh.volumeList(iOp)); 
+    feIFDG.updateMeasNormalQuadPtFirstDerivOp(mesh.faceList(i), mesh.volumeList(iOp));
 
     ifmat.zero();
     ifvec.zero();
@@ -383,13 +383,13 @@ template<typename OperDG, typename OperDGIF, typename OperDGBF,
 
 }
 
-template<typename OperDG,  typename OperDGIF, typename OperDGBF, 
-	 typename DOF, typename DOFBYFACE, 
+template<typename OperDG,  typename OperDGIF, typename OperDGBF,
+	 typename DOF, typename DOFBYFACE,
 	 typename RegionMesh, typename UsrSourceFct,
 	 typename Matrix, typename Vector, typename Velocity>
-  void assemble_AdvecDG(OperDG operDG, OperDGIF operDGIF, OperDGBF operDGBF, 
-			const RegionMesh& mesh, 
-			const BC_Handler& BCh,
+  void assemble_AdvecDG(OperDG operDG, OperDGIF operDGIF, OperDGBF operDGBF,
+			const RegionMesh& mesh,
+			const BCHandler& BCh,
 			Velocity& u,
 			CurrentFEDG& feDG, CurrentIFDG& feIFDG, CurrentBFDG& feBFDG,
 			const DOF& dof, const DOFBYFACE& dofbyface,
@@ -451,14 +451,14 @@ template<typename OperDG,  typename OperDGIF, typename OperDGBF,
 
     }
   }
-    
+
   // Assembling internal faces contributions
   for(i = mesh.numBFaces() + 1; i <= mesh.numFaces(); ++i){
     iAd = (UInt)mesh.faceList(i).ad_first();
     iOp = (UInt)mesh.faceList(i).ad_second();
 
     feIFDG.updateMeasNormalQuadPtFirstDerivAd(mesh.faceList(i), mesh.volumeList(iAd));
-    feIFDG.updateMeasNormalQuadPtFirstDerivOp(mesh.faceList(i), mesh.volumeList(iOp)); 
+    feIFDG.updateMeasNormalQuadPtFirstDerivOp(mesh.faceList(i), mesh.volumeList(iOp));
 
     ifmat.zero();
     ifvec.zero();
@@ -539,7 +539,7 @@ void compute_mat_DG(ElemMat& elmat, Oper& oper,
 	s += oper(i, j, ig, x, y, z, 0, 0, iblock, jblock) * fe.weightDet(ig);
        }
 
-      mat((int)i,(int)j) += s;     
+      mat((int)i,(int)j) += s;
     }
   }
 }
@@ -565,7 +565,7 @@ void compute_mat_DG_BF(ElemMat& bfmat, Oper& oper,
 	s += oper(i, j, ig, x, y, z, 0, 0, iblock, jblock) * fe.weightMeas(ig);
 
        }
-      mat((int)i, (int)j) += s;     
+      mat((int)i, (int)j) += s;
     }
   }
 }
@@ -595,7 +595,7 @@ void compute_mat_DG_IF(ElemMat& ifmat, Oper& oper, int nbNodeAd,
 	    s += oper(i, j, ig, x, y, z, K, H, iblock, jblock) * fe.weightMeas(ig);
 	  }// for ig
 
-	  mat((int)(H * nbNodeAd + i), (int)(K * nbNodeAd + j)) += s;	      
+	  mat((int)(H * nbNodeAd + i), (int)(K * nbNodeAd + j)) += s;
 	}//for j
       }// for i
     }// for H
@@ -762,13 +762,13 @@ void assemb_mat( Matrix& M, ElemMat& elmat, const LocalDofPattern& fe, const DOF
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Added by D. A. Di Pietro: Assembling of the elementary matrices for DG 
+// Added by D. A. Di Pietro: Assembling of the elementary matrices for DG
 //
 ////////////////////////////////////////////////////////////////////////////////
 
 template<typename DOF, typename Matrix>
-void assemb_mat_DG(Matrix& M, ElemMat& elmat, const CurrentFEDG& fe, const DOF& dof, 
-		const UInt feId, int iblock = 0,int jblock = 0) 
+void assemb_mat_DG(Matrix& M, ElemMat& elmat, const CurrentFEDG& fe, const DOF& dof,
+		const UInt feId, int iblock = 0,int jblock = 0)
 {
   Tab2dView mat = elmat.block(iblock, jblock);
   UInt totdof = dof.numTotalDof();
@@ -776,7 +776,7 @@ void assemb_mat_DG(Matrix& M, ElemMat& elmat, const CurrentFEDG& fe, const DOF& 
   UInt ig, jg;
 
   UInt eleId = feId; //! direct use of the fe identity number. (different from the other assemb_mat)
-  
+
   for(k = 0 ; k < fe.refFE.elPattern.nbPattern() ; k++){
 
     i = fe.patternFirst(k);
@@ -790,15 +790,15 @@ void assemb_mat_DG(Matrix& M, ElemMat& elmat, const CurrentFEDG& fe, const DOF& 
 }
 
 template<typename DOF, typename Matrix>
-void assemb_mass_DG(Matrix& M, KNM<Real>& mat, const CurrentFEDG& fe, const DOF& dof, 
-		const UInt feId, int iblock = 0,int jblock = 0) 
+void assemb_mass_DG(Matrix& M, KNM<Real>& mat, const CurrentFEDG& fe, const DOF& dof,
+		const UInt feId, int iblock = 0,int jblock = 0)
 {
   UInt totdof = dof.numTotalDof();
   int i, j, k;
   UInt ig, jg;
 
   UInt eleId = feId; //! direct use of the fe identity number. (different from the other assemb_mat)
-  
+
   for(k = 0 ; k < fe.refFE.elPattern.nbPattern() ; k++){
 
     i = fe.patternFirst(k);
@@ -812,15 +812,15 @@ void assemb_mass_DG(Matrix& M, KNM<Real>& mat, const CurrentFEDG& fe, const DOF&
 }
 
 template<typename DOFBYFACE, typename Matrix>
-void assemb_mat_DG_IF(Matrix& M, ElemMat& ifmat, const CurrentFEDG& fe, const DOFBYFACE& dofbyface, 
-		const UInt ifId, int iblock=0,int jblock=0) 
+void assemb_mat_DG_IF(Matrix& M, ElemMat& ifmat, const CurrentFEDG& fe, const DOFBYFACE& dofbyface,
+		const UInt ifId, int iblock=0,int jblock=0)
 {
   Tab2dView mat = ifmat.block(iblock, jblock);
   UInt totdof = dofbyface.numTotalDof();
 
   int i, j, k;
   UInt ig, jg;
-  
+
   UInt faceId = ifId;
 
   for(k = 0 ; k < fe.refFE.facePattern.nbPattern(); k++){
@@ -836,8 +836,8 @@ void assemb_mat_DG_IF(Matrix& M, ElemMat& ifmat, const CurrentFEDG& fe, const DO
 }
 
 template<typename DOF, typename Matrix>
-void assemb_mat_DG_BF(Matrix& M, ElemMat& bfmat, const CurrentFEDG& fe, const DOF& dof, 
-		const UInt AdId, int iblock=0,int jblock=0) 
+void assemb_mat_DG_BF(Matrix& M, ElemMat& bfmat, const CurrentFEDG& fe, const DOF& dof,
+		const UInt AdId, int iblock=0,int jblock=0)
 {
   Tab2dView mat = bfmat.block(iblock, jblock);
   UInt totdof = dof.numTotalDof();
@@ -846,7 +846,7 @@ void assemb_mat_DG_BF(Matrix& M, ElemMat& bfmat, const CurrentFEDG& fe, const DO
   UInt ig, jg;
 
   UInt eleId = AdId;
-  
+
   for(k = 0; k < fe.refFE.elPattern.nbPattern(); k++){
 
     i = fe.patternFirst(k);
@@ -1037,7 +1037,7 @@ void compute_vec( Real constant, ElemVec& elvec, const CurrentFE& fe, int iblock
   Why dont we let CurrentFE to store the time as well?
   we may choose then a common layout for the user functions that always has
   the time as entry point.
- */ 
+ */
 //
 //
 //////////////////
@@ -1155,7 +1155,7 @@ assemb_vec( Vector& V, ElemVec& elvec, const CurrentFE& fe, const DOF& dof, int 
 ////////////////////////////////////////////////////////////////////////////////
 
 template<typename DOF, typename Vector, typename ElemVec>
-void assemb_vec_DG(Vector& V, ElemVec& elvec,const CurrentFEDG& feDG, const DOF& dof, int iblock) 
+void assemb_vec_DG(Vector& V, ElemVec& elvec,const CurrentFEDG& feDG, const DOF& dof, int iblock)
 {
   UInt totdof = dof.numTotalDof();
   Tab1dView vec = elvec.block(iblock);

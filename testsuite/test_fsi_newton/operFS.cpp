@@ -25,7 +25,7 @@ using namespace std;
 
 operFS::operFS(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
 	       VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
-	       BC_Handler& BCh_du, BC_Handler& BCh_dz):
+	       BCHandler& BCh_du, BCHandler& BCh_dz):
   _fluid(fluid),
      _solid(solid),
      _dispStruct( 3*_solid.dDof().numTotalDof() ),
@@ -61,7 +61,7 @@ void operFS::eval(Vector& dispNew, Vector& velo, const Vector& disp, int status)
 
   _fluid.postProcess();
   _solid.postProcess();
-  
+
 }
 
 

@@ -59,7 +59,7 @@ public:
                           const RefFE& refFE,
                           const QuadRule& quadRule,
                           const QuadRule& boundaryQuadRule,
-                          BC_Handler& bcHandler );
+                          BCHandler& bcHandler );
 
     //! Update the right hand side for time advancing
     /*!
@@ -117,7 +117,7 @@ private:
     Real M_time;
 
     bool M_steady;
-    
+
     Real M_gammaBeta;
     Real M_gammaDiv;
     Real M_gammaPress;
@@ -141,7 +141,7 @@ NavierStokesSolverIP( const GetPot& dataFile,
                       const RefFE& refFE,
                       const QuadRule& quadRule,
                       const QuadRule& boundaryQuadRule,
-                      BC_Handler& bcHandler ):
+                      BCHandler& bcHandler ):
     NavierStokesHandler<Mesh>( dataFile, refFE, refFE, quadRule,
                                boundaryQuadRule, quadRule, boundaryQuadRule,
                                bcHandler ),

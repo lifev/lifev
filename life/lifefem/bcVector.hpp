@@ -1,5 +1,10 @@
 /*
  This file is part of the LifeV library
+
+ Authors: Miguel Fernandez
+          Vincent Martin
+          Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+
  Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
 
  This library is free software; you can redistribute it and/or
@@ -15,18 +20,14 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*!
-  \file bcVector.h
+  \file bcVector.hpp
   \brief classes to handle data vectors for boundary conditions.
-  \version 1.0
   \author M.A. Fernandez
-  \date 11/2002
- 
-  \version 1.1
   \author V. Martin
-  \date 02/2003
- 
+  \author C. Prud'homme
+
   This file contains the classes which may be used to store boundary
   conditions.
 */
@@ -42,17 +43,14 @@
 
 namespace LifeV
 {
-// ============ BCVecto_Base ================
-
 /*!
- 
- \class BCVector_Base
- 
- Base class that holding data vector for boundary conditions
- 
-*/
 
-class BCVector_Base
+ \class BCVectorBase
+
+ Base class that holding data vector for boundary conditions
+
+*/
+class BCVectorBase
 {
 public:
 
@@ -61,73 +59,143 @@ public:
       \param vec data vector holding data
       \param nbTotalDof number of total dof in the vector of data
     */
-    BCVector_Base( Vector& vec, const UInt nbTotalDof );
+    BCVectorBase( Vector& vec, const UInt nbTotalDof );
 
 
     //! Constructor
     /*!
       \param vec data vector holding data
       \param nbTotalDof number of total dof in the vector of data
-      \param type must be   
-               0:  boundary integration done (ex. residual of a variational problem)
-               1:  needs boundary integration of \lambda n \cdot  \boldphi_i (implemented only for the Natural BC AM 10/2004)
-               2:  needs boundary integration of \boldlambda \cdot n \phi_i (not yet implemented AM 10/2004)
+      \param type must be
+      -# 0:  boundary integration done (ex. residual of a variational problem)
+      -# 1:  needs boundary integration of \f$\lambda n \cdot  \mathbf{\phi}_i\f$
+      \warning (implemented only for the Natural BC AM 10/2004)
+      -# 2:  needs boundary integration of \f$\mathbf{\lambda} \cdot n \phi_i\f$
+      \warning (not yet implemented AM 10/2004)
     */
-    BCVector_Base( Vector& vec, const UInt nbTotalDof, UInt type );
+    BCVectorBase( Vector& vec, const UInt nbTotalDof, UInt type );
 
 
     //! Default Constructor (the user must call setBCVector(..))
-    BCVector_Base();
+    BCVectorBase();
 
     //! Do nothing destructor
-    virtual ~BCVector_Base()
-    {}
+    virtual ~BCVectorBase()
+        {
+            // nothing to be done here
+        }
 
-    //! set the Mixte coefficient
-    void setMixteCoef( const Real& coef );
+    //@{
+
+    //! assignement operator
+    virtual BCVectorBase& operator=( BCVectorBase const& );
 
     //! This method returns the value to be imposed in the component iComp of the dof iDof
     /*!
       \param iDof the number of the Dof
       \param iComp the number of the component
     */
-    virtual Real operator() ( const ID& iDof, const ID& iComp ) const = 0;
+    virtual Real operator() ( const ID& iDof, const ID& iComp ) const;
+    //@}
+
+
+
+    //@{
+
+    //! \return true if finalized, false otherwise
+    bool isFinalized() const
+        {
+            return _M_finalized;
+        }
+
+    //! return the total number of DOF
+    UInt nbTotalDOF() const
+        {
+            return _M_nbTotalDof;
+        }
+
+    /*!
+      Return the type of the kind of information in BCVector
+
+      -# 0:  boundary integration done (ex. residual of a variational problem)
+
+      -# 1: needs boundary integration of \f$\lambda n \cdot \mathbf{\phi}_i\f$
+      \warning (implemented only for the Natural BC - AM 10/2004)
+
+      -# 2:  needs boundary integration of \f$\mathbf{\lambda} \cdot n \phi_i\f$
+      \warning (not yet implemented - AM 10/2004)
+    */
+    UInt type() const
+        {
+            return _M_type;
+        }
+
 
     //! Return the value of the Mixte coefficient
-    Real MixteCoef() const;
+    Real mixteCoef() const
+        {
+            return _M_mixteCoef;
+        }
 
-    //! Return the type of the kind of information in BCVector
-    /*!         0:  boundary integration done (ex. residual of a variational problem)
-                1:  needs boundary integration of \lambda n \cdot  \boldphi_i (implemented only for the Natural BC - AM 10/2004)
-                2:  needs boundary integration of \boldlambda \cdot n \phi_i (not yet implemented - AM 10/2004)
-    */
-    UInt type() const;
+
+    //@}
+
+
+    //@{
+
+    //! finalize the BC
+    void setFinalized( bool __v )
+        {
+            _M_finalized = __v;
+        }
+
+    //! set the Mixte coefficient
+    void setMixteCoef( const Real& coef )
+        {
+            _M_mixteCoef = coef;
+        }
+
+    //! set the vector
+    void setVector( Vector& __vec, UInt nbDOF );
+
+    //@}
+
+    //@{
 
     //! Output
     virtual std::ostream & showMe( bool verbose = false, std::ostream & out = std::cout ) const = 0;
 
+    //@}
+
 protected:
 
     //! The data vector
-    Vector* _vec;
+    Vector* _M_vec;
 
     //! Number of total dof in the vector of data
-    UInt _nbTotalDof;
+    UInt _M_nbTotalDof;
 
     //! Coefficient for mixte boundary conditions (Robin)
     /*! For the moment, it is the same for all the entries of the data vector.
      */
-    Real _MixteCoef;
+    Real _M_mixteCoef;
+
+
+    /*!
+      Type of boundary condition
+
+      -# boundary integration done (ex. residual of a variational problem)
+
+      -# needs boundary integration of \f$\lambda n \cdot  \mathbf{\phi}_i\f$
+
+      -# needs boundary integration of \f$\mathbf{\lambda} \cdot n \phi_i\f$
+    */
+    UInt _M_type;
+
+private:
 
     //! true when the BCVector is updated (and can be used)
-    bool _finalized;
-
-    //! Type:
-    /*!        0:  boundary integration done (ex. residual of a variational problem)
-               1:  needs boundary integration of \lambda n \cdot  \boldphi_i
-               2:  needs boundary integration of \boldlambda \cdot n \phi_i
-    */
-    UInt _type;
+    bool _M_finalized;
 
 };
 
@@ -136,17 +204,20 @@ protected:
 // ============ BCVector ================
 
 /*!
- 
+
  \class BCVector
- 
+
  Class that holds a user data vector for boundary conditions
- 
+
 */
 
 class BCVector:
-            public BCVector_Base
+            public BCVectorBase
 {
 public:
+
+    //! super class
+    typedef BCVectorBase super;
 
     //! Constructor
     /*!
@@ -160,50 +231,49 @@ public:
     /*!
       \param vec data vector holding data
       \param nbTotalDof number of total dof in the vector of data
-      \param type must be   
-               0:  boundary integration done (ex. residual of a variational problem)
-               1:  needs boundary integration of \lambda n \cdot  \boldphi_i (not yet implemented - AM 10/2004)
-               2:  needs boundary integration of \boldlambda \cdot n \phi_i (implemented only for the Natural BC - AM 10/2004)
+      \param type must be
+       -# boundary integration done (ex. residual of a variational problem)
+       -# needs boundary integration of \f$\lambda n \cdot  \mathbf{\phi}_i\f$ \warning (not yet implemented - AM 10/2004)
+       -# needs boundary integration of \f$\mathbf{\lambda} \cdot n \phi_i\f$ \warning (implemented only for the Natural BC - AM 10/2004)
     */
     BCVector( Vector& vec, UInt const nbTotalDof, UInt type );
 
-    //! Default Constructor (the user must call setvector(..))
+    //! Default Constructor (the user must call setVector(..))
     BCVector();
 
-    //! set the BC vector (after default construction)
-    void setvector( Vector& vec, UInt nbTotalDof );
-
-    //! This method returns the value to be imposed in the component iComp of the dof iDof
-    /*!
-      \param iDof the number of the Dof
-      \param iComp the number of the component
-    */
-    Real operator() ( const ID& iDof, const ID& iComp ) const;
-
-
-    //! Assignment operator for BCVector_Interface
+    //! Assignment operator for BCVectorInterface
     BCVector & operator=( const BCVector & BCv );
 
     //! Output
     std::ostream & showMe( bool verbose = false, std::ostream & out = std::cout ) const;
 };
 
-// ============ BCVector_Interface ================
+// ============ BCVectorInterface ================
 
 /*!
- 
- \class BCVector_Interface
- 
- Class that holds a user data vector for boundary conditions on interfaces
- 
- The data funcitions given by the user must have the following declaration
- Real g(const Real& time, const Real& x, const Real& y, const Real& z, const ID& icomp)
+
+ \class BCVectorInterface
+
+ Class that holds a user data vector for boundary conditions on
+ interfaces
+
+ The data functions given by the user must have the following
+ declaration
+
+ \verbatim
+ Real g( const Real& time, const Real& x, const Real& y,
+         const Real& z, const ID& icomp)
+ \endverbatim
 */
 
-class BCVector_Interface:
-            public BCVector_Base
+class BCVectorInterface
+    :
+    public BCVectorBase
 {
 public:
+
+    //! super class
+    typedef BCVectorBase super;
 
     //! Constructor
     /*!
@@ -212,36 +282,38 @@ public:
       \param dofIn dofInterfaceBase object holding the connections between the interface dofs of the
              data vector and those of the associated to the boundary conditions
     */
-    BCVector_Interface( Vector& vec, UInt nbTotalDof, DofInterfaceBase& dofIn );
+    BCVectorInterface( Vector& vec, UInt nbTotalDof, DofInterfaceBase& dofIn );
 
     //! Default Constructor (the user must call setBCVector(..))
-    BCVector_Interface ();
+    BCVectorInterface ();
 
     //! set the BC vector (after default construction)
-    void setvector( Vector& vec, UInt nbTotalDof, DofInterfaceBase& dofIn );
+    void setVector( Vector& vec, UInt nbTotalDof, DofInterfaceBase& dofIn );
 
-    //! This method returns the value to be imposed in the component iComp of the dof iDof
     /*!
-      \param iDof the number of the Dof
+      This method returns the value to be imposed in the component iComp of the dof iDof.
+
+      \param iDof the number of the Dofin
       \param iComp the number of the component
     */
     Real operator() ( const ID& iDof, const ID& iComp ) const;
 
-    //! Assignment operator for BCVector_Interface
-    BCVector_Interface & operator=( const BCVector_Interface & BCv );
+    //! Assignment operator for BCVectorInterface
+    BCVectorInterface & operator=( const BCVectorInterface & BCv );
 
     //! getter
+    DofInterfaceBase const & dofInterface() const
+        {
+            return *_M_dofIn;
+        }
 
-    DofInterfaceBase const & dofInterface() const 
-        {return *_dofIn;}
-    
     //! Output
     std::ostream & showMe( bool verbose = false, std::ostream & out = std::cout ) const;
 
 protected:
 
     //! DofInterfaceBase object holding the connections between the interface dofs
-    DofInterfaceBase* _dofIn;
+    DofInterfaceBase* _M_dofIn;
 
 };
 }

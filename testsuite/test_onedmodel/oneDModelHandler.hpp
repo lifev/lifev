@@ -107,7 +107,7 @@ protected:
   CurrentFE _M_fe;     //!< current finite element
 
 
-  //! Dirichlet boundary value at left and right boundaries (NO bc_handler)
+  //! Dirichlet boundary value at left and right boundaries (NO BCHandler)
   Vec2D _M_bcDirLeft; //! first -> U1, second ->U2
   Vec2D _M_bcDirRight;
 

@@ -23,25 +23,25 @@
   \version 1.0
   \author M.A. Fernandez
   \date 07/2002
- 
+
   This file contains the functions which may used to impose boundary
   conditions. This file shall be modified to implement new boundary
   coditions (not yet implemented: tangential, normal, etc...)  At the
   moment, we can impose Essential, Natural and Mixte boundary conditions,
   for Scalar or vectors problems.
-*/ 
+*/
 /*! \note Bug report (V. Martin, 12/02/2003)
   (tested with the mixed hybrid RT0 elements (Darcy))
- 
+
   The new functions bc_manage_matrix and bc_manage_vector
   are compiling for Essential FUNCTIONS
   but the results are WRONG!
- 
+
   The new function bc_manage_matrix passes for BC VECTORS
   (result: ??)
   The new function bc_manage_vector fails for BC VECTORS
   (segmentation fault).
- 
+
 */
 
 #ifndef _BC_MANAGE_
@@ -57,7 +57,7 @@ namespace LifeV
 // ===================================================
 template <typename MatrixType, typename VectorType, typename MeshType, typename DataType>
 void bc_manage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& dof,
-                const BC_Handler& BCh,
+                const BCHandler& BCh,
                 CurrentBdFE& bdfem, const DataType& coef, const DataType& t )
 {
 
@@ -88,7 +88,7 @@ void bc_manage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& d
 //Miguel:10/02  - Mixte : V. Martin: 03/03 // I added the time t for the mixte case. V. Martin
 template <typename MatrixType, typename MeshType, typename DataType>
 void bc_manage_matrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
-                       const BC_Handler& BCh,
+                       const BCHandler& BCh,
                        CurrentBdFE& bdfem, const DataType& coef, const DataType& t = 0 )
 {
 
@@ -118,7 +118,7 @@ void bc_manage_matrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
 //Miguel:10/02  - Mixte : V. Martin: 03/03
 template <typename VectorType, typename MeshType, typename DataType>
 void bc_manage_vector( VectorType& b, const MeshType& mesh, const Dof& dof,
-                       const BC_Handler& BCh, CurrentBdFE& bdfem, const DataType& t, const DataType& coef )
+                       const BCHandler& BCh, CurrentBdFE& bdfem, const DataType& t, const DataType& coef )
 {
 
     // Loop on boundary conditions
@@ -149,7 +149,7 @@ void bc_manage_vector( VectorType& b, const MeshType& mesh, const Dof& dof,
 template <typename MatrixType1, typename MatrixType2, typename VectorType,
 typename MeshType, typename DataType>
 void bc_manage( MatrixType1& C, MatrixType2& trD, VectorType& b,
-                const MeshType& mesh, const Dof& dof, const BC_Handler& BCh,
+                const MeshType& mesh, const Dof& dof, const BCHandler& BCh,
                 CurrentBdFE& bdfem, const DataType& coef, const DataType& t )
 {
     // Loop on boundary conditions
@@ -180,7 +180,7 @@ template <typename MatrixType1, typename MatrixType2, typename MatrixType3,
 typename VectorType, typename MeshType, typename DataType>
 void bc_manage( MatrixType1& C, MatrixType2& trD, MatrixType3& D,
                 VectorType& b, VectorType& bp, const MeshType& mesh,
-                const Dof& dof, const BC_Handler& BCh, CurrentBdFE& bdfem,
+                const Dof& dof, const BCHandler& BCh, CurrentBdFE& bdfem,
                 const DataType& coef, const DataType& t )
 {
     // Loop on boundary conditions
@@ -208,7 +208,7 @@ void bc_manage( MatrixType1& C, MatrixType2& trD, MatrixType3& D,
 // Essential BC
 // ===================================================
 template <typename MatrixType, typename VectorType, typename MeshType, typename DataType>
-void bcEssentialManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& dof, const BC_Base& BCb,
+void bcEssentialManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& dof, const BCBase& BCb,
                         const CurrentBdFE& bdfem, const DataType& coef, const DataType& t )
 {
 
@@ -263,7 +263,7 @@ void bcEssentialManage( MatrixType& A, VectorType& b, const MeshType& mesh, cons
 //Version that treates only the matrix modifications
 //Miguel:10/02
 template <typename MatrixType, typename DataType>
-void bcEssentialManageMatrix( MatrixType& A, const Dof& dof, const BC_Base& BCb, const DataType& coef )
+void bcEssentialManageMatrix( MatrixType& A, const Dof& dof, const BCBase& BCb, const DataType& coef )
 {
 
     ID idDof;
@@ -292,7 +292,7 @@ void bcEssentialManageMatrix( MatrixType& A, const Dof& dof, const BC_Base& BCb,
 //Version that treates only the vector modifications
 //Miguel:10/02
 template <typename VectorType, typename DataType>
-void bcEssentialManageVector( VectorType& b, const Dof& dof, const BC_Base& BCb, const DataType& t, const DataType& coef )
+void bcEssentialManageVector( VectorType& b, const Dof& dof, const BCBase& BCb, const DataType& t, const DataType& coef )
 {
 
 
@@ -352,7 +352,7 @@ template <typename MatrixType1, typename MatrixType2, typename VectorType,
 typename MeshType, typename DataType>
 void bcEssentialManage( MatrixType1& A, MatrixType2& trD, VectorType& b,
                         const MeshType& mesh, const Dof& dof,
-                        const BC_Base& BCb, const CurrentBdFE& bdfem,
+                        const BCBase& BCb, const CurrentBdFE& bdfem,
                         const DataType& coef, const DataType& t )
 {
     ID idDof;
@@ -413,7 +413,7 @@ template <typename MatrixType1, typename MatrixType2, typename MatrixType3,
 typename VectorType, typename MeshType, typename DataType>
 void bcEssentialManage( MatrixType1& A, MatrixType2& trD, MatrixType3& D,
                         VectorType& b, VectorType& bp, const MeshType& mesh,
-                        const Dof& dof, const BC_Base& BCb,
+                        const Dof& dof, const BCBase& BCb,
                         const CurrentBdFE& bdfem,
                         const DataType& coef, const DataType& t )
 {
@@ -473,7 +473,7 @@ void bcEssentialManage( MatrixType1& A, MatrixType2& trD, MatrixType3& D,
 // Natural BC
 // ===================================================
 template <typename VectorType, typename MeshType, typename DataType>
-void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const BC_Base& BCb,
+void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const BCBase& BCb,
                       CurrentBdFE& bdfem, const DataType& t )
 {
 
@@ -647,7 +647,7 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
 // Mixte BC
 // ===================================================
 template <typename MatrixType, typename VectorType, typename DataType, typename MeshType>
-void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& dof, const BC_Base& BCb,
+void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& dof, const BCBase& BCb,
                     CurrentBdFE& bdfem, const DataType& t )
 {
 
@@ -669,7 +669,7 @@ void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Do
     {   //! If BC is given under a vectorial form
 
         //! for the moment, only one coefficient per BCvector.
-        DataType mcoef = BCb.MixteCoef();   //!< the mixte coefficient
+        DataType mcoef = BCb.mixteCoef();   //!< the mixte coefficient
 
         // Loop on BC identifiers
         for ( ID i = 1; i <= BCb.list_size(); ++i )
@@ -759,7 +759,7 @@ void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Do
 
         DataType x, y, z;
 
-        const BCFunction_Mixte* pBcF = static_cast<const BCFunction_Mixte*>( BCb.pointerToFunctor() );
+        const BCFunctionMixte* pBcF = static_cast<const BCFunctionMixte*>( BCb.pointerToFunctor() );
 
         // Loop on BC identifiers
         for ( ID i = 1; i <= BCb.list_size(); ++i )
@@ -855,7 +855,7 @@ void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Do
 // V. Martin 02/03/2003
 template <typename MatrixType, typename DataType, typename MeshType>
 void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
-                          const BC_Base& BCb, CurrentBdFE& bdfem, const DataType& t )
+                          const BCBase& BCb, CurrentBdFE& bdfem, const DataType& t )
 {
 
     // Number of local Dof in this face
@@ -876,7 +876,7 @@ void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
     {   //! If BC is given under a vectorial form
 
         //! for the moment, only one coefficient per BCvector.
-        DataType mcoef = BCb.MixteCoef();   //!< the mixte coefficient
+        DataType mcoef = BCb.mixteCoef();   //!< the mixte coefficient
 
         // Loop on BC identifiers
         for ( ID i = 1; i <= BCb.list_size(); ++i )
@@ -955,7 +955,7 @@ void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
 
         DataType x, y, z;
 
-        const BCFunction_Mixte* pBcF = static_cast<const BCFunction_Mixte*>( BCb.pointerToFunctor() );
+        const BCFunctionMixte* pBcF = static_cast<const BCFunctionMixte*>( BCb.pointerToFunctor() );
 
         // Loop on BC identifiers
         for ( ID i = 1; i <= BCb.list_size(); ++i )
@@ -1047,7 +1047,7 @@ void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
 // V. Martin 02/03/2003
 template <typename VectorType, typename DataType, typename MeshType>
 void bcMixteManageVector( VectorType& b, const MeshType& mesh, const Dof& dof,
-                          const BC_Base& BCb, CurrentBdFE& bdfem, const DataType& t )
+                          const BCBase& BCb, CurrentBdFE& bdfem, const DataType& t )
 {
 
     // Number of local Dof in this face
@@ -1155,7 +1155,7 @@ void bcMixteManageVector( VectorType& b, const MeshType& mesh, const Dof& dof,
 template <typename MatrixType1, typename MatrixType2, typename VectorType,
 typename DataType, typename MeshType>
 void bcMixteManage( MatrixType1& A, MatrixType2 & trD, VectorType& b,
-                    const MeshType& mesh, const Dof& dof, const BC_Base& BCb,
+                    const MeshType& mesh, const Dof& dof, const BCBase& BCb,
                     CurrentBdFE& bdfem, const DataType& t )
 {
 
@@ -1174,7 +1174,7 @@ void bcMixteManage( MatrixType1& A, MatrixType2 & trD, VectorType& b,
     const Identifier_Natural* pId;
     ID ibF, idDof, jdDof;
 
-    const BCFunction_Mixte* pBcF = static_cast<const BCFunction_Mixte*>( BCb.pointerToFunctor() );
+    const BCFunctionMixte* pBcF = static_cast<const BCFunctionMixte*>( BCb.pointerToFunctor() );
 
     for ( ID i = 1; i <= BCb.list_size(); ++i )
     {
@@ -1262,7 +1262,7 @@ template <typename MatrixType1, typename MatrixType2, typename MatrixType3,
 typename VectorType, typename DataType, typename MeshType>
 void bcMixteManage( MatrixType1& A, MatrixType2 & trD, MatrixType3 & D,
                     VectorType& b, VectorType& bp, const MeshType& mesh,
-                    const Dof& dof, const BC_Base& BCb, CurrentBdFE& bdfem,
+                    const Dof& dof, const BCBase& BCb, CurrentBdFE& bdfem,
                     const DataType& t )
 {
     ASSERT( !BCb.dataVector() , "BC Vector not yet implemented for this particular bcMixteManage." );
@@ -1280,7 +1280,7 @@ void bcMixteManage( MatrixType1& A, MatrixType2 & trD, MatrixType3 & D,
     const Identifier_Natural* pId;
     ID ibF, idDof, jdDof;
 
-    const BCFunction_Mixte* pBcF = static_cast<const BCFunction_Mixte*>( BCb.pointerToFunctor() );
+    const BCFunctionMixte* pBcF = static_cast<const BCFunctionMixte*>( BCb.pointerToFunctor() );
 
     for ( ID i = 1; i <= BCb.list_size(); ++i )
     {

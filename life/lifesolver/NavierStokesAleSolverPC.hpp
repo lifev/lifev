@@ -79,8 +79,8 @@ public:
                              const QuadRule& bdQr_u,
                              const QuadRule& Qr_p,
                              const QuadRule& bdQr_p,
-                             BC_Handler& BCh_u,
-                             BC_Handler& BCh_mesh );
+                             BCHandler& BCh_u,
+                             BCHandler& BCh_mesh );
 
     //! Update the right  hand side  for time advancing
     /*!
@@ -94,9 +94,9 @@ public:
 
     void iterateTransp( const Real& time );
 
-    void iterateLin( const Real& time, BC_Handler& BCh_du );
+    void iterateLin( const Real& time, BCHandler& BCh_du );
 
-    BC_Handler const & BC_fluid() const {return _mesh_BCh;}
+    BCHandler const & BC_fluid() const {return _mesh_BCh;}
 
     Vector& residual();
 
@@ -217,8 +217,8 @@ private:
 template <typename Mesh>
 NavierStokesAleSolverPC<Mesh>::
 NavierStokesAleSolverPC( const GetPot& data_file, const RefFE& refFE_u, const RefFE& refFE_p, const QuadRule& Qr_u,
-                         const QuadRule& bdQr_u, const QuadRule& Qr_p, const QuadRule& bdQr_p, BC_Handler& BCh_u,
-                         BC_Handler& BCh_mesh ) :
+                         const QuadRule& bdQr_u, const QuadRule& Qr_p, const QuadRule& bdQr_p, BCHandler& BCh_u,
+                         BCHandler& BCh_mesh ) :
         NavierStokesAleHandler<Mesh>( data_file,
                                       refFE_u,
                                       refFE_p,
@@ -746,7 +746,7 @@ iterateTransp( const Real& time )
 //
 template <typename Mesh>
 void NavierStokesAleSolverPC<Mesh>::
-iterateLin( const Real& time, BC_Handler& BCh_du )
+iterateLin( const Real& time, BCHandler& BCh_du )
 {
 
     Chrono chrono;

@@ -43,7 +43,7 @@ int main(int argc, char** argv)
 
     // Number of boundary conditions for the velocity and mesh motion
     //
-    BC_Handler BCh(2);
+    BCHandler BCh(2);
 
     // The linear Venant-Kirchhof solver
     //
@@ -53,7 +53,7 @@ int main(int argc, char** argv)
 
     // Boundary conditions for the displacement
     //
-    BCFunction_Base fixed(g1);
+    BCFunctionBase fixed(g1);
     BCh.addBC("Base2 ", 2 , Essential, Full, fixed, 3);
     BCh.addBC("Base3 ", 3 , Essential, Full, fixed, 3);
 

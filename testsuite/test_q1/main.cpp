@@ -50,11 +50,11 @@ int main() {
     // Boundary conditions definition
     // ===================================================
 
-    BCFunction_Base gv1(g1); // Functor storing the user definded function g1
-    BCFunction_Base gv2(g2); // Functor storing the user definded function g2
-    BCFunction_Base gv3(g3); // Functor storing the user definded function g3
+    BCFunctionBase gv1(g1); // Functor storing the user definded function g1
+    BCFunctionBase gv2(g2); // Functor storing the user definded function g2
+    BCFunctionBase gv3(g3); // Functor storing the user definded function g3
 
-    BC_Handler BCh(5); // We impose five boundary conditions
+    BCHandler BCh(5); // We impose five boundary conditions
 
     BCh.addBC("Wall",  2, Essential, Scalar, gv2);
     BCh.addBC("BInlet",  4, Essential, Scalar, gv1);

@@ -18,7 +18,7 @@
 */
 /*!
   \file bcVector.cc
-  \brief Implementations for bcVector.h
+  \brief Implementations for bcVector.hpp
   \version 1.0
   \author M.A. Fernandez
   \date 11/2002
@@ -32,48 +32,68 @@
 namespace LifeV
 {
 //
-// Implementation for BCVector_Base
+// Implementation for BCVectorBase
 //
 
 
 //! Default Constructor (the user must call setBCVector(..))
-BCVector_Base::BCVector_Base() :
-        _MixteCoef( 0.0 ), _finalized( false ), _type( 0 )
+BCVectorBase::BCVectorBase()
+    :
+   _M_mixteCoef( 0.0 ),
+   _M_type( 0 ),
+   _M_finalized( false )
 {}
 
 //! Constructor
-BCVector_Base::BCVector_Base( Vector& vec, UInt nbTotalDof ) :
-        _vec( &vec ), _nbTotalDof( nbTotalDof ),
-        _MixteCoef( 0.0 ), _finalized( false ), _type( 0 )
+BCVectorBase::BCVectorBase( Vector& vec, UInt nbTotalDof )
+    :
+   _M_vec( &vec ),
+   _M_nbTotalDof( nbTotalDof ),
+   _M_mixteCoef( 0.0 ),
+   _M_type( 0 ),
+   _M_finalized( false )
 {}
 
 //! Constructor
-BCVector_Base::BCVector_Base( Vector& vec, const UInt nbTotalDof, UInt type ) :
-        _vec( &vec ), _nbTotalDof( nbTotalDof ),
-        _MixteCoef( 0.0 ), _finalized( false ), _type( type )
+BCVectorBase::BCVectorBase( Vector& vec, const UInt nbTotalDof, UInt type )
+    :
+    _M_vec( &vec ),
+    _M_nbTotalDof( nbTotalDof ),
+    _M_mixteCoef( 0.0 ),
+    _M_type( type ),
+    _M_finalized( false )
 {}
 
-
-//! set the Mixte coefficient
-void BCVector_Base::setMixteCoef( const Real& coef )
+BCVectorBase&
+BCVectorBase::operator=( BCVectorBase const& __bcv )
 {
-    _MixteCoef = coef;
+    if ( this == &__bcv )
+        return *this;
+
+    _M_vec = __bcv._M_vec;
+    _M_nbTotalDof = __bcv._M_nbTotalDof;
+    _M_mixteCoef = __bcv._M_mixteCoef;
+    _M_type = __bcv._M_type;
+    _M_finalized = __bcv._M_finalized;
+
+    return *this;
 }
 
-
-//! Return the value of the Mixte coefficient
-Real BCVector_Base::MixteCoef() const
+//! This method returns the value to be imposed in the component iComp of the dof iDof
+Real
+BCVectorBase::operator() ( const ID& iDof, const ID& iComp ) const
 {
-    return _MixteCoef;
+    ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
+    return ( *_M_vec ) ( ( iComp - 1 ) * _M_nbTotalDof + iDof - 1 );
 }
 
-//! Return the value of type
-UInt BCVector_Base::type() const
+void
+BCVectorBase::setVector( Vector& __vec, UInt __nbTotalDof )
 {
-    return _type;
+    _M_vec = &__vec ;
+    _M_nbTotalDof = __nbTotalDof;
+    _M_finalized = true;
 }
-
-
 
 //
 // Implementation for BCVector
@@ -84,58 +104,43 @@ BCVector::BCVector()
 {}
 
 //! Constructor
-BCVector::BCVector( Vector& vec, UInt nbTotalDof ) :
-        BCVector_Base( vec, nbTotalDof )
+BCVector::BCVector( Vector& vec, UInt nbTotalDof )
+    :
+    BCVectorBase( vec, nbTotalDof )
 {
-    _finalized = true;
+    this->setFinalized( true );
 }
 
 //! Constructor
-BCVector::BCVector( Vector& vec, UInt const nbTotalDof, UInt type ) :
-        BCVector_Base( vec, nbTotalDof, type )
+BCVector::BCVector( Vector& vec, UInt const nbTotalDof, UInt type )
+    :
+    BCVectorBase( vec, nbTotalDof, type )
 {
-    _finalized = true;
+    this->setFinalized( true );
 }
 
-
-
-
-//!set the BC vector (after default construction)
-void BCVector::setvector( Vector& vec, UInt nbTotalDof )
-{
-    ASSERT_PRE( !_finalized, "BC Vector cannot be set twice." );
-    _vec = &vec ;
-    _nbTotalDof = nbTotalDof;
-    _finalized = true;
-}
-
-
-//! This method returns the value to be imposed in the component iComp of the dof iDof
-Real BCVector::operator() ( const ID& iDof, const ID& iComp ) const
-{
-    ASSERT_PRE( _finalized, "BC Vector should be finalized before being accessed." );
-    return ( *_vec ) ( ( iComp - 1 ) * _nbTotalDof + iDof - 1 );
-}
 
 //! Assignment operator for BCVector
-BCVector & BCVector::operator=( const BCVector& BCv )
+BCVector&
+BCVector::operator=( const BCVector& BCv )
 {
-    _vec = BCv._vec;
-    _nbTotalDof = BCv._nbTotalDof;
-    _MixteCoef = BCv._MixteCoef;
-    _finalized = BCv._finalized;
-    _type = BCv._type;
+    if ( this == &BCv )
+        return *this;
+
+    super::operator=( ( super& )BCv );
+
     return *this;
 }
 
 
 //! Output
-std::ostream& BCVector::showMe( bool verbose, std::ostream & out ) const
+std::ostream&
+BCVector::showMe( bool verbose, std::ostream & out ) const
 {
-    ASSERT_PRE( _finalized, "BC Vector should be finalized before being accessed." );
+    ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
     out << "+++++++++++++++++++++++++++++++" << std::endl;
     out << "BC Vector Interface: " << std::endl;
-    out << "number of interface vector Dof : " << _nbTotalDof << std::endl;
+    out << "number of interface vector Dof : " << this->nbTotalDOF() << std::endl;
     out << "==>Interface Dof :\n";
     out << "+++++++++++++++++++++++++++++++" << std::endl;
     return out;
@@ -143,63 +148,69 @@ std::ostream& BCVector::showMe( bool verbose, std::ostream & out ) const
 
 
 //
-// Implementation for BCVector_Interface
+// Implementation for BCVectorInterface
 //
 
 //! Default Constructor (the user must call setBCVector(..))
-BCVector_Interface::BCVector_Interface()
+BCVectorInterface::BCVectorInterface()
 {}
 
 //! Constructor
-BCVector_Interface::BCVector_Interface( Vector& vec, UInt nbTotalDof,
-                                        DofInterfaceBase& dofIn ) :
-        BCVector_Base( vec, nbTotalDof ),
-        _dofIn( &dofIn )
+BCVectorInterface::BCVectorInterface( Vector& vec, UInt nbTotalDof,
+                                      DofInterfaceBase& dofIn )
+    :
+    BCVectorBase( vec, nbTotalDof ),
+    _M_dofIn( &dofIn )
 {
-    _finalized = true;
+    this->setFinalized( true );
 }
 
 
 //!set the BC vector (after default construction)
-void BCVector_Interface::setvector( Vector& vec, UInt nbTotalDof, DofInterfaceBase& dofIn )
+void
+BCVectorInterface::setVector( Vector& vec, UInt nbTotalDof, DofInterfaceBase& dofIn )
 {
-    ASSERT_PRE( !_finalized, "BC Vector cannot be set twice." );
-    _vec = &vec ;
-    _dofIn = &dofIn;
-    _nbTotalDof = nbTotalDof;
-    _finalized = true;
+    ASSERT_PRE( !this->isFinalized(), "BC Vector cannot be set twice." );
+
+    super::setVector( vec, nbTotalDof );
+
+    _M_dofIn = &dofIn;
+
 }
 
 
 //! This method returns the value to be imposed in the component iComp of the dof iDof
-Real BCVector_Interface::operator() ( const ID& iDof, const ID& iComp ) const
+Real
+BCVectorInterface::operator() ( const ID& iDof, const ID& iComp ) const
 {
-    ASSERT_PRE( _finalized, "BC Vector should be finalized before being accessed." );
-    return ( *_vec ) ( ( iComp - 1 ) * _nbTotalDof + _dofIn->getInterfaceDof( iDof ) - 1 );
+    ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
+    return ( *_M_vec ) ( ( iComp - 1 ) * _M_nbTotalDof + _M_dofIn->getInterfaceDof( iDof ) - 1 );
 }
 
-//! Assignment operator for BCVector_Interface
-BCVector_Interface & BCVector_Interface::operator=( const BCVector_Interface & BCv )
+//! Assignment operator for BCVectorInterface
+BCVectorInterface&
+BCVectorInterface::operator=( const BCVectorInterface & BCv )
 {
-    _vec = BCv._vec;
-    _dofIn = BCv._dofIn;
-    _nbTotalDof = BCv._nbTotalDof;
-    _MixteCoef = BCv._MixteCoef;
-    _finalized = BCv._finalized;
-    _type = BCv._type;
+    if ( this == &BCv )
+        return *this;
+
+    super::operator=( ( super& ) BCv );
+
+    _M_dofIn = BCv._M_dofIn;
     return *this;
 }
 
 
 //! Output
-std::ostream& BCVector_Interface::showMe( bool verbose, std::ostream & out ) const
+std::ostream&
+BCVectorInterface::showMe( bool verbose, std::ostream & out ) const
 {
-    ASSERT_PRE( _finalized, "BC Vector should be finalized before being accessed." );
+    ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
     out << "+++++++++++++++++++++++++++++++" << std::endl;
     out << "BC Vector Interface: " << std::endl;
-    out << "number of interface vector Dof : " << _nbTotalDof << std::endl;
+    out << "number of interface vector Dof : " << _M_nbTotalDof << std::endl;
     out << "==>Interface Dof :\n";
-    _dofIn->showMe( verbose, out );  // no showMe(..) in Miguel's DofInterface
+    _M_dofIn->showMe( verbose, out );  // no showMe(..) in Miguel's DofInterface
     out << "+++++++++++++++++++++++++++++++" << std::endl;
     return out;
 }

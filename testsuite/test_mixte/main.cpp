@@ -62,11 +62,11 @@ int main()
     // ===================================================
 
 
-    BCFunction_Base gv(g); // Functor storing the user definded function g
+    BCFunctionBase gv(g); // Functor storing the user definded function g
 
-    BCFunction_Mixte hv(h,coef); // Functor for Robin conditions with user defined function h and coef
+    BCFunctionMixte hv(h,coef); // Functor for Robin conditions with user defined function h and coef
 
-    BC_Handler BCh(2); // We impose tow  boundary conditions
+    BCHandler BCh(2); // We impose tow  boundary conditions
 
     BCh.addBC("Inlet",  10, Essential, Scalar, gv);
     BCh.addBC("Outlet", 20, Mixte, Scalar, hv);

@@ -36,12 +36,12 @@ int main(int argc, char** argv)
   Real s = 2.134e-3;
 
 // ********** Boundary conditions definitions for mass transport **************
-  BCFunction_Base c_inflow(c1);
-  BCFunction_Mixte c_wall(alpha,beta);   // Permeability boundary condition
-  BC_Handler BCh_cl(3);
+  BCFunctionBase c_inflow(c1);
+  BCFunctionMixte c_wall(alpha,beta);   // Permeability boundary condition
+  BCHandler BCh_cl(3);
 
-  BCFunction_Base c_adv(cadv);
-  BC_Handler BCh_cw(2);
+  BCFunctionBase c_adv(cadv);
+  BCHandler BCh_cw(2);
 
 // ****** Concentration class lumen: cdrlumen **********************************
   ConvDiffReactSolverPC< RegionMesh3D<LinearHexa> >
@@ -68,12 +68,12 @@ int main(int argc, char** argv)
 // Passing data from the lumen to the wall
   DofInterface3Dto3D dofLumentoWall(feHexaQ1,cdrwall.cDof(),feHexaQ1,cdrlumen.cDof());
   dofLumentoWall.update(cdrwall.mesh(), 3, cdrlumen.mesh(), 6, tol);
-  BCVector_Interface cl_coupling(cl_interface, dim_cl, dofLumentoWall);
+  BCVectorInterface cl_coupling(cl_interface, dim_cl, dofLumentoWall);
   cl_coupling.setMixteCoef((-1.0/epsilon)*(u_filt*(((s*kappa)/2)-Klag)-P));
 // Passing data from the wall to the lumen
   DofInterface3Dto3D dofWalltoLumen(feHexaQ1,cdrlumen.cDof(),feHexaQ1,cdrwall.cDof());
   dofWalltoLumen.update(cdrlumen.mesh(), 6, cdrwall.mesh(), 3, tol);
-  BCVector_Interface cw_coupling(cw_interface, dim_cw, dofWalltoLumen);
+  BCVectorInterface cw_coupling(cw_interface, dim_cw, dofWalltoLumen);
   cw_coupling.setMixteCoef(P-u_filt*(1.0-((s*kappa)/2)));
 
   BCh_cl.addBC("coupling part",   6, Mixte, Scalar, cw_coupling);// Interface to wall part

@@ -52,9 +52,9 @@ int main(int argc, char** argv)
     // Number of boundary conditions for the fluid velocity,
     // solid displacement, and fluid mesh motion
     //
-    BC_Handler BCh_u(3,0);
-    BC_Handler BCh_d(3,0);
-    BC_Handler BCh_mesh(4,1);
+    BCHandler BCh_u(3,0);
+    BCHandler BCh_d(3,0);
+    BCHandler BCh_mesh(4,1);
 
 
     //========================================================================================
@@ -90,7 +90,7 @@ int main(int argc, char** argv)
     //
     DofInterface3Dto3D dofFluidToStructure(feTetraP1, solid.dDof(), feTetraP1bubble, fluid.uDof());
     dofFluidToStructure.update(solid.mesh(), 1, fluid.mesh(), 1, 0.0);
-    BCVector_Interface g_wall(fluid.residual(), dim_fluid, dofFluidToStructure);
+    BCVectorInterface g_wall(fluid.residual(), dim_fluid, dofFluidToStructure);
 
 
     // Passing data from structure to the fluid mesh: motion of the fluid domain
@@ -98,7 +98,7 @@ int main(int argc, char** argv)
     DofInterface3Dto3D dofStructureToFluidMesh(fluid.mesh().getRefFE(), fluid.dofMesh(),
                                                feTetraP1, solid.dDof());
     dofStructureToFluidMesh.update(fluid.mesh(), 1, solid.mesh(), 1, 0.0);
-    BCVector_Interface displ(solid.d(), dim_solid, dofStructureToFluidMesh);
+    BCVectorInterface displ(solid.d(), dim_solid, dofStructureToFluidMesh);
 
 
 
@@ -106,7 +106,7 @@ int main(int argc, char** argv)
     //
     DofInterface3Dto3D dofMeshToFluid(feTetraP1bubble, fluid.uDof(), feTetraP1bubble, fluid.uDof() );
     dofMeshToFluid.update(fluid.mesh(), 1, fluid.mesh(), 1, 0.0);
-    BCVector_Interface u_wall(fluid.wInterpolated(),fluid.uDof().numTotalDof(),dofMeshToFluid);
+    BCVectorInterface u_wall(fluid.wInterpolated(),fluid.uDof().numTotalDof(),dofMeshToFluid);
 
 
     //========================================================================================
@@ -115,14 +115,14 @@ int main(int argc, char** argv)
     //
     // Boundary conditions for the harmonic extension of the
     // interface solid displacement
-    BCFunction_Base bcf(fZero);
+    BCFunctionBase bcf(fZero);
     BCh_mesh.addBC("Interface", 1, Essential, Full, displ, 3);
     BCh_mesh.addBC("Top",       3, Essential, Full, bcf,   3);
     BCh_mesh.addBC("Base",      2, Essential, Full, bcf,   3);
     BCh_mesh.addBC("Edges",    20, Essential, Full, bcf,   3);
 
     // Boundary conditions for the fluid velocity
-    BCFunction_Base in_flow(u2);
+    BCFunctionBase in_flow(u2);
     BCh_u.addBC("Wall",   1,  Essential, Full, u_wall,  3);
     BCh_u.addBC("InFlow", 2,  Natural,   Full, in_flow, 3);
     BCh_u.addBC("Edges",  20, Essential, Full, bcf,     3);

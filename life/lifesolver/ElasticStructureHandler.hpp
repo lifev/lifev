@@ -15,15 +15,15 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*!
   \file ElasticStructureHandler.h
   \author M.A. Fernandez
   \date 06/2003
   \version 1.0
- 
+
   \brief This file contains an abstract class for Elastic Structures.
- 
+
 */
 
 #ifndef _ELASTICSTRUCTUREHANDLER_H_
@@ -65,7 +65,7 @@ public:
       \param BCh boundary conditions for the displacement
     */
     ElasticStructureHandler( const GetPot& data_file, const RefFE& refFE,
-                             const QuadRule& Qr, const QuadRule& bdQr, BC_Handler& BCh );
+                             const QuadRule& Qr, const QuadRule& bdQr, BCHandler& BCh );
 
     //! Sets initial condition for the displacment en velocity
     void initialize( const Function& d0, const Function& w0 );
@@ -129,7 +129,7 @@ protected:
     PhysVectUnknown<Vector> _w;
 
     //! The BC handler
-    BC_Handler& _BCh;
+    BCHandler& _BCh;
 
     //! The actual time
     Real _time;
@@ -149,7 +149,7 @@ protected:
 template <typename Mesh>
 ElasticStructureHandler<Mesh>::
 ElasticStructureHandler( const GetPot& data_file, const RefFE& refFE,
-                         const QuadRule& Qr, const QuadRule& bdQr, BC_Handler& BCh )
+                         const QuadRule& Qr, const QuadRule& bdQr, BCHandler& BCh )
         :
         DataElasticStructure<Mesh>( data_file ),
         _refFE( refFE ),

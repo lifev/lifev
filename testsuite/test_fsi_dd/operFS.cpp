@@ -26,8 +26,8 @@ namespace LifeV
 
 operFS::operFS(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
                VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
-               BC_Handler &BCh_du,
-               BC_Handler &BCh_dz):
+               BCHandler &BCh_du,
+               BCHandler &BCh_dz):
 //                   GetPot     &data_file):
     M_fluid       (fluid),
     M_solid       (solid),
@@ -47,8 +47,6 @@ operFS::operFS(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
 }
 
 // Destructor
-
-
 operFS::~operFS()
 {
 }
@@ -68,8 +66,8 @@ void operFS::computeResidualFSI()
 {
     M_residualFSI = 0.;
 
-    BC_Base const &BC_fluidInterface = M_fluid.BC_fluid()[0];
-    BC_Base const &BC_solidInterface = M_solid.BC_solid()[0];
+    BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[0];
+    BCBase const &BC_solidInterface = M_solid.BC_solid()[0];
 
     UInt nDofInterface = BC_fluidInterface.list_size();
 
@@ -83,8 +81,8 @@ void operFS::computeResidualFSI()
     {
         ID IDfluid = BC_fluidInterface(iBC)->id();
 
-        BCVector_Interface const *BCVInterface =
-            static_cast <BCVector_Interface const *>
+        BCVectorInterface const *BCVInterface =
+            static_cast <BCVectorInterface const *>
             (BC_fluidInterface.pointerToBCVector());
 
         ID IDsolid = BCVInterface->
@@ -102,8 +100,8 @@ void operFS::computeResidualFSI()
 
 void operFS::setResidualFSI(double *_res)
 {
-    BC_Base const &BC_fluidInterface = M_fluid.BC_fluid()[0];
-    BC_Base const &BC_solidInterface = M_solid.BC_solid()[0];
+    BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[0];
+    BCBase const &BC_solidInterface = M_solid.BC_solid()[0];
 
     UInt nDofInterface = BC_fluidInterface.list_size();
 
@@ -117,8 +115,8 @@ void operFS::setResidualFSI(double *_res)
     {
         ID IDfluid = BC_fluidInterface(iBC)->id();
 
-        BCVector_Interface const *BCVInterface =
-            static_cast <BCVector_Interface const *>
+        BCVectorInterface const *BCVInterface =
+            static_cast <BCVectorInterface const *>
             (BC_fluidInterface.pointerToBCVector());
 
         ID IDsolid = BCVInterface->
@@ -134,8 +132,8 @@ void operFS::setResidualFSI(double *_res)
 
 void operFS::setResidualFSI(const Vector _res)
 {
-    BC_Base const &BC_fluidInterface = M_fluid.BC_fluid()[0];
-    BC_Base const &BC_solidInterface = M_solid.BC_solid()[0];
+    BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[0];
+    BCBase const &BC_solidInterface = M_solid.BC_solid()[0];
 
     UInt nDofInterface = BC_fluidInterface.list_size();
 
@@ -149,8 +147,8 @@ void operFS::setResidualFSI(const Vector _res)
     {
         ID IDfluid = BC_fluidInterface(iBC)->id();
 
-        BCVector_Interface const *BCVInterface =
-            static_cast <BCVector_Interface const *>
+        BCVectorInterface const *BCVInterface =
+            static_cast <BCVectorInterface const *>
             (BC_fluidInterface.pointerToBCVector());
 
         ID IDsolid = BCVInterface->
@@ -170,8 +168,8 @@ Vector operFS::getResidualFSIOnSolid()
     Vector vec = M_residualS;
     vec = 0.;
 
-    BC_Base const &BC_fluidInterface = M_fluid.BC_fluid()[0];
-    BC_Base const &BC_solidInterface = M_solid.BC_solid()[0];
+    BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[0];
+    BCBase const &BC_solidInterface = M_solid.BC_solid()[0];
 
     UInt nDofInterface = BC_fluidInterface.list_size();
 
@@ -185,8 +183,8 @@ Vector operFS::getResidualFSIOnSolid()
     {
         ID IDfluid = BC_fluidInterface(iBC)->id();
 
-        BCVector_Interface const *BCVInterface =
-            static_cast <BCVector_Interface const *>
+        BCVectorInterface const *BCVInterface =
+            static_cast <BCVectorInterface const *>
             (BC_fluidInterface.pointerToBCVector());
 
         ID IDsolid = BCVInterface->

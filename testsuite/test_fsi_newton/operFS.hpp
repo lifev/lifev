@@ -49,7 +49,7 @@ class operFS {
 
   operFS(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
 	 VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
-	 BC_Handler& BCh_du, BC_Handler& BCh_dz);
+	 BCHandler& BCh_du, BCHandler& BCh_dz);
 
   //
   void eval(Vector& dispNew, Vector& veloStruct, const Vector& disp,int status);
@@ -84,8 +84,8 @@ class operFS {
 
   UInt _nbEval;
 
-  BC_Handler& _BCh_du;
-  BC_Handler& _BCh_dz;
+  BCHandler& _BCh_du;
+  BCHandler& _BCh_dz;
 
   DataJacobian _dataJacobian;
 

@@ -15,15 +15,15 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*!
   \file convDiffReactHandler.h
   \author M. Prosi
   \date 03/2004
   \version 1.0
- 
+
   \brief This file contains an abstract class for the Convection-Diffusion-Reaktion equation  solvers.
- 
+
 */
 
 #ifndef _CONVDIFFREACTHANDLER_H_
@@ -49,11 +49,11 @@ namespace LifeV
 {
 /*!
   \class convDiffReactHandler
- 
+
   Abstract class which defines the general structure of a Convection-Diffusion-Reaction solver.
   For each new Convection-Diffusion-Reaction solver  we have to implement the corresponding
   timeAdvance and an iterate methods
- 
+
 */
 
 template <typename Mesh>
@@ -75,7 +75,7 @@ public:
       \param ord_bdf order of the bdf time advancing scheme (default: Backward Euler)
     */
     ConvDiffReactHandler( const GetPot& data_file, const RefFE& refFE_c,
-                          const QuadRule& Qr_c, const QuadRule& bdQr_c, BC_Handler& BCh_c );
+                          const QuadRule& Qr_c, const QuadRule& bdQr_c, BCHandler& BCh_c );
 
     //! Sets initial condition for the concentration (incremental approach): the initial time is t0, the time step dt
     void initialize( const Function& c0, Real t0, Real dt );
@@ -147,7 +147,7 @@ protected:
     std::vector<intpolcoord> _u_to_c;
 
     //! The BC handler
-    BC_Handler& _BCh_c;
+    BCHandler& _BCh_c;
 
     // ! The BDF Time Advance Method
     Bdf _bdf;
@@ -165,7 +165,7 @@ protected:
 template <typename Mesh>
 ConvDiffReactHandler<Mesh>::
 ConvDiffReactHandler( const GetPot& data_file, const RefFE& refFE_c,
-                      const QuadRule& Qr_c, const QuadRule& bdQr_c, BC_Handler& BCh_c ) :
+                      const QuadRule& Qr_c, const QuadRule& bdQr_c, BCHandler& BCh_c ) :
         DataConvDiffReact<Mesh>( data_file ),
         _refFE_c( refFE_c ),
         _dof_c( _mesh, _refFE_c ),

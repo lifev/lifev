@@ -56,9 +56,9 @@ int main(int argc, char** argv)
     // Number of boundary conditions for the fluid velocity,
     // solid displacement, and fluid mesh motion
 
-    BC_Handler BCh_u(3);
-    BC_Handler BCh_d(3);
-    BC_Handler BCh_mesh(4);
+    BCHandler BCh_u(3);
+    BCHandler BCh_d(3);
+    BCHandler BCh_mesh(4);
 
 
     //========================================================================================
@@ -111,7 +111,7 @@ int main(int argc, char** argv)
                                fluid.mesh(),
                                1,
                                0.);
-    BCVector_Interface g_wall(fluid.residual(),
+    BCVectorInterface g_wall(fluid.residual(),
                               dim_fluid,
                               dofFluidToStructure);
     //
@@ -126,9 +126,10 @@ int main(int argc, char** argv)
                                solid.mesh(),
                                1,
                                0.);
-    BCVector_Interface d_wall(solid.d(),
-                              dim_solid,
-                              dofStructureToSolid);
+
+    BCVectorInterface d_wall(solid.d(),
+                             dim_solid,
+                             dofStructureToSolid);
     //
     // Passing data from structure to the fluid mesh: motion of the fluid domain
     //
@@ -141,7 +142,7 @@ int main(int argc, char** argv)
                                    solid.mesh(),
                                    1,
                                    0.0);
-    BCVector_Interface displ(solid.d(),
+    BCVectorInterface displ(solid.d(),
                              dim_solid,
                              dofStructureToFluidMesh);
     //
@@ -156,7 +157,7 @@ int main(int argc, char** argv)
                           fluid.mesh(),
                           1,
                           0.0);
-    BCVector_Interface u_wall(fluid.wInterpolated(),
+    BCVectorInterface u_wall(fluid.wInterpolated(),
                               dim_fluid,
                               dofMeshToFluid);
     //========================================================================================
@@ -165,14 +166,14 @@ int main(int argc, char** argv)
 
     // Boundary conditions for the harmonic extension of the
     // interface solid displacement
-    BCFunction_Base bcf(fZero);
+    BCFunctionBase bcf(fZero);
     BCh_mesh.addBC("Interface", 1, Essential, Full, displ, 3);
     BCh_mesh.addBC("Top",       3, Essential, Full, bcf,   3);
     BCh_mesh.addBC("Base",      2, Essential, Full, bcf,   3);
     BCh_mesh.addBC("Edges",    20, Essential, Full, bcf,   3);
 
     // Boundary conditions for the fluid velocity
-    BCFunction_Base in_flow(u2);
+    BCFunctionBase in_flow(u2);
     BCh_u.addBC("Wall",   1,  Essential, Full, u_wall,  3);
     BCh_u.addBC("InFlow", 2,  Natural,   Full, in_flow, 3);
     BCh_u.addBC("Edges",  20, Essential, Full, bcf,     3);
@@ -187,8 +188,8 @@ int main(int argc, char** argv)
     //  COUPLED FSI LINEARIZED OPERATORS
     //========================================================================================
 
-    BC_Handler BCh_du(2);
-    BC_Handler BCh_dz(3);
+    BCHandler BCh_du(2);
+    BCHandler BCh_dz(3);
 
     operFS oper(fluid, solid, BCh_du, BCh_dz);
 
@@ -197,11 +198,11 @@ int main(int argc, char** argv)
     // rem: for now: no fluid.dwInterpolated().
     //      In the future this could be relevant
 
-    BCVector_Interface du_wall(oper.residualFSI(),
+    BCVectorInterface du_wall(oper.residualFSI(),
                                dim_fluid,
                                dofStructureToFluidMesh);
     // Passing the residual to the linearized structure: \sigma -> dz
-    BCVector_Interface dg_wall(oper.residualFSI(),
+    BCVectorInterface dg_wall(oper.residualFSI(),
                                dim_fluid,
                                dofFluidToStructure);
     // Boundary conditions for du

@@ -110,18 +110,18 @@ public:
   UInt numFacesPerVolume; //! number of faces per volume
   RegionMesh3D<LinearHexa> mesh; // the mesh
   int nb_bc;                //!< number of boundary conditions
-  BC_Handler bc;            //!< boundary conditions handler
+  BCHandler bc;            //!< boundary conditions handler
 
   //! boundary conditions functions
   //! on a cube one might use them as follows:
-  BCFunction_Base bc_fct1;  //!< low  X
-  BCFunction_Base bc_fct2;  //!< high X
-  BCFunction_Base bc_fct3;  //!< low  Y
-  BCFunction_Base bc_fct4;  //!< high Y
-  BCFunction_Base bc_fct5;  //!< low  Z
-  BCFunction_Base bc_fct6;  //!< high Z
+  BCFunctionBase bc_fct1;  //!< low  X
+  BCFunctionBase bc_fct2;  //!< high X
+  BCFunctionBase bc_fct3;  //!< low  Y
+  BCFunctionBase bc_fct4;  //!< high Y
+  BCFunctionBase bc_fct5;  //!< low  Z
+  BCFunctionBase bc_fct6;  //!< high Z
 
-  BCFunction_Mixte bc_fct_rob;  //!< a mixte (or Robin) bc function
+  BCFunctionMixte bc_fct_rob;  //!< a mixte (or Robin) bc function
 
 public:
   DarcyHandler(const GetPot& data_file);

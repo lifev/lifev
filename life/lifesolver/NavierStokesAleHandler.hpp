@@ -69,8 +69,8 @@ public:
                             const QuadRule& bdQr_u,
                             const QuadRule& Qr_p,
                             const QuadRule& bdQr_p,
-                            BC_Handler& BCh_u,
-                            BC_Handler& BCh_mesh );
+                            BCHandler& BCh_u,
+                            BCHandler& BCh_mesh );
 
     //! Do nothing destructor
     virtual ~NavierStokesAleHandler()
@@ -128,7 +128,7 @@ template <typename Mesh>
 NavierStokesAleHandler<Mesh>::
 NavierStokesAleHandler( const GetPot& data_file, const RefFE& refFE_u,
                         const RefFE& refFE_p, const QuadRule& Qr_u, const QuadRule& bdQr_u,
-                        const QuadRule& Qr_p, const QuadRule& bdQr_p, BC_Handler& BCh_u, BC_Handler& BCh_mesh ) :
+                        const QuadRule& Qr_p, const QuadRule& bdQr_p, BCHandler& BCh_u, BCHandler& BCh_mesh ) :
         NavierStokesHandler<Mesh>( data_file,
                                    refFE_u,
                                    refFE_p,

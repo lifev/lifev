@@ -15,7 +15,7 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*!
   \file bcCond.h
   \brief classes to handle boundary conditions.
@@ -23,14 +23,26 @@
   \author M.A. Fernandez
   \date 06/2002
         11/2002 Introduction of data vectors and method bdUpdate (moved from Dof class).
- 
+
   This file contains the classes which may be used to store boundary
-  conditions. A boundary condition objet will have the following elements: a name identifying
-  a specific BC, a flag identifying a specific part of the mesh boundary, a type
-  (Essential, Natural, Mixte), a mode of implementation (Scalar, Full, Component, Normal, Tangential), a
-  functor holding the data function, a bool vector describing the components involved in this boundary
-  condition and finally a list of pointers to identifiers allowing the user to know to which DOF
-  the boundary condition applies.
+  conditions. A boundary condition objet will have the following
+  elements:
+
+  -# a name identifying a specific BC,
+
+  -# a flag identifying a specific part of the mesh boundary,
+
+  -# a type (Essential, Natural, Mixte),
+
+  -# a mode of implementation (Scalar, Full, Component, Normal,
+     Tangential),
+
+  -# a functor holding the data function,
+
+  -# a bool vector  describing the components involved in this boundary condition
+
+  -# a list of pointers to identifiers allowing the user to know to
+     which DOF the boundary condition applies.
 */
 
 #ifndef __BCCOND_HH__
@@ -48,38 +60,42 @@
 
 namespace LifeV
 {
-/*! Boundary condition basic types
+/** Boundary condition basic types
     Essential, Natural or Mixte
 */
 enum BCType{Essential, Natural, Mixte};
 
-/*! Type for boundary conditions application modes
- 
-  Scalar: for scalar problems
-  Full: for vector problems involving all components
-  Component: for vector problems not involving all compontents
-  Normal: for vector problems dealing with the normal component
-  Tangential: for vector problems dealing with tangential components
+/** Type for boundary conditions application modes
+
+-# Scalar: for scalar problems
+
+-# Full: for vector problems involving all components
+
+-# Component: for vector problems not involving all compontents
+
+-# Normal: for vector problems dealing with the normal component
+
+-# Tangential: for vector problems dealing with tangential components
 */
 enum BCMode{Scalar, Full, Component, Normal, Tangential};
 
 
-// ============ BCFunction_Base ================
+// ============ BCFunctionBase ================
 
 /*!
- 
- \class BCFunction_Base
- 
+
+ \class BCFunctionBase
+
  Base class (STL functor) that holds the function used for imposing BC.
- 
+
   The data functions given by the user must have the following declaration
   Real g(const Real& time, const Real& x, const Real& y, const Real& z, const ID& icomp)
   We can use inheritance to hold specific boundary condition data. See, for instance,
   Mixed boundary conditions.
- 
+
 */
 
-class BCFunction_Base
+class BCFunctionBase
 {
 public:
     //! Type for a generic user defined  function
@@ -89,21 +105,21 @@ public:
     /*!
       The user must supply a function by calling setFunction(..)
     */
-    BCFunction_Base()
+    BCFunctionBase()
     {}
-    ; // JFG (26/10/2002)
+    ;
 
     //! Constructing from a user defined function
     /*!
       \param g the user defined function
     */
-    BCFunction_Base( Function g );
+    BCFunctionBase( Function g );
 
     //! Constructing from a user defined functor
     /*!
       \param bcf user defined functor
     */
-    BCFunction_Base( const BCFunction_Base& bcf );
+    BCFunctionBase( const BCFunctionBase& bcf );
 
     //! Set the function
     /*!
@@ -130,16 +146,18 @@ protected:
 
 
 /*!
- 
- \class BCFunction_Mixte
- 
+
+ \class BCFunctionMixte
+
  Class (STL functor) that holds the user defined fonctions for a Mixte BC.
- 
+
   The data funcitions given by the user must have the following declaration
  Real g(const Real& time, const Real& x, const Real& y, const Real& z, const ID& icomp)
 */
 
-class BCFunction_Mixte: public BCFunction_Base
+class BCFunctionMixte
+    :
+    public BCFunctionBase
 {
 public:
 
@@ -148,9 +166,8 @@ public:
     /*!
       The user must supply a function by calling setFunction(..)
     */
-    BCFunction_Mixte()
-    {}
-    ; // VM (04/02/2003)
+    BCFunctionMixte()
+        {}
 
 
     //! Constructing from user defined functions
@@ -158,13 +175,13 @@ public:
       \param g user defined function
       \param coef user defined function
     */
-    BCFunction_Mixte( Function g, Function coef );
+    BCFunctionMixte( Function g, Function coef );
 
     //! Constructing from a user defined functor
     /*!
       \param bcf user defined functor
     */
-    BCFunction_Mixte( const BCFunction_Mixte& bcf );
+    BCFunctionMixte( const BCFunctionMixte& bcf );
 
 
     //! Set the functions in the mixte case (beware : plural!)
@@ -193,80 +210,121 @@ private:
 
 
 
-// ============ BC_Base ================
+// ============ BCBase ================
 
 
 
 /*!
-  \class BC_Base
- 
+  \class BCBase
+
   Base class which holds the boundary condition information
- 
-   For each boundary condtion the user must give a name, a mesh flag, a type, a mode, a data BCFuncion,
-  and three (or two in 2D) bools describing the components involved in this boundary
-  condition. Finally the list of pointers to identifiers will be updated in the Dof class
-  (BC_Handler::bdUpdate method).
-  The idea is to not use inheritance from dis class... if hope it will possible.
+
+  For each boundary condtion the user must give
+
+  -# a name,
+
+  -# a mesh flag,
+
+  -# a type,
+
+  -# a mode,
+
+  -# a data BCFuncion,
+
+  -# three (or two in 2D) bools describing the components involved in
+     this boundary condition.
+
+  Finally the list of pointers to identifiers will be updated in the
+  Dof class (\c BCHandler::bdUpdate method).
+
+  \warning The idea is to not use inheritance from this class
 */
 
 
 //!
-class BC_Base
+class BCBase
 {
 public:
 
-    friend class BC_Handler;
+    friend class BCHandler;
 
     //! iterator type in the identifiers list
-    typedef std::set
-        <Identifier_Base*, identifierComp>::iterator IDIterator0;
+    typedef std::set<Identifier_Base*, identifierComp>::iterator IDIterator0;
     typedef std::vector<Identifier_Base*>::iterator IDIterator;
 
 
-    //! Constructor for BC
-    /*!
+    /**
+       Constructor for BC
+
       \param name the name of the boundary condition
-      \param flag the mesh flag identifying the part of the mesh where the boundary condition applies
+
+      \param flag the mesh flag identifying the part of the mesh where
+      the boundary condition applies
+
       \param type the boundary condition type: Natural, Essential, Mixte
-      \param mode the boundary condition mode: Scalar, Full, Component, Normal, Tangential
-      \param bcf the function holding the user defined function involved in this boundary condition
-      \param std::vector<ID> storing the list of components involved in this boundary condition
+
+      \param mode the boundary condition mode: Scalar, Full,
+      Component, Normal, Tangential
+
+      \param bcf the function holding the user defined function
+      involved in this boundary condition
+
+      \param std::vector<ID> storing the list of components involved
+      in this boundary condition
      */
-    BC_Base( const std::string& name,
+    BCBase( const std::string& name,
              const EntityFlag& flag,
              const BCType& type,
              const BCMode& mode,
-             BCFunction_Base& bcf,
+             BCFunctionBase& bcf,
              const std::vector<ID>& comp );
 
-    //! Constructor for BC without components for Scalar, Tangential or Normal  mode problems
-    /*!
-      \param name the name of the boundary condition
-      \param flag the mesh flag identifying the part of the mesh where the boundary condiion applies
-      \param type the boundary condition type: Natural, Essential, Mixte
-      \param mode the boundary condition mode: Scalar, Full, Normal, Tangential
-      \param bcf the function holding the user defined function involved in this boundary condition
-    */
-    BC_Base( const std::string& name,
-             const EntityFlag& flag,
-             const BCType& type,
-             const BCMode& mode,
-             BCFunction_Base& bcf );
+    /**
+       Constructor for BC without components for Scalar, Tangential or
+       Normal mode problems
 
-    //! Constructor for BC without list of components for Full mode problems
-    /*!
       \param name the name of the boundary condition
-      \param flag the mesh flag identifying the part of the mesh where the boundary condiion applies
+
+      \param flag the mesh flag identifying the part of the mesh where
+      the boundary condiion applies
+
       \param type the boundary condition type: Natural, Essential, Mixte
+
       \param mode the boundary condition mode: Scalar, Full, Normal, Tangential
-      \param bcf the function holding the user defined function involved in this boundary condition
-      \param nComp the number of componets involved in this boundary condition
+
+      \param bcf the function holding the user defined function
+      involved in this boundary condition
     */
-    BC_Base( const std::string& name,
+    BCBase( const std::string& name,
              const EntityFlag& flag,
              const BCType& type,
              const BCMode& mode,
-             BCFunction_Base& bcf,
+             BCFunctionBase& bcf );
+
+    /**
+       Constructor for BC without list of components for Full mode problems
+
+       \param name the name of the boundary condition
+
+      \param flag the mesh flag identifying the part of the mesh where
+      the boundary condiion applies
+
+      \param type the boundary condition type: Natural, Essential,
+      Mixte
+
+      \param mode the boundary condition mode: Scalar, Full, Normal, Tangential
+
+      \param bcf the function holding the user defined function
+      involved in this boundary condition
+
+      \param nComp the number of componets involved in this boundary
+      condition
+    */
+    BCBase( const std::string& name,
+             const EntityFlag& flag,
+             const BCType& type,
+             const BCMode& mode,
+             BCFunctionBase& bcf,
              const UInt& nComp );
 
 
@@ -279,11 +337,11 @@ public:
       \param bcv data vector
       \param std::vector<ID> storing the list of components involved in this boundary condition
      */
-    BC_Base( const std::string& name,
+    BCBase( const std::string& name,
              const EntityFlag& flag,
              const BCType& type,
              const BCMode& mode,
-             BCVector_Base& bcv,
+             BCVectorBase& bcv,
              const std::vector<ID>& comp );
 
     //! Constructor for BC with data vector, without components for Scalar, Tangential or Normal  mode problems
@@ -294,11 +352,11 @@ public:
       \param mode the boundary condition mode: Scalar, Full, Normal, Tangential
       \param bcv data vector
     */
-    BC_Base( const std::string& name,
+    BCBase( const std::string& name,
              const EntityFlag& flag,
              const BCType& type,
              const BCMode& mode,
-             BCVector_Base& bcv );
+             BCVectorBase& bcv );
 
     //! Constructor for BC with data vector, without list of components for Full mode problems
     /*!
@@ -309,11 +367,11 @@ public:
       \param bcv data vector
       \param nComp the number of componets involved in this boundary condition
     */
-    BC_Base( const std::string& name,
+    BCBase( const std::string& name,
              const EntityFlag& flag,
              const BCType& type,
              const BCMode& mode,
-             BCVector_Base& bcv,
+             BCVectorBase& bcv,
              const UInt& nComp );
 
 
@@ -321,16 +379,16 @@ public:
     /*!
       \param BCb a boundary condition
     */
-    BC_Base( const BC_Base& BCb );
+    BCBase( const BCBase& BCb );
 
     //! Assignment operator for BC (we have a vector of pointers to ID's and a pointer to user defined functions)
     /*!
       \param BCb a boundary condition
     */
-    BC_Base & operator=( const BC_Base& );
+    BCBase & operator=( const BCBase& );
 
     //! Destructor (we have a vector of pointers to ID's and a pointer to user defined functions)
-    ~BC_Base();
+    ~BCBase();
 
     //! Returns the BC name
     std::string name() const;
@@ -347,14 +405,22 @@ public:
     //! Returns the number of components involved in this boundary condition
     UInt numberOfComponents() const;
 
-    //! Returns the global i-th component involved in the boundary condition
-    /*!
-      \param i the specified "local" component (from 1 to numberOfComponents)
-      \return true if the specified component component is involved in the BC
+    /**
+       Returns the global i-th component involved in the boundary
+       condition
+
+       \param i the specified "local" component (from 1 to
+       numberOfComponents)
+
+      \return true if the specified component component is involved in
+      the BC
     */
     ID component( const ID i ) const;
 
-    //! Returns wether the list is finalised and the vector of ID's is then accessible
+    /**
+       Returns wether the list is finalised and the vector of ID's is
+       then accessible.
+    */
     bool finalised() const;
 
     //! Overloading function operator by calling the _bcf() user specified function
@@ -371,10 +437,10 @@ public:
 
 
     //! Returns a pointer  to the user defined STL functor
-    const BCFunction_Base* pointerToFunctor() const;
+    const BCFunctionBase* pointerToFunctor() const;
 
     //! Returns a pointer to the BCVector
-    const BCVector_Base* pointerToBCVector() const;
+    const BCVectorBase* pointerToBCVector() const;
 
     //! True if a data vector has been provided
     bool dataVector() const;
@@ -394,7 +460,7 @@ public:
 
 
     //! Returns the value of the mixte coefficient (in BC Vector)
-    Real MixteCoef() const;
+    Real mixteCoef() const;
 
     //! Returns a pointer to the i-th elements in the (finalised) list
     //! (counting from 0 ' a la C')
@@ -410,13 +476,13 @@ public:
     std::ostream & showMe( bool verbose = false, std::ostream & out = std::cout ) const;
 
     //! overloaded operator allowing decreasing ordering operations
-    friend bool operator<( const BC_Base& a, const BC_Base& b )
+    friend bool operator<( const BCBase& a, const BCBase& b )
     {
         return ( a.type() > b.type() );
     }
 
     //! overloaded operator allowing finding operations
-    friend bool operator==( const BC_Base& a, const EntityFlag flag )
+    friend bool operator==( const BCBase& a, const EntityFlag flag )
     {
         return a.flag() == flag;
     }
@@ -435,11 +501,11 @@ private:
     BCMode _mode;
 
     //! Pointer to a user defined functor
-    BCFunction_Base* _bcf;
+    BCFunctionBase* _bcf;
 
 
     //! Pointer to a user given data vector
-    BCVector_Base* _bcv;
+    BCVectorBase* _bcv;
 
     //! True is a data vector has been provided
     bool _dataVector;
@@ -466,51 +532,47 @@ private:
 
 
 
-// ============ BC_Handler ================
+// ============ BCHandler ================
 
 
-/*!
- 
-  \class BC_Handler
- 
-  Container for BC_Base classes
- 
- 
-BC_Handler is a container for the boundary condition classes
-It just uses a stl vector to store BC_Base objets. The usage is simple:
-the user creates the data functors from the de user defined functions
- \verbatim
-  BCFunction_Base gv(g);
-  BCFunction_Mixte gp(h,q);
- \endverbatim
-Then he/she specifies the number of BC and uses the Handler for creating the actual
-BC objects and storing them.
- 
-\verbatim
- BC_Handler bc_v(3);
- bc_v.addBC("inlet",10,Essential,Full,gv,3);
- bc_v.addBC("outflow",11,Mixte,Scalar);
- bc_v.addBC("wall",10,Essential,Full,gv,3);
-\endverbatim
- 
+/**
+   \class BCHandler
+
+   Container for BCBase classes
+
+
+   \c BCHandler is a container for the boundary condition classes It just
+   uses and stl vector to store BCBase objets. The usage is simple: the
+   user creates the data functors from the de user defined functions
+
+   \verbatim
+   BCFunctionBase gv(g);
+   BCFunctionMixte gp(h,q);
+   \endverbatim
+   Then he/she specifies the number of BC and uses the Handler for creating the actual
+   BC objects and storing them.
+
+   \verbatim
+   BCHandler bc_v(3);
+   bc_v.addBC("inlet",10,Essential,Full,gv,3);
+   bc_v.addBC("outflow",11,Mixte,Scalar);
+   bc_v.addBC("wall",10,Essential,Full,gv,3);
+   \endverbatim
 */
-
-
-class BC_Handler
+class BCHandler
 {
 public:
 
-    typedef std::vector<BC_Base>::iterator Iterator;
+    typedef std::vector<BCBase>::iterator Iterator;
 
     //! Constructor doing nothing (the user must call setNumber(..))
-    BC_Handler();
+    BCHandler();
+
     //! Constructor taking the number of BC to be stored
-    // JFG (25/10/2002)
-    BC_Handler( const ID& );
-    BC_Handler( const ID&, const bool& fullEssential );
+    BCHandler( const ID& );
+    BCHandler( const ID&, const bool& fullEssential );
 
     //! Set the number of BC to be stored
-    // JFG (25/10/2002)
     void setNumber( const ID& nbc );
 
 
@@ -540,7 +602,7 @@ public:
       \param std::vector<ID> storing the list of components involved in this boundary condition
     */
     void addBC( const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
-                BCFunction_Base& bcf, const std::vector<ID>& comp );
+                BCFunctionBase& bcf, const std::vector<ID>& comp );
     //! add new BC to the list  without specified components for Scalar, Tangential or Normal  mode problems  (user defined function)
     /*!
       \param name the name of the boundary condition
@@ -550,7 +612,7 @@ public:
       \param bcf the function holding the user defined function involved in this boundary condition
     */
     void addBC( const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
-                BCFunction_Base& bcf );
+                BCFunctionBase& bcf );
 
 
     //! add new BC to the list without list of components for Full mode problems  (user defined function)
@@ -563,7 +625,7 @@ public:
       \param nComp the number of componets involved in this boundary condition
     */
     void addBC( const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
-                BCFunction_Base& bcf, const UInt& nComp );
+                BCFunctionBase& bcf, const UInt& nComp );
 
 
     //! add new BC to the list (data vector)
@@ -576,7 +638,7 @@ public:
       \param std::vector<ID> storing the list of components involved in this boundary condition
     */
     void addBC( const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
-                BCVector_Base& bcv, const std::vector<ID>& comp );
+                BCVectorBase& bcv, const std::vector<ID>& comp );
 
 
     //! add new BC to the list  without specified components for Scalar, Tangential or Normal  mode problemst (data vector)
@@ -588,7 +650,7 @@ public:
       \param bcv data vector
     */
     void addBC( const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
-                BCVector_Base& bcv );
+                BCVectorBase& bcv );
 
 
     //! add new BC to the list without list of components for Full mode problems t (data vector)
@@ -604,7 +666,7 @@ public:
                 const EntityFlag& flag,
                 const BCType& type,
                 const BCMode& mode,
-                BCVector_Base& bcv,
+                BCVectorBase& bcv,
                 const UInt& nComp );
 
 
@@ -627,8 +689,8 @@ public:
     bool fullEssential() const;
 
     //! extracting a BC in the list
-    BC_Base& operator[] ( const Index_t& );
-    const BC_Base& operator[] ( const Index_t& ) const;
+    BCBase& operator[] ( const Index_t& );
+    const BCBase& operator[] ( const Index_t& ) const;
 
     //! output
     std::ostream & showMe( bool verbose = false, std::ostream & out = std::cout ) const;
@@ -644,7 +706,7 @@ protected:
     bool _fullEssential;
 
     //! vector list holding the stored BC
-    std::vector<BC_Base> _bcList;
+    std::vector<BCBase> _bcList;
 };
 
 
@@ -653,12 +715,12 @@ protected:
 ********************************************************************/
 
 //! 11/2002: The update method must be a method of BCh: it updates
-//! BC_Handler objects not Dof objects
+//! BCHandler objects not Dof objects
 
 
 //! Build the boundary staff
 template <typename Mesh>
-void BC_Handler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
+void BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
 {
 
     typedef typename Mesh::VolumeShape GeoShape;
@@ -689,7 +751,7 @@ void BC_Handler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
     UInt nDofElemE = nElemE * nDofpE; // number of edge's Dof on a Element
 
     SimpleVect<ID> bdltg( nDofF );
-    typedef std::vector<BC_Base>::iterator Iterator;
+    typedef std::vector<BCBase>::iterator Iterator;
     Iterator where;
     std::vector<Iterator> whereList;
 

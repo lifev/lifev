@@ -51,7 +51,7 @@ int main( int argc, char** argv )
     // Number of boundary conditions for the fluid velocity,
     // solid displacement, and fluid mesh motion
     //
-    BC_Handler BCh( 1 );
+    BCHandler BCh( 1 );
 
     NavierStokesSolverIP< RegionMesh3D<LinearTetra> >
         fluid( data_file, feTetraP1, quadRuleTetra4pt, quadRuleTria3pt, BCh );
@@ -60,12 +60,12 @@ int main( int argc, char** argv )
     // Boundary conditions for the fluid velocity
     //vector<ID> icomp( 1 );
     //icomp[0] = 1;
-    BCFunction_Base u_wall( uexact );
-    // BCFunction_Base bcf( fZero );
+    BCFunctionBase u_wall( uexact );
+    // BCFunctionBase bcf( fZero );
     BCh.addBC( "Wall", 1, Essential, Full, u_wall, 3 );
     //BCh.addBC( "Wall", 2, Essential, Component, bcf, icomp );
-    //BCFunction_Base bcf( afZero );
-    //BCFunction_Base in_flow( u2 );
+    //BCFunctionBase bcf( afZero );
+    //BCFunctionBase in_flow( u2 );
     //BCh.addBC( "Wall", 1, Essential, Full, bcf, 3 );
     //BCh.addBC( "InFlow", 2, Natural, Full, in_flow, 3 );
     //BCh.addBC( "Edges", 20, Essential, Full, bcf, 3 );

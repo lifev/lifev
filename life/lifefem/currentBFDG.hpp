@@ -29,7 +29,7 @@ class CurrentBFDG:public CurrentBdDG{
 #endif
 
   template<class GEOELE>
-    void updateBCType(const GEOELE& geoele, const BC_Handler& BCh){
+    void updateBCType(const GEOELE& geoele, const BCHandler& BCh){
     marker = EntityFlag(geoele.marker());
     bcType = BCh.boundaryType(marker);
   }

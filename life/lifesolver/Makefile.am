@@ -29,8 +29,13 @@ include_HEADERS	= ElasticStructureHandler.hpp NavierStokesAleHandler.hpp NavierS
 NavierStokesSolverPC.hpp VenantKirchhofSolver.hpp dataElasticStructure.hpp \
 dataNavierStokes.hpp dataSimplifiedStructure.hpp simplifiedStructure.hpp convDiffReactHandler.hpp convDiffReactSolverPC.hpp dataConvDiffReact.hpp
 
+
 #lib_LTLIBRARIES	= lifesolver.la
 
 #lifesolver_la_SOURCES	= 
+
+bin_PROGRAMS=multiscale
+multiscale_SOURCES  = multiscale.cpp
+multiscale_LDADD    = ../lifecore/liblifecore.la 
 
 include $(top_srcdir)/admin/Doxyfile.am

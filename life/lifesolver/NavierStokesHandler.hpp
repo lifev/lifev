@@ -15,15 +15,15 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*!
   \file NavierStokesHandler.h
   \author M.A. Fernandez
   \date 01/2003
   \version 1.0
- 
+
   \brief This file contains an abstract class for NavierStokes solvers.
- 
+
 */
 
 #ifndef _NAVIERSTOKESHANDLER_H_
@@ -90,7 +90,7 @@ public:
                          const QuadRule& bdQr_u,
                          const QuadRule& Qr_p,
                          const QuadRule& bdQr_p,
-                         BC_Handler& BCh_u );
+                         BCHandler& BCh_u );
 
     //! Sets initial condition for the velocity (here the initial time is 0.0)
     void initialize( const Function& u0 );
@@ -196,7 +196,7 @@ protected:
     ScalUnknown<Vector> _p;
 
     //! The BC handler
-    BC_Handler& _BCh_u;
+    BCHandler& _BCh_u;
 
     // ! The BDF Time Advance Method + Incremental Pressure
     BdfNS _bdf;
@@ -221,7 +221,7 @@ template <typename Mesh>
 NavierStokesHandler<Mesh>::
 NavierStokesHandler( const GetPot& data_file, const RefFE& refFE_u,
                      const RefFE& refFE_p, const QuadRule& Qr_u, const QuadRule& bdQr_u,
-                     const QuadRule& Qr_p, const QuadRule& bdQr_p, BC_Handler& BCh_u ) :
+                     const QuadRule& Qr_p, const QuadRule& bdQr_p, BCHandler& BCh_u ) :
     DataNavierStokes<Mesh>( data_file ),
     _refFE_u( refFE_u ),
     _refFE_p( refFE_p ),

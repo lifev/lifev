@@ -15,13 +15,13 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*!
   \file convDiffReactSolverPC.h
   \author M. Prosi
   \date 03/2004
   \version 1.0
- 
+
   \brief This file contains a solver class for the Convection-Diffusion-Reaction equation
 */
 
@@ -48,9 +48,9 @@ namespace LifeV
 {
 /*!
   \class convDiffReactSolverPC
- 
+
    This class implements a solver for the Convection-Diffusion-Reaction equation
- 
+
 */
 template <typename Mesh>
 class ConvDiffReactSolverPC:
@@ -70,7 +70,7 @@ public:
       \param BCh_c boundary conditions for the concentration
     */
     ConvDiffReactSolverPC( const GetPot& data_file, const RefFE& refFE_c, const QuadRule& Qr_c,
-                           const QuadRule& bdQr_c, BC_Handler& BCh_c );
+                           const QuadRule& bdQr_c, BCHandler& BCh_c );
 
     //! Update the right  hand side  for time advancing
     /*!
@@ -84,12 +84,12 @@ public:
 
     //! Projection of the velocity on grid of concentration discretization
     template <typename RegionMesh3D>
-    void getvel( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u, const Real& time );
+    void getvel( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u, const Real& time );
 
     //! Calculate the local coordinates of concentration gridpoints in the
     //! velocity grid (is needed for the Projection)
     template <typename RegionMesh3D>
-    void getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u );
+    void getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u );
 
     //! Calculate the volume of a tetrahedra given by its corner nodes
     Real calcvol( Real x[ 4 ], Real y[ 4 ], Real z[ 4 ] );
@@ -137,7 +137,7 @@ private:
 template <typename Mesh>
 ConvDiffReactSolverPC<Mesh>::
 ConvDiffReactSolverPC( const GetPot& data_file, const RefFE& refFE_c, const QuadRule& Qr_c,
-                       const QuadRule& bdQr_c, BC_Handler& BCh_c ) :
+                       const QuadRule& bdQr_c, BCHandler& BCh_c ) :
         ConvDiffReactHandler<Mesh>( data_file, refFE_c, Qr_c, bdQr_c, BCh_c ),
         _pattM( _dof_c ),
         _DR( _pattM ),
@@ -402,7 +402,7 @@ iterate( const Real& time )
 template <typename Mesh>
 template <typename RegionMesh3D>
 void ConvDiffReactSolverPC<Mesh>::
-getvel( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u, const Real& time )
+getvel( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u, const Real& time )
 {
 
     //   for (UInt j=0; j<3; j++){
@@ -451,7 +451,7 @@ getvel( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u, co
 template <typename Mesh>
 template <typename RegionMesh3D>
 void ConvDiffReactSolverPC<Mesh>::
-getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u )
+getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
 {
 
     Real b1, b2, b3;

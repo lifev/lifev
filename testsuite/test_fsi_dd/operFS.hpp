@@ -57,7 +57,7 @@ namespace LifeV
 
         operFS(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
                VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
-               BC_Handler& BCh_du, BC_Handler& BCh_dz);
+               BCHandler& BCh_du, BCHandler& BCh_dz);
 //               GetPot &data_file);
 
         // destructor
@@ -70,10 +70,10 @@ namespace LifeV
                              int    status,
                              Vector &dispNew,
                              Vector &veloStruct);
-        
+
         Vector evalResidual (Vector &sol,
                              int    iter);
-            
+
         void updateJac      (Vector& sol,
                              int     iter);
 
@@ -81,7 +81,7 @@ namespace LifeV
 
         Vector solvePrec      (const Vector &,
                                double);
-        
+
         void solveLinearFluid();
 
         void solveLinearSolid();
@@ -143,12 +143,12 @@ namespace LifeV
 
         UInt                    M_nbEval;
 
-        BC_Handler&             M_BCh_du;
-        BC_Handler&             M_BCh_dz;
+        BCHandler&             M_BCh_du;
+        BCHandler&             M_BCh_dz;
 
         DataJacobian            M_dataJacobian;
 
-        
+
         void  invSfPrime  (const Vector &res,
                            double       linear_rel_tol,
                            Vector       &step);

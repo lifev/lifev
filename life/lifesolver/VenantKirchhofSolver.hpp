@@ -15,16 +15,16 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*!
   \file VenantKirchhofSolver.h
   \author M.A. Fernandez
   \date 6/2003
   \version 1.0
- 
+
   \brief
   This file contains solvers for St. Venant-Kirchhof materials (linear for the moment)
- 
+
 */
 #ifndef _VENANTKIRCHHOFSOLVER_H_
 #define _VENANTKIRCHHOFSOLVER_H_
@@ -48,12 +48,12 @@ namespace LifeV
 
 /*!
   \class VenantKirchhofSolver
- 
+
   \brief
   This class solves the linear elastodynamics equations for a (only linear right now)
   St. Venant-Kirchoff material
- 
- 
+
+
 */
 template <typename Mesh>
 class VenantKirchhofSolver:
@@ -73,7 +73,7 @@ public:
       \param BCh boundary conditions for the displacement
     */
     VenantKirchhofSolver( const GetPot& data_file, const RefFE& refFE, const QuadRule& Qr,
-                          const QuadRule& bdQr, BC_Handler& BCh );
+                          const QuadRule& bdQr, BCHandler& BCh );
 
     //! Update the right  hand side  for time advancing
     /*!
@@ -88,9 +88,9 @@ public:
     //! Output
     void showMe( std::ostream& c = std::cout ) const;
 
-    //! BC_Handler getter
+    //! BCHandler getter
 
-    BC_Handler const & BC_solid() const {return _BCh;}
+    BCHandler const & BC_solid() const {return _BCh;}
 
     //! residual getter
     Vector& residual() {return _residual_d;}
@@ -167,7 +167,7 @@ private:
     void solveJac( Vector& step, const Vector& res, double& linear_rel_tol );
 
     //! solves the tangent problem with custom BC
-    void solveJac( Vector& step, const Vector& res, double& linear_rel_tol, BC_Handler &_BCd );
+    void solveJac( Vector& step, const Vector& res, double& linear_rel_tol, BCHandler &_BCd );
 
     //! files for lists of iterations and residuals per timestep
     std::ofstream _out_iter;
@@ -190,7 +190,7 @@ private:
 template <typename Mesh>
 VenantKirchhofSolver<Mesh>::
 VenantKirchhofSolver( const GetPot& data_file, const RefFE& refFE, const QuadRule& Qr,
-                      const QuadRule& bdQr, BC_Handler& BCh ) :
+                      const QuadRule& bdQr, BCHandler& BCh ) :
         ElasticStructureHandler<Mesh>( data_file, refFE, Qr, bdQr, BCh ),
         DataNewton( data_file, "solid/newton" ),
         _pattM_block( this->_dof ),
@@ -390,7 +390,7 @@ iterate()
     _residual_d = _C*this->_d - _rhsWithoutBC;
 //    _residual_d = _K * this->_d;// - _rhsWithoutBC;
 
-    
+
 //     for (UInt ii = 0; ii < _residual_d.size(); ++ii)
 //         std::cout << _residual_d[ii] << std::endl;
 
@@ -626,7 +626,7 @@ solveJac( Vector& step, const Vector& res, double& linear_rel_tol )
 
 template <typename Mesh>
 void VenantKirchhofSolver<Mesh>::
-solveJac(Vector& step, const Vector& res, double& linear_rel_tol, BC_Handler &_BCd )
+solveJac(Vector& step, const Vector& res, double& linear_rel_tol, BCHandler &_BCd )
 {
 
     Chrono chrono;

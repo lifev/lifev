@@ -59,7 +59,7 @@ namespace LifeV
   The constructor of the class built the global matrix of the discretized laplacian. The extension of the
   displacement is computed by calling the public method update. Finally, this extension can be recovered by
   calling method getDisplacement.
- 
+
 */
 
 class HarmonicExtension
@@ -74,7 +74,7 @@ public:
       \param bdQr the quadrature rule for surface elementary computations
       \param mesh_BCh the list of boundary conditions involved in the harmonic extension
 
-      \note The BC_Handler objet (bch) holds the displacement imposed on moving boundary
+      \note The BCHandler objet (bch) holds the displacement imposed on moving boundary
       in the mesh trhough a BCVetor_Interface objet.
 
     */
@@ -84,7 +84,7 @@ public:
                        const Real& diffusion,
                        const QuadRule& Qr,
                        const QuadRule& bdQr,
-                       BC_Handler& mesh_BCh );
+                       BCHandler& mesh_BCh );
 
     //! This method updates the extension of the displacement, i.e. it solves the laplacian proglem
 
@@ -116,7 +116,7 @@ protected:
     const QuadRule& _bdQr;
 
     //! BC holding the imposed boundary displacement
-    BC_Handler& _mesh_BCh;
+    BCHandler& _mesh_BCh;
 
     //! The Dof object associated with the displacement computations
     Dof _dof_mesh;
@@ -156,7 +156,7 @@ protected:
   \param bdQr the quadrature rule for surface elementary computations
   \param bch the list of boundary conditions involved in the harmonic extension
 
-  \note The BC_Handler objet (bch) holds the displacement imposed on moving boundary
+  \note The BCHandler objet (bch) holds the displacement imposed on moving boundary
   in the mesh trhough a BCVetor_Interface objet.
 
 */
@@ -166,7 +166,7 @@ HarmonicExtension( Mesh& mesh,
                    const Real& diffusion,
                    const QuadRule& Qr,
                    const QuadRule& bdQr,
-                   BC_Handler& mesh_BCh ) :
+                   BCHandler& mesh_BCh ) :
         _diffusion( diffusion ),
         _Qr( Qr ),
         _bdQr( bdQr ),

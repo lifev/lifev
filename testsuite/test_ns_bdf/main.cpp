@@ -36,9 +36,9 @@ int main(int argc, char** argv)
 
     // Boundary conditions definition
     //
-    BCFunction_Base u_wall(u1);
-    BCFunction_Base in_flow(u2);
-    BC_Handler BCh_u(2);
+    BCFunctionBase u_wall(u1);
+    BCFunctionBase in_flow(u2);
+    BCHandler BCh_u(2);
     BCh_u.addBC("Wall",   2, Essential, Full, u_wall,  3);
     BCh_u.addBC("InFlow", 1, Natural,   Full, in_flow, 3);
 
