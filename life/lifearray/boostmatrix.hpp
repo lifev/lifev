@@ -53,6 +53,12 @@ namespace LifeV
         : public boost::numeric::ublas::compressed_matrix<double, storage_scheme>
     {
     public:
+        //! empty constructor
+        BoostMatrix( typename BoostMatrix::size_type size1,
+                     typename BoostMatrix::size_type size2 )
+            : boost::numeric::ublas::compressed_matrix<double, storage_scheme>
+            ( size1, size2 ) { }
+
         //! Copy constructor
 
         template<typename __E>
@@ -227,7 +233,7 @@ namespace LifeV
     template<UInt BROWS, UInt BCOLS, typename PATTERN>
     BoostMatrix<boost::numeric::ublas::row_major>::BoostMatrix( const MixedPattern<BROWS, BCOLS, PATTERN>& pattern )
         :
-        boost::numeric::ublas::compressed_matrix<double, boost::numeric::ublas::row_major>( pattern.nRows(), pattern.nCols() ) 
+        boost::numeric::ublas::compressed_matrix<double, boost::numeric::ublas::row_major>( pattern.nRows(), pattern.nCols() )
     {
         UInt __nnz = pattern.nNz();
 
@@ -276,7 +282,7 @@ namespace LifeV
     template<UInt BROWS, UInt BCOLS, typename PATTERN>
     BoostMatrix<boost::numeric::ublas::column_major>::BoostMatrix( const MixedPattern<BROWS, BCOLS, PATTERN>& pattern )
         :
-        boost::numeric::ublas::compressed_matrix<double, boost::numeric::ublas::column_major>( pattern.nRows(), pattern.nCols() ) 
+        boost::numeric::ublas::compressed_matrix<double, boost::numeric::ublas::column_major>( pattern.nRows(), pattern.nCols() )
     {
         UInt __nnz = pattern.nNz();
 
@@ -362,7 +368,6 @@ namespace LifeV
 
         void invert()
         {
-            DiagonalBoostMatrix theInverse( this->size1() );
             for ( size_type i=0; i<this->size1(); ++i )
                 {
                     this->value_data()[i] = 1. / this->value_data()[i];
@@ -422,7 +427,7 @@ namespace LifeV
     {
         using namespace boost::numeric::ublas;
         ASSERT( D.size2() == H.size1() && H.size2() == G.size1() &&
-                D.size1() == S.size1() && G.size2() == S.size2(), 
+                D.size1() == S.size1() && G.size2() == S.size2(),
                 "[schurProduct] ERROR: cannot multiply " <<
                 D.size1() << "x" << D.size2() << " matrix by " <<
                 H.size1() << "x" << H.size2() << " matrix by " <<
