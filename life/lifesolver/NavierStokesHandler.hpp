@@ -849,7 +849,8 @@ Real NavierStokesHandler<Mesh>::pErrorL2( const Function& pexact,
     Real sum2 = 0.;
     Real sum1 = 0.;
     Real sum0 = 0.;
-    Real sumExact = 0.;
+    Real sumExact2 = 0.;
+    Real sumExact1 = 0.;
     for ( UInt iVol = 1; iVol <= _mesh.numVolumes(); iVol++ )
     {
         _fe_p.updateFirstDeriv( _mesh.volumeList( iVol ) );
@@ -858,13 +859,15 @@ Real NavierStokesHandler<Mesh>::pErrorL2( const Function& pexact,
         sum0 += _fe_p.measure();
         if (relError)
         {
-            sumExact += elem_L2_2( pexact, _fe_p, time, 1 );
+            sumExact2 += elem_L2_2( pexact, _fe_p, time, 1 );
+            sumExact1 += elem_integral( pexact, _fe_p, time, 1 );
         }
     }
     Real absError = sqrt( sum2 - sum1*sum1/sum0 );
     if (relError)
     {
-        *relError = absError / sqrt( sumExact );
+        Real normExact = sqrt( sumExact2 - sumExact1*sumExact1/sum0 );
+        *relError = absError / normExact;
     }
     return absError;
 }
