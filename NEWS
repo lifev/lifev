@@ -4,6 +4,12 @@ Bugs fixed in 0.4.0:
 * More C++ standard compliance (CP)
 * Better g++-3.4 support however still insufficient (CP)
 
+[configure]
+* Fixed umfpack check and readded it to configure (CP)
+
+[lifecore]
+* Renamed LDebug to Debug for area debugging (CP)
+
 [lifefilters]
 * OpenDX filter got revamped (CW)
 
@@ -18,6 +24,7 @@ New in 0.4.0:
 
 [lifecore]
 * Added an implementation of the Singleton design pattern (CP)
+* Added an implementation of the Factory design pattern (CP)
 * Added policies for creation and lifetime of objects (CP)
 
 [lifearray]
@@ -41,6 +48,8 @@ New in 0.4.0:
 [testsuite]
 * Added test case for coupled mass transport solvers (MP)
 * Added NS test case for boundary condition given as a vector (AM)
+* Added test for singleton pattern : lifecore/test_singleton (CP)
+* Added test for factory pattern : lifecore/test_factory (CP)
 
 
 Bugs fixed in 0.3.0:
