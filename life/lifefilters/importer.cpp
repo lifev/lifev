@@ -54,6 +54,10 @@ import( std::string const& __filename, MeshFormat const& __format,
             readGmshFile( mesh, __filename, regionFlag );
             break;
 
+        case NETGEN:
+            readNetgenMesh( mesh, __filename, regionFlag );
+            break;
+
     }
 
 }

@@ -37,7 +37,8 @@ namespace LifeV
 enum MeshFormat {
     MESHPP,
     INRIA,
-    GMSH
+    GMSH,
+    NETGEN
 };
 class importer
 {
