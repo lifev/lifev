@@ -427,6 +427,48 @@ namespace LifeV
                 }
         }
 
+        //! Dump matrix to file in Matlab format and spy
+        void spy( std::string const &filename )
+        {
+            std::string name = filename;
+            std::string separator = " , ";
+
+            // check on the file name
+            int i = filename.find( "." );
+
+            if ( i <= 0 )
+                name = filename + ".m";
+            else
+                {
+                    if ( ( unsigned int ) i != filename.size() - 2 ||
+                         filename[ i + 1 ] != 'm' )
+                        {
+                            std::cerr << "Wrong file name ";
+                            name = filename + ".m";
+                        }
+                }
+
+            std::ofstream file_out( name.c_str() );
+            ASSERT( file_out, "[DiagonalBoostMatrix::spy] ERROR: File " << filename <<
+                    " cannot be opened for writing.");
+
+            file_out << "S = [ ";
+
+            for ( DiagonalBoostMatrix::iterator1 i1=begin1();
+                  i1!=end1(); ++i1 )
+                {
+                    for ( DiagonalBoostMatrix::iterator2 i2=i1.begin();
+                          i2!=i1.end(); ++i2 )
+                        file_out << i2.index1() + 1 << separator
+                                 << i2.index2() + 1 << separator
+                                 << *i2  << std::endl;
+                }
+
+            file_out << "];" << std::endl;
+            file_out << "I=S(:,1); J=S(:,2); S=S(:,3);" << std::endl;
+            file_out << "A=sparse(I,J,S); spy(A);" << std::endl;
+        }
+
     }; // class DiagonalBoostMatrix
 
     /** efficient (Schur) product of sparse, diagonal, and sparse matrix D*H*G
