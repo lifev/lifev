@@ -15,5 +15,6 @@
 Makefile
 Makefile.in
 auto
+lifev-dev
 lifev-dev.tex.backup
 lifev-dev_generalities.tex.backup

@@ -19,7 +19,7 @@ QuickBuild=PDFLaTeX+ViewPDF
 archive=true
 encoding=ISO 8859-1
 highlight=LaTeX-Kile
-open=false
+open=true
 
 [item:lifev-dev.kilepr]
 archive=true
