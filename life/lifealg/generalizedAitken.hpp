@@ -35,33 +35,18 @@ namespace LifeV
     template<class Vector, class Real>
     class generalizedAitken
     {
-        /*
-          compute the acceleration with the vector variant of Aitken.
-          lk(0,1)  are column vectors (lambda_k lambda_{k-1})
-          lk(2) = lk(0)-lk(1)
-          Rk(0,1)  are  column vectors of residuals(possibly more than one) .
-          Rk(2) = Rk(0)-Rk(1)
-          lk(M_k(0)): lambda at the iterate k
-          lk(M_k(1)): lambda at the iterate k-1
-          Rk: residual(s) associated to lk. in some cases = lk-f(lk)
-          defaultOmega: defaultOmega can only be a scalar.
-          If defaultOmega < 0, then do not use Aitken, but fixed relaxation
-          parameter=abs(defaultOmega)
-          If you want to assign a fixed parameter different from 
-          the default one, you can use 
-          Vector deltaLambda(lam, res, omega)
-          be sure that omega has the size sizeOmega!
-          If length(Rk1)==0, then Aitken acceleration is not applicable,
-          hence we need a default value for omega.
-          !: should be of the size 1,size(Rk,2)
-          sizeOmega is the number of relaxation parameters to be computed.
-          usually sizeOmega=1, but for example fo r a N-N preconditioner, =2.
+        /*!
+          Compute the acceleration with the vector variant of Aitken.
+          See "A domain decompostion framework for fluid/structure interaction problems"
+          by Simone Deparis, Marco Discacciati and Alfio Quarteroni for reference
         */
     public:
 
         // Constructors
         
-        generalizedAitken(const int dof, const Real& defOmega=0.1, const int size=1);
+        generalizedAitken(const int dof,
+                          const Real defOmegaS = 0.1,
+                          const Real defOmegaF = 0.1);
 
 
         // Destructor
@@ -72,29 +57,26 @@ namespace LifeV
 
         void   restart();
 
-        inline void   setLambdaS  (const Vector&, const int);
-        inline Real   getLambdaS  (const int, const int);
-        inline void   setLambdaF  (const Vector&, const int);
-        inline Real   getLambdaF  (const int, const int);
-
         inline void   setNuS      (const Vector&, const int);
-        inline Real   getNuS      (const int, const int);
+        inline Real   getNuS      (const int    , const int);
         inline void   setNuF      (const Vector&, const int);
-        inline Real   getNuF      (const int, const int);
+        inline Real   getNuF      (const int    , const int);
 
+        inline Real   getNewOmegaS(){return M_omegaS;};
+        inline Real   getNewOmegaF(){return M_omegaF;};
         
-        Vector deltaLambda(const Vector& lam, const Vector res[]);
-        Vector deltaLambda(const Vector& lam, const Vector res[], Real omega[]);
+        Vector        computeLambda();
+        
+        //Vector deltaLambda(const Vector& lam, const Vector res[]);
+        //Vector deltaLambda(const Vector& lam, const Vector res[], Real omega[]);
 
         // in this case, omega is taken as the default value
 
     private:
 
-        //! array formed by the vectors [\lamda_s^k, \lamdba_s^{k-1}]
-        Vector M_lambdaS;
-
-        //! array formed by the vectors [\lamda_f^k, \lamdba_f^{k-1}]
-        Vector M_lambdaF;
+        //! M_lamdba0 = \lambda_{k} M_lambda1 = \lambda_{k - 1}
+        Vector M_lambda0;
+        Vector M_lambda1;
 
         //! array formed by the vectors [\nu_s^k, \nu_s^{k-1}]
         Vector M_nuS;
@@ -103,40 +85,28 @@ namespace LifeV
         Vector M_nuF;
 
         //! new step coefficients
-        Vector M_omega;
-        
-        Real   M_defaultOmega;
+        Real   M_omegaS;
+        Real   M_omegaF;
 
-        int    M_sizeOmega;
-        int    M_dof;
+        //! fluid/structure interface dof count
 
-        int    M_k[2]; // to avoid useless copying, use this to say which is the 
-        // k variable and which is the k-1
-
-        Vector M_lk(const int k=0) const;
-        Vector M_Rk(const int k=0, const int i=0) const;
-    
-        void   switchLamRes();
-        void   computeDifferences();
+        int    M_nDof;
     };
 
 
 // Constructors
 
     template<class Vector, class Real>
-    generalizedAitken< Vector,  Real>::
-    generalizedAitken(const int dof, const Real& defOmega, const int size):
-        M_dof         (dof),
-        M_lambdaS     (dof*size),
-        M_lambdaF     (dof*size),
-        M_nuS         (dof*size),
-        M_nuF         (dof*size),
-        M_sizeOmega   (size),
-        M_omega       (M_sizeOmega),
-        M_defaultOmega(defOmega)
+    generalizedAitken<Vector,  Real>::
+    generalizedAitken(const int dof, const Real defOmegaS, const Real defOmegaF):
+        M_nDof         (  dof),
+        M_lambda0      (  dof),
+        M_lambda1      (  dof),
+        M_nuS          (2*dof),
+        M_nuF          (2*dof),
+        M_omegaS       (defOmegaS),
+        M_omegaF       (defOmegaS)
     {
-        M_k[0]=-1;
-        M_k[1]=-1;
     }
     
     //
@@ -148,42 +118,12 @@ namespace LifeV
     //
 
 
-    // setter and getter for lambdaS and lamdbaF
-    
-    template<class Vector, class Real>
-    inline void generalizedAitken<Vector, Real>::setLambdaS(const Vector& _lamdba, const int _pos)
-    {
-        int jt = _pos*M_dof;
-        for (int it = 0; it < _lamdba.size(); ++it, ++jt)
-            M_lambdaS[jt] = _lambda[it];
-    }
-    
-    template<class Vector, class Real>
-    inline Real generalizedAitken<Vector, Real>::getLambdaS(const int _i, const int _j)
-    {
-        return M_lambdaS[_j*M_dof + _i];
-    }
-        
-    template<class Vector, class Real>
-    inline void generalizedAitken<Vector, Real>::setLambdaF(const Vector& _lamdba, const int _pos)
-    {
-        int jt = _pos*M_dof;
-        for (int it = 0; it < _lamdba.size(); ++it, ++jt)
-            M_lambdaF[jt] = _lambda[it];
-    }
-    
-    template<class Vector, class Real>
-    inline Real generalizedAitken<Vector, Real>::getLambdaF(const int _i, const int _j)
-    {
-        return M_lambdaF[_j*M_dof + _i];
-    }
-    
     // setter and getter for nuS and nuF
 
     template<class Vector, class Real>
     inline void generalizedAitken<Vector, Real>::setNuS(const Vector& _nu, const int _pos)
     {
-        int jt = _pos*M_dof;
+        int jt = _pos*M_nDof;
         for (int it = 0; it < _lamdba.size(); ++it, ++jt)
             M_nuS[jt] = _nu[it];
     }
@@ -197,7 +137,7 @@ namespace LifeV
     template<class Vector, class Real>
     inline void generalizedAitken<Vector, Real>::setNuF(const Vector& _nu, const int _pos)
     {
-        int jt = _pos*M_dof;
+        int jt = _pos*M_nDof;
         for (int it = 0; it < _lamdba.size(); ++it, ++jt)
             M_nuF[jt] = _nu[it];
     }
@@ -210,127 +150,59 @@ namespace LifeV
     
     //
 
-    
-    
-//     template<class Vector, class Real>
-//     Vector generalizedAitken<Vector, Real>::lk(const int k) const
-//     {
-//         if (k<2) {
-//             return(lamRes[M_k[k]]);
-//         } else {
-//             if (k==2) {
-//                 return(lamRes[k]);
-//             } else {	
-//                 return(-1);
-//             }
-//         }
-//     }
 
-//     template<class Vector, class Real>
-//     Vector generalizedAitken< Vector,  Real>::Rk(const int k, const int i) const
-//     {
-//         if (k<2 && i < sizeOmega) {
-//             return(lamRes[3*(i+1)+M_k[k]]);
-//         } else {
-//             if (k==2) {
-//                 return(lamRes[3*(i+1)+k]);
-//             } else {	
-//                 return(-1);
-//             }
-//         }
-//     }
+    //! this functions computes omega and store the results in M_omegaS and M_omegaF
+    template<class Vector, class Real>
+    Vector generalizedAitken<Vector, Real>::computeLambda()
+    {
+        Vector lambda(M_nDof);
+        
+        lambda = M_lamdba0 - M_lambda1;
 
-//     template<class Vector, class Real>
-//     void generalizedAitken< Vector,  Real>::switchLamRes()
-//     {
-//         M_k[1] = M_k[0];
-//         M_k[0] = 1-M_k[1];
-//     }
+        Real   a11 = 0.;
+        Real   a12 = 0.;
+        Real   a22 = 0.;
+        Real   b1  = 0.;
+        Real   b2  = 0.;
 
-//     template<class Vector, class Real>
-//     void generalizedAitken< Vector,  Real>::computeDifferences()
-//     {
-//         for (int i(0); i<sizeOmega+1; i++)
-//         {
-//             lamRes[2+3*i] = lamRes[M_k[0]+3*i] -  lamRes[M_k[1]+3*i] ;
-//         }
-//     }
+        Vector nuS   (M_nDof);
+        Vector nuF   (M_nDof);
 
-//     template<class Vector, class Real>
-//     generalizedAitken< Vector, Real>::~generalizedAitken()
-//     {
-//     }
+        for (int ii = 0; ii < M_nDof; ++ii)
+        {
+            nuS[ii] = getNuS(ii, 0) - getNuS(ii, 1);
+            nuF[ii] = getNuF(ii, 0) - getNuF(ii, 1);
 
-//     template<class Vector, class Real>
-//     void generalizedAitken<Vector, Real>::restart()
-//     {
-//         M_k[0]-1;
-//         M_k[1]-1;
-//     }
+            a11    += nuF[ii]*nuF[ii];
+            a21    += nuF[ii]*nuS[ii];
+            a22    += nuS[ii]*nuS[ii];
 
+            b1     += nuF[ii]*lambda[ii];
+            b2     += nuS[ii]*lambda[ii];
+        }
+            
+        Real omega1, omega2;
 
-//     template<class Vector, class Real>
-//     Vector generalizedAitken<Vector,  Real>::deltaLambda(const Vector& lam, const Vector residue[], Real omega[])
-//     {
-//         Vector res(M_dof);
-//         res = 0;
-//         int i;
+        Real det = a21*a21 - a22*a11;
 
-//         if (defaultOmega<=0)
-//         {
-//             for (i=0; i<sizeOmega; i++)
-//                 res+= omega[i] * residue[i];
-//             return(res);
-//         }
-  
+        if (det != 0.)
+        {
+            omega1 = (a22*b1 - a21*b2)/det;
+            omega2 = (a11*b2 - a21*b1)/det;
+        }
 
-//         if (Mk[0] == -1){ // back to default omega
-//             Mk[0] = 0;
-    
-//             lamRes[K_k[0]] = lam;
-//             for (i=0; i < sizeOmega; ++i)
-//             {
-//                 lamRes[3*(i+1)+M_k[0]] = residue[i];
-//                 res+= omega[i] * Rk(0,i);
-//             }
-//             return(res);
-//         }
+        for (int ii = 0; ii < M_nDof; ++ii)
+            lambda = lamdba + omega1*getNuF[ii] + omega2*getNuS[ii];
+                
+        lambda1 = lambda0;
+        lambda0 = lamdba;
 
-//         switchLamRes(); // switch
+        return lambda;
+        
+            
+    }
 
-//         lamRes[M_k[0]] = lam;
-//         for (i=0; i<sizeOmega; i++){
-//             lamRes[3*(i+1)+M_k[0]] = residue[i];
-//         }
-  
-//         computeDifferences();
-
-//         if (sizeOmega == 1) {
-//             omega[0] = - (Rk(2,0)*lk(2)) / (Rk(2,0)*Rk(2,0)); // checks whether functions exist
-//         } else {
-//             cout << "not yet implemented" << endl;
-//             //  *omega=-pinv(Rk-Rk1)*(lk-lk1);
-//         }
-
-//         for (i=0; i<sizeOmega; i++){
-//             res+= omega[i] * Rk(0,i);
-//         }
-//         return(res);
-//     }
-
-
-//     template<class Vector, class Real>
-//     Vector generalizedAitken< Vector,  Real>::deltaLambda(const Vector& lam, const Vector residue[])
-//     {
-//         Real* omega;
-//         omega = new Real[sizeOmega];
-//         int i;
-//         for(i=0; i<sizeOmega; i++){
-//             omega[i] = abs(defaultOmega);
-//         }
-//         return(deltaLambda(lam,residue,omega) );
-
-//     }
 
 }
+
 #endif
