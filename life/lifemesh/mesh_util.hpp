@@ -232,6 +232,10 @@ Real testClosedDomain(RegionMesh3D const & mesh,ostream & err=cerr)
      err<< "Only tria and quad surface elements  may be checked for volume orientation at the moment"<<endl;
      ASSERT0(false,"ABORT CONDITION OCCURRED");
   }
+  
+  // cleanup after usage
+  delete bdfe;
+  
   return test;
   
 }
