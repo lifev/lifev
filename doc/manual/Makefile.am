@@ -34,8 +34,7 @@ all:$(PDF)
 
 .tex.pdf: 
 	@echo "*** PDFLatex compiling $< ...";\
-    chmod +x ltxcompile; \
-	srcdir=$(srcdir) top_srcdir=$(top_srcdir) ltxcompile `basename $< .tex`;\
+	srcdir=$(srcdir) top_srcdir=$(top_srcdir) /bin/sh $(srcdir)/ltxcompile `basename $< .tex`;\
     test $$? -eq 0 || (cat ltxcompile.log | grep -B 5 -n Error)
 
 lifev-dev.pdf: $(lifev_dev_TEX)
@@ -49,5 +48,5 @@ EXTRA_DIST = $(lifev_dev_TEX) $(IMAGES_SRC)
 
 MOSTLYCLEANFILES	= lifev-dev.log lifev-dev.glo lifev-dev.idx lifev-dev.ind lifev-dev.ilg lifev-dev.aux lifev-dev.out \
                           lifev-dev.pdf lifev-dev.toc lifev-dev.lof lifev-dev.lot lifev-dev.blg lifev-dev.bbl \
-			  lifev-dev_generalities.aux lifev-dev_conventions.aux lifev-dev_overview.aux lifev-dev_howto.aux
+			  lifev-dev_generalities.aux lifev-dev_conventions.aux lifev-dev_overview.aux lifev-dev_howto.aux ltxcompile.log
 
