@@ -72,7 +72,9 @@ public:
         M_dofMeshToFluid( new DofInterface3Dto3D ),
         M_dispStruct(),
         M_velo(),
-        M_nbEval( 0 )
+        M_nbEval( 0 ),
+        M_method(),
+        M_precond( NO_PRECONDITIONER )
         {}
 
     operFS(fluid_type & fluid,

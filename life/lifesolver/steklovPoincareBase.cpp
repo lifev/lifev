@@ -46,6 +46,7 @@ steklovPoincare::steklovPoincare()
     M_aitkFS(),
     M_dataJacobian( this )
 {
+    this->setPreconditioner( DIRICHLET_NEUMANN );
     M_aitkFS.setDefault( M_defOmegaS, M_defOmegaF );
 }
 
