@@ -27,7 +27,7 @@
    \date 2004-10-12
  */
 #include <lifeV.hpp>
-#include <NavierStokesSolverPC.hpp>
+#include <NavierStokesSolverPCnotincr.hpp>
 #include <NavierStokesWithTwoFluxes.hpp>
 #include <chrono.hpp>
 #include <ud_functions.hpp>
@@ -67,7 +67,7 @@ main(int argc, char** argv)
     // BC definitions
     //
     BCFunctionBase u_wall(u1);
-    BCFunctionBase inflow(uo);
+    BCFunctionBase inflow(u1);
     BCFunctionBase outflow(u1);
     BCHandler BCh_u(4);
     BCh_u.addBC("Wall",   4, Essential, Full, u_wall,  3);                          
@@ -88,14 +88,14 @@ main(int argc, char** argv)
 
     // Impose the fluxes
     // 
-    __ns_with_flux.setFlux(1, my_flux_cost); //costant
+    __ns_with_flux.setFlux(3, my_flux_cost); //costant
     __ns_with_flux.setFlux(2, my_flux_cost2); //costant
     //__ns_with_flux.setFlux("InFlow", my_flux_cos); //cosinusoidal
     //__ns_with_flux.setFlux("InFlow", my_flux_physio); // physiological
 
     toEnsight EnsightFilter;
     __ns_with_flux.doOnIterationFinish( EnsightFilter  );
-    __ns_with_flux.solve(1,2);
+    __ns_with_flux.solve(3,2);
 
     return EXIT_SUCCESS;
 }
