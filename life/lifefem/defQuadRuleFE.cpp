@@ -206,12 +206,13 @@ const SetOfQuadRule allQuadRuleQuad(quad_rule_quad,NB_QUAD_RULE_QUAD);
  *
  *=======================================================================*/
 //! total number of quadrature rules in 3D on tetraedra  
-#define NB_QUAD_RULE_TETRA 4
+#define NB_QUAD_RULE_TETRA 5
 //! id of the quadrature rules on tetraedra
 #define QUAD_RULE_TETRA_1PT     1
 #define QUAD_RULE_TETRA_4PT     2
 #define QUAD_RULE_TETRA_5PT     3
-#define QUAD_RULE_TETRA_64PT    4
+#define QUAD_RULE_TETRA_15PT    4
+#define QUAD_RULE_TETRA_64PT    5
 //----------------------------------------------------------------------
 
 static const QuadPoint pt_tetra_1pt[1] =
@@ -250,6 +251,50 @@ static const QuadPoint pt_tetra_5pt[5]=
 const QuadRule quadRuleTetra5pt(pt_tetra_5pt,
 			  QUAD_RULE_TETRA_5PT,
 			  "Quadrature rule 5 points on a tetraedra",TETRA,5,3);
+//
+//----------------------------------------------------------------------
+//                     15 points integration rule for tetra.
+//                   D o E = 5 (Stroud, T3:5-1 pag. 315)
+// r
+const Real r5=0.25;
+// s
+const Real s5[4]={ 0.09197107805272303,  0.3197936278296299  }; // (7 \mp \sqrt(15))/34
+// t
+const Real t5[4]={ 0.7240867658418310,    0.04061911651111023 }; // (13 \pm 3*sqrt(15))/34
+// u
+const Real u5 = 0.05635083268962915;// (10-2*sqrt(15))/40
+// v
+const Real v5 = 0.4436491673103708; // (10+2*sqrt(15))/40
+// A
+const Real A5 = 0.01975308641975309;// 16/135*1/6
+// B
+const Real B5[2]={ 0.01198951396316977,     0.01151136787104540 }; // 1/6*(2665 \pm 14*sqrt(15))/37800
+// C
+const Real C5=0.008818342151675485; // 20/378*1/6
+//
+static const QuadPoint pt_tetra_15pt[15]=
+{
+  QuadPoint(r5, r5, r5, A5),
+  QuadPoint(s5[0], s5[0], s5[0], B5[0]),
+  QuadPoint(t5[0], s5[0], s5[0], B5[0]),
+  QuadPoint(s5[0], t5[0], s5[0], B5[0]),
+  QuadPoint(s5[0], s5[0], t5[0], B5[0]),
+  QuadPoint(s5[1], s5[1], s5[1], B5[1]),
+  QuadPoint(t5[1], s5[1], s5[1], B5[1]),
+  QuadPoint(s5[1], t5[1], s5[1], B5[1]),
+  QuadPoint(s5[1], s5[1], t5[1], B5[1]),
+  QuadPoint(u5, u5, v5, C5),  
+  QuadPoint(u5, v5, u5, C5),
+  QuadPoint(v5, u5, u5, C5),
+  QuadPoint(v5, v5, u5, C5),
+  QuadPoint(v5, u5, v5, C5),
+  QuadPoint(u5, v5, v5, C5)
+};
+//
+const QuadRule quadRuleTetra15pt(pt_tetra_15pt,
+				 QUAD_RULE_TETRA_15PT,
+				 "Quadrature rule 15 points on a tetraedra",
+				 TETRA,15,5);
 //----------------------------------------------------------------------
 //                     64 points integration rule for tetra.
 //                   D o E = 7 (Stroud, T3:7-1 pag. 315)
@@ -356,6 +401,7 @@ static const QuadRule quad_rule_tetra[NB_QUAD_RULE_TETRA] = {
   quadRuleTetra1pt,
   quadRuleTetra4pt,
   quadRuleTetra5pt,
+  quadRuleTetra15pt,
   quadRuleTetra64pt
 };
 const SetOfQuadRule allQuadRuleTetra(quad_rule_tetra,NB_QUAD_RULE_TETRA);
