@@ -32,8 +32,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #ifndef _HYPERBOLICSOLVERIP_HPP_
 #define _HYPERBOLICSOLVERIP_HPP_
 
-#define HSIP_USE_AZTEC_SOLVER 0
-#define HSIP_USE_BOOST_MATRIX 1
+#define L_HSIP_AZTEC 0
+#define L_HSIP_UMFPACK 1
+#define L_HSIP_PETSC 2
+
+#define L_HSIP_LINEAR_SOLVER L_HSIP_UMFPACK
+#define L_HSIP_USE_BOOST_MATRIX 0
 
 #include <utility>
 #include <algorithm>
@@ -56,10 +60,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <life/lifefem/bdf.hpp>
 
 
-#if HSIP_USE_AZTEC_SOLVER
+#if L_HSIP_LINEAR_SOLVER == L_HSIP_AZTEC
 #include <life/lifealg/SolverAztec.hpp>
-#else
+#elif L_HSIP_LINEAR_SOLVER == L_HSIP_UMFPACK
 #include <life/lifealg/SolverUMFPACK.hpp>
+#elif L_HSIP_LINEAR_SOLVER == L_HSIP_PETSC
+#include <life/lifealg/SolverPETSC.hpp>
 #endif
 
 #include <life/lifefem/bcHandler.hpp>
@@ -88,24 +94,32 @@ namespace LifeV {
 
         typedef MeshType mesh_type;
 
-        
 
-#if HSIP_USE_AZTEC_SOLVER
+
+#if L_HSIP_LINEAR_SOLVER == L_HSIP_AZTEC
         typedef SolverAztec solver_type;
         typedef MSRPatt pattern_type;
         typedef MSRMatr<Real> matrix_type;
-#else
+
+#elif L_HSIP_LINEAR_SOLVER == L_HSIP_UMFPACK
         typedef SolverUMFPACK solver_type;
-#if HSIP_USE_BOOST_MATRIX
-        typedef MSRPatt pattern_type;
+        typedef CSRPatt pattern_type;
+#if L_HSIP_USE_BOOST_MATRIX
+        typedef BoostMatrix<boost::numeric::ublas::column_major> matrix_type;
+#else
+        typedef CSRMatr<CSRPatt, Real> matrix_type;
+#endif
+
+#elif L_HSIP_LINEAR_SOLVER == L_HSIP_PETSC
+        typedef SolverPETSC solver_type;
+        typedef CSRPatt pattern_type;
+#if L_HSIP_USE_BOOST_MATRIX
         typedef BoostMatrix<boost::numeric::ublas::row_major> matrix_type;
 #else
-        /* CSRMatr use with SolverUMFPACK is not available at the moment
-          typedef CSRPatt pattern_type;
-          typedef CSRMatr<CSRPatt, Real> matrix_type;
-        */
+        typedef CSRMatr<CSRPatt, Real> matrix_type;
 #endif
-#endif
+
+#endif /* L_HSIP_LINEAR_SOLVER */
 
         typedef Vector u_type;
         typedef Vector velocity_type;
@@ -142,7 +156,11 @@ namespace LifeV {
             _M_dof(_M_mesh, _M_reffe),
             _M_M_pattern(_M_dof, nbComp),
             _M_M(_M_M_pattern),
+#if L_HSIP_LINEAR_SOLVER == L_HSIP_AZTEC
             _M_A_pattern(_M_dof, _M_mesh, nbComp),
+#else
+            _M_A_pattern(_M_dof, nbComp, _M_mesh),
+#endif
             _M_A_steady(_M_A_pattern),
             _M_A(_M_A_pattern),
             _M_dim( _M_dof.numTotalDof() ),
@@ -156,15 +174,22 @@ namespace LifeV {
             _M_bdf(_M_bdf_order),
             _M_monitored_times(5)
         {
-#if HSIP_USE_AZTEC_SOLVER
-            _M_solver.setOptionsFromGetPot(_M_data_file, (_M_data_section + "/solver").data());        
+#if L_HSIP_LINEAR_SOLVER == L_HSIP_AZTEC
+            _M_solver.setOptionsFromGetPot(_M_data_file,
+                                           (_M_data_section +
+                                            "/solver_aztec").data());
             std::cout << "** HSIP ** Using AZTEC solver" << std::endl;
-#else
+#elif L_HSIP_LINEAR_SOLVER == L_HSIP_UMFPACK
             std::cout << "** HSIP ** Using UMFPACK solver" << std::endl;
+#elif L_HSIP_LINEAR_SOLVER == L_HSIP_PETSC
+             _M_solver.setOptionsFromGetPot(_M_data_file,
+                                            (_M_data_section +
+                                             "/solver_petsc").data());
+            std::cout << "** HSIP ** Using PETSC solver" << std::endl;
 #endif
 
-#if HSIP_USE_BOOST_MATRIX
-            std::cout << "** HSIP ** Using boost matrix" << std::endl;             
+#if L_HSIP_USE_BOOST_MATRIX
+            std::cout << "** HSIP ** Using boost matrix" << std::endl;
 #else
             std::cout << "** HSIP ** Using MSR/CSRMatr" << std::endl;
 #endif
@@ -446,6 +471,9 @@ namespace LifeV {
 
     template<typename MeshType>
     void HyperbolicSolverIP<MeshType>::compute_M_A_steady() {
+        _M_M.zeros();
+        _M_A_steady.zeros();
+
         ElemMat __elmat(_M_fe.nbNode, 1, 1);
         ElemVec __elvec(_M_fe.nbNode, NDIM);
 
@@ -615,7 +643,7 @@ namespace LifeV {
 
         if(_M_verbose) std::cout << "** HSIP ** Adding RHS unsteady terms" << std::endl;
 
-#if HSIP_USE_BOOST_MATRIX
+#if L_HSIP_USE_BOOST_MATRIX
         for_each(_M_b.begin(), _M_b.end(), boost::lambda::_1 = 0.0 );
         axpy_prod( _M_M, _M_bdf.time_der(_M_delta_t), _M_b, false );
 
@@ -654,10 +682,12 @@ std::ostream& operator<<(std::ostream& __ostr, HyperbolicSolverIP<_MeshType>& __
     __ostr << "==================================================" << std::endl;
     __ostr << "** HSIP ** Report" << std::endl;
     __ostr << "==================================================" << std::endl;
-#if HSIP_USE_AZTEC_SOLVER
+#if L_HSIP_LINEAR_SOLVER != L_HSIP_UMFPACK
     __ostr << "Convergence                         ";
     __HS._M_solver.converged() ? __ostr << "YES" : __ostr << "NO";
     __ostr << std::endl;
+    __ostr << "Number of iterations                "
+           << __HS._M_solver.iterations() << std::endl;
     __ostr << "--------------------------------------------------" << std::endl;
 #endif
     __ostr << "Timings" << std::endl << std::endl;
@@ -675,5 +705,7 @@ std::ostream& operator<<(std::ostream& __ostr, HyperbolicSolverIP<_MeshType>& __
 
     return __ostr;
 }
-}
-#endif
+
+} // namespace LifeV
+
+#endif /* _HYPERBOLICSOLVERIP_HPP_ */
