@@ -31,8 +31,9 @@
 
 #include <lifeconfig.h>
 
-#if defined(HAVE_BOOST_TEST) && defined(HAVE_PETSC_H)
+#include <vecUnknown.hpp>
 
+#if defined(HAVE_BOOST_TEST) && defined(HAVE_PETSC_H)
 // Boost.Test
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>
