@@ -25,19 +25,20 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .tex .pdf
 
-TEX_SRC	= docfe.tex jfg.tex lifev-dev.tex
-NOTEX_SRC	= docfe jfg lifev-dev 
 PDF		= docfe.pdf jfg.pdf lifev-dev.pdf
 
-all: $(PDF)
+lifev_dev_TEX	= lifev-dev.tex lifev-dev_generalities.tex lifev-dev_conventions.tex lifev-dev_overview.tex
 
+all:$(PDF)
 
-.tex.pdf: $(NOTEX_SRC)
+.tex.pdf: 
 	-(TEXINPUTS=$$TEXINPUTS:$(srcdir):$(top_srcdir)/doc/tex//  pdflatex `basename $< .tex`)
 	-(BIBINPUTS=$$BIBINPUTS:$(srcdir):$(top_srcdir)/doc/tex//  bibtex `basename $< .tex`)
+	-(BIBINPUTS=$$BIBINPUTS:$(srcdir):$(top_srcdir)/doc/tex//  makeindex `basename $< .tex`)
 	-(TEXINPUTS=$$TEXINPUTS:$(srcdir):$(top_srcdir)/doc/tex//  pdflatex `basename $< .tex`)
 	-(TEXINPUTS=$$TEXINPUTS:$(srcdir):$(top_srcdir)/doc/tex//  pdflatex `basename $< .tex`)
 
+lifev-dev.pdf: $(lifev_dev_TEX)
 
 IMAGES_SRC	= BCCond.fig  BCHandler.fig  BasElSha.fig  Fem_nodes.fig  mixed_pattern.fig  theFE.fig \
 BCCond.eps BasElSha.eps NSCode_mesh_types.eps theFE.eps BCHandler.eps Fem_nodes.eps mixed_pattern.eps \
@@ -48,6 +49,6 @@ EXTRA_DIST = $(TEX_SRC) $(IMAGES_SRC) life.bib
 
 MOSTLYCLEANFILES	= docfe.log docfe.aux docfe.pdf docfe.blg docfe.bbl \
 			  jfg.log jfg.aux jfg.pdf jfg.blg jfg.bbl \
-			  lifev-dev.log lifev-dev.glo lifev-dev.idx lifev-dev.aux lifev-dev.out \
+			  lifev-dev.log lifev-dev.glo lifev-dev.idx lifev-dev.ind lifev-dev.ilg lifev-dev.aux lifev-dev.out \
                           lifev-dev.pdf lifev-dev.toc lifev-dev.lof lifev-dev.lot lifev-dev.blg lifev-dev.bbl \
 			  lifev-dev_generalities.aux lifev-dev_conventions.aux lifev-dev_overview.aux
