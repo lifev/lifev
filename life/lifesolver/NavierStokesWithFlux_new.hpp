@@ -107,7 +107,6 @@ public:
         _M_solver( __s ),
         _M_ndof( _M_solver->uDof().numTotalDof() ),
         _M_u_nso( _M_solver->uDof().numTotalDof() ),
-        _M_p_nso( _M_solver->pDof().numTotalDof() ),
         _M_uzero(_M_solver->uDof().numTotalDof()),
         _M_uprec(_M_solver->uDof().numTotalDof()),
         _M_uns1(_M_solver->uDof().numTotalDof()),
@@ -116,6 +115,7 @@ public:
         _M_pns1(_M_solver->pDof().numTotalDof()),
         _M_pnso1(_M_solver->pDof().numTotalDof()),
         _M_pnso2(_M_solver->pDof().numTotalDof()),
+        _M_p_nso( _M_solver->pDof().numTotalDof() ),
         _M_Qno( 0 ),
         _M_vec_lambda( _M_solver->uDof().numTotalDof() ),
         _M_lambda( 0 )
@@ -273,11 +273,18 @@ NavierStokesWithFlux<NSSolver>::initialize( const Function& u0, const Function& 
     switch ( _M_fluxes.size() )
     {
         case 1:
-	   initialize_one_flux(u0,p0,t0,dt);
-        break;
+            initialize_one_flux(u0,p0,t0,dt);
+            break;
         case 2:
-           initialize_two_fluxes(u0,p0,t0,dt);
-        break;
+            initialize_two_fluxes(u0,p0,t0,dt);
+            break;
+        default:
+            std::ostringstream __ex;
+            __ex << "The number of flux is invalid it is : " << _M_fluxes.size() << "\n"
+                 << "you have to specify either one flux or two fluxes for this algorithm to work\n"
+                 << "using the setFlux( label, flux ) member function\n";
+            throw std::logic_error( __ex.str() );
+            break;
     }
 }
 
