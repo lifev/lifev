@@ -23,10 +23,10 @@ namespace LifeV
 {
 
 Real maxnorm(const Vector& v) {
-  Real max = abs(v[0]);
+  Real max = fabs(v[0]);
   for (UInt i=1; i<v.size(); ++i) {
-    if ( abs(v[i]) > max )
-      max =  abs(v[i]);
+    if ( fabs(v[i]) > max )
+      max =  fabs(v[i]);
   }
   return max;
 }
