@@ -2,26 +2,8 @@
   \file dof.h
   \brief Degrees of freedom, the class that provides the localtoglobal table
   \version 1.0
-  \author M.A. Fernandez & Luca Formaggia
-  \date 07/2002
-
-  The numbering of the degrees of freedom follow the order
-  Vertices - Edges - Faces - Volumes
-  If more than one degree of freedon is associated to a geometrical entity, the
-  global numbering associated to two "consecutive" degree of freedom  on the given
-  entity is consecutive, and the order is according to the entity orientation.
-
-
-  \author Modified by Vincent MARTIN & Mohamed BELHADJ
-  \date 19/07/2002
-   
-  We added the HdivFE element here. 
-
-  \author Modified by Daniele A. DI PIETRO
-  \date 12/2003
-
-  I added discontinuous FEM. It would be a good idea to make a new member instead of 
-  modifying existing one with compiler directives (to be done...)
+  \author D. A. Di Pietro
+  \date 10/2004
 */
 
 #ifndef _DOFDG_HH
@@ -181,7 +163,7 @@ void DofDG::update(Mesh& M){
   
 
   unsigned int gcount(_offset);
-  unsigned int lcount;
+  unsigned int lcount = 0;
   unsigned int lc;
   
   // Vertex Based Dof
