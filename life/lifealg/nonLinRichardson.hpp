@@ -29,7 +29,7 @@ namespace LifeV
 template <class Fct, class Vector, class Real, class Norm>
 int nonLinRichardson( Vector& sol,
                       Fct& f,
-                      Norm norm,
+                      const Norm& norm,
                       Real abstol,
                       Real reltol,
                       int& maxit,
