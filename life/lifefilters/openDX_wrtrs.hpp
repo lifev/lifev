@@ -480,5 +480,120 @@ void wr_opendx_vector( std::string fname, std::string name, VectorType U,
     ofile << "end";
     ofile << std::endl;
 }
+
+/**
+   \An openDX writer suitable for DG-FEM
+*/
+
+template<class MESH, class CURRENTFE, class DOF, class VECTOR>
+void elem_wise_DX_wrtr(std::string fname, const MESH& mesh, const DOF& dof, CURRENTFE& fe, 
+                       const KNM<Real>& PlotNodes, const KNM<UInt>& Connections, const VECTOR& U)
+{
+    // WARNING: Connections must start from 0
+  
+    // Open output file
+    std::ofstream ofile( fname.c_str(), std::ios::app );
+  
+    ASSERT( ofile, "Error: Output file cannot be open" );
+  
+    // Number of coordinates
+    ASSERT_PRE(fe.nbCoor == PlotNodes.M(), "At present time works in 3D only");
+  
+    // Number of local and total plot nodes, tetrahedra
+    UInt nE = mesh.numVolumes();
+    const int nbPlotNodes = PlotNodes.N();
+    int nbTotalPlotNodes = nbPlotNodes * nE;
+    int nbConn = Connections.N();
+  
+    // Number of (local) dofs
+    const int nbDof = fe.refFE.nbDof;
+  
+    // Multi-index array storing shape functions' values on plot nodes
+    KNM<Real> PhiOnPlotNodes(nbDof, nbPlotNodes);
+  
+    // Variables to store plot nodes' coordinates on the reference element
+    Real xi, eta, zeta;
+  
+    // Variables to store plot nodes' physical coordinates
+    Real x, y, z;
+  
+    for(int i = 0; i < PhiOnPlotNodes.N(); i++)
+        for(int j = 0; j < PhiOnPlotNodes.M(); j++)
+            {
+                xi = PlotNodes(j, 0); eta = PlotNodes(j, 1); zeta = PlotNodes(j, 2);
+                PhiOnPlotNodes(i, j) = fe.refFE.phi(i, xi, eta, zeta);
+            }
+  
+    // ** Write positions **
+    ofile << "# POSITIONS" << std::endl;
+    ofile << "object 1 class array type float rank 1 shape 3 items " << nbTotalPlotNodes << " data follows" << std::endl;
+    for(UInt iE = 1; iE <= nE; iE++)
+        {
+            for(int iPN = 0; iPN < nbPlotNodes; iPN++)
+                {
+                    xi = PlotNodes(iPN, 0); eta = PlotNodes(iPN, 1); zeta = PlotNodes(iPN, 2);
+      
+                    // Update element
+                    fe.update( mesh.volumeList(iE) );
+      
+                    // Plot node's physical coordinates
+                    fe.coorMap(x, y, z, xi, eta, zeta);
+      
+                    ofile << (float)x << " " << (float)y << " " << (float)z << std::endl;
+                }
+        }
+  
+    // ** Write connections **
+    ofile << "# CONNECTIONS" << std::endl;
+    int nbTotalConn = nE * nbConn;
+    ofile << "object 2 class array type int rank 1 shape 4 items " << nbTotalConn << " data follows" << std::endl;
+
+    UInt nPN = 0;
+    for(UInt iE = 1; iE <= nE; iE++)
+        {
+            for(int iConn = 0; iConn < nbConn; iConn++)
+                {
+                    for(int i = 0; i < 4; i++)
+                        {
+                            ofile << Connections(iConn, i) + nPN << " ";
+                        }
+                    ofile << std::endl;
+                }
+            nPN += nbPlotNodes;
+        } 
+    ofile << "attribute \"element type\" string \"tetrahedra\"" << std::endl;
+    ofile << "attribute \"ref\" string \"positions\"" << std::endl;
+  
+    // ** Write data **
+    Real UOnPlotNode;
+    ofile << "# DATA" << std::endl;
+    ofile << "object 3 class array type float rank 0 items " << nbTotalPlotNodes << " data follows" << std::endl;
+    UInt ig;
+  
+    for(UInt iE = 1; iE <= nE; iE++)
+        {
+            for(int iPN = 0; iPN < nbPlotNodes; iPN++)
+                {
+                    // Solution value on plot node
+                    UOnPlotNode = 0.;      
+                    for(int iDof = 0; iDof < nbDof; iDof++)
+                        {
+                            ig = dof.localToGlobal(iE, iDof + 1) - 1;
+                            UOnPlotNode += PhiOnPlotNodes(iDof, iPN)  * U(ig);
+                        }
+                    ofile << (float)UOnPlotNode << std::endl;
+                }
+        }
+  
+    ofile << "attribute \"dep\" string \"positions\"" << std::endl;
+    ofile << "# FIELD" << std::endl;
+    ofile << "object \"irregular positions irregular connections\" class field" << std::endl;
+    ofile << "component \"positions\" value 1" << std::endl;
+    ofile << "component \"connections\" value 2" << std::endl;
+    ofile << "component \"data\" value 3" << std::endl;
+    ofile << "end" << std::endl;
+  
+    ofile.close();
+}
 }
 #endif
