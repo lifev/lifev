@@ -276,9 +276,6 @@ Real testClosedDomain( RegionMesh3D const & mesh, std::ostream & err = std::cerr
         ASSERT0( false, "ABORT CONDITION OCCURRED" );
     }
 
-    // cleanup after usage
-    delete bdfe;
-
     return test;
 
 }
