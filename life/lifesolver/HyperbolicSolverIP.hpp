@@ -128,15 +128,15 @@ namespace LifeV {
             _M_dof_velocity(dof_velocity),
             _M_dim_velocity( _M_dof_velocity.numTotalDof() ),
             _M_velocity(velocity0),
-            _M_bdf_order( datafile("levelset/bdf/order", 2) ),
+            _M_bdf_order( datafile("hyp/bdf/order", 2) ),
             _M_bdf(_M_bdf_order)
         {
-            _M_solver.setOptionsFromGetPot(_M_datafile, "levelset/solver");
+            _M_solver.setOptionsFromGetPot(_M_datafile, "hyp/solver");
 
-            _M_t0 = _M_datafile("levelset/bdf/t0", 0);
-            _M_delta_t = _M_datafile("levelset/bdf/delta_t", .02);
+            _M_t0 = _M_datafile("hyp/bdf/t0", 0);
+            _M_delta_t = _M_datafile("hyp/bdf/delta_t", .02);
 
-            _M_gamma = _M_datafile("levelset/ipstab/gamma", 0.125);
+            _M_gamma = _M_datafile("hyp/ipstab/gamma", 0.125);
         }
         //@}
 
@@ -227,16 +227,16 @@ namespace LifeV {
         //! Quadrature rule for boundary integrals
         const QuadRule& _M_qr_bd;
 
-        //! Current finite element for the levelset function
+        //! Current finite element for the unknown
         CurrentFE _M_fe;
 
-        //! Current boundary element for the levelset function
+        //! Current boundary element for the unknown
         CurrentBdFE _M_fe_bd;
 
         //! Current finite element for the velocity
         CurrentFE _M_fe_velocity;
 
-        //! Degrees of freedom for the level set function
+        //! Degrees of freedom for the unknown
         Dof _M_dof;
 
         //! Pattern for the mass matrix
@@ -254,10 +254,10 @@ namespace LifeV {
         //! The full problem matrix (steady + unsteady)
         matrix_type _M_A;
 
-        //!The number of total dofs for the level set function
+        //!The number of total dofs for the unknown
         UInt _M_dim;
 
-        //! The level set function
+        //! The unknown
         u_type _M_u;
 
         //! Right hand side vector
@@ -330,7 +330,7 @@ namespace LifeV {
         /**
            \Evaluate velocity field on qn_id-th quadrature node of fe_id-th
            \element. It is assumed that the same mesh is used for both the
-           \velocity and the level set function.
+           \velocity field and the unknown
         */
 
         inline void evaluate_velocity(UInt fe_id, ElemVec& elvec) {
