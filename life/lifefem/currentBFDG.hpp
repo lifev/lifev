@@ -20,14 +20,14 @@
 #define _CURRENTBFDG_H
 
 #include "currentBdDG.hpp"
-#include "bcCond.hpp"
+#include "bcHandler.hpp"
 
 namespace LifeV
 {
 
 /*!
   \class CurrentBFDG
-  \brief The class for a discontinuous finite element 
+  \brief The class for a discontinuous finite element
   \author D. A. Di Pietro
   \date 12/2003
 */
@@ -55,7 +55,7 @@ class CurrentBFDG:public CurrentBdDG{
 #endif
 
   template<class GEOELE>
-    void updateBCType(const GEOELE& geoele, const BC_Handler& BCh){
+    void updateBCType(const GEOELE& geoele, const BCHandler& BCh) {
     marker = EntityFlag(geoele.marker());
     bcType = BCh.boundaryType(marker);
   }
