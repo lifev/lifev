@@ -30,8 +30,8 @@ HarmonicExtension::getDisplacement()
 
 void HarmonicExtension::setHarmonicExtensionBC( BCHandler &BCh_harmonicExtension )
 {
-    _mesh_BCh = BCh_harmonicExtension;
-    M_setBC   = true;
+    M_BCh_HarmonicExtension = &BCh_harmonicExtension;
+    M_setBC                 = true;
 }
 
 const Dof& HarmonicExtension::

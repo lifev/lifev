@@ -114,7 +114,8 @@ public:
     const bool setHarmonicExtensionBC() const {return M_setBC;}
     //! set the mesh BCs
     void setHarmonicExtensionBC(BCHandler &BCh_HarmonicExtension);
-
+    //! returns the BCHandler
+    BCHandler& BCh_HarmonicExtension() {return *M_BCh_HarmonicExtension;}
 
 protected:
 
@@ -127,8 +128,6 @@ protected:
     //! Quadrature rule for surface elementary computations
     const QuadRule& _bdQr;
 
-    //! BC holding the imposed boundary displacement
-    BCHandler& _mesh_BCh;
 
     //! The Dof object associated with the displacement computations
     Dof _dof_mesh;
@@ -160,6 +159,9 @@ protected:
 
 private:
 
+    //! BC holding the imposed boundary displacement
+    BCHandler    *M_BCh_HarmonicExtension;
+
     bool          M_setBC;
 
 };
@@ -187,7 +189,6 @@ HarmonicExtension( Mesh& mesh,
         _diffusion( diffusion ),
         _Qr       ( Qr ),
         _bdQr     ( bdQr ),
-        _mesh_BCh ( mesh_BCh ),
         _dof_mesh ( mesh, mesh.getRefFE() ),
         _aPattB   ( _dof_mesh ),
         _aPatt    ( _aPattB, "diag" ),
@@ -196,9 +197,9 @@ HarmonicExtension( Mesh& mesh,
         _feBd     ( mesh.getRefFE().boundaryFE(), mesh.getGeoMap().boundaryMap(), _bdQr ),
         _elmat    ( _fe.nbNode, nDimensions, nDimensions ),
         _disp     ( _dof_mesh.numTotalDof() ),
-        _f        ( _dof_mesh.numTotalDof() )
+        _f        ( _dof_mesh.numTotalDof() ),
+        M_BCh_HarmonicExtension ( &mesh_BCh )
 {
-
     // Loop on elements
     for ( UInt i = 1; i <= mesh.numVolumes(); ++i )
     {
@@ -254,20 +255,18 @@ HarmonicExtension( Mesh& mesh,
     _disp = ZeroVector( _disp.size() );
 }
 
-
-
 // This method updates the extension of the displacement, i.e. it solves the laplacian problem
+
 template <typename Mesh>
 void HarmonicExtension::updateExtension( Mesh& mesh, const Real& time, const UInt recur )
 {
-
-    if ( !_mesh_BCh.bdUpdateDone() )
+    if ( !BCh_HarmonicExtension().bdUpdateDone() )
     {
         // BC boundary information update
-        _mesh_BCh.bdUpdate( mesh, _feBd, _dof_mesh );
+        BCh_HarmonicExtension().bdUpdate( mesh, _feBd, _dof_mesh );
 
         // Boundary conditions treatment on the matrix
-        bcManageMatrix( _a, mesh, _dof_mesh, _mesh_BCh, _feBd, 1.0 );
+        bcManageMatrix( _a, mesh, _dof_mesh, BCh_HarmonicExtension(), _feBd, 1.0 );
     }
 
     // Number to total dof
@@ -277,7 +276,7 @@ void HarmonicExtension::updateExtension( Mesh& mesh, const Real& time, const UIn
     _f = ZeroVector( _f.size() );
 
     // Boundary conditions treatment
-    bcManageVector( _f, mesh, _dof_mesh, _mesh_BCh, _feBd, time, 1.0 );
+    bcManageVector( _f, mesh, _dof_mesh, BCh_HarmonicExtension(), _feBd, time, 1.0 );
 
     // AZTEC stuff
     int proc_config[ AZ_PROC_SIZE ];   // Processor information:
@@ -309,7 +308,8 @@ void HarmonicExtension::updateExtension( Mesh& mesh, const Real& time, const UIn
 
     // Fixed Aztec options for this linera system
     options[ AZ_solver ] = AZ_gmres;
-    options[ AZ_output ] = AZ_warnings;
+    options[ AZ_output ] = AZ_none;
+//    options[ AZ_output ] = 1;
     options[ AZ_poly_ord ] = 5;
     options[ AZ_kspace ] = 40;
     options[ AZ_precond ] = AZ_dom_decomp;
@@ -344,7 +344,7 @@ void HarmonicExtension::updateExtensionTransp( Mesh& mesh, const Real& time )
 {
 
     // Boundary conditions treatment
-    bcManageVector( _disp, mesh, _dof_mesh, _mesh_BCh, _feBd, time );
+    bcManageVector( _disp, mesh, _dof_mesh, BCh_HarmonicExtension(), _feBd, time );
 }
 }
 #endif
