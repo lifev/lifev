@@ -487,9 +487,8 @@ readINRIAMeshFile(RegionMesh3D<GeoShape,MC> & mesh, string  const & filename, En
   // Test mesh
   Switch sw;
 
-  ///// CORRECTION JFG
-  //if (mesh.check(1, true,true))done=0;
-  if(!checkMesh3D(mesh, sw, true,true, cout,cout,cout)) abort(); // CORRECTION JFG
+  if(!checkMesh3D(mesh, sw, true,false, cout,cout,cout)) abort(); 
+  // if(!checkMesh3D(mesh, sw, true,true, cout,cout,cout)) abort();//verbose version
 
   // This part is to build a P2 mesh from a P1 geometry
 
