@@ -85,12 +85,14 @@ namespace LifeV
         
         Vector residual     = sol;
         Vector step         = sol;
-        Vector simgaS       = sol;
-        Vector simgaF       = sol;
+
+        Vector muS          = sol;
+        Vector muF          = sol;
+
+        muS                 = 0.;
+        muF                 = 0.;
         
         step                = 0.;
-        simgaS              = 0.;
-        simgaF              = 0.;
         
         Real   normResOld   = 1;
         Real   lambda;
@@ -134,17 +136,24 @@ namespace LifeV
 
             linres     = linear_rel_tol;
 
-            f.solvePrec(step,-1.*residual,linres); // residual = f(sol)
+            muS        = sol;
+            
+            f.solvePrec(sol); 
 
+            muS        = sol - muS;
+            
 /*
               linres contains the relative linear tolerance achieved by the
               linear solver, i.e linear_rel_tol = | -f(sol) - P step | / |-f(sol)|
 */
 
-            step  = aitken.computeDeltaLambda(sol, simgaS, simgaF);
-            slope = normRes*normRes*(linres*linres - 1);
+            step  = aitken.computeDeltaLambda(sol, muS, muF);
 
-            cout << "### slope = " << slope << endl;
+            sol   = sol - step;
+            
+//            slope = normRes*normRes*(linres*linres - 1);
+
+//            cout << "### slope = " << slope << endl;
 
 /*
               slope denotes the quantity f^T J step, which is generally used by
