@@ -21,7 +21,8 @@
 namespace LifeV
 {
 //
-void compute_vec( Real constant, ElemVec& elvec, const CurrentFE& fe, int iblock )
+void
+compute_vec( Real constant, ElemVec& elvec, const CurrentFE& fe, int iblock )
 {
     int i, ig;
     ElemVec::vector_view vec = elvec.block( iblock );
@@ -34,4 +35,42 @@ void compute_vec( Real constant, ElemVec& elvec, const CurrentFE& fe, int iblock
         vec( i ) += constant * s;
     }
 }
+void
+compute_vec_DG_BF(const BCHandler& BCh, ElemVec& bfvec, const CurrentBFDG& bfDG, int iblock)
+{
+
+    int i, ig, icoor;
+
+    ElemVec::vector_view vec = bfvec.block(iblock);
+
+    Real s, x, y, z;
+
+    const BCBase& CurrBC = BCh.GetBCWithFlag(bfDG.marker);
+    if(bfDG.bcType == Essential){
+        //Dirichlet boundary conditions
+        for(i = 0; i < bfDG.nbNodeAd; i++){
+            s = 0.;
+            for(ig = 0; ig < bfDG.nbQuadPt; ig++){
+                bfDG.coorQuadPt(x, y, z, ig);
+
+                for(icoor = 0; icoor < bfDG.nbCoorAd; icoor++){
+                    s += - (bfDG.phiDerAd(i, icoor, ig) * bfDG.normal(icoor, ig))
+                        * CurrBC(0., x, y, z, iblock) * bfDG.weightMeas(ig);
+                }
+            }
+            vec(i) += s;
+        }
+    }else{
+        //Von Neumann boundary conditions
+        for(i = 0; i < bfDG.nbNodeAd; i++){
+            s = 0.;
+            for(ig = 0; ig < bfDG.nbQuadPt; ig++){
+                bfDG.coorQuadPt(x, y, z, ig);
+                s += bfDG.phiAd(i, ig) * CurrBC(0., x, y, z, iblock) * bfDG.weightMeas(ig);
+            }
+            vec(i) += s;
+        }
+    }
+}
+
 }

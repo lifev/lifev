@@ -45,6 +45,7 @@
 
 namespace LifeV
 {
+
 // For the moment, the selection of the components of the differential operators to be computed is carried out
 // inside the differential operator. This is simpler, but not the best: indeed an "if" is processed
 // for every integral computation. It would be better to set up a table of simple operators
@@ -287,6 +288,9 @@ assemble_symm_block_diagonal( Oper oper, const RegionMesh& mesh, CurrentFE& fe, 
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+// Compute right hand side vector
+void compute_vec_DG_BF(const BCHandler& BCh, ElemVec& bfvec, const CurrentBFDG& bfDG, int iblock);
+
 template<typename OperDG, typename OperDGIF, typename OperDGBF,
 	 typename DOF, typename DOFBYFACE,
 	 typename RegionMesh, typename UsrSourceFct,
@@ -352,15 +356,7 @@ template<typename OperDG, typename OperDGIF, typename OperDGBF,
 	assemb_mat_DG_BF(A, bfmat, feDG, dof, iAd, ic, jc);
 
       }
-
-      /*
-        Call to compute_vec_DG_BF is disabled since the implementation
-        is not available.
-       */
-#warning CALL TO compute_vec_DG_BF DISABLED: IMPLEMENTATION DOES NOT EXIT
-#if 0
       compute_vec_DG_BF(BCh, bfvec, feBFDG, ic);
-#endif
       assemb_vec_DG_BF(b, bfvec, feBFDG, iAd, dof, ic);
 
     }
@@ -1094,6 +1090,7 @@ void compute_vec_DG(const UsrFct& fct, ElemVec& elvec, const CurrentFEDG& feDG, 
     vec(i) += s;
   }
 }
+
 
 // Compute right hand side vector for pure hyperbolic problems
 template<typename Velocity>
