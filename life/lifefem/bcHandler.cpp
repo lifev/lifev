@@ -26,6 +26,13 @@
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
    \date 2004-10-11
 */
+#include <sstream>
+#include <stdexcept>
+
+#include <boost/lambda/lambda.hpp>
+#include <boost/lambda/bind.hpp>
+#include <boost/lambda/if.hpp>
+
 #include <bcHandler.hpp>
 
 namespace LifeV
@@ -161,9 +168,10 @@ void BCHandler::addBC( const std::string& name, const EntityFlag& flag,
         std::sort( _bcList.begin(), _bcList.end() );
 }
 
-void BCHandler::addBC( const std::string& name, const EntityFlag& flag,
-                        const BCType& type, const BCMode& mode,
-                        BCVectorBase& bcv, const UInt& nComp )
+void
+BCHandler::addBC( const std::string& name, const EntityFlag& flag,
+                  const BCType& type, const BCMode& mode,
+                  BCVectorBase& bcv, const UInt& nComp )
 {
     if ( _nbc == _bcList.size() )
         ERROR_MSG( "You cannot add another BC, the list of BC in the Handler is full" );
@@ -178,7 +186,33 @@ void BCHandler::addBC( const std::string& name, const EntityFlag& flag,
         std::sort( _bcList.begin(), _bcList.end() );
 }
 
+void
+BCHandler::modifyBC( std::string const& __name, BCFunctionBase& __bcv )
+{
 
+}
+void
+BCHandler::modifyBC( std::string const& __name, BCVectorBase& __bcv )
+{
+    using namespace boost::lambda;
+    BCBase* __bc = 0;
+    std::for_each( _bcList.begin(),
+                   _bcList.end(),
+                   if_( bind( &BCBase::name, boost::lambda::_1 ) == __name )[var( __bc ) = &boost::lambda::_1] );
+
+    //! handle invalid name case: ie we didnot find the name in the _bcList
+    if ( !__bc )
+    {
+        std::ostringstream __ex;
+        __ex << "invalid name for BC to be modified : " << __name << "\n"
+             << "The list of available BCs is:\n";
+        std::for_each( _bcList.begin(),
+                       _bcList.end(),
+                       std::cout << bind( &BCBase::name, boost::lambda::_1 ) << constant( "\n" ) );
+        throw std::invalid_argument( __ex.str() );
+    }
+
+}
 // returns true if the bdUpdate has been done before
 bool BCHandler::bdUpdateDone() const
 {

@@ -221,6 +221,11 @@ public:
                 BCVectorBase& bcv,
                 const UInt& nComp );
 
+    //! modify the boundary condition \c name with condition \c bcv
+    void modifyBC( std::string const& name, BCFunctionBase& bcv );
+
+    //! modify the boundary condition \c name with condition \c bcv
+    void modifyBC( std::string const& name, BCVectorBase& bcv );
 
     //! Build the boundary stuff
     /*!
@@ -362,7 +367,7 @@ void BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                         switch ( where->type() )
                         {
                             case Essential:
-                                // Why kind of data ?
+                                // Which kind of data ?
                                 if ( where->dataVector() )
                                 { // With data vector
                                     where->addIdentifier( new IdentifierBase( gDof ) ); // We only need the dof number
@@ -378,7 +383,9 @@ void BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                                 { // With data
                                     switch ( where->pointerToBCVector() ->type() )
                                     {
-                                        case 0:  // if the BC is a function or a vector which values don't need to be integrated
+                                        case 0:
+                                            // if the BC is a function or a vector which values
+                                            // don't need to be integrated
                                             where->addIdentifier( new IdentifierNatural( gDof ) );
                                             break;
                                         case 1:  // if the BC is a vector of values to be integrated
@@ -442,7 +449,7 @@ void BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                         switch ( where->type() )
                         {
                             case Essential:
-                                // Why kind of data ?
+                                // Which kind of data ?
                                 if ( where->dataVector() )
                                 { // With data vector
                                     where->addIdentifier( new IdentifierBase( gDof ) );
@@ -454,12 +461,14 @@ void BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                                 }
                                 break;
                             case Natural:
-                                // Why kind of data ?
+                                // Which kind of data ?
                                 if ( where->dataVector() )
                                 { // With data vector
                                     switch ( where->pointerToBCVector() ->type() )
                                     {
-                                        case 0:  // if the BC is a function or a vector which values don't need to be integrated
+                                        case 0:
+                                            // if the BC is a function or a vector which values
+                                            // don't need to be integrated
                                             where->addIdentifier( new IdentifierNatural( gDof ) );
                                             break;
                                         case 1:  // if the BC is a vector of values to be integrated
@@ -470,7 +479,7 @@ void BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                                 }
                                 break;
                             case Mixte:
-                                // Why kind of data ?
+                                // Which kind of data ?
                                 if ( where->dataVector() )
                                 { // With data vector
                                     where->addIdentifier( new IdentifierNatural( gDof ) );

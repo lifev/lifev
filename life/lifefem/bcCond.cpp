@@ -36,113 +36,79 @@ namespace LifeV
 BCBase::BCBase( const std::string& name, const EntityFlag& flag,
                   const BCType& type, const BCMode& mode,
                   BCFunctionBase& bcf, const std::vector<ID>& comp )
+    :
+    _M_name( name ),
+    _M_flag( flag ),
+    _M_type( type ),
+    _M_mode( mode ),
+    _M_bcf( FactoryCloneBC::instance().createObject( &bcf ) ),
+    _M_dataVector( false ),
+    _M_comp( comp ),
+    _M_finalised( false )
 {
-    _name = name;
-    _flag = flag;
-    _type = type;
-    if ( mode != Component )
+    if ( _M_mode != Component )
         ERROR_MSG( "You should use a more specific constructor for this mode" );
-    _mode = mode;
-
-    switch ( type )
-    {
-        case Essential:
-        case Natural:
-            _bcf = new BCFunctionBase( bcf );
-            break;
-        case Mixte:
-            // We have to hold a pointer to a mixte functor
-            _bcf = new BCFunctionMixte( static_cast<BCFunctionMixte&>( bcf ) );
-            break;
-    }
-    _dataVector = 0;
-
-    UInt nComp = comp.size();
-    _comp.reserve( nComp );
-    _comp.insert( _comp.end(), comp.begin(), comp.end() );
-
-    _finalised = 0;
 }
 
 //! Constructor for BC without components for Scalar, Tangential or Normal  mode problems
 BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
                   BCFunctionBase& bcf )
+    :
+    _M_name( name ),
+    _M_flag( flag ),
+    _M_type( type ),
+    _M_mode( mode ),
+    _M_bcf( FactoryCloneBC::instance().createObject( &bcf ) ),
+    _M_dataVector( false ),
+    _M_comp(),
+    _M_finalised( false )
 {
-    _name = name;
-    _flag = flag;
-    _type = type;
-
     UInt nComp;
-    switch ( _mode = mode )
+    switch ( _M_mode = mode )
     {
-    case Scalar:
-        nComp = 1;
-        _comp.reserve( nComp );
-        _comp.push_back( 1 );
-        switch ( type )
-        {
-        case Essential:
-        case Natural:
-            _bcf = new BCFunctionBase( bcf );
+        case Scalar:
+            nComp = 1;
+            _M_comp.reserve( nComp );
+            _M_comp.push_back( 1 );
             break;
-        case Mixte:
-            // We have to hold a pointer to a mixte functor
-            _bcf = new BCFunctionMixte( static_cast<BCFunctionMixte&>( bcf ) );
+        case Tangential:
+            nComp = nDimensions - 1;
+            _M_comp.reserve( nComp );
+            for ( ID i = 1; i <= nComp; ++i )
+                _M_comp.push_back( i );
             break;
-        }
-        break;
-    case Tangential:
-        nComp = nDimensions - 1;
-        _comp.reserve( nComp );
-        for ( ID i = 1; i <= nComp; ++i )
-            _comp.push_back( i );
-        _bcf = new BCFunctionBase( bcf );
-        break;
-    case Normal:
-        nComp = 1;
-        _comp.reserve( nComp );
-        _comp.push_back( nDimensions );
-        _bcf = new BCFunctionBase( bcf );
-        break;
-    default:
-        ERROR_MSG( "You should use a more specific constructor for this mode" );
+        case Normal:
+            nComp = 1;
+            _M_comp.reserve( nComp );
+            _M_comp.push_back( nDimensions );
+            break;
+        default:
+            ERROR_MSG( "You should use a more specific constructor for this mode" );
     }
-    _dataVector = 0;
-    _finalised = 0;
 }
 
 
 //! Constructor for BC without list of components for Full mode problems
 BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& type,
                   const BCMode& mode, BCFunctionBase& bcf, const UInt& nComp )
+
+    :
+    _M_name( name ),
+    _M_flag( flag ),
+    _M_type( type ),
+    _M_mode( mode ),
+    _M_bcf( FactoryCloneBC::instance().createObject( &bcf ) ),
+    _M_dataVector( false ),
+    _M_comp(),
+    _M_finalised( false )
 {
-    _name = name;
-    _flag = flag;
-    _type = type;
-
-    if ( mode != Full )
+    if ( _M_mode != Full )
         ERROR_MSG( "You should use a more specific constructor for this mode" );
-    _mode = mode;
 
-
-    switch ( type )
-    {
-    case Essential:
-    case Natural:
-        _bcf = new BCFunctionBase( bcf );
-        break;
-    case Mixte:
-        // We have to hold a pointer to a mixte functor
-        _bcf = new BCFunctionMixte( static_cast<BCFunctionMixte&>( bcf ) );
-        break;
-    }
-
-    _comp.reserve( nComp );
+    _M_comp.reserve( nComp );
     for ( ID i = 1; i <= nComp; ++i )
-        _comp.push_back( i );
+        _M_comp.push_back( i );
 
-    _dataVector = 0;
-    _finalised = 0;
 }
 
 
@@ -150,136 +116,89 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& t
 //! Constructor for BC with data vector
 BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
                   BCVectorBase& bcv, const std::vector<ID>& comp )
+    :
+    _M_name( name ),
+    _M_flag( flag ),
+    _M_type( type ),
+    _M_mode( mode ),
+    _M_bcf(),
+    _M_bcv( &bcv ),
+    _M_dataVector( true ),
+    _M_comp(comp),
+    _M_finalised( false )
 {
-    _name = name;
-    _flag = flag;
-    _type = type;
     if ( mode != Component )
         ERROR_MSG( "You should use a more specific constructor for this mode" );
-    _mode = mode;
-
-    _dataVector = 1;
-    _bcv = &bcv;
-
-
-    UInt nComp = comp.size();
-    _comp.reserve( nComp );
-    _comp.insert( _comp.end(), comp.begin(), comp.end() );
-
-    _finalised = 0;
 }
 
 //! Constructor for BC with data vector, without components for Scalar, Tangential or Normal  mode problems
 BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
                   BCVectorBase& bcv )
+    :
+    _M_name( name ),
+    _M_flag( flag ),
+    _M_type( type ),
+    _M_mode( mode ),
+    _M_bcf(),
+    _M_bcv( &bcv ),
+    _M_dataVector( true ),
+    _M_comp(),
+    _M_finalised( false )
 {
-    _name = name;
-    _flag = flag;
-    _type = type;
-
     UInt nComp;
-    switch ( _mode = mode )
+    switch ( _M_mode = mode )
     {
     case Scalar:
         nComp = 1;
-        _comp.reserve( nComp );
-        _comp.push_back( 1 );
-
-        _dataVector = 1;
-        _bcv = &bcv;
+        _M_comp.reserve( nComp );
+        _M_comp.push_back( 1 );
 
         break;
     case Tangential:
         nComp = nDimensions - 1;
-        _comp.reserve( nComp );
+        _M_comp.reserve( nComp );
         for ( ID i = 1; i <= nComp; ++i )
-            _comp.push_back( i );
-
-        _dataVector = 1;
-        _bcv = &bcv;
+            _M_comp.push_back( i );
 
         break;
     case Normal:
         nComp = 1;
-        _comp.reserve( nComp );
-        _comp.push_back( nDimensions );
-
-        _dataVector = 1;
-        _bcv = &bcv;
+        _M_comp.reserve( nComp );
+        _M_comp.push_back( nDimensions );
 
         break;
     default:
         ERROR_MSG( "You should use a more specific constructor for this mode" );
     }
-    _finalised = 0;
 }
 
 
 //! Constructor for BC with data vector, without list of components for Full mode problems
 BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& type,
                   const BCMode& mode, BCVectorBase& bcv, const UInt& nComp )
+    :
+    _M_name( name ),
+    _M_flag( flag ),
+    _M_type( type ),
+    _M_mode( mode ),
+    _M_bcf(),
+    _M_bcv( &bcv ),
+    _M_dataVector( true ),
+    _M_comp(),
+    _M_finalised( false )
 {
-    _name = name;
-    _flag = flag;
-    _type = type;
-
     if ( mode != Full )
         ERROR_MSG( "You should use a more specific constructor for this mode" );
-    _mode = mode;
 
-    _dataVector = 1;
-    _bcv = &bcv;
-
-    _comp.reserve( nComp );
+    _M_comp.reserve( nComp );
     for ( ID i = 1; i <= nComp; ++i )
-        _comp.push_back( i );
-
-    _finalised = 0;
+        _M_comp.push_back( i );
 }
 
 
 //! Destructor (we have a vector of pointers to ID's and Functors)
 BCBase::~BCBase()
 {
-
-    // \warning Important: The set member list0 is always empty at this
-    // point, it is just an auxiliary container used at the moment of
-    // the boundary update (see BCHandler::bdUpdate)
-
-    switch ( _type )
-    {
-    case Essential:
-        // Deleting identifiers
-        for ( IDIterator i = _idList.begin();i != _idList.end();++i )
-            delete static_cast<IdentifierEssential*>( *i );
-
-        break;
-    case Natural:
-    case Mixte:
-        for ( IDIterator i = _idList.begin();i != _idList.end();++i )
-            // Deleting identifiers
-            delete static_cast<IdentifierNatural*>( *i );
-        break;
-    }
-
-    if ( _dataVector )
-    {
-        _dataVector = 0;
-    }
-    else
-    {
-        // Deleting user defined functors
-        switch ( _type )
-        {
-        case Natural:
-        case Essential:
-            delete _bcf;
-            break;
-        case Mixte:
-            delete static_cast<BCFunctionMixte*>( _bcf );
-            break;
-        }
-    }
 }
 
 
@@ -289,46 +208,23 @@ BCBase::~BCBase()
 BCBase & BCBase::operator=( const BCBase& BCb )
 {
 
-    _name = BCb._name;
-    _flag = BCb._flag;
-    _type = BCb._type;
-    _mode = BCb._mode;
-    _finalised = BCb._finalised;
-    _dataVector = BCb._dataVector;
+    _M_name = BCb._M_name;
+    _M_flag = BCb._M_flag;
+    _M_type = BCb._M_type;
+    _M_mode = BCb._M_mode;
+    _M_finalised = BCb._M_finalised;
+    _M_dataVector = BCb._M_dataVector;
+    _M_bcv = BCb._M_bcv;
+    _M_bcf = BCb._M_bcf;
 
-    switch ( _type )
-    {
-    case Essential:
-    case Natural:
-        if ( _dataVector )
-        {
-            _bcv = BCb._bcv;
-        }
-        else
-        {
-            _bcf = new BCFunctionBase( *( BCb._bcf ) );
-        }
-        break;
-    case Mixte:
-        if ( _dataVector )
-        {
-            _bcv = BCb._bcv;
-        }
-        else
-        {
-            _bcf = new BCFunctionMixte( *( static_cast<BCFunctionMixte*>( BCb._bcf ) ) );
-        }
-        break;
-    }
-
-    _comp = BCb._comp;
+    _M_comp = BCb._M_comp;
 
     // Important!!: The set member list0 is always empty at this
     // point, it is just an auxiliary container used at the moment of
     // the boundary update (see BCHandler::bdUpdate)
 
     // The list of ID's must be empty
-    if ( !_idList.empty() || !BCb._idList.empty() )
+    if ( !_M_idList.empty() || !BCb._M_idList.empty() )
         ERROR_MSG( "The BC assigment operator does not work with lists of identifiers which are not empty" );
 
     return *this;
@@ -336,96 +232,73 @@ BCBase & BCBase::operator=( const BCBase& BCb )
 
 //! Copy constructor for BC (we have a vector of pointers to ID's and a pointer to user defined functions)
 BCBase::BCBase( const BCBase& BCb )
+    :
+    _M_name( BCb._M_name ),
+    _M_flag( BCb._M_flag ),
+    _M_type( BCb._M_type ),
+    _M_mode( BCb._M_mode ),
+    _M_bcf( BCb._M_bcf ),
+    _M_bcv( BCb._M_bcv ),
+    _M_dataVector( BCb._M_dataVector ),
+    _M_comp( BCb._M_comp ),
+    _M_finalised( BCb._M_finalised )
 {
-    _name = BCb._name;
-    _flag = BCb._flag;
-    _type = BCb._type;
-    _mode = BCb._mode;
-    _finalised = BCb._finalised;
-    _dataVector = BCb._dataVector;
-
-    switch ( _type )
-    {
-    case Essential:
-    case Natural:
-        if ( _dataVector )
-        {
-            _bcv = BCb._bcv;
-        }
-        else
-        {
-            _bcf = new BCFunctionBase( *( BCb._bcf ) );
-        }
-        break;
-    case Mixte:
-        if ( _dataVector )
-        {
-            _bcv = BCb._bcv;
-        }
-        else
-        {
-            _bcf = new BCFunctionMixte( *( static_cast<BCFunctionMixte*>( BCb._bcf ) ) );
-        }
-        break;
-    }
-    _comp = BCb._comp;
-
     // Important!!: The set member list0 is always empty at this point, it is just
     // an auxiliary container used at the moment of the boundary update (see BCHandler::bdUpdate)
 
     // The list of ID's must be empty
-    if ( !_idList.empty() || !BCb._idList.empty() )
+    if ( !_M_idList.empty() || !BCb._M_idList.empty() )
         ERROR_MSG( "The BC copy constructor does not work whith list of identifiers which are not empty" );
 }
 
 //! Returns the BC name
 std::string BCBase::name() const
 {
-    return _name;
+    return _M_name;
 }
 
 //! Returns the BC associated flag
 EntityFlag BCBase::flag() const
 {
-    return _flag;
+    return _M_flag;
 }
 
 //! Returns the BC type
 BCType BCBase::type() const
 {
-    return _type;
+    return _M_type;
 }
 
 //! Returns the BC mode
 BCMode BCBase::mode() const
 {
-    return _mode;
+    return _M_mode;
 }
 
 //! Returns the number of components involved in this boundary condition
 UInt BCBase::numberOfComponents() const
 {
-    return _comp.size();
+    return _M_comp.size();
 }
 
 //! eturns the global i-th component involved in the boundary condition
 ID BCBase::component( const ID i ) const
 {
-    ASSERT_BD( i >= 1 && i <= _comp.size() );
-    return _comp[ i -1 ];
+    ASSERT_BD( i >= 1 && i <= _M_comp.size() );
+    return _M_comp[ i -1 ];
 }
 
 //! Returns wether the list is finalised and the vector of ID's is then accessible
 bool BCBase::finalised() const
 {
-    return _finalised;
+    return _M_finalised;
 }
 
-//! Overloading function operator by calling the (*_bcf)() user specified function
+//! Overloading function operator by calling the (*_M_bcf)() user specified function
 Real BCBase::operator() ( const Real& t, const Real& x, const Real& y,
                            const Real& z, const ID& i ) const
 {
-    return _bcf->operator() ( t,x, y, z, i );
+    return _M_bcf->operator() ( t,x, y, z, i );
 }
 
 
@@ -433,27 +306,27 @@ Real BCBase::operator() ( const Real& t, const Real& x, const Real& y,
 //! Returns a pointer  to the user defined STL functor
 const BCFunctionBase* BCBase::pointerToFunctor() const
 {
-    return _bcf;
+    return _M_bcf.get();
 }
 
 //! Returns a pointer  to the BCVector
 const BCVectorBase* BCBase::pointerToBCVector() const
 {
-    return _bcv;
+    return _M_bcv;
 }
 
 //! True is a data vector has been provided
 bool BCBase::dataVector() const
 {
-    return _dataVector;
+    return _M_dataVector;
 }
 
 
 
 Real BCBase::operator() ( const ID& iDof, const ID& iComp ) const
 {
-    if ( _dataVector )
-        return ( *_bcv ) ( iDof, iComp );
+    if ( _M_dataVector )
+        return ( *_M_bcv ) ( iDof, iComp );
     else
     {
         ERROR_MSG( "A data vector must be specified before calling this method" );
@@ -465,8 +338,8 @@ Real BCBase::operator() ( const ID& iDof, const ID& iComp ) const
 //! Returns the value of the mixte coefficient (in BC Vector)
 Real BCBase::mixteCoef() const
 {
-    if ( _dataVector )
-        return ( *_bcv ).mixteCoef();
+    if ( _M_dataVector )
+        return ( *_M_bcv ).mixteCoef();
     else
     {
         ERROR_MSG( "A data vector must be specified before calling this method" );
@@ -479,8 +352,8 @@ Real BCBase::mixteCoef() const
 //! Returns the value of the mixte coefficient vector (in BC Vector) M.Prosi
 Real BCBase::MixteVec( const ID& iDof, const ID& iComp ) const
 {
-    if ( _dataVector )
-        return ( *_bcv).MixteVec( iDof, iComp );
+    if ( _M_dataVector )
+        return ( *_M_bcv).MixteVec( iDof, iComp );
     else
     {
         ERROR_MSG( "A data vector must be specified before calling this method" );
@@ -490,68 +363,75 @@ Real BCBase::MixteVec( const ID& iDof, const ID& iComp ) const
 }
 //! Returns a pointer  to the i-th elements in the (finalised) list
 //! (counting from 1 ' a la FORTRAN')
-const IdentifierBase* BCBase::operator() ( const ID& i ) const
+const IdentifierBase*
+BCBase::operator() ( const ID& i ) const
 {
     return this->operator[] ( i-1 );
 }
 
 //! Returns a pointer to the i-th elements in the (finalised) list
 //! (counting from 0 ' a la C')
-const IdentifierBase* BCBase::operator[] ( const Index_t& i ) const
+const IdentifierBase*
+BCBase::operator[] ( const Index_t& i ) const
 {
-    ASSERT_PRE( _finalised, "BC List should be finalised before being accessed" );
-    ASSERT_BD( i >= 0 && i < _idList.size() );
-    return _idList[ i ];
+    ASSERT_PRE( _M_finalised, "BC List should be finalised before being accessed" );
+    ASSERT_BD( i >= 0 && i < _M_idList.size() );
+    return _M_idList[ i ].get();
 }
 
 
 //! Add a new identifier to the preliminary list of Identifiers
-void BCBase::addIdentifier( IdentifierBase* iden )
+void
+BCBase::addIdentifier( IdentifierBase* iden )
 {
-    list0.insert( iden );
+    list0.insert( boost::shared_ptr<IdentifierBase>( iden ) );
 }
 
 
 //! Transfer between the list and vector containers of ID's
-void BCBase::finalise()
+void
+BCBase::finalise()
 {
     if ( ! list0.empty() )
     {
-        _idList.clear();
-        _idList.reserve( list0.size() );
-        std::copy( list0.begin(), list0.end(), std::inserter( _idList, _idList.end() ) );
+        _M_idList.clear();
+        _M_idList.reserve( list0.size() );
+        std::copy( list0.begin(), list0.end(), std::inserter( _M_idList, _M_idList.end() ) );
         list0.clear();
     }
-    _finalised = true;
+    _M_finalised = true;
 }
 
 
 //! Returns the liste size
-UInt BCBase::list_size() const
+UInt
+BCBase::list_size() const
 {
-    return _idList.size();
+    return _M_idList.size();
 }
 
 //! Output
-std::ostream& BCBase::showMe( bool verbose, std::ostream & out ) const
+std::ostream&
+BCBase::showMe( bool verbose, std::ostream & out ) const
 {
     out << "********************************" << std::endl;
-    out << "BC Name: " << _name << std::endl;
-    out << "Flag: " << _flag << std::endl;
-    out << "Type: " << _type << std::endl;
-    out << "Mode: " << _mode << std::endl;
-    out << "Number of components: " << _comp.size() << std::endl;
+    out << "BC Name: " << _M_name << std::endl;
+    out << "Flag: " << _M_flag << std::endl;
+    out << "Type: " << _M_type << std::endl;
+    out << "Mode: " << _M_mode << std::endl;
+    out << "Number of components: " << _M_comp.size() << std::endl;
     out << "List of components: ";
-    for ( Index_t i = 0; i < _comp.size(); ++i )
-        out << _comp[ i ] << " ";
+    for ( Index_t i = 0; i < _M_comp.size(); ++i )
+        out << _M_comp[ i ] << " ";
     out << std::endl;
-    out << "Number of stored ID's: " << _idList.size() << std::endl;
+    out << "Number of stored ID's: " << _M_idList.size() << std::endl;
 
-    if ( verbose && _finalised )
+    if ( verbose && _M_finalised )
     {
         unsigned int count( 0 ), lines( 10 );
         out << "IDs in list";
-        for ( std::vector<IdentifierBase*>::const_iterator i = _idList.begin(); i != _idList.end(); i++ )
+        for ( std::vector<boost::shared_ptr<IdentifierBase> >::const_iterator i = _M_idList.begin();
+              i != _M_idList.end(); i++ )
         {
             if ( count++ % lines == 0 )
             {
@@ -565,7 +445,7 @@ std::ostream& BCBase::showMe( bool verbose, std::ostream & out ) const
         }
         if ( dataVector() )
         {
-            _bcv->showMe( verbose, out );
+            _M_bcv->showMe( verbose, out );
         }
     }
 

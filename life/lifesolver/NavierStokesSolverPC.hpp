@@ -67,6 +67,7 @@ class NavierStokesSolverPC:
 public:
 
     typedef typename NavierStokesHandler<Mesh>::Function Function;
+    typedef Mesh mesh_type;
 
     //! Constructor
     /*!

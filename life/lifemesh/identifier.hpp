@@ -35,6 +35,8 @@
 
 #include <iostream>
 
+#include <boost/shared_ptr.hpp>
+
 #include "lifeV.hpp"
 #include "SimpleVect.hpp"
 
@@ -49,8 +51,11 @@ namespace LifeV
 
  Base class holding Dof identifiers for implementing BC
 
- \todo The data funcitions given by the user must have the following declaration
+ \todo The data functions given by the user must have the following declaration
+ \verbatim
  Real g(const Real& time, const Real& x, const Real& y, const Real& z, const ID& icomp)
+ \endverbatim
+
  We can use inheritance to hold specific boundary condition data. See, for instance,
  Mixte boundary conditions.
 */
@@ -64,8 +69,14 @@ public:
       \param i ussualy the id of the Dof, id of a boundary face, etc...
     */
     IdentifierBase( ID const & i ) : _id( i )
-    {}
-    ;
+        {
+            //nothing to be done here
+        }
+
+    virtual ~IdentifierBase()
+        {
+            //nothing to be done here
+        }
 
     //! Returns the ID
     const ID& id() const
@@ -101,6 +112,10 @@ public:
     bool operator() ( const IdentifierBase* i1, const IdentifierBase* i2 ) const
     {
         return ( i1->id() < i2->id() );
+    }
+    bool operator() ( boost::shared_ptr<IdentifierBase> const& i1, boost::shared_ptr<IdentifierBase> const& i2 ) const
+    {
+        return ( i1.get()->id() < i2.get()->id() );
     }
 };
 

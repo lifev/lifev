@@ -36,20 +36,23 @@ namespace LifeV
 // BCFunctionBase
 //
 BCFunctionBase::BCFunctionBase( const BCFunctionBase& bcf )
+    :
+    _M_g( bcf._M_g )
 {
-    _g = bcf._g;
 }
 
 //! Constructor for BCFuncion_Base from a user defined function
-BCFunctionBase::BCFunctionBase( Function g )
+BCFunctionBase::BCFunctionBase( function_type g )
+    :
+    _M_g( g )
 {
-    _g = g;
 }
 
 //! set the function after having built it.
-void BCFunctionBase::setFunction( Function g )
+void
+BCFunctionBase::setFunction( function_type g )
 {
-    _g = g;
+    _M_g = g;
 }
 
 //! Overloading function operator by calling attribut _g
@@ -57,39 +60,57 @@ Real
 BCFunctionBase::operator() ( const Real& t, const Real& x, const Real& y,
                              const Real& z, const ID& icomp ) const
 {
-    return _g( t, x, y, z, icomp );
+    return _M_g( t, x, y, z, icomp );
 }
+
+BCFunctionBase*
+createBCFunctionBase( BCFunctionBase const* __bc )
+{
+    return new BCFunctionBase( ( BCFunctionBase const& )*__bc );
+}
+// register BCFunctionBase in factory for cloning
+const bool __bcbase = FactoryCloneBC::instance().registerProduct( typeid(BCFunctionBase), &createBCFunctionBase );
 
 //
 // BCFunctionMixte
 //
 BCFunctionMixte::BCFunctionMixte( const BCFunctionMixte& bcf )
     :
-    BCFunctionBase( bcf._g )
+    BCFunctionBase( bcf ),
+    _M_coef( bcf._M_coef )
 {
-    _coef = bcf._coef;
 }
 
-BCFunctionMixte::BCFunctionMixte( Function g, Function coef )
+BCFunctionMixte::BCFunctionMixte( function_type g, function_type coef )
     :
-    BCFunctionBase( g )
+    BCFunctionBase( g ),
+    _M_coef( coef )
+
 {
-    _coef = coef;
 }
 
 //! set the functions after having built it.
-void BCFunctionMixte::setFunctions_Mixte( Function g, Function coef )
+void
+BCFunctionMixte::setFunctions_Mixte( function_type g, function_type coef )
 {
-    _g = g;
-    _coef = coef;
+    setFunction( g );
+    _M_coef = coef;
 }
 
-Real BCFunctionMixte::coef( const Real& t, const Real& x, const Real& y,
-                             const Real& z, const ID& icomp ) const
+Real
+BCFunctionMixte::coef( const Real& t, const Real& x, const Real& y,
+                       const Real& z, const ID& icomp ) const
 {
-    return _coef( t, x, y, z, icomp );
+    return _M_coef( t, x, y, z, icomp );
 }
 
+BCFunctionBase*
+createBCFunctionMixte( BCFunctionBase const* __bc )
+{
+    return new BCFunctionMixte( ( BCFunctionMixte const& )*__bc );
+}
+// register BCFunctionMixte in factory for cloning
+const bool __bcmixte = FactoryCloneBC::instance().registerProduct( typeid(BCFunctionMixte), &createBCFunctionMixte );
 
 }
 

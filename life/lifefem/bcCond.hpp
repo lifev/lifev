@@ -51,6 +51,8 @@
 #include <set>
 #include <map>
 
+#include <boost/shared_ptr.hpp>
+
 #include "lifeV.hpp"
 #include "identifier.hpp"
 #include "markers.hpp"
@@ -60,6 +62,7 @@
 
 #include "bcVector.hpp"
 #include "bcFunction.hpp"
+
 
 namespace LifeV
 {
@@ -291,7 +294,7 @@ public:
     */
     bool finalised() const;
 
-    //! Overloading function operator by calling the _bcf() user specified function
+    //! Overloading function operator by calling the _M_bcf() user specified function
     /*!
       \param t time
       \param x coordinate
@@ -330,7 +333,7 @@ public:
     //! Returns the value of the mixte coefficient (in BC Vector)
     Real mixteCoef() const;
 
-    //! Returns the value of the mixte coefficient vector (in BC Vector) 
+    //! Returns the value of the mixte coefficient vector (in BC Vector)
     Real MixteVec( const ID& iDof, const ID& iComp ) const;
 
     //! Returns a pointer to the i-th elements in the (finalised) list
@@ -360,39 +363,39 @@ public:
 
 private:
     //! name identifying a specific BC
-    std::string _name;
+    std::string _M_name;
 
     //! flag identifying a specific part of the mesh boundary
-    EntityFlag _flag;
+    EntityFlag _M_flag;
 
     //! the boundary condition type
-    BCType _type;
+    BCType _M_type;
 
     //! the boundary condition mode of application
-    BCMode _mode;
+    BCMode _M_mode;
 
     //! Pointer to a user defined functor
-    BCFunctionBase* _bcf;
+    boost::shared_ptr<BCFunctionBase> _M_bcf;
 
 
     //! Pointer to a user given data vector
-    BCVectorBase* _bcv;
+    BCVectorBase* _M_bcv;
 
     //! True is a data vector has been provided
-    bool _dataVector;
+    bool _M_dataVector;
 
     //! the list of involved in this BC
-    std::vector<ID> _comp;
+    std::vector<ID> _M_comp;
 
     //! set of pointers to identifiers allowing the user to get hold the DOF
     //! to which the BC applies
-    std::set<IdentifierBase*, identifierComp> list0;
+    std::set<boost::shared_ptr<IdentifierBase>, identifierComp> list0;
 
     //! container for id's when the list is finalised
-    std::vector<IdentifierBase*> _idList;
+    std::vector<boost::shared_ptr<IdentifierBase> > _M_idList;
 
     //! true, when idlist updated
-    bool _finalised;
+    bool _M_finalised;
 
     //! Transfert between list and vector containers
     void finalise();

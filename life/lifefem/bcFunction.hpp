@@ -29,6 +29,10 @@
 #ifndef __bcFunction_H
 #define __bcFunction_H 1
 
+#include <boost/function.hpp>
+
+#include <singleton.hpp>
+#include <factory.hpp>
 
 namespace LifeV
 {
@@ -51,7 +55,8 @@ class BCFunctionBase
 {
 public:
     //! Type for a generic user defined  function
-    typedef Real ( *Function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
+    //typedef Real ( *Function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
+    typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID& )> function_type;
 
     //! Default constructor
     /*!
@@ -65,7 +70,7 @@ public:
     /*!
       \param g the user defined function
     */
-    BCFunctionBase( Function g );
+    BCFunctionBase( function_type g );
 
     //! Constructing from a user defined functor
     /*!
@@ -73,11 +78,14 @@ public:
     */
     BCFunctionBase( const BCFunctionBase& bcf );
 
+    virtual ~BCFunctionBase()
+        {}
+
     //! Set the function
     /*!
       \param g the user defined function
     */
-    void setFunction( Function g );
+    void setFunction( function_type g );
 
     //! Overloading function operator by calling _g
     /*!
@@ -93,7 +101,7 @@ public:
 
 protected:
     //! user defined function
-    Function _g;
+    function_type _M_g;
 };
 
 
@@ -112,7 +120,7 @@ class BCFunctionMixte
 {
 public:
 
-    typedef BCFunctionBase::Function Function;
+    typedef BCFunctionBase::function_type function_type;
 
     //! Default constructor
     /*!
@@ -127,7 +135,7 @@ public:
       \param g user defined function
       \param coef user defined function
     */
-    BCFunctionMixte( Function g, Function coef );
+    BCFunctionMixte( function_type g, function_type coef );
 
     //! Constructing from a user defined functor
     /*!
@@ -141,7 +149,7 @@ public:
       \param g : the user defined function
       \param coef : user defined function
     */
-    void setFunctions_Mixte( Function g, Function coef );
+    void setFunctions_Mixte( function_type g, function_type coef );
 
 
     //! Method to call the auxiliary user defined function
@@ -157,8 +165,10 @@ public:
                const Real& z, const ID& i ) const;
 private:
     //! user defined function
-    Function _coef;
+    function_type _M_coef;
 };
+
+typedef LifeV::singleton< LifeV::factoryClone< BCFunctionBase > > FactoryCloneBC;
 
 }
 
