@@ -8,9 +8,9 @@
 
 o There seems to be a problem with test_masstransport on amd64 systems
   with g++-3.3 it crashes in the convDiffReactSolverPC::getcoord() for
-  no apparent reasons with the compilation flags -g -O2
+  no apparent reasons with the compilation flags -g -O2.
   With any other set of flags: "-g" "-g3 -O0" "-O2" it runs fine.
-  It could be that it ia a compiler bug or some very tricky bug triggered
+  It could be that it is a compiler bug or some very tricky bug triggered
   only with this specific set of flags(i.e -g -O2)
 
- -- Christophe Prud'homme <prudhomm@mit.edu>, Tue Aug 31 09:38:58 2004
+ -- Christophe Prud'homme <prudhomm@mit.edu>, Tue Aug 31 09:52:17 2004
