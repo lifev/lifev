@@ -193,7 +193,7 @@ public:
 
     //! Returns whether the last solve converged
     bool converged() const;
-    
+
     //! get the petsc preconditioner
     PC const& preconditioner() const;
 
@@ -289,7 +289,7 @@ void setTolerances( double = PETSC_DEFAULT,
     */
     void solve( array_type& __X,
                 array_type const& __B,
-                MatStructure __ptype = SAME_NONZERO_PATTERN );
+                MatStructure __ptype = SAME_PRECONDITIONER );
 
     /*
       solve the transpose problem \f$ A^T x = b  \f$
@@ -315,7 +315,7 @@ void setTolerances( double = PETSC_DEFAULT,
     */
     void solveTranspose( array_type& __X,
                          array_type const& __B,
-                         MatStructure __ptype = SAME_NONZERO_PATTERN );
+                         MatStructure __ptype = SAME_PRECONDITIONER );
 
 
     //@}
