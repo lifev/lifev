@@ -65,7 +65,7 @@
 \RequirePackage[english]{babel}
 \RequirePackage{tabularx}
  
-\RequirePackage[pdftex,colorlinks,pdfpagemode=None,pdfview=Fit,pdfcreator={LIFE}]{hyperref}
+\RequirePackage[pdftex,colorlinks]{hyperref}
 
 % Graphics rules
 %
@@ -89,6 +89,11 @@
 %% Index
 %%
 \newcommand{\ix}[1]{#1\index{#1}}
+\newcommand{\ixn}[1]{\index{#1}}
+\newcommand{\ixv}[1]{{\tt #1}\index{#1}}
+\newcommand{\ixs}[2]{#1\index{#1|see{#2}}\index{#2!#1}}
+\newcommand{\ixns}[2]{\index{#1|see{#2}}\index{#2!#1}}
+\newcommand{\ixvs}[2]{{\tt #1}\index{#1|see{#2}}\index{#2!#1}}
 \newcommand{\nindex}[1]{\textit{#1}\index[name]{#1}}
 
 

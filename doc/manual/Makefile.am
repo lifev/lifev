@@ -26,18 +26,18 @@
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .tex .pdf
 
 
-PDF		= docfe.pdf lifev-dev.pdf
+PDF		= lifev-dev.pdf
 
-lifev_dev_TEX	= lifev-dev.tex lifev-dev_generalities.tex lifev-dev_conventions.tex lifev-dev_overview.tex
+lifev_dev_TEX	= lifev-dev.tex lifev-dev_generalities.tex lifev-dev_conventions.tex lifev-dev_overview.tex lifev-dev_howto.tex
 
 all:$(PDF)
 
 .tex.pdf: 
-	-(TEXINPUTS=$$TEXINPUTS:$(srcdir):$(top_srcdir)/doc/tex//  pdflatex `basename $< .tex`)
-	-(BIBINPUTS=$$BIBINPUTS:$(srcdir):$(top_srcdir)/doc/tex//  bibtex `basename $< .tex`)
-	-(BIBINPUTS=$$BIBINPUTS:$(srcdir):$(top_srcdir)/doc/tex//  makeindex `basename $< .tex`)
-	-(TEXINPUTS=$$TEXINPUTS:$(srcdir):$(top_srcdir)/doc/tex//  pdflatex `basename $< .tex`)
-	-(TEXINPUTS=$$TEXINPUTS:$(srcdir):$(top_srcdir)/doc/tex//  pdflatex `basename $< .tex`)
+	-(TEXINPUTS=$(srcdir):$(top_srcdir)/doc/tex//:$$TEXINPUTS  pdflatex `basename $< .tex`)
+	-(BIBINPUTS=$$BIBINPUTS:$(srcdir):$(top_srcdir)/doc/tex//:$$BIBINPUTS  bibtex `basename $< .tex`)
+	-makeindex `basename $< .tex`)
+	-(TEXINPUTS=$(srcdir):$(top_srcdir)/doc/tex//:$$TEXINPUTS  pdflatex `basename $< .tex`)
+	-(TEXINPUTS=$(srcdir):$(top_srcdir)/doc/tex//:$$TEXINPUTS  pdflatex `basename $< .tex`)
 
 lifev-dev.pdf: $(lifev_dev_TEX)
 
@@ -48,10 +48,7 @@ BCCond.pdf BasElSha.pdf NSCode_mesh_types.pdf theFE.pdf BCHandler.pdf Fem_nodes.
 
 EXTRA_DIST = $(lifev_dev_TEX) $(IMAGES_SRC) life.bib 
 
-MOSTLYCLEANFILES	= docfe.log docfe.aux docfe.pdf docfe.blg docfe.bbl \
-			  jfg.log jfg.aux jfg.pdf jfg.blg jfg.bbl \
-			  lifev-dev.log lifev-dev.glo lifev-dev.idx lifev-dev.ind lifev-dev.ilg lifev-dev.aux lifev-dev.out \
+MOSTLYCLEANFILES	= lifev-dev.log lifev-dev.glo lifev-dev.idx lifev-dev.ind lifev-dev.ilg lifev-dev.aux lifev-dev.out \
                           lifev-dev.pdf lifev-dev.toc lifev-dev.lof lifev-dev.lot lifev-dev.blg lifev-dev.bbl \
-			  lifev-dev_generalities.aux lifev-dev_conventions.aux lifev-dev_overview.aux
+			  lifev-dev_generalities.aux lifev-dev_conventions.aux lifev-dev_overview.aux lifev-dev_howto.aux
 
-#info_TEXINFOS = lifev-install.texi

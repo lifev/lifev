@@ -44,19 +44,16 @@ production.
 To tackle this issue, a web site ala Sourceforge\footnote{\url{http://www.sourceforge.net}} \url{http://iacspc50.epfl.ch} has been set up. It requires that you open an account\footnote{\url{https://iacspc50.epfl.ch/account/register.php}} there and that you declare your intentions to work on \lifev through an email to the development mailing list of \lifev. Once you are part of the project, you have access to all the facilities: tracker, task manager, CVS repository, forums, document manager and a few other tools which are very useful if not absolutely essential to such a project.
 
 
-\subsection{Version Management}
-\label{sec:some-conventions}
-
 The software source, its documentation and all related documents (this
-one included) will be kept in a repository under revision control
-using CVS\ix{versioning!CVS}\ix{CVS|see{versioning}}\footnote{CVS
+one included) is kept in a repository under revision control
+using \ixs{CVS}{versioning}\footnote{CVS
   stands for Concurrent Version System}.
 
 CVS keywords like \verb!Id! and \verb!Log! should not be included in source files,
 they cause many unnecessary conflicts at update/commit time. Use 
 \verb!cvs log! to get the information given by \verb!Id! or \verb!Log!.
 
-\section{Compile LifeV}
+\section{Compiling LifeV}
 \label{compile-lifev} 
 
 In order to compile \lifev, certain requirements must be met in terms
@@ -67,15 +64,15 @@ of compilation tools, and libraries to link to.
 \subsubsection{Compilation Environment}
 
 \lifev depends on a number of tools at compilation time, they are part
-of the autotools\ix{autotools} from the GNU
+of the \ix{autotools} from the GNU
 project\footnote{\url{http://www.gnu.org}}. 
 
 \begin{itemize}
-\item \verb!libtool 1.5!\ix{autotools!libtool}\ix{libtool|see{autotools}}
-\item \verb!automake 1.7!\ix{autotools!automake}\ix{automake|see{autotools}}
-\item \verb!autoconf 2.5x x>=2!\ix{autotools!autoconf}\ix{autoconf|see{autotools}}
-\item \verb!g++-3.x x>=2!\ix{compilers!g++}\ix{g++|see{compilers}}
-\item \verb!aztec!\ix{algebra!aztec}\ix{aztec!see{algebra}}(which depends on \verb!blas! and \verb!lapack!)
+\item \verb!libtool 1.5!\ixns{libtool}{autotools}
+\item \verb!automake 1.7!\ixns{automake}{autotools}
+\item \verb!autoconf 2.5x x>=2!\ixns{autoconf}{autotools}
+\item \verb!g++-3.x x>=2!\ixns{g++}{compilers}
+\item \verb!aztec!\ixns{aztec}{algebra} (which depends on \verb!blas! and \verb!lapack!)
 \end{itemize} 
 
 \subsubsection{Runtime Environment}
@@ -90,8 +87,8 @@ project\footnote{\url{http://www.gnu.org}}.
 You need first to have an account on \url{http://iacspc50.epfl.ch} and
 be part of the \lifev project, see~\ref{sec:software-management}. 
 
-\noindent First, you need to checkout \lifev. \verb!CVS!\ix{CVS} has
-been configured to use \verb!ssh!\ix{ssh} and your \verb!ssh! keys to
+\noindent First, you need to checkout \lifev. \ixv{CVS} has
+been configured to use \ixv{ssh} and your \verb!ssh! keys to
 access the 
 
 \begin{verbatim}
@@ -104,8 +101,8 @@ cvs -z3 -d:ext:developername@cvs.iacspc50.epfl.ch:/cvsroot/lifev co lifev
 make -f Makefile.cvs
 \end{verbatim}
 
-\noindent Third, you have to execute the scr1ipt
-\verb!configure!\ix{autotools!configure}\ix{configure|see{autotools}},
+\noindent Third, you have to execute the script
+\ixvs{configure}{autotools}
 it will automatically check the availability of the needed components
 for \lifev compilation. You type: 
 
@@ -113,7 +110,7 @@ for \lifev compilation. You type:
 configure
 \end{verbatim}
 
-\noindent Finally, you just have to use \verb!make!\ix{make} to compile \lifev libraries. You type
+\noindent Finally, you just have to use \ixv{make} to compile \lifev libraries. You type
 \begin{verbatim}
 make 
 \end{verbatim}
