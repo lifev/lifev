@@ -21,18 +21,18 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 namespace LifeV
 {
 /*! \ingroup BareItemsBuilder
- \brief It creates Bare Face objects from three Point ID's
+ \brief It creates Bare Face objects from three Point id_type's
   \param  bool is false if orientation  has been changed.
-  \param i is a Point ID
-  \param j is a Point ID
-  \param k is a Point ID
- 
+  \param i is a Point id_type
+  \param j is a Point id_type
+  \param k is a Point id_type
+
   To be used for triangular faces.
   \pre i, j and k >0. i!=j!=k
- 
+
 */
 std::pair<BareFace, bool>
-makeBareFace( ID const i, ID const j, ID const k )
+makeBareFace( id_type const i, id_type const j, id_type const k )
 {
     if ( i < j && i < k )
     {
@@ -70,30 +70,30 @@ makeBareFace( ID const i, ID const j, ID const k )
 }
 
 /*! \ingroup BareItemsBuilder
- \brief It creates Bare Face objects from four Point ID's
+ \brief It creates Bare Face objects from four Point id_type's
   \param  bool is false if orientation  has been changed.
-  \param i is a Point ID
-  \param j is a Point ID
-  \param k is a Point ID
-  \param l is a Point ID
+  \param i is a Point id_type
+  \param j is a Point id_type
+  \param k is a Point id_type
+  \param l is a Point id_type
   \pre i, j, k and l >0. i!=j!=k!=l
- 
+
   To be used with Quad faces.
- 
+
 \remarks For quad faces the construction process is more complex. We start from
   the smallest vertex and we take the first three vertices in the
    sequence. We then procede as for the triangles.
 */
 
 std::pair<BareFace, bool>
-makeBareFace( ID const i, ID const j, ID const k, ID const l )
+makeBareFace( id_type const i, id_type const j, id_type const k, id_type const l )
 {
-    std::vector<ID> helper( 4 );
+    std::vector<id_type> helper( 4 );
     helper[ 0 ] = i;
     helper[ 1 ] = j;
     helper[ 2 ] = k;
     helper[ 3 ] = l;
-    std::vector<ID>::iterator vi = std::max_element( helper.begin(), helper.end() );
+    std::vector<id_type>::iterator vi = std::max_element( helper.begin(), helper.end() );
     std::rotate( helper.begin(), vi, helper.end() );
     return makeBareFace( helper[ 1 ], helper[ 2 ], helper[ 3 ] );
 }
