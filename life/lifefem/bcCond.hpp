@@ -343,8 +343,10 @@ class BC_Base{
   //! Returns a pointer  to the user defined STL functor
   BCFunction_Base* pointerToFunctor() const;
 
+  //! Returns a pointer to the BCVector 
+  BCVector_Base* pointerToBCVector() const; 
 
-  //! True is a data vector has been provided
+  //! True if a data vector has been provided
   bool dataVector() const;
 
 
@@ -699,8 +701,16 @@ void BC_Handler::bdUpdate(Mesh& mesh, CurrentBdFE& feBd, const Dof& dof) {
 	      }
 	      break;
             case Natural:
-	      if ( where->dataVector()  ) { // With data vector
-	      	where->addIdentifier( new Identifier_Natural(gDof) );
+	      if ( where->dataVector()  ) { // With data 
+		switch( where->pointerToBCVector()->type() ){
+		case 0: // if the BC is a function or a vector which values don't need to be integrated
+		  where->addIdentifier( new Identifier_Natural(gDof) );
+		  break;
+		case 1: // if the BC is a vector of values to be integrated
+		  break;
+		default:
+		  ERROR_MSG("This boundary condition type is not yet implemented");
+		}
 	      }
 	      break;
             case Mixte:
@@ -717,6 +727,7 @@ void BC_Handler::bdUpdate(Mesh& mesh, CurrentBdFE& feBd, const Dof& dof) {
 	}
       }
     }
+
 
 
     // ===================================================
@@ -762,7 +773,15 @@ void BC_Handler::bdUpdate(Mesh& mesh, CurrentBdFE& feBd, const Dof& dof) {
                 case Natural:
                     // Why kind of data ?
                     if ( where->dataVector() ) { // With data vector
+		      switch( where->pointerToBCVector()->type() ){
+		      case 0: // if the BC is a function or a vector which values don't need to be integrated
                         where->addIdentifier( new Identifier_Natural(gDof) );
+			break;
+		      case 1: // if the BC is a vector of values to be integrated
+			break;
+		      default:
+			ERROR_MSG("This boundary condition type is not yet implemented");
+		      }	
                     }
                     break;
                 case Mixte:
@@ -774,10 +793,12 @@ void BC_Handler::bdUpdate(Mesh& mesh, CurrentBdFE& feBd, const Dof& dof) {
                 default:
                     ERROR_MSG("This boundary condition type is not yet implemented");
             }
-        }
+          }
 	}
       }
     }
+
+
 
     // ===================================================
     // Face based Dof
@@ -817,11 +838,26 @@ void BC_Handler::bdUpdate(Mesh& mesh, CurrentBdFE& feBd, const Dof& dof) {
         // vincent please check again for your Mixte-FE it doesn't work for Q1
           if ( where->dataVector()  )
           { // With data vector
+	    switch( where->pointerToBCVector()->type() ){
+            case 0: // if the BC is a function or a vector which values don't need to be integrated 
               for (ID l=1; l<=nDofpF; ++l) {
                   lDof = nDofFE + nDofFV + l; // local Dof
                   gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + (iFaEl-1)*nDofpF + l); // global Dof
                   where->addIdentifier( new Identifier_Natural(gDof) );
               }
+	      break;
+	    case 1: // if the BC is a vector of values to be integrated
+              // Loop on number of Dof per face
+              for (ID l=1; l<=nDofpF; ++l) {
+                  lDof = nDofFE + nDofFV + l; // local Dof
+                  gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + (iFaEl-1)*nDofpF + l); // global Dof
+                  bdltg( lDof ) =  gDof; // local to global on this face
+              }
+              where->addIdentifier( new Identifier_Natural(ibF,bdltg) );
+	      break;
+	    default:
+	      ERROR_MSG("This BCVector type is not yet implemented");
+	    }  
           }
           else
           {

@@ -423,6 +423,11 @@ BCFunction_Base*  BC_Base::pointerToFunctor() const {
   return _bcf;
 }
 
+//! Returns a pointer  to the BCVector 
+BCVector_Base* BC_Base::pointerToBCVector() const {
+  return _bcv;
+}
+
 //! True is a data vector has been provided
 bool BC_Base::dataVector() const {
   return _dataVector;

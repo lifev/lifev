@@ -29,7 +29,6 @@
 */
 
 #include "bcVector.hpp"
-
 namespace LifeV
 {
 //
@@ -39,16 +38,20 @@ namespace LifeV
 
 //! Default Constructor (the user must call setBCVector(..))
 BCVector_Base::BCVector_Base():
-  _MixteCoef(0.0),_finalized(false)
+  _MixteCoef(0.0),_finalized(false),_type(0)
 {}
 
 //! Constructor
 BCVector_Base::BCVector_Base(Vector& vec, UInt nbTotalDof):
   _vec(&vec),_nbTotalDof(nbTotalDof),
-  _MixteCoef(0.0),_finalized(false)
+  _MixteCoef(0.0),_finalized(false),_type(0)
 {}
 
-
+//! Constructor
+BCVector_Base::BCVector_Base(Vector& vec, const UInt nbTotalDof, UInt type):
+  _vec(&vec),_nbTotalDof(nbTotalDof),
+  _MixteCoef(0.0),_finalized(false),_type(type)
+{}
 
 
 //! set the Mixte coefficient
@@ -60,6 +63,11 @@ void BCVector_Base::setMixteCoef( const Real& coef ){
 //! Return the value of the Mixte coefficient
 Real BCVector_Base::MixteCoef() const{
   return _MixteCoef;
+}
+
+//! Return the value of type
+UInt BCVector_Base::type() const {
+  return _type;
 }
 
 
@@ -78,6 +86,14 @@ BCVector::BCVector(Vector& vec, UInt nbTotalDof):
 {   _finalized = true;
 }
 
+//! Constructor
+BCVector::BCVector(Vector& vec, UInt const nbTotalDof,UInt type):
+  BCVector_Base(vec, nbTotalDof,type)
+{   _finalized = true; 
+}
+
+
+
 
 //!set the BC vector (after default construction)
 void BCVector::setvector(Vector& vec, UInt nbTotalDof)
@@ -95,13 +111,13 @@ Real BCVector::operator()(const ID& iDof, const ID& iComp) const {
   return (*_vec)( (iComp-1)* _nbTotalDof + iDof - 1 );
 }
 
-//! Assignment operator for BCVector_Interface
+//! Assignment operator for BCVector
 BCVector & BCVector::operator=(const BCVector& BCv) {
   _vec        = BCv._vec;
   _nbTotalDof = BCv._nbTotalDof;
   _MixteCoef  = BCv._MixteCoef;
   _finalized  = BCv._finalized;
-
+  _type       = BCv._type;
   return *this;
 }
 
@@ -159,7 +175,7 @@ BCVector_Interface & BCVector_Interface::operator=(const BCVector_Interface & BC
   _nbTotalDof = BCv._nbTotalDof;
   _MixteCoef  = BCv._MixteCoef;
   _finalized  = BCv._finalized;
-
+  _type       = BCv._type;
   return *this;
 }
 

@@ -39,9 +39,9 @@
 #include "vecUnknown.hpp"
 
 
+
 namespace LifeV
 {
-
 // ============ BCVecto_Base ================
 
 /*!
@@ -59,10 +59,21 @@ class BCVector_Base {
   /*!
     \param vec data vector holding data
     \param nbTotalDof number of total dof in the vector of data
-    \param dofIn dofInterfaceBase object holding the connections between the interface dofs of the
-           data vector and those of the associated to the boundary conditions
   */
   BCVector_Base(Vector& vec, const UInt nbTotalDof);
+
+
+  //! Constructor
+  /*!
+    \param vec data vector holding data
+    \param nbTotalDof number of total dof in the vector of data
+    \param type must be   
+             0:  boundary integration done (ex. residual of a variational problem)
+             1:  needs boundary integration of \lambda n \cdot  \boldphi_i (implemented only for the Natural BC AM 10/2004)
+             2:  needs boundary integration of \boldlambda \cdot n \phi_i (not yet implemented AM 10/2004)
+  */
+  BCVector_Base(Vector& vec, const UInt nbTotalDof, UInt type);
+
 
   //! Default Constructor (the user must call setBCVector(..))
   BCVector_Base();
@@ -83,6 +94,12 @@ class BCVector_Base {
    //! Return the value of the Mixte coefficient
    Real MixteCoef() const;
 
+   //! Return the type of the kind of information in BCVector    
+   /*!         0:  boundary integration done (ex. residual of a variational problem)
+               1:  needs boundary integration of \lambda n \cdot  \boldphi_i (implemented only for the Natural BC - AM 10/2004)
+               2:  needs boundary integration of \boldlambda \cdot n \phi_i (not yet implemented - AM 10/2004)
+   */
+   UInt type() const;
 
    //! Output
    virtual std::ostream &  showMe(bool verbose=false, std::ostream & out=std::cout) const =0;
@@ -102,6 +119,13 @@ class BCVector_Base {
 
    //! true when the BCVector is updated (and can be used)
    bool _finalized;
+
+  //! Type:  
+  /*!        0:  boundary integration done (ex. residual of a variational problem)
+             1:  needs boundary integration of \lambda n \cdot  \boldphi_i
+             2:  needs boundary integration of \boldlambda \cdot n \phi_i
+  */
+  UInt _type;
 
 };
 
@@ -128,6 +152,17 @@ class BCVector:
            data vector and those of the associated to the boundary conditions
   */
   BCVector( Vector& vec, UInt nbTotalDof);
+
+  //! Constructor
+  /*!
+    \param vec data vector holding data
+    \param nbTotalDof number of total dof in the vector of data
+    \param type must be   
+             0:  boundary integration done (ex. residual of a variational problem)
+             1:  needs boundary integration of \lambda n \cdot  \boldphi_i (not yet implemented - AM 10/2004)
+             2:  needs boundary integration of \boldlambda \cdot n \phi_i (implemented only for the Natural BC - AM 10/2004)
+  */
+  BCVector( Vector& vec, UInt const nbTotalDof, UInt type);
 
   //! Default Constructor (the user must call setvector(..))
   BCVector();
