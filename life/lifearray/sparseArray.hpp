@@ -111,7 +111,7 @@ public:
   void set_mat(UInt where, DataType loc_val);
   void set_mat(UInt row, UInt col, DataType loc_val);
   void set_mat_inc(UInt row, UInt col, DataType loc_val);
-  DataType get_value(UInt i, UInt j)
+  DataType& get_value(UInt i, UInt j) const
   { return _value[_Patt->locate_index(i,j).first];};
 
   void ShowMe();
@@ -185,9 +185,9 @@ public:
 
   void set_mat(UInt row, UInt col, DataType loc_val);
   void set_mat_inc(UInt row, UInt col, DataType loc_val);
-  DataType get_value(UInt i, UInt j)
+  DataType& get_value(UInt i, UInt j)
   { return _value[_Patt->locate_index(i,j).first];};
-  const DataType get_value(UInt i, UInt j) const
+  const DataType& get_value(UInt i, UInt j) const
   { return _value[_Patt->locate_index(i,j).first];};
 
   void ShowMe();
@@ -293,80 +293,154 @@ template<typename DataType>
 class MSRMatr
 {
 public:
-  MSRMatr(); // default constructor : NULL pattern
-  //
-  // Note that the constructors MUST be based on an existing pattern
-  //
-  MSRMatr(const MSRPatt &ex_pattern);
-  // Alain : constructor from CSR pattern
-  MSRMatr(const CSRPatt &ex_pattern);
-  MSRMatr(const MSRPatt* ex_pattern, const vector<DataType> &ex_value);
-  MSRMatr(const MSRMatr<DataType> &RightHandMSR);
-  // MSRMatr(const MSRPatt &ex_pattern,const CSRMatr<CSRPatt,DataType> &RightHandCSR);
-  /*! conversion of a CSRMatr into a MSRMatr.
-   *
-   *  To convert, do the following steps:
-   *  -# MSRPatt myMSRpattern(myCSRpattern);
-   *  -# MSRMatr myMSRMatrix(myMSRpattern);
-   *  -# CSRmat2MSRmat(myMSRmatrix, myCSRmatrix);
-   * 
-   *  Remarks:
-   * 
-   *  -# The pattern must be converted before calling CSRmat2MSRmat.
-   *  -# only implemented for DataType=double
-   */
-  friend void CSRmat2MSRmat(MSRMatr<double> &MSRmat,
-			    CSRMatr<CSRPatt,double> const &CSRmat);
+  //! default constructor. Caution: does not have a pattern.
+  MSRMatr();
 
+  // All other constructors MUST be based on an existing pattern
+
+  //! constructor from MSR pattern
+  MSRMatr(const MSRPatt &ex_pattern);
+
+  /*! constructor from CSR pattern
+   *  @author Alain Gauthier
+   */
+  MSRMatr(const CSRPatt &ex_pattern);
+  
+  /*! constructor with given value array
+   *  @param ex_pattern the MSR pattern
+   *  @param ex_value the value array
+   */
+  MSRMatr(const MSRPatt* ex_pattern, const vector<DataType> &ex_value);
+
+  //! copy constructor
+  MSRMatr(const MSRMatr<DataType> &RightHandMSR);
+  
+  /*! conversion copy constructor.
+   *  requires an already converted pattern
+   *  @param ex_pattern the converted pattern
+   *  @param RightHandCSR the CSRMatrix to be copied
+   */
+  MSRMatr(const MSRPatt &ex_pattern,
+          const CSRMatr<CSRPatt, DataType> &RightHandCSR);
+
+  //! returns a const * to the pattern
   const MSRPatt * Patt() const {return _Patt;};
 
+  //! returns the value vector read only
   const vector<DataType> & value() const {return _value;};
+
+  //! returns the value vector writable
   vector<DataType> & value()  {return _value;};
 
-  DataType * giveRaw_value() {return &(_value.front());} // give the value vector in Raw format (suitable for C)
-  DataType const * giveRaw_value() const {return &(_value.front());} // give the value vector in Raw format (suitable for C)
+  //! give the value vector writable in raw format (suitable for C)
+  DataType * giveRaw_value() {return &(_value.front());}
+
+  //! give the value vector read only in raw format (suitable for C)
+  DataType const * giveRaw_value() const {return &(_value.front());}
 
   //! determine the lumped matrix for P1
   vector<DataType> MassDiagP1() const;
+
   //! build the inverse of a diagonal matrix and multiply it by another matrix
   friend void MultInvDiag(const vector<Real> &Diag,
-			  const MSRMatr<Real> &Mat, MSRMatr<Real> &ans);
+                          const MSRMatr<Real> &Mat, MSRMatr<Real> &ans);
 
   //! give the diagonal of an MSR matrix
   vector<DataType> giveDiag() const;
 
-  MSRMatr & operator= (const MSRMatr<DataType> &RhMsr);// Warning: the two matrices will point to the same pattern
+  //! assignment operator.
+  //! Warning: the two matrices will point to the same pattern
+  MSRMatr & operator= (const MSRMatr<DataType> &RhMsr);
+  
+  //! assignment operator for MSR <- CSR.
+  //! the two matrices need to have the same dimension and sparsity pattern
+  MSRMatr & operator= (const CSRMatr<CSRPatt, DataType> &RhCsr);
+  
+  /*! set single value by position in value vector
+   *  @param where position in value vector
+   *  @param loc_val new value
+   */
   void set_mat(UInt where, DataType loc_val);
+
+  /*! set single value by (row,col)-address
+   *  @param row row number
+   *  @param col column number
+   *  @param loc_val new value
+   */
   void set_mat(UInt row, UInt col, DataType loc_val);
+
+  //! add \c loc_val to entry (row,col), useful for assembly
   void set_mat_inc(UInt row, UInt col, DataType loc_val);
-  DataType get_value(UInt i, UInt j)
+
+  //! return matrix entry (i,j)
+  DataType& get_value(UInt i, UInt j)
   { return _value[_Patt->locate_index(i,j).first];};
-  const DataType get_value(UInt i, UInt j) const
+
+  //! return matrix entry (i,j)
+  const DataType& get_value(UInt i, UInt j) const
   { return _value[_Patt->locate_index(i,j).first];};
+
+  //! print matrix to standard output
   void ShowMe();
+
+  //! write matrix in sparse matlab format and spy
   void spy(string  const &filename);
+    
+  //! set entry (r,r) to coeff and rest of row r to zero
   void diagonalize_row ( UInt const r, DataType const coeff);
-  void diagonalize ( UInt const r, DataType const coeff, vector<DataType> &b, DataType datum);
-  //Version for the type Vector
-  void diagonalize( UInt const r, DataType const coeff, Vector &b, DataType datum);
-  vector<DataType>  operator* (const vector<DataType> &v) const; //Matrix-vector product
-  //Matrix-vector product for the class Vector (useful for IML++)
+
+  /*! apply constraint on row r
+   *  @param r row number
+   *  @param coeff value to set entry (r,r) at
+   *  @param b right hand side vector of the system to be adapted accordingly
+   *  @param datum value to constrain entry r of the solution at
+   */
+  void diagonalize (UInt const r, DataType const coeff, vector<DataType> &b,
+                    DataType datum);
+  /*! apply constraint on row r
+   *  @param r row number
+   *  @param coeff value to set entry (r,r) at
+   *  @param b right hand side Vector of the system to be adapted accordingly
+   *  @param datum value to constrain entry r of the solution at
+   */
+  void diagonalize(UInt const r, DataType const coeff, Vector &b,
+                   DataType datum);
+    
+  //! matrix vector product
+  vector<DataType>  operator* (const vector<DataType> &v) const;
+
+  //! Matrix-vector product for the class Vector (useful for IML++)
   Vector operator*(const Vector &v) const;
+
   //! Version for C pointer vector. BEWARE: no check on bounds done !
   template <typename DataT>
   friend void operMatVec(DataT * const mv,
-			 const MSRMatr<DataT> &Mat,
-			 const DataT *v);
-  //necessary for IML++ library: transpose-matrix by vector product
+                         const MSRMatr<DataT> &Mat,
+                         const DataT *v);
+
+  //! transpose-matrix by vector product. necessary for IML++ library
   Vector trans_mult(const Vector &v) const;
 
+  //! scaling operator
   MSRMatr operator*(const DataType num);
-  MSRMatr & operator*=(const DataType num); //Real*Matrix product
-  MSRMatr & flop(const DataType num, MSRMatr<DataType> & M, MSRMatr<DataType> & A); //Matrix=num*M+A
-  MSRMatr & flop(const DataType num, MSRMatr<DataType> & M); //Matrix=num*M+Matrix
+
+  //! in place scaling operator
+  MSRMatr & operator*=(const DataType num);
+
+  /*! set this matrix to num*M + A of two matrices scaling plus addition
+   *  @return num*M + A
+   */
+  MSRMatr & flop(const DataType num, MSRMatr<DataType> & M,
+                 MSRMatr<DataType> & A);
+
+  /*! add num*M to this matrix
+   *  @return new value of this matrix
+   */
+  MSRMatr & flop(const DataType num, MSRMatr<DataType> & M);
+
   //    MSRMatr & operator* (const DataType num,const MSRMatr<DataType> &M); //Real*Matrix product
 
-  //! set to zero the matrix;
+  //! set the matrix to zero
   void zeros();
 
 private:
@@ -439,11 +513,11 @@ public:
   //! Adds loc_val to the matrix element (row,col) of block (ib,jb).
   void set_mat_inc(UInt ib, UInt jb, UInt row, UInt col, DataType loc_val);
   //! Returns the matrix element (i,j) value.
-  DataType get_value(UInt i, UInt j);
-  const DataType get_value(UInt i, UInt j) const;
+  DataType& get_value(UInt i, UInt j);
+  const DataType& get_value(UInt i, UInt j) const;
   //! Returns the matrix element (i,j) value of block (ib,jb).
-  DataType get_value(UInt ib, UInt jb, UInt i, UInt j);
-  const DataType get_value(UInt ib, UInt jb, UInt i, UInt j) const;
+  DataType& get_value(UInt ib, UInt jb, UInt i, UInt j);
+  const DataType& get_value(UInt ib, UInt jb, UInt i, UInt j) const;
   //! Shows the matrix (only the pattern here).
   void ShowMe()
   {return _Patt->showMe(true);}
@@ -551,10 +625,10 @@ class MixedMatr<BRows, BCols, MSRPatt, double>
   //! Adds loc_val to the matrix element (row,col) of block (ib,jb).
   void set_mat_inc(UInt ib, UInt jb, UInt row, UInt col, double loc_val);
   //! Returns the matrix element (i,j) value.
-  double get_value(UInt i, UInt j);
+  double& get_value(UInt i, UInt j);
   const double get_value(UInt i, UInt j) const;
   //! Returns the matrix element (i,j) value of block (ib,jb).
-  double get_value(UInt ib, UInt jb, UInt i, UInt j);
+  double& get_value(UInt ib, UInt jb, UInt i, UInt j);
   const double get_value(UInt ib, UInt jb, UInt i, UInt j) const;
   //! Shows the matrix (only the pattern here).
   void ShowMe()
@@ -661,10 +735,10 @@ class MixedMatr<BRows, BCols, CSRPatt, double>
   //! Adds loc_val to the matrix element (row,col) of block (ib,jb).
   void set_mat_inc(UInt ib, UInt jb, UInt row, UInt col, double loc_val);
   //! Returns the matrix element (i,j) value.
-  double get_value(UInt i, UInt j);
+  double& get_value(UInt i, UInt j);
   const double get_value(UInt i, UInt j) const;
   //! Returns the matrix element (i,j) value of block (ib,jb).
-  double get_value(UInt ib, UInt jb, UInt i, UInt j);
+  double& get_value(UInt ib, UInt jb, UInt i, UInt j);
   const double get_value(UInt ib, UInt jb, UInt i, UInt j) const;
   //! Shows the matrix (only the pattern here).
   void ShowMe()
@@ -1614,10 +1688,48 @@ MSRMatr<DataType>::operator= (const MSRMatr<DataType> &RhMsr)
   return *this;
 };
 
-// conversion CSR->MSR, the pattern must have been already converted
-// therefore no check is done on the matrix dimensions !
-void CSRmat2MSRmat(MSRMatr<double> &MSRmat,
-		   CSRMatr<CSRPatt,double> const &CSRmat);
+//! convert CSR matrix to MSR matrix. provided for backward compatibility only
+template<class DataType>
+void CSRmat2MSRmat(MSRMatr<DataType> &MSRmat,
+                   CSRMatr<CSRPatt, DataType> const &CSRmat) {
+    MSRmat = CSRmat;
+}
+
+template<typename DataType>
+MSRMatr<DataType>::MSRMatr(const MSRPatt &ex_pattern,
+        const CSRMatr<CSRPatt,DataType> &RightHandCSR) {
+    _Patt = &ex_pattern;
+    _value.resize(ex_pattern.nNz()+1);
+    *this = RightHandCSR;
+}
+
+template<typename DataType>
+MSRMatr<DataType>& MSRMatr<DataType>::
+operator= (const CSRMatr<CSRPatt, DataType> &CSRmat) {
+    Container::const_iterator bindx=Patt()->give_bindx().begin();
+    Container::const_iterator ia=CSRmat.Patt()->give_ia().begin();
+    Container::const_iterator ja=CSRmat.Patt()->give_ja().begin();
+    vector<double>::const_iterator valueCSR=CSRmat.value().begin();
+
+    // copy of CSR_value into MSR_value
+    UInt nrows = _Patt->nRows();
+
+    for (UInt i=0; i<nrows; ++i) {
+        UInt j_msr = *(bindx + i - OFFSET);
+        UInt ifirst_csr = *(ia + i - OFFSET);
+        UInt ilast_csr = *(ia + i+1 - OFFSET);
+
+        for (UInt i_csr=ifirst_csr; i_csr<ilast_csr; i_csr++) {
+            UInt j_csr = *(ja + i_csr);
+            if (i==j_csr) {
+                _value[i] = *(valueCSR + i_csr);
+            } else {
+                _value[j_msr++] = *(valueCSR + i_csr);
+            }
+        }
+    }
+    return *this;
+}
 
 template<class DataType>
 vector<DataType>
@@ -2262,7 +2374,7 @@ set_mat_inc(UInt ib, UInt jb, UInt row, UInt col, DataType loc_val)
 
 // Returns the matrix element (i,j) value.
 template<UInt BRows, UInt BCols, typename PatternType, typename DataType>
-DataType
+DataType&
 MixedMatr<BRows, BCols, PatternType, DataType>::
 get_value(UInt i, UInt j)
 {
@@ -2273,7 +2385,7 @@ get_value(UInt i, UInt j)
 }
 // const qualifyer version
 template<UInt BRows, UInt BCols, typename PatternType, typename DataType>
-const DataType
+const DataType&
 MixedMatr<BRows, BCols, PatternType, DataType>::
 get_value(UInt i, UInt j) const
 {
@@ -2285,7 +2397,7 @@ get_value(UInt i, UInt j) const
 
 // Returns the matrix element (i,j) value of block (ib,jb).
 template<UInt BRows, UInt BCols, typename PatternType, typename DataType>
-DataType
+DataType&
 MixedMatr<BRows, BCols, PatternType, DataType>::
 get_value(UInt ib, UInt jb, UInt i, UInt j)
 {
@@ -2296,7 +2408,7 @@ get_value(UInt ib, UInt jb, UInt i, UInt j)
 }
 // const qualifyer version
 template<UInt BRows, UInt BCols, typename PatternType, typename DataType>
-const DataType
+const DataType&
 MixedMatr<BRows, BCols, PatternType, DataType>::
 get_value(UInt ib, UInt jb, UInt i, UInt j) const
 {
@@ -2840,7 +2952,7 @@ set_mat_inc(UInt ib, UInt jb, UInt row, UInt col, double loc_val)
 
 // Returns the matrix element (i,j) value.
 template<UInt BRows, UInt BCols>
-double
+double&
 MixedMatr<BRows, BCols, MSRPatt, double>::
 get_value(UInt i, UInt j)
 {
@@ -2863,7 +2975,7 @@ get_value(UInt i, UInt j) const
 
 // Returns the matrix element (i,j) value of block (ib,jb).
 template<UInt BRows, UInt BCols>
-double
+double&
 MixedMatr<BRows, BCols, MSRPatt, double>::
 get_value(UInt ib, UInt jb, UInt i, UInt j)
 {
@@ -3425,7 +3537,7 @@ set_mat_inc(UInt ib, UInt jb, UInt row, UInt col, double loc_val)
 
 // Returns the matrix element (i,j) value.
 template<UInt BRows, UInt BCols>
-double
+double&
 MixedMatr<BRows, BCols, CSRPatt, double>::
 get_value(UInt i, UInt j)
 {
@@ -3448,7 +3560,7 @@ get_value(UInt i, UInt j) const
 
 // Returns the matrix element (i,j) value of block (ib,jb).
 template<UInt BRows, UInt BCols>
-double
+double&
 MixedMatr<BRows, BCols, CSRPatt, double>::
 get_value(UInt ib, UInt jb, UInt i, UInt j)
 {

@@ -401,36 +401,6 @@ void rowUnify(CSRMatr<CSRPatt,double> &ans, const CSRMatr<CSRPatt,double> &Mat1,
   ans._value = val;
 }
 
-// conversion CSR->MSR, the pattern must have been already converted
-// therefore no check is done on the matrix dimensions !
-void CSRmat2MSRmat(MSRMatr<double> &MSRmat,
-		   CSRMatr<CSRPatt,double> const &CSRmat)
-{
-  Container::const_iterator bindx=MSRmat.Patt()->give_bindx().begin();
-  Container::const_iterator ia=CSRmat.Patt()->give_ia().begin();
-  Container::const_iterator ja=CSRmat.Patt()->give_ja().begin();
-  vector<double>::const_iterator valueCSR=CSRmat.value().begin();
-
-  // copy of CSR_value into MSR_value
-  UInt nrows = MSRmat._Patt->nRows();
-
-  for (UInt i=0; i< nrows; ++i)
-    {
-      UInt j_msr = *(bindx + i -OFFSET);
-      UInt ifirst_csr = *(ia + i -OFFSET);
-      UInt ilast_csr = *(ia + i+1 -OFFSET);
-
-      for (UInt i_csr= ifirst_csr; i_csr < ilast_csr; i_csr++)
-	{
-	  UInt j_csr = *(ja + i_csr);
-	  if (i==j_csr)
-	    MSRmat._value[i] = *(valueCSR + i_csr);
-	  else
-	    MSRmat._value[j_msr++] = *(valueCSR + i_csr);
-	}
-    }
-}
-
 //Inversion of a diagonal matrix and multiplication with a sparse matrix
 //Miguel: 4/2003, the last version was too expensive.
 void MultInvDiag(const vector<Real> &Diag, const MSRMatr<Real> &Mat, MSRMatr<Real> &ans)
