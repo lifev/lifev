@@ -15,18 +15,32 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
-/*
+*/
+/*!
   \file lifeV.hpp
- 
+
   LifeV main header file
- 
+
   \author Luca Formaggia
   \author Jean-Fred Gerbeau.
- 
+  \author Christophe Prud'homme
+
   #Purposes Defines typedefs and macros common to ALL lifeV.h software
   it must be includes in all translation units.
 */
+
+#include <boost/mpl/multiplies.hpp>
+#include <boost/mpl/list.hpp>
+#include <boost/mpl/lower_bound.hpp>
+#include <boost/mpl/transform_view.hpp>
+#include <boost/mpl/sizeof.hpp>
+#include <boost/mpl/int.hpp>
+#include <boost/mpl/identity.hpp>
+#include <boost/mpl/base.hpp>
+#include <boost/mpl/eval_if.hpp>
+#include <boost/mpl/deref.hpp>
+#include <boost/mpl/begin_end.hpp>
+
 # ifndef __cplusplus
 # error You must use C++ for LifeV
 # endif
@@ -41,6 +55,19 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 # include <numeric>
 # include <iosfwd>
 # include <string>
+
+/*!  \page macros_page LifeV Macros
+  \section macros Macros
+
+  \subsection assertions Assertions
+
+  LifeV defines a few macros to test pre and post conditions. To
+  enable them all you define the preprocessing variable \c
+  LIFEV_CHECK_ALL . This is done easily by configuring LifeV with the
+  flag \c --enable-debug which will include the option
+  \c -DLIFEV_CHECK_ALL
+
+*/
 
 #define ABORT() std::abort()
 
@@ -73,9 +100,7 @@ ERROR_MSG(A <<std::endl <<  "Invariant Error " << "in file " << __FILE__  \
 ERROR_MSG("Array bound error " << "in file " << __FILE__  \
    << " line " << __LINE__) ;
 
-//
-// switch all debugging on if LIFEV_CHECK_ALL is set
-//
+
 #ifdef  LIFEV_CHECK_ALL
 #define CHECK_KN
 #define TEST_PRE
@@ -131,22 +156,138 @@ ERROR_MSG("Array bound error " << "in file " << __FILE__  \
 #endif
 namespace LifeV
 {
-// Typedefs
 
-//! Real data
+
+/*!  \page types_page LifeV Types
+  \section types Types
+  \subsection real Real Numbers
+
+  LifeV defines a number of types that are used in the library.
+
+  -# \c Real 64 bits real number type
+
+  \section ints Integers
+
+  LifeV defines a number of integer type that have controlled bit
+  size. These types are constructed automatically by LifeV in order to have
+  platform independant integer types.
+
+  Here is the list of signed integers:
+
+  -# \c int1_type  a 1 bit signed integer
+  -# \c int8_type a 8 bit signed integer
+  -# \c int16_type a 16 bit signed integer
+  -# \c int32_type a 32 bit signed integer
+  -# \c int64_type a 64 bit signed integer
+
+  Here is the list of unsigned integers:
+
+  -# \c uint1_type a 1 bit unsigned integer
+  -# \c uint8_type a 8 bit unsigned integer
+  -# \c uint16_type a 16 bit unsigned integer
+  -# \c uint32_type a 32 bit unsigned integer
+  -# \c uint64_type a 64 bit unsigned integer
+
+  LifeV defines a number of useful aliases for integers
+  -# \c Int an alias to int16_type
+  -# \c UInt an alias to uint16_type used for adressing
+  -# \c USInt an alias to uint8_type
+  -# \c id_type an alias to uint8_type used to identify local numbering or components
+  -# \c dim_type an alias to uint8_type used to identify dimensions
+  -# \c size_type an alias to size_t used as indices for arrays, vectors or matrices
+
+*/
+
 typedef double Real;
+
+namespace mpl = boost::mpl;
+
+
+/*! \namespace detail
+  \internal
+*/
+namespace detail
+{
+template<int bit_size>
+class no_int
+{
+private:
+    no_int();
+};
+
+template< int bit_size >
+struct integer
+{
+    typedef mpl::list<signed char,signed short, signed int, signed long int, signed long long> builtins_;
+    typedef typename mpl::base< typename mpl::lower_bound<
+          mpl::transform_view< builtins_, mpl::multiplies< mpl::sizeof_<mpl::placeholders::_1>, mpl::int_<8> >
+            >
+        , mpl::integral_c<size_t, bit_size>
+        >::type >::type iter_;
+
+    typedef typename mpl::end<builtins_>::type last_;
+    typedef typename mpl::eval_if<
+          boost::is_same<iter_,last_>
+        , mpl::identity< no_int<bit_size> >
+        , mpl::deref<iter_>
+        >::type type;
+};
+}
+
+typedef detail::integer<1>::type  int1_type;
+
+typedef detail::integer<8>::type  int8_type;
+typedef detail::integer<16>::type int16_type;
+typedef detail::integer<32>::type int32_type;
+typedef detail::integer<64>::type int64_type;
+
+/*! \namespace detail
+  \internal
+*/
+namespace detail
+{
+template< int bit_size >
+struct unsigned_integer
+{
+    typedef mpl::list<unsigned char,unsigned short,unsigned int,unsigned long int, unsigned long long> builtins_;
+    typedef typename mpl::base< typename mpl::lower_bound<
+          mpl::transform_view< builtins_
+            , mpl::multiplies< mpl::sizeof_<mpl::placeholders::_1>, mpl::int_<8> >
+            >
+        , mpl::integral_c<size_t, bit_size>
+        >::type >::type iter_;
+
+    typedef typename mpl::end<builtins_>::type last_;
+    typedef typename mpl::eval_if<
+          boost::is_same<iter_,last_>
+        , mpl::identity< no_int<bit_size> >
+        , mpl::deref<iter_>
+        >::type type;
+};
+}
+typedef detail::unsigned_integer<1>::type  uint1_type;
+typedef detail::unsigned_integer<8>::type  uint8_type;
+typedef detail::unsigned_integer<16>::type uint16_type;
+typedef detail::unsigned_integer<32>::type uint32_type;
+typedef detail::unsigned_integer<64>::type uint64_type;
+
 //! Generic integer data
-typedef int Int;
+typedef int16_type Int;
 //! generic unsigned integer (used mainly for addressing)
-typedef uint UInt;
-typedef unsigned short int USInt;
+typedef uint16_type UInt;
+typedef uint8_type USInt;
 
 //! IDs (which starts ALWAYS from 1)
-typedef UInt ID;
-//! specialised version of ID for Degree of Freedom ID
-typedef ID ID_Dof;
+typedef uint16_type id_type;
+typedef id_type ID;
+
+//! dimension type
+typedef uint8_type dim_type;
+
 //! Indices (starting from 0)
-typedef UInt Index_t;
+typedef size_t size_type;
+
+
 
 // typedef for indices
 
