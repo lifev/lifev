@@ -1,5 +1,5 @@
 New in 0.2.90:
-* use AutoTest (from autoconf) as testing framework
+* a new unit testing framework : we use AutoTest(from autoconf) 
   ported all tests to this framework
   ported all tests to GetPot
 
