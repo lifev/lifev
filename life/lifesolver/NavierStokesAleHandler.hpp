@@ -29,7 +29,7 @@
 
 #ifndef _NAVIERSTOKESALEHANDLER_H_
 #define _NAVIERSTOKESALEHANDLER_H_
-#include "NavierStokesHandler_miguel.hpp"
+#include "NavierStokesHandler.hpp"
 #include "meshMotion.hpp"
 
 namespace LifeV
@@ -78,9 +78,9 @@ public HarmonicExtension {
   PhysVectUnknown<Vector>& dwInterpolated();
 
   //! Updating mesh
-  void updateMesh();
+  void updateMesh(const Real& time);
 
-  void updateMeshTransp();
+  void updateMeshTransp(const Real& time);
 
   void updateDispVelo();
 
@@ -138,9 +138,9 @@ NavierStokesAleHandler(const GetPot& data_file,  const RefFE& refFE_u,
 
 // Mesh and grid velocity update
 template <typename Mesh> void NavierStokesAleHandler<Mesh>::
-updateMesh() {
+updateMesh(const Real& time) {
   // Updating mesh displacement and velocity
-  updateExtension(_mesh,_time);
+  updateExtension(_mesh,time);
 
   Real dti = 1.0/_dt;
   _w=( _disp-_dispOld )*dti;
@@ -152,9 +152,9 @@ updateMesh() {
 
 // Mesh and grid velocity update
 template <typename Mesh> void NavierStokesAleHandler<Mesh>::
-updateMeshTransp() {
+updateMeshTransp(const Real& time) {
 
-  updateExtensionTransp(_mesh,_time);
+  updateExtensionTransp(_mesh,time);
   Real dti = 1.0/_dt;
   _w=( _disp-_dispOld )*dti;
   _interpMeshVelocity();
