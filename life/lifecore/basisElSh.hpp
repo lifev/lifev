@@ -15,48 +15,47 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 //! \file basisElSh.h
-/*! Contains the basic element shapes, to be used by Geometric and Finite
-  Elements
- 
-  $Header: /cvsroot/lifev/lifev/life/lifecore/Attic/basisElSh.hpp,v 1.7 2004-11-14 18:11:45 mm0 Exp $
- 
- \version 0.0 Experimental   19/8/99. Luca Formaggia
- 
+/*!
+  \brief Contains the basic element shapes, to be used by Geometric
+  and Finite Elements
+
+  \author Luca Formaggia
+
  These classes provides the most basic definitions for the geometric
  elements. The variables names are self-explanatory.
- 
+
  The Basis Geometric Shapes (<tt>GeoShape</tt>) are derived from a set of
  class called Basis Reference Shapes (<tt>BasRefSha</tt>), which contains
  the very basic information about the reference element geometries
  supported by the library (reference element geometry=geometry of the
  finite element in the reference space.)
- 
+
  A Basis Geometric Shape contains (when relevant) the following methods
- 
-  static ID eToP(ID const _localEdge, ID const _point);
- 
- 
-  static ID fToP(ID const _localFace, ID const _point);
- 
-  which returns the local ID of a point on a face of the GeoShape
- 
-  static pair<ID,bool> fToE(ID const _localFace, ID const _edge);
- 
-  which returns the local ID corresponding and edge on the face _localface.
+
+  static id_type eToP(id_type const _localEdge, id_type const _point);
+
+
+  static id_type fToP(id_type const _localFace, id_type const _point);
+
+  which returns the local id_type of a point on a face of the GeoShape
+
+  static pair<id_type,bool> fToE(id_type const _localFace, id_type const _edge);
+
+  which returns the local id_type corresponding and edge on the face _localface.
   It returna also if the orientation of the edge on the face is consistent
   with that of the same edge on the element
- 
- 
- \note The methods edge to point-ID (EtoP) and Face to point-ID (FtoP)
+
+
+ \note The methods edge to point-id_type (EtoP) and Face to point-id_type (FtoP)
  return the local id number of points on faces and edges (when relevant)
  We follow the convention of indicating THE VERTICES FIRST!  */
 
 
 #ifndef _BASISELSH_HH_
 #define _BASISELSH_HH_
-#if defined(__Linux) 
+#if defined(__Linux)
 //# include <pair.h>
 # include <utility>
 #elif defined(__OSF1)
@@ -74,7 +73,7 @@ template <typename GeoShape>
 class reversePoint
 {
 public:
-    INLINE ID operate( ID const & point );
+    INLINE id_type operate( id_type const & point );
 };
 
 
@@ -104,7 +103,7 @@ public:
     static const ReferenceGeometry Geometry = EDGE;
     static const UInt nDim = 1;
     static const UInt numFaces = 0;
-    static const UInt numEdges = 1;	
+    static const UInt numEdges = 1;
     static const UInt numVertices = 2;
 };
 
@@ -116,7 +115,7 @@ public:
     static const ReferenceGeometry Geometry = FACE;
     static const UInt nDim = 2;
     static const UInt numVertices = 3;
-    static const UInt numFaces = 1;	
+    static const UInt numFaces = 1;
     static const UInt numEdges = numVertices;
 };
 
@@ -127,7 +126,7 @@ public:
     static const ReferenceShapes Shape = QUAD;
     static const ReferenceGeometry Geometry = FACE;
     static const UInt nDim = 2;
-    static const UInt numFaces = 1;	
+    static const UInt numFaces = 1;
     static const UInt numVertices = 4;
     static const UInt numEdges = numVertices;
 };
@@ -157,7 +156,7 @@ public:
 };
 /*
  Now the Basis Geometric Shapes, derived from the Reference Shapes
-*/ 
+*/
 //! \defgroup GeoShape Basis Geometric Shapes
 /// Forward Declarations.
 class GeoPoint;
@@ -217,7 +216,7 @@ public:
     static const UInt nbPtsPerVertex = 1;
     static const UInt nbPtsPerEdge = 0;
     static const UInt nbPtsPerFace = 0;
-    static ID eToP( ID const _localEdge, ID const _point );
+    static id_type eToP( id_type const _localEdge, id_type const _point );
 };
 
 //! \ingroup GeoShape
@@ -231,7 +230,7 @@ public:
     static const UInt nbPtsPerVertex = 1;
     static const UInt nbPtsPerEdge = 1;
     static const UInt nbPtsPerFace = 0;
-    static ID eToP( ID const _localEdge, ID const _point );
+    static id_type eToP( id_type const _localEdge, id_type const _point );
 };
 
 //! \ingroup GeoShape
@@ -245,7 +244,7 @@ public:
     static const UInt nbPtsPerVertex = 1;
     static const UInt nbPtsPerEdge = 0;
     static const UInt nbPtsPerFace = 0;
-    static ID eToP( ID const _localEdge, ID const _point );
+    static id_type eToP( id_type const _localEdge, id_type const _point );
 };
 
 //! \ingroup GeoShape
@@ -259,7 +258,7 @@ public:
     static const UInt nbPtsPerVertex = 1;
     static const UInt nbPtsPerEdge = 1;
     static const UInt nbPtsPerFace = 1;
-    static ID eToP( ID const _localEdge, ID const _point );
+    static id_type eToP( id_type const _localEdge, id_type const _point );
 };
 
 //! \ingroup GeoShape
@@ -274,9 +273,9 @@ public:
     static const UInt nbPtsPerEdge = 0;
     static const UInt nbPtsPerFace = 0;
     static const UInt nbPtsPerVolume = 0;
-    static ID eToP( ID const _localEdge, ID const _point );
-    static ID fToP( ID const _localFace, ID const _point );
-    static pair<ID, bool> fToE( ID const _localFace, ID const _edge );
+    static id_type eToP( id_type const _localEdge, id_type const _point );
+    static id_type fToP( id_type const _localFace, id_type const _point );
+    static pair<id_type, bool> fToE( id_type const _localFace, id_type const _edge );
 };
 
 //! \ingroup GeoShape
@@ -291,9 +290,9 @@ public:
     static const UInt nbPtsPerEdge = 1;
     static const UInt nbPtsPerFace = 0;
     static const UInt nbPtsPerVolume = 0;
-    static ID eToP( ID const _localEdge, ID const _point );
-    static ID fToP( ID const _localFace, ID const _point );
-    static pair<ID, bool> fToE( ID const _localFace, ID const _edge );
+    static id_type eToP( id_type const _localEdge, id_type const _point );
+    static id_type fToP( id_type const _localFace, id_type const _point );
+    static pair<id_type, bool> fToE( id_type const _localFace, id_type const _edge );
 };
 
 //! \ingroup GeoShape
@@ -308,9 +307,9 @@ public:
     static const UInt nbPtsPerEdge = 0;
     static const UInt nbPtsPerFace = 0;
     static const UInt nbPtsPerVolume = 0;
-    static ID eToP( ID const _localEdge, ID const _point );
-    static ID fToP( ID const _localFace, ID const _point );
-    static pair<ID, bool> fToE( ID const _localFace, ID const _edge );
+    static id_type eToP( id_type const _localEdge, id_type const _point );
+    static id_type fToP( id_type const _localFace, id_type const _point );
+    static pair<id_type, bool> fToE( id_type const _localFace, id_type const _edge );
 };
 
 //! \ingroup GeoShape
@@ -325,9 +324,9 @@ public:
     static const UInt nbPtsPerEdge = 1;
     static const UInt nbPtsPerFace = 1;
     static const UInt nbPtsPerVolume = 1;
-    static ID eToP( ID const _localEdge, ID const _point );
-    static ID fToP( ID const _localFace, ID const _point );
-    static pair<ID, bool> fToE( ID const _localFace, ID const _edge );
+    static id_type eToP( id_type const _localEdge, id_type const _point );
+    static id_type fToP( id_type const _localFace, id_type const _point );
+    static pair<id_type, bool> fToE( id_type const _localFace, id_type const _edge );
 };
 
 /*******************************************************************
@@ -335,8 +334,8 @@ public:
 *******************************************************************/
 template <typename GeoShape>
 INLINE
-ID reversePoint<GeoShape>::
-operate( ID const & point )
+id_type reversePoint<GeoShape>::
+operate( id_type const & point )
 {
     return point <= GeoShape::numVertices ? GeoShape::numVertices - point + 1 : GeoShape::numPoints - point + GeoShape::numVertices + 1;
 }
