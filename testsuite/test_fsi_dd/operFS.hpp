@@ -73,27 +73,29 @@ class operFS {
   UInt nbEval();
 
 
-  NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& _fluid;
+  NavierStokesAleSolverPC
+  < RegionMesh3D_ALE<LinearTetra> >& M_fluid;
 
-  VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& _solid;
+  VenantKirchhofSolver
+  < RegionMesh3D_ALE<LinearTetra> >& M_solid;
 
-  Vector _dispStruct;
-  Vector _velo;
-  Vector _dz;
-  Vector _rhs_dz;
+  Vector       M_dispStruct;
+  Vector       M_velo;
+  Vector       M_dz;
+  Vector       M_rhs_dz;
 
-  UInt _nbEval;
+  UInt         M_nbEval;
 
-  BC_Handler& _BCh_du;
-  BC_Handler& _BCh_dz;
+  BC_Handler&  M_BCh_du;
+  BC_Handler&  M_BCh_dz;
 
-  DataJacobian _dataJacobian;
+  DataJacobian M_dataJacobian;
 
   void setTime(const Real& time);
 
  private:
 
-  Real _time;
+  Real         M_time;
 
 };
 

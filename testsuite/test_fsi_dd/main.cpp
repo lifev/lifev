@@ -28,12 +28,13 @@
 
 /*
 
-   This programs couples the Navier-Stokes and (linear) Elastodynamic equations
-   At each time step the resulting non-linear coupled problem is solved via
-   Newton's method. The jacobian is fully computed (see Fernandez-Moubachir 2003,2004 )
+This programs couples the Navier-Stokes and (linear) Elastodynamic equations
+At each time step the resulting non-linear coupled problem is solved via
+Domain Decomposition method.
 
-   The present test simulates the pressure wave propagation in a curved cylindrical vessel
+The present test simulates the pressure wave propagation in a curved cylindrical vessel
 
+Based on Miguel Fernandez's test_fsi_newton
 */
 
 
@@ -51,7 +52,7 @@ int main(int argc, char** argv)
 
     // Number of boundary conditions for the fluid velocity,
     // solid displacement, and fluid mesh motion
-    //
+
     BC_Handler BCh_u(3);
     BC_Handler BCh_d(3);
     BC_Handler BCh_mesh(4);
@@ -143,18 +144,22 @@ int main(int argc, char** argv)
 
     // Passing data from structure to the fluid: z -> du
     //
+
     BCVector_Interface du_wall(fluid.dwInterpolated(), dim_fluid, dofMeshToFluid);
 
     // Passing data from fluid to the structure: du -> dz
     //
+
     BCVector_Interface dg_wall(fluid.residual(), dim_fluid, dofFluidToStructure);
 
     // Boundary conditions for du
+    
     BCh_du.addBC("Wall",   1,  Essential, Full, du_wall,  3);
     BCh_du.addBC("Edges",  20, Essential, Full, bcf,      3);
 
 
     // Boundary conditions for dz
+    
     BCh_dz.addBC("Interface", 1, Natural,   Full, dg_wall, 3);
     BCh_dz.addBC("Top",       3, Essential, Full, bcf,  3);
     BCh_dz.addBC("Base",      2, Essential, Full, bcf,  3);
@@ -164,61 +169,77 @@ int main(int argc, char** argv)
     //========================================================================================
     //  TEMPORAL LOOP
     //========================================================================================
-    //
 
-    UInt maxpf = 100;
-    Real dt = fluid.timestep();
-    Real T  = fluid.endtime();
+    UInt maxpf  = 100;
+    Real dt     = fluid.timestep();
+    Real T      = fluid.endtime();
+
     fluid.initialize(u0);
     solid.initialize(d0,w0);
-    Real abstol=1.e-7, reltol=0.0, etamax=1.e-3;
-    int status,maxiter,linesearch=0;
+
+    Real abstol = 1.e-7;
+    Real reltol = 0.0;
+    Real etamax = 1.e-3;
+    
+    int status;
+    int maxiter;
+    int linesearch = 0;
 
     ofstream nout("num_iter");
     ASSERT(nout,"Error: Output file cannot be opened.");
 
     Vector disp(3*dim_solid);
-    disp =0.0;
+    disp   = 0.0;
 
     Vector velo_1(3*dim_solid);
-    velo_1 =0.0;
+    velo_1 = 0.0;
 
     ofstream out_iter("iter");
-    ofstream out_res("res");
+    ofstream out_res ("res");
 
+    // 
     // Temporal loop
     //
-    for (Real time=dt; time <= T; time+=dt) {
-
+    
+    for (Real time=dt; time <= T; time+=dt)
+    {
         fluid.timeAdvance(f,time);
         solid.timeAdvance(f,time);
         oper.setTime(time);
-
+        
         // displacement prediction
-        disp = solid.d() + dt*(1.5*solid.w() - 0.5*velo_1);
-
+        
+        disp   = solid.d() + dt*(1.5*solid.w() - 0.5*velo_1);
+        
         velo_1 = solid.w();
-
-        cout << "norm( disp ) init = " << maxnorm(disp) << endl;
-        cout << "norm( velo_! ) init = " << maxnorm(velo_1) << endl;
-
+        
+        cout << "norm( disp   ) init = " << maxnorm(disp)   << endl;
+        cout << "norm( velo_1 ) init = " << maxnorm(velo_1) << endl;
+        
         maxiter = maxpf;
 
         // the newton solver
+
         status = newton(disp,oper, maxnorm, abstol, reltol, maxiter, etamax,linesearch,out_res,time);
 
-        if(status == 1) {
+        if(status == 1)
+        {
             cout << "Inners iterations failed\n";
             exit(1);
         }
-        else {
+        else
+        {
             cout << "End of time "<< time << endl;
-            cout << "Number of inner iterations       : " << maxiter << endl;
-            out_iter << time << " " << maxiter << " " << oper.nbEval() << endl;
+            cout << "Number of inner iterations       : "
+                 << maxiter << endl;
+            out_iter << time << " " << maxiter << " "
+                     << oper.nbEval() << endl;
+
             fluid.postProcess();
             solid.postProcess();
         }
     }
+
     return 0;
 }
 
