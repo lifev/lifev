@@ -189,8 +189,6 @@ public DataNavierStokes<Mesh> {
   //***** Prova di Agosto 2003
   PostProc<Mesh> _ns_post_proc;
 
- private:
-
   //! Aux. var. for PostProc
   UInt _count;
 };
