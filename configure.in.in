@@ -94,6 +94,9 @@ else
  fi
 fi
 
+AC_CHECK_BOOST
+
+
 dnl
 dnl checks for some scientific computing libraries
 dnl 
@@ -106,6 +109,7 @@ AM_CONDITIONAL(HAVE_UMFPACK, test "x$umfpack_libs" != "x" )
 
 dnl lapack, blas, g2c
 AC_CHECK_LAPACK
+AC_CHECK_UMFPACK
 
 dnl aztec
 AC_CHECK_AZTEC
