@@ -383,12 +383,12 @@ _interpolate( const UInt nbComp, const Vector& w, Vector& wInterp )
                     {
 
                         // Interpolating data at the nodal point
-                        sum = 0;
+                        double __sum = 0;
                         for ( ID idof = 0; idof < nDofElem; ++idof )   // Loop on local Dof on the adjacent element
-                            sum += wLoc( icmp * nDofElem + idof ) * _mesh.getRefFE().phi( idof, x, y, z );
+                            __sum += wLoc( icmp * nDofElem + idof ) * _mesh.getRefFE().phi( idof, x, y, z );
 
                         // Updating interpolating vector
-                        wInterp( icmp * _dof_u.numTotalDof() + _dof_u.localToGlobal( iElem, lDof ) - 1 ) = sum;
+                        wInterp( icmp * _dof_u.numTotalDof() + _dof_u.localToGlobal( iElem, lDof ) - 1 ) = __sum;
                     }
                 }
             }
