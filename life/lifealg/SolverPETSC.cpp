@@ -36,6 +36,7 @@ extern "C"
 #include <petsc.h>
 #include <petscksp.h>
 #include <petscvec.h>
+#define PETSC_KSPSOLVE_OLD_INTERFACE 1
 #endif /* HAVE_PETSC_H */
 };
 
@@ -224,10 +225,25 @@ SolverPETSC::solve( array_type& __X, array_type const& __B, MatStructure  __ptyp
 
     KSPSetOperators( _M_p->__ksp, _M_p->__A, _M_p->__A, __ptype  ); //CHKERRQ(__ierr);
 
+#if PETSC_KSPSOLVE_OLD_INTERFACE
     KSPSetRhs(_M_p->__ksp,__b);
     KSPSetSolution(_M_p->__ksp,__x);
     KSPSolve( _M_p->__ksp ); //CHKERRQ(__ierr);
-
+#else
+    KSPSolve( _M_p->__ksp, __b, __x);
+    KSPConvergedReason reason;
+    PetscInt           its;
+    KSPGetConvergedReason(_M_p->__ksp, &reason);
+    if (reason==KSP_DIVERGED_INDEFINITE_PC) {
+        std::cout << "\nDivergence because of indefinite preconditioner;\n";
+    } else if (reason<0) {
+        std::cout << "\nOther kind of divergence: this should not happen.\n";
+    } else {
+        KSPGetIterationNumber(_M_p->__ksp , &its);
+        std::cout << "\nConvergence in " << (int)its << " iterations.\n";
+    }
+    std::cout << "\n";
+#endif
     /*
       View info about the solver
     */
@@ -270,9 +286,25 @@ SolverPETSC::solveTranspose( array_type& __X, array_type const& __B, MatStructur
 
     KSPSetOperators( _M_p->__ksp, _M_p->__A_t, _M_p->__A_t, __ptype ); ////CHKERRQ(__ierr);
 
+#if PETSC_KSPSOLVE_OLD_INTERFACE
     KSPSetRhs(_M_p->__ksp,__b);
     KSPSetSolution(_M_p->__ksp,__x);
-    KSPSolve( _M_p->__ksp ); ////CHKERRQ(__ierr);
+    KSPSolve( _M_p->__ksp ); //CHKERRQ(__ierr);
+#else
+    KSPSolve( _M_p->__ksp, __b, __x);
+    KSPConvergedReason reason;
+    PetscInt           its;
+    KSPGetConvergedReason(_M_p->__ksp, &reason);
+    if (reason==KSP_DIVERGED_INDEFINITE_PC) {
+        std::cout << "\nDivergence because of indefinite preconditioner;\n";
+    } else if (reason<0) {
+        std::cout << "\nOther kind of divergence: this should not happen.\n";
+    } else {
+        KSPGetIterationNumber(_M_p->__ksp , &its);
+        std::cout << "\nConvergence in " << (int)its << " iterations.\n";
+    }
+    std::cout << "\n";
+#endif
 
     /*
       View info about the solver
