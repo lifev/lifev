@@ -92,29 +92,81 @@ using namespace std;
 // So I can handle non symmetric matrices with a symmetric pattern
 //
 
+template<typename DataType>
+class MSRMatr;
+
 template<typename PatternType, typename DataType>
 class CSRMatr
 {
 public:
-  CSRMatr(); // default constructor : NULL pattern
-  //
-  // Note that the constructors MUST be based on an existing pattern
-  //
+  //! default constructor. Caution: does not have a pattern.
+  CSRMatr();
+
+  // All other constructors MUST be based on an existing pattern
+
+  //! constructor from pattern
   CSRMatr(const PatternType &ex_pattern);
+
+  /*! constructor with given value array
+   *  @param ex_pattern the pattern
+   *  @param ex_value the value array
+   */
   CSRMatr(const PatternType &ex_pattern, const vector<DataType> &ex_value);
+
+  //! copy constructor
   CSRMatr(const CSRMatr<PatternType,DataType> &RightHandCSR);
+
+  /*! conversion copy constructor.
+   *  requires an already converted pattern
+   *  @param ex_pattern the converted pattern
+   *  @param msrMatr the MSRMatrix to be copied
+   */
+  CSRMatr(const PatternType& ex_pattern, const MSRMatr<DataType>& msrMatr);
+
+  //! assignment operator for CSR <- MSR.
+  //! the two matrices need to have the same dimension and sparsity pattern
+  CSRMatr& operator=(const MSRMatr<DataType>& msrMatr);
+
+  //! returns a const * to the pattern
   const PatternType * Patt() const {return _Patt;};
+
+  //! returns the value vector
   vector<DataType> & value()  {return _value;};
+
+  //! give the value vector in raw format (suitable for C)
   DataType * giveRawCSR_value() {return &(_values.front());}
 
-  CSRMatr& operator= (const CSRMatr<PatternType,DataType> &RhCsr  );// Warning: the two matrices will point to the same pattern
+  //! give the value vector in const raw format (suitable for C)
+  const DataType * giveRawCSR_value() const {return &(_values.front());}
+
+  //! assignment operator.
+  //! Warning: the two matrices will point to the same pattern
+  CSRMatr& operator= (const CSRMatr<PatternType,DataType> &RhCsr);
+
+  /*! set single value by position in value vector
+   *  @param where position in value vector
+   *  @param loc_val new value
+   */
   void set_mat(UInt where, DataType loc_val);
+
+  /*! set single value by (row,col)-address
+   *  @param row row number
+   *  @param col column number
+   *  @param loc_val new value
+   */
   void set_mat(UInt row, UInt col, DataType loc_val);
+
+  //! add \c loc_val to entry (row,col), useful for assembly
   void set_mat_inc(UInt row, UInt col, DataType loc_val);
+
+  //! return matrix entry (i,j)
   DataType& get_value(UInt i, UInt j) const
   { return _value[_Patt->locate_index(i,j).first];};
 
+  //! print matrix to standard output
   void ShowMe();
+
+  //! write matrix in sparse matlab format and spy
   void spy(string  const &filename);
 
 private:
@@ -143,13 +195,18 @@ public:
   CSRMatr(const CSRPatt &ex_pattern, UInt const nr, UInt const nc);
   CSRMatr(const CSRPatt &ex_pattern, const vector<DataType> &ex_value);
   CSRMatr(const CSRMatr<CSRPatt,DataType> &RightHandCSR);
+  CSRMatr(const CSRPatt &ex_pattern, const MSRMatr<DataType> &msrMatr);
   const CSRPatt * Patt() const {return _Patt;};
   const vector<DataType> & value() const {return _value;};
   vector<DataType> & value()  {return _value;};
   DataType * giveRawCSR_value() {return &(_value.front());}
+  const DataType * giveRawCSR_value() const {return &(_value.front());}
 
   CSRMatr& operator= (const CSRMatr<CSRPatt,DataType> &RhCsr  );
   // Warning: the two matrices will point to the same pattern
+
+  CSRMatr& operator= (const MSRMatr<DataType> &msrMatr);
+
 
   //! Matrix-vector product
   Vector operator*(const Vector &v) const;
@@ -305,7 +362,7 @@ public:
    *  @author Alain Gauthier
    */
   MSRMatr(const CSRPatt &ex_pattern);
-  
+
   /*! constructor with given value array
    *  @param ex_pattern the MSR pattern
    *  @param ex_value the value array
@@ -314,7 +371,7 @@ public:
 
   //! copy constructor
   MSRMatr(const MSRMatr<DataType> &RightHandMSR);
-  
+
   /*! conversion copy constructor.
    *  requires an already converted pattern
    *  @param ex_pattern the converted pattern
@@ -351,11 +408,11 @@ public:
   //! assignment operator.
   //! Warning: the two matrices will point to the same pattern
   MSRMatr & operator= (const MSRMatr<DataType> &RhMsr);
-  
+
   //! assignment operator for MSR <- CSR.
   //! the two matrices need to have the same dimension and sparsity pattern
   MSRMatr & operator= (const CSRMatr<CSRPatt, DataType> &RhCsr);
-  
+
   /*! set single value by position in value vector
    *  @param where position in value vector
    *  @param loc_val new value
@@ -385,7 +442,7 @@ public:
 
   //! write matrix in sparse matlab format and spy
   void spy(string  const &filename);
-    
+
   //! set entry (r,r) to coeff and rest of row r to zero
   void diagonalize_row ( UInt const r, DataType const coeff);
 
@@ -405,7 +462,7 @@ public:
    */
   void diagonalize(UInt const r, DataType const coeff, Vector &b,
                    DataType datum);
-    
+
   //! matrix vector product
   vector<DataType>  operator* (const vector<DataType> &v) const;
 
@@ -888,6 +945,14 @@ CSRMatr<PatternType,DataType>::
 CSRMatr(const CSRMatr<PatternType,DataType> &RightHandCSR):
   _value(RightHandCSR.value()),_Patt(RightHandCSR.Patt()) {};
 
+template<typename PatternType,typename DataType>
+CSRMatr<PatternType,DataType>::
+CSRMatr(const PatternType &ex_pattern, const MSRMatr<DataType>& msrMatr) {
+  _Patt = &ex_pattern;
+  _value.reserve(ex_pattern.nNz());
+  *this = msrMatr;
+}
+
 template<typename PatternType, typename DataType>
 CSRMatr<PatternType,DataType>&
 CSRMatr<PatternType,DataType>::operator= (const CSRMatr<PatternType,DataType> &RhCsr)
@@ -900,6 +965,22 @@ CSRMatr<PatternType,DataType>::operator= (const CSRMatr<PatternType,DataType> &R
   return *this;
 };
 
+template<typename PatternType, typename DataType>
+CSRMatr<PatternType, DataType>&
+CSRMatr<PatternType, DataType>::operator= (const MSRMatr<DataType>& msrMatr)
+{
+    typename std::vector<DataType>::iterator value = _value.begin();
+    const Container& ja = _Patt->ja();
+    Container::const_iterator ia = _Patt->ia().begin();
+    UInt nrows = _Patt->nRows();
+    for(UInt iRow=0; iRow<nrows; ++iRow, ++ia) {
+        for(UInt i=*ia-OFFSET; i<*(ia+1)-OFFSET; ++i, ++value) {
+            iCol = ja[i]-OFFSET;
+            *value = msrMatr.get_value(iRow, iCol);
+        }
+    }
+    return *this;
+};
 
 template<typename PatternType, typename DataType>
 void
@@ -972,6 +1053,14 @@ CSRMatr(const CSRMatr<CSRPatt,DataType> &RightHandCSR):
   _value(RightHandCSR.value()),_Patt(RightHandCSR.Patt()) {};
 
 template<typename DataType>
+CSRMatr<CSRPatt,DataType>::
+CSRMatr(const CSRPatt &ex_pattern, const MSRMatr<DataType>& msrMatr) {
+  _Patt = &ex_pattern;
+  _value.reserve(ex_pattern.nNz());
+  *this = msrMatr;
+}
+
+template<typename DataType>
 CSRMatr<CSRPatt,DataType>&
 CSRMatr<CSRPatt,DataType>::operator= (const CSRMatr<CSRPatt,DataType> &RhCsr)
 {
@@ -983,6 +1072,23 @@ CSRMatr<CSRPatt,DataType>::operator= (const CSRMatr<CSRPatt,DataType> &RhCsr)
   return *this;
 };
 
+
+template<typename DataType>
+CSRMatr<CSRPatt, DataType>&
+CSRMatr<CSRPatt, DataType>::operator= (const MSRMatr<DataType>& msrMatr)
+{
+    typename std::vector<DataType>::iterator value = _value.begin();
+    const Container& ja = _Patt->ja();
+    Container::const_iterator ia = _Patt->ia().begin();
+    UInt nrows = _Patt->nRows();
+    for(UInt iRow=0; iRow<nrows; ++iRow, ++ia) {
+        for(UInt i=*ia-OFFSET; i<*(ia+1)-OFFSET; ++i, ++value) {
+            UInt iCol = ja[i]-OFFSET;
+            *value = msrMatr.get_value(iRow, iCol);
+        }
+    }
+    return *this;
+};
 
 template<typename DataType>
 void
@@ -3995,5 +4101,7 @@ solve(const Vector &x) const;
 VectorBlock
 IDPreconditioner<VectorBlock>::
 solve(const VectorBlock &x) const;
-}
-#endif
+
+} // namespace LifeV
+
+#endif // _SPARSE_ARRAY_HH
