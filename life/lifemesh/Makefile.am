@@ -23,13 +23,13 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .cc
 # CP temporary to make it compile
 INCLUDES 	= -I$(top_srcdir)/life/lifecore -I$(top_srcdir)/life/lifearray 
 
-include_HEADERS		= dataMesh.hpp geo0D.hpp \
+include_HEADERS		= dataMesh.hpp bareItems.hpp basisElSh.hpp geo0D.hpp \
 geoElement.hpp geoND.hpp identifier.hpp markers.hpp  mesh_util_base.hpp\
 markers_base.hpp meshEntity.hpp  regionMesh2D.hpp \
-regionMesh3D.hpp 
+regionMesh3D.hpp subDomainNeighbors.hpp
 lib_LTLIBRARIES		= liblifemesh.la
-liblifemesh_la_SOURCES	= geo0D.cpp identifier.cpp \
-markers_base.cpp  mesh_util_base.cpp regionMesh3D.cpp
+liblifemesh_la_SOURCES	= bareItems.cpp basisElSh.cpp geo0D.cpp identifier.cpp \
+markers_base.cpp  mesh_util_base.cpp regionMesh3D.cpp subDomainNeighbors.cpp
 
 liblifemesh_la_LIBADD	= ../lifecore/liblifecore.la
 

@@ -21,11 +21,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 namespace LifeV
 {
 //! useful function to sort a list and remove multiple numbers.
-void RemoveMultiple( const std::vector<ID> & list0, std::vector<ID> & listf )
+void RemoveMultiple( const std::vector<id_type> & list0, std::vector<id_type> & listf )
 {
 
-    Index_t counter;
-    std::vector<ID> tmplist = list0;
+    size_type counter;
+    std::vector<id_type> tmplist = list0;
 
     //! Sort the list
     sort( tmplist.begin(), tmplist.end() );
@@ -35,7 +35,7 @@ void RemoveMultiple( const std::vector<ID> & list0, std::vector<ID> & listf )
     counter = 0;
 
     //! We remove the multiple occurences :
-    for ( Index_t i = 1 ; i < tmplist.size() ; i++ )
+    for ( size_type i = 1 ; i < tmplist.size() ; i++ )
     {
         if ( tmplist[ i ] != listf[ counter ] )
         {
@@ -47,7 +47,7 @@ void RemoveMultiple( const std::vector<ID> & list0, std::vector<ID> & listf )
 }
 
 //! Constructor
-SubDomainNeighbors::SubDomainNeighbors( ID SDomID ) :
+SubDomainNeighbors::SubDomainNeighbors( id_type SDomID ) :
         _SDomID( SDomID ),
         _nbInterf( 0 ),
         _nbNeigh( 0 ),
@@ -55,7 +55,7 @@ SubDomainNeighbors::SubDomainNeighbors( ID SDomID ) :
 {}
 
 //! Constructor taking the connectivity table in a file as input (to do)
-SubDomainNeighbors::SubDomainNeighbors( ID SDomID, std::string fname ) :
+SubDomainNeighbors::SubDomainNeighbors( id_type SDomID, std::string fname ) :
         _SDomID( SDomID ),
         _nbInterf( 0 ),
         _nbNeigh( 0 ),
@@ -67,13 +67,13 @@ SubDomainNeighbors::~SubDomainNeighbors()
 {}
 
 //! How many neighbors stored?
-Index_t SubDomainNeighbors::sizeNeigh() const
+size_type SubDomainNeighbors::sizeNeigh() const
 {
     return _neighList.size();
 }
 
 //! return the reference of the interface i in the neighbors' list. (Beware: i starts from 0).
-Int SubDomainNeighbors::NeighInterfaceRef( const Index_t & i ) const
+Int SubDomainNeighbors::NeighInterfaceRef( const size_type & i ) const
 {
     return _neighList[ i ].InterfaceRef;
 }
@@ -88,7 +88,7 @@ std::ostream& SubDomainNeighbors::showMe( bool verbose, std::ostream & out ) con
     out << "Size of _neighList: " << _neighList.size() << std::endl;
     out << "List of Neighbors: \n";
     // starts from 0
-    for ( Index_t i = 0 ; i < _nbNeigh ; i++ )
+    for ( size_type i = 0 ; i < _nbNeigh ; i++ )
     {
         out << _neighList[ i ].NeighborID << " ";
         out << _neighList[ i ].InterfaceRef << " ; ";
@@ -98,7 +98,7 @@ std::ostream& SubDomainNeighbors::showMe( bool verbose, std::ostream & out ) con
     out << "Size of _interfList: " << _interfList.size() << std::endl;
     out << "List of Interfaces: \n";
     // starts from 0
-    for ( Index_t i = 0 ; i < _nbInterf ; i++ )
+    for ( size_type i = 0 ; i < _nbInterf ; i++ )
         out << _interfList[ i ] << " ";
     out << std::endl;
 
