@@ -333,27 +333,54 @@ namespace LifeV {
                    __vector_type_p& __p,
                    const __vector_type_b_u& __b_u,
                    const __vector_type_b_p& __b_p) {
+            Chrono chrono;
+            
             // Inverse of (e.g. lumped) mass matrix
+            chrono.start();
+            std::cout << "[Yosida::solve] invert mass matrix            "
+                      << std::flush;
             M_L_matrix_type __H(_M_M_L);
             __H.invert();
+            chrono.stop();
+            std::cout << "in " << chrono.diff() << " s" << std::endl;
 
             // Approximate Schur complement
+            chrono.start();
+            std::cout << "[Yosida::solve] calculate Schur product       "
+                      << std::flush;
             matrix_type __S( _M_D.size1(), _M_D_T.size2());
             schurProduct(_M_D, __H, _M_D_T, __S);
+            chrono.stop();
+            std::cout << "in " << chrono.diff() << " s" << std::endl;
 
             // Set matrices for the linear solvers
             _M_solver_u.setMatrix(_M_C);
             _M_solver_p.setMatrix(__S);
 
             // Intermediate velocity computation
+            chrono.start();
+            std::cout << "[Yosida::solve] compute intermediate velocity "
+                      << std::flush;
             Vector  __u_tilde( __u.size() );
             _M_solver_u.solve( __u_tilde, __b_u );
+            chrono.stop();
+            std::cout << " in " << chrono.diff() << " s" << std::endl;
 
             // Pressure computation
+            chrono.start();
+            std::cout << "[Yosida::solve] compute pressure              "
+                      << std::flush;
             _M_solver_p.solve( __p, prod(_M_D, __u_tilde) - __b_p );
+            chrono.stop();
+            std::cout << " in " << chrono.diff() << " s" << std::endl;
 
             // End-of-step velocity computation
+            chrono.start();
+            std::cout << "[Yosida::solve] compute final velocity        "
+                      << std::flush;
             _M_solver_u.solve( __u, prod(_M_C, __u_tilde) - prod(_M_D_T, __p));
+            chrono.stop();
+            std::cout << " in " << chrono.diff() << " s" << std::endl;
         }
     };
 
