@@ -31,7 +31,7 @@ SUBDIRS		= data  \
 		  test_darcy \
 		  test_ns_bdf test_ns_cyl test_ns_sstress \
 		  test_fsi_newton test_fsi_picard \
-		  test_masstransport
+		  test_masstransport test_ns_ipstab
 
 check-qmtest: 
 	qmtest -D $(srcdir) run
