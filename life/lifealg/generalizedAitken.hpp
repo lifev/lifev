@@ -254,7 +254,7 @@ computeDeltaLambda( const Vector &_lambda,
         std::cout << " omegaS = " << omegaS
         << " omegaF = " << omegaF << std::endl;
 
-        deltaLambda = - omegaF * _muF - omegaS * _muS;
+        deltaLambda = omegaF * _muF + omegaS * _muS;
 
         M_lambda = _lambda;
         M_muF = _muF;
@@ -269,7 +269,7 @@ computeDeltaLambda( const Vector &_lambda,
         std::cout << " --------------- generalizedAitken: first call" << std::endl;
         M_firstCall = false;
 
-        deltaLambda = - M_defOmegaF * _muF - M_defOmegaS * _muS ;
+        deltaLambda = M_defOmegaF * _muF + M_defOmegaS * _muS ;
 
         std::cout << "generalizedAitken: omegaS = " << M_defOmegaS
         << " omegaF = " << M_defOmegaF << std::endl;
@@ -331,7 +331,7 @@ computeDeltaLambda( const Vector &_lambda,
     {
         M_firstCall = false;
 
-        deltaLambda = - M_defOmegaS * _mu;
+        deltaLambda = M_defOmegaS * _mu;
 
         std::cout << "generalizedAitken: omega = " << M_defOmegaS << std::endl;
 

@@ -239,11 +239,11 @@ void  steklovPoincare::solveJac(Vector &muk,
     {
         case 0:
             // Neumann-Dirichlet preconditioner
-            invSfPrime(-1.*_res, _linearRelTol, muk);
+            invSfPrime(_res, _linearRelTol, muk);
             break;
         case 1:
             // Dirichlet-Neumann preconditioner
-            invSsPrime(-1.*_res, _linearRelTol, muk);
+            invSsPrime(_res, _linearRelTol, muk);
             break;
         case 2:
             // Neumann-Neumann preconditioner
@@ -251,8 +251,8 @@ void  steklovPoincare::solveJac(Vector &muk,
             Vector muF(_res.size());
             Vector muS(_res.size());
 
-            invSsPrime(-1.*_res, _linearRelTol, muS);
-            invSfPrime(-1.*_res, _linearRelTol, muF);
+            invSsPrime(_res, _linearRelTol, muS);
+            invSfPrime(_res, _linearRelTol, muF);
 
             std::cout << "norm_inf muS = " << norm_inf(muS) << std::endl;
             std::cout << "norm_inf muF = " << norm_inf(muF) << std::endl;
