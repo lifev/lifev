@@ -449,10 +449,10 @@ void  operFS::invSfPrime(const Vector& res,
 
     Vector deltaLambda = this->M_fluid.getDeltaLambda();
 
-    std::cout << "deltaLambda norm = " << norm(deltaLambda) << std::endl;
+    std::cout << "deltaLambda norm = " << maxnorm(deltaLambda) << std::endl;
 
     step = getFluidInterfaceOnSolid(deltaLambda);
-    std::cout << "deltaLambda step = " << norm(step) << std::endl;
+    std::cout << "deltaLambda step = " << maxnorm(step) << std::endl;
 }
 
 
