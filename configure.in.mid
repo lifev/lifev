@@ -1,0 +1,2 @@
+
+AC_DEFINE_UNQUOTED(LIFE_PREFIX, "${prefix:-\"/usr\"}",[define prefix dir for life installation])

@@ -1,14 +1,16 @@
 Bugs fixed in 0.1.90
-* Bug #23: fixed wrong assembly in elemOper.cpp in stiff_sd (Martin Prosi):
+* Bug #23: fixed wrong assembly in elemOper.cpp in stiff_sd (MP):
 
 New in 0.1.90:
+* added area debugging see LDebug class (CP)
+* added a petsc interface in lifealfg, see SolverPETSC class (CP)
 * chenged interface to vecUnknown classes: no need to use .vec() anymore
-  fixed speed issues at the same time
-* updated libtool scripts
-* added configure check for parmetis (at least 3.1)
-* added configure check for petsc (at least 2.1.6)
-* added configure check for umfpack (at least 4.3)
-* added configure check for mpi 
+  fixed speed issues at the same time (CP)
+* updated libtool scripts (CP)
+* added configure check for parmetis (at least 3.1) (CP)
+* added configure check for petsc (at least 2.1.6) (CP)
+* added configure check for umfpack (at least 4.3) (CP)
+* added configure check for mpi (CP)
 
 
 Bugs fixed in 0.1.0pre5:
