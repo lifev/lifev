@@ -70,6 +70,7 @@ public:
 
     //! Sets initial condition for the displacment en velocity
     void initialize( const Function& d0, const Function& w0 );
+    void initialize( const std::string& depName );
 
     //! Update the right  hand side  for time advancing
     /*!
@@ -247,7 +248,6 @@ ElasticStructureHandler<Mesh>::postProcess()
     }
 }
 
-
 // Sets the initial condition
 template <typename Mesh>
 void
@@ -379,6 +379,99 @@ ElasticStructureHandler<Mesh>::initialize( const Function& d0, const Function& w
             }
         }
     }
+}
+
+// Sets the initial condition
+template <typename Mesh>
+void
+ElasticStructureHandler<Mesh>::initialize( const std::string& depName )
+{
+    // Loop on elements of the mesh
+    for ( ID iElem = 1; iElem <= this->_mesh.numVolumes(); ++iElem )
+    {
+        _fe.updateJac( this->_mesh.volume( iElem ) );
+    }
+
+    std::string dummy;
+    int nsx, nsy, nsz;
+    int ndim;
+
+    int nDof = _d.nbcomp();
+
+    std::string filenamex = velName;
+    filenamex.insert(filenamex.end(), "_x.bb");
+
+    std::cout << "Reading INRIA solid file   (" << filenamex << ")"
+              << ":" << std::endl;
+
+    std::ifstream filex(filenamex.c_str(), std::ios::in);
+
+    if (!filex)
+    {
+        std::cout << "Reading file " << filenamex
+                  << " impossible" << std::endl;
+        exit(1);
+    }
+
+    filex >> ndim;
+    filex >> sdummy;
+    filex >> nsx;
+    filex >> sdummy;
+
+    for (int ix = 0; ix < nsx; ++ix)
+        filex >> _d[ix + 0*nDof];
+
+    filex.close();
+
+    std::string filenamey = velName;
+    filenamey.insert(filenamey.end(), "_y.bb");
+
+    std::cout << "Reading INRIA solid file   (" << filenamey << ")"
+              << ":" << std::endl;
+
+    std::ifstream filey(filenamey.c_str(), std::ios::in);
+
+    if (!filey)
+    {
+        std::cout << "Reading file " << filenamey
+                  << " impossible" << std::endl;
+        exit(1);
+    }
+
+    filey >> ndim;
+    filey >> sdummy;
+    filey >> nsy;
+    filey >> sdummy;
+
+    for (int iy = 0; iy < nsy; ++iy)
+        filey >> _d[iy + 1*nDof];
+
+    filey.close();
+
+    std::string filenamez = velName;
+    filenamez.insert(filenamez.end(), "_z.bb");
+
+    std::cout << "Reading INRIA solid mesh file   (" << filenamez << ")"
+              << ":" << std::endl;
+
+    std::ifstream filez(filenamez.c_str(), std::ios::in);
+
+    if (!filez)
+    {
+        std::cout << "Reading mesh file " << filenamez
+                  << " impossible" << std::endl;
+        exit(1);
+    }
+
+    filez >> ndim;
+    filez >> sdummy;
+    filez >> nsz;
+    filez >> sdummy;
+
+    for (int iz = 0; iz < nsz; ++iz)
+        filez >> _d[iz + 2*nDof];
+
+    filez.close();
 }
 }
 

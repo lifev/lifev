@@ -126,13 +126,6 @@ void steklovPoincare::eval(const Vector& disp,
     if(status) M_nbEval = 0; // new time step
     M_nbEval++;
 
-//    M_solid->d() = setDispOnInterface(disp);
-
-//     transferOnInterface(disp,
-//                         M_solid->BC_solid(),
-//                         "Interface",
-//                         M_solid->d());
-
     M_solid->d() = disp;
 
     M_fluid->updateMesh(M_time);
@@ -389,7 +382,7 @@ void  steklovPoincare::invSfPrime(const Vector& res,
 
     M_solid->d() = ZeroVector(M_solid->d().size());
     std::cout << "norm_inf residual FSI = " << norm_inf(M_residualFSI);
-    this->M_fluid->updateDispVelo();
+//    this->M_fluid.updateDispVelo();
     solveLinearFluid();
 
     Vector deltaLambda = this->M_fluid->getDeltaLambda();
@@ -545,41 +538,6 @@ Vector steklovPoincare::getFluidInterfaceOnSolid(Vector const& _vec)
                             _vec[IDfluid - 1 + jDim*totalDofSolid] );
 
     return vec;
-}
-
-void steklovPoincare::transferOnInterface(const Vector      &_vec1,
-                                          const BCHandler   &_BC,
-                                          const std::string &_BCName,
-                                          Vector            &_vec2)
-{
-    int iBC = _BC.getBCbyName(_BCName);
-
-    BCBase const &BCInterface = _BC[(UInt) iBC];
-
-    UInt nDofInterface = BCInterface.list_size();
-
-    UInt nDim = BCInterface.numberOfComponents();
-
-    UInt totalDof1 = _vec1.size()/ nDim;
-    UInt totalDof2 = _vec2.size()/ nDim;
-
-    for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)
-    {
-        ID ID1 = BCInterface(iBC)->id();
-
-        BCVectorInterface const *BCVInterface =
-            static_cast <BCVectorInterface const *>
-            (BCInterface.pointerToBCVector());
-
-        ID ID2 = BCVInterface->
-            dofInterface().getInterfaceDof(ID1);
-
-        for (UInt jDim = 0; jDim < nDim; ++jDim)
-        {
-            _vec2[ID2 - 1 + jDim*totalDof2] =
-                _vec1[ID1 - 1 + jDim*totalDof1];
-        }
-    }
 }
 
 //

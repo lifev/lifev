@@ -137,10 +137,10 @@ private:
     Vector getSolidInterfaceOnFluid(Vector const& _vec);
     Vector getFluidInterfaceOnSolid(Vector const& _vec);
 
-    void transferOnInterface(const Vector      &_vec1,
-                             const BCHandler   &_BC,
-                             const std::string &_BCName,
-                             Vector            &_vec2);
+//     void transferOnInterface(const Vector      &_vec1,
+//                              const BCHandler   &_BC,
+//                              const std::string &_BCName,
+//                              Vector            &_vec2);
 
     DataJacobian            M_dataJacobian;
 };

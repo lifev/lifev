@@ -108,6 +108,10 @@ public:
     //! Sets initial condition for the velocity and the pressure from file
     void initialize( const std::string & vname );
 
+    //! Sets initial condition for the velocity and the pressure
+    //! from medit file
+    void initialize( const std::string& velName,
+                     const std::string& pressName);
     //! set the source term functor
     void setSourceTerm( source_type __s )
         {
@@ -514,6 +518,119 @@ NavierStokesHandler<Mesh>::initialize( const std::string & vname )
 
 }
 
+//! Initialize the fluid with a solution file
+//! written in MEDIT format
+template <typename Mesh>
+void
+NavierStokesHandler<Mesh>::initialize( const std::string& velName,
+                                       const std::string& pressName)
+{
+    std::string dummy;
+    int nsx, nsy, nsz;
+    int ndim;
+
+    int nDof = uDof.numTotalDof();
+
+    std::string filenamex = velName;
+    filenamex.insert(filenamex.end(), "_x.bb");
+
+    std::cout << "Reading INRIA fluid file   (" << filenamex << ")"
+              << ":" << std::endl;
+
+    std::ifstream filex(filenamex.c_str(), std::ios::in);
+
+    if (!filex)
+    {
+        std::cout << "Reading file " << filenamex
+                  << " impossible" << std::endl;
+        exit(1);
+    }
+
+    filex >> ndim;
+    filex >> sdummy;
+    filex >> nsx;
+    filex >> sdummy;
+
+    for (int ix = 0; ix < nsx; ++ix)
+        filex >> _u[ix + 0*nDof];
+
+    filex.close();
+
+    std::string filenamey = velName;
+    filenamey.insert(filenamey.end(), "_y.bb");
+
+    std::cout << "Reading INRIA fluid file   (" << filenamey << ")"
+              << ":" << std::endl;
+
+    std::ifstream filey(filenamey.c_str(), std::ios::in);
+
+    if (!filey)
+    {
+        std::cout << "Reading file " << filenamey
+                  << " impossible" << std::endl;
+        exit(1);
+    }
+
+    filey >> ndim;
+    filey >> sdummy;
+    filey >> nsy;
+    filey >> sdummy;
+
+    for (int iy = 0; iy < nsy; ++iy)
+        filey >> _u[iy + 1*nDof];
+
+    filey.close();
+
+    std::string filenamez = velName;
+    filenamez.insert(filenamez.end(), "_z.bb");
+
+    std::cout << "Reading INRIA fluid mesh file   (" << filenamez << ")"
+              << ":" << std::endl;
+
+    std::ifstream filez(filenamez.c_str(), std::ios::in);
+
+    if (!filez)
+    {
+        std::cout << "Reading mesh file " << filenamez
+                  << " impossible" << std::endl;
+        exit(1);
+    }
+
+    filez >> ndim;
+    filez >> sdummy;
+    filez >> nsz;
+    filez >> sdummy;
+
+    for (int iz = 0; iz < nsz; ++iz)
+        filez >> _u[iz + 2*nDof];
+
+    filez.close();
+
+    std::string filenamep = pressName;
+    filenamep.insert(filenamep.end(), ".bb");
+
+    std::cout << "Reading INRIA fluid file   (" << filenamep << ")"
+              << ":" << std::endl;
+
+    std::ifstream filep(filenamep.c_str(), std::ios::in);
+
+    if (!filep)
+    {
+        std::cout << "Reading file " << filenamep
+                  << " impossible" << std::endl;
+        exit(1);
+    }
+
+    filep >> ndim;
+    filep >> sdummy;
+    filep >> nsy;
+    filep >> sdummy;
+
+    for (int ip = 0; ip < nsp; ++ip)
+        filep >> _p[ip];
+
+    filep.close();
+}
 
 //! Computes the flux on a given part of the boundary
 template <typename Mesh>

@@ -145,6 +145,11 @@ public:
 
 protected:
 
+    void transferOnInterface(const Vector      &_vec1,
+                             const BCHandler   &_BC,
+                             const std::string &_BCName,
+                             Vector            &_vec2);
+
     bchandler_type          M_BCh_u;
     bchandler_type          M_BCh_d;
     bchandler_type          M_BCh_mesh;
@@ -168,9 +173,9 @@ protected:
 
 private:
 
-
     UInt                    M_method;
     OperFSPreconditioner    M_precond;
+
 };
 
 typedef boost::shared_ptr<operFS> oper_fsi_ptr;
