@@ -673,7 +673,12 @@ void grad(const int icoor,Real coef,ElemMat& elmat,
       s = 0;
       for(ig=0;ig<fe_u.nbQuadPt;ig++)
 	// Be careful the minus is here and not in coef!!!!
-	s -= fe_p.phi(j,ig)*fe_u.phiDer(i,icoor,ig)*fe_u.weightDet(ig);
+
+// wrong for different quadrules of fe_u and fe_p !!   Martin P.
+//	s -= fe_p.phi(j,ig)*fe_u.phiDer(i,icoor,ig)*fe_u.weightDet(ig); 
+
+	s -= fe_p.refFE.phi(j,fe_u.qr.quadPointCoor(ig,0),fe_u.qr.quadPointCoor(ig,1),
+			    fe_u.qr.quadPointCoor(ig,2))*fe_u.phiDer(i,icoor,ig)*fe_u.weightDet(ig);
       mat(i,j) += coef*s;
     }
   }
