@@ -10,6 +10,7 @@
 [./physics]
 density         = 1.0               # density
 viscosity       = 0.035             # viscosity
+inittime        = 0.00              # starttime
 endtime         = 4.00              # endtime
 
 

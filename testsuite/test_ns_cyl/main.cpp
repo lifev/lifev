@@ -49,22 +49,47 @@ int main(int argc, char** argv)
   // Navier-Stokes Solver
   //
   NavierStokesSolverPC< RegionMesh3D<LinearTetra> > ns(data_file, feTetraP1bubble, feTetraP1,quadRuleTetra64pt, 
-						       quadRuleTria3pt, quadRuleTetra64pt, quadRuleTria3pt, BCh_u);
+						       quadRuleTria3pt, quadRuleTetra5pt, quadRuleTria3pt, BCh_u);
   ns.showMe();
 
 
   // Initialization
   //
-  Real dt = ns.timestep();
+  Real dt = ns.timestep();  
+  Real startT = ns.inittime();
   Real T  = ns.endtime();
-  ns.initialize(u0,p0,0.0,dt);
+
+  if(startT > 0.0){
+     cout << "initialize velocity and pressure with data from file" << std::endl;
+     ostringstream indexin;
+     string vinname, cinname;
+     indexin << (startT*100);
+     vinname = "fluid.res"+indexin.str();
+     ns.initialize(vinname);}
+  else{
+     cout << "initialize velocity and pressure with u0 and p0" << std::endl;	
+     ns.initialize(u0,p0,0.0,dt);
+  }
 
 
   // Temporal loop
   //
-  for (Real time=dt ; time <= T; time+=dt) {
+  for (Real time=startT+dt ; time <= T; time+=dt) {
+
     ns.timeAdvance(f,time);
-    ns.iterate(time);  
+    ns.iterate(time); 
+
+// ************* saving result on file *****************************************
+    ostringstream indexout;
+    indexout << (time*100);
+    string voutname;
+    voutname = "fluid.res"+indexout.str();
+    fstream Resfile(voutname.c_str(),ios::out | ios::binary);
+    Resfile.write((char*)&ns.u()(1),ns.u().size()*sizeof(double));
+    Resfile.write((char*)&ns.p()(1),ns.p().size()*sizeof(double));
+    Resfile.close();
+
+ 
     ns.postProcessPressure();
   }
   
