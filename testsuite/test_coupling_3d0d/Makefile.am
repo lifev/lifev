@@ -23,7 +23,7 @@
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
 
-check_HEADERS  = ud_functions.hpp zeroDModelSolver.hpp
+check_HEADERS  = ud_functions.hpp zeroDModelSolver.hpp meanPressure.hpp flowRate.hpp
 
 check_PROGRAMS  = test_coupling_3d0d
 test_coupling_3d0d_SOURCES = main.cpp

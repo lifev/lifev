@@ -16,8 +16,8 @@ inittime        = 0.00              # starttime
 endtime         = 0.002             # endtime --> two steps for testing purposes
 
 [../geometry]
-length = 5;
-radius =0.5;
+length = 5.0                        # length of the cylinder
+radius = 0.5	                    # radius of the cylinder
 
 
 [../discretization]
@@ -27,7 +27,7 @@ timestep  = 0.001                # timestep
 
 
 [../miscellaneous]
-verbose         = 1
+verbose         = 1000
 
 
 [../aztec_i]

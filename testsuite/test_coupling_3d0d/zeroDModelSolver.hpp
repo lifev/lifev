@@ -55,17 +55,17 @@ public:
     \param Radius of the 3D tube
     \param Thicknes of the wall (only in the case where 3D is compliant - FSI)
   */
-  zeroDModelSolver(GetPot & data_file);
+  zeroDModelSolver(GetPot const& data_file);
 
   //! Computes the pressure of the network, given the flux from 3D 
   //! \param current time step
   //! \param flux from 3d
-  Real getPressureFromQ(Real & time, Real & Q);
+  Real getPressureFromQ(Real const& time, Real const& Q);
 
   //! Computes the flux of the network, given the pression from 3D 
   //! \param current time step
   //! \param pressure from 3D
-  Real getQFromPressure(Real & time, Real & deltaP);
+  Real getQFromPressure(Real const& time, Real const& deltaP);
 
 private:
 
@@ -95,7 +95,7 @@ private:
 //                                     IMPLEMENTATION                                    //
 //***************************************************************************************//
 
-zeroDModelSolver::zeroDModelSolver(GetPot & data_file):
+zeroDModelSolver::zeroDModelSolver(GetPot const& data_file):
 
   _M_C1(0.05), 
   _M_C2(0.5), 
@@ -112,6 +112,11 @@ zeroDModelSolver::zeroDModelSolver(GetPot & data_file):
   _M_Length     = data_file( "fluid/geometry/length", 0. );
   _M_Radius     = data_file( "fluid/geometry/radius", 1. );
   _M_Thickness  = data_file( "fluid/geometry/thickness", 0. );
+
+  std::cout << " \n Raio  == " << _M_Radius << "\n";
+  std::cout << " \n Comp  == " << _M_Length << "\n";
+  std::cout << " \n espe  == " << _M_Thickness << "\n";
+
 
   _M_dt  = data_file("fluid/discretization/timestep", 0. );
   _M_rho = data_file("fluid/physics/density", 1. );
@@ -132,17 +137,9 @@ zeroDModelSolver::zeroDModelSolver(GetPot & data_file):
   x[6]=0.0211;
   x[7]=0.0257;
 
-  _M_outfile.open("res_Q.m", std::ios::app);
-  _M_outfile << "Q = [ " << std::endl;
-  _M_outfile.close();
-
-  _M_outfile.open("res_DP.m", std::ios::app);
-  _M_outfile << "DP = [ " << std::endl;
-  _M_outfile.close();
-
 }
 
-Real zeroDModelSolver::getPressureFromQ(Real & time, Real & Q)
+Real zeroDModelSolver::getPressureFromQ(Real const& time, Real const& Q)
 { 
   Real _M_Q = Q;                // Flux coming from the 3D
   _M_U=0.1+cos(2*pi*time);      // Forcing term
@@ -160,19 +157,11 @@ Real zeroDModelSolver::getPressureFromQ(Real & time, Real & Q)
     x[i]=y[i];
   };
 
-  _M_outfile.open("res_Q.m", std::ios::app);
-  _M_outfile << "     " << -_M_Q << ";" << std::endl;
-  _M_outfile.close();
-
-  _M_outfile.open("res_DP.m", std::ios::app);
-  _M_outfile << "      " <<  y[3]-y[2] << ";" << std::endl;
-  _M_outfile.close();
-
   return y[3]-y[2];
 }
 
 
-Real zeroDModelSolver::getQFromPressure(Real & time, Real & deltaP)
+Real zeroDModelSolver::getQFromPressure(Real const& time, Real const& deltaP)
 { 
    Real _M_L_int  = 2*_M_L; // Induntance necessary on the interface for the flow rate problem
    Real _M_deltaP = deltaP; // Pressure coming from the 3D Model
@@ -190,14 +179,6 @@ Real zeroDModelSolver::getQFromPressure(Real & time, Real & deltaP)
   for(UInt i=0; i<8; ++i){
     x[i]=y[i];
   };
-
-  _M_outfile.open("res_Q.m", std::ios::app);
-  _M_outfile << "     " << -y[6] << ";" << std::endl;
-  _M_outfile.close();
-
-  _M_outfile.open("res_DP.m", std::ios::app);
-  _M_outfile << "      " <<  _M_deltaP << ";" << std::endl;
-  _M_outfile.close();
 
   return -y[6];
 }
