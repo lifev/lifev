@@ -33,7 +33,7 @@ class GetPot;
 
 namespace LifeV {
 
-UInt SolverAztec::_solverNumber = 1;
+UInt SolverAztec::_solverNumber = 100;
 
 SolverAztec::SolverAztec()
     : _matrix(0), _precond(0), _tempPattern(0), _tempMatrix(0)
