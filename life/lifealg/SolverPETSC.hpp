@@ -250,37 +250,41 @@ public:
 
     //@}
 
+    /*! Adds options from data file to PETSC database and sets these new
+     *  options for this solver. Any option of the form
+     *  NAME = VALUE is passed to PETSC as command line option -NAME VALUE.
+     *  Example: ksp_type = gmres. See the PETSC documentation for more
+     *  available options.
+     *  @param dataFile GetPot object containing the options from the data file
+     *  @param section section in the GetPot object containing the PETSC stuff
+     *
+     *  You should have a look at PETSC documentation for further details.
+     *  @author Christoph Winkelmann
+     *  @see http://www.mcs.anl.gov/petsc/
+     */
+    void setOptionsFromGetPot(const GetPot& dataFile,
+                              std::string section = "petsc");
+     
 private:
     Private* _M_p;
 };
 
 /*!
-  \class PETSCforSingleton
+  \class PETSC
   \brief initialization and finalization for PETSC linear solvers
 
-  You should have a look at PETSC documentation for further details.
+  Should be used as LifeV::singleton<PETSC>
 
   @author Christoph Winkelmann
   @see http://www.mcs.anl.gov/petsc/
 */
-class PETSCforSingleton {
+class PETSC {
 public:
-
-    /*! Initializes PETSC with options from data file. Any option of the form
-      NAME = VALUE is passed to PETSC as command line option -NAME VALUE.
-      Example: ksp_type = gmres. See the PETSC documentation for more
-      available options.
-      @param dataFile GetPot object containing the options from the data file
-      @param section section in the GetPot object containing the PETSC stuff
-    */
-    PETSCforSingleton(const GetPot& dataFile, std::string section = "petsc");
-
+    //! Initializes PETSC
+    PETSC() { PetscInitialize(0, 0, 0, 0); }
     //! Finalizes PETSC
-    ~PETSCforSingleton();
-
-private:
-    char** _argv; //!< fake argv passed to petsc as command line argument
-    int _argc; //!< fake argc passed to petsc as command line argument
+    ~PETSC() { PetscFinalize(); }
 };
+
 }
 #endif /* __SolverPETSC_H */

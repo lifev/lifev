@@ -30,6 +30,7 @@
 
 #include <SolverPETSC.hpp>
 #include "GetPot.hpp"
+#include "singleton.hpp"
 
 namespace LifeV
 {
@@ -64,6 +65,8 @@ SolverPETSC::SolverPETSC( std::string const& __ksp_type,
     :
     _M_p ( new Private )
 {
+    const PETSC& petsc = singleton<PETSC>::instance();
+
     int ierr = KSPCreate( PETSC_COMM_WORLD, &_M_p->__ksp ); //CHKERRQ(ierr);
 
     ierr = KSPGetPC( _M_p->__ksp, &_M_p->__pc ); //CHKERRQ(ierr);
@@ -309,8 +312,8 @@ SolverPETSC::solveTranspose( array_type& __X, array_type const& __B, MatStructur
     VecDestroy( __b );
 }
 
-PETSCforSingleton::PETSCforSingleton(const GetPot& dataFile,
-                                     std::string section) {
+void SolverPETSC::setOptionsFromGetPot(const GetPot& dataFile,
+                                       std::string section) {
     // get variable names
     const getpot::StringVector vars = dataFile.get_variable_names();
 
@@ -320,7 +323,7 @@ PETSCforSingleton::PETSCforSingleton(const GetPot& dataFile,
     for(getpot::StringVector::const_iterator it=vars.begin();
         it!=vars.end(); ++it) {
         std::string::size_type p = it->find(section+"/");
-        if ( p != std::string::npos ) {
+        if ( p != std::string::npos ) { // one might use == 0 to be more strict
             std::string name = it->substr(p+section.size()+1);
             std::string value = dataFile(it->c_str(), "");
             petscOpts.push_back("-"+name);
@@ -328,30 +331,26 @@ PETSCforSingleton::PETSCforSingleton(const GetPot& dataFile,
         }
     }
 
-    // build up _argv and _argc
-    _argv = new char*[petscOpts.size()+1];
-    _argc = 0;
+    // build up argv and argc
+    char** argv = new char*[petscOpts.size()+1];
+    int argc = 0;
     for(getpot::StringVector::const_iterator it=petscOpts.begin();
         it!=petscOpts.end(); ++it) {
-        _argv[_argc] = new char[it->size()+1];
-        strcpy(_argv[_argc++], it->c_str());
+        argv[argc] = new char[it->size()+1];
+        strcpy(argv[argc++], it->c_str());
     }
-    _argv[_argc] = 0;
-//     for(int i=0; i<_argc; ++i) {
-//         std::cout << _argv[i] << std::endl;
+    argv[argc] = 0;
+//     for(int i=0; i<argc; ++i) {
+//         std::cout << argv[i] << std::endl;
 //     }
 
-    // initialize petsc
-    PetscInitialize(&_argc, &_argv, 0, 0);
-
-}
-
-PETSCforSingleton::~PETSCforSingleton() {
-    PetscFinalize();
-    for(int i=0; i<_argc; ++i) {
-        delete[] _argv[i];
+    // set options
+    PetscOptionsInsert(&argc, &argv, 0);
+    KSPSetFromOptions( _M_p->__ksp ); //CHKERRQ(ierr);
+    for(int i=0; i<argc; ++i) {
+        delete[] argv[i];
     }
-    delete[] _argv;
+    delete[] argv;
 }
 
-}
+} // namespace LifeV
