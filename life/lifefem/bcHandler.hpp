@@ -248,7 +248,7 @@ public:
                 const BCMode& mode,
                 BCVectorBase& bcv,
                 const UInt& nComp );
-    
+
     void addBC( const std::string& name,
                 const EntityFlag& flag,
                 const BCType& type,
@@ -330,6 +330,47 @@ private:
 
     BCBase* findBC( int lab );
 
+    //! determine whether BCs in M_bcList are only essential
+    bool listHasOnlyEssential() const;
+
+    //! stores status (essential or not) of the boundary associated to a marker
+    class EssentialStatus
+    {
+    public:
+        EssentialStatus() : M_normal( false ), M_tangential( false )
+            {
+                for(UInt iComp=0; iComp<nDimensions; ++iComp)
+                {
+                    M_components[iComp] = false;
+                }
+            }
+        void setComponent(UInt comp) { M_components[comp-1] = true; }
+        void setAllComponents()
+            {
+                for(UInt iComp=0; iComp<nDimensions; ++iComp)
+                {
+                    M_components[iComp] = true;
+                }
+            }
+        void setNormal() { M_normal = true; }
+        void setTangential() { M_tangential = true; }
+        bool isEssential() const
+            {
+                bool result = true;
+                for (UInt iComp=0; iComp<nDimensions; ++iComp)
+                {
+                    result &= M_components[iComp];
+                }
+                result = result || ( M_normal && M_tangential );
+                return result;
+            }
+    private:
+        bool M_components[nDimensions];
+        bool M_normal;
+        bool M_tangential;
+    };
+    
+    //! set of markers which are in the mesh but not in the list
     std::set<EntityFlag> M_notFoundMarkers;
 
 };
@@ -689,8 +730,8 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
             notFoundMarkersNew.insert( *it );
         }
     }
-   
-    
+
+
     if( notFoundMarkersNew.size() > 0 )
     {
         std::cerr <<

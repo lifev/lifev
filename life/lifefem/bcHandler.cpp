@@ -247,14 +247,9 @@ bool BCHandler::hasOnlyEssential() const
     }
     else
     {
-        bool listOnlyEssential = true;
         bool storedOnlyEssential = ( M_hint == HINT_BC_ONLY_ESSENTIAL );
-        for( ConstIterator it = M_bcList.begin(); it != M_bcList.end(); ++it )
-        {
-            listOnlyEssential &=
-                ( it->type() == Essential ) &&
-                ( it->mode() == Full );
-        }
+        bool listOnlyEssential = listHasOnlyEssential();
+
         if ( listOnlyEssential != storedOnlyEssential )
         {
             std::ostringstream __ex;
@@ -360,6 +355,62 @@ std::ostream & BCHandler::showMe( bool verbose, std::ostream & out ) const
     }
     out << " <===========================>" << std::endl;
     return out;
+}
+
+
+bool BCHandler::listHasOnlyEssential() const
+{
+    std::map<EntityFlag, EssentialStatus> statusMap;
+    for( ConstIterator it = M_bcList.begin(); it != M_bcList.end(); ++it )
+    {
+        // make sure that this flag is in the map
+        EssentialStatus& status = statusMap[it->flag()];
+        if ( it->type() == Essential )
+        {
+            switch ( it->mode() )
+            {
+                case Scalar:
+                    status.setAllComponents();
+                    break;
+                case Full:
+                    status.setAllComponents();
+                    break;
+                case Component:
+                    {
+                        UInt nComp = it->numberOfComponents();
+                        for (UInt iComp=1; iComp<=nComp; ++iComp)
+                        {
+                            status.setComponent( it->component(iComp) );
+                        }
+                    }
+                    break;
+                case Normal:
+                    status.setNormal();
+                    break;
+                case Tangential:
+                    status.setTangential();
+                    break;
+                default:
+                    {
+                        std::ostringstream __ex;
+                        __ex << "BCHandler::hasOnlyEssential(): BC mode "
+                             << "unknown\n";
+                        std::cerr << std::endl << "Throwing exception:\n"
+                                  << __ex.str() << std::endl;
+                        throw std::logic_error( __ex.str() );
+                    }
+                    break;
+            }
+        }
+    }
+
+    bool listOnlyEssential = true;
+    for (std::map<EntityFlag, EssentialStatus>::const_iterator
+             it = statusMap.begin(); it != statusMap.end(); ++it)
+    {
+        listOnlyEssential &= it->second.isEssential();
+    }
+    return listOnlyEssential;
 }
 
 } // namespace LifeV
