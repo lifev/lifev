@@ -29,8 +29,9 @@ if HAVE_PETSC
 PETSC_SRCS	= SolverPETSC.cpp
 PETSC_HDRS	= SolverPETSC.hpp
 endif
+BLASLAPACK      = cblas.h clapack.h
 
-include_HEADERS	= algebraic_facto.hpp dataAztec.hpp dataNewton.hpp inexactLU.hpp \
+include_HEADERS	= $(BLASLAPACK) algebraic_facto.hpp dataAztec.hpp dataNewton.hpp inexactLU.hpp \
 linesearch_cubic.hpp linesearch_parabolic.hpp mixed_pattern.hpp newton.hpp \
 picard.hpp saddlePointCG.hpp vectorNorms.hpp $(PETSC_HDRS)
 
