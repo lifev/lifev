@@ -636,7 +636,8 @@ void DarcySolver<Mesh>::computePresFlux()
 //-------------------------------------------------
 //! post processing part.
 //-------------------------------------------------
-#define ANALYTICAL_SOL 1
+//! switch to compute or not the analytical solution
+#define ANALYTICAL_SOL 0
 
 template <typename Mesh>
 Real DarcySolver<Mesh>::computeFluxFlag(int flag)
