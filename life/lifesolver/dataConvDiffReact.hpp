@@ -31,12 +31,15 @@ class DataConvDiffReact:public DataMesh<Mesh>,public DataTime {
   
   //! Ouptut
   void showMe(ostream& c=cout);
-  //! End time
+  //! Diffusivity
   Real diffusivity() const;
+  //! Reaction coefficient
+  Real react() const;
 
  protected:
   //! Physics
-  Real _diffusivity; // Diffusifity
+  Real _diffusivity; // Diffusivity
+  Real _react; // Reaction coefficient
 };
 
 
@@ -54,6 +57,7 @@ DataConvDiffReact(const GetPot& dfile):
   
   // physics
   _diffusivity = dfile("masstransport/physics/diffusivity",1.);
+  _react = dfile("masstransport/physics/react",1.);
 }
 
 // Output
@@ -64,6 +68,7 @@ showMe(ostream& c)
   // physics
   c << "\n*** Values for data [masstransport/physics]\n\n";
   c << "diffusivity   = " << _diffusivity << endl; 
+  c << "reaction coefficient  = " << _react << endl;
 
   c << "\n*** Values for data [masstransport/discretization]\n\n";
   DataMesh<Mesh>::showMe(c);
@@ -76,6 +81,13 @@ template <typename Mesh>
 Real DataConvDiffReact<Mesh>::
 diffusivity() const {
   return  _diffusivity;
+}
+
+// The reaction coefficient
+template <typename Mesh>
+Real DataConvDiffReact<Mesh>::
+react() const {
+  return  _react;
 }
 
 #endif

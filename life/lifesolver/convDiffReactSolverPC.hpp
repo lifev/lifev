@@ -87,10 +87,10 @@ protected:
   //! Pattern of M
   MSRPatt _pattM;
 
-  //! Matrix C:  1/dt*Cmass + D*Cstiff operator (+ r*Cmass ... reaction Term TODO !!!)
+  //! Matrix C:  1/dt*Cmass + D*Cstiff operator + r*Cmass
   MSRMatr<double> _DR;
 
-  //! Matrix C:  1/dt*Cmass + D*Cstiff operator + Convective_transport term (+ r*Cmass ... reaction Term TODO !!!)
+  //! Matrix C:  1/dt*Cmass + D*Cstiff operator + Convective_transport term + r*Cmass
   MSRMatr<double> _CDR;
 
   //! Matrix C_u: Cmass
@@ -99,14 +99,12 @@ protected:
   //! Elementary matrices and vectors
   ElemMat _elmatC; //Concentration stiffnes
   ElemMat _elmatM_c; //Concentration mass
+  ElemMat _elmatMR_c; // Concentration mass and reaction
   ElemVec _elvec; // Elementary right hand side
   ElemVec _elvec_u; // Elementary velocity for convection term
 
   //! Right  hand  side for the concentration
   ScalUnknown<Vector> _f_c;
-
-  //! velocity vector on the concentration nodes
-  PhysVectUnknown<Vector> _u_c;
 
   DataAztec _dataAztec_o;
 };
@@ -124,10 +122,10 @@ ConvDiffReactSolverPC(const GetPot& data_file, const RefFE& refFE_c, const QuadR
      _M_c(_pattM),
      _elmatC(_fe_c.nbNode,1,1),
      _elmatM_c(_fe_c.nbNode,1,1),
+     _elmatMR_c(_fe_c.nbNode,1,1),
      _elvec(_fe_c.nbNode,1),
      _elvec_u(_fe_c.nbNode,nDimensions),
      _f_c(_dim_c),
-     _u_c(_dim_c),
      _dataAztec_o(data_file,"masstransport/aztec_o"){
 
   cout << endl;
@@ -161,17 +159,16 @@ ConvDiffReactSolverPC(const GetPot& data_file, const RefFE& refFE_c, const QuadR
 
     _elmatC.zero();
     _elmatM_c.zero();
+    _elmatMR_c.zero();
 
     stiff(_diffusivity,_elmatC,_fe_c);
-//    _elmatC.showMe();
-    mass(first_coeff*dti,_elmatM_c,_fe_c);
-//    _elmatM_c.showMe();
 
-    // stiffness + mass
-    _elmatC.mat() += _elmatM_c.mat();
+    mass((first_coeff*dti-_react),_elmatMR_c,_fe_c);
+    mass(dti,_elmatM_c,_fe_c);
 
+    _elmatC.mat() += _elmatMR_c.mat();
 
-    // stiffness
+    // stiffness + mass + reaction term
     assemb_mat(_DR,_elmatC,_fe_c,_dof_c);
 
     // mass
