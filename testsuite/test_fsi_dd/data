@@ -3,6 +3,12 @@
 #      Data file for Fluid Structure Solver 
 #-------------------------------------------------
 
+[problem]
+
+method     = 0 # 0 = , 1 = 	
+precond    = 1
+
+
 [fluid]
 
 [./physics]

@@ -27,6 +27,6 @@ include $(top_srcdir)/testsuite/Makefile.testsuite
 check_HEADERS = operFS.hpp ud_functions.hpp 
 
 check_PROGRAMS = test_fsi_dd
-test_fsi_dd_SOURCES = main.cpp operFS.cpp 
+test_fsi_dd_SOURCES = main.cpp operFS.cpp ud_functions.cpp 
 
 EXTRA_DIST = data testsuite.at 

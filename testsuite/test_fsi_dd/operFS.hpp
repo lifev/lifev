@@ -17,6 +17,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#include "dofInterface3Dto3D.hpp"
 #include "NavierStokesAleSolverPC.hpp"
 #include "VenantKirchhofSolver.hpp"
 #include "vectorNorms.hpp"
@@ -25,7 +26,7 @@
 #include "generalizedAitken.hpp"
 #include "bcHandler.hpp"
 #include "dof.hpp"
-
+#include "ud_functions.hpp"
 
 #ifndef _OPERFS
 #define _OPERFS
@@ -55,10 +56,7 @@ namespace LifeV
 
         // constructors
 
-        operFS(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
-               VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
-               BCHandler& BCh_du, BCHandler& BCh_dz,
-               GetPot &data_file);
+        operFS(GetPot &data_file);
 
         // destructor
 
@@ -122,11 +120,18 @@ namespace LifeV
 
     private:
 
+        BCHandler               M_BCh_u;
+        BCHandler               M_BCh_d;
+        BCHandler               M_BCh_mesh;
+
+        BCHandler               M_BCh_du;
+        BCHandler               M_BCh_dz;
+
         NavierStokesAleSolverPC
-        < RegionMesh3D_ALE<LinearTetra> > &M_fluid;
+        < RegionMesh3D_ALE<LinearTetra> > M_fluid;
 
         VenantKirchhofSolver
-        < RegionMesh3D_ALE<LinearTetra> > &M_solid;
+        < RegionMesh3D_ALE<LinearTetra> > M_solid;
 
         Vector                  M_dispStruct;
 
@@ -139,21 +144,29 @@ namespace LifeV
         Vector                  M_dz;
         Vector                  M_rhs_dz;
 
+        DofInterface3Dto3D      M_dofFluidToStructure;
+        DofInterface3Dto3D      M_dofStructureToSolid;
+        DofInterface3Dto3D      M_dofStructureToFluidMesh;
+        DofInterface3Dto3D      M_dofMeshToFluid;
+
+
         PhysVectUnknown<Vector> M_residualS;
         PhysVectUnknown<Vector> M_residualF;
         PhysVectUnknown<Vector> M_residualFSI;
 
         UInt                    M_nbEval;
 
-        BCHandler&              M_BCh_du;
-        BCHandler&              M_BCh_dz;
-
         DataJacobian            M_dataJacobian;
+
+        UInt                    M_method;
+        UInt                    M_precond;
 
         Vector  invSfPrime  (const Vector &res);
         Vector  invSsPrime  (const Vector &res);
 
         Vector  invSfSsPrime(const Vector &res);
+
+        void    setUpBC();
     };
 
 

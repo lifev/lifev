@@ -51,181 +51,16 @@ int main(int argc, char** argv)
     GetPot data_file(data_file_name);
 
 
-    // Number of boundary conditions for the fluid velocity,
-    // solid displacement, and fluid mesh motion
-
-    BCHandler BCh_u(3);
-    BCHandler BCh_d(3);
-    BCHandler BCh_mesh(4);
-
-
-    //========================================================================================
-    // FLUID AND SOLID SOLVERS
-    //========================================================================================
-
-    //
-    // The NavierStokes ALE solver
-    //
-    NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >
-        fluid(data_file,
-              feTetraP1bubble,
-              feTetraP1,
-              quadRuleTetra64pt,
-              quadRuleTria3pt,
-              quadRuleTetra64pt,
-              quadRuleTria3pt,
-              BCh_u, BCh_mesh);
-    //
-    // The structural solver
-    //
-    VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >
-        solid(data_file,
-              feTetraP1,
-              quadRuleTetra4pt,
-              quadRuleTria3pt,
-              BCh_d);
-    // Outputs
-    fluid.showMe();
-    solid.showMe();
-
-    UInt dim_solid = solid.dDof().numTotalDof();
-    UInt dim_fluid = fluid.uDof().numTotalDof();
-
-
-    //========================================================================================
-    //  DATA INTERFACING BETWEEN BOTH SOLVERS
-    //========================================================================================
-
-    //
-    // Passing data from the fluid to the structure: fluid load at the interface
-    //
-
-    DofInterface3Dto3D dofFluidToStructure(feTetraP1,
-                                           solid.dDof(),
-                                           feTetraP1bubble,
-                                           fluid.uDof());
-    dofFluidToStructure.update(solid.mesh(),
-                               1,
-                               fluid.mesh(),
-                               1,
-                               0.);
-    BCVectorInterface g_wall(fluid.residual(),
-                              dim_fluid,
-                              dofFluidToStructure);
-    //
-    // Passing data from structure to the solid mesh: motion of the solid domain
-    //
-    DofInterface3Dto3D dofStructureToSolid(feTetraP1,
-                                           solid.dDof(),
-                                           feTetraP1,
-                                           solid.dDof() );
-    dofStructureToSolid.update(solid.mesh(),
-                               1,
-                               solid.mesh(),
-                               1,
-                               0.);
-
-    BCVectorInterface d_wall(solid.d(),
-                             dim_solid,
-                             dofStructureToSolid);
-    //
-    // Passing data from structure to the fluid mesh: motion of the fluid domain
-    //
-    DofInterface3Dto3D dofStructureToFluidMesh(fluid.mesh().getRefFE(),
-                                               fluid.dofMesh(),
-                                               feTetraP1,
-                                               solid.dDof());
-    dofStructureToFluidMesh.update(fluid.mesh(),
-                                   1,
-                                   solid.mesh(),
-                                   1,
-                                   0.0);
-    BCVectorInterface displ(solid.d(),
-                             dim_solid,
-                             dofStructureToFluidMesh);
-    //
-    // Passing data from structure to the fluid: solid velocity at the interface velocity
-    //
-    DofInterface3Dto3D dofMeshToFluid(feTetraP1bubble,
-                                      fluid.uDof(),
-                                      feTetraP1bubble,
-                                      fluid.uDof() );
-    dofMeshToFluid.update(fluid.mesh(),
-                          1,
-                          fluid.mesh(),
-                          1,
-                          0.0);
-    BCVectorInterface u_wall(fluid.wInterpolated(),
-                              dim_fluid,
-                              dofMeshToFluid);
-    //========================================================================================
-    //  BOUNDARY CONDITIONS
-    //========================================================================================
-
-    // Boundary conditions for the harmonic extension of the
-    // interface solid displacement
-    BCFunctionBase bcf(fZero);
-    BCh_mesh.addBC("Interface", 1, Essential, Full, displ, 3);
-    BCh_mesh.addBC("Top",       3, Essential, Full, bcf,   3);
-    BCh_mesh.addBC("Base",      2, Essential, Full, bcf,   3);
-    BCh_mesh.addBC("Edges",    20, Essential, Full, bcf,   3);
-
-    // Boundary conditions for the fluid velocity
-    BCFunctionBase in_flow(u2);
-    BCh_u.addBC("Wall",   1,  Essential, Full, u_wall,  3);
-    BCh_u.addBC("InFlow", 2,  Natural,   Full, in_flow, 3);
-    BCh_u.addBC("Edges",  20, Essential, Full, bcf,     3);
-
-    // Boundary conditions for the solid displacement
-    BCh_d.addBC("Interface", 1, Essential, Full, d_wall, 3);
-    BCh_d.addBC("Top",       3, Essential, Full, bcf,  3);
-    BCh_d.addBC("Base",      2, Essential, Full, bcf,  3);
-
-
-    //========================================================================================
-    //  COUPLED FSI LINEARIZED OPERATORS
-    //========================================================================================
-
-    BCHandler BCh_du(2);
-    BCHandler BCh_dz(3);
-
-    operFS oper(fluid, solid, BCh_du, BCh_dz, data_file);
-
-    // Passing the residue to the linearized fluid: \sigma -> du
-    //
-    // rem: for now: no fluid.dwInterpolated().
-    //      In the future this could be relevant
-
-    BCVectorInterface du_wall(oper.residualFSI(),
-                              dim_fluid,
-                              dofStructureToFluidMesh);
-    // Passing the residual to the linearized structure: \sigma -> dz
-    BCVectorInterface dg_wall(oper.residualFSI(),
-                              dim_fluid,
-                              dofFluidToStructure);
-    // Boundary conditions for du
-
-    BCh_du.addBC("Wall",   1,  Natural  , Full, du_wall,  3);
-    BCh_du.addBC("Edges",  20, Essential, Full, bcf,      3);
-
-    // Boundary conditions for dz
-
-    BCh_dz.addBC("Interface", 1, Natural  , Full, dg_wall, 3);
-    BCh_dz.addBC("Top",       3, Essential, Full, bcf,     3);
-    BCh_dz.addBC("Base",      2, Essential, Full, bcf,     3);
-
-
     //========================================================================================
     //  TEMPORAL LOOP
     //========================================================================================
 
+    operFS oper(data_file);
 
     UInt maxpf  = 100;
-    Real dt     = fluid.timestep();
-    Real T      = fluid.endtime();
+    Real dt     = oper.fluid().timestep();
+    Real T      = oper.fluid().endtime();
 
-    fluid.initialize(u0);
-    solid.initialize(d0,w0);
 
     Real abstol = 1.e-7;
     Real reltol = 0.;
@@ -237,6 +72,9 @@ int main(int argc, char** argv)
 
     std::ofstream nout("num_iter");
     ASSERT(nout,"Error: Output file cannot be opened.");
+
+    UInt dim_solid = oper.solid().dDof().numTotalDof();
+    UInt dim_fluid = oper.fluid().uDof().numTotalDof();
 
     Vector disp(3*dim_solid);
     disp   = 0.0;
@@ -253,15 +91,15 @@ int main(int argc, char** argv)
 
     for (Real time=dt; time <= T; time+=dt)
     {
-        fluid.timeAdvance(f,time);
-        solid.timeAdvance(f,time);
+        oper.fluid().timeAdvance(f,time);
+        oper.solid().timeAdvance(f,time);
         oper.setTime(time);
 
         // displacement prediction
 
         disp   = 0.;//solid.d();// + dt*(1.5*solid.w() - 0.5*velo_1);
 
-        velo_1 = solid.w();
+        velo_1 = oper.solid().w();
 
         std::cout << "norm( disp   ) init = " << maxnorm(disp)   << std::endl;
         std::cout << "norm( velo_1 ) init = " << maxnorm(velo_1) << std::endl;
@@ -288,8 +126,8 @@ int main(int argc, char** argv)
             out_iter << time << " " << maxiter << " "
                      << oper.nbEval() << std::endl;
 
-            fluid.postProcess();
-            solid.postProcess();
+            oper.fluid().postProcess();
+            oper.solid().postProcess();
         }
     }
 
