@@ -56,16 +56,24 @@ public:
     Remark: this array could be in regionMesh.
   */
   KNM<Real> signLocalFace; 
+  KN<Real> diffusion_scalar_ele; //! scalar diffusion coeff, element by element 
 
   SourceFct sourceFct;
 
-  void computeHybridMatrix(); //!< compute the matrix for TP
+  void _element_computation(int i); //!< computations of element matrices
+
+  void computeHybridMatrixAndSourceRHS(); //!< compute the matrix for TP 
+  //!< and the contribution from the source term to the globalF right hand side.
+
   void applyBC(); //!< apply the b.c. for the TP problem
-  void solveDarcy();//!< solve the linear system for TP
+  void solveDarcy();//!< solve the linear system for TP with Aztec
   void computePresFlux();//!< Compute P and U (once TP known)
+  void postProcessTraceOfPressureRT0();//!< postprocess TP constant per face
+  void postProcessVelocityRT0();//!< postprocess Velocity (RT0 per element)
   void postProcessPressureQ0();//!< postprocess P constant per element
   void postProcessPressureQ1();//!< projection of P (Q0) on Q1 and postproc.
   void postProcessVelocityQ1();//!< projection of U (RT0) on Q1 and postproc.
+  double computeFluxFlag(int flag);
 };
 
 #endif

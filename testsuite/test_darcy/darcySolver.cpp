@@ -20,6 +20,7 @@
 #include "bc_manage.hpp"
 #include "medit_wrtrs.hpp"
 #include "clapack.h"
+#include "user_diffusion.hpp"
 
 //====================================================
 
@@ -39,36 +40,16 @@ DarcySolver::DarcySolver(const GetPot& data_file):
   BtB(pfe.nbNode,pfe.nbNode),
   CtC(refTPFE.nbDof, refTPFE.nbDof),
   BtC(pfe.nbNode, refTPFE.nbDof),
-  signLocalFace(mesh.numVolumes(),numFacesPerVolume)
+  signLocalFace(mesh.numVolumes(),numFacesPerVolume),
+  diffusion_scalar_ele(1 /*mesh.numVolumes()*/)  //to save memory when possible...
 {
-  globalTP=0.0; 
-  globalF=0.0;
-  globalP = 0.0;
-  globalFlux = 0.0;
-  elvecHyb.zero();
+
   signLocalFace = -1.;
-  elvecSource.zero();
-  elvecFlux.zero();
-  elmatMix.zero();
-  elmatHyb.zero();
+
+  // initialisation of the space dependent diffusion with diffusion_scalar
+  diffusion_scalar_ele = diffusion_scalar;
+
   /*
-    Update the divergence Matrix
-    (independant of the current element thanks to the Piola transform)
-  */
-  grad_Hdiv(1.,elmatMix,vfe,pfe,0,1);
-  /*
-    Update the Boundary Matrix
-    (independant of the current element thanks to the Piola transform.)
-  */
-  TP_VdotN_Hdiv(1., elmatMix, refTPFE, 0, 2 );
-  //
-  if(verbose>2){
-    cout << "elmatHyb : \n";
-    elmatHyb.showMe();
-    cout << "elmatMix : \n";
-    elmatMix.showMe();
-  }
-    /*
     Initialization of the signs of the faces:
     the rule is the following: if 
   */
@@ -86,9 +67,102 @@ DarcySolver::DarcySolver(const GetPot& data_file):
   }
 }
 
-void DarcySolver::computeHybridMatrix()
+
+void DarcySolver::_element_computation(int ielem)
 {
-  char* UPLO = "L";
+  // update the current element for the Velocity (only).
+  vfe.updatePiola(mesh.volumeList(ielem));
+  /*
+    update the current element for the Pressure (used for the source term).
+    The only necessary part is the quadpt.
+    The jacobian is not used. (check...)
+  */
+  pfe.updateJacQuadPt(mesh.volumeList(ielem));
+  /*
+    modify the (0,0) block (A) of the matrix
+    the blocks (0,1) (B) and (0,2) (C) are independent of the element
+    and have already been computed
+  */
+  // only one block is set to zero since the other ones are not recomputed
+  elmatMix.block(0,0) = 0.;
+
+  double xg,yg,zg;
+
+  switch(diffusion_type){
+  case 0:
+    //-------------------------
+    // *** scalar diffusion ***
+    //-------------------------
+    switch(diffusion_function){
+    case 0: // constant diffusion given in the data file
+      mass_Hdiv(1./diffusion_scalar,elmatMix,vfe,0,0);
+      break;
+    case 9: // porous medium with a function
+      pfe.barycenter(xg,yg,zg); // coordinate of the barycenter of the current element
+      diffusion_scalar = permeability_sd009(xg, yg, zg);
+      mass_Hdiv(1./diffusion_scalar,elmatMix,vfe,0,0);
+      break;
+    case 10: // porous medium with a function
+      pfe.barycenter(xg,yg,zg); // coordinate of the barycenter of the current element
+      diffusion_scalar = permeability_sd010(xg, yg, zg);
+      mass_Hdiv(1./diffusion_scalar,elmatMix,vfe,0,0);
+      break;
+    default:
+      cerr << "Unknown function for scalar diffusion. Change physics/diffusion_function in the data file\n";
+      exit(1);
+    }
+    break;
+  case 1:
+    //-------------------------
+    // *** tensor diffusion ***
+    //-------------------------
+    {
+      KNM<double> permlower(3,3),invpermea(3,3);
+      switch(diffusion_function){
+      case 0: // constant diffusion tensor given in the data file
+	permlower = diffusion_tensor;
+	permlower *= diffusion_scalar; 
+	/* // the diffusion matrix is divided by the viscosity which sould be 1/diffusion_scalar!
+           Remark: not very optimal since in this case
+	   this constant matrix is inverted on each elements.
+	   (can be easily improved if needed)
+	*/
+	break;
+      case 1: // fibrous medium
+	pfe.barycenter(xg,yg,zg); // coordinate of the barycenter of the current element
+	permlower = fibrous_permea(1./diffusion_scalar,diffusion_tensor, xg); //! added "1./"
+	break;
+      default:
+	cerr << "Unknown function for tensor diffusion. Change physics/diffusion_function in the data file\n";
+	exit(1);
+      }
+      //
+      // we compute the inverse of permlower
+      //
+      // PERM <- L and Lt where L Lt is the Cholesky factorization of PERM
+      int NBT[1] = {3}; //  dim of tensor permeabilite
+      int INFO[1] = {0};
+      dpotrf_("L", NBT, permlower, NBT, INFO);
+      ASSERT_PRE(!INFO[0],"Lapack factorization of PERM is not achieved.");
+      dpotri_("L", NBT, permlower, NBT, INFO);
+      ASSERT_PRE(!INFO[0],"Lapack solution of PERM is not achieved."); 
+      permlower(0,1) = permlower(1,0);
+      permlower(0,2) = permlower(2,0);
+      permlower(1,2) = permlower(2,1);
+      invpermea = permlower;
+      //
+      mass_Hdiv(invpermea, elmatMix, vfe,0,0); //  modify the (0,0) block of the matrix
+      break;
+    }
+  default:
+    cerr << "diffusion_type=" << diffusion_type << " ??? \n";
+    exit(1);
+  }
+}
+
+
+void DarcySolver::computeHybridMatrixAndSourceRHS()
+{
   int INFO[1] = {0};
   int NBRHS[1] = {1};//  nb columns of the rhs := 1.
   int NBP[1] = {pfe.nbNode};//  pressure dof
@@ -97,6 +171,37 @@ void DarcySolver::computeHybridMatrix()
   double ONE_[1]      = {1.0};
   double MINUSONE_[1] = {-1.0};
   double ZERO_[1]     = {0.0};
+  //
+  elvecHyb.zero();
+  elvecSource.zero();
+  elvecFlux.zero();
+  elmatMix.zero();
+  elmatHyb.zero();
+  /*
+    Update the divergence Matrix
+    (independant of the current element thanks to the Piola transform)
+  */
+  grad_Hdiv(1.,elmatMix,vfe,pfe,0,1);
+  /*
+    Update the Boundary Matrix
+    (independant of the current element thanks to the Piola transform.)
+  */
+  TP_VdotN_Hdiv(1., elmatMix, refTPFE, 0, 2 );
+  //
+  if(verbose>3){
+    cerr << "elmatHyb : \n";
+    elmatHyb.showMe();
+    cerr << "elmatMix : \n";
+    elmatMix.showMe();
+  }
+  //
+  globalTP=0.0; 
+  globalF=0.0;
+  globalP = 0.0;
+  globalFlux = 0.0;
+  mat.zeros(); 
+  //
+  //
   /*
   Initial Element Matrix : (where t is transpose)
   
@@ -137,37 +242,14 @@ void DarcySolver::computeHybridMatrix()
   Tab2d BB = elmatMix.block(0,1);
   Tab2d CC = elmatMix.block(0,2);
   
-  for(UInt i = 1; i<= mesh.numVolumes(); i++){
+  SourceAnalyticalFct sourceAnalytical;
+
+  for(UInt ivol = 1; ivol<= mesh.numVolumes(); ivol++){
     //----------------------------
     // LOOP ON THE VOLUME ELEMENTS
     //----------------------------
-    // update the current element for the Velocity (only).
-    vfe.updatePiola(mesh.volumeList(i));
-    /*
-      update the current element for the Pressure
-      (used for the source term).
-      The only necessary part is the quadpt.
-      The jacobian is not used. (check...)
-    */
-    pfe.updateJacQuadPt(mesh.volumeList(i));
-    /*
-      modify the (0,0) block (A) of the matrix
-      the blocks (0,1) (B) and (0,2) (C) are independent of the element
-      and have already been computed
-    */
-    // only one block is set to zero since the other ones are not recomputed
-    elmatMix.block(0,0) = 0.;
-    switch(diffusion_type){
-    case 0:
-      mass_Hdiv(diffusion_coef,elmatMix,vfe,0,0);
-      break;
-    case 1:
-      // mass_Hdiv(diffusion_tensor,elmatMix,vfe,0,0);
-      break;
-    default:
-      cout << "diffusion_type=" << diffusion_type << " ??? \n";
-      exit(1);
-    }
+    _element_computation(ivol);
+    //
     AA = elmatMix.block(0,0); // AA <- A
     BB = elmatMix.block(0,1); // BB <- B
     CC = elmatMix.block(0,2); // CC <- C
@@ -224,7 +306,12 @@ void DarcySolver::computeHybridMatrix()
     Tab1dView RHSTP = elvecHyb.block(0);
 
     // The source term is computed with a test function in the Pressure space.
-    source(sourceFct, elvecSource, pfe, 0); 
+    switch(test_case){
+    case 33: 
+      source(sourceAnalytical, elvecSource, pfe, 0);     
+    default:
+      source(sourceFct, elvecSource, pfe, 0);
+    }
     // initialize the rhs vector (clean this some day...)
     Tab1dView rhs = elvecSource.block(0); // corresponds to F2
     // Compute rhs = LB^{-1} rhs <- LB^{-1} F2
@@ -241,9 +328,9 @@ void DarcySolver::computeHybridMatrix()
     elmatHyb.block(0,0) = CtC;  /* update the hybrid element matrix
 				   Everything is stored in the Lower part */
     assemb_mat_symm_lower(mat,elmatHyb,refTPFE,tpdof,
-                          mesh.volumeList(i).id(),0,0);
+                          mesh.volumeList(ivol).id(),0,0);
     assemb_vec(globalF,elvecHyb,refTPFE,tpdof,
-               mesh.volumeList(i).id(), 0);
+               mesh.volumeList(ivol).id(), 0);
     //-----------------------------------
     // END OF LOOP ON THE VOLUME ELEMENTS
     //-----------------------------------
@@ -263,7 +350,10 @@ void DarcySolver::solveDarcy()
 
 void DarcySolver::computePresFlux()
 {
-  char* UPLO = "L";
+  //! reset to 0
+  globalP = 0.0;
+  globalFlux = 0.0;
+
   int INFO[1] = {0};
   int NBRHS[1] = {1};// nb columns of the rhs := 1.
   int INC1[1] = {1};// increment := 1.
@@ -287,24 +377,13 @@ void DarcySolver::computePresFlux()
   Tab2d BB = elmatMix.block(0,1);
   Tab2d CC = elmatMix.block(0,2);
 
+  SourceAnalyticalFct sourceAnalytical;
 
   RegionMesh3D<LinearHexa>::VolumeType* vol;
-  ID iglobface,iglobvol;
+  ID iglobface;
   for(ID ivol = 1; ivol<= mesh.numVolumes(); ivol++){
     vol = &(mesh.volumeList(ivol));
-    iglobvol = vol->id();    
-    //----------------------------------
-    //  LOOP ON THE VOLUME ELEMENTS
-    //----------------------------------
-    // update the current element for the Velocity (only).
-    vfe.updatePiola( *vol );
-    // update the current element for the Pressure (used for the source term).
-    // The only necessary part is the quadpt. The jacobian is not used. (check...)
-    pfe.updateJacQuadPt( *vol );
-    // elmatMix.zero();
-    // only one block is set to zero since the other ones are not recomputed
-    elmatMix.block(0,0) = 0.;
-    mass_Hdiv(1.,elmatMix,vfe,0,0);  //  modify the (0,0) block of the matrix.
+    _element_computation(ivol);
     // initialize the temporary matrices
 
     AA = elmatMix.block(0,0);
@@ -358,7 +437,12 @@ void DarcySolver::computePresFlux()
     elvecHyb.zero();        //  hybrid rhs : extracted from the global vector.
     // The source term is computed with a test function in the Pressure space.
     // Beware: integrate the source term... ?
-    source(sourceFct, elvecSource, pfe, 0); 
+    switch(test_case){
+    case 33:
+      source(sourceAnalytical, elvecSource, pfe, 0);      
+    default:
+      source(sourceFct, elvecSource, pfe, 0);
+    }
     // initialize the rhs vector (clean this some day...)
     Tab1dView rhs = elvecSource.block(0); // corresponds to F2
     // Compute rhs = LB^{-1} rhs <- LB^{-1} F2
@@ -366,7 +450,7 @@ void DarcySolver::computePresFlux()
     ASSERT_PRE(!INFO[0],
 	       "Lapack Computation rhs = LB^{-1} rhs is not achieved.");
     // extract the resulting TP for the current fe and put it into elvecHyb. 
-    extract_vec(globalTP, elvecHyb, refTPFE, tpdof,iglobvol, 0);
+    extract_vec(globalTP, elvecHyb, refTPFE, tpdof,ivol, 0);
     Tab1dView RHSTP = elvecHyb.block(0);
     // RHSTP = elvecHyb.block(0)  contains the local TP for the current fe.
     // rhs = BtC * RHSTP + rhs <- LB^{-1} Bt A^{-1} C * L + LB^{-1} F2 
@@ -384,7 +468,7 @@ void DarcySolver::computePresFlux()
     // contains the pressure for the current element.
     /* Put the pressure of the current fe ("elvecSource")
       in the global vector globalP.*/
-    assemb_vec( globalP, elvecSource, refPFE, pdof,iglobvol, 0);    
+    assemb_vec( globalP, elvecSource, refPFE, pdof,ivol, 0);    
     //__________________________________
     // 2/ Computation of the VELOCITIES
     //__________________________________
@@ -402,10 +486,16 @@ void DarcySolver::computePresFlux()
     dtrtrs_("L", "T", "N", NBU, NBRHS, AA, NBU, flux, NBU, INFO);
     ASSERT_PRE(!INFO[0],
 	       "Lapack Computation flux = L^{-T} flux is not achieved.");
-    // TO DO: the case when F1 is not zero
+    // TO DO: the case when F1 is not zero (done, no!??)
+
+    //---------------------------------------
+    //           BEWARE!!!!
+    // THIS IS WRONG IN THE RTk FOR k >= 1 !!!!
+    //---------------------------------------
+
     for(ID ilocface=1;ilocface<=vol->numLocalFaces;ilocface++){
-      iglobface = mesh.localFaceId(iglobvol,ilocface);
-      if(mesh.faceElement(iglobface,1) == iglobvol){
+      iglobface = mesh.localFaceId(ivol,ilocface);
+      if(mesh.faceElement(iglobface,1) == ivol){
 	global_flux[iglobface-1] = flux( ilocface-1 );
       }
     }
@@ -419,3 +509,23 @@ void DarcySolver::computePresFlux()
   }
 }
 
+double DarcySolver::computeFluxFlag(int flag)
+{
+  RegionMesh3D<LinearHexa>::FaceType* face;
+  double faceflux,Fl;
+  EntityFlag marker;
+  Vector& globalFlux_vec = globalFlux;
+  //
+  //
+  Fl = 0.;
+  for(ID i=1; i<= mesh.numBFaces(); i++){
+    face = &(mesh.faceList(i));
+    marker = face->marker();
+    faceflux = globalFlux_vec[i-1];
+    if(marker==flag){
+      //      if(faceflux <= 0) cerr << "Warning: flux <=0 on outlet ??? \n";
+      Fl += faceflux;
+    }
+  }
+  return Fl;
+}

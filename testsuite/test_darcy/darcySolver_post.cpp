@@ -18,6 +18,31 @@
 */
 #include "darcySolver.hpp"
 #include "medit_wrtrs.hpp"
+#include "sobolevNorms.hpp"
+
+#define ANALYTICAL_SOL 0
+
+void DarcySolver::postProcessTraceOfPressureRT0()
+{
+  if(verbose) cout << "Postprocessing of TP (RT0 per element)\n";
+  if(post_proc_format == "medit"){
+    wr_medit_ascii_scalar(post_dir + "/presTP0.bb",globalTP.giveVec(),globalTP.size(),1);
+  } else {
+    cerr
+      <<"Warning: Solution constant by element is possible only with medit for the moment\n";
+  }
+}
+
+void DarcySolver::postProcessVelocityRT0()
+{
+  if(verbose) cout << "Postprocessing of velocity (RT0 per element)\n";
+  if(post_proc_format == "medit"){
+    wr_medit_ascii_scalar(post_dir + "/velocRT0.bb",globalFlux.giveVec(),globalFlux.size(),1);
+  } else {
+    cerr
+      <<"Warning: Solution constant by element is possible only with medit for the moment\n";
+  }
+}
 
 void DarcySolver::postProcessPressureQ0()
 {
@@ -28,6 +53,46 @@ void DarcySolver::postProcessPressureQ0()
     cerr
       <<"Warning: Solution constant by element is possible only with medit for the moment\n";
   }
+
+
+#if ANALYTICAL_SOL
+  cout <<"Compute L2 pressure error:\n";
+  AnalyticalSolPres analyticSol;
+  
+  double normL2=0., normL2diff=0., normL2sol=0.;
+  double normL2sq=0., normL2diffsq=0., normL2solsq=0.;
+
+  for(UInt i=1; i<=mesh.numVolumes(); ++i){
+    
+    pfe.updateFirstDeriv(mesh.volumeList(i));
+    
+    normL2sq     += elem_L2_2(globalP,pfe,pdof);
+    normL2solsq  += elem_L2_2(analyticSol,pfe);
+    normL2diffsq += elem_L2_diff_2(globalP,analyticSol,pfe,pdof);
+    
+  }
+
+  normL2     = sqrt(normL2sq);
+  normL2sol  = sqrt(normL2solsq);
+  normL2diff = sqrt(normL2diffsq);
+
+  string errname = post_dir + "/errQ0Pres.txt";
+  ofstream ofile(errname.c_str());
+
+  ASSERT(ofile,"Error: Output file cannot be opened.");
+  ofile << "PRESSION ERROR (Q0)" << endl;
+  ofile << "|| p       ||_{L^2}                   = " << normL2 << endl;
+  ofile << "|| p_ex     ||_{L^2}                   = " << normL2sol << endl;
+  ofile << "|| p - p_ex ||_{L^2}                   = " << normL2diff<< endl;
+  ofile << "|| P - p_ex ||_{L^2} / || p_ex ||_{L^2} = " 
+	<< normL2diff / normL2sol << endl << endl;
+  ofile << "|| p       ||^2_{L^2}                   = " << normL2sq << endl;
+  ofile << "|| p_ex     ||^2_{L^2}                   = " << normL2solsq << endl;
+  ofile << "|| p - p_ex ||^2_{L^2}                   = " << normL2diffsq << endl;
+  ofile << "|| P - p_ex ||^2_{L^2} / || p_ex ||^2_{L^2} = " 
+	<< normL2diffsq / normL2solsq << endl;
+#endif
+
 }
   
 void DarcySolver::postProcessPressureQ1()
@@ -68,12 +133,73 @@ void DarcySolver::postProcessPressureQ1()
   aztecSolveLinearSyst(A_q1,p_q1.giveVec(),f_q1.giveVec(),p_q1.size(),
 		       pattA_q1,options,params);  
   //
+  string vtkname,bbname;
+  /*  
+  char str_iter[10],str_time[10];
+  static int iter_post=0;
+  sprintf(str_time,"t=%f",time);
+  sprintf(str_iter,".%03d",iter_post);
+  */
+  //
   if(post_proc_format == "medit"){
-    wr_medit_ascii_scalar(post_dir + "/presQ1.bb",p_q1.giveVec(),p_q1.size());
+    //bbname = post_dir + "/presQ1" + (string) str_iter + ".bb";
+    bbname = post_dir + "/presQ1.bb";
+    wr_medit_ascii_scalar(bbname,p_q1.giveVec(),p_q1.size());
   } else if (post_proc_format == "vtk"){
-    wr_vtk_ascii_header(post_dir + "/pres.vtk","Title",mesh, dof_q1, fe_q1);
-    wr_vtk_ascii_scalar(post_dir + "/pres.vtk","scal",p_q1.giveVec(), p_q1.size());
+    //vtkname = post_dir + "/presQ1" + (string) str_iter + ".vtk";
+    vtkname = post_dir + "/presQ1.vtk";
+    wr_vtk_ascii_header(vtkname,"Pressure",mesh, dof_q1, fe_q1);
+    wr_vtk_ascii_scalar(vtkname,"P",p_q1.giveVec(), p_q1.size());
   }
+  //iter_post ++;
+  //---------------------------------------------
+
+
+#if ANALYTICAL_SOL
+  cout <<"Compute pressure error:\n";
+  AnalyticalSolPres analyticSol;
+  
+  double normL2=0., normL2diff=0., normL2sol=0.;
+  double normH1=0., normH1diff=0., normH1sol=0.;
+
+  for(UInt i=1; i<=mesh.numVolumes(); ++i){
+    
+    fe_q1.updateFirstDeriv(mesh.volumeList(i));
+    
+    normL2     += elem_L2_2(p_q1,fe_q1,dof_q1);
+    normL2sol  += elem_L2_2(analyticSol,fe_q1);
+    normL2diff += elem_L2_diff_2(p_q1,analyticSol,fe_q1,dof_q1);
+    
+    normH1     += elem_H1_2(p_q1,fe_q1,dof_q1);
+    normH1sol  += elem_H1_2(analyticSol,fe_q1);
+    normH1diff += elem_H1_diff_2(p_q1,analyticSol,fe_q1,dof_q1);
+  }
+
+  normL2     = sqrt(normL2);
+  normL2sol  = sqrt(normL2sol);
+  normL2diff = sqrt(normL2diff);
+
+  normH1     = sqrt(normH1);
+  normH1sol  = sqrt(normH1sol);
+  normH1diff = sqrt(normH1diff);
+
+  string errname = post_dir + "/errQ1Pres.txt";
+  ofstream ofile(errname.c_str());
+
+  ASSERT(ofile,"Error: Output file cannot be opened.");
+  ofile << "PRESSION ERROR (Q1)" << endl;
+  ofile << "|| p       ||_{L^2}                   = " << normL2 << endl;
+  ofile << "|| p_ex     ||_{L^2}                   = " << normL2sol << endl;
+  ofile << "|| p - p_ex ||_{L^2}                   = " << normL2diff<< endl;
+  ofile << "|| P - p_ex ||_{L^2} / || p_ex ||_{L^2} = " << normL2diff/normL2sol
+       << endl;
+  
+  ofile << "|| U       ||_{H^1}                   = " << normH1 << endl;
+  ofile << "|| sol     ||_{H^1}                   = " << normH1sol << endl;
+  ofile << "|| U - sol ||_{H^1}                   = " << normH1diff<< endl;
+  ofile << "|| U - sol ||_{H^1} / || sol ||_{H^1} = " << normH1diff/normH1sol
+       << endl;
+#endif
 }
 
 void DarcySolver::postProcessVelocityQ1()
@@ -129,10 +255,84 @@ void DarcySolver::postProcessVelocityQ1()
   aztecSolveLinearSyst(A_q1,u_q1.giveVec(),f_q1.giveVec(),u_q1.size(),
 		       pattA_q1,options,params);  
   //
+  string vtkname,bbname;
+  /*
+  char str_iter[10],str_time[10];
+  static int iter_post=0;
+  sprintf(str_time,"t=%f",time);
+  sprintf(str_iter,".%03d",iter_post);
+  */
+  //
   if(post_proc_format == "medit"){
-    wr_medit_ascii_vector(post_dir + "/velQ1.bb",u_q1.giveVec(),u_q1.size());
+    //bbname = post_dir + "/vel" + (string) str_iter + ".bb";
+    bbname = post_dir + "/velQ1.bb";
+    wr_medit_ascii_vector(bbname,u_q1.giveVec(),u_q1.size());
   } else if (post_proc_format == "vtk"){
-    wr_vtk_ascii_header(post_dir + "/vel.vtk","Title",mesh, dof_q1, fe_q1);
-    wr_vtk_ascii_vector(post_dir + "/vel.vtk","Velocity",u_q1.giveVec(), u_q1.size());
+    //vtkname = post_dir + "/vel" + (string) str_iter + ".vtk";
+    vtkname = post_dir + "/velQ1.vtk";
+    wr_vtk_ascii_header(vtkname,"Velocity",mesh, dof_q1, fe_q1);
+    wr_vtk_ascii_vector(vtkname,"U",u_q1.giveVec(), u_q1.size());
   }
+  //iter_post ++;
+
+  //---------------------------------------------
+
+#if ANALYTICAL_SOL
+  cout <<"Velocity error:\n";
+  AnalyticalSolFlux analyticSol;
+
+  /*
+  analyticSol.init(diffusion_tensor(0,0)  / diffusion_scalar,
+		   diffusion_tensor(2,0) / diffusion_scalar,
+		   diffusion_tensor(2,2) / diffusion_scalar,
+		   diffusion_tensor(1,1) / diffusion_scalar);
+  */
+  
+  double normL2=0., normL2diff=0., normL2sol=0.;
+  double normH1=0., normH1diff=0., normH1sol=0.;
+
+  for(UInt i=1; i<=mesh.numVolumes(); ++i){
+    
+    fe_q1.updateFirstDeriv(mesh.volumeList(i));
+    
+    normL2     += elem_L2_2(u_q1,fe_q1,dof_q1,3);
+    normL2sol  = -1.; //! elem_L2_2 is not reckognized
+    //! (confusion with another templated function)
+    //    normL2sol  += elem_L2_2(analyticSol,fe_q1,0.0,3);
+    normL2diff += elem_L2_diff_2(u_q1,analyticSol,fe_q1,dof_q1,0.,3);
+    /*    
+    normH1     += elem_H1_2(u_q1,fe_q1,dof_q1,0,3);
+    normH1sol  += elem_H1_2(analyticSol,fe_q1,0,3);
+    normH1diff += elem_H1_diff_2(u_q1,analyticSol,fe_q1,dof_q1,0,3);
+    */
+  }
+
+  normL2     = sqrt(normL2);
+  normL2sol  = sqrt(normL2sol);
+  normL2diff = sqrt(normL2diff);
+
+  normH1     = sqrt(normH1);
+  normH1sol  = sqrt(normH1sol);
+  normH1diff = sqrt(normH1diff);
+
+  string errname = post_dir + "/errQ1Vel.txt";
+  ofstream ofile(errname.c_str());
+
+  ASSERT(ofile,"Error: Output file cannot be opened.");
+  ofile << "VELOCITY ERROR (Q1)" << endl;
+
+  ofile << "|| U         ||_{L^2}                   = " << normL2 << endl;
+  ofile << "|| exact     ||_{L^2}                   = " << normL2sol << endl;
+  ofile << "|| U - exact ||_{L^2}                   = " << normL2diff<< endl;
+  ofile << "|| U - exact ||_{L^2}/|| exact ||_{L^2} = " << normL2diff/normL2sol
+       << endl;
+  
+  //  cerr << "|| U       ||_{H^1}                   = " << normH1 << endl;
+  //  cerr << "|| exact     ||_{H^1}                   = " << normH1sol << endl;
+  //  cerr << "|| U - exact ||_{H^1}                   = " << normH1diff<< endl;
+  // cerr << "|| U - exact ||_{H^1} / || exact ||_{H^1} = " << normH1diff/normH1sol
+  //   << endl;
+
+#endif
 }
+
