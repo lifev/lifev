@@ -15,17 +15,17 @@ options='%S.idx'
 MakeIndex=Default
 QuickBuild=PDFLaTeX+ViewPDF
 
-[item:Specifications.tex]
-archive=true
-encoding=ISO 8859-1
-highlight=LaTeX-Kile
-open=true
-
 [item:lifev-dev.kilepr]
 archive=true
 encoding=
 highlight=
 open=false
+
+[item:lifev-dev.tex]
+archive=true
+encoding=ISO 8859-1
+highlight=LaTeX-Kile
+open=true
 
 [item:lifev-dev_conventions.tex]
 archive=true
@@ -41,6 +41,6 @@ open=true
 
 [item:lifev-dev_overview.tex]
 archive=true
-encoding=
-highlight=
-open=false
+encoding=ISO 8859-1
+highlight=LaTeX
+open=true

@@ -1,5 +1,3 @@
-Makefile
-Makefile.in
 *.aux
 *.bbl
 *.blg
@@ -14,4 +12,8 @@ Makefile.in
 *.pdf
 *.rip
 *.toc
+Makefile
+Makefile.in
 auto
+lifev-dev.tex.backup
+lifev-dev_generalities.tex.backup

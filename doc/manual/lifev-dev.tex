@@ -1,25 +1,33 @@
 \documentclass[a4paper,report]{lifestyle}
 
 
-\RCS $Revision: 1.1 $ 
-\RCS $Date: 2004-03-08 10:03:38 $ 
+\RCS $Revision: 1.2 $ 
+\RCS $Date: 2004-03-08 15:07:14 $ 
 \RCS $State: Exp $
 
-\newcommand{\thelibrary}{\textsl{LIFE V}}
 
-\title{\HUGE LifeV Developer Manual}
-\author{\raggedright L. Formaggia\\
-J.-F. Gerbeau\\
-C. Prud'homme}
-\date{\lifedraftdate}
+
+\title{\lifetitle{LifeV Developer Manual}{L. Formaggia\\J.-F. Gerbeau\\C. Prud'homme}}
+\date{}
 
 \makeindex
 \makeglossary
 
 \pagestyle{fancy}
+
+%% \includeonly{lifev-dev_generalities}
+
 \begin{document}
 
 \maketitle
+
+
+\phantom{dummy text}
+\vfill
+This manual is for LifeV (version 0.1, 8 March 2004), a library for scientific computing specially aimed at fluid-structure interaction and blood flow simulation.
+
+Copyright (C) 2001, 2002, 2003 EPFL, INRIA, Polytechnico Di Milano.
+
 
 \tableofcontents
 
@@ -30,6 +38,7 @@ C. Prud'homme}
 \include{lifev-dev_generalities}
 \include{lifev-dev_conventions}
 \include{lifev-dev_overview}
+
 
 \bibliographystyle{plain}
 \bibliography{life}
