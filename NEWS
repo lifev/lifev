@@ -1,9 +1,20 @@
 # -*- readme-debian -*-
 
 
-Bugs fixed in 0.6.0:
+Bugs fixed in 0.7.0:
 ====================
 
+New in 0.7.0:
+=============
+
+[lifefem]
+* Added levelset solver (DADP)
+* Added hyperbolic solver (DADP)
+
+[testsuite]
+* Added levelset tests (DADP)
+
+
 New in 0.6.0:
 =============
 [configure]
@@ -243,4 +254,4 @@ New in 0.1.0pre3:
 * fixed some bugs and miscompilation in a few places
 
 
- -- Christophe Prud'homme <prudhomm@debian.org>, Thu Jan 27 11:43:29 2005
+ -- Christophe Prud'homme <prudhomm@debian.org>, Thu Feb  3 12:22:24 2005
