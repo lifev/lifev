@@ -803,8 +803,30 @@ void BC_Handler::bdUpdate(Mesh& mesh, CurrentBdFE& feBd, const Dof& dof) {
 	}
 	break;
       case Natural:
-      case Mixte:
+
 	// Why kind of data ?
+        // vincent please check again for your Mixte-FE it doesn't work for Q1
+          if ( where->dataVector()  )
+          { // With data vector
+              for (ID l=1; l<=nDofpF; ++l) {
+                  lDof = nDofFE + nDofFV + l; // local Dof
+                  gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + (iFaEl-1)*nDofpF + l); // global Dof
+                  where->addIdentifier( new Identifier_Natural(gDof) );
+              }
+          }
+          else
+          {
+              // Loop on number of Dof per face
+              for (ID l=1; l<=nDofpF; ++l) {
+                  lDof = nDofFE + nDofFV + l; // local Dof
+                  gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + (iFaEl-1)*nDofpF + l); // global Dof
+                  bdltg( lDof ) =  gDof; // local to global on this face
+              }
+              where->addIdentifier( new Identifier_Natural(ibF,bdltg) );
+          }
+          break;
+          case Mixte:
+              // Why kind of data ?
         // vincent please check again for your Mixte-FE it doesn't work for Q1
 //	if ( where->dataVector()  ) { // With data vector
 //	  for (ID l=1; l<=nDofpF; ++l) {
