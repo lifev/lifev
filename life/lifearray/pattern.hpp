@@ -18,7 +18,7 @@
 */ 
 /*----------------------------------------------------------------------*
 |
-| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.13 2004-10-05 12:31:50 prudhomm Exp $
+| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.14 2004-10-13 10:26:02 ddipietro Exp $
 |
 |
 | #Version  0.1 Experimental   07/7/00. Luca Formaggia & Alessandro Veneziani  |
@@ -138,9 +138,19 @@ protected:
     bool setpatt( const DOF& dof, const MESH& mesh, DynPattern & dynpatt,
                   UInt const nbcomp );
 
+    //! Added by D. A. Di Pietro (01/2004)
+    //! It builds the SYMMETRIC pattern associated to StiffDG operators.
+    //! This pattern should work with several penalization terms (IP,
+    //! Bassi et al., ecc...). Boundary integrals involve one element
+    //! and its adjacent neighbours.
+
+    template<typename DOF, typename DOFBYFACE>
+    bool setpattDG(DOF const & dof, DOFBYFACE const & dofbyface, DynPattern & dynpatt, 
+                   UInt const nbcomp = 1);
+
     //! Version for mixed patterns
     //! It builds the dynamic pattern. It is the standard routine for a
-    //! pattern associated to two degrees of freedom object.
+    //! pattern associated to two degrees of	 freedom object.
     //! it uses the MixedLocalPattern class for the local patterns.
     //! See the documentation in the implementation part for more details
     template <typename DOF1, typename DOF2>
@@ -650,12 +660,20 @@ public:
     template <typename DOF, typename MESH>
     MSRPatt( const DOF& dof, const MESH& mesh, const UInt nbcomp );
 
+    // D. A. Di Pietro 10/2004
+    template<typename DOF, typename DOFBYFACE> 
+    MSRPatt(DOF const & dof, DOFBYFACE const & dofbyface, const std::string& type, UInt const nbcomp = 1);
+
     template <typename DOF>
     bool buildPattern( DOF const & dof, UInt const nbcomp );
 
     // Miguel 12/2003: new version handling patterns coming from IP stabilization
     template <typename DOF, typename MESH>
     bool buildPattern( const DOF& dof, const MESH& mesh, const UInt nbcomp );
+
+    // D. A. Di Pietro 10/2004
+    template<typename DOF, typename DOFBYFACE> 
+    bool buildPattern(DOF const & dof, DOFBYFACE const & dofbyface, const std::string& type, UInt const nbcomp = 1);
 
     Container bindx() const
     {
@@ -1126,6 +1144,49 @@ bool BasePattern::setpatt( const DOF& dof, const MESH& mesh, DynPattern & dynpat
     return true;
 }
 
+// Daniele A. Di Pietro: useful for DG
+template<typename DOF, typename DOFBYFACE>
+ bool BasePattern::setpattDG(DOF const & dof, DOFBYFACE const & dofbyface, DynPattern & dynpatt, 
+                             UInt const nbcomp){
+
+ Diff_t ig, jg;
+
+ // Recall that dof.fe here will be refEleDG.elPattern
+ // and dofbyface.fe will be refEleDG.facePattern...
+
+ for(UInt el = 1; el <= dof.numElements(); el++){
+   for (int l = dof.fe.nbDiag(); l < dof.fe.nbPattern(); ++l){      
+     ID i  = dof.fe.patternFirst(l) + 1;
+     ID j  = dof.fe.patternSecond(l) + 1;
+
+     ig = dof.localToGlobal(el, i) - 1; // I store with numering from 0 (and correct later on)
+     jg = dof.localToGlobal(el, j) - 1;
+
+     dynpatt.insert(setBareEdge(ig, jg));
+   }
+ }
+
+ for(UInt face = 1; face <= dofbyface.numIFaces(); face++){
+   for(int l = dofbyface.fe.nbDiag(); l < dofbyface.fe.nbPattern(); ++l){
+     ID i = dofbyface.fe.patternFirst(l) + 1;
+     ID j = dofbyface.fe.patternSecond(l) + 1;
+
+     ig = dofbyface.localToGlobal(face, i) - 1;
+     jg = dofbyface.localToGlobal(face, j) - 1;
+
+     dynpatt.insert(setBareEdge(ig, jg)); 
+   }
+ }
+
+ _nrows = nbcomp * dof.numTotalDof();
+ _ncols = _nrows; // just one DOF => square matrix
+ // _nnz = (diagonal entries + off-diagonal entries) * number of components: only diagonal blocks
+ // why nbcomp * nbcomp?!?
+ //  _nnz = nbcomp * nbcomp *(dof.numTotalDof() + 2 * dynpatt.size());
+ _nnz = nbcomp * (dof.numTotalDof() + 2 * dynpatt.size());
+
+ return true;
+}
 
 /* THE ROUTINE THAT BUILDS THE DYN PATTERN MAY BE GLOBAL (WHY NOT) */
 
@@ -1936,6 +1997,14 @@ MSRPatt::MSRPatt( const DOF& dof, const MESH& mesh, const UInt nbcomp )
     ASSERT_PRE( built, "Error in MSR Pattern construction from DOF object" );
 }
 
+// D. A. Di Pietro
+template<typename DOF, typename DOFBYFACE>
+ MSRPatt::MSRPatt(DOF const & dof, DOFBYFACE const & dofbyface, const std::string& type, UInt const nbcomp)
+{
+ bool built;
+ built = buildPattern(dof, dofbyface, type, nbcomp);
+ ASSERT_PRE(built,"Error in MSR Pattern construction from DOF and DOFBYFACE objects");
+}
 
 template <typename DOF1>
 bool MSRPatt::buildPattern( DOF1 const & dof1, UInt const nbcomp )
@@ -2062,6 +2131,97 @@ bool MSRPatt::buildPattern( const DOF& dof, const MESH& mesh,
     }
     return built;
 }
+
+
+// Daniele A. Di Pietro
+template<typename DOF, typename DOFBYFACE>
+bool MSRPatt::buildPattern(DOF const & dof, DOFBYFACE const & dofbyface, const std::string& type, UInt const nbcomp){
+ ASSERT_PRE(type == "dg", "Error: for DG elements only");
+ DynPattern  dynpatt; 
+ bool built = setpattDG(dof, dofbyface, dynpatt, nbcomp); 
+ if(!built)return false;
+
+ Index_t ig, jg, cur;
+
+ _bindx.resize(_nnz + 1, 0);  
+ _ybind.resize(_nnz - _nrows, 0);  
+
+ // Count
+ for (DynPattern::iterator d = dynpatt.begin(); d != dynpatt.end(); ++d){
+   ig = d -> first;
+   jg = d -> second;
+
+   _bindx[ig] += nbcomp; 
+   _bindx[jg] += nbcomp; // D. A. Di Pietro: questo, suppongo, per la simmetria del pattern
+ }
+
+ //other components
+ Diff_t offset= dof.numTotalDof();
+ UInt icomp, jcomp;
+
+ //We add the missing diagonal term for jcomp != icomp
+ for (icomp = 0; icomp < nbcomp; icomp++)
+   for (ig = 0; ig < offset; ++ig)
+     _bindx[ig + icomp * offset] += nbcomp - 1;
+
+ Container::iterator start     = _bindx.begin();
+ Container::iterator end       = _bindx.begin() + offset;
+ for (icomp=1; icomp < nbcomp; icomp++)
+   {
+     Container::iterator start_copy= _bindx.begin()+ icomp*offset;
+     copy(start, end, start_copy);
+   }
+
+ // Count entries BY ACCUMULATING
+ // shift right 1 position
+ rotate(_bindx.begin(), _bindx.begin() + _nrows, _bindx.begin() + _nrows + 1);
+ _bindx[0]= _nrows + 1;
+
+ for (ig = 1; ig < static_cast<Index_t>(_nrows) + 1; ++ig)
+   _bindx[ig] += _bindx[ig - 1];
+
+ 
+ // for each component
+ for (icomp=0; icomp< nbcomp; icomp++){
+   for (jcomp=0; jcomp< nbcomp; jcomp++){
+
+     //We add the missing diagonal term for jcomp != icomp
+     if (jcomp != icomp)
+	for (ig=0; ig < offset; ++ig){
+	  _ybind[_bindx[ig+icomp*offset]-_nrows-1]=_bindx[ig+jcomp*offset];
+	  _bindx[_bindx[ig+icomp*offset]++]=ig+jcomp*offset;
+	}
+
+     for (DynPattern::iterator d=dynpatt.begin(); d !=dynpatt.end(); ++d){
+	ig=d->first+icomp*offset;
+	jg=d->second+jcomp*offset;
+	_ybind[_bindx[ig]-_nrows-1]=_bindx[jg];
+	_ybind[_bindx[jg]-_nrows-1]=_bindx[ig]; 
+	_bindx[_bindx[ig]++]=jg;
+	_bindx[_bindx[jg]++]=ig;
+     }
+   }
+ }
+ 
+ // shift right 1 position
+ rotate(_bindx.begin(),_bindx.begin()+_nrows,_bindx.begin()+_nrows+1);
+ _bindx[0]=_nrows+1;
+
+ for (ig=0; ig <static_cast<Index_t>(_nrows); ++ig){
+   // We now sort the off diagonal entries
+   jg=_bindx[ig]; 
+   cur = _bindx[ig+1];
+   sort(_bindx.begin()+jg,_bindx.begin()+cur);
+ }
+ 
+ // do we need it 'a la Fortran?'
+ if (PatternOffset != 0) for (Container::iterator ip=_bindx.begin();ip!=_bindx.end();++ip)*ip+=PatternOffset;
+ 
+ dynpatt.clear(); // Non sono sicuro che serva....
+ _diagfirst=true;// default for MSR
+ _filled=true;
+ return true;
+};
 
 inline UInt MSRPatt::nbNeighbours( ID const d ) const
 {
