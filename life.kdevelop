@@ -6,10 +6,16 @@
     <version>$VERSION$</version>
     <projectmanagement>KDevAutoProject</projectmanagement>
     <primarylanguage>C++</primarylanguage>
-    <ignoreparts/>
+    <ignoreparts>
+      <part>KDevVisualBoyAdvance</part>
+      <part>KDevClearCase</part>
+      <part>KDevPerforce</part>
+      <part>KDevsubversion</part>
+    </ignoreparts>
     <projectdirectory>.</projectdirectory>
     <absoluteprojectpath>false</absoluteprojectpath>
-    <description/>
+    <description>A C++ Finite Element Library.
+</description>
     <secondaryLanguages>
       <language>Fortran77</language>
     </secondaryLanguages>
@@ -17,10 +23,10 @@
   <kdevautoproject>
     <general>
       <activetarget>testsuite/official/test_mesh/test_mesh</activetarget>
-      <useconfiguration>debug</useconfiguration>
+      <useconfiguration>debug-3.3</useconfiguration>
     </general>
     <run>
-      <mainprogram>src/life</mainprogram>
+      <mainprogram/>
       <directoryradio>executable</directoryradio>
       <customdirectory>/</customdirectory>
       <programargs/>
@@ -47,21 +53,59 @@
         <cppflags/>
         <ldflags/>
         <ccompilerbinary/>
-        <cxxcompilerbinary/>
+        <cxxcompilerbinary>g++-3.3</cxxcompilerbinary>
         <f77compilerbinary>g77</f77compilerbinary>
         <cflags>-O0 -g3</cflags>
         <f77flags>-O0 -g3</f77flags>
+        <envvars/>
       </debug>
+      <debug-3.3>
+        <envvars/>
+        <configargs>--enable-debug --with-mkl=/opt/intel/mkl701/
+</configargs>
+        <builddir>/home/prudhomm/scratch/Devel/LifeV/lifev-head/debug-3.3</builddir>
+        <topsourcedir>/home/prudhomm/Devel/LifeV/lifev-head</topsourcedir>
+        <cppflags>-I/home/prudhomm/Devel/LifeV/lifev-head</cppflags>
+        <ldflags/>
+        <ccompiler>kdevgccoptions</ccompiler>
+        <cxxcompiler>kdevgppoptions</cxxcompiler>
+        <f77compiler>kdevg77options</f77compiler>
+        <ccompilerbinary>gcc-3.3</ccompilerbinary>
+        <cxxcompilerbinary>g++-3.3</cxxcompilerbinary>
+        <f77compilerbinary>g77-3.3</f77compilerbinary>
+        <cflags>-O0 -g3</cflags>
+        <cxxflags>-O0 -g3</cxxflags>
+        <f77flags>-O0 -g3</f77flags>
+      </debug-3.3>
+      <opt-3.3>
+        <envvars/>
+        <configargs>--enable-opt --with-mkl=/opt/intel/mkl701/
+</configargs>
+        <builddir>/home/prudhomm/scratch/Devel/LifeV/lifev-head/opt-3.3</builddir>
+        <topsourcedir>/home/prudhomm/Devel/LifeV/lifev-head</topsourcedir>
+        <cppflags/>
+        <ldflags/>
+        <ccompiler>kdevgccoptions</ccompiler>
+        <cxxcompiler>kdevgppoptions</cxxcompiler>
+        <f77compiler>kdevg77options</f77compiler>
+        <ccompilerbinary>gcc-3.3</ccompilerbinary>
+        <cxxcompilerbinary>g++-3.3</cxxcompilerbinary>
+        <f77compilerbinary/>
+        <cflags/>
+        <cxxflags/>
+        <f77flags/>
+      </opt-3.3>
     </configurations>
     <make>
       <envvars>
         <envvar value="1" name="WANT_AUTOCONF_2_5" />
         <envvar value="1" name="WANT_AUTOMAKE_1_6" />
       </envvars>
-      <abortonerror>false</abortonerror>
+      <abortonerror>true</abortonerror>
       <numberofjobs>1</numberofjobs>
       <dontact>false</dontact>
       <makebin/>
+      <prio>0</prio>
     </make>
   </kdevautoproject>
   <kdevdebugger>
@@ -125,7 +169,7 @@
   </kdevfileview>
   <cppsupportpart>
     <filetemplates>
-      <interfacesuffix>.h</interfacesuffix>
+      <interfacesuffix>.hpp</interfacesuffix>
       <implementationsuffix>.cpp</implementationsuffix>
     </filetemplates>
   </cppsupportpart>
@@ -140,4 +184,35 @@
     <ignoretocs/>
     <ignoredevhelp/>
   </kdevdoctreeview>
+  <kdevdocumentation>
+    <projectdoc>
+      <docsystem/>
+      <docurl/>
+      <usermanualurl>/home/prudhomm/scratch/Devel/LifeV/lifev-head/debug-3.3/doc/api/index.html</usermanualurl>
+    </projectdoc>
+  </kdevdocumentation>
+  <dist>
+    <custom>false</custom>
+    <bzip>false</bzip>
+    <archname/>
+    <appname>life</appname>
+    <version>0.7.0</version>
+    <release>0.7.0</release>
+    <vendor>The Life Project</vendor>
+    <licence>LGPL/GPL</licence>
+    <summary>A C++ Finite Element Library</summary>
+    <group/>
+    <packager>Christophe Prud'homme</packager>
+    <description/>
+    <changelog/>
+    <devpackage>false</devpackage>
+    <docspackage>false</docspackage>
+    <appicon>false</appicon>
+    <arch>0</arch>
+    <genHTML>false</genHTML>
+    <useRPM>false</useRPM>
+    <ftpkde>false</ftpkde>
+    <appskde>false</appskde>
+    <url/>
+  </dist>
 </kdevelop>
