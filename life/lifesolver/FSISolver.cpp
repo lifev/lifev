@@ -119,7 +119,7 @@ FSISolver::iterate( Real time )
 
 
     M_oper->fluid().timeAdvance( M_oper->fluid().sourceTerm(), time);
-    M_oper->solid().timeAdvance( M_oper->fluid().sourceTerm(), time);
+    M_oper->solid().timeAdvance( M_oper->solid().sourceTerm(), time);
     M_oper->setTime(time);
 
     // displacement prediction
