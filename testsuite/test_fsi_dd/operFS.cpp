@@ -258,17 +258,18 @@ void operFS::eval(const Vector& disp,
 
     Vector sol(disp.size());
 
-    M_solid.d() = setDispOnInterface(disp);
+//    M_solid.d() = setDispOnInterface(disp);
+    M_solid.d() = disp;
 
     M_solid._recur = 0;
     M_solid.iterate(sol);
 
-    M_solid.postProcess();
+//    M_solid.postProcess();
 
     M_fluid.updateMesh(M_time);
     M_fluid.iterate   (M_time);
 
-    M_fluid.postProcess();
+//    M_fluid.postProcess();
 
     dispNew = M_solid.d();
     velo    = M_solid.w();
@@ -385,14 +386,11 @@ void  operFS::solveLinearSolid()
 
     std::cout << "rhs_dz norm = " << maxnorm(M_rhs_dz) << std::endl;
     M_solid._recur = 1;
+    Vector null(M_dz.size()); // null displacement for Jacobian matrix update
+    null = 0.;
+    M_solid.updateJac(null, 0);
     M_solid.solveJac(M_dz, M_rhs_dz, tol, M_BCh_dz);
-//    M_solid.solveJac(M_dz, M_rhs_dz, tol);
     std::cout << "dz norm     = " << maxnorm(M_dz) << std::endl;
-
-//     for (int ii = 0; ii < M_dz .size(); ++ii)
-//         std::cout << M_rhs_dz[ii] << " " << M_dz[ii] << std::endl;
-
-//    M_BCh_dz.showMe();
 }
 
 

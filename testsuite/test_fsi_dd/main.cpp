@@ -229,7 +229,7 @@ int main(int argc, char** argv)
     fluid.initialize(u0);
     solid.initialize(d0,w0);
 
-    Real abstol = 5.e-7;
+    Real abstol = 5.e-6;
     Real reltol = 1.e-4;
     Real etamax = 1.e-3;
 
@@ -261,7 +261,10 @@ int main(int argc, char** argv)
 
         // displacement prediction
 
-        disp   = solid.d() + dt*(1.5*solid.w() - 0.5*velo_1);
+        if (time == 2*dt)
+            disp = solid.d() + dt*solid.w();
+        else
+            disp   = solid.d() + dt*(1.5*solid.w() - 0.5*velo_1);
 
         velo_1 = solid.w();
 
