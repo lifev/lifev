@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------*
 | LifeV main header file                                               |
 |                                                                      |
-| $Header: /cvsroot/lifev/lifev/life/lifecore/Attic/lifeV.hpp,v 1.3 2004-02-24 13:28:11 prudhomm Exp $                                                             |
+| $Header: /cvsroot/lifev/lifev/life/lifecore/Attic/lifeV.hpp,v 1.4 2004-02-25 14:52:31 prudhomm Exp $                                                             |
 |                                                                      |
 | #Version  0.0 Experimental   9/7/99. Luca Formaggia                  |
 |           0.1 Experimental  10/8/99. Jean-Fred Gerbeau.              |
@@ -39,31 +39,31 @@
 
 # include <string>
 
-#define ABORT() abort()
+#define ABORT() std::abort()
 
 
 // debugging macros
 # define ERROR_MSG(A)  \
-   do { cerr << endl << endl << A << endl << endl ; ABORT() ; } while (0)
+   do { std::cerr << std::endl << std::endl << A << std::endl << std::endl ; ABORT() ; } while (0)
 
 
   
 # define ASSERT0(X,A) if ( !(X) ) \
-ERROR_MSG(A << endl << "Error in file" << __FILE__ << " line " << __LINE__) ;
+ERROR_MSG(A << std::endl << "Error in file" << __FILE__ << " line " << __LINE__) ;
 
 
 # define ASSERT_PRE0(X,A) if ( !(X) ) \
-ERROR_MSG(A << endl << "Precondition Error " << "in file " << __FILE__ \
+ERROR_MSG(A << std::endl << "Precondition Error " << "in file " << __FILE__ \
 	    << " line " << __LINE__) ;
 
 
 # define ASSERT_POS0(X,A) if ( !(X) ) \
-ERROR_MSG(A << endl <<"Postcondition Error " << "in file " << __FILE__ \
+ERROR_MSG(A << std::endl <<"Postcondition Error " << "in file " << __FILE__ \
 	    << " line " << __LINE__) ;
 
 
 # define ASSERT_INV0(X,A)  if ( !(X) ) \
-ERROR_MSG(A <<endl <<  "Invariant Error " << "in file " << __FILE__  \
+ERROR_MSG(A <<std::endl <<  "Invariant Error " << "in file " << __FILE__  \
 	  << " line " << __LINE__) ;
 
 # define ASSERT_BD0(X)  if ( !(X) ) \
@@ -182,7 +182,7 @@ const UInt nDimensions=3;
 
 #undef VERSION_2D
 # define MSG(A)  \
-   do { cout << A << endl ; } while (0)
+   do { std::cout << A << std::endl ; } while (0)
 
 // Trace the constructors and destructors
 #ifdef TRACE_CONSTRUCTOR
