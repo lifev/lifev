@@ -27,7 +27,7 @@ include $(top_srcdir)/testsuite/Makefile.testsuite
 TESTS			= test_mesh
 check_PROGRAMS		= test_mesh
 
-test_mesh_SOURCES	= main.cpp
+test_mesh_SOURCES	= test_mesh.cpp
  
 test_mesh_LDFLAGS       =-lg2c
 
