@@ -32,22 +32,40 @@ AC_PROG_F77_C_O
 
 # check for libtool
 AC_PROG_LIBTOOL
+AC_ARG_WITH([aztec], 
+ AS_HELP_STRING([--with-aztec],[tell where aztec resides]),
+ [
+  # AZTEC check
+  AC_MSG_CHECKING([Aztec headers files presence])
+  ac_aztec_includedirs="$REPOSITORY/$ARCH/include/Aztec_LifeV/ /usr/include /usr/local/include"
+  ac_aztec_includedir="$withval/include"
+  AC_MSG_RESULT([$ac_aztec_includedir])
+  CXXFLAGS="-I$ac_aztec_includedir ${CXXFLAGS}"
 
-# AZTEC check
-AC_MSG_CHECKING([Aztec headers files presence])
-ac_aztec_includedirs="$REPOSITORY/$ARCH/include/Aztec_LifeV/ /usr/include /usr/local/include"
-AC_FIND_FILE("az_aztec.h",$ac_aztec_includedirs , ac_aztec_includedir)
-AC_MSG_RESULT([$ac_aztec_includedir])
-CXXFLAGS="-I$ac_aztec_includedir ${CXXFLAGS}"
+  AC_MSG_CHECKING([Aztec libraries presence])
+  ac_aztec_libdir="$withval/lib"
+  LDFLAGS="${LDFLAGS} -L${ac_aztec_libdir}"
+  aztec_libs="-laztec"
+  AC_SUBST(aztec_libs)
+  AC_MSG_RESULT([$aztec_libs])
+ ],
+ [
+  # AZTEC check
+  AC_MSG_CHECKING([Aztec headers files presence])
+  ac_aztec_includedirs="$REPOSITORY/$ARCH/include/Aztec_LifeV/ /usr/include /usr/local/include"
+  AC_FIND_FILE("az_aztec.h",$ac_aztec_includedirs , ac_aztec_includedir)
+  AC_MSG_RESULT([$ac_aztec_includedir])
+  CXXFLAGS="-I$ac_aztec_includedir ${CXXFLAGS}"
 
-AC_MSG_CHECKING([Aztec libraries presence])
-ac_aztec_libdirs="$REPOSITORY/$ARCH/lib$AFFIX/Aztec_LifeV/ /usr/lib /usr/local/lib"
-AC_FIND_FILE("libaztec.a", $ac_aztec_libdirs, ac_aztec_libdir)
-# echo $ac_aztec_libdir
-LDFLAGS="${LDFLAGS} -L${ac_aztec_libdir}"
-aztec_libs="-laztec"
-AC_SUBST(aztec_libs)
-AC_MSG_RESULT([$aztec_libs])
+  AC_MSG_CHECKING([Aztec libraries presence])
+  ac_aztec_libdirs="$REPOSITORY/$ARCH/lib$AFFIX/Aztec_LifeV/ /usr/lib /usr/local/lib"
+  AC_FIND_FILE("libaztec.a", $ac_aztec_libdirs, ac_aztec_libdir)
+  # echo $ac_aztec_libdir
+  LDFLAGS="${LDFLAGS} -L${ac_aztec_libdir}"
+  aztec_libs="-laztec"
+  AC_SUBST(aztec_libs)
+  AC_MSG_RESULT([$aztec_libs])
+ ])
 
 CXXFLAGS="-I/usr/include/blitz ${CXXFLAGS}"
 CXXFLAGS="-I\$(top_srcdir)/life/lifecore -I\$(top_srcdir)/life/lifemesh -I\$(top_srcdir)/life/lifefem ${CXXFLAGS}"
