@@ -32,8 +32,6 @@ CurrentFE::CurrentFE(const RefFE& _refFE,const GeoMap& _geoMap,const QuadRule& _
       }
     }
   }
-  std::cerr << "N= " << point.N() << "\n"
-	    << "M= " << point.M() << "\n";
 
 #ifdef TEST_PRE
   _hasJac = false;

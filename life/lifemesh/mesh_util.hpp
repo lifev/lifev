@@ -81,8 +81,6 @@ Real checkVolumes(RegionMesh3D const & mesh, SimpleVect<bool> & elSign, Switch &
   case TETRA:
   {
     CurrentFE fe(feTetraP1,geoLinearTetra,quadRuleTetra1pt);
-    std::cerr << "N= " << fe.point.N() << "\n"
-	      << "M= " << fe.point.M() << "\n";
     for(ID i = 1; i<=mesh.numVolumes(); i++){
       fe.updateJac(mesh.volume(i));
       lmeas = fe.measure();
