@@ -37,7 +37,7 @@ extern "C"
 
 #include <vecUnknown.hpp>
 
-namespace life
+namespace Life
 {
 /*!
   \typedef enum SMonitorType

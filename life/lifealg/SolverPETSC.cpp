@@ -38,7 +38,7 @@ extern "C"
 };
 
 
-namespace life
+namespace Life
 {
 
 class SolverPETSC::Private
