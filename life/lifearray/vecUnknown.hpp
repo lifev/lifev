@@ -170,14 +170,6 @@ public:
         _size( RhPhysVectUnknown.size() )
         {}
 
-
-#if 0
-    PhysVectUnknown& operator=( double __val )
-        {
-            super::operator=( __val );
-            return *this;
-        }
-#endif
     PhysVectUnknown& operator=( VectorType const& __v )
         {
             if ( this == &__v )
@@ -227,13 +219,6 @@ public:
         {}
     explicit ScalUnknown( UInt const Ndof );
     ScalUnknown( const ScalUnknown<VectorType> &RhScalUnknown );
-#if 0
-    ScalUnknown& operator=( double __val )
-        {
-            super::operator=( __val );
-            return *this;
-        }
-#endif
 
     ScalUnknown& operator=( VectorType const& __v )
         {
@@ -341,104 +326,6 @@ public:
 };
 
 ///////////////////////////////////////////////////////////
-#if 0
-class Vector
-{
-    Tab1d _v;
-public:
-
-    //!< Default constructor we need for IML++
-    Vector()
-        :
-        _v( 0 )
-        {}
-
-    Vector( Vector const &ex_v )
-        :
-        _v( ex_v.v() )
-        {}
-    Vector( UInt n )
-        :
-        _v( ( int ) n )
-        {
-            _v = 0.0;
-        }
-    void
-    showMe( std::ostream& c = std::cout ) const
-        {
-            c << _v ;
-            c << std::endl;
-        }
-    Tab1dView v() const
-        {
-            return _v;
-        }
-    UInt size() const
-        {
-            return _v.size();
-        }
-    //operators
-    Vector operator=( Vector const &ex_v )
-        {
-            if ( &ex_v != this )
-            {
-#if 0
-                if ( _v.size() == 0 )
-                {
-                    this->~Vector();
-                    new ( this ) Vector( ex_v );
-                }
-                else
-                    _v = ex_v.v();
-#else
-                _v.resize( ex_v.size() );
-                _v = ex_v.v();
-#endif
-            };
-            return *this;
-        }
-    Vector operator=( double const val )
-        {
-            for ( int i = 0; i < _v.N(); i++ )
-                _v( i ) = val;
-            return *this;
-        }
-    Vector operator-=( Vector const &ex_v )
-        {
-            _v -= ex_v.v();
-            return *this;
-        }
-    Vector operator+=( Vector const &ex_v )
-        {
-            _v += ex_v.v();
-            return *this;
-        }
-    double & operator() ( const int i ) const
-        {
-            return _v( i );
-        }
-    double & operator[] ( const int i ) const
-        {
-            return _v( i );
-        }
-
-    friend Vector operator+( Vector const &ex_v1, Vector const &ex_v2 );
-    friend Vector operator-( Vector const &ex_v1, Vector const &ex_v2 );
-    friend Vector operator*( Vector const &ex_v, double const val );
-    friend Vector operator*( double const val, Vector const &ex_v );
-
-    //! vector inner product
-    friend double dot( Vector const &ex_v1, Vector const &ex_v2 );
-    friend inline double l2norm( Vector const &ex_v )
-        {
-            return sqrt( dot( ex_v, ex_v ) );
-        }
-};
-#else
-
-
-#endif
-
 inline VectorBlock
 operator+( VectorBlock const &ex_v1, VectorBlock
            const &ex_v2 )
@@ -659,44 +546,6 @@ GenericVecHdl( const GenericVecHdl<VectorType> &RhGenVec,
 template <>
 GenericVecHdl<VectorBlock>::GenericVecHdl( const GenericVecHdl<VectorBlock> &RhGenVec,
                                            const PhysVectUnknown<VectorBlock> &RhPhVU );
-
-
-//////////////////////////////
-// class Vector
-/////////////////////////////
-#if 0
-inline Vector operator+( Vector const &ex_v1, Vector const &ex_v2 )
-{
-    ASSERT( ex_v1._v.N() == ex_v2._v.N(), " wrong dimension of vector" );
-    Vector ans( ex_v1._v.N() );
-    ans = ex_v1;
-    ans += ex_v2;
-    return ans;
-}
-inline Vector operator-( Vector const &ex_v1, Vector const &ex_v2 )
-{
-    ASSERT( ex_v1._v.N() == ex_v2._v.N(), " wrong dimension of vector" );
-    Vector ans( ex_v1._v.N() );
-    ans = ex_v1;
-    ans -= ex_v2;
-    return ans;
-}
-inline Vector operator*( Vector const &ex_v, double const val )
-{
-    Vector ans( ex_v._v.N() );
-    ans._v = ex_v._v;
-    ans._v *= val;
-    return ans;
-}
-inline Vector operator*( double const val, Vector const &ex_v )
-{
-    return ex_v * val;
-}
-inline double dot( Vector const &ex_v1, Vector const &ex_v2 )
-{
-    return ( ex_v1._v, ex_v2._v );
-}
-#endif
 
 }
 #endif

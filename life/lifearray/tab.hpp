@@ -282,14 +282,6 @@ typedef KNM<R> RNM;
 typedef KNM_<R> RNM_;
 typedef KN<R> RN;
 typedef KN_<R> RN_;
-#if 0
-
-typedef KNM<Real> Tab2d;
-typedef KNM_<Real> Tab2dView;
-typedef KN<Real> Tab1d;
-typedef KN_<Real> Tab1dView;
-#else
-
 
 #if 0
 typedef boost::numeric::ublas::matrix<R> RNM;
@@ -333,7 +325,7 @@ maxnorm( Vector const &ex_v )
 {
     return boost::numeric::ublas::norm_inf( ex_v );
 }
-#endif
+
 /*!
   \typedef Fct1D is a pointer on a function taking a real as argument
   and returning a real
