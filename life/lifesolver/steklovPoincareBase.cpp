@@ -474,7 +474,10 @@ void my_matvecSfSsPrime(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
 
             my_data->M_pFS->getQuasiNewton()->setDacc(da);
             my_data->M_pFS->getQuasiNewton()->solveReducedLinearFluid();
+
+            my_data->M_pFS->solid().d() = zSolid;
             my_data->M_pFS->solveLinearSolid();
+
             my_data->M_pFS->setResidualS(my_data->M_pFS->solid().residual());
             my_data->M_pFS->setResidualF(my_data->M_pFS->getQuasiNewton()->residual());
         }
