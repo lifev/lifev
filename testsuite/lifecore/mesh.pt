@@ -1,0 +1,6 @@
+[mesh]
+file = mesh1;
+check = 1;
+facemarkers = 1;
+logfile = mesh.log;
+

@@ -20,8 +20,6 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .cc
 
-SUBDIRS		= . testsuite
-
 include_HEADERS		= GetPot.hpp  LDebug.hpp\
 chrono.hpp dataString.hpp dataTime.hpp fortran_wrap.hpp \
 lifeV.hpp post_proc.hpp subDomainNeighbors.hpp switch.hpp \
