@@ -45,7 +45,6 @@ reducedLinFluid::reducedLinFluid(FSIOperator* const _op,
     M_f(M_dim),
     M_computedC(false),
     M_computedResidual(false)
-
 {
 }
 
@@ -102,7 +101,6 @@ void reducedLinFluid::solveReducedLinearFluid()
     M_linearSolver.solve( M_dp, M_f, SolverAztec::SAME_PRECONDITIONER );
 
     M_computedResidual = false;
-
     M_minusdp = -1.0*M_dp;
 }
 
@@ -110,90 +108,32 @@ void reducedLinFluid::solveReducedLinearFluid()
 void reducedLinFluid::evalResidual()
 
 {
-    M_residual_dp = ZeroVector(M_residual_dp.size());
+    M_residual_dp= ZeroVector(M_residual_dp.size());
+    BCHandler BCh;
 
-    bchandler_type BCb = M_FSIOperator->BCh_mesh();
+    FSIOperator::dof_interface_type dofReducedFluidToMesh
+        (new FSIOperator::dof_interface_type::element_type);
 
-    if (!BCb->bdUpdateDone())
-        BCb->bdUpdate(M_fluid->mesh(), M_fluid->feBd_u(), M_fluid->uDof() );
+    dofReducedFluidToMesh->setup(feTetraP1bubble, M_fluid->uDof(),
+                                 feTetraP1, M_fluid->pDof());
+    dofReducedFluidToMesh->update(M_fluid->mesh(), 1,
+                                  M_fluid->mesh(), 1,
+                                  0.0);
 
-    UInt iBC = BCb->getBCbyName("Interface");
-    // Number of local Dof (i.e. nodes) in this face
-    UInt nDofF = this->M_feBd.nbNode;
+    UInt dim_press = M_fluid->pDof().numTotalDof();
 
-    // Number of total scalar Dof
-    UInt totalDof = this->M_dof.numTotalDof();
+    BCVectorInterface p_wall(this->M_dp,
+                             dim_press,
+                             dofReducedFluidToMesh,
+                             1);
 
-    // Number of components involved in this boundary condition
-    UInt nComp = (*BCb)[iBC].numberOfComponents();
+    BCh.addBC("Interface", 1, Natural, Full, p_wall, 3);
+    BCh.bdUpdate(this->M_fluid->mesh(),
+                 this->M_feBd,
+                 this->M_dof);
 
-    const IdentifierNatural* pId;
-    ID ibF, idDof, icDof, gDof;
-
-    std::cout << "iBC = " << iBC << std::endl;
-    std::cout << "NoC = " << nComp << std::endl;
-    std::cout << "dof = " << totalDof << std::endl;
-
-    for ( ID i = 1; i <= (*BCb)[iBC].list_size(); ++i )
-    {
-        // Pointer to the i-th itdentifier in the list
-        pId = static_cast< const IdentifierNatural* >( (*BCb)[iBC]( i ) );
-
-        // Number of the current boundary face
-        ibF = pId->id();
-
-        std::cout << "iBF = " << ibF << std::flush << std::endl;
-        // Updating face stuff
-        M_feBd.updateMeasNormalQuadPt( M_fluid->mesh().boundaryFace( ibF ) );
-
-        std::cout << "normal updated ... " << std::flush << std::endl;
-        // Loop on total Dof per Face
-        for ( ID l = 1; l <= nDofF; ++l )
-        {
-            gDof = pId->bdLocalToGlobal( l );
-
-            std::cout << "gDof = " << gDof << std::flush << std::endl;
-            // Loop on components involved in this boundary condition
-            for ( UInt ic = 0; ic < nComp; ++ic )
-            {
-                icDof = gDof + ic * totalDof;
-
-                // Loop on quadrature points
-                for ( int iq = 0; iq < M_feBd.nbQuadPt; ++iq )
-                {
-                    std::cout << icDof << " " << gDof << std::flush << std::endl;
-                    // Adding right hand side contribution
-                    M_residual_dp[ icDof ] += M_dp[gDof]*
-                        M_feBd.phi( int( l - 1 ), iq )*
-                        M_feBd.normal( int( ic ), iq )*
-                        M_feBd.weightMeas( iq );
-                }
-            }
-        }
-    }
-
-
-
-//     for ( UInt gDof = 0; gDof < M_dp.size(); ++gDof )
-//     {
-//         M_feBd.updateMeasNormalQuadPt( M_fluid->mesh().boundaryFace( gDof ) );
-
-//         for ( ID l = 1; l <= nDofF; ++l )
-//             for ( UInt ic = 0; ic < nComp; ++ic )
-//             {
-//                 icDof = gDof + ic * totalDof;
-
-//                 // Loop on quadrature points
-//                 for ( int iq = 0; iq < this->M_feBd.nbQuadPt; ++iq )
-//                 {
-//                     M_residual_dp[ icDof ] += M_dp[gDof]*
-//                         this->M_feBd.phi( int( l - 1 ), iq )*
-//                         this->M_feBd.normal( int( ic ), iq )*
-//                         this->M_feBd.weightMeas( iq );
-//                 }
-//             }
-//         std::cout << icDof << "->" << gDof << "->" << M_residual_dp[ icDof ] << std::endl;
-//    }
+    bcManageVector(M_residual_dp, M_fluid->mesh(), M_fluid->pDof(), BCh,
+             this->M_feBd, 1.0, M_FSIOperator->time());
 
     M_computedResidual = true;
 

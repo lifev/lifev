@@ -78,7 +78,7 @@ public:
 private:
 
     //! pointer to FSIOperator
-    FSIOperator*          M_FSIOperator;
+    FSIOperator*     M_FSIOperator;
 
     //! pointer to fluid
     fluid_type       M_fluid;
