@@ -30,6 +30,7 @@ INCLUDES 	= -I$(top_srcdir)/life/lifecore -I$(top_srcdir)/life/lifearray -I$(top
 include_HEADERS		= Operator01.hpp assemb.hpp\
 bcCond.hpp bcFunction.hpp bcVector.hpp bcHandler.hpp \
 bdf.hpp bdfNS.hpp \
+interpolate.hpp \
 bcManage.hpp currentBdFE.hpp currentFE.hpp currentHdivFE.hpp \
 dof.hpp dofInterface3Dto2D.hpp dofInterface3Dto3D.hpp dofInterfaceBase.hpp \
 dofInterfaceHandler.hpp  elemOper.hpp elemOper_ext.hpp \
