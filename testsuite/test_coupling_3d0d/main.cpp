@@ -62,22 +62,22 @@ struct toMedit
             std::cout << "============================================================\n"
                       << "Call medit writer here to save the data \n"
                       << "============================================================\n";
-            std::string name;
-            name +=  __it;
+            std::ostringstream name;
+            name <<  __it;
             int __dim_u = __u.size()/__u.nbcomp();
             // postprocess data file for medit
-            wr_medit_ascii_scalar( "press." + name + ".bb", __p.giveVec(), __p.size() );
-            wr_medit_ascii_scalar( "vel_x." + name + ".bb", __u.giveVec(), __mesh.numVertices() );
-            wr_medit_ascii_scalar( "vel_y." + name + ".bb", __u.giveVec() + __dim_u, __mesh.numVertices() );
-            wr_medit_ascii_scalar( "vel_z." + name + ".bb", __u.giveVec() + 2 * __dim_u, __mesh.numVertices() );
+            wr_medit_ascii_scalar( "press." + name.str() + ".bb", __p.giveVec(), __p.size() );
+            wr_medit_ascii_scalar( "vel_x." + name.str() + ".bb", __u.giveVec(), __mesh.numVertices() );
+            wr_medit_ascii_scalar( "vel_y." + name.str() + ".bb", __u.giveVec() + __dim_u, __mesh.numVertices() );
+            wr_medit_ascii_scalar( "vel_z." + name.str() + ".bb", __u.giveVec() + 2 * __dim_u, __mesh.numVertices() );
 
             std::string __dir = _M_data( "fluid/discretization/mesh_dir", "." );
             std::string __file = _M_data( "fluid/discretization/mesh_file", "mesh.mesh" );
 
-            system( ( "ln -s " + __dir + __file + " press." + name + ".mesh" ).data() );
-            system( ( "ln -s " + __dir + __file + " vel_x." + name + ".mesh" ).data() );
-            system( ( "ln -s " + __dir + __file + " vel_y." + name + ".mesh" ).data() );
-            system( ( "ln -s " + __dir + __file + " vel_z." + name + ".mesh" ).data() );
+            system( ( "ln -s " + __dir + __file + " press." + name.str() + ".mesh" ).data() );
+            system( ( "ln -s " + __dir + __file + " vel_x." + name.str() + ".mesh" ).data() );
+            system( ( "ln -s " + __dir + __file + " vel_y." + name.str() + ".mesh" ).data() );
+            system( ( "ln -s " + __dir + __file + " vel_z." + name.str() + ".mesh" ).data() );
         }
 private:
     GetPot _M_data;
@@ -184,7 +184,7 @@ int main(int argc, char** argv)
 
     // Temporal loop
     //
-    switch(strategy) 
+    switch(strategy)
       {
       case 1:
 	{
@@ -208,7 +208,7 @@ int main(int argc, char** argv)
 	  }
 	}
 	break;
-	
+
       case 2:
 	{
 	std::cout << "Flow Rate problem \n";
@@ -228,20 +228,20 @@ int main(int argc, char** argv)
 	ns_with_flux.doOnIterationFinish( EnsightFilter  );
 	toMedit MeditFilter( data_file );
 	ns_with_flux.doOnIterationFinish( MeditFilter  );
-	  
+
 	for (Real time=startT+dt ; time <= T; time+=dt){
 
 	  deltaP = ns_with_flux.pressure();
 
 	  ns_with_flux.setFlux(1, flux_adaptor( network.getQFromPressure(time, deltaP) ) );
-	      
+
 	  ns_with_flux.timeAdvance( f, time );
 	  ns_with_flux.iterate( time );
 	}
 	}
 	break;
-	
-      default: 
+
+      default:
         ERROR_MSG("No coupling strategy defined \n");
       }
 
