@@ -159,7 +159,17 @@ public:
                       << "see http://graceplot.sourceforge.net/ to install grace\n"
                       << "================================================================================\n";
         }
+    GracePlot( GetPot const& )
+        {
+            std::cerr << "================================================================================\n"
+                      << "WARNING: you are using the dummy graceplot class\n"
+                      << "because grace is not installed on your system\n"
+                      << "see http://graceplot.sourceforge.net/ to install grace\n"
+                      << "================================================================================\n";
+        }
     ~GracePlot(){ };
+
+    bool doPlot() const { return false; }
 
     void Title(string title) {}
 
