@@ -209,24 +209,38 @@ PhysVectUnknown<VectorBlock>::PhysVectUnknown( UInt const Ndof );
 template <typename VectorType>
 class ScalUnknown
     :
-        public VectorType
+    public VectorType
 {
-    UInt _size;
-    static const UInt _nbcomp = 1;
+    static const UInt _S_nbcomp = 1;
 public:
 
     typedef VectorType super;
 
     ScalUnknown()
+        :
+        super()
         {}
-    explicit ScalUnknown( UInt const Ndof );
-    ScalUnknown( const ScalUnknown<VectorType> &RhScalUnknown );
+    explicit ScalUnknown( UInt const Ndof )
+        :
+        super( Ndof )
+        {}
 
-    ScalUnknown& operator=( VectorType const& __v )
+    ScalUnknown( const ScalUnknown<VectorType> &RhScalUnknown )
+        :
+        super( RhScalUnknown )
+        {}
+
+    ScalUnknown& operator=( ScalUnknown const& __v )
         {
             if ( this == &__v )
                 return * this;
             super::operator=( ( super const& )__v );
+            return *this;
+        }
+    template<typename VectorExpr>
+    ScalUnknown& operator=( VectorExpr const& __v )
+        {
+            super::operator=( __v );
             return *this;
         }
     //! gives the front of the vector
@@ -237,11 +251,11 @@ public:
 
     UInt size() const
         {
-            return _size;
+            return this->size();
         }
-    UInt nbcomp() const
+    static UInt nbcomp()
         {
-            return _nbcomp;
+            return _S_nbcomp;
         }
 };
 
@@ -403,24 +417,6 @@ point2Vector( double const * point, VectorType & v )
   IMPLEMENTATION
   /-------------------------------------------------------*/
 
-
-//////////////////////////////
-// class ScalUnknown
-/////////////////////////////
-
-template <typename VectorType>
-ScalUnknown<VectorType>::ScalUnknown( UInt const Ndof )
-    :
-    super( Ndof ),
-    _size( Ndof )
-{}
-
-template <typename VectorType>
-ScalUnknown<VectorType>::ScalUnknown( const ScalUnknown<VectorType> &RhScalUnknown )
-    :
-    super( RhScalUnknown ),
-    _size( RhScalUnknown.size() )
-{}
 
 //////////////////////////////
 // class GenericVecHdl
