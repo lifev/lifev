@@ -19,6 +19,10 @@ Bugs fixed in 0.5.0:
 * Bug #33: random crash in convDiffReactSolverPC::getcoord (MM)
 * Sanitized the FSI related classes especially wrt BC (CP)
 
+[testsuite] 
+* Fixed inhomogeneous Neumann conditions test. The test was supposed
+to test these BCs but it was only testing Dirichlet BCs (CW)
+
 New in 0.5.0:
 =============
 [configure]
@@ -212,4 +216,4 @@ New in 0.1.0pre3:
 * fixed some bugs and miscompilation in a few places
 
 
- -- Christophe Prud'homme <prudhomm@mit.edu>, Fri Nov 19 12:02:17 2004
+ -- Christophe Prud'homme <prudhomm@mit.edu>, Tue Nov 30 08:40:19 2004
