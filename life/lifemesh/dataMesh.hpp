@@ -57,16 +57,18 @@ class DataMesh
 
   //! The mesh
   Mesh& mesh();
-  
   //! Virtual destructor
   virtual ~DataMesh();
 
  protected: 
  
   //! mesh 
-  string _mesh_dir;  // mesh dir
-  string _mesh_file; // mesh fil
-  Mesh   _mesh;      // the mesh
+  string _mesh_dir;   // mesh dir
+  string _mesh_file;  // mesh files
+  string _mesh_type;  // mesh fil
+  string _mesh_faces; // update all mesh faces
+  string _mesh_edges; // update all mesh edges
+  Mesh   _mesh;       // the mesh
 
 };
 
@@ -83,14 +85,26 @@ DataMesh(const GetPot& dfile, const string& section)
 {
   _mesh_dir  = dfile((section+"/mesh_dir").data(),"./");
   _mesh_file = dfile((section+"/mesh_file").data(),"mesh.mesh");
+  _mesh_type = dfile((section+"/mesh_type").data(),".mesh");
+  _mesh_faces = dfile((section+"/mesh_faces").data(),"boundary");
+  _mesh_edges = dfile((section+"/mesh_edges").data(),"boundary");
 
-#ifdef MESH_INRIA
-  readINRIAMeshFile(_mesh, _mesh_dir+_mesh_file, 1); // mesh readding
-#else // MESH_MOX
-  readMppFile(_mesh,_mesh_dir+_mesh_file,1);
-#endif
-  _mesh.updateElementEdges();
-  _mesh.updateElementFaces();
+  
+  if ( _mesh_type == ".mesh" ) 
+    readINRIAMeshFile(_mesh, _mesh_dir+_mesh_file, 1); // mesh readding
+  else if ( _mesh_type == ".m++" )
+    readMppFile(_mesh,_mesh_dir+_mesh_file,1);
+  else 
+    ERROR_MSG("Sorry, this mesh file can not be loaded");
+
+  if ( _mesh_edges == "all" ) 
+    _mesh.updateElementEdges(true);
+  else 
+    _mesh.updateElementEdges();
+  if ( _mesh_faces == "all" ) 
+    _mesh.updateElementFaces(true);
+  else 
+    _mesh.updateElementFaces();
  
 }
 
@@ -106,8 +120,11 @@ void DataMesh<Mesh>::
 showMe(ostream& c) const
 {
   // mesh
-  c << "mesh_dir  = " << _mesh_dir << endl; 
-  c << "mesh_file = " << _mesh_file << endl; 
+  c << "mesh_dir   = " << _mesh_dir << endl; 
+  c << "mesh_file  = " << _mesh_file << endl;
+  c << "mesh_type  = " << _mesh_type << endl;
+  c << "mesh_edges = " << _mesh_edges << endl;
+  c << "mesh_faces = " << _mesh_faces << endl;
 }
 
 
