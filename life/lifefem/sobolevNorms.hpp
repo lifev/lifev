@@ -193,6 +193,7 @@ Real elem_L2_diff_2( VectorType & u, UsrFct& fct, const CurrentFE& fe,
     return s;
 }
 
+//! returns the square of the L2 norm of (u-fct) on the current element
 //! for time dependent+vectorial
 template <typename VectorType, typename UsrFct, typename DOF>
 Real elem_L2_diff_2( VectorType & u, UsrFct& fct, const CurrentFE& fe,
@@ -300,5 +301,35 @@ Real elem_H1_diff_2( const VectorType & u, const UsrFct& fct, const CurrentFE& f
     }
     return s;
 }
+
+//! returns the integral of (u-fct) on the current element
+//! for time dependent+vectorial
+template <typename VectorType, typename UsrFct, typename DOF>
+Real elem_integral_diff( VectorType & u, UsrFct& fct, const CurrentFE& fe,
+                    const DOF& dof, const Real t, const int nbcomp )
+{
+    // returns the integral of (u-fct) on the current element
+    int i, inod, ig;
+    UInt eleID = fe.currentId();
+    int ic;
+    Real s = 0., u_ig, u_minus_f, x, y, z;
+    for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+    {
+        for ( ic = 0; ic < nbcomp; ic++ )
+        {
+            u_ig = 0.;
+            for ( i = 0;i < fe.nbNode;i++ )
+            {
+                inod = dof.localToGlobal( eleID, i + 1 ) - 1 + ic * dof.numTotalDof();
+                u_ig += u( inod ) * fe.phi( i, ig );
+            }
+            fe.coorQuadPt( x, y, z, ig );
+            u_minus_f = u_ig - fct( t, x, y, z, ic + 1 );
+            s += u_minus_f * fe.weightDet( ig );
+        }
+    }
+    return s;
 }
+
+} // namespace LifeV
 #endif
