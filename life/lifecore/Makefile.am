@@ -22,13 +22,13 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .cc
 
 SUBDIRS		= . testsuite
 
-include_HEADERS		= GetPot.hpp  \
+include_HEADERS		= GetPot.hpp  LDebug.hpp\
 chrono.hpp dataString.hpp dataTime.hpp fortran_wrap.hpp \
 lifeV.hpp post_proc.hpp subDomainNeighbors.hpp switch.hpp \
 util_string.hpp 
 
 lib_LTLIBRARIES		= liblifecore.la
-liblifecore_la_SOURCES	= GetPot.cpp  dataString.cpp \
+liblifecore_la_SOURCES	= GetPot.cpp  LDebug.cpp dataString.cpp \
 dataTime.cpp subDomainNeighbors.cpp switch.cpp util_string.cpp 
 
 
