@@ -395,6 +395,7 @@ PhysVectUnknown<VectorType>::PhysVectUnknown(UInt const Ndof)
 }
 
 //! the case of VectorBlock type
+template<>
 PhysVectUnknown<VectorBlock>::PhysVectUnknown(UInt const Ndof);
 
 template<typename VectorType>
@@ -456,8 +457,9 @@ GenericVecHdl<VectorType>::GenericVecHdl(const ScalUnknown<VectorType> &RhScU1, 
   for (UInt i=0; i<RhScU2.size(); ++i) (*this)[i+RhScU1.size()]=RhScU2[i];
 }
 //! the case of VectorBlock type
+template<>
 GenericVecHdl<VectorBlock>::GenericVecHdl(const ScalUnknown<VectorBlock> &RhScU1,
-					  const ScalUnknown<VectorBlock> &RhScU2);
+                                          const ScalUnknown<VectorBlock> &RhScU2);
 
 
 //! construction from a physical vectorial unknown:
@@ -482,14 +484,14 @@ GenericVecHdl<VectorType>::GenericVecHdl(const PhysVectUnknown<VectorType> &RhPh
   for (UInt i=0; i<RhScU.size(); ++i) (*this)[RhPhVU.size()+i]=RhScU[i];
 }
 //! the case of VectorBlock type
-GenericVecHdl<VectorBlock>::
-GenericVecHdl(const PhysVectUnknown<VectorBlock> &RhPhVU,
-	      const ScalUnknown<VectorBlock> &RhScU);
+template<>
+GenericVecHdl<VectorBlock>::GenericVecHdl(const PhysVectUnknown<VectorBlock> &RhPhVU,
+                                          const ScalUnknown<VectorBlock> &RhScU);
 
 
 template<typename VectorType>
 GenericVecHdl<VectorType>::GenericVecHdl(const ScalUnknown<VectorType> &RhScU,
-					 const PhysVectUnknown<VectorType> &RhPhVU)
+                                         const PhysVectUnknown<VectorType> &RhPhVU)
     :
     super(RhPhVU.size()+RhScU.size()),
     _size(RhPhVU.size()+RhScU.size()),
@@ -499,8 +501,9 @@ GenericVecHdl<VectorType>::GenericVecHdl(const ScalUnknown<VectorType> &RhScU,
   for (UInt i=0; i<RhPhVU.size(); ++i) (*this)[RhScU.size()+i]=RhPhVU[i];
 }
 //! the case of VectorBlock type
-GenericVecHdl<VectorBlock>::
-GenericVecHdl(const ScalUnknown<VectorBlock> &RhScU, const PhysVectUnknown<VectorBlock> &RhPhVU);
+template<>
+GenericVecHdl<VectorBlock>::GenericVecHdl(const ScalUnknown<VectorBlock> &RhScU,
+                                          const PhysVectUnknown<VectorBlock> &RhPhVU);
 
 
 //! construction from a physical vectorial unknown and a generic unknown:
@@ -516,8 +519,9 @@ GenericVecHdl<VectorType>::GenericVecHdl(const PhysVectUnknown<VectorType> &RhPh
   for (UInt i=0;i<RhGenVec.size();++i) (*this)[RhPhVU.size()+i]=RhGenVec[i];
 }
 //! the case of VectorBlock type
+template<>
 GenericVecHdl<VectorBlock>::GenericVecHdl(const PhysVectUnknown<VectorBlock> &RhPhVU,
-					  const GenericVecHdl<VectorBlock> &RhGenVec);
+                                          const GenericVecHdl<VectorBlock> &RhGenVec);
 
 
 template<typename VectorType>
@@ -532,9 +536,9 @@ GenericVecHdl(const GenericVecHdl<VectorType> &RhGenVec,
   for (UInt i=0;i<RhPhVU.size();++i) (*this)[i+RhGenVec.size()]=RhPhVU[i];
 }
 //! the case of VectorBlock type
-GenericVecHdl<VectorBlock>::
-GenericVecHdl(const GenericVecHdl<VectorBlock> &RhGenVec,
-	      const PhysVectUnknown<VectorBlock> &RhPhVU);
+template<>
+GenericVecHdl<VectorBlock>::GenericVecHdl(const GenericVecHdl<VectorBlock> &RhGenVec,
+                                          const PhysVectUnknown<VectorBlock> &RhPhVU);
 
 
 //////////////////////////////
