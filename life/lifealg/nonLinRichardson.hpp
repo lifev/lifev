@@ -87,63 +87,71 @@ int nonLinRichardson( Vector& sol,
     step = 0.;
     muk  = 0.;
 
-    Real normMukOld = 1;
+    Real normResOld = 1;
 
     Real omegaS = omega;
     Real omegaF = omega;
 
+        std::cout << "------------------------------------------------------------------" << std::endl;
+        std::cout << "  NonLinRichardson: starting " << std::endl;
+        std::cout << "------------------------------------------------------------------" << std::endl;
     f.evalResidual( residual, sol, iter );
 
-//@    Real normMuk      = norm( residual );
-    Real normMuk      = norm( step );
-    Real stop_tol     = abstol + reltol*normMuk;
+    Real normRes      = norm( residual );
+    Real normMuk      = normRes;
+    Real stop_tol     = abstol + reltol*normRes;
     Real linearRelTol = fabs(eta_max);
 
     generalizedAitken<Vector, Real> aitken( nDofFS, omegaS, omegaF );
 
     //
 
-    out_res << time << "    " << iter << "   " << normMuk << std::endl;
+    out_res << time << "    " << iter << "   " << normRes << std::endl;
 
-    normMuk = 1.;
+//@    normMuk = 1.;
 
-    while ( normMuk > stop_tol && iter < maxit )
+    while ( normRes > stop_tol && iter < maxit )
     {
         std::cout << std::endl;
         std::cout << "------------------------------------------------------------------" << std::endl;
-        std::cout << "  NonLinRichardson: residual = " << normMuk
+        std::cout << "  NonLinRichardson: iter = " << iter
+		  << ", residual = " << normRes
                   << ", stoping tolerance = " << stop_tol << std::endl;
         std::cout << "------------------------------------------------------------------" << std::endl;
         std::cout << std::endl;
 
         iter++;
 
-        normMukOld = normMuk;
+        normResOld = normRes;
 
         f.solveJac(muk, residual, linearRelTol);
         step = aitken.computeDeltaLambda( sol, muk );
 
-        std::cout << "Step norm = " << norm( step ) << std::endl;
+        normMuk  = norm( muk );
+
+        std::cout << "Muk norm = " << normMuk << std::endl;
         out_res   << "iter = " << iter
-                  << " Step norm = " << norm( step );
+                  << " Muk norm = " << normMuk;
 
         sol += step;
 
         f.evalResidual( residual, sol, iter );
+	normRes = norm( residual );
+        out_res << " residual  norm = " << normRes << std::endl;
 
-        out_res << " muk norm = " << norm( muk ) << std::endl;
-
-        normMuk  = norm( muk );
     }
 
-    if ( normMuk > stop_tol )
+    if ( normRes > stop_tol )
     {
         std::cout << "!!! NonLinRichardson: convergence fails" << std::endl;
         maxit = iter;
         return 1;
     }
 
-    std::cout << "--- NonLinRichardson: convergence in " << iter << " iterations\n\n";
+    std::cout << "------------------------------------------------------------------" << std::endl;
+    std::cout << "--- NonLinRichardson: convergence (" << normRes
+	      <<") in " << iter << " iterations\n\n";
+    std::cout << "------------------------------------------------------------------" << std::endl;
 
     maxit = iter;
 

@@ -86,8 +86,13 @@ private:
     Real M_defOmegaF;
 
     //! first time call boolean
-
     bool M_firstCall;
+    
+    //! If default omega is negative, then always use the 
+    // absolute value of the default omega. In this case 
+    //  M_usedefault=true 
+    bool M_useDefault;
+    
 };
 
 //
@@ -109,6 +114,12 @@ generalizedAitken<Vector, Real>::generalizedAitken( const int _nDof,
     M_muF = 0.;
     M_lambda = 0.;
     M_firstCall = true;
+    if (( M_defOmegaS < 0 ) || ( M_defOmegaF< 0 ))
+    {
+        M_useDefault = true;
+    } else {
+        M_useDefault = false;
+    }
 }
 
 //
@@ -139,7 +150,7 @@ computeDeltaLambda( const Vector &_lambda,
 {
     Vector deltaLambda;
 
-    if ( !M_firstCall )
+    if (( !M_firstCall ) && ( !M_useDefault ))
     {
         Real a11 = 0.;
         Real a21 = 0.;
@@ -232,7 +243,7 @@ computeDeltaLambda( const Vector &_lambda,
     Vector deltaLambda;
 
 
-    if ( !M_firstCall )
+    if (( !M_firstCall ) && ( !M_useDefault ))
     {
         Vector deltaMu = _mu - M_muS;
         Real omega = 0.;
