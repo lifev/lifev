@@ -16,31 +16,32 @@
 */
 class QuadPoint
 {
-  Real _coor[3];
-  Real _weight;
+    Real _coor[3];
+    Real _weight;
 public:
-  QuadPoint():_weight(0){
-    _coor[0] = 0;_coor[1]=0;_coor[2]=0;
-  }
-  QuadPoint(Real x,Real y,Real z,Real weight):_weight(weight){
-    _coor[0] = x;_coor[1] = y;_coor[2] = z;
-  }
-  QuadPoint(Real x,Real y,Real weight):_weight(weight){
-    _coor[0] = x;_coor[1] = y;_coor[2] = 0.;
-  }
-  QuadPoint(Real x,Real weight):_weight(weight){
-    _coor[0] = x;_coor[1] = 0.;_coor[2] = 0.;
-  }
-  inline Real weight() const {return _weight;}
-  inline Real x() const {return _coor[0];}
-  inline Real y() const {return _coor[1];}
-  inline Real z() const {return _coor[2];}
-  inline Real coor(int i) const{ASSERT_BD(i>=0 && i<3);return _coor[i];}
-  friend ostream & operator << (ostream& c,const QuadPoint& pt){
-    c << "coor = " << pt._coor[0] << "," << pt._coor[1] << "," << pt._coor[2]
-      << "  weight = " << pt._weight ;
-    return c;
-  }
+    QuadPoint():_weight(0){
+	_coor[0] = 0;_coor[1]=0;_coor[2]=0;
+    }
+    QuadPoint(Real x,Real y,Real z,Real weight):_weight(weight){
+	_coor[0] = x;_coor[1] = y;_coor[2] = z;
+    }
+    QuadPoint(Real x,Real y,Real weight):_weight(weight){
+	_coor[0] = x;_coor[1] = y;_coor[2] = 0.;
+    }
+    QuadPoint(Real x,Real weight):_weight(weight){
+	_coor[0] = x;_coor[1] = 0.;_coor[2] = 0.;
+    }
+    inline Real weight() const {return _weight;}
+    inline Real x() const {return _coor[0];}
+    inline Real y() const {return _coor[1];}
+    inline Real z() const {return _coor[2];}
+    inline Real coor(int i) const{ASSERT_BD(i>=0 && i<3);return _coor[i];}
+    friend std::ostream & operator << ( std::ostream& c, const QuadPoint& pt)
+	{
+	    c << "coor = " << pt._coor[0] << "," << pt._coor[1] << "," << pt._coor[2]
+	      << "  weight = " << pt._weight ;
+	    return c;
+	}
 };
 
 
@@ -81,12 +82,12 @@ class QuadRule
 {
   const  QuadPoint* _pt;
 public:
-  QuadRule(const QuadPoint* pt,int _id,string _name,ReferenceShapes _shape,
+  QuadRule(const QuadPoint* pt,int _id, std::string _name,ReferenceShapes _shape,
 	   int _nbQuadPt,int _defOfExact);
   ~QuadRule();
   const ReferenceShapes shape;//!< geometrical shape of the domain on which the quadrature rule can be used
   const int id;//!< id of the quadrature rule. e.g. QR_GAUSS_LEGENDRE_1PT_1D
-  const string name; //!< name of the quadrature rule
+  const std::string name; //!< name of the quadrature rule
   const int nbQuadPt; //!< number of quadrature points
   const int degOfExact; //!< degree of exactness
   const QuadPoint& quadPoint(int ig) const//!< quadPoint(ig) is the ig-th quadrature point
@@ -98,7 +99,7 @@ public:
     ASSERT_BD(ig<nbQuadPt);
     return _pt[ig].coor(icoor);
   }
-  friend ostream& operator << (ostream& c,const QuadRule& qr);
+  friend std::ostream& operator << (std::ostream& c,const QuadRule& qr);
 };
 
 /*!

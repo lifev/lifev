@@ -40,7 +40,7 @@ LocalDofPattern::LocalDofPattern(int _nbLocalDof,int _nbDofPerVertex,int _nbDofP
       _nbPattern = 24;
       _nbDiag = 6;
       _nbUpper = 9;
-      typedef pair<int,int> COO;
+      typedef std::pair<int,int> COO;
       COO pattern_p1isop2_tria[24] = {
 	COO(0,0),COO(1,1), COO(2,2), COO(3,3), COO(4,4), COO(5,5), // diagonal entries
 	COO(0,3),COO(0,5),COO(1,3),COO(1,4),COO(2,4),COO(2,5),COO(3,4),COO(3,5),COO(4,5), //upper entries
