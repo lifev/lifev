@@ -16,21 +16,23 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-#ifndef USRFCT_H
-#define USRFCT_H
 
-#include "lifeV.hpp"
+#include "user_fct.hpp"
 
-Real g1(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i) {
+double zero(const double& t, const double& x, const double& y, const double& z, const ID& i) {
+  return 0.;
+}
+
+double g1(const double& t, const double& x, const double& y, const double& z, const ID& i) {
   switch(i){
   case 1:
-    return 1;
+    return 1.;
     break;
   }
   return 0;
 }
 
-Real g2(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i) {
+double g2(const double& t, const double& x, const double& y, const double& z, const ID& i) {
   switch(i){
   case 1:
     return 2*z; //2*z;
@@ -39,12 +41,67 @@ Real g2(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
   return 0;
 }
 
-Real g3(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i) {
+double g3(const double& t, const double& x, const double& y, const double& z, const ID& i) {
   switch(i){
   case 1:
-    return -1; 
+    return -1.; 
     break;
   }
   return 0;
 }
-#endif
+
+double mixte_coeff(const double& t, const double& x, const double& y, const double& z, const ID& i) {
+  return 1.;
+}
+//////////////////////////////////////////////////////////////////////
+
+//! Analytical solution function (0 bc on the hexahedron [0,1]x[0,2]x[0,5])
+double Vfct(const double& t, const double& x, const double& y, const double& z, const ID& i)
+{
+  switch(i){
+  case 1:
+    return x*(1-x) * y*(2-y) * z*(5-z);
+    break;
+  }
+  return 0.;
+}
+
+//! First derivatives
+double VfctDer1(const double& t, const double& x, const double& y, const double& z, const ID& i)
+{
+  switch(i){
+  case 1:   //! Dx
+    return (1-2*x) * y*(2-y) * z*(5-z); 
+    break;
+  case 2:   //! Dy
+    return x*(1-x) * (2-2*y) * z*(5-z);
+    break;
+  case 3:   //! Dz
+    return x*(1-x) * y*(2-y) * (5-2*z);
+    break;
+  }
+  return 0.;
+}
+
+//! Second derivatives
+double VfctDer2(const double& t, const double& x, const double& y, const double& z, const ID& i)
+{
+  switch(i){
+  case 1:  //! Dxx
+    return  -2 * y*(2-y) * z*(5-z);
+    break;
+  case 2:  //! Dyy
+    return  - x*(1-x)* 2 * z*(5-z);
+    break;
+  case 3:  //! Dzz
+    return - x*(1-x) * y*(2-y) * 2; 
+    break;
+  }
+  return 0.;
+}
+
+//!< := -laplace(Vfct)
+double minusLaplaceVfct(const double& t, const double& x, const double& y, const double& z, const ID& i)
+{
+  return - ( VfctDer2(t,x,y,z,1) + VfctDer2(t,x,y,z,2) + VfctDer2(t,x,y,z,3) );
+}

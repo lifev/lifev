@@ -16,14 +16,85 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-Real g1(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
-Real g2(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
-Real g3(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+#ifndef _USERFUNCTION_H
+#define _USERFUNCTION_H
+#include "user_diffusion.hpp"
+
+double zero(const double& t, const double& x, const double& y, const double& z, const ID& i);
+double g1(const double& t, const double& x, const double& y, const double& z, const ID& i);
+double g2(const double& t, const double& x, const double& y, const double& z, const ID& i);
+double g3(const double& t, const double& x, const double& y, const double& z, const ID& i);
+double mixte_coeff(const double& t, const double& x, const double& y, const double& z, const ID& i);
 
 class SourceFct
 {
 public:
-  inline Real operator()(Real x,Real y,Real z,int ic=0) const {
+  inline double operator()(double x,double y,double z,int ic=0) const {
     return 0.;
   }
 };
+
+//! Analytical solution (0 bc) and its Derivatives functions :
+double Vfct(const double& t, const double& x, const double& y, const double& z, const ID& i); //!< Analytical solution
+
+double VfctDer1(const double& t, const double& x, const double& y, const double& z, const ID& i); //! 1rst derivatives
+double VfctDer2(const double& t, const double& x, const double& y, const double& z, const ID& i); //! 2nd derivatives
+double minusLaplaceVfct(const double& t, const double& x, const double& y, const double& z, const ID& i); //!< := -laplace(Vfct)
+
+class SourceAnalyticalFct
+{
+  // this is a check function: with this rhs, the solution
+  // to the laplace pb should be (Ufct)
+  // (with non homegeneous dirichlet b.c.)
+public:
+  inline double operator()(double x,double y,double z,int ic=0) const 
+  {
+    return - minusLaplaceVfct(0., x, y, z, 1);
+  }
+};
+
+
+class AnalyticalSolPres
+{
+public:
+  inline double operator()(double x,double y,double z) const {
+    //    return x*(1-x)*y*(1-y)*z*(1-z);
+    return Vfct(0., x, y, z, 1);
+  }
+  inline double der_x(double x,double y,double z) const {
+    //    return (1-2*x)*y*(1-y)*z*(1-z);
+    return VfctDer1(0., x, y, z, 1);
+  }
+  inline double der_y(double x,double y,double z) const {
+    //    return  x*(1-x)*(1-2*y)*z*(1-z);
+    return VfctDer1(0., x, y, z, 2);
+  }
+  inline double der_z(double x,double y,double z) const {
+    //    return x*(1-x)*y*(1-y)*(1-2*z);
+    return VfctDer1(0., x, y, z, 3);
+  }
+};
+
+class AnalyticalSolFlux
+{
+public:
+  inline double operator()(double t,double x,double y,double z,int ic) const {
+    switch(ic){
+    case 1:
+      return -( VfctDer1(0., x, y, z, 1) );
+      break;
+    case 2:
+      return -( VfctDer1(0., x, y, z, 2) );
+      break;
+    case 3:
+      return -( VfctDer1(0., x, y, z, 3) );
+      break;
+    default:
+      cerr <<" AnalyticalSolFlux icomp ?????" << endl;
+      exit(1);
+    }
+  }
+};
+
+
+#endif
