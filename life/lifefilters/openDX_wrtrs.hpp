@@ -335,15 +335,10 @@ void wr_opendx_header( std::string fname, const RegionMesh& mesh, const Dof& dof
 
     ASSERT( ofile, "Error: Output file cannot be open" ); //
 
-    UInt nlv = dof.numLocalVertices();
-    UInt nle = dof.numLocalEdges();
-    UInt nlf = dof.numLocalFaces();
     UInt nV = mesh.numVolumes();
     UInt nv = mesh.numVertices();
-    UInt nf = mesh.numFaces();
     UInt nldof = mesh.numLocalVertices();
-    ;
-    //  _totalDof=nV*nldpV+ne*nldpe+nv*nldpv+nf*nldpf;
+
     char quotes = '"';
 
     // Coordinates writing
@@ -355,19 +350,9 @@ void wr_opendx_header( std::string fname, const RegionMesh& mesh, const Dof& dof
     ofile << " items " << nv;
     ofile << " data follows" << std::endl;
 
-    UInt i, ie, index, j;
-
     // Dof: the coordinates are available from the Pont List
-    for ( i = 0;i < nv;++i )
+    for (UInt i = 0;i < nv;++i )
     {
-        // needed due to dx bugs
-        if ( fabs( mesh.pointList[ i ].x() ) < EPS_DX )
-            mesh.pointList[ i ].x() = 0. ;
-        if ( fabs( mesh.pointList[ i ].y() ) < EPS_DX )
-            mesh.pointList[ i ].y() = 0. ;
-        if ( fabs( mesh.pointList[ i ].z() ) < EPS_DX )
-            mesh.pointList[ i ].z() = 0. ;
-
         ofile << mesh.pointList[ i ].x() << " " << mesh.pointList[ i ].y() << " "
         << mesh.pointList[ i ].z() << std::endl;
     }
@@ -380,10 +365,9 @@ void wr_opendx_header( std::string fname, const RegionMesh& mesh, const Dof& dof
     ofile << " items " << nV;
     ofile << " data follows" << std::endl;
 
-
-    for ( i = 0;i < nV;++i )
+    for (UInt i = 0; i < nV; ++i )
     {
-        for ( j = 0;j < nldof;++j )
+        for (UInt j = 0; j < nldof; ++j )
             ofile << dof.localToGlobal( i + 1, j + 1 ) - 1 << " "; //damned (C vs) Fortran
 
         ofile << std::endl;
