@@ -29,7 +29,7 @@ reltol  = 1.e-8
 
 [../aztec]
 output          = none #all_res
-max_iter        = 300
+max_iter        = 10
 poly_ord        = 5
 kspace          = 40
 precond         = dom_decomp

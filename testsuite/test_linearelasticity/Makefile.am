@@ -22,9 +22,10 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-SUBDIRS         =  
-check_PROGRAMS = linear 
 noinst_HEADERS = norm.hpp ud_functions.hpp 
 LDADD = $(life_libs)
-linear_SOURCES = main.cpp norm.cpp 
+
+check_PROGRAMS = test_linearelasticity
+test_linearelasticity_SOURCES = main.cpp norm.cpp 
+
 EXTRA_DIST = data 
