@@ -59,4 +59,23 @@ Real u2(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
   }  
   return 0.0;
 }
+
+Real u0o(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
+{
+ return 0.0;
+}
+Real uo(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
+{
+  switch(i) {
+  case 1:
+  case 2:
+    return 0.0;
+    break;
+  case 3:
+    return -1.0;
+    break;
+  }
+  return 0.0;
+}
+
 }
