@@ -18,7 +18,7 @@
 */
 /*----------------------------------------------------------------------*
 |
-| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.6 2004-08-29 15:53:20 prudhomm Exp $
+| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.7 2004-09-06 11:03:49 winkelma Exp $
 |
 |
 | #Version  0.1 Experimental   07/7/00. Luca Formaggia & Alessandro Veneziani  |
@@ -31,18 +31,18 @@
 |  A pattern defines the graph of a sparse matrix. The pattern class builds that
 |  graph starting from a Degree of Freedom (DOF) object.
 |
-|  The pattern are meant to be used also as way of interrogating the local connectiviries of
+|  The patterns are meant to be used also as way of interrogating the local connectivities of
 |  degrees of freedom. In order to avoid ambiguities the degrees of freedom ARE ALWAYS numbered
 |  from 1 and they are indicated by using the type name ID (in this way we avoid ambiguity with UInt).
 |  On the other hand, we may have a FORTRAN or C-like style for the RAW data storig the pattern
-|  which may be CSR of MSR format. In this way ww hopefully will be able to better interface external
-|  Linear Algebra packages Fotran-style (like SPARSEKIT).
+|  which may be CSR of MSR format. In this way we hopefully will be able to better interface external
+|  Linear Algebra packages Fortran-style (like SPARSEKIT).
 |
 |
 |
 *----------------------------------------------------------------------*/
 #ifndef PATTERN_OFFSET
-#define PATTERN_OFFSET 0 // for the Fortran (PATTERN_OFFET=1) vs C (PATTERN_OFFET=0) numbering
+#define PATTERN_OFFSET 0 // for the Fortran (PATTERN_OFFSET=1) vs C (PATTERN_OFFSET=0) numbering
 #endif
 #ifndef _PATTERN_HH
 #define _PATTERN_HH
@@ -68,15 +68,14 @@ namespace LifeV
 const INDEX_T PatternOffset= PATTERN_OFFSET;
 
 // We DEFINITIVELY need NAMESPACES (LUCA)
+/*! \class PatternDefs
+  This class containes some useful functions and typedefs which will be
+  common to ALL patterns (base and mixed ones). I use BareEdges for the
+  dynamic pattern, because I have provided the comparison function. Actually,
+  just a pair<UInt,UInt> should work all the same.
+*/
 class PatternDefs
 {
-  /* !\class PatternDefs
-     This class containes some useful functions and typedefs
-     /home/luca/Software/NSCode/Software/include/mesh/patternwhich will be
-     common to ALL patterns (base and mixed ones) I USE BAREEDGES for the
-     dynamic pattern, BECAUSE I HAVE PROVIDED THE COMPARISON FUNCTION. Actually,
-     just a pair<UInt,UInt> should woark all the same!!!
-  */
 public:
   typedef INDEX_T Index_t; //!< Type for indices
   typedef vector<Index_t> Container; //!< Container for the actual (raw) pattern
@@ -94,11 +93,11 @@ public:
 };
 
 
+/*!\class BasePattern
+  This is the building block for the pattern classes.
+*/
 class BasePattern :public PatternDefs
 {
-  /*!\class BasePattern
-    This is the building block for the Pattern classes.
-  */
 public:
 
   BasePattern();
@@ -118,21 +117,25 @@ public:
  protected:
   //! It builds the dynamic pattern. It is the standard routine for a
   //! SYMMETRIC pattern associated to a single degree of freedom object.
-  //! it uses the local pattern provided through the DOF object.
+  //! It uses the local pattern provided through the DOF object.
   //! If nbcomp > 1, it reproduces the pattern for (nbcomp X nbcomp) blocks
   template<typename DOF1>
   bool setpatt(DOF1 const & dof1, DynPattern & dynpatt,
 	       UInt const nbcomp = 1);
 
-  // Miguel 12/2003: new version handling paterns comming from IP stabilization
+  // Miguel 12/2003: new version handling patterns coming from IP stabilization
+  /*! It builds the dynamic pattern. It uses the local pattern provided through
+   *  the DOF object, augmented by the couplings needed for IP stabilization.
+   *  If nbcomp > 1, it reproduces the pattern for (nbcomp X nbcomp) blocks.
+   */
   template<typename DOF, typename MESH>
   bool setpatt(const DOF& dof, const MESH& mesh, DynPattern & dynpatt,
 	       UInt const nbcomp);
 
   //! Version for mixed patterns
   //! It builds the dynamic pattern. It is the standard routine for a
-  //!  pattern associated to two  degrees of freedom object.
-  //! it uses the MIxedLOcalPattern class for the local patterns.
+  //! pattern associated to two degrees of freedom object.
+  //! it uses the MixedLocalPattern class for the local patterns.
   //! See the documentation in the implementation part for more details
   template<typename DOF1, typename DOF2>
   bool setpatt(DOF1 const & dof1, DOF2 const & dof2, DynPattern & dynpatt,
@@ -181,11 +184,11 @@ public:
   //! one component
   template<typename DOF> CSRPatt(DOF const  & dof, UInt const nbcomp = 1);
   template<typename DOF>
-    bool buildPattern(DOF const  & dof, const UInt nbcomp);
+  bool buildPattern(DOF const  & dof, const UInt nbcomp);
   //! Constructors for two DOF (in general non-square matrix)
   //! This constructors are required if we want to use the pattern in a
-  //! Mixed_Pattern. It may be useful also stand alone. Look at the documentation of
-  //! buildpatt<DOF1,DOF2> to have details.
+  //! MixedPattern. It may be useful also stand alone. Look at the
+  //! documentation of buildPattern<DOF1,DOF2> to have details.
   template<typename DOF1,typename DOF2>
     CSRPatt(DOF1 const  & dof1,DOF2 const  & dof2,
 	    UInt const bRows= 1, UInt const bCols= 1);
@@ -197,7 +200,7 @@ public:
   //! Version which construct two patterns: patt and its transpose one,
   //! in addition an other Container for the access to
   //! the columns of the transpose matrix is built.
-  //! Alain. nov 2002.
+  //! @author Alain, Nov. 2002
   template<typename DOF1,typename DOF2>
     friend void
     buildPattTpatt(DOF1 const& dof1, DOF2 const  & dof2,
@@ -228,7 +231,7 @@ public:
   inline ID neighbour(ID const i,ID const d) const;//!< the i-th (start from 1) neighbour of dof d. The first is d itself
   inline void neighbours(ID const d, Container & start) const;//!< put neighbours of dof d in a list
 
-  //! The forllowing template function extracts a row (useful to implement A*b), returning two sequences:
+  //! The following template function extracts a row (useful to implement A*b), returning two sequences:
   //! One with the column numbering (coldata) of one with the corresponding offsets in the vector holding
   //! the matrix value. coldata   is given as a sequence of Index_t (i.e. the content depend by the value of PATETRN_OFFSET), while
   //! the position sequence are always offsets (i.e. starting from 0)
@@ -489,14 +492,14 @@ class MSRPatt:
   MSRPatt & operator= (const MSRPatt&  RhMsr);
   template<typename DOF> MSRPatt(DOF const  & dof, UInt const nbcomp=1);
 
-  // Miguel 12/2003: new version handling patterns comming from IP stabilization
+  // Miguel 12/2003: new version handling patterns coming from IP stabilization
   template<typename DOF, typename MESH>
     MSRPatt(const  DOF& dof, const MESH& mesh, const UInt nbcomp);
 
   template<typename DOF>
     bool buildPattern(DOF const  & dof, UInt const nbcomp);
 
-  // Miguel 12/2003: new version handling patterns comming from IP stabilization
+  // Miguel 12/2003: new version handling patterns coming from IP stabilization
   template<typename DOF, typename MESH>
     bool buildPattern(const  DOF& dof, const MESH& mesh, const UInt nbcomp);
 
@@ -524,7 +527,7 @@ class MSRPatt:
   void showMe(bool verbose=false, ostream& c=cout) const ; // pattern visualization
   void spy(string const & filname="matrice.m")const ; //pattern visualization a la Matlab
 
-  // Costruzione di una Matrice diagonale a n blocchi
+  // Construction of a diagonal matrix of n blocks
   friend void diagblockMatrix(MSRPatt &ans, MSRPatt const &patt, UInt const nblock);
 
  protected:
@@ -539,6 +542,10 @@ class MSRPatt:
   // a counterpart of ybind should be added also to the CSR format
   // ybind should facilitate also the locate_pattern subroutines
   // IT IS BASED ON THE ASSUMPTION THAT THE PATTERN IS SYMMETRIC
+
+  template<typename DOF>
+  void _buildPattern(DOF const & dof, DynPattern const & dynpatt,
+                     UInt const nbcomp);
 };
 
 ///////////////////////////////////////////////////
@@ -612,14 +619,14 @@ public:
   inline UInt nCols() const; // Global number of cols.
   UInt nNz() const; // Non zeros in global matrix
 
-  // Neigbours at block level. (local ID numbering)
+  // Neighbours at block level. (local ID numbering)
   UInt nbNeighbours(Diff_t const m, Diff_t const n, ID const d) const ;
   ID neighbour(Diff_t const m, Diff_t const n,ID const i, ID const d) const;
   inline void neighbours(Diff_t const m, Diff_t const n, ID const d,Container & neighs) const;
   template <typename Iter>
   inline UInt row(Diff_t const m, Diff_t const n,Diff_t const row, Iter  coldata, Iter Position) const;// extracts a row (useful to implement A*b)
 
-  // Neigbours at global level (global ID numbering)
+  // Neighbours at global level (global ID numbering)
   UInt nbNeighbours(ID const d_g) const ;
   ID neighbour(ID const i_g, ID const d_g) const;
   void neighbours(ID const d_g, Container & neighs) const;
@@ -856,7 +863,7 @@ template<typename DOF, typename MESH>
 	     1,5,7,8,
 	     2,5,6,9};
   UInt* a;
-  UInt iop,jop,nop; // number of oposite dof
+  UInt iop,jop,nop; // number of opposite dof
 
   if ( dof.fe.nbLocalDof == 4) {
     a = p1; // P1 FE
@@ -960,7 +967,7 @@ bool CSRPatt::buildPattern(DOF1 const & dof1, UInt const nbcomp)
     _filled=false;
     return built;
   }
-
+  
   Diff_t ig,jg,cur;
 
   // I use a modified version of CSR (compatible with the standard one), where:
@@ -1055,7 +1062,7 @@ bool CSRPatt::buildPattern(DOF1 const & dof1, UInt const nbcomp)
   _filled=true;
   _diagfirst=true;
 
-  dynpatt.clear(); // Non sono sicuro che serva....
+  dynpatt.clear(); // not sure if this helps...
 
   return built;
 };
@@ -1141,7 +1148,7 @@ bool CSRPatt::buildPattern(DOF1 const & dof1, DOF2 const & dof2,
   }
   _filled=true;
   _diagfirst=false;
-  dynpatt.clear(); // Non sono sicuro che serva....
+  dynpatt.clear(); // not sure if this helps...
   return true;
 }
 
@@ -1354,7 +1361,7 @@ void buildPattTpatt(DOF1 const& dof1, DOF2 const  & dof2,
   Patt._diagfirst=false;
   Tpatt._filled=true;
   Tpatt._diagfirst=false;
-  dynpatt.clear(); // Non sono sicuro che serva....
+  dynpatt.clear(); // not sure if this helps...
 }
 
 
@@ -1522,7 +1529,7 @@ bool CSRPattSymm::buildPattern(DOF1 const & dof1){
 
   _filled=true;
   _diagfirst=true;
-  dynpatt.clear(); // Non sono sicuro che serva....
+  dynpatt.clear(); // not sure if this helps...
   return true;
 };
 
@@ -1602,11 +1609,20 @@ MSRPatt::MSRPatt(const DOF& dof, const MESH& mesh, const UInt nbcomp)
 
 
 template<typename DOF1>
-bool MSRPatt::buildPattern(DOF1 const & dof1, UInt const nbcomp){
+bool MSRPatt::buildPattern(DOF1 const & dof1, UInt const nbcomp) {
+  DynPattern dynpatt;
+  bool built = setpatt(dof1, dynpatt, nbcomp);
+  if (built) {
+      _buildPattern<DOF1>(dof1, dynpatt, nbcomp);
+      dynpatt.clear(); // not sure if this helps...
+  }
+  return built;
+}
 
-  DynPattern  dynpatt;
-  bool built = setpatt(dof1,dynpatt, nbcomp);
-  if(!built)return false;
+
+template<typename DOF1>
+void MSRPatt::_buildPattern(DOF1 const & dof1, const DynPattern & dynpatt,
+                            UInt const nbcomp) {
   Index_t ig,jg,cur;
 
   _bindx.resize(_nnz+1,0);
@@ -1684,10 +1700,8 @@ bool MSRPatt::buildPattern(DOF1 const & dof1, UInt const nbcomp){
   // do we need it 'a la Fortran?'
   if (PatternOffset != 0) for (Container::iterator ip=_bindx.begin();ip!=_bindx.end();++ip)*ip+=PatternOffset;
 
-  dynpatt.clear(); // Non sono sicuro che serva....
   _diagfirst=true;// default for MSR
   _filled=true;
-  return true;
 }
 
 
@@ -1696,116 +1710,16 @@ bool MSRPatt::buildPattern(DOF1 const & dof1, UInt const nbcomp){
 //
 //
 template<typename DOF, typename MESH>
-bool MSRPatt::buildPattern(const DOF&  dof, const MESH& mesh, const UInt nbcomp){
-
-
-  DynPattern  dynpatt;
-  bool built = setpatt(dof,mesh,dynpatt, nbcomp);
-  if(!built)return false;
-  Index_t ig,jg,cur;
-
-  _bindx.resize(_nnz+1,0);
-  _ybind.resize(_nnz-_nrows,0);
-
-  // Count
-  for (DynPattern::iterator d=dynpatt.begin(); d !=dynpatt.end(); ++d){
-    ig=d->first;
-    jg=d->second;
-    _bindx[ig]+= nbcomp;
-    _bindx[jg]+= nbcomp;
+bool MSRPatt::buildPattern(const DOF&  dof, const MESH& mesh,
+                           const UInt nbcomp) {
+  DynPattern dynpatt;
+  bool built = setpatt(dof, mesh, dynpatt, nbcomp);
+  if (built) {
+      _buildPattern<DOF>(dof, dynpatt, nbcomp);
+      dynpatt.clear();
   }
-
-  //other components
-
-  Diff_t offset= dof.numTotalDof();
-  UInt icomp, jcomp;
-
-  //We add the missing diagonal term for jcomp != icomp
-  for (icomp=0; icomp < nbcomp; icomp++)
-    for (ig=0; ig < offset; ++ig)
-      _bindx[ig+icomp*offset]+=nbcomp-1;
-
-  Container::iterator start     = _bindx.begin();
-  Container::iterator end       = _bindx.begin()+ offset;
-  for (icomp=1; icomp < nbcomp; icomp++)
-    {
-      Container::iterator start_copy= _bindx.begin()+ icomp*offset;
-      copy(start, end, start_copy);
-    }
-
-  // Count entries BY ACCUMULATING
-  // shift right 1 position
-  rotate(_bindx.begin(),_bindx.begin()+_nrows,_bindx.begin()+_nrows+1);
-  _bindx[0]=_nrows+1;
-
-  for (ig=1; ig <static_cast<Index_t>(_nrows)+1; ++ig)
-    _bindx[ig]+=_bindx[ig-1];
-
-
-  // for each component
-  for (icomp=0; icomp< nbcomp; icomp++){
-    for (jcomp=0; jcomp< nbcomp; jcomp++){
-
-      //We add the missing diagonal term for jcomp != icomp
-      if (jcomp != icomp)
-	for (ig=0; ig < offset; ++ig){
-	  _ybind[_bindx[ig+icomp*offset]-_nrows-1]=_bindx[ig+jcomp*offset];
-	  _bindx[_bindx[ig+icomp*offset]++]=ig+jcomp*offset;
-	}
-
-      for (DynPattern::iterator d=dynpatt.begin(); d !=dynpatt.end(); ++d){
-	ig=d->first+icomp*offset;
-	jg=d->second+jcomp*offset;
-	_ybind[_bindx[ig]-_nrows-1]=_bindx[jg];
-	_ybind[_bindx[jg]-_nrows-1]=_bindx[ig];
-	_bindx[_bindx[ig]++]=jg;
-	_bindx[_bindx[jg]++]=ig;
-      }
-    }
-  }
-
-  // shift right 1 position
-  rotate(_bindx.begin(),_bindx.begin()+_nrows,_bindx.begin()+_nrows+1);
-  _bindx[0]=_nrows+1;
-
-
-
-  for (ig=0; ig <static_cast<Index_t>(_nrows); ++ig){
-    // We now sort the off diagonal entries
-    jg=_bindx[ig];
-    cur = _bindx[ig+1];
-    sort(_bindx.begin()+jg,_bindx.begin()+cur);
-  }
-
-  // do we need it 'a la Fortran?'
-  if (PatternOffset != 0) for (Container::iterator ip=_bindx.begin();ip!=_bindx.end();++ip)*ip+=PatternOffset;
-
-  dynpatt.clear(); // Non sono sicuro che serva....
-  _diagfirst=true;// default for MSR
-  _filled=true;
-
-
-
-  /*
-  Container::iterator debut = _bindx.begin();
-
-  for (UInt i = 0; i < _nrows; ++i)
-    {
-      UInt begin = *(debut+i);
-      UInt end   = *(debut+i+1);
-      cout << i+1 << " : ";
-      for (UInt pos = begin; pos < end; ++pos)
-	cout << _bindx[pos]+1 << ", ";
-      cout << endl;
-    }
-
-  //cout << "patern OK\n"<< endl;
-  // exit(1);
-  */
- return true;
-
+  return built;
 }
-
 
 inline UInt MSRPatt::nbNeighbours(ID const d)const {
   ASSERT_BD(d>0 && d<=_nrows);
