@@ -182,6 +182,14 @@ SolverPETSC::iterations() const
     return __iter;
 }
 
+bool
+SolverPETSC::converged() const
+{
+    KSPConvergedReason reason;
+    KSPGetConvergedReason( _M_p->__ksp, &reason );
+    return reason >= 0;
+}
+
 PC const& SolverPETSC::preconditioner() const
 {
     return _M_p->__pc;

@@ -191,6 +191,9 @@ public:
     //! Gets the number of iterations performed in the last solve.
     int iterations() const;
 
+    //! Returns whether the last solve converged
+    bool converged() const;
+    
     //! get the petsc preconditioner
     PC const& preconditioner() const;
 
