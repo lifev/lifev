@@ -100,7 +100,8 @@ int main(int argc, char** argv)
   if(pb.verbose)
     cout << "<---  done in " << chrono.diff() << "s." << endl << endl;
   //
-  
+
+  return 0;
 }
 
 
