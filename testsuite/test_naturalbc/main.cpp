@@ -103,7 +103,7 @@ int main()
 
     GetPot datafile( "data" );
     std::string mesh_dir = datafile( "mesh_dir", "." );//../data/mesh/mesh++/";
-    std::string fname=mesh_dir+datafile( "mesh_file", "cube_384.m++" );
+    std::string fname=mesh_dir+datafile( "mesh_file", "cube_48_neumann.m++" );
 
     long int  m=1;
     readMppFile(aMesh,fname,m);

@@ -4,5 +4,5 @@
 #-------------------------------------------------
 
 mesh_dir   = '../data/mesh/mesh++/'  # the directory where the mesh file is
-mesh_file  = 'cube_384.m++'       # mesh file
-mesh_faces = all                    # update all faces elements
+mesh_file  = 'cube_48_neumann.m++'   # mesh file
+mesh_faces = all                     # update all faces elements
