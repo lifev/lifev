@@ -68,11 +68,11 @@ namespace LifeV
           max_increase_res: maximum number of successive increases in residual
           before failure is reported
         */
-        const int max_increase_res = 5;
+//        const int max_increase_res = 5;
         /*
           Parameters for the linear solver, gamma: Default value = 0.9
         */
-        const Real gamma   = 0.9;
+//        const Real gamma   = 0.9;
 
 //----------------------------------------------------------------------
 
@@ -94,7 +94,6 @@ namespace LifeV
         step                = 0.;
 
         Real   normResOld   = 1;
-        Real   lambda;
         Real   slope;
 
         Real   omegaS       = omega;
@@ -102,12 +101,14 @@ namespace LifeV
 
         f.evalResidual(residual, sol, iter);
 
+        f.fluid().postProcess();
+        f.solid().postProcess();
+
         Real normRes        = norm(residual);
         Real normStep       = 0;
         Real stop_tol       = abstol + reltol*normRes;
         Real linear_rel_tol = fabs(eta_max);
 
-        Real ratio;
         Real eta_old;
         Real eta_new;
 
@@ -115,19 +116,23 @@ namespace LifeV
 
 //
 
-        std::cout << "------------------------------------------------------------------" << std::endl;
-        std::cout << "  NonLinRichardson: residual = " << normRes
-                  << ", stoping tolerance = "          << stop_tol << std::endl;
-        std::cout << "------------------------------------------------------------------" << std::endl;
-        
         out_res << time << "    " << iter << "   " << normRes << std::endl;
+
         
 
         while( normRes > stop_tol && iter < maxit)
         {
+
+            std::cout << std::endl;
+            std::cout << "------------------------------------------------------------------" << std::endl;
+            std::cout << "  NonLinRichardson: residual = " << normRes
+                      << ", stoping tolerance = "          << stop_tol << std::endl;
+            std::cout << "------------------------------------------------------------------" << std::endl;
+            std::cout << std::endl;
+            std::cout << norm(f.dispStruct());
+
             iter++;
 
-            ratio      = normRes / normResOld;
             normResOld = normRes;
             normRes    = norm(residual);
 
@@ -135,24 +140,24 @@ namespace LifeV
 
             linres     = linear_rel_tol;
 
-            muS        = sol - muS;
+            muS        = residual - muS;
             
             step       = aitken.computeDeltaLambda(sol, muS, muF);
 
-            muS        = sol;
-            sol        = sol + step;
+            std::cout << "Step norm = " << norm(step) << std::endl;
             
+            muS        = residual;
+            sol       += step;
+
+//            sol = 0.;
             f.evalResidual(residual, sol, iter);
+
+            f.fluid().postProcess();
+            f.solid().postProcess();
+            
             
             normRes    = norm(residual);
-            
-            std::cout << "------------------------------------------------------------------"<< std::endl;
-            std::cout << "    NonLinRichardson " << iter
-                      << ": residual=" << normRes << ",  step="
-                      << normStep << std::endl;
-            std::cout << "------------------------------------------------------------------"<< std::endl;
-            
-            
+
         }
 
         if(normRes > stop_tol)
