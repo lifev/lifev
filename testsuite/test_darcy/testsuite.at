@@ -25,7 +25,7 @@
 # \author Vincent Martin <vincent.martin@mate.polimi.it>
 # \date 2004-10-10
 # 
-AT_SETUP([test_darcy (hexa)])
+AT_SETUP([test_darcy (StraightTubeHexa)])
 AT_KEYWORDS([test_darcy darcy])
 AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 #-------------------------------------------------
@@ -34,22 +34,15 @@ AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 
 [darcy]
 
-[./physics]
-test_case       = 1                 # in particular for b.c. condition
-diffusion_type  = 0                 # 0: scalar diffusion, 1: tensor diffusion
-diffusion_function = 0  # select a user function
-diffusion_scalar  = 1.  # scalar diffusion coefficient
-diffusion_tensor  = '1. 0. 0.  0. 1. 0  0. 0. 1.' # diffusion tensor
+[./discretization]
+mesh_dir    = ./ # the directory where the mesh file is
+mesh_file   = cylhexa.mesh      #
+mesh_type   = .mesh
+mesh_faces   = all      # OBLIGATORY! we need all faces!
 
 [../linearsolver]
 theLinearSolver   = 0    # 0: Aztec, 1: UMFPack (UMFPack not implemented yet)
 
-[../discretization]
-mesh_dir    = ./        # the directory where the mesh file is
-mesh_file   = cylhexa.mesh      #
-mesh_type   = .mesh
-mesh_faces   = all      # OBLIGATORY! we need all faces!
-element_shape = 1       # 0: tetra; 1: hexa
 
 [../miscellaneous]
 post_dir = ./                 # the directory for postprocessing files
@@ -61,37 +54,30 @@ solver = cg  #cg , gmres, cgs, tfqmr, bicgstab, slu, symmlq, fixed_pt, lu
 precond = dom_decomp
 subdomain_solve = icc
 output = warnings    #warnings , none , all, all_res, last
-tol = 1e-6
+tol = 1e-8
 ]])
-AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria/cylhexa.mesh &&  $top_builddir/testsuite/test_darcy/test_darcy],[0],[ignore],[ignore])
+AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria/cylhexa.mesh && $top_builddir/testsuite/test_darcy/test_darcy -c StraightTubeHexa],[0],[ignore],[ignore])
 AT_CLEANUP
 
 
-AT_SETUP([test_darcy (tetra)])
+AT_SETUP([test_darcy (StraightTubeTetra)])
 AT_KEYWORDS([test_darcy darcy])
-AT_DATA([datatetra],[[# -*- getpot -*- (GetPot mode activation for emacs)
+AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 #-------------------------------------------------
 #          Data file for a Darcy problem
 #-------------------------------------------------
 
 [darcy]
 
-[./physics]
-test_case       = 1                 # in particular for b.c. condition
-diffusion_type  = 0                 # 0: scalar diffusion, 1: tensor diffusion
-diffusion_function = 0  # select a user function
-diffusion_scalar  = 1.  # scalar diffusion coefficient
-diffusion_tensor  = '1. 0. 0.  0. 1. 0  0. 0. 1.' # diffusion tensor
+[./discretization]
+mesh_dir    = ./ # the directory where the mesh file is
+mesh_file   = cyltetra.mesh      #
+mesh_type   = .mesh
+mesh_faces   = all      # OBLIGATORY! we need all faces!
 
 [../linearsolver]
 theLinearSolver   = 0    # 0: Aztec, 1: UMFPack (UMFPack not implemented yet)
 
-[../discretization]
-mesh_dir    = ./        # the directory where the mesh file is
-mesh_file   = cyltetra.mesh      #
-mesh_type   = .mesh
-mesh_faces   = all      # OBLIGATORY! we need all faces!
-element_shape = 0       # 0: tetra; 1: hexa
 
 [../miscellaneous]
 post_dir = ./                 # the directory for postprocessing files
@@ -103,7 +89,76 @@ solver = cg  #cg , gmres, cgs, tfqmr, bicgstab, slu, symmlq, fixed_pt, lu
 precond = dom_decomp
 subdomain_solve = icc
 output = warnings    #warnings , none , all, all_res, last
-tol = 1e-6
+tol = 1e-8
 ]])
-AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria/cyltetra.mesh &&  $top_builddir/testsuite/test_darcy/test_darcy -f datatetra],[0],[ignore],[ignore])
+AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria/cyltetra.mesh && $top_builddir/testsuite/test_darcy/test_darcy -c StraightTubeTetra],[0],[ignore],[ignore])
+AT_CLEANUP
+
+AT_SETUP([test_darcy (AnalyticalHexa)])
+AT_KEYWORDS([test_darcy darcy])
+AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#          Data file for a Darcy problem
+#-------------------------------------------------
+
+[darcy]
+
+[./discretization]
+mesh_dir    = ./ # the directory where the mesh file is
+mesh_file   = hexahexa10x10x10.mesh      #
+mesh_type   = .mesh
+mesh_faces   = all      # OBLIGATORY! we need all faces!
+
+[../linearsolver]
+theLinearSolver   = 0    # 0: Aztec, 1: UMFPack (UMFPack not implemented yet)
+
+
+[../miscellaneous]
+post_dir = ./                 # the directory for postprocessing files
+verbose = 1
+post_proc_format = medit          # vtk or medit
+
+[../aztec]
+solver = cg  #cg , gmres, cgs, tfqmr, bicgstab, slu, symmlq, fixed_pt, lu
+precond = dom_decomp
+subdomain_solve = icc
+output = warnings    #warnings , none , all, all_res, last
+tol = 1e-8
+]])
+AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria/hexahexa10x10x10.mesh && $top_builddir/testsuite/test_darcy/test_darcy -c AnalyticalHexa],[0],[ignore],[ignore])
+AT_CLEANUP
+
+
+AT_SETUP([test_darcy (ArterialWallTetra)])
+AT_KEYWORDS([test_darcy darcy])
+AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#          Data file for a Darcy problem
+#-------------------------------------------------
+
+[darcy]
+
+[./discretization]
+mesh_dir    = ./ # the directory where the mesh file is
+mesh_file   = piece-of-tube-wall-tetra.mesh      #
+mesh_type   = .mesh
+mesh_faces   = all      # OBLIGATORY! we need all faces!
+
+[../linearsolver]
+theLinearSolver   = 0    # 0: Aztec, 1: UMFPack (UMFPack not implemented yet)
+
+
+[../miscellaneous]
+post_dir = ./                 # the directory for postprocessing files
+verbose = 1
+post_proc_format = medit          # vtk or medit
+
+[../aztec]
+solver = cg  #cg , gmres, cgs, tfqmr, bicgstab, slu, symmlq, fixed_pt, lu
+precond = dom_decomp
+subdomain_solve = icc
+output = warnings    #warnings , none , all, all_res, last
+tol = 1e-8
+]])
+AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria/piece-of-tube-wall-tetra.mesh && $top_builddir/testsuite/test_darcy/test_darcy -c ArterialWallTetra],[0],[ignore],[ignore])
 AT_CLEANUP

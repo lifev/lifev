@@ -165,7 +165,7 @@ checkStraightTubeHexa()
     __darcy->solve();
 }
 void
-checkAnalytical()
+checkAnalyticalHexa()
 {
     using namespace LifeV;
 
@@ -232,10 +232,27 @@ darcy -i           : read the data file, print the read values and exit
 */
 int main(int argc, char** argv)
 {
-    //checkAnalytical();
-    //checkStraightTubeHexa();
-    //checkStraightTubeTetra();
-    checkArterialWallTetra();
+
+    GetPot command_line(argc,argv);
+    const std::string check_name = command_line.follow("StraightTubeHexa", 2, "-c","--check");
+
+    std::cout << "*** check_name " << check_name << std::endl;
+    
+    if ( check_name == "AnalyticalHexa" ) {
+        checkAnalyticalHexa();
+    }
+    if ( check_name == "StraightTubeHexa" ) {
+        checkStraightTubeHexa();
+    }
+    if ( check_name == "StraightTubeTetra" ) {
+        checkStraightTubeTetra();
+    }
+    if ( check_name == "ArterialWallTetra" ) {
+        checkArterialWallTetra();
+    }
+
+
+
 }
 
 

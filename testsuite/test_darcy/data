@@ -5,28 +5,20 @@
 
 [darcy]
 
-[./physics]
-test_case       = 33                 # in particular for b.c. condition
-diffusion_type  = 0                 # 0: scalar diffusion, 1: tensor diffusion
-diffusion_function = 0  # select a user function
-diffusion_scalar  = 1.  # scalar diffusion coefficient
-diffusion_tensor  = '1. 0. 0.  0. 1. 0  0. 0. 1.' # diffusion tensor
+[./discretization]
+mesh_dir    = ../data/mesh/inria/ # the directory where the mesh file is
+#mesh_file   = hexahexa10x10x10.mesh  
+mesh_file   = cylhexa.mesh      #
+#mesh_file   = cyltetra.mesh    
+#mesh_file   = piece-of-tube-wall-tetra.mesh     #
+mesh_type   = .mesh
+mesh_faces   = all      # OBLIGATORY! we need all faces!
 
 [../linearsolver]
 theLinearSolver   = 0    # 0: Aztec, 1: UMFPack (UMFPack not implemented yet)
 
-[../discretization]
-mesh_dir    = ../data/mesh/inria/ # the directory where the mesh file is
-#mesh_file   = hexahexa10x10x10.mesh  
-#mesh_file   = cylhexa.mesh      #
-#mesh_file   = cyltetra.mesh    
-mesh_file   = piece-of-tube-wall-tetra.mesh     #
-mesh_type   = .mesh
-mesh_faces   = all      # OBLIGATORY! we need all faces!
-element_shape = 1       # 0: tetra; 1: hexa
 
 [../miscellaneous]
-mesh_dir = ../data/mesh/inria # the directory where the mesh file is
 post_dir = ./                 # the directory for postprocessing files
 verbose = 1
 post_proc_format = medit          # vtk or medit
@@ -36,4 +28,4 @@ solver = cg  #cg , gmres, cgs, tfqmr, bicgstab, slu, symmlq, fixed_pt, lu
 precond = dom_decomp
 subdomain_solve = icc
 output = warnings    #warnings , none , all, all_res, last
-tol = 1e-6
+tol = 1e-8
