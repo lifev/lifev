@@ -63,9 +63,6 @@ public DataConvDiffReact<Mesh> {
  //! Sets initial condition for the concentration from file
   void initialize(const std::string & vname);
 
- //! Calculate the local elementsize of the elements for upwind 
-  void calc_local_elemsize();
-
   //! Update the right  hand side  for time advancing   
   /*! 
     \param source volumic source  
@@ -84,9 +81,6 @@ public DataConvDiffReact<Mesh> {
 
   //! Returns the BDF Time Advancing stuff
   const Bdf& bdf() const;
-
-  //! Returns the local element size
-  ScalUnknown<Vector>& h();
 
   //! Do nothing destructor
   virtual ~ConvDiffReactHandler() {}
@@ -122,9 +116,6 @@ public DataConvDiffReact<Mesh> {
   // ! The BDF Time Advance Method 
   Bdf _bdf;
 
-  //! The element size
-  ScalUnknown<Vector> _h;
-
 };
 
 
@@ -148,7 +139,6 @@ ConvDiffReactHandler(const GetPot& data_file,  const RefFE& refFE_c,
      _fe_c(_refFE_c,getGeoMap(_mesh),_Qr_c),
      _feBd_c(_refFE_c.boundaryFE(),getGeoMap(_mesh).boundaryMap(),_bdQr_c),
      _c(_dim_c),
-     _h(_mesh.numVolumes()),
      _BCh_c(BCh_c),
      _bdf(_order_bdf) {}
 
@@ -157,13 +147,6 @@ ConvDiffReactHandler(const GetPot& data_file,  const RefFE& refFE_c,
 template<typename Mesh> ScalUnknown<Vector>& 
 ConvDiffReactHandler<Mesh>::c() {
   return _c;
-}
-
-
-// Returns the local element size
-template<typename Mesh> ScalUnknown<Vector>& 
-ConvDiffReactHandler<Mesh>::h() {
-  return _h;
 }
 
 // Returns the concentration Dof 
@@ -203,34 +186,6 @@ ConvDiffReactHandler<Mesh>::initialize(const std::string & vname) {
    _bdf.initialize_unk(_c);
 
    _bdf.showMe();
-
-}
-
-
-// ! Calculate the locale element size for upwind parameter
-template<typename Mesh> void 
-ConvDiffReactHandler<Mesh>::calc_local_elemsize() {
-
-  UInt NVertex=4;
-  Real x[4],y[4],z[4],dx,dy,dz;
-  Real h=0.0,h_corr; 
-  for (UInt ih=1;ih<=_mesh.numVolumes();ih++){
-    for (UInt ih_c=0;ih_c<NVertex;ih_c++){
-      x[ih_c]=_mesh.volumeList(ih).point(ih_c+1).x();
-      y[ih_c]=_mesh.volumeList(ih).point(ih_c+1).y();
-      z[ih_c]=_mesh.volumeList(ih).point(ih_c+1).z();
-       }
-    h=0;
-    for (UInt ih_c=0;ih_c<NVertex;ih_c++){
-     for (UInt jh_c=ih_c+1;jh_c<NVertex;jh_c++){
-       dx= x[ih_c]-x[jh_c]; dy=y[ih_c]-y[jh_c]; dz=z[ih_c]-z[jh_c];
-       h_corr=sqrt(dx*dx+dy*dy+dz*dz);
-       if (h_corr>h) h=h_corr;
-     }
-    }
-    _h(ih)=h;
-  }
-  
 
 }
 
