@@ -1,6 +1,5 @@
 Welcome to the lifeV library. This library is a joint effort of several people
 
-
 The main developers are 
 
 Miguel Fernadez
@@ -63,7 +62,10 @@ good luck
 
 
 #$Log: README,v $
-#Revision 1.5  2002-10-29 17:39:18  cvs
+#Revision 1.6  2002-10-29 17:39:54  cvs
+#*** empty log message ***
+#
+#Revision 1.5  2002/10/29 17:39:18  cvs
 #*** empty log message ***
 #
 #Revision 1.4  2002/10/29 17:35:37  cvs
