@@ -41,7 +41,10 @@ They should be listed by numbers like below
 
  * Proposal:
    a- use blitz
-   b- use std::vector, boost::array, boost::multi_array or boost::ublas
+   b- use std::vector
+   c- boost::array, boost::multi_array 
+   d- boost::ublas vectors and matrices
+   e- a mix of above ?
 
 
 2-
