@@ -18,7 +18,7 @@
 */
 /*----------------------------------------------------------------------*
 |
-| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.10 2004-09-29 07:51:31 winkelma Exp $
+| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.11 2004-10-04 16:18:11 prudhomm Exp $
 |
 |
 | #Version  0.1 Experimental   07/7/00. Luca Formaggia & Alessandro Veneziani  |
@@ -2116,29 +2116,29 @@ template
 void
 MixedPattern<BROWS,BCOLS,PATTERN>::neighbours(ID const d_g,Container & neighs) const //ith neighbour of d (Global!)
 {
-  // This is MUCH MORE complicated
-  //Locate line in blocks
-  std::pair<UInt,UInt> _b=locateBlock(d_g,0);
-  ASSERT_PRE(_b<BROWS, "Invalid dof entry d_g");
-  // Get local numbering of dof
-  UInt m=b.first;
-  UInt _d=d_g-_rowoff[m][0];
+    // This is MUCH MORE complicated
+    //Locate line in blocks
+    std::pair<UInt,UInt> _b=this->locateBlock(d_g,0);
+    //ASSERT_PRE(_b<BROWS, "Invalid dof entry d_g");
+    // Get local numbering of dof
+    UInt m=_b.first;
+    UInt _d=d_g-_rowoff[m][0];
 
-  // In which block does i_g fall?
-  // I remember that all high level interfaces use the convention of having numbering from 1
-  // So i_g and d_g have always numbering from 1
-  //neighs.clear();
-  neighs.resize(nbNeighbours(d_g));
-  if (neighs.empty()) return;
-  Container piece;
-  // Sweep columns
-  for (UInt n=0; n<BCOLS; n++){
-    if (_blocks[m][n] != 0 ){
-      _blocks[m][n]->neighbours(_d,piece);
-      for(Container::iterator ip=piece.begin();ip=!piece.end();++ip) *ip+=_coloff[m][n];
-      neighs.insert(neighs.end(),piece.begin(),piece.end());
+    // In which block does i_g fall?
+    // I remember that all high level interfaces use the convention of having numbering from 1
+    // So i_g and d_g have always numbering from 1
+    //neighs.clear();
+    neighs.resize(nbNeighbours(d_g));
+    if (neighs.empty()) return;
+    Container piece;
+    // Sweep columns
+    for (UInt n=0; n<BCOLS; n++){
+        if (_blocks[m][n] != 0 ){
+            _blocks[m][n]->neighbours(_d,piece);
+            for(Container::iterator ip=piece.begin();ip=!piece.end();++ip) *ip+=_coloff[m][n];
+            neighs.insert(neighs.end(),piece.begin(),piece.end());
+        }
     }
-  }
 }
 
 template
@@ -2327,18 +2327,19 @@ PATTERN * MixedPattern<BROWS,BCOLS,PATTERN>::buildBlock(Diff_t m, Diff_t n, DOF1
 
 template <UInt BROWS, UInt BCOLS, typename PATTERN>
 template <typename DOF1>
-PATTERN * MixedPattern<BROWS,BCOLS,PATTERN>::buildBlock(Diff_t m, Diff_t n, DOF1 dof1){
-  ASSERT_PRE( m<BROWS && m>=0, " Invalid block row address");
-  ASSERT_PRE( n<BCOLS && n>=0, " Invalid block column address");
+PATTERN * MixedPattern<BROWS,BCOLS,PATTERN>::buildBlock(Diff_t m, Diff_t n, DOF1 dof1)
+{
+    ASSERT_PRE( m<BROWS && m>=0, " Invalid block row address");
+    ASSERT_PRE( n<BCOLS && n>=0, " Invalid block column address");
 
-  if(_blocks[m][n]!=0 && !_linked[m][n]) delete _blocks[m][n];
+    if(_blocks[m][n]!=0 && !_linked[m][n]) delete _blocks[m][n];
 
-  _blocks[m][n]=new PATTERN(dof1);
-  _nrows[m][n]=_blocks[m][n]->nRows();
-  _ncols[m][n]=_blocks[m][n]->nCols();
-  _linked[m][n]=false;
-  resetOffset(m,n);
-  return _blocks[m][n];
+    _blocks[m][n]=new PATTERN(dof1);
+    _nrows[m][n]=_blocks[m][n]->nRows();
+    _ncols[m][n]=_blocks[m][n]->nCols();
+    _linked[m][n]=false;
+    resetOffset(m,n);
+    return _blocks[m][n];
 }
 
 
@@ -2346,35 +2347,36 @@ PATTERN * MixedPattern<BROWS,BCOLS,PATTERN>::buildBlock(Diff_t m, Diff_t n, DOF1
 template
 <UInt BROWS, UInt BCOLS, typename PATTERN>
 void
-MixedPattern<BROWS,BCOLS,PATTERN>::
-linkBlocks(Diff_t const m_from, Diff_t const n_from, Diff_t const m_to, Diff_t const n_to){
-  // ASSERT_PRE if it is ok!
-  ASSERT_PRE( m_from<BROWS && m_from>=0, " Invalid block row address");
-  ASSERT_PRE( n_from<BCOLS && n_from>=0, " Invalid block column address");
-  ASSERT_PRE( m_to<BROWS && m_to>=0, " Invalid block row address");
-  ASSERT_PRE( n_to<BCOLS && n_to>=0, " Invalid block column address");
+MixedPattern<BROWS,BCOLS,PATTERN>::linkBlocks(Diff_t const m_from, Diff_t const n_from,
+                                              Diff_t const m_to, Diff_t const n_to)
+{
+    // ASSERT_PRE if it is ok!
+    ASSERT_PRE( m_from<BROWS && m_from>=0, " Invalid block row address");
+    ASSERT_PRE( n_from<BCOLS && n_from>=0, " Invalid block column address");
+    ASSERT_PRE( m_to<BROWS && m_to>=0, " Invalid block row address");
+    ASSERT_PRE( n_to<BCOLS && n_to>=0, " Invalid block column address");
 
-  _blocks[m_to][n_to]=_blocks[m_from][n_from];
-  _nrows[m_to][n_to]=_nrows[m_from][n_from];
-  _ncols[m_to][n_to]=_ncols[m_from][n_from];
-  _linked[m_to][n_to]=true;
-  resetOffset(m,n);
+    _blocks[m_to][n_to]=_blocks[m_from][n_from];
+    _nrows[m_to][n_to]=_nrows[m_from][n_from];
+    _ncols[m_to][n_to]=_ncols[m_from][n_from];
+    _linked[m_to][n_to]=true;
+    resetOffset(m_to,n_to);
 }
 
 
 template
 <UInt BROWS, UInt BCOLS, typename PATTERN>
 void
-MixedPattern<BROWS,BCOLS,PATTERN>::
-deleteBlock(Diff_t const m, Diff_t const n){
-  ASSERT_PRE( m<BROWS && m>=0, " Invalid block row address");
-  ASSERT_PRE( n<BCOLS && n>=0, " Invalid block column address");
-  if(_blocks[m][n]!=0&& ! linked[m][n]) delete _blocks[m][n];
-  _blocks[m][n]=0;
-  _nrows[m][n]=0;
-  _ncols[m][n]=0;
-  _linked[m][n]=false;
-  resetOffset(m,n);
+MixedPattern<BROWS,BCOLS,PATTERN>::deleteBlock(Diff_t const m, Diff_t const n)
+{
+    ASSERT_PRE( m<BROWS && m>=0, " Invalid block row address");
+    ASSERT_PRE( n<BCOLS && n>=0, " Invalid block column address");
+    if(_blocks[m][n]!=0&& ! _linked[m][n]) delete _blocks[m][n];
+    _blocks[m][n]=0;
+    _nrows[m][n]=0;
+    _ncols[m][n]=0;
+    _linked[m][n]=false;
+    resetOffset(m,n);
 }
 
 
@@ -2383,20 +2385,22 @@ template
 <UInt BROWS, UInt BCOLS, typename PATTERN>
 inline
 bool
-MixedPattern<BROWS,BCOLS,PATTERN>::isZero(Diff_t const m, Diff_t const n) const{
-  ASSERT_PRE( m<BROWS && m>=0, " Invalid block row address");
-  ASSERT_PRE( n<BCOLS && n>=0, " Invalid block column address");
-  return _blocks[m][n]=0 && _nrows[m][n]+_ncols[m][n] != 0;
+MixedPattern<BROWS,BCOLS,PATTERN>::isZero(Diff_t const m, Diff_t const n) const
+{
+    ASSERT_PRE( m<BROWS && m>=0, " Invalid block row address");
+    ASSERT_PRE( n<BCOLS && n>=0, " Invalid block column address");
+    return _blocks[m][n]=0 && _nrows[m][n]+_ncols[m][n] != 0;
 }
 
 template
 <UInt BROWS, UInt BCOLS, typename PATTERN>
 inline
 bool
-MixedPattern<BROWS,BCOLS,PATTERN>::isSet(Diff_t const m, Diff_t const n) const{
-  ASSERT_PRE( m<BROWS && m>=0, " Invalid block row address");
-  ASSERT_PRE( n<BCOLS && n>=0, " Invalid block column address");
-  return _blocks[m][n]!=0 || _nrows[m][n]!=0 || _ncols[m][n]!=0 || _linked[m][n];
+MixedPattern<BROWS,BCOLS,PATTERN>::isSet(Diff_t const m, Diff_t const n) const
+{
+    ASSERT_PRE( m<BROWS && m>=0, " Invalid block row address");
+    ASSERT_PRE( n<BCOLS && n>=0, " Invalid block column address");
+    return _blocks[m][n]!=0 || _nrows[m][n]!=0 || _ncols[m][n]!=0 || _linked[m][n];
 }
 
 template
@@ -2404,21 +2408,21 @@ template
 void
 MixedPattern<BROWS,BCOLS,PATTERN>::resetOffset(Diff_t const m, Diff_t const n) // Puts offset right!
 {
-  UInt _m=m;
-  UInt _n=n;
+    UInt _m=m;
+    UInt _n=n;
 
-  while( _m<BROWS && _n <BCOLS){
+    while( _m<BROWS && _n <BCOLS){
 
-    for (UInt i=_m+1; i<BROWS; i++){
-      _rowoff[i][_n]=_rowoff[i-1][_n]+_nrows[i-1][_n];
+        for (UInt i=_m+1; i<BROWS; i++){
+            _rowoff[i][_n]=_rowoff[i-1][_n]+_nrows[i-1][_n];
+        }
+
+        for (UInt i=_n+1; i<BCOLS; i++){
+            _coloff[_m][i]=_coloff[_m][i-1]+_ncols[_m][i-1];
+        }
+        _m++;
+        _n++;
     }
-
-    for (UInt i=_n+1; i<BCOLS; i++){
-      _coloff[_m][i]=_coloff[_m][i-1]+_ncols[_m][i-1];
-    }
-    _m++;
-    _n++;
-  }
 }
 
 
