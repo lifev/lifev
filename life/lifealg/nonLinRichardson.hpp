@@ -26,8 +26,8 @@
 
 namespace LifeV
 {
-template <class Fct, class Vector, class Real, class Norm>
-int nonLinRichardson( Vector& sol,
+template <class Fct, class VectorType, class Real, class Norm>
+int nonLinRichardson( VectorType& sol,
                       Fct& f,
                       const Norm& norm,
                       Real abstol,
@@ -80,9 +80,9 @@ int nonLinRichardson( Vector& sol,
 
     int nDofFS = sol.size();
 
-    Vector residual ( sol.size() );
-    Vector step     ( sol.size() );
-    Vector muk      ( sol.size() );
+    VectorType residual ( sol.size() );
+    VectorType step     ( sol.size() );
+    VectorType muk      ( sol.size() );
 
     step = ZeroVector( step.size() );
     muk  = ZeroVector( muk.size() );
@@ -102,7 +102,7 @@ int nonLinRichardson( Vector& sol,
     Real stop_tol     = abstol + reltol*normRes;
     Real linearRelTol = fabs(eta_max);
 
-    generalizedAitken<Vector, Real> aitken( nDofFS, omegaS, omegaF );
+    generalizedAitken<VectorType, Real> aitken( nDofFS, omegaS, omegaF );
 
     //
 
