@@ -38,7 +38,8 @@
 #include <MatrixTest.hpp>
 
 
-static char help[] = "";
+static char help[] = "Solves a linear system with KSP.\n\
+-N <N>       : number of rows/cols\n\n";
 
 namespace LifeV{
 
@@ -102,18 +103,20 @@ bool test_petsc( Mat& __mat )
 }
 int main( int argc, char** argv )
 {
+    try
+    {
+    int N = 100;
+
 #if defined(HAVE_PETSC_H)
     PetscInitialize(&argc,&argv,(char *)0,help);
+    PetscOptionsGetInt(PETSC_NULL,"-N",&N,PETSC_NULL);
 #endif /* HAVE_PETSC_H */
 
-
-    uint N = 100;
-    if ( argc > 1 )
-        N = std::atoi( argv[1] );
 
     //
     // Mass matrix
     //
+    std::cout << "mass matrix...\n";
     LifeV::MatrixMass mass( N );
     mass.matrix().spy( "mass.m" );
 
@@ -123,14 +126,26 @@ int main( int argc, char** argv )
     //
     // convdiff matrix
     //
-    LifeV::MatrixConvectionDiffusion convdiff( N, 1.0 );
+    std::cout << "convection diffusion matrix...\n";
+    LifeV::MatrixConvectionDiffusion convdiff( N , 1.0 );
     convdiff.matrix().spy( "convdiff.m" );
 
-    assert( LifeV::test_petsc ( convdiff ) );
-    assert( LifeV::test_umfpack ( convdiff ) );
+    LifeV::test_petsc ( convdiff );
+    LifeV::test_umfpack ( convdiff );
 
 #if defined(HAVE_PETSC_H)
     PetscFinalize();
 #endif /* HAVE_PETSC_H */
-    return 0;
+    }
+    catch( std::exception const& __e )
+    {
+        std::cout << "std::exception: " << __e.what() << "\n";
+        return EXIT_FAILURE;
+    }
+    catch( ... )
+    {
+        std::cout << "unknown exception caught\n";
+        return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
 }

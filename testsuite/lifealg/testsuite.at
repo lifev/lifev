@@ -28,17 +28,17 @@
 AT_BANNER([life/lifealg testsuite...])
 
 AT_SETUP([test_linearsolvers (Matrix size : 10x10)])
-AT_CHECK([$top_builddir/testsuite/lifealg/test_linearsolvers 10],[0],[ignore],[ignore])
+AT_CHECK([$top_builddir/testsuite/lifealg/test_linearsolvers -N 10 -log_summary],[0],[ignore],[ignore])
 AT_KEYWORDS([ alg linear solver algebra])
 AT_CLEANUP
 
 AT_SETUP([test_linearsolvers (Matrix size : 100x100)])
-AT_CHECK([$top_builddir/testsuite/lifealg/test_linearsolvers 100],[0],[ignore],[ignore])
+AT_CHECK([$top_builddir/testsuite/lifealg/test_linearsolvers  -N 100 -log_summary],[0],[ignore],[ignore])
 AT_KEYWORDS([ alg linear solver algebra])
 AT_CLEANUP
 
 
 AT_SETUP([test_linearsolvers (Matrix size : 200x200)])
-AT_CHECK([$top_builddir/testsuite/lifealg/test_linearsolvers 200],[0],[ignore],[ignore])
+AT_CHECK([$top_builddir/testsuite/lifealg/test_linearsolvers  -N 200 -log_summary],[0],[ignore],[ignore])
 AT_KEYWORDS([ alg linear solver algebra])
 AT_CLEANUP
