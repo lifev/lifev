@@ -66,7 +66,7 @@ public:
     void solveLinearSolid();
 
     void setUpBC();
-
+    void setPrecond(int prec){M_precond = prec;}
 
     //setters and getters
 
@@ -130,6 +130,7 @@ private:
 
     DataJacobianSP            M_dataJacobian;
 };
+
 Real fzeroSP(const Real& t,
              const Real& x,
              const Real& y,

@@ -140,16 +140,13 @@ void steklovPoincare::evalResidual(Vector &res,
     std::cout << "max ResidualFSI = " << norm_inf(M_residualFSI)
               << std::endl;
 
-//     M_dispStruct = setDispOnInterface(disp);
-
-//    M_residualS = M_solid.residual();
 //     Vector muk = disp;
 //     muk = ZeroVector( muk.size() );
 //     invSsPrime(M_residualS, 1e-08, muk);
 //     std::cout << "Norm_max d_disp = " << norm_inf(disp - muk) << std::endl;
-//      muk = ZeroVector( muk.size() );
-//       invSfPrime(M_residualF, 1e-08, muk);
-//       std::cout << "Norm_max f_disp = " << norm_inf(disp - muk) << std::endl;
+//     muk = ZeroVector( muk.size() );
+//     invSfPrime(M_residualF, 1e-08, muk);
+//     std::cout << "Norm_max f_disp = " << norm_inf(disp - muk) << std::endl;
 }
 
 //
@@ -345,6 +342,9 @@ void  steklovPoincare::invSfPrime(const Vector& res,
                                   Vector& step)
 {
     setResidualFSI(res);
+
+    M_solid.d() = ZeroVector(M_solid.d().size());
+    std::cout << "norm_inf residual FSI = " << norm_inf(M_residualFSI); 
     this->M_fluid.updateDispVelo();
     solveLinearFluid();
 
@@ -354,8 +354,8 @@ void  steklovPoincare::invSfPrime(const Vector& res,
                         M_fluid.BC_fluid(),
                         "Interface",
                         step);
-
-    std::cout << "deltaLambda step = " << norm_inf(step) << std::endl;
+    std::cout << "norm_2 deltaLambda = " << norm_2(deltaLambda) << std::endl;
+    std::cout << "norm_2 step        = " << norm_2(step) << std::endl;
 }
 
 
@@ -700,6 +700,7 @@ void steklovPoincare::transferOnInterface(const Vector      &_vec1,
         ID ID2 = BCVInterface->
             dofInterface().getInterfaceDof(ID1);
 
+//        std::cout << ID1 << " -> " << ID2 << std::endl;
 //        std::cout << "ID1 = " << ID1 << " ID2 = " << ID2 << std::endl;
         for (UInt jDim = 0; jDim < nDim; ++jDim)
         {

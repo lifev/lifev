@@ -179,8 +179,8 @@ computeDeltaLambda( const Vector &_lambda,
         Real a11 = 0.;
         Real a21 = 0.;
         Real a22 = 0.;
-        Real b1 = 0.;
-        Real b2 = 0.;
+        Real b1  = 0.;
+        Real b2  = 0.;
 
         Real muS( 0 );
         Real muF( 0 );
@@ -202,16 +202,10 @@ computeDeltaLambda( const Vector &_lambda,
             b2 += muS * ( _lambda[ ii ] - M_lambda[ ii ] );
         }
 
-        std::cout << "a11 = " << a11 << std::endl;
-        std::cout << "a22 = " << a22 << std::endl;
-        std::cout << "a21 = " << a21 << std::endl;
-        std::cout << "b1  = " << b1  << std::endl;
-        std::cout << "b2  = " << b2  << std::endl;
         Real omegaS ( M_defOmegaS );
         Real omegaF ( M_defOmegaF );
 
         Real det ( a22 * a11 - a21 * a21 );
-        std::cout << "det = " << det << std::endl;
 
         if ( std::fabs(det) != 0. )  //! eq. (12) page 8
         {
@@ -240,22 +234,6 @@ computeDeltaLambda( const Vector &_lambda,
             std::cout << "generalizedAitken: Failure: Det=0!!"
                       << fabs(det) << std::endl;
         }
-
-//         if ( std::fabs(omegaF) < std::fabs(M_defOmegaF)/1024
-//              || std::fabs(omegaF) > std::fabs(M_defOmegaF)*1024 )
-//         {
-//             std::cout << "generalizedAitken: Failure: omegaF too small/big: "
-//                       << omegaF << std::endl;
-//             omegaF = M_defOmegaF;
-//         }
-
-//         if ( std::fabs(omegaS) < std::fabs(M_defOmegaS)/1024
-//              || std::fabs(omegaS) > std::fabs(M_defOmegaS)*1024 )
-//         {
-//             std::cout << "generalizedAitken: Failure: omegaS too small/big: "
-//                       << omegaS << std::endl;
-//             omegaS = M_defOmegaS;
-//         }
 
         std::cout << " --------------- generalizedAitken: " << std::endl;
         std::cout << " omegaS = " << omegaS

@@ -27,7 +27,7 @@ namespace LifeV
 {
 template <class Fct, class Vector, class Real, class Norm>
 int newton( Vector& sol, Fct& f, Norm norm, Real abstol, Real reltol,
-            int& maxit, Real eta_max, int linesearch = 0, std::ofstream& out_res,
+            int& maxit, Real eta_max, int linesearch, std::ofstream& out_res,
             const Real& time )
 {
     /*
@@ -65,7 +65,6 @@ int newton( Vector& sol, Fct& f, Norm norm, Real abstol, Real reltol,
 
     Real normResOld = 1, lambda, slope;
     f.evalResidual( residual, sol, iter);
-//    f.evalResidual( sol, iter, residual );
     Real normRes = norm( residual ), normStep = 0,
                    stop_tol = abstol + reltol * normRes,
                               ratio;
@@ -78,7 +77,11 @@ int newton( Vector& sol, Fct& f, Norm norm, Real abstol, Real reltol,
     std::cout << "------------------------------------------------------------------"
     << std::endl;
 
-    out_res << time << "    " << iter << "   " << normRes << std::endl;
+    out_res << std::scientific;
+    out_res << "# time = ";
+    out_res << time << "   " << "initial norm_res " <<  normRes
+            << " stop tol = " << stop_tol << std::endl;
+    out_res << "#iter      disp_norm       step_norm       residual_norm" << std::endl;
 
     f.updateJac( sol , 1);
 
@@ -90,14 +93,19 @@ int newton( Vector& sol, Fct& f, Norm norm, Real abstol, Real reltol,
         normRes = norm( residual );
         if (iter != 1) f.updateJac( sol, iter );
         linres = linear_rel_tol;
+
         f.solveJac( step, -1. * residual, linres); // residual = f(sol)
-//        f.solveJac( -1. * residual, linres, step); // residual = f(sol)
-        /*
-          linres contains the relative linear tolerance achieved by the
-          linear solver, i.e linear_rel_tol = | -f(sol) - J step | / |-f(sol)|
-        */
+
+        normStep = norm_2(step);
+
+        out_res   << std::setw(5) << iter
+                  << std::setw(15) << norm_2  (sol)
+                  << std::setw(15) << norm_2  (step);
+
         slope = normRes * normRes * ( linres * linres - 1 );
-        std::cout << "### slope = " << slope << std::endl;
+        std::cout << "Newton " << iter << " ### slope = " << slope << std::endl;
+        std::cout << "linesearch = " << linesearch << std::endl;
+        std::cout << "step norm  = " << normStep << std::endl;
         /*
           slope denotes the quantity f^T J step, which is generally used by
           line search algorithms. This formula comes form Brown & Saad (1990),
@@ -109,27 +117,39 @@ int newton( Vector& sol, Fct& f, Norm norm, Real abstol, Real reltol,
         //
         // -- line search
         //
-        switch ( linesearch )
+        if (normStep > 1.e-07)
         {
-        case 0: // no linesearch
             sol += step;
             f.evalResidual( residual, sol, iter);
-//            f.evalResidual( sol, iter, residual );
             normRes = norm( residual );
-            break;
-        case 1:
-            lineSearch_parab( f, norm, residual, sol, step, normRes, lambda, iter );
-            break;
-        case 2:  // recommended
-            lineSearch_cubic( f, norm, residual, sol, step, normRes, lambda, slope, iter );
-            break;
-        default:
-            std::cout << "Unknown linesearch \n";
-            exit( 1 );
         }
+        else
+        {
+            switch ( linesearch )
+            {
+                case 0: // no linesearch
+                    sol += step;
+                    f.evalResidual( residual, sol, iter);
+                    normRes = norm( residual );
+                    break;
+                case 1:
+                    lineSearch_parab( f, norm, residual, sol, step, normRes, lambda, iter );
+                    break;
+                case 2:  // recommended
+                    lineSearch_cubic( f, norm, residual, sol, step, normRes, lambda, slope, iter );
+                    break;
+                default:
+                    std::cout << "Unknown linesearch \n";
+                    exit( 1 );
+            }
+        }
+
         //
         //-- end of line search
         //
+
+        out_res << std::setw(15) << norm(residual) << std::endl;
+
         normStep = lambda * norm( step );
         ratio = normRes / normResOld;
         if ( ratio > 1 )
@@ -155,11 +175,11 @@ int newton( Vector& sol, Fct& f, Norm norm, Real abstol, Real reltol,
         std::cout << "------------------------------------------------------------------"
         << std::endl;
 
-        out_res << time << " " << iter << " "
-                << std::setw(15) << normRes << " "
-                << std::setw(15) << norm(sol) << " "
-                << std::setw(15) << normStep
-                << std::endl;
+//         out_res << time << " " << iter << " "
+//                 << std::setw(15) << normRes << " "
+//                 << std::setw(15) << norm_2(sol) << " "
+//                 << std::setw(15) << norm_2(step)
+//                 << std::endl;
 
         //
         //-- forcing term computation (Eisenstat-Walker)

@@ -396,6 +396,7 @@ iterate( const Real& time )
 
         // Non linear term, Semi-implicit approach
         // u_loc contains the velocity values in the nodes
+
         for ( UInt k = 0 ; k < ( UInt ) _fe_u.nbNode ; k++ )
         {
             UInt iloc = _fe_u.patternFirst( k );
@@ -409,7 +410,6 @@ iterate( const Real& time )
 
         // ALE term: 0.5 div (u^n-w) u v
         mass_divw( -_rho, _w_loc, _elmatC, _fe_u, 0, 0, nc_u );
-
 
         // loop on velocity components
         for ( UInt ic = 0;ic < nc_u;ic++ )
@@ -588,8 +588,6 @@ iterate( const Real& time )
     AZ_precond_destroy( &prec_C );
 
     _residual_u = _f_uWithOutBC - _CAux * _u - _trDAux * _p;
-
-
 }
 
 
@@ -821,9 +819,6 @@ iterateLin( const Real& time, BCHandler& BCh_du )
         //  + ( (\grad u^k):[I\div d - (\grad d)^T] , q  )
         source_press( 1.0, _uk_loc, _d_loc, _elvec_dp, _fe_u, _fe_p );
 
-
-
-
         //
         // Assembling
         //
@@ -859,7 +854,7 @@ iterateLin( const Real& time, BCHandler& BCh_du )
 
 
     chrono.stop();
-    std::cout << "done in " << chrono.diff() << "s." << std::endl;
+    std::cout << " done in " << chrono.diff() << "s." << std::endl;
     std::cout << "  norm_inf (_f_du) after BC= " << norm_inf( _f_u ) << std::endl;
     std::cout << "  norm_inf ( difference ) after BC= " << norm_inf( _f_duWithOutBC - _f_u ) << std::endl;
 
@@ -1008,7 +1003,7 @@ iterateLin( const Real& time, BCHandler& BCh_du )
     _residual_u = _f_duWithOutBC - _CAux * _du - _trDAux * _dp;
 
     std::cout << "  norm_inf (_residual_du ) = " << norm_inf( _residual_u ) << std::endl;
-    std::cout << "  norm_inf (_du )          = " << norm_inf( _du ) << std::endl;
+    std::cout << "  norm_inf (_du )          = " << norm_2( _du ) << std::endl;
 }
 
 
