@@ -1,7 +1,7 @@
 /*! file regionMesh3D.h
   \brief The mesh classes interfaces
-  \version $Revision: 1.1 $ Luca Formaggia
-  \version $Revision: 1.1 $ Miguel Fernandez
+  \version $Revision: 1.2 $ Luca Formaggia
+  \version $Revision: 1.2 $ Miguel Fernandez
 
   Introduces the RegionMesh3D class
 */
@@ -557,11 +557,11 @@ protected:
   I use a Define to use localto global array or directly the 
   bareedges */
 #ifdef SAVEMEMORY
-  BareItemsHandler<BareFace> * _VToF;
-  BareItemsHandler<BareEdge> * _VToE;
+  BareItemsHandler<BareFace> _VToF;
+  BareItemsHandler<BareEdge> _VToE;
 #else
-  SimpleArray<UInt> * _VToF;
-  SimpleArray<UInt> * _VToE;
+  SimpleArray<UInt> _VToF;
+  SimpleArray<UInt> _VToE;
 #endif
 
 #ifdef NOT_BDATA_FIRST
@@ -654,10 +654,7 @@ ASSERT(true, "Assignement Operator  Yet Not Implemented for RegionMesh3d") ;
 
 template<typename GEOSHAPE, typename MC>
 RegionMesh3D<GEOSHAPE,MC>::~RegionMesh3D()
-{
-  delete _VToF;
-  delete _VToE;
-}
+{}
 
 
 //! Modif Miguel:11/2002 
@@ -1810,14 +1807,14 @@ template<typename GEOSHAPE, typename MC>
 INLINE
 bool 
 RegionMesh3D<GEOSHAPE,MC>::hasLocalFaces() const{
-return ! _VToF->empty();
+return ! _VToF.empty();
 }
 
 template<typename GEOSHAPE, typename MC>
 INLINE
 bool 
 RegionMesh3D<GEOSHAPE,MC>::hasLocalEdges() const{
-return ! _VToE->empty();
+return ! _VToE.empty();
 }
 
 #ifdef SAVEMEMORY
@@ -1827,7 +1824,7 @@ template<typename GEOSHAPE, typename MC>
 INLINE
 ID
 RegionMesh3D<GEOSHAPE,MC>::localFaceId(ID const volId, ID const locF) const{
-ASSERT_PRE(!_VToF->empty(), "Volume to Face array not  set");
+ASSERT_PRE(!_VToF.empty(), "Volume to Face array not  set");
 ASSERT_BD( volId >0 && volId <= _numVolumes);
 ASSERT_BD( locF >0 && locF <= VolumeType::numLocalFaces );
  pair<BareFace, bool> it;
@@ -1848,14 +1845,14 @@ ASSERT_BD( locF >0 && locF <= VolumeType::numLocalFaces );
  else{
    it=makeBareFace(i1,i2,i3);
  }
- return _VToF->id(it.first);
+ return _VToF.id(it.first);
 }
 
 template<typename GEOSHAPE, typename MC>
 INLINE
 ID
 RegionMesh3D<GEOSHAPE,MC>::localEdgeId(ID const volId, ID const locE) const{
-  ASSERT_PRE(!_VToE->empty(), "Volume to Edges array not  set");
+  ASSERT_PRE(!_VToE.empty(), "Volume to Edges array not  set");
   ASSERT_BD( volId >0 && volId <= _numVolumes);
   ASSERT_BD( locE >0 && locE <= VolumeType::numLocalEdges );
   pair<BareEdge, bool> it;
@@ -1866,14 +1863,14 @@ RegionMesh3D<GEOSHAPE,MC>::localEdgeId(ID const volId, ID const locE) const{
   i1=(iv.point(i1)).id();
   i2=(iv.point(i2)).id();
   it=makeBareEdge(i1,i2);
-  return _VToE->id(it.first);
+  return _VToE.id(it.first);
 }
 
 template<typename GEOSHAPE, typename MC>
 INLINE
 ID
 RegionMesh3D<GEOSHAPE,MC>::localFaceId(const VolumeType & iv, ID const locF) const{
-ASSERT_PRE(!_VToF->empty(), "Volume to Face array not  set");
+ASSERT_PRE(!_VToF.empty(), "Volume to Face array not  set");
 ASSERT_BD( volId >0 && volId <= _numVolumes);
 ASSERT_BD( locF >0 && locF <= VolumeType::numLocalFaces );
  pair<BareFace, bool> it;
@@ -1893,14 +1890,14 @@ ASSERT_BD( locF >0 && locF <= VolumeType::numLocalFaces );
  else{
    it=makeBareFace(i1,i2,i3);
  }
- return _VToF->id(it.first);
+ return _VToF.id(it.first);
 }
 
 template<typename GEOSHAPE, typename MC>
 INLINE
 ID
 RegionMesh3D<GEOSHAPE,MC>::localEdgeId(const VolumeType & iv, ID const locE) const{
-  ASSERT_PRE(!_VToE->empty(), "Volume to Edges array not  set");
+  ASSERT_PRE(!_VToE.empty(), "Volume to Edges array not  set");
   ASSERT_BD( locE >0 && locE <= VolumeType::numLocalEdges );
   pair<BareEdge, bool> it;
   ID i1,i2;
@@ -1909,17 +1906,17 @@ RegionMesh3D<GEOSHAPE,MC>::localEdgeId(const VolumeType & iv, ID const locE) con
   i1=(iv.point(i1)).id();
   i2=(iv.point(i2)).id();
   it=makeBareEdge(i1,i2);
-  return _VToE->id(it.first);
+  return _VToE.id(it.first);
 }
 #else
 template<typename GEOSHAPE, typename MC>
 INLINE
 ID
 RegionMesh3D<GEOSHAPE,MC>::localFaceId(ID const volId, ID const locF) const{
-ASSERT_PRE(!_VToF->empty(), "Volume to Face array not  set");
+ASSERT_PRE(!_VToF.empty(), "Volume to Face array not  set");
 ASSERT_BD( volId >0 && volId <= _numVolumes);
 ASSERT_BD( locF >0 && locF <= VolumeType::numLocalFaces );
-return _VToF->operator()(locF,volId);
+return _VToF.operator()(locF,volId);
 }
 
 template<typename GEOSHAPE, typename MC>
@@ -1928,19 +1925,19 @@ ID
 RegionMesh3D<GEOSHAPE,MC>::localEdgeId(ID const volId, ID const locE)
 const
 {
-ASSERT_PRE(!_VToE->empty(), "Volume to Edges array not  set");
+ASSERT_PRE(!_VToE.empty(), "Volume to Edges array not  set");
 ASSERT_BD( volId >0 && volId <= _numVolumes);
 ASSERT_BD( locE >0 && locE <= VolumeType::numLocalEdges );
-return (*_VToE)(locE,volId);
+return _VToE(locE,volId);
 }
 
 template<typename GEOSHAPE, typename MC>
 INLINE
 ID
 RegionMesh3D<GEOSHAPE,MC>::localFaceId(const VolumeType & iv, ID const locF) const{
-ASSERT_PRE(!_VToF->empty(), "Volume to Face array not  set");
+ASSERT_PRE(!_VToF.empty(), "Volume to Face array not  set");
 ASSERT_BD( locF >0 && locF <= VolumeType::numLocalFaces );
-return (*_VToF)(locF,iv.id());
+return _VToF(locF,iv.id());
 }
 
 template<typename GEOSHAPE, typename MC>
@@ -1949,9 +1946,9 @@ ID
 RegionMesh3D<GEOSHAPE,MC>::localEdgeId(const VolumeType & iv, ID const locE)
 const
 {
-ASSERT_PRE(!_VToE->empty(), "Volume to Edges array not  set");
+ASSERT_PRE(!_VToE.empty(), "Volume to Edges array not  set");
 ASSERT_BD( locE >0 && locE <= VolumeType::numLocalEdges );
-return _VToE->operator()(locE,iv.id());
+return _VToE.operator()(locE,iv.id());
 }
 #endif
 
@@ -1983,20 +1980,16 @@ RegionMesh3D<GEOSHAPE,MC>::updateElementEdges(bool ce, UInt ee){
   // this is ok for domains with at most 1 hole!
   if (ce && ee == 0) ee = _numEdges > _numBEdges? _numEdges :(GEOSHAPE::numFaces/2-1)*numVolumes()+_numBFaces/2+numVertices();
   
-  ASSERT( ! ce || ee ==0, "Mesh is not properly set!");
 
   if (ce) {
     // We want to create the edges, yet we need to clear existing edges, since we start from scratch!
-    faceList.reserve(ee);
-    faceList.resize(0);
+    edgeList.reserve(ee);
+    edgeList.resize(0);
   }
 #ifndef SAVEMEMORY 
   BareItemsHandler<BareEdge> _be;
   pair<UInt,bool> e;
-  _VToE= new SimpleArray<UInt>(numLocalEdges(),numVolumes());
-  _VToE->reshape(numLocalEdges(),numVolumes());// DIMENSION ARRAY
-#else
-  _VToE= new BareItemsHandler<BareEdge>;
+  _VToE.reshape(numLocalEdges(),numVolumes());// DIMENSION ARRAY
 #endif
   UInt vid,i1,i2;
   pair<BareEdge,bool> _edge;
@@ -2047,7 +2040,7 @@ RegionMesh3D<GEOSHAPE,MC>::updateElementEdges(bool ce, UInt ee){
 	i2=(ifa->point(i2)).id();
 	_edge=makeBareEdge(i1,i2);
 	if(ce && e.second){
-	  for (UInt k=1;k<=2+FaceShape::nbPtsPerEdge;j++)edg.point(k)=(ifa->point(k)).id();
+	  for (UInt k=1;k<=2+FaceShape::nbPtsPerEdge;j++)edg.setPoint(k,ifa->point(k));
 	  inheritWeakerMarker(edg);
 	  addEdge(edg,true);
 	}
@@ -2072,13 +2065,13 @@ RegionMesh3D<GEOSHAPE,MC>::updateElementEdges(bool ce, UInt ee){
       i2=(iv->point(i2)).id();
       _edge=makeBareEdge(i1,i2);
 #ifdef SAVEMEMORY
-      e=_VToE->addIfNotThere(_edge.first);
+      e=_VToE.addIfNotThere(_edge.first);
 #else
       e=_be.addIfNotThere(_edge.first);
-      _VToE->operator()(j,vid)=e.first;
+      _VToE.operator()(j,vid)=e.first;
 #endif
       if(ce && e.second){
-	for (UInt k=1;k<=2+VolumeShape::nbPtsPerEdge;j++)edg.point(k)=(iv->point(k)).id();
+	for (UInt k=1;k<=2+VolumeShape::nbPtsPerEdge;j++)edg.setPoint(k,iv->point(k));
 	inheritWeakerMarker(edg);
 	addEdge(edg,false);
       }
@@ -2090,7 +2083,7 @@ RegionMesh3D<GEOSHAPE,MC>::updateElementEdges(bool ce, UInt ee){
   }
   
 #ifdef SAVEMEMORY
-  UInt n=_VToE->maxId();
+  UInt n=_VToE.maxId();
 #else
   UInt n=_be.maxId();
 #endif
@@ -2111,7 +2104,7 @@ RegionMesh3D<GEOSHAPE,MC>::updateElementFaces(bool cf, UInt ef){
   
   if (cf && ef == 0) ef = _numFaces > _numBFaces? _numFaces :(GEOSHAPE::numFaces*numVolumes()+_numBFaces)/2;
 
-  ASSERT( ! cf || ef ==0, "Mesh is not properly set!");
+  ASSERT( cf||  numFaces()>0 , "Mesh is not properly set!");
 
   if (cf) faceList.reserve(ef);
   
@@ -2121,8 +2114,7 @@ RegionMesh3D<GEOSHAPE,MC>::updateElementFaces(bool cf, UInt ef){
 #ifndef SAVEMEMORY 
   BareItemsHandler<BareFace> _be;
   pair<UInt,bool> e;
-  _VToF=new SimpleArray<UInt>(numLocalFaces(),numVolumes());
-  _VToF->reshape(numLocalFaces(),numVolumes());// DIMENSION ARRAY
+  _VToF.reshape(numLocalFaces(),numVolumes());// DIMENSION ARRAY
 #endif
   UInt vid,i1,i2,i3,i4;
   pair<BareFace,bool>_face;
@@ -2142,10 +2134,10 @@ RegionMesh3D<GEOSHAPE,MC>::updateElementFaces(bool cf, UInt ef){
       else{
 	_face=makeBareFace(i1,i2,i3);
       }
-      _check=_VToF->addIfNotThere(_face.first);
+      _check=_VToF.addIfNotThere(_face.first);
 #else
-      (*_VToF)(itf->pos_first() ,itf->ad_first() )=itf->id();
-      (*_VToF)(itf->pos_second(),itf->ad_second())=itf->id();
+      if(itf->pos_first()   !=0)  _VToF(itf->pos_first() ,itf->ad_first() )=itf->id();
+      if(itf->pos_second() != 0)  _VToF(itf->pos_second(),itf->ad_second())=itf->id();
 #endif
     }
     // we finish here
@@ -2177,7 +2169,7 @@ RegionMesh3D<GEOSHAPE,MC>::updateElementFaces(bool cf, UInt ef){
 	_face=makeBareFace(i1,i2,i3);
       }
 #ifdef SAVEMEMORY
-      _check=_VToF->addIfNotThere(_face.first);
+      _check=_VToF.addIfNotThere(_face.first);
 #else
       _check=_be.addIfNotThere(_face.first);
 #endif
@@ -2223,10 +2215,10 @@ RegionMesh3D<GEOSHAPE,MC>::updateElementFaces(bool cf, UInt ef){
 	_face=makeBareFace(i1,i2,i3);
       }
 #ifdef SAVEMEMORY
-      e=_VToF->addIfNotThere(_face.first);
+      e=_VToF.addIfNotThere(_face.first);
 #else
       e=_be.addIfNotThere(_face.first);
-      (*_VToF)(j,vid)=e.first;
+      _VToF(j,vid)=e.first;
 #endif
       if(cf)
 	{
@@ -2254,7 +2246,7 @@ RegionMesh3D<GEOSHAPE,MC>::updateElementFaces(bool cf, UInt ef){
     }
   }
 #ifdef SAVEMEMORY
-  UInt n=_VToF->maxId();
+  UInt n=_VToF.maxId();
 #else
   UInt n=_be.maxId();
 #endif
@@ -2269,14 +2261,22 @@ RegionMesh3D<GEOSHAPE,MC>::updateElementFaces(bool cf, UInt ef){
 template<typename GEOSHAPE, typename MC>
 void
 RegionMesh3D<GEOSHAPE,MC>::cleanElementFaces(){
-  delete _VToF;
+#ifdef SAVEMEMORY
+  _VToF.clear();
+#else
+  _VToF.clean();
+#endif
   unsetLinkSwitch("HAS_VOLUME_TO_FACES");
 }
 
 template<typename GEOSHAPE, typename MC>
 void
 RegionMesh3D<GEOSHAPE,MC>::cleanElementEdges(){
-  delete _VToE;
+#ifdef SAVEMEMORY
+  _VToE.clear();
+#else
+  _VToE.clean();
+#endif
   unsetLinkSwitch("HAS_VOLUME_TO_EDGES");
 }
 
