@@ -24,3 +24,7 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 
 SUBDIRS		= data test_mesh test_matrix test_naturalbc test_essentialbc
+
+check-qmtest: 
+	qmtest -D $(srcdir) run
+	qmtest -D $(srcdir) sumarize
