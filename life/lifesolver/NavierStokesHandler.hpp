@@ -77,6 +77,9 @@ public:
     typedef boost::function<Real ( Real const&, Real const&, Real const&,
                                    Real const&, ID const& )> source_type;
 
+    //! type used for flux computations (see FacesOnSections)
+    typedef __gnu_cxx::slist< std::pair< ID, SimpleVect< ID > > > face_dof_type;
+
     //! Constructor
     /*!
       \param data_file GetPot data file
@@ -185,7 +188,79 @@ public:
 
     //! Computes the flux on a given part of the boundary
     //! \param flag the mesh flag identifying the part of the mesh where the flux is computed
+    //! NB: all the connectivity is recomputed at each call of this function
     Real flux( const EntityFlag& flag );
+
+    /*! Computes the area and flux on a given part of the boundary
+      \param flag the mesh flag identifying the part of the mesh where the flux is computed
+      \param __faces_on_section : list of faces that were found:
+      first:  global face number
+      second: vector of size nDofF (nb of dof per face). contains the local (in the face) to global dof.
+    */
+    void FacesOnFlag( const EntityFlag& flag, face_dof_type & __faces_on_flag );
+
+
+    /*! Get the faces that live on a horizontal section (z=__z_section)
+      up to a given tolerance (z = __z_section +/- __tolerance ).
+
+      \param __z_section : position of the planar section
+      \param __faces_on_section : list of faces that were found:
+      first:  global face number
+      second: vector of size nDofF (nb of dof per face). contains the local (in the face) to global dof.
+      \param __tolerance_section :
+                  all faces between the two planes  z = __z_section - __tolerance_section
+                  and z = __z_section + __tolerance_section are kept.
+      (we only check the first 3 points of the faces)
+
+      \param __x_frontier : given point on the boundary.
+      \param __point_on_boundary is a pair<global face ID, Vertex ID> determining a point
+          close to a given boundary point __x_frontier.
+
+      This function is VERY mesh dependent!! Use it with caution.
+    */
+    void FacesOnSection( const Real&  __z_section,
+                         face_dof_type & __faces_on_section,
+                         const Real& __tolerance_section,
+                         const Real&  __x_frontier,
+                         std::pair<ID, ID> & __point_on_boundary );
+
+protected:
+    /*! Update the local (face dof) to global dof vector
+
+       \param __faces_on_section : list of faces that were found:
+       first:  global face number (input)
+       second: output vector of size nDofF (nb of dof per face).
+       On output it contains the local (in the face) to global dof.
+    */
+    void _updateDofFaces( face_dof_type & __faces_on_section );
+
+public:
+    /*! compute the area in the case of a cylindric domain (axis centered on the origin),
+      given a boundary point (i.e. the radius).
+      The area is approximated using the regular polygonal area formula.
+
+      \param __point_on_boundary is a pair<global face ID, Vertex ID> determining a point
+      close to a given boundary point.
+
+      \param nb_edge_polygon : nb of edges of the polygon for the formula
+    */
+    Real AreaCylindric( const std::pair<ID, ID> & __point_on_boundary,
+                        const int & __nb_edge_polygon );
+
+    /*! compute the Area and Flux
+      \param __faces_on_section : list of faces that were found:
+                                first:  global face number
+                                second: vector of size nDofF (nb of dof per face)
+                                        contains the local (in the face) to global dof.
+      \param modify_sign_normal : if == true, the computed flux is positive if (u \dot z) is positive
+    */
+    std::pair< Real, Real > AreaAndFlux( const face_dof_type & __faces_on_section,
+                                         const bool& modify_sign_normal = false );
+
+    /*! compute the Areas and Fluxes for all sections and write them on a file
+      in the plotmtv format
+    */
+    void PostProcessAreaAndFlux( const Real & __time );
 
     //! Interpolate a given velocity function nodally onto a velocity vector
     void uInterpolate( const Function& uFct, Vector& uVect, Real time );
@@ -267,6 +342,22 @@ protected:
 
     //! Aux. var. for PostProc
     UInt _count;
+
+protected:
+    //---------------
+    //! stuff to compute the fluxes at each section for a cylindrical tube (mesh: tube20.mesh)
+    //! This is hard coded as it strongly depends on the mesh
+    //---------------
+    const int M_nb_sections;
+    std::vector<Real> M_z_section; //! position of the sections
+    std::vector< face_dof_type > M_list_of_faces_on_section;
+    //! points that are on the external boundary (used to compute the area)
+    std::vector< std::pair<ID, ID> > M_list_of_points_on_boundary;
+
+    std::ofstream M_out_areas;
+    std::ofstream M_out_areas_polygon;
+    std::ofstream M_out_fluxes;
+
 };
 
 
@@ -303,8 +394,61 @@ NavierStokesHandler( const GetPot& data_file, const RefFE& refFE_u,
     _BCh_u( BCh_u ),
     _bdf( this->_order_bdf ), _ns_post_proc( this->_mesh, _feBd_u, _dof_u,
                                              NDIM ),  // /******************
-    _count( 0 )
-{}
+    _count( 0 ),
+    //! stuff to compute the fluxes at each section (ex. of mesh: tube20.mesh)
+    M_nb_sections( NbZSections() ),
+    M_z_section( M_nb_sections ),
+    M_list_of_faces_on_section( M_nb_sections ),
+    M_list_of_points_on_boundary( M_nb_sections ),
+    M_out_areas("Areas.res"), M_out_areas_polygon("AreasPolygon.res"),
+    M_out_fluxes("Fluxes.res")
+{
+  if ( this->computeMeanValuesPerSection() == 1 ) {
+    //---------------
+    //! stuff to compute the fluxes at each section for a cylindrical tube
+    //! (ex. of mesh: tube20.mesh)
+    //---------------
+    
+    /*
+      M_out_areas = std::ofstream("Areas.res");
+    ASSERT( M_out_areas, "Error: Output areas file cannot be open" );
+    M_out_areas_polygon = std::ofstream("AreasPolygon.res");
+    ASSERT( M_out_areas_polygon, "Error: Output Polygon areas file cannot be open" ); 
+    M_out_fluxes = std::ofstream("Fluxes.res");
+    ASSERT( M_out_areas, "Error: Output fluxes file cannot be open" ); 
+    */
+    
+    
+    if ( ! this->_mesh.hasInternalFaces() )
+        ERROR_MSG("The mesh must have all internal faces built up. Check that 'mesh_faces = all' in the data file.");
+    if ( M_nb_sections < 2 )
+        ERROR_MSG("We can't compute the mean values on less than 2 sections.");
+    ASSERT( ZSectionFinal() - ZSectionInit() > 0,
+	    "We can't compute the mean values on less than 2 sections.");
+
+    for ( int izs = 0; izs < M_nb_sections ; izs ++  ){
+        M_z_section[ izs ] = ZSectionInit() + Real(izs) * ( ZSectionFinal() - ZSectionInit() )
+	  / Real(M_nb_sections-1); // mesh dependent (length of tube=5)
+    }
+
+    for ( int izs = 0; izs < M_nb_sections ; izs ++  ){
+        this->FacesOnSection( M_z_section[izs], M_list_of_faces_on_section[izs], ToleranceSection(),
+                              XSectionFrontier(), M_list_of_points_on_boundary[izs] );
+        if ( M_list_of_faces_on_section[izs].size() == 0) {
+            std::cout << "section z=" << M_z_section[izs] << " size="
+                      << M_list_of_faces_on_section[izs].size() << std::endl;
+            ERROR_MSG("For this section, no faces found.");
+        }
+    }
+    if ( M_list_of_faces_on_section.size() == 0) {
+        ERROR_MSG("No list of faces found.");
+    }
+    //---------------
+    //! end of stuff to compute the fluxes
+    //---------------
+  }
+  
+}
 
 
 // Returns the velocity vector
@@ -650,12 +794,167 @@ NavierStokesHandler<Mesh>::initialize( const std::string& velName,
     filep.close();
 }
 
-//! Computes the flux on a given part of the boundary
+/*! Computes the flux on a given part of the boundary
+    call of function AreaAndFlux( )
+    NOT optimal! recompute the connectivity at each time step.
+    (To do something faster, call once FacesOnFlag...)
+*/
 template <typename Mesh>
 Real
 NavierStokesHandler<Mesh>::flux( const EntityFlag& flag )
 {
+    face_dof_type faces_on_flag;
+    FacesOnFlag( flag, faces_on_flag ); //! reconstruct all the connectivity
 
+    std::pair< Real, Real > area_flux = AreaAndFlux( faces_on_flag ,
+                                                     false ); //! keep the orientation of the normal
+    return area_flux.second;
+}
+
+/*! Get the faces that are on a part of the boundary which is defined by its flag
+
+   \param flag : __flag of the faces that are sought
+   \param __faces_on_section : list of faces that were found:
+   first:  global face number
+   second: vector of size nDofF (nb of dof per face).
+   contains the local (in the face) to global dof.
+*/
+template <typename Mesh>
+void
+NavierStokesHandler<Mesh>::FacesOnFlag( const EntityFlag& __flag ,
+                                        face_dof_type & __faces_on_flag )
+{
+
+    typedef typename Mesh::FaceShape GeoBShape;
+
+    // Some useful local variables, to save some typing
+    UInt nDofpV = _refFE_u.nbDofPerVertex; // number of Dof per vertices
+    UInt nDofpE = _refFE_u.nbDofPerEdge;   // number of Dof per edges
+    UInt nDofpF = _refFE_u.nbDofPerFace;   // number of Dof per faces
+
+    UInt nFaceV = GeoBShape::numVertices; // Number of face's vertices
+    UInt nFaceE = GeoBShape::numEdges;    // Number of face's edges
+
+    UInt nDofFV = nDofpV * nFaceV; // number of vertex's Dof on a face
+    UInt nDofFE = nDofpE * nFaceE; // number of edge's Dof on a face
+
+    UInt nDofF = nDofFV + nDofFE + nDofpF; // number of total Dof on a face
+
+    UInt bdnF = this->_mesh.numBFaces();    // number of faces on boundary
+
+    EntityFlag marker;
+    typedef face_dof_type::iterator FaceDofIterator;
+
+    //
+    // Loop on boundary faces: List of boundary faces
+    // with marker = __flag
+    //
+    for ( ID i = 1 ; i <= bdnF; ++i )
+    {
+        marker = this->_mesh.boundaryFace( i ).marker();
+        if ( marker == __flag )
+        {
+            __faces_on_flag.push_front( make_pair( i, SimpleVect<ID>( nDofF ) ) );
+        }
+    }
+
+    //! building the local to global vector for these boundary faces
+    _updateDofFaces( __faces_on_flag );
+
+}
+
+/*! Get the faces that live on a horizontal section (z=__z_section)
+    up to a given tolerance (z = __z_section +/- __tolerance ).
+
+    \param __z_section : position of the planar section
+    \param __faces_on_section : list of faces that were found:
+      first:  global face number
+      second: vector of size nDofF (nb of dof per face).
+      contains the local (in the face) to global dof.
+   \param __tolerance_section :
+                  all faces between the two planes  z = __z_section - __tolerance_section
+                  and z = __z_section + __tolerance_section are kept.
+   (we only check the first 3 points of the faces)
+
+   \param __x_frontier : given point on the boundary.
+   \param __point_on_boundary is a pair<global face ID, Vertex ID> determining a point
+          close to a given boundary point __x_frontier.
+
+   This function is VERY mesh dependent!! Use it with caution.
+*/
+template <typename Mesh>
+void
+NavierStokesHandler<Mesh>::FacesOnSection( const Real&  __z_section,
+                                           face_dof_type & __faces_on_section,
+                                           const Real& __tolerance_section ,
+                                           const Real&  __x_frontier,
+                                           std::pair<ID, ID> & __point_on_boundary )
+{
+    typedef typename Mesh::FaceShape GeoBShape;
+
+    // Some useful local variables, to save some typing
+    UInt nDofpV = _refFE_u.nbDofPerVertex; // number of Dof per vertices
+    UInt nDofpE = _refFE_u.nbDofPerEdge;   // number of Dof per edges
+    UInt nDofpF = _refFE_u.nbDofPerFace;   // number of Dof per faces
+
+    UInt nFaceV = GeoBShape::numVertices; // Number of face's vertices
+    UInt nFaceE = GeoBShape::numEdges;    // Number of face's edges
+
+    UInt nDofFV = nDofpV * nFaceV; // number of vertex's Dof on a face
+    UInt nDofFE = nDofpE * nFaceE; // number of edge's Dof on a face
+
+    UInt nDofF = nDofFV + nDofFE + nDofpF; // number of total Dof on a face
+
+    UInt nF = this->_mesh.numFaces();    // number of faces (all faces)
+
+    ID  iglobface;
+
+    bool _found_point = false;
+
+    //! search the faces on a given horizontal section
+    //! loop on all faces
+    for( ID iface = 1 ; iface <= nF ; iface ++ ) {
+        iglobface = this->_mesh.faceList(iface).id();
+
+        //! 3 points on the faces
+        Real z_VeFa1 = this->_mesh.faceList(iface).point( 1 ).z();
+        Real z_VeFa2 = this->_mesh.faceList(iface).point( 2 ).z();
+        Real z_VeFa3 = this->_mesh.faceList(iface).point( 3 ).z();
+
+        //! check the tolerance here (depends on the mesh)
+        if ( std::fabs( __z_section - z_VeFa1 ) < __tolerance_section &&
+             std::fabs( __z_section - z_VeFa2 ) < __tolerance_section &&
+             std::fabs( __z_section - z_VeFa3 ) < __tolerance_section
+             ) {
+            __faces_on_section.push_front( make_pair( iglobface, SimpleVect<ID>( nDofF ) ) );
+
+            ID iVeFa = 1;
+            while ( ! _found_point && iVeFa <= nFaceV ) {
+                Real x_VeFa = this->_mesh.faceList(iface).point( iVeFa ).x();
+                if ( std::fabs( x_VeFa - __x_frontier ) < __tolerance_section ) {
+                    __point_on_boundary = std::pair<ID, ID>( iglobface , iVeFa );
+                    _found_point = true;
+                }
+                iVeFa ++;
+            }
+        }
+    }
+
+    //! building the local to global vector for these boundary faces
+    _updateDofFaces( __faces_on_section );
+}
+
+/*! Update the local (face dof) to global dof vector
+
+    \param __faces_on_section : list of faces that were found:
+    first:  global face number (input)
+    second: output vector of size nDofF (nb of dof per face).
+    On output it contains the local (in the face) to global dof.
+*/
+template <typename Mesh>
+void
+NavierStokesHandler<Mesh>::_updateDofFaces( face_dof_type & __faces_on_section )
+{
     typedef typename Mesh::VolumeShape GeoShape;
     typedef typename Mesh::FaceShape GeoBShape;
 
@@ -673,49 +972,31 @@ NavierStokesHandler<Mesh>::flux( const EntityFlag& flag )
     UInt nDofFV = nDofpV * nFaceV; // number of vertex's Dof on a face
     UInt nDofFE = nDofpE * nFaceE; // number of edge's Dof on a face
 
-    UInt nDofF = nDofFV + nDofFE + nDofpF; // number of total Dof on a face
-
     UInt nDofElemV = nElemV * nDofpV; // number of vertex's Dof on a Element
     UInt nDofElemE = nElemE * nDofpE; // number of edge's Dof on a Element
 
-    UInt bdnF = this->_mesh.numBFaces();    // number of faces on boundary
-
-    Real flux = 0.0;
-    __gnu_cxx::slist<std::pair<ID, SimpleVect<ID> > > faces;
-    ID ibF;
+    //! search the faces on a given horizontal section
+    ID iFace;
     UInt iElAd, iVeEl, iFaEl, iEdEl;
-    ID lDof, gDof, numTotalDof = _dof_u.numTotalDof();
+    ID lDof, gDof;
 
-    EntityFlag marker;
-    typedef __gnu_cxx::slist<pair<ID, SimpleVect<ID> > >::iterator Iterator;
+    typedef face_dof_type::iterator FaceDofIterator;
 
-    //
-    // Loop on boundary faces: List of boundary faces
-    // with marker = flag
-    //
-    for ( ID i = 1 ; i <= bdnF; ++i )
-    {
-        marker = this->_mesh.boundaryFace( i ).marker();
-        if ( marker == flag )
-        {
-            faces.push_front( make_pair( i, SimpleVect<ID>( nDofF ) ) );
-        }
-    }
 
     //
     // Loop on faces: building the local to global vector
-    // for these boundary faces
+    // for these faces
     //
-    for ( Iterator j = faces.begin(); j != faces.end(); ++j )
+    for ( FaceDofIterator j = __faces_on_section.begin(); j != __faces_on_section.end(); ++j )
     {
 
-        ibF = j->first;
+        iFace = j->first;
 
         // id of the element adjacent to the face
-        iElAd = this->_mesh.boundaryFace( ibF ).ad_first();
+        iElAd = this->_mesh.boundaryFace( iFace ).ad_first();
 
         // local id of the face in its adjacent element
-        iFaEl = this->_mesh.boundaryFace( ibF ).pos_first();
+        iFaEl = this->_mesh.boundaryFace( iFace ).pos_first();
 
         // Vertex based Dof
         if ( nDofpV )
@@ -786,6 +1067,70 @@ NavierStokesHandler<Mesh>::flux( const EntityFlag& flag )
             }
         }
     }
+}
+
+/*! compute the area in the case of a cylindric domain (axis centered on the origin),
+    given a boundary point (i.e. the radius).
+    The area is approximated using the regular polygonal area formula.
+
+   \param __point_on_boundary is a pair<global face ID, Vertex ID> determining a point
+          close to a given boundary point.
+
+   \param nb_edge_polygon : nb of edges of the polygon for the formula
+
+ */
+template <typename Mesh>
+Real
+NavierStokesHandler<Mesh>::AreaCylindric( const std::pair<ID, ID> & __point_on_boundary,
+                                          const int & __nb_edge_polygon )
+{
+    ID iglobface = __point_on_boundary.first;
+    ID iVeFa     = __point_on_boundary.second;
+
+    Real radius = this->_mesh.faceList(iglobface).point( iVeFa ).x();
+
+    return  0.5 * __nb_edge_polygon * radius * radius * std::sin( 2. * LifeV::Pi / __nb_edge_polygon );
+}
+
+
+
+/*! compute the Area and Flux
+  \param __faces_on_section : list of faces that were found:
+  first:  global face number
+  second: vector of size nDofF (nb of dof per face)
+  contains the local (in the face) to global dof.
+  \param modify_sign_normal : if == true, the computed flux is positive if (u \dot z) is positive
+*/
+template <typename Mesh>
+std::pair< Real, Real >
+NavierStokesHandler<Mesh>::AreaAndFlux( const face_dof_type & __faces_on_section,
+                                        const bool & modify_sign_normal )
+{
+    ASSERT( computeMeanValuesPerSection() == 1,
+	    "AreaAndFlux() is disabled if you don't ask to compute the Mean Values." );
+    
+    typedef typename Mesh::FaceShape GeoBShape;
+
+    // Some useful local variables, to save some typing
+    UInt nDofpV = _refFE_u.nbDofPerVertex; // number of Dof per vertices
+    UInt nDofpE = _refFE_u.nbDofPerEdge;   // number of Dof per edges
+    UInt nDofpF = _refFE_u.nbDofPerFace;   // number of Dof per faces
+
+    UInt nFaceV = GeoBShape::numVertices; // Number of face's vertices
+    UInt nFaceE = GeoBShape::numEdges;    // Number of face's edges
+
+    UInt nDofFV = nDofpV * nFaceV; // number of vertex's Dof on a face
+    UInt nDofFE = nDofpE * nFaceE; // number of edge's Dof on a face
+
+    UInt nDofF = nDofFV + nDofFE + nDofpF; // number of total Dof on a face
+
+    //! two unknows
+    Real __area = 0.0;
+    Real __flux = 0.0;
+
+    ID gDof, numTotalDof = _dof_u.numTotalDof();
+
+    typedef face_dof_type::const_iterator constFaceDofIterator;
 
     // Number of velocity components
     UInt nc_u = _u.nbcomp();
@@ -794,10 +1139,10 @@ NavierStokesHandler<Mesh>::flux( const EntityFlag& flag )
     std::vector<Real> u_local( nc_u * nDofF );
 
     // Loop on faces
-    for ( Iterator j = faces.begin(); j != faces.end(); ++j )
+    for ( constFaceDofIterator j = __faces_on_section.begin(); j != __faces_on_section.end(); ++j )
     {
 
-        // Extracting lodal values of the velocity in the current face
+        // Extracting local values of the velocity in the current face
         for ( UInt ic = 0; ic < nc_u; ++ic )
         {
             for ( ID l = 1; l <= nDofF; ++l )
@@ -811,10 +1156,19 @@ NavierStokesHandler<Mesh>::flux( const EntityFlag& flag )
         // Updating quadrature data on the current face
         _feBd_u.updateMeasNormalQuadPt( this->_mesh.boundaryFace( j->first ) );
 
+        __area += _feBd_u.measure();
+
+
         // Quadrature formula
         // Loop on quadrature points
         for ( int iq = 0; iq < _feBd_u.nbQuadPt; ++iq )
         {
+            //! check the orientation of the normal
+            //! the flux will be positive if (u \dot z) is positive
+            Real sign_normal_dot_z = 1.0;
+            if ( modify_sign_normal && _feBd_u.normal( 2, iq ) < 0 ) { //! component=2 -> z axis
+                sign_normal_dot_z = -1.0;
+            }
 
             // Dot product
             // Loop on components
@@ -824,16 +1178,45 @@ NavierStokesHandler<Mesh>::flux( const EntityFlag& flag )
                 // Interpolation
                 // Loop on local dof
                 for ( ID l = 1; l <= nDofF; ++l )
-                    flux += _feBd_u.weightMeas( iq ) *
+                    __flux += _feBd_u.weightMeas( iq ) *
                         u_local[ ic * nDofF + l - 1 ] *
                         _feBd_u.phi( int( l - 1 ), iq ) *
-                        _feBd_u.normal( int( ic ), iq );
+                        _feBd_u.normal( int( ic ), iq ) *
+                        sign_normal_dot_z;
             }
         }
     }
 
-    return flux;
+    return  std::pair< Real, Real > ( __area , __flux );
 }
+
+/*! compute the Areas and Fluxes for all sections and write them on a file
+    in the plotmtv format
+*/
+template <typename Mesh>
+void NavierStokesHandler<Mesh>::PostProcessAreaAndFlux( const Real & __time )
+{
+    M_out_areas  << "$ DATA = CURVE2D\n %% xlabel='z'\n"
+                 << "%% toplabel='Section,time=" << __time << "'\n %% ylabel='Area'\n";
+    M_out_fluxes << "$ DATA = CURVE2D\n %% xlabel='z'\n"
+                 << "%% toplabel='Section,time=" << __time << "'\n %% ylabel='Flux'\n";
+    M_out_areas_polygon  << "$ DATA = CURVE2D\n %% xlabel='z'\n"
+                         << "%% toplabel='Section,time=" << __time << "'\n %% ylabel='AreaPolygonal'\n";
+
+    for ( int izs = 0; izs < M_nb_sections ; izs ++  ){
+        //! all normals are oriented along z axis -> "true"
+        std::pair<Real, Real> AQmid  = this->AreaAndFlux( M_list_of_faces_on_section[izs], true );
+        M_out_areas  << M_z_section[izs] << "\t" << AQmid.first << "\n";
+        M_out_fluxes << M_z_section[izs] << "\t" << AQmid.second << "\n";
+
+        Real area_polygon = this->AreaCylindric( M_list_of_points_on_boundary[izs], NbPolygonEdges() ); 
+        M_out_areas_polygon  << M_z_section[izs] << "\t" << area_polygon << "\n";
+    }
+    M_out_areas << std::endl;
+    M_out_fluxes << std::endl;
+    M_out_areas_polygon << std::endl;
+}
+
 
 template<typename Mesh>
 void NavierStokesHandler<Mesh>::uInterpolate( const Function& uFct,

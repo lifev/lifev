@@ -64,6 +64,17 @@ public:
     Real dump_init() const;
     UInt dump_period() const;
 
+    //! a way to obtain the Mean Flux, Mean Pressure and
+    //! Mean Area at a section defined by z=z_data.
+    UInt computeMeanValuesPerSection() const;
+    UInt NbZSections() const;
+    Real ToleranceSection() const;
+    Real XSectionFrontier() const;
+    Real ZSectionInit() const;
+    Real ZSectionFinal() const;
+    UInt NbPolygonEdges() const;
+  
+    
 protected:
     //! Physics
     Real _rho; // density
@@ -76,6 +87,16 @@ protected:
     UInt _verbose; // temporal output verbose
     Real _dump_init; // time for starting the dumping of the results (Alex December 2003)
     UInt _dump_period; // frequency of the dumping (one dump after _dump_period time steps) (Alex December 2003)
+
+private:
+    //! To extract Mean Values at a given section z
+    UInt M_computeMeanValuesPerSection; //! switch: 0 don't compute it, 1 compute
+    UInt M_NbZSections;
+    Real M_ToleranceSection;
+    Real M_XSectionFrontier;
+    Real M_ZSectionInit;
+    Real M_ZSectionFinal;
+    UInt M_NbPolygonEdges; //! number of edges of the polygon (in mesh) describing the circle
 };
 
 
@@ -102,6 +123,22 @@ DataNavierStokes( const GetPot& dfile ) :
     _verbose = dfile( "fluid/miscellaneous/verbose", 1 );
     _dump_init = dfile( "fluid/miscellaneous/dump_init", _inittime );
     _dump_period = dfile( "fluid/miscellaneous/dump_period", 1 );
+
+    //mean values per section
+    M_computeMeanValuesPerSection =
+      dfile( "fluid/valuespersection/computeMeanValuesPerSection", 0 );
+    M_NbZSections =
+      dfile( "fluid/valuespersection/nb_z_section", 2 );
+    M_ToleranceSection =
+      dfile( "fluid/valuespersection/tol_section", 2e-2 );
+    M_XSectionFrontier =
+      dfile( "fluid/valuespersection/x_section_frontier", 0. );
+    M_ZSectionInit =
+      dfile( "fluid/valuespersection/z_section_init", -1. );
+    M_ZSectionFinal =
+      dfile( "fluid/valuespersection/z_section_final", 0. ); 
+    M_NbPolygonEdges =
+      dfile( "fluid/valuespersection/nb_polygon_edges", 10 );
 }
 
 // Output
@@ -124,6 +161,16 @@ showMe( std::ostream& c )
     c << "\n*** Values for data [fluid/discretization]\n\n";
     DataMesh<Mesh>::showMe( c );
     DataTime::showMe( c );
+
+    c << "\n*** Values for data [fluid/valuespersection]\n\n";
+    c << "computeMeanValuesPerSection (switch 0: don't compute, 1: compute)  = "
+      << M_computeMeanValuesPerSection << std::endl;
+    c << "nb_z_section  = " << M_NbZSections << std::endl;
+    c << "tol_section  = " << M_ToleranceSection << std::endl;
+    c << "x_section_frontier  = " << M_XSectionFrontier << std::endl;
+    c << "z_section_init  = " << M_ZSectionInit << std::endl;
+    c << "z_section_final  = " << M_ZSectionFinal << std::endl;
+    c << "nb_polygon_edges  = " << M_NbPolygonEdges << std::endl;
 
 }
 ////////////////////
@@ -182,5 +229,64 @@ dump_period() const
 {
     return _dump_period;
 }
+
+//! Mean Values per Sections
+//! compute (0) or not (1) the mean values per sections
+template <typename Mesh>
+UInt DataNavierStokes<Mesh>::
+computeMeanValuesPerSection() const
+{
+    return M_computeMeanValuesPerSection;
+}
+//! number of sections 
+template <typename Mesh>
+UInt DataNavierStokes<Mesh>::
+NbZSections() const
+{
+    return M_NbZSections;
+}
+//! tolerance for point proximity
+template <typename Mesh>
+Real DataNavierStokes<Mesh>::
+ToleranceSection() const
+{
+    return M_ToleranceSection;
+}
+//! x (see NSHandler): point at the frontier for computation of the area
+//! with a polygonal formula (x -> displacement of the boundary)
+template <typename Mesh>
+Real DataNavierStokes<Mesh>::
+XSectionFrontier() const
+{
+    return M_XSectionFrontier;
+}
+//! lower section
+template <typename Mesh>
+Real DataNavierStokes<Mesh>::
+ZSectionInit() const
+{
+    return M_ZSectionInit;
+}
+//! upper section
+template <typename Mesh>
+Real DataNavierStokes<Mesh>::
+ZSectionFinal() const
+{
+    return M_ZSectionFinal;
+}
+//! number of edges of the polygon (in mesh) describing the circle
+template <typename Mesh>
+UInt DataNavierStokes<Mesh>::
+NbPolygonEdges() const
+{
+    return M_NbPolygonEdges;
+}
+
+
 }
 #endif
+
+
+
+
+
