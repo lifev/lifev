@@ -252,15 +252,15 @@ ElasticStructureHandler<Mesh>::postProcess()
         system( ( "ln -s " + namedef + " dep_z." + name + ".mesh" ).data() );
         // system(("ln -s "+this->_mesh_file+" veloc."+name+".mesh").data());
 
-        wr_medit_ascii_scalar( "vel_x." + name + ".bb", _w.giveVec(), this->_mesh.numVertices() );
-        wr_medit_ascii_scalar( "vel_y." + name + ".bb", _w.giveVec() + _dim, this->_mesh.numVertices() );
-        wr_medit_ascii_scalar( "vel_z." + name + ".bb", _w.giveVec() + 2 * _dim, this->_mesh.numVertices() );
+//         wr_medit_ascii_scalar( "vel_x." + name + ".bb", _w.giveVec(), this->_mesh.numVertices() );
+//         wr_medit_ascii_scalar( "vel_y." + name + ".bb", _w.giveVec() + _dim, this->_mesh.numVertices() );
+//         wr_medit_ascii_scalar( "vel_z." + name + ".bb", _w.giveVec() + 2 * _dim, this->_mesh.numVertices() );
 
-        // wr_medit_ascii_vector("veloc."+name+".bb",_u.giveVec(),this->_mesh.numVertices(),_dim_u);
-        system( ( "ln -s " + namedef + " vel_x." + name + ".mesh" ).data() );
-        system( ( "ln -s " + namedef + " vel_y." + name + ".mesh" ).data() );
-        system( ( "ln -s " + namedef + " vel_z." + name + ".mesh" ).data() );
-        // system(("ln -s "+this->_mesh_file+" veloc."+name+".mesh").data());
+//         // wr_medit_ascii_vector("veloc."+name+".bb",_u.giveVec(),this->_mesh.numVertices(),_dim_u);
+//         system( ( "ln -s " + namedef + " vel_x." + name + ".mesh" ).data() );
+//         system( ( "ln -s " + namedef + " vel_y." + name + ".mesh" ).data() );
+//         system( ( "ln -s " + namedef + " vel_z." + name + ".mesh" ).data() );
+//         system(("ln -s "+this->_mesh_file+" veloc."+name+".mesh").data());
     }
 }
 
