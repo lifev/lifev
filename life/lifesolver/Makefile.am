@@ -35,7 +35,9 @@ include_HEADERS	= ElasticStructureHandler.hpp NavierStokesAleHandler.hpp \
                 convDiffReactHandler.hpp convDiffReactSolverPC.hpp dataConvDiffReact.hpp \
                 dataDarcy.hpp darcyHandler.hpp darcySolverBase.hpp darcySolver.hpp \
                 FSIOperator.hpp steklovPoincareBase.hpp fixedPointBase.hpp exactJacobianBase.hpp \
-                FSISolver.hpp timeSolver.hpp parabolicSolver.hpp reducedLinFluid.hpp
+                FSISolver.hpp timeSolver.hpp parabolicSolver.hpp reducedLinFluid.hpp \
+                LevelSetSolver.hpp LevelSetSolverUtils.hpp \
+                HyperbolicSolverIP.hpp
 
 
 lib_LTLIBRARIES	= liblifesolver.la
