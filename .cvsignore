@@ -1,2 +1,13 @@
 Doxygen
+aclocal.m4
+autom4te.cache
+config.h.in
+configure
+configure.files
+configure.in
 doxy.log
+life.kdevelop.pcs
+life.kdevses
+lifeconfig.h.in
+stamp-h.in
+subdirs

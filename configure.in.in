@@ -1,0 +1,47 @@
+#
+# Configure script
+#
+
+AC_INIT(life, 0.1.0pre1, christophe.prudhomme@epfl.ch)
+
+AC_CONFIG_AUX_DIR(admin)
+
+dnl What the current system and host
+AC_CANONICAL_HOST
+AC_CANONICAL_SYSTEM
+
+
+AM_INIT_AUTOMAKE(life, 0.1.0pre1 )
+AM_CONFIG_HEADER(lifeconfig.h)
+
+
+
+# check for a C compiler
+AC_PROG_CC( gcc )
+AC_PROG_CC_C_O
+AC_PROG_CXX( g++ )
+AC_PROG_F77( g77 )
+AC_PROG_F77_C_O
+
+# check for libtool
+AC_PROG_LIBTOOL
+
+# AZTEC check
+ac_aztec_includedirs="$REPOSITORY/$ARCH/include/Aztec_LifeV/ /usr/include /usr/local/include"
+AC_FIND_FILE("az_aztec.h",$ac_aztec_includedirs , ac_aztec_includedir)
+ echo $ac_aztec_includedir
+CXXFLAGS="-I$ac_aztec_includedir ${CXXFLAGS}"
+
+ac_aztec_libdirs="$REPOSITORY/$ARCH/lib$AFFIX/Aztec_LifeV/ /usr/lib /usr/local/lib"
+AC_FIND_FILE("libaztec.a", $ac_aztec_libdirs, ac_aztec_libdir)
+ echo $ac_aztec_libdir
+LDFLAGS="${LDFLAGS} -L${ac_aztec_libdir}"
+aztec_libs="-laztec"
+AC_SUBST( aztec_libs )
+
+
+CXXFLAGS="-I\$(top_srcdir)/life/lifecore -I\$(top_srcdir)/life/lifemesh -I\$(top_srcdir)/life/lifefem"
+CXXFLAGS="-DTHREEDIM -Wall ${CXXFLAGS}"
+
+life_libs="\$(top_builddir)/life/lifefem/liblifefem.la \$(top_builddir)/life/lifemesh/liblifemesh.la \$(top_builddir)/life/lifecore/liblifecore.la"
+AC_SUBST(life_libs)

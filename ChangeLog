@@ -1,0 +1,15 @@
+2004-02-06  Christophe Prud'homme  <prudhomm@zion>
+
+	* life/lifecore/assemb.hpp (assemble): fix compilation error in assemb. ic should be ints to avoid overload clashes
+	moved jc also as a local variable
+
+2003-10-20 Christophe Prud'homme <prudhomm@mit.edu>
+	* removed makefile files, they are generated automagically now 
+	 
+
+2003-10-20 Christophe Prud'homme <prudhomm@mit.edu>
+	* use admin/cvs.sh 
+	* added files that automake want (dummy for now) 
+	* added kdevelop configuration 
+	 
+
