@@ -29,6 +29,9 @@
 #ifndef _CONVDIFFREACTHANDLER_H_
 #define _CONVDIFFREACTHANDLER_H_
 
+#include <cmath>
+#include <sstream>
+
 
 #include "lifeV.hpp"
 #include "dataConvDiffReact.hpp"
@@ -41,8 +44,6 @@
 #include "bdf.hpp"
 #include "postProc.hpp"
 #include "openDX_wrtrs.hpp"
-#include <cmath>
-#include <sstream>
 
 
 namespace LifeV
