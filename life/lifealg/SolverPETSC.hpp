@@ -141,8 +141,8 @@ public:
     //! default constructor
     /*!
       The solver and preconditionner are the ones defined in petsc/petscksp.h
-      \arg ksp krylov subspace method
-      \arg pc preconditionner
+      \param ksp krylov subspace method
+      \param pc preconditionner
     */
     SolverPETSC( std::string const& ksp = "gmres",
                  std::string const& pc = "ilu",
@@ -268,10 +268,10 @@ public:
 
     /*! Initializes PETSC with options from data file. Any option of the form
       NAME = VALUE is passed to PETSC as command line option -NAME VALUE.
-      Example: ksp_type = gmres. See the PETSC documentation for more 
+      Example: ksp_type = gmres. See the PETSC documentation for more
       available options.
-      @arg dataFile GetPot object containing the options from the data file
-      @arg section the section in the GetPot object containing the PETSC stuff
+      @param dataFile GetPot object containing the options from the data file
+      @param section section in the GetPot object containing the PETSC stuff
     */
     PETSCforSingleton(const GetPot& dataFile, std::string section = "petsc");
 
