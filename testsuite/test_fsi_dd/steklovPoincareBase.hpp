@@ -55,7 +55,7 @@ public:
     void evalResidual(const Vector &_disp,
                       const int     _iter,
                       Vector       &_res);
-    void solvePrec   (const Vector &_res,
+    void solveJac   (const Vector &_res,
                       const double  _linearRelTol,
                       Vector       &_muk);
 

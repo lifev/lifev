@@ -201,7 +201,7 @@ void steklovPoincare::setUpBC()
 //
 
 
-void  steklovPoincare::solvePrec(const Vector  &_res,
+void  steklovPoincare::solveJac(const Vector  &_res,
                                  const double   _linearRelTol,
                                  Vector        &_muk)
 {
