@@ -7,4 +7,9 @@
 5000 -- LifeV::fem
 6000 -- LifeV::solver
 6010 -- LifeV::NavierStokesWithFlux
+6020 -- LifeV::NavierStokesSolverPC
+6100 -- LifeV::DarcySolver
 7000 -- LifeV::solver
+10000 -- testsuite
+10010 -- test_naturalbc
+10010 -- test_essentialbc
