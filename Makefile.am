@@ -23,7 +23,7 @@
 # DESCRIP-END.
 #
 
-AUTOMAKE_OPTIONS = foreign 1.6 dejagnu
+AUTOMAKE_OPTIONS = foreign 1.6
 
 $(top_srcdir)/acinclude.m4: $(top_srcdir)/admin/acinclude.m4.in $(top_srcdir)/admin/libtool.m4.in $(top_srcdir)/libltdl/ltdl.m4
 	@cd $(top_srcdir) && cat admin/acinclude.m4.in admin/libtool.m4.in libltdl/ltdl.m4 > acinclude.m4
