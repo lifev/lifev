@@ -20,7 +20,7 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /**
    \file SolverPETSC.hpp
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
@@ -59,13 +59,13 @@ typedef enum PetscMonitorType
 /*!
   \class SolverPETSC
   \brief wrap petsc linear solvers
- 
+
   You should have a look at PETSC documentation for further details.
- 
+
   By default the solver is gmres and the preconditioner is ilu.
- 
+
   Here is the list of solvers available:
- 
+
   -# "richardson"
   -# "chebychev"
   -# "cg"
@@ -83,9 +83,9 @@ typedef enum PetscMonitorType
   -# "minres"
   -# "symmlq"
   -# "lgmres"
- 
+
   Here is the list of preconditioners available:
- 
+
   -# "none"
   -# "jacobi"
   -# "sor"
@@ -113,7 +113,7 @@ typedef enum PetscMonitorType
   -# "petscesi"
   -# "mat"
   -# "hypre"
- 
+
   @author Christophe Prud'homme
   @see
 */
@@ -123,7 +123,7 @@ public:
 
 
     /** @name Typedefs
-     */ 
+     */
     //@{
 
     typedef double value_type;
@@ -136,7 +136,7 @@ public:
     //@}
 
     /** @name Constructors, destructor
-     */ 
+     */
     //@{
 
     //! default constructor
@@ -144,6 +144,7 @@ public:
       The solver and preconditionner are the ones defined in petsc/petscksp.h
       \param ksp krylov subspace method
       \param pc preconditionner
+      \param monitor Petsc monitor called at each iteration
     */
     SolverPETSC( std::string const& ksp = "gmres",
                  std::string const& pc = "ilu",
@@ -158,9 +159,15 @@ public:
     //@}
 
     /** @name Accessors
-     */ 
+     */
     //@{
 
+    /*!
+      \brief Gets the last (approximate preconditioned) residual norm that has
+      been computed.
+
+      \return last (approximate preconditioned) residual norm
+    */
     double residualNorm() const;
 
     //! get the petsc preconditioner
@@ -172,7 +179,7 @@ public:
     //@}
 
     /** @name  Mutators
-     */ 
+     */
     //@{
 
     //! set matrix from raw CSR arrays
@@ -182,8 +189,8 @@ public:
     template <typename PatternType>
     void setMatrix( const CSRMatr<PatternType, value_type>& m )
     {
-        _tempPattern.reset( 0 );
-        _tempMatrix.reset( 0 );
+        _M_tempPattern.reset( 0 );
+        _M_tempMatrix.reset( 0 );
         setMatrix( m.Patt() ->nRows(),
                    m.Patt() ->giveRawCSR_ia(),
                    m.Patt() ->giveRawCSR_ja(),
@@ -198,7 +205,28 @@ public:
     void setMatrix( const MSRMatr<value_type>& m );
 
     void setMatrixTranspose( uint, const uint*, const uint*, const double* );
-    void setTolerances( double = PETSC_DEFAULT, double = PETSC_DEFAULT, double = PETSC_DEFAULT, int = PETSC_DEFAULT );
+    /*!
+      \brief Sets the relative, absolute, divergence, and maximum iteration
+      tolerances used by the default KSP convergence testers.
+
+      Use PETSC_DEFAULT to retain the default value of any of the tolerances.
+
+      See KSPDefaultConverged() for details on the use of these parameters in
+      the default convergence test. See also KSPSetConvergenceTest() for
+      setting user-defined stopping criteria.
+
+      \arg rtol - the relative convergence tolerance (relative decrease in the
+      residual norm)
+      \arg atol - the absolute convergence tolerance (absolute size of the
+      residual norm)
+      \arg dtol - the divergence tolerance (amount residual can increase before
+      KSPDefaultConverged() concludes that the method is diverging)
+      \arg maxits - maximum number of iterations to use
+*/
+void setTolerances( double = PETSC_DEFAULT,
+                        double = PETSC_DEFAULT,
+                        double = PETSC_DEFAULT,
+                        int = PETSC_DEFAULT );
 
     //! get the petsc preconditioner
     PC & preconditioner();
@@ -209,7 +237,7 @@ public:
     //@}
 
     /** @name  Methods
-     */ 
+     */
     //@{
 
     /*
@@ -235,7 +263,9 @@ public:
       -# \c DIFFERENT_NONZERO_PATTERN -
       Pmat does not have the same nonzero structure.
     */
-    void solve( array_type& __X, array_type const& __B, MatStructure __ptype = SAME_NONZERO_PATTERN );
+    void solve( array_type& __X,
+                array_type const& __B,
+                MatStructure __ptype = SAME_NONZERO_PATTERN );
 
     /*
       solve the transpose problem \f$ A^T x = b  \f$
@@ -260,7 +290,9 @@ public:
       -# \c DIFFERENT_NONZERO_PATTERN -
       Pmat does not have the same nonzero structure.
     */
-    void solveTranspose( array_type& __X, array_type const& __B, MatStructure __ptype = SAME_NONZERO_PATTERN );
+    void solveTranspose( array_type& __X,
+                         array_type const& __B,
+                         MatStructure __ptype = SAME_NONZERO_PATTERN );
 
 
     //@}
@@ -281,21 +313,27 @@ public:
                                std::string section = "petsc" );
 
 private:
-    Private* _M_p;
+    std::auto_ptr<Private> _M_p;
 
     //! CSRPatt converted from MSRPatt if matrix given as MSRMatr
-    std::auto_ptr<CSRPatt> _tempPattern;
+    std::auto_ptr<CSRPatt> _M_tempPattern;
 
     //! CSRMatr converted from MSRMatr if given as such
-    std::auto_ptr<CSRMatr<CSRPatt, value_type> > _tempMatrix;
+    std::auto_ptr<CSRMatr<CSRPatt, value_type> > _M_tempMatrix;
+
+    //! common code for solve and solveTranspose
+    void _F_solveCommon( Mat const& __A,
+                         array_type& __X,
+                         array_type const& __B,
+                         MatStructure __ptype = SAME_NONZERO_PATTERN);
 };
 
 /*!
   \class PETSC
   \brief initialization and finalization for PETSC linear solvers
- 
+
   Should be used as LifeV::singleton<PETSC>
- 
+
   @author Christoph Winkelmann
   @see http://www.mcs.anl.gov/petsc/
 */
