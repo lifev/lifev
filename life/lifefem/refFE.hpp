@@ -34,64 +34,66 @@ namespace LifeV
   \brief The class for a reference Lagrangian finite element
   \author J.-F. Gerbeau
   \date 04/2002
- 
+
   \par How to add a new finite element ?
- 
+
   (1) in refEle.h : you declare the functions you need (fct1_Pipo_2D,
   derfct1_1_Pipo_2D, etc...), the static arrays containing these functions
   and the coordinates of the nodes on the reference element.
- 
+
   \par
   (2) in defQuadRuleFE.cc : you define these functions (fct1_Pipo_2D, etc...)
- 
+
   \par
   (3) in refFE.h, you declare your finite element:
   \code
   extern const RefFE fePipo;
   \endcode
- 
+
   \par
   (4) in defQuadRuleFE.cc: you define your new element with a command like:
   \code
   const RefFE feTriaPipo("Pipo element on a triangle",TRIANGLE,1,0,0,0,3,2,
-                         fct_Pipo_2D,derfct_Pipo_2D,der2fct_Pipo_2D,refcoor_Pipo_2D,allQuadRuleTria,STANDARD_PATTERN,&feSegP1);
+  fct_Pipo_2D,derfct_Pipo_2D,der2fct_Pipo_2D,refcoor_Pipo_2D,allQuadRuleTria,STANDARD_PATTERN,&feSegP1);
   \endcode
   See documentation of RefFE::RefFE(...) for a precise description of all arguments
- 
-*/ 
+
+*/
 /* Unique FE identifier*/
+enum FE_TYPE
+{
+    FE_P1_1D = 1,
+    FE_P2_1D = 2,
 
-#define FE_P1_1D 1
-#define FE_P2_1D 2
+    FE_P0_2D = 10,
+    FE_P1_2D = 11,
+    FE_P2_2D = 12,
 
-#define FE_P0_2D 10
-#define FE_P1_2D 11
-#define FE_P2_2D 12
+    FE_Q0_2D = 13,
+    FE_Q1_2D = 14,
+    FE_Q2_2D = 15,
 
-#define FE_Q0_2D 13
-#define FE_Q1_2D 14
-#define FE_Q2_2D 15
+    FE_P0_3D = 20,
+    FE_P1_3D = 21,
+    FE_P1bubble_3D = 22,
+    FE_P2_3D = 23,
+    FE_P2tilde_3D = 24,
 
-#define FE_P0_3D 20
-#define FE_P1_3D 21
-#define FE_P1bubble_3D 22
-#define FE_P2_3D 23
-#define FE_P2tilde_3D 24
+    FE_Q0_3D = 25,
+    FE_Q1_3D = 26,
+    FE_Q2_3D = 27,
 
-#define FE_Q0_3D 25
-#define FE_Q1_3D 26
-#define FE_Q2_3D 27
-
-#define FE_RT0_HEXA_3D 31         //!< Vectorial space for Mixed FE
-#define FE_RT0_TETRA_3D 32
-#define FE_RT0_HYB_HEXA_3D 41     //!< for hybrid Mixed FE.
-#define FE_RT1_HYB_HEXA_3D 42
-#define FE_RT0_HYB_TETRA_3D 44
+    FE_RT0_HEXA_3D = 31,         //!< Vectorial space for Mixed FE
+    FE_RT0_TETRA_3D = 32,
+    FE_RT0_HYB_HEXA_3D = 41,     //!< for hybrid Mixed FE.
+    FE_RT1_HYB_HEXA_3D = 42,
+    FE_RT0_HYB_TETRA_3D = 44
+};
 
 
 class RefFE:
-            public RefEle,
-            public LocalDofPattern
+        public RefEle,
+public LocalDofPattern
 {
     const RefFE* _boundaryFE;
 public:
@@ -135,10 +137,10 @@ public:
     friend std::ostream& operator << ( std::ostream& f, const RefFE& fe );
     //! return the natural reference finite element for the boundary
     inline const RefFE& boundaryFE() const
-    {
-        ASSERT_PRE( _boundaryFE , "No boundary FE defined" );
-        return *_boundaryFE;
-    }
+        {
+            ASSERT_PRE( _boundaryFE , "No boundary FE defined" );
+            return *_boundaryFE;
+        }
 };
 
 //--------------------------------------------------
