@@ -22,7 +22,6 @@
 
 namespace LifeV
 {
-using namespace std;
 
 DarcyHandler::DarcyHandler(const GetPot& data_file):
   DataDarcy(data_file),
@@ -36,6 +35,7 @@ DarcyHandler::DarcyHandler(const GetPot& data_file):
   refVFE(feHexaRT0),
   refPFE(feHexaQ0),
   refTPFE(feHexaRT0Hyb),
+  refVdotNFE(feHexaRT0VdotNHyb),
   vfe(refVFE,geoMap,qr),
   pfe(refPFE,geoMap,qr),
   feBd(refBdFE,geoMapBd,qrBd),
@@ -61,9 +61,9 @@ DarcyHandler::DarcyHandler(const GetPot& data_file):
   dimVdof = vdof.numTotalDof();
 
   if(verbose>0){
-    cout << "Number of TP dof : " << dimTPdof << endl;
-    cout << "Number of  P dof : " << dimPdof << endl;
-    cout << "Number of  V dof : " << dimVdof << endl;
+    std::cout << "Number of TP dof : " << dimTPdof << std::endl;
+    std::cout << "Number of  P dof : " << dimPdof << std::endl;
+    std::cout << "Number of  V dof : " << dimVdof << std::endl;
   }
   // define the boundary conditions
   switch(test_case){

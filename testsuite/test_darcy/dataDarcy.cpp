@@ -1,9 +1,26 @@
+/* -*- mode: c++ -*-
+   This program is part of the LifeV library 
+   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politechnico di Milano
+
+   This program is free software; you can redistribute it and/or
+   modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2
+   of the License, or (at your option) any later version.
+   
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+   
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+*/
 #include <iostream>
 #include "dataDarcy.hpp"
 
 namespace LifeV
 {
-using namespace std;
 
 //! constructor using a data file.
 DataDarcy::DataDarcy(const GetPot& dfile):
@@ -34,7 +51,7 @@ DataDarcy::DataDarcy(const GetPot& dfile):
   post_proc_format   = dfile("miscellaneous/post_proc_format","vtk");
 }
 
-void DataDarcy::dataDarcyShowMe(ostream& c)
+void DataDarcy::dataDarcyShowMe(std::ostream& c)
 {
   // physics
   c << "\n*** Values for data [physics]\n\n";
@@ -54,7 +71,7 @@ void DataDarcy::dataDarcyShowMe(ostream& c)
   c << "post_proc_format = " << post_proc_format << endl;
 }
 
-void DataDarcy::dataDarcyHelp(ostream& c)
+void DataDarcy::dataDarcyHelp(std::ostream& c)
 {
   // physics
   c << "\n*** Help for data [physics]\n\n";

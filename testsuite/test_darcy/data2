@@ -16,7 +16,7 @@ theLinearSolver   = 1    # 0: Aztec, 1: UMFPack (UMFPack not implemented yet)
 
 [miscellaneous]
 mesh_dir = ../data/mesh/inria # the directory where the mesh file is
-post_dir = ./Post2             # the directory for postprocessing files
+post_dir = ./             # the directory for postprocessing files
 verbose = 1
 post_proc_format = medit            # vtk or medit
 

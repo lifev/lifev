@@ -21,8 +21,6 @@
 #include "darcySolver.hpp"
 #include "chrono.hpp"
 
-using namespace std;
-
 /*
 
   Darcy soler using Mixed Hybrid finite element
@@ -46,17 +44,17 @@ int main(int argc, char** argv)
     }
     Chrono chrono;
     //
-    cout << "*** Initialisation --->" << endl;
+    std::cout << "*** Initialisation --->" << std::endl;
     chrono.start();
     DarcySolver pb(data_file);
     if(command_line.search(2,".hpp","--help")){
-        cout << endl << endl;
-        cout <<"usage: darcy              : read the data file 'data' \n";
-        cout <<"       darcy -f otherdata : read the data file 'otherdata' \n";
-        cout <<"	   darcy -h           : help and exit\n";
-        cout <<"       darcy -i           : : read the data file, print the read values and exit\n";
-        cout << endl;
-        cout << "Help for the data file:\n";
+        std::cout << std::endl << std::endl;
+        std::cout <<"usage: darcy              : read the data file 'data' \n";
+        std::cout <<"       darcy -f otherdata : read the data file 'otherdata' \n";
+        std::cout <<"	   darcy -h           : help and exit\n";
+        std::cout <<"       darcy -i           : : read the data file, print the read values and exit\n";
+        std::cout << std::endl;
+        std::cout << "Help for the data file:\n";
         pb.dataAztecHelp();
         pb.dataAztecShowMe();
         pb.dataDarcyHelp();
@@ -65,32 +63,32 @@ int main(int argc, char** argv)
     }
     //
     chrono.stop();
-    cout << "<--- Initialisation done in " << chrono.diff() << "s." << endl;
+    std::cout << "<--- Initialisation done in " << chrono.diff() << "s." << std::endl;
 
     if(pb.verbose)
-        cout << "*** Compute the matrix --->" << endl;
+        std::cout << "*** Compute the matrix --->" << std::endl;
     chrono.start();
     pb.computeHybridMatrixAndSourceRHS();
     chrono.stop();
     if(pb.verbose)
-        cout << "<--- matrix computation done in "<< chrono.diff() << "s." << endl;
+        std::cout << "<--- matrix computation done in "<< chrono.diff() << "s." << std::endl;
     pb.applyBC();
     //
-    if(pb.verbose) cout << "*** Resolution of the hybrid system --->\n";
+    if(pb.verbose) std::cout << "*** Resolution of the hybrid system --->\n";
     chrono.start();
     pb.solveDarcy();
     chrono.stop();
-    if(pb.verbose)cout << "<--- Linear system solved in " << chrono.diff()
-                       << "s." << endl << endl;
+    if(pb.verbose)std::cout << "<--- Linear system solved in " << chrono.diff()
+                       << "s." << std::endl << std::endl;
 
-    if(pb.verbose) cout << "*** Compute pressure and flux --->" << endl;
+    if(pb.verbose) std::cout << "*** Compute pressure and flux --->" << std::endl;
     chrono.start();
     pb.computePresFlux();
     chrono.stop();
     if(pb.verbose)
-        cout << "<---  done in " << chrono.diff() << "s." << endl << endl;
+        std::cout << "<---  done in " << chrono.diff() << "s.\n" << std::endl;
 
-    if(pb.verbose) cout << "*** Postproc --->" << endl;
+    if(pb.verbose) std::cout << "*** Postproc --->" << std::endl;
     chrono.start();
     pb.postProcessTraceOfPressureRT0();
     pb.postProcessVelocityRT0();
@@ -99,7 +97,7 @@ int main(int argc, char** argv)
     pb.postProcessVelocityQ1();
     chrono.stop();
     if(pb.verbose)
-        cout << "<---  done in " << chrono.diff() << "s." << endl << endl;
+        std::cout << "<---  done in " << chrono.diff() << "s.\n" << std::endl;
     //
 
     return 0;

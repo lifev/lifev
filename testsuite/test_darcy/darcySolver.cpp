@@ -117,7 +117,8 @@ void DarcySolver::_element_computation(int ielem)
       mass_Hdiv(1./diffusion_scalar,elmatMix,vfe,0,0);
       break;
     default:
-      cerr << "Unknown function for scalar diffusion. Change physics/diffusion_function in the data file\n";
+      std::cerr << "Unknown function for scalar diffusion. Change physics/diffusion_function in the data file\n"
+		<< std::endl;
       exit(1);
     }
     break;
@@ -142,7 +143,8 @@ void DarcySolver::_element_computation(int ielem)
 	permlower = fibrous_permea(1./diffusion_scalar,diffusion_tensor, xg); //! added "1./"
 	break;
       default:
-	cerr << "Unknown function for tensor diffusion. Change physics/diffusion_function in the data file\n";
+	std::cerr << "Unknown function for tensor diffusion. Change physics/diffusion_function in the data file\n"
+	     << std::endl;
 	exit(1);
       }
       //
@@ -164,11 +166,11 @@ void DarcySolver::_element_computation(int ielem)
       break;
     }
   default:
-    cerr << "diffusion_type=" << diffusion_type << " ??? \n";
+    std::cerr << "diffusion_type=" << diffusion_type << " ??? \n" 
+	      << std::endl;
     exit(1);
   }
 }
-
 
 void DarcySolver::computeHybridMatrixAndSourceRHS()
 {
@@ -195,12 +197,12 @@ void DarcySolver::computeHybridMatrixAndSourceRHS()
     Update the Boundary Matrix
     (independant of the current element thanks to the Piola transform.)
   */
-  TP_VdotN_Hdiv(1., elmatMix, refTPFE, 0, 2 );
+  TP_VdotN_Hdiv(1., elmatMix, refTPFE,refVdotNFE, 0, 2 );
   //
   if(verbose>3){
-    cerr << "elmatHyb : \n";
+    std::cout << "elmatHyb : \n" << std::endl;
     elmatHyb.showMe();
-    cerr << "elmatMix : \n";
+    std::cout << "elmatMix : \n" << std::endl;
     elmatMix.showMe();
   }
   //
@@ -474,7 +476,7 @@ void DarcySolver::computePresFlux()
     dtrtrs_("L", "T", "N", NBP, NBRHS, BtB, NBP, rhs, NBP, INFO);
     ASSERT_PRE(!INFO[0],
 	       "Lapack Computation rhs = LB^{-T} rhs is not achieved.");
-    // contains the pressure for the current element.
+    // rhs contains the pressure for the current element.
     /* Put the pressure of the current fe ("elvecSource")
       in the global vector globalP.*/
     assemb_vec( globalP, elvecSource, refPFE, pdof,ivol, 0);
@@ -532,7 +534,7 @@ double DarcySolver::computeFluxFlag(int flag)
     marker = face->marker();
     faceflux = globalFlux_vec[i-1];
     if(marker==flag){
-      //      if(faceflux <= 0) cerr << "Warning: flux <=0 on outlet ??? \n";
+      //  if(faceflux <= 0) std::cerr << "Warning: flux <=0 on outlet ??? \n" <<  std::endl;
       Fl += faceflux;
     }
   }

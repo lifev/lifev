@@ -26,39 +26,39 @@ namespace LifeV
 {
 void DarcySolver::postProcessTraceOfPressureRT0()
 {
-  if(verbose) cout << "Postprocessing of TP (RT0 per element)\n";
+  if(verbose) std::cout << "Postprocessing of TP (RT0 per element)\n";
   if(post_proc_format == "medit"){
     wr_medit_ascii_scalar(post_dir + "/presTP0.bb",globalTP.giveVec(),globalTP.size(),1);
   } else {
-    cerr
+    std::cerr
       <<"Warning: Solution constant by element is possible only with medit for the moment\n";
   }
 }
 
 void DarcySolver::postProcessVelocityRT0()
 {
-  if(verbose) cout << "Postprocessing of velocity (RT0 per element)\n";
+  if(verbose) std::cout << "Postprocessing of velocity (RT0 per element)\n";
   if(post_proc_format == "medit"){
     wr_medit_ascii_scalar(post_dir + "/velocRT0.bb",globalFlux.giveVec(),globalFlux.size(),1);
   } else {
-    cerr
+    std::cerr
       <<"Warning: Solution constant by element is possible only with medit for the moment\n";
   }
 }
 
 void DarcySolver::postProcessPressureQ0()
 {
-  if(verbose) cout << "Postprocessing of pressure (constant by element)\n";
+  if(verbose) std::cout << "Postprocessing of pressure (constant by element)\n";
   if(post_proc_format == "medit"){
     wr_medit_ascii_scalar(post_dir + "/presQ0.bb",globalP.giveVec(),globalP.size(),1);
   } else {
-    cerr
+    std::cerr
       <<"Warning: Solution constant by element is possible only with medit for the moment\n";
   }
 
 
 #if ANALYTICAL_SOL
-  cout <<"Compute L2 pressure error:\n";
+  std::cout <<"Compute L2 pressure error:\n";
   AnalyticalSolPres analyticSol;
 
   double normL2=0., normL2diff=0., normL2sol=0.;
@@ -78,21 +78,22 @@ void DarcySolver::postProcessPressureQ0()
   normL2sol  = sqrt(normL2solsq);
   normL2diff = sqrt(normL2diffsq);
 
-  string errname = post_dir + "/errQ0Pres.txt";
-  ofstream ofile(errname.c_str());
+  std::string errname = post_dir + "/errQ0Pres.txt";
+  std::ofstream ofile(errname.c_str());
 
   ASSERT(ofile,"Error: Output file cannot be opened.");
-  ofile << "PRESSION ERROR (Q0)" << endl;
-  ofile << "|| p       ||_{L^2}                   = " << normL2 << endl;
-  ofile << "|| p_ex     ||_{L^2}                   = " << normL2sol << endl;
-  ofile << "|| p - p_ex ||_{L^2}                   = " << normL2diff<< endl;
+  ofile << "PRESSION ERROR (Q0)" << std::endl;
+  ofile << "|| p       ||_{L^2}                   = " << normL2 << std::endl;
+  ofile << "|| p_ex     ||_{L^2}                   = " << normL2sol << std::endl;
+  ofile << "|| p - p_ex ||_{L^2}                   = " << normL2diff<< std::endl;
   ofile << "|| P - p_ex ||_{L^2} / || p_ex ||_{L^2} = "
-	<< normL2diff / normL2sol << endl << endl;
-  ofile << "|| p       ||^2_{L^2}                   = " << normL2sq << endl;
-  ofile << "|| p_ex     ||^2_{L^2}                   = " << normL2solsq << endl;
-  ofile << "|| p - p_ex ||^2_{L^2}                   = " << normL2diffsq << endl;
+	<< normL2diff / normL2sol << "\n" << std::endl;
+  ofile << "SQUARE of PRESSION ERROR (Q0)" << std::endl;
+  ofile << "|| p       ||^2_{L^2}                   = " << normL2sq << std::endl;
+  ofile << "|| p_ex     ||^2_{L^2}                   = " << normL2solsq << std::endl;
+  ofile << "|| p - p_ex ||^2_{L^2}                   = " << normL2diffsq << std::endl;
   ofile << "|| P - p_ex ||^2_{L^2} / || p_ex ||^2_{L^2} = "
-	<< normL2diffsq / normL2solsq << endl;
+	<< normL2diffsq / normL2solsq << std::endl;
 #endif
 
 }
@@ -100,7 +101,7 @@ void DarcySolver::postProcessPressureQ0()
 void DarcySolver::postProcessPressureQ1()
 {
   if(verbose)
-    cout << "Postprocessing of pressure (L2 projection on the nodes)\n";
+    std::cout << "Postprocessing of pressure (L2 projection on the nodes)\n";
   // Q1 elements
   const RefFE& refFE    = feHexaQ1;
   CurrentFE fe_q1(refFE,geoMap,qr);
@@ -158,7 +159,7 @@ void DarcySolver::postProcessPressureQ1()
 
 
 #if ANALYTICAL_SOL
-  cout <<"Compute pressure error:\n";
+  std::cout <<"Compute pressure error:\n";
   AnalyticalSolPres analyticSol;
 
   double normL2=0., normL2diff=0., normL2sol=0.;
@@ -185,29 +186,29 @@ void DarcySolver::postProcessPressureQ1()
   normH1sol  = sqrt(normH1sol);
   normH1diff = sqrt(normH1diff);
 
-  string errname = post_dir + "/errQ1Pres.txt";
-  ofstream ofile(errname.c_str());
+  std::string errname = post_dir + "/errQ1Pres.txt";
+  std::ofstream ofile(errname.c_str());
 
   ASSERT(ofile,"Error: Output file cannot be opened.");
-  ofile << "PRESSION ERROR (Q1)" << endl;
-  ofile << "|| p       ||_{L^2}                   = " << normL2 << endl;
-  ofile << "|| p_ex     ||_{L^2}                   = " << normL2sol << endl;
-  ofile << "|| p - p_ex ||_{L^2}                   = " << normL2diff<< endl;
+  ofile << "PRESSION ERROR (Q1)" << std::endl;
+  ofile << "|| p       ||_{L^2}                   = " << normL2 << std::endl;
+  ofile << "|| p_ex     ||_{L^2}                   = " << normL2sol << std::endl;
+  ofile << "|| p - p_ex ||_{L^2}                   = " << normL2diff<< std::endl;
   ofile << "|| P - p_ex ||_{L^2} / || p_ex ||_{L^2} = " << normL2diff/normL2sol
-       << endl;
+       << std::endl;
 
-  ofile << "|| U       ||_{H^1}                   = " << normH1 << endl;
-  ofile << "|| sol     ||_{H^1}                   = " << normH1sol << endl;
-  ofile << "|| U - sol ||_{H^1}                   = " << normH1diff<< endl;
+  ofile << "|| U       ||_{H^1}                   = " << normH1 << std::endl;
+  ofile << "|| sol     ||_{H^1}                   = " << normH1sol << std::endl;
+  ofile << "|| U - sol ||_{H^1}                   = " << normH1diff<< std::endl;
   ofile << "|| U - sol ||_{H^1} / || sol ||_{H^1} = " << normH1diff/normH1sol
-       << endl;
+       << std::endl;
 #endif
 }
 
 void DarcySolver::postProcessVelocityQ1()
 {
   if(verbose)
-    cout << "Postprocessing of velocity (L2 projection on the nodes)\n";
+    std::cout << "Postprocessing of velocity (L2 projection on the nodes)\n";
   // Q1 elements
   const RefFE& refFE    = feHexaQ1;
   CurrentFE fe_q1(refFE,geoMap,qr);
@@ -257,7 +258,7 @@ void DarcySolver::postProcessVelocityQ1()
   aztecSolveLinearSyst(A_q1,u_q1.giveVec(),f_q1.giveVec(),u_q1.size(),
 		       pattA_q1,options,params);
   //
-  string vtkname,bbname;
+  std::string vtkname,bbname;
   /*
   char str_iter[10],str_time[10];
   static int iter_post=0;
@@ -280,7 +281,7 @@ void DarcySolver::postProcessVelocityQ1()
   //---------------------------------------------
 
 #if ANALYTICAL_SOL
-  cout <<"Velocity error:\n";
+  std::cout <<"Velocity error:\n";
   AnalyticalSolFlux analyticSol;
 
   /*
@@ -317,23 +318,23 @@ void DarcySolver::postProcessVelocityQ1()
   normH1sol  = sqrt(normH1sol);
   normH1diff = sqrt(normH1diff);
 
-  string errname = post_dir + "/errQ1Vel.txt";
-  ofstream ofile(errname.c_str());
+  std::string errname = post_dir + "/errQ1Vel.txt";
+  std::ofstream ofile(errname.c_str());
 
   ASSERT(ofile,"Error: Output file cannot be opened.");
-  ofile << "VELOCITY ERROR (Q1)" << endl;
+  ofile << "VELOCITY ERROR (Q1)" << std::endl;
 
-  ofile << "|| U         ||_{L^2}                   = " << normL2 << endl;
-  ofile << "|| exact     ||_{L^2}                   = " << normL2sol << endl;
-  ofile << "|| U - exact ||_{L^2}                   = " << normL2diff<< endl;
+  ofile << "|| U         ||_{L^2}                   = " << normL2 << std::endl;
+  ofile << "|| exact     ||_{L^2}                   = " << normL2sol << std::endl;
+  ofile << "|| U - exact ||_{L^2}                   = " << normL2diff<< std::endl;
   ofile << "|| U - exact ||_{L^2}/|| exact ||_{L^2} = " << normL2diff/normL2sol
-       << endl;
+       << std::endl;
 
-  //  cerr << "|| U       ||_{H^1}                   = " << normH1 << endl;
-  //  cerr << "|| exact     ||_{H^1}                   = " << normH1sol << endl;
-  //  cerr << "|| U - exact ||_{H^1}                   = " << normH1diff<< endl;
-  // cerr << "|| U - exact ||_{H^1} / || exact ||_{H^1} = " << normH1diff/normH1sol
-  //   << endl;
+  //  std::cerr << "|| U       ||_{H^1}                   = " << normH1 << std::endl;
+  //  std::cerr << "|| exact     ||_{H^1}                   = " << normH1sol << std::endl;
+  //  std::cerr << "|| U - exact ||_{H^1}                   = " << normH1diff<< std::endl;
+  // std::cerr << "|| U - exact ||_{H^1} / || exact ||_{H^1} = " << normH1diff/normH1sol
+  //   << std::endl;
 
 #endif
 }

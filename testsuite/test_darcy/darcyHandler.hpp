@@ -96,6 +96,8 @@ public:
   const RefHdivFE& refVFE; //!< finite element for u (RT0)
   const RefFE &  refPFE; //!< finite element for p (Q0)
   const RefHybridFE &  refTPFE; //!< finite element for TP (Q0 on faces)
+  const RefHybridFE &  refVdotNFE; //!< finite element for V dot N on faces
+
   CurrentHdivFE vfe;
   CurrentFE pfe;
   CurrentBdFE feBd;
