@@ -1,21 +1,5 @@
-/* -*- mode: c++ -*-
-   This program is part of the LifeV library 
-   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politechnico di Milano
+// data darcy declaration -*- C++ -*-
 
-   This program is free software; you can redistribute it and/or
-   modify it under the terms of the GNU General Public License
-   as published by the Free Software Foundation; either version 2
-   of the License, or (at your option) any later version.
-   
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-   
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-*/
 #ifndef _DATADARCY_H_
 #define _DATADARCY_H_
 #include <string>
@@ -24,6 +8,23 @@
 #include "tab.hpp"
 
 using namespace std;
+
+//! add here any linear solver you like (Mumps...) 
+enum LinearSolver{LinSlv_Aztec, LinSlv_UMFPack};
+
+/*! Type of BC on the interface (if any) of the subdomain
+ in Input (In) or Output (Out).
+ If p is the scalar variable and u = K grad p the velocity
+ and n the unit normal 
+   -- Dirichlet  : p                    on Sigma
+   -- Neumann    : (- u.n)              on Sigma
+   -- Robin      : (- u.n) + alpha p    on Sigma
+   -- MinusRobin : -(- u.n) + alpha p   on Sigma
+*/
+enum TypeOfBCInterfaceIn{DirichletIn, NeumannIn, RobinIn};
+enum TypeOfBCInterfaceOut{DirichletOut, NeumannOut, RobinOut, MinusRobinOut}; 
+
+
 class DataDarcy
 {
 public:
@@ -33,16 +34,22 @@ public:
   int test_case;
   string mesh_file;
   int diffusion_type;
-  double diffusion_coef;
+  int diffusion_function;
+  double diffusion_scalar;
   KNM<double> diffusion_tensor;
+  //
+  // Linear Solver
+  //
+  LinearSolver theLinearSolver;
   //
   // Miscellaneous
   //
   string mesh_dir;
-  string post_dir;
+  string post_dir; //! full name (including path)
   int verbose;
   string post_proc_format;
-  //
+
+  //! constructor using a data file.
   DataDarcy(const GetPot& dfile);
   void dataDarcyShowMe(ostream& c=cout);
   void dataDarcyHelp(ostream& c=cout);
