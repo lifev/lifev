@@ -15,15 +15,15 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*!
   \file dataTime.h
   \author M.A. Fernandez
   \date 01/2003
   \version 1.0
- 
+
   \brief File containing a class for handling temporal discretization with GetPot
- 
+
 */
 #ifndef _DATATIME_H_
 #define _DATATIME_H_
@@ -37,10 +37,10 @@ namespace LifeV
 {
 
 /*!
-  \class DataMesh
- 
+  \class DataTime
+
   Base class which holds data concerning temporal discretization
- 
+
 */
 class DataTime
 {

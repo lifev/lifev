@@ -15,15 +15,15 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*!
   \file dataTransient.hpp
   \author J.F. Gerbeau
   \date 09/2004
   \version 1.0
- 
+
   \brief File containing a class for handling temporal discretization with GetPot
- 
+
 */
 #ifndef _DATATRANSIENT_H_
 #define _DATATRANSIENT_H_
@@ -36,16 +36,17 @@ namespace LifeV
 {
 
 /*
+  \class DataTransient
   \author J.F. Gerbeau
   \brief Data for time dependent problems
- 
+
   \todo merge with dataTime
- 
+
   \todo allow variable time steps
   \todo select a stopping test (based on either max_time_iter or max_time)
   \todo tolerance for steady state
- 
-*/ 
+
+*/
 
 class DataTransient
 {
@@ -74,7 +75,7 @@ public:
      Print some help
   */
   void dataTransientHelp(std::ostream& c);
-  
+
   /**
      Print current iteration and time
   */
