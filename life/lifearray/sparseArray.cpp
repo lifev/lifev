@@ -20,15 +20,17 @@
 
 namespace LifeV
 {
-//Realizza l'inversa di una matrice diagonale e la moltiplica per un'altra matrice
+// realize the inverse of a diagonal matrix and multiply it by another matrix
 void MultInvDiag( const std::vector<Real> &Diag,
                   const CSRMatr<CSRPatt, Real> &Mat, CSRMatr<CSRPatt, Real> &ans )
 {
-    ASSERT( find( Diag.begin(), Diag.end(), 0 ) == Diag.end(), "La matrice diagonale deve essere invertibile" );
+    ASSERT( find( Diag.begin(), Diag.end(), 0 ) == Diag.end(),
+            "The diagonal matrix must be invertible" );
 
-    ASSERT( Diag.size() == Mat._Patt->nRows(), "Le matrice non sono compatibili per poter calcolare il loro prodotto" );
+    ASSERT( Diag.size() == Mat._Patt->nRows(),
+            "The matrices are not compatible for calculating their product" );
 
-    // Esecuzione del prodotto
+    // execute the product
     for ( UInt row = 0; row < Mat._Patt->nRows(); ++row )
         for ( UInt pos = Mat._Patt->ia() [ row ]; pos < Mat._Patt->ia() [ row + 1 ]; ++pos )
             ans._value[ pos ] = ( Mat._value[ pos ] / Diag[ row ] );
@@ -423,9 +425,12 @@ void rowUnify( CSRMatr<CSRPatt, double> &ans, const CSRMatr<CSRPatt, double> &Ma
 //Miguel: 4/2003, the last version was too expensive.
 void MultInvDiag( const std::vector<Real> &Diag, const MSRMatr<Real> &Mat, MSRMatr<Real> &ans )
 {
-    ASSERT( find( Diag.begin(), Diag.end(), 0 ) == Diag.end(), "La matrice diagonale deve essere invertibile" );
+    ASSERT( find( Diag.begin(), Diag.end(), 0 ) == Diag.end(),
+            "The diagonal matrix must be invertible" );
 
-    ASSERT( Diag.size() == Mat._Patt->nRows(), "Le matrice non sono compatibili per poter calcolare il loro prodotto" );
+    ASSERT( Diag.size() == Mat._Patt->nRows(),
+            "The matrices are not compatible for calculating their product" );
+
     UInt begin, end;
     Real diag;
     UInt nRows = Mat._Patt->nRows();
