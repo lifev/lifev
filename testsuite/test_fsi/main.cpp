@@ -54,7 +54,9 @@ int main(int argc, char** argv)
     //  TEMPORAL LOOP
     //========================================================================================
 
-    int method  = data_file("problem/method" ,0);
+    int  method   = data_file("problem/method" ,0);
+    Real defOmega = data_file("problem/defOmega",1);
+
 
     std::cout << std::endl;
     std::cout << "Fluid/Structure interactions";
@@ -154,7 +156,7 @@ int main(int argc, char** argv)
         {
             status = nonLinRichardson(disp, oper, norm_inf_adaptor(), abstol, reltol,
                                       maxiter, etamax, linesearch, out_res,
-                                      time, 0.01);
+                                      time, defOmega);
         }
 
         if(status == 1)

@@ -59,6 +59,11 @@ public:
 
     // Member functions
 
+    void setDefault( const Real _defOmegaS = 0.1,
+                     const Real _defOmegaF = 0.1 );
+    void restart();
+    
+
     Vector computeDeltaLambda( const Vector &,
                                const Vector &,
                                const Vector & );
@@ -134,6 +139,29 @@ generalizedAitken<Vector, Real>::~generalizedAitken()
 // Member functions
 //
 
+template <class Vector, class Real>
+void generalizedAitken<Vector, Real>::
+setDefault( const Real _defOmegaS,
+	    const Real _defOmegaF )
+{
+    if (( _defOmegaS < 0 ) || ( _defOmegaF< 0 ))
+    {
+        M_useDefault = true;
+        M_defOmegaS = std::fabs(_defOmegaS);
+        M_defOmegaF = std::fabs(_defOmegaF);
+    } else {
+        M_useDefault = false;
+	M_defOmegaS = _defOmegaS;
+	M_defOmegaF = _defOmegaF; 
+    }
+}
+
+template <class Vector, class Real>
+void generalizedAitken<Vector, Real>::
+restart()
+{
+    M_firstCall = true;
+}
 
 /*! this functions computes omega and return the new lambda
     _lambda is \lamdba^{k}

@@ -30,9 +30,13 @@ steklovPoincare::steklovPoincare(GetPot &_dataFile):
     M_residualS   ( M_solid.dDof().numTotalDof() ),
     M_residualF   ( M_fluid.uDof().numTotalDof() ),
     M_residualFSI ( M_fluid.uDof().numTotalDof() ),
-    M_dataJacobian(this)
+    M_dataJacobian(this),
+    M_aitkFS      (3*M_solid.dDof().numTotalDof())
 {
-    M_precond = _dataFile("problem/precond",1);
+    M_precond   = _dataFile("problem/precond",1);
+    M_defOmegaS = _dataFile("problem/defOmegaS",1);
+    M_defOmegaF = _dataFile("problem/defOmegaF",1);
+    M_aitkFS.setDefault(M_defOmegaS, M_defOmegaF);
 //    setUpBC();
 }
 
@@ -236,9 +240,6 @@ void  steklovPoincare::solveJac(Vector &muk,
             std::cout << "norm_inf muS = " << norm_inf(muS) << std::endl;
             std::cout << "norm_inf muF = " << norm_inf(muF) << std::endl;
 
-            muk = .9*muS + .1*muF;
-
-            std::cout << "norm_inf muk = " << norm_inf(muk) << std::endl;
             // indeed, Here we should call Aitken (a different instance than
             // the one defined in nonLinRichardson) and
             // we should replace the defaultOmega for he nonLinRichardson
@@ -250,8 +251,11 @@ void  steklovPoincare::solveJac(Vector &muk,
             // generalizedAitken aitkDN(...) (DN for Dirichlet Neumann)
             // then
             //
-            // muk = aitkDN.computeDeltaLambda( sol, muS, muF );
+            muk = M_aitkFS.computeDeltaLambda(getResidualFSIOnSolid(), muS, muF );
             // muk = muS + muF;
+            // muk = .9*muS + .1*muF;
+
+            std::cout << "maxnorm muk = " << norm_inf(muk) << std::endl;
         }
         break;
         default:

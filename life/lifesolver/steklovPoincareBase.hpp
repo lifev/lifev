@@ -84,6 +84,10 @@ private:
     PhysVectUnknown<Vector> M_residualFSI;
 
     UInt                    M_precond;
+    Real                    M_defOmegaS;
+    Real                    M_defOmegaF;
+    generalizedAitken<Vector, Real> M_aitkFS;
+
 
     Real                    M_linearRelTol;
 
