@@ -9,8 +9,10 @@
     <ignoreparts/>
     <projectdirectory>.</projectdirectory>
     <absoluteprojectpath>false</absoluteprojectpath>
-    <description/>
-    <secondaryLanguages/>
+    <description></description>
+    <secondaryLanguages>
+      <language>Fortran77</language>
+    </secondaryLanguages>
   </general>
   <kdevautoproject>
     <general>
@@ -20,6 +22,11 @@
     <run>
       <mainprogram>src/life</mainprogram>
       <directoryradio>executable</directoryradio>
+      <customdirectory>/</customdirectory>
+      <programargs></programargs>
+      <terminal>false</terminal>
+      <autocompile>true</autocompile>
+      <envvars/>
     </run>
     <configurations>
       <optimized>
@@ -34,14 +41,14 @@
         <builddir>debug</builddir>
         <ccompiler>kdevgccoptions</ccompiler>
         <cxxcompiler>kdevgppoptions</cxxcompiler>
-        <f77compiler>kdevpgf77options</f77compiler>
+        <f77compiler>kdevg77options</f77compiler>
         <cxxflags>-O0 -g3</cxxflags>
         <topsourcedir/>
         <cppflags/>
         <ldflags/>
         <ccompilerbinary/>
         <cxxcompilerbinary/>
-        <f77compilerbinary/>
+        <f77compilerbinary>g77</f77compilerbinary>
         <cflags>-O0 -g3</cflags>
         <f77flags>-O0 -g3</f77flags>
       </debug>
@@ -51,16 +58,20 @@
         <envvar value="1" name="WANT_AUTOCONF_2_5" />
         <envvar value="1" name="WANT_AUTOMAKE_1_6" />
       </envvars>
+      <abortonerror>false</abortonerror>
+      <numberofjobs>1</numberofjobs>
+      <dontact>false</dontact>
+      <makebin></makebin>
     </make>
   </kdevautoproject>
   <kdevdebugger>
     <general>
       <dbgshell>libtool</dbgshell>
-      <programargs/>
-      <gdbpath/>
-      <configGdbScript/>
-      <runShellScript/>
-      <runGdbScript/>
+      <programargs></programargs>
+      <gdbpath></gdbpath>
+      <configGdbScript></configGdbScript>
+      <runShellScript></runShellScript>
+      <runGdbScript></runGdbScript>
       <breakonloadinglibs>true</breakonloadinglibs>
       <separatetty>false</separatetty>
       <floatingtoolbar>false</floatingtoolbar>
@@ -102,10 +113,7 @@
     </codecompletion>
   </kdevcppsupport>
   <kdevfileview>
-    <groups>
-      <hidenonprojectfiles>false</hidenonprojectfiles>
-      <hidenonlocation>false</hidenonlocation>
-    </groups>
+    <groups/>
     <tree>
       <hidepatterns>*.o,*.lo,CVS</hidepatterns>
       <showvcsfields>false</showvcsfields>
@@ -118,4 +126,15 @@
       <implementationsuffix>.cpp</implementationsuffix>
     </filetemplates>
   </cppsupportpart>
+  <kdevdoctreeview>
+    <projectdoc>
+      <userdocDir>html/</userdocDir>
+      <apidocDir>html/</apidocDir>
+    </projectdoc>
+    <ignoreqt_xml/>
+    <ignoredoxygen/>
+    <ignorekdocs/>
+    <ignoretocs/>
+    <ignoredevhelp/>
+  </kdevdoctreeview>
 </kdevelop>
