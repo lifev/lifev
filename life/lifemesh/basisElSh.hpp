@@ -1,6 +1,6 @@
 /*
   This file is part of the LifeV library
-  Copyright (C) 2001,2002,2003 LifeV Team
+  Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,7 @@
 /*! Contains the basic element shapes, to be used by Geometric and Finite
   Elements 
 
-  $Header: /cvsroot/lifev/lifev/life/lifemesh/basisElSh.hpp,v 1.3 2004-03-30 12:14:07 prudhomm Exp $
+  $Header: /cvsroot/lifev/lifev/life/lifemesh/basisElSh.hpp,v 1.4 2004-03-30 12:26:39 prudhomm Exp $
 
  \version 0.0 Experimental   19/8/99. Luca Formaggia
 

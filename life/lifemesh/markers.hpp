@@ -1,6 +1,6 @@
 /*
   This file is part of the LifeV library
-  Copyright (C) 2001,2002,2003 LifeV Team
+  Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,7 @@
 /*! \file markers.h
   \brief A Simple implementation of Markers
   \author Luca Formaggia
-  \Version $Revision: 1.3 $
+  \Version $Revision: 1.4 $
   
   This is the simplest implementation of the markers, which just adopts the
   basis marker classes defined in marker_base.h.

@@ -1,6 +1,6 @@
 /*
   This file is part of the LifeV library
-  Copyright (C) 2001,2002,2003 LifeV Team
+  Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
 /*---------------------------------------------------------------------*
 | LifeV main header file                                               |
 |                                                                      |
-| $Header: /cvsroot/lifev/lifev/life/lifecore/Attic/lifeV.hpp,v 1.7 2004-03-30 12:14:06 prudhomm Exp $                                                             |
+| $Header: /cvsroot/lifev/lifev/life/lifecore/Attic/lifeV.hpp,v 1.8 2004-03-30 12:25:40 prudhomm Exp $                                                             |
 |                                                                      |
 | #Version  0.0 Experimental   9/7/99. Luca Formaggia                  |
 |           0.1 Experimental  10/8/99. Jean-Fred Gerbeau.              |

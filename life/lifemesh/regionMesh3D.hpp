@@ -1,6 +1,6 @@
 /*
   This file is part of the LifeV library
-  Copyright (C) 2001,2002,2003 LifeV Team
+  Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -18,8 +18,8 @@
 */
 /*! file regionMesh3D.h
   \brief The mesh classes interfaces
-  \version $Revision: 1.3 $ Luca Formaggia
-  \version $Revision: 1.3 $ Miguel Fernandez
+  \version $Revision: 1.4 $ Luca Formaggia
+  \version $Revision: 1.4 $ Miguel Fernandez
 
   Introduces the RegionMesh3D class
 */
