@@ -225,6 +225,27 @@ computeDeltaLambda( const Vector &_lambda,
             omegaS = -b2 / a22;
             omegaF = 0.;
         }
+	else
+	{
+	    std::cout << "generalizedAitken: Failure: Det=0!!" << std::endl; 
+	}
+	
+	if ( std::fabs(omegaF) < std::fabs(M_defOmegaF)/1024 
+	     || std::fabs(omegaF) > std::fabs(M_defOmegaF)*1024 ) 
+	{
+	    std::cout << "generalizedAitken: Failure: omegaF too small/big: " 
+		      << omegaF << std::endl; 
+	    omegaF = M_defOmegaF;
+	}
+
+	if ( std::fabs(omegaS) < std::fabs(M_defOmegaS)/1024 
+	     || std::fabs(omegaS) > std::fabs(M_defOmegaS)*1024 ) 
+	{
+	    std::cout << "generalizedAitken: Failure: omegaS too small/big: " 
+		      << omegaS << std::endl; 
+	    omegaS = M_defOmegaS;
+	}
+
 
         std::cout << " --------------- generalizedAitken: " << std::endl;
         std::cout << " omegaS = " << omegaS
@@ -289,6 +310,15 @@ computeDeltaLambda( const Vector &_lambda,
         M_muS = _mu;
 
         omega = - omega / norm ;
+
+	if ( std::fabs(omega) < std::fabs(M_defOmegaS)/1024 
+	     || std::fabs(omega) > std::fabs(M_defOmegaS)*1024 ) 
+	{
+	    std::cout << "generalizedAitken: Failure: omega too small/big: " 
+		      << omega << std::endl; 
+	    omega = M_defOmegaS;
+	}
+
         deltaLambda = omega * _mu;
 
         std::cout << "generalizedAitken: omega = " << omega << std::endl;
