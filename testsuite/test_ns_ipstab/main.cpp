@@ -51,7 +51,7 @@ int main( int argc, char** argv )
     // Number of boundary conditions for the fluid velocity,
     // solid displacement, and fluid mesh motion
     //
-    BCHandler bcH( 1 );
+    BCHandler bcH( 1, true );
 
     NavierStokesSolverIP< RegionMesh3D<LinearTetra> >
         fluid( dataFile, feTetraP1, quadRuleTetra4pt, quadRuleTria3pt, bcH );
