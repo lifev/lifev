@@ -208,20 +208,22 @@ computeDeltaLambda( const Vector &_lambda,
         Real omegaS ( M_defOmegaS );
         Real omegaF ( M_defOmegaF );
 
-        Real det ( a21 * a21 - a22 * a11 );
+        Real det ( a22 * a11 - a21 * a21 );
 
-        if ( det != 0. )  //! eq. (12) page 8
+        if ( std::fabs(det) > 1E-8 )  //! eq. (12) page 8
         {
             omegaF = -( a22 * b1 - a21 * b2 ) / det;
             omegaS = -( a11 * b2 - a21 * b1 ) / det; // !
         }
-        else if ( a22 == 0 )
+        else if (  std::fabs(a22) < 1E-8 )
         {
+	    std::cout << "generalizedAitken:  a22=0!!" << std::endl; 
             omegaS = 0.;
             omegaF = -b1 / a11;
         }
-        else if ( a11 == 0 )
+        else if (  std::fabs(a11) < 1E-8 )
         {
+	    std::cout << "generalizedAitken:  a11=0!!" << std::endl; 
             omegaS = -b2 / a22;
             omegaF = 0.;
         }
