@@ -89,7 +89,7 @@ public:
       \param ord_bdf order of the Bdf time advancing scheme + incremental for the pressure
     */
     NavierStokesSolverPC( const GetPot& data_file, const RefFE& refFE_u, const RefFE& refFE_p, const QuadRule& Qr_u,
-                          const QuadRule& bdQr_u, const QuadRule& Qr_p, const QuadRule& bdQr_p, BCHandler& BCh_u );
+                          const QuadRule& bdQr_u, const QuadRule& Qr_p, const QuadRule& bdQr_p, BCHandler& BCh_u, const int& flag_curl  );
 
     //! Update the right  hand side  for time advancing
     /*!
@@ -203,7 +203,7 @@ private:
 template <typename Mesh>
 NavierStokesSolverPC<Mesh>::
 NavierStokesSolverPC( const GetPot& data_file, const RefFE& refFE_u, const RefFE& refFE_p, const QuadRule& Qr_u,
-                      const QuadRule& bdQr_u, const QuadRule& Qr_p, const QuadRule& bdQr_p, BCHandler& BCh_u )
+                      const QuadRule& bdQr_u, const QuadRule& Qr_p, const QuadRule& bdQr_p, BCHandler& BCh_u, const int& flag_curl = 0  )
     :
     NavierStokesHandler<Mesh>( data_file, refFE_u, refFE_p, Qr_u, bdQr_u, Qr_p, bdQr_p, BCh_u ),
         _pattC_block( this->_dof_u ),
@@ -285,7 +285,13 @@ NavierStokesSolverPC( const GetPot& data_file, const RefFE& refFE_u, const RefFE
         elmatM_u_St.zero();
         _elmatDtr.zero();
 
-        stiff( this->_mu, _elmatC, this->_fe_u, 0, 0, nDimensions );
+        if (flag_curl!=1){
+          stiff( this->_mu, _elmatC, this->_fe_u, 0, 0, nDimensions );
+        }
+        if (flag_curl==1){
+          stiff_curl( this->_mu, _elmatC, this->_fe_u, 0, 0, nDimensions );
+        }
+        
         // *******************************************************
         mass( first_coeff * this->_rho * dti, elmatM_u_St, this->_fe_u, 0, 0, nDimensions );
         mass( this->_rho * dti, _elmatM_u, this->_fe_u, 0, 0, nDimensions );
