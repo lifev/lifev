@@ -585,28 +585,28 @@ Real fct2_P2_1D( cRRef x, cRRef, cRRef )
     return 2. * x * ( x - 0.5 );
 }
 
-Real derfct1_1_P2_1D( cRRef x, cRRef , cRRef )
+Real derfct1_1_P2_1D( cRRef x, cRRef, cRRef )
 {
     return 4. * x - 3.;
 }
-Real derfct3_1_P2_1D( cRRef x, cRRef , cRRef )
+Real derfct3_1_P2_1D( cRRef x, cRRef, cRRef )
 {
     return -8. * x + 4.;
 }
-Real derfct2_1_P2_1D( cRRef x, cRRef , cRRef )
+Real derfct2_1_P2_1D( cRRef x, cRRef, cRRef )
 {
     return 4. * x - 1.;
 }
 
-Real der2fct1_11_P2_1D( cRRef x, cRRef , cRRef )
+Real der2fct1_11_P2_1D( cRRef, cRRef, cRRef )
 {
     return 4;
 }
-Real der2fct3_11_P2_1D( cRRef x, cRRef , cRRef )
+Real der2fct3_11_P2_1D( cRRef, cRRef, cRRef )
 {
     return -8;
 }
-Real der2fct2_11_P2_1D( cRRef x, cRRef , cRRef )
+Real der2fct2_11_P2_1D( cRRef, cRRef, cRRef )
 {
     return 4;
 }
@@ -624,7 +624,7 @@ Real der2fct2_11_P2_1D( cRRef x, cRRef , cRRef )
                            | 1\
                             ---
 */
-Real fct1_P0_2D( cRRef , cRRef , cRRef )
+Real fct1_P0_2D( cRRef, cRRef, cRRef )
 {
     return 1. ;
 }   //check this : 1. or 2. (\int fct1 = 0.5 or 1.)  ???
@@ -654,11 +654,11 @@ Real fct1_P1_2D( cRRef x, cRRef y, cRRef )
 {
     return ( 1. - x - y );
 }
-Real fct2_P1_2D( cRRef x, cRRef , cRRef )
+Real fct2_P1_2D( cRRef x, cRRef, cRRef )
 {
     return x ;
 }
-Real fct3_P1_2D( cRRef , cRRef y, cRRef )
+Real fct3_P1_2D( cRRef, cRRef y, cRRef )
 {
     return y ;
 }
@@ -712,11 +712,11 @@ Real fct1_P2_2D( cRRef x, cRRef y, cRRef )
 {
     return ( 1 -x - y ) * ( 1 - x - x - y - y );
 }
-Real fct2_P2_2D( cRRef x, cRRef y, cRRef )
+Real fct2_P2_2D( cRRef x, cRRef, cRRef )
 {
     return -x * ( 1 - x - x );
 }
-Real fct3_P2_2D( cRRef x, cRRef y, cRRef )
+Real fct3_P2_2D( cRRef, cRRef y, cRRef )
 {
     return -y * ( 1 - y - y );
 }
@@ -741,19 +741,19 @@ Real derfct1_2_P2_2D( cRRef x, cRRef y, cRRef )
 {
     return 4 * ( x + y ) - 3;
 }
-Real derfct2_1_P2_2D( cRRef x, cRRef , cRRef )
+Real derfct2_1_P2_2D( cRRef x, cRRef, cRRef )
 {
     return 4 * x - 1;
 }
-Real derfct2_2_P2_2D( cRRef , cRRef , cRRef )
+Real derfct2_2_P2_2D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real derfct3_1_P2_2D( cRRef , cRRef , cRRef )
+Real derfct3_1_P2_2D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real derfct3_2_P2_2D( cRRef , cRRef y, cRRef )
+Real derfct3_2_P2_2D( cRRef, cRRef y, cRRef )
 {
     return 4 * y - 1;
 }
@@ -761,19 +761,19 @@ Real derfct4_1_P2_2D( cRRef x, cRRef y, cRRef )
 {
     return 4 * ( 1 - x - x - y );
 }
-Real derfct4_2_P2_2D( cRRef x, cRRef , cRRef )
+Real derfct4_2_P2_2D( cRRef x, cRRef, cRRef )
 {
     return -4 * x;
 }
-Real derfct5_1_P2_2D( cRRef , cRRef y, cRRef )
+Real derfct5_1_P2_2D( cRRef, cRRef y, cRRef )
 {
     return 4 * y;
 }
-Real derfct5_2_P2_2D( cRRef x, cRRef , cRRef )
+Real derfct5_2_P2_2D( cRRef x, cRRef, cRRef )
 {
     return 4 * x;
 }
-Real derfct6_1_P2_2D( cRRef , cRRef y, cRRef )
+Real derfct6_1_P2_2D( cRRef, cRRef y, cRRef )
 {
     return -4 * y;
 }
@@ -782,104 +782,104 @@ Real derfct6_2_P2_2D( cRRef x, cRRef y, cRRef )
     return 4 * ( 1 - x - y - y );
 }
 
-Real der2fct1_11_P2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct1_11_P2_2D( cRRef, cRRef, cRRef )
 {
     return 4;
 }
-Real der2fct1_12_P2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct1_12_P2_2D( cRRef, cRRef, cRRef )
 {
     return 4;
 }
-Real der2fct1_21_P2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct1_21_P2_2D( cRRef, cRRef, cRRef )
 {
     return 4;
 }
-Real der2fct1_22_P2_2D( cRRef x, cRRef y, cRRef )
-{
-    return 4;
-}
-
-Real der2fct2_11_P2_2D( cRRef x, cRRef , cRRef )
-{
-    return 4;
-}
-Real der2fct2_12_P2_2D( cRRef , cRRef , cRRef )
-{
-    return 0;
-}
-Real der2fct2_21_P2_2D( cRRef x, cRRef , cRRef )
-{
-    return 0;
-}
-Real der2fct2_22_P2_2D( cRRef , cRRef , cRRef )
-{
-    return 0;
-}
-
-Real der2fct3_11_P2_2D( cRRef , cRRef , cRRef )
-{
-    return 0;
-}
-Real der2fct3_12_P2_2D( cRRef , cRRef y, cRRef )
-{
-    return 0;
-}
-Real der2fct3_21_P2_2D( cRRef , cRRef , cRRef )
-{
-    return 0;
-}
-Real der2fct3_22_P2_2D( cRRef , cRRef y, cRRef )
+Real der2fct1_22_P2_2D( cRRef, cRRef, cRRef )
 {
     return 4;
 }
 
-Real der2fct4_11_P2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct2_11_P2_2D( cRRef, cRRef, cRRef )
+{
+    return 4;
+}
+Real der2fct2_12_P2_2D( cRRef, cRRef, cRRef )
+{
+    return 0;
+}
+Real der2fct2_21_P2_2D( cRRef, cRRef, cRRef )
+{
+    return 0;
+}
+Real der2fct2_22_P2_2D( cRRef, cRRef, cRRef )
+{
+    return 0;
+}
+
+Real der2fct3_11_P2_2D( cRRef, cRRef, cRRef )
+{
+    return 0;
+}
+Real der2fct3_12_P2_2D( cRRef, cRRef, cRRef )
+{
+    return 0;
+}
+Real der2fct3_21_P2_2D( cRRef, cRRef, cRRef )
+{
+    return 0;
+}
+Real der2fct3_22_P2_2D( cRRef, cRRef, cRRef )
+{
+    return 4;
+}
+
+Real der2fct4_11_P2_2D( cRRef, cRRef, cRRef )
 {
     return -8;
 }
-Real der2fct4_12_P2_2D( cRRef x, cRRef , cRRef )
+Real der2fct4_12_P2_2D( cRRef, cRRef, cRRef )
 {
     return -4;
 }
-Real der2fct4_21_P2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct4_21_P2_2D( cRRef, cRRef, cRRef )
 {
     return -4;
 }
-Real der2fct4_22_P2_2D( cRRef x, cRRef , cRRef )
+Real der2fct4_22_P2_2D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
 
-Real der2fct5_11_P2_2D( cRRef , cRRef y, cRRef )
+Real der2fct5_11_P2_2D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct5_12_P2_2D( cRRef x, cRRef , cRRef )
+Real der2fct5_12_P2_2D( cRRef, cRRef, cRRef )
 {
     return 4;
 }
-Real der2fct5_21_P2_2D( cRRef , cRRef y, cRRef )
+Real der2fct5_21_P2_2D( cRRef, cRRef, cRRef )
 {
     return 4;
 }
-Real der2fct5_22_P2_2D( cRRef x, cRRef , cRRef )
+Real der2fct5_22_P2_2D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
 
-Real der2fct6_11_P2_2D( cRRef , cRRef y, cRRef )
+Real der2fct6_11_P2_2D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct6_12_P2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct6_12_P2_2D( cRRef, cRRef, cRRef )
 {
     return -4;
 }
-Real der2fct6_21_P2_2D( cRRef , cRRef y, cRRef )
+Real der2fct6_21_P2_2D( cRRef, cRRef, cRRef )
 {
     return -4;
 }
-Real der2fct6_22_P2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct6_22_P2_2D( cRRef, cRRef, cRRef )
 {
     return -8;
 }
@@ -895,16 +895,16 @@ Real der2fct6_22_P2_2D( cRRef x, cRRef y, cRRef )
                            |       |
                             -------
 */
-Real fct1_Q0_2D( cRRef x, cRRef y, cRRef )
+Real fct1_Q0_2D( cRRef, cRRef, cRRef )
 {
     return 1. ;
 }
-Real derfct1_Q0_2D( cRRef x, cRRef y, cRRef )
+Real derfct1_Q0_2D( cRRef, cRRef, cRRef )
 {
     return 0. ;
 }
 // The second derivative is equal to the first : both are equal to 0.
-Real der2fct1_Q0_2D( cRRef x, cRRef y, cRRef )
+Real der2fct1_Q0_2D( cRRef, cRRef, cRRef )
 {
     return 0. ;
 }
@@ -938,35 +938,35 @@ Real fct4_Q1_2D( cRRef x, cRRef y, cRRef )
     return y * ( 1. - x );
 }
 
-Real derfct1_1_Q1_2D( cRRef x, cRRef y, cRRef )
+Real derfct1_1_Q1_2D( cRRef, cRRef y, cRRef )
 {
     return -( 1. - y );
 }
-Real derfct1_2_Q1_2D( cRRef x, cRRef y, cRRef )
+Real derfct1_2_Q1_2D( cRRef x, cRRef, cRRef )
 {
     return -( 1. - x );
 }
-Real derfct2_1_Q1_2D( cRRef x, cRRef y, cRRef )
+Real derfct2_1_Q1_2D( cRRef, cRRef y, cRRef )
 {
     return ( 1. - y );
 }
-Real derfct2_2_Q1_2D( cRRef x, cRRef y, cRRef )
+Real derfct2_2_Q1_2D( cRRef x, cRRef, cRRef )
 {
     return -x;
 }
-Real derfct3_1_Q1_2D( cRRef x, cRRef y, cRRef )
+Real derfct3_1_Q1_2D( cRRef, cRRef y, cRRef )
 {
     return y;
 }
-Real derfct3_2_Q1_2D( cRRef x, cRRef y, cRRef )
+Real derfct3_2_Q1_2D( cRRef x, cRRef, cRRef )
 {
     return x;
 }
-Real derfct4_1_Q1_2D( cRRef x, cRRef y, cRRef )
+Real derfct4_1_Q1_2D( cRRef, cRRef y, cRRef )
 {
     return -y;
 }
-Real derfct4_2_Q1_2D( cRRef x, cRRef y, cRRef )
+Real derfct4_2_Q1_2D( cRRef x, cRRef, cRRef )
 {
     return ( 1. - x );
 }
@@ -1098,7 +1098,7 @@ Real derfct9_2_Q2_2D( cRRef x, cRRef y, cRRef )
     return 16. * x * ( x - 1. ) * ( 2. * y - 1. );
 }
 
-Real der2fct1_11_Q2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct1_11_Q2_2D( cRRef, cRRef y, cRRef )
 {
     return ( 2. * y - 1. ) * ( y - 1. ) * 4.;
 }
@@ -1110,12 +1110,12 @@ Real der2fct1_21_Q2_2D( cRRef x, cRRef y, cRRef )
 {
     return ( 4. * y - 3. ) * ( 4. * x - 3. );
 }
-Real der2fct1_22_Q2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct1_22_Q2_2D( cRRef x, cRRef, cRRef )
 {
     return ( 2. * x - 1. ) * ( x - 1. ) * 4.;
 }
 
-Real der2fct5_11_Q2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct5_11_Q2_2D( cRRef, cRRef y, cRRef )
 {
     return -8. * ( 2. * y - 1. ) * ( y - 1. );
 }
@@ -1128,12 +1128,12 @@ Real der2fct5_21_Q2_2D( cRRef x, cRRef y, cRRef )
     return -4. * ( 2. * x - 1 ) * ( 4. * y - 3 );
     ;
 }
-Real der2fct5_22_Q2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct5_22_Q2_2D( cRRef x, cRRef, cRRef )
 {
     return -16. * x * ( x - 1. );
 }
 
-Real der2fct2_11_Q2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct2_11_Q2_2D( cRRef, cRRef y, cRRef )
 {
     return ( 2. * y - 1. ) * ( y - 1. ) * 4.;
 }
@@ -1145,12 +1145,12 @@ Real der2fct2_21_Q2_2D( cRRef x, cRRef y, cRRef )
 {
     return ( 4. * y - 3. ) * ( 4. * x - 1. );
 }
-Real der2fct2_22_Q2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct2_22_Q2_2D( cRRef x, cRRef, cRRef )
 {
     return x * ( 2. * x - 1. ) * 4.;
 }
 
-Real der2fct6_11_Q2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct6_11_Q2_2D( cRRef, cRRef y, cRRef )
 {
     return -16. * y * ( y - 1. );
 }
@@ -1162,12 +1162,12 @@ Real der2fct6_21_Q2_2D( cRRef x, cRRef y, cRRef )
 {
     return -4. * ( 4. * x - 1. ) * ( 2. * y - 1. );
 }
-Real der2fct6_22_Q2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct6_22_Q2_2D( cRRef x, cRRef, cRRef )
 {
     return -8. * x * ( 2. * x - 1. );
 }
 
-Real der2fct3_11_Q2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct3_11_Q2_2D( cRRef, cRRef y, cRRef )
 {
     return 4. * y * ( 2. * y - 1. );
 }
@@ -1179,12 +1179,12 @@ Real der2fct3_21_Q2_2D( cRRef x, cRRef y, cRRef )
 {
     return ( 4. * x - 1. ) * ( 4. * y - 1. );
 }
-Real der2fct3_22_Q2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct3_22_Q2_2D( cRRef x, cRRef, cRRef )
 {
     return 4. * x * ( 2. * x - 1. );
 }
 
-Real der2fct7_11_Q2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct7_11_Q2_2D( cRRef, cRRef y, cRRef )
 {
     return -8. * y * ( 2. * y - 1. );
 }
@@ -1196,12 +1196,12 @@ Real der2fct7_21_Q2_2D( cRRef x, cRRef y, cRRef )
 {
     return -4. * ( 2. * x - 1. ) * ( 4. * y - 1. );
 }
-Real der2fct7_22_Q2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct7_22_Q2_2D( cRRef x, cRRef, cRRef )
 {
     return -16. * x * ( x - 1. );
 }
 
-Real der2fct4_11_Q2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct4_11_Q2_2D( cRRef, cRRef y, cRRef )
 {
     return 4. * y * ( 2. * y - 1. );
 }
@@ -1213,12 +1213,12 @@ Real der2fct4_21_Q2_2D( cRRef x, cRRef y, cRRef )
 {
     return ( 4. * x - 3. ) * ( 4. * y - 1. );
 }
-Real der2fct4_22_Q2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct4_22_Q2_2D( cRRef x, cRRef, cRRef )
 {
     return 4. * ( 2. * x - 1. ) * ( x - 1. );
 }
 
-Real der2fct8_11_Q2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct8_11_Q2_2D( cRRef, cRRef y, cRRef )
 {
     return -16. * y * ( y - 1. );
 }
@@ -1230,12 +1230,12 @@ Real der2fct8_21_Q2_2D( cRRef x, cRRef y, cRRef )
 {
     return -4. * ( 4. * x - 3. ) * ( 2. * y - 1. );
 }
-Real der2fct8_22_Q2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct8_22_Q2_2D( cRRef x, cRRef, cRRef )
 {
     return -8. * ( 2. * x - 1. ) * ( x - 1. );
 }
 
-Real der2fct9_11_Q2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct9_11_Q2_2D( cRRef, cRRef y, cRRef )
 {
     return 32. * y * ( y - 1. );
 }
@@ -1247,7 +1247,7 @@ Real der2fct9_21_Q2_2D( cRRef x, cRRef y, cRRef )
 {
     return 16. * ( 2. * x - 1. ) * ( 2. * y - 1. );
 }
-Real der2fct9_22_Q2_2D( cRRef x, cRRef y, cRRef )
+Real der2fct9_22_Q2_2D( cRRef x, cRRef, cRRef )
 {
     return 32. * x * ( x - 1. );
 }
@@ -1266,7 +1266,7 @@ Real der2fct9_22_Q2_2D( cRRef x, cRRef y, cRRef )
            /.       \!
          1 ----------2
 */
-Real fct1_P0_3D( cRRef x, cRRef y, cRRef z )
+Real fct1_P0_3D( cRRef, cRRef, cRRef )
 {
     return 1.;
 }
@@ -1301,15 +1301,15 @@ Real fct1_P1_3D( cRRef x, cRRef y, cRRef z )
 {
     return 1 -x - y - z;
 }
-Real fct2_P1_3D( cRRef x, cRRef , cRRef )
+Real fct2_P1_3D( cRRef x, cRRef, cRRef )
 {
     return x;
 }
-Real fct3_P1_3D( cRRef , cRRef y, cRRef )
+Real fct3_P1_3D( cRRef, cRRef y, cRRef )
 {
     return y;
 }
-Real fct4_P1_3D( cRRef , cRRef , cRRef z )
+Real fct4_P1_3D( cRRef, cRRef, cRRef z )
 {
     return z;
 }
@@ -1387,15 +1387,15 @@ Real fct1_P1bubble_3D( cRRef x, cRRef y, cRRef z )
 {
     return 1 -x - y - z;
 }
-Real fct2_P1bubble_3D( cRRef x, cRRef , cRRef )
+Real fct2_P1bubble_3D( cRRef x, cRRef, cRRef )
 {
     return x;
 }
-Real fct3_P1bubble_3D( cRRef , cRRef y, cRRef )
+Real fct3_P1bubble_3D( cRRef, cRRef y, cRRef )
 {
     return y;
 }
-Real fct4_P1bubble_3D( cRRef , cRRef , cRRef z )
+Real fct4_P1bubble_3D( cRRef, cRRef, cRRef z )
 {
     return z;
 }
@@ -1470,7 +1470,7 @@ Real der2fctx_xx_P1bubble_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct5_11_P1bubble_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_11_P1bubble_3D( cRRef, cRRef y, cRRef z )
 {
     return -2 * y * z;
 }
@@ -1486,7 +1486,7 @@ Real der2fct5_21_P1bubble_3D( cRRef x, cRRef y, cRRef z )
 {
     return ( 1 -2 * x - 2 * y - z ) * z;
 }
-Real der2fct5_22_P1bubble_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_22_P1bubble_3D( cRRef x, cRRef, cRRef z )
 {
     return -2 * x * z;
 }
@@ -1502,7 +1502,7 @@ Real der2fct5_32_P1bubble_3D( cRRef x, cRRef y, cRRef z )
 {
     return ( 1 -x - 2 * y - 2 * z ) * x;
 }
-Real der2fct5_33_P1bubble_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_33_P1bubble_3D( cRRef x, cRRef y, cRRef )
 {
     return -2 * x * y;
 }
@@ -1525,15 +1525,15 @@ Real fct1_P2_3D( cRRef x, cRRef y, cRRef z )
 {
     return -( 1 - x - y - z ) * ( 1 - 2 * ( 1 - x - y - z ) );
 }
-Real fct2_P2_3D( cRRef x, cRRef y, cRRef z )
+Real fct2_P2_3D( cRRef x, cRRef, cRRef )
 {
     return -x * ( 1 - 2 * x );
 }
-Real fct3_P2_3D( cRRef x, cRRef y, cRRef z )
+Real fct3_P2_3D( cRRef, cRRef y, cRRef )
 {
     return -y * ( 1 - 2 * y );
 }
-Real fct4_P2_3D( cRRef x, cRRef y, cRRef z )
+Real fct4_P2_3D( cRRef, cRRef, cRRef z )
 {
     return -z * ( 1 - 2 * z );
 }
@@ -1541,7 +1541,7 @@ Real fct5_P2_3D( cRRef x, cRRef y, cRRef z )
 {
     return 4 * x * ( 1 - x - y - z );
 }
-Real fct6_P2_3D( cRRef x, cRRef y, cRRef z )
+Real fct6_P2_3D( cRRef x, cRRef y, cRRef )
 {
     return 4 * x * y;
 }
@@ -1553,11 +1553,11 @@ Real fct8_P2_3D( cRRef x, cRRef y, cRRef z )
 {
     return 4 * z * ( 1 - x - y - z );
 }
-Real fct9_P2_3D( cRRef x, cRRef y, cRRef z )
+Real fct9_P2_3D( cRRef x, cRRef, cRRef z )
 {
     return 4 * x * z;
 }
-Real fct10_P2_3D( cRRef x, cRRef y, cRRef z )
+Real fct10_P2_3D( cRRef, cRRef y, cRRef z )
 {
     return 4 * y * z;
 }
@@ -1576,41 +1576,41 @@ Real derfct1_3_P2_3D( cRRef x, cRRef y, cRRef z )
     return -3 + 4 * x + 4 * y + 4 * z;
 }
 
-Real derfct2_1_P2_3D( cRRef x, cRRef y, cRRef z )
+Real derfct2_1_P2_3D( cRRef x, cRRef, cRRef )
 {
     return -1 + 4 * x;
 }
-Real derfct2_2_P2_3D( cRRef x, cRRef y, cRRef z )
+Real derfct2_2_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0.;
 }
-Real derfct2_3_P2_3D( cRRef x, cRRef y, cRRef z )
+Real derfct2_3_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0.;
 }
 
-Real derfct3_1_P2_3D( cRRef x, cRRef y, cRRef z )
+Real derfct3_1_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0.;
 }
-Real derfct3_2_P2_3D( cRRef x, cRRef y, cRRef z )
+Real derfct3_2_P2_3D( cRRef, cRRef y, cRRef )
 {
     return -1 + 4 * y;
 }
-Real derfct3_3_P2_3D( cRRef x, cRRef y, cRRef z )
+Real derfct3_3_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0.;
 }
 
-Real derfct4_1_P2_3D( cRRef x, cRRef y, cRRef z )
+Real derfct4_1_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0.;
 }
-Real derfct4_2_P2_3D( cRRef x, cRRef y, cRRef z )
+Real derfct4_2_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0.;
 }
-Real derfct4_3_P2_3D( cRRef x, cRRef y, cRRef z )
+Real derfct4_3_P2_3D( cRRef, cRRef, cRRef z )
 {
     return -1 + 4 * z;
 }
@@ -1619,29 +1619,29 @@ Real derfct5_1_P2_3D( cRRef x, cRRef y, cRRef z )
 {
     return 4 - 8 * x - 4 * y - 4 * z;
 }
-Real derfct5_2_P2_3D( cRRef x, cRRef y, cRRef z )
+Real derfct5_2_P2_3D( cRRef x, cRRef, cRRef )
 {
     return -4 * x;
 }
-Real derfct5_3_P2_3D( cRRef x, cRRef y, cRRef z )
+Real derfct5_3_P2_3D( cRRef x, cRRef, cRRef )
 {
     return -4 * x;
 }
 
-Real derfct6_1_P2_3D( cRRef x, cRRef y, cRRef z )
+Real derfct6_1_P2_3D( cRRef, cRRef y, cRRef )
 {
     return 4 * y;
 }
-Real derfct6_2_P2_3D( cRRef x, cRRef y, cRRef z )
+Real derfct6_2_P2_3D( cRRef x, cRRef, cRRef )
 {
     return 4 * x;
 }
-Real derfct6_3_P2_3D( cRRef x, cRRef y, cRRef z )
+Real derfct6_3_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0.;
 }
 
-Real derfct7_1_P2_3D( cRRef x, cRRef y, cRRef z )
+Real derfct7_1_P2_3D( cRRef, cRRef y, cRRef )
 {
     return -4 * y;
 }
@@ -1649,16 +1649,16 @@ Real derfct7_2_P2_3D( cRRef x, cRRef y, cRRef z )
 {
     return 4 - 4 * x - 8 * y - 4 * z;
 }
-Real derfct7_3_P2_3D( cRRef x, cRRef y, cRRef z )
+Real derfct7_3_P2_3D( cRRef, cRRef y, cRRef )
 {
     return -4 * y;
 }
 
-Real derfct8_1_P2_3D( cRRef x, cRRef y, cRRef z )
+Real derfct8_1_P2_3D( cRRef, cRRef, cRRef z )
 {
     return -4 * z;
 }
-Real derfct8_2_P2_3D( cRRef x, cRRef y, cRRef z )
+Real derfct8_2_P2_3D( cRRef, cRRef, cRRef z )
 {
     return -4 * z;
 }
@@ -1667,399 +1667,399 @@ Real derfct8_3_P2_3D( cRRef x, cRRef y, cRRef z )
     return 4 - 4 * x - 4 * y - 8 * z;
 }
 
-Real derfct9_1_P2_3D( cRRef x, cRRef y, cRRef z )
+Real derfct9_1_P2_3D( cRRef, cRRef, cRRef z )
 {
     return 4 * z;
 }
-Real derfct9_2_P2_3D( cRRef x, cRRef y, cRRef z )
+Real derfct9_2_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0.;
 }
-Real derfct9_3_P2_3D( cRRef x, cRRef y, cRRef z )
+Real derfct9_3_P2_3D( cRRef x, cRRef, cRRef )
 {
     return 4 * x;
 }
 
-Real derfct10_1_P2_3D( cRRef x, cRRef y, cRRef z )
+Real derfct10_1_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0.;
 }
-Real derfct10_2_P2_3D( cRRef x, cRRef y, cRRef z )
+Real derfct10_2_P2_3D( cRRef, cRRef, cRRef z )
 {
     return 4 * z;
 }
-Real derfct10_3_P2_3D( cRRef x, cRRef y, cRRef z )
+Real derfct10_3_P2_3D( cRRef, cRRef y, cRRef )
 {
     return 4 * y;
 }
 
 
-Real der2fct1_11_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct1_11_P2_3D( cRRef, cRRef, cRRef )
 {
     return 4;
 }
-Real der2fct1_12_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct1_12_P2_3D( cRRef, cRRef, cRRef )
 {
     return 4;
 }
-Real der2fct1_13_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct1_13_P2_3D( cRRef, cRRef, cRRef )
 {
     return 4;
 }
-Real der2fct1_21_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct1_21_P2_3D( cRRef, cRRef, cRRef )
 {
     return 4;
 }
-Real der2fct1_22_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct1_22_P2_3D( cRRef, cRRef, cRRef )
 {
     return 4;
 }
-Real der2fct1_23_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct1_23_P2_3D( cRRef, cRRef, cRRef )
 {
     return 4;
 }
-Real der2fct1_31_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct1_31_P2_3D( cRRef, cRRef, cRRef )
 {
     return 4;
 }
-Real der2fct1_32_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct1_32_P2_3D( cRRef, cRRef, cRRef )
 {
     return 4;
 }
-Real der2fct1_33_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 4;
-}
-
-Real der2fct2_11_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 4;
-}
-Real der2fct2_12_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 0;
-}
-Real der2fct2_13_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 0;
-}
-Real der2fct2_21_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 0;
-}
-Real der2fct2_22_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 0;
-}
-Real der2fct2_23_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 0;
-}
-Real der2fct2_31_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 0;
-}
-Real der2fct2_32_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 0;
-}
-Real der2fct2_33_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 0;
-}
-
-Real der2fct3_11_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 0;
-}
-Real der2fct3_12_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 0;
-}
-Real der2fct3_13_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 0;
-}
-Real der2fct3_21_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 0;
-}
-Real der2fct3_22_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 4;
-}
-Real der2fct3_23_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 0;
-}
-Real der2fct3_31_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 0;
-}
-Real der2fct3_32_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 0;
-}
-Real der2fct3_33_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 0;
-}
-
-Real der2fct4_11_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 0;
-}
-Real der2fct4_12_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 0;
-}
-Real der2fct4_13_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 0;
-}
-Real der2fct4_21_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 0;
-}
-Real der2fct4_22_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 0;
-}
-Real der2fct4_23_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 0;
-}
-Real der2fct4_31_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 0;
-}
-Real der2fct4_32_P2_3D( cRRef x, cRRef y, cRRef z )
-{
-    return 0;
-}
-Real der2fct4_33_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct1_33_P2_3D( cRRef, cRRef, cRRef )
 {
     return 4;
 }
 
-Real der2fct5_11_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct2_11_P2_3D( cRRef, cRRef, cRRef )
+{
+    return 4;
+}
+Real der2fct2_12_P2_3D( cRRef, cRRef, cRRef )
+{
+    return 0;
+}
+Real der2fct2_13_P2_3D( cRRef, cRRef, cRRef )
+{
+    return 0;
+}
+Real der2fct2_21_P2_3D( cRRef, cRRef, cRRef )
+{
+    return 0;
+}
+Real der2fct2_22_P2_3D( cRRef, cRRef, cRRef )
+{
+    return 0;
+}
+Real der2fct2_23_P2_3D( cRRef, cRRef, cRRef )
+{
+    return 0;
+}
+Real der2fct2_31_P2_3D( cRRef, cRRef, cRRef )
+{
+    return 0;
+}
+Real der2fct2_32_P2_3D( cRRef, cRRef, cRRef )
+{
+    return 0;
+}
+Real der2fct2_33_P2_3D( cRRef, cRRef, cRRef )
+{
+    return 0;
+}
+
+Real der2fct3_11_P2_3D( cRRef, cRRef, cRRef )
+{
+    return 0;
+}
+Real der2fct3_12_P2_3D( cRRef, cRRef, cRRef )
+{
+    return 0;
+}
+Real der2fct3_13_P2_3D( cRRef, cRRef, cRRef )
+{
+    return 0;
+}
+Real der2fct3_21_P2_3D( cRRef, cRRef, cRRef )
+{
+    return 0;
+}
+Real der2fct3_22_P2_3D( cRRef, cRRef, cRRef )
+{
+    return 4;
+}
+Real der2fct3_23_P2_3D( cRRef, cRRef, cRRef )
+{
+    return 0;
+}
+Real der2fct3_31_P2_3D( cRRef, cRRef, cRRef )
+{
+    return 0;
+}
+Real der2fct3_32_P2_3D( cRRef, cRRef, cRRef )
+{
+    return 0;
+}
+Real der2fct3_33_P2_3D( cRRef, cRRef, cRRef )
+{
+    return 0;
+}
+
+Real der2fct4_11_P2_3D( cRRef, cRRef, cRRef )
+{
+    return 0;
+}
+Real der2fct4_12_P2_3D( cRRef, cRRef, cRRef )
+{
+    return 0;
+}
+Real der2fct4_13_P2_3D( cRRef, cRRef, cRRef )
+{
+    return 0;
+}
+Real der2fct4_21_P2_3D( cRRef, cRRef, cRRef )
+{
+    return 0;
+}
+Real der2fct4_22_P2_3D( cRRef, cRRef, cRRef )
+{
+    return 0;
+}
+Real der2fct4_23_P2_3D( cRRef, cRRef, cRRef )
+{
+    return 0;
+}
+Real der2fct4_31_P2_3D( cRRef, cRRef, cRRef )
+{
+    return 0;
+}
+Real der2fct4_32_P2_3D( cRRef, cRRef, cRRef )
+{
+    return 0;
+}
+Real der2fct4_33_P2_3D( cRRef, cRRef, cRRef )
+{
+    return 4;
+}
+
+Real der2fct5_11_P2_3D( cRRef, cRRef, cRRef )
 {
     return -8;
 }
-Real der2fct5_12_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_12_P2_3D( cRRef, cRRef, cRRef )
 {
     return -4;
 }
-Real der2fct5_13_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_13_P2_3D( cRRef, cRRef, cRRef )
 {
     return -4;
 }
-Real der2fct5_21_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_21_P2_3D( cRRef, cRRef, cRRef )
 {
     return -4;
 }
-Real der2fct5_22_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_22_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct5_23_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_23_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct5_31_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_31_P2_3D( cRRef, cRRef, cRRef )
 {
     return -4;
 }
-Real der2fct5_32_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_32_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct5_33_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_33_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
 
-Real der2fct6_11_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct6_11_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct6_12_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct6_12_P2_3D( cRRef, cRRef, cRRef )
 {
     return 4;
 }
-Real der2fct6_13_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct6_13_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct6_21_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct6_21_P2_3D( cRRef, cRRef, cRRef )
 {
     return 4;
 }
-Real der2fct6_22_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct6_22_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct6_23_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct6_23_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct6_31_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct6_31_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct6_32_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct6_32_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct6_33_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct6_33_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
 
-Real der2fct7_11_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct7_11_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct7_12_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct7_12_P2_3D( cRRef, cRRef, cRRef )
 {
     return -4;
 }
-Real der2fct7_13_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct7_13_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct7_21_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct7_21_P2_3D( cRRef, cRRef, cRRef )
 {
     return -4;
 }
-Real der2fct7_22_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct7_22_P2_3D( cRRef, cRRef, cRRef )
 {
     return -8;
 }
-Real der2fct7_23_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct7_23_P2_3D( cRRef, cRRef, cRRef )
 {
     return -4;
 }
-Real der2fct7_31_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct7_31_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct7_32_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct7_32_P2_3D( cRRef, cRRef, cRRef )
 {
     return -4;
 }
-Real der2fct7_33_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct7_33_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
 
-Real der2fct8_11_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct8_11_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct8_12_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct8_12_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct8_13_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct8_13_P2_3D( cRRef, cRRef, cRRef )
 {
     return -4;
 }
-Real der2fct8_21_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct8_21_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct8_22_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct8_22_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct8_23_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct8_23_P2_3D( cRRef, cRRef, cRRef )
 {
     return -4;
 }
-Real der2fct8_31_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct8_31_P2_3D( cRRef, cRRef, cRRef )
 {
     return -4;
 }
-Real der2fct8_32_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct8_32_P2_3D( cRRef, cRRef, cRRef )
 {
     return -4;
 }
-Real der2fct8_33_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct8_33_P2_3D( cRRef, cRRef, cRRef )
 {
     return -8;
 }
 
-Real der2fct9_11_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct9_11_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct9_12_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct9_12_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct9_13_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct9_13_P2_3D( cRRef, cRRef, cRRef )
 {
     return 4;
 }
-Real der2fct9_21_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct9_21_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct9_22_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct9_22_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct9_23_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct9_23_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct9_31_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct9_31_P2_3D( cRRef, cRRef, cRRef )
 {
     return 4;
 }
-Real der2fct9_32_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct9_32_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct9_33_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct9_33_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
 
-Real der2fct10_11_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct10_11_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct10_12_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct10_12_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct10_13_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct10_13_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct10_21_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct10_21_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct10_22_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct10_22_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct10_23_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct10_23_P2_3D( cRRef, cRRef, cRRef )
 {
     return 4;
 }
-Real der2fct10_31_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct10_31_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct10_32_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct10_32_P2_3D( cRRef, cRRef, cRRef )
 {
     return 4;
 }
-Real der2fct10_33_P2_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct10_33_P2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
@@ -2682,8 +2682,8 @@ Real der2fct11_33_P2tilde_3D( cRRef x, cRRef y, cRRef z )
 //
 //======================================================================
 /*
-                      ________
-                     /.      /|
+        ________
+       /.      /|
       / .     / |
      /_______/  |
      |  .  1 |  |
@@ -2693,16 +2693,16 @@ Real der2fct11_33_P2tilde_3D( cRRef x, cRRef y, cRRef z )
      |_______|
 
 */
-Real fct1_Q0_3D( cRRef x, cRRef y, cRRef z )
+Real fct1_Q0_3D( cRRef, cRRef, cRRef )
 {
     return 1.;
 }
-Real derfct1_Q0_3D( cRRef x, cRRef y, cRRef z )
+Real derfct1_Q0_3D( cRRef, cRRef, cRRef )
 {
     return 0.;
 }
 // The second derivative is equal to the first : both are equal to 0.
-Real der2fct1_Q0_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct1_Q0_3D( cRRef, cRRef, cRRef )
 {
     return 0.;
 }
@@ -2713,8 +2713,8 @@ Real der2fct1_Q0_3D( cRRef x, cRRef y, cRRef z )
 //
 //======================================================================
 /*
-                      8-------7
-                     /.      /|
+        8-------7
+       /.      /|
       / .     / |
      5_______6  |
      |  .    |  |
@@ -2756,395 +2756,395 @@ Real fct8_Q1_3D( cRRef x, cRRef y, cRRef z )
     return ( 1. - x ) * y * z;
 }
 
-Real derfct1_1_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real derfct1_1_Q1_3D( cRRef, cRRef y, cRRef z )
 {
     return -( 1. - y ) * ( 1. - z );
 }
-Real derfct1_2_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real derfct1_2_Q1_3D( cRRef x, cRRef, cRRef z )
 {
     return -( 1. - x ) * ( 1. - z );
 }
-Real derfct1_3_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real derfct1_3_Q1_3D( cRRef x, cRRef y, cRRef )
 {
     return -( 1. - x ) * ( 1. - y );
 }
-Real derfct2_1_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real derfct2_1_Q1_3D( cRRef, cRRef y, cRRef z )
 {
     return ( 1. - y ) * ( 1. - z );
 }
-Real derfct2_2_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real derfct2_2_Q1_3D( cRRef x, cRRef, cRRef z )
 {
     return -x * ( 1. - z ) ;
 }
-Real derfct2_3_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real derfct2_3_Q1_3D( cRRef x, cRRef y, cRRef )
 {
     return -x * ( 1. - y );
 }
-Real derfct3_1_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real derfct3_1_Q1_3D( cRRef, cRRef y, cRRef z )
 {
     return y * ( 1. - z );
 }
-Real derfct3_2_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real derfct3_2_Q1_3D( cRRef x, cRRef, cRRef z )
 {
     return x * ( 1. - z );
 }
-Real derfct3_3_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real derfct3_3_Q1_3D( cRRef x, cRRef y, cRRef )
 {
     return -x * y ;
 }
-Real derfct4_1_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real derfct4_1_Q1_3D( cRRef, cRRef y, cRRef z )
 {
     return -y * ( 1. - z );
 }
-Real derfct4_2_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real derfct4_2_Q1_3D( cRRef x, cRRef, cRRef z )
 {
     return ( 1. - x ) * ( 1. - z );
 }
-Real derfct4_3_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real derfct4_3_Q1_3D( cRRef x, cRRef y, cRRef )
 {
     return -( 1. - x ) * y;
 }
-Real derfct5_1_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real derfct5_1_Q1_3D( cRRef, cRRef y, cRRef z )
 {
     return -( 1. - y ) * z;
 }
-Real derfct5_2_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real derfct5_2_Q1_3D( cRRef x, cRRef, cRRef z )
 {
     return -( 1. - x ) * z;
 }
-Real derfct5_3_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real derfct5_3_Q1_3D( cRRef x, cRRef y, cRRef )
 {
     return ( 1. - x ) * ( 1. - y );
 }
-Real derfct6_1_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real derfct6_1_Q1_3D( cRRef, cRRef y, cRRef z )
 {
     return ( 1. - y ) * z ;
 }
-Real derfct6_2_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real derfct6_2_Q1_3D( cRRef x, cRRef, cRRef z )
 {
     return -x * z;
 }
-Real derfct6_3_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real derfct6_3_Q1_3D( cRRef x, cRRef y, cRRef )
 {
     return x * ( 1. - y );
 }
-Real derfct7_1_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real derfct7_1_Q1_3D( cRRef, cRRef y, cRRef z )
 {
     return y * z;
 }
-Real derfct7_2_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real derfct7_2_Q1_3D( cRRef x, cRRef, cRRef z )
 {
     return x * z;
 }
-Real derfct7_3_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real derfct7_3_Q1_3D( cRRef x, cRRef y, cRRef )
 {
     return x * y;
 }
-Real derfct8_1_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real derfct8_1_Q1_3D( cRRef, cRRef y, cRRef z )
 {
     return -y * z;
 }
-Real derfct8_2_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real derfct8_2_Q1_3D( cRRef x, cRRef, cRRef z )
 {
     return ( 1. - x ) * z;
 }
-Real derfct8_3_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real derfct8_3_Q1_3D( cRRef x, cRRef y, cRRef )
 {
     return ( 1. - x ) * y;
 }
 
-Real der2fct1_11_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct1_11_Q1_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct1_12_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct1_12_Q1_3D( cRRef, cRRef, cRRef z )
 {
     return 1. - z;
 }
-Real der2fct1_13_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct1_13_Q1_3D( cRRef, cRRef y, cRRef )
 {
     return 1. - y;
 }
-Real der2fct1_21_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct1_21_Q1_3D( cRRef, cRRef, cRRef z )
 {
     return 1. - z;
 }
-Real der2fct1_22_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct1_22_Q1_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct1_23_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct1_23_Q1_3D( cRRef x, cRRef, cRRef )
 {
     return 1. - x;
 }
-Real der2fct1_31_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct1_31_Q1_3D( cRRef, cRRef y, cRRef )
 {
     return 1. - y;
 }
-Real der2fct1_32_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct1_32_Q1_3D( cRRef x, cRRef, cRRef )
 {
     return 1. - x;
 }
-Real der2fct1_33_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct1_33_Q1_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
 
-Real der2fct2_11_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct2_11_Q1_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct2_12_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct2_12_Q1_3D( cRRef, cRRef, cRRef z )
 {
     return -( 1. - z );
 }
-Real der2fct2_13_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct2_13_Q1_3D( cRRef, cRRef y, cRRef )
 {
     return -( 1. - y );
 }
-Real der2fct2_21_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct2_21_Q1_3D( cRRef, cRRef, cRRef z )
 {
     return -( 1. - z );
 }
-Real der2fct2_22_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct2_22_Q1_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct2_23_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct2_23_Q1_3D( cRRef x, cRRef, cRRef )
 {
     return x;
 }
-Real der2fct2_31_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct2_31_Q1_3D( cRRef, cRRef y, cRRef )
 {
     return -( 1. - y );
 }
-Real der2fct2_32_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct2_32_Q1_3D( cRRef x, cRRef, cRRef )
 {
     return x;
 }
-Real der2fct2_33_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct2_33_Q1_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
 
-Real der2fct3_11_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct3_11_Q1_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct3_12_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct3_12_Q1_3D( cRRef, cRRef, cRRef z )
 {
     return ( 1. - z );
 }
-Real der2fct3_13_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct3_13_Q1_3D( cRRef, cRRef y, cRRef )
 {
     return -y;
 }
-Real der2fct3_21_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct3_21_Q1_3D( cRRef, cRRef, cRRef z )
 {
     return ( 1. - z );
 }
-Real der2fct3_22_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct3_22_Q1_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct3_23_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct3_23_Q1_3D( cRRef x, cRRef, cRRef )
 {
     return -x;
 }
-Real der2fct3_31_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct3_31_Q1_3D( cRRef, cRRef y, cRRef )
 {
     return -y;
 }
-Real der2fct3_32_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct3_32_Q1_3D( cRRef x, cRRef, cRRef )
 {
     return -x;
 }
-Real der2fct3_33_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct3_33_Q1_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
 
-Real der2fct4_11_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct4_11_Q1_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct4_12_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct4_12_Q1_3D( cRRef, cRRef, cRRef z )
 {
     return -( 1. - z );
 }
-Real der2fct4_13_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct4_13_Q1_3D( cRRef, cRRef y, cRRef )
 {
     return y;
 }
-Real der2fct4_21_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct4_21_Q1_3D( cRRef, cRRef, cRRef z )
 {
     return -( 1. - z );
 }
-Real der2fct4_22_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct4_22_Q1_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct4_23_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct4_23_Q1_3D( cRRef x, cRRef, cRRef )
 {
     return -( 1. - x );
 }
-Real der2fct4_31_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct4_31_Q1_3D( cRRef, cRRef y, cRRef )
 {
     return y;
 }
-Real der2fct4_32_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct4_32_Q1_3D( cRRef x, cRRef, cRRef )
 {
     return -( 1. - x );
 }
-Real der2fct4_33_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct4_33_Q1_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
 
-Real der2fct5_11_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_11_Q1_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct5_12_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_12_Q1_3D( cRRef, cRRef, cRRef z )
 {
     return z;
 }
-Real der2fct5_13_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_13_Q1_3D( cRRef, cRRef y, cRRef )
 {
     return -( 1. - y );
 }
-Real der2fct5_21_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_21_Q1_3D( cRRef, cRRef, cRRef z )
 {
     return z;
 }
-Real der2fct5_22_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_22_Q1_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct5_23_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_23_Q1_3D( cRRef x, cRRef, cRRef )
 {
     return -( 1. - x );
 }
-Real der2fct5_31_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_31_Q1_3D( cRRef, cRRef y, cRRef )
 {
     return -( 1. - y );
 }
-Real der2fct5_32_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_32_Q1_3D( cRRef x, cRRef, cRRef )
 {
     return -( 1. - x );
 }
-Real der2fct5_33_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct5_33_Q1_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
 
-Real der2fct6_11_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct6_11_Q1_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct6_12_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct6_12_Q1_3D( cRRef, cRRef, cRRef z )
 {
     return -z;
 }
-Real der2fct6_13_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct6_13_Q1_3D( cRRef, cRRef y, cRRef )
 {
     return 1. - y;
 }
-Real der2fct6_21_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct6_21_Q1_3D( cRRef, cRRef, cRRef z )
 {
     return -z;
 }
-Real der2fct6_22_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct6_22_Q1_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct6_23_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct6_23_Q1_3D( cRRef x, cRRef, cRRef )
 {
     return -x;
 }
-Real der2fct6_31_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct6_31_Q1_3D( cRRef, cRRef y, cRRef )
 {
     return 1. - y;
 }
-Real der2fct6_32_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct6_32_Q1_3D( cRRef x, cRRef, cRRef )
 {
     return -x;
 }
-Real der2fct6_33_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct6_33_Q1_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
 
-Real der2fct7_11_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct7_11_Q1_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct7_12_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct7_12_Q1_3D( cRRef, cRRef, cRRef z )
 {
     return z;
 }
-Real der2fct7_13_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct7_13_Q1_3D( cRRef, cRRef y, cRRef )
 {
     return y;
 }
-Real der2fct7_21_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct7_21_Q1_3D( cRRef, cRRef, cRRef z )
 {
     return z;
 }
-Real der2fct7_22_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct7_22_Q1_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct7_23_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct7_23_Q1_3D( cRRef x, cRRef, cRRef )
 {
     return x;
 }
-Real der2fct7_31_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct7_31_Q1_3D( cRRef, cRRef y, cRRef )
 {
     return y;
 }
-Real der2fct7_32_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct7_32_Q1_3D( cRRef x, cRRef, cRRef )
 {
     return x;
 }
-Real der2fct7_33_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct7_33_Q1_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
 
-Real der2fct8_11_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct8_11_Q1_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct8_12_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct8_12_Q1_3D( cRRef, cRRef, cRRef z )
 {
     return -z;
 }
-Real der2fct8_13_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct8_13_Q1_3D( cRRef, cRRef y, cRRef )
 {
     return -y;
 }
-Real der2fct8_21_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct8_21_Q1_3D( cRRef, cRRef, cRRef z )
 {
     return -z;
 }
-Real der2fct8_22_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct8_22_Q1_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real der2fct8_23_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct8_23_Q1_3D( cRRef x, cRRef, cRRef )
 {
     return 1. - x;
 }
-Real der2fct8_31_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct8_31_Q1_3D( cRRef, cRRef y, cRRef )
 {
     return -y;
 }
-Real der2fct8_32_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct8_32_Q1_3D( cRRef x, cRRef, cRRef )
 {
     return 1 -x;
 }
-Real der2fct8_33_Q1_3D( cRRef x, cRRef y, cRRef z )
+Real der2fct8_33_Q1_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
@@ -3157,8 +3157,8 @@ Real der2fct8_33_Q1_3D( cRRef x, cRRef y, cRRef z )
 //======================================================================
 /*
 
-                      8-------7
-                     /.      /|
+        8-------7
+       /.      /|
       / .     / |
      5_______6  |
      |  .    |  |
@@ -3176,105 +3176,105 @@ Real der2fct8_33_Q1_3D( cRRef x, cRRef y, cRRef z )
 
 */
 
-Real fct1_RT0_1_3D( cRRef x, cRRef y, cRRef z )
+Real fct1_RT0_1_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real fct1_RT0_2_3D( cRRef x, cRRef y, cRRef z )
+Real fct1_RT0_2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real fct1_RT0_3_3D( cRRef x, cRRef y, cRRef z )
+Real fct1_RT0_3_3D( cRRef, cRRef, cRRef z )
 {
     return z -1;
 }
 
-Real fct2_RT0_1_3D( cRRef x, cRRef y, cRRef z )
+Real fct2_RT0_1_3D( cRRef x, cRRef, cRRef )
 {
     return x -1;
 }
-Real fct2_RT0_2_3D( cRRef x, cRRef y, cRRef z )
+Real fct2_RT0_2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real fct2_RT0_3_3D( cRRef x, cRRef y, cRRef z )
+Real fct2_RT0_3_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
 
-Real fct3_RT0_1_3D( cRRef x, cRRef y, cRRef z )
+Real fct3_RT0_1_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real fct3_RT0_2_3D( cRRef x, cRRef y, cRRef z )
+Real fct3_RT0_2_3D( cRRef, cRRef y, cRRef )
 {
     return y -1;
 }
-Real fct3_RT0_3_3D( cRRef x, cRRef y, cRRef z )
+Real fct3_RT0_3_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
 
-Real fct4_RT0_1_3D( cRRef x, cRRef y, cRRef z )
+Real fct4_RT0_1_3D( cRRef x, cRRef, cRRef )
 {
     return x;
 }
-Real fct4_RT0_2_3D( cRRef x, cRRef y, cRRef z )
+Real fct4_RT0_2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real fct4_RT0_3_3D( cRRef x, cRRef y, cRRef z )
+Real fct4_RT0_3_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
 
-Real fct5_RT0_1_3D( cRRef x, cRRef y, cRRef z )
+Real fct5_RT0_1_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real fct5_RT0_2_3D( cRRef x, cRRef y, cRRef z )
+Real fct5_RT0_2_3D( cRRef, cRRef y, cRRef )
 {
     return y;
 }
-Real fct5_RT0_3_3D( cRRef x, cRRef y, cRRef z )
+Real fct5_RT0_3_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
 
-Real fct6_RT0_1_3D( cRRef x, cRRef y, cRRef z )
+Real fct6_RT0_1_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real fct6_RT0_2_3D( cRRef x, cRRef y, cRRef z )
+Real fct6_RT0_2_3D( cRRef, cRRef, cRRef )
 {
     return 0;
 }
-Real fct6_RT0_3_3D( cRRef x, cRRef y, cRRef z )
+Real fct6_RT0_3_3D( cRRef, cRRef, cRRef z )
 {
     return z;
 }
 
-Real fct1_DIV_RT0_3D( cRRef x, cRRef y, cRRef z )
+Real fct1_DIV_RT0_3D( cRRef, cRRef, cRRef )
 {
     return 1 ;
 }
-Real fct2_DIV_RT0_3D( cRRef x, cRRef y, cRRef z )
+Real fct2_DIV_RT0_3D( cRRef, cRRef, cRRef )
 {
     return 1 ;
 }
-Real fct3_DIV_RT0_3D( cRRef x, cRRef y, cRRef z )
+Real fct3_DIV_RT0_3D( cRRef, cRRef, cRRef )
 {
     return 1 ;
 }
-Real fct4_DIV_RT0_3D( cRRef x, cRRef y, cRRef z )
+Real fct4_DIV_RT0_3D( cRRef, cRRef, cRRef )
 {
     return 1 ;
 }
-Real fct5_DIV_RT0_3D( cRRef x, cRRef y, cRRef z )
+Real fct5_DIV_RT0_3D( cRRef, cRRef, cRRef )
 {
     return 1 ;
 }
-Real fct6_DIV_RT0_3D( cRRef x, cRRef y, cRRef z )
+Real fct6_DIV_RT0_3D( cRRef, cRRef, cRRef )
 {
     return 1 ;
 }
@@ -3309,71 +3309,71 @@ SEE basisElSh.cc   for the ORIENTATION CONVENTIONS
 
 */
 
-Real fct3_RT0_1_3D_TETRA( cRRef x, cRRef y, cRRef z )
+Real fct3_RT0_1_3D_TETRA( cRRef x, cRRef, cRRef )
 {
     return 2 * x;
 }
-Real fct3_RT0_2_3D_TETRA( cRRef x, cRRef y, cRRef z )
+Real fct3_RT0_2_3D_TETRA( cRRef, cRRef y, cRRef )
 {
     return 2 * y;
 }
-Real fct3_RT0_3_3D_TETRA( cRRef x, cRRef y, cRRef z )
+Real fct3_RT0_3_3D_TETRA( cRRef, cRRef, cRRef z )
 {
     return 2 * z;
 }
 
-Real fct4_RT0_1_3D_TETRA( cRRef x, cRRef y, cRRef z )
+Real fct4_RT0_1_3D_TETRA( cRRef x, cRRef, cRRef )
 {
     return 2 * x - 2;
 }
-Real fct4_RT0_2_3D_TETRA( cRRef x, cRRef y, cRRef z )
+Real fct4_RT0_2_3D_TETRA( cRRef, cRRef y, cRRef )
 {
     return 2 * y;
 }
-Real fct4_RT0_3_3D_TETRA( cRRef x, cRRef y, cRRef z )
+Real fct4_RT0_3_3D_TETRA( cRRef, cRRef, cRRef z )
 {
     return 2 * z;
 }
 
-Real fct2_RT0_1_3D_TETRA( cRRef x, cRRef y, cRRef z )
+Real fct2_RT0_1_3D_TETRA( cRRef x, cRRef, cRRef )
 {
     return 2 * x;
 }
-Real fct2_RT0_2_3D_TETRA( cRRef x, cRRef y, cRRef z )
+Real fct2_RT0_2_3D_TETRA( cRRef, cRRef y, cRRef )
 {
     return 2 * y - 2;
 }
-Real fct2_RT0_3_3D_TETRA( cRRef x, cRRef y, cRRef z )
+Real fct2_RT0_3_3D_TETRA( cRRef, cRRef, cRRef z )
 {
     return 2 * z;
 }
 
-Real fct1_RT0_1_3D_TETRA( cRRef x, cRRef y, cRRef z )
+Real fct1_RT0_1_3D_TETRA( cRRef x, cRRef, cRRef )
 {
     return 2 * x;
 }
-Real fct1_RT0_2_3D_TETRA( cRRef x, cRRef y, cRRef z )
+Real fct1_RT0_2_3D_TETRA( cRRef, cRRef y, cRRef )
 {
     return 2 * y;
 }
-Real fct1_RT0_3_3D_TETRA( cRRef x, cRRef y, cRRef z )
+Real fct1_RT0_3_3D_TETRA( cRRef, cRRef, cRRef z )
 {
     return 2 * z - 2;
 }
 
-Real fct1_DIV_RT0_3D_TETRA( cRRef x, cRRef y, cRRef z )
+Real fct1_DIV_RT0_3D_TETRA( cRRef, cRRef, cRRef )
 {
     return 6 ;
 }
-Real fct2_DIV_RT0_3D_TETRA( cRRef x, cRRef y, cRRef z )
+Real fct2_DIV_RT0_3D_TETRA( cRRef, cRRef, cRRef )
 {
     return 6 ;
 }
-Real fct3_DIV_RT0_3D_TETRA( cRRef x, cRRef y, cRRef z )
+Real fct3_DIV_RT0_3D_TETRA( cRRef, cRRef, cRRef )
 {
     return 6 ;
 }
-Real fct4_DIV_RT0_3D_TETRA( cRRef x, cRRef y, cRRef z )
+Real fct4_DIV_RT0_3D_TETRA( cRRef, cRRef, cRRef )
 {
     return 6 ;
 }

@@ -127,7 +127,7 @@ BCVector::operator=( const BCVector& BCv )
 
 //! Output
 std::ostream&
-BCVector::showMe( bool verbose, std::ostream & out ) const
+BCVector::showMe( bool /* verbose */, std::ostream & out ) const
 {
     ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
     out << "+++++++++++++++++++++++++++++++" << std::endl;
