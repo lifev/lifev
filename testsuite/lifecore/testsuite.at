@@ -117,6 +117,17 @@ AT_CHECK([$top_builddir/testsuite/lifecore/test_seq < input],[0],[ignore],[ignor
 AT_KEYWORDS([ core seq])
 AT_CLEANUP
 
+#
+# Singleton test
+#
+AT_SETUP([test_singleton])
+AT_CHECK([$top_builddir/testsuite/lifecore/test_singleton],[0],
+         [aSingleton value = -1
+],[ignore])
+AT_KEYWORDS([ core singleton])
+AT_CLEANUP
+
+
 AT_SETUP([test_size])
 AT_CHECK([$top_builddir/testsuite/lifecore/test_size],[0],[ignore],[ignore])
 AT_KEYWORDS([ core size])
