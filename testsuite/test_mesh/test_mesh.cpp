@@ -23,25 +23,6 @@
 #include "regionMesh3D.hpp"
 #include "bareItems.hpp"
 
-/**
-   \page mesh_tutorial Mesh Tutorial
-   \dontinclude test_mesh.cpp
-
-   First we define a mesh structure, here it is a 3D mesh formed by quadratic tetrahedras,
-   it is done like this:
-
-   \skip RegionMesh3D
-   \until ;
-
-   We then load a mesh++ file :
-
-   \skipline  readMppFile(aMesh,fname, m);
-
-   In order to check the validity of the mesh, do the following:
-
-   \skipline aMesh.check(0,true,true);
-
- */
 
 int main()
 {
@@ -90,13 +71,12 @@ int main()
     aMesh.cleanElementEdges();
     aMesh.cleanElementFaces();
     aMesh.showMe();
-    UInt bedges_found, iedges_found;
     cout <<" **********************************************************"<<endl;
 
     cout<< "  ****************** BUILDING ALL EDGES"<<endl;
+    UInt bedges_found, iedges_found;
     buildEdges(aMesh, ofile, cerr, bedges_found,
                iedges_found, true, true,true);
-
     cout <<" **********************************************************"<<endl;
 
     cout<< "  ****************** BUILDING ALL FACES"<<endl;
@@ -128,68 +108,5 @@ int main()
     cerr<<endl;
     vector<Real> disp(3*aMesh.numPoints());
     aMesh.moveMesh(disp);
-
-    //    SimpleVect<bool>elsign;
-    //aMesh.volume(2).swapPoints(1,3);
-    //UInt lp=GeoND<QuadraticTetra>::numLocalPoints;
-    //    UInt lp=GeoND<QuadraticTetra>::numLocalPoints;
-    //for(UInt i = 1; i<=aMesh.numVolumes(); i++){
-    //      for(UInt j=1; j<=lp;j++){
-    //cout << "Point " << j << ":"
-    //
-    //     << "("<< aMesh.volumeList(i).point(j).id() << ") ,"
-    //     << aMesh.volumeList(i).point(j).coordinate(1) <<","
-    //     << aMesh.volumeList(i).point(j).coordinate(2) <<","
-    //     << aMesh.volumeList(i).point(j).coordinate(3) << endl;}}
-    //    UInt i1,i2,i3,i4;
-
-    //for (UInt i=1; i<=aMesh.numVolumes(); ++i){
-    //  cout << "Element # "<< i << ": "<<aMesh.volume(i).point(1).id()<<","
-    //   <<aMesh.volume(i).point(2).id()
-    //   <<","<<aMesh.volume(i).point(3).id()<<","
-    //   <<aMesh.volume(i).point(4).id()<<endl;
-    //for(UInt k=1;k<=aMesh.numLocalEdges();++k){
-    //i1=aMesh.localEdgeId(i,k);
-    //cout << i1<< "-";
-    //}
-    //cout<<endl;
-    //}
-
-//for (UInt i=1; i<=aMesh.numVolumes(); ++i){
-//    cout << "Element # "<< i << ": "<<aMesh.volume(i).point(1).id()<<","
-//   <<aMesh.volume(i).point(2).id()
-//   <<","<<aMesh.volume(i).point(3).id()<<","
-//   <<aMesh.volume(i).point(4).id()<<endl;
-//    for(UInt k=1;k<=aMesh.numLocalFaces();++k){
-//i1=aMesh.localFaceId(i,k);
-    //cout << i1<< "-";
-    //}
-    //cout<<endl;
-    //}
-
-    // TESTING FIELDS
-    //Dof<FE_P1_Tetra_Base,LinearTetra> dof;
-    //Dof<FE_P2_Tetra_Base,LinearTetra> dof;
-    //FiniteEle<FE_P2_Tetra_4pt> fe;
-    ///Dof<FE_P2_Tetra_Base,QuadraticTetra> dof;
-    //Dof<FE_P2_Tetra,QuadraticTetra> dof();
-    //dof.update(aMesh);
-    // dof.showMe();
-    //    for (UInt i=1; i<=aMesh.numVolumes(); ++i){
-    //cout << "Element # "<< i << ": "<<aMesh.volume(i).point(1).id()<<","
-    //   <<aMesh.volume(i).point(2).id()
-    //   <<","<<aMesh.volume(i).point(3).id()<<","
-    //   <<aMesh.volume(i).point(4).id()<<endl;
-    //for(UInt k=1;k<=dof.numLocalDof();++k){
-    //i1=dof.localToGlobal(i,k);
-    //cout << i1<< "-";
-    //}
-    //cout<<endl;
-    //}
-    /*
-      RegionMesh3D<LinearTetra> aMesh;
-      aMesh.test3DBuilder();
-      aMesh.showMe();
-    */
 }
 
