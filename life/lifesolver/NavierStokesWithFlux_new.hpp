@@ -32,6 +32,8 @@
 #ifndef __NavierStokesWithFlux_H
 #define __NavierStokesWithFlux_H 1
 
+#include <stdexcept>
+
 #include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
 #include <boost/signal.hpp>
@@ -101,7 +103,7 @@ public:
 
     NavierStokesWithFlux( solver_type& __s )
         :
-        
+
         _M_solver( __s ),
         _M_ndof( _M_solver->uDof().numTotalDof() ),
         _M_u_nso( _M_solver->uDof().numTotalDof() ),
@@ -110,10 +112,10 @@ public:
         _M_uprec(_M_solver->uDof().numTotalDof()),
         _M_uns1(_M_solver->uDof().numTotalDof()),
         _M_unso1(_M_solver->uDof().numTotalDof()),
-        _M_unso2(_M_solver->uDof().numTotalDof()),   
+        _M_unso2(_M_solver->uDof().numTotalDof()),
         _M_pns1(_M_solver->pDof().numTotalDof()),
         _M_pnso1(_M_solver->pDof().numTotalDof()),
-        _M_pnso2(_M_solver->pDof().numTotalDof()), 
+        _M_pnso2(_M_solver->pDof().numTotalDof()),
         _M_Qno( 0 ),
         _M_vec_lambda( _M_solver->uDof().numTotalDof() ),
         _M_lambda( 0 )
@@ -207,7 +209,7 @@ public:
 
     void timeAdvance( source_type const& __source, const Real& __time );
 
-    void iterate( int label0 , int label1 , const Real& time );
+    void iterate( const Real& time );
     //@}
 
 
@@ -220,9 +222,9 @@ private:
     void iterate_one_flux( Real const& );
 
     //! two fluxes version of the algorithm
-    void iterate_two_fluxes( int , int , Real const& );
+    void iterate_two_fluxes( Real const& );
 
-    //! one flux version of the algorithm  
+    //! one flux version of the algorithm
     void initialize_one_flux( const Function& , const Function& , Real , Real  );
 
     //! two fluxes version of the algorithm
@@ -241,17 +243,17 @@ private:
 
     //! signal at each iteration
     iteration_signal_type _M_iteration_finish_signal;
-         
+
     //! Variables ror the algorithm
     PhysVectUnknown<Vector> _M_u_nso;
     PhysVectUnknown<Vector> _M_uzero;
     PhysVectUnknown<Vector> _M_uprec;
     PhysVectUnknown<Vector> _M_uns1;
     PhysVectUnknown<Vector> _M_unso1;
-    PhysVectUnknown<Vector> _M_unso2;   
+    PhysVectUnknown<Vector> _M_unso2;
     ScalUnknown<Vector> _M_pns1;
     ScalUnknown<Vector> _M_pnso1;
-    ScalUnknown<Vector> _M_pnso2; 
+    ScalUnknown<Vector> _M_pnso2;
     ScalUnknown<Vector> _M_p_nso;
 
     //! Flux from NSo
@@ -261,7 +263,7 @@ private:
     Vector _M_vec_lambda;
 
     Real _M_lambda;
- 
+
 };
 
 template<typename NSSolver>
@@ -335,7 +337,7 @@ NavierStokesWithFlux<NSSolver>::timeAdvance( source_type const& __source, Real c
 
 template<typename NSSolver>
 void
-NavierStokesWithFlux<NSSolver>::iterate( int label0 , int label1 , const Real& time )
+NavierStokesWithFlux<NSSolver>::iterate( const Real& time )
 {
     switch ( _M_fluxes.size() )
     {
@@ -344,7 +346,14 @@ NavierStokesWithFlux<NSSolver>::iterate( int label0 , int label1 , const Real& t
             iterate_one_flux( time );
         break;
         case 2:
-            iterate_two_fluxes( label0 , label1 , time );
+            iterate_two_fluxes( time );
+            break;
+        default:
+            std::ostringstream __ex;
+            __ex << "The number of flux is invalid it is : " << _M_fluxes.size() << "\n"
+                 << "you have to specify either one flux or two fluxes for this algorithm to work\n"
+                 << "using the setFlux( label, flux ) member function\n";
+            throw std::logic_error( __ex.str() );
             break;
     }
 }
@@ -406,29 +415,31 @@ NavierStokesWithFlux<NSSolver>::iterate_one_flux( const Real& time )
 }
 template<typename NSSolver>
 void
-NavierStokesWithFlux<NSSolver>::iterate_two_fluxes( int label0 , int label1 , const Real& time )
+NavierStokesWithFlux<NSSolver>::iterate_two_fluxes( const Real& time )
 {
     Debug( 6020 ) << "starting two fluxes version at time " << time << "\n";
-    
+
+    int label0 = _M_fluxes.begin()->first;
+    int label1 = boost::next( _M_fluxes.begin() )->first;
+    Debug( 6020 ) << "imposing fluxes on BC : " << label0 << " and BC : "<< label1 << "\n";
+
     Real Q[2],Qn[2];
     Real lambda[2],v1[2],v2[2],r0[2],z[2];
     Real w1[2],w2[2],h[2][2];
     Real absr0;
-    //int label0 = _M_fluxes.begin().first;
-    //int label1 = boost::next( _M_fluxes.begin() )->first;
-    //int label0 = 2;
-    //int label1 = 3;
+
+
     UInt dim_lambda=_M_solver->uDof().numTotalDof();
     Vector vec_lambda0(dim_lambda);
     Vector vec_lambda1(dim_lambda);
-    BCVector bcvec0(vec_lambda0,dim_lambda,1); 
+    BCVector bcvec0(vec_lambda0,dim_lambda,1);
     BCVector bcvec1(vec_lambda1,dim_lambda,1);
     _M_solver->bcHandler().modifyBC(label0,bcvec0);
     _M_solver->bcHandler().modifyBC(label1,bcvec1);
 
     for (UInt i=0 ; i<_M_solver->uDof().numTotalDof(); ++i) {
         _M_uzero[i]=0.;
-    }  
+    }
 
     Q[0] = _M_fluxes[label0](time);
     Q[1] = _M_fluxes[label1](time);
@@ -474,7 +485,7 @@ NavierStokesWithFlux<NSSolver>::iterate_two_fluxes( int label0 , int label1 , co
     r0[1]=Qn[1]-Q[1];
     absr0=std::sqrt(r0[0]*r0[0]+r0[1]*r0[1]);
     v1[0]=r0[0]/absr0;
-    v1[1]=r0[1]/absr0; 
+    v1[1]=r0[1]/absr0;
 
     // NSo1
     //
@@ -515,7 +526,7 @@ NavierStokesWithFlux<NSSolver>::iterate_two_fluxes( int label0 , int label1 , co
     h[1][0]=std::sqrt(w1[0]*w1[0]+w1[1]*w1[1]);
     v2[0]=w1[0]/h[1][0];
     v2[1]=w1[1]/h[1][0];
-    
+
     // NSo2
     //
     // Changing BC
@@ -548,13 +559,13 @@ NavierStokesWithFlux<NSSolver>::iterate_two_fluxes( int label0 , int label1 , co
     w2[0]=_M_solver->flux(label0);
     w2[1]=_M_solver->flux(label1);
 
-    h[0][1]=w2[0]*v1[0]+w2[1]*v1[1];       
+    h[0][1]=w2[0]*v1[0]+w2[1]*v1[1];
     w2[0]=w2[0]-h[0][1]*v1[0];
     w2[1]=w2[1]-h[0][1]*v1[1];
-    h[1][1]=w2[0]*v2[0]+w2[1]*v2[1];       
+    h[1][1]=w2[0]*v2[0]+w2[1]*v2[1];
     w2[0]=w2[0]-h[1][1]*v2[0];
     w2[1]=w2[1]-h[1][1]*v2[1];
-    
+
     // check
     //
     std::cout << "w2 = " << w2[0] << "\n"
@@ -564,7 +575,7 @@ NavierStokesWithFlux<NSSolver>::iterate_two_fluxes( int label0 , int label1 , co
     // Update lambda
     //
     z[0]=-h[1][1]*absr0/(h[1][0]*h[0][1]-h[0][0]*h[1][1]);
-    z[1]=-h[1][0]*absr0/(h[1][0]*h[0][1]-h[0][0]*h[1][1]); 
+    z[1]=-h[1][0]*absr0/(h[1][0]*h[0][1]-h[0][0]*h[1][1]);
     lambda[0]=lambda[0]+v1[0]*z[0]+v2[0]*z[1];
     lambda[1]=lambda[1]+v1[1]*z[0]+v2[1]*z[1];
     std::cout <<"lambda0 = " << lambda[0] << "\n";
