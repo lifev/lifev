@@ -59,9 +59,9 @@ public:
     // constructors
     operFS()
         :
-        M_BCh_u(),
-        M_BCh_d(),
-        M_BCh_mesh(),
+        M_BCh_u( *new BCHandler),
+        M_BCh_d( *new BCHandler),
+        M_BCh_mesh( *new BCHandler),
         M_fluid(),
         M_solid(),
         M_dofFluidToStructure( new DofInterface3Dto3D ),
@@ -124,7 +124,7 @@ public:
 
     virtual void setDataFromGetPot( GetPot const& data );
 
-    void setBC( BCHandler const& bc_u,  BCHandler const& bc_d, BCHandler const& bc_m )
+    void setBC( BCHandler& bc_u,  BCHandler& bc_d, BCHandler& bc_m )
         {
             M_BCh_u = bc_u;
             M_BCh_d = bc_d;
@@ -138,9 +138,9 @@ public:
 
 protected:
 
-    BCHandler               M_BCh_u;
-    BCHandler               M_BCh_d;
-    BCHandler               M_BCh_mesh;
+    BCHandler               &M_BCh_u;
+    BCHandler               &M_BCh_d;
+    BCHandler               &M_BCh_mesh;
 
     fluid_type              M_fluid;
     solid_type              M_solid;
