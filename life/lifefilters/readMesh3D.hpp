@@ -68,7 +68,7 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
     UInt nVe( 0 ), nBVe( 0 ), nFa( 0 ), nBFa( 0 ), nPo( 0 ), nBPo( 0 );
     UInt nVo( 0 ), nEd( 0 ), nBEd( 0 );
     UInt i;
-    
+
     std::stringstream discardedLog;
     std::ostream& oStr = verbose ? std::cout : discardedLog;
 
@@ -121,15 +121,15 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
         nPo = nVe;
         nBPo = nBVe;
     }
-    std::cout << "#Vertices= " << nVe;
-    std::cout << " #BVertices= " << nBVe << std::endl;
-    std::cout << "#Faces= " << nFa;
-    std::cout << " #Boundary Faces= " << nBFa << std::endl;
-    std::cout << "#Edges= " << nEd;
-    std::cout << " #Boundary Edges= " << nBEd << std::endl;
-    std::cout << "#Points= " << nPo;
-    std::cout << " #Boundary Points= " << nBPo << std::endl;
-    std::cout << "#Volumes= " << nVo << std::endl;
+    std::cout << "#Vertices = "          << std::setw(10) << nVe
+              << "  #BVertices       = " << std::setw(10) << nBVe << std::endl;
+    std::cout << "#Faces    = "          << std::setw(10) << nFa
+              << "  #Boundary Faces  = " << std::setw(10) << nBFa << std::endl;
+    std::cout << "#Edges    = "          << std::setw(10) << nEd
+              << "  #Boundary Edges  = " << std::setw(10) << nBEd << std::endl;
+    std::cout << "#Points   = "          << std::setw(10) << nPo
+              << "  #Boundary Points = " << std::setw(10) << nBPo << std::endl;
+    std::cout << "#Volumes  = "          << std::setw(10) << nVo  << std::endl;
 
     // Set all basic data structure
 
@@ -401,15 +401,15 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
         ERROR_MSG( "Current version of INRIA Mesh file reader only accepts TETRA and HEXA" );
     }
 
-    std::cout << "#Vertices= " << nVe;
-    std::cout << " #BVertices= " << nBVe << std::endl;
-    std::cout << "#Faces= " << nFa;
-    std::cout << " #Boundary Faces= " << nBFa << std::endl;
-    std::cout << "#Edges= " << nEd;
-    std::cout << " #Boundary Edges= " << nBEd << std::endl;
-    std::cout << "#Points= " << nPo;
-    std::cout << " #Boundary Points= " << nBPo << std::endl;
-    std::cout << "#Volumes= " << nVo << std::endl;
+    std::cout << "#Vertices = "          << std::setw(10) << nVe
+              << "  #BVertices       = " << std::setw(10) << nBVe << std::endl;
+    std::cout << "#Faces    = "          << std::setw(10) << nFa
+              << "  #Boundary Faces  = " << std::setw(10) << nBFa << std::endl;
+    std::cout << "#Edges    = "          << std::setw(10) << nEd
+              << "  #Boundary Edges  = " << std::setw(10) << nBEd << std::endl;
+    std::cout << "#Points   = "          << std::setw(10) << nPo
+              << "  #Boundary Points = " << std::setw(10) << nBPo << std::endl;
+    std::cout << "#Volumes  = "          << std::setw(10) << nVo  << std::endl;
 
     // Set all basic data structure
 
