@@ -1,6 +1,8 @@
 Bugs fixed in 0.4.0:
 [all]
 * Banished using directives from _all_ header files (CW, CP, VM)
+* More C++ standard compliance (CP)
+* Better g++-3.4 support however still insufficient (CP)
 
 [lifefilters]
 * OpenDX filter got revamped (CW)
