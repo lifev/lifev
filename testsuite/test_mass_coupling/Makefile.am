@@ -24,7 +24,7 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-check_HEADERS = ud_functions.hpp ensight7-write.hpp
+check_HEADERS = ud_functions.hpp 
 
 check_PROGRAMS = test_mass_coupling
 test_mass_coupling_SOURCES = main.cpp 

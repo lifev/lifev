@@ -3,12 +3,12 @@
 
 // author:M. Prosi                                august/04
 #include "lifeV.hpp"
-#include "convDiffReactSolverPC.hpp" 
+#include "convDiffReactSolverPC.hpp"
 #include "dofInterface3Dto3D.hpp"
 #include "chrono.hpp"
 #include "ud_functions.hpp"
 #include "GetPot.hpp"
-#include "ensight7-write.hpp"
+#include "ensight7Writer.hpp"
 #include <vectorNorms.hpp> // - for new version or Christophe will kill me
 
 int main(int argc, char** argv)
@@ -28,7 +28,7 @@ int main(int argc, char** argv)
   Real U_0 = 15.7;
   Real L_0 = 0.67;
   Real Klag = 0.1164;
-  Real epsilon = 0.15;	
+  Real epsilon = 0.15;
 
   Real P = 2.0e-8;
   Real kappa = 0.6176;
@@ -43,12 +43,12 @@ int main(int argc, char** argv)
   BC_Handler BCh_cw(2);
 
 // ****** Concentration class lumen: cdrlumen **********************************
-  ConvDiffReactSolverPC< RegionMesh3D<LinearHexa> > 
+  ConvDiffReactSolverPC< RegionMesh3D<LinearHexa> >
      cdrlumen(data_file1, feHexaQ1, quadRuleHexa8pt, quadRuleQuad4pt, BCh_cl);
   cdrlumen.showMe();
 
 // ******** Concentration class wall: cdrwall **********************************
-  ConvDiffReactSolverPC< RegionMesh3D<LinearHexa> > 
+  ConvDiffReactSolverPC< RegionMesh3D<LinearHexa> >
      cdrwall(data_file2, feHexaQ1, quadRuleHexa8pt, quadRuleQuad4pt, BCh_cw);
   cdrwall.showMe();
 
@@ -66,21 +66,21 @@ int main(int argc, char** argv)
 //
 // Passing data from the lumen to the wall
   DofInterface3Dto3D dofLumentoWall(feHexaQ1,cdrwall.cDof(),feHexaQ1,cdrlumen.cDof());
-  dofLumentoWall.update(cdrwall.mesh(), 3, cdrlumen.mesh(), 6, tol);                              
+  dofLumentoWall.update(cdrwall.mesh(), 3, cdrlumen.mesh(), 6, tol);
   BCVector_Interface cl_coupling(cl_interface, dim_cl, dofLumentoWall);
   cl_coupling.setMixteCoef((-1.0/epsilon)*(u_filt*(((s*kappa)/2)-Klag)-P));
 // Passing data from the wall to the lumen
   DofInterface3Dto3D dofWalltoLumen(feHexaQ1,cdrlumen.cDof(),feHexaQ1,cdrwall.cDof());
-  dofWalltoLumen.update(cdrlumen.mesh(), 6, cdrwall.mesh(), 3, tol);                                 
+  dofWalltoLumen.update(cdrlumen.mesh(), 6, cdrwall.mesh(), 3, tol);
   BCVector_Interface cw_coupling(cw_interface, dim_cw, dofWalltoLumen);
   cw_coupling.setMixteCoef(P-u_filt*(1.0-((s*kappa)/2)));
 
   BCh_cl.addBC("coupling part",   6, Mixte, Scalar, cw_coupling);// Interface to wall part
   BCh_cl.addBC("C-Endothel",   2, Mixte, Scalar, c_wall);        // Permeability boundary condition
-  BCh_cl.addBC("C-InFlow", 1, Essential,  Scalar, c_inflow);     // Concentration profile 
+  BCh_cl.addBC("C-InFlow", 1, Essential,  Scalar, c_inflow);     // Concentration profile
 
   BCh_cw.addBC("C-Endothel",   3, Mixte, Scalar, cl_coupling);   // Interface to lumen
-  BCh_cw.addBC("C-Adventitia", 1, Essential,  Scalar, c_adv);    // Concentration at the adventitia 
+  BCh_cw.addBC("C-Adventitia", 1, Essential,  Scalar, c_adv);    // Concentration at the adventitia
 
 // *********** Initialization **************************************************
 // this are properties of the fluid classes, they are not included here (analytical
@@ -153,7 +153,7 @@ int main(int argc, char** argv)
 	cdrwall.iterate(time);
 
 	cw_delta=cdrwall.c()-cw_old;
-	cl_delta=cdrlumen.c()-cl_old; 
+	cl_delta=cdrlumen.c()-cl_old;
 
 	std::cout << "difference in the wall: " << maxnorm(cw_delta) << std::endl;
 	std::cout << "difference in the lumen: " << maxnorm(cl_delta) << std::endl;
@@ -164,39 +164,39 @@ int main(int argc, char** argv)
 
 
     cout <<  sqrt(cdrlumen.mesh().point(4964).x()*cdrlumen.mesh().point(4964).x()+
-                     cdrlumen.mesh().point(4964).y()*cdrlumen.mesh().point(4964).y()) 
+                     cdrlumen.mesh().point(4964).y()*cdrlumen.mesh().point(4964).y())
             << ", " << cdrlumen.c()(4964) << endl;
     cout <<  sqrt(cdrlumen.mesh().point(4971).x()*cdrlumen.mesh().point(4971).x()+
-                     cdrlumen.mesh().point(4971).y()*cdrlumen.mesh().point(4971).y()) 
+                     cdrlumen.mesh().point(4971).y()*cdrlumen.mesh().point(4971).y())
             << ", " << cdrlumen.c()(4971) << endl;
     cout <<  sqrt(cdrlumen.mesh().point(4978).x()*cdrlumen.mesh().point(4978).x()+
-                     cdrlumen.mesh().point(4978).y()*cdrlumen.mesh().point(4978).y()) 
+                     cdrlumen.mesh().point(4978).y()*cdrlumen.mesh().point(4978).y())
             << ", " << cdrlumen.c()(4978) << endl;
     cout <<  sqrt(cdrlumen.mesh().point(4985).x()*cdrlumen.mesh().point(4985).x()+
-                     cdrlumen.mesh().point(4985).y()*cdrlumen.mesh().point(4985).y()) 
+                     cdrlumen.mesh().point(4985).y()*cdrlumen.mesh().point(4985).y())
             << ", " << cdrlumen.c()(4985) << endl;
     cout <<  sqrt(cdrlumen.mesh().point(4992).x()*cdrlumen.mesh().point(4992).x()+
-                     cdrlumen.mesh().point(4992).y()*cdrlumen.mesh().point(4992).y()) 
+                     cdrlumen.mesh().point(4992).y()*cdrlumen.mesh().point(4992).y())
             << ", " << cdrlumen.c()(4992) << endl;
     for(int i=0; i<4;i++){
     cout <<  sqrt(cdrlumen.mesh().point(5234+i*9).x()*cdrlumen.mesh().point(5234+i*9).x()+
-                     cdrlumen.mesh().point(5234+i*9).y()*cdrlumen.mesh().point(5234+i*9).y()) 
+                     cdrlumen.mesh().point(5234+i*9).y()*cdrlumen.mesh().point(5234+i*9).y())
 	 << ", " << cdrlumen.c()(5234+i*9) << endl;}
     cout <<  sqrt(cdrlumen.mesh().point(4999).x()*cdrlumen.mesh().point(4999).x()+
-                     cdrlumen.mesh().point(4999).y()*cdrlumen.mesh().point(4999).y()) 
+                     cdrlumen.mesh().point(4999).y()*cdrlumen.mesh().point(4999).y())
             << ", " << cdrlumen.c()(4999) << endl;
-    for(int i=0; i<9;i++){	
+    for(int i=0; i<9;i++){
     cout <<  sqrt(cdrlumen.mesh().point(5597+i*9).x()*cdrlumen.mesh().point(5597+i*9).x()+
-                     cdrlumen.mesh().point(5597+i*9).y()*cdrlumen.mesh().point(5597+i*9).y()) 
+                     cdrlumen.mesh().point(5597+i*9).y()*cdrlumen.mesh().point(5597+i*9).y())
 	 << ", " << cdrlumen.c()(5597+i*9) << endl;}
     cout <<  sqrt(cdrlumen.mesh().point(5006).x()*cdrlumen.mesh().point(5006).x()+
-                     cdrlumen.mesh().point(5006).y()*cdrlumen.mesh().point(5006).y()) 
+                     cdrlumen.mesh().point(5006).y()*cdrlumen.mesh().point(5006).y())
             << ", " << cdrlumen.c()(5006) << endl;
 
 
     for(int i=0; i<21;i++){
        cout <<  sqrt(cdrwall.mesh().point(19+777*3+37*i).x()*cdrwall.mesh().point(19+777*3+37*i).x()+
-                     cdrwall.mesh().point(19+777*3+37*i).y()*cdrwall.mesh().point(19+777*3+37*i).y()) 
+                     cdrwall.mesh().point(19+777*3+37*i).y()*cdrwall.mesh().point(19+777*3+37*i).y())
             << ", " << cdrwall.c()(19+777*3+37*i) << endl;}
 
 
@@ -217,8 +217,8 @@ int main(int argc, char** argv)
     Resfile_cw.close();
 
 // ************* creating Ensight output file **********************************
-// TODO: creatig outputfiles for two domains 
+// TODO: creatig outputfiles for two domains
   }
-  
+
   return 0;
 }

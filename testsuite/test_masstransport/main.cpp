@@ -8,7 +8,7 @@
 #include "chrono.hpp"
 #include "ud_functions.hpp"
 #include "GetPot.hpp"
-#include "ensight7-write.hpp"
+#include "ensight7Writer.hpp"
 
 int main(int argc, char** argv)
 {

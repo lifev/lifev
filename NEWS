@@ -1,10 +1,34 @@
 Bugs fixed in 0.3.90:
+[lifefilters]
 * OpenDX filter got revamped (CW)
 
+[testsuite]
+* Avoid multiple copies of classes/files around (CP)
+
 New in 0.3.90:
+[configure]
 * Added --with-petsc=<top level petsc directory> configure option (CP)
 * Added support for automake 1.9 (CP)
+
+[lifecore]
+* Added an implementation of the Singleton design pattern (CP)
+
+[lifearray]
+* Added helpers for the Fitzhugh-Nagumo solver (JFG)
+
+[lifealg]
+* Added support for petsc 2.2.0/2.2.1 (CW & CP)
+
+[lifefem]
+* Added helpers for the Fitzhugh-Nagumo solver (JFG)
+
+[lifesolver]
 * Got rid of NavierStokesHandler_miguel.hpp (CW)
+
+[lifefilters]
+* Added Ensight7 writer (MP)
+
+[testsuite]
 * Added test case for coupled mass transport solvers (MP)
 
 
