@@ -388,7 +388,7 @@ void wr_opendx_header( std::string fname, const RegionMesh& mesh, const Dof& dof
   vector. Alain 21/01/02.
 */
 template <typename VectorType>
-void wr_opendx_scalar( std::string fname, std::string name, VectorType U )
+void wr_opendx_scalar( std::string fname, std::string name, VectorType const & U )
 {
     unsigned int i;
     char quotes = '"';
@@ -407,11 +407,7 @@ void wr_opendx_scalar( std::string fname, std::string name, VectorType U )
     ofile << "data follows" << std::endl;
 
     for ( i = 0;i < U.size();++i )
-    {
-        if ( fabs( U[ i ] ) < EPS_DX )
-            U[ i ] = 0. ; // needed due to dx bugs
-        ofile << U[ i ] << std::endl;
-    }
+        fabs(U[i]) < EPS_DX ? ofile << 0. << std::endl : ofile << U[i] << std::endl;
 
     ofile << "attribute " << quotes << "dep" << quotes << " string " << quotes
     << "positions" << quotes << std::endl;
