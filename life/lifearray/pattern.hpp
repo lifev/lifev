@@ -18,7 +18,7 @@
 */
 /*----------------------------------------------------------------------*
 |
-| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.3 2004-06-22 13:49:41 prudhomm Exp $
+| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.4 2004-06-22 14:42:33 simone Exp $
 |
 |
 | #Version  0.1 Experimental   07/7/00. Luca Formaggia & Alessandro Veneziani  |
@@ -567,8 +567,8 @@ public:
   UInt nRows() const;
   UInt nCols() const;
   UInt nbPattern() const;
-  Diff_t patternFirst(Diff_t const i) const; //Numbering from 0
-  Diff_t patternSecond(Diff_t const i) const; //Numbering from 0
+  UInt patternFirst(UInt const i) const; //Numbering from 0
+  UInt patternSecond(UInt const i) const; //Numbering from 0
 };
 ///////////////////////////////////////////////////
 ///
@@ -606,7 +606,7 @@ public:
   // make a diagonal pattern for vectorial problem
   void makeDiagPattern(PATTERN & ex_patt);
 
-  inline pair<Diff_t,Diff_t> nBlocks() const; // Number of blocks (rows and columns)
+  inline pair<UInt,UInt> nBlocks() const; // Number of blocks (rows and columns)
 
   inline UInt nRows(Diff_t const m, Diff_t const n) const; // Number of rows in block (m,n)
   inline UInt nCols(Diff_t const m, Diff_t const n) const;
@@ -632,7 +632,7 @@ public:
   inline       PATTERN * block_ptr(Diff_t const m, Diff_t const n); // Pointer to a a local pattern
   inline const PATTERN * block_ptr(Diff_t const m, Diff_t const n) const; // Pointer to a a local pattern
 
-  inline pair<Diff_t,Diff_t> blockOffset(Diff_t const m, Diff_t const n) const;// The row/col offsets of the block
+  inline pair<UInt,UInt> blockOffset(UInt const m, UInt const n) const;// The row/col offsets of the block
   pair<Diff_t,Diff_t> locateElBlock(Index_t const i_g, Index_t const j_g) const;
   //  Gives the block numbering corresponding to the  GLOBAL matrix index (i_g,j_g) Returns
   // (BROWS,BCOLS) if element not found
@@ -658,7 +658,7 @@ public:
   void buildZeroPattern(Diff_t const m, Diff_t const n,UInt const nrows, UInt const ncols);
 
   // This just links the block to an existing pattern (Viewer paradigm)
-  void linkBlockToPattern(Diff_t const m, Diff_t const n,PATTERN & pattern);
+  void linkBlockToPattern(UInt const m, UInt const n,PATTERN & pattern);
 
   // These insetade create a pattern, by relying on the local pattern constructors
   template <typename DOF1, typename DOF2> PATTERN * buildBlock(Diff_t m, Diff_t n, DOF1 dof1, DOF2 dof2);
@@ -2235,7 +2235,7 @@ block_ptr(Diff_t const m, Diff_t const n) const{
 template
 <UInt BROWS, UInt BCOLS, typename PATTERN>
 inline
-pair<PatternDefs::Diff_t,PatternDefs::Diff_t>
+pair<UInt,UInt>
 MixedPattern<BROWS,BCOLS,PATTERN>::blockOffset(UInt const m, UInt const n) const{
   ASSERT_PRE( m<BROWS && m>=0, " Invalid block row address");
   ASSERT_PRE( n<BCOLS && n>=0, " Invalid block column address");
