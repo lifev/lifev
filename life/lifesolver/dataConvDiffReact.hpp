@@ -81,7 +81,7 @@ template <typename Mesh>
 DataConvDiffReact<Mesh>::
 DataConvDiffReact( const GetPot& dfile ) :
         DataMesh<Mesh>( dfile, "masstransport/discretization" ),
-        DataTime( dfile, "fluid/discretization" )
+        DataTime( dfile, "masstransport/discretization" )
 {
 
     // physics
