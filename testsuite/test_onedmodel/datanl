@@ -4,7 +4,7 @@
 #-------------------------------------------------
 
 [boundcond]
-test_case	= 3	# test case for boundary conditions
+test_case	= 4	# test case for boundary conditions
 
 [parameters]
 alphaCor	= 3.0		# coriolis coeff
@@ -14,7 +14,7 @@ Kr	= 6.0		# friction parameter (source term)
 
 [time]
 timebeg	 = 0.0		# inittime
-timeend	 = .15		# endtime
+timeend	 = 1.		# endtime
 timestep = 1e-4		# timestep		
 
 [discretization]

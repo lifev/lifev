@@ -563,6 +563,9 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
   //! result of the 2x2 linear system to be solved at each side
   Vec2D resBC;
 
+  //! bc values of U at one side
+  Vec2D UBC_data;
+
   //! quasi linear source term
   Vec2D qlSource;
 
@@ -572,7 +575,7 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
   Real  boundaryPoint, internalBdPoint;
 
   switch ( _M_test_case ) {
-  case 1: //! simple linear test case: both eigenvalues are > 0
+  case 1: //! both eigenvalues are > 0
     // *******************************************************
     //! left BC. 
     // *******************************************************
@@ -672,7 +675,7 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
 
     _M_bcDirRight = resBC;
     break;
-  case 2: //! simple linear test case: both eigenvalues are < 0
+  case 2: //! both eigenvalues are < 0
     // *******************************************************
     //! left BC. 
     // *******************************************************
@@ -772,7 +775,7 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
     _M_bcDirRight = resBC;
     break;
 
-  case 3: //! simple linear test case: eig1 > 0 and eig2 < 0.
+  case 3: //! eig1 > 0 and eig2 < 0.
     // *******************************************************
     //! left BC. 
     // *******************************************************
@@ -948,6 +951,210 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
     rhsBC.first -= _M_time_step * dot( left_eigvec1 , qlSource );
 
     resBC = _solveLinearSyst2x2( left_eigvec1, line2_id, rhsBC );
+
+    _M_bcDirRight = resBC;
+    break;
+
+
+  case 4: //! eig1 > 0 and eig2 < 0.
+    /*! In this test case, we assume that the 2 values (U1 and U2) are given
+        at each boundary. We use these 2 values to compute the incoming characteristics
+	and set it as the boundary condition.
+	The second boundary condition remains the compatibility condition.
+	Once again, we treat the problem explicitly after linearisation.
+    */
+    // *******************************************************
+    //! left BC. 
+    // *******************************************************
+    //-------------------------------------
+    //! Dirichlet bc.
+    // rhsBC.first = _M_oneDParam.Area0(0) * ( 1 + 0.1 * std::sin( 2 * M_PI * time_val ) );
+    if( time_val <= 5e-2 ){
+      UBC_data.first = _M_oneDParam.Area0( leftDof ) * 
+	( 1 + 20000 * _M_oneDParam.DensityRho() / _M_oneDParam.Beta0( leftDof ) );
+    } else {
+      UBC_data.first = _M_oneDParam.Area0( leftDof );
+    }
+    UBC_data.second = 0;
+
+    
+    //-------------------------------------
+    //! Compute the eigen values and vectors
+    boundaryPoint   = leftedge.pt1().x(); //!< point on the boundary (on the left of the edge!)
+    internalBdPoint = leftedge.pt2().x(); //!< neighboring point (internal)
+
+    //! values of U on the boundary
+    U_boundary   = Vec2D ( _M_U1_thistime( leftDof ) , 
+			   _M_U2_thistime( leftDof ) );
+    //! values of U on the neighboring node of the boundary point 
+    U_internalBd = Vec2D ( _M_U1_thistime( leftDof + 1 ) , 
+			   _M_U2_thistime( leftDof + 1 ) );
+
+    //! compute the eigenvalues/eigenvectors of the flux jacobian (computed on the boundary point)
+    _M_fluxFun.jacobian_EigenValues_Vectors(U_boundary.first, U_boundary.second, 
+					    eigval1, eigval2, 
+					    left_eigvec1.first, left_eigvec1.second, 
+					    left_eigvec2.first, left_eigvec2.second, 
+					    leftDof);
+
+    /*! interpolate the eigenvectors
+    //wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+    //! compute the eigenvalues/eigenvectors of the flux jacobian (computed at the internal bd point)
+    _M_fluxFun.jacobian_EigenValues_Vectors(U_internalBd.first, U_internalBd.second, 
+					    eigval1_internalBd, eigval2_internalBd, 
+					    left_eigvec1_internalBd.first, left_eigvec1_internalBd.second, 
+					    left_eigvec2_internalBd.first, left_eigvec2_internalBd.second, 
+					    leftDof + 1);
+
+    left_eigvec2_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint, 
+					      _M_time_step, eigval2, 
+					      left_eigvec2, left_eigvec2_internalBd);
+       
+    std::cout << "\nEigenVector2 " << left_eigvec2.first << " " << left_eigvec2.second << std::endl;
+    std::cout << "EigenVector2 charac " << left_eigvec2_charact_pt.first 
+	      << " " << left_eigvec2_charact_pt.second << std::endl;
+   
+    left_eigvec2.first  = left_eigvec2_charact_pt.first;
+    left_eigvec2.second = left_eigvec2_charact_pt.second;
+    //wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+    */
+   
+    //------------------------------------------------------------
+
+    if ( _M_verbose > 1 ) 
+      std::cout << "\nEigenValue 1 " << eigval1 << " EigenValue 2 " << eigval2 << std::endl;
+
+    ASSERT( eigval1 > 0. &&  eigval2 < 0.  ,
+	    "The eigenvalues do not have the expected signs.");
+
+
+    //-------------------------------------
+    //! Dirichlet bc. (treated through the incoming characteristics)
+    //! rhsBC1 = left_eigvec1 dot UBC_data
+    rhsBC.first = dot( left_eigvec1 , UBC_data );
+
+    
+    //-------------------------------------
+    //!compatibility condition
+    //-------------------------------------
+    //! second characteristics    
+    //! interpolation of U at the foot of the 2nd characteristics
+    U_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint, 
+				   _M_time_step, eigval2, 
+				   U_boundary, U_internalBd);
+    
+    //! rhsBC2 = left_eigvec2 dot U(tn, z = charact_pt2)
+    rhsBC.second = dot( left_eigvec2 , U_charact_pt );
+    
+    //! take into account the (quasi linear) source term
+    /*!BEWARE: HERE THE PARAMETERS ARE TAKEN AT rightDof
+               THEY SHOULD BE TAKEN AT THE CHARACTERISTICS!!
+    */ 
+    qlSource.first  = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+						     1, leftDof);
+    qlSource.second = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+						     2, leftDof);
+
+    //! rhsBC2 = rhsBC2 - deltaT * left_eigvec2 dot qlSource(tn, z = charact_pt2)
+    rhsBC.second -= _M_time_step * dot( left_eigvec2 , qlSource );
+
+    /*!-------------------------------------
+      solve the linear system Theta_left * U(tn+1, z=z_left) = rhsBC
+      i.e.
+        [ left_eigvec1^T ;  [U1(tn+1,z_left);   = [ left_eigvec1^T * UBC_data;
+	  left_eigvec2^T ]   U2(tn+1,z_left) ]      left_eigvec2^T * U(tn, charact_pt2) - deltaT * left_eigvec2^T * qlSource(tn, charact_pt2)]
+      -------------------------------------
+     */
+    resBC = _solveLinearSyst2x2( left_eigvec1, left_eigvec2, rhsBC );
+
+    _M_bcDirLeft = resBC;
+
+
+    // *******************************************************
+    //! right BC. 
+    // *******************************************************
+    //-------------------------------------
+    //! Dirichlet bc.
+    UBC_data.first = _M_oneDParam.Area0( leftDof );
+    UBC_data.second = 0.;
+
+    //-------------------------------------
+    //! Compute the eigen values and vectors
+    boundaryPoint   = rightedge.pt2().x(); //!< point on the boundary (on the right of the edge!)
+    internalBdPoint = rightedge.pt1().x(); //!< neighboring point (internal)
+
+    //! values of U on the boundary
+    U_boundary   = Vec2D ( _M_U1_thistime( rightDof ) , 
+			   _M_U2_thistime( rightDof ) );
+    //! values of U on the neighboring node of the boundary point 
+    U_internalBd = Vec2D ( _M_U1_thistime( rightDof - 1 ) , 
+			   _M_U2_thistime( rightDof - 1 ) );
+
+    //! compute the eigenvalues/eigenvectors of the flux jacobian (computed on the boundary point)
+    _M_fluxFun.jacobian_EigenValues_Vectors(U_boundary.first, U_boundary.second, 
+					    eigval1, eigval2, 
+					    left_eigvec1.first, left_eigvec1.second, 
+					    left_eigvec2.first, left_eigvec2.second, 
+					    rightDof);
+    /*! interpolate the eigenvectors
+    //wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+    //! compute the eigenvalues/eigenvectors of the flux jacobian (computed at the internal bd point)
+    _M_fluxFun.jacobian_EigenValues_Vectors(U_internalBd.first, U_internalBd.second, 
+					    eigval1_internalBd, eigval2_internalBd, 
+					    left_eigvec1_internalBd.first, left_eigvec1_internalBd.second, 
+					    left_eigvec2_internalBd.first, left_eigvec2_internalBd.second, 
+					    rightDof - 1);
+
+    left_eigvec1_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint, 
+					      _M_time_step, eigval1, 
+					      left_eigvec1, left_eigvec1_internalBd);
+       
+    std::cout << "\nEigenVector1 " << left_eigvec1.first << " " << left_eigvec1.second << std::endl;
+    std::cout << "EigenVector1 charac " << left_eigvec1_charact_pt.first 
+	      << " " << left_eigvec1_charact_pt.second << std::endl;
+   
+    left_eigvec1.first  = left_eigvec1_charact_pt.first;
+    left_eigvec1.second = left_eigvec1_charact_pt.second;
+    //wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+    */
+
+    if ( _M_verbose > 1 ) 
+      std::cout << "EigenValue 1 " << eigval1 << " EigenValue 2 " << eigval2 << std::endl;
+    
+
+    ASSERT( eigval1 > 0. && eigval2 < 0. ,
+	    "The eigenvalues do not have the expected signs.");
+
+    //-------------------------------------
+    //! Dirichlet bc. (treated through the incoming characteristics)
+    //! rhsBC2 = left_eigvec2 dot UBC_data
+    rhsBC.second = dot( left_eigvec2 , UBC_data );
+
+    //-------------------------------------
+    //!compatibility condition
+    //-------------------------------------
+    //! first characteristics    
+    //! interpolation of U at the foot of the 1rst characteristics
+    U_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint, 
+				   _M_time_step, eigval1, 
+				   U_boundary, U_internalBd);
+
+    //! rhsBC1 = left_eigvec1 dot U(tn, z = charact_pt1)
+    rhsBC.first = dot( left_eigvec1 , U_charact_pt );
+
+    //! take into account the (quasi linear) source term
+    /*!BEWARE: HERE THE PARAMETERS ARE TAKEN AT rightDof
+               THEY SHOULD BE TAKEN AT THE CHARACTERISTICS!!
+    */ 
+    qlSource.first  = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+						     1, rightDof);
+    qlSource.second = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+						     2, rightDof);
+
+    //! rhsBC1 = rhsBC1 - deltaT * left_eigvec1 dot qlSource(tn, z = charact_pt1)
+    rhsBC.first -= _M_time_step * dot( left_eigvec1 , qlSource );
+
+    resBC = _solveLinearSyst2x2( left_eigvec1, left_eigvec2, rhsBC );
 
     _M_bcDirRight = resBC;
     break;
