@@ -377,6 +377,17 @@ namespace LifeV {
 
     template<typename MeshType>
     void HyperbolicSolverIP<MeshType>::compute_M_A_steady() {
+        /*
+          Local contributions from the stabilization term. WARNING: only
+          works if _M_fe and fe2 are of the same type
+        */
+
+        ElemMat elmat11(_M_fe.nbNode, 1, 1);
+        ElemMat elmat12(_M_fe.nbNode, 1, 1);
+        ElemMat elmat21(_M_fe.nbNode, 1, 1);
+        ElemMat elmat22(_M_fe.nbNode, 1, 1);
+
+        // Local contributions from other terms
         ElemMat elmat(_M_fe.nbNode, 1, 1);
         ElemVec elvec(_M_fe.nbNode, NDIM);
 
@@ -401,7 +412,10 @@ namespace LifeV {
         ElemVec beta( _M_fe_bd.nbNode, nDimensions );
 
         for(UInt i = _M_mesh.numBFaces() + 1; i <= _M_mesh.numFaces(); i++){
-            elmat.zero();
+            elmat11.zero();
+            elmat12.zero();
+            elmat21.zero();
+            elmat22.zero();
 
             UInt ad_first = _M_mesh.faceList(i).ad_first();
             UInt ad_second = _M_mesh.faceList(i).ad_second();
@@ -430,9 +444,15 @@ namespace LifeV {
                 }
             }
 
-            ipstab_bagrad(stab_coeff, elmat, _M_fe, fe2, beta, _M_fe_bd, 0, 0);
+            ipstab_bagrad(stab_coeff, elmat11, _M_fe, _M_fe, beta, _M_fe_bd, 0, 0);
+            ipstab_bagrad(stab_coeff, elmat12, _M_fe, fe2, beta, _M_fe_bd, 0, 0);
+            ipstab_bagrad(stab_coeff, elmat21, fe2, _M_fe, beta, _M_fe_bd, 0, 0);
+            ipstab_bagrad(stab_coeff, elmat22, fe2, fe2, beta, _M_fe_bd, 0, 0);
 
-            assemb_mat(_M_A_steady, elmat, _M_fe, fe2, _M_dof);
+            assemb_mat(_M_A_steady, elmat11, _M_fe, _M_fe, _M_dof);
+            assemb_mat(_M_A_steady, elmat12, _M_fe, fe2, _M_dof);
+            assemb_mat(_M_A_steady, elmat21, fe2, _M_fe, _M_dof);
+            assemb_mat(_M_A_steady, elmat22, fe2, fe2, _M_dof);
         }
     }
 
