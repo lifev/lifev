@@ -39,32 +39,32 @@
 #include "bcManage.hpp"
 #include "bcHandler.hpp"
 #include "chrono.hpp"
-#include "dataAztec.hpp"
+#include "SolverAztec.hpp"
 #include "dataNewton.hpp"
 #include "newton.hpp"
 
 namespace LifeV
 {
 
-/*!
-  \class VenantKirchhofSolver
+  /*!
+    \class VenantKirchhofSolver
+    
+    \brief
+    This class solves the linear elastodynamics equations for a (only linear right now)
+    St. Venant-Kirchoff material
+    
 
-  \brief
-  This class solves the linear elastodynamics equations for a (only linear right now)
-  St. Venant-Kirchoff material
-
-
-*/
-template <typename Mesh>
-class VenantKirchhofSolver:
-            public ElasticStructureHandler<Mesh>, public DataNewton
-{
-
-public:
-
+  */
+  template <typename Mesh>
+  class VenantKirchhofSolver:
+    public ElasticStructureHandler<Mesh>, public DataNewton
+  {
+    
+  public:
+    
     typedef typename ElasticStructureHandler<Mesh>::Function Function;
     typedef typename ElasticStructureHandler<Mesh>::source_type source_type;
-
+    
     //! Constructor
     /*!
       \param data_file GetPot data file
@@ -95,7 +95,7 @@ public:
     //! BCHandler getter and setter
 
     BCHandler const & BC_solid() const {return _BCh;}
-    void setBCSolid(const BCHandler &_BCd) {_BCh = _BCd;}
+    void setBCSolid(const BCHandler & BCd) {_BCh = BCd;}
     //! residual getter
     Vector& residual() {return _residual_d;}
 
@@ -107,17 +107,20 @@ public:
 
     //! solves the tangent problem for newton iterations
     void solveJac( Vector &step, const Vector& res, double& linear_rel_tol);
-//    void solveJac( const Vector& res, double& linear_rel_tol, Vector &step);
+    //    void solveJac( const Vector& res, double& linear_rel_tol, Vector &step);
     //! solves the tangent problem with custom BC
-//    void solveJac( const Vector& res, double& linear_rel_tol, Vector &step, BCHandler &_BCd );
-    void solveJac( Vector &step, const Vector& res, double& linear_rel_tol, BCHandler &_BCd );
+    void solveJac( Vector &step, const Vector& res, double& linear_rel_tol, BCHandler &BCd );
     void solveLin( Vector &step, const Vector& res, double linear_rel_tol);
-
+    
     //! evaluates residual for newton interations
     void evalResidual( Vector &res, const Vector& sol, int iter);
-
+    
     void setSourceTerm( source_type const& __s ) { _M_source = __s; }
     source_type const& sourceTerm() const { return _M_source; }
+    
+    Vector& rhsWithoutBC() { return _rhsWithoutBC; }
+
+
 
 private:
 
@@ -157,19 +160,15 @@ private:
     //! right  hand  side velocity
     PhysVectUnknown<Vector> _rhs_w;
 
-
     //! right  hand  side
     PhysVectUnknown<Vector> _rhsWithoutBC;
 
     //! right  hand  side
     PhysVectUnknown<Vector> _f;
 
+      
     //! residual
     PhysVectUnknown<Vector> _residual_d;
-
-    //! data for solving tangent problem with aztec
-    DataAztec _dataAztec;
-
 
     //! updates the tangent matrix for newton iterations
 
@@ -184,6 +183,10 @@ private:
     UInt _recur;
 
     source_type _M_source;
+
+    //! data for solving tangent problem with aztec
+    SolverAztec _linearSolver;
+
 };
 
 
@@ -214,8 +217,7 @@ VenantKirchhofSolver( const GetPot& data_file, const RefFE& refFE, const QuadRul
         _rhsWithoutBC( this->_dim ),
         _f( this->_dim ),
         _residual_d( this->_dim ),
-        _dataAztec( data_file, "solid/aztec" ),
-        _out_iter( "out_iter_solid" ),
+	_out_iter( "out_iter_solid" ),
         _out_res( "out_res_solid" ),
         _time( 0.0 ),
         _recur( 0 )
@@ -224,6 +226,9 @@ VenantKirchhofSolver( const GetPot& data_file, const RefFE& refFE, const QuadRul
     std::cout << std::endl;
     std::cout << "O-  Displacement unknowns: " << this->_dim << std::endl;
     std::cout << "O-  Computing mass and linear strain matrices... ";
+
+    _linearSolver.setOptionsFromGetPot( data_file, "solid/aztec" );
+    _linearSolver.setMatrix( _J );
 
     Chrono chrono;
     chrono.start();
@@ -360,7 +365,7 @@ timeAdvance( source_type const& source, const Real& time )
     _rhsWithoutBC -= _K * this->_d;
 
     _rhs_w = ( 2.0 / this->_dt ) * this->_d + _w;
-
+ 
     std::cout << std::endl;
     std::cout << "_rhs_w norm = " << norm_2(_rhs_w) << std::endl;
     std::cout << "    _w norm = " << norm_2(_w) << std::endl;
@@ -601,56 +606,13 @@ solveJac( Vector &step, const Vector& res, double& linear_rel_tol)
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
-    // AZTEC specifications for the first system
-    int data_org[ AZ_COMM_SIZE ];   // data organisation for C
-    int proc_config[ AZ_PROC_SIZE ]; // Processor information:
-    int options[ AZ_OPTIONS_SIZE ]; // Array used to select solver options.
-    double params[ AZ_PARAMS_SIZE ];   // User selected solver paramters.
-    double status[ AZ_STATUS_SIZE ];   // Information returned from AZ_solve()
-    // indicating success or failure.
-    AZ_set_proc_config( proc_config, AZ_NOT_MPI );
+    _linearSolver.setRecursionLevel( _recur );
 
-    //AZTEC matrix and preconditioner
-    AZ_MATRIX *J;
-    AZ_PRECOND *prec_J;
-
-    int N_eq = 3 * this->_dim; // number of DOF for each component
-    // data_org assigned "by hands" while no parallel computation is performed
-    data_org[ AZ_N_internal ] = N_eq;
-    data_org[ AZ_N_border ] = 0;
-    data_org[ AZ_N_external ] = 0;
-    data_org[ AZ_N_neigh ] = 0;
-    data_org[ AZ_name ] = 0;
-
-    // create matrix and preconditionner
-    J = AZ_matrix_create( N_eq );
-    prec_J = AZ_precond_create( J, AZ_precondition, NULL );
-
-    AZ_set_MSR( J, ( int* ) _pattK.giveRaw_bindx(),
-                ( double* ) _J.giveRaw_value(),
-                data_org, 0, NULL, AZ_LOCAL );
-
-    _dataAztec.aztecOptionsFromDataFile( options, params );
-
-    options[ AZ_recursion_level ] = _recur;
-
-
-    //keep  factorisation and preconditioner reused in my_matvec
-    // options_i[AZ_keep_info]= 1;
-
-    //params[AZ_tol]       = linear_rel_tol;
-
-    std::cout << "  o-  Solving system...  ";
+    std::cout << "  o-  Solving system... "<< std::flush;
     chrono.start();
-    AZ_iterate( &step[ 0 ], _f.giveVec(), options, params, status,
-                proc_config, J, prec_J, NULL );
-    chrono.stop();
+    _linearSolver.solve( step , _f);
+      chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
-
-    //--options[AZ_recursion_level];
-
-    AZ_matrix_destroy( &J );
-    AZ_precond_destroy( &prec_J );
 
 }
 
@@ -659,8 +621,7 @@ solveJac( Vector &step, const Vector& res, double& linear_rel_tol)
 
 template <typename Mesh>
 void VenantKirchhofSolver<Mesh>::
-//solveJac(const Vector& res, double& linear_rel_tol, Vector &step, BCHandler &_BCd )
-solveJac(Vector &step, const Vector& res, double& linear_rel_tol, BCHandler &_BCd )
+solveJac(Vector &step, const Vector& res, double& linear_rel_tol, BCHandler &BCd )
 {
 
     Chrono chrono;
@@ -674,67 +635,20 @@ solveJac(Vector &step, const Vector& res, double& linear_rel_tol, BCHandler &_BC
     chrono.start();
 
     // BC manage for the velocity
-    if ( !_BCd.bdUpdateDone() )
-        _BCd.bdUpdate( _mesh, _feBd, this->_dof );
+    if ( !BCd.bdUpdateDone() )
+        BCd.bdUpdate( _mesh, _feBd, this->_dof );
 
-//    _BCd.showMe();
-
-    bcManageMatrix( _J, _mesh, this->_dof, _BCd, _feBd, tgv );
+    bcManageMatrix( _J, _mesh, this->_dof, BCd, _feBd, tgv );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
-//    _J.spy("Jacobian");
-
-    // AZTEC specifications for the first system
-    int data_org[ AZ_COMM_SIZE ];   // data organisation for C
-    int proc_config[ AZ_PROC_SIZE ]; // Processor information:
-    int options[ AZ_OPTIONS_SIZE ]; // Array used to select solver options.
-    double params[ AZ_PARAMS_SIZE ];   // User selected solver paramters.
-    double status[ AZ_STATUS_SIZE ];   // Information returned from AZ_solve()
-    // indicating success or failure.
-    AZ_set_proc_config( proc_config, AZ_NOT_MPI );
-
-    //AZTEC matrix and preconditioner
-    AZ_MATRIX *J;
-    AZ_PRECOND *prec_J;
-
-    int N_eq = 3 * this->_dim; // number of DOF for each component
-    // data_org assigned "by hands" while no parallel computation is performed
-    data_org[ AZ_N_internal ] = N_eq;
-    data_org[ AZ_N_border ] = 0;
-    data_org[ AZ_N_external ] = 0;
-    data_org[ AZ_N_neigh ] = 0;
-    data_org[ AZ_name ] = 0;
-
-    // create matrix and preconditionner
-    J = AZ_matrix_create( N_eq );
-    prec_J = AZ_precond_create( J, AZ_precondition, NULL );
-
-    AZ_set_MSR( J, ( int* ) _pattK.giveRaw_bindx(), ( double* ) _J.giveRaw_value(), data_org, 0, NULL, AZ_LOCAL );
-
-    _dataAztec.aztecOptionsFromDataFile( options, params );
-
-    options[ AZ_recursion_level ] = _recur;
-
-
-    //keep  factorisation and preconditioner reused in my_matvec
-    // options_i[AZ_keep_info]= 1;
-
-    //params[AZ_tol]       = linear_rel_tol;
-
-    std::cout << "  o-  Solving system...  ";
+    _linearSolver.setRecursionLevel( _recur );
+    
+    std::cout << "  o-  Solving system... "<< std::flush;
     chrono.start();
-    AZ_iterate( &step[ 0 ], _f.giveVec(), options, params, status,
-                proc_config, J, prec_J, NULL );
+    _linearSolver.solve( step , _f );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
-
-    //--options[AZ_recursion_level];
-
-    AZ_matrix_destroy( &J );
-    AZ_precond_destroy( &prec_J );
-
-//    bcManageMatrix( _J, _mesh, this->_dof, _BCh, _feBd, tgv );
 }
 
 
@@ -760,59 +674,16 @@ solveLin( Vector &step, const Vector& res, double linear_rel_tol)
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
-    // AZTEC specifications for the first system
-    int data_org[ AZ_COMM_SIZE ];   // data organisation for C
-    int proc_config[ AZ_PROC_SIZE ]; // Processor information:
-    int options[ AZ_OPTIONS_SIZE ]; // Array used to select solver options.
-    double params[ AZ_PARAMS_SIZE ];   // User selected solver paramters.
-    double status[ AZ_STATUS_SIZE ];   // Information returned from AZ_solve()
-    // indicating success or failure.
-    AZ_set_proc_config( proc_config, AZ_NOT_MPI );
-
-    //AZTEC matrix and preconditioner
-    AZ_MATRIX *J;
-    AZ_PRECOND *prec_J;
-
-    int N_eq = 3 * this->_dim; // number of DOF for each component
-    // data_org assigned "by hands" while no parallel computation is performed
-    data_org[ AZ_N_internal ] = N_eq;
-    data_org[ AZ_N_border ] = 0;
-    data_org[ AZ_N_external ] = 0;
-    data_org[ AZ_N_neigh ] = 0;
-    data_org[ AZ_name ] = 0;
-
-    // create matrix and preconditionner
-    J = AZ_matrix_create( N_eq );
-    prec_J = AZ_precond_create( J, AZ_precondition, NULL );
-
-    AZ_set_MSR( J, ( int* ) _pattK.giveRaw_bindx(),
-                ( double* ) _J.giveRaw_value(),
-                data_org, 0, NULL, AZ_LOCAL );
-
-    _dataAztec.aztecOptionsFromDataFile( options, params );
-
-    options[ AZ_recursion_level ] = _recur;
-
-
-    //keep  factorisation and preconditioner reused in my_matvec
-    // options_i[AZ_keep_info]= 1;
-
-    //params[AZ_tol]       = linear_rel_tol;
-
-    std::cout << "  o-  Solving system...  ";
+    _linearSolver.setRecursionLevel( _recur );
+    
+    std::cout << "  o-  Solving system... "<< std::flush;
     chrono.start();
-    AZ_iterate( &step[ 0 ], _f.giveVec(), options, params, status,
-                proc_config, J, prec_J, NULL );
+    _linearSolver.solve( step , _f );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
-    //--options[AZ_recursion_level];
-
-    AZ_matrix_destroy( &J );
-    AZ_precond_destroy( &prec_J );
-
     _w = ( 2.0 / this->_dt ) * step - _rhs_w;
-
+    
     _residual_d = _C*step - _rhsWithoutBC;
 
 }
