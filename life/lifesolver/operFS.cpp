@@ -89,9 +89,6 @@ operFS::operFS(GetPot     &data_file):
 
     M_solverAztec.setOptionsFromGetPot(data_file,"jacobian/aztec");
     M_method  = data_file("problem/method" ,0);
-
-    M_fluid.initialize(u0);
-    M_solid.initialize(d0,w0);
 }
 
 // Destructor

@@ -38,6 +38,8 @@ lib_LTLIBRARIES	= liblifesolver.la
 
 liblifesolver_la_SOURCES	= operFS.cpp steklovPoincareBase.cpp fixedPointBase.cpp 
 
+liblifesolver_la_LIBADD    = ../lifefilters/liblifefilters.la ../lifecore/liblifecore.la ../lifearray/liblifearray.la $(petsc_libs) $(aztec_libs)
+include $(top_srcdir)/admin/Doxyfile.am
 #bin_PROGRAMS=multiscale
 #multiscale_SOURCES  = #multiscale.cpp
 #multiscale_LDADD    = ../lifecore/liblifecore.la 
