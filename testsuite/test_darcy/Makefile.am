@@ -24,11 +24,13 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 AM_CPPFLAGS	= -DNO_BLASLAPACK
 
-include $(top_srcdir)/testsuite/Makefile.testsuite
+check_HEADERS = darcyHandler.hpp darcySolver.hpp dataDarcy.hpp user_fct.hpp user_diffusion.hpp 
 
-check_PROGRAMS = DarcySolver 
-noinst_HEADERS = darcyHandler.hpp darcySolver.hpp dataDarcy.hpp user_fct.hpp user_diffusion.hpp 
-DarcySolver_SOURCES = darcyHandler.cpp darcySolver.cpp darcySolver_post.cpp dataDarcy.cpp main.cpp user_fct.cpp user_diffusion.cpp 
+
+check_PROGRAMS = test_darcy
+test_darcy_SOURCES = darcyHandler.cpp darcySolver.cpp darcySolver_post.cpp dataDarcy.cpp main.cpp user_fct.cpp user_diffusion.cpp 
+
 EXTRA_DIST = data
 
 
+include $(top_srcdir)/testsuite/Makefile.testsuite
