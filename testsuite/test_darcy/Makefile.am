@@ -31,3 +31,4 @@ noinst_HEADERS = darcyHandler.hpp darcySolver.hpp dataDarcy.hpp user_fct.hpp use
 DarcySolver_SOURCES = darcyHandler.cpp darcySolver.cpp darcySolver_post.cpp dataDarcy.cpp main.cpp user_fct.cpp user_diffusion.cpp 
 EXTRA_DIST = data data2
 
+TESTS = DarcySolver

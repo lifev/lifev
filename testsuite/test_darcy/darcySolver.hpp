@@ -22,7 +22,7 @@
 
 /*!
   \brief A mixed hybrid Darcy solver
-  \file darcySolver.h
+  \file darcySolver.hpp
   \author J.-F. Gerbeau and V. Martin
   \date 11/2002
 */

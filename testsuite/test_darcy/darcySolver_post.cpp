@@ -298,7 +298,7 @@ void DarcySolver::postProcessVelocityQ1()
     normL2     += elem_L2_2(u_q1,fe_q1,dof_q1,3);
     normL2sol  = -1.; //! elem_L2_2 is not reckognized
     //! (confusion with another templated function)
-    //    normL2sol  += elem_L2_2(analyticSol,fe_q1,0.0,3);
+    // normL2sol  += elem_L2_2<AnalyticalSolFlux>(analyticSol,fe_q1,0.0,3);
     normL2diff += elem_L2_diff_2(u_q1,analyticSol,fe_q1,dof_q1,0.,3);
     /*    
     normH1     += elem_H1_2(u_q1,fe_q1,dof_q1,0,3);

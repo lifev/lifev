@@ -45,7 +45,7 @@ DarcyHandler::DarcyHandler(const GetPot& data_file):
   // read mesh
   readINRIAMeshFile(mesh,mesh_dir+"/"+mesh_file,1);
   //  mesh.check(true,true);
-  mesh.updateElementEdges();
+  //  mesh.updateElementEdges(); //! We need only the faces.
   mesh.updateElementFaces(true); /*the "true" flag is to build the faceList
 				   of all faces (and not only the boundary) */
   if(verbose>2) mesh.showMe();

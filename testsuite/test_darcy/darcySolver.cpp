@@ -16,6 +16,13 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
+/*!
+  \brief A mixed hybrid Darcy solver
+  \file darcySolver.cpp
+  \author J.-F. Gerbeau and V. Martin
+  \date 11/2002
+*/
+
 #include "darcySolver.hpp"
 #include "bc_manage.hpp"
 #include "medit_wrtrs.hpp"
