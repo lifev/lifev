@@ -234,11 +234,19 @@ public:
     template <typename Mesh>
     void bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof );
 
+    /*! Extract the type of the boundary condition with flag aFlag. Useful for weak
+      imposition of boundary conditions (e.g. in DG-FEM).
+      */
+    BCType boundaryType(const EntityFlag& aFlag) const;
 
+    /*! Extract a BC in the list according to its flag
+    */
+    BCBase& GetBCWithFlag(const EntityFlag& );
+    const BCBase& GetBCWithFlag(const EntityFlag&) const;
 
     //! output
     std::ostream& showMe( bool verbose = false, std::ostream & out = std::cout ) const;
-
+    
     //@}
 
 

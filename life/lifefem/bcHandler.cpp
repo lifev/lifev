@@ -205,7 +205,45 @@ const BCBase& BCHandler::operator[] ( const Index_t& i ) const
     return _bcList[ i ];
 }
 
+BCBase& BCHandler::GetBCWithFlag(const EntityFlag& aFlag){
+  ASSERT_PRE(_nbc == _bcList.size(), "Some BC have not been added to the list");
 
+  Index_t i;
+
+  for(i = 0; i <= _nbc; i++){
+    if(aFlag == _bcList[i].flag()){
+      break;
+    }
+  }
+
+  return _bcList[i];
+}
+
+const BCBase& BCHandler::GetBCWithFlag(const EntityFlag& aFlag) const {
+  ASSERT_PRE(_nbc == _bcList.size(), "Some BC have not added to the list");
+
+  Index_t i;
+
+  for(i = 0; i <= _nbc; i++){
+    if(aFlag == _bcList[i].flag()){
+      break;
+    }
+  }
+  return _bcList[i];
+}
+
+BCType BCHandler::boundaryType(const EntityFlag& aFlag) const{
+  BCType CurrType;
+
+  for(UInt i = 0; i <= _nbc; i++){
+    if(aFlag == _bcList[i].flag()){
+      CurrType = _bcList[i].type();
+      break;
+    }
+  }
+
+  return CurrType;
+}
 //! Ouput
 std::ostream & BCHandler::showMe( bool verbose, std::ostream & out ) const
 {
