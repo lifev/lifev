@@ -23,8 +23,9 @@ namespace LifeV
 {
     operFS::operFS(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
                    VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
-                   BC_Handler& BCh_du,
-                   BC_Handler& BCh_dz):
+                   BC_Handler &BCh_du,
+                   BC_Handler &BCh_dz,
+                   GetPot     &data_file):
         M_fluid       (fluid),
         M_solid       (solid),
         M_dispStruct  ( 3*M_solid.dDof().numTotalDof() ),
@@ -36,7 +37,7 @@ namespace LifeV
         M_BCh_dz      (BCh_dz),
         M_dataJacobian(this)
     {
-// constructors already called, nothing to do
+        M_solverAztec.setOptionsFromGetPot(data_file,"jacobian/aztec");
     }
 
 
@@ -97,48 +98,14 @@ namespace LifeV
 
 //
 
-    void  operFS::solvePrec(Vector& step, const Vector& res, double& linear_rel_tol)
+    void  operFS::solvePrec(Vector &step, const Vector &res, double linear_rel_tol)
     {
-        // AZTEC specifications for the second system
-        int    data_org[AZ_COMM_SIZE];   // data organisation for J
-        int    proc_config[AZ_PROC_SIZE];  // Processor information:
-        int    options[AZ_OPTIONS_SIZE];   // Array used to select solver options.
-        double params[AZ_PARAMS_SIZE];     // User selected solver paramters.
-        double status[AZ_STATUS_SIZE];     // Information returned from AZ_solve()
-
-        AZ_set_proc_config(proc_config, AZ_NOT_MPI);
-
         // data_org assigned "by hands": no parallel computation is performed
 
         UInt dim_res = res.size();
 
-        data_org[AZ_N_internal] = dim_res;
-        data_org[AZ_N_border  ] = 0;
-        data_org[AZ_N_external] = 0;
-        data_org[AZ_N_neigh   ] = 0;
-
-        // Recovering AZTEC defaults options and params
-
-        AZ_defaults(options,params);
-
-        // Fixed Aztec options for this linear system
-
-        options[AZ_solver  ] = AZ_gmres;
-        options[AZ_output  ] = 1;
-        options[AZ_poly_ord] = 5;
-        options[AZ_kspace  ] = 40;
-        options[AZ_conv    ] = AZ_rhs;
-        params [AZ_tol     ] = linear_rel_tol;
-
-        //AZTEC matrix for the jacobian
-
-        AZ_MATRIX *J;
-        
-        J = AZ_matrix_create(dim_res);
-
-        // data containing the matrices C, D, trD and H as pointers
-        // are passed through A_ii and pILU_ii:
-        AZ_set_MATFREE(J, &M_dataJacobian, my_matvecJacobian);
+        M_solverAztec.setTolerance(linear_rel_tol);
+        M_solverAztec.setMatrixFree(dim_res, &M_dataJacobian, my_matvecJacobian);
 
         cout << "  o-  Solving Jacobian system... ";
         Chrono chrono;
@@ -147,26 +114,24 @@ namespace LifeV
             step[i] = 0.0;
 
         chrono.start();
-        
-        AZ_iterate(&step[0], &res[0], options, params,
-                   status, proc_config, J, NULL, NULL);
+
+        M_solverAztec.solve(step, res);
 
         chrono.stop();
 
         cout << "done in " << chrono.diff() << " s." << endl;
-
-        AZ_matrix_destroy(&J);
     }
 
 
-
 //
+    
     void  operFS::solveLinearFluid()
     {
         M_fluid.iterateLin(M_time, M_BCh_du);
     }
 
 //
+    
     void  operFS::solveLinearSolid()
     {
         M_rhs_dz = 0.0;
@@ -195,14 +160,14 @@ namespace LifeV
         M_time = time;
     }
 
-    void my_matvecJacobian(double *z, double *Jz, AZ_MATRIX* J, int proc_config[])
+    void my_matvecJacobian(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
     {
         // Extraction of data from J
         DataJacobian* my_data = static_cast< DataJacobian* >(AZ_get_matvec_data(J));
 
-        UInt dim = my_data->_pFS->M_dz.size();
+        UInt dim = my_data->M_pFS->M_dz.size();
 
-        double xnorm =  AZ_gvector_norm(dim,-1,z,proc_config);
+        double xnorm =  AZ_gvector_norm(dim, -1, z, proc_config);
         cout << " ***** norm (z)= " << xnorm << endl<< endl;
         
         if ( xnorm == 0.0 )
@@ -211,15 +176,16 @@ namespace LifeV
         else
         {
             for (int i=0; i <(int)dim; ++i) 
-                my_data->_pFS->M_solid.d()[i] =  z[i];
+                my_data->M_pFS->M_solid.d()[i] =  z[i];
             
-            my_data->_pFS->M_fluid.updateDispVelo();
-            my_data->_pFS->solveLinearFluid();
-            my_data->_pFS->solveLinearSolid();
+            my_data->M_pFS->M_fluid.updateDispVelo();
+            my_data->M_pFS->solveLinearFluid();
+            my_data->M_pFS->solveLinearSolid();
+
             for (int i = 0; i < (int) dim; ++i)
-                Jz[i] =  z[i] - my_data->_pFS->M_dz[i];
+                Jz[i] =  z[i] - my_data->M_pFS->M_dz[i];
         }
-        cout << " ***** norm (Jz)= " << AZ_gvector_norm(dim,-1,Jz,proc_config)
+        cout << " ***** norm (Jz)= " << AZ_gvector_norm(dim, -1, Jz, proc_config)
              << endl << endl;
     }
 }

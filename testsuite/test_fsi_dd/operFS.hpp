@@ -16,10 +16,12 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
+
 #include "NavierStokesAleSolverPC.hpp"
 #include "VenantKirchhofSolver.hpp"
 #include "vectorNorms.hpp"
 #include "regionMesh3D_ALE.hpp"
+#include "SolverAztec.hpp"
 
 #ifndef _OPERFS
 #define _OPERFS
@@ -27,16 +29,16 @@
 namespace LifeV
 {
     class operFS;
-
+//    class GetPot;
 
     class DataJacobian
     {
     public:
         
         DataJacobian(operFS* oper):
-            _pFS(oper){}
+            M_pFS(oper){}
         
-        operFS* _pFS;
+        operFS* M_pFS;
     };
     
 
@@ -51,7 +53,8 @@ namespace LifeV
         
         operFS(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
                VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
-               BC_Handler& BCh_du, BC_Handler& BCh_dz);
+               BC_Handler& BCh_du, BC_Handler& BCh_dz,
+               GetPot &data_file);
 
 
         // member functions
@@ -59,22 +62,22 @@ namespace LifeV
         //
         void eval         (Vector &dispNew,
                            Vector &veloStruct,
-                           const Vector &disp,
-                           int status);
+                           const  Vector &disp,
+                           int    status);
         
         //
         void evalResidual (Vector &res,
-                           const Vector &sol,
-                           int iter);
+                           const  Vector &sol,
+                           int    iter);
 
         //
         void updatePrec   (Vector& sol,
-                           int iter);
+                           int     iter);
 
         //
         void solvePrec    (Vector &step,
-                           const Vector &res,
-                           double &linear_rel_tol);
+                           const  Vector &res,
+                           double linear_rel_tol);
 
         //
         void solveLinearFluid();
@@ -104,12 +107,17 @@ namespace LifeV
 
         DataJacobian M_dataJacobian;
 
-        void setTime(const Real& time);
+
+        
+        void setTime(const Real &time);
 
     private:
 
         Real         M_time;
 
+        SolverAztec  M_solverAztec;
+        
+        
     };
 
     void my_matvecJacobian(double *z, double *Jz, AZ_MATRIX* J, int proc_config[]);
