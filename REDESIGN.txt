@@ -31,15 +31,17 @@ They should be listed by numbers like below
 1- Array Classes
 ================
 
- * Objective:
-   redesign the array classes and removed the RNM dependency
+ * Objectives:
+   a- redesign the array classes 
+   b- removed the RNM dependency
+   c- setup clear rules on array usages
 
  * Issues:
    a- RNM<> is badly designed and with no documentation. g++-3.4 which is
       very close to the C++ standard cannot conmpile code with RNM<>. 
    b- no small array classes
 
- * Proposal:
+ * Proposals:
    a- use blitz
    b- use std::vector
    c- boost::array, boost::multi_array 
