@@ -30,9 +30,12 @@ test: $(TESTINGS)
 
 
 all-local:
-	@if test "$(top_srcdir)" != "$(top_builddir)"; then\
-	 for i in $(EXTRA_DIST); do \
-           $(LN_S) -f $(srcdir)/$$i .; \
-         done; \
+	if test "$(top_srcdir)" != "$(top_builddir)"; then\
+     extra_dist=$(EXTRA_DIST);\
+	 if test ! -z $$extra_dist; then \
+       for i in $(EXTRA_DIST); do \
+         $(LN_S) -f $(srcdir)/$$i .; \
+       done; \
+     fi; \
 	fi
 
