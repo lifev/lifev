@@ -116,6 +116,9 @@ public:
     //! evaluates residual for newton interations
     void evalResidual( Vector &res, const Vector& sol, int iter);
 
+    void setSourceTerm( source_type const& __s ) { _M_source = __s; }
+    source_type const& sourceTerm() const { return _M_source; }
+
 private:
 
     //! Block pattern of M
@@ -179,6 +182,8 @@ private:
 
     //! level of recursion for Aztec (has a sens with FSI coupling)
     UInt _recur;
+
+    source_type _M_source;
 };
 
 
