@@ -1,6 +1,5 @@
 /*
 
-  $Id: timeSolver.cpp,v 1.2 2004-12-14 15:12:33 winkelma Exp $
   TimeSolver class
 
 */

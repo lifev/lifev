@@ -1,6 +1,5 @@
 /*
 
-  $Id: timeSolver.hpp,v 1.2 2004-12-14 15:12:33 winkelma Exp $
   TimeSolver class
   the purpouse of this class is to handle more easily
   the solution of M\partial u/\partial t + Au=b

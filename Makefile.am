@@ -78,6 +78,7 @@ MOSTLYCLEANFILES	= ChangeLog
 $(top_srcdir)/acinclude.m4:
 	@echo 'm4_include([admin/ac_check_aztec.m4])' > acinclude.m4
 	@echo 'm4_include([admin/ac_check_boost.m4])' >> acinclude.m4
+	@echo 'm4_include([admin/ac_check_itk.m4])' >> acinclude.m4
 	@echo 'm4_include([admin/ac_check_lapack.m4])' >> acinclude.m4
 	@echo 'm4_include([admin/ac_check_mpi.m4])' >> acinclude.m4
 	@echo 'm4_include([admin/ac_check_parmetis.m4])' >> acinclude.m4
@@ -85,4 +86,5 @@ $(top_srcdir)/acinclude.m4:
 	@echo 'm4_include([admin/ac_check_umfpack.m4])' >> acinclude.m4
 	@echo 'm4_include([admin/ac_find_file.m4])' >> acinclude.m4
 	@echo 'm4_include([admin/lifev_check_compilers.m4])'>>acinclude.m4
+	@echo 'm4_include([admin/lifev_default_paths.m4])'>>acinclude.m4
 
