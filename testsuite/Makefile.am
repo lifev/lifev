@@ -92,6 +92,12 @@ $(TESTSUITE): $(srcdir)/testsuite.at $(srcdir)/package.m4 $(TESTSUITES)
      ln -sf $(TESTSUITE);\
     fi
 
+testsuite: $(srcdir)/testsuite.at $(srcdir)/package.m4 $(TESTSUITES)
+	$(AUTOTEST) -I $(srcdir) $@.at -o $@.tmp
+	mv $@.tmp $@
+	@if test $(top_srcdir) != $(top_builddir); then\
+     ln -sf $(TESTSUITE);\
+    fi
 
 
 include $(top_srcdir)/admin/Doxyfile.am
