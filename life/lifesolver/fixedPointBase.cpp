@@ -121,8 +121,8 @@ void fixedPoint::setUpBC()
 {
     std::cout << "Boundary Conditions setup ... ";
 
-    UInt dim_solid = this->M_solid->dDof().numTotalDof();
-    UInt dim_fluid = this->M_fluid->uDof().numTotalDof();
+//     UInt dim_solid = this->M_solid->dDof().numTotalDof();
+//     UInt dim_fluid = this->M_fluid->uDof().numTotalDof();
 
     //========================================================================================
     //  DATA INTERFACING BETWEEN BOTH SOLVERS
@@ -130,25 +130,22 @@ void fixedPoint::setUpBC()
     //
     // Passing data from the fluid to the structure: fluid load at the interface
     //
-    BCVectorInterface g_wall(this->M_fluid->residual(),
-                             dim_fluid,
-                             M_dofFluidToStructure  );
+    setFluidLoadToStructure(this->M_fluid->residual());
     //
-    // Passing data from structure to the fluid mesh: motion of the fluid domain
+    // Passing data from structure to the harmonic extension: motion of the fluid domain
     //
-    BCVectorInterface displ(this->M_solid->d(),
-                            dim_solid,
-                            M_dofStructureToFluidMesh );
+    setStructureDispToHarmonicExtension(this->M_solid->d());
     //========================================================================================
     //  BOUNDARY CONDITIONS
     //========================================================================================
-
+    //
     // Boundary conditions for the harmonic extension of the
     // interface solid displacement
-    M_BCh_mesh->addBC("Interface", 1, Essential, Full, displ, 3);
-
+    M_BCh_mesh->addBC("Interface", 1, Essential, Full,
+                      *bcvStructureDispToHarmonicExtension(), 3);
     // Boundary conditions for the solid displacement
-    M_BCh_d->addBC("Interface", 1, Natural, Full, g_wall, 3);
+    M_BCh_d->addBC("Interface", 1, Natural,   Full,
+                   *bcvFluidLoadToStructure(), 3);
 }
 
 

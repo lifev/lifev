@@ -51,15 +51,15 @@ FSIOperator::setup()
                                       M_solid->mesh(), 1,
                                       0.);
 
-        M_dofStructureToFluidMesh->setup(M_fluid->mesh().getRefFE(), M_fluid->dofMesh(),
-                                         feTetraP1, M_solid->dDof());
-        M_dofStructureToFluidMesh->update(M_fluid->mesh(), 1,
-                                          M_solid->mesh(), 1,
-                                          0.0);
+        M_dofStructureToHarmonicExtension->setup(M_fluid->mesh().getRefFE(), M_fluid->dofMesh(),
+                                                 feTetraP1, M_solid->dDof());
+        M_dofStructureToHarmonicExtension->update(M_fluid->mesh(), 1,
+                                                  M_solid->mesh(), 1,
+                                                  0.0);
 
-        M_dofMeshToFluid->setup(feTetraP1bubble,M_fluid->uDof(),
+        M_dofHarmonicExtensionToFluid->setup(feTetraP1bubble,M_fluid->uDof(),
                                 feTetraP1bubble,M_fluid->uDof());
-        M_dofMeshToFluid->update(M_fluid->mesh(), 1,
+        M_dofHarmonicExtensionToFluid->update(M_fluid->mesh(), 1,
                                  M_fluid->mesh(), 1,
                                  0.0);
 
@@ -157,5 +157,50 @@ void FSIOperator::transferOnInterface(const Vector      &_vec1,
     }
 }
 
+
+//
+
+void FSIOperator::setHarmonicExtensionVelToFluid(PhysVectUnknown<Vector> &vel)
+{
+    M_bcvHarmonicExtensionVelToFluid->setup(vel,
+                                            M_fluid->uDof().numTotalDof(),
+                                            M_dofHarmonicExtensionToFluid );
+}
+
+void FSIOperator::setDerHarmonicExtensionVelToFluid(PhysVectUnknown<Vector> &dvel)
+{
+    M_bcvDerHarmonicExtensionVelToFluid->setup(dvel,
+                                               M_fluid->uDof().numTotalDof(),
+                                               M_dofHarmonicExtensionToFluid );
+}
+
+void FSIOperator::setStructureDispToHarmonicExtension(PhysVectUnknown<Vector> &disp)
+{
+    M_bcvStructureDispToHarmonicExtension->setup(disp,
+                                                 M_solid->dDof().numTotalDof(),
+                                                 M_dofStructureToHarmonicExtension);
+}
+
+void FSIOperator::setStructureDispToSolid(PhysVectUnknown<Vector> &disp)
+{
+    M_bcvStructureDispToSolid->setup(disp,
+                                     M_solid->dDof().numTotalDof(),
+                                     M_dofStructureToSolid);
+}
+
+
+void FSIOperator::setFluidLoadToStructure(Vector &load)
+{
+    M_bcvFluidLoadToStructure->setup(load,
+                                     M_fluid->uDof().numTotalDof(),
+                                     M_dofFluidToStructure);
+}
+
+void FSIOperator::setDerFluidLoadToStructure(Vector &dload)
+{
+    M_bcvDerFluidLoadToStructure->setup(dload,
+                                        M_fluid->uDof().numTotalDof(),
+                                        M_dofFluidToStructure);
+}
 
 }

@@ -83,7 +83,9 @@ steklovPoincare::setup()
 
     M_dzSolid.resize( 3*M_solid->dDof().numTotalDof() );
     M_dzFluid.resize( 3*M_fluid->uDof().numTotalDof() );
+
     M_rhs_dz.resize( 3*M_solid->dDof().numTotalDof() );
+
     M_residualS.resize( M_solid->dDof().numTotalDof() );
     M_residualF.resize( M_fluid->uDof().numTotalDof() );
     M_residualFSI.resize( M_fluid->uDof().numTotalDof() );
@@ -571,46 +573,18 @@ void steklovPoincare::setBC()
 {
     UInt dim_solid        = this->M_solid->dDof().numTotalDof();
     UInt dim_fluid        = this->M_fluid->uDof().numTotalDof();
-    //UInt dim_reducedfluid = this->M_fluid->pDof().numTotalDof();
 
     // Boundary conditions for du and inverse
 
     BCFunctionBase bcf(fzeroSP);
 
-    //
-    // Passing data from the fluid to the structure: fluid load at the interface
-    //
-    BCVectorInterface g_wall( this->M_fluid->residual(),
-                              dim_fluid,
-                              M_dofFluidToStructure );
-    //
-    // Passing data from structure to the solid mesh: motion of the solid domain
-    //
-    BCVectorInterface d_wall(this->M_solid->d(),
-                             dim_solid,
-                             M_dofStructureToSolid );
-    //
-    // Passing data from structure to the fluid mesh: motion of the fluid domain
-    //
-    BCVectorInterface displ(this->M_solid->d(),
-                            dim_solid,
-                            M_dofStructureToFluidMesh);
-    //
-    // Passing data from structure to the fluid: solid velocity at the interface velocity
-    //
-    BCVectorInterface u_wall(this->M_fluid->wInterpolated(),
-                             dim_fluid,
-                             M_dofMeshToFluid);
-    //    //  BOUNDARY CONDITIONS
-    //
-    // Boundary conditions for the harmonic extension of the
-    // interface solid displacement
+    setStructureDispToSolid            (this->M_solid->d());
+    setStructureDispToHarmonicExtension(this->M_solid->d());
 
-    M_BCh_mesh->addBC("Interface", 1, Essential, Full, displ, 3);
-
-    // Boundary conditions for the solid displacement
-
-    M_BCh_d->addBC("Interface", 1, Essential, Full, d_wall, 3);
+    M_BCh_mesh->addBC("Interface", 1, Essential, Full,
+                      *bcvStructureDispToHarmonicExtension(), 3);
+    M_BCh_d->addBC("Interface", 1, Essential, Full,
+                   *bcvStructureDispToSolid(), 3);
 
     //    //  COUPLED FSI LINEARIZED OPERATORS
     //
@@ -656,7 +630,6 @@ void steklovPoincare::setBC()
 
     M_reducedLinFluid->setUpBC(M_BCh_dp);
     M_reducedLinFluid->setUpInvBC(M_BCh_dp_inv);
-
 }
 
 
@@ -668,7 +641,7 @@ void steklovPoincare::setInterfaceBC()
 
     BCVectorInterface du_wall(M_residualFSI,
                               dim_fluid,
-                              M_dofMeshToFluid);
+                              M_dofHarmonicExtensionToFluid);
     M_BCh_du->addBC("Wall"     , 1, Natural  , Full, du_wall, 3);
 
     // Passing the residual to the linearized structure: \sigma -> dz
@@ -690,7 +663,7 @@ void steklovPoincare::setInterfaceNewtonBC()
 
     BCVectorInterface du_wall(M_fluid->dwInterpolated(),
                               dim_fluid,
-                              M_dofMeshToFluid );
+                              M_dofHarmonicExtensionToFluid );
 
     M_BCh_du->addBC("Wall"     , 1, Essential , Full, du_wall, 3);
 
@@ -699,7 +672,13 @@ void steklovPoincare::setInterfaceNewtonBC()
                               dim_solid,
                               M_dofStructureToSolid );
 
-
+    // Passing data from the harmonic extension to the fluid
+    //setDerHarmonicExtensionVelToFluid(this->M_fluid->dwInterpolated());
+    // Passing data from fluid to the structure: du -> dz
+    //setDerFluidLoadToStructure(this->residualFSI());
+    // Boundary conditions for du
+    //M_BCh_du->addBC("Wall",   1,  Essential, Full,
+    //                *bcvDerHarmonicExtensionVelToFluid(), 3);
 
     M_BCh_dz->addBC("Interface", 1, Essential , Full, dg_wall, 3);
 
@@ -707,7 +686,7 @@ void steklovPoincare::setInterfaceNewtonBC()
 
     BCVectorInterface du_wall_inv(M_residualFSI,
                                   dim_fluid,
-                                  M_dofMeshToFluid);
+                                  M_dofHarmonicExtensionToFluid);
 
     M_BCh_du_inv->addBC("Wall", 1, Natural  , Full, du_wall_inv, 3);
 

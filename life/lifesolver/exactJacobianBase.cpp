@@ -124,21 +124,11 @@ void exactJacobian::setUpBC()
     //
     // Passing data from the fluid to the structure: fluid load at the interface
     //
-    BCVectorInterface g_wall(this->M_fluid->residual(),
-                             dim_fluid,
-                             M_dofFluidToStructure );
+    setFluidLoadToStructure(this->M_fluid->residual());
     //
-    // Passing data from structure to the fluid mesh: motion of the fluid domain
+    // Passing data from structure to the harmonic Extension: motion of the fluid domain
     //
-    BCVectorInterface displ(this->M_solid->d(),
-                            dim_solid,
-                            M_dofStructureToFluidMesh );
-    //
-    // Passing data from structure to the fluid: solid velocity at the interface velocity
-    //
-    BCVectorInterface u_wall(this->M_fluid->wInterpolated(),
-                             dim_fluid,
-                             M_dofMeshToFluid );
+    setStructureDispToHarmonicExtension(this->M_solid->d());
     //========================================================================================
     //  Interface BOUNDARY CONDITIONS
     //========================================================================================
@@ -147,34 +137,34 @@ void exactJacobian::setUpBC()
 
     // Boundary conditions for the harmonic extension of the
     // interface solid displacement
-    M_BCh_mesh->addBC("Interface", 1, Essential, Full, displ, 3);
+    M_BCh_mesh->addBC("Interface", 1, Essential, Full,
+                      *bcvStructureDispToHarmonicExtension(), 3);
 
     // Boundary conditions for the solid displacement
-    M_BCh_d->addBC("Interface", 1, Natural,   Full, g_wall, 3);
-
+    M_BCh_d->addBC("Interface", 1, Natural,   Full,
+                   *bcvFluidLoadToStructure(), 3);
 
     //========================================================================================
     //  Linear operators BOUNDARY CONDITIONS
     //========================================================================================
 
-    std::cout << "reducedFluid " << reducedFluid() << std::endl;
     if (!reducedFluid())
     {
-        BCVectorInterface du_wall(M_fluid->dwInterpolated(), dim_fluid, M_dofMeshToFluid );
-
+        // Passing data from the harmonic extension to the fluid
+        setDerHarmonicExtensionVelToFluid(this->M_fluid->dwInterpolated());
         // Passing data from fluid to the structure: du -> dz
-        //
-        BCVectorInterface dg_wall(M_fluid->residual(), dim_fluid, M_dofFluidToStructure );
-
+        setDerFluidLoadToStructure(this->M_fluid->residual());
         // Boundary conditions for du
-        M_BCh_du->addBC("Wall",   1,  Essential, Full, du_wall,  3);
+        M_BCh_du->addBC("Wall",   1,  Essential, Full,
+                        *bcvDerHarmonicExtensionVelToFluid(), 3);
         M_BCh_du->addBC("Edges",  20, Essential, Full, bcf,      3);
         M_BCh_du->addBC("InFlow", 2,  Natural,   Full, bcf,      3);
         M_BCh_du->addBC("OutFlow",3,  Natural,   Full, bcf,      3);
 
 
         // Boundary conditions for dz
-        M_BCh_dz->addBC("Interface", 1, Natural,   Full, dg_wall, 3);
+        M_BCh_dz->addBC("Interface", 1, Natural,   Full,
+                        *bcvDerFluidLoadToStructure(), 3);
         M_BCh_dz->addBC("Top",       3, Essential, Full, bcf,  3);
         M_BCh_dz->addBC("Base",      2, Essential, Full, bcf,  3);
     }

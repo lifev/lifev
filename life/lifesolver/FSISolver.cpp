@@ -167,18 +167,10 @@ FSISolver::setFSIOperator( std::string const& __op )
     M_oper->setFluid( M_fluid );
     M_oper->setSolid( M_solid );
 
-    //UInt dim_solid = M_oper->solid().dDof().numTotalDof();
-    UInt dim_fluid = M_oper->fluid().uDof().numTotalDof();
-
-
-    // Passing data from structure to the fluid: solid velocity at the interface velocity
-    //
-    BCVectorInterface u_wall( M_oper->fluid().wInterpolated(),
-                              dim_fluid,
-                              M_oper->dofMeshToFluid() );
-
+    M_oper->setHarmonicExtensionVelToFluid(M_oper->fluid().wInterpolated());
     // Boundary conditions for the fluid velocity
-    M_BCh_u->addBC("Interface",   1,  Essential, Full, u_wall,  3);
+    M_BCh_u->addBC("Interface",   1,  Essential, Full,
+                   *M_oper->bcvHarmonicExtensionVelToFluid(),  3);
 
     M_oper->setBC( M_BCh_u, M_BCh_d, M_BCh_mesh );
     M_oper->setup();
@@ -190,9 +182,6 @@ FSISolver::iterate( Real time )
 {
     Debug( 6220 ) << "============================================================\n";
     Debug( 6220 ) << "Solving FSI at time " << time << " with FSIOperator: " << M_method  << "\n";
-
-    //UInt dim_solid = M_oper->solid().dDof().numTotalDof();
-    //UInt dim_fluid = M_oper->fluid().uDof().numTotalDof();
 
 
     M_oper->fluid().timeAdvance( M_oper->fluid().sourceTerm(), time);

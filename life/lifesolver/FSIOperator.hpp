@@ -72,10 +72,11 @@ public:
                                    & )> function_type;
 
     typedef boost::shared_ptr<DofInterface3Dto3D> dof_interface_type;
-    typedef boost::shared_ptr<BCHandler> bchandler_type;
+    typedef boost::shared_ptr<BCVectorInterface>  bc_vector_interface;
+    typedef boost::shared_ptr<BCHandler>          bchandler_type;
 
 //    typedef boost::shared_ptr<reducedLinFluid> quasi_newton_type;
-    typedef boost::shared_ptr<reducedLinFluid> quasi_newton_type;
+    typedef boost::shared_ptr<reducedLinFluid>    quasi_newton_type;
 
     // constructors
     FSIOperator():
@@ -90,12 +91,24 @@ public:
         M_BCh_dp_inv(new BCHandler),
         M_fluid(),
         M_solid(),
-        M_dofFluidToStructure( new DofInterface3Dto3D ),
-        M_dofStructureToSolid( new DofInterface3Dto3D ),
-        M_dofStructureToFluidMesh( new DofInterface3Dto3D ),
-        M_dofMeshToFluid( new DofInterface3Dto3D ),
-        M_dofStructureToReducedFluid( new DofInterface3Dto3D ),
-        M_dofReducedFluidToStructure( new DofInterface3Dto3D ),
+        M_dofFluidToStructure                ( new DofInterface3Dto3D ),
+//         M_dofFluidToSolid                    ( new DofInterface3Dto3D ),
+//         M_dofSolidTofluid                    ( new DofInterface3Dto3D ),
+        M_dofStructureToSolid                ( new DofInterface3Dto3D ),
+        M_dofStructureToHarmonicExtension    ( new DofInterface3Dto3D ),
+        M_dofHarmonicExtensionToFluid        ( new DofInterface3Dto3D ),
+        M_dofStructureToReducedFluid         ( new DofInterface3Dto3D ),
+        M_dofReducedFluidToStructure         ( new DofInterface3Dto3D ),
+        // boundary vector interfaces
+        M_bcvFluidLoadToStructure            ( new  BCVectorInterface ),
+        M_bcvStructureDispToSolid            ( new  BCVectorInterface ),
+        M_bcvStructureDispToHarmonicExtension( new  BCVectorInterface ),
+        M_bcvHarmonicExtensionVelToFluid     ( new  BCVectorInterface ),
+        M_bcvStructureToFluid                ( new  BCVectorInterface ),
+        M_bcvStructureToReducedFluid         ( new  BCVectorInterface ),
+        M_bcvReducedFluidToStructure         ( new  BCVectorInterface ),
+        M_bcvDerHarmonicExtensionVelToFluid  ( new  BCVectorInterface ),
+        M_bcvDerFluidLoadToStructure         ( new  BCVectorInterface ),
         M_dispStruct(),
         M_dispStructOld(),
         M_velo(),
@@ -168,19 +181,34 @@ public:
 
     virtual void setup();
 
-    dof_interface_type& dofMeshToFluid() { return M_dofMeshToFluid; }
-    dof_interface_type const& dofMeshToFluid() const
-        { return M_dofMeshToFluid; }
-    dof_interface_type const& dofStructureTofluidMesh() const
-        { return M_dofStructureToFluidMesh; }
-    dof_interface_type const& dofStructureToReducedFluid() const
-        { return M_dofStructureToReducedFluid; }
-    dof_interface_type const& dofReducedFluidToStructure() const
-        { return M_dofReducedFluidToStructure; }
-    dof_interface_type const& dofFluidToStructure() const
-        { return M_dofFluidToStructure; }
-    dof_interface_type const& dofStructureToSolid() const
-        { return M_dofStructureToSolid; }
+    // BC Vector Interface setters and getters
+
+    void setHarmonicExtensionVelToFluid(PhysVectUnknown<Vector> &vel);
+    bc_vector_interface bcvHarmonicExtensionVelToFluid()
+        {return M_bcvHarmonicExtensionVelToFluid;}
+
+    void setDerHarmonicExtensionVelToFluid(PhysVectUnknown<Vector> &dvel);
+    bc_vector_interface bcvDerHarmonicExtensionVelToFluid()
+        {return M_bcvDerHarmonicExtensionVelToFluid;}
+
+    void setStructureDispToHarmonicExtension(PhysVectUnknown<Vector> &disp);
+    bc_vector_interface bcvStructureDispToHarmonicExtension()
+        {return M_bcvStructureDispToHarmonicExtension;}
+
+    void setStructureDispToSolid(PhysVectUnknown<Vector> &disp);
+    bc_vector_interface bcvStructureDispToSolid()
+        {return M_bcvStructureDispToSolid;}
+
+    void setFluidLoadToStructure(Vector &load);
+    bc_vector_interface bcvFluidLoadToStructure()
+        {return M_bcvFluidLoadToStructure;}
+
+    void setDerFluidLoadToStructure(Vector &dload);
+    bc_vector_interface bcvDerFluidLoadToStructure()
+        {return M_bcvDerFluidLoadToStructure;}
+
+    //
+
 
     quasi_newton_type getReducedLinFluid(){return M_reducedLinFluid;}
 
@@ -227,10 +255,21 @@ protected:
 
     dof_interface_type      M_dofFluidToStructure;
     dof_interface_type      M_dofStructureToSolid;
-    dof_interface_type      M_dofStructureToFluidMesh;
-    dof_interface_type      M_dofMeshToFluid;
+    dof_interface_type      M_dofStructureToHarmonicExtension;
+    dof_interface_type      M_dofHarmonicExtensionToFluid;
     dof_interface_type      M_dofStructureToReducedFluid;
     dof_interface_type      M_dofReducedFluidToStructure;
+
+    bc_vector_interface     M_bcvFluidLoadToStructure;
+    bc_vector_interface     M_bcvStructureDispToSolid;
+    bc_vector_interface     M_bcvStructureDispToHarmonicExtension;
+    bc_vector_interface     M_bcvHarmonicExtensionVelToFluid;
+    bc_vector_interface     M_bcvStructureToFluid;
+    bc_vector_interface     M_bcvStructureToReducedFluid;
+    bc_vector_interface     M_bcvReducedFluidToStructure;
+
+    bc_vector_interface     M_bcvDerHarmonicExtensionVelToFluid;
+    bc_vector_interface     M_bcvDerFluidLoadToStructure;
 
     Vector                  M_dispStruct;
     Vector                  M_dispStructOld;
