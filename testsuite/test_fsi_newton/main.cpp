@@ -192,6 +192,7 @@ int main(int argc, char** argv)
 
         fluid.timeAdvance(f,time);
         solid.timeAdvance(f,time);
+        oper.setTime(time);
 
         // displacement prediction
         disp = solid.d() + dt*(1.5*solid.w() - 0.5*velo_1);

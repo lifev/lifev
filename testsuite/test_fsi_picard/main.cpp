@@ -175,6 +175,7 @@ int main(int argc, char** argv)
 
         fluid.timeAdvance(f,time);
         solid.timeAdvance(f,time);
+        oper.setTime(time);
 
         // Displacement prediction
         //
