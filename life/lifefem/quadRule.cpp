@@ -61,7 +61,7 @@ SetOfQuadRule::SetOfQuadRule(const QuadRule* qr,int _nb)
   for(int i=0;i<nbQuadRule;i++){
     _posQuadRule[ qr[i].id ] = i;
   }
-};
+}
 
 SetOfQuadRule::~SetOfQuadRule()
 {

@@ -99,7 +99,7 @@ void assemble_first(MatrixType& M,ElemMat& elmat,
     jg = dof.localToGlobal(eleID,j+1)-1;  // damned 1-base vs 0-base !
     M.set_mat_inc(ig,jg,mat(i,j));
   }
-};
+}
 
 template<typename Vector,typename FE1,typename GeoMap>
 void assemble_vec(Vector& V,ElemVec& elvec,const FE1& fe1,const GeoMap& geo,
@@ -116,6 +116,6 @@ void assemble_vec(Vector& V,ElemVec& elvec,const FE1& fe1,const GeoMap& geo,
     ig = dof.localToGlobal(eleID,i+1) - 1;
     V[ig] += vec(i);
   }
-};
+}
 }
 #endif

@@ -153,7 +153,7 @@ POINTTYPE & GeoND<GEOSHAPE,POINTTYPE>::point(ID const i)
 {
   ASSERT_BD((i>0 && i<= GeoND<GEOSHAPE,POINTTYPE>::numLocalPoints)) ;
   return *(static_cast<POINTTYPE *>(_points[i-1])); // indexing from 1
-};
+}
 
 template <typename GEOSHAPE,typename POINTTYPE>
 INLINE
@@ -161,7 +161,7 @@ POINTTYPE const & GeoND<GEOSHAPE,POINTTYPE>::point(ID const i) const
 {
   ASSERT_BD((i>0 && i<= GeoND<GEOSHAPE,POINTTYPE>::numLocalPoints));
   return *(static_cast<POINTTYPE *>(_points[i-1]));
-};
+}
 
 template <typename GEOSHAPE,typename POINTTYPE>
 INLINE
@@ -169,7 +169,7 @@ POINTTYPE & GeoND<GEOSHAPE,POINTTYPE>::reversepoint(ID const i)
 {
   ASSERT_BD((i>0 && i<= GeoND<GEOSHAPE,POINTTYPE>::numLocalPoints)) ;
   return *(static_cast<POINTTYPE *>(_points[reversePoint<GEOSHAPE>::operate(i) -1])); // indexing from 1
-};
+}
 
 template <typename GEOSHAPE,typename POINTTYPE>
 INLINE
@@ -177,7 +177,7 @@ POINTTYPE const & GeoND<GEOSHAPE,POINTTYPE>::reversepoint(ID const i) const
 {
   ASSERT_BD((i>0 && i<= GeoND<GEOSHAPE,POINTTYPE>::numLocalPoints));
   return *(static_cast<POINTTYPE *>(_points[reversePoint<GEOSHAPE>::operate(i) -1]));
-};
+}
 
 
 template <typename GEOSHAPE,typename POINTTYPE>
@@ -186,7 +186,7 @@ void  GeoND<GEOSHAPE,POINTTYPE>::setPoint(UInt const i,Geo0D  const & p)
 {
   ASSERT_BD( (i > 0 && i <= GeoND<GEOSHAPE,POINTTYPE>::numLocalPoints )) ;
   _points[i-1]= const_cast<Geo0D  *>(&p);
-};
+}
 
 
 template <typename GEOSHAPE,typename POINTTYPE>
@@ -201,7 +201,7 @@ bool  GeoND<GEOSHAPE,POINTTYPE>::setPointBD(UInt const i,Geo0D  const & p)
 
   _points[i-1]=const_cast<Geo0D *>(&p);
   return true;
-};
+}
 
 template <typename GEOSHAPE,typename POINTTYPE>
 INLINE
@@ -209,7 +209,7 @@ void  GeoND<GEOSHAPE,POINTTYPE>::setPoint(UInt const i,Geo0D  const * p)
 {
   ASSERT_BD( (i > 0 && i <= GeoND<GEOSHAPE,POINTTYPE>::numLocalPoints) ) ;
   _points[i-1]= const_cast<Geo0D  *>(p);
-};
+}
 
 
 template <typename GEOSHAPE,typename POINTTYPE>
@@ -224,7 +224,7 @@ bool  GeoND<GEOSHAPE,POINTTYPE>::setPointBD(UInt const i,Geo0D  const * p)
 
   _points[i-1]=const_cast<Geo0D *>(p);
   return true;
-};
+}
 
 
 template <typename GEOSHAPE,typename POINTTYPE>
@@ -246,7 +246,7 @@ showMe(bool verbose,std::ostream & out) const
     }
   out << "----- END OF GeoND data ---"<<std::endl<<std::endl;
   return out;
-};
+}
 
 template <typename GEOSHAPE,typename POINTTYPE>
 void  GeoND<GEOSHAPE,POINTTYPE>::swapPoints(const ID & pt1, const ID & pt2)

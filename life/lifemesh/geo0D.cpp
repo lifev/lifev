@@ -77,6 +77,6 @@ std::ostream & Geo0D::showMe(bool verbose, std::ostream & out) const
   out << "ID= "<< id()<<"  ";
   out << "----- END OF Geo0D data ---"<<std::endl<<std::endl;
   return out;
-};
+}
 
 }

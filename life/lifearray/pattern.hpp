@@ -18,7 +18,7 @@
 */
 /*----------------------------------------------------------------------*
 |
-| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.11 2004-10-04 16:18:11 prudhomm Exp $
+| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.12 2004-10-05 09:36:08 prudhomm Exp $
 |
 |
 | #Version  0.1 Experimental   07/7/00. Luca Formaggia & Alessandro Veneziani  |
@@ -973,7 +973,7 @@ CSRPatt::CSRPatt(DOF1 const & dof1, UInt const nbcomp) {
 #else
   buildPattern(dof1, nbcomp);
 #endif
-};
+}
 
 // Alain (nov. 2002): version for (nbcomp X nbcomp) block matrix.
 template<typename DOF1>
@@ -997,7 +997,7 @@ CSRPatt::CSRPatt(DOF const& dof,  UInt const nbcomp, MESH const& mesh) {
 #else
   buildPattern(dof, nbcomp, mesh);
 #endif
-};
+}
 
 template<typename DOF, typename MESH>
 bool CSRPatt::buildPattern(DOF const& dof, const UInt nbcomp,
@@ -1114,7 +1114,7 @@ void CSRPatt::_buildPattern(DOF1 const & dof1, DynPattern const & dynpatt,
 
   _filled=true;
   _diagfirst=true;
-};
+}
 
 template<typename DOF1,typename DOF2>
 CSRPatt::CSRPatt(DOF1 const & dof1, DOF2 const & dof2,
@@ -1122,7 +1122,7 @@ CSRPatt::CSRPatt(DOF1 const & dof1, DOF2 const & dof2,
   bool built;
   built = buildPattern(dof1, dof2, bRows, bCols);
   ASSERT_PRE(built,"Error in CSR Pattern construction from DOF object");
-};
+}
 
 template<typename DOF1,typename DOF2>
 bool CSRPatt::buildPattern(DOF1 const & dof1, DOF2 const & dof2,
@@ -1214,7 +1214,7 @@ ID CSRPatt::neighbour(ID const i, ID const d) const {
   ASSERT_BD(i>0);
   ASSERT_PRE(_filled, "Cannot access an empty pattern");
   return _i2d(_ja[_i2o(_ia[d-1]) +_d2o(i)]);
-};
+}
 
 inline
 void CSRPatt::neighbours(ID const d, Container & neigs) const{
@@ -1225,7 +1225,7 @@ void CSRPatt::neighbours(ID const d, Container & neigs) const{
   neigs.resize(nbNeighbours(d),0);// copy wants a sequence!
   copy(start1,start1+nbNeighbours(d),neigs.begin());
   _i2d(neigs);// trasform to DOF ID's
-};
+}
 
 template <typename Iter>
 inline
@@ -1460,7 +1460,7 @@ VBRPatt::VBRPatt(DOF1 const  & dof1,DOF2 const  & dof2, UInt
 {
   bool built = buildPattern(blockSize);
   ASSERT_PRE(built,"Error in VBR Pattern construction from DOF object");
-};
+}
 
 inline UInt VBRPatt::row(Diff_t const row,  Container & coldata, Container & position) const
 {
@@ -1484,11 +1484,11 @@ inline UInt VBRPatt::row(Diff_t const row,  Container & coldata, Container & pos
     for (UInt i=0; i<blsize; ++i){
       coldata.push_back(colblocdata[ibl-start]*blsize+i);
       position.push_back(_indx[ibl]+localr+i*blsize);
-    };
-  };
+    }
+  }
 
   return (end-start)*blsize;
-};
+}
 ////////////////////////////////////////////////////////////////////////
 //
 // C S R Symmetric Pattern
@@ -1580,7 +1580,7 @@ bool CSRPattSymm::buildPattern(DOF1 const & dof1){
   _diagfirst=true;
   dynpatt.clear(); // not sure if this helps...
   return true;
-};
+}
 
 inline
 std::pair<PatternDefs::Diff_t,bool>
@@ -1644,7 +1644,7 @@ MSRPatt::MSRPatt(DOF1 const & dof1, UInt const nbcomp)
   bool built;
   built = buildPattern(dof1, nbcomp);
   ASSERT_PRE(built,"Error in MSR Pattern construction from DOF object");
-};
+}
 
 // Miguel 12/2003
 //
@@ -1654,7 +1654,7 @@ MSRPatt::MSRPatt(const DOF& dof, const MESH& mesh, const UInt nbcomp)
   bool built;
   built = buildPattern(dof, mesh, nbcomp);
   ASSERT_PRE(built,"Error in MSR Pattern construction from DOF object");
-};
+}
 
 
 template<typename DOF1>

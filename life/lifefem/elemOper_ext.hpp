@@ -257,23 +257,23 @@ class trVdiv
 {
 public:
 
-  trVdiv(CurrentFE * fe, int ncomp):_fe1(fe), _fe2(fe), _ncomp(ncomp){}
+    trVdiv(CurrentFE * fe, int ncomp):_fe1(fe), _fe2(fe), _ncomp(ncomp){}
 
-  CurrentFE* fe1_ptr() {return _fe1;}
-  CurrentFE* fe2_ptr() {return _fe2;}
+    CurrentFE* fe1_ptr() {return _fe1;}
+    CurrentFE* fe2_ptr() {return _fe2;}
 
-  trVdiv(CurrentFE * fe1, CurrentFE * fe2, int ncomp):_fe1(fe1),_fe2(fe2),_ncomp(ncomp){}
+    trVdiv(CurrentFE * fe1, CurrentFE * fe2, int ncomp):_fe1(fe1),_fe2(fe2),_ncomp(ncomp){}
 
-  Real operator()(int i, int j, int iq, Real x, Real y,
-		  Real z,int ic, int jc)
-    {
-      return -_fe2->phi(j,iq)*_fe1->phiDer(i,ic,iq);
-    }
+    Real operator()(int i, int j, int iq, Real x, Real y,
+                    Real z,int ic, int jc)
+        {
+            return -_fe2->phi(j,iq)*_fe1->phiDer(i,ic,iq);
+        }
 
 private:
-  CurrentFE* _fe1; // MUST be pointers
-  CurrentFE* _fe2; // MUST be pointers
-  int _ncomp;
+    CurrentFE* _fe1; // MUST be pointers
+    CurrentFE* _fe2; // MUST be pointers
+    int _ncomp;
 };
 
 
@@ -486,7 +486,7 @@ EOExpr<P,EOBinOp<P,EOExpr<P,A>,EOExpr<P,B>,EOAdd<P> > >
   {
    typedef EOBinOp<P,EOExpr<P,A>,EOExpr<P,B>,EOAdd<P> > ExprT;
    return EOExpr<P,ExprT>(ExprT(a,b));
-  };
+  }
 
 template<typename P, typename A>
 EOExpr<P,EORBinOp<P,EOExpr<P,A>,EORMult<P> > >
@@ -494,7 +494,7 @@ EOExpr<P,EORBinOp<P,EOExpr<P,A>,EORMult<P> > >
   {
    typedef EORBinOp<P,EOExpr<P,A>,EORMult<P> > ExprT;
    return EOExpr<P,ExprT>(ExprT(a,b));
-  };
+  }
 
 template<typename P, typename A>
 EOExpr<P,EORBinOp<P,EOExpr<P,A>,EORMult<P> > >
@@ -502,7 +502,7 @@ EOExpr<P,EORBinOp<P,EOExpr<P,A>,EORMult<P> > >
   {
    typedef EORBinOp<P,EOExpr<P,A>,EORMult<P> > ExprT;
    return EOExpr<P,ExprT>(ExprT(a,b));
-  };
+  }
 
 template<typename P, typename A>
 EOExpr<P,EOFTBinOp<P,EOExpr<P,A>,EORMult<P> > >
@@ -510,7 +510,7 @@ EOExpr<P,EOFTBinOp<P,EOExpr<P,A>,EORMult<P> > >
   {
    typedef EOFTBinOp<P,EOExpr<P,A>,EORMult<P> > ExprT;
    return EOExpr<P,ExprT>(ExprT(t,a));
-  };
+  }
 
 template<typename P, typename A>
 EOExpr<P,EORTBinOp<P,EOExpr<P,A>,EORMult<P> > >
@@ -518,7 +518,7 @@ EOExpr<P,EORTBinOp<P,EOExpr<P,A>,EORMult<P> > >
   {
    typedef EORTBinOp<P,EOExpr<P,A>,EORMult<P> > ExprT;
    return EOExpr<P,ExprT>(ExprT(t,a));
-  };
+  }
 
 template<typename P, typename A>
 EOExpr<P,EOFBinOp<P,EOExpr<P,A>,EORMult<P> > >
@@ -526,7 +526,7 @@ EOExpr<P,EOFBinOp<P,EOExpr<P,A>,EORMult<P> > >
   {
    typedef EOFBinOp<P,EOExpr<P,A>,EORMult<P> > ExprT;
    return EOExpr<P,ExprT>(ExprT(a,f));
-  };
+  }
 
 template<typename P, typename A>
 EOExpr<P,EOFBinOp<P,EOExpr<P,A>,EORMult<P> > >
@@ -534,7 +534,7 @@ EOExpr<P,EOFBinOp<P,EOExpr<P,A>,EORMult<P> > >
   {
    typedef EOFBinOp<P,EOExpr<P,A>,EORMult<P> > ExprT;
    return EOExpr<P,ExprT>(ExprT(a,f));
-  };
+  }
 
 // STABILIZATION STUFF
 
@@ -557,8 +557,8 @@ class PhiFct
 {
 public:
 
-  PhiFct<FCT>(CurrentFE* fe,FCT& fcT):_fe(fe),_fcT(fcT){};
-  CurrentFE* fe_ptr() {return _fe;};
+  PhiFct<FCT>(CurrentFE* fe,FCT& fcT):_fe(fe),_fcT(fcT){}
+  CurrentFE* fe_ptr() {return _fe;}
 
   Real operator()(int j,int iq,Real x,Real y,Real z)
     {
@@ -594,9 +594,9 @@ class PurePhi
 {
 public:
 
-PurePhi(CurrentFE* fe): _fe(fe){};
+PurePhi(CurrentFE* fe): _fe(fe){}
 
-CurrentFE* fe_ptr() {return _fe;};
+CurrentFE* fe_ptr() {return _fe;}
 
 Real operator()(UInt k,UInt iq)
 {
@@ -615,9 +615,9 @@ class PureGrad
 {
 public:
 
- PureGrad(CurrentFE* fe): _fe(fe){};
+ PureGrad(CurrentFE* fe): _fe(fe){}
 
- CurrentFE* fe_ptr() {return _fe;};
+ CurrentFE* fe_ptr() {return _fe;}
 
  Real operator()(int k,int icoor,int iq)
  {
@@ -636,9 +636,9 @@ class PureDer2
 {
  public:
 
-  PureDer2( CurrentFE* fe ): _fe( fe ){} ;
+  PureDer2( CurrentFE* fe ): _fe( fe ){}
 
-  CurrentFE* fe_ptr() {return _fe;};
+  CurrentFE* fe_ptr() {return _fe;}
 
   Real operator()( UInt k ,UInt icoor,UInt jcoor,UInt iq )
     {
@@ -659,7 +659,7 @@ class Laplacian
 {
  public:
 
-  Laplacian<  PHD > (PHD& phD): _phD(phD){};
+  Laplacian<  PHD > (PHD& phD): _phD(phD){}
 
   Real operator()(UInt k ,UInt iq)
     {
@@ -686,8 +686,8 @@ class LS
 {
  public:
 
-  LS<L>(L &Lap,CurrentFE* fe,Real sigma,Real mu):_Lap(Lap),_fe(fe),_sigma(sigma),_mu(mu){};
-  CurrentFE* fe_ptr() {return _fe;};
+  LS<L>(L &Lap,CurrentFE* fe,Real sigma,Real mu):_Lap(Lap),_fe(fe),_sigma(sigma),_mu(mu){}
+  CurrentFE* fe_ptr() {return _fe;}
   Real operator()(UInt i,UInt iq)
     {
       return _mu*_Lap(i,iq)+_sigma*_fe->phi(i,iq);
@@ -711,7 +711,7 @@ class LSS
 {
  public:
 
-  LSS<PHD,VT>(PHD& phD,VT& Beta):_phD(phD),_Beta(Beta){};
+  LSS<PHD,VT>(PHD& phD,VT& Beta):_phD(phD),_Beta(Beta){}
 
   Real operator()(UInt k,UInt iq)
     {
@@ -741,7 +741,7 @@ class Stab
 {
  public:
 
-  Stab<LS,LSS,FCT>(LS& ols,LSS& olss,FCT& fct,Real Delta,Real Ro): _ols(ols),_olss(olss),_fct(fct),_Delta(Delta),_Ro(Ro){};
+  Stab<LS,LSS,FCT>(LS& ols,LSS& olss,FCT& fct,Real Delta,Real Ro): _ols(ols),_olss(olss),_fct(fct),_Delta(Delta),_Ro(Ro){}
 
   Real operator()(UInt i,UInt j,UInt iq,Real x ,Real y ,Real z,UInt ic=0,UInt jc=0)
     {
@@ -770,7 +770,7 @@ template<typename LS,typename LSS,typename FCT>
 class VStab
 {
  public:
-  VStab<LS,LSS,FCT>(LS& ols,LSS& olss,FCT& fct,Real Delta,Real Ro): _ols(ols),_olss(olss),_fct(fct),_Delta(Delta),_Ro(Ro){};
+  VStab<LS,LSS,FCT>(LS& ols,LSS& olss,FCT& fct,Real Delta,Real Ro): _ols(ols),_olss(olss),_fct(fct),_Delta(Delta),_Ro(Ro){}
 
  Real operator()(UInt i,UInt j,UInt iq,Real x,Real y,Real z,UInt ic,UInt jc)
    {

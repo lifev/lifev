@@ -32,5 +32,5 @@ Bdf& BdfNS::bdf_p()
 {
   return _bdf_p;
 }
-BdfNS::~BdfNS() {};
+BdfNS::~BdfNS() {}
 }

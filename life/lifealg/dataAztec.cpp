@@ -17,6 +17,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include <iostream>
+#include <vector>
+#include <fstream>
+
 #include "dataAztec.hpp"
 
 namespace LifeV
@@ -279,14 +282,14 @@ void DataAztec::dataAztecShowMe(std::ostream& c)
     c << "\n*** Values for data [aztec]\n\n";
     c << "aztec_solver            = " << aztec_solver << " ("
       << aztec_solver_str<< ")" << std::endl;
-    c << "aztec_scaling           = " << aztec_scaling << " (" 
+    c << "aztec_scaling           = " << aztec_scaling << " ("
       << aztec_scaling_str << ")" << std::endl;
-    c << "aztec_precond           = " << aztec_precond << " (" 
+    c << "aztec_precond           = " << aztec_precond << " ("
       << aztec_precond_str << ")" << std::endl;
     c << "aztec_tol               = " << aztec_tol << std::endl;
-    c << "aztec_conv              = " << aztec_conv << " (" 
+    c << "aztec_conv              = " << aztec_conv << " ("
       << aztec_conv_str << ")" << std::endl;
-    c << "aztec_output            = " << aztec_output << " (" 
+    c << "aztec_output            = " << aztec_output << " ("
       << aztec_output_str << ")" << std::endl;
     c << "aztec_pre_calc          = " << aztec_pre_calc << std::endl;
     c << "aztec_max_iter          = " << aztec_max_iter << std::endl;

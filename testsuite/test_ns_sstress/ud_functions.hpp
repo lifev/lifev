@@ -91,7 +91,7 @@ Real calc_g(const Real& time)
          return coeff22*dt*dt*dt*dt+coeff23*dt*dt+coeff21;
       }
        return 0.;
-};
+}
 
 // velocity imposed on the walls
 Real u_in(const Real& t, const Real& x, const Real& y, const Real& z,

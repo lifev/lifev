@@ -16,7 +16,7 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#include "sparseArray.hpp"
+#include <sparseArray.hpp>
 
 namespace LifeV
 {
@@ -37,8 +37,8 @@ void MultInvDiag(const std::vector<Real> &Diag,
 }
 
 //version for Datatype=Tab2d
-CSRMatr<CSRPatt,Tab2d>::
-CSRMatr(const CSRPatt &ex_pattern, UInt const nr, UInt const nc)
+template<>
+CSRMatr<CSRPatt,Tab2d>::CSRMatr(const CSRPatt &ex_pattern, UInt const nr, UInt const nc)
 {
   _Patt = &ex_pattern;
   Tab2d mzero(nr,nc);
@@ -47,9 +47,9 @@ CSRMatr(const CSRPatt &ex_pattern, UInt const nr, UInt const nc)
 }
 
 // version for block matrices
+template<>
 VectorBlock
-CSRMatr<CSRPatt,Tab2d>::
-trans_mult(const VectorBlock &v)
+CSRMatr<CSRPatt,Tab2d>::trans_mult(const VectorBlock &v)
 {
   UInt nblockr=_Patt->nRows(); // for square matrices...
   int blsize=_value[0].N(); // for square block
@@ -70,8 +70,9 @@ trans_mult(const VectorBlock &v)
 }
 
 // version for block matrices
-VectorBlock CSRMatr<CSRPatt,Tab2d>::
-operator*(const VectorBlock &v) const
+template<>
+VectorBlock
+CSRMatr<CSRPatt,Tab2d>::operator*(const VectorBlock &v) const
 {
   UInt nblockr=_Patt->nRows();
   UInt nblockc=_Patt->nCols();
@@ -85,13 +86,14 @@ operator*(const VectorBlock &v) const
     {
       for (UInt ii=_Patt->give_ia()[ir]-OFFSET;ii<_Patt->give_ia()[ir+1]-OFFSET;++ii)
 	ans.numBlock(ir)+=(_value[ii]*v.numBlock(_Patt->give_ja()[ii]-OFFSET));
-    };
+    }
   return ans;
 }
 
 // the case of block matrices with Tab2d block type.
-void CSRMatr<CSRPatt,Tab2d>::
-spy(std::string  const &filename)
+template<>
+void
+CSRMatr<CSRPatt,Tab2d>::spy(std::string  const &filename)
 {
   // Purpose: Matlab dumping and spy
   std::string name=filename, uti=" , ";
@@ -128,11 +130,12 @@ spy(std::string  const &filename)
 
   file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"
            << std::endl;
-};
+}
 //version without using static (I think it is better)
 // Modified by A. Gilardi. 03/02.
-void colUnify(CSRMatr<CSRPatt,double> &ans, const CSRMatr<CSRPatt,double> &Mat1,
-	      const CSRMatr<CSRPatt,double> &Mat2)
+void
+colUnify(CSRMatr<CSRPatt,double> &ans, const CSRMatr<CSRPatt,double> &Mat1,
+         const CSRMatr<CSRPatt,double> &Mat2)
 {
   typedef std::vector<double>::const_iterator ConstIter;
   typedef std::vector<double>::iterator Iter;
@@ -441,8 +444,8 @@ double nihil(double val){
 //-----------------------------------------------------------------------
 
 //for CSR or MSR normal pattern
-DiagPreconditioner<Vector>::
-DiagPreconditioner(const CSRMatr<CSRPatt,double> &M)
+template<>
+DiagPreconditioner<Vector>::DiagPreconditioner(const CSRMatr<CSRPatt,double> &M)
 {
   double loc_val=0.0;
   UInt M_size=M.Patt()->nRows();
@@ -457,8 +460,8 @@ DiagPreconditioner(const CSRMatr<CSRPatt,double> &M)
       _diag(i) = 1./loc_val ;
     };
 }
-DiagPreconditioner<Vector>::
-DiagPreconditioner(const MSRMatr<double> &M)
+template<>
+DiagPreconditioner<Vector>::DiagPreconditioner(const MSRMatr<double> &M)
 {
   double loc_val=0.0;
   UInt M_size=M.Patt()->nRows();
@@ -474,8 +477,8 @@ DiagPreconditioner(const MSRMatr<double> &M)
     };
 }
 //for VBR pattern
-DiagPreconditioner<Vector>::
-DiagPreconditioner(const VBRMatr<double> &M)
+template<>
+DiagPreconditioner<Vector>::DiagPreconditioner(const VBRMatr<double> &M)
 {
   double loc_val=0.0;
   UInt Nblocks=M.Patt()->nRows();
@@ -494,8 +497,8 @@ DiagPreconditioner(const VBRMatr<double> &M)
 }
 
 //for CSR block pattern
-DiagPreconditioner<VectorBlock>::
-DiagPreconditioner(const CSRMatr<CSRPatt,Tab2d> &M)
+template<>
+DiagPreconditioner<VectorBlock>::DiagPreconditioner(const CSRMatr<CSRPatt,Tab2d> &M)
 {
   UInt Nblocks=M.Patt()->nRows();
   int blockSize =M.value()[0].N();
@@ -517,9 +520,9 @@ DiagPreconditioner(const CSRMatr<CSRPatt,Tab2d> &M)
     };
 }
 //solve the diagonal system
+template<>
 Vector
-DiagPreconditioner<Vector>::
-solve(const Vector &x) const
+DiagPreconditioner<Vector>::solve(const Vector &x) const
 {
   Vector y(x.size());
 
@@ -528,9 +531,9 @@ solve(const Vector &x) const
 
   return y;
 }
+template<>
 VectorBlock
-DiagPreconditioner<VectorBlock>::
-solve(const VectorBlock &x) const
+DiagPreconditioner<VectorBlock>::solve(const VectorBlock &x) const
 {
   VectorBlock y(x.size(),x.numBlock(0).N());
 
@@ -545,8 +548,8 @@ solve(const VectorBlock &x) const
 //-----------------------------------------------------------------------
 
 //for CSR or MSR normal pattern
-IDPreconditioner<Vector>::
-IDPreconditioner(const CSRMatr<CSRPatt,double> &M)
+template<>
+IDPreconditioner<Vector>::IDPreconditioner(const CSRMatr<CSRPatt,double> &M)
 {
   UInt M_size=M.Patt()->nRows();
   Vector v_id(M_size);
@@ -554,8 +557,8 @@ IDPreconditioner(const CSRMatr<CSRPatt,double> &M)
   _diag=v_id;
 }
 
-IDPreconditioner<Vector>::
-IDPreconditioner(const MSRMatr<double> &M)
+template<>
+IDPreconditioner<Vector>::IDPreconditioner(const MSRMatr<double> &M)
 {
   UInt M_size=M.Patt()->nRows();
   Vector v_id(M_size);
@@ -564,8 +567,8 @@ IDPreconditioner(const MSRMatr<double> &M)
 }
 
 //for VBR pattern
-IDPreconditioner<Vector>::
-IDPreconditioner(const VBRMatr<double> &M)
+template<>
+IDPreconditioner<Vector>::IDPreconditioner(const VBRMatr<double> &M)
 {
   UInt Nblocks=M.Patt()->nRows();
   UInt blockSize = M.Patt()->rpntr()[1]-M.Patt()->rpntr()[0];
@@ -575,8 +578,8 @@ IDPreconditioner(const VBRMatr<double> &M)
   _diag=v_id;
 }
 //for CSR block pattern
-IDPreconditioner<VectorBlock>::
-IDPreconditioner(const CSRMatr<CSRPatt,Tab2d> &M)
+template<>
+IDPreconditioner<VectorBlock>::IDPreconditioner(const CSRMatr<CSRPatt,Tab2d> &M)
 {
   int Nblocks=M.Patt()->nRows();
   int blockSize =M.value()[0].N();
@@ -586,14 +589,16 @@ IDPreconditioner(const CSRMatr<CSRPatt,Tab2d> &M)
 }
 
 //solve the diagonal system
+template<>
 Vector
-IDPreconditioner<Vector>::
-solve(const Vector &x) const
-{return x;}
+IDPreconditioner<Vector>::solve(const Vector &x) const
+{
+    return x;
+}
 
+template<>
 VectorBlock
-IDPreconditioner<VectorBlock>::
-solve(const VectorBlock &x) const
+IDPreconditioner<VectorBlock>::solve(const VectorBlock &x) const
 {return x;}
 
 }

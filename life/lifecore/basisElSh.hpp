@@ -20,7 +20,7 @@
 /*! Contains the basic element shapes, to be used by Geometric and Finite
   Elements
 
-  $Header: /cvsroot/lifev/lifev/life/lifecore/Attic/basisElSh.hpp,v 1.2 2004-08-29 15:53:20 prudhomm Exp $
+  $Header: /cvsroot/lifev/lifev/life/lifecore/Attic/basisElSh.hpp,v 1.3 2004-10-05 09:36:08 prudhomm Exp $
 
  \version 0.0 Experimental   19/8/99. Luca Formaggia
 
@@ -339,7 +339,7 @@ ID reversePoint<GeoShape>::
 operate(ID const & point)
 {
   return point <=GeoShape::numVertices? GeoShape::numVertices-point+1:GeoShape::numPoints-point+GeoShape::numVertices+1;
-};
+}
 }
 
 #endif

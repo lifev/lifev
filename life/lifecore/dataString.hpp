@@ -86,7 +86,7 @@ class DataStringList
     std::string _title;
     std::vector<DataString> _list;
 public:
-    DataStringList::DataStringList(std::string title);
+    DataStringList(std::string title);
     void add(std::string str,int val,std::string help);
     void showMe(std::ostream& c= std::cout,bool val=false) const;//!<val=true:the values are shown
     int  value(const std::string& str) const;

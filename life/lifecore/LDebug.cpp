@@ -81,7 +81,7 @@ enum DebugLevels
 	LDEBUG_INFO  = 0,
 	LDEBUG_WARN  = 1,
 	LDEBUG_ERROR = 2,
-	LDEBUG_FATAL = 3,
+	LDEBUG_FATAL = 3
 };
 struct LDebugStream::Private
 {

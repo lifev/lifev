@@ -18,7 +18,7 @@
 */
 /*! file geoElement.h
 \brief Geometric elements
-\version $Revision: 1.6 $ Luca Formaggia
+\version $Revision: 1.7 $ Luca Formaggia
 
   Introduces all the geometric elements
 */
@@ -196,17 +196,17 @@ public:
 template <typename MC>
 GeoElement0D<MC>::GeoElement0D():
 Geo0D(), MC::PointMarker()
-{};
+{}
 
 template <typename MC>
 GeoElement0D<MC>::GeoElement0D(ID id,bool boundary):
 Geo0D(id,boundary), MC::PointMarker()
-{};
+{}
 
 template <typename MC>
 GeoElement0D<MC>::GeoElement0D(ID id,Real x, Real y, Real z, bool boundary):
 Geo0D(id,x,y,z,boundary), MC::PointMarker()
-{};
+{}
 
 template <typename MC>
 GeoElement0D<MC>::GeoElement0D(GeoElement0D<MC> const & g):
@@ -242,7 +242,7 @@ GeoElement1D<GEOSHAPE,MC>::GeoElement1D(ID id):GeoND<GEOSHAPE,GeoElement0D<MC> >
 #endif
 {
   ASSERT_PRE( GEOSHAPE::nDim == 1 , "geoElement2D with incorrect GeoSHape" ) ;
-};
+}
 
 /*-------------------------------------------------------------------------
   GeoElement2D
@@ -265,7 +265,7 @@ GeoElement2D<GEOSHAPE,MC>::GeoElement2D(ID id):
 #endif
 {
   ASSERT_PRE( GEOSHAPE::nDim == 2 , "geoElement2D with incorrect GeoSHape" ) ;
-};
+}
 
 
 /*-------------------------------------------------------------------------

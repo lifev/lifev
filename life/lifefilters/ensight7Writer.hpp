@@ -26,14 +26,16 @@
    \author Martin Prosi <martin.prosi@epfl.ch>
    \date 2004-09-10
  */
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <fstream>
+#include <sstream>
+#include <cstdio>
+#include <string>
+
 #include "lifeV.hpp"
 #include "NavierStokesSolverPC.hpp"
-
-#include <vector>
-#include <fstream>
-#include <ctype.h>
-#include <stdio.h>
-#include <string>
 
 namespace LifeV
 {

@@ -18,8 +18,8 @@
 */
 /*! file regionMesh3D.h
   \brief The mesh classes interfaces
-  \version $Revision: 1.9 $ Luca Formaggia
-  \version $Revision: 1.9 $ Miguel Fernandez
+  \version $Revision: 1.10 $ Luca Formaggia
+  \version $Revision: 1.10 $ Miguel Fernandez
 
   Introduces the RegionMesh3D class
 */
@@ -1619,7 +1619,7 @@ ASSERT_PRE( Pos==1 || Pos==2 , "Wrong position (1 or 2)" ) ;
 ASSERT_BD( i >0 ) ;
 if (Pos==1)  {return (faceList[i-1]).ad_first();}
 else { return (faceList[i-1]).ad_second();}
-};
+}
 
 template<typename GEOSHAPE, typename MC>
 INLINE
@@ -1631,7 +1631,7 @@ ASSERT_PRE( Pos==1 || Pos==2 , "Wrong position (1 or 2)" ) ;
 //ASSERT_BD( i >0 ) ;
 if (Pos==1)  {return f.ad_first();}
 else { return f.ad_second();}
-};
+}
 
 
 template<typename GEOSHAPE, typename MC>
@@ -1640,7 +1640,7 @@ void
 RegionMesh3D<GEOSHAPE,MC>::setLinkSwitch(std::string const & _s)
 {
   ASSERT0(switches.set(_s),"Switch named " << _s <<" is not allowed");
-};
+}
 
 template<typename GEOSHAPE, typename MC>
 INLINE
@@ -1648,7 +1648,7 @@ void
 RegionMesh3D<GEOSHAPE,MC>::unsetLinkSwitch(std::string const & _s)
 {
   ASSERT0(switches.unset(_s),"Switch named " << _s <<" is not allowed");
-};
+}
 
 template<typename GEOSHAPE, typename MC>
 INLINE
@@ -1656,7 +1656,7 @@ bool
 RegionMesh3D<GEOSHAPE,MC>::getLinkSwitch(std::string const & _s) const
 {
   return switches.test(_s);
-};
+}
 
 template<typename GEOSHAPE, typename MC>
 INLINE

@@ -29,6 +29,8 @@
 #ifndef _NAVIERSTOKESHANDLER_H_
 #define _NAVIERSTOKESHANDLER_H_
 
+#include <sstream>
+
 
 #include "lifeV.hpp"
 #include "refFE.hpp"
@@ -216,21 +218,21 @@ NavierStokesHandler(const GetPot& data_file,  const RefFE& refFE_u,
      DataNavierStokes<Mesh>(data_file),
      _refFE_u(refFE_u),
      _refFE_p(refFE_p),
-     _dof_u(_mesh,_refFE_u),
-     _dof_p(_mesh,_refFE_p),
+     _dof_u(this->_mesh,_refFE_u),
+     _dof_p(this->_mesh,_refFE_p),
      _dim_u(_dof_u.numTotalDof()),
      _dim_p(_dof_p.numTotalDof()),
      _Qr_u(Qr_u),
      _bdQr_u(bdQr_u),
      _Qr_p(Qr_p),
      _bdQr_p(bdQr_p),
-     _fe_u(_refFE_u,getGeoMap(_mesh),_Qr_u),
-     _feBd_u(_refFE_u.boundaryFE(),getGeoMap(_mesh).boundaryMap(),_bdQr_u),
-     _fe_p(_refFE_p,getGeoMap(_mesh),_Qr_p),
+     _fe_u(_refFE_u,getGeoMap(this->_mesh),_Qr_u),
+     _feBd_u(_refFE_u.boundaryFE(),getGeoMap(this->_mesh).boundaryMap(),_bdQr_u),
+     _fe_p(_refFE_p,getGeoMap(this->_mesh),_Qr_p),
      _u(_dim_u),
      _p(_dim_p),
      _BCh_u(BCh_u),
-     _bdf(_order_bdf),_ns_post_proc(_mesh,_feBd_u,_dof_u,NDIM), // /******************
+     _bdf(this->_order_bdf),_ns_post_proc(this->_mesh,_feBd_u,_dof_u,NDIM), // /******************
      _count(0) {}
 
 
@@ -297,9 +299,9 @@ NavierStokesHandler<Mesh>::postProcess() {
 
   ++_count;
 
-  if (fmod(float(_count),float(_verbose)) == 0.0) {
+  if (fmod(float(_count),float(this->_verbose)) == 0.0) {
     std::cout << "  o-  Post-processing \n";
-    index << (_count/_verbose);
+    index << (_count/this->_verbose);
 
     switch( index.str().size() ) {
     case 1:
@@ -314,17 +316,17 @@ NavierStokesHandler<Mesh>::postProcess() {
     }
 
     // postprocess data file for GMV
-    wr_gmv_ascii("test."+name+".inp",_mesh, _dim_u,_u.giveVec(), _p.giveVec());
+    wr_gmv_ascii("test."+name+".inp",this->_mesh, _dim_u,_u.giveVec(), _p.giveVec());
 
     // postprocess data file for medit
     wr_medit_ascii_scalar("press."+name+".bb",_p.giveVec(),_p.size());
-    wr_medit_ascii_scalar("vel_x."+name+".bb",_u.giveVec(),_mesh.numVertices());
-    wr_medit_ascii_scalar("vel_y."+name+".bb",_u.giveVec() + _dim_u,_mesh.numVertices());
-    wr_medit_ascii_scalar("vel_z."+name+".bb",_u.giveVec() + 2*_dim_u,_mesh.numVertices());
-    system(("ln -s "+_mesh_dir+_mesh_file+" press."+name+".mesh").data());
-    system(("ln -s "+_mesh_dir+_mesh_file+" vel_x."+name+".mesh").data());
-    system(("ln -s "+_mesh_dir+_mesh_file+" vel_y."+name+".mesh").data());
-    system(("ln -s "+_mesh_dir+_mesh_file+" vel_z."+name+".mesh").data());
+    wr_medit_ascii_scalar("vel_x."+name+".bb",_u.giveVec(),this->_mesh.numVertices());
+    wr_medit_ascii_scalar("vel_y."+name+".bb",_u.giveVec() + _dim_u,this->_mesh.numVertices());
+    wr_medit_ascii_scalar("vel_z."+name+".bb",_u.giveVec() + 2*_dim_u,this->_mesh.numVertices());
+    system(("ln -s "+this->_mesh_dir+this->_mesh_file+" press."+name+".mesh").data());
+    system(("ln -s "+this->_mesh_dir+this->_mesh_file+" vel_x."+name+".mesh").data());
+    system(("ln -s "+this->_mesh_dir+this->_mesh_file+" vel_y."+name+".mesh").data());
+    system(("ln -s "+this->_mesh_dir+this->_mesh_file+" vel_z."+name+".mesh").data());
   }
 }
 
@@ -337,10 +339,10 @@ NavierStokesHandler<Mesh>::dx_write_sol(std::string const& file_sol, std::string
   std::string file_vel=file_sol+"_vel.dx";
   std::string file_pre=file_sol+"_pre.dx";
 
-  wr_opendx_header(file_pre,_mesh,_dof_p,_fe_p,fe_type_pre);
+  wr_opendx_header(file_pre,this->_mesh,_dof_p,_fe_p,fe_type_pre);
   wr_opendx_scalar(file_pre,"pression",_p);
 
-  wr_opendx_header(file_vel,_mesh,_dof_u,_fe_u,fe_type_vel);
+  wr_opendx_header(file_vel,this->_mesh,_dof_u,_fe_u,fe_type_vel);
   wr_opendx_vector(file_vel, "velocity", _u, _u.nbcomp());
 
 }
@@ -380,9 +382,9 @@ NavierStokesHandler<Mesh>::initialize(const Function& u0) {
   ID lDof;
 
   // Loop on elements of the mesh
-  for (ID iElem=1; iElem <= _mesh.numVolumes(); ++iElem){
+  for (ID iElem=1; iElem <= this->_mesh.numVolumes(); ++iElem){
 
-    _fe_u.updateJac( _mesh.volume(iElem) );
+    _fe_u.updateJac( this->_mesh.volume(iElem) );
 
     // Vertex based Dof
     if ( nDofpV ) {
@@ -474,10 +476,10 @@ NavierStokesHandler<Mesh>::initialize(const Function& u0, const Function& p0, Re
   ID nbComp = _u.nbcomp(); // Number of components of the velocity
 
 
-  _bdf.bdf_u().initialize_unk(u0,_mesh,_refFE_u,_fe_u,_dof_u,t0,dt,nbComp);
+  _bdf.bdf_u().initialize_unk(u0,this->_mesh,_refFE_u,_fe_u,_dof_u,t0,dt,nbComp);
   _u=*(_bdf.bdf_u().unk().begin()); // initialize _u with the first element in bdf_u.unk (=last value)
 
-  _bdf.bdf_p().initialize_unk(p0,_mesh,_refFE_p,_fe_p,_dof_p,t0,dt,1);
+  _bdf.bdf_p().initialize_unk(p0,this->_mesh,_refFE_p,_fe_p,_dof_p,t0,dt,1);
   _p=*(_bdf.bdf_p().unk().begin()); // initialize _u with the first element in bdf_u.unk (=last value)
 
 
@@ -531,7 +533,7 @@ NavierStokesHandler<Mesh>::flux(const EntityFlag& flag) {
   UInt nDofElemV = nElemV*nDofpV; // number of vertex's Dof on a Element
   UInt nDofElemE = nElemE*nDofpE; // number of edge's Dof on a Element
 
-  UInt bdnF  = _mesh.numBFaces();    // number of faces on boundary
+  UInt bdnF  = this->_mesh.numBFaces();    // number of faces on boundary
 
   Real flux = 0.0;
   __gnu_cxx::slist<std::pair<ID, SimpleVect<ID> > > faces;
@@ -547,7 +549,7 @@ NavierStokesHandler<Mesh>::flux(const EntityFlag& flag) {
   // with marker = flag
   //
   for (ID i=1 ; i<=bdnF; ++i) {
-    marker = _mesh.boundaryFace(i).marker();
+    marker = this->_mesh.boundaryFace(i).marker();
     if ( marker == flag  ) {
       faces.push_front(make_pair(i,SimpleVect<ID>(nDofF)));
     }
@@ -561,17 +563,17 @@ NavierStokesHandler<Mesh>::flux(const EntityFlag& flag) {
 
     ibF = j->first;
 
-    iElAd = _mesh.boundaryFace(ibF).ad_first();  // id of the element adjacent to the face
-    iFaEl = _mesh.boundaryFace(ibF).pos_first(); // local id of the face in its adjacent element
+    iElAd = this->_mesh.boundaryFace(ibF).ad_first();  // id of the element adjacent to the face
+    iFaEl = this->_mesh.boundaryFace(ibF).pos_first(); // local id of the face in its adjacent element
 
     // Vertex based Dof
     if ( nDofpV ) {
 
       // loop on face vertices
       for (ID iVeFa=1; iVeFa<=nFaceV; ++iVeFa){
-	
+
 	iVeEl = GeoShape::fToP(iFaEl,iVeFa); // local vertex number (in element)
-	
+
 	// Loop number of Dof per vertex
 	for (ID l=1; l<=nDofpV; ++l) {
 	  lDof =   (iVeFa-1) * nDofpV + l ; // local Dof j-esimo grado di liberta' su una faccia
@@ -586,11 +588,11 @@ NavierStokesHandler<Mesh>::flux(const EntityFlag& flag) {
 
       // loop on face edges
       for (ID iEdFa=1; iEdFa<=nFaceE; ++iEdFa) {
-	
+
 	iEdEl  = GeoShape::fToE(iFaEl,iEdFa).first; // local edge number (in element)
 	// Loop number of Dof per edge
 	for (ID l=1; l<=nDofpE; ++l) {
-	
+
 	  lDof =  nDofFV + (iEdFa-1) * nDofpE + l ; // local Dof sono messi dopo gli lDof dei vertici
 	  gDof =  _dof_u.localToGlobal( iElAd, nDofElemV + (iEdEl-1)*nDofpE + l); // global Dof
 	  j->second( lDof ) =  gDof; // local to global on this face
@@ -605,8 +607,8 @@ NavierStokesHandler<Mesh>::flux(const EntityFlag& flag) {
 	lDof = nDofFE + nDofFV + l; // local Dof sono messi dopo gli lDof dei vertici e dopo quelli degli spigoli
 	gDof = _dof_u.localToGlobal( iElAd, nDofElemE + nDofElemV + (iFaEl-1)*nDofpF + l); // global Dof
 	j->second( lDof ) =  gDof; // local to global on this face
-      }	
-    }	
+      }
+    }
   }
 
   // Number of velocity components
@@ -627,7 +629,7 @@ NavierStokesHandler<Mesh>::flux(const EntityFlag& flag) {
     }
 
     // Updating quadrature data on the current face
-    _feBd_u.updateMeasNormalQuadPt(_mesh.boundaryFace(j->first));
+    _feBd_u.updateMeasNormalQuadPt(this->_mesh.boundaryFace(j->first));
 
     // Quadrautre formula
     // Loop on quadrature points

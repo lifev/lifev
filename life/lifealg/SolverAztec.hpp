@@ -29,8 +29,7 @@
 #ifndef SolverAztec_H
 #define SolverAztec_H 1
 
-#include <iostream>
-#include "dataAztec.hpp"
+#include <dataAztec.hpp>
 #include <vecUnknown.hpp>
 
 class GetPot;

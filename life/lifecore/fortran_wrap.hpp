@@ -221,7 +221,7 @@ template <class T>
 
 inline CHARACTER::CHARACTER(char* cstring)
   : rep(cstring), len(strlen(cstring))
-{};
+{}
 
 inline CHARACTER::CHARACTER(char* cstring, const size_t lstr)
   : rep(cstring), len(lstr)

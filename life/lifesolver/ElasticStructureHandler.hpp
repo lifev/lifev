@@ -49,91 +49,91 @@ namespace LifeV
 
 template <typename Mesh>
 class ElasticStructureHandler:
-public DataElasticStructure<Mesh> {
+        public DataElasticStructure<Mesh> {
 
- public:
+public:
 
-  typedef Real (*Function)(const Real&, const Real&, const Real&, const Real&, const ID&);
+    typedef Real (*Function)(const Real&, const Real&, const Real&, const Real&, const ID&);
 
-  //! Constructor
-  /*!
-    \param data_file GetPot data file
-    \param refFE reference FE for the displacement
-    \param Qr volumic quadrature rule
-    \param bdQr surface quadrature
-    \param BCh boundary conditions for the displacement
-  */
-  ElasticStructureHandler(const GetPot& data_file,  const RefFE& refFE,
-			  const QuadRule& Qr, const QuadRule& bdQr, BC_Handler& BCh);
+    //! Constructor
+    /*!
+      \param data_file GetPot data file
+      \param refFE reference FE for the displacement
+      \param Qr volumic quadrature rule
+      \param bdQr surface quadrature
+      \param BCh boundary conditions for the displacement
+    */
+    ElasticStructureHandler(const GetPot& data_file,  const RefFE& refFE,
+                            const QuadRule& Qr, const QuadRule& bdQr, BC_Handler& BCh);
 
-  //! Sets initial condition for the displacment en velocity
-  void initialize(const Function& d0, const Function& w0);
+    //! Sets initial condition for the displacment en velocity
+    void initialize(const Function& d0, const Function& w0);
 
-  //! Update the right  hand side  for time advancing
-  /*!
-    \param source volumic force
-    \param time present time
-  */
-  virtual void timeAdvance(const Function source, const Real& time) = 0;
+    //! Update the right  hand side  for time advancing
+    /*!
+      \param source volumic force
+      \param time present time
+    */
+    virtual void timeAdvance(const Function source, const Real& time) = 0;
 
-  //! Solve the non-linear problem
-  virtual void iterate() = 0;
+    //! Solve the non-linear problem
+    virtual void iterate() = 0;
 
-  //! Returns the displacement vector
-  PhysVectUnknown<Vector>& d();
+    //! Returns the displacement vector
+    PhysVectUnknown<Vector>& d();
 
-  //! Returns the velocity vector
-  PhysVectUnknown<Vector>& w();
+    //! Returns the velocity vector
+    PhysVectUnknown<Vector>& w();
 
-  //! Returns the displacement Dof
-  const Dof& dDof() const;
+    //! Returns the displacement Dof
+    const Dof& dDof() const;
 
-  //! Returns the quadrature rule
-  CurrentFE& currentFE();
+    //! Returns the quadrature rule
+    CurrentFE& currentFE();
 
-  //! Postprocessing
-  void postProcess();
+    //! Postprocessing
+    void postProcess();
 
-  //! Do nothing destructor
-  virtual ~ElasticStructureHandler() {}
+    //! Do nothing destructor
+    virtual ~ElasticStructureHandler() {}
 
- protected:
+protected:
 
-  //! Reference FE
-  const RefFE& _refFE;
+    //! Reference FE
+    const RefFE& _refFE;
 
-  //! The Dof object
-  Dof _dof;
+    //! The Dof object
+    Dof _dof;
 
-  //! The number of total displacement dofs
-  UInt _dim;
+    //! The number of total displacement dofs
+    UInt _dim;
 
-  //! Quadrature rule for volumic elementary computations
-  const QuadRule& _Qr;
+    //! Quadrature rule for volumic elementary computations
+    const QuadRule& _Qr;
 
-  //! Quadrature rule for elementary computations
-  const QuadRule& _bdQr;
+    //! Quadrature rule for elementary computations
+    const QuadRule& _bdQr;
 
-  //! Current FE
-  CurrentFE _fe;
+    //! Current FE
+    CurrentFE _fe;
 
-  //! Current boundary FE
-  CurrentBdFE _feBd;
+    //! Current boundary FE
+    CurrentBdFE _feBd;
 
-  //! The displacement
-  PhysVectUnknown<Vector> _d;
+    //! The displacement
+    PhysVectUnknown<Vector> _d;
 
-  //! The velocity
-  PhysVectUnknown<Vector> _w;
+    //! The velocity
+    PhysVectUnknown<Vector> _w;
 
-  //! The BC handler
-  BC_Handler& _BCh;
+    //! The BC handler
+    BC_Handler& _BCh;
 
-  //! The actual time
-  Real _time;
+    //! The actual time
+    Real _time;
 
-  //! Aux. var. for PostProc
-  UInt _count;
+    //! Aux. var. for PostProc
+    UInt _count;
 };
 
 
@@ -147,15 +147,16 @@ public DataElasticStructure<Mesh> {
 template <typename Mesh>
 ElasticStructureHandler<Mesh>::
 ElasticStructureHandler(const GetPot& data_file,  const RefFE& refFE,
-			const QuadRule& Qr, const QuadRule& bdQr, BC_Handler& BCh):
-     DataElasticStructure<Mesh>(data_file),
+                        const QuadRule& Qr, const QuadRule& bdQr, BC_Handler& BCh)
+    :
+    DataElasticStructure<Mesh>(data_file),
      _refFE(refFE),
-     _dof(_mesh,_refFE),
+     _dof(this->_mesh,_refFE),
      _dim(_dof.numTotalDof()),
      _Qr(Qr),
      _bdQr(bdQr),
-     _fe(_refFE,getGeoMap(_mesh),_Qr),
-     _feBd(_refFE.boundaryFE(),getGeoMap(_mesh).boundaryMap(),_bdQr),
+     _fe(_refFE,getGeoMap(this->_mesh),_Qr),
+     _feBd(_refFE.boundaryFE(),getGeoMap(this->_mesh).boundaryMap(),_bdQr),
      _d(_dim),
      _w(_dim),
      _BCh(BCh),
@@ -196,9 +197,9 @@ ElasticStructureHandler<Mesh>::postProcess() {
 
   ++_count;
 
-  if (fmod(float(_count),float(_verbose)) == 0.0) {
+  if (fmod(float(_count),float(this->_verbose)) == 0.0) {
     std::cout << "  o-  Post-processing \n";
-    index << (_count/_verbose);
+    index << (_count/this->_verbose);
 
     switch( index.str().size() ) {
     case 1:
@@ -213,15 +214,15 @@ ElasticStructureHandler<Mesh>::postProcess() {
     }
 
     namedef = "defor."+name+".mesh";
-    wr_medit_ascii_scalar("dep_x."+name+".bb",_d.giveVec(),_mesh.numVertices());
-    wr_medit_ascii_scalar("dep_y."+name+".bb",_d.giveVec() + _dim,_mesh.numVertices());
-    wr_medit_ascii_scalar("dep_z."+name+".bb",_d.giveVec() + 2*_dim,_mesh.numVertices());
-    wr_medit_ascii2(namedef, _mesh, _d, _factor);
-    // wr_medit_ascii_vector("veloc."+name+".bb",_u.giveVec(),_mesh.numVertices(),_dim_u);
+    wr_medit_ascii_scalar("dep_x."+name+".bb",_d.giveVec(),this->_mesh.numVertices());
+    wr_medit_ascii_scalar("dep_y."+name+".bb",_d.giveVec() + _dim,this->_mesh.numVertices());
+    wr_medit_ascii_scalar("dep_z."+name+".bb",_d.giveVec() + 2*_dim,this->_mesh.numVertices());
+    wr_medit_ascii2(namedef, this->_mesh, _d, this->_factor);
+    // wr_medit_ascii_vector("veloc."+name+".bb",_u.giveVec(),this->_mesh.numVertices(),_dim_u);
     system(("ln -s "+namedef  +" dep_x."+name+".mesh").data());
     system(("ln -s "+namedef  +" dep_y."+name+".mesh").data());
     system(("ln -s "+namedef  +" dep_z."+name+".mesh").data());
-    // system(("ln -s "+_mesh_file+" veloc."+name+".mesh").data());
+    // system(("ln -s "+this->_mesh_file+" veloc."+name+".mesh").data());
   }
 }
 
@@ -255,9 +256,9 @@ ElasticStructureHandler<Mesh>::initialize(const Function& d0, const Function& w0
   ID lDof;
 
   // Loop on elements of the mesh
-  for (ID iElem=1; iElem <= _mesh.numVolumes(); ++iElem) {
+  for (ID iElem=1; iElem <= this->_mesh.numVolumes(); ++iElem) {
 
-    _fe.updateJac( _mesh.volume(iElem) );
+    _fe.updateJac( this->_mesh.volume(iElem) );
 
     // Vertex based Dof
     if ( nDofpV ) {

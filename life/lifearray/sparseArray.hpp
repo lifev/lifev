@@ -48,24 +48,29 @@
 /---------------------------------------------------------------------------*/
 #ifndef _SPARSE_ARRAY_HH
 #define _SPARSE_ARRAY_HH
-#ifndef OFFSET
-#define OFFSET 0 // for the Fortran vs C numbering
-#endif
-#include "lifeV.hpp"
-#ifndef _LIFEV_HH_
-//more correct version
-typedef size_t  UInt;
-typedef std::vector<UInt>::iterator UIIter;
-#endif
+
 #include <fstream>
 #include<set>
 #include<algorithm>
 #include<string>
 #include<utility>
-#include "pattern.hpp"
-#ifndef _VEC_UNKNOWN_HH
-#include "vecUnknown.hpp"
+
+
+#ifndef OFFSET
+#define OFFSET 0 // for the Fortran vs C numbering
 #endif
+#include <lifeV.hpp>
+
+#if 0
+#ifndef _LIFEV_HH_
+//more correct version
+typedef size_t  UInt;
+typedef std::vector<UInt>::iterator UIIter;
+#endif
+#endif
+
+#include <pattern.hpp>
+#include <vecUnknown.hpp>
 
 namespace LifeV
 {
@@ -850,6 +855,12 @@ private:
 
 };
 
+/**
+   helper function
+ */
+double nihil(double val);
+
+
 ////////////////////////////////////////////////////////////////
 //
 // DiagPreconditioner class for IML++ dense preconditioner matrix
@@ -923,7 +934,12 @@ public:
 // CSR - VALUES
 //------------------------------------------------------------------------------------------------------
 template<typename PatternType, typename DataType>
-CSRMatr<PatternType,DataType>::CSRMatr():_Patt(0){};
+CSRMatr<PatternType,DataType>::CSRMatr()
+    :
+    _Patt(0)
+{
+    // nothing to do here
+}
 
 template<typename PatternType,typename DataType>
 CSRMatr<PatternType,DataType>::
@@ -950,7 +966,10 @@ CSRMatr(const PatternType &ex_pattern, const std::vector<DataType> &ex_value)
 template<typename PatternType, typename DataType>
 CSRMatr<PatternType,DataType>::
 CSRMatr(const CSRMatr<PatternType,DataType> &RightHandCSR):
-  _value(RightHandCSR.value()),_Patt(RightHandCSR.Patt()) {};
+  _value(RightHandCSR.value()),_Patt(RightHandCSR.Patt())
+{
+    // nothing to do here
+}
 
 template<typename PatternType,typename DataType>
 CSRMatr<PatternType,DataType>::
@@ -970,7 +989,7 @@ CSRMatr<PatternType,DataType>::operator= (const CSRMatr<PatternType,DataType> &R
       _value = RhCsr.value();
     }
   return *this;
-};
+}
 
 template<typename PatternType, typename DataType>
 CSRMatr<PatternType, DataType>&
@@ -989,7 +1008,7 @@ CSRMatr<PatternType, DataType>::operator= (const MSRMatr<DataType>& msrMatr)
         }
     }
     return *this;
-};
+}
 
 template<typename PatternType, typename DataType>
 void
@@ -998,7 +1017,7 @@ set_mat(UInt where, DataType loc_val)
 {
   _value[where] = loc_val;
   return;
-};
+}
 
 template<typename PatternType, typename DataType>
 void
@@ -1008,7 +1027,7 @@ set_mat(UInt row, UInt col, DataType loc_val)
   std::pair<UInt,bool> where = *_Patt.locate_index(row,col);
   if (where.second) _value[where.first] = loc_val;
   return;
-};
+}
 
 template<typename PatternType, typename DataType>
 void
@@ -1020,14 +1039,19 @@ set_mat_inc(UInt row, UInt col, DataType loc_val)
   if (where.second) _value[where.first] += loc_val;
 
   return;
-};
+}
 
 
 //-------------------------------------------------------------------------------------------------------
 // CSR - VALUES WITH CSR Pattern (Usual)
 //------------------------------------------------------------------------------------------------------
 template<typename DataType>
-CSRMatr<CSRPatt,DataType>::CSRMatr():_Patt(0){};
+CSRMatr<CSRPatt,DataType>::CSRMatr()
+    :
+    _Patt(0)
+{
+    // nothing to do here
+}
 
 
 template<typename DataType>
@@ -1058,7 +1082,10 @@ CSRMatr<CSRPatt,DataType>::CSRMatr(const CSRPatt &ex_pattern,
 template<typename DataType>
 CSRMatr<CSRPatt,DataType>::
 CSRMatr(const CSRMatr<CSRPatt,DataType> &RightHandCSR):
-  _value(RightHandCSR.value()),_Patt(RightHandCSR.Patt()) {};
+  _value(RightHandCSR.value()),_Patt(RightHandCSR.Patt())
+{
+    // nothing to do here
+}
 
 template<typename DataType>
 CSRMatr<CSRPatt,DataType>::
@@ -1078,7 +1105,7 @@ CSRMatr<CSRPatt,DataType>::operator= (const CSRMatr<CSRPatt,DataType> &RhCsr)
       _value = RhCsr.value();
     }
   return *this;
-};
+}
 
 
 template<typename DataType>
@@ -1096,7 +1123,7 @@ CSRMatr<CSRPatt, DataType>::operator= (const MSRMatr<DataType>& msrMatr)
         }
     }
     return *this;
-};
+}
 
 template<typename DataType>
 void
@@ -1106,7 +1133,7 @@ set_mat(UInt row, UInt col, DataType loc_val)
   std::pair<UInt,bool> where = _Patt->locate_index(row,col);
   if (where.second) _value[where.first] = loc_val;
   return;
-};
+}
 
 template<typename DataType>
 void
@@ -1117,23 +1144,23 @@ set_mat_inc(UInt row, UInt col, DataType loc_val)
   if (where.second) _value[where.first] += loc_val;
 
   return;
-};
+}
 
 // determine the lumped matrix for P1
 template<typename DataType>
 std::vector<DataType>
 CSRMatr<CSRPatt,DataType>::MassDiagP1() const
 {
-  UInt nrows = _Patt->nRows();
-  UInt ncols = _Patt->nCols();
-  ASSERT(ncols == nrows, "The matrix must be square to be lumped");
-  std::vector<DataType> diag(nrows);
-  for (UInt nrow = 0; nrow < nrows; ++nrow)
+    UInt nrows = _Patt->nRows();
+    UInt ncols = _Patt->nCols();
+    ASSERT(ncols == nrows, "The matrix must be square to be lumped");
+    std::vector<DataType> diag(nrows);
+    for (UInt nrow = 0; nrow < nrows; ++nrow)
     {
-      for (UInt ii = _Patt->ia()[nrow]; ii < _Patt->ia()[nrow+1]; ++ii)
-	diag[nrow] += _value[ii];
-    };
-  return diag;
+        for (UInt ii = _Patt->ia()[nrow]; ii < _Patt->ia()[nrow+1]; ++ii)
+            diag[nrow] += _value[ii];
+    }
+    return diag;
 }
 
 
@@ -1148,16 +1175,16 @@ Vector
 CSRMatr<CSRPatt,DataType>::
 trans_mult(const Vector &v) const
 {
-  UInt nrows=_Patt->nRows(); // for square matrices...
-  ASSERT(nrows==v.size(),"Error in Matrix Vector product");
-  Vector ans(nrows);
-  ans=0.0;
+    UInt nrows=_Patt->nRows(); // for square matrices...
+    ASSERT(nrows==v.size(),"Error in Matrix Vector product");
+    Vector ans(nrows);
+    ans=0.0;
 
-  for (UInt ir=0+OFFSET;ir<nrows+OFFSET;++ir){
-    for (UInt ii=_Patt->ia()[ir]-OFFSET;ii<_Patt->ia()[ir+1]-OFFSET;++ii)
-      ans(_Patt->ja()[ii]-OFFSET)+=_value[ii]*v(ir);
-  };
-  return ans;
+    for (UInt ir=0+OFFSET;ir<nrows+OFFSET;++ir){
+        for (UInt ii=_Patt->ia()[ir]-OFFSET;ii<_Patt->ia()[ir+1]-OFFSET;++ii)
+            ans(_Patt->ja()[ii]-OFFSET)+=_value[ii]*v(ir);
+    }
+    return ans;
 }
 
 // version for block matrices
@@ -1175,8 +1202,9 @@ zero_row(UInt const row)
   typename std::vector<DataType>::iterator end= _value.begin()+
     *(_Patt->give_ia().begin()+row+1-OFFSET);
 
-  transform(start,end,start,nihil); //nihil is the same used for diagonalize
+  //nihil is the same used for diagonalize
   //method in MSRMatr class.
+  transform(start,end,start,nihil);
 }
 
 
@@ -1185,18 +1213,18 @@ template<typename DataType>
 Vector  CSRMatr<CSRPatt,DataType>::
 operator*(const Vector &v) const
 {
-  UInt nrows=_Patt->nRows();
-  UInt ncols=_Patt->nCols();
+    UInt nrows=_Patt->nRows();
+    UInt ncols=_Patt->nCols();
 
-  ASSERT(ncols==v.size(),"Error in Matrix Vector product");
-  Vector ans(nrows);
-  ans=0.0;
+    ASSERT(ncols==v.size(),"Error in Matrix Vector product");
+    Vector ans(nrows);
+    ans=0.0;
 
-  for (UInt ir=0+OFFSET;ir<nrows+OFFSET;++ir){
-    for (UInt ii=_Patt->give_ia()[ir]-OFFSET;ii<_Patt->give_ia()[ir+1]-OFFSET;++ii)
-      ans(ir)+=_value[ii]*v(_Patt->give_ja()[ii]-OFFSET);
-  };
-  return ans;
+    for (UInt ir=0+OFFSET;ir<nrows+OFFSET;++ir){
+        for (UInt ii=_Patt->give_ia()[ir]-OFFSET;ii<_Patt->give_ia()[ir+1]-OFFSET;++ii)
+            ans(ir)+=_value[ii]*v(_Patt->give_ja()[ii]-OFFSET);
+    }
+    return ans;
 }
 
 // version for block matrices
@@ -1210,14 +1238,14 @@ void operMatVec(DataType * const mv,
 		const CSRMatr<CSRPatt, DataType> &Mat,
 		const DataType *v)
 {
-  UInt nrows=Mat._Patt->nRows();
-  UInt ncols=Mat._Patt->nCols();
+    UInt nrows=Mat._Patt->nRows();
+    UInt ncols=Mat._Patt->nCols();
 
-  for (UInt ir=0+OFFSET;ir<nrows+OFFSET;++ir){
-    mv[ir]= 0.;
-    for (UInt ii=Mat._Patt->give_ia()[ir]-OFFSET;ii<Mat._Patt->give_ia()[ir+1]-OFFSET;++ii)
-      mv[ir]+=Mat._value[ii]*v[Mat._Patt->give_ja()[ii]-OFFSET];
-  };
+    for (UInt ir=0+OFFSET;ir<nrows+OFFSET;++ir){
+        mv[ir]= 0.;
+        for (UInt ii=Mat._Patt->give_ia()[ir]-OFFSET;ii<Mat._Patt->give_ia()[ir+1]-OFFSET;++ii)
+            mv[ir]+=Mat._value[ii]*v[Mat._Patt->give_ja()[ii]-OFFSET];
+    }
 }
 
 /*! Diagonalization of row r of the system. Done by setting A(r,r) = coeff,
@@ -1300,41 +1328,41 @@ CSRMatr<CSRPatt,DataType>::ShowMe()
     }
   std::cout << "nnz = " << nnz << ", nrow = " << nrows << ", ncol = " << ncols << std::endl;
   return;
-};
+}
 
 template<typename DataType>
 void CSRMatr<CSRPatt,DataType>::
 spy(std::string  const &filename)
 {
-  // Purpose: Matlab dumping and spy
-  std::string nome=filename, uti=" , ";
-  UInt nrows=_Patt->nRows();
-  Container ia=_Patt->ia(), ja=_Patt->ja();
-  //
-  // check on the file name
-  //
-  int i=filename.find(".");
+    // Purpose: Matlab dumping and spy
+    std::string nome=filename, uti=" , ";
+    UInt nrows=_Patt->nRows();
+    Container ia=_Patt->ia(), ja=_Patt->ja();
+    //
+    // check on the file name
+    //
+    int i=filename.find(".");
 
-  if (i<=0) nome=filename+".m";
-  else {
-    if ((unsigned int)i!=filename.size()-2  || filename[i+1]!='m')
-      {std::cerr << "Wrong file name ";
-      nome=filename+".m";}
-  }
+    if (i<=0) nome=filename+".m";
+    else {
+        if ((unsigned int)i!=filename.size()-2  || filename[i+1]!='m')
+        {std::cerr << "Wrong file name ";
+        nome=filename+".m";}
+    }
 
-  std::ofstream file_out(nome.c_str());
-  ASSERT(file_out,"Error: Output Matrix (Values) file cannot be open");
+    std::ofstream file_out(nome.c_str());
+    ASSERT(file_out,"Error: Output Matrix (Values) file cannot be open");
 
 
-  file_out << "S = [ ";
-  for (UInt i=0;i<nrows;++i){
-    for (UInt ii=ia[i]-OFFSET;ii<ia[i+1]-OFFSET;++ii)
-      file_out << i+1 << uti << ja[ii]+1-OFFSET << uti << _value[ii] << std::endl; /* */
-  }
-  file_out << "];" << std::endl;
+    file_out << "S = [ ";
+    for (UInt i=0;i<nrows;++i){
+        for (UInt ii=ia[i]-OFFSET;ii<ia[i+1]-OFFSET;++ii)
+            file_out << i+1 << uti << ja[ii]+1-OFFSET << uti << _value[ii] << std::endl; /* */
+    }
+    file_out << "];" << std::endl;
 
-  file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"<<std::endl;
-};
+    file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"<<std::endl;
+}
 
 // the case of block matrices with Tab2d block type.
 template<>
@@ -1426,24 +1454,24 @@ template<class DataType>
 std::vector<DataType>
 VBRMatr<DataType>::operator*(const std::vector<DataType> &v) const
 {
-  UInt blockSize_r=_Patt->rpntr()[1]-_Patt->rpntr()[0];
-  //...for square matrices...
-  UInt nrows=_Patt->nRows()*blockSize_r;
-  UInt ncols=_Patt->nCols()*blockSize_r;
-  ASSERT(ncols==v.size(),"Error in Matrix Vector product");
-  std::vector<DataType> ans;
-  ans.resize(nrows,0.0);
+    UInt blockSize_r=_Patt->rpntr()[1]-_Patt->rpntr()[0];
+    //...for square matrices...
+    UInt nrows=_Patt->nRows()*blockSize_r;
+    UInt ncols=_Patt->nCols()*blockSize_r;
+    ASSERT(ncols==v.size(),"Error in Matrix Vector product");
+    std::vector<DataType> ans;
+    ans.resize(nrows,0.0);
 
-  for (UInt ir=0+OFFSET;ir<nrows+OFFSET;++ir){
-    // column index of non-zero elements and its position respectively
-    Container coldata, position;
-    UInt nnz_c;
-    nnz_c=_Patt->row(ir, coldata, position);
-    for (UInt jc=0; jc < nnz_c ; jc++){
-      ans[ir]+=_value[position[jc]+OFFSET]*v[coldata[jc]+OFFSET];
-    };
-  };
-  return ans;
+    for (UInt ir=0+OFFSET;ir<nrows+OFFSET;++ir){
+        // column index of non-zero elements and its position respectively
+        Container coldata, position;
+        UInt nnz_c;
+        nnz_c=_Patt->row(ir, coldata, position);
+        for (UInt jc=0; jc < nnz_c ; jc++){
+            ans[ir]+=_value[position[jc]+OFFSET]*v[coldata[jc]+OFFSET];
+        }
+    }
+    return ans;
 }
 // version for Vector class
 template<class DataType>
@@ -1466,8 +1494,8 @@ operator*(const Vector &v) const
     nnz_c=_Patt->row(ir, coldata, position);
     for (UInt jc=0; jc < nnz_c ; jc++){
       ans(ir)+=_value[position[jc]+OFFSET]*v(coldata[jc]+OFFSET);
-    };
-  };
+    }
+  }
   return ans;
 }
 
@@ -1491,8 +1519,8 @@ trans_mult(const Vector &v) const
     nnz_c=_Patt->row(ir, coldata, position);
     for (UInt jc=0; jc < nnz_c ; jc++){
       ans(coldata[jc]+OFFSET)+=_value[position[jc]+OFFSET]*v(ir);
-    };
-  };
+    }
+  }
   return ans;
 }
 
@@ -1571,7 +1599,7 @@ set_mat_inc(UInt row, UInt col, DataType loc_val)
   if (whereBloc.second) _value[ind] += loc_val;
 
   return;
-};
+}
 
 // version for block operation
 template<typename DataType>
@@ -1582,25 +1610,25 @@ template<typename DataType>
 void VBRMatr<DataType>::
 set_mat_inc(UInt row, UInt col, std::vector<DataType> &loc_block)
 {
-  std::pair<UInt,bool> whereBloc = _Patt->locate_index(row,col);
+    std::pair<UInt,bool> whereBloc = _Patt->locate_index(row,col);
 
-  typename std::vector<DataType>::const_iterator loc_start= loc_block.begin();
-  typename std::vector<DataType>::const_iterator loc_end= loc_block.end();
+    typename std::vector<DataType>::const_iterator loc_start= loc_block.begin();
+    typename std::vector<DataType>::const_iterator loc_end= loc_block.end();
 
-  UInt ind=_Patt->indx()[whereBloc.first];
-  //copy of the block
-  typename std::vector<DataType>::iterator val_start= _value.begin()+ind;
-  for (typename std::vector<DataType>::const_iterator ip= loc_start;
-       ip != loc_end; ip++)
+    UInt ind=_Patt->indx()[whereBloc.first];
+    //copy of the block
+    typename std::vector<DataType>::iterator val_start= _value.begin()+ind;
+    for (typename std::vector<DataType>::const_iterator ip= loc_start;
+         ip != loc_end; ip++)
     {
-      *val_start+=*ip;
-      val_start++;
-    };
-  //I haven't been able to use transform (we would avoid the loop):
-  //transform(loc_start, loc_end, val_start, val_start, addition<DataType>);
+        *val_start+=*ip;
+        val_start++;
+    }
+    //I haven't been able to use transform (we would avoid the loop):
+    //transform(loc_start, loc_end, val_start, val_start, addition<DataType>);
 
-  return;
-};
+    return;
+}
 
 template<typename DataType>
 void
@@ -1619,7 +1647,7 @@ set_mat(UInt row, UInt col, DataType loc_val)
   if (whereBloc.second) _value[ind] = loc_val;
 
   return;
-};
+}
 
 // version for block operation
 template<typename DataType>
@@ -1638,7 +1666,7 @@ set_mat(UInt row, UInt col, std::vector<DataType> &loc_block)
   if (whereBloc.second) copy(loc_start, loc_end, val_start);
 
   return;
-};
+}
 
 
 template<typename DataType>
@@ -1649,7 +1677,7 @@ set_mat(UInt where, DataType loc_val)
   _value[where-OFFSET]=loc_val;
 
   return;
-};
+}
 
 template<typename DataType>
 void
@@ -1670,7 +1698,7 @@ spy(std::string  const &filename)
     if ((unsigned int)i!=filename.size()-2  || filename[i+1]!='m')
       {std::cerr << "Wrong file name ";
       nome=filename+".m";}
-  };
+  }
 
   std::ofstream file_out(nome.c_str());
   ASSERT(file_out,"Error: Output Matrix (Values) file cannot be open");
@@ -1684,10 +1712,10 @@ spy(std::string  const &filename)
 	  file_out << irb*blocsize+i-OFFSET+1 << uti <<
 	    ja[ic]*blocsize+j-OFFSET+1  << uti <<
 	    _value[indx[ic]+i+(j-OFFSET)*blocsize] << std::endl;
-  };
+  }
   file_out << "];" << std::endl;
   file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"<<std::endl;
-};
+}
 
 /*
 template<typename DataType>
@@ -1719,19 +1747,19 @@ showMe() const
 	    if (j==_Patt->ja()[i_first+jj]-OFFSET){
 	      for (UInt ib=0;ib<blsize;ib++) std::cout << " * ";
 	      jj++;
-	    };
+	    }
 	    else for (UInt ib=0;ib<blsize;ib++) std::cout << " 0 ";
-	  };
-	};
+	  }
+	}
       if (i_index==static_cast<PatternDefs::Diff_t>(_Patt->nRows()-1))
 	std::cout << " ]] " << std::endl;
       else
 	std::cout << " ]  " << std::endl;
       std::cout << std::endl;
-    };
+    }
   std::cout << "**************************" << std::endl;
   return;
-};
+}
 */
 
 //-------------------------------------------------------------------------------------------------------
@@ -1739,7 +1767,12 @@ showMe() const
 //-------------------------------------------------------------------------------------------------------
 
 template<class DataType>
-MSRMatr<DataType>::MSRMatr():_Patt(0){};
+MSRMatr<DataType>::MSRMatr()
+    :
+    _Patt(0)
+{
+    // nothing to do here
+}
 
 template<typename DataType>
 MSRMatr<DataType>::
@@ -1789,7 +1822,10 @@ MSRMatr(const MSRPatt* ex_pattern, const std::vector<DataType> &ex_value):
 template<class DataType>
 MSRMatr<DataType>::
 MSRMatr(const MSRMatr<DataType> &RightHandMSR):
-  _value(RightHandMSR.value()),_Patt(RightHandMSR.Patt()) {};
+  _value(RightHandMSR.value()),_Patt(RightHandMSR.Patt())
+{
+    // nothing to do here
+}
 
 template<class DataType>
 MSRMatr<DataType>&
@@ -1802,7 +1838,7 @@ MSRMatr<DataType>::operator= (const MSRMatr<DataType> &RhMsr)
     }
 
   return *this;
-};
+}
 
 //! convert CSR matrix to MSR matrix. provided for backward compatibility only
 template<class DataType>
@@ -1861,7 +1897,7 @@ MSRMatr<DataType>::operator* (const std::vector<DataType> &v) const
       ans[i]+=_value[j]*v[_Patt->give_bindx()[j]];
   }
   return ans;
-};
+}
 
 //Matrix-vector product for the class Vector (useful for IML++)
 template<class DataType>
@@ -1923,7 +1959,7 @@ MSRMatr<DataType>::operator*=(const DataType num)
   UInt stop=_Patt->nNz()+1;
   for (UInt i=0;i<stop;++i) _value[i]*=num;
   return *this;
-};
+}
 
 template<class DataType>
 MSRMatr<DataType>
@@ -1936,7 +1972,7 @@ MSRMatr<DataType>::operator*(const DataType num)
     ans.set_mat(i,num*_value[i]);
 
   return ans;
-};
+}
 
 template<class DataType>
 MSRMatr<DataType>&
@@ -1977,7 +2013,7 @@ MSRMatr<DataType>::operator* (const DataType num, MSRMatr<DataType>& M)
       _value[i]=num*M.value()[i];
 
    return *this;
-  };
+  }
 
       */
 
@@ -2015,7 +2051,7 @@ void MSRMatr<DataType>::ShowMe()
                     std::cout << " 0 ";
                 else
                 {
-                    UInt j_index=found-&vec_temp[0];
+                    UInt j_index=found- ( &vec_temp.front() );
                     std::cout << " " << _value[j_index] << " ";
                 }
             }
@@ -2027,7 +2063,7 @@ void MSRMatr<DataType>::ShowMe()
     }
     std::cout << "nnz = " << _nnz << ", nrow = " << _nrows << ", ncol = " << _ncols << std::endl;
     return;
-};
+}
 
 template<typename DataType>
 void
@@ -2060,7 +2096,7 @@ MSRMatr<DataType>::spy(std::string  const &filename)
     file_out << "];" << std::endl;
 
   file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"<<std::endl;
-};
+}
 
 template<typename DataType>
 void
@@ -2076,7 +2112,7 @@ set_mat_inc(UInt row, UInt col, DataType loc_val)
     ERROR_MSG("problem in MSR::set_mat_inc");
   }
   return;
-};
+}
 
 template<typename DataType>
 void
@@ -2088,7 +2124,7 @@ set_mat(UInt row, UInt col, DataType loc_val)
   if(where.second) _value[where.first] = loc_val;
 
   return;
-};
+}
 
 template<typename DataType>
 void
@@ -2098,7 +2134,7 @@ set_mat(UInt where, DataType loc_val)
   _value[where-OFFSET]=loc_val;
 
   return;
-};
+}
 
 // determine the lumped matrix for P1
 template<typename DataType>
@@ -2113,7 +2149,7 @@ std::vector<DataType> MSRMatr<DataType>::MassDiagP1() const
       diag[nrow] = _value[nrow];
       for (UInt ii = _Patt->bindx()[nrow]; ii < _Patt->bindx()[nrow+1]; ++ii)
 	diag[nrow] += _value[ii];
-    };
+    }
 
   return diag;
 }
@@ -2249,8 +2285,6 @@ zeros()
   typename std::vector<DataType>::iterator end  = _value.end();
   fill(start, end, 0.0);
 }
-
-double nihil(double val);
 
 
 //-----------------------------------------------------------------------

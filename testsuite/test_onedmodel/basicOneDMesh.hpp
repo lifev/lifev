@@ -44,32 +44,32 @@ namespace LifeV
 class Point1D
 {
 public:
-  //! Default constructor
-  Point1D();
+    //! Default constructor
+    Point1D();
 
-  //! Constructor
-  Point1D(const Real& x, const UInt& id=0);
+    //! Constructor
+    Point1D(const Real& x, const UInt& id=0);
 
-  //! Copy constructor
-  Point1D(const Point1D& pt);
+    //! Copy constructor
+    Point1D(const Point1D& pt);
 
-  //! operator=
-  Point1D & operator= (const Point1D & pt);
+    //! operator=
+    Point1D & operator= (const Point1D & pt);
 
-  //! return the identity of the point
-  INLINE UInt id() const {return _M_id;};
+    //! return the identity of the point
+    UInt id() const {return _M_id;}
 
-  //! return the abscissae (and other coordinates :=0)
-  INLINE Real x() const {return _M_x;};
-  INLINE Real y() const {return 0.;};
-  INLINE Real z() const {return 0.;};
+    //! return the abscissae (and other coordinates :=0)
+    Real x() const {return _M_x;}
+    Real y() const {return 0.;}
+    Real z() const {return 0.;}
 
 protected:
-  //! abscissa
-  Real _M_x;
+    //! abscissa
+    Real _M_x;
 
-  //! identity
-  UInt _M_id;
+    //! identity
+    UInt _M_id;
 };
 
 /*!
@@ -79,85 +79,85 @@ protected:
 class Edge1D
 {
 public:
-  //! Default constructor
-  Edge1D::Edge1D();
+    //! Default constructor
+    Edge1D();
 
-  //! Constructor with two end abscissae
-  Edge1D( const Real& x1, const Real& x2, const UInt& id=0 );
+    //! Constructor with two end abscissae
+    Edge1D( const Real& x1, const Real& x2, const UInt& id=0 );
 
-  //! Constructor with two end points
-  Edge1D( const Point1D& pt1, const Point1D& pt2, const UInt& id=0 );
+    //! Constructor with two end points
+    Edge1D( const Point1D& pt1, const Point1D& pt2, const UInt& id=0 );
 
-  //! operator=
-  Edge1D & operator= (const Edge1D & edg);
+    //! operator=
+    Edge1D & operator= (const Edge1D & edg);
 
 
-  //! return the identity of the edge
-  INLINE UInt id() const {return _M_id;};
+    //! return the identity of the edge
+    UInt id() const {return _M_id;};
 
-  //! return the length of the edge
-  INLINE Real length() const {return _M_length;};
+    //! return the length of the edge
+    Real length() const {return _M_length;};
 
-  //! return the end points
-  Point1D pt1() const {return _M_pt1;};
-  Point1D pt2() const {return _M_pt2;};
+    //! return the end points
+    Point1D pt1() const {return _M_pt1;};
+    Point1D pt2() const {return _M_pt2;};
 
-  // return one of the end points (i=1 or 2)
-  Point1D point( const UInt& i ) const;
+    // return one of the end points (i=1 or 2)
+    Point1D point( const UInt& i ) const;
 
 protected:
-  //! first end point
-  Point1D _M_pt1;
-  //! second end point (pt1.x() < pt2.x())
-  Point1D _M_pt2;
+    //! first end point
+    Point1D _M_pt1;
+    //! second end point (pt1.x() < pt2.x())
+    Point1D _M_pt2;
 
-  //! edge length (always positive)
-  Real _M_length;
+    //! edge length (always positive)
+    Real _M_length;
 
-  //! identity
-  UInt _M_id;
+    //! identity
+    UInt _M_id;
 };
 
 /*!
   \class BasicOneDMesh : very basic one d mesh handler.
-         I don't have the courage to modify (and then debug!!)
-	 the huge 3D Mesh class...
-	 To be done...
+  I don't have the courage to modify (and then debug!!)
+  the huge 3D Mesh class...
+  To be done...
 
 */
 class BasicOneDMesh
 {
 public:
-  //! constructor reading a mesh file: do it!
-  BasicOneDMesh(const std::string& mesh_file,
-		const std::string& mesh_dir);
+    //! constructor reading a mesh file: do it!
+    BasicOneDMesh(const std::string& mesh_file,
+                  const std::string& mesh_dir);
 
-  //! constructor for regular meshes
-  BasicOneDMesh(const Real& xl, const Real& xr,
-		const UInt& nb_elem);
+    //! constructor for regular meshes
+    BasicOneDMesh(const Real& xl, const Real& xr,
+                  const UInt& nb_elem);
 
-  //! return one edge of the list (BEWARE: start at 1)
-  Edge1D edgeList( const UInt& iedg ) const;
+    //! return one edge of the list (BEWARE: start at 1)
+    Edge1D edgeList( const UInt& iedg ) const;
 
-  //! return the one point of the list (BEWARE: start at 1)
-  Point1D pointList( const UInt& iedg ) const ;
+    //! return the one point of the list (BEWARE: start at 1)
+    Point1D pointList( const UInt& iedg ) const ;
 
-  //! return the full list of points
-  const std::vector< Point1D >& pointList() const {return _M_pointList;};
+    //! return the full list of points
+    const std::vector< Point1D >& pointList() const {return _M_pointList;};
 
-  //! number of points
-  UInt numVertices() const {return _M_pointList.size();};
+    //! number of points
+    UInt numVertices() const {return _M_pointList.size();};
 
-  //! number of edges
-  UInt numEdges() const {return _M_edgeList.size();};
+    //! number of edges
+    UInt numEdges() const {return _M_edgeList.size();};
 
-  //! Output
-  void showMe(std::ostream& c=std::cout, const UInt& verbose = 0);
+    //! Output
+    void showMe(std::ostream& c=std::cout, const UInt& verbose = 0);
 
 protected:
 
-  std::vector< Point1D >  _M_pointList;
-  std::vector< Edge1D >  _M_edgeList;
+    std::vector< Point1D >  _M_pointList;
+    std::vector< Edge1D >  _M_edgeList;
 
 };
 }

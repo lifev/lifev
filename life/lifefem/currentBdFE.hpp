@@ -73,7 +73,7 @@ public:
       point(i,1) = geoele.point(i+1).y();
       point(i,2) = geoele.point(i+1).z();
     }
-  };
+  }
   /*!
     Compute the arrays meas, weightMeas, tangent
     on the current boundary element
@@ -97,7 +97,7 @@ public:
     }
     // compute the measure
     _comp_meas();
-  };
+  }
   /*!
     Compute the arrays meas, weightMeas, tangent
     and quadrature points on the current boundary element
@@ -123,7 +123,7 @@ public:
     _comp_meas();
     // compute the coordinates of the quad points
     _comp_quad_point_coor();
-  };
+  }
   /*!
     Compute the arrays meas, weightMeas, tangent
     and normal on the current boundary element

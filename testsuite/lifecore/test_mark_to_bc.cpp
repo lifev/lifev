@@ -88,7 +88,7 @@ unsigned int process_marker_flag::number_digits_per_group() const{
 
 unsigned int  process_marker_flag::number_of_groups() const{
   return my_ng;
-};
+}
 
 
 unsigned int process_marker_flag::extract_group(MarkerFlag const &  mf, unsigned int const & group) const

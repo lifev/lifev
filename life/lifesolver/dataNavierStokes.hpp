@@ -129,14 +129,14 @@ showMe(std::ostream& c)
 template <typename Mesh>
 Real DataNavierStokes<Mesh>::
 density() const {
-  return  _density;
+  return  this->_density;
 }
 
 // The viscosity
 template <typename Mesh>
 Real DataNavierStokes<Mesh>::
 viscosity() const {
-  return  _viscosity;
+  return  this->_viscosity;
 }
 
 

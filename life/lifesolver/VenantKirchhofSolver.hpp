@@ -149,7 +149,7 @@ namespace LifeV
 
         //! residual
         PhysVectUnknown<Vector> _residual_d;
-        
+
         //! data for solving tangent problem with aztec
         DataAztec _dataAztec;
 
@@ -185,24 +185,24 @@ namespace LifeV
                          const QuadRule& bdQr, BC_Handler& BCh):
         ElasticStructureHandler<Mesh>(data_file,refFE,Qr,bdQr,BCh),
         DataNewton(data_file,"solid/newton"),
-        _pattM_block(_dof),
+        _pattM_block(this->_dof),
         _pattM(_pattM_block,"diag"),
-        _pattK(_dof,3),
+        _pattK(this->_dof,3),
         _M(_pattM),
         _Kl(_pattK),
         _K(_pattK),
         _C(_pattK),
         _J(_pattK),
-        _elmatK(_fe.nbNode,nDimensions,nDimensions),
-        _elmatM(_fe.nbNode,nDimensions,nDimensions),
-        _elmatC(_fe.nbNode,nDimensions,nDimensions),
-        _elvec(_fe.nbNode,nDimensions),
-        _dk_loc(_fe.nbNode,nDimensions),
-        _rhs(_dim),
-        _rhs_w(_dim),
-        _rhsWithoutBC(_dim),
-        _f(_dim),
-        _residual_d(_dim),
+        _elmatK(this->_fe.nbNode,nDimensions,nDimensions),
+        _elmatM(this->_fe.nbNode,nDimensions,nDimensions),
+        _elmatC(this->_fe.nbNode,nDimensions,nDimensions),
+        _elvec(this->_fe.nbNode,nDimensions),
+        _dk_loc(this->_fe.nbNode,nDimensions),
+        _rhs(this->_dim),
+        _rhs_w(this->_dim),
+        _rhsWithoutBC(this->_dim),
+        _f(this->_dim),
+        _residual_d(this->_dim),
         _dataAztec(data_file,"solid/aztec"),
         _out_iter("out_iter_solid"),
         _out_res("out_res_solid"),
@@ -210,7 +210,7 @@ namespace LifeV
         _recur(0) {
 
         std::cout << std::endl;
-        std::cout << "O-  Displacement unknowns: " << _dim << std::endl;
+        std::cout << "O-  Displacement unknowns: " << this->_dim << std::endl;
         std::cout << "O-  Computing mass and linear strain matrices... ";
 
         Chrono chrono;
@@ -221,40 +221,40 @@ namespace LifeV
         _Kl.zeros();
         _C.zeros();
         // Number of displacement components
-        UInt nc=_d.nbcomp();
+        UInt nc=this->_d.nbcomp();
 
         //inverse of dt:
-        Real dti2 = 2.0/(_dt*_dt);
+        Real dti2 = 2.0/(this->_dt*this->_dt);
 
         // Elementary computation and matrix assembling
         // Loop on elements
         for(UInt i = 1; i <= _mesh.numVolumes(); i++){
 
-            _fe.updateFirstDerivQuadPt(_mesh.volumeList(i));
+            this->_fe.updateFirstDerivQuadPt(_mesh.volumeList(i));
 
             _elmatK.zero();
             _elmatM.zero();
 
             // stiffness
-            stiff_strain(_mu,_elmatK,_fe);
-            stiff_div   (0.5*_lambda,_elmatK,_fe);
+            stiff_strain(_mu,_elmatK,this->_fe);
+            stiff_div   (0.5*_lambda,_elmatK,this->_fe);
 
             _elmatC.mat() = _elmatK.mat();
 
             // mass
-            mass(dti2*_rho,_elmatM,_fe,0,0,nDimensions);
+            mass(dti2*_rho,_elmatM,this->_fe,0,0,nDimensions);
 
             _elmatC.mat() += _elmatM.mat();
 
             // assembling
             for(UInt ic=0;ic<nc;ic++){
                 for(UInt jc=0;jc<nc;jc++) {
-                    assemb_mat(_Kl,_elmatK,_fe,_dof,ic,jc);
-                    assemb_mat(_C,_elmatC,_fe,_dof,ic,jc);
+                    assemb_mat(_Kl,_elmatK,this->_fe,this->_dof,ic,jc);
+                    assemb_mat(_C,_elmatC,this->_fe,this->_dof,ic,jc);
                 }
 
                 //mass
-                assemb_mat(_M,_elmatM,_fe,_dof,ic,ic);
+                assemb_mat(_M,_elmatM,this->_fe,this->_dof,ic,ic);
             }
         }
 
@@ -282,35 +282,35 @@ namespace LifeV
         _K = _Kl;
 
         // Number of displacement components
-        UInt nc=_d.nbcomp();
+        UInt nc=this->_d.nbcomp();
 
         if (_maxiter > 1 ) {
 
             // l`oop on volumes: assembling source term
             for(UInt i=1; i<=_mesh.numVolumes(); ++i){
 
-                _fe.updateFirstDerivQuadPt(_mesh.volumeList(i));
+                this->_fe.updateFirstDerivQuadPt(_mesh.volumeList(i));
 
                 _elmatK.zero();
 
                 // _dk_loc contains the displacement in the nodes
-                for (UInt j=0 ; j<(UInt)_fe.nbNode ; ++j) {
+                for (UInt j=0 ; j<(UInt)this->_fe.nbNode ; ++j) {
                     for (UInt ic=0; ic<nc; ++ic){
-                        ig=_dof.localToGlobal(i,j+1)-1+ic*_dim;
-                        _dk_loc[j+ic*_fe.nbNode] = _d(ig);
+                        ig=this->_dof.localToGlobal(i,j+1)-1+ic*this->_dim;
+                        _dk_loc[j+ic*this->_fe.nbNode] = this->_d(ig);
                     }
                 }
-      
+
                 // stiffness for non-linear terms
                 // 1/2 * \mu * ( [\grad d^k]^T \grad d : \grad v  )
-                stiff_dergradbis( _mu*0.5, _dk_loc, _elmatK, _fe);
+                stiff_dergradbis( _mu*0.5, _dk_loc, _elmatK, this->_fe);
 
                 // 1/4 * \lambda * ( \tr { [\grad d^k]^T \grad d }, \div v  )
-                stiff_derdiv( _lambda*0.25, _dk_loc,_elmatK, _fe);
+                stiff_derdiv( _lambda*0.25, _dk_loc,_elmatK, this->_fe);
 
                 for (UInt ic=0; ic<nc; ++ic){
                     for(UInt jc=0;jc<nc;jc++)
-                        assemb_mat(_K,_elmatK,_fe,_dof,ic,jc);
+                        assemb_mat(_K,_elmatK,this->_fe,this->_dof,ic,jc);
                 }
             }
         }
@@ -321,21 +321,21 @@ namespace LifeV
         // loop on volumes: assembling source term
         for(UInt i=1; i<=_mesh.numVolumes(); ++i){
 
-            _fe.updateFirstDerivQuadPt(_mesh.volumeList(i));
+            this->_fe.updateFirstDerivQuadPt(_mesh.volumeList(i));
 
             _elvec.zero();
 
             for (UInt ic=0; ic<nc; ++ic){
-                compute_vec(source,_elvec,_fe,_time,ic); // compute local vector
-                assemb_vec(_rhsWithoutBC,_elvec,_fe,_dof,ic); // assemble local vector into global one
+                compute_vec(source,_elvec,this->_fe,_time,ic); // compute local vector
+                assemb_vec(_rhsWithoutBC,_elvec,this->_fe,this->_dof,ic); // assemble local vector into global one
             }
         }
 
         // right hand side without boundary load terms
-        _rhsWithoutBC += _M * ( _d + _dt * _w );
-        _rhsWithoutBC -= _K * _d;
+        _rhsWithoutBC += _M * ( this->_d + this->_dt * _w );
+        _rhsWithoutBC -= _K * this->_d;
 
-        _rhs_w =  (2.0/_dt) * _d  +  _w;
+        _rhs_w =  (2.0/this->_dt) * this->_d  +  _w;
 
         //
         chrono.stop();
@@ -352,7 +352,7 @@ namespace LifeV
 
         int maxiter = _maxiter;
 
-        status = newton( _d, *this, maxnorm,_abstol, _reltol, maxiter, _etamax, (int)_linesearch, _out_res, _time);
+        status = newton( this->_d, *this, maxnorm,_abstol, _reltol, maxiter, _etamax, (int)_linesearch, _out_res, _time);
 
         if(status == 1) {
             std::cout << "Inners iterations failed\n";
@@ -363,10 +363,10 @@ namespace LifeV
             _out_iter << _time << " " << maxiter << std::endl;
         }
 
-        _w = (2.0/_dt) *  _d - _rhs_w;
+        _w = (2.0/this->_dt) *  this->_d - _rhs_w;
 
-        _residual_d = _K*_d - _rhs;
-        
+        _residual_d = _K*this->_d - _rhs;
+
     }
 
 
@@ -398,35 +398,35 @@ namespace LifeV
             UInt ig;
 
             // Number of displacement components
-            UInt nc=_d.nbcomp();
+            UInt nc=this->_d.nbcomp();
 
             // Elementary computation and matrix assembling
             // Loop on elements
             for(UInt i = 1; i <= _mesh.numVolumes(); i++){
 
-                _fe.updateFirstDerivQuadPt(_mesh.volumeList(i));
+                this->_fe.updateFirstDerivQuadPt(_mesh.volumeList(i));
 
                 _elmatK.zero();
 
                 // _dk_loc contains the displacement in the nodes
-                for (UInt j=0 ; j<(UInt)_fe.nbNode ; ++j) {
+                for (UInt j=0 ; j<(UInt)this->_fe.nbNode ; ++j) {
                     for (UInt ic=0; ic<nc; ++ic){
-                        ig=_dof.localToGlobal(i,j+1)-1+ic*_dim;
-                        _dk_loc[j+ic*_fe.nbNode] = sol(ig);
+                        ig=this->_dof.localToGlobal(i,j+1)-1+ic*this->_dim;
+                        _dk_loc[j+ic*this->_fe.nbNode] = sol(ig);
                     }
                 }
                 // stiffness for non-linear terms
-      
+
                 // 1/2 * \mu * ( [\grad d^k]^T \grad d : \grad v  )
-                stiff_dergradbis( _mu*0.5, _dk_loc, _elmatK, _fe);
+                stiff_dergradbis( _mu*0.5, _dk_loc, _elmatK, this->_fe);
 
                 // 1/4 * \lambda * ( \tr { [\grad d^k]^T \grad d }, \div v  )
-                stiff_derdiv( _lambda*0.25, _dk_loc ,_elmatK, _fe);
+                stiff_derdiv( _lambda*0.25, _dk_loc ,_elmatK, this->_fe);
 
                 // assembling
                 for(UInt ic=0;ic<nc;ic++)
                     for(UInt jc=0;jc<nc;jc++)
-                        assemb_mat(_K,_elmatK,_fe,_dof,ic,jc);
+                        assemb_mat(_K,_elmatK,this->_fe,this->_dof,ic,jc);
             }
         }
 
@@ -434,11 +434,11 @@ namespace LifeV
 
 
         if ( !_BCh.bdUpdateDone() )
-            _BCh.bdUpdate(_mesh, _feBd, _dof);
-        bc_manage_matrix(_K, _mesh, _dof, _BCh, _feBd,   1.0);
+            _BCh.bdUpdate(_mesh, _feBd, this->_dof);
+        bc_manage_matrix(_K, _mesh, this->_dof, _BCh, _feBd,   1.0);
 
         _rhs = _rhsWithoutBC;
-        bc_manage_vector(_rhs, _mesh, _dof, _BCh, _feBd, _time, 1.0);
+        bc_manage_vector(_rhs, _mesh, this->_dof, _BCh, _feBd, _time, 1.0);
 
         res  = _K*sol - _rhs;
 
@@ -468,7 +468,7 @@ namespace LifeV
             UInt ig;
 
             // Number of displacement components
-            UInt nc=_d.nbcomp();
+            UInt nc=this->_d.nbcomp();
 
             // loop on volumes: assembling source term
             for(UInt i=1; i<=_mesh.numVolumes(); ++i){
@@ -480,7 +480,7 @@ namespace LifeV
                 // _dk_loc contains the displacement in the nodes
                 for (UInt j=0 ; j<(UInt)_fe.nbNode ; ++j) {
                     for (UInt ic=0; ic<nc; ++ic){
-                        ig=_dof.localToGlobal(i,j+1)-1+ic*_dim;
+                        ig=this->_dof.localToGlobal(i,j+1)-1+ic*this->_dim;
                         _dk_loc[j+ic*_fe.nbNode] = sol[ig];
                     }
                 }
@@ -495,7 +495,7 @@ namespace LifeV
                 // assembleing
                 for (UInt ic=0; ic<nc; ++ic)
                     for(UInt jc=0; jc<nc; jc++)
-                        assemb_mat(_J,_elmatK,_fe,_dof,ic,jc);
+                        assemb_mat(_J,_elmatK,_fe,this->_dof,ic,jc);
 
             }
 
@@ -525,9 +525,9 @@ namespace LifeV
 
         // BC manage for the velocity
         if ( !_BCh.bdUpdateDone() )
-            _BCh.bdUpdate(_mesh, _feBd, _dof);
+            _BCh.bdUpdate(_mesh, _feBd, this->_dof);
 
-        bc_manage_matrix(_J,  _mesh, _dof, _BCh, _feBd, tgv);
+        bc_manage_matrix(_J,  _mesh, this->_dof, _BCh, _feBd, tgv);
         chrono.stop();
         std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
@@ -544,7 +544,7 @@ namespace LifeV
         AZ_MATRIX *J;
         AZ_PRECOND *prec_J;
 
-        int N_eq= 3*_dim; // number of DOF for each component
+        int N_eq= 3*this->_dim; // number of DOF for each component
         // data_org assigned "by hands" while no parallel computation is performed
         data_org[AZ_N_internal]= N_eq;
         data_org[AZ_N_border]= 0;

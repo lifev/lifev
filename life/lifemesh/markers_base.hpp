@@ -226,19 +226,34 @@ public:
 //Marker_Base<MarkerTraits>
 
 template<typename MarkerTraits>
-Marker_Base<MarkerTraits>::Marker_Base():flag(MarkerTraits::NULLFLAG){};
+Marker_Base<MarkerTraits>::Marker_Base():flag(MarkerTraits::NULLFLAG)
+{
+    // nothing to be done here
+}
 
 template<typename MarkerTraits>
-Marker_Base<MarkerTraits>::Marker_Base(EntityFlag & p):flag(p){};
+Marker_Base<MarkerTraits>::Marker_Base(EntityFlag & p):flag(p)
+{
+    // nothing to be done here
+}
 
 template<typename MarkerTraits>
-Marker_Base<MarkerTraits>::Marker_Base(Marker_Base<MarkerTraits> const & m):flag(m.marker()){};
+Marker_Base<MarkerTraits>::Marker_Base(Marker_Base<MarkerTraits> const & m):flag(m.marker())
+{
+    // nothing to be done here
+}
 
 template<typename MarkerTraits>
-typename MarkerTraits::EntityFlag Marker_Base<MarkerTraits>::marker() const {return flag;};
+typename MarkerTraits::EntityFlag Marker_Base<MarkerTraits>::marker() const
+{
+    return flag;
+}
 
 template<typename MarkerTraits>
-typename MarkerTraits::EntityFlag const & Marker_Base<MarkerTraits>::nullFlag() const {return MarkerTraits::NULLFLAG;}
+typename MarkerTraits::EntityFlag const & Marker_Base<MarkerTraits>::nullFlag() const
+{
+    return MarkerTraits::NULLFLAG;
+}
 
 template<typename MarkerTraits>
 typename MarkerTraits::EntityFlag Marker_Base<MarkerTraits>::setMarker(EntityFlag const & c){return flag=c;}

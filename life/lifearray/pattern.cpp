@@ -56,7 +56,10 @@ BasePattern::showMe(bool const verbose,ostream & out) const{
 // C S R Pattern
 //
 ////////////////////////////////////////////////////////////////////////
-CSRPatt::CSRPatt() {};
+CSRPatt::CSRPatt()
+{
+    // nothing to do here
+}
 
 CSRPatt::CSRPatt(UInt ex_nnz, UInt ex_nrow, UInt ex_ncol):
   BasePattern(ex_nnz,ex_nrow,ex_ncol)
@@ -71,7 +74,7 @@ CSRPatt::CSRPatt(UInt ex_nnz, UInt ex_nrow, UInt ex_ncol, const vector<Index_t> 
   ASSERT_PRE(ex_ia.size()==ex_nrow+1 && ex_ja.size()==ex_nnz,"Error in CSR Pattern Life V"); // check on the compatibility of the external data
   _filled = !ex_ia.empty(); // Test if the given containers are empty!
   if(_filled)_diagfirst=_i2o(_ja[_i2o(_ia[_nrows-1])])==_nrows-1; //stupid test
-};
+}
 
 CSRPatt::CSRPatt(const CSRPatt &RightHandCSRP):BasePattern(RightHandCSRP),
 					       _ia(RightHandCSRP.ia()),_ja(RightHandCSRP.ja()){}
@@ -142,7 +145,8 @@ CSRPatt::CSRPatt(MSRPatt const& msrPatt)
     _diagfirst = true;
 }
 
-CSRPatt& CSRPatt::operator= (const CSRPatt& RhCsr){
+CSRPatt& CSRPatt::operator= (const CSRPatt& RhCsr)
+{
   if (&RhCsr != this)
     {
       _nnz = RhCsr.nNz();
@@ -154,7 +158,7 @@ CSRPatt& CSRPatt::operator= (const CSRPatt& RhCsr){
       _diagfirst=RhCsr.diagFirst();
     }
   return *this;
-};
+}
 
 pair<PatternDefs::Diff_t,bool>
 CSRPatt::locate_pattern(Index_t const i,Index_t const j) const {
@@ -213,7 +217,7 @@ void  CSRPatt::showMe(bool verbose, ostream& c) const
   }
   c << "**************************" << endl;
   return;
-};
+}
 
 void  CSRPatt::spy(string  const &filename) const
 {
@@ -242,141 +246,141 @@ void  CSRPatt::spy(string  const &filename) const
   file_out << "];" << endl;
 
   file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"<<endl;
-};
+}
 
 // column-concatenation of two CSR block patterns
 
 CSRPatt colUnify(CSRPatt const &patt1, CSRPatt const &patt2)
 {
 
-  cout << "colUnify: OBSOLETE function ==> use CSRPatt constructor or MixedPattern class" << endl;
+    cout << "colUnify: OBSOLETE function ==> use CSRPatt constructor or MixedPattern class" << endl;
 
-  typedef PatternDefs::Container::const_iterator ConstIter;
-  typedef PatternDefs::Container::iterator Iter;
+    typedef PatternDefs::Container::const_iterator ConstIter;
+    typedef PatternDefs::Container::iterator Iter;
 
-  UInt nnz1=patt1._nnz, nnz2=patt2._nnz;
-  UInt nrows1=patt1._nrows, nrows2=patt2._nrows;
-  UInt ncols1=patt1._ncols, ncols2=patt2._ncols;
+    UInt nnz1=patt1._nnz, nnz2=patt2._nnz;
+    UInt nrows1=patt1._nrows, nrows2=patt2._nrows;
+    UInt ncols1=patt1._ncols, ncols2=patt2._ncols;
 
-  ASSERT(nrows1==nrows2, "pattern1 and pattern2 must have same nrows");
+    ASSERT(nrows1==nrows2, "pattern1 and pattern2 must have same nrows");
 
 
-  UInt nnz= nnz1 + nnz2;
-  UInt nrows= nrows1;
-  UInt ncols= ncols1 + ncols2;
+    UInt nnz= nnz1 + nnz2;
+    UInt nrows= nrows1;
+    UInt ncols= ncols1 + ncols2;
 
-  UInt end = 0;
+    UInt end = 0;
 
-  bool diag = patt1._diagfirst;
+    bool diag = patt1._diagfirst;
 
-  if (diag)
-    if (nrows > ncols1)
-      {
-	pair<UInt,bool> where;
-	if (ncols2 <= (nrows - ncols1))
-	  end = ncols2;
-	else
-	  end = nrows - ncols1;
-	for (UInt i = 0; i < end; ++i)
-	  {
-	    where = patt2.locate_index(i+ncols1,i);
-	    if (!where.second)
-	      {
-		diag = false;
-		break;
-	      }
-	  };
-      }
+    if (diag)
+        if (nrows > ncols1)
+        {
+            pair<UInt,bool> where;
+            if (ncols2 <= (nrows - ncols1))
+                end = ncols2;
+            else
+                end = nrows - ncols1;
+            for (UInt i = 0; i < end; ++i)
+            {
+                where = patt2.locate_index(i+ncols1,i);
+                if (!where.second)
+                {
+                    diag = false;
+                    break;
+                }
+            }
+        }
 
-  CSRPatt ans(nnz, nrows, ncols);
+    CSRPatt ans(nnz, nrows, ncols);
 
-  ans._ja.resize(nnz,PatternOffset);
+    ans._ja.resize(nnz,PatternOffset);
 
-  Iter ja_start = ans._ja.begin();
+    Iter ja_start = ans._ja.begin();
 
-  if (!diag && patt1._diagfirst)
+    if (!diag && patt1._diagfirst)
     {
-      for (UInt i=0; i < nrows; i++)
-	{
-	  // construction of ia
-	  ans._ia.push_back(patt1._ia[i]+patt2._ia[i]-PatternOffset);
+        for (UInt i=0; i < nrows; i++)
+        {
+            // construction of ia
+            ans._ia.push_back(patt1._ia[i]+patt2._ia[i]-PatternOffset);
 
-	  // construction of ja
-	  ConstIter ja1_start = patt1._ja.begin() + patt1._i2o(patt1._ia[i]);
-	  ConstIter ja2_start = patt2._ja.begin() + patt2._i2o(patt2._ia[i]);
-	  ConstIter ja1_end = patt1._ja.begin() + patt1._i2o(patt1._ia[i+1]);
-	  ConstIter ja2_end = patt2._ja.begin() + patt2._i2o(patt2._ia[i+1]);
+            // construction of ja
+            ConstIter ja1_start = patt1._ja.begin() + patt1._i2o(patt1._ia[i]);
+            ConstIter ja2_start = patt2._ja.begin() + patt2._i2o(patt2._ia[i]);
+            ConstIter ja1_end = patt1._ja.begin() + patt1._i2o(patt1._ia[i+1]);
+            ConstIter ja2_end = patt2._ja.begin() + patt2._i2o(patt2._ia[i+1]);
 
-	  Iter ja_start1 = ja_start + ans._i2o(ans._ia[i]);
-	  Iter ja_end1 = ja_start1 + (patt1._ia[i+1]-patt1._ia[i]);
+            Iter ja_start1 = ja_start + ans._i2o(ans._ia[i]);
+            Iter ja_end1 = ja_start1 + (patt1._ia[i+1]-patt1._ia[i]);
 
-	  // copy of the first block
-	  partial_sort_copy(ja1_start, ja1_end, ja_start1, ja_end1);
-	  //the starting place of the second block
-	  Iter ja_start2 = ja_end1;
-	  // the end of the second block
-	  Iter ja_end2 = ja_start2 + (patt2._ia[i+1]-patt2._ia[i]);
-	  // copy of the second block
-	  partial_sort_copy(ja2_start, ja2_end, ja_start2, ja_end2);
+            // copy of the first block
+            partial_sort_copy(ja1_start, ja1_end, ja_start1, ja_end1);
+            //the starting place of the second block
+            Iter ja_start2 = ja_end1;
+            // the end of the second block
+            Iter ja_end2 = ja_start2 + (patt2._ia[i+1]-patt2._ia[i]);
+            // copy of the second block
+            partial_sort_copy(ja2_start, ja2_end, ja_start2, ja_end2);
 
-	  // adds ncols1 to the second block
-	  for (Iter ip=ja_start2; ip != ja_end2; ++ip)
-	    *ip+=ncols1;
-	};
+            // adds ncols1 to the second block
+            for (Iter ip=ja_start2; ip != ja_end2; ++ip)
+                *ip+=ncols1;
+        }
     }
-  else
+    else
     {
-      for (UInt i=0; i < nrows; i++)
-	{
-	  // construction of ia
-	  ans._ia.push_back(patt1._ia[i]+patt2._ia[i]-PatternOffset);
+        for (UInt i=0; i < nrows; i++)
+        {
+            // construction of ia
+            ans._ia.push_back(patt1._ia[i]+patt2._ia[i]-PatternOffset);
 
-	  // construction of ja
-	  ConstIter ja1_start = patt1._ja.begin() + patt1._i2o(patt1._ia[i]);
-	  ConstIter ja2_start = patt2._ja.begin() + patt2._i2o(patt2._ia[i]);
-	  ConstIter ja1_end = patt1._ja.begin() + patt1._i2o(patt1._ia[i+1]);
-	  ConstIter ja2_end = patt2._ja.begin() + patt2._i2o(patt2._ia[i+1]);
+            // construction of ja
+            ConstIter ja1_start = patt1._ja.begin() + patt1._i2o(patt1._ia[i]);
+            ConstIter ja2_start = patt2._ja.begin() + patt2._i2o(patt2._ia[i]);
+            ConstIter ja1_end = patt1._ja.begin() + patt1._i2o(patt1._ia[i+1]);
+            ConstIter ja2_end = patt2._ja.begin() + patt2._i2o(patt2._ia[i+1]);
 
-	  Iter ja_start1 = ja_start + ans._i2o(ans._ia[i]);
+            Iter ja_start1 = ja_start + ans._i2o(ans._ia[i]);
 
-	  // copy of the first block
-	  copy(ja1_start, ja1_end, ja_start1);
-	  //the starting place of the second block
-	  Iter ja_start2 = ja_start1 + (patt1._ia[i+1]-patt1._ia[i]);
-	  // the end of the second block
-	  Iter ja_end = ja_start2 + (patt2._ia[i+1]-patt2._ia[i]);
-	  // copy of the second block
-	  partial_sort_copy(ja2_start, ja2_end, ja_start2, ja_end);
+            // copy of the first block
+            copy(ja1_start, ja1_end, ja_start1);
+            //the starting place of the second block
+            Iter ja_start2 = ja_start1 + (patt1._ia[i+1]-patt1._ia[i]);
+            // the end of the second block
+            Iter ja_end = ja_start2 + (patt2._ia[i+1]-patt2._ia[i]);
+            // copy of the second block
+            partial_sort_copy(ja2_start, ja2_end, ja_start2, ja_end);
 
-	  // adds ncols1 to the second block
-	  for (Iter ip=ja_start2; ip != ja_end; ++ip)
-	    *ip+=ncols1;
-	};
+            // adds ncols1 to the second block
+            for (Iter ip=ja_start2; ip != ja_end; ++ip)
+                *ip+=ncols1;
+        }
     }
 
-  //ultimate _ia
-  ans._ia.push_back(patt1._ia[nrows]+patt2._ia[nrows]-PatternOffset);
-  ans._filled = true;
-  ans._diagfirst = diag;
+    //ultimate _ia
+    ans._ia.push_back(patt1._ia[nrows]+patt2._ia[nrows]-PatternOffset);
+    ans._filled = true;
+    ans._diagfirst = diag;
 
-  if (!diag)
+    if (!diag)
+        return ans;
+
+    for (UInt i = 0; i < end; ++i)
+    {
+        UInt row = i + ncols1;
+
+        Iter ja_start1 = ja_start + ans._i2o(ans._ia[row]);
+        Iter ja_end1 = ja_start + ans._i2o(ans._ia[row+1]);
+
+        // find diagonal element
+        Iter ja_diag = find(ja_start1, ja_end1, row);
+
+        // reorder
+        rotate(ja_start1, ja_diag, ja_diag + 1);
+    }
+
     return ans;
-
-  for (UInt i = 0; i < end; ++i)
-    {
-      UInt row = i + ncols1;
-
-      Iter ja_start1 = ja_start + ans._i2o(ans._ia[row]);
-      Iter ja_end1 = ja_start + ans._i2o(ans._ia[row+1]);
-
-      // find diagonal element
-      Iter ja_diag = find(ja_start1, ja_end1, row);
-
-      // reorder
-      rotate(ja_start1, ja_diag, ja_diag + 1);
-    }
-
-  return ans;
 }
 
 
@@ -430,137 +434,137 @@ CSRPatt colUnify(UInt const ncolZero, CSRPatt const &patt1)
 // rows-concatenation of two CSR block patterns
 CSRPatt rowUnify(CSRPatt const &patt1, CSRPatt const &patt2)
 {
-  cout << "rowUnify: OBSOLETE function ==> use CSRPatt constructor or MixedPattern class" << endl;
-  typedef PatternDefs::Container::const_iterator ConstIter;
-  typedef PatternDefs::Container::iterator Iter;
+    cout << "rowUnify: OBSOLETE function ==> use CSRPatt constructor or MixedPattern class" << endl;
+    typedef PatternDefs::Container::const_iterator ConstIter;
+    typedef PatternDefs::Container::iterator Iter;
 
-  UInt nnz1=patt1._nnz, nnz2=patt2._nnz;
-  UInt nrows1=patt1._nrows, nrows2=patt2._nrows;
-  UInt ncols1=patt1._ncols, ncols2=patt2._ncols;
+    UInt nnz1=patt1._nnz, nnz2=patt2._nnz;
+    UInt nrows1=patt1._nrows, nrows2=patt2._nrows;
+    UInt ncols1=patt1._ncols, ncols2=patt2._ncols;
 
-  ASSERT(ncols1==ncols2, "pattern1 and pattern2 must have same ncols");
+    ASSERT(ncols1==ncols2, "pattern1 and pattern2 must have same ncols");
 
-  UInt nnz= nnz1 + nnz2;
-  UInt nrows= nrows1 + nrows2;
-  UInt ncols= ncols1;
+    UInt nnz= nnz1 + nnz2;
+    UInt nrows= nrows1 + nrows2;
+    UInt ncols= ncols1;
 
-  CSRPatt ans(nnz, nrows, ncols);
-  ans._ia.resize(nrows+1,0);
-  ans._ja.resize(nnz,0);
+    CSRPatt ans(nnz, nrows, ncols);
+    ans._ia.resize(nrows+1,0);
+    ans._ja.resize(nnz,0);
 
-  UInt end = 0;
+    UInt end = 0;
 
-  bool diag = patt1._diagfirst;
+    bool diag = patt1._diagfirst;
 
-  if (diag)
-    if (ncols > nrows1)
-      {
-	pair<UInt,bool> where;
-	if (nrows2 <= (ncols - nrows1))
-	  end = nrows2;
-	else
-	  end = ncols - nrows1;
-	for (UInt i = 0; i < end; ++i)
-	  {
-	    where = patt2.locate_index(i,i+nrows1);
-	    if (!where.second)
-	      {
-		diag = false;
-		break;
-	      }
-	  };
-      }
+    if (diag)
+        if (ncols > nrows1)
+        {
+            pair<UInt,bool> where;
+            if (nrows2 <= (ncols - nrows1))
+                end = nrows2;
+            else
+                end = ncols - nrows1;
+            for (UInt i = 0; i < end; ++i)
+            {
+                where = patt2.locate_index(i,i+nrows1);
+                if (!where.second)
+                {
+                    diag = false;
+                    break;
+                }
+            }
+        }
 
-  //construction of ia
-  ConstIter ia1_start = patt1._ia.begin();
-  ConstIter ia2_start = patt2._ia.begin();
-  ConstIter ia1_end = patt1._ia.end()-1;
-  ConstIter ia2_end = patt2._ia.end();
+    //construction of ia
+    ConstIter ia1_start = patt1._ia.begin();
+    ConstIter ia2_start = patt2._ia.begin();
+    ConstIter ia1_end = patt1._ia.end()-1;
+    ConstIter ia2_end = patt2._ia.end();
 
-  // copy of the first block
-  Iter ia_start1 = ans._ia.begin();
-  copy(ia1_start, ia1_end, ia_start1);
-  // copy of the second block
-  Iter ia_start2 = ans._ia.begin() + nrows1;
-  copy(ia2_start, ia2_end, ia_start2);
-  // adds nnz1 to the second block
-  Iter ia_end = ans._ia.end();
-  for (Iter ip=ia_start2; ip != ia_end; ++ip)
-    *ip+=nnz1;
+    // copy of the first block
+    Iter ia_start1 = ans._ia.begin();
+    copy(ia1_start, ia1_end, ia_start1);
+    // copy of the second block
+    Iter ia_start2 = ans._ia.begin() + nrows1;
+    copy(ia2_start, ia2_end, ia_start2);
+    // adds nnz1 to the second block
+    Iter ia_end = ans._ia.end();
+    for (Iter ip=ia_start2; ip != ia_end; ++ip)
+        *ip+=nnz1;
 
-  //construction of ja
-  ConstIter ja1_start = patt1._ja.begin();
-  ConstIter ja1_end = patt1._ja.end();
+    //construction of ja
+    ConstIter ja1_start = patt1._ja.begin();
+    ConstIter ja1_end = patt1._ja.end();
 
-  //copy of the first block
-  Iter ja_start = ans._ja.begin();
-
-  if (!diag && patt1._diagfirst)
-    {
-      for (UInt i = 0; i < nrows1; ++i)
-	{
-	  //construction of ja
-	  ConstIter ja1_start1 = ja1_start + patt1._i2o(patt1._ia[i]);
-	  ConstIter ja1_end1 = ja1_start  + patt1._i2o(patt1._ia[i+1]);
-
-	  Iter ja_start1 = ja_start + ans._i2o(ans._ia[i]);
-	  Iter ja_end1 = ja_start + ans._i2o(ans._ia[i+1]);
-
-	  //copy of the first block
-	  partial_sort_copy(ja1_start1, ja1_end1, ja_start1, ja_end1);
-	};
-    }
-  else
     //copy of the first block
-    copy(ja1_start, ja1_end, ja_start);
+    Iter ja_start = ans._ja.begin();
 
-  //construction of ja
-  ConstIter ja2_start = patt2._ja.begin();
-  ConstIter ja2_end = patt2._ja.end();
-
-  //copy of the second block
-  if (patt2._diagfirst)
+    if (!diag && patt1._diagfirst)
     {
-      for (UInt i=0; i < nrows2; i++)
-	{
-	  UInt row= nrows1+i;
-	  ConstIter ja2_start2 = ja2_start + patt2._i2o(patt2._ia[i]);
-	  ConstIter ja2_end2 = ja2_start + patt2._i2o(patt2._ia[i+1]);
+        for (UInt i = 0; i < nrows1; ++i)
+        {
+            //construction of ja
+            ConstIter ja1_start1 = ja1_start + patt1._i2o(patt1._ia[i]);
+            ConstIter ja1_end1 = ja1_start  + patt1._i2o(patt1._ia[i+1]);
 
-	  //the starting place of the second block
-	  Iter ja_start2 =  ja_start + ans._i2o(ans._ia[row]);
-	  // the end of the second block
-	  Iter ja_end2 = ja_start + ans._i2o(ans._ia[row+1]);
+            Iter ja_start1 = ja_start + ans._i2o(ans._ia[i]);
+            Iter ja_end1 = ja_start + ans._i2o(ans._ia[i+1]);
 
-	  // copy of the second block
-	  partial_sort_copy(ja2_start2, ja2_end2, ja_start2, ja_end2);
-	};
+            //copy of the first block
+            partial_sort_copy(ja1_start1, ja1_end1, ja_start1, ja_end1);
+        }
     }
-  else
-    copy(ja2_start, ja2_end, ja_start + ans._ia[nrows1]);
+    else
+        //copy of the first block
+        copy(ja1_start, ja1_end, ja_start);
+
+    //construction of ja
+    ConstIter ja2_start = patt2._ja.begin();
+    ConstIter ja2_end = patt2._ja.end();
+
+    //copy of the second block
+    if (patt2._diagfirst)
+    {
+        for (UInt i=0; i < nrows2; i++)
+        {
+            UInt row= nrows1+i;
+            ConstIter ja2_start2 = ja2_start + patt2._i2o(patt2._ia[i]);
+            ConstIter ja2_end2 = ja2_start + patt2._i2o(patt2._ia[i+1]);
+
+            //the starting place of the second block
+            Iter ja_start2 =  ja_start + ans._i2o(ans._ia[row]);
+            // the end of the second block
+            Iter ja_end2 = ja_start + ans._i2o(ans._ia[row+1]);
+
+            // copy of the second block
+            partial_sort_copy(ja2_start2, ja2_end2, ja_start2, ja_end2);
+        }
+    }
+    else
+        copy(ja2_start, ja2_end, ja_start + ans._ia[nrows1]);
 
 
-  ans._filled=true;
-  ans._diagfirst = diag;
+    ans._filled=true;
+    ans._diagfirst = diag;
 
-  if (!diag)
+    if (!diag)
+        return ans;
+
+    for (UInt i = 0; i < end; ++i)
+    {
+        UInt row = i + nrows1;
+
+        Iter ja_start1 = ans._ja.begin() + ans._i2o(ans._ia[row]);
+        Iter ja_end1 = ans._ja.begin() + ans._i2o(ans._ia[row+1]);
+
+        // find diagonal element
+        Iter ja_diag = find(ja_start1, ja_end1, row);
+
+        // reorder
+        rotate(ja_start1, ja_diag, ja_diag + 1);
+    }
+
     return ans;
-
-  for (UInt i = 0; i < end; ++i)
-    {
-      UInt row = i + nrows1;
-
-      Iter ja_start1 = ans._ja.begin() + ans._i2o(ans._ia[row]);
-      Iter ja_end1 = ans._ja.begin() + ans._i2o(ans._ia[row+1]);
-
-      // find diagonal element
-      Iter ja_diag = find(ja_start1, ja_end1, row);
-
-      // reorder
-      rotate(ja_start1, ja_diag, ja_diag + 1);
-    }
-
-  return ans;
 }
 
 // row-concatenation of one CSR block patterns and nrowZero null rows
@@ -629,57 +633,57 @@ CSRPatt rowUnify(UInt const nrowZero, CSRPatt const &patt1)
 // construction of a block diagonal matrix
 CSRPatt diagblockMatrix(CSRPatt const &patt, UInt const nblock)
 {
-  typedef PatternDefs::Container::const_iterator ConstIter;
-  typedef PatternDefs::Container::iterator Iter;
+    typedef PatternDefs::Container::const_iterator ConstIter;
+    typedef PatternDefs::Container::iterator Iter;
 
-  ASSERT(patt._nrows == patt._ncols, "Matrix must be square!");
+    ASSERT(patt._nrows == patt._ncols, "Matrix must be square!");
 
-  UInt nrowsblock = patt._nrows; // Numero di righe di un blocco
-  UInt nnz = nblock*patt._nnz;
-  UInt nrows = nblock*nrowsblock;
-  UInt ncols = nblock*nrowsblock;
+    UInt nrowsblock = patt._nrows; // Numero di righe di un blocco
+    UInt nnz = nblock*patt._nnz;
+    UInt nrows = nblock*nrowsblock;
+    UInt ncols = nblock*nrowsblock;
 
-  CSRPatt ans(nnz, nrows, ncols);
-  ans._ia.resize(nrows+1,0);
-  ans._ja.resize(nnz,0);
+    CSRPatt ans(nnz, nrows, ncols);
+    ans._ia.resize(nrows+1,0);
+    ans._ja.resize(nnz,0);
 
-  ConstIter ja1_start = patt._ja.begin();
+    ConstIter ja1_start = patt._ja.begin();
 
-  Iter ja_start = ans._ja.begin();
+    Iter ja_start = ans._ja.begin();
 
-  UInt i, nrow = 0, brow = 0;
+    UInt i, nrow = 0, brow = 0;
 
-  for (UInt block = 1; block <= nblock; ++block)
+    for (UInt block = 1; block <= nblock; ++block)
     {
-      for (i = 0; i < nrowsblock; ++i)
-	{
-	  // current row number of global matrix
-	  nrow = i + nrowsblock*(block-1);
+        for (i = 0; i < nrowsblock; ++i)
+        {
+            // current row number of global matrix
+            nrow = i + nrowsblock*(block-1);
 
-	  ans._ia[nrow] = patt._ia[i] + brow - PatternOffset;
+            ans._ia[nrow] = patt._ia[i] + brow - PatternOffset;
 
-	  Iter ja_start1 = ja_start + ans._i2o(ans._ia[nrow]);
+            Iter ja_start1 = ja_start + ans._i2o(ans._ia[nrow]);
 
-	  // construction of ja
-	  ConstIter ja1_start1 = ja1_start + patt._i2o(patt._ia[i]);
-	  ConstIter ja1_end1 = ja1_start + patt._i2o(patt._ia[i+1]);
+            // construction of ja
+            ConstIter ja1_start1 = ja1_start + patt._i2o(patt._ia[i]);
+            ConstIter ja1_end1 = ja1_start + patt._i2o(patt._ia[i+1]);
 
-	  // copy of ja
-	  copy(ja1_start1, ja1_end1, ja_start1);
+            // copy of ja
+            copy(ja1_start1, ja1_end1, ja_start1);
 
-	  Iter ja_end1 = ja_start1 + patt._ia[i+1] - patt._ia[i];
+            Iter ja_end1 = ja_start1 + patt._ia[i+1] - patt._ia[i];
 
-	  for (Iter ip = ja_start1; ip != ja_end1; ++ip)
-	    *ip += nrowsblock*(block-1);
-	};
-      // row number of global matrix where block number block+1 begins
-      brow = ans._ia[nrow] + patt._ia[i] - patt._ia[i-1] - PatternOffset;
-    };
+            for (Iter ip = ja_start1; ip != ja_end1; ++ip)
+                *ip += nrowsblock*(block-1);
+        }
+        // row number of global matrix where block number block+1 begins
+        brow = ans._ia[nrow] + patt._ia[i] - patt._ia[i-1] - PatternOffset;
+    }
 
-  ans._ia[nrow+1] = nnz;
-  ans._filled=true;
-  ans._diagfirst = patt._diagfirst;
-  return ans;
+    ans._ia[nrow+1] = nnz;
+    ans._filled=true;
+    ans._diagfirst = patt._diagfirst;
+    return ans;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -694,7 +698,7 @@ VBRPatt::VBRPatt(UInt ex_nnz, UInt ex_nrow, UInt ex_ncol):
   _indx.reserve(ex_nnz+1);
   _rpntr.reserve(ex_nrow+1);
   _cpntr.reserve(ex_ncol+1);
-};
+}
 
 VBRPatt::VBRPatt(UInt ex_nnz, UInt ex_nrow, UInt ex_ncol, const
 		 vector<Index_t> &ex_ia, const vector<Index_t> &ex_ja,
@@ -743,7 +747,7 @@ bool VBRPatt::buildPattern(UInt const blockSize)
       *ip+=PatternOffset;
   }
   return true;
-};
+}
 VBRPatt &VBRPatt::operator= (const VBRPatt& RhVbr){
   if (&RhVbr != this)
     {
@@ -796,47 +800,50 @@ void  VBRPatt::showMe(bool verbose, ostream& c) const
   }
   c << "**************************" << endl;
   return;
-};
+}
 
 void VBRPatt::spy(string  const &filename) const
 {
-  // Purpose: Matlab dumping and spy
-  string nome=filename, uti=" , ";
-  UInt nblocrow=_nrows, blocsize=_rpntr[1]-_rpntr[0];
-  //
-  // check on the file name
-  //
-  int i=filename.find(".");
+    // Purpose: Matlab dumping and spy
+    string nome=filename, uti=" , ";
+    UInt nblocrow=_nrows, blocsize=_rpntr[1]-_rpntr[0];
+    //
+    // check on the file name
+    //
+    int i=filename.find(".");
 
-  if (i<=0) nome=filename+".m";
-  else {
-    if (i!=(int)filename.size()-2  || filename[i+1]!='m')
-      {cerr << "Wrong file name ";
-      nome=filename+".m";}
-  };
+    if (i<=0) nome=filename+".m";
+    else {
+        if (i!=(int)filename.size()-2  || filename[i+1]!='m')
+        {cerr << "Wrong file name ";
+        nome=filename+".m";}
+    }
 
-  ofstream file_out(nome.c_str());
-  ASSERT(file_out,"Error: Output Matrix (Values) file cannot be open");
+    ofstream file_out(nome.c_str());
+    ASSERT(file_out,"Error: Output Matrix (Values) file cannot be open");
 
 
-  file_out << "S = [ ";
-  for (UInt irb=0;irb<nblocrow;++irb){
-    for (UInt ic=_ia[irb];ic<_ia[irb+1];++ic)
-      for (UInt i=0;i<blocsize;++i)
-	for (UInt j=0;j<blocsize;++j)
-	  file_out << irb*blocsize+i-PatternOffset+1 << uti <<
-	    _ja[ic]*blocsize+j-PatternOffset+1  << uti << "1.0" << endl;
-  };
-  file_out << "];" << endl;
-  file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"<<endl;
-};
+    file_out << "S = [ ";
+    for (UInt irb=0;irb<nblocrow;++irb){
+        for (UInt ic=_ia[irb];ic<_ia[irb+1];++ic)
+            for (UInt i=0;i<blocsize;++i)
+                for (UInt j=0;j<blocsize;++j)
+                    file_out << irb*blocsize+i-PatternOffset+1 << uti <<
+                        _ja[ic]*blocsize+j-PatternOffset+1  << uti << "1.0" << endl;
+    }
+    file_out << "];" << endl;
+    file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"<<endl;
+}
 
 ////////////////////////////////////////////////////////////////////////
 //
 // C S R Symmetric Pattern
 //
 ////////////////////////////////////////////////////////////////////////
-CSRPattSymm::CSRPattSymm() {};
+CSRPattSymm::CSRPattSymm()
+{
+    // nothing to do here
+}
 
 CSRPattSymm::CSRPattSymm(UInt ex_nnz, UInt ex_nrow, UInt ex_ncol):
   BasePattern(ex_nnz,ex_nrow,ex_ncol)
@@ -851,10 +858,13 @@ CSRPattSymm::CSRPattSymm(UInt ex_nnz, UInt ex_nrow, UInt ex_ncol,  const vector<
   ASSERT_PRE(ex_ia.size()==ex_nrow+1,"Error in CSR Pattern Life V"); // check on the compatibility of the external data
   _filled=ex_ia.size()>0;
   _diagfirst=true;
-};
+}
 
 CSRPattSymm::CSRPattSymm(const CSRPattSymm &RightHandCSRP):BasePattern(RightHandCSRP),
-							   _ia(RightHandCSRP.ia()),_ja(RightHandCSRP.ja()) {};
+							   _ia(RightHandCSRP.ia()),_ja(RightHandCSRP.ja())
+{
+    // nothing to do here
+}
 
 
 
@@ -904,7 +914,7 @@ CSRPattSymm& CSRPattSymm::operator= (const CSRPattSymm& RhCsr){
       _diagfirst=RhCsr.diagFirst();
     }
   return *this;
-};
+}
 
 UInt
 CSRPattSymm::nbNeighbours(ID const d) const
@@ -1001,7 +1011,7 @@ void  CSRPattSymm::showMe(bool verbose, ostream& c) const{
   }
   c << "********************************" << endl;
   return;
-};
+}
 
 void  CSRPattSymm::spy(string  const &filename) const{
   // Purpose: Matlab dumping and spy
@@ -1031,14 +1041,17 @@ void  CSRPattSymm::spy(string  const &filename) const{
   file_out << "];" << endl;
 
   file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"<<endl;
-};
+}
 /////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 //
 // M S R Pattern
 //
 ////////////////////////////////////////////////////////////////////////
-MSRPatt::MSRPatt() {};
+MSRPatt::MSRPatt()
+{
+    // nothing to do here
+}
 
 MSRPatt::MSRPatt(UInt ex_nnz, UInt ex_nrow, UInt ex_ncol):
   BasePattern(ex_nnz,ex_nrow,ex_ncol)
@@ -1050,13 +1063,16 @@ MSRPatt::MSRPatt(UInt ex_nnz, UInt ex_nrow, UInt ex_ncol):
 MSRPatt::MSRPatt(UInt ex_nnz, UInt ex_nrow, UInt ex_ncol, const vector<Index_t> &ex_bindx, const vector<Index_t> &ex_ybind):
   BasePattern(ex_nnz,ex_nrow,ex_ncol),_bindx(ex_bindx),_ybind(ex_ybind)
 {
-  ASSERT_PRE(ex_bindx.size()==ex_nnz+1,"Compatibility error in MSR Pattern "); // check on the compatibility of the external data
-  _filled=!ex_bindx.empty();
-  _diagfirst=true; // default for MSR
-};
+    ASSERT_PRE(ex_bindx.size()==ex_nnz+1,"Compatibility error in MSR Pattern "); // check on the compatibility of the external data
+    _filled=!ex_bindx.empty();
+    _diagfirst=true; // default for MSR
+}
 
 MSRPatt::MSRPatt(const MSRPatt &RightHandMSRP):BasePattern(RightHandMSRP),
-					       _bindx(RightHandMSRP.bindx()),_ybind(RightHandMSRP.ybind()) {};
+					       _bindx(RightHandMSRP.bindx()),_ybind(RightHandMSRP.ybind())
+{
+    // nothing to do here
+}
 
 // TODO: It would be useful to write some convertors, not only as constructors
 //       but also as functions
@@ -1065,43 +1081,43 @@ MSRPatt::MSRPatt(const MSRPatt &RightHandMSRP):BasePattern(RightHandMSRP),
 MSRPatt::MSRPatt(const CSRPatt &RightHandCSRP):BasePattern(RightHandCSRP),
 					       _bindx(RightHandCSRP.nNz()+1)
 {
-  PatternDefs::Container::const_iterator ia=RightHandCSRP.give_ia().begin();
-  PatternDefs::Container::const_iterator ja=RightHandCSRP.give_ja().begin();
+    PatternDefs::Container::const_iterator ia=RightHandCSRP.give_ia().begin();
+    PatternDefs::Container::const_iterator ja=RightHandCSRP.give_ja().begin();
 
-  Diff_t jj=0;
-  _bindx[0] = _nrows+1;
-  for (UInt i=1; i<=_nrows; ++i)
+    Diff_t jj=0;
+    _bindx[0] = _nrows+1;
+    for (UInt i=1; i<=_nrows; ++i)
     {
-      Index_t ifirst = *(ia+ i-1);
-      Index_t ilast = *(ia + i);
+        Index_t ifirst = *(ia+ i-1);
+        Index_t ilast = *(ia + i);
 
-      _bindx[i] = _bindx[i-1] + ilast - ifirst -1; // Pay attention to the circumstance that only off-diagonal elements are counted
+        _bindx[i] = _bindx[i-1] + ilast - ifirst -1; // Pay attention to the circumstance that only off-diagonal elements are counted
 
-      for (Index_t j=ifirst; j < ilast;++j)
-	{
-	  Index_t jjj = *(ja + _i2o(j));
-	  if ((i-1)!=_i2o(jjj))
-	    _bindx[_nrows+1+jj++] = jjj;
-	};
+        for (Index_t j=ifirst; j < ilast;++j)
+        {
+            Index_t jjj = *(ja + _i2o(j));
+            if ((i-1)!=_i2o(jjj))
+                _bindx[_nrows+1+jj++] = jjj;
+        }
     }
 
-  //construction of ybind
-  _ybind.resize(RightHandCSRP.nNz()-_nrows,0);
-  //temporary bindx
-  PatternDefs::Container bindAux(_bindx);
+    //construction of ybind
+    _ybind.resize(RightHandCSRP.nNz()-_nrows,0);
+    //temporary bindx
+    PatternDefs::Container bindAux(_bindx);
 
-  jj=0;
-  for (UInt i=0; i<_nrows; ++i)
+    jj=0;
+    for (UInt i=0; i<_nrows; ++i)
     {
-      Index_t ifirst= _bindx[i];
-      Index_t ilast= _bindx[i+1];
-      for (Index_t j=ifirst; j < ilast;++j)
-	_ybind[jj++]= bindAux[_bindx[j]]++;
-    };
+        Index_t ifirst= _bindx[i];
+        Index_t ilast= _bindx[i+1];
+        for (Index_t j=ifirst; j < ilast;++j)
+            _ybind[jj++]= bindAux[_bindx[j]]++;
+    }
 
-  _diagfirst=true;// default for MSR
-  return;
-};
+    _diagfirst=true;// default for MSR
+    return;
+}
 
 
 MSRPatt & MSRPatt::operator= (const MSRPatt& RhMsr){
@@ -1117,7 +1133,7 @@ MSRPatt & MSRPatt::operator= (const MSRPatt& RhMsr){
 
     }
   return *this;
-};
+}
 
 void MSRPatt::neighbours(ID const d, Container & neigh) const
 {
@@ -1179,7 +1195,7 @@ void  MSRPatt::showMe(bool verbose, ostream& c) const{
     }
   }
   return;
-};
+}
 
 void  MSRPatt::spy(string  const &filename)const
 {
@@ -1210,7 +1226,7 @@ void  MSRPatt::spy(string  const &filename)const
   file_out << "];" << endl;
 
   file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"<<endl;
-};
+}
 
 // Construction of diagonal block matrix. Done by A. Gilardi.
 // Alain (nov. 2002), update of ybind as well !

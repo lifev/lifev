@@ -41,7 +41,7 @@ vec2elemVec(Vector& V,ElemVec& elvec,const CurrentFE& fe, const DOF& dof,
       vec(i) = V[ig];
     }
   }
-};
+}
 
 //======================================================================
 /*

@@ -26,6 +26,8 @@
    \author Christoph Winkelmann <christoph.winkelmann@epfl.ch>
    \date 2004-09-22
 */
+#include <iostream>
+#include <fstream>
 
 #include <SolverAztec.hpp>
 

@@ -692,7 +692,7 @@ assemb_vec(Vector& V,ElemVec& elvec,const CurrentFE& fe, const DOF& dof, int ibl
     ig = dof.localToGlobal(eleId,i+1) - 1+iblock*totdof;
     V[ig] += vec(i);
   }
-};
+}
 ///
 
 
@@ -721,7 +721,7 @@ assemb_vec( Vector& V, ElemVec& elvec, const LocalDofPattern& fe, const DOF& dof
     //    std::cout << "ig= " << ig << std::endl;
     V[ig] += vec(i);
   }
-};
+}
 ///
 
 ///
@@ -751,7 +751,7 @@ extract_vec( Vector& V, ElemVec& elvec, const LocalDofPattern& fe, const DOF& do
     //    std::cout << "ig= " << ig << std::endl;
     vec(i) = V[ig];
   }
-};
+}
 }
 
 #endif

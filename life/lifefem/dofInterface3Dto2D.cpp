@@ -20,6 +20,30 @@
 
 namespace LifeV
 {
+
+
+void RemoveMultiple(const std::list<ID> & list0, std::list< std::pair<ID,ID> > & listf)
+{
+  ID counter = 1;
+  std::list<ID> tmplist(list0);
+
+  //! Sort the list
+  tmplist.sort();
+
+  //! initialize the new list
+  std::pair <ID,ID>  p0( tmplist.front() , counter );
+  listf.push_back( p0 );
+
+  //! We remove the multiple occurences :
+  for (std::list<ID>::iterator it = tmplist.begin() ;  it !=tmplist.end() ; ++ it ){
+    if ( (*it) != listf.back().first ){
+      counter ++ ;
+      //! Add to the list the new value
+      std::pair <ID,ID>  p( (*it) , counter );
+      listf.push_back( p );
+    }
+  }
+}
 //! Constructor for interfacing Dof of the same type (RefFE)
 /*!
   \param refFe the part of the reference FE that contains the dof patterns (nbDofPerEdge...)
@@ -126,27 +150,5 @@ std::ostream& DofInterface3Dto2D::showMe2D(bool verbose, std::ostream& out) cons
 
 
 
-//! useful function to sort a list and remove multiple numbers.
-void RemoveMultiple(const std::list<ID> & list0, std::list< std::pair<ID,ID> > & listf){
 
-  ID counter = 1;
-  std::list<ID> tmplist(list0);
-
-  //! Sort the list
-  tmplist.sort();
-
-  //! initialize the new list
-  std::pair <ID,ID>  p0( tmplist.front() , counter );
-  listf.push_back( p0 );
-
-  //! We remove the multiple occurences :
-  for (std::list<ID>::iterator it = tmplist.begin() ;  it !=tmplist.end() ; ++ it ){
-    if ( (*it) != listf.back().first ){
-      counter ++ ;
-      //! Add to the list the new value
-      std::pair <ID,ID>  p( (*it) , counter );
-      listf.push_back( p );
-    }
-  }
-}
 }

@@ -31,15 +31,18 @@
 #ifndef __MESHMOTION_HH__
 #define __MESHMOTION_HH__
 
-#include "lifeV.hpp"
-#include "dof.hpp"
-#include "pattern.hpp"
-#include "elemMat.hpp"
-#include "elemOper.hpp"
-#include "refFE.hpp"
-#include "values.hpp"
-#include "assemb.hpp"
-#include "bc_manage.hpp"
+#include <lifeV.hpp>
+
+#include <dataAztec.hpp>
+
+#include <dof.hpp>
+#include <pattern.hpp>
+#include <elemMat.hpp>
+#include <elemOper.hpp>
+#include <refFE.hpp>
+#include <values.hpp>
+#include <assemb.hpp>
+#include <bc_manage.hpp>
 
 
 namespace LifeV
@@ -187,8 +190,8 @@ HarmonicExtension(Mesh& mesh, const Real& diffusion, const QuadRule& Qr, const Q
 
 // This method updates the extension of the displacement, i.e. it solves the laplacian proglem
 template<typename Mesh>
-void HarmonicExtension::updateExtension(Mesh& mesh, const Real& time, const UInt recur) {
-
+void HarmonicExtension::updateExtension(Mesh& mesh, const Real& time, const UInt recur)
+{
 
   if ( !_mesh_BCh.bdUpdateDone() ) {
     // BC boundary information update

@@ -36,10 +36,10 @@ AM_INIT_AUTOMAKE([foreign check-news 1.7.8 dist-bzip2])
 AM_CONFIG_HEADER(lifeconfig.h)
 
 # checks for a C compiler
-AC_PROG_CC( gcc-3.3 gcc-3.2 gcc )
+AC_PROG_CC( gcc-3.4 gcc-3.3 gcc-3.2 gcc )
 AC_PROG_CC_C_O
-AC_PROG_CXX( g++-3.3 g++-3.2 g++ )
-AC_PROG_F77( g77-3.3 g77-3.2 g77 )
+AC_PROG_CXX( g++-3.4 g++-3.3 g++-3.2 g++ )
+AC_PROG_F77( g++-3.4 g77-3.3 g77-3.2 g77 )
 AC_PROG_F77_C_O
 
 # no need for static libs 
@@ -78,14 +78,18 @@ then
   AC_MSG_ERROR(Cannot use --enable-debug and --enable-opt at the same time!)
 fi
 
+#CXXFLAGS="-Wall -Wno-long-long -ansi -pedantic"
+#CXXFLAGS="-Wall -Wno-long-long  -pedantic"
+CXXFLAGS="-Wall -Wno-long-long"
+
 if test $ac_use_debug_code = "yes"; then
  CPPFLAGS="-DLIFEV_CHECK_ALL ${CPPFLAGS}" 
- CXXFLAGS="-g3 -O0 -Wall"
- CFLAGS="-g3 -O0 -Wall"
+ CXXFLAGS="-g3 -O0  ${CXXFLAGS}"
+ CFLAGS="-g3 -O0  ${CFLAGS}"
 else 
  if test $ac_use_opt_code = "yes"; then
-  CXXFLAGS="-O2 -funroll-all-loops -fargument-noalias-global -fno-gcse -Wall"
-  CFLAGS="-O2 -funroll-all-loops -fargument-noalias-global -fno-gcse -Wall"
+  CXXFLAGS="-O2 -funroll-all-loops -fargument-noalias-global -fno-gcse ${CXXFLAGS}"
+  CFLAGS="-O2 -funroll-all-loops -fargument-noalias-global -fno-gcse  ${CFLAGS}"
   CPPFLAGS="-DNDEBUG ${CPPFLAGS}"
  fi
 fi

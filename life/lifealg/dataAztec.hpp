@@ -18,16 +18,21 @@
 */
 #ifndef _DATAAZTEC_H_
 #define _DATAAZTEC_H_
+
 #include <string>
 #include <iostream>
+#include <fstream>
+#include <vector>
 
+extern "C"
+{
 //! Aztec include
 #include "az_aztec.h"
+}
 
-
-#include "GetPot.hpp"
-#include "sparseArray.hpp"
-#include "dataString.hpp"
+#include <GetPot.hpp>
+#include <sparseArray.hpp>
+#include <dataString.hpp>
 
 namespace LifeV
 {
@@ -50,8 +55,6 @@ namespace LifeV
   \todo dataAztecHelp() is not complete, and other items could
   be named with a string rather than with an integer
 */
-//using namespace std;
-
 class DataAztec
 {
 public:
