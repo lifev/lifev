@@ -25,6 +25,11 @@ namespace LifeV
 // Constructors
 
 operFS::operFS(GetPot     &data_file):
+    M_BCh_u       (3),
+    M_BCh_d       (3),
+    M_BCh_mesh    (4),
+    M_BCh_du      (2),
+    M_BCh_dz      (3),
     M_fluid       (data_file,
                    feTetraP1bubble,
                    feTetraP1,
@@ -38,11 +43,6 @@ operFS::operFS(GetPot     &data_file):
                    quadRuleTetra4pt,
                    quadRuleTria3pt,
                    M_BCh_d),
-    M_BCh_u       (3),
-    M_BCh_d       (3),
-    M_BCh_mesh    (4),
-    M_BCh_du      (2),
-    M_BCh_dz      (3),
     M_dofFluidToStructure(feTetraP1,
                           M_solid.dDof(),
                           feTetraP1bubble,

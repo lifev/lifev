@@ -60,9 +60,9 @@ void exactJacobian::eval(const Vector &_disp,
 }
 
 
-void exactJacobian::evalResidual(const Vector &_disp,
-                                 const int     _iter,
-                                 Vector       &_res)
+void exactJacobian::evalResidual(Vector &_res,
+                                 const Vector &_disp,
+                                 const int     _iter)
 {
     int status = 0;
 
@@ -173,9 +173,9 @@ void exactJacobian::setUpBC(function_type _bcf,
 //
 
 
-void  exactJacobian::solveJac(const Vector  &_res,
-                               const double   _linearRelTol,
-                               Vector        &_muk)
+void  exactJacobian::solveJac(Vector         &_muk,
+                              const Vector  &_res,
+                               const double   _linearRelTol)
 {
  // AZTEC specifications for the second system
   int    data_org[AZ_COMM_SIZE];   // data organisation for J
@@ -257,7 +257,7 @@ void  exactJacobian::solveLinearSolid()
 
     std::cout << "rhs_dz norm = " << maxnorm(M_rhs_dz) << std::endl;
     this->M_solid.setRecur(1);
-    this->M_solid.solveJac(M_rhs_dz, tol, M_dz);
+    this->M_solid.solveJac(M_dz, M_rhs_dz, tol);
     std::cout << "dz norm     = " << maxnorm(M_dz) << std::endl;
 }
 

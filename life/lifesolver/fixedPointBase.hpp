@@ -40,20 +40,22 @@ public:
 
     // member functions
 
-    void evalResidual(const Vector &_disp,
-                      const int     _iter,
-                      Vector       &_res);
-    void solvePrec   (const Vector &_res,
-                      const double  _linearRelTol,
-                      Vector       &_muk);
-
+    void evalResidual(Vector       &_res,
+                      const Vector &_disp,
+                      const int     _iter);
+    void solveJac   (Vector       &_muk,
+                     const Vector &_res,
+                     const double  _linearRelTol);
+    
     void setUpBC     (function_type _bcf,
                       function_type _vel);
 
 private:
 
-    void eval        (const Vector &_disp,
-                      const int     _status);
+//     void eval        (const Vector &_disp,
+//                       const int     _status);
+
+    void eval(Vector& dispNew, Vector& velo, const Vector& disp, int status);
 
 };
 

@@ -31,12 +31,12 @@ include_HEADERS	= ElasticStructureHandler.hpp NavierStokesAleHandler.hpp \
                 dataNavierStokes.hpp dataSimplifiedStructure.hpp simplifiedStructure.hpp \
                 convDiffReactHandler.hpp convDiffReactSolverPC.hpp dataConvDiffReact.hpp \
                 dataDarcy.hpp darcyHandler.hpp darcySolver.hpp operFS.hpp steklovPoincareBase.hpp \
-		fixedPointBase.hpp 
+		fixedPointBase.hpp exactJacobianBase.hpp
 
 
 lib_LTLIBRARIES	= liblifesolver.la
 
-liblifesolver_la_SOURCES	= operFS.cpp steklovPoincareBase.cpp fixedPointBase.cpp 
+liblifesolver_la_SOURCES	= operFS.cpp steklovPoincareBase.cpp fixedPointBase.cpp exactJacobianBase.cpp 
 
 liblifesolver_la_LIBADD    = ../lifefilters/liblifefilters.la ../lifecore/liblifecore.la ../lifearray/liblifearray.la $(petsc_libs) $(aztec_libs)
 include $(top_srcdir)/admin/Doxyfile.am

@@ -39,7 +39,6 @@ class DataJacobianSP {
 };
 
 
-
 class steklovPoincare : public operFS
 {
 public:
@@ -54,12 +53,13 @@ public:
 
     // member functions
 
-    void evalResidual(const Vector &_disp,
-                      const int     _iter,
-                      Vector       &_res);
-    void solveJac   (const Vector &_res,
-                      const double  _linearRelTol,
-                      Vector       &_muk);
+    void evalResidual(Vector       &_res,
+                      const Vector &_disp,
+                      const int     _iter);
+
+    void solveJac   (Vector        &_muk,
+                     const Vector &_res,
+                     const double  _linearRelTol);
 
     void solveLinearFluid();
     void solveLinearSolid();

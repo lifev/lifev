@@ -36,49 +36,86 @@ fixedPoint::~fixedPoint()
 // Residual computation
 //
 
-void fixedPoint::eval(const Vector &_disp,
-                      const int     _status)
+// void fixedPoint::eval(const Vector &_disp,
+//                       const int     _status)
+// {
+//     this->M_solid.d() = _disp;
+
+//     this->M_fluid.updateMesh(time());
+//     this->M_fluid.iterate   (time());
+
+//     this->M_fluid.postProcess();
+
+//     this->M_solid.setRecur(0);
+//     this->M_solid.iterate();
+
+//     this->M_solid.postProcess();
+// }
+
+
+// void fixedPoint::evalResidual(const Vector &_disp,
+//                               const int     _iter,
+//                               Vector       &_res)
+// {
+//     int status = 0;
+
+//     if(_iter == 0) status = 1;
+
+//     std::cout << "*** Residual computation g(x_" << _iter <<") at time " << time();
+//     if (status) std::cout << " [NEW TIME STEP] ";
+//     std::cout << std::endl;
+
+//     eval(M_dispStruct, status);
+
+//     M_dispStruct = this->M_solid.d();
+//     M_velo       = this->M_solid.w();
+
+//     std::cout << "                ::: norm(disp     ) = "
+//               << maxnorm(_disp) << std::endl;
+//     std::cout << "                ::: norm(dispNew  ) = "
+//               << maxnorm(M_dispStruct) << std::endl;
+//     std::cout << "                ::: norm(velo     ) = "
+//               << maxnorm(M_velo) << std::endl;
+
+//     _res = M_dispStruct - _disp;
+// }
+
+
+void fixedPoint::eval(Vector& dispNew, Vector& velo, const Vector& disp, int status)
 {
-    this->M_solid.d() = _disp;
+  if(status) M_nbEval = 0; // new time step
+  M_nbEval++ ;
 
-    this->M_fluid.updateMesh(time());
-    this->M_fluid.iterate   (time());
+  M_solid.d() = disp;
 
-    this->M_fluid.postProcess();
+  M_fluid.updateMesh(M_time);
+  M_fluid.iterate(M_time);
 
-    this->M_solid.setRecur(0);
-    this->M_solid.iterate();
+  M_solid.setRecur(0);
+  M_solid.iterate();
 
-    this->M_solid.postProcess();
+  dispNew = M_solid.d();
+  velo    = M_solid.w();
+
+  std::cout << "                ::: norm(disp     ) = " << maxnorm(disp) << std::endl;
+  std::cout << "                ::: norm(dispNew  ) = " << maxnorm(dispNew) << std::endl;
+  std::cout << "                ::: norm(velo     ) = " << maxnorm(velo) << std::endl;
 }
 
 
-void fixedPoint::evalResidual(const Vector &_disp,
-                              const int     _iter,
-                              Vector       &_res)
+// Residual evaluation
+//
+void fixedPoint::evalResidual(Vector &res, const Vector& disp, int iter)
 {
-    int status = 0;
-
-    if(_iter == 0) status = 1;
-
-    std::cout << "*** Residual computation g(x_" << _iter <<") at time " << time();
-    if (status) std::cout << " [NEW TIME STEP] ";
-    std::cout << std::endl;
-
-    eval(M_dispStruct, status);
-
-    M_dispStruct = this->M_solid.d();
-    M_velo       = this->M_solid.w();
-
-    std::cout << "                ::: norm(disp     ) = "
-              << maxnorm(_disp) << std::endl;
-    std::cout << "                ::: norm(dispNew  ) = "
-              << maxnorm(M_dispStruct) << std::endl;
-    std::cout << "                ::: norm(velo     ) = "
-              << maxnorm(M_velo) << std::endl;
-
-    _res = M_dispStruct - _disp;
+  int status = 0;
+  if(iter == 0) status = 1;
+  std::cout << "*** Residual computation g(x_" << iter <<" )";
+  if (status) std::cout << " [NEW TIME STEP] ";
+  std::cout << std::endl;
+  eval(M_dispStruct,M_velo,disp,status);
+  res = disp - M_dispStruct;
 }
+
 
 
 //
@@ -146,9 +183,9 @@ void fixedPoint::setUpBC(function_type _bcf,
 //
 
 
-void  fixedPoint::solvePrec(const Vector  &_res,
-                            const double   _linearRelTol,
-                            Vector        &_muk)
+void  fixedPoint::solveJac(Vector         &_muk,
+                           const Vector  &_res,
+                            const double   _linearRelTol)
 {
     _muk = _res;
 }

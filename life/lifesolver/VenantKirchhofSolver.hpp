@@ -84,6 +84,7 @@ public:
 
     //! Solve the non-linear system
     void iterate();
+    void iterate(Vector &_sol);
 
     //! Output
     void showMe( std::ostream& c = std::cout ) const;
@@ -93,7 +94,7 @@ public:
     //! BCHandler getter and setter
 
     BCHandler const & BC_solid() const {return _BCh;}
-    void setBCSolid(const BCHandler &_BCd) {_BCh = _BCd;} 
+    void setBCSolid(const BCHandler &_BCd) {_BCh = _BCd;}
     //! residual getter
     Vector& residual() {return _residual_d;}
 
@@ -115,10 +116,11 @@ public:
     void updateJac( Vector& sol, int iter );
 
     //! solves the tangent problem for newton iterations
-    void solveJac( const Vector& res, double& linear_rel_tol, Vector &step);
-
+    void solveJac( Vector &step, const Vector& res, double& linear_rel_tol);
+//    void solveJac( const Vector& res, double& linear_rel_tol, Vector &step);
     //! solves the tangent problem with custom BC
-    void solveJac( const Vector& res, double& linear_rel_tol, Vector &step, BCHandler &_BCd );
+//    void solveJac( const Vector& res, double& linear_rel_tol, Vector &step, BCHandler &_BCd );
+    void solveJac( Vector &step, const Vector& res, double& linear_rel_tol, BCHandler &_BCd );
 
 
 private:
@@ -173,8 +175,8 @@ private:
     DataAztec _dataAztec;
 
     //! evaluates residual for newton interations
-    void evalResidual( const Vector& sol, int iter, Vector &res );
-
+//    void evalResidual( const Vector& sol, int iter, Vector &res );
+    void evalResidual( Vector &res, const Vector& sol, int iter);
     //! updates the tangent matrix for newton iterations
 
     //! files for lists of iterations and residuals per timestep
@@ -399,6 +401,35 @@ iterate()
 //    _residual_d = -1.*_residual_d;
 }
 
+template <typename Mesh>
+void VenantKirchhofSolver<Mesh>::
+iterate(Vector &_sol)
+{
+
+    int status;
+
+    int maxiter = _maxiter;
+
+    status = newton( _sol, *this, maxnorm, _abstol, _reltol, maxiter, _etamax, ( int ) _linesearch, _out_res, _time );
+
+    if ( status == 1 )
+    {
+        std::cout << "Inners iterations failed\n";
+        exit( 1 );
+    }
+    else
+    {
+        std::cout << "Number of inner iterations       : " << maxiter << std::endl;
+        _out_iter << _time << " " << maxiter << std::endl;
+    }
+
+    _w = ( 2.0 / this->_dt ) * this->_d - _rhs_w;
+
+    std::cout << "sol norm = " << norm(_sol) << std::endl;
+
+    _residual_d = -1*(_C*_sol);// - _rhsWithoutBC;
+//    _residual_d = -1.*_residual_d;
+}
 
 
 template <typename Mesh>
@@ -412,7 +443,8 @@ showMe( std::ostream& c ) const
 
 template <typename Mesh>
 void VenantKirchhofSolver<Mesh>::
-evalResidual( const Vector& sol, int iter, Vector &res )
+evalResidual( Vector &res, const Vector& sol, int iter)
+//evalResidual( const Vector& sol, int iter, Vector &res )
 {
 
 
@@ -489,8 +521,6 @@ template <typename Mesh>
 void VenantKirchhofSolver<Mesh>::
 updateJac( Vector& sol, int iter )
 {
-
-
     std::cout << "    o-  Solid: Updating JACOBIAN in iter " << iter << std::endl << "  ... ";
 
     Chrono chrono;
@@ -541,10 +571,13 @@ updateJac( Vector& sol, int iter )
         }
 
     }
+    if (iter == 1)
+    {
+        _J.spy("Jacobian");
+    }
 
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
-
 }
 
 
@@ -552,7 +585,8 @@ updateJac( Vector& sol, int iter )
 
 template <typename Mesh>
 void VenantKirchhofSolver<Mesh>::
-solveJac( const Vector& res, double& linear_rel_tol, Vector &step)
+//solveJac( const Vector& res, double& linear_rel_tol, Vector &step)
+solveJac( Vector &step, const Vector& res, double& linear_rel_tol)
 {
 
     Chrono chrono;
@@ -598,7 +632,9 @@ solveJac( const Vector& res, double& linear_rel_tol, Vector &step)
     J = AZ_matrix_create( N_eq );
     prec_J = AZ_precond_create( J, AZ_precondition, NULL );
 
-    AZ_set_MSR( J, ( int* ) _pattK.giveRaw_bindx(), ( double* ) _J.giveRaw_value(), data_org, 0, NULL, AZ_LOCAL );
+    AZ_set_MSR( J, ( int* ) _pattK.giveRaw_bindx(),
+                ( double* ) _J.giveRaw_value(),
+                data_org, 0, NULL, AZ_LOCAL );
 
     _dataAztec.aztecOptionsFromDataFile( options, params );
 
@@ -627,7 +663,8 @@ solveJac( const Vector& res, double& linear_rel_tol, Vector &step)
 
 template <typename Mesh>
 void VenantKirchhofSolver<Mesh>::
-solveJac(const Vector& res, double& linear_rel_tol, Vector &step, BCHandler &_BCd )
+//solveJac(const Vector& res, double& linear_rel_tol, Vector &step, BCHandler &_BCd )
+solveJac(Vector &step, const Vector& res, double& linear_rel_tol, BCHandler &_BCd )
 {
 
     Chrono chrono;
@@ -644,9 +681,13 @@ solveJac(const Vector& res, double& linear_rel_tol, Vector &step, BCHandler &_BC
     if ( !_BCd.bdUpdateDone() )
         _BCd.bdUpdate( _mesh, _feBd, this->_dof );
 
+//    _BCd.showMe();
+
     bcManageMatrix( _J, _mesh, this->_dof, _BCd, _feBd, tgv );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
+
+//    _J.spy("Jacobian");
 
     // AZTEC specifications for the first system
     int data_org[ AZ_COMM_SIZE ];   // data organisation for C

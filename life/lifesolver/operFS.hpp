@@ -50,13 +50,13 @@ namespace LifeV
 
         // virtual memeber functions
 
-        virtual void evalResidual(const Vector &_disp,
-                                  const int     _iter,
-                                  Vector       &res) = 0;
+        virtual void evalResidual(Vector &res,
+                                  const Vector &_disp,
+                                  const int     _iter) = 0;
 
-        virtual void solveJac (const Vector &_res,
-                                const double  _linearRelTol,
-                                Vector       &_muk) = 0;
+        virtual void solveJac (Vector &_muk,
+                               const Vector &_res,
+                                const double  _linearRelTol) = 0;
 
         // member functions
 
@@ -106,11 +106,11 @@ namespace LifeV
 
         SolverAztec             M_solverAztec;
 
-    private:
-
         Real                    M_time;
 
         UInt                    M_nbEval;
+    private:
+
 
         UInt                    M_method;
         UInt                    M_precond;

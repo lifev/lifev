@@ -64,8 +64,8 @@ void lineSearch_parab( Fct& f, Norm& norm, Vector& residual, Vector& sol, Vector
     lambda_cur = lambda;
     sol_cur = sol;
     sol += lambda * step;
-    f.evalResidual( sol, iter, residual );
-//    f.evalResidual( residual, sol, iter );
+//    f.evalResidual( sol, iter, residual );
+    f.evalResidual( residual, sol, iter );
     normRes_test = norm( residual );
     res_test2 = normRes_test * normRes_test;
     res_test_old2 = res_test2;
@@ -94,8 +94,8 @@ void lineSearch_parab( Fct& f, Norm& norm, Vector& residual, Vector& sol, Vector
         lambda_old = lambda_cur;
         lambda_cur = lambda;
         // eval norms
-        f.evalResidual( sol, iter, residual );
-//        f.evalResidual( residual, sol, iter );
+//        f.evalResidual( sol, iter, residual );
+        f.evalResidual( residual, sol, iter );
         normRes_test = norm( residual );
         res_test_old2 = res_test2;
         res_test2 = normRes_test * normRes_test;
