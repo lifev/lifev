@@ -1,4 +1,4 @@
-/*
+/*-*- mode: c++ -*-
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
 
@@ -90,7 +90,7 @@ StaticBdFE::StaticBdFE(const RefFE& _refFE,const GeoMap& _geoMap):
 */
 StaticBdFE::StaticBdFE(const RefFE& _refFE,const GeoMap& _geoMap,
 		       const QuadRule& _qr, const Real* refcoor,
-		       UInt currentid):
+		       UInt currentid, Real _invarea):
   _currentId(currentid),
   nbGeoNode(_geoMap.nbDof),nbNode(_refFE.nbDof),nbCoor(_refFE.nbCoor),
   nbQuadPt(_qr.nbQuadPt), point(nbGeoNode,nbCoor+1),
@@ -103,12 +103,13 @@ StaticBdFE::StaticBdFE(const RefFE& _refFE,const GeoMap& _geoMap,
   weightMeas((int)nbQuadPt),meas((int)nbQuadPt),
   normal((int)nbCoor+1,(int)nbQuadPt),
   tangent((int)nbCoor,(int)nbCoor+1,(int)nbQuadPt),
-  metric((int)nbCoor,(int)nbCoor,(int)nbQuadPt),quadPt((int)nbQuadPt,3)
+  metric((int)nbCoor,(int)nbCoor,(int)nbQuadPt),quadPt((int)nbQuadPt,3), 
+  invArea(_invarea)
 {
   CONSTRUCTOR("StaticBdFE (with refCoor)");
   for(int ig=0;ig<nbQuadPt;ig++){
     for(int i=0;i<nbNode;i++){
-      phi(i,ig) = refFE.phi(i,ig,qr);
+      phi(i,ig) = invArea * refFE.phi(i,ig,qr); // invArea added here
       for(int icoor=0;icoor<nbCoor;icoor++){
 	dPhiRef(i,icoor,ig) = refFE.dPhi(i,icoor,ig,qr);
       }

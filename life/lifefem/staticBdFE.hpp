@@ -1,4 +1,4 @@
-/*
+/*-*- mode: c++ -*-
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
 
@@ -60,8 +60,9 @@ protected:
 public:
   StaticBdFE(const RefFE& _refFE,const GeoMap& _geoMap);
   StaticBdFE(const RefFE& _refFE,const GeoMap& _geoMap,const QuadRule& _qr);
+ //! new optionnal argument for hybrid hdiv fe invArea
   StaticBdFE(const RefFE& _refFE,const GeoMap& _geoMap,const QuadRule& _qr,
-	     const Real* refcoor, UInt currentid);
+	     const Real* refcoor, UInt currentid, Real _invarea=1.);
   ~StaticBdFE();
 
   const int nbGeoNode; //!< Number of geometrical nodes
@@ -72,6 +73,7 @@ public:
   const RefFE& refFE;//!< The reference finite element
   const GeoMap& geoMap;//!< The geometical mapping
   const QuadRule& qr;//!< The quadrature rule
+
   KNM<Real> phi;//!< Values of the basis functions on quadrature points
   KNMK<Real> dPhiRef;//! Values of the derivatives of the basis functions on quadrature points on the reference finite element
   KNMK<Real> dPhi; //!<Values of the derivatives of the basis functions on quadrature points on the current finite element \warning NOT YET IMPLEMENTED
@@ -83,7 +85,9 @@ public:
   KNMK<Real> tangent;//!< Values of the tangents on the quadrature points
   KNMK<Real> metric;//!< Metric tensor on the quadrature points
   KNM<Real> quadPt; //!< Coordinates of the quadrature points on the current element
-  //--------------------------------------------------------------------------
+
+  const  Real invArea; //!<  added for the treatment of hybrid hdiv fe
+ //--------------------------------------------------------------------------
 #ifdef TEST_PRE
   /*!
     return true if a quadrature rule has been given

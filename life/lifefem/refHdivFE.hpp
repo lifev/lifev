@@ -1,4 +1,4 @@
-/*
+/*-*- mode: c++ -*-
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
 
@@ -145,7 +145,7 @@ public:
   //! return the value of the i-th basis function on point (x,y,z)
   inline double phi(int i,int icomp,cRRef x,cRRef y,cRRef z) const{
     ASSERT_BD( i<nbDof && icomp < nbCoor)
-      //      cout << _phi[3*i+icomp](x,y,z) << endl;
+      //      std::cout << _phi[3*i+icomp](x,y,z) << std::endl;
       return _phi[nbCoor*i+icomp](x,y,z);
   }
   //!return the value of the i-th basis function on the ig-th point of integration of quadrature rule qr
@@ -181,12 +181,8 @@ public:
       return _divPhiQuad( _idxDQuad(qr.id) + ig*nbDof+ i );
   }
   void RefHdivFE::check() const;//!< A simple check function
-  friend ostream& operator << (ostream& f,const RefHdivFE& fe);
+  friend std::ostream& operator << (std::ostream& f,const RefHdivFE& fe);
 };
-
-//!======================================================================
-//!     DECLARATION OF FINITE ELEMENTS (defined in defQuadRule.cc)
-extern const RefHdivFE feHexaRT0;
 
 //!======================================================================
 //!
@@ -262,5 +258,77 @@ static const FCT fct_RT0_3D[18] = {fct1_RT0_1_3D,fct1_RT0_2_3D,fct1_RT0_3_3D,
 static const FCT fct_DIV_RT0_3D[6] = {fct1_DIV_RT0_3D, fct2_DIV_RT0_3D,
 				      fct3_DIV_RT0_3D, fct4_DIV_RT0_3D,
 				      fct5_DIV_RT0_3D, fct6_DIV_RT0_3D};
+
+
+//!======================================================================
+//!
+//!                           RT0  (3D)
+//!
+//!======================================================================
+/*
+  
+                4
+               / .  
+              /  \.3
+             /  . \\
+            / .    \\
+           /.       \!
+         1 ----------2
+
+SEE basisElSh.cc   for the ORIENTATION CONVENTIONS
+   point 1: 0, 0, 0
+   point 2: 1, 0, 0
+   point 3: 0, 1, 0
+   point 4: 0, 0, 1
+
+   face 1: 2, 3, 4 
+   face 2: 1, 4, 3 
+   face 3: 1, 2, 4 
+   face 4: 1, 3, 2 
+*/
+
+Real fct1_RT0_1_3D_TETRA(cRRef x,cRRef y,cRRef z);
+Real fct1_RT0_2_3D_TETRA(cRRef x,cRRef y,cRRef z);
+Real fct1_RT0_3_3D_TETRA(cRRef x,cRRef y,cRRef z);
+
+Real fct2_RT0_1_3D_TETRA(cRRef x,cRRef y,cRRef z);
+Real fct2_RT0_2_3D_TETRA(cRRef x,cRRef y,cRRef z);
+Real fct2_RT0_3_3D_TETRA(cRRef x,cRRef y,cRRef z);
+
+Real fct3_RT0_1_3D_TETRA(cRRef x,cRRef y,cRRef z);
+Real fct3_RT0_2_3D_TETRA(cRRef x,cRRef y,cRRef z);
+Real fct3_RT0_3_3D_TETRA(cRRef x,cRRef y,cRRef z);
+
+Real fct4_RT0_1_3D_TETRA(cRRef x,cRRef y,cRRef z);
+Real fct4_RT0_2_3D_TETRA(cRRef x,cRRef y,cRRef z);
+Real fct4_RT0_3_3D_TETRA(cRRef x,cRRef y,cRRef z);
+
+
+Real fct1_DIV_RT0_3D_TETRA(cRRef x,cRRef y,cRRef z);
+Real fct2_DIV_RT0_3D_TETRA(cRRef x,cRRef y,cRRef z);
+Real fct3_DIV_RT0_3D_TETRA(cRRef x,cRRef y,cRRef z);
+Real fct4_DIV_RT0_3D_TETRA(cRRef x,cRRef y,cRRef z);
+
+
+static const Real refcoor_RT0_3D_TETRA[12] = { 1./3  ,1./3.  ,0.    ,
+					       1./3. ,0.     ,1./3. ,
+					       1./3. ,1./3.  ,1./3. ,  
+					       0.    ,1./3.  ,1./3. };
+
+static const FCT fct_RT0_3D_TETRA[12] = {fct1_RT0_1_3D_TETRA,fct1_RT0_2_3D_TETRA,fct1_RT0_3_3D_TETRA, 
+                                   fct2_RT0_1_3D_TETRA,fct2_RT0_2_3D_TETRA,fct2_RT0_3_3D_TETRA,
+                                   fct3_RT0_1_3D_TETRA,fct3_RT0_2_3D_TETRA,fct3_RT0_3_3D_TETRA,
+                                   fct4_RT0_1_3D_TETRA,fct4_RT0_2_3D_TETRA,fct4_RT0_3_3D_TETRA};
+
+static const FCT fct_DIV_RT0_3D_TETRA[4] = {fct1_DIV_RT0_3D_TETRA, fct2_DIV_RT0_3D_TETRA,  
+				      fct3_DIV_RT0_3D_TETRA, fct4_DIV_RT0_3D_TETRA};
+
+
+//!======================================================================
+//!     DECLARATION OF FINITE ELEMENTS (defined in defQuadRule.cc)
+extern const RefHdivFE feHexaRT0;
+
+extern const RefHdivFE feTetraRT0;
+
 }
 #endif

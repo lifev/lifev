@@ -1,4 +1,4 @@
-/*
+/*-*- mode: c++ -*-
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
 
@@ -58,12 +58,12 @@ void RefHybridFE::check() const
 {
   Real sumphi,sumdphi;
   int nbdofbdfe=0;
-  cout << "*** Check " << name << endl;
+  std::cout << "*** Check " << name << std::endl;
   for(UInt nf = 0 ; nf < _nBdFE ;  nf ++){
     const StaticBdFE& bdfe = _bdfeList[ nf ];
     const QuadRule& qr = bdfe.qr;
-    cout << endl << "    " << bdfe.refFE.name << ", whose identity is " << bdfe.currentId() << endl;
-    cout << "    " << qr.name << endl;
+    std::cout << std::endl << "    " << bdfe.refFE.name << ", whose identity is " << bdfe.currentId() << std::endl;
+    std::cout << "    " << qr.name << std::endl;
     nbdofbdfe += bdfe.nbNode;
 
     for(int i = 0 ; i <  bdfe.nbNode ; i ++){
@@ -73,26 +73,26 @@ void RefHybridFE::check() const
  	for(int icoor = 0 ; icoor < bdfe.nbCoor ; icoor ++)
 	  sumdphi += bdfe.dPhiRef(i,icoor,ig) * bdfe.weightMeas(ig);
       }
-    cout << "      integral_Face phi_i                                   = " << sumphi << endl;
-    cout << "      sum_{icoor} integral dphi_i/dx_icoor                  = " << sumdphi << endl;
+    std::cout << "      integral_Face phi_i                                   = " << sumphi << std::endl;
+    std::cout << "      sum_{icoor} integral dphi_i/dx_icoor                  = " << sumdphi << std::endl;
     }
   }
-  cout << "     number of dof (should be : "<< nbDof << " )             = " << nbdofbdfe << endl;
+  std::cout << "     number of dof (should be : "<< nbDof << " )             = " << nbdofbdfe << std::endl;
   //! simple consistency test:
   ASSERT_PRE( nbdofbdfe == nbDof , \
     "There should be as many dof in the refHybrid element as the sum of all dof in the boundary elements.");
-  cout << endl;
+  std::cout << std::endl;
 }
 
-ostream& operator << (ostream& f,const RefHybridFE& fe)
+std::ostream& operator << (std::ostream& f,const RefHybridFE& fe)
 {
   f << "-------------------------\n";
-  f << "Reference Finite Element: " << fe.name << endl;
+  f << "Reference Finite Element: " << fe.name << std::endl;
   f << "-------------------------\n";
-  f << "*** Shape : " << fe.shape << endl;
+  f << "*** Shape : " << fe.shape << std::endl;
   f << "*** Local coordinate of the nodes :\n";
   for(int i=0;i<fe.nbDof;i++){
-    f << fe.xi(i) << " " << fe.eta(i) << " " << fe.zeta(i) << endl;
+    f << fe.xi(i) << " " << fe.eta(i) << " " << fe.zeta(i) << std::endl;
   }
   f << "*** Pattern :\n";
   for(int i=0;i<fe.nbPattern();i++) f << "(" << fe.patternFirst(i) << "," << fe.patternSecond(i) << ") \n";

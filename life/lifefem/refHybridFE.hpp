@@ -1,4 +1,4 @@
-/*
+/*-*- mode: c++ -*-
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
 
@@ -154,7 +154,7 @@ public:
   }
 
   void check() const;//!< A simple check function
-  friend ostream& operator << (ostream& f,const RefHybridFE& fe);
+  friend std::ostream& operator << (std::ostream& f,const RefHybridFE& fe);
 };
 
 
@@ -163,9 +163,13 @@ public:
 //     DECLARATION OF FINITE ELEMENTS (defined in defQuadRule.cc)
 
 extern const RefHybridFE feHexaRT0Hyb;
+extern const RefHybridFE feHexaRT0VdotNHyb;
+
 extern const RefHybridFE feHexaRT1Hyb;
+extern const RefHybridFE feHexaRT1VdotNHyb;
 
 extern const RefHybridFE feTetraRT0Hyb;
+extern const RefHybridFE feTetraRT0VdotNHyb;
 
 //======================================================================
 //
@@ -326,10 +330,10 @@ SEE basisElSh.cc   for the ORIENTATION CONVENTIONS
 // not really useful(?). to be  removed? in this case, remove also xi, eta, zeta, etc. in the class.
 // this info is included in Staticbdfe.
 //! for the TETRA : These values are FALSE!!
-static const Real refcoor_RT0HYB_TETRA[12] = {0.27  ,0.27  ,0.   ,
-					      0.27  ,0.    ,0.27 ,
-					      0.    ,0.    ,0.  ,    //FALSE!!
-					      0.    ,0.27  ,0.   };
+static const Real refcoor_RT0HYB_TETRA[12] = { 1./3  ,1./3.  ,0.    ,
+					       1./3. ,0.     ,1./3. ,
+					       1./3. ,1./3.  ,1./3. ,  
+					       0.    ,1./3.  ,1./3. };
 
 
 /*!

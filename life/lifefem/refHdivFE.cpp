@@ -1,4 +1,4 @@
-/*
+/*-*- mode: c++ -*-
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
 
@@ -62,50 +62,51 @@ void RefHdivFE::check() const
 {
   /*
   Real sumphi,sumdivphi;
-  cout << "*** Check " << name << endl;
+  std::cout << "*** Check " << name << std::endl;
   for(int k=0;k<_sqr->nbQuadRule;k++){
     sumphi=sumdivphi=0.;
     const QuadRule& qr = _sqr->quadRule(k);
-    cout << endl << "    " << qr.name << endl;
+    std::cout << std::endl << "    " << qr.name << std::endl;
     for(int ig=0;ig<qr.nbQuadPt;ig++){
       for(int i=0;i<nbDof;i++){
 	sumphi += phi(i,ig,qr) * qr.weight(ig);
 	for(int icoor=0;icoor<nbCoor;icoor++) sumdivphi += divPhi(i,icoor,ig,qr)*qr.weight(ig);
       }
     }
-    cout << "     sum_i integral phi_i                                   = " << sumphi << endl;
-    cout << "     sum_{i,icoor} integral divphi_i/dx_icoor               = " << sumdivphi << endl;
+    std::cout << "     sum_i integral phi_i                                   = " << sumphi << std::endl;
+    std::cout << "     sum_{i,icoor} integral divphi_i/dx_icoor               = " << sumdivphi << std::endl;
   }
-  cout << endl;
+  std::cout << std::endl;
   */
 }
 
-ostream& operator << (ostream& f,const RefHdivFE& fe)
+std::ostream& operator << (std::ostream& f,const RefHdivFE& fe)
 {
   f << "-------------------------\n";
-  f << "Reference Finite Element: " << fe.name << endl;
+  f << "Reference Finite Element: " << fe.name << std::endl;
   f << "-------------------------\n";
-  f << "*** Shape : " << fe.shape << endl;
+  f << "*** Shape : " << fe.shape << std::endl;
   f << "*** Local coordinate of the nodes :\n";
   for(int i=0;i<fe.nbDof;i++){
-    f << fe.xi(i) << " " << fe.eta(i) << " " << fe.zeta(i) << endl;
+    f << fe.xi(i) << " " << fe.eta(i) << " " << fe.zeta(i) << std::endl;
   }
   f << "*** Pattern :\n";
-  for(int i=0;i<fe.nbPattern();i++) f << "(" << fe.patternFirst(i) << "," << fe.patternSecond(i) << ") \n";
+  for(int i=0;i<fe.nbPattern();i++) 
+    f << "(" << fe.patternFirst(i) << "," << fe.patternSecond(i) << ") \n";
   for(int k=0;k<fe._sqr->nbQuadRule;k++){
     const QuadRule& qr = fe._sqr->quadRule(k);
-    f << "\n*** Quadrature rule : " << qr.name << endl;
+    f << "\n*** Quadrature rule : " << qr.name << std::endl;
     for(int ig=0;ig<qr.nbQuadPt;ig++){
-      f << "    - Quadrature point : " << ig << endl;
-      //      f << "     number and values of basis functions = " << fe.phiQuadPt(ig,qr) << endl;
+      f << "    - Quadrature point : " << ig << std::endl;
+      //  f << "     number and values of basis functions = " << fe.phiQuadPt(ig,qr) << std::endl;
       for(int i=0;i<fe.nbDof;i++){
-	f << "      Basif fct " << i << endl;
+	f << "      Basif fct " << i << std::endl;
         for(int icomp=0;icomp<fe.nbCoor;icomp++){
-          f << "         Value = " << fe.phi(i,icomp,ig,qr) << endl;
+          f << "         Value = " << fe.phi(i,icomp,ig,qr) << std::endl;
         }
 	f << "         Divergence = " ;
         f << " " << fe.divPhi(i,ig,qr);
-        f << endl;
+        f << std::endl;
       }
     }
   }
