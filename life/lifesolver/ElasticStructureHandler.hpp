@@ -70,7 +70,9 @@ public:
 
     //! Sets initial condition for the displacment en velocity
     void initialize( const Function& d0, const Function& w0 );
-    void initialize( const std::string& depName, const std::string& velName );
+    void initialize( const std::string& depName,
+                     const std::string& velName,
+                     double             startT = 0.);
 
     //! Update the right  hand side  for time advancing
     /*!
@@ -403,14 +405,18 @@ ElasticStructureHandler<Mesh>::initialize( const Function& d0, const Function& w
 template <typename Mesh>
 void
 ElasticStructureHandler<Mesh>::initialize( const std::string& depName,
-                                           const std::string& velName )
+                                           const std::string& velName,
+                                           double             startT)
 {
+    std::cout << "  S- restarting at time = " << startT << std::endl;
+
+    _count = (int) (startT/_dt - 0.5);
+
     // Loop on elements of the mesh
     for ( ID iElem = 1; iElem <= this->_mesh.numVolumes(); ++iElem )
     {
         _fe.updateJac( this->_mesh.volume( iElem ) );
     }
-
     readUnknown(depName, _d);
     readUnknown(velName, _w);
 }
@@ -420,7 +426,6 @@ template <typename Mesh>
 void
 ElasticStructureHandler<Mesh>::readUnknown( const std::string       &name,
                                             PhysVectUnknown<Vector> &unknown)
-//                                            double                  factor)
 {
     std::string sdummy;
     std::string ext;
@@ -428,14 +433,10 @@ ElasticStructureHandler<Mesh>::readUnknown( const std::string       &name,
     int ndim;
 
     int nDof = _dim;
-    std::cout << "size = " << nDof << std::endl;
 
     std::string filenamex = name;
     ext = "_x.bb";
     filenamex.insert(filenamex.end(), ext.begin(), ext.end());
-
-//     std::cout << "Reading INRIA solid file   (" << filenamex << ")"
-//               << ":" << std::endl;
 
     std::ifstream filex(filenamex.c_str(), std::ios::in);
 
@@ -469,9 +470,6 @@ ElasticStructureHandler<Mesh>::readUnknown( const std::string       &name,
     std::string filenamey = name;
     ext = "_y.bb";
     filenamey.insert(filenamey.end(), ext.begin(), ext.end());
-
-//     std::cout << "Reading INRIA solid file   (" << filenamey << ")"
-//               << ":" << std::endl;
 
     std::ifstream filey(filenamey.c_str(), std::ios::in);
 

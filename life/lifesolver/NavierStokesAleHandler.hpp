@@ -112,7 +112,8 @@ public:
     //! from medit file
     void initialize( const std::string& velName,
                      const std::string& pressName,
-                     const std::string& velwName);
+                     const std::string& velwName,
+                     double             startT = 0.);
     //! Postprocessing
     void postProcess();
 
@@ -265,9 +266,12 @@ template <typename Mesh>
 void
 NavierStokesAleHandler<Mesh>::initialize( const std::string& velName,
                                           const std::string& pressName,
-                                          const std::string& velwName)
+                                          const std::string& velwName,
+                                          double             startT)
 {
-    std::cout << "  F- restarting ... " << std::endl;
+    std::cout << "  F- restarting at time = " << startT << " " << _dt << std::endl;
+
+    _count = (UInt) (startT/_dt - 0.5);
 
     NavierStokesHandler<Mesh>::initialize( velName, pressName);
 
@@ -278,8 +282,8 @@ NavierStokesAleHandler<Mesh>::initialize( const std::string& velName,
 
     filenamep.insert(filenamep.end(), ext.begin(), ext.end());
 
-    std::cout << "    F - Reading INRIA fluid mesh file   (" << filenamep << ")"
-              << ":" << std::endl;
+//     std::cout << "    F - Reading INRIA fluid mesh file   (" << filenamep << ")"
+//               << ":" << std::endl;
 
     std::ifstream file(filenamep.c_str(), std::ios::in);
 
@@ -331,7 +335,7 @@ NavierStokesAleHandler<Mesh>::initialize( const std::string& velName,
 
     _dispOld = _disp - _w*_dt;
 
-    _mesh.moveMesh(_disp);
+//    _mesh.moveMesh(_disp);
 
 }
 
@@ -348,7 +352,6 @@ NavierStokesAleHandler<Mesh>::readUnknown( const std::string       &name,
     int ndim;
 
     int nDof = _mesh.pointList.size();
-    std::cout << "size = " << nDof << std::endl;
 
     std::string filenamex = name;
     ext = "_x.bb";
@@ -473,7 +476,7 @@ NavierStokesAleHandler<Mesh>::postProcess()
     ++_count;
     if ( fmod( float( _count ), float( _verbose ) ) == 0.0 )
     {
-        std::cout << "  o-  Post-processing \n";
+        std::cout << "  F-  Post-processing \n";
         index << ( _count / _verbose );
 
         switch ( index.str().size() )

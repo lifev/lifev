@@ -817,6 +817,12 @@ NavierStokesHandler<Mesh, DataType>::initialize( const std::string& velName,
         filep >> _p[ip];
 
     filep.close();
+
+
+    _bdf.bdf_u().initialize_unk( _u );
+    _bdf.bdf_p().initialize_unk( _p );
+
+
 }
 
 /*! Computes the flux on a given part of the boundary

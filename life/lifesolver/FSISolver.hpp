@@ -163,10 +163,11 @@ public:
                      std::string pressName,
                      std::string velwName,
                      std::string depName,
-                     std::string velSName)
+                     std::string velSName,
+                     double      Tstart = 0.)
         {
-            M_oper->fluid().initialize(velFName, pressName, velwName);
-            M_oper->solid().initialize(depName, velSName);
+            M_oper->fluid().initialize(velFName, pressName, velwName, Tstart);
+            M_oper->solid().initialize(depName, velSName, Tstart);
         }
 
     void iterate( Real time );
