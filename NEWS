@@ -31,6 +31,9 @@ New in 0.5.0:
 * Factorized and merged FSI::operFS (GF)
 * Added NavierStokesWithFlux solver to impose fluxes (CV, CP)
 
+[lifefilters]
+* Added netgen reader/writer(solution) (MM) 
+
 [testsuite]
 * Added test for 3D/0D coupling (AM)
 * Moved files of test_darcy in lifesolver (VM, CP)
@@ -186,4 +189,4 @@ New in 0.1.0pre3:
 * fixed some bugs and miscompilation in a few places
 
 
- -- Christophe Prud'homme <prudhomm@debian.org>, Thu Oct 28 19:18:06 2004
+ -- Christophe Prud'homme <prudhomm@debian.org>, Mon Nov  8 14:55:09 2004
