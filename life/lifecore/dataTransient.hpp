@@ -1,0 +1,62 @@
+/*
+  This file is part of the LifeV library
+  Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+/*!
+  \file dataTime.h
+  \author M.A. Fernandez
+  \date 01/2003
+  \version 1.0
+
+  \brief File containing a class for handling temporal discretization with GetPot
+
+*/
+#ifndef _DATATRANSIENT_H_
+#define _DATATRANSIENT_H_
+#include <string>
+#include "GetPot.hpp"
+
+
+namespace LifeV
+{
+
+/*
+  \author JFG
+  \brief very poor data for time dependent problem
+  \TODO
+  1) allow variable time steps 
+  2) select a stopping test (based on either max_time_iter or max_time)
+  3) a standard banner for new time step
+  4) tolerance for steady state
+ 
+*/
+using namespace std;
+class DataTransient
+{
+public:
+  double max_time;
+  int    max_time_iter;
+  double time_step;
+  int    post_proc_period;
+  //
+  DataTransient(const GetPot& dfile);
+  void dataTransientShowMe(ostream& c);
+  void dataTransientHelp(ostream& c);
+  void timeBanner(int iter,double t);
+};
+}
+#endif
