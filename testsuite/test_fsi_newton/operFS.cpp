@@ -49,34 +49,30 @@ void operFS::eval(Vector& dispNew, Vector& velo, const Vector& disp, int status)
   _fluid.updateMesh(_time);
   _fluid.iterate(_time);
 
-  _solid._recur=0;
+  _solid.setRecur(0);
   _solid.iterate();
 
   dispNew = _solid.d();
   velo    = _solid.w();
 
-  cout << "                ::: norm(disp     ) = " << maxnorm(disp) << endl;
-  cout << "                ::: norm(dispNew  ) = " << maxnorm(dispNew) << endl;
-  cout << "                ::: norm(velo     ) = " << maxnorm(velo) << endl;
-
-  _fluid.postProcess();
-  _solid.postProcess();
+  std::cout << "                ::: norm(disp     ) = " << maxnorm(disp) << std::endl;
+  std::cout << "                ::: norm(dispNew  ) = " << maxnorm(dispNew) << std::endl;
+  std::cout << "                ::: norm(velo     ) = " << maxnorm(velo) << std::endl;
 
 }
 
 
 // Residual evaluation
 //
-void operFS::evalResidual(Vector& res, const Vector& disp, int iter) {
+void operFS::evalResidual(const Vector& disp, int iter, Vector &res) {
 
   int status = 0;
   if(iter == 0) status = 1;
-  cout << "*** Residual computation g(x_" << iter <<" )";
-  if (status) cout << " [NEW TIME STEP] ";
-  cout << endl;
+  std::cout << "*** Residual computation g(x_" << iter <<" )";
+  if (status) std::cout << " [NEW TIME STEP] ";
+  std::cout << std::endl;
   eval(_dispStruct,_velo,disp,status);
   res = disp - _dispStruct;
-
 }
 
 
@@ -86,7 +82,7 @@ void  operFS::updateJac(Vector& sol,int iter) {
 
 
 //
-void  operFS::solveJac(Vector& step, const Vector& res, double& linear_rel_tol) {
+void  operFS::solveJac(const Vector& res, double& linear_rel_tol, Vector &step) {
 
  // AZTEC specifications for the second system
   int    data_org[AZ_COMM_SIZE];   // data organisation for J
@@ -123,7 +119,7 @@ void  operFS::solveJac(Vector& step, const Vector& res, double& linear_rel_tol) 
   // are passed through A_ii and pILU_ii:
   AZ_set_MATFREE(J, &_dataJacobian, my_matvecJacobian);
 
-  cout << "  o-  Solving Jacobian system... ";
+  std::cout << "  o-  Solving Jacobian system... ";
   Chrono chrono;
 
   for (UInt i=0;i<dim_res; ++i)
@@ -132,7 +128,7 @@ void  operFS::solveJac(Vector& step, const Vector& res, double& linear_rel_tol) 
   chrono.start();
   AZ_iterate(&step[0], &res[0], options, params, status, proc_config, J, NULL, NULL);
   chrono.stop();
-  cout << "done in " << chrono.diff() << " s." << endl;
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
 
   AZ_matrix_destroy(&J);
@@ -158,9 +154,12 @@ void  operFS::solveLinearSolid() {
 
   Real tol=1.e-10;
 
-  _solid._recur = 1;
+  _solid.setRecur(1);
 
-  _solid.solveJac(_dz, _rhs_dz, tol);
+  _solid.solveJac(_dz, tol, _rhs_dz);
+
+//   for (UInt ii = 0; ii < _rhs_dz.size(); ++ii)
+//       std::std::cout << _rhs_dz[ii] << " " << _dz[ii] << std::std::endl;
 
 }
 
@@ -182,7 +181,7 @@ void my_matvecJacobian(double *z, double *Jz, AZ_MATRIX* J, int proc_config[]) {
   UInt dim = my_data->_pFS->_dz.size();
 
   double xnorm =  AZ_gvector_norm(dim,-1,z,proc_config);
-  cout << " ***** norm (z)= " << xnorm << endl<< endl;
+  std::cout << " ***** norm (z)= " << xnorm << std::endl<< std::endl;
 
   if ( xnorm == 0.0 ) {
     for (int i=0; i <(int)dim; ++i)
@@ -198,6 +197,6 @@ void my_matvecJacobian(double *z, double *Jz, AZ_MATRIX* J, int proc_config[]) {
     for (int i=0; i <(int)dim; ++i)
       Jz[i] =  z[i]-my_data->_pFS->_dz[i];
   }
-  cout << " ***** norm (Jz)= " << AZ_gvector_norm(dim,-1,Jz,proc_config)<< endl<< endl;
+  std::cout << " ***** norm (Jz)= " << AZ_gvector_norm(dim,-1,Jz,proc_config)<< std::endl<< std::endl;
 }
 }
