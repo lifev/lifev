@@ -48,12 +48,33 @@
 namespace Life
 {
 /*!
-  \class SDebug
-  \brief brief description
+  \class LDebug
+  \brief Area debugging tool
 
-  @author Christophe Prud'homme
-  @see
-  @version $Id: LDebug.cpp,v 1.1 2004-05-27 12:30:55 prudhomm Exp $
+  \c LDebug() provides a debug stream to which you can pass a number, say 100, associated
+  to an area of the code, say a class \c A.  In the implementation of the class \c A, you use
+  debug statement like
+
+  void A::f()
+  {
+    LDebug(100) << "A::f() is called.\n";
+    // do something here
+  }
+
+  Now the debug message "A::f() is called." will be seen only if the area 100
+  is defined in the environment(shell) variable \c DEBUG while executing a program
+  \c A::f() is called \c runWithA that makes use of our class \c A.
+
+  > runwithA
+    --> no debug message related to A
+  > export DEBUG="100"
+  > runwithA
+    A::f() is called.
+
+   With this tool you can select the area you want to debug explicitly while keeping the
+   others hidden.
+
+  @author Christophe Prud'homme (christophe.prudhomme@epfl.ch)
 */
 enum DebugLevels
 {

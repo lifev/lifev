@@ -19,8 +19,8 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#ifndef __SDebug_H
-#define __SDebug_H 1
+#ifndef __LDebug_H
+#define __LDebug_H 1
 
 #include <cstdio>
 #include <iosfwd>
