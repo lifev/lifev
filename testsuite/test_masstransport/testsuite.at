@@ -90,6 +90,7 @@ react           = 0.0               # reaction coefficient
 [../discretization]
 mesh_dir = ./
 mesh_file = cyltetra.mesh     # mesh file
+timestep  = 0.1              # timestep
 
 [../aztec_o]
 output          = warnings #all_res

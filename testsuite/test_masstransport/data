@@ -17,7 +17,7 @@ endtime         = 0.1              # endtime
 [../discretization]
 mesh_dir  = ../data/mesh/inria/  # the directory where the mesh file is
 mesh_file = cyltetra.mesh     # mesh file
-timestep  = 0.01              # timestep
+timestep  = 0.1              # timestep
 
 
 [../miscellaneous]
@@ -61,7 +61,7 @@ react           = 0.0               # reaction coefficient
 [../discretization]
 mesh_dir  = ../data/mesh/inria/  # the directory where the mesh file is
 mesh_file = cyltetra.mesh     # mesh file
-timestep  = 0.01              # timestep
+timestep  = 0.1              # timestep
 
 [../aztec_o]
 output          = warnings #all_res
