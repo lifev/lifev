@@ -29,15 +29,18 @@
 #ifndef __SolverUMFPACK_H
 #define __SolverUMFPACK_H 1
 
+
 extern "C"
 {
 #include <umfpack.h>
 };
 
 #include <boost/shared_array.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
 #include <boost/numeric/ublas/vector.hpp>
 
+#include <sparseArray.hpp>
 #include <vecUnknown.hpp>
 
 namespace LifeV
@@ -60,7 +63,11 @@ public:
     //@{
 
     typedef double value_type;
+
+    typedef boost::numeric::ublas::compressed_matrix<value_type, boost::numeric::ublas::column_major> matrix_type;
+
     typedef Vector array_type;
+
 
 
     //@}
@@ -100,14 +107,10 @@ public:
      */
     //@{
 
-    //! set matrix from raw CSR arrays
-    void setMatrix( uint __N, const uint* __ia, const uint* __ja, const double* __v )
-        {
-            _M_nrows = __N;
-            _M_ia = ( long int* )__ia;
-            _M_ja = ( long int* )__ja;
-            _M_v = __v;
-        }
+    //! set matrix from CSRMatr
+    void setMatrix( const CSRMatr<CSRPatt, value_type>& m );
+
+    void setMatrix( matrix_type const& m );
 
     //@}
 
@@ -142,12 +145,11 @@ private:
 
     void prepareSolve();
 
+
 private:
 
-    size_t _M_nrows;
-    long int const* _M_ia;
-    long int const* _M_ja;
-    double const* _M_v;
+    class Pimpl;
+    boost::shared_ptr<Pimpl> _M_p;
 
     bool _M_matrix_reset;
     bool _M_matrix_values_reset;
@@ -155,8 +157,8 @@ private:
     void *_M_symbolic;
     void *_M_numeric;
 
-    boost::shared_array<double> _M_Control;
-    boost::shared_array<double> _M_Info;
+    double* _M_Control;
+    double* _M_Info;
 
 };
 }
