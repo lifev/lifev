@@ -235,16 +235,25 @@ public:
     UInt reducedFluid(){return M_reducedFluid;}
 
     bchandler_type const& BCh_fluid(){return M_BCh_u;}
+    void setBCh_fluid(bchandler_type BCh_fluid){M_BCh_u = BCh_fluid;}
 
     bchandler_type const& BCh_solid(){return M_BCh_d;}
+    void setBCh_solid(bchandler_type BCh_solid){M_BCh_d = BCh_solid;}
 
     bchandler_type const& BCh_harmonicExtension(){return M_BCh_mesh;}
+    void setBCh_HarmonicExtension(bchandler_type BCh_mesh){M_BCh_mesh = BCh_mesh;}
 
     bchandler_type const& BCh_du(){return M_BCh_du;}
+    void setBCh_fluidDer(bchandler_type BCh_fluidDer){M_BCh_du = BCh_fluidDer;}
+
     bchandler_type const& BCh_du_inv(){return M_BCh_du_inv;}
+    void setBCh_fluidDerInv(bchandler_type BCh_fluidDerInv){M_BCh_du_inv = BCh_fluidDerInv;}
 
     bchandler_type const& BCh_dz(){return M_BCh_dz;}
+    void setBCh_solidDer(bchandler_type BCh_solidDer){M_BCh_dz = BCh_solidDer;}
+
     bchandler_type const& BCh_dz_inv(){return M_BCh_dz_inv;}
+    void setBCh_solidDerInv(bchandler_type BCh_solidDerInv){M_BCh_dz_inv = BCh_solidDerInv;}
 
 
 protected:
