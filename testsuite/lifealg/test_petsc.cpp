@@ -33,7 +33,7 @@
 
 #include <vecUnknown.hpp>
 
-#if defined(HAVE_BOOST_TEST) && defined(HAVE_PETSC_H)
+#if defined(HAVE_BOOST_TEST)
 // Boost.Test
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>
@@ -41,6 +41,7 @@
 
 #include <debug.hpp>
 
+#if defined(HAVE_PETSC_H)
 #include <SolverPETSC.hpp>
 
 using boost::unit_test_framework::test_suite;
@@ -72,13 +73,14 @@ init_unit_test_suite( int argc, char** argv )
 
     return test;
 }
-#elif defined(HAVE_BOOST_TEST)
+#else
 test_suite*
 init_unit_test_suite( int argc, char** argv )
 {
     test_suite* test= BOOST_TEST_SUITE( "PETSC Unit Test" );
     return test;
 }
+#endif /* HAVE_PETSC_H */
 #else
 int main()
 {
