@@ -78,4 +78,15 @@ Real c0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
 {
   return 0.3;
 }
+
+// ****** Zero function for homogeneous boundary conditions made explicit *****
+Real fZero(const LifeV::Real& t,
+           const LifeV::Real& x,
+           const LifeV::Real& y,
+           const LifeV::Real& z,
+           const LifeV::ID& i)
+{
+    return 0.;
 }
+
+} // namespace LifeV

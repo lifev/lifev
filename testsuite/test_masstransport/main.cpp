@@ -10,15 +10,6 @@
 #include "GetPot.hpp"
 #include "ensight7Writer.hpp"
 
-LifeV::Real fZero(const LifeV::Real& t,
-                  const LifeV::Real& x,
-                  const LifeV::Real& y,
-                  const LifeV::Real& z,
-                  const LifeV::ID& i)
-{
-    return 0.;
-}
-
 int main(int argc, char** argv)
 {
     using namespace LifeV;
@@ -58,7 +49,7 @@ int main(int argc, char** argv)
     BCh_c.addBC("C-Wall-outflow",   5, Essential, Scalar, c_wall);
 
     BCh_c.addBC("C-InFlow", 1, Essential,  Scalar, c_inflow); // Concentration profile
-    BCh_c.addBC("C-OutFlow", 2, Natural, Full, f_zero, 3); // free outflow
+    BCh_c.addBC("C-OutFlow", 2, Natural, Scalar, f_zero); // free outflow
 
 // *********** Fluid class: ns *************************************************
     NavierStokesSolverPC< RegionMesh3D<LinearTetra> >
