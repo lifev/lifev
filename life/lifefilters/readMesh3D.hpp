@@ -610,6 +610,14 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
 // GMSH
 //
 
+/**
+  read a gmsh mesh (3D) file and store it in a RegionMesh3D
+ 
+  @param mesh mesh data structure to fill in
+  @param filename name of the gmsh mesh file  to read
+  @param regionFlag identifier for the region
+  @return true if everything went fine, false otherwise
+*/
 template <typename GeoShape, typename MC>
 bool
 readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
