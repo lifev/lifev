@@ -9,5 +9,6 @@
 6010 -- LifeV::NavierStokesWithFlux
 6020 -- LifeV::NavierStokesSolverPC
 6100 -- LifeV::DarcySolver
-7000 -- LifeV::solver
+7000 -- LifeV::alg
+7010 -- LifeV::SolverPETSC
 10000 -- testsuite

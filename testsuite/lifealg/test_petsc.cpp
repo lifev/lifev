@@ -59,10 +59,6 @@ void petsc_manager()
     PETSC::instance().initialize();
     BOOST_REQUIRE( PETSC::instance().isInitialized() );
 
-    // force reinitialization
-    PETSC::instance().initialize( true );
-    BOOST_REQUIRE( PETSC::instance().isInitialized() );
-
     // finalize
     PETSC::instance().finalize();
     BOOST_REQUIRE( PETSC::instance().isInitialized() == false );

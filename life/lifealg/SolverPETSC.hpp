@@ -383,14 +383,13 @@ public:
         }
     /**
        initialized PETSC
-
-       \param force if \c true it will force the initialization even
-       if PETSC had already been initialized
     */
-    bool initialize( bool __force = false )
+    bool initialize()
         {
             if ( !isInitialized() )
             {
+                Debug( 7010 ) << "initialize PETSC with dummy arguments\n";
+
                 // dummy arguments for PetscInitialize
                 int __argc = 1;
                 char** __argv = ( char** )malloc( sizeof( char* ) );
@@ -398,10 +397,10 @@ public:
                 __argv[0][0] = 't';
                 __argv[0][1] = '\0';
 
-                _M_initialized = initialize( __argc, __argv, __force );
+                _M_initialized = initialize( __argc, __argv );
 
-                free( __argv[0] );
-                free( __argv );
+                //free( __argv[0] );
+                //free( __argv );
 
             }
             return _M_initialized;
@@ -409,19 +408,13 @@ public:
 
     /**
        initialized PETSC
-
-       \param force if \c true it will force the initialization even
-       if PETSC had already been initialized.
     */
-    bool initialize( int __argc, char** __argv, bool __force = false )
+    bool initialize( int __argc, char** __argv )
         {
-            if ( __force && isInitialized() )
-            {
-                finalize();
-            }
-
             if ( !isInitialized() )
             {
+                Debug( 7010 ) << "initialize PETSC\n";
+                //MPI_Init( &__argc, &__argv );
                 PetscInitialize( &__argc, &__argv,PETSC_NULL,PETSC_NULL);
 
                 _M_initialized = true;
@@ -441,6 +434,7 @@ public:
         {
             if ( isInitialized() )
             {
+                //MPI_Finalize();
                 PetscFinalize();
                 _M_initialized = false;
             }
