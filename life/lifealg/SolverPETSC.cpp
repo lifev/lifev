@@ -20,7 +20,7 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /**
    \file SolverPETSC.hpp
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
@@ -126,7 +126,7 @@ SolverPETSC::New()
 
 /*!
   \brief Gets the last (approximate preconditioned) residual norm that has been computed.
- 
+
   \return last (approximate preconditioned) residual norm
 */
 double
@@ -159,12 +159,12 @@ KSP & SolverPETSC::krylovSolver()
 /*!
   \brief Sets the relative, absolute, divergence, and maximum iteration tolerances
   used by the default KSP convergence testers.
- 
+
   Use PETSC_DEFAULT to retain the default value of any of the tolerances.
- 
+
   See KSPDefaultConverged() for details on the use of these parameters in the default convergence test.
   See also KSPSetConvergenceTest() for setting user-defined stopping criteria.
- 
+
   \arg rtol - the relative convergence tolerance (relative decrease in the residual norm)
   \arg atol - the absolute convergence tolerance (absolute size of the residual norm)
   \arg dtol - the divergence tolerance (amount residual can increase before KSPDefaultConverged() concludes that the method is diverging)
@@ -217,7 +217,7 @@ SolverPETSC::setMatrixTranspose( uint __nrows, const uint* __r, const uint *__i,
 
 //! solve \f[ A X = B \f]
 /*!
- 
+
 \param __X  the solution
 \param __B the right hand side
 \return the number of iterations
@@ -277,12 +277,6 @@ SolverPETSC::solve( array_type& __X, array_type const& __B, MatStructure __ptype
     {
         KSPView( _M_p->__ksp, PETSC_VIEWER_STDOUT_WORLD );
     }
-
-    /*
-      View solver info; we could instead use the option -ksp_view to
-      print this info to the screen at the conclusion of KSPSolve().
-    */
-    KSPView( _M_p->__ksp, PETSC_VIEWER_STDOUT_WORLD );
 
     // Petsc won't deallocate the memory so __X and __B contains the informations
     VecDestroy( __x );
