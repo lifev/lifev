@@ -1,0 +1,6 @@
+AT_BANNER([life/lifearray testsuite...])
+
+AT_SETUP([test_simple_vect])
+AT_CHECK([$top_builddir/testsuite/lifearray/test_simple_vect],[0],[ignore],[ignore])
+AT_KEYWORDS([ array simple vect])
+AT_CLEANUP

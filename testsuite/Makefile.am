@@ -24,16 +24,21 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 
 SUBDIRS		= data  \
-                  test_mesh test_matrix test_naturalbc test_essentialbc \
-                  test_q1 test_p2 test_mixte test_fe \
-                  test_postproc test_bdf \
-		  test_linearelasticity \
-		  test_darcy test_onedmodel\
-		  test_ns_bdf test_ns_cyl test_ns_sstress \
-		  test_fsi_newton test_fsi_picard \
-		  test_masstransport test_ns_ipstab
+              lifecore lifearray lifealg \
+              test_mesh test_laplacian test_naturalbc test_essentialbc \
+              test_q1 test_p2 test_mixte test_fe \
+              test_postproc test_bdf \
+		      test_linearelasticity \
+		      test_darcy test_onedmodel\
+		      test_ns_bdf test_ns_cyl test_ns_sstress \
+		      test_fsi_newton test_fsi_picard \
+		      test_masstransport test_ns_ipstab
 
-TESTSUITES=$(srcdir)/test_bdf/testsuite.at \
+TESTSUITES=$(srcdir)/lifecore/testsuite.at \
+$(srcdir)/lifearray/testsuite.at \
+$(srcdir)/lifealg/testsuite.at \
+$(srcdir)/test_bdf/testsuite.at \
+$(srcdir)/test_bdf/testsuite.at \
 $(srcdir)/test_darcy/testsuite.at \
 $(srcdir)/test_essentialbc/testsuite.at \
 $(srcdir)/test_fe/testsuite.at \
@@ -41,7 +46,7 @@ $(srcdir)/test_fsi_newton/testsuite.at \
 $(srcdir)/test_fsi_picard/testsuite.at \
 $(srcdir)/test_linearelasticity/testsuite.at \
 $(srcdir)/test_masstransport/testsuite.at \
-$(srcdir)/test_matrix/testsuite.at \
+$(srcdir)/test_laplacian/testsuite.at \
 $(srcdir)/test_mesh/testsuite.at \
 $(srcdir)/test_mixte/testsuite.at \
 $(srcdir)/test_naturalbc/testsuite.at \

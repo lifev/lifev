@@ -2,7 +2,7 @@
 #
 # Author: Christophe Prud'homme
 #
-# Copyright (C) 2004 EPFL
+# Copyright (C) 2004 @COPYRIGHT@
 #
 # Distributed under the GPL(GNU Public License):
 # This program is free software; you can redistribute it and/or modify
@@ -22,24 +22,8 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-INCLUDES 	= -I$(top_srcdir)/life/lifecore  -I$(top_srcdir)/life/lifearray 
-#INCLUDES 	= -I$(top_srcdir)/life/lifecore -I$(top_srcdir)/life/lifearray 
+INCLUDES	= -I$(top_srcdir)/life/lifearray
 
-if HAVE_PETSC
-PETSC_SRCS	= SolverPETSC.cpp
-PETSC_HDRS	= SolverPETSC.hpp
-endif
+check_PROGRAMS	= test_simple_vect
 
-include_HEADERS	= algebraic_facto.hpp dataAztec.hpp dataNewton.hpp inexactLU.hpp \
-linesearch_cubic.hpp linesearch_parabolic.hpp mixed_pattern.hpp newton.hpp \
-picard.hpp saddlePointCG.hpp $(PETSC_HDRS)
-
-
-lib_LTLIBRARIES	= liblifealg.la
-
-liblifealg_la_SOURCES	= dataAztec.cpp dataNewton.cpp $(PETSC_SRCS)
-
-liblifealg_la_LIBADD	= ../lifecore/liblifecore.la ../lifearray/liblifearray.la $(petsc_libs) $(aztec_libs)
-include $(top_srcdir)/admin/Doxyfile.am
-
-
+test_simple_vect_SOURCES= test_simple_vect.cpp

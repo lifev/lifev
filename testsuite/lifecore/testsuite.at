@@ -1,0 +1,116 @@
+AT_BANNER([life/lifecore testsuite ...])
+
+AT_SETUP([test_casts])
+AT_CHECK([$top_builddir/testsuite/lifecore/test_casts],[0],[ignore],[ignore])
+AT_KEYWORDS([ core casts])
+AT_CLEANUP
+
+AT_SETUP([test_copy])
+AT_CHECK([$top_builddir/testsuite/lifecore/test_copy],[0],[ignore],[ignore])
+AT_KEYWORDS([ core copy])
+AT_CLEANUP
+
+AT_SETUP([test_debug])
+AT_CHECK([$top_builddir/testsuite/lifecore/test_debug],[0],[ignore],[ignore])
+AT_KEYWORDS([ core debug])
+AT_CLEANUP
+
+##
+## GetPot tests
+## 
+AT_SETUP([test_getpot (mesh1)])
+AT_DATA([potfile],[[
+[mesh]
+file = mesh1;
+check = 1;
+facemarkers = 1;
+logfile = mesh.log;
+]])
+AT_CHECK([$top_builddir/testsuite/lifecore/test_getpot --input-file=potfile],[0],[ignore],[ignore])
+AT_KEYWORDS([ core getpot])
+AT_CLEANUP
+
+AT_SETUP([test_getpot (mesh2)])
+AT_DATA([potfile],[[
+[mesh]
+edgemarkers = 1;
+]])
+AT_CHECK([$top_builddir/testsuite/lifecore/test_getpot --input-file=potfile],[0],[ignore],[ignore])
+AT_KEYWORDS([ core getpot])
+AT_CLEANUP
+
+AT_SETUP([test_getpot (mesh3)])
+AT_DATA([potfile],[[
+[mesh]
+edgemarkers = 0;
+]])
+AT_CHECK([$top_builddir/testsuite/lifecore/test_getpot --input-file=potfile],[0],[ignore],[ignore])
+AT_KEYWORDS([ core getpot])
+AT_CLEANUP
+
+##
+## marker to BC
+##
+AT_SETUP([test_mark_to_bc])
+AT_DATA([keystrokes],[[6
+0
+0
+0
+0
+0
+]])
+AT_CHECK([$top_builddir/testsuite/lifecore/test_mark_to_bc < keystrokes],[0],[ignore],[ignore])
+AT_KEYWORDS([ core mark_to_bc])
+AT_CLEANUP
+
+AT_SETUP([test_pairs])
+AT_CHECK([$top_builddir/testsuite/lifecore/test_pairs],[0],[ignore],[ignore])
+AT_KEYWORDS([ core pairs])
+AT_CLEANUP
+
+AT_SETUP([test_pf])
+AT_CHECK([$top_builddir/testsuite/lifecore/test_pf],[0],[ignore],[ignore])
+AT_KEYWORDS([ core pf])
+AT_CLEANUP
+
+AT_SETUP([test_prova])
+AT_CHECK([$top_builddir/testsuite/lifecore/test_prova],[0],[ignore],[ignore])
+AT_KEYWORDS([ core prova])
+AT_CLEANUP
+
+AT_SETUP([test_rotate])
+AT_CHECK([$top_builddir/testsuite/lifecore/test_rotate],[0],[ignore],[ignore])
+AT_KEYWORDS([ core rotate])
+AT_CLEANUP
+
+AT_SETUP([test_seq])
+AT_DATA([input],[[1 2 3 4 23 25 21 100
+]])
+AT_CHECK([$top_builddir/testsuite/lifecore/test_seq < input],[0],[ignore],[ignore])
+AT_KEYWORDS([ core seq])
+AT_CLEANUP
+
+AT_SETUP([test_size])
+AT_CHECK([$top_builddir/testsuite/lifecore/test_size],[0],[ignore],[ignore])
+AT_KEYWORDS([ core size])
+AT_CLEANUP
+
+AT_SETUP([test_typedefs])
+AT_CHECK([$top_builddir/testsuite/lifecore/test_typedefs],[0],[ignore],[ignore])
+AT_KEYWORDS([ core typedefs])
+AT_CLEANUP
+
+AT_SETUP([test_using])
+AT_CHECK([$top_builddir/testsuite/lifecore/test_using],[0],[ignore],[ignore])
+AT_KEYWORDS([ core using])
+AT_CLEANUP
+
+AT_SETUP([test_valarray])
+AT_CHECK([$top_builddir/testsuite/lifecore/test_valarray],[0],[ignore],[ignore])
+AT_KEYWORDS([ core valarray])
+AT_CLEANUP
+
+AT_SETUP([test_vsize])
+AT_CHECK([$top_builddir/testsuite/lifecore/test_vsize],[0],[ignore],[ignore])
+AT_KEYWORDS([ core vsize])
+AT_CLEANUP

@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -93,9 +93,9 @@ unsigned int  process_marker_flag::number_of_groups() const{
 
 unsigned int process_marker_flag::extract_group(MarkerFlag const &  mf, unsigned int const & group) const
 {
-  unsigned long ff = std::pow((double)factor,std::max(int(my_ng- group),int(0))); //group numbering starts from 1
-  //std::cout << "FF_GROUP: "<<ff<<std::endl;
-  return (mf/ff) % factor;
+    unsigned long ff = std::pow((double)factor,std::max(int(my_ng- group),int(0))); //group numbering starts from 1
+    //std::cout << "FF_GROUP: "<<ff<<std::endl;
+    return (mf/ff) % factor;
 }
 
 unsigned int
@@ -107,29 +107,29 @@ process_marker_flag::extract_digit_in_group(unsigned int const &  group , unsign
 
 int
 main(){
-  MarkerFlag flag(1);
-  unsigned int groups=4;
-  unsigned int group;
-  unsigned int ndg=2;
-  unsigned int digit;
-  
-  process_marker_flag proc(ndg,groups);
-  
-  do{
-    std::cout<< " Gimme MarkerFlag (digits) "<<ndg*groups<<std::endl;
-    std::cin >> flag;
-    std::cout<<flag<<std::endl;
+    MarkerFlag flag(1);
+    unsigned int groups=4;
+    unsigned int group;
+    unsigned int ndg=2;
+    unsigned int digit;
+
+    process_marker_flag proc(ndg,groups);
+
     do{
-      std::cout<< " Gimme Group"<<std::endl;
-      std::cin >> group;
-      digit=group;
-      std::cout<<proc.extract_group(flag,group)<<std::endl;
-      do{
-	std::cout<< " Gimme Digit"<<std::endl;
-	std::cin >> digit;
-	std::cout<<proc.extract_digit_in_group(proc.extract_group(flag,group),digit)<<std::endl;
-      }while(digit!=0);
-    }while(group !=0);
-  }while(flag!=0);
-  
+        std::cout<< " Gimme MarkerFlag (digits) "<<ndg*groups<<std::endl;
+        std::cin >> flag;
+        std::cout<<flag<<std::endl;
+        do{
+            std::cout<< " Gimme Group"<<std::endl;
+            std::cin >> group;
+            digit=group;
+            std::cout<<proc.extract_group(flag,group)<<std::endl;
+            do{
+                std::cout<< " Gimme Digit"<<std::endl;
+                std::cin >> digit;
+                std::cout<<proc.extract_digit_in_group(proc.extract_group(flag,group),digit)<<std::endl;
+            }while(digit!=0);
+        }while(group !=0);
+    }while(flag!=0);
+
 }

@@ -21,8 +21,6 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .cc
 
-SUBDIRS		= . testsuite
-
 INCLUDES 	= -I$(top_srcdir)/life/lifecore 
 
 include_HEADERS	= RNM.hpp RNM_op.hpp RNM_opc.hpp RNM_tpl.hpp tab.hpp \

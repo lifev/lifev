@@ -1,0 +1,14 @@
+AT_SETUP([test_laplacian])
+AT_KEYWORDS([laplacian])
+AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file for Mesh test
+#-------------------------------------------------
+
+mesh_type  = 'INRIA'
+mesh_dir = ./
+mesh_file  = 'cube_6007.mesh'       # mesh file
+mesh_faces = all                    # update all faces elements
+]])
+AT_CHECK([ln -sf $top_builddir/testsuite/'data/mesh/inria/'/'cube_6007.mesh' &&  $top_builddir/testsuite/test_laplacian/test_laplacian],[0],[ignore],[ignore])
+AT_CLEANUP

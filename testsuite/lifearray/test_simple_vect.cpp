@@ -16,14 +16,21 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#include "switches.hpp"
-class pluto
-{
-public:
-  int pp;
-  
-protected:
-  Switches _mapSwitch;
-  float b;
-};
+#include<iostream>
 
+#include "SimpleVect.hpp"
+
+int
+main()
+{
+  SimpleVect<int> a;
+  SimpleVect<float> b(10);
+
+  for (SimpleVect<float>::iterator p=b.begin(); p!= b.end();++p)
+  {
+      *p=10.0;
+  }
+  std::cout << b(4) << "\n";
+}
+
+  

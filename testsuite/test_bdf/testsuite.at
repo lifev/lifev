@@ -1,4 +1,48 @@
-AT_SETUP([test_bdf])
+AT_SETUP([test_bdf (order 1)])
+AT_KEYWORDS([test_bdf bdf])
+AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file for Mesh test
+#-------------------------------------------------
+
+mesh_type  = MESH++
+mesh_dir   = ./                 # the directory where the mesh file is
+mesh_file  = cube_384.m++       # mesh file
+mesh_faces = all                    # update all faces elements
+
+[bdf]
+    endtime  = 1
+    timestep = 0.5
+    order    = 1
+]])
+AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/mesh++/cube_384.m++  && $top_builddir/testsuite/test_bdf/test_bdf],[0],[ignore],[ignore])
+AT_CLEANUP
+
+
+AT_SETUP([test_bdf (order 2)])
+AT_KEYWORDS([test_bdf bdf])
+AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file for Mesh test
+#-------------------------------------------------
+
+mesh_type  = MESH++
+mesh_dir   = ./                 # the directory where the mesh file is
+mesh_file  = cube_384.m++       # mesh file
+mesh_faces = all                    # update all faces elements
+
+[bdf]
+    endtime  = 1
+    timestep = 0.5
+    order    = 2
+]])
+AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/mesh++/cube_384.m++  && $top_builddir/testsuite/test_bdf/test_bdf],[0],[ignore],[ignore])
+AT_CLEANUP
+
+
+
+
+AT_SETUP([test_bdf (order 3)])
 AT_KEYWORDS([test_bdf bdf])
 AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 #-------------------------------------------------
@@ -19,22 +63,47 @@ AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/mesh++/cube_384.m++  && $top_
 AT_CLEANUP
 
 
-AT_SETUP([test_bdf])
+AT_SETUP([test_bdf (order 4)])
+AT_XFAIL_IF(true)
 AT_KEYWORDS([test_bdf bdf])
 AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 #-------------------------------------------------
 #      Data file for Mesh test
 #-------------------------------------------------
 
-mesh_type  = INRIA
+mesh_type  = MESH++
 mesh_dir   = ./                 # the directory where the mesh file is
-mesh_file  = cube_6007.mesh       # mesh file
+mesh_file  = cube_384.m++       # mesh file
 mesh_faces = all                    # update all faces elements
 
 [bdf]
     endtime  = 1
     timestep = 0.5
-    order    = 3
+    order    = 4
 ]])
-AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria/cube_6007.mesh  && $top_builddir/testsuite/test_bdf/test_bdf],[0],[ignore],[ignore])
+AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/mesh++/cube_384.m++  && $top_builddir/testsuite/test_bdf/test_bdf],[0],[ignore],[ignore])
 AT_CLEANUP
+
+
+AT_SETUP([test_bdf (order 5)])
+AT_XFAIL_IF(true)
+AT_KEYWORDS([test_bdf bdf])
+AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file for Mesh test
+#-------------------------------------------------
+
+mesh_type  = MESH++
+mesh_dir   = ./                 # the directory where the mesh file is
+mesh_file  = cube_384.m++       # mesh file
+mesh_faces = all                    # update all faces elements
+
+[bdf]
+    endtime  = 1
+    timestep = 0.5
+    order    = 5
+]])
+AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/mesh++/cube_384.m++  && $top_builddir/testsuite/test_bdf/test_bdf],[0],[ignore],[ignore])
+AT_CLEANUP
+
+

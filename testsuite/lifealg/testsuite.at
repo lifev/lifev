@@ -1,0 +1,7 @@
+AT_BANNER([life/lifealg testsuite...])
+
+AT_SETUP([test_linearsolvers])
+AT_CHECK([$top_builddir/testsuite/lifealg/test_linearsolvers],[0],[ignore],[ignore])
+AT_KEYWORDS([ alg linear solver algebra])
+AT_CLEANUP
+

@@ -26,7 +26,7 @@
 # DESCRIP-END.
 #
 
-for i in test_*
+for i in $1
 do
   if test -d $i; then
       cp /dev/null  $i/testsuite.at
