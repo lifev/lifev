@@ -28,6 +28,10 @@ namespace LifeV
   double one(const double& t, const double& x, const double& y, const double& z, const ID& i) {
     return 1.;
   }
+  double stim_inlet(const double& t, const double& x, const double& y, const double& z, const ID& i) {
+   if(t<10) return 1.;
+   else return 0.;
+  }
 
   //======================================================================
   // Stimulation coefficient (Robin b.c.)

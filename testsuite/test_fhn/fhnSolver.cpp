@@ -217,7 +217,7 @@ namespace LifeV{
     static bool flag = true;
     static int az_name;
     compute_rhs();
-    bcManageVector(rhs,mesh,dof,bc,feBd,time,0.);
+    bcManageVector(rhs,mesh,dof,bc,feBd,time,1.);
     //
     int options[AZ_OPTIONS_SIZE]; 
     double params[AZ_PARAMS_SIZE];

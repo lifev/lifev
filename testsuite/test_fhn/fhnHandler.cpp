@@ -62,9 +62,9 @@ FhNHandler::FhNHandler(const GetPot& data_file):
     bc.setNumber(nb_bc);
     vector<ID> comp(1);
     comp[0] = 1;
-    // coef u + diff du/dn = g 
-    bc_fct_rob.setFunctions_Mixte(one,zero); // first argument: g , second : coef
-    bc.addBC("In",1, Mixte,Component,bc_fct_rob,comp);
+    // u_in = 1
+    bc_fct.setFunction(stim_inlet); 
+    bc.addBC("In",1, Essential,Component,bc_fct,comp);
     break;
     }
   case 2:

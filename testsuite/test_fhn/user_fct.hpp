@@ -27,6 +27,8 @@ namespace LifeV
 	      const ID& i);
   double one(const double& t, const double& x, const double& y, const double& z,
 	     const ID& i);
+  double stim_inlet(const double& t, const double& x, const double& y, const double& z,
+		    const ID& i);
   double stim_coef(const double& t, const double& x, const double& y, const double& z,
 	     const ID& i);
   double stim_g(const double& t, const double& x, const double& y, const double& z,

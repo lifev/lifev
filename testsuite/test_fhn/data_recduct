@@ -1,0 +1,52 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#          Data file for a Fitzhugh-Nagumo problem
+#-------------------------------------------------
+#
+# Reference solution : constant diffusion, no stimulation, simulataneous initial excitation
+#
+[physics]
+test_case   = 1                 # in particular for b.c. condition
+mesh_file   = recduct.mesh    #
+
+fhn_f0      = 1.6
+fhn_diff    = 1.6
+fhn_diff_fct= 0
+fhn_eps     = 0. # .0032
+fhn_alpha   = 0.25
+fhn_beta    = 0.32
+fhn_gamma   = 1.
+
+t_start_LV  = 0.
+t_stop_LV   = 20.
+source_value_LV = 0.1
+
+t_start_RV  = 0.
+t_stop_RV   = 20.
+source_value_RV = 0.1
+
+
+[miscellaneous]
+mesh_dir = ../data/mesh/inria # the directory where the mesh file is
+post_dir = ./Post/                 # the directory for postprocessing files
+verbose = 1
+nb_ref_time = 160
+ref_file = ref.mat
+post_proc_format = medit
+
+[aztec]  
+solver = gmres  #cg , gmres, cgs, tfqmr, bicgstab, slu, symmlq, fixed_pt, lu
+precond = dom_decomp
+subdomain_solve = ilu
+output = all_res    #warnings , none , all, all_res, last
+tol = 1e-7
+
+[transient]
+time_step = 1.
+max_time_iter = 800
+init_time = 0.
+max_time = 200.
+adapt_period = 1
+post_proc_period = 5
+init_data = 0
+
