@@ -197,11 +197,18 @@ public:
     DataAztec* _dataAztec_s;
 
     //! true if full Dirichlet conditions are involved
-    bool _fullEssential;
+    //bool _fullEssential;
 
     //! recursion level
     UInt _recur;
 
+    //! full essential ?
+    bool const fullEssential() const {return _fullEssential;}
+    //! set full essential
+    void setFullEssential(bool fullEssential){_fullEssential = fullessential;}
+private:
+    //! true if full Dirichlet conditions are involved
+    bool _fullEssential;
 };
 
 template <typename MatrixTypeC, typename MatrixTypeD, typename MatrixTypeDtr,
@@ -315,11 +322,11 @@ DataFactorisation<MatrixTypeC, MatrixTypeD, MatrixTypeDtr, MatrixTypeH, MatrixTy
    In output the result is set in the vector ap.
 */
 template <typename MatrixTypeC,
-typename MatrixTypeD,
-typename MatrixTypeDtr,
-typename MatrixTypeH,
-typename MatrixTypeMpLp,
-typename VectorType>
+          typename MatrixTypeD,
+          typename MatrixTypeDtr,
+          typename MatrixTypeH,
+          typename MatrixTypeMpLp,
+          typename VectorType>
 void my_Cmatvec( double *p, double *ap, AZ_MATRIX * Amat,
                  int proc_config[] )
 {
@@ -525,7 +532,7 @@ void my_matvec( double *p, double *ap, AZ_MATRIX * Amat, int proc_config[] )
     // product p=D*p2:
     operMatVec( ap, *my_data.D(), &p2.front() );
 
-    if ( my_data->_fullEssential )
+    if ( my_data->fullEssential() )
         ap[ dim - 1 ] = p[ dim - 1 ]; // diagonalisation of the last row.
 }
 
@@ -543,10 +550,10 @@ void my_matvec( double *p, double *ap, AZ_MATRIX * Amat, int proc_config[] )
            method.
  */
 template <typename MatrixTypeD,
-typename MatrixTypeDtr,
-typename MatrixTypeH,
-typename MatrixTypeMpLp,
-typename VectorType>
+          typename MatrixTypeDtr,
+          typename MatrixTypeH,
+          typename MatrixTypeMpLp,
+          typename VectorType>
 void my_matvec( double *p, double *ap, AZ_MATRIX * Amat, int /*proc_config*/[] )
 {
     // Extraction of C, D and trD stored in the structure AZ_MATRIX
@@ -630,7 +637,7 @@ void my_matvec( double *p, double *ap, AZ_MATRIX * Amat, int /*proc_config*/[] )
     // product p=D*p2:
     operMatVec( ap, *( my_data->_D ), &p2.front() );
 
-    if ( my_data->_fullEssential )
+    if ( my_data->fullEssential() )
     {
         const UInt dim = my_data->_trD->Patt() ->nCols();
         ap[ dim - 1 ] = p[ dim - 1 ]; // diagonalisation of the last row.
@@ -653,11 +660,11 @@ void my_matvec( double *p, double *ap, AZ_MATRIX * Amat, int /*proc_config*/[] )
            method.
  */
 template <typename MatrixTypeC,
-typename MatrixTypeD,
-typename MatrixTypeDtr,
-typename MatrixTypeH,
-typename MatrixTypeMpLp,
-typename VectorType>
+          typename MatrixTypeD,
+          typename MatrixTypeDtr,
+          typename MatrixTypeH,
+          typename MatrixTypeMpLp,
+          typename VectorType>
 void my_matvec_block( double *p, double *ap, AZ_MATRIX * Amat,
                       int /*proc_config*/[] )
 {
@@ -778,7 +785,7 @@ void my_matvec_block( double *p, double *ap, AZ_MATRIX * Amat,
     // product p=D*p2:
     operMatVec( ap, *( my_data->_D ), &p2.front() );
 
-    if ( my_data->_fullEssential )
+    if ( my_data->fullEssential() )
     {
         const UInt dim = my_data->_trD->Patt() ->nCols();
         ap[ dim - 1 ] = p[ dim - 1 ]; // diagonalisation of the last row.
@@ -797,11 +804,11 @@ void my_matvec_block( double *p, double *ap, AZ_MATRIX * Amat,
    REMARK: H is diagonal and then stored in vector type.
  */
 template <typename MatrixTypeC,
-typename MatrixTypeD,
-typename MatrixTypeDtr,
-typename MatrixTypeH,
-typename MatrixTypeMpLp,
-typename VectorType>
+          typename MatrixTypeD,
+          typename MatrixTypeDtr,
+          typename MatrixTypeH,
+          typename MatrixTypeMpLp,
+          typename VectorType>
 void my_approxmatvec( double *p, double *ap, AZ_MATRIX * Amat, int /*proc_config*/[] )
 {
     // Extraction of H, , HinvDtr, D and trD stored in the structure AZ_MATRIX
@@ -822,7 +829,7 @@ void my_approxmatvec( double *p, double *ap, AZ_MATRIX * Amat, int /*proc_config
     operMatVec( ap, *( my_data->_D ), &p1.front() );
 
 
-    if ( my_data->_fullEssential )
+    if ( my_data->fullEssential() )
     {
         UInt dim = my_data->_trD->Patt() ->nCols();
         ap[ dim - 1 ] = p[ dim - 1 ]; // diagonalisation of the last row.
@@ -843,11 +850,11 @@ void my_approxmatvec( double *p, double *ap, AZ_MATRIX * Amat, int /*proc_config
    REMARK: H is diagonal and then stored in vector type.
  */
 template <typename MatrixTypeC,
-typename MatrixTypeD,
-typename MatrixTypeDtr,
-typename MatrixTypeH,
-typename MatrixTypeMpLp,
-typename VectorType>
+          typename MatrixTypeD,
+          typename MatrixTypeDtr,
+          typename MatrixTypeH,
+          typename MatrixTypeMpLp,
+          typename VectorType>
 void my_precSchur( double *z, int *options, int *proc_config, double *params,
                    AZ_MATRIX *Amat, AZ_PRECOND *prec )
 {
@@ -895,7 +902,7 @@ void my_precSchur( double *z, int *options, int *proc_config, double *params,
     // destroy AZTEC matrices
     AZ_matrix_destroy( &SchurPrec );
 
-    if ( my_data->_fullEssential )
+    if ( my_data->fullEssential() )
     {
         z[ dim - 1 ] = lastz; // diagonalisation of the last row.
     }
@@ -917,11 +924,11 @@ void my_precSchur( double *z, int *options, int *proc_config, double *params,
    REMARK: H is diagonal and then stored in vector type.
  */
 template <typename MatrixTypeC,
-typename MatrixTypeD,
-typename MatrixTypeDtr,
-typename MatrixTypeH,
-typename MatrixTypeMpLp,
-typename VectorType>
+          typename MatrixTypeD,
+          typename MatrixTypeDtr,
+          typename MatrixTypeH,
+          typename MatrixTypeMpLp,
+          typename VectorType>
 void my_precSchur_PC( double *z, int */*options*/, int *proc_config, double */*params*/,
                       AZ_MATRIX */*Amat*/, AZ_PRECOND *prec )
 {
@@ -1002,7 +1009,7 @@ void my_precSchur_PC( double *z, int */*options*/, int *proc_config, double */*p
     // destroy matS
     AZ_matrix_destroy( &matS );
 
-    if ( my_data->_fullEssential )
+    if ( my_data->fullEssential() )
         z[ dim - 1 ] = lastz; // diagonalisation of the last row.
 
 }
@@ -1022,11 +1029,11 @@ void my_precSchur_PC( double *z, int */*options*/, int *proc_config, double */*p
    REMARK: H is diagonal and then stored in vector type.
  */
 template <typename MatrixTypeC,
-typename MatrixTypeD,
-typename MatrixTypeDtr,
-typename MatrixTypeH,
-typename MatrixTypeMpLp,
-typename VectorType>
+          typename MatrixTypeD,
+          typename MatrixTypeDtr,
+          typename MatrixTypeH,
+          typename MatrixTypeMpLp,
+          typename VectorType>
 void my_precSchur_CC( double *z, int *options, int *proc_config, double *params,
                       AZ_MATRIX *Amat, AZ_PRECOND *prec )
 {
@@ -1154,7 +1161,7 @@ void my_precSchur_CC( double *z, int *options, int *proc_config, double *params,
     for ( UInt i = 0; i < dim; i++ )
         z[ i ] += z1[ i ];
 
-    if ( my_data->_fullEssential )
+    if ( my_data->fullEssential() )
         z[ dim - 1 ] = lastz; // diagonalisation of the last row.
 }
 }
