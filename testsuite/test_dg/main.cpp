@@ -1,9 +1,9 @@
 /* -*- mode: c++ -*-
    This program is part of the LifeV library
-   
+
    Author(s): Daniele A. Di Pietro <dipietro@unibg.it>
    Date: 2004-10
-   
+
    Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politechnico di Milano
 
    This program is free software; you can redistribute it and/or
@@ -32,14 +32,14 @@ int main(){
   bool built;
 
   Vortex velocity;
-  
+
   //============================================================================
   // Plotting stuff
   //============================================================================
-  
+
   // Define plot nodes
   KNM<Real> PN(4, 3);
-  
+
   for(UInt i = 1; i < 4; i++)
     for(UInt j = 0; j < 3; j++)
       PN(i, j) = (j==i - 1) ? 1. : 0.;
@@ -53,17 +53,17 @@ int main(){
     }
     cout << endl;
   }
-  
+
   KNM<UInt> Conn(1, 4);
   Conn(0, 0) = 0; Conn(0, 1) = 1; Conn(0, 2) = 2; Conn(0, 3) = 3;
-  
+
   //============================================================================
   // Boundary conditions
   //============================================================================
 
   BCFunctionBase gv1(g1);
   BCHandler BCh(1);
-   
+
   BCh.addBC("Inlet", 10, Essential, Scalar, gv1);
 
   //============================================================================
@@ -101,7 +101,7 @@ int main(){
   else if ( mesh_type == "MESH++" )
     {
       string mesh_dir = datafile( "mesh/mesh_dir", "." );
-      string fname = mesh_dir + datafile( "mesh/mesh_file", "cube_48.m++" );      
+      string fname = mesh_dir + datafile( "mesh/mesh_file", "cube_48.m++" );
       readMppFile(mesh,fname,m);
       cout << "Successfully opened mesh file " << fname << endl;
     }
@@ -110,7 +110,7 @@ int main(){
       std::cerr << "wrong mesh type. It can be either MESH++ or INRIA" << std::endl;
       return EXIT_FAILURE;
     }
-  
+
   UInt numIFaces = mesh.numFaces() - mesh.numBFaces();
   UInt numBFaces = mesh.numBFaces();
 
@@ -139,7 +139,7 @@ int main(){
 
   DofByFace dofByFace(facePattern_P1_DG_3D);
   dofByFace.update(mesh, dof);
-  
+
   cout << "** DOF by face created and updated" << endl;
 
   //============================================================================
@@ -151,8 +151,8 @@ int main(){
   SourceFct sourceFct;
 
   ScalUnknown<Vector> U(dim), F(dim), rhs(dim), K1(dim), K2(dim);
-  U = 0.0;
-  F = 0.0;
+  U = ZeroVector( U.size() );
+  F = ZeroVector( F.size() );
 
   cout << "** Vector unknown and rhs initializated" << endl;
 
@@ -192,12 +192,12 @@ int main(){
   assemble_AdvecDG(advecDG, advecIFUW1DG + advecIFUW2DG, advecBFUWDG, mesh,
   		   BCh, velocity, feDG, ifDG, bfDG, dof, dofByFace, sourceFct, A, M, F);
 
-		   
+
   cout << "** Finished to assemble matrices A and M" << endl;
-  
+
   A.spy( "stiffness.m" );
   M.spy( "mass.m" );
-  
+
   //============================================================================
   // Initial conditions
   //============================================================================
@@ -223,37 +223,37 @@ int main(){
   ofile.close();
   //==ENDOFLINESTOREMOVE
   elem_wise_wrtr("sphere_initial.dx", mesh, dof, feDG, PN, Conn, U);
-  
+
   //============================================================================
   // Advancing in time with a second order RK method
-  //============================================================================  
-  
+  //============================================================================
+
   Real h = datafile("time_advancement/h", 0.005);
   Real t0 = datafile("time_advancement/t0", 0.);
   Real T = datafile("time_advancement/T", 0.01);
-  
+
   LifeV::SolverAztec solver;
   solver.setOptionsFromGetPot(datafile);
   solver.setMatrix(M);
-  
+
   for (Real t = t0; t <= T; t += h) {
     cout << "t = " << t << endl;
-    
+
     // RK step 1
     rhs = A * U;
     solver.solve(K1, rhs);
     K1 = U - h * K1;
-    
+
     // RK step 2
     rhs = A * K1;
     solver.solve(K2, rhs);
     K2 = K1 - h * K2;
-    
+
     // RK Final solution
     U = 0.5 * U + 0.5 * K2;
   }
-  
-  
+
+
   elem_wise_wrtr("sphere_final.dx", mesh, dof, feDG, PN, Conn, U);
   cout << "** Solution written on file sphere.dx" << endl;
   return 0;

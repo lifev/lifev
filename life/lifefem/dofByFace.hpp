@@ -23,9 +23,9 @@ namespace LifeV
 class DofByFace{
  public:
   typedef SimpleArray<ID> Container;
-  
+
   const LocalDofPattern& fe;
-  /*! 
+  /*!
     This constructors simply inspects the second part of mesh.faceList
     (from mesh.numBFaces() to mesh.numFaces(), where internal faces are
     stored) and copies the DOF of both adjacent and opposite element of
@@ -43,7 +43,7 @@ class DofByFace{
     void update(Mesh& mesh, DOF& dof);
 
   /*!
-    Returns the global numbering of a DOF, given an internal face and the 
+    Returns the global numbering of a DOF, given an internal face and the
     local numbering
     \param faceId the internal face ID
     \param localDOF the local DOF numbering (starting from 1)
@@ -89,7 +89,7 @@ void DofByFace::update(Mesh& mesh, DOF& dof){
   UInt numFaces = mesh.numFaces();
 
   _numIFaces = numFaces - numBFaces;
-  
+
   UInt numLocalDof = dof.numLocalDof();
 
   ID iAd, iOp;
@@ -97,13 +97,13 @@ void DofByFace::update(Mesh& mesh, DOF& dof){
   _ltg.reshape(_numLocalDofByFace, _numIFaces);
 
   if(numFaces == numBFaces){
-    std::cout << "Internal faces not stored" << endl;
+    std::cout << "Internal faces not stored" << std::endl;
     return;
   }else{
     for(UInt j = numBFaces + 1; j <= numFaces; j++){
       iAd = (ID)mesh.faceList(j).ad_first(); //! ID of the adjacent element
       iOp = (ID)mesh.faceList(j).ad_second(); //! ID of the opposite element
- 
+
       for(UInt i = 1; i <= numLocalDof; i++){
 	_ltg(i, j - numBFaces) = dof.localToGlobal(iAd, i);
 	_ltg(i + numLocalDof, j - numBFaces) = dof.localToGlobal(iOp, i);
