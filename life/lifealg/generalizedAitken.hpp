@@ -229,7 +229,8 @@ computeDeltaLambda( const Vector &_lambda,
         }
 	else
 	{
-	    std::cout << "generalizedAitken: Failure: Det=0!!" << std::endl; 
+	    std::cout << "generalizedAitken: Failure: Det=0!!" 
+		      << fabs(det) << std::endl; 
 	}
 	
 	if ( std::fabs(omegaF) < std::fabs(M_defOmegaF)/1024 
