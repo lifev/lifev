@@ -5,14 +5,19 @@ Bugs fixed in 0.5.0:
 [configure]
 * Fixed umfpack check when umfpack is not installed (CP)
 
-[all]
-* fixed little bugs in convDiffReactSolverPC,
-  basisElSh,currentFE,defQuadRuleFE (MM)
+[lifefem]
+* fixed little bugs in basisElSh,currentFE,defQuadRuleFE (MM)
+
+[lifesolver]
+* Bug #33: random crash in convDiffReactSolverPC::getcoord (MM)
 
 New in 0.5.0:
 =============
 [configure]
 * Added support for boost which is mandatory now (CP)
+
+[all]
+* Ported LifeV to ublas::vector<Real>, got rid of the old vector classes (CP)
 
 [lifecore]
 * Added the Cloning Factory pattern (aka Abstract Factory)
@@ -196,4 +201,4 @@ New in 0.1.0pre3:
 * fixed some bugs and miscompilation in a few places
 
 
- -- Christophe Prud'homme <prudhomm@debian.org>, Tue Nov  9 17:09:24 2004
+ -- Christophe Prud'homme <prudhomm@debian.org>, Tue Nov 16 09:29:14 2004
