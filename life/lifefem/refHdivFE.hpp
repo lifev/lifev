@@ -76,7 +76,7 @@ private:
   KN<int> _idxQuad;//!< _idxQuad[t] = index of the quadrature rules of id t in _phiQuad
   KN<int> _idxDQuad;//!< _idxDQuad[t] = index of the quadrature rules of id t in _divPhiQuad
 public:
-  const string name; //!< name of the reference element
+  const std::string name; //!< name of the reference element
   const int type; //!< Type of finite element (FE_P1_2D, ..., see the #define at the beginning of refFE.h)
   const ReferenceShapes shape; //!< geometrical shape of the element
   const int nbDof;   //!< Total number of degrees of freedom
@@ -117,7 +117,7 @@ public:
     (to define a new pattern, add a new #define in refFE.h and code it in refFE.cc following the
     example of P1ISOP2_TRIA_PATTERN)
    */
-  RefHdivFE(string _name, int _type, ReferenceShapes _shape,
+  RefHdivFE(std::string _name, int _type, ReferenceShapes _shape,
 	    int _nbDofPerVertex,int _nbDofPerEdge,int _nbDofPerFace,int _nbDofPerVolume,
 	    int _nbDof,int _nbCoor,const FCT* phi,const FCT* divPhi,
 	    const Real* _refCoor,const SetOfQuadRule& sqr,PatternType _patternType);

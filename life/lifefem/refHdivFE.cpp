@@ -22,7 +22,7 @@
 namespace LifeV
 {
 
-RefHdivFE::RefHdivFE(string _name, int _type, ReferenceShapes _shape,int _nbDofPerVertex,
+RefHdivFE::RefHdivFE(std::string _name, int _type, ReferenceShapes _shape,int _nbDofPerVertex,
 		     int _nbDofPerEdge,int _nbDofPerFace,int _nbDofPerVolume,
 		     int _nbDof,int _nbCoor,const FCT* fctphi,const FCT* fctdivPhi,
 		     const Real* refCoor,const SetOfQuadRule& sqr,PatternType _patternType):
