@@ -22,7 +22,7 @@ New in 0.7.0:
 * Updated doxygen config file (CP)
 
 [lifecore]
-* Pave to way to lifev-apps and lifev-playground  (CP)
+* Pave the way to lifev-apps and lifev-playground  (CP)
   ** Renamed lifeV.hpp to life.hpp and split it
   ** lifeversion.hpp to handle macros and functions to interrogate
      life version
@@ -277,4 +277,4 @@ New in 0.1.0pre3:
 * fixed some bugs and miscompilation in a few places
 
 
- -- Christophe Prud'homme <prudhomm@debian.org>, Sat Feb 19 22:36:10 2005
+ -- Christophe Prud'homme <prudhomm@debian.org>, Sat Feb 19 22:49:20 2005
