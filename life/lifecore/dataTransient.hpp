@@ -17,9 +17,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 /*!
-  \file dataTime.h
-  \author M.A. Fernandez
-  \date 01/2003
+  \file dataTransient.hpp
+  \author J.F. Gerbeau
+  \date 09/2004
   \version 1.0
 
   \brief File containing a class for handling temporal discretization with GetPot
@@ -37,26 +37,40 @@ namespace LifeV
 /*
   \author JFG
   \brief very poor data for time dependent problem
-  \TODO
-  1) allow variable time steps 
-  2) select a stopping test (based on either max_time_iter or max_time)
-  3) a standard banner for new time step
-  4) tolerance for steady state
- 
+
+  \todo merge with dataTime
+
+  \todo allow variable time steps
+  \todo select a stopping test (based on either max_time_iter or max_time)
+  \todo a standard banner for new time step
+  \todo tolerance for steady state
+
 */
 using namespace std;
 class DataTransient
 {
 public:
-  double max_time;
-  int    max_time_iter;
-  double time_step;
-  int    post_proc_period;
-  //
-  DataTransient(const GetPot& dfile);
-  void dataTransientShowMe(ostream& c);
-  void dataTransientHelp(ostream& c);
-  void timeBanner(int iter,double t);
+    double max_time;
+    int    max_time_iter;
+    double time_step;
+    int    post_proc_period;
+    /**
+       Constructor from GetPot
+     */
+    DataTransient(const GetPot& dfile);
+    /**
+       Print information
+     */
+    void dataTransientShowMe(ostream& c);
+    /**
+       Print some help
+     */
+    void dataTransientHelp(ostream& c);
+
+    /**
+       Print current iteration and time
+     */
+    void timeBanner(int iter,double t);
 };
 }
 #endif
