@@ -841,6 +841,8 @@ void stiff( Real coef, ElemMat& elmat, const CurrentFE& fe,
   Stiffness matrix: coef*\int grad v_i . grad v_j (nb blocks on the diagonal, nb>1)
 */
 {
+    
+
     ASSERT_PRE( fe.hasFirstDeriv(),
                 "Stiffness (vect) matrix needs at least the first derivatives" );
     ASSERT_PRE( nb > 1, "if nb = 1, use the other stiff function" );
@@ -902,7 +904,432 @@ void stiff( Real coef, ElemMat& elmat, const CurrentFE& fe,
     }
 }
 
+// VC - Dicembre 2004
+//
+void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
+            int iblock, int jblock, int nb )
 
+  
+/*
+  Stiffness matrix: coef*\int curl v_i . curl v_j (nb blocks on the diagonal, nb>1)
+*/
+{
+    
+
+    ASSERT_PRE( fe.hasFirstDeriv(),
+                "Stiffness (vect) matrix needs at least the first derivatives" );
+    ASSERT_PRE( nb > 1, "if nb = 1, use the other stiff function" );
+    Tab2d mat_tmp( fe.nbNode, fe.nbNode );
+    mat_tmp = ZeroMatrix( fe.nbNode, fe.nbNode );
+    Tab2d mat_tmp11( fe.nbNode, fe.nbNode );
+    mat_tmp11 = ZeroMatrix( fe.nbNode, fe.nbNode );
+    Tab2d mat_tmp12( fe.nbNode, fe.nbNode );
+    mat_tmp12 = ZeroMatrix( fe.nbNode, fe.nbNode );
+    Tab2d mat_tmp13( fe.nbNode, fe.nbNode );
+    mat_tmp13 = ZeroMatrix( fe.nbNode, fe.nbNode );
+    Tab2d mat_tmp21( fe.nbNode, fe.nbNode );
+    mat_tmp21 = ZeroMatrix( fe.nbNode, fe.nbNode );
+    Tab2d mat_tmp22( fe.nbNode, fe.nbNode );
+    mat_tmp22 = ZeroMatrix( fe.nbNode, fe.nbNode );
+    Tab2d mat_tmp23( fe.nbNode, fe.nbNode );
+    mat_tmp23 = ZeroMatrix( fe.nbNode, fe.nbNode );
+    Tab2d mat_tmp31( fe.nbNode, fe.nbNode );
+    mat_tmp31 = ZeroMatrix( fe.nbNode, fe.nbNode );
+    Tab2d mat_tmp32( fe.nbNode, fe.nbNode );
+    mat_tmp32 = ZeroMatrix( fe.nbNode, fe.nbNode );
+    Tab2d mat_tmp33( fe.nbNode, fe.nbNode );
+    mat_tmp33 = ZeroMatrix( fe.nbNode, fe.nbNode );
+
+    
+
+    int iloc, jloc;
+    int i, icoor, ig;
+    double s, coef_s;
+    
+    // diagonal 11
+    // 
+    for ( i = 0; i < fe.nbDiag; i++ )
+    {
+        iloc = fe.patternFirst( i );
+        s = 0;
+        for ( ig = 0; ig < fe.nbQuadPt; ig++ )
+        {
+         s = fe.phiDer( iloc, 1, ig ) * fe.phiDer( iloc, 1, ig ) * fe.weightDet( ig )
+           + fe.phiDer( iloc, 2, ig ) * fe.phiDer( iloc, 2, ig ) * fe.weightDet( ig ) ;
+	}
+        mat_tmp11( iloc, iloc ) += coef * s;
+    }
+    // extra diagonal 11
+    //
+    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        jloc = fe.patternSecond( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        {
+            s = fe.phiDer( iloc, 1, ig ) * fe.phiDer( jloc, 1, ig ) * fe.weightDet( ig )
+              + fe.phiDer( iloc, 2, ig ) * fe.phiDer( jloc, 2, ig ) * fe.weightDet( ig )       ;
+        }
+        coef_s = coef * s;
+        mat_tmp11( iloc, jloc ) += coef_s;
+        mat_tmp11( jloc, iloc ) += coef_s;
+    }
+
+    // diagonal 12
+    // 
+    for ( i = 0; i < fe.nbDiag; i++ )
+    {
+        iloc = fe.patternFirst( i );
+        s = 0;
+        for ( ig = 0; ig < fe.nbQuadPt; ig++ )
+        {
+         s = - fe.phiDer( iloc, 1, ig ) * fe.phiDer( iloc, 0, ig ) * fe.weightDet( ig );
+	}
+        mat_tmp12( iloc, iloc ) -= coef * s;
+    }
+    // extra diagonal 12
+    //
+    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        jloc = fe.patternSecond( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        {
+            s = - fe.phiDer( iloc, 1, ig ) * fe.phiDer( jloc, 0, ig ) * fe.weightDet( ig );
+        }
+        coef_s = coef * s;
+        mat_tmp12( iloc, jloc ) -= coef_s;
+        mat_tmp12( jloc, iloc ) -= coef_s;
+    }
+
+    // diagonal 13
+    // 
+    for ( i = 0; i < fe.nbDiag; i++ )
+    {
+        iloc = fe.patternFirst( i );
+        s = 0;
+        for ( ig = 0; ig < fe.nbQuadPt; ig++ )
+        {
+	  s = - fe.phiDer( iloc, 2, ig ) * fe.phiDer( iloc, 0, ig ) * fe.weightDet( ig );
+        }
+        mat_tmp13( iloc, iloc ) -= coef * s;
+    }
+    // extra diagonal 13
+    //
+    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        jloc = fe.patternSecond( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        {
+            s = - fe.phiDer( iloc, 2, ig ) * fe.phiDer( jloc, 0, ig ) * fe.weightDet( ig );
+        }
+        coef_s = coef * s;
+        mat_tmp13( iloc, jloc ) -= coef_s;
+        mat_tmp13( jloc, iloc ) -= coef_s;
+    }
+
+    // diagonal 21
+    // 
+    for ( i = 0; i < fe.nbDiag; i++ )
+    {
+        iloc = fe.patternFirst( i );
+        s = 0;
+        for ( ig = 0; ig < fe.nbQuadPt; ig++ )
+        {
+         s = - fe.phiDer( iloc, 0, ig ) * fe.phiDer( iloc, 1, ig ) * fe.weightDet( ig );
+	}
+        mat_tmp21( iloc, iloc ) -= coef * s;
+    }
+    // extra diagonal 21
+    //
+    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        jloc = fe.patternSecond( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        {
+            s = - fe.phiDer( iloc, 0, ig ) * fe.phiDer( jloc, 1, ig ) * fe.weightDet( ig );
+        }
+        coef_s = coef * s;
+        mat_tmp21( iloc, jloc ) -= coef_s;
+        mat_tmp21( jloc, iloc ) -= coef_s;
+    }
+
+    // diagonal 22
+    // 
+    for ( i = 0; i < fe.nbDiag; i++ )
+    {
+        iloc = fe.patternFirst( i );
+        s = 0;
+        for ( ig = 0; ig < fe.nbQuadPt; ig++ )
+        {
+         s = fe.phiDer( iloc, 0, ig ) * fe.phiDer( iloc, 0, ig ) * fe.weightDet( ig )
+           + fe.phiDer( iloc, 2, ig ) * fe.phiDer( iloc, 2, ig ) * fe.weightDet( ig ) ;
+	}
+        mat_tmp22( iloc, iloc ) += coef * s;
+    }
+    // extra diagonal 22
+    //
+    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        jloc = fe.patternSecond( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        {
+            s = fe.phiDer( iloc, 0, ig ) * fe.phiDer( jloc, 0, ig ) * fe.weightDet( ig )
+              + fe.phiDer( iloc, 2, ig ) * fe.phiDer( jloc, 2, ig ) * fe.weightDet( ig )       ;
+        }
+        coef_s = coef * s;
+        mat_tmp22( iloc, jloc ) += coef_s;
+        mat_tmp22( jloc, iloc ) += coef_s;
+    }
+
+    // diagonal 23
+    // 
+    for ( i = 0; i < fe.nbDiag; i++ )
+    {
+        iloc = fe.patternFirst( i );
+        s = 0;
+        for ( ig = 0; ig < fe.nbQuadPt; ig++ )
+        {
+         s = - fe.phiDer( iloc, 2, ig ) * fe.phiDer( iloc, 1, ig ) * fe.weightDet( ig );
+	}
+        mat_tmp23( iloc, iloc ) -= coef * s;
+    }
+    // extra diagonal 23
+    //
+    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        jloc = fe.patternSecond( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        {
+            s = - fe.phiDer( iloc, 2, ig ) * fe.phiDer( jloc, 1, ig ) * fe.weightDet( ig );
+        }
+        coef_s = coef * s;
+        mat_tmp23( iloc, jloc ) -= coef_s;
+        mat_tmp23( jloc, iloc ) -= coef_s;
+    }
+
+    // diagonal 31
+    // 
+    for ( i = 0; i < fe.nbDiag; i++ )
+    {
+        iloc = fe.patternFirst( i );
+        s = 0;
+        for ( ig = 0; ig < fe.nbQuadPt; ig++ )
+        {
+	  s = - fe.phiDer( iloc, 0, ig ) * fe.phiDer( iloc, 2, ig ) * fe.weightDet( ig );
+        }
+        mat_tmp31( iloc, iloc ) -= coef * s;
+    }
+    // extra diagonal 31
+    //
+    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        jloc = fe.patternSecond( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        {
+            s = - fe.phiDer( iloc, 0, ig ) * fe.phiDer( jloc, 2, ig ) * fe.weightDet( ig );
+        }
+        coef_s = coef * s;
+        mat_tmp31( iloc, jloc ) -= coef_s;
+        mat_tmp31( jloc, iloc ) -= coef_s;
+    }
+
+    // diagonal 32
+    // 
+    for ( i = 0; i < fe.nbDiag; i++ )
+    {
+        iloc = fe.patternFirst( i );
+        s = 0;
+        for ( ig = 0; ig < fe.nbQuadPt; ig++ )
+        {
+         s = - fe.phiDer( iloc, 1, ig ) * fe.phiDer( iloc, 2, ig ) * fe.weightDet( ig );
+	}
+        mat_tmp32( iloc, iloc ) -= coef * s;
+    }
+    // extra diagonal 32
+    //
+    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        jloc = fe.patternSecond( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        {
+            s = - fe.phiDer( iloc, 1, ig ) * fe.phiDer( jloc, 2, ig ) * fe.weightDet( ig );
+        }
+        coef_s = coef * s;
+        mat_tmp32( iloc, jloc ) -= coef_s;
+        mat_tmp32( jloc, iloc ) -= coef_s;
+    }
+
+    // diagonal 33
+    // 
+    for ( i = 0; i < fe.nbDiag; i++ )
+    {
+        iloc = fe.patternFirst( i );
+        s = 0;
+        for ( ig = 0; ig < fe.nbQuadPt; ig++ )
+        {
+         s = fe.phiDer( iloc, 0, ig ) * fe.phiDer( iloc, 0, ig ) * fe.weightDet( ig )
+           + fe.phiDer( iloc, 1, ig ) * fe.phiDer( iloc, 1, ig ) * fe.weightDet( ig ) ;
+	}
+        mat_tmp33( iloc, iloc ) += coef * s;
+    }
+    // extra diagonal 33
+    //
+    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        jloc = fe.patternSecond( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        {
+            s = fe.phiDer( iloc, 1, ig ) * fe.phiDer( jloc, 1, ig ) * fe.weightDet( ig )
+              + fe.phiDer( iloc, 2, ig ) * fe.phiDer( jloc, 2, ig ) * fe.weightDet( ig )       ;
+        }
+        coef_s = coef * s;
+        mat_tmp33( iloc, jloc ) += coef_s;
+        mat_tmp33( jloc, iloc ) += coef_s;
+    }
+
+          ElemMat::matrix_view mat_icomp = elmat.block( iblock + 0, jblock + 0 );
+          for ( i = 0; i < fe.nbDiag; i++ )
+          {
+             iloc = fe.patternFirst( i );
+            mat_icomp( iloc, iloc ) += mat_tmp11( iloc, iloc );
+          }
+          for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+          {
+            iloc = fe.patternFirst( i );
+            jloc = fe.patternSecond( i );
+            mat_icomp( iloc, jloc ) += mat_tmp11( iloc, jloc );
+            mat_icomp( jloc, iloc ) += mat_tmp11( jloc, iloc );
+        }
+
+	  mat_icomp = elmat.block( iblock + 0, jblock + 1 );
+          for ( i = 0; i < fe.nbDiag; i++ )
+          {
+             iloc = fe.patternFirst( i );
+            mat_icomp( iloc, iloc ) -= mat_tmp12( iloc, iloc );
+          }
+          for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+          {
+            iloc = fe.patternFirst( i );
+            jloc = fe.patternSecond( i );
+            mat_icomp( iloc, jloc ) -= mat_tmp12( iloc, jloc );
+            mat_icomp( jloc, iloc ) -= mat_tmp12( jloc, iloc );
+        }
+
+          mat_icomp = elmat.block( iblock + 0, jblock + 2 );
+          for ( i = 0; i < fe.nbDiag; i++ )
+          {
+             iloc = fe.patternFirst( i );
+            mat_icomp( iloc, iloc ) -= mat_tmp13( iloc, iloc );
+          }
+          for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+          {
+            iloc = fe.patternFirst( i );
+            jloc = fe.patternSecond( i );
+            mat_icomp( iloc, jloc ) -= mat_tmp13( iloc, jloc );
+            mat_icomp( jloc, iloc ) -= mat_tmp13( jloc, iloc );
+        }
+
+        mat_icomp = elmat.block( iblock + 1, jblock + 0 );
+          for ( i = 0; i < fe.nbDiag; i++ )
+          {
+             iloc = fe.patternFirst( i );
+            mat_icomp( iloc, iloc ) -= mat_tmp21( iloc, iloc );
+          }
+          for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+          {
+            iloc = fe.patternFirst( i );
+            jloc = fe.patternSecond( i );
+            mat_icomp( iloc, jloc ) -= mat_tmp21( iloc, jloc );
+            mat_icomp( jloc, iloc ) -= mat_tmp21( jloc, iloc );
+        }
+
+        mat_icomp = elmat.block( iblock + 1, jblock + 1 );
+          for ( i = 0; i < fe.nbDiag; i++ )
+          {
+             iloc = fe.patternFirst( i );
+            mat_icomp( iloc, iloc ) += mat_tmp22( iloc, iloc );
+          }
+          for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+          {
+            iloc = fe.patternFirst( i );
+            jloc = fe.patternSecond( i );
+            mat_icomp( iloc, jloc ) += mat_tmp22( iloc, jloc );
+            mat_icomp( jloc, iloc ) += mat_tmp22( jloc, iloc );
+        }
+
+        mat_icomp = elmat.block( iblock + 1, jblock + 2 );
+          for ( i = 0; i < fe.nbDiag; i++ )
+          {
+             iloc = fe.patternFirst( i );
+            mat_icomp( iloc, iloc ) -= mat_tmp23( iloc, iloc );
+          }
+          for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+          {
+            iloc = fe.patternFirst( i );
+            jloc = fe.patternSecond( i );
+            mat_icomp( iloc, jloc ) -= mat_tmp23( iloc, jloc );
+            mat_icomp( jloc, iloc ) -= mat_tmp23( jloc, iloc );
+        }
+
+        mat_icomp = elmat.block( iblock + 2, jblock + 0 );
+          for ( i = 0; i < fe.nbDiag; i++ )
+          {
+             iloc = fe.patternFirst( i );
+            mat_icomp( iloc, iloc ) -= mat_tmp31( iloc, iloc );
+          }
+          for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+          {
+            iloc = fe.patternFirst( i );
+            jloc = fe.patternSecond( i );
+            mat_icomp( iloc, jloc ) -= mat_tmp31( iloc, jloc );
+            mat_icomp( jloc, iloc ) -= mat_tmp31( jloc, iloc );
+        }
+
+        mat_icomp = elmat.block( iblock + 2, jblock + 1 );
+          for ( i = 0; i < fe.nbDiag; i++ )
+          {
+             iloc = fe.patternFirst( i );
+            mat_icomp( iloc, iloc ) -= mat_tmp32( iloc, iloc );
+          }
+          for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+          {
+            iloc = fe.patternFirst( i );
+            jloc = fe.patternSecond( i );
+            mat_icomp( iloc, jloc ) -= mat_tmp32( iloc, jloc );
+            mat_icomp( jloc, iloc ) -= mat_tmp32( jloc, iloc );
+        }
+
+        mat_icomp = elmat.block( iblock + 2, jblock + 2 );
+          for ( i = 0; i < fe.nbDiag; i++ )
+          {
+             iloc = fe.patternFirst( i );
+            mat_icomp( iloc, iloc ) += mat_tmp33( iloc, iloc );
+          }
+          for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+          {
+            iloc = fe.patternFirst( i );
+            jloc = fe.patternSecond( i );
+            mat_icomp( iloc, jloc ) += mat_tmp33( iloc, jloc );
+            mat_icomp( jloc, iloc ) += mat_tmp( jloc, iloc );
+        }
+    }
 
 // Miguel 10/2003:
 /*
