@@ -325,6 +325,10 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
 {
     Chrono chrono;
 
+    // velocity vector for linearization
+    Vector& beta = _u;
+    //Vector beta(_bdf.bdf_u().extrap());
+
     M_time = time;
 
     std::cout << "  o-  Copying Stokes matrix...                 "
@@ -361,7 +365,7 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
             for ( UInt iComp = 0; iComp<nbCompU; ++iComp )
             {
                 UInt ig = _dof_u.localToGlobal( eleID, iloc+1 )-1+iComp*_dim_u;
-                M_elvec.vec()[ iloc+iComp*_fe_u.nbNode ] = _rho * _u( ig );
+                M_elvec.vec()[ iloc+iComp*_fe_u.nbNode ] = _rho * beta( ig );
             }
         }
 
@@ -392,7 +396,7 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
     IPStabilization<Mesh, Dof>
         allStab( _mesh, _dof_u, _refFE_u, _feBd_u, _Qr_u,
                  M_gammaBeta, M_gammaDiv, M_gammaPress, this->viscosity() );
-    allStab.apply( M_matrFull, this->_u );
+    allStab.apply( M_matrFull, beta );
 
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
@@ -461,6 +465,14 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
     M_linearSolver.solve( M_sol, M_rhsFull );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
+
+#if USE_AZTEC_SOLVER
+#else
+    std::cout << "        estimated condition number (preconditioned) = "
+              << M_linearSolver.condEst() << std::endl;
+#endif
+    std::cout << "        number of iterations                        = "
+              << M_linearSolver.iterations() << std::endl;
 
     for ( UInt iDof = 0; iDof<nDimensions*_dim_u; ++iDof )
     {
