@@ -229,9 +229,9 @@ template<typename MatrixType, typename VectorType, typename MeshType, typename D
 	// Glogal Dof
 	idDof  =  BCb(i)->id() + (BCb.component(j)-1)*totalDof;
 	// Coordinates of the node where we impose the value
-	x = static_cast< Identifier_Essential* >( BCb(i) )->x();
-	y = static_cast< Identifier_Essential* >( BCb(i) )->y();
-	z = static_cast< Identifier_Essential* >( BCb(i) )->z();
+	x = static_cast< const Identifier_Essential* >( BCb(i) )->x();
+	y = static_cast< const Identifier_Essential* >( BCb(i) )->y();
+	z = static_cast< const Identifier_Essential* >( BCb(i) )->z();
 	// Modifying matrix and right hand side
 	A.diagonalize(idDof-1, coef, b, BCb(t,x,y,z,BCb.component(j) ) );
       }
@@ -305,9 +305,9 @@ template<typename VectorType, typename DataType>
 	// Glogal Dof
 	idDof  =  BCb(i)->id() + (BCb.component(j)-1)*totalDof;
 	// Coordinates of the node where we impose the value
-	x = static_cast< Identifier_Essential* >( BCb(i) )->x();
-	y = static_cast< Identifier_Essential* >( BCb(i) )->y();
-	z = static_cast< Identifier_Essential* >( BCb(i) )->z();
+	x = static_cast< const Identifier_Essential* >( BCb(i) )->x();
+	y = static_cast< const Identifier_Essential* >( BCb(i) )->y();
+	z = static_cast< const Identifier_Essential* >( BCb(i) )->z();
 	// Modifying right hand side
         b(idDof-1) = coef * BCb(t,x,y,z,BCb.component(j) );
       }
@@ -360,9 +360,9 @@ void bcEssentialManage(MatrixType1& A, MatrixType2& trD, VectorType& b,
 	// Glogal Dof
 	idDof  =  BCb(i)->id() + (BCb.component(j)-1)*totalDof;
 	// Coordinates of the node where we impose the value
-	x = static_cast< Identifier_Essential* >( BCb(i) )->x();
-	y = static_cast< Identifier_Essential* >( BCb(i) )->y();
-	z = static_cast< Identifier_Essential* >( BCb(i) )->z();
+	x = static_cast< const Identifier_Essential* >( BCb(i) )->x();
+	y = static_cast< const Identifier_Essential* >( BCb(i) )->y();
+	z = static_cast< const Identifier_Essential* >( BCb(i) )->z();
 	// Modifying matrix and right hand side
 	A.diagonalize(idDof-1, coef, b, BCb(t,x,y,z,BCb.component(j) ) );
 	trD.zero_row(idDof-1);
@@ -416,9 +416,9 @@ void bcEssentialManage(MatrixType1& A, MatrixType2& trD, MatrixType3& D,
 	// Glogal Dof
 	idDof  =  BCb(i)->id() + (BCb.component(j)-1)*totalDof;
 	// Coordinates of the node where we impose the value
-	x = static_cast< Identifier_Essential* >( BCb(i) )->x();
-	y = static_cast< Identifier_Essential* >( BCb(i) )->y();
-	z = static_cast< Identifier_Essential* >( BCb(i) )->z();
+	x = static_cast< const Identifier_Essential* >( BCb(i) )->x();
+	y = static_cast< const Identifier_Essential* >( BCb(i) )->y();
+	z = static_cast< const Identifier_Essential* >( BCb(i) )->z();
 	// Modifying matrix and right hand side
 	A.diagonalize(idDof-1, coef, b, BCb(t,x,y,z,BCb.component(j)));
 	zero_row_col(idDof-1, trD, D, bp, BCb(t,x,y,z,BCb.component(j)));
@@ -443,12 +443,12 @@ void bcNaturalManage(VectorType& b, const MeshType& mesh, const Dof& dof,  const
   // Number of components involved in this boundary condition
   UInt nComp = BCb.numberOfComponents();
 
-  Identifier_Natural* pId;
+  const Identifier_Natural* pId;
   ID ibF, idDof, icDof, gDof;
 
   if ( BCb.dataVector() ) { //! If BC is given under a vectorial form
     switch( BCb.pointerToBCVector()->type() ) {
-    case 0: // if the BC is a vector which values don't need to be integrated 
+    case 0: // if the BC is a vector which values don't need to be integrated
       // Loop on BC identifiers
       for (ID i=1; i<=BCb.list_size(); ++i) {
 	// Loop on components involved in this boundary condition
@@ -464,30 +464,30 @@ void bcNaturalManage(VectorType& b, const MeshType& mesh, const Dof& dof,  const
     case 1: // if the BC is a vector of values to be integrated
       // Loop on BC identifiers
       for (ID i=1; i<=BCb.list_size(); ++i) {
-      
+
 	// Pointer to the i-th itdentifier in the list
-	pId = static_cast< Identifier_Natural* >( BCb(i) );
-      
+	pId = static_cast< const Identifier_Natural* >( BCb(i) );
+
 	// Number of the current boundary face
-	ibF = pId->id(); 
-        
+	ibF = pId->id();
+
 	// Updating face stuff
 	bdfem.updateMeasNormalQuadPt( mesh.boundaryFace(ibF) );
-                
+
         // Loop on total Dof per Face
 	for (ID l=1; l<=nDofF; ++l) {
 
-	  gDof = pId->bdLocalToGlobal(l); 
+	  gDof = pId->bdLocalToGlobal(l);
 
 	  // Loop on components involved in this boundary condition
 	  for (UInt ic=0; ic<nComp; ++ic) {
 	    icDof = gDof + ic*totalDof;
-	    
+	
 	    // Loop on quadrature points
 	    for(int iq=0; iq<bdfem.nbQuadPt; ++iq) {
 	      // Adding right hand side contribution
 	      b[icDof-1] +=  BCb(gDof ,1)*bdfem.phi(int(l-1),iq)* bdfem.normal(int(ic),iq)*bdfem.weightMeas(iq);
-	    }    
+	    }
 	  }
 	}
       }
@@ -518,7 +518,7 @@ void bcNaturalManage(VectorType& b, const MeshType& mesh, const Dof& dof,  const
     for (ID i=1; i<=BCb.list_size(); ++i) {
 
       // Pointer to the i-th itdentifier in the list
-      pId = static_cast< Identifier_Natural* >( BCb(i) );
+      pId = static_cast< const Identifier_Natural* >( BCb(i) );
 
       // Number of the current boundary face
       ibF = pId->id();
@@ -554,7 +554,7 @@ void bcNaturalManage(VectorType& b, const MeshType& mesh, const Dof& dof,  const
     for (ID i=1; i<=BCb.list_size(); ++i) {
 
       // Pointer to the i-th itdentifier in the list
-      pId = static_cast< Identifier_Natural* >( BCb(i) );
+      pId = static_cast< const Identifier_Natural* >( BCb(i) );
 
       // Number of the current boundary face
       ibF = pId->id();
@@ -605,7 +605,7 @@ void bcMixteManage(MatrixType& A, VectorType& b, const MeshType& mesh, const Dof
 
   DataType sum;
 
-  Identifier_Natural* pId;
+  const Identifier_Natural* pId;
   ID ibF, idDof, jdDof;
 
   if ( BCb.dataVector() ) {   //! If BC is given under a vectorial form
@@ -617,7 +617,7 @@ void bcMixteManage(MatrixType& A, VectorType& b, const MeshType& mesh, const Dof
     for (ID i=1; i<=BCb.list_size(); ++i) {
 
       // Pointer to the i-th identifier in the list
-      pId = static_cast< Identifier_Natural* >( BCb(i) );
+      pId = static_cast< const Identifier_Natural* >( BCb(i) );
 
       // Number of the current boundary face
       ibF = pId->id();
@@ -693,13 +693,13 @@ void bcMixteManage(MatrixType& A, VectorType& b, const MeshType& mesh, const Dof
 
     DataType x, y, z;
 
-    BCFunction_Mixte* pBcF = static_cast<BCFunction_Mixte*>( BCb.pointerToFunctor() );
+    const BCFunction_Mixte* pBcF = static_cast<const BCFunction_Mixte*>( BCb.pointerToFunctor() );
 
     // Loop on BC identifiers
     for (ID i=1; i<=BCb.list_size(); ++i) {
 
       // Pointer to the i-th identifier in the list
-      pId = static_cast< Identifier_Natural* >( BCb(i) );
+      pId = static_cast< const Identifier_Natural* >( BCb(i) );
 
       // Number of the current boundary face
       ibF = pId->id();
@@ -795,7 +795,7 @@ void bcMixteManageMatrix(MatrixType& A, const MeshType& mesh, const Dof& dof,
 
   DataType sum;
 
-  Identifier_Natural* pId;
+  const Identifier_Natural* pId;
   ID ibF, idDof, jdDof;
 
   if ( BCb.dataVector() ) {   //! If BC is given under a vectorial form
@@ -807,7 +807,7 @@ void bcMixteManageMatrix(MatrixType& A, const MeshType& mesh, const Dof& dof,
     for (ID i=1; i<=BCb.list_size(); ++i) {
 
       // Pointer to the i-th identifier in the list
-      pId = static_cast< Identifier_Natural* >( BCb(i) );
+      pId = static_cast< const Identifier_Natural* >( BCb(i) );
 
       // Number of the current boundary face
       ibF = pId->id();
@@ -872,13 +872,13 @@ void bcMixteManageMatrix(MatrixType& A, const MeshType& mesh, const Dof& dof,
 
     DataType x, y, z;
 
-    BCFunction_Mixte* pBcF = static_cast<BCFunction_Mixte*>( BCb.pointerToFunctor() );
+    const BCFunction_Mixte* pBcF = static_cast<const BCFunction_Mixte*>( BCb.pointerToFunctor() );
 
     // Loop on BC identifiers
     for (ID i=1; i<=BCb.list_size(); ++i) {
 
       // Pointer to the i-th identifier in the list
-      pId = static_cast< Identifier_Natural* >( BCb(i) );
+      pId = static_cast< const Identifier_Natural* >( BCb(i) );
 
       // Number of the current boundary face
       ibF = pId->id();
@@ -968,7 +968,7 @@ void bcMixteManageVector(VectorType& b, const MeshType& mesh, const Dof& dof,
   // Number of components involved in this boundary condition
   UInt nComp = BCb.numberOfComponents();
 
-  Identifier_Natural* pId;
+  const Identifier_Natural* pId;
   ID ibF, idDof;
 
   if ( BCb.dataVector() ) {   //! If BC is given under a vectorial form
@@ -977,7 +977,7 @@ void bcMixteManageVector(VectorType& b, const MeshType& mesh, const Dof& dof,
     for (ID i=1; i<=BCb.list_size(); ++i) {
 
       // Pointer to the i-th identifier in the list
-      pId = static_cast< Identifier_Natural* >( BCb(i) );
+      pId = static_cast< const Identifier_Natural* >( BCb(i) );
 
       // Number of the current boundary face
       ibF = pId->id();
@@ -1013,7 +1013,7 @@ void bcMixteManageVector(VectorType& b, const MeshType& mesh, const Dof& dof,
     for (ID i=1; i<=BCb.list_size(); ++i) {
 
       // Pointer to the i-th identifier in the list
-      pId = static_cast< Identifier_Natural* >( BCb(i) );
+      pId = static_cast< const Identifier_Natural* >( BCb(i) );
 
       // Number of the current boundary face
       ibF = pId->id();
@@ -1070,15 +1070,15 @@ void bcMixteManage(MatrixType1& A, MatrixType2 & trD, VectorType& b,
   UInt nComp = BCb.numberOfComponents();
 
   DataType x, y, z, sum;
-  Identifier_Natural* pId;
+  const Identifier_Natural* pId;
   ID ibF, idDof, jdDof;
 
-  BCFunction_Mixte* pBcF = static_cast<BCFunction_Mixte*>( BCb.pointerToFunctor() );
+  const BCFunction_Mixte* pBcF = static_cast<const BCFunction_Mixte*>( BCb.pointerToFunctor() );
 
   for (ID i=1; i<=BCb.list_size(); ++i) {
 
     // Pointer to the i-th identifier in the list
-    pId = static_cast< Identifier_Natural* >( BCb(i) );
+    pId = static_cast< const Identifier_Natural* >( BCb(i) );
 
     // Number of the current boundary face
     ibF = pId->id();
@@ -1169,15 +1169,15 @@ void bcMixteManage(MatrixType1& A, MatrixType2 & trD, MatrixType3 & D,
   UInt nComp = BCb.numberOfComponents();
 
   DataType x, y, z, sum;
-  Identifier_Natural* pId;
+  const Identifier_Natural* pId;
   ID ibF, idDof, jdDof;
 
-  BCFunction_Mixte* pBcF = static_cast<BCFunction_Mixte*>( BCb.pointerToFunctor() );
+  const BCFunction_Mixte* pBcF = static_cast<const BCFunction_Mixte*>( BCb.pointerToFunctor() );
 
   for (ID i=1; i<=BCb.list_size(); ++i) {
 
     // Pointer to the i-th identifier in the list
-    pId = static_cast< Identifier_Natural* >( BCb(i) );
+    pId = static_cast< const Identifier_Natural* >( BCb(i) );
 
     // Number of the current boundary face
     ibF = pId->id();

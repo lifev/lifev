@@ -341,10 +341,10 @@ class BC_Base{
 
 
   //! Returns a pointer  to the user defined STL functor
-  BCFunction_Base* pointerToFunctor() const;
+  const BCFunction_Base* pointerToFunctor() const;
 
-  //! Returns a pointer to the BCVector 
-  BCVector_Base* pointerToBCVector() const; 
+  //! Returns a pointer to the BCVector
+  const BCVector_Base* pointerToBCVector() const;
 
   //! True if a data vector has been provided
   bool dataVector() const;
@@ -352,7 +352,7 @@ class BC_Base{
 
   //! Returns a pointer  to the i-th elements in the (finalised) list
   //! (counting from 1 ' a la FORTRAN')
-  Identifier_Base*  operator()(const ID& i) const;
+  const Identifier_Base*  operator()(const ID& i) const;
 
 
   //! Overloading function operator by calling the
@@ -368,7 +368,7 @@ class BC_Base{
 
   //! Returns a pointer to the i-th elements in the (finalised) list
   //! (counting from 0 ' a la C')
-  Identifier_Base* operator[](const Index_t& i) const;
+  const Identifier_Base* operator[](const Index_t& i) const;
 
   //! Add a new indentifier in the list
   void addIdentifier(Identifier_Base*);
@@ -701,7 +701,7 @@ void BC_Handler::bdUpdate(Mesh& mesh, CurrentBdFE& feBd, const Dof& dof) {
 	      }
 	      break;
             case Natural:
-	      if ( where->dataVector()  ) { // With data 
+	      if ( where->dataVector()  ) { // With data
 		switch( where->pointerToBCVector()->type() ){
 		case 0: // if the BC is a function or a vector which values don't need to be integrated
 		  where->addIdentifier( new Identifier_Natural(gDof) );
@@ -839,7 +839,7 @@ void BC_Handler::bdUpdate(Mesh& mesh, CurrentBdFE& feBd, const Dof& dof) {
           if ( where->dataVector()  )
           { // With data vector
 	    switch( where->pointerToBCVector()->type() ){
-            case 0: // if the BC is a function or a vector which values don't need to be integrated 
+            case 0: // if the BC is a function or a vector which values don't need to be integrated
               for (ID l=1; l<=nDofpF; ++l) {
                   lDof = nDofFE + nDofFV + l; // local Dof
                   gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + (iFaEl-1)*nDofpF + l); // global Dof
@@ -857,7 +857,7 @@ void BC_Handler::bdUpdate(Mesh& mesh, CurrentBdFE& feBd, const Dof& dof) {
 	      break;
 	    default:
 	      ERROR_MSG("This BCVector type is not yet implemented");
-	    }  
+	    }
           }
           else
           {

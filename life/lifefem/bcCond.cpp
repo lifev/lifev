@@ -419,12 +419,12 @@ Real BC_Base::operator()(const Real& t, const Real& x, const Real& y,
 
 
 //! Returns a pointer  to the user defined STL functor
-BCFunction_Base*  BC_Base::pointerToFunctor() const {
+const BCFunction_Base*  BC_Base::pointerToFunctor() const {
   return _bcf;
 }
 
-//! Returns a pointer  to the BCVector 
-BCVector_Base* BC_Base::pointerToBCVector() const {
+//! Returns a pointer  to the BCVector
+const BCVector_Base* BC_Base::pointerToBCVector() const {
   return _bcv;
 }
 
@@ -458,13 +458,13 @@ Real BC_Base::MixteCoef() const{
 
 //! Returns a pointer  to the i-th elements in the (finalised) list
 //! (counting from 1 ' a la FORTRAN')
-Identifier_Base* BC_Base::operator()(const ID& i) const {
+const Identifier_Base* BC_Base::operator()(const ID& i) const {
   return this->operator[](i-1);
 }
 
 //! Returns a pointer to the i-th elements in the (finalised) list
 //! (counting from 0 ' a la C')
-Identifier_Base* BC_Base::operator[](const Index_t& i) const {
+const Identifier_Base* BC_Base::operator[](const Index_t& i) const {
   ASSERT_PRE(_finalised, "BC List should be finalised before being accessed");
   ASSERT_BD(i >= 0 && i < _idList.size());
   return _idList[i];
