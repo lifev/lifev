@@ -218,6 +218,7 @@ extern const QuadRule quadRuleSeg3pt;
 extern const QuadRule quadRuleTria1pt;
 extern const QuadRule quadRuleTria3pt;
 extern const QuadRule quadRuleTria4pt;
+extern const QuadRule quadRuleTria6pt;
 extern const QuadRule quadRuleTria7pt;
 
 extern const QuadRule quadRuleQuad1pt;
