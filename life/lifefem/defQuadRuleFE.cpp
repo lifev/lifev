@@ -91,11 +91,12 @@ const SetOfQuadRule allQuadRuleSeg( quad_rule_seg, NB_QUAD_RULE_SEG );
  *
  *=======================================================================*/
 //! total number of quadrature rules in 2D on triangle
-#define NB_QUAD_RULE_TRIA 3
+#define NB_QUAD_RULE_TRIA 4
 //! id of the quadrature rules on triangles
 #define QUAD_RULE_TRIA_1PT     1
 #define QUAD_RULE_TRIA_3PT     2
 #define QUAD_RULE_TRIA_4PT     3
+#define QUAD_RULE_TRIA_7PT     4
 //----------------------------------------------------------------------
 
 static const QuadPoint pt_tria_1pt[ 1 ] =
@@ -134,6 +135,28 @@ static const QuadPoint pt_tria_4pt[ 4 ] =
 const QuadRule quadRuleTria4pt( pt_tria_4pt,
                                 QUAD_RULE_TRIA_4PT,
                                 "Quadrature rule 4 points on a triangle", TRIANGLE, 4, 3 );
+//----------------------------------------------------------------------
+// 7 points Integration rule for triangle (Ref. Stroud) D of Ex = 5
+const Real t7pt_x0 = 1. / 3.;
+const Real t7pt_x1 = 0.10128650732345633;
+const Real t7pt_x2 = 0.47014206410511508;
+const Real t7pt_w0 = 0.1125;
+const Real t7pt_w1 = 0.062969590272413576;
+const Real t7pt_w2 = 0.066197076394253090;
+
+static const QuadPoint pt_tria_7pt[ 7 ] =
+    {
+        QuadPoint(     t7pt_x0,     t7pt_x0, t7pt_w0 ),
+        QuadPoint(     t7pt_x1,     t7pt_x1, t7pt_w1 ),
+        QuadPoint(     t7pt_x1, 1-2*t7pt_x1, t7pt_w1 ),
+        QuadPoint( 1-2*t7pt_x1,     t7pt_x1, t7pt_w1 ),
+        QuadPoint(     t7pt_x2,     t7pt_x2, t7pt_w2 ),
+        QuadPoint(     t7pt_x2, 1-2*t7pt_x2, t7pt_w2 ),
+        QuadPoint( 1-2*t7pt_x2,     t7pt_x2, t7pt_w2 ),
+    };
+const QuadRule quadRuleTria7pt( pt_tria_7pt,
+                                QUAD_RULE_TRIA_7PT,
+                                "Quadrature rule 7 points on a triangle", TRIANGLE, 7, 5 );
 /*----------------------------------------------------------------------
   Set of all quadrature rules on triangle
   ----------------------------------------------------------------------*/
@@ -141,7 +164,8 @@ static const QuadRule quad_rule_tria[ NB_QUAD_RULE_TRIA ] =
     {
         quadRuleTria1pt,
         quadRuleTria3pt,
-        quadRuleTria4pt
+        quadRuleTria4pt,
+        quadRuleTria7pt
     };
 const SetOfQuadRule allQuadRuleTria( quad_rule_tria, NB_QUAD_RULE_TRIA );
 //----------------------------------------------------------------------

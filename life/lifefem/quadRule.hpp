@@ -27,7 +27,7 @@ namespace LifeV
  *
  *                       Quadrature Rules
  *
- ----------------------------------------------------------------------*/ 
+ ----------------------------------------------------------------------*/
 /*!
   \class QuadPoint
   \brief The class for the quadrature points i.e. (x,y,z,weight)
@@ -98,11 +98,11 @@ public:
   \brief The class of quadrature rules
   \author J.-F. Gerbeau
   \date 04/2002
- 
+
   It contains the quadrature points and the weights.
- 
+
   \par How to add a new quadrature rule:
- 
+
   Suppose you want to add the quadrature rule qr_Pipo on a tetrahedra:
   in the file quadRule.h, add
   \code
@@ -116,7 +116,7 @@ public:
   to another quadrature rule on a tetrahedra and copy/paste/modify an existing
   quadrature rule. Finally, increment NB_QUAD_RULE_TETRA,
   and add it to the array of all quadrature rule on a tetra, namely :
- 
+
   \code
   static const QuadRule quad_rule_tetra[NB_QUAD_RULE_TETRA] = {
   quadRuleTetra1pt,
@@ -162,7 +162,7 @@ public:
   \author J.-F. Gerbeau
   \date 04/2002
   \brief Set of quadrature rule
- 
+
   The purpose of the class SetOfQuadRule is to gather all the quadrature
   rules defined on a geometry (e.g. triangle, tetra, etc) in order to
   easily fill the array of a reference finite element with all avaible
@@ -218,6 +218,7 @@ extern const QuadRule quadRuleSeg3pt;
 extern const QuadRule quadRuleTria1pt;
 extern const QuadRule quadRuleTria3pt;
 extern const QuadRule quadRuleTria4pt;
+extern const QuadRule quadRuleTria7pt;
 
 extern const QuadRule quadRuleQuad1pt;
 extern const QuadRule quadRuleQuad4pt;
