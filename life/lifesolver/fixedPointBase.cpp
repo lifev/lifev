@@ -26,7 +26,6 @@ namespace LifeV
 fixedPoint::fixedPoint(GetPot &_dataFile):
     operFS(_dataFile)
 {
-    setUpBC();
 }
 
 fixedPoint::~fixedPoint()
@@ -87,7 +86,8 @@ void fixedPoint::evalResidual(const Vector &_disp,
 //
 
 
-void fixedPoint::setUpBC()
+void fixedPoint::setUpBC(function_type _bcf,
+                         function_type _vel)
 {
     std::cout << "Boundary Conditions setup ... ";
 
@@ -121,7 +121,7 @@ void fixedPoint::setUpBC()
 
     // Boundary conditions for the harmonic extension of the
     // interface solid displacement
-    BCFunctionBase bcf(fZero);
+    BCFunctionBase bcf(_bcf);
     M_BCh_mesh.addBC("Interface", 1, Essential, Full, displ, 3);
     M_BCh_mesh.addBC("Top",       3, Essential, Full, bcf,   3);
     M_BCh_mesh.addBC("Base",      2, Essential, Full, bcf,   3);
@@ -129,7 +129,7 @@ void fixedPoint::setUpBC()
 
 
     // Boundary conditions for the fluid velocity
-    BCFunctionBase in_flow(u2);
+    BCFunctionBase in_flow(_vel);
     M_BCh_u.addBC("Wall",   1,  Essential, Full, u_wall,  3);
     M_BCh_u.addBC("InFlow", 2,  Natural,   Full, in_flow, 3);
     M_BCh_u.addBC("Edges",  20, Essential, Full, bcf,     3);

@@ -43,6 +43,8 @@ class DataJacobianSP {
 class steklovPoincare : public operFS
 {
 public:
+    typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID
+                                   & )> function_type;
 
     // constructors
     steklovPoincare(GetPot &_dataFile);
@@ -62,6 +64,9 @@ public:
     void solveLinearFluid();
     void solveLinearSolid();
 
+    void setUpBC(function_type _bcf,
+                 function_type _vel);
+
 
     //setters and getters
 
@@ -69,7 +74,6 @@ public:
 
     void setResidualFSI(double *_res);
     void setResidualFSI(const Vector _res);
-
 
 
 private:
@@ -88,7 +92,6 @@ private:
     void eval        (const Vector &_disp,
                       const int     _status);
 
-    void setUpBC();
 
     Vector invSfPrime  (const Vector& _res);
     Vector invSsPrime  (const Vector& _res);

@@ -25,6 +25,7 @@
 #include "SolverAztec.hpp"
 #include "generalizedAitken.hpp"
 #include "bcHandler.hpp"
+#include "bcFunction.hpp"
 #include "dof.hpp"
 
 #ifndef _OPERFS

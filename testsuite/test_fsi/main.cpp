@@ -20,7 +20,6 @@
 #include "NavierStokesAleSolverPC.hpp"
 #include "VenantKirchhofSolver.hpp"
 #include "nonLinRichardson.hpp"
-#include "operFS.hpp"
 #include "steklovPoincareBase.hpp"
 #include "fixedPointBase.hpp"
 #include "vectorNorms.hpp"
@@ -34,8 +33,6 @@
 This programs couples the Navier-Stokes and (linear) Elastodynamic equations
 At each time step the resulting non-linear coupled problem is solved via
 Domain Decomposition method.
-
-The present test simulates the pressure wave propagation in a curved cylindrical vessel
 
 Based on Miguel Fernandez's test_fsi_newton. See:
 A Newton method using exact jacobians for solving fluid-structure coupling
@@ -57,7 +54,7 @@ int main(int argc, char** argv)
     //  TEMPORAL LOOP
     //========================================================================================
 
-    fixedPoint oper(data_file);
+    steklovPoincare oper(data_file);
 
     UInt maxpf  = 100;
     Real dt     = oper.fluid().timestep();
@@ -87,8 +84,10 @@ int main(int argc, char** argv)
     std::ofstream out_iter("iter");
     std::ofstream out_res ("res");
 
-    M_fluid.initialize(u0);
-    M_solid.initialize(d0,w0);
+    oper.setUpBC(fZero, u2);
+
+    oper.fluid().initialize(u0);
+    oper.solid().initialize(d0,w0);
 
     //
     // Temporal loop
@@ -102,7 +101,7 @@ int main(int argc, char** argv)
 
         // displacement prediction
 
-        disp   = 0.;//solid.d();// + dt*(1.5*solid.w() - 0.5*velo_1);
+        disp   = oper.solid().d() + dt*(1.5*oper.solid().w() - 0.5*velo_1);
 
         velo_1 = oper.solid().w();
 
@@ -115,7 +114,7 @@ int main(int argc, char** argv)
 
         status = nonLinRichardson(disp, oper, maxnorm, abstol, reltol,
                         maxiter, etamax, linesearch, out_res,
-                        time, 0.01);
+                        time, 0.1);
 //        status = newton(disp,oper, maxnorm, abstol, reltol, maxiter, etamax,linesearch,out_res,time);
 
         if(status == 1)

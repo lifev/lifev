@@ -33,7 +33,7 @@ steklovPoincare::steklovPoincare(GetPot &_dataFile):
     M_dataJacobian(this)
 {
     M_precond = _dataFile("problem/precond",1);
-    setUpBC();
+//    setUpBC();
 }
 
 steklovPoincare::~steklovPoincare()
@@ -106,7 +106,8 @@ void steklovPoincare::evalResidual(const Vector &_disp,
 //
 
 
-void steklovPoincare::setUpBC()
+void steklovPoincare::setUpBC(function_type _bcf,
+                              function_type _vel)
 {
     std::cout << "Boundary Conditions setup ... ";
 
@@ -147,7 +148,7 @@ void steklovPoincare::setUpBC()
 
     // Boundary conditions for the harmonic extension of the
     // interface solid displacement
-    BCFunctionBase bcf(fZero);
+    BCFunctionBase bcf(_bcf);
     M_BCh_mesh.addBC("Interface", 1, Essential, Full, displ, 3);
     M_BCh_mesh.addBC("Top",       3, Essential, Full, bcf,   3);
     M_BCh_mesh.addBC("Base",      2, Essential, Full, bcf,   3);
@@ -155,7 +156,7 @@ void steklovPoincare::setUpBC()
 
 
     // Boundary conditions for the fluid velocity
-    BCFunctionBase in_flow(u2);
+    BCFunctionBase in_flow(_vel);
     M_BCh_u.addBC("Wall",   1,  Essential, Full, u_wall,  3);
     M_BCh_u.addBC("InFlow", 2,  Natural,   Full, in_flow, 3);
     M_BCh_u.addBC("Edges",  20, Essential, Full, bcf,     3);

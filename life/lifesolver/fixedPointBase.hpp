@@ -30,6 +30,8 @@ class fixedPoint : public operFS
 {
 public:
 
+    typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID
+                                   & )> function_type;
     // constructors
     fixedPoint(GetPot &_dataFile);
 
@@ -45,12 +47,13 @@ public:
                       const double  _linearRelTol,
                       Vector       &_muk);
 
+    void setUpBC     (function_type _bcf,
+                      function_type _vel);
+
 private:
 
     void eval        (const Vector &_disp,
                       const int     _status);
-
-    void setUpBC();
 
 };
 
