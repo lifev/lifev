@@ -72,7 +72,7 @@ namespace LifeV
 
 //----------------------------------------------------------------------
 
-        Real linres = 1.e-3;
+//        Real linres = 1.e-3;
 
         int    iter         = 0;
 
@@ -97,7 +97,7 @@ namespace LifeV
 
         Real normRes        = norm(residual);
         Real stop_tol       = abstol + reltol*normRes;
-        Real linear_rel_tol = fabs(eta_max);
+//        Real linear_rel_tol = fabs(eta_max);
 
         generalizedAitken<Vector,Real> aitken(nDofFS, omegaS, omegaF);
 
