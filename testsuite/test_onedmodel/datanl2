@@ -29,5 +29,5 @@ nb_elem	= 30	#   number of elements
 post_dir = ./                 # the directory for postprocessing files
 post_file = soltube2               # the file name
 verbose = 5
-show_graceplot = 1                # 0: no grace plot, 1: show grace plots
+show_graceplot = 0                # 0: no grace plot, 1: show grace plots
 
