@@ -37,6 +37,7 @@
 #include "dataNavierStokes.hpp"
 #include "dataAztec.hpp"
 #include "medit_wrtrs.hpp"
+#include "gmv_wrtrs.hpp"
 #include "bcCond.hpp"
 #include "bdfNS.hpp"
 #include "post_proc.hpp"
@@ -109,8 +110,9 @@ public DataNavierStokes<Mesh> {
   //! Returns the pressure Dof 
   const Dof& pDof() const;
 
-  //! Postprocessing pressure
-  void postProcessPressure();
+ //! Postprocessing
+  void postProcess();
+
 
   //! OpenDX writers
   void dx_write_sol(std::string const& file_sol, std::string const& fe_type_vel, std::string const& fe_type_pre);
@@ -281,36 +283,45 @@ NavierStokesHandler<Mesh>::post_proc_set_phi()
   _ns_post_proc.set_phi(_feBd_u,_dof_u);
 }
 
-// Postprocessing pressure
+// Postprocessing 
 template<typename Mesh>  void 
-NavierStokesHandler<Mesh>::postProcessPressure() 
-{
-    
-  std::ostringstream index;
-  std::string name;
-
+NavierStokesHandler<Mesh>::postProcess() {
+  ostringstream index;
+  string name;
+ 
   ++_count;
-
+ 
   if (fmod(float(_count),float(_verbose)) == 0.0) {
-    cout << "  o-  Post-processing pressure\n";
+    cout << "  o-  Post-processing \n";
     index << (_count/_verbose);
-  
+ 
     switch( index.str().size() ) {
     case 1:
-      name = "sol.00"+index.str();
+      name = "00"+index.str();
       break;
-    case 2:   
-      name = "sol.0"+index.str();
+    case 2:
+      name = "0"+index.str();
       break;
-    case 3:   
-      name = "sol."+index.str();
+    case 3:
+      name = index.str();
       break;
-    }
-    
-    wr_medit_ascii(name+".mesh", _mesh);
-    wr_medit_ascii_scalar(name+".bb",_p.giveVec(),_p.size()); 
+    } 
+ 
+    wr_gmv_ascii("test."+name+".inp",_mesh, _dim_u,_u.giveVec(), _p.giveVec());
+
+    //wr_medit_ascii_scalar("press."+name+".bb",_p.giveVec(),_p.size());
+    //wr_medit_ascii_scalar("vel_x."+name+".bb",_u.giveVec(),_mesh.numVertices());
+    //wr_medit_ascii_scalar("vel_y."+name+".bb",_u.giveVec() + _dim_u,_mesh.numVertices());
+    //wr_medit_ascii_scalar("vel_z."+name+".bb",_u.giveVec() + 2*_dim_u,_mesh.numVertices());
+    // wr_medit_ascii_vector("veloc."+name+".bb",_u.giveVec(),_mesh.numVertices(),_dim_u);
+    //system(("ln -s "+_mesh_file+" press."+name+".mesh").data());
+    //system(("ln -s "+_mesh_file+" vel_x."+name+".mesh").data());
+    //system(("ln -s "+_mesh_file+" vel_y."+name+".mesh").data());
+    //system(("ln -s "+_mesh_file+" vel_z."+name+".mesh").data());
+    // system(("ln -s "+_mesh_file+" veloc."+name+".mesh").data());
   }
 }
+
 
 // Writing (DX)
 // ! Write the solution in DX format
