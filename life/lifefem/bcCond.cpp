@@ -48,7 +48,7 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag,
     _M_finalised( false )
 {
     if ( _M_mode != Component )
-        ERROR_MSG( "You should use a more specific constructor for this mode" );
+        ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
 }
 
 //! Constructor for BC without components for Scalar, Tangential or Normal  mode problems
@@ -85,7 +85,7 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& t
             _M_comp.push_back( nDimensions );
             break;
         default:
-            ERROR_MSG( "You should use a more specific constructor for this mode" );
+            ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
 }
 
@@ -106,7 +106,7 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& t
     _M_finalised( false )
 {
     if ( _M_mode != Full )
-        ERROR_MSG( "You should use a more specific constructor for this mode" );
+        ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
 
     _M_comp.reserve( nComp );
     for ( ID i = 1; i <= nComp; ++i )
@@ -132,7 +132,7 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& t
     _M_finalised( false )
 {
     if ( mode != Component )
-        ERROR_MSG( "You should use a more specific constructor for this mode" );
+        ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
 }
 
 //! Constructor for BC with data vector, without components for Scalar, Tangential or Normal  mode problems
@@ -173,7 +173,7 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& t
 
         break;
     default:
-        ERROR_MSG( "You should use a more specific constructor for this mode" );
+        ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
 }
 
@@ -194,15 +194,15 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& t
     _M_finalised( false )
 {
     if ( mode != Full )
-        ERROR_MSG( "You should use a more specific constructor for this mode" );
+        ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
 
     _M_comp.reserve( nComp );
     for ( ID i = 1; i <= nComp; ++i )
         _M_comp.push_back( i );
 }
 
-BCBase::BCBase( const std::string& name, const EntityFlag& flag, 
-		const BCType& type, const BCMode& mode, 
+BCBase::BCBase( const std::string& name, const EntityFlag& flag,
+		const BCType& type, const BCMode& mode,
 		BCFunctionUDepBase& bcf, const std::vector<ID>& comp )
     :
     _M_isUDep(true),
@@ -216,10 +216,10 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag,
     _M_finalised( false )
 {
     if ( _M_mode != Component )
-        ERROR_MSG( "You should use a more specific constructor for this mode" );
+        ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
 }
-BCBase::BCBase( const std::string& name, const EntityFlag& flag, 
-		const BCType& type, const BCMode& mode, 
+BCBase::BCBase( const std::string& name, const EntityFlag& flag,
+		const BCType& type, const BCMode& mode,
 		BCFunctionUDepBase& bcf)
     :
     _M_isUDep(true),
@@ -252,11 +252,11 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag,
             _M_comp.push_back( nDimensions );
             break;
         default:
-            ERROR_MSG( "You should use a more specific constructor for this mode" );
+            ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
 }
-BCBase::BCBase( const std::string& name, const EntityFlag& flag, 
-		const BCType& type, const BCMode& mode, 
+BCBase::BCBase( const std::string& name, const EntityFlag& flag,
+		const BCType& type, const BCMode& mode,
 		BCFunctionUDepBase& bcf, const UInt& nComp )
     :
     _M_isUDep(true),
@@ -270,7 +270,7 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag,
     _M_finalised( false )
 {
     if ( _M_mode != Full )
-        ERROR_MSG( "You should use a more specific constructor for this mode" );
+        ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
 
     _M_comp.reserve( nComp );
     for ( ID i = 1; i <= nComp; ++i )
@@ -313,7 +313,7 @@ BCBase & BCBase::operator=( const BCBase& BCb )
 
     // The list of ID's must be empty
     if ( !_M_idList.empty() || !BCb._M_idList.empty() )
-        ERROR_MSG( "The BC assigment operator does not work with lists of identifiers which are not empty" );
+        ERROR_MSG( "BCBase::operator= : The BC assigment operator does not work with lists of identifiers which are not empty" );
 
     return *this;
 }
@@ -338,7 +338,7 @@ BCBase::BCBase( const BCBase& BCb )
 
     // The list of ID's must be empty
     if ( !_M_idList.empty() || !BCb._M_idList.empty() )
-        ERROR_MSG( "The BC copy constructor does not work whith list of identifiers which are not empty" );
+        ERROR_MSG( "BCBase::BCBase : The BC copy constructor does not work whith list of identifiers which are not empty" );
 }
 
 //! Returns the BC name
@@ -402,7 +402,7 @@ Real BCBase::operator() ( const Real& t, const Real& x, const Real& y,
 {
     /* is there a better way ? */
 Debug(800)<<"debug800 in BCBase::operator(6x)\n";
-   return _M_bcfUDep->operator()(t,x, y, z, i, u); 
+   return _M_bcfUDep->operator()(t,x, y, z, i, u);
 Debug(800)<<"debug800 out BCBase::operator(6x)\n";
 }
 
@@ -462,7 +462,7 @@ Real BCBase::operator() ( const ID& iDof, const ID& iComp ) const
         return ( *_M_bcv ) ( iDof, iComp );
     else
     {
-        ERROR_MSG( "A data vector must be specified before calling this method" );
+        ERROR_MSG( "BCBase::operator() : A data vector must be specified before calling this method" );
         return 0.;
     }
 }
@@ -475,7 +475,7 @@ Real BCBase::mixteCoef() const
         return ( *_M_bcv ).mixteCoef();
     else
     {
-        ERROR_MSG( "A data vector must be specified before calling this method" );
+        ERROR_MSG( "BCBase::mixteCoef : A data vector must be specified before calling this method" );
         return 0.;
     }
 
@@ -489,7 +489,7 @@ Real BCBase::MixteVec( const ID& iDof, const ID& iComp ) const
         return ( *_M_bcv).MixteVec( iDof, iComp );
     else
     {
-        ERROR_MSG( "A data vector must be specified before calling this method" );
+        ERROR_MSG( "BCBase::MixteVec : A data vector must be specified before calling this method" );
         return 0.;
     }
 
