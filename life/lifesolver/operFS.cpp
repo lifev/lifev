@@ -101,4 +101,69 @@ void  operFS::updateJac(Vector& sol,int iter)
 //
 
 
+void operFS::displacementOnInterface()
+{
+    UInt iBCf = M_fluid.BC_fluid().getBCbyName("Interface");
+    UInt iBCd = M_solid.BC_solid().getBCbyName("Interface");
+
+    BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[iBCf];
+    BCBase const &BC_solidInterface = M_solid.BC_solid()[iBCd];
+
+    UInt nDofInterface = BC_fluidInterface.list_size();
+
+    UInt nDimF = BC_fluidInterface.numberOfComponents();
+    UInt nDimS = BC_solidInterface.numberOfComponents();
+
+    UInt totalDofFluid = M_fluid.getDisplacement().size()/ nDimF;
+    UInt totalDofSolid = M_solid.d().size()/ nDimS;
+
+//     std::cout << totalDofFluid << " ";
+//     std::cout << M_fluid.uDof().numTotalDof() << " ";
+//     std::cout << totalDofSolid << " ";
+//     std::cout << nDimF << " ";
+//     std::cout << nDimS << " ";
+
+    Vector dispOnInterface(M_solid.d().size());
+    dispOnInterface = ZeroVector(dispOnInterface.size());
+
+    for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)
+    {
+        ID IDfluid = BC_fluidInterface(iBC)->id();
+
+        BCVectorInterface const *BCVInterface =
+            static_cast <BCVectorInterface const *>
+            (BC_fluidInterface.pointerToBCVector());
+
+        ID IDsolid = BCVInterface->
+            dofInterface().getInterfaceDof(IDfluid);
+
+
+        for (UInt jDim = 0; jDim < nDimF; ++jDim)
+        {
+            dispOnInterface[IDsolid - 1 + jDim*totalDofSolid] =
+                M_solid.d()              [IDsolid - 1 + jDim*totalDofSolid] -
+                M_fluid.getDisplacement()[IDfluid - 1 + jDim*totalDofFluid];
+//             std::cout << M_solid.d()[IDsolid - 1 + jDim*totalDofSolid];
+//             std::cout << " -> ";
+//             std::cout << M_fluid.getDisplacement()[IDfluid - 1 + jDim*totalDofFluid];
+//             std::cout << "(";
+//             std::cout << M_solid.d().size() << ",";
+//             std::cout << M_fluid.getDisplacement().size();
+//             std::cout << ")";
+//             std::cout << IDsolid - 1 + jDim*totalDofSolid << " ";
+//             std::cout << IDfluid - 1 + jDim*totalDofFluid;
+//             std::cout << std::endl;
+        }
+    }
+
+//     for (int ii = 0; ii < M_fluid.getDisplacement().size(); ++ii)
+//         std::cout << M_fluid.getDisplacement()[ii] << std::endl;
+
+    std::cout << "max norm disp = " << norm_inf(dispOnInterface);
+    std::cout << std::endl;
+    std::cout << "l2  norm disp = " << norm_2(dispOnInterface);
+    std::cout << std::endl;
+}
+
+
 }

@@ -578,6 +578,9 @@ Vector steklovPoincare::getResidualFSIOnSolid()
     UInt totalDofFluid = M_residualF.size()/ nDimF;
     UInt totalDofSolid = M_residualS.size()/ nDimS;
 
+    std::cout << "total dof fluid = " << totalDofFluid << std::endl;
+    std::cout << "total dof solid = " << totalDofSolid << std::endl;
+
     for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)
     {
         ID IDfluid = BC_fluidInterface(iBC)->id();
@@ -702,8 +705,6 @@ void steklovPoincare::transferOnInterface(const Vector      &_vec1,
         ID ID2 = BCVInterface->
             dofInterface().getInterfaceDof(ID1);
 
-//        std::cout << ID1 << " -> " << ID2 << std::endl;
-//        std::cout << "ID1 = " << ID1 << " ID2 = " << ID2 << std::endl;
         for (UInt jDim = 0; jDim < nDim; ++jDim)
         {
             _vec2[ID2 - 1 + jDim*totalDof2] =

@@ -86,6 +86,8 @@ namespace LifeV
         void setTime(const Real &time) {M_time = time;};
         Real time() {return M_time;};
 
+        void displacementOnInterface();
+
     protected:
 
         BCHandler               &M_BCh_u;
