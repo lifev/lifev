@@ -159,12 +159,13 @@ public:
             M_oper->solid().initialize(__d0,__w0);
         }
 
-    void initialize( std::string velName,
+    void initialize( std::string velFName,
                      std::string pressName,
-                     std::string depName)
+                     std::string depName,
+                     std::string velSName)
         {
-            M_oper->fluid().initialize(velName, pressName);
-            M_oper->solid().initialize(depName);
+            M_oper->fluid().initialize(velFName, pressName);
+            M_oper->solid().initialize(depName, velSName);
         }
 
     void iterate( Real time );
@@ -204,11 +205,11 @@ private:
     FSIOperator::solid_type M_solid;
 
 
-
     Vector             M_disp;
     Vector             M_velo;
 
     /* data */
+    bool               M_firstIter;
     std::string        M_method;
     UInt               M_maxpf;
     Real               M_defomega;

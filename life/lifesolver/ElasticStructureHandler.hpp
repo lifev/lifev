@@ -70,7 +70,7 @@ public:
 
     //! Sets initial condition for the displacment en velocity
     void initialize( const Function& d0, const Function& w0 );
-    void initialize( const std::string& depName );
+    void initialize( const std::string& depName, const std::string& velName );
 
     //! Update the right  hand side  for time advancing
     /*!
@@ -144,6 +144,11 @@ protected:
 
     //! Aux. var. for PostProc
     UInt _count;
+
+private:
+
+    void readUnknown( const std::string& name, PhysVectUnknown<Vector> &unknown );
+
 };
 
 
@@ -220,7 +225,7 @@ ElasticStructureHandler<Mesh>::postProcess()
 
     if ( fmod( float( _count ), float( this->_verbose ) ) == 0.0 )
     {
-        std::cout << "  o-  Post-processing \n";
+        std::cout << "  S-  Post-processing \n";
         index << ( _count / this->_verbose );
 
         switch ( index.str().size() )
@@ -245,6 +250,16 @@ ElasticStructureHandler<Mesh>::postProcess()
         system( ( "ln -s " + namedef + " dep_x." + name + ".mesh" ).data() );
         system( ( "ln -s " + namedef + " dep_y." + name + ".mesh" ).data() );
         system( ( "ln -s " + namedef + " dep_z." + name + ".mesh" ).data() );
+        // system(("ln -s "+this->_mesh_file+" veloc."+name+".mesh").data());
+
+        wr_medit_ascii_scalar( "velS_x." + name + ".bb", _w.giveVec(), this->_mesh.numVertices() );
+        wr_medit_ascii_scalar( "velS_y." + name + ".bb", _w.giveVec() + _dim, this->_mesh.numVertices() );
+        wr_medit_ascii_scalar( "velS_z." + name + ".bb", _w.giveVec() + 2 * _dim, this->_mesh.numVertices() );
+
+        // wr_medit_ascii_vector("veloc."+name+".bb",_u.giveVec(),this->_mesh.numVertices(),_dim_u);
+        system( ( "ln -s " + namedef + " velS_x." + name + ".mesh" ).data() );
+        system( ( "ln -s " + namedef + " velS_y." + name + ".mesh" ).data() );
+        system( ( "ln -s " + namedef + " velS_z." + name + ".mesh" ).data() );
         // system(("ln -s "+this->_mesh_file+" veloc."+name+".mesh").data());
     }
 }
@@ -386,7 +401,8 @@ ElasticStructureHandler<Mesh>::initialize( const Function& d0, const Function& w
 // Sets the initial condition
 template <typename Mesh>
 void
-ElasticStructureHandler<Mesh>::initialize( const std::string& depName )
+ElasticStructureHandler<Mesh>::initialize( const std::string& depName,
+                                           const std::string& velName )
 {
     // Loop on elements of the mesh
     for ( ID iElem = 1; iElem <= this->_mesh.numVolumes(); ++iElem )
@@ -394,14 +410,25 @@ ElasticStructureHandler<Mesh>::initialize( const std::string& depName )
         _fe.updateJac( this->_mesh.volume( iElem ) );
     }
 
+    readUnknown(depName, _d);
+    readUnknown(velName, _w);
+}
+
+
+template <typename Mesh>
+void
+ElasticStructureHandler<Mesh>::readUnknown( const std::string       &name,
+                                            PhysVectUnknown<Vector> &unknown)
+{
     std::string sdummy;
     std::string ext;
     int nsx, nsy, nsz;
     int ndim;
 
-    int nDof = _d.nbcomp();
+    int nDof = _dim;
+    std::cout << "size = " << nDof << std::endl;
 
-    std::string filenamex = depName;
+    std::string filenamex = name;
     ext = "_x.bb";
     filenamex.insert(filenamex.end(), ext.begin(), ext.end());
 
@@ -423,11 +450,11 @@ ElasticStructureHandler<Mesh>::initialize( const std::string& depName )
     filex >> sdummy;
 
     for (int ix = 0; ix < nsx; ++ix)
-        filex >> _d[ix + 0*nDof];
+        filex >> unknown[ix + 0*nDof];
 
     filex.close();
 
-    std::string filenamey = depName;
+    std::string filenamey = name;
     ext = "_y.bb";
     filenamey.insert(filenamey.end(), ext.begin(), ext.end());
 
@@ -449,11 +476,11 @@ ElasticStructureHandler<Mesh>::initialize( const std::string& depName )
     filey >> sdummy;
 
     for (int iy = 0; iy < nsy; ++iy)
-        filey >> _d[iy + 1*nDof];
+        filey >> unknown[iy + 1*nDof];
 
     filey.close();
 
-    std::string filenamez = depName;
+    std::string filenamez = name;
     ext = "_z.bb";
     filenamez.insert(filenamez.end(), ext.begin(), ext.end());
 
@@ -475,7 +502,7 @@ ElasticStructureHandler<Mesh>::initialize( const std::string& depName )
     filez >> sdummy;
 
     for (int iz = 0; iz < nsz; ++iz)
-        filez >> _d[iz + 2*nDof];
+        filez >> unknown[iz + 2*nDof];
 
     filez.close();
 }

@@ -45,6 +45,7 @@ FSISolver::FSISolver( GetPot const& data_file,
                                                  quadRuleTria3pt, *M_BCh_d) ),
     M_disp(3*M_solid->dDof().numTotalDof()),
     M_velo(3*M_solid->dDof().numTotalDof()),
+    M_firstIter(true),
     M_method( data_file("problem/method"    , "steklovPoincare") ),
     M_maxpf( data_file("problem/maxSubIter", 300) ),
     M_defomega( data_file("problem/defOmega"  , 0.01) ),
@@ -109,6 +110,7 @@ FSISolver::setFSIOperator( std::string const& __op )
     M_oper->setup();
     Debug( 6220 ) << "FSISolver::setFSIOperator done\n";
 }
+
 void
 FSISolver::iterate( Real time )
 {
@@ -124,12 +126,19 @@ FSISolver::iterate( Real time )
     M_oper->setTime(time);
 
     // displacement prediction
+    if (M_firstIter)
+    {
+        M_firstIter = false;
+        M_disp   = M_oper->solid().d() + timeStep()*M_oper->solid().w();
+        M_velo   = M_oper->solid().w();
+    }
+    else
+    {
+        M_disp   = M_oper->solid().d() + timeStep()*(1.5*M_oper->solid().w() - 0.5*M_velo);
+        M_velo   = M_oper->solid().w();
+    }
 
-    M_disp   = M_oper->solid().d() + timeStep()*(1.5*M_oper->solid().w() - 0.5*M_velo);
-
-    M_velo = M_oper->solid().w();
-
-    std::cout << "norm( disp   ) init = " << norm_inf(M_disp)   << std::endl;
+    std::cout << "norm( disp ) init = " << norm_inf(M_disp)   << std::endl;
     std::cout << "norm( velo ) init = " << norm_inf(M_velo) << std::endl;
 
     int maxiter = M_maxpf;
@@ -164,8 +173,10 @@ FSISolver::iterate( Real time )
                  << M_oper->nbEval() << std::endl;
 
         M_oper->fluid().postProcess();
+
         if( M_oper->fluid().computeMeanValuesPerSection() )
             M_oper->fluid().PostProcessPressureAreaAndFlux( time );
+
         M_oper->solid().postProcess();
     }
 
