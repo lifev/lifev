@@ -91,8 +91,8 @@ $(TESTSUITE): $(srcdir)/testsuite.at $(srcdir)/package.m4 $(TESTSUITES)
     fi
 
 testsuite: $(srcdir)/testsuite.at $(srcdir)/package.m4 $(TESTSUITES)
-	$(AUTOTEST) -I $(srcdir) $@.at -o $@.tmp
-	mv $@.tmp $@
+	$(AUTOTEST) -I $(srcdir) $(srcdir)/$@.at -o $(srcdir)/$@.tmp
+	mv $(srcdir)/$@.tmp $(srcdir)/$@
 	@if test $(top_srcdir) != $(top_builddir); then\
      ln -sf $(TESTSUITE);\
     fi
