@@ -42,6 +42,9 @@ exactJacobian::~exactJacobian()
 void exactJacobian::eval(const Vector &_disp,
                          const int     _status)
 {
+    if(_status) M_nbEval = 0; // new time step
+    M_nbEval++ ;
+
     this->M_solid.d() = _disp;
 
     this->M_fluid.updateMesh(time());
@@ -69,7 +72,7 @@ void exactJacobian::evalResidual(Vector &_res,
     if (status) std::cout << " [NEW TIME STEP] ";
     std::cout << std::endl;
 
-    eval(M_dispStruct, status);
+    eval(_disp, status);
 
     M_dispStruct = this->M_solid.d();
     M_velo       = this->M_solid.w();

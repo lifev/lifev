@@ -1005,7 +1005,7 @@ iterateLin( const Real& time, BCHandler& BCh_du )
 
     _residual_u = _f_duWithOutBC - _CAux * _du - _trDAux * _dp;
 
-    std::cout << "  maxnorm (_residual_du ) = " << maxnorm( _residual_u ) << std::endl;
+    std::cout << "  maxnorm (_residual_du ) = " << maxnorm( _dt*_du ) << std::endl;
 }
 
 

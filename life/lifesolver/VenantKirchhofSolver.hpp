@@ -534,6 +534,7 @@ updateJac( Vector& sol, int iter )
 
     if ( _maxiter > 1 )
     {
+        std::cout << " ******** non linear part" << std::endl;
 
         UInt ig;
 
@@ -543,7 +544,6 @@ updateJac( Vector& sol, int iter )
         // loop on volumes: assembling source term
         for ( UInt i = 1; i <= _mesh.numVolumes(); ++i )
         {
-
             _fe.updateFirstDerivQuadPt( _mesh.volumeList( i ) );
 
             _elmatK.zero();

@@ -46,7 +46,7 @@ public:
     void solveJac   (Vector       &_muk,
                      const Vector &_res,
                      const double  _linearRelTol);
-    
+
     void setUpBC     (function_type _bcf,
                       function_type _vel);
 

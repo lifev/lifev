@@ -83,18 +83,18 @@ namespace LifeV
 
     protected:
 
-        NavierStokesAleSolverPC
-        < RegionMesh3D_ALE<LinearTetra> > M_fluid;
-
-        VenantKirchhofSolver
-        < RegionMesh3D_ALE<LinearTetra> > M_solid;
-
         BCHandler               M_BCh_u;
         BCHandler               M_BCh_d;
         BCHandler               M_BCh_mesh;
 
         BCHandler               M_BCh_du;
         BCHandler               M_BCh_dz;
+
+        NavierStokesAleSolverPC
+        < RegionMesh3D_ALE<LinearTetra> > M_fluid;
+
+        VenantKirchhofSolver
+        < RegionMesh3D_ALE<LinearTetra> > M_solid;
 
         DofInterface3Dto3D      M_dofFluidToStructure;
         DofInterface3Dto3D      M_dofStructureToSolid;

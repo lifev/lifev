@@ -55,17 +55,19 @@ int main(int argc, char** argv)
     //  TEMPORAL LOOP
     //========================================================================================
 
-    steklovPoincare oper(data_file);
-    //fixedPoint oper(data_file);
-    //exactJacobian oper(data_file);
+    //steklovPoincare oper(data_file);
+//    fixedPoint oper(data_file);
+    exactJacobian oper(data_file);
+
+    oper.fluid().showMe();
+    oper.solid().showMe();
 
     UInt maxpf  = 100;
     Real dt     = oper.fluid().timestep();
     Real T      = oper.fluid().endtime();
 
-
     Real abstol = 1.e-7;
-    Real reltol = 1.e-4;
+    Real reltol = 0.e-4;
     Real etamax = 1.e-3;
 
     int status;
@@ -115,11 +117,10 @@ int main(int argc, char** argv)
 
         // the newton solver
 
-         status = nonLinRichardson(disp, oper, maxnorm, abstol, reltol,
-                         maxiter, etamax, linesearch, out_res,
-                         time, 0.1);
-//         status = newton(disp, oper, maxnorm, abstol, reltol, maxiter, etamax,
-//                         linesearch,out_res,time);
+//         status = nonLinRichardson(disp, oper, maxnorm, abstol, reltol,
+//                         maxiter, etamax, linesearch, out_res,
+//                         time, 0.1);
+        status = newton(disp,oper, maxnorm, abstol, reltol, maxiter, etamax,linesearch,out_res,time);
 
         if(status == 1)
         {
