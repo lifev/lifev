@@ -54,9 +54,10 @@ int main(int argc, char** argv)
     //  TEMPORAL LOOP
     //========================================================================================
 
-    int  method   = data_file("problem/method"  , 0);
-    int precond   = data_file("problem/precond"  , 1);
-    Real defOmega = data_file("problem/defOmega", 0.01);
+    UInt method   = data_file("problem/method"    , 0);
+    UInt maxpf    = data_file("problem/maxSubIter", 300);
+    UInt precond  = data_file("problem/precond"   , 1);
+    Real defOmega = data_file("problem/defOmega"  , 0.01);
 
     std::cout << std::endl;
     std::cout << "Fluid/Structure interactions";
@@ -94,7 +95,6 @@ int main(int argc, char** argv)
     oper.fluid().showMe();
     oper.solid().showMe();
 
-    UInt maxpf  = 100;
     Real dt     = oper.fluid().timestep();
     Real T      = oper.fluid().endtime();
 
