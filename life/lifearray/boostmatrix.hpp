@@ -374,7 +374,7 @@ namespace LifeV
             boost::numeric::ublas::compressed_matrix<double, boost::numeric::ublas::row_major>(M)
         {
         }
-        
+
         void invert()
         {
             for ( size_type i=0; i<this->size1(); ++i )
@@ -390,7 +390,7 @@ namespace LifeV
         }
 
         template<typename matrix_type>
-        void lumpRowSum( const matrix_type m )
+        void lumpRowSum( const matrix_type& m )
         {
             for ( typename matrix_type::const_iterator1 i1=m.begin1();
                   i1!=m.end1(); ++i1 )
@@ -406,7 +406,7 @@ namespace LifeV
         }
 
         template<typename matrix_type>
-        void lumpDiagonalScaling( const matrix_type m )
+        void lumpDiagonalScaling( const matrix_type& m )
         {
             double totalMass = 0;
             double diagonalMass = 0;
