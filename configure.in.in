@@ -101,3 +101,5 @@ life_libs="\$(top_builddir)/life/lifefilters/liblifefilters.la  \$(top_builddir)
 
 AC_SUBST(life_libs)
 
+AC_DEFINE_UNQUOTED(LIFE_PREFIX, "$prefix",[define prefix dir for life installation])
+
