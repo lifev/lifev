@@ -1,9 +1,9 @@
 # -*- autoconf -*-
 # 
 #
-AC_INIT(life, 0.1.0pre5, christophe.prudhomme@epfl.ch)
+AC_INIT(life, 0.1.0, christophe.prudhomme@epfl.ch)
 LIFE_PACKAGE=life
-LIFE_VERSION=0.1.0pre5
+LIFE_VERSION=0.1.0
 
 PACKAGE=$LIFE_PACKAGE
 VERSION=$LIFE_VERSION

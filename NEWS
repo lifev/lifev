@@ -1,3 +1,10 @@
+Bugs fixed in 0.1.0:
+*
+
+New in 0.1.0:
+*
+
+
 Bugs fixed in 0.1.0pre5:
 * Bug #2 : documentation update to lifev-dev manual
 * Bug #17: fixed segfault in medium size NavierStokes problem
