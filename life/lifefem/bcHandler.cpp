@@ -287,10 +287,23 @@ const BCBase& BCHandler::GetBCWithFlag(const EntityFlag& aFlag) const {
 
 UInt BCHandler::getBCbyName(const std::string __BCName) const
 {
-    int iBC = -1;
+    UInt iBC( -1 );
 
     for (UInt jBC = 0; jBC < M_bcList.size(); jBC++)
-        if (M_bcList[jBC].name() == __BCName) iBC = jBC;
+        if (M_bcList[jBC].name() == __BCName)
+            iBC = jBC;
+
+    if ( iBC == UInt( -1 ) )
+    {
+        std::ostringstream __ex;
+        __ex << __BCName << " was not found in this Boundary conditions set\n"
+             << "This set contains \n";
+        for ( UInt i = 0; i < M_bcList.size(); ++i )
+        {
+            M_bcList[ i ].showMe( true, __ex );
+        }
+        throw std::invalid_argument( __ex.str() );
+    }
 
     return iBC;
 }
