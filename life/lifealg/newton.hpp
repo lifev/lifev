@@ -155,7 +155,11 @@ int newton( Vector& sol, Fct& f, Norm norm, Real abstol, Real reltol,
         std::cout << "------------------------------------------------------------------"
         << std::endl;
 
-        out_res << time << "    " << iter << "   " << normRes << std::endl;
+        out_res << time << " " << iter << " "
+                << std::setw(15) << normRes << " "
+                << std::setw(15) << norm(sol) << " "
+                << std::setw(15) << normStep
+                << std::endl;
 
         //
         //-- forcing term computation (Eisenstat-Walker)

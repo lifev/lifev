@@ -1,4 +1,3 @@
-
 /* -*- mode: c++ -*-
 
 This file is part of the LifeV library
@@ -62,7 +61,6 @@ public:
     void setDefault( const Real _defOmegaS = 0.1,
                      const Real _defOmegaF = 0.1 );
     void restart();
-    
 
     Vector computeDeltaLambda( const Vector &,
                                const Vector &,
@@ -97,7 +95,6 @@ private:
     // absolute value of the default omega. In this case
     //  M_usedefault=true
     bool M_useDefault;
-
 };
 
 //
@@ -106,14 +103,14 @@ private:
 
 template <class Vector, class Real>
 generalizedAitken<Vector, Real>::generalizedAitken( const int _nDof,
-        const Real _defOmegaF,
-        const Real _defOmegaS ) :
-        M_nDof ( _nDof ),
-        M_lambda ( ZeroVector( _nDof ) ),
-        M_muS ( ZeroVector( _nDof ) ),
-        M_muF ( ZeroVector( _nDof ) ),
-        M_defOmegaS ( _defOmegaS ),
-        M_defOmegaF ( _defOmegaF )
+                                                    const Real _defOmegaF,
+                                                    const Real _defOmegaS ) :
+    M_nDof ( _nDof ),
+    M_lambda ( ZeroVector( _nDof ) ),
+    M_muS ( ZeroVector( _nDof ) ),
+    M_muF ( ZeroVector( _nDof ) ),
+    M_defOmegaS ( _defOmegaS ),
+    M_defOmegaF ( _defOmegaF )
 {
     M_firstCall = true;
     if (( M_defOmegaS < 0 ) || ( M_defOmegaF< 0 ))
@@ -142,7 +139,7 @@ generalizedAitken<Vector, Real>::~generalizedAitken()
 template <class Vector, class Real>
 void generalizedAitken<Vector, Real>::
 setDefault( const Real _defOmegaS,
-	    const Real _defOmegaF )
+            const Real _defOmegaF )
 {
     if (( _defOmegaS < 0 ) || ( _defOmegaF< 0 ))
     {
@@ -151,8 +148,8 @@ setDefault( const Real _defOmegaS,
         M_defOmegaF = std::fabs(_defOmegaF);
     } else {
         M_useDefault = false;
-	M_defOmegaS = _defOmegaS;
-	M_defOmegaF = _defOmegaF; 
+        M_defOmegaS = _defOmegaS;
+        M_defOmegaF = _defOmegaF;
     }
 }
 
@@ -164,9 +161,9 @@ restart()
 }
 
 /*! this functions computes omega and return the new lambda
-    _lambda is \lamdba^{k}
-    _muS    is \mu_s^{k}
-    _muF    is \mu_f^{k}
+  _lambda is \lamdba^{k}
+  _muS    is \mu_s^{k}
+  _muF    is \mu_f^{k}
 */
 
 template <class Vector, class Real>
@@ -217,42 +214,41 @@ computeDeltaLambda( const Vector &_lambda,
         }
         else if (  std::fabs(a22) < 1E-8 )
         {
-	    std::cout << "generalizedAitken:  a22=0!!" << std::endl; 
+            std::cout << "generalizedAitken:  a22=0!!" << std::endl;
             omegaS = 0.;
             omegaF = -b1 / a11;
         }
         else if (  std::fabs(a11) < 1E-8 )
         {
-	    std::cout << "generalizedAitken:  a11=0!!" << std::endl; 
+            std::cout << "generalizedAitken:  a11=0!!" << std::endl;
             omegaS = -b2 / a22;
             omegaF = 0.;
         }
-	else
-	{
-	    std::cout << "generalizedAitken: Failure: Det=0!!" 
-		      << fabs(det) << std::endl; 
-	}
-	
-	if ( std::fabs(omegaF) < std::fabs(M_defOmegaF)/1024 
-	     || std::fabs(omegaF) > std::fabs(M_defOmegaF)*1024 ) 
-	{
-	    std::cout << "generalizedAitken: Failure: omegaF too small/big: " 
-		      << omegaF << std::endl; 
-	    omegaF = M_defOmegaF;
-	}
+        else
+        {
+            std::cout << "generalizedAitken: Failure: Det=0!!"
+                      << fabs(det) << std::endl;
+        }
 
-	if ( std::fabs(omegaS) < std::fabs(M_defOmegaS)/1024 
-	     || std::fabs(omegaS) > std::fabs(M_defOmegaS)*1024 ) 
-	{
-	    std::cout << "generalizedAitken: Failure: omegaS too small/big: " 
-		      << omegaS << std::endl; 
-	    omegaS = M_defOmegaS;
-	}
+//         if ( std::fabs(omegaF) < std::fabs(M_defOmegaF)/1024
+//              || std::fabs(omegaF) > std::fabs(M_defOmegaF)*1024 )
+//         {
+//             std::cout << "generalizedAitken: Failure: omegaF too small/big: "
+//                       << omegaF << std::endl;
+//             omegaF = M_defOmegaF;
+//         }
 
+//         if ( std::fabs(omegaS) < std::fabs(M_defOmegaS)/1024
+//              || std::fabs(omegaS) > std::fabs(M_defOmegaS)*1024 )
+//         {
+//             std::cout << "generalizedAitken: Failure: omegaS too small/big: "
+//                       << omegaS << std::endl;
+//             omegaS = M_defOmegaS;
+//         }
 
         std::cout << " --------------- generalizedAitken: " << std::endl;
         std::cout << " omegaS = " << omegaS
-        << " omegaF = " << omegaF << std::endl;
+                  << " omegaF = " << omegaF << std::endl;
 
         deltaLambda = omegaF * _muF + omegaS * _muS;
 
@@ -263,7 +259,7 @@ computeDeltaLambda( const Vector &_lambda,
     else
     {
         /*! first time aitken is called, the coefficients must be
-            set to their default values
+          set to their default values
         */
 
         std::cout << " --------------- generalizedAitken: first call" << std::endl;
@@ -272,7 +268,7 @@ computeDeltaLambda( const Vector &_lambda,
         deltaLambda = M_defOmegaF * _muF + M_defOmegaS * _muS ;
 
         std::cout << "generalizedAitken: omegaS = " << M_defOmegaS
-        << " omegaF = " << M_defOmegaF << std::endl;
+                  << " omegaF = " << M_defOmegaF << std::endl;
 
         M_lambda = _lambda;
         M_muF = _muF;
@@ -314,13 +310,13 @@ computeDeltaLambda( const Vector &_lambda,
 
         omega = - omega / norm ;
 
-	if ( std::fabs(omega) < std::fabs(M_defOmegaS)/1024 
-	     || std::fabs(omega) > std::fabs(M_defOmegaS)*1024 ) 
-	{
-	    std::cout << "generalizedAitken: Failure: omega too small/big: " 
-		      << omega << std::endl; 
-	    omega = M_defOmegaS;
-	}
+        if ( std::fabs(omega) < std::fabs(M_defOmegaS)/1024
+             || std::fabs(omega) > std::fabs(M_defOmegaS)*1024 )
+        {
+            std::cout << "generalizedAitken: Failure: omega too small/big: "
+                      << omega << std::endl;
+            omega = M_defOmegaS;
+        }
 
         deltaLambda = omega * _mu;
 

@@ -106,9 +106,10 @@ int nonLinRichardson( Vector& sol,
 
     //
 
-    out_res << time << "    " << iter << "   " << normRes << std::endl;
-
-//@    normMuk = 1.;
+    out_res << "# time = ";
+    out_res << time << "   " << "initial norm_res " <<  normRes
+            << " stop tol = " << stop_tol << std::endl;
+    out_res << "#iter      disp_norm       step_norm       muk_norm   residual_norm" << std::endl;
 
     while ( normRes > stop_tol && iter < maxit )
     {
@@ -130,15 +131,16 @@ int nonLinRichardson( Vector& sol,
         normMuk  = norm( muk );
 
         std::cout << "Muk norm = " << normMuk << std::endl;
-        out_res   << "iter = " << iter
-                  << " Muk norm = " << normMuk
-                  << " step norm = " << norm_inf(step);
+        out_res   << iter
+                  << std::setw(15) << norm(sol)
+                  << std::setw(15) << norm_inf(step)
+                  << std::setw(15) << normMuk;
 
         sol += step;
 
         f.evalResidual( residual, sol, iter );
         normRes = norm( residual );
-        out_res << " residual  norm = " << normRes << std::endl;
+        out_res << std::setw(15) << normRes << std::endl;
 
     }
 
