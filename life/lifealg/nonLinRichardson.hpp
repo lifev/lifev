@@ -103,7 +103,7 @@ namespace LifeV
 
         f.fluid().postProcess();
         f.solid().postProcess();
-
+        
         Real normRes        = norm(residual);
         Real normStep       = 0;
         Real stop_tol       = abstol + reltol*normRes;
@@ -129,8 +129,7 @@ namespace LifeV
                       << ", stoping tolerance = "          << stop_tol << std::endl;
             std::cout << "------------------------------------------------------------------" << std::endl;
             std::cout << std::endl;
-            std::cout << norm(f.dispStruct());
-
+            
             iter++;
 
             normResOld = normRes;
@@ -144,11 +143,13 @@ namespace LifeV
             
             step       = aitken.computeDeltaLambda(sol, muS, muF);
 
+            
             std::cout << "Step norm = " << norm(step) << std::endl;
             
             muS        = residual;
-            sol       += step;
+            sol       -= step;
 
+            
 //            sol = 0.;
             f.evalResidual(residual, sol, iter);
 
