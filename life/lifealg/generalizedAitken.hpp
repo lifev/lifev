@@ -165,18 +165,22 @@ namespace LifeV
             
             Real det    = a21*a21 - a22*a11;
             
-            if (det != 0.)
+            if (det != 0.) //! eq. (12) page 8
             {
                 omegaF = (a22*b1 - a21*b2)/det;
                 omegaS = (a11*b2 - a21*b1)/det;
             }
-            else if (a22 == 0)
+            else if (a22 == 0) 
             {
-                //! eq. (12) page 8
                 omegaS = 0.;
                 omegaF = b1/a11*a11;
             }
-
+            else if (a11 == 0)
+            {
+                omegaS = b2/a22*a22;
+                omegaF = 0.;
+            }
+                
             deltaLambda = omegaF*muF + omegaS*muS;
             
             M_lambda    = _lambda;
