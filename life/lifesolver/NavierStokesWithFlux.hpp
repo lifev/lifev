@@ -24,7 +24,7 @@
 */
 /**
    \file NavierStokesWithFlux.hpp
-   \author Christian Vergara <>
+   \author Christian Vergara <vergara@mate.polimi.it>
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
    \date 2004-10-08
  */
@@ -187,7 +187,6 @@ NavierStokesWithFlux<NSSolver>::solve()
     Real lambda;
     Real r0,y,z;
     Real absr0;
-    Real pi=3.14159265358979;
     int v;
    
     // Initialization
@@ -211,8 +210,6 @@ NavierStokesWithFlux<NSSolver>::solve()
     //
     PhysVectUnknown<Vector> u_nso(_M_solver->uDof().numTotalDof());
     PhysVectUnknown<Vector> p_nso(_M_solver->pDof().numTotalDof());
-     
-    // compute the flux of NSo  
     u_nso=_M_solver->u();
     //p_nso=_M_solver->p();
     
@@ -260,6 +257,7 @@ NavierStokesWithFlux<NSSolver>::solve()
       //compute the flux of NS
       //
       Qn=_M_solver->flux(1); 
+      std::cout << "flux before update" << " " << Qn << "\n"; 
 
       // compute the variables to update lambda
       r0=Qn-Q;
