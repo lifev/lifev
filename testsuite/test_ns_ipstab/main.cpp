@@ -91,12 +91,12 @@ int main( int argc, char** argv )
         Vector x1( lVec );
         Vector x0( lVec );
 
-        fx1 = 0.0;
-        fx0 = 0.0;
-        gx1 = 0.0;
-        gx0 = 0.0;
-        x1  = 0.0;
-        x0  = 0.0;
+        fx1 = ZeroVector( lVec );
+        fx0 = ZeroVector( lVec );
+        gx1 = ZeroVector( lVec );
+        gx0 = ZeroVector( lVec );
+        x1  = ZeroVector( lVec );
+        x0  = ZeroVector( lVec );
 
         // Compute right hand side
         fluid.initialize( xexact );

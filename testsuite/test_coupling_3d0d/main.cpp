@@ -24,105 +24,104 @@
 #include "GetPot.hpp"
 #include "zeroDModelSolver.hpp"
 
-/*
-  
-    This test couples the Navier-Stokes equations (3D Model) with a lumped parameter model 
-    (0D Model - electric network). 
-    It is used a couple strategy where the 3D Model gives the flux information to the 
-    0D Model wereas the 0D Model passes the pressure to the 3D.
+/**
+    This test couples the Navier-Stokes equations (3D Model) with a
+    lumped parameter model (0D Model - electric network).
 
+    It is used a couple strategy where the 3D Model gives the flux
+    information to the 0D Model wereas the 0D Model passes the
+    pressure to the 3D.
 */
-
 int main(int argc, char** argv)
 {
-  using namespace LifeV;
+    using namespace LifeV;
 
-  // Reading from data file
-  //
-  GetPot command_line(argc,argv);
-  const char* data_file_name = command_line.follow("data", 2, "-f","--file");
-  GetPot data_file(data_file_name);
+    // Reading from data file
+    //
+    GetPot command_line(argc,argv);
+    const char* data_file_name = command_line.follow("data", 2, "-f","--file");
+    GetPot data_file(data_file_name);
 
-  BCFunctionBase u_wall(u1);
-  BCFunctionBase out_flow(u1);
-  BCHandler BCh_u(5);
-
-
-  // Navier-Stokes Solver
-  //
-  typedef NavierStokesSolverPC< RegionMesh3D<LinearTetra> > NS;
-  NS ns(data_file, feTetraP1bubble, feTetraP1,quadRuleTetra64pt,
-	quadRuleTria3pt, quadRuleTetra5pt, quadRuleTria3pt, BCh_u);
-  ns.showMe();
-
-  // BC Definition
-  //
-  UInt dim_fluid = ns.uDof().numTotalDof();
-  Vector vec_press(dim_fluid);
-  BCVector bcvec(vec_press,dim_fluid,1);
-
-  BCh_u.addBC("Wall",   2, Essential, Full, u_wall,  3);
-  BCh_u.addBC("Wall-inflow",   4, Essential, Full, u_wall,  3);
-  BCh_u.addBC("Wall-outflow",   5, Essential, Full, u_wall,  3);
-  BCh_u.addBC("InFlow", 1, Natural,  Full, bcvec , 3);
-  BCh_u.addBC("OutFlow", 3, Natural,  Full, out_flow, 3);
-
-  // Initialization
-  //
-  std::ofstream outfile;
-
-  Real dt = ns.timestep();
-  Real startT = ns.inittime();
-  Real T  = ns.endtime();
-
-  outfile.open("res_Q.m", std::ios::app);
-  outfile << "xx=[0:" << dt << ":" << T << "]; " << std::endl;
-  outfile.close();
-
-  outfile.open("res_DP.m", std::ios::app);
-  outfile << "xx=[0:" << dt << ":" << T << "]; " << std::endl;
-  outfile.close();
+    BCFunctionBase u_wall(u1);
+    BCFunctionBase out_flow(u1);
+    BCHandler BCh_u(5);
 
 
-  if(startT > 0.0){
-     std::cout << "initialize velocity and pressure with data from file" << std::endl;
-     std::ostringstream indexin;
-     std::string vinname, cinname;
-     indexin << (startT*100);
-     vinname = "fluid.res"+indexin.str();
-     ns.initialize(vinname);}
-  else{
-     std::cout << "initialize velocity and pressure with u0 and p0" << std::endl;
-     ns.initialize(u0,p0,0.0,dt);
-  }
+    // Navier-Stokes Solver
+    //
+    typedef NavierStokesSolverPC< RegionMesh3D<LinearTetra> > NS;
+    NS ns(data_file, feTetraP1bubble, feTetraP1,quadRuleTetra64pt,
+          quadRuleTria3pt, quadRuleTetra5pt, quadRuleTria3pt, BCh_u);
+    ns.showMe();
 
-  zeroDModelSolver< NS > getPressureFromQ(ns, dt);
+    // BC Definition
+    //
+    UInt dim_fluid = ns.uDof().numTotalDof();
+    Vector vec_press(dim_fluid);
+    BCVector bcvec(vec_press,dim_fluid,1);
 
-  // Temporal loop
-  //
-  for (Real time=startT+dt ; time <= T; time+=dt) {
+    BCh_u.addBC("Wall",   2, Essential, Full, u_wall,  3);
+    BCh_u.addBC("Wall-inflow",   4, Essential, Full, u_wall,  3);
+    BCh_u.addBC("Wall-outflow",   5, Essential, Full, u_wall,  3);
+    BCh_u.addBC("InFlow", 1, Natural,  Full, bcvec , 3);
+    BCh_u.addBC("OutFlow", 3, Natural,  Full, out_flow, 3);
 
-    // pressure coming from the 0D Model
-    vec_press = -getPressureFromQ.pression(time);
+    // Initialization
+    //
+    std::ofstream outfile;
 
-    ns.timeAdvance(f,time);
-    ns.iterate(time);
+    Real dt = ns.timestep();
+    Real startT = ns.inittime();
+    Real T  = ns.endtime();
 
-    ns.postProcess();
-  }
+    outfile.open("res_Q.m", std::ios::app);
+    outfile << "xx=[0:" << dt << ":" << T << "]; " << std::endl;
+    outfile.close();
 
-  outfile.open("res_Q.m", std::ios::app);
-  outfile << "    ]; " << std::endl;
-  outfile << "figure;" << std::endl;
-  outfile << "plot(xx,Q);" << std::endl;
-  outfile.close();
-
-  outfile.open("res_DP.m", std::ios::app);
-  outfile << "     ]; " << std::endl;
-  outfile << "figure;" << std::endl;
-  outfile << "plot(xx,DP);" << std::endl;
-  outfile.close();
+    outfile.open("res_DP.m", std::ios::app);
+    outfile << "xx=[0:" << dt << ":" << T << "]; " << std::endl;
+    outfile.close();
 
 
-  return 0;
+    if(startT > 0.0){
+        std::cout << "initialize velocity and pressure with data from file" << std::endl;
+        std::ostringstream indexin;
+        std::string vinname, cinname;
+        indexin << (startT*100);
+        vinname = "fluid.res"+indexin.str();
+        ns.initialize(vinname);}
+    else{
+        std::cout << "initialize velocity and pressure with u0 and p0" << std::endl;
+        ns.initialize(u0,p0,0.0,dt);
+    }
+
+    zeroDModelSolver< NS > getPressureFromQ(ns, dt);
+
+    // Temporal loop
+    //
+    for (Real time=startT+dt ; time <= T; time+=dt)
+    {
+        // pressure coming from the 0D Model
+        vec_press = ScalarVector( vec_press.size(), -getPressureFromQ.pression(time) );
+
+        ns.timeAdvance(f,time);
+        ns.iterate(time);
+
+        ns.postProcess();
+    }
+
+    outfile.open("res_Q.m", std::ios::app);
+    outfile << "    ]; " << std::endl;
+    outfile << "figure;" << std::endl;
+    outfile << "plot(xx,Q);" << std::endl;
+    outfile.close();
+
+    outfile.open("res_DP.m", std::ios::app);
+    outfile << "     ]; " << std::endl;
+    outfile << "figure;" << std::endl;
+    outfile << "plot(xx,DP);" << std::endl;
+    outfile.close();
+
+
+    return 0;
 }

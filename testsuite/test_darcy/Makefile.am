@@ -29,7 +29,7 @@ check_HEADERS = user_fct.hpp user_diffusion.hpp
 
 check_PROGRAMS = test_darcy
 test_darcy_SOURCES =  main.cpp user_fct.cpp user_diffusion.cpp 
-
+test_darcy_LDADD   = $(life_libs) $(boost_libs)
 EXTRA_DIST = data datatetra testsuite.at
 
 

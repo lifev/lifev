@@ -54,7 +54,9 @@
 int main() {
     using namespace LifeV;
     using namespace std;
+#if WITH_EXCEPTION
     try
+#endif
     {
         Chrono chrono;
 
@@ -153,8 +155,8 @@ int main() {
 
         // initialization of vector of unknowns and rhs
         ScalUnknown<Vector> U(dim), F(dim);
-        U=0.0;
-        F=0.0;
+        U=ZeroVector( dim );
+        F=ZeroVector( dim );
 
         // ==========================================
         // Definition of the time integration stuff
@@ -265,7 +267,7 @@ int main() {
             cout << "Now we are at time " << t << endl;
 
             A.zeros();
-            F=0;
+            F=ZeroVector( F.size() );
             // ======================================================================
             // Update of the right hand sied with the solution at the previous steps
             // ======================================================================
@@ -338,8 +340,9 @@ int main() {
                 fe.updateFirstDeriv(aMesh.volumeList(i));
 
                 normL2     += elem_L2_2(U,fe,dof);
-                normL2sol  += elem_L2_2(analyticSol,fe,t,U.nbcomp());// U.nbcomp()=1 for a scalar problem
-                normL2diff += elem_L2_diff_2(U,analyticSol,fe,dof,t,U.nbcomp());
+                // U.nbcomp()=1 for a scalar problem
+                normL2sol  += elem_L2_2(analyticSol,fe,t,( UInt )U.nbcomp());
+                normL2diff += elem_L2_diff_2(U,analyticSol,fe, dof, t,( UInt )U.nbcomp());
 
                 normH1     += elem_H1_2(U,fe,dof);
                 normH1sol  += elem_H1_2(analyticSol,fe,t,U.nbcomp());
@@ -373,11 +376,13 @@ int main() {
 
         } // END OF TIME LOOP
     }
+#if WITH_EXCEPTION
     catch( std::exception const& __e )
     {
         std::cerr << "An exception was caught in LifeV\n"
         << "reason: \n" << __e.what() << "\n";
         return EXIT_FAILURE;
     }
+#endif
     return EXIT_SUCCESS;
 }

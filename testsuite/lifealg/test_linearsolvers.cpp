@@ -88,17 +88,17 @@ bool test_petsc( Mat& __mat )
     Vector __sol( Nrows );
     Vector __b( Nrows );
 
-    __sol = 10;
+    __sol = ScalarVector( Nrows, 10 );
     __b = __mat.matrix() * __sol;
 
-    __x = 0;
+    __x = ZeroVector( Nrows );
     __petsc.solve( __x, __b );
 
-    std::cout << "l2 norm(x) = " << l2norm( __x ) << "\n";
+    std::cout << "l2 norm(x) = " << norm_2( __x ) << "\n";
 
     __x -= __sol;
-    std::cout << "l2 norm(error) = " << l2norm( __x ) << "\n";
-    return l2norm(__x) < 1e-10;
+    std::cout << "l2 norm(error) = " << norm_2( __x ) << "\n";
+    return norm_2(__x) < 1e-10;
 #else
     return 1;
 #endif
@@ -117,17 +117,17 @@ bool test_aztec( Mat& __mat )
     Vector __sol( Nrows );
     Vector __b( Nrows );
 
-    __sol = 10;
+    __sol = ScalarVector( Nrows, 10 );
     __b = __mat.matrix() * __sol;
 
-    __x = 0;
+    __x = ZeroVector( Nrows );
     __aztec.solve( __x, __b );
 
-    std::cout << "l2 norm(x) = " << l2norm( __x ) << "\n";
+    std::cout << "l2 norm(x) = " << norm_2( __x ) << "\n";
 
     __x -= __sol;
-    std::cout << "l2 norm(error) = " << l2norm( __x ) << "\n";
-    return l2norm(__x) < 1e-10;
+    std::cout << "l2 norm(error) = " << norm_2( __x ) << "\n";
+    return norm_2(__x) < 1e-10;
 }
 
 } // namespace LifeV

@@ -153,8 +153,8 @@ int main()
 
     // initialization of vector of unknowns and rhs
     ScalUnknown<Vector> U(dim), F(dim);
-    U=0.0;
-    F=0.0;
+    U=ZeroVector( dim );
+    F=ZeroVector( dim );
 
     // ==========================================
     // Definition of the time integration stuff

@@ -262,7 +262,7 @@ NavierStokesSolverIP( const GetPot& dataFile,
     //                 0, 0, M_gammaPress, this->viscosity() );
     //pressureStab.apply(M_matrStokes, this->_u);
 
-    M_sol = 0.0;
+    M_sol = ZeroVector( M_sol.size() );
 
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
@@ -290,7 +290,7 @@ timeAdvance( const Function source, const Real& time )
     chrono.start();
 
     // Right hand side for the velocity at time
-    M_rhsU = 0.0;
+    M_rhsU = ZeroVector( M_rhsU.size() );
 
     // loop on volumes: assembling source term
     for ( UInt iVol = 1; iVol<= _mesh.numVolumes(); ++iVol )

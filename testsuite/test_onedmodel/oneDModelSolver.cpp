@@ -127,7 +127,7 @@ OneDModelSolver::OneDModelSolver(const GetPot& data_file,
     grad( 0 , - _M_coeffGrad, _M_elmatGrad, _M_fe, _M_fe, 0, 0 );
 
     //! assemble the mass and grad matrices
-    assemb_mat( _M_massMatrix, _M_elmatMass, _M_fe, _M_dof1D , 0, 0 );  
+    assemb_mat( _M_massMatrix, _M_elmatMass, _M_fe, _M_dof1D , 0, 0 );
     assemb_mat( _M_gradMatrix, _M_elmatGrad, _M_fe, _M_dof1D , 0, 0 );
 
   } //! end loop on elements
@@ -155,7 +155,7 @@ OneDModelSolver::OneDModelSolver(const GetPot& data_file,
 
 }
 
-/*! Update the coefficients 
+/*! Update the coefficients
   (from the flux, source functions and their derivatives)
 */
 void OneDModelSolver::
@@ -180,7 +180,7 @@ _updateMatrixCoefficients(const UInt& ii, const UInt& jj , const UInt& iedge)
   if( ii == 2 && jj == 2 ) {
     dFluxdUelem = _M_diffFlux22( iedge - 1 );
     dSrcdUelem  = _M_diffSrc22( iedge - 1 );
-  }  
+  }
 
   _M_coeffGrad  = dFluxdUelem; //! term gradDiffFlux(U) [* S(U)]
   _M_coeffDiv   = dSrcdUelem;  //! term  divDiffSrc(U) [* F(U)]
@@ -188,7 +188,7 @@ _updateMatrixCoefficients(const UInt& ii, const UInt& jj , const UInt& iedge)
   _M_coeffMass  = dSrcdUelem;  //! term  massDiffSrc(U) [* S(U)]
 }
 
-//! Update the element matrices with the updated 
+//! Update the element matrices with the updated
 //! current element and updated coefficients
 void OneDModelSolver::_updateElemMatrices()
 {
@@ -248,8 +248,8 @@ _assemble_matrices(const UInt& ii, const UInt& jj )
 
   if( ii == 1 && jj == 1 ) {
     //! assemble the mass matrix
-    assemb_mat( _M_massMatrixDiffSrc11, _M_elmatMass, _M_fe, _M_dof1D , 0, 0 );  
-  
+    assemb_mat( _M_massMatrixDiffSrc11, _M_elmatMass, _M_fe, _M_dof1D , 0, 0 );
+
     //! assemble the stiffness matrix
     assemb_mat( _M_stiffMatrixDiffFlux11, _M_elmatStiff, _M_fe, _M_dof1D , 0, 0 );
 
@@ -263,7 +263,7 @@ _assemble_matrices(const UInt& ii, const UInt& jj )
   }
   if( ii == 1 && jj == 2 ) {
     //! assemble the mass matrix
-    assemb_mat( _M_massMatrixDiffSrc12, _M_elmatMass, _M_fe, _M_dof1D , 0, 0 );  
+    assemb_mat( _M_massMatrixDiffSrc12, _M_elmatMass, _M_fe, _M_dof1D , 0, 0 );
 
     //! assemble the stiffness matrix
     assemb_mat( _M_stiffMatrixDiffFlux12, _M_elmatStiff, _M_fe, _M_dof1D , 0, 0 );
@@ -278,7 +278,7 @@ _assemble_matrices(const UInt& ii, const UInt& jj )
   }
   if( ii == 2 && jj == 1 ) {
     //! assemble the mass matrix
-    assemb_mat( _M_massMatrixDiffSrc21, _M_elmatMass, _M_fe, _M_dof1D , 0, 0 );  
+    assemb_mat( _M_massMatrixDiffSrc21, _M_elmatMass, _M_fe, _M_dof1D , 0, 0 );
 
     //! assemble the stiffness matrix
     assemb_mat( _M_stiffMatrixDiffFlux21, _M_elmatStiff, _M_fe, _M_dof1D , 0, 0 );
@@ -293,7 +293,7 @@ _assemble_matrices(const UInt& ii, const UInt& jj )
   }
   if( ii == 2 && jj == 2 ) {
     //! assemble the mass matrix
-    assemb_mat( _M_massMatrixDiffSrc22, _M_elmatMass, _M_fe, _M_dof1D , 0, 0 );  
+    assemb_mat( _M_massMatrixDiffSrc22, _M_elmatMass, _M_fe, _M_dof1D , 0, 0 );
 
     //! assemble the stiffness matrix
     assemb_mat( _M_stiffMatrixDiffFlux22, _M_elmatStiff, _M_fe, _M_dof1D , 0, 0 );
@@ -306,15 +306,15 @@ _assemble_matrices(const UInt& ii, const UInt& jj )
 
     return 0;
   }
-  
+
   ERROR_MSG("Invalid values for the _assemble_matrices method.");
 }
 
-/*! update the matrices  
+/*! update the matrices
   _M_massMatrixDiffSrcij, _M_stiffMatrixDiffFluxij
   _M_gradMatrixDiffFluxij, and _M_divMatrixDiffSrcij (i,j=1,2)
 
-  from the values of diffFlux(Un) and diffSrc(Un) 
+  from the values of diffFlux(Un) and diffSrc(Un)
   that are computed with _updateMatrixCoefficients.
 */
 void OneDModelSolver::_updateMatrices()
@@ -330,7 +330,7 @@ void OneDModelSolver::_updateMatrices()
   //! Elementary computation and matrix assembling
   //! Loop on elements
   for(UInt iedge = 1; iedge <= _M_mesh.numEdges(); iedge++){
-    
+
     //! update the current element
     _M_fe.updateFirstDerivQuadPt(_M_mesh.edgeList(iedge));
     //  std::cout << _M_fe.currentId() << std::endl;
@@ -349,7 +349,7 @@ void OneDModelSolver::_updateMatrices()
   for(UInt iedge = 1; iedge <= _M_mesh.numEdges(); iedge++){
     for(UInt ii = 1; ii <= 2; ii ++) {
       for(UInt jj = 1; jj <= 2; jj ++) {
-    
+
 	//! update the _M_coeff*
 	_updateMatrixCoefficients( ii , jj, iedge);
 
@@ -437,14 +437,14 @@ void OneDModelSolver::_updateMatrices()
   //! Elementary computation and matrix assembling
   //! Loop on elements
   for(UInt iedge = 1; iedge <= _M_mesh.numEdges(); iedge++){
-    
+
     //! update the current element
     _M_fe.updateFirstDerivQuadPt(_M_mesh.edgeList(iedge));
     //  std::cout << _M_fe.currentId() << std::endl;
 
     for(UInt ii = 1; ii <= 2; ii ++) {
       for(UInt jj = 1; jj <= 2; jj ++) {
-    
+
 	//! update the _M_coeff*
 	_updateMatrixCoefficients( ii , jj, iedge);
 
@@ -465,7 +465,7 @@ void OneDModelSolver::_updateMatrices()
   */
 
   //! usefull ??????
-  //! taking into account the dirichlet bc 
+  //! taking into account the dirichlet bc
   _updateBCDirichletMatrix( _M_massMatrixDiffSrc11 );
   _updateBCDirichletMatrix( _M_massMatrixDiffSrc12 );
   _updateBCDirichletMatrix( _M_massMatrixDiffSrc21 );
@@ -539,7 +539,7 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
   UInt leftDof = 0;
   //! node on the right boundary
   UInt rightDof  = _M_rhs1.size()-1;
-  
+
   Edge1D leftedge  = _M_mesh.edgeList( 1 ); //! from 1 to nb_elem
   Edge1D rightedge = _M_mesh.edgeList( _M_nb_elem ); //! from 1 to nb_elem
 
@@ -547,7 +547,7 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
   Real  eigval1, eigval2;
   //! left eigen vectors for the eigen values eigval1 and eigval2
   Vec2D left_eigvec1, left_eigvec2;
-  
+
   /*! interpolate the eigenvectors
   Vec2D left_eigvec1_internalBd, left_eigvec2_internalBd;
   Vec2D left_eigvec1_charact_pt, left_eigvec2_charact_pt;
@@ -577,18 +577,18 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
   switch ( _M_test_case ) {
   case 1: //! both eigenvalues are > 0
     // *******************************************************
-    //! left BC. 
+    //! left BC.
     // *******************************************************
     rhsBC.first  = std::sin( 2 * M_PI * time_val ); //! Dirichlet bc.
     rhsBC.second = 1.; //! Dirichlet bc.
-    
+
     //! solve the linear system Id * U(tn+1, z=z_right) = rhsBC (a bit artificial...)
     resBC = _solveLinearSyst2x2( line1_id, line2_id, rhsBC );
 
     _M_bcDirLeft = resBC;
 
     // *******************************************************
-    //! right BC. 
+    //! right BC.
     // *******************************************************
     //-------------------------------------
     //!compatibility conditions
@@ -597,27 +597,27 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
     internalBdPoint = rightedge.pt1().x(); //!< neighboring point (internal)
 
     //! values of U on the boundary
-    U_boundary   = Vec2D ( _M_U1_thistime( rightDof ) , 
+    U_boundary   = Vec2D ( _M_U1_thistime( rightDof ) ,
 			   _M_U2_thistime( rightDof ) );
-    //! values of U on the neighboring node of the boundary point 
-    U_internalBd = Vec2D ( _M_U1_thistime( rightDof - 1 ) , 
+    //! values of U on the neighboring node of the boundary point
+    U_internalBd = Vec2D ( _M_U1_thistime( rightDof - 1 ) ,
 			   _M_U2_thistime( rightDof - 1 ) );
 
     //! compute the eigenvalues/eigenvectors of the flux jacobian (computed at the boundary point)
-    _M_fluxFun.jacobian_EigenValues_Vectors(U_boundary.first, U_boundary.second, 
-					    eigval1, eigval2, 
-					    left_eigvec1.first, left_eigvec1.second, 
-					    left_eigvec2.first, left_eigvec2.second, 
+    _M_fluxFun.jacobian_EigenValues_Vectors(U_boundary.first, U_boundary.second,
+					    eigval1, eigval2,
+					    left_eigvec1.first, left_eigvec1.second,
+					    left_eigvec2.first, left_eigvec2.second,
 					    rightDof);
 
     ASSERT( eigval1 > 0. && eigval2 > 0. ,
 	    "The eigenvalues do not have the expected signs.");
 
     //-------------------------------------
-    //! first characteristics    
+    //! first characteristics
     //! interpolation of U at the foot of the 1rst characteristics
-    U_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint, 
-				   _M_time_step, eigval1, 
+    U_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint,
+				   _M_time_step, eigval1,
 				   U_boundary, U_internalBd);
 
     //! rhsBC1 = left_eigvec1 dot U(tn, z = charact_pt1)
@@ -626,32 +626,32 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
     //! take into account the (quasi linear) source term
     /*!BEWARE: HERE THE PARAMETERS ARE TAKEN AT rightDof
                THEY SHOULD BE TAKEN AT THE CHARACTERISTICS!!
-    */ 
-    qlSource.first  = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+    */
+    qlSource.first  = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second,
 						     1, rightDof);
-    qlSource.second = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+    qlSource.second = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second,
 						     2, rightDof);
 
     //! rhsBC1 = rhsBC1 - deltaT * left_eigvec1 dot qlSource(tn, z = charact_pt1)
     rhsBC.first -= _M_time_step * dot( left_eigvec1 , qlSource );
 
     //-------------------------------------
-    //! second characteristics    
+    //! second characteristics
     //! interpolation of U at the foot of the 2nd characteristics
-    U_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint, 
-				   _M_time_step, eigval2, 
+    U_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint,
+				   _M_time_step, eigval2,
 				   U_boundary, U_internalBd);
-    
+
     //! rhsBC2 = left_eigvec2 dot U(tn, z = charact_pt2)
     rhsBC.second = dot( left_eigvec2 , U_charact_pt );
 
     //! take into account the (quasi linear) source term
     /*!BEWARE: HERE THE PARAMETERS ARE TAKEN AT rightDof
                THEY SHOULD BE TAKEN AT THE CHARACTERISTICS!!
-    */ 
-    qlSource.first  = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+    */
+    qlSource.first  = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second,
 						     1, rightDof);
-    qlSource.second = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+    qlSource.second = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second,
 						     2, rightDof);
 
     //! rhsBC2 = rhsBC2 - deltaT * left_eigvec2 dot qlSource(tn, z = charact_pt2)
@@ -661,13 +661,13 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
     /*!-------------------------------------
       solve the linear system L * U(tn+1, z=z_right) = rhsBC
       i.e.
-  [ left_eigvec1^T;  [U1(tn+1,z_right);   = [ left_eigvec1^T * U(tn, charact_pt1);   
+  [ left_eigvec1^T;  [U1(tn+1,z_right);   = [ left_eigvec1^T * U(tn, charact_pt1);
     left_eigvec2^T ]  U2(tn+1,z_right) ]      left_eigvec2^T * U(tn, charact_pt2) ]
-	
+
                                           - dt * [ left_eigvec1^T * qlSource(tn, charact_pt1);
 					           left_eigvec2^T * qlSource(tn, charact_pt2) ]
 
-	  
+
 	 with L such that L * dF/dU * L^{-1} = diag(eigval1, eigval2)
       -------------------------------------
      */
@@ -677,7 +677,7 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
     break;
   case 2: //! both eigenvalues are < 0
     // *******************************************************
-    //! left BC. 
+    //! left BC.
     // *******************************************************
     //-------------------------------------
     //!compatibility conditions
@@ -686,17 +686,17 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
     internalBdPoint = leftedge.pt2().x(); //!< neighboring point (internal)
 
     //! values of U on the boundary
-    U_boundary   = Vec2D ( _M_U1_thistime( leftDof ) , 
+    U_boundary   = Vec2D ( _M_U1_thistime( leftDof ) ,
 			   _M_U2_thistime( leftDof ) );
-    //! values of U on the neighboring node of the boundary point 
-    U_internalBd = Vec2D ( _M_U1_thistime( leftDof + 1 ) , 
+    //! values of U on the neighboring node of the boundary point
+    U_internalBd = Vec2D ( _M_U1_thistime( leftDof + 1 ) ,
 			   _M_U2_thistime( leftDof + 1 ) );
 
     //! compute the eigenvalues/eigenvectors of the flux jacobian (computed on the boundary point)
-    _M_fluxFun.jacobian_EigenValues_Vectors(U_boundary.first, U_boundary.second, 
-					    eigval1, eigval2, 
-					    left_eigvec1.first, left_eigvec1.second, 
-					    left_eigvec2.first, left_eigvec2.second, 
+    _M_fluxFun.jacobian_EigenValues_Vectors(U_boundary.first, U_boundary.second,
+					    eigval1, eigval2,
+					    left_eigvec1.first, left_eigvec1.second,
+					    left_eigvec2.first, left_eigvec2.second,
 					    leftDof);
 
 
@@ -705,10 +705,10 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
 
 
    //-------------------------------------
-    //! first characteristics    
+    //! first characteristics
     //! interpolation of U at the foot of the 1rst characteristics
-    U_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint, 
-				   _M_time_step, eigval1, 
+    U_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint,
+				   _M_time_step, eigval1,
 				   U_boundary, U_internalBd);
 
     //! rhsBC1 = left_eigvec1 dot U(tn, z = charact_pt1)
@@ -717,32 +717,32 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
     //! take into account the (quasi linear) source term
     /*!BEWARE: HERE THE PARAMETERS ARE TAKEN AT rightDof
                THEY SHOULD BE TAKEN AT THE CHARACTERISTICS!!
-    */ 
-    qlSource.first  = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+    */
+    qlSource.first  = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second,
 						     1, leftDof);
-    qlSource.second = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+    qlSource.second = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second,
 						     2, leftDof);
 
     //! rhsBC1 = rhsBC1 - deltaT * left_eigvec1 dot qlSource(tn, z = charact_pt1)
     rhsBC.first -= _M_time_step * dot( left_eigvec1 , qlSource );
 
     //-------------------------------------
-    //! second characteristics    
+    //! second characteristics
     //! interpolation of U at the foot of the 2nd characteristics
-    U_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint, 
-				   _M_time_step, eigval2, 
+    U_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint,
+				   _M_time_step, eigval2,
 				   U_boundary, U_internalBd);
-    
+
     //! rhsBC2 = left_eigvec2 dot U(tn, z = charact_pt2)
     rhsBC.second = dot( left_eigvec2 , U_charact_pt );
 
     //! take into account the (quasi linear) source term
     /*!BEWARE: HERE THE PARAMETERS ARE TAKEN AT rightDof
                THEY SHOULD BE TAKEN AT THE CHARACTERISTICS!!
-    */ 
-    qlSource.first  = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+    */
+    qlSource.first  = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second,
 						     1, leftDof);
-    qlSource.second = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+    qlSource.second = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second,
 						     2, leftDof);
 
     //! rhsBC2 = rhsBC2 - deltaT * left_eigvec2 dot qlSource(tn, z = charact_pt2)
@@ -751,10 +751,10 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
     /*!-------------------------------------
       solve the linear system L * U(tn+1, z=z_left) = rhsBC
       i.e.
-        [ left_eigvec1^T;  [U1(tn+1,z_left);   = [ left_eigvec1^T * U(tn, charact_pt1); 
+        [ left_eigvec1^T;  [U1(tn+1,z_left);   = [ left_eigvec1^T * U(tn, charact_pt1);
 	  left_eigvec2^T ]  U2(tn+1,z_left) ]      left_eigvec2^T * U(tn, charact_pt2) ]
 
-	  
+
 	 with L such that L * dF/dU * L^{-1} = diag(eigval1, eigval2)
       -------------------------------------
      */
@@ -764,11 +764,11 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
 
 
     // *******************************************************
-    //! right BC. 
+    //! right BC.
     // *******************************************************
     rhsBC.first  = std::sin( 2 * M_PI * time_val ); //! Dirichlet bc.
     rhsBC.second = 1.; //! Dirichlet bc.
-    
+
     //! solve the linear system Id * U(tn+1, z=z_right) = rhsBC (a bit artificial...)
     resBC = _solveLinearSyst2x2( line1_id, line2_id, rhsBC );
 
@@ -777,13 +777,13 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
 
   case 3: //! eig1 > 0 and eig2 < 0.
     // *******************************************************
-    //! left BC. 
+    //! left BC.
     // *******************************************************
     //-------------------------------------
     //! Dirichlet bc.
     // rhsBC.first = _M_oneDParam.Area0(0) * ( 1 + 0.1 * std::sin( 2 * M_PI * time_val ) );
     if( time_val <= 5e-2 ){
-      rhsBC.first = _M_oneDParam.Area0( leftDof ) * 
+      rhsBC.first = _M_oneDParam.Area0( leftDof ) *
 	( 1 + 20000 * _M_oneDParam.DensityRho() / _M_oneDParam.Beta0( leftDof ) );
     } else {
       rhsBC.first = _M_oneDParam.Area0( leftDof );
@@ -796,44 +796,44 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
     internalBdPoint = leftedge.pt2().x(); //!< neighboring point (internal)
 
     //! values of U on the boundary
-    U_boundary   = Vec2D ( _M_U1_thistime( leftDof ) , 
+    U_boundary   = Vec2D ( _M_U1_thistime( leftDof ) ,
 			   _M_U2_thistime( leftDof ) );
-    //! values of U on the neighboring node of the boundary point 
-    U_internalBd = Vec2D ( _M_U1_thistime( leftDof + 1 ) , 
+    //! values of U on the neighboring node of the boundary point
+    U_internalBd = Vec2D ( _M_U1_thistime( leftDof + 1 ) ,
 			   _M_U2_thistime( leftDof + 1 ) );
 
     //! compute the eigenvalues/eigenvectors of the flux jacobian (computed on the boundary point)
-    _M_fluxFun.jacobian_EigenValues_Vectors(U_boundary.first, U_boundary.second, 
-					    eigval1, eigval2, 
-					    left_eigvec1.first, left_eigvec1.second, 
-					    left_eigvec2.first, left_eigvec2.second, 
+    _M_fluxFun.jacobian_EigenValues_Vectors(U_boundary.first, U_boundary.second,
+					    eigval1, eigval2,
+					    left_eigvec1.first, left_eigvec1.second,
+					    left_eigvec2.first, left_eigvec2.second,
 					    leftDof);
 
     /*! interpolate the eigenvectors
     //wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
     //! compute the eigenvalues/eigenvectors of the flux jacobian (computed at the internal bd point)
-    _M_fluxFun.jacobian_EigenValues_Vectors(U_internalBd.first, U_internalBd.second, 
-					    eigval1_internalBd, eigval2_internalBd, 
-					    left_eigvec1_internalBd.first, left_eigvec1_internalBd.second, 
-					    left_eigvec2_internalBd.first, left_eigvec2_internalBd.second, 
+    _M_fluxFun.jacobian_EigenValues_Vectors(U_internalBd.first, U_internalBd.second,
+					    eigval1_internalBd, eigval2_internalBd,
+					    left_eigvec1_internalBd.first, left_eigvec1_internalBd.second,
+					    left_eigvec2_internalBd.first, left_eigvec2_internalBd.second,
 					    leftDof + 1);
 
-    left_eigvec2_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint, 
-					      _M_time_step, eigval2, 
+    left_eigvec2_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint,
+					      _M_time_step, eigval2,
 					      left_eigvec2, left_eigvec2_internalBd);
-       
+
     std::cout << "\nEigenVector2 " << left_eigvec2.first << " " << left_eigvec2.second << std::endl;
-    std::cout << "EigenVector2 charac " << left_eigvec2_charact_pt.first 
+    std::cout << "EigenVector2 charac " << left_eigvec2_charact_pt.first
 	      << " " << left_eigvec2_charact_pt.second << std::endl;
-   
+
     left_eigvec2.first  = left_eigvec2_charact_pt.first;
     left_eigvec2.second = left_eigvec2_charact_pt.second;
     //wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
     */
-   
+
     //------------------------------------------------------------
 
-    if ( _M_verbose > 1 ) 
+    if ( _M_verbose > 1 )
       std::cout << "\nEigenValue 1 " << eigval1 << " EigenValue 2 " << eigval2 << std::endl;
 
     ASSERT( eigval1 > 0. &&  eigval2 < 0.  ,
@@ -841,22 +841,22 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
 
 
     //-------------------------------------
-    //! second characteristics    
+    //! second characteristics
     //! interpolation of U at the foot of the 2nd characteristics
-    U_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint, 
-				   _M_time_step, eigval2, 
+    U_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint,
+				   _M_time_step, eigval2,
 				   U_boundary, U_internalBd);
-    
+
     //! rhsBC2 = left_eigvec2 dot U(tn, z = charact_pt2)
     rhsBC.second = dot( left_eigvec2 , U_charact_pt );
-    
+
     //! take into account the (quasi linear) source term
     /*!BEWARE: HERE THE PARAMETERS ARE TAKEN AT rightDof
                THEY SHOULD BE TAKEN AT THE CHARACTERISTICS!!
-    */ 
-    qlSource.first  = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+    */
+    qlSource.first  = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second,
 						     1, leftDof);
-    qlSource.second = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+    qlSource.second = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second,
 						     2, leftDof);
 
     //! rhsBC2 = rhsBC2 - deltaT * left_eigvec2 dot qlSource(tn, z = charact_pt2)
@@ -875,7 +875,7 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
 
 
     // *******************************************************
-    //! right BC. 
+    //! right BC.
     // *******************************************************
     //-------------------------------------
     //! Dirichlet bc.
@@ -887,52 +887,52 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
     internalBdPoint = rightedge.pt1().x(); //!< neighboring point (internal)
 
     //! values of U on the boundary
-    U_boundary   = Vec2D ( _M_U1_thistime( rightDof ) , 
+    U_boundary   = Vec2D ( _M_U1_thistime( rightDof ) ,
 			   _M_U2_thistime( rightDof ) );
-    //! values of U on the neighboring node of the boundary point 
-    U_internalBd = Vec2D ( _M_U1_thistime( rightDof - 1 ) , 
+    //! values of U on the neighboring node of the boundary point
+    U_internalBd = Vec2D ( _M_U1_thistime( rightDof - 1 ) ,
 			   _M_U2_thistime( rightDof - 1 ) );
 
     //! compute the eigenvalues/eigenvectors of the flux jacobian (computed on the boundary point)
-    _M_fluxFun.jacobian_EigenValues_Vectors(U_boundary.first, U_boundary.second, 
-					    eigval1, eigval2, 
-					    left_eigvec1.first, left_eigvec1.second, 
-					    left_eigvec2.first, left_eigvec2.second, 
+    _M_fluxFun.jacobian_EigenValues_Vectors(U_boundary.first, U_boundary.second,
+					    eigval1, eigval2,
+					    left_eigvec1.first, left_eigvec1.second,
+					    left_eigvec2.first, left_eigvec2.second,
 					    rightDof);
     /*! interpolate the eigenvectors
     //wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
     //! compute the eigenvalues/eigenvectors of the flux jacobian (computed at the internal bd point)
-    _M_fluxFun.jacobian_EigenValues_Vectors(U_internalBd.first, U_internalBd.second, 
-					    eigval1_internalBd, eigval2_internalBd, 
-					    left_eigvec1_internalBd.first, left_eigvec1_internalBd.second, 
-					    left_eigvec2_internalBd.first, left_eigvec2_internalBd.second, 
+    _M_fluxFun.jacobian_EigenValues_Vectors(U_internalBd.first, U_internalBd.second,
+					    eigval1_internalBd, eigval2_internalBd,
+					    left_eigvec1_internalBd.first, left_eigvec1_internalBd.second,
+					    left_eigvec2_internalBd.first, left_eigvec2_internalBd.second,
 					    rightDof - 1);
 
-    left_eigvec1_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint, 
-					      _M_time_step, eigval1, 
+    left_eigvec1_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint,
+					      _M_time_step, eigval1,
 					      left_eigvec1, left_eigvec1_internalBd);
-       
+
     std::cout << "\nEigenVector1 " << left_eigvec1.first << " " << left_eigvec1.second << std::endl;
-    std::cout << "EigenVector1 charac " << left_eigvec1_charact_pt.first 
+    std::cout << "EigenVector1 charac " << left_eigvec1_charact_pt.first
 	      << " " << left_eigvec1_charact_pt.second << std::endl;
-   
+
     left_eigvec1.first  = left_eigvec1_charact_pt.first;
     left_eigvec1.second = left_eigvec1_charact_pt.second;
     //wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
     */
 
-    if ( _M_verbose > 1 ) 
+    if ( _M_verbose > 1 )
       std::cout << "EigenValue 1 " << eigval1 << " EigenValue 2 " << eigval2 << std::endl;
-    
+
 
     ASSERT( eigval1 > 0. && eigval2 < 0. ,
 	    "The eigenvalues do not have the expected signs.");
 
     //-------------------------------------
-    //! first characteristics    
+    //! first characteristics
     //! interpolation of U at the foot of the 1rst characteristics
-    U_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint, 
-				   _M_time_step, eigval1, 
+    U_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint,
+				   _M_time_step, eigval1,
 				   U_boundary, U_internalBd);
 
     //! rhsBC1 = left_eigvec1 dot U(tn, z = charact_pt1)
@@ -941,10 +941,10 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
     //! take into account the (quasi linear) source term
     /*!BEWARE: HERE THE PARAMETERS ARE TAKEN AT rightDof
                THEY SHOULD BE TAKEN AT THE CHARACTERISTICS!!
-    */ 
-    qlSource.first  = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+    */
+    qlSource.first  = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second,
 						     1, rightDof);
-    qlSource.second = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+    qlSource.second = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second,
 						     2, rightDof);
 
     //! rhsBC1 = rhsBC1 - deltaT * left_eigvec1 dot qlSource(tn, z = charact_pt1)
@@ -964,64 +964,64 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
 	Once again, we treat the problem explicitly after linearisation.
     */
     // *******************************************************
-    //! left BC. 
+    //! left BC.
     // *******************************************************
     //-------------------------------------
     //! Dirichlet bc.
     // rhsBC.first = _M_oneDParam.Area0(0) * ( 1 + 0.1 * std::sin( 2 * M_PI * time_val ) );
     if( time_val <= 5e-2 ){
-      UBC_data.first = _M_oneDParam.Area0( leftDof ) * 
+      UBC_data.first = _M_oneDParam.Area0( leftDof ) *
 	( 1 + 20000 * _M_oneDParam.DensityRho() / _M_oneDParam.Beta0( leftDof ) );
     } else {
       UBC_data.first = _M_oneDParam.Area0( leftDof );
     }
     UBC_data.second = 0;
 
-    
+
     //-------------------------------------
     //! Compute the eigen values and vectors
     boundaryPoint   = leftedge.pt1().x(); //!< point on the boundary (on the left of the edge!)
     internalBdPoint = leftedge.pt2().x(); //!< neighboring point (internal)
 
     //! values of U on the boundary
-    U_boundary   = Vec2D ( _M_U1_thistime( leftDof ) , 
+    U_boundary   = Vec2D ( _M_U1_thistime( leftDof ) ,
 			   _M_U2_thistime( leftDof ) );
-    //! values of U on the neighboring node of the boundary point 
-    U_internalBd = Vec2D ( _M_U1_thistime( leftDof + 1 ) , 
+    //! values of U on the neighboring node of the boundary point
+    U_internalBd = Vec2D ( _M_U1_thistime( leftDof + 1 ) ,
 			   _M_U2_thistime( leftDof + 1 ) );
 
     //! compute the eigenvalues/eigenvectors of the flux jacobian (computed on the boundary point)
-    _M_fluxFun.jacobian_EigenValues_Vectors(U_boundary.first, U_boundary.second, 
-					    eigval1, eigval2, 
-					    left_eigvec1.first, left_eigvec1.second, 
-					    left_eigvec2.first, left_eigvec2.second, 
+    _M_fluxFun.jacobian_EigenValues_Vectors(U_boundary.first, U_boundary.second,
+					    eigval1, eigval2,
+					    left_eigvec1.first, left_eigvec1.second,
+					    left_eigvec2.first, left_eigvec2.second,
 					    leftDof);
 
     /*! interpolate the eigenvectors
     //wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
     //! compute the eigenvalues/eigenvectors of the flux jacobian (computed at the internal bd point)
-    _M_fluxFun.jacobian_EigenValues_Vectors(U_internalBd.first, U_internalBd.second, 
-					    eigval1_internalBd, eigval2_internalBd, 
-					    left_eigvec1_internalBd.first, left_eigvec1_internalBd.second, 
-					    left_eigvec2_internalBd.first, left_eigvec2_internalBd.second, 
+    _M_fluxFun.jacobian_EigenValues_Vectors(U_internalBd.first, U_internalBd.second,
+					    eigval1_internalBd, eigval2_internalBd,
+					    left_eigvec1_internalBd.first, left_eigvec1_internalBd.second,
+					    left_eigvec2_internalBd.first, left_eigvec2_internalBd.second,
 					    leftDof + 1);
 
-    left_eigvec2_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint, 
-					      _M_time_step, eigval2, 
+    left_eigvec2_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint,
+					      _M_time_step, eigval2,
 					      left_eigvec2, left_eigvec2_internalBd);
-       
+
     std::cout << "\nEigenVector2 " << left_eigvec2.first << " " << left_eigvec2.second << std::endl;
-    std::cout << "EigenVector2 charac " << left_eigvec2_charact_pt.first 
+    std::cout << "EigenVector2 charac " << left_eigvec2_charact_pt.first
 	      << " " << left_eigvec2_charact_pt.second << std::endl;
-   
+
     left_eigvec2.first  = left_eigvec2_charact_pt.first;
     left_eigvec2.second = left_eigvec2_charact_pt.second;
     //wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
     */
-   
+
     //------------------------------------------------------------
 
-    if ( _M_verbose > 1 ) 
+    if ( _M_verbose > 1 )
       std::cout << "\nEigenValue 1 " << eigval1 << " EigenValue 2 " << eigval2 << std::endl;
 
     ASSERT( eigval1 > 0. &&  eigval2 < 0.  ,
@@ -1033,26 +1033,26 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
     //! rhsBC1 = left_eigvec1 dot UBC_data
     rhsBC.first = dot( left_eigvec1 , UBC_data );
 
-    
+
     //-------------------------------------
     //!compatibility condition
     //-------------------------------------
-    //! second characteristics    
+    //! second characteristics
     //! interpolation of U at the foot of the 2nd characteristics
-    U_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint, 
-				   _M_time_step, eigval2, 
+    U_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint,
+				   _M_time_step, eigval2,
 				   U_boundary, U_internalBd);
-    
+
     //! rhsBC2 = left_eigvec2 dot U(tn, z = charact_pt2)
     rhsBC.second = dot( left_eigvec2 , U_charact_pt );
-    
+
     //! take into account the (quasi linear) source term
     /*!BEWARE: HERE THE PARAMETERS ARE TAKEN AT rightDof
                THEY SHOULD BE TAKEN AT THE CHARACTERISTICS!!
-    */ 
-    qlSource.first  = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+    */
+    qlSource.first  = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second,
 						     1, leftDof);
-    qlSource.second = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+    qlSource.second = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second,
 						     2, leftDof);
 
     //! rhsBC2 = rhsBC2 - deltaT * left_eigvec2 dot qlSource(tn, z = charact_pt2)
@@ -1071,7 +1071,7 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
 
 
     // *******************************************************
-    //! right BC. 
+    //! right BC.
     // *******************************************************
     //-------------------------------------
     //! Dirichlet bc.
@@ -1084,43 +1084,43 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
     internalBdPoint = rightedge.pt1().x(); //!< neighboring point (internal)
 
     //! values of U on the boundary
-    U_boundary   = Vec2D ( _M_U1_thistime( rightDof ) , 
+    U_boundary   = Vec2D ( _M_U1_thistime( rightDof ) ,
 			   _M_U2_thistime( rightDof ) );
-    //! values of U on the neighboring node of the boundary point 
-    U_internalBd = Vec2D ( _M_U1_thistime( rightDof - 1 ) , 
+    //! values of U on the neighboring node of the boundary point
+    U_internalBd = Vec2D ( _M_U1_thistime( rightDof - 1 ) ,
 			   _M_U2_thistime( rightDof - 1 ) );
 
     //! compute the eigenvalues/eigenvectors of the flux jacobian (computed on the boundary point)
-    _M_fluxFun.jacobian_EigenValues_Vectors(U_boundary.first, U_boundary.second, 
-					    eigval1, eigval2, 
-					    left_eigvec1.first, left_eigvec1.second, 
-					    left_eigvec2.first, left_eigvec2.second, 
+    _M_fluxFun.jacobian_EigenValues_Vectors(U_boundary.first, U_boundary.second,
+					    eigval1, eigval2,
+					    left_eigvec1.first, left_eigvec1.second,
+					    left_eigvec2.first, left_eigvec2.second,
 					    rightDof);
     /*! interpolate the eigenvectors
     //wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
     //! compute the eigenvalues/eigenvectors of the flux jacobian (computed at the internal bd point)
-    _M_fluxFun.jacobian_EigenValues_Vectors(U_internalBd.first, U_internalBd.second, 
-					    eigval1_internalBd, eigval2_internalBd, 
-					    left_eigvec1_internalBd.first, left_eigvec1_internalBd.second, 
-					    left_eigvec2_internalBd.first, left_eigvec2_internalBd.second, 
+    _M_fluxFun.jacobian_EigenValues_Vectors(U_internalBd.first, U_internalBd.second,
+					    eigval1_internalBd, eigval2_internalBd,
+					    left_eigvec1_internalBd.first, left_eigvec1_internalBd.second,
+					    left_eigvec2_internalBd.first, left_eigvec2_internalBd.second,
 					    rightDof - 1);
 
-    left_eigvec1_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint, 
-					      _M_time_step, eigval1, 
+    left_eigvec1_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint,
+					      _M_time_step, eigval1,
 					      left_eigvec1, left_eigvec1_internalBd);
-       
+
     std::cout << "\nEigenVector1 " << left_eigvec1.first << " " << left_eigvec1.second << std::endl;
-    std::cout << "EigenVector1 charac " << left_eigvec1_charact_pt.first 
+    std::cout << "EigenVector1 charac " << left_eigvec1_charact_pt.first
 	      << " " << left_eigvec1_charact_pt.second << std::endl;
-   
+
     left_eigvec1.first  = left_eigvec1_charact_pt.first;
     left_eigvec1.second = left_eigvec1_charact_pt.second;
     //wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
     */
 
-    if ( _M_verbose > 1 ) 
+    if ( _M_verbose > 1 )
       std::cout << "EigenValue 1 " << eigval1 << " EigenValue 2 " << eigval2 << std::endl;
-    
+
 
     ASSERT( eigval1 > 0. && eigval2 < 0. ,
 	    "The eigenvalues do not have the expected signs.");
@@ -1133,10 +1133,10 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
     //-------------------------------------
     //!compatibility condition
     //-------------------------------------
-    //! first characteristics    
+    //! first characteristics
     //! interpolation of U at the foot of the 1rst characteristics
-    U_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint, 
-				   _M_time_step, eigval1, 
+    U_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint,
+				   _M_time_step, eigval1,
 				   U_boundary, U_internalBd);
 
     //! rhsBC1 = left_eigvec1 dot U(tn, z = charact_pt1)
@@ -1145,10 +1145,10 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
     //! take into account the (quasi linear) source term
     /*!BEWARE: HERE THE PARAMETERS ARE TAKEN AT rightDof
                THEY SHOULD BE TAKEN AT THE CHARACTERISTICS!!
-    */ 
-    qlSource.first  = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+    */
+    qlSource.first  = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second,
 						     1, rightDof);
-    qlSource.second = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+    qlSource.second = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second,
 						     2, rightDof);
 
     //! rhsBC1 = rhsBC1 - deltaT * left_eigvec1 dot qlSource(tn, z = charact_pt1)
@@ -1165,30 +1165,30 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
 
 //! linear interpolation at the foot of the characteristic
 //! determined by the given eigenvalue
-OneDModelSolver::Vec2D 
+OneDModelSolver::Vec2D
 OneDModelSolver::_interpolLinear(const Real& point_bound, const Real& point_internal,
-				 const Real& deltaT, const Real& eigenvalue, 
+				 const Real& deltaT, const Real& eigenvalue,
 				 const Vec2D& U_bound, const Vec2D& U_intern) const
 {
   Real deltaX = std::abs(point_bound - point_internal);
-  
+
   Real cfl =  eigenvalue * deltaT / deltaX;
 
   Real weight;   //!< weight in the linear approximation
 
   if ( point_bound < point_internal ) { //! the edge is on the left of the domain
-    ASSERT( -1. < cfl && cfl < 0. , 
+    ASSERT( -1. < cfl && cfl < 0. ,
 	    "This characteristics is wrong!\nEither it is not outcoming (eigenvalue>0 at the left of the domain),\n or CFL is too high.");
 
     weight = - cfl;
   }
   else {  //! the edge is on the right of the domain
-    ASSERT( 0. < cfl && cfl < 1. , 
+    ASSERT( 0. < cfl && cfl < 1. ,
 	    "This characteristics is wrong!\nEither it is not outcoming (eigenvalue<0 at the right of the domain),\n or CFL is too high.");
 
     weight = cfl;
   }
-    
+
   Vec2D u_interp( ( 1 - weight ) * U_bound.first  + weight * U_intern.first ,
 		  ( 1 - weight ) * U_bound.second + weight * U_intern.second );
   return u_interp;
@@ -1197,7 +1197,7 @@ OneDModelSolver::_interpolLinear(const Real& point_bound, const Real& point_inte
 
 
 //! simple cfl computation (correct for constant mesh)
-void OneDModelSolver::CheckCFL() const 
+void OneDModelSolver::CheckCFL() const
 {
   Real CFL = 0.;
 
@@ -1216,22 +1216,22 @@ void OneDModelSolver::CheckCFL() const
     Qinode = _M_U2_thistime( inode );
 
     //! compute the eigenvalues at node
-    _M_fluxFun.jacobian_EigenValues_Vectors( Ainode, Qinode, 
-					     eigval1, eigval2, 
-					     tmp11, tmp12, 
-					     tmp21, tmp22, 
+    _M_fluxFun.jacobian_EigenValues_Vectors( Ainode, Qinode,
+					     eigval1, eigval2,
+					     tmp11, tmp12,
+					     tmp21, tmp22,
 					     inode );
 
 
     lambda1_max = std::max<Real>( std::fabs(eigval1), lambda1_max );
     lambda2_max = std::max<Real>( std::fabs(eigval2), lambda2_max );
   }
-  
+
   CFL = _M_time_step / deltaX * std::max<Real>( lambda1_max , lambda2_max );
   if ( _M_verbose > 1) {
     std::cout << "CFL = " << CFL << std::endl;
   }
-  
+
   ASSERT( CFL < 0.5774 , "CFL not respected" );
 }
 
@@ -1242,7 +1242,7 @@ void OneDModelSolver::CheckCFL() const
          line2 ]
   return A^{-1} * rhs2d
 */
-OneDModelSolver::Vec2D 
+OneDModelSolver::Vec2D
 OneDModelSolver::_solveLinearSyst2x2(const Vec2D& line1, const Vec2D& line2,
 				     const Vec2D& rhs2d) const
 {
@@ -1253,7 +1253,7 @@ OneDModelSolver::_solveLinearSyst2x2(const Vec2D& line1, const Vec2D& line2,
 
   Real determinant = aa11 * aa22 - aa12 * aa21;
 
-  ASSERT( determinant != 0, 
+  ASSERT( determinant != 0,
 	  "Error: the 2x2 system on the boundary is not invertible. \nCheck the boundary conditions.");
   Vec2D res( (   aa22 * rhs2d.first - aa12 * rhs2d.second ) / determinant,
 	     ( - aa21 * rhs2d.first + aa11 * rhs2d.second ) / determinant );
@@ -1279,7 +1279,7 @@ void OneDModelSolver::Axpy(const Vec2D& line1, const Vec2D& line2,
 //! 2D dot product
 Real OneDModelSolver::dot(const Vec2D& vec1, const Vec2D& vec2) const
 {
-  return vec1.first * vec2.first + vec1.second * vec2.second; 
+  return vec1.first * vec2.first + vec1.second * vec2.second;
 }
 
 
@@ -1297,9 +1297,9 @@ void OneDModelSolver::_updateFlux()
   }
 }
 
-/*! call _updateFlux and update the P0 derivative of flux vector from U: 
+/*! call _updateFlux and update the P0 derivative of flux vector from U:
   _M_diffFluxij = dF_h/dU(Un) i,j=1,2
-  
+
   _M_diffFluxij(elem) = 1/2 [ dF/dU(U(node1(elem))) + dF/dU(U(node2(elem))) ]
 
   (mean value of the two extremal values of dF/dU)
@@ -1361,9 +1361,9 @@ void OneDModelSolver::_updateSource()
   }
 }
 
-/*! call _updateSource and update the P0 derivative of source vector from U: 
+/*! call _updateSource and update the P0 derivative of source vector from U:
   _M_diffSrcij = dS_h/dU(Un) i,j=1,2
-  
+
   _M_diffSrcij(elem) = 1/2 [ dS/dU(U(node1(elem))) + dS/dU(U(node2(elem))) ]
 
   (mean value of the two extremal values of dS/dU)
@@ -1478,8 +1478,8 @@ void OneDModelSolver::_directsolveMassMatrix( ScalUnknown<Vector>& vec )
 // ! Initialize with constant initial conditions concentration
 void OneDModelSolver::initialize(const Real& u10, const Real& u20)
 {
-  _M_U1_thistime = u10;
-  _M_U2_thistime = u20;
+  _M_U1_thistime = ScalarVector( _M_U1_thistime.size(), u10 );
+  _M_U2_thistime = ScalarVector( _M_U1_thistime.size(), u20 );
 }
 
 // ! Initialize when  initial conditions concentration
@@ -1516,10 +1516,10 @@ void OneDModelSolver::timeAdvance( const Real& time_val )
   //! output cfl
   CheckCFL();
 
-  //! update the vector containing the values of the flux at the nodes 
+  //! update the vector containing the values of the flux at the nodes
   //! and its jacobian
   _updateFluxDer();
-  //! update the vector containing the values of the source term at the nodes 
+  //! update the vector containing the values of the source term at the nodes
   //! and its jacobian
   _updateSourceDer();
   chrono.stop();
@@ -1686,7 +1686,7 @@ void OneDModelSolver::timeAdvance( const Real& time_val )
 
 void OneDModelSolver::iterate( const Real& time_val , const int& count)
 {
-  std::cout << "  o-  Solving the system... t = " << time_val 
+  std::cout << "  o-  Solving the system... t = " << time_val
 	    << ", iter = " << count  << "... ";
   Chrono chrono;
   chrono.start();
@@ -1740,8 +1740,8 @@ void OneDModelSolver::gplot( )
 }
 
 //! output for Plotmtv.
-void OneDModelSolver::output_to_plotmtv(std::string fname, Real time_val, 
-					const std::vector< Point1D >& ptlist, 
+void OneDModelSolver::output_to_plotmtv(std::string fname, Real time_val,
+					const std::vector< Point1D >& ptlist,
 					const ScalUnknown<Vector>& U,
 					const int& count )
 {
@@ -1759,7 +1759,7 @@ void OneDModelSolver::output_to_plotmtv(std::string fname, Real time_val,
     fprintf(fp,"%10.6f %10.6f\n", ptlist[ii].x(), U[ii]);
   }
   fclose(fp);
-  
+
 }
 
 }

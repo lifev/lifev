@@ -31,7 +31,7 @@ SUBDIRS		= data  \
 		      test_linearelasticity \
 		      test_darcy test_onedmodel\
 		      test_ns_bdf test_ns_cyl test_ns_cyl_flux test_ns_bcvec test_ns_sstress \
-		      test_fsi test_fsi_newton test_fsi_picard test_fsi_dd \
+		      test_fsi \
 		      test_masstransport test_mass_coupling test_ns_ipstab \
                       test_coupling_3d0d
 
@@ -44,11 +44,8 @@ $(srcdir)/test_coupling_3d0d/testsuite.at \
 $(srcdir)/test_darcy/testsuite.at \
 $(srcdir)/test_essentialbc/testsuite.at \
 $(srcdir)/test_fe/testsuite.at \
-$(srcdir)/test_fsi_newton/testsuite.at \
 $(srcdir)/test_linearelasticity/testsuite.at \
 $(srcdir)/test_fsi/testsuite.at \
-$(srcdir)/test_fsi_picard/testsuite.at \
-$(srcdir)/test_fsi_dd/testsuite.at \
 $(srcdir)/test_masstransport/testsuite.at \
 $(srcdir)/test_mass_coupling/testsuite.at \
 $(srcdir)/test_laplacian/testsuite.at \

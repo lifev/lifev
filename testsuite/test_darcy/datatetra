@@ -6,7 +6,7 @@
 [darcy]
 
 [./physics]
-test_case       = 1                 # in particular for b.c. condition
+test_case       = 33                 # in particular for b.c. condition
 diffusion_type  = 0                 # 0: scalar diffusion, 1: tensor diffusion
 diffusion_function = 0  # select a user function
 diffusion_scalar  = 1.  # scalar diffusion coefficient

@@ -6,7 +6,7 @@
 [darcy]
 
 [./physics]
-test_case       = 1                 # in particular for b.c. condition
+test_case       = 33                 # in particular for b.c. condition
 diffusion_type  = 0                 # 0: scalar diffusion, 1: tensor diffusion
 diffusion_function = 0  # select a user function
 diffusion_scalar  = 1.  # scalar diffusion coefficient
@@ -17,7 +17,7 @@ theLinearSolver   = 0    # 0: Aztec, 1: UMFPack (UMFPack not implemented yet)
 
 [../discretization]
 mesh_dir    = ../data/mesh/inria/ # the directory where the mesh file is
-mesh_file   = cylhexa.mesh      #
+mesh_file   = hexahexa10x10x10.mesh  # cylhexa.mesh      #
 mesh_type   = .mesh
 mesh_faces   = all      # OBLIGATORY! we need all faces!
 element_shape = 1       # 0: tetra; 1: hexa

@@ -179,10 +179,10 @@ int main(int argc, char** argv)
     ASSERT(nout,"Error: Output file cannot be opened.");
 
     Vector disp(3*dim_solid);
-    disp =0.0;
+    disp = ZeroVector( disp.size() );
 
     Vector velo_1(3*dim_solid);
-    velo_1 =0.0;
+    velo_1 = ZeroVector( velo_1.size() );
 
     ofstream out_iter("iter");
     ofstream out_res("res");

@@ -61,19 +61,19 @@ class AnalyticalSol
 {
   // ic stands for a component index (unuseful in the scalar case)
 public:
-  inline Real operator()(Real x,Real y,Real z, Real t, UInt ic) const {
+  inline Real operator()(Real t, Real x,Real y,Real z, UInt ic) const {
     return t*t*(x*x+y*y+z*z);
   }
-  inline Real der_t(Real x,Real y,Real z,Real t, UInt ic) const {
+  inline Real der_t(Real t, Real x,Real y,Real z, UInt ic) const {
     return 2*t*(x*x+y*y+z*z);
   }
-  inline Real der_x(Real x,Real y,Real z,Real t, UInt ic) const {
+  inline Real der_x(Real t, Real x,Real y,Real z, UInt ic) const {
     return 2*x*t*t;
   }
-  inline Real der_y(Real x,Real y,Real z, Real t, UInt ic) const {
+  inline Real der_y(Real t, Real x,Real y,Real z, UInt ic) const {
     return 2*y*t*t;
   }
-  inline Real der_z(Real x,Real y,Real z, Real t, UInt ic) const {
+  inline Real der_z(Real t, Real x,Real y,Real z, UInt ic) const {
     return 2*z*t*t;
   }
 };

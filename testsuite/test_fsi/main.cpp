@@ -55,8 +55,8 @@ int main(int argc, char** argv)
     //  TEMPORAL LOOP
     //========================================================================================
 
-    //steklovPoincare oper(data_file);
-    fixedPoint oper(data_file);
+    steklovPoincare oper(data_file);
+    //fixedPoint oper(data_file);
     //exactJacobian oper(data_file);
 
     UInt maxpf  = 100;
@@ -79,10 +79,10 @@ int main(int argc, char** argv)
     UInt dim_fluid = oper.fluid().uDof().numTotalDof();
 
     Vector disp(3*dim_solid);
-    disp   = 0.0;
+    disp   = ZeroVector( disp.size() );
 
     Vector velo_1(3*dim_solid);
-    velo_1 = 0.0;
+    velo_1 = ZeroVector( velo_1.size() );
 
     std::ofstream out_iter("iter");
     std::ofstream out_res ("res");
