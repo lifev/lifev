@@ -102,7 +102,10 @@ main(int argc, char** argv)
     Real startT = __ns_with_flux.inittime();
     Real T  = __ns_with_flux.endtime();
 
-    __ns_with_flux.initialize(u0,p0,0.0,dt);
+    //__ns_with_flux.initialize(u0,p0,0.0,dt);
+    __ns_with_flux.initialize_inexact(u0,p0,0.0,dt);// inexact version for two fluxes imposed, if flux is one nothing changes
+
+    //ofstream outfile("flusso_inesatto.txt");
 
     for (Real time=startT+dt ; time <= T; time+=dt)
     {
@@ -114,9 +117,9 @@ main(int argc, char** argv)
        //__ns_with_flux.setFlux(1, my_flux_cos); //cosinusoidal
        //__ns_with_flux.setFlux(1, my_flux_physio); // physiological
 
-       __ns_with_flux.iterate( time ); 
-       //__ns->postProcess();
-    }
+       //__ns_with_flux.iterate( time );
+       __ns_with_flux.iterate_inexact( time );// inexact version for two fluxes imposed, if flux is one nothing changes 
+       }
 
     return EXIT_SUCCESS;
 }
