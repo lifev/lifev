@@ -175,12 +175,12 @@ int main(int argc, char** argv)
 	std::cout << iter << std::endl;
 
 	for(UInt ii=0; ii < dim_cw; ii++){
-	   cw_interface(ii)=cdrwall.c()(ii)*(1/epsilon)*(P-u_filt*((s*kappa)/2));}
+	   cw_interface(ii)=cdrwall.c()(ii)*(1/epsilon)*(Pw_var(ii)-u_filt*((s*kappa)/2));}
 
 	cdrlumen.iterate(time);
 
 	for(UInt ii=0; ii < dim_cl; ii++){
-	   cl_interface(ii)=cdrlumen.c()(ii)*(P+u_filt*((s*kappa)/2));}
+	   cl_interface(ii)=cdrlumen.c()(ii)*(Pl_var(ii)+u_filt*((s*kappa)/2));}
 
 	cdrwall.iterate(time);
 
