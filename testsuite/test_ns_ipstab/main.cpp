@@ -22,9 +22,9 @@
 \author M.A. Fernandez
 \date 01/01/2004
 
-\brief Main program for solving he Ossen's equation with reaction using
-P1/P1 or P2/P2 FEM with Interior Penalty ( IP ) stabilization
-( See Burman-Fernandez-Hansbo 2004 ).
+\brief Main program for solving he Oseen's equation with reaction using
+P1/P1 or P2/P2 FEM with Interior Penalty (IP) stabilization
+(See Burman-Fernandez-Hansbo 2004).
 
 */
 
@@ -34,6 +34,8 @@ P1/P1 or P2/P2 FEM with Interior Penalty ( IP ) stabilization
 //#include <ethierSteinman.hpp>
 //#include <simple.hpp>
 #include <picard.hpp>
+
+#include <iostream>
 
 int main( int argc, char** argv )
 {
@@ -69,6 +71,12 @@ int main( int argc, char** argv )
     //bcH.addBC( "Edges", 20, Essential, Full, bcf, 3 );
 
     //bcH.showMe();
+
+    // linearization of fluid
+    if ( dataFile( "fluid/discretization/linearized", 0 ) )
+    {
+        fluid.linearize( uexact );
+    }
 
     if ( dataFile( "fluid/miscellaneous/steady", 1 ) != 0 )
     {
@@ -139,14 +147,23 @@ int main( int argc, char** argv )
             fluid.timeAdvance( f, time );
             fluid.iterate( time );
 
+            Real epr;
+            Real epL2 = fluid.pErrorL2(pexact, time, &epr);
+            Real eur;
+            Real euL2 = fluid.uErrorL2(uexact, time, &eur);
+
             std::cout << "      - L2 pressure error = "
-                      << fluid.pErrorL2(pexact, time) << std::endl;
+                      << epL2 << std::endl;
             std::cout << "      - L2 velocity error = "
-                      << fluid.uErrorL2(uexact, time) << std::endl;
+                      << euL2 << std::endl;
+            std::cout << "      - L2 p error (rel.) = "
+                      << epr << std::endl;
+            std::cout << "      - L2 u error (rel.) = "
+                      << eur << std::endl;
 
             // save result on file
             std::ostringstream indexout;
-            indexout << ( time*100 );
+            indexout << ( (int)(time/dt+0.5) );
             std::string voutname;
             voutname = "fluid.res"+indexout.str();
             std::fstream resFile( voutname.c_str(),
