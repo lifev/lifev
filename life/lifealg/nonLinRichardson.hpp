@@ -106,9 +106,12 @@ int nonLinRichardson( Vector& sol,
 
     //
 
+    out_res << std::scientific;
     out_res << "# time = ";
     out_res << time << "   " << "initial norm_res " <<  normRes
-            << " stop tol = " << stop_tol << std::endl;
+            << " stop tol = " << stop_tol
+            << "initial norm_sol "
+            << norm_2(sol) << std::endl;
     out_res << "#iter      disp_norm       step_norm       muk_norm   residual_norm" << std::endl;
 
     while ( normRes > stop_tol && iter < maxit )
@@ -126,14 +129,15 @@ int nonLinRichardson( Vector& sol,
         normResOld = normRes;
 
         f.solveJac(muk, residual, linearRelTol);
+
         step = aitken.computeDeltaLambda( sol, muk );
 
-        normMuk  = norm( muk );
+        normMuk  = norm_2( muk );
 
         std::cout << "Muk norm = " << normMuk << std::endl;
         out_res   << iter
-                  << std::setw(15) << norm(sol)
-                  << std::setw(15) << norm_inf(step)
+                  << std::setw(15) << norm_2(sol)
+                  << std::setw(15) << norm_2(step)
                   << std::setw(15) << normMuk;
 
         sol += step;
@@ -141,7 +145,6 @@ int nonLinRichardson( Vector& sol,
         f.evalResidual( residual, sol, iter );
         normRes = norm( residual );
         out_res << std::setw(15) << normRes << std::endl;
-
     }
 
     if ( normRes > stop_tol )

@@ -202,23 +202,32 @@ computeDeltaLambda( const Vector &_lambda,
             b2 += muS * ( _lambda[ ii ] - M_lambda[ ii ] );
         }
 
+        std::cout << "a11 = " << a11 << std::endl;
+        std::cout << "a22 = " << a22 << std::endl;
+        std::cout << "a21 = " << a21 << std::endl;
+        std::cout << "b1  = " << b1  << std::endl;
+        std::cout << "b2  = " << b2  << std::endl;
         Real omegaS ( M_defOmegaS );
         Real omegaF ( M_defOmegaF );
 
         Real det ( a22 * a11 - a21 * a21 );
+        std::cout << "det = " << det << std::endl;
 
-        if ( std::fabs(det) > 1E-18 )  //! eq. (12) page 8
+        if ( std::fabs(det) > 1e-15 )  //! eq. (12) page 8
         {
-            omegaF = -( a22 * b1 - a21 * b2 ) / det;
-            omegaS = -( a11 * b2 - a21 * b1 ) / det; // !
+            omegaF = - ( a22 * b1 - a21 * b2 ) / det;
+            omegaS = - ( a11 * b2 - a21 * b1 ) / det; // !
+
+            if (omegaS == 0.) omegaS = M_defOmegaS;
+            if (omegaF == 0.) omegaF = M_defOmegaF;
         }
-        else if (  std::fabs(a22) < 1E-8 )
+        else if (  std::fabs(a22) < 1e-15 )
         {
             std::cout << "generalizedAitken:  a22=0!!" << std::endl;
             omegaS = 0.;
             omegaF = -b1 / a11;
         }
-        else if (  std::fabs(a11) < 1E-8 )
+        else if (  std::fabs(a11) < 1e-15 )
         {
             std::cout << "generalizedAitken:  a11=0!!" << std::endl;
             omegaS = -b2 / a22;
@@ -286,15 +295,13 @@ Vector generalizedAitken<Vector, Real>::
 computeDeltaLambda( const Vector &_lambda,
                     const Vector &_mu )
 {
-
     Vector deltaLambda;
-
 
     if (( !M_firstCall ) && ( !M_useDefault ))
     {
         Vector deltaMu = _mu - M_muS;
         Real omega = 0.;
-        Real norm = 0.;
+        Real norm  = 0.;
 
         deltaLambda = _lambda - M_lambda;
 
@@ -302,13 +309,13 @@ computeDeltaLambda( const Vector &_lambda,
         for ( UInt ii = 0; ii < deltaLambda.size(); ++ii )
         {
             omega += deltaLambda[ ii ] * deltaMu[ ii ];
-            norm += deltaMu[ ii ] * deltaMu[ ii ];
+            norm  += deltaMu[ ii ] * deltaMu[ ii ];
         }
 
         M_lambda = _lambda;
-        M_muS = _mu;
+        M_muS    = _mu;
 
-        omega = - omega / norm ;
+        omega    = - omega / norm ;
 
         if ( std::fabs(omega) < std::fabs(M_defOmegaS)/1024
              || std::fabs(omega) > std::fabs(M_defOmegaS)*1024 )
