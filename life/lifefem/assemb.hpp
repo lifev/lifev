@@ -352,7 +352,15 @@ template<typename OperDG, typename OperDGIF, typename OperDGBF,
 	assemb_mat_DG_BF(A, bfmat, feDG, dof, iAd, ic, jc);
 
       }
+
+      /*
+        Call to compute_vec_DG_BF is disabled since the implementation
+        is not available.
+       */
+#warning CALL TO compute_vec_DG_BF DISABLED: IMPLEMENTATION DOES NOT EXIT
+#if 0
       compute_vec_DG_BF(BCh, bfvec, feBFDG, ic);
+#endif
       assemb_vec_DG_BF(b, bfvec, feBFDG, iAd, dof, ic);
 
     }
