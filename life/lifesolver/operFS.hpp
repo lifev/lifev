@@ -118,13 +118,13 @@ public:
 
     solid_type::value_type& solid() {return *M_solid;}
 
-    void setPreconditioner( OperFSPreconditioner __p ) { M_precond = __p; }
+    void setPreconditioner( OperFSPreconditioner _p ) { M_precond = _p; }
     OperFSPreconditioner preconditioner() const { return M_precond; }
 
     void setTime(const Real &time) {M_time = time;};
     Real time() {return M_time;};
 
-    void displacementOnInterface();
+    Vector displacementOnInterface();
 
     void setFluid( fluid_type const& fluid ){ M_fluid = fluid;}
     void setSolid( solid_type const& solid ){ M_solid = solid;}

@@ -141,7 +141,7 @@ operFS::updateJac(Vector& sol,int iter)
 //
 
 
-void
+Vector
 operFS::displacementOnInterface()
 {
 
@@ -155,6 +155,8 @@ operFS::displacementOnInterface()
     std::cout << std::endl;
     std::cout << "l2  norm disp = " << norm_2(dispOnInterface);
     std::cout << std::endl;
+
+    return dispOnInterface;
 }
 
 
