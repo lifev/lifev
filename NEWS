@@ -2,9 +2,13 @@ Bugs fixed in 0.3.90:
 * OpenDX filter got revamped (CW)
 
 New in 0.3.90:
+* Added --with-petsc=<top level petsc directory> configure option (CP)
 * Added support for automake 1.9 (CP)
 * Got rid of NavierStokesHandler_miguel.hpp (CW)
-                                                                                
+* darcySolver is officially distributed (CP)
+  moved to life/lifesolver and cleanup a bit
+
+
 Bugs fixed in 0.3.0:
 * Fixed (hopefully) mpi autoconf check (CP)
 * Fixed petsc support, require petsc2.2 now (CP)
