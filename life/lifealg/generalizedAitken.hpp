@@ -190,7 +190,7 @@ computeDeltaLambda( const Vector &_lambda,
 
         /*! bulding the matrix and the right hand side
           see eq. (16) page 10
-        */
+     
 
         for ( UInt ii = 0; ii < M_nDof; ++ii )
         {
