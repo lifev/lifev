@@ -536,7 +536,7 @@ void stiff(Real coef,Real (*fct)(Real,Real,Real),ElemMat& elmat,
     Stiffness matrix: coef*\int grad v_i . grad v_j
   */
 {
-  ASSERT_PRE(fe.hasFirstDerivQuadPt(),
+  ASSERT_PRE(fe.hasFirstDeriv() && fe.hasQuadPtCoor(),
 	     "Stiffness matrix with a diffusion function needs the first derivatives and the coordinates of the quadrature points.  Call for example updateFirstDerivQuadPt() instead of updateFirstDeriv()");
   Tab2dView mat = elmat.block(iblock,jblock);
   int iloc,jloc;
