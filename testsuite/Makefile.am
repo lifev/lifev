@@ -71,7 +71,7 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.in.in
 	} >$(srcdir)/package.m4
 
 
-EXTRA_DIST = testsuite.at testsuite
+EXTRA_DIST = testsuite.at testsuite package.m4
 
 TESTSUITE = $(srcdir)/testsuite
 check-local: atconfig atlocal  $(TESTSUITE)
