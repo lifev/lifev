@@ -276,7 +276,11 @@ SolverPETSC::setNullSpace( const std::vector<const Vector*>& __nullSpace )
                         dimNullSpace,
                         nullSpaceVecs,
                         &nullSpace );
+#if PETSC_VERSION == 220
+    PCNullSpaceAttach( _M_p->__pc, nullSpace );
+#else
     KSPSetNullSpace( _M_p->__ksp, nullSpace );
+#endif
     delete[] nullSpaceVecs;
 }
 
