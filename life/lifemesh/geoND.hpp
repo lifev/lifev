@@ -33,7 +33,10 @@ namespace LifeV
 
 */
 template <typename GEOSHAPE,typename POINTTYPE=Geo0D>
-class GeoND :public MeshEntity, public GEOSHAPE
+class GeoND
+    :
+     public MeshEntity,
+     public GEOSHAPE
 {
 public:
 
@@ -47,9 +50,9 @@ public:
   typedef POINTTYPE  PointType;
 
   //! Number of points associated to the entity
-  static const UInt numLocalPoints=numPoints;// for comp only
+  static const UInt numLocalPoints=GEOSHAPE::numPoints;// for comp only
   //! Number of Vertices associated to the entity
-  static const UInt numLocalVertices=numVertices;// for comp only
+  static const UInt numLocalVertices=GEOSHAPE::numVertices;// for comp only
   //! The ith point (starting from 1)
   /* It returns the reference to an point object (possibly derived from
      Geo0D)*/
@@ -88,7 +91,7 @@ public:
     (remeber the numbering from 1 of the ID's!. This is a member function
     to be used ONLY by routines for checking or amending meshes. You must
     give ID (which start from 1 as usual!)  */
-  void exchangePoints(const ID otn[numPoints]);
+  void exchangePoints(const ID otn[GEOSHAPE::numPoints]);
 
  private:
   Geo0D *  _points[GEOSHAPE::numPoints];

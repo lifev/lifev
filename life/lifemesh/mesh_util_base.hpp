@@ -713,7 +713,9 @@ fixBPoints(RegionMesh  & mesh, std::ostream & clog=std::cout,std::ostream & err=
 \pre It assumes that boundary points are properly stored in the mesh
 */
 template <typename RegionMesh>
-bool setBoundaryEdgesFirst(RegionMesh & mesh){
+void
+setBoundaryEdgesFirst(RegionMesh & mesh)
+{
 
   typedef typename RegionMesh::Edges Edges;
   // set the functor
@@ -728,7 +730,8 @@ bool setBoundaryEdgesFirst(RegionMesh & mesh){
 \pre It assumes that boundary points are properly stored in the mesh
 */
 template <typename RegionMesh>
-bool setBoundaryFacesFirst(RegionMesh & mesh){
+void
+setBoundaryFacesFirst(RegionMesh & mesh){
 
   typedef typename RegionMesh::Faces Faces;
   // set the functor
@@ -736,7 +739,6 @@ bool setBoundaryFacesFirst(RegionMesh & mesh){
 
   std::partition(mesh.faceList.begin(),mesh.faceList.end(),enquireBFace);
   fixIdnumber(mesh.faceList);
-
 }
 
 //! Tests if boundary faces are stored first

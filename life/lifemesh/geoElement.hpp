@@ -18,7 +18,7 @@
 */
 /*! file geoElement.h
 \brief Geometric elements
-\version $Revision: 1.5 $ Luca Formaggia
+\version $Revision: 1.6 $ Luca Formaggia
 
   Introduces all the geometric elements
 */
@@ -113,13 +113,16 @@ class GeoElement1D : public GeoND<GEOSHAPE,GeoElement0D<MC> >, public MC::EdgeMa
   3Delements and their relative position.*/
 template
 <typename GEOSHAPE, typename MC=DefMarkerCommon>
-class GeoElement2D : public GeoND<GEOSHAPE,GeoElement0D<MC> >, public MC::FaceMarker
+class GeoElement2D
+    :
+    public GeoND<GEOSHAPE,GeoElement0D<MC> >,
+    public MC::FaceMarker
 {
  public:
 
   GeoElement2D(ID id=0);
   //! Number of element edges
-  static const UInt numLocalEdges=numEdges; //For compatibility
+  static const UInt numLocalEdges=GeoND<GEOSHAPE,GeoElement0D<MC> >::numEdges; //For compatibility
 
   typedef GEOSHAPE GeoShape;
   typedef typename MC::FaceMarker Marker;
@@ -158,7 +161,10 @@ class GeoElement2D : public GeoND<GEOSHAPE,GeoElement0D<MC> >, public MC::FaceMa
 //! Class for 3D elements
 template
 <typename GEOSHAPE, typename MC=DefMarkerCommon>
-class GeoElement3D : public GeoND<GEOSHAPE,GeoElement0D<MC> >, public MC::VolumeMarker
+class GeoElement3D
+    :
+    public GeoND<GEOSHAPE,GeoElement0D<MC> >,
+    public MC::VolumeMarker
 {
 public:
 
@@ -175,11 +181,11 @@ public:
   typedef  FaceType GeoBElement;
 
   //! Number of local Vertices
-  static  const UInt numLocalVertices=numVertices;
+  static  const UInt numLocalVertices=GeoND<GEOSHAPE,GeoElement0D<MC> >::numVertices;
   //! Number of local Faces
-  static  const UInt numLocalFaces=numFaces;
+  static  const UInt numLocalFaces=GeoND<GEOSHAPE,GeoElement0D<MC> >::numFaces;
   //! Number of local Edges (using Euler Formula)
-  static  const UInt numLocalEdges=numEdges;
+  static  const UInt numLocalEdges=GeoND<GEOSHAPE,GeoElement0D<MC> >::numEdges;
 };
 /*@}*/
 

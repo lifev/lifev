@@ -18,8 +18,8 @@
 */
 /*! file regionMesh3D.h
   \brief The mesh classes interfaces
-  \version $Revision: 1.8 $ Luca Formaggia
-  \version $Revision: 1.8 $ Miguel Fernandez
+  \version $Revision: 1.9 $ Luca Formaggia
+  \version $Revision: 1.9 $ Miguel Fernandez
 
   Introduces the RegionMesh3D class
 */
@@ -1350,14 +1350,16 @@ RegionMesh3D<GEOSHAPE,MC>::numBVertices() {
 // *************** GENERAL *******************
 
 template<typename GEOSHAPE, typename MC>
-std::ostream &  RegionMesh3D<GEOSHAPE,MC>::showMe(bool verbose, std::ostream & out){
+std::ostream &
+RegionMesh3D<GEOSHAPE,MC>::showMe(bool verbose, std::ostream & out)
+{
   out << "**************************************************"<<std::endl;
   out << "**************************************************"<<std::endl;
   out << "                      RegionMesh3D                "<<std::endl;
   out << "**************************************************"<<std::endl;
   out << "**************************************************"<<std::endl;
   out << " ID: "<< _id <<" Marker Flag:";
-  printFlag(out);
+  this->printFlag(out);
   out<<std::endl;
   //  out <<"Faces local to  volumes stored: "<<hasLocalFaces()<<std::endl;
   //out <<"Edges local to  volumes stored: "<<hasLocalEdges()<<std::endl;
@@ -1626,7 +1628,7 @@ RegionMesh3D<GEOSHAPE,MC>::faceElement(FaceType const &  f, UInt const Pos) cons
 {
 ASSERT_BD( ! faceList.empty()) ;
 ASSERT_PRE( Pos==1 || Pos==2 , "Wrong position (1 or 2)" ) ;
-ASSERT_BD( i >0 ) ;
+//ASSERT_BD( i >0 ) ;
 if (Pos==1)  {return f.ad_first();}
 else { return f.ad_second();}
 };
@@ -2194,7 +2196,7 @@ RegionMesh3D<GEOSHAPE,MC>::updateElementFaces(bool cf, UInt ef){
 	      face.ad_first()=vid;
 	      face.pos_first()=j;
 	      // gets the marker from the RegionMesh
-	      face.setMarker(marker());
+	      face.setMarker(this->marker());
 	      addFace(face,false); //The id should be correct
 	    }
 	  else
