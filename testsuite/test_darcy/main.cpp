@@ -69,7 +69,7 @@ int main(int argc, char** argv)
   if(pb.verbose)
     cout << "*** Compute the matrix --->" << endl;
   chrono.start();
-  pb.computeHybridMatrix();
+  pb.computeHybridMatrixAndSourceRHS();
   chrono.stop();
   if(pb.verbose)
     cout << "<--- matrix computation done in "<< chrono.diff() << "s." << endl;
@@ -88,8 +88,11 @@ int main(int argc, char** argv)
   chrono.stop();
   if(pb.verbose)
     cout << "<---  done in " << chrono.diff() << "s." << endl << endl;
+
   if(pb.verbose) cout << "*** Postproc --->" << endl;
   chrono.start();
+  pb.postProcessTraceOfPressureRT0();
+  pb.postProcessVelocityRT0();
   pb.postProcessPressureQ0();
   pb.postProcessPressureQ1();
   pb.postProcessVelocityQ1();
