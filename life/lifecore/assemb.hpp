@@ -43,8 +43,8 @@ assemble(Oper oper, const RegionMesh& mesh, CurrentFE& fe,
     elmat.zero();
     //
     elvec.zero();
-    for (int ic=0; ic<nc; ++ic){
-      for (int jc=0; jc<nc; ++jc){
+    for ( uint ic=0; ic<nc; ++ic){
+      for ( uint jc=0; jc<nc; ++jc){
 	compute_mat(elmat,oper,fe,ic,jc); // compute local matrix
 	// the previous line would become:  compute_mat(elmat,oper.comp(ic,jc),fe); ****
 	assemb_mat(A,elmat,fe,dof,ic,jc); // assemble local matrix into global one
