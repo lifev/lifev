@@ -22,19 +22,34 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-
-check_HEADERS  = ud_functions.hpp zeroDModelSolver.hpp meanPressure.hpp flowRate.hpp
-
-check_PROGRAMS  = test_coupling_3d0d
-test_coupling_3d0d_SOURCES = main.cpp
-
-EXTRA_DIST = data testsuite.at
-
-
+AM_CPPFLAGS	= -DNO_BLASLAPACK
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
+
+check_HEADERS  = ud_functions.hpp operFS.hpp zeroDModelSolver.hpp meanPressure.hpp flowRate.hpp
+
+check_PROGRAMS  = test_coupling_NS0d test_coupling_FSI0d
+
+test_coupling_NS0d_SOURCES = main_NS0d.cpp
+
+test_coupling_FSI0d_SOURCES = main_FSI0d.cpp operFS.cpp
+
+EXTRA_DIST = data_NS0d data_FSI0d testsuite.at
 
 MOSTLYCLEANFILES=fluid.res1 test.001.inp press.001.bb \
                  vel_x.001.bb vel_y.001.bb vel_z.001.bb fluid.res2 test.002.inp\
                  press.002.bb vel_x.002.bb vel_y.002.bb vel_z.002.bb \
-                 res_DP.m res_Q.m
+                 res_DP.m res_Q.m \
+                 \
+                 vel_x.001.bb vel_y.001.bb vel_z.001.bb \
+                 vel_x.002.bb vel_y.002.bb vel_z.002.bb \
+                 vel_x.001.mesh vel_y.001.mesh vel_z.001.mesh \
+                 vel_x.002.mesh vel_y.002.mesh vel_z.002.mesh \
+                 dep_x.001.bb dep_y.001.bb dep_z.001.bb \
+                 dep_x.002.bb dep_y.002.bb dep_z.002.bb \
+                 dep_x.001.mesh dep_y.001.mesh dep_z.001.mesh \
+                 dep_x.002.mesh dep_y.002.mesh dep_z.002.mesh \
+                 press.001.bb press.002.bb press.001.mesh press.002.mesh\
+                 defor.001.mesh defor.002.mesh \
+                 iter num_iter out_iter_solid out_res_solid res \
+                 res_DP.m res_Qin.m res_Qout.m
