@@ -97,8 +97,8 @@ OneDModelSolver::OneDModelSolver(const GetPot& data_file,
     std::cout << "O-  Nb of unknowns: " << _M_dimDof     << "\n";
     std::cout << "O-  Computing the constant matrices... \n" << std::endl;
 
-    std::string fname1 = "solA.mtv";
-    std::string fname2 = "solQ.mtv";
+    std::string fname1 = _M_post_dir + "/" + _M_post_file + "A.mtv";
+    std::string fname2 = _M_post_dir + "/" + _M_post_file + "Q.mtv";
     output_to_plotmtv( fname1, 0., _M_mesh.pointList(), _M_U1_thistime, 0);
     output_to_plotmtv( fname2, 0., _M_mesh.pointList(), _M_U2_thistime, 0);
 
@@ -1416,23 +1416,23 @@ OneDModelSolver::_interpolLinear(const Real& point_bound, const Real& point_inte
 }
 
 //! get the flux function
-const NonLinearFluxFun1D& OneDModelSolver::FluxFun() const 
+const NonLinearFluxFun1D& OneDModelSolver::FluxFun() const
 {
     return _M_fluxFun;
 }
 //! get the source function
-const NonLinearSourceFun1D& OneDModelSolver::SourceFun() const 
+const NonLinearSourceFun1D& OneDModelSolver::SourceFun() const
 {
     return _M_sourceFun;
 }
 
 //! get the left edge
-Edge1D const& OneDModelSolver::LeftEdge() const
+Edge1D OneDModelSolver::LeftEdge() const
 {
     return _M_leftEdge;
 }
 //! get the right edge
-Edge1D const& OneDModelSolver::RightEdge() const
+Edge1D OneDModelSolver::RightEdge() const
 {
     return _M_rightEdge;
 }
@@ -1450,8 +1450,6 @@ UInt OneDModelSolver::LeftInternalNodeId() const
 //! get the right node
 UInt OneDModelSolver::RightNodeId() const
 {
-    std::cerr << "RightNodeId() " << _M_rightNodeId << std::endl;
-
     return _M_rightNodeId;
 }
 //! get the right internal node (neighboring node)
@@ -1464,25 +1462,25 @@ UInt OneDModelSolver::RightInternalNodeId() const
 OneDModelSolver::Vec2D OneDModelSolver::BCValuesLeft() const
 {
     return Vec2D( _M_U1_thistime( LeftNodeId() ), 
-		  _M_U2_thistime( LeftNodeId() ) );
+                  _M_U2_thistime( LeftNodeId() ) );
 }
 //! get the value at neighboring node (left)
 OneDModelSolver::Vec2D OneDModelSolver::BCValuesInternalLeft() const
 {
     return Vec2D( _M_U1_thistime( LeftInternalNodeId() ), 
-		  _M_U2_thistime( LeftInternalNodeId() ) );
+                  _M_U2_thistime( LeftInternalNodeId() ) );
 }
 //! get the Dirichlet boundary conditions (right)
 OneDModelSolver::Vec2D OneDModelSolver::BCValuesRight() const 
 {
     return Vec2D( _M_U1_thistime( RightNodeId() ), 
-		  _M_U2_thistime( RightNodeId() ) );
+                  _M_U2_thistime( RightNodeId() ) );
 }
 //! get the value at neighboring node (right)
 OneDModelSolver::Vec2D OneDModelSolver::BCValuesInternalRight() const 
 {
     return Vec2D( _M_U1_thistime( RightInternalNodeId() ), 
-		  _M_U2_thistime( RightInternalNodeId() ) );
+                  _M_U2_thistime( RightInternalNodeId() ) );
 }
 
 //! set the Dirichlet boundary conditions (right)
@@ -1835,63 +1833,13 @@ void OneDModelSolver::timeAdvance( const Real& time_val )
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
-    /*
-      std::cout << "\n\n\tMass matrix " << std::endl;
-      _M_massMatrix.showMe( std::cout , _M_verbose );
-      std::cout << "\n\n\tGradient matrix " << std::endl;
-      _M_gradMatrix.showMe( std::cout , _M_verbose );
-
-      std::cout << "\n\n\tGradientDiffFlux11 matrix " << std::endl;
-      _M_gradMatrixDiffFlux11.showMe( std::cout , _M_verbose );
-      std::cout << "\n\n\tGradientDiffFlux12 matrix " << std::endl;
-      _M_gradMatrixDiffFlux12.showMe( std::cout , _M_verbose );
-
-      std::cout << "\n\n\tStiffnessDiffFlux11 matrix " << std::endl;
-      _M_stiffMatrixDiffFlux11.showMe( std::cout , _M_verbose );
-      std::cout << "\n\n\tStiffnessDiffFlux12 matrix " << std::endl;
-      _M_stiffMatrixDiffFlux12.showMe( std::cout , _M_verbose );
-
-      std::cout << "\n\n\tDivergenceDiffSrc11 matrix " << std::endl;
-      _M_divMatrixDiffSrc11.showMe( std::cout , _M_verbose );
-      std::cout << "\n\n\tDivergenceDiffSrc12 matrix " << std::endl;
-      _M_divMatrixDiffSrc12.showMe( std::cout , _M_verbose );
-
-      std::cout << "\n\n\tMassDiffSrc11 matrix " << std::endl;
-      _M_massMatrixDiffSrc11.showMe( std::cout , _M_verbose );
-      std::cout << "\n\n\tMassDiffSrc12 matrix " << std::endl;
-      _M_massMatrixDiffSrc12.showMe( std::cout , _M_verbose );
-    */
-    /*
-      std::cout << "\n\n\tFACTORIZED Mass matrix " << std::endl;
-      _M_factorMassMatrix.showMe( std::cout , _M_verbose );
-      ScalUnknown<Vector> vec( _M_dimDof );
-      for (int ii=0; ii < _M_stiffMatrix.OrderMatrix() ; ii++ ) {
-      vec( ii ) = ii;
-      std::cout <<  ii << " " << vec(ii) << std::endl;;
-      }
-
-      _solveMassMatrix( vec );
-      std::cout << "solve " << std::endl;
-      for (int ii=0; ii < _M_stiffMatrix.OrderMatrix() ; ii++ ) {
-      std::cout <<  ii << " " << vec(ii) << std::endl;;
-      }
-
-      vec = 1000.;
-      _M_stiffMatrix.Axpy( 1., _M_rhs , 1., vec );
-      std::cout << "matvec " << std::endl;
-      for (int ii=0; ii < _M_stiffMatrix.OrderMatrix() ; ii++ ) {
-      std::cout <<  ii << " " << vec(ii) << std::endl;;
-      }
-    */
-
-
     /*!
       ---------------------------------------------------
       Taylor-Galerkin scheme: (explicit, U = [U1,U2]^T )
       ---------------------------------------------------
 
       (Un+1, phi) =                             //! massFactor^{-1} * Un+1
-      (Un, phi)                         //!            mass * U
+                 (Un, phi)                         //!            mass * U
       + dt     * (       Fh(Un), dphi/dz )         //!            grad * F(U)
       - dt^2/2 * (diffFh(Un) Sh(Un), dphi/dz )     //! gradDiffFlux(U) * S(U)
       + dt^2/2 * (diffSh(Un) dFh/dz(Un), phi )     //!   divDiffSrc(U) * F(U)
@@ -2023,9 +1971,9 @@ void OneDModelSolver::iterate( const Real& time_val , const int& count)
     }
     }
     */
-    if( !(count % 10) ){
-        std::string fname1 = "solA.mtv";
-        std::string fname2 = "solQ.mtv";
+    if( !(count % 5) ){
+        std::string fname1 = _M_post_dir + "/" + _M_post_file + "A.mtv";
+        std::string fname2 = _M_post_dir + "/" + _M_post_file + "Q.mtv";
         output_to_plotmtv( fname1, time_val, _M_mesh.pointList(), _M_U1_thistime, count);
         output_to_plotmtv( fname2, time_val, _M_mesh.pointList(), _M_U2_thistime, count);
     }

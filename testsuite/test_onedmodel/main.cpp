@@ -110,18 +110,6 @@ int main(int argc, char** argv)
     if ( data_file( "miscellaneous/show_graceplot", 0 ) )
       onedm.gplot();
 
-    // ************* saving result on file *****************************************
-    std::ostringstream indexout;
-    indexout << (time*100);
-    std::string voutname;
-    voutname = onedm.PostDirectory() + "/res.res" + indexout.str();
-    // fstream Resfile(voutname.c_str(),ios::out | ios::binary);
-    std::fstream Resfile(voutname.c_str(),std::ios::out );
-    // Resfile.write((char*)&onedm.u()(1),onedm.u().size()*sizeof(Real));
-    Resfile.write((char*)&onedm.U1_thistime()(1),
-		  onedm.U1_thistime().size()*sizeof(Real));
-    Resfile.close();
-
     //onedm.postProcess();
   }
 

@@ -194,9 +194,9 @@ public:
     NonLinearSourceFun1D const& SourceFun() const;
 
     //! get the left edge
-    Edge1D const& LeftEdge() const;
+    Edge1D LeftEdge() const;
     //! get the right edge
-    Edge1D const& RightEdge() const;
+    Edge1D RightEdge() const;
 
     //! get the left node
     UInt LeftNodeId() const;
@@ -234,7 +234,7 @@ private:
     /*
     //! the flux function
     LinearSimpleFluxFun1D _M_fluxFun;
-    //! the source function 
+    //! the source function
     LinearSimpleSourceFun1D _M_sourceFun ;
     */
 
@@ -244,8 +244,8 @@ private:
     const UInt _M_rightInternalNodeId;
 
     //! boundary edges
-    const Edge1D& _M_leftEdge;
-    const Edge1D& _M_rightEdge;
+    const Edge1D _M_leftEdge;
+    const Edge1D _M_rightEdge;
 
     //! coefficient in front of the corresponding _M_elmat*
     Real _M_coeffMass;

@@ -130,7 +130,7 @@ public:
 
   //! compute the total pressure : Pt = P + rho/2 * (Q/A)^2
   Real totalPressure(const Real& _A, const Real& _Q, 
-		     const UInt& indz = 0) const;
+                     const UInt& indz = 0) const;
 
   //! compute the derivative of total pressure
   Real totalPressureDiff( const Real& _A, const Real& _Q, 
