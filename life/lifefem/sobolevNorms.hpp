@@ -53,7 +53,7 @@ Real elem_L2_2( const VectorType & u, const CurrentFE& fe, const DOF& dof,
     UInt eleID = fe.currentId();
     UInt ic;
     Real s = 0, u_ig;
-    for ( ic = 0; ic < nbcomp; ic++ )
+    for ( ic = 0; ic < (UInt)nbcomp; ic++ )
     {
         for ( ig = 0;ig < fe.nbQuadPt;ig++ )
         {
