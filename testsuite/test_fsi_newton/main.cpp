@@ -100,11 +100,7 @@ int main(int argc, char** argv)
 
 
 
-    // Passing data from structure to the fluid: solid velocity at the interface velocity
-    //
-    DofInterface3Dto3D dofMeshToFluid(feTetraP1bubble, fluid.uDof(), feTetraP1bubble, fluid.uDof() );
-    dofMeshToFluid.update(fluid.mesh(), 1, fluid.mesh(), 1, 0.0);
-    BCVectorInterface u_wall(fluid.wInterpolated(), dim_fluid,dofMeshToFluid);
+  
 
 
     //========================================================================================
@@ -120,10 +116,12 @@ int main(int argc, char** argv)
     BCh_mesh.addBC("Edges",    20, Essential, Full, bcf,   3);
 
     // Boundary conditions for the fluid velocity
-    BCFunctionBase in_flow(u2);
-    BCh_u.addBC("Wall",   1,  Essential, Full, u_wall,  3);
-    BCh_u.addBC("InFlow", 2,  Natural,   Full, in_flow, 3);
-    BCh_u.addBC("Edges",  20, Essential, Full, bcf,     3);
+    BCFunctionBase in_flow(u2);  
+    BCVector u_wall(fluid.wInterpolated(), dim_fluid);   // Passing w -> u at the interface
+    BCh_u.addBC("Wall",        1, Essential, Full, u_wall,  3);    
+    BCh_u.addBC("Wall_Edges", 20, Essential, Full, u_wall,  3);
+    BCh_u.addBC("InFlow",      2, Natural,   Full, in_flow, 3);
+
 
     // Boundary conditions for the solid displacement
     BCh_d.addBC("Interface", 1, Natural, Full, g_wall, 3);
@@ -142,23 +140,20 @@ int main(int argc, char** argv)
 
     operFS oper(fluid,solid,BCh_du,BCh_dz);
 
-    // Passing data from structure to the fluid: z -> du
-    //
-    BCVectorInterface du_wall(fluid.dwInterpolated(), dim_fluid, dofMeshToFluid);
-
     // Passing data from fluid to the structure: du -> dz
     //
     BCVectorInterface dg_wall(fluid.residual(), dim_fluid, dofFluidToStructure);
 
     // Boundary conditions for du
-    BCh_du.addBC("Wall",   1,  Essential, Full, du_wall,  3);
-    BCh_du.addBC("Edges",  20, Essential, Full, bcf,      3);
+    BCVector du_wall(fluid.dwInterpolated(), dim_fluid); // dw -> du
+    BCh_du.addBC("Wall",         1, Essential, Full, du_wall, 3);
+    BCh_du.addBC("Wall_Edges",  20, Essential, Full, du_wall, 3);
 
 
     // Boundary conditions for dz
     BCh_dz.addBC("Interface", 1, Natural,   Full, dg_wall, 3);
-    BCh_dz.addBC("Top",       3, Essential, Full, bcf,  3);
-    BCh_dz.addBC("Base",      2, Essential, Full, bcf,  3);
+    BCh_dz.addBC("Top",       3, Essential, Full, bcf,     3);
+    BCh_dz.addBC("Base",      2, Essential, Full, bcf,     3);
 
 
 
