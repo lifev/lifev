@@ -1,8 +1,11 @@
 .deps
 .libs
 GetPot.lo
+LDebug.lo
 Makefile
 Makefile.in
+bareItems.lo
+basisElSh.lo
 dataString.lo
 dataTime.lo
 liblifecore.la

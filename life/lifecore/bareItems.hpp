@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -75,14 +75,16 @@ faces and all edges. We need then to choose a unique way to identify the
 orientation of an Edge or of a Face <em>independently </em> from the fact
 that they are active or not. We will call this orientation the <em>natural </em>
 orientation. We have chosen the following
-convention for natural orientation of faces and edges<ul>
+convention for natural orientation of faces and edges
 
-<li>The positive natural orientation of an  <em>Edge</em> is given by \f$V_min \rightarrow V_max \f$,
-\f$V_min$ being the Edge Vertex with smallest ID</li>
+<ul>
+<li>The positive natural orientation of an  <em>Edge</em> is given by \f$V_{min} \rightarrow V_{max} \f$,
+    \f$V_{min}\f$ being the Edge Vertex with smallest ID</li>
+
 <li>The positive natural orientation of a  <em>Face</em> is given by the cicle
-\f$V_min \rightarrow V_2\rightarrow V_3 \f$,
-\f$V_min$ being the Face Vertex with smallest ID, \f$V_2\f$ the second smallest
-and \f$V_2\f$ the thirsd smallest.</li>
+    \f$V_{min} \rightarrow V_2\rightarrow V_3 \f$,
+    \f$V_{min}\f$ being the Face Vertex with smallest ID, \f$V_2\f$ the second smallest
+    and \f$V_2\f$ the thirsd smallest.</li>
 </ul>
 
 Note that the latter definition applies both to triangular and to quad faces.
@@ -93,7 +95,7 @@ RegionMesh classes treat boundary items in a rather special way).
 
 
 
-\par Usage 
+\par Usage
 
 Since BareItems are used only internally, we are (temporarily) omitting a
 detailed documentation.
@@ -104,11 +106,11 @@ detailed documentation.
 /*!
   Special routines to read meshes and special structures for
   sides and faces handling
-  
+
   Classes BareFace and BareEdge have been created to give an UNIQUE
   Representation for mesh faces and edges and thus allow the construction
   of global tables or Fields.
- 
+
 */
 #include<utility>
 #include<vector>
@@ -118,7 +120,7 @@ detailed documentation.
 
 #include "lifeV.hpp"
 
-#ifndef _LIFEV_HH_ 
+#ifndef _LIFEV_HH_
 /*! \typedef typedef unsigned int ID
 \brief type used for Identifiers (Integral type in the range [1, MAX_INT]).
 All principal items handled by the library have an identified, which is an
@@ -132,14 +134,14 @@ typedef size_t ID;
 // more correct version
 typedef size_t UInt;
 // original version
-//typedef unsigned int UInt; 
+//typedef unsigned int UInt;
 #endif
 
 //! The Edge basis class
 /*! It contains the attributes common to all Edges In particular, it
 contains the two ID's (first and second) of the points at the two ends
-of the edge. 
-\invariant first < second 
+of the edge.
+\invariant first < second
 */
 struct BareEdge
 {
@@ -152,7 +154,7 @@ struct BareEdge
 //! The base Face class
 /*! Contains the common parameters of all Edges A Face contains three
   ID's (first, second and third) of points at face vertex, chosen so
-  to uniquely identify the face. 
+  to uniquely identify the face.
 \invariant first<second<third.
 
 */
@@ -164,20 +166,20 @@ struct BareFace
   /*! Constructor that takes a BareEdge Object and an ID. The face is
     then identified by the ID of the Points on the BareEdge +
     <tt>i</tt>*/
-  BareFace(ID i, const BareEdge & e):first(i),second(e.first),third(e.second){}; 
+  BareFace(ID i, const BareEdge & e):first(i),second(e.first),third(e.second){};
   ID first;//!< First ID which defines the BareFace
   ID second;//!< Second ID which defines the BareFace
   ID third;//!< Third ID which defines the BareFace
-}; 
+};
 
 
 //! \defgroup BareItemsBuilder Global functions to build Bare Items.
 
 /*! \ingroup BareItemsBuilder
   \brief It creates a BareEdge end returns the orientation of the created edge with respect
-  to the given data. 
+  to the given data.
   \param  bool is false if orientation  has been changed.
-  \param i is a Point ID 
+  \param i is a Point ID
   \param j is a Point ID
 
   The BareEdge that will be built is the one passing by <tt>i</tt> and
@@ -199,7 +201,7 @@ makeBareEdge(ID const i, ID  const j){
 }
 
 /*! \ingroup BareItemsBuilder
-  \param i is a Point ID 
+  \param i is a Point ID
   \param j is a Point ID
   \brief It creates a BareEdge, ignoring orientation.
 
@@ -219,15 +221,15 @@ setBareEdge(ID const i, ID  const j){
 
 /*! \ingroup BareItemsBuilder
   \param  bool is false if orientation  has been changed.
-  \param i is a Point ID 
+  \param i is a Point ID
   \param j is a Point ID
   \pre i and j >0
   \brief It creates a non-standard BareEdge.
 
   Yet another  lighter version of MakeBareEdge, without orientation, To be used for
   non-oriented graphs.
-  
-  \warning It produces a BareEdge which does not comply with the invariant of the 
+
+  \warning It produces a BareEdge which does not comply with the invariant of the
   class (first < second). It must be used only if the BareEdge class is NOT used to uniquely identify edges.
  */
 inline
@@ -240,7 +242,7 @@ setBareEdgeNo(ID const i, ID  const j){
 /*! \ingroup BareItemsBuilder
  \brief It creates Bare Face objects from three Point ID's
   \param  bool is false if orientation  has been changed.
-  \param i is a Point ID 
+  \param i is a Point ID
   \param j is a Point ID
   \param k is a Point ID
 
@@ -253,7 +255,7 @@ std::pair<BareFace,bool> makeBareFace(ID const i, ID  const j, ID const k);
 /*! \ingroup BareItemsBuilder
  \brief It creates Bare Face objects from four Point ID's
   \param  bool is false if orientation  has been changed.
-  \param i is a Point ID 
+  \param i is a Point ID
   \param j is a Point ID
   \param k is a Point ID
   \param l is a Point ID
@@ -268,7 +270,7 @@ std::pair<BareFace,bool> makeBareFace(ID const i, ID  const j, ID const k, ID co
   Operators for comparing BareItems
 */
 
-/*! \ingroup comparison 
+/*! \ingroup comparison
     inequality
 */
 inline
@@ -362,7 +364,7 @@ struct cmpBareItem<BareEdge> //!< The actual comparison operator
     {
       return e2.first > e1.first || (e2.first == e1.first && e2.second > e1.second);
     }
-}; 
+};
 
 /*! \ingroup comparison
   Specialised functor for Faces
@@ -380,12 +382,12 @@ struct cmpBareItem<BareFace>
 	}
       return false;
     }
-}; 
+};
 
-//! Handles Bare Items 
+//! Handles Bare Items
 /*! This class handles mesh bare edges and faces construction. Used only in mesh builders
  A BareItemsHandler is a specialisation of a STL map which holds the pair
- formed by a bareitem and its ID. 
+ formed by a bareitem and its ID.
  The ID  is automatically generated if one uses the method  addIfNotThere
 */
 template <typename BareItem>
@@ -395,7 +397,7 @@ class BareItemsHandler: public std::map<BareItem,ID,cmpBareItem<BareItem> >{
   typedef  typename container::iterator iterator;
   typedef  typename container::const_iterator const_iterator;
   typedef  std::pair<const BareItem, UInt> value_type;
-  
+
   BareItemsHandler();
   bool isThere(BareItem const &) const; //!< is the item there? I just ask
   ID id(BareItem const &) const; //!< Returns ID of a BareItem. 0 if not there
@@ -414,7 +416,7 @@ class BareItemsHandler: public std::map<BareItem,ID,cmpBareItem<BareItem> >{
 /*********************************************************************************
                IMPLEMENTATIONS
 *********************************************************************************/
-// 
+//
 /*! \defgroup Helper Some helper functions
 */
 
@@ -442,7 +444,7 @@ _idCount(0)
 
 template<class BareItem>
 inline
-bool 
+bool
 BareItemsHandler<BareItem>::isThere(const BareItem & s) const{
   return find(s) != container::end();
 }
@@ -458,14 +460,14 @@ BareItemsHandler<BareItem>::setId(const BareItem & s,ID const id ){
   } else {
     return false;
   }
-  
+
 }
 
 template<class BareItem>
 inline
 ID
 BareItemsHandler<BareItem>::id(const BareItem & s)const {
-  const_iterator i=find(s); 
+  const_iterator i=find(s);
   if (i != container::end())
     return i->second;
   else
@@ -492,13 +494,13 @@ BareItemsHandler<BareItem>::addIfNotThere(const BareItem & s, const ID id ){
 
 template<class BareItem>
 inline
-UInt 
+UInt
 BareItemsHandler<BareItem>::howMany() const{
   return container::size();
 }
 
 template<class BareItem>
-bool 
+bool
 BareItemsHandler<BareItem>::isThereDel(BareItem const & s){
   return erase(s) != 0;
 }
@@ -509,7 +511,7 @@ void BareItemsHandler<BareItem>::showMe() const{
   std::cout << "BareItemsHandler: " << std::endl;
   std::cout << "Number of Items stored: "<< this->size() <<std::endl;
   std::cout << "Max Id stored         : "<< this->maxId()<<std::endl;
-  std::cout << "End of Information";  
+  std::cout << "End of Information";
 }
 #endif
 
