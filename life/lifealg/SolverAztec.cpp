@@ -54,6 +54,8 @@ SolverAztec::SolverAztec()
 SolverAztec::~SolverAztec() {
     if (_matrix) {
         AZ_matrix_destroy(&_matrix);
+    }
+    if (_precond) {
         AZ_precond_destroy(&_precond);
     }
 }
@@ -83,11 +85,27 @@ void SolverAztec::setMatrix(CSRMatr<CSRPatt, value_type> const& m) {
     _setMatrix(*_tempMatrix);
 }
 
+void SolverAztec::
+setMatrixFree(int nEq, void* data,
+              void (*matvec)(double*,double*, AZ_MATRIX_STRUCT*, int*)) {
+    _data_org[AZ_N_internal] = nEq;
+    if (_matrix) {
+        AZ_matrix_destroy(&_matrix);
+    }
+    if (_precond) {
+        AZ_precond_destroy(&_precond);
+    }
+    _matrix = AZ_matrix_create(nEq);
+    AZ_set_MATFREE(_matrix, data, matvec);
+}
+
 void SolverAztec::_setMatrix(MSRMatr<value_type> const& m) {
     int nEq = m.Patt()->nRows();
     _data_org[AZ_N_internal] = nEq;
     if (_matrix) {
         AZ_matrix_destroy(&_matrix);
+    }
+    if (_precond) {
         AZ_precond_destroy(&_precond);
     }
     _matrix = AZ_matrix_create(nEq);

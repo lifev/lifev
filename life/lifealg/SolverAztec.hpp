@@ -94,6 +94,16 @@ public:
      */
     void setMatrix(CSRMatr<CSRPatt, value_type> const& m);
 
+    /** set matrix free data
+     *  @param nEq number of equations
+     *  @data data for matvec
+     *  @matvec user provided function for matrix vector product
+     *  @see Aztec documentation, http://www.cs.sandia.gov/CRF/aztec1.html
+     */
+    void setMatrixFree(int nEq, void* data,
+                       void (*matvec)(double*, double*, AZ_MATRIX_STRUCT*,
+                                      int*));
+        
     //@}
 
     /** @name  Methods
