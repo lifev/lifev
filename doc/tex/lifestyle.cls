@@ -53,12 +53,14 @@
 \RequirePackage{a4wide}
 
 \RequirePackage{fancyhdr}
+\RequirePackage{fancybox}
 \RequirePackage{xspace}
 \RequirePackage{multicol}
 \RequirePackage{makeidx}
 \RequirePackage{subfigure}
 \RequirePackage{verbatim}
 \RequirePackage{rcs}
+\RequirePackage{colortbl}
 
 \RequirePackage[english]{babel}
 \RequirePackage{tabularx}
@@ -78,13 +80,59 @@
 
 \newcommand{\lifedraftdate}{\small Revision: \RCSRevision, \RCSDate, \RCSTime\ UTC Printed: \today}
 
+\newenvironment{rationale}{\renewcommand{\labelitemi}{\textit{Rationale:}}
+  \begin{itemize}
+  \item
+    }{  \end{itemize}}
 
 %%
 %% Index
 %%
 \newcommand{\ix}[1]{#1\index{#1}}
 \newcommand{\nindex}[1]{\textit{#1}\index[name]{#1}}
+
+
 \newcommand{\cppobj}[1]{\index{C++ Objects!#1}}
+\newcommand{\lifetitle}[2]{\raggedright{\HUGE #1}\\
+ \rule[2ex]{\linewidth}{1mm}\\
+ {\hfill\lifedraftdate}\\
+ \vfill{\Large #2}\\
+ \rule[2ex]{\linewidth}{.5mm}} 
+
+\newcommand{\thelibrary}{\textsl{LIFE V}\xspace}
+\newcommand{\lifev}{\textsl{LifeV}\xspace}
+
+%%
+%% generate hints
+%%
+\usepackage{fancybox,framed}
+\newcommand{\hinttitle}[1]{\mbox{#1}\xspace}
+\definecolor{hintcolor}{rgb}{.95,1,.95}
+% \newenvironment{\hint}[1]{
+% \begin{framed}
+% \colorbox{hintcolor}{\parbox{.65\linewidth}{
+% % \begin{tabular}[.65\linewidth]{l}
+% % \hinttitle{#1}\\
+% % \rule[2ex]{\linewidth}{1mm}\\
+% }{\end{framed}}
+\makeatletter
+\renewenvironment{hint}[1]{%
+
+  \def\FrameCommand{%
+    % \setlength{\fboxrule}{\FrameRule}%
+    % \setlength{\fboxsep}{\FrameSep}%
+    \shadowbox
+  }%
+  \fram@d{\advance\hsize-\width}%
+  #1 Hint\\
+  \rule[2ex]{\linewidth}{.5mm}\\
+}{%
+  \endfram@d
+}
+\makeatother
+
+
+
 
 \makeglossary
 \makeindex
