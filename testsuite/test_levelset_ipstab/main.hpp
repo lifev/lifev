@@ -79,7 +79,7 @@ namespace LifeV
        \Analytical expression for signed distance function
     */
 
-    Real sphere(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i) {
+    Real sphere(const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& i) {
         switch(i){
         case 1:
             return sqrt( (x - .5) * (x - .5) + (y - .75) * (y - .75) + (z - .5) * (z - .5) ) - .2;
