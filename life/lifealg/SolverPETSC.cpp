@@ -258,6 +258,29 @@ SolverPETSC::setMatrixTranspose( uint __nrows, const uint* __r,
 }
 
 void
+SolverPETSC::setNullSpace( const std::vector<const Vector*>& __nullSpace )
+{
+    UInt dimNullSpace = __nullSpace.size();
+    UInt dimVec = __nullSpace[ 0 ]->size();
+    Vec* nullSpaceVecs = new Vec[dimNullSpace];
+    for ( UInt i=0; i<dimNullSpace; ++i )
+    {
+        VecCreateSeqWithArray( PETSC_COMM_SELF,
+                               dimVec,
+                               __nullSpace[ i ]->data().begin(),
+                               nullSpaceVecs+i );
+    }
+    MatNullSpace nullSpace;
+    MatNullSpaceCreate( PETSC_COMM_WORLD,
+                        PETSC_FALSE,
+                        dimNullSpace,
+                        nullSpaceVecs,
+                        &nullSpace );
+    KSPSetNullSpace( _M_p->__ksp, nullSpace );
+    delete[] nullSpaceVecs;
+}
+
+void
 SolverPETSC::solve( array_type& __X,
                     array_type const& __B,
                     MatStructure __ptype )

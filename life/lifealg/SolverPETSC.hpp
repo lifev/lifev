@@ -246,12 +246,19 @@ public:
       \arg dtol - the divergence tolerance (amount residual can increase before
       KSPDefaultConverged() concludes that the method is diverging)
       \arg maxits - maximum number of iterations to use
-*/
-void setTolerances( double = PETSC_DEFAULT,
+    */
+    void setTolerances( double = PETSC_DEFAULT,
                         double = PETSC_DEFAULT,
                         double = PETSC_DEFAULT,
                         int = PETSC_DEFAULT );
 
+    /*!
+      \brief set the null space of the matrix to be solved for
+      
+      \param nullSpace orthonormal basis of the null space
+    */
+    void setNullSpace( const std::vector<const Vector*>& nullSpace );
+    
     //! get the petsc preconditioner
     PC & preconditioner();
 
