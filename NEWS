@@ -1,3 +1,11 @@
+Bugs fixed in 0.1.0pre5:
+* Bug #17: fixed segfault in medium size NavierStokes problem
+* Bug #20: fixed data files in testsuite to reflect the tests location
+
+New in 0.1.0pre5:
+* added --enable-debug and --enable-opt to configure script
+
+
 Bugs fixed in 0.1.0pre4:
 * Bug #8 : wrong (?) assert in regionMesh3D.hpp
 * Bug #9 : updateElementFaces(true) requires updateElementEdges() first.
