@@ -125,6 +125,7 @@ protected:
 
   //! Right  hand  side for the concentration
   ScalUnknown<Vector> _f_c;
+  ScalUnknown<Vector> _f_c_noBC;
 
   DataAztec _dataAztec_o;
 };
@@ -148,9 +149,9 @@ ConvDiffReactSolverPC(const GetPot& data_file, const RefFE& refFE_c, const QuadR
      _f_c(_dim_c),
      _dataAztec_o(data_file,"masstransport/aztec_o"){
 
-  cout << endl;
-  cout << "O-  Concentration unknowns: " << _dim_c     << endl;
-  cout << "O-  Computing mass and stiffness matrices... ";
+  std::cout << endl;
+  std::cout << "O-  Concentration unknowns: " << _dim_c     << std::endl;
+  std::cout << "O-  Computing mass and stiffness matrices... ";
 
   Chrono chrono;
   chrono.start();
@@ -166,8 +167,8 @@ ConvDiffReactSolverPC(const GetPot& data_file, const RefFE& refFE_c, const QuadR
   // *******************************************************
   // Coefficient of the mass term at time t^{n+1}
   Real first_coeff = _bdf.coeff_der(0);
-  cout << endl;
-  cout << "Bdf CDR first coeff " << first_coeff << endl;
+  std::cout << endl;
+  std::cout << "Bdf CDR first coeff " << first_coeff << std::endl;
 
   _bdf.showMe();
 
@@ -183,8 +184,11 @@ ConvDiffReactSolverPC(const GetPot& data_file, const RefFE& refFE_c, const QuadR
 
     stiff(_diffusivity,_elmatC,_fe_c);
 
-    mass((first_coeff*dti-_react),_elmatMR_c,_fe_c);
-    mass(dti,_elmatM_c,_fe_c);
+   if(_stationary){
+      mass((-_react),_elmatMR_c,_fe_c);}
+   else{
+      mass((first_coeff*dti-_react),_elmatMR_c,_fe_c);
+      mass(dti,_elmatM_c,_fe_c);}
 
     _elmatC.mat() += _elmatMR_c.mat();
 
@@ -197,7 +201,7 @@ ConvDiffReactSolverPC(const GetPot& data_file, const RefFE& refFE_c, const QuadR
   }
 
   chrono.stop();
-  cout << "done in " << chrono.diff() << " s." << endl;
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
 }
 
@@ -205,7 +209,7 @@ template<typename Mesh>
 void ConvDiffReactSolverPC<Mesh>::
 timeAdvance(const Function source, const Real& time) {
 
-  cout << "  o-  Updating mass term on right hand side (concentration)... ";
+  std::cout << "  o-  Updating mass term on right hand side (concentration)... ";
 
   Chrono chrono;
   chrono.start();
@@ -224,8 +228,9 @@ timeAdvance(const Function source, const Real& time) {
 
   // *******************************************************
   _f_c += _M_c*_bdf.time_der(); //_M_u is the mass matrix divided by the time step
+  _f_c_noBC=_f_c;
   chrono.stop();
-  cout << "done in " << chrono.diff() << " s." << endl;
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
 }
 
 
@@ -240,11 +245,12 @@ iterate(const Real& time) {
   // CDR = DR + convective term (C)
   chrono.start();
   _CDR=_DR;
+  _f_c=_f_c_noBC;
   chrono.stop();
 
 
-  cout << "  o-  Diffusion-Reaction matrix was copied in " << chrono.diff() << "s." << endl;
-  cout << "  o-  Updating convective transport... ";
+  std::cout << "  o-  Diffusion-Reaction matrix was copied in " << chrono.diff() << "s." << std::endl;
+  std::cout << "  o-  Updating convective transport... ";
 
   chrono.start();
 
@@ -314,12 +320,12 @@ iterate(const Real& time) {
 
   }
   chrono.stop();
-  cout << "done in " << chrono.diff() << "s." << endl;
+  std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
   // for BC treatment (done at each time-step)
   Real tgv=1.e02;
 
-  cout << "  o-  Applying boundary conditions... ";
+  std::cout << "  o-  Applying boundary conditions... ";
   chrono.start();
   // BC manage for the concentration
   if ( !_BCh_c.bdUpdateDone() )
@@ -327,7 +333,7 @@ iterate(const Real& time) {
   bc_manage(_CDR, _f_c, _mesh, _dof_c, _BCh_c, _feBd_c, tgv, time);
   chrono.stop();
 
-  cout << "done in " << chrono.diff() << "s." << endl;
+  std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
 
   int    proc_config_o[AZ_PROC_SIZE];// Processor information:
@@ -338,7 +344,7 @@ iterate(const Real& time) {
   int    *data_org_o;                // Array to specify data layout
   double status_o[AZ_STATUS_SIZE];   // Information returned from AZ_solve()
                                    // indicating success or failure.
-  // altre dichiarazioni per AZTEC
+  // other declarations for AZTEC
   int    *update_o,                  // vector elements updated on this node.
          *external_o;                // vector elements needed by this node.
   int    *update_index_o;            // ordering of update[] and external[]
@@ -366,7 +372,7 @@ iterate(const Real& time) {
 	   _CDR.giveRaw_value(), data_org_o,status_o, proc_config_o);
   //
     chrono.stop();
-    cout << "*** Solution (Concentration) computed in " << chrono.diff() << "s." << endl;
+    std::cout << "*** Solution (Concentration) computed in " << chrono.diff() << "s." << std::endl;
   _bdf.shift_right(_c);
 
 }
@@ -601,7 +607,7 @@ getcoord(RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u){
   }
 
   chrono.stop();
-  cout << " Calculation of the projection coordinates " << chrono.diff() << "s." << endl;
+  std::cout << " Calculation of the projection coordinates " << chrono.diff() << "s." << std::endl;
 
 }
 
