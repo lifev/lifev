@@ -303,13 +303,13 @@ public:
       \param dofIn dofInterfaceBase object holding the connections between the interface dofs of the
       data vector and those of the associated to the boundary conditions
     */
-    BCVectorInterface( Vector& vec, UInt nbTotalDof, dof_interface_type& dofIn );
+    BCVectorInterface( Vector& vec, UInt nbTotalDof, dof_interface_type dofIn );
 
     //! Default Constructor (the user must call setBCVector(..))
     BCVectorInterface ();
 
     //! set the BC vector (after default construction)
-    void setVector( Vector& vec, UInt nbTotalDof, dof_interface_type& dofIn );
+    void setVector( Vector& vec, UInt nbTotalDof, dof_interface_type dofIn );
 
     /*!
       This method returns the value to be imposed in the component iComp of the dof iDof.
