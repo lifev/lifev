@@ -92,7 +92,7 @@ int nonLinRichardson( Vector& sol,
     Real omegaS = omega;
     Real omegaF = omega;
 
-    residual = f.evalResidual( sol, iter );
+    f.evalResidual( sol, iter, residual );
 
 //@    Real normMuk      = norm( residual );
     Real normMuk      = norm( step );
@@ -120,7 +120,7 @@ int nonLinRichardson( Vector& sol,
 
         normMukOld = normMuk;
 
-        muk  = f.solvePrec(residual, linearRelTol);
+        f.solvePrec(residual, linearRelTol, muk);
         step = aitken.computeDeltaLambda( sol, muk );
 
         std::cout << "Step norm = " << norm( step ) << std::endl;
@@ -129,7 +129,7 @@ int nonLinRichardson( Vector& sol,
 
         sol += step;
 
-        residual = f.evalResidual( sol, iter );
+        f.evalResidual( sol, iter, residual );
 
         out_res << " muk norm = " << norm( muk ) << std::endl;
 
