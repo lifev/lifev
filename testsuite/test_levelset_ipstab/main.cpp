@@ -48,7 +48,7 @@ int main() {
     /*
       No boundary condition is needed in this testcase since the normal
       component of velocity is zero all over the boundary and hence no inlet
-      boundary exists. This part of the code is however only commented out 
+      boundary exists. This part of the code is however only commented out
       since it may serve as a template.
 
       BCFunctionBase gv1(g1); // Functor storing the user definded function g
@@ -64,12 +64,13 @@ int main() {
 
     const GeoMap& geoMap = geoLinearTetra;
     const GeoMap& geoMapBd = geoMap.boundaryMap();
-    
-    const QuadRule& qr = quadRuleTetra5pt;
-    const QuadRule& qrBd = quadRuleTria3pt;
 
-    const RefFE& refFE = feTetraP1;
+    const QuadRule& qr = quadRuleTetra15pt;
+    const QuadRule& qrBd = quadRuleTria7pt;
+
+    const RefFE& refFE = feTetraP2;
     const RefFE& refBdFE = refFE.boundaryFE();
+    std::string feName("P2");
 
     // Mesh stuff
 
@@ -78,36 +79,43 @@ int main() {
 
     long int  m=1;
     GetPot datafile( "data" );
-    std::string mesh_type = datafile( "levelset/discretization/mesh_type", ".m++" );
+    std::string mesh_type = datafile( "levelset/discretization/mesh_type",
+                                      ".m++" );
     std::cout << mesh_type << std::endl;
     if ( mesh_type == "INRIA" )
     {
-        std::string mesh_dir = datafile( "levelset/discretization/mesh_dir", "." );
-        std::string fname=mesh_dir+datafile( "levelset/discretization/mesh_file", "cube_6000.mesh" );
+        std::string mesh_dir = datafile( "levelset/discretization/mesh_dir",
+                                         "." );
+        std::string fname = mesh_dir +
+            datafile( "levelset/discretization/mesh_file", "cube_6000.mesh" );
         readINRIAMeshFile(mesh,fname,m);
     }
     else if ( mesh_type == ".m++" )
     {
-        std::string mesh_dir = datafile( "levelset/discretization/mesh_dir", "." );
-        std::string fname=mesh_dir+datafile( "levelset/discretization/mesh_file", "cube_6000.m++" );
+        std::string mesh_dir = datafile( "levelset/discretization/mesh_dir",
+                                         "." );
+        std::string fname = mesh_dir +
+            datafile( "levelset/discretization/mesh_file", "cube_6000.m++" );
         readMppFile(mesh,fname,m);
     }
     else
     {
-        std::cerr << "wrong mesh type. It can be either MESH++ or INRIA" << std::endl;
+        std::cerr << "wrong mesh type. It can be either MESH++ or INRIA"
+                  << std::endl;
         return EXIT_FAILURE;
     }
 
     mesh.updateElementFaces();
     mesh.updateElementEdges();
-    
+
     // Build ALL faces (interior faces are necessary for IP stabilization)
 
     std::cout << " o-> Building face list" << std::endl;
 
     UInt numIFaces = mesh.numFaces() - mesh.numBFaces();
     UInt numBFaces = mesh.numBFaces();
-    buildFaces(mesh, std::cout, std::cerr, numBFaces, numIFaces, true, true, false);
+    buildFaces(mesh, std::cout, std::cerr, numBFaces, numIFaces,
+               true, true, false);
 
     // Current FE classes for the problem under study with mapping and
     // quadrature rules
@@ -117,14 +125,14 @@ int main() {
 
     // Update of the Dof for the particular FE problem and for the boundary
     // conditions
- 
+
     Dof dof(refFE);
     dof.update(mesh);
 
     /*
       No boundary condition is needed in this testcase since the normal
       component of velocity is zero all over the boundary and hence no inlet
-      boundary exists. This part of the code is however only commented out 
+      boundary exists. This part of the code is however only commented out
       since it may serve as a template.
 
       BCh.bdUpdate( mesh,  feBd, dof );
@@ -134,7 +142,8 @@ int main() {
 
     // Velocity field projection
 
-    bool analyticalBeta = datafile("levelset/parameters/analytical_beta", false);
+    bool analyticalBeta = datafile("levelset/parameters/analytical_beta",
+                                   false);
 
     SolverAztec solverMass;
     solverMass.setOptionsFromGetPot(datafile, "levelset/solver-mass");
@@ -144,7 +153,8 @@ int main() {
     betaVec = ZeroVector(NDIM * dim);
 
     if (!analyticalBeta) {
-        std::cout << "O-> Projecting velocity field onto P1 fe space" << std::endl;
+        std::cout << "O-> Projecting velocity field onto fe space"
+                  << std::endl;
 
         MSRPatt pattM_NDIM(dof, mesh, NDIM);
         MSRMatr<Real> M_NDIM(pattM_NDIM);
@@ -159,10 +169,11 @@ int main() {
                 assemb_mat(M_NDIM, elmatM, fe, dof, ic, ic);
             }
 
-    
+
 
         vortex analyticalVelocityField;
-        projectVelocityField(mesh, fe, dof, betaVec, analyticalVelocityField, NDIM, M_NDIM, solverMass);
+        projectVelocityField(mesh, fe, dof, betaVec, analyticalVelocityField,
+                             NDIM, M_NDIM, solverMass);
 
     }
 
@@ -171,7 +182,7 @@ int main() {
     /*
       No boundary condition is needed in this testcase since the normal
       component of velocity is zero all over the boundary and hence no inlet
-      boundary exists. This part of the code is however only commented out 
+      boundary exists. This part of the code is however only commented out
       since it may serve as a template.
 
       std::cout << "O-> BC Management " << std::endl;
@@ -189,9 +200,9 @@ int main() {
       LevelSetSolver(mesh_type& mesh,
       const GetPot& data_file,
       const std::string& data_section,
-      const RefFE& reffe, 
-      const QuadRule& qr, 
-      const QuadRule& qr_bd, 
+      const RefFE& reffe,
+      const QuadRule& qr,
+      const QuadRule& qr_bd,
       const BCHandler& bc_h,
       CurrentFE& fe_velocity,
       const Dof& dof_velocity,
@@ -207,7 +218,8 @@ int main() {
 
     // Solver initialization
 
-    LevelSetSolver<meshType> lss(mesh, datafile, "levelset", refFE, qr, qrBd, BCh, fe, dof, betaVec);
+    LevelSetSolver<meshType> lss(mesh, datafile, "levelset", refFE,
+                                 qr, qrBd, BCh, fe, dof, betaVec);
     lss.initialize(sphere, t0, delta_t);
 
     const LevelSetSolver<meshType>::lsfunction_type& U = lss.lsfunction();
@@ -215,13 +227,13 @@ int main() {
 
     // Save initial conditions
 
-    wr_opendx_header(outputFileRoot + "0000.dx", mesh, dof); 
+    wr_opendx_header(outputFileRoot + "0000.dx", mesh, dof, lss.fe(), feName );
     wr_opendx_scalar(outputFileRoot + "0000.dx", "levelset_ipstab", U);
 
     // Reinitialize and save re-initialized IC
 
     lss.directReinitialization();
-    wr_opendx_header(outputFileRoot + "0000r.dx", mesh, dof); 
+    wr_opendx_header(outputFileRoot + "0000r.dx", mesh, dof, lss.fe(), feName );
     wr_opendx_scalar(outputFileRoot + "0000r.dx", "levelset_ipstab", U);
 
     // Retrieve parameters from data file
@@ -232,9 +244,10 @@ int main() {
     UInt current_step = 1;
     UInt steps_after_last_reini = 1;
     UInt steps_after_last_save = 1;
-    
+
     for(Real t = t0; t < T; t += delta_t) {
-        std::cout << " o-> Step: " << current_step << ", t = " << t << std::endl;
+        std::cout << " o-> Step: " << current_step << ", t = " << t
+                  << std::endl;
         lss.timeAdvance();
 
         std::ostringstream number;
@@ -243,28 +256,32 @@ int main() {
         number << current_step;
 
         if(steps_after_last_save == save_every) {
-            wr_opendx_header(outputFileRoot + number.str() + ".dx", mesh, dof); 
-            wr_opendx_scalar(outputFileRoot + number.str() + ".dx", "levelset_ipstab", U);
+            wr_opendx_header(outputFileRoot + number.str() + ".dx", mesh, dof, lss.fe(), feName );
+            wr_opendx_scalar(outputFileRoot + number.str() + ".dx",
+                             "levelset_ipstab", U);
 
             steps_after_last_save = 1;
         } else
             steps_after_last_save++;
 
         if(steps_after_last_reini == reini_every) {
-            std::cout << "  - reinitializing signed distance function" << std::endl;
+            std::cout << "  - reinitializing signed distance function"
+                      << std::endl;
             lss.directReinitialization();
 
             steps_after_last_reini = 1;
 
-            wr_opendx_header(outputFileRoot + number.str() + "r.dx", mesh, dof); 
-            wr_opendx_scalar(outputFileRoot + number.str() + "r.dx", "levelset_ipstab", U);
+            wr_opendx_header(outputFileRoot + number.str() + "r.dx",
+                             mesh, dof, lss.fe(), feName );
+            wr_opendx_scalar(outputFileRoot + number.str() + "r.dx",
+                             "levelset_ipstab", U);
         }
         else
             steps_after_last_reini++;
 
         current_step++;
     }
-    
+
     std::cout << "O-> Done" << std::endl;
 
     return 0;
