@@ -33,6 +33,8 @@
 
 #include <iostream>
 
+#include <lifeconfig.h>
+
 #if defined(HAVE_PETSC_H)
 #define PETSC_USE_EXTERN_CXX
 #include <petsc.h>
@@ -240,7 +242,7 @@ public:
                    &(m.index2_data()[0]),
                    &(m.value_data()[0]) );
         }
-    
+
     void setMatrixTranspose( uint, const uint*, const uint*, const double* );
     /*!
       \brief Sets the relative, absolute, divergence, and maximum iteration
@@ -384,7 +386,7 @@ private:
                          array_type& __X,
                          array_type const& __B,
                          MatStructure __ptype = SAME_NONZERO_PATTERN);
-};
+}; // class SolverPETSC
 
 /*!
   \class PETSCManager
@@ -473,7 +475,10 @@ public:
         }
 private:
     bool _M_initialized;
-};
+}; // class PETSCManager
+
 typedef singleton<PETSCManager> PETSC;
-}
+
+} // namespace LifeV
+
 #endif /* __SolverPETSC_H */
