@@ -173,10 +173,10 @@ BCVectorInterface::BCVectorInterface()
 
 //! Constructor
 BCVectorInterface::BCVectorInterface( Vector& vec, UInt nbTotalDof,
-                                      DofInterfaceBase& dofIn )
+                                      dof_interface_type& dofIn )
     :
     BCVectorBase( vec, nbTotalDof ),
-    _M_dofIn( &dofIn )
+    _M_dofIn( dofIn )
 {
     this->setFinalized( true );
 }
@@ -184,13 +184,13 @@ BCVectorInterface::BCVectorInterface( Vector& vec, UInt nbTotalDof,
 
 //!set the BC vector (after default construction)
 void
-BCVectorInterface::setVector( Vector& vec, UInt nbTotalDof, DofInterfaceBase& dofIn )
+BCVectorInterface::setVector( Vector& vec, UInt nbTotalDof, dof_interface_type& dofIn )
 {
     ASSERT_PRE( !this->isFinalized(), "BC Vector cannot be set twice." );
 
     super::setVector( vec, nbTotalDof );
 
-    _M_dofIn = &dofIn;
+    _M_dofIn = dofIn;
 
 }
 

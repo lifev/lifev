@@ -35,10 +35,12 @@
 #ifndef __BCVECTOR__
 #define __BCVECTOR__
 
+#include <boost/function.hpp>
+#include <boost/shared_ptr.hpp>
+
 #include "lifeV.hpp"
 #include "dofInterfaceBase.hpp"
 #include "vecUnknown.hpp"
-#include <boost/function.hpp>
 
 #include <singleton.hpp>
 #include <factory.hpp>
@@ -292,6 +294,7 @@ public:
 
     //! super class
     typedef BCVectorBase super;
+    typedef boost::shared_ptr<DofInterfaceBase> dof_interface_type;
 
     //! Constructor
     /*!
@@ -300,13 +303,13 @@ public:
       \param dofIn dofInterfaceBase object holding the connections between the interface dofs of the
       data vector and those of the associated to the boundary conditions
     */
-    BCVectorInterface( Vector& vec, UInt nbTotalDof, DofInterfaceBase& dofIn );
+    BCVectorInterface( Vector& vec, UInt nbTotalDof, dof_interface_type& dofIn );
 
     //! Default Constructor (the user must call setBCVector(..))
     BCVectorInterface ();
 
     //! set the BC vector (after default construction)
-    void setVector( Vector& vec, UInt nbTotalDof, DofInterfaceBase& dofIn );
+    void setVector( Vector& vec, UInt nbTotalDof, dof_interface_type& dofIn );
 
     /*!
       This method returns the value to be imposed in the component iComp of the dof iDof.
@@ -334,7 +337,7 @@ public:
 protected:
 
     //! DofInterfaceBase object holding the connections between the interface dofs
-    DofInterfaceBase* _M_dofIn;
+    dof_interface_type _M_dofIn;
 
 };
 typedef LifeV::singleton< LifeV::factoryClone< BCVectorBase > > FactoryCloneBCVector;
