@@ -1031,6 +1031,7 @@ void operMatVec(DataType * const mv,
  *  side of the system.
  *  @param r row to diagonalize
  *  @param coeff value to set the diagonal entry A(r,r) to
+ *  @param b right hand side vector to be corrected
  *  @param datum value to set the fix the solution entry x(r) at
  */
 template<typename DataType>
@@ -1041,8 +1042,11 @@ void CSRMatr<CSRPatt,DataType>::diagonalize(UInt const r, DataType const coeff,
         set_mat(r, j, 0.); // A(r,j) = 0
     }
     for(UInt i=0; i<_Patt->nRows(); ++i) {
-        b[i-OFFSET] -= get_value(i,r) * datum; // correct right hand side
-        set_mat(i, r, 0.); // A(j,r) = 0
+        std::pair<UInt,bool> where = _Patt->locate_index(i, r);
+        if (where.second) {
+            b[i-OFFSET] -= _value[where.first] * datum; // correct rhs
+            _value[where.first] = 0.0; // A(j,r) = 0
+        }
     }
 
     set_mat(r, r, coeff); // A(r,r) = coeff
@@ -1050,23 +1054,18 @@ void CSRMatr<CSRPatt,DataType>::diagonalize(UInt const r, DataType const coeff,
     b[r-OFFSET] = coeff*datum; // correct right hand side for row r
 }
 
-//Alain (25/10/02): works only for diagfirst case at the moment.
+/*! Diagonalization of row r of the system. Done by setting A(r,r) = coeff
+ *  and A(r,j) = 0 for j!=r without correcting the right hand side
+ *  @param r row to diagonalize
+ *  @param coeff value to set the diagonal entry A(r,r) to
+ */
 template<typename DataType>
 void CSRMatr<CSRPatt, DataType>::diagonalize_row(UInt const r,
                                                  DataType const coeff) {
-  ASSERT(_Patt->nRows() >= _Patt->nCols(), "nRow must be > to nCols for diagonalization");
-  ASSERT(_Patt->diagFirst(),"Not yet implemented if not diagfirst in CSR");
-
-  _value[_Patt->give_ia()[r]-OFFSET] = coeff;
-
-  typename vector<DataType>::iterator start=_value.begin()+
-    *(_Patt->give_ia().begin()+r-OFFSET)+1; //diagfirst is assumed
-  typename vector<DataType>::iterator end=_value.begin()+
-    *(_Patt->give_ia().begin()+r+1-OFFSET);
-
-  transform(start,end,start,nihil);
-
-  return;
+    for(UInt j=0; j<_Patt->nCols(); ++j) {
+        set_mat(r, j, 0.); // A(r,j) = 0
+    }
+    set_mat(r, r, coeff); // A(r,r) = coeff
 }
 
 
