@@ -544,7 +544,12 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
     std::cout << "  o-  Solving system...                        "
               << std::flush;
     chrono.start();
-    M_linearSolver.solve( M_sol, M_rhsFull );
+#if USE_AZTEC_SOLVER
+    M_linearSolver.solve( M_sol, M_rhsFull,
+                          SolverAztec::SAME_PRECONDITIONER );
+#else
+    M_linearSolver.solve( M_sol, M_rhsFull, SAME_PRECONDITIONER );
+#endif
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
