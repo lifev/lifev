@@ -278,9 +278,9 @@ NavierStokesAleSolverPC( const GetPot& data_file, const RefFE& refFE_u, const Re
 
 
     std::cout << std::endl;
-    std::cout << "O-  Pressure unknowns: " << _dim_p << std::endl;
-    std::cout << "O-  Velocity unknowns: " << _dim_u << std::endl << std::endl;
-    std::cout << "O-  Computing mass matrix... ";
+    std::cout << "F-  Pressure unknowns: " << _dim_p << std::endl;
+    std::cout << "F-  Velocity unknowns: " << _dim_u << std::endl << std::endl;
+    std::cout << "F-  Computing mass matrix... ";
 
     Chrono chrono;
     chrono.start();
@@ -317,12 +317,12 @@ timeAdvance( source_type const& source, const Real& time )
 {
 
     std::cout << std::endl;
-    std::cout << "O== FLUID: Now we are at time " << time << " s." << std::endl;
+    std::cout << "F== FLUID: Now we are at time " << time << " s." << std::endl;
 
     // Number of velocity components
     UInt nc_u = _u.nbcomp();
 
-    std::cout << "  o-  Updating mass term on right hand side... ";
+    std::cout << "  F-  Updating mass term on right hand side... ";
 
     Chrono chrono;
     chrono.start();
@@ -362,7 +362,7 @@ iterate( const Real& time )
     // Number of velocity components
     UInt nc_u = _u.nbcomp();
 
-    std::cout << "  o-  Updating matrices... ";
+    std::cout << "  F-  Updating matrices... ";
 
     chrono.start();
 
@@ -450,7 +450,7 @@ iterate( const Real& time )
     // for BC treatment (done at each time-step)
     Real tgv = 1.e02;
 
-    std::cout << "  o-  Applying boundary conditions... ";
+    std::cout << "  F-  Applying boundary conditions... ";
     chrono.start();
     _f_u = _f_uWithOutBC;
     _BCh_u.bdUpdate( _mesh, _feBd_u, _dof_u );
@@ -500,7 +500,7 @@ iterate( const Real& time )
     // ---------------
 
     // intermediate velocity computation
-    std::cout << "  o-  Solving system (i)... ";
+    std::cout << "  F-  Solving system (i)... ";
     chrono.start();
     AZ_iterate( _u.giveVec(), _f_u.giveVec(), options_i, params_i, status_i,
                 proc_config_i, C, prec_C, NULL );
@@ -565,7 +565,7 @@ iterate( const Real& time )
         _p[ _dim_p - 1 ] = 1.0; // pressure value at the last node.
     }
 
-    std::cout << "  o-  Solving pressure system... ";
+    std::cout << "  F-  Solving pressure system... ";
     chrono.start();
     AZ_iterate( _p.giveVec(), &vec_DV[ 0 ], options_ii, params_ii, status_ii,
                 proc_config_ii, A_ii, pILU_ii, NULL );
@@ -580,7 +580,7 @@ iterate( const Real& time )
 
     // everything is done...
     _u = _u - _invCtrDP;
-    std::cout << "  o-  Velocity updated" << std::endl;
+    std::cout << "  F-  Velocity updated" << std::endl;
 
     AZ_matrix_destroy( &A_ii );
     AZ_precond_destroy( &pILU_ii );
@@ -604,7 +604,7 @@ iterateTransp( const Real& time )
     // for BC treatment (done at each time-step)
     Real tgv = 1.e02;
 
-    std::cout << "  o-  Applying boundary conditions... ";
+    std::cout << "  F-  Applying boundary conditions... ";
     chrono.start();
     _f_u = _f_uWithOutBC;
     _BCh_u.bdUpdate( _mesh, _feBd_u, _dof_u );
@@ -653,7 +653,7 @@ iterateTransp( const Real& time )
     // ---------------
 
     // intermediate velocity computation
-    std::cout << "  o-  Solving system (i)... ";
+    std::cout << "  F-  Solving system (i)... ";
     chrono.start();
     AZ_iterate( _u.giveVec(), _f_u.giveVec(), options_i, params_i, status_i,
                 proc_config_i, C, prec_C, NULL );
@@ -714,7 +714,7 @@ iterateTransp( const Real& time )
         _p[ _dim_p - 1 ] = 1.0; // pressure value at the last node.
     }
 
-    std::cout << "  o-  Solving pressure system... ";
+    std::cout << "  F-  Solving pressure system... ";
     chrono.start();
     AZ_iterate( _p.giveVec(), &vec_DV[ 0 ], options_ii, params_ii, status_ii,
                 proc_config_ii, A_ii, pILU_ii, NULL );
@@ -729,7 +729,7 @@ iterateTransp( const Real& time )
 
     // everything is done...
     _u = _u - _invCtrDP;
-    std::cout << "  o-  Velocity updated" << std::endl;
+    std::cout << "  F-  Velocity updated" << std::endl;
 
     AZ_matrix_destroy( &A_ii );
     AZ_precond_destroy( &pILU_ii );
@@ -755,9 +755,9 @@ iterateLin( const Real& time, BCHandler& BCh_du )
     // Number of velocity components
     UInt nc_u = _u.nbcomp(), iloc, ig;
 
-    std::cout << "  OOO-  LINEARIZED FLUID SYSTEM\n\n";
+    std::cout << "  F-  LINEARIZED FLUID SYSTEM\n\n";
 
-    std::cout << "    o-  Updating right hand side... ";
+    std::cout << "    F-  Updating right hand side... ";
 
     //
     // RIGHT HAND SIDE FOR THE LINEARIZED ALE SYSTEM
@@ -841,7 +841,7 @@ iterateLin( const Real& time, BCHandler& BCh_du )
     // for BC treatment (done at each time-step)
     Real tgv = 1.e02;
 
-    std::cout << "    o-  Applying boundary conditions... ";
+    std::cout << "    F-  Applying boundary conditions... ";
     chrono.start();
     _C = _CAux;
     _trD = _trDAux;
@@ -906,7 +906,7 @@ iterateLin( const Real& time, BCHandler& BCh_du )
     _du = ZeroVector( _du.size() );
 
     // intermediate velocity computation
-    std::cout << "  o-  Solving system (i)... ";
+    std::cout << "  F-  Solving system (i)... ";
     chrono.start();
     AZ_iterate( _du.giveVec(), _f_u.giveVec(), options_i, params_i, status_i,
                 proc_config_i, C, prec_C, NULL );
@@ -974,7 +974,7 @@ iterateLin( const Real& time, BCHandler& BCh_du )
     _dp = ZeroVector( _dp.size() );
 
 
-    std::cout << "  o-  Solving pressure system... \n";
+    std::cout << "  F-  Solving pressure system... \n";
     std::cout << "  norm_inf (vec_DV) = " << norm_inf( vec_DV ) << std::endl;
     std::cout << "  norm_inf (_f_p) = " << norm_inf( _f_p ) << std::endl;
     std::cout << "  norm_inf (_D*_du ) = " << norm_inf( _D * _du ) << std::endl;
@@ -994,7 +994,7 @@ iterateLin( const Real& time, BCHandler& BCh_du )
     // (iii) V = V-(C^(-1)*trD) * P
     // ----------------------------
     _du = _du - _invCtrDP;
-    std::cout << "  o-  Velocity updated" << std::endl;
+    std::cout << "  F-  Velocity updated" << std::endl;
 
     AZ_matrix_destroy( &A_ii );
     AZ_precond_destroy( &pILU_ii );

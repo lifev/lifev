@@ -147,7 +147,8 @@ protected:
 
 private:
 
-    void readUnknown( const std::string& name, PhysVectUnknown<Vector> &unknown );
+    void readUnknown( const std::string       &name,
+                      PhysVectUnknown<Vector> &unknown);
 
 };
 
@@ -252,14 +253,14 @@ ElasticStructureHandler<Mesh>::postProcess()
         system( ( "ln -s " + namedef + " dep_z." + name + ".mesh" ).data() );
         // system(("ln -s "+this->_mesh_file+" veloc."+name+".mesh").data());
 
-//         wr_medit_ascii_scalar( "vel_x." + name + ".bb", _w.giveVec(), this->_mesh.numVertices() );
-//         wr_medit_ascii_scalar( "vel_y." + name + ".bb", _w.giveVec() + _dim, this->_mesh.numVertices() );
-//         wr_medit_ascii_scalar( "vel_z." + name + ".bb", _w.giveVec() + 2 * _dim, this->_mesh.numVertices() );
+        wr_medit_ascii_scalar( "veld_x." + name + ".bb", _w.giveVec(), this->_mesh.numVertices() );
+        wr_medit_ascii_scalar( "veld_y." + name + ".bb", _w.giveVec() + _dim, this->_mesh.numVertices() );
+        wr_medit_ascii_scalar( "veld_z." + name + ".bb", _w.giveVec() + 2 * _dim, this->_mesh.numVertices() );
 
 //         // wr_medit_ascii_vector("veloc."+name+".bb",_u.giveVec(),this->_mesh.numVertices(),_dim_u);
-//         system( ( "ln -s " + namedef + " vel_x." + name + ".mesh" ).data() );
-//         system( ( "ln -s " + namedef + " vel_y." + name + ".mesh" ).data() );
-//         system( ( "ln -s " + namedef + " vel_z." + name + ".mesh" ).data() );
+        system( ( "ln -s " + namedef + " veld_x." + name + ".mesh" ).data() );
+        system( ( "ln -s " + namedef + " veld_y." + name + ".mesh" ).data() );
+        system( ( "ln -s " + namedef + " veld_z." + name + ".mesh" ).data() );
 //         system(("ln -s "+this->_mesh_file+" veloc."+name+".mesh").data());
     }
 }
@@ -419,6 +420,7 @@ template <typename Mesh>
 void
 ElasticStructureHandler<Mesh>::readUnknown( const std::string       &name,
                                             PhysVectUnknown<Vector> &unknown)
+//                                            double                  factor)
 {
     std::string sdummy;
     std::string ext;
@@ -432,8 +434,8 @@ ElasticStructureHandler<Mesh>::readUnknown( const std::string       &name,
     ext = "_x.bb";
     filenamex.insert(filenamex.end(), ext.begin(), ext.end());
 
-    std::cout << "Reading INRIA solid file   (" << filenamex << ")"
-              << ":" << std::endl;
+//     std::cout << "Reading INRIA solid file   (" << filenamex << ")"
+//               << ":" << std::endl;
 
     std::ifstream filex(filenamex.c_str(), std::ios::in);
 
@@ -447,10 +449,20 @@ ElasticStructureHandler<Mesh>::readUnknown( const std::string       &name,
     filex >> ndim;
     filex >> sdummy;
     filex >> nsx;
+
+    if (nsx != _dim)
+    {
+        std::cout << "restart: nonmatching dimension in file " << filenamex << std::endl;
+        exit(1);
+    }
+
     filex >> sdummy;
 
     for (int ix = 0; ix < nsx; ++ix)
-        filex >> unknown[ix + 0*nDof];
+        {
+            filex >> unknown[ix + 0*nDof];
+//            unknown[ix + 0*nDof] /= factor;
+        }
 
     filex.close();
 
@@ -458,8 +470,8 @@ ElasticStructureHandler<Mesh>::readUnknown( const std::string       &name,
     ext = "_y.bb";
     filenamey.insert(filenamey.end(), ext.begin(), ext.end());
 
-    std::cout << "Reading INRIA solid file   (" << filenamey << ")"
-              << ":" << std::endl;
+//     std::cout << "Reading INRIA solid file   (" << filenamey << ")"
+//               << ":" << std::endl;
 
     std::ifstream filey(filenamey.c_str(), std::ios::in);
 
@@ -473,10 +485,20 @@ ElasticStructureHandler<Mesh>::readUnknown( const std::string       &name,
     filey >> ndim;
     filey >> sdummy;
     filey >> nsy;
+
+    if (nsy != _dim)
+    {
+        std::cout << "restart: nonmatching dimension in file " << filenamex << std::endl;
+        exit(1);
+    }
+
     filey >> sdummy;
 
     for (int iy = 0; iy < nsy; ++iy)
+    {
         filey >> unknown[iy + 1*nDof];
+//        unknown[iy + 1*nDof] /= factor;
+    }
 
     filey.close();
 
@@ -484,8 +506,8 @@ ElasticStructureHandler<Mesh>::readUnknown( const std::string       &name,
     ext = "_z.bb";
     filenamez.insert(filenamez.end(), ext.begin(), ext.end());
 
-    std::cout << "Reading INRIA solid file   (" << filenamez << ")"
-              << ":" << std::endl;
+//     std::cout << "Reading INRIA solid file   (" << filenamez << ")"
+//               << ":" << std::endl;
 
     std::ifstream filez(filenamez.c_str(), std::ios::in);
 
@@ -499,10 +521,20 @@ ElasticStructureHandler<Mesh>::readUnknown( const std::string       &name,
     filez >> ndim;
     filez >> sdummy;
     filez >> nsz;
+
+    if (nsz != _dim)
+    {
+        std::cout << "restart: nonmatching dimension in file " << filenamex << std::endl;
+        exit(1);
+    }
+
     filez >> sdummy;
 
     for (int iz = 0; iz < nsz; ++iz)
+    {
         filez >> unknown[iz + 2*nDof];
+//        unknown[iz + 2*nDof] /= factor;
+    }
 
     filez.close();
 }

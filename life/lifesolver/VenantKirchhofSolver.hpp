@@ -218,8 +218,8 @@ VenantKirchhofSolver( const GetPot& data_file, const RefFE& refFE, const QuadRul
 {
 
     std::cout << std::endl;
-    std::cout << "O-  Displacement unknowns: " << this->_dim << std::endl;
-    std::cout << "O-  Computing mass and linear strain matrices... ";
+    std::cout << "S-  Displacement unknowns: " << this->_dim << std::endl;
+    std::cout << "S-  Computing mass and linear strain matrices... ";
 
     _linearSolver.setOptionsFromGetPot( data_file, "solid/aztec" );
     _linearSolver.setMatrix( _J );
@@ -286,9 +286,9 @@ timeAdvance( source_type const& source, const Real& time )
     _time = time;
 
     std::cout << std::endl;
-    std::cout << "O== SOLID: Now we are at time " << _time << " s." << std::endl;
+    std::cout << "S: Now we are at time " << _time << " s." << std::endl;
 
-    std::cout << "  o-  Updating mass term on right hand side... ";
+    std::cout << "  s-  Updating mass term on right hand side... ";
 
     Chrono chrono;
     chrono.start();
@@ -444,7 +444,7 @@ template <typename Mesh>
 void VenantKirchhofSolver<Mesh>::
 evalResidual( Vector &res, const Vector& sol, int /*iter*/)
 {
-    std::cout << "O-    Computing residual... ";
+    std::cout << "S-    Computing residual... ";
 
     Chrono chrono;
     chrono.start();
@@ -514,7 +514,7 @@ template <typename Mesh>
 void VenantKirchhofSolver<Mesh>::
 updateJac( Vector& sol, int iter )
 {
-    std::cout << "    o-  Solid: Updating JACOBIAN in iter " << iter << "  ... ";
+    std::cout << "  S-  Solid: Updating JACOBIAN in iter " << iter << "  ... ";
 
     Chrono chrono;
     chrono.start();
@@ -585,7 +585,7 @@ solveJac( Vector &step, const Vector& res, double& /*linear_rel_tol*/)
 
     // for BC treatment (done at each time-step)
     Real tgv = 1.0;
-    std::cout << "   o-  Applying boundary conditions... ";
+    std::cout << "   S-  Applying boundary conditions      ... ";
     chrono.start();
 
     // BC manage for the velocity
@@ -598,7 +598,7 @@ solveJac( Vector &step, const Vector& res, double& /*linear_rel_tol*/)
 
     _linearSolver.setRecursionLevel( _recur );
 
-    std::cout << "   o-  Solving system... "<< std::flush;
+    std::cout << "   S-  Solving system                    ... "<< std::flush;
     chrono.start();
     _linearSolver.solve( step , _f);
     chrono.stop();
@@ -626,7 +626,7 @@ solveJac(Vector &step, const Vector& res, double& linear_rel_tol, BCHandler &BCd
 
     // for BC treatment (done at each time-step)
     Real tgv = 1.0;
-    std::cout << "  o-  Applying boundary conditions... ";
+    std::cout << "  S-  Applying boundary conditions      ... ";
     chrono.start();
 
     // BC manage for the velocity
@@ -639,7 +639,7 @@ solveJac(Vector &step, const Vector& res, double& linear_rel_tol, BCHandler &BCd
 
     _linearSolver.setRecursionLevel( _recur );
 
-    std::cout << "  o-  Solving system... "<< std::flush;
+    std::cout << "  S-  Solving system                    ... "<< std::flush;
     chrono.start();
     _linearSolver.solve( step , _f );
     chrono.stop();
@@ -665,7 +665,7 @@ solveLin( Vector &step, const Vector& res, double /*linear_rel_tol*/, BCHandler 
 
     // for BC treatment (done at each time-step)
     Real tgv = 1.0;
-    std::cout << "  S-  Applying boundary conditions... ";
+    std::cout << "  S-  Applying boundary conditions        ... ";
     chrono.start();
 
     // BC manage for the velocity
@@ -678,7 +678,7 @@ solveLin( Vector &step, const Vector& res, double /*linear_rel_tol*/, BCHandler 
 
     _linearSolver.setRecursionLevel( _recur );
 
-    std::cout << "  o-  Solving system... "<< std::flush;
+    std::cout << "  S-  Solving system                      ... "<< std::flush;
     chrono.start();
     _linearSolver.solve( step , _f );
     chrono.stop();
@@ -686,7 +686,9 @@ solveLin( Vector &step, const Vector& res, double /*linear_rel_tol*/, BCHandler 
 
     _w = ( 2.0 / this->_dt ) * step - _rhs_w;
 
+    std::cout << "  S-  Computing residual                  ... " << std::flush;
     _residual_d = _C*step;
+    std::cout << " ok." << std::endl;
 }
 
 

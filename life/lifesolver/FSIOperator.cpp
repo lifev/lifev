@@ -64,6 +64,7 @@ FSIOperator::setup()
                                  0.0);
 
         M_dofStructureToReducedFluid->setup(feTetraP1, M_fluid->pDof(),
+//        M_dofStructureToReducedFluid->setup(M_fluid->mesh().getRefFE(), M_fluid->dofMesh(),
                                             feTetraP1, M_solid->dDof());
         M_dofStructureToReducedFluid->update(M_fluid->mesh(), 1,
                                              M_solid->mesh(), 1,
@@ -85,9 +86,8 @@ FSIOperator::setDataFromGetPot( GetPot const& data_file )
     M_method  = data_file("problem/method" ,0);
     M_reducedFluid = data_file("problem/reducedFluid", 0);
     std::cout << "setdatafromgetpot: reducedFluid " << M_reducedFluid << std::endl;
-   if (M_reducedLinFluid) M_reducedLinFluid->setLinearSolver(data_file);
+    if (M_reducedLinFluid) M_reducedLinFluid->setLinearSolver(data_file);
 }
-
 
 //
 

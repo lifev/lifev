@@ -111,7 +111,8 @@ public:
     //! Sets initial condition for the velocity and the pressure
     //! from medit file
     void initialize( const std::string& velName,
-                     const std::string& pressName);
+                     const std::string& pressName,
+                     const std::string& velwName);
     //! Postprocessing
     void postProcess();
 
@@ -138,6 +139,8 @@ protected:
 private:
 
     Real _factor; // amplification factor for deformed mesh
+    void readUnknown( const std::string       &name,
+                      PhysVectUnknown<Vector> &unknown);
 };
 
 
@@ -261,7 +264,8 @@ NavierStokesAleHandler<Mesh>::initialize(  const std::string & vname )
 template <typename Mesh>
 void
 NavierStokesAleHandler<Mesh>::initialize( const std::string& velName,
-                                          const std::string& pressName)
+                                          const std::string& pressName,
+                                          const std::string& velwName)
 {
     std::cout << "  F- restarting ... " << std::endl;
 
@@ -313,26 +317,149 @@ NavierStokesAleHandler<Mesh>::initialize( const std::string& velName,
              >> disp[inode + 2*nnode]
              >> idummy;
 
-//        std::cout << disp[inode + 0*nnode] << " " << disp[inode + 1*nnode] << " "  << disp[inode + 2*nnode] << std::endl; 
-//         std::cout << _mesh.pointList[inode].coordinate(0) << " "
-//                   << _mesh.pointList[inode].coordinate(1) << " "
-//                   << _mesh.pointList[inode].coordinate(2) << std::endl;
-
-        disp[inode + 0*nnode] -= _mesh.pointList[inode].coordinate(1);
-        disp[inode + 1*nnode] -= _mesh.pointList[inode].coordinate(2);
-        disp[inode + 2*nnode] -= _mesh.pointList[inode].coordinate(3);
+        disp[inode + 0*nnode] = (disp[inode + 0*nnode] - _mesh.pointList[inode].coordinate(1))/_factor;
+        disp[inode + 1*nnode] = (disp[inode + 1*nnode] - _mesh.pointList[inode].coordinate(2))/_factor;
+        disp[inode + 2*nnode] = (disp[inode + 2*nnode] - _mesh.pointList[inode].coordinate(3))/_factor;
 
     }
 
     file.close();
 
+//    _mesh.moveMesh(disp);
+
+    readUnknown(velwName, _w);
+
+    //now we must compute the "old" displacement
+
+    _dispOld = disp - _w*_dt;
+
     _mesh.moveMesh(disp);
-
-
-
 
 }
 
+
+template <typename Mesh>
+void
+NavierStokesAleHandler<Mesh>::readUnknown( const std::string       &name,
+                                            PhysVectUnknown<Vector> &unknown)
+//                                            double                  factor)
+{
+    std::string sdummy;
+    std::string ext;
+    int nsx, nsy, nsz;
+    int ndim;
+
+    int nDof = _mesh.pointList.size();
+    std::cout << "size = " << nDof << std::endl;
+
+    std::string filenamex = name;
+    ext = "_x.bb";
+    filenamex.insert(filenamex.end(), ext.begin(), ext.end());
+
+//     std::cout << "Reading INRIA solid file   (" << filenamex << ")"
+//               << ":" << std::endl;
+
+    std::ifstream filex(filenamex.c_str(), std::ios::in);
+
+    if (!filex)
+    {
+        std::cout << "Reading file " << filenamex
+                  << " impossible" << std::endl;
+        exit(1);
+    }
+
+    filex >> ndim;
+    filex >> sdummy;
+    filex >> nsx;
+
+    if (nsx != nDof)
+    {
+        std::cout << "restart: nonmatching dimension in file " << filenamex << std::endl;
+        std::cout << nDof << " != " << nsx << std::endl;
+        exit(1);
+    }
+
+    filex >> sdummy;
+
+    for (int ix = 0; ix < nsx; ++ix)
+        {
+            filex >> unknown[ix + 0*nDof];
+        }
+
+    filex.close();
+
+    std::string filenamey = name;
+    ext = "_y.bb";
+    filenamey.insert(filenamey.end(), ext.begin(), ext.end());
+
+//     std::cout << "Reading INRIA solid file   (" << filenamey << ")"
+//               << ":" << std::endl;
+
+    std::ifstream filey(filenamey.c_str(), std::ios::in);
+
+    if (!filey)
+    {
+        std::cout << "Reading file " << filenamey
+                  << " impossible" << std::endl;
+        exit(1);
+    }
+
+    filey >> ndim;
+    filey >> sdummy;
+    filey >> nsy;
+
+    if (nsy != nDof)
+    {
+        std::cout << "restart: nonmatching dimension in file " << filenamey << std::endl;
+        std::cout << nDof << " != " << nsy << std::endl;
+        exit(1);
+    }
+
+    filey >> sdummy;
+
+    for (int iy = 0; iy < nsy; ++iy)
+    {
+        filey >> unknown[iy + 1*nDof];
+    }
+
+    filey.close();
+
+    std::string filenamez = name;
+    ext = "_z.bb";
+    filenamez.insert(filenamez.end(), ext.begin(), ext.end());
+
+//     std::cout << "Reading INRIA solid file   (" << filenamez << ")"
+//               << ":" << std::endl;
+
+    std::ifstream filez(filenamez.c_str(), std::ios::in);
+
+    if (!filez)
+    {
+        std::cout << "Reading mesh file " << filenamez
+                  << " impossible" << std::endl;
+        exit(1);
+    }
+
+    filez >> ndim;
+    filez >> sdummy;
+    filez >> nsz;
+
+    if (nsz != nDof)
+    {
+        std::cout << "restart: nonmatching dimension in file " << filenamez << std::endl;
+        std::cout << nDof << " != " << nsz << std::endl;
+        exit(1);
+    }
+
+    filez >> sdummy;
+
+    for (int iz = 0; iz < nsz; ++iz)
+    {
+        filez >> unknown[iz + 2*nDof];
+    }
+
+    filez.close();
+}
 
 
 
@@ -366,12 +493,14 @@ NavierStokesAleHandler<Mesh>::postProcess()
 
 
         wr_medit_ascii_scalar( "press." + name + ".bb", _p.giveVec(), _p.size() );
+
         wr_medit_ascii_scalar( "vel_x." + name + ".bb", _u.giveVec(), _mesh.numVertices() );
         wr_medit_ascii_scalar( "vel_y." + name + ".bb", _u.giveVec() + _dim_u, _mesh.numVertices() );
         wr_medit_ascii_scalar( "vel_z." + name + ".bb", _u.giveVec() + 2 * _dim_u, _mesh.numVertices() );
-        //   wr_medit_ascii_scalar("velw_x."+name+".bb",_w.giveVec(),_mesh.numVertices());
-        // wr_medit_ascii_scalar("velw_y."+name+".bb",_w.giveVec() + _mesh.numVertices(),_mesh.numVertices());
-        //wr_medit_ascii_scalar("velw_z."+name+".bb",_w.giveVec() + 2*_mesh.numVertices(),_mesh.numVertices());
+
+        wr_medit_ascii_scalar("velw_x."+name+".bb",_w.giveVec(),_mesh.numVertices());
+        wr_medit_ascii_scalar("velw_y."+name+".bb",_w.giveVec() + _mesh.numVertices(),_mesh.numVertices());
+        wr_medit_ascii_scalar("velw_z."+name+".bb",_w.giveVec() + 2*_mesh.numVertices(),_mesh.numVertices());
 
 
         //wr_medit_ascii("press."+name+".mesh", _mesh);
@@ -380,9 +509,10 @@ NavierStokesAleHandler<Mesh>::postProcess()
         system( ( "ln -s press." + name + ".mesh vel_x." + name + ".mesh" ).data() );
         system( ( "ln -s press." + name + ".mesh vel_y." + name + ".mesh" ).data() );
         system( ( "ln -s press." + name + ".mesh vel_z." + name + ".mesh" ).data() );
-        //system(("ln -s press."+name+".mesh velw_x."+name+".mesh").data());
-        //system(("ln -s press."+name+".mesh velw_y."+name+".mesh").data());
-        //system(("ln -s press."+name+".mesh velw_z."+name+".mesh").data());
+
+        system(("ln -s press."+name+".mesh velw_x."+name+".mesh").data());
+        system(("ln -s press."+name+".mesh velw_y."+name+".mesh").data());
+        system(("ln -s press."+name+".mesh velw_z."+name+".mesh").data());
 
         // system(("ln -s "+_mesh_file+" veloc."+name+".mesh").data());
     }

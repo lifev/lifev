@@ -103,8 +103,8 @@ void reducedLinFluid::solveReducedLinearFluid()
     M_C = M_CAux;
     M_f = ZeroVector( M_f.size() );
 
-    M_BCh_dp_inv->showMe();
-    M_BCh_dp->showMe();
+//     M_BCh_dp_inv->showMe();
+//     M_BCh_dp->showMe();
 
     bcManage(M_C, M_f, M_fluid->mesh(),
              M_dof,

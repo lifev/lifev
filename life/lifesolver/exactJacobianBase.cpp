@@ -71,6 +71,8 @@ void exactJacobian::eval(const Vector &_disp,
     this->M_solid->setRecur(0);
     this->M_solid->iterate();
 
+//     this->M_fluid->postProcess();
+//     this->M_solid->postProcess();
 }
 
 void exactJacobian::evalResidual(Vector &_res,
@@ -288,10 +290,10 @@ void  exactJacobian::solveLinearSolid()
                    1., 1.);
 
     Real tol       = 1.e-10;
-    std::cout << "rhs_dz norm = " << norm_2(M_rhs_dz) << std::endl;
+//    std::cout << "rhs_dz norm = " << norm_2(M_rhs_dz) << std::endl;
     this->M_solid->setRecur(1);
     this->M_solid->solveJac(M_dz, M_rhs_dz, tol);
-    std::cout << "dz norm     = " << norm_inf(M_dz) << std::endl;
+//    std::cout << "dz norm     = " << norm_inf(M_dz) << std::endl;
 }
 
 

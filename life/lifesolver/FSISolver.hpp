@@ -161,10 +161,11 @@ public:
 
     void initialize( std::string velFName,
                      std::string pressName,
+                     std::string velwName,
                      std::string depName,
                      std::string velSName)
         {
-            M_oper->fluid().initialize(velFName, pressName);
+            M_oper->fluid().initialize(velFName, pressName, velwName);
             M_oper->solid().initialize(depName, velSName);
         }
 

@@ -114,6 +114,10 @@ void steklovPoincare::eval(const Vector& disp,
     M_solid->d() = disp;
 
     M_fluid->updateMesh(M_time);
+
+//     M_solid->postProcess();
+//     M_fluid->postProcess();
+
     M_fluid->iterate   (M_time);
 
     M_solid->setRecur(0);
@@ -123,11 +127,11 @@ void steklovPoincare::eval(const Vector& disp,
     velo    = M_solid->w();
 
     std::cout << "                ::: norm(disp     ) = "
-              << norm_2(disp) << std::endl;
+              << norm_inf(disp) << std::endl;
     std::cout << "                ::: norm(dispNew  ) = "
-              << norm_2(dispNew) << std::endl;
+              << norm_inf(dispNew) << std::endl;
     std::cout << "                ::: norm(velo     ) = "
-              << norm_2(velo) << std::endl;
+              << norm_inf(velo) << std::endl;
 }
 
 void steklovPoincare::evalResidual(Vector       &res,
@@ -135,6 +139,9 @@ void steklovPoincare::evalResidual(Vector       &res,
                                    const int     iter)
 {
     int status = 0;
+
+//     M_solid->postProcess();
+//     M_fluid->postProcess();
 
     if(iter == 0) status = 1;
 
@@ -163,8 +170,7 @@ void steklovPoincare::evalResidual(Vector       &res,
     std::cout << "max ResidualFSI = " << norm_inf(M_strongResidualFSI)
               << std::endl;
 
-//    M_solid->postProcess();
-//    M_fluid->postProcess();
+
 //      Vector muk = disp;
 //      muk = ZeroVector( muk.size() );
 //      invSsPrime(M_residualS, 1e-08, muk);

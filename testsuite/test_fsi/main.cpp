@@ -74,13 +74,14 @@ public:
             _M_Tstart = 0.;
             if (restart)
             {
-                std::string velFName  = data_file("fluid/miscellanoues/velname"  ,"velF");
-                std::string pressName = data_file("fluid/miscellanoues/pressname","press");
-                std::string depName   = data_file("solid/miscellanoues/depname"  ,"dep");
-                std::string velSName  = data_file("solid/miscellanoues/velname"  ,"velS");
+                std::string velFName  = data_file("fluid/miscellaneous/velname"  ,"vel");
+                std::string pressName = data_file("fluid/miscellaneous/pressname","press");
+                std::string velwName  = data_file("fluid/miscellaneous/velwname", "velw");
+                std::string depName   = data_file("solid/miscellaneous/depname"  ,"dep");
+                std::string velSName  = data_file("solid/miscellaneous/velname"  ,"velw");
                 _M_Tstart             = data_file("problem/Tstart"   ,0.);
                 std::cout << "Starting time = " << _M_Tstart << std::endl;
-                _M_fsi->initialize(velFName, pressName, depName, velSName);
+                _M_fsi->initialize(velFName, pressName, velwName, depName, velSName);
             }
             else
             {

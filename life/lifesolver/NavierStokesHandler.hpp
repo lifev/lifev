@@ -554,7 +554,7 @@ NavierStokesHandler<Mesh, DataType>::postProcess()
 
     if ( fmod( float( _count ), float( this->_verbose ) ) == 0.0 )
     {
-        std::cout << "  o-  Post-processing \n";
+        std::cout << "  F-  Post-processing \n";
         index << ( _count / this->_verbose );
 
         switch ( index.str().size() )
@@ -683,6 +683,7 @@ NavierStokesHandler<Mesh, DataType>::initialize( const std::string & vname )
                   << std::endl;
         abort();
     }
+
     resfile.read( ( char* ) & _u( 1 ), _u.size() * sizeof( double ) );
     resfile.read( ( char* ) & _p( 1 ), _p.size() * sizeof( double ) );
     resfile.close();
@@ -700,18 +701,21 @@ NavierStokesHandler<Mesh, DataType>::initialize( const std::string & vname )
 template <typename Mesh, typename DataType>
 void
 NavierStokesHandler<Mesh, DataType>::initialize( const std::string& velName,
-                                       const std::string& pressName)
+                                                 const std::string& pressName)
 {
     std::string sdummy;
     std::string ext;
     int nsx, nsy, nsz, nsp;
     int ndim;
+//    int dotpos;
 
     int nDof = uDof().numTotalDof();
 
     std::string filenamex = velName;
 
     ext = "_x.bb";
+//    dotpos = filenamex.find(".");
+
     filenamex.insert(filenamex.end(), ext.begin(), ext.end());
 
     std::cout << "Reading INRIA fluid file   (" << filenamex << ")"
@@ -774,7 +778,7 @@ NavierStokesHandler<Mesh, DataType>::initialize( const std::string& velName,
 
     if (!filez)
     {
-        std::cout << "Reading mesh file " << filenamez
+        std::cout << "Reading file " << filenamez
                   << " impossible" << std::endl;
         exit(1);
     }
