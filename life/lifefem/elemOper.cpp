@@ -30,9 +30,9 @@ namespace LifeV
 */
 void mass( Real (*coef)(Real,Real,Real,Real,Real),
            ElemMat& elmat, const CurrentFE& fe,
-	   const Dof& dof,
-	   const ScalUnknown<Vector> U,Real t)
-{ 
+           const Dof& dof,
+           const ScalUnknown<Vector>& U,Real t)
+{
     ASSERT_PRE( fe.hasJac(), "Mass matrix needs at least the jacobian" );
     int iblock=0,jblock=0;
     ElemMat::matrix_view mat = elmat.block( iblock, jblock );
@@ -47,7 +47,7 @@ void mass( Real (*coef)(Real,Real,Real,Real,Real),
     std::vector<Real> locU(fe.nbNode);
     for (i=0;i<fe.nbNode;i++)
     {
-      locU[i]=U[dof.localToGlobal(eleId,i+1)-1];	//(one component)
+        locU[i]=U[dof.localToGlobal(eleId,i+1)-1];	//(one component)
     }
 
     //
@@ -59,13 +59,13 @@ void mass( Real (*coef)(Real,Real,Real,Real,Real),
         s = 0;
         for ( ig = 0;ig < fe.nbQuadPt;ig++ )
         {
-	    uPt=0.0;
-	    for(iu=0;iu<fe.nbNode;iu++){
-	      uPt+=locU[iu]*fe.phi(iu,ig);
-	    }
-	    fe.coorQuadPt(x,y,z,ig);
+            uPt=0.0;
+            for(iu=0;iu<fe.nbNode;iu++){
+                uPt+=locU[iu]*fe.phi(iu,ig);
+            }
+            fe.coorQuadPt(x,y,z,ig);
             s += fe.phi( iloc, ig ) * fe.phi( iloc, ig ) * fe.weightDet( ig )*
-	    	coef(t,x,y,z,uPt);
+                coef(t,x,y,z,uPt);
         }
         mat( iloc, iloc ) += s;
     }
@@ -78,15 +78,15 @@ void mass( Real (*coef)(Real,Real,Real,Real,Real),
         jloc = fe.patternSecond( i );
         s = 0;
         for ( ig = 0;ig < fe.nbQuadPt;ig++ )
-	{
-	    uPt=0.0;
-	    for(iu=0;iu<fe.nbNode;iu++){
-	      uPt+=locU[iu]*fe.phi(iu,ig);
-	    }
-	    fe.coorQuadPt(x,y,z,ig);
+        {
+            uPt=0.0;
+            for(iu=0;iu<fe.nbNode;iu++){
+                uPt+=locU[iu]*fe.phi(iu,ig);
+            }
+            fe.coorQuadPt(x,y,z,ig);
             s += fe.phi( iloc, ig ) * fe.phi( jloc, ig ) * fe.weightDet( ig )*
-	    	coef(t,x,y,z,uPt);
-	}
+                coef(t,x,y,z,uPt);
+        }
         coef_s = s;
         mat( iloc, jloc ) += coef_s;
         mat( jloc, iloc ) += coef_s;
@@ -98,9 +98,9 @@ void mass( Real (*coef)(Real,Real,Real,Real,Real),
   Stiffness matrix: \int coef(t,x,y,z,u) grad v_i . grad v_j
 */
 void stiff( Real (*coef)(Real,Real,Real,Real,Real),
-           ElemMat& elmat, const CurrentFE& fe,
-	   const Dof& dof,
-	   const ScalUnknown<Vector> U,Real t)
+            ElemMat& elmat, const CurrentFE& fe,
+            const Dof& dof,
+            const ScalUnknown<Vector>& U,Real t)
 {
     int iblock=0,jblock=0;
     ASSERT_PRE( fe.hasFirstDeriv(),
@@ -117,7 +117,7 @@ void stiff( Real (*coef)(Real,Real,Real,Real,Real),
     std::vector<Real> locU(fe.nbNode);
     for (i=0;i<fe.nbNode;i++)
     {
-      locU[i]=U[dof.localToGlobal(eleId,i+1)-1];	//(one component)
+        locU[i]=U[dof.localToGlobal(eleId,i+1)-1];	//(one component)
     }
     //
     // diagonal
@@ -128,14 +128,14 @@ void stiff( Real (*coef)(Real,Real,Real,Real,Real),
         s = 0;
         for ( ig = 0;ig < fe.nbQuadPt;ig++ )
         {
-	    uPt=0.0;
-	    for(iu=0;iu<fe.nbNode;iu++){
-	      uPt+=locU[iu]*fe.phi(iu,ig);
-	    }
-	    fe.coorQuadPt(x,y,z,ig);
+            uPt=0.0;
+            for(iu=0;iu<fe.nbNode;iu++){
+                uPt+=locU[iu]*fe.phi(iu,ig);
+            }
+            fe.coorQuadPt(x,y,z,ig);
             for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
                 s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( iloc, icoor, ig )
-                     * fe.weightDet( ig )*coef(t,x,y,z,uPt);
+                    * fe.weightDet( ig )*coef(t,x,y,z,uPt);
         }
         mat( iloc, iloc ) += s;
     }
@@ -149,14 +149,14 @@ void stiff( Real (*coef)(Real,Real,Real,Real,Real),
         s = 0;
         for ( ig = 0;ig < fe.nbQuadPt;ig++ )
         {
-	    uPt=0.0;
-	    for(iu=0;iu<fe.nbNode;iu++){
-	      uPt+=locU[iu]*fe.phi(iu,ig);
-	    }
-	    fe.coorQuadPt(x,y,z,ig);
+            uPt=0.0;
+            for(iu=0;iu<fe.nbNode;iu++){
+                uPt+=locU[iu]*fe.phi(iu,ig);
+            }
+            fe.coorQuadPt(x,y,z,ig);
             for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
                 s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( jloc, icoor, ig ) *
-                     fe.weightDet( ig )*coef(t,x,y,z,uPt);
+                    fe.weightDet( ig )*coef(t,x,y,z,uPt);
         }
         coef_s = s;
         mat( iloc, jloc ) += coef_s;
@@ -167,46 +167,46 @@ void stiff( Real (*coef)(Real,Real,Real,Real,Real),
 
 /*
   compute \int fct(t,x,y,z,u) \phi_i
- */
+*/
 void source( Real (*fct)(Real,Real,Real,Real,Real),
-           ElemVec& elvec, const CurrentFE& fe,
-	   const Dof& dof,
-	   const ScalUnknown<Vector> U,Real t)
+             ElemVec& elvec, const CurrentFE& fe,
+             const Dof& dof,
+             const ScalUnknown<Vector>& U,Real t)
 {
-  int iblock=0;
-  ASSERT_PRE( fe.hasQuadPtCoor(), 
-  	"Source with space dependent fonction need updated quadrature "
-	"point coordinates. Call for example updateFirstDerivQuadPt() "
-	"instead of updateFirstDeriv()." );
-  int i, ig;
-  ElemVec::vector_view vec = elvec.block( iblock );
-  Real s;
-  ID eleId=fe.currentId();
-  int iu;
-  double uPt;
+    int iblock=0;
+    ASSERT_PRE( fe.hasQuadPtCoor(),
+                "Source with space dependent fonction need updated quadrature "
+                "point coordinates. Call for example updateFirstDerivQuadPt() "
+                "instead of updateFirstDeriv()." );
+    int i, ig;
+    ElemVec::vector_view vec = elvec.block( iblock );
+    Real s;
+    ID eleId=fe.currentId();
+    int iu;
+    double uPt;
 
-  std::vector<Real> locU(fe.nbNode);
-  for (i=0;i<fe.nbNode;i++)
-  {
-    locU[i]=U[dof.localToGlobal(eleId,i+1)-1];	//(one component)
-  }
-  for ( i = 0;i < fe.nbNode;i++ )
-  {
-    s = 0.0;
-    for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+    std::vector<Real> locU(fe.nbNode);
+    for (i=0;i<fe.nbNode;i++)
     {
-      uPt=0.0;
-      for(iu=0;iu<fe.nbNode;iu++){
-        uPt+=locU[iu]*fe.phi(iu,ig);
-      }
-      s += fe.phi( i, ig ) * 
-      	   fct(t, fe.quadPt( ig, 0 ), 
-	   	fe.quadPt( ig, 1 ), 
-		fe.quadPt( ig, 2 ), uPt) *
-           fe.weightDet( ig );
+        locU[i]=U[dof.localToGlobal(eleId,i+1)-1];	//(one component)
     }
-    vec( i ) += s;
-  }
+    for ( i = 0;i < fe.nbNode;i++ )
+    {
+        s = 0.0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        {
+            uPt=0.0;
+            for(iu=0;iu<fe.nbNode;iu++){
+                uPt+=locU[iu]*fe.phi(iu,ig);
+            }
+            s += fe.phi( i, ig ) *
+                fct(t, fe.quadPt( ig, 0 ),
+                    fe.quadPt( ig, 1 ),
+                    fe.quadPt( ig, 2 ), uPt) *
+                fe.weightDet( ig );
+        }
+        vec( i ) += s;
+    }
 }
 
 
@@ -625,7 +625,7 @@ void ipstab_bgrad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const 
                 for ( jcoor = 0; jcoor < fe1.nbCoor; ++jcoor )
                     for ( ig = 0;ig < bdfe.nbQuadPt;ig++ )
                         sum += phid1[ i ][ icoor ][ ig ] * phid2[ j ][ jcoor ][ ig ] * b[ icoor ][ ig ]
-                               * b[ jcoor ][ ig ] * bdfe.weightMeas( ig );
+                            * b[ jcoor ][ ig ] * bdfe.weightMeas( ig );
             mat_tmp( i, j ) = coef * sum;
         }
     }
@@ -760,7 +760,7 @@ void stiff( Real coef, ElemMat& elmat, const CurrentFE& fe,
         {
             for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
                 s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( iloc, icoor, ig )
-                     * fe.weightDet( ig );
+                    * fe.weightDet( ig );
         }
         mat( iloc, iloc ) += coef * s;
     }
@@ -776,7 +776,7 @@ void stiff( Real coef, ElemMat& elmat, const CurrentFE& fe,
         {
             for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
                 s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( jloc, icoor, ig ) *
-                     fe.weightDet( ig );
+                    fe.weightDet( ig );
         }
         coef_s = coef * s;
         mat( iloc, jloc ) += coef_s;
@@ -809,7 +809,7 @@ void stiff( Real coef, Real ( *fct ) ( Real, Real, Real ), ElemMat& elmat,
             coef_f = fct( fe.quadPt( ig, 0 ), fe.quadPt( ig, 1 ), fe.quadPt( ig, 2 ) );
             for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
                 s += coef_f * fe.phiDer( iloc, icoor, ig ) * fe.phiDer( iloc, icoor, ig )
-                     * fe.weightDet( ig );
+                    * fe.weightDet( ig );
         }
         mat( iloc, iloc ) += coef * s;
     }
@@ -826,7 +826,7 @@ void stiff( Real coef, Real ( *fct ) ( Real, Real, Real ), ElemMat& elmat,
             coef_f = fct( fe.quadPt( ig, 0 ), fe.quadPt( ig, 1 ), fe.quadPt( ig, 2 ) );
             for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
                 s += coef_f * fe.phiDer( iloc, icoor, ig ) * fe.phiDer( jloc, icoor, ig ) *
-                     fe.weightDet( ig );
+                    fe.weightDet( ig );
         }
         coef_s = coef * s;
         mat( iloc, jloc ) += coef_s;
@@ -841,7 +841,7 @@ void stiff( Real coef, ElemMat& elmat, const CurrentFE& fe,
   Stiffness matrix: coef*\int grad v_i . grad v_j (nb blocks on the diagonal, nb>1)
 */
 {
-    
+
 
     ASSERT_PRE( fe.hasFirstDeriv(),
                 "Stiffness (vect) matrix needs at least the first derivatives" );
@@ -863,7 +863,7 @@ void stiff( Real coef, ElemMat& elmat, const CurrentFE& fe,
         {
             for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
                 s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( iloc, icoor, ig )
-                     * fe.weightDet( ig );
+                    * fe.weightDet( ig );
         }
         mat_tmp( iloc, iloc ) += coef * s;
     }
@@ -879,7 +879,7 @@ void stiff( Real coef, ElemMat& elmat, const CurrentFE& fe,
         {
             for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
                 s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( jloc, icoor, ig ) *
-                     fe.weightDet( ig );
+                    fe.weightDet( ig );
         }
         coef_s = coef * s;
         mat_tmp( iloc, jloc ) += coef_s;
@@ -907,14 +907,14 @@ void stiff( Real coef, ElemMat& elmat, const CurrentFE& fe,
 // VC - Dicembre 2004
 //
 void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
-            int iblock, int jblock, int nb )
+                 int iblock, int jblock, int nb )
 
-  
+
 /*
   Stiffness matrix: coef*\int curl v_i . curl v_j (nb blocks on the diagonal, nb>1)
 */
 {
-    
+
 
     ASSERT_PRE( fe.hasFirstDeriv(),
                 "Stiffness (vect) matrix needs at least the first derivatives" );
@@ -940,23 +940,23 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
     Tab2d mat_tmp33( fe.nbNode, fe.nbNode );
     mat_tmp33 = ZeroMatrix( fe.nbNode, fe.nbNode );
 
-    
+
 
     int iloc, jloc;
     int i, icoor, ig;
     double s, coef_s;
-    
+
     // diagonal 11
-    // 
+    //
     for ( i = 0; i < fe.nbDiag; i++ )
     {
         iloc = fe.patternFirst( i );
         s = 0;
         for ( ig = 0; ig < fe.nbQuadPt; ig++ )
         {
-         s = fe.phiDer( iloc, 1, ig ) * fe.phiDer( iloc, 1, ig ) * fe.weightDet( ig )
-           + fe.phiDer( iloc, 2, ig ) * fe.phiDer( iloc, 2, ig ) * fe.weightDet( ig ) ;
-	}
+            s = fe.phiDer( iloc, 1, ig ) * fe.phiDer( iloc, 1, ig ) * fe.weightDet( ig )
+                + fe.phiDer( iloc, 2, ig ) * fe.phiDer( iloc, 2, ig ) * fe.weightDet( ig ) ;
+        }
         mat_tmp11( iloc, iloc ) += coef * s;
     }
     // extra diagonal 11
@@ -969,7 +969,7 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
         for ( ig = 0;ig < fe.nbQuadPt;ig++ )
         {
             s = fe.phiDer( iloc, 1, ig ) * fe.phiDer( jloc, 1, ig ) * fe.weightDet( ig )
-              + fe.phiDer( iloc, 2, ig ) * fe.phiDer( jloc, 2, ig ) * fe.weightDet( ig )       ;
+                + fe.phiDer( iloc, 2, ig ) * fe.phiDer( jloc, 2, ig ) * fe.weightDet( ig )       ;
         }
         coef_s = coef * s;
         mat_tmp11( iloc, jloc ) += coef_s;
@@ -977,15 +977,15 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
     }
 
     // diagonal 12
-    // 
+    //
     for ( i = 0; i < fe.nbDiag; i++ )
     {
         iloc = fe.patternFirst( i );
         s = 0;
         for ( ig = 0; ig < fe.nbQuadPt; ig++ )
         {
-         s = - fe.phiDer( iloc, 1, ig ) * fe.phiDer( iloc, 0, ig ) * fe.weightDet( ig );
-	}
+            s = - fe.phiDer( iloc, 1, ig ) * fe.phiDer( iloc, 0, ig ) * fe.weightDet( ig );
+        }
         mat_tmp12( iloc, iloc ) -= coef * s;
     }
     // extra diagonal 12
@@ -1005,14 +1005,14 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
     }
 
     // diagonal 13
-    // 
+    //
     for ( i = 0; i < fe.nbDiag; i++ )
     {
         iloc = fe.patternFirst( i );
         s = 0;
         for ( ig = 0; ig < fe.nbQuadPt; ig++ )
         {
-	  s = - fe.phiDer( iloc, 2, ig ) * fe.phiDer( iloc, 0, ig ) * fe.weightDet( ig );
+            s = - fe.phiDer( iloc, 2, ig ) * fe.phiDer( iloc, 0, ig ) * fe.weightDet( ig );
         }
         mat_tmp13( iloc, iloc ) -= coef * s;
     }
@@ -1033,15 +1033,15 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
     }
 
     // diagonal 21
-    // 
+    //
     for ( i = 0; i < fe.nbDiag; i++ )
     {
         iloc = fe.patternFirst( i );
         s = 0;
         for ( ig = 0; ig < fe.nbQuadPt; ig++ )
         {
-         s = - fe.phiDer( iloc, 0, ig ) * fe.phiDer( iloc, 1, ig ) * fe.weightDet( ig );
-	}
+            s = - fe.phiDer( iloc, 0, ig ) * fe.phiDer( iloc, 1, ig ) * fe.weightDet( ig );
+        }
         mat_tmp21( iloc, iloc ) -= coef * s;
     }
     // extra diagonal 21
@@ -1061,16 +1061,16 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
     }
 
     // diagonal 22
-    // 
+    //
     for ( i = 0; i < fe.nbDiag; i++ )
     {
         iloc = fe.patternFirst( i );
         s = 0;
         for ( ig = 0; ig < fe.nbQuadPt; ig++ )
         {
-         s = fe.phiDer( iloc, 0, ig ) * fe.phiDer( iloc, 0, ig ) * fe.weightDet( ig )
-           + fe.phiDer( iloc, 2, ig ) * fe.phiDer( iloc, 2, ig ) * fe.weightDet( ig ) ;
-	}
+            s = fe.phiDer( iloc, 0, ig ) * fe.phiDer( iloc, 0, ig ) * fe.weightDet( ig )
+                + fe.phiDer( iloc, 2, ig ) * fe.phiDer( iloc, 2, ig ) * fe.weightDet( ig ) ;
+        }
         mat_tmp22( iloc, iloc ) += coef * s;
     }
     // extra diagonal 22
@@ -1083,7 +1083,7 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
         for ( ig = 0;ig < fe.nbQuadPt;ig++ )
         {
             s = fe.phiDer( iloc, 0, ig ) * fe.phiDer( jloc, 0, ig ) * fe.weightDet( ig )
-              + fe.phiDer( iloc, 2, ig ) * fe.phiDer( jloc, 2, ig ) * fe.weightDet( ig )       ;
+                + fe.phiDer( iloc, 2, ig ) * fe.phiDer( jloc, 2, ig ) * fe.weightDet( ig )       ;
         }
         coef_s = coef * s;
         mat_tmp22( iloc, jloc ) += coef_s;
@@ -1091,15 +1091,15 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
     }
 
     // diagonal 23
-    // 
+    //
     for ( i = 0; i < fe.nbDiag; i++ )
     {
         iloc = fe.patternFirst( i );
         s = 0;
         for ( ig = 0; ig < fe.nbQuadPt; ig++ )
         {
-         s = - fe.phiDer( iloc, 2, ig ) * fe.phiDer( iloc, 1, ig ) * fe.weightDet( ig );
-	}
+            s = - fe.phiDer( iloc, 2, ig ) * fe.phiDer( iloc, 1, ig ) * fe.weightDet( ig );
+        }
         mat_tmp23( iloc, iloc ) -= coef * s;
     }
     // extra diagonal 23
@@ -1119,14 +1119,14 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
     }
 
     // diagonal 31
-    // 
+    //
     for ( i = 0; i < fe.nbDiag; i++ )
     {
         iloc = fe.patternFirst( i );
         s = 0;
         for ( ig = 0; ig < fe.nbQuadPt; ig++ )
         {
-	  s = - fe.phiDer( iloc, 0, ig ) * fe.phiDer( iloc, 2, ig ) * fe.weightDet( ig );
+            s = - fe.phiDer( iloc, 0, ig ) * fe.phiDer( iloc, 2, ig ) * fe.weightDet( ig );
         }
         mat_tmp31( iloc, iloc ) -= coef * s;
     }
@@ -1147,15 +1147,15 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
     }
 
     // diagonal 32
-    // 
+    //
     for ( i = 0; i < fe.nbDiag; i++ )
     {
         iloc = fe.patternFirst( i );
         s = 0;
         for ( ig = 0; ig < fe.nbQuadPt; ig++ )
         {
-         s = - fe.phiDer( iloc, 1, ig ) * fe.phiDer( iloc, 2, ig ) * fe.weightDet( ig );
-	}
+            s = - fe.phiDer( iloc, 1, ig ) * fe.phiDer( iloc, 2, ig ) * fe.weightDet( ig );
+        }
         mat_tmp32( iloc, iloc ) -= coef * s;
     }
     // extra diagonal 32
@@ -1175,16 +1175,16 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
     }
 
     // diagonal 33
-    // 
+    //
     for ( i = 0; i < fe.nbDiag; i++ )
     {
         iloc = fe.patternFirst( i );
         s = 0;
         for ( ig = 0; ig < fe.nbQuadPt; ig++ )
         {
-         s = fe.phiDer( iloc, 0, ig ) * fe.phiDer( iloc, 0, ig ) * fe.weightDet( ig )
-           + fe.phiDer( iloc, 1, ig ) * fe.phiDer( iloc, 1, ig ) * fe.weightDet( ig ) ;
-	}
+            s = fe.phiDer( iloc, 0, ig ) * fe.phiDer( iloc, 0, ig ) * fe.weightDet( ig )
+                + fe.phiDer( iloc, 1, ig ) * fe.phiDer( iloc, 1, ig ) * fe.weightDet( ig ) ;
+        }
         mat_tmp33( iloc, iloc ) += coef * s;
     }
     // extra diagonal 33
@@ -1197,139 +1197,139 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
         for ( ig = 0;ig < fe.nbQuadPt;ig++ )
         {
             s = fe.phiDer( iloc, 1, ig ) * fe.phiDer( jloc, 1, ig ) * fe.weightDet( ig )
-              + fe.phiDer( iloc, 2, ig ) * fe.phiDer( jloc, 2, ig ) * fe.weightDet( ig )       ;
+                + fe.phiDer( iloc, 2, ig ) * fe.phiDer( jloc, 2, ig ) * fe.weightDet( ig )       ;
         }
         coef_s = coef * s;
         mat_tmp33( iloc, jloc ) += coef_s;
         mat_tmp33( jloc, iloc ) += coef_s;
     }
 
-          ElemMat::matrix_view mat_icomp = elmat.block( iblock + 0, jblock + 0 );
-          for ( i = 0; i < fe.nbDiag; i++ )
-          {
-             iloc = fe.patternFirst( i );
-            mat_icomp( iloc, iloc ) += mat_tmp11( iloc, iloc );
-          }
-          for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
-          {
-            iloc = fe.patternFirst( i );
-            jloc = fe.patternSecond( i );
-            mat_icomp( iloc, jloc ) += mat_tmp11( iloc, jloc );
-            mat_icomp( jloc, iloc ) += mat_tmp11( jloc, iloc );
-        }
-
-	  mat_icomp = elmat.block( iblock + 0, jblock + 1 );
-          for ( i = 0; i < fe.nbDiag; i++ )
-          {
-             iloc = fe.patternFirst( i );
-            mat_icomp( iloc, iloc ) -= mat_tmp12( iloc, iloc );
-          }
-          for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
-          {
-            iloc = fe.patternFirst( i );
-            jloc = fe.patternSecond( i );
-            mat_icomp( iloc, jloc ) -= mat_tmp12( iloc, jloc );
-            mat_icomp( jloc, iloc ) -= mat_tmp12( jloc, iloc );
-        }
-
-          mat_icomp = elmat.block( iblock + 0, jblock + 2 );
-          for ( i = 0; i < fe.nbDiag; i++ )
-          {
-             iloc = fe.patternFirst( i );
-            mat_icomp( iloc, iloc ) -= mat_tmp13( iloc, iloc );
-          }
-          for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
-          {
-            iloc = fe.patternFirst( i );
-            jloc = fe.patternSecond( i );
-            mat_icomp( iloc, jloc ) -= mat_tmp13( iloc, jloc );
-            mat_icomp( jloc, iloc ) -= mat_tmp13( jloc, iloc );
-        }
-
-        mat_icomp = elmat.block( iblock + 1, jblock + 0 );
-          for ( i = 0; i < fe.nbDiag; i++ )
-          {
-             iloc = fe.patternFirst( i );
-            mat_icomp( iloc, iloc ) -= mat_tmp21( iloc, iloc );
-          }
-          for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
-          {
-            iloc = fe.patternFirst( i );
-            jloc = fe.patternSecond( i );
-            mat_icomp( iloc, jloc ) -= mat_tmp21( iloc, jloc );
-            mat_icomp( jloc, iloc ) -= mat_tmp21( jloc, iloc );
-        }
-
-        mat_icomp = elmat.block( iblock + 1, jblock + 1 );
-          for ( i = 0; i < fe.nbDiag; i++ )
-          {
-             iloc = fe.patternFirst( i );
-            mat_icomp( iloc, iloc ) += mat_tmp22( iloc, iloc );
-          }
-          for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
-          {
-            iloc = fe.patternFirst( i );
-            jloc = fe.patternSecond( i );
-            mat_icomp( iloc, jloc ) += mat_tmp22( iloc, jloc );
-            mat_icomp( jloc, iloc ) += mat_tmp22( jloc, iloc );
-        }
-
-        mat_icomp = elmat.block( iblock + 1, jblock + 2 );
-          for ( i = 0; i < fe.nbDiag; i++ )
-          {
-             iloc = fe.patternFirst( i );
-            mat_icomp( iloc, iloc ) -= mat_tmp23( iloc, iloc );
-          }
-          for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
-          {
-            iloc = fe.patternFirst( i );
-            jloc = fe.patternSecond( i );
-            mat_icomp( iloc, jloc ) -= mat_tmp23( iloc, jloc );
-            mat_icomp( jloc, iloc ) -= mat_tmp23( jloc, iloc );
-        }
-
-        mat_icomp = elmat.block( iblock + 2, jblock + 0 );
-          for ( i = 0; i < fe.nbDiag; i++ )
-          {
-             iloc = fe.patternFirst( i );
-            mat_icomp( iloc, iloc ) -= mat_tmp31( iloc, iloc );
-          }
-          for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
-          {
-            iloc = fe.patternFirst( i );
-            jloc = fe.patternSecond( i );
-            mat_icomp( iloc, jloc ) -= mat_tmp31( iloc, jloc );
-            mat_icomp( jloc, iloc ) -= mat_tmp31( jloc, iloc );
-        }
-
-        mat_icomp = elmat.block( iblock + 2, jblock + 1 );
-          for ( i = 0; i < fe.nbDiag; i++ )
-          {
-             iloc = fe.patternFirst( i );
-            mat_icomp( iloc, iloc ) -= mat_tmp32( iloc, iloc );
-          }
-          for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
-          {
-            iloc = fe.patternFirst( i );
-            jloc = fe.patternSecond( i );
-            mat_icomp( iloc, jloc ) -= mat_tmp32( iloc, jloc );
-            mat_icomp( jloc, iloc ) -= mat_tmp32( jloc, iloc );
-        }
-
-        mat_icomp = elmat.block( iblock + 2, jblock + 2 );
-          for ( i = 0; i < fe.nbDiag; i++ )
-          {
-             iloc = fe.patternFirst( i );
-            mat_icomp( iloc, iloc ) += mat_tmp33( iloc, iloc );
-          }
-          for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
-          {
-            iloc = fe.patternFirst( i );
-            jloc = fe.patternSecond( i );
-            mat_icomp( iloc, jloc ) += mat_tmp33( iloc, jloc );
-            mat_icomp( jloc, iloc ) += mat_tmp( jloc, iloc );
-        }
+    ElemMat::matrix_view mat_icomp = elmat.block( iblock + 0, jblock + 0 );
+    for ( i = 0; i < fe.nbDiag; i++ )
+    {
+        iloc = fe.patternFirst( i );
+        mat_icomp( iloc, iloc ) += mat_tmp11( iloc, iloc );
     }
+    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        jloc = fe.patternSecond( i );
+        mat_icomp( iloc, jloc ) += mat_tmp11( iloc, jloc );
+        mat_icomp( jloc, iloc ) += mat_tmp11( jloc, iloc );
+    }
+
+    mat_icomp = elmat.block( iblock + 0, jblock + 1 );
+    for ( i = 0; i < fe.nbDiag; i++ )
+    {
+        iloc = fe.patternFirst( i );
+        mat_icomp( iloc, iloc ) -= mat_tmp12( iloc, iloc );
+    }
+    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        jloc = fe.patternSecond( i );
+        mat_icomp( iloc, jloc ) -= mat_tmp12( iloc, jloc );
+        mat_icomp( jloc, iloc ) -= mat_tmp12( jloc, iloc );
+    }
+
+    mat_icomp = elmat.block( iblock + 0, jblock + 2 );
+    for ( i = 0; i < fe.nbDiag; i++ )
+    {
+        iloc = fe.patternFirst( i );
+        mat_icomp( iloc, iloc ) -= mat_tmp13( iloc, iloc );
+    }
+    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        jloc = fe.patternSecond( i );
+        mat_icomp( iloc, jloc ) -= mat_tmp13( iloc, jloc );
+        mat_icomp( jloc, iloc ) -= mat_tmp13( jloc, iloc );
+    }
+
+    mat_icomp = elmat.block( iblock + 1, jblock + 0 );
+    for ( i = 0; i < fe.nbDiag; i++ )
+    {
+        iloc = fe.patternFirst( i );
+        mat_icomp( iloc, iloc ) -= mat_tmp21( iloc, iloc );
+    }
+    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        jloc = fe.patternSecond( i );
+        mat_icomp( iloc, jloc ) -= mat_tmp21( iloc, jloc );
+        mat_icomp( jloc, iloc ) -= mat_tmp21( jloc, iloc );
+    }
+
+    mat_icomp = elmat.block( iblock + 1, jblock + 1 );
+    for ( i = 0; i < fe.nbDiag; i++ )
+    {
+        iloc = fe.patternFirst( i );
+        mat_icomp( iloc, iloc ) += mat_tmp22( iloc, iloc );
+    }
+    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        jloc = fe.patternSecond( i );
+        mat_icomp( iloc, jloc ) += mat_tmp22( iloc, jloc );
+        mat_icomp( jloc, iloc ) += mat_tmp22( jloc, iloc );
+    }
+
+    mat_icomp = elmat.block( iblock + 1, jblock + 2 );
+    for ( i = 0; i < fe.nbDiag; i++ )
+    {
+        iloc = fe.patternFirst( i );
+        mat_icomp( iloc, iloc ) -= mat_tmp23( iloc, iloc );
+    }
+    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        jloc = fe.patternSecond( i );
+        mat_icomp( iloc, jloc ) -= mat_tmp23( iloc, jloc );
+        mat_icomp( jloc, iloc ) -= mat_tmp23( jloc, iloc );
+    }
+
+    mat_icomp = elmat.block( iblock + 2, jblock + 0 );
+    for ( i = 0; i < fe.nbDiag; i++ )
+    {
+        iloc = fe.patternFirst( i );
+        mat_icomp( iloc, iloc ) -= mat_tmp31( iloc, iloc );
+    }
+    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        jloc = fe.patternSecond( i );
+        mat_icomp( iloc, jloc ) -= mat_tmp31( iloc, jloc );
+        mat_icomp( jloc, iloc ) -= mat_tmp31( jloc, iloc );
+    }
+
+    mat_icomp = elmat.block( iblock + 2, jblock + 1 );
+    for ( i = 0; i < fe.nbDiag; i++ )
+    {
+        iloc = fe.patternFirst( i );
+        mat_icomp( iloc, iloc ) -= mat_tmp32( iloc, iloc );
+    }
+    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        jloc = fe.patternSecond( i );
+        mat_icomp( iloc, jloc ) -= mat_tmp32( iloc, jloc );
+        mat_icomp( jloc, iloc ) -= mat_tmp32( jloc, iloc );
+    }
+
+    mat_icomp = elmat.block( iblock + 2, jblock + 2 );
+    for ( i = 0; i < fe.nbDiag; i++ )
+    {
+        iloc = fe.patternFirst( i );
+        mat_icomp( iloc, iloc ) += mat_tmp33( iloc, iloc );
+    }
+    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        jloc = fe.patternSecond( i );
+        mat_icomp( iloc, jloc ) += mat_tmp33( iloc, jloc );
+        mat_icomp( jloc, iloc ) += mat_tmp( jloc, iloc );
+    }
+}
 
 // Miguel 10/2003:
 /*
@@ -1770,7 +1770,7 @@ void stiff_sd( Real coef, const ElemVec& vec_loc, ElemMat& elmat, const CurrentF
                 for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
                 {
                     s += coef_v[ icoor ] * fe.phiDer( iloc, icoor, ig ) * coef_v[ jcoor ] * fe.phiDer( iloc, jcoor, ig )
-                         * fe.weightDet( ig );
+                        * fe.weightDet( ig );
                 }
             }
         }
@@ -1800,7 +1800,7 @@ void stiff_sd( Real coef, const ElemVec& vec_loc, ElemMat& elmat, const CurrentF
                 for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
                 {
                     s += coef_v[ icoor ] * fe.phiDer( iloc, icoor, ig ) * coef_v[ jcoor ] * fe.phiDer( jloc, jcoor, ig )
-                         * fe.weightDet( ig );
+                        * fe.weightDet( ig );
                 }
             }
         }
@@ -2123,58 +2123,58 @@ void grad( const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
 //
 //
 /*
-  //////////////////////
-  // NONLINEAR TERMS
-  /////////////////////
-  //
-  //
-  //--------------------
-  // Jacobian: 2*\Sum V_k \Int \phi_k \phi_i \phi_j
-  //    and
-  // Vector F(V) = \Sum V_k \Sum V_j \Int \phi_k \phi_i \phi_j
-  //-------------------
-  void quad(std::vector<Real> coef, ElemMat& elmat, ElemVec& elvec,
-  const CurrentFE& fe,int iblock=0,int jblock=0)
-  {
-  ElemMat::matrix_view mat = elmat.block(iblock,jblock);
-  int i,ig,iq,siz;
-  int iloc,jloc,qloc;
-  Real s,coef_s;
-  siz=coef.size();
-  ASSERT(siz==fe.nbDiag,
-  "Error in building Local Matrix of the quadratic term");
-  //
-  // diagonal
-  //
-  for(i=0;i<fe.nbDiag;i++){
-    iloc = fe.patternFirst(i);
-    s = 0;
-   for (iq=0;i<siz;++i){
-    qloc = fe.patternFirst(iq);
-    for(ig=0;ig<fe.nbQuadPt;ig++)
-      s += coef(iq)*fe.phi(qloc,ig)*fe.phi(iloc,ig)*fe.phi(iloc,ig)*
- fe.weightDet(ig);
-   }
-    mat(iloc,iloc) += 2*s;
-    elvec(iloc) += coef(iloc)*s;
-  }
-  //
-  // extra diagonal
-  //
-  for(i=fe.nbDiag;i<fe.nbDiag+fe.nbUpper;i++){
-    iloc = fe.patternFirst(i);
-    jloc = fe.patternSecond(i);
-    s = 0;
-   for (iq=0;i<siz;++i){
-    qloc = fe.patternFirst(iq);
-    for(ig=0;ig<fe.nbQuadPt;ig++)
-      s += coef(iq)*fe.phi(qloc,ig)*
- fe.phi(iloc,ig)*fe.phi(jloc,ig)*fe.weightDet(ig);
-    }
-    mat(iloc,jloc) += 2*s;
-    mat(jloc,iloc) += 2*s;
-    }
-    }
+//////////////////////
+// NONLINEAR TERMS
+/////////////////////
+//
+//
+//--------------------
+// Jacobian: 2*\Sum V_k \Int \phi_k \phi_i \phi_j
+//    and
+// Vector F(V) = \Sum V_k \Sum V_j \Int \phi_k \phi_i \phi_j
+//-------------------
+void quad(std::vector<Real> coef, ElemMat& elmat, ElemVec& elvec,
+const CurrentFE& fe,int iblock=0,int jblock=0)
+{
+ElemMat::matrix_view mat = elmat.block(iblock,jblock);
+int i,ig,iq,siz;
+int iloc,jloc,qloc;
+Real s,coef_s;
+siz=coef.size();
+ASSERT(siz==fe.nbDiag,
+"Error in building Local Matrix of the quadratic term");
+//
+// diagonal
+//
+for(i=0;i<fe.nbDiag;i++){
+iloc = fe.patternFirst(i);
+s = 0;
+for (iq=0;i<siz;++i){
+qloc = fe.patternFirst(iq);
+for(ig=0;ig<fe.nbQuadPt;ig++)
+s += coef(iq)*fe.phi(qloc,ig)*fe.phi(iloc,ig)*fe.phi(iloc,ig)*
+fe.weightDet(ig);
+}
+mat(iloc,iloc) += 2*s;
+elvec(iloc) += coef(iloc)*s;
+}
+//
+// extra diagonal
+//
+for(i=fe.nbDiag;i<fe.nbDiag+fe.nbUpper;i++){
+iloc = fe.patternFirst(i);
+jloc = fe.patternSecond(i);
+s = 0;
+for (iq=0;i<siz;++i){
+qloc = fe.patternFirst(iq);
+for(ig=0;ig<fe.nbQuadPt;ig++)
+s += coef(iq)*fe.phi(qloc,ig)*
+fe.phi(iloc,ig)*fe.phi(jloc,ig)*fe.weightDet(ig);
+}
+mat(iloc,jloc) += 2*s;
+mat(jloc,iloc) += 2*s;
+}
+}
 */
 //----------------------------------------------------------------------
 //                      Element vector operator
@@ -2712,14 +2712,14 @@ void source_press( Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, ElemV
 
 //----------------------------------------------------------------------
 /*! \function grad_Hdiv : compute
-       - coef * \int_{current element} q_j * div w_i
-                 where w_j is a vectorial H(div) basis function,
-   and q_j is a L2 basis function.
-\param coef  : constant coefficient.
-\param elmat : (mixed) element matrix.
-\param fe_u  : current vectorial element (in H(div))
-\param fe_p  : current scalar element (in L2)
-\param iblock, \param jblock : subarray indexes where to store the integral just computed.
+  - coef * \int_{current element} q_j * div w_i
+  where w_j is a vectorial H(div) basis function,
+  and q_j is a L2 basis function.
+  \param coef  : constant coefficient.
+  \param elmat : (mixed) element matrix.
+  \param fe_u  : current vectorial element (in H(div))
+  \param fe_p  : current scalar element (in L2)
+  \param iblock, \param jblock : subarray indexes where to store the integral just computed.
 */
 void grad_Hdiv( Real coef, ElemMat& elmat, const CurrentHdivFE& fe_u,
                 const CurrentFE& fe_p, int iblock, int jblock )
@@ -2744,14 +2744,14 @@ void grad_Hdiv( Real coef, ElemMat& elmat, const CurrentHdivFE& fe_u,
 
 //----------------------------------------------------------------------
 /*! \function div_Hdiv : compute
-       coef * \int_{current element} q_j * div w_i
-                  where w_j is a vectorial H(div) basis function,
-    and q_j is a scalar L2 basis function.
-\param coef  : constant coefficient.
-\param elmat : (mixed) element matrix.
-\param fe_u  : current vectorial element (in H(div))
-\param fe_p  : current scalar element (in L2)
-\param iblock, \param jblock : subarray indexes where to store the integral just computed.
+  coef * \int_{current element} q_j * div w_i
+  where w_j is a vectorial H(div) basis function,
+  and q_j is a scalar L2 basis function.
+  \param coef  : constant coefficient.
+  \param elmat : (mixed) element matrix.
+  \param fe_u  : current vectorial element (in H(div))
+  \param fe_p  : current scalar element (in L2)
+  \param iblock, \param jblock : subarray indexes where to store the integral just computed.
 */
 void div_Hdiv( Real coef, ElemMat& elmat, const CurrentHdivFE& fe_u,
                const CurrentFE& fe_p, int iblock, int jblock )
@@ -2777,24 +2777,24 @@ void div_Hdiv( Real coef, ElemMat& elmat, const CurrentHdivFE& fe_u,
 //----------------------------------------------------------------------
 /*! \function TP_VdotN_Hdiv : compute
 
-       coef * \int_{BOUNDARY of current element} lambda_j * { w_i \cdot n }
+coef * \int_{BOUNDARY of current element} lambda_j * { w_i \cdot n }
 
-                  where w_j is a vectorial H(div) basis function,
-    and lambda_j are the Lagrange multiplier basis functions
-    that enforce continuity of the normal component of
-    the vectorial functions across two neighbouring elements.
-    Interprated as trace of pressure... (TP)
-    See Hybridization for Mixed Hybrid Finite Element Method.
+where w_j is a vectorial H(div) basis function,
+and lambda_j are the Lagrange multiplier basis functions
+that enforce continuity of the normal component of
+the vectorial functions across two neighbouring elements.
+Interprated as trace of pressure... (TP)
+See Hybridization for Mixed Hybrid Finite Element Method.
 
-    Thanks to the Piola transform, the computation is performed
-    on the boundary of the REFERENCE Element. But in general, the
-    boundary of a 3D Reference element is not a 2D Reference element.
-    Example:
-    REFERENCE TETRA -> 3 REFERENCE TRIA + 1 EQUILATERAL TRIANGLE...
-    REFERENCE PRISM -> 2 TRIA + 3 QUAD...?
-    REFERENCE HEXA  -> 6 REFERENCE QUAD.
+Thanks to the Piola transform, the computation is performed
+on the boundary of the REFERENCE Element. But in general, the
+boundary of a 3D Reference element is not a 2D Reference element.
+Example:
+REFERENCE TETRA -> 3 REFERENCE TRIA + 1 EQUILATERAL TRIANGLE...
+REFERENCE PRISM -> 2 TRIA + 3 QUAD...?
+REFERENCE HEXA  -> 6 REFERENCE QUAD.
 
-    n : is the normal unit vector oriented outward of the current element.
+n : is the normal unit vector oriented outward of the current element.
 
 \param coef  : constant coefficient.
 \param elmat : (mixed) element matrix.
@@ -2839,23 +2839,23 @@ void TP_VdotN_Hdiv( Real coef, ElemMat& elmat, const RefHybridFE& tpfe,
 //----------------------------------------------------------------------
 /*! \function TP_TP_Hdiv : compute
 
-       coef * \int_{BOUNDARY of current element} lambda_j * lambda_i
+coef * \int_{BOUNDARY of current element} lambda_j * lambda_i
 
-                  where lambda_j are the Lagrange multiplier basis functions
-    that enforce continuity of the normal component of
-    the vectorial functions across two neighbouring elements.
-    Interprated as trace of pressure... (TP)
-    See Hybridization for Mixed Hybrid Finite Element Method.
+where lambda_j are the Lagrange multiplier basis functions
+that enforce continuity of the normal component of
+the vectorial functions across two neighbouring elements.
+Interprated as trace of pressure... (TP)
+See Hybridization for Mixed Hybrid Finite Element Method.
 
-    Thanks to the Piola transform, the computation is performed
-    on the boundary of the REFERENCE Element. But in general, the
-    boundary of a 3D Reference element is not a 2D Reference element.
-    Example:
-    REFERENCE TETRA -> 3 REFERENCE TRIA + 1 EQUILATERAL TRIANGLE...
-    REFERENCE PRISM -> 2 TRIA + 3 QUAD...?
-    REFERENCE HEXA  -> 6 REFERENCE QUAD.
+Thanks to the Piola transform, the computation is performed
+on the boundary of the REFERENCE Element. But in general, the
+boundary of a 3D Reference element is not a 2D Reference element.
+Example:
+REFERENCE TETRA -> 3 REFERENCE TRIA + 1 EQUILATERAL TRIANGLE...
+REFERENCE PRISM -> 2 TRIA + 3 QUAD...?
+REFERENCE HEXA  -> 6 REFERENCE QUAD.
 
-    n : is the normal unit vector oriented outward of the current element.
+n : is the normal unit vector oriented outward of the current element.
 
 \param coef  : constant coefficient.
 \param elmat : (mixed) element matrix.
@@ -2894,8 +2894,8 @@ void TP_TP_Hdiv( Real coef, ElemMat& elmat, const RefHybridFE& tpfe, int iblock,
 //----------------------------------------------------------------------
 /*! \function mass_Hdiv : compute
 
-       coef *  \int_{current element} w_j * w_i
-                  where w_j is a vectorial H(div) basis function
+coef *  \int_{current element} w_j * w_i
+where w_j is a vectorial H(div) basis function
 
 Here the permeability matrix is a CONSTANT SCALAR tensor (i.e. = coef * Id).
 
@@ -3033,30 +3033,30 @@ TO BE DONE LATER... IN ELEMOPER.H
 void mass_Hdiv(KNM<Real> &Kperm, ElemMat& elmat, const CurrentHdivFE& fe,
 int iblock=0, int jblock=0)
 {
-  ElemMat::matrix_view mat = elmat.block(iblock,jblock);
-  // int ig,i,j,icoor;
-  Real s;
-  KN<Real> p(fe.nbCoor);
-  KN<Real> b(fe.nbCoor);
-  KN<Real> x(fe.nbCoor);
-  KN<Real> y(fe.nbCoor);
+ElemMat::matrix_view mat = elmat.block(iblock,jblock);
+// int ig,i,j,icoor;
+Real s;
+KN<Real> p(fe.nbCoor);
+KN<Real> b(fe.nbCoor);
+KN<Real> x(fe.nbCoor);
+KN<Real> y(fe.nbCoor);
 
-  for(int j=0;j<fe.nbNode;j++){
-    for(int i=0;i<fe.nbNode;i++){
-      s =0.;
-      for(int ig=0;ig<fe.nbQuadPt;ig++){
-        choldc(Kperm, p);
- for(int lcoor=0;lcoor<fe.nbCoor;lcoor++){
- b(lcoor) = fe.phi(j,lcoor,ig);
-        }
-        cholsl(Kperm,p, b, y);
-        for(int icoor=0;icoor<fe.nbCoor;icoor++){
-          s += y(icoor)*fe.phi(i,icoor,ig)*fe.weightDet(ig);
-        }
-      }
-      mat(i,j) += s;
-    }
-  }
+for(int j=0;j<fe.nbNode;j++){
+for(int i=0;i<fe.nbNode;i++){
+s =0.;
+for(int ig=0;ig<fe.nbQuadPt;ig++){
+choldc(Kperm, p);
+for(int lcoor=0;lcoor<fe.nbCoor;lcoor++){
+b(lcoor) = fe.phi(j,lcoor,ig);
+}
+cholsl(Kperm,p, b, y);
+for(int icoor=0;icoor<fe.nbCoor;icoor++){
+s += y(icoor)*fe.phi(i,icoor,ig)*fe.weightDet(ig);
+}
+}
+mat(i,j) += s;
+}
+}
 }
 */
 

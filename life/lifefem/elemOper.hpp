@@ -38,16 +38,16 @@ namespace LifeV
 void mass( Real (*coef)(Real,Real,Real,Real,Real),
            ElemMat& elmat, const CurrentFE& fe,
 	   const Dof& dof,
-	   const ScalUnknown<Vector> U,Real t);
+	   const ScalUnknown<Vector>& U,Real t);
 
 void stiff( Real (*coef)(Real,Real,Real,Real,Real),
 	   ElemMat& elmat, const CurrentFE& fe,
 	   const Dof& dof,
-	   const ScalUnknown<Vector> U,Real t);
+	   const ScalUnknown<Vector>& U,Real t);
 void source( Real (*fct)(Real,Real,Real,Real,Real),
            ElemVec& elvec, const CurrentFE& fe,
 	   const Dof& dof,
-	   const ScalUnknown<Vector> U,Real t);
+	   const ScalUnknown<Vector>& U,Real t);
 
 void mass( Real coef, ElemMat& elmat, const CurrentFE& fe,
            int iblock = 0, int jblock = 0 );
