@@ -1,10 +1,16 @@
+#ifndef __main_H
+#define __main_H 1
+
+#include <vector>
+#include <algorithm>
+
 #define N_PHY_UNK 1
 #define DEBUG
 
 #define CSR_ORD // ensuring Ordered CSR
 
-#include <vector>
-#include <algorithm>
+
+
 #include "lifeV.hpp"
 #include "readMesh3D.hpp"
 #include "chrono.hpp"
@@ -91,3 +97,4 @@ void init_options(int options[], double params[])
 } /* init_options */
 //////////////////////////////////////////////////
 
+#endif /* __main_H */

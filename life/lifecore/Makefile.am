@@ -25,6 +25,7 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .cc
 
+SUBDIRS		= . testsuite
 
 AM_CPPFLAGS	= -DTHREEDIM
 

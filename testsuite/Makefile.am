@@ -23,7 +23,10 @@
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
 
-SUBDIRS		= data test_mesh test_matrix test_naturalbc test_essentialbc
+SUBDIRS		= data  \
+                  test_mesh test_matrix test_naturalbc test_essentialbc \
+                  test_q1 test_p2 test_mixte test_rt test_rtcyl test_fe \
+                  test_postproc test_bdf
 
 check-qmtest: 
 	qmtest -D $(srcdir) run
