@@ -1,4 +1,24 @@
-2004-08-17  prudhomm
+2004-08-17 16:50  prudhomm
+
+	* testsuite/: test_fsi_newton/testsuite.at,
+	test_fsi_picard/testsuite.at:
+
+	fixed testsuite: was missing the mesh for the vessel
+
+2004-08-17 16:47  prudhomm
+
+	* testsuite/test_bdf/: Makefile.am, data, main.cpp, testsuite.at:
+
+	ported to GetPot ported to new testing framework. It runs the test
+	ok now
+
+2004-08-17 16:11  prudhomm
+
+	* ChangeLog:
+
+	update ChangeLog
+
+2004-08-17 16:06  prudhomm
 
 	* NEWS, configure.in.in, configure.in.mid, admin/ac_check_aztec.m4,
 	testsuite/testsuite.at, testsuite/test_fsi_newton/Makefile.am,
@@ -18,67 +38,53 @@
 	(following directory name)   it is easier to make script blah blah
 	blah ...
 
-2004-08-17  prudhomm
+2004-08-17 15:31  prudhomm
 
-	* testsuite/.cvsignore, testsuite/README,
-	testsuite/test_ns_bdf/Makefile.am,
-	testsuite/test_ns_cyl/Makefile.am,
-	testsuite/test_ns_sstress/Makefile.am:
+	* testsuite/: .cvsignore, README, test_ns_bdf/Makefile.am,
+	test_ns_cyl/Makefile.am, test_ns_sstress/Makefile.am:
 
 	* added README for the LifeV testing framework * use standard
 	naming conventions for the tests
 
-2004-08-17  prudhomm
+2004-08-17 14:39  prudhomm
 
 	* testsuite/test_darcy/Makefile.am:
 
 	* use standard naming for tests: DarcySolver --> test_darcy
 
-2004-08-17  prudhomm
+2004-08-17 14:36  prudhomm
 
-	* testsuite/test_essentialbc/data, testsuite/test_matrix/data,
-	testsuite/test_mesh/data, testsuite/test_mixte/data,
-	testsuite/test_naturalbc/data, testsuite/test_p2/data,
-	testsuite/test_q1/data:
+	* testsuite/: test_essentialbc/data, test_matrix/data,
+	test_mesh/data, test_mixte/data, test_naturalbc/data, test_p2/data,
+	test_q1/data:
 
 	ported the tests to GetPot. created their data file
 
-2004-08-17  prudhomm
+2004-08-17 14:35  prudhomm
 
-	* testsuite/Makefile.testsuite, testsuite/gentest.sh,
-	testsuite/testsuite.at, testsuite/test_darcy/testsuite.at,
-	testsuite/test_essentialbc/Makefile.am,
-	testsuite/test_essentialbc/main.cpp,
-	testsuite/test_essentialbc/testsuite.at,
-	testsuite/test_fe/testsuite.at,
-	testsuite/test_fsi_newton/testsuite.at,
-	testsuite/test_fsi_picard/testsuite.at,
-	testsuite/test_linearelasticity/testsuite.at,
-	testsuite/test_masstransport/testsuite.at,
-	testsuite/test_matrix/Makefile.am, testsuite/test_matrix/main.cpp,
-	testsuite/test_matrix/testsuite.at,
-	testsuite/test_mesh/Makefile.am, testsuite/test_mesh/test_mesh.cpp,
-	testsuite/test_mesh/testsuite.at, testsuite/test_mixte/Makefile.am,
-	testsuite/test_mixte/main.cpp, testsuite/test_mixte/testsuite.at,
-	testsuite/test_naturalbc/Makefile.am,
-	testsuite/test_naturalbc/main.cpp,
-	testsuite/test_naturalbc/testsuite.at,
-	testsuite/test_ns_bdf/testsuite.at,
-	testsuite/test_ns_cyl/testsuite.at,
-	testsuite/test_ns_ipstab/testsuite.at,
-	testsuite/test_ns_sstress/testsuite.at,
-	testsuite/test_onedmodel/data, testsuite/test_onedmodel/main.cpp,
-	testsuite/test_onedmodel/testsuite.at,
-	testsuite/test_p2/Makefile.am, testsuite/test_p2/main.cpp,
-	testsuite/test_p2/testsuite.at,
-	testsuite/test_postproc/testsuite.at,
-	testsuite/test_q1/Makefile.am, testsuite/test_q1/main.cpp,
-	testsuite/test_q1/testsuite.at:
+	* testsuite/: Makefile.testsuite, gentest.sh, testsuite.at,
+	test_darcy/testsuite.at, test_essentialbc/Makefile.am,
+	test_essentialbc/main.cpp, test_essentialbc/testsuite.at,
+	test_fe/testsuite.at, test_fsi_newton/testsuite.at,
+	test_fsi_picard/testsuite.at, test_linearelasticity/testsuite.at,
+	test_masstransport/testsuite.at, test_matrix/Makefile.am,
+	test_matrix/main.cpp, test_matrix/testsuite.at,
+	test_mesh/Makefile.am, test_mesh/test_mesh.cpp,
+	test_mesh/testsuite.at, test_mixte/Makefile.am,
+	test_mixte/main.cpp, test_mixte/testsuite.at,
+	test_naturalbc/Makefile.am, test_naturalbc/main.cpp,
+	test_naturalbc/testsuite.at, test_ns_bdf/testsuite.at,
+	test_ns_cyl/testsuite.at, test_ns_ipstab/testsuite.at,
+	test_ns_sstress/testsuite.at, test_onedmodel/data,
+	test_onedmodel/main.cpp, test_onedmodel/testsuite.at,
+	test_p2/Makefile.am, test_p2/main.cpp, test_p2/testsuite.at,
+	test_postproc/testsuite.at, test_q1/Makefile.am, test_q1/main.cpp,
+	test_q1/testsuite.at:
 
 	the first 8 tests are working in the new framework. the rest is
 	coming real soon
 
-2004-08-17  prudhomm
+2004-08-17 14:33  prudhomm
 
 	* life/lifesolver/convDiffReactSolverPC.hpp:
 
@@ -89,72 +95,51 @@
 	debugging   when you see these values you know that something is
 	wrong :)
 
-2004-08-17  prudhomm
+2004-08-17 12:43  prudhomm
 
-	* testsuite/Makefile.am, testsuite/Makefile.testsuite,
-	testsuite/atlocal.in, testsuite/expectations.qmr,
-	testsuite/gentest.sh, testsuite/test_bdf_comp.qmt,
-	testsuite/test_bdf_exec.qmt, testsuite/test_bdf_resu.qmt,
-	testsuite/test_essentialbc_comp.qmt,
-	testsuite/test_essentialbc_exec.qmt,
-	testsuite/test_essentialbc_resu.qmt, testsuite/test_fe_comp.qmt,
-	testsuite/test_fe_exec.qmt, testsuite/test_fe_resu.qmt,
-	testsuite/test_linearelasticity_comp.qmt,
-	testsuite/test_linearelasticity_exec.qmt,
-	testsuite/test_linearelasticity_resu.qmt,
-	testsuite/test_matrix_comp.qmt, testsuite/test_matrix_exec.qmt,
-	testsuite/test_matrix_resu.qmt, testsuite/test_mesh_comp.qmt,
-	testsuite/test_mesh_exec.qmt, testsuite/test_mesh_resu.qmt,
-	testsuite/test_mixte_comp.qmt, testsuite/test_mixte_exec.qmt,
-	testsuite/test_mixte_resu.qmt, testsuite/test_naturalbc_comp.qmt,
-	testsuite/test_naturalbc_exec.qmt,
-	testsuite/test_naturalbc_resu.qmt, testsuite/test_p2_comp.qmt,
-	testsuite/test_p2_exec.qmt, testsuite/test_p2_resu.qmt,
-	testsuite/test_postproc_comp.qmt, testsuite/test_postproc_exec.qmt,
-	testsuite/test_postproc_resu.qmt, testsuite/test_q1_comp.qmt,
-	testsuite/test_q1_exec.qmt, testsuite/test_q1_resu.qmt,
-	testsuite/testsuite.at, testsuite/test_bdf/testsuite.at,
-	testsuite/test_darcy/Makefile.am,
-	testsuite/test_darcy/testsuite.at,
-	testsuite/test_essentialbc/Makefile.am,
-	testsuite/test_essentialbc/testsuite.at,
-	testsuite/test_fe/Makefile.am, testsuite/test_fe/testsuite.at,
-	testsuite/test_fsi_newton/testsuite.at,
-	testsuite/test_fsi_picard/testsuite.at,
-	testsuite/test_linearelasticity/testsuite.at,
-	testsuite/test_masstransport/Makefile.am,
-	testsuite/test_masstransport/testsuite.at,
-	testsuite/test_matrix/Makefile.am,
-	testsuite/test_matrix/testsuite.at,
-	testsuite/test_mesh/Makefile.am, testsuite/test_mesh/testsuite.at,
-	testsuite/test_mixte/testsuite.at,
-	testsuite/test_naturalbc/Makefile.am,
-	testsuite/test_naturalbc/testsuite.at,
-	testsuite/test_ns_bdf/Makefile.am,
-	testsuite/test_ns_bdf/testsuite.at,
-	testsuite/test_ns_cyl/Makefile.am,
-	testsuite/test_ns_cyl/testsuite.at,
-	testsuite/test_ns_ipstab/Makefile.am,
-	testsuite/test_ns_ipstab/testsuite.at,
-	testsuite/test_ns_sstress/Makefile.am,
-	testsuite/test_ns_sstress/testsuite.at,
-	testsuite/test_onedmodel/Makefile.am,
-	testsuite/test_onedmodel/testsuite.at,
-	testsuite/test_p2/Makefile.am, testsuite/test_p2/testsuite.at,
-	testsuite/test_postproc/testsuite.at,
-	testsuite/test_q1/testsuite.at:
+	* testsuite/: Makefile.am, Makefile.testsuite, atlocal.in,
+	expectations.qmr, gentest.sh, test_bdf_comp.qmt, test_bdf_exec.qmt,
+	test_bdf_resu.qmt, test_essentialbc_comp.qmt,
+	test_essentialbc_exec.qmt, test_essentialbc_resu.qmt,
+	test_fe_comp.qmt, test_fe_exec.qmt, test_fe_resu.qmt,
+	test_linearelasticity_comp.qmt, test_linearelasticity_exec.qmt,
+	test_linearelasticity_resu.qmt, test_matrix_comp.qmt,
+	test_matrix_exec.qmt, test_matrix_resu.qmt, test_mesh_comp.qmt,
+	test_mesh_exec.qmt, test_mesh_resu.qmt, test_mixte_comp.qmt,
+	test_mixte_exec.qmt, test_mixte_resu.qmt, test_naturalbc_comp.qmt,
+	test_naturalbc_exec.qmt, test_naturalbc_resu.qmt, test_p2_comp.qmt,
+	test_p2_exec.qmt, test_p2_resu.qmt, test_postproc_comp.qmt,
+	test_postproc_exec.qmt, test_postproc_resu.qmt, test_q1_comp.qmt,
+	test_q1_exec.qmt, test_q1_resu.qmt, testsuite.at,
+	test_bdf/testsuite.at, test_darcy/Makefile.am,
+	test_darcy/testsuite.at, test_essentialbc/Makefile.am,
+	test_essentialbc/testsuite.at, test_fe/Makefile.am,
+	test_fe/testsuite.at, test_fsi_newton/testsuite.at,
+	test_fsi_picard/testsuite.at, test_linearelasticity/testsuite.at,
+	test_masstransport/Makefile.am, test_masstransport/testsuite.at,
+	test_matrix/Makefile.am, test_matrix/testsuite.at,
+	test_mesh/Makefile.am, test_mesh/testsuite.at,
+	test_mixte/testsuite.at, test_naturalbc/Makefile.am,
+	test_naturalbc/testsuite.at, test_ns_bdf/Makefile.am,
+	test_ns_bdf/testsuite.at, test_ns_cyl/Makefile.am,
+	test_ns_cyl/testsuite.at, test_ns_ipstab/Makefile.am,
+	test_ns_ipstab/testsuite.at, test_ns_sstress/Makefile.am,
+	test_ns_sstress/testsuite.at, test_onedmodel/Makefile.am,
+	test_onedmodel/testsuite.at, test_p2/Makefile.am,
+	test_p2/testsuite.at, test_postproc/testsuite.at,
+	test_q1/testsuite.at:
 
 	now uses AutoTest from autoconf: a portable testing framework that
 	fits most of our needs
 
-2004-08-17  prudhomm
+2004-08-17 10:30  prudhomm
 
 	* admin/ac_check_aztec.m4:
 
 	don't change LDFLAGS and CPPFLAGS if the header and lib dirs have
 	not been found by AC_FIND_FILE
 
-2004-08-17  prudhomm
+2004-08-17 10:15  prudhomm
 
 	* configure.in.in:
 
@@ -162,31 +147,29 @@
 	presence * added preliminary AutoTest support(more coming real
 	soon) * bump up version to 0.2.90
 
-2004-08-17  prudhomm
+2004-08-17 10:14  prudhomm
 
 	* doc/manual/Makefile.am:
 
 	disable manual compilation if pdflatex is not available
 
-2004-08-17  prudhomm
+2004-08-17 10:11  prudhomm
 
 	* testsuite/test_onedmodel/.cvsignore:
 
 	files to ignore
 
-2004-08-17  prudhomm
+2004-08-17 10:10  prudhomm
 
 	* testsuite/test_onedmodel/Makefile.in:
 
 	This file should not be in CVS it is automatically generated by
 	automake
 
-2004-08-17  prudhomm
+2004-08-17 10:09  prudhomm
 
-	* testsuite/test_onedmodel/Makefile.am,
-	testsuite/test_onedmodel/Makefile.in,
-	testsuite/test_onedmodel/gracePlot.cpp,
-	testsuite/test_onedmodel/gracePlot.hpp:
+	* testsuite/test_onedmodel/: Makefile.am, Makefile.in,
+	gracePlot.cpp, gracePlot.hpp:
 
 	* Grace:  check in configure that grace_np.h and libgrace_np.a are
 	actually available.
@@ -197,60 +180,47 @@
 
 	* reworked a bit Makefile.am
 
-2004-08-05  lformaggia
+2004-08-05 14:32  lformaggia
 
-	* life/lifefem/bcCond.cpp, life/lifefem/bcCond.hpp,
-	life/lifefem/bcVector.cpp, life/lifefem/bcVector.hpp:
+	* life/lifefem/: bcCond.cpp, bcCond.hpp, bcVector.cpp,
+	bcVector.hpp:
 
 	New organization to handle interfaces without explicitely
 	interfacing (no need of DofInterface)
 
-2004-07-30  vmartin
+2004-07-30 20:52  vmartin
 
-	* testsuite/test_onedmodel/Makefile.am,
-	testsuite/test_onedmodel/Makefile.in,
-	testsuite/test_onedmodel/basicOneDMesh.cpp,
-	testsuite/test_onedmodel/basicOneDMesh.hpp,
-	testsuite/test_onedmodel/data,
-	testsuite/test_onedmodel/dataOneDModel.hpp,
-	testsuite/test_onedmodel/main.cpp,
-	testsuite/test_onedmodel/oneDModelHandler.cpp,
-	testsuite/test_onedmodel/oneDModelHandler.hpp,
-	testsuite/test_onedmodel/oneDModelSolver.cpp,
-	testsuite/test_onedmodel/oneDModelSolver.hpp:
+	* testsuite/test_onedmodel/: Makefile.am, Makefile.in,
+	basicOneDMesh.cpp, basicOneDMesh.hpp, data, dataOneDModel.hpp,
+	main.cpp, oneDModelHandler.cpp, oneDModelHandler.hpp,
+	oneDModelSolver.cpp, oneDModelSolver.hpp:
 
 	scalar and linear 1d is quite finished. not yet the compatibility
 	conditions
 
-2004-07-30  vmartin
+2004-07-30 20:49  vmartin
 
-	* testsuite/test_onedmodel/gracePlot.cpp,
-	testsuite/test_onedmodel/gracePlot.hpp:
+	* testsuite/test_onedmodel/: gracePlot.cpp, gracePlot.hpp:
 
 	graceplot handler for dynamic 1D visualisation.  the graceplot
 	library is not furnished with lifev.
 
-2004-07-30  vmartin
+2004-07-30 13:55  vmartin
 
-	* testsuite/test_onedmodel/data,
-	testsuite/test_onedmodel/dataOneDModel.cpp,
-	testsuite/test_onedmodel/dataOneDModel.hpp,
-	testsuite/test_onedmodel/main.cpp,
-	testsuite/test_onedmodel/oneDModelHandler.cpp,
-	testsuite/test_onedmodel/oneDModelHandler.hpp,
-	testsuite/test_onedmodel/oneDModelSolver.cpp,
-	testsuite/test_onedmodel/oneDModelSolver.hpp:
+	* testsuite/test_onedmodel/: data, dataOneDModel.cpp,
+	dataOneDModel.hpp, main.cpp, oneDModelHandler.cpp,
+	oneDModelHandler.hpp, oneDModelSolver.cpp, oneDModelSolver.hpp:
 
 	second step towards 1d: scalar and linear taylor-galerkin. no
 	compatibility conditions.
 
-2004-07-30  vmartin
+2004-07-30 11:39  vmartin
 
 	* life/lifearray/tridiagMatrix.hpp:
 
 	tridiagonal Axpy product. (with no use of blas2)
 
-2004-07-29  prosi
+2004-07-29 11:08  prosi
 
 	* life/lifesolver/convDiffReactSolverPC.hpp,
 	life/lifesolver/convDiffReactHandler.hpp,
@@ -259,147 +229,129 @@
 	including methods for interpolating velocity on the concentration
 	grid non-conforming concentration and velocity grid
 
-2004-07-29  prosi
+2004-07-29 07:31  prosi
 
 	* life/lifesolver/convDiffReactSolverPC.hpp:
 
 	added privat velocity array (on concentration nodes) to
 	convDiffReactSolver class (1. step)
 
-2004-07-29  prosi
+2004-07-29 07:29  prosi
 
 	* testsuite/test_masstransport/main.cpp:
 
 	added privat velocity array (on the concentration nodes) to
 	convDiffReactSolver class (1.step)
 
-2004-07-28  vmartin
-
-	* testsuite/test_darcy/Makefile.am:
-
-	[no log message]
-
-2004-07-28  vmartin
+2004-07-28 08:58  vmartin
 
 	* testsuite/test_darcy/data:
 
 	write the output files in directory "./"
 
-2004-07-28  vmartin
+2004-07-27 22:23  vmartin
 
-	* testsuite/test_onedmodel/Makefile.am,
-	testsuite/test_onedmodel/Makefile.in,
-	testsuite/test_onedmodel/dofOneD.hpp:
+	* testsuite/test_onedmodel/: Makefile.am, Makefile.in, dofOneD.hpp:
 
 	a simple dof class for 1D meshes. Mimic the behaviour of the "real"
 	Dof of dof.hpp.  Not based on the lifev mesh handler format (that
 	does not exist so far for 1D).	Use it rather with basicOneDMesh...
 
-2004-07-28  vmartin
+2004-07-27 22:16  vmartin
 
 	* life/lifearray/tridiagMatrix.hpp:
 
 	set_mat and set_mat_inc added to assemble the tridiag matrices.
 
-2004-07-27  vmartin
+2004-07-27 13:57  vmartin
 
-	* testsuite/test_onedmodel/Makefile.am,
-	testsuite/test_onedmodel/Makefile.in,
-	testsuite/test_onedmodel/main.cpp,
-	testsuite/test_onedmodel/ud_functions.hpp:
+	* testsuite/test_onedmodel/: Makefile.am, Makefile.in, main.cpp,
+	ud_functions.hpp:
 
 	last useful files
 
-2004-07-27  vmartin
+2004-07-27 13:55  vmartin
 
-	* testsuite/test_onedmodel/oneDModelHandler.cpp,
-	testsuite/test_onedmodel/oneDModelHandler.hpp,
-	testsuite/test_onedmodel/oneDModelSolver.cpp,
-	testsuite/test_onedmodel/oneDModelSolver.hpp:
+	* testsuite/test_onedmodel/: oneDModelHandler.cpp,
+	oneDModelHandler.hpp, oneDModelSolver.cpp, oneDModelSolver.hpp:
 
 	classes for handling and solving a 1D model.
 
-2004-07-27  vmartin
+2004-07-27 13:54  vmartin
 
-	* testsuite/test_onedmodel/data,
-	testsuite/test_onedmodel/dataOneDModel.cpp,
-	testsuite/test_onedmodel/dataOneDModel.hpp:
+	* testsuite/test_onedmodel/: data, dataOneDModel.cpp,
+	dataOneDModel.hpp:
 
 	data file and data Handling class for 1D model
 
-2004-07-27  vmartin
+2004-07-27 13:53  vmartin
 
-	* testsuite/test_onedmodel/basicOneDMesh.cpp,
-	testsuite/test_onedmodel/basicOneDMesh.hpp:
+	* testsuite/test_onedmodel/: basicOneDMesh.cpp, basicOneDMesh.hpp:
 
 	class handling a general 1D mesh.  Possibility to construct a
 	regular one (dx=cst).
 
-2004-07-27  vmartin
+2004-07-27 13:44  vmartin
 
-	* life/lifearray/Makefile.am, life/lifearray/tridiagMatrix.hpp:
+	* life/lifearray/: Makefile.am, tridiagMatrix.hpp:
 
 	added tridiagMatrix.hpp in Makefile.am and modif a comment.
 
-2004-07-27  vmartin
+2004-07-27 13:39  vmartin
 
-	* testsuite/test_darcy/Makefile.am,
-	testsuite/test_darcy/darcyHandler.cpp,
-	testsuite/test_darcy/darcySolver.cpp,
-	testsuite/test_darcy/darcySolver.hpp,
-	testsuite/test_darcy/darcySolver_post.cpp:
+	* testsuite/test_darcy/: Makefile.am, darcyHandler.cpp,
+	darcySolver.cpp, darcySolver.hpp, darcySolver_post.cpp:
 
 	Minor modif. Some more comments. Added the test in Makefile.
 
-2004-07-27  vmartin
+2004-07-27 13:31  vmartin
 
 	* testsuite/Makefile.am:
 
 	test_onedmodel added
 
-2004-07-27  vmartin
+2004-07-27 13:28  vmartin
 
-	* life/lifefem/currentFE.cpp, life/lifefem/currentFE.hpp:
+	* life/lifefem/: currentFE.cpp, currentFE.hpp:
 
 	Transformed the #if defined(THREEDIM) into switch over the
 	dimension.  Purpose: multiscale problems (1D in lifev).  Did also a
 	little code factorization and cleaning.
 
-2004-07-27  vmartin
+2004-07-27 13:24  vmartin
 
 	* life/lifearray/tridiagMatrix.hpp:
 
 	A special class for tridiagonal matrices. Under construction for 1d
 	model.
 
-2004-07-27  prudhomm
+2004-07-27 08:54  prudhomm
 
 	* admin/Doxyfile.am, admin/Doxyfile.global, testsuite/Makefile.am:
 
 	doxygen doc for testsuite
 
-2004-07-27  prudhomm
+2004-07-27 08:54  prudhomm
 
-	* testsuite/test_mesh/Makefile.am, testsuite/test_mesh/main.cpp,
-	testsuite/test_mesh/test_mesh.cpp:
+	* testsuite/test_mesh/: Makefile.am, main.cpp, test_mesh.cpp:
 
 	added some trivial doxygen info. will commit more soon; testcase
 	for testsuite doxygen doc
 
-2004-07-23  prudhomm
+2004-07-23 19:08  prudhomm
 
 	* doc/manual/ltxcompile:
 
 	should solve the problem for vincent get rid of the faultu option
 	--file-line-error-style which does seem too new
 
-2004-07-23  prudhomm
+2004-07-23 15:10  prudhomm
 
 	* testsuite/Makefile.testsuite:
 
 	$(EXTRA_DIST) --> $$extra_dist
 
-2004-07-23  prudhomm
+2004-07-23 11:58  prudhomm
 
 	* doc/manual/Makefile.am:
 
@@ -409,7 +361,7 @@
 
 	thanks for reporting it !!!!!!!!!
 
-2004-07-23  prudhomm
+2004-07-23 11:56  prudhomm
 
 	* testsuite/Makefile.testsuite:
 
@@ -418,34 +370,28 @@
 	Vincent: could you please do a make in testsuite and then a make
 	check ?
 
-2004-07-23  vmartin
+2004-07-23 09:18  prudhomm
 
-	* testsuite/test_darcy/main.cpp:
-
-	[no log message]
-
-2004-07-23  prudhomm
-
-	* doc/manual/lifev-dev.tex, doc/manual/ltxcompile:
+	* doc/manual/: lifev-dev.tex, ltxcompile:
 
 	- reduced size of the logfile. show only errorlog if they are
 	errors
 
-2004-07-23  prudhomm
+2004-07-23 08:40  prudhomm
 
 	* doc/manual/Makefile.am:
 
 	- reduced size of the logfile. show only errorlog if they are
 	errors
 
-2004-07-23  prudhomm
+2004-07-23 08:07  prudhomm
 
 	* doc/manual/Makefile.am:
 
 	- use a script now to compile the manual - redirect the output of
 	the commands to ltxcompile.log
 
-2004-07-23  prudhomm
+2004-07-23 07:39  prudhomm
 
 	* .cvsignore, Doxyfile, Makefile.am, admin/Doxyfile.am,
 	admin/Doxyfile.global, doc/api/.cvsignore, life/lifealg/.cvsignore,
@@ -458,7 +404,7 @@
 	doxygen and code documentation are redirected to Doxylog   (one
 	Doxylog perdirectory to ease the reading of the problems)
 
-2004-07-22  vmartin
+2004-07-22 12:29  vmartin
 
 	* testsuite/test_darcy/main.cpp:
 
@@ -466,11 +412,10 @@
 	DarcySolver::computeHybridMatrixAndSourceRHS() for the sake of
 	clarity.  (see darcySolver.hpp).  More outputs.
 
-2004-07-22  vmartin
+2004-07-22 12:26  vmartin
 
-	* testsuite/test_darcy/darcySolver.cpp,
-	testsuite/test_darcy/darcySolver.hpp,
-	testsuite/test_darcy/darcySolver_post.cpp:
+	* testsuite/test_darcy/: darcySolver.cpp, darcySolver.hpp,
+	darcySolver_post.cpp:
 
 	Bug fixed for the computation of the velocity (before this
 	computation did not take into account the source term).  added the
@@ -484,77 +429,67 @@
 	Pressure.  Example of a possibility to compute some errors if the
 	analytical solution is given.
 
-2004-07-22  vmartin
+2004-07-22 12:20  vmartin
 
-	* testsuite/test_darcy/darcyHandler.cpp,
-	testsuite/test_darcy/darcyHandler.hpp:
+	* testsuite/test_darcy/: darcyHandler.cpp, darcyHandler.hpp:
 
 	Two new test cases: --Robin/Mixte boundary condition --analytical
 	solution More bc_functions declared for this.
 
-2004-07-22  vmartin
+2004-07-22 12:17  vmartin
 
-	* testsuite/test_darcy/Makefile.am:
-
-	[no log message]
-
-2004-07-22  vmartin
-
-	* testsuite/test_darcy/user_diffusion.cpp,
-	testsuite/test_darcy/user_diffusion.hpp,
-	testsuite/test_darcy/user_fct.cpp,
-	testsuite/test_darcy/user_fct.hpp:
+	* testsuite/test_darcy/: user_diffusion.cpp, user_diffusion.hpp,
+	user_fct.cpp, user_fct.hpp:
 
 	several new user defined functions added as example.  for instance:
 	analytical function, robin coefficient...  And: added user defined
 	permeability functions.
 
-2004-07-22  vmartin
+2004-07-22 12:15  vmartin
 
-	* testsuite/test_darcy/dataDarcy.cpp,
-	testsuite/test_darcy/dataDarcy.hpp:
+	* testsuite/test_darcy/: dataDarcy.cpp, dataDarcy.hpp:
 
 	New entries in the data files: possible use of functions for
 	permeability.
 
-2004-07-22  vmartin
+2004-07-22 12:14  vmartin
 
-	* testsuite/test_darcy/data, testsuite/test_darcy/data2:
+	* testsuite/test_darcy/: data, data2:
 
 	Two data files (data2 with analytic function for convergence tests)
 	with new entries (see dataDarcy.hpp).
 
-2004-07-22  vmartin
+2004-07-22 11:24  vmartin
 
 	* testsuite/data/mesh/inria/hexahexa10x10x10.mesh:
 
 	mesh size: [0,1] [0,2] [0,3] (10x10x10)
 
-2004-07-22  vmartin
+2004-07-22 09:58  vmartin
 
 	* testsuite/data/mesh/inria/Makefile.am:
 
 	added a simple hexa mesh
 
-2004-07-22  vmartin
+2004-07-22 09:46  vmartin
 
-	* life/lifefem/currentFE.cpp, life/lifefem/currentFE.hpp:
+	* life/lifefem/: currentFE.cpp, currentFE.hpp:
 
 	added the method barycenter() of the cell
 
-2004-07-22  vmartin
+2004-07-22 09:38  vmartin
 
 	* testsuite/data/mesh/inria/hexahexa10x10x10.mesh:
 
 	new simple mesh : hexahedron made of 10x10x10 hexahedra
 
-2004-07-21  prudhomm
+2004-07-21 13:55  prudhomm
 
 	* testsuite/test_masstransport/Makefile.am:
 
 	thanks to Martin, readd test_mass in the check at runtime list
 
-2004-07-21  prosi
+2004-07-21 09:15  prosi
 
 	* testsuite/test_masstransport/ensight7-write.hpp:
 
@@ -562,28 +497,28 @@
 	similar) is spoken buy one third of the european population (so
 	quit common)
 
-2004-07-21  prosi
+2004-07-21 09:12  prosi
 
 	* life/lifesolver/convDiffReactSolverPC.hpp:
 
 	use method diameter() of class CurrentFE instead of h(), and some
 	additional changes to make test succsessful
 
-2004-07-21  prosi
+2004-07-21 09:09  prosi
 
 	* life/lifesolver/convDiffReactHandler.hpp:
 
 	deleted method calc_elemsize - CurrentFE includes a similar method:
 	diameter()
 
-2004-07-21  prudhomm
+2004-07-21 07:52  prudhomm
 
 	* admin/ac_check_mpi.m4:
 
 	backported fix for ac_check_mpi to have no default mpi libs if none
 	was found
 
-2004-07-21  prudhomm
+2004-07-21 07:16  prudhomm
 
 	* admin/ac_check_mpi.m4:
 
@@ -591,7 +526,7 @@
 	else like (-lmpich) quick hack to allow people without mpi to link
 	lifev
 
-2004-07-20  prudhomm
+2004-07-20 16:41  prudhomm
 
 	* life/lifealg/testsuite/.cvsignore,
 	testsuite/test_masstransport/.cvsignore,
@@ -600,35 +535,34 @@
 
 	ignore non CVS files
 
-2004-07-20  prudhomm
+2004-07-20 16:39  prudhomm
 
-	* testsuite/test_masstransport/Makefile.am,
-	testsuite/test_ns_ipstab/Makefile.am,
-	testsuite/test_ns_sstress/Makefile.am:
+	* testsuite/: test_masstransport/Makefile.am,
+	test_ns_ipstab/Makefile.am, test_ns_sstress/Makefile.am:
 
 	update: test_ns_sstress fails, test_masstransport fails so remove
 	them from the run time check list
 
-2004-07-20  prudhomm
+2004-07-20 16:19  prudhomm
 
 	* AUTHORS, NEWS, configure.in.in:
 
 	preparing 0.2.0-pre1
 
-2004-07-20  prudhomm
+2004-07-20 15:43  prudhomm
 
 	* Makefile.am, NEWS, admin/Doxyfile.am, doc/api/.cvsignore,
 	doc/api/Makefile.am:
 
 	ported api doc generation fixes from 0.1.0 beanch to HEAD
 
-2004-07-20  prudhomm
+2004-07-20 15:02  prudhomm
 
 	* Makefile.am:
 
 	update
 
-2004-07-20  prudhomm
+2004-07-20 14:50  prudhomm
 
 	* Makefile.am, NEWS, admin/Doxyfile.am, doc/api/Makefile.am,
 	doc/common/Makefile.am, doc/common/mainheader.html,
@@ -636,7 +570,7 @@
 
 	clean up after work is done.
 
-2004-07-20  prudhomm
+2004-07-20 13:21  prudhomm
 
 	* Doxyfile, Mainpage.dox, Makefile.am, configure.in.in,
 	admin/Doxyfile.am, testsuite/test_bdf/.cvsignore,
@@ -655,36 +589,35 @@
 	- ported changes to api documentation from 0.1.0-rc2 to HEAD   and
 	modify accordingly - ignore non CVS files
 
-2004-07-20  prudhomm
+2004-07-20 13:15  prudhomm
 
 	* Mainpage.dox:
 
 	minor change for consistency with HEAD
 
-2004-07-20  prudhomm
+2004-07-20 13:10  prudhomm
 
 	* Mainpage.dox, Makefile.am, configure.in.in:
 
 	more work on api documentation
 
-2004-07-20  prudhomm
+2004-07-20 11:53  prudhomm
 
-	* life/lifecore/.cvsignore, life/lifealg/.cvsignore,
-	life/lifearray/.cvsignore, life/lifearray/testsuite/.cvsignore,
-	life/lifefem/.cvsignore, life/lifefilters/.cvsignore,
-	life/lifemesh/.cvsignore, life/lifesolver/.cvsignore:
+	* life/: lifecore/.cvsignore, lifealg/.cvsignore,
+	lifearray/.cvsignore, lifearray/testsuite/.cvsignore,
+	lifefem/.cvsignore, lifefilters/.cvsignore, lifemesh/.cvsignore,
+	lifesolver/.cvsignore:
 
 	ignore non CVS files
 
-2004-07-20  prudhomm
+2004-07-20 11:09  prudhomm
 
-	* life/lifecore/.cvsignore, life/lifecore/bareItems.hpp,
-	life/lifecore/testsuite/.cvsignore:
+	* life/lifecore/: .cvsignore, bareItems.hpp, testsuite/.cvsignore:
 
 	ported fix to apidox-all , now compiles all the way through ignore
 	non CVS files
 
-2004-07-20  prudhomm
+2004-07-20 11:06  prudhomm
 
 	* Mainpage.dox, Makefile.am, admin/Doxyfile.am, doc/api/.cvsignore,
 	life/lifecore/.cvsignore, life/lifefem/.cvsignore,
@@ -695,7 +628,7 @@
 	through  - fix doxygen comment in bareitems and mesh_util  -
 	removed spaces at end of lines
 
-2004-07-20  prudhomm
+2004-07-20 10:36  prudhomm
 
 	* .cvsignore, Makefile.am, NEWS, configure.in.in,
 	admin/ac_check_aztec.m4, life/lifecore/.cvsignore,
@@ -722,31 +655,30 @@
 	janitory work on 0.1 branch  - ignoring non CVS files  - removing
 	automatically generated files from CVS
 
-2004-07-20  prudhomm
+2004-07-20 09:54  prudhomm
 
-	* admin/ac_check_aztec.m4, admin/ac_check_lapack.m4,
-	admin/ac_check_mpi.m4:
+	* admin/: ac_check_aztec.m4, ac_check_lapack.m4, ac_check_mpi.m4:
 
 	backported ac_check aztec, ac_check_lapack and ac_check_mpi in 0.1
 	branch
 
-2004-07-20  prudhomm
+2004-07-20 09:51  prudhomm
 
-	* admin/ac_check_aztec.m4, admin/ac_check_lapack.m4:
+	* admin/: ac_check_aztec.m4, ac_check_lapack.m4:
 
 	better check for aztec and check also for trilinos/aztecoo
 
 	moved checks to lapack, blas, g2c to ac_check_lapack.m4 (see
 	configure.in.in)
 
-2004-07-20  prudhomm
+2004-07-20 09:17  prudhomm
 
 	* admin/ac_check_mpi.m4:
 
 	configure can handle mpi or serial before it was just serial bump
 	up version to 2.1-5
 
-2004-07-20  prudhomm
+2004-07-20 07:50  prudhomm
 
 	* .cvsignore, Makefile.am, NEWS, configure.in.in, admin/.cvsignore,
 	doc/api/.cvsignore, doc/common/.cvsignore, doc/tex/.cvsignore,
@@ -767,85 +699,81 @@
 
 	Fixeg Bug #27 bump up version to 0.1rc2 CVS:ignore some files
 
-2004-07-19  fernandez
+2004-07-19 09:58  fernandez
 
 	* testsuite/test_ns_ipstab/NavierStokesSolverIP.hpp:
 
 	Last version
 
-2004-07-19  fernandez
+2004-07-19 09:58  fernandez
 
 	* testsuite/test_ns_ipstab/main.cpp:
 
 	only one boundary condition
 
-2004-07-19  fernandez
+2004-07-19 09:55  fernandez
 
 	* testsuite/data/mesh/inria/Makefile.am:
 
 	Updated
 
-2004-07-19  fernandez
+2004-07-19 08:58  fernandez
 
-	* testsuite/data/mesh/inria/hexa16x16.mesh,
-	testsuite/data/mesh/inria/hexa2x2.mesh,
-	testsuite/data/mesh/inria/hexa32x32.mesh,
-	testsuite/data/mesh/inria/hexa4x4.mesh,
-	testsuite/data/mesh/inria/hexa8x8.mesh:
+	* testsuite/data/mesh/inria/: hexa16x16.mesh, hexa2x2.mesh,
+	hexa32x32.mesh, hexa4x4.mesh, hexa8x8.mesh:
 
 	All meshes with marker 1 at the boundary and without node
 	reordering
 
-2004-07-14  prudhomm
+2004-07-14 12:21  prudhomm
 
 	* AUTHORS, Makefile.am:
 
 	minor mods
 
-2004-07-13  prudhomm
+2004-07-13 08:27  prudhomm
 
-	* admin/cvs.sh, admin/detect-autoconf.sh:
+	* admin/: cvs.sh, detect-autoconf.sh:
 
 	make sure that if automake-1.6 exists we don't pick it !! we should
 	pick at least automake-1.7
 
-2004-06-25  simone
+2004-06-25 11:39  simone
 
 	* Makefile.am:
 
 	We do no tuse dejagnu
 
-2004-06-24  prudhomm
+2004-06-24 14:52  prudhomm
 
-	* testsuite/Makefile.testsuite, testsuite/test_ns_bdf/Makefile.am,
-	testsuite/test_ns_bdf/data, testsuite/test_ns_cyl/Makefile.am,
-	testsuite/test_ns_cyl/data, testsuite/test_ns_ipstab/.cvsignore,
-	testsuite/test_ns_sstress/Makefile.am,
-	testsuite/test_ns_sstress/data:
+	* testsuite/: Makefile.testsuite, test_ns_bdf/Makefile.am,
+	test_ns_bdf/data, test_ns_cyl/Makefile.am, test_ns_cyl/data,
+	test_ns_ipstab/.cvsignore, test_ns_sstress/Makefile.am,
+	test_ns_sstress/data:
 
 	* now data link when top_srcdir != top_builddir is done before
 	executing the tests * execute ns tests now but only for two time
 	steps
 
-2004-06-23  winkelma
+2004-06-23 16:17  winkelma
 
 	* testsuite/data/mesh/mesh++/Makefile.am:
 
 	please don't forget to add new meshes in Makefile.am
 
-2004-06-23  ales
+2004-06-23 15:50  ales
 
 	* testsuite/data/mesh/mesh++/carotide.m++:
 
 	Better late that never
 
-2004-06-23  simone
+2004-06-23 12:12  simone
 
 	* life/lifearray/pattern.hpp:
 
 	still some errors found in the pattern.hpp file.
 
-2004-06-22  simone
+2004-06-22 14:42  simone
 
 	* life/lifearray/pattern.hpp:
 
@@ -853,34 +781,34 @@
 	Diff_t I tried to solve some of it. I hope to have corrected
 	exactely.
 
-2004-06-22  prudhomm
+2004-06-22 13:49  prudhomm
 
 	* life/lifearray/pattern.hpp:
 
 	use uint instead of size_t
 
-2004-06-22  simone
+2004-06-22 12:11  simone
 
 	* life/lifearray/RNM_tpl.hpp:
 
 	Porting to itanum2: previous ci was wrong. Actually, return *this
 	since x was not existing any more and of the wrong type
 
-2004-06-22  fernandez
+2004-06-22 11:40  fernandez
 
 	* life/lifesolver/NavierStokesHandler.hpp:
 
 	Adding postprocessing with GMV and medit
 
-2004-06-22  fernandez
+2004-06-22 11:37  fernandez
 
-	* testsuite/test_ns_cyl/data, testsuite/test_ns_cyl/main.cpp:
+	* testsuite/test_ns_cyl/: data, main.cpp:
 
 	Bug fixed in main.cpp with postprocessing. Segmentation fault comes
 	from the data file.  The preconditioner system didn't converge, I
 	increased the max number of iterations and it works
 
-2004-06-22  simone
+2004-06-22 10:53  simone
 
 	* life/lifearray/RNM_tpl.hpp:
 
@@ -891,7 +819,7 @@
 	{      for (int i=0;i<n;i++)	    {  R & x(v[index(i)]);
 	  x =  f(x);}	   return x;	}
 
-2004-06-14  simone
+2004-06-14 10:13  simone
 
 	* life/lifecore/bareItems.hpp:
 
@@ -908,14 +836,14 @@
 
 	In the
 
-2004-06-14  simone
+2004-06-14 09:26  simone
 
 	* testsuite/test_ns_ipstab/.cvsignore:
 
 	I have added Makefiel.in in .cvsignore since it is automatically
 	created by
 
-2004-06-14  simone
+2004-06-14 09:21  simone
 
 	* doc/tex/framed.sty:
 
@@ -923,289 +851,268 @@
 	If somebody does not agree, please remove it. I will not claim.
 	But know that OTHERS have the same problem\! ;-)
 
-2004-06-09  fernandez
+2004-06-09 16:05  fernandez
 
 	* life/lifesolver/NavierStokesAleSolverPC.hpp:
 
 	Last version had a bad (experimental) convective term.
 
-2004-06-09  winkelma
+2004-06-09 15:40  winkelma
 
 	* testsuite/data/mesh/inria/Makefile.am:
 
 	added missing meshes
 
-2004-06-09  fernandez
+2004-06-09 11:15  fernandez
 
 	* testsuite/Makefile.am:
 
 	new test_ns_ipstab directory
 
-2004-06-09  fernandez
+2004-06-09 11:04  fernandez
 
-	* testsuite/test_fsi_newton/main.cpp,
-	testsuite/test_fsi_picard/main.cpp,
-	testsuite/test_linearelasticity/main.cpp,
-	testsuite/test_masstransport/main.cpp, testsuite/test_ns_bdf/data,
-	testsuite/test_ns_bdf/main.cpp, testsuite/test_ns_cyl/main.cpp,
-	testsuite/test_ns_sstress/data, testsuite/test_ns_sstress/main.cpp:
+	* testsuite/: test_fsi_newton/main.cpp, test_fsi_picard/main.cpp,
+	test_linearelasticity/main.cpp, test_masstransport/main.cpp,
+	test_ns_bdf/data, test_ns_bdf/main.cpp, test_ns_cyl/main.cpp,
+	test_ns_sstress/data, test_ns_sstress/main.cpp:
 
 	Removing $define MESH_INRIA MESH MOX, now we set up the mesh type
 	on the data file (mesh_file=.mesh or .m++)
 
-2004-06-09  fernandez
+2004-06-09 09:48  fernandez
 
-	* testsuite/test_ns_ipstab/Makefile.am,
-	testsuite/test_ns_ipstab/NavierStokesSolverIP.hpp,
-	testsuite/test_ns_ipstab/data, testsuite/test_ns_ipstab/main.cpp,
-	testsuite/test_ns_ipstab/norm.cpp,
-	testsuite/test_ns_ipstab/norm.hpp,
-	testsuite/test_ns_ipstab/ud_functions.hpp:
+	* testsuite/test_ns_ipstab/: Makefile.am, NavierStokesSolverIP.hpp,
+	data, main.cpp, norm.cpp, norm.hpp, ud_functions.hpp:
 
 	test IP stabilization
 
-2004-06-09  fernandez
+2004-06-09 09:31  fernandez
 
 	* life/lifesolver/NavierStokesHandler.hpp:
 
 	postProcessing modified (allows GMV)
 
-2004-06-09  fernandez
+2004-06-09 09:29  fernandez
 
 	* life/lifemesh/dataMesh.hpp:
 
 	Added new options: mesh_type, mesh_faces, mesh_edges
 
-2004-06-09  fernandez
+2004-06-09 09:28  fernandez
 
-	* life/lifefem/assemb.hpp, life/lifefem/elemOper.cpp,
-	life/lifefem/elemOper.hpp, life/lifefem/sobolevNorms.hpp:
+	* life/lifefem/: assemb.hpp, elemOper.cpp, elemOper.hpp,
+	sobolevNorms.hpp:
 
 	IP stabilization
 
-2004-06-09  fernandez
+2004-06-09 09:25  fernandez
 
-	* life/lifearray/pattern.hpp, life/lifearray/sparseArray.hpp,
-	life/lifearray/values.hpp, life/lifearray/vecUnknown.hpp:
+	* life/lifearray/: pattern.hpp, sparseArray.hpp, values.hpp,
+	vecUnknown.hpp:
 
 	New routines comming from IP stabilization
 
-2004-06-09  fernandez
+2004-06-09 09:21  fernandez
 
 	* life/lifefilters/gmv_wrtrs.hpp:
 
 	Postprocessing using the GMV visulazation software
 
-2004-06-09  fernandez
+2004-06-09 08:15  fernandez
 
-	* testsuite/data/mesh/inria/hexa16x16.mesh,
-	testsuite/data/mesh/inria/hexa2x2.mesh,
-	testsuite/data/mesh/inria/hexa32x32.mesh,
-	testsuite/data/mesh/inria/hexa4x4.mesh,
-	testsuite/data/mesh/inria/hexa8x8.mesh:
+	* testsuite/data/mesh/inria/: hexa16x16.mesh, hexa2x2.mesh,
+	hexa32x32.mesh, hexa4x4.mesh, hexa8x8.mesh:
 
 	Mesh files for error computations usign IP stabilization
 
-2004-06-07  prudhomm
+2004-06-07 15:49  prudhomm
 
 	* AUTHORS, NEWS, configure.in.in:
 
 	do not check for umfpack yet (it is not used yet anyway)
 
-2004-06-07  winkelma
+2004-06-07 15:06  winkelma
 
 	* Mainpage.dox:
 
 	* fixed typos * changed URL for more documentation according to new
 	homepage
 
-2004-06-01  prudhomm
+2004-06-01 17:47  prudhomm
 
-	* life/lifecore/LDebug.cpp, life/lifecore/LDebug.hpp:
+	* life/lifecore/: LDebug.cpp, LDebug.hpp:
 
 	added documentation to LDebug()
 
-2004-06-01  prudhomm
+2004-06-01 11:10  prudhomm
 
 	* Makefile.am:
 
 	Oops spaces instead of tabs
 
-2004-06-01  prudhomm
+2004-06-01 11:08  prudhomm
 
 	* Makefile.am:
 
 	now apidox-all generates both the general index file for doxygen
 	and the per-library documentation
 
-2004-05-31  prudhomm
+2004-05-31 07:41  prudhomm
 
 	* NEWS, configure.in.in, configure.in.mid:
 
 	set LIFE_PREFIX define in lifeconfig.h updated NEWS file
 
-2004-05-31  prudhomm
+2004-05-31 07:35  prudhomm
 
 	* NEWS, configure.in.in:
 
 	Release Candidate 1 for 0.1.0
 
-2004-05-31  prudhomm
+2004-05-31 07:32  prudhomm
 
 	* .cvsignore, .emacs.dirvars:
 
 	added emacs dirvars config file consistent with HEAD
 
-2004-05-31  prudhomm
+2004-05-31 07:27  prudhomm
 
 	* doc/manual/lifev-dev.tex:
 
 	fix
 
-2004-05-27  fernandez
+2004-05-27 15:39  fernandez
 
 	* testsuite/test_fsi_picard/data:
 
 	Correcting mesh path in data file
 
-2004-05-27  lformaggia
+2004-05-27 15:34  lformaggia
 
 	* life.kdevelop:
 
 	For MOX
 
-2004-05-27  lformaggia
+2004-05-27 15:34  lformaggia
 
 	* configure.in.in:
 
 	Reflects new library arrangement
 
-2004-05-27  fernandez
+2004-05-27 15:24  fernandez
 
 	* testsuite/test_fsi_newton/data:
 
 	Correcting mesh path in data file
 
-2004-05-27  fernandez
+2004-05-27 15:21  fernandez
 
 	* testsuite/data/mesh/inria/vessel2x4x20_10cm.mesh:
 
 	Mesh file added from linearelasticity test
 
-2004-05-27  fernandez
+2004-05-27 15:16  fernandez
 
-	* testsuite/test_linearelasticity/data,
-	testsuite/test_linearelasticity/vessel2x4x20_10cm.mesh:
+	* testsuite/test_linearelasticity/: data, vessel2x4x20_10cm.mesh:
 
 	Removing mesh file and correct data file
 
-2004-05-27  prosi
+2004-05-27 14:32  prosi
 
 	* testsuite/test_masstransport/data:
 
 	changed mesh file for testcase
 
-2004-05-27  lformaggia
+2004-05-27 14:30  lformaggia
 
-	* testsuite/test_darcy/darcySolver.cpp,
-	testsuite/test_fsi_newton/main.cpp,
-	testsuite/test_fsi_newton/operFS.cpp,
-	testsuite/test_fsi_newton/operFS.hpp,
-	testsuite/test_fsi_picard/main.cpp,
-	testsuite/test_fsi_picard/operFS.hpp,
-	testsuite/test_linearelasticity/main.cpp,
-	testsuite/test_masstransport/ensight7-write.hpp:
+	* testsuite/: test_darcy/darcySolver.cpp, test_fsi_newton/main.cpp,
+	test_fsi_newton/operFS.cpp, test_fsi_newton/operFS.hpp,
+	test_fsi_picard/main.cpp, test_fsi_picard/operFS.hpp,
+	test_linearelasticity/main.cpp,
+	test_masstransport/ensight7-write.hpp:
 
 	Modified to support the new definition of RegioMesh3D:
 
 	_mesh.getGeoMap() has been replaces by getGeoMap(_mesh)
 
-2004-05-27  lformaggia
+2004-05-27 14:29  lformaggia
 
-	* life/lifefem/regionMesh3D_ALE.cpp,
-	life/lifefem/regionMesh3D_ALE.hpp:
+	* life/lifefem/: regionMesh3D_ALE.cpp, regionMesh3D_ALE.hpp:
 
 	regionMesh3D_ALE is a specialisation of regionMesh3D that
 	implements the methods
 
 	getGeoMap() (see also geoMap.h in lifefem) getFE()
 
-2004-05-27  prudhomm
+2004-05-27 14:24  prudhomm
 
 	* testsuite/data/mesh/inria/Makefile.am:
 
 	forgot to add these meshes for the link when top_srcdir !=
 	top_builddir
 
-2004-05-27  lformaggia
+2004-05-27 14:15  lformaggia
 
 	* life/lifefem/geoMap.hpp:
 
 	added getGeoMap function that gets the GeoMap assocatied to a mesh.
 	 Needed in order to make lifemesh independent from lifefem
 
-2004-05-27  lformaggia
+2004-05-27 14:14  lformaggia
 
-	* life/lifealg/Makefile.am, life/lifealg/pattern.cpp,
-	life/lifealg/pattern.hpp, life/lifealg/values.cpp,
-	life/lifealg/values.hpp, life/lifealg/testsuite/Makefile.am,
-	life/lifealg/testsuite/MatrixTest.hpp, life/lifearray/Makefile.am,
-	life/lifearray/elemMat.cpp, life/lifearray/elemMat.hpp,
-	life/lifearray/elemVec.cpp, life/lifearray/elemVec.hpp,
-	life/lifearray/pattern.cpp, life/lifearray/pattern.hpp,
-	life/lifearray/sparseArray.cpp, life/lifearray/sparseArray.hpp,
-	life/lifearray/values.cpp, life/lifearray/values.hpp,
-	life/lifecore/Makefile.am, life/lifecore/bareItems.cpp,
-	life/lifecore/bareItems.hpp, life/lifecore/basisElSh.cpp,
-	life/lifecore/basisElSh.hpp,
-	life/lifecore/testsuite/test_typedefs.cpp,
-	life/lifefem/Makefile.am, life/lifefem/defQuadRuleFE.cpp,
-	life/lifefem/elemMat.cpp, life/lifefem/elemMat.hpp,
-	life/lifefem/elemVec.cpp, life/lifefem/elemVec.hpp,
-	life/lifefem/v2elemVec.cpp, life/lifefem/v2elemVec.hpp,
-	life/lifefem/values.hpp, life/lifefilters/Makefile.am,
-	life/lifefilters/mesh_util.cpp, life/lifefilters/mesh_util.hpp,
-	life/lifefilters/readMesh2D.hpp, life/lifefilters/readMesh3D.cpp,
-	life/lifefilters/readMesh3D.hpp, life/lifemesh/Makefile.am,
-	life/lifemesh/bareItems.cpp, life/lifemesh/bareItems.hpp,
-	life/lifemesh/basisElSh.cpp, life/lifemesh/basisElSh.hpp,
-	life/lifemesh/mesh_util.cpp, life/lifemesh/mesh_util.hpp,
-	life/lifemesh/mesh_util_base.hpp, life/lifemesh/readMesh2D.hpp,
-	life/lifemesh/readMesh3D.cpp, life/lifemesh/readMesh3D.hpp,
-	life/lifemesh/regionMesh3D.hpp,
-	life/lifesolver/ElasticStructureHandler.hpp,
-	life/lifesolver/Makefile.am,
-	life/lifesolver/NavierStokesHandler.hpp,
-	life/lifesolver/NavierStokesHandler_miguel.hpp,
-	life/lifesolver/convDiffReactHandler.hpp:
+	* life/: lifealg/Makefile.am, lifealg/pattern.cpp,
+	lifealg/pattern.hpp, lifealg/values.cpp, lifealg/values.hpp,
+	lifealg/testsuite/Makefile.am, lifealg/testsuite/MatrixTest.hpp,
+	lifearray/Makefile.am, lifearray/elemMat.cpp,
+	lifearray/elemMat.hpp, lifearray/elemVec.cpp,
+	lifearray/elemVec.hpp, lifearray/pattern.cpp,
+	lifearray/pattern.hpp, lifearray/sparseArray.cpp,
+	lifearray/sparseArray.hpp, lifearray/values.cpp,
+	lifearray/values.hpp, lifecore/Makefile.am, lifecore/bareItems.cpp,
+	lifecore/bareItems.hpp, lifecore/basisElSh.cpp,
+	lifecore/basisElSh.hpp, lifecore/testsuite/test_typedefs.cpp,
+	lifefem/Makefile.am, lifefem/defQuadRuleFE.cpp,
+	lifefem/elemMat.cpp, lifefem/elemMat.hpp, lifefem/elemVec.cpp,
+	lifefem/elemVec.hpp, lifefem/v2elemVec.cpp, lifefem/v2elemVec.hpp,
+	lifefem/values.hpp, lifefilters/Makefile.am,
+	lifefilters/mesh_util.cpp, lifefilters/mesh_util.hpp,
+	lifefilters/readMesh2D.hpp, lifefilters/readMesh3D.cpp,
+	lifefilters/readMesh3D.hpp, lifemesh/Makefile.am,
+	lifemesh/bareItems.cpp, lifemesh/bareItems.hpp,
+	lifemesh/basisElSh.cpp, lifemesh/basisElSh.hpp,
+	lifemesh/mesh_util.cpp, lifemesh/mesh_util.hpp,
+	lifemesh/mesh_util_base.hpp, lifemesh/readMesh2D.hpp,
+	lifemesh/readMesh3D.cpp, lifemesh/readMesh3D.hpp,
+	lifemesh/regionMesh3D.hpp, lifesolver/ElasticStructureHandler.hpp,
+	lifesolver/Makefile.am, lifesolver/NavierStokesHandler.hpp,
+	lifesolver/NavierStokesHandler_miguel.hpp,
+	lifesolver/convDiffReactHandler.hpp:
 
 	MOved files and classes to suit new organization.
 
 	Makefiles.am reflects the changes
 
-2004-05-27  lformaggia
+2004-05-27 14:08  lformaggia
 
-	* admin/ac_check_aztec.m4, admin/ac_check_mpi.m4,
-	admin/ac_check_parmetis.m4, admin/ac_check_petsc.m4,
-	admin/ac_check_umfpack.m4:
+	* admin/: ac_check_aztec.m4, ac_check_mpi.m4, ac_check_parmetis.m4,
+	ac_check_petsc.m4, ac_check_umfpack.m4:
 
 	Modified to account for MOX system
 
 	PLEASE CHRISTOPHE CHECK IN PARTICULAR ac_check_petsc.m4
 
-2004-05-27  prudhomm
+2004-05-27 12:35  prudhomm
 
-	* life/lifealg/SolverPETSC.cpp, life/lifealg/SolverPETSC.hpp,
-	life/lifealg/testsuite/test_linearsolvers.cpp:
+	* life/lifealg/: SolverPETSC.cpp, SolverPETSC.hpp,
+	testsuite/test_linearsolvers.cpp:
 
 	namespace life --> namespace Life
 
-2004-05-27  prudhomm
+2004-05-27 12:30  prudhomm
 
-	* life/ldebug.areas, life/lifecore/LDebug.cpp,
-	life/lifecore/LDebug.hpp, life/lifecore/Makefile.am,
-	life/lifecore/testsuite/Makefile.am,
-	life/lifecore/testsuite/test_debug.cpp:
+	* life/: ldebug.areas, lifecore/LDebug.cpp, lifecore/LDebug.hpp,
+	lifecore/Makefile.am, lifecore/testsuite/Makefile.am,
+	lifecore/testsuite/test_debug.cpp:
 
 	implemented area debugging
 
@@ -1219,20 +1126,20 @@
 
 	This is handled at execution time and not compile time.
 
-2004-05-27  prudhomm
+2004-05-27 12:02  prudhomm
 
 	* configure.in.in:
 
 	defined LIFE_PREFIX in lifeconfig.h it is the root location where
 	LifeV is installed
 
-2004-05-27  prudhomm
+2004-05-27 11:35  prudhomm
 
-	* life/lifealg/SolverPETSC.cpp, life/lifealg/SolverPETSC.hpp:
+	* life/lifealg/: SolverPETSC.cpp, SolverPETSC.hpp:
 
 	obey the no indentation rule in namespace thanks to dirvars
 
-2004-05-27  prudhomm
+2004-05-27 11:30  prudhomm
 
 	* .cvsignore, admin/.cvsignore, doc/common/.cvsignore,
 	doc/tex/.cvsignore, life/.cvsignore, life/lifealg/.cvsignore,
@@ -1258,34 +1165,28 @@
 	janitory work tell CVS to ignore some automatically generated files
 	(objects, ...)
 
-2004-05-27  prudhomm
+2004-05-27 11:25  prudhomm
 
 	* .emacs-dirvars:
 
 	added emacs dirvars (using dirvars.el) for global configuration of
 	indentation, tabing, ...
 
-2004-05-27  prudhomm
+2004-05-27 11:22  prudhomm
 
-	* life/lifealg/Makefile.am, life/lifealg/testsuite/Makefile.am:
+	* life/lifealg/: Makefile.am, testsuite/Makefile.am:
 
 	removed lifefem dependency from lifealg. this was need when
 	compiling with -g -O0. Luca will fix that soon after values.hpp is
 	split
 
-2004-05-26  prudhomm
-
-	* doc/manual/lifev-dev_generalities.tex:
-
-	[no log message]
-
-2004-05-26  prudhomm
+2004-05-26 13:09  prudhomm
 
 	* doc/manual/lifev-dev_generalities.tex:
 
 	minor update iacspc50 --> cmcsforge
 
-2004-05-19  prudhomm
+2004-05-19 14:29  prudhomm
 
 	* life/lifealg/Makefile.am, life/lifearray/Makefile.am,
 	life/lifearray/testsuite/Makefile.am,
@@ -1293,7 +1194,7 @@
 
 	some small fixes in Makefile.am
 
-2004-05-18  prudhomm
+2004-05-18 16:37  prudhomm
 
 	* configure.in.in, admin/ac_check_petsc.m4,
 	admin/ac_check_umfpack.m4, life/lifealg/SolverPETSC.cpp,
@@ -1310,7 +1211,7 @@
 	moved finite difference  matrices (mass matrix and
 	convection/diffusion)	to MatrixTest.{h,c}pp
 
-2004-05-18  prudhomm
+2004-05-18 13:45  prudhomm
 
 	* Makefile.am, configure.in.in, doc/common/doxygen.css,
 	doc/common/footer.html, doc/common/header.html,
@@ -1328,71 +1229,66 @@
 	see how it works on "finite difference"   matrices - ignore some
 	automatically generated files
 
-2004-05-06  prosi
+2004-05-06 15:04  prosi
 
-	* testsuite/test_masstransport/Makefile.am,
-	testsuite/test_masstransport/data,
-	testsuite/test_masstransport/ensight7-write.hpp,
-	testsuite/test_masstransport/main.cpp,
-	testsuite/test_masstransport/ud_functions.hpp:
+	* testsuite/test_masstransport/: Makefile.am, data,
+	ensight7-write.hpp, main.cpp, ud_functions.hpp:
 
 	test case for mass transport
 
-2004-05-06  prosi
+2004-05-06 14:59  prosi
 
-	* life/lifesolver/Makefile.am,
-	life/lifesolver/convDiffReactHandler.hpp,
-	life/lifesolver/convDiffReactSolverPC.hpp,
-	life/lifesolver/dataConvDiffReact.hpp:
+	* life/lifesolver/: Makefile.am, convDiffReactHandler.hpp,
+	convDiffReactSolverPC.hpp, dataConvDiffReact.hpp:
 
 	mass transport class (but still under constructions) updates will
 	follow
 
-2004-05-05  prudhomm
+2004-05-05 10:50  prudhomm
 
 	* life/lifesolver/NavierStokesHandler.hpp:
 
 	more std::
 
-2004-05-05  prosi
+2004-05-05 10:22  prosi
 
 	* life/lifesolver/NavierStokesHandler.hpp:
 
 	 I have to follow Christophe's rules
 
-2004-05-05  prosi
+2004-05-05 09:56  prosi
 
-	* testsuite/test_ns_cyl/data, testsuite/test_ns_cyl/main.cpp:
+	* testsuite/test_ns_cyl/: data, main.cpp:
 
 	modified testcase with possibility to read (write) data from (to)
 	file
 
-2004-05-05  prosi
+2004-05-05 09:54  prosi
 
 	* life/lifesolver/NavierStokesHandler.hpp:
 
 	include initialization of fluid solver with data from file
 
-2004-05-05  prosi
+2004-05-05 08:06  prosi
 
-	* life/lifefem/defQuadRuleFE.cpp, life/lifefem/quadRule.hpp:
+	* life/lifefem/: defQuadRuleFE.cpp, quadRule.hpp:
 
 	added 15pt quatrule for tetrahedrons
 
-2004-05-05  prosi
+2004-05-05 07:31  prosi
 
 	* life/lifefem/elemOper.cpp:
 
 	corrected grad() for different quadrules of pressure and velocity,
 	but there might be a better way to do this
 
-2004-05-04  prudhomm
+2004-05-03 22:03  prudhomm
 
 	* doc/api/.cvsignore:
 
 	ignore
 
-2004-05-04  prudhomm
+2004-05-03 22:02  prudhomm
 
 	* .cvsignore, Doxyfile, Mainpage.dox, Makefile.am, configure.in.in,
 	admin/Doxyfile.am, admin/Doxyfile.global, admin/Makefile.am,
@@ -1404,7 +1300,7 @@
 
 	added doxygen documentation update biblio with recent talk in graz
 
-2004-05-03  prosi
+2004-05-03 16:05  prosi
 
 	* admin/ac_check_mpi.m4, admin/ac_check_petsc.m4,
 	life/lifecore/testsuite/test_pairs,
@@ -1413,22 +1309,22 @@
 
 	CP: compiles now and cleanup a bit martin CVS
 
-2004-05-03  prudhomm
+2004-05-03 15:40  prudhomm
 
-	* admin/ac_check_parmetis.m4, admin/ac_check_petsc.m4:
+	* admin/: ac_check_parmetis.m4, ac_check_petsc.m4:
 
 	one more iteration for martin who does nopt have petsc umfpack and
 	parmetis
 
-2004-05-03  prudhomm
+2004-05-03 15:15  prudhomm
 
-	* admin/ac_check_parmetis.m4, admin/ac_check_petsc.m4,
-	admin/ac_check_umfpack.m4:
+	* admin/: ac_check_parmetis.m4, ac_check_petsc.m4,
+	ac_check_umfpack.m4:
 
 	don't stop and exit configure if umfpack petsc or parmetis are not
 	found
 
-2004-05-03  prudhomm
+2004-05-03 14:25  prudhomm
 
 	* Mainpage.dox, Makefile.am, configure.in.in, admin/Doxyfile.am,
 	admin/Doxyfile.global, life/Makefile.am, life/lifealg/Makefile.am,
@@ -1439,19 +1335,19 @@
 
 	framework for doxygen documentation per library
 
-2004-05-03  prudhomm
+2004-05-03 10:26  prudhomm
 
 	* configure.in.in:
 
 	bump up development version to 0.1.90
 
-2004-05-03  prudhomm
+2004-05-03 10:24  prudhomm
 
 	* life/lifearray/testsuite/.cvsignore:
 
 	ignore
 
-2004-05-03  prudhomm
+2004-05-03 10:23  prudhomm
 
 	* NEWS, life/lifealg/Makefile.am, life/lifearray/vecUnknown.cpp,
 	life/lifearray/vecUnknown.hpp, life/lifefem/elemVec.cpp,
@@ -1482,7 +1378,7 @@
 	** .vec() is not required anymore ** speed issue corrected * fixed
 	all test_* with the new vecunknown classes interface
 
-2004-05-03  prudhomm
+2004-05-03 09:48  prudhomm
 
 	* admin/ltmain.sh:
 
@@ -1491,13 +1387,13 @@
 	updated libtool scripts added some tests for make distcheck or make
 	check
 
-2004-04-19  prudhomm
+2004-04-19 08:49  prudhomm
 
 	* configure.in.in:
 
 	still prerelease - bumped up to 0.1.0pre6
 
-2004-04-19  prudhomm
+2004-04-19 08:48  prudhomm
 
 	* Doxyfile, NEWS, life/lifecore/vecUnknown.hpp:
 
@@ -1505,35 +1401,35 @@
 	done   each time it was called. That's a serious performance
 	bottleneck.  * updated Doxyfile for doxygen generation
 
-2004-04-12  prudhomm
+2004-04-12 10:39  prudhomm
 
 	* admin/ac_check_parmetis.m4:
 
 	parmetis check
 
-2004-04-12  prudhomm
+2004-04-12 10:39  prudhomm
 
 	* NEWS, configure.in.in:
 
 	NEWS updates bump up to 0.1.90 added checks for petsc, parmetis,
 	umfpack and mpi
 
-2004-04-12  prudhomm
+2004-04-12 10:35  prudhomm
 
 	* life/lifearray/testsuite/Makefile.in:
 
 	automatically generated
 
-2004-04-12  prudhomm
+2004-04-12 10:33  prudhomm
 
 	* testsuite/test_bdf/Makefile.am:
 
 	removed warning when executing make -f Makefile.cvs
 
-2004-04-06  prudhomm
+2004-04-06 10:32  prudhomm
 
-	* admin/ac_check_aztec.m4, admin/ac_check_mpi.m4,
-	admin/ac_check_petsc.m4, admin/ac_check_umfpack.m4:
+	* admin/: ac_check_aztec.m4, ac_check_mpi.m4, ac_check_petsc.m4,
+	ac_check_umfpack.m4:
 
 	hey goodies start to crawl in
 
@@ -1542,19 +1438,19 @@
 
 	it is preliminary to the mpi, petsc and umfpack interfaces
 
-2004-04-01  prudhomm
+2004-04-01 12:41  prudhomm
 
 	* NEWS, life/lifefem/elemOper.cpp:
 
 	backported fix for bug #23 from Branch	LIFEV_0_1_0_BRANCH
 
-2004-04-01  prudhomm
+2004-04-01 12:39  prudhomm
 
 	* NEWS:
 
 	updated NEWS
 
-2004-04-01  prudhomm
+2004-04-01 12:35  prudhomm
 
 	* life/lifefem/elemOper.cpp:
 
@@ -1563,23 +1459,23 @@
 
 	thanks Martin
 
-2004-03-31  prudhomm
+2004-03-31 14:43  prudhomm
 
-	* testsuite/Makefile.testsuite, testsuite/test_bdf/Makefile.am,
-	testsuite/test_mixte/Makefile.am, testsuite/test_p2/Makefile.am,
-	testsuite/test_postproc/Makefile.am, testsuite/test_q1/Makefile.am:
+	* testsuite/: Makefile.testsuite, test_bdf/Makefile.am,
+	test_mixte/Makefile.am, test_p2/Makefile.am,
+	test_postproc/Makefile.am, test_q1/Makefile.am:
 
 	now all testsuite tests compile
 
 	only links fail because of the problem in lifemesh
 
-2004-03-31  prudhomm
+2004-03-31 14:42  prudhomm
 
 	* life/lifearray/Makefile.am:
 
 	added testsuite for test_simplevect
 
-2004-03-31  prudhomm
+2004-03-31 10:07  prudhomm
 
 	* configure.in.in, life/lifealg/.cvsignore,
 	life/lifealg/Makefile.am, life/lifealg/tab.hpp,
@@ -1608,45 +1504,36 @@
 	should be splitted between lifemesh and lifefilters(mesh ops with
 	fe dependencies)
 
-2004-03-31  prudhomm
+2004-03-31 10:03  prudhomm
 
-	* life/lifemesh/mesh_util.cpp, life/lifemesh/mesh_util.hpp,
-	life/lifemesh/mesh_util_base.cpp, life/lifemesh/mesh_util_base.hpp:
+	* life/lifemesh/: mesh_util.cpp, mesh_util.hpp, mesh_util_base.cpp,
+	mesh_util_base.hpp:
 
 	readded mesh_util
 
-2004-03-31  prudhomm
+2004-03-31 10:02  prudhomm
 
-	* life/lifemesh/Makefile.am, life/lifemesh/meshMotion.cpp,
-	life/lifemesh/meshMotion.hpp, life/lifemesh/mesh_util.cpp,
-	life/lifemesh/mesh_util.hpp, life/lifemesh/mesh_util_base.cpp,
-	life/lifemesh/mesh_util_base.hpp:
+	* life/lifemesh/: Makefile.am, meshMotion.cpp, meshMotion.hpp,
+	mesh_util.cpp, mesh_util.hpp, mesh_util_base.cpp,
+	mesh_util_base.hpp:
 
 	moved
 
-2004-03-31  prudhomm
+2004-03-31 08:49  prudhomm
 
-	* life/lifefem/bcCond.cpp, life/lifefem/bcCond.hpp,
-	life/lifefem/bcVector.cpp, life/lifefem/bcVector.hpp,
-	life/lifefem/dof.cpp, life/lifefem/dof.hpp,
-	life/lifefem/dofInterface3Dto2D.cpp,
-	life/lifefem/dofInterface3Dto2D.hpp,
-	life/lifefem/dofInterface3Dto3D.cpp,
-	life/lifefem/dofInterface3Dto3D.hpp,
-	life/lifefem/dofInterfaceBase.cpp,
-	life/lifefem/dofInterfaceBase.hpp,
-	life/lifefem/dofInterfaceHandler.cpp,
-	life/lifefem/dofInterfaceHandler.hpp, life/lifemesh/bcCond.cpp,
-	life/lifemesh/bcCond.hpp, life/lifemesh/bcVector.cpp,
-	life/lifemesh/bcVector.hpp, life/lifemesh/dof.cpp,
-	life/lifemesh/dof.hpp, life/lifemesh/dofInterface3Dto2D.cpp,
-	life/lifemesh/dofInterface3Dto2D.hpp,
-	life/lifemesh/dofInterface3Dto3D.cpp,
-	life/lifemesh/dofInterface3Dto3D.hpp,
-	life/lifemesh/dofInterfaceBase.cpp,
-	life/lifemesh/dofInterfaceBase.hpp,
-	life/lifemesh/dofInterfaceHandler.cpp,
-	life/lifemesh/dofInterfaceHandler.hpp:
+	* life/: lifefem/bcCond.cpp, lifefem/bcCond.hpp,
+	lifefem/bcVector.cpp, lifefem/bcVector.hpp, lifefem/dof.cpp,
+	lifefem/dof.hpp, lifefem/dofInterface3Dto2D.cpp,
+	lifefem/dofInterface3Dto2D.hpp, lifefem/dofInterface3Dto3D.cpp,
+	lifefem/dofInterface3Dto3D.hpp, lifefem/dofInterfaceBase.cpp,
+	lifefem/dofInterfaceBase.hpp, lifefem/dofInterfaceHandler.cpp,
+	lifefem/dofInterfaceHandler.hpp, lifemesh/bcCond.cpp,
+	lifemesh/bcCond.hpp, lifemesh/bcVector.cpp, lifemesh/bcVector.hpp,
+	lifemesh/dof.cpp, lifemesh/dof.hpp,
+	lifemesh/dofInterface3Dto2D.cpp, lifemesh/dofInterface3Dto2D.hpp,
+	lifemesh/dofInterface3Dto3D.cpp, lifemesh/dofInterface3Dto3D.hpp,
+	lifemesh/dofInterfaceBase.cpp, lifemesh/dofInterfaceBase.hpp,
+	lifemesh/dofInterfaceHandler.cpp, lifemesh/dofInterfaceHandler.hpp:
 
 	moved dof* and bc* to lifefem they belong there
 
@@ -1654,16 +1541,16 @@
 
 	mesh checks with Fe should go in lifefilters
 
-2004-03-31  prudhomm
+2004-03-31 08:30  prudhomm
 
-	* life/lifealg/algebraic_facto.hpp, life/lifealg/tab.hpp,
-	life/lifecore/Operator01.hpp, life/lifecore/algebraic_facto.hpp,
-	life/lifecore/bc_manage.hpp, life/lifecore/tab.hpp,
-	life/lifefem/Operator01.hpp, life/lifefem/bc_manage.hpp:
+	* life/: lifealg/algebraic_facto.hpp, lifealg/tab.hpp,
+	lifecore/Operator01.hpp, lifecore/algebraic_facto.hpp,
+	lifecore/bc_manage.hpp, lifecore/tab.hpp, lifefem/Operator01.hpp,
+	lifefem/bc_manage.hpp:
 
 	more moves
 
-2004-03-31  prudhomm
+2004-03-31 08:09  prudhomm
 
 	* configure.in.in, life/lifealg/dataAztec.cpp,
 	life/lifealg/dataAztec.hpp, life/lifealg/dataNewton.cpp,
@@ -1692,96 +1579,91 @@
 
 	more moves
 
-2004-03-30  prudhomm
+2004-03-30 16:38  prudhomm
 
-	* life/lifecore/ElasticStructureHandler.hpp,
-	life/lifecore/Makefile.am,
-	life/lifecore/NavierStokesAleHandler.hpp,
-	life/lifecore/NavierStokesAleSolverPC.hpp,
-	life/lifecore/NavierStokesHandler.hpp,
-	life/lifecore/NavierStokesHandler_miguel.hpp,
-	life/lifecore/NavierStokesSolverPC.hpp,
-	life/lifecore/VenantKirchhofSolver.hpp,
-	life/lifesolver/ElasticStructureHandler.hpp,
-	life/lifesolver/Makefile.am,
-	life/lifesolver/NavierStokesAleHandler.hpp,
-	life/lifesolver/NavierStokesAleSolverPC.hpp,
-	life/lifesolver/NavierStokesHandler.hpp,
-	life/lifesolver/NavierStokesHandler_miguel.hpp,
-	life/lifesolver/NavierStokesSolverPC.hpp,
-	life/lifesolver/VenantKirchhofSolver.hpp:
+	* life/: lifecore/ElasticStructureHandler.hpp,
+	lifecore/Makefile.am, lifecore/NavierStokesAleHandler.hpp,
+	lifecore/NavierStokesAleSolverPC.hpp,
+	lifecore/NavierStokesHandler.hpp,
+	lifecore/NavierStokesHandler_miguel.hpp,
+	lifecore/NavierStokesSolverPC.hpp,
+	lifecore/VenantKirchhofSolver.hpp,
+	lifesolver/ElasticStructureHandler.hpp, lifesolver/Makefile.am,
+	lifesolver/NavierStokesAleHandler.hpp,
+	lifesolver/NavierStokesAleSolverPC.hpp,
+	lifesolver/NavierStokesHandler.hpp,
+	lifesolver/NavierStokesHandler_miguel.hpp,
+	lifesolver/NavierStokesSolverPC.hpp,
+	lifesolver/VenantKirchhofSolver.hpp:
 
 	moved to lifesolver
 
-2004-03-30  prudhomm
+2004-03-30 16:20  prudhomm
 
-	* life/Makefile.am, life/lifealg/Makefile.am,
-	life/lifealg/mixed_pattern.hpp, life/lifealg/pattern.cpp,
-	life/lifealg/pattern.hpp, life/lifecore/mixed_pattern.hpp,
-	life/lifecore/pattern.cpp, life/lifecore/pattern.hpp:
+	* life/: Makefile.am, lifealg/Makefile.am,
+	lifealg/mixed_pattern.hpp, lifealg/pattern.cpp,
+	lifealg/pattern.hpp, lifecore/mixed_pattern.hpp,
+	lifecore/pattern.cpp, lifecore/pattern.hpp:
 
 	movec pattern.* amd mix_pattern.* from lifecore to lifealg
 
-2004-03-30  prudhomm
+2004-03-30 15:45  prudhomm
 
-	* life/lifealg/Makefile.am, life/lifealg/cblas.h,
-	life/lifealg/clapack.h, life/lifealg/inexactLU.hpp,
-	life/lifealg/picard.hpp, life/lifealg/saddlePointCG.hpp,
-	life/lifecore/cblas.h, life/lifecore/clapack.h,
-	life/lifecore/inexactLU.hpp, life/lifecore/picard.hpp,
-	life/lifecore/saddlePointCG.hpp:
+	* life/: lifealg/Makefile.am, lifealg/cblas.h, lifealg/clapack.h,
+	lifealg/inexactLU.hpp, lifealg/picard.hpp,
+	lifealg/saddlePointCG.hpp, lifecore/cblas.h, lifecore/clapack.h,
+	lifecore/inexactLU.hpp, lifecore/picard.hpp,
+	lifecore/saddlePointCG.hpp:
 
 	moved
 
 	picard saddlePointCG cblas and clapack to lifealg/
 
-2004-03-30  prudhomm
+2004-03-30 15:37  prudhomm
 
-	* life/lifecore/Makefile.am, life/lifefilters/Makefile.am:
-
-	start moving files around
-
-	RNM* --> lifearray *_wrtrs* --> lifefilters
-
-2004-03-30  prudhomm
-
-	* life/lifealg/Makefile.am, life/lifearray/Makefile.am,
-	life/lifearray/RNM.hpp, life/lifearray/RNM_op.hpp,
-	life/lifearray/RNM_opc.hpp, life/lifearray/RNM_tpl.hpp,
-	life/lifearray/dummy.cpp, life/lifecore/RNM.hpp,
-	life/lifecore/RNM_op.hpp, life/lifecore/RNM_opc.hpp,
-	life/lifecore/RNM_tpl.hpp, life/lifecore/gmsh_wrtrs.hpp,
-	life/lifecore/medit_wrtrs.cpp, life/lifecore/medit_wrtrs.hpp,
-	life/lifecore/openDX_wrtrs.hpp, life/lifecore/vtk_wrtrs.cpp,
-	life/lifecore/vtk_wrtrs.hpp, life/lifefilters/Makefile.am,
-	life/lifefilters/gmsh_wrtrs.hpp, life/lifefilters/medit_wrtrs.cpp,
-	life/lifefilters/medit_wrtrs.hpp,
-	life/lifefilters/openDX_wrtrs.hpp, life/lifefilters/vtk_wrtrs.cpp,
-	life/lifefilters/vtk_wrtrs.hpp, life/lifesolver/Makefile.am:
+	* life/: lifecore/Makefile.am, lifefilters/Makefile.am:
 
 	start moving files around
 
 	RNM* --> lifearray *_wrtrs* --> lifefilters
 
-2004-03-30  prudhomm
+2004-03-30 15:34  prudhomm
 
-	* doc/common/Makefile.am, doc/common/.cvsignore:
+	* life/: lifealg/Makefile.am, lifearray/Makefile.am,
+	lifearray/RNM.hpp, lifearray/RNM_op.hpp, lifearray/RNM_opc.hpp,
+	lifearray/RNM_tpl.hpp, lifearray/dummy.cpp, lifecore/RNM.hpp,
+	lifecore/RNM_op.hpp, lifecore/RNM_opc.hpp, lifecore/RNM_tpl.hpp,
+	lifecore/gmsh_wrtrs.hpp, lifecore/medit_wrtrs.cpp,
+	lifecore/medit_wrtrs.hpp, lifecore/openDX_wrtrs.hpp,
+	lifecore/vtk_wrtrs.cpp, lifecore/vtk_wrtrs.hpp,
+	lifefilters/Makefile.am, lifefilters/gmsh_wrtrs.hpp,
+	lifefilters/medit_wrtrs.cpp, lifefilters/medit_wrtrs.hpp,
+	lifefilters/openDX_wrtrs.hpp, lifefilters/vtk_wrtrs.cpp,
+	lifefilters/vtk_wrtrs.hpp, lifesolver/Makefile.am:
+
+	start moving files around
+
+	RNM* --> lifearray *_wrtrs* --> lifefilters
+
+2004-03-30 13:47  prudhomm
+
+	* doc/common/: Makefile.am, .cvsignore:
 
 	added
 
-2004-03-30  prudhomm
+2004-03-30 13:43  prudhomm
 
 	* NEWS, configure.in.in:
 
 	bump up to 0.1.0 before branching
 
-2004-03-30  prudhomm
+2004-03-30 13:41  prudhomm
 
 	* NEWS:
 
 	updated for 0.1.0pre5
 
-2004-03-30  prudhomm
+2004-03-30 12:43  prudhomm
 
 	* COPYING, admin/config.guess, admin/config.sub, doc/Makefile.am,
 	doc/common/GPL, doc/common/LGPL, doc/manual/Makefile.am,
@@ -1791,62 +1673,40 @@
 	LGPL licenses * added these licenses doc/common * fix lifev.bib
 	location
 
-2004-03-30  prudhomm
+2004-03-30 12:27  prudhomm
 
-	* testsuite/test_bdf/main.cpp, testsuite/test_bdf/main.hpp,
-	testsuite/test_bdf/ud_functions.hpp,
-	testsuite/test_darcy/darcyHandler.cpp,
-	testsuite/test_darcy/darcyHandler.hpp,
-	testsuite/test_darcy/darcySolver.cpp,
-	testsuite/test_darcy/darcySolver.hpp,
-	testsuite/test_darcy/darcySolver_post.cpp,
-	testsuite/test_darcy/dataDarcy.cpp,
-	testsuite/test_darcy/dataDarcy.hpp, testsuite/test_darcy/main.cpp,
-	testsuite/test_darcy/user_fct.cpp,
-	testsuite/test_darcy/user_fct.hpp,
-	testsuite/test_essentialbc/main.cpp,
-	testsuite/test_essentialbc/main.hpp,
-	testsuite/test_essentialbc/ud_functions.hpp,
-	testsuite/test_fe/build_pattern.cpp,
-	testsuite/test_fsi_newton/main.cpp,
-	testsuite/test_fsi_newton/norm.cpp,
-	testsuite/test_fsi_newton/norm.hpp,
-	testsuite/test_fsi_newton/operFS.cpp,
-	testsuite/test_fsi_newton/operFS.hpp,
-	testsuite/test_fsi_newton/ud_functions.hpp,
-	testsuite/test_fsi_picard/main.cpp,
-	testsuite/test_fsi_picard/norm.cpp,
-	testsuite/test_fsi_picard/norm.hpp,
-	testsuite/test_fsi_picard/operFS.hpp,
-	testsuite/test_fsi_picard/ud_functions.hpp,
-	testsuite/test_linearelasticity/main.cpp,
-	testsuite/test_linearelasticity/norm.cpp,
-	testsuite/test_linearelasticity/norm.hpp,
-	testsuite/test_linearelasticity/ud_functions.hpp,
-	testsuite/test_matrix/main.cpp, testsuite/test_matrix/main.hpp,
-	testsuite/test_matrix/ud_functions.hpp,
-	testsuite/test_mesh/main.cpp, testsuite/test_mixte/main.cpp,
-	testsuite/test_mixte/main.hpp,
-	testsuite/test_mixte/ud_functions.hpp,
-	testsuite/test_naturalbc/main.cpp,
-	testsuite/test_naturalbc/main.hpp,
-	testsuite/test_naturalbc/ud_functions.hpp,
-	testsuite/test_ns_bdf/main.cpp,
-	testsuite/test_ns_bdf/ud_functions.hpp,
-	testsuite/test_ns_cyl/main.cpp,
-	testsuite/test_ns_cyl/ud_functions.hpp,
-	testsuite/test_ns_sstress/main.cpp,
-	testsuite/test_ns_sstress/ud_functions.hpp,
-	testsuite/test_ns_sstress/ud_functions_ns.hpp,
-	testsuite/test_p2/main.cpp, testsuite/test_p2/main.hpp,
-	testsuite/test_p2/ud_functions.hpp,
-	testsuite/test_postproc/main.cpp, testsuite/test_postproc/main.hpp,
-	testsuite/test_postproc/ud_functions.hpp:
+	* testsuite/: test_bdf/main.cpp, test_bdf/main.hpp,
+	test_bdf/ud_functions.hpp, test_darcy/darcyHandler.cpp,
+	test_darcy/darcyHandler.hpp, test_darcy/darcySolver.cpp,
+	test_darcy/darcySolver.hpp, test_darcy/darcySolver_post.cpp,
+	test_darcy/dataDarcy.cpp, test_darcy/dataDarcy.hpp,
+	test_darcy/main.cpp, test_darcy/user_fct.cpp,
+	test_darcy/user_fct.hpp, test_essentialbc/main.cpp,
+	test_essentialbc/main.hpp, test_essentialbc/ud_functions.hpp,
+	test_fe/build_pattern.cpp, test_fsi_newton/main.cpp,
+	test_fsi_newton/norm.cpp, test_fsi_newton/norm.hpp,
+	test_fsi_newton/operFS.cpp, test_fsi_newton/operFS.hpp,
+	test_fsi_newton/ud_functions.hpp, test_fsi_picard/main.cpp,
+	test_fsi_picard/norm.cpp, test_fsi_picard/norm.hpp,
+	test_fsi_picard/operFS.hpp, test_fsi_picard/ud_functions.hpp,
+	test_linearelasticity/main.cpp, test_linearelasticity/norm.cpp,
+	test_linearelasticity/norm.hpp,
+	test_linearelasticity/ud_functions.hpp, test_matrix/main.cpp,
+	test_matrix/main.hpp, test_matrix/ud_functions.hpp,
+	test_mesh/main.cpp, test_mixte/main.cpp, test_mixte/main.hpp,
+	test_mixte/ud_functions.hpp, test_naturalbc/main.cpp,
+	test_naturalbc/main.hpp, test_naturalbc/ud_functions.hpp,
+	test_ns_bdf/main.cpp, test_ns_bdf/ud_functions.hpp,
+	test_ns_cyl/main.cpp, test_ns_cyl/ud_functions.hpp,
+	test_ns_sstress/main.cpp, test_ns_sstress/ud_functions.hpp,
+	test_ns_sstress/ud_functions_ns.hpp, test_p2/main.cpp,
+	test_p2/main.hpp, test_p2/ud_functions.hpp, test_postproc/main.cpp,
+	test_postproc/main.hpp, test_postproc/ud_functions.hpp:
 
 	testsuite/*.{hpp,cpp} are GPL and copyright is EPFL,INRIA,
 	Politechnico
 
-2004-03-30  prudhomm
+2004-03-30 12:25  prudhomm
 
 	* COPYING, life/lifecore/ElasticStructureHandler.hpp,
 	life/lifecore/GetPot.cpp, life/lifecore/GetPot.hpp,
@@ -1950,141 +1810,122 @@
 
 	life/*.{hpp,cpp} are LGPL and copyright is EPFL,INRIA, Politechnico
 
-2004-03-30  prudhomm
+2004-03-30 12:14  prudhomm
 
-	* life/lifecore/ElasticStructureHandler.hpp,
-	life/lifecore/GetPot.cpp, life/lifecore/GetPot.hpp,
-	life/lifecore/NavierStokesAleHandler.hpp,
-	life/lifecore/NavierStokesAleSolverPC.hpp,
-	life/lifecore/NavierStokesHandler.hpp,
-	life/lifecore/NavierStokesHandler_miguel.hpp,
-	life/lifecore/NavierStokesSolverPC.hpp,
-	life/lifecore/Operator01.hpp, life/lifecore/RNM.hpp,
-	life/lifecore/RNM_op.hpp, life/lifecore/RNM_opc.hpp,
-	life/lifecore/RNM_tpl.hpp, life/lifecore/SimpleVect.hpp,
-	life/lifecore/VenantKirchhofSolver.hpp,
-	life/lifecore/algebraic_facto.hpp, life/lifecore/assemb.cpp,
-	life/lifecore/assemb.hpp, life/lifecore/bc_manage.hpp,
-	life/lifecore/bdf.cpp, life/lifecore/bdf.hpp,
-	life/lifecore/bdfNS.cpp, life/lifecore/bdfNS.hpp,
-	life/lifecore/chrono.hpp, life/lifecore/dataAztec.cpp,
-	life/lifecore/dataAztec.hpp,
-	life/lifecore/dataElasticStructure.hpp, life/lifecore/dataMesh.hpp,
-	life/lifecore/dataNavierStokes.hpp, life/lifecore/dataNewton.cpp,
-	life/lifecore/dataNewton.hpp,
-	life/lifecore/dataSimplifiedStructure.hpp,
-	life/lifecore/dataString.cpp, life/lifecore/dataString.hpp,
-	life/lifecore/dataTime.cpp, life/lifecore/dataTime.hpp,
-	life/lifecore/elemMat.cpp, life/lifecore/elemMat.hpp,
-	life/lifecore/elemVec.cpp, life/lifecore/elemVec.hpp,
-	life/lifecore/fortran_wrap.hpp, life/lifecore/gmsh_wrtrs.hpp,
-	life/lifecore/inexactLU.hpp, life/lifecore/lifeV.hpp,
-	life/lifecore/linesearch_cubic.hpp,
-	life/lifecore/linesearch_parabolic.hpp,
-	life/lifecore/medit_wrtrs.cpp, life/lifecore/medit_wrtrs.hpp,
-	life/lifecore/mixed_pattern.hpp, life/lifecore/newton.hpp,
-	life/lifecore/openDX_wrtrs.hpp, life/lifecore/pattern.cpp,
-	life/lifecore/pattern.hpp, life/lifecore/picard.hpp,
-	life/lifecore/post_proc.hpp, life/lifecore/saddlePointCG.hpp,
-	life/lifecore/simplifiedStructure.hpp,
-	life/lifecore/subDomainNeighbors.cpp,
-	life/lifecore/subDomainNeighbors.hpp, life/lifecore/switch.cpp,
-	life/lifecore/switch.hpp, life/lifecore/tab.hpp,
-	life/lifecore/util_string.cpp, life/lifecore/util_string.hpp,
-	life/lifecore/values.cpp, life/lifecore/values.hpp,
-	life/lifecore/variables.hpp, life/lifecore/vecUnknown.cpp,
-	life/lifecore/vecUnknown.hpp, life/lifecore/vtk_wrtrs.cpp,
-	life/lifecore/vtk_wrtrs.hpp, life/lifecore/testsuite/a_try.cpp,
-	life/lifecore/testsuite/generic.cpp,
-	life/lifecore/testsuite/gp.cpp, life/lifecore/testsuite/tcc.cpp,
-	life/lifecore/testsuite/test_a.cpp,
-	life/lifecore/testsuite/test_casts.cpp,
-	life/lifecore/testsuite/test_copy.cpp,
-	life/lifecore/testsuite/test_mark_to_bc.cpp,
-	life/lifecore/testsuite/test_pairs.cpp,
-	life/lifecore/testsuite/test_pf.cpp,
-	life/lifecore/testsuite/test_prova.cpp,
-	life/lifecore/testsuite/test_rotate.cpp,
-	life/lifecore/testsuite/test_seq.cpp,
-	life/lifecore/testsuite/test_simple_vect.cpp,
-	life/lifecore/testsuite/test_size.cpp,
-	life/lifecore/testsuite/test_typedefs.cpp,
-	life/lifecore/testsuite/test_using.cpp,
-	life/lifecore/testsuite/test_valarray.cpp,
-	life/lifecore/testsuite/test_vsize.cpp,
-	life/lifefem/currentBdFE.cpp, life/lifefem/currentBdFE.hpp,
-	life/lifefem/currentFE.cpp, life/lifefem/currentFE.hpp,
-	life/lifefem/currentHdivFE.cpp, life/lifefem/currentHdivFE.hpp,
-	life/lifefem/defQuadRuleFE.cpp, life/lifefem/elemOper.cpp,
-	life/lifefem/elemOper.hpp, life/lifefem/elemOper_ext.hpp,
-	life/lifefem/geoMap.cpp, life/lifefem/geoMap.hpp,
-	life/lifefem/localDofPattern.cpp, life/lifefem/localDofPattern.hpp,
-	life/lifefem/quadRule.cpp, life/lifefem/quadRule.hpp,
-	life/lifefem/refEle.cpp, life/lifefem/refEle.hpp,
-	life/lifefem/refFE.cpp, life/lifefem/refFE.hpp,
-	life/lifefem/refHdivFE.cpp, life/lifefem/refHdivFE.hpp,
-	life/lifefem/refHybridFE.cpp, life/lifefem/refHybridFE.hpp,
-	life/lifefem/sobolevNorms.hpp, life/lifefem/staticBdFE.cpp,
-	life/lifefem/staticBdFE.hpp, life/lifemesh/bareItems.cpp,
-	life/lifemesh/bareItems.hpp, life/lifemesh/basisElSh.cpp,
-	life/lifemesh/basisElSh.hpp, life/lifemesh/bcCond.cpp,
-	life/lifemesh/bcCond.hpp, life/lifemesh/bcVector.cpp,
-	life/lifemesh/bcVector.hpp, life/lifemesh/dof.cpp,
-	life/lifemesh/dof.hpp, life/lifemesh/dofInterface3Dto2D.cpp,
-	life/lifemesh/dofInterface3Dto2D.hpp,
-	life/lifemesh/dofInterface3Dto3D.cpp,
-	life/lifemesh/dofInterface3Dto3D.hpp,
-	life/lifemesh/dofInterfaceBase.cpp,
-	life/lifemesh/dofInterfaceBase.hpp,
-	life/lifemesh/dofInterfaceHandler.cpp,
-	life/lifemesh/dofInterfaceHandler.hpp, life/lifemesh/geo0D.cpp,
-	life/lifemesh/geo0D.hpp, life/lifemesh/geoElement.hpp,
-	life/lifemesh/geoND.hpp, life/lifemesh/identifier.cpp,
-	life/lifemesh/identifier.hpp, life/lifemesh/markers.hpp,
-	life/lifemesh/markers_base.cpp, life/lifemesh/markers_base.hpp,
-	life/lifemesh/meshEntity.hpp, life/lifemesh/meshMotion.cpp,
-	life/lifemesh/meshMotion.hpp, life/lifemesh/mesh_util.cpp,
-	life/lifemesh/mesh_util.hpp, life/lifemesh/mesh_util_base.cpp,
-	life/lifemesh/mesh_util_base.hpp, life/lifemesh/readMesh2D.hpp,
-	life/lifemesh/readMesh3D.cpp, life/lifemesh/readMesh3D.hpp,
-	life/lifemesh/regionMesh2D.hpp, life/lifemesh/regionMesh3D.cpp,
-	life/lifemesh/regionMesh3D.hpp:
+	* life/: lifecore/ElasticStructureHandler.hpp, lifecore/GetPot.cpp,
+	lifecore/GetPot.hpp, lifecore/NavierStokesAleHandler.hpp,
+	lifecore/NavierStokesAleSolverPC.hpp,
+	lifecore/NavierStokesHandler.hpp,
+	lifecore/NavierStokesHandler_miguel.hpp,
+	lifecore/NavierStokesSolverPC.hpp, lifecore/Operator01.hpp,
+	lifecore/RNM.hpp, lifecore/RNM_op.hpp, lifecore/RNM_opc.hpp,
+	lifecore/RNM_tpl.hpp, lifecore/SimpleVect.hpp,
+	lifecore/VenantKirchhofSolver.hpp, lifecore/algebraic_facto.hpp,
+	lifecore/assemb.cpp, lifecore/assemb.hpp, lifecore/bc_manage.hpp,
+	lifecore/bdf.cpp, lifecore/bdf.hpp, lifecore/bdfNS.cpp,
+	lifecore/bdfNS.hpp, lifecore/chrono.hpp, lifecore/dataAztec.cpp,
+	lifecore/dataAztec.hpp, lifecore/dataElasticStructure.hpp,
+	lifecore/dataMesh.hpp, lifecore/dataNavierStokes.hpp,
+	lifecore/dataNewton.cpp, lifecore/dataNewton.hpp,
+	lifecore/dataSimplifiedStructure.hpp, lifecore/dataString.cpp,
+	lifecore/dataString.hpp, lifecore/dataTime.cpp,
+	lifecore/dataTime.hpp, lifecore/elemMat.cpp, lifecore/elemMat.hpp,
+	lifecore/elemVec.cpp, lifecore/elemVec.hpp,
+	lifecore/fortran_wrap.hpp, lifecore/gmsh_wrtrs.hpp,
+	lifecore/inexactLU.hpp, lifecore/lifeV.hpp,
+	lifecore/linesearch_cubic.hpp, lifecore/linesearch_parabolic.hpp,
+	lifecore/medit_wrtrs.cpp, lifecore/medit_wrtrs.hpp,
+	lifecore/mixed_pattern.hpp, lifecore/newton.hpp,
+	lifecore/openDX_wrtrs.hpp, lifecore/pattern.cpp,
+	lifecore/pattern.hpp, lifecore/picard.hpp, lifecore/post_proc.hpp,
+	lifecore/saddlePointCG.hpp, lifecore/simplifiedStructure.hpp,
+	lifecore/subDomainNeighbors.cpp, lifecore/subDomainNeighbors.hpp,
+	lifecore/switch.cpp, lifecore/switch.hpp, lifecore/tab.hpp,
+	lifecore/util_string.cpp, lifecore/util_string.hpp,
+	lifecore/values.cpp, lifecore/values.hpp, lifecore/variables.hpp,
+	lifecore/vecUnknown.cpp, lifecore/vecUnknown.hpp,
+	lifecore/vtk_wrtrs.cpp, lifecore/vtk_wrtrs.hpp,
+	lifecore/testsuite/a_try.cpp, lifecore/testsuite/generic.cpp,
+	lifecore/testsuite/gp.cpp, lifecore/testsuite/tcc.cpp,
+	lifecore/testsuite/test_a.cpp, lifecore/testsuite/test_casts.cpp,
+	lifecore/testsuite/test_copy.cpp,
+	lifecore/testsuite/test_mark_to_bc.cpp,
+	lifecore/testsuite/test_pairs.cpp, lifecore/testsuite/test_pf.cpp,
+	lifecore/testsuite/test_prova.cpp,
+	lifecore/testsuite/test_rotate.cpp,
+	lifecore/testsuite/test_seq.cpp,
+	lifecore/testsuite/test_simple_vect.cpp,
+	lifecore/testsuite/test_size.cpp,
+	lifecore/testsuite/test_typedefs.cpp,
+	lifecore/testsuite/test_using.cpp,
+	lifecore/testsuite/test_valarray.cpp,
+	lifecore/testsuite/test_vsize.cpp, lifefem/currentBdFE.cpp,
+	lifefem/currentBdFE.hpp, lifefem/currentFE.cpp,
+	lifefem/currentFE.hpp, lifefem/currentHdivFE.cpp,
+	lifefem/currentHdivFE.hpp, lifefem/defQuadRuleFE.cpp,
+	lifefem/elemOper.cpp, lifefem/elemOper.hpp,
+	lifefem/elemOper_ext.hpp, lifefem/geoMap.cpp, lifefem/geoMap.hpp,
+	lifefem/localDofPattern.cpp, lifefem/localDofPattern.hpp,
+	lifefem/quadRule.cpp, lifefem/quadRule.hpp, lifefem/refEle.cpp,
+	lifefem/refEle.hpp, lifefem/refFE.cpp, lifefem/refFE.hpp,
+	lifefem/refHdivFE.cpp, lifefem/refHdivFE.hpp,
+	lifefem/refHybridFE.cpp, lifefem/refHybridFE.hpp,
+	lifefem/sobolevNorms.hpp, lifefem/staticBdFE.cpp,
+	lifefem/staticBdFE.hpp, lifemesh/bareItems.cpp,
+	lifemesh/bareItems.hpp, lifemesh/basisElSh.cpp,
+	lifemesh/basisElSh.hpp, lifemesh/bcCond.cpp, lifemesh/bcCond.hpp,
+	lifemesh/bcVector.cpp, lifemesh/bcVector.hpp, lifemesh/dof.cpp,
+	lifemesh/dof.hpp, lifemesh/dofInterface3Dto2D.cpp,
+	lifemesh/dofInterface3Dto2D.hpp, lifemesh/dofInterface3Dto3D.cpp,
+	lifemesh/dofInterface3Dto3D.hpp, lifemesh/dofInterfaceBase.cpp,
+	lifemesh/dofInterfaceBase.hpp, lifemesh/dofInterfaceHandler.cpp,
+	lifemesh/dofInterfaceHandler.hpp, lifemesh/geo0D.cpp,
+	lifemesh/geo0D.hpp, lifemesh/geoElement.hpp, lifemesh/geoND.hpp,
+	lifemesh/identifier.cpp, lifemesh/identifier.hpp,
+	lifemesh/markers.hpp, lifemesh/markers_base.cpp,
+	lifemesh/markers_base.hpp, lifemesh/meshEntity.hpp,
+	lifemesh/meshMotion.cpp, lifemesh/meshMotion.hpp,
+	lifemesh/mesh_util.cpp, lifemesh/mesh_util.hpp,
+	lifemesh/mesh_util_base.cpp, lifemesh/mesh_util_base.hpp,
+	lifemesh/readMesh2D.hpp, lifemesh/readMesh3D.cpp,
+	lifemesh/readMesh3D.hpp, lifemesh/regionMesh2D.hpp,
+	lifemesh/regionMesh3D.cpp, lifemesh/regionMesh3D.hpp:
 
 	lifev is now LGPL Library GNU Public License
 
-2004-03-30  prudhomm
+2004-03-30 06:30  prudhomm
 
 	* doc/manual/lifev-dev_generalities.tex:
 
 	minor add \ref
 
-2004-03-30  prudhomm
+2004-03-30 06:24  prudhomm
 
 	* doc/manual/lifev-dev_generalities.tex:
 
 	added documentation on testsuite and make check
 
-2004-03-26  prudhomm
+2004-03-26 12:46  prudhomm
 
 	* doc/tex/lifev.bib:
 
 	doc/ -> documentation/
 
-2004-03-26  prudhomm
+2004-03-26 12:39  prudhomm
 
 	* doc/tex/lifev.bib:
 
 	added some new entries FSI precond for NS
 
-2004-03-26  prudhomm
+2004-03-26 11:44  prudhomm
 
 	* doc/tex/lifev.bib:
 
 	keep uppercase
 
-2004-03-26  prudhomm
+2004-03-26 11:14  prudhomm
 
-	* doc/manual/life.bib, doc/manual/lifev-dev.tex, doc/tex/lifev.bib:
+	* doc/: manual/life.bib, manual/lifev-dev.tex, tex/lifev.bib:
 
 	moved biblio to tex/ and renamed it to lifev.bib
 
@@ -2092,51 +1933,47 @@
 
 	* the LifeV project * the LifeV developer manual
 
-2004-03-22  prudhomm
+2004-03-22 11:53  prudhomm
 
-	* doc/manual/.cvsignore, doc/manual/lifev-dev.kilepr:
+	* doc/manual/: .cvsignore, lifev-dev.kilepr:
 
 	minor update
 
-2004-03-22  prudhomm
+2004-03-22 11:53  prudhomm
 
 	* NEWS:
 
 	update NEWS to reflect the new version and the latest NEWS and bug
 	fixed
 
-2004-03-22  prudhomm
+2004-03-22 11:52  prudhomm
 
 	* configure.in.in:
 
 	bump up version to 0.1.0pre5 added --enable-debug and --enable-opt
 	options to configure
 
-2004-03-22  prudhomm
+2004-03-22 11:51  prudhomm
 
-	* testsuite/Makefile.testsuite, testsuite/test_darcy/Makefile.am,
-	testsuite/test_darcy/data, testsuite/test_fsi_newton/Makefile.am,
-	testsuite/test_fsi_newton/data,
-	testsuite/test_fsi_picard/Makefile.am,
-	testsuite/test_fsi_picard/data,
-	testsuite/test_linearelasticity/Makefile.am,
-	testsuite/test_linearelasticity/data,
-	testsuite/test_ns_bdf/Makefile.am, testsuite/test_ns_bdf/data,
-	testsuite/test_ns_cyl/Makefile.am, testsuite/test_ns_cyl/data,
-	testsuite/test_ns_sstress/Makefile.am,
-	testsuite/test_ns_sstress/data:
+	* testsuite/: Makefile.testsuite, test_darcy/Makefile.am,
+	test_darcy/data, test_fsi_newton/Makefile.am, test_fsi_newton/data,
+	test_fsi_picard/Makefile.am, test_fsi_picard/data,
+	test_linearelasticity/Makefile.am, test_linearelasticity/data,
+	test_ns_bdf/Makefile.am, test_ns_bdf/data, test_ns_cyl/Makefile.am,
+	test_ns_cyl/data, test_ns_sstress/Makefile.am,
+	test_ns_sstress/data:
 
 	fix data files to reflect to location of the meshes added a
 	check-local rule to create the symlink in $(builddir) to
 	$(srcdir)/data
 
-2004-03-22  prudhomm
+2004-03-22 11:51  prudhomm
 
 	* life/lifemesh/mesh_util.hpp:
 
 	Memory loss fix delete pointer at end of block
 
-2004-03-22  prudhomm
+2004-03-22 11:50  prudhomm
 
 	* life/lifecore/algebraic_facto.hpp:
 
@@ -2153,74 +1990,72 @@
 
 	Also fix Bug #17
 
-2004-03-19  lformaggia
+2004-03-19 10:45  lformaggia
 
 	* testsuite/test_mesh/Makefile.am:
 
 	added libg2c library at the linking step.
 
-2004-03-19  prudhomm
+2004-03-19 10:15  prudhomm
 
-	* doc/manual/Makefile.am, doc/manual/lifev-dev_howto.tex:
-
-	fixed indexing the development manual
-
-2004-03-19  prudhomm
-
-	* doc/manual/Makefile.am, doc/manual/lifev-dev.tex,
-	doc/manual/lifev-dev_generalities.tex, doc/tex/lifestyle.cls:
+	* doc/manual/: Makefile.am, lifev-dev_howto.tex:
 
 	fixed indexing the development manual
 
-2004-03-19  prudhomm
+2004-03-19 10:09  prudhomm
 
-	* doc/manual/Makefile.am, doc/manual/docfe.tex, doc/manual/jfg.tex,
-	doc/manual/lifev-dev.tex, doc/manual/lifev-dev_howto.tex:
+	* doc/: manual/Makefile.am, manual/lifev-dev.tex,
+	manual/lifev-dev_generalities.tex, tex/lifestyle.cls:
+
+	fixed indexing the development manual
+
+2004-03-19 09:35  prudhomm
+
+	* doc/manual/: Makefile.am, docfe.tex, jfg.tex, lifev-dev.tex,
+	lifev-dev_howto.tex:
 
 	created an HOWTO chapter in development manual(formerly docfe)
 	removed jfg.tex
 
-2004-03-19  prudhomm
+2004-03-19 09:07  prudhomm
 
-	* doc/manual/Makefile.am, doc/manual/lifev-dev.tex,
-	doc/manual/lifev-dev_generalities.tex:
+	* doc/manual/: Makefile.am, lifev-dev.tex,
+	lifev-dev_generalities.tex:
 
 	update and fixes
 
 	type 'make' to build the manual
 
-2004-03-19  prudhomm
+2004-03-19 06:58  prudhomm
 
 	* doc/tex/lifestyle.cls:
 
 	\HUGE -> \Huge
 
-2004-03-19  prudhomm
+2004-03-19 06:52  prudhomm
 
-	* doc/manual/lifev-dev.tex, doc/manual/lifev-dev_generalities.tex:
+	* doc/manual/: lifev-dev.tex, lifev-dev_generalities.tex:
 
 	\HUGE -> \Huge
 
-2004-03-18  prosi
+2004-03-18 15:00  prosi
 
-	* testsuite/data/.cvsignore, testsuite/data/mesh/.cvsignore,
-	testsuite/data/mesh/mesh++/.cvsignore:
+	* testsuite/data/: .cvsignore, mesh/.cvsignore,
+	mesh/mesh++/.cvsignore:
 
 	ignore Makefile by CVS they are automatically generated by
 	configure do not put them in CVS
 
-2004-03-18  prosi
+2004-03-18 14:58  prosi
 
-	* testsuite/data/mesh/inria/.cvsignore,
-	testsuite/data/mesh/inria/README,
-	testsuite/data/mesh/inria/flowatch-fine-0-percent.mesh,
-	testsuite/data/mesh/inria/flowatch-medium-0-percent.mesh,
-	testsuite/data/mesh/inria/flowatch-short-0-percent.mesh:
+	* testsuite/data/mesh/inria/: .cvsignore, README,
+	flowatch-fine-0-percent.mesh, flowatch-medium-0-percent.mesh,
+	flowatch-short-0-percent.mesh:
 
 	added new geometries for clipped artery (flowatch) added README for
 	triavial description ignore Makefile by CVS
 
-2004-03-18  prudhomm
+2004-03-18 11:39  prudhomm
 
 	* NEWS, doc/manual/Makefile.am,
 	testsuite/test_essentialbc/Makefile.am,
@@ -2228,28 +2063,27 @@
 
 	0.1.0pre4 est dans les bacs
 
-2004-03-18  prudhomm
+2004-03-18 09:04  prudhomm
 
 	* life/lifecore/Makefile.am:
 
 	added clapack.h and cblas.h to include_HEADERS they must be
 	installed for proper compilation
 
-2004-03-18  prudhomm
+2004-03-18 08:18  prudhomm
 
 	* testsuite/Makefile.am:
 
 	removed test_rt and test_rtcyl: they do not compile
 
-2004-03-18  prudhomm
+2004-03-18 08:18  prudhomm
 
-	* testsuite/test_rt_comp.qmt, testsuite/test_rt_exec.qmt,
-	testsuite/test_rt_resu.qmt, testsuite/test_rtcyl_comp.qmt,
-	testsuite/test_rtcyl_exec.qmt, testsuite/test_rtcyl_resu.qmt:
+	* testsuite/: test_rt_comp.qmt, test_rt_exec.qmt, test_rt_resu.qmt,
+	test_rtcyl_comp.qmt, test_rtcyl_exec.qmt, test_rtcyl_resu.qmt:
 
 	moved to sandbox: they do not compile
 
-2004-03-18  prudhomm
+2004-03-18 08:15  prudhomm
 
 	* NEWS, configure.in.in:
 
@@ -2258,61 +2092,48 @@
 	-I and -D g++ option are for the preprocessor so add them to
 	CPPFLAGS instead of CXXFLAGS
 
-2004-03-18  prudhomm
+2004-03-18 08:14  prudhomm
 
 	* testsuite/test_darcy/Makefile.am:
 
 	no more empty dir Post
 
-2004-03-18  prudhomm
+2004-03-18 08:03  prudhomm
 
-	* testsuite/Makefile.am, testsuite/data/mesh/inria/tube2x4x20.mesh,
-	testsuite/data/mesh/inria/tube_curve20.mesh,
-	testsuite/data/mesh/inria/vessel2x4x20.mesh,
-	testsuite/data/mesh/inria/vessel_curve20.mesh,
-	testsuite/test_fsi_newton/.cvsignore,
-	testsuite/test_fsi_newton/Makefile.am,
-	testsuite/test_fsi_newton/data, testsuite/test_fsi_newton/main.cpp,
-	testsuite/test_fsi_newton/norm.cpp,
-	testsuite/test_fsi_newton/norm.hpp,
-	testsuite/test_fsi_newton/operFS.cpp,
-	testsuite/test_fsi_newton/operFS.hpp,
-	testsuite/test_fsi_newton/ud_functions.hpp,
-	testsuite/test_fsi_picard/.cvsignore,
-	testsuite/test_fsi_picard/Makefile.am,
-	testsuite/test_fsi_picard/data, testsuite/test_fsi_picard/main.cpp,
-	testsuite/test_fsi_picard/norm.cpp,
-	testsuite/test_fsi_picard/norm.hpp,
-	testsuite/test_fsi_picard/operFS.hpp,
-	testsuite/test_fsi_picard/ud_functions.hpp:
+	* testsuite/: Makefile.am, data/mesh/inria/tube2x4x20.mesh,
+	data/mesh/inria/tube_curve20.mesh,
+	data/mesh/inria/vessel2x4x20.mesh,
+	data/mesh/inria/vessel_curve20.mesh, test_fsi_newton/.cvsignore,
+	test_fsi_newton/Makefile.am, test_fsi_newton/data,
+	test_fsi_newton/main.cpp, test_fsi_newton/norm.cpp,
+	test_fsi_newton/norm.hpp, test_fsi_newton/operFS.cpp,
+	test_fsi_newton/operFS.hpp, test_fsi_newton/ud_functions.hpp,
+	test_fsi_picard/.cvsignore, test_fsi_picard/Makefile.am,
+	test_fsi_picard/data, test_fsi_picard/main.cpp,
+	test_fsi_picard/norm.cpp, test_fsi_picard/norm.hpp,
+	test_fsi_picard/operFS.hpp, test_fsi_picard/ud_functions.hpp:
 
 	added test_fsi_{newton,picard} moved meshes to mesh/inria
 
-2004-03-18  prudhomm
+2004-03-18 07:53  prudhomm
 
 	* testsuite/Makefile.am:
 
 	development shall disappear
 
-2004-03-18  prudhomm
+2004-03-18 07:46  prudhomm
 
-	* testsuite/Makefile.am,
-	testsuite/data/mesh/mesh++/cyl_coarse.mesh++,
-	testsuite/data/mesh/mesh++/cyl_fine.mesh++,
-	testsuite/data/mesh/mesh++/cylverycoarse.mesh++,
-	testsuite/test_ns_bdf/.cvsignore,
-	testsuite/test_ns_bdf/Makefile.am, testsuite/test_ns_bdf/data,
-	testsuite/test_ns_bdf/main.cpp,
-	testsuite/test_ns_bdf/ud_functions.hpp,
-	testsuite/test_ns_cyl/.cvsignore,
-	testsuite/test_ns_cyl/Makefile.am, testsuite/test_ns_cyl/data,
-	testsuite/test_ns_cyl/main.cpp, testsuite/test_ns_cyl/test.out,
-	testsuite/test_ns_cyl/ud_functions.hpp,
-	testsuite/test_ns_sstress/.cvsignore,
-	testsuite/test_ns_sstress/Makefile.am,
-	testsuite/test_ns_sstress/data, testsuite/test_ns_sstress/main.cpp,
-	testsuite/test_ns_sstress/ud_functions.hpp,
-	testsuite/test_ns_sstress/ud_functions_ns.hpp:
+	* testsuite/: Makefile.am, data/mesh/mesh++/cyl_coarse.mesh++,
+	data/mesh/mesh++/cyl_fine.mesh++,
+	data/mesh/mesh++/cylverycoarse.mesh++, test_ns_bdf/.cvsignore,
+	test_ns_bdf/Makefile.am, test_ns_bdf/data, test_ns_bdf/main.cpp,
+	test_ns_bdf/ud_functions.hpp, test_ns_cyl/.cvsignore,
+	test_ns_cyl/Makefile.am, test_ns_cyl/data, test_ns_cyl/main.cpp,
+	test_ns_cyl/test.out, test_ns_cyl/ud_functions.hpp,
+	test_ns_sstress/.cvsignore, test_ns_sstress/Makefile.am,
+	test_ns_sstress/data, test_ns_sstress/main.cpp,
+	test_ns_sstress/ud_functions.hpp,
+	test_ns_sstress/ud_functions_ns.hpp:
 
 	moved development/NavvierStokes/{testBDF,testcyl,testSStress} to
 	test_ns_cyl test_ns_sstress test_ns_bdf
@@ -2321,41 +2142,34 @@
 
 	avoid to duplicate meshes moved them to data/mesh/
 
-2004-03-18  prudhomm
+2004-03-18 07:36  prudhomm
 
-	* testsuite/test_darcy/.cvsignore,
-	testsuite/test_darcy/Makefile.am,
-	testsuite/test_darcy/darcyHandler.cpp,
-	testsuite/test_darcy/darcyHandler.hpp,
-	testsuite/test_darcy/darcySolver.cpp,
-	testsuite/test_darcy/darcySolver.hpp,
-	testsuite/test_darcy/darcySolver_post.cpp,
-	testsuite/test_darcy/data, testsuite/test_darcy/dataDarcy.cpp,
-	testsuite/test_darcy/dataDarcy.hpp, testsuite/test_darcy/main.cpp,
-	testsuite/test_darcy/user_fct.cpp,
-	testsuite/test_darcy/user_fct.hpp:
+	* testsuite/test_darcy/: .cvsignore, Makefile.am, darcyHandler.cpp,
+	darcyHandler.hpp, darcySolver.cpp, darcySolver.hpp,
+	darcySolver_post.cpp, data, dataDarcy.cpp, dataDarcy.hpp, main.cpp,
+	user_fct.cpp, user_fct.hpp:
 
 	moved testsuite/development/darcySolver to testsuite/test_darcy
 
-2004-03-18  prudhomm
+2004-03-18 07:27  prudhomm
 
-	* life/lifecore/Makefile.am, life/lifemesh/Makefile.am:
+	* life/: lifecore/Makefile.am, lifemesh/Makefile.am:
 
 	removed -DTHREEDIM configure takes care of it
 
-2004-03-18  lformaggia
+2004-03-18 06:57  lformaggia
 
 	* testsuite/test_mesh/Makefile.am:
 
 	Added -lg2c to the linker flags
 
-2004-03-18  lformaggia
+2004-03-18 06:56  lformaggia
 
 	* life/lifemesh/regionMesh3D.hpp:
 
 	Corrected bugs #8 and bugs #9
 
-2004-03-18  lformaggia
+2004-03-18 06:55  lformaggia
 
 	* life/lifecore/SimpleVect.hpp:
 
@@ -2364,25 +2178,25 @@
 	the system, using the trick explained in More Exceptional C++ by
 	Sutter.
 
-2004-03-10  prudhomm
+2004-03-10 16:30  prudhomm
 
 	* configure.in.in:
 
 	fix typo
 
-2004-03-10  prudhomm
+2004-03-10 16:26  prudhomm
 
 	* configure.in.in:
 
 	fix typo
 
-2004-03-10  prudhomm
+2004-03-10 16:25  prudhomm
 
 	* configure.in.in:
 
 	I guess I am using always version that are too new
 
-2004-03-10  prudhomm
+2004-03-10 16:13  prudhomm
 
 	* configure.in.in, life.kdevelop, doc/manual/lifev-dev.kilepr:
 
@@ -2400,132 +2214,113 @@
 
 	happy coding!
 
-2004-03-08  prudhomm
+2004-03-08 15:07  prudhomm
 
-	* doc/manual/.cvsignore, doc/manual/lifev-dev.kilepr,
-	doc/manual/lifev-dev.tex, doc/manual/lifev-dev_generalities.tex:
+	* doc/manual/: .cvsignore, lifev-dev.kilepr, lifev-dev.tex,
+	lifev-dev_generalities.tex:
 
 	update manual with some compilation instructions
 
-2004-03-08  prudhomm
+2004-03-08 15:06  prudhomm
 
-	* doc/tex/.cvsignore, doc/tex/lifestyle.cls:
+	* doc/tex/: .cvsignore, lifestyle.cls:
 
 	update added some macros
 
-2004-03-08  prudhomm
+2004-03-08 10:03  prudhomm
 
-	* doc/manual/.cvsignore, doc/manual/Makefile.am,
-	doc/manual/Specifications.tex, doc/manual/lifev-dev.kilepr,
-	doc/manual/lifev-dev.tex, doc/manual/lifev-dev_conventions.tex,
-	doc/manual/lifev-dev_generalities.tex,
-	doc/manual/lifev-dev_overview.tex:
+	* doc/manual/: .cvsignore, Makefile.am, Specifications.tex,
+	lifev-dev.kilepr, lifev-dev.tex, lifev-dev_conventions.tex,
+	lifev-dev_generalities.tex, lifev-dev_overview.tex:
 
 	work on documentation: * split chapters into files for easier
 	maintenance * minor update on CVS comment
 
-2004-03-08  prudhomm
+2004-03-08 09:08  prudhomm
 
 	* life/lifecore/cblas.h:
 
 	use F77NAME from fortran_wrap cleaned up the extra #defines include
 	fortran_wrap
 
-2004-03-08  prudhomm
+2004-03-08 09:07  prudhomm
 
 	* life/lifecore/clapack.h:
 
 	use F77NAME() fron fortran_wrap.h include "cblas.h"
 
-2004-03-03  prudhomm
+2004-03-03 08:11  prudhomm
 
-	* life/lifecore/cblas.h, life/lifecore/clapack.h:
+	* life/lifecore/: cblas.h, clapack.h:
 
 	added cblas for declaration of _all_ blas routines (all 3 levels)
 
-2004-03-03  prudhomm
+2004-03-03 08:08  prudhomm
 
 	* life/lifecore/clapack.h:
 
 	added decalaration of _all_ lapack routines.
 
-2004-03-03  prudhomm
+2004-03-03 08:07  prudhomm
 
 	* life/lifecore/fortran_wrap.hpp:
 
 	standardified wrt C++
 
-2004-03-02  prudhomm
+2004-03-02 09:41  prudhomm
 
 	* admin/cvs.sh:
 
 	fix Bug #3 added check on libtool >= 1.5
 
-2004-03-01  prudhomm
+2004-03-01 08:07  prudhomm
 
 	* testsuite/Makefile.am:
 
 	add qmtest run and summarize
 
-2004-02-26  prudhomm
+2004-02-26 08:19  prudhomm
 
 	* NEWS:
 
 	updated
 
-2004-02-26  prudhomm
+2004-02-26 08:19  prudhomm
 
-	* testsuite/test_linearelasticity_comp.qmt,
-	testsuite/test_linearelasticity_exec.qmt,
-	testsuite/test_linearelasticity_resu.qmt,
-	testsuite/test_linearelasticity/Makefile.am,
-	testsuite/test_linearelasticity/data:
+	* testsuite/: test_linearelasticity_comp.qmt,
+	test_linearelasticity_exec.qmt, test_linearelasticity_resu.qmt,
+	test_linearelasticity/Makefile.am, test_linearelasticity/data:
 
 	added test_linearelasticy to qmtest changed maxiter to 10 instead
 	of 300
 
-2004-02-26  prudhomm
+2004-02-26 08:19  prudhomm
 
 	* life/lifecore/lifeV.hpp:
 
 	cleanup
 
-2004-02-26  prudhomm
+2004-02-26 08:11  prudhomm
 
-	* testsuite/test_linearelasticity/.cvsignore,
-	testsuite/test_linearelasticity/Makefile.am,
-	testsuite/test_linearelasticity/data,
-	testsuite/test_linearelasticity/main.cpp,
-	testsuite/test_linearelasticity/norm.cpp,
-	testsuite/test_linearelasticity/norm.hpp,
-	testsuite/test_linearelasticity/ud_functions.hpp,
-	testsuite/test_linearelasticity/vessel2x4x20_10cm.mesh:
+	* testsuite/test_linearelasticity/: .cvsignore, Makefile.am, data,
+	main.cpp, norm.cpp, norm.hpp, ud_functions.hpp,
+	vessel2x4x20_10cm.mesh:
 
 	added test_linearelasticity
 
 	it compiles
 
-2004-02-26  prudhomm
+2004-02-26 08:00  prudhomm
 
-	* life/lifecore/testsuite/Makefile.am,
-	life/lifecore/testsuite/test_casts.cpp,
-	life/lifecore/testsuite/test_copy.cpp,
-	life/lifecore/testsuite/test_mark_to_bc.cpp,
-	life/lifecore/testsuite/test_pairs.cpp,
-	life/lifecore/testsuite/test_pf.cpp,
-	life/lifecore/testsuite/test_prova.cpp,
-	life/lifecore/testsuite/test_rotate.cpp,
-	life/lifecore/testsuite/test_seq.cpp,
-	life/lifecore/testsuite/test_simple_vect.cpp,
-	life/lifecore/testsuite/test_size.cpp,
-	life/lifecore/testsuite/test_typedefs.cpp,
-	life/lifecore/testsuite/test_using.cpp,
-	life/lifecore/testsuite/test_valarray.cpp,
-	life/lifecore/testsuite/test_vsize.cpp:
+	* life/lifecore/testsuite/: Makefile.am, test_casts.cpp,
+	test_copy.cpp, test_mark_to_bc.cpp, test_pairs.cpp, test_pf.cpp,
+	test_prova.cpp, test_rotate.cpp, test_seq.cpp,
+	test_simple_vect.cpp, test_size.cpp, test_typedefs.cpp,
+	test_using.cpp, test_valarray.cpp, test_vsize.cpp:
 
 	ALL TESTS in lifecore/testsuite compile and are std:: clean
 
-2004-02-25  prudhomm
+2004-02-25 15:35  prudhomm
 
 	* life/lifecore/Makefile.am, testsuite/Makefile.am,
 	testsuite/test_essentialbc/main.hpp:
@@ -2533,7 +2328,7 @@
 	ALL TESTS in testsuite compile	except test_rt and test_rtcyl the
 	author of these two tests should have a look !!
 
-2004-02-25  prudhomm
+2004-02-25 15:31  prudhomm
 
 	* testsuite/test_fe/build_pattern.cpp:
 
@@ -2541,18 +2336,16 @@
 
 	using std:: where needed and other minor things
 
-2004-02-25  prudhomm
+2004-02-25 15:19  prudhomm
 
 	* NEWS, configure.in.in:
 
 	bump up the version to 0.1.0pre4 updated NEWS file
 
-2004-02-25  prudhomm
+2004-02-25 15:16  prudhomm
 
-	* life/lifecore/lifeV.hpp, life/lifecore/SimpleVect.hpp,
-	life/lifecore/dataNewton.cpp, life/lifecore/dataNewton.hpp,
-	life/lifecore/dataTime.cpp, life/lifecore/dataTime.hpp,
-	life/lifecore/tab.hpp:
+	* life/lifecore/: lifeV.hpp, SimpleVect.hpp, dataNewton.cpp,
+	dataNewton.hpp, dataTime.cpp, dataTime.hpp, tab.hpp:
 
 	cleanup in lifecore:
 
@@ -2561,141 +2354,107 @@
 	* use std:: namespace to ensure proper name resolution * use
 	std::make_pair instead of calling constructor directly
 
-2004-02-25  prudhomm
+2004-02-25 15:15  prudhomm
 
-	* life/lifefem/localDofPattern.cpp, life/lifefem/quadRule.cpp,
-	life/lifefem/quadRule.hpp:
+	* life/lifefem/: localDofPattern.cpp, quadRule.cpp, quadRule.hpp:
 
 	cleanup in lifefem:
 
 	* use std:: namespace to ensure proper name resolution * use
 	std::make_pair instead of calling constructor directly
 
-2004-02-25  prudhomm
+2004-02-25 15:10  prudhomm
 
-	* life/lifemesh/bareItems.cpp, life/lifemesh/bareItems.hpp,
-	life/lifemesh/dof.cpp, life/lifemesh/dof.hpp:
+	* life/lifemesh/: bareItems.cpp, bareItems.hpp, dof.cpp, dof.hpp:
 
 	cleanup in lifemesh:
 
 	* use std:: namespace to ensure proper name resolution * use
 	std::make_pair instead of calling constructor directly
 
-2004-02-25  prudhomm
+2004-02-25 14:52  prudhomm
 
 	* life/lifecore/lifeV.hpp:
 
 	use std:: namespace to ensure proper name resolution
 
-2004-02-25  prudhomm
+2004-02-25 08:52  prudhomm
 
-	* testsuite/test_fe_comp.qmt, testsuite/test_fe_exec.qmt,
-	testsuite/test_fe_resu.qmt, testsuite/test_p2_comp.qmt,
-	testsuite/test_p2_exec.qmt, testsuite/test_p2_resu.qmt,
-	testsuite/test_postproc_comp.qmt, testsuite/test_postproc_exec.qmt,
-	testsuite/test_postproc_resu.qmt, testsuite/test_q1_comp.qmt,
-	testsuite/test_q1_exec.qmt, testsuite/test_q1_resu.qmt,
-	testsuite/test_rt_comp.qmt, testsuite/test_rt_exec.qmt,
-	testsuite/test_rt_resu.qmt, testsuite/test_rtcyl_comp.qmt,
-	testsuite/test_rtcyl_exec.qmt, testsuite/test_rtcyl_resu.qmt,
-	testsuite/test_p2/Makefile.am, testsuite/test_postproc/main.cpp,
-	testsuite/test_q1/Makefile.am:
+	* testsuite/: test_fe_comp.qmt, test_fe_exec.qmt, test_fe_resu.qmt,
+	test_p2_comp.qmt, test_p2_exec.qmt, test_p2_resu.qmt,
+	test_postproc_comp.qmt, test_postproc_exec.qmt,
+	test_postproc_resu.qmt, test_q1_comp.qmt, test_q1_exec.qmt,
+	test_q1_resu.qmt, test_rt_comp.qmt, test_rt_exec.qmt,
+	test_rt_resu.qmt, test_rtcyl_comp.qmt, test_rtcyl_exec.qmt,
+	test_rtcyl_resu.qmt, test_p2/Makefile.am, test_postproc/main.cpp,
+	test_q1/Makefile.am:
 
 	more tests in the testsuite and they almost all compile and execute
 	results are not yet there
 
-2004-02-25  prudhomm
+2004-02-25 08:44  prudhomm
 
-	* life/lifecore/testsuite/.cvsignore,
-	life/lifecore/testsuite/Makefile.am,
-	life/lifecore/testsuite/a_try.cpp,
-	life/lifecore/testsuite/generic.cpp,
-	life/lifecore/testsuite/gp.cpp, life/lifecore/testsuite/mesh.pt,
-	life/lifecore/testsuite/mesh2.pt, life/lifecore/testsuite/mesh3.pt,
-	life/lifecore/testsuite/tcc.cpp,
-	life/lifecore/testsuite/test_a.cpp,
-	life/lifecore/testsuite/test_casts.cpp,
-	life/lifecore/testsuite/test_copy.cpp,
-	life/lifecore/testsuite/test_mark_to_bc.cpp,
-	life/lifecore/testsuite/test_pairs,
-	life/lifecore/testsuite/test_pairs.cpp,
-	life/lifecore/testsuite/test_pf.cpp,
-	life/lifecore/testsuite/test_prova.cpp,
-	life/lifecore/testsuite/test_rotate.cpp,
-	life/lifecore/testsuite/test_seq,
-	life/lifecore/testsuite/test_seq.cpp,
-	life/lifecore/testsuite/test_simple_vect.cpp,
-	life/lifecore/testsuite/test_size,
-	life/lifecore/testsuite/test_size.cpp,
-	life/lifecore/testsuite/test_typedefs.cpp,
-	life/lifecore/testsuite/test_using.cpp,
-	life/lifecore/testsuite/test_valarray.cpp,
-	life/lifecore/testsuite/test_vsize.cpp:
+	* life/lifecore/testsuite/: .cvsignore, Makefile.am, a_try.cpp,
+	generic.cpp, gp.cpp, mesh.pt, mesh2.pt, mesh3.pt, tcc.cpp,
+	test_a.cpp, test_casts.cpp, test_copy.cpp, test_mark_to_bc.cpp,
+	test_pairs, test_pairs.cpp, test_pf.cpp, test_prova.cpp,
+	test_rotate.cpp, test_seq, test_seq.cpp, test_simple_vect.cpp,
+	test_size, test_size.cpp, test_typedefs.cpp, test_using.cpp,
+	test_valarray.cpp, test_vsize.cpp:
 
 	these tests belongs to lifecore/testsuite, lifemersh/testsuite or
 	lifefem/testsuite they are minitests
 
-2004-02-25  prudhomm
+2004-02-25 08:33  prudhomm
 
-	* testsuite/test_mixte_comp.qmt, testsuite/test_mixte_exec.qmt,
-	testsuite/test_mixte_resu.qmt, testsuite/test_fe/.cvsignore,
-	testsuite/test_fe/Makefile.am, testsuite/test_fe/build_pattern.cpp,
-	testsuite/test_p2/.cvsignore, testsuite/test_p2/Makefile.am,
-	testsuite/test_p2/main.cpp, testsuite/test_p2/main.hpp,
-	testsuite/test_p2/ud_functions.hpp,
-	testsuite/test_postproc/.cvsignore,
-	testsuite/test_postproc/Makefile.am,
-	testsuite/test_postproc/main.cpp, testsuite/test_postproc/main.hpp,
-	testsuite/test_postproc/ud_functions.hpp,
-	testsuite/test_q1/.cvsignore, testsuite/test_q1/Makefile.am,
-	testsuite/test_q1/main.cpp, testsuite/test_q1/main.hpp,
-	testsuite/test_q1/ud_functions.hpp:
+	* testsuite/: test_mixte_comp.qmt, test_mixte_exec.qmt,
+	test_mixte_resu.qmt, test_fe/.cvsignore, test_fe/Makefile.am,
+	test_fe/build_pattern.cpp, test_p2/.cvsignore, test_p2/Makefile.am,
+	test_p2/main.cpp, test_p2/main.hpp, test_p2/ud_functions.hpp,
+	test_postproc/.cvsignore, test_postproc/Makefile.am,
+	test_postproc/main.cpp, test_postproc/main.hpp,
+	test_postproc/ud_functions.hpp, test_q1/.cvsignore,
+	test_q1/Makefile.am, test_q1/main.cpp, test_q1/main.hpp,
+	test_q1/ud_functions.hpp:
 
 	no more uppercase added more tests
 
-2004-02-25  prudhomm
+2004-02-25 07:54  prudhomm
 
 	* testsuite/test_mixte/main.cpp:
 
 	correct path for meshes
 
-2004-02-25  prudhomm
+2004-02-25 07:50  prudhomm
 
-	* testsuite/test_bdf_comp.qmt, testsuite/test_bdf_exec.qmt,
-	testsuite/test_bdf_resu.qmt, testsuite/test_bdf/.cvsignore,
-	testsuite/test_bdf/Makefile.am, testsuite/test_bdf/main.cpp,
-	testsuite/test_bdf/main.hpp, testsuite/test_bdf/main_sample.out,
-	testsuite/test_bdf/ud_functions.hpp,
-	testsuite/test_mixte/.cvsignore, testsuite/test_mixte/Makefile.am,
-	testsuite/test_mixte/main.cpp, testsuite/test_mixte/main.hpp,
-	testsuite/test_mixte/ud_functions.hpp:
+	* testsuite/: test_bdf_comp.qmt, test_bdf_exec.qmt,
+	test_bdf_resu.qmt, test_bdf/.cvsignore, test_bdf/Makefile.am,
+	test_bdf/main.cpp, test_bdf/main.hpp, test_bdf/main_sample.out,
+	test_bdf/ud_functions.hpp, test_mixte/.cvsignore,
+	test_mixte/Makefile.am, test_mixte/main.cpp, test_mixte/main.hpp,
+	test_mixte/ud_functions.hpp:
 
 	moved to testsuite/ for automatic testing using qmtest
 
-2004-02-25  prudhomm
+2004-02-25 07:31  prudhomm
 
-	* testsuite/expectations.qmr, testsuite/gentest.sh,
-	testsuite/run.sh, testsuite/test_essentialbc_comp.qmt,
-	testsuite/test_essentialbc_exec.qmt,
-	testsuite/test_essentialbc_resu.qmt,
-	testsuite/test_matrix_comp.qmt, testsuite/test_matrix_exec.qmt,
-	testsuite/test_matrix_resu.qmt, testsuite/test_mesh_comp.qmt,
-	testsuite/test_mesh_exec.qmt, testsuite/test_mesh_resu.qmt,
-	testsuite/test_naturalbc_comp.qmt,
-	testsuite/test_naturalbc_exec.qmt,
-	testsuite/test_naturalbc_resu.qmt:
+	* testsuite/: expectations.qmr, gentest.sh, run.sh,
+	test_essentialbc_comp.qmt, test_essentialbc_exec.qmt,
+	test_essentialbc_resu.qmt, test_matrix_comp.qmt,
+	test_matrix_exec.qmt, test_matrix_resu.qmt, test_mesh_comp.qmt,
+	test_mesh_exec.qmt, test_mesh_resu.qmt, test_naturalbc_comp.qmt,
+	test_naturalbc_exec.qmt, test_naturalbc_resu.qmt:
 
 	all tests PASS except *_resu
 
-2004-02-24  prudhomm
+2004-02-24 16:35  prudhomm
 
-	* testsuite/test_essentialbc/main.cpp,
-	testsuite/test_matrix/main.cpp, testsuite/test_mesh/main.cpp,
-	testsuite/test_naturalbc/main.cpp:
+	* testsuite/: test_essentialbc/main.cpp, test_matrix/main.cpp,
+	test_mesh/main.cpp, test_naturalbc/main.cpp:
 
 	correct path to mesh files
 
-2004-02-24  prudhomm
+2004-02-24 16:14  prudhomm
 
 	* testsuite/test_essentialbc_comp.qmt, admin/.cvsignore,
 	doc/tex/.cvsignore, life/.cvsignore, life/lifecore/.cvsignore,
@@ -2703,112 +2462,94 @@
 
 	ignore files update essentialbc compilation test
 
-2004-02-24  prudhomm
+2004-02-24 15:31  prudhomm
 
 	* testsuite/Makefile.am:
 
 	added check-qmtest rule
 
-2004-02-24  prudhomm
+2004-02-24 15:30  prudhomm
 
-	* testsuite/Makefile.testsuite, testsuite/data/.cvsignore,
-	testsuite/data/mesh/.cvsignore,
-	testsuite/data/mesh/inria/.cvsignore,
-	testsuite/data/mesh/mesh++/.cvsignore,
-	testsuite/test_essentialbc/Makefile.am,
-	testsuite/test_matrix/Makefile.am, testsuite/test_mesh/Makefile.am,
-	testsuite/test_naturalbc/Makefile.am:
+	* testsuite/: Makefile.testsuite, data/.cvsignore,
+	data/mesh/.cvsignore, data/mesh/inria/.cvsignore,
+	data/mesh/mesh++/.cvsignore, test_essentialbc/Makefile.am,
+	test_matrix/Makefile.am, test_mesh/Makefile.am,
+	test_naturalbc/Makefile.am:
 
 	updated all Makefile.am in testsuite
 
-2004-02-24  prudhomm
+2004-02-24 15:28  prudhomm
 
-	* testsuite/test_essentialbc_comp.qmt,
-	testsuite/test_matrix_comp.qmt, testsuite/test_mesh_comp.qmt,
-	testsuite/test_naturalbc_comp.qmt:
+	* testsuite/: test_essentialbc_comp.qmt, test_matrix_comp.qmt,
+	test_mesh_comp.qmt, test_naturalbc_comp.qmt:
 
 	added qmtest environment see http://www.codesourcery.com/qm/qmtest
 
 	extremely powerful and easy to use
 
-2004-02-24  prudhomm
+2004-02-24 15:20  prudhomm
 
 	* testsuite/Makefile.am:
 
 	updated
 
-2004-02-24  prudhomm
+2004-02-24 15:19  prudhomm
 
-	* testsuite/Makefile.testsuite, testsuite/README,
-	testsuite/test_essentialbc/.cvsignore,
-	testsuite/test_essentialbc/Makefile.am,
-	testsuite/test_essentialbc/main.cpp,
-	testsuite/test_essentialbc/main.hpp,
-	testsuite/test_essentialbc/main_sample.out,
-	testsuite/test_essentialbc/ud_functions.hpp,
-	testsuite/test_matrix/.cvsignore,
-	testsuite/test_matrix/Makefile.am, testsuite/test_matrix/main.cpp,
-	testsuite/test_matrix/main.hpp,
-	testsuite/test_matrix/main_sample.out,
-	testsuite/test_matrix/ud_functions.hpp,
-	testsuite/test_mesh/.cvsignore, testsuite/test_mesh/Makefile.am,
-	testsuite/test_mesh/main.cpp,
-	testsuite/test_mesh/testBuilders_sample.out,
-	testsuite/test_naturalbc/.cvsignore,
-	testsuite/test_naturalbc/Makefile.am,
-	testsuite/test_naturalbc/main.cpp,
-	testsuite/test_naturalbc/main.hpp,
-	testsuite/test_naturalbc/main_sample.out,
-	testsuite/test_naturalbc/ud_functions.hpp:
+	* testsuite/: Makefile.testsuite, README,
+	test_essentialbc/.cvsignore, test_essentialbc/Makefile.am,
+	test_essentialbc/main.cpp, test_essentialbc/main.hpp,
+	test_essentialbc/main_sample.out,
+	test_essentialbc/ud_functions.hpp, test_matrix/.cvsignore,
+	test_matrix/Makefile.am, test_matrix/main.cpp,
+	test_matrix/main.hpp, test_matrix/main_sample.out,
+	test_matrix/ud_functions.hpp, test_mesh/.cvsignore,
+	test_mesh/Makefile.am, test_mesh/main.cpp,
+	test_mesh/testBuilders_sample.out, test_naturalbc/.cvsignore,
+	test_naturalbc/Makefile.am, test_naturalbc/main.cpp,
+	test_naturalbc/main.hpp, test_naturalbc/main_sample.out,
+	test_naturalbc/ud_functions.hpp:
 
 	moved testsuite/official to testsuite to simplify the automatic
 	testing
 
-2004-02-24  prudhomm
+2004-02-24 15:10  prudhomm
 
-	* life/lifefem/currentFE.cpp, life/lifemesh/mesh_util.hpp:
+	* life/: lifefem/currentFE.cpp, lifemesh/mesh_util.hpp:
 
 	get rid of some output
 
-2004-02-24  prudhomm
+2004-02-24 14:38  prudhomm
 
 	* life/lifecore/assemb.hpp:
 
 	fix compilation bis : cast to int when calling compute_vec this
 	needs to be cleaned up
 
-2004-02-24  prudhomm
+2004-02-24 14:32  prudhomm
 
 	* life/lifecore/assemb.hpp:
 
 	fix  compilation warning: use uint
 
-2004-02-24  prudhomm
+2004-02-24 14:01  prudhomm
 
 	* ChangeLog:
 
 	update ChangeLog
 
-2004-02-24  prudhomm
+2004-02-24 13:28  prudhomm
 
-	* ChangeLog:
+	* life/: lifecore/GetPot.cpp, lifecore/GetPot.hpp,
+	lifecore/SimpleVect.hpp, lifecore/algebraic_facto.hpp,
+	lifecore/chrono.hpp, lifecore/elemVec.hpp, lifecore/lifeV.hpp,
+	lifecore/pattern.hpp, lifecore/values.hpp, lifemesh/bareItems.hpp,
+	lifemesh/basisElSh.hpp, lifemesh/markers.hpp,
+	lifemesh/markers_base.cpp, lifemesh/markers_base.hpp:
 
-	[no log message]
-
-2004-02-24  prudhomm
-
-	* life/lifecore/GetPot.cpp, life/lifecore/GetPot.hpp,
-	life/lifecore/SimpleVect.hpp, life/lifecore/algebraic_facto.hpp,
-	life/lifecore/chrono.hpp, life/lifecore/elemVec.hpp,
-	life/lifecore/lifeV.hpp, life/lifecore/pattern.hpp,
-	life/lifecore/values.hpp, life/lifemesh/bareItems.hpp,
-	life/lifemesh/basisElSh.hpp, life/lifemesh/markers.hpp,
-	life/lifemesh/markers_base.cpp, life/lifemesh/markers_base.hpp:
-
-	get rid of $Id: ChangeLog,v 1.6 2004-08-17 16:11:43 prudhomm Exp $ and $Log$ tags that cause enormous troubles:
+	get rid of $Id: ChangeLog,v 1.7 2004-08-17 17:03:48 prudhomm Exp $ and $Log$ tags that cause enormous troubles:
 	conflicts,...
 
-2004-02-21  prudhomm
+2004-02-21 08:29  prudhomm
 
 	* AUTHORS, NEWS, README, configure.in.in,
 	testsuite/data/mesh/inria/Makefile.am,
@@ -2818,42 +2559,38 @@
 
 	don't forget that lifev CVS is on iacspc50.epfl.ch
 
-2004-02-20  prudhomm
+2004-02-20 05:56  prudhomm
 
-	* admin/Makefile.am, admin/Makefile.common, admin/ac_find_file.m4,
-	admin/config.guess, admin/config.sub, admin/configure.in.bot.end,
-	admin/configure.in.min, admin/cvs-clean.pl, admin/cvs.sh,
-	admin/depcomp, admin/detect-autoconf.sh, admin/install-sh,
-	admin/ltmain.sh, admin/missing, admin/mkinstalldirs:
+	* admin/: Makefile.am, Makefile.common, ac_find_file.m4,
+	config.guess, config.sub, configure.in.bot.end, configure.in.min,
+	cvs-clean.pl, cvs.sh, depcomp, detect-autoconf.sh, install-sh,
+	ltmain.sh, missing, mkinstalldirs:
 
 	Initial revision
 
-2004-02-20  prudhomm
+2004-02-20 05:56  prudhomm
 
-	* admin/Makefile.am, admin/Makefile.common, admin/ac_find_file.m4,
-	admin/config.guess, admin/config.sub, admin/configure.in.bot.end,
-	admin/configure.in.min, admin/cvs-clean.pl, admin/cvs.sh,
-	admin/depcomp, admin/detect-autoconf.sh, admin/install-sh,
-	admin/ltmain.sh, admin/missing, admin/mkinstalldirs:
+	* admin/: Makefile.am, Makefile.common, ac_find_file.m4,
+	config.guess, config.sub, configure.in.bot.end, configure.in.min,
+	cvs-clean.pl, cvs.sh, depcomp, detect-autoconf.sh, install-sh,
+	ltmain.sh, missing, mkinstalldirs:
 
 	import
 
-2004-02-18  prudhomm
+2004-02-18 08:49  prudhomm
 
-	* testsuite/Makefile.am, testsuite/data/Makefile.am,
-	testsuite/data/mesh/Makefile.am,
-	testsuite/data/mesh/inria/Makefile.am,
-	testsuite/data/mesh/mesh++/Makefile.am:
+	* testsuite/: Makefile.am, data/Makefile.am, data/mesh/Makefile.am,
+	data/mesh/inria/Makefile.am, data/mesh/mesh++/Makefile.am:
 
 	added data to build system
 
-2004-02-18  prudhomm
+2004-02-18 07:43  prudhomm
 
 	* testsuite/.cvsignore:
 
 	ignore
 
-2004-02-13  prudhomm
+2004-02-13 09:59  prudhomm
 
 	* .cvsignore, ChangeLog, Makefile.am, configure.in.in,
 	life.kdevelop, life/lifecore/Makefile.am, life/lifecore/RNM.hpp,
@@ -2869,37 +2606,26 @@
 	fixes in testsuite * use data/mesh to get the meshses in testsuite
 	and not Meshes anymore
 
-2004-02-08  prudhomm
+2004-02-08 09:53  prudhomm
 
 	* testsuite/data/mesh/mesh++/makefile:
 
 	removed old makefile files
 
-2004-02-08  prudhomm
+2004-02-08 09:25  prudhomm
 
-	* testsuite/Makefile.am, testsuite/data/mesh/.cvsignore,
-	testsuite/data/mesh/inria/.cvsignore,
-	testsuite/data/mesh/inria/cube_384.mesh,
-	testsuite/data/mesh/inria/cube_6007.mesh,
-	testsuite/data/mesh/inria/cylhexa.mesh,
-	testsuite/data/mesh/inria/cyltetra.mesh,
-	testsuite/data/mesh/mesh++/.cvsignore,
-	testsuite/data/mesh/mesh++/cintot.m,
-	testsuite/data/mesh/mesh++/cintot_ext.m,
-	testsuite/data/mesh/mesh++/cube_384.m++,
-	testsuite/data/mesh/mesh++/cube_47785.m++,
-	testsuite/data/mesh/mesh++/cube_48.m++,
-	testsuite/data/mesh/mesh++/cube_48000.m++,
-	testsuite/data/mesh/mesh++/cube_48_neumann.m++,
-	testsuite/data/mesh/mesh++/cube_59.m++,
-	testsuite/data/mesh/mesh++/cube_6.m++,
-	testsuite/data/mesh/mesh++/cube_6000.m++,
-	testsuite/data/mesh/mesh++/cube_6007.m++,
-	testsuite/data/mesh/mesh++/cube_750.m++,
-	testsuite/data/mesh/mesh++/cube_99.m++,
-	testsuite/data/mesh/mesh++/makefile,
-	testsuite/data/mesh/mesh++/mod_mesh.m++,
-	testsuite/data/mesh/mesh++/simplemesh.m++:
+	* testsuite/: Makefile.am, data/mesh/.cvsignore,
+	data/mesh/inria/.cvsignore, data/mesh/inria/cube_384.mesh,
+	data/mesh/inria/cube_6007.mesh, data/mesh/inria/cylhexa.mesh,
+	data/mesh/inria/cyltetra.mesh, data/mesh/mesh++/.cvsignore,
+	data/mesh/mesh++/cintot.m, data/mesh/mesh++/cintot_ext.m,
+	data/mesh/mesh++/cube_384.m++, data/mesh/mesh++/cube_47785.m++,
+	data/mesh/mesh++/cube_48.m++, data/mesh/mesh++/cube_48000.m++,
+	data/mesh/mesh++/cube_48_neumann.m++, data/mesh/mesh++/cube_59.m++,
+	data/mesh/mesh++/cube_6.m++, data/mesh/mesh++/cube_6000.m++,
+	data/mesh/mesh++/cube_6007.m++, data/mesh/mesh++/cube_750.m++,
+	data/mesh/mesh++/cube_99.m++, data/mesh/mesh++/makefile,
+	data/mesh/mesh++/mod_mesh.m++, data/mesh/mesh++/simplemesh.m++:
 
 	added testsuite
 
@@ -2908,90 +2634,73 @@
 	at all times testsuite/development contains development tests for
 	the latest features
 
-2004-02-08  prudhomm
+2004-02-08 09:09  prudhomm
 
-	* life/lifemesh/Makefile.am, life/lifemesh/bareItems.cpp,
-	life/lifemesh/bareItems.hpp, life/lifemesh/basisElSh.cpp,
-	life/lifemesh/basisElSh.hpp, life/lifemesh/bcCond.cpp,
-	life/lifemesh/bcCond.hpp, life/lifemesh/bcVector.cpp,
-	life/lifemesh/bcVector.hpp, life/lifemesh/dof.cpp,
-	life/lifemesh/dof.hpp, life/lifemesh/dofInterface3Dto2D.cpp,
-	life/lifemesh/dofInterface3Dto2D.hpp,
-	life/lifemesh/dofInterface3Dto3D.cpp,
-	life/lifemesh/dofInterface3Dto3D.hpp,
-	life/lifemesh/dofInterfaceBase.cpp,
-	life/lifemesh/dofInterfaceBase.hpp,
-	life/lifemesh/dofInterfaceHandler.cpp,
-	life/lifemesh/dofInterfaceHandler.hpp, life/lifemesh/geo0D.cpp,
-	life/lifemesh/geo0D.hpp, life/lifemesh/geoElement.hpp,
-	life/lifemesh/geoND.hpp, life/lifemesh/identifier.cpp,
-	life/lifemesh/identifier.hpp, life/lifemesh/markers.hpp,
-	life/lifemesh/markers_base.cpp, life/lifemesh/markers_base.hpp,
-	life/lifemesh/meshEntity.hpp, life/lifemesh/meshMotion.cpp,
-	life/lifemesh/meshMotion.hpp, life/lifemesh/mesh_util.cpp,
-	life/lifemesh/mesh_util.hpp, life/lifemesh/mesh_util_base.cpp,
-	life/lifemesh/mesh_util_base.hpp, life/lifemesh/readMesh2D.hpp,
-	life/lifemesh/readMesh3D.cpp, life/lifemesh/readMesh3D.hpp,
-	life/lifemesh/regionMesh2D.hpp, life/lifemesh/regionMesh3D.cpp,
-	life/lifemesh/regionMesh3D.hpp, life/lifefem/Makefile.am,
-	life/lifefem/currentBdFE.cpp, life/lifefem/currentBdFE.hpp,
-	life/lifefem/currentFE.cpp, life/lifefem/currentFE.hpp,
-	life/lifefem/currentHdivFE.cpp, life/lifefem/currentHdivFE.hpp,
-	life/lifefem/defQuadRuleFE.cpp, life/lifefem/elemOper.cpp,
-	life/lifefem/elemOper.hpp, life/lifefem/elemOper_ext.hpp,
-	life/lifefem/geoMap.cpp, life/lifefem/geoMap.hpp,
-	life/lifefem/localDofPattern.cpp, life/lifefem/localDofPattern.hpp,
-	life/lifefem/quadRule.cpp, life/lifefem/quadRule.hpp,
-	life/lifefem/refEle.cpp, life/lifefem/refEle.hpp,
-	life/lifefem/refFE.cpp, life/lifefem/refFE.hpp,
-	life/lifefem/refHdivFE.cpp, life/lifefem/refHdivFE.hpp,
-	life/lifefem/refHybridFE.cpp, life/lifefem/refHybridFE.hpp,
-	life/lifefem/sobolevNorms.hpp, life/lifefem/staticBdFE.cpp,
-	life/lifefem/staticBdFE.hpp,
-	life/lifecore/ElasticStructureHandler.hpp,
-	life/lifecore/GetPot.cpp, life/lifecore/GetPot.hpp,
-	life/lifecore/Makefile.am,
-	life/lifecore/NavierStokesAleHandler.hpp,
-	life/lifecore/NavierStokesAleSolverPC.hpp,
-	life/lifecore/NavierStokesHandler.hpp,
-	life/lifecore/NavierStokesHandler_miguel.hpp,
-	life/lifecore/NavierStokesSolverPC.hpp,
-	life/lifecore/Operator01.hpp, life/lifecore/RNM.hpp,
-	life/lifecore/RNM_op.hpp, life/lifecore/RNM_opc.hpp,
-	life/lifecore/RNM_tpl.hpp, life/lifecore/SimpleVect.hpp,
-	life/lifecore/VenantKirchhofSolver.hpp,
-	life/lifecore/algebraic_facto.hpp, life/lifecore/assemb.cpp,
-	life/lifecore/assemb.hpp, life/lifecore/bc_manage.hpp,
-	life/lifecore/bdf.cpp, life/lifecore/bdf.hpp,
-	life/lifecore/bdfNS.cpp, life/lifecore/bdfNS.hpp,
-	life/lifecore/chrono.hpp, life/lifecore/dataAztec.cpp,
-	life/lifecore/dataAztec.hpp,
-	life/lifecore/dataElasticStructure.hpp, life/lifecore/dataMesh.hpp,
-	life/lifecore/dataNavierStokes.hpp, life/lifecore/dataNewton.cpp,
-	life/lifecore/dataNewton.hpp,
-	life/lifecore/dataSimplifiedStructure.hpp,
-	life/lifecore/dataString.cpp, life/lifecore/dataString.hpp,
-	life/lifecore/dataTime.cpp, life/lifecore/dataTime.hpp,
-	life/lifecore/elemMat.cpp, life/lifecore/elemMat.hpp,
-	life/lifecore/elemVec.cpp, life/lifecore/elemVec.hpp,
-	life/lifecore/fortran_wrap.hpp, life/lifecore/gmsh_wrtrs.hpp,
-	life/lifecore/inexactLU.hpp, life/lifecore/lifeV.hpp,
-	life/lifecore/linesearch_cubic.hpp,
-	life/lifecore/linesearch_parabolic.hpp,
-	life/lifecore/medit_wrtrs.cpp, life/lifecore/medit_wrtrs.hpp,
-	life/lifecore/mixed_pattern.hpp, life/lifecore/newton.hpp,
-	life/lifecore/openDX_wrtrs.hpp, life/lifecore/pattern.cpp,
-	life/lifecore/pattern.hpp, life/lifecore/picard.hpp,
-	life/lifecore/post_proc.hpp, life/lifecore/saddlePointCG.hpp,
-	life/lifecore/simplifiedStructure.hpp,
-	life/lifecore/subDomainNeighbors.cpp,
-	life/lifecore/subDomainNeighbors.hpp, life/lifecore/switch.cpp,
-	life/lifecore/switch.hpp, life/lifecore/tab.hpp,
-	life/lifecore/util_string.cpp, life/lifecore/util_string.hpp,
-	life/lifecore/values.cpp, life/lifecore/values.hpp,
-	life/lifecore/variables.hpp, life/lifecore/vecUnknown.cpp,
-	life/lifecore/vecUnknown.hpp, life/lifecore/vtk_wrtrs.cpp,
-	life/lifecore/vtk_wrtrs.hpp, life/Makefile.am:
+	* life/: lifemesh/Makefile.am, lifemesh/bareItems.cpp,
+	lifemesh/bareItems.hpp, lifemesh/basisElSh.cpp,
+	lifemesh/basisElSh.hpp, lifemesh/bcCond.cpp, lifemesh/bcCond.hpp,
+	lifemesh/bcVector.cpp, lifemesh/bcVector.hpp, lifemesh/dof.cpp,
+	lifemesh/dof.hpp, lifemesh/dofInterface3Dto2D.cpp,
+	lifemesh/dofInterface3Dto2D.hpp, lifemesh/dofInterface3Dto3D.cpp,
+	lifemesh/dofInterface3Dto3D.hpp, lifemesh/dofInterfaceBase.cpp,
+	lifemesh/dofInterfaceBase.hpp, lifemesh/dofInterfaceHandler.cpp,
+	lifemesh/dofInterfaceHandler.hpp, lifemesh/geo0D.cpp,
+	lifemesh/geo0D.hpp, lifemesh/geoElement.hpp, lifemesh/geoND.hpp,
+	lifemesh/identifier.cpp, lifemesh/identifier.hpp,
+	lifemesh/markers.hpp, lifemesh/markers_base.cpp,
+	lifemesh/markers_base.hpp, lifemesh/meshEntity.hpp,
+	lifemesh/meshMotion.cpp, lifemesh/meshMotion.hpp,
+	lifemesh/mesh_util.cpp, lifemesh/mesh_util.hpp,
+	lifemesh/mesh_util_base.cpp, lifemesh/mesh_util_base.hpp,
+	lifemesh/readMesh2D.hpp, lifemesh/readMesh3D.cpp,
+	lifemesh/readMesh3D.hpp, lifemesh/regionMesh2D.hpp,
+	lifemesh/regionMesh3D.cpp, lifemesh/regionMesh3D.hpp,
+	lifefem/Makefile.am, lifefem/currentBdFE.cpp,
+	lifefem/currentBdFE.hpp, lifefem/currentFE.cpp,
+	lifefem/currentFE.hpp, lifefem/currentHdivFE.cpp,
+	lifefem/currentHdivFE.hpp, lifefem/defQuadRuleFE.cpp,
+	lifefem/elemOper.cpp, lifefem/elemOper.hpp,
+	lifefem/elemOper_ext.hpp, lifefem/geoMap.cpp, lifefem/geoMap.hpp,
+	lifefem/localDofPattern.cpp, lifefem/localDofPattern.hpp,
+	lifefem/quadRule.cpp, lifefem/quadRule.hpp, lifefem/refEle.cpp,
+	lifefem/refEle.hpp, lifefem/refFE.cpp, lifefem/refFE.hpp,
+	lifefem/refHdivFE.cpp, lifefem/refHdivFE.hpp,
+	lifefem/refHybridFE.cpp, lifefem/refHybridFE.hpp,
+	lifefem/sobolevNorms.hpp, lifefem/staticBdFE.cpp,
+	lifefem/staticBdFE.hpp, lifecore/ElasticStructureHandler.hpp,
+	lifecore/GetPot.cpp, lifecore/GetPot.hpp, lifecore/Makefile.am,
+	lifecore/NavierStokesAleHandler.hpp,
+	lifecore/NavierStokesAleSolverPC.hpp,
+	lifecore/NavierStokesHandler.hpp,
+	lifecore/NavierStokesHandler_miguel.hpp,
+	lifecore/NavierStokesSolverPC.hpp, lifecore/Operator01.hpp,
+	lifecore/RNM.hpp, lifecore/RNM_op.hpp, lifecore/RNM_opc.hpp,
+	lifecore/RNM_tpl.hpp, lifecore/SimpleVect.hpp,
+	lifecore/VenantKirchhofSolver.hpp, lifecore/algebraic_facto.hpp,
+	lifecore/assemb.cpp, lifecore/assemb.hpp, lifecore/bc_manage.hpp,
+	lifecore/bdf.cpp, lifecore/bdf.hpp, lifecore/bdfNS.cpp,
+	lifecore/bdfNS.hpp, lifecore/chrono.hpp, lifecore/dataAztec.cpp,
+	lifecore/dataAztec.hpp, lifecore/dataElasticStructure.hpp,
+	lifecore/dataMesh.hpp, lifecore/dataNavierStokes.hpp,
+	lifecore/dataNewton.cpp, lifecore/dataNewton.hpp,
+	lifecore/dataSimplifiedStructure.hpp, lifecore/dataString.cpp,
+	lifecore/dataString.hpp, lifecore/dataTime.cpp,
+	lifecore/dataTime.hpp, lifecore/elemMat.cpp, lifecore/elemMat.hpp,
+	lifecore/elemVec.cpp, lifecore/elemVec.hpp,
+	lifecore/fortran_wrap.hpp, lifecore/gmsh_wrtrs.hpp,
+	lifecore/inexactLU.hpp, lifecore/lifeV.hpp,
+	lifecore/linesearch_cubic.hpp, lifecore/linesearch_parabolic.hpp,
+	lifecore/medit_wrtrs.cpp, lifecore/medit_wrtrs.hpp,
+	lifecore/mixed_pattern.hpp, lifecore/newton.hpp,
+	lifecore/openDX_wrtrs.hpp, lifecore/pattern.cpp,
+	lifecore/pattern.hpp, lifecore/picard.hpp, lifecore/post_proc.hpp,
+	lifecore/saddlePointCG.hpp, lifecore/simplifiedStructure.hpp,
+	lifecore/subDomainNeighbors.cpp, lifecore/subDomainNeighbors.hpp,
+	lifecore/switch.cpp, lifecore/switch.hpp, lifecore/tab.hpp,
+	lifecore/util_string.cpp, lifecore/util_string.hpp,
+	lifecore/values.cpp, lifecore/values.hpp, lifecore/variables.hpp,
+	lifecore/vecUnknown.cpp, lifecore/vecUnknown.hpp,
+	lifecore/vtk_wrtrs.cpp, lifecore/vtk_wrtrs.hpp, Makefile.am:
 
 	finally added the new life libraries layout
 
@@ -3000,7 +2709,7 @@
 
 	more to come in the future
 
-2004-02-08  prudhomm
+2004-02-08 09:05  prudhomm
 
 	* .cvsignore, AUTHORS, COPYING, ChangeLog, INSTALL, Makefile.am,
 	Makefile.cvs, NEWS, configure.in.bot, configure.in.in,
@@ -3013,28 +2722,25 @@
 
 	updated admin/ with aa lot of new powerful tools
 
-2004-02-08  prudhomm
+2004-02-08 08:54  prudhomm
 
-	* doc/.cvsignore, doc/Makefile.am, doc/manual/.cvsignore,
-	doc/manual/BCCond.eps, doc/manual/BCCond.fig,
-	doc/manual/BCCond.pdf, doc/manual/BCHandler.eps,
-	doc/manual/BCHandler.fig, doc/manual/BCHandler.pdf,
-	doc/manual/BasElSha.eps, doc/manual/BasElSha.fig,
-	doc/manual/BasElSha.pdf, doc/manual/Directories_Organization,
-	doc/manual/Fem_nodes.eps, doc/manual/Fem_nodes.fig,
-	doc/manual/Fem_nodes.pdf, doc/manual/Fem_nodes.ps,
-	doc/manual/Makefile.am, doc/manual/NSCode_mesh_types.eps,
-	doc/manual/NSCode_mesh_types.kpr, doc/manual/NSCode_mesh_types.pdf,
-	doc/manual/Specifications.tex, doc/manual/boundary_conditions.ps,
-	doc/manual/doc_menu.ps, doc/manual/docfe.tex, doc/manual/jfg.tex,
-	doc/manual/letter_Jan_2000.txt, doc/manual/life.bib,
-	doc/manual/lsc_page.html, doc/manual/mixed_pattern.eps,
-	doc/manual/mixed_pattern.fig, doc/manual/mixed_pattern.pdf,
-	doc/manual/theFE.eps, doc/manual/theFE.fig, doc/manual/theFE.pdf,
-	doc/notes/.cvsignore, doc/notes/Makefile.am,
-	doc/notes/bdf_notes_alex_oct_03.txt, doc/notes/doxy_comment.tex,
-	doc/notes/letter_changes_ott03.txt, doc/tex/Makefile.am,
-	doc/tex/lifestyle.cls, doc/tex/rcs.sty:
+	* doc/: .cvsignore, Makefile.am, manual/.cvsignore,
+	manual/BCCond.eps, manual/BCCond.fig, manual/BCCond.pdf,
+	manual/BCHandler.eps, manual/BCHandler.fig, manual/BCHandler.pdf,
+	manual/BasElSha.eps, manual/BasElSha.fig, manual/BasElSha.pdf,
+	manual/Directories_Organization, manual/Fem_nodes.eps,
+	manual/Fem_nodes.fig, manual/Fem_nodes.pdf, manual/Fem_nodes.ps,
+	manual/Makefile.am, manual/NSCode_mesh_types.eps,
+	manual/NSCode_mesh_types.kpr, manual/NSCode_mesh_types.pdf,
+	manual/Specifications.tex, manual/boundary_conditions.ps,
+	manual/doc_menu.ps, manual/docfe.tex, manual/jfg.tex,
+	manual/letter_Jan_2000.txt, manual/life.bib, manual/lsc_page.html,
+	manual/mixed_pattern.eps, manual/mixed_pattern.fig,
+	manual/mixed_pattern.pdf, manual/theFE.eps, manual/theFE.fig,
+	manual/theFE.pdf, notes/.cvsignore, notes/Makefile.am,
+	notes/bdf_notes_alex_oct_03.txt, notes/doxy_comment.tex,
+	notes/letter_changes_ott03.txt, tex/Makefile.am, tex/lifestyle.cls,
+	tex/rcs.sty:
 
 	documentation is now in doc/
 
@@ -3043,50 +2749,44 @@
 
 	Christophe Prud'homme
 
-2004-01-29  prudhomm
+2004-01-29 15:35  prudhomm
 
-	* life/lifecore/GetPot.cc, life/lifecore/GetPot.h,
-	life/lifecore/NavierStokesSolverPC.h, life/lifecore/SimpleVect.h,
-	life/lifecore/algebraic_facto.h, life/lifecore/chrono.h,
-	life/lifecore/dataNavierStokes.h, life/lifecore/elemVec.h,
-	life/lifecore/fortran_wrap.h, life/lifecore/lifeV.h,
-	life/lifecore/mixed_pattern.h, life/lifecore/pattern.h,
-	life/lifecore/values.h, life/lifefem/localDofPattern.cc,
-	life/lifefem/localDofPattern.h, life/lifefem/refFE.cc,
-	life/lifefem/refFE.h, life/lifefem/refHdivFE.cc,
-	life/lifefem/refHdivFE.h, life/lifefem/refHybridFE.cc,
-	life/lifefem/refHybridFE.h, life/lifemesh/bareItems.h,
-	life/lifemesh/basisElSh.h, life/lifemesh/bcCond.h,
-	life/lifemesh/dof.cc, life/lifemesh/dof.h,
-	life/lifemesh/dofInterface3Dto2D.cc,
-	life/lifemesh/dofInterface3Dto2D.h,
-	life/lifemesh/dofInterface3Dto3D.h,
-	life/lifemesh/dofInterfaceBase.cc,
-	life/lifemesh/dofInterfaceBase.h,
-	life/lifemesh/dofInterfaceHandler.cc,
-	life/lifemesh/dofInterfaceHandler.h, life/lifemesh/geoElement.h,
-	life/lifemesh/markers.h, life/lifemesh/markers_base.cc,
-	life/lifemesh/markers_base.h, life/lifemesh/mesh_util.cc,
-	life/lifemesh/mesh_util.h, life/lifemesh/mesh_util_base.cc,
-	life/lifemesh/mesh_util_base.h, life/lifemesh/regionMesh2D.h,
-	life/lifemesh/regionMesh3D.h:
+	* life/: lifecore/GetPot.cc, lifecore/GetPot.h,
+	lifecore/NavierStokesSolverPC.h, lifecore/SimpleVect.h,
+	lifecore/algebraic_facto.h, lifecore/chrono.h,
+	lifecore/dataNavierStokes.h, lifecore/elemVec.h,
+	lifecore/fortran_wrap.h, lifecore/lifeV.h,
+	lifecore/mixed_pattern.h, lifecore/pattern.h, lifecore/values.h,
+	lifefem/localDofPattern.cc, lifefem/localDofPattern.h,
+	lifefem/refFE.cc, lifefem/refFE.h, lifefem/refHdivFE.cc,
+	lifefem/refHdivFE.h, lifefem/refHybridFE.cc, lifefem/refHybridFE.h,
+	lifemesh/bareItems.h, lifemesh/basisElSh.h, lifemesh/bcCond.h,
+	lifemesh/dof.cc, lifemesh/dof.h, lifemesh/dofInterface3Dto2D.cc,
+	lifemesh/dofInterface3Dto2D.h, lifemesh/dofInterface3Dto3D.h,
+	lifemesh/dofInterfaceBase.cc, lifemesh/dofInterfaceBase.h,
+	lifemesh/dofInterfaceHandler.cc, lifemesh/dofInterfaceHandler.h,
+	lifemesh/geoElement.h, lifemesh/markers.h,
+	lifemesh/markers_base.cc, lifemesh/markers_base.h,
+	lifemesh/mesh_util.cc, lifemesh/mesh_util.h,
+	lifemesh/mesh_util_base.cc, lifemesh/mesh_util_base.h,
+	lifemesh/regionMesh2D.h, lifemesh/regionMesh3D.h:
 
 	sync with Software/src
 
-2003-12-02  prudhomm
+2003-12-02 08:42  prudhomm
 
 	* configure.ac:
 
 	* added OFFICIAL_TESTS in configure.ac * merged changes from JF and
 	Vincent (docInterface*)
 
-2003-11-13  prudhomm
+2003-11-13 11:15  prudhomm
 
 	* doc/tex/lifereport.cls:
 
 	moved to lifestyle
 
-2003-11-13  prudhomm
+2003-11-13 11:09  prudhomm
 
 	* doc/tex/lifestyle.cls:
 
@@ -3098,92 +2798,88 @@
 	one can use the options of these classes one can use the parameter
 	option toc to create a table of contexts
 
-2003-11-13  prudhomm
+2003-11-13 10:00  prudhomm
 
 	* doc/tex/rcs.sty:
 
 	added rcs.sty
 
-2003-11-12  prudhomm
+2003-11-12 18:31  prudhomm
 
 	* Makefile.am, configure.ac:
 
 	update with HEAD and fixe compilation
 
-2003-11-12  prudhomm
+2003-11-12 17:45  prudhomm
 
 	* configure.ac:
 
 	update with HEAD
 
-2003-10-29  forma
+2003-10-29 17:19  forma
 
 	* doc/.cvsignore, doc/manual/.cvsignore, doc/notes/.cvsignore,
 	life/.cvsignore, life/lifecore/.cvsignore, life/lifefem/.cvsignore:
 
 	Ignoring autoconf generated Makefiles.
 
-2003-10-29  forma
+2003-10-29 17:16  forma
 
 	* life/lifemesh/markers_base.cc:
 
 	Corrected a little bug introduced by xemacs ....
 
-2003-10-29  forma
+2003-10-29 17:12  forma
 
 	* configure.ac:
 
 	now finding aztec works
 
-2003-10-29  prudhomm
+2003-10-29 16:51  prudhomm
 
 	* configure.ac:
 
 	bugfix for mox/epfl repository system
 
-2003-10-29  forma
+2003-10-29 14:01  forma
 
 	* README:
 
 	README file for the new release of LifeV.
 
-2003-10-29  prudhomm
+2003-10-29 13:02  prudhomm
 
 	* LifeV.kdevelop, Makefile.am, configure.ac,
 	doc/manual/Specifications.tex:
 
 	* minor mods * some minor changes in manual
 
-2003-10-29  prudhomm
+2003-10-29 11:55  prudhomm
 
-	* doc/manual/Specifications.tex, doc/tex/lifereport.cls:
+	* doc/: manual/Specifications.tex, tex/lifereport.cls:
 
 	do not use the draft option for report it fails horribly
 
-2003-10-29  prudhomm
+2003-10-29 11:46  prudhomm
 
-	* doc/.cvsignore, doc/Makefile.am, doc/manual/.cvsignore,
-	doc/manual/Specifications.tex, doc/manual/life.bib,
-	doc/tex/lifereport.cls:
+	* doc/: .cvsignore, Makefile.am, manual/.cvsignore,
+	manual/Specifications.tex, manual/life.bib, tex/lifereport.cls:
 
 	* added tex directory for macros : lifereport style file is in *
 	added Saad bibtex entry * updated manual
 
-2003-10-29  prudhomm
+2003-10-29 11:17  prudhomm
 
-	* doc/manual/.cvsignore, doc/notes/.cvsignore,
-	doc/notes/Makefile.am:
+	* doc/: manual/.cvsignore, notes/.cvsignore, notes/Makefile.am:
 
 	* added Makefile.am for automake * ignore automatically generated
 	files (e.g Makefile Makefile.in)
 
-2003-10-29  prudhomm
+2003-10-29 11:03  prudhomm
 
-	* doc/manual/BCCond.pdf, doc/manual/BCHandler.pdf,
-	doc/manual/BasElSha.pdf, doc/manual/Fem_nodes.pdf,
-	doc/manual/Makefile.am, doc/manual/NSCode_mesh_types.pdf,
-	doc/manual/Specifications.tex, doc/manual/life.bib,
-	doc/manual/mixed_pattern.pdf, doc/manual/theFE.pdf:
+	* doc/manual/: BCCond.pdf, BCHandler.pdf, BasElSha.pdf,
+	Fem_nodes.pdf, Makefile.am, NSCode_mesh_types.pdf,
+	Specifications.tex, life.bib, mixed_pattern.pdf, theFE.pdf:
 
 	manual changes:
 
@@ -3192,36 +2888,34 @@
 	bibliography: life.bib * added index (\ix{word} to write and index
 	work see lifereport.cls)
 
-2003-10-29  prudhomm
+2003-10-29 09:08  prudhomm
 
-	* life/lifecore/GetPot.cc, life/lifecore/GetPot.h,
-	life/lifecore/SimpleVect.h, life/lifecore/algebraic_facto.h,
-	life/lifecore/chrono.h, life/lifecore/elemVec.h,
-	life/lifecore/fortran_wrap.h, life/lifecore/lifeV.h,
-	life/lifecore/pattern.h, life/lifecore/values.h:
+	* life/lifecore/: GetPot.cc, GetPot.h, SimpleVect.h,
+	algebraic_facto.h, chrono.h, elemVec.h, fortran_wrap.h, lifeV.h,
+	pattern.h, values.h:
 
-	get rid of CVS Identifiers like $Id: ChangeLog,v 1.6 2004-08-17 16:11:43 prudhomm Exp $ and $Log$ they change the
+	get rid of CVS Identifiers like $Id: ChangeLog,v 1.7 2004-08-17 17:03:48 prudhomm Exp $ and $Log$ they change the
 	source code _after_ a commit : the code will then be recompiled by
 	make which is a waste of time
 
-2003-10-29  prudhomm
+2003-10-29 08:58  prudhomm
 
-	* life/lifemesh/basisElSh.h, life/lifemesh/markers.h:
+	* life/lifemesh/: basisElSh.h, markers.h:
 
-	get rid of CVS Identifiers like $Id: ChangeLog,v 1.6 2004-08-17 16:11:43 prudhomm Exp $ and $Log$ they change the
+	get rid of CVS Identifiers like $Id: ChangeLog,v 1.7 2004-08-17 17:03:48 prudhomm Exp $ and $Log$ they change the
 	source code _after_ a commit : the code will then be recompiled by
 	make which is a waste of time
 
-2003-10-29  prudhomm
+2003-10-29 08:53  prudhomm
 
-	* life/lifemesh/bareItems.h, life/lifemesh/markers_base.cc,
-	life/lifemesh/markers_base.h, life/lifemesh/mesh_util_base.cc:
+	* life/lifemesh/: bareItems.h, markers_base.cc, markers_base.h,
+	mesh_util_base.cc:
 
-	get rid of CVS Identifiers like $Id: ChangeLog,v 1.6 2004-08-17 16:11:43 prudhomm Exp $ and $Log$ they change the
+	get rid of CVS Identifiers like $Id: ChangeLog,v 1.7 2004-08-17 17:03:48 prudhomm Exp $ and $Log$ they change the
 	source code _after_ a commit : the code will then be recompiled by
 	make which is a waste of time
 
-2003-10-29  prudhomm
+2003-10-29 08:43  prudhomm
 
 	* .cvsignore, LifeV.kdevelop, Makefile.cvs, configure.ac,
 	life/.cvsignore, life/lifecore/Makefile.am,
@@ -3234,154 +2928,136 @@
 	dependencies   THIS WILL NEED CLEANUP IN THE FUTURE: EVERY
 	LIBRARIES DEPEND   ON THE OTHER ONES
 
-2003-10-29  prudhomm
+2003-10-29 08:13  prudhomm
 
-	* life/lifemesh/Makefile.am, life/lifemesh/mesh_util.cc,
-	life/lifemesh/mesh_util_base.cc, life/lifemesh/mesh_util_base.h:
+	* life/lifemesh/: Makefile.am, mesh_util.cc, mesh_util_base.cc,
+	mesh_util_base.h:
 
 	removed redundant code that caused multiple definitions in
 	liblifemesh.la.  now everything compiles nicely
 
-2003-10-28  prudhomm
+2003-10-28 13:07  prudhomm
 
 	* .cvsignore, Doxyfile, LifeV.kdevelop, Makefile.am:
 
 	minor update * update SUBDIRS to accomodate the new directory
 	layout
 
-2003-10-28  prudhomm
+2003-10-28 11:59  prudhomm
 
-	* life/lifefem/Makefile.am, life/lifemesh/Makefile.am:
+	* life/: lifefem/Makefile.am, lifemesh/Makefile.am:
 
 	correct dependencies between the various libraries
 
-2003-10-28  prudhomm
+2003-10-28 11:54  prudhomm
 
-	* life/Makefile.am, life/lifecore/.cvsignore,
-	life/lifecore/GetPot.cc, life/lifecore/GetPot.h,
-	life/lifecore/Makefile.am, life/lifecore/NavierStokesAleHandler.h,
-	life/lifecore/NavierStokesAleSolverPC.h,
-	life/lifecore/NavierStokesHandler.h,
-	life/lifecore/NavierStokesSolverPC.h, life/lifecore/Operator01.h,
-	life/lifecore/RNM.hpp, life/lifecore/RNM_op.hpp,
-	life/lifecore/RNM_opc.hpp, life/lifecore/RNM_tpl.hpp,
-	life/lifecore/SimpleVect.h, life/lifecore/algebraic_facto.h,
-	life/lifecore/assemb.cc, life/lifecore/assemb.h,
-	life/lifecore/bc_manage.h, life/lifecore/chrono.h,
-	life/lifecore/dataAztec.cc, life/lifecore/dataAztec.h,
-	life/lifecore/dataMesh.h, life/lifecore/dataNavierStokes.h,
-	life/lifecore/dataSimplifiedStructure.h,
-	life/lifecore/dataString.cc, life/lifecore/dataString.h,
-	life/lifecore/dataTime.cc, life/lifecore/dataTime.h,
-	life/lifecore/elemMat.cc, life/lifecore/elemMat.h,
-	life/lifecore/elemVec.cc, life/lifecore/elemVec.h,
-	life/lifecore/fortran_wrap.h, life/lifecore/gmsh_wrtrs.h,
-	life/lifecore/inexactLU.h, life/lifecore/lifeV.h,
-	life/lifecore/medit_wrtrs.cc, life/lifecore/medit_wrtrs.h,
-	life/lifecore/mixed_pattern.h, life/lifecore/openDX_wrtrs.h,
-	life/lifecore/pattern.cc, life/lifecore/pattern.h,
-	life/lifecore/saddlePointCG.h, life/lifecore/simplifiedStructure.h,
-	life/lifecore/subDomainNeighbors.cc,
-	life/lifecore/subDomainNeighbors.h, life/lifecore/switch.cc,
-	life/lifecore/switch.h, life/lifecore/tab.h,
-	life/lifecore/util_string.cc, life/lifecore/util_string.h,
-	life/lifecore/values.cc, life/lifecore/values.h,
-	life/lifecore/variables.h, life/lifecore/vecUnknown.cc,
-	life/lifecore/vecUnknown.h, life/lifecore/vtk_wrtrs.cc,
-	life/lifecore/vtk_wrtrs.h, life/lifefem/Makefile.am,
-	life/lifefem/currentBdFE.cc, life/lifefem/currentBdFE.h,
-	life/lifefem/currentFE.cc, life/lifefem/currentFE.h,
-	life/lifefem/currentHdivFE.cc, life/lifefem/currentHdivFE.h,
-	life/lifefem/defQuadRuleFE.cc, life/lifefem/elemOper.cc,
-	life/lifefem/elemOper.h, life/lifefem/elemOper_ext.h,
-	life/lifefem/geoMap.cc, life/lifefem/geoMap.h,
-	life/lifefem/localDofPattern.cc, life/lifefem/localDofPattern.h,
-	life/lifefem/quadRule.cc, life/lifefem/quadRule.h,
-	life/lifefem/refEle.cc, life/lifefem/refEle.h,
-	life/lifefem/refFE.cc, life/lifefem/refFE.h,
-	life/lifefem/refHdivFE.cc, life/lifefem/refHdivFE.h,
-	life/lifefem/refHybridFE.cc, life/lifefem/refHybridFE.h,
-	life/lifefem/sobolevNorms.h, life/lifefem/staticBdFE.cc,
-	life/lifefem/staticBdFE.h, life/lifemesh/.cvsignore,
-	life/lifemesh/Makefile.am, life/lifemesh/bareItems.cc,
-	life/lifemesh/bareItems.h, life/lifemesh/basisElSh.cc,
-	life/lifemesh/basisElSh.h, life/lifemesh/bcCond.cc,
-	life/lifemesh/bcCond.h, life/lifemesh/bcVector.cc,
-	life/lifemesh/bcVector.h, life/lifemesh/dof.cc,
-	life/lifemesh/dof.h, life/lifemesh/dofInterface3Dto2D.cc,
-	life/lifemesh/dofInterface3Dto2D.h,
-	life/lifemesh/dofInterface3Dto3D.cc,
-	life/lifemesh/dofInterface3Dto3D.h,
-	life/lifemesh/dofInterfaceBase.cc,
-	life/lifemesh/dofInterfaceBase.h,
-	life/lifemesh/dofInterfaceHandler.cc,
-	life/lifemesh/dofInterfaceHandler.h, life/lifemesh/geo0D.cc,
-	life/lifemesh/geo0D.h, life/lifemesh/geoElement.h,
-	life/lifemesh/geoND.h, life/lifemesh/identifier.cc,
-	life/lifemesh/identifier.h, life/lifemesh/markers.h,
-	life/lifemesh/markers_base.cc, life/lifemesh/markers_base.h,
-	life/lifemesh/meshEntity.h, life/lifemesh/meshMotion.cc,
-	life/lifemesh/meshMotion.h, life/lifemesh/mesh_util.cc,
-	life/lifemesh/mesh_util.h, life/lifemesh/mesh_util_base.cc,
-	life/lifemesh/mesh_util_base.h, life/lifemesh/readMesh2D.h,
-	life/lifemesh/readMesh3D.cc, life/lifemesh/readMesh3D.h,
-	life/lifemesh/regionMesh2D.h, life/lifemesh/regionMesh3D.cc,
-	life/lifemesh/regionMesh3D.h:
+	* life/: Makefile.am, lifecore/.cvsignore, lifecore/GetPot.cc,
+	lifecore/GetPot.h, lifecore/Makefile.am,
+	lifecore/NavierStokesAleHandler.h,
+	lifecore/NavierStokesAleSolverPC.h, lifecore/NavierStokesHandler.h,
+	lifecore/NavierStokesSolverPC.h, lifecore/Operator01.h,
+	lifecore/RNM.hpp, lifecore/RNM_op.hpp, lifecore/RNM_opc.hpp,
+	lifecore/RNM_tpl.hpp, lifecore/SimpleVect.h,
+	lifecore/algebraic_facto.h, lifecore/assemb.cc, lifecore/assemb.h,
+	lifecore/bc_manage.h, lifecore/chrono.h, lifecore/dataAztec.cc,
+	lifecore/dataAztec.h, lifecore/dataMesh.h,
+	lifecore/dataNavierStokes.h, lifecore/dataSimplifiedStructure.h,
+	lifecore/dataString.cc, lifecore/dataString.h,
+	lifecore/dataTime.cc, lifecore/dataTime.h, lifecore/elemMat.cc,
+	lifecore/elemMat.h, lifecore/elemVec.cc, lifecore/elemVec.h,
+	lifecore/fortran_wrap.h, lifecore/gmsh_wrtrs.h,
+	lifecore/inexactLU.h, lifecore/lifeV.h, lifecore/medit_wrtrs.cc,
+	lifecore/medit_wrtrs.h, lifecore/mixed_pattern.h,
+	lifecore/openDX_wrtrs.h, lifecore/pattern.cc, lifecore/pattern.h,
+	lifecore/saddlePointCG.h, lifecore/simplifiedStructure.h,
+	lifecore/subDomainNeighbors.cc, lifecore/subDomainNeighbors.h,
+	lifecore/switch.cc, lifecore/switch.h, lifecore/tab.h,
+	lifecore/util_string.cc, lifecore/util_string.h,
+	lifecore/values.cc, lifecore/values.h, lifecore/variables.h,
+	lifecore/vecUnknown.cc, lifecore/vecUnknown.h,
+	lifecore/vtk_wrtrs.cc, lifecore/vtk_wrtrs.h, lifefem/Makefile.am,
+	lifefem/currentBdFE.cc, lifefem/currentBdFE.h,
+	lifefem/currentFE.cc, lifefem/currentFE.h,
+	lifefem/currentHdivFE.cc, lifefem/currentHdivFE.h,
+	lifefem/defQuadRuleFE.cc, lifefem/elemOper.cc, lifefem/elemOper.h,
+	lifefem/elemOper_ext.h, lifefem/geoMap.cc, lifefem/geoMap.h,
+	lifefem/localDofPattern.cc, lifefem/localDofPattern.h,
+	lifefem/quadRule.cc, lifefem/quadRule.h, lifefem/refEle.cc,
+	lifefem/refEle.h, lifefem/refFE.cc, lifefem/refFE.h,
+	lifefem/refHdivFE.cc, lifefem/refHdivFE.h, lifefem/refHybridFE.cc,
+	lifefem/refHybridFE.h, lifefem/sobolevNorms.h,
+	lifefem/staticBdFE.cc, lifefem/staticBdFE.h, lifemesh/.cvsignore,
+	lifemesh/Makefile.am, lifemesh/bareItems.cc, lifemesh/bareItems.h,
+	lifemesh/basisElSh.cc, lifemesh/basisElSh.h, lifemesh/bcCond.cc,
+	lifemesh/bcCond.h, lifemesh/bcVector.cc, lifemesh/bcVector.h,
+	lifemesh/dof.cc, lifemesh/dof.h, lifemesh/dofInterface3Dto2D.cc,
+	lifemesh/dofInterface3Dto2D.h, lifemesh/dofInterface3Dto3D.cc,
+	lifemesh/dofInterface3Dto3D.h, lifemesh/dofInterfaceBase.cc,
+	lifemesh/dofInterfaceBase.h, lifemesh/dofInterfaceHandler.cc,
+	lifemesh/dofInterfaceHandler.h, lifemesh/geo0D.cc,
+	lifemesh/geo0D.h, lifemesh/geoElement.h, lifemesh/geoND.h,
+	lifemesh/identifier.cc, lifemesh/identifier.h, lifemesh/markers.h,
+	lifemesh/markers_base.cc, lifemesh/markers_base.h,
+	lifemesh/meshEntity.h, lifemesh/meshMotion.cc,
+	lifemesh/meshMotion.h, lifemesh/mesh_util.cc, lifemesh/mesh_util.h,
+	lifemesh/mesh_util_base.cc, lifemesh/mesh_util_base.h,
+	lifemesh/readMesh2D.h, lifemesh/readMesh3D.cc,
+	lifemesh/readMesh3D.h, lifemesh/regionMesh2D.h,
+	lifemesh/regionMesh3D.cc, lifemesh/regionMesh3D.h:
 
 	moved sources to life : life/lifecore life/lifemesh life/lifefem
 
-2003-10-28  prudhomm
+2003-10-28 10:39  prudhomm
 
-	* doc/manual/BCCond.eps, doc/manual/BCCond.fig,
-	doc/manual/BCHandler.eps, doc/manual/BCHandler.fig,
-	doc/manual/BasElSha.eps, doc/manual/BasElSha.fig,
-	doc/manual/Directories_Organization, doc/manual/Fem_nodes.eps,
-	doc/manual/Fem_nodes.fig, doc/manual/Fem_nodes.ps,
-	doc/manual/NSCode_mesh_types.eps, doc/manual/NSCode_mesh_types.kpr,
-	doc/manual/Specifications.tex, doc/manual/boundary_conditions.ps,
-	doc/manual/doc_menu.ps, doc/manual/docfe.tex, doc/manual/jfg.tex,
-	doc/manual/letter_Jan_2000.txt, doc/manual/lsc_page.html,
-	doc/manual/mixed_pattern.eps, doc/manual/mixed_pattern.fig,
-	doc/manual/theFE.eps, doc/manual/theFE.fig,
-	doc/notes/Alain_dec01.ps, doc/notes/Meeting06-09-2002.ps,
-	doc/notes/Meeting200502.ps, doc/notes/doxy_comment.tex:
+	* doc/: manual/BCCond.eps, manual/BCCond.fig, manual/BCHandler.eps,
+	manual/BCHandler.fig, manual/BasElSha.eps, manual/BasElSha.fig,
+	manual/Directories_Organization, manual/Fem_nodes.eps,
+	manual/Fem_nodes.fig, manual/Fem_nodes.ps,
+	manual/NSCode_mesh_types.eps, manual/NSCode_mesh_types.kpr,
+	manual/Specifications.tex, manual/boundary_conditions.ps,
+	manual/doc_menu.ps, manual/docfe.tex, manual/jfg.tex,
+	manual/letter_Jan_2000.txt, manual/lsc_page.html,
+	manual/mixed_pattern.eps, manual/mixed_pattern.fig,
+	manual/theFE.eps, manual/theFE.fig, notes/Alain_dec01.ps,
+	notes/Meeting06-09-2002.ps, notes/Meeting200502.ps,
+	notes/doxy_comment.tex:
 
 	moved Documents/Manual Documents/Various and Notes to doc/manual
 	doc/misc doc/notes
 
-2003-10-23  prudhomm
+2003-10-23 16:30  prudhomm
 
 	* configure.ac:
 
 	configure checks for the presence of aztec now (it even looks at
 	the mox/epfl repository)
 
-2003-10-23  prudhomm
+2003-10-23 07:49  prudhomm
 
 	* INSTALL.cvs:
 
 	add extremely extensive documentation for compilation from CVS
 
-2003-10-23  prudhomm
+2003-10-23 07:17  prudhomm
 
 	* .cvsignore, AUTHORS, INSTALL, INSTALL.cvs, README:
 
 	* ignore automatically generated file * INSTALL file added *
 	INSTALL.cvs to be written * README is to be re-written also
 
-2003-10-20  prudhomm
+2003-10-20 17:19  prudhomm
 
 	* LifeV.kdevelop, configure.ac:
 
 	added C++ support :)
 
-2003-10-20  prudhomm
+2003-10-20 11:30  prudhomm
 
 	* .cvsignore, ChangeLog, LifeV.kdevelop:
 
 	update
 
-2003-10-20  prudhomm
+2003-10-20 10:20  prudhomm
 
 	* AUTHORS, COPYING, ChangeLog, INSTALL, LifeV.kdevelop,
 	Makefile.cvs, NEWS:
@@ -3389,39 +3065,39 @@
 	* use admin/cvs.sh * added files that automake want (dummy for now)
 	* added kdevelop configuration
 
-2003-10-20  prudhomm
+2003-10-20 10:10  prudhomm
 
 	* configure.ac:
 
 	some minor changes * my email address * version * echoing info to
 	show some activity
 
-2003-10-20  prudhomm
+2003-10-20 10:00  prudhomm
 
 	* configure.ac:
 
 	add admin as config dir
 
-2003-10-20  prudhomm
+2003-10-20 09:41  prudhomm
 
 	* Makefile.am, Makefile.cvs, configure.ac:
 
 	reorg started in branch LIFEV_reorganization. imported autotools
 	scripts (autoconf,automake,libtool)
 
-2003-10-15  prudhomm
+2003-10-15 17:24  prudhomm
 
 	* README:
 
 	README
 
-2003-10-15  prudhomm
+2003-10-15 16:59  prudhomm
 
 	* README:
 
 	my main contribution to Life ;) : edit the README file
 
-2003-06-19  forma
+2003-06-19 06:34  forma
 
 	* Doxyfile:
 
@@ -3429,51 +3105,29 @@
 	and space. After all who is using LaTeX documentation produced by
 	doxygen?
 
-2002-10-29  cvs
-
-	* README:
-
-	[no log message]
-
-2002-10-29  cvs
-
-	* README:
-
-	[no log message]
-
-2002-10-29  cvs
-
-	* README:
-
-	[no log message]
-
-2002-10-29  cvs
-
-	* README:
-
-	[no log message]
-
-2002-10-29  cvs
+2002-10-29 17:31  cvs
 
 	* README:
 
 	Una prova
 
-2002-10-08  cvs
-
-	* .cvsignore, Doxyfile, README:
-
-	[no log message]
-
-2002-10-03  cvs
+2002-10-03 16:31  cvs
 
 	* Doxyfile:
 
 	Initial revision
 
-2002-10-03  cvs
+2002-10-03 16:31  cvs
 
 	* Doxyfile:
 
 	LifeV Version 1.0
+
+1970-01-01 00:00  
+
+	* .cvsignore, ChangeLog, Doxyfile, README,
+	doc/manual/lifev-dev_generalities.tex,
+	testsuite/test_darcy/Makefile.am, testsuite/test_darcy/main.cpp:
+
+	[no log message]
 

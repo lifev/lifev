@@ -38,6 +38,15 @@ SUBDIRS = admin doc life testsuite
 
 include $(top_srcdir)/admin/Doxyfile.am
 
+dist-hook: changelog
+# make sure that we have an up-to-date ChangeLog
+	cp $(srcdir)/ChangeLog .
+
+changelog:
+	@if test -x /usr/bin/cvs2cl; then\
+	(cd $(srcdir) && cvs2cl -b -t  -S --utc -P);\
+    fi
+
 apidox-all:
 	make apidox
 	cd life && make apidox
