@@ -355,8 +355,8 @@ struct cmpBareItem;
    Specialised functor for Edges
 */
 // Specialisations
-struct
-cmpBareItem<BareEdge> //!< The actual comparison operator
+template<>
+struct cmpBareItem<BareEdge> //!< The actual comparison operator
 {
   bool operator() (const BareEdge & e1, const BareEdge & e2) const
     {
@@ -367,8 +367,8 @@ cmpBareItem<BareEdge> //!< The actual comparison operator
 /*! \ingroup comparison
   Specialised functor for Faces
 */
-struct
-cmpBareItem<BareFace>
+template<>
+struct cmpBareItem<BareFace>
 {
   bool operator() (const BareFace & e1, const BareFace & e2) const
     {
@@ -444,7 +444,7 @@ template<class BareItem>
 inline
 bool 
 BareItemsHandler<BareItem>::isThere(const BareItem & s) const{
-  return find(s) != end();
+  return find(s) != container::end();
 }
 
 template<class BareItem>
@@ -452,7 +452,7 @@ inline
 bool
 BareItemsHandler<BareItem>::setId(const BareItem & s,ID const id ){
   const_iterator i=find(s);
-  if (i != end()){
+  if (i != container::end()){
     i->second=id;
     return true;
   } else {
@@ -465,8 +465,8 @@ template<class BareItem>
 inline
 ID
 BareItemsHandler<BareItem>::id(const BareItem & s)const {
-  const_iterator i=find(s);
-  if (i != end())
+  const_iterator i=find(s); 
+  if (i != container::end())
     return i->second;
   else
     return 0;
@@ -494,7 +494,7 @@ template<class BareItem>
 inline
 UInt 
 BareItemsHandler<BareItem>::howMany() const{
-  return size();
+  return container::size();
 }
 
 template<class BareItem>
@@ -506,10 +506,10 @@ BareItemsHandler<BareItem>::isThereDel(BareItem const & s){
 template<typename BareItem>
 inline
 void BareItemsHandler<BareItem>::showMe() const{
-  cout << "BareItemsHandler: " << endl;
-  cout << "Number of Items stored: "<< this->size() <<endl;
-  cout << "Max Id stored         : "<< this->maxId()<<endl;
-  cout << "End of Information";  
+  std::cout << "BareItemsHandler: " << std::endl;
+  std::cout << "Number of Items stored: "<< this->size() <<std::endl;
+  std::cout << "Max Id stored         : "<< this->maxId()<<std::endl;
+  std::cout << "End of Information";  
 }
 #endif
 
