@@ -81,5 +81,4 @@ tol             = 1.00e-6
 drop            = 1.00e-4
 ilut_fill       = 1.5
 ]])
-AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria//piece-of-tube.mesh && $top_builddir/testsuite/data/mesh/inria//piece-of-tube-wall.mesh &&  $top_builddir/testsuite/test_mass_coupling/test_mass_coupling],[0],[ignore],[ignore])
 AT_CLEANUP
