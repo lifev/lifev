@@ -55,7 +55,7 @@ struct factoryDefaultError
         public std::exception
     {
     public:
-        Exception( IdentifierType id )
+        Exception( IdentifierType /*id*/ )
             :
             std::exception(),
             _M_ex()
@@ -89,7 +89,6 @@ struct factoryDefaultError
   \sa factoryDefaultError, factoryClone, TypeInfo
 
   @author Christophe Prud'homme
-  @version $Id: factory.hpp,v 1.3 2005-02-24 14:08:28 prudhomm Exp $
 */
 template
 <
@@ -121,18 +120,46 @@ public:
      */
     //@{
 
+    /**
+     * Register a product.
+     *
+     * A product is composed of an identifier (typically a
+     * std::string) and a functor that will create the associated
+     * object.
+     *
+     * @param id identifier for the object to be registered
+     * @param creator the functor that will create the registered
+     * object
+     *
+     * @return true if registration went fine, false otherwise
+     */
     bool registerProduct( const identifier_type& id, creator_type creator )
         {
             LifeV::Debug( 2200 ) << "Registered type with id : " << id << "\n";
             return _M_associations.insert( typename id_to_product_type::value_type( id, creator ) ).second;
         }
 
+    /**
+     * Unregister a product
+     *
+     * @param id
+     * @sa registerProduct
+     * @return true if unregistration went fine, false otherwise
+     */
     bool unregisterProduct( const identifier_type& id )
         {
             LifeV::Debug( 2200 ) << "Unregistered type with id : " << id << "\n";
             return _M_associations.erase( id ) == 1;
         }
 
+    /**
+     * Create an object from a product registered in the factory using
+     * identifier \c id
+     *
+     * @param id identifier of the product to instantiate
+     *
+     * @return the object associate with \c id
+     */
     product_type* createObject( const identifier_type& id )
         {
             typename id_to_product_type::const_iterator i = _M_associations.find( id );
