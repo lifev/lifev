@@ -404,7 +404,7 @@ namespace LifeV {
             // interface
             for(UInt iV = 1; iV <= _M_mesh.numVolumes(); iV++) {
 
-                _M_fe.update( _M_mesh.volumeList( iV ) );
+                _M_fe.updateJac( _M_mesh.volumeList( iV ) );
 
                 for(UInt iSe = 0; iSe < se.numSubelements(); ++iSe ) {
 
