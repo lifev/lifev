@@ -555,7 +555,7 @@ void BCBase::finalise()
     {
         _idList.clear();
         _idList.reserve( list0.size() );
-        copy( list0.begin(), list0.end(), inserter( _idList, _idList.end() ) );
+        std::copy( list0.begin(), list0.end(), std::inserter( _idList, _idList.end() ) );
         list0.clear();
     }
     _finalised = true;
@@ -668,7 +668,7 @@ void BCHandler::addBC( const std::string& name, const EntityFlag& flag,
 
     if ( _nbc == _bcList.size() )
         // Sorting list of BC. Essential BC must be treated at the end !!!!
-        sort( _bcList.begin(), _bcList.end() );
+        std::sort( _bcList.begin(), _bcList.end() );
 }
 void BCHandler::addBC( const std::string& name, const EntityFlag& flag,
                         const BCType& type, const BCMode& mode,
@@ -685,7 +685,7 @@ void BCHandler::addBC( const std::string& name, const EntityFlag& flag,
 
     if ( _nbc == _bcList.size() )
         // Sorting list of BC. Essential BC must be treated at the end !!!!
-        sort( _bcList.begin(), _bcList.end() );
+        std::sort( _bcList.begin(), _bcList.end() );
 }
 
 void BCHandler::addBC( const std::string& name, const EntityFlag& flag,
@@ -703,7 +703,7 @@ void BCHandler::addBC( const std::string& name, const EntityFlag& flag,
 
     if ( _nbc == _bcList.size() )
         // Sorting list of BC. Essential BC must be treated at the end !!!!
-        sort( _bcList.begin(), _bcList.end() );
+        std::sort( _bcList.begin(), _bcList.end() );
 }
 
 
@@ -722,7 +722,7 @@ void BCHandler::addBC( const std::string& name, const EntityFlag& flag,
 
     if ( _nbc == _bcList.size() )
         // Sorting list of BC. Essential BC must be treated at the end !!!!
-        sort( _bcList.begin(), _bcList.end() );
+        std::sort( _bcList.begin(), _bcList.end() );
 }
 void BCHandler::addBC( const std::string& name, const EntityFlag& flag,
                         const BCType& type, const BCMode& mode,
@@ -738,7 +738,7 @@ void BCHandler::addBC( const std::string& name, const EntityFlag& flag,
 
     if ( _nbc == _bcList.size() )
         // Sorting list of BC. Essential BC must be treated at the end !!!!
-        sort( _bcList.begin(), _bcList.end() );
+        std::sort( _bcList.begin(), _bcList.end() );
 }
 
 void BCHandler::addBC( const std::string& name, const EntityFlag& flag,
@@ -755,7 +755,7 @@ void BCHandler::addBC( const std::string& name, const EntityFlag& flag,
 
     if ( _nbc == _bcList.size() )
         // Sorting list of BC. Essential BC must be treated at the end !!!!
-        sort( _bcList.begin(), _bcList.end() );
+        std::sort( _bcList.begin(), _bcList.end() );
 }
 
 

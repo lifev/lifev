@@ -28,7 +28,7 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .cc
 INCLUDES 	= -I$(top_srcdir)/life/lifecore -I$(top_srcdir)/life/lifearray -I$(top_srcdir)/life/lifemesh -I$(top_srcdir)/life/lifealg
 
 include_HEADERS		= Operator01.hpp assemb.hpp bcCond.hpp bcVector.hpp bdf.hpp bdfNS.hpp \
-bc_manage.hpp currentBdFE.hpp currentFE.hpp currentHdivFE.hpp \
+bcManage.hpp currentBdFE.hpp currentFE.hpp currentHdivFE.hpp \
 dof.hpp dofInterface3Dto2D.hpp dofInterface3Dto3D.hpp dofInterfaceBase.hpp \
 dofInterfaceHandler.hpp  elemOper.hpp elemOper_ext.hpp \
 geoMap.hpp localDofPattern.hpp meshMotion.hpp quadRule.hpp \

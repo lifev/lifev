@@ -36,7 +36,7 @@
 #include "values.hpp"
 #include "pattern.hpp"
 #include "assemb.hpp"
-#include "bc_manage.hpp"
+#include "bcManage.hpp"
 #include "bcCond.hpp"
 #include "chrono.hpp"
 #include "dataAztec.hpp"
@@ -469,11 +469,11 @@ evalResidual( Vector&res, const Vector& sol, int iter )
     if ( !_BCh.bdUpdateDone() )
         _BCh.bdUpdate( _mesh, _feBd, this->_dof );
 
-    bc_manage_matrix( _K, _mesh, this->_dof, _BCh, _feBd, 1.0 );
+    bcManageMatrix( _K, _mesh, this->_dof, _BCh, _feBd, 1.0 );
 
     _rhs = _rhsWithoutBC;
 
-    bc_manage_vector( _rhs, _mesh, this->_dof, _BCh, _feBd, _time, 1.0 );
+    bcManageVector( _rhs, _mesh, this->_dof, _BCh, _feBd, _time, 1.0 );
 
     res = _K * sol - _rhs;
 
@@ -568,7 +568,7 @@ solveJac( Vector& step, const Vector& res, double& linear_rel_tol )
     if ( !_BCh.bdUpdateDone() )
         _BCh.bdUpdate( _mesh, _feBd, this->_dof );
 
-    bc_manage_matrix( _J, _mesh, this->_dof, _BCh, _feBd, tgv );
+    bcManageMatrix( _J, _mesh, this->_dof, _BCh, _feBd, tgv );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
@@ -643,7 +643,7 @@ solveJac(Vector& step, const Vector& res, double& linear_rel_tol, BCHandler &_BC
     if ( !_BCd.bdUpdateDone() )
         _BCd.bdUpdate( _mesh, _feBd, this->_dof );
 
-    bc_manage_matrix( _J, _mesh, this->_dof, _BCd, _feBd, tgv );
+    bcManageMatrix( _J, _mesh, this->_dof, _BCd, _feBd, tgv );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 

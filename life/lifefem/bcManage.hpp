@@ -18,7 +18,7 @@
 */
 
 /*!
-  \file bc_manage.h
+  \file bcManage.h
   \brief Functions for imposing boundary condtitions.
   \version 1.0
   \author M.A. Fernandez
@@ -33,19 +33,19 @@
 /*! \note Bug report (V. Martin, 12/02/2003)
   (tested with the mixed hybrid RT0 elements (Darcy))
 
-  The new functions bc_manage_matrix and bc_manage_vector
+  The new functions bcManageMatrix and bcManageVector
   are compiling for Essential FUNCTIONS
   but the results are WRONG!
 
-  The new function bc_manage_matrix passes for BC VECTORS
+  The new function bcManageMatrix passes for BC VECTORS
   (result: ??)
-  The new function bc_manage_vector fails for BC VECTORS
+  The new function bcManageVector fails for BC VECTORS
   (segmentation fault).
 
 */
 
-#ifndef _BC_MANAGE_
-#define _BC_MANAGE_
+#ifndef _BCMANAGE_
+#define _BCMANAGE_
 #include "bcCond.hpp"
 #include "dof.hpp"
 
@@ -56,7 +56,7 @@ namespace LifeV
 // Boundary conditions treatment
 // ===================================================
 template <typename MatrixType, typename VectorType, typename MeshType, typename DataType>
-void bc_manage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& dof,
+void bcManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& dof,
                 const BCHandler& BCh,
                 CurrentBdFE& bdfem, const DataType& coef, const DataType& t )
 {
@@ -87,7 +87,7 @@ void bc_manage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& d
 //Version that treates only the matrix modifications
 //Miguel:10/02  - Mixte : V. Martin: 03/03 // I added the time t for the mixte case. V. Martin
 template <typename MatrixType, typename MeshType, typename DataType>
-void bc_manage_matrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
+void bcManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
                        const BCHandler& BCh,
                        CurrentBdFE& bdfem, const DataType& coef, const DataType& t = 0 )
 {
@@ -117,7 +117,7 @@ void bc_manage_matrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
 //Version that treates only the vector modifications
 //Miguel:10/02  - Mixte : V. Martin: 03/03
 template <typename VectorType, typename MeshType, typename DataType>
-void bc_manage_vector( VectorType& b, const MeshType& mesh, const Dof& dof,
+void bcManageVector( VectorType& b, const MeshType& mesh, const Dof& dof,
                        const BCHandler& BCh, CurrentBdFE& bdfem, const DataType& t, const DataType& coef )
 {
 
@@ -148,7 +148,7 @@ void bc_manage_vector( VectorType& b, const MeshType& mesh, const Dof& dof,
 //! Alain, 07/08/02
 template <typename MatrixType1, typename MatrixType2, typename VectorType,
 typename MeshType, typename DataType>
-void bc_manage( MatrixType1& C, MatrixType2& trD, VectorType& b,
+void bcManage( MatrixType1& C, MatrixType2& trD, VectorType& b,
                 const MeshType& mesh, const Dof& dof, const BCHandler& BCh,
                 CurrentBdFE& bdfem, const DataType& coef, const DataType& t )
 {
@@ -178,7 +178,7 @@ void bc_manage( MatrixType1& C, MatrixType2& trD, VectorType& b,
 //! the transpose matrix D. So the global matrix remains symmetric.
 template <typename MatrixType1, typename MatrixType2, typename MatrixType3,
 typename VectorType, typename MeshType, typename DataType>
-void bc_manage( MatrixType1& C, MatrixType2& trD, MatrixType3& D,
+void bcManage( MatrixType1& C, MatrixType2& trD, MatrixType3& D,
                 VectorType& b, VectorType& bp, const MeshType& mesh,
                 const Dof& dof, const BCHandler& BCh, CurrentBdFE& bdfem,
                 const DataType& coef, const DataType& t )

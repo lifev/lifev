@@ -42,7 +42,7 @@
 #include <refFE.hpp>
 #include <values.hpp>
 #include <assemb.hpp>
-#include <bc_manage.hpp>
+#include <bcManage.hpp>
 
 
 namespace LifeV
@@ -212,7 +212,7 @@ void HarmonicExtension::updateExtension( Mesh& mesh, const Real& time, const UIn
         _mesh_BCh.bdUpdate( mesh, _feBd, _dof_mesh );
 
         // Boundary conditions treatment on the matrix
-        bc_manage_matrix( _a, mesh, _dof_mesh, _mesh_BCh, _feBd, 1.0 );
+        bcManageMatrix( _a, mesh, _dof_mesh, _mesh_BCh, _feBd, 1.0 );
     }
 
     // Number to total dof
@@ -222,7 +222,7 @@ void HarmonicExtension::updateExtension( Mesh& mesh, const Real& time, const UIn
     _f = 0.0;
 
     // Boundary conditions treatment
-    bc_manage_vector( _f, mesh, _dof_mesh, _mesh_BCh, _feBd, time, 1.0 );
+    bcManageVector( _f, mesh, _dof_mesh, _mesh_BCh, _feBd, time, 1.0 );
 
     // AZTEC stuff
     int proc_config[ AZ_PROC_SIZE ]; // Processor information:
@@ -289,7 +289,7 @@ void HarmonicExtension::updateExtensionTransp( Mesh& mesh, const Real& time )
 {
 
     // Boundary conditions treatment
-    bc_manage_vector( _disp, mesh, _dof_mesh, _mesh_BCh, _feBd, time );
+    bcManageVector( _disp, mesh, _dof_mesh, _mesh_BCh, _feBd, time );
 }
 }
 #endif

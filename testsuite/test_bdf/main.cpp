@@ -39,7 +39,7 @@
 
 #include "main.hpp"
 #include "ud_functions.hpp"
-#include "bc_manage.hpp"
+#include "bcManage.hpp"
 #include "elemMat.hpp"
 #include "elemOper.hpp"
 #include "bdf.hpp"
@@ -302,7 +302,7 @@ int main() {
             Real tgv=1.;
 
             chrono.start();
-            bc_manage(A,F,aMesh,dof,BCh,feBd,tgv,t);
+            bcManage(A,F,aMesh,dof,BCh,feBd,tgv,t);
 
             chrono.stop();
             cout << chrono.diff() << "s." << endl;

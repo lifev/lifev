@@ -35,8 +35,6 @@
 
 namespace LifeV
 {
-//using namespace std;
-
 class DofInterfaceHandler
 {
 

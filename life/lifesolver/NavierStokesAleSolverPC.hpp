@@ -38,7 +38,7 @@
 #include "values.hpp"
 #include "pattern.hpp"
 #include "assemb.hpp"
-#include "bc_manage.hpp"
+#include "bcManage.hpp"
 #include "algebraic_facto.hpp"
 #include "chrono.hpp"
 #include "dataAztec.hpp"
@@ -451,7 +451,7 @@ iterate( const Real& time )
     chrono.start();
     _f_u = _f_uWithOutBC;
     _BCh_u.bdUpdate( _mesh, _feBd_u, _dof_u );
-    bc_manage( _C, _trD, _f_u, _mesh, _dof_u, _BCh_u, _feBd_u, tgv, time );
+    bcManage( _C, _trD, _f_u, _mesh, _dof_u, _BCh_u, _feBd_u, tgv, time );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
@@ -607,7 +607,7 @@ iterateTransp( const Real& time )
     chrono.start();
     _f_u = _f_uWithOutBC;
     _BCh_u.bdUpdate( _mesh, _feBd_u, _dof_u );
-    bc_manage( _C, _trD, _f_u, _mesh, _dof_u, _BCh_u, _feBd_u, tgv, time );
+    bcManage( _C, _trD, _f_u, _mesh, _dof_u, _BCh_u, _feBd_u, tgv, time );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
@@ -852,7 +852,7 @@ iterateLin( const Real& time, BCHandler& BCh_du )
 
 
     BCh_du.bdUpdate( _mesh, _feBd_u, _dof_u );
-    bc_manage( _C, _trD, _f_u, _mesh, _dof_u, BCh_du, _feBd_u, tgv, time );
+    bcManage( _C, _trD, _f_u, _mesh, _dof_u, BCh_du, _feBd_u, tgv, time );
 
 
     chrono.stop();

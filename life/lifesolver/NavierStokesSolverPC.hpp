@@ -41,7 +41,7 @@
 #include "values.hpp"
 #include "pattern.hpp"
 #include "assemb.hpp"
-#include "bc_manage.hpp"
+#include "bcManage.hpp"
 #include "algebraic_facto.hpp"
 #include "bcCond.hpp"
 #include "chrono.hpp"
@@ -425,7 +425,7 @@ iterate( const Real& time )
     // BC manage for the velocity
     if ( !this->_BCh_u.bdUpdateDone() )
         this->_BCh_u.bdUpdate( this->_mesh, this->_feBd_u, this->_dof_u );
-    bc_manage( _C, _trD, _f_u, this->_mesh, this->_dof_u, this->_BCh_u, this->_feBd_u, tgv, time );
+    bcManage( _C, _trD, _f_u, this->_mesh, this->_dof_u, this->_BCh_u, this->_feBd_u, tgv, time );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 

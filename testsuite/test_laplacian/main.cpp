@@ -33,7 +33,7 @@
 
 #include "main.hpp"
 #include "ud_functions.hpp"
-#include "bc_manage.hpp"
+#include "bcManage.hpp"
 #include "elemMat.hpp"
 #include "elemOper.hpp"
 #include "openDX_wrtrs.hpp"

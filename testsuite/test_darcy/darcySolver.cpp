@@ -24,7 +24,7 @@
 */
 
 #include "darcySolver.hpp"
-#include "bc_manage.hpp"
+#include "bcManage.hpp"
 #include "medit_wrtrs.hpp"
 #include "clapack.h"
 #include "user_diffusion.hpp"
@@ -166,7 +166,7 @@ void DarcySolver::_element_computation(int ielem)
       break;
     }
   default:
-    std::cerr << "diffusion_type=" << diffusion_type << " ??? \n" 
+    std::cerr << "diffusion_type=" << diffusion_type << " ??? \n"
 	      << std::endl;
     exit(1);
   }
@@ -350,7 +350,7 @@ void DarcySolver::computeHybridMatrixAndSourceRHS()
 
 void DarcySolver::applyBC()
 {
-  bc_manage(mat,globalF,mesh,tpdof,bc,feBd,1.,0.0);
+  bcManage(mat,globalF,mesh,tpdof,bc,feBd,1.,0.0);
 }
 
 void DarcySolver::solveDarcy()

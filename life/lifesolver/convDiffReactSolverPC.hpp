@@ -35,7 +35,7 @@
 #include "values.hpp"
 #include "pattern.hpp"
 #include "assemb.hpp"
-#include "bc_manage.hpp"
+#include "bcManage.hpp"
 #include "algebraic_facto.hpp"
 #include "bcCond.hpp"
 #include "chrono.hpp"
@@ -350,7 +350,7 @@ iterate( const Real& time )
     // BC manage for the concentration
     if ( !_BCh_c.bdUpdateDone() )
         _BCh_c.bdUpdate( _mesh, _feBd_c, _dof_c );
-    bc_manage( _CDR, _f_c, _mesh, _dof_c, _BCh_c, _feBd_c, tgv, time );
+    bcManage( _CDR, _f_c, _mesh, _dof_c, _BCh_c, _feBd_c, tgv, time );
     chrono.stop();
 
     std::cout << "done in " << chrono.diff() << "s." << std::endl;

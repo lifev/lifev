@@ -17,7 +17,7 @@
 #include <values.hpp>
 #include <pattern.hpp>
 #include <assemb.hpp>
-#include <bc_manage.hpp>
+#include <bcManage.hpp>
 #include <SolverAztec.hpp>
 //#include <lifeconfig.h>
 //#if defined( HAVE_PETSC_H )
@@ -445,7 +445,7 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
     // BC manage for the velocity
     if ( !_BCh_u.bdUpdateDone() )
         _BCh_u.bdUpdate( _mesh, _feBd_u, _dof_u );
-    bc_manage( M_matrFull, M_rhsFull, _mesh, _dof_u, _BCh_u, _feBd_u, 1.0,
+    bcManage( M_matrFull, M_rhsFull, _mesh, _dof_u, _BCh_u, _feBd_u, 1.0,
                M_time );
 
 

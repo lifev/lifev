@@ -154,7 +154,7 @@ void  operFS::solveLinearSolid() {
 
   if ( !_BCh_dz.bdUpdateDone() )
     _BCh_dz.bdUpdate(_solid._mesh,_solid._feBd,_solid._dof);
-  bc_manage_vector(_rhs_dz,_solid._mesh,_solid._dof,_BCh_dz,_solid._feBd, 1.0, 1.0);
+  bcManageVector(_rhs_dz,_solid._mesh,_solid._dof,_BCh_dz,_solid._feBd, 1.0, 1.0);
 
   Real tol=1.e-10;
 

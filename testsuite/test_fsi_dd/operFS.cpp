@@ -364,7 +364,7 @@ void  operFS::solveLinearSolid()
         M_BCh_dz.bdUpdate(M_solid._mesh, M_solid._feBd,
                           M_solid._dof);
 
-    bc_manage_vector(M_rhs_dz, M_solid._mesh, M_solid._dof,
+    bcManageVector(M_rhs_dz, M_solid._mesh, M_solid._dof,
                      M_BCh_dz, M_solid._feBd, 1., 1.);
 
     Real tol       = 1.e-10;
