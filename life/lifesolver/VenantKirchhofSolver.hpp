@@ -115,10 +115,10 @@ public:
     void updateJac( Vector& sol, int iter );
 
     //! solves the tangent problem for newton iterations
-    void solveJac( Vector& step, const Vector& res, double& linear_rel_tol );
+    void solveJac( const Vector& res, double& linear_rel_tol, Vector &step);
 
     //! solves the tangent problem with custom BC
-    void solveJac( Vector& step, const Vector& res, double& linear_rel_tol, BCHandler &_BCd );
+    void solveJac( const Vector& res, double& linear_rel_tol, Vector &step, BCHandler &_BCd );
 
 
 private:
@@ -173,7 +173,7 @@ private:
     DataAztec _dataAztec;
 
     //! evaluates residual for newton interations
-    void evalResidual( Vector&res, const Vector& sol, int iter );
+    void evalResidual( const Vector& sol, int iter, Vector &res );
 
     //! updates the tangent matrix for newton iterations
 
@@ -412,7 +412,7 @@ showMe( std::ostream& c ) const
 
 template <typename Mesh>
 void VenantKirchhofSolver<Mesh>::
-evalResidual( Vector&res, const Vector& sol, int iter )
+evalResidual( const Vector& sol, int iter, Vector &res )
 {
 
 
@@ -552,7 +552,7 @@ updateJac( Vector& sol, int iter )
 
 template <typename Mesh>
 void VenantKirchhofSolver<Mesh>::
-solveJac( Vector& step, const Vector& res, double& linear_rel_tol )
+solveJac( const Vector& res, double& linear_rel_tol, Vector &step)
 {
 
     Chrono chrono;
@@ -627,7 +627,7 @@ solveJac( Vector& step, const Vector& res, double& linear_rel_tol )
 
 template <typename Mesh>
 void VenantKirchhofSolver<Mesh>::
-solveJac(Vector& step, const Vector& res, double& linear_rel_tol, BCHandler &_BCd )
+solveJac(const Vector& res, double& linear_rel_tol, Vector &step, BCHandler &_BCd )
 {
 
     Chrono chrono;
