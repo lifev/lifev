@@ -149,8 +149,7 @@ operFS::displacementOnInterface()
     dispOnInterface = ZeroVector(dispOnInterface.size());
 
     FOR_EACH_INTERFACE_DOF( dispOnInterface[IDsolid - 1 + jDim*totalDofSolid] =
-                            M_solid->d()              [IDsolid - 1 + jDim*totalDofSolid] -
-                            M_fluid->getDisplacement()[IDfluid - 1 + jDim*totalDofFluid] );
+                            M_solid->d()              [IDsolid - 1 + jDim*totalDofSolid]);
 
     std::cout << "max norm disp = " << norm_inf(dispOnInterface);
     std::cout << std::endl;

@@ -59,8 +59,7 @@ public:
     typedef boost::shared_ptr<BCHandler> bchandler_type;
 
     // constructors
-    operFS()
-        :
+    operFS():
         M_BCh_u(),
         M_BCh_d(),
         M_BCh_mesh(),
@@ -71,6 +70,7 @@ public:
         M_dofStructureToFluidMesh( new DofInterface3Dto3D ),
         M_dofMeshToFluid( new DofInterface3Dto3D ),
         M_dispStruct(),
+        M_dispStructOld(),
         M_velo(),
         M_nbEval( 0 ),
         M_method(),
@@ -163,6 +163,7 @@ protected:
     dof_interface_type      M_dofMeshToFluid;
 
     Vector                  M_dispStruct;
+    Vector                  M_dispStructOld;
     Vector                  M_velo;
 
     SolverAztec             M_solverAztec;

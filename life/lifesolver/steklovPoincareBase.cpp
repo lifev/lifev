@@ -137,6 +137,9 @@ void steklovPoincare::eval(const Vector& disp,
     dispNew = M_solid->d();
     velo    = M_solid->w();
 
+//     M_solid->postProcess();
+//     M_fluid->postProcess();
+
     std::cout << "                ::: norm(disp     ) = "
               << norm_2(disp) << std::endl;
     std::cout << "                ::: norm(dispNew  ) = "
@@ -157,6 +160,8 @@ void steklovPoincare::evalResidual(Vector &res,
     if (status) std::cout << " [NEW TIME STEP] ";
     std::cout << std::endl;
 
+    M_dispStructOld = disp;
+
     eval(disp, status, M_dispStruct, M_velo);
 
     M_residualS = M_solid->residual();
@@ -172,10 +177,10 @@ void steklovPoincare::evalResidual(Vector &res,
     std::cout << "max ResidualFSI = " << norm_inf(M_residualFSI)
               << std::endl;
 
-//     Vector muk = disp;
-//     muk = ZeroVector( muk.size() );
-//     invSsPrime(M_residualS, 1e-08, muk);
-//     std::cout << "Norm_max d_disp = " << norm_inf(disp - muk) << std::endl;
+//      Vector muk = disp;
+//      muk = ZeroVector( muk.size() );
+//      invSsPrime(M_residualS, 1e-08, muk);
+//      std::cout << "Norm_max d_disp = " << norm_inf(disp - muk) << std::endl;
 //     muk = ZeroVector( muk.size() );
 //     invSfPrime(M_residualF, 1e-08, muk);
 //     std::cout << "Norm_max f_disp = " << norm_inf(disp - muk) << std::endl;
@@ -329,7 +334,7 @@ void  steklovPoincare::solveJac(Vector &muk,
     }
 
     if (M_nbEval == 1) M_aitkFS.restart();
-    muk = M_aitkFS.computeDeltaLambda(M_dispStruct, muF, muS );
+    muk = M_aitkFS.computeDeltaLambda(M_dispStructOld, muF, muS );
 }
 
 

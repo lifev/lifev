@@ -72,18 +72,21 @@ fixedPoint::setup()
     setUpBC();
 }
 
-void fixedPoint::eval(Vector& dispNew, Vector& velo, const Vector& disp, int status)
+void fixedPoint::eval(Vector& dispNew,
+                      Vector& velo,
+                      const Vector& disp,
+                      int status)
 {
     if(status) M_nbEval = 0; // new time step
     M_nbEval++ ;
 
-    M_solid->d() = disp;
+    this->M_solid->d() = disp;
 
-    M_fluid->updateMesh(M_time);
-    M_fluid->iterate(M_time);
+    this->M_fluid->updateMesh(M_time);
+    this->M_fluid->iterate(M_time);
 
-    M_solid->setRecur(0);
-    M_solid->iterate();
+    this->M_solid->setRecur(0);
+    this->M_solid->iterate();
 
     dispNew = M_solid->d();
     velo    = M_solid->w();
@@ -108,6 +111,8 @@ void fixedPoint::evalResidual(Vector &res, const Vector& disp, int iter)
     std::cout << "*** Residual computation g(x_" << iter <<" )";
     if (status) std::cout << " [NEW TIME STEP] ";
     std::cout << std::endl;
+
+    M_dispStructOld = disp;
 
     eval(M_dispStruct, M_velo, disp, status);
 
@@ -171,52 +176,9 @@ void  fixedPoint::solveJac(Vector        &_muk,
                            const Vector  &_res,
                            const double   _linearRelTol)
 {
-//     Vector muF(_res.size());
-//     Vector muS(_res.size());
-
-//     muS = _res;
-
     if (M_nbEval == 1) M_aitkFS.restart();
-//    _muk = M_aitkFS.computeDeltaLambda(M_dispStruct, muF, muS);
-    _muk = M_aitkFS.computeDeltaLambda(M_dispStruct, _res);
+    _muk = M_aitkFS.computeDeltaLambda(M_dispStructOld, -1.*_res);
 }
-
-
-void fixedPoint::transferOnInterface(const Vector      &_vec1,
-                                     const BCHandler   &_BC,
-                                     const std::string &_BCName,
-                                     Vector            &_vec2)
-{
-    int iBC = _BC.getBCbyName(_BCName);
-
-    BCBase const &BCInterface = _BC[(UInt) iBC];
-
-    UInt nDofInterface = BCInterface.list_size();
-
-    UInt nDim = BCInterface.numberOfComponents();
-
-    UInt totalDof1 = _vec1.size()/ nDim;
-    UInt totalDof2 = _vec2.size()/ nDim;
-
-    for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)
-    {
-        ID ID1 = BCInterface(iBC)->id();
-
-        BCVectorInterface const *BCVInterface =
-            static_cast <BCVectorInterface const *>
-            (BCInterface.pointerToBCVector());
-
-        ID ID2 = BCVInterface->
-            dofInterface().getInterfaceDof(ID1);
-
-        for (UInt jDim = 0; jDim < nDim; ++jDim)
-        {
-            _vec2[ID2 - 1 + jDim*totalDof2] =
-                _vec1[ID1 - 1 + jDim*totalDof1];
-        }
-    }
-}
-
 
 
 //
