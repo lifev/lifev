@@ -183,7 +183,7 @@ int main(int argc, char** argv)
     fluid.initialize(u0);
     solid.initialize(d0,w0);
 
-    Real abstol = 1.e-7;
+    Real abstol = 1.e-6;
     Real reltol = 0.0;
     Real etamax = 1.e-3;
 
