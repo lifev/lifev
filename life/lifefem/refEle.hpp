@@ -1,4 +1,4 @@
-/*
+/*-*- mode: c++ -*-
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
 
@@ -144,7 +144,7 @@ public:
       return _d2PhiQuad( _idxD2Quad(qr.id) + ((ig*nbDof+ i) * nbCoor + icoor)*nbCoor + jcoor );
   }
   void check() const;//!< A simple check function
-  friend ostream& operator << (ostream& f,const RefEle& fe);
+  friend std::ostream& operator << (std::ostream& f,const RefEle& fe);
 };
 
 
@@ -548,6 +548,36 @@ static const Fct der2fct_Q2_2D[36] =
   der2fct9_11_Q2_2D,der2fct9_12_Q2_2D,der2fct9_21_Q2_2D,der2fct9_22_Q2_2D
 };
 
+//======================================================================
+//
+//                            P0  (3D)
+//
+//======================================================================
+/*                 
+                
+               / .  
+              /  \.
+             /  . \\
+            / . 1  \\
+           /.       \!
+           ----------
+*/
+Real fct1_P0_3D(cRRef x,cRRef y,cRRef z);
+
+Real derfct1_P0_3D(cRRef,cRRef,cRRef );
+
+// Second derivatives
+Real der2fct1_P0_3D(cRRef,cRRef,cRRef);
+
+static const Real refcoor_P0_3D[3] = {0.25  ,0.25  ,0.25};
+
+static const Fct fct_P0_3D[1] = {fct1_P0_3D};
+
+static const Fct derfct_P0_3D[3] = {derfct1_P0_3D, derfct1_P0_3D, derfct1_P0_3D};
+static const Fct der2fct_P0_3D[9] =
+{derfct1_P0_3D, derfct1_P0_3D, derfct1_P0_3D,
+ derfct1_P0_3D, derfct1_P0_3D, derfct1_P0_3D,
+ derfct1_P0_3D, derfct1_P0_3D, derfct1_P0_3D};
 
 //======================================================================
 //

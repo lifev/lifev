@@ -1,4 +1,4 @@
-/*
+/*-*- mode: c++ -*-
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
 
@@ -39,35 +39,35 @@ RefFE::~RefFE()
   DESTRUCTOR("RefFE");
 }
 
-ostream& operator << (ostream& f,const RefFE& fe)
+std::ostream& operator << (std::ostream& f,const RefFE& fe)
 {
   f << "-------------------------\n";
-  f << "Reference Finite Element: " << fe.name << endl;
+  f << "Reference Finite Element: " << fe.name << std::endl;
   f << "-------------------------\n";
-  f << "*** Shape : " << fe.shape << endl;
+  f << "*** Shape : " << fe.shape << std::endl;
   f << "*** Local coordinate of the nodes :\n";
   for(int i=0;i<fe.nbDof;i++){
-    f << fe.xi(i) << " " << fe.eta(i) << " " << fe.zeta(i) << endl;
+    f << fe.xi(i) << " " << fe.eta(i) << " " << fe.zeta(i) << std::endl;
   }
   f << "*** Pattern :\n";
   for(int i=0;i<fe.nbPattern();i++) f << "(" << fe.patternFirst(i) << "," << fe.patternSecond(i) << ") \n";
   for(int k=0;k<fe._sqr->nbQuadRule;k++){
     const QuadRule& qr = fe._sqr->quadRule(k);
-    f << "\n*** Quadrature rule : " << qr.name << endl;
+    f << "\n*** Quadrature rule : " << qr.name << std::endl;
     for(int ig=0;ig<qr.nbQuadPt;ig++){
-      f << "    - Quadrature point : " << ig << endl;
-      //      f << "     number and values of basis functions = " << fe.phiQuadPt(ig,qr) << endl;
+      f << "    - Quadrature point : " << ig << std::endl;
+      //      f << "     number and values of basis functions = " << fe.phiQuadPt(ig,qr) << std::endl;
       for(int i=0;i<fe.nbDof;i++){
-	f << "      Basif fct " << i << endl;
-	f << "         Value = " << fe.phi(i,ig,qr) << endl;
+	f << "      Basif fct " << i << std::endl;
+	f << "         Value = " << fe.phi(i,ig,qr) << std::endl;
 	f << "         Derivatives = " ;
 	for(int icoor=0;icoor<fe.nbCoor;icoor++) f << " " << fe.dPhi(i,icoor,ig,qr);
-	f << endl;
+	f << std::endl;
 	f << "         Second derivatives = " ;
 	for(int icoor=0;icoor<fe.nbCoor;icoor++)
 	  for(int jcoor=0;jcoor<fe.nbCoor;jcoor++)
 	  f << " " << fe.d2Phi(i,icoor,jcoor,ig,qr);
-	f << endl;
+	f << std::endl;
       }
     }
   }

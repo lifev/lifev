@@ -1,4 +1,4 @@
-/*
+/*-*- mode: c++ -*-
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
 
@@ -72,6 +72,7 @@ namespace LifeV
 #define FE_Q1_2D 14
 #define FE_Q2_2D 15
 
+#define FE_P0_3D 20
 #define FE_P1_3D 21
 #define FE_P1bubble_3D 22
 #define FE_P2_3D 23
@@ -82,7 +83,7 @@ namespace LifeV
 #define FE_Q2_3D 27
 
 #define FE_RT0_HEXA_3D 31         //!< Vectorial space for Mixed FE
-
+#define FE_RT0_TETRA_3D 32
 #define FE_RT0_HYB_HEXA_3D 41     //!< for hybrid Mixed FE.
 #define FE_RT1_HYB_HEXA_3D 42
 #define FE_RT0_HYB_TETRA_3D 44
@@ -131,7 +132,7 @@ public:
 	const Real* _refCoor,const SetOfQuadRule& sqr,PatternType _patternType,
 	const RefFE* bdRefFE);
   ~RefFE();
-  friend ostream& operator << (ostream& f,const RefFE& fe);
+  friend std::ostream& operator << (std::ostream& f,const RefFE& fe);
   //! return the natural reference finite element for the boundary
   inline const RefFE& boundaryFE() const {
     ASSERT_PRE( _boundaryFE , "No boundary FE defined");
@@ -152,6 +153,7 @@ extern const RefFE feQuadQ0;
 extern const RefFE feQuadQ1;
 extern const RefFE feQuadQ2;
 
+extern const RefFE feTetraP0;
 extern const RefFE feTetraP1;
 extern const RefFE feTetraP1bubble;
 extern const RefFE feTetraP2;

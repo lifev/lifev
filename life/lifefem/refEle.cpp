@@ -1,4 +1,4 @@
-/*
+/*-*- mode: c++ -*-
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
 
@@ -65,11 +65,11 @@ RefEle::~RefEle()
 void RefEle::check() const
 {
   Real sumphi,sumdphi,sumd2phi;
-  cout << "*** Check " << name << endl;
+  std::cout << "*** Check " << name << std::endl;
   for(int k=0;k<_sqr->nbQuadRule;k++){
     sumphi=sumdphi=sumd2phi=0.;
     const QuadRule& qr = _sqr->quadRule(k);
-    cout << endl << "    " << qr.name << endl;
+    std::cout << std::endl << "    " << qr.name << std::endl;
     for(int ig=0;ig<qr.nbQuadPt;ig++){
       for(int i=0;i<nbDof;i++){
 	sumphi += phi(i,ig,qr) * qr.weight(ig);
@@ -79,40 +79,40 @@ void RefEle::check() const
 	    sumd2phi += d2Phi(i,icoor,jcoor,ig,qr)*qr.weight(ig);
       }
     }
-    cout << "     sum_i integral phi_i                                   = " << sumphi << endl;
-    cout << "     sum_{i,icoor} integral dphi_i/dx_icoor                 = " << sumdphi << endl;
-    cout << "     sum_{i,icoor,jcoor} integral d2phi_i/dx_icoor dy_icoor = " << sumd2phi << endl;
+    std::cout << "     sum_i integral phi_i                                   = " << sumphi << std::endl;
+    std::cout << "     sum_{i,icoor} integral dphi_i/dx_icoor                 = " << sumdphi << std::endl;
+    std::cout << "     sum_{i,icoor,jcoor} integral d2phi_i/dx_icoor dy_icoor = " << sumd2phi << std::endl;
   }
-  cout << endl;
+  std::cout << std::endl;
 }
 
-ostream& operator << (ostream& f,const RefEle& ele)
+std::ostream& operator << (std::ostream& f,const RefEle& ele)
 {
   f << "-------------------------\n";
-  f << "Reference Element: " << ele.name << endl;
+  f << "Reference Element: " << ele.name << std::endl;
   f << "-------------------------\n";
-  f << "*** Shape : " << ele.shape << endl;
+  f << "*** Shape : " << ele.shape << std::endl;
   f << "*** Local coordinate of the nodes :\n";
   for(int i=0;i<ele.nbDof;i++){
-    f << ele.xi(i) << " " << ele.eta(i) << " " << ele.zeta(i) << endl;
+    f << ele.xi(i) << " " << ele.eta(i) << " " << ele.zeta(i) << std::endl;
   }
   for(int k=0;k<ele._sqr->nbQuadRule;k++){
     const QuadRule& qr = ele._sqr->quadRule(k);
-    f << "\n*** Quadrature rule : " << qr.name << endl;
+    f << "\n*** Quadrature rule : " << qr.name << std::endl;
     for(int ig=0;ig<qr.nbQuadPt;ig++){
-      f << "    - Quadrature point : " << ig << endl;
-      //      f << "     number and values of basis functions = " << ele.phiQuadPt(ig,qr) << endl;
+      f << "    - Quadrature point : " << ig << std::endl;
+      //      f << "     number and values of basis functions = " << ele.phiQuadPt(ig,qr) << std::endl;
       for(int i=0;i<ele.nbDof;i++){
-	f << "      Basif fct " << i << endl;
-	f << "         Value = " << ele.phi(i,ig,qr) << endl;
+	f << "      Basif fct " << i << std::endl;
+	f << "         Value = " << ele.phi(i,ig,qr) << std::endl;
 	f << "         Derivatives = " ;
 	for(int icoor=0;icoor<ele.nbCoor;icoor++) f << " " << ele.dPhi(i,icoor,ig,qr);
-	f << endl;
+	f << std::endl;
 	f << "         Second derivatives = " ;
 	for(int icoor=0;icoor<ele.nbCoor;icoor++)
 	  for(int jcoor=0;jcoor<ele.nbCoor;jcoor++)
 	  f << " " << ele.d2Phi(i,icoor,jcoor,ig,qr);
-	f << endl;
+	f << std::endl;
       }
     }
   }
