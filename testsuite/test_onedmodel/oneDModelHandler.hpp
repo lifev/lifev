@@ -38,7 +38,7 @@
 #include "geoMap.hpp"
 #include "currentFE.hpp"
 #include "refFE.hpp"
-#include "dof.hpp"
+#include "dofOneD.hpp"
 #include "bcCond.hpp"
 #include "medit_wrtrs.hpp"
 
@@ -70,11 +70,14 @@ public:
   //! Do nothing destructor
   ~OneDModelHandler() {};
 
-   //! Sets initial condition for the concentration 
+  //! Sets initial condition for the concentration 
+  void initialize(const double& u0); 
+  
+  //! Sets initial condition for the concentration 
   //! (incremental approach): the initial time is t0, the time step dt
   void initialize(const Function& c0, Real t0, Real dt); 
 
- //! Sets initial condition for the concentration from file
+  //! Sets initial condition for the concentration from file
   void initialize(const std::string & vname);
 
   //! Update the right  hand side  for time advancing   
@@ -107,16 +110,18 @@ public:
 
   const RefFE& _M_refFE;   //!< Reference Finite Element
 
-  //  Dof  _M_dof;       //!< the degree of freedom  (useless without the 1D mesh)
+  DofOneD _M_dof;       //!< the simplified degrees of freedom
   UInt _M_dimDof;   //!< number of dof  := nb of vertices
 
   CurrentFE _M_fe;     //!< current finite element
 
-  int _M_nb_BC;                //!< number of boundary conditions
-  BC_Handler _M_BCh;            //!< boundary conditions handler
 
-  //!!! Why  BC_Handler& _BCh_c;??
+  //! Dirichlet boundary value at left and right (NO bc_handler)
+  double _M_bcDirLeft;
+  double _M_bcDirRight;
 
+  //! initial value for the unknown
+  ScalUnknown<Vector> _M_U_initial;
 
   //! Area unknown
   ScalUnknown<Vector> _M_AreaUnkn;

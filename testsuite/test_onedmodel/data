@@ -13,9 +13,9 @@ beta1	= 5.5		# pressure law exponent
 Kr	= 6.0		# friction parameter (source term)
 
 [time]
-timebeg	= 1.00		# inittime
-timeend	= 1.10		# endtime
-timestep= 0.02		# timestep		
+timebeg	 = 0.0		# inittime
+timeend	 = 5.0		# endtime
+timestep = 0.05		# timestep		
 
 [discretization]
 mesh_file	= cylhexa.mesh	# mesh file name

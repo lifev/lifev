@@ -46,8 +46,14 @@ public:
   //! Constructor
   DataOneDModel(const GetPot& dfile);
   
+  // return the different time data
+  double timestep() const;
+  double inittime() const;
+  double endtime()  const;
+  
+
   //! Output 
-  void showMeData(std::ostream& c=std::cout);
+  void showMeData(std::ostream& c=std::cout) const;
 
 protected:
   //

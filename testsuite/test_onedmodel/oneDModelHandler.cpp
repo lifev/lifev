@@ -37,8 +37,8 @@ OneDModelHandler::OneDModelHandler(const GetPot& data_file):
      _M_geoMap(geoLinearSeg),
      _M_qr(quadRuleSeg3pt),
      _M_refFE(feSegP1),
+     _M_dof(_M_mesh.numVertices()),
      _M_dimDof(_M_mesh.numVertices()),
-     //     _M_dof(_M_refFE),
      _M_fe(_M_refFE,_M_geoMap,_M_qr)
 {
   /* Useless as long as we don't have a 1d mesh reader and handler...
@@ -52,11 +52,6 @@ OneDModelHandler::OneDModelHandler(const GetPot& data_file):
 
   std::cout << "dimDof = "  << _M_dimDof << std::endl;
   
-  std::cerr << "_M_fe.nbCoor = " << _M_fe.nbCoor << std::endl;
-  std::cerr << "_M_fe.nbGeoNode = " << _M_fe.nbGeoNode << std::endl;
-  std::cerr << "_M_fe.nbNode = " << _M_fe.nbNode << std::endl;
-  std::cerr << "_M_fe.nbQuadPt = " << _M_fe.nbQuadPt << std::endl;
-
 }
 
 
@@ -72,6 +67,12 @@ void OneDModelHandler::showMeHandler(std::ostream& c, UInt verbose)
 ScalUnknown<Vector>& OneDModelHandler::AreaUnkn() 
 {
   return _M_AreaUnkn;
+}
+
+// ! Initialize with constant initial conditions concentration
+void OneDModelHandler::initialize(const double& u0) 
+{
+  _M_U_initial = u0;
 }
 
 // ! Initialize when  initial conditions concentration

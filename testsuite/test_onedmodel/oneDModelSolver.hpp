@@ -62,19 +62,21 @@ public:
   */
   OneDModelSolver(const GetPot& data_file);
 
+  //! return the solution at current time step
+  const ScalUnknown<Vector>& U_thistime() const { return _M_U_thistime;}
+
+  //! return the solution at next time step
+  const ScalUnknown<Vector>& U_nexttime() const{ return _M_U_nexttime;}
+
   //! Update the right  hand side  for time advancing 
-  /*! 
-    \param source volumic source  
-    \param time present time
-  */
-  void timeAdvance(const Function source, const double& time);
+  void timeAdvance();
 
   //! Update convective term, bc treatment and solve the linearized ns system
-  void iterate(const double& time, PhysVectUnknown<Vector> & u);
+  void iterate();
+  
+private:
 
- private:
-
-  //! coefficient in the corresponding _M_elmat*
+  //! coefficient in front of the corresponding _M_elmat*
   double _M_coeffMass;  
   double _M_coeffStiff;
   double _M_coeffGrad;
@@ -88,14 +90,64 @@ public:
 
   ElemVec _M_elvec; // Elementary right hand side
 
-  //! Right  hand  side 
+  //! Unknown at present time step
+  ScalUnknown<Vector> _M_U_thistime; //! not used??
+  //! Unknown at next time step
+  ScalUnknown<Vector> _M_U_nexttime;
+  //! Flux (at present time step: F_h(U_h^n) )
+  ScalUnknown<Vector> _M_FluxU;
+  //! Right hand side 
   ScalUnknown<Vector> _M_rhs;
-  
+      
   //! tridiagonal mass matrix
   TriDiagMatrix<double> _M_massMatrix;
+   //! tridiagonal stiffness matrix
+  TriDiagMatrix<double> _M_stiffMatrix;
+  //! tridiagonal gradient matrix
+  TriDiagMatrix<double> _M_gradMatrix;
+  //! tridiagonal divergence matrix
+  TriDiagMatrix<double> _M_divMatrix;
+
+  //! lapack LU factorized tridiagonal mass matrix 
+  TriDiagMatrix<double> _M_factorMassMatrix;
+  //! vectors used by lapack for factorization:
+  KN<double> _M_massupdiag2; //!< second upper diagonal (used by lapack) (size _M_order-2)
+  KN<int>    _M_massipiv;   //!< indices of pivot in the lapack LU (size _M_order)
 
   //! Update the element matrices with the current element (from 1)
   void _updateElemMatrices( const UInt& iedge );
+
+  /*! modify the matrix to take into account 
+    the Dirichlet boundary conditions 
+    (works for P1Seg and canonic numbering!)
+  */
+  void _updateBCDirichletMatrix( TriDiagMatrix<double>& mat );
+
+  /*! modify the vector to take into account 
+    the Dirichlet boundary conditions 
+    (works for P1Seg and canonic numbering!)
+ 
+     \param vec : the rhs vector   
+     \param val_left  : Dirichlet value inserted to the left
+     \param val_right : Dirichlet value inserted to the right
+ */
+  void _updateBCDirichletVector( ScalUnknown<Vector>& vec, 
+				 const double& val_left, 
+				 const double& val_right );
+
+  //! update the flux from the current unknown: FfluxU = F_h(U_h^n)
+  void _updateFlux();
+
+  //! lapack LU factorization for tridiag matrices 
+  //! (modifies _M_factorMassMatrix, _M_massupdiag2 and _M_massipiv.)
+  void _factorizeMassMatrix();
+  //! lapack LU solve for tridiag matrices (AFTER factorization)
+  void _solveMassMatrix( ScalUnknown<Vector>& vec );
+
+  //! direct lapack LU solve for tridiag matrices 
+  //! quite useless as you can call it only once! 
+  //! REMOVE it some day... (just an example)
+  void _directsolveMassMatrix( ScalUnknown<Vector>& vec );
 
 };
 

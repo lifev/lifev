@@ -23,6 +23,8 @@
 #include "oneDModelSolver.hpp"
 #include "ud_functions.hpp"
 #include "GetPot.hpp"
+#include <sstream> 
+
 
 int main(int argc, char** argv)
 {
@@ -36,6 +38,58 @@ int main(int argc, char** argv)
   OneDModelSolver onedm(data_file_name);
   onedm.showMeData();
   onedm.showMeHandler(cout, 6);
+
+
+  // Initialization
+  //
+  Real dt     = onedm.timestep();  
+  Real startT = onedm.inittime();
+  Real T      = onedm.endtime();
+
+  Real u0 = 0.; //! constant initial condition
+
+  /*
+  if(startT > 0.0){
+     cout << "initialize velocity and pressure with data from file" << std::endl;
+     ostringstream indexin;
+     string vinname, cinname;
+     indexin << (startT*100);
+     vinname = "fluid.res"+indexin.str();
+     onedm.initialize(vinname);}
+  else{
+     std::cout << "initialize velocity and pressure with u0 and p0" << std::endl;	
+      onedm.initialize(u0,p0,0.0,dt);
+  }
+  */
+
+  std::cout << "initialize with u0" << std::endl;	
+  onedm.initialize(u0);
+
+  std::cout << "startT T dt " << startT << " " <<  T << " " << dt << std::endl;	
+
+  // Temporal loop
+  //
+  for (Real time=startT+dt ; time <= T; time+=dt) {
+
+    onedm.timeAdvance();
+    onedm.iterate(); 
+
+// ************* saving result on file *****************************************
+    ostringstream indexout;
+    indexout << (time*100);
+    string voutname;
+    voutname = "res.res"+indexout.str();
+    // fstream Resfile(voutname.c_str(),ios::out | ios::binary);
+    fstream Resfile(voutname.c_str(),ios::out );
+    // Resfile.write((char*)&onedm.u()(1),onedm.u().size()*sizeof(double));
+    Resfile.write((char*)&onedm.U_nexttime()(1),
+		  onedm.U_nexttime().size()*sizeof(double));
+    Resfile.close();
+
+ 
+    //onedm.postProcess();
+  }
+
 
   return 0;
 }

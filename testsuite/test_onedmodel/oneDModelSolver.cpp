@@ -36,8 +36,17 @@ OneDModelSolver::OneDModelSolver(const GetPot& data_file):
   _M_elmatGrad (_M_fe.nbNode,1,1), 
   _M_elmatDiv  (_M_fe.nbNode,1,1), 
   _M_elvec     (_M_fe.nbNode,1), 
+  _M_U_thistime(_M_dimDof),
+  _M_U_nexttime(_M_dimDof),
+  _M_FluxU(_M_dimDof),
   _M_rhs(_M_dimDof),
-  _M_massMatrix(_M_dimDof)
+  _M_massMatrix(_M_dimDof),
+  _M_stiffMatrix(_M_dimDof),
+  _M_gradMatrix(_M_dimDof),
+  _M_divMatrix(_M_dimDof),
+  _M_factorMassMatrix(_M_dimDof),
+  _M_massupdiag2( _M_dimDof - 2 ),
+  _M_massipiv( _M_dimDof )
 {
   
   cout << endl;
@@ -49,10 +58,16 @@ OneDModelSolver::OneDModelSolver(const GetPot& data_file):
 
   //! Matrices initialization 
   _M_massMatrix.zero();
+  _M_stiffMatrix.zero();
+  _M_gradMatrix.zero();
+  _M_divMatrix.zero();
+  _M_factorMassMatrix.zero();
+
   _M_massMatrix.showMe(std::cout, _M_verbose);
 
-  //inverse of the time step:
-  double dti=1./_M_time_step;
+  _M_rhs = 1.;
+  _M_bcDirLeft  = 1.;
+  _M_bcDirRight = 0;
 
   _M_coeffMass  = 1.;
   _M_coeffStiff = 1.;
@@ -63,22 +78,64 @@ OneDModelSolver::OneDModelSolver(const GetPot& data_file):
   //! Loop on elements
   for(UInt iedge = 1; iedge <= _M_mesh.numEdges(); iedge++){          
 
-    //! update _M_elmat*
+    //! update _M_fe and _M_elmat*
     _updateElemMatrices( iedge );
 
+    //! assemble the mass matrix 
+    assemb_mat( _M_massMatrix, _M_elmatMass, _M_fe, _M_dof , 0, 0 );
 
-    // stiffness + mass
-    //    _elmatC.mat() += _elmatM_c.mat();
-    
-    
-    // stiffness
-    // assemb_mat(_DR,_elmatC,_M_fe,_dof_c);
-      
-    // mass
-    //assemb_mat(_M_c,_elmatM_c,_M_fe,_dof_c);
-     
-  }
+    //! assemble the stiffness matrix
+    assemb_mat( _M_stiffMatrix, _M_elmatStiff, _M_fe, _M_dof , 0, 0 );
+
+    //! assemble the gradient matrix
+    assemb_mat( _M_gradMatrix, _M_elmatGrad, _M_fe, _M_dof , 0, 0 );
+
+    //! assemble the divergence matrix
+    assemb_mat( _M_divMatrix, _M_elmatDiv, _M_fe, _M_dof , 0, 0 );
+  } //! end loop on elements
+
+  //! Dirichlet boundary conditions set in matrices
+  _updateBCDirichletMatrix( _M_massMatrix );
+  _updateBCDirichletMatrix( _M_stiffMatrix );
+  _updateBCDirichletMatrix( _M_gradMatrix );
+  _updateBCDirichletMatrix( _M_divMatrix );
+
+  _M_factorMassMatrix = _M_massMatrix;
+  //! factorization of the mass matrix
+  _factorizeMassMatrix();
+
+  /*
+  cout << "\n\n\tMass matrix " << endl;
+  _M_massMatrix.showMe( std::cout , _M_verbose );
+  cout << "\n\n\tStiffness matrix " << endl;
+  _M_stiffMatrix.showMe( std::cout , _M_verbose );
+  cout << "\n\n\tGradient matrix " << endl;
+  _M_gradMatrix.showMe( std::cout , _M_verbose );
+  cout << "\n\n\tDivergence matrix " << endl;
+  _M_divMatrix.showMe( std::cout , _M_verbose );
+  cout << "\n\n\tFACTORIZED Mass matrix " << endl;
+  _M_factorMassMatrix.showMe( std::cout , _M_verbose );
    
+  ScalUnknown<Vector> vec( _M_dimDof );
+  for (int ii=0; ii < _M_stiffMatrix.OrderMatrix() ; ii++ ) {
+    vec( ii ) = ii;
+    cout <<  ii << " " << vec(ii) << endl;;
+  }
+
+  _solveMassMatrix( vec );
+  cout << "solve " << endl;
+  for (int ii=0; ii < _M_stiffMatrix.OrderMatrix() ; ii++ ) {
+    cout <<  ii << " " << vec(ii) << endl;;
+  }
+
+  vec = 1000.;
+  _M_stiffMatrix.Axpy( 1., _M_rhs , 1., vec );
+  cout << "matvec " << endl;
+  for (int ii=0; ii < _M_stiffMatrix.OrderMatrix() ; ii++ ) {
+    cout <<  ii << " " << vec(ii) << endl;;
+  }
+  */
+
   chrono.stop();
   cout << "done in " << chrono.diff() << " s." << endl;
 
@@ -138,176 +195,165 @@ void OneDModelSolver::_updateElemMatrices( const UInt& iedge )
   _M_elmatDiv.showMe( std::cout );
 }
 
+/*! modify the matrix to take into account 
+  the Dirichlet boundary conditions 
+  (works for P1Seg and canonic numbering!)
+*/
+void OneDModelSolver::
+_updateBCDirichletMatrix( TriDiagMatrix<double>& mat )
+{
+  UInt firstDof = 0;
+  UInt lastDof  = mat.OrderMatrix()-1;
+  //! modify the first row 
+  mat.Diag()( firstDof )   = 1.;
+  mat.UpDiag()( firstDof ) = 0.;
+  //! modify the last row
+  mat.Diag()( lastDof )      = 1.;
+  mat.LowDiag()( lastDof-1 ) = 0.;
+}
 
-/*
-template<typename Mesh>  
-void OneDModelSolver<Mesh>::
-timeAdvance(const Function source, const double& time) {
+/*! modify the vector to take into account 
+  the Dirichlet boundary conditions 
+  (works for P1Seg and canonic numbering!)
+ 
+  \param vec : the rhs vector   
+  \param val_left  : Dirichlet value inserted to the left
+  \param val_right : Dirichlet value inserted to the right
+*/
+void  OneDModelSolver::
+_updateBCDirichletVector( ScalUnknown<Vector>& vec, 
+			  const double& val_left, 
+			  const double& val_right )
+{
+  UInt firstDof = 0;
+  UInt lastDof  = vec.size()-1;
+  //! first row and last row are modified
+  vec( firstDof ) = val_left;
+  vec( lastDof  ) = val_right;
+}
 
-  cout << "  o-  Updating mass term on right hand side (concentration)... ";
+//! update the flux from the current unknown: FfluxU = F_h(U_h^n)
+void OneDModelSolver::_updateFlux()
+{
+  double celerity = 2.;
+  for ( UInt ii=0; ii < _M_dimDof ; ii++ ) {
+    _M_FluxU( ii ) = celerity * _M_U_thistime( ii );
+  } 
+}
+
+/*! LU factorize with lapack _M_factorMassMatrix
+  SUBROUTINE DGTTRF( N, DL, D, DU, DU2, IPIV, INFO )
+  BEWARE: it modifies _M_factorMassMatrix!
+*/
+void OneDModelSolver::_factorizeMassMatrix()
+{
+  int INFO = 0;
+  int OrderMat =_M_factorMassMatrix.OrderMatrix();
+
+  //! solve with lapack (for tridiagonal matrices)
+  dgttrf_( &OrderMat, _M_factorMassMatrix.LowDiag(), _M_factorMassMatrix.Diag(), 
+	   _M_factorMassMatrix.UpDiag(), _M_massupdiag2, _M_massipiv, &INFO);
+  ASSERT_PRE(!INFO,"Lapack factorization of tridiagonal matrix not achieved.");
+  
+}
+/*! lapack LU solve AFTER FACTORIZATION of _M_factorMassMatrix
+  SUBROUTINE DGTTRS( TRANS, N, NRHS, DL, D, DU, DU2, IPIV, B, LDB, INFO )
+
+*  TRANS   (input) CHARACTER
+*          Specifies the form of the system of equations.
+*          = 'N':  A * X = B  (No transpose)
+*          = 'T':  A'* X = B  (Transpose)
+*          = 'C':  A'* X = B  (Conjugate transpose = Transpose)
+
+*/
+void OneDModelSolver::_solveMassMatrix( ScalUnknown<Vector>& vec )
+{
+  int INFO = 0;
+  int NBRHS = 1;//  nb columns of the vec := 1.
+  int OrderMat = _M_factorMassMatrix.OrderMatrix();
+
+  ASSERT_PRE( OrderMat == (int)vec.size() ,
+	      "The right-hand side must have the same dimensions as the tridiag matrix.");
+  
+  //! solve with lapack (for tridiagonal matrices)
+  dgttrs_( "N", &OrderMat, &NBRHS, _M_factorMassMatrix.LowDiag(), _M_factorMassMatrix.Diag(), 
+	   _M_factorMassMatrix.UpDiag(), _M_massupdiag2, _M_massipiv, 
+	  vec.giveVec(), &OrderMat, &INFO);
+  ASSERT_PRE(!INFO,"Lapack solve of tridiagonal matrix not achieved.");
+
+}
+
+/*! direct LU solve with lapack _M_factorMassMatrix 
+  (use it once as it changes the matrix !)
+  SUBROUTINE DGTSV( N, NRHS, DL, D, DU, B, LDB, INFO )
+*/
+void OneDModelSolver::_directsolveMassMatrix( ScalUnknown<Vector>& vec )
+{
+  int INFO = 0;
+  int NBRHS = 1;//  nb columns of the vec := 1.
+  int OrderMat = _M_factorMassMatrix.OrderMatrix();
+
+  ASSERT_PRE( OrderMat == (int)vec.size() ,
+	      "The right-hand side must have the same dimensions as the tridiag matrix.");
+  
+  //! solve with lapack (for tridiagonal matrices)
+  dgtsv_( &OrderMat, &NBRHS, _M_factorMassMatrix.LowDiag(), _M_factorMassMatrix.Diag(), 
+	   _M_factorMassMatrix.UpDiag(), 
+	  vec.giveVec(), &OrderMat, &INFO);
+  ASSERT_PRE(!INFO,"Lapack solve of tridiagonal matrix not achieved.");
+
+}
+
+//! Update the right hand side for time advancing 
+void OneDModelSolver::timeAdvance() 
+{
+  cout << "  o-  Updating right hand side... ";
 
   Chrono chrono;
   chrono.start();
 
-  // Right hand side for the velocity at time
-  _f_c=0.;
+  double dt2over2 = _M_time_step * _M_time_step * 0.5;
+  
+  //! _M_FluxU = F_h( U_h^n )
+  _updateFlux();
 
-  // loop on volumes: assembling source term
-  for(UInt i=1; i<=_mesh.numVolumes(); ++i){
-     _elvec.zero();
-     _M_fe.update(_mesh.volumeList(i));
+  //! Reminder of the function Axpy:
+  //! Axpy(alpha, x, beta, y) -> y = alpha*A*x + beta*y
 
-      compute_vec(source,_elvec,_M_fe,time,0); // compute local vector
-      assemb_vec(_f_c,_elvec,_M_fe,_dof_c,0); // assemble local vector into global one       
-  }
+  //! rhs = mass * Un 
+  _M_massMatrix.Axpy( 1., _M_U_thistime , 0., _M_rhs );
+
+  //! rhs = rhs + dt * grad * F_h(Un)
+  _M_gradMatrix.Axpy( _M_time_step, _M_FluxU , 1., _M_rhs );
+
+  //! rhs = rhs - dt^2/2 * stiff * F_h(Un)
+  _M_stiffMatrix.Axpy( -dt2over2, _M_FluxU , 1., _M_rhs );
+   
+  //! take into account the bc
+  _updateBCDirichletVector( _M_rhs, _M_bcDirLeft, _M_bcDirRight );
 
   // ******************************************************* 
-  _f_c += _M_c*_bdf.time_der(); //_M_u is the mass matrix divided by the time step
   chrono.stop();
   cout << "done in " << chrono.diff() << " s." << endl;
 }
 
-
-template<typename Mesh>  
-void OneDModelSolver<Mesh>::
-iterate(const double& time, PhysVectUnknown<Vector> & u) {
-
-  UInt nc_u=u.nbcomp();
-
-  Chrono  chrono;
-
-  // CDR = DR + convective term (C)
+void OneDModelSolver::iterate() 
+{
+  cout << "  o-  Solving the system... ";
+  Chrono chrono;
   chrono.start();
-  _CDR=_DR;
-  chrono.stop();
-
-
-  cout << "  o-  Diffusion-Reaction matrix was copied in " << chrono.diff() << "s." << endl;
-  cout << "  o-  Updating convective transport... ";
- 
-  chrono.start();
-
-  // loop on volumes
-  for(UInt i=1; i<=_mesh.numVolumes(); ++i){
   
-    _M_fe.updateFirstDeriv(_mesh.volumeList(i)); // as updateFirstDer
-
-    _elmatC.zero();
-
-    UInt eleID = _M_fe.currentId();
-
-// ********** copy global velocity vector to local velocity vector *************
-// ********** assuming velocity is given on concentration mesh *****************
-
-    for (UInt k=0 ; k<(UInt)_M_fe.nbNode ; k++){
-       UInt  iloc = _M_fe.patternFirst(k);
-       for (UInt ic=0; ic<nc_u; ++ic){
-	  UInt ig=_dof_c.localToGlobal(eleID,iloc+1)-1+ic*_dim_c;     
-	  _elvec_u[iloc+ic*_M_fe.nbNode] = u(ig);
-       }
-     }
-
-    grad(0,_elvec_u,_elmatC,_M_fe,_M_fe,_M_fe);
-    grad(1,_elvec_u,_elmatC,_M_fe,_M_fe,_M_fe);
-    grad(2,_elvec_u,_elmatC,_M_fe,_M_fe,_M_fe);
-
-
-// *************************************** Upwind ******************************
-
-      double VLoc_infty=0.;
-      double VLoc_mean=0.;
-      double VLoc_c=0.;
-      for (UInt ih_c=0 ; ih_c<(UInt)_M_fe.nbNode ; ih_c++){
-         UInt  iloc = _M_fe.patternFirst(ih_c);
-	 for (UInt ic=0; ic<nc_u;++ic){
-	   UInt ig=_dof_c.localToGlobal(eleID,iloc+1)-1+ic*_dim_c;
-           _elvec_u[iloc+ic*_M_fe.nbNode] = u(ig);
-	   VLoc_c+=u(ig)*u(ig);}
-	 VLoc_c=sqrt(VLoc_c);
-	 VLoc_mean += VLoc_c;
-	if (VLoc_c>VLoc_infty) VLoc_infty=VLoc_c;
-      }
-      VLoc_mean=VLoc_mean/_M_fe.nbNode;
-
-      double coef_stab, Pe_loc;
-//      coef_stab=_M_fe.diameter()*VLoc_infty; // Alessandro - method
-
-      Pe_loc=VLoc_infty*_M_fe.diameter()/(2.0*_diffusivity);
-
-//      coef_stab=(1.0/tanh(Pe_loc))-(1.0/Pe_loc); // classical approach
-
-      if(Pe_loc < -3.0)
-	 coef_stab= -1.0;
-      else {
-	 if(Pe_loc > 3.0)
-	    coef_stab=1.0;
-	 else	
-	    coef_stab=Pe_loc/3.0;}
-
-// ******************************* STREAMLINEUPWIND ****************************
-     stiff_sd(coef_stab/(VLoc_mean*VLoc_mean),_elvec_u,_elmatC,_M_fe,_M_fe);
-
-// ************************* Assembling ****************************************
-
-     assemb_mat(_CDR,_elmatC,_M_fe,_dof_c);
-
+  _solveMassMatrix( _M_rhs );
+   
+  cout << "\n\tsolution at time n+1 " << endl;
+  for ( UInt ii=0; ii < _M_dimDof ; ii++ ) {
+    cout <<  ii << " " << _M_rhs(ii) << endl;;
   }
+  
+  //! solution for the next time step 
+  _M_U_thistime = _M_rhs;
+   // ******************************************************* 
   chrono.stop();
-  cout << "done in " << chrono.diff() << "s." << endl;
+  cout << "done in " << chrono.diff() << " s." << endl;
 
-  // for BC treatment (done at each time-step)
-  double tgv=1.e02; 
-
-  cout << "  o-  Applying boundary conditions... ";
-  chrono.start(); 
-  // BC manage for the concentration
-  if ( !_BCh_c.bdUpdateDone() )  
-    _BCh_c.bdUpdate(_mesh, _feBd_c, _dof_c);
-  bc_manage(_CDR, _f_c, _mesh, _dof_c, _BCh_c, _feBd_c, tgv, time);
-  chrono.stop();
-
-  cout << "done in " << chrono.diff() << "s." << endl;
-
-
-  int    proc_config_o[AZ_PROC_SIZE];// Processor information:                 
-  //  proc_config[AZ_node] = node name      
-  //  proc_config[AZ_N_procs] = # of nodes  
-  int    options_o[AZ_OPTIONS_SIZE]; // Array used to select solver options.     
-  double params_o[AZ_PARAMS_SIZE];   // User selected solver paramters.          
-  int    *data_org_o;                // Array to specify data layout   
-  double status_o[AZ_STATUS_SIZE];   // Information returned from AZ_solve()
-                                   // indicating success or failure.           
-  // altre dichiarazioni per AZTEC  
-  int    *update_o,                  // vector elements updated on this node. 
-         *external_o;                // vector elements needed by this node.    
-  int    *update_index_o;            // ordering of update[] and external[]     
-  int    *extern_index_o;            // locally on this processor.              
-  //  int    *bindx;                 // Sparse matrix to be solved is stored    
-  //  double *val;                   // in these MSR arrays.                    
-  int    N_update_o;                 // # of unknowns updated on this node      
-
-  AZ_set_proc_config(proc_config_o, AZ_NOT_MPI );
-
-    AZ_read_update(&N_update_o, &update_o, proc_config_o, _dim_c, 1, AZ_linear);
-    AZ_defaults(options_o,params_o);
-    _dataAztec_o.aztecOptionsFromDataFile(options_o,params_o);
-    AZ_transform(proc_config_o, &external_o, 
-	       (int *)_pattM.giveRaw_bindx(), _CDR.giveRaw_value(), 
-	       update_o, &update_index_o,
-	       &extern_index_o, &data_org_o, N_update_o, NULL, NULL, NULL, NULL,
-	       AZ_MSR_MATRIX);
-  
-    chrono.start();
-//    init_options_c(options_o,params_o);
-  
-    AZ_solve(_c.giveVec(),_f_c.giveVec(), options_o, params_o, NULL, 
-	   (int *)_pattM.giveRaw_bindx(), NULL, NULL, NULL, 
-	   _CDR.giveRaw_value(), data_org_o,status_o, proc_config_o);
-  //
-    chrono.stop();
-    cout << "*** Solution (Concentration) computed in " << chrono.diff() << "s." << endl;
-  _bdf.shift_right(_c);
-  
 }
-
-*/

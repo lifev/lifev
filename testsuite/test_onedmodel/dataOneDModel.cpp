@@ -54,7 +54,20 @@ DataOneDModel::DataOneDModel(const GetPot& dfile)
   _M_post_proc_format   = dfile("miscellaneous/post_proc_format","medit");
 }
 
-void DataOneDModel::showMeData(std::ostream& c)
+double DataOneDModel::timestep() const
+{
+  return _M_time_step;
+}
+double DataOneDModel::inittime() const
+{
+  return _M_time_beg;
+}
+double DataOneDModel::endtime() const
+{
+  return _M_time_end;
+}
+
+void DataOneDModel::showMeData(std::ostream& c) const
 {
   c << "\n*** Values for data [physics]\n";
   // Physics/BCs
