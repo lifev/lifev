@@ -28,8 +28,7 @@ SUBDIRS		= data  \
                   test_q1 test_p2 test_mixte test_rt test_rtcyl test_fe \
                   test_postproc test_bdf \
 		  test_linearelasticity \
-		  test_darcy \
-		  development
+		  test_darcy
 
 check-qmtest: 
 	qmtest -D $(srcdir) run
