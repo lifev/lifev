@@ -164,6 +164,8 @@ FSISolver::iterate( Real time )
                  << M_oper->nbEval() << std::endl;
 
         M_oper->fluid().postProcess();
+        if( M_oper->fluid().computeMeanValuesPerSection() )
+            M_oper->fluid().PostProcessPressureAreaAndFlux( time );
         M_oper->solid().postProcess();
     }
 
