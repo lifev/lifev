@@ -54,7 +54,7 @@ SolverAztec::SolverAztec()
     GetPot dataFile;
     DataAztec dataAztec( dataFile, "aztec" );
     dataAztec.aztecOptionsFromDataFile( M_options, M_params );
-    
+
     // use ilu by default
     M_options[ AZ_precond ] = AZ_dom_decomp;
     M_options[ AZ_subdomain_solve ] = AZ_ilu;
@@ -157,7 +157,7 @@ void SolverAztec::solve( array_type& x, array_type const& b )
         throw std::logic_error( __ex.str() );
     }
     AZ_iterate( &x[ 0 ],
-                const_cast<double*>( &b[0] ),
+                const_cast<double*>( b.data().begin() ),
                 M_options, M_params, M_status,
                 M_procConfig, M_matrix, M_precond, NULL );
 }
