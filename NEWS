@@ -11,6 +11,10 @@ New in 0.7.0:
 =============
 
 [all]
+* Gathered all headers in Makefile.headers (CP)
+  ** Uses nobase to install every header in their proper module
+  ** Added script(update-headers) to ensure no header will be
+     forgotten
 * Renamed LifeV.hpp to life.hpp (CP)
 * Fixed tons of GCC (3.3) warnings (CP)
   ** Commented out unused variables
@@ -29,6 +33,12 @@ New in 0.7.0:
   ** lifemacros.hpp for deprecation, (no)export macros 
   ** lifeassert.hpp for assertions macros
 * Added SmartAssert class and LIFEV_ASSERT macro (CP)
+* Added AboutData class (CP) 
+  ** provides information on authors and contributors to an application 
+  ** provides license, copyright and a few other information
+* Added Application class (CP)
+  ** base class for applications
+  ** provides generic options
 
 [lifefem]
 * Added levelset solver (DADP)
@@ -282,4 +292,4 @@ New in 0.1.0pre3:
 * fixed some bugs and miscompilation in a few places
 
 
- -- Christophe Prud'homme <prudhomm@debian.org>, Tue Feb 22 10:15:24 2005
+ -- Christophe Prud'homme <prudhomm@debian.org>, Sat Mar 19 13:42:54 2005
