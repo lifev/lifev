@@ -24,7 +24,6 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 AM_CPPFLAGS	= -DNO_BLASLAPACK
 
-SUBDIRS         = Post  
 check_PROGRAMS = DarcySolver 
 noinst_HEADERS = darcyHandler.hpp darcySolver.hpp dataDarcy.hpp user_fct.hpp 
 LDADD = $(life_libs)
