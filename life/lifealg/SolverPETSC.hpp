@@ -4,7 +4,7 @@
 
   Author: Christophe Prud'homme <christophe.prudhomme@epfl.ch>
 
-  Copyright (C) 2004 EPFL, INRIA, Politecnico di Milano
+  Copyright (C) 2004 EPFL
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public

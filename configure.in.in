@@ -76,6 +76,8 @@ dnl libm
 AC_CHECK_LIB(m,cos,[LIBS="-lm ${LIBS}"],${LIBS})
 dnl umfpack
 AC_CHECK_UMFPACK(4.3.0) # at least umfpack 4.3
+AM_CONDITIONAL(HAVE_UMFPACK, test "x$umfpack_libs" != "x" )
+
 dnl aztec
 AC_CHECK_AZTEC
 dnl petsc
