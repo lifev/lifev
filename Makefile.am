@@ -23,13 +23,13 @@
 # DESCRIP-END.
 #
 
-AUTOMAKE_OPTIONS = foreign 1.6
+AUTOMAKE_OPTIONS = foreign 1.7
 
 $(top_srcdir)/configure.in: $(top_srcdir)/subdirs $(top_srcdir)/configure.files $(CONF_FILES)
 	cd $(top_srcdir) && $(MAKE) -f admin/Makefile.common configure.in
 
 
-EXTRA_DIST = configure.in.in configure.in.bot  configure.in.mid subdirs configure.files 
+EXTRA_DIST = configure.in.in configure.in.bot  configure.in.mid subdirs configure.files Mainpage.dox
 
 MAINTAINERCLEANFILES = configure.files subdirs
 
@@ -42,6 +42,18 @@ apidox-all:
 	make apidox
 	cd life && make apidox
 
+all-local: 
+	make apidox-all
+	@echo ""
+	@echo "************************************************************"
+	@echo "* LifeV compilation has ended."
+	@echo "*"
+	@echo "* LifeV API documentation has been generated in doc/api/"
+	@echo "* Open your browser at doc/api/index.html."
+	@echo "*"
+	@echo "* Enjoy!"
+	@echo "*  C.P."
+	@echo "************************************************************"
 
 upload-api:
 	-cd doc/ && rsync -avz api/ `whoami`@cmcsforge.epfl.ch:/var/lib/gforge/chroot/home/groups/lifev/htdocs/api-$(LIFEV_MAJOR_VERSION).$(LIFEV_MINOR_VERSION).$(LIFEV_MICRO_VERSION)

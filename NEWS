@@ -1,5 +1,6 @@
 Bugs fixed in 0.1.90
 * Bug #23: fixed wrong assembly in elemOper.cpp in stiff_sd (MP)
+* Bug #27: "No rule to make target `admin/acinclude.m4.in'"
 
 New in 0.1.90:
 * Task #xx completed (LF & CP)
