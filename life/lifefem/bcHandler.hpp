@@ -330,6 +330,7 @@ private:
 
     BCBase* findBC( int lab );
 
+    std::set<EntityFlag> M_notFoundMarkers;
 
 };
 
@@ -383,8 +384,8 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
     UInt iElAd, iVeEl, iFaEl, iEdEl;
     ID lDof, gDof;
     Real x, y, z;
-    
-    std::set<EntityFlag> notFoundMarkers;
+
+    std::set<EntityFlag> notFoundMarkersCurrent;
 
     // ===================================================
     // Loop on boundary faces
@@ -419,7 +420,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                 }
                 if ( whereList.size() == 0 )
                 {
-                    notFoundMarkers.insert(marker);
+                    notFoundMarkersCurrent.insert(marker);
                 }
 
                 // Loop number of Dof per vertex
@@ -505,7 +506,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                 }
                 if ( whereList.size() == 0 )
                 {
-                    notFoundMarkers.insert(marker);
+                    notFoundMarkersCurrent.insert(marker);
                 }
 
                 // Loop number of Dof per edge
@@ -584,7 +585,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
         }
         if ( whereList.size() == 0 )
         {
-            notFoundMarkers.insert(marker);
+            notFoundMarkersCurrent.insert(marker);
         }
 
         // Adding identifier
@@ -680,19 +681,30 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
         }
     }
 
-    if( notFoundMarkers.size() > 0 )
+    std::set<EntityFlag> notFoundMarkersNew;
+    for( std::set<EntityFlag>::iterator it = notFoundMarkersCurrent.begin();
+         it != notFoundMarkersCurrent.end(); ++it )
+    {
+        if ( M_notFoundMarkers.find( *it ) == M_notFoundMarkers.end() ) {
+            notFoundMarkersNew.insert( *it );
+        }
+    }
+   
+    
+    if( notFoundMarkersNew.size() > 0 )
     {
         std::cerr <<
             "WARNING -- BCHandler::bdUpdate()\n" <<
             "  boundary degrees of freedom with the following markers\n" <<
             "  have no boundary condition set: ";
-        for( std::set<EntityFlag>::iterator it = notFoundMarkers.begin();
-             it != notFoundMarkers.end(); ++it )
+        for( std::set<EntityFlag>::iterator it = notFoundMarkersNew.begin();
+             it != notFoundMarkersNew.end(); ++it )
         {
             std::cerr << *it << " ";
         }
         std::cerr << std::endl;
     }
+    M_notFoundMarkers = notFoundMarkersCurrent;
 
     whereList.clear();
     // ============================================================================
