@@ -39,6 +39,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 #include <tab.hpp>
 
+#include <dataMesh.hpp>
+
 #include <GetPot.hpp>
 #include <SolverAztec.hpp>
 #include <bdf.hpp>
@@ -68,7 +70,9 @@ namespace LifeV {
     */
 
     template<typename MeshType, typename SolverType = SolverAztec>
-    class HyperbolicSolverIP {
+    class HyperbolicSolverIP
+        :
+        public DataMesh<MeshType> {
     public:
         /** @name Typedefs
          */
@@ -91,19 +95,18 @@ namespace LifeV {
         /** @name Constructors
          */
         //@{
-        HyperbolicSolverIP(mesh_type& mesh, 
-                       const GetPot& datafile,
-                       solver_type& solver,
-                       const GeoMap& geomap,
-                       const RefFE& reffe, 
-                       const QuadRule& qr, 
-                       const QuadRule& qr_bd, 
-                       const BCHandler& bc_h,
-                       CurrentFE& fe_velocity,
-                       const Dof& dof_velocity,
-                       velocity_type& velocity0) 
+        HyperbolicSolverIP(const GetPot& datafile,
+                           solver_type& solver,
+                           const GeoMap& geomap,
+                           const RefFE& reffe, 
+                           const QuadRule& qr, 
+                           const QuadRule& qr_bd, 
+                           const BCHandler& bc_h,
+                           CurrentFE& fe_velocity,
+                           const Dof& dof_velocity,
+                           velocity_type& velocity0) 
             :
-            _M_mesh(mesh),
+            DataMesh<MeshType>(datafile, "hyp/discretization"),
             _M_datafile(datafile),
             _M_solver(solver),
             _M_geomap(geomap),
@@ -115,10 +118,10 @@ namespace LifeV {
             _M_fe(_M_reffe, _M_geomap, _M_qr),
             _M_fe_bd(_M_reffe_bd, _M_geomap_bd, _M_qr_bd),
             _M_fe_velocity(fe_velocity),
-            _M_dof(_M_mesh, _M_reffe),
+            _M_dof(_mesh, _M_reffe),
             _M_M_pattern(_M_dof, 1),
             _M_M(_M_M_pattern),
-            _M_A_pattern(_M_dof, mesh, 1),
+            _M_A_pattern(_M_dof, _mesh, 1),
             _M_A_steady(_M_A_pattern),
             _M_A(_M_A_pattern),
             _M_dim( _M_dof.numTotalDof() ),
@@ -199,9 +202,6 @@ namespace LifeV {
        
     protected:
     
-        //! Mesh
-        mesh_type& _M_mesh;
-
         //! Data file
         const GetPot& _M_datafile;
 
@@ -308,16 +308,16 @@ namespace LifeV {
         */
 
         void compute_stabilization_parameters() {
-            _M_h2pK.resize( _M_mesh.numVolumes() );
+            _M_h2pK.resize( _mesh.numVolumes() );
 
             Real measure;
 
-            for(UInt i = _M_mesh.numBFaces() + 1; i <= _M_mesh.numFaces(); i++){
-                _M_fe_bd.updateMeasQuadPt( _M_mesh.faceList(i) );
+            for(UInt i = _mesh.numBFaces() + 1; i <= _mesh.numFaces(); i++){
+                _M_fe_bd.updateMeasQuadPt( _mesh.faceList(i) );
                 measure = _M_fe_bd.measure();
 
-                _M_h2pK[_M_mesh.faceList(i).ad_first() - 1] += measure * 0.5;
-                _M_h2pK[_M_mesh.faceList(i).ad_second() - 1] += measure * 0.5;
+                _M_h2pK[_mesh.faceList(i).ad_first() - 1] += measure * 0.5;
+                _M_h2pK[_mesh.faceList(i).ad_second() - 1] += measure * 0.5;
             }
         }
 
@@ -369,8 +369,8 @@ namespace LifeV {
 
         Real coeff = _M_bdf.coeff_der(0) / _M_delta_t;
 
-        for(UInt i = 1; i <= _M_mesh.numVolumes(); i++){
-            _M_fe.updateJac( _M_mesh.volumeList(i) );
+        for(UInt i = 1; i <= _mesh.numVolumes(); i++){
+            _M_fe.updateJac( _mesh.volumeList(i) );
 
             elmat.zero();
             mass(coeff, elmat, _M_fe, 0, 0);
@@ -384,18 +384,18 @@ namespace LifeV {
         CurrentFE fe2(_M_fe);
         Real stab_coeff;
 
-        for(UInt i = _M_mesh.numBFaces() + 1; i <= _M_mesh.numFaces(); i++){
+        for(UInt i = _mesh.numBFaces() + 1; i <= _mesh.numFaces(); i++){
             elmat.zero();
 
-            UInt ad_first = _M_mesh.faceList(i).ad_first();
-            UInt ad_second = _M_mesh.faceList(i).ad_second();
+            UInt ad_first = _mesh.faceList(i).ad_first();
+            UInt ad_second = _mesh.faceList(i).ad_second();
 
             stab_coeff = _M_gamma * ( pow(_M_h2pK[ad_first - 1], 2) * pow(_M_h2pK[ad_second - 1], 2) );
 
-            _M_fe.updateFirstDerivQuadPt( _M_mesh.volumeList(ad_first) );
-            fe2.updateFirstDerivQuadPt( _M_mesh.volumeList(ad_second) );
+            _M_fe.updateFirstDerivQuadPt( _mesh.volumeList(ad_first) );
+            fe2.updateFirstDerivQuadPt( _mesh.volumeList(ad_second) );
 
-            _M_fe_bd.updateMeasQuadPt( _M_mesh.faceList(i) );
+            _M_fe_bd.updateMeasQuadPt( _mesh.faceList(i) );
 
             ipstab_grad(stab_coeff, elmat, _M_fe, fe2, _M_fe_bd, 0, 0, 1);
             assemb_mat(_M_A_steady, elmat, _M_fe, fe2, _M_dof);
@@ -407,8 +407,8 @@ namespace LifeV {
         ElemMat elmat(_M_fe.nbNode, 1, 1);
         ElemVec elvec(_M_fe.nbNode, NDIM); //DDP: corretto? o elvec(1, NDIM)?
 
-        for(UInt i = 1; i <= _M_mesh.numVolumes(); i++){
-            _M_fe.updateFirstDeriv( _M_mesh.volumeList(i) );
+        for(UInt i = 1; i <= _mesh.numVolumes(); i++){
+            _M_fe.updateFirstDeriv( _mesh.volumeList(i) );
             elmat.zero();
 
             evaluate_velocity(i, elvec);
@@ -431,15 +431,15 @@ namespace LifeV {
     void HyperbolicSolverIP<MeshType, SolverType>::initialize(const function_type& u0) {
         // Initialize bdf
 
-        _M_bdf.initialize_unk(u0, _M_mesh, _M_reffe, _M_fe, _M_dof, _M_t0, _M_delta_t, 1);
+        _M_bdf.initialize_unk(u0, _mesh, _M_reffe, _M_fe, _M_dof, _M_t0, _M_delta_t, 1);
         
         // Check if mesh has internal faces. If not, build them
 
-        if( !_M_mesh.hasInternalFaces() ) {
-            UInt num_b_faces = _M_mesh.numBFaces();
-            UInt num_i_faces = _M_mesh.numFaces() - _M_mesh.numBFaces();
+        if( !_mesh.hasInternalFaces() ) {
+            UInt num_b_faces = _mesh.numBFaces();
+            UInt num_i_faces = _mesh.numFaces() - _mesh.numBFaces();
 
-            buildFaces(_M_mesh, std::cout, std::cerr, num_b_faces, num_i_faces, true, true, false);
+            buildFaces(_mesh, std::cout, std::cerr, num_b_faces, num_i_faces, true, true, false);
         }
             
         // Compute the stabilization parameters

@@ -233,8 +233,7 @@ namespace LifeV {
         /** @name Constructors and destructors
          */
         //@{
-        LevelSetSolver(mesh_type& mesh, 
-                       const GetPot& datafile,
+        LevelSetSolver(const GetPot& datafile,
                        solver_type& solver,
                        const GeoMap& geomap,
                        const RefFE& reffe, 
@@ -245,8 +244,7 @@ namespace LifeV {
                        const Dof& dof_velocity,
                        velocity_type& velocity0)
             :
-            HyperbolicSolverIP<mesh_type, solver_type>(mesh, 
-                                                       datafile,
+            HyperbolicSolverIP<mesh_type, solver_type>(datafile,
                                                        solver,
                                                        geomap,
                                                        reffe, 
@@ -296,10 +294,10 @@ namespace LifeV {
 
             build_interface();
 
-            for(UInt iP = 1; iP < _M_mesh.numPoints(); iP++) {
+            for(UInt iP = 1; iP < _mesh.numPoints(); iP++) {
 
                 point_type P;
-                convert_point_type(P, _M_mesh.pointList(iP));
+                convert_point_type(P, _mesh.pointList(iP));
 
                 Real d = _M_face_list.begin()->point_to_face_distance(P);
             
@@ -321,8 +319,8 @@ namespace LifeV {
             Real ls_fun;
             int jg;
 
-            for(UInt i = 1; i <= _M_mesh.numVolumes(); i++) {
-                _M_fe.updateJac( _M_mesh.volumeList(i) );
+            for(UInt i = 1; i <= _mesh.numVolumes(); i++) {
+                _M_fe.updateJac( _mesh.volumeList(i) );
 
                 for(int iq = 0; iq < _M_fe.nbQuadPt; iq++) {
                     ls_fun = 0.;
@@ -352,11 +350,11 @@ namespace LifeV {
         */
 
         inline void build_interface() {
-            for(UInt iV = 1; iV <= _M_mesh.numVolumes(); iV++) {
+            for(UInt iV = 1; iV <= _mesh.numVolumes(); iV++) {
 
                 point_list_type locPointList;
 
-                for(UInt ie = 1; ie <= _M_mesh.numLocalEdges(); ie++) {
+                for(UInt ie = 1; ie <= _mesh.numLocalEdges(); ie++) {
                     
                     UInt j1 = mesh_type::ElementShape::eToP(ie, 1);
                     UInt j2 = mesh_type::ElementShape::eToP(ie, 2);
@@ -372,13 +370,13 @@ namespace LifeV {
                         point_type P1;
                         point_type P2;
                         
-                        P1[0] = _M_mesh.pointList(jg1 + 1).x();
-                        P1[1] = _M_mesh.pointList(jg1 + 1).y(); 
-                        P1[2] = _M_mesh.pointList(jg1 + 1).z();
+                        P1[0] = _mesh.pointList(jg1 + 1).x();
+                        P1[1] = _mesh.pointList(jg1 + 1).y(); 
+                        P1[2] = _mesh.pointList(jg1 + 1).z();
 
-                        P2[0] = _M_mesh.pointList(jg2 + 1).x();
-                        P2[1] = _M_mesh.pointList(jg2 + 1).y(); 
-                        P2[2] = _M_mesh.pointList(jg2 + 1).z();
+                        P2[0] = _mesh.pointList(jg2 + 1).x();
+                        P2[1] = _mesh.pointList(jg2 + 1).y(); 
+                        P2[2] = _mesh.pointList(jg2 + 1).z();
 
                         find_zero_on_edge(P1, u1, P2, u2, P);
 
