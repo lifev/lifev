@@ -69,13 +69,17 @@ FSISolver::FSISolver( GetPot const& data_file,
 
     Debug( 6220 ) << "FSISolver::preconditioner: " << precond << "\n";
 
-    if (  !__oper.empty() )
+    if ( !__oper.empty() )
     {
         M_method = __oper;
     }
+
     this->setFSIOperator( M_method );
 
     M_oper->setPreconditioner( precond );
+
+    M_oper->setUpBC();
+
     Debug( 6220 ) << "FSISolver::FSISolver ends\n";
 }
 void

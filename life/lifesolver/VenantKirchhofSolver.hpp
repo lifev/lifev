@@ -365,7 +365,6 @@ timeAdvance( source_type const& source, const Real& time )
     _rhsWithoutBC -= _K * this->_d;
 
     _rhs_w = ( 2.0 / this->_dt ) * this->_d + _w;
- 
     std::cout << std::endl;
     std::cout << "_rhs_w norm = " << norm_2(_rhs_w) << std::endl;
     std::cout << "    _w norm = " << norm_2(_w) << std::endl;
@@ -433,7 +432,6 @@ iterate(Vector &_sol)
     std::cout << "sol norm = " << norm(_sol) << std::endl;
 
     _residual_d = _C*_sol - _rhsWithoutBC;
-//    _residual_d = -1.*_residual_d;
 }
 
 
@@ -614,6 +612,12 @@ solveJac( Vector &step, const Vector& res, double& linear_rel_tol)
       chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
+    //--options[AZ_recursion_level];
+
+//    AZ_matrix_destroy( &J );
+//    AZ_precond_destroy( &prec_J );
+
+    _residual_d = _C*step;// - _rhsWithoutBC;
 }
 
 
@@ -643,12 +647,20 @@ solveJac(Vector &step, const Vector& res, double& linear_rel_tol, BCHandler &BCd
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
     _linearSolver.setRecursionLevel( _recur );
-    
+
     std::cout << "  o-  Solving system... "<< std::flush;
     chrono.start();
     _linearSolver.solve( step , _f );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
+
+    //--options[AZ_recursion_level];
+
+//    AZ_matrix_destroy( &J );
+//    AZ_precond_destroy( &prec_J );
+
+    _residual_d = _C*step;// - _rhsWithoutBC;
+//    bcManageMatrix( _J, _mesh, this->_dof, _BCh, _feBd, tgv );
 }
 
 
@@ -675,7 +687,7 @@ solveLin( Vector &step, const Vector& res, double linear_rel_tol)
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
     _linearSolver.setRecursionLevel( _recur );
-    
+
     std::cout << "  o-  Solving system... "<< std::flush;
     chrono.start();
     _linearSolver.solve( step , _f );
@@ -683,7 +695,7 @@ solveLin( Vector &step, const Vector& res, double linear_rel_tol)
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
     _w = ( 2.0 / this->_dt ) * step - _rhs_w;
-    
+
     _residual_d = _C*step - _rhsWithoutBC;
 
 }

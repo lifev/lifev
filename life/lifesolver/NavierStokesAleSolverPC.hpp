@@ -1003,7 +1003,7 @@ iterateLin( const Real& time, BCHandler& BCh_du )
     _residual_u = _f_duWithOutBC - _CAux * _du - _trDAux * _dp;
 
     std::cout << "  norm_inf (_residual_du ) = " << norm_inf( _residual_u ) << std::endl;
-    std::cout << "  norm_inf (_du )          = " << norm_2( _du ) << std::endl;
+    std::cout << "  norm_inf (_du )          = " << norm_inf( _du ) << std::endl;
 }
 
 

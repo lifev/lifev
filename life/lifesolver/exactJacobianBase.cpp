@@ -60,7 +60,7 @@ exactJacobian::setup()
     M_dz.resize(3*M_solid->dDof().numTotalDof());
     M_rhs_dz.resize(3*M_solid->dDof().numTotalDof());
 
-    setUpBC();
+//    setUpBC();
 }
 //
 // Residual computation

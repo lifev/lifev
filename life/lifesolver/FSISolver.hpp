@@ -158,6 +158,15 @@ public:
             M_oper->fluid().initialize(__u0);
             M_oper->solid().initialize(__d0,__w0);
         }
+
+    void initialize( std::string velName,
+                     std::string pressName,
+                     std::string depName)
+        {
+            M_oper->fluid().initialize(velName, pressName);
+            M_oper->solid().initialize(depName);
+        }
+
     void iterate( Real time );
 
     void showMe()
@@ -182,30 +191,33 @@ private:
 private:
 
     // be careful here: the BCs must be constructed before the solvers
-    bchandler_type M_BCh_u;
-    bchandler_type M_BCh_d;
-    bchandler_type M_BCh_mesh;
+    bchandler_type     M_BCh_u;
+    bchandler_type     M_BCh_d;
+    bchandler_type     M_BCh_mesh;
 
-    oper_fsi_ptr M_oper;
+    bchandler_type     M_BCh_du;
+    bchandler_type     M_BCh_dz;
+
+    oper_fsi_ptr       M_oper;
 
     operFS::fluid_type M_fluid;
     operFS::solid_type M_solid;
 
 
 
-    Vector    M_disp;
-    Vector    M_velo;
+    Vector             M_disp;
+    Vector             M_velo;
 
     /* data */
-    std::string M_method;
-    UInt M_maxpf;
-    Real M_defomega;
+    std::string        M_method;
+    UInt               M_maxpf;
+    Real               M_defomega;
 
-    Real M_abstol;
-    Real M_reltol;
-    Real M_etamax;
+    Real               M_abstol;
+    Real               M_reltol;
+    Real               M_etamax;
 
-    int M_linesearch;
+    int                M_linesearch;
 
     /* streams */
     std::ofstream out_iter;

@@ -69,7 +69,7 @@ fixedPoint::setup()
     // call operFS setup()
     super::setup();
     M_aitkFS.setup( 3*M_solid->dDof().numTotalDof() );
-    setUpBC();
+//    setUpBC();
 }
 
 void fixedPoint::eval(Vector& dispNew,

@@ -62,6 +62,9 @@ public:
     void solveLinearFluid();
     void solveLinearSolid();
 
+    void solveInvLinearFluid();
+    void solveInvLinearSolid();
+
     void setUpBC();
 
     //setters and getters
@@ -97,11 +100,19 @@ public:
         steklovPoincare* M_pFS;
     };
 
+    bchandler_type   BCh_du_inv(){return M_BCh_du_inv;}
+    bchandler_type   BCh_dz_inv(){return M_BCh_dz_inv;}
+
+    bchandler_type   BCh_du(){return M_BCh_du;}
+    bchandler_type   BCh_dz(){return M_BCh_dz;}
 
 private:
 
     bchandler_type          M_BCh_du;
     bchandler_type          M_BCh_dz;
+
+    bchandler_type          M_BCh_du_inv;
+    bchandler_type          M_BCh_dz_inv;
 
     Vector                  M_dz;
     Vector                  M_rhs_dz;
@@ -157,11 +168,16 @@ Real fzeroSP(const Real& t,
              const Real& y,
              const Real& z,
              const ID& i);
+
 void my_matvecSfSsPrime(double *z,
                         double *Jz,
                         AZ_MATRIX* J,
                         int proc_config[]);
 
+void my_matvecSfSsPrimePrec(double *z,
+                            double *Jz,
+                            AZ_MATRIX* J,
+                            int proc_config[]);
 
 }
 
