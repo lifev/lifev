@@ -413,11 +413,11 @@ iterate( const Real& time )
         for ( UInt ic = 0;ic < nc_u;ic++ )
         {
 
-            for ( UInt jc = 0;jc < nc_u;jc++ )
-            {
-                grad( jc, _elvec, _elmatC, _fe_u, _fe_u, ic, ic );
-                assemb_mat( _C, _elmatC, _fe_u, _dof_u, ic, jc );
-            }
+             for ( UInt jc = 0;jc < nc_u;jc++ )
+             {
+                 grad( jc, _elvec, _elmatC, _fe_u, _fe_u, ic, ic );
+                 assemb_mat( _C, _elmatC, _fe_u, _dof_u, ic, jc );
+             }
 
             // mass
             assemb_mat( _M_u, _elmatM_u, _fe_u, _dof_u, ic, ic );

@@ -55,7 +55,8 @@ int main(int argc, char** argv)
     //========================================================================================
 
     int  method   = data_file("problem/method"  , 0);
-    Real defOmega = data_file("problem/defOmega", .01);
+    int precond   = data_file("problem/precond"  , 1);
+    Real defOmega = data_file("problem/defOmega", 0.01);
 
     std::cout << std::endl;
     std::cout << "Fluid/Structure interactions";
@@ -75,6 +76,7 @@ int main(int argc, char** argv)
                       << std::endl;
             std::cout << std::endl;
             p_oper.reset(new steklovPoincare(data_file));
+            if (precond == 2) defOmega = -1.;
             break;
         case 2:
             std::cout << " -- exactJacobian method" << std::endl;
@@ -97,7 +99,7 @@ int main(int argc, char** argv)
     Real T      = oper.fluid().endtime();
 
     Real abstol = 1.e-7;
-    Real reltol = 1.e-4;
+    Real reltol = 1.e-3;
     Real etamax = 1.e-3;
 
     int status;

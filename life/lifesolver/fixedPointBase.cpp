@@ -26,6 +26,9 @@ namespace LifeV
 fixedPoint::fixedPoint(GetPot &_dataFile):
     operFS(_dataFile)
 {
+    M_defOmega =  _dataFile("problem/defOmega",0.01);
+    std::cout << "Default aikten start value = " << M_defOmega
+              << std::endl;
 }
 
 fixedPoint::~fixedPoint()

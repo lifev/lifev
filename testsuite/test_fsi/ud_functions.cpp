@@ -45,7 +45,7 @@ Real u2(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
     return 0.0;
     break;
   case 3:
-     if ( t <= 0.003  )
+     if ( t <= 0.003 )
       return 1.3332e4;
     else
       return 0.0;

@@ -48,12 +48,16 @@ public:
     void setUpBC     (function_type _bcf,
                       function_type _vel);
 
+    Real   defOmega() {return M_defOmega;}
+
 private:
 
 //     void eval        (const Vector &_disp,
 //                       const int     _status);
 
     void eval(Vector& dispNew, Vector& velo, const Vector& disp, int status);
+
+    Real                    M_defOmega;
 
 };
 

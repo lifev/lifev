@@ -34,9 +34,22 @@ steklovPoincare::steklovPoincare(GetPot &_dataFile):
     M_dataJacobian(this)
 {
     M_precond   = _dataFile("problem/precond"  , 1);
-    M_defOmegaS = _dataFile("problem/defOmegaS",0.005);
-    M_defOmegaF = _dataFile("problem/defOmegaF",0.005);
-    M_aitkFS.setDefault(M_defOmegaS, M_defOmegaF);
+
+    // for the NN case, aitken is inside the step
+    // computation routine
+    if (M_precond == 2)
+    {
+        M_defOmega  = -1.;
+        M_defOmegaS = _dataFile("problem/defOmegaS",0.005);
+        M_defOmegaF = _dataFile("problem/defOmegaF",0.005);
+        M_aitkFS.setDefault(M_defOmegaS, M_defOmegaF);
+    }
+    else
+    {
+        M_defOmega =  _dataFile("problem/defOmega",0.01);
+        std::cout << "Default aikten start value = " << M_defOmega
+                  << std::endl;
+    }
 //    setUpBC();
 }
 
@@ -56,14 +69,7 @@ void steklovPoincare::eval(const Vector& disp,
     if(status) M_nbEval = 0; // new time step
     M_nbEval++;
 
-    UInt nDofInterface;
-    nDofInterface = M_fluid.BC_fluid()[1].list_size();
-
-
-//    Vector sol(disp.size());
-
     M_solid.d() = setDispOnInterface(disp);
-//    M_solid.d() = disp;
 
     M_fluid.updateMesh(M_time);
     M_fluid.iterate   (M_time);
@@ -112,15 +118,16 @@ void steklovPoincare::evalResidual(Vector &res,
     std::cout << "Max ResidualFSI = " << norm_inf(M_residualFSI)
               << std::endl;
 
+    M_dispStruct = setDispOnInterface(disp);
 
 //    M_residualS = M_solid.residual();
 //     Vector muk = disp;
 //     muk = ZeroVector( muk.size() );
 //     invSsPrime(-1*M_residualS, 1e-08, muk);
 //     std::cout << "Norm_max d_disp = " << norm_inf(disp - muk) << std::endl;
-//     muk = ZeroVector( muk.size() );
-//     invSfPrime(0.*M_residualF, 1e-08, muk);
-//     std::cout << "Norm_max f_disp = " << norm_inf(disp - muk) << std::endl;
+//      muk = ZeroVector( muk.size() );
+//       invSfPrime(M_residualF, 1e-08, muk);
+//       std::cout << "Norm_max f_disp = " << norm_inf(disp - muk) << std::endl;
 }
 
 //
@@ -261,7 +268,8 @@ void  steklovPoincare::solveJac(Vector &muk,
             // generalizedAitken aitkDN(...) (DN for Dirichlet Neumann)
             // then
             //
-            muk = M_aitkFS.computeDeltaLambda(getResidualFSIOnSolid(), muS, muF );
+//            muk = M_aitkFS.computeDeltaLambda(getResidualFSIOnSolid(), muS, muF );
+            muk = M_aitkFS.computeDeltaLambda(M_dispStruct, muS, muF );
             // muk = muS + muF;
             // muk = .9*muS + .1*muF;
 

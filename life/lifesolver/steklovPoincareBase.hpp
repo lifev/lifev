@@ -68,7 +68,8 @@ public:
 
     //setters and getters
 
-    Vector dz() {return M_dz;}
+    Vector dz()       {return M_dz;}
+    Real   defOmega() {return M_defOmega;}
 
     void setResidualFSI(double *_res);
     void setResidualFSI(const Vector _res);
@@ -84,6 +85,8 @@ private:
     PhysVectUnknown<Vector> M_residualFSI;
 
     UInt                    M_precond;
+
+    Real                    M_defOmega;
     Real                    M_defOmegaS;
     Real                    M_defOmegaF;
 

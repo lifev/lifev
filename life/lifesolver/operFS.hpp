@@ -56,12 +56,13 @@ namespace LifeV
 
         virtual void solveJac (Vector &_muk,
                                const Vector &_res,
-                                const double  _linearRelTol) = 0;
+                               const double  _linearRelTol) = 0;
 
         // member functions
 
         virtual void setUpBC(function_type _bcf,
                              function_type _vel) = 0;
+
         void updateJac (Vector& sol,
                         int     iter);
 

@@ -94,7 +94,8 @@ operFS::~operFS()
 
 //
 
-void  operFS::updateJac(Vector& sol,int iter) {
+void  operFS::updateJac(Vector& sol,int iter)
+{
 }
 
 //
