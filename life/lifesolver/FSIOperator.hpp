@@ -183,6 +183,14 @@ public:
             M_BCh_mesh = bc_m;
         }
 
+    void setFluidBC(bchandler_type &bc_fluid){M_BCh_u = bc_fluid;}
+    void setLinFluidBC(bchandler_type &bc_dfluid){M_BCh_du = bc_dfluid;}
+    void setInvLinFluidBC(bchandler_type &bc_dfluid_inv){M_BCh_du_inv = bc_dfluid_inv;}
+    void setHarmonicExtensionBC(bchandler_type &bc_he){M_BCh_mesh = bc_he;}
+    void setSolidBC(bchandler_type &bc_solid){M_BCh_d = bc_solid;}
+    void setLinSolidBC(bchandler_type &bc_dsolid){M_BCh_dz = bc_dsolid;}
+    void setInvLinSolidBC(bchandler_type &bc_dsolid_inv){M_BCh_dz = bc_dsolid_inv;}
+
     virtual void setup();
 
     // BC Vector Interface setters and getters
