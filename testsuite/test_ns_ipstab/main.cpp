@@ -31,8 +31,7 @@ P1/P1 or P2/P2 FEM with Interior Penalty (IP) stabilization
 #include <lifeV.hpp>
 #include <NavierStokesSolverIP.hpp>
 #include <ud_functions.hpp>
-//#include <ethierSteinman.hpp>
-//#include <simple.hpp>
+#include <ethierSteinman.hpp>
 #include <picard.hpp>
 
 #include <iostream>
@@ -40,7 +39,6 @@ P1/P1 or P2/P2 FEM with Interior Penalty (IP) stabilization
 int main( int argc, char** argv )
 {
     using namespace LifeV;
-    //using namespace std;
 
     // Reading from data file
     //
@@ -48,10 +46,13 @@ int main( int argc, char** argv )
     const char* dataFileName = commandLine.follow( "data", 2, "-f", "--file" );
     GetPot dataFile( dataFileName );
 
-    // Number of boundary conditions for the fluid velocity,
-    // solid displacement, and fluid mesh motion
-    //
-    BCHandler bcH( 1, true ); // flag for fully essential BC is set to true
+    typedef EthierSteinmanSteady Problem;
+    Problem::setParamsFromGetPot( dataFile );
+
+    bool neumann = dataFile( "fluid/miscellaneous/neumann", 0 );
+
+    // second argument is flag for fully essential BC
+    BCHandler bcH( 0, !neumann );
 
     NavierStokesSolverIP< RegionMesh3D<LinearTetra> >
         fluid( dataFile, feTetraP1, quadRuleTetra4pt, quadRuleTria3pt, bcH );
@@ -60,9 +61,17 @@ int main( int argc, char** argv )
     // Boundary conditions for the fluid velocity
     //vector<ID> icomp( 1 );
     //icomp[0] = 1;
-    BCFunctionBase uWall( uexact );
-    // BCFunctionBase bcf( fZero );
+    BCFunctionBase uWall( Problem::uexact );
+    BCFunctionBase uNeumann( Problem::fNeumann );
     bcH.addBC( "Wall", 1, Essential, Full, uWall, 3 );
+    if ( neumann )
+    {
+        bcH.addBC( "Flux", 2, Natural, Full, uNeumann, 3 );
+    }
+    else
+    {
+        bcH.addBC( "Wall", 2, Essential, Full, uWall, 3 );
+    }
     //bcH.addBC( "Wall", 2, Essential, Component, bcf, icomp );
     //BCFunctionBase bcf( afZero );
     //BCFunctionBase inFlow( u2 );
@@ -75,7 +84,7 @@ int main( int argc, char** argv )
     // linearization of fluid
     if ( dataFile( "fluid/discretization/linearized", 0 ) )
     {
-        fluid.linearize( uexact );
+        fluid.linearize( Problem::uexact );
     }
 
     if ( dataFile( "fluid/miscellaneous/steady", 1 ) != 0 )
@@ -106,8 +115,8 @@ int main( int argc, char** argv )
         x0  = ZeroVector( lVec );
 
         // Compute right hand side
-        fluid.initialize( xexact );
-        fluid.timeAdvance( f, 0.0 );
+        fluid.initialize( Problem::xexact );
+        fluid.timeAdvance( Problem::f, 0.0 );
 
         int  status = picard( &fluid, norm_inf_adaptor(), fx1, fx0, gx1, gx0,
                               x1, x0, abstol, reltol, maxiter, method, omega );
@@ -123,9 +132,11 @@ int main( int argc, char** argv )
             std::cout << "Number of inner iterations       : " << maxiter
                       << std::endl;
             std::cout << "      - L2 pressure error = "
-                      << fluid.pErrorL2(pexact, 0.) << std::endl;
+                      << fluid.pErrorL2( Problem::pexact, 0. )
+                      << std::endl;
             std::cout << "      - L2 velocity error = "
-                      << fluid.uErrorL2(uexact, 0.) << std::endl;
+                      << fluid.uErrorL2( Problem::uexact, 0. )
+                      << std::endl;
             fluid.postProcess();
         }
     }
@@ -138,19 +149,19 @@ int main( int argc, char** argv )
         Real dt = fluid.timestep();
         Real t0 = fluid.inittime();
         Real tFinal = fluid.endtime();
-        fluid.initialize( xexact, t0, dt );
+        fluid.initialize( Problem::xexact, t0, dt );
 
         // Temporal loop
 
         for ( Real time = t0+dt ; time <= tFinal; time+=dt )
         {
-            fluid.timeAdvance( f, time );
+            fluid.timeAdvance( Problem::f, time );
             fluid.iterate( time );
 
             Real epr;
-            Real epL2 = fluid.pErrorL2(pexact, time, &epr);
+            Real epL2 = fluid.pErrorL2( Problem::pexact, time, &epr );
             Real eur;
-            Real euL2 = fluid.uErrorL2(uexact, time, &eur);
+            Real euL2 = fluid.uErrorL2( Problem::uexact, time, &eur );
 
             std::cout << "      - L2 pressure error = "
                       << epL2 << std::endl;
