@@ -22,15 +22,17 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 /**
-   \file interpolateFE.hpp
+   \file interpolate.hpp
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
    \date 2004-11-11
  */
-#ifndef __interpolateFE_H
-#define __interpolateFE_H 1
+#ifndef __interpolate_H
+#define __interpolate_H 1
 
 #include <tab.hpp>
 #include <boost/function.hpp>
+
+#warning SHOULD NOT BE USED YET
 
 namespace LifeV
 {
@@ -185,4 +187,4 @@ interpolate( boost::function<Real ( node_type const&, id_type const& )> const& u
     return __interp;
 }
 }
-#endif /* __interpolateFE_H */
+#endif /* __interpolate_H */
