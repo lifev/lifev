@@ -1,0 +1,4 @@
+New in 0.1.0pre3:
+* new architecture using the autotools from the GNU
+* new standard directory layout
+* fixed some bugs and miscompilation in a few places

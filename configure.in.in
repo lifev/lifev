@@ -1,14 +1,15 @@
 # -*- autoconf -*-
 # 
 #
-
+AC_INIT(life, 0.1.0pre3, christophe.prudhomme@epfl.ch)
 LIFE_PACKAGE=life
-LIFE_VERSION=0.1.0pre2
+LIFE_VERSION=0.1.0pre3
+
+PACKAGE=$LIFE_PACKAGE
+VERSION=$LIFE_VERSION
+
 AC_SUBST(LIFE_PACKAGE)
 AC_SUBST(LIFE_VERSION)
-
-# AC_INIT(${LIFE_PACKAGE}, ${LIFE_VERSION}, christophe.prudhomme@epfl.ch)
-AC_INIT(Makefile.am)
 
 AC_CONFIG_AUX_DIR(admin)
 
