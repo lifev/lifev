@@ -223,6 +223,9 @@ namespace LifeV {
         //! Lumped velocity mass matrix
         matrix_type_M_L _M_M_L;
 
+        //! Weighted lumped velocity mass matrix for Yosida solver
+        matrix_type_M_L _M_M_L_w;
+
         //! Matrix C
         matrix_type_C _M_C;
 
@@ -318,6 +321,7 @@ namespace LifeV {
         _M_pattern_Dtr(_M_pattern_Dtr_block),
         _M_M(_M_pattern_C),
         _M_M_L(_dim_u * NDIM),
+        _M_M_L_w(_dim_u * NDIM),
         _M_C(_M_pattern_C),
         _M_D(_M_pattern_D),
         _M_Dtr(_M_pattern_Dtr),
@@ -334,7 +338,7 @@ namespace LifeV {
         _M_beta_fct(0),
         _M_constant_pressure( _dim_p ),
         _M_lsfunction(_M_lss.lsfunction()),
-        _M_solver(_M_M_L, _M_C, _M_D, _M_Dtr, _M_data_file, "navier-stokes/yosida", _M_solver_u, _M_solver_p)
+        _M_solver(_M_M_L_w, _M_C, _M_D, _M_Dtr, _M_data_file, "navier-stokes/yosida", _M_solver_u, _M_solver_p)
     {
         if(_M_verbose)
             std::cout << "** NS2F ** Using boost matrix" << std::endl;
@@ -502,6 +506,7 @@ namespace LifeV {
 
         // Lump mass matrix
         _M_M_L.lumpRowSum(_M_M);
+        _M_M_L_w = ( _bdf.bdf_u().coeff_der(0) / _dt ) *_M_M_L;
 
         __chrono.stop();
 
