@@ -63,11 +63,13 @@ int nonLinRichardson( Vector& sol,
     /*
       max_increase_res: maximum number of successive increases in residual
       before failure is reported
-    */ 
+    */
+
     //        const int max_increase_res = 5;
+
     /*
       Parameters for the linear solver, gamma: Default value = 0.9
-    */ 
+    */
     //        const Real gamma   = 0.9;
 
     //----------------------------------------------------------------------
@@ -81,11 +83,6 @@ int nonLinRichardson( Vector& sol,
     Vector residual = sol;
     Vector step = sol;
 
-    Vector muS( f.solid().dDof().numTotalDof() );
-    Vector muF( f.fluid().uDof().numTotalDof() );
-
-    muS = -2.;
-    muF = -1.;
     step = 0.;
 
     Real normResOld = 1;
@@ -108,7 +105,6 @@ int nonLinRichardson( Vector& sol,
 
     while ( normRes > stop_tol && iter < maxit )
     {
-
         std::cout << std::endl;
         std::cout << "------------------------------------------------------------------" << std::endl;
         std::cout << "  NonLinRichardson: residual = " << normRes
@@ -121,18 +117,11 @@ int nonLinRichardson( Vector& sol,
         normResOld = normRes;
         normRes = norm( residual );
 
-        //            muS        = residual;
-
         step = aitken.computeDeltaLambda( sol, residual );
 
         std::cout << "Step norm = " << norm( step ) << std::endl;
-
-        out_res << "Step norm = " << norm( step );
-        out_res << "size d = " << f.solid().dDof().numTotalDof() << std::endl;
-        out_res << "size f = " << f.fluid().uDof().numTotalDof() << std::endl;
-
-        muS = f.residualS();
-        muF = f.residualF();
+        out_res   << "iter = " << iter
+                  << " Step norm = " << norm( step );
 
         sol += step;
 
@@ -141,7 +130,6 @@ int nonLinRichardson( Vector& sol,
         out_res << " Res norm = " << norm( residual ) << std::endl;
 
         normRes = norm( residual );
-
     }
 
     if ( normRes > stop_tol )
@@ -159,5 +147,3 @@ int nonLinRichardson( Vector& sol,
 }
 }
 #endif
-
-
