@@ -41,7 +41,7 @@ reducedLinFluid::reducedLinFluid(FSIOperator* const _op,
     M_feBd(M_refFE.boundaryFE(), getGeoMap(M_fluid->mesh()  ).boundaryMap(), M_bdQr),
     M_elmatC(M_fe.nbNode, 1, 1),
     M_dp(M_dim),
-    M_residual_dp(3*M_dim),
+    M_residual_dp(3*_fluid->uDof().numTotalDof()),
     M_f(M_dim),
     M_computedC(false),
     M_computedResidual(false)
@@ -132,8 +132,8 @@ void reducedLinFluid::evalResidual()
                  this->M_feBd,
                  this->M_dof);
 
-    bcManageVector(M_residual_dp, M_fluid->mesh(), M_fluid->pDof(), BCh,
-             this->M_feBd, 1.0, M_FSIOperator->time());
+    bcManageVector(M_residual_dp, M_fluid->mesh(), M_fluid->uDof(), BCh,
+                   this->M_feBd, 1.0, M_FSIOperator->time());
 
     M_computedResidual = true;
 
