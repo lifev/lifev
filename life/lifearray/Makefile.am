@@ -21,7 +21,7 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .cc
 
-INCLUDES 	= -I$(top_srcdir)/life/lifecore 
+INCLUDES 	= -I$(top_srcdir)/life/lifecore -I$(top_srcdir)/life/lifemesh
 
 include_HEADERS	= RNM.hpp RNM_op.hpp RNM_opc.hpp RNM_tpl.hpp tab.hpp \
 		  vecUnknown.hpp variables.hpp pattern.hpp \
@@ -32,7 +32,7 @@ include_HEADERS	= RNM.hpp RNM_op.hpp RNM_opc.hpp RNM_tpl.hpp tab.hpp \
 lib_LTLIBRARIES	= liblifearray.la
 
 liblifearray_la_SOURCES	= elemMat.cpp elemVec.cpp pattern.cpp sparseArray.cpp \
-			  vecUnknown.cpp
+			  vecUnknown.cpp 
 
 liblifearray_la_LIBADD	= ../lifecore/liblifecore.la
 include $(top_srcdir)/admin/Doxyfile.am

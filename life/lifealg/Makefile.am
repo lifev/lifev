@@ -22,7 +22,7 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-INCLUDES 	= -I$(top_srcdir)/life/lifecore  -I$(top_srcdir)/life/lifearray 
+INCLUDES 	= -I$(top_srcdir)/life/lifecore  -I$(top_srcdir)/life/lifearray -I$(top_srcdir)/life/lifemesh
 #INCLUDES 	= -I$(top_srcdir)/life/lifecore -I$(top_srcdir)/life/lifearray 
 
 if HAVE_PETSC
