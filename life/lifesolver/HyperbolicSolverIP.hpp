@@ -109,7 +109,8 @@ namespace LifeV {
         /** @name Constructors
          */
         //@{
-        HyperbolicSolverIP(const GetPot& datafile,
+        HyperbolicSolverIP(const GetPot& data_file,
+                           const std::string& data_section,
                            const RefFE& reffe, 
                            const QuadRule& qr, 
                            const QuadRule& qr_bd, 
@@ -118,8 +119,9 @@ namespace LifeV {
                            const Dof& dof_velocity,
                            velocity_type& velocity0) 
             :
-            DataMesh<MeshType>(datafile, "hyp/discretization"),
-            _M_datafile(datafile),
+            DataMesh<MeshType>(data_file, (data_section + "/discretization").data()),
+            _M_data_file(data_file),
+            _M_data_section(data_section),
             _M_reffe(reffe),
             _M_reffe_bd( _M_reffe.boundaryFE() ),
             _M_qr(qr),
@@ -140,15 +142,15 @@ namespace LifeV {
             _M_dof_velocity(dof_velocity),
             _M_dim_velocity( _M_dof_velocity.numTotalDof() ),
             _M_velocity(velocity0),
-            _M_bdf_order( datafile("hyp/bdf/order", 2) ),
+            _M_bdf_order( data_file((data_section + "/bdf/order").data(), 2) ),
             _M_bdf(_M_bdf_order)
         {
-            _M_solver.setOptionsFromGetPot(_M_datafile, "hyp/solver");
+            _M_solver.setOptionsFromGetPot(_M_data_file, (_M_data_section + "/solver").data());
 
-            _M_t0 = _M_datafile("hyp/bdf/t0", 0);
-            _M_delta_t = _M_datafile("hyp/bdf/delta_t", .02);
+            _M_t0 = _M_data_file((_M_data_section + "/bdf/t0").data(), 0);
+            _M_delta_t = _M_data_file((_M_data_section + "/bdf/delta_t").data(), .02);
 
-            _M_gamma = _M_datafile("hyp/ipstab/gamma", 0.125);
+            _M_gamma = _M_data_file((_M_data_section + "/ipstab/gamma").data(), 0.125);
         }
         //@}
 
@@ -210,9 +212,11 @@ namespace LifeV {
         void iterate();
        
     protected:
-    
         //! Data file
-        const GetPot& _M_datafile;
+        const GetPot& _M_data_file;
+
+        //! Data section
+        const std::string _M_data_section;
 
         //! The linear solver
         //#if USE_AZTEC_SOLVER

@@ -234,7 +234,8 @@ namespace LifeV {
         /** @name Constructors and destructors
          */
         //@{
-        LevelSetSolver(const GetPot& datafile,
+        LevelSetSolver(const GetPot& data_file,
+                       const std::string& data_section,
                        const RefFE& reffe, 
                        const QuadRule& qr, 
                        const QuadRule& qr_bd, 
@@ -243,7 +244,8 @@ namespace LifeV {
                        const Dof& dof_velocity,
                        velocity_type& velocity0)
             :
-            HyperbolicSolverIP<mesh_type>(datafile,
+            HyperbolicSolverIP<mesh_type>(data_file,
+                                          data_section,
                                           reffe, 
                                           qr, 
                                           qr_bd, 
