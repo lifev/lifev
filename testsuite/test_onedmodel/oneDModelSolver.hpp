@@ -149,8 +149,8 @@ public:
     \param data_file GetPot data file
   */
   OneDModelSolver(const GetPot& data_file, 
-		  //		  const OneDNonLinModelParam& onedparam);
-		  const LinearSimpleParam& onedparam);
+		  const OneDNonLinModelParam& onedparam);
+  // const LinearSimpleParam& onedparam);
 
   //! return the solution at current time step
   const ScalUnknown<Vector>& U1_thistime() const { return _M_U1_thistime;}
@@ -158,11 +158,24 @@ public:
   //! return the solution at current time step
   const ScalUnknown<Vector>& U2_thistime() const { return _M_U2_thistime;}
 
+  //! Sets initial condition for the concentration
+  void initialize(const Real& u10, const Real& u20);
+
+  //! Sets initial condition for the concentration
+  //! (incremental approach): the initial time is t0, the time step dt
+  void initialize(const Function& c0, Real t0, Real dt);
+
+  //! Sets initial condition for the concentration from file
+  void initialize(const std::string & vname);
+
   //! Update the right  hand side  for time advancing
   void timeAdvance( const Real& time );
 
   //! Update convective term, bc treatment and solve the linearized ns system
   void iterate( const Real& time , const int& count);
+
+  //! simple cfl computation (correct for constant mesh)
+  void CheckCFL() const;
 
   //! plotting
   void gplot();
@@ -177,20 +190,20 @@ public:
 private:
 
   //! the parameters
-  //  const OneDNonLinModelParam& _M_oneDParam;
-  const LinearSimpleParam& _M_oneDParam;
+  const OneDNonLinModelParam& _M_oneDParam;
+  // const LinearSimpleParam& _M_oneDParam;
 
-  /*
+
   //! the flux function
   NonLinearFluxFun1D _M_fluxFun;
   //! the source function 
   NonLinearSourceFun1D _M_sourceFun ;
-  */
+  /*
   //! the flux function
   LinearSimpleFluxFun1D _M_fluxFun;
   //! the source function 
   LinearSimpleSourceFun1D _M_sourceFun ;
-
+  */
 
   //! coefficient in front of the corresponding _M_elmat*
   Real _M_coeffMass;

@@ -373,6 +373,56 @@ Real NonLinearSourceFun1D::diff2(const Real& _A, const Real& _Q,
   ERROR_MSG("Source's second differential function has only 8 components.");
 }
 
+Real NonLinearSourceFun1D::
+QuasiLinearSource(const Real& _A, const Real& _Q, 
+		  const ID& ii, 
+		  const UInt& indz) const 
+{
+  Real Sql2;
+  Real Area0, beta0, beta1, rho, Kr;
+  Real AoverA0, AoverA0POWbeta1timesA;
+  Real tmp;
+
+  Real dArea0dz = 0.;
+  Real dbeta0dz = 0.;
+  Real dbeta1dz = 0.;
+  Real dalphadz = 0.;
+
+  if( ii == 1 ) { //! Sql1
+    return 0.; 
+  }
+  if( ii == 2 ) { //! Sql2
+
+    Area0 = _M_oneDParam.Area0(indz);
+    beta0 = _M_oneDParam.Beta0(indz);
+    beta1 = _M_oneDParam.Beta1(indz);
+    Kr    = _M_oneDParam.FrictionKr(indz);
+    rho   = _M_oneDParam.DensityRho();
+
+    AoverA0 = _A / Area0;
+    AoverA0POWbeta1timesA = std::pow( AoverA0, beta1 ) * _A;
+
+    tmp = beta0 / rho * AoverA0POWbeta1timesA;
+    //! friction term
+    Sql2 = Kr * _Q /_A;
+
+    //! term with the derivative of A0 with respect to z
+    Sql2 += - tmp * beta1 / Area0 * dArea0dz; 
+
+    //! term with the derivative of beta0 with respect to z
+    Sql2 += 1 / rho * ( AoverA0POWbeta1timesA  -  _A ) * dbeta0dz;
+
+    //! term with the derivative of beta1 with respect to z
+    Sql2 += tmp * std::log( AoverA0 ) * dbeta1dz;
+
+    //! term with the derivative of alpha with respect to z
+    Sql2 += _Q * _Q / _A * dalphadz;
+
+    return Sql2;
+  }
+  ERROR_MSG("The QL source function has only 2 components.");
+}
+
 //+++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
@@ -486,7 +536,7 @@ Real LinearSimpleSourceFun1D::operator()(const Real& _U1, const Real& _U2,
   ERROR_MSG("The flux function has only 2 components.");
 }
 
-//! Jacobian matrix dBi/dxj 
+//! Jacobian matrix dSi/dxj 
 Real LinearSimpleSourceFun1D::diff(const Real& _U1, const Real& _U2, 
 				   const ID& ii, const ID& jj, 
 				   const UInt& indz) const 
@@ -507,7 +557,7 @@ Real LinearSimpleSourceFun1D::diff(const Real& _U1, const Real& _U2,
 
 }
 
-//! Second derivative tensor d2Bi/(dxj dxk)
+//! Second derivative tensor d2Si/(dxj dxk)
 Real LinearSimpleSourceFun1D::diff2(const Real& _U1, const Real& _U2, 
 				    const ID& ii, const ID& jj, const ID& kk,
 				    const UInt& indz) const

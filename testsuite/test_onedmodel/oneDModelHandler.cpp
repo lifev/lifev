@@ -42,8 +42,6 @@ OneDModelHandler::OneDModelHandler(const GetPot& data_file):
      _M_dof1D(_M_mesh.numVertices()),
      _M_dimDof(_M_dof1D.numTotalDof()),
      _M_fe(_M_refFE,_M_geoMap,_M_qr),
-     _M_U1_initial(_M_dimDof),
-     _M_U2_initial(_M_dimDof),
      _M_GracePlot( data_file )
 {
   /* Useless as long as we don't have a 1d mesh reader and handler...
@@ -65,32 +63,6 @@ void OneDModelHandler::showMeHandler(std::ostream& c, UInt verbose)
   _M_mesh.showMe(c, verbose);
   c << "--- End of One Dimensional Model Handler\n";
 
-}
-
-// ! Initialize with constant initial conditions concentration
-void OneDModelHandler::initialize(const Real& u10, const Real& u20)
-{
-  _M_U1_initial = u10;
-  _M_U2_initial = u20;
-}
-
-// ! Initialize when  initial conditions concentration
-void OneDModelHandler::initialize(const Function& c0, Real t0, Real dt)
-{
-
-}
-
-// ! Initialize when initial values for the concentration are read from file
-void OneDModelHandler::initialize(const std::string & vname)
-{
-
-  std::fstream Resfile(vname.c_str(),std::ios::in | std::ios::binary);
-  if (Resfile.fail()) {
-    std::cerr<<" Error in initialize: File not found or locked"<<std::endl;
-    abort();
-  }
-  Resfile.read((char*)&_M_U1_initial(1),_M_U1_initial.size()*sizeof(Real));
-  Resfile.close();
 }
 
 }

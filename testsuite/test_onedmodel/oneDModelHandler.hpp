@@ -77,22 +77,12 @@ public:
   //! Do nothing destructor
   ~OneDModelHandler() {};
 
-  //! Sets initial condition for the concentration
-  void initialize(const Real& u10, const Real& u20);
-
-  //! Sets initial condition for the concentration
-  //! (incremental approach): the initial time is t0, the time step dt
-  void initialize(const Function& c0, Real t0, Real dt);
-
-  //! Sets initial condition for the concentration from file
-  void initialize(const std::string & vname);
-
   //! Update the right  hand side  for time advancing
   /*!
     \param source volumic source
     \param time present time
   */
-  //  virtual void timeAdvance(const Function source, const Real& time) = 0;
+  // virtual void timeAdvance(const Function source, const Real& time) = 0;
 
   //! Update convective term, bc treatment and solve the linearized cdr system
   //  virtual void iterate(const Real& time, PhysVectUnknown<Vector> & u) = 0;
@@ -120,14 +110,6 @@ protected:
   //! Dirichlet boundary value at left and right boundaries (NO bc_handler)
   Vec2D _M_bcDirLeft; //! first -> U1, second ->U2
   Vec2D _M_bcDirRight;
-
-  //! initial value for the unknown
-  ScalUnknown<Vector> _M_U1_initial;
-  ScalUnknown<Vector> _M_U2_initial;
-
-  //! boundary conditions functions
-  BCFunction_Base _M_bc_fct1;  //!< low  X
-  BCFunction_Base _M_bc_fct2;  //!< high X
 
   GracePlot _M_GracePlot; //!< for plotting
 

@@ -31,8 +31,8 @@
 namespace LifeV
 {
 OneDModelSolver::OneDModelSolver(const GetPot& data_file,
-				 // const OneDNonLinModelParam& onedparam):
-				 const LinearSimpleParam& onedparam):
+				 const OneDNonLinModelParam& onedparam):
+  // const LinearSimpleParam& onedparam):
   OneDModelHandler(data_file),
   _M_oneDParam(onedparam),
   _M_fluxFun(_M_oneDParam),
@@ -87,7 +87,7 @@ OneDModelSolver::OneDModelSolver(const GetPot& data_file,
 
   std::cout << "\n";
   std::cout << "O-  Nb of unknowns: " << _M_dimDof     << "\n";
-  std::cout << "O-  Computing mass matrix... \n" << std::endl;
+  std::cout << "O-  Computing the constant matrices... \n" << std::endl;
 
   std::string fname1 = "solA.mtv";
   std::string fname2 = "solQ.mtv";
@@ -547,6 +547,12 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
   Real  eigval1, eigval2;
   //! left eigen vectors for the eigen values eigval1 and eigval2
   Vec2D left_eigvec1, left_eigvec2;
+  
+  /*! interpolate the eigenvectors
+  Vec2D left_eigvec1_internalBd, left_eigvec2_internalBd;
+  Vec2D left_eigvec1_charact_pt, left_eigvec2_charact_pt;
+  Real eigval1_internalBd, eigval2_internalBd;
+  */
 
   //! first and second line of the identity matrix
   Vec2D line1_id( 1. , 0. );
@@ -772,7 +778,13 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
     // *******************************************************
     //-------------------------------------
     //! Dirichlet bc.
-    rhsBC.first = std::sin( 2 * M_PI * time_val );
+    // rhsBC.first = _M_oneDParam.Area0(0) * ( 1 + 0.1 * std::sin( 2 * M_PI * time_val ) );
+    if( time_val <= 5e-2 ){
+      rhsBC.first = _M_oneDParam.Area0( leftDof ) * 
+	( 1 + 20000 * _M_oneDParam.DensityRho() / _M_oneDParam.Beta0( leftDof ) );
+    } else {
+      rhsBC.first = _M_oneDParam.Area0( leftDof );
+    }
 
     //-------------------------------------
     //!compatibility condition
@@ -794,6 +806,32 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
 					    left_eigvec2.first, left_eigvec2.second, 
 					    leftDof);
 
+    /*! interpolate the eigenvectors
+    //wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+    //! compute the eigenvalues/eigenvectors of the flux jacobian (computed at the internal bd point)
+    _M_fluxFun.jacobian_EigenValues_Vectors(U_internalBd.first, U_internalBd.second, 
+					    eigval1_internalBd, eigval2_internalBd, 
+					    left_eigvec1_internalBd.first, left_eigvec1_internalBd.second, 
+					    left_eigvec2_internalBd.first, left_eigvec2_internalBd.second, 
+					    leftDof + 1);
+
+    left_eigvec2_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint, 
+					      _M_time_step, eigval2, 
+					      left_eigvec2, left_eigvec2_internalBd);
+       
+    std::cout << "\nEigenVector2 " << left_eigvec2.first << " " << left_eigvec2.second << std::endl;
+    std::cout << "EigenVector2 charac " << left_eigvec2_charact_pt.first 
+	      << " " << left_eigvec2_charact_pt.second << std::endl;
+   
+    left_eigvec2.first  = left_eigvec2_charact_pt.first;
+    left_eigvec2.second = left_eigvec2_charact_pt.second;
+    //wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+    */
+   
+    //------------------------------------------------------------
+
+    if ( _M_verbose > 1 ) 
+      std::cout << "\nEigenValue 1 " << eigval1 << " EigenValue 2 " << eigval2 << std::endl;
 
     ASSERT( eigval1 > 0. &&  eigval2 < 0.  ,
 	    "The eigenvalues do not have the expected signs.");
@@ -858,6 +896,31 @@ void OneDModelSolver::_computeBCValues( const Real& time_val )
 					    left_eigvec1.first, left_eigvec1.second, 
 					    left_eigvec2.first, left_eigvec2.second, 
 					    rightDof);
+    /*! interpolate the eigenvectors
+    //wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+    //! compute the eigenvalues/eigenvectors of the flux jacobian (computed at the internal bd point)
+    _M_fluxFun.jacobian_EigenValues_Vectors(U_internalBd.first, U_internalBd.second, 
+					    eigval1_internalBd, eigval2_internalBd, 
+					    left_eigvec1_internalBd.first, left_eigvec1_internalBd.second, 
+					    left_eigvec2_internalBd.first, left_eigvec2_internalBd.second, 
+					    rightDof - 1);
+
+    left_eigvec1_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint, 
+					      _M_time_step, eigval1, 
+					      left_eigvec1, left_eigvec1_internalBd);
+       
+    std::cout << "\nEigenVector1 " << left_eigvec1.first << " " << left_eigvec1.second << std::endl;
+    std::cout << "EigenVector1 charac " << left_eigvec1_charact_pt.first 
+	      << " " << left_eigvec1_charact_pt.second << std::endl;
+   
+    left_eigvec1.first  = left_eigvec1_charact_pt.first;
+    left_eigvec1.second = left_eigvec1_charact_pt.second;
+    //wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+    */
+
+    if ( _M_verbose > 1 ) 
+      std::cout << "EigenValue 1 " << eigval1 << " EigenValue 2 " << eigval2 << std::endl;
+    
 
     ASSERT( eigval1 > 0. && eigval2 < 0. ,
 	    "The eigenvalues do not have the expected signs.");
@@ -923,6 +986,46 @@ OneDModelSolver::_interpolLinear(const Real& point_bound, const Real& point_inte
 		  ( 1 - weight ) * U_bound.second + weight * U_intern.second );
   return u_interp;
 
+}
+
+
+//! simple cfl computation (correct for constant mesh)
+void OneDModelSolver::CheckCFL() const 
+{
+  Real CFL = 0.;
+
+  //! length of the first edge (arbitrary as they are all supposed equal).
+  Real deltaX = _M_mesh.edgeList( 1 ).pt2().x() - _M_mesh.edgeList( 1 ).pt1().x();
+  Real Ainode, Qinode;
+
+  Real lambda1_max = 0.;
+  Real lambda2_max = 0.;
+  Real eigval1, eigval2;
+  Real tmp11, tmp12, tmp21, tmp22;
+
+  for ( UInt inode=0; inode < _M_dimDof ; inode++ ) {
+
+    Ainode = _M_U1_thistime( inode );
+    Qinode = _M_U2_thistime( inode );
+
+    //! compute the eigenvalues at node
+    _M_fluxFun.jacobian_EigenValues_Vectors( Ainode, Qinode, 
+					     eigval1, eigval2, 
+					     tmp11, tmp12, 
+					     tmp21, tmp22, 
+					     inode );
+
+
+    lambda1_max = std::max<Real>( std::fabs(eigval1), lambda1_max );
+    lambda2_max = std::max<Real>( std::fabs(eigval2), lambda2_max );
+  }
+  
+  CFL = _M_time_step / deltaX * std::max<Real>( lambda1_max , lambda2_max );
+  if ( _M_verbose > 1) {
+    std::cout << "CFL = " << CFL << std::endl;
+  }
+  
+  ASSERT( CFL < 0.5774 , "CFL not respected" );
 }
 
 /*! solve a 2x2 linear system by the Cramer method (for the boundary systems)
@@ -1164,6 +1267,35 @@ void OneDModelSolver::_directsolveMassMatrix( ScalUnknown<Vector>& vec )
 
 }
 
+
+// ! Initialize with constant initial conditions concentration
+void OneDModelSolver::initialize(const Real& u10, const Real& u20)
+{
+  _M_U1_thistime = u10;
+  _M_U2_thistime = u20;
+}
+
+// ! Initialize when  initial conditions concentration
+void OneDModelSolver::initialize(const Function& c0, Real t0, Real dt)
+{
+  ERROR_MSG("Not yet implemented");
+}
+
+// ! Initialize when initial values for the concentration are read from file
+void OneDModelSolver::initialize(const std::string & vname)
+{
+  ERROR_MSG("Not yet implemented");
+
+  std::fstream Resfile(vname.c_str(),std::ios::in | std::ios::binary);
+  if (Resfile.fail()) {
+    std::cerr<<" Error in initialize: File not found or locked"<<std::endl;
+    abort();
+  }
+  Resfile.read((char*)&_M_U1_thistime(1),_M_U1_thistime.size()*sizeof(Real));
+  Resfile.close();
+}
+
+
 //! Update the right hand side for time advancing
 void OneDModelSolver::timeAdvance( const Real& time_val )
 {
@@ -1173,6 +1305,10 @@ void OneDModelSolver::timeAdvance( const Real& time_val )
 
   std::cout << "  o-  updates of flux and sources... ";
   chrono.start();
+
+  //! output cfl
+  CheckCFL();
+
   //! update the vector containing the values of the flux at the nodes 
   //! and its jacobian
   _updateFluxDer();
@@ -1181,6 +1317,7 @@ void OneDModelSolver::timeAdvance( const Real& time_val )
   _updateSourceDer();
   chrono.stop();
   std::cout << "done in " << chrono.diff() << " s." << std::endl;
+
 
   std::cout << "  o-  updates of matrices... ";
   chrono.start();

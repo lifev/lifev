@@ -176,6 +176,20 @@ public:
   Real diff2(const Real& _A, const Real& _Q, 
 	     const ID& ii, const ID& jj, const ID& kk, 
 	     const UInt& indz = 0) const;
+
+  /*! Sql = [Sql1, Sql2]^T
+    
+    Sql source term of the equation under its quasi-linear
+        formulation :
+
+	dU/dt + H(U) dU/dz + Sql(U) = 0
+	
+     \param indz : is the index position for the parameter
+  */
+  Real QuasiLinearSource(const Real& _U1, const Real& _U2, 
+			 const ID& ii, 
+			 const UInt& indz = 0) const ;
+
 };
 //+++++++++++++++++++++++++++++++++++++++++++++++++++
 

@@ -37,6 +37,8 @@ int main(int argc, char** argv)
   GetPot data_file(data_file_name);
 
   OneDNonLinModelParam onedparamNL(data_file_name);
+  onedparamNL.initParam(4e6);
+
   LinearSimpleParam onedparamLin(data_file_name);
 
   std::cout << "======\n\tNon Linear model " << std::endl;
@@ -46,7 +48,8 @@ int main(int argc, char** argv)
   onedparamLin.showMeData(std::cout);
   std::cout << "-----------------------------" << std::endl;
 
-  OneDModelSolver onedm(data_file_name, onedparamLin);
+  //  OneDModelSolver onedm(data_file_name, onedparamLin);
+  OneDModelSolver onedm(data_file_name, onedparamNL);
 
   onedm.showMeData();
   //  onedm.showMeHandler(cout, 6);
@@ -59,7 +62,11 @@ int main(int argc, char** argv)
   Real startT = onedm.inittime();
   Real T      = onedm.endtime();
 
+  /*
   Real u1_0 = 0.; //! constant initial condition
+  Real u2_0 = 0.; //! constant initial condition
+  */
+  Real u1_0 = onedparamNL.Area0(0); //! constant initial condition
   Real u2_0 = 0.; //! constant initial condition
 
   /*
