@@ -41,10 +41,10 @@ Real u0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
     break;
   case 3:
     
-    return 32/pi*(1.0/4-(x*x+y*y));// initial condition for flux=1 for the cylinder
+    //return 32/pi*(1.0/4-(x*x+y*y));// initial condition for flux=1 for the cylinder
     //return 0.325*32/pi*(1.0/4-(x*x+y*y));// initial condition for physiological flux for the cylinder
      //return 2.5774*(1-16/25*(x*x+y*y));
-     //return 0.0;
+     return 0.0;
      break;
   }
   return 0;
@@ -99,7 +99,13 @@ Real my_flux_cost2( Real time ){
 // sinusoidal flux
 Real my_flux_cos( Real time ){
   Real pi = 3.14159265358979;
-  return -1.*cos(2*pi*time);
+  return 0.01*cos(2*pi*time);
+}
+
+// sinusoidal flux
+Real my_flux_cos2( Real time ){
+  Real pi = 3.14159265358979;
+  return 0.005*cos(2*pi*time);
 }
 
 // physiological flux
@@ -174,5 +180,6 @@ Real my_flux_physio( Real time ){
   }
   return -flux;
 }
+
 
 }
