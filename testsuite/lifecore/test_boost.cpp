@@ -56,6 +56,7 @@ double f2( double t, double x , double y, double z, LifeV::ID const& i)
             return z*z*cos( t );
             break;
     }
+    return 0;
 };
 void
 test_function()
@@ -74,7 +75,7 @@ test_function()
         boost::timer __timer;
         for ( ulong __i = 0;__i < N;++__i )
         {
-            double a = f1(t, x, y, z, id);
+            f1(t, x, y, z, id);
         }
         std::cout << "Elapsed time for pure function pointer: " << __timer.elapsed() << "\n";
         __out << __timer.elapsed() << " ";
@@ -84,7 +85,7 @@ test_function()
         __timer.restart();
         for ( ulong __i = 0;__i < N;++__i )
         {
-            double a = myfunctor(t, x, y, z, id);
+            myfunctor(t, x, y, z, id);
         }
         std::cout << "Elapsed time for boost::function: " << __timer.elapsed() << "\n";
         __out << __timer.elapsed() << " ";
@@ -95,7 +96,7 @@ test_function()
         for ( ulong __i = 0;__i < N;++__i )
         {
             id = __i%3+1;
-            double a = f2(t, x, y, z, id);
+            f2(t, x, y, z, id);
         }
         std::cout << "Elapsed time for pure function pointer: " << __timer.elapsed() << "\n";
         __out << __timer.elapsed() << " ";
@@ -106,7 +107,7 @@ test_function()
         for ( ulong __i = 0;__i < N;++__i )
         {
             id = __i%3+1;
-            double a = myfunctor2(t, x, y, z, id);
+            myfunctor2(t, x, y, z, id);
         }
         std::cout << "Elapsed time for boost::function: " << __timer.elapsed() << "\n";
         __out << __timer.elapsed() << "\n";
