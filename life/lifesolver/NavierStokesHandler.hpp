@@ -40,7 +40,7 @@
 #include "dataAztec.hpp"
 #include "medit_wrtrs.hpp"
 #include "gmv_wrtrs.hpp"
-#include "bcCond.hpp"
+#include "bcHandler.hpp"
 #include "bdfNS.hpp"
 #include "post_proc.hpp"
 #include "openDX_wrtrs.hpp"

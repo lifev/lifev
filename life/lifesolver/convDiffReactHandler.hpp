@@ -37,7 +37,7 @@
 #include "refFE.hpp"
 #include "dof.hpp"
 #include "medit_wrtrs.hpp"
-#include "bcCond.hpp"
+#include "bcHandler.hpp"
 #include "bdf.hpp"
 #include "post_proc.hpp"
 #include "openDX_wrtrs.hpp"

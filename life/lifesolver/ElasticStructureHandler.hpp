@@ -39,7 +39,7 @@
 #include "dof.hpp"
 #include "lifeV.hpp"
 #include "medit_wrtrs.hpp"
-#include "bcCond.hpp"
+#include "bcHandler.hpp"
 
 namespace LifeV
 {

@@ -37,7 +37,7 @@
 #include "pattern.hpp"
 #include "assemb.hpp"
 #include "bcManage.hpp"
-#include "bcCond.hpp"
+#include "bcHandler.hpp"
 #include "chrono.hpp"
 #include "dataAztec.hpp"
 #include "dataNewton.hpp"

@@ -43,7 +43,7 @@
 #include "assemb.hpp"
 #include "bcManage.hpp"
 #include "algebraic_facto.hpp"
-#include "bcCond.hpp"
+#include "bcHandler.hpp"
 #include "chrono.hpp"
 #include "dataAztec.hpp"
 #include "bdfNS.hpp"

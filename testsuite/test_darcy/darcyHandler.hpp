@@ -25,7 +25,7 @@
 #include "refHdivFE.hpp"
 #include "refHybridFE.hpp"
 #include "elemOper.hpp"
-#include "bcCond.hpp"
+#include "bcHandler.hpp"
 #include "dof.hpp"
 #include "pattern.hpp"
 #include "values.hpp"

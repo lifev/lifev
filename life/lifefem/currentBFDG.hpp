@@ -2,7 +2,7 @@
 #define _CURRENTBFDG_H
 
 #include "currentBdDG.hpp"
-#include "bcCond.hpp"
+#include "bcHandler.hpp"
 
 namespace LifeV
 {

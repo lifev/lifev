@@ -41,7 +41,7 @@
 #include "currentFE.hpp"
 #include "refFE.hpp"
 #include "dofOneD.hpp"
-#include "bcCond.hpp"
+#include "bcHandler.hpp"
 #include "medit_wrtrs.hpp"
 
 #include "gracePlot.hpp"

@@ -23,7 +23,7 @@
 //#if defined( HAVE_PETSC_H )
 //#include <SolverPETSC.hpp>
 //#endif /* HAVE_PETSC_H */
-#include <bcCond.hpp>
+#include <bcHandler.hpp>
 #include <chrono.hpp>
 #include <sobolevNorms.hpp>
 #include <geoMap.hpp>

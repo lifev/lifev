@@ -46,7 +46,7 @@
 
 #ifndef _BCMANAGE_
 #define _BCMANAGE_
-#include "bcCond.hpp"
+#include "bcHandler.hpp"
 #include "dof.hpp"
 
 

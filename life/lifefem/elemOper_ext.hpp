@@ -2,17 +2,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
- 
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
- 
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
- 
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -24,7 +24,7 @@
 /******************************************************************
  Definition of ElementarOperators and all the utilities
  for the assembly via Expression Templates (See Veldhuizen, Haney, Furnish)
- 
+
  Release 0.1 - A. Veneziani, January 2001
  Adaptation to the new f.e. JFG 04/2002 (remark : several class
  implementation should now be put in a .cc)
@@ -36,7 +36,7 @@
 #include "currentFEDG.hpp"
 #include "currentIFDG.hpp"
 #include "currentBFDG.hpp"
-#include "bcCond.hpp"
+#include "bcHandler.hpp"
 
 namespace LifeV
 {
@@ -207,7 +207,7 @@ class JumpIF {
  public:
   JumpIF(CurrentIFDG* fe):_fe(fe){};
   CurrentIFDG* fe_ptr() {return _fe;};
- 
+
   Real operator()(int i, int icoor, int iq, int H)
     {
       // returns the coor-th component of jump(phi^H_i)
@@ -225,7 +225,7 @@ class JumpBF {
  public:
   JumpBF(CurrentBFDG* fe):_fe(fe){};
   CurrentBFDG* fe_ptr() {return _fe;};
- 
+
   Real operator()(int i, int icoor, int iq, int H)
     {
       // returns the coor-th component of jump(phi^H_i)
@@ -239,7 +239,7 @@ class AvgIF {
  public:
   AvgIF(CurrentIFDG* fe):_fe(fe){};
   CurrentIFDG* fe_ptr() {return _fe;};
- 
+
   Real operator()(int i, int iq, int H)
     {
       // returns the average of phi^H_i
@@ -257,7 +257,7 @@ class AvgBF {
  public:
   AvgBF(CurrentBFDG* fe):_fe(fe){};
   CurrentBFDG* fe_ptr() {return _fe;};
- 
+
   Real operator()(int i, int icoor, int iq, int H)
     {
       // returns the average of phi^H_i
@@ -490,7 +490,7 @@ class SymEOExpr: public EOExpr<P,A>{
  public:
    SymEOExpr(const A& eo): EOExpr<P,A>(eo)
      {}
-     };*/ 
+     };*/
 //////////////////////////////////////////////
 //
 // Example of use: -mu*Laplace(u) + sigma*(u)
@@ -539,13 +539,13 @@ public:
     };
    // D. A. Di Pietro: This overloading of operator() is necessary to handle DG operators
    P operator()(int i, int j, int iq, Real x, Real y, Real z, int K, int H, int ic, int jc)
-     { 
+     {
        return Op::apply(_a(i, j, iq, x, y, z, K, H, ic, jc), _b(i, j, iq, x, y, z, K, H, ic, jc));
      };
-   
+
    // D. A. Di Pietro: This overloading of operator() includes time dependence
    P operator()(int i, int j, int iq, Real t, Real x, Real y, Real z, int K, int H, int ic, int jc)
-     { 
+     {
        return Op::apply(_a(i, j, iq, t, x, y, z, K, H, ic, jc), _b(i, j, iq, t, x, y, z, K, H, ic, jc));
      };
 };
@@ -577,7 +577,7 @@ public:
   P operator()(int i, int j, int iq, Real x, Real y, Real z, int K, int H, int ic, int jc)
     {
       return Op::apply(_a(i, j, iq, x, y, z, K, H, ic, jc), _b);
-    };		       
+    };
 
 
   // Added by D. A. Di Pietro 2/2004

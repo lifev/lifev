@@ -41,7 +41,7 @@
 #include "elemMat.hpp"
 #include "elemVec.hpp"
 #include "localDofPattern.hpp"
-#include "bcCond.hpp"
+#include "bcHandler.hpp"
 
 namespace LifeV
 {

@@ -27,7 +27,9 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .cc
 
 INCLUDES 	= -I$(top_srcdir)/life/lifecore -I$(top_srcdir)/life/lifearray -I$(top_srcdir)/life/lifemesh -I$(top_srcdir)/life/lifealg
 
-include_HEADERS		= Operator01.hpp assemb.hpp bcCond.hpp bcVector.hpp bdf.hpp bdfNS.hpp \
+include_HEADERS		= Operator01.hpp assemb.hpp\
+bcCond.hpp bcFunction.hpp bcVector.hpp bcHandler.hpp \
+bdf.hpp bdfNS.hpp \
 bcManage.hpp currentBdFE.hpp currentFE.hpp currentHdivFE.hpp \
 dof.hpp dofInterface3Dto2D.hpp dofInterface3Dto3D.hpp dofInterfaceBase.hpp \
 dofInterfaceHandler.hpp  elemOper.hpp elemOper_ext.hpp \
@@ -39,7 +41,9 @@ currentFEDG.hpp currentBdDG.hpp currentBFDG.hpp currentIFDG.hpp \
 dofDG.hpp
 
 lib_LTLIBRARIES		= liblifefem.la
-liblifefem_la_SOURCES	= assemb.cpp bcCond.cpp bcVector.cpp bdf.cpp bdfNS.cpp currentBdFE.cpp  \
+liblifefem_la_SOURCES	= assemb.cpp\
+ bcCond.cpp bcFunction.cpp bcVector.cpp bcHandler.cpp \
+bdf.cpp bdfNS.cpp currentBdFE.cpp  \
 currentFE.cpp currentHdivFE.cpp defQuadRuleFE.cpp dof.cpp \
 dofInterface3Dto2D.cpp dofInterface3Dto3D.cpp dofInterfaceBase.cpp dofInterfaceHandler.cpp \
 elemOper.cpp  geoMap.cpp \
