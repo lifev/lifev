@@ -84,6 +84,38 @@ struct printError
 };
 
 void
+checkArterialWallTetra()
+{
+    using namespace LifeV;
+
+    /*
+      Robin condition (dp/dq = alpha + beta*p, alpha=2.535e-6, beta=-7.596) at endothel (ref 3)
+      and Dirichlet (p=7.4226e-8) at adventitia (ref 1)
+      example of mesh: piece-of-tube-wall-tetra.mesh
+      diffusion coefficient: 1.0
+      This is the scaled problem of plasma filtration through the artery wall with phys.
+      realistic data: diff.coeff (=darcy_perm/mu_plasma = 2e-14/0.0072 = 2.78e-12
+      RobinBC resulting from the flux balance at the endothel (L_p_end=2.11e-11)
+      pressure at the adventitia = 20 mmHg
+      (scaling: p* = diff.coeff * p otherwise wrong result - bad condition of Matrices)
+    */
+    BCFunctionMixte bcFct_rob;
+    bcFct_rob.setFunctions_Mixte(alpha, beta);
+    BCFunctionBase bcFct2;
+    bcFct2.setFunction(p_adv);
+    int nb_bc = 2;
+    BCHandler bc;
+    bc.setNumber(nb_bc);
+    bc.addBC("Endothel",   3,     Mixte, Scalar, bcFct_rob);
+    bc.addBC("Adventitia",  1, Essential, Scalar, bcFct2);
+
+    boost::shared_ptr<DarcySolverBase> __darcy( FactoryDarcy::instance().createObject( "darcy_tetra" ) );
+
+    __darcy->setBC( bc );
+    __darcy->setup();
+    __darcy->solve();
+}
+void
 checkStraightTubeTetra()
 {
     using namespace LifeV;
@@ -202,7 +234,8 @@ int main(int argc, char** argv)
 {
     //checkAnalytical();
     //checkStraightTubeHexa();
-    checkStraightTubeTetra();
+    //checkStraightTubeTetra();
+    checkArterialWallTetra();
 }
 
 
