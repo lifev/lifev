@@ -1175,7 +1175,7 @@ zero_row(UInt const row)
   typename std::vector<DataType>::iterator end= _value.begin()+
     *(_Patt->give_ia().begin()+row+1-OFFSET);
 
-  transform(start,end,start,this->nihil); //nihil is the same used for diagonalize
+  transform(start,end,start,nihil); //nihil is the same used for diagonalize
   //method in MSRMatr class.
 }
 
@@ -2177,7 +2177,7 @@ diagonalize(UInt const r, DataType const coeff, std::vector<DataType> &b,
   UInt disp = _Patt->nRows()+1;
   UInt row,col;
 
-  transform(start,end,start,this->nihil);
+  transform(start,end,start,nihil);
 
   for (UInt i=istart;i<iend;++i)
     {
@@ -2213,7 +2213,7 @@ diagonalize(UInt const r, DataType const coeff, Vector &b, DataType datum)
 
   UInt row,col;
 
-  transform(start,end,start,this->nihil);
+  transform(start,end,start,nihil);
 
 
   // Miguel: There is a buh using ybind. Alex, did you fix it?.
