@@ -31,6 +31,7 @@ include_HEADERS		= Operator01.hpp assemb.hpp\
 bcCond.hpp bcFunction.hpp bcVector.hpp bcHandler.hpp \
 bdf.hpp bdfNS.hpp dataTime.hpp dataTransient.hpp \
 interpolate.hpp \
+postProc.hpp \
 bcManage.hpp currentBdFE.hpp currentFE.hpp currentHdivFE.hpp \
 dof.hpp dofInterface3Dto2D.hpp dofInterface3Dto3D.hpp dofInterfaceBase.hpp \
 dofInterfaceHandler.hpp  elemOper.hpp elemOper_ext.hpp \
