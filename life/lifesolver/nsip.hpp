@@ -152,7 +152,7 @@ private:
 
 
 template<typename Mesh> void NavierStokesSolverIP<Mesh>::
-eval( Vector& fx0, Vector& gx0, Vector x0, int status )
+eval( Vector& fx0, Vector& /* gx0 */, Vector /* x0 */, int /* status */ )
 {
     iterate( 0.0 );
     for ( UInt iDof = 0; iDof < nDimensions*_dim_u ; ++iDof )
