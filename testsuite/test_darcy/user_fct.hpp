@@ -27,6 +27,9 @@ double g1(const double& t, const double& x, const double& y, const double& z, co
 double g2(const double& t, const double& x, const double& y, const double& z, const ID& i);
 double g3(const double& t, const double& x, const double& y, const double& z, const ID& i);
 double mixte_coeff(const double& t, const double& x, const double& y, const double& z, const ID& i);
+double alpha(const double& t, const double& x, const double& y, const double& z, const ID& i);
+double beta(const double& t, const double& x, const double& y, const double& z, const ID& i);
+double p_adv(const double& t, const double& x, const double& y, const double& z, const ID& i);
 
 class SourceFct
 {
