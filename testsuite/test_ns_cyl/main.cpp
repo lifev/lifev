@@ -96,8 +96,8 @@ int main(int argc, char** argv)
 
 
         ns.postProcess();
-	if( ns.computeMeanValuesPerSection() )
-	  ns.PostProcessAreaAndFlux( time );
+        if( ns.computeMeanValuesPerSection() )
+            ns.PostProcessPressureAreaAndFlux( time );
     }
 
     return 0;
