@@ -1,6 +1,6 @@
 /*
 
-  $Id: timeSolver.hpp,v 1.1 2004-12-07 19:28:31 mm0 Exp $
+  $Id: timeSolver.hpp,v 1.2 2004-12-14 15:12:33 winkelma Exp $
   TimeSolver class
   the purpouse of this class is to handle more easily
   the solution of M\partial u/\partial t + Au=b
@@ -55,7 +55,7 @@ public:
   typedef const ScalUnknown<Vector> & const_vector_type;
   typedef const MSRMatr<Real> & const_matrix_type;
 
-  TimeSolver():SolverAztec(),P(),q(),u_k(),
+  TimeSolver():SolverAztec("data"),P(),q(),u_k(),
   		b_k(),b_k_1(),u_k_1(),M_k(),M_k_1(),A_k(),
                 A_k_1(),theta(0.5),dt(1.0)
 
@@ -66,7 +66,7 @@ public:
   {
     DESTRUCTOR("TimeSolver");
   }
-  TimeSolver(UInt _dim):SolverAztec(),
+  TimeSolver(UInt _dim):SolverAztec("data"),
   		P(),q(_dim),u_k(_dim),
   		b_k(_dim),b_k_1(_dim),u_k_1(_dim),M_k(),M_k_1(),A_k(),
                 A_k_1(),theta(0.5),dt(1.0)
@@ -146,7 +146,7 @@ Debug(6013)<<"entering call to TimeSolver::update()\n";
        MSRMatr::flop (4 args) is not commmited stil, I added it for better
        efficiency */
     //P=(M*dti+A_k*theta);
-    matrix_type M=M_k; 
+    matrix_type M=M_k;
     M.flop(theta,M_k,(1-theta),M_k_1);
 
     P.flop(dti,M,theta,A_k);
@@ -160,7 +160,7 @@ Debug(6013)<<"entering call to TimeSolver::update()\n";
 */
 
     q=b_k*theta+b_k_1*(1.0-theta)-(A_k_1.operator*(u_k_1*(1.0-theta)))+ (M.operator*(u_k_1*(1/dt)));
-  
+
 
 //  this works in debug mode ublasvectors*MSRMatr allowed
 //    q=b_k*theta+b_k_1*(1.0-theta)-(A_k_1*(u_k_1*(1.0-theta)))+ (M*(u_k_1*(1/dt)));
@@ -191,7 +191,7 @@ private:
   Real dti;
 
 
- 
+
 };
 
 

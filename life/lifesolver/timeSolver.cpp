@@ -1,6 +1,6 @@
 /*
 
-  $Id: timeSolver.cpp,v 1.1 2004-12-07 19:28:31 mm0 Exp $
+  $Id: timeSolver.cpp,v 1.2 2004-12-14 15:12:33 winkelma Exp $
   TimeSolver class
 
 */
@@ -34,7 +34,7 @@ TimeSolver::TimeSolver(Real _dt,const_matrix_type _M_k,const_matrix_type _M_k_1,
 		const_matrix_type _A_k,const_matrix_type _A_k_1,
              	const_vector_type _b_k,const_vector_type _b_k_1,
 		const_vector_type _u_k_1,Real _theta):
-	     SolverAztec(),
+	     SolverAztec("data"),
 	     P(matrix_type(*_M_k.Patt())),q(vector_type(_M_k.Patt()->nRows())),
 	     u_k(_u_k_1), b_k(_b_k),b_k_1(_b_k_1),
 	     u_k_1(_u_k_1),M_k(_M_k),M_k_1(_M_k_1),A_k(_A_k),
@@ -44,6 +44,6 @@ TimeSolver::TimeSolver(Real _dt,const_matrix_type _M_k,const_matrix_type _M_k_1,
 }
 
 
- 
+
 }
 
