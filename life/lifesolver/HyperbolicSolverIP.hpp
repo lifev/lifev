@@ -239,6 +239,21 @@ namespace LifeV {
             return _M_t + _M_delta_t;
         }
 
+        /*! \return the current finite element */
+        const CurrentFE& fe() const {
+            return _M_fe;
+        }
+
+        /*! \return the mesh */
+        const mesh_type& mesh() const {
+            return _M_mesh;
+        }
+
+        /*! \return verbose mode */
+        bool verboseMode() const {
+            return _M_verbose;
+        }
+
         //@}
 
         /*! @name Mutators */
@@ -252,6 +267,11 @@ namespace LifeV {
         //! Set advection field
         void setVelocity(velocity_type& __velocity) {
             _M_velocity = __velocity;
+        }
+
+        /*! \return a reference to the current finite element */
+        CurrentFE& fe() {
+            return _M_fe;
         }
 
         //@}
@@ -297,6 +317,13 @@ namespace LifeV {
         //@}
 
     protected:
+
+        //! \return a reference the current numeric solution
+        u_type & u() {
+            return _M_u;
+        }
+        
+    private:
         //! Mesh
         mesh_type& _M_mesh;
 
@@ -461,7 +488,6 @@ namespace LifeV {
         void apply_bc();
         //@}
 
-    private:
         typedef ID ( *FTOP )( ID const localFace, ID const point );
         FTOP _M_fToP;
 
@@ -586,9 +612,12 @@ namespace LifeV {
 
         // Initialize bdf
 
-        _M_bdf.initialize_unk(u0, _M_mesh, _M_reffe, _M_fe, _M_dof, _M_t0, _M_delta_t, 1);
+        _M_bdf.initialize_unk(u0, _M_mesh, _M_reffe, _M_fe, _M_dof,
+                              _M_t0-_M_delta_t, _M_delta_t, 1);
         _M_u = *_M_bdf.unk().begin();
-
+        _M_bdf.initialize_unk(u0, _M_mesh, _M_reffe, _M_fe, _M_dof,
+                              _M_t0, _M_delta_t, 1);
+        
         // Check if mesh has internal faces. If not, build them
 
         if( !_M_mesh.hasInternalFaces() ) {
@@ -626,7 +655,7 @@ namespace LifeV {
     void HyperbolicSolverIP<MeshType>::timeAdvance() {
         Chrono __chrono;
 
-        if ( _M_t != _M_t0 ) _M_bdf.shift_right(_M_u);
+        _M_bdf.shift_right(_M_u);
 
         if(_M_verbose) std::cout << "** HSIP ** Computing problem matrix" << std::endl;
 
