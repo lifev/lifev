@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------*
 | LifeV main header file                                               |
 |                                                                      |
-| $Header: /cvsroot/lifev/lifev/life/lifecore/Attic/lifeV.hpp,v 1.5 2004-02-25 15:16:04 prudhomm Exp $                                                             |
+| $Header: /cvsroot/lifev/lifev/life/lifecore/Attic/lifeV.hpp,v 1.6 2004-02-26 08:19:07 prudhomm Exp $                                                             |
 |                                                                      |
 | #Version  0.0 Experimental   9/7/99. Luca Formaggia                  |
 |           0.1 Experimental  10/8/99. Jean-Fred Gerbeau.              |
@@ -17,22 +17,12 @@
 # ifndef _LIFEV_HH_ 
 # define _LIFEV_HH_ 
 
+# include <cstdlib>
+
 # include <iostream>
 # include <cmath>
 # include <numeric>
-
 # include <iosfwd> 
-
-// standard stuff
-
-#if defined(__Linux)
-# include <cstdlib>
-#elif defined(__OSF1)
-# include <stdlib.h>
-#endif
-
-// stl string class (always includes)
-
 # include <string>
 
 #define ABORT() std::abort()
@@ -130,7 +120,7 @@ typedef double Real;
 //! Generic integer data
 typedef int Int;
 //! generic unsigned integer (used mainly for addressing)
-typedef size_t  UInt;
+typedef uint  UInt;
 typedef unsigned short int USInt;
 
 //! IDs (which starts ALWAYS from 1)
