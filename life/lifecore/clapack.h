@@ -1,6 +1,8 @@
 #ifndef __CLAPACK_H
 #define __CLAPACK_H
 
+#include "cblas.h"
+
 typedef int integer;
 typedef unsigned long uinteger;
 typedef char *address;
