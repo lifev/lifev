@@ -45,21 +45,25 @@ steklovPoincare::steklovPoincare(GetPot &_dataFile,
 {
     M_precond   = _dataFile("problem/precond"  , 1);
 
+    M_defOmegaS = _dataFile("problem/defOmegaS",0.005);
+    M_defOmegaF = _dataFile("problem/defOmegaF",0.005);
+    M_aitkFS.setDefault(M_defOmegaS, M_defOmegaF);
+
     // for the NN case, aitken is inside the step
     // computation routine
-    if (M_precond == 2)
-    {
-        M_defOmega  = -1.;
-        M_defOmegaS = _dataFile("problem/defOmegaS",0.005);
-        M_defOmegaF = _dataFile("problem/defOmegaF",0.005);
-        M_aitkFS.setDefault(M_defOmegaS, M_defOmegaF);
-    }
-    else
-    {
-        M_defOmega =  _dataFile("problem/defOmega",0.01);
-        std::cout << "Default aikten start value = " << M_defOmega
-                  << std::endl;
-    }
+//     if (M_precond == 2)
+//     {
+//         M_defOmega  = -1.;
+//         M_defOmegaS = _dataFile("problem/defOmegaS",0.005);
+//         M_defOmegaF = _dataFile("problem/defOmegaF",0.005);
+//         M_aitkFS.setDefault(M_defOmegaS, M_defOmegaF);
+//     }
+//     else
+//     {
+//         M_defOmega =  _dataFile("problem/defOmega",0.01);
+//         std::cout << "Default aikten start value = " << M_defOmega
+//                   << std::endl;
+//     }
     setUpBC();
 }
 
@@ -245,24 +249,24 @@ void  steklovPoincare::solveJac(Vector &muk,
                                 const Vector  &_res,
                                 double        _linearRelTol)
 {
+    Vector muF(_res.size());
+    Vector muS(_res.size());
+
     switch(M_precond)
     {
         case 0:
             // Neumann-Dirichlet preconditioner
-            invSfPrime(_res, _linearRelTol, muk);
+            invSfPrime(-1*_res, _linearRelTol, muF);
             break;
         case 1:
             // Dirichlet-Neumann preconditioner
-            invSsPrime(_res, _linearRelTol, muk);
+            invSsPrime(-1*_res, _linearRelTol, muS);
             break;
         case 2:
             // Neumann-Neumann preconditioner
         {
-            Vector muF(_res.size());
-            Vector muS(_res.size());
-
-            invSsPrime(_res, _linearRelTol, muS);
-            invSfPrime(_res, _linearRelTol, muF);
+            invSsPrime(-1*_res, _linearRelTol, muS);
+            invSfPrime(-1*_res, _linearRelTol, muF);
 
             std::cout << "norm_inf muS = " << norm_inf(muS) << std::endl;
             std::cout << "norm_inf muF = " << norm_inf(muF) << std::endl;
@@ -279,11 +283,10 @@ void  steklovPoincare::solveJac(Vector &muk,
             // then
             //
 //            muk = M_aitkFS.computeDeltaLambda(getResidualFSIOnSolid(), muS, muF );
-            muk = M_aitkFS.computeDeltaLambda(M_dispStruct, muS, 0.*muF );
             // muk = muS + muF;
             // muk = .9*muS + .1*muF;
 
-            std::cout << "maxnorm muk = " << norm_inf(muk) << std::endl;
+//            std::cout << "maxnorm muk = " << norm_inf(muk) << std::endl;
         }
         break;
         default:
@@ -291,6 +294,8 @@ void  steklovPoincare::solveJac(Vector &muk,
             invSfSsPrime(_res, _linearRelTol, muk);
     }
 
+    if (M_nbEval == 1) M_aitkFS.restart();
+    muk = M_aitkFS.computeDeltaLambda(M_dispStruct, muF, muS );
 }
 
 
