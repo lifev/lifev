@@ -43,3 +43,7 @@ include $(top_srcdir)/admin/Doxyfile.am
 
 apidox-all:
 	cd life && make apidox
+
+
+upload-api:
+	cd doc/ && scp -r api prudhomm@cmcsforge.epfl.ch:/var/lib/gforge/chroot/home/groups/lifev/htdocs/api-$(VERSION)

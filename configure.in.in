@@ -80,6 +80,8 @@ dnl aztec
 AC_CHECK_AZTEC
 dnl petsc
 AC_CHECK_PETSC(2.1.6) #
+AM_CONDITIONAL(HAVE_PETSC, test "x$petsc_libs" != "x" )
+
 dnl parmetis
 AC_CHECK_PARMETIS
 
