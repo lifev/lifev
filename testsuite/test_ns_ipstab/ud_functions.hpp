@@ -30,7 +30,7 @@
 #ifndef __UD_FUNCTIONS_HPP
 #define __UD_FUNCTIONS_HPP 1
 
-#include <lifeV.hpp>
+#include <life.hpp>
 #include <GetPot.hpp>
 
 namespace LifeV {

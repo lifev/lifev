@@ -30,7 +30,7 @@
 #include <string>
 #include <iostream>
 
-#include <lifeV.hpp>
+#include <life.hpp>
 #include <GetPot.hpp>
 #include <tab.hpp>
 
@@ -43,13 +43,13 @@ namespace LifeV
   1D Non Linear blood flow model.
 
 
-  parameters: 
+  parameters:
      Area0, alpha, beta0, beta1, Kr, rho.
 
   dA/dt + dQ/dz = 0
   dQ/dt + d/dz(alpha * Q^2/A) + A/rho * dP/dz + Kr * Q/A = 0
 
-  with 
+  with
   P - P_ext = beta0 [ ( A / Area0 )^{beta1} - 1 ]
 
 */
@@ -60,7 +60,7 @@ public :
   //! constructor
   OneDNonLinModelParam(const GetPot& dfile);
 
-  //! return the values 
+  //! return the values
   Real Area0(const UInt& ii) const;
   Real AlphaCor(const UInt& ii) const;
   Real Beta0(const UInt& ii) const;
@@ -79,10 +79,10 @@ private :
   //! size of the parameter vectors (=1 if they are constant along the vessel)
   UInt _M_paramSize;
 
-  //! reference area (often called A0) 
+  //! reference area (often called A0)
   Vector _M_Area0;
-  
-  //! coriolis coefficient (often called alpha) 
+
+  //! coriolis coefficient (often called alpha)
   Vector _M_AlphaCoriolis;
 
   /*!-----------------------------------------------------
@@ -94,21 +94,21 @@ private :
    BEWARE: there are at least 2 or 3 different ways of defining it!!!
 
    -------------------------------------------------------
-   CONVENTIONS used here: 
+   CONVENTIONS used here:
    -------------------------------------------------------
    1/ Parameter homogeneous to a pressure:
    P - P_ext = PressBeta0 [ ( A / Area0 )^{PressBeta1} - 1 ]
 
-   This PressBeta0 is homogeneous to a pressure. 
-   In most cases PressBeta1 is taken equal to 1/2. 
+   This PressBeta0 is homogeneous to a pressure.
+   In most cases PressBeta1 is taken equal to 1/2.
 
    PressBeta0 = ( \sqrt{\pi} h_0 E ) / ( ( 1 - \ksi^2 ) * \sqrt{Area0} )
    -------------------------------------------------------
    (
    other conventions: (not used!!)
    1/ from Formaggia and Veneziani (p. 1.10, MOX report No 21 - june 2003)
-   P - P_ext = \tilde{\beta_0} ( \sqrt{A} - \sqrt{A_0} ) / A_0 
-   with 
+   P - P_ext = \tilde{\beta_0} ( \sqrt{A} - \sqrt{A_0} ) / A_0
+   with
    \beta0 = ( \sqrt{\pi} h_0 E ) / ( 1 - \ksi^2 )
 
    link with PressBeta0:
@@ -116,15 +116,15 @@ private :
       \tilde{\beta_0} = PressBeta0 * \sqrt{A_0}
 
    2/ Auxiliary Parameter often used in the model1D code (by J-FG or D Lamponi)
-      (ONLY when beta1=1/2 !!) 
+      (ONLY when beta1=1/2 !!)
    P - P_ext = 2 * rho * AuxBeta ( \sqrt{A} - \sqrt{A_0} )
 
    link with PressBeta0:
 
-      AuxBeta = PressBeta0 * PressBeta1 / ( rho * Area0^(PressBeta1) ) 
+      AuxBeta = PressBeta0 * PressBeta1 / ( rho * Area0^(PressBeta1) )
 
         or whenever PressBeta1 = 1/2 :
-      AuxBeta = PressBeta0 / ( 2 * rho * \sqrt{A_0} ) 
+      AuxBeta = PressBeta0 / ( 2 * rho * \sqrt{A_0} )
    )
    -------------------------------------------------------
   */
@@ -134,7 +134,7 @@ private :
   Vector _M_PressBeta1; //! power coeff (>0, often=1/2)
 
 
-  // friction parameter Kr 
+  // friction parameter Kr
   Vector _M_FrictionKr;
 
   //! density rho (always taken constant along the vessel)
@@ -150,11 +150,11 @@ private :
   1D  Linear hyperbolic equation.
 
 
-  parameters: 
+  parameters:
      F11, F12, F21, F22,
      celerity1, celerity2
-  
-     
+
+
   dU1/dt + F11 dU1/dz + F12 dU2/dz = 0
   dU2/dt + F21 dU1/dz + F22 dU2/dz = 0
 
@@ -169,11 +169,11 @@ public:
   //! constructor
   LinearSimpleParam(const GetPot& dfile);
 
-  //! return the values 
-  Real Flux11(const UInt& ii) const; 
-  Real Flux12(const UInt& ii) const; 
-  Real Flux21(const UInt& ii) const; 
-  Real Flux22(const UInt& ii) const; 
+  //! return the values
+  Real Flux11(const UInt& ii) const;
+  Real Flux12(const UInt& ii) const;
+  Real Flux21(const UInt& ii) const;
+  Real Flux22(const UInt& ii) const;
 
   Real Celerity1(const UInt& ii) const;
   Real Celerity2(const UInt& ii) const;
@@ -183,16 +183,16 @@ public:
   Real LeftEigenVector21(const UInt& ii) const;
   Real LeftEigenVector22(const UInt& ii) const;
 
-  Real Source10(const UInt& ii) const; 
-  Real Source20(const UInt& ii) const; 
-  Real Source11(const UInt& ii) const; 
-  Real Source12(const UInt& ii) const; 
-  Real Source21(const UInt& ii) const; 
-  Real Source22(const UInt& ii) const; 
+  Real Source10(const UInt& ii) const;
+  Real Source20(const UInt& ii) const;
+  Real Source11(const UInt& ii) const;
+  Real Source12(const UInt& ii) const;
+  Real Source21(const UInt& ii) const;
+  Real Source22(const UInt& ii) const;
 
   //! output
   void showMeData(std::ostream& c) const;
- 
+
 private :
 
   //! size of the parameter vectors (=1 if they are constant along the vessel)

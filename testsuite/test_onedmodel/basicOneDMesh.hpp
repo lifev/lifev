@@ -32,7 +32,7 @@
 
 #include <cmath>
 #include <vector>
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "GetPot.hpp"
 
 namespace LifeV

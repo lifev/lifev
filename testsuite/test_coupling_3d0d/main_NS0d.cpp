@@ -17,7 +17,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "chrono.hpp"
 #include "ud_functions.hpp"
 #include "GetPot.hpp"

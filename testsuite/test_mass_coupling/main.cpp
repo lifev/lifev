@@ -2,7 +2,7 @@
 // (the arterial lumen and the arterial wall)
 
 // author:M. Prosi                                august/04
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "convDiffReactSolverPC.hpp"
 #include "dofInterface3Dto3D.hpp"
 #include "chrono.hpp"

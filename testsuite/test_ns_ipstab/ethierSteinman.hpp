@@ -30,7 +30,7 @@
 #ifndef __ETHIER_STEINMAN_HPP
 #define __ETHIER_STEINMAN_HPP 1
 
-#include <lifeV.hpp>
+#include <life.hpp>
 #include <GetPot.hpp>
 
 namespace LifeV

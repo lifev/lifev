@@ -2,7 +2,7 @@
 // and mass transport in the arterial lumen
 
 // author:M. Prosi                                march/04
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "NavierStokesSolverPC.hpp"
 #include "convDiffReactSolverPC.hpp"
 #include "chrono.hpp"
@@ -68,7 +68,7 @@ int main(int argc, char** argv)
     Real startT = ns.inittime();
 
     if( dt != cdr.timestep())
-    {	
+    {
        std::cerr << "Time steps of fluid und mass transport class are different" << std::endl;
        std::cerr << "Please check data file" << std::endl;
        abort();

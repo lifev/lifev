@@ -16,7 +16,7 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "NavierStokesAleSolverPC.hpp"
 #include "VenantKirchhofSolver.hpp"
 #include "operFS.hpp"
@@ -28,8 +28,8 @@
 /*
 
    This programs couples the Navier-Stokes and (linear) Elastodynamic equations
-   At each time step the resulting non-linear coupled problem is solved using a 
-   quasi Newton method. The fluid jacobian is approximated using a reduced model 
+   At each time step the resulting non-linear coupled problem is solved using a
+   quasi Newton method. The fluid jacobian is approximated using a reduced model
    (see Gerbeau-Vidrascu M2AN 2003)
 
    The present test simulates the pressure wave propagation in a curved cylindrical vessel
@@ -52,31 +52,31 @@ int main(int argc, char** argv)
 
 
 
-    
+
     // solid displacement, fluid velocity and mesh displacement BC's
     //
-    BCHandler BCh_u; 
-    BCHandler BCh_d; 
-    BCHandler BCh_mesh; 
+    BCHandler BCh_u;
+    BCHandler BCh_d;
+    BCHandler BCh_mesh;
 
 
     // fluid solver
     //
-    NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> > fluid(data_file, 
-								   feTetraP1bubble, 
+    NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> > fluid(data_file,
+								   feTetraP1bubble,
 								   feTetraP1,
 								   quadRuleTetra64pt,
-                                                                   quadRuleTria3pt, 
-								   quadRuleTetra64pt, 
+                                                                   quadRuleTria3pt,
+								   quadRuleTetra64pt,
 								   quadRuleTria3pt,
                                                                    BCh_u,BCh_mesh);
 
     // structural solver
     //
-    VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> > solid(data_file, 
-								feTetraP1, 
+    VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> > solid(data_file,
+								feTetraP1,
 								quadRuleTetra4pt,
-                                                                quadRuleTria3pt, 
+                                                                quadRuleTria3pt,
 								BCh_d);
 
 
@@ -91,20 +91,20 @@ int main(int argc, char** argv)
 
     // passing data from the fluid to the structure: fluid load at the interface
     //
-    dof_interface_type  dofFluidToStructure( new DofInterface3Dto3D(feTetraP1, 
-								    solid.dDof(), 
-								    feTetraP1bubble, 
+    dof_interface_type  dofFluidToStructure( new DofInterface3Dto3D(feTetraP1,
+								    solid.dDof(),
+								    feTetraP1bubble,
 								    fluid.uDof()) );
     dofFluidToStructure->update(solid.mesh(), 1, fluid.mesh(), 1, 0.0);
-    
+
     // passing data from structure to the fluid mesh: motion of the fluid domain
     //
-    dof_interface_type dofStructureToFluidMesh( new  DofInterface3Dto3D(fluid.mesh().getRefFE(), 
+    dof_interface_type dofStructureToFluidMesh( new  DofInterface3Dto3D(fluid.mesh().getRefFE(),
 									fluid.dofMesh(),
-									feTetraP1, 
+									feTetraP1,
 									solid.dDof()) );
     dofStructureToFluidMesh->update(fluid.mesh(), 1, solid.mesh(), 1, 0.0);
-   
+
 
     // BC's for the harmonic extension of the
     // interface solid displacement
@@ -115,22 +115,22 @@ int main(int argc, char** argv)
     BCh_mesh.addBC("Base",      2, Essential, Full, bcf,   3);
     BCh_mesh.addBC("Edges",    20, Essential, Full, bcf,   3);
 
-    // BC's for the fluid velocity u 
-    BCFunctionBase in_flow(u2);  
+    // BC's for the fluid velocity u
+    BCFunctionBase in_flow(u2);
     BCVector u_wall(fluid.wInterpolated(), dim_fluid);   // Passing w -> u at the interface
-    BCh_u.addBC("Wall",        1, Essential, Full, u_wall,  3);    
+    BCh_u.addBC("Wall",        1, Essential, Full, u_wall,  3);
     BCh_u.addBC("Wall_Edges", 20, Essential, Full, u_wall,  3);
     BCh_u.addBC("InFlow",      2, Natural,   Full, in_flow, 3);
 
-    // BC's for the solid displacement d 
+    // BC's for the solid displacement d
     BCVectorInterface g_wall(fluid.residual(), dim_fluid,  dofFluidToStructure );
     BCh_d.addBC("Interface", 1, Natural, Full, g_wall, 3);
     BCh_d.addBC("Top",       3, Essential, Full, bcf,  3);
     BCh_d.addBC("Base",      2, Essential, Full, bcf,  3);
-     
 
-    
-    // pressure and displacement variations BC's 
+
+
+    // pressure and displacement variations BC's
     BCHandler BCh_dp; // approximated using a reduced model (see Gerbeau-Vidrascu M2AN 2003)
     BCHandler BCh_dz;
 
@@ -139,24 +139,24 @@ int main(int argc, char** argv)
 
     // passing data bettwen the reduced linearized fluid to the linearized solver solid:
     // reduced fluid pressure
-    dof_interface_type dofReducedFluidToStructure( new DofInterface3Dto3D(feTetraP1, 
-									  solid.dDof(), 
-									  feTetraP1, 
+    dof_interface_type dofReducedFluidToStructure( new DofInterface3Dto3D(feTetraP1,
+									  solid.dDof(),
+									  feTetraP1,
 									  fluid.pDof()) );
     dofReducedFluidToStructure->update(solid.mesh(), 1, fluid.mesh(), 1, 0.0);
-    
+
     // solid acceleration
-    dof_interface_type dofStructureToReducedFluid( new DofInterface3Dto3D(feTetraP1, 
-									  fluid.pDof(), 
-									  feTetraP1, 
+    dof_interface_type dofStructureToReducedFluid( new DofInterface3Dto3D(feTetraP1,
+									  fluid.pDof(),
+									  feTetraP1,
 									  solid.dDof()) );
     dofStructureToReducedFluid->update(fluid.mesh(), 1, solid.mesh(), 1, 0.0);
 
-    
+
     // Boundary conditions for dp
     BCVectorInterface da_wall(oper.da(), dim_solid, dofStructureToReducedFluid,2); // type  = 2
-    BCh_dp.addBC("Wall",        1, Natural,   Scalar, da_wall);    
-    BCh_dp.addBC("Wall_Edges", 20, Essential, Scalar, bcf);   
+    BCh_dp.addBC("Wall",        1, Natural,   Scalar, da_wall);
+    BCh_dp.addBC("Wall_Edges", 20, Essential, Scalar, bcf);
     BCh_dp.addBC("InFlow",      2, Essential, Scalar, bcf);
     BCh_dp.addBC("OutFlow",     3, Essential, Scalar, bcf);
 
@@ -166,11 +166,11 @@ int main(int argc, char** argv)
     BCh_dz.addBC("Interface", 1, Natural,   Full, dg_wall, 3);
     BCh_dz.addBC("Top",       3, Essential, Full, bcf,     3);
     BCh_dz.addBC("Base",      2, Essential, Full, bcf,     3);
-    
 
-    
+
+
     //  TEMPORAL LOOP
-    
+
     UInt maxpf = 100;
     Real dt = fluid.timestep();
     Real T  = fluid.endtime();

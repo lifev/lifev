@@ -26,7 +26,7 @@
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
    \date 2004-10-12
  */
-#include <lifeV.hpp>
+#include <life.hpp>
 #include <NavierStokesSolverPC.hpp>
 #include <NavierStokesWithFlux.hpp>
 #include <chrono.hpp>
@@ -88,7 +88,7 @@ main(int argc, char** argv)
     NavierStokesWithFlux<ns_type> __ns_with_flux( __ns );
 
     // Impose the fluxes
-    // 
+    //
     __ns_with_flux.setFlux(1, my_flux_cost); //costant
     //__ns_with_flux.setFlux(1, my_flux_cos); //cosinusoidal
     //__ns_with_flux.setFlux(1, my_flux_physio); // physiological

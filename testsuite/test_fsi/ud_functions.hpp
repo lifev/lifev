@@ -20,7 +20,7 @@
 #ifndef UDF_HPP
 #define UDF_HPP
 
-#include "lifeV.hpp"
+#include "life.hpp"
 
 namespace LifeV
 {

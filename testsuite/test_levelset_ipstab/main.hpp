@@ -29,7 +29,7 @@
 
 #include <boost/numeric/ublas/vector.hpp>
 
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "readMesh3D.hpp"
 #include "chrono.hpp"
 #include "elemMat.hpp"
@@ -48,7 +48,7 @@
 
 namespace LifeV
 {
- 
+
     /**
        \Analytical velocity field
     */
@@ -95,7 +95,7 @@ namespace LifeV
     template <class DOF, class MESH, class VECTOR, class  FUNCTION, class MATRIX, class SOLVER>
     void projectVelocityField(const MESH& mesh, CurrentFE& fe, const DOF& dof, VECTOR& U, const FUNCTION& u_ex, UInt nc,
                               MATRIX& M, SOLVER& solver) {
-        
+
         VECTOR b(U.size());
         b = ZeroVector(U.size());
 
@@ -130,12 +130,12 @@ namespace LifeV
             for (int j = 0; j < fe.nbNode; j++) {
                 s = 0.;
                 for (int iq = 0; iq < fe.nbQuadPt; iq++) {
-                    // Co-ordinates of current quadrature point            
+                    // Co-ordinates of current quadrature point
                     x = fe.quadPt(iq, 0);
                     y = fe.quadPt(iq, 1);
                     z = fe.quadPt(iq, 2);
 
-                    b_dot_grad = 0.;            
+                    b_dot_grad = 0.;
                     for(int icoor = 0; icoor < fe.nbCoor; icoor++)
                         b_dot_grad += beta(icoor, x, y, z) * fe.phiDer(j,icoor,iq) * fe.phi(i,iq);
 

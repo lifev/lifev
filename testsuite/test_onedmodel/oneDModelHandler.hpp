@@ -33,7 +33,7 @@
 #include <cmath>
 #include <utility>
 
-#include <lifeV.hpp>
+#include <life.hpp>
 #include <dataOneDModel.hpp>
 #include <basicOneDMesh.hpp>
 #include <geoMap.hpp>

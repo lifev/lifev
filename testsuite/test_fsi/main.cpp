@@ -18,7 +18,7 @@
 */
 #include <cassert>
 
-#include <lifeV.hpp>
+#include <life.hpp>
 
 #include <boost/timer.hpp>
 

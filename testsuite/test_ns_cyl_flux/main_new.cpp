@@ -26,7 +26,7 @@
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
    \date 2004-10-12
  */
-#include <lifeV.hpp>
+#include <life.hpp>
 #include <NavierStokesSolverPC.hpp>
 #include <NavierStokesWithFlux.hpp>
 #include <chrono.hpp>
@@ -108,7 +108,7 @@ main(int argc, char** argv)
     Real T  = __ns_with_flux.endtime();
 
     __ns_with_flux.initialize(u0,p0,0.0,dt);
-    
+
     //ofstream outfile("flusso_inesatto.txt");
 
     for (Real time=startT+dt ; time <= T; time+=dt)

@@ -44,7 +44,7 @@
 #define _DOFONED_H_
 
 
-#include "lifeV.hpp"
+#include "life.hpp"
 
 namespace LifeV
 {

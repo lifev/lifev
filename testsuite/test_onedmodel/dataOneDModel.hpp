@@ -29,7 +29,7 @@
 #define _DATAONEDMODEL_H_
 #include <string>
 #include <iostream>
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "GetPot.hpp"
 
 namespace LifeV

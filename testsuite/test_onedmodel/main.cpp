@@ -17,7 +17,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 //! \author:Vincent Martin 09/04
-#include <lifeV.hpp>
+#include <life.hpp>
 #include <chrono.hpp>
 #include <dataOneDModel.hpp>
 #include <oneDModelSolver.hpp>

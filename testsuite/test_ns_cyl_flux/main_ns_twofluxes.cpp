@@ -26,7 +26,7 @@
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
    \date 2004-10-12
  */
-#include <lifeV.hpp>
+#include <life.hpp>
 #include <NavierStokesSolverPC.hpp>
 #include <NavierStokesWithTwoFluxes.hpp>
 #include <chrono.hpp>

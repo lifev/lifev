@@ -21,7 +21,7 @@
 
 #include <cstdlib>
 
-#include "lifeV.hpp"
+#include "life.hpp"
 
 namespace LifeV
 {

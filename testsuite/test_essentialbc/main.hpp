@@ -29,7 +29,7 @@
 
 
 
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "readMesh3D.hpp"
 #include "chrono.hpp"
 #include "elemMat.hpp"

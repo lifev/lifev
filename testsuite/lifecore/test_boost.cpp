@@ -32,7 +32,7 @@
 
 
 #include <lifeconfig.h>
-#include <lifeV.hpp>
+#include <life.hpp>
 
 #include <boost/function.hpp>
 #include <boost/timer.hpp>

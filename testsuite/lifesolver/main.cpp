@@ -41,7 +41,7 @@
 #include "vtk_wrtrs.hpp"
 #include <vector>
 #include <algorithm>
-#include "lifeV.hpp"
+#include "life.hpp"
 
 #include "vtk_wrtrs.hpp"
 #include "readMesh3D.hpp"
@@ -72,7 +72,7 @@ main ()
   UInt i;
 
   // ===================================================
-  // Boundary conditions definition 
+  // Boundary conditions definition
   //   (UDep means depending on solution)
   // ===================================================
 
@@ -182,7 +182,7 @@ main ()
   ScalUnknown < Vector > U (dim), U0 (dim);
   U0 = ZeroVector (dim);
 
-  //init solution at time 0: U0   
+  //init solution at time 0: U0
   for (i = 0; i < dim; i++)
     U0[i] = 0;
 
