@@ -8,6 +8,12 @@ HOWTO to make a release X_Y_Z
 2- update NEWS
 
 3- run make distcheck 
+   o you can try the following command to speed up this check
+
+ make distcheck DISTCHECK_CONFIGURE_FLAGS="--enable-opt2" AM_MAKEFLAGS="-j <n>" 
+
+    where <n> is the number of processes you want to launch concurrently
+
    o ensures that the generated tarball is complete
    o runs all tests from the tarball
 
