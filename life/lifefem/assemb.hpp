@@ -283,7 +283,7 @@ assemble_symm_block_diagonal( Oper oper, const RegionMesh& mesh, CurrentFE& fe, 
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Added by D. A. Di Pietro: DG matrix assembling
+// DG matrix assembling
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -394,7 +394,7 @@ template<typename OperDG,  typename OperDGIF, typename OperDGBF,
 			CurrentFEDG& feDG, CurrentIFDG& feIFDG, CurrentBFDG& feBFDG,
 			const DOF& dof, const DOFBYFACE& dofbyface,
 			const UsrSourceFct& source_fct,
-			Matrix& A, Matrix& invM, Vector& b)
+			Matrix& A, Matrix& M, Vector& b)
 {
   UInt i, ic, jc;
   UInt nc = b.size() / dof.numTotalDof();
@@ -420,7 +420,7 @@ template<typename OperDG,  typename OperDGIF, typename OperDGBF,
 	compute_mat_DG(elmat, operDG, feDG, ic, jc);
 	assemb_mat_DG(A, elmat, feDG, dof, i, ic, jc);
 
-	assemb_mass_DG(invM, feDG.invMass, feDG, dof, i, ic, jc);
+	assemb_mass_DG(M, feDG.mass, feDG, dof, i, ic, jc);
       }
       compute_vec_DG(source_fct, elvec, feDG, ic);
       assemb_vec_DG(b, elvec, feDG, dof, ic);
@@ -512,7 +512,7 @@ void compute_mat( ElemMat& elmat, Oper& oper,
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Added by D. A. Di Pietro: Compute local matrices for DG
+// Compute local matrices for DG
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -762,7 +762,7 @@ void assemb_mat( Matrix& M, ElemMat& elmat, const LocalDofPattern& fe, const DOF
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Added by D. A. Di Pietro: Assembling of the elementary matrices for DG
+// Assembling of the elementary matrices for DG
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1065,6 +1065,61 @@ template <typename UsrFct>
 void compute_vec( const UsrFct& fct, ElemVec& elvec, const CurrentFE& fe )
 {
     compute_vec( fct, elvec, fe, 0 );
+}
+////////////////////////////////////////////////////////////////////////////////
+//
+// rhs computation for DG elements
+//
+///////////////////////////////////////////////////////////////////////////////
+
+template<typename UsrFct>
+void compute_vec_DG(const UsrFct& fct, ElemVec& elvec, const CurrentFEDG& feDG, int iblock){
+  int i,ig;
+  Tab1dView vec = elvec.block(iblock);
+  Real s, x, y, z;
+  for(i = 0; i < feDG.nbNode; i++){
+    s = 0.;
+    for(ig = 0; ig < feDG.nbQuadPt; ig++){
+      feDG.coorQuadPt(x, y, z, ig);
+      s += feDG.phi(i,ig) * fct(x,y,z,iblock) * feDG.weightDet(ig);
+    }
+    vec(i) += s;
+  }
+}
+
+// Compute right hand side vector for pure hyperbolic problems
+template<typename Velocity>
+void compute_vec_AdvecDG_BF(const BCHandler& BCh, Velocity& u, ElemVec& bfvec, const CurrentBFDG& bfDG, int iblock){
+
+  int i, ig, icoor;
+
+  Tab1dView vec = bfvec.block(iblock);
+
+  Real s, x, y, z, u_normal;
+
+  const BCBase& CurrBC = BCh.GetBCWithFlag(bfDG.marker);
+  ASSERT_PRE(bfDG.bcType == Essential, "Only essential conditions admitted in pure hyperbolic problems")
+
+  for(i = 0; i < bfDG.nbNodeAd; i++){
+    s = 0.;
+    u_normal = 0.;
+
+    for(ig = 0; ig < bfDG.nbQuadPt; ig++){
+      bfDG.coorQuadPt(x, y, z, ig);
+
+      for(icoor = 0; icoor < bfDG.nbCoorAd; icoor++){
+        u_normal += bfDG.normal(icoor, ig) * u(x, y, z, icoor);
+      }
+
+      if(u_normal < 0){
+	for(icoor = 0; icoor < bfDG.nbCoorAd; icoor++){
+	  s += - u_normal * bfDG.phiAd(i, ig) * CurrBC(0., x, y, z, iblock) * bfDG.weightMeas(ig);
+	}
+      }
+    }
+
+    vec(i) += s;
+  }
 }
 
 // ! versione per il caso stabilizzato (o comunque son termine forzante wrappato)
