@@ -33,14 +33,18 @@ namespace LifeV
 //               Operators for classical finite elements
 //
 //----------------------------------------------------------------------
-void mass(Real coef,ElemMat& elmat,const CurrentFE& fe,
-	  int iblock=0,int jblock=0);
-void mass(Real coef,ElemMat& elmat,const CurrentFE& fe,
-	  int iblock,int jblock,int nb);
-void stiff(Real coef,ElemMat& elmat,const CurrentFE& fe,
-	  int iblock=0,int jblock=0);
-void stiff(Real coef,ElemMat& elmat,const CurrentFE& fe,
-	  int iblock,int jblock,int nb);
+  void mass(Real coef,ElemMat& elmat,const CurrentFE& fe,
+	    int iblock=0,int jblock=0);
+  void mass(Real coef,ElemMat& elmat,const CurrentFE& fe,
+	    int iblock,int jblock,int nb);
+  void stiff(Real coef,ElemMat& elmat,const CurrentFE& fe,
+	     int iblock=0,int jblock=0);
+  void stiff(Real coef,Real (*fct)(Real,Real,Real),ElemMat& elmat,
+	     const CurrentFE& fe,int iblock,int jblock);
+  void stiff(Real coef,ElemMat& elmat,const CurrentFE& fe,
+	     int iblock,int jblock,int nb);
+  
+	   
 
 
 

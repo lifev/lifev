@@ -528,6 +528,52 @@ void stiff(Real coef,ElemMat& elmat,const CurrentFE& fe,
     mat(jloc,iloc) += coef_s;
   }
 }
+
+
+void stiff(Real coef,Real (*fct)(Real,Real,Real),ElemMat& elmat,
+	   const CurrentFE& fe,int iblock,int jblock)
+  /*
+    Stiffness matrix: coef*\int grad v_i . grad v_j
+  */
+{
+  ASSERT_PRE(fe.hasFirstDerivQuadPt(),
+	     "Stiffness matrix with a diffusion function needs the first derivatives and the coordinates of the quadrature points.  Call for example updateFirstDerivQuadPt() instead of updateFirstDeriv()");
+  Tab2dView mat = elmat.block(iblock,jblock);
+  int iloc,jloc;
+  int i,icoor,ig;
+  double s,coef_s,coef_f;
+  //
+  // diagonal
+  //
+  for(i=0;i<fe.nbDiag;i++){
+    iloc = fe.patternFirst(i);
+    s = 0;
+    for(ig=0;ig<fe.nbQuadPt;ig++){
+      coef_f = fct(fe.quadPt(ig,0),fe.quadPt(ig,1),fe.quadPt(ig,2));
+      for(icoor=0;icoor<fe.nbCoor;icoor++)
+	s += coef_f * fe.phiDer(iloc,icoor,ig)*fe.phiDer(iloc,icoor,ig)
+	  *fe.weightDet(ig);
+    }
+    mat(iloc,iloc) += coef*s;
+  }
+  //
+  // extra diagonal
+  //
+  for(i=fe.nbDiag;i<fe.nbDiag+fe.nbUpper;i++){
+    iloc = fe.patternFirst(i);
+    jloc = fe.patternSecond(i);
+    s = 0;
+    for(ig=0;ig<fe.nbQuadPt;ig++){
+      coef_f = fct(fe.quadPt(ig,0),fe.quadPt(ig,1),fe.quadPt(ig,2));
+      for(icoor=0;icoor<fe.nbCoor;icoor++)
+	s += coef_f * fe.phiDer(iloc,icoor,ig)*fe.phiDer(jloc,icoor,ig)*
+	  fe.weightDet(ig);
+    }
+    coef_s = coef*s;
+    mat(iloc,jloc) += coef_s;
+    mat(jloc,iloc) += coef_s;
+  }
+}
 //
 
 void stiff(Real coef,ElemMat& elmat,const CurrentFE& fe,

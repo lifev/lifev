@@ -95,7 +95,7 @@ Real elem_L2_2(const UsrFct& fct,const CurrentFE& fe, const Real t,
   return s;
 }
 
-//! returns the square of the H1 norm of u on the current element
+//! returns the square of the H1 semi-norm of u on the current element
 template<typename VectorType,typename DOF>
 Real elem_H1_2(const VectorType & u,const CurrentFE& fe,const DOF& dof)
 {
@@ -120,7 +120,7 @@ Real elem_H1_2(const VectorType & u,const CurrentFE& fe,const DOF& dof)
   return s;
 }
 
-//! returns the square of the H1 norm of fct on the current element
+//! returns the square of the H1 semi-norm of fct on the current element
 template<typename UsrFct>
 Real elem_H1_2(const UsrFct& fct,const CurrentFE& fe)
 {
@@ -137,7 +137,7 @@ Real elem_H1_2(const UsrFct& fct,const CurrentFE& fe)
   return s+s1;
 }
 
-//! returns the square of the H1 norm of fct on the current element (time-dependent case)
+//! returns the square of the H1 semi-norm of fct on the current element (time-dependent case)
 template<typename UsrFct>
 Real elem_H1_2(const UsrFct& fct,const CurrentFE& fe,const Real t, const UInt nbcomp)
 {
@@ -203,7 +203,7 @@ Real elem_L2_diff_2(VectorType & u, UsrFct& fct,const CurrentFE& fe,
   return s;
 }
 
-//! returns the square of the H1 norm of (u-fct) on the current element
+//! returns the square of the H1 semi-norm of (u-fct) on the current element
 template<typename VectorType,typename UsrFct,typename DOF>
 Real elem_H1_diff_2(const VectorType & u,const UsrFct& fct,const CurrentFE& fe,
 		    const DOF& dof)
@@ -239,7 +239,7 @@ Real elem_H1_diff_2(const VectorType & u,const UsrFct& fct,const CurrentFE& fe,
   return s;
 }
 
-//! returns the square of the H1 norm of (u-fct) on the current element  (time-dependent case)
+//! returns the square of the H1 semi-norm of (u-fct) on the current element  (time-dependent case)
 template<typename VectorType,typename UsrFct,typename DOF>
 Real elem_H1_diff_2(const VectorType & u,const UsrFct& fct,const CurrentFE& fe,
 		    const DOF& dof, const Real t, const UInt nbcomp)
