@@ -29,7 +29,7 @@ namespace LifeV
 template <class Fct, class Vector, class Real, class Norm>
 int nonLinRichardson( Vector& sol,
                       Fct& f,
-                      Norm& norm,
+                      Norm norm,
                       Real abstol,
                       Real reltol,
                       int& maxit,
@@ -131,7 +131,8 @@ int nonLinRichardson( Vector& sol,
 
         std::cout << "Muk norm = " << normMuk << std::endl;
         out_res   << "iter = " << iter
-                  << " Muk norm = " << normMuk;
+                  << " Muk norm = " << normMuk
+                  << " step norm = " << norm_inf(step);
 
         sol += step;
 
