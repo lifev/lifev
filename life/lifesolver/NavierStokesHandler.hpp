@@ -112,7 +112,7 @@ public DataNavierStokes<Mesh> {
   void postProcessPressure();
 
   //! OpenDX writers
-  void dx_write_sol(string file_sol, string fe_type_vel, string fe_type_pre);
+  void dx_write_sol(std::string const& file_sol, std::string const& fe_type_vel, std::string const& fe_type_pre);
 
   //! Returns the BDF Time Advancing stuff
   const BdfNS& bdf() const;
@@ -282,10 +282,11 @@ NavierStokesHandler<Mesh>::post_proc_set_phi()
 
 // Postprocessing pressure
 template<typename Mesh>  void 
-NavierStokesHandler<Mesh>::postProcessPressure() {
-
-  ostringstream index;
-  string name;
+NavierStokesHandler<Mesh>::postProcessPressure() 
+{
+    
+  std::ostringstream index;
+  std::string name;
 
   ++_count;
 
@@ -313,10 +314,10 @@ NavierStokesHandler<Mesh>::postProcessPressure() {
 // Writing (DX)
 // ! Write the solution in DX format
 template<typename Mesh>  void 
-NavierStokesHandler<Mesh>::dx_write_sol(string file_sol, string fe_type_vel, string fe_type_pre) {
+NavierStokesHandler<Mesh>::dx_write_sol(std::string const& file_sol, std::string const& fe_type_vel, std::string const& fe_type_pre) {
 
-  string file_vel=file_sol+"_vel.dx";
-  string file_pre=file_sol+"_pre.dx";
+  std::string file_vel=file_sol+"_vel.dx";
+  std::string file_pre=file_sol+"_pre.dx";
  
   wr_opendx_header(file_pre,_mesh,_dof_p,_fe_p,fe_type_pre);
   wr_opendx_scalar(file_pre,"pression",_p);
@@ -471,7 +472,7 @@ NavierStokesHandler<Mesh>::initialize(const Function& u0, const Function& p0, Re
 template<typename Mesh> void 
 NavierStokesHandler<Mesh>::initialize(const std::string & vname) {
   
-    fstream resfile(vname.c_str(),ios::in | ios::binary);
+    std::fstream resfile(vname.c_str(),ios::in | ios::binary);
     if (resfile.fail()) {std::cerr<<" Error in initialization: File not found or locked"<<std::endl; abort();}
     resfile.read((char*)&_u(1),_u.size()*sizeof(double));
     resfile.read((char*)&_p(1),_p.size()*sizeof(double));
