@@ -46,6 +46,7 @@ m4_include([test_p2/testsuite.at])
 m4_include([test_q1/testsuite.at])
 m4_include([test_fe/testsuite.at])
 m4_include([test_mixte/testsuite.at])
+m4_include([test_dg/testsuite.at])
 
 # solver tests
 AT_BANNER([life/lifesolver testsuite ...])

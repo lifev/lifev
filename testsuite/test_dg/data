@@ -1,0 +1,27 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file for Mesh test
+#-------------------------------------------------
+
+[mesh]
+mesh_type  = 'MESH++'
+mesh_dir   = '../data/mesh/mesh++/' # the directory where the mesh file is
+mesh_file  = 'cube_750.m++'         # mesh file
+mesh_faces = all                    # update all faces elements
+
+[time_advancement]
+h = 0.005;                          # the time step
+t0 = 0;                             # the initial integration time
+T = 0.01;                           # the final integration time
+
+[linearsolver] 
+theLinearSolver   = 0               # 0: Aztec, 1: UMFPack
+
+
+[aztec]  
+solver = cg                         #cg , gmres, cgs, tfqmr, bicgstab, slu, symmlq, fixed_pt, lu
+precond = dom_decomp
+subdomain_solve = icc
+output = all_res                    #warnings , none , all, all_res, last
+tol = 1e-6
+
