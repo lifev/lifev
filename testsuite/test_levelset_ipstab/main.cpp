@@ -78,18 +78,18 @@ int main() {
 
     long int  m=1;
     GetPot datafile( "data" );
-    std::string mesh_type = datafile( "levelset/discretization/mesh_type", "INRIA" );
+    std::string mesh_type = datafile( "hyp/discretization/mesh_type", "INRIA" );
     std::cout << mesh_type << " pippo " << std::endl;
     if ( mesh_type == "INRIA" )
     {
-        std::string mesh_dir = datafile( "levelset/discretization/mesh_dir", "." );
-        std::string fname=mesh_dir+datafile( "levelset/discretization/mesh_file", "cube_6000.mesh" );
+        std::string mesh_dir = datafile( "hyp/discretization/mesh_dir", "." );
+        std::string fname=mesh_dir+datafile( "hyp/discretization/mesh_file", "cube_6000.mesh" );
         readINRIAMeshFile(mesh,fname,m);
     }
-    else if ( mesh_type == "MESH++" )
+    else if ( mesh_type == ".m++" )
     {
-        std::string mesh_dir = datafile( "levelset/discretization/mesh_dir", "." );
-        std::string fname=mesh_dir+datafile( "levelset/discretization/mesh_file", "cube_6000.m++" );
+        std::string mesh_dir = datafile( "hyp/discretization/mesh_dir", "." );
+        std::string fname=mesh_dir+datafile( "hyp/discretization/mesh_file", "cube_6000.m++" );
         readMppFile(mesh,fname,m);
     }
     else
@@ -185,7 +185,7 @@ int main() {
 
     SolverAztec solver;
 
-    LevelSetSolver<meshType> lss(mesh, datafile, solver, geoMap, refFE, qr, qrBd, BCh, fe, dof, betaVec);
+    LevelSetSolver<meshType> lss(datafile, solver, geoMap, refFE, qr, qrBd, BCh, fe, dof, betaVec);
     lss.initialize(sphere);
 
     LevelSetSolver<meshType>::lsfunction_type U = lss.lsfunction();

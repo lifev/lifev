@@ -5,10 +5,16 @@
 
 [hyp]
 
-[./bdf]
+[./discretization]
+mesh_type   = '.m++'
+mesh_dir    = '../data/mesh/mesh++/'
+mesh_file   = 'cube_6000.m++'
+mesh_faces  = all
+
+[../bdf]
 delta_t     = .02
 t0          = .0
-T           = .02
+T           = .06
 order       = 2
 
 [../ipstab]
@@ -31,11 +37,6 @@ tol             = 1.00e-6
 save_every      = 1
 reinit_every    = 1
 analytical_beta = 0
-
-[../discretization]
-mesh_type   = 'MESH++'
-mesh_dir    = '../data/mesh/mesh++/' # the directory where the mesh file is
-mesh_file   = 'cube_6000.m++'        # mesh file
 
 [../solver-mass]
 solver_name     = aztec
