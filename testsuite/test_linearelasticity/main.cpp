@@ -18,7 +18,6 @@
 */
 #include <cstdlib>
 #include "lifeV.hpp"
-#include "vectorNorms.hpp"
 #include "regionMesh3D_ALE.hpp"
 #include "VenantKirchhofSolver.hpp"
 #include "ud_functions.hpp"

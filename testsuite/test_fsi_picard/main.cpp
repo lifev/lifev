@@ -22,7 +22,6 @@
 #include "ud_functions.hpp"
 #include "picard.hpp"
 #include "operFS.hpp"
-#include <vectorNorms.hpp>
 #include "dofInterface3Dto3D.hpp"
 
 

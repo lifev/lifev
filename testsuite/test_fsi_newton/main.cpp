@@ -20,7 +20,6 @@
 #include "NavierStokesAleSolverPC.hpp"
 #include "VenantKirchhofSolver.hpp"
 #include "operFS.hpp"
-#include "vectorNorms.hpp"
 #include "dofInterface3Dto3D.hpp"
 #include "ud_functions.hpp"
 #include "regionMesh3D_ALE.hpp"

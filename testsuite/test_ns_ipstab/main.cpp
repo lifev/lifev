@@ -34,7 +34,6 @@ P1/P1 or P2/P2 FEM with Interior Penalty ( IP ) stabilization
 //#include <ethierSteinman.hpp>
 //#include <simple.hpp>
 #include <picard.hpp>
-#include <vectorNorms.hpp>
 
 int main( int argc, char** argv )
 {

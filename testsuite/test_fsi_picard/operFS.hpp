@@ -21,7 +21,6 @@
 
 #include "NavierStokesAleSolverPC.hpp"
 #include "VenantKirchhofSolver.hpp"
-#include "vectorNorms.hpp"
 #include "regionMesh3D_ALE.hpp"
 
 namespace LifeV

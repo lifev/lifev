@@ -34,15 +34,14 @@ BLASLAPACK      = cblas.h clapack.h
 include_HEADERS	= $(BLASLAPACK) algebraic_facto.hpp dataAztec.hpp \
 dataNewton.hpp inexactLU.hpp \
 linesearch_cubic.hpp linesearch_parabolic.hpp newton.hpp \
-picard.hpp saddlePointCG.hpp vectorNorms.hpp SolverAztec.hpp \
+picard.hpp saddlePointCG.hpp SolverAztec.hpp \
 generalizedAitken.hpp nonLinRichardson.hpp \
 $(PETSC_HDRS) 
 
 
 lib_LTLIBRARIES	= liblifealg.la 
 
-liblifealg_la_SOURCES	= dataAztec.cpp dataNewton.cpp vectorNorms.cpp \
-SolverAztec.cpp $(PETSC_SRCS)
+liblifealg_la_SOURCES	= dataAztec.cpp dataNewton.cpp SolverAztec.cpp $(PETSC_SRCS)
 
 liblifealg_la_LIBADD	= ../lifecore/liblifecore.la ../lifearray/liblifearray.la $(petsc_libs) $(aztec_libs)
 include $(top_srcdir)/admin/Doxyfile.am

@@ -9,7 +9,6 @@
 #include "ud_functions.hpp"
 #include "GetPot.hpp"
 #include "ensight7Writer.hpp"
-#include <vectorNorms.hpp> // - for new version or Christophe will kill me
 
 int main(int argc, char** argv)
 {

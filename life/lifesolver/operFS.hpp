@@ -20,7 +20,6 @@
 #include "dofInterface3Dto3D.hpp"
 #include "NavierStokesAleSolverPC.hpp"
 #include "VenantKirchhofSolver.hpp"
-#include "vectorNorms.hpp"
 #include "regionMesh3D_ALE.hpp"
 #include "SolverAztec.hpp"
 #include "generalizedAitken.hpp"
