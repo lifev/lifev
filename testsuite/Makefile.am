@@ -81,7 +81,7 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.in.in
 EXTRA_DIST = testsuite.at testsuite package.m4
 
 TESTSUITE = $(srcdir)/testsuite
-check-local: atconfig atlocal  $(TESTSUITE)
+check-local: atconfig atlocal  $(TESTSUITE) $(LN_TESTSUITE)
 	$(SHELL) $(TESTSUITE)
 
 AUTOM4TE    = autom4te
@@ -89,7 +89,9 @@ AUTOTEST = $(AUTOM4TE) --language=autotest
 $(TESTSUITE): $(srcdir)/testsuite.at $(srcdir)/package.m4 $(TESTSUITES)
 	$(AUTOTEST) -I $(srcdir) $@.at -o $@.tmp
 	mv $@.tmp $@
-	ln -sf $(TESTSUITE)
+	@if test $(top_srcdir) != $(top_builddir); then\
+     ln -sf $(TESTSUITE);\
+    fi
 
 
 
