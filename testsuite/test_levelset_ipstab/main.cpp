@@ -79,18 +79,18 @@ int main() {
 
     long int  m=1;
     GetPot datafile( "data" );
-    std::string mesh_type = datafile( "hyp/discretization/mesh_type", "INRIA" );
-    std::cout << mesh_type << " pippo " << std::endl;
+    std::string mesh_type = datafile( "levelset/discretization/mesh_type", ".m++" );
+    std::cout << mesh_type << std::endl;
     if ( mesh_type == "INRIA" )
     {
-        std::string mesh_dir = datafile( "hyp/discretization/mesh_dir", "." );
-        std::string fname=mesh_dir+datafile( "hyp/discretization/mesh_file", "cube_6000.mesh" );
+        std::string mesh_dir = datafile( "levelset/discretization/mesh_dir", "." );
+        std::string fname=mesh_dir+datafile( "levelset/discretization/mesh_file", "cube_6000.mesh" );
         readINRIAMeshFile(mesh,fname,m);
     }
     else if ( mesh_type == ".m++" )
     {
-        std::string mesh_dir = datafile( "hyp/discretization/mesh_dir", "." );
-        std::string fname=mesh_dir+datafile( "hyp/discretization/mesh_file", "cube_6000.m++" );
+        std::string mesh_dir = datafile( "levelset/discretization/mesh_dir", "." );
+        std::string fname=mesh_dir+datafile( "levelset/discretization/mesh_file", "cube_6000.m++" );
         readMppFile(mesh,fname,m);
     }
     else
@@ -186,7 +186,7 @@ int main() {
 
     SolverAztec solver;
 
-    LevelSetSolver<meshType> lss(datafile, refFE, qr, qrBd, BCh, fe, dof, betaVec);
+    LevelSetSolver<meshType> lss(datafile, "levelset", refFE, qr, qrBd, BCh, fe, dof, betaVec);
     lss.initialize(sphere);
 
     const LevelSetSolver<meshType>::lsfunction_type& U = lss.lsfunction();
@@ -199,9 +199,9 @@ int main() {
 
     // Retrieve time advancement parameters
 
-    Real t0 = datafile("hyp/bdf/t0", 0.);
-    Real delta_t = datafile("hyp/bdf/delta_t", 0.01);
-    Real T = datafile("hyp/bdf/T", 0.04);
+    Real t0 = datafile("levelset/bdf/t0", 0.);
+    Real delta_t = datafile("levelset/bdf/delta_t", 0.01);
+    Real T = datafile("levelset/bdf/T", 0.04);
 
     UInt save_every = datafile("levelset/parameters/save_every", 1);
     UInt reini_every = datafile("levelset/parameters/reinit_every", 10);

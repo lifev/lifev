@@ -3,7 +3,7 @@
 #      Data file for Mesh test
 #-------------------------------------------------
 
-[hyp]
+[levelset]
 
 [./discretization]
 mesh_type   = '.m++'
@@ -31,9 +31,7 @@ kspace          = 50
 precond         = none              # none, jacobi, sym_gs, neumann, ls, smoother, dom_decomp
 tol             = 1.00e-6
 
-[levelset]
-
-[./parameters]
+[../parameters]
 save_every      = 1
 reinit_every    = 1
 analytical_beta = 0
