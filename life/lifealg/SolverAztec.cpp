@@ -22,7 +22,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 /**
-   \file SolverAztec.hpp
+   \file SolverAztec.cpp
    \author Christoph Winkelmann <christoph.winkelmann@epfl.ch>
    \date 2004-09-22
 */
@@ -33,30 +33,30 @@ class GetPot;
 
 namespace LifeV {
 
-UInt SolverAztec::_solverNumber = 100;
+UInt SolverAztec::S_solverNumber = 100;
 
 SolverAztec::SolverAztec()
-    : _matrix(0), _precond(0), _tempPattern(0), _tempMatrix(0)
+    : M_matrix(0), M_precond(0), M_tempPattern(0), M_tempMatrix(0)
 {
-    _data_org[AZ_N_internal] = 0;
-    _data_org[AZ_N_border]= 0;
-    _data_org[AZ_N_external]= 0;
-    _data_org[AZ_N_neigh]= 0;
-    _data_org[AZ_name]= _solverNumber++;
-    AZ_set_proc_config(_proc_config, AZ_NOT_MPI);
+    M_dataOrg[AZ_N_internal] = 0;
+    M_dataOrg[AZ_N_border]= 0;
+    M_dataOrg[AZ_N_external]= 0;
+    M_dataOrg[AZ_N_neigh]= 0;
+    M_dataOrg[AZ_name]= S_solverNumber++;
+    AZ_set_proc_config(M_procConfig, AZ_NOT_MPI);
 
     // let dataAztec set the defaults
     GetPot dataFile;
     DataAztec dataAztec(dataFile, "aztec");
-    dataAztec.aztecOptionsFromDataFile(_options, _params);
+    dataAztec.aztecOptionsFromDataFile(M_options, M_params);
 }
 
 SolverAztec::~SolverAztec() {
-    if (_matrix) {
-        AZ_matrix_destroy(&_matrix);
+    if (M_matrix != 0) {
+        AZ_matrix_destroy(&M_matrix);
     }
-    if (_precond) {
-        AZ_precond_destroy(&_precond);
+    if (M_precond != 0) {
+        AZ_precond_destroy(&M_precond);
     }
 }
 
@@ -70,64 +70,67 @@ SolverAztec* SolverAztec::New() {
   \return last residual norm
 */
 double SolverAztec::residualNorm() const {
-    return _status[AZ_r];
+    return M_status[AZ_r];
 }
 
-void SolverAztec::setMatrix(MSRMatr<value_type> const& m) {
-    _tempPattern.reset(0);
-    _tempMatrix.reset(0);
-    _setMatrix(m);
+void SolverAztec::setMatrix(MSRMatr<value_type> const& newMatrix) {
+    M_tempPattern.reset(0);
+    M_tempMatrix.reset(0);
+    F_setMatrix(newMatrix);
 }
 
-void SolverAztec::setMatrix(CSRMatr<CSRPatt, value_type> const& m) {
-    _tempPattern.reset(new MSRPatt(*(m.Patt())));
-    _tempMatrix.reset(new MSRMatr<value_type>(*_tempPattern, m));
-    _setMatrix(*_tempMatrix);
+void SolverAztec::setMatrix(CSRMatr<CSRPatt, value_type> const& newMatrix) {
+    M_tempPattern.reset(new MSRPatt(*(newMatrix.Patt())));
+    M_tempMatrix.reset(new MSRMatr<value_type>(*M_tempPattern, newMatrix));
+    F_setMatrix(*M_tempMatrix);
 }
 
 void SolverAztec::
 setMatrixFree(int nEq, void* data,
               void (*matvec)(double*,double*, AZ_MATRIX_STRUCT*, int*)) {
-    _data_org[AZ_N_internal] = nEq;
-    if (_matrix) {
-        AZ_matrix_destroy(&_matrix);
+    M_dataOrg[AZ_N_internal] = nEq;
+    if (M_matrix != 0) {
+        AZ_matrix_destroy(&M_matrix);
     }
-    if (_precond) {
-        AZ_precond_destroy(&_precond);
+    if (M_precond != 0) {
+        AZ_precond_destroy(&M_precond);
     }
-    _matrix = AZ_matrix_create(nEq);
-    AZ_set_MATFREE(_matrix, data, matvec);
+    M_matrix = AZ_matrix_create(nEq);
+    AZ_set_MATFREE(M_matrix, data, matvec);
 }
 
-void SolverAztec::_setMatrix(MSRMatr<value_type> const& m) {
-    int nEq = m.Patt()->nRows();
-    _data_org[AZ_N_internal] = nEq;
-    if (_matrix) {
-        AZ_matrix_destroy(&_matrix);
+void SolverAztec::F_setMatrix(MSRMatr<value_type> const& newMatrix) {
+    int nEq = newMatrix.Patt()->nRows();
+    M_dataOrg[AZ_N_internal] = nEq;
+    if (M_matrix != 0) {
+        AZ_matrix_destroy(&M_matrix);
     }
-    if (_precond) {
-        AZ_precond_destroy(&_precond);
+    if (M_precond != 0) {
+        AZ_precond_destroy(&M_precond);
     }
-    _matrix = AZ_matrix_create(nEq);
-    _precond = AZ_precond_create(_matrix, AZ_precondition, NULL);
-    AZ_set_MSR(_matrix, (int*)(m.Patt()->giveRaw_bindx()),
-               (double*)(m.giveRaw_value()), _data_org, 0, NULL, AZ_LOCAL);
+    M_matrix = AZ_matrix_create(nEq);
+    M_precond = AZ_precond_create(M_matrix, AZ_precondition, NULL);
+    AZ_set_MSR(M_matrix,
+               (int*)(newMatrix.Patt()->giveRaw_bindx()),
+               (double*)(newMatrix.giveRaw_value()),
+               M_dataOrg, 0, NULL, AZ_LOCAL);
 }
 
 void SolverAztec::solve( array_type& x, array_type const& b) {
-    if (_matrix) {
-        std::cerr << "[SolverAztec::solve]  Solving primal\n";
-        AZ_iterate(&x[0], &b[0], _options, _params, _status, _proc_config,
-                   _matrix, _precond, NULL);
+    if (M_matrix != 0) {
+        std::cerr << "[SolverAztec::solve]  Solving primal" << std::endl;
+        AZ_iterate(&x[0], &b[0], M_options, M_params, M_status, M_procConfig,
+                   M_matrix, M_precond, NULL);
     } else {
-        std::cerr << "[SolverAztec::solve]  ERROR: Matrix not set\n";
+        std::cerr << "[SolverAztec::solve]  ERROR: Matrix not set"
+                  << std::endl;
     }
 }
 
 void SolverAztec::setOptionsFromGetPot(GetPot const& dataFile,
                                        std::string section) {
     DataAztec dataAztec(dataFile, section);
-    dataAztec.aztecOptionsFromDataFile(_options, _params);
+    dataAztec.aztecOptionsFromDataFile(M_options, M_params);
 }
 
 } // namespace LifeV

@@ -85,14 +85,14 @@ public:
     //@{
 
     //! set matrix from MSRMatr
-    void setMatrix(MSRMatr<value_type> const& m);
+    void setMatrix(MSRMatr<value_type> const& newMatrix);
 
     /** set matrix from CSRMatr
      *
      *  Warning: The matrix is converted to MSR. This method provides ease of
      *  use, possibly for the sake of efficiency.
      */
-    void setMatrix(CSRMatr<CSRPatt, value_type> const& m);
+    void setMatrix(CSRMatr<CSRPatt, value_type> const& newMatrix);
 
     /** set matrix free data
      *  @param nEq number of equations
@@ -135,7 +135,7 @@ public:
 
 private:
     //! private method containing code shared by public setMatrix methods
-    void F_setMatrix(MSRMatr<value_type> const& m);
+    void F_setMatrix(MSRMatr<value_type> const& newMatrix);
 
     //! data organisation for C
     int M_dataOrg[AZ_COMM_SIZE];
