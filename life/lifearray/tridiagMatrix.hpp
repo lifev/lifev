@@ -15,13 +15,13 @@
   You should have received a copy of the GNU General Public License
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-*/ 
+*/
 /*!
   \file tridiagMatrix.hpp
   \author Vincent Martin
   \date 07/2004
   \version 1.0
- 
+
   \brief This file contains a class for tridiagonal matrices.
 */
 
@@ -40,9 +40,9 @@ namespace LifeV
 
 /*!
   \class TriDiagMatrix
- 
+
    A class for tridiagonal matrices.
- 
+
 */
 template < class R >
 class TriDiagMatrix
@@ -188,7 +188,7 @@ void TriDiagMatrix<R>::set_mat( UInt row, UInt col, const_R loc_val )
 template < class R >
 void TriDiagMatrix<R>::set_mat_inc( UInt row, UInt col, const_R loc_val )
 {
-    switch ( row - col )
+    switch ( (int)row - (int)col )
     {
     case 0:
         _M_diag( row ) += loc_val;
@@ -196,7 +196,7 @@ void TriDiagMatrix<R>::set_mat_inc( UInt row, UInt col, const_R loc_val )
     case 1:
         _M_lowdiag( col ) += loc_val;
         break;
-    case - 1:
+    case -1:
         _M_updiag( row ) += loc_val;
         break;
     default:
@@ -206,7 +206,7 @@ void TriDiagMatrix<R>::set_mat_inc( UInt row, UInt col, const_R loc_val )
 
 /*!
   simple axpy product.
- 
+
   @@ It SHOULD use the blas2 routine : (but it does NOT!)
   SUBROUTINE DGBMV ( TRANS, M, N, KL, KU, ALPHA, A, LDA, X, INCX,
                       BETA, Y, INCY )
@@ -216,7 +216,7 @@ void TriDiagMatrix<R>::set_mat_inc( UInt row, UInt col, const_R loc_val )
 *
 *  where alpha and beta are scalars, x and y are vectors and A is an
 *  m by n band matrix, with kl sub-diagonals and ku super-diagonals.
- 
+
 One should first transform the three vectors into an adapted array for dgbmv...
 */
 template < class R >
