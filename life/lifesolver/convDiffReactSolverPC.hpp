@@ -64,6 +64,18 @@ public ConvDiffReactHandler<Mesh> {
   //! Projection of the velocity on grid of concentration discretization
   template <typename RegionMesh3D>
   void getvel(RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u, const Real& time);
+ 
+  //! Calculate the local coordinates of concentration gridpoints in the 
+  //! velocity grid (is needed for the Projection)     
+  template <typename RegionMesh3D> 
+  void getcoord(RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u);
+
+  //! Calculate the volume of a tetrahedra given by its corner nodes
+  Real calcvol(Real x[4], Real y[4], Real z[4]);
+
+  //! tests if point (xp, yp, zp) is in the tetrahedra (x[4], y[4], z[4]) and returns
+  //! interpolation coefficents (1-b1-b2-b3, b1, b2, b3)
+  int test(Real x[4], Real y[4], Real z[4], Real & xp, Real & yp, Real & zp, Real & b1, Real & b2, Real & b3);
 
  private:
 
@@ -337,16 +349,346 @@ iterate(const Real& time) {
   
 }
 
+
+
 template<typename Mesh> template<typename RegionMesh3D>  
 void ConvDiffReactSolverPC<Mesh>::
 getvel(RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u, const Real& time){
 
-   for (UInt j=0; j<3; j++){
-       for(UInt i=0; i< _dim_c; i++){
-	  _u_c(i+j*_dim_c)=u(i+j*u.size()/3);
-       }}
+  //   for (UInt j=0; j<3; j++){
+  //       for(UInt i=0; i< _dim_c; i++){
+  //	  _u_c(i+j*_dim_c)=u(i+j*u.size()/3);
+  //       }}
+
+  for(UInt i=0; i < _mesh.numVertices(); i++){
 
 
+    if(_u_to_c[i].ele == 0){
+    // Dirichlet boundary for the velocity -> get velocity for boundary function
+      Real xp=_mesh.point(i+1).x();
+      Real yp=_mesh.point(i+1).y();
+      Real zp=_mesh.point(i+1).z();
+      for (ID jj=0; jj<3; ++jj)
+	_u_c(i+jj*_u_c.size()/3)=BCh_u[(int)_u_to_c[i].b[0]](time,xp,yp,zp,BCh_u[(int)_u_to_c[i].b[0]].component(jj+1));
+      
+    }
+    else{
+    // Velocity interpolation
+      _u_c(i)=_u_to_c[i].b[0]*u(umesh.volume(_u_to_c[i].ele).point(1).id()-1)+
+                    _u_to_c[i].b[1]*u(umesh.volume(_u_to_c[i].ele).point(2).id()-1)+
+                    _u_to_c[i].b[2]*u(umesh.volume(_u_to_c[i].ele).point(3).id()-1)+
+	            _u_to_c[i].b[3]*u(umesh.volume(_u_to_c[i].ele).point(4).id()-1);
+
+      _u_c(i+_dim_c)=_u_to_c[i].b[0]*u(umesh.volume(_u_to_c[i].ele).point(1).id()-1+u.size()/3)+
+                                        _u_to_c[i].b[1]*u(umesh.volume(_u_to_c[i].ele).point(2).id()-1+u.size()/3)+
+                                        _u_to_c[i].b[2]*u(umesh.volume(_u_to_c[i].ele).point(3).id()-1+u.size()/3)+
+	                                _u_to_c[i].b[3]*u(umesh.volume(_u_to_c[i].ele).point(4).id()-1+u.size()/3);
+
+      _u_c(i+2*_dim_c)=_u_to_c[i].b[0]*u(umesh.volume(_u_to_c[i].ele).point(1).id()-1+2*u.size()/3)+
+                                          _u_to_c[i].b[1]*u(umesh.volume(_u_to_c[i].ele).point(2).id()-1+2*u.size()/3)+
+                                          _u_to_c[i].b[2]*u(umesh.volume(_u_to_c[i].ele).point(3).id()-1+2*u.size()/3)+
+	                                  _u_to_c[i].b[3]*u(umesh.volume(_u_to_c[i].ele).point(4).id()-1+2*u.size()/3);
+    }
+
+
+  }
+
+}
+
+template<typename Mesh> template<typename RegionMesh3D>  
+void ConvDiffReactSolverPC<Mesh>::
+getcoord(RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u){
+
+  Real b1, b2, b3;
+  intpolcoord localcoord;
+
+  Chrono  chrono;
+  chrono.start();
+
+  _u_c=-100.0;
+
+  Real x[4], y[4], z[4], xt[4], yt[4], zt[4];
+  UInt vid, i1, i2, i3, v1, v2, v3, v4;
+  LinearTetra ele;
+
+  SimpleVect<GeoElement3D<LinearTetra> >::iterator iv = umesh.volumeList.begin();
+ 
+  for(UInt i=0; i < _mesh.numVertices(); i++){
+
+    cout << i << endl;
+
+    x[0]=_mesh.point(i+1).x();
+    y[0]=_mesh.point(i+1).y();
+    z[0]=_mesh.point(i+1).z();
+
+    if(_mesh.point(i+1).boundary()){
+
+      UInt l;
+
+      for(UInt k=0; k < BCh_u.size(); k++){
+	if(BCh_u[k].flag() == _mesh.point(i+1).marker()){ l=k;}}
+
+      switch( BCh_u[l].type() ) {
+      case Essential:
+	cout << "Dirichlet boundary point" << endl;
+	localcoord.b[0]=(Real)l;
+	localcoord.b[1]=(Real)l;
+	localcoord.b[2]=(Real)l;
+	localcoord.b[3]=(Real)l;
+	localcoord.ele=0;
+	_u_to_c.push_back(localcoord);
+	break;
+      default:
+	cout << "Neumann boundary point" << endl;
+	 for(Int found = 0;found == 0;){
+	    vid = iv -> id();
+	    Real volume[umesh.numLocalFaces()],minvolume=100.0;
+	    UInt jk;
+	    for(UInt jj=1; jj <= umesh.numLocalFaces();jj++){
+	       i1=ele.fToP(jj,1);
+	       i2=ele.fToP(jj,2);
+	       i3=ele.fToP(jj,3);
+
+	       i1=(iv->point(i1)).id();
+	       i2=(iv->point(i2)).id();
+	       i3=(iv->point(i3)).id();
+	
+	       x[1]=umesh.point(i1).x();
+	       x[2]=umesh.point(i2).x();
+	       x[3]=umesh.point(i3).x();
+	       y[1]=umesh.point(i1).y();
+	       y[2]=umesh.point(i2).y();
+	       y[3]=umesh.point(i3).y();
+	       z[1]=umesh.point(i1).z();
+	       z[2]=umesh.point(i2).z();
+	       z[3]=umesh.point(i3).z();
+	       volume[jj]=calcvol(x,y,z);
+	       if(volume[jj] < minvolume){
+	       minvolume = volume[jj];
+	       jk=jj;}}
+	 if(minvolume < -0.0000000001){
+	    if(umesh.faceList(umesh.localFaceId(vid,jk)).ad_first() == vid){
+	       iv=iv+umesh.faceList(umesh.localFaceId(vid,jk)).ad_second()-vid;}
+	    else{
+	       iv=iv+umesh.faceList(umesh.localFaceId(vid,jk)).ad_first()-vid;}
+	 }
+	 else{
+	    found = 1;
+	    v1=(iv->point(1)).id();
+	    v2=(iv->point(2)).id();
+	    v3=(iv->point(3)).id();
+	    v4=(iv->point(4)).id();
+	    xt[0]=umesh.point(v1).x();
+	    yt[0]=umesh.point(v1).y();
+	    zt[0]=umesh.point(v1).z();
+	    xt[1]=umesh.point(v2).x();
+	    yt[1]=umesh.point(v2).y();
+	    zt[1]=umesh.point(v2).z();
+	    xt[2]=umesh.point(v3).x();
+	    yt[2]=umesh.point(v3).y();
+	    zt[2]=umesh.point(v3).z();
+	    xt[3]=umesh.point(v4).x();
+	    yt[3]=umesh.point(v4).y();
+	    zt[3]=umesh.point(v4).z();
+
+            if(test(xt, yt, zt, x[0], y[0], z[0], b1, b2, b3)){
+	       localcoord.b[0]=1.0-b1-b2-b3;
+	       localcoord.b[1]=b1;
+	       localcoord.b[2]=b2;
+	       localcoord.b[3]=b3;
+	       localcoord.ele=vid;
+	       _u_to_c.push_back(localcoord);}
+	    else{
+	       cout << "Punkt liegt ausserhalb des Gebietes" << endl;
+	       localcoord.b[0]=1.0-b1-b2-b3;
+	       localcoord.b[1]=b1;
+	       localcoord.b[2]=b2;
+	       localcoord.b[3]=b3;
+	       localcoord.ele=vid;
+	       _u_to_c.push_back(localcoord);
+	    }}}
+	 break;
+      }
+    }
+    else{
+      cout << "Inner point" << endl;
+       for(Int found = 0;found == 0;){
+	  vid = iv -> id();
+	  Real volume[umesh.numLocalFaces()],minvolume=100.0;
+	  UInt jk;
+	  for(UInt jj=1; jj <= umesh.numLocalFaces();jj++){
+	     i1=ele.fToP(jj,1);
+	     i2=ele.fToP(jj,2);
+	     i3=ele.fToP(jj,3);
+
+	     i1=(iv->point(i1)).id();
+	     i2=(iv->point(i2)).id();
+	     i3=(iv->point(i3)).id();
+	
+	     x[1]=umesh.point(i1).x();
+	     x[2]=umesh.point(i2).x();
+	     x[3]=umesh.point(i3).x();
+	     y[1]=umesh.point(i1).y();
+	     y[2]=umesh.point(i2).y();
+	     y[3]=umesh.point(i3).y();
+	     z[1]=umesh.point(i1).z();
+	     z[2]=umesh.point(i2).z();
+	     z[3]=umesh.point(i3).z();
+	     volume[jj]=calcvol(x,y,z);
+	     if(volume[jj] < minvolume){
+		minvolume = volume[jj];
+		jk=jj;}}
+	  if(minvolume < -0.00000001){
+	     if(umesh.faceList(umesh.localFaceId(vid,jk)).ad_first() == vid){
+		iv=iv+umesh.faceList(umesh.localFaceId(vid,jk)).ad_second()-vid;}
+	     else{
+		iv=iv+umesh.faceList(umesh.localFaceId(vid,jk)).ad_first()-vid;}
+	  }
+	  else{
+	     found = 1;
+	     v1=(iv->point(1)).id();
+	     v2=(iv->point(2)).id();
+	     v3=(iv->point(3)).id();
+	     v4=(iv->point(4)).id();
+	     xt[0]=umesh.point(v1).x();
+	     yt[0]=umesh.point(v1).y();
+	     zt[0]=umesh.point(v1).z();
+	     xt[1]=umesh.point(v2).x();
+	     yt[1]=umesh.point(v2).y();
+	     zt[1]=umesh.point(v2).z();
+	     xt[2]=umesh.point(v3).x();
+	     yt[2]=umesh.point(v3).y();
+	     zt[2]=umesh.point(v3).z();
+	     xt[3]=umesh.point(v4).x();
+	     yt[3]=umesh.point(v4).y();
+	     zt[3]=umesh.point(v4).z();
+
+	     if(test(xt, yt, zt, x[0], y[0], z[0], b1, b2, b3)){
+		localcoord.b[0]=1.0-b1-b2-b3;
+		localcoord.b[1]=b1;
+		localcoord.b[2]=b2;
+		localcoord.b[3]=b3;
+	       localcoord.ele=vid;
+	       _u_to_c.push_back(localcoord);}
+	     else{
+		localcoord.b[0]=1.0-b1-b2-b3;
+		localcoord.b[1]=b1;
+		localcoord.b[2]=b2;
+		localcoord.b[3]=b3;
+		localcoord.ele=vid;
+		_u_to_c.push_back(localcoord);
+	     }
+	     cout << 1.0-b1-b2-b3 << ", " << b1 << ", " << b2 << ", " << b3 << endl;
+	  }
+       }
+    }
+
+  }
+
+  chrono.stop();
+  cout << " Calculation of the projection coordinates " << chrono.diff() << "s." << endl;
+ 
+}
+
+template<typename Mesh>
+Real ConvDiffReactSolverPC<Mesh>::
+calcvol(Real x[4], Real y[4], Real z[4]){
+     Real volume=0.0;
+     volume +=((x[1]-x[2])*(y[1]-y[3])*(z[1]-z[0]));
+     volume +=((y[1]-y[2])*(z[1]-z[3])*(x[1]-x[0]));
+     volume +=((z[1]-z[2])*(x[1]-x[3])*(y[1]-y[0]));
+     volume -=((x[1]-x[0])*(y[1]-y[3])*(z[1]-z[2]));
+     volume -=((y[1]-y[0])*(z[1]-z[3])*(x[1]-x[2]));
+     volume -=((z[1]-z[0])*(x[1]-x[3])*(y[1]-y[2]));
+     return volume;
+}
+
+
+template<typename Mesh>
+int ConvDiffReactSolverPC<Mesh>::
+test(Real x[4], Real y[4], Real z[4], Real & xp, Real & yp, Real & zp, Real & b1, Real & b2, Real & b3){
+
+    Real a11, a12, a13, a21, a22, a23, a31, a32, a33, zw;
+    int found;
+
+    a11 = x[1]-x[0];
+    a12 = x[2]-x[0];
+    a13 = x[3]-x[0];
+    a21 = y[1]-y[0];
+    a22 = y[2]-y[0];
+    a23 = y[3]-y[0];
+    a31 = z[1]-z[0];
+    a32 = z[2]-z[0];
+    a33 = z[3]-z[0];
+
+    b1  = xp-x[0];
+    b2  = yp-y[0];
+    b3  = zp-z[0];
+
+//  Solve the equation system (without loop - faster)
+
+        if(abs(a11) < max(abs(a21),abs(a31))){
+          if(abs(a21) > abs(a31)){
+	     zw  = a11;
+	     a11 = a21;
+	     a21 = zw;
+	     zw  = a12;
+	     a12 = a22;
+	     a22 = zw;
+	     zw  = a13;
+	     a13 = a23;
+	     a23 = zw;
+	     zw  = b1;
+	     b1  = b2;
+	     b2  = zw;}
+	  else{
+	     zw  = a11;
+	     a11 = a31;
+	     a31 = zw;
+	     zw  = a12;
+	     a12 = a32;
+	     a32 = zw;
+	     zw  = a13;
+	     a13 = a33;
+	     a33 = zw;
+	     zw  = b1;
+	     b1  = b3;
+	     b3  = zw;}}
+
+        zw  = a21 / a11;
+        a22 = a22 - zw * a12;
+        a23 = a23 - zw * a13;
+        b2  = b2  - zw * b1;
+        zw  = a31 / a11;
+        a32 = a32 - zw * a12;
+        a33 = a33 - zw * a13;
+        b3  = b3  - zw * b1;
+
+        if(abs(a32) > abs(a22)){
+	   zw  = a22;
+	   a22 = a32;
+	   a32 = zw;
+	   zw  = a23;
+	   a23 = a33;
+	   a33 = zw;
+	   zw  = b2;
+	   b2  = b3;
+	   b3  = zw;}
+
+        zw = a32 / a22;
+        a33 = a33 - zw * a23;
+
+        b3 = b3 - zw * b2;
+        b3 = b3 / a33;
+        b2 = (b2 - a23 * b3) / a22;
+        b1 = (b1 - a12 * b2 - a13 * b3) / a11;
+
+	if((b1 >= 0.0) && (b2 >= 0.0) && (b3 >= 0.0) && (b1+b2+b3 <= 1.0))
+	  found = 1;
+	else
+	  found = 0;
+
+	return found;
 }
 
 

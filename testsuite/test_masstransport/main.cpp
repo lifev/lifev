@@ -80,6 +80,11 @@ int main(int argc, char** argv)
      cdr.initialize(c0,0.0,dt);
   }
 
+ // *** calculate the interpolation coordinates of the concentration grid points in the
+ // *** velocity grid - for handling different grids for velocity and concenration
+  ns.mesh().updateElementFaces(true);
+  cdr.getcoord(ns.mesh(), ns.u(), BCh_u);
+
 // ************ Temporal loop **************************************************
   for (Real time=startT+dt ; time <= T; time+=dt) {
 
@@ -88,6 +93,7 @@ int main(int argc, char** argv)
 
      cdr.timeAdvance(fc,time);
 
+// ***** interpolate the velocity field on the concentration nodes ************
      cdr.getvel(ns.mesh(),ns.u(),BCh_u,time);
 
      cdr.iterate(time);

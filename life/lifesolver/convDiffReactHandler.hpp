@@ -71,11 +71,11 @@ public DataConvDiffReact<Mesh> {
   virtual void timeAdvance(const Function source, const Real& time) = 0; 
 
   //! Update convective term, bc treatment and solve the linearized cdr system
-  virtual void iterate(const Real& time, PhysVectUnknown<Vector> & u) = 0;
-
+  virtual void iterate(const Real& time) = 0;
+ 
   //! Returns the concentration vector
   ScalUnknown<Vector>& c();
-  
+
   //! Returns the concentration Dof 
   const Dof& cDof() const;
 
@@ -109,7 +109,11 @@ public DataConvDiffReact<Mesh> {
 
   //! The concenration
   ScalUnknown<Vector> _c;
-   
+
+  //! Structure to hold the interpolation values of concentration nodes in the velocity grid
+  struct intpolcoord{Real b[4]; ID ele;};
+  vector<intpolcoord> _u_to_c;
+
   //! The BC handler
   BC_Handler& _BCh_c;
 
