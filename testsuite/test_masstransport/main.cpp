@@ -115,12 +115,12 @@ int main(int argc, char** argv)
         std::string voutname;
         voutname = "fluid.res"+indexout.str();
         std::fstream Resfile(voutname.c_str(),ios::out | ios::binary);
-        Resfile.write((char*)&ns.u()(1),ns.u().size()*sizeof(double));
-        Resfile.write((char*)&ns.p()(1),ns.p().size()*sizeof(double));
+        Resfile.write((char*)&ns.u()(0),ns.u().size()*sizeof(double));
+        Resfile.write((char*)&ns.p()(0),ns.p().size()*sizeof(double));
         Resfile.close();
         voutname = "concentration.res"+indexout.str();
         std::fstream Resfilec(voutname.c_str(),ios::out | ios::binary);
-        Resfilec.write((char*)&cdr.c()(1),cdr.c().size()*sizeof(double));
+        Resfilec.write((char*)&cdr.c()(0),cdr.c().size()*sizeof(double));
         Resfilec.close();
 
 // ************* creating Ensight output file **********************************

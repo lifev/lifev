@@ -1680,7 +1680,7 @@ void OneDModelSolver::initialize(const std::string & vname)
         std::cerr<<" Error in initialize: File not found or locked"<<std::endl;
         abort();
     }
-    Resfile.read((char*)&_M_U1_thistime(1),_M_U1_thistime.size()*sizeof(Real));
+    Resfile.read((char*)&_M_U1_thistime(0),_M_U1_thistime.size()*sizeof(Real));
     Resfile.close();
 }
 

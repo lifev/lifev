@@ -246,11 +246,11 @@ int main(int argc, char** argv)
     std::string voutname;
     voutname = "concentration-lumen.res"+indexout.str();
     std::fstream Resfile_cl(voutname.c_str(),ios::out | ios::binary);
-    Resfile_cl.write((char*)&cdrlumen.c()(1),cdrlumen.c().size()*sizeof(double));
+    Resfile_cl.write((char*)&cdrlumen.c()(0),cdrlumen.c().size()*sizeof(double));
     Resfile_cl.close();
     voutname = "concentration-wall.res"+indexout.str();
     std::fstream Resfile_cw(voutname.c_str(),ios::out | ios::binary);
-    Resfile_cw.write((char*)&cdrwall.c()(1),cdrwall.c().size()*sizeof(double));
+    Resfile_cw.write((char*)&cdrwall.c()(0),cdrwall.c().size()*sizeof(double));
     Resfile_cw.close();
 
 // ************* creating Ensight output file **********************************

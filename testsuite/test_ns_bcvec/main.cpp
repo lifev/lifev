@@ -110,8 +110,8 @@ int main(int argc, char** argv)
     string voutname;
     voutname = "fluid.res"+indexout.str();
     fstream Resfile(voutname.c_str(),ios::out | ios::binary);
-    Resfile.write((char*)&ns.u()(1),ns.u().size()*sizeof(double));
-    Resfile.write((char*)&ns.p()(1),ns.p().size()*sizeof(double));
+    Resfile.write((char*)&ns.u()(0),ns.u().size()*sizeof(double));
+    Resfile.write((char*)&ns.p()(0),ns.p().size()*sizeof(double));
     Resfile.close();
 
 

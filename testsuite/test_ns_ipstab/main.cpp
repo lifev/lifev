@@ -226,9 +226,9 @@ int main( int argc, char** argv )
             voutname = "fluid.res"+indexout.str();
             std::fstream resFile( voutname.c_str(),
                                   std::ios::out | std::ios::binary );
-            resFile.write( ( char* )&fluid.u()( 1 ),
+            resFile.write( ( char* )&fluid.u()( 0 ),
                            fluid.u().size()*sizeof( double ) );
-            resFile.write( ( char* )&fluid.p()( 1 ),
+            resFile.write( ( char* )&fluid.p()( 0 ),
                            fluid.p().size()*sizeof( double ) );
             resFile.close();
 

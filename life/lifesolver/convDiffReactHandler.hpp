@@ -243,7 +243,7 @@ ConvDiffReactHandler<Mesh>::initialize( const std::string & vname )
         std::cerr << " Error in initialize: File not found or locked" << std::endl;
         abort();
     }
-    Resfile.read( ( char* ) & _c( 1 ), _c.size() * sizeof( double ) );
+    Resfile.read( ( char* ) & _c( 0 ), _c.size() * sizeof( double ) );
     Resfile.close();
 
     _bdf.initialize_unk( _c );

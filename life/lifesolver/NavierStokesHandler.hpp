@@ -684,8 +684,8 @@ NavierStokesHandler<Mesh, DataType>::initialize( const std::string & vname )
         abort();
     }
 
-    resfile.read( ( char* ) & _u( 1 ), _u.size() * sizeof( double ) );
-    resfile.read( ( char* ) & _p( 1 ), _p.size() * sizeof( double ) );
+    resfile.read( ( char* ) & _u( 0 ), _u.size() * sizeof( double ) );
+    resfile.read( ( char* ) & _p( 0 ), _p.size() * sizeof( double ) );
     resfile.close();
 
     _bdf.bdf_u().initialize_unk( _u );
