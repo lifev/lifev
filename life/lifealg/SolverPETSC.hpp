@@ -39,6 +39,7 @@
 #endif /* HAVE_PETSC_H */
 
 #include <vecUnknown.hpp>
+#include "sparseArray.hpp"
 
 class GetPot;
 
@@ -174,13 +175,26 @@ public:
      */
     //@{
 
+    //! set matrix from raw CSR arrays
     void setMatrix( uint, const uint*, const uint*, const double* );
 
-    template<typename Matrix>
-    void SolverPETSC::setMatrix( Matrix& m ) {
-        setMatrix(m.Patt()->nRows(), m.Patt()->giveRawCSR_ia(),
-                  m.Patt()->giveRawCSR_ja(), m.giveRawCSR_value());
+    //! set matrix from CSRMatr
+    template<typename PatternType>
+    void setMatrix( const CSRMatr<PatternType, value_type>& m ) {
+        _tempPattern.reset(0);
+        _tempMatrix.reset(0);
+        setMatrix(m.Patt()->nRows(),
+                  m.Patt()->giveRawCSR_ia(),
+                  m.Patt()->giveRawCSR_ja(),
+                  m.giveRawCSR_value());
     }
+    
+    /** set matrix from MSRMatr
+     *
+     *  Warning: The matrix is converted to CSR. This method provides ease of
+     *  use, possibly for the sake of efficiency.
+     */
+    void setMatrix( const MSRMatr<value_type>& m );
 
     void setMatrixTranspose( uint, const uint*, const uint*, const double* );
     void setTolerances( double = PETSC_DEFAULT, double = PETSC_DEFAULT, double = PETSC_DEFAULT, int = PETSC_DEFAULT );
@@ -264,9 +278,15 @@ public:
      */
     void setOptionsFromGetPot(const GetPot& dataFile,
                               std::string section = "petsc");
-     
+
 private:
     Private* _M_p;
+
+    //! CSRPatt converted from MSRPatt if matrix given as MSRMatr
+    std::auto_ptr<CSRPatt> _tempPattern;
+
+    //! CSRMatr converted from MSRMatr if given as such
+    std::auto_ptr<CSRMatr<CSRPatt, value_type> > _tempMatrix;
 };
 
 /*!

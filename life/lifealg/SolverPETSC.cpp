@@ -177,6 +177,15 @@ SolverPETSC::setMatrix( uint __nrows, const uint* __r, const uint *__i, const do
     _M_p->_M_use_A = true;
 }
 
+void SolverPETSC::setMatrix( const MSRMatr<value_type>& m ) {
+    _tempPattern.reset(new CSRPatt(*(m.Patt())));
+    _tempMatrix.reset(new CSRMatr<CSRPatt, value_type>(*_tempPattern, m));
+    setMatrix(_tempPattern->nRows(),
+              _tempPattern->giveRawCSR_ia(),
+              _tempPattern->giveRawCSR_ja(),
+              _tempMatrix->giveRawCSR_value());
+}
+
 void
 SolverPETSC::setMatrixTranspose( uint __nrows, const uint* __r, const uint *__i, const double* __v )
 {
