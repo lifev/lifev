@@ -20,7 +20,7 @@
 #  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
+SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 
 check_HEADERS		= fhnHandler.hpp user_fct.hpp fhnSolver.hpp dataFhN.hpp user_functor.hpp
@@ -29,7 +29,7 @@ check_PROGRAMS		= test_fhn
 
 test_fhn_SOURCES	= main.cpp fhnHandler.cpp user_fct.cpp fhnSolver.cpp dataFhN.cpp  user_functor.cpp
 
-MOSTLYCLEANFILES	= 
+MOSTLYCLEANFILES	=
 
 EXTRA_DIST = data testsuite.at
 

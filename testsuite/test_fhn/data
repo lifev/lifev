@@ -34,7 +34,7 @@ nb_ref_time = 160
 ref_file = ref.mat
 post_proc_format = medit
 
-[aztec]  
+[aztec]
 solver = gmres  #cg , gmres, cgs, tfqmr, bicgstab, slu, symmlq, fixed_pt, lu
 precond = dom_decomp
 subdomain_solve = ilu

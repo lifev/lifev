@@ -24,9 +24,9 @@
 # \file testsuite.at
 # \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
 # \date 2004-08-29
-# 
-AT_SETUP([test_fhn])
-AT_KEYWORDS([Fitzhugh-Nagumo])
+#
+AT_SETUP([test_fhn (Fitzhugh-Nagumo heart model)])
+AT_KEYWORDS([Fitzhugh-Nagumo fhn test_fhn])
 AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 #-------------------------------------------------
 #          Data file for a Fitzhugh-Nagumo problem
@@ -56,14 +56,14 @@ source_value_RV = 0.1
 
 
 [miscellaneous]
-mesh_dir = ../data/mesh/inria # the directory where the mesh file is
-post_dir = ./Post/                 # the directory for postprocessing files
+mesh_dir = ./ # the directory where the mesh file is
+post_dir = ./                 # the directory for postprocessing files
 verbose = 1
 nb_ref_time = 160
 ref_file = ref.mat
-post_proc_format = medit          # vtk or medit
+post_proc_format = medit
 
-[aztec]  
+[aztec]
 solver = gmres  #cg , gmres, cgs, tfqmr, bicgstab, slu, symmlq, fixed_pt, lu
 precond = dom_decomp
 subdomain_solve = ilu
@@ -76,10 +76,9 @@ max_time_iter = 800
 init_time = 0.
 max_time = 10.
 adapt_period = 1
-post_proc_period = 1
+post_proc_period = 5
 init_data = 0
 
-
 ]])
-AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria//cyltetra.mesh &&  $top_builddir/testsuite/test_masstransport/test_masstransport],[0],[ignore],[ignore])
+AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria/heart1959.mesh &&  $top_builddir/testsuite/test_fhn/test_fhn -f data],[0],[ignore],[ignore])
 AT_CLEANUP
