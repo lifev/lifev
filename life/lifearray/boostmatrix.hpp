@@ -366,12 +366,27 @@ namespace LifeV
                 }
         }
 
+        //! Copy constructor
+
+        template<typename __E>
+        DiagonalBoostMatrix( const boost::numeric::ublas::matrix_expression<__E>& M)
+            :
+            boost::numeric::ublas::compressed_matrix<double, boost::numeric::ublas::row_major>(M)
+        {
+        }
+        
         void invert()
         {
             for ( size_type i=0; i<this->size1(); ++i )
                 {
                     this->value_data()[ i ] = 1. / this->value_data()[ i ];
                 }
+        }
+
+        //! Operator =
+        template<typename __E>
+        DiagonalBoostMatrix operator=(const boost::numeric::ublas::matrix_expression<__E>& M) {
+            return boost::numeric::ublas::compressed_matrix<double, boost::numeric::ublas::row_major>::operator=(M);
         }
 
         template<typename matrix_type>
