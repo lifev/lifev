@@ -64,22 +64,13 @@ public:
     /*!
       \param vec data vector holding data
       \param nbTotalDof number of total dof in the vector of data
-    */
-    BCVectorBase( Vector& vec, const UInt nbTotalDof );
-
-
-    //! Constructor
-    /*!
-      \param vec data vector holding data
-      \param nbTotalDof number of total dof in the vector of data
       \param type must be
       -# 0:  boundary integration done (ex. residual of a variational problem)
       -# 1:  needs boundary integration of \f$\lambda n \cdot  \mathbf{\phi}_i\f$
       \warning (implemented only for the Natural BC AM 10/2004)
       -# 2:  needs boundary integration of \f$\mathbf{\lambda} \cdot n \phi_i\f$
-      \warning (not yet implemented AM 10/2004)
     */
-    BCVectorBase( Vector& vec, const UInt nbTotalDof, UInt type );
+    BCVectorBase( Vector& vec, const UInt nbTotalDof, UInt type=0 );
 
 
     //! Default Constructor (the user must call setBCVector(..))
@@ -173,7 +164,7 @@ public:
 
 
     //! set the vector
-    void setVector( Vector& __vec, UInt nbDOF );
+    void setVector( Vector& __vec, UInt nbDOF, UInt type=0 );
 
     //@}
 
@@ -239,15 +230,7 @@ public:
     //! super class
     typedef BCVectorBase super;
 
-    //! Constructor
-    /*!
-      \param vec data vector holding data
-      \param nbTotalDof number of total dof in the vector of data
-      data vector and those of the associated to the boundary conditions
-    */
-    BCVector( Vector& vec, UInt nbTotalDof );
-
-    //! Constructor
+  //! Constructor
     /*!
       \param vec data vector holding data
       \param nbTotalDof number of total dof in the vector of data
@@ -256,7 +239,7 @@ public:
       -# needs boundary integration of \f$\lambda n \cdot  \mathbf{\phi}_i\f$ \warning (not yet implemented - AM 10/2004)
       -# needs boundary integration of \f$\mathbf{\lambda} \cdot n \phi_i\f$ \warning (implemented only for the Natural BC - AM 10/2004)
     */
-    BCVector( Vector& vec, UInt const nbTotalDof, UInt type );
+    BCVector( Vector& vec, UInt const nbTotalDof, UInt type=0 );
 
     //! Default Constructor (the user must call setVector(..))
     BCVector();
@@ -300,16 +283,21 @@ public:
     /*!
       \param vec data vector holding data
       \param nbTotalDof number of total dof in the vector of data
-      \param dofIn dofInterfaceBase object holding the connections between the interface dofs of the
+      \param dofIn dofInterfaceBase object holding the connections between the interface dofs of the 
       data vector and those of the associated to the boundary conditions
+      \param type must be
+      -# 0:  boundary integration done (ex. residual of a variational problem)
+      -# 1:  needs boundary integration of \f$\lambda n \cdot  \mathbf{\phi}_i\f$
+      \warning: implemented only for the Natural BC
+      -# 2:  needs boundary integration of \f$\mathbf{\lambda} \cdot n \phi_i\f$
     */
-    BCVectorInterface( Vector& vec, UInt nbTotalDof, dof_interface_type dofIn );
+    BCVectorInterface( Vector& vec, UInt nbTotalDof, dof_interface_type dofIn, UInt type=0 );
 
     //! Default Constructor (the user must call setBCVector(..))
     BCVectorInterface ();
 
     //! set the BC vector (after default construction)
-    void setVector( Vector& vec, UInt nbTotalDof, dof_interface_type dofIn );
+    void setVector( Vector& vec, UInt nbTotalDof, dof_interface_type dofIn, UInt type=0);
 
     /*!
       This method returns the value to be imposed in the component iComp of the dof iDof.

@@ -818,8 +818,41 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
                 }
             }
             break;
+	case 2:  // if the BC is a vector of values with components to be integrated
+	  // Loop on BC identifiers
+	  for ( ID i = 1; i <= BCb.list_size(); ++i )
+            {
+	      
+	      // Pointer to the i-th itdentifier in the list
+	      pId = static_cast< const IdentifierNatural* >( BCb( i ) );
+	      
+	      // Number of the current boundary face
+	      ibF = pId->id();
+	      
+	      // Updating face stuff
+	      bdfem.updateMeasNormalQuadPt( mesh.boundaryFace( ibF ) );
+	      
+	      // Loop on total Dof per Face
+	      for ( ID l = 1; l <= nDofF; ++l )
+                {
+
+		  gDof = pId->bdLocalToGlobal( l );
+		  
+		  // Loop on space dimensions condition
+		  for ( UInt ic = 0; ic < nDimensions; ++ic )
+                    {
+		      // Loop on quadrature points
+		      for ( int iq = 0; iq < bdfem.nbQuadPt; ++iq )
+                        {
+			  // Adding right hand side contribution
+			  b[ gDof - 1 ] += BCb( gDof , ic+1 ) * bdfem.phi( int( l - 1 ), iq ) * bdfem.normal( int( ic ), iq ) * bdfem.weightMeas( iq );
+                        }
+                    }
+                }
+            }
+	  break;
         default:
-            ERROR_MSG( "This type of BCVector does not exists" );
+	  ERROR_MSG( "This type of BCVector does not exists" );
         }
     }
     /*

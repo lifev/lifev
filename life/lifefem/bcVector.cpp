@@ -45,16 +45,6 @@ BCVectorBase::BCVectorBase()
 {}
 
 //! Constructor
-BCVectorBase::BCVectorBase( Vector& vec, UInt nbTotalDof )
-    :
-   _M_vec( &vec ),
-   _M_nbTotalDof( nbTotalDof ),
-   _M_mixteCoef( 0.0 ),
-   _M_type( 0 ),
-   _M_finalized( false )
-{}
-
-//! Constructor
 BCVectorBase::BCVectorBase( Vector& vec, const UInt nbTotalDof, UInt type )
     :
     _M_vec( &vec ),
@@ -97,10 +87,11 @@ BCVectorBase::MixteVec ( const ID& iDof, const ID& iComp ) const
 
 
 void
-BCVectorBase::setVector( Vector& __vec, UInt __nbTotalDof )
+BCVectorBase::setVector( Vector& __vec, UInt __nbTotalDof, UInt type )
 {
     _M_vec = &__vec ;
     _M_nbTotalDof = __nbTotalDof;
+    _M_type = type;
     _M_finalized = true;
 }
 
@@ -111,14 +102,6 @@ BCVectorBase::setVector( Vector& __vec, UInt __nbTotalDof )
 //! Default Constructor (the user must call setBCVector(..))
 BCVector::BCVector()
 {}
-
-//! Constructor
-BCVector::BCVector( Vector& vec, UInt nbTotalDof )
-    :
-    BCVectorBase( vec, nbTotalDof )
-{
-    this->setFinalized( true );
-}
 
 //! Constructor
 BCVector::BCVector( Vector& vec, UInt const nbTotalDof, UInt type )
@@ -173,9 +156,9 @@ BCVectorInterface::BCVectorInterface()
 
 //! Constructor
 BCVectorInterface::BCVectorInterface( Vector& vec, UInt nbTotalDof,
-                                      dof_interface_type dofIn )
+                                      dof_interface_type dofIn, UInt type )
     :
-    BCVectorBase( vec, nbTotalDof ),
+    BCVectorBase( vec, nbTotalDof, type ),
     _M_dofIn( dofIn )
 {
     this->setFinalized( true );
@@ -184,11 +167,11 @@ BCVectorInterface::BCVectorInterface( Vector& vec, UInt nbTotalDof,
 
 //!set the BC vector (after default construction)
 void
-BCVectorInterface::setVector( Vector& vec, UInt nbTotalDof, dof_interface_type dofIn )
+BCVectorInterface::setVector( Vector& vec, UInt nbTotalDof, dof_interface_type dofIn, UInt type )
 {
     ASSERT_PRE( !this->isFinalized(), "BC Vector cannot be set twice." );
 
-    super::setVector( vec, nbTotalDof );
+    super::setVector( vec, nbTotalDof, type );
 
     _M_dofIn = dofIn;
 
