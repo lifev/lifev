@@ -216,6 +216,7 @@ SolverPETSC::solve( array_type& __X, array_type const& __B, MatStructure  __ptyp
 
     KSPSetOperators( _M_p->__ksp, _M_p->__A, _M_p->__A, __ptype  ); //CHKERRQ(__ierr);
 
+    PetscInt           its = 0;
 #if PETSC_KSPSOLVE_OLD_INTERFACE
     KSPSetRhs(_M_p->__ksp,__b);
     KSPSetSolution(_M_p->__ksp,__x);
@@ -223,7 +224,6 @@ SolverPETSC::solve( array_type& __X, array_type const& __B, MatStructure  __ptyp
 #else
     KSPSolve( _M_p->__ksp, __b, __x);
     KSPConvergedReason reason;
-    PetscInt           its;
     KSPGetConvergedReason(_M_p->__ksp, &reason);
     if (reason==KSP_DIVERGED_INDEFINITE_PC) {
         std::cout << "\nDivergence because of indefinite preconditioner;\n";
@@ -275,6 +275,7 @@ SolverPETSC::solveTranspose( array_type& __X, array_type const& __B, MatStructur
 
     KSPSetOperators( _M_p->__ksp, _M_p->__A_t, _M_p->__A_t, __ptype ); ////CHKERRQ(__ierr);
 
+    PetscInt           its = 0;
 #if PETSC_KSPSOLVE_OLD_INTERFACE
     KSPSetRhs(_M_p->__ksp,__b);
     KSPSetSolution(_M_p->__ksp,__x);
@@ -282,7 +283,6 @@ SolverPETSC::solveTranspose( array_type& __X, array_type const& __B, MatStructur
 #else
     KSPSolve( _M_p->__ksp, __b, __x);
     KSPConvergedReason reason;
-    PetscInt           its;
     KSPGetConvergedReason(_M_p->__ksp, &reason);
     if (reason==KSP_DIVERGED_INDEFINITE_PC) {
         std::cout << "\nDivergence because of indefinite preconditioner;\n";
