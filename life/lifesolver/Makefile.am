@@ -30,12 +30,13 @@ include_HEADERS	= ElasticStructureHandler.hpp NavierStokesAleHandler.hpp \
                 NavierStokesSolverPC.hpp VenantKirchhofSolver.hpp dataElasticStructure.hpp \
                 dataNavierStokes.hpp dataSimplifiedStructure.hpp simplifiedStructure.hpp \
                 convDiffReactHandler.hpp convDiffReactSolverPC.hpp dataConvDiffReact.hpp \
-                dataDarcy.hpp darcyHandler.hpp darcySolver.hpp
+                dataDarcy.hpp darcyHandler.hpp darcySolver.hpp operFS.hpp steklovPoincareBase.hpp \
+		fixedPointBase.hpp 
 
 
-#lib_LTLIBRARIES	= lifesolver.la
+lib_LTLIBRARIES	= liblifesolver.la
 
-#lifesolver_la_SOURCES	= 
+liblifesolver_la_SOURCES	= operFS.cpp steklovPoincareBase.cpp fixedPointBase.cpp 
 
 #bin_PROGRAMS=multiscale
 #multiscale_SOURCES  = #multiscale.cpp
