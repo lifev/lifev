@@ -219,16 +219,54 @@ namespace LifeV
     }
 
 
-    /*! one parameter version.*/    
+    /*! one parameter version of the generalized aitken method.*/    
     template<class Vector, class Real>
     Vector generalizedAitken<Vector, Real>::computeDeltaLambda(const Vector &_lambda,
                                                                const Vector &_mu)
     {
+
         Vector    deltaLambda;
-        Vector muF(_mu);
-        muF=0;
+
         
-        return computeDeltaLambda(_lambda, _mu, muF);
+        if (!M_firstCall)
+        {
+            Vector    deltaMu     = _mu     - M_muS;
+            Real      omega       = 0.;
+            Real      norm        = 0.;
+
+            deltaLambda = _lambda - M_lambda;
+
+            
+            for (UInt ii = 0; ii < deltaLambda.size(); ++ii)
+            {
+                omega += deltaLambda[ii]*deltaMu[ii];
+                norm  += deltaMu[ii];
+            }
+            
+            M_lambda = _lambda;
+            M_muS    = _mu;
+            
+            deltaLambda = omega/norm*_mu;
+            
+            std::cout << "generalizedAitken: omega = "  << omega << std::endl;
+
+        }
+        else
+        {
+            M_firstCall = false;
+
+            deltaLambda = M_defOmegaS*_mu;
+            
+            std::cout << "generalizedAitken: omega = "  << M_defOmegaS << std::endl;
+
+            M_lambda = _lambda;
+            M_muS    = _mu;
+        }
+            
+        return deltaLambda;
+            
+
+        
     }
     
 
