@@ -49,6 +49,7 @@ SolverAztec::SolverAztec( std::string filename )
     M_dataOrg[ AZ_N_neigh ] = 0;
     M_dataOrg[ AZ_name ] = S_solverNumber++;
     AZ_set_proc_config( M_procConfig, AZ_NOT_MPI );
+    M_status[ AZ_its ] = -1; // to detect whether a solve has been done yet
 
     // let dataAztec set the defaults
     GetPot emptyDataFile;
@@ -58,7 +59,7 @@ SolverAztec::SolverAztec( std::string filename )
     // use ilu by default
     M_options[ AZ_precond ] = AZ_dom_decomp;
     M_options[ AZ_subdomain_solve ] = AZ_ilu;
-    
+
     // set options from file if given
     if ( !filename.empty() )
     {
@@ -155,13 +156,30 @@ void SolverAztec::F_setMatrix( MSRMatr<value_type> const& newMatrix )
                 M_dataOrg, 0, NULL, AZ_LOCAL );
 }
 
-void SolverAztec::solve( array_type& x, array_type const& b )
+void SolverAztec::solve( array_type& x,
+                         array_type const& b,
+                         PreCalc preCalc )
 {
     if ( M_matrix == 0 )
     {
         std::ostringstream __ex;
         __ex << "[SolverAztec::solve]  ERROR: Matrix not set";
         throw std::logic_error( __ex.str() );
+    }
+    if ( M_status[ AZ_its ] >= 0 )
+    {
+        switch ( preCalc )
+        {
+            case SAME_PRECONDITIONER:
+                M_options[AZ_pre_calc] = AZ_reuse;
+                break;
+            case SAME_NONZERO_PATTERN:
+                M_options[AZ_pre_calc] = AZ_recalc;
+                break;
+            case DIFFERENT_NONZERO_PATTERN:
+                M_options[AZ_pre_calc] = AZ_calc;
+                break;
+        }
     }
     AZ_iterate( x.data().begin(),
                 const_cast<double*>( b.data().begin() ),

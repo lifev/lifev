@@ -58,6 +58,11 @@ public:
 
     //@}
 
+    //! describes if/how the preconditioner shall be recalculated
+    enum PreCalc { SAME_PRECONDITIONER,
+                   SAME_NONZERO_PATTERN,
+                   DIFFERENT_NONZERO_PATTERN };
+    
     /** @name Constructors, destructor
      */
     //@{
@@ -115,13 +120,13 @@ public:
     {
         M_params[ AZ_tol ] = newTolerance;
     }
- 
-   // setes the level of recursion in the solution 
-   // of a linear system  
-   void setRecursionLevel( int newLevel )
+
+    //! set the level of recursion in the solution of a linear system
+    void setRecursionLevel( int newLevel )
     {
         M_options[ AZ_recursion_level ] = newLevel;
     }
+
     //@}
 
     /** @name  Methods
@@ -133,8 +138,26 @@ public:
 
       \c A has been entered via \c setMatrix .
 
+      \c preCalc can have the following values :
+
+      -# \c SAME_PRECONDITIONER -
+      Pmat is identical during successive linear solves.
+      This option is intended for folks who are using
+      different Amat and Pmat matrices and want to reuse the
+      same preconditioner matrix.  For example, this option
+      saves work by not recomputing incomplete factorization
+      for ILU/ICC preconditioners.
+
+      -# \c SAME_NONZERO_PATTERN :
+      Pmat has the same nonzero structure during
+      successive linear solves.
+
+      -# \c DIFFERENT_NONZERO_PATTERN -
+      Pmat does not have the same nonzero structure.
     */
-    void solve( array_type& x, array_type const& b );
+    void solve( array_type& x,
+                array_type const& b,
+                PreCalc preCalc = DIFFERENT_NONZERO_PATTERN );
 
     //@}
 
@@ -180,6 +203,7 @@ private:
 
     //! MSRMatr converted from CSRMatr if given as such
     std::auto_ptr<MSRMatr<value_type> > M_tempMatrix;
+    
 };
 
 }
