@@ -287,7 +287,7 @@ Vector operFS::getFluidInterfaceOnSolid(Vector    &_vec,
                                         BCHandler &_BCh)
 {
     Vector vec(M_residualF.size());
-    vec = 0;
+    vec = 1.;
 
 //     for (UInt iBC = 1;
 
@@ -335,15 +335,15 @@ void operFS::transferOnInterface(const Vector      &_vec1,
         return;
     }
 
-    std::cout << "iBC " << _BCName << " = " << iBC << std::endl;
-    std::cout << std::endl;
+//     std::cout << "iBC " << _BCName << " = " << iBC << std::endl;
+//     std::cout << std::endl;
     // we know the BC number for each mesh, let's swap
 
     BCBase const &BCInterface = _BC[(UInt) iBC];
 
     UInt nDofInterface = BCInterface.list_size();
 
-    std::cout << "nDofInterface = " << nDofInterface << std::endl;
+//     std::cout << "nDofInterface = " << nDofInterface << std::endl;
 
     UInt nDim = BCInterface.numberOfComponents();
 
@@ -394,12 +394,11 @@ void operFS::eval(const Vector& disp,
     M_solid.d() = setDispOnInterface(disp);
 //    M_solid.d() = disp;
 
+    M_fluid.updateMesh(M_time);
+    M_fluid.iterate   (M_time);
 
     M_solid._recur = 0;
     M_solid.iterate();
-
-    M_fluid.updateMesh(M_time);
-    M_fluid.iterate   (M_time);
 
     M_solid.postProcess();
     M_fluid.postProcess();
@@ -465,14 +464,6 @@ void  operFS::solveJac(Vector &muk,
 {
     UInt precChoice = 0;
 
-
-//     Vector mup = muk;
-//     invSfPrime(_res, _linearRelTol, muk);
-//     invSsPrime(_res, _linearRelTol, mup);
-
-//     for (int ii = 0; ii < muk.size(); ii++)
-//         std::cout << muk[ii] << " " << mup[ii] << std::endl;
-
     switch(precChoice)
     {
         case 0:
@@ -489,23 +480,28 @@ void  operFS::solveJac(Vector &muk,
             Vector muF(_res.size());
             Vector muS(_res.size());
 
-            invSfPrime(_res, _linearRelTol, muF);
             invSsPrime(_res, _linearRelTol, muS);
+            invSfPrime(_res, _linearRelTol, muF);
 
-	    // indeed, Here we should call Aitken (a different instance than 
-	    // the one defined in nonLinRichardson) and 
-	    // we should replace the defaultOmega for he nonLinRichardson
+            std::cout << "maxnorm muS = " << maxnorm(muS) << std::endl;
+            std::cout << "maxnorm muF = " << maxnorm(muF) << std::endl;
+
+            muk = .9*muS + .1*muF;
+
+            std::cout << "maxnorm muk = " << maxnorm(muk) << std::endl;
+            // indeed, Here we should call Aitken (a different instance than
+            // the one defined in nonLinRichardson) and
+            // we should replace the defaultOmega for he nonLinRichardson
             // to -1, such that there is no relaxation at all there.
-	    //
-	    // Maybe we have to define precChoice as Memeber -> M_precChoice
-	    // and get the choice as input parameter with the constructor
-	    // and add a memeber 
-	    // generalizedAitken aitkDN(...) (DN for Dirichlet Neumann)
-	    // then 
-	    //
-	    // muk = aitkDN.computeDeltaLambda( sol, muS, muF );
-
-            muk = muS + muF;
+            //
+            // Maybe we have to define precChoice as Memeber -> M_precChoice
+            // and get the choice as input parameter with the constructor
+            // and add a memeber
+            // generalizedAitken aitkDN(...) (DN for Dirichlet Neumann)
+            // then
+            //
+            // muk = aitkDN.computeDeltaLambda( sol, muS, muF );
+            // muk = muS + muF;
         }
         break;
         default:
@@ -521,6 +517,7 @@ void  operFS::solveLinearFluid()
 {
     M_fluid.iterateLin(M_time, M_BCh_du);
 }
+
 
 //
 
@@ -546,7 +543,6 @@ void  operFS::solveLinearSolid()
 }
 
 
-
 //
 //
 //
@@ -556,41 +552,24 @@ void  operFS::invSfPrime(const Vector& res,
                          double linear_rel_tol,
                          Vector& step)
 {
-    // step = S'_f^{-1} \cdot res
 
-    setResidualFSI(-1*res);
-//     transferOnInterface(res,
-//                          M_BCh_dz,
-//                          "Interface",
-//                          M_residualFSI);
+    setResidualFSI(res);
     this->M_fluid.updateDispVelo();
-//    M_residualFSI = 0.;
     solveLinearFluid();
 
     Vector deltaLambda = this->M_fluid.getDeltaLambda();
-//      for (int ii = 0; ii < deltaLambda.size(); ++ii)
-//          std::cout << deltaLambda[ii] << std::endl;
-    Vector deltaL = deltaLambda;
-    deltaL = 0.;
+
+//    Vector deltaL = deltaLambda;
+//    deltaL = 0.;
+//     transferOnInterface(deltaLambda,
+//                         M_BCh_du,
+//                         "Wall",
+//                         deltaL);
     transferOnInterface(deltaLambda,
-                        M_BCh_du,
-                        "Wall",
-//                         M_fluid.BC_fluid(),
-//                         "Interface",
-                        deltaL);
-
-    std::cout << "deltaLambda norm = " << maxnorm(deltaLambda) << std::endl;
-    std::cout << "ResidualFSI norm = " << maxnorm(M_residualFSI) << std::endl;
-
-    transferOnInterface(deltaL,
                         M_fluid.BC_fluid(),
                         "Interface",
                         step);
 
-//     for (int ii = 0; ii < M_residualFSI.size(); ++ii)
-//         std::cout << M_residualFSI[ii] << " "
-//                   << deltaLambda[ii] << " "
-//                   << deltaL[ii] << std::endl;
     std::cout << "deltaLambda step = " << maxnorm(step) << std::endl;
 }
 
@@ -615,6 +594,8 @@ void  operFS::invSsPrime(const Vector& res,
 
 //      for (int i = 0; i < (int) M_dz.size(); ++i)
 //          step[i] = dz()[i];
+//     for (int ii = 0; ii < step.size(); ++ii)
+//         std::cout << step[ii] << std::endl;
 
 //     return;
 }

@@ -222,7 +222,7 @@ int main(int argc, char** argv)
     //========================================================================================
 
 
-    UInt maxpf  = 100;
+    UInt maxpf  = 10000;
     Real dt     = fluid.timestep();
     Real T      = fluid.endtime();
 
