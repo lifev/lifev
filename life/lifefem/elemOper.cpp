@@ -2321,30 +2321,31 @@ void mass_Hdiv( Real coef, ElemMat& elmat, const CurrentHdivFE& fe, int iblock, 
   \param fe      : current vectorial element (in H(div))
   \param iblock, \param jblock : subarray indexes where to store the integral just computed.
 */
-void mass_Hdiv( KNM<Real>& Invperm, ElemMat& elmat, const CurrentHdivFE& fe,
+void mass_Hdiv( Matrix const&  Invperm, ElemMat& elmat, const CurrentHdivFE& fe,
                 int iblock, int jblock )
 {
     ElemMat::matrix_view mat = elmat.block( iblock, jblock );
-    int ig, i, j, icoor, jcoor;
-    Real x;
-    for ( j = 0 ; j < fe.nbNode ; j ++ )
+
+    for (Int j = 0 ; j < fe.nbNode ; j ++ )
     {
-        for ( i = 0 ; i < fe.nbNode /* by symmetry j+1 */ ; i ++ )
+        for (Int i = 0 ; i < fe.nbNode /* by symmetry j+1 */ ; i ++ )
         {
-            x = 0.;
-            for ( ig = 0 ; ig < fe.nbQuadPt ; ig ++ )
+            Real x = 0.;
+            for (Int ig = 0 ; ig < fe.nbQuadPt ; ig ++ )
             {
-                for ( icoor = 0 ; icoor < fe.nbCoor ; icoor ++ )
+                double __t = 0;
+                //x = phi[icoor]^T * K^-1 * phi[jcoor]
+                for (Int icoor = 0 ; icoor < fe.nbCoor ; icoor ++ )
                 {
-                    for ( jcoor = 0 ; jcoor < fe.nbCoor ; jcoor ++ )
+                    for (Int jcoor = 0 ; jcoor < fe.nbCoor ; jcoor ++ )
                     {
                         //! Invperm is the inverse of the permeability
-                        x += Invperm( icoor, jcoor ) *
-                            fe.phi( j, jcoor, ig ) *
-                            fe.phi( i, icoor, ig ) *
-                            fe.weightDet( ig );
+                        __t += (  Invperm( icoor, jcoor ) *
+                                  fe.phi( j, jcoor, ig ) *
+                                  fe.phi( i, icoor, ig ) );
                     }
                 }
+                x += __t*fe.weightDet( ig );
             }
             mat( i, j ) += x ;
         }

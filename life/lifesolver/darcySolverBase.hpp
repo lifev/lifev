@@ -53,12 +53,19 @@ struct DarcyDefaultSource
             return 0;
         }
 };
-struct DarcyDefaultDiffusion
+class DarcyDefaultInversePermeability
 {
-    Matrix operator()( double, double, double )
+public:
+    DarcyDefaultInversePermeability()
+        :
+        _M_id( IdentityMatrix( 3 ) )
+        {}
+    Matrix const& operator()( Real const&, Real const&, Real const& )
         {
-            return ScalarMatrix( 3, 3, 1.0 );
+            return _M_id;
         }
+private:
+    Matrix _M_id;
 };
 /*!
   \class DarcySolverBase
@@ -74,7 +81,8 @@ public:
     /** @name Typedefs
      */
     //@{
-    typedef boost::function<Matrix ( double, double, double )> diffusion_type;
+    typedef boost::function<Matrix const& ( Real const&, Real const&, Real const& )> tensor_type;
+
     typedef boost::function<double( double, double, double, int )> source_type;
     typedef boost::function<double( double, double, double )> pressure_solution_type;
     typedef boost::function<double( double, double, double, double, UInt )> velocity_solution_type;
@@ -90,13 +98,13 @@ public:
     DarcySolverBase()
         :
         _M_source( DarcyDefaultSource() ),
-        _M_diffusion( DarcyDefaultDiffusion() )
+        _M_inv_permeability( DarcyDefaultInversePermeability() )
         {}
 
     DarcySolverBase( DarcySolverBase const& __ds )
         :
         _M_source( __ds._M_source ),
-        _M_diffusion( __ds._M_diffusion )
+        _M_inv_permeability( __ds._M_inv_permeability )
         {}
 
     virtual ~DarcySolverBase()
@@ -121,10 +129,14 @@ public:
             return _M_source;
         }
 
-    diffusion_type diffusion() const
+    /**
+       provide the inverse of the permeability tensor at point (x,y,z)
+     */
+    Matrix const& inversePermeability( Real const& __x, Real const& __y,  Real const& __z ) const
         {
-            return _M_diffusion;
+            return _M_inv_permeability( __x, __y, __z );
         }
+
     //@}
 
     /** @name  Mutators
@@ -142,9 +154,9 @@ public:
     virtual void setBC( BCHandler const&  ) = 0;
 
     //! set the diffusion tensor
-    void setDiffusion( diffusion_type __d )
+    void setInversePermeability( tensor_type const& __d )
         {
-            _M_diffusion = __d;
+            _M_inv_permeability = __d;
         }
 
     //@}
@@ -187,7 +199,7 @@ protected:
     source_type _M_source;
 
     //! diffusion type
-    diffusion_type _M_diffusion;
+    tensor_type _M_inv_permeability;
 
 
     //! signal at each error

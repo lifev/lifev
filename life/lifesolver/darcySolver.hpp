@@ -244,12 +244,10 @@ void DarcySolver<Mesh>::_element_computation(int ielem)
     // only one block is set to zero since the other ones are not recomputed
     elmatMix.block(0,0) = 0.;
 
-#warning NEED TO PROVIDE A GENERAL DIFFUSION TENSOR
-    double xg,yg,zg;
     // coordinate of the barycenter of the current element
+    double xg,yg,zg;
     pfe.barycenter(xg,yg,zg);
-    diffusion_scalar = _M_diffusion( xg, yg, zg )( 0, 0 );
-    mass_Hdiv( 1./diffusion_scalar, elmatMix,vfe,0,0 );
+    mass_Hdiv( this->inversePermeability( xg, yg, zg ), elmatMix,vfe,0,0 );
 
 }
 
@@ -440,6 +438,9 @@ void DarcySolver<Mesh>::solve()
     aztecSolveLinearSyst(mat,globalTP.giveVec(),globalF.giveVec(),
                          globalTP.size(),msrPattern);
     computePresFlux();
+    postProcessPressureQ1();
+    postProcessVelocityQ1();
+    postProcessEnsight();
 }
 
 template <typename Mesh>
@@ -526,18 +527,12 @@ void DarcySolver<Mesh>::computePresFlux()
         // initialize the rhs vectors.
         elvecSource.zero();     //  source rhs (NBP)
         elvecHyb.zero();        //  hybrid rhs : extracted from the global vector.
+
+
         // The source term is computed with a test function in the Pressure space.
         // Beware: integrate the source term... ?
-#if 0
-        switch(test_case){
-        case 33:
-            source(sourceAnalytical, elvecSource, pfe, 0);
-        default:
-            source(sourceFct, elvecSource, pfe, 0);
-        }
-#else
-        source( this->sourceTerm(), elvecSource, pfe, 0);
-#endif
+        source( this->sourceTerm(), elvecSource, pfe,  0 );
+
         // initialize the rhs vector (clean this some day...)
         ElemVec::vector_view rhs = elvecSource.block(0); // corresponds to F2
         // Compute rhs = LB^{-1} rhs <- LB^{-1} F2
@@ -549,9 +544,6 @@ void DarcySolver<Mesh>::computePresFlux()
         ElemVec::vector_view  RHSTP = elvecHyb.block(0);
         // RHSTP = elvecHyb.block(0)  contains the local TP for the current fe.
         // rhs = BtC * RHSTP + rhs <- LB^{-1} Bt A^{-1} C * L + LB^{-1} F2
-        /* FAUTE DE SIGNE !!!! version originale @@@@@@@@@@@@@@
-           dgemm_("N", "N", NBP, NBRHS, NBL, ONE_, BtC, NBP, RHSTP, NBL,
-           ONE_, rhs, NBP, strlen("T"), strlen("N") );*/
         dgemm_("N", "N", NBP, NBRHS, NBL, MINUSONE_, BtC, NBP, RHSTP, NBL,
                MINUSONE_, rhs, NBP );
         //  rhs = LB^{-T} rhs
@@ -700,13 +692,6 @@ DarcySolver<Mesh>::errorL2( velocity_solution_type __analytical_sol )
     // send the signals to all observers that the l2 errors has been computed
     _M_error_signal( "L2", DARCY_VELOCITY, normL2sq, normL2solsq, normL2diffsq );
 }
-
-//-------------------------------------------------
-//! post processing part.
-//-------------------------------------------------
-//! switch to compute or not the analytical solution
-#define ANALYTICAL_SOL 0
-
 template <typename Mesh>
 Real DarcySolver<Mesh>::computeFluxFlag(int flag)
 {
@@ -724,42 +709,6 @@ Real DarcySolver<Mesh>::computeFluxFlag(int flag)
         }
     }
     return Fl;
-}
-
-template <typename Mesh>
-void DarcySolver<Mesh>::postProcessTraceOfPressureRT0()
-{
-    Debug( 6100 ) << "Postprocessing of TP (RT0 per element)\n";
-    if(post_proc_format == "medit"){
-        wr_medit_ascii_scalar(post_dir + "/presTP0.bb",globalTP.giveVec(),globalTP.size(),1);
-    } else {
-        std::cerr
-            <<"Warning: Solution constant by element is possible only with medit for the moment\n";
-    }
-}
-
-template <typename Mesh>
-void DarcySolver<Mesh>::postProcessVelocityRT0()
-{
-    Debug( 6100 ) << "Postprocessing of velocity (RT0 per element)\n";
-    if(post_proc_format == "medit"){
-        wr_medit_ascii_scalar(post_dir + "/velocRT0.bb",globalFlux.giveVec(),globalFlux.size(),1);
-    } else {
-        std::cerr
-            <<"Warning: Solution constant by element is possible only with medit for the moment\n";
-    }
-}
-
-template <typename Mesh>
-void DarcySolver<Mesh>::postProcessPressureQ0()
-{
-    Debug( 6100 ) << "Postprocessing of pressure (constant by element)\n";
-    if ( post_proc_format == "medit" ) {
-        wr_medit_ascii_scalar(post_dir + "/presQ0.bb",globalP.giveVec(),globalP.size(),1);
-    } else {
-        std::cerr
-            <<"Warning: Solution constant by element is possible only with medit for the moment\n";
-    }
 }
 
 template <typename Mesh>
@@ -800,41 +749,6 @@ void DarcySolver<Mesh>::projectPressureQ1( ScalUnknown<Vector> & p_q1 )
     options[AZ_subdomain_solve] = AZ_icc;
     aztecSolveLinearSyst(A_q1,p_q1.giveVec(),f_q1.giveVec(),p_q1.size(),
                          pattA_q1,options,params);
-}
-
-template <typename Mesh>
-void DarcySolver<Mesh>::postProcessPressureQ1()
-{
-    Debug( 6100 ) << "Postprocessing of pressure (L2 projection on the nodes)\n";
-    // Q1 or P1 elements
-    CurrentFE fe_q1( refPFEnodal , geoMap , qr );
-    Dof dof_q1( refPFEnodal );
-    dof_q1.update( this->_mesh );
-    UInt dim_q1 = dof_q1.numTotalDof();
-    ScalUnknown<Vector> nodalPres( dim_q1 );
-    projectPressureQ1( nodalPres );
-
-    std::string vtkname,bbname;
-    /*
-      char str_iter[10],str_time[10];
-      static int iter_post=0;
-      sprintf(str_time,"t=%f",time);
-      sprintf(str_iter,".%03d",iter_post);
-    */
-    //
-    if(post_proc_format == "medit"){
-        //bbname = post_dir + "/presQ1" + (string) str_iter + ".bb";
-        bbname = post_dir + "/presQ1.bb";
-        wr_medit_ascii_scalar(bbname,nodalPres.giveVec(),nodalPres.size());
-    } else if (post_proc_format == "vtk"){
-        //vtkname = post_dir + "/presQ1" + (string) str_iter + ".vtk";
-        vtkname = post_dir + "/presQ1.vtk";
-        wr_vtk_ascii_header(vtkname,"Pressure",this->_mesh, dof_q1, fe_q1);
-        wr_vtk_ascii_scalar(vtkname,"P",nodalPres.giveVec(), nodalPres.size());
-    }
-    //iter_post ++;
-    //---------------------------------------------
-
 }
 
 template <typename Mesh>
@@ -889,6 +803,86 @@ void DarcySolver<Mesh>::projectVelocityQ1( PhysVectUnknown<Vector>& u_q1 )
     options[AZ_subdomain_solve] = AZ_icc;
     aztecSolveLinearSyst(A_q1,u_q1.giveVec(),f_q1.giveVec(),u_q1.size(),
                          pattA_q1,options,params);
+}
+
+
+//-------------------------------------------------
+//! post processing part.
+//-------------------------------------------------
+//! switch to compute or not the analytical solution
+#define ANALYTICAL_SOL 0
+
+
+template <typename Mesh>
+void DarcySolver<Mesh>::postProcessTraceOfPressureRT0()
+{
+    Debug( 6100 ) << "Postprocessing of TP (RT0 per element)\n";
+    if(post_proc_format == "medit"){
+        wr_medit_ascii_scalar(post_dir + "/presTP0.bb",globalTP.giveVec(),globalTP.size(),1);
+    } else {
+        std::cerr
+            <<"Warning: Solution constant by element is possible only with medit for the moment\n";
+    }
+}
+
+template <typename Mesh>
+void DarcySolver<Mesh>::postProcessVelocityRT0()
+{
+    Debug( 6100 ) << "Postprocessing of velocity (RT0 per element)\n";
+    if(post_proc_format == "medit"){
+        wr_medit_ascii_scalar(post_dir + "/velocRT0.bb",globalFlux.giveVec(),globalFlux.size(),1);
+    } else {
+        std::cerr
+            <<"Warning: Solution constant by element is possible only with medit for the moment\n";
+    }
+}
+
+template <typename Mesh>
+void DarcySolver<Mesh>::postProcessPressureQ0()
+{
+    Debug( 6100 ) << "Postprocessing of pressure (constant by element)\n";
+    if ( post_proc_format == "medit" ) {
+        wr_medit_ascii_scalar(post_dir + "/presQ0.bb",globalP.giveVec(),globalP.size(),1);
+    } else {
+        std::cerr
+            <<"Warning: Solution constant by element is possible only with medit for the moment\n";
+    }
+}
+
+
+template <typename Mesh>
+void DarcySolver<Mesh>::postProcessPressureQ1()
+{
+    Debug( 6100 ) << "Postprocessing of pressure (L2 projection on the nodes)\n";
+    // Q1 or P1 elements
+    CurrentFE fe_q1( refPFEnodal , geoMap , qr );
+    Dof dof_q1( refPFEnodal );
+    dof_q1.update( this->_mesh );
+    UInt dim_q1 = dof_q1.numTotalDof();
+    ScalUnknown<Vector> nodalPres( dim_q1 );
+    projectPressureQ1( nodalPres );
+
+    std::string vtkname,bbname;
+    /*
+      char str_iter[10],str_time[10];
+      static int iter_post=0;
+      sprintf(str_time,"t=%f",time);
+      sprintf(str_iter,".%03d",iter_post);
+    */
+    //
+    if(post_proc_format == "medit"){
+        //bbname = post_dir + "/presQ1" + (string) str_iter + ".bb";
+        bbname = post_dir + "/presQ1.bb";
+        wr_medit_ascii_scalar(bbname,nodalPres.giveVec(),nodalPres.size());
+    } else if (post_proc_format == "vtk"){
+        //vtkname = post_dir + "/presQ1" + (string) str_iter + ".vtk";
+        vtkname = post_dir + "/presQ1.vtk";
+        wr_vtk_ascii_header(vtkname,"Pressure",this->_mesh, dof_q1, fe_q1);
+        wr_vtk_ascii_scalar(vtkname,"P",nodalPres.giveVec(), nodalPres.size());
+    }
+    //iter_post ++;
+    //---------------------------------------------
+
 }
 
 

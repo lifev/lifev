@@ -84,6 +84,55 @@ struct printError
 };
 
 void
+checkStraightTubeTetra()
+{
+    using namespace LifeV;
+
+    /*
+      Neumann condition (on p) at inlet (ref 1) and outlet (ref 3)
+      example of mesh: cyltetra.mesh
+    */
+    BCFunctionBase bcFct1;
+    BCFunctionBase bcFct2;
+    bcFct1.setFunction(g1);
+    bcFct2.setFunction(g3);
+    int nb_bc = 2;
+    BCHandler bc;
+    bc.setNumber(nb_bc);
+    bc.addBC("Inlet",      1, Natural,   Scalar, bcFct1);
+    bc.addBC("Outlet",  3, Natural, Scalar, bcFct2);
+
+    boost::shared_ptr<DarcySolverBase> __darcy( FactoryDarcy::instance().createObject( "darcy_tetra" ) );
+
+    __darcy->setBC( bc );
+    __darcy->setup();
+    __darcy->solve();
+}
+void
+checkStraightTubeHexa()
+{
+    using namespace LifeV;
+/*
+  Dirichlet condition (on p) at inlet (ref 1) and outlet (ref 3)
+  example of mesh: cylhexa.mesh
+*/
+    BCFunctionBase bcFct1;
+    BCFunctionBase bcFct2;
+    bcFct1.setFunction(g1);
+    bcFct2.setFunction(g3);
+    int nb_bc = 2;
+    BCHandler bc;
+    bc.setNumber(nb_bc);
+    bc.addBC("Inlet",      1, Essential,   Scalar, bcFct1);
+    bc.addBC("Outlet",  3, Essential, Scalar, bcFct2);
+
+    boost::shared_ptr<DarcySolverBase> __darcy( FactoryDarcy::instance().createObject( "darcy_hexa" ) );
+
+    __darcy->setBC( bc );
+    __darcy->setup();
+    __darcy->solve();
+}
+void
 checkAnalytical()
 {
     using namespace LifeV;
@@ -132,6 +181,7 @@ checkAnalytical()
     __darcy->setup();
     __darcy->solve();
     __darcy->doOnErrorComputation( printError() );
+    //__darcy->doAfterSolve( meditDarcy() );
     __darcy->errorL2( LifeV::DARCY_PRESSURE_GLOBAL, AnalyticalSolPres() );
     __darcy->errorL2( LifeV::DARCY_PRESSURE, AnalyticalSolPres() );
     __darcy->errorL2( AnalyticalSolFlux() );
@@ -150,7 +200,9 @@ darcy -i           : read the data file, print the read values and exit
 */
 int main(int argc, char** argv)
 {
-    checkAnalytical();
+    //checkAnalytical();
+    //checkStraightTubeHexa();
+    checkStraightTubeTetra();
 }
 
 

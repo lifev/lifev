@@ -300,6 +300,7 @@ typedef boost::numeric::ublas::range TabRange;
 
 typedef boost::numeric::ublas::zero_matrix<double> ZeroMatrix;
 typedef boost::numeric::ublas::scalar_matrix<double> ScalarMatrix;
+typedef boost::numeric::ublas::identity_matrix<double> IdentityMatrix;
 
 
 typedef boost::numeric::ublas::vector<double> Tab1d;

@@ -264,11 +264,12 @@ void mass_gradu( Real coef, const ElemVec& u0_loc, ElemMat& elmat, const Current
 
 //-------------Mass matrix---------------------------------------
 /*!
- Weighted Mass matrix with permeability matrix which is a constant per element symmetric
- positive definite matrix (non diagonal a priori) and ALREADY INVERTED
- (with Lapack LU or Choleski for instance).
+  Weighted Mass matrix with permeability matrix which is a constant
+  per element symmetric positive definite matrix (non diagonal a
+  priori) and ALREADY INVERTED (with Lapack LU or Choleski for
+  instance).
 */
-void mass_Hdiv( KNM<Real> &Invperm, ElemMat& elmat, const CurrentHdivFE& fe,
+void mass_Hdiv( Matrix const& Invperm, ElemMat& elmat, const CurrentHdivFE& fe,
                 int iblock = 0, int jblock = 0 );
 
 
