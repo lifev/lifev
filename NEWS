@@ -17,11 +17,12 @@ New in 0.5.0:
 * Added support for boost which is mandatory now (CP)
 
 [all]
+* Moved files to their proper library (CP)
 * Ported LifeV to ublas::vector<Real>, got rid of the old vector classes (CP)
 
 [lifecore]
 * Added the Cloning Factory pattern (aka Abstract Factory)
-  implementation (CP)  
+  implementation (CP)
 
 [lifefem]
 * Added discontinuous finite element(discontinuous galerkin) (DADP)
@@ -201,4 +202,4 @@ New in 0.1.0pre3:
 * fixed some bugs and miscompilation in a few places
 
 
- -- Christophe Prud'homme <prudhomm@debian.org>, Tue Nov 16 09:29:14 2004
+ -- Christophe Prud'homme <prudhomm@mit.edu>, Tue Nov 16 11:14:24 2004
