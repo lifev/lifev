@@ -33,13 +33,44 @@
   \brief The class for a finite element 
   \author J.-F. Gerbeau
   \date 04/2002  
+
+  modified: the update methods to have
+            them dependent on the dimension (lifev becomes multiscale...)
+	    (nbCoor = Nb Dimension = 1, 2 or 3).
+
+	    I removed the Macro "#if defined(THREEDIM)" to
+	    use a normal switch. 
+	    Question: IS IT TOO SLOW???
+
+	    I also factorized some code, and 
+	    postponed the implementation of template methods
+	    after the class declaration.
+  \author Vincent Martin
+  \date 07/2004
 */
 
 class CurrentFE{
 private:
-  void _comp_jacobian();
-  void _comp_inv_jacobian();
+  //! compute only the jacobian matrix
+  void _comp_jacobian();  
+  //! call _comp_jacobian() and compute its determinant
+  void _comp_jacobian_and_det(); 
+  //! call _comp_jacobian() and compute its inverse and its determinant 
+  void _comp_inv_jacobian_and_det();
   void _comp_quad_point_coor();
+
+  //! update the definition of the geo points  (VM 07/2004)
+  //! contains a switch over nbCoor (= dimension of pb): slow???
+  template<class GEOELE>  void _update_point(const GEOELE& geoele);
+
+  //! compute phiDer
+  void _comp_phiDer();
+  //! compute the second derivative phiDer2
+  void _comp_phiDer2();
+  //! compute phiDer and phiDer2
+  void _comp_phiDerDer2();
+
+
   UInt _currentId;
 #ifdef TEST_PRE
   bool _hasJac;
@@ -140,328 +171,294 @@ public:
   }
 
   /*!
+    Return the measure of the current element
+  */
+  Real measure() const;
+
+  //---------------------------------------
+  //! DECLARATION of the update methods
+  //---------------------------------------
+  /*!
     minimal update: we just identify the id of the current element
   */
-  template<class GEOELE>
-  void update(const GEOELE& geoele)
-  {
-#ifdef TEST_PRE
-    _hasJac = false;
-    _hasFirstDeriv = false;
-    _hasSecondDeriv = false;
-    _hasQuadPtCoor = false;
-#endif
-    _currentId = geoele.id();
-  }
+  template<class GEOELE>  void update(const GEOELE& geoele);
   /*!
     compute the arrays detJac, weightDet, jacobian on
     the current element
   */
-  template<class GEOELE>
-  void updateJac(const GEOELE& geoele)
-  {
-#ifdef TEST_PRE
-    _hasJac = true;
-    _hasFirstDeriv = false;
-    _hasSecondDeriv = false;
-    _hasQuadPtCoor = false;
-#endif
-    _currentId = geoele.id();
-    // update the definition of the geo points 
-    for(int i=0;i<nbGeoNode;i++){
-      point(i,0) = geoele.point(i+1).x();
-      point(i,1) = geoele.point(i+1).y();
-      point(i,2) = geoele.point(i+1).z();
-    }
-    // compute the jacobian...
-    _comp_jacobian();
-  }
+  template<class GEOELE>  void updateJac(const GEOELE& geoele);
   /*!
     compute the arrays detJac, weightDet, jacobian and quadPt
     on the current element
   */
-  template<class GEOELE>
-  void updateJacQuadPt(const GEOELE& geoele)
-  {
-#ifdef TEST_PRE
-    _hasJac = true;
-    _hasFirstDeriv = false;
-    _hasSecondDeriv = false;
-    _hasQuadPtCoor = true;
-#endif
-    _currentId = geoele.id();
-    // update the definition of the geo points 
-    for(int i=0;i<nbGeoNode;i++){
-      point(i,0) = geoele.point(i+1).x();
-      point(i,1) = geoele.point(i+1).y();
-      point(i,2) = geoele.point(i+1).z();
-    }
-    // compute the jacobian...
-    _comp_jacobian();
-    // and the coordinates of the quadrature points
-    _comp_quad_point_coor();
-  }
+  template<class GEOELE>  void updateJacQuadPt(const GEOELE& geoele);
   /*!
     compute the arrays detJac, weightDet, jacobian,
     tInvJac, phiDer on the current element
   */
-  template<class GEOELE>
-  void updateFirstDeriv(const GEOELE& geoele)
-  {
-#ifdef TEST_PRE
-    _hasJac = true;
-    _hasFirstDeriv = true;
-    _hasSecondDeriv = false;
-    _hasQuadPtCoor = false;
-#endif
-    _currentId = geoele.id();
-    // update the definition of the geo points 
-    for(int i=0;i<nbGeoNode;i++){
-      // for(int icoor=0;icoor<nbCoor;icoor++)
-      // point(i,icoor) =  geoele.coor(i+1,icoor+1);
-      point(i,0) = geoele.point(i+1).x();
-      point(i,1) = geoele.point(i+1).y();
-      point(i,2) = geoele.point(i+1).z();
-    }
-    // compute the inverse jacobian...
-    _comp_inv_jacobian();
-    // product InvJac by dPhiRef:
-    Real x;
-    for(int ig=0;ig<nbQuadPt;ig++){
-      for(int j=0;j<nbNode;j++){
-	for(int icoor=0;icoor<nbCoor;icoor++){
-	  x = 0.;
-	  for(int jcoor=0;jcoor<nbCoor;jcoor++){
-	    x += tInvJac(icoor,jcoor,ig)*dPhiRef(j,jcoor,ig) ;
-	  }
-	  phiDer(j,icoor,ig)=x;
-	}
-      }
-    }
-  }
+  template<class GEOELE>  void updateFirstDeriv(const GEOELE& geoele);
   /*!
     compute the arrays detJac, weightDet, jacobian,
     tInvJac, phiDer and quadPt on the current element
   */
-  template<class GEOELE>
-  void updateFirstDerivQuadPt(const GEOELE& geoele)
-  {
-#ifdef TEST_PRE
-    _hasJac = true;
-    _hasFirstDeriv = true;
-    _hasSecondDeriv = false;
-    _hasQuadPtCoor = true;
-#endif
-    _currentId = geoele.id();
-    // update the definition of the geo points 
-    for(int i=0;i<nbGeoNode;i++){
-      point(i,0) = geoele.point(i+1).x();
-      point(i,1) = geoele.point(i+1).y();
-      point(i,2) = geoele.point(i+1).z();
-    }
-    // compute the inverse jacobian...
-    _comp_inv_jacobian();
-    // product InvJac by dPhiRef:
-    Real x;
-    for(int ig=0;ig<nbQuadPt;ig++){
-      for(int j=0;j<nbNode;j++){
-	for(int icoor=0;icoor<nbCoor;icoor++){
-	  x = 0.;
-	  for(int jcoor=0;jcoor<nbCoor;jcoor++){
-	    x += tInvJac(icoor,jcoor,ig)*dPhiRef(j,jcoor,ig) ;
-	  }
-	  phiDer(j,icoor,ig)=x;
-	}
-      }
-    }
-    // and the coordinates of the quadrature points
-    _comp_quad_point_coor();
-  }
-
-  // A. Veneziani, October 30, 2002
+  template<class GEOELE>  void updateFirstDerivQuadPt(const GEOELE& geoele);
   /*!
     compute the arrays detJac, weightDet, jacobian,
     tInvJac, phiDer2 on the current element
   */
-  template<class GEOELE>
-  void updateSecondDeriv(const GEOELE& geoele)
-  {
-#ifdef TEST_PRE
-    _hasJac = true;
-    _hasFirstDeriv = false;
-    _hasSecondDeriv = true;
-    _hasQuadPtCoor = false;
-#endif
-    _currentId = geoele.id();
-    // update the definition of the geo points 
-    for(int i=0;i<nbGeoNode;i++){
-      // for(int icoor=0;icoor<nbCoor;icoor++)
-      // point(i,icoor) =  geoele.coor(i+1,icoor+1);
-      point(i,0) = geoele.point(i+1).x();
-      point(i,1) = geoele.point(i+1).y();
-      point(i,2) = geoele.point(i+1).z();
-    }
-    // compute the inverse jacobian...
-    _comp_inv_jacobian();
-
-    Real x;
-    for(int ig=0;ig<nbQuadPt;ig++){
-     for(int j=0;j<nbNode;j++){
-      for(int icoor=0;icoor<nbCoor;icoor++){
-        for(int jcoor=0;jcoor<nbCoor;jcoor++){
-           x=0.;
-          for (int k1=0;k1<nbCoor;k1++){
-           for (int k2=0;k2<nbCoor;k2++){
-            x += tInvJac(icoor,k1,ig)*dPhiRef2(j,k1,k2,ig)*tInvJac(jcoor,k2,ig);
-           }
-          }
-          phiDer2(j,icoor,jcoor,ig)=x;
-         }
-        }
-       }
-      }
-  }
-
+  template<class GEOELE>  void updateSecondDeriv(const GEOELE& geoele);
   /*!
     compute the arrays detJac, weightDet, jacobian,
     tInvJac, phiDer2 on the current element
   */
-  template<class GEOELE>
-  void updateSecondDerivQuadPt(const GEOELE& geoele)
-  {
-#ifdef TEST_PRE
-    _hasJac = true;
-    _hasFirstDeriv = false;
-    _hasSecondDeriv = true;
-    _hasQuadPtCoor = true;
-#endif
-    _currentId = geoele.id();
-    // update the definition of the geo points 
-    for(int i=0;i<nbGeoNode;i++){
-      // for(int icoor=0;icoor<nbCoor;icoor++)
-      // point(i,icoor) =  geoele.coor(i+1,icoor+1);
-      point(i,0) = geoele.point(i+1).x();
-      point(i,1) = geoele.point(i+1).y();
-      point(i,2) = geoele.point(i+1).z();
-    }
-    // compute the inverse jacobian...
-    _comp_inv_jacobian();
-
-    Real x;
-    for(int ig=0;ig<nbQuadPt;ig++){
-     for(int j=0;j<nbNode;j++){
-      for(int icoor=0;icoor<nbCoor;icoor++){
-        for(int jcoor=0;jcoor<nbCoor;jcoor++){
-           x=0.;
-          for (int k1=0;k1<nbCoor;k1++){
-           for (int k2=0;k2<nbCoor;k2++){
-            x += tInvJac(icoor,k1,ig)*dPhiRef2(j,k1,k2,ig)*tInvJac(jcoor,k2,ig);
-           }
-          }
-          phiDer2(j,icoor,jcoor,ig)=x;
-         }
-        }
-       }
-      }
-    // and the coordinates of the quadrature points
-    _comp_quad_point_coor();
-  }
+  template<class GEOELE>  void updateSecondDerivQuadPt(const GEOELE& geoele);
   /*!
     compute the arrays detJac, weightDet, jacobian,
     tInvJac, phiDer, phiDer2 on the current element
   */
-  template<class GEOELE>
-  void updateFirstSecondDeriv(const GEOELE& geoele)
-  {
-#ifdef TEST_PRE
-    _hasJac = true;
-    _hasFirstDeriv = true;
-    _hasSecondDeriv = true;
-    _hasQuadPtCoor = false;
-#endif
-    _currentId = geoele.id();
-    // update the definition of the geo points 
-    for(int i=0;i<nbGeoNode;i++){
-      // for(int icoor=0;icoor<nbCoor;icoor++)
-      // point(i,icoor) =  geoele.coor(i+1,icoor+1);
-      point(i,0) = geoele.point(i+1).x();
-      point(i,1) = geoele.point(i+1).y();
-      point(i,2) = geoele.point(i+1).z();
-    }
-    // compute the inverse jacobian...
-    _comp_inv_jacobian();
-
-    Real x1,x2; 
-    for(int ig=0;ig<nbQuadPt;ig++){
-     for(int j=0;j<nbNode;j++){
-      for(int icoor=0;icoor<nbCoor;icoor++){
-	x1=0.;
-        for(int jcoor=0;jcoor<nbCoor;jcoor++){
-          x2=0.;
-          for (int k1=0;k1<nbCoor;k1++){
-           for (int k2=0;k2<nbCoor;k2++){
-            x2 += tInvJac(icoor,k1,ig)*dPhiRef2(j,k1,k2,ig)*tInvJac(jcoor,k2,ig);
-           }
-          }
-          phiDer2(j,icoor,jcoor,ig)=x2;
-         }
-         phiDer(j,icoor,ig)=x1;
-        }
-       }
-      }
-  }
+  template<class GEOELE>  void updateFirstSecondDeriv(const GEOELE& geoele);
   /*!
     compute the arrays detJac, weightDet, jacobian,
     tInvJac, phiDer, phiDer2 on the current element
   */
-  template<class GEOELE>
-  void updateFirstSecondDerivQuadPt(const GEOELE& geoele)
-  {
-#ifdef TEST_PRE
-    _hasJac = true;
-    _hasFirstDeriv = true;
-    _hasSecondDeriv = true;
-    _hasQuadPtCoor = true;
-#endif
-    _currentId = geoele.id();
-    // update the definition of the geo points 
-    for(int i=0;i<nbGeoNode;i++){
-      // for(int icoor=0;icoor<nbCoor;icoor++)
-      // point(i,icoor) =  geoele.coor(i+1,icoor+1);
-      point(i,0) = geoele.point(i+1).x();
-      point(i,1) = geoele.point(i+1).y();
-      point(i,2) = geoele.point(i+1).z();
-    }
-    // compute the inverse jacobian...
-    _comp_inv_jacobian();
+  template<class GEOELE>  void updateFirstSecondDerivQuadPt(const GEOELE& geoele);
 
-    Real x1,x2; 
-    for(int ig=0;ig<nbQuadPt;ig++){
-     for(int j=0;j<nbNode;j++){
-      for(int icoor=0;icoor<nbCoor;icoor++){
-	x1=0.;
-        for(int jcoor=0;jcoor<nbCoor;jcoor++){
-          x2=0.;
-          for (int k1=0;k1<nbCoor;k1++){
-           for (int k2=0;k2<nbCoor;k2++){
-            x2 += tInvJac(icoor,k1,ig)*dPhiRef2(j,k1,k2,ig)*tInvJac(jcoor,k2,ig);
-           }
-          }
-          phiDer2(j,icoor,jcoor,ig)=x2;
-         }
-         phiDer(j,icoor,ig)=x1;
-        }
-       }
-      }
-    // and the coordinates of the quadrature points
-    _comp_quad_point_coor();
-  }
-
-
-
-  /*!
-    Return the measure of the current element
-  */
-  Real measure() const;
 };
+
+
+//----------------------------------------------------------------------
+//! IMPLEMENTATION 
+//----------------------------------------------------------------------
+//! update the definition of the geo points (VM 07/04)
+template<class GEOELE>
+void CurrentFE::_update_point(const GEOELE& geoele)
+{
+  //! old way: it was practical, but is it still working???
+  // for(int icoor=0;icoor<nbCoor;icoor++)
+  // point(i,icoor) =  geoele.coor(i+1,icoor+1);
+
+  switch (nbCoor) {
+  case 1:   //! 1D
+    for(int i=0;i<nbGeoNode;i++){
+      point(i,0) = geoele.point(i+1).x();
+    }
+    break;
+  case 2:   //! 2D
+    for(int i=0;i<nbGeoNode;i++){
+      point(i,0) = geoele.point(i+1).x();
+      point(i,1) = geoele.point(i+1).y();
+    }
+    break;
+  case 3:   //! 3D
+    for(int i=0;i<nbGeoNode;i++){
+      point(i,0) = geoele.point(i+1).x();
+      point(i,1) = geoele.point(i+1).y();
+      point(i,2) = geoele.point(i+1).z();
+    }
+    break;
+  default:
+    ERROR_MSG("Dimension: only 1, 2 or 3!" );
+  }
+
+}
+
+//---------------------------------------
+//! IMPLEMENTATION of the CurrentFE::update methods
+//---------------------------------------
+
+/*!
+    minimal update: we just identify the id of the current element
+  */
+template<class GEOELE>
+void CurrentFE::update(const GEOELE& geoele)
+{
+#ifdef TEST_PRE
+  _hasJac = false;
+  _hasFirstDeriv = false;
+  _hasSecondDeriv = false;
+  _hasQuadPtCoor = false;
+#endif
+  _currentId = geoele.id();
+}
+
+/*!
+    compute the arrays detJac, weightDet, jacobian on
+    the current element
+*/
+template<class GEOELE>
+void CurrentFE::updateJac(const GEOELE& geoele)
+{
+#ifdef TEST_PRE
+  _hasJac = true;
+  _hasFirstDeriv = false;
+  _hasSecondDeriv = false;
+  _hasQuadPtCoor = false;
+#endif
+  _currentId = geoele.id();
+  //! update the definition of the geo points 
+  _update_point( geoele );
+  //! compute the jacobian and its determinant...
+  _comp_jacobian_and_det();
+}
+
+/*!
+    compute the arrays detJac, weightDet, jacobian and quadPt
+    on the current element
+*/
+template<class GEOELE>
+void CurrentFE::updateJacQuadPt(const GEOELE& geoele)
+{
+#ifdef TEST_PRE
+  _hasJac = true;
+  _hasFirstDeriv = false;
+  _hasSecondDeriv = false;
+  _hasQuadPtCoor = true;
+#endif
+  _currentId = geoele.id();
+  //! update the definition of the geo points 
+  _update_point( geoele );
+  //! compute the jacobian and its determinant...
+  _comp_jacobian_and_det();
+  //! and the coordinates of the quadrature points
+  _comp_quad_point_coor();
+}
+
+/*!
+    compute the arrays detJac, weightDet, jacobian,
+    tInvJac, phiDer on the current element
+*/
+template<class GEOELE>
+void CurrentFE::updateFirstDeriv(const GEOELE& geoele)
+{
+#ifdef TEST_PRE
+  _hasJac = true;
+  _hasFirstDeriv = true;
+  _hasSecondDeriv = false;
+  _hasQuadPtCoor = false;
+#endif
+  _currentId = geoele.id();
+  //! update the definition of the geo points 
+  _update_point( geoele );
+  //! compute the inverse jacobian...
+  _comp_inv_jacobian_and_det();
+  //! product InvJac by dPhiRef to compute phiDer
+  _comp_phiDer();
+}
+
+/*!
+    compute the arrays detJac, weightDet, jacobian,
+    tInvJac, phiDer and quadPt on the current element
+*/
+template<class GEOELE>
+void CurrentFE::updateFirstDerivQuadPt(const GEOELE& geoele)
+{
+#ifdef TEST_PRE
+  _hasJac = true;
+  _hasFirstDeriv = true;
+  _hasSecondDeriv = false;
+  _hasQuadPtCoor = true;
+#endif
+  _currentId = geoele.id();
+  //! update the definition of the geo points 
+  _update_point( geoele );
+  //! compute the inverse jacobian...
+  _comp_inv_jacobian_and_det();
+  //! product InvJac by dPhiRef to compute phiDer
+  _comp_phiDer();
+  //! and the coordinates of the quadrature points
+  _comp_quad_point_coor();
+}
+
+// A. Veneziani, October 30, 2002
+/*!
+  compute the arrays detJac, weightDet, jacobian,
+  tInvJac, phiDer2 on the current element
+*/
+template<class GEOELE>
+void CurrentFE::updateSecondDeriv(const GEOELE& geoele)
+{
+#ifdef TEST_PRE
+  _hasJac = true;
+  _hasFirstDeriv = false;
+  _hasSecondDeriv = true;
+  _hasQuadPtCoor = false;
+#endif
+  _currentId = geoele.id();
+  //! update the definition of the geo points 
+  _update_point( geoele );
+  //! compute the inverse jacobian...
+  _comp_inv_jacobian_and_det();
+  //! compute the second derivative
+  _comp_phiDer2();
+}
+
+/*!
+    compute the arrays detJac, weightDet, jacobian,
+    tInvJac, phiDer2 on the current element
+  */
+template<class GEOELE>
+void CurrentFE::updateSecondDerivQuadPt(const GEOELE& geoele)
+{
+#ifdef TEST_PRE
+  _hasJac = true;
+  _hasFirstDeriv = false;
+  _hasSecondDeriv = true;
+  _hasQuadPtCoor = true;
+#endif
+  _currentId = geoele.id();
+  //! update the definition of the geo points 
+  _update_point( geoele );
+  //! compute the inverse jacobian...
+  _comp_inv_jacobian_and_det();
+  //! compute the second derivative
+  _comp_phiDer2();
+  //! and the coordinates of the quadrature points
+  _comp_quad_point_coor();
+}
+/*!
+    compute the arrays detJac, weightDet, jacobian,
+    tInvJac, phiDer, phiDer2 on the current element
+  */
+template<class GEOELE>
+void CurrentFE::updateFirstSecondDeriv(const GEOELE& geoele)
+{
+#ifdef TEST_PRE
+  _hasJac = true;
+  _hasFirstDeriv = true;
+  _hasSecondDeriv = true;
+  _hasQuadPtCoor = false;
+#endif
+  _currentId = geoele.id();
+  //! update the definition of the geo points 
+  _update_point( geoele );
+  //! compute the inverse jacobian...
+  _comp_inv_jacobian_and_det();
+  //! compute phiDer and phiDer2
+  _comp_phiDerDer2();
+}
+/*!
+    compute the arrays detJac, weightDet, jacobian,
+    tInvJac, phiDer, phiDer2 on the current element
+  */
+template<class GEOELE>
+void CurrentFE::updateFirstSecondDerivQuadPt(const GEOELE& geoele)
+{
+#ifdef TEST_PRE
+  _hasJac = true;
+  _hasFirstDeriv = true;
+  _hasSecondDeriv = true;
+  _hasQuadPtCoor = true;
+#endif
+  _currentId = geoele.id();
+  //! update the definition of the geo points 
+  _update_point( geoele );
+  //! compute the inverse jacobian...
+  _comp_inv_jacobian_and_det();
+  //! compute phiDer and phiDer2
+  _comp_phiDerDer2();
+  //! and the coordinates of the quadrature points
+  _comp_quad_point_coor();
+}
+
+
 #endif
