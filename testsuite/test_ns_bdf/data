@@ -10,7 +10,7 @@
 [./physics]
 density         = 1.0               # density
 viscosity       = 0.035             # viscosity
-endtime         = 0.01              # endtime
+endtime         = 0.0002            # endtime --> two time step for testing purpose
 
 
 [../discretization]

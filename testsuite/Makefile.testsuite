@@ -29,7 +29,7 @@ INCLUDES		= $(all_includes)
 test: $(TESTINGS)
 
 
-check-local:
+all-local:
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\
 	 for i in $(EXTRA_DIST); do \
            $(LN_S) -f $(srcdir)/$$i .; \
