@@ -79,6 +79,10 @@ private:
 
     void eval(Vector& dispNew, Vector& velo, const Vector& disp, int status);
 
+    void transferOnInterface(const Vector      &_vec1,
+                             const BCHandler   &_BC,
+                             const std::string &_BCName,
+                             Vector            &_vec2);
 };
 
 }
