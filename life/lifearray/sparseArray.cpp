@@ -77,10 +77,9 @@ VectorBlock
 CSRMatr<CSRPatt, Tab2d>::operator*( const VectorBlock &v ) const
 {
     UInt nblockr = _Patt->nRows();
-    UInt nblockc = _Patt->nCols();
     int blsize = _value[ 0 ].size1(); // for square block
 
-    ASSERT( nblockc == v.size(), "Error in Matrix Vector product" );
+    ASSERT( _Patt->nCols() == v.size(), "Error in Matrix Vector product" );
     VectorBlock ans( nblockr, blsize );
     ans = 0.0;
 

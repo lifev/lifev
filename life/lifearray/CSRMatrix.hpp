@@ -570,9 +570,8 @@ Vector CSRMatr<CSRPatt, DataType>::
 operator*( const Vector &v ) const
 {
     UInt nrows = _Patt->nRows();
-    UInt ncols = _Patt->nCols();
 
-    ASSERT( ncols == v.size(), "Error in Matrix Vector product" );
+    ASSERT( _Patt->nCols() == v.size(), "Error in Matrix Vector product" );
     Vector ans( nrows );
     ans = ZeroVector( nrows );
 
