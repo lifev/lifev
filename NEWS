@@ -3,8 +3,8 @@ Bugs fixed in 0.3.90:
 
 New in 0.3.90:
 * Added support for automake 1.9 (CP)
-
-
+* Got rid of NavierStokesHandler_miguel.hpp (CW)
+                                                                                
 Bugs fixed in 0.3.0:
 * Fixed (hopefully) mpi autoconf check (CP)
 * Fixed petsc support, require petsc2.2 now (CP)
