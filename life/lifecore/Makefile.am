@@ -20,15 +20,19 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .cc
 
-include_HEADERS		= GetPot.hpp  debug.hpp\
+include_HEADERS		= life.hpp lifeversion.hpp lifemacros.hpp\
+GetPot.hpp  debug.hpp\
 chrono.hpp dataString.hpp  fortran_wrap.hpp \
-lifeV.hpp switch.hpp util_string.hpp \
-factory.hpp singleton.hpp policy.hpp typeInfo.hpp
+switch.hpp util_string.hpp \
+factory.hpp singleton.hpp policy.hpp typeInfo.hpp\
+SmartAssert.hpp
 
 lib_LTLIBRARIES		= liblifecore.la
 
-liblifecore_la_SOURCES	= GetPot.cpp  dataString.cpp debug.cpp \
-switch.cpp util_string.cpp typeInfo.cpp
+liblifecore_la_SOURCES	=  lifeversion.cpp\
+GetPot.cpp  dataString.cpp debug.cpp \
+switch.cpp util_string.cpp typeInfo.cpp\
+SmartAssert.cpp
 
 
 liblifecore_la_LIBADD	= $(aztec_libs)

@@ -28,7 +28,7 @@
  */
 #include <cassert>
 
-#include <lifeV.hpp>
+#include <life.hpp>
 #include <typeInfo.hpp>
 
 namespace LifeV
