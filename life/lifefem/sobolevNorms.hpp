@@ -75,8 +75,8 @@ elem_L2_2( const VectorType & u, const CurrentFE& fe, const Dof& dof,
 }
 
 //! returns the square of the L2 norm of fct on the current element
-Real
-elem_L2_2( boost::function<double( double,double,double )> fct,
+inline Real
+elem_L2_2( boost::function<double( double,double,double )>& fct,
            const CurrentFE& fe )
 {
     Real s = 0., f, x, y, z;
@@ -90,8 +90,8 @@ elem_L2_2( boost::function<double( double,double,double )> fct,
 }
 
 //! for time dependent+vectorial.
-Real
-elem_L2_2( boost::function<double( double, double, double, double, UInt )> fct,
+inline Real
+elem_L2_2( boost::function<double( double, double, double, double, UInt )>& fct,
            const CurrentFE& fe, const Real t, const UInt nbcomp )
 {
     int ig;
@@ -181,7 +181,7 @@ Real elem_H1_2( const UsrFct& fct, const CurrentFE& fe, const Real t, const UInt
 //! returns the square of the L2 norm of (u-fct) on the current element
 template <typename VectorType>
 Real elem_L2_diff_2( VectorType & u,
-                     boost::function<double( double, double, double )> fct,
+                     boost::function<double( double, double, double )>& fct,
                      const CurrentFE& fe,
                      const Dof& dof )
 {
@@ -207,7 +207,7 @@ Real elem_L2_diff_2( VectorType & u,
 //! for time dependent+vectorial
 template <typename VectorType>
 Real elem_L2_diff_2( VectorType & u,
-                     boost::function<double( double, double, double, double, UInt )> fct,
+                     boost::function<double( double, double, double, double, UInt )>& fct,
                      const CurrentFE& fe,
                      const Dof& dof, const Real t, const int nbcomp )
 {
@@ -318,7 +318,7 @@ Real elem_H1_diff_2( const VectorType & u, const UsrFct& fct, const CurrentFE& f
 //! for time dependent+vectorial
 template <typename VectorType>
 Real elem_integral_diff( VectorType & u,
-                         boost::function<double( double, double, double, double, UInt )> fct,
+                         boost::function<double( double, double, double, double, UInt )>& fct,
                          const CurrentFE& fe,
                          const Dof& dof, const Real t, const int nbcomp )
 {
@@ -367,9 +367,10 @@ Real elem_integral( VectorType & u,
 
 //! returns the integral of fct on the current element
 //! for time dependent+vectorial
-Real elem_integral( boost::function<double( double, double, double,
-                                            double, UInt )> fct,
-                    const CurrentFE& fe, const Real t, const int nbcomp )
+inline Real
+elem_integral( boost::function<double( double, double, double,
+                                       double, UInt )>& fct,
+               const CurrentFE& fe, const Real t, const int nbcomp )
 {
     int ig;
     Real s = 0., x, y, z;
