@@ -141,4 +141,3 @@ SimpleArray<T, OFFSETVEC>::reshape(size_type nrows, size_type ncols)
 
 #endif
 
-// $Id: SimpleVect.hpp,v 1.1 2004-02-08 09:09:24 prudhomm Exp $

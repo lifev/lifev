@@ -483,31 +483,3 @@ void BareItemsHandler<BareItem>::showMe() const{
 }
 #endif
 
-// $Id: bareItems.hpp,v 1.1 2004-02-08 09:09:22 prudhomm Exp $
-//$Log: bareItems.hpp,v $
-//Revision 1.1  2004-02-08 09:09:22  prudhomm
-//finally added the new life libraries layout
-//
-//life/lifecore core library
-//life/lifemesh mesh library
-//life/lifefem fem library
-//
-//more to come in the future
-//
-//Revision 1.5  2003/11/10 18:10:47  forma
-//Better documentation.
-//
-//Revision 1.4  2002/11/18 11:23:47  forma
-//p1p2mesh is now in mesh_util.h
-//
-//updateElementFaces can now create internal faces
-//
-//a front end buildBoundary Faces and BuildBoundaryEdges have been added
-//to mesh_util.h
-//
-//small changes to bareItems
-//
-//Revision 1.3  2002/11/15 13:03:32  forma
-//Modifications related to the new marker classes and the new mesh
-//checking routines.
-//

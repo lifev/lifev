@@ -1133,38 +1133,3 @@ void my_precSchur_CC(double *z, int *options, int *proc_config, double *params,
 
 #endif
 
-//$Id: algebraic_facto.hpp,v 1.1 2004-02-08 09:09:24 prudhomm Exp $
-//$Log: algebraic_facto.hpp,v $
-//Revision 1.1  2004-02-08 09:09:24  prudhomm
-//finally added the new life libraries layout
-//
-//life/lifecore core library
-//life/lifemesh mesh library
-//life/lifefem fem library
-//
-//more to come in the future
-//
-//Revision 1.8  2004/01/30 11:17:57  fernandez
-//Miguel 30/01/04
-//
-//Revision 1.7  2003/02/25 14:02:01  fernandez
-//Miguel 25/02/2003
-//
-//Revision 1.6  2002/12/18 11:22:38  veneziani
-//Added some features for stabilizations stuff and operators for NS
-//
-//Revision 1.5  2002/12/10 10:03:38  gauthier
-//bug fixed
-//
-//Revision 1.4  2002/12/06 14:21:06  gauthier
-//faster matrix vector operation for Azter
-//
-//Revision 1.3  2002/11/21 13:38:37  gauthier
-//MixedMatr: more efficient matrix-vector product
-//
-//Revision 1.2  2002/10/31 16:30:06  gerbeau
-//JFG 31/10/2002
-//
-//Revision 1.1.1.1  2002/10/03 16:31:13  cvs
-//LifeV Version 1.0
-//

@@ -1,6 +1,6 @@
 /*----------------------------------------------------------------------*
 |           
-| $Header: /cvsroot/lifev/lifev/life/lifecore/Attic/pattern.hpp,v 1.1 2004-02-08 09:09:24 prudhomm Exp $ 
+| $Header: /cvsroot/lifev/lifev/life/lifecore/Attic/pattern.hpp,v 1.2 2004-02-24 13:28:11 prudhomm Exp $ 
 |
 |
 | #Version  0.1 Experimental   07/7/00. Luca Formaggia & Alessandro Veneziani  |
@@ -2425,26 +2425,3 @@ MixedLocalPattern<FE1,FE2>::patternSecond(UInt const i) const
 
 #endif
 
-//$Id: pattern.hpp,v 1.1 2004-02-08 09:09:24 prudhomm Exp $
-//$Log: pattern.hpp,v $
-//Revision 1.1  2004-02-08 09:09:24  prudhomm
-//finally added the new life libraries layout
-//
-//life/lifecore core library
-//life/lifemesh mesh library
-//life/lifefem fem library
-//
-//more to come in the future
-//
-//Revision 1.6  2004/01/30 11:17:57  fernandez
-//Miguel 30/01/04
-//
-//Revision 1.5  2002/11/25 17:50:34  fernandez
-//Miguel 25/11/2002
-//
-//Revision 1.4  2002/11/21 21:40:28  fernandez
-//Modif Miguel 21/11/2002
-//
-//Revision 1.3  2002/11/18 15:49:02  gauthier
-//New matrix constructors. Treatment of the BC for keeping the matrix symmetry.
-//

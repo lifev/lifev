@@ -2,7 +2,7 @@
 /*! Contains the basic element shapes, to be used by Geometric and Finite
   Elements 
 
-  $Header: /cvsroot/lifev/lifev/life/lifemesh/basisElSh.hpp,v 1.1 2004-02-08 09:09:22 prudhomm Exp $
+  $Header: /cvsroot/lifev/lifev/life/lifemesh/basisElSh.hpp,v 1.2 2004-02-24 13:28:11 prudhomm Exp $
 
  \version 0.0 Experimental   19/8/99. Luca Formaggia
 
@@ -325,4 +325,3 @@ operate(ID const & point)
 
 #endif
 
-// $Id: basisElSh.hpp,v 1.1 2004-02-08 09:09:22 prudhomm Exp $

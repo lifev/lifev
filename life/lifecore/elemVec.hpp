@@ -74,4 +74,3 @@ vec2elemVec(Vector& V,ElemVec& elvec,const CurrentFE& fe, const DOF& dof,
 
 #endif
 
-// $Id: elemVec.hpp,v 1.1 2004-02-08 09:09:24 prudhomm Exp $

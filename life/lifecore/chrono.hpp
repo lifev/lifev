@@ -15,6 +15,3 @@ public:
 };
 #endif
 
-
-
-// $Id: chrono.hpp,v 1.1 2004-02-08 09:09:24 prudhomm Exp $

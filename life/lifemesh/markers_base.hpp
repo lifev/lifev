@@ -278,27 +278,4 @@ std::ostream & Marker_Base<MarkerTraits>::printFlag(std::ostream & out) const{
 
 
 #endif
-// $Id: markers_base.hpp,v 1.1 2004-02-08 09:09:22 prudhomm Exp $
-// $Log: markers_base.hpp,v $
-// Revision 1.1  2004-02-08 09:09:22  prudhomm
-// finally added the new life libraries layout
-//
-// life/lifecore core library
-// life/lifemesh mesh library
-// life/lifefem fem library
-//
-// more to come in the future
-//
-// Revision 1.5  2003/06/18 18:05:49  forma
-// New mesh utilities! Thise are rthe changes indiced by soime code cleanup
-// in the mesh_util file and in the RegionMesh3D<>
-//
-// Revision 1.4  2002/11/19 17:34:04  forma
-// The template classes have been simplified
-//
-// NULLFLAG is now exposed as global variable.
-//
-// Revision 1.3  2002/11/15 13:03:32  forma
-// Modifications related to the new marker classes and the new mesh
-// checking routines.
-//
+

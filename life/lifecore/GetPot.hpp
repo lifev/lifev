@@ -2,7 +2,6 @@
 //  -*- c++ -*- 
 //  GetPot Version 1.0-LifeV             Sept/13/2002
 //
-// $Id: GetPot.hpp,v 1.1 2004-02-08 09:09:24 prudhomm Exp $
 //
 //
 /*!

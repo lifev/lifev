@@ -4,7 +4,7 @@
 /*! \file markers.h
   \brief A Simple implementation of Markers
   \author Luca Formaggia
-  \Version $Revision: 1.1 $
+  \Version $Revision: 1.2 $
   
   This is the simplest implementation of the markers, which just adopts the
   basis marker classes defined in marker_base.h.
@@ -23,4 +23,3 @@ typedef MarkerTraits_Base::EntityFlag EntityFlag;
 static const EntityFlag NULLFLAG=MarkerTraits_Base::NULLFLAG;
 #endif
 
-// $Id: markers.hpp,v 1.1 2004-02-08 09:09:22 prudhomm Exp $

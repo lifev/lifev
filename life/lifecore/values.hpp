@@ -3925,33 +3925,3 @@ IDPreconditioner<VectorBlock>::
 solve(const VectorBlock &x) const;
 
 #endif
-
-//$Id: values.hpp,v 1.1 2004-02-08 09:09:24 prudhomm Exp $
-//$Log: values.hpp,v $
-//Revision 1.1  2004-02-08 09:09:24  prudhomm
-//finally added the new life libraries layout
-//
-//life/lifecore core library
-//life/lifemesh mesh library
-//life/lifefem fem library
-//
-//more to come in the future
-//
-//Revision 1.8  2004/01/30 11:17:57  fernandez
-//Miguel 30/01/04
-//
-//Revision 1.7  2003/03/20 11:14:33  forma
-//The bug concerning operator *= has been corrected
-//
-//Revision 1.6  2002/12/06 14:21:06  gauthier
-//faster matrix vector operation for Azter
-//
-//Revision 1.5  2002/12/02 16:51:32  gauthier
-//zeros method for matrices
-//
-//Revision 1.4  2002/11/21 13:38:37  gauthier
-//MixedMatr: more efficient matrix-vector product
-//
-//Revision 1.3  2002/11/18 15:49:02  gauthier
-//New matrix constructors. Treatment of the BC for keeping the matrix symmetry.
-//
