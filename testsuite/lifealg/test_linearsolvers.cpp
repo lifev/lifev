@@ -86,10 +86,13 @@ bool test_petsc( Mat& __mat )
 #if defined(HAVE_PETSC_H)
     LifeV::Debug( 10000 ) << "PETSC solver test\n";
     int Nrows = __mat.matrix().Patt()->nRows();
+    
+    double __relTol = 1.e-14;
 
     LifeV::SolverPETSC __petsc( "gmres", "ilu" );
     //__petsc.setMatrix( Nrows, __mat.iaData(), __mat.jaData(), __mat.valueData() );
     __petsc.setMatrix(__mat.matrix());
+    __petsc.setTolerances( 0, __relTol );
 
     Vector __x( Nrows );
     Vector __sol( Nrows );
@@ -107,7 +110,7 @@ bool test_petsc( Mat& __mat )
     LifeV::Debug( 10000 ) << "norm_2(error) = " << norm_2( __x ) << "\n";
     LifeV::Debug( 10000 ) << "PETSC solver test done\n";
 
-    return norm_2(__x) < 1e-10;
+    return __petsc.converged();
 #else
     return 1;
 #endif
@@ -117,10 +120,12 @@ template<typename Mat>
 bool test_aztec( Mat& __mat )
 {
     int Nrows = __mat.matrix().Patt()->nRows();
+    
+    double __relTol = 1.e-14;
 
     LifeV::SolverAztec __aztec;
     __aztec.setMatrix(__mat.matrix());
-    __aztec.setTolerance( 1e-16 );
+    __aztec.setTolerance( __relTol );
 
     Vector __x( Nrows );
     Vector __sol( Nrows );
@@ -136,7 +141,7 @@ bool test_aztec( Mat& __mat )
 
     __x -= __sol;
     LifeV::Debug( 10000 )  << "norm_2(error) = " << norm_2( __x ) << "\n";
-    return norm_2(__x) < 1e-10;
+    return __aztec.converged();
 }
 
 } // namespace LifeV
@@ -146,11 +151,11 @@ int main( int argc, char** argv )
     bool success = true;
     try
     {
-        int N = 100;
+        GetPot commandLine( argc, argv );
+        int N = commandLine.follow( 100, "-N" );
 
 #if defined(HAVE_PETSC_H)
         PetscInitialize(&argc,&argv,(char *)0,help);
-        PetscOptionsGetInt(PETSC_NULL,"-N",&N,PETSC_NULL);
 #endif /* HAVE_PETSC_H */
 
 
