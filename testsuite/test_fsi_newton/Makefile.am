@@ -22,17 +22,9 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-
-SUBDIRS		= data  \
-                  test_mesh test_matrix test_naturalbc test_essentialbc \
-                  test_q1 test_p2 test_mixte test_rt test_rtcyl test_fe \
-                  test_postproc test_bdf \
-		  test_linearelasticity \
-		  test_darcy \
-		  test_ns_bdf test_ns_cyl test_ns_sstress \
-		  test_fsi_newton test_fsi_picard
-
-check-qmtest: 
-	qmtest -D $(srcdir) run
-	qmtest -D $(srcdir) summarize
-
+SUBDIRS         =  
+check_PROGRAMS = Newton 
+noinst_HEADERS = norm.hpp operFS.hpp ud_functions.hpp 
+LDADD = $(life_libs)
+Newton_SOURCES = main.cpp norm.cpp operFS.cpp 
+EXTRA_DIST = data 
