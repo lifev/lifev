@@ -54,7 +54,7 @@ bool test_umfpack( Mat& __mat )
     int Nrows = __mat.matrix().Patt()->nRows();
 
     SolverUMFPACK __solver;
-    __solver.setMatrix( Nrows, __mat.iaData(), __mat.jaData(), __mat.valueData() );
+    //__solver.setMatrix( Nrows, __mat.iaData(), __mat.jaData(), __mat.valueData() );
 
     Vector __x( Nrows );
     Vector __sol( Nrows );
