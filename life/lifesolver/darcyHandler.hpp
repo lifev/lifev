@@ -173,7 +173,7 @@ DarcyHandler<Mesh>::DarcyHandler( const GetPot& data_file, const RefHdivFE& refF
     /*the "true" flag is to build the faceList
       of all faces (and not only the boundary) */
 
-    if(verbose>2) this->_mesh.showMe();
+    if(this->verbose>2) this->_mesh.showMe();
     // build dof
     vdof.update(this->_mesh);
     pdof.update(this->_mesh);
