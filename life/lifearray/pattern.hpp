@@ -18,7 +18,7 @@
 */
 /*----------------------------------------------------------------------*
 |
-| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.23 2005-03-01 09:46:54 ddipietro Exp $
+| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.24 2005-03-01 10:15:11 winkelma Exp $
 |
 |
 | #Version  0.1 Experimental   07/7/00. Luca Formaggia & Alessandro Veneziani
@@ -133,7 +133,7 @@ public:
     BasePattern( UInt ex_nnz, UInt ex_nrow, UInt ex_ncol );
 
     //! Default distructor
-    virtual ~BasePattern() {}; 
+    virtual ~BasePattern() {};
 
     //! Copy constructor
     BasePattern( BasePattern const &rightHandPattern );
@@ -709,6 +709,7 @@ public:
       PATTERN_OFFSET)
     */
 
+    //! Returns true if the indices (i,j) are in the pattern
     bool isThere( Index_t i, Index_t j ) const;
 
 protected:
@@ -839,7 +840,7 @@ public:
                                  MSRPatt const &patt,
                                  UInt const nblock );
 
-    // superata dalla locate
+    //! Returns true if the indices (i,j) are in the pattern
     bool isThere( Index_t i, Index_t j ) const;
 
 protected:
@@ -1076,8 +1077,8 @@ public:
     //! Tests if offsets are consistent with those of a global matrix
     bool check( bool verbose = false, std::ostream & c = std::cout ) const;
 
-    /**! 
-       \Returns true if the indices (i,j) are in the pattern. (i, j) are in 
+    /**!
+       \Returns true if the indices (i,j) are in the pattern. (i, j) are in
        \global numbering
     */
     bool isThere( Index_t const i_g, Index_t const j_g ) const;
