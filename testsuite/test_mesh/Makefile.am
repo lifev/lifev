@@ -28,5 +28,7 @@ TESTS			= test_mesh
 check_PROGRAMS		= test_mesh
 
 test_mesh_SOURCES	= main.cpp
+ 
+test_mesh_LDFLAGS       =-lg2c
 
 MOSTLYCLEANFILES	= testBuilders.dat
