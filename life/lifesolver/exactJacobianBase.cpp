@@ -181,7 +181,7 @@ void exactJacobian::setUpBC()
 
         setDerReducedFluidLoadToStructure(M_reducedLinFluid->minusdp(), 1);
         M_BCh_dz->addBC("Interface", 1, Natural,   Full, //dg_wall, 3);
-                        *bcvDerFluidLoadToStructure(), 2);
+                        *bcvDerReducedFluidLoadToStructure(), 2);
         M_BCh_dz->addBC("Top",       3, Essential, Full, bcf,     3);
         M_BCh_dz->addBC("Base",      2, Essential, Full, bcf,     3);
     }
