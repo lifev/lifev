@@ -256,9 +256,9 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix, const VECTOR& state )
                         beta.vec()[ iCoor*M_feBd.nbNode + iNode ];
                     bcmax = std::max<Real>
                         (bcmax, normal(iNode, (iCoor+1)%3) *
-                         beta.vec()[ iCoor*M_feBd.nbNode + (iNode+2)%3 ] -
+                         beta.vec()[ (iCoor+2)%3*M_feBd.nbNode + iNode ] -
                          normal(iNode, (iCoor+2)%3) *
-                         beta.vec()[ iCoor*M_feBd.nbNode + (iNode+1)%3 ]);
+                         beta.vec()[ (iCoor+1)%3*M_feBd.nbNode + iNode ]);
                 }
                 bnmax = std::max<Real> (bnmax, bn);
             }
