@@ -29,6 +29,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #ifndef _GENERALIZEDAITKEN_H
 #define _GENERALIZEDAITKEN_H
 
+#include "lifeV.hpp"
+
 namespace LifeV
 {
     
@@ -55,7 +57,7 @@ namespace LifeV
 
         void   restart();
 
-        Vector        computeLambda();
+        Vector        computeLambda(const Vector &, const Vector &);
         
         // in this case, omega is taken as the default value
 
@@ -119,7 +121,7 @@ namespace LifeV
     */
     
     template<class Vector, class Real>
-    Vector generalizedAitken<Vector, Real>::computeLambda(Vector _muS, Vector _muF)
+    Vector generalizedAitken<Vector, Real>::computeLambda(const Vector &_muS, const Vector &_muF)
     {
         Vector lambda(M_nDof);
         
