@@ -51,7 +51,7 @@ exactJacobian::setup()
 
     M_dz.resize(3*M_solid->dDof().numTotalDof());
     M_rhs_dz.resize(3*M_solid->dDof().numTotalDof());
-    M_quasiNewton.reset(new quasiNewton(M_fluid, this));
+    M_quasiNewton.reset(new quasiNewton(this, M_fluid, M_solid));
 }
 //
 // Residual computation
@@ -288,7 +288,7 @@ void  exactJacobian::solveLinearSolid()
                    1., 1.);
 
     Real tol       = 1.e-10;
-    std::cout << "rhs_dz norm = " << norm_inf(M_rhs_dz) << std::endl;
+    std::cout << "rhs_dz norm = " << norm_2(M_rhs_dz) << std::endl;
     this->M_solid->setRecur(1);
     this->M_solid->solveJac(M_dz, M_rhs_dz, tol);
     std::cout << "dz norm     = " << norm_inf(M_dz) << std::endl;
@@ -304,6 +304,11 @@ void my_matvecJacobianEJ(double *z, double *Jz, AZ_MATRIX* J, int proc_config[])
 
     double xnorm =  AZ_gvector_norm(dim,-1,z,proc_config);
     std::cout << " ***** norm (z)= " << xnorm << std::endl << std::endl;
+
+    Vector zSolid(dim);
+
+    for (int ii = 0; ii < (int) dim; ++ii)
+        zSolid[ii] = z[ii];
 
     if ( xnorm == 0.0 )
     {
@@ -328,8 +333,7 @@ void my_matvecJacobianEJ(double *z, double *Jz, AZ_MATRIX* J, int proc_config[])
             double dt   = my_data->M_pFS->fluid().timestep();
             double dti2 = 1.0/( dt * dt);
 
-            for (int i=0; i <(int)dim; ++i)
-                da[i] =  - my_data->M_pFS->fluid().density() * z[i] * dti2;
+            da = - my_data->M_pFS->fluid().density()*dti2*zSolid;
 
             my_data->M_pFS->getQuasiNewton()->setDacc(da);
             my_data->M_pFS->getQuasiNewton()->solveReducedLinearFluid();

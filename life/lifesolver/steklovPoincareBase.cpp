@@ -94,7 +94,7 @@ steklovPoincare::setup()
 
     M_aitkFS.setup( 3*M_solid->dDof().numTotalDof() );
 
-    M_quasiNewton.reset(new quasiNewton(M_fluid, this));
+    M_quasiNewton.reset(new quasiNewton(this, M_fluid, M_solid));
 }
 //
 // Residual computation
@@ -469,8 +469,7 @@ void my_matvecSfSsPrime(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
             double dt = my_data->M_pFS->fluid().timestep();
             double dti2 = 1.0/( dt * dt) ;
 
-            for (int i=0; i <(int) dim; ++i)
-                da[i] =  - my_data->M_pFS->fluid().density() * z[i] * dti2;
+            da = - my_data->M_pFS->fluid().density()*dti2*zSolid;
 
             my_data->M_pFS->getQuasiNewton()->setDacc(da);
             my_data->M_pFS->getQuasiNewton()->solveReducedLinearFluid();
