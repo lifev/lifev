@@ -176,7 +176,7 @@ namespace LifeV {
         const Dof& lsDof() {
             return _M_lss.dof();
         }
-        
+
         CurrentFE& fe_ls() {
             return _M_lss.fe();
         }
@@ -384,7 +384,7 @@ namespace LifeV {
 #if L_NS2F_LINEAR_SOLVER_P == L_NS2F_PETSC
         std::cout << "[NSSolver2FluidsMixed::constructor] Using PETSC linear solver for p" << std::endl;
         _M_solver_p.setOptionsFromGetPot(_M_data_file, "navier-stokes/yosida/solver-p");
-        if ( _BCh_u.hasOnlyEssential() ) {
+        if ( this->BCh_fluid().hasOnlyEssential() ) {
             Real constPress = 1. / sqrt( _dim_p );
             for(UInt i = 0; i < _dim_p; ++i) {
                 _M_constant_pressure[ i ] = constPress;
@@ -464,7 +464,7 @@ namespace LifeV {
                 UInt iglo = _M_lss.dof().localToGlobal(element_id, node_id + 1) - 1;
                 _M_elvec_lss.vec()[ node_id ] = _M_lsfunction[ iglo ];
             }
-         
+
             // Stiffness strain
             stiff_strain_2f(2. * viscosity(fluid1), 2. * viscosity(fluid2), _M_elvec_lss, _M_lss.fe(), _M_elmat_C, fe_u());
 
@@ -479,7 +479,7 @@ namespace LifeV {
 #if L_NS2F_PROBLEM == L_NAVIER_STOKES
             // Compute local contributions
             element_id = _fe_u.currentId();
-   
+
             //  Extract the vector of local velocity dofs
             for(UInt node_id = 0; node_id < (UInt)fe_u().nbNode; node_id++) {
                 for(UInt comp_id = 0; comp_id < nbCompU; comp_id++) {
@@ -531,7 +531,7 @@ namespace LifeV {
                       << __cumul2 << " s" << std::endl;
             std::cout << "[NSSolver2FluidsMixed::advance_NS] Off-diagonal block assembling: "
                       << __cumul3 << " s" << std::endl;
-        }  
+        }
 
         // Lump mass matrix
         _M_M_L.lumpRowSum(_M_M);
@@ -550,10 +550,10 @@ namespace LifeV {
             std::cout << "[NSSolver2FluidsMixed::advance_NS] Applying boundary conditions"
                       << std::endl;
 
-        if (!_BCh_u.bdUpdateDone())
-            _BCh_u.bdUpdate(_mesh, _feBd_u, uDof());
+        if (!this->BCh_fluid().bdUpdateDone())
+            this->BCh_fluid().bdUpdate(_mesh, _feBd_u, uDof());
 
-        bcManage(_M_C, _M_G, _M_rhs_u, _mesh, uDof(), _BCh_u, _feBd_u, 1.0, _M_time );
+        bcManage(_M_C, _M_G, _M_rhs_u, _mesh, uDof(), this->BCh_fluid(), _feBd_u, 1.0, _M_time );
 
         if(_M_verbose)
             std::cout << "[NSSolver2FluidsMixed::advance_NS] Computing discrete divergence operator"
