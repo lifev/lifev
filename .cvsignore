@@ -1,8 +1,10 @@
 -Idebug
+ChangeLog
 Doxygen
 Doxylog
 Makefile
 Makefile.in
+acinclude.m4
 aclocal.m4
 autom4te.cache
 config.h.in
@@ -27,4 +29,3 @@ optimized
 stamp-h.in
 stamp-h1
 subdirs
-ChangeLog
