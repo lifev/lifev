@@ -24,8 +24,9 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 AM_CPPFLAGS	= -DNO_BLASLAPACK
 
+include $(top_srcdir)/testsuite/Makefile.testsuite
+
 check_PROGRAMS = DarcySolver 
 noinst_HEADERS = darcyHandler.hpp darcySolver.hpp dataDarcy.hpp user_fct.hpp 
-LDADD = $(life_libs)
 DarcySolver_SOURCES = darcyHandler.cpp darcySolver.cpp darcySolver_post.cpp dataDarcy.cpp main.cpp user_fct.cpp 
 EXTRA_DIST = data 

@@ -22,9 +22,9 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-SUBDIRS         =  
+include $(top_srcdir)/testsuite/Makefile.testsuite
+
 check_PROGRAMS = Picard 
 noinst_HEADERS = norm.hpp operFS.hpp ud_functions.hpp 
-LDADD = $(life_libs)
 Picard_SOURCES = main.cpp norm.cpp 
 EXTRA_DIST = data 

@@ -14,10 +14,10 @@ endtime         = 1              # endtime
 
 
 [../discretization]
-mesh_dir  = ./                # the directory where the mesh file is
-mesh_file = carotide.m++     # mesh file
-timestep  = 0.01            # timestep
-order_bdf = 1                 # order of the time integration scheme
+mesh_dir  = ../data/mesh/mesh++  # the directory where the mesh file is
+mesh_file = carotide.m++         # mesh file
+timestep  = 0.01                 # timestep
+order_bdf = 1                    # order of the time integration scheme
 
 [../miscellaneous]
 verbose         = 3

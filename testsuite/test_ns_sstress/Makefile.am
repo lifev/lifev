@@ -22,9 +22,9 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-SUBDIRS         =  
+include $(top_srcdir)/testsuite/Makefile.testsuite
+
 check_PROGRAMS = testSStress 
 noinst_HEADERS = ud_functions.hpp ud_functions_ns.hpp 
-LDADD = $(life_libs)
 testSStress_SOURCES = main.cpp 
 EXTRA_DIST = data 

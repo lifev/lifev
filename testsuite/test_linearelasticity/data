@@ -13,9 +13,9 @@ poisson   = 0.3
 endtime   = 2.0
 
 [../discretization]
-mesh_dir  = ./                # the directory where the mesh file is
-mesh_file = vessel2x4x20_10cm.mesh     # mesh file
-timestep  = 0.01             # timestep
+mesh_dir  = ../data/mesh/inria     # the directory where the mesh file is
+mesh_file = vessel2x4x20_10cm.mesh # mesh file
+timestep  = 0.01                   # timestep
 
 [../miscellaneous]
 factor    = 1

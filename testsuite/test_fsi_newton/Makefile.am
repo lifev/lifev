@@ -22,9 +22,9 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-SUBDIRS         =  
+include $(top_srcdir)/testsuite/Makefile.testsuite
+
 check_PROGRAMS = Newton 
 noinst_HEADERS = norm.hpp operFS.hpp ud_functions.hpp 
-LDADD = $(life_libs)
 Newton_SOURCES = main.cpp norm.cpp operFS.cpp 
 EXTRA_DIST = data 

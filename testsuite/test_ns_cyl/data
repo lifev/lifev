@@ -14,7 +14,7 @@ endtime         = 4.00              # endtime
 
 
 [../discretization]
-mesh_dir  = ../../../data/mesh/inria/  # the directory where the mesh file is
+mesh_dir  = ../data/mesh/inria/  # the directory where the mesh file is
 mesh_file = cyltetra.mesh     # mesh file
 timestep  = 0.01               # timestep
 

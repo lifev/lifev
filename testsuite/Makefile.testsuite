@@ -26,3 +26,11 @@ LDADD			= $(life_libs)
 
 test: $(TESTINGS)
 
+
+check-local:
+	@if test "$(top_srcdir)" != "$(top_builddir)"; then\
+	 for i in $(EXTRA_DIST); do \
+           $(LN_S) -f $(srcdir)/$$i .; \
+         done; \
+	fi
+

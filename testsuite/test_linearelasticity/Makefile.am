@@ -23,9 +23,11 @@
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
 noinst_HEADERS = norm.hpp ud_functions.hpp 
-LDADD = $(life_libs)
+
+include $(top_srcdir)/testsuite/Makefile.testsuite
 
 check_PROGRAMS = test_linearelasticity
 test_linearelasticity_SOURCES = main.cpp norm.cpp 
 
 EXTRA_DIST = data 
+
