@@ -54,9 +54,8 @@ int main(int argc, char** argv)
     //  TEMPORAL LOOP
     //========================================================================================
 
-    int  method   = data_file("problem/method" ,0);
-    Real defOmega = data_file("problem/defOmega",1);
-
+    int  method   = data_file("problem/method"  , 0);
+    Real defOmega = data_file("problem/defOmega", .01);
 
     std::cout << std::endl;
     std::cout << "Fluid/Structure interactions";

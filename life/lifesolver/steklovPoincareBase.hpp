@@ -86,6 +86,7 @@ private:
     UInt                    M_precond;
     Real                    M_defOmegaS;
     Real                    M_defOmegaF;
+
     generalizedAitken<Vector, Real> M_aitkFS;
 
 

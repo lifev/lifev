@@ -33,9 +33,9 @@ steklovPoincare::steklovPoincare(GetPot &_dataFile):
     M_dataJacobian(this),
     M_aitkFS      (3*M_solid.dDof().numTotalDof())
 {
-    M_precond   = _dataFile("problem/precond",1);
-    M_defOmegaS = _dataFile("problem/defOmegaS",1);
-    M_defOmegaF = _dataFile("problem/defOmegaF",1);
+    M_precond   = _dataFile("problem/precond"  , 1);
+    M_defOmegaS = _dataFile("problem/defOmegaS", 0.01);
+    M_defOmegaF = _dataFile("problem/defOmegaF", 0.01);
     M_aitkFS.setDefault(M_defOmegaS, M_defOmegaF);
 //    setUpBC();
 }
@@ -222,15 +222,15 @@ void  steklovPoincare::solveJac(Vector &muk,
     {
         case 0:
             // Neumann-Dirichlet preconditioner
-            invSfPrime(_res, _linearRelTol, muk);
+            invSfPrime(-1.*_res, _linearRelTol, muk);
             break;
         case 1:
             // Dirichlet-Neumann preconditioner
-            invSsPrime(_res, _linearRelTol, muk);
+            invSsPrime(-1.*_res, _linearRelTol, muk);
             break;
         case 2:
             // Neumann-Neumann preconditioner
-	{
+        {
             Vector muF(_res.size());
             Vector muS(_res.size());
 
@@ -267,14 +267,14 @@ void  steklovPoincare::solveJac(Vector &muk,
 
 
 
-void  steklovPoincare::solveLinearFluid()
+void steklovPoincare::solveLinearFluid()
 {
     this->M_fluid.iterateLin(time(), M_BCh_du);
 }
 
 //
 
-void  steklovPoincare::solveLinearSolid()
+void steklovPoincare::solveLinearSolid()
 {
     M_rhs_dz = ZeroVector( M_rhs_dz.size() );
     M_dz     = ZeroVector( M_dz.size() );
