@@ -31,7 +31,7 @@
 #define _IPSTABILIZATION_HPP_
 
 #define USE_OLD_PARAMETERS 0
-#define WITH_DIVERGENCE 0
+#define WITH_DIVERGENCE 1
 
 namespace LifeV
 {
@@ -145,11 +145,13 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix, const VECTOR& state )
     {
         chronoUpdate.start();
         // update current finite elements
+#if WITH_DIVERGENCE
+        M_feBd.updateMeas( M_mesh.face( iFace ) );
+#else
         M_feBd.updateMeasNormal( M_mesh.face( iFace ) );
-        //M_feBd.updateMeas( M_mesh.face( iFace ) );
         KNM<Real>& normal = M_feBd.normal;
+#endif
         const Real hK2 = M_feBd.measure();
-        const Real hK = sqrt( hK2 );
         const UInt iElAd1 = M_mesh.face( iFace ).ad_first();
         const UInt iElAd2 = M_mesh.face( iFace ).ad_second();
         M_fe1.updateFirstDeriv( M_mesh.volumeList( iElAd1 ) );
@@ -186,10 +188,10 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix, const VECTOR& state )
         {
 #if USE_OLD_PARAMETERS
             Real coeffPress = M_gammaPress * hK2; // P1, P2 (code)
-            //Real coeffPress = M_gammaPress * hK; // P1 p nonsmooth (code)
+            //Real coeffPress = M_gammaPress * sqrt( hK2 ); // P1 p nonsmooth (code)
 #else
             Real coeffPress = M_gammaPress * hK2 / // Pk (paper)
-                std::max<Real>( bmax, M_viscosity/hK );
+                std::max<Real>( bmax, M_viscosity/sqrt( hK2 ) );
 #endif
 
             chronoElemComp.start();
@@ -241,7 +243,7 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix, const VECTOR& state )
 #endif
 
             Real coeffDiv = M_gammaDiv * hK2 * bmax; // (code and paper)
-            //Real coeffDiv = M_gammaDiv * hK * bmax; // ? (code)
+            //Real coeffDiv = M_gammaDiv * sqrt( hK2 ) * bmax; // ? (code)
 #else
             // determine bnmax = ||\beta \cdot n||_{0,\infty,K}
             // and       bcmax = ||\beta \cross n||_{0,\infty,K}
