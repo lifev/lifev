@@ -228,7 +228,7 @@ NavierStokesSolverPC( const GetPot& data_file, const RefFE& refFE_u, const RefFE
         _dataAztec_i( data_file, "fluid/aztec_i" ),
         _dataAztec_ii( data_file, "fluid/aztec_ii" ),
         _dataAztec_s( data_file, "fluid/aztec_s" ),
-        _factor_data( _C, _D, _trD, _H, _HinvC, _HinvDtr, _invCtrDP, _dataAztec_i, _dataAztec_s, this->_BCh_u.fullEssential() )
+        _factor_data( _C, _D, _trD, _H, _HinvC, _HinvDtr, _invCtrDP, _dataAztec_i, _dataAztec_s, this->_BCh_u.hasOnlyEssential() )
 {
 
     Debug( 6020 ) << "\n";
@@ -370,8 +370,8 @@ iterate( const Real& time )
     // Number of velocity components
     UInt nc_u = this->_u.nbcomp();
     //Vector u_extrap = this->_bdf.bdf_u().extrap();
-    Vector u_extrap = this->_u; 
- 
+    Vector u_extrap = this->_u;
+
     Chrono chrono;
 
     // C = CStokes + convective term
@@ -592,7 +592,7 @@ iterate( const Real& time )
     this->_p = ZeroVector( this->_p.size() ); // AT this point, this vector stands for the "pressure increment"
 
     // case of pure Dirichlet BCs:
-    if ( this->_BCh_u.fullEssential() )
+    if ( this->_BCh_u.hasOnlyEssential() )
     {
         vec_DV[ this->_dim_p - 1 ] = 0.0; // correction of the right hand side.
         this->_p[ this->_dim_p - 1 ] = 0.0; // pressure value at the last node.

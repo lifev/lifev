@@ -230,7 +230,7 @@ NavierStokesSolverPC( const GetPot& data_file, const RefFE& refFE_u, const RefFE
         _dataAztec_i( data_file, "fluid/aztec_i" ),
         _dataAztec_ii( data_file, "fluid/aztec_ii" ),
         _dataAztec_s( data_file, "fluid/aztec_s" ),
-        _factor_data( _C, _D, _trD, _H, _HinvC, _HinvDtr, _invCtrDP, _dataAztec_i, _dataAztec_s, this->_BCh_u.fullEssential() )
+        _factor_data( _C, _D, _trD, _H, _HinvC, _HinvDtr, _invCtrDP, _dataAztec_i, _dataAztec_s, this->_BCh_u.hasOnlyEssential() )
 {
 
     Debug( 6020 ) << "\n";
@@ -259,7 +259,7 @@ NavierStokesSolverPC( const GetPot& data_file, const RefFE& refFE_u, const RefFE
     Real dti = 1. / this->_dt;
 
     flag_flux=0;
-  
+
     // *******************************************************
     // Coefficient of the mass term at time t^{n+1}
     Real first_coeff = this->_bdf.bdf_u().coeff_der( 0 );
@@ -385,15 +385,15 @@ iterate( const Real& time )
     // Number of velocity components
     UInt nc_u = this->_u.nbcomp();
 
-    Vector u_extrap; 
- 
+    Vector u_extrap;
+
     if (flag_flux==0){
       u_extrap = this->_bdf.bdf_u().extrap();
     }
     if (flag_flux==1){
-      u_extrap = this->_u; 
+      u_extrap = this->_u;
     }
-    
+
     Chrono chrono;
 
     // C = CStokes + convective term
@@ -450,7 +450,7 @@ iterate( const Real& time )
       //INCREMENTAL correction for the pressure: IT MUST BE AFTER THE INITIALIZATION of _f_u_noBC
       _f_u -= _trD * this->_bdf.bdf_p().extrap();
     }
-    
+
     // for BC treatment (done at each time-step)
     Real tgv = 1.e02;
 
@@ -616,7 +616,7 @@ iterate( const Real& time )
     this->_p = ZeroVector( this->_p.size() ); // AT this point, this vector stands for the "pressure increment"
 
     // case of pure Dirichlet BCs:
-    if ( this->_BCh_u.fullEssential() )
+    if ( this->_BCh_u.hasOnlyEssential() )
     {
         vec_DV[ this->_dim_p - 1 ] = 0.0; // correction of the right hand side.
         this->_p[ this->_dim_p - 1 ] = 0.0; // pressure value at the last node.
@@ -642,13 +642,13 @@ iterate( const Real& time )
     Debug( 6020 ) << "  o-  Velocity updated" << "\n";
 
     // *******************************************************
-    
+
     if (flag_flux==0){
       // This is the REAL pressure (not the increment)
       this->_p += this->_bdf.bdf_p().extrap();
       Debug( 6020 ) << "  o-  Pressure updated" << "\n";
     }
- 
+
     // *******************************************************
     // update the array of the previous solutions
     this->_bdf.bdf_u().shift_right( this->_u );

@@ -272,8 +272,8 @@ NavierStokesAleSolverPC( const GetPot& data_file, const RefFE& refFE_u, const Re
         _dataAztec_i( data_file, "fluid/aztec_i" ),
         _dataAztec_ii( data_file, "fluid/aztec_ii" ),
         _dataAztec_s( data_file, "fluid/aztec_s" ),
-        _factor_data( _C, _D, _trD, _H, _HinvC, _HinvDtr, _invCtrDP, _dataAztec_i, _dataAztec_s, _BCh_u.fullEssential(), 1 ),
-        _factor_data_jacobian( _C, _D, _trD, _H, _HinvC, _HinvDtr, _invCtrDP, _dataAztec_i, _dataAztec_s, _BCh_u.fullEssential(), 2 )
+        _factor_data( _C, _D, _trD, _H, _HinvC, _HinvDtr, _invCtrDP, _dataAztec_i, _dataAztec_s, _BCh_u.hasOnlyEssential(), 1 ),
+        _factor_data_jacobian( _C, _D, _trD, _H, _HinvC, _HinvDtr, _invCtrDP, _dataAztec_i, _dataAztec_s, _BCh_u.hasOnlyEssential(), 2 )
 {
 
 
@@ -558,7 +558,7 @@ iterate( const Real& time )
     vec_DV = _D * _u;
 
     // case of pure Dirichlet BCs:
-    if ( _BCh_u.fullEssential()
+    if ( _BCh_u.hasOnlyEssential()
        )
     {
         vec_DV[ _dim_p - 1 ] = 1.0; // correction of the right hand side.
@@ -709,7 +709,7 @@ iterateTransp( const Real& time )
     vec_DV = _D * _u;
 
     // case of pure Dirichlet BCs:
-    if ( _BCh_u.fullEssential()
+    if ( _BCh_u.hasOnlyEssential()
        )
     {
         vec_DV[ _dim_p - 1 ] = 1.0; // correction of the right hand side.
@@ -969,7 +969,7 @@ iterateLin( const Real& time, BCHandler& BCh_du )
     vec_DV = _D * _du - _f_p;
 
     // case of pure Dirichlet BCs:
-    if ( BCh_du.fullEssential()
+    if ( BCh_du.hasOnlyEssential()
        )
     {
         vec_DV[ _dim_p - 1 ] = 1.0; // correction of the right hand side.

@@ -218,7 +218,7 @@ bool BCHandler::bdUpdateDone() const
 }
 
 //! returns true if all the stored BC are of Essential type
-bool BCHandler::fullEssential() const
+bool BCHandler::hasOnlyEssential() const
 {
     if ( empty() )
     {
@@ -236,7 +236,7 @@ bool BCHandler::fullEssential() const
         if ( listFullEssential != _fullEssential )
         {
             std::ostringstream __ex;
-            __ex << "BCHandler::fullEssential(): state is not consistent:\n"
+            __ex << "BCHandler::hasOnlyEssential(): state is not consistent:\n"
                  << "flag from constructor says    " << _fullEssential << "\n"
                  << "added boundary conditions say " << listFullEssential;
             throw std::logic_error( __ex.str() );

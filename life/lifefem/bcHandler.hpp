@@ -77,7 +77,7 @@ public:
      */
     //@{
 
-    //! Constructor doing nothing (the user must call setNumber(..))
+    //! Constructor doing nothing
     BCHandler();
 
     //! Constructor taking the number of BC to be stored
@@ -125,7 +125,7 @@ public:
     bool bdUpdateDone() const;
 
     //! returns  true if all the stored BC are of Essential type
-    bool fullEssential() const;
+    bool hasOnlyEssential() const;
 
 
     //@}
@@ -133,9 +133,6 @@ public:
     /** @name  Mutators
      */
     //@{
-    //! Set the number of BC to be stored
-    void setNumber( const ID& nbc );
-
 
     //@}
 

@@ -85,7 +85,7 @@ public:
 
     //! linearize convective term around given (exact) velocity function
     void linearize( const Function& betaFct ) { M_betaFct = &betaFct; }
-    
+
 private:
 
     //! Block pattern of M_u
@@ -445,7 +445,7 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
                M_time );
 
 
-    //if ( _BCh_u.fullEssential() )
+    //if ( _BCh_u.hasOnlyEssential() )
 //    M_matrFull.diagonalize( nDimensions*_dim_u, 1.0, M_rhsFull, 0);
 //                             pexact( M_time,
 //                                     _mesh.point( 1 ).x(),
