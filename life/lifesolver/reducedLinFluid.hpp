@@ -69,7 +69,7 @@ public:
     void solveInvReducedLinearFluid();
 
 
-    const Vector& dacc()    {return M_dacc;}
+    Vector& dacc()    {return M_dacc;}
     void setDacc(Vector const &_vec){M_dacc = _vec;}
     void setComputedMatrix(bool pred){M_computedC = pred;}
     Vector& minusdp() {return M_minusdp;}

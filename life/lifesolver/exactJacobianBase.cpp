@@ -170,24 +170,18 @@ void exactJacobian::setUpBC()
     }
     else
     {
-        // Boundary conditions for the reduced fluid
-        BCVectorInterface da_wall(M_reducedLinFluid->dacc(),
-                                  dim_solid,
-                                  M_dofStructureToReducedFluid,
-                                  2); // type  = 2
-        M_BCh_dp->addBC("Wall",        1, Natural,   Scalar, da_wall);
+        setDerStructureAccToReducedFluid(M_reducedLinFluid->dacc(), 2);
+        M_BCh_dp->addBC("Wall",        1, Natural,   Scalar, //da_wall);
+                        *bcvDerStructureAccToReducedFluid());
         M_BCh_dp->addBC("Wall_Edges", 20, Essential, Scalar, bcf);
         M_BCh_dp->addBC("InFlow",      2, Essential, Scalar, bcf);
         M_BCh_dp->addBC("OutFlow",     3, Essential, Scalar, bcf);
 
         M_reducedLinFluid->setUpBC(M_BCh_dp);
 
-        // Boundary conditions for dz
-        BCVectorInterface dg_wall(M_reducedLinFluid->minusdp(),
-                                  dim_reducedfluid,
-                                  M_dofReducedFluidToStructure,
-                                  1); // type = 1
-        M_BCh_dz->addBC("Interface", 1, Natural,   Full, dg_wall, 3);
+        setDerReducedFluidLoadToStructure(M_reducedLinFluid->minusdp(), 1);
+        M_BCh_dz->addBC("Interface", 1, Natural,   Full, //dg_wall, 3);
+                        *bcvDerFluidLoadToStructure(), 2);
         M_BCh_dz->addBC("Top",       3, Essential, Full, bcf,     3);
         M_BCh_dz->addBC("Base",      2, Essential, Full, bcf,     3);
     }

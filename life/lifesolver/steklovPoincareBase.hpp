@@ -81,7 +81,7 @@ public:
     Vector getSolidInterfaceOnFluid(Vector const& _vec);
     Vector getFluidInterfaceOnSolid(Vector const& _vec);
 
-    Vector const & residualFSI() const {return M_residualFSI;}
+    Vector & residualFSI() {return M_residualFSI;}
     void setup();
 
     struct DataJacobian

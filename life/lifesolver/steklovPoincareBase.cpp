@@ -155,7 +155,7 @@ void steklovPoincare::evalResidual(Vector       &res,
     computeResidualFSI();
     res = getResidualFSIOnSolid();
 
-    computeStrongResidualFSI();
+    //computeStrongResidualFSI();
 
     std::cout << "max ResidualF   = " << norm_inf(M_residualF)
               << std::endl;
@@ -344,7 +344,7 @@ void  steklovPoincare::invSfPrime(const Vector& res,
     setResidualFSI(res);
 
     M_solid->d() = ZeroVector(M_solid->d().size());
-    std::cout << "norm_inf residual FSI = " << norm_inf(M_residualFSI);
+    //std::cout << "norm_inf residual FSI = " << norm_inf(M_residualFSI);
 
     solveLinearFluid();
 
@@ -611,91 +611,64 @@ void steklovPoincare::setBC()
 
     // solid acceleration
     // Boundary conditions for dp
-    BCVectorInterface da_wall(M_reducedLinFluid->dacc(),
-                              dim_solid,
-                              M_dofStructureToReducedFluid,
-                              2); // type 2
-    M_BCh_dp->addBC("Wall",        1, Natural,   Scalar, da_wall);
-    M_BCh_dp->addBC("Wall_Edges", 20, Essential, Scalar, bcf);
-    M_BCh_dp->addBC("InFlow",      2, Essential, Scalar, bcf);
-    M_BCh_dp->addBC("OutFlow",     3, Essential, Scalar, bcf);
 
-    BCVectorInterface dr_wall(M_strongResidualFSI,
-                              dim_fluid,
-                              M_dofReducedFluidToStructure);
-    M_BCh_dp_inv->addBC("Wall",        1, Essential, Scalar, dr_wall);
-    M_BCh_dp_inv->addBC("Wall_Edges", 20, Essential, Scalar, bcf);
-    M_BCh_dp_inv->addBC("InFlow",      2, Essential, Scalar, bcf);
-    M_BCh_dp_inv->addBC("OutFlow",     3, Essential, Scalar, bcf);
+     if (reducedFluid())
+     {
+         setDerStructureAccToReducedFluid(M_reducedLinFluid->dacc(), 2);
+         M_BCh_dp->addBC("Wall",        1, Natural,   Scalar, //da_wall);
+                         *bcvDerStructureAccToReducedFluid());
+         M_BCh_dp->addBC("Wall_Edges", 20, Essential, Scalar, bcf);
+         M_BCh_dp->addBC("InFlow",      2, Essential, Scalar, bcf);
+         M_BCh_dp->addBC("OutFlow",     3, Essential, Scalar, bcf);
 
-    M_reducedLinFluid->setUpBC(M_BCh_dp);
-    M_reducedLinFluid->setUpInvBC(M_BCh_dp_inv);
+         setDerReducedFluidLoadToStructure(M_strongResidualFSI);
+         M_BCh_dp_inv->addBC("Wall",        1, Essential, Scalar,//dr_wall);
+                             *bcvDerReducedFluidLoadToStructure());
+         M_BCh_dp_inv->addBC("Wall_Edges", 20, Essential, Scalar, bcf);
+         M_BCh_dp_inv->addBC("InFlow",      2, Essential, Scalar, bcf);
+         M_BCh_dp_inv->addBC("OutFlow",     3, Essential, Scalar, bcf);
+
+         M_reducedLinFluid->setUpBC(M_BCh_dp);
+         M_reducedLinFluid->setUpInvBC(M_BCh_dp_inv);
+     }
 }
 
 
 void steklovPoincare::setInterfaceBC()
 {
-    //UInt dim_solid        = this->M_solid->dDof().numTotalDof();
-    UInt dim_fluid        = this->M_fluid->uDof().numTotalDof();
-    //UInt dim_reducedfluid = this->M_fluid->pDof().numTotalDof();
+    setDerFluidLoadToFluid(residualFSI());
+    M_BCh_du->addBC("Wall"     , 1, Natural  , Full,
+                    *bcvDerFluidLoadToFluid(), 3);
 
-    BCVectorInterface du_wall(M_residualFSI,
-                              dim_fluid,
-                              M_dofHarmonicExtensionToFluid);
-    M_BCh_du->addBC("Wall"     , 1, Natural  , Full, du_wall, 3);
-
-    // Passing the residual to the linearized structure: \sigma -> dz
-    BCVectorInterface dg_wall(M_residualFSI,
-                              dim_fluid,
-                              M_dofFluidToStructure);
-    M_BCh_dz->addBC("Interface", 1, Natural  , Full, dg_wall, 3);
+    setDerFluidLoadToStructure(residualFSI());
+    M_BCh_dz->addBC("Interface", 1, Natural  , Full,
+                    *bcvDerFluidLoadToStructure(), 3);
 }
 
 
 
 void steklovPoincare::setInterfaceNewtonBC()
 {
-    UInt dim_solid        = this->M_solid->dDof().numTotalDof();
-    UInt dim_fluid        = this->M_fluid->uDof().numTotalDof();
-    //UInt dim_reducedfluid = this->M_fluid->pDof().numTotalDof();
-
     std::cout << "Steklov-Poincare: NEWTON boundary conditions" << std::flush << std::endl;
 
-    BCVectorInterface du_wall(M_fluid->dwInterpolated(),
-                              dim_fluid,
-                              M_dofHarmonicExtensionToFluid );
+    setDerHarmonicExtensionVelToFluid(this->M_fluid->dwInterpolated());
+    M_BCh_du->addBC("Wall",   1,  Essential, Full,
+                    *bcvDerHarmonicExtensionVelToFluid(), 3);
 
-    M_BCh_du->addBC("Wall"     , 1, Essential , Full, du_wall, 3);
-
-
-    BCVectorInterface dg_wall(M_solid->d(),
-                              dim_solid,
-                              M_dofStructureToSolid );
-
-    // Passing data from the harmonic extension to the fluid
-    //setDerHarmonicExtensionVelToFluid(this->M_fluid->dwInterpolated());
-    // Passing data from fluid to the structure: du -> dz
-    //setDerFluidLoadToStructure(this->residualFSI());
-    // Boundary conditions for du
-    //M_BCh_du->addBC("Wall",   1,  Essential, Full,
-    //                *bcvDerHarmonicExtensionVelToFluid(), 3);
-
-    M_BCh_dz->addBC("Interface", 1, Essential , Full, dg_wall, 3);
+    setDerStructureDispToSolid(M_solid->d());
+    M_BCh_dz->addBC("Interface", 1, Essential , Full,
+                    *bcvDerStructureDispToSolid(), 3);
 
     //! inverse operators
 
-    BCVectorInterface du_wall_inv(M_residualFSI,
-                                  dim_fluid,
-                                  M_dofHarmonicExtensionToFluid);
-
-    M_BCh_du_inv->addBC("Wall", 1, Natural  , Full, du_wall_inv, 3);
+    setDerFluidLoadToFluid(residualFSI());
+    M_BCh_du_inv->addBC("Wall", 1, Natural  , Full,
+                        *bcvDerFluidLoadToFluid(), 3);
 
 
-    BCVectorInterface dg_wall_inv(M_residualFSI,
-                                  dim_fluid,
-                                  M_dofFluidToStructure);
-
-    M_BCh_dz_inv->addBC("Interface", 1, Natural  , Full, dg_wall_inv, 3);
+    setDerFluidLoadToStructure(residualFSI());
+    M_BCh_dz_inv->addBC("Interface", 1, Natural  , Full,
+                        *bcvDerFluidLoadToStructure(), 3);
 }
 
 //

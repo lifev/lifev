@@ -160,47 +160,95 @@ void FSIOperator::transferOnInterface(const Vector      &_vec1,
 
 //
 
-void FSIOperator::setHarmonicExtensionVelToFluid(PhysVectUnknown<Vector> &vel)
+void FSIOperator::setHarmonicExtensionVelToFluid(PhysVectUnknown<Vector> &vel,
+                                                 UInt type)
 {
     M_bcvHarmonicExtensionVelToFluid->setup(vel,
                                             M_fluid->uDof().numTotalDof(),
-                                            M_dofHarmonicExtensionToFluid );
+                                            M_dofHarmonicExtensionToFluid,
+                                            type);
 }
 
-void FSIOperator::setDerHarmonicExtensionVelToFluid(PhysVectUnknown<Vector> &dvel)
+void FSIOperator::setDerHarmonicExtensionVelToFluid(PhysVectUnknown<Vector> &dvel,
+                                                    UInt type)
 {
     M_bcvDerHarmonicExtensionVelToFluid->setup(dvel,
                                                M_fluid->uDof().numTotalDof(),
-                                               M_dofHarmonicExtensionToFluid );
+                                               M_dofHarmonicExtensionToFluid,
+                                               type);
 }
 
-void FSIOperator::setStructureDispToHarmonicExtension(PhysVectUnknown<Vector> &disp)
+void FSIOperator::setStructureDispToHarmonicExtension(PhysVectUnknown<Vector> &disp,
+                                                      UInt type)
 {
     M_bcvStructureDispToHarmonicExtension->setup(disp,
                                                  M_solid->dDof().numTotalDof(),
-                                                 M_dofStructureToHarmonicExtension);
+                                                 M_dofStructureToHarmonicExtension,
+                                                 type);
 }
 
-void FSIOperator::setStructureDispToSolid(PhysVectUnknown<Vector> &disp)
+void FSIOperator::setStructureDispToSolid(PhysVectUnknown<Vector> &disp,
+                                          UInt type)
 {
     M_bcvStructureDispToSolid->setup(disp,
                                      M_solid->dDof().numTotalDof(),
-                                     M_dofStructureToSolid);
+                                     M_dofStructureToSolid,
+                                     type);
+}
+
+void FSIOperator::setDerStructureDispToSolid(PhysVectUnknown<Vector> &ddisp,
+                                             UInt type)
+{
+    M_bcvDerStructureDispToSolid->setup(ddisp,
+                                        M_solid->dDof().numTotalDof(),
+                                        M_dofStructureToSolid,
+                                        type);
 }
 
 
-void FSIOperator::setFluidLoadToStructure(Vector &load)
+void FSIOperator::setFluidLoadToStructure(Vector &load,
+                                          UInt type)
 {
     M_bcvFluidLoadToStructure->setup(load,
                                      M_fluid->uDof().numTotalDof(),
-                                     M_dofFluidToStructure);
+                                     M_dofFluidToStructure,
+                                     type);
 }
 
-void FSIOperator::setDerFluidLoadToStructure(Vector &dload)
+void FSIOperator::setDerFluidLoadToStructure(Vector &dload,
+                                             UInt type)
 {
     M_bcvDerFluidLoadToStructure->setup(dload,
                                         M_fluid->uDof().numTotalDof(),
-                                        M_dofFluidToStructure);
+                                        M_dofFluidToStructure,
+                                        type);
 }
 
+void FSIOperator::setDerFluidLoadToFluid(Vector &dload,
+                                         UInt type)
+{
+    M_bcvDerFluidLoadToFluid->setup(dload,
+                                    M_fluid->uDof().numTotalDof(),
+                                    M_dofHarmonicExtensionToFluid,
+                                    type);
+}
+
+void FSIOperator::setDerReducedFluidLoadToStructure(Vector &dload,
+                                                    UInt type)
+{
+    M_bcvDerReducedFluidLoadToStructure->setup(dload,
+                                               M_fluid->uDof().numTotalDof(),
+                                               M_dofReducedFluidToStructure,
+                                               type);
+}
+
+void FSIOperator:: setDerStructureAccToReducedFluid(Vector &acc,
+                                                    UInt type)
+{
+
+    M_bcvDerStructureAccToReducedFluid->setup(acc,
+                                              M_solid->dDof().numTotalDof(),
+                                              M_dofStructureToReducedFluid,
+                                              type);
+}
 }

@@ -109,6 +109,10 @@ public:
         M_bcvReducedFluidToStructure         ( new  BCVectorInterface ),
         M_bcvDerHarmonicExtensionVelToFluid  ( new  BCVectorInterface ),
         M_bcvDerFluidLoadToStructure         ( new  BCVectorInterface ),
+        M_bcvDerFluidLoadToFluid             ( new  BCVectorInterface ),
+        M_bcvDerStructureDispToSolid         ( new  BCVectorInterface ),
+        M_bcvDerReducedFluidLoadToStructure  ( new  BCVectorInterface ),
+        M_bcvDerStructureAccToReducedFluid   ( new  BCVectorInterface ),
         M_dispStruct(),
         M_dispStructOld(),
         M_velo(),
@@ -183,29 +187,45 @@ public:
 
     // BC Vector Interface setters and getters
 
-    void setHarmonicExtensionVelToFluid(PhysVectUnknown<Vector> &vel);
+    void setHarmonicExtensionVelToFluid(PhysVectUnknown<Vector> &vel, UInt type = 0);
     bc_vector_interface bcvHarmonicExtensionVelToFluid()
         {return M_bcvHarmonicExtensionVelToFluid;}
 
-    void setDerHarmonicExtensionVelToFluid(PhysVectUnknown<Vector> &dvel);
+    void setDerHarmonicExtensionVelToFluid(PhysVectUnknown<Vector> &dvel, UInt type = 0);
     bc_vector_interface bcvDerHarmonicExtensionVelToFluid()
         {return M_bcvDerHarmonicExtensionVelToFluid;}
 
-    void setStructureDispToHarmonicExtension(PhysVectUnknown<Vector> &disp);
+    void setStructureDispToHarmonicExtension(PhysVectUnknown<Vector> &disp, UInt type = 0);
     bc_vector_interface bcvStructureDispToHarmonicExtension()
         {return M_bcvStructureDispToHarmonicExtension;}
 
-    void setStructureDispToSolid(PhysVectUnknown<Vector> &disp);
+    void setStructureDispToSolid(PhysVectUnknown<Vector> &disp, UInt type = 0);
     bc_vector_interface bcvStructureDispToSolid()
         {return M_bcvStructureDispToSolid;}
 
-    void setFluidLoadToStructure(Vector &load);
+    void setDerStructureDispToSolid(PhysVectUnknown<Vector> &ddisp, UInt type = 0);
+    bc_vector_interface bcvDerStructureDispToSolid()
+        {return M_bcvDerStructureDispToSolid;}
+
+    void setFluidLoadToStructure(Vector &load, UInt type = 0);
     bc_vector_interface bcvFluidLoadToStructure()
         {return M_bcvFluidLoadToStructure;}
 
-    void setDerFluidLoadToStructure(Vector &dload);
+    void setDerFluidLoadToStructure(Vector &dload, UInt type = 0);
     bc_vector_interface bcvDerFluidLoadToStructure()
         {return M_bcvDerFluidLoadToStructure;}
+
+    void setDerFluidLoadToFluid(Vector &dload, UInt type = 0);
+    bc_vector_interface bcvDerFluidLoadToFluid()
+        {return M_bcvDerFluidLoadToFluid;}
+
+    void setDerReducedFluidLoadToStructure(Vector &dload, UInt type = 0);
+    bc_vector_interface bcvDerReducedFluidLoadToStructure()
+        {return M_bcvDerReducedFluidLoadToStructure;}
+
+    void setDerStructureAccToReducedFluid(Vector &acc, UInt type = 0);
+    bc_vector_interface bcvDerStructureAccToReducedFluid()
+        {return M_bcvDerStructureAccToReducedFluid;}
 
     //
 
@@ -270,6 +290,10 @@ protected:
 
     bc_vector_interface     M_bcvDerHarmonicExtensionVelToFluid;
     bc_vector_interface     M_bcvDerFluidLoadToStructure;
+    bc_vector_interface     M_bcvDerFluidLoadToFluid;
+    bc_vector_interface     M_bcvDerStructureDispToSolid;
+    bc_vector_interface     M_bcvDerReducedFluidLoadToStructure;
+    bc_vector_interface     M_bcvDerStructureAccToReducedFluid;
 
     Vector                  M_dispStruct;
     Vector                  M_dispStructOld;

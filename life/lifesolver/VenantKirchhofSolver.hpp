@@ -764,6 +764,7 @@ template <typename Mesh>
 void VenantKirchhofSolver<Mesh>::
 solveLin( Vector &step, const Vector& res, double /*linear_rel_tol*/, BCHandler &BCd )
 {
+    std::cout << "  S-  LINEARIZED FLUID SYSTEM" << std::endl;
     Chrono chrono;
 
     _f = res;

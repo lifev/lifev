@@ -878,7 +878,7 @@ iterateLin( const Real& time, BCHandler& BCh_du )
     // Number of velocity components
     UInt nc_u = _u.nbcomp(), iloc, ig;
 
-    std::cout << "  F-  LINEARIZED FLUID SYSTEM\n\n";
+    std::cout << "  F-  LINEARIZED FLUID SYSTEM\n";
 
     std::cout << "    F-  Updating right hand side... ";
 
