@@ -185,6 +185,7 @@ BCHandler::addBC( const std::string& name, const EntityFlag& flag,
         // Sorting list of BC. Essential BC must be treated at the end !!!!
         std::sort( _bcList.begin(), _bcList.end() );
 }
+
 BCBase*
 BCHandler::findBC( std::string const& __name )
 {
@@ -208,6 +209,19 @@ BCHandler::findBC( std::string const& __name )
     }
     return __bc;
 }
+
+BCBase*
+BCHandler::findBC( int lab)
+{
+    BCBase* __bc = 0;
+    std::for_each( _bcList.begin(),
+                   _bcList.end(),
+                   boost::lambda::if_then( boost::lambda::bind( &BCBase::flag, boost::lambda::_1 ) == lab,
+                                           boost::lambda::var( __bc ) = &boost::lambda::_1 ) );
+
+    return __bc;
+}
+
 void
 BCHandler::modifyBC( std::string const& __name, BCFunctionBase& __bcf )
 {
@@ -222,6 +236,22 @@ BCHandler::modifyBC( std::string const& __name, BCVectorBase& __bcv )
 
     __bc->setBCVector( __bcv );
 }
+
+void
+BCHandler::modifyBC( int lab, BCFunctionBase& __bcf )
+{
+    BCBase* __bc = findBC( lab );
+
+    __bc->setBCFunction( __bcf );
+}
+void
+BCHandler::modifyBC( int lab, BCVectorBase& __bcv )
+{
+    BCBase* __bc = findBC( lab );
+
+    __bc->setBCVector( __bcv );
+}
+
 // returns true if the bdUpdate has been done before
 bool BCHandler::bdUpdateDone() const
 {

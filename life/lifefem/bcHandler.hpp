@@ -228,6 +228,12 @@ public:
     //! modify the boundary condition \c name with condition \c bcv
     void modifyBC( std::string const& name, BCVectorBase& bcv );
 
+    //! modify the boundary condition \c lab with condition \c bcv
+    void modifyBC( int lab, BCFunctionBase& bcv );
+
+    //! modify the boundary condition \c lab with condition \c bcv
+    void modifyBC( int lab, BCVectorBase& bcv );
+
     //! Build the boundary stuff
     /*!
       \param mesh the mesh
@@ -281,6 +287,8 @@ private:
        \return a pointer to \c BCBase
      */
     BCBase* findBC( std::string const& __name );
+
+    BCBase* findBC( int lab );
 
 
 };
