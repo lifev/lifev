@@ -167,11 +167,6 @@ void my_matvecSfSsPrime(double *z,
                         AZ_MATRIX* J,
                         int proc_config[]);
 
-void my_matvecSfSsPrimePrec(double *z,
-                            double *Jz,
-                            AZ_MATRIX* J,
-                            int proc_config[]);
-
 }
 
 #endif

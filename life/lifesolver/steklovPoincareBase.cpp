@@ -122,9 +122,9 @@ void steklovPoincare::eval(const Vector& disp,
               << norm_2(velo) << std::endl;
 }
 
-void steklovPoincare::evalResidual(Vector &res,
+void steklovPoincare::evalResidual(Vector       &res,
                                    const Vector &disp,
-                                   const int iter)
+                                   const int     iter)
 {
     int status = 0;
 
@@ -184,7 +184,6 @@ void steklovPoincare::setUpBC()
     BCVectorInterface g_wall( this->M_fluid->residual(),
                               dim_fluid,
                               M_dofFluidToStructure );
-
     //
     // Passing data from structure to the solid mesh: motion of the solid domain
     //
@@ -315,8 +314,10 @@ void  steklovPoincare::solveJac(Vector &muk,
 {
     Vector muF(_res.size());
     Vector muS(_res.size());
-    Debug(  6205 ) << "steklovPoincare::solveJac _linearRelTol  : " << _linearRelTol << "\n";
-    Debug(  6205 ) << "steklovPoincare::solveJac preconditioner : "  << this->preconditioner() << "\n";
+
+    Debug(  6215 ) << "steklovPoincare::solveJac _linearRelTol  : " << _linearRelTol << "\n";
+    Debug(  6215 ) << "steklovPoincare::solveJac preconditioner : "  << this->preconditioner() << "\n";
+
     switch(this->preconditioner())
     {
         case NEUMANN_DIRICHLET:
@@ -397,12 +398,12 @@ void steklovPoincare::solveLinearSolid()
 
     Real tol       = 1.e-10;
 
-    std::cout << "rhs_dz norm   = " << norm_inf(M_rhs_dz) << std::endl;
+    Debug(6215) << "rhs_dz norm   = " << norm_inf(M_rhs_dz) << "\n";
     this->M_solid->setRecur(1);
     this->M_solid->updateJac(M_dzSolid, 0);
     this->M_solid->solveLin(M_dzSolid, M_rhs_dz, tol, *M_BCh_dz);
-    std::cout << "dz norm       = " << norm_inf(M_dzSolid) << std::endl;
-    std::cout << "residual norm = " << norm_inf(M_solid->residual()) << std::endl;
+    Debug(6215) << "dz norm       = " << norm_inf(M_dzSolid) << "\n";
+    Debug(6215) << "residual norm = " << norm_inf(M_solid->residual()) << "\n";
 }
 
 
@@ -425,12 +426,12 @@ void steklovPoincare::solveInvLinearSolid()
 
     Real tol       = 1.e-10;
 
-    std::cout << "rhs_dz norm   = " << norm_inf(M_rhs_dz) << std::endl;
+    Debug(  6215 ) << "rhs_dz norm   = " << norm_inf(M_rhs_dz) << "\n";
     this->M_solid->setRecur(1);
     this->M_solid->updateJac(M_dzSolid, 0);
     this->M_solid->solveLin(M_dzSolid, M_rhs_dz, tol, *M_BCh_dz_inv);
-    std::cout << "dz norm       = " << norm_inf(M_dzSolid) << std::endl;
-    std::cout << "residual norm = " << norm_inf(M_solid->residual()) << std::endl;
+    Debug(  6215 ) << "dz norm       = " << norm_inf(M_dzSolid) << "\n";
+    Debug(  6215 ) << "residual norm = " << norm_inf(M_solid->residual()) << "\n";
 }
 
 
@@ -447,7 +448,7 @@ void  steklovPoincare::invSfPrime(const Vector& res,
 
     M_solid->d() = ZeroVector(M_solid->d().size());
     std::cout << "norm_inf residual FSI = " << norm_inf(M_residualFSI);
-//    this->M_fluid.updateDispVelo();
+
     solveLinearFluid();
 
     Vector deltaLambda = this->M_fluid->getDeltaLambda();
@@ -486,8 +487,8 @@ void steklovPoincare::invSfSsPrime(const Vector& _res,
                                    double _linearRelTol,
                                    Vector& _muk)
 {
-        // AZTEC specifications for the second system
-    int    data_org[AZ_COMM_SIZE];   // data organisation for J
+    // AZTEC specifications for the second system
+    int    data_org[AZ_COMM_SIZE];     // data organisation for J
     int    proc_config[AZ_PROC_SIZE];  // Processor information:
     int    options[AZ_OPTIONS_SIZE];   // Array used to select solver options.
     double params[AZ_PARAMS_SIZE];     // User selected solver paramters.
@@ -519,8 +520,8 @@ void steklovPoincare::invSfSsPrime(const Vector& _res,
 
     // data containing the matrices C, D, trD and H as pointers
     // are passed through A_ii and pILU_ii:
-    AZ_set_MATFREE(J, &M_dataJacobian, my_matvecSfSsPrimePrec);
-//    AZ_set_MATFREE(J, &M_dataJacobian, my_matvecSfSsPrime);
+
+    AZ_set_MATFREE(J, &M_dataJacobian, my_matvecSfSsPrime);
 
     std::cout << "  o-  Solving Jacobian system... ";
     Chrono chrono;
@@ -542,54 +543,8 @@ void steklovPoincare::invSfSsPrime(const Vector& _res,
     AZ_matrix_destroy(&J);
 }
 
+
 void my_matvecSfSsPrime(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
-{
-    // Extraction of data from J
-    steklovPoincare::DataJacobian* my_data = static_cast< steklovPoincare::DataJacobian* >(AZ_get_matvec_data(J));
-
-    UInt dim = my_data->M_pFS->dzSolid().size();
-
-    double xnorm =  AZ_gvector_norm(dim, -1, z, proc_config);
-    std::cout << " ***** norm (z)  = " << xnorm << std::endl<< std::endl;
-
-    Vector jz(dim);
-    Vector zSolid(dim);
-
-    if ( xnorm == 0.0 )
-        for (int i=0; i <(int) dim; ++i)
-            {
-                Jz[i]  = 0.0;
-            }
-    else
-    {
-        zSolid =  my_data->M_pFS->getSolidInterfaceOnSolid(z);
-
-        for (int i = 0; i <(int) dim; ++i)
-        {
-            my_data->M_pFS->solid().d()[i] =  zSolid[i];
-        }
-
-        my_data->M_pFS->fluid().updateDispVelo();
-        my_data->M_pFS->solveLinearFluid();
-
-        my_data->M_pFS->solveLinearSolid();
-
-        my_data->M_pFS->setResidualS(my_data->M_pFS->solid().residual());
-        my_data->M_pFS->setResidualF(my_data->M_pFS->fluid().residual());
-
-        my_data->M_pFS->getResidualFSIOnSolid(jz);
-
-        for (int i = 0; i < (int) dim; ++i)
-            Jz[i] =  jz[i];
-    }
-
-    std::cout << " ***** norm (Jz) = "
-              << AZ_gvector_norm(dim, -1, Jz, proc_config)
-              << std::endl << std::endl;
-}
-
-
-void my_matvecSfSsPrimePrec(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
 {
     // Extraction of data from J
     steklovPoincare::DataJacobian* my_data = static_cast< steklovPoincare::DataJacobian* >(AZ_get_matvec_data(J));
@@ -637,6 +592,7 @@ void my_matvecSfSsPrimePrec(double *z, double *Jz, AZ_MATRIX *J, int proc_config
 Vector steklovPoincare::DDNprecond(Vector const &_z)
 {
     std::cout << "Domain Decompostion Newton Precond. using ";
+
     Vector Pz(_z.size());
 
     setResidualFSI(_z);
@@ -648,9 +604,16 @@ Vector steklovPoincare::DDNprecond(Vector const &_z)
     {
         case NEUMANN_DIRICHLET:
             // Neumann-Dirichlet preconditioner
-            std::cout << " Neumann-Dirichlet Precond ... \n" << std::endl;
-            solveInvLinearFluid();
-            Pz = getFluidInterfaceOnSolid(M_dzFluid);
+            {
+                std::cout << " Neumann-Dirichlet Precond ... \n" << std::endl;
+                solveInvLinearFluid();
+//            Pz = getFluidInterfaceOnSolid(M_dzFluid);
+                Vector deltaLambda = this->M_fluid->getDeltaLambda();
+                transferOnInterface(deltaLambda,
+                                    M_fluid->BC_fluid(),
+                                    "Interface",
+                                    Pz);
+            }
             break;
         case DIRICHLET_NEUMANN:
             // Dirichlet-Neumann preconditioner
