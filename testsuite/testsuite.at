@@ -66,6 +66,7 @@ m4_include([test_ns_bcvec/testsuite.at])
 m4_include([test_ns_cyl/testsuite.at])
 m4_include([test_ns_cyl_flux/testsuite.at])
 m4_include([test_ns_ipstab/testsuite.at])
+m4_include([test_levelset_ipstab/testsuite.at])
 #m4_include([lifesolver/testsuite.at])
 
 AT_BANNER([test_ns_sstress test is broken, skipping/disabling it for now])
