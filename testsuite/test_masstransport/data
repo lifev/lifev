@@ -1,6 +1,6 @@
 # -*- getpot -*- (GetPot mode activation for emacs)
 #-------------------------------------------------
-#        Data file for NavierStokes ACT PC
+#   Data file for NavierStokes and Masstransport 
 #-------------------------------------------------
 
 
@@ -10,13 +10,13 @@
 [./physics]
 density         = 1.0               # density
 viscosity       = 0.035             # viscosity
-inittime        = 0.50              # inittime
-endtime         = 4.00              # endtime
+inittime        = 0.00              # inittime
+endtime         = 0.10              # endtime
 
 
 [../discretization]
 mesh_dir  = ../data/mesh/inria/  # the directory where the mesh file is
-mesh_file = tube-mass-transp.mesh     # mesh file
+mesh_file = cyltetra.mesh     # mesh file
 timestep  = 0.1              # timestep
 
 
@@ -60,7 +60,7 @@ diffusivity     = 2.87e-7           # diffusivity
 # Till now we compute fluid and mastransport on the same mesh
 [../discretization]
 mesh_dir  = ../data/mesh/inria/  # the directory where the mesh file is
-mesh_file = tube-mass-transp.mesh     # mesh file
+mesh_file = cyltetra.mesh     # mesh file
 
 [../aztec_o]
 output          = warnings #all_res
