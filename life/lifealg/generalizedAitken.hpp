@@ -34,7 +34,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 namespace LifeV
 {
     
-    template<class Vector, class Real>
     class generalizedAitken
     {
         /*!
@@ -63,6 +62,9 @@ namespace LifeV
 
     private:
 
+        //! fluid/structure interface dof count
+        UInt   M_nDof;
+
         //! M_lamdba0 = \lambda_{k} M_lambda1 = \lambda_{k - 1}
         Vector M_lambda0;
         Vector M_lambda1;
@@ -77,17 +79,15 @@ namespace LifeV
         Real   M_omegaS;
         Real   M_omegaF;
 
-        //! fluid/structure interface dof count
 
-        int    M_nDof;
     };
 
 
 // Constructors
 
-    template<class Vector, class Real>
-    generalizedAitken<Vector,  Real>::
-    generalizedAitken(const int _nDof, const Real _defOmegaS, const Real _defOmegaF):
+    generalizedAitken::generalizedAitken(const int _nDof,
+                                         const Real _defOmegaS,
+                                         const Real _defOmegaF):
         M_nDof         (_nDof),
         M_lambda0      (_nDof),
         M_lambda1      (_nDof),
@@ -106,7 +106,7 @@ namespace LifeV
     // Destructor
     //
     /*template<class Vector, class Real>
-    generalizedAitken<Vector,  Real>::
+      generalizedAitken<Vector,  Real>::
     ~generalizedAitken()
     {
     }*/
@@ -120,15 +120,15 @@ namespace LifeV
         _muF is \mu_f^k
     */
     
-    template<class Vector, class Real>
-    Vector generalizedAitken<Vector, Real>::computeLambda(const Vector &_muS, const Vector &_muF)
+    Vector generalizedAitken::computeLambda(const Vector &_muS,
+                                            const Vector &_muF)
     {
         Vector lambda(M_nDof);
         
         lambda = M_lambda0 - M_lambda1;
 
         Real   a11 = 0.;
-        Real   a12 = 0.;
+        Real   a21 = 0.;
         Real   a22 = 0.;
         Real   b1  = 0.;
         Real   b2  = 0.;
@@ -136,7 +136,7 @@ namespace LifeV
         Vector muS   (M_nDof);
         Vector muF   (M_nDof);
         
-        for (int ii = 0; ii < M_nDof; ++ii)
+        for (UInt ii = 0; ii < M_nDof; ++ii)
         {
             muS[ii] = _muS[ii] - M_muS[ii];
             muF[ii] = _muF[ii] - M_muF[ii];
@@ -164,12 +164,11 @@ namespace LifeV
             omega2 = 0.;
             omega1 = b1/a11*a11;
         }
-
-        for (int ii = 0; ii < M_nDof; ++ii)
-            lambda = lambda + omega1*getMuF[ii] + omega2*getMuS[ii];
+        
+        lambda = lambda + omega1*muF + omega2*muS;
                 
-        lambda1 = lambda0;
-        lambda0 = lambda;
+        M_lambda1 = M_lambda0;
+        M_lambda0 = lambda;
 
         M_muF   = _muF;
         M_muS   = _muS;
