@@ -24,6 +24,7 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
+LDADD                   += -lg2c 
 TESTS			= test_mesh
 check_PROGRAMS		= test_mesh
 
