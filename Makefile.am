@@ -35,7 +35,8 @@ EXTRA_DIST = configure.in.in configure.in.bot  configure.in.mid subdirs configur
 MAINTAINERCLEANFILES = configure.files subdirs
 
 
-SUBDIRS = admin doc life testsuite tools
+#SUBDIRS = admin doc life testsuite tools
+SUBDIRS = $(TOPSUBDIRS)
 
 include $(top_srcdir)/admin/Doxyfile.am
 

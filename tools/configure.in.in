@@ -1,0 +1,7 @@
+AC_CHECK_BOOST_PRG_EXEC_MONITOR
+AC_CHECK_BOOST_FILESYSTEM
+
+if test x$boost_filesystem_error = xyes -o x$boost_prg_exec_monitor_error = xyes; then
+ DO_NOT_COMPILE="$DO_NOT_COMPILE tools"
+fi
+
