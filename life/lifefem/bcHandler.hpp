@@ -664,7 +664,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
 		if ( where->dataVector() )
 		  { // With data vector
 		    UInt type = where->pointerToBCVector()->type() ; 
-		    if ( type = 0 )
+		    if ( type == 0 )
 		      {
                           // if the BC is a vector which values don't need to be integrated
 			for ( ID l = 1; l <= nDofpF; ++l )
