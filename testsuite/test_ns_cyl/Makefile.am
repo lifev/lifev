@@ -22,16 +22,9 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-
-SUBDIRS		= data  \
-                  test_mesh test_matrix test_naturalbc test_essentialbc \
-                  test_q1 test_p2 test_mixte test_rt test_rtcyl test_fe \
-                  test_postproc test_bdf \
-		  test_linearelasticity \
-		  test_darcy \
-		  development
-
-check-qmtest: 
-	qmtest -D $(srcdir) run
-	qmtest -D $(srcdir) summarize
-
+SUBDIRS         =  
+check_PROGRAMS = testcyl 
+noinst_HEADERS = ud_functions.hpp 
+LDADD = $(life_libs)
+testcyl_SOURCES = main.cpp 
+EXTRA_DIST = data 
