@@ -514,7 +514,7 @@ template <typename Mesh>
 void VenantKirchhofSolver<Mesh>::
 updateJac( Vector& sol, int iter )
 {
-    std::cout << "    o-  Solid: Updating JACOBIAN in iter " << iter << std::endl << "  ... ";
+    std::cout << "    o-  Solid: Updating JACOBIAN in iter " << iter << "  ... ";
 
     Chrono chrono;
     chrono.start();
@@ -587,7 +587,7 @@ solveJac( Vector &step, const Vector& res, double& linear_rel_tol)
 
     // for BC treatment (done at each time-step)
     Real tgv = 1.0;
-    std::cout << "  o-  Applying boundary conditions... ";
+    std::cout << "   o-  Applying boundary conditions... ";
     chrono.start();
 
     // BC manage for the velocity
@@ -600,7 +600,7 @@ solveJac( Vector &step, const Vector& res, double& linear_rel_tol)
 
     _linearSolver.setRecursionLevel( _recur );
 
-    std::cout << "  o-  Solving system... "<< std::flush;
+    std::cout << "   o-  Solving system... "<< std::flush;
     chrono.start();
     _linearSolver.solve( step , _f);
     chrono.stop();
@@ -653,7 +653,7 @@ solveJac(Vector &step, const Vector& res, double& linear_rel_tol, BCHandler &BCd
 //    AZ_matrix_destroy( &J );
 //    AZ_precond_destroy( &prec_J );
 
-    _residual_d = _C*step - _rhsWithoutBC;
+    _residual_d = _C*step;
 //    bcManageMatrix( _J, _mesh, this->_dof, _BCh, _feBd, tgv );
 }
 
@@ -669,7 +669,7 @@ solveLin( Vector &step, const Vector& res, double linear_rel_tol, BCHandler &BCd
 
     // for BC treatment (done at each time-step)
     Real tgv = 1.0;
-    std::cout << "  o-  Applying boundary conditions... ";
+    std::cout << "  S-  Applying boundary conditions... ";
     chrono.start();
 
     // BC manage for the velocity
@@ -690,8 +690,7 @@ solveLin( Vector &step, const Vector& res, double linear_rel_tol, BCHandler &BCd
 
     _w = ( 2.0 / this->_dt ) * step - _rhs_w;
 
-    _residual_d = _C*step; // - _rhsWithoutBC;
-
+    _residual_d = _C*step;
 }
 
 
