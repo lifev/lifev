@@ -3,9 +3,26 @@
 namespace LifeV
 {
 
+// unnamed namespace to hide the symbol
+namespace
+{
+// Returns the trace of matrix A
+template<typename P>
+P Trace(KNM<P>& A){
+  ASSERT_PRE(A.N() == A.M(), "Can only compute the trace of a square matrix")
+
+  P s = 0.;
+
+  for(int i = 0; i < A.N(); i++)
+    s += A(i, i);
+
+  return s;
+}
+}
+
 CurrentFEDG::CurrentFEDG(const RefFEDG& _refFE, const GeoMap& _geoMap, const QuadRule& _qr):
   nbGeoNode(_geoMap.nbDof), nbNode(_refFE.nbDof), nbCoor(_refFE.nbCoor),
-  nbQuadPt(_qr.nbQuadPt), 
+  nbQuadPt(_qr.nbQuadPt),
   nbDiag( _refFE.elPattern.nbDiag() ), nbUpper( _refFE.elPattern.nbUpper() ) , nbPattern( _refFE.elPattern.nbPattern() ),
   point(nbGeoNode,nbCoor),
   refFE(_refFE), geoMap(_geoMap), qr(_qr),
@@ -25,7 +42,7 @@ CurrentFEDG::CurrentFEDG(const RefFEDG& _refFE, const GeoMap& _geoMap, const Qua
       for(int icoor = 0; icoor < nbCoor; icoor++){
 	dPhiRef(i, icoor, ig) = refFE.dPhi(i, icoor, ig, qr);
         for(int jcoor = 0; jcoor < nbCoor; jcoor++)
-          dPhiRef2(i, icoor, jcoor, ig) = refFE.d2Phi(i, icoor, jcoor, ig, qr); 
+          dPhiRef2(i, icoor, jcoor, ig) = refFE.d2Phi(i, icoor, jcoor, ig, qr);
       } // for icoor
     } // for i
 
@@ -119,7 +136,7 @@ void CurrentFEDG::_comp_jacobian()
   // determinant on integrations points
 
 #if defined(TWODIM)
-  // *** 2D code *** 
+  // *** 2D code ***
   Real a,b,c,d;
   for(int ig=0;ig<nbQuadPt;ig++){
     a = jacobian(0,0,ig);
@@ -130,7 +147,7 @@ void CurrentFEDG::_comp_jacobian()
     weightDet(ig) = detJac(ig) * qr.weight(ig);
   }
 #elif defined(THREEDIM)
-  // *** 3D code *** 
+  // *** 3D code ***
   Real a,b,c,d,e,f,g,h,i,ei,fh,bi,ch,bf,ce;
   for(int ig=0;ig<nbQuadPt;ig++){
     a = jacobian(0,0,ig);
@@ -175,7 +192,7 @@ void CurrentFEDG::_comp_inv_jacobian()
     // determinant on integrations points an inverse tranpose jacobian
 
 #if defined(TWODIM)
-    // *** 2D code *** 
+    // *** 2D code ***
     Real a,b,c,d,det;
     for(int ig=0;ig<nbQuadPt;ig++){
       a = jacobian(0,0,ig);
@@ -186,12 +203,12 @@ void CurrentFEDG::_comp_inv_jacobian()
       detJac(ig) = det;
       weightDet(ig) = detJac(ig) * qr.weight(ig);
       tInvJac(0,0,ig) = d/det ;
-      tInvJac(0,1,ig) =-c/det ;   
+      tInvJac(0,1,ig) =-c/det ;
       tInvJac(1,0,ig) =-b/det ;
       tInvJac(1,1,ig) = a/det ;
     }
 #elif defined(THREEDIM)
-    // *** 3D code *** 
+    // *** 3D code ***
     Real a,b,c,d,e,f,g,h,i,ei,fh,bi,ch,bf,ce,det;
     for(int ig=0;ig<nbQuadPt;ig++){
       a = jacobian(0,0,ig);
@@ -215,11 +232,11 @@ void CurrentFEDG::_comp_inv_jacobian()
       tInvJac(0,0,ig) = (  ei - fh )/det ;
       tInvJac(0,1,ig) = (-d*i + f*g)/det ;
       tInvJac(0,2,ig) = ( d*h - e*g)/det ;
-      
+
       tInvJac(1,0,ig) = ( -bi + ch )/det ;
       tInvJac(1,1,ig) = ( a*i - c*g)/det ;
       tInvJac(1,2,ig) = (-a*h + b*g)/det ;
-      
+
       tInvJac(2,0,ig) = (  bf - ce )/det ;
       tInvJac(2,1,ig) = (-a*f + c*d)/det ;
       tInvJac(2,2,ig) = ( a*e - b*d)/det ;
@@ -257,7 +274,7 @@ void CurrentFEDG::_comp_inv_mass()
   ASSERT_PRE(_hasJac, "Mass matrix computation needs updated Jacobian")
 #endif
     Real s;
-  
+
   // Compute mass matrix
 
     for(int i = 0; i < nbNode; i++){
@@ -348,16 +365,5 @@ void MatMult(MATRIX& A, MATRIX& B, MATRIX& C){
     }
 }
 
-// Returns the trace of matrix A
-template<typename P>
-P Trace(KNM<P>& A){
-  ASSERT_PRE(A.N() == A.M(), "Can only compute the trace of a square matrix")
 
-  P s = 0.;
-
-  for(int i = 0; i < A.N(); i++)
-    s += A(i, i);
-
-  return s;
-}
 }
