@@ -89,14 +89,24 @@ private:
 
     Real                    M_linearRelTol;
 
-    void eval        (const Vector &_disp,
-                      const int     _status);
+
+    void eval           (const  Vector &disp,
+                         int    status,
+                         Vector &dispNew,
+                         Vector &veloStruct);
+
+    void  invSfPrime  (const Vector &res,
+                       double       linear_rel_tol,
+                       Vector       &step);
+
+    void  invSsPrime  (const Vector &res,
+                       double       linear_rel_tol,
+                       Vector       &step);
 
 
-    Vector invSfPrime  (const Vector& _res);
-    Vector invSsPrime  (const Vector& _res);
-
-    Vector invSfSsPrime(const Vector& _res);
+    void  invSfSsPrime(const Vector &res,
+                       double       linear_rel_tol,
+                       Vector       &step);
 
     void computeResidualFSI();
 
@@ -105,6 +115,11 @@ private:
     Vector getSolidInterfaceOnFluid(Vector &_vec);
     Vector getFluidInterfaceOnSolid(Vector &_vec);
     Vector setDispOnInterface(const Vector &_disp);
+
+    void transferOnInterface(const Vector      &_vec1,
+                             const BCHandler   &_BC,
+                             const std::string &_BCName,
+                             Vector            &_vec2);
 
     DataJacobianSP            M_dataJacobian;
 };

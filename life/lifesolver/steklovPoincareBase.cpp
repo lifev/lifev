@@ -44,15 +44,22 @@ steklovPoincare::~steklovPoincare()
 // Residual computation
 //
 
-void steklovPoincare::eval(const Vector &_disp,
-                           const int     _status)
+void steklovPoincare::eval(const Vector& disp,
+                           int           status,
+                           Vector&       dispNew,
+                           Vector&       velo)
 {
-//     this->M_solid.d() = _disp;
-
-    if(_status) M_nbEval = 0; // new time step
+    if(status) M_nbEval = 0; // new time step
     M_nbEval++;
 
-    M_solid.d() = setDispOnInterface(_disp);
+    UInt nDofInterface;
+    nDofInterface = M_fluid.BC_fluid()[1].list_size();
+
+
+//    Vector sol(disp.size());
+
+    M_solid.d() = setDispOnInterface(disp);
+//    M_solid.d() = disp;
 
     M_fluid.updateMesh(M_time);
     M_fluid.iterate   (M_time);
@@ -60,42 +67,39 @@ void steklovPoincare::eval(const Vector &_disp,
     M_solid.setRecur(0);
     M_solid.iterate();
 
-//     M_solid.postProcess();
-//     M_fluid.postProcess();
+    M_solid.postProcess();
+    M_fluid.postProcess();
+
+    dispNew = M_solid.d();
+    velo    = M_solid.w();
+
+    std::cout << "                ::: norm(disp     ) = "
+              << norm_inf(disp) << std::endl;
+    std::cout << "                ::: norm(dispNew  ) = "
+              << norm_inf(dispNew) << std::endl;
+    std::cout << "                ::: norm(velo     ) = "
+              << norm_inf(velo) << std::endl;
 }
 
-
-void steklovPoincare::evalResidual(Vector       &_res,
-                                   const Vector &_disp,
-                                   const int     _iter)
+void steklovPoincare::evalResidual(Vector &res,
+                                   const Vector &disp,
+                                   const int iter)
 {
     int status = 0;
 
-    if(_iter == 0) status = 1;
+    if(iter == 0) status = 1;
 
-    std::cout << "*** Residual computation g(x_" << _iter <<")"
-              << " at time " << time();
+    std::cout << "*** Residual computation g(x_" << iter <<" )";
     if (status) std::cout << " [NEW TIME STEP] ";
     std::cout << std::endl;
 
-    eval(_disp, status);
+    eval(disp, status, M_dispStruct, M_velo);
 
-    Vector dispNew = this->M_solid.d();
-    Vector velo    = this->M_solid.w();
-
-    std::cout << "norm(disp     ) = "
-              << norm_inf(_disp) << std::endl;
-    std::cout << "norm(dispNew  ) = "
-              << norm_inf(dispNew) << std::endl;
-    std::cout << "norm(velo     ) = "
-              << norm_inf(velo) << std::endl;
-
-    M_residualS = this->M_solid.residual();
-    M_residualF = this->M_fluid.residual();
+    M_residualS = M_solid.residual();
+    M_residualF = M_fluid.residual();
 
     computeResidualFSI();
-
-    _res = getResidualFSIOnSolid();
+    res = getResidualFSIOnSolid();
 
     std::cout << "Max ResidualF   = " << norm_inf(M_residualF)
               << std::endl;
@@ -104,7 +108,6 @@ void steklovPoincare::evalResidual(Vector       &_res,
     std::cout << "Max ResidualFSI = " << norm_inf(M_residualFSI)
               << std::endl;
 }
-
 
 //
 // Boundary conditions setup
@@ -182,7 +185,7 @@ void steklovPoincare::setUpBC(function_type _bcf,
 
     BCVectorInterface du_wall(M_residualFSI,
                               dim_fluid,
-                              M_dofStructureToFluidMesh);
+                              M_dofMeshToFluid);
     // Passing the residual to the linearized structure: \sigma -> dz
     BCVectorInterface dg_wall(M_residualFSI,
                               dim_fluid,
@@ -207,47 +210,60 @@ void steklovPoincare::setUpBC(function_type _bcf,
 //
 
 
-void  steklovPoincare::solveJac(Vector         &_muk,
-                                const Vector   &_res,
-                                const double    _linearRelTol)
+void  steklovPoincare::solveJac(Vector &muk,
+                                const Vector  &_res,
+                                double        _linearRelTol)
 {
-    M_linearRelTol = _linearRelTol;
+    UInt precChoice = 0;
 
-    std::cout << "  o-  Solving the preconditionned system... ";
-
-    Chrono chrono;
-
-    switch(M_precond)
+    switch(precChoice)
     {
         case 0:
-            // Dirichlet-Neumann preconditioner
-            _muk = invSfPrime(_res);
+            // Neumann-Dirichlet preconditioner
+            invSfPrime(_res, _linearRelTol, muk);
             break;
         case 1:
             // Dirichlet-Neumann preconditioner
-            _muk = invSsPrime(_res);
+            invSsPrime(_res, _linearRelTol, muk);
             break;
         case 2:
-            // Dirichlet-Neumann preconditioner
-        {
+            // Neumann-Neumann preconditioner
+	{
             Vector muF(_res.size());
             Vector muS(_res.size());
 
-            muF = invSfPrime(_res);
-            muS = invSsPrime(_res);
+            invSsPrime(_res, _linearRelTol, muS);
+            invSfPrime(_res, _linearRelTol, muF);
 
-            _muk = muS + muF;
+            std::cout << "norm_inf muS = " << norm_inf(muS) << std::endl;
+            std::cout << "norm_inf muF = " << norm_inf(muF) << std::endl;
+
+            muk = .9*muS + .1*muF;
+
+            std::cout << "norm_inf muk = " << norm_inf(muk) << std::endl;
+            // indeed, Here we should call Aitken (a different instance than
+            // the one defined in nonLinRichardson) and
+            // we should replace the defaultOmega for he nonLinRichardson
+            // to -1, such that there is no relaxation at all there.
+            //
+            // Maybe we have to define precChoice as Memeber -> M_precChoice
+            // and get the choice as input parameter with the constructor
+            // and add a memeber
+            // generalizedAitken aitkDN(...) (DN for Dirichlet Neumann)
+            // then
+            //
+            // muk = aitkDN.computeDeltaLambda( sol, muS, muF );
+            // muk = muS + muF;
         }
         break;
         default:
             // Newton preconditioner
-            _muk = invSfSsPrime(_res);
+            invSfSsPrime(_res, _linearRelTol, muk);
     }
 
-    chrono.stop();
-
-    std::cout << "done in " << chrono.diff() << " s." << std::endl;
 }
+
+
 
 void  steklovPoincare::solveLinearFluid()
 {
@@ -289,17 +305,29 @@ void  steklovPoincare::solveLinearSolid()
 //
 
 
-Vector steklovPoincare::invSfPrime(const Vector& _res)
+void  steklovPoincare::invSfPrime(const Vector& res,
+                                  double linear_rel_tol,
+                                  Vector& step)
 {
-    Vector step(_res.size());
 
-    setResidualFSI(_res);
+    setResidualFSI(res);
+    this->M_fluid.updateDispVelo();
     solveLinearFluid();
 
     Vector deltaLambda = this->M_fluid.getDeltaLambda();
 
-    step = getFluidInterfaceOnSolid(deltaLambda);
-    return step;
+//    Vector deltaL = deltaLambda;
+//    deltaL = 0.;
+//     transferOnInterface(deltaLambda,
+//                         M_BCh_du,
+//                         "Wall",
+//                         deltaL);
+    transferOnInterface(deltaLambda,
+                        M_fluid.BC_fluid(),
+                        "Interface",
+                        step);
+
+    std::cout << "deltaLambda step = " << norm_inf(step) << std::endl;
 }
 
 
@@ -309,24 +337,32 @@ Vector steklovPoincare::invSfPrime(const Vector& _res)
 
 
 
-Vector steklovPoincare::invSsPrime(const Vector& _res)
+void  steklovPoincare::invSsPrime(const Vector& res,
+                                  double linear_rel_tol,
+                                  Vector& step)
 {
-    Vector step(_res.size());
-
-    setResidualFSI(_res);
+    setResidualFSI(res);
     solveLinearSolid();
 
-    for (int i = 0; i < (int) M_dz.size(); ++i)
-        step[i] = M_dz[i];
+    step = setDispOnInterface(M_dz);
 
-    return step;
+//     for (int ii = 0; ii < step.size(); ++ii)
+//         std::cout << step[ii] << std::endl;
+
+//      for (int i = 0; i < (int) M_dz.size(); ++i)
+//          step[i] = dz()[i];
+//     for (int ii = 0; ii < step.size(); ++ii)
+//         std::cout << step[ii] << std::endl;
+
+//     return;
 }
 
 
-Vector steklovPoincare::invSfSsPrime(const Vector& _res)
+void steklovPoincare::invSfSsPrime(const Vector& res,
+                                   double linear_rel_tol,
+                                   Vector& step)
 {
-    UInt dimRes = _res.size();
-    Vector step(dimRes);
+    UInt dimRes = res.size();
 
     M_solverAztec.setTolerance(M_linearRelTol);
 
@@ -341,12 +377,10 @@ Vector steklovPoincare::invSfSsPrime(const Vector& _res)
         step[i]=0.0;
 
     chrono.start();
-    M_solverAztec.solve(step, _res);
+    M_solverAztec.solve(step, res);
     chrono.stop();
 
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
-
-    return step;
 }
 
 
@@ -634,6 +668,56 @@ Vector steklovPoincare::setDispOnInterface(const Vector &_disp)
     }
 
     return vec;
+}
+
+
+void steklovPoincare::transferOnInterface(const Vector      &_vec1,
+                                 const BCHandler   &_BC,
+                                 const std::string &_BCName,
+                                 Vector            &_vec2)
+{
+    int iBC = -1;
+    for (UInt jBC = 0; jBC < _BC.size(); jBC++)
+        if (_BC[jBC].name() == _BCName) iBC = jBC;
+    if (iBC == -1)
+    {
+        std::cout << _BCName << " not found on BC ";
+        return;
+    }
+
+//     std::cout << "iBC " << _BCName << " = " << iBC << std::endl;
+//     std::cout << std::endl;
+    // we know the BC number for each mesh, let's swap
+
+    BCBase const &BCInterface = _BC[(UInt) iBC];
+
+    UInt nDofInterface = BCInterface.list_size();
+
+//     std::cout << "nDofInterface = " << nDofInterface << std::endl;
+
+    UInt nDim = BCInterface.numberOfComponents();
+
+    UInt totalDof1 = _vec1.size()/ nDim;
+    UInt totalDof2 = _vec2.size()/ nDim;
+
+    for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)
+    {
+        ID ID1 = BCInterface(iBC)->id();
+
+        BCVectorInterface const *BCVInterface =
+            static_cast <BCVectorInterface const *>
+            (BCInterface.pointerToBCVector());
+
+        ID ID2 = BCVInterface->
+            dofInterface().getInterfaceDof(ID1);
+
+//        std::cout << "ID1 = " << ID1 << " ID2 = " << ID2 << std::endl;
+        for (UInt jDim = 0; jDim < nDim; ++jDim)
+        {
+            _vec2[ID2 - 1 + jDim*totalDof2] =
+                _vec1[ID1 - 1 + jDim*totalDof1];
+        }
+    }
 }
 
 }
