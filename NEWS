@@ -4,7 +4,8 @@ Bugs fixed in 0.1.0pre4:
 * Bug #15: data directory in testsuite
 
 New in 0.1.0pre4:
-* Lifev compiles entirely included all testsuite tests
+* 'make distcheck' works from start to finish properly
+* lifev compiles entirely included all testsuite tests
 * removed entirely testsuite/development: either created a proper 
   testsuite/test_{} test or moved the test to the lifev-sandbox
 * added lifecore/testsuite for small tests programs related to lifecore

@@ -49,4 +49,5 @@ EXTRA_DIST = $(TEX_SRC) $(IMAGES_SRC) life.bib
 MOSTLYCLEANFILES	= docfe.log docfe.aux docfe.pdf docfe.blg docfe.bbl \
 			  jfg.log jfg.aux jfg.pdf jfg.blg jfg.bbl \
 			  lifev-dev.log lifev-dev.glo lifev-dev.idx lifev-dev.aux lifev-dev.out \
-                          lifev-dev.pdf lifev-dev.toc lifev-dev.lof lifev-dev.lot lifev-dev.blg lifev-dev.bbl 
+                          lifev-dev.pdf lifev-dev.toc lifev-dev.lof lifev-dev.lot lifev-dev.blg lifev-dev.bbl \
+			  lifev-dev_generalities.aux lifev-dev_conventions.aux lifev-dev_overview.aux

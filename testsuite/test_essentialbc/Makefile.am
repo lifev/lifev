@@ -30,4 +30,3 @@ TESTS			= test_essentialbc
 check_PROGRAMS		= test_essentialbc
 
 test_essentialbc_SOURCES	= main.cpp
-
