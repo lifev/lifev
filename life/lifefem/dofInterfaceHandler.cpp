@@ -126,13 +126,13 @@ UInt DofInterfaceHandler::NbInterfaceUnknowns() const
 DofInterface3Dto2D& DofInterfaceHandler::operator[] ( const UInt& i )
 {
     ASSERT_PRE( _nbNeigh == _neighList.size(), "Some neighbors have not been added to the list" );
-    ASSERT_BD( i >= 0 && i < _nbNeigh );
+    ASSERT_BD( i < _nbNeigh );
     return *_neighList[ i ];
 }
 const DofInterface3Dto2D& DofInterfaceHandler::operator[] ( const UInt& i ) const
 {
     ASSERT_PRE( _nbNeigh == _neighList.size(), "Some neighbors have not been added to the list" );
-    ASSERT_BD( i >= 0 && i < _nbNeigh );
+    ASSERT_BD( i < _nbNeigh );
     return *_neighList[ i ];
 }
 
@@ -141,13 +141,13 @@ const DofInterface3Dto2D& DofInterfaceHandler::operator[] ( const UInt& i ) cons
 const Vector & DofInterfaceHandler::InIBC( const UInt & i ) const
 {
     ASSERT_PRE( _nbNeigh == _InIBCList.size(), "Some Vectors have not been added to the list (InIBC)." );
-    ASSERT_BD( i >= 0 && i < _nbNeigh );
+    ASSERT_BD( i < _nbNeigh );
     return _InIBCList[ i ];
 }
 Vector & DofInterfaceHandler::InIBC( const UInt & i )
 {
     ASSERT_PRE( _nbNeigh == _InIBCList.size(), "Some Vectors have not been added to the list (InIBC)." );
-    ASSERT_BD( i >= 0 && i < _nbNeigh );
+    ASSERT_BD( i < _nbNeigh );
     return _InIBCList[ i ];
 }
 
@@ -170,13 +170,13 @@ Vector & DofInterfaceHandler::InIBC_byRefInterf( const Int & refinterf )
 const Vector & DofInterfaceHandler::OutIBC( const UInt & i ) const
 {
     ASSERT_PRE( _nbNeigh == _OutIBCList.size(), "Some Vectors have not been added to the list (OutIBC)." );
-    ASSERT_BD( i >= 0 && i < _nbNeigh );
+    ASSERT_BD( i < _nbNeigh );
     return _OutIBCList[ i ];
 }
 Vector & DofInterfaceHandler::OutIBC( const UInt & i )
 {
     ASSERT_PRE( _nbNeigh == _OutIBCList.size(), "Some Vectors have not been added to the list (OutIBC)." );
-    ASSERT_BD( i >= 0 && i < _nbNeigh );
+    ASSERT_BD( i < _nbNeigh );
     return _OutIBCList[ i ];
 }
 
