@@ -173,13 +173,16 @@ namespace LifeV
             else if (a22 == 0) 
             {
                 omegaS = 0.;
-                omegaF = b1/a11*a11;
+                omegaF = b1/(a11*a11);
             }
             else if (a11 == 0)
             {
-                omegaS = b2/a22*a22;
+                omegaS = b2/(a22*a22);
                 omegaF = 0.;
             }
+
+            std::cout << "generalizedAitken: omegaS = " << omegaS
+                      << " omegaF = " << omegaF << std::endl;
                 
             deltaLambda = omegaF*muF + omegaS*muS;
             
@@ -197,10 +200,14 @@ namespace LifeV
                         
             deltaLambda = M_defOmegaF*_muF + M_defOmegaS*_muS;            
 
+            std::cout << "generalizedAitken: omegaS = " << M_defOmegaS
+                      << " omegaF = " << M_defOmegaF << std::endl;
+
             M_lambda    = _lambda;
             M_muF       = _muF;
             M_muS       = _muS;
         }
+
         
         return deltaLambda;
     }
