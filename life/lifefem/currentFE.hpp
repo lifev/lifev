@@ -114,6 +114,10 @@ public:
   void coorMap(Real& x,Real& y,Real& z,
 	       const Real & xi,const Real & eta, const Real &
 	       zeta) const;
+  /*! 
+    return the barycenter of the element
+   */
+  void barycenter(Real& x, Real& y, Real& z);
   /*!  return (x,y,z) = the global coordinates of the quadrature point ig
     in the current element. \warning this function is almost obsolete since if
     you call the function updateFirstDerivQuadPt rather than updateFirstDeriv

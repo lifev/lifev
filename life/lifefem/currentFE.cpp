@@ -71,6 +71,22 @@ void CurrentFE::coorMap(Real& x,Real& y,Real& z,
 #endif
   }
 }
+//========Barycenter===============================
+void CurrentFE::barycenter(Real& x,Real& y,Real& z)
+{
+  x = y = z = 0.;
+  for(int i=0;i<nbGeoNode;i++){ 
+    x += point(i,0);
+    y += point(i,1);
+#if defined(THREEDIM)
+    z += point(i,2);
+#endif  
+  }
+  x /= nbGeoNode;
+  y /= nbGeoNode;
+  z /= nbGeoNode;
+}
+//=====End of Barycenter=============================
 //----------------------------------------------------------------------
 Real CurrentFE::measure() const
 {
