@@ -22,4 +22,4 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-SUBDIRS		= inria mesh++
+SUBDIRS		= inria mesh++ netgen
