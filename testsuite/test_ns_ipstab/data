@@ -21,11 +21,11 @@ order_bdf       = 1
 linearized      = 1
 diagonalize     = 1 # weight, 0=off
 div_beta_u_v    = 0 # 1=on, 0=off
+p_order         = 1
 
 [../miscellaneous]
 verbose         = 1
 steady          = 1
-neumann         = 0
 
 [../aztec]
 solver          = gmres
@@ -70,3 +70,5 @@ gammaPress = 0.03125
 a = 0.75
 b = 0.75
 sigma = 0
+#neumannList =
+dirichletList = 1

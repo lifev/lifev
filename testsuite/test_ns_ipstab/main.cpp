@@ -36,11 +36,31 @@ P1/P1 or P2/P2 FEM with Interior Penalty (IP) stabilization
 #include <picard.hpp>
 
 #include <iostream>
+#include <set>
+
+using namespace LifeV;
+
+std::set<UInt> parseList( const std::string& list )
+{
+    std::string stringList = list;
+    std::set<UInt> setList;
+    if ( list == "" )
+    {
+        return setList;
+    }
+    UInt commaPos = 0;
+    while ( commaPos != std::string::npos )
+    {
+        commaPos = stringList.find( "," );
+        setList.insert( atoi( stringList.substr( 0, commaPos ).c_str() ) );
+        stringList = stringList.substr( commaPos+1 );
+    }
+    setList.insert( atoi( stringList.c_str() ) );
+    return setList;
+}
 
 int main( int argc, char** argv )
 {
-    using namespace LifeV;
-
     // Reading from data file
     //
     GetPot commandLine( argc, argv );
@@ -52,23 +72,28 @@ int main( int argc, char** argv )
     Problem::setParamsFromGetPot( dataFile );
 
     // Boundary conditions
-    bool neumann = dataFile( "fluid/miscellaneous/neumann", 0 );
+    std::string dirichletList = dataFile( "fluid/problem/dirichletList", "" );
+    std::set<UInt> dirichletMarkers = parseList( dirichletList );
+    std::string neumannList = dataFile( "fluid/problem/neumannList", "" );
+    std::set<UInt> neumannMarkers = parseList( neumannList );
 
-    BCHandler::BCHints hint =
-        neumann ? BCHandler::HINT_BC_NONE : BCHandler::HINT_BC_ONLY_ESSENTIAL;
+    BCHandler::BCHints hint = neumannMarkers.size() != 0 ?
+        BCHandler::HINT_BC_NONE : BCHandler::HINT_BC_ONLY_ESSENTIAL;
     BCHandler bcH( 0, hint );
-
     BCFunctionBase uWall( Problem::uexact );
     BCFunctionBase uNeumann( Problem::fNeumann );
-    bcH.addBC( "Wall", 1, Essential, Full, uWall, 3 );
-    if ( neumann )
+
+    for (std::set<UInt>::const_iterator it = dirichletMarkers.begin();
+         it != dirichletMarkers.end(); ++it)
     {
-        bcH.addBC( "Flux", 2, Natural, Full, uNeumann, 3 );
+        bcH.addBC( "Wall", *it, Essential, Full, uWall, 3 );
     }
-    else
+    for (std::set<UInt>::const_iterator it = neumannMarkers.begin();
+         it != neumannMarkers.end(); ++it)
     {
-        bcH.addBC( "Wall", 2, Essential, Full, uWall, 3 );
+        bcH.addBC( "Flux", *it, Natural, Full, uNeumann, 3 );
     }
+
     //bcH.addBC( "Wall", 2, Essential, Component, bcf, icomp );
     //BCFunctionBase bcf( afZero );
     //BCFunctionBase inFlow( u2 );
@@ -77,13 +102,29 @@ int main( int argc, char** argv )
     //bcH.addBC( "Edges", 20, Essential, Full, bcf, 3 );
 
     //bcH.showMe();
+
     // fluid solver
-    const RefFE& refFE = feTetraP1;
-    const QuadRule& qR = quadRuleTetra4pt;
-    const QuadRule& bdQr = quadRuleTria3pt;
+    const RefFE* refFE;
+    const QuadRule* qR;
+    const QuadRule* bdQr;
+
+    if ( dataFile( "fluid/discretization/p_order", 1 ) == 2 )
+    {
+        // P2 only if specified 2
+        refFE = &feTetraP2;
+        qR = &quadRuleTetra15pt; // DoE 5
+        bdQr = &quadRuleTria3pt; // DoE 1
+    }
+    else
+    {
+        // P1 by default
+        refFE = &feTetraP1;
+        qR = &quadRuleTetra4pt; // DoE 2
+        bdQr = &quadRuleTria3pt; // DoE 2
+    }
 
     NavierStokesSolverIP< RegionMesh3D<LinearTetra> >
-        fluid( dataFile, refFE, qR, bdQr, bcH );
+        fluid( dataFile, *refFE, *qR, *bdQr, bcH );
     //fluid.showMe();
 
     // linearization of fluid
