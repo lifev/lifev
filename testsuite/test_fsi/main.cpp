@@ -119,9 +119,7 @@ struct FSIChecker
         data_file( _data_file ),
         oper( _oper ),
         prec( _prec )
-        {
-
-        }
+        {}
     void
     operator()()
         {
@@ -153,28 +151,38 @@ int main(int argc, char** argv)
     const char* data_file_name = command_line.follow("data", 2, "-f","--file");
     GetPot data_file(data_file_name);
 
+    const bool check = command_line.search(2, "-c", "--check");
+
+    if (check)
+    {
+        LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+
+        FSIChecker __sp_check( data_file );
+        __sp_check();
+
+        LifeV::Debug( 10000 ) << "__sp_disp size : "  << __sp_check.disp.size() << "\n";
+        LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+
+        LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+
+        FSIChecker __fp_check( data_file,  "fixedPoint" );
+        __fp_check();
 
 
-    LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+        LifeV::Debug( 10000 ) << "__fp_disp size : "  << __fp_check.disp.size() << "\n";
+        LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 
-    FSIChecker __sp_check( data_file,  "steklovPoincare", LifeV::DIRICHLET_NEUMANN );
-    __sp_check();
+        std::cout << "norm_2(SP displacement)    = " << LifeV::norm_2( __sp_check.disp ) << " \n"
+                  << "norm_2(FP displacement)    = " << LifeV::norm_2( __fp_check.disp ) << " \n"
+                  << "norm_2(displacement error) = " << LifeV::norm_2( __sp_check.disp - __fp_check.disp ) << "\n";
+    }
+    else
+    {
+        FSIChecker __sp_check( data_file );
+        __sp_check();
+    }
 
-    LifeV::Debug( 10000 ) << "__sp_disp size : "  << __sp_check.disp.size() << "\n";
-    LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-
-    LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-
-    FSIChecker __fp_check( data_file,  "fixedPoint" );
-    __fp_check();
-
-
-    LifeV::Debug( 10000 ) << "__fp_disp size : "  << __fp_check.disp.size() << "\n";
-    LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-
-    std::cout << "norm_2(SP displacement)    = " << LifeV::norm_2( __sp_check.disp ) << " \n"
-              << "norm_2(FP displacement)    = " << LifeV::norm_2( __fp_check.disp ) << " \n"
-              << "norm_2(displacement error) = " << LifeV::norm_2( __sp_check.disp - __fp_check.disp ) << "\n";
     return 0;
+
 }
 
