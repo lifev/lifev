@@ -30,12 +30,12 @@ steklovPoincare::steklovPoincare(GetPot &_dataFile):
     M_residualS   ( M_solid.dDof().numTotalDof() ),
     M_residualF   ( M_fluid.uDof().numTotalDof() ),
     M_residualFSI ( M_fluid.uDof().numTotalDof() ),
-    M_dataJacobian(this),
-    M_aitkFS      (3*M_solid.dDof().numTotalDof())
+    M_aitkFS      ( 3*M_solid.dDof().numTotalDof() ),
+    M_dataJacobian(this)
 {
     M_precond   = _dataFile("problem/precond"  , 1);
-    M_defOmegaS = _dataFile("problem/defOmegaS", 0.01);
-    M_defOmegaF = _dataFile("problem/defOmegaF", 0.01);
+    M_defOmegaS = _dataFile("problem/defOmegaS",0.005);
+    M_defOmegaF = _dataFile("problem/defOmegaF",0.005);
     M_aitkFS.setDefault(M_defOmegaS, M_defOmegaF);
 //    setUpBC();
 }
