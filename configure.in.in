@@ -41,6 +41,9 @@ AC_PROG_CC_C_O
 AC_PROG_CXX( g++-3.3 g++-3.2 g++ )
 AC_PROG_F77( g77-3.3 g77-3.2 g77 )
 AC_PROG_F77_C_O
+
+# no need for static libs 
+AC_DISABLE_STATIC
 AC_PROG_LIBTOOL
 
 # pdflatex
