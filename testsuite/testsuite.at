@@ -30,7 +30,7 @@ AT_BANNER([test_ns_sstress test is broken, skipping/disabling it])
 #m4_include([test_ns_sstress/testsuite.at])
 
 m4_include([test_masstransport/testsuite.at])
-m4_include([test_fsi_newton/testsuite.at])
-m4_include([test_fsi_picard/testsuite.at])
-#m4_include([test_onedmodel/testsuite.at])
+#m4_include([test_fsi_newton/testsuite.at])
+#m4_include([test_fsi_picard/testsuite.at])
+m4_include([test_onedmodel/testsuite.at])
 

@@ -1,5 +1,9 @@
 AT_SETUP([test_onedmodel])
 AT_KEYWORDS([onedmodel])
+AT_DATA([keystrokes],[[
+
+]])
+
 AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 #-------------------------------------------------
 #   Data file for One D Model (Non Linear)
@@ -31,7 +35,7 @@ nx	= 99	# (nx+1) = number of elements (0,...,nx)
 post_dir = ./Post                 # the directory for postprocessing files
 verbose = 5
 post_proc_format = medit          # vtk or medit
-show_graceplot = true
+show_graceplot = false
 
 [aztec]  
 solver = cg  #cg , gmres, cgs, tfqmr, bicgstab, slu, symmlq, fixed_pt, lu
@@ -40,5 +44,5 @@ subdomain_solve = icc
 output = warnings    #warnings , none , all, all_res, last
 tol = 1e-6
 ]])
-AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria/cylhexa.mesh	 &&  $top_builddir/testsuite/test_onedmodel/test_onedmodel],[0],[ignore],[ignore])
+AT_CHECK([$top_builddir/testsuite/test_onedmodel/test_onedmodel < keystrokes],[0],[ignore],[ignore])
 AT_CLEANUP
