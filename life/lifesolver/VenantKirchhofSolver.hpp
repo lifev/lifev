@@ -1,20 +1,20 @@
 /*
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
+  This file is part of the LifeV library
+  Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 /*!
   \file VenantKirchhofSolver.h
@@ -46,25 +46,22 @@
 namespace LifeV
 {
 
-  /*!
-    \class VenantKirchhofSolver
-    
-    \brief
-    This class solves the linear elastodynamics equations for a (only linear right now)
-    St. Venant-Kirchoff material
-    
+/*!
+  \class VenantKirchhofSolver
+  \brief
+  This class solves the linear elastodynamics equations for a (only linear right now)
+  St. Venant-Kirchoff material
 
-  */
-  template <typename Mesh>
-  class VenantKirchhofSolver:
-    public ElasticStructureHandler<Mesh>, public DataNewton
-  {
-    
-  public:
-    
+*/
+template <typename Mesh>
+class VenantKirchhofSolver:
+        public ElasticStructureHandler<Mesh>, public DataNewton
+{
+public:
+
     typedef typename ElasticStructureHandler<Mesh>::Function Function;
     typedef typename ElasticStructureHandler<Mesh>::source_type source_type;
-    
+
     //! Constructor
     /*!
       \param data_file GetPot data file
@@ -110,14 +107,13 @@ namespace LifeV
     //    void solveJac( const Vector& res, double& linear_rel_tol, Vector &step);
     //! solves the tangent problem with custom BC
     void solveJac( Vector &step, const Vector& res, double& linear_rel_tol, BCHandler &BCd );
-    void solveLin( Vector &step, const Vector& res, double linear_rel_tol);
-    
+    void solveLin( Vector &step, const Vector& res, double linear_rel_tol, BCHandler &BCd );
     //! evaluates residual for newton interations
     void evalResidual( Vector &res, const Vector& sol, int iter);
-    
+
     void setSourceTerm( source_type const& __s ) { _M_source = __s; }
     source_type const& sourceTerm() const { return _M_source; }
-    
+
     Vector& rhsWithoutBC() { return _rhsWithoutBC; }
 
 
@@ -166,7 +162,6 @@ private:
     //! right  hand  side
     PhysVectUnknown<Vector> _f;
 
-      
     //! residual
     PhysVectUnknown<Vector> _residual_d;
 
@@ -186,7 +181,6 @@ private:
 
     //! data for solving tangent problem with aztec
     SolverAztec _linearSolver;
-
 };
 
 
@@ -197,30 +191,30 @@ template <typename Mesh>
 VenantKirchhofSolver<Mesh>::
 VenantKirchhofSolver( const GetPot& data_file, const RefFE& refFE, const QuadRule& Qr,
                       const QuadRule& bdQr, BCHandler& BCh ) :
-        ElasticStructureHandler<Mesh>( data_file, refFE, Qr, bdQr, BCh ),
-        DataNewton( data_file, "solid/newton" ),
-        _pattM_block( this->_dof ),
-        _pattM( _pattM_block, "diag" ),
-        _pattK( this->_dof, 3 ),
-        _M( _pattM ),
-        _Kl( _pattK ),
-        _K( _pattK ),
-        _C( _pattK ),
-        _J( _pattK ),
-        _elmatK( this->_fe.nbNode, nDimensions, nDimensions ),
-        _elmatM( this->_fe.nbNode, nDimensions, nDimensions ),
-        _elmatC( this->_fe.nbNode, nDimensions, nDimensions ),
-        _elvec( this->_fe.nbNode, nDimensions ),
-        _dk_loc( this->_fe.nbNode, nDimensions ),
-        _rhs( this->_dim ),
-        _rhs_w( this->_dim ),
-        _rhsWithoutBC( this->_dim ),
-        _f( this->_dim ),
-        _residual_d( this->_dim ),
+    ElasticStructureHandler<Mesh>( data_file, refFE, Qr, bdQr, BCh ),
+    DataNewton( data_file, "solid/newton" ),
+    _pattM_block( this->_dof ),
+    _pattM( _pattM_block, "diag" ),
+    _pattK( this->_dof, 3 ),
+    _M( _pattM ),
+    _Kl( _pattK ),
+    _K( _pattK ),
+    _C( _pattK ),
+    _J( _pattK ),
+    _elmatK( this->_fe.nbNode, nDimensions, nDimensions ),
+    _elmatM( this->_fe.nbNode, nDimensions, nDimensions ),
+    _elmatC( this->_fe.nbNode, nDimensions, nDimensions ),
+    _elvec( this->_fe.nbNode, nDimensions ),
+    _dk_loc( this->_fe.nbNode, nDimensions ),
+    _rhs( this->_dim ),
+    _rhs_w( this->_dim ),
+    _rhsWithoutBC( this->_dim ),
+    _f( this->_dim ),
+    _residual_d( this->_dim ),
 	_out_iter( "out_iter_solid" ),
-        _out_res( "out_res_solid" ),
-        _time( 0.0 ),
-        _recur( 0 )
+    _out_res( "out_res_solid" ),
+    _time( 0.0 ),
+    _recur( 0 )
 {
 
     std::cout << std::endl;
@@ -360,14 +354,14 @@ timeAdvance( source_type const& source, const Real& time )
 
     // right hand side without boundary load terms
     Vector __z = this->_d + this->_dt * _w;
-    //_rhsWithoutBC += _M * ( this->_d + this->_dt * _w );
     _rhsWithoutBC += _M * __z;
     _rhsWithoutBC -= _K * this->_d;
 
     _rhs_w = ( 2.0 / this->_dt ) * this->_d + _w;
     std::cout << std::endl;
-    std::cout << "_rhs_w norm = " << norm_2(_rhs_w) << std::endl;
-    std::cout << "    _w norm = " << norm_2(_w) << std::endl;
+    std::cout << "rhsWithoutBC norm = " << norm_2(_rhsWithoutBC) << std::endl;
+    std::cout << "_rhs_w norm       = " << norm_2(_rhs_w) << std::endl;
+    std::cout << "    _w norm       = " << norm_2(_w) << std::endl;
     //
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
@@ -609,7 +603,7 @@ solveJac( Vector &step, const Vector& res, double& linear_rel_tol)
     std::cout << "  o-  Solving system... "<< std::flush;
     chrono.start();
     _linearSolver.solve( step , _f);
-      chrono.stop();
+    chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
     //--options[AZ_recursion_level];
@@ -617,7 +611,7 @@ solveJac( Vector &step, const Vector& res, double& linear_rel_tol)
 //    AZ_matrix_destroy( &J );
 //    AZ_precond_destroy( &prec_J );
 
-    _residual_d = _C*step;// - _rhsWithoutBC;
+    _residual_d = _C*step - _rhsWithoutBC;
 }
 
 
@@ -659,14 +653,14 @@ solveJac(Vector &step, const Vector& res, double& linear_rel_tol, BCHandler &BCd
 //    AZ_matrix_destroy( &J );
 //    AZ_precond_destroy( &prec_J );
 
-    _residual_d = _C*step;// - _rhsWithoutBC;
+    _residual_d = _C*step - _rhsWithoutBC;
 //    bcManageMatrix( _J, _mesh, this->_dof, _BCh, _feBd, tgv );
 }
 
 
 template <typename Mesh>
 void VenantKirchhofSolver<Mesh>::
-solveLin( Vector &step, const Vector& res, double linear_rel_tol)
+solveLin( Vector &step, const Vector& res, double linear_rel_tol, BCHandler &BCd )
 {
     Chrono chrono;
 
@@ -679,10 +673,10 @@ solveLin( Vector &step, const Vector& res, double linear_rel_tol)
     chrono.start();
 
     // BC manage for the velocity
-    if ( !_BCh.bdUpdateDone() )
-        _BCh.bdUpdate( _mesh, _feBd, this->_dof );
+    if ( !BCd.bdUpdateDone() )
+        BCd.bdUpdate( _mesh, _feBd, this->_dof );
 
-    bcManageMatrix( _J, _mesh, this->_dof, _BCh, _feBd, tgv );
+    bcManageMatrix( _J, _mesh, this->_dof, BCd, _feBd, tgv );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
@@ -696,7 +690,7 @@ solveLin( Vector &step, const Vector& res, double linear_rel_tol)
 
     _w = ( 2.0 / this->_dt ) * step - _rhs_w;
 
-    _residual_d = _C*step - _rhsWithoutBC;
+    _residual_d = _C*step; // - _rhsWithoutBC;
 
 }
 
