@@ -55,6 +55,8 @@ POTFILES			= mesh.pot mesh2.pot mesh3.pot
 EXTRA_DIST			= $(POTFILES)
 
 check-local: $(POTFILES)
-	@for potfile in $(POTFILES); do\
-     ln -sf $(srcdir)/$$potfile ;  \
-    done
+	@if test "$(top_srcdir)" != "$(top_builddir)"; then\
+      for potfile in $(POTFILES); do\
+        ln -sf $(srcdir)/$$potfile ;  \
+      done;\
+    fi
