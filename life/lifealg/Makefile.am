@@ -31,8 +31,9 @@ PETSC_HDRS	= SolverPETSC.hpp
 endif
 BLASLAPACK      = cblas.h clapack.h
 
-include_HEADERS	= $(BLASLAPACK) algebraic_facto.hpp dataAztec.hpp dataNewton.hpp inexactLU.hpp \
-linesearch_cubic.hpp linesearch_parabolic.hpp mixed_pattern.hpp newton.hpp \
+include_HEADERS	= $(BLASLAPACK) algebraic_facto.hpp dataAztec.hpp \
+dataNewton.hpp inexactLU.hpp \
+linesearch_cubic.hpp linesearch_parabolic.hpp newton.hpp \
 picard.hpp saddlePointCG.hpp vectorNorms.hpp SolverAztec.hpp \
 generalizedAitken.hpp nonLinRichardson.hpp  $(PETSC_HDRS) 
 
