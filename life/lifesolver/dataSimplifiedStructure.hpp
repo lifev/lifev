@@ -52,7 +52,7 @@ public DataMesh<Mesh> {
   DataSimplifiedStructure(const GetPot& dfile);
 
   //! Ouptut
-  void showMe(ostream& c=cout) const;
+  void showMe(std::ostream& c=std::cout) const;
 
  protected:
   //! Physics
@@ -88,15 +88,15 @@ DataSimplifiedStructure(const GetPot& dfile):
 // Output
 template<typename Mesh>
 void DataSimplifiedStructure<Mesh>::
-showMe(ostream& c) const
+showMe(std::ostream& c) const
 {
   // physics
   c << "\n*** Values for data [solid/physics]\n\n";
-  c << "density   = " << _rho << endl;
-  c << "thickness = " << _h   << endl;
-  c << "young     = " << _E   << endl;
-  c << "poisson   = " << _nu  << endl;
-  c << "radius    = " << _R0  << endl;
+  c << "density   = " << _rho << std::endl;
+  c << "thickness = " << _h   << std::endl;
+  c << "young     = " << _E   << std::endl;
+  c << "poisson   = " << _nu  << std::endl;
+  c << "radius    = " << _R0  << std::endl;
   c << "\n*** Values for data [solid/discretization]\n\n";
   DataMesh<Mesh>::showMe();
 }

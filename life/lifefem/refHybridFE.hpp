@@ -83,7 +83,7 @@ class RefHybridFE:
                        //! useless...
 
 public:
-  const string name; //!< name of the reference element
+  const std::string name; //!< name of the reference element
   const int type; //!< Type of finite element (FE_P1_2D, ..., see the #define at the beginning of refFE.h)
   const ReferenceShapes shape; //!< geometrical shape of the element
   const int nbDof;   //!< Total number of degrees of freedom
@@ -120,7 +120,7 @@ public:
     ( What's the use of this here?? )
    */
   RefHybridFE(const UInt& nbdfe, const StaticBdFE* bdfelist,
-	      string _name, int _type, ReferenceShapes _shape,
+	      std::string _name, int _type, ReferenceShapes _shape,
 	      int _nbDofPerVertex,int _nbDofPerEdge,int _nbDofPerFace,int _nbDofPerVolume,
 	      int _nbDof,int _nbCoor, const Real* _refCoor,PatternType _patternType=STANDARD_PATTERN);
   ~RefHybridFE();
@@ -332,7 +332,7 @@ SEE basisElSh.cc   for the ORIENTATION CONVENTIONS
 //! for the TETRA : These values are FALSE!!
 static const Real refcoor_RT0HYB_TETRA[12] = { 1./3  ,1./3.  ,0.    ,
 					       1./3. ,0.     ,1./3. ,
-					       1./3. ,1./3.  ,1./3. ,  
+					       1./3. ,1./3.  ,1./3. ,
 					       0.    ,1./3.  ,1./3. };
 
 

@@ -56,7 +56,7 @@ private:
 template <typename RegionMesh3D>
 bool outensight7Mesh3D(RegionMesh3D & mesh, PhysVectUnknown<Vector> & u, ScalUnknown<Vector> & p, Real & time){
 
-    vector<Coord> grid; // coordinates of Grid nodes
+    std::vector<Coord> grid; // coordinates of Grid nodes
     grid.resize(mesh.numVertices()+mesh.numVolumes());
 //  grid.resize(mesh.numVertices()+mesh.numEdges());
 
@@ -65,7 +65,7 @@ bool outensight7Mesh3D(RegionMesh3D & mesh, PhysVectUnknown<Vector> & u, ScalUnk
         grid[i][0]=(float)mesh.point(i+1).x();
         grid[i][1]=(float)mesh.point(i+1).y();
         grid[i][2]=(float)mesh.point(i+1).z();}
-//     cout << grid[i][0] << ", " << grid[i][1]  << ", " << grid[i][2] << endl; }
+//     std::cout << grid[i][0] << ", " << grid[i][1]  << ", " << grid[i][2] << std::endl; }
 
 // 6 additional mesh points for Tetra P2 (mittle points of edges)
 //  typename RegionMesh3D::EdgeType * pe=0;
@@ -79,13 +79,13 @@ bool outensight7Mesh3D(RegionMesh3D & mesh, PhysVectUnknown<Vector> & u, ScalUnk
 //     grid[mesh.numVertices()+i-1][0]=(float)(mesh.point(i1).x()+mesh.point(i2).x())*0.5;
 //     grid[mesh.numVertices()+i-1][1]=(float)(mesh.point(i1).y()+mesh.point(i2).y())*0.5;
 //     grid[mesh.numVertices()+i-1][2]=(float)(mesh.point(i1).z()+mesh.point(i2).z())*0.5;}
-//     cout << grid[i][0] << ", " << grid[i][1]  << ", " << grid[i][2] << endl;}
+//     std::cout << grid[i][0] << ", " << grid[i][1]  << ", " << grid[i][2] << std::endl;}
 
 
     char buffer[80];
-    vector <int> idnode, idelem;
+    std::vector<int> idnode, idelem;
 
-    fstream File3("test.geo",ios::out | ios::binary);
+    std::fstream File3("test.geo",std::ios::out | std::ios::binary);
 
     strcpy(buffer,"C Binary");
     File3.write((char *)&buffer,sizeof(buffer));
@@ -153,16 +153,16 @@ bool outensight7Mesh3D(RegionMesh3D & mesh, PhysVectUnknown<Vector> & u, ScalUnk
 
     File3.close();
 
-    cout << "output in ensight7 format" << endl;
-    cout << "geometry file is test.geo" << endl;
+    std::cout << "output in ensight7 format" << std::endl;
+    std::cout << "geometry file is test.geo" << std::endl;
 
 // read pressure von acsii-file ./Post/presQ1.bb and convert it into ensight7 binary format
 
-    vector<float> pressure; // presure values at Grid nodes
-    vector<Coord> velocity; // velocity values at Grid nodes
+    std::vector<float> pressure; // presure values at Grid nodes
+    std::vector<Coord> velocity; // velocity values at Grid nodes
 
-    ostringstream index;
-    string name, vname;
+    std::ostringstream index;
+    std::string name, vname;
     Coord nodevel;
 
     index << (time*100);
@@ -192,7 +192,7 @@ bool outensight7Mesh3D(RegionMesh3D & mesh, PhysVectUnknown<Vector> & u, ScalUnk
         nodevel[2]=(float)u(i+2*(u.size()/3));
         velocity.push_back(nodevel);}
 
-    std::fstream File4(name.c_str(),ios::out | ios::binary);
+    std::fstream File4(name.c_str(),std::ios::out | std::ios::binary);
 
     strcpy(buffer,"concentration distribution timestep ");
     File4.write((char*)&buffer,sizeof(buffer));
@@ -201,7 +201,7 @@ bool outensight7Mesh3D(RegionMesh3D & mesh, PhysVectUnknown<Vector> & u, ScalUnk
 
     File4.close();
 
-    std::fstream File5(vname.c_str(),ios::out | ios::binary);
+    std::fstream File5(vname.c_str(),std::ios::out | std::ios::binary);
 
     strcpy(buffer,"velocity field  timestep 1");
     File5.write((char*)&buffer,sizeof(buffer));
@@ -210,7 +210,7 @@ bool outensight7Mesh3D(RegionMesh3D & mesh, PhysVectUnknown<Vector> & u, ScalUnk
 
     File5.close();
 
-    cout << "result files are velocity.res*** and pressure.res*** " << endl;
+    std::cout << "result files are velocity.res*** and pressure.res*** " << std::endl;
 
     return true;
 

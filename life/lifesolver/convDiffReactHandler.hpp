@@ -138,7 +138,7 @@ public DataConvDiffReact<Mesh> {
 
   //! Structure to hold the interpolation values of concentration nodes in the velocity grid
   struct intpolcoord{Real b[4]; ID ele;};
-  vector<intpolcoord> _u_to_c;
+  std::vector<intpolcoord> _u_to_c;
 
   //! The BC handler
   BC_Handler& _BCh_c;
@@ -216,7 +216,7 @@ template<typename Mesh> void
 ConvDiffReactHandler<Mesh>::initialize(const std::string & vname) {
 
 
-    std::fstream Resfile(vname.c_str(),ios::in | ios::binary);
+    std::fstream Resfile(vname.c_str(),std::ios::in | std::ios::binary);
     if (Resfile.fail()) {std::cerr<<" Error in initialize: File not found or locked"<<std::endl; abort();}
     Resfile.read((char*)&_c(1),_c.size()*sizeof(double));
     Resfile.close();

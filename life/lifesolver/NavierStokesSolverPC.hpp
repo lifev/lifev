@@ -96,7 +96,7 @@ public NavierStokesHandler<Mesh> {
   PhysVectUnknown<Vector> residual();
 
   // ! Shear stress computation ***** Prova Agosto 2003
-  void ShearStressCompute(string filename_sstress, string fe_type);
+  void ShearStressCompute(std::string filename_sstress, std::string fe_type);
 
 
  private:
@@ -142,7 +142,7 @@ public NavierStokesHandler<Mesh> {
 
 
   //! H diag matrix: H= diag( _M_u )/sum( diag( _M_u ) ) where _M_u = mass * rho / dt
-  vector<double>  _H;
+  std::vector<double>  _H;
 
   //! Elementary matrices and vectors
   ElemMat _elmatC; //velocity stiffnes
@@ -180,7 +180,7 @@ public NavierStokesHandler<Mesh> {
     MixedMatr<3,3,MSRPatt,double>,
     MixedMatr<1,3,CSRPatt,double>,
     MixedMatr<3,1,CSRPatt,double>,
-    vector<double>,
+    std::vector<double>,
     MSRMatr<double>,
     Vector> _factor_data;
 };
@@ -219,10 +219,10 @@ NavierStokesSolverPC(const GetPot& data_file, const RefFE& refFE_u, const RefFE&
      _dataAztec_s(data_file,"fluid/aztec_s"),
      _factor_data(_C,_D,_trD,_H,_HinvC,_HinvDtr,_invCtrDP,_dataAztec_i,_dataAztec_s,_BCh_u.fullEssential()) {
 
-  cout << endl;
-  cout << "O-  Pressure unknowns: " << _dim_p     << endl;
-  cout << "O-  Velocity unknowns: " << _dim_u     << endl<<endl;
-  cout << "O-  Computing mass and Stokes matrices... ";
+  std::cout << std::endl;
+  std::cout << "O-  Pressure unknowns: " << _dim_p     << std::endl;
+  std::cout << "O-  Velocity unknowns: " << _dim_u     << std::endl<<std::endl;
+  std::cout << "O-  Computing mass and Stokes matrices... ";
 
   Chrono chrono;
   chrono.start();
@@ -248,8 +248,8 @@ NavierStokesSolverPC(const GetPot& data_file, const RefFE& refFE_u, const RefFE&
   // *******************************************************
   // Coefficient of the mass term at time t^{n+1}
   Real first_coeff = _bdf.bdf_u().coeff_der(0);
-  cout << endl;
-  cout << "Bdf NS first coeff " << first_coeff << endl;
+  std::cout << std::endl;
+  std::cout << "Bdf NS first coeff " << first_coeff << std::endl;
 
   _bdf.bdf_u().showMe();
   _bdf.bdf_p().showMe();
@@ -303,20 +303,20 @@ NavierStokesSolverPC(const GetPot& data_file, const RefFE& refFE_u, const RefFE&
     _H[i]=_H[i]*first_coeff*dti/sum; // H = lumping of first_coeff/dt*Mass
 
   chrono.stop();
-  cout << "done in " << chrono.diff() << " s." << endl;
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
 }
 
 template<typename Mesh>
 void NavierStokesSolverPC<Mesh>::
 timeAdvance(const Function source, const Real& time) {
 
-  cout << endl;
-  cout << "O== Now we are at time "<< time << " s." << endl;
+  std::cout << std::endl;
+  std::cout << "O== Now we are at time "<< time << " s." << std::endl;
 
   // Number of velocity components
   UInt nc_u=_u.nbcomp();
 
-  cout << "  o-  Updating mass term on right hand side... ";
+  std::cout << "  o-  Updating mass term on right hand side... ";
 
 
   Chrono chrono;
@@ -340,7 +340,7 @@ timeAdvance(const Function source, const Real& time) {
   _f_u += _M_u*_bdf.bdf_u().time_der(); //_M_u is the mass matrix divided by the time step
   //  _f_u += _M_u * _u;
   chrono.stop();
-  cout << "done in " << chrono.diff() << " s." << endl;
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
 }
 
 
@@ -360,8 +360,8 @@ iterate(const Real& time) {
   chrono.stop();
 
 
-  cout << "  o-  Stokes matrix was copied in " << chrono.diff() << "s." << endl;
-  cout << "  o-  Updating convective term... ";
+  std::cout << "  o-  Stokes matrix was copied in " << chrono.diff() << "s." << std::endl;
+  std::cout << "  o-  Updating convective term... ";
 
   chrono.start();
 
@@ -393,7 +393,7 @@ iterate(const Real& time) {
     }
   }
   chrono.stop();
-  cout << "done in " << chrono.diff() << "s." << endl;
+  std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
   // QUI VENGONO APPLICATE LE BC
   _CnoBc=_C;
@@ -406,14 +406,14 @@ iterate(const Real& time) {
   // for BC treatment (done at each time-step)
   Real tgv=1.e02;
 
-  cout << "  o-  Applying boundary conditions... ";
+  std::cout << "  o-  Applying boundary conditions... ";
   chrono.start();
   // BC manage for the velocity
   if ( !_BCh_u.bdUpdateDone() )
     _BCh_u.bdUpdate(_mesh, _feBd_u, _dof_u);
   bc_manage(_C, _trD, _f_u, _mesh, _dof_u, _BCh_u, _feBd_u, tgv, time);
   chrono.stop();
-  cout << "done in " << chrono.diff() << "s." << endl;
+  std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
   //matrices HinvDtr:
   MultInvDiag(_H, _trD, _HinvDtr);
@@ -496,7 +496,7 @@ iterate(const Real& time) {
 		 MixedMatr<3,3,MSRPatt,double>,
 		 MixedMatr<1,3,CSRPatt,double>,
 		 MixedMatr<3,1,CSRPatt,double>,
-		 vector<double>,
+		 std::vector<double>,
 		 MSRMatr<double>,
 		 Vector>);
 
@@ -504,7 +504,7 @@ iterate(const Real& time) {
 			     MixedMatr<3,3,MSRPatt,double>,
 			     MixedMatr<1,3,CSRPatt,double>,
 			     MixedMatr<3,1,CSRPatt,double>,
-			     vector<double>,
+			     std::vector<double>,
 			     MSRMatr<double>,
 			     Vector>, &_factor_data);
 
@@ -523,7 +523,7 @@ iterate(const Real& time) {
   // ---------------
   // (i) C * V = F_V
   // ---------------
-  cout << "  o-  Solving first system... ";
+  std::cout << "  o-  Solving first system... ";
 
   AZ_set_MSR(C1, (int*) _pattC_block.giveRaw_bindx(),
 	     (double*) _C.giveRaw_value(0,0),
@@ -557,7 +557,7 @@ iterate(const Real& time) {
 
   //
   chrono.stop();
-  cout << "done in " << chrono.diff() << " s." << endl;
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
   // ---------------------------------------------------
   // (ii) (D*C^(-1)*trD) * \delta P = D*C^{-1}*F_V = D*V
@@ -573,14 +573,14 @@ iterate(const Real& time) {
     _p[_dim_p-1] = 0.0; // pressure value at the last node.
   }
 
-  cout << "  o-  Solving second system... ";
+  std::cout << "  o-  Solving second system... ";
 
   chrono.start();
   AZ_iterate(_p.giveVec(), &vec_DV[0],  options_ii,params_ii, status_ii,
 	     proc_config_ii, A_ii, pILU_ii, NULL);
 
   chrono.stop();
-  cout << "done in " << chrono.diff() << " s." << endl;
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
   // ------------------------------------
   // (iii) V = V-(C^(-1)*trD) * \delta P
@@ -589,12 +589,12 @@ iterate(const Real& time) {
 
   // everything is done...
   _u = _u - _invCtrDP;
-  cout << "  o-  Velocity updated" << endl;
+  std::cout << "  o-  Velocity updated" << std::endl;
 
   // *******************************************************
   // This is the REAL pressure (not the increment)
   _p += _bdf.bdf_p().extrap();
-  cout << "  o-  Pressure updated" << endl;
+  std::cout << "  o-  Pressure updated" << std::endl;
 
   // *******************************************************
   // update the array of the previous solutions
@@ -622,16 +622,16 @@ PhysVectUnknown<Vector> NavierStokesSolverPC<Mesh>::residual()
  {
   Chrono chrono;
   PhysVectUnknown<Vector> r(_dim_u);
-  cout << "  o- Computing the residual...";
+  std::cout << "  o- Computing the residual...";
   chrono.start();
   r = _f_u_noBc-_CnoBc*_u - _trDnoBc*_p;
   chrono.stop();
-  cout << "done in " << chrono.diff() << "s" << endl;
+  std::cout << "done in " << chrono.diff() << "s" << std::endl;
   return r;
   }
 
 template<typename Mesh>
-void NavierStokesSolverPC<Mesh>::ShearStressCompute(string filename_stress, string fe_type)
+void NavierStokesSolverPC<Mesh>::ShearStressCompute(std::string filename_stress, std::string fe_type)
 {
   Vector residual(this->residual());
   UInt ss = residual.size()/NDIM;
@@ -642,7 +642,7 @@ void NavierStokesSolverPC<Mesh>::ShearStressCompute(string filename_stress, stri
   UInt where;
   for (UInt i=0;i<s;i++){
     where=_ns_post_proc.fBdToIn()[i];
-    //    cout << residual.size() << " " << s << " " << where << " " << i << endl;
+    //    std::cout << residual.size() << " " << s << " " << where << " " << i << std::endl;
    for (UInt j=0;j<NDIM;j++) residual[where-1+j*ss]=sstress[i+j*s];
   }
   wr_opendx_header(filename_stress, _mesh, _dof_u,_fe_u,fe_type);

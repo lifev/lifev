@@ -52,7 +52,7 @@ public DataTime {
   DataNavierStokes(const GetPot& dfile);
 
   //! Ouptut
-  void showMe(ostream& c=cout);
+  void showMe(std::ostream& c=std::cout);
   //! End time
   Real density() const;
   Real viscosity() const;
@@ -105,19 +105,19 @@ DataNavierStokes(const GetPot& dfile):
 // Output
 template <typename Mesh>
 void DataNavierStokes<Mesh>::
-showMe(ostream& c)
+showMe(std::ostream& c)
 {
   // physics
   c << "\n*** Values for data [fluid/physics]\n\n";
-  c << "density   = " << _rho << endl;
-  c << "viscosity = " << _mu << endl;
-  c << "initial time = " << _inittime << endl;
-  c << "endtime   = " << _endtime << endl;
+  c << "density   = " << _rho << std::endl;
+  c << "viscosity = " << _mu << std::endl;
+  c << "initial time = " << _inittime << std::endl;
+  c << "endtime   = " << _endtime << std::endl;
 
   c << "\n*** Values for data [fluid/miscellaneous]\n\n";
-  c << "verbose   = " << _verbose << endl;
-  c << "initial time for writing solution  = " << _dump_init << endl;
-  c << "number of time steps between two consecutive dumps of the solution = " << _dump_period << endl;
+  c << "verbose   = " << _verbose << std::endl;
+  c << "initial time for writing solution  = " << _dump_init << std::endl;
+  c << "number of time steps between two consecutive dumps of the solution = " << _dump_period << std::endl;
 
   c << "\n*** Values for data [fluid/discretization]\n\n";
   DataMesh<Mesh>::showMe(c);

@@ -92,7 +92,7 @@ void DofInterfaceHandler::initBCVector_Interface(){
 
 //! How many neighbors stored?
 UInt DofInterfaceHandler::NbNeigh() const{
-  //  cerr << "list size " << _neighList.size() << " and _nbNeigh " << _nbNeigh << endl;
+  //  std::cerr << "list size " << _neighList.size() << " and _nbNeigh " << _nbNeigh << std::endl;
   return _neighList.size();
 }
 
@@ -191,7 +191,7 @@ BCVector_Interface & DofInterfaceHandler::BCvec( const UInt & i ){
   \param interfref : the reference of the interface.
 */
 UInt DofInterfaceHandler::IndexOfInterfaceRef(const Int& interfref) const {
-  map<Int,UInt>::const_iterator it  = _indexInterfRefMap.find(interfref);
+  std::map<Int,UInt>::const_iterator it  = _indexInterfRefMap.find(interfref);
   if (it == _indexInterfRefMap.end())
     ERROR_MSG("Dof number not found");
   return it->second;

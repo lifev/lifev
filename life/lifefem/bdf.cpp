@@ -67,8 +67,8 @@ Bdf::~Bdf() {}
 
 void Bdf::initialize_unk(Vector u0)
 {
-  vector< Vector >::iterator iter=_unk.begin();
-  vector< Vector >::iterator iter_end=_unk.end();
+  std::vector< Vector >::iterator iter=_unk.begin();
+  std::vector< Vector >::iterator iter_end=_unk.end();
 
   _s = u0.size();
 
@@ -80,12 +80,12 @@ void Bdf::initialize_unk(Vector u0)
 }
 
 
-void Bdf::initialize_unk(vector<Vector> uv0)
+void Bdf::initialize_unk(std::vector<Vector> uv0)
 {
-  vector< Vector >::iterator iter=_unk.begin();
-  vector< Vector >::iterator iter_end=_unk.end();
+  std::vector< Vector >::iterator iter=_unk.begin();
+  std::vector< Vector >::iterator iter_end=_unk.end();
 
-  vector< Vector >::iterator iter0 = uv0.begin();
+  std::vector< Vector >::iterator iter0 = uv0.begin();
 
   _s = iter0->size();
 
@@ -95,7 +95,7 @@ void Bdf::initialize_unk(vector<Vector> uv0)
   ASSERT(n0<_n,"Initial data are not enough for the selected BDF")
 
   // if n0>n, only the first n unital data will be considered
-  if (_n>n0) cout << "The initial data set is larger than needed by the BDF. Only the first n data will be considered. " << endl;
+  if (_n>n0) std::cout << "The initial data set is larger than needed by the BDF. Only the first n data will be considered. " << std::endl;
 
   for (iter=_unk.begin() ; iter != iter_end; iter++){
     *iter=*iter0;
@@ -113,7 +113,7 @@ void Bdf::initialize_unk(vector<Vector> uv0)
 
 
 
-vector<Vector> Bdf::unk()
+std::vector<Vector> Bdf::unk()
 {
   return _unk;
 }
@@ -135,28 +135,28 @@ double Bdf::coeff_ext(UInt i)
 
 void Bdf::showMe()
 {
-  cout << "*** BDF Time discretization of order " << _n << "***" << endl;
-  cout << endl;
-  cout << "*** Coefficients: " << endl;
-  cout << endl;
+  std::cout << "*** BDF Time discretization of order " << _n << "***" << std::endl;
+  std::cout << std::endl;
+  std::cout << "*** Coefficients: " << std::endl;
+  std::cout << std::endl;
   for (UInt i=0;i<_n+1;++i)
-    cout << "alpha("<<i<<") = "<<_alpha[i]<<endl;
+    std::cout << "alpha("<<i<<") = "<<_alpha[i]<<std::endl;
   for (UInt i=0;i<_n;++i)
-    cout << "beta("<<i<<") = "<<_beta[i]<<endl;
+    std::cout << "beta("<<i<<") = "<<_beta[i]<<std::endl;
 
-  cout << "Length unknown vectors:" << _unk.size() << "," << _s << endl;
+  std::cout << "Length unknown vectors:" << _unk.size() << "," << _s << std::endl;
 
-/*   vector< Vector >::iterator itg=_u_prec.begin(); */
-/*   vector< Vector >::iterator itge=_u_prec.end(); */
+/*   std::vector< Vector >::iterator itg=_u_prec.begin(); */
+/*   std::vector< Vector >::iterator itge=_u_prec.end(); */
 /*   for ( ; itg!=itge;++itg){ */
-/*     cout << "u_prec: " << itg-_u_prec.begin() << endl; */
+/*     std::cout << "u_prec: " << itg-_u_prec.begin() << std::endl; */
 /*     Vector::iterator itl=itg->begin(); */
 /*     Vector::iterator itle=itg->end(); */
-/*     cout << "[ "; */
+/*     std::cout << "[ "; */
 /*     for ( ;itl!=itle; ++itl) */
-/*       cout << *itl << ", " ;   */
+/*       std::cout << *itl << ", " ;   */
 
-/*     cout << "]" << endl; */
+/*     std::cout << "]" << std::endl; */
 /*   }  */
 
 
@@ -165,9 +165,9 @@ void Bdf::showMe()
 
 void Bdf::shift_right(Vector unk_curr)
 {
-  vector< Vector >::iterator it=_unk.end()-1;
-  vector< Vector >::iterator itm1=_unk.end()-1;
-  vector< Vector >::iterator itb=_unk.begin();
+  std::vector< Vector >::iterator it=_unk.end()-1;
+  std::vector< Vector >::iterator itm1=_unk.end()-1;
+  std::vector< Vector >::iterator itb=_unk.begin();
 
   for (; it!=itb; --it){
     itm1--;

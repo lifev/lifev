@@ -40,17 +40,17 @@ int main(int argc, char** argv)
   LinearSimpleParam onedparamLin(data_file_name);
 
   std::cout << "======\n\tNon Linear model " << std::endl;
-  onedparamNL.showMeData(std::cout); 
+  onedparamNL.showMeData(std::cout);
   std::cout << "-----------------------------" << std::endl;
   std::cout << "======\n\tLinear model " << std::endl;
-  onedparamLin.showMeData(std::cout); 
+  onedparamLin.showMeData(std::cout);
   std::cout << "-----------------------------" << std::endl;
 
   OneDModelSolver onedm(data_file_name, onedparamLin);
 
   onedm.showMeData();
   //  onedm.showMeHandler(cout, 6);
-  
+
 
 
   // Initialization
@@ -83,7 +83,7 @@ int main(int argc, char** argv)
 
   char ch;
   std::cout << "Hit return to continue" << std::endl;
-  cin.get(ch);
+  std::cin.get(ch);
 
   // Temporal loop
   //
@@ -91,7 +91,7 @@ int main(int argc, char** argv)
   int count = 0;
   for (Real time=startT+dt ; time <= T; time+=dt) {
     count++;
-    std::cout << "Iteration " <<  count  << ", t = " << time 
+    std::cout << "Iteration " <<  count  << ", t = " << time
 	      << "s... \n";
     chrono.start();
 
@@ -110,7 +110,7 @@ int main(int argc, char** argv)
     std::string voutname;
     voutname = onedm.PostDirectory() + "/res.res" + indexout.str();
     // fstream Resfile(voutname.c_str(),ios::out | ios::binary);
-    std::fstream Resfile(voutname.c_str(),ios::out );
+    std::fstream Resfile(voutname.c_str(),std::ios::out );
     // Resfile.write((char*)&onedm.u()(1),onedm.u().size()*sizeof(Real));
     Resfile.write((char*)&onedm.U1_thistime()(1),
 		  onedm.U1_thistime().size()*sizeof(Real));
@@ -120,7 +120,7 @@ int main(int argc, char** argv)
   }
 
   std::cout << "Hit return to close" << std::endl;
-  cin.get(ch);
+  std::cin.get(ch);
 
   return 0;
 }

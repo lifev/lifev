@@ -54,19 +54,19 @@ class PostProc{
 
   void show_phi();
 
-  vector< ID > fBdToIn(){return _fBdToIn;}
+  std::vector< ID > fBdToIn(){return _fBdToIn;}
 
   Vector compute_sstress(Vector r, UInt ncomp);
 
 
  private:
   UInt _nBdDof;
-  vector<Real> _area; // vector whose ith-component is the area of the patch of the ith-node on the boundary
-  vector<Real> _normal; // vector with the components of the average  normal vector of each boundary node
-  vector<Real> _phi;  // vector with \int_{Patch(i)} \phi_i dx where \phi_i is the basis function.
+  std::vector<Real> _area; // vector whose ith-component is the area of the patch of the ith-node on the boundary
+  std::vector<Real> _normal; // vector with the components of the average  normal vector of each boundary node
+  std::vector<Real> _phi;  // vector with \int_{Patch(i)} \phi_i dx where \phi_i is the basis function.
 
-  vector< SimpleVect<ID> > _bdLtoG; // for each boundary face, it contains the numbering of the dof of the face
-  vector< ID > _fBdToIn; // it converts from a local numeration over the boundary faces on the global numeration of the mesh
+  std::vector< SimpleVect<ID> > _bdLtoG; // for each boundary face, it contains the numbering of the dof of the face
+  std::vector< ID > _fBdToIn; // it converts from a local numeration over the boundary faces on the global numeration of the mesh
   Mesh& _mesh;
 
 };
@@ -110,7 +110,7 @@ PostProc<Mesh>::PostProc(Mesh& mesh, CurrentBdFE& feBd, const Dof& dof, UInt nco
 
   UInt iElAd, iVeEl, iFaEl, iEdEl;
   ID lDof, gDof,auxDof, bDof=1;
-  vector<ID>::iterator vidit;
+  std::vector<ID>::iterator vidit;
 
   // ===================================================
   // Loop on boundary faces
@@ -195,15 +195,15 @@ PostProc<Mesh>::PostProc(Mesh& mesh, CurrentBdFE& feBd, const Dof& dof, UInt nco
 
   _nBdDof=_fBdToIn.size();
   _area.resize(_nBdDof);
-  for (vector<Real>::iterator it=_area.begin();it<_area.end();it++)
+  for (std::vector<Real>::iterator it=_area.begin();it<_area.end();it++)
     *it = 0.0;
 
   _normal.resize(_nBdDof*NDIM);
-  for (vector<Real>::iterator it=_normal.begin();it<_normal.end();it++)
+  for (std::vector<Real>::iterator it=_normal.begin();it<_normal.end();it++)
     *it = 0.0;
 
   _phi.resize(_nBdDof);
-  for (vector<Real>::iterator it=_phi.begin();it<_phi.end();it++)
+  for (std::vector<Real>::iterator it=_phi.begin();it<_phi.end();it++)
     *it = 0.0;
 
 
@@ -265,8 +265,8 @@ void PostProc<Mesh>::show_area(){
 
   ID count=1;
 
-  for (vector<Real>::iterator it=_area.begin();it<_area.end();it++){
-    cout << "Boundary Dof: " << count << ", corresponding to Global Dof: " << _fBdToIn[count-1] << " has patch area: " << *it << endl;
+  for (std::vector<Real>::iterator it=_area.begin();it<_area.end();it++){
+    std::cout << "Boundary Dof: " << count << ", corresponding to Global Dof: " << _fBdToIn[count-1] << " has patch area: " << *it << std::endl;
     count++;
   }
 }
@@ -275,22 +275,22 @@ template<typename Mesh>
 void PostProc<Mesh>::show_bdLtoG(){
 
   int count=0;
-  cout << "***** Post Proc: Bd Local To Global *****" << endl;
-  cout << _bdLtoG.size() << endl;
-  for (vector<SimpleVect<ID> >::iterator it1=_bdLtoG.begin();it1<_bdLtoG.end();it1++) {
+  std::cout << "***** Post Proc: Bd Local To Global *****" << std::endl;
+  std::cout << _bdLtoG.size() << std::endl;
+  for (std::vector<SimpleVect<ID> >::iterator it1=_bdLtoG.begin();it1<_bdLtoG.end();it1++) {
     count++;
-    cout << "Bd Face " << count << endl;
+    std::cout << "Bd Face " << count << std::endl;
     for (SimpleVect<ID>::iterator it2=it1->begin();it2<it1->end();it2++){
-      cout << *it2 << ",";
+      std::cout << *it2 << ",";
    }
-    cout << endl;
+    std::cout << std::endl;
   }
 
- cout << "***** Post Proc: From Boundary Faces to Global Dof *****" << endl;
-  cout << _fBdToIn.size() << endl;
+ std::cout << "***** Post Proc: From Boundary Faces to Global Dof *****" << std::endl;
+  std::cout << _fBdToIn.size() << std::endl;
 
-  for (vector<ID>::iterator it3=_fBdToIn.begin();it3<_fBdToIn.end();it3++) {
-    cout << "Index :" << it3-_fBdToIn.begin() << ", Global Dof: " << *it3 << endl;
+  for (std::vector<ID>::iterator it3=_fBdToIn.begin();it3<_fBdToIn.end();it3++) {
+    std::cout << "Index :" << it3-_fBdToIn.begin() << ", Global Dof: " << *it3 << std::endl;
   }
 }
 
@@ -367,17 +367,17 @@ void PostProc<Mesh>::show_normal(){
 
   ID count=1;
 
-  for (vector<Real>::iterator it=_area.begin();it<_area.end();it++){
-    cout << "Boundary Dof: " << count << ", corresponding to Global Dof: " << _fBdToIn[count-1] << " has patch area: " << *it << endl;
-    cout << "and normal components " ;
+  for (std::vector<Real>::iterator it=_area.begin();it<_area.end();it++){
+    std::cout << "Boundary Dof: " << count << ", corresponding to Global Dof: " << _fBdToIn[count-1] << " has patch area: " << *it << std::endl;
+    std::cout << "and normal components " ;
     for (int icomp=0; icomp<NDIM; icomp++)
-     cout << _normal[icomp*_nBdDof+count-1] << " ";
+     std::cout << _normal[icomp*_nBdDof+count-1] << " ";
 
-    cout << endl;
+    std::cout << std::endl;
     count++;
   }
 
-  cout << "End SHOW NORMAL" << endl;
+  std::cout << "End SHOW NORMAL" << std::endl;
 }
 
 //////////////////////////////////////////////////
@@ -441,13 +441,13 @@ void PostProc<Mesh>::show_phi(){
 
   ID count=0;
 
-  for (vector<Real>::iterator it=_area.begin();it<_area.end();it++){
-    cout << "Boundary Dof: " << count+1 << ", corresponding to Global Dof: " << _fBdToIn[count] << " has patch area: " << *it << endl;
-    cout << "and average phi  " << _phi[count]<<endl ;
+  for (std::vector<Real>::iterator it=_area.begin();it<_area.end();it++){
+    std::cout << "Boundary Dof: " << count+1 << ", corresponding to Global Dof: " << _fBdToIn[count] << " has patch area: " << *it << std::endl;
+    std::cout << "and average phi  " << _phi[count]<<std::endl ;
     count++;
   }
 
-  cout << "End SHOW PHI" << endl;
+  std::cout << "End SHOW PHI" << std::endl;
 }
 
 
@@ -468,7 +468,7 @@ Vector  PostProc<Mesh>::compute_sstress(Vector r, UInt ncomp){
   UInt dim=r.size()/ncomp;
 
   //// (Average) stress computation: from residual to stress
-  for (vector<Real>::iterator it=_phi.begin();it<_phi.end();it++){
+  for (std::vector<Real>::iterator it=_phi.begin();it<_phi.end();it++){
     glodof =  _fBdToIn[count];
     for (UInt ind_comp=0;ind_comp<ncomp;ind_comp++)
       stress[count+ind_comp*_nBdDof]=r[glodof-1+ind_comp*dim]/(*it);//damned conventions trouble : 0 or 1
@@ -491,7 +491,7 @@ Vector  PostProc<Mesh>::compute_sstress(Vector r, UInt ncomp){
   // Shear Stress
   sstress = stress - nstress;
   // count=0;
-  // for (vector<Real>::iterator it=sstress.begin();it<sstress.end();it++)
+  // for (std::vector<Real>::iterator it=sstress.begin();it<sstress.end();it++)
   // {
   //  *it = stress[count]-nstress[count];
   //  count++;}

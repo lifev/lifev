@@ -61,7 +61,7 @@ SUBROUTINE_F77  F77NAME(readmesh2dhead) (I_F77 & ne, I_F77 & np,
 //! Reeads a mesh in MEsh2d (LF) format.
 template <typename RegionMesh2D>
 bool
-readMesh2d(RegionMesh2D & mesh, const string & fname, EntityFlag regionFlag)
+readMesh2d(RegionMesh2D & mesh, const std::string & fname, EntityFlag regionFlag)
 {
   UInt p1,p2,p3;
   UInt nVe, nBVe,nFa,nPo,nBPo,nEd,nBEd;
@@ -70,11 +70,11 @@ readMesh2d(RegionMesh2D & mesh, const string & fname, EntityFlag regionFlag)
   typedef typename RegionMesh2D::ElementShape ElementShape;
 
   if (ElementShape::Shape != TRIANGLE){
-    cerr<< "Sorry, Readmesh2d reads only triangle meshes"<<endl;
+    std::cerr<< "Sorry, Readmesh2d reads only triangle meshes"<<std::endl;
     abort();
   }
   if (ElementShape::numPoints > 6 ){
-    cerr<< "Sorry, ReadMppFiles handles only liner&quad triangles"<<endl;
+    std::cerr<< "Sorry, ReadMppFiles handles only liner&quad triangles"<<std::endl;
     abort();
   }
 
@@ -82,15 +82,15 @@ readMesh2d(RegionMesh2D & mesh, const string & fname, EntityFlag regionFlag)
   I_F77 ne,np,nptot,npe,nb,nx,npc,ierr,nps,ndimn,npb;
   F77NAME(readmesh2dhead)(ne,np,nptot,npe,nb,nps,nx,npc,ierr,filename);
   if (ierr != 0){
-    cout << " Error in readmesh2d: file "<< fname<<endl;
-    cout << " not accessible or incorrectly formatted"<<endl;
+    std::cout << " Error in readmesh2d: file "<< fname<<std::endl;
+    std::cout << " not accessible or incorrectly formatted"<<std::endl;
     abort();
   }
 
-  cout << "INFORMATION ON 2D MESH AS READ FROM MESH2D FILE"<<endl;
-  cout << " See mesh2d docs for explanation"<<endl;
-  cout << "ne,np,nptot,npe,nb,nx,npc,nps,ierr" <<endl;
-  cout <<ne<<" "<< np<<" "<< nptot<<" "<<npe<<" "<<nb<<" "<<nx<<" "<<npc<<" "<<nps<<" "<<ierr<<endl;
+  std::cout << "INFORMATION ON 2D MESH AS READ FROM MESH2D FILE"<<std::endl;
+  std::cout << " See mesh2d docs for explanation"<<std::endl;
+  std::cout << "ne,np,nptot,npe,nb,nx,npc,nps,ierr" <<std::endl;
+  std::cout <<ne<<" "<< np<<" "<< nptot<<" "<<npe<<" "<<nb<<" "<<nx<<" "<<npc<<" "<<nps<<" "<<ierr<<std::endl;
 
   // Dimensioning all arrays
   I_F77 nd(npe);
@@ -113,13 +113,13 @@ readMesh2d(RegionMesh2D & mesh, const string & fname, EntityFlag regionFlag)
 		       ic, bc, ie, cpl, xmed, isw, ierr, filename);
   switch (ierr){
   case 1:
-    cerr<<" Error in readmesh2d: file incorrectly formatted"<<endl;
+    std::cerr<<" Error in readmesh2d: file incorrectly formatted"<<std::endl;
     abort();
   case 0:
-    cout<<" File succesfully read"<<endl;
+    std::cout<<" File succesfully read"<<std::endl;
     break;
   default:
-    cerr<<" Error in readmesh2d: file incomplete"<<endl;
+    std::cerr<<" Error in readmesh2d: file incomplete"<<std::endl;
     abort();
   }
 
@@ -140,10 +140,10 @@ readMesh2d(RegionMesh2D & mesh, const string & fname, EntityFlag regionFlag)
 
   // I still have not yet implemented converters p1->p2 for 2d meshes...
   if (p2meshwanted && ! p2meshstored ){
-    cerr<<" Warning in readmesh2d:"<<endl;
-    cout<< "file "<<fname<<endl;
-    cout<< "contains a P1 mesh, while we request a P2 mesh"<<endl;
-    cout << "Construction of 2D P2 mesh from P1 data not yet implemented"<<endl;
+    std::cerr<<" Warning in readmesh2d:"<<std::endl;
+    std::cout<< "file "<<fname<<std::endl;
+    std::cout<< "contains a P1 mesh, while we request a P2 mesh"<<std::endl;
+    std::cout << "Construction of 2D P2 mesh from P1 data not yet implemented"<<std::endl;
     abort();
   }
 
@@ -154,16 +154,16 @@ readMesh2d(RegionMesh2D & mesh, const string & fname, EntityFlag regionFlag)
     nPo=UInt(nptot);
     nBPo=2*nBVe;
   }
-  cout << "Using Euler formula to compute number of internal edges, assuming connected domain"<<endl;
-  cout << "(More precise technique still to be implemented)"<<endl;
+  std::cout << "Using Euler formula to compute number of internal edges, assuming connected domain"<<std::endl;
+  std::cout << "(More precise technique still to be implemented)"<<std::endl;
   nEd=3*(nFa-nBEd)/2;
-  cout<< "#Vertices = "<<nVe;
-  cout<< "#BVertices= "<<nBVe<<endl;
-  cout<< "#Faces    = "<<nFa;
-  cout<< "#Edges    = "<<nEd;
-  cout<< "#BEdges   = "<<nBEd<<endl;
-  cout<< "#Points   = "<<nPo;
-  cout<< "#BPoints  = "<<nBPo<<endl;
+  std::cout<< "#Vertices = "<<nVe;
+  std::cout<< "#BVertices= "<<nBVe<<std::endl;
+  std::cout<< "#Faces    = "<<nFa;
+  std::cout<< "#Edges    = "<<nEd;
+  std::cout<< "#BEdges   = "<<nBEd<<std::endl;
+  std::cout<< "#Points   = "<<nPo;
+  std::cout<< "#BPoints  = "<<nBPo<<std::endl;
 
   // I store all Points
   mesh.setMaxNumPoints(nPo,true);
@@ -198,7 +198,7 @@ readMesh2d(RegionMesh2D & mesh, const string & fname, EntityFlag regionFlag)
     pp->x()=Real(coor(0,i));
     pp->y()=Real(coor(1,i));
   }
-  cout<< "Vertices and Points Created "<<endl;
+  std::cout<< "Vertices and Points Created "<<std::endl;
   // now the boundary edges
   ID ia1;
   long int test;
@@ -228,9 +228,9 @@ readMesh2d(RegionMesh2D & mesh, const string & fname, EntityFlag regionFlag)
     else if (test ==i3)
       pe->pos_first()=1;
     else
-      cerr<< "Information on adjacency of boundary edge is wrong!"<<endl;
+      std::cerr<< "Information on adjacency of boundary edge is wrong!"<<std::endl;
   }
-  cout<< "Boundary Edges Created "<<endl;
+  std::cout<< "Boundary Edges Created "<<std::endl;
 
   // Finally the triangular faces!
   for(i=0;i<nFa;i++){
@@ -253,7 +253,7 @@ readMesh2d(RegionMesh2D & mesh, const string & fname, EntityFlag regionFlag)
 	pf->setPoint(6,mesh.point(p3)); // set face conn.
       }
   }
-  cout<< "Triangular Faces Created "<<endl;
+  std::cout<< "Triangular Faces Created "<<std::endl;
   return ierr==0;
 }
 }

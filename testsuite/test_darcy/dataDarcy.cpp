@@ -1,17 +1,17 @@
 /* -*- mode: c++ -*-
-   This program is part of the LifeV library 
+   This program is part of the LifeV library
    Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politechnico di Milano
 
    This program is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public License
    as published by the Free Software Foundation; either version 2
    of the License, or (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -55,43 +55,43 @@ void DataDarcy::dataDarcyShowMe(std::ostream& c)
 {
   // physics
   c << "\n*** Values for data [physics]\n\n";
-  c << "test_case = " << test_case << endl;
-  c << "mesh_file = " << mesh_file << endl;
-  c << "diffusion_type = " << diffusion_type << endl;
-  c << "diffusion_scalar = " << diffusion_scalar << endl;
-  c << "diffusion_tensor = " << diffusion_tensor << endl;
+  c << "test_case = " << test_case << std::endl;
+  c << "mesh_file = " << mesh_file << std::endl;
+  c << "diffusion_type = " << diffusion_type << std::endl;
+  c << "diffusion_scalar = " << diffusion_scalar << std::endl;
+  c << "diffusion_tensor = " << diffusion_tensor << std::endl;
   // Linear Solver
   c << "\n*** Values for data [linear solver]\n\n";
-  c << "theLinearSolver = " << theLinearSolver << endl;
+  c << "theLinearSolver = " << theLinearSolver << std::endl;
   // miscellaneous
   c << "\n*** Values for data [miscellaneous]\n\n";
-  c << "mesh_dir         = " << mesh_dir << endl;
-  c << "post_dir         = " << post_dir << endl;
-  c << "verbose          = " << verbose << endl;
-  c << "post_proc_format = " << post_proc_format << endl;
+  c << "mesh_dir         = " << mesh_dir << std::endl;
+  c << "post_dir         = " << post_dir << std::endl;
+  c << "verbose          = " << verbose << std::endl;
+  c << "post_proc_format = " << post_proc_format << std::endl;
 }
 
 void DataDarcy::dataDarcyHelp(std::ostream& c)
 {
   // physics
   c << "\n*** Help for data [physics]\n\n";
-  c << "test_case: a number indicating the test case" << endl;
-  c << "mesh_file: the mesh file"<< endl;
-  c << "diffusion_type: 0: scalar diffusion given by diffusion_scalar" << endl;
-  c << "                1: tensor diffusion given diffusion_tensor" << endl;
-  c << "                2: tensor diffusion for fibrous media" << endl;
-  c << "diffusion_scalar: a scalar diffusion coefficient" << endl;
-  c << "diffusion_tensor: the 9 entries of the diffusion tensor (by rows)" << endl;
-  c << "diffusion_function: number of a user defined function (usrDiffusion.cc)" << endl;
+  c << "test_case: a number indicating the test case" << std::endl;
+  c << "mesh_file: the mesh file"<< std::endl;
+  c << "diffusion_type: 0: scalar diffusion given by diffusion_scalar" << std::endl;
+  c << "                1: tensor diffusion given diffusion_tensor" << std::endl;
+  c << "                2: tensor diffusion for fibrous media" << std::endl;
+  c << "diffusion_scalar: a scalar diffusion coefficient" << std::endl;
+  c << "diffusion_tensor: the 9 entries of the diffusion tensor (by rows)" << std::endl;
+  c << "diffusion_function: number of a user defined function (usrDiffusion.cc)" << std::endl;
   // Linear Solver
   c << "theLinearSolver: the linear solver you want to use:\n"
-    << "Aztec: " << LinSlv_Aztec <<  "\tUMFPack: " << LinSlv_UMFPack << endl;
+    << "Aztec: " << LinSlv_Aztec <<  "\tUMFPack: " << LinSlv_UMFPack << std::endl;
   // miscellaneous
   c << "\n*** Help for data [miscellaneous]\n\n";
-  c << "mesh_dir         : the directory where the mesh file is" << endl;;
+  c << "mesh_dir         : the directory where the mesh file is" << std::endl;;
   c << "post_dir         : the full postprocessing directory (including path)"
-    << endl;
-  c << "verbose          : to make the code verbose" << endl;
-  c << "post_proc_format : postprocessing format (medit, vtk, ...)" << endl;
+    << std::endl;
+  c << "verbose          : to make the code verbose" << std::endl;
+  c << "post_proc_format : postprocessing format (medit, vtk, ...)" << std::endl;
 }
 }

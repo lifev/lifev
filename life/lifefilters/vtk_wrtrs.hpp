@@ -76,10 +76,11 @@ namespace LifeV
   NB: it works with P1, P2, but it needs probably to be adapted to more general cases...
 */
 template<typename TheMesh, typename TheDof>
-void wr_vtk_ascii_header(string fname, string title,const  TheMesh& mesh, const TheDof& dof,CurrentFE& fe)
+void wr_vtk_ascii_header(std::string fname, std::string title,
+                         const TheMesh& mesh, const TheDof& dof, CurrentFE& fe)
 {
   // Note: it is assumed that all the (volume) element of the mesh are associated to the same reference finite element
- ofstream ofile(fname.c_str());
+ std::ofstream ofile(fname.c_str());
 
  const RefFE& refFE = fe.refFE;
  //  const GeoMap& geoMap = fe.geoMap;
@@ -97,7 +98,7 @@ void wr_vtk_ascii_header(string fname, string title,const  TheMesh& mesh, const 
    cell_type = VTK_HEXAHEDRON;
    break;
  default:
-   cout << "WARNING: the element is not yet implemented in vtk_wrtrs.h\n";
+   std::cout << "WARNING: the element is not yet implemented in vtk_wrtrs.h\n";
    return;
  }
 
@@ -119,28 +120,28 @@ void wr_vtk_ascii_header(string fname, string title,const  TheMesh& mesh, const 
  UInt cells_size;
  UInt num_points =  dof.numTotalDof(); // discuterne con Luca
  UInt num_points_supp =  dof.numTotalDof() - nv; // discuterne con Luca
- vector<Real> supp_x(num_points_supp,0.0);
- vector<Real> supp_y(num_points_supp,0.0);
- vector<Real> supp_z(num_points_supp,0.0);
+ std::vector<Real> supp_x(num_points_supp,0.0);
+ std::vector<Real> supp_y(num_points_supp,0.0);
+ std::vector<Real> supp_z(num_points_supp,0.0);
  Real x,y,z;
 
- ofile << "# vtk DataFile Version " << VTK_VERSION << endl;
- ofile << title << endl;
- ofile << "ASCII" << endl;
- ofile << endl;
- ofile << "DATASET UNSTRUCTURED_GRID" << endl;
- ofile << "POINTS " << num_points  << " " << "float" << endl; // forse si puo' fare una RTTI sul dato contenuto nella point list
+ ofile << "# vtk DataFile Version " << VTK_VERSION << std::endl;
+ ofile << title << std::endl;
+ ofile << "ASCII" << std::endl;
+ ofile << std::endl;
+ ofile << "DATASET UNSTRUCTURED_GRID" << std::endl;
+ ofile << "POINTS " << num_points  << " " << "float" << std::endl; // forse si puo' fare una RTTI sul dato contenuto nella point list
 
   UInt i,ie,index,j;
   UInt gcount;
   UInt lcount;
 
   // Vertex based Dof: the coordinates are available from the Pont List
-  cout << "nv = " << nv << endl;
+  std::cout << "nv = " << nv << std::endl;
   for(i=0;i<nv;++i) // BUG ???????? i=1 ... !!!!!! (jfg 20/10/2002)
     ofile << mesh.pointList[i].x() << " "
 	  <<  mesh.pointList[i].y() << " "
-	  <<  mesh.pointList[i].z() << endl;
+	  <<  mesh.pointList[i].z() << std::endl;
 
  // Now I store the coordinates of the supplementary nodes in a temporary vector
   // Edge Based Dof
@@ -187,32 +188,32 @@ void wr_vtk_ascii_header(string fname, string title,const  TheMesh& mesh, const 
     }
   }
   for(i=0;i<num_points_supp;++i){
-    ofile << supp_x[i] << " " <<  supp_y[i] << " " <<  supp_z[i] << endl;
+    ofile << supp_x[i] << " " <<  supp_y[i] << " " <<  supp_z[i] << std::endl;
   }
 
   // connectivity
   // cells_size = nldof*(nV+1);
   cells_size = (nldof+1)*nV;
 
-  ofile << endl;
+  ofile << std::endl;
 
-  ofile << "CELLS " << nV << " " << cells_size << endl;
+  ofile << "CELLS " << nV << " " << cells_size << std::endl;
   for (i=0;i<nV;++i){
     ofile << nldof << " ";
     for (j=0;j<nldof;++j)
       ofile << dof.localToGlobal(i+1,j+1)-1 << " ";//damned (C vs) Fortran
 
-    ofile << endl;
+    ofile << std::endl;
   }
 
-  ofile << endl;
+  ofile << std::endl;
 
   // elements type
-  ofile << "CELL_TYPES " << nV << endl;
+  ofile << "CELL_TYPES " << nV << std::endl;
   for (i=0;i<nV;++i)
-    ofile << cell_type << endl;
-  ofile << endl;
-   ofile << "POINT_DATA " << num_points << endl;
+    ofile << cell_type << std::endl;
+  ofile << std::endl;
+   ofile << "POINT_DATA " << num_points << std::endl;
 }
 
 /* ! {\tt  wr_vtk_ascii_scalar} is a subrotuine for writing SCALARS unknown in ASCII for VTK
@@ -222,10 +223,11 @@ void wr_vtk_ascii_header(string fname, string title,const  TheMesh& mesh, const 
    there is the user defined table.
 */
 
-void wr_vtk_ascii_scalar(string fname, string name, Real* U, int Usize,
-			 string look_up_table="default");
+void wr_vtk_ascii_scalar(std::string fname, std::string name, Real* U,
+                         int Usize, std::string look_up_table="default");
 
-void wr_vtk_ascii_vector(string fname, string name, Real* U, int Usize);
+void wr_vtk_ascii_vector(std::string fname, std::string name, Real* U,
+                         int Usize);
 
 
 
@@ -234,7 +236,9 @@ void wr_vtk_ascii_vector(string fname, string name, Real* U, int Usize);
 
 //----------------------------------------------------------------------
 // obsolete ?
-void wr_vtk_ascii_scalar(string fname, string name, vector<Real> U, string look_up_table="default");
+void wr_vtk_ascii_scalar(std::string fname, std::string name,
+                         std::vector<Real> U,
+                         std::string look_up_table="default");
 
 
 /* ! This subroutine considers the "iso" cases, whenever the points of the mesh actually coincide with the ones
@@ -243,10 +247,12 @@ void wr_vtk_ascii_scalar(string fname, string name, vector<Real> U, string look_
  (which on the base of the McKoy algorithm are not explicitly computed so far (see fields...update))
 */
 template<typename RegionMesh, typename Dof>
-void wr_vtk_ascii_header(string fname, string title, const RegionMesh& mesh, const Dof& dof, UInt cell_type)
+void wr_vtk_ascii_header(std::string fname, std::string title,
+                         const RegionMesh& mesh, const Dof& dof,
+                         UInt cell_type)
 {
 
- ofstream ofile(fname.c_str());
+ std::ofstream ofile(fname.c_str());
  UInt cells_size;
  UInt i,j;
 
@@ -256,37 +262,37 @@ void wr_vtk_ascii_header(string fname, string title, const RegionMesh& mesh, con
 
  ASSERT(ofile,"Error: Output file cannot be open");
 
- ofile << "# vtk DataFile Version " << VTK_VERSION << endl;
- ofile << title << endl;
- ofile << "ASCII" << endl; // capire come scrivere in binario in C++
- ofile << endl;
- ofile << "DATASET UNSTRUCTURED_GRID" << endl;
- ofile << "POINTS " << nv  << " " << "float" << endl; // forse si puo' fare una RTTI sul dato contenuto nella point list
+ ofile << "# vtk DataFile Version " << VTK_VERSION << std::endl;
+ ofile << title << std::endl;
+ ofile << "ASCII" << std::endl; // capire come scrivere in binario in C++
+ ofile << std::endl;
+ ofile << "DATASET UNSTRUCTURED_GRID" << std::endl;
+ ofile << "POINTS " << nv  << " " << "float" << std::endl; // forse si puo' fare una RTTI sul dato contenuto nella point list
 
  // nodes coordinates (they are all available in the Point List)
  for(i=0;i<nv;++i){
-  ofile << mesh.pointList[i].x() << " " <<  mesh.pointList[i].y() << " " <<  mesh.pointList[i].z() << endl;
+  ofile << mesh.pointList[i].x() << " " <<  mesh.pointList[i].y() << " " <<  mesh.pointList[i].z() << std::endl;
  }
 
  // connectivity
  // cells_size = nldof*(nV+1);
  cells_size = (nldof+1)*nV;
- ofile << endl;
+ ofile << std::endl;
 
- ofile << "CELLS " << nV << " " << cells_size << endl;
+ ofile << "CELLS " << nV << " " << cells_size << std::endl;
  for (i=0;i<nV;++i){
   ofile << nldof << " ";
   for (j=0;j<nldof;++j)
     ofile << dof.localToGlobal(i+1,j+1)-1 << " "; //damned (C vs) Fortran
-  ofile << endl;
+  ofile << std::endl;
  }
- ofile << endl;
+ ofile << std::endl;
  // elements type
- ofile << "CELL_TYPES " << nV << endl;
+ ofile << "CELL_TYPES " << nV << std::endl;
  for (i=0;i<nV;++i)
-  ofile << cell_type << endl;
+  ofile << cell_type << std::endl;
 
- ofile << endl;
+ ofile << std::endl;
 
 }
 }

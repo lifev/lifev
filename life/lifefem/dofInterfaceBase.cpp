@@ -24,12 +24,13 @@ namespace LifeV
 DofInterfaceBase::DofInterfaceBase(){}
 
 
-void DofInterfaceBase::ReadVectorDataAndDofMap(const string filename, Vector& dataVec){
+void DofInterfaceBase::ReadVectorDataAndDofMap(const std::string filename,
+                                               Vector& dataVec){
 
   UInt vecsize, idof;
   Real val;
 
-  ifstream ifile(filename.c_str());
+  std::ifstream ifile(filename.c_str());
 
   ASSERT(ifile,"Error: Input Dof External BC file cannot be opened.");
 
@@ -51,7 +52,7 @@ void DofInterfaceBase::ReadVectorDataAndDofMap(const string filename, Vector& da
   \param i a dof number in mesh1
 */
 ID DofInterfaceBase::getInterfaceDof(const ID& i) const {
-  map<ID,ID>::const_iterator it  = _locDofMap.find(i);
+  std::map<ID,ID>::const_iterator it  = _locDofMap.find(i);
   if (it == _locDofMap.end())
     ERROR_MSG("Dof number not found");
   return it->second;
@@ -69,7 +70,7 @@ std::ostream& DofInterfaceBase::showMe(bool verbose, std::ostream& out) const  {
   if ( verbose ){
     UInt count(0),lines(10);
     out << "List of connections between Dof: (global, local)";
-    for (map<ID,ID>::const_iterator it = _locDofMap.begin(); it!=_locDofMap.end(); ++it) {
+    for (std::map<ID,ID>::const_iterator it = _locDofMap.begin(); it!=_locDofMap.end(); ++it) {
       if (count++ % lines ==0){
 	out << std::endl;
       }

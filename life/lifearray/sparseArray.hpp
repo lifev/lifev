@@ -55,7 +55,7 @@
 #ifndef _LIFEV_HH_
 //more correct version
 typedef size_t  UInt;
-typedef vector<UInt>::iterator UIIter;
+typedef std::vector<UInt>::iterator UIIter;
 #endif
 #include <fstream>
 #include<set>
@@ -70,14 +70,14 @@ typedef vector<UInt>::iterator UIIter;
 namespace LifeV
 {
 //more correct version
-typedef vector<INDEX_T> Container;
+typedef std::vector<INDEX_T> Container;
 typedef Container::iterator ContIter;
 //original version
-//typedef vector<UInt> Container;
-//typedef vector<UInt>::iterator ContIter;
+//typedef std::vector<UInt> Container;
+//typedef std::vector<UInt>::iterator ContIter;
 // Alain : I am a bit lost in all typedef...
 
-using namespace std;
+//using namespace std;
 
 ////////////////////////////////////////////////////////////////
 //
@@ -111,7 +111,8 @@ public:
    *  @param ex_pattern the pattern
    *  @param ex_value the value array
    */
-  CSRMatr(const PatternType &ex_pattern, const vector<DataType> &ex_value);
+    CSRMatr(const PatternType &ex_pattern,
+            const std::vector<DataType> &ex_value);
 
   //! copy constructor
   CSRMatr(const CSRMatr<PatternType,DataType> &RightHandCSR);
@@ -131,7 +132,7 @@ public:
   const PatternType * Patt() const {return _Patt;};
 
   //! returns the value vector
-  vector<DataType> & value()  {return _value;};
+  std::vector<DataType> & value()  {return _value;};
 
   //! give the value vector in raw format (suitable for C)
   DataType * giveRawCSR_value() {return &(_values.front());}
@@ -167,10 +168,10 @@ public:
   void ShowMe();
 
   //! write matrix in sparse matlab format and spy
-  void spy(string  const &filename);
+  void spy(std::string  const &filename);
 
 private:
-  vector<DataType> _value;
+  std::vector<DataType> _value;
   const PatternType *_Patt; // I want to link the values to a pattern, NOT to change the pattern itself  (which is const)
   //     static const DataType _DefaultValue = 0;
 };
@@ -193,12 +194,12 @@ public:
   CSRMatr(const CSRPatt &ex_pattern);
   //! Version for DataType=Tab2d
   CSRMatr(const CSRPatt &ex_pattern, UInt const nr, UInt const nc);
-  CSRMatr(const CSRPatt &ex_pattern, const vector<DataType> &ex_value);
+  CSRMatr(const CSRPatt &ex_pattern, const std::vector<DataType> &ex_value);
   CSRMatr(const CSRMatr<CSRPatt,DataType> &RightHandCSR);
   CSRMatr(const CSRPatt &ex_pattern, const MSRMatr<DataType> &msrMatr);
   const CSRPatt * Patt() const {return _Patt;};
-  const vector<DataType> & value() const {return _value;};
-  vector<DataType> & value()  {return _value;};
+  const std::vector<DataType> & value() const {return _value;};
+  std::vector<DataType> & value()  {return _value;};
   DataType * giveRawCSR_value() {return &(_value.front());}
   const DataType * giveRawCSR_value() const {return &(_value.front());}
 
@@ -234,9 +235,9 @@ public:
   void diagonalize_row(UInt const r, DataType const coeff);
 
   //! determine the lumped matrix for P1
-  vector<DataType> MassDiagP1() const;
+  std::vector<DataType> MassDiagP1() const;
   //! build the inverse of a diagonal matrix and multiply it by another matrix
-  friend void MultInvDiag(const vector<Real> &Diag,
+  friend void MultInvDiag(const std::vector<Real> &Diag,
 			  const CSRMatr<CSRPatt,Real> &Mat,
 			  CSRMatr<CSRPatt,Real> &ans);
 
@@ -248,7 +249,7 @@ public:
   { return _value[_Patt->locate_index(i,j).first];};
 
   void ShowMe();
-  void spy(string  const &filename);
+  void spy(std::string  const &filename);
 
   //!column-concatenation of two blocks of CSRMatr
   /*  friend CSRMatr<CSRPatt,double>
@@ -275,7 +276,7 @@ public:
   void zeros();
 
  private:
-  vector<DataType> _value;
+  std::vector<DataType> _value;
   const CSRPatt *_Patt; // I want to link the values to a pattern, NOT to change the pattern itself  (which is const)
   //  static const DataType _DefaultValue = 0;
 };
@@ -295,19 +296,19 @@ public:
   // Note that the constructors MUST be based on an existing pattern
   //
   VBRMatr(const VBRPatt &ex_pattern);
-  VBRMatr(const VBRPatt& ex_pattern, const vector<DataType> &ex_value);
+  VBRMatr(const VBRPatt& ex_pattern, const std::vector<DataType> &ex_value);
   VBRMatr(const VBRMatr<DataType> &RightHandVBR):
     _Patt(RightHandVBR.Patt()), _value(RightHandVBR.value()){}
 
   const VBRPatt *Patt() const {return _Patt;}
-  vector<DataType> value() const {return _value;}
+  std::vector<DataType> value() const {return _value;}
   DataType* giveRaw_value() {return &(_value.front());} // give the
   // value vector in Raw format (suitable for C)
 
   VBRMatr& operator=(const VBRMatr<DataType> &RhVbr);// Warning: the
   // two matrices will point to the same pattern
 
-  vector<DataType>  operator*(const vector<DataType> &v) const; //Matrix-vector product
+  std::vector<DataType>  operator*(const std::vector<DataType> &v) const; //Matrix-vector product
   //Matrix vector product for IML++ (uses the Vector class)
   Vector operator*(const Vector &v) const;
   //necessary for IML++ library: transpose-matrix by vector product
@@ -321,20 +322,20 @@ public:
   void set_mat(UInt row, UInt col, DataType loc_val);
   void set_mat_inc(UInt row, UInt col, DataType loc_val);
   // version for block operation
-  void set_mat(UInt row, UInt col, vector<DataType> &loc_block);
-  void set_mat_inc(UInt row, UInt col, vector<DataType> &loc_block);
+  void set_mat(UInt row, UInt col, std::vector<DataType> &loc_block);
+  void set_mat_inc(UInt row, UInt col, std::vector<DataType> &loc_block);
 
   DataType& get_value(UInt i, UInt j)
   { return _value[_Patt->locate_index(i,j).first];};
   const DataType& get_value(UInt i, UInt j) const
   { return _value[_Patt->locate_index(i,j).first];};
   //  void ShowMe() const;
-  void spy(string  const &filename);
+  void spy(std::string  const &filename);
   //  void diagonalize_row ( UInt const r, DataType const coeff);
-  //  void diagonalize ( UInt const r, DataType const coeff, vector<DataType> &b, DataType datum);
+  //  void diagonalize ( UInt const r, DataType const coeff, std::vector<DataType> &b, DataType datum);
 
 private:
-  vector<DataType> _value;
+  std::vector<DataType> _value;
   const VBRPatt *_Patt; // I want to link the values to a pattern, NOT
   // changing the pattern itself  (which is const)
   //  static const DataType _DefaultValue = 0;
@@ -367,7 +368,7 @@ public:
    *  @param ex_pattern the MSR pattern
    *  @param ex_value the value array
    */
-  MSRMatr(const MSRPatt* ex_pattern, const vector<DataType> &ex_value);
+  MSRMatr(const MSRPatt* ex_pattern, const std::vector<DataType> &ex_value);
 
   //! copy constructor
   MSRMatr(const MSRMatr<DataType> &RightHandMSR);
@@ -384,10 +385,10 @@ public:
   const MSRPatt * Patt() const {return _Patt;};
 
   //! returns the value vector read only
-  const vector<DataType> & value() const {return _value;};
+  const std::vector<DataType> & value() const {return _value;};
 
   //! returns the value vector writable
-  vector<DataType> & value()  {return _value;};
+  std::vector<DataType> & value()  {return _value;};
 
   //! give the value vector writable in raw format (suitable for C)
   DataType * giveRaw_value() {return &(_value.front());}
@@ -396,14 +397,14 @@ public:
   DataType const * giveRaw_value() const {return &(_value.front());}
 
   //! determine the lumped matrix for P1
-  vector<DataType> MassDiagP1() const;
+  std::vector<DataType> MassDiagP1() const;
 
   //! build the inverse of a diagonal matrix and multiply it by another matrix
-  friend void MultInvDiag(const vector<Real> &Diag,
+  friend void MultInvDiag(const std::vector<Real> &Diag,
                           const MSRMatr<Real> &Mat, MSRMatr<Real> &ans);
 
   //! give the diagonal of an MSR matrix
-  vector<DataType> giveDiag() const;
+  std::vector<DataType> giveDiag() const;
 
   //! assignment operator.
   //! Warning: the two matrices will point to the same pattern
@@ -441,7 +442,7 @@ public:
   void ShowMe();
 
   //! write matrix in sparse matlab format and spy
-  void spy(string  const &filename);
+  void spy(std::string  const &filename);
 
   //! set entry (r,r) to coeff and rest of row r to zero
   void diagonalize_row ( UInt const r, DataType const coeff);
@@ -452,8 +453,8 @@ public:
    *  @param b right hand side vector of the system to be adapted accordingly
    *  @param datum value to constrain entry r of the solution at
    */
-  void diagonalize (UInt const r, DataType const coeff, vector<DataType> &b,
-                    DataType datum);
+  void diagonalize (UInt const r, DataType const coeff,
+                    std::vector<DataType> &b, DataType datum);
   /*! apply constraint on row r
    *  @param r row number
    *  @param coeff value to set entry (r,r) at
@@ -464,7 +465,7 @@ public:
                    DataType datum);
 
   //! matrix vector product
-  vector<DataType>  operator* (const vector<DataType> &v) const;
+  std::vector<DataType>  operator* (const std::vector<DataType> &v) const;
 
   //! Matrix-vector product for the class Vector (useful for IML++)
   Vector operator*(const Vector &v) const;
@@ -501,7 +502,7 @@ public:
   void zeros();
 
 private:
-  vector<DataType> _value;
+  std::vector<DataType> _value;
   const MSRPatt *_Patt; // I want to link the values to a pattern, NOT to change the pattern itself  (which is const)
   //     static const DataType _DefaultValue = 0;
 };
@@ -533,11 +534,13 @@ public:
   //! gives the pattern pointer.
   const MixedPattern<BRows, BCols, PatternType> * Patt() const {return _Patt;}
   //! points to the values vector array.
-  vector<DataType> * bValues() const {return _bValues;}
+  std::vector<DataType> * bValues() const {return _bValues;}
   //! The container of block (i,j).
   //! BEWARE: no check is done on the array size.
-  const vector<DataType> & bValues(UInt i,UInt j) const {return _bValues[i][j];}
-  vector<DataType> & bValues(UInt i,UInt j) {return _bValues[i][j];}
+  const std::vector<DataType> & bValues(UInt i,UInt j) const {
+      return _bValues[i][j];
+  }
+  std::vector<DataType> & bValues(UInt i,UInt j) {return _bValues[i][j];}
   //! give the block (i,j) value vector in Raw format (suitable for C)
   DataType * giveRaw_value(UInt i, UInt j)
   {return &(_bValues[i][j].front());}
@@ -546,14 +549,14 @@ public:
   {return &(_bValues[i][j].front());}
 
   //! Determines the lumped diagonal of P1 mass matrix.
-  vector<DataType> MassDiagP1() const;
+  std::vector<DataType> MassDiagP1() const;
   //! Inverts the diagonal matrix Diag and mulitply it by the matrix Mat.
   template<UInt BR, UInt BC, typename PattType>
-  friend void MultInvDiag(const vector<Real> &Diag,
+  friend void MultInvDiag(const std::vector<Real> &Diag,
 			  const MixedMatr<BR,BC,PattType,Real> &Mat,
 			  MixedMatr<BR,BC,PattType,Real> &ans);
   //! Gives the diagonal of a block matrix.
-  vector<DataType> giveDiag() const;
+  std::vector<DataType> giveDiag() const;
 
   //! Warning: the two matrices will point to the same pattern.
   MixedMatr & operator= (const MixedMatr<BRows,BCols,PatternType,DataType>
@@ -579,7 +582,7 @@ public:
   void ShowMe()
   {return _Patt->showMe(true);}
   //! Matrix visualization a la matlab.
-  void spy(string  const &filename);
+  void spy(std::string  const &filename);
   //! Assigns matrix diagonal element (r,r) to coeff, other elts
   //! of row r to zero.
   void diagonalize_row( UInt const r, DataType const coeff);
@@ -592,7 +595,7 @@ public:
 		      DataType datum);
 
   //! Matrix-vector product.
-  vector<DataType>  operator*(const vector<DataType> &v) const;
+  std::vector<DataType>  operator*(const std::vector<DataType> &v) const;
   //! Version for type Vector.
   Vector operator*(const Vector &v) const;
   //! Version for C pointer vector. BEWARE: no check on bounds done !
@@ -611,7 +614,7 @@ private:
   const MixedPattern<BRows, BCols, PatternType> * _Patt;
   //! An array of values vector: there is one vector of values for
   //! each block.
-  vector<DataType> _bValues[BRows][BCols];
+  std::vector<DataType> _bValues[BRows][BCols];
 
 };
 
@@ -645,11 +648,13 @@ class MixedMatr<BRows, BCols, MSRPatt, double>
   //! gives the pattern pointer.
   const MixedPattern<BRows, BCols, MSRPatt> * Patt() const {return _Patt;}
   //! points to the values vector array.
-  vector<double> * bValues() const {return _bValues;}
+  std::vector<double> * bValues() const {return _bValues;}
   //! The container of block (i,j).
   //! BEWARE: no check is done on the array size.
-  const vector<double> & bValues(UInt i,UInt j) const {return _bValues[i][j];}
-  vector<double> & bValues(UInt i,UInt j) {return _bValues[i][j];}
+  const std::vector<double> & bValues(UInt i,UInt j) const {
+      return _bValues[i][j];
+  }
+  std::vector<double> & bValues(UInt i,UInt j) {return _bValues[i][j];}
   //! give the block (i,j) value vector in Raw format (suitable for C)
   double * giveRaw_value(UInt i, UInt j)
   {return &(_bValues[i][j].front());}
@@ -658,14 +663,14 @@ class MixedMatr<BRows, BCols, MSRPatt, double>
   {return &(_bValues[i][j].front());}
 
   //! Determines the lumped diagonal of P1 mass matrix.
-  vector<double> MassDiagP1() const;
+  std::vector<double> MassDiagP1() const;
   //! Inverts the diagonal matrix Diag and mulitply it by the matrix Mat.
   template<UInt BR, UInt BC>
-  friend void MultInvDiag(const vector<Real> &Diag,
+  friend void MultInvDiag(const std::vector<Real> &Diag,
 			  const MixedMatr<BR,BC,MSRPatt,Real> &Mat,
 			  MixedMatr<BR,BC,MSRPatt,Real> &ans);
   //! Gives the diagonal of a block matrix.
-  vector<double> giveDiag() const;
+  std::vector<double> giveDiag() const;
 
   //! Warning: the two matrices will point to the same pattern.
   MixedMatr & operator= (const MixedMatr<BRows,BCols,MSRPatt,double>
@@ -691,7 +696,7 @@ class MixedMatr<BRows, BCols, MSRPatt, double>
   void ShowMe()
   {return _Patt->showMe(true);}
   //! Matrix visualization a la matlab.
-  void spy(string  const &filename);
+  void spy(std::string  const &filename);
   //! Assigns matrix diagonal element (r,r) to coeff, other elts
   //! of row r to zero.
   void diagonalize_row( UInt const r, double const coeff);
@@ -704,7 +709,7 @@ class MixedMatr<BRows, BCols, MSRPatt, double>
 		      double datum);
 
   //! Matrix-vector product.
-  vector<double>  operator*(const vector<double> &v) const;
+  std::vector<double>  operator*(const std::vector<double> &v) const;
   //! Version for type Vector.
   Vector operator*(const Vector &v) const;
   //! Version for C pointer vector. BEWARE: no check on bounds done !
@@ -722,7 +727,7 @@ class MixedMatr<BRows, BCols, MSRPatt, double>
   const MixedPattern<BRows, BCols, MSRPatt> * _Patt;
   //! An array of values vector: there is one vector of values for
   //! each block.
-  vector<double> _bValues[BRows][BCols];
+  std::vector<double> _bValues[BRows][BCols];
 
 };
 
@@ -754,11 +759,13 @@ class MixedMatr<BRows, BCols, CSRPatt, double>
   //! gives the pattern pointer.
   const MixedPattern<BRows, BCols, CSRPatt> * Patt() const {return _Patt;}
   //! points to the values vector array.
-  vector<double> * bValues() const {return _bValues;}
+  std::vector<double> * bValues() const {return _bValues;}
   //! The container of block (i,j).
   //! BEWARE: no check is done on the array size.
-  const vector<double> & bValues(UInt i,UInt j) const {return _bValues[i][j];}
-  vector<double> & bValues(UInt i,UInt j) {return _bValues[i][j];}
+  const std::vector<double> & bValues(UInt i,UInt j) const {
+      return _bValues[i][j];
+  }
+  std::vector<double> & bValues(UInt i,UInt j) {return _bValues[i][j];}
   //! give the block (i,j) value vector in Raw format (suitable for C)
   double * giveRaw_value(UInt i, UInt j)
   {return &(_bValues[i][j].front());}
@@ -767,15 +774,15 @@ class MixedMatr<BRows, BCols, CSRPatt, double>
   {return &(_bValues[i][j].front());}
 
   //! Determines the lumped diagonal of P1 mass matrix.
-  vector<double> MassDiagP1() const;
+  std::vector<double> MassDiagP1() const;
   //! Inverts the diagonal matrix Diag and mulitply it by the matrix Mat.
   template<UInt BR, UInt BC>
-  friend void MultInvDiag(const vector<Real> &Diag,
+  friend void MultInvDiag(const std::vector<Real> &Diag,
 			  const MixedMatr<BR,BC,CSRPatt,Real> &Mat,
 			  MixedMatr<BR,BC,CSRPatt,Real> &ans);
 
   //! Gives the diagonal of a block matrix.
-  vector<double> giveDiag() const;
+  std::vector<double> giveDiag() const;
 
   //! Warning: the two matrices will point to the same pattern.
   MixedMatr & operator= (const MixedMatr<BRows,BCols,CSRPatt,double>
@@ -801,7 +808,7 @@ class MixedMatr<BRows, BCols, CSRPatt, double>
   void ShowMe()
   {return _Patt->showMe(true);}
   //! Matrix visualization a la matlab.
-  void spy(string  const &filename);
+  void spy(std::string  const &filename);
   //! Assigns matrix diagonal element (r,r) to coeff, other elts
   //! of row r to zero.
   void diagonalize_row( UInt const r, double const coeff);
@@ -821,7 +828,7 @@ class MixedMatr<BRows, BCols, CSRPatt, double>
 		 DataType const datum);
 
   //! Matrix-vector product.
-  vector<double>  operator*(const vector<double> &v) const;
+  std::vector<double>  operator*(const std::vector<double> &v) const;
   //! Version for type Vector.
   Vector operator*(const Vector &v) const;
   //! Version for C pointer vector. BEWARE: no check on bounds done !
@@ -839,7 +846,7 @@ private:
   const MixedPattern<BRows, BCols, CSRPatt> * _Patt;
   //! An array of values vector: there is one vector of values for
   //! each block.
-  vector<double> _bValues[BRows][BCols];
+  std::vector<double> _bValues[BRows][BCols];
 
 };
 
@@ -929,7 +936,7 @@ CSRMatr(const PatternType &ex_pattern)
 
 template<typename PatternType, typename DataType>
 CSRMatr<PatternType,DataType>::
-CSRMatr(const PatternType &ex_pattern, const vector<DataType> &ex_value)
+CSRMatr(const PatternType &ex_pattern, const std::vector<DataType> &ex_value)
 {
   _value.reserve(ex_pattern.nNz()); // in case of block matrix, there is
   // no default constructor for class KNM
@@ -996,7 +1003,7 @@ void
 CSRMatr<PatternType,DataType>::
 set_mat(UInt row, UInt col, DataType loc_val)
 {
-  pair<UInt,bool> where = *_Patt.locate_index(row,col);
+  std::pair<UInt,bool> where = *_Patt.locate_index(row,col);
   if (where.second) _value[where.first] = loc_val;
   return;
 };
@@ -1007,7 +1014,7 @@ CSRMatr<PatternType,DataType>::
 set_mat_inc(UInt row, UInt col, DataType loc_val)
 {
 
-  pair<UInt,bool> where = _Patt->locate_index(row,col);
+  std::pair<UInt,bool> where = _Patt->locate_index(row,col);
   if (where.second) _value[where.first] += loc_val;
 
   return;
@@ -1036,7 +1043,7 @@ CSRMatr(const CSRPatt &ex_pattern, UInt const nr, UInt const nc);
 
 template<typename DataType>
 CSRMatr<CSRPatt,DataType>::
-CSRMatr(const CSRPatt &ex_pattern, const vector<DataType> &ex_value)
+CSRMatr(const CSRPatt &ex_pattern, const std::vector<DataType> &ex_value)
 {
   _value.reserve(ex_pattern.nNz()); // in case of block matrix, there is
   // no default constructor for class KNM
@@ -1095,7 +1102,7 @@ void
 CSRMatr<CSRPatt,DataType>::
 set_mat(UInt row, UInt col, DataType loc_val)
 {
-  pair<UInt,bool> where = _Patt->locate_index(row,col);
+  std::pair<UInt,bool> where = _Patt->locate_index(row,col);
   if (where.second) _value[where.first] = loc_val;
   return;
 };
@@ -1105,7 +1112,7 @@ void
 CSRMatr<CSRPatt,DataType>::
 set_mat_inc(UInt row, UInt col, DataType loc_val)
 {
-  pair<UInt,bool> where = _Patt->locate_index(row,col);
+  std::pair<UInt,bool> where = _Patt->locate_index(row,col);
   if (where.second) _value[where.first] += loc_val;
 
   return;
@@ -1113,13 +1120,13 @@ set_mat_inc(UInt row, UInt col, DataType loc_val)
 
 // determine the lumped matrix for P1
 template<typename DataType>
-vector<DataType>
+std::vector<DataType>
 CSRMatr<CSRPatt,DataType>::MassDiagP1() const
 {
   UInt nrows = _Patt->nRows();
   UInt ncols = _Patt->nCols();
   ASSERT(ncols == nrows, "The matrix must be square to be lumped");
-  vector<DataType> diag(nrows);
+  std::vector<DataType> diag(nrows);
   for (UInt nrow = 0; nrow < nrows; ++nrow)
     {
       for (UInt ii = _Patt->ia()[nrow]; ii < _Patt->ia()[nrow+1]; ++ii)
@@ -1130,7 +1137,7 @@ CSRMatr<CSRPatt,DataType>::MassDiagP1() const
 
 
 // build the inverse of a diagonal matrix and multiply it by another matrix
-void MultInvDiag(const vector<Real> &Diag,
+void MultInvDiag(const std::vector<Real> &Diag,
 		 const CSRMatr<CSRPatt,Real> &Mat, CSRMatr<CSRPatt,Real> &ans) ;
 
 
@@ -1162,9 +1169,9 @@ template<typename DataType>
 void CSRMatr<CSRPatt,DataType>::
 zero_row(UInt const row)
 {
-  typename vector<DataType>::iterator start= _value.begin()+
+  typename std::vector<DataType>::iterator start= _value.begin()+
     *(_Patt->give_ia().begin()+row-OFFSET);
-  typename vector<DataType>::iterator end= _value.begin()+
+  typename std::vector<DataType>::iterator end= _value.begin()+
     *(_Patt->give_ia().begin()+row+1-OFFSET);
 
   transform(start,end,start,nihil); //nihil is the same used for diagonalize
@@ -1262,43 +1269,43 @@ CSRMatr<CSRPatt,DataType>::ShowMe()
   UInt i_first,nrows=_Patt->nRows(),ncols=_Patt->nCols(),nnz=_Patt->nNz();
   Container ja = _Patt->ja();
 
-  string pare="[";
-  cout << "**************************" << endl;
-  cout << "     CSR Matrix           " << endl;
-  cout << endl;
-  cout << pare;
+  std::string pare="[";
+  std::cout << "**************************" << std::endl;
+  std::cout << "     CSR Matrix           " << std::endl;
+  std::cout << std::endl;
+  std::cout << pare;
   for (UInt i_index=0; i_index < nrows; ++i_index)
     {
-      cout << pare;
+      std::cout << pare;
       pare = " [";
       i_first=_Patt->give_ia()[i_index] - OFFSET;
 
       UInt jj=0;
       for(UInt j=0;j<ncols;j++)
 	{
-	  if (j==i_index) {cout << " " <<_value[i_first+jj]<<" "; jj++;}
+	  if (j==i_index) {std::cout << " " <<_value[i_first+jj]<<" "; jj++;}
 	  else {
 	    if (j==ja[i_first+jj]-OFFSET){
-	      cout <<" "<< _value[i_first+jj]<<" "; jj++;}
+	      std::cout <<" "<< _value[i_first+jj]<<" "; jj++;}
 	    else
-	      cout << " 0 ";
+	      std::cout << " 0 ";
 	  }
 	}
       if (i_index==nrows-1)
-        cout << " ]] " << endl;
+        std::cout << " ]] " << std::endl;
       else
-        cout << " ]  " << endl;
+        std::cout << " ]  " << std::endl;
     }
-  cout << "nnz = " << nnz << ", nrow = " << nrows << ", ncol = " << ncols << endl;
+  std::cout << "nnz = " << nnz << ", nrow = " << nrows << ", ncol = " << ncols << std::endl;
   return;
 };
 
 template<typename DataType>
 void CSRMatr<CSRPatt,DataType>::
-spy(string  const &filename)
+spy(std::string  const &filename)
 {
   // Purpose: Matlab dumping and spy
-  string nome=filename, uti=" , ";
+  std::string nome=filename, uti=" , ";
   UInt nrows=_Patt->nRows();
   Container ia=_Patt->ia(), ja=_Patt->ja();
   //
@@ -1309,27 +1316,27 @@ spy(string  const &filename)
   if (i<=0) nome=filename+".m";
   else {
     if ((unsigned int)i!=filename.size()-2  || filename[i+1]!='m')
-      {cerr << "Wrong file name ";
+      {std::cerr << "Wrong file name ";
       nome=filename+".m";}
   }
 
-  ofstream file_out(nome.c_str());
+  std::ofstream file_out(nome.c_str());
   ASSERT(file_out,"Error: Output Matrix (Values) file cannot be open");
 
 
   file_out << "S = [ ";
   for (UInt i=0;i<nrows;++i){
     for (UInt ii=ia[i]-OFFSET;ii<ia[i+1]-OFFSET;++ii)
-      file_out << i+1 << uti << ja[ii]+1-OFFSET << uti << _value[ii] << endl; /* */
+      file_out << i+1 << uti << ja[ii]+1-OFFSET << uti << _value[ii] << std::endl; /* */
   }
-  file_out << "];" << endl;
+  file_out << "];" << std::endl;
 
-  file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"<<endl;
+  file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"<<std::endl;
 };
 
 // the case of block matrices with Tab2d block type.
 void CSRMatr<CSRPatt,Tab2d>::
-spy(string  const &filename);
+spy(std::string  const &filename);
 
 //version without using static (I think it is better)
 // Modified by A. Gilardi. 03/02.
@@ -1367,8 +1374,8 @@ template<typename DataType>
 void CSRMatr<CSRPatt,DataType>::
 zeros()
 {
-  typename vector<DataType>::iterator start= _value.begin();
-  typename vector<DataType>::iterator end  = _value.end();
+  typename std::vector<DataType>::iterator start= _value.begin();
+  typename std::vector<DataType>::iterator end  = _value.end();
   fill(start, end, 0.0);
 }
 
@@ -1390,7 +1397,7 @@ VBRMatr(const VBRPatt &ex_pattern)
 
 template<class DataType>
 VBRMatr<DataType>::
-VBRMatr(const VBRPatt & ex_pattern, const vector<DataType> &ex_value):
+VBRMatr(const VBRPatt & ex_pattern, const std::vector<DataType> &ex_value):
   _value(ex_value)
 {
   _Patt=&ex_pattern;
@@ -1413,15 +1420,15 @@ VBRMatr<DataType>::operator=(const VBRMatr<DataType> &RhVbr)
 }
 
 template<class DataType>
-vector<DataType>
-VBRMatr<DataType>::operator*(const vector<DataType> &v) const
+std::vector<DataType>
+VBRMatr<DataType>::operator*(const std::vector<DataType> &v) const
 {
   UInt blockSize_r=_Patt->rpntr()[1]-_Patt->rpntr()[0];
   //...for square matrices...
   UInt nrows=_Patt->nRows()*blockSize_r;
   UInt ncols=_Patt->nCols()*blockSize_r;
   ASSERT(ncols==v.size(),"Error in Matrix Vector product");
-  vector<DataType> ans;
+  std::vector<DataType> ans;
   ans.resize(nrows,0.0);
 
   for (UInt ir=0+OFFSET;ir<nrows+OFFSET;++ir){
@@ -1553,7 +1560,7 @@ set_mat_inc(UInt row, UInt col, DataType loc_val)
   PatternDefs::Diff_t blocrow = _Patt->rbloc(row+OFFSET);
   PatternDefs::Diff_t bloccol = _Patt->cbloc(col+OFFSET);
 
-  pair<UInt,bool> whereBloc = _Patt->locate_index(blocrow,bloccol);
+  std::pair<UInt,bool> whereBloc = _Patt->locate_index(blocrow,bloccol);
 
   UInt ind=_Patt->indx()[whereBloc.first] + _Patt->locr(row+OFFSET) +
     _Patt->locc(col+OFFSET)*(blockSize-OFFSET);
@@ -1570,18 +1577,18 @@ DataType addition(DataType val1, DataType val2)
 
 template<typename DataType>
 void VBRMatr<DataType>::
-set_mat_inc(UInt row, UInt col, vector<DataType> &loc_block)
+set_mat_inc(UInt row, UInt col, std::vector<DataType> &loc_block)
 {
-  pair<UInt,bool> whereBloc = _Patt->locate_index(row,col);
+  std::pair<UInt,bool> whereBloc = _Patt->locate_index(row,col);
 
-  typename vector<DataType>::const_iterator loc_start= loc_block.begin();
-  typename vector<DataType>::const_iterator loc_end= loc_block.end();
+  typename std::vector<DataType>::const_iterator loc_start= loc_block.begin();
+  typename std::vector<DataType>::const_iterator loc_end= loc_block.end();
 
   UInt ind=_Patt->indx()[whereBloc.first];
   //copy of the block
-  typename vector<DataType>::iterator val_start= _value.begin()+ind;
-  for (typename vector<DataType>::const_iterator ip= loc_start; ip != loc_end;
-       ip++)
+  typename std::vector<DataType>::iterator val_start= _value.begin()+ind;
+  for (typename std::vector<DataType>::const_iterator ip= loc_start;
+       ip != loc_end; ip++)
     {
       *val_start+=*ip;
       val_start++;
@@ -1601,7 +1608,7 @@ set_mat(UInt row, UInt col, DataType loc_val)
   PatternDefs::Diff_t blocrow=_Patt->rbloc(row);
   PatternDefs::Diff_t bloccol=_Patt->cbloc(col);
 
-  pair<UInt,bool> whereBloc = _Patt->locate_index(blocrow,bloccol);
+  std::pair<UInt,bool> whereBloc = _Patt->locate_index(blocrow,bloccol);
 
   UInt ind=_Patt->indx()[whereBloc.first] + _Patt->locr(row+OFFSET) +
     _Patt->locc(col+OFFSET)*(blockSize-OFFSET);
@@ -1614,16 +1621,16 @@ set_mat(UInt row, UInt col, DataType loc_val)
 // version for block operation
 template<typename DataType>
 void VBRMatr<DataType>::
-set_mat(UInt row, UInt col, vector<DataType> &loc_block)
+set_mat(UInt row, UInt col, std::vector<DataType> &loc_block)
 {
-  pair<UInt,bool> whereBloc = _Patt->locate_index(row,col);
+  std::pair<UInt,bool> whereBloc = _Patt->locate_index(row,col);
 
-  typename vector<DataType>::const_iterator loc_start= loc_block.begin();
-  typename vector<DataType>::const_iterator loc_end= loc_block.end();
+  typename std::vector<DataType>::const_iterator loc_start= loc_block.begin();
+  typename std::vector<DataType>::const_iterator loc_end= loc_block.end();
 
   UInt ind=_Patt->indx()[whereBloc.first];
   //copy of the block
-  typename vector<DataType>::iterator val_start= _value.begin()+ind;
+  typename std::vector<DataType>::iterator val_start= _value.begin()+ind;
   //  _value[ind] += loc_val;
   if (whereBloc.second) copy(loc_start, loc_end, val_start);
 
@@ -1644,10 +1651,10 @@ set_mat(UInt where, DataType loc_val)
 template<typename DataType>
 void
 VBRMatr<DataType>::
-spy(string  const &filename)
+spy(std::string  const &filename)
 {
   // Purpose: Matlab dumping and spy
-  string nome=filename, uti=" , ";
+  std::string nome=filename, uti=" , ";
   UInt nblocrow=_Patt->nRows(), blocsize=_Patt->rpntr()[1]-_Patt->rpntr()[0];
   Container ia=_Patt->ia(), ja=_Patt->ja(), indx=_Patt->indx();
   //
@@ -1658,11 +1665,11 @@ spy(string  const &filename)
   if (i<=0) nome=filename+".m";
   else {
     if ((unsigned int)i!=filename.size()-2  || filename[i+1]!='m')
-      {cerr << "Wrong file name ";
+      {std::cerr << "Wrong file name ";
       nome=filename+".m";}
   };
 
-  ofstream file_out(nome.c_str());
+  std::ofstream file_out(nome.c_str());
   ASSERT(file_out,"Error: Output Matrix (Values) file cannot be open");
 
 
@@ -1673,10 +1680,10 @@ spy(string  const &filename)
 	for (UInt j=0;j<blocsize;++j)
 	  file_out << irb*blocsize+i-OFFSET+1 << uti <<
 	    ja[ic]*blocsize+j-OFFSET+1  << uti <<
-	    _value[indx[ic]+i+(j-OFFSET)*blocsize] << endl;
+	    _value[indx[ic]+i+(j-OFFSET)*blocsize] << std::endl;
   };
-  file_out << "];" << endl;
-  file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"<<endl;
+  file_out << "];" << std::endl;
+  file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"<<std::endl;
 };
 
 /*
@@ -1687,39 +1694,39 @@ showMe() const
 {
   UInt blsize=_Patt->rpntr()[1]-_Patt->rpntr()[0]; // block size
   int i_first;
-  string pare="[";
-  cout << "**************************" << endl;
-  cout << "     VBR Matrix Pattern   " << endl;
-  cout << endl;
+  std::string pare="[";
+  std::cout << "**************************" << std::endl;
+  std::cout << "     VBR Matrix Pattern   " << std::endl;
+  std::cout << std::endl;
 
-  cout << pare;
+  std::cout << pare;
   for (PatternDefs::Diff_t i_index=0; i_index <
 	 static_cast<PatternDefs::Diff_t>(_Patt->nRows()); i_index++)
     for (UInt jb=0;jb<blsize;jb++){
-      cout << pare;
+      std::cout << pare;
       pare = " [";
       i_first=_Patt->ia()[i_index]-OFFSET+1; // In _ia[i_index] there is the
                                             // diagonal entry
       UInt jj=0;
       for(PatternDefs::Diff_t j=0;j<static_cast<PatternDefs::Diff_t>(_Patt->nCols());j++)
 	{
-	  if (j==i_index) for (UInt ib=0;ib<blsize;ib++) cout <<
+	  if (j==i_index) for (UInt ib=0;ib<blsize;ib++) std::cout <<
 							   _value[];
 	  else {
 	    if (j==_Patt->ja()[i_first+jj]-OFFSET){
-	      for (UInt ib=0;ib<blsize;ib++) cout << " * ";
+	      for (UInt ib=0;ib<blsize;ib++) std::cout << " * ";
 	      jj++;
 	    };
-	    else for (UInt ib=0;ib<blsize;ib++) cout << " 0 ";
+	    else for (UInt ib=0;ib<blsize;ib++) std::cout << " 0 ";
 	  };
 	};
       if (i_index==static_cast<PatternDefs::Diff_t>(_Patt->nRows()-1))
-	cout << " ]] " << endl;
+	std::cout << " ]] " << std::endl;
       else
-	cout << " ]  " << endl;
-      cout << endl;
+	std::cout << " ]  " << std::endl;
+      std::cout << std::endl;
     };
-  cout << "**************************" << endl;
+  std::cout << "**************************" << std::endl;
   return;
 };
 */
@@ -1750,11 +1757,11 @@ MSRMatr(const CSRPatt &ex_pattern)
 
 /* template<class DataType> */
 /* CSRMatr<DataType>:: */
-/* CSRMatr(UInt ex_nnz, UInt ex_nrows, UInt ex_ncols, const vector<UInt> &ex_ia, const vector<UInt> &ex_ja, const vector<DataType> &ex_value): */
+/* CSRMatr(UInt ex_nnz, UInt ex_nrows, UInt ex_ncols, const std::vector<UInt> &ex_ia, const std::vector<UInt> &ex_ja, const std::vector<DataType> &ex_value): */
 /* _value(ex_nnz) */
 /*  { */
 /*   _Patt = 0; */
-/*   Csr_Lv_P Pattern(UInt ex_nnz, UInt ex_nrows, UInt ex_ncols, const vector<UInt> &ex_ia, const vector<UInt> &ex_ja); */
+/*   Csr_Lv_P Pattern(UInt ex_nnz, UInt ex_nrows, UInt ex_ncols, const std::vector<UInt> &ex_ia, const std::vector<UInt> &ex_ja); */
 /*   _nnz = ex_nnz; */
 /*   _nrows = ex_nrows; */
 /*   _ncols = ex_ncols; */
@@ -1767,7 +1774,7 @@ MSRMatr(const CSRPatt &ex_pattern)
 
 template<class DataType>
 MSRMatr<DataType>::
-MSRMatr(const MSRPatt* ex_pattern, const vector<DataType> &ex_value):
+MSRMatr(const MSRPatt* ex_pattern, const std::vector<DataType> &ex_value):
   _Patt(ex_pattern),_value(ex_value)
 {
   //  _nnz = ex_pattern.nnz();
@@ -1815,7 +1822,7 @@ operator= (const CSRMatr<CSRPatt, DataType> &CSRmat) {
     Container::const_iterator bindx=Patt()->give_bindx().begin();
     Container::const_iterator ia=CSRmat.Patt()->give_ia().begin();
     Container::const_iterator ja=CSRmat.Patt()->give_ja().begin();
-    vector<double>::const_iterator valueCSR=CSRmat.value().begin();
+    std::vector<double>::const_iterator valueCSR=CSRmat.value().begin();
 
     // copy of CSR_value into MSR_value
     UInt nrows = _Patt->nRows();
@@ -1838,12 +1845,12 @@ operator= (const CSRMatr<CSRPatt, DataType> &CSRmat) {
 }
 
 template<class DataType>
-vector<DataType>
-MSRMatr<DataType>::operator* (const vector<DataType> &v) const
+std::vector<DataType>
+MSRMatr<DataType>::operator* (const std::vector<DataType> &v) const
 {
   UInt nrows=_Patt->nRows();
   ASSERT(nrows==v.size(),"Error in Matrix Vector product");
-  vector<DataType> ans;
+  std::vector<DataType> ans;
   ans.resize(nrows,0.0);
   for (UInt i=0+OFFSET;i<nrows+OFFSET;++i){
     ans[i]=_value[i]*v[i];
@@ -1976,54 +1983,54 @@ void MSRMatr<DataType>::ShowMe()
 {
   Container::iterator found;
   int i_first,i_last;
-  vector<UInt> vec_temp = _Patt->bindx();
+  std::vector<UInt> vec_temp = _Patt->bindx();
   UInt _nrows= _Patt->nRows();
   UInt _ncols= _Patt->nCols();
   UInt _nnz  = _Patt->nNz();
 
-  string pare="[";
-  cout << "**************************" << endl;
-  cout << "     MSR Matrix           " << endl;
-  cout << endl;
-  cout << pare;
+  std::string pare="[";
+  std::cout << "**************************" << std::endl;
+  std::cout << "     MSR Matrix           " << std::endl;
+  std::cout << std::endl;
+  std::cout << pare;
   for (UInt i_index=0; i_index < _nrows; ++i_index)
     {
-      cout << pare;
+      std::cout << pare;
       pare = " [";
       i_first=_Patt->bindx()[i_index];
       i_last =_Patt->bindx()[i_index+1];
-      //      cout << i_first << " " << i_last << endl;
+      //      std::cout << i_first << " " << i_last << std::endl;
       for(int j=0;j<_ncols;++j)
 	{
 	  if (j==i_index)
-	    cout << " " << _value[i_index] << " ";
+	    std::cout << " " << _value[i_index] << " ";
 	  else
 	    {
 	      found = find(&vec_temp[i_first],&vec_temp[i_last],j); // I am not supposing any given ordering in _ja
 	      if (found==&vec_temp[i_last])
-		cout << " 0 ";
+		std::cout << " 0 ";
 	      else
 		{
 		  UInt j_index=found-&vec_temp[0];
-		  cout << " " << _value[j_index] << " ";
+		  std::cout << " " << _value[j_index] << " ";
 		}
 	    }
         }
       if (i_index==_nrows-1)
-        cout << " ]] " << endl;
+        std::cout << " ]] " << std::endl;
       else
-        cout << " ]  " << endl;
+        std::cout << " ]  " << std::endl;
     }
-  cout << "nnz = " << _nnz << ", nrow = " << _nrows << ", ncol = " << _ncols << endl;
+  std::cout << "nnz = " << _nnz << ", nrow = " << _nrows << ", ncol = " << _ncols << std::endl;
   return;
 };
 
 template<typename DataType>
 void
-MSRMatr<DataType>::spy(string  const &filename)
+MSRMatr<DataType>::spy(std::string  const &filename)
 {
   // Purpose: Matlab dumping and spy
-  string nome=filename, uti=" , ";
+  std::string nome=filename, uti=" , ";
   //
   // check on the file name
   //
@@ -2032,23 +2039,23 @@ MSRMatr<DataType>::spy(string  const &filename)
   if (i<=0) nome=filename+".m";
   else {
     if ((unsigned int)i!=filename.size()-2  || filename[i+1]!='m'){
-      cerr << "Wrong file name ";
+      std::cerr << "Wrong file name ";
       nome=filename+".m";}
   }
 
-  ofstream file_out(nome.c_str());
+  std::ofstream file_out(nome.c_str());
 
   file_out << "S = [ ";
   for (UInt i=1;i<=_Patt->nRows();++i){
-    file_out << i << uti << i << uti << _value[i-1] << endl;
+    file_out << i << uti << i << uti << _value[i-1] << std::endl;
     for (UInt ii=_Patt->give_bindx()[i-1];ii<_Patt->give_bindx()[i];++ii)
       file_out << i << uti << _Patt->give_bindx()[ii]+1-OFFSET <<
-	uti << _value[ii] << endl;
+	uti << _value[ii] << std::endl;
   }
 
-    file_out << "];" << endl;
+    file_out << "];" << std::endl;
 
-  file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"<<endl;
+  file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"<<std::endl;
 };
 
 template<typename DataType>
@@ -2057,11 +2064,11 @@ MSRMatr<DataType>::
 set_mat_inc(UInt row, UInt col, DataType loc_val)
 {
 
-  pair<UInt,bool> where = _Patt->locate_index(row,col);
+  std::pair<UInt,bool> where = _Patt->locate_index(row,col);
   if (where.second)
     _value[where.first] += loc_val;
   else {
-    cout << row +1<< "," << col +1<< endl;
+    std::cout << row +1<< "," << col +1<< std::endl;
     ERROR_MSG("problem in MSR::set_mat_inc");
   }
   return;
@@ -2073,7 +2080,7 @@ MSRMatr<DataType>::
 set_mat(UInt row, UInt col, DataType loc_val)
 {
 
-  pair<UInt,bool> where = _Patt->locate_index(row,col);
+  std::pair<UInt,bool> where = _Patt->locate_index(row,col);
   if(where.second) _value[where.first] = loc_val;
 
   return;
@@ -2091,11 +2098,11 @@ set_mat(UInt where, DataType loc_val)
 
 // determine the lumped matrix for P1
 template<typename DataType>
-vector<DataType> MSRMatr<DataType>::MassDiagP1() const
+std::vector<DataType> MSRMatr<DataType>::MassDiagP1() const
 {
   UInt nrows = _Patt->nRows();
 
-  vector<DataType> diag(nrows);
+  std::vector<DataType> diag(nrows);
 
   for (UInt nrow = 0; nrow < nrows; ++nrow)
     {
@@ -2108,15 +2115,16 @@ vector<DataType> MSRMatr<DataType>::MassDiagP1() const
 }
 
 // build the inverse of a diagonal matrix and multiply it by another matrix
-void MultInvDiag(const vector<Real> &Diag, const MSRMatr<Real> &Mat, MSRMatr<Real> &ans) ;
+void MultInvDiag(const std::vector<Real> &Diag, const MSRMatr<Real> &Mat,
+                 MSRMatr<Real> &ans) ;
 
 // give the diagonal of an MSR matrix
 template<typename DataType>
-vector<DataType> MSRMatr<DataType>::giveDiag() const
+std::vector<DataType> MSRMatr<DataType>::giveDiag() const
 {
   UInt nrows = _Patt->nRows();
 
-  vector<DataType> diag(nrows);
+  std::vector<DataType> diag(nrows);
 
   for (UInt nrow = 0; nrow < nrows; ++nrow)
     diag[nrow] = _value[nrow];
@@ -2148,7 +2156,8 @@ diagonalize_row(UInt const r, DataType const coeff)
 template<typename DataType>
 void
 MSRMatr<DataType>::
-diagonalize(UInt const r, DataType const coeff, vector<DataType> &b, DataType datum)
+diagonalize(UInt const r, DataType const coeff, std::vector<DataType> &b,
+            DataType datum)
 {
   // AIM: Diagonalization of a row of the system, by setting:
   // A(i,i) = coeff,
@@ -2159,8 +2168,8 @@ diagonalize(UInt const r, DataType const coeff, vector<DataType> &b, DataType da
   UInt istart= *(_Patt->give_bindx().begin()+r-OFFSET);
   UInt iend  = *(_Patt->give_bindx().begin()+r+1-OFFSET);
 
-  typename vector<DataType>::iterator start=_value.begin() + istart;
-  typename vector<DataType>::iterator end=_value.begin() + iend;
+  typename std::vector<DataType>::iterator start=_value.begin() + istart;
+  typename std::vector<DataType>::iterator end=_value.begin() + iend;
   UInt disp = _Patt->nRows()+1;
   UInt row,col;
 
@@ -2195,8 +2204,8 @@ diagonalize(UInt const r, DataType const coeff, Vector &b, DataType datum)
   UInt istart= *(_Patt->give_bindx().begin()+r-OFFSET);
   UInt iend  = *(_Patt->give_bindx().begin()+r+1-OFFSET);
 
-  typename vector<DataType>::iterator start=_value.begin() + istart;
-  typename vector<DataType>::iterator end=_value.begin() + iend;
+  typename std::vector<DataType>::iterator start=_value.begin() + istart;
+  typename std::vector<DataType>::iterator end=_value.begin() + iend;
 
   UInt row,col;
 
@@ -2232,8 +2241,8 @@ template<typename DataType>
 void MSRMatr<DataType>::
 zeros()
 {
-  typename vector<DataType>::iterator start= _value.begin();
-  typename vector<DataType>::iterator end  = _value.end();
+  typename std::vector<DataType>::iterator start= _value.begin();
+  typename std::vector<DataType>::iterator end  = _value.end();
   fill(start, end, 0.0);
 }
 
@@ -2281,7 +2290,7 @@ MixedMatr(const MixedPattern<BRows, BCols, CSRPatt> &ex_pattern)
 
 // Determines the lumped diagonal of P1 mass matrix.
 template<UInt BRows, UInt BCols, typename PatternType, typename DataType>
-vector<DataType>
+std::vector<DataType>
 MixedMatr<BRows, BCols, PatternType, DataType>::
 MassDiagP1() const
 {
@@ -2289,7 +2298,7 @@ MassDiagP1() const
   UInt nnz = 0, nr_global = 0;
   Container coldata, position;
 
-  vector<DataType> diag;
+  std::vector<DataType> diag;
   diag.resize(nrows,0.0);
 
   for (UInt ib=0; ib< BRows; ib++){
@@ -2319,7 +2328,7 @@ MassDiagP1() const
 // Inverts the diagonal matrix Diag and mulitply it by the matrix Mat.
 template<UInt BR, UInt BC, typename PattType>
 void
-MultInvDiag(const vector<Real> &Diag,
+MultInvDiag(const std::vector<Real> &Diag,
 	    const MixedMatr<BR,BC,PattType,Real> &Mat,
 	    MixedMatr<BR,BC,PattType,Real> &ans)
 {
@@ -2357,13 +2366,13 @@ MultInvDiag(const vector<Real> &Diag,
 
 // Gives the diagonal of a block matrix.
 template<UInt BRows, UInt BCols, typename PatternType, typename DataType>
-vector<DataType>
+std::vector<DataType>
 MixedMatr<BRows, BCols, PatternType, DataType>::
 giveDiag() const
 {
   ASSERT_PRE(BRows == BCols, "block matrix must be a square matrix");
 
-  vector<Real> diag;
+  std::vector<Real> diag;
   diag.resize(_Patt->nRows(),0.0);
 
   Container coldata, pos;
@@ -2448,7 +2457,7 @@ set_mat(UInt ib, UInt jb, UInt row, UInt col, DataType loc_val)
 {
   if (_Patt->block_ptr(ib,jb) != 0 )
     {
-      pair<UInt,bool> where = _Patt->block_ptr(ib,jb)->locate_index(row,col);
+      std::pair<UInt,bool> where = _Patt->block_ptr(ib,jb)->locate_index(row,col);
       if (where.second) _bValues[ib][jb][where.first] = loc_val;
     }
 }
@@ -2473,7 +2482,7 @@ set_mat_inc(UInt ib, UInt jb, UInt row, UInt col, DataType loc_val)
 {
   if (_Patt->block_ptr(ib,jb) != 0 )
     {
-      pair<UInt,bool> where = _Patt->block_ptr(ib,jb)->locate_index(row,col);
+      std::pair<UInt,bool> where = _Patt->block_ptr(ib,jb)->locate_index(row,col);
       if (where.second) _bValues[ib][jb][where.first] += loc_val;
     }
 }
@@ -2528,10 +2537,10 @@ get_value(UInt ib, UInt jb, UInt i, UInt j) const
 template<UInt BRows, UInt BCols, typename PatternType, typename DataType>
 void
 MixedMatr<BRows, BCols, PatternType, DataType>::
-spy(string  const &filename)
+spy(std::string  const &filename)
 {
   // Purpose: Matlab dumping and spy
-  string nome=filename, uti=" , ";
+  std::string nome=filename, uti=" , ";
   //
   // check on the file name
   //
@@ -2540,11 +2549,11 @@ spy(string  const &filename)
   if (i<=0) nome=filename+".m";
   else {
     if (i!=filename.size()-2  || filename[i+1]!='m'){
-      cerr << "Wrong file name ";
+      std::cerr << "Wrong file name ";
       nome=filename+".m";}
   }
 
-  ofstream file_out(nome.c_str());
+  std::ofstream file_out(nome.c_str());
   UInt nnz, mb, nb;
   Container coldata, pos;
   coldata.resize(_Patt->nCols());
@@ -2556,11 +2565,11 @@ spy(string  const &filename)
     for (UInt j=0; j< nnz; ++j){
       extract_pair(_Patt->locateElBlock(i,coldata[j]-OFFSET),mb,nb);
       file_out << i+1 << uti << coldata[j]+1-OFFSET << uti <<
-	_bValues[mb][nb][pos[j]] << endl;
+	_bValues[mb][nb][pos[j]] << std::endl;
     }
   }
-  file_out << "];" << endl;
-  file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"<<endl;
+  file_out << "];" << std::endl;
+  file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"<<std::endl;
 }
 
 // Assigns matrix diagonal element (r,r) to coeff, other elts
@@ -2653,12 +2662,12 @@ diagonalize( UInt const row, DataType const coeff, VectorType &b,
 
 // Matrix-vector product.
 template<UInt BRows, UInt BCols, typename PatternType, typename DataType>
-vector<DataType>
+std::vector<DataType>
 MixedMatr<BRows, BCols, PatternType, DataType>::
-operator*(const vector<DataType> &v) const
+operator*(const std::vector<DataType> &v) const
 {
   ASSERT(_Patt->nCols()==v.size(),"Error in Matrix Vector product");
-  vector<DataType> ans;
+  std::vector<DataType> ans;
   ans.resize(_Patt->nRows(),0.0);
 
   UInt nrows = 0, ncols = 0;
@@ -2824,8 +2833,8 @@ zeros()
   for (ib= 0; ib < BRows; ib++)
     for (jb= 0; jb < BCols; jb++)
       if (_Patt->block_ptr(ib,jb) != 0 ){
-	typename vector<DataType>::iterator start= _bValues[ib][jb].begin();
-	typename vector<DataType>::iterator end  = _bValues[ib][jb].end();
+	typename std::vector<DataType>::iterator start= _bValues[ib][jb].begin();
+	typename std::vector<DataType>::iterator end  = _bValues[ib][jb].end();
 	fill(start, end, 0.0);
       }
 }
@@ -2859,7 +2868,7 @@ MixedMatr(const MixedPattern<BRows, BCols, MSRPatt> &ex_pattern)
 
 // Determines the lumped diagonal of P1 mass matrix.
 template<UInt BRows, UInt BCols>
-vector<double>
+std::vector<double>
 MixedMatr<BRows, BCols, MSRPatt, double>::
 MassDiagP1() const
 {
@@ -2867,7 +2876,7 @@ MassDiagP1() const
   UInt nnz = 0, nr_global = 0;
   Container coldata, position;
 
-  vector<double> diag;
+  std::vector<double> diag;
   diag.resize(nrows,0.0);
 
   for (UInt ib=0; ib< BRows; ib++){
@@ -2897,7 +2906,7 @@ MassDiagP1() const
 // Inverts the diagonal matrix Diag and mulitply it by the matrix Mat.
 template<UInt BR, UInt BC>
 void
-MultInvDiag(const vector<Real> &Diag,
+MultInvDiag(const std::vector<Real> &Diag,
 	    const MixedMatr<BR,BC,MSRPatt,Real> &Mat,
 	    MixedMatr<BR,BC,MSRPatt,Real> &ans)
 {
@@ -2935,13 +2944,13 @@ MultInvDiag(const vector<Real> &Diag,
 
 // Gives the diagonal of a block matrix.
 template<UInt BRows, UInt BCols>
-vector<double>
+std::vector<double>
 MixedMatr<BRows, BCols, MSRPatt, double>::
 giveDiag() const
 {
   ASSERT_PRE(BRows == BCols, "block matrix must be a square matrix");
 
-  vector<Real> diag;
+  std::vector<Real> diag;
   diag.resize(_Patt->nRows(),0.0);
 
   Container coldata, pos;
@@ -3026,7 +3035,7 @@ set_mat(UInt ib, UInt jb, UInt row, UInt col, double loc_val)
 {
   if (_Patt->block_ptr(ib,jb) != 0 )
     {
-      pair<UInt,bool> where = _Patt->block_ptr(ib,jb)->locate_index(row,col);
+      std::pair<UInt,bool> where = _Patt->block_ptr(ib,jb)->locate_index(row,col);
       if (where.second) _bValues[ib][jb][where.first] = loc_val;
     }
 }
@@ -3051,7 +3060,7 @@ set_mat_inc(UInt ib, UInt jb, UInt row, UInt col, double loc_val)
 {
   if (_Patt->block_ptr(ib,jb) != 0 )
     {
-      pair<UInt,bool> where = _Patt->block_ptr(ib,jb)->locate_index(row,col);
+      std::pair<UInt,bool> where = _Patt->block_ptr(ib,jb)->locate_index(row,col);
       if (where.second) _bValues[ib][jb][where.first] += loc_val;
     }
 }
@@ -3106,10 +3115,10 @@ get_value(UInt ib, UInt jb, UInt i, UInt j) const
 template<UInt BRows, UInt BCols>
 void
 MixedMatr<BRows, BCols, MSRPatt, double>::
-spy(string  const &filename)
+spy(std::string  const &filename)
 {
   // Purpose: Matlab dumping and spy
-  string nome=filename, uti=" , ";
+  std::string nome=filename, uti=" , ";
   //
   // check on the file name
   //
@@ -3118,11 +3127,11 @@ spy(string  const &filename)
   if (i<=0) nome=filename+".m";
   else {
     if (i!=filename.size()-2  || filename[i+1]!='m'){
-      cerr << "Wrong file name ";
+      std::cerr << "Wrong file name ";
       nome=filename+".m";}
   }
 
-  ofstream file_out(nome.c_str());
+  std::ofstream file_out(nome.c_str());
   UInt nnz, mb, nb;
   Container coldata, pos;
   coldata.resize(_Patt->nCols());
@@ -3134,11 +3143,11 @@ spy(string  const &filename)
     for (UInt j=0; j< nnz; ++j){
       extract_pair(_Patt->locateElBlock(i,coldata[j]-OFFSET),mb,nb);
       file_out << i+1 << uti << coldata[j]+1-OFFSET << uti <<
-	_bValues[mb][nb][pos[j]] << endl;
+	_bValues[mb][nb][pos[j]] << std::endl;
     }
   }
-  file_out << "];" << endl;
-  file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"<<endl;
+  file_out << "];" << std::endl;
+  file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"<<std::endl;
 }
 
 // Assigns matrix diagonal element (r,r) to coeff, other elts
@@ -3240,12 +3249,12 @@ diagonalize( UInt const row, double const coeff, VectorType &b,
 
 // Matrix-vector product.
 template<UInt BRows, UInt BCols>
-vector<double>
+std::vector<double>
 MixedMatr<BRows, BCols, MSRPatt, double>::
-operator*(const vector<double> &v) const
+operator*(const std::vector<double> &v) const
 {
   ASSERT(_Patt->nCols()==v.size(),"Error in Matrix Vector product");
-  vector<double> ans;
+  std::vector<double> ans;
   ans.resize(_Patt->nRows(),0.0);
 
   UInt nrows, istart,iend;
@@ -3409,8 +3418,8 @@ zeros()
   for (ib= 0; ib < BRows; ib++)
     for (jb= 0; jb < BCols; jb++)
       if (_Patt->block_ptr(ib,jb) != 0 ){
-	typename vector<double>::iterator start= _bValues[ib][jb].begin();
-	typename vector<double>::iterator end  = _bValues[ib][jb].end();
+	typename std::vector<double>::iterator start= _bValues[ib][jb].begin();
+	typename std::vector<double>::iterator end  = _bValues[ib][jb].end();
 	fill(start, end, 0.0);
       }
 }
@@ -3444,7 +3453,7 @@ MixedMatr(const MixedPattern<BRows, BCols, CSRPatt> &ex_pattern)
 
 // Determines the lumped diagonal of P1 mass matrix.
 template<UInt BRows, UInt BCols>
-vector<double>
+std::vector<double>
 MixedMatr<BRows, BCols, CSRPatt, double>::
 MassDiagP1() const
 {
@@ -3452,7 +3461,7 @@ MassDiagP1() const
   UInt nnz = 0, nr_global = 0;
   Container coldata, position;
 
-  vector<double> diag;
+  std::vector<double> diag;
   diag.resize(nrows,0.0);
 
   for (UInt ib=0; ib< BRows; ib++){
@@ -3482,7 +3491,7 @@ MassDiagP1() const
 // Inverts the diagonal matrix Diag and mulitply it by the matrix Mat.
 template<UInt BR, UInt BC>
 void
-MultInvDiag(const vector<Real> &Diag,
+MultInvDiag(const std::vector<Real> &Diag,
 	    const MixedMatr<BR,BC,CSRPatt,Real> &Mat,
 	    MixedMatr<BR,BC,CSRPatt,Real> &ans)
 {
@@ -3520,13 +3529,13 @@ MultInvDiag(const vector<Real> &Diag,
 
 // Gives the diagonal of a block matrix.
 template<UInt BRows, UInt BCols>
-vector<double>
+std::vector<double>
 MixedMatr<BRows, BCols, CSRPatt, double>::
 giveDiag() const
 {
   ASSERT_PRE(BRows == BCols, "block matrix must be a square matrix");
 
-  vector<Real> diag;
+  std::vector<Real> diag;
   diag.resize(_Patt->nRows(),0.0);
 
   Container coldata, pos;
@@ -3611,7 +3620,7 @@ set_mat(UInt ib, UInt jb, UInt row, UInt col, double loc_val)
 {
   if (_Patt->block_ptr(ib,jb) != 0 )
     {
-      pair<UInt,bool> where = _Patt->block_ptr(ib,jb)->locate_index(row,col);
+      std::pair<UInt,bool> where = _Patt->block_ptr(ib,jb)->locate_index(row,col);
       if (where.second) _bValues[ib][jb][where.first] = loc_val;
     }
 }
@@ -3636,7 +3645,7 @@ set_mat_inc(UInt ib, UInt jb, UInt row, UInt col, double loc_val)
 {
   if (_Patt->block_ptr(ib,jb) != 0 )
     {
-      pair<UInt,bool> where = _Patt->block_ptr(ib,jb)->locate_index(row,col);
+      std::pair<UInt,bool> where = _Patt->block_ptr(ib,jb)->locate_index(row,col);
       if (where.second) _bValues[ib][jb][where.first] += loc_val;
     }
 }
@@ -3691,10 +3700,10 @@ get_value(UInt ib, UInt jb, UInt i, UInt j) const
 template<UInt BRows, UInt BCols>
 void
 MixedMatr<BRows, BCols, CSRPatt, double>::
-spy(string  const &filename)
+spy(std::string  const &filename)
 {
   // Purpose: Matlab dumping and spy
-  string nome=filename, uti=" , ";
+  std::string nome=filename, uti=" , ";
   //
   // check on the file name
   //
@@ -3703,11 +3712,11 @@ spy(string  const &filename)
   if (i<=0) nome=filename+".m";
   else {
     if (i!=filename.size()-2  || filename[i+1]!='m'){
-      cerr << "Wrong file name ";
+      std::cerr << "Wrong file name ";
       nome=filename+".m";}
   }
 
-  ofstream file_out(nome.c_str());
+  std::ofstream file_out(nome.c_str());
   UInt mb, nb, j;
   UInt r_offset, c_offset, ia_start, ia_end;
   file_out << "S = [ ";
@@ -3726,13 +3735,13 @@ spy(string  const &filename)
 	  for( j= ia_start; j < ia_end; j++){
 	    file_out << i+r_offset+1 << uti
 		     <<	_Patt->block_ptr(mb,nb)->give_ja()[j]+c_offset+1-OFFSET
-		     << uti << _bValues[mb][nb][j] << endl;
+		     << uti << _bValues[mb][nb][j] << std::endl;
 	  }
 	}
   }
 
-  file_out << "];" << endl;
-  file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"<<endl;
+  file_out << "];" << std::endl;
+  file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"<<std::endl;
 }
 
 // Assigns matrix diagonal element (r,r) to coeff, other elts
@@ -3866,12 +3875,12 @@ void zero_row_col(UInt const row, MixedMatr<BR,BC,CSRPatt,Real> &trD,
 
 // Matrix-vector product.
 template<UInt BRows, UInt BCols>
-vector<double>
+std::vector<double>
 MixedMatr<BRows, BCols, CSRPatt, double>::
-operator*(const vector<double> &v) const
+operator*(const std::vector<double> &v) const
 {
   ASSERT(_Patt->nCols()==v.size(),"Error in Matrix Vector product");
-  vector<double> ans;
+  std::vector<double> ans;
   ans.resize(_Patt->nRows(),0.0);
 
   UInt nrows, iastart,iaend;
@@ -4027,8 +4036,8 @@ zeros()
   for (ib= 0; ib < BRows; ib++)
     for (jb= 0; jb < BCols; jb++)
       if (_Patt->block_ptr(ib,jb) != 0 ){
-	typename vector<double>::iterator start= _bValues[ib][jb].begin();
-	typename vector<double>::iterator end  = _bValues[ib][jb].end();
+	typename std::vector<double>::iterator start= _bValues[ib][jb].begin();
+	typename std::vector<double>::iterator end  = _bValues[ib][jb].end();
 	fill(start, end, 0.0);
       }
 }

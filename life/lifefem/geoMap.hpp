@@ -71,9 +71,11 @@ public:
 
      bdMap : a pointer on the natural associated mapping for the boundary of the element
    */
-  GeoMap(string _name,ReferenceShapes _shape,int _nbDof,int _nbCoor,const Fct* phi,const Fct* dPhi,const Fct* d2Phi,const Real* _refCoor,const SetOfQuadRule& sqr,const GeoMap* bdMap);
+  GeoMap(std::string _name, ReferenceShapes _shape, int _nbDof, int _nbCoor,
+         const Fct* phi, const Fct* dPhi, const Fct* d2Phi,
+         const Real* _refCoor, const SetOfQuadRule& sqr, const GeoMap* bdMap);
   ~GeoMap();
-  friend ostream& operator << (ostream& f,const GeoMap& geomap);
+  friend std::ostream& operator << (std:: ostream& f,const GeoMap& geomap);
   //! return the natural mapping for the boundary of the element
   inline const GeoMap& boundaryMap() const
   {

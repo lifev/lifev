@@ -40,7 +40,7 @@
 #include "markers.hpp"
 #include "currentBdFE.hpp"
 #include <ext/slist>
-using namespace __gnu_cxx;
+//using namespace __gnu_cxx;
 
 namespace LifeV
 {
@@ -129,14 +129,14 @@ class DofInterface3Dto3D:
   Dof _dof;
 
   //! STL list which holds the connections between faces at the interface
-  slist< pair<ID,ID> > _elc;
+  __gnu_cxx::slist< pair<ID,ID> > _elc;
 
   //!  Auxiliary STL list which holds the connections between Dof at the interface
   //! Empty after calling update
-  slist< pair<ID,ID> > _locDof;
+  __gnu_cxx::slist< pair<ID,ID> > _locDof;
 
   //!  STL iterator type for the lists
-  typedef slist< pair<ID,ID> >::iterator Iterator;
+  typedef __gnu_cxx::slist< pair<ID,ID> >::iterator Iterator;
 
   //! This method builds the connections between faces at the interface (_elc container)
   /*!

@@ -54,7 +54,7 @@ class SDomNeighborData{
   SDomNeighborData();
 
   //! output
-  ostream & showMe( ostream  & out=cout ) const;
+  std::ostream & showMe( std::ostream  & out=std::cout ) const;
 
  public:
 */

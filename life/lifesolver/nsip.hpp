@@ -152,10 +152,10 @@ NavierStokesSolverIP(const GetPot& data_file, const RefFE& refFE, const QuadRule
     _solver.setOptionsFromGetPot(data_file, "fluid/aztec");
     //_solver.setOptionsFromGetPot(data_file, "fluid/petsc");
 
-    cout << endl;
-    cout << "O-  Pressure unknowns: " << _dim_p     << endl;
-    cout << "O-  Velocity unknowns: " << _dim_u     << endl<<endl;
-    cout << "O-  Computing mass and Stokes matrices... ";
+    std::cout << std::endl;
+    std::cout << "O-  Pressure unknowns: " << _dim_p     << std::endl;
+    std::cout << "O-  Velocity unknowns: " << _dim_u     << std::endl<<std::endl;
+    std::cout << "O-  Computing mass and Stokes matrices... ";
 
     Chrono chrono;
     chrono.start();
@@ -215,7 +215,7 @@ NavierStokesSolverIP(const GetPot& data_file, const RefFE& refFE, const QuadRule
     }
 
 
-    cout << endl;
+    std::cout << std::endl;
 
     UInt iElAd1, iElAd2;
     CurrentFE fe1(_refFE_u,getGeoMap(_mesh),_Qr_u);
@@ -258,7 +258,7 @@ NavierStokesSolverIP(const GetPot& data_file, const RefFE& refFE, const QuadRule
   _x = 0.0;
 
   chrono.stop();
-  cout << "done in " << chrono.diff() << " s." << endl;
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
   // _CStokes.spy("CS.m");
 
 
@@ -271,13 +271,13 @@ timeAdvance(const Function source, const Real& time) {
 
   _time = time;
 
-  cout << endl;
-  cout << "O== Now we are at time "<< _time << " s." << endl;
+  std::cout << std::endl;
+  std::cout << "O== Now we are at time "<< _time << " s." << std::endl;
 
   // Number of velocity components
   UInt nc_u=_u.nbcomp();
 
-  cout << "  o-  Updating mass term on right hand side... ";
+  std::cout << "  o-  Updating mass term on right hand side... ";
 
   Chrono chrono;
   chrono.start();
@@ -301,7 +301,7 @@ timeAdvance(const Function source, const Real& time) {
   //  _f_u += _M_u * _u;
 
   chrono.stop();
-  cout << "done in " << chrono.diff() << " s." << endl;
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
 }
 
 
@@ -319,9 +319,9 @@ void NavierStokesSolverIP<Mesh>::iterate(const Real& time) {
 
   chrono.stop();
 
-  cout << "  o-  Stokes matrix was copied in " << chrono.diff() << "s." << endl;
+  std::cout << "  o-  Stokes matrix was copied in " << chrono.diff() << "s." << std::endl;
 
-  cout << "  o-  Updating convective term... ";
+  std::cout << "  o-  Updating convective term... ";
 
   // Number of velocity components
   UInt nc_u=_u.nbcomp();
@@ -415,10 +415,10 @@ void NavierStokesSolverIP<Mesh>::iterate(const Real& time) {
       }
     }
 
-    bmax = abs(beta.vec()[0]);
+    bmax = fabs(beta.vec()[0]);
     for (int l=1; l < int(fe1.nbCoor*_feBd_u.nbNode); ++l) {
-      if ( bmax < abs(beta.vec()[l]) )
-	bmax = abs(beta.vec()[l]);
+      if ( bmax < fabs(beta.vec()[l]) )
+	bmax = fabs(beta.vec()[l]);
     }
 
     bmax_u = bmax;
@@ -466,12 +466,12 @@ void NavierStokesSolverIP<Mesh>::iterate(const Real& time) {
 
 
   chrono.stop();
-  cout << "done in " << chrono.diff() << "s." << endl;
+  std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
 
 
   // for BC treatment (done at each time-step)
-  cout << "  o-  Applying boundary conditions... ";
+  std::cout << "  o-  Applying boundary conditions... ";
   chrono.start();
 
 
@@ -494,7 +494,7 @@ void NavierStokesSolverIP<Mesh>::iterate(const Real& time) {
   //_b[3*_dim_u]= pexact(_mesh.point(1).x(),_mesh.point(1).y() ,_mesh.point(1).z());
 
   chrono.stop();
-  cout << "done in " << chrono.diff() << "s." << endl;
+  std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
   _solver.setMatrix(_C);
 
@@ -509,20 +509,20 @@ void NavierStokesSolverIP<Mesh>::iterate(const Real& time) {
 
   _diff = _x;
 
-  cout << "  o-  Solving system...  ";
+  std::cout << "  o-  Solving system...  ";
   chrono.start();
   _solver.solve(_x, _b);
   chrono.stop();
-  cout << "done in " << chrono.diff() << " s." << endl;
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
   for (UInt i=0; i<3*_dim_u; ++i) {
     _u[i]=_x[i];
-    //   cout << i+1 << ": " << _x[i] << endl;
+    //   std::cout << i+1 << ": " << _x[i] << std::endl;
   }
 
   for (UInt i=0; i<_dim_u; ++i) {
      _p[i]=_x[i+3*_dim_u];
-     // cout << i+1 << ": " << _x[i+3*_dim_u] << endl;
+     // std::cout << i+1 << ": " << _x[i+3*_dim_u] << std::endl;
   }
 
   Real norm_p=0.0;
@@ -536,10 +536,10 @@ void NavierStokesSolverIP<Mesh>::iterate(const Real& time) {
     norm_u += elem_L2_diff_2(_u,uexact,_fe_u,_dof_u,0.0,int(nc_u));
 
   }
-  cout << endl;
-  cout << " - L2 pressure error = " << sqrt(norm_p) << endl;
-  cout << " - L2 velocity error = " << sqrt(norm_u) << endl;
-  cout << endl;
+  std::cout << std::endl;
+  std::cout << " - L2 pressure error = " << sqrt(norm_p) << std::endl;
+  std::cout << " - L2 velocity error = " << sqrt(norm_u) << std::endl;
+  std::cout << std::endl;
 
 }
 }

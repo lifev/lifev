@@ -85,12 +85,12 @@ public ElasticStructureHandler<Mesh>, public DataNewton {
   void iterate();
 
   //! Output
-  void showMe(ostream& c=cout) const;
+  void showMe(std::ostream& c=std::cout) const;
 
  //! friends classes related to the newton solver
   template<class Fct,class Vector,class Real, class Norm>
     friend int newton(Vector& sol,Fct& f,Norm& norm, Real abstol,Real reltol,int& maxit,
-		      Real eta_max,int linesearch, ofstream& out_res, const Real& time);
+		      Real eta_max,int linesearch, std::ofstream& out_res, const Real& time);
   template<class Fct,class Vector,class Real, class Norm>
     friend void lineSearch_cubic(Fct& f,Norm& norm, Vector& residual,Vector& sol,Vector& step,
 				 Real& normRes,Real& lambda,Real slope,int iter);
@@ -156,8 +156,8 @@ public ElasticStructureHandler<Mesh>, public DataNewton {
   void solveJac(Vector& step, const Vector& res, double& linear_rel_tol);
 
   //! files for lists of iterations and residuals per timestep
-  ofstream _out_iter;
-  ofstream _out_res;
+  std::ofstream _out_iter;
+  std::ofstream _out_res;
 
   //! the present time
   Real _time;
@@ -201,9 +201,9 @@ VenantKirchhofSolver(const GetPot& data_file, const RefFE& refFE, const QuadRule
      _time(0.0),
      _recur(0) {
 
-  cout << endl;
-  cout << "O-  Displacement unknowns: " << _dim << endl;
-  cout << "O-  Computing mass and linear strain matrices... ";
+  std::cout << std::endl;
+  std::cout << "O-  Displacement unknowns: " << _dim << std::endl;
+  std::cout << "O-  Computing mass and linear strain matrices... ";
 
   Chrono chrono;
   chrono.start();
@@ -251,7 +251,7 @@ VenantKirchhofSolver(const GetPot& data_file, const RefFE& refFE, const QuadRule
   }
 
   chrono.stop();
-  cout << "done in " << chrono.diff() << " s." << endl;
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
 }
 
@@ -263,10 +263,10 @@ timeAdvance(const Function source, const Real& time) {
 
   _time = time;
 
-  cout << endl;
-  cout << "O== SOLID: Now we are at time "<< _time << " s." << endl;
+  std::cout << std::endl;
+  std::cout << "O== SOLID: Now we are at time "<< _time << " s." << std::endl;
 
-  cout << "  o-  Updating mass term on right hand side... ";
+  std::cout << "  o-  Updating mass term on right hand side... ";
 
   Chrono chrono;
   chrono.start();
@@ -331,7 +331,7 @@ timeAdvance(const Function source, const Real& time) {
 
   //
   chrono.stop();
-  cout << "done in " << chrono.diff() << " s." << endl;
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
 }
 
@@ -347,12 +347,12 @@ iterate() {
   status = newton( _d, *this, maxnorm,_abstol, _reltol, maxiter, _etamax, (int)_linesearch, _out_res, _time);
 
   if(status == 1) {
-    cout << "Inners iterations failed\n";
+    std::cout << "Inners iterations failed\n";
     exit(1);
   }
   else {
-    cout << "Number of inner iterations       : " << maxiter << endl;
-    _out_iter << _time << " " << maxiter << endl;
+    std::cout << "Number of inner iterations       : " << maxiter << std::endl;
+    _out_iter << _time << " " << maxiter << std::endl;
   }
 
   _w = (2.0/_dt) *  _d - _rhs_w;
@@ -363,7 +363,7 @@ iterate() {
 
 template<typename Mesh>
 void VenantKirchhofSolver<Mesh>::
-showMe(ostream& c) const{
+showMe(std::ostream& c) const{
   DataElasticStructure<Mesh>::showMe(c);
   c << "\n*** Values for data [solid/newton]\n\n";
   DataNewton::showMe(c);
@@ -374,7 +374,7 @@ void VenantKirchhofSolver<Mesh>::
 evalResidual(Vector&res, const Vector& sol, int iter) {
 
 
-  cout << "O-    Computing residual... ";
+  std::cout << "O-    Computing residual... ";
 
 
   Chrono chrono;
@@ -433,7 +433,7 @@ evalResidual(Vector&res, const Vector& sol, int iter) {
   res  = _K*sol - _rhs;
 
   chrono.stop();
-  cout << "done in " << chrono.diff() << " s." << endl;
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
 }
 
@@ -444,7 +444,7 @@ void VenantKirchhofSolver<Mesh>::
 updateJac(Vector& sol,int iter) {
 
 
-  cout << "    o-  Updating JACOBIAN in iter " << iter << endl << "  ... ";
+  std::cout << "    o-  Updating JACOBIAN in iter " << iter << std::endl << "  ... ";
 
   Chrono chrono;
   chrono.start();
@@ -492,7 +492,7 @@ updateJac(Vector& sol,int iter) {
   }
 
   chrono.stop();
-  cout << "done in " << chrono.diff() << " s." << endl;
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
 }
 
@@ -510,7 +510,7 @@ solveJac(Vector& step, const Vector& res, double& linear_rel_tol){
 
   // for BC treatment (done at each time-step)
   Real tgv=1.0;
-  cout << "  o-  Applying boundary conditions... ";
+  std::cout << "  o-  Applying boundary conditions... ";
   chrono.start();
 
   // BC manage for the velocity
@@ -519,7 +519,7 @@ solveJac(Vector& step, const Vector& res, double& linear_rel_tol){
 
   bc_manage_matrix(_J,  _mesh, _dof, _BCh, _feBd, tgv);
   chrono.stop();
-  cout << "done in " << chrono.diff() << "s." << endl;
+  std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
   // AZTEC specifications for the first system
   int    data_org[AZ_COMM_SIZE];   // data organisation for C
@@ -558,12 +558,12 @@ solveJac(Vector& step, const Vector& res, double& linear_rel_tol){
 
   //params[AZ_tol]       = linear_rel_tol;
 
-  cout << "  o-  Solving system...  ";
+  std::cout << "  o-  Solving system...  ";
   chrono.start();
   AZ_iterate(&step[0], _f.giveVec(), options, params, status,
   	     proc_config, J, prec_J, NULL);
   chrono.stop();
-  cout << "done in " << chrono.diff() << " s." << endl;
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
   //--options[AZ_recursion_level];
 

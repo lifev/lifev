@@ -77,7 +77,7 @@ public:
 
     bool doPlot() const { return _M_do_plot; }
 
-    void Title(string title)
+    void Title(std::string title)
         {
             if (  doPlot() )
             {
@@ -86,7 +86,7 @@ public:
             }
         }
 
-    void Legend(string label)
+    void Legend(std::string label)
         {
             if (  doPlot() )
             {
@@ -95,7 +95,7 @@ public:
             }
         }
 
-    void Xlabel(string xlabel)
+    void Xlabel(std::string xlabel)
         {
             if (  doPlot() )
             {
@@ -104,7 +104,7 @@ public:
             }
         }
 
-    void Ylabel(string ylabel)
+    void Ylabel(std::string ylabel)
         {
             if (  doPlot() )
             {
@@ -171,13 +171,13 @@ public:
 
     bool doPlot() const { return false; }
 
-    void Title(string title) {}
+    void Title(std::string title) {}
 
-    void Legend(string label) {}
+    void Legend(std::string label) {}
 
-    void Xlabel(string xlabel) {}
+    void Xlabel(std::string xlabel) {}
 
-    void Ylabel(string ylabel) {}
+    void Ylabel(std::string ylabel) {}
 
     void Plot(const Rn& x, const Rn& y);
 

@@ -26,6 +26,9 @@
 
 namespace LifeV
 {
+
+using namespace std;
+
 class operFS {
 
  public:

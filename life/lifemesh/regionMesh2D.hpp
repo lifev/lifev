@@ -18,7 +18,7 @@
 */
 /*! file regionMesh2D.h
   \brief The 2D mesh classes interfaces
-  \version $Revision: 1.4 $ Luca Formaggia
+  \version $Revision: 1.5 $ Luca Formaggia
 
   Introduces the RegionMesh2D class
 */
@@ -131,11 +131,11 @@ public:
   //! Returns the number of switches which have been set
   const UInt numSwitches() const {return switches.size();};
   //! Interrogate Switch
-  bool getLinkSwitch(string const & _s) const;
+  bool getLinkSwitch(std::string const & _s) const;
   //! Set a switch
-  void setLinkSwitch(string const & _s);
+  void setLinkSwitch(std::string const & _s);
   //! uset a switch
-  void unsetLinkSwitch(string const & _s);
+  void unsetLinkSwitch(std::string const & _s);
   //@}
   UInt numLocalVertices() const; //!< Number of local vertices for each (2D) element
   UInt numLocalEdges() const;  //!< Number of local edges for each (2D) element
@@ -331,10 +331,10 @@ public:
 
 
   //! Prints some mesh info
-  ostream &  showMe(bool verbose=false, ostream & out=cout);
+  std::ostream &  showMe(bool verbose=false, std::ostream & out=std::cout);
   //! Basic tests for mesh consistency.
   /*! For more estensive test see \link mesh_util.h */
-  int check(int level=0,bool const fix=false,bool const verbose=true,ostream & out=std::cerr);
+  int check(int level=0,bool const fix=false,bool const verbose=true,std::ostream & out=std::cerr);
 
   /*! \name RegionContainers
    *
@@ -430,7 +430,7 @@ ASSERT(true, "Assignement Operator  Yet Not Implemented for RegionMesh2D") ;
 template<typename GEOSHAPE, typename MC>
 INLINE
 void
-RegionMesh2D<GEOSHAPE,MC>::setLinkSwitch(string const & _s)
+RegionMesh2D<GEOSHAPE,MC>::setLinkSwitch(std::string const & _s)
 {
   ASSERT0(switches.set(_s),"Switch named " << _s <<" is not allowed");
 };
@@ -438,7 +438,7 @@ RegionMesh2D<GEOSHAPE,MC>::setLinkSwitch(string const & _s)
 template<typename GEOSHAPE, typename MC>
 INLINE
 bool
-RegionMesh2D<GEOSHAPE,MC>::getLinkSwitch(string const & _s) const
+RegionMesh2D<GEOSHAPE,MC>::getLinkSwitch(std::string const & _s) const
 {
   switches.test(_s);
 };
@@ -446,7 +446,7 @@ RegionMesh2D<GEOSHAPE,MC>::getLinkSwitch(string const & _s) const
 template<typename GEOSHAPE, typename MC>
 INLINE
 void
-RegionMesh2D<GEOSHAPE,MC>::unsetLinkSwitch(string const & _s)
+RegionMesh2D<GEOSHAPE,MC>::unsetLinkSwitch(std::string const & _s)
 {
   ASSERT0(switches.unset(_s),"Switch named " << _s <<" is not allowed");
 };
@@ -542,12 +542,12 @@ setMaxNumItems(SimpleVect< T> &   list, UInt n, char * title) {
   }
   else if(list.capacity()==n){
 #ifdef VERBOSE
-    cerr<< "WARNING: Capacity of "<< title<< "list already set to "<< n<<endl;
+    std::cerr<< "WARNING: Capacity of "<< title<< "list already set to "<< n<<std::endl;
 #endif
   }else{
 #ifdef VERBOSE
-      cerr<< "WARNING: Resetting " << title <<" list size to " << n <<endl;
-      cerr<< "         ALL PREVIOUS POINTERS TO THE LIST (IF ANY) ARE NOW INVALID"<<endl;
+      std::cerr<< "WARNING: Resetting " << title <<" list size to " << n <<std::endl;
+      std::cerr<< "         ALL PREVIOUS POINTERS TO THE LIST (IF ANY) ARE NOW INVALID"<<std::endl;
 #endif
       list.reserve(n);
     }
@@ -1156,13 +1156,13 @@ RegionMesh2D<GEOSHAPE,MC>::updateElementEdges(){
 #ifdef TEST_PRE
       // This precondition is hard to test otherwise!
       if(!_check.second){
-	cerr<< "Two identical Edges stored in EdgeList"<<endl;
-	cerr<< "Vertex ids: "<<i1<<", " << i2<<endl;
+	std::cerr<< "Two identical Edges stored in EdgeList"<<std::endl;
+	std::cerr<< "Vertex ids: "<<i1<<", " << i2<<std::endl;
 	abort();
       }
       if(_check.first != edgeList[j].id() ){
-	cerr<< "Edges in EdgeList have no correct id"<<endl;
-	cerr<< "Stored Id: "<<edgeList[j].id()<<", Found " << _check.first<<endl;
+	std::cerr<< "Edges in EdgeList have no correct id"<<std::endl;
+	std::cerr<< "Stored Id: "<<edgeList[j].id()<<", Found " << _check.first<<std::endl;
 	abort();
       }
 #endif
@@ -1194,7 +1194,7 @@ RegionMesh2D<GEOSHAPE,MC>::updateElementEdges(){
 #endif
   if (_numEdges == 0 || _numEdges == _numBEdges) _numEdges=n;
   ASSERT_POS( n == _numEdges , "#Edges found not equal that in RegionMesh"<<n<<" "<<_numEdges ) ;
-  setLinkSwitch(string("HAS_VOLUME_TO_EDGES"));
+  setLinkSwitch(std::string("HAS_VOLUME_TO_EDGES"));
 }
 
 template<typename GEOSHAPE, typename MC>
@@ -1208,47 +1208,47 @@ _FToE.clear();
 // *************** GENERAL INFO *******************
 
 template<typename GEOSHAPE, typename MC>
-ostream &  RegionMesh2D<GEOSHAPE,MC>::showMe(bool verbose, ostream & out){
-  out << "**************************************************"<<endl;
-  out << "**************************************************"<<endl;
-  out << "                      RegionMesh2D                "<<endl;
-  out << "**************************************************"<<endl;
-  out << "**************************************************"<<endl;
-  out << " ID: "<< _id <<endl;
-  out <<"Edges local to  faces stored: "<<hasLocalEdges()<<endl;
-  //out <<"Edges local to  faces   stored:"<<switches.test("FACEtoEDGE")<<endl;
-  //out <<"Faces adjacent to Edges stored: "<<switches.test("EDGEtoFACE")<<endl<<endl;
+std::ostream &  RegionMesh2D<GEOSHAPE,MC>::showMe(bool verbose, std::ostream & out){
+  out << "**************************************************"<<std::endl;
+  out << "**************************************************"<<std::endl;
+  out << "                      RegionMesh2D                "<<std::endl;
+  out << "**************************************************"<<std::endl;
+  out << "**************************************************"<<std::endl;
+  out << " ID: "<< _id <<std::endl;
+  out <<"Edges local to  faces stored: "<<hasLocalEdges()<<std::endl;
+  //out <<"Edges local to  faces   stored:"<<switches.test("FACEtoEDGE")<<std::endl;
+  //out <<"Faces adjacent to Edges stored: "<<switches.test("EDGEtoFACE")<<std::endl<<std::endl;
   out <<"Edges Stored: " << hasEdges()<<" Internal: "
-      << hasInternalEdges()<<endl;
-  out << "**************************************************"<<endl;
-  out <<"NumPoints="<< numPoints()<<"  "<<"numBPoints="<<numBPoints()<<endl;
-  out <<"NumVertices="<< numVertices()<<"  "<<"numBVerices="<<numBVertices()<<endl;
-  out <<"numFaces="<<numFaces()<<endl;
-  out << "numEdges="<<numEdges() <<"NumBEdges="<< numBEdges()  <<endl;
-  out << "**************************************************"<<endl;
+      << hasInternalEdges()<<std::endl;
+  out << "**************************************************"<<std::endl;
+  out <<"NumPoints="<< numPoints()<<"  "<<"numBPoints="<<numBPoints()<<std::endl;
+  out <<"NumVertices="<< numVertices()<<"  "<<"numBVerices="<<numBVertices()<<std::endl;
+  out <<"numFaces="<<numFaces()<<std::endl;
+  out << "numEdges="<<numEdges() <<"NumBEdges="<< numBEdges()  <<std::endl;
+  out << "**************************************************"<<std::endl;
   switches.showMe(verbose,out);
-  out << "**************************************************"<<endl;
-  out << "**************************************************"<<endl;
+  out << "**************************************************"<<std::endl;
+  out << "**************************************************"<<std::endl;
   if(verbose)
     {
-      cout << "Verbose version not implemented yet";
+      std::cout << "Verbose version not implemented yet";
     }
   return out;
 
 }
 template<typename GEOSHAPE, typename MC>
 int
-RegionMesh2D<GEOSHAPE,MC>::check(int level, bool const fix, bool const verb,ostream & out)
+RegionMesh2D<GEOSHAPE,MC>::check(int level, bool const fix, bool const verb,std::ostream & out)
 {
   if(verb){
-    out << "**************************************************"<<endl;
-    out << "         Checkin  RegionMesh2D                "<<endl;
-    out << " ID: "<< _id <<endl;
-    out << "**************************************************"<<endl;
+    out << "**************************************************"<<std::endl;
+    out << "         Checkin  RegionMesh2D                "<<std::endl;
+    out << " ID: "<< _id <<std::endl;
+    out << "**************************************************"<<std::endl;
   }
   if(pointList.size() != _numPoints) {
     out<< " Point list size " << pointList.size() <<" not equal to internal counter value "
-	<< _numPoints<<endl;
+	<< _numPoints<<std::endl;
     if(fix) {
       _numPoints=pointList.size();
       out<< "Fixed";
@@ -1256,10 +1256,10 @@ RegionMesh2D<GEOSHAPE,MC>::check(int level, bool const fix, bool const verb,ostr
     }
   }
   if(edgeList.size() ==0)
-    if(verb) out<< "Warning: No Edges Stored"<<endl;
+    if(verb) out<< "Warning: No Edges Stored"<<std::endl;
 
   if(faceList.size() ==0)
-    if(verb) out<< "Warning: No Faces Stored"<<endl;
+    if(verb) out<< "Warning: No Faces Stored"<<std::endl;
 
   UInt count=0;
   for (Points::iterator i=pointList.begin(); i != pointList.end(); ++i)
@@ -1267,7 +1267,7 @@ RegionMesh2D<GEOSHAPE,MC>::check(int level, bool const fix, bool const verb,ostr
     if(i->boundary())++count;
   if(count != _numBPoints) {
     out<< " Num Boundary points " << count <<" not equal to internal counter value "
-	<< _numBPoints<<endl;
+	<< _numBPoints<<std::endl;
     if(fix) {
       _numBPoints=count;
       out<< "Fixed";
@@ -1307,8 +1307,8 @@ RegionMesh2D<GEOSHAPE,MC>::check(int level, bool const fix, bool const verb,ostr
     out<< " SEVERITY ERROR: boundary Vertices Counter unset";
 
   if(verb)
-    out << "   Check Finished              "<<endl<<
-      "***********************************************"<<endl;
+    out << "   Check Finished              "<<std::endl<<
+      "***********************************************"<<std::endl;
 }
 }
 #endif

@@ -20,6 +20,9 @@
 
 namespace LifeV
 {
+
+using namespace std;
+
 operFS::operFS(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
 	       VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
 	       BC_Handler& BCh_du, BC_Handler& BCh_dz):

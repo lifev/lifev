@@ -52,10 +52,10 @@ class DataMesh
   /*!
     \param section the section in the data file
   */
-  DataMesh(const GetPot& dfile, const string& section="discretization");
+  DataMesh(const GetPot& dfile, const std::string& section="discretization");
 
-  //! Ouptut
-  virtual void showMe(ostream& c=cout) const;
+  //! Output
+  virtual void showMe(std::ostream& c=std::cout) const;
 
   //! The mesh
   Mesh& mesh();
@@ -65,11 +65,11 @@ class DataMesh
  protected:
 
   //! mesh
-  string _mesh_dir;   // mesh dir
-  string _mesh_file;  // mesh files
-  string _mesh_type;  // mesh fil
-  string _mesh_faces; // update all mesh faces
-  string _mesh_edges; // update all mesh edges
+  std::string _mesh_dir;   // mesh dir
+  std::string _mesh_file;  // mesh files
+  std::string _mesh_type;  // mesh fil
+  std::string _mesh_faces; // update all mesh faces
+  std::string _mesh_edges; // update all mesh edges
   Mesh   _mesh;       // the mesh
 
 };
@@ -83,7 +83,7 @@ class DataMesh
 // Constructor
 template <typename Mesh>
 DataMesh<Mesh>::
-DataMesh(const GetPot& dfile, const string& section)
+DataMesh(const GetPot& dfile, const std::string& section)
 {
   _mesh_dir  = dfile((section+"/mesh_dir").data(),"./");
   _mesh_file = dfile((section+"/mesh_file").data(),"mesh.mesh");
@@ -119,14 +119,14 @@ DataMesh<Mesh>::
 // Output
 template <typename Mesh>
 void DataMesh<Mesh>::
-showMe(ostream& c) const
+showMe(std::ostream& c) const
 {
   // mesh
-  c << "mesh_dir   = " << _mesh_dir << endl;
-  c << "mesh_file  = " << _mesh_file << endl;
-  c << "mesh_type  = " << _mesh_type << endl;
-  c << "mesh_edges = " << _mesh_edges << endl;
-  c << "mesh_faces = " << _mesh_faces << endl;
+  c << "mesh_dir   = " << _mesh_dir << std::endl;
+  c << "mesh_file  = " << _mesh_file << std::endl;
+  c << "mesh_type  = " << _mesh_type << std::endl;
+  c << "mesh_edges = " << _mesh_edges << std::endl;
+  c << "mesh_faces = " << _mesh_faces << std::endl;
 }
 
 

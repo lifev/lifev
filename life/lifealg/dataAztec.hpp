@@ -50,22 +50,22 @@ namespace LifeV
   \todo dataAztecHelp() is not complete, and other items could
   be named with a string rather than with an integer
 */
-using namespace std;
+//using namespace std;
 
 class DataAztec
 {
 public:
   // Aztec Options
   int aztec_solver;
-  string aztec_solver_str;
+  std::string aztec_solver_str;
   int aztec_scaling;
-  string aztec_scaling_str;
+  std::string aztec_scaling_str;
   int aztec_precond;
-  string aztec_precond_str;
+  std::string aztec_precond_str;
   int aztec_conv;
-  string aztec_conv_str;
+  std::string aztec_conv_str;
   int aztec_output;
-  string aztec_output_str;
+  std::string aztec_output_str;
   int aztec_pre_calc;
   int aztec_max_iter;
   int aztec_poly_ord;
@@ -77,7 +77,7 @@ public:
   int aztec_reorder;
   int aztec_keep_info;
   int aztec_subdomain_solve;
-  string aztec_subdomain_solve_str;
+  std::string aztec_subdomain_solve_str;
   int aztec_graph_fill;
   int aztec_init_guess;
   int aztec_keep_kvecs;
@@ -99,7 +99,7 @@ public:
   DataStringList aztec_output_list;
   DataStringList aztec_subdomain_solve_list;
   //
-  DataAztec(const GetPot& dfile, const string& section="aztec");
+  DataAztec(const GetPot& dfile, const std::string& section="aztec");
 
   void aztecOptionsFromDataFile(int* option,double* param);
   /*! solve a linear system with the parameters given in the data file */
@@ -110,9 +110,9 @@ public:
 			    Real* unknown,Real* rhs,int unknown_size,
 			    MSRPatt& pattern,int* options,double* params);
   /*! to see a little help */
-  void dataAztecHelp(ostream& c=cout);
+  void dataAztecHelp(std::ostream& c=std::cout);
   /*! to see the values of the items (including the default ones) */
-  void dataAztecShowMe(ostream& c=cout);
+  void dataAztecShowMe(std::ostream& c=std::cout);
 };
 }
 #endif

@@ -24,7 +24,7 @@
 
 namespace LifeV
 {
-using namespace std;
+//using namespace std;
 /*!
   \file gmv_wrtrs.hpp
   \author M.A. Fernandez
@@ -37,9 +37,9 @@ using namespace std;
 */
 
 template<typename Mesh>
-void wr_gmv_ascii(string fname, const Mesh& mesh, const UInt& dim, const Real* U, const Real* P) {
+void wr_gmv_ascii(std::string fname, const Mesh& mesh, const UInt& dim, const Real* U, const Real* P) {
 
-  ofstream ofile(fname.c_str());
+  std::ofstream ofile(fname.c_str());
 
   ASSERT(ofile,"Error: Output file cannot be open");
 
@@ -51,22 +51,22 @@ void wr_gmv_ascii(string fname, const Mesh& mesh, const UInt& dim, const Real* U
   //
   ofile << "nodev ";
   UInt nV = mesh.numVertices();
-  ofile << nV << endl;
+  ofile << nV << std::endl;
 
   for(UInt i=1; i <= nV; ++i) {
     ofile << mesh.point(i).x() << " "
 	  << mesh.point(i).y() << " "
 	  << mesh.point(i).z() << " "
-	  << endl;
+	  << std::endl;
       }
-  ofile << endl;
+  ofile << std::endl;
 
   //
   // Elements
   //
   ofile << "cells ";
   UInt nE = mesh.numVolumes();
-  ofile << nE << endl;
+  ofile << nE << std::endl;
 
   typedef typename Mesh::VolumeShape ElementShape;
   UInt nVpE = ElementShape::numVertices;
@@ -75,28 +75,28 @@ void wr_gmv_ascii(string fname, const Mesh& mesh, const UInt& dim, const Real* U
     ofile << "tet 4\n";
     for (ID i=1; i<= nVpE; ++i)
       ofile << mesh.volume(k).point(i).id() << " ";
-    ofile << endl;
+    ofile << std::endl;
   }
-  ofile << endl;
+  ofile << std::endl;
   //
   // Velocity
   //
   ofile << "velocity 1\n";
   for(int icomp=0; icomp< 3 ; ++icomp)
     for(int i = 0; i< int(nV); i++){
-      ofile << U[icomp*dim+i] << endl;
+      ofile << U[icomp*dim+i] << std::endl;
     }
 
-  ofile << endl;
+  ofile << std::endl;
   //
   // Pressure
   //
   ofile << "variable 'pressure' 1\n";
   for(int i = 0; i< int(nV); i++){
-    ofile << P[i] << endl;
+    ofile << P[i] << std::endl;
   }
   ofile << "endvars\n";
-  ofile << endl;
+  ofile << std::endl;
 
   ofile << "endgmv\n";
 

@@ -37,10 +37,10 @@ namespace LifeV
  */
 
 //! A locally used structure, not meant for general use
-typedef map<BareFace,pair<ID,ID >,cmpBareItem<BareFace> > TempFaceContainer;
+typedef std::map<BareFace,std::pair<ID,ID >,cmpBareItem<BareFace> > TempFaceContainer;
 
 //! A locally used structure, not meant for general use
-typedef map<BareEdge,pair<ID,ID>,cmpBareItem<BareEdge> > TempEdgeContainer;
+typedef std::map<BareEdge,std::pair<ID,ID>,cmpBareItem<BareEdge> > TempEdgeContainer;
 
 /*
 *************************************************************************************
@@ -426,7 +426,7 @@ EntityFlag inheritWeakerMarker(GeoElement & fp){
 template <typename RegionMesh3D>
 UInt testClosedDomain_Top(RegionMesh3D const & mesh, UInt & numBEdges){
 
-  typedef set<BareEdge,cmpBareItem<BareEdge> > TempEdgeContainer2;
+  typedef std::set<BareEdge,cmpBareItem<BareEdge> > TempEdgeContainer2;
   TempEdgeContainer2 bedges;
   UInt i1,i2;
   BareEdge bedge;
@@ -494,12 +494,12 @@ bool checkMarkerSet(const MeshEntityList & list)
 
 template <typename RegionMesh>
 void
-setBEdgesMarker(RegionMesh  & mesh, ostream & clog=cout, ostream & err=cerr, bool verbose=true)
+setBEdgesMarker(RegionMesh  & mesh, std::ostream & clog=std::cout, std::ostream & err=std::cerr, bool verbose=true)
 {
   typename RegionMesh::EdgeType *  fp=0;
   unsigned int count(0);
 
-  if(verbose) clog<<"NEW EDGE MARKER MAP"<<endl<<" ID->New Marker"<<endl;
+  if(verbose) clog<<"NEW EDGE MARKER MAP"<<std::endl<<" ID->New Marker"<<std::endl;
 
   for (ID k=1; k<=mesh.numBEdges(); ++k){
     fp = &(mesh.edge(k));
@@ -509,11 +509,11 @@ setBEdgesMarker(RegionMesh  & mesh, ostream & clog=cout, ostream & err=cerr, boo
 	clog<<fp->id()<<" -> ";
 	fp->printFlag(clog);
 	clog<<" ";
-	if (++count % 3 ==0) clog<<endl;
+	if (++count % 3 ==0) clog<<std::endl;
       }
     }
   }
-  if (verbose) clog<<endl;
+  if (verbose) clog<<std::endl;
 }
 
 
@@ -528,12 +528,12 @@ setBEdgesMarker(RegionMesh  & mesh, ostream & clog=cout, ostream & err=cerr, boo
 */
 template <typename RegionMesh>
 void
-setBFacesMarker(RegionMesh  & mesh, ostream & clog=cout, ostream & err=cerr,bool verbose=true)
+setBFacesMarker(RegionMesh  & mesh, std::ostream & clog=std::cout, std::ostream & err=std::cerr,bool verbose=true)
 {
   typename RegionMesh::FaceType *  fp=0;
   unsigned int count(0);
 
-  if(verbose) clog<<"NEW FACE MARKER MAP"<<endl<<" ID->New Marker"<<endl;
+  if(verbose) clog<<"NEW FACE MARKER MAP"<<std::endl<<" ID->New Marker"<<std::endl;
 
   for (UInt k=1;k<=mesh.numBFaces();++k){
     fp = &(mesh.face(k));
@@ -543,11 +543,11 @@ setBFacesMarker(RegionMesh  & mesh, ostream & clog=cout, ostream & err=cerr,bool
 	clog<<fp->id()<<" -> ";
 	fp->printFlag(clog);
 	clog<<" ";
-	if (++count % 3 ==0) clog<<endl;
+	if (++count % 3 ==0) clog<<std::endl;
       }
     }
   }
-  if (verbose) clog<<endl;
+  if (verbose) clog<<std::endl;
 }
 
 //! It sets the marker flag of boundary points, by inheriting it from boundary elements.
@@ -558,15 +558,15 @@ setBFacesMarker(RegionMesh  & mesh, ostream & clog=cout, ostream & err=cerr,bool
 */
 template <typename RegionMesh>
 void
-setBPointsMarker(RegionMesh & mesh, ostream & clog=cout, ostream& err=cerr, bool verbose=false)
+setBPointsMarker(RegionMesh & mesh, std::ostream & clog=std::cout, std::ostream& err=std::cerr, bool verbose=false)
 {
   // First looks at points whose marker has already been set
-  vector<bool> markset(mesh.storedPoints(),false);
+  std::vector<bool> markset(mesh.storedPoints(),false);
 
   typedef typename RegionMesh::Points::iterator PointIterator;
   typedef typename RegionMesh::BElementShape BElementShape;
 
-  vector<bool>::iterator pm=markset.begin();
+  std::vector<bool>::iterator pm=markset.begin();
 
   for (PointIterator p=mesh.pointList.begin();p!=mesh.pointList.end();++p)*(pm++)=p->isMarkerSet();
 
@@ -582,15 +582,15 @@ setBPointsMarker(RegionMesh & mesh, ostream & clog=cout, ostream& err=cerr, bool
   }
   unsigned int count(0);
   if (verbose){
-    clog<<"**** NEW POINTS MARKERS **************"<<endl;
-    clog<<"id->marker    id->marker     id->marker"<<endl;
+    clog<<"**** NEW POINTS MARKERS **************"<<std::endl;
+    clog<<"id->marker    id->marker     id->marker"<<std::endl;
     pm=markset.begin();
     for (PointIterator p=mesh.pointList.begin();p!=mesh.pointList.end();++p){
       if (*pm++){
 	clog<<p->id()<<" -> ";
 	p->printFlag(clog);
 	clog<<" ";
-	if(++count % 3)clog<<endl;
+	if(++count % 3)clog<<std::endl;
       }
     }
   }
@@ -681,14 +681,14 @@ setBPointsCounters(RegionMesh & mesh){
 /*!
   \param mesh a mesh
   \param clog logging stream
-  \param cerr error stream
+  \param err error stream
   \param verbose If true you have a verbose output
 
   \pre mesh point list must exists and boundary face lsist  must have been set properly.
 */
 template <typename RegionMesh>
 void
-fixBPoints(RegionMesh  & mesh, ostream & clog=cout,ostream & err=cerr, bool verbose=true){
+fixBPoints(RegionMesh  & mesh, std::ostream & clog=std::cout,std::ostream & err=std::cerr, bool verbose=true){
   ASSERT_PRE(mesh.numPoints()>0,"The point list should not be empty");
   ASSERT_PRE(mesh.numBElements()>0,"The BElements list should not be empty");
 
@@ -696,11 +696,11 @@ fixBPoints(RegionMesh  & mesh, ostream & clog=cout,ostream & err=cerr, bool verb
   typedef typename RegionMesh::BElementShape BElementShape;
   typename RegionMesh::BElementType * fp;
 
-  if (verbose) clog<<"New BPoints Found "<<endl;
+  if (verbose) clog<<"New BPoints Found "<<std::endl;
   for (UInt k=1;k<=mesh.numBElements();++k){
     fp = &(mesh.bElement(k));
     for (UInt j=1;j<=BElementShape::numPoints;++j){
-      if (verbose && !fp->point(j).boundary() ) clog<<"ID: "<<fp->point(j).id()<<endl;
+      if (verbose && !fp->point(j).boundary() ) clog<<"ID: "<<fp->point(j).id()<<std::endl;
       fp->point(j).boundary()=true;
     }
   }
@@ -818,10 +818,10 @@ Possible values are
 
 template <class RegionMesh3D>
 bool fixBoundaryFaces(RegionMesh3D & mesh,
-		      ostream & clog, ostream &err, Switch & sw,
-		      UInt & numFaces, UInt & bfaces_found,
-		      bool fixMarker=false, bool verbose=false,
-		      TempFaceContainer * ext_container)
+                      std::ostream & clog, std::ostream &err, Switch & sw,
+                      UInt & numFaces, UInt & bfaces_found,
+                      bool fixMarker=false, bool verbose=false,
+                      TempFaceContainer * ext_container)
 {
 
   typedef typename RegionMesh3D::Volumes Volumes;
@@ -836,7 +836,7 @@ bool fixBoundaryFaces(RegionMesh3D & mesh,
   typename RegionMesh3D::VolumeShape ele;
   TempFaceContainer * bfaces;
   TempFaceContainer::iterator fi;
-  pair<ID,ID>info;
+  std::pair<ID,ID>info;
   ID j;
   ID vol;
   UInt numInternalFaces;
@@ -858,32 +858,32 @@ bool fixBoundaryFaces(RegionMesh3D & mesh,
 
 
   if (notEnough){
-    err << "WARNING: number of B. Faces stored smaller"<<endl;
-    err << "than the number of bfaces found  and build is not set"<<endl;
-    err << "POSSIBLE ERROR"<<endl;
+    err << "WARNING: number of B. Faces stored smaller"<<std::endl;
+    err << "than the number of bfaces found  and build is not set"<<std::endl;
+    err << "POSSIBLE ERROR"<<std::endl;
     sw.create("BFACE_STORED_MISMATCH",true);
   }
 
   if (mesh.numBElements()==0){
-    err<<"ERROR: Boundary Element counter was not set"<<endl;
-    err<<"I Cannot proceed because the situation is ambiguous"<<endl;
-    err<<"Please check and eventually either: (a) call buildBoundaryFaces()"<<endl;
-    err<<"or (b) set the correct number of bfaces in the mesh using mesh.numBElements()"<<endl;
+    err<<"ERROR: Boundary Element counter was not set"<<std::endl;
+    err<<"I Cannot proceed because the situation is ambiguous"<<std::endl;
+    err<<"Please check and eventually either: (a) call buildBoundaryFaces()"<<std::endl;
+    err<<"or (b) set the correct number of bfaces in the mesh using mesh.numBElements()"<<std::endl;
     err<<"ABORT";
     sw.create("BELEMENT_COUNTER_UNSET",true);
   }
 
   if(mesh.numBFaces()!=bfaces_found){
     err<<"WARNING: B Face counter in mesh is set to "<< mesh.numBFaces();
-    err<<"While I have found "<< bfaces_found<<" B. Elements in mesh"<<endl;
-    err<<"Plese check... I continue anyway"<<endl;
+    err<<"While I have found "<< bfaces_found<<" B. Elements in mesh"<<std::endl;
+    err<<"Plese check... I continue anyway"<<std::endl;
     sw.create("BFACE_COUNTER_MISMATCH",true);
   }
 
   if (verbose){
-    clog<<"**** Marker Flags for Fixed Boundary Faces ***"<<endl;
-    clog<<" (it only contains those that were fixed because unset !"<<endl;
-    clog<<"id->marker   id->marker  id->marker"<<endl;
+    clog<<"**** Marker Flags for Fixed Boundary Faces ***"<<std::endl;
+    clog<<" (it only contains those that were fixed because unset !"<<std::endl;
+    clog<<"id->marker   id->marker  id->marker"<<std::endl;
   }
 
   UInt count(0);
@@ -921,7 +921,7 @@ bool fixBoundaryFaces(RegionMesh3D & mesh,
 	  clog<<fit->id()<<" -> ";
 	  fit->printFlag(clog);
 	  clog<<" ";
-	  if (++count % 3 ==0) clog<<endl;
+	  if (++count % 3 ==0) clog<<std::endl;
 	}
       }
       // Take out face from temporary container
@@ -938,18 +938,18 @@ bool fixBoundaryFaces(RegionMesh3D & mesh,
   }
 
   if(verbose){
-    clog<<endl<<"  *****  END OF LIST ****"<<endl;
+    clog<<std::endl<<"  *****  END OF LIST ****"<<std::endl;
   }
 
   // Here I calculate the number of faces,
 
   if (mesh.numFaces()!=numFaces){
-    err<<"WARNING: faces counter in mesh  should be "<<numFaces<<endl;
-    err<<"(bfaces->size()+numInternalFaces)"<<endl;
+    err<<"WARNING: faces counter in mesh  should be "<<numFaces<<std::endl;
+    err<<"(bfaces->size()+numInternalFaces)"<<std::endl;
     err<<"it is instead "<<mesh.numFaces();
     sw.create("NUM_FACES_MISMATCH",true);
   }
-    mesh.setLinkSwitch(string("HAS_BOUNDARY_FACES"));
+    mesh.setLinkSwitch(std::string("HAS_BOUNDARY_FACES"));
 
     return true;
 }
@@ -986,7 +986,7 @@ bool fixBoundaryFaces(RegionMesh3D & mesh,
  */
 template <class RegionMesh3D>
 bool buildFaces(RegionMesh3D & mesh,
-		ostream & clog, ostream &err, UInt & bfaces_found,
+		std::ostream & clog, std::ostream &err, UInt & bfaces_found,
 		UInt & numInternalFaces,
 		bool buildboundary=true,
 		bool buildinternal=false,
@@ -1004,7 +1004,7 @@ bool buildFaces(RegionMesh3D & mesh,
   TempFaceContainer::iterator fi;
   bool extcont(false);
 
-  pair<ID,ID>info;
+  std::pair<ID,ID>info;
   ID j,id;
   ID vol;
 
@@ -1031,8 +1031,8 @@ bool buildFaces(RegionMesh3D & mesh,
   if(buildboundary){
 
     if (verbose){
-      clog<<"**** Marker Flags for Newly Created Boundary Faces ***"<<endl;
-      clog<<"id->marker   id->marker  id->marker"<<endl;
+      clog<<"**** Marker Flags for Newly Created Boundary Faces ***"<<std::endl;
+      clog<<"id->marker   id->marker  id->marker"<<std::endl;
     }
 
     for(fi=bfaces->begin();fi!=bfaces->end();++fi){
@@ -1049,15 +1049,15 @@ bool buildFaces(RegionMesh3D & mesh,
       inheritWeakerMarker(face);
       id=mesh.addFace(face,true).id();
       if(verbose){
-	if (id %3 == 0) clog<<endl;
+	if (id %3 == 0) clog<<std::endl;
 	clog<<id<<" -> ";
 	face.printFlag(clog);
 	clog<<" ";
       }
     }
-    mesh.setLinkSwitch(string("HAS_BOUNDARY_FACES"));
-    if (! buildinternal)mesh.unsetLinkSwitch(string("HAS_ALL_FACES"));
-    mesh.setLinkSwitch(string("FACES_HAVE_ADIACENCY"));
+    mesh.setLinkSwitch(std::string("HAS_BOUNDARY_FACES"));
+    if (! buildinternal)mesh.unsetLinkSwitch(std::string("HAS_ALL_FACES"));
+    mesh.setLinkSwitch(std::string("FACES_HAVE_ADIACENCY"));
   }
 
   if (!extcont) delete bfaces;
@@ -1067,8 +1067,8 @@ bool buildFaces(RegionMesh3D & mesh,
 
   if(!buildboundary){
     if (mesh.storedFaces()<mesh.numBFaces()){
-      err<< "ERROR: mesh has not boundary faces, cannot just create internal ones!!!"<<endl;
-      err<<"ABORT CONDITION"<<endl;
+      err<< "ERROR: mesh has not boundary faces, cannot just create internal ones!!!"<<std::endl;
+      err<<"ABORT CONDITION"<<std::endl;
       return false;
     }
     else if (mesh.storedFaces()>mesh.numBFaces()){
@@ -1084,8 +1084,8 @@ bool buildFaces(RegionMesh3D & mesh,
 
 
   BareItemsHandler<BareFace> _be;
-  pair<UInt,bool> e;
-  pair<BareFace,bool> _face;
+  std::pair<UInt,bool> e;
+  std::pair<BareFace,bool> _face;
 
   for (UInt j=0; j<mesh.faceList.size();++j){
     i1=(mesh.faceList[j].point(1)).id();
@@ -1145,7 +1145,7 @@ bool buildFaces(RegionMesh3D & mesh,
 	}
     }
   }
-  mesh.setLinkSwitch(string("HAS_ALL_FACES"));
+  mesh.setLinkSwitch(std::string("HAS_ALL_FACES"));
   return true;
 }
 
@@ -1183,7 +1183,7 @@ bool buildFaces(RegionMesh3D & mesh,
  */
 
 template <typename RegionMesh3D>
-bool buildEdges(RegionMesh3D & mesh, ostream & clog, ostream &err, UInt & bedges_found,
+bool buildEdges(RegionMesh3D & mesh, std::ostream & clog, std::ostream &err, UInt & bedges_found,
 		UInt & iedges_found, bool buildboundary=true, bool buildinternal=false, bool verbose=false,
 		TempEdgeContainer * ext_container=0)
 {
@@ -1200,7 +1200,7 @@ bool buildEdges(RegionMesh3D & mesh, ostream & clog, ostream &err, UInt & bedges
 
   TempEdgeContainer * bedges;
   TempEdgeContainer iedges;
-  pair<ID,ID>info;
+  std::pair<ID,ID>info;
   ID j,id;
   ID facID;
 
@@ -1221,9 +1221,9 @@ bool buildEdges(RegionMesh3D & mesh, ostream & clog, ostream &err, UInt & bedges
   if(!buildinternal)iedges.clear();
   if(!buildboundary && buildinternal){
     if (mesh.storedEdges()<bedges_found){
-      err<<"ERROR in buildedges(): mesh does not contain boundary edges"<<endl;
-      err<<"I need to set buildboundary=true"<<endl;
-      err<<"ABORT CONDITION"<<endl;
+      err<<"ERROR in buildedges(): mesh does not contain boundary edges"<<std::endl;
+      err<<"I need to set buildboundary=true"<<std::endl;
+      err<<"ABORT CONDITION"<<std::endl;
       return false;
     }
     else if (mesh.storedEdges()>bedges_found){
@@ -1235,15 +1235,15 @@ bool buildEdges(RegionMesh3D & mesh, ostream & clog, ostream &err, UInt & bedges
   if(buildboundary)mesh.edgeList.clear();
   if(buildboundary && ! buildinternal) mesh.setMaxNumEdges(bedges_found,false);
   if(buildinternal) mesh.setMaxNumEdges(bedges_found+iedges_found,true);
-  err<< "Building edges from scratch"<<endl;
+  err<< "Building edges from scratch"<<std::endl;
 
   EdgeType edge;
 
   if(buildboundary){
 
     if (verbose){
-      clog<<"**** Marker Flags for Newly Created Boundary Edges ***"<<endl;
-      clog<<"id->marker   id->marker   id->marker"<<endl;
+      clog<<"**** Marker Flags for Newly Created Boundary Edges ***"<<std::endl;
+      clog<<"id->marker   id->marker   id->marker"<<std::endl;
     }
 
     // First boundary.
@@ -1261,22 +1261,22 @@ bool buildEdges(RegionMesh3D & mesh, ostream & clog, ostream &err, UInt & bedges
 
       id=mesh.addEdge(edge,true).id();
       if(verbose){
-	if (id %3 == 0) clog<<endl;
+	if (id %3 == 0) clog<<std::endl;
 	clog<<id<<" -> ";
 	edge.printFlag(clog);
 	clog<<" ";
       }
     }
 
-    if (verbose) clog<<endl<<"  *****  END OF LIST OF BOUNDARY EDGES ****"<<endl;
+    if (verbose) clog<<std::endl<<"  *****  END OF LIST OF BOUNDARY EDGES ****"<<std::endl;
 
-    mesh.setLinkSwitch(string("HAS_BOUNDARY_EDGES"));
+    mesh.setLinkSwitch(std::string("HAS_BOUNDARY_EDGES"));
   }
 
   if (!extcont) delete bedges;
 
   if(!buildinternal){
-    mesh.unsetLinkSwitch(string("HAS_ALL_EDGES"));
+    mesh.unsetLinkSwitch(std::string("HAS_ALL_EDGES"));
     return true;
   }
 
@@ -1297,7 +1297,7 @@ bool buildEdges(RegionMesh3D & mesh, ostream & clog, ostream &err, UInt & bedges
     mesh.addEdge(edge,false);
   }
 
-  mesh.setLinkSwitch(string("HAS_ALL_EDGES"));
+  mesh.setLinkSwitch(std::string("HAS_ALL_EDGES"));
 
   return true;
 }
@@ -1317,13 +1317,13 @@ bool buildEdges(RegionMesh3D & mesh, ostream & clog, ostream &err, UInt & bedges
   \note the function takes advantage of the fact that
 */
 template<typename RegionMesh> void
-p1top2(RegionMesh & mesh, ostream & out=std::cout){
+p1top2(RegionMesh & mesh, std::ostream & out=std::cout){
 
   typedef typename RegionMesh::ElementShape GeoShape;
   typedef typename RegionMesh::BElementShape GeoBShape;
   ASSERT_PRE(GeoShape::numPoints > 4, "p1top2 ERROR: we need a P2 mesh");
 
-  out << "Building P2 mesh points and connectivities from P1 data" <<endl;
+  out << "Building P2 mesh points and connectivities from P1 data" <<std::endl;
 
 
   typename RegionMesh::PointType * pp=0;
@@ -1334,11 +1334,11 @@ p1top2(RegionMesh & mesh, ostream & out=std::cout){
   typedef typename RegionMesh::BElements BElements;
 
   BareItemsHandler<BareEdge> _be;
-  pair<UInt,bool> _edgeid;
+  std::pair<UInt,bool> _edgeid;
   UInt i1,i2,e_id;
-  pair<BareEdge,bool> _edge;
+  std::pair<BareEdge,bool> _edge;
   typename RegionMesh::ElementShape ele;
-  out<<"Processing "<< mesh.storedEdges()<<" P1 Edges"<<endl;
+  out<<"Processing "<< mesh.storedEdges()<<" P1 Edges"<<std::endl;
   UInt nbe=mesh.numBEdges();
   for (UInt j=1; j<=mesh.storedEdges();++j){
     pe=& mesh.edge(j);
@@ -1386,7 +1386,7 @@ p1top2(RegionMesh & mesh, ostream & out=std::cout){
   if (GeoShape::nDim ==3 ){
     UInt nbf=mesh.numBFaces();
     UInt nbv=GeoBShape::numVertices;
-    out<<"Processing "<<mesh.storedFaces()<<" Face Edges"<<endl;
+    out<<"Processing "<<mesh.storedFaces()<<" Face Edges"<<std::endl;
     for (UInt k=1; k<=mesh.storedFaces(); ++k){
       pbe= &mesh.face(k);
       for (UInt j=1;j<=mesh.numLocalEdgesOfFace();j++){
@@ -1416,7 +1416,7 @@ p1top2(RegionMesh & mesh, ostream & out=std::cout){
       }
     }
 
-  out<<"Processing "<< mesh.numElements()<<" Mesh Elements"<<endl;
+  out<<"Processing "<< mesh.numElements()<<" Mesh Elements"<<std::endl;
   UInt nev=GeoShape::numVertices;
   for (UInt k=1; k<= mesh.numElements(); ++k){
     pv= &mesh.element(k);
@@ -1444,7 +1444,7 @@ p1top2(RegionMesh & mesh, ostream & out=std::cout){
     }
   }
   /*=============================*/
-  out << " ******* Done Construction of P2 Mmesh *******" <<endl<<endl;
+  out << " ******* Done Construction of P2 Mmesh *******" <<std::endl<<std::endl;
 }
 
 //! Fix mesh switches
@@ -1454,11 +1454,11 @@ p1top2(RegionMesh & mesh, ostream & out=std::cout){
 
 // template<typename RegionMesh>
 // void
-// fixSwitches(RegionMesh ^ mesh, ostream & clog=cout, bool verbose=false)
+// fixSwitches(RegionMesh ^ mesh, std::ostream & clog=std::cout, bool verbose=false)
 // {
 
-//   clog<<" ************** FIXING MESH SWITCHES **********************"<<endl;
-//   clog<<"            Mesh switches Status before fixing"<<endl;
+//   clog<<" ************** FIXING MESH SWITCHES **********************"<<std::endl;
+//   clog<<"            Mesh switches Status before fixing"<<std::endl;
 //   mesh.showLinkSwitch(verbose,clog);
 //   if (mesh.storedFaces()> mesh.numBFaces()){
 //     mesh.setLinkSwitch("HAS_ALL_FACES");

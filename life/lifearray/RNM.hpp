@@ -27,13 +27,13 @@
 
 #include <cmath>
 
-using namespace std;
+//using namespace std;
 #define const_R   R
 #ifdef CHECK_KN
 #include <cstdlib>
 inline void Check_Kn(const char * str,const char * file,int line)
 {
- cerr << "CHECK_KN: " << str << " in file: " << file << ", line " << line <<endl;
+ std::cerr << "CHECK_KN: " << str << " in file: " << file << ", line " << line <<std::endl;
  abort();
 }
 #define K_assert(i)  if (!(i)) Check_Kn(#i,__FILE__,__LINE__);
@@ -161,7 +161,7 @@ class ShapeOfArray{ protected:
 
 };
 
-ostream & operator<<(ostream & f,const ShapeOfArray & s);
+std::ostream & operator<<(std::ostream & f,const ShapeOfArray & s);
 
 inline bool  SameShape(const ShapeOfArray & a,const ShapeOfArray & b)
            { return  !a.step || !b.step || a.n == b.n ;}
@@ -176,7 +176,7 @@ inline SubArray::SubArray(const ShapeOfArray & s)
 
 
 template<class R>
-ostream & operator<<(ostream & f,const KN_<const_R> & v) ;
+std::ostream & operator<<(std::ostream & f,const KN_<const_R> & v) ;
 
 
 template<class R>
@@ -238,7 +238,7 @@ public:
   const KN_& operator =(const MatriceCreuseMulKN_<R> & ) ;
   const KN_& operator =(const MatriceCreuseDivKN_<R> &)  ;
 
- friend   ostream & operator<< <R>(ostream & f,const KN_<const_R> & v)  ;
+ friend   std::ostream & operator<< <R>(std::ostream & f,const KN_<const_R> & v)  ;
 
  private:
 
@@ -891,16 +891,16 @@ class Mul_KNM_KN_ { public:
 };
 
 
-ostream & operator<<(ostream & f,const ShapeOfArray & s);
+std::ostream & operator<<(std::ostream & f,const ShapeOfArray & s);
 
-template<class R> ostream & operator<<(ostream & f,const KN_<const_R>   & v);
-template<class R> ostream & operator<<(ostream & f,const KNM_<const_R>  & v);
-template<class R> ostream & operator<<(ostream & f,const KNMK_<const_R> & v);
-template<class R> inline ostream & operator<<(ostream & f,const KN<const_R>   & v)
+template<class R> std::ostream & operator<<(std::ostream & f,const KN_<const_R>   & v);
+template<class R> std::ostream & operator<<(std::ostream & f,const KNM_<const_R>  & v);
+template<class R> std::ostream & operator<<(std::ostream & f,const KNMK_<const_R> & v);
+template<class R> inline std::ostream & operator<<(std::ostream & f,const KN<const_R>   & v)
     { return f << (KN_<const_R>) v;}
-template<class R> inline ostream & operator<<(ostream & f,const KNM<const_R>  & v)
+template<class R> inline std::ostream & operator<<(std::ostream & f,const KNM<const_R>  & v)
     { return f << (KNM_<const_R>) v;}
-template<class R> inline ostream & operator<<(ostream & f,const KNMK<const_R> & v)
+template<class R> inline std::ostream & operator<<(std::ostream & f,const KNMK<const_R> & v)
     { return f << (KNMK_<const_R>) v;}
 
 

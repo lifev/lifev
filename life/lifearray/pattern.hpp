@@ -18,7 +18,7 @@
 */
 /*----------------------------------------------------------------------*
 |
-| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.9 2004-09-24 13:57:23 winkelma Exp $
+| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.10 2004-09-29 07:51:31 winkelma Exp $
 |
 |
 | #Version  0.1 Experimental   07/7/00. Luca Formaggia & Alessandro Veneziani  |
@@ -63,6 +63,7 @@
 //#include<functional>
 #include "bareItems.hpp"
 
+
 namespace LifeV
 {
 const INDEX_T PatternOffset= PATTERN_OFFSET;
@@ -78,7 +79,7 @@ class PatternDefs
 {
 public:
   typedef INDEX_T Index_t; //!< Type for indices
-  typedef vector<Index_t> Container; //!< Container for the actual (raw) pattern
+  typedef std::vector<Index_t> Container; //!< Container for the actual (raw) pattern
   typedef Container::size_type Diff_t; //!< type for differences (offsets)
   /* Some useful converters */
   Index_t _d2i(ID const d) const; //!< From Identifier (DOF) to Index
@@ -89,7 +90,7 @@ public:
   Container & _d2i(Container & list_of_dof)const;
   Container & _d2o(Container & list_of_dof)const;
  protected:
-  typedef set<BareEdge,cmpBareItem<BareEdge> > DynPattern; //!< Container for the dynamic pattern
+    typedef std::set<BareEdge,cmpBareItem<BareEdge> > DynPattern; //!< Container for the dynamic pattern
 };
 
 
@@ -112,7 +113,7 @@ public:
 
   bool diagFirst()const {return _diagfirst;}; //!< Diagonal is the first item furnished by  the raw pattern data
 
-  void showMe(bool const verbose=false, ostream & out=cout ) const; //!< some info for the curious
+  void showMe(bool const verbose=false, std::ostream & out=std::cout ) const; //!< some info for the curious
 
  protected:
   //! It builds the dynamic pattern. It is the standard routine for a
@@ -179,7 +180,9 @@ public:
   //! CSRPatt(Const_Iter &ex_ia, Const_Iter  &ex_ja )
   //! where Const_iter is an iterator to a sequence (then  a pointer as well)
   //! LUCA: I will do it soon!
-  CSRPatt(UInt ex_nnz, UInt ex_nrow, UInt ex_ncol, const vector<Index_t> &ex_ia, const vector<Index_t> &ex_ja );
+  CSRPatt(UInt ex_nnz, UInt ex_nrow, UInt ex_ncol,
+          const std::vector<Index_t> &ex_ia,
+          const std::vector<Index_t> &ex_ja );
 
   CSRPatt(const CSRPatt &RightHandCSRP);
   //! Constructors for single DOF (square matrix), possibly with more than
@@ -206,7 +209,7 @@ public:
 	    UInt const bRows= 1, UInt const bCols= 1);
 
     CSRPatt(const MSRPatt& msrPatt);
-    
+
   template<typename DOF1,typename DOF2>
     bool buildPattern(DOF1 const& dof1,DOF2 const  & dof2,
 		      UInt const bRows= 1, UInt const bCols= 1);
@@ -240,7 +243,7 @@ public:
   Container const & give_ja() const {return _ja;};//!< Give ja (as container)
   Container const & give_jaT() const {return _jaT;};//!< Give jaT (as container)
 
-  inline pair<UInt,UInt> giveMinMax() const; //!< Min and Max elements in a row.
+  inline std::pair<UInt,UInt> giveMinMax() const; //!< Min and Max elements in a row.
   inline UInt nbNeighbours(ID const d)const; //!< N of neighbours of the DOF numbeered d . BEWARE d is INCLUDED!
   inline ID neighbour(ID const i,ID const d) const;//!< the i-th (start from 1) neighbour of dof d. The first is d itself
   inline void neighbours(ID const d, Container & start) const;//!< put neighbours of dof d in a list
@@ -259,11 +262,11 @@ public:
 
   //! Here the routines whcih locate the position in the vector containing the matrix value of an entry (i,j), which may be a couple
   //! of indices or of ID's (degree of freedoms identifiers)
-  inline pair<Diff_t,bool> locate_dof(ID const i,ID const j) const; //!< Locate position of DOF ID couple (i,j)
-  inline pair<Diff_t,bool> locate_index(Index_t const i,Index_t const j) const;//!< Locate position of index couple (i,j)
+  inline std::pair<Diff_t,bool> locate_dof(ID const i,ID const j) const; //!< Locate position of DOF ID couple (i,j)
+  inline std::pair<Diff_t,bool> locate_index(Index_t const i,Index_t const j) const;//!< Locate position of index couple (i,j)
 
-  void showMe(bool const verbose=false,ostream& c=cout) const ; //!< pattern visualization
-  void spy(string const & filname="matrice.m") const; //!< pattern visualization a la Matlab
+  void showMe(bool const verbose=false,std::ostream& c=std::cout) const ; //!< pattern visualization
+  void spy(std::string const & filname="matrice.m") const; //!< pattern visualization a la Matlab
 
   //! column-concatenation of two CSR block patterns
   friend CSRPatt colUnify(CSRPatt const &patt1, CSRPatt const &patt2);
@@ -284,7 +287,7 @@ protected:
   Diff_t _row_off(Index_t i)const {//!< Row offset for row index i
     return _i2o(_ia[_i2o(i)]);}
   inline bool isThere(Index_t const i,Index_t const j) const; //!< Are indices (i,j) in the pattern
-  pair<Diff_t,bool> locate_pattern(Index_t const i,Index_t const j) const;//!< Are indices (i,j) in the pattern
+  std::pair<Diff_t,bool> locate_pattern(Index_t const i,Index_t const j) const;//!< Are indices (i,j) in the pattern
   Container _ia; //!< point to the rows entries
   Container _ja; //!< contain col indices for each row
   Container _jaT;//!< point to the col entries of the transpose pattern
@@ -324,9 +327,9 @@ class VBRPatt: public CSRPatt
   VBRPatt(){}
   VBRPatt(UInt ex_nnz, UInt ex_nrow, UInt ex_ncol);
   VBRPatt(UInt ex_nnz, UInt ex_nrow, UInt ex_ncol, const
-	  vector<Index_t> &ex_ia, const vector<Index_t> &ex_ja, const
-	  vector<Index_t> &ex_indx, const vector<Index_t> &ex_rpntr, const
-	  vector<Index_t> &ex_cpntr);
+	  std::vector<Index_t> &ex_ia, const std::vector<Index_t> &ex_ja, const
+	  std::vector<Index_t> &ex_indx, const std::vector<Index_t> &ex_rpntr, const
+	  std::vector<Index_t> &ex_cpntr);
 
   VBRPatt(const VBRPatt &RightHandVBRP);
 
@@ -416,8 +419,8 @@ class VBRPatt: public CSRPatt
   // information on the block position (element (1,1) of the block).
 
   //! pattern visualization
-  void showMe(bool const verbose=false,ostream& c=cout) const ;
-  void spy(string const & filname="matrice.m") const; //!< pattern visualization
+  void showMe(bool const verbose=false,std::ostream& c=std::cout) const ;
+  void spy(std::string const & filname="matrice.m") const; //!< pattern visualization
                                                      //!< a la Matlab
 
  private:
@@ -446,7 +449,9 @@ class CSRPattSymm:
  public:
   CSRPattSymm();
   CSRPattSymm(UInt ex_nnz, UInt ex_nrow, UInt ex_ncol);
-  CSRPattSymm(UInt ex_nnz, UInt ex_nrow, UInt ex_ncol, const vector<Index_t> &ex_ia, const vector<Index_t> &ex_ja );
+  CSRPattSymm(UInt ex_nnz, UInt ex_nrow, UInt ex_ncol,
+              const std::vector<Index_t> &ex_ia,
+              const std::vector<Index_t> &ex_ja );
   CSRPattSymm(const CSRPattSymm &RightHandCSRP);
   template<typename DOF>CSRPattSymm(DOF const  & dof);
   CSRPattSymm & operator= (const CSRPattSymm&  RhCsr);
@@ -460,7 +465,7 @@ class CSRPattSymm:
   Index_t * giveRawCSR_ja() {return &(_ja.front());}; // Give ja (in a raw form)
   Container & give_ia() {return _ia;}; // Give ia (as container)
   Container & give_ja() {return _ja;};// Give ja (as container)
-  inline pair<UInt,UInt> giveMinMax() const;
+  inline std::pair<UInt,UInt> giveMinMax() const;
 
   // DO NOt use them (are very inefficient)
   UInt nbNeighbours(ID const d)const;
@@ -469,12 +474,12 @@ class CSRPattSymm:
   template<typename Iter>
   inline UInt row(Diff_t const row, Iter  coldata, Iter position) const;// extracts a row (useful to implement A*b)
 
-  inline pair<Diff_t,bool> locate_dof(ID const i,ID const j) const;
+  inline std::pair<Diff_t,bool> locate_dof(ID const i,ID const j) const;
 
-  inline pair<Diff_t,bool> locate_index(Index_t const i,Index_t const j) const;
+  inline std::pair<Diff_t,bool> locate_index(Index_t const i,Index_t const j) const;
 
-  void showMe(bool verbose=false,ostream& c=cout) const; // pattern visualization
-  void spy(string const & filname="matrice.m") const; //pattern visualization a la Matlab
+  void showMe(bool verbose=false,std::ostream& c=std::cout) const; // pattern visualization
+  void spy(std::string const & filname="matrice.m") const; //pattern visualization a la Matlab
 
 
   // DOF are ALWAYS numbered a la Fortran: the following definition set the correct numbering
@@ -483,7 +488,7 @@ class CSRPattSymm:
 protected:
   Diff_t _row_off(Index_t i)const {// Row offset for row index i
     return _i2o(_ia[_i2o(i)]);}
-  pair<Diff_t,bool> locate_pattern(Index_t const i,Index_t const j) const;
+  std::pair<Diff_t,bool> locate_pattern(Index_t const i,Index_t const j) const;
   bool isThere(Index_t i,Index_t j) const;
 
  private:
@@ -505,7 +510,9 @@ class MSRPatt:
  public:
   MSRPatt();
   MSRPatt(UInt ex_nnz, UInt ex_nrow, UInt ex_ncol);
-  MSRPatt(UInt ex_nnz, UInt ex_nrow, UInt ex_ncol,const vector<Index_t> &bindx,const vector<Index_t> &ybind );
+  MSRPatt(UInt ex_nnz, UInt ex_nrow, UInt ex_ncol,
+          const std::vector<Index_t> &bindx,
+          const std::vector<Index_t> &ybind );
   MSRPatt(const MSRPatt &RightHandMSRP);
   MSRPatt(const CSRPatt &RightHandCSRP);
   MSRPatt & operator= (const MSRPatt&  RhMsr);
@@ -538,13 +545,13 @@ class MSRPatt:
   void neighbours(ID const d, Container & start) const;
   template <typename Iter> inline UInt row(Diff_t const row, Iter  coldata, Iter position) const;// extracts a row (useful to implement A*b)
 
-  inline pair<Diff_t,bool> locate_dof(ID const i,ID const j) const;
+  inline std::pair<Diff_t,bool> locate_dof(ID const i,ID const j) const;
 //
-  inline pair<UInt,UInt> giveMinMax() const;
-  inline pair<Diff_t,bool> locate_index(Index_t const i,Index_t const j) const;
+  inline std::pair<UInt,UInt> giveMinMax() const;
+  inline std::pair<Diff_t,bool> locate_index(Index_t const i,Index_t const j) const;
 
-  void showMe(bool verbose=false, ostream& c=cout) const ; // pattern visualization
-  void spy(string const & filname="matrice.m")const ; //pattern visualization a la Matlab
+  void showMe(bool verbose=false, std::ostream& c=std::cout) const ; // pattern visualization
+  void spy(std::string const & filname="matrice.m")const ; //pattern visualization a la Matlab
 
   // Construction of a diagonal matrix of n blocks
   friend void diagblockMatrix(MSRPatt &ans, MSRPatt const &patt, UInt const nblock);
@@ -552,7 +559,7 @@ class MSRPatt:
  protected:
   Diff_t _row_off(Index_t i)const {// Row offset for row index i
     return _i2o(_bindx[_i2o(i)]);}
-  pair<Diff_t,bool> locate_pattern(Index_t const i,Index_t const j) const;
+  std::pair<Diff_t,bool> locate_pattern(Index_t const i,Index_t const j) const;
   inline bool isThere(Index_t i,Index_t j)const ; // superata dalla locate
 
  private:
@@ -622,14 +629,14 @@ public:
   // Miguel 11/02: I want to construct a diagonal pattern
   // in the initialisation list, so I need a constructor which makes the pattern
   // construct and link to an external pattern (type = "diag") (Alain: type="full")
-  MixedPattern(PATTERN & ex_patt, const string& type="full");
+  MixedPattern(PATTERN & ex_patt, const std::string& type="full");
 
   ~MixedPattern();
 
   // make a diagonal pattern for vectorial problem
   void makeDiagPattern(PATTERN & ex_patt);
 
-  inline pair<UInt,UInt> nBlocks() const; // Number of blocks (rows and columns)
+  inline std::pair<UInt,UInt> nBlocks() const; // Number of blocks (rows and columns)
 
   inline UInt nRows(Diff_t const m, Diff_t const n) const; // Number of rows in block (m,n)
   inline UInt nCols(Diff_t const m, Diff_t const n) const;
@@ -655,26 +662,26 @@ public:
   inline       PATTERN * block_ptr(Diff_t const m, Diff_t const n); // Pointer to a a local pattern
   inline const PATTERN * block_ptr(Diff_t const m, Diff_t const n) const; // Pointer to a a local pattern
 
-  inline pair<UInt,UInt> blockOffset(UInt const m, UInt const n) const;// The row/col offsets of the block
-  pair<UInt,UInt> locateElBlock(Index_t const i_g, Index_t const j_g) const;
+  inline std::pair<UInt,UInt> blockOffset(UInt const m, UInt const n) const;// The row/col offsets of the block
+  std::pair<UInt,UInt> locateElBlock(Index_t const i_g, Index_t const j_g) const;
   //  Gives the block numbering corresponding to the  GLOBAL matrix index (i_g,j_g) Returns
   // (BROWS,BCOLS) if element not found
-  pair<Diff_t,Diff_t> locateDofBlock(ID const di_g, ID const dj_g) const;
+  std::pair<Diff_t,Diff_t> locateDofBlock(ID const di_g, ID const dj_g) const;
   // Give the block correponding to a THE GLOBAL DOF (di_g,dj_g)
   // Returns (BROWS,BCOLS) if dofs not found
 
   // local/global numbering in the block, given global numbering. It can be applied to indices and IDs.
   // I rely on implicit conversion ID->Index_t if Index_t != ID
-  // LUCA: If that does not work I will do a template function pair<A,A>localNumber<T>(Diff_t,Diff_t,T,T) and the
+  // LUCA: If that does not work I will do a template function std::pair<A,A>localNumber<T>(Diff_t,Diff_t,T,T) and the
   // necessary specialisations.
-  inline pair<ID,ID> localNumber(Diff_t const m, Diff_t const n, ID const i_g, ID const j_g) const;
-  inline pair<ID,ID> globalNumber(Diff_t const m, Diff_t const n, ID const i, ID const j) const;
+  inline std::pair<ID,ID> localNumber(Diff_t const m, Diff_t const n, ID const i_g, ID const j_g) const;
+  inline std::pair<ID,ID> globalNumber(Diff_t const m, Diff_t const n, ID const i, ID const j) const;
 
   // Returns position in matrix  corrspondinf to a  DOF (local numbering)  in a block
-  pair<Diff_t,bool> locateDof(Diff_t const m, Diff_t const n, ID const di, ID const dj) const;
+  std::pair<Diff_t,bool> locateDof(Diff_t const m, Diff_t const n, ID const di, ID const dj) const;
 
   // Returns position in matrix corrspondinf to element (i,j) in a block (local numbering)
-  pair<Diff_t,bool> locateIndex(Diff_t const m, Diff_t const n, Index_t const i, Index_t const j)const ;
+  std::pair<Diff_t,bool> locateIndex(Diff_t const m, Diff_t const n, Index_t const i, Index_t const j)const ;
 
   // I can set the size of a block without linking the block to a pattern (I may have a matrix of ZEROS!)
   // To that purpose I use the following:
@@ -700,9 +707,9 @@ public:
 
   // Tre is a block has been set to a  local pattern
   inline bool isSet(Diff_t const m, Diff_t const n) const;
-  void showMe( bool verbose=false, ostream & c=cout) const;
+  void showMe( bool verbose=false, std::ostream & c=std::cout) const;
   // Tests if offsets are  consistent with that of a global matrix
-  bool check(bool verbose=false, ostream & c=cout) const;
+  bool check(bool verbose=false, std::ostream & c=std::cout) const;
 
 protected:
 
@@ -741,7 +748,7 @@ template
 <typename T1, typename T2>
 inline
 void
-extract_pair(pair<T1,T2> const & p, T1 & t1, T2 & t2)
+extract_pair(std::pair<T1,T2> const & p, T1 & t1, T2 & t2)
 {
   t1=p.first;
   t2=p.second;
@@ -1245,37 +1252,37 @@ bool CSRPatt::isThere(Index_t const i, Index_t const j) const {
 }
 
 
-// locate function for CSR Pattern. It returns a pair. First member
+// locate function for CSR Pattern. It returns a std::pair. First member
 // is the position (offset) in the array correponding to (i,j), the second
 // is a bool telling if that position exists (i.e. if i,j is in the
 //pattern). If the boolean value is false the first member is meaningless!
 inline
-pair<PatternDefs::Diff_t,bool>
+std::pair<PatternDefs::Diff_t,bool>
 CSRPatt::locate_index(Index_t const i,Index_t const j) const {
   return locate_pattern(i,j);
 }
 
 inline
-pair<PatternDefs::Diff_t,bool>
+std::pair<PatternDefs::Diff_t,bool>
 CSRPatt::locate_dof(ID const i,ID const j) const {
     return locate_pattern(_d2i(i),_d2i(j));
 }
 
 
 inline
-pair<UInt,UInt>
+std::pair<UInt,UInt>
 CSRPatt::giveMinMax() const {
   Container::const_iterator current;
   UInt curr_min=_ncols;
   UInt curr_max=0;
   for (current=_ia.begin()+1;current<_ia.end();++current){
     UInt loc_col = *current - *(current-1);
-    curr_min=min(curr_min,loc_col);
-    curr_max=max(curr_max,loc_col);
+    curr_min = std::min<UInt>(curr_min,loc_col);
+    curr_max = std::max<UInt>(curr_max,loc_col);
     //if (loc_col < curr_min) curr_min=loc_col;
       //if (loc_col > curr_max) curr_max=loc_col;
   }
-  return make_pair(curr_min,curr_max);
+  return std::make_pair(curr_min,curr_max);
 }
 
 // Version for the construction two patterns: patt and its transpose one,
@@ -1576,22 +1583,22 @@ bool CSRPattSymm::buildPattern(DOF1 const & dof1){
 };
 
 inline
-pair<PatternDefs::Diff_t,bool>
+std::pair<PatternDefs::Diff_t,bool>
 CSRPattSymm::locate_index(Index_t const i,Index_t const j) const {
   return locate_pattern(i,j);
 }
 
 inline
-pair<PatternDefs::Diff_t,bool>
+std::pair<PatternDefs::Diff_t,bool>
 CSRPattSymm::locate_dof(ID const i,ID const j) const {
   return locate_pattern(_d2i(i),_d2i(j));
 }
 
 inline
-pair<UInt,UInt>
+std::pair<UInt,UInt>
 CSRPattSymm::giveMinMax() const
 {
-  vector<UInt> accumulate(max(_nrows,_ncols),0);// just to be sure!!!
+  std::vector<UInt> accumulate(std::max<UInt>(_nrows,_ncols),0);// just to be sure!!!
   Diff_t col;
   Diff_t row;
   for (row=0;row<_nrows;++row){
@@ -1603,9 +1610,9 @@ CSRPattSymm::giveMinMax() const
       ++accumulate[col];
     }
   }
-  UInt curr_min=*min_element(accumulate.begin(),accumulate.end());
-  UInt curr_max=*max_element(accumulate.begin(),accumulate.end());
-  return make_pair(curr_min,curr_max);
+  UInt curr_min=*std::min_element(accumulate.begin(),accumulate.end());
+  UInt curr_max=*std::max_element(accumulate.begin(),accumulate.end());
+  return std::make_pair(curr_min,curr_max);
 }
 
 template <typename Iter>
@@ -1807,19 +1814,19 @@ bool MSRPatt::isThere(Index_t i,Index_t j)const
 
 
 inline
-pair<PatternDefs::Diff_t,bool>
+std::pair<PatternDefs::Diff_t,bool>
 MSRPatt:: locate_index(Index_t const i,Index_t const j) const{
   return locate_pattern(i,j);
 }
 
 inline
-pair<PatternDefs::Diff_t,bool>
+std::pair<PatternDefs::Diff_t,bool>
 MSRPatt:: locate_dof(ID const i,ID const j) const{
   return locate_pattern(_d2i(i),_d2i(j));
 }
 
 inline
-pair<UInt,UInt>
+std::pair<UInt,UInt>
 MSRPatt::giveMinMax()const{
   Container::const_iterator current;
   UInt curr_min=_ncols;
@@ -1830,7 +1837,7 @@ MSRPatt::giveMinMax()const{
       if (loc_col < curr_min) curr_min=loc_col;
       if (loc_col > curr_max) curr_max=loc_col;
     }
-  return make_pair(curr_min+1,curr_max+1); // Adding the diagonal term
+  return std::make_pair(curr_min+1,curr_max+1); // Adding the diagonal term
 }
 
 
@@ -1866,7 +1873,7 @@ MixedPattern()
 // in the initialisation list, so I need a constructor which makes the pattern
 // construct and link to an external pattern (type = "diag") (Alain: type="full")
 template <UInt BROWS, UInt BCOLS, typename PATTERN>
-MixedPattern<BROWS,BCOLS,PATTERN>::MixedPattern(PATTERN & ex_patt, const string& type) {
+MixedPattern<BROWS,BCOLS,PATTERN>::MixedPattern(PATTERN & ex_patt, const std::string& type) {
 
   if (type == "full" ) {
     for (UInt i=0; i<BROWS; i++){
@@ -1933,9 +1940,9 @@ makeDiagPattern(PATTERN & ex_patt)
 template
 <UInt BROWS, UInt BCOLS, typename PATTERN>
 inline
-pair<UInt,UInt>
+std::pair<UInt,UInt>
 MixedPattern<BROWS,BCOLS,PATTERN>::nBlocks() const{
-  return make_pair(BROWS,BCOLS);
+  return std::make_pair(BROWS,BCOLS);
 }
 
 template
@@ -2057,7 +2064,7 @@ UInt
 MixedPattern<BROWS,BCOLS,PATTERN>::nbNeighbours(ID const d_g) const{
   // This is MORE complicated
   //Locate line corresponding to dof d_g in block
-  pair<UInt,UInt> _b=locateDofBlock(d_g,1); // Remember that dofs are ALWAYS numbered from 1
+  std::pair<UInt,UInt> _b=locateDofBlock(d_g,1); // Remember that dofs are ALWAYS numbered from 1
   // line local nomber
   UInt m=_b.first;
   UInt _d=d_g-_rowoff[m][0];
@@ -2076,7 +2083,7 @@ MixedPattern<BROWS,BCOLS,PATTERN>::neighbour(ID const i_g, ID const d_g) const /
 {
   // This is MUCH MORE complicated
   //Locate line in blocks
-  pair<UInt,UInt> _b=locateDofBlock(d_g,1);
+  std::pair<UInt,UInt> _b=locateDofBlock(d_g,1);
   ASSERT_PRE(_b.first < BROWS, "Invalid dof entry d_g");
   // Get local numbering of dof
   UInt m=_b.first;
@@ -2111,7 +2118,7 @@ MixedPattern<BROWS,BCOLS,PATTERN>::neighbours(ID const d_g,Container & neighs) c
 {
   // This is MUCH MORE complicated
   //Locate line in blocks
-  pair<UInt,UInt> _b=locateBlock(d_g,0);
+  std::pair<UInt,UInt> _b=locateBlock(d_g,0);
   ASSERT_PRE(_b<BROWS, "Invalid dof entry d_g");
   // Get local numbering of dof
   UInt m=b.first;
@@ -2188,16 +2195,16 @@ block_ptr(Diff_t const m, Diff_t const n) const{
 template
 <UInt BROWS, UInt BCOLS, typename PATTERN>
 inline
-pair<UInt,UInt>
+std::pair<UInt,UInt>
 MixedPattern<BROWS,BCOLS,PATTERN>::blockOffset(UInt const m, UInt const n) const{
   ASSERT_PRE( m<BROWS && m>=0, " Invalid block row address");
   ASSERT_PRE( n<BCOLS && n>=0, " Invalid block column address");
-  return make_pair(_rowoff[m][n],_coloff[m][n]);
+  return std::make_pair(_rowoff[m][n],_coloff[m][n]);
 }
 
 template
 <UInt BROWS, UInt BCOLS, typename PATTERN>
-pair<UInt,UInt>
+std::pair<UInt,UInt>
 MixedPattern<BROWS,BCOLS,PATTERN>::
 locateElBlock(Index_t const i_g, Index_t const j_g) const
 {
@@ -2209,12 +2216,12 @@ locateElBlock(Index_t const i_g, Index_t const j_g) const
   while(m<BROWS &&(_itest <_rowoff[m][0] || _itest >=_rowoff[m][0]+ _nrows[m][n])) ++m;
   while(n<BCOLS &&(_jtest <_coloff[0][n] || _jtest >=_coloff[0][n]+ _ncols[m][n])) ++n;
 
-  return make_pair(m,n);
+  return std::make_pair(m,n);
 }
 
 template
 <UInt BROWS, UInt BCOLS, typename PATTERN>
-pair<PatternDefs::Diff_t,PatternDefs::Diff_t>
+std::pair<PatternDefs::Diff_t,PatternDefs::Diff_t>
 MixedPattern<BROWS,BCOLS,PATTERN>::
 locateDofBlock(ID const i_g, ID const j_g) const
 {
@@ -2225,48 +2232,48 @@ locateDofBlock(ID const i_g, ID const j_g) const
 
   while(m<BROWS &&(_itest <_rowoff[m][0] || _itest >=_rowoff[m][0]+ _nrows[m][n])) ++m;
   while(n<BCOLS &&(_jtest <_coloff[0][n] || _jtest >=_coloff[0][n]+ _ncols[m][n])) ++n;
-  return make_pair(m,n);
+  return std::make_pair(m,n);
 }
 
 
 template
 <UInt BROWS, UInt BCOLS, typename PATTERN>
 inline
-pair<ID,ID>
+std::pair<ID,ID>
 MixedPattern<BROWS,BCOLS,PATTERN>::localNumber(Diff_t const m, Diff_t const n,ID const i_g, ID const j_g) const{
   ASSERT_PRE( m<BROWS && m>=0, " Invalid block row address");
   ASSERT_PRE( n<BCOLS && n>=0, " Invalid block column address");
 
-  return make_pair(i_g-_rowoff[m][n],j_g-_coloff[m][n]);
+  return std::make_pair(i_g-_rowoff[m][n],j_g-_coloff[m][n]);
 }
 
 template
 <UInt BROWS, UInt BCOLS, typename PATTERN>
 inline
-pair<ID,ID>
+std::pair<ID,ID>
 MixedPattern<BROWS,BCOLS,PATTERN>::globalNumber(Diff_t const m, Diff_t const n,ID const i, ID const j) const{
   ASSERT_PRE( m<BROWS && m>=0, " Invalid block row address");
   ASSERT_PRE( n<BCOLS && n>=0, " Invalid block column address");
-  return make_pair(i+_rowoff[m][n],j+_coloff[m][n]);
+  return std::make_pair(i+_rowoff[m][n],j+_coloff[m][n]);
 }
 
 template
 <UInt BROWS, UInt BCOLS, typename PATTERN>
-pair<PatternDefs::Diff_t,bool>
+std::pair<PatternDefs::Diff_t,bool>
 MixedPattern<BROWS,BCOLS,PATTERN>::locateIndex(Diff_t const m, Diff_t const n,Index_t const i, Index_t const j) const{
   ASSERT_PRE( m<BROWS && m>=0, " Invalid block row address");
   ASSERT_PRE( n<BCOLS && n>=0, " Invalid block column address");
-  if (_blocks[m][n]==0)return make_pair(0,false);
+  if (_blocks[m][n]==0)return std::make_pair(0,false);
   return _blocks[m][n]->locateIndex(i,j);
 }
 
 template
 <UInt BROWS, UInt BCOLS, typename PATTERN>
-pair<PatternDefs::Diff_t,bool>
+std::pair<PatternDefs::Diff_t,bool>
 MixedPattern<BROWS,BCOLS,PATTERN>::locateDof(Diff_t const m, Diff_t const n,ID const i, ID const j) const{
   ASSERT_PRE( m<BROWS && m>=0, " Invalid block row address");
   ASSERT_PRE( n<BCOLS && n>=0, " Invalid block column address");
-  if (_blocks[m][n]==0)return make_pair(0,false);
+  if (_blocks[m][n]==0)return std::make_pair(0,false);
   return _blocks[m][n]->locateDof(i,j);
 }
 
@@ -2418,7 +2425,7 @@ MixedPattern<BROWS,BCOLS,PATTERN>::resetOffset(Diff_t const m, Diff_t const n) /
 template
 <UInt BROWS, UInt BCOLS, typename PATTERN>
 bool
-MixedPattern<BROWS,BCOLS,PATTERN>::check(bool verbose, ostream & c) const{
+MixedPattern<BROWS,BCOLS,PATTERN>::check(bool verbose, std::ostream & c) const{
   bool ok=true;
 
   for (Diff_t m=0; m<BROWS; m++){
@@ -2430,7 +2437,7 @@ MixedPattern<BROWS,BCOLS,PATTERN>::check(bool verbose, ostream & c) const{
     for (Diff_t n=0; n<BCOLS; n++){
       if(_blocks[m][n]==0&&_nrows[m][n]==0&&_ncols[m][n]==0){
 	ok=false;
-	c<< "Block " <<"("<<m<<", "<<n<<") unset"<<endl;
+	c<< "Block " <<"("<<m<<", "<<n<<") unset"<<std::endl;
       }
     }
   }
@@ -2442,15 +2449,15 @@ MixedPattern<BROWS,BCOLS,PATTERN>::check(bool verbose, ostream & c) const{
   }
 
   if (verbose && ! ok){
-    c<< " Error checking mixed pattern"<<endl;
+    c<< " Error checking mixed pattern"<<std::endl;
     for (Diff_t m=0; m<BROWS; m++){
       for (Diff_t n=0; n<BCOLS; n++){
 	if(_rowoff[m][n]!=_rowoff[m][n-1] || _coloff[m][n]!=_coloff[m-1][n]){
-	  c<<"Inconsistent Offsets of Blocks:"<<endl;
+	  c<<"Inconsistent Offsets of Blocks:"<<std::endl;
 	  c<<"("<<m<<", "<<n<<") Row offset= "<<_rowoff[m][n]
-	   <<"("<<m<<", "<<n-1<<") Row offset= "<<_rowoff[m][n-1]<<endl;
+	   <<"("<<m<<", "<<n-1<<") Row offset= "<<_rowoff[m][n-1]<<std::endl;
 	  c<<"("<<m<<", "<<n<<") Col offset= "<<_coloff[m][n]
-	   <<"("<<m-1<<", "<<n<<") Col offset= "<<_coloff[m-1][n]<<endl;
+	   <<"("<<m-1<<", "<<n<<") Col offset= "<<_coloff[m-1][n]<<std::endl;
 	}
       }
     }
@@ -2458,13 +2465,13 @@ MixedPattern<BROWS,BCOLS,PATTERN>::check(bool verbose, ostream & c) const{
       for (Diff_t n=0; n<BCOLS; n++){
 	if(_rowoff[m][n]-_rowoff[m-1][n] +_nrows[m-1][n]!=0 ||
 	   _coloff[m][n]-_coloff[m][n-1]-_ncols[m][n-1]!=0){
-	  c<<"Inconsistent Number of cols/rows:"<<endl;
+	  c<<"Inconsistent Number of cols/rows:"<<std::endl;
 	  c<<"("<<m<<", "<<n<<") Row offset= "<<_rowoff[m][n];
-	  c<<"("<<m-1<<", "<<n<<") Row offset= "<<_rowoff[m-1][n]<<endl;
-	  c<<"("<<m-1<<", "<<n<<") N Rows= "<<_nrows[m-1][n]<<endl;
+	  c<<"("<<m-1<<", "<<n<<") Row offset= "<<_rowoff[m-1][n]<<std::endl;
+	  c<<"("<<m-1<<", "<<n<<") N Rows= "<<_nrows[m-1][n]<<std::endl;
 	  c<<"("<<m<<", "<<n<<") Col offset= "<<_coloff[m][n];
-	  c<<"("<<m<<", "<<n-1<<") Col offset= "<<_coloff[m][n-1]<<endl;
-	  c<<"("<<m<<", "<<n-1<<") N Cols= "<<_ncols[m][n-1]<<endl;
+	  c<<"("<<m<<", "<<n-1<<") Col offset= "<<_coloff[m][n-1]<<std::endl;
+	  c<<"("<<m<<", "<<n-1<<") N Cols= "<<_ncols[m][n-1]<<std::endl;
 	}
       }
     }
@@ -2476,31 +2483,31 @@ MixedPattern<BROWS,BCOLS,PATTERN>::check(bool verbose, ostream & c) const{
 template
 <UInt BROWS, UInt BCOLS, typename PATTERN>
 void
-MixedPattern<BROWS,BCOLS,PATTERN>::showMe(bool verbose, ostream & c) const{
-  c<<endl;
-  c<<" ******************* MIXED PATTERN *******************"<<endl;
-  c<<nBlocks().first<<"X"<<nBlocks().second<<" Blocks"<<endl;
-  c<<"Block    Row Off   Cols OFF    Nrows     Ncols     Set      Linked  "<<endl;
+MixedPattern<BROWS,BCOLS,PATTERN>::showMe(bool verbose, std::ostream & c) const{
+  c<<std::endl;
+  c<<" ******************* MIXED PATTERN *******************"<<std::endl;
+  c<<nBlocks().first<<"X"<<nBlocks().second<<" Blocks"<<std::endl;
+  c<<"Block    Row Off   Cols OFF    Nrows     Ncols     Set      Linked  "<<std::endl;
   for (Diff_t m=0; m<BROWS; m++){
     for (Diff_t n=0; n<BCOLS; n++){
       c<<"("<<m<<", "<<n<<") "<<_rowoff[m][n]<<" "<<_coloff[m][n]<<" "<<_nrows[m][n]<<" "<<_ncols[m][n]<<" ";
-      c<<isSet(m,n)<<" "<<_linked[m][n]<<endl;
+      c<<isSet(m,n)<<" "<<_linked[m][n]<<std::endl;
     }
   }
   if(verbose){
-    c<<endl<< "Mixed pattern: single block info"<<endl;
+    c<<std::endl<< "Mixed pattern: single block info"<<std::endl;
 
     for (Diff_t m=0; m<BROWS; m++){
       for (Diff_t n=0; n<BCOLS; n++){
-	c<<"("<<m<<", "<<n<<") ->  " <<endl;
+	c<<"("<<m<<", "<<n<<") ->  " <<std::endl;
 	if (_blocks[m][n] != 0 ){
 	  _blocks[m][n]->showMe(false,c);
 	}
 	else{
 	  if(_ncols[m][n] ==0 && _nrows[m][n] ==0)
-	    c<<" UNSET"<<endl;
+	    c<<" UNSET"<<std::endl;
 	  else
-	    c<< "Zero Pattern "<<  _nrows[m][n]<<" X "<< _ncols[m][n]<<endl;
+	    c<< "Zero Pattern "<<  _nrows[m][n]<<" X "<< _ncols[m][n]<<std::endl;
 	}
       }
     }

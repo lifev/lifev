@@ -60,22 +60,22 @@ Geo0D::operator=(Geo0D const & G)
 }
 
 
-ostream & Geo0D::showMe(bool verbose, ostream & out) const
+std::ostream & Geo0D::showMe(bool verbose, std::ostream & out) const
 {
-  out.setf(ios::scientific,ios::floatfield);
-  out << " Geo0D object " <<endl;
+  out.setf(std::ios::scientific,std::ios::floatfield);
+  out << " Geo0D object " <<std::endl;
   if (verbose)
     {
-      out << " Coordinates:" <<endl;
+      out << " Coordinates:" <<std::endl;
       Real const * c=coor();
       for ( unsigned i=0; i<nDimensions; i++ )
 	{
 	  out << c[i] <<",  ";
 	}
-      out << endl<<endl;
+      out << std::endl<<std::endl;
     }
   out << "ID= "<< id()<<"  ";
-  out << "----- END OF Geo0D data ---"<<endl<<endl;
+  out << "----- END OF Geo0D data ---"<<std::endl<<std::endl;
   return out;
 };
 

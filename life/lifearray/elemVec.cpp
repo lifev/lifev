@@ -82,9 +82,9 @@ ElemVec::ElemVec(int nNode1,int nbr1,
 }
 
 
-void ElemVec::showMe(ostream& c)
+void ElemVec::showMe(std::ostream& c)
 {
   for(int i=0;i<_nBlockRow;i++)
-    c << "Block (" << i << "), " << block(i) << endl;
+    c << "Block (" << i << "), " << block(i) << std::endl;
 }
 }

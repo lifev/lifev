@@ -22,7 +22,7 @@
 namespace LifeV
 {
 
-DataAztec::DataAztec(const GetPot& dfile, const string& section):
+DataAztec::DataAztec(const GetPot& dfile, const std::string& section):
   aztec_solver_list(section+"/solver"),
   aztec_precond_list(section+"/precond"),
   aztec_scaling_list(section+"/scaling"),
@@ -34,10 +34,13 @@ DataAztec::DataAztec(const GetPot& dfile, const string& section):
   // solver
   //
   aztec_solver_list.add("cg",AZ_cg,"preconditioned conjugate gradient method");
-  aztec_solver_list.add("gmres",AZ_gmres,"preconditioned gmres method (default)");
+  aztec_solver_list.add("gmres",AZ_gmres,
+                        "preconditioned gmres method (default)");
   aztec_solver_list.add("cgs",AZ_cgs,"preconditioned cg squared method");
-  aztec_solver_list.add("tfqmr",AZ_tfqmr,"preconditioned transpose-free qmr method");
-  aztec_solver_list.add("bicgstab",AZ_bicgstab,"preconditioned stabilized bi-cg method");
+  aztec_solver_list.add("tfqmr",AZ_tfqmr,
+                        "preconditioned transpose-free qmr method");
+  aztec_solver_list.add("bicgstab",AZ_bicgstab,
+                        "preconditioned stabilized bi-cg method");
   aztec_solver_list.add("slu",AZ_slu,"super LU direct method");
   aztec_solver_list.add("symmlq",AZ_symmlq,"indefinite symmetric like symmlq");
   aztec_solver_list.add("fixed_pt",AZ_fixed_pt,"fixed point iteration");
@@ -53,8 +56,10 @@ DataAztec::DataAztec(const GetPot& dfile, const string& section):
   aztec_scaling_list.add("bjacobi",AZ_BJacobi,"block Jacobi scaling");
   aztec_scaling_list.add("row_sum",AZ_row_sum,"point row-sum scaling");
   aztec_scaling_list.add("sym_diag",AZ_sym_diag,"symmetric diagonal scaling");
-  aztec_scaling_list.add("sym_row_sum",AZ_sym_row_sum,"symmetric row-sum scaling");
-  aztec_scaling_list.add("sym_bjacobi",AZ_sym_BJacobi,"symmetric block Jacobi scaling");
+  aztec_scaling_list.add("sym_row_sum",AZ_sym_row_sum,
+                         "symmetric row-sum scaling");
+  aztec_scaling_list.add("sym_bjacobi",AZ_sym_BJacobi,
+                         "symmetric block Jacobi scaling");
   //
   aztec_scaling_str  = dfile((section+"/scaling").data(),"none");
   aztec_scaling = aztec_scaling_list.value(aztec_scaling_str);
@@ -63,12 +68,18 @@ DataAztec::DataAztec(const GetPot& dfile, const string& section):
   //
   aztec_precond_list.add("none",AZ_none,"no preconditioning (default)");
   aztec_precond_list.add("jacobi",AZ_Jacobi,"Jacobi preconditioning");
-  aztec_precond_list.add("sym_gs",AZ_sym_GS,"symmetric Gauss-Siedel preconditioning");
-  aztec_precond_list.add("neumann",AZ_Neumann,"Neumann series polynomial preconditioning");
-  aztec_precond_list.add("ls",AZ_ls,"least-squares polynomial preconditioning");
-  aztec_precond_list.add("smoother",AZ_smoother,"Recursive call to AZ_iterate()");
-  aztec_precond_list.add("dom_decomp",AZ_dom_decomp,"Domain decomposition using subdomain solver given by options[AZ_subdomain_solve] = ilu, ilut, icc, rilu, bilu or lu");
-  aztec_precond_list.add("user_precond",AZ_user_precond,"user's preconditioning");
+  aztec_precond_list.add("sym_gs",AZ_sym_GS,
+                         "symmetric Gauss-Siedel preconditioning");
+  aztec_precond_list.add("neumann",AZ_Neumann,
+                         "Neumann series polynomial preconditioning");
+  aztec_precond_list.add("ls",AZ_ls,
+                         "least-squares polynomial preconditioning");
+  aztec_precond_list.add("smoother",AZ_smoother,
+                         "Recursive call to AZ_iterate()");
+  aztec_precond_list.add("dom_decomp",AZ_dom_decomp,
+                         "Domain decomposition using subdomain solver given by options[AZ_subdomain_solve] = ilu, ilut, icc, rilu, bilu or lu");
+  aztec_precond_list.add("user_precond",AZ_user_precond,
+                         "user's preconditioning");
   //
   aztec_precond_str  = dfile((section+"/precond").data(),"none");
   aztec_precond = aztec_precond_list.value(aztec_precond_str);
@@ -78,9 +89,11 @@ DataAztec::DataAztec(const GetPot& dfile, const string& section):
   aztec_conv_list.add("r0",AZ_r0," ||r||_2 / ||r^{(0)}||_2 (default)");
   aztec_conv_list.add("rhs",AZ_rhs,"||r||_2 / ||b||_2 ");
   aztec_conv_list.add("anorm",AZ_Anorm,"||r||_2 / ||A||_infty ");
-  aztec_conv_list.add("sol",AZ_sol,"||r||_infty/(||A||_infty ||x||_1+||b||_infty)");
+  aztec_conv_list.add("sol",AZ_sol,
+                      "||r||_infty/(||A||_infty ||x||_1+||b||_infty)");
   aztec_conv_list.add("weighted",AZ_weighted,"||r||_WRMS");
-  aztec_conv_list.add("expected_values",AZ_expected_values,"||r||_WRMS with weights taken as |A||x0|");
+  aztec_conv_list.add("expected_values",AZ_expected_values,
+                      "||r||_WRMS with weights taken as |A||x0|");
   aztec_conv_list.add("noscaled",AZ_noscaled,"||r||_2 ");
   //
   aztec_conv_str     = dfile((section+"/conv").data(),"r0");
@@ -89,10 +102,14 @@ DataAztec::DataAztec(const GetPot& dfile, const string& section):
   // output
   //
   aztec_output_list.add("all",AZ_all,"Print out everything including matrix");
-  aztec_output_list.add("none",AZ_none,"Print out no results (not even warnings)");
-  aztec_output_list.add("last",AZ_last,"Print out final residual and warnings");
-  aztec_output_list.add("warnings",AZ_warnings,"Print out only warning messages");
-  aztec_output_list.add("all_res",1,"Print out all residuals and warnings (default)");
+  aztec_output_list.add("none",AZ_none,
+                        "Print out no results (not even warnings)");
+  aztec_output_list.add("last",AZ_last,
+                        "Print out final residual and warnings");
+  aztec_output_list.add("warnings",AZ_warnings,
+                        "Print out only warning messages");
+  aztec_output_list.add("all_res",1,
+                        "Print out all residuals and warnings (default)");
 
   aztec_output_str   = dfile((section+"/output").data(),"all_res");
   aztec_output = aztec_output_list.value(aztec_output_str);
@@ -111,15 +128,19 @@ DataAztec::DataAztec(const GetPot& dfile, const string& section):
   //
   aztec_subdomain_solve_list.add("bilu",AZ_bilu,
 				 "domain decomp with block ilu in subdomains");
-  aztec_subdomain_solve_list.add("ilu",AZ_ilu,"domain decomp with ilu in subdomains");
-  aztec_subdomain_solve_list.add("lu",AZ_lu,"domain decomp with lu in subdomains");
+  aztec_subdomain_solve_list.add("ilu",AZ_ilu,
+                                 "domain decomp with ilu in subdomains");
+  aztec_subdomain_solve_list.add("lu",AZ_lu,
+                                 "domain decomp with lu in subdomains");
   aztec_subdomain_solve_list.add("icc",AZ_icc,
 				 "domain decomp with incomp Choleski in domains");
   aztec_subdomain_solve_list.add("ilut",AZ_ilut,
 				 "domain decomp with ilut in subdomains");
-  aztec_subdomain_solve_list.add("rilu",AZ_rilu,"domain decomp with rilu in subdomains");
+  aztec_subdomain_solve_list.add("rilu",AZ_rilu,
+                                 "domain decomp with rilu in subdomains");
   //
-  aztec_subdomain_solve_str = dfile((section+"/subdomain_solve").data(), "ilut");
+  aztec_subdomain_solve_str = dfile((section+"/subdomain_solve").data(),
+                                    "ilut");
   aztec_subdomain_solve = aztec_subdomain_solve_list.value(aztec_subdomain_solve_str);
   //
   aztec_graph_fill = dfile((section+"/graph_fill").data(), 0);
@@ -128,7 +149,8 @@ DataAztec::DataAztec(const GetPot& dfile, const string& section):
   aztec_apply_kvecs= dfile((section+"/apply_kvecs").data(),AZ_FALSE);
   aztec_orth_kvecs = dfile((section+"/orth_kvecs").data(),AZ_FALSE);
   aztec_ignore_scaling = dfile((section+"/ignore_scaling").data(),AZ_FALSE);
-  aztec_check_update_size = dfile((section+"/check_update_size").data(),AZ_FALSE);
+  aztec_check_update_size = dfile((section+"/check_update_size").data(),
+                                  AZ_FALSE);
   //
   aztec_tol  = dfile((section+"/tol").data(), 1.0e-06);
   aztec_drop = dfile((section+"/drop").data(),0.0);
@@ -239,50 +261,55 @@ void DataAztec::aztecSolveLinearSyst(MSRMatr<double>& mat,
 	   mat.giveRaw_value(), data_org,status, proc_config);
 }
 
-void DataAztec::dataAztecHelp(ostream& c)
+void DataAztec::dataAztecHelp(std::ostream& c)
 {
   c << "\n*** Help for data [aztec]\n\n";
-  c << endl;
+  c << std::endl;
   aztec_solver_list.showMe();
-  c << endl;
+  c << std::endl;
   aztec_precond_list.showMe();
-  c << endl;
+  c << std::endl;
   aztec_subdomain_solve_list.showMe();
-  c << endl;
+  c << std::endl;
   c << "to be completed...\n";
 }
 
-void DataAztec::dataAztecShowMe(ostream& c)
+void DataAztec::dataAztecShowMe(std::ostream& c)
 {
     c << "\n*** Values for data [aztec]\n\n";
-    c << "aztec_solver            = "<<aztec_solver<<" ("<<aztec_solver_str<< ")"<< endl;
-    c << "aztec_scaling           = "<<aztec_scaling<<" ("<<aztec_scaling_str<< ")"<< endl;
-    c << "aztec_precond           = "<<aztec_precond<<" ("<<aztec_precond_str<< ")"<< endl;
-    c << "aztec_tol               = " << aztec_tol << endl;
-    c << "aztec_conv              = "<<aztec_conv<<" ("<<aztec_conv_str<< ")"<< endl;
-    c << "aztec_output            = "<<aztec_output<<" ("<<aztec_output_str<< ")"<< endl;
-    c << "aztec_pre_calc          = " << aztec_pre_calc << endl;
-    c << "aztec_max_iter          = " << aztec_max_iter << endl;
-    c << "aztec_poly_ord          = " << aztec_poly_ord << endl;
-    c << "aztec_overlap           = " << aztec_overlap << endl;
-    c << "aztec_type_overlap      = " << aztec_type_overlap << endl;
-    c << "aztec_kspace            = " << aztec_kspace << endl;
-    c << "aztec_orthog            = " << aztec_orthog << endl;
-    c << "aztec_aux_vec           = " << aztec_aux_vec << endl;
-    c << "aztec_reorder           = " << aztec_reorder << endl;
-    c << "aztec_keep_info         = " << aztec_keep_info << endl;
-    c << "aztec_subdomain_solve   = "<<aztec_subdomain_solve
-      <<" ("<<aztec_subdomain_solve_str<< ")"<< endl;
-    c << "aztec_graph_fill        = " << aztec_graph_fill << endl;
-    c << "aztec_init_guess        = " << aztec_init_guess << endl;
-    c << "aztec_keep_kvecs        = " << aztec_keep_kvecs << endl;
-    c << "aztec_apply_kvecs       = " << aztec_apply_kvecs << endl;
-    c << "aztec_orth_kvecs        = " << aztec_orth_kvecs << endl;
-    c << "aztec_ignore_scaling    = " << aztec_ignore_scaling << endl;
-    c << "aztec_check_update_size = " << aztec_check_update_size << endl;
-    c << "aztec_drop              = " << aztec_drop << endl;
-    c << "aztec_ilut_fill         = " << aztec_ilut_fill<< endl;
-    c << "aztec_omega             = " << aztec_omega << endl;
-    c << "aztec_update_reduction  = " << aztec_update_reduction << endl;
+    c << "aztec_solver            = " << aztec_solver << " ("
+      << aztec_solver_str<< ")" << std::endl;
+    c << "aztec_scaling           = " << aztec_scaling << " (" 
+      << aztec_scaling_str << ")" << std::endl;
+    c << "aztec_precond           = " << aztec_precond << " (" 
+      << aztec_precond_str << ")" << std::endl;
+    c << "aztec_tol               = " << aztec_tol << std::endl;
+    c << "aztec_conv              = " << aztec_conv << " (" 
+      << aztec_conv_str << ")" << std::endl;
+    c << "aztec_output            = " << aztec_output << " (" 
+      << aztec_output_str << ")" << std::endl;
+    c << "aztec_pre_calc          = " << aztec_pre_calc << std::endl;
+    c << "aztec_max_iter          = " << aztec_max_iter << std::endl;
+    c << "aztec_poly_ord          = " << aztec_poly_ord << std::endl;
+    c << "aztec_overlap           = " << aztec_overlap << std::endl;
+    c << "aztec_type_overlap      = " << aztec_type_overlap << std::endl;
+    c << "aztec_kspace            = " << aztec_kspace << std::endl;
+    c << "aztec_orthog            = " << aztec_orthog << std::endl;
+    c << "aztec_aux_vec           = " << aztec_aux_vec << std::endl;
+    c << "aztec_reorder           = " << aztec_reorder << std::endl;
+    c << "aztec_keep_info         = " << aztec_keep_info << std::endl;
+    c << "aztec_subdomain_solve   = " << aztec_subdomain_solve
+      << " (" << aztec_subdomain_solve_str << ")" << std::endl;
+    c << "aztec_graph_fill        = " << aztec_graph_fill << std::endl;
+    c << "aztec_init_guess        = " << aztec_init_guess << std::endl;
+    c << "aztec_keep_kvecs        = " << aztec_keep_kvecs << std::endl;
+    c << "aztec_apply_kvecs       = " << aztec_apply_kvecs << std::endl;
+    c << "aztec_orth_kvecs        = " << aztec_orth_kvecs << std::endl;
+    c << "aztec_ignore_scaling    = " << aztec_ignore_scaling << std::endl;
+    c << "aztec_check_update_size = " << aztec_check_update_size << std::endl;
+    c << "aztec_drop              = " << aztec_drop << std::endl;
+    c << "aztec_ilut_fill         = " << aztec_ilut_fill << std::endl;
+    c << "aztec_omega             = " << aztec_omega << std::endl;
+    c << "aztec_update_reduction  = " << aztec_update_reduction << std::endl;
 }
 }

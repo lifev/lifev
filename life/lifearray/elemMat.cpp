@@ -144,13 +144,13 @@ ElemMat::ElemMat(UInt nNode1,UInt nbr1,UInt nbc1,
   }
 }
 
-void ElemMat::showMe(ostream& c)
+void ElemMat::showMe(std::ostream& c)
 {
   UInt i,j;
   for(i=0;i<_nBlockRow;i++){
     for(j=0;j<_nBlockCol;j++){
       c << "Block (" << i << "," << j <<"), ";
-      c << block(i,j) << endl;
+      c << block(i,j) << std::endl;
     }
   }
 }

@@ -66,7 +66,7 @@
 //more correct version
 typedef size_t  UInt;
 //original version
-typedef vector<UInt>::iterator UIIter;
+typedef std::vector<UInt>::iterator UIIter;
 #endif
 
 #ifndef _VEC_UNKNOWN_HH
@@ -75,7 +75,7 @@ typedef vector<UInt>::iterator UIIter;
 
 namespace LifeV
 {
-using namespace std;
+//using namespace std;
 
 
 /*---------------------------------------------------------------------------------/
@@ -86,7 +86,7 @@ void assemble_first(MatrixType& M,ElemMat& elmat,
 		    const FE1& fe1,const GeoMap& geo,const Dof& dof)
 {
   if(elmat.nBlockRow()!=1 || elmat.nBlockCol() != 1){
-    cout << "assemble for vector elem mat not yet implemented\n";
+    std::cout << "assemble for vector elem mat not yet implemented\n";
     exit(1);
   }
   Tab2dView mat=elmat.block(0,0);
@@ -106,7 +106,7 @@ void assemble_vec(Vector& V,ElemVec& elvec,const FE1& fe1,const GeoMap& geo,
 		  const Dof& dof)
 {
   if(elvec.nBlockRow()!=1){
-    cout << "assemble for vector elem vec not yet implemented\n";
+    std::cout << "assemble for vector elem vec not yet implemented\n";
     exit(1);
   }
   Tab1dView vec=elvec.block(0);

@@ -54,25 +54,25 @@ void MatMul(KNM_<R> & ab, KNM_<R> &  a, KNM_<R> & b){
 
 
 
-inline ostream & operator<<(ostream & f,const ShapeOfArray & s)
+inline std::ostream & operator<<(std::ostream & f,const ShapeOfArray & s)
   { f << s.n ;
     if(s.step != 1)
       f << ":" << s.step ;
     if (s.step*s.n  !=  s.next )
-      f << " n: " << setw(3) << s.next ;
+    f << " n: " << std::setw(3) << s.next ;
     f << ",";
      return f;
    };
 
-template<class R> ostream & operator<<(ostream & f,const KN_<const_R> & v)
+template<class R> std::ostream & operator<<(std::ostream & f,const KN_<const_R> & v)
   { //f <<  " KN_ : " << (ShapeOfArray) v << " "   <<  (const_R *) v << " :\n\t"  ;
     f << v.N() << "\t:\t" ;
     for (int i=0;i<v.N();i++)
-      cout   << setw(3) << v[i] << ((i % 10) == 9 ? "\n\t" : "\t");
+      std::cout   << std::setw(3) << v[i] << ((i % 10) == 9 ? "\n\t" : "\t");
      return f;
    };
 
-template<class R> ostream & operator<<(ostream & f,const KNM_<const_R> & v)
+template<class R> std::ostream & operator<<(std::ostream & f,const KNM_<const_R> & v)
   {  //f << " KNM_ "<<v.N()<<"x"<<v.M()<< ": " << (ShapeOfArray) v
      //<< " i "  << v.shapei
      // << " j "  << v.shapej
@@ -80,25 +80,25 @@ template<class R> ostream & operator<<(ostream & f,const KNM_<const_R> & v)
      f << v.N()<<'x'<<v.M() /*<< "  n" << v.next<<" :"<< v.shapei.next << "," << v.shapej.next */<< "\t:\n\t" ;
     for (int i=0;i<v.N();i++) {
       for (int j=0;j<v.M();j++)
-        cout << " " << setw(3) << v(i,j);
-       cout << "\n\t";}
+        std::cout << " " << std::setw(3) << v(i,j);
+       std::cout << "\n\t";}
   return f;
 
    };
 
-template<class R> ostream & operator<<(ostream & f,const KNMK_<const_R> & v)
+template<class R> std::ostream & operator<<(std::ostream & f,const KNMK_<const_R> & v)
   { //f << " KNM_" <<v.N()<<"x"<<v.M()<<"x"<<v.K()<< " : " << (ShapeOfArray) v
     // << " i "  << v.shapei
     // << " j "  << v.shapej
-    // << " k "  << v.shapek << endl;
+    // << " k "  << v.shapek << std::endl;
     // << " " << (void *) & v(0,0,0) << "\n\t" ;
    f << v.N()<< 'x' <<v.M()<< 'x'<<v.K() << "\t:\n\t" ;
   for (int i=0;i<v.shapei.n;i++){
     for (int j=0;j<v.shapej.n;j++){
       for (int k=0;k<v.shapek.n;k++)
-	cout << " " << setw(3) << v(i,j,k);
-      cout << "\n\t";}
-    cout << "\n\t";}
+	std::cout << " " << std::setw(3) << v(i,j,k);
+      std::cout << "\n\t";}
+    std::cout << "\n\t";}
   return f;
 
    };

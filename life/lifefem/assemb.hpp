@@ -409,7 +409,7 @@ void assemb_mat(Matrix& M, ElemMat& elmat, const LocalDofPattern& fe, const DOF&
 		const UInt feId, int iblock=0,int jblock=0)
 {
   //  if(elmat.nBlockRow()!=1 || elmat.nBlockCol() != 1){
-  //    cout << "assemble for vector elem mat not yet implemented\n";
+  //    std::cout << "assemble for vector elem mat not yet implemented\n";
   //    exit(1);
   //  }
   Tab2dView mat=elmat.block(iblock,jblock);
@@ -441,7 +441,7 @@ void assemb_mat_symm_lower(Matrix& M, ElemMat& elmat, const LocalDofPattern& fe,
 			   const DOF& dof, const UInt feId, int iblock=0,int jblock=0)
 {
   //  if(elmat.nBlockRow()!=1 || elmat.nBlockCol() != 1){
-  //    cout << "assemble for vector elem mat not yet implemented\n";
+  //    std::cout << "assemble for vector elem mat not yet implemented\n";
   //    exit(1);
   //  }
   Tab2dView mat=elmat.block(iblock,jblock);
@@ -450,8 +450,8 @@ void assemb_mat_symm_lower(Matrix& M, ElemMat& elmat, const LocalDofPattern& fe,
   UInt ig,jg;
   UInt eleId = feId; //! direct use of the fe identity number.
 
-  //  cout << " Lower case " << endl;
-  //  cout << mat << endl;
+  //  std::cout << " Lower case " << std::endl;
+  //  std::cout << mat << std::endl;
 
   //
   // diagonal
@@ -462,12 +462,12 @@ void assemb_mat_symm_lower(Matrix& M, ElemMat& elmat, const LocalDofPattern& fe,
     ig = dof.localToGlobal(eleId,i+1)-1+iblock*totdof;  // damned 1-base vs 0-base !
     jg = dof.localToGlobal(eleId,j+1)-1+jblock*totdof;  // damned 1-base vs 0-base !
     M.set_mat_inc(ig,jg,mat(i,j));
-    //    cout << mat(i,j)  << "\t";
+    //    std::cout << mat(i,j)  << "\t";
   }
   //
   // extra diagonal : Lower part.
   //
-  //  cout << "\nextra diag \nnbupper " <<  fe.nbUpper()  << endl;
+  //  std::cout << "\nextra diag \nnbupper " <<  fe.nbUpper()  << std::endl;
   for( k = fe.nbDiag() ; k < fe.nbDiag() + fe.nbUpper() ; k ++ ){   //! instead of currentFE::nbUpper
     j = fe.patternFirst(k);   //! transpose of upper -> lower CAUTION: TESTED ONLY WITH THE STANDARD PATTERN...
     i = fe.patternSecond(k);  //! transpose of upper -> lower
@@ -475,7 +475,7 @@ void assemb_mat_symm_lower(Matrix& M, ElemMat& elmat, const LocalDofPattern& fe,
     jg = dof.localToGlobal(eleId,j+1)-1+jblock*totdof;  // damned 1-base vs 0-base !
     M.set_mat_inc(ig,jg,mat(i,j));
     M.set_mat_inc(jg,ig,mat(i,j));
-    //    cout << mat(i,j)  << "\t";
+    //    std::cout << mat(i,j)  << "\t";
   }
 }
 
@@ -492,7 +492,7 @@ void assemb_mat_symm_upper(Matrix& M, ElemMat& elmat, const LocalDofPattern& fe,
 			   const DOF& dof, const UInt feId, int iblock=0,int jblock=0)
 {
   //  if(elmat.nBlockRow()!=1 || elmat.nBlockCol() != 1){
-  //    cout << "assemble for vector elem mat not yet implemented\n";
+  //    std::cout << "assemble for vector elem mat not yet implemented\n";
   //    exit(1);
   //  }
   Tab2dView mat=elmat.block(iblock,jblock);
@@ -501,7 +501,7 @@ void assemb_mat_symm_upper(Matrix& M, ElemMat& elmat, const LocalDofPattern& fe,
   UInt ig,jg;
   UInt eleId = feId; //! direct use of the fe identity number.
 
-  //  cout << " Upper case " << endl;
+  //  std::cout << " Upper case " << std::endl;
 
   //
   // diagonal
@@ -706,19 +706,19 @@ assemb_vec( Vector& V, ElemVec& elvec, const LocalDofPattern& fe, const DOF& dof
 	    const UInt feId, int iblock)
 {
   //  if(elvec.nBlockRow()!=1){
-  //    cout << "assemble for vector elem vec not yet implemented\n";
+  //    std::cout << "assemble for vector elem vec not yet implemented\n";
   //    exit(1);
   //  }
   UInt totdof = dof.numTotalDof();
   Tab1dView vec=elvec.block(iblock);
   int i;
-  //  cout << "in assemb_vec" << endl;
+  //  std::cout << "in assemb_vec" << std::endl;
   UInt ig;
   //  UInt eleId = feId;  //simplify.
   for(i=0 ; i<fe.nbLocalDof ; i++){    //! instead of CurrentFE::nbNode
     ig = dof.localToGlobal(feId,i+1) - 1+iblock*totdof;
-    //    cout << "i= " << i << endl;
-    //    cout << "ig= " << ig << endl;
+    //    std::cout << "i= " << i << std::endl;
+    //    std::cout << "ig= " << ig << std::endl;
     V[ig] += vec(i);
   }
 };
@@ -736,19 +736,19 @@ extract_vec( Vector& V, ElemVec& elvec, const LocalDofPattern& fe, const DOF& do
 	     const UInt feId, int iblock)
 {
   //  if(elvec.nBlockRow()!=1){
-  //    cout << "assemble for vector elem vec not yet implemented\n";
+  //    std::cout << "assemble for vector elem vec not yet implemented\n";
   //    exit(1);
   //  }
 
   UInt totdof   = dof.numTotalDof();
   Tab1dView vec = elvec.block(iblock);
   int i;
-  //  cout << "in assemb_vec" << endl;
+  //  std::cout << "in assemb_vec" << std::endl;
   UInt ig;
   for(i=0 ; i<fe.nbLocalDof ; i++){
     ig = dof.localToGlobal(feId,i+1) - 1+iblock*totdof;
-    //    cout << "i= " << i << endl;
-    //    cout << "ig= " << ig << endl;
+    //    std::cout << "i= " << i << std::endl;
+    //    std::cout << "ig= " << ig << std::endl;
     vec(i) = V[ig];
   }
 };

@@ -18,7 +18,7 @@
 */
 /*! file geoElement.h
 \brief Geometric elements
-\version $Revision: 1.4 $ Luca Formaggia
+\version $Revision: 1.5 $ Luca Formaggia
 
   Introduces all the geometric elements
 */
@@ -33,7 +33,7 @@
 
 namespace LifeV
 {
-using namespace std; //Pretty useless
+//using namespace std; //Pretty useless
 
 //     *********** Geometrical Elements *****************
 //! \defgroup GeoEle Geometry Element classes

@@ -20,7 +20,7 @@
 
 namespace LifeV
 {
-BdfNS::BdfNS(const UInt n):_bdf_u(n),_bdf_p(max((UInt)1,n-1))
+BdfNS::BdfNS(const UInt n):_bdf_u(n),_bdf_p(std::max((UInt)1,n-1))
 {}
 
 Bdf& BdfNS::bdf_u()

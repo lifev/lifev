@@ -191,13 +191,13 @@ ElasticStructureHandler<Mesh>::currentFE() {
 // Postprocessing
 template<typename Mesh>  void
 ElasticStructureHandler<Mesh>::postProcess() {
-  ostringstream index;
-  string name, namedef;
+  std::ostringstream index;
+  std::string name, namedef;
 
   ++_count;
 
   if (fmod(float(_count),float(_verbose)) == 0.0) {
-    cout << "  o-  Post-processing \n";
+    std::cout << "  o-  Post-processing \n";
     index << (_count/_verbose);
 
     switch( index.str().size() ) {

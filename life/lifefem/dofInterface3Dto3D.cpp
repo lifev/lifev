@@ -47,7 +47,7 @@ bool coincide(const KN_<Real>& v1, const KN_<Real>& v2, const Real& tol) {
   Real sumDif=0.;
 
   for (UInt i=0; i<nDimensions; ++i)
-    sumDif += abs(v1[i]-v2[i]);
+    sumDif += fabs(v1[i]-v2[i]);
 
   if (sumDif <= tol )
     return true;
@@ -59,7 +59,7 @@ bool coincide(const KN_<Real>& v1, const KN_<Real>& v2, const Real& tol) {
 //! Returns true if points (x1,y1,z1) and (x2,y2,z2) are equal with respect to the tolerance tol
 bool coincide(const Real& x1, const Real& y1, const Real& z1, const Real& x2, const Real& y2, const Real& z2, const Real& tol) {
 
-  Real sumDif = abs(x1-x2) +  abs(y1-y2) + abs(z1-z2);
+  Real sumDif = fabs(x1-x2) +  fabs(y1-y2) + fabs(z1-z2);
 
   if (sumDif <= tol )
     return true;

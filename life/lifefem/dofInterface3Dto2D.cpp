@@ -81,7 +81,7 @@ void DofInterface3Dto2D::ClearLists(){
 //! This is a simple algorithm... Find out something better some day...?
 ID  DofInterface3Dto2D::_Vtx3Dto2D( const ID& idpoint3D ) const {
   ASSERT_PRE(_finalized, "The list of vertices must be finalized before accessing to the interface vertices." );
-  for (list< pair<ID,ID> >::const_iterator it = _vertexList.begin(); it!=_vertexList.end(); ++it) {
+  for (std::list< std::pair<ID,ID> >::const_iterator it = _vertexList.begin(); it!=_vertexList.end(); ++it) {
     if ( it->first == idpoint3D )
       return  it->second;
   }
@@ -97,7 +97,7 @@ std::ostream& DofInterface3Dto2D::showMe2D(bool verbose, std::ostream& out) cons
   if ( verbose ){
     unsigned int count(0),lines(10);
     out << "\tList of connections between Faces: (global, local)";
-    for (vector< pair<ID,ID> >::const_iterator i=_faceList.begin(); i != _faceList.end(); ++i) {
+    for (std::vector< std::pair<ID,ID> >::const_iterator i=_faceList.begin(); i != _faceList.end(); ++i) {
       if (count++ % lines ==0){
 	out << std::endl;
       }
@@ -109,7 +109,7 @@ std::ostream& DofInterface3Dto2D::showMe2D(bool verbose, std::ostream& out) cons
   if ( verbose ){
     unsigned int count(0),lines(10);
     out << "\tList of connections between Vertices: (global, local)";
-    for (list< pair<ID,ID> >::const_iterator it = _vertexList.begin(); it!=_vertexList.end(); ++it) {
+    for (std::list< std::pair<ID,ID> >::const_iterator it = _vertexList.begin(); it!=_vertexList.end(); ++it) {
       if (count++ % lines ==0){
 	out << std::endl;
       }
@@ -127,24 +127,24 @@ std::ostream& DofInterface3Dto2D::showMe2D(bool verbose, std::ostream& out) cons
 
 
 //! useful function to sort a list and remove multiple numbers.
-void RemoveMultiple(const list<ID> & list0, list< pair<ID,ID> > & listf){
+void RemoveMultiple(const std::list<ID> & list0, std::list< std::pair<ID,ID> > & listf){
 
   ID counter = 1;
-  list<ID> tmplist(list0);
+  std::list<ID> tmplist(list0);
 
   //! Sort the list
   tmplist.sort();
 
   //! initialize the new list
-  pair <ID,ID>  p0( tmplist.front() , counter );
+  std::pair <ID,ID>  p0( tmplist.front() , counter );
   listf.push_back( p0 );
 
   //! We remove the multiple occurences :
-  for (list<ID>::iterator it = tmplist.begin() ;  it !=tmplist.end() ; ++ it ){
+  for (std::list<ID>::iterator it = tmplist.begin() ;  it !=tmplist.end() ; ++ it ){
     if ( (*it) != listf.back().first ){
       counter ++ ;
       //! Add to the list the new value
-      pair <ID,ID>  p( (*it) , counter );
+      std::pair <ID,ID>  p( (*it) , counter );
       listf.push_back( p );
     }
   }

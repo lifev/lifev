@@ -35,7 +35,7 @@
 
 namespace LifeV
 {
-using namespace std;
+//using namespace std;
 
 class DofInterfaceHandler{
 
@@ -120,28 +120,28 @@ class DofInterfaceHandler{
   const UInt _nbNeigh; //!< number of neighbors
 
   //! list of DofInterface3Dto2D (each one lives on one interface)
-  vector< DofInterface3Dto2D > _neighList;
+  std::vector< DofInterface3Dto2D > _neighList;
 
   //! list of INPUT Vectors that live on the interfaces (one per interface)
   //! INPUT interface Boundary Conditions values.
   //! (This is the vector of unknows that lives on the interfaces of the
   //! current subdomain in a domain decomposition method).
   //! It is also the vector that contains the interface boundary conditions data.
-  vector< Vector > _InIBCList;
+  std::vector< Vector > _InIBCList;
 
   //! list of OUTPUT Vectors that live on the interfaces (one per interface)
   //! OUTPUT interface Boundary Conditions values.
   //! (This is the vector of unknows that live on the interfaces of the
   //! current subdomain in a domain decomposition method).
-  vector< Vector > _OutIBCList;
+  std::vector< Vector > _OutIBCList;
 
   //! list of classes of BCVector_Interface (one per interface)
-  vector< BCVector_Interface > _bcvList;
+  std::vector< BCVector_Interface > _bcvList;
 
   //! map between the index number (second) in the vectors
   //!  (_neighList, _InIBCList ...)
   //!  and its reference interface number (first).
-  map<Int, UInt> _indexInterfRefMap;
+  std::map<Int, UInt> _indexInterfRefMap;
 
 };
 }

@@ -136,7 +136,7 @@ void DarcySolver::postProcessPressureQ1()
   aztecSolveLinearSyst(A_q1,p_q1.giveVec(),f_q1.giveVec(),p_q1.size(),
 		       pattA_q1,options,params);
   //
-  string vtkname,bbname;
+  std::string vtkname,bbname;
   /*
   char str_iter[10],str_time[10];
   static int iter_post=0;

@@ -31,10 +31,10 @@ class ElemMat
   Tab2d _mat; // the array
   UInt _nBlockRow; // number of block rows
   UInt _nBlockCol; // number of block columns
-  vector<UInt> _nRow; // _nRow[i]=nb of rows in the i-th block row
-  vector<UInt> _firstRow;//_firstRow[i]=index of first row of i-th block row
-  vector<UInt> _nCol; // _nCol[i]=nb of col in the i-th block col
-  vector<UInt> _firstCol;//_firstCol[i]=index of first col of i-th block col
+  std::vector<UInt> _nRow; // _nRow[i]=nb of rows in the i-th block row
+  std::vector<UInt> _firstRow;//_firstRow[i]=index of first row of i-th block row
+  std::vector<UInt> _nCol; // _nCol[i]=nb of col in the i-th block col
+  std::vector<UInt> _firstCol;//_firstCol[i]=index of first col of i-th block col
 public:
   ~ElemMat();
   ElemMat(UInt nNode1,UInt nbr1,UInt nbc1);// constructor for 1 finite element
@@ -51,7 +51,7 @@ public:
     return _mat(SubArray(_nRow[i],_firstRow[i]),
 		SubArray(_nCol[j],_firstCol[j]));}
   inline void zero(){_mat = 0;};
-  void showMe(ostream& c=cout);
+  void showMe(std::ostream& c=std::cout);
 };
 }
 #endif

@@ -55,7 +55,7 @@ int picard(Oper* f,Norm& norm, Vector& fx1,Vector& fx0,
   x1 = fx0; // the first iteration is not relaxed
   double normRes = norm(fx0 - x0);
   double stop_tol = abstol + reltol*normRes;
-  string methodName;
+  std::string methodName;
   switch (method){
   case 0:
     methodName = "constant relaxation";
@@ -67,18 +67,18 @@ int picard(Oper* f,Norm& norm, Vector& fx1,Vector& fx0,
     methodName = "Irons & Tuck";
     break;
   default:
-    cout << "Unknown Picard method\n";
+    std::cout << "Unknown Picard method\n";
     exit(1);
   }
-  cout << "--------------------------=----------------------------------------"
-       << endl;
-  cout << "    Picard 1 : residual=" << normRes << ", stoping tolerance = "
-       << stop_tol << endl;
-  cout << "-------------------------------------------------------------------"
-       << endl;
+  std::cout << "--------------------------=----------------------------------------"
+       << std::endl;
+  std::cout << "    Picard 1 : residual=" << normRes << ", stoping tolerance = "
+       << stop_tol << std::endl;
+  std::cout << "-------------------------------------------------------------------"
+       << std::endl;
   if(normRes <= stop_tol){
     // the algorithm has converged in 1 iteration without relaxation
-    cout << "--- Picard : convergence in 1 iteration\n\n";
+    std::cout << "--- Picard : convergence in 1 iteration\n\n";
     maxit = iter;
     return 0;
   }
@@ -109,12 +109,12 @@ int picard(Oper* f,Norm& norm, Vector& fx1,Vector& fx0,
       omega =  1 - mu;
       break;
     }
-    cout << "-----------------------------------------------------------------"
-	 << endl;
-    cout <<  "Picard " << iter  << " ( " << methodName
-	 << ") " << "omega=" << omega <<", residual=" << normRes <<  endl;
-    cout << "-----------------------------------------------------------------"
-	 << endl;
+    std::cout << "-----------------------------------------------------------------"
+	 << std::endl;
+    std::cout <<  "Picard " << iter  << " ( " << methodName
+	 << ") " << "omega=" << omega <<", residual=" << normRes <<  std::endl;
+    std::cout << "-----------------------------------------------------------------"
+	 << std::endl;
     iter++;
     // save the old iterate
     fx0 = fx1;
@@ -126,11 +126,11 @@ int picard(Oper* f,Norm& norm, Vector& fx1,Vector& fx0,
     normRes = norm(fx1 - x1);
   }
   if(normRes>stop_tol){
-    cout << "!!! picard: convergence fails" << endl;
+    std::cout << "!!! picard: convergence fails" << std::endl;
     maxit = iter;
     return 1;
   }
-  cout << "--- picard: convergence in " << iter << " iterations\n\n";
+  std::cout << "--- picard: convergence in " << iter << " iterations\n\n";
   maxit = iter;
   return 0;
 }

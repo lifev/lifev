@@ -71,15 +71,15 @@ void lineSearch_cubic(Fct& f,Norm& norm, Vector& residual,Vector& sol,Vector& st
         iter_linesearch++;
         lambda *= 2;
         sol = sol_cur + lambda * step;
-        cout << "--- line search (extrapolation, Goldstein rule)" << endl;
+        std::cout << "--- line search (extrapolation, Goldstein rule)" << std::endl;
         f.evalResidual(residual,sol,iter);
-        cout << "    line search iter : " << iter_linesearch << " residual test = "
-             << normRes_test << ", lambda = " << lambda << endl;
+        std::cout << "    line search iter : " << iter_linesearch << " residual test = "
+             << normRes_test << ", lambda = " << lambda << std::endl;
         normRes_test = norm(residual);
         ftest = 0.5 * normRes_test * normRes_test;
     }
     if(iter_linesearch == max_linesearch){
-        cout << "line search: too many extrapolations" << endl;
+        std::cout << "line search: too many extrapolations" << std::endl;
         exit(1);
     }
     lambda_old = lambda;
@@ -119,15 +119,15 @@ void lineSearch_cubic(Fct& f,Norm& norm, Vector& residual,Vector& sol,Vector& st
             lambda = lambda_tmp;
         //--
         sol = sol_cur + lambda * step;
-        cout << "--- line search (cubic interpolation, Armijo rule)" << endl;
+        std::cout << "--- line search (cubic interpolation, Armijo rule)" << std::endl;
         f.evalResidual(residual,sol,iter);
         normRes_test = norm(residual);
-        cout << "    line search iter : " << iter_linesearch << " residual test = "
-             << normRes_test << ", lambda = " << lambda << endl;
+        std::cout << "    line search iter : " << iter_linesearch << " residual test = "
+             << normRes_test << ", lambda = " << lambda << std::endl;
         ftest = 0.5 * normRes_test * normRes_test;
     }
     if(iter_linesearch == max_linesearch){
-        cout << "line search: too many interpolations" << endl;
+        std::cout << "line search: too many interpolations" << std::endl;
         exit(1);
     }
     normRes = normRes_test;

@@ -39,7 +39,7 @@ namespace LifeV
 /*! \class PhysVectUnknown
   vector unknown which has the dimension of the physical domain
    The type VectorType could be a Vector, or a VectorBlock or a
-   vector<double> depending on the choice of the linear system solver and
+   std::vectordouble> depending on the choice of the linear system solver and
    on the case of scalar or vectorial problem
 */
 template<typename VectorType>
@@ -85,7 +85,7 @@ public:
 /*! \class ScalUnknown
    scalar unknown of dimension=1
    The type VectorType could be a Vector, or a VectorBlock or a
-   vector<double> depending on the choice of the linear system solver and
+   std::vectordouble> depending on the choice of the linear system solver and
    on the case of scalar or vectorial problem
 */
 template<typename VectorType>
@@ -130,7 +130,7 @@ public:
 /*! \class GenericVecHdl
    vector problem handler
    The type VectorType could be a Vector, or a VectorBlock or a
-   vector<double> depending on the choice of the linear system solver and
+   std::vectordouble> depending on the choice of the linear system solver and
    on the case of scalar or vectorial problem
 */
 template<typename VectorType>
@@ -175,7 +175,7 @@ public:
 	    __super = __val;
 	    return *this;
 	}
-  
+
     GenericVecHdl& operator=( VectorType const& __v )
 	{
 	    if ( this == &__v )
@@ -214,10 +214,10 @@ class Vector
   Vector():_v(0){}   //!< Default constructor we need for IML++
   Vector(Vector const &ex_v):_v(ex_v.v()){}
   Vector(UInt n):_v((int)n){_v= 0.0;}
-  void showMe(ostream& c=cout) const
+  void showMe(std::ostream& c=std::cout) const
   {
     c << _v ;
-    c << endl;
+    c << std::endl;
   }
   inline Tab1dView v() const {return _v;}
   inline UInt size() const {return _v.size();}
@@ -292,7 +292,7 @@ class VectorBlock
       _v.resize(n,bloc);
     }
   VectorBlock(VectorBlock const &ex_v){*this = ex_v;}
-  inline vector<Tab1d> v() const {return _v;}
+    inline std::vector<Tab1d> v() const {return _v;}
   inline UInt size() const {return _v.size();}
   //operators
   inline VectorBlock & operator=(VectorBlock const &ex_v)
@@ -308,7 +308,7 @@ class VectorBlock
     }
   inline VectorBlock operator=(double const val)
     {
-      for (vector<Tab1d>::iterator ip=_v.begin(); ip < _v.end(); ip++)
+        for (std::vector<Tab1d>::iterator ip=_v.begin(); ip < _v.end(); ip++)
 	*ip=val;
       return *this;
     }

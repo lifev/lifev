@@ -50,7 +50,7 @@ class DataConvDiffReact:public DataMesh<Mesh>,public DataTime {
   DataConvDiffReact(const GetPot& dfile);
 
   //! Ouptut
-  void showMe(ostream& c=cout);
+  void showMe(std::ostream& c=std::cout);
   //! Diffusivity
   Real diffusivity() const;
   //! Reaction coefficient
@@ -64,8 +64,8 @@ class DataConvDiffReact:public DataMesh<Mesh>,public DataTime {
   //! Physics
   Real _diffusivity; // Diffusivity
   Real _react; // Reaction coefficient
-  Real _inittime; // initialisation time 
-  Real _endtime; // end time 
+  Real _inittime; // initialisation time
+  Real _endtime; // end time
   int _stationary; // switch stationary/instationary calculation
 };
 
@@ -93,7 +93,7 @@ DataConvDiffReact(const GetPot& dfile):
 // Output
 template <typename Mesh>
 void DataConvDiffReact<Mesh>::
-showMe(ostream& c)
+showMe(std::ostream& c)
 {
   // physics
   c << "\n*** Values for data [masstransport/physics]\n\n";

@@ -20,77 +20,80 @@
 
 namespace LifeV
 {
-void wr_vtk_ascii_scalar(string fname, string name, Real* U, int Usize,
-			 string look_up_table)
+void wr_vtk_ascii_scalar(std::string fname, std::string name, Real* U,
+                         int Usize,
+			 std::string look_up_table)
 {
  int i,j;
- ofstream ofile(fname.c_str(),ios::app);
+ std::ofstream ofile(fname.c_str(),std::ios::app);
 
  ASSERT(ofile,"Error: Output file cannot be open");
 
- ofile << "SCALARS " << name << " " << "float " << "1" << endl;
- ofile << "LOOKUP_TABLE " << look_up_table << endl;
+ ofile << "SCALARS " << name << " " << "float " << "1" << std::endl;
+ ofile << "LOOKUP_TABLE " << look_up_table << std::endl;
 
  for (i=0;i<Usize;++i)
-  ofile << U[i] << endl;
+  ofile << U[i] << std::endl;
 
  if (look_up_table!="default")
    {
-    ofile << "LOOKUP_TABLE " << look_up_table << " " << Usize << endl;
-    ifstream lutfile(look_up_table.c_str());
+    ofile << "LOOKUP_TABLE " << look_up_table << " " << Usize << std::endl;
+    std::ifstream lutfile(look_up_table.c_str());
     ASSERT(lutfile,"Error: LookUp Table  file cannot be open");
     // assert
     Real r,g,b,a;
     for (j=0;j<Usize;++j){
      lutfile >> r >> g >> b >> a;
-     ofile << r << " " << g << " " << b << " " << a << endl;
+     ofile << r << " " << g << " " << b << " " << a << std::endl;
     }
    }
 }
-void wr_vtk_ascii_vector(string fname, string name, Real* U, int Usize)
+void wr_vtk_ascii_vector(std::string fname, std::string name, Real* U,
+                         int Usize)
 {
  int i,j;
- ofstream ofile(fname.c_str(),ios::app);
+ std::ofstream ofile(fname.c_str(),std::ios::app);
  int nbcomp = 3;
 
  ASSERT(ofile,"Error: Output file cannot be open");
 
 
- ofile << "VECTORS " << name << " " << "float " << endl;
+ ofile << "VECTORS " << name << " " << "float " << std::endl;
  for (i=0;i< Usize/nbcomp; ++i){
      for (j=0; j<nbcomp; j++)
        ofile << U[i+j*Usize/nbcomp] << " ";
-     ofile << endl;
+     ofile << std::endl;
    }
 }
 
 //----------------------------------------------------------------------
 // obsolete ?
-void wr_vtk_ascii_scalar(string fname, string name, vector<Real> U, string look_up_table)
+void wr_vtk_ascii_scalar(std::string fname, std::string name,
+                         std::vector<Real> U, std::string look_up_table)
 {
  unsigned int i,j;
- ofstream ofile(fname.c_str(),ios::app);
+ std::ofstream ofile(fname.c_str(),std::ios::app);
 
  ASSERT(ofile,"Error: Output file cannot be open");
 
 
- ofile << "POINT_DATA " << U.size() << endl;
- ofile << "SCALARS " << name << " " << "float " << "1" << endl;
- ofile << "LOOKUP_TABLE " << look_up_table << endl;
+ ofile << "POINT_DATA " << U.size() << std::endl;
+ ofile << "SCALARS " << name << " " << "float " << "1" << std::endl;
+ ofile << "LOOKUP_TABLE " << look_up_table << std::endl;
 
  for (i=0;i<U.size();++i)
-  ofile << U[i] << endl;
+  ofile << U[i] << std::endl;
 
  if (look_up_table!="default")
    {
-    ofile << "LOOKUP_TABLE " << look_up_table << " " << U.size() << endl;
-    ifstream lutfile(look_up_table.c_str());
+    ofile << "LOOKUP_TABLE " << look_up_table << " " << U.size() << std::endl;
+    std::ifstream lutfile(look_up_table.c_str());
     ASSERT(lutfile,"Error: LookUp Table  file cannot be open");
     // assert
     Real r,g,b,a;
     for (j=0;j<U.size();++j){
      lutfile >> r >> g >> b >> a;
-     ofile << r << " " << g << " " << b << " " << a << endl;
+     ofile << r << " " << g << " " << b << " " << a << std::endl;
     }
    }
 }

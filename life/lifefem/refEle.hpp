@@ -56,7 +56,7 @@ protected:
   const Fct*  _d2Phi;//!< pointer on the second derivatives of the basis functions
   const Real* _refCoor;//!< reference coordinates. Order: xi_1,eta_1,zeta_1,xi_2,eta_2,zeta_2,...
 public:
-  const string name; //!< name of the reference element
+  const std::string name; //!< name of the reference element
   const ReferenceShapes shape; //!< geometrical shape of the element
   const int nbDof;   //!< Total number of degrees of freedom
   const int nbCoor;  //!< Number of local coordinates
@@ -73,8 +73,9 @@ private:
   KN<int> _idxD2Quad;//!< _idxD2Quad[t] = index of the quadrature rules of id t in _d2PhiQuad
 public:
   //! constructor
-  RefEle(string _name,ReferenceShapes _shape,int _nbDof,int _nbCoor,const Fct* phi,const Fct* dPhi,
-	 const Fct* d2Phi,const Real* _refCoor,const SetOfQuadRule& sqr);
+  RefEle(std::string _name, ReferenceShapes _shape, int _nbDof, int _nbCoor,
+         const Fct* phi, const Fct* dPhi,
+         const Fct* d2Phi, const Real* _refCoor, const SetOfQuadRule& sqr);
   ~RefEle();
   //! return the first local coordinate of the i-th node of the reference element
   inline Real xi(int i) const {
@@ -553,9 +554,9 @@ static const Fct der2fct_Q2_2D[36] =
 //                            P0  (3D)
 //
 //======================================================================
-/*                 
-                
-               / .  
+/*
+
+               / .
               /  \.
              /  . \\
             / . 1  \\

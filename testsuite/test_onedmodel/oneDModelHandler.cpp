@@ -84,9 +84,9 @@ void OneDModelHandler::initialize(const Function& c0, Real t0, Real dt)
 void OneDModelHandler::initialize(const std::string & vname)
 {
 
-  std::fstream Resfile(vname.c_str(),ios::in | ios::binary);
+  std::fstream Resfile(vname.c_str(),std::ios::in | std::ios::binary);
   if (Resfile.fail()) {
-    std::cerr<<" Error in initialize: File not found or locked"<<std::endl; 
+    std::cerr<<" Error in initialize: File not found or locked"<<std::endl;
     abort();
   }
   Resfile.read((char*)&_M_U1_initial(1),_M_U1_initial.size()*sizeof(Real));

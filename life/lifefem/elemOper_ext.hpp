@@ -63,7 +63,7 @@ public:
   }
 
 private:
-  vector<vector<A> > m;
+  std::vector<std::vector<A> > m;
 };
 
 typedef Tensor<Function*> FTens;
@@ -104,8 +104,8 @@ class VMass {
   // CHIEDRE AD ALAIN per quanto segue
   // For the VBR Pattern (Aztec): operator returns the single component of the local matrix
   // (for each quadrature node) which is a _ncomp*_ncomp vector organized as in the inner comment
-  vector<Real>  operator()(int i, int j, int iq, Real x, Real y, Real z)
-    { vector<Real> v(_ncomp*_ncomp);
+  std::vector<Real>  operator()(int i, int j, int iq, Real x, Real y, Real z)
+    { std::vector<Real> v(_ncomp*_ncomp);
     for (int jc=1;jc<=_ncomp;++jc){
       for (int ic=1;ic<=_ncomp;++ic)
        {
@@ -183,8 +183,8 @@ class VStiff {
  // CHIEDERE AD ALAIN per quanto segue
   // For the VBR Pattern (Aztec): operator returns the single component of the local matrix
   // (for each quadtarure node) which is a _ncomp*_ncom vector organized as in the inner comment
-  vector<Real>  operator()(int i, int j, int iq, Real x, Real y, Real z)
-    { vector<Real> v(_ncomp*_ncomp);
+  std::vector<Real>  operator()(int i, int j, int iq, Real x, Real y, Real z)
+    { std::vector<Real> v(_ncomp*_ncomp);
     for (int jc=1;jc<=_ncomp;++jc){
       for (int ic=1;ic<=_ncomp;++ic)
        {
@@ -351,7 +351,7 @@ class EOBinOp{
  public:
   EOBinOp(const A& a, const B& b):_a(a),_b(b)
     {
-      //     if (a.nc()!=b.nc()) {cerr << "Error: you can't compose differential operators with different components"<<endl; exit(1);}
+      //     if (a.nc()!=b.nc()) {std::cerr << "Error: you can't compose differential operators with different components"<<std::endl; exit(1);}
       //     _ncomp=a.nc();
     };
 
@@ -806,7 +806,7 @@ class HMStab
 {
 public:
 
-  HMStab<OLS,OLSS,FCT,MESH>(OLS& ols,OLSS& olss,FCT& fct,MESH& Me,CurrentFE* fe,Real& Mu,int& Ro,vector<double>& Tv);
+  HMStab<OLS,OLSS,FCT,MESH>(OLS& ols,OLSS& olss,FCT& fct,MESH& Me,CurrentFE* fe,Real& Mu,int& Ro,std::vector<double>& Tv);
 
   void updateLocalElement();
 
@@ -845,7 +845,7 @@ private:
   Real _Mu;				// Diffusione (inizializzata dal costruttore)
   int _Cn;				// Contatore tetredri (inizializzata dal costruttore a 1)
 
-  vector<double> _Tv;	        // Vettore componenti trasporto (costruttore)
+  std::vector<double> _Tv;	        // Vettore componenti trasporto (costruttore)
 
   int _C[4][3];			// Matrice connessione del tetraedro (inizializzata dal costruttore)
   Real _Vcoor[4][3];		// Coordinate dei vertici del tetraedro
@@ -861,7 +861,7 @@ private:
 // inline HMStab<OLS,OLSS,FCT>::HMStab(OLS& ols,OLSS& olss,FCT& fct,int Ro)
 //---------------------------------------------------------------------------------------------------------------------------
 template<typename OLS,typename OLSS,typename FCT,typename MESH>
-inline HMStab<OLS,OLSS,FCT,MESH>::HMStab(OLS& ols,OLSS& olss,FCT& fct,MESH& Me,CurrentFE* fe,Real& Mu,int& Ro,vector<double>& Tv):_ols(ols),_olss(olss),_fct(fct),_Me(Me),_fe(fe) //,_Tv(Tv), _Mu(Mu),_Ro(Ro),_V(0.0) ,_T(0.),_S(0.0) ,_Delta(Delta),_At(0.0) ,_Pe(0.0) ,_Cn(1)
+inline HMStab<OLS,OLSS,FCT,MESH>::HMStab(OLS& ols,OLSS& olss,FCT& fct,MESH& Me,CurrentFE* fe,Real& Mu,int& Ro,std::vector<double>& Tv):_ols(ols),_olss(olss),_fct(fct),_Me(Me),_fe(fe) //,_Tv(Tv), _Mu(Mu),_Ro(Ro),_V(0.0) ,_T(0.),_S(0.0) ,_Delta(Delta),_At(0.0) ,_Pe(0.0) ,_Cn(1)
 {
         _Cn=1;   _Pe=0.0;  _At=0.0;  _Delta=0.0; _S=0.0;     _T=0.0;
         _V=0.0;  _Ro=Ro;   _Mu=Mu;   _Tv=Tv;      int i=0;   int j=0;
@@ -915,7 +915,7 @@ inline void HMStab<OLS,OLSS,FCT,MESH>::updateLocalElement()
 
 	 _fe->updateJac(_Me.volumeList(_Cn));
 	 _V = _fe->measure();
-	 //cout << "Volume " << _V << endl;
+	 //std::cout << "Volume " << _V << std::endl;
 
 	 for (j=1;j<5;j++)
 	   {
@@ -988,8 +988,8 @@ inline void HMStab<OLS,OLSS,FCT,MESH>::updateLocalElement()
 
 	// Calcolo il numero di Peclet:
 	_Pe=(_T*_S)/(2*_Mu);
-	//	cout <<  " valeur du numero de Peclet :  " <<  _Pe << endl;
-	//cout << endl << "Peclet " << _Pe ;
+	//	std::cout <<  " valeur du numero de Peclet :  " <<  _Pe << std::endl;
+	//std::cout << std::endl << "Peclet " << _Pe ;
 
 	// Assegno il valore del parametro di stabilizzazione:
 	if(_Pe>=1)
@@ -997,7 +997,7 @@ inline void HMStab<OLS,OLSS,FCT,MESH>::updateLocalElement()
 	else
 	  _Delta=0;
 	_Cn++;
-	//	cout <<  " valeur de delta :  " <<  _Delta << endl;
+	//	std::cout <<  " valeur de delta :  " <<  _Delta << std::endl;
 }
 
 
@@ -1010,7 +1010,7 @@ class StabUP
 {
 public:
 
-  StabUP<STIFF,MESH>(STIFF& stiff,MESH& Me,CurrentFE* fe,vector<double>& Tv);
+  StabUP<STIFF,MESH>(STIFF& stiff,MESH& Me,CurrentFE* fe,std::vector<double>& Tv);
 
   void updateLocalElementUP();
 
@@ -1021,7 +1021,7 @@ public:
 	  updateLocalElementUP();
 	}
       //return (0.0);
-     // cout << _S << " " << _T << endl;
+     // std::cout << _S << " " << _T << std::endl;
       return (_S*_T*_stiff(i,j,ig,x,y,z));
       //return ( 0.12*0.042265*_stiff(i,j,ig,x,y,z));
     }
@@ -1038,7 +1038,7 @@ private:
 
   int _Cn;				// Contatore tetredri (inizializzata dal costruttore a 1)
 
-  vector<double> _Tv;	        // Vettore componenti trasporto (costruttore)
+  std::vector<double> _Tv;	        // Vettore componenti trasporto (costruttore)
 
   int _C[4][3];			// Matrice connessione del tetraedro (inizializzata dal costruttore)
   Real _Vcoor[4][3];		// Coordinate dei vertici del tetraedro
@@ -1055,7 +1055,7 @@ private:
 // inline StabUP<OLS,OLSS,FCT>::StabUP(OLS& ols,OLSS& olss,FCT& fct,int Ro)
 //-----------------------------------------------------------------------------------------------------------------
 template<typename STIFF,typename MESH>
-inline StabUP<STIFF,MESH>::StabUP (STIFF& stiff,MESH& Me,CurrentFE* fe ,vector<double>& Tv):_stiff(stiff),_Me(Me),_fe(fe)
+inline StabUP<STIFF,MESH>::StabUP (STIFF& stiff,MESH& Me,CurrentFE* fe ,std::vector<double>& Tv):_stiff(stiff),_Me(Me),_fe(fe)
 {
         _Cn=1;       _At=0.0;      _S=0.0;
         _T=0.0;      _V=0.0;       _Tv=Tv;

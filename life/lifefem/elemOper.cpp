@@ -1338,7 +1338,7 @@ void grad(const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
   //    and
   // Vector F(V) = \Sum V_k \Sum V_j \Int \phi_k \phi_i \phi_j
   //-------------------
-  void quad(vector<Real> coef, ElemMat& elmat, ElemVec& elvec,
+  void quad(std::vector<Real> coef, ElemMat& elmat, ElemVec& elvec,
   const CurrentFE& fe,int iblock=0,int jblock=0)
   {
   Tab2dView mat = elmat.block(iblock,jblock);
@@ -1410,7 +1410,7 @@ void source(Real coef,ElemVec& f, ElemVec& elvec, const CurrentFE& fe,
   Tab1dView vec = elvec.block(eblock);
   Tab1dView vecf = f.block(fblock);
   Real f_ig;
-  
+
   for(ig=0;ig<fe.nbQuadPt;ig++){
     f_ig = 0.;
     for(i=0;i<fe.nbNode;i++) f_ig += vecf(i)*fe.phi(i,ig);
@@ -1435,7 +1435,7 @@ void source_fhn(Real coef_f,Real coef_a,ElemVec& u, ElemVec& elvec, const Curren
   Tab1dView vec = elvec.block(eblock);
   Tab1dView vecu = u.block(fblock);
   Real f_ig;
-  
+
   for(ig=0;ig<fe.nbQuadPt;ig++){
     f_ig = 0.;
     for(i=0;i<fe.nbNode;i++) f_ig += vecu(i)*fe.phi(i,ig);
@@ -1443,7 +1443,7 @@ void source_fhn(Real coef_f,Real coef_a,ElemVec& u, ElemVec& elvec, const Curren
        vec(i) += coef_f*f_ig*(1-f_ig)*(f_ig-coef_a)*fe.phi(i,ig)*fe.weightDet(ig);
     }
   }
-  
+
 }
 
 
@@ -1950,7 +1950,7 @@ void div_Hdiv(Real coef, ElemMat& elmat,const CurrentHdivFE& fe_u,
 \param tpfe  : reference lagrange multiplier element (for hybrid MFE)
 \param iblock, \param jblock : subarray indexes where to store the integral just computed.
 */
-void TP_VdotN_Hdiv(Real coef, ElemMat& elmat, const RefHybridFE& tpfe, 
+void TP_VdotN_Hdiv(Real coef, ElemMat& elmat, const RefHybridFE& tpfe,
 		   const RefHybridFE& vdotnfe, int iblock,int jblock)
 {
   //! previous way of construction (worked only for RTO hexa)
@@ -1976,7 +1976,7 @@ void TP_VdotN_Hdiv(Real coef, ElemMat& elmat, const RefHybridFE& tpfe,
 	//! using the Piola transform properties.
 
 	//! Matrix : block diagonal. size of the blocks = bdfe.nbNode.
-	mat(nf * nbnode + i, nf * nbnode + j) += tpvn * coef; 
+	mat(nf * nbnode + i, nf * nbnode + j) += tpvn * coef;
       }
     }
   }
@@ -2044,7 +2044,7 @@ Here the permeability matrix is a CONSTANT SCALAR tensor (i.e. = coef * Id).
 
 BEWARE  :   it is "coef" that is used (and NOT ITS INVERSE!!).
 
-\param coef  : constant coefficient. 
+\param coef  : constant coefficient.
 \param elmat : (mixed) element matrix.
 \param fe_u  : current vectorial element (in H(div))
 \param iblock, \param jblock : subarray indexes where to store the integral just computed.
@@ -2069,14 +2069,14 @@ void mass_Hdiv(Real coef, ElemMat& elmat,const CurrentHdivFE& fe,int iblock,int 
 }
 
 //----------------------------------------------------------------------
-/*! \function mass_Hdiv : compute  
+/*! \function mass_Hdiv : compute
   \int_{current element} ((Invperm* w_j) * w_i
   where w_j is a vectorial H(div) basis function
-  
-  Here the permeability matrix "Invperm" is a CONSTANT symmetric positive definite 
-  matrix (NON DIAGONAL a priori). The matrix is constant over the 
-  whole current element and is already inverted by LU or Choleski Lapack. 
-  
+
+  Here the permeability matrix "Invperm" is a CONSTANT symmetric positive definite
+  matrix (NON DIAGONAL a priori). The matrix is constant over the
+  whole current element and is already inverted by LU or Choleski Lapack.
+
   \param Invperm : constant coefficient TENSOR. (CONSTANT over the current element).
   \param elmat   : (mixed) element matrix.
   \param fe      : current vectorial element (in H(div))
@@ -2093,29 +2093,29 @@ void mass_Hdiv(KNM<Real>& Invperm, ElemMat& elmat, const CurrentHdivFE& fe,
       x =0.;
       for( ig = 0 ; ig < fe.nbQuadPt ; ig ++ ){
         for( icoor = 0 ; icoor < fe.nbCoor ; icoor ++ ){
-	  for( jcoor = 0 ; jcoor < fe.nbCoor ; jcoor ++ ){  
+	  for( jcoor = 0 ; jcoor < fe.nbCoor ; jcoor ++ ){
 	    //! Invperm is the inverse of the permeability
 	    x += Invperm(icoor,jcoor) * fe.phi( j, jcoor, ig ) * fe.phi( i, icoor, ig ) * fe.weightDet(ig);
-	  }      
+	  }
 	}
       }
-      mat(i,j) += x ;  	  
+      mat(i,j) += x ;  	
     }
   }
 }
 
 
 //----------------------------------------------------------------------
-/*! \function mass_Hdiv : compute  
+/*! \function mass_Hdiv : compute
   \int_{current element} ((Invperm* w_j) * w_i
   where w_j is a vectorial H(div) basis function
-  
-  Here the permeability is a NON-CONSTANT scalar function 
+
+  Here the permeability is a NON-CONSTANT scalar function
   whose inverse is "Invperm".
- 
-  We note again that it is the inverse of the permeability that 
+
+  We note again that it is the inverse of the permeability that
   is provided directly (Invperm = K^{-1}).
-  
+
   \param Invperm : scalar function inverse of the permeability.
   \param elmat   : (mixed) element matrix.
   \param fe      : current vectorial element (in H(div))
@@ -2134,11 +2134,11 @@ void mass_Hdiv(Real (*Invperm)(const Real&, const Real&,const Real&),
         fe.coorQuadPt(x,y,z,ig);
         for( icoor = 0 ; icoor < fe.nbCoor ; icoor ++ ){
           //! caution inverse of the permeability
-          intg += 1. * Invperm(x,y,z) * fe.phi( j , icoor , ig ) 
+          intg += 1. * Invperm(x,y,z) * fe.phi( j , icoor , ig )
 	    * fe.phi( i , icoor , ig ) * fe.weightDet( ig );
-        }      
-      } 
-      mat(i,j) += intg;  	  
+        }
+      }
+      mat(i,j) += intg;  	
     }
   }
 }

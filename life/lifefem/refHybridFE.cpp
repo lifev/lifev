@@ -23,11 +23,11 @@ namespace LifeV
 {
 
 RefHybridFE::RefHybridFE(const UInt& nbdfe, const StaticBdFE* bdfelist,
-			 string _name, int _type, ReferenceShapes _shape,
-			 int _nbDofPerVertex,int _nbDofPerEdge,
-			 int _nbDofPerFace,int _nbDofPerVolume,
-			 int _nbDof,int _nbCoor,const Real* refCoor,
-			 PatternType _patternType):
+                         std::string _name, int _type, ReferenceShapes _shape,
+                         int _nbDofPerVertex,int _nbDofPerEdge,
+                         int _nbDofPerFace,int _nbDofPerVolume,
+                         int _nbDof,int _nbCoor,const Real* refCoor,
+                         PatternType _patternType):
   LocalDofPattern(_nbDof,_nbDofPerVertex,_nbDofPerEdge,_nbDofPerFace,_nbDofPerVolume,_patternType),
   _nBdFE(nbdfe), _bdfeList(bdfelist), _refCoor(refCoor),
   name(_name), type(_type), shape(_shape),

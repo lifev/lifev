@@ -23,7 +23,7 @@
 
 namespace LifeV
 {
-using namespace std; //Pretty useless
+//using namespace std; //Pretty useless
 
 //! Base class of all Mesh Entities
 /*! It contains the Entity ID and it defined the comparison operators */

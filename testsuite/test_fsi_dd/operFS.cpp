@@ -55,18 +55,18 @@ namespace LifeV
         M_fluid.iterate   (M_time);
 
         M_solid._recur = 0;
-        
+
         M_solid.iterate();
 
         dispNew = M_solid.d();
         velo    = M_solid.w();
 
-        cout << "                ::: norm(disp     ) = "
-             << maxnorm(disp) << endl;
-        cout << "                ::: norm(dispNew  ) = "
-             << maxnorm(dispNew) << endl;
-        cout << "                ::: norm(velo     ) = "
-             << maxnorm(velo) << endl;
+        std::cout << "                ::: norm(disp     ) = "
+                  << maxnorm(disp) << std::endl;
+        std::cout << "                ::: norm(dispNew  ) = "
+                  << maxnorm(dispNew) << std::endl;
+        std::cout << "                ::: norm(velo     ) = "
+                  << maxnorm(velo) << std::endl;
     }
 
 
@@ -80,10 +80,10 @@ namespace LifeV
 
         if(iter == 0) status = 1;
 
-        cout << "*** Residual computation g(x_" << iter <<" )";
-        if (status) cout << " [NEW TIME STEP] ";
-        cout << endl;
-        
+        std::cout << "*** Residual computation g(x_" << iter <<" )";
+        if (status) std::cout << " [NEW TIME STEP] ";
+        std::cout << std::endl;
+
         eval(M_dispStruct, M_velo, disp, status);
 
         res = disp - M_dispStruct;
@@ -104,52 +104,52 @@ namespace LifeV
 
         UInt dim = _uBarS.size();
 
-        cout << "  o-  Solving the preconditionned system... ";
+        std::cout << "  o-  Solving the preconditionned system... ";
         Chrono chrono;
 
-        for (int ii = 0; ii < (int) dim; ++ii) 
+        for (int ii = 0; ii < (int) dim; ++ii)
             solid().d()[ii] =  _uBarS[ii];
-        
+
         fluid().updateDispVelo();
         solveLinearFluid();
         solveLinearSolid();
-        
+
         for (int i = 0; i < (int) dim; ++i)
             _uBarS[i] =  dz()[i] - _uBarS[i];
-        
+
         chrono.stop();
 
-        cout << "done in " << chrono.diff() << " s." << endl;
+        std::cout << "done in " << chrono.diff() << " s." << std::endl;
     }
 
 
 //
-    
+
     void  operFS::solveLinearFluid()
     {
         M_fluid.iterateLin(M_time, M_BCh_du);
     }
 
 //
-    
+
     void  operFS::solveLinearSolid()
     {
         M_rhs_dz = 0.0;
-        
+
         if ( !M_BCh_dz.bdUpdateDone() )
             M_BCh_dz.bdUpdate(M_solid._mesh, M_solid._feBd,
                               M_solid._dof);
-        
+
         bc_manage_vector(M_rhs_dz, M_solid._mesh, M_solid._dof,
                          M_BCh_dz, M_solid._feBd, 1.0, 1.0);
-        
+
         Real tol       = 1.e-10;
-        
+
         M_solid._recur = 1;
         M_solid.solveJac(M_dz, M_rhs_dz, tol);
     }
-    
-    
+
+
     void my_matvecJacobian(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
     {
         // Extraction of data from J
@@ -158,24 +158,25 @@ namespace LifeV
         UInt dim = my_data->M_pFS->dz().size();
 
         double xnorm =  AZ_gvector_norm(dim, -1, z, proc_config);
-        cout << " ***** norm (z)= " << xnorm << endl<< endl;
-        
+        std::cout << " ***** norm (z)= " << xnorm << std::endl<< std::endl;
+
         if ( xnorm == 0.0 )
             for (int i=0; i <(int)dim; ++i)
                 Jz[i] =  0.0;
         else
         {
-            for (int i=0; i <(int)dim; ++i) 
+            for (int i=0; i <(int)dim; ++i)
                 my_data->M_pFS->solid().d()[i] =  z[i];
-            
+
             my_data->M_pFS->fluid().updateDispVelo();
             my_data->M_pFS->solveLinearFluid();
             my_data->M_pFS->solveLinearSolid();
-            
+
             for (int i = 0; i < (int) dim; ++i)
                 Jz[i] =  z[i] - my_data->M_pFS->dz()[i];
         }
-        cout << " ***** norm (Jz)= " << AZ_gvector_norm(dim, -1, Jz, proc_config)
-             << endl << endl;
+        std::cout << " ***** norm (Jz)= "
+                  << AZ_gvector_norm(dim, -1, Jz, proc_config)
+                  << std::endl << std::endl;
     }
 }

@@ -22,8 +22,9 @@
 namespace LifeV
 {
 
-RefEle::RefEle(string _name,ReferenceShapes _shape,int _nbDof,int _nbCoor,const Fct* phi,const Fct* dPhi,
-	       const Fct* d2Phi,const Real* refCoor,const SetOfQuadRule& sqr):
+RefEle::RefEle(std::string _name, ReferenceShapes _shape, int _nbDof,
+               int _nbCoor, const Fct* phi, const Fct* dPhi, const Fct* d2Phi,
+               const Real* refCoor, const SetOfQuadRule& sqr):
   _sqr(&sqr),
   _phi(phi),_dPhi(dPhi),_d2Phi(d2Phi),_refCoor(refCoor),name(_name),shape(_shape),nbDof(_nbDof),nbCoor(_nbCoor),
   _phiQuad(sqr.totalNbQuadPoint() * _nbDof ),

@@ -170,15 +170,15 @@ updateDispVelo() {
 
   Real dti = 1.0/_dt;
 
-  cout << " max norm dx = " << maxnorm( _disp ) << endl;
+  std::cout << " max norm dx = " << maxnorm( _disp ) << std::endl;
 
   _interpolate(_w.nbcomp(),_disp,_dInterp);
 
-  cout << " max norm dxInterp = " << maxnorm( _dInterp ) << endl;
+  std::cout << " max norm dxInterp = " << maxnorm( _dInterp ) << std::endl;
 
   _dwInterp = _dInterp*dti;
 
-  cout << " max norm dwInterp = " << maxnorm( _dwInterp ) << endl;
+  std::cout << " max norm dwInterp = " << maxnorm( _dwInterp ) << std::endl;
 
 }
 
@@ -186,12 +186,12 @@ updateDispVelo() {
 template<typename Mesh>  void
 NavierStokesAleHandler<Mesh>::postProcess() {
 
-  ostringstream index;
-  string name;
+  std::ostringstream index;
+  std::string name;
 
   ++_count;
   if (fmod(float(_count),float(_verbose)) == 0.0) {
-    cout << "  o-  Post-processing \n";
+    std::cout << "  o-  Post-processing \n";
     index << (_count/_verbose);
 
     switch( index.str().size() ) {

@@ -107,13 +107,13 @@ BCVector & BCVector::operator=(const BCVector& BCv) {
 
 
 //! Output
-ostream& BCVector::showMe(bool verbose, ostream & out) const {
+std::ostream& BCVector::showMe(bool verbose, std::ostream & out) const {
   ASSERT_PRE(_finalized, "BC Vector should be finalized before being accessed.");
-  out << "+++++++++++++++++++++++++++++++"<<endl;
-  out << "BC Vector Interface: "  << endl;
-  out << "number of interface vector Dof : " << _nbTotalDof << endl;
+  out << "+++++++++++++++++++++++++++++++"<<std::endl;
+  out << "BC Vector Interface: "  << std::endl;
+  out << "number of interface vector Dof : " << _nbTotalDof << std::endl;
   out << "==>Interface Dof :\n";
-  out << "+++++++++++++++++++++++++++++++" << endl;
+  out << "+++++++++++++++++++++++++++++++" << std::endl;
   return out;
 }
 
@@ -165,14 +165,14 @@ BCVector_Interface & BCVector_Interface::operator=(const BCVector_Interface & BC
 
 
 //! Output
-ostream& BCVector_Interface::showMe(bool verbose, ostream & out) const {
+std::ostream& BCVector_Interface::showMe(bool verbose, std::ostream & out) const {
   ASSERT_PRE(_finalized, "BC Vector should be finalized before being accessed.");
-  out << "+++++++++++++++++++++++++++++++"<<endl;
-  out << "BC Vector Interface: "  << endl;
-  out << "number of interface vector Dof : " << _nbTotalDof << endl;
+  out << "+++++++++++++++++++++++++++++++"<<std::endl;
+  out << "BC Vector Interface: "  << std::endl;
+  out << "number of interface vector Dof : " << _nbTotalDof << std::endl;
   out << "==>Interface Dof :\n";
   _dofIn->showMe( verbose, out );  // no showMe(..) in Miguel's DofInterface
-  out << "+++++++++++++++++++++++++++++++" << endl;
+  out << "+++++++++++++++++++++++++++++++" << std::endl;
   return out;
 }
 }

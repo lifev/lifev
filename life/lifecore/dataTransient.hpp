@@ -28,6 +28,7 @@
 #ifndef _DATATRANSIENT_H_
 #define _DATATRANSIENT_H_
 #include <string>
+#include <iostream>
 #include "GetPot.hpp"
 
 
@@ -46,7 +47,7 @@ namespace LifeV
   \todo tolerance for steady state
 
 */
-using namespace std;
+//using namespace std;
 class DataTransient
 {
 public:
@@ -61,11 +62,11 @@ public:
     /**
        Print information
      */
-    void dataTransientShowMe(ostream& c);
+    void dataTransientShowMe(std::ostream& c);
     /**
        Print some help
      */
-    void dataTransientHelp(ostream& c);
+    void dataTransientHelp(std::ostream& c);
 
     /**
        Print current iteration and time

@@ -29,7 +29,7 @@ template<typename UnkType,int size,int nblock>
 class Unknown {
 
  public:
-  /*  Unknown(string name):_name(name),_size(size),_nb(nblock)
+  /*  Unknown(std::string name):_name(name),_size(size),_nb(nblock)
    {if (size==1) {unk=0}
     else (unk(size,nblock));
     return;};
@@ -43,9 +43,9 @@ class Unknown {
   int size() {return _size;}; //physical dimension of the unknown
   int ndof() {return _ndof;}; //degrees of freedom for the unknown
   int nb() {return _nb;};
-  string name() {return _name;};
+  std::string name() {return _name;};
 
-  vector<UnkType> unk;
+  std::vector<UnkType> unk;
   void set_vect(int ndof){unk(ndof);};
 
 
@@ -53,7 +53,7 @@ class Unknown {
 
 
  private:
- string _name;
+ std::string _name;
  int _size;
  int _nb;
  int _ndof;

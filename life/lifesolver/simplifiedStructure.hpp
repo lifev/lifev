@@ -123,7 +123,7 @@ public DataTime {
   void relaxation(const Real& omega, Vector& d);
 
   //! Output
-  void showMe(ostream& c=cout) const;
+  void showMe(std::ostream& c=std::cout) const;
 
  private:
 
@@ -314,7 +314,7 @@ relaxation(const Real& omega, Vector& d) {
 
 //! Output
 template <typename Mesh> void  IndependentRing<Mesh>::
-showMe(ostream& c) const {
+showMe(std::ostream& c) const {
   DataSimplifiedStructure<Mesh>::showMe(c);
   DataTime::showMe(c);
 }

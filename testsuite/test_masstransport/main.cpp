@@ -13,6 +13,7 @@
 int main(int argc, char** argv)
 {
     using namespace LifeV;
+    using namespace std;
     // ********** Reading from data file ******************************************
 
     GetPot command_line(argc,argv);

@@ -91,13 +91,13 @@ void wr_opendx_header(std::string fname, const TheMesh& mesh, const TheDof& dof,
 
  // Coordinates writing
 
-  ofile << endl; // added by Diego
-  ofile << "object " << quotes << "pos" << quotes << endl;
+  ofile << std::endl; // added by Diego
+  ofile << "object " << quotes << "pos" << quotes << std::endl;
   ofile << "class array ";
   ofile << "type float ";
   ofile << "rank " << VRANK << " shape " << NDIM;
   ofile << " items " <<  num_points;
-  ofile << " data follows" << endl;
+  ofile << " data follows" << std::endl;
 
   UInt i,ie,index,j;
   UInt gcount;
@@ -106,7 +106,7 @@ void wr_opendx_header(std::string fname, const TheMesh& mesh, const TheDof& dof,
   // Vertex based Dof: the coordinates are available from the Pont List
  for(i=0;i<nv;++i)
   ofile << mesh.pointList[i].x() << " " <<  mesh.pointList[i].y() << " "
-        <<  mesh.pointList[i].z() << endl;
+        <<  mesh.pointList[i].z() << std::endl;
 
 // Now I store the coordinates of the supplementary nodes in a temporary vector
   // Edge Based Dof
@@ -156,16 +156,16 @@ void wr_opendx_header(std::string fname, const TheMesh& mesh, const TheDof& dof,
   }
 
   for(i=0;i<num_points_supp;++i){
-    if (abs(supp_x[i])<EPS_DX)  supp_x[i]=0.; // needed due to dx bugs
-    if (abs(supp_y[i])<EPS_DX)  supp_y[i]=0.; // needed due to dx bugs
-    if (abs(supp_z[i])<EPS_DX)  supp_z[i]=0.; // needed due to dx bugs
-    ofile << supp_x[i] << " " <<  supp_y[i] << " " <<  supp_z[i] << endl;
+    if (fabs(supp_x[i])<EPS_DX)  supp_x[i]=0.; // needed due to dx bugs
+    if (fabs(supp_y[i])<EPS_DX)  supp_y[i]=0.; // needed due to dx bugs
+    if (fabs(supp_z[i])<EPS_DX)  supp_z[i]=0.; // needed due to dx bugs
+    ofile << supp_x[i] << " " <<  supp_y[i] << " " <<  supp_z[i] << std::endl;
   }
 
-  ofile << endl;
+  ofile << std::endl;
 
  // connectivity
-  ofile << "object " << quotes << "con" << quotes << endl;
+  ofile << "object " << quotes << "con" << quotes << std::endl;
   ofile << "class array ";
   ofile << "type int ";
   // Alain: this test was not working in case of using mixed fe
@@ -192,7 +192,7 @@ void wr_opendx_header(std::string fname, const TheMesh& mesh, const TheDof& dof,
   else if (nam_fe == "P2" || nam_fe == "P2tilde")
     ofile << " items " <<  nV*8;
   //#endif
-  ofile << " data follows" << endl;
+  ofile << " data follows" << std::endl;
 
   //#if defined(LINEAR_P1)
   if (nam_fe == "P1"){
@@ -200,7 +200,7 @@ void wr_opendx_header(std::string fname, const TheMesh& mesh, const TheDof& dof,
       for (j=0;j<nldof;++j)
 	ofile << dof.localToGlobal(i+1,j+1)-1 << " ";//damned (C vs) Fortran
 
-      ofile << endl;
+      ofile << std::endl;
     }
   }
 
@@ -209,7 +209,7 @@ void wr_opendx_header(std::string fname, const TheMesh& mesh, const TheDof& dof,
       for (j=0;j<nldof-1;++j)
 	ofile << dof.localToGlobal(i+1,j+1)-1 << " ";//damned (C vs) Fortran
 
-      ofile << endl;
+      ofile << std::endl;
     }
   }
 
@@ -222,7 +222,7 @@ for (i=0;i<nV;++i){
  for (j=0;j<nldof-6;++j)
   ofile << dof.localToGlobal(i+1,j+1)-1 << " ";//damned (C vs) Fortran
 
- ofile << endl;
+ ofile << std::endl;
  }
 
 */
@@ -237,60 +237,60 @@ for (i=0;i<nV;++i){
       ofile << MyCon[0] << " ";
       ofile << MyCon[7] << " ";
       ofile << MyCon[6] << " ";
-      ofile << endl;
+      ofile << std::endl;
 
       ofile << MyCon[6] << " ";
       ofile << MyCon[2] << " ";
       ofile << MyCon[9] << " ";
       ofile << MyCon[5] << " ";
-      ofile << endl;
+      ofile << std::endl;
 
       ofile << MyCon[4] << " ";
       ofile << MyCon[1] << " ";
       ofile << MyCon[8] << " ";
       ofile << MyCon[5] << " ";
-      ofile << endl;
+      ofile << std::endl;
 
       ofile << MyCon[7] << " ";
       ofile << MyCon[8] << " ";
       ofile << MyCon[9] << " ";
       ofile << MyCon[3] << " ";
-      ofile << endl;
+      ofile << std::endl;
 
       ofile << MyCon[4] << " ";
       ofile << MyCon[9] << " ";
       ofile << MyCon[7] << " ";
       ofile << MyCon[8] << " ";
-      ofile << endl;
+      ofile << std::endl;
 
       ofile << MyCon[4] << " ";
       ofile << MyCon[9] << " ";
       ofile << MyCon[7] << " ";
       ofile << MyCon[6] << " ";
-      ofile << endl;
+      ofile << std::endl;
 
       ofile << MyCon[4] << " ";
       ofile << MyCon[9] << " ";
       ofile << MyCon[5] << " ";
       ofile << MyCon[8] << " ";
-      ofile << endl;
+      ofile << std::endl;
 
       ofile << MyCon[4] << " ";
       ofile << MyCon[9] << " ";
       ofile << MyCon[5] << " ";
       ofile << MyCon[6] << " ";
-      ofile << endl;
+      ofile << std::endl;
 
     }
   }
   //#endif
 
   ofile << "attribute " << quotes << "element type" << quotes
-        << " string " << quotes << CELL << quotes << endl;
+        << " string " << quotes << CELL << quotes << std::endl;
   ofile << "attribute " << quotes << "ref" << quotes
-        << " string " << quotes << "positions" << quotes << endl;
+        << " string " << quotes << "positions" << quotes << std::endl;
 
-  ofile << endl;
+  ofile << std::endl;
 
 }
 
@@ -320,47 +320,47 @@ void wr_opendx_header(std::string fname, const RegionMesh& mesh, const Dof& dof)
 
  // Coordinates writing
 
-  ofile << "object " << quotes << "pos" << quotes << endl;
+  ofile << "object " << quotes << "pos" << quotes << std::endl;
   ofile << "class array ";
   ofile << "type float ";
   ofile << "rank " << VRANK << " shape " << NDIM;
   ofile << " items " <<  nv;
-  ofile << " data follows" << endl;
+  ofile << " data follows" << std::endl;
 
   UInt i,ie,index,j;
 
   // Dof: the coordinates are available from the Pont List
   for(i=0;i<nv;++i){
    // needed due to dx bugs
-   if (abs(mesh.pointList[i].x())<EPS_DX)  mesh.pointList[i].x()=0. ;
-   if (abs(mesh.pointList[i].y())<EPS_DX)  mesh.pointList[i].y()=0. ;
-   if (abs(mesh.pointList[i].z())<EPS_DX)  mesh.pointList[i].z()=0. ;
+   if (fabs(mesh.pointList[i].x())<EPS_DX)  mesh.pointList[i].x()=0. ;
+   if (fabs(mesh.pointList[i].y())<EPS_DX)  mesh.pointList[i].y()=0. ;
+   if (fabs(mesh.pointList[i].z())<EPS_DX)  mesh.pointList[i].z()=0. ;
 
   ofile << mesh.pointList[i].x() << " " <<  mesh.pointList[i].y() << " "
-        <<  mesh.pointList[i].z() << endl;
+        <<  mesh.pointList[i].z() << std::endl;
   }
 
  // connectivity
-  ofile << "object " << quotes << "con" << quotes << endl;
+  ofile << "object " << quotes << "con" << quotes << std::endl;
   ofile << "class array ";
   ofile << "type int ";
   ofile << "rank " << VRANK << " shape " << nldof;
   ofile << " items " <<  nV;
-  ofile << " data follows" << endl;
+  ofile << " data follows" << std::endl;
 
 
  for (i=0;i<nV;++i){
   for (j=0;j<nldof;++j)
    ofile << dof.localToGlobal(i+1,j+1)-1 << " ";//damned (C vs) Fortran
 
-  ofile << endl;
+  ofile << std::endl;
  }
 
   ofile << "attribute " << quotes << "element type" << quotes << " string "
-        << quotes << CELL << quotes << endl;
+        << quotes << CELL << quotes << std::endl;
   ofile << "attribute " << quotes << "ref" << quotes << " string " << quotes
-        << "positions" << quotes << endl;
-  ofile << endl;
+        << "positions" << quotes << std::endl;
+  ofile << std::endl;
 
 
 }
@@ -382,32 +382,32 @@ void wr_opendx_scalar(std::string fname, std::string name, VectorType U)
  ASSERT(ofile,"Error: Output file cannot be open");
 
 
-  ofile << "object " << quotes << nameExt << quotes << endl; // modif. by Diego
+  ofile << "object " << quotes << nameExt << quotes << std::endl; // modif. by Diego
   ofile << "class array ";
   ofile << "type double ";
   ofile << "rank " << SRANK << " ";
   ofile << "items " <<  U.size() << " ";
-  ofile << "data follows" << endl;
+  ofile << "data follows" << std::endl;
 
   for (i=0;i<U.size();++i){
-   if (abs(U[i])<EPS_DX)  U[i]=0. ; // needed due to dx bugs
-   ofile << U[i] << endl;
+   if (fabs(U[i])<EPS_DX)  U[i]=0. ; // needed due to dx bugs
+   ofile << U[i] << std::endl;
   }
 
   ofile << "attribute " << quotes << "dep" << quotes << " string " << quotes
-        << "positions" << quotes << endl;
-  ofile << endl;
-  ofile << "object " << quotes << name << quotes << " class field" << endl;
+        << "positions" << quotes << std::endl;
+  ofile << std::endl;
+  ofile << "object " << quotes << name << quotes << " class field" << std::endl;
   ofile << "component " << quotes << "positions" << quotes << " value "
-        << quotes << "pos" << quotes << endl;
+        << quotes << "pos" << quotes << std::endl;
   ofile << "component " << quotes << "connections" << quotes << " value "
-        << quotes << "con" << quotes << endl;
+        << quotes << "con" << quotes << std::endl;
   ofile << "component " << quotes << "data" << quotes << " value " << quotes
-        << nameExt << quotes << endl; // modified by Diego
-  ofile << endl; // added by Diego
+        << nameExt << quotes << std::endl; // modified by Diego
+  ofile << std::endl; // added by Diego
   ofile << "end";// added by Diego
   // caution: "end" must be put only once at the end of the file
-  ofile << endl;
+  ofile << std::endl;
 }
 
 void wr_opendx_vector(std::string fname, std::string name, std::vector<Real> U,
@@ -428,36 +428,36 @@ void wr_opendx_vector(std::string fname, std::string name, VectorType U,
 
  udim=U.size();
 
-  ofile << "object " << quotes << nameExt << quotes << endl;
+  ofile << "object " << quotes << nameExt << quotes << std::endl;
   ofile << "class array ";
   ofile << "type float ";
   ofile << "rank " << VRANK << " shape " << nbcomp;
   ofile << " items " <<  udim/nbcomp << " ";
-  ofile << "data follows" << endl;
+  ofile << "data follows" << std::endl;
 
  for (i=0;i< udim/nbcomp; ++i)
    {
      for (j=0; j<nbcomp; j++){
        unsigned int pos=i+j*udim/nbcomp;
-       if (abs(U[pos])<EPS_DX) U[pos]=0. ; // needed due to dx bugs
+       if (fabs(U[pos])<EPS_DX) U[pos]=0. ; // needed due to dx bugs
        ofile << U[pos] << " ";
      }
-     ofile << endl;
+     ofile << std::endl;
    }
 
   ofile << "attribute " << quotes << "dep" << quotes << " string " << quotes
-        << "positions" << quotes << endl;
-  ofile << endl;
-  ofile << "object " << quotes << name << quotes << " class field" << endl;
+        << "positions" << quotes << std::endl;
+  ofile << std::endl;
+  ofile << "object " << quotes << name << quotes << " class field" << std::endl;
   ofile << "component " << quotes << "positions" << quotes << " value "
-        << quotes << "pos" << quotes << endl;
+        << quotes << "pos" << quotes << std::endl;
   ofile << "component " << quotes << "connections" << quotes << " value "
-        << quotes << "con" << quotes << endl;
+        << quotes << "con" << quotes << std::endl;
   ofile << "component " << quotes << "data" << quotes << " value " << quotes
-        << nameExt << quotes << endl;
-  ofile << endl;
+        << nameExt << quotes << std::endl;
+  ofile << std::endl;
   ofile << "end";
-  ofile << endl;
+  ofile << std::endl;
 }
 }
 #endif

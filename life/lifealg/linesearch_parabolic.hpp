@@ -80,8 +80,8 @@ void lineSearch_parab(Fct& f,Norm& norm, Vector& residual,Vector& sol,Vector& st
       if(lambda < sigma0*lambda_cur) lambda = sigma0*lambda_cur;
       if(lambda > sigma1*lambda_cur) lambda = sigma1*lambda_cur;
     }
-    cout << "--- line search " << iter_linesearch << " : residual test = "
-	 << normRes_test << ", reduction = " << lambda << endl;
+    std::cout << "--- line search " << iter_linesearch << " : residual test = "
+	 << normRes_test << ", reduction = " << lambda << std::endl;
     // update sol_test
     sol = sol_cur + lambda * step;
     lambda_old = lambda_cur;
@@ -92,7 +92,7 @@ void lineSearch_parab(Fct& f,Norm& norm, Vector& residual,Vector& sol,Vector& st
     res_test_old2 = res_test2;
     res_test2 = normRes_test*normRes_test;
     if(iter_linesearch>max_linesearch){
-      cout << "!!! Too many iterations in the line search algorithm" << endl;
+      std::cout << "!!! Too many iterations in the line search algorithm" << std::endl;
       exit(1);
     }
   }

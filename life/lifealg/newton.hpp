@@ -26,8 +26,9 @@
 namespace LifeV
 {
 template<class Fct,class Vector,class Real, class Norm>
-int newton(Vector& sol,Fct& f,Norm& norm,Real abstol,Real reltol,int& maxit,
-	   Real eta_max,int linesearch=0, ofstream& out_res, const Real& time)
+int newton(Vector& sol, Fct& f, Norm& norm, Real abstol, Real reltol,
+           int& maxit, Real eta_max, int linesearch=0, std::ofstream& out_res,
+           const Real& time)
 {
   /*
     sol            :  the solution
@@ -66,14 +67,14 @@ int newton(Vector& sol,Fct& f,Norm& norm,Real abstol,Real reltol,int& maxit,
     ratio;
   Real eta_old,eta_new,linear_rel_tol=fabs(eta_max);
   //
-  cout << "------------------------------------------------------------------"
-       << endl;
-  cout << "    Newton 0: residual=" << normRes << ", stoping tolerance = "
-       << stop_tol << endl;
-  cout << "------------------------------------------------------------------"
-       << endl;
+  std::cout << "------------------------------------------------------------------"
+       << std::endl;
+  std::cout << "    Newton 0: residual=" << normRes << ", stoping tolerance = "
+       << stop_tol << std::endl;
+  std::cout << "------------------------------------------------------------------"
+       << std::endl;
 
-  out_res << time << "    " << iter << "   " << normRes << endl;
+  out_res << time << "    " << iter << "   " << normRes << std::endl;
 
   while( normRes > stop_tol && iter < maxit){
     iter++;
@@ -88,7 +89,7 @@ int newton(Vector& sol,Fct& f,Norm& norm,Real abstol,Real reltol,int& maxit,
       linear solver, i.e linear_rel_tol = | -f(sol) - J step | / |-f(sol)|
     */
     slope = normRes*normRes*(linres*linres - 1);
-    cout << "### slope = " << slope << endl;
+    std::cout << "### slope = " << slope << std::endl;
     /*
       slope denotes the quantity f^T J step, which is generally used by
       line search algorithms. This formula comes form Brown & Saad (1990),
@@ -113,7 +114,7 @@ int newton(Vector& sol,Fct& f,Norm& norm,Real abstol,Real reltol,int& maxit,
       lineSearch_cubic(f,norm,residual,sol,step,normRes,lambda,slope,iter);
       break;
     default:
-      cout << "Unknown linesearch \n";
+      std::cout << "Unknown linesearch \n";
       exit(1);
     }
     //
@@ -123,24 +124,24 @@ int newton(Vector& sol,Fct& f,Norm& norm,Real abstol,Real reltol,int& maxit,
     ratio = normRes/normResOld;
     if(ratio > 1){
       increase_res ++;
-      cout << "!!! Newton warning: increase in residual \n";
+      std::cout << "!!! Newton warning: increase in residual \n";
       if(increase_res == max_increase_res){
-	cout << "!!! Newton:" << max_increase_res
-	     << " consecutive increases in residual" << endl;
+	std::cout << "!!! Newton:" << max_increase_res
+	     << " consecutive increases in residual" << std::endl;
 	maxit = iter;
 	return 1;
       }
     } else {
       increase_res=0;
     }
-    cout << "------------------------------------------------------------------"
-	 << endl;
-    cout << "    Newton " << iter << ": residual=" << normRes << ",  step="
-	 << normStep << endl;
-    cout << "------------------------------------------------------------------"
-	 << endl;
+    std::cout << "------------------------------------------------------------------"
+	 << std::endl;
+    std::cout << "    Newton " << iter << ": residual=" << normRes << ",  step="
+	 << normStep << std::endl;
+    std::cout << "------------------------------------------------------------------"
+	 << std::endl;
 
-    out_res << time << "    " << iter << "   " << normRes << endl;
+    out_res << time << "    " << iter << "   " << normRes << std::endl;
 
     //
     //-- forcing term computation (Eisenstat-Walker)
@@ -148,21 +149,25 @@ int newton(Vector& sol,Fct& f,Norm& norm,Real abstol,Real reltol,int& maxit,
     if (eta_max>0){
       eta_old=linear_rel_tol;
       eta_new=gamma*ratio*ratio;
-      if(gamma*eta_old*eta_old>.1) eta_new=max(eta_new,gamma*eta_old*eta_old);
-      linear_rel_tol=min(eta_new,eta_max);
-      linear_rel_tol=min(eta_max,max(linear_rel_tol,.5*stop_tol/normRes));
-      cout <<"    Newton: forcing term eta = " << linear_rel_tol << endl;
+      if(gamma*eta_old*eta_old>.1) {
+          eta_new=std::max<Real>(eta_new, gamma*eta_old*eta_old);
+      }
+      linear_rel_tol = std::min<Real>(eta_new, eta_max);
+      linear_rel_tol = std::min<Real>(eta_max,
+                                      std::max<Real>(linear_rel_tol,
+                                                     .5*stop_tol/normRes));
+      std::cout <<"    Newton: forcing term eta = " << linear_rel_tol << std::endl;
     }
     //
     //-- end of forcing term computation
     //
   }
   if(normRes > stop_tol){
-    cout << "!!! Newton: convergence fails" << endl;
+    std::cout << "!!! Newton: convergence fails" << std::endl;
     maxit = iter;
     return 1;
   }
-  cout << "--- Newton: convergence in " << iter << " iterations\n\n";
+  std::cout << "--- Newton: convergence in " << iter << " iterations\n\n";
   maxit = iter;
   return 0;
 }

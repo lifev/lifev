@@ -36,7 +36,7 @@ namespace LifeV
                          int&        maxit,
                          Real        eta_max,
                          int         linesearch=0,
-                         ofstream&   out_res,
+                         std::ofstream&   out_res,
                          const Real& time,
                          const Real  omega)
     {
@@ -48,7 +48,7 @@ namespace LifeV
 
           The linear solver terminates when the relative
           linear residual is smaller than eta*| f(sol) |.
-          
+
           The value linear_rel_tol send for the relative tolerance
           to the linear solver is therefore eta. eta is determined
           by the modified Eisenstat-Walker formula if etamax > 0.
@@ -56,9 +56,9 @@ namespace LifeV
           If eta_max < 0, then eta = |etamax| for the entire
           iteration (e.g. etamax = -1e-6 ensures that the linear
           tolerance would be always 1e-6). Default value = 0.9
-          linesearch     :  for now consider only the case linesearch=0 
+          linesearch     :  for now consider only the case linesearch=0
           (coded but not theoretically analysed)
-          
+
           omega          :  default relaxation parameter to be passed to Aitken.
           if omega is negative, then its absolute value is
           taken as constant relaxation parameter
@@ -81,8 +81,8 @@ namespace LifeV
         int    iter         = 0;
         int    increase_res = 0;
 
-        int    nDofFS       = sol.size();   
-        
+        int    nDofFS       = sol.size();
+
         Vector residual     = sol;
         Vector step         = sol;
 
@@ -91,16 +91,16 @@ namespace LifeV
 
         muS                 = 0.;
         muF                 = 0.;
-        
+
         step                = 0.;
-        
+
         Real   normResOld   = 1;
         Real   lambda;
         Real   slope;
 
         Real   omegaS       = omega;
         Real   omegaF       = omega;
-        
+
         f.evalResidual(residual, sol, iter);
 
         Real normRes        = norm(residual);
@@ -116,18 +116,18 @@ namespace LifeV
 
 //
 
-        cout << "------------------------------------------------------------------" << endl;
-        cout << "  NonLinRichardson: residual = " << normRes
-             << ", stoping tolerance = "          << stop_tol << endl;
-        cout << "------------------------------------------------------------------" << endl;
-        
-        out_res << time << "    " << iter << "   " << normRes << endl;
+        std::cout << "------------------------------------------------------------------" << std::endl;
+        std::cout << "  NonLinRichardson: residual = " << normRes
+             << ", stoping tolerance = "          << stop_tol << std::endl;
+        std::cout << "------------------------------------------------------------------" << std::endl;
 
-        
+        out_res << time << "    " << iter << "   " << normRes << std::endl;
+
+
         while( normRes > stop_tol && iter < maxit)
         {
             iter++;
-            
+
             ratio      = normRes / normResOld;
             normResOld = normRes;
             normRes    = norm(residual);
@@ -136,11 +136,11 @@ namespace LifeV
 
             linres     = linear_rel_tol;
 
-            
-            //f.solvePrec(sol); 
+
+            //f.solvePrec(sol);
 
             f.evalResidual(residual, sol, iter);
-            
+
 /*
               linres contains the relative linear tolerance achieved by the
               linear solver, i.e linear_rel_tol = | -f(sol) - P step | / |-f(sol)|
@@ -151,10 +151,10 @@ namespace LifeV
             muS   = sol;
 
             sol   = sol - step;
-            
+
 //            slope = normRes*normRes*(linres*linres - 1);
 
-//            cout << "### slope = " << slope << endl;
+//            std::cout << "### slope = " << slope << std::endl;
 
 /*
               slope denotes the quantity f^T J step, which is generally used by
@@ -184,10 +184,10 @@ namespace LifeV
 //                     lineSearch_cubic(f, norm, residual, sol, step, normRes, lambda, slope, iter);
 //                     break;
 //                 default:
-//                     cout << "Unknown linesearch \n";
+//                     std::cout << "Unknown linesearch \n";
 //                     exit(1);
 //             }
-            
+
 //             //
 //             //-- end of line search
 //             //
@@ -198,26 +198,26 @@ namespace LifeV
 //             if(ratio > 1)
 //             {
 //                 increase_res ++;
-//                 cout << "!!! NonLinRichardson warning: increase in residual \n";
+//                 std::cout << "!!! NonLinRichardson warning: increase in residual \n";
 
 //                 if(increase_res == max_increase_res)
 //                 {
-//                     cout << "!!! NonLinRichardson:" << max_increase_res
-//                          << " consecutive increases in residual" << endl;
+//                     std::cout << "!!! NonLinRichardson:" << max_increase_res
+//                          << " consecutive increases in residual" << std::endl;
 //                     maxit = iter;
 //                     return 1;
 //                 }
 //             }
 //             else increase_res=0;
-            
-//             cout << "------------------------------------------------------------------"
-//                  << endl;
-//             cout << "    NonLinRichardson " << iter << ": residual=" << normRes << ",  step="
-//                  << normStep << endl;
-//             cout << "------------------------------------------------------------------"
-//                  << endl;
 
-//             out_res << time << "    " << iter << "   " << normRes << endl;
+//             std::cout << "------------------------------------------------------------------"
+//                  << std::endl;
+//             std::cout << "    NonLinRichardson " << iter << ": residual=" << normRes << ",  step="
+//                  << normStep << std::endl;
+//             std::cout << "------------------------------------------------------------------"
+//                  << std::endl;
+
+//             out_res << time << "    " << iter << "   " << normRes << std::endl;
 
 //             //
 //             //-- forcing term computation (Eisenstat-Walker)
@@ -227,16 +227,16 @@ namespace LifeV
 //             {
 //                 eta_old = linear_rel_tol;
 //                 eta_new = gamma*ratio*ratio;
-                
+
 //                 if(gamma*eta_old*eta_old > .1)
-//                     eta_new = max(eta_new, gamma*eta_old*eta_old);
+//                     eta_new = std::max<Real>(eta_new, gamma*eta_old*eta_old);
 
 //                 linear_rel_tol = min(eta_new,eta_max);
-//                 linear_rel_tol = min(eta_max,max(linear_rel_tol,.5*stop_tol/normRes));
+//                 linear_rel_tol = min(eta_max,std::max<Real>(linear_rel_tol,.5*stop_tol/normRes));
 
-//                 cout <<"    NonLinRichardson: forcing term eta = " << linear_rel_tol << endl;
+//                 std::cout <<"    NonLinRichardson: forcing term eta = " << linear_rel_tol << std::endl;
 //             }
-            
+
 //             //
 //             //-- end of forcing term computation
 //             //
@@ -244,12 +244,12 @@ namespace LifeV
 
         if(normRes > stop_tol)
         {
-            cout << "!!! NonLinRichardson: convergence fails" << endl;
+            std::cout << "!!! NonLinRichardson: convergence fails" << std::endl;
             maxit = iter;
             return 1;
         }
-        
-        cout << "--- NonLinRichardson: convergence in " << iter << " iterations\n\n";
+
+        std::cout << "--- NonLinRichardson: convergence in " << iter << " iterations\n\n";
 
         maxit = iter;
 

@@ -91,7 +91,7 @@ int main(int argc, char** argv)
     //
     // Passing data from the fluid to the structure: fluid load at the interface
     //
-    
+
     DofInterface3Dto3D dofFluidToStructure(feTetraP1, solid.dDof(), feTetraP1bubble, fluid.uDof());
     dofFluidToStructure.update(solid.mesh(), 1, fluid.mesh(), 1, 0.0);
     BCVector_Interface g_wall(fluid.residual(), dim_fluid, dofFluidToStructure);
@@ -99,7 +99,7 @@ int main(int argc, char** argv)
     //
     // Passing data from structure to the fluid mesh: motion of the fluid domain
     //
-    
+
     DofInterface3Dto3D dofStructureToFluidMesh(fluid.mesh().getRefFE(), fluid.dofMesh(),
                                                feTetraP1, solid.dDof());
     dofStructureToFluidMesh.update(fluid.mesh(), 1, solid.mesh(), 1, 0.0);
@@ -159,13 +159,13 @@ int main(int argc, char** argv)
     BCVector_Interface dg_wall(fluid.residual(), dim_fluid, dofFluidToStructure);
 
     // Boundary conditions for du
-    
+
     BCh_du.addBC("Wall",   1,  Essential, Full, du_wall,  3);
     BCh_du.addBC("Edges",  20, Essential, Full, bcf,      3);
 
 
     // Boundary conditions for dz
-    
+
     BCh_dz.addBC("Interface", 1, Natural,   Full, dg_wall, 3);
     BCh_dz.addBC("Top",       3, Essential, Full, bcf,  3);
     BCh_dz.addBC("Base",      2, Essential, Full, bcf,  3);
@@ -186,12 +186,12 @@ int main(int argc, char** argv)
     Real abstol = 1.e-7;
     Real reltol = 0.0;
     Real etamax = 1.e-3;
-    
+
     int status;
     int maxiter;
     int linesearch = 0;
 
-    ofstream nout("num_iter");
+    std::ofstream nout("num_iter");
     ASSERT(nout,"Error: Output file cannot be opened.");
 
     Vector disp(3*dim_solid);
@@ -200,28 +200,28 @@ int main(int argc, char** argv)
     Vector velo_1(3*dim_solid);
     velo_1 = 0.0;
 
-    ofstream out_iter("iter");
-    ofstream out_res ("res");
+    std::ofstream out_iter("iter");
+    std::ofstream out_res ("res");
 
-    // 
+    //
     // Temporal loop
     //
-    
+
     for (Real time=dt; time <= T; time+=dt)
     {
         fluid.timeAdvance(f,time);
         solid.timeAdvance(f,time);
         oper.setTime(time);
-        
+
         // displacement prediction
-        
+
         disp   = solid.d() + dt*(1.5*solid.w() - 0.5*velo_1);
-        
+
         velo_1 = solid.w();
-        
-        cout << "norm( disp   ) init = " << maxnorm(disp)   << endl;
-        cout << "norm( velo_1 ) init = " << maxnorm(velo_1) << endl;
-        
+
+        std::cout << "norm( disp   ) init = " << maxnorm(disp)   << std::endl;
+        std::cout << "norm( velo_1 ) init = " << maxnorm(velo_1) << std::endl;
+
         maxiter = maxpf;
 
         // the newton solver
@@ -232,16 +232,16 @@ int main(int argc, char** argv)
 
         if(status == 1)
         {
-            cout << "Inners iterations failed\n";
+            std::cout << "Inners iterations failed\n";
             exit(1);
         }
         else
         {
-            cout << "End of time "<< time << endl;
-            cout << "Number of inner iterations       : "
-                 << maxiter << endl;
+            std::cout << "End of time "<< time << std::endl;
+            std::cout << "Number of inner iterations       : "
+                      << maxiter << std::endl;
             out_iter << time << " " << maxiter << " "
-                     << oper.nbEval() << endl;
+                     << oper.nbEval() << std::endl;
 
             fluid.postProcess();
             solid.postProcess();

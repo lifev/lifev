@@ -126,7 +126,7 @@ public:
     code it in refFE.cc following the example of P1ISOP2_TRIA_PATTERN)
     \param bdRefFE  a pointer on the associated reference finite element on the boundary
   */
-  RefFE(string _name,int _type,ReferenceShapes _shape,
+  RefFE(std::string _name, int _type, ReferenceShapes _shape,
 	int _nbDofPerVertex,int _nbDofPerEdge,int _nbDofPerFace,int _nbDofPerVolume,
 	int _nbDof,int _nbCoor,const Fct* phi,const Fct* dPhi,const Fct* d2Phi,
 	const Real* _refCoor,const SetOfQuadRule& sqr,PatternType _patternType,

@@ -44,9 +44,11 @@
 namespace LifeV
 {
 template<typename TheMesh, typename TheDof, typename TheFem, typename GeoMap>
-void wr_gmsh_parsed(string fname, string title,const  TheMesh& mesh, const TheDof& dof, const TheFem& fem, const GeoMap& geo, vector<Real> U)
+void wr_gmsh_parsed(std::string fname, std::string title, const  TheMesh& mesh,
+                    const TheDof& dof, const TheFem& fem, const GeoMap& geo,
+                    std::vector<Real> U)
 {
- ofstream ofile(fname.c_str());
+ std::ofstream ofile(fname.c_str());
 
  ASSERT(ofile,"Error: Output file cannot be open"); //
 
@@ -66,13 +68,13 @@ void wr_gmsh_parsed(string fname, string title,const  TheMesh& mesh, const TheDo
  UInt cells_size;
  UInt num_points =  dof.numTotalDof(); // discuterne con Luca
  UInt num_points_supp =  dof.numTotalDof() - nv; // discuterne con Luca
- vector<Real> supp_x(num_points_supp,0.0);
- vector<Real> supp_y(num_points_supp,0.0);
- vector<Real> supp_z(num_points_supp,0.0);
+ std::vector<Real> supp_x(num_points_supp,0.0);
+ std::vector<Real> supp_y(num_points_supp,0.0);
+ std::vector<Real> supp_z(num_points_supp,0.0);
  Real x,y,z;
  char virgole='"';
 
- ofile << "View "<< virgole<<title<<virgole<< "{" << endl;
+ ofile << "View "<< virgole<<title<<virgole<< "{" << std::endl;
 
   UInt i,ie,index,j;
   UInt gcount;
@@ -80,7 +82,7 @@ void wr_gmsh_parsed(string fname, string title,const  TheMesh& mesh, const TheDo
 
   // Vertex based Dof: the coordinates are available from the Pont List
  for(i=0;i<nv;++i)
-  ofile << "SP("<<mesh.pointList[i].x() << "," <<  mesh.pointList[i].y() << "," <<  mesh.pointList[i].z()<<")"<<"{"<<U[i]<<"};" << endl;
+  ofile << "SP("<<mesh.pointList[i].x() << "," <<  mesh.pointList[i].y() << "," <<  mesh.pointList[i].z()<<")"<<"{"<<U[i]<<"};" << std::endl;
 
  // Now I store the coordinates of the supplementary nodes in a temporary vector
   // Edge Based Dof
@@ -129,7 +131,7 @@ void wr_gmsh_parsed(string fname, string title,const  TheMesh& mesh, const TheDo
   }
 
  for(i=nv;i<nv+num_points_supp;++i){
-  ofile << "SP("<<supp_x[i-nv] << "," << supp_y[i-nv] << "," << supp_z[i-nv]<<")"<<"{"<<U[i]<<"};" << endl;
+  ofile << "SP("<<supp_x[i-nv] << "," << supp_y[i-nv] << "," << supp_z[i-nv]<<")"<<"{"<<U[i]<<"};" << std::endl;
  }
 
  for (ie=1; ie<= nV; ++ie){
@@ -137,8 +139,8 @@ void wr_gmsh_parsed(string fname, string title,const  TheMesh& mesh, const TheDo
 
  }
 
- ofile << endl;
- ofile << "};" << endl;
+ ofile << std::endl;
+ ofile << "};" << std::endl;
 }
 }
 #endif

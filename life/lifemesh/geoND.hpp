@@ -72,7 +72,7 @@ public:
   //!Inserts a point. Uses pointers (bounds check)
   bool setPointBD(ID const i,Geo0D  const * p); //with forced bound check
 
-  ostream &  showMe(bool verbose=false, ostream & c=cout) const;
+  std::ostream &  showMe(bool verbose=false, std::ostream & c=std::cout) const;
 
   /*! Swap Points
 
@@ -225,22 +225,23 @@ bool  GeoND<GEOSHAPE,POINTTYPE>::setPointBD(UInt const i,Geo0D  const * p)
 
 
 template <typename GEOSHAPE,typename POINTTYPE>
-ostream &  GeoND<GEOSHAPE,POINTTYPE>::showMe(bool verbose,ostream & out) const
+std::ostream &  GeoND<GEOSHAPE,POINTTYPE>::
+showMe(bool verbose,std::ostream & out) const
 {
-  out << " GeoND object " <<endl;
-  out << " Number of Vertices=" << GEOSHAPE::numVertices<<endl;
-  out << " Number of Points=" << GEOSHAPE::numPoints<<endl;
-  out << "ID= "<< id()<<endl;
+  out << " GeoND object " <<std::endl;
+  out << " Number of Vertices=" << GEOSHAPE::numVertices<<std::endl;
+  out << " Number of Points=" << GEOSHAPE::numPoints<<std::endl;
+  out << "ID= "<< id()<<std::endl;
   if (verbose)
     {
-      out << " POINTS INFORMATION"<<endl<<endl;
+      out << " POINTS INFORMATION"<<std::endl<<std::endl;
       for (unsigned i=1 ; i<= GEOSHAPE::numVertices; i++)
 	{
-	  out << "POINT ID."<< i << endl;
+	  out << "POINT ID."<< i << std::endl;
 	  out << point(i).showMe(verbose,out);
 	}
     }
-  out << "----- END OF GeoND data ---"<<endl<<endl;
+  out << "----- END OF GeoND data ---"<<std::endl<<std::endl;
   return out;
 };
 

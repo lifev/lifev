@@ -142,7 +142,7 @@ public NavierStokesAleHandler<Mesh> {
 
 
   //! H diag matrix: H= diag( _M_u )/sum( diag( _M_u ) ) where _M_u = mass * rho / dt
-  vector<double>  _H;
+  std::vector<double>  _H;
 
   //! Elementary matrices and vectors
   ElemMat _elmatC; //velocity stiffnes
@@ -193,11 +193,11 @@ public NavierStokesAleHandler<Mesh> {
 
   //! DataFactorisation: data passed to matrix-vector product are stored in the class
   DataFactorisation< MSRMatr<double>, MixedMatr<1,3,CSRPatt,double>,
-    MixedMatr<3,1,CSRPatt,double>, vector<double>, MSRMatr<double>, Vector> _factor_data;
+    MixedMatr<3,1,CSRPatt,double>, std::vector<double>, MSRMatr<double>, Vector> _factor_data;
 
   //! DataFactorisation: data passed to matrix-vector product are stored in the class
   DataFactorisation< MSRMatr<double>, MixedMatr<1,3,CSRPatt,double>,
-    MixedMatr<3,1,CSRPatt,double>, vector<double>, MSRMatr<double>, Vector> _factor_data_jacobian;
+    MixedMatr<3,1,CSRPatt,double>, std::vector<double>, MSRMatr<double>, Vector> _factor_data_jacobian;
 
 };
 
@@ -255,10 +255,10 @@ NavierStokesAleSolverPC(const GetPot& data_file, const RefFE& refFE_u, const Ref
      _factor_data_jacobian(_C,_D,_trD,_H,_HinvC,_HinvDtr,_invCtrDP,_dataAztec_i,_dataAztec_s,_BCh_u.fullEssential(),2) {
 
 
-  cout << endl;
-  cout << "O-  Pressure unknowns: " << _dim_p     << endl;
-  cout << "O-  Velocity unknowns: " << _dim_u     << endl<<endl;
-  cout << "O-  Computing mass matrix... ";
+  std::cout << std::endl;
+  std::cout << "O-  Pressure unknowns: " << _dim_p     << std::endl;
+  std::cout << "O-  Velocity unknowns: " << _dim_u     << std::endl<<std::endl;
+  std::cout << "O-  Computing mass matrix... ";
 
   Chrono chrono;
   chrono.start();
@@ -282,7 +282,7 @@ NavierStokesAleSolverPC(const GetPot& data_file, const RefFE& refFE_u, const Ref
   }
 
   chrono.stop();
-  cout << "done in " << chrono.diff() << " s." << endl;
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
 }
 
 
@@ -291,13 +291,13 @@ template<typename Mesh>
 void NavierStokesAleSolverPC<Mesh>::
 timeAdvance(const Function source, const Real& time) {
 
-  cout << endl;
-  cout << "O== FLUID: Now we are at time "<< time << " s." << endl;
+  std::cout << std::endl;
+  std::cout << "O== FLUID: Now we are at time "<< time << " s." << std::endl;
 
   // Number of velocity components
   UInt nc_u=_u.nbcomp();
 
-  cout << "  o-  Updating mass term on right hand side... ";
+  std::cout << "  o-  Updating mass term on right hand side... ";
 
   Chrono chrono;
   chrono.start();
@@ -321,7 +321,7 @@ timeAdvance(const Function source, const Real& time) {
   _un = _u;
 
   chrono.stop();
-  cout << "done in " << chrono.diff() << " s." << endl;
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
 }
 
 
@@ -334,7 +334,7 @@ iterate(const Real& time) {
   // Number of velocity components
   UInt nc_u=_u.nbcomp();
 
-  cout << "  o-  Updating matrices... ";
+  std::cout << "  o-  Updating matrices... ";
 
   chrono.start();
 
@@ -411,19 +411,19 @@ iterate(const Real& time) {
     _H[i]=_H[i]*dti/sum;
 
   chrono.stop();
-  cout << "done in "<< chrono.diff() << "s." << endl;
+  std::cout << "done in "<< chrono.diff() << "s." << std::endl;
 
 
   // for BC treatment (done at each time-step)
   Real tgv=1.e02;
 
-  cout << "  o-  Applying boundary conditions... ";
+  std::cout << "  o-  Applying boundary conditions... ";
   chrono.start();
   _f_u=_f_uWithOutBC;
   _BCh_u.bdUpdate(_mesh, _feBd_u, _dof_u);
   bc_manage(_C, _trD, _f_u, _mesh, _dof_u, _BCh_u, _feBd_u, tgv, time);
   chrono.stop();
-  cout << "done in " << chrono.diff() << "s." << endl;
+  std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
    //matrices HinvDtr:
   MultInvDiag(_H, _trD, _HinvDtr);
@@ -467,12 +467,12 @@ iterate(const Real& time) {
   // ---------------
 
   // intermediate velocity computation
-  cout << "  o-  Solving system (i)... ";
+  std::cout << "  o-  Solving system (i)... ";
   chrono.start();
   AZ_iterate(_u.giveVec(), _f_u.giveVec(), options_i,params_i, status_i,
   	     proc_config_i, C, prec_C, NULL);
   chrono.stop();
-  cout << "done in " << chrono.diff() << " s." << endl;
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
 
   // --------------------------------------------
@@ -498,13 +498,13 @@ iterate(const Real& time) {
   // are passed through A_ii and pILU_ii:
   AZ_set_MATFREE(A_ii, &_factor_data,
 		 my_matvec< MixedMatr<1,3,CSRPatt,double>, MixedMatr<3,1,CSRPatt,double>,
-		 vector<double>, MSRMatr<double>, Vector >);
+		 std::vector<double>, MSRMatr<double>, Vector >);
 
   pILU_ii= AZ_precond_create(A_ii, my_precSchur_PC<
 			     MSRMatr<double>,
 			     MixedMatr<1,3,CSRPatt,double>,
 			     MixedMatr<3,1,CSRPatt,double>,
-			     vector<double>,
+			     std::vector<double>,
 			     MSRMatr<double>,
 			     Vector>, &_factor_data);
 
@@ -530,14 +530,14 @@ iterate(const Real& time) {
     _p[_dim_p-1] = 1.0; // pressure value at the last node.
   }
 
-  cout << "  o-  Solving pressure system... ";
+  std::cout << "  o-  Solving pressure system... ";
   chrono.start();
   AZ_iterate(_p.giveVec(), &vec_DV[0],  options_ii,params_ii, status_ii,
        proc_config_ii, A_ii, pILU_ii, NULL);
 
 
   chrono.stop();
-  cout << "done in " << chrono.diff() << " s." << endl;
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
   // ----------------------------
   // (iii) V = V-(C^(-1)*trD) * P
@@ -545,7 +545,7 @@ iterate(const Real& time) {
 
   // everything is done...
   _u = _u - _invCtrDP;
-  cout << "  o-  Velocity updated" << endl;
+  std::cout << "  o-  Velocity updated" << std::endl;
 
   AZ_matrix_destroy(&A_ii);
   AZ_precond_destroy(&pILU_ii);
@@ -570,13 +570,13 @@ iterateTransp(const Real& time) {
   // for BC treatment (done at each time-step)
   Real tgv=1.e02;
 
-  cout << "  o-  Applying boundary conditions... ";
+  std::cout << "  o-  Applying boundary conditions... ";
   chrono.start();
   _f_u=_f_uWithOutBC;
   _BCh_u.bdUpdate(_mesh, _feBd_u, _dof_u);
   bc_manage(_C, _trD, _f_u, _mesh, _dof_u, _BCh_u, _feBd_u, tgv, time);
   chrono.stop();
-  cout << "done in " << chrono.diff() << "s." << endl;
+  std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
 
   // ---------------
@@ -619,12 +619,12 @@ iterateTransp(const Real& time) {
   // ---------------
 
   // intermediate velocity computation
-  cout << "  o-  Solving system (i)... ";
+  std::cout << "  o-  Solving system (i)... ";
   chrono.start();
   AZ_iterate(_u.giveVec(), _f_u.giveVec(), options_i,params_i, status_i,
   	     proc_config_i, C, prec_C, NULL);
   chrono.stop();
-  cout << "done in " << chrono.diff() << " s." << endl;
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
 
   // --------------------------------------------
@@ -650,13 +650,13 @@ iterateTransp(const Real& time) {
   // are passed through A_ii and pILU_ii:
   AZ_set_MATFREE(A_ii, &_factor_data,
 		 my_matvec< MixedMatr<1,3,CSRPatt,double>, MixedMatr<3,1,CSRPatt,double>,
-		 vector<double>, MSRMatr<double>, Vector >);
+		 std::vector<double>, MSRMatr<double>, Vector >);
 
   pILU_ii= AZ_precond_create(A_ii, my_precSchur_PC<
 			     MSRMatr<double>,
 			     MixedMatr<1,3,CSRPatt,double>,
 			     MixedMatr<3,1,CSRPatt,double>,
-			     vector<double>,
+			     std::vector<double>,
 			     MSRMatr<double>,
 			     Vector>, &_factor_data);
 
@@ -678,14 +678,14 @@ iterateTransp(const Real& time) {
     _p[_dim_p-1] = 1.0; // pressure value at the last node.
   }
 
-  cout << "  o-  Solving pressure system... ";
+  std::cout << "  o-  Solving pressure system... ";
   chrono.start();
   AZ_iterate(_p.giveVec(), &vec_DV[0],  options_ii,params_ii, status_ii,
        proc_config_ii, A_ii, pILU_ii, NULL);
 
 
   chrono.stop();
-  cout << "done in " << chrono.diff() << " s." << endl;
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
   // ----------------------------
   // (iii) V = V-(C^(-1)*trD) * P
@@ -693,7 +693,7 @@ iterateTransp(const Real& time) {
 
   // everything is done...
   _u = _u - _invCtrDP;
-  cout << "  o-  Velocity updated" << endl;
+  std::cout << "  o-  Velocity updated" << std::endl;
 
   AZ_matrix_destroy(&A_ii);
   AZ_precond_destroy(&pILU_ii);
@@ -718,9 +718,9 @@ iterateLin(const Real& time, BC_Handler& BCh_du) {
   // Number of velocity components
   UInt nc_u=_u.nbcomp(), iloc, ig;
 
-  cout << "  OOO-  LINEARIZED FLUID SYSTEM\n\n";
+  std::cout << "  OOO-  LINEARIZED FLUID SYSTEM\n\n";
 
-  cout << "    o-  Updating right hand side... ";
+  std::cout << "    o-  Updating right hand side... ";
 
   //
   // RIGHT HAND SIDE FOR THE LINEARIZED ALE SYSTEM
@@ -795,14 +795,14 @@ iterateLin(const Real& time, BC_Handler& BCh_du) {
   }
 
   chrono.stop();
-  cout << "done in "<< chrono.diff() << "s." << endl;
+  std::cout << "done in "<< chrono.diff() << "s." << std::endl;
 
-  cout << "  maxnorm (_f_duWithOutBC) = " <<  maxnorm(_f_duWithOutBC)   << endl;
+  std::cout << "  maxnorm (_f_duWithOutBC) = " <<  maxnorm(_f_duWithOutBC)   << std::endl;
 
   // for BC treatment (done at each time-step)
   Real tgv=1.e02;
 
-  cout << "    o-  Applying boundary conditions... ";
+  std::cout << "    o-  Applying boundary conditions... ";
   chrono.start();
   _C   = _CAux;
   _trD = _trDAux;
@@ -816,9 +816,9 @@ iterateLin(const Real& time, BC_Handler& BCh_du) {
 
 
   chrono.stop();
-  cout << "done in " << chrono.diff() << "s." << endl;
-  cout << "  maxnorm (_f_du) after BC= " <<  maxnorm(_f_u)   << endl;
-  cout << "  maxnorm ( difference ) after BC= " <<  maxnorm( _f_duWithOutBC - _f_u)   << endl;
+  std::cout << "done in " << chrono.diff() << "s." << std::endl;
+  std::cout << "  maxnorm (_f_du) after BC= " <<  maxnorm(_f_u)   << std::endl;
+  std::cout << "  maxnorm ( difference ) after BC= " <<  maxnorm( _f_duWithOutBC - _f_u)   << std::endl;
 
   //matrices HinvDtr:
   MultInvDiag(_H, _trD, _HinvDtr);
@@ -867,12 +867,12 @@ iterateLin(const Real& time, BC_Handler& BCh_du) {
   _du=0.0;
 
   // intermediate velocity computation
-  cout << "  o-  Solving system (i)... ";
+  std::cout << "  o-  Solving system (i)... ";
   chrono.start();
   AZ_iterate(_du.giveVec(), _f_u.giveVec(), options_i,params_i, status_i,
   	     proc_config_i, C, prec_C, NULL);
   chrono.stop();
-  cout << "done in " << chrono.diff() << " s." << endl;
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
   //options_i[AZ_recursion_level]=0;
 
@@ -899,13 +899,13 @@ iterateLin(const Real& time, BC_Handler& BCh_du) {
   // are passed through A_ii and pILU_ii:
   AZ_set_MATFREE(A_ii, &_factor_data_jacobian,
 		 my_matvec< MixedMatr<1,3,CSRPatt,double>, MixedMatr<3,1,CSRPatt,double>,
-		 vector<double>, MSRMatr<double>, Vector >);
+		 std::vector<double>, MSRMatr<double>, Vector >);
 
   pILU_ii= AZ_precond_create(A_ii, my_precSchur_PC<
 			     MSRMatr<double>,
 			     MixedMatr<1,3,CSRPatt,double>,
 			     MixedMatr<3,1,CSRPatt,double>,
-			     vector<double>,
+			     std::vector<double>,
 			     MSRMatr<double>,
 			     Vector>, &_factor_data_jacobian);
 
@@ -933,10 +933,10 @@ iterateLin(const Real& time, BC_Handler& BCh_du) {
   _dp=0.0;
 
 
-  cout << "  o-  Solving pressure system... \n";
-  cout << "  maxnorm (vec_DV) = " <<  maxnorm(vec_DV) << endl;
-  cout << "  maxnorm (_f_p) = " <<  maxnorm(_f_p)   << endl;
-  cout << "  maxnorm (_D*_du ) = " <<  maxnorm(_D*_du) << endl;
+  std::cout << "  o-  Solving pressure system... \n";
+  std::cout << "  maxnorm (vec_DV) = " <<  maxnorm(vec_DV) << std::endl;
+  std::cout << "  maxnorm (_f_p) = " <<  maxnorm(_f_p)   << std::endl;
+  std::cout << "  maxnorm (_D*_du ) = " <<  maxnorm(_D*_du) << std::endl;
 
   chrono.start();
   options_ii[AZ_recursion_level]=1;
@@ -946,14 +946,14 @@ iterateLin(const Real& time, BC_Handler& BCh_du) {
 
   chrono.stop();
 
-  cout << "done in " << chrono.diff() << " s." << endl;
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
   //options_ii[AZ_recursion_level]=0;
 
   // ----------------------------
   // (iii) V = V-(C^(-1)*trD) * P
   // ----------------------------
   _du = _du - _invCtrDP;
-  cout << "  o-  Velocity updated" << endl;
+  std::cout << "  o-  Velocity updated" << std::endl;
 
   AZ_matrix_destroy(&A_ii);
   AZ_precond_destroy(&pILU_ii);
@@ -962,7 +962,7 @@ iterateLin(const Real& time, BC_Handler& BCh_du) {
 
   _residual_u = _f_duWithOutBC - _CAux * _du - _trDAux   * _dp;
 
-  cout << "  maxnorm (_residual_du ) = " <<  maxnorm( _residual_u ) << endl;
+  std::cout << "  maxnorm (_residual_du ) = " <<  maxnorm( _residual_u ) << std::endl;
 }
 
 

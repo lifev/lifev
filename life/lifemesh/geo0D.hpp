@@ -98,7 +98,7 @@ class Geo0D:
     return _coor[i-1];
   }
   //! Useful for debugging
-  ostream &  showMe(bool verbose=false, ostream & c=cout) const;
+  std::ostream &  showMe(bool verbose=false, std::ostream & c=std::cout) const;
 
 private:
   Real _coor[nDimensions];

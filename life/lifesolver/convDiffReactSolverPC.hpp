@@ -149,7 +149,7 @@ ConvDiffReactSolverPC(const GetPot& data_file, const RefFE& refFE_c, const QuadR
      _f_c(_dim_c),
      _dataAztec_o(data_file,"masstransport/aztec_o"){
 
-  std::cout << endl;
+  std::cout << std::endl;
   std::cout << "O-  Concentration unknowns: " << _dim_c     << std::endl;
   std::cout << "O-  Computing mass and stiffness matrices... ";
 
@@ -167,7 +167,7 @@ ConvDiffReactSolverPC(const GetPot& data_file, const RefFE& refFE_c, const QuadR
   // *******************************************************
   // Coefficient of the mass term at time t^{n+1}
   Real first_coeff = _bdf.coeff_der(0);
-  std::cout << endl;
+  std::cout << std::endl;
   std::cout << "Bdf CDR first coeff " << first_coeff << std::endl;
 
   _bdf.showMe();
@@ -648,8 +648,8 @@ test(Real x[4], Real y[4], Real z[4], Real & xp, Real & yp, Real & zp, Real & b1
 
 //  Solve the equation system (without loop - faster)
 
-        if(abs(a11) < max(abs(a21),abs(a31))){
-          if(abs(a21) > abs(a31)){
+    if(fabs(a11) < std::max<Real>(fabs(a21),fabs(a31))){
+      if(fabs(a21) > fabs(a31)){
 	     zw  = a11;
 	     a11 = a21;
 	     a21 = zw;
@@ -685,7 +685,7 @@ test(Real x[4], Real y[4], Real z[4], Real & xp, Real & yp, Real & zp, Real & b1
         a33 = a33 - zw * a13;
         b3  = b3  - zw * b1;
 
-        if(abs(a32) > abs(a22)){
+        if(fabs(a32) > fabs(a22)){
 	   zw  = a22;
 	   a22 = a32;
 	   a32 = zw;

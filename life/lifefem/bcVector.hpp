@@ -85,7 +85,7 @@ class BCVector_Base {
 
 
    //! Output
-   virtual ostream &  showMe(bool verbose=false, ostream & out=cout) const =0;
+   virtual std::ostream &  showMe(bool verbose=false, std::ostream & out=std::cout) const =0;
 
  protected:
 
@@ -147,7 +147,7 @@ class BCVector:
   BCVector & operator=(const BCVector & BCv);
 
   //! Output
-  ostream &  showMe(bool verbose=false, ostream & out=cout) const;
+  std::ostream &  showMe(bool verbose=false, std::ostream & out=std::cout) const;
 };
 
 // ============ BCVector_Interface ================
@@ -194,7 +194,7 @@ class BCVector_Interface:
 
 
    //! Output
-   ostream &  showMe(bool verbose=false, ostream & out=cout) const;
+   std::ostream &  showMe(bool verbose=false, std::ostream & out=std::cout) const;
 
  protected:
 

@@ -49,7 +49,7 @@ class Bdf
   // ! Inizialize all the entries of the unknown vector to be derived with the vector u0 (duplicated)
   void initialize_unk(Vector u0);
   // ! Inizialize all the entries of the unknown vector to be derived with a set of vectors uv0
-  void initialize_unk(vector<Vector > uv0);
+  void initialize_unk(std::vector<Vector > uv0);
   // ! Initialize alle the entries of the unknonwn vectors with a given function
 template<typename Mesh,typename RefFE, typename CurrFE, typename Dof>
   void initialize_unk(const Funct& u0,Mesh& mesh,RefFE& refFE, CurrFE& currFE, Dof& dof, Real t0, Real dt, UInt nbComp);
@@ -73,7 +73,7 @@ template<typename Mesh,typename RefFE, typename CurrFE, typename Dof>
   // ! Return the i-th coefficient of the time extrapolation
   double coeff_ext(UInt i);
 
-  vector<Vector> unk();
+  std::vector<Vector> unk();
 
   void showMe();
 
@@ -90,7 +90,7 @@ template<typename Mesh,typename RefFE, typename CurrFE, typename Dof>
   // ! Coefficients of the  extrapolation: u(t^{n+1}) = beta(0) u^{n}+beta(1) u^{n-1} + beta(2) u^{n-2} + ...
   Vector _beta;
 
-  vector<Vector > _unk; // Unknown solutions stored
+  std::vector<Vector > _unk; // Unknown solutions stored
 };
 
 
@@ -124,8 +124,8 @@ void Bdf::initialize_unk(const Funct& u0,Mesh& mesh,RefFE& refFE, CurrFE& currFE
   UInt nDofElemE = nElemE*nDofpE; // number of edge's Dof on a Element
   UInt nDofElemF = nElemF*nDofpF; // number of face's Dof on a Element
 
-  vector< Vector >::iterator iter=_unk.begin();
-  vector< Vector >::iterator iter_end=_unk.end();
+  std::vector< Vector >::iterator iter=_unk.begin();
+  std::vector< Vector >::iterator iter_end=_unk.end();
 
 
   UInt size_comp=dof.numTotalDof();
@@ -163,9 +163,9 @@ void Bdf::initialize_unk(const Funct& u0,Mesh& mesh,RefFE& refFE, CurrFE& currFE
 
 	  // Loop on data vector components ****************
           backtime=0;
-          for (vector<Vector>::iterator it=_unk.begin();it<_unk.end();it++){
+          for (std::vector<Vector>::iterator it=_unk.begin();it<_unk.end();it++){
 	    for (UInt icmp=0; icmp < nbComp; ++icmp){
-	      //              cout << "comp " << icmp*size_comp + dof.localToGlobal(iElem,lDof) - 1 << endl;
+	      //              std::cout << "comp " << icmp*size_comp + dof.localToGlobal(iElem,lDof) - 1 << std::endl;
 	     (*it)( icmp*size_comp + dof.localToGlobal(iElem,lDof) - 1 ) = u0(t0-backtime*dt,x,y,z,icmp+1);
              backtime++;
 	    }
@@ -189,7 +189,7 @@ void Bdf::initialize_unk(const Funct& u0,Mesh& mesh,RefFE& refFE, CurrFE& currFE
 
 	  // Loop on data vector components
           backtime=0;
-          for (vector<Vector>::iterator it=_unk.begin();it<_unk.end();it++){
+          for (std::vector<Vector>::iterator it=_unk.begin();it<_unk.end();it++){
 	    for (UInt icmp=0; icmp < nbComp; ++icmp){
 	     (*it)( icmp*size_comp + dof.localToGlobal(iElem,lDof) - 1 ) = u0(t0-backtime*dt,x,y,z,icmp+1);
              backtime++;
@@ -215,7 +215,7 @@ void Bdf::initialize_unk(const Funct& u0,Mesh& mesh,RefFE& refFE, CurrFE& currFE
 
 	  // Loop on data vector components
           backtime=0;
-          for (vector<Vector>::iterator it=_unk.begin();it<_unk.end();it++){
+          for (std::vector<Vector>::iterator it=_unk.begin();it<_unk.end();it++){
 	    for (UInt icmp=0; icmp < nbComp; ++icmp){
 	     (*it)( icmp*size_comp + dof.localToGlobal(iElem,lDof) - 1 ) = u0(t0-backtime*dt,x,y,z,icmp+1);
              backtime++;
@@ -235,7 +235,7 @@ void Bdf::initialize_unk(const Funct& u0,Mesh& mesh,RefFE& refFE, CurrFE& currFE
 
       // Loop on data vector components
           backtime=0;
-          for (vector<Vector>::iterator it=_unk.begin();it<_unk.end();it++){
+          for (std::vector<Vector>::iterator it=_unk.begin();it<_unk.end();it++){
 	    for (UInt icmp=0; icmp < nbComp; ++icmp){
 	     (*it)( icmp*size_comp + dof.localToGlobal(iElem,lDof) - 1 ) = u0(t0-backtime*dt,x,y,z,icmp+1);
              backtime++;

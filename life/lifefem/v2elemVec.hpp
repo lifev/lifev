@@ -51,7 +51,7 @@ vec2elemVec(Vector& V,ElemVec& elvec,const CurrentFE& fe, const DOF& dof,
   const DOF& dof)
   {
   if(elvec.nBlockRow()!=1){
-  cout << "assemble for vector elem vec not yet implemented\n";
+  std::cout << "assemble for vector elem vec not yet implemented\n";
   exit(1);
   }
   Tab1dView vec=elvec.block(0);

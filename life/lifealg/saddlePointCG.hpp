@@ -151,11 +151,11 @@ int SaddlePointCG<OpA,OpB,Prec,Vector>::solveDualRHS(Vector& y,
   double tol = _tol;
   i = CG( (*this) , y , b , (*_P) , maxit , tol);
   if(i)
-    cout << "SaddlePointCG::solveDualRHS --> Convergence failed ! max iter = "
-	 << maxit << ", tolerance = " << tol << endl;
+    std::cout << "SaddlePointCG::solveDualRHS --> Convergence failed ! max iter = "
+	 << maxit << ", tolerance = " << tol << std::endl;
   else
-    cout << "SaddlePointCG::solveDualRHS --> iter = "
-	 << maxit << ", tolerance = " << tol << endl;
+    std::cout << "SaddlePointCG::solveDualRHS --> iter = "
+	 << maxit << ", tolerance = " << tol << std::endl;
   return i;
 }
 //----------------------------------------
@@ -170,10 +170,10 @@ int SaddlePointCG<OpA,OpB,Prec,Vector>::solveDual(Vector& y,
   double tol = _tol;
   i = CG( (*this) , y , (*_B) * x - g , (*_P) , maxit , tol);
   if(i)
-    cout << "SaddlePointCG::solveDual --> Convergence failed ! max iter = "
-	 << maxit << ", tolerance = " << tol << endl;
+    std::cout << "SaddlePointCG::solveDual --> Convergence failed ! max iter = "
+	 << maxit << ", tolerance = " << tol << std::endl;
   else
-    cout << "SaddlePointCG::solveDual --> iter = " << maxit << ", tolerance = " << tol << endl;
+    std::cout << "SaddlePointCG::solveDual --> iter = " << maxit << ", tolerance = " << tol << std::endl;
   return i;
 }
 
@@ -189,11 +189,11 @@ int SaddlePointCG<OpA,OpB,Prec,Vector>::solveDual(Vector& y,
   double tol = _tol;
   i = CG( (*this) , y , (*_B) * x, (*_P) , maxit , tol);
   if(i)
-    cout << "SaddlePointCG::solveDual --> Convergence failed ! max iter = "
-	 << maxit <<", tolerance = " << tol << endl;
+    std::cout << "SaddlePointCG::solveDual --> Convergence failed ! max iter = "
+	 << maxit <<", tolerance = " << tol << std::endl;
   else
-    cout << "SaddlePointCG::solveDual --> iter = " << maxit
-	 << ", tolerance = " << tol << endl;
+    std::cout << "SaddlePointCG::solveDual --> iter = " << maxit
+	 << ", tolerance = " << tol << std::endl;
   return i;
 }
 }

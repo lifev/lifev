@@ -133,7 +133,7 @@ Real checkVolumes(RegionMesh3D const & mesh, SimpleVect<bool> & elSign, Switch &
 /*!
   \brief Fixes  negative volume elements.
 
-  Given a vector<bool> indicating negative elements, it inverts those that
+  Given a std::vector<bool> indicating negative elements, it inverts those that
   have been found negative.
 
   \param mesh A 3D mesh. It will be modified.
@@ -179,7 +179,7 @@ void fixVolumes(RegionMesh3D & mesh, const SimpleVect<bool> & elSign, Switch & s
   A 3D mesh \param vols returns 3 Real corresponding to the 3 integrals
 */
 template <typename RegionMesh3D>
-void getVolumeFromFaces(RegionMesh3D const & mesh, Real vols[3],ostream & err=cerr)
+void getVolumeFromFaces(RegionMesh3D const & mesh, Real vols[3],std::ostream & err=std::cerr)
 {
   GetCoordComponent getx(0);
   GetCoordComponent gety(1);
@@ -220,7 +220,7 @@ void getVolumeFromFaces(RegionMesh3D const & mesh, Real vols[3],ostream & err=ce
   The value returned  should be very proximal to zero
  */
 template <typename RegionMesh3D>
-Real testClosedDomain(RegionMesh3D const & mesh,ostream & err=cerr)
+Real testClosedDomain(RegionMesh3D const & mesh,std::ostream & err=std::cerr)
 {
   typedef typename RegionMesh3D::FaceType FaceType;
 
@@ -280,7 +280,7 @@ Real testClosedDomain(RegionMesh3D const & mesh,ostream & err=cerr)
 template <typename RegionMesh3D>
 bool checkMesh3D(RegionMesh3D & mesh, Switch & sw,
 		       bool fix=true, bool verbose=false,
-		       ostream & out=cerr, ostream & err=cerr, ostream & clog=cout){
+		       std::ostream & out=std::cerr, std::ostream & err=std::cerr, std::ostream & clog=std::cout){
 
   if(mesh.storedPoints()==0){
     err<<"FATAL: mesh does not store points: I cannot do anything"<<std::endl;
@@ -526,7 +526,7 @@ bool checkMesh3D(RegionMesh3D & mesh, Switch & sw,
       err<<" **FIXED"<<std::endl;
       mesh.numEdges()=Ned;
     }
-    cerr<<std::endl;
+    std::cerr<<std::endl;
   }
   UInt nbed;
   UInt counte=testClosedDomain_Top(mesh,nbed);
@@ -558,7 +558,7 @@ bool checkMesh3D(RegionMesh3D & mesh, Switch & sw,
   if (! checkMarkerSet(mesh.pointList)){
     err<<"WARNING B. Points MARKER incorrectly set"<<std::endl;
     if (fix){
-      setBPointsMarker(mesh, clog, cerr, verbose);
+      setBPointsMarker(mesh, clog, std::cerr, verbose);
       if (! checkMarkerSet(mesh.pointList)){
 	err<<"Cannot Fix Points MARKER"<<std::endl;
 	sw.create("POINT_MARKER_UNSET",true);

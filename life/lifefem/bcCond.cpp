@@ -74,8 +74,8 @@ Real BCFunction_Mixte::coef(const Real& t, const Real& x, const Real& y,
 
 // ============ BC_Base ================
 //! Constructor for BC
-BC_Base::BC_Base(const string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
-		 BCFunction_Base& bcf, const vector<ID>& comp){
+BC_Base::BC_Base(const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
+		 BCFunction_Base& bcf, const std::vector<ID>& comp){
   _name = name;
   _flag = flag;
   _type = type;
@@ -103,7 +103,7 @@ BC_Base::BC_Base(const string& name, const EntityFlag& flag, const BCType& type,
 }
 
 //! Constructor for BC without components for Scalar, Tangential or Normal  mode problems
-BC_Base::BC_Base(const string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
+BC_Base::BC_Base(const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
 		 BCFunction_Base& bcf) {
   _name = name;
   _flag = flag;
@@ -148,7 +148,7 @@ BC_Base::BC_Base(const string& name, const EntityFlag& flag, const BCType& type,
 
 
 //! Constructor for BC without list of components for Full mode problems
-BC_Base::BC_Base(const string& name, const EntityFlag& flag, const BCType& type,
+BC_Base::BC_Base(const std::string& name, const EntityFlag& flag, const BCType& type,
 	const BCMode& mode, BCFunction_Base& bcf, const UInt& nComp){
   _name = name;
   _flag = flag;
@@ -181,8 +181,8 @@ BC_Base::BC_Base(const string& name, const EntityFlag& flag, const BCType& type,
 
 
 //! Constructor for BC with data vector
-BC_Base::BC_Base(const string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
-		 BCVector_Base& bcv, const vector<ID>& comp){
+BC_Base::BC_Base(const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
+		 BCVector_Base& bcv, const std::vector<ID>& comp){
   _name = name;
   _flag = flag;
   _type = type;
@@ -202,7 +202,7 @@ BC_Base::BC_Base(const string& name, const EntityFlag& flag, const BCType& type,
 }
 
 //! Constructor for BC with data vector, without components for Scalar, Tangential or Normal  mode problems
-BC_Base::BC_Base(const string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
+BC_Base::BC_Base(const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
 		 BCVector_Base& bcv) {
   _name = name;
   _flag = flag;
@@ -246,7 +246,7 @@ BC_Base::BC_Base(const string& name, const EntityFlag& flag, const BCType& type,
 
 
 //! Constructor for BC with data vector, without list of components for Full mode problems
-BC_Base::BC_Base(const string& name, const EntityFlag& flag, const BCType& type,
+BC_Base::BC_Base(const std::string& name, const EntityFlag& flag, const BCType& type,
 	const BCMode& mode, BCVector_Base& bcv, const UInt& nComp){
   _name = name;
   _flag = flag;
@@ -387,7 +387,7 @@ BC_Base::BC_Base(const BC_Base& BCb) {
 }
 
 //! Returns the BC name
-string BC_Base::name() const { return _name; }
+std::string BC_Base::name() const { return _name; }
 
 //! Returns the BC associated flag
 EntityFlag BC_Base::flag() const { return _flag; }
@@ -448,7 +448,7 @@ Real BC_Base::MixteCoef() const{
     ERROR_MSG("A data vector must be specified before calling this method");
     return 0.;
   }
-  
+
 }
 
 //! Returns a pointer  to the i-th elements in the (finalised) list
@@ -489,35 +489,35 @@ void BC_Base::finalise()
 UInt BC_Base::list_size() const { return _idList.size();}
 
 //! Output
-ostream& BC_Base::showMe(bool verbose, ostream & out) const {
-  out << "********************************"<<endl;
-  out << "BC Name: " << _name << endl;
-  out << "Flag: " << _flag << endl;
-  out << "Type: " << _type << endl;
-  out << "Mode: " << _mode << endl;
-  out << "Number of components: " <<_comp.size() <<endl;
+std::ostream& BC_Base::showMe(bool verbose, std::ostream & out) const {
+  out << "********************************"<<std::endl;
+  out << "BC Name: " << _name << std::endl;
+  out << "Flag: " << _flag << std::endl;
+  out << "Type: " << _type << std::endl;
+  out << "Mode: " << _mode << std::endl;
+  out << "Number of components: " <<_comp.size() <<std::endl;
   out << "List of components: ";
   for (Index_t i=0; i<_comp.size(); ++i)
     out << _comp[i] <<" ";
-  out << endl;
-  out << "Number of stored ID's: " << _idList.size() << endl;
+  out << std::endl;
+  out << "Number of stored ID's: " << _idList.size() << std::endl;
 
   if (verbose && _finalised){
     unsigned int count(0),lines(10);
     out << "IDs in list";
-    for (vector<Identifier_Base*>::const_iterator i= _idList.begin(); i != _idList.end(); i++){
+    for (std::vector<Identifier_Base*>::const_iterator i= _idList.begin(); i != _idList.end(); i++){
       if (count++ % lines ==0){
-	out << endl;
+	out << std::endl;
       }
       out<< (*i)->id() <<"  ";
     }
-    if (count % lines !=0){ out<<endl;}
+    if (count % lines !=0){ out<<std::endl;}
     if ( dataVector() ){
       _bcv->showMe(verbose, out);
     }
   }
 
-  out << "********************************" << endl;
+  out << "********************************" << std::endl;
   return out;
 }
 
@@ -560,8 +560,8 @@ bool BC_Handler::empty() const {
 }
 
 //! Adding new BC to the list with user defined functions
-void BC_Handler::addBC(const string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
-		       BCFunction_Base& bcf, const vector<ID>& comp) {
+void BC_Handler::addBC(const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
+		       BCFunction_Base& bcf, const std::vector<ID>& comp) {
   if ( _nbc == _bcList.size() )
     ERROR_MSG("You cannot add another BC, the list of BC in the Handler is full");
   else if (_nbc == 0)
@@ -575,7 +575,7 @@ void BC_Handler::addBC(const string& name, const EntityFlag& flag, const BCType&
     // Sorting list of BC. Essential BC must be treated at the end !!!!
     sort(_bcList.begin(), _bcList.end());
 }
-void BC_Handler::addBC(const string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
+void BC_Handler::addBC(const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
 		       BCFunction_Base& bcf){
   if ( _nbc == _bcList.size() )
     ERROR_MSG("You cannot add another BC, the list of BC in the Handler is full");
@@ -591,7 +591,7 @@ void BC_Handler::addBC(const string& name, const EntityFlag& flag, const BCType&
     sort(_bcList.begin(), _bcList.end());
 }
 
-void BC_Handler::addBC(const string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
+void BC_Handler::addBC(const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
 		       BCFunction_Base& bcf, const UInt& nComp){
   if ( _nbc == _bcList.size() )
     ERROR_MSG("You cannot add another BC, the list of BC in the Handler is full");
@@ -609,8 +609,8 @@ void BC_Handler::addBC(const string& name, const EntityFlag& flag, const BCType&
 
 
 //! Adding new BC to the list with data vectors
-void BC_Handler::addBC(const string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
-		       BCVector_Base& bcv, const vector<ID>& comp) {
+void BC_Handler::addBC(const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
+		       BCVector_Base& bcv, const std::vector<ID>& comp) {
   if ( _nbc == _bcList.size() )
     ERROR_MSG("You cannot add another BC, the list of BC in the Handler is full");
   else if (_nbc == 0)
@@ -623,7 +623,7 @@ void BC_Handler::addBC(const string& name, const EntityFlag& flag, const BCType&
     // Sorting list of BC. Essential BC must be treated at the end !!!!
     sort(_bcList.begin(), _bcList.end());
 }
-void BC_Handler::addBC(const string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
+void BC_Handler::addBC(const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
 		        BCVector_Base& bcv){
   if ( _nbc == _bcList.size() )
     ERROR_MSG("You cannot add another BC, the list of BC in the Handler is full");
@@ -638,7 +638,7 @@ void BC_Handler::addBC(const string& name, const EntityFlag& flag, const BCType&
     sort(_bcList.begin(), _bcList.end());
 }
 
-void BC_Handler::addBC(const string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
+void BC_Handler::addBC(const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
 		       BCVector_Base& bcv, const UInt& nComp){
   if ( _nbc == _bcList.size() )
     ERROR_MSG("You cannot add another BC, the list of BC in the Handler is full");
@@ -678,17 +678,17 @@ const BC_Base& BC_Handler::operator[](const Index_t& i) const {
 
 
 //! Ouput
-ostream & BC_Handler::showMe(bool verbose, ostream & out) const
+std::ostream & BC_Handler::showMe(bool verbose, std::ostream & out) const
 {
-  out<< " Boundary Conditions Handler ====>"<<endl;
+  out<< " Boundary Conditions Handler ====>"<<std::endl;
   if ( _nbc != _bcList.size() )
     out<<" Some BC have not been added to the list\n";
-  out<< " Number of BC stored "<<size()<<endl;;
-  out<< " List => "<<endl;
+  out<< " Number of BC stored "<<size()<<std::endl;;
+  out<< " List => "<<std::endl;
   for(UInt i=0; i<_nbc; ++i){
     _bcList[i].showMe(verbose,out);
   }
-  out<< " <===========================>"<<endl;
+  out<< " <===========================>"<<std::endl;
 return out;
 }
 }

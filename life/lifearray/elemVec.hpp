@@ -66,7 +66,7 @@ public:
 	    super& __super = (super&)*this;
 	    __super = super(this->N(),0.0);
 	}
-    void showMe(ostream& c=cout);
+    void showMe(std::ostream& c=std::cout);
 };
 }
 

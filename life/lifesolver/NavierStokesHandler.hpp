@@ -44,7 +44,7 @@
 #include "openDX_wrtrs.hpp"
 #include <cmath>
 #include <sstream>
-#include <ext/slist> 
+#include <ext/slist>
 #include "SimpleVect.hpp"
 #include <utility>
 using std::pair;
@@ -135,7 +135,7 @@ public DataNavierStokes<Mesh> {
 
   //! Computes the flux on a given part of the boundary
   //! \param flag the mesh flag identifying the part of the mesh where the flux is computed
-  Real flux(const EntityFlag& flag); 
+  Real flux(const EntityFlag& flag);
 
   //! Do nothing destructor
   virtual ~NavierStokesHandler() {}
@@ -292,13 +292,13 @@ NavierStokesHandler<Mesh>::post_proc_set_phi()
 // Postprocessing
 template<typename Mesh>  void
 NavierStokesHandler<Mesh>::postProcess() {
-  ostringstream index;
-  string name;
+  std::ostringstream index;
+  std::string name;
 
   ++_count;
 
   if (fmod(float(_count),float(_verbose)) == 0.0) {
-    cout << "  o-  Post-processing \n";
+    std::cout << "  o-  Post-processing \n";
     index << (_count/_verbose);
 
     switch( index.str().size() ) {
@@ -490,7 +490,7 @@ NavierStokesHandler<Mesh>::initialize(const Function& u0, const Function& p0, Re
 template<typename Mesh> void
 NavierStokesHandler<Mesh>::initialize(const std::string & vname) {
 
-    std::fstream resfile(vname.c_str(),ios::in | ios::binary);
+    std::fstream resfile(vname.c_str(),std::ios::in | std::ios::binary);
     if (resfile.fail()) {std::cerr<<" Error in initialization: File not found or locked"<<std::endl; abort();}
     resfile.read((char*)&_u(1),_u.size()*sizeof(double));
     resfile.read((char*)&_p(1),_p.size()*sizeof(double));
@@ -506,48 +506,48 @@ NavierStokesHandler<Mesh>::initialize(const std::string & vname) {
 
 
 //! Computes the flux on a given part of the boundary
-template<typename Mesh> Real 
+template<typename Mesh> Real
 NavierStokesHandler<Mesh>::flux(const EntityFlag& flag) {
-  
+
   typedef  typename Mesh::VolumeShape GeoShape;
   typedef  typename Mesh::FaceShape GeoBShape;
-  
-  // Some useful local variables, to save some typing  
+
+  // Some useful local variables, to save some typing
   UInt nDofpV = _refFE_u.nbDofPerVertex; // number of Dof per vertices
   UInt nDofpE = _refFE_u.nbDofPerEdge;   // number of Dof per edges
   UInt nDofpF = _refFE_u.nbDofPerFace;   // number of Dof per faces
 
-  UInt nFaceV = GeoBShape::numVertices; // Number of face's vertices 
-  UInt nFaceE = GeoBShape::numEdges;    // Number of face's edges 
-  
-  UInt nElemV = GeoShape::numVertices; // Number of element's vertices 
+  UInt nFaceV = GeoBShape::numVertices; // Number of face's vertices
+  UInt nFaceE = GeoBShape::numEdges;    // Number of face's edges
+
+  UInt nElemV = GeoShape::numVertices; // Number of element's vertices
   UInt nElemE = GeoShape::numEdges;    // Number of element's edges
-  
-  UInt nDofFV = nDofpV * nFaceV; // number of vertex's Dof on a face 
-  UInt nDofFE = nDofpE * nFaceE; // number of edge's Dof on a face 
-  
-  UInt nDofF  = nDofFV+nDofFE+nDofpF; // number of total Dof on a face 
-  
+
+  UInt nDofFV = nDofpV * nFaceV; // number of vertex's Dof on a face
+  UInt nDofFE = nDofpE * nFaceE; // number of edge's Dof on a face
+
+  UInt nDofF  = nDofFV+nDofFE+nDofpF; // number of total Dof on a face
+
   UInt nDofElemV = nElemV*nDofpV; // number of vertex's Dof on a Element
   UInt nDofElemE = nElemE*nDofpE; // number of edge's Dof on a Element
 
   UInt bdnF  = _mesh.numBFaces();    // number of faces on boundary
 
   Real flux = 0.0;
-  slist<pair<ID, SimpleVect<ID> > > faces;
+  __gnu_cxx::slist<std::pair<ID, SimpleVect<ID> > > faces;
   ID ibF;
   UInt iElAd, iVeEl, iFaEl, iEdEl;
   ID lDof, gDof, numTotalDof=_dof_u.numTotalDof();
-  
+
   EntityFlag marker;
-  typedef slist<pair<ID, SimpleVect<ID> > >::iterator Iterator;
-  
+  typedef __gnu_cxx::slist<pair<ID, SimpleVect<ID> > >::iterator Iterator;
+
   //
-  // Loop on boundary faces: List of boundary faces 
-  // with marker = flag 
+  // Loop on boundary faces: List of boundary faces
+  // with marker = flag
   //
   for (ID i=1 ; i<=bdnF; ++i) {
-    marker = _mesh.boundaryFace(i).marker();    
+    marker = _mesh.boundaryFace(i).marker();
     if ( marker == flag  ) {
       faces.push_front(make_pair(i,SimpleVect<ID>(nDofF)));
     }
@@ -555,19 +555,19 @@ NavierStokesHandler<Mesh>::flux(const EntityFlag& flag) {
 
   //
   // Loop on faces: building the local to global vector
-  // for these boundary faces 
+  // for these boundary faces
   //
   for (Iterator j=faces.begin(); j != faces.end(); ++j) {
 
     ibF = j->first;
 
-    iElAd = _mesh.boundaryFace(ibF).ad_first();  // id of the element adjacent to the face 
+    iElAd = _mesh.boundaryFace(ibF).ad_first();  // id of the element adjacent to the face
     iFaEl = _mesh.boundaryFace(ibF).pos_first(); // local id of the face in its adjacent element
- 
-    // Vertex based Dof  
-    if ( nDofpV ) { 
-      
-      // loop on face vertices 
+
+    // Vertex based Dof
+    if ( nDofpV ) {
+
+      // loop on face vertices
       for (ID iVeFa=1; iVeFa<=nFaceV; ++iVeFa){
 	
 	iVeEl = GeoShape::fToP(iFaEl,iVeFa); // local vertex number (in element)
@@ -580,59 +580,59 @@ NavierStokesHandler<Mesh>::flux(const EntityFlag& flag) {
 	}
       }
     }
-    
-    // Edge based Dof 
-    if (nDofpE) { 
-      
-      // loop on face edges 
+
+    // Edge based Dof
+    if (nDofpE) {
+
+      // loop on face edges
       for (ID iEdFa=1; iEdFa<=nFaceE; ++iEdFa) {
 	
 	iEdEl  = GeoShape::fToE(iFaEl,iEdFa).first; // local edge number (in element)
 	// Loop number of Dof per edge
 	for (ID l=1; l<=nDofpE; ++l) {
-	  
+	
 	  lDof =  nDofFV + (iEdFa-1) * nDofpE + l ; // local Dof sono messi dopo gli lDof dei vertici
 	  gDof =  _dof_u.localToGlobal( iElAd, nDofElemV + (iEdEl-1)*nDofpE + l); // global Dof
 	  j->second( lDof ) =  gDof; // local to global on this face
 	}
       }
     }
-    // Face based Dof 
-    if (nDofpF) { 
-      
+    // Face based Dof
+    if (nDofpF) {
+
       // Loop on number of Dof per face
-      for (ID l=1; l<=nDofpF; ++l) {  
+      for (ID l=1; l<=nDofpF; ++l) {
 	lDof = nDofFE + nDofFV + l; // local Dof sono messi dopo gli lDof dei vertici e dopo quelli degli spigoli
 	gDof = _dof_u.localToGlobal( iElAd, nDofElemE + nDofElemV + (iFaEl-1)*nDofpF + l); // global Dof
 	j->second( lDof ) =  gDof; // local to global on this face
-      }	    
-    }	   
+      }	
+    }	
   }
 
-  // Number of velocity components  
+  // Number of velocity components
   UInt nc_u=_u.nbcomp();
-  
+
   // Nodal values of the velocity in the current face
-  vector<Real> u_local(nc_u*nDofF);
+  std::vector<Real> u_local(nc_u*nDofF);
 
   // Loop on faces
   for (Iterator j=faces.begin(); j != faces.end(); ++j) {
 
     // Extracting lodal values of the velocity in the current face
-    for (UInt ic =0; ic<nc_u; ++ic) { 
+    for (UInt ic =0; ic<nc_u; ++ic) {
       for (ID l=1; l<=nDofF; ++l) {
 	gDof = j->second(l);
-	u_local[ic*nDofF+l-1] = _u(ic*numTotalDof+gDof-1);  
+	u_local[ic*nDofF+l-1] = _u(ic*numTotalDof+gDof-1);
       }
     }
 
     // Updating quadrature data on the current face
     _feBd_u.updateMeasNormalQuadPt(_mesh.boundaryFace(j->first));
-    
+
     // Quadrautre formula
     // Loop on quadrature points
     for(int iq=0; iq< _feBd_u.nbQuadPt; ++iq) {
-      
+
       // Dot product
       // Loop on components
       for (UInt ic =0; ic<nc_u; ++ic) {
@@ -644,7 +644,7 @@ NavierStokesHandler<Mesh>::flux(const EntityFlag& flag) {
       }
     }
   }
-  
+
   return flux;
 }
 

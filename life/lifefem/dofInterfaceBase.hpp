@@ -34,7 +34,7 @@
 #include <fstream>
 #include "vecUnknown.hpp"
 
-using namespace __gnu_cxx;
+//using namespace __gnu_cxx;
 
 namespace LifeV
 {
@@ -62,7 +62,7 @@ class DofInterfaceBase {
    USAGE: file datavec.txt : nb_couples
                              couple:(idof, value) repeated nb_couples times
   */
-  void ReadVectorDataAndDofMap(const string filename, Vector& dataVec);
+  void ReadVectorDataAndDofMap(const std::string filename, Vector& dataVec);
 
   //! This method returns the corrresponding dof number of the mesh2 at the interface
   //! for a specific dof number at the interface in mesh1
@@ -80,7 +80,7 @@ class DofInterfaceBase {
  protected:
 
   //!  STL map container which holds the connections between Dof at the interface
-  map<ID,ID> _locDofMap;
+  std::map<ID,ID> _locDofMap;
 
 };
 }

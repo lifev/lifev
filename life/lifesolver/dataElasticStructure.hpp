@@ -54,7 +54,7 @@ public DataTime {
   DataElasticStructure(const GetPot& dfile);
 
   //! Ouptut
-  void showMe(ostream& c=cout) const;
+  void showMe(std::ostream& c=std::cout) const;
 
   //! End time
   Real endtime() const;
@@ -106,19 +106,19 @@ DataElasticStructure(const GetPot& dfile):
 // Output
 template<typename Mesh>
 void DataElasticStructure<Mesh>::
-showMe(ostream& c) const
+showMe(std::ostream& c) const
 {
   // physics
   c << "\n*** Values for data [solid/physics]\n\n";
-  c << "density                          = " << _rho << endl;
-  c << "young                            = " << _E   << endl;
-  c << "poisson                          = " << _nu  << endl;
-  c << "lame constants (lambda, mu)      = " << _lambda << " " << _mu  << endl;
-  c << "endtime                          = " << _endtime << endl;
+  c << "density                          = " << _rho << std::endl;
+  c << "young                            = " << _E   << std::endl;
+  c << "poisson                          = " << _nu  << std::endl;
+  c << "lame constants (lambda, mu)      = " << _lambda << " " << _mu  << std::endl;
+  c << "endtime                          = " << _endtime << std::endl;
 
   c << "\n*** Values for data [solid/miscellaneous]\n\n";
-  c << "deformation factor               = " << _factor << endl;
-  c << "verbose                          = " << _verbose << endl;
+  c << "deformation factor               = " << _factor << std::endl;
+  c << "verbose                          = " << _verbose << std::endl;
 
   c << "\n*** Values for data [solid/discretization]\n\n";
   DataMesh<Mesh>::showMe();

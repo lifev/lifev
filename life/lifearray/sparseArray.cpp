@@ -21,7 +21,7 @@
 namespace LifeV
 {
 //Realizza l'inversa di una matrice diagonale e la moltiplica per un'altra matrice
-void MultInvDiag(const vector<Real> &Diag,
+void MultInvDiag(const std::vector<Real> &Diag,
 		 const CSRMatr<CSRPatt,Real> &Mat, CSRMatr<CSRPatt,Real> &ans)
 {
   ASSERT(find(Diag.begin(),Diag.end(),0) == Diag.end(), "La matrice diagonale deve essere invertibile");
@@ -91,10 +91,10 @@ operator*(const VectorBlock &v) const
 
 // the case of block matrices with Tab2d block type.
 void CSRMatr<CSRPatt,Tab2d>::
-spy(string  const &filename)
+spy(std::string  const &filename)
 {
   // Purpose: Matlab dumping and spy
-  string nome=filename, uti=" , ";
+  std::string name=filename, uti=" , ";
   UInt nrows=_Patt->nRows();
   Container ia=_Patt->ia(), ja=_Patt->ja();
   int blsize=_value[0].N(); // for square block
@@ -103,14 +103,14 @@ spy(string  const &filename)
   //
   UInt i=filename.find(".");
 
-  if (i<=0) nome=filename+".m";
+  if (i<=0) name=filename+".m";
   else {
     if (i!=filename.size()-2  || filename[i+1]!='m')
-      {cerr << "Wrong file name ";
-      nome=filename+".m";}
+      {std::cerr << "Wrong file name ";
+      name=filename+".m";}
   }
 
-  ofstream file_out(nome.c_str());
+  std::ofstream file_out(name.c_str());
   ASSERT(file_out,"Error: Output Matrix (Values) file cannot be open");
 
 
@@ -121,20 +121,21 @@ spy(string  const &filename)
       for (int rloc=0; rloc<blsize; ++rloc)
 	for (int cloc=0; cloc<blsize; ++cloc)
 	  file_out << rblock*blsize + rloc +1 << uti << cblock*blsize
-	    + cloc +1 << uti << _value[ii](rloc,cloc) << endl; /* */
+	    + cloc +1 << uti << _value[ii](rloc,cloc) << std::endl; /* */
     }
   }
-  file_out << "];" << endl;
+  file_out << "];" << std::endl;
 
-  file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"<<endl;
+  file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"
+           << std::endl;
 };
 //version without using static (I think it is better)
 // Modified by A. Gilardi. 03/02.
 void colUnify(CSRMatr<CSRPatt,double> &ans, const CSRMatr<CSRPatt,double> &Mat1,
 	      const CSRMatr<CSRPatt,double> &Mat2)
 {
-  typedef vector<double>::const_iterator ConstIter;
-  typedef vector<double>::iterator Iter;
+  typedef std::vector<double>::const_iterator ConstIter;
+  typedef std::vector<double>::iterator Iter;
   typedef PatternDefs::Container::const_iterator PaConstIter;
   typedef PatternDefs::Container::iterator PaIter;
 
@@ -143,7 +144,7 @@ void colUnify(CSRMatr<CSRPatt,double> &ans, const CSRMatr<CSRPatt,double> &Mat1,
 	 "pattern concatenation must be done first");
 
   // concatenation of the matrix values
-  vector<double> val(ans._Patt->nNz(),0.0);
+  std::vector<double> val(ans._Patt->nNz(),0.0);
 
   UInt end = 0;
 
@@ -199,7 +200,8 @@ void colUnify(CSRMatr<CSRPatt,double> &ans, const CSRMatr<CSRPatt,double> &Mat1,
 	  //the starting place of the second block
 	  Iter value_start2_part1 = value_start1 + Mat1._Patt->give_ia()[i+1] - Mat1._Patt->give_ia()[i];
 
-	  PaConstIter ja_pos_diag = find_if(ja2_start, ja2_end, bind2nd(greater<UInt>(),*ja2_start));
+	  PaConstIter ja_pos_diag=find_if(ja2_start, ja2_end,
+                                    bind2nd(std::greater<UInt>(),*ja2_start));
 
 	  ConstIter value2_pos_diag = value2_start + (ja_pos_diag - ja2_start);
 
@@ -224,7 +226,8 @@ void colUnify(CSRMatr<CSRPatt,double> &ans, const CSRMatr<CSRPatt,double> &Mat1,
 	  //the starting place of the first block
 	  Iter value_start1_part1 = val.begin() + ans._Patt->_i2o(ans._Patt->give_ia()[i]);
 
-	  PaConstIter ja_pos_diag = find_if(ja1_start, ja1_end, bind2nd(greater<UInt>(),*ja1_start));
+	  PaConstIter ja_pos_diag=find_if(ja1_start, ja1_end,
+                                    bind2nd(std::greater<UInt>(),*ja1_start));
 
 	  ConstIter value_pos_diag = value1_start + (ja_pos_diag - ja1_start);
 
@@ -239,7 +242,8 @@ void colUnify(CSRMatr<CSRPatt,double> &ans, const CSRMatr<CSRPatt,double> &Mat1,
 	  //the starting place of the second block
 	  Iter value_start2_part1 = value_start1_part1 + Mat1._Patt->give_ia()[i+1] - Mat1._Patt->give_ia()[i];
 
-	  ja_pos_diag = find_if(ja2_start, ja2_end, bind2nd(greater<UInt>(),*ja2_start));
+	  ja_pos_diag = find_if(ja2_start, ja2_end,
+                          bind2nd(std::greater<UInt>(),*ja2_start));
 
 	  value_pos_diag = value2_start + (ja_pos_diag - ja2_start);
 
@@ -264,7 +268,8 @@ void colUnify(CSRMatr<CSRPatt,double> &ans, const CSRMatr<CSRPatt,double> &Mat1,
       PaIter ja_start = ja.begin() + ans._Patt->_i2o(ans._Patt->give_ia()[i]);
       PaIter ja_end = ja.begin() + ans._Patt->_i2o(ans._Patt->give_ia()[i+1]);
 
-      PaIter ja_pos_diag = find_if(ja_start, ja_end, bind2nd(greater<UInt>(),*ja_start));
+      PaIter ja_pos_diag = find_if(ja_start, ja_end,
+                                   bind2nd(std::greater<UInt>(),*ja_start));
 
       Iter value_pos_diag = value_start + (ja_pos_diag - ja_start) - 1;
 
@@ -281,8 +286,8 @@ void colUnify(CSRMatr<CSRPatt,double> &ans, const CSRMatr<CSRPatt,double> &Mat1,
 void rowUnify(CSRMatr<CSRPatt,double> &ans, const CSRMatr<CSRPatt,double> &Mat1,
 	      const CSRMatr<CSRPatt,double> &Mat2)
 {
-  typedef vector<double>::const_iterator ConstIter;
-  typedef vector<double>::iterator Iter;
+  typedef std::vector<double>::const_iterator ConstIter;
+  typedef std::vector<double>::iterator Iter;
   typedef PatternDefs::Container::const_iterator PaConstIter;
   typedef PatternDefs::Container::iterator PaIter;
 
@@ -290,7 +295,7 @@ void rowUnify(CSRMatr<CSRPatt,double> &ans, const CSRMatr<CSRPatt,double> &Mat1,
   ASSERT(ans._Patt->nNz()==Mat1._Patt->nNz()+Mat2._Patt->nNz(),"pattern concatenation must be done first");
 
   // concatenation of the matrix values
-  vector<double> val(ans._Patt->nNz(),0.0);
+  std::vector<double> val(ans._Patt->nNz(),0.0);
 
   bool diag = ans._Patt->diagFirst();
 
@@ -319,7 +324,8 @@ void rowUnify(CSRMatr<CSRPatt,double> &ans, const CSRMatr<CSRPatt,double> &Mat1,
 	  //the starting place of the first block
 	  Iter value_start1_part1 = val.begin() + ans._Patt->_i2o(ans._Patt->give_ia()[i]);
 
-	  PaConstIter ja_pos_diag = find_if(ja1_start, ja1_end, bind2nd(greater<UInt>(),*ja1_start));
+	  PaConstIter ja_pos_diag=find_if(ja1_start, ja1_end,
+                                    bind2nd(std::greater<UInt>(),*ja1_start));
 
 	  ConstIter value_pos_diag = value1_start + (ja_pos_diag - ja1_start);
 
@@ -356,7 +362,8 @@ void rowUnify(CSRMatr<CSRPatt,double> &ans, const CSRMatr<CSRPatt,double> &Mat1,
 
 	  Iter value_start2_part1 = value_start2 + Mat2._Patt->give_ia()[i] - OFFSET;
 
-	  PaConstIter ja_pos_diag = find_if(ja2_start, ja2_end, bind2nd(greater<UInt>(),*ja2_start));
+	  PaConstIter ja_pos_diag=find_if(ja2_start, ja2_end,
+                                    bind2nd(std::greater<UInt>(),*ja2_start));
 
 	  ConstIter value_pos_diag = value2_start + (ja_pos_diag - ja2_start);
 
@@ -389,7 +396,8 @@ void rowUnify(CSRMatr<CSRPatt,double> &ans, const CSRMatr<CSRPatt,double> &Mat1,
       PaIter ja_start = ja.begin() + ans._Patt->_i2o(ans._Patt->give_ia()[i]);
       PaIter ja_end = ja.begin() + ans._Patt->_i2o(ans._Patt->give_ia()[i+1]);
 
-      PaIter ja_pos_diag = find_if(ja_start, ja_end, bind2nd(greater<UInt>(),*ja_start));
+      PaIter ja_pos_diag = find_if(ja_start, ja_end,
+                                   bind2nd(std::greater<UInt>(),*ja_start));
 
       Iter value_pos_diag = value_start + (ja_pos_diag - ja_start) - 1;
 
@@ -403,7 +411,7 @@ void rowUnify(CSRMatr<CSRPatt,double> &ans, const CSRMatr<CSRPatt,double> &Mat1,
 
 //Inversion of a diagonal matrix and multiplication with a sparse matrix
 //Miguel: 4/2003, the last version was too expensive.
-void MultInvDiag(const vector<Real> &Diag, const MSRMatr<Real> &Mat, MSRMatr<Real> &ans)
+void MultInvDiag(const std::vector<Real> &Diag, const MSRMatr<Real> &Mat, MSRMatr<Real> &ans)
 {
   ASSERT(find(Diag.begin(),Diag.end(),0) == Diag.end(), "La matrice diagonale deve essere invertibile");
 
@@ -411,7 +419,7 @@ void MultInvDiag(const vector<Real> &Diag, const MSRMatr<Real> &Mat, MSRMatr<Rea
   UInt begin, end;
   Real diag;
   UInt nRows= Mat._Patt->nRows();
-  vector<Index_t>::const_iterator start = Mat._Patt->give_bindx().begin();
+  std::vector<Index_t>::const_iterator start = Mat._Patt->give_bindx().begin();
 
   for (UInt row = 0; row < nRows; ++row)
     {
