@@ -76,13 +76,15 @@ int newton( Vector& sol, Fct& f, Norm& norm, Real abstol, Real reltol,
 
     out_res << time << "    " << iter << "   " << normRes << std::endl;
 
+    f.updateJac( sol , 1);
+
     while ( normRes > stop_tol && iter < maxit )
     {
         iter++;
         ratio = normRes / normResOld;
         normResOld = normRes;
         normRes = norm( residual );
-        f.updateJac( sol, iter );
+        if (iter != 1) f.updateJac( sol, iter );
         linres = linear_rel_tol;
         f.solveJac( step, -1. * residual, linres ); // residual = f(sol)
         /*
