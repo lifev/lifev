@@ -22,34 +22,41 @@
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # \file testsuite.at
-# \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-# \date 2004-08-29
+# \author Vincent Martin <vincent.martin@mate.polimi.it>
+# \date 2004-10-10
 # 
-AT_SETUP([test_darcy])
-AT_KEYWORDS([darcy])
+AT_SETUP([test_darcy (hexa)])
+AT_KEYWORDS([test_darcy darcy])
 AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 #-------------------------------------------------
 #          Data file for a Darcy problem
 #-------------------------------------------------
 
-[physics]
+[darcy]
+
+[./physics]
 test_case       = 1                 # in particular for b.c. condition
-mesh_file       = cylhexa.mesh      #
 diffusion_type  = 0                 # 0: scalar diffusion, 1: tensor diffusion
 diffusion_function = 0  # select a user function
 diffusion_scalar  = 1.  # scalar diffusion coefficient
 diffusion_tensor  = '1. 0. 0.  0. 1. 0  0. 0. 1.' # diffusion tensor
 
-[linearsolver] 
+[../linearsolver]
 theLinearSolver   = 0    # 0: Aztec, 1: UMFPack (UMFPack not implemented yet)
 
-[miscellaneous]
-mesh_dir = ./
+[../discretization]
+mesh_dir    = ./        # the directory where the mesh file is
+mesh_file   = cylhexa.mesh      #
+mesh_type   = .mesh
+mesh_faces   = all      # OBLIGATORY! we need all faces!
+element_shape = 1       # 0: tetra; 1: hexa
+
+[../miscellaneous]
 post_dir = ./                 # the directory for postprocessing files
 verbose = 1
 post_proc_format = medit          # vtk or medit
 
-[aztec]  
+[../aztec]
 solver = cg  #cg , gmres, cgs, tfqmr, bicgstab, slu, symmlq, fixed_pt, lu
 precond = dom_decomp
 subdomain_solve = icc
@@ -57,4 +64,46 @@ output = warnings    #warnings , none , all, all_res, last
 tol = 1e-6
 ]])
 AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria/cylhexa.mesh &&  $top_builddir/testsuite/test_darcy/test_darcy],[0],[ignore],[ignore])
+AT_CLEANUP
+
+
+AT_SETUP([test_darcy (tetra)])
+AT_KEYWORDS([test_darcy darcy])
+AT_DATA([datatetra],[[# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#          Data file for a Darcy problem
+#-------------------------------------------------
+
+[darcy]
+
+[./physics]
+test_case       = 1                 # in particular for b.c. condition
+diffusion_type  = 0                 # 0: scalar diffusion, 1: tensor diffusion
+diffusion_function = 0  # select a user function
+diffusion_scalar  = 1.  # scalar diffusion coefficient
+diffusion_tensor  = '1. 0. 0.  0. 1. 0  0. 0. 1.' # diffusion tensor
+
+[../linearsolver]
+theLinearSolver   = 0    # 0: Aztec, 1: UMFPack (UMFPack not implemented yet)
+
+[../discretization]
+mesh_dir    = ./        # the directory where the mesh file is
+mesh_file   = cyltetra.mesh      #
+mesh_type   = .mesh
+mesh_faces   = all      # OBLIGATORY! we need all faces!
+element_shape = 0       # 0: tetra; 1: hexa
+
+[../miscellaneous]
+post_dir = ./                 # the directory for postprocessing files
+verbose = 1
+post_proc_format = medit          # vtk or medit
+
+[../aztec]
+solver = cg  #cg , gmres, cgs, tfqmr, bicgstab, slu, symmlq, fixed_pt, lu
+precond = dom_decomp
+subdomain_solve = icc
+output = warnings    #warnings , none , all, all_res, last
+tol = 1e-6
+]])
+AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria/cyltetra.mesh &&  $top_builddir/testsuite/test_darcy/test_darcy -f datatetra],[0],[ignore],[ignore])
 AT_CLEANUP

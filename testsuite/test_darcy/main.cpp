@@ -23,13 +23,13 @@
 
 /*
 
-  Darcy soler using Mixed Hybrid finite element
+Darcy soler using Mixed Hybrid finite element
 
 
-  usage: darcy              : read the data file "data" and run the solver
-         darcy -f otherdata : read the data file "otherdata" and run the solver
-	 darcy -h           : read the data file, print help and exit
-	 darcy -i           : read the data file, print the read values and exit
+usage: darcy       : read the data file "data" and run the solver
+darcy -f otherdata : read the data file "otherdata" and run the solver
+darcy -h           : read the data file, print help and exit
+darcy -i           : read the data file, print the read values and exit
 
 */
 int main(int argc, char** argv)
@@ -42,65 +42,120 @@ int main(int argc, char** argv)
         data_file.print();
         exit(0);
     }
-    Chrono chrono;
-    //
-    std::cout << "*** Initialisation --->" << std::endl;
-    chrono.start();
-    DarcySolver pb(data_file);
-    if(command_line.search(2,".hpp","--help")){
+
+    if( command_line.search( 2 , "-h" , "--help" ) ) {
         std::cout << std::endl << std::endl;
         std::cout <<"usage: darcy              : read the data file 'data' \n";
         std::cout <<"       darcy -f otherdata : read the data file 'otherdata' \n";
-        std::cout <<"	   darcy -h           : help and exit\n";
+        std::cout <<"	    darcy -h           : help and exit\n";
         std::cout <<"       darcy -i           : : read the data file, print the read values and exit\n";
         std::cout << std::endl;
-        std::cout << "Help for the data file:\n";
-        pb.dataAztecHelp();
-        pb.dataAztecShowMe();
-        pb.dataDarcyHelp();
-        pb.dataDarcyShowMe();
         exit(0);
     }
-    //
-    chrono.stop();
-    std::cout << "<--- Initialisation done in " << chrono.diff() << "s." << std::endl;
 
-    if(pb.verbose)
-        std::cout << "*** Compute the matrix --->" << std::endl;
-    chrono.start();
-    pb.computeHybridMatrixAndSourceRHS();
-    chrono.stop();
-    if(pb.verbose)
-        std::cout << "<--- matrix computation done in "<< chrono.diff() << "s." << std::endl;
-    pb.applyBC();
-    //
-    if(pb.verbose) std::cout << "*** Resolution of the hybrid system --->\n";
-    chrono.start();
-    pb.solveDarcy();
-    chrono.stop();
-    if(pb.verbose)std::cout << "<--- Linear system solved in " << chrono.diff()
-                       << "s." << std::endl << std::endl;
+    enum MeshElementShape{ TetraElt, HexaElt };
 
-    if(pb.verbose) std::cout << "*** Compute pressure and flux --->" << std::endl;
-    chrono.start();
-    pb.computePresFlux();
-    chrono.stop();
-    if(pb.verbose)
-        std::cout << "<---  done in " << chrono.diff() << "s.\n" << std::endl;
+    MeshElementShape elemshape = (MeshElementShape)
+        data_file( "darcy/discretization/element_shape", TetraElt );
 
-    if(pb.verbose) std::cout << "*** Postproc --->" << std::endl;
-    chrono.start();
-    pb.postProcessTraceOfPressureRT0();
-    pb.postProcessVelocityRT0();
-    pb.postProcessPressureQ0();
-    pb.postProcessPressureQ1();
-    pb.postProcessVelocityQ1();
-    chrono.stop();
-    if(pb.verbose)
-        std::cout << "<---  done in " << chrono.diff() << "s.\n" << std::endl;
+    std::cout << "*** shape " << elemshape << std::endl;
+
+
+    Chrono chrono;
     //
+    std::cout << "*** Initialisation --->" << std::endl;
+
+
+    //-----------------------------------------------------
+    if ( elemshape == HexaElt ) {
+        //! case for hexahedric mesh
+        chrono.start();
+
+        DarcySolver< RegionMesh3D<LinearHexa> >
+            darcyslv(data_file, feHexaRT0, feHexaQ0, feHexaRT0Hyb,
+                     feHexaRT0VdotNHyb, feHexaQ1, quadRuleHexa8pt, quadRuleQuad4pt);
+
+        chrono.stop();
+        std::cout << "<--- Initialisation done in " << chrono.diff() << "s." << std::endl;
+
+        if(darcyslv.verbose)
+            std::cout << "*** Compute the matrix --->" << std::endl;
+        chrono.start();
+        darcyslv.computeHybridMatrixAndSourceRHS();
+        chrono.stop();
+        if(darcyslv.verbose)
+            std::cout << "<--- matrix computation done in "<< chrono.diff() << "s." << std::endl;
+        darcyslv.applyBC();
+        //
+        if(darcyslv.verbose) std::cout << "*** Resolution of the hybrid system --->\n";
+        chrono.start();
+        darcyslv.solveDarcy();
+        chrono.stop();
+        if(darcyslv.verbose)std::cout << "<--- Linear system solved in " << chrono.diff()
+                                      << "s." << std::endl << std::endl;
+
+        if(darcyslv.verbose) std::cout << "*** Compute pressure and flux --->" << std::endl;
+        chrono.start();
+        darcyslv.computePresFlux();
+        chrono.stop();
+        if(darcyslv.verbose)
+            std::cout << "<---  done in " << chrono.diff() << "s.\n" << std::endl;
+
+        if(darcyslv.verbose) std::cout << "*** Postproc --->" << std::endl;
+        chrono.start();
+        darcyslv.postProcessTraceOfPressureRT0();
+        darcyslv.postProcessVelocityRT0();
+        darcyslv.postProcessPressureQ0();
+        darcyslv.postProcessPressureQ1();
+        darcyslv.postProcessVelocityQ1();
+        chrono.stop();
+        if(darcyslv.verbose)
+            std::cout << "<---  done in " << chrono.diff() << "s.\n" << std::endl;
+        //-----------------------------------------------------
+
+    }
+    else if ( elemshape == TetraElt ) {
+        //-----------------------------------------------------
+        //! case for tetrahedric mesh
+        DarcySolver< RegionMesh3D<LinearTetra> >
+            darcyslv( data_file, feTetraRT0, feTetraP0, feTetraRT0Hyb, feTetraRT0VdotNHyb, 
+                      feTetraP1, quadRuleTetra15pt, quadRuleTria4pt );
+        if(darcyslv.verbose)
+            std::cout << "*** Compute the matrix --->" << std::endl;
+        chrono.start();
+        darcyslv.computeHybridMatrixAndSourceRHS();
+        chrono.stop();
+        if(darcyslv.verbose)
+            std::cout << "<--- matrix computation done in "<< chrono.diff() << "s." << std::endl;
+        darcyslv.applyBC();
+        //
+        if(darcyslv.verbose) std::cout << "*** Resolution of the hybrid system --->\n";
+        chrono.start();
+        darcyslv.solveDarcy();
+        chrono.stop();
+        if(darcyslv.verbose)std::cout << "<--- Linear system solved in " << chrono.diff()
+                                      << "s." << std::endl << std::endl;
+
+        if(darcyslv.verbose) std::cout << "*** Compute pressure and flux --->" << std::endl;
+        chrono.start();
+        darcyslv.computePresFlux();
+        chrono.stop();
+        if(darcyslv.verbose)
+            std::cout << "<---  done in " << chrono.diff() << "s.\n" << std::endl;
+
+        if(darcyslv.verbose) std::cout << "*** Postproc --->" << std::endl;
+        chrono.start();
+        darcyslv.postProcessTraceOfPressureRT0();
+        darcyslv.postProcessVelocityRT0();
+        darcyslv.postProcessPressureQ0();
+        darcyslv.postProcessPressureQ1();
+        darcyslv.postProcessVelocityQ1();
+        chrono.stop();
+        if(darcyslv.verbose)
+            std::cout << "<---  done in " << chrono.diff() << "s.\n" << std::endl;
+
+    }
+    //-----------------------------------------------------
 
     return 0;
 }
-
-
