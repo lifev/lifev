@@ -11,7 +11,7 @@
 density         = 1.0               # density
 viscosity       = 0.035             # viscosity
 inittime        = 0.00              # inittime
-endtime         = 0.02              # endtime
+endtime         = 0.1              # endtime
 
 
 [../discretization]
