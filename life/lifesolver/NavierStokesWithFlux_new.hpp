@@ -112,9 +112,13 @@ public:
         _M_uns1(_M_solver->uDof().numTotalDof()),
         _M_unso1(_M_solver->uDof().numTotalDof()),
         _M_unso2(_M_solver->uDof().numTotalDof()),
+        _M_unso1_staz(_M_solver->uDof().numTotalDof()),
+        _M_unso2_staz(_M_solver->uDof().numTotalDof()),
         _M_pns1(_M_solver->pDof().numTotalDof()),
         _M_pnso1(_M_solver->pDof().numTotalDof()),
         _M_pnso2(_M_solver->pDof().numTotalDof()),
+        _M_pnso1_staz(_M_solver->pDof().numTotalDof()),
+        _M_pnso2_staz(_M_solver->pDof().numTotalDof()),
         _M_pnso( _M_solver->pDof().numTotalDof() ),
         _M_Qno( 0 ),
         _M_vec_lambda( _M_solver->uDof().numTotalDof() ),
@@ -133,9 +137,13 @@ public:
         _M_uns1(__nswf._M_uns1),
         _M_unso1(__nswf._M_unso1),
         _M_unso2(__nswf._M_unso2),
+        _M_unso1_staz(__nswf._M_unso1_staz),
+        _M_unso2_staz(__nswf._M_unso2_staz),
         _M_pns1(__nswf._M_pns1),
         _M_pnso1(__nswf._M_pnso1),
-        _M_pnso2(__nswf._M_pnso1),
+        _M_pnso2(__nswf._M_pnso2),
+        _M_pnso1_staz(__nswf._M_pnso1_staz),
+        _M_pnso2_staz(__nswf._M_pnso2_staz),
         _M_pnso( __nswf._M_pnso ),
         _M_Qno( __nswf._M_Qno ),
         _M_vec_lambda( __nswf._M_vec_lambda ),
@@ -215,9 +223,14 @@ public:
 
     void initialize( const Function& u0, const Function& p0, Real t0, Real dt );
 
+    void initialize_inexact( const Function& u0, const Function& p0, Real t0, Real dt );
+
     void timeAdvance( source_type const& __source, const Real& __time );
 
     void iterate( const Real& time );
+
+    void iterate_inexact( const Real& time );
+
     //@}
 
 
@@ -232,12 +245,19 @@ private:
     //! two fluxes version of the algorithm
     void iterate_two_fluxes( Real const& );
 
+    //! two fluxes inexact version of the algorithm
+    void iterate_two_fluxes_inexact( Real const& );
+
     //! one flux version of the algorithm
     void initialize_one_flux( const Function& , const Function& , Real , Real  );
 
     //! two fluxes version of the algorithm
     void initialize_two_fluxes( const Function& , const Function& , Real , Real  );
 
+    //! two fluxes inexact version of the algorithm
+    void initialize_two_fluxes_inexact( const Function& , const Function& , Real , Real  );
+
+    
 private:
 
     //! Navier-Stokes solver
@@ -259,18 +279,24 @@ private:
     PhysVectUnknown<Vector> _M_uns1;
     PhysVectUnknown<Vector> _M_unso1;
     PhysVectUnknown<Vector> _M_unso2;
+    PhysVectUnknown<Vector> _M_unso1_staz;
+    PhysVectUnknown<Vector> _M_unso2_staz;
     ScalUnknown<Vector> _M_pns1;
     ScalUnknown<Vector> _M_pnso1;
     ScalUnknown<Vector> _M_pnso2;
+    ScalUnknown<Vector> _M_pnso1_staz;
+    ScalUnknown<Vector> _M_pnso2_staz;
     ScalUnknown<Vector> _M_pnso;
-
+   
     //! Flux from NSo
     Real _M_Qno;
-
+  
     //! lagrange multiplier to impose flux
     Vector _M_vec_lambda;
 
     Real _M_lambda;
+
+    //std::ofstream outfile;
 
 };
 
@@ -285,6 +311,28 @@ NavierStokesWithFlux<NSSolver>::initialize( const Function& u0, const Function& 
             break;
         case 2:
             initialize_two_fluxes(u0,p0,t0,dt);
+            break;
+        default:
+            std::ostringstream __ex;
+            __ex << "The number of flux is invalid it is : " << _M_fluxes.size() << "\n"
+                 << "you have to specify either one flux or two fluxes for this algorithm to work\n"
+                 << "using the setFlux( label, flux ) member function\n";
+            throw std::logic_error( __ex.str() );
+            break;
+    }
+}
+
+template<typename NSSolver>
+void
+NavierStokesWithFlux<NSSolver>::initialize_inexact( const Function& u0, const Function& p0, Real t0, Real dt )
+{
+    switch ( _M_fluxes.size() )
+    {
+        case 1:
+            initialize_one_flux(u0,p0,t0,dt);
+            break;
+        case 2:
+            initialize_two_fluxes_inexact(u0,p0,t0,dt);
             break;
         default:
             std::ostringstream __ex;
@@ -344,6 +392,69 @@ NavierStokesWithFlux<NSSolver>::initialize_two_fluxes( const Function& u0, const
 
 template<typename NSSolver>
 void
+NavierStokesWithFlux<NSSolver>::initialize_two_fluxes_inexact( const Function& u0, const Function& p0, Real t0, Real dt )
+{
+    Debug( 6020 ) << "start NSo1\n";
+
+    int label0 = _M_fluxes.begin()->first;
+    int label1 = boost::next( _M_fluxes.begin() )->first;
+    UInt dim_lambda=_M_solver->uDof().numTotalDof();
+    Vector vec_lambda0(dim_lambda);
+    Vector vec_lambda1(dim_lambda);
+    BCVector bcvec0(vec_lambda0,dim_lambda,1);
+    BCVector bcvec1(vec_lambda1,dim_lambda,1);
+    vec_lambda0 = ScalarVector( vec_lambda0.size(),1 );
+    vec_lambda1 = ScalarVector( vec_lambda1.size(),0 );
+    
+    // Change the BC for the stationary NSo1
+    //
+    _M_solver->bcHandler().modifyBC(label0,bcvec0 );
+    _M_solver->bcHandler().modifyBC(label1,bcvec1 );
+
+    // Stationary Navier-Stokes (NSo1)
+    //
+    _M_solver->initialize(u0o,p0,0.0,dt);
+
+    Real startT = _M_solver->inittime();
+    Real time=startT+dt;
+    _M_solver->timeAdvance( _M_solver->sourceTerm(), time );
+    _M_solver->iterate( time );
+    
+    
+    // Store the solution of NSo1
+    //
+    _M_unso1_staz=_M_solver->u();
+    _M_pnso1_staz=_M_solver->p();
+
+    Debug( 6020 ) << "end NSo1\n";
+
+    // Change the BC for the stationary NSo2
+    //
+    _M_solver->bcHandler().modifyBC(label0,bcvec1 );
+    _M_solver->bcHandler().modifyBC(label1,bcvec0 );
+
+    Debug( 6020 ) << "start NSo2\n";
+
+    // Stationary Navier-Stokes (NSo2)
+    //
+    _M_solver->initialize(u0o,p0,0.0,dt);
+
+    _M_solver->timeAdvance( _M_solver->sourceTerm(), time );
+    _M_solver->iterate( time );
+
+    // Store the solutions of NSo2
+    //
+    _M_unso2_staz=_M_solver->u();
+    
+    Debug( 6020 ) << "end NSo2\n";
+
+    // Initialize the non stationary NS
+    //
+    _M_solver->initialize(u0,p0,0.0,dt);
+}
+
+template<typename NSSolver>
+void
 NavierStokesWithFlux<NSSolver>::timeAdvance( source_type const& __source, Real const& __time )
 {
     // update right hand side for NS solves for new time step
@@ -372,6 +483,30 @@ NavierStokesWithFlux<NSSolver>::iterate( const Real& time )
             break;
     }
 }
+
+template<typename NSSolver>
+void
+NavierStokesWithFlux<NSSolver>::iterate_inexact( const Real& time )
+{
+    switch ( _M_fluxes.size() )
+    {
+        case 1:
+            timeAdvance( _M_solver->sourceTerm(), time );
+            iterate_one_flux( time );
+        break;
+        case 2:
+            iterate_two_fluxes_inexact( time );
+            break;
+        default:
+            std::ostringstream __ex;
+            __ex << "The number of flux is invalid it is : " << _M_fluxes.size() << "\n"
+                 << "you have to specify either one flux or two fluxes for this algorithm to work\n"
+                 << "using the setFlux( label, flux ) member function\n";
+            throw std::logic_error( __ex.str() );
+            break;
+    }
+}
+
 template<typename NSSolver>
 void
 NavierStokesWithFlux<NSSolver>::iterate_one_flux( const Real& time )
@@ -604,6 +739,142 @@ NavierStokesWithFlux<NSSolver>::iterate_two_fluxes( const Real& time )
     std::cout << "numerical flux 0" << " " << Qn[0] << "\n";
     std::cout << "imposed flux 1" << " " << Q[1] << "\n";
     std::cout << "numerical flux 1" << " " << Qn[1] << "\n";
+}
+
+template<typename NSSolver>
+void
+NavierStokesWithFlux<NSSolver>::iterate_two_fluxes_inexact( const Real& time )
+{
+    Debug( 6020 ) << "starting inexact two fluxes version at time " << time << "\n";
+
+    int label0 = _M_fluxes.begin()->first;
+    int label1 = boost::next( _M_fluxes.begin() )->first;
+    Debug( 6020 ) << "imposing fluxes on BC : " << label0 << " and BC : "<< label1 << "\n";
+
+    Vector Q( 2 ),Qn( 2 );
+    Vector lambda( 2 ),v1( 2 ),v2( 2 ),r0( 2 ),z( 2 );
+    Vector w1( 2 ),w2( 2 );
+    Matrix h( 2, 2 );
+    Real absr0;
+
+    UInt dim_lambda=_M_solver->uDof().numTotalDof();
+    Vector vec_lambda0(dim_lambda);
+    Vector vec_lambda1(dim_lambda);
+    BCVector bcvec0(vec_lambda0,dim_lambda,1);
+    BCVector bcvec1(vec_lambda1,dim_lambda,1);
+    _M_solver->bcHandler().modifyBC(label0,bcvec0);
+    _M_solver->bcHandler().modifyBC(label1,bcvec1);
+
+    _M_uzero = ZeroVector( _M_uzero.size() );
+
+    Q[0] = _M_fluxes[label0](time);
+    Q[1] = _M_fluxes[label1](time);
+    lambda = Q;
+    std::cout << "imposed flux 0" << " " << Q[0] << "\n";
+    std::cout << "imposed flux 1" << " " << Q[1] << "\n";
+
+    // NS
+    //
+    // Construction of vectors vec_lambda
+    //
+    vec_lambda0 = ScalarVector( vec_lambda0.size(), lambda[0] );
+    vec_lambda1 = ScalarVector( vec_lambda1.size(), lambda[1] );
+
+    std::cout << "start NS time" << " " << time << "\n";
+    _M_solver->timeAdvance(_M_solver->sourceTerm(),time);
+    _M_solver->iterate(time);
+
+    _M_iteration_finish_signal( ( uint )time*100,
+                                 _M_solver->mesh(),
+                                 _M_solver->u(),
+                                 _M_solver->p(),
+                            1 );
+
+    // Store the solution
+    //
+    _M_uns1=_M_solver->u();
+    _M_pns1=_M_solver->p();
+
+    // Compute the fluxes of NS
+    //
+    Qn[0]=_M_solver->flux(label0);
+    Qn[1]=_M_solver->flux(label1);
+    Debug( 6020 ) << "flux 0 before update" << " " << Qn[0] << "\n";
+    Debug( 6020 ) << "flux 1 before update" << " " << Qn[1] << "\n";
+
+    // GMRes algorithm
+    //
+    r0 = Qn - Q;
+    absr0 = norm_2( r0 );
+    v1 = r0/absr0;
+
+    // Compute real (inexact) solution of NSo1
+    //
+    _M_unso1=v1[0]*_M_unso1_staz+v1[1]*_M_unso2_staz;
+    _M_pnso1=v1[0]*_M_pnso1_staz+v1[1]*_M_pnso2_staz;
+  
+    // Compute the fluxes of NSo1
+    //
+    _M_solver->u()=_M_unso1;
+    w1[0]=_M_solver->flux(label0);
+    w1[1]=_M_solver->flux(label1);
+
+    h( 0, 0 ) = inner_prod( w1, v1 );
+    w1 -= h( 0, 0 )*v1;
+    h( 1, 0 ) = norm_2( w1 );
+    v2 = w1/h( 1, 0 );
+
+    // Compute real (inexact) solution of NSo2
+    //
+    _M_unso2=v2[0]*_M_unso1_staz+v2[1]*_M_unso2_staz;
+    _M_pnso2=v2[0]*_M_pnso1_staz+v2[1]*_M_pnso2_staz;
+
+    // Compute the fluxes of NSo2
+    //
+    _M_solver->u()=_M_unso2;
+    w2[0]=_M_solver->flux(label0);
+    w2[1]=_M_solver->flux(label1);
+
+    h( 0, 1 ) = inner_prod( w2, v1 );
+    w2 -= h( 0, 1 )*v1;
+    h( 1, 1 ) = inner_prod( w2, v2 );
+    w2 -= h( 1, 1 )*v2;
+
+    // check
+    //
+    std::cout << "w2 = " << w2 << "\n";
+
+    // Update lambda
+    //
+    Real tt = absr0/( h( 1, 0 )*h( 0, 1 )-h( 0, 0 )*h( 1, 1 ) );
+    z[0] = -h( 1, 1 )*tt;
+    z[1] = -h( 1, 0 )*tt;
+    lambda += v1*z[0]+v2*z[1];
+    std::cout << "lambda = " << lambda << "\n";
+
+    // Update the velocity and the pressure
+    //
+    _M_solver->u()=_M_uns1-z[0]*_M_unso1-z[1]*_M_unso2;
+    _M_solver->p()=_M_pns1-z[0]*_M_pnso1-z[1]*_M_pnso2;
+
+    // Save the final solutions
+    //
+    _M_solver->postProcess();
+
+    // Compute the fluxes of NS: the definitive one
+    //
+    Qn[0]=_M_solver->flux(label0);
+    Qn[1]=_M_solver->flux(label1);
+    std::cout << "imposed flux 0" << " " << Q[0] << "\n";
+    std::cout << "numerical flux 0" << " " << Qn[0] << "\n";
+    std::cout << "imposed flux 1" << " " << Q[1] << "\n";
+    std::cout << "numerical flux 1" << " " << Qn[1] << "\n";
+    //outfile.open("flusso_inesatto.txt",std::ios::app);
+    //outfile << Q[0] << "\n";
+    //outfile << Qn[0] << "\n";
+    //outfile << Q[1] << "\n";
+    //outfile << Qn[1] << "\n";
+    //outfile.close();
 }
 }
 #endif /* __NavierStokesWithFlux_H */
