@@ -152,7 +152,7 @@ void BlockMatrix::matrixVectorProductAztec( double* p, double* ap) const
 }
 
 void blockMatrixVectorProduct( double* p, double* ap,
-                               AZ_MATRIX* aMat, int proc_config[] )
+                               AZ_MATRIX* aMat, int /* proc_config */ [] )
 {
     BlockMatrix& a = *(static_cast<BlockMatrix*>(AZ_get_matvec_data( aMat )));
     a.matrixVectorProductAztec( p, ap );
