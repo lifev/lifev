@@ -40,7 +40,7 @@ FhNHandler::FhNHandler(const GetPot& data_file):
 {
   // read mesh
   readINRIAMeshFile(mesh,mesh_dir+"/"+mesh_file,1);
-  
+
   if(verbose>2) mesh.showMe();
   // build dof
   dof.update(mesh);
@@ -59,11 +59,10 @@ FhNHandler::FhNHandler(const GetPot& data_file):
       example of mesh : recduct.mesh
     */
     nb_bc = 1;
-    bc.setNumber(nb_bc);
     vector<ID> comp(1);
     comp[0] = 1;
     // u_in = 1
-    bc_fct.setFunction(stim_inlet); 
+    bc_fct.setFunction(stim_inlet);
     bc.addBC("In",1, Essential,Component,bc_fct,comp);
     break;
     }
@@ -82,10 +81,9 @@ FhNHandler::FhNHandler(const GetPot& data_file):
 	Robin b.c. to take into account the position of an electrode
       */
       nb_bc = 1;
-      bc.setNumber(nb_bc);
       vector<ID> comp(1);
       comp[0] = 1;
-      // coef u + diff du/dn = g 
+      // coef u + diff du/dn = g
       bc_fct_rob.setFunctions_Mixte(stim_g,stim_coef);
       // first argument: g , second : coef (see user_fct.cpp)
       bc.addBC("In",0, Mixte,Component,bc_fct_rob,comp);
