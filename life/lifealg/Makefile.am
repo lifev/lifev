@@ -47,7 +47,7 @@ lib_LTLIBRARIES	= liblifealg.la
 
 liblifealg_la_SOURCES	= dataAztec.cpp dataNewton.cpp SolverAztec.cpp $(PETSC_SRCS) $(UMFPACK_SRCS)
 
-liblifealg_la_LIBADD	= ../lifecore/liblifecore.la ../lifearray/liblifearray.la $(petsc_libs) $(aztec_libs)
+liblifealg_la_LIBADD	= ../lifecore/liblifecore.la ../lifearray/liblifearray.la $(petsc_libs) $(umfpack_libs) $(aztec_libs) 
 include $(top_srcdir)/admin/Doxyfile.am
 
 
