@@ -39,25 +39,25 @@ namespace LifeV
 /**
    \class BCHandler
 
-   Container for BCBase classes
+   Container for \c BCBase classes
 
 
-   \c BCHandler is a container for the boundary condition classes It just
-   uses and stl vector to store BCBase objets. The usage is simple: the
-   user creates the data functors from the de user defined functions
+   \c BCHandler is a container for the boundary condition (BC) classes. It just
+   uses an stl vector to store \c BCBase objets. The usage is simple: the
+   user creates the data functors from the user defined functions:
 
    \verbatim
-   BCFunctionBase gv(g);
-   BCFunctionMixte gp(h,q);
+   BCFunctionBase gv( g );
+   BCFunctionMixte gp( h, q );
    \endverbatim
-   Then he/she specifies the number of BC and uses the Handler for creating the actual
-   BC objects and storing them.
+   Then he/she specifies the number of BC and uses the \c BCHandler for
+   creating the actual \c BCBase objects and storing them.
 
    \verbatim
-   BCHandler bc_v(3);
-   bc_v.addBC("inlet",10,Essential,Full,gv,3);
-   bc_v.addBC("outflow",11,Mixte,Scalar);
-   bc_v.addBC("wall",10,Essential,Full,gv,3);
+   BCHandler bcV( 3 );
+   bcV.addBC( "inlet", 10, Essential, Full, gv, 3 );
+   bcV.addBC( "outflow", 11, Mixte, Scalar );
+   bcV.addBC( "wall", 10, Essential, Full, gv, 3 );
    \endverbatim
 */
 class BCHandler
@@ -71,18 +71,28 @@ public:
     typedef std::vector<BCBase>::iterator Iterator;
     typedef std::vector<BCBase>::const_iterator ConstIterator;
 
+    /*!
+      \typedef enum
+      Hints about the nature of the BCs
+    */
+    typedef enum BCHints
+        {
+            HINT_BC_NONE,          //!< no hint
+            HINT_BC_ONLY_ESSENTIAL //!< BCs are only essential
+        };
+
     //@}
 
     /** @name Constructors, destructor
      */
     //@{
 
-    //! Constructor doing nothing
-    BCHandler();
-
-    //! Constructor taking the number of BC to be stored
-    BCHandler( const ID& );
-    BCHandler( const ID&, const bool& fullEssential );
+    /*!
+      Constructor.
+      \param nbc the number of BC to be stored
+      \param hint hint about their nature
+    */
+    BCHandler( const ID& nbc = 0 , BCHints hint = HINT_BC_NONE );
 
     //@}
 
@@ -90,43 +100,44 @@ public:
      */
     //@{
 
-
     //! extracting a BC in the list
     BCBase& operator[] ( const Index_t& );
 
     //! extracting a BC in the list
     const BCBase& operator[] ( const Index_t& ) const;
 
-
     //@}
 
     /** @name Accessors
      */
     //@{
+
     //! How many BC stored?
     Index_t size() const;
 
-    //! Is there no BC?
+    //! Is there no BC stored?
     bool empty() const;
 
     //! Iterators for the begining and end of the BC list
     Iterator begin()
         {
-            return _bcList.begin();
+            return M_bcList.begin();
         }
     Iterator end()
         {
-            return _bcList.end();
+            return M_bcList.end();
         }
-
-
 
     //! returns true if the bdUpdate has been done before
     bool bdUpdateDone() const;
 
-    //! returns  true if all the stored BC are of Essential type
-    bool hasOnlyEssential() const;
+    /*!
+      \brief returns true if all the stored BC are of Essential type
 
+      It throws a \c logic_error exception if state is not consistent with
+      hint.
+    */
+    bool hasOnlyEssential() const;
 
     //@}
 
@@ -283,19 +294,17 @@ public:
 
 
 
-protected:
+private:
     //! number of BC to be stored
 
     //! true if the bdUpdate has been done
-    bool _bdUpdateDone;
+    bool M_bdUpdateDone;
 
-    //! true if all the stored BC are of Essential type
-    bool _fullEssential;
+    //! hints about the nature of the BCs
+    BCHints M_hint;
 
     //! vector list holding the stored BC
-    std::vector<BCBase> _bcList;
-
-private:
+    std::vector<BCBase> M_bcList;
 
     /**
        look for the BC named \c name.
@@ -317,9 +326,9 @@ private:
 ********************************************************************/
 
 /**
-   The update method must be a method of BCh.
+   The update method must be a method of \c BCHandler.
 
-   It updates BCHandler objects not Dof objects
+   It updates \c BCHandler objects not \c Dof objects
    Build the boundary stuff
 */
 template <typename Mesh>
@@ -388,8 +397,8 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
 
                 // Finding this marker on the BC list
                 whereList.clear();
-                where = _bcList.begin();
-                while ( ( where = find( where, _bcList.end(), marker ) ) != _bcList.end() )
+                where = M_bcList.begin();
+                while ( ( where = find( where, M_bcList.end(), marker ) ) != M_bcList.end() )
                 {
                     whereList.push_back( where );
                     ++where;
@@ -470,8 +479,8 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
 
                 // Finding this marker on the BC list
                 whereList.clear();
-                where = _bcList.begin();
-                while ( ( where = find( where, _bcList.end(), marker ) ) != _bcList.end() )
+                where = M_bcList.begin();
+                while ( ( where = find( where, M_bcList.end(), marker ) ) != M_bcList.end() )
                 {
                     whereList.push_back( where );
                     ++where;
@@ -545,8 +554,8 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
 
         // Finding this marker on the BC list
         whereList.clear();
-        where = _bcList.begin();
-        while ( ( where = find( where, _bcList.end(), marker ) ) != _bcList.end() )
+        where = M_bcList.begin();
+        while ( ( where = find( where, M_bcList.end(), marker ) ) != M_bcList.end() )
         {
             whereList.push_back( where );
             ++where;
@@ -650,12 +659,12 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
     // There is no more identifiers to add to the boundary conditions
     // We finalise de set of identifiers by transfering it elements to a std::vector
     // ============================================================================
-    for ( Iterator it = _bcList.begin(); it != _bcList.end(); ++it )
+    for ( Iterator it = M_bcList.begin(); it != M_bcList.end(); ++it )
     {
         it->finalise();
     }
 
-    _bdUpdateDone = 1;
+    M_bdUpdateDone = true;
 }
 }
 #endif /* __BCHandler_H */

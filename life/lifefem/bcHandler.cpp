@@ -38,42 +38,29 @@
 namespace LifeV
 {
 
-// ============ BCHandler ================
-
-//! Constructor doing nothing (the user must call setNumber(..))
-BCHandler::BCHandler() : _bdUpdateDone( 0 ), _fullEssential( 0 )
-{}
-
-
-//! Constructor taking the number of BC to be stored
-BCHandler::BCHandler( const ID& nbc, const bool& fullEssential )
-    : _bdUpdateDone( 0 ),
-      _fullEssential( fullEssential )
+BCHandler::BCHandler( const ID& nbc, BCHints hint )
+    : M_bdUpdateDone( 0 ),
+      M_hint( hint )
 {
-    _bcList.reserve( nbc );
+    if ( nbc > 0 )
+    {
+        M_bcList.reserve( nbc );
+    }
 }
 
-//! Constructor taking the number of BC to be stored
-BCHandler::BCHandler( const ID& nbc )
-    : _bdUpdateDone( 0 ),
-      _fullEssential( 0 )
-{
-    _bcList.reserve( nbc );
-}
 
-//! How many BC stored?
 Index_t BCHandler::size() const
 {
-    return _bcList.size();
+    return M_bcList.size();
 }
 
-//! Is there no BC into the list?
+
 bool BCHandler::empty() const
 {
-    return _bcList.empty();
+    return M_bcList.empty();
 }
 
-//! Adding new BC to the list with user defined functions
+
 void BCHandler::addBC( const std::string& name,
                        const EntityFlag& flag,
                        const BCType& type,
@@ -82,9 +69,11 @@ void BCHandler::addBC( const std::string& name,
                        const std::vector<ID>& comp )
 {
     // Adding BC
-    _bcList.push_back( BCBase( name, flag, type, mode, bcf, comp ) );
-    std::sort( _bcList.begin(), _bcList.end() );
+    M_bcList.push_back( BCBase( name, flag, type, mode, bcf, comp ) );
+    std::sort( M_bcList.begin(), M_bcList.end() );
 }
+
+
 void BCHandler::addBC( const std::string& name,
                        const EntityFlag& flag,
                        const BCType& type,
@@ -92,8 +81,8 @@ void BCHandler::addBC( const std::string& name,
                        BCFunctionBase& bcf )
 {
     // Adding BC
-    _bcList.push_back( BCBase( name, flag, type, mode, bcf ) );
-    std::sort( _bcList.begin(), _bcList.end() );
+    M_bcList.push_back( BCBase( name, flag, type, mode, bcf ) );
+    std::sort( M_bcList.begin(), M_bcList.end() );
 }
 
 void BCHandler::addBC( const std::string& name,
@@ -104,12 +93,11 @@ void BCHandler::addBC( const std::string& name,
                        const UInt& nComp )
 {
     // Adding BC
-    _bcList.push_back( BCBase( name, flag, type, mode, bcf, nComp ) );
-    std::sort( _bcList.begin(), _bcList.end() );
+    M_bcList.push_back( BCBase( name, flag, type, mode, bcf, nComp ) );
+    std::sort( M_bcList.begin(), M_bcList.end() );
 }
 
 
-//! Adding new BC to the list with data vectors
 void BCHandler::addBC( const std::string& name,
                        const EntityFlag& flag,
                        const BCType& type,
@@ -118,8 +106,8 @@ void BCHandler::addBC( const std::string& name,
                        const std::vector<ID>& comp )
 {
     // Adding BC
-    _bcList.push_back( BCBase( name, flag, type, mode, bcv, comp ) );
-    std::sort( _bcList.begin(), _bcList.end() );
+    M_bcList.push_back( BCBase( name, flag, type, mode, bcv, comp ) );
+    std::sort( M_bcList.begin(), M_bcList.end() );
 }
 void BCHandler::addBC( const std::string& name,
                        const EntityFlag& flag,
@@ -128,9 +116,10 @@ void BCHandler::addBC( const std::string& name,
                        BCVectorBase& bcv )
 {
     // Adding BC
-    _bcList.push_back( BCBase( name, flag, type, mode, bcv ) );
-    std::sort( _bcList.begin(), _bcList.end() );
+    M_bcList.push_back( BCBase( name, flag, type, mode, bcv ) );
+    std::sort( M_bcList.begin(), M_bcList.end() );
 }
+
 
 void
 BCHandler::addBC( const std::string& name,
@@ -141,27 +130,28 @@ BCHandler::addBC( const std::string& name,
                   const UInt& nComp )
 {
     // Adding BC
-    _bcList.push_back( BCBase( name, flag, type, mode, bcv, nComp ) );
-    std::sort( _bcList.begin(), _bcList.end() );
+    M_bcList.push_back( BCBase( name, flag, type, mode, bcv, nComp ) );
+    std::sort( M_bcList.begin(), M_bcList.end() );
 }
+
 
 BCBase*
 BCHandler::findBC( std::string const& __name )
 {
     BCBase* __bc = 0;
-    std::for_each( _bcList.begin(),
-                   _bcList.end(),
+    std::for_each( M_bcList.begin(),
+                   M_bcList.end(),
                    boost::lambda::if_then( boost::lambda::bind( &BCBase::name, boost::lambda::_1 ) == __name,
                                            boost::lambda::var( __bc ) = &boost::lambda::_1 ) );
 
-    //! handle invalid name case: ie we didnot find the name in the _bcList
+    //! handle invalid name case: ie we didnot find the name in the M_bcList
     if ( !__bc )
     {
         std::ostringstream __ex;
         __ex << "Invalid name for BC to be modified : " << __name << "\n"
              << "The list of available BCs is:\n";
-        std::for_each( _bcList.begin(),
-                       _bcList.end(),
+        std::for_each( M_bcList.begin(),
+                       M_bcList.end(),
                        std::cout << boost::lambda::bind( &BCBase::name, boost::lambda::_1 )
                        << boost::lambda::constant( "\n" ) );
         throw std::invalid_argument( __ex.str() );
@@ -169,17 +159,19 @@ BCHandler::findBC( std::string const& __name )
     return __bc;
 }
 
+
 BCBase*
 BCHandler::findBC( int lab)
 {
     BCBase* __bc = 0;
-    std::for_each( _bcList.begin(),
-                   _bcList.end(),
+    std::for_each( M_bcList.begin(),
+                   M_bcList.end(),
                    boost::lambda::if_then( boost::lambda::bind( &BCBase::flag, boost::lambda::_1 ) == lab,
                                            boost::lambda::var( __bc ) = &boost::lambda::_1 ) );
 
     return __bc;
 }
+
 
 void
 BCHandler::modifyBC( std::string const& __name, BCFunctionBase& __bcf )
@@ -188,6 +180,8 @@ BCHandler::modifyBC( std::string const& __name, BCFunctionBase& __bcf )
 
     __bc->setBCFunction( __bcf );
 }
+
+
 void
 BCHandler::modifyBC( std::string const& __name, BCVectorBase& __bcv )
 {
@@ -196,6 +190,7 @@ BCHandler::modifyBC( std::string const& __name, BCVectorBase& __bcv )
     __bc->setBCVector( __bcv );
 }
 
+
 void
 BCHandler::modifyBC( int lab, BCFunctionBase& __bcf )
 {
@@ -203,6 +198,8 @@ BCHandler::modifyBC( int lab, BCFunctionBase& __bcf )
 
     __bc->setBCFunction( __bcf );
 }
+
+
 void
 BCHandler::modifyBC( int lab, BCVectorBase& __bcv )
 {
@@ -211,86 +208,89 @@ BCHandler::modifyBC( int lab, BCVectorBase& __bcv )
     __bc->setBCVector( __bcv );
 }
 
-// returns true if the bdUpdate has been done before
+
 bool BCHandler::bdUpdateDone() const
 {
-    return _bdUpdateDone;
+    return M_bdUpdateDone;
 }
 
-//! returns true if all the stored BC are of Essential type
+
 bool BCHandler::hasOnlyEssential() const
 {
     if ( empty() )
     {
-        return _fullEssential;
+        return M_hint == HINT_BC_ONLY_ESSENTIAL;
     }
     else
     {
-        bool listFullEssential = true;
-        for( ConstIterator it=_bcList.begin(); it!=_bcList.end(); ++it )
+        bool listOnlyEssential = true;
+        bool storedOnlyEssential = ( M_hint == HINT_BC_ONLY_ESSENTIAL );
+        for( ConstIterator it = M_bcList.begin(); it != M_bcList.end(); ++it )
         {
-            listFullEssential &=
+            listOnlyEssential &=
                 ( it->type() == Essential ) &&
                 ( it->mode() == Full );
         }
-        if ( listFullEssential != _fullEssential )
+        if ( listOnlyEssential != storedOnlyEssential )
         {
             std::ostringstream __ex;
-            __ex << "BCHandler::hasOnlyEssential(): state is not consistent:\n"
-                 << "flag from constructor says    " << _fullEssential << "\n"
-                 << "added boundary conditions say " << listFullEssential;
+            __ex << "BCHandler::hasOnlyEssential(): state is not consistent:"
+                 << "\nflag from constructor says    " << storedOnlyEssential
+                 << "\nadded boundary conditions say " << listOnlyEssential;
             std::cerr << std::endl << "Throwing exception:\n"
                       << __ex.str() << std::endl;
             throw std::logic_error( __ex.str() );
         }
-        return listFullEssential;
+        return listOnlyEssential;
     }
 }
 
-//! Extracting BC from the list
+
 BCBase& BCHandler::operator[] ( const Index_t& i )
 {
-    return _bcList[ i ];
+    return M_bcList[ i ];
 }
 
 
 const BCBase& BCHandler::operator[] ( const Index_t& i ) const
 {
-    return _bcList[ i ];
+    return M_bcList[ i ];
 }
+
 
 BCBase& BCHandler::GetBCWithFlag(const EntityFlag& aFlag){
 
   Index_t i;
 
-  for(i = 0; i <= _bcList.size(); i++){
-    if(aFlag == _bcList[i].flag()){
+  for(i = 0; i <= M_bcList.size(); i++){
+    if(aFlag == M_bcList[i].flag()){
       break;
     }
   }
 
-  return _bcList[i];
+  return M_bcList[i];
 }
+
 
 const BCBase& BCHandler::GetBCWithFlag(const EntityFlag& aFlag) const {
 
-  Index_t i;
+    Index_t i;
 
-  for(i = 0; i <= _bcList.size(); i++){
-    if(aFlag == _bcList[i].flag()){
-      break;
+    for(i = 0; i <= M_bcList.size(); i++){
+        if(aFlag == M_bcList[i].flag()){
+            break;
+        }
     }
-  }
-  return _bcList[i];
+    return M_bcList[i];
 }
 
 
-UInt BCHandler::getBCbyName(const std::string _BCName) const
+UInt BCHandler::getBCbyName(const std::string __BCName) const
 {
     int iBC = -1;
 
-    for (UInt jBC = 0; jBC < _bcList.size(); jBC++)
-        if (_bcList[jBC].name() == _BCName) iBC = jBC;
+    for (UInt jBC = 0; jBC < M_bcList.size(); jBC++)
+        if (M_bcList[jBC].name() == __BCName) iBC = jBC;
 
     return iBC;
 }
@@ -298,29 +298,31 @@ UInt BCHandler::getBCbyName(const std::string _BCName) const
 
 BCType BCHandler::boundaryType(const EntityFlag& aFlag) const
 {
-  BCType CurrType;
+    BCType CurrType;
 
-  for(UInt i = 0; i <= _bcList.size(); i++){
-    if(aFlag == _bcList[i].flag()){
-      CurrType = _bcList[i].type();
-      break;
+    for(UInt i = 0; i <= M_bcList.size(); i++){
+        if(aFlag == M_bcList[i].flag()){
+            CurrType = M_bcList[i].type();
+            break;
+        }
     }
-  }
 
   return CurrType;
 }
-//! Ouput
+
+
 std::ostream & BCHandler::showMe( bool verbose, std::ostream & out ) const
 {
     out << " Boundary Conditions Handler ====>" << std::endl;
     out << " Number of BC stored " << size() << std::endl;
 
     out << " List => " << std::endl;
-    for ( UInt i = 0; i < _bcList.size(); ++i )
+    for ( UInt i = 0; i < M_bcList.size(); ++i )
     {
-        _bcList[ i ].showMe( verbose, out );
+        M_bcList[ i ].showMe( verbose, out );
     }
     out << " <===========================>" << std::endl;
     return out;
 }
-}
+
+} // namespace LifeV
