@@ -28,7 +28,13 @@ namespace LifeV
   \param dof2 the Dof object of the mesh which provides de data at the interface
 */
 DofInterface3Dto3D::DofInterface3Dto3D( const RefFE& refFE, const Dof& dof1,
-                                        const Dof& dof2 ) : _refFE1( refFE ), _dof1( dof1 ), _refFE2( refFE ), _dof2( dof2 ), _dof( refFE )
+                                        const Dof& dof2 )
+    :
+    _refFE1( &refFE ),
+    _dof1( &dof1 ),
+    _refFE2( &refFE ),
+    _dof2( &dof2 ),
+    _dof( new Dof( refFE ) )
 {}
 
 //! Constructor for interfacing Dof of diferent type (RefFE)
@@ -38,10 +44,35 @@ DofInterface3Dto3D::DofInterface3Dto3D( const RefFE& refFE, const Dof& dof1,
   \param refFe2 the reference FE used in the mesh which provides de data at the interface
   \param dof2 the Dof object of the mesh which provides de data at the interface
 */
-DofInterface3Dto3D::DofInterface3Dto3D( const RefFE& refFE1, const Dof& dof1, const RefFE refFE2,
-                                        const Dof& dof2 ) : _refFE1( refFE1 ), _dof1( dof1 ), _refFE2( refFE2 ), _dof2( dof2 ), _dof( refFE1 )
+DofInterface3Dto3D::DofInterface3Dto3D( const RefFE& refFE1, const Dof& dof1, const RefFE& refFE2,
+                                        const Dof& dof2 )
+    :
+    _refFE1( &refFE1 ),
+    _dof1( &dof1 ),
+    _refFE2( &refFE2 ),
+    _dof2( &dof2 ),
+    _dof( new Dof( refFE1 ) )
 {}
 
+void
+DofInterface3Dto3D::setup( const RefFE& refFE, const Dof& dof1, const Dof& dof2 )
+{
+    _refFE1 = &refFE;
+    _dof1 = &dof1;
+    _refFE2 = &refFE;
+    _dof2 = &dof2;
+    _dof = boost::shared_ptr<Dof>( new Dof( refFE ) );
+}
+
+void
+DofInterface3Dto3D::setup( const RefFE& refFE1, const Dof& dof1, const RefFE& refFE2, const Dof& dof2 )
+{
+    _refFE1 = &refFE1;
+    _dof1 = &dof1;
+    _refFE2 = &refFE2;
+    _dof2 = &dof2;
+    _dof = boost::shared_ptr<Dof>( new Dof( refFE1 ) );
+}
 
 //! Returns true if the vectors v1 and v2 are equal with respect to the tolerance tol
 bool coincide( const KN_<Real>& v1, const KN_<Real>& v2, const Real& tol )

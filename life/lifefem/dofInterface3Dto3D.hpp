@@ -15,19 +15,21 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*!
   \file dofInterface3Dto3D.h
   \brief Class for interfacing dofs between two 3D meshes
   \version 1.0
   \author M.A. Fernandez
   \date 11/2002
- 
+
   This file contains the class which may be used to update and hold the connections between the dof
   on two matching meshes.
 */
 #ifndef _DOFINTERFACE3DTO3D_HH
 #define _DOFINTERFACE3DTO3D_HH
+
+#include <boost/shared_ptr.hpp>
 
 #include "dofInterfaceBase.hpp"
 
@@ -61,6 +63,15 @@ class DofInterface3Dto3D:
 {
 public:
 
+    //! default constructor
+    DofInterface3Dto3D()
+        :
+        _refFE1( 0 ),
+        _dof1( 0 ),
+        _refFE2( 0 ),
+        _dof2( 0 )
+        {}
+
     //! Constructor for interfacing Dof of the same type (RefFE)
     /*!
      \param refFe the reference FE used in both meshes
@@ -76,7 +87,10 @@ public:
       \param refFe2 the reference FE used in the mesh which provides de data at the interface
       \param dof2 the Dof object of the mesh which provides de data at the interface
      */
-    DofInterface3Dto3D( const RefFE& refFE1, const Dof& dof1, const RefFE refFE2, const Dof& dof2 );
+    DofInterface3Dto3D( const RefFE& refFE1, const Dof& dof1, const RefFE& refFE2, const Dof& dof2 );
+
+    void setup(const RefFE& refFE, const Dof& dof1, const Dof& dof2 );
+    void setup(const RefFE& refFE1, const Dof& dof1, const RefFE& refFE2, const Dof& dof2 );
 
     //! This method builds the Dof connections at the interface
     /*!
@@ -113,20 +127,20 @@ public:
 private:
 
     //! RefFE object used in the mesh in which we want to make the computations
-    const RefFE& _refFE1;
+    const RefFE* _refFE1;
 
     //! Dof object of the mesh in which we want to make the computations
-    const Dof& _dof1;
+    const Dof* _dof1;
 
     //! RefFE objet used in the mesh which provides de data at the interface
-    const RefFE& _refFE2;
+    const RefFE* _refFE2;
 
     //! Dof object of the mesh which provides de data at the interface
-    const Dof& _dof2;
+    const Dof* _dof2;
 
     //! Auxiliary Dof object of the mesh which provides de local to global table
     //! when interpolation is used
-    Dof _dof;
+    boost::shared_ptr<Dof> _dof;
 
     //! STL list which holds the connections between faces at the interface
     __gnu_cxx::slist< pair<ID, ID> > _elc;
@@ -281,13 +295,13 @@ void DofInterface3Dto3D::_updateDofConnections( const Mesh& mesh1, const Dof& do
     UInt nFaceV = GeoBShape::numVertices; // Number of face's vertices
     UInt nFaceE = GeoBShape::numEdges;    // Number of face's edges
 
-    UInt nDofpV1 = _refFE1.nbDofPerVertex; // number of Dof per vertices on mesh1
-    UInt nDofpE1 = _refFE1.nbDofPerEdge;   // number of Dof per edges on mesh1
-    UInt nDofpF1 = _refFE1.nbDofPerFace;   // number of Dof per faces on mesh1
+    UInt nDofpV1 = _refFE1->nbDofPerVertex; // number of Dof per vertices on mesh1
+    UInt nDofpE1 = _refFE1->nbDofPerEdge;   // number of Dof per edges on mesh1
+    UInt nDofpF1 = _refFE1->nbDofPerFace;   // number of Dof per faces on mesh1
 
-    UInt nDofpV2 = _refFE2.nbDofPerVertex; // number of Dof per vertices on mesh2
-    UInt nDofpE2 = _refFE2.nbDofPerEdge;   // number of Dof per edges on mesh2
-    UInt nDofpF2 = _refFE2.nbDofPerFace;   // number of Dof per faces on mesh2
+    UInt nDofpV2 = _refFE2->nbDofPerVertex; // number of Dof per vertices on mesh2
+    UInt nDofpE2 = _refFE2->nbDofPerEdge;   // number of Dof per edges on mesh2
+    UInt nDofpF2 = _refFE2->nbDofPerFace;   // number of Dof per faces on mesh2
 
     UInt nElemV = GeoShape::numVertices; // Number of element's vertices
     UInt nElemE = GeoShape::numEdges;    // Number of element's edges
@@ -310,8 +324,8 @@ void DofInterface3Dto3D::_updateDofConnections( const Mesh& mesh1, const Dof& do
 
     bool test = false;
 
-    CurrentBdFE feBd1( _refFE1.boundaryFE(), getGeoMap( mesh1 ).boundaryMap() );
-    CurrentBdFE feBd2( _refFE2.boundaryFE(), getGeoMap( mesh2 ).boundaryMap() );
+    CurrentBdFE feBd1( _refFE1->boundaryFE(), getGeoMap( mesh1 ).boundaryMap() );
+    CurrentBdFE feBd2( _refFE2->boundaryFE(), getGeoMap( mesh2 ).boundaryMap() );
 
     // Loop on faces at the interface (matching faces)
     for ( Iterator i = _elc.begin(); i != _elc.end(); ++i )
@@ -477,15 +491,15 @@ void DofInterface3Dto3D::update( Mesh& mesh1, const EntityFlag& flag1,
     // Updating face connections at the interface
     _updateFaceConnections( mesh1, flag1, mesh2, flag2, tol );
 
-    if ( _refFE1.nbDof > _refFE2.nbDof )
+    if ( _refFE1->nbDof > _refFE2->nbDof )
     {
         // Update of the Dof connections when we need interpolation
-        _dof.update( mesh2 ); // Building auxiliary dof
-        _updateDofConnections( mesh1, _dof1, mesh2, _dof, tol ); // Update of the Dof connections
+        _dof->update( mesh2 ); // Building auxiliary dof
+        _updateDofConnections( mesh1, *_dof1, mesh2, *_dof, tol ); // Update of the Dof connections
     }
     else
         // Update of the Dof connections without inperpolation
-        _updateDofConnections( mesh1, _dof1, mesh2, _dof2, tol );
+        _updateDofConnections( mesh1, *_dof1, mesh2, *_dof2, tol );
 }
 
 
@@ -509,14 +523,14 @@ void DofInterface3Dto3D::interpolate( Mesh& mesh2, const VecUnknown& v, VecUnkno
     UInt nFaceV = GeoBShape::numVertices; // Number of face's vertices
     UInt nFaceE = GeoBShape::numEdges;    // Number of face's edges
 
-    UInt nDofpV = _refFE1.nbDofPerVertex; // number of Dof per vertices
-    UInt nDofpE = _refFE1.nbDofPerEdge;   // number of Dof per edges
-    UInt nDofpF = _refFE1.nbDofPerFace;   // number of Dof per faces
+    UInt nDofpV = _refFE1->nbDofPerVertex; // number of Dof per vertices
+    UInt nDofpE = _refFE1->nbDofPerEdge;   // number of Dof per edges
+    UInt nDofpF = _refFE1->nbDofPerFace;   // number of Dof per faces
 
     UInt nElemV = GeoShape::numVertices; // Number of element's vertices
     UInt nElemE = GeoShape::numEdges;    // Number of element's edges
 
-    UInt nDofElem = _refFE2.nbDof; // Number of Dof per element in the lowDof mesh
+    UInt nDofElem = _refFE2->nbDof; // Number of Dof per element in the lowDof mesh
 
     UInt nDofElemV = nElemV * nDofpV; // number of vertex's Dof on a Element
     UInt nDofElemE = nElemE * nDofpE; // number of edge's Dof on a Element
@@ -542,7 +556,7 @@ void DofInterface3Dto3D::interpolate( Mesh& mesh2, const VecUnknown& v, VecUnkno
         // Updating the local dof of the data vector in the adjacent element
         for ( UInt icmp = 0; icmp < nbComp; ++icmp )
             for ( ID idof = 0; idof < nDofElem; ++idof )
-                vLoc( icmp * nDofElem + idof ) = ( v.vec() ) ( icmp * _dof2.numTotalDof() + _dof2.localToGlobal( iElAd, idof + 1 ) - 1 );
+                vLoc( icmp * nDofElem + idof ) = ( v.vec() ) ( icmp * _dof2->numTotalDof() + _dof2->localToGlobal( iElAd, idof + 1 ) - 1 );
 
         // Vertex based Dof
         if ( nDofpV )
@@ -560,9 +574,9 @@ void DofInterface3Dto3D::interpolate( Mesh& mesh2, const VecUnknown& v, VecUnkno
                     lDof = ( iVeEl - 1 ) * nDofpV + l; // Local dof in the adjacent Element
 
                     // Nodal coordinates
-                    x = _refFE1.xi( lDof - 1 );
-                    y = _refFE1.eta( lDof - 1 );
-                    z = _refFE1.zeta( lDof - 1 );
+                    x = _refFE1->xi( lDof - 1 );
+                    y = _refFE1->eta( lDof - 1 );
+                    z = _refFE1->zeta( lDof - 1 );
 
                     // Loop on data vector components
                     for ( UInt icmp = 0; icmp < nbComp; ++icmp )
@@ -571,10 +585,10 @@ void DofInterface3Dto3D::interpolate( Mesh& mesh2, const VecUnknown& v, VecUnkno
                         // Interpolating data at the nodal point
                         sum = 0;
                         for ( ID idof = 0; idof < nDofElem; ++idof )  // Loop on local Dof on the adjacent element
-                            sum += vLoc( icmp * nDofElem + idof ) * _refFE2.phi( idof, x, y, z );
+                            sum += vLoc( icmp * nDofElem + idof ) * _refFE2->phi( idof, x, y, z );
 
                         // Updating interpolating vector
-                        ( vI.vec() ) ( icmp * _dof.numTotalDof() + _dof.localToGlobal( iElAd, lDof ) - 1 ) = sum;
+                        ( vI.vec() ) ( icmp * _dof->numTotalDof() + _dof->localToGlobal( iElAd, lDof ) - 1 ) = sum;
                     }
                 }
             }
@@ -596,9 +610,9 @@ void DofInterface3Dto3D::interpolate( Mesh& mesh2, const VecUnknown& v, VecUnkno
                     lDof = nDofElemV + ( iEdEl - 1 ) * nDofpE + l; // Local dof in the adjacent Element
 
                     // Nodal coordinates
-                    x = _refFE1.xi( lDof - 1 );
-                    y = _refFE1.eta( lDof - 1 );
-                    z = _refFE1.zeta( lDof - 1 );
+                    x = _refFE1->xi( lDof - 1 );
+                    y = _refFE1->eta( lDof - 1 );
+                    z = _refFE1->zeta( lDof - 1 );
 
                     // Loop on data vector components
                     for ( UInt icmp = 0; icmp < nbComp; ++icmp )
@@ -607,10 +621,10 @@ void DofInterface3Dto3D::interpolate( Mesh& mesh2, const VecUnknown& v, VecUnkno
                         // Interpolating data at the nodal point
                         sum = 0;
                         for ( ID idof = 0; idof < nDofElem; ++idof )   // Loop on local Dof on the adjacent element
-                            sum += vLoc( icmp * nDofElem + idof ) * _refFE2.phi( idof, x, y, z );
+                            sum += vLoc( icmp * nDofElem + idof ) * _refFE2->phi( idof, x, y, z );
 
                         // Updating interpolating vector
-                        ( vI.vec() ) ( icmp * _dof.numTotalDof() + _dof.localToGlobal( iElAd, lDof ) - 1 ) = sum;
+                        ( vI.vec() ) ( icmp * _dof->numTotalDof() + _dof->localToGlobal( iElAd, lDof ) - 1 ) = sum;
                     }
                 }
             }
@@ -622,9 +636,9 @@ void DofInterface3Dto3D::interpolate( Mesh& mesh2, const VecUnknown& v, VecUnkno
             lDof = nDofElemE + nDofElemV + ( iFaEl - 1 ) * nDofpF + l; // Local dof in the adjacent Element
 
             // Nodal coordinates
-            x = _refFE1.xi( lDof - 1 );
-            y = _refFE1.eta( lDof - 1 );
-            z = _refFE1.zeta( lDof - 1 );
+            x = _refFE1->xi( lDof - 1 );
+            y = _refFE1->eta( lDof - 1 );
+            z = _refFE1->zeta( lDof - 1 );
 
             // Loop on data vector components
             for ( UInt icmp = 0; icmp < nbComp; ++icmp )
@@ -633,10 +647,10 @@ void DofInterface3Dto3D::interpolate( Mesh& mesh2, const VecUnknown& v, VecUnkno
                 // Interpolating data at the nodal point
                 sum = 0;
                 for ( ID idof = 0; idof < nDofElem; ++idof )  // Loop on local Dof on the adjacent element
-                    sum += vLoc( icmp * nDofElem + idof ) * _refFE2.phi( idof, x, y, z );
+                    sum += vLoc( icmp * nDofElem + idof ) * _refFE2->phi( idof, x, y, z );
 
                 // Updating interpolating vector
-                ( vI.vec() ) ( icmp * _dof.numTotalDof() + _dof.localToGlobal( iElAd, lDof ) - 1 ) = sum;
+                ( vI.vec() ) ( icmp * _dof->numTotalDof() + _dof->localToGlobal( iElAd, lDof ) - 1 ) = sum;
             }
         }
     }
