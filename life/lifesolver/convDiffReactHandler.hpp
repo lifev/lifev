@@ -39,7 +39,7 @@
 #include "medit_wrtrs.hpp"
 #include "bcHandler.hpp"
 #include "bdf.hpp"
-#include "post_proc.hpp"
+#include "postProc.hpp"
 #include "openDX_wrtrs.hpp"
 #include <cmath>
 #include <sstream>

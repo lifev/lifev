@@ -44,7 +44,7 @@
 #include "openDX_wrtrs.hpp"
 #include "vtk_wrtrs.hpp"
 #include "sobolevNorms.hpp"
-#include "post_proc.hpp"
+#include "postProc.hpp"
 
 #define  OPER_TEMPLATE
 #undef P2

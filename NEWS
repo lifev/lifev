@@ -5,6 +5,10 @@ Bugs fixed in 0.5.0:
 [configure]
 * Fixed umfpack check when umfpack is not installed (CP)
 
+[lifecore]
+* Cleaned lifecore: nothing belongs to lifecore that should 
+  belong elsewhere (CP)
+
 [lifefem]
 * fixed little bugs in basisElSh,currentFE,defQuadRuleFE (MM)
 
@@ -202,4 +206,4 @@ New in 0.1.0pre3:
 * fixed some bugs and miscompilation in a few places
 
 
- -- Christophe Prud'homme <prudhomm@mit.edu>, Tue Nov 16 11:14:24 2004
+ -- Christophe Prud'homme <prudhomm@debian.org>, Tue Nov 16 11:56:38 2004
