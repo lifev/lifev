@@ -143,6 +143,24 @@ namespace LifeV {
         {
             _M_solver.setOptionsFromGetPot(_M_data_file, (_M_data_section + "/solver").data());
             _M_gamma = _M_data_file((_M_data_section + "/ipstab/gamma").data(), 0.125);
+            switch( _M_fe.nbNode )
+            {
+                case 4:
+                    _M_fToP = LinearTetra::fToP;
+                    break;
+                case 10:
+                    _M_fToP = QuadraticTetra::fToP;
+                    break;
+                case 8:
+                    _M_fToP = LinearHexa::fToP;
+                    break;
+                case 20:
+                    _M_fToP = QuadraticHexa::fToP;
+                    break;
+                default:
+                    ERROR_MSG( "This refFE is not allowed with IP stabilisation" );
+                    break;
+            }
         }
 
         //@}
@@ -351,6 +369,10 @@ namespace LifeV {
 
         void apply_bc();
         //@}
+    private:
+        typedef ID ( *FTOP )( ID const localFace, ID const point );
+        FTOP _M_fToP;
+
     };
 
     template<typename MeshType>
@@ -375,18 +397,9 @@ namespace LifeV {
         CurrentFE fe2(_M_fe);
         Real stab_coeff;
 
-//         UInt eleID = _M_fe_velocity.currentId();
-//         // M_elvec contains the velocity values in the nodes
-//         for ( UInt iNode = 0 ; iNode<( UInt )_M_fe_velocity.nbNode ; iNode++ )
-//         {
-//             UInt  iloc = _M_fe_velocity.patternFirst( iNode );
-//             for ( UInt iComp = 0; iComp<nbCompU; ++iComp )
-//             {
-//                 UInt ig = _dof_u.localToGlobal( eleID, iloc+1 )-1+iComp*_dim_u;
-//                 M_elvec.vec()[ iloc+iComp*_M_fe_velocity.nbNode ]=betaVec(ig);
-//             }
-//         }
-        
+        // local trace of the velocity
+        ElemVec beta( _M_fe_bd.nbNode, nDimensions );
+
         for(UInt i = _M_mesh.numBFaces() + 1; i <= _M_mesh.numFaces(); i++){
             elmat.zero();
 
@@ -398,10 +411,27 @@ namespace LifeV {
             _M_fe.updateFirstDerivQuadPt( _M_mesh.volumeList(ad_first) );
             fe2.updateFirstDerivQuadPt( _M_mesh.volumeList(ad_second) );
 
-            _M_fe_bd.updateMeasQuadPt( _M_mesh.faceList(i) );
+            //_M_fe_bd.updateMeasQuadPt( _M_mesh.faceList(i) );
+            //ipstab_grad(stab_coeff, elmat, _M_fe, fe2,  _M_fe_bd, 0, 0, 1);
 
-            ipstab_grad(stab_coeff, elmat, _M_fe, fe2,  _M_fe_bd, 0, 0, 1);
-            //ipstab_bgrad(stab_coeff, elmat, _M_fe, fe2, beta, _M_fe_bd, 0,0,1);
+            _M_fe_bd.updateMeasNormalQuadPt( _M_mesh.faceList(i) );
+            // get the local trace of the velocity into beta
+        
+            // local id of the face in its adjacent element
+            UInt iFaEl = _M_mesh.face( i ).pos_first();
+            for ( int iNode = 0; iNode < _M_fe_bd.nbNode; ++iNode )
+            {
+                UInt iloc = _M_fToP( iFaEl, iNode+1 );
+                for ( int iCoor = 0; iCoor < _M_fe.nbCoor; ++iCoor )
+                {
+                    UInt ig = _M_dof.localToGlobal( ad_first, iloc+1 ) - 1 +
+                        iCoor * _M_dof.numTotalDof();
+                    beta.vec()[ iCoor*_M_fe_bd.nbNode + iNode ] = _M_velocity( ig );
+                }
+            }
+
+            ipstab_bagrad(stab_coeff, elmat, _M_fe, fe2, beta, _M_fe_bd, 0, 0);
+
             assemb_mat(_M_A_steady, elmat, _M_fe, fe2, _M_dof);
         }
     }
