@@ -230,8 +230,6 @@ public:
 
     void initialize( const Function& u0, const Function& p0, Real t0, Real dt );
 
-    void timeAdvance( source_type const& __source, const Real& __time );
-
     void iterate( const Real& time );
 
     //@}
@@ -300,7 +298,7 @@ private:
     Real _M_lambda;
 
     int flag_strategy;
-    //std::ofstream outfile;
+  //std::ofstream outfile;
 };
 
 template<typename NSSolver>
@@ -339,6 +337,10 @@ NavierStokesWithFlux<NSSolver>::initialize_one_flux( const Function& u0, const F
     // if one flux do the NSo solves
     // Stationary Navier-Stokes (NSo)
     //
+    BCVector bcvec( _M_vec_lambda, _M_vec_lambda.size(), 1 );
+    _M_solver->bcHandler().modifyBC( _M_fluxes.begin()->first, bcvec );
+    _M_vec_lambda = ScalarVector( _M_vec_lambda.size(), 1 );
+
     _M_solver->initialize(u0o,p0,0.0,dt);
 
     Real startT = _M_solver->inittime();
@@ -360,7 +362,6 @@ NavierStokesWithFlux<NSSolver>::initialize_one_flux( const Function& u0, const F
     // Change the BC for the non stationary NS
     //
 
-    BCVector bcvec( _M_vec_lambda, _M_vec_lambda.size(), 1 );
     _M_solver->bcHandler().modifyBC( _M_fluxes.begin()->first, bcvec );
 
     // Navier Stokes in temporal loop
@@ -441,20 +442,11 @@ NavierStokesWithFlux<NSSolver>::initialize_two_fluxes_inexact( const Function& u
 
 template<typename NSSolver>
 void
-NavierStokesWithFlux<NSSolver>::timeAdvance( source_type const& __source, Real const& __time )
-{
-    // update right hand side for NS solves for new time step
-    _M_solver->timeAdvance( __source,__time );
-}
-
-template<typename NSSolver>
-void
 NavierStokesWithFlux<NSSolver>::iterate( const Real& time )
 {
     switch ( _M_fluxes.size() )
     {
         case 1:
-            timeAdvance( _M_solver->sourceTerm(), time );
             iterate_one_flux( time );
         break;
         case 2:
@@ -490,6 +482,7 @@ NavierStokesWithFlux<NSSolver>::iterate_one_flux( const Real& time )
     // update vec_lambda
     _M_vec_lambda = ScalarVector( _M_vec_lambda.size(), -lambda0 );
 
+    _M_solver->timeAdvance( _M_solver->sourceTerm(), time );
     _M_solver->iterate(time);
 
     //compute the flux of NS
@@ -842,7 +835,7 @@ NavierStokesWithFlux<NSSolver>::iterate_two_fluxes_inexact( const Real& time )
     std::cout << "numerical flux 0" << " " << Qn[0] << "\n";
     std::cout << "imposed flux 1" << " " << Q[1] << "\n";
     std::cout << "numerical flux 1" << " " << Qn[1] << "\n";
-    //outfile.open("flusso_inesatto.txt",std::ios::app);
+    //outfile.open("flusso_esatto.txt",std::ios::app);
     //outfile << Q[0] << "\n";
     //outfile << Qn[0] << "\n";
     //outfile << Q[1] << "\n";
