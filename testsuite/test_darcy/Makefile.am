@@ -30,7 +30,7 @@ check_HEADERS = user_fct.hpp user_diffusion.hpp
 check_PROGRAMS = test_darcy
 test_darcy_SOURCES =  main.cpp user_fct.cpp user_diffusion.cpp 
 test_darcy_LDADD   = $(life_libs) $(boost_libs)
-EXTRA_DIST = data data-analytichexa datatetra data-arterialwall testsuite.at
+EXTRA_DIST = data data-analyticalhexa datatetra data-arterialwall testsuite.at
 
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
