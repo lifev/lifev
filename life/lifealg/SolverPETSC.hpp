@@ -31,16 +31,16 @@
 
 #include <iostream>
 
-extern "C"
-{
 #if defined(HAVE_PETSC_H)
+#define PETSC_USE_EXTERN_CXX
 #include <petsc.h>
 #include <petscksp.h>
 #include <petscpc.h>
 #endif /* HAVE_PETSC_H */
-}
 
 #include <vecUnknown.hpp>
+
+class GetPot;
 
 namespace LifeV
 {
@@ -175,6 +175,13 @@ public:
     //@{
 
     void setMatrix( uint, const uint*, const uint*, const double* );
+
+    template<typename Matrix>
+    void SolverPETSC::setMatrix( Matrix m ) {
+        setMatrix(m.Patt()->nRows(), m.Patt()->giveRawCSR_ia(),
+                  m.Patt()->giveRawCSR_ja(), m.giveRawCSR_value());
+    }
+
     void setMatrixTranspose( uint, const uint*, const uint*, const double* );
     void setTolerances( double = PETSC_DEFAULT, double = PETSC_DEFAULT, double = PETSC_DEFAULT, int = PETSC_DEFAULT );
 
@@ -245,7 +252,35 @@ public:
 
 private:
     Private* _M_p;
+};
 
+/*!
+  \class PETSCforSingleton
+  \brief initialization and finalization for PETSC linear solvers
+
+  You should have a look at PETSC documentation for further details.
+
+  @author Christoph Winkelmann
+  @see http://www.mcs.anl.gov/petsc/
+*/
+class PETSCforSingleton {
+public:
+
+    /*! Initializes PETSC with options from data file. Any option of the form
+      NAME = VALUE is passed to PETSC as command line option -NAME VALUE.
+      Example: ksp_type = gmres. See the PETSC documentation for more 
+      available options.
+      @arg dataFile GetPot object containing the options from the data file
+      @arg section the section in the GetPot object containing the PETSC stuff
+    */
+    PETSCforSingleton(const GetPot& dataFile, std::string section = "petsc");
+
+    //! Finalizes PETSC
+    ~PETSCforSingleton();
+
+private:
+    char** _argv; //!< fake argv passed to petsc as command line argument
+    int _argc; //!< fake argc passed to petsc as command line argument
 };
 }
 #endif /* __SolverPETSC_H */

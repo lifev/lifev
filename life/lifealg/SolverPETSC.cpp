@@ -29,17 +29,9 @@
 #include <lifeconfig.h>
 
 #include <SolverPETSC.hpp>
+#include "GetPot.hpp"
 
-extern "C"
-{
-#if defined(HAVE_PETSC_H)
-#include <petsc.h>
-#include <petscksp.h>
-#include <petscvec.h>
 #define PETSC_KSPSOLVE_OLD_INTERFACE 0
-#endif /* HAVE_PETSC_H */
-};
-
 
 namespace LifeV
 {
@@ -100,7 +92,8 @@ SolverPETSC::SolverPETSC( std::string const& __ksp_type,
 
     if ( __pc_type == "ilu" )
     {
-        ierr = PCILUSetLevels( _M_p->__pc, 2 ); //CHKERRQ(ierr);
+        //ierr = PCILUSetLevels( _M_p->__pc, 2 ); //CHKERRQ(ierr);
+        ierr = PCILUSetUseDropTolerance(_M_p->__pc, 1e-6, 0.1, 200);
     }
     if ( __pc_type == "icc" )
     {
@@ -213,8 +206,6 @@ SolverPETSC::solve( array_type& __X, array_type const& __B, MatStructure  __ptyp
     int __colA;
     MatGetSize(_M_p->__A,&__rowA,&__colA); //CHKERRQ(__ierr);
 
-    int __iterations;
-
     std::cerr << "[SolverPETSC::solve]  Solving primal\n";
     Vec __x;
     VecCreateSeqWithArray( PETSC_COMM_SELF, __X.size(), &__X[0], &__x );
@@ -264,8 +255,8 @@ SolverPETSC::solve( array_type& __X, array_type const& __B, MatStructure  __ptyp
     VecDestroy( __x );
     VecDestroy( __b );
 
-    std::cerr << "[SolverPETSC::solve] Solving primal done in " << __iterations << " iterations\n";
-    return __iterations;
+    std::cerr << "[SolverPETSC::solve] Solving primal done in " << its << " iterations\n";
+    return its;
 }
 
 int
@@ -274,8 +265,6 @@ SolverPETSC::solveTranspose( array_type& __X, array_type const& __B, MatStructur
     int __rowA;
     int __colA;
     MatGetSize(_M_p->__A_t,&__rowA,&__colA); ////CHKERRQ(__ierr);
-
-    int __iterations;
 
     std::cerr << "[SolverPETSC::solveTranspose] Solving transpose\n";
     Vec __x;
@@ -320,8 +309,52 @@ SolverPETSC::solveTranspose( array_type& __X, array_type const& __B, MatStructur
     VecDestroy( __x );
     VecDestroy( __b );
 
-    std::cerr << "[SolverPETSC::solveTranspose] Solving transpose done in " << __iterations << " iterations\n";
-    return __iterations;
+    std::cerr << "[SolverPETSC::solveTranspose] Solving transpose done in " << its << " iterations\n";
+    return its;
+}
+
+PETSCforSingleton::PETSCforSingleton(const GetPot& dataFile,
+                                     std::string section) {
+    // get variable names
+    const getpot::StringVector vars = dataFile.get_variable_names();
+
+    // build up vector of options
+    getpot::StringVector petscOpts;
+    for(getpot::StringVector::const_iterator it=vars.begin();
+        it!=vars.end(); ++it) {
+        std::string::size_type p = it->find(section+"/");
+        if ( p != std::string::npos ) {
+            std::string name = it->substr(p+section.size()+1);
+            std::string value = dataFile(it->c_str(), "");
+            petscOpts.push_back("-"+name);
+            petscOpts.push_back(value);
+        }
+    }
+
+    // build up _argv and _argc
+    _argv = new char*[petscOpts.size()+1];
+    _argc = 0;
+    for(getpot::StringVector::const_iterator it=petscOpts.begin();
+        it!=petscOpts.end(); ++it) {
+        _argv[_argc] = new char[it->size()+1];
+        strcpy(_argv[_argc++], it->c_str());
+    }
+    _argv[_argc] = 0;
+//     for(int i=0; i<_argc; ++i) {
+//         std::cout << _argv[i] << std::endl;
+//     }
+
+    // initialize petsc
+    PetscInitialize(&_argc, &_argv, 0, 0);
+    
+}
+
+PETSCforSingleton::~PETSCforSingleton() {
+    PetscFinalize();
+    for(int i=0; i<_argc; ++i) {
+        delete[] _argv[i];
+    }
+    delete[] _argv;  
 }
 
 }
