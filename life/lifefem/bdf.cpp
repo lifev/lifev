@@ -144,16 +144,19 @@ double Bdf::coeff_ext( UInt i ) const
 
 void Bdf::showMe() const
 {
-    std::cout << "*** BDF Time discretization of order " << _n << "***" << std::endl;
-    std::cout << std::endl;
-    std::cout << "*** Coefficients: " << std::endl;
-    std::cout << std::endl;
+    std::cout << "*** BDF Time discretization of order " << _n << " ***"
+              << std::endl;
+    std::cout << "    Coefficients: " << std::endl;
     for ( UInt i = 0;i < _n + 1;++i )
-        std::cout << "alpha(" << i << ") = " << _alpha[ i ] << std::endl;
+        std::cout << "       alpha(" << i << ") = " << _alpha[ i ]
+                  << std::endl;
     for ( UInt i = 0;i < _n;++i )
-        std::cout << "beta(" << i << ") = " << _beta[ i ] << std::endl;
+        std::cout << "       beta (" << i << ") = " << _beta[ i ]
+                  << std::endl;
 
-    std::cout << "Length unknown vectors:" << _unk.size() << "," << _s << std::endl;
+    std::cout << "    " << _unk.size() << " unknown vector" 
+              << (_unk.size() == 1 ? "" : "s") << " of length "
+              << _s << std::endl;
 
     /*   std::vector< Vector >::iterator itg=_u_prec.begin(); */
     /*   std::vector< Vector >::iterator itge=_u_prec.end(); */
