@@ -47,7 +47,7 @@ namespace LifeV {
     */
 
     /**
-       \Two-fluid mass contribution
+       \Two-fluid mass operator
     */
 
     void mass_2f(Real coef1, Real coef2,
@@ -56,7 +56,16 @@ namespace LifeV {
                  int iblock, int jblock);
 
     /**
-       \Two-fluid stiffness-strain contribution
+       \Two-fluid lumped mass operator
+    */
+
+    void lumped_mass_2f(Real coef1, Real coef2, 
+                        const ElemVec& ls_fun_loc, const CurrentFE& fe_ls,
+                        ElemMat& elmat, const CurrentFE& fe,
+                        int iblock, int jblock);
+
+    /**
+       \Two-fluid stiffness-strain operator
     */
 
     void stiff_strain_2f(Real coef1, Real coef2,
@@ -65,7 +74,7 @@ namespace LifeV {
 
 
     /**
-       \Two-fluid passive advection term
+       \Two-fluid passive advection operator
     */
 
     void advection_2f(const int icoor, Real coef1, Real coef2,
@@ -125,6 +134,40 @@ namespace LifeV {
             }
         }
     }
+
+    void lumped_mass_2f(Real coef1, Real coef2, 
+                 const ElemVec& ls_fun_loc, const CurrentFE& fe_ls,
+                 ElemMat& elmat, const CurrentFE& fe,
+                 int iblock = 0, int jblock = 0) {
+        ASSERT_PRE( fe.hasJac(), "Mass matrix needs at least the Jacobian" );
+        ElemMat::matrix_view mat = elmat.block(iblock, jblock);
+        Real s, coef_s;
+        Real ls_fun_on_qn;
+
+        for (int i = 0; i < fe.nbNode; i++) {
+            for(int j = 0; j < fe.nbNode; j++) {
+                s = 0;
+                for (int iq = 0; iq < fe.nbQuadPt; iq++) {
+                    // Evaluate level set function on current quadrature node
+
+                    ls_fun_on_qn = 0.;
+                    for(int k = 0; k < fe_ls.nbNode; k++)
+                        ls_fun_on_qn += ls_fun_loc(k) * fe_ls.phi(k, iq);
+
+                    // Evaluate coefficient on current quadrature node
+
+                    coef_s = coef1 * (ls_fun_on_qn > 0) + coef2 * (ls_fun_on_qn < 0);
+
+                    // Compute local contribution
+
+                    s += coef_s * fe.phi(i, iq) * fe.phi(j, iq) * fe.weightDet(iq);
+                }
+
+                mat(i, i) += s;
+            }
+        }
+    }
+
 
     void stiff_strain_2f(Real coef1, Real coef2,
                          const ElemVec& ls_fun_loc, const CurrentFE& fe_ls,
