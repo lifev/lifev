@@ -1350,6 +1350,57 @@ void source(Real constant,ElemVec& elvec,const CurrentFE& fe,int iblock){
   }
 }
 
+void source(Real coef,ElemVec& f, ElemVec& elvec, const CurrentFE& fe,
+	    int fblock,int eblock)
+  /*
+    compute \int f \phi_i
+    where f is given on the dof of this element
+    fblock is the block of the values read in f
+    eblock is the block where the result is writen in the elvec
+  */
+{
+  int i,ig;
+  ASSERT_PRE(fe.hasJac(),"Source vector (f) needs at least the jacobian");
+  Tab1dView vec = elvec.block(eblock);
+  Tab1dView vecf = f.block(fblock);
+  Real f_ig;
+  
+  for(ig=0;ig<fe.nbQuadPt;ig++){
+    f_ig = 0.;
+    for(i=0;i<fe.nbNode;i++) f_ig += vecf(i)*fe.phi(i,ig);
+    for(i=0;i<fe.nbNode;i++){
+       vec(i) += coef*f_ig*fe.phi(i,ig)*fe.weightDet(ig);
+    }
+  }
+}
+
+void source_fhn(Real coef_f,Real coef_a,ElemVec& u, ElemVec& elvec, const CurrentFE& fe,
+	    int fblock,int eblock)
+  /*
+    compute \int coef_f u(1-u)(u-coef_a) \phi_i
+    (right-hand side for the Fitzhugh-Nagumo equations)
+    where u is given on the dof of this element
+    fblock is the block of the values read in f
+    eblock is the block where the result is writen in the elvec
+  */
+{
+  int i,ig;
+  ASSERT_PRE(fe.hasJac(),"elemOper.cpp source_fhn: FHN source vector (f) needs at least the jacobian");
+  Tab1dView vec = elvec.block(eblock);
+  Tab1dView vecu = u.block(fblock);
+  Real f_ig;
+  
+  for(ig=0;ig<fe.nbQuadPt;ig++){
+    f_ig = 0.;
+    for(i=0;i<fe.nbNode;i++) f_ig += vecu(i)*fe.phi(i,ig);
+    for(i=0;i<fe.nbNode;i++){
+       vec(i) += coef_f*f_ig*(1-f_ig)*(f_ig-coef_a)*fe.phi(i,ig)*fe.weightDet(ig);
+    }
+  }
+  
+}
+
+
 
 // Miguel & Marwan 06/2003:
 //

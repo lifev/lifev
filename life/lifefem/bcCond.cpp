@@ -433,8 +433,10 @@ bool BC_Base::dataVector() const {
 Real BC_Base::operator()(const ID& iDof, const ID& iComp) const {
   if ( _dataVector )
     return (*_bcv)(iDof,iComp);
-  else
+  else{
     ERROR_MSG("A data vector must be specified before calling this method");
+    return 0.;
+  }
 }
 
 
@@ -442,8 +444,11 @@ Real BC_Base::operator()(const ID& iDof, const ID& iComp) const {
 Real BC_Base::MixteCoef() const{
   if ( _dataVector )
     return (*_bcv).MixteCoef();
-  else
+  else{
     ERROR_MSG("A data vector must be specified before calling this method");
+    return 0.;
+  }
+  
 }
 
 //! Returns a pointer  to the i-th elements in the (finalised) list

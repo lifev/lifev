@@ -18,8 +18,8 @@
 */
 /*! file regionMesh3D.h
   \brief The mesh classes interfaces
-  \version $Revision: 1.6 $ Luca Formaggia
-  \version $Revision: 1.6 $ Miguel Fernandez
+  \version $Revision: 1.7 $ Luca Formaggia
+  \version $Revision: 1.7 $ Miguel Fernandez
 
   Introduces the RegionMesh3D class
 */
@@ -556,7 +556,7 @@ public:
   //! Switches
   // \sa Switch
   Switch switches;
-
+  void list_of_points(bool (*fct)(double,double,double),vector<UInt>& list_pts);
 protected:
   /*! Arrays containing the ids of Edges and Faces of each element
   I use a Define to use localto global array or directly the
@@ -600,6 +600,8 @@ protected:
 
   // Modif Miguel:11/2002
   bool _moved; // True whenever the mesh has been moved
+
+  //
 };
 
 
@@ -2242,5 +2244,20 @@ RegionMesh3D<GEOSHAPE,MC>::cleanElementEdges(){
 #endif
   unsetLinkSwitch("HAS_VOLUME_TO_EDGES");
 }
+
+  
+template<typename GEOSHAPE, typename MC>
+void
+RegionMesh3D<GEOSHAPE,MC>::
+list_of_points(bool (*fct)(double,double,double),vector<UInt>& list_pts)
+  {
+    for(UInt i=1;i<=_numPoints;i++){
+      Geo0D& pt = pointList(i);
+      if(fct(pt.x(),pt.y(),pt.z())){
+	list_pts.push_back(i);
+      }
+    }
+  }
+
 }
 #endif

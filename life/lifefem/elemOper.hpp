@@ -170,7 +170,12 @@ void source(const UsrFct& fct,ElemVec& elvec,const CurrentFE& fe,Real t,int iblo
 }
 
 
+  void source(Real coef,ElemVec& f, ElemVec& elvec, const CurrentFE& fe,
+	      int fblock=0,int eblock=0);
 
+  void source_fhn(Real coef_f,Real coef_a,ElemVec& u, ElemVec& elvec, const CurrentFE& fe,
+		  int fblock=0,int eblock=0);
+  
 // Miguel & Marwan 06/2003:
 //
 // coef * ( \grad (convect):[I\div d - (\grad d)^T] u^k + convect^T[I\div d - (\grad d)^T] (\grad u^k)^T , v  ) for Newton FSI

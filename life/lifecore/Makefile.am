@@ -23,12 +23,12 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .cc
 include_HEADERS		= GetPot.hpp  LDebug.hpp\
 chrono.hpp dataString.hpp dataTime.hpp fortran_wrap.hpp \
 lifeV.hpp post_proc.hpp subDomainNeighbors.hpp switch.hpp \
-util_string.hpp bareItems.hpp basisElSh.hpp
+util_string.hpp bareItems.hpp basisElSh.hpp dataTransient.hpp
 
 lib_LTLIBRARIES		= liblifecore.la
 
 liblifecore_la_SOURCES	= bareItems.cpp basisElSh.cpp GetPot.cpp  dataString.cpp LDebug.cpp \
-dataTime.cpp subDomainNeighbors.cpp switch.cpp util_string.cpp 
+dataTime.cpp subDomainNeighbors.cpp switch.cpp util_string.cpp dataTransient.cpp
 
 
 liblifecore_la_LIBADD	= $(aztec_libs)

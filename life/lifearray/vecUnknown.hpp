@@ -168,6 +168,23 @@ public:
     GenericVecHdl(const GenericVecHdl<VectorType> &RhGenVec,
 		  const PhysVectUnknown<VectorType> &RhPhVU);
 
+
+    GenericVecHdl& operator=( double const __val )
+	{
+	    super & __super = (*this) ;
+	    __super = __val;
+	    return *this;
+	}
+  
+    GenericVecHdl& operator=( VectorType const& __v )
+	{
+	    if ( this == &__v )
+		return *this;
+	    super & __super = (*this) ;
+	    __super = __v;
+	    return *this;
+
+	  }
     //! gives the front of the vector
     inline Real * giveVec(){return &((*this)[0]);}
     inline UInt size() const {return _size;}
@@ -197,6 +214,11 @@ class Vector
   Vector():_v(0){}   //!< Default constructor we need for IML++
   Vector(Vector const &ex_v):_v(ex_v.v()){}
   Vector(UInt n):_v((int)n){_v= 0.0;}
+  void showMe(ostream& c=cout) const
+  {
+    c << _v ;
+    c << endl;
+  }
   inline Tab1dView v() const {return _v;}
   inline UInt size() const {return _v.size();}
   //operators
