@@ -65,8 +65,8 @@ $(srcdir)/test_p2/testsuite.at \
 $(srcdir)/test_postproc/testsuite.at \
 $(srcdir)/test_q1/testsuite.at \
 $(srcdir)/lifefilters/testsuite.at \
-$(srcdir)/lifesolver/testsuite.at 
-
+$(srcdir)/lifesolver/testsuite.at \
+$(srcdir)/lifefem/testsuite.at 
 
 $(srcdir)/package.m4: $(top_srcdir)/configure.in.in
 	{									   \

@@ -43,6 +43,7 @@ m4_include([test_mesh/testsuite.at])
 
 # fem tests
 AT_BANNER([life/lifefem testsuite ...])
+m4_include([lifefem/testsuite.at])
 m4_include([test_p2/testsuite.at])
 m4_include([test_q1/testsuite.at])
 m4_include([test_fe/testsuite.at])
