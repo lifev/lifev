@@ -235,7 +235,6 @@ namespace LifeV {
         //@{
         LevelSetSolver(const GetPot& datafile,
                        solver_type& solver,
-                       const GeoMap& geomap,
                        const RefFE& reffe, 
                        const QuadRule& qr, 
                        const QuadRule& qr_bd, 
@@ -246,7 +245,6 @@ namespace LifeV {
             :
             HyperbolicSolverIP<mesh_type, solver_type>(datafile,
                                                        solver,
-                                                       geomap,
                                                        reffe, 
                                                        qr, 
                                                        qr_bd, 

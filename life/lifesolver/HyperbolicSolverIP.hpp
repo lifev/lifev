@@ -97,7 +97,6 @@ namespace LifeV {
         //@{
         HyperbolicSolverIP(const GetPot& datafile,
                            solver_type& solver,
-                           const GeoMap& geomap,
                            const RefFE& reffe, 
                            const QuadRule& qr, 
                            const QuadRule& qr_bd, 
@@ -109,14 +108,12 @@ namespace LifeV {
             DataMesh<MeshType>(datafile, "hyp/discretization"),
             _M_datafile(datafile),
             _M_solver(solver),
-            _M_geomap(geomap),
-            _M_geomap_bd( _M_geomap.boundaryMap() ),
             _M_reffe(reffe),
             _M_reffe_bd( _M_reffe.boundaryFE() ),
             _M_qr(qr),
             _M_qr_bd(qr_bd),
-            _M_fe(_M_reffe, _M_geomap, _M_qr),
-            _M_fe_bd(_M_reffe_bd, _M_geomap_bd, _M_qr_bd),
+            _M_fe(_M_reffe, getGeoMap(this->_mesh), _M_qr),
+            _M_fe_bd(_M_reffe_bd, getGeoMap(this->_mesh).boundaryMap(), _M_qr_bd),
             _M_fe_velocity(fe_velocity),
             _M_dof(_mesh, _M_reffe),
             _M_M_pattern(_M_dof, 1),
@@ -208,13 +205,6 @@ namespace LifeV {
         //! The linear solver
         solver_type _M_solver;
         
-        //! Geo map
-        const GeoMap& _M_geomap;
-
-        //! Boundary geo map
-
-        const GeoMap& _M_geomap_bd;
-
         //! Reference FE
         const RefFE& _M_reffe;
 
