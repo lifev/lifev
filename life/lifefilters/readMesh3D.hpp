@@ -86,7 +86,7 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
         std::cerr << " Error in readMpp: File not found or locked" << std::endl;
         abort();
     }
-    oStr << "Reading Mesh++ file" << std::endl;
+    std::cout << "Reading Mesh++ file" << std::endl;
     if ( ! readMppFileHead( hstream, nVe, nBVe, nBFa, nBEd, nVo ) )
     {
         std::cerr << " Error While reading mesh++ file headers" << std::endl;
@@ -123,9 +123,9 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
     }
     std::cout << "#Vertices = "          << std::setw(10) << nVe
               << "  #BVertices       = " << std::setw(10) << nBVe << std::endl;
-    std::cout << "#Faces    = "          << std::setw(10) << nFa
+    oStr      << "#Faces    = "          << std::setw(10) << nFa
               << "  #Boundary Faces  = " << std::setw(10) << nBFa << std::endl;
-    std::cout << "#Edges    = "          << std::setw(10) << nEd
+    oStr      << "#Edges    = "          << std::setw(10) << nEd
               << "  #Boundary Edges  = " << std::setw(10) << nBEd << std::endl;
     std::cout << "#Points   = "          << std::setw(10) << nPo
               << "  #Boundary Points = " << std::setw(10) << nBPo << std::endl;
@@ -348,7 +348,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
                   << std::endl;
         abort();
     }
-    oStr << "Reading INRIA mesh file" << std::endl;
+    std::cout << "Reading INRIA mesh file" << std::endl;
     if ( ! readINRIAMeshFileHead( hstream, nVe, nBVe, nBFa, nBEd, nVo, shape ) )
     {
         std::cerr << " Error While reading INRIA mesh file headers" << std::endl;
@@ -376,7 +376,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
 
     case HEXA:
         ASSERT_PRE0( GeoShape::numPoints == 8, "Sorry I can read only bilinear Hexa meshes" );
-        oStr << "Linear Hexa Mesh" << std::endl;
+        std::cout << "Linear Hexa Mesh" << std::endl;
         nPo = nVe;
         nBPo = nBVe;
         break;
@@ -403,9 +403,9 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
 
     std::cout << "#Vertices = "          << std::setw(10) << nVe
               << "  #BVertices       = " << std::setw(10) << nBVe << std::endl;
-    std::cout << "#Faces    = "          << std::setw(10) << nFa
+    oStr      << "#Faces    = "          << std::setw(10) << nFa
               << "  #Boundary Faces  = " << std::setw(10) << nBFa << std::endl;
-    std::cout << "#Edges    = "          << std::setw(10) << nEd
+    oStr      << "#Edges    = "          << std::setw(10) << nEd
               << "  #Boundary Edges  = " << std::setw(10) << nBEd << std::endl;
     std::cout << "#Points   = "          << std::setw(10) << nPo
               << "  #Boundary Points = " << std::setw(10) << nBPo << std::endl;
