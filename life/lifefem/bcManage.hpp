@@ -982,13 +982,13 @@ void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Do
     DataType sum;
 
     const IdentifierNatural* pId;
-    ID ibF, idDof, jdDof;
+    ID ibF, idDof, jdDof, kdDof;
 
     if ( BCb.dataVector() )
     {   //! If BC is given under a vectorial form
 
         //! for the moment, only one coefficient per BCvector.
-//        DataType mcoef = BCb.mixteCoef();   //!< the mixte coefficient implement mixte vector M.Prosi
+        DataType mcoef, mbcb;   
 
         // Loop on BC identifiers
         for ( ID i = 1; i <= BCb.list_size(); ++i )
@@ -1023,16 +1023,27 @@ void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Do
                     for ( int l = 0; l < bdfem.nbQuadPt; ++l )
                     {
 
+                       // Compute the mixte coefficients on the quadrature point - vector of mixte
+                       // coefficients is given on the element nodes !
+		       mcoef = 0.0;
+		       mbcb = 0.0;
+		       for( ID n = 1; n <= nDofF; ++n)
+		       {
+			  kdDof=pId->bdLocalToGlobal( n ) + ( BCb.component( j ) - 1 ) * totalDof;
+			  mcoef += BCb.MixteVec( kdDof, BCb.component( j ) ) * bdfem.phi( int( n - 1 ), l );
+			  mbcb += BCb( kdDof, BCb.component( j ) ) * bdfem.phi( int( n - 1 ), l );
+		       }
+
                         // Contribution to the diagonal entry of the elementary boundary mass matrix
 //                        sum += mcoef * bdfem.phi( int( idofF - 1 ), l ) * bdfem.phi( int( idofF - 1 ), l ) *
 //                               bdfem.weightMeas( l );
-	                sum += BCb.MixteVec( idDof, BCb.component( j ) )* bdfem.phi( int( idofF - 1 ), l ) *
+	                sum += mcoef* bdfem.phi( int( idofF - 1 ), l ) *
                                bdfem.phi( int( idofF - 1 ), l ) *bdfem.weightMeas( l );
 
                         // Adding right hand side contribution
                         //vincent please check again for your Mixte-FE it doesn't work for Q1:
                         //     b[idDof-1] += bdfem.phi(int(idofF-1),l) * BCb(BCb(i)->id(),BCb.component(j)) *
-                        b[ idDof - 1 ] += bdfem.phi( int( idofF - 1 ), l ) * BCb( idDof, BCb.component( j ) ) *
+                        b[ idDof - 1 ] += bdfem.phi( int( idofF - 1 ), l ) * mbcb *
                                           bdfem.weightMeas( l );
                     }
 
@@ -1061,10 +1072,20 @@ void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Do
                         for ( int l = 0; l < bdfem.nbQuadPt; ++l )
                         {
 
+                       // Compute the mixte coefficient on the quadrature point - vector of mixte
+                       // coefficients is given on the element nodes !
+		       mcoef = 0.0;
+		       for( ID n = 1; n <= nDofF; ++n)
+		       {
+			  kdDof=pId->bdLocalToGlobal( n ) + ( BCb.component( j ) - 1 ) * totalDof;
+			  mcoef += BCb.MixteVec( kdDof, BCb.component( j ) ) * bdfem.phi( int( n - 1 ), l );
+		       }
+
+
                             // Upper diagonal entry of the elementary boundary mass matrix
 //                            sum += mcoef * bdfem.phi( int( idofF - 1 ), l ) * bdfem.phi( int( k - 1 ), l ) *
 //                                   bdfem.weightMeas( l );
-                            sum += BCb.MixteVec( idDof, BCb.component( j ) )*bdfem.phi( int( idofF - 1 ), l ) *
+                            sum += mcoef*bdfem.phi( int( idofF - 1 ), l ) *
                                    bdfem.phi( int( k - 1 ), l ) * bdfem.weightMeas( l );
 
                         }
