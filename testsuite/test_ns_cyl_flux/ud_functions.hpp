@@ -50,7 +50,7 @@ Real u0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
   return 0;
 }
 
-// Initial velocity for stationary NS (NSo)
+// Initial velocity for stationary NS (NSo1 and NSo2)
 Real u0o(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
 {
   switch(i) {
@@ -74,7 +74,6 @@ Real p0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
 // Neumann conditions for NSo
 Real uo(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
 {
-  //Real pi = 3.14159265358979;
   switch(i) {
   case 1:
   case 2:
@@ -89,7 +88,12 @@ Real uo(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
 
 // constant flux
 Real my_flux_cost( Real time ){
-   return -1.;
+   return 0.01;
+  }
+
+// constant flux
+Real my_flux_cost2( Real time ){
+   return 0.005;
   }
 
 // sinusoidal flux
