@@ -377,16 +377,7 @@ namespace LifeV {
 
     template<typename MeshType>
     void HyperbolicSolverIP<MeshType>::compute_M_A_steady() {
-        /*
-          Local contributions from the stabilization term. WARNING: only
-          works if _M_fe and fe2 are of the same type
-        */
-
-        ElemMat elmat11(_M_fe.nbNode, 1, 1);
-        ElemMat elmat12(_M_fe.nbNode, 1, 1);
-        ElemMat elmat21(_M_fe.nbNode, 1, 1);
-        ElemMat elmat22(_M_fe.nbNode, 1, 1);
-
+        
         // Local contributions from other terms
         ElemMat elmat(_M_fe.nbNode, 1, 1);
         ElemVec elvec(_M_fe.nbNode, NDIM);
@@ -404,6 +395,21 @@ namespace LifeV {
             mass(1., elmat, _M_fe, 0, 0);
             assemb_mat(_M_M, elmat, _M_fe, _M_dof, 0, 0);
         }
+
+
+    }
+
+    template<typename MeshType>
+    void HyperbolicSolverIP<MeshType>::add_A_unsteady() {
+        ElemVec elvec(_M_fe_velocity.nbNode, NDIM);
+
+        // Local contributions from the stabilization term. WARNING: only
+        // works if _M_fe and fe2 are of the same type
+
+        ElemMat elmat11(_M_fe.nbNode, 1, 1);
+        ElemMat elmat12(_M_fe.nbNode, 1, 1);
+        ElemMat elmat21(_M_fe.nbNode, 1, 1);
+        ElemMat elmat22(_M_fe.nbNode, 1, 1);
 
         CurrentFE fe2(_M_fe);
         Real stab_coeff;
@@ -425,41 +431,35 @@ namespace LifeV {
             _M_fe.updateFirstDerivQuadPt( _M_mesh.volumeList(ad_first) );
             fe2.updateFirstDerivQuadPt( _M_mesh.volumeList(ad_second) );
 
-            //_M_fe_bd.updateMeasQuadPt( _M_mesh.faceList(i) );
-            //ipstab_grad(stab_coeff, elmat, _M_fe, fe2,  _M_fe_bd, 0, 0, 1);
-
             _M_fe_bd.updateMeasNormalQuadPt( _M_mesh.faceList(i) );
+
             // get the local trace of the velocity into beta
         
             // local id of the face in its adjacent element
             UInt iFaEl = _M_mesh.face( i ).pos_first();
             for ( int iNode = 0; iNode < _M_fe_bd.nbNode; ++iNode )
-            {
-                UInt iloc = _M_fToP( iFaEl, iNode+1 );
-                for ( int iCoor = 0; iCoor < _M_fe.nbCoor; ++iCoor )
                 {
-                    UInt ig = _M_dof.localToGlobal( ad_first, iloc+1 ) - 1 +
-                        iCoor * _M_dof.numTotalDof();
-                    beta.vec()[ iCoor*_M_fe_bd.nbNode + iNode ] = _M_velocity( ig );
+                    UInt iloc = _M_fToP( iFaEl, iNode+1 );
+                    for ( int iCoor = 0; iCoor < _M_fe.nbCoor; ++iCoor )
+                        {
+                            UInt ig = _M_dof.localToGlobal( ad_first, iloc+1 ) - 1 +
+                                iCoor * _M_dof.numTotalDof();
+                            beta.vec()[ iCoor*_M_fe_bd.nbNode + iNode ] = _M_velocity( ig );
+                        }
                 }
-            }
 
             ipstab_bagrad(stab_coeff, elmat11, _M_fe, _M_fe, beta, _M_fe_bd, 0, 0);
             ipstab_bagrad(stab_coeff, elmat12, _M_fe, fe2, beta, _M_fe_bd, 0, 0);
             ipstab_bagrad(stab_coeff, elmat21, fe2, _M_fe, beta, _M_fe_bd, 0, 0);
             ipstab_bagrad(stab_coeff, elmat22, fe2, fe2, beta, _M_fe_bd, 0, 0);
 
-            assemb_mat(_M_A_steady, elmat11, _M_fe, _M_fe, _M_dof);
-            assemb_mat(_M_A_steady, elmat12, _M_fe, fe2, _M_dof);
-            assemb_mat(_M_A_steady, elmat21, fe2, _M_fe, _M_dof);
-            assemb_mat(_M_A_steady, elmat22, fe2, fe2, _M_dof);
+            assemb_mat(_M_A, elmat11, _M_fe, _M_fe, _M_dof);
+            assemb_mat(_M_A, elmat12, _M_fe, fe2, _M_dof);
+            assemb_mat(_M_A, elmat21, fe2, _M_fe, _M_dof);
+            assemb_mat(_M_A, elmat22, fe2, fe2, _M_dof);
         }
-    }
 
-    template<typename MeshType>
-    void HyperbolicSolverIP<MeshType>::add_A_unsteady() {
         ElemMat elmat(_M_fe.nbNode, 1, 1);
-        ElemVec elvec(_M_fe_velocity.nbNode, NDIM);
 
         for(UInt i = 1; i <= _M_mesh.numVolumes(); i++){
             _M_fe.updateFirstDeriv( _M_mesh.volumeList(i) );
