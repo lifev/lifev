@@ -33,7 +33,7 @@
 
 #include <life/lifecore/life.hpp>
 #include <life/lifearray/tab.hpp>
-#include <clapack.h>
+#include <life/lifealg/clapack.hpp>
 
 
 namespace LifeV
