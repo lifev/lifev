@@ -52,11 +52,13 @@ namespace LifeV
 
         // Destructor
 
+        ~generalizedAitken();
+        
         // Member functions
 
-        void   restart();
-
-        Vector        computeLambda(const Vector &, const Vector &);
+        Vector        computeDeltaLambda(const Vector &,
+                                         const Vector &,
+                                         const Vector &);
         
         // in this case, omega is taken as the default value
 
@@ -65,21 +67,22 @@ namespace LifeV
         //! fluid/structure interface dof count
         UInt   M_nDof;
 
-        //! M_lamdba0 = \lambda_{k} M_lambda1 = \lambda_{k - 1}
-        Vector M_lambda0;
-        Vector M_lambda1;
+        //! \lambda^{k - 1}
+        Vector M_lambda;
 
-        //! array formed by the vectors [\mu_s^k, \mu_s^{k-1}]
+        //! \mu_s^{k - 1}
         Vector M_muS;
 
-        //! array formed by the vectors [\mu_f^k, \mu_f^{k-1}]
+        //! \mu_f^{k - 1}
         Vector M_muF;
 
-        //! new step coefficients
-        Real   M_omegaS;
-        Real   M_omegaF;
+        //! defaults \omega_s and \omega_f
+        Real   M_defOmegaS;
+        Real   M_defOmegaF;
 
+        //! first time call boolean
 
+        bool   M_firstCall;
     };
 
 
@@ -89,91 +92,106 @@ namespace LifeV
                                          const Real _defOmegaS,
                                          const Real _defOmegaF):
         M_nDof         (_nDof),
-        M_lambda0      (_nDof),
-        M_lambda1      (_nDof),
+        M_lambda       (_nDof),
         M_muS          (_nDof),
         M_muF          (_nDof),
-        M_omegaS       (_defOmegaS),
-        M_omegaF       (_defOmegaS)
+        M_defOmegaS    (_defOmegaS),
+        M_defOmegaF    (_defOmegaF)
     {
-        M_muS     = 0.;
-        M_muF     = 0.;
-        M_lambda0 = 0.;
-        M_lambda1 = 0.;
+        M_muS       = 0.;
+        M_muF       = 0.;
+        M_lambda    = 0.;
+        M_firstCall = true;
     }
     
     //
     // Destructor
     //
-    /*template<class Vector, class Real>
-      generalizedAitken<Vector,  Real>::
-    ~generalizedAitken()
-    {
-    }*/
+
+    generalizedAitken::~generalizedAitken()
+    { //nothing needs to be done
+    }
+        
     //
     // Member functions
     //
 
 
     /*! this functions computes omega and return the new lambda
-        _muS is \mu_s^k
-        _muF is \mu_f^k
+        _lambda is \lamdba^{k}
+        _muS    is \mu_s^{k}
+        _muF    is \mu_f^{k}
     */
     
-    Vector generalizedAitken::computeLambda(const Vector &_muS,
-                                            const Vector &_muF)
+    Vector generalizedAitken::computeDeltaLambda(const Vector &_lambda, 
+                                                 const Vector &_muS,
+                                                 const Vector &_muF)
     {
-        Vector lambda(M_nDof);
-        
-        lambda = M_lambda0 - M_lambda1;
 
-        Real   a11 = 0.;
-        Real   a21 = 0.;
-        Real   a22 = 0.;
-        Real   b1  = 0.;
-        Real   b2  = 0.;
+        Vector    deltaLambda;
 
-        Vector muS   (M_nDof);
-        Vector muF   (M_nDof);
-        
-        for (UInt ii = 0; ii < M_nDof; ++ii)
+        if (!M_firstCall)
         {
-            muS[ii] = _muS[ii] - M_muS[ii];
-            muF[ii] = _muF[ii] - M_muF[ii];
-
-            a11    += muF[ii]*muF[ii];
-            a21    += muF[ii]*muS[ii];
-            a22    += muS[ii]*muS[ii];
-
-            b1     += muF[ii]*lambda[ii];
-            b2     += muS[ii]*lambda[ii];
-        }
+            M_firstCall = false;
+            Real   a11 = 0.;
+            Real   a21 = 0.;
+            Real   a22 = 0.;
+            Real   b1  = 0.;
+            Real   b2  = 0.;
             
-        Real omega1 = M_omegaF;
-        Real omega2 = M_omegaS;
-
-        Real det = a21*a21 - a22*a11;
-
-        if (det != 0.)
-        {
-            omega1 = (a22*b1 - a21*b2)/det;
-            omega2 = (a11*b2 - a21*b1)/det;
-        }
-        else if (a22 == 0)
-        {
-            omega2 = 0.;
-            omega1 = b1/a11*a11;
-        }
-        
-        lambda = lambda + omega1*muF + omega2*muS;
+            Vector muS   (M_nDof);
+            Vector muF   (M_nDof);
+            
+            //! bulding the matrix and the right hdand side
+            for (UInt ii = 0; ii < M_nDof; ++ii)
+            {
+                muS[ii] = _muS[ii] - M_muS[ii];
+                muF[ii] = _muF[ii] - M_muF[ii];
                 
-        M_lambda1 = M_lambda0;
-        M_lambda0 = lambda;
+                a11    += muF[ii]*muF[ii];
+                a21    += muF[ii]*muS[ii];
+                a22    += muS[ii]*muS[ii];
+                
+                b1     += muF[ii]*(_lambda[ii] - M_lambda[ii]);
+                b2     += muS[ii]*(_lambda[ii] - M_lambda[ii]);
+            }
+            
+            Real omegaS = M_defOmegaS;
+            Real omegaF = M_defOmegaF;
+            
+            Real det = a21*a21 - a22*a11;
+            
+            if (det != 0.)
+            {
+                omegaF = (a22*b1 - a21*b2)/det;
+                omegaS = (a11*b2 - a21*b1)/det;
+            }
+            else if (a22 == 0)
+            {
+                omegaS = 0.;
+                omegaF = b1/a11*a11;
+            }
 
-        M_muF   = _muF;
-        M_muS   = _muS;
+            deltaLambda = omegaF*muF + omegaS*muS;
+            
+            M_lambda    = _lambda;
+            M_muF       = _muF;
+            M_muS       = _muS;
+        }
+        else
+        {
+            /*! first time aitken is called, the coefficient must be 
+                set to their default values
+            */
+
+            deltaLambda = M_defOmegaF*_muF + M_defOmegaS*_muS;            
+
+            M_lambda    = _lambda;
+            M_muF       = _muF;
+            M_muS       = _muS;
+        }
         
-        return lambda;
+        return deltaLambda;
     }
 }
 
