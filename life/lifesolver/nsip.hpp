@@ -53,6 +53,7 @@ class NavierStokesSolverIP:
 
 public:
     typedef  typename  NavierStokesHandler<Mesh>::Function Function;
+    typedef  typename  NavierStokesHandler<Mesh>::source_type source_type;
 
     //! Constructor
     /*!
@@ -73,7 +74,7 @@ public:
       \param source volumic source
       \param time present time
     */
-    void timeAdvance( const Function source, const Real& time );
+    void timeAdvance( source_type const& source, Real const& time );
 
     //! Update convective term, bc treatment and solve the linearized ns system
     void iterate( const Real& time );
@@ -273,7 +274,7 @@ NavierStokesSolverIP( const GetPot& dataFile,
 
 template<typename Mesh>
 void NavierStokesSolverIP<Mesh>::
-timeAdvance( const Function source, const Real& time )
+timeAdvance( source_type const& source, Real const& time )
 {
     M_time = time;
 
