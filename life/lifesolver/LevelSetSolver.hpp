@@ -27,8 +27,10 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
    \date 1-28-2005
 */
 
-#ifndef _LEVELSETSOLVER_H_
-#define _LEVELSETSOLVER_H_
+#ifndef _LEVELSETSOLVER_HPP_
+#define _LEVELSETSOLVER_HPP_
+
+#define DEBUG_REINI
 
 #include <tab.hpp>
 
@@ -74,12 +76,12 @@ namespace LifeV {
              */
             //@{
             Face() {
-                _M_points.resize(3);
+                _M_points.resize(NUMNODES);
                 _M_has_normal = false;
             }
 
             Face(ID id) : _M_id(id) {
-                _M_points.resize(3);
+                _M_points.resize(NUMNODES);
             }
             //@}
 
@@ -87,7 +89,13 @@ namespace LifeV {
              */
             //@{
 
-            
+            /**
+               \Return the number of local nodes
+            */
+            const int numLocalNodes() const {
+                return NUMNODES;
+            }
+
             /**
                \Return a const reference to the i-th point
             */
@@ -149,10 +157,10 @@ namespace LifeV {
             }
 
             /**
-               \Compute the distance between point P and the face_id-th face
+               \Compute the distance between point P and the face
             */
 
-            inline Real point_to_face_distance(point_type& P) {
+            inline Real pointToFaceDistance(point_type& P) {
                 point_type P0 = _M_points[0];
                 vector_type n = normal();
                 point_type Q;
@@ -161,18 +169,38 @@ namespace LifeV {
 
                 Real d;
 
-                pointProjectionOnPlane(P, P0, n, Q);
-                projection_is_on_face = pointIsOnFace(Q, *this);
+                pointProjectionOnPlane(P, P0, n, Q, d);
+                //projection_is_on_face = pointIsOnFace(Q);
+                projection_is_on_face = false;
 
-                if (projection_is_on_face) {
-                    d = pointToPointDistance(P, Q);
-                } else {
-                    d = pointToPointDistance(P, P0);
+                if (! projection_is_on_face) {
+                    d = pointToPointDistance(P, point(1));
                     for(int iP = 2; iP <= 3; iP++)
                         d = std::min( d, pointToPointDistance(P, point(iP)) );
                 }
 
                 return d;
+            }
+
+            /**
+               \Determine whether the point P belongs to the face. It is assumed
+               \that point P belongs to the plane the face is a subset of.
+            */
+
+            bool pointIsOnFace(const point_type& P) {
+                Real D = _M_points[0][0] * (_M_points[2][1] - _M_points[1][1]) +
+                    _M_points[1][0] * (_M_points[0][1] - _M_points[2][1]) +
+                    _M_points[2][0] * (_M_points[1][1] - _M_points[0][1]);
+
+                Real xi = (P[0] - _M_points[0][0]) * (_M_points[0][1] - _M_points[2][1]) +
+                    (P[1] - _M_points[0][1]) * (_M_points[2][0] - _M_points[2][0]);
+                xi /= D;
+
+                Real eta = (P[0] - _M_points[0][0]) * (_M_points[1][1] - _M_points[0][1]) +
+                    (P[1] - _M_points[0][1]) * (_M_points[0][0] - _M_points[1][0]);
+                eta /= D;
+
+                return (xi >= 0 && xi <= 1 && eta >= 0 && eta <= 1 - xi);
             }
 
             /**
@@ -202,13 +230,6 @@ namespace LifeV {
         };
         //@}
 
-        /**
-           @name Friend classes
-        */
-        //@{
-        //friend class LevelSetSolver<MeshType>;
-        //@}
-
         /** @name Typedefs
          */
         //@{
@@ -234,7 +255,8 @@ namespace LifeV {
         /** @name Constructors and destructors
          */
         //@{
-        LevelSetSolver(const GetPot& data_file,
+        LevelSetSolver(mesh_type& mesh,
+                       const GetPot& data_file,
                        const std::string& data_section,
                        const RefFE& reffe, 
                        const QuadRule& qr, 
@@ -244,7 +266,8 @@ namespace LifeV {
                        const Dof& dof_velocity,
                        velocity_type& velocity0)
             :
-            HyperbolicSolverIP<mesh_type>(data_file,
+            HyperbolicSolverIP<mesh_type>(mesh,
+                                          data_file,
                                           data_section,
                                           reffe, 
                                           qr, 
@@ -254,9 +277,8 @@ namespace LifeV {
                                           dof_velocity,
                                           velocity0) 
         {
-            _M_tol = 1e-6;
+            _M_tol = 1e-10;
         }
-        ~LevelSetSolver() {}
         //@}
 
         /** @name Accessors
@@ -270,11 +292,32 @@ namespace LifeV {
         lsfunction_type const & lsfunction() const {
             return u();
         }
+
+        /**
+           \Return the current finite element
+        */
+
+        const CurrentFE& fe() const {
+            return _M_fe;
+        }
+
+        /**
+           \Return the dof table
+        */
+
+        const Dof& dof() const {
+            return _M_dof;
+        }
         //@}
 
         /** @name Mutators
          */
         //@{
+
+        CurrentFE& fe() {
+            return _M_fe;
+        }
+
         void setTol(Real tol) {
             _M_tol = tol;
         }
@@ -289,24 +332,26 @@ namespace LifeV {
         */
 
         void directReinitialization() {
-            _M_u = _M_bdf.extrap();
-
             build_interface();
-
-            for(UInt iP = 1; iP < _mesh.numPoints(); iP++) {
-
+#ifdef DEBUG_REINI
+            std::cout << "DEBUG MESSAGE: reinitializing the interface" << std::endl;
+            exportToMatlab("./results/before.m");
+#endif
+            for(UInt iP = 1; iP <= _M_mesh.numPoints(); iP++) {
                 point_type P;
-                convertPointType(P, _mesh.pointList(iP));
+                convertPointType(P, _M_mesh.pointList(iP));
 
-                Real d = _M_face_list.begin()->point_to_face_distance(P);
+                Real d = _M_face_list.begin()->pointToFaceDistance(P);
             
-                for(face_list_iterator faces_it = _M_face_list.begin(); faces_it != _M_face_list.end(); faces_it++) {
-                    Real d1 = faces_it->point_to_face_distance(P);
-                    d = std::min(d, d1);
-                }
+                for(face_list_iterator faces_it = _M_face_list.begin(); faces_it != _M_face_list.end(); faces_it++)
+                    d = std::min(d, faces_it->pointToFaceDistance(P));
 
-                _M_u[iP] = d;
+                _M_u[iP - 1] = signum(_M_u[iP - 1]) * d;
             }
+#ifdef DEBUG_REINI
+            build_interface();
+            exportToMatlab("./results/after.m");
+#endif
         }
   
         /**
@@ -318,8 +363,8 @@ namespace LifeV {
             Real ls_fun;
             int jg;
 
-            for(UInt i = 1; i <= _mesh.numVolumes(); i++) {
-                _M_fe.updateJac( _mesh.volumeList(i) );
+            for(UInt i = 1; i <= _M_mesh.numVolumes(); i++) {
+                _M_fe.updateJac( _M_mesh.volumeList(i) );
 
                 for(int iq = 0; iq < _M_fe.nbQuadPt; iq++) {
                     ls_fun = 0.;
@@ -335,6 +380,61 @@ namespace LifeV {
             }
             return mass;
         }
+
+        /**
+           \Export the interface to a Matlab script for debugging/visualization 
+           \purposes
+        */
+
+        void exportToMatlab(std::string __file_name) {
+            std::ofstream ofile(__file_name.c_str());
+            ASSERT( __file_name, "Error exporting interface to Matlab format: Output file cannot be open" );
+
+            // POINTS
+
+            ofile << "% ========================================" << std::endl;
+            ofile << "% POINTS" << std::endl;
+            ofile << "% ----------------------------------------" << std::endl;
+            ofile << "% P(i, j) = j-th coordinate of point i" << std::endl;
+            ofile << "% ========================================" << std::endl;
+            ofile << "P = [..." << std::endl;
+            for(face_list_iterator faces_it = _M_face_list.begin(); faces_it != _M_face_list.end(); faces_it++) {
+                for(int node_id = 1; node_id <= faces_it->numLocalNodes(); node_id++)
+                    ofile << faces_it->point(node_id)[0] << ", "
+                          << faces_it->point(node_id)[1] << ", "
+                          << faces_it->point(node_id)[2] << ";... " << std::endl;
+            }
+            ofile << "];" << std::endl;
+
+            // CONNECTIVITIES
+
+            ofile << "% ========================================" << std::endl;
+            ofile << "% CONNECTIVITIES" << std::endl;
+            ofile << "% ----------------------------------------" << std::endl;
+            ofile << "% C(i, j) = global id of j-th local node  " << std::endl;
+            ofile << "% of face i" << std::endl;
+            ofile << "% ========================================" << std::endl;
+            ofile << " C = [..." << std::endl;
+            int nP = 1;
+            for(face_list_iterator faces_it = _M_face_list.begin(); faces_it != _M_face_list.end(); faces_it++) {
+                for(int node_id = 1; node_id <= faces_it->numLocalNodes(); node_id++, nP++)
+                    ofile << nP << " ";
+                ofile << ";..." << std::endl;
+            }
+            ofile << "];" << std::endl;
+
+            // SOLUTION
+
+            ofile << "% ========================================" << std::endl;
+            ofile << "% SOLUTION" << std::endl;
+            ofile << "% ========================================" << std::endl;
+            ofile << "U = [..." << std::endl;
+            for(UInt i = 0; i < _M_u.size(); i++)
+                ofile << _M_u[i] << ";..." << std::endl;
+            ofile << "];" << std::endl;
+
+            ofile.close();
+        }
         //@}
 
     private:
@@ -349,11 +449,17 @@ namespace LifeV {
         */
 
         inline void build_interface() {
-            for(UInt iV = 1; iV <= _mesh.numVolumes(); iV++) {
+            // Clear the face list
+
+            _M_face_list.clear();
+
+            // A loop on the volumes to find the local intersection with the
+            // interface
+            for(UInt iV = 1; iV <= _M_mesh.numVolumes(); iV++) {
 
                 point_list_type locPointList;
 
-                for(UInt ie = 1; ie <= _mesh.numLocalEdges(); ie++) {
+                for(UInt ie = 1; ie <= _M_mesh.numLocalEdges(); ie++) {
                     
                     UInt j1 = mesh_type::ElementShape::eToP(ie, 1);
                     UInt j2 = mesh_type::ElementShape::eToP(ie, 2);
@@ -364,18 +470,18 @@ namespace LifeV {
                     Real u1 = _M_u[jg1];
                     Real u2 = _M_u[jg2];
                   
-                    if(u1 * u2 < 0) {
+                    if(u1 * u2 < 0) { // If the solution is zero somewhere on the segment
                         point_type P;
                         point_type P1;
                         point_type P2;
                         
-                        P1[0] = _mesh.pointList(jg1 + 1).x();
-                        P1[1] = _mesh.pointList(jg1 + 1).y(); 
-                        P1[2] = _mesh.pointList(jg1 + 1).z();
+                        P1[0] = _M_mesh.pointList(jg1 + 1).x();
+                        P1[1] = _M_mesh.pointList(jg1 + 1).y(); 
+                        P1[2] = _M_mesh.pointList(jg1 + 1).z();
 
-                        P2[0] = _mesh.pointList(jg2 + 1).x();
-                        P2[1] = _mesh.pointList(jg2 + 1).y(); 
-                        P2[2] = _mesh.pointList(jg2 + 1).z();
+                        P2[0] = _M_mesh.pointList(jg2 + 1).x();
+                        P2[1] = _M_mesh.pointList(jg2 + 1).y(); 
+                        P2[2] = _M_mesh.pointList(jg2 + 1).z();
 
                         findZeroOnEdge(P1, u1, P2, u2, P);
 

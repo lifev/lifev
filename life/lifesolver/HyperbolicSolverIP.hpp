@@ -27,8 +27,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
    \date 1-26-2005
 */
 
-#ifndef _HYPERBOLICSOLVERIP_H_
-#define _HYPERBOLICSOLVERIP_H_
+#ifndef _HYPERBOLICSOLVERIP_HPP_
+#define _HYPERBOLICSOLVERIP_HPP_
 
 #include <utility>
 #include <algorithm>
@@ -56,9 +56,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 #include <bcHandler.hpp>
 #include <dof.hpp>
-#include <elemMat.hpp>
-#include <elemVec.hpp>
 #include <elemOper.hpp>
+#include <elemOper2Fluids.hpp>
 
 namespace LifeV {
     /**
@@ -72,16 +71,14 @@ namespace LifeV {
       \class HyperbolicSolverIP
       \brief Level set solver class
 
-      \c A very simple hyperbolic solver with IP stabilization
+      \c Hyperbolic solver with IP stabilization
 
       @author Daniele Antonio Di Pietro <dipietro@unibg.it>
       @see
     */
 
     template<typename MeshType>
-    class HyperbolicSolverIP
-        :
-        public DataMesh<MeshType> {
+    class HyperbolicSolverIP {
     public:
         /** @name Typedefs
          */
@@ -109,7 +106,8 @@ namespace LifeV {
         /** @name Constructors
          */
         //@{
-        HyperbolicSolverIP(const GetPot& data_file,
+        HyperbolicSolverIP(mesh_type& mesh,
+                           const GetPot& data_file,
                            const std::string& data_section,
                            const RefFE& reffe, 
                            const QuadRule& qr, 
@@ -119,20 +117,20 @@ namespace LifeV {
                            const Dof& dof_velocity,
                            velocity_type& velocity0) 
             :
-            DataMesh<MeshType>(data_file, (data_section + "/discretization").data()),
+            _M_mesh(mesh),
             _M_data_file(data_file),
             _M_data_section(data_section),
             _M_reffe(reffe),
             _M_reffe_bd( _M_reffe.boundaryFE() ),
             _M_qr(qr),
             _M_qr_bd(qr_bd),
-            _M_fe(_M_reffe, getGeoMap(this->_mesh), _M_qr),
-            _M_fe_bd(_M_reffe_bd, getGeoMap(this->_mesh).boundaryMap(), _M_qr_bd),
+            _M_fe(_M_reffe, getGeoMap(_M_mesh), _M_qr),
+            _M_fe_bd(_M_reffe_bd, getGeoMap(_M_mesh).boundaryMap(), _M_qr_bd),
             _M_fe_velocity(fe_velocity),
-            _M_dof(_mesh, _M_reffe),
+            _M_dof(_M_mesh, _M_reffe),
             _M_M_pattern(_M_dof, 1),
             _M_M(_M_M_pattern),
-            _M_A_pattern(_M_dof, _mesh, 1),
+            _M_A_pattern(_M_dof, _M_mesh, 1),
             _M_A_steady(_M_A_pattern),
             _M_A(_M_A_pattern),
             _M_dim( _M_dof.numTotalDof() ),
@@ -146,10 +144,6 @@ namespace LifeV {
             _M_bdf(_M_bdf_order)
         {
             _M_solver.setOptionsFromGetPot(_M_data_file, (_M_data_section + "/solver").data());
-
-            _M_t0 = _M_data_file((_M_data_section + "/bdf/t0").data(), 0);
-            _M_delta_t = _M_data_file((_M_data_section + "/bdf/delta_t").data(), .02);
-
             _M_gamma = _M_data_file((_M_data_section + "/ipstab/gamma").data(), 0.125);
         }
         //@}
@@ -163,6 +157,10 @@ namespace LifeV {
 
         inline Real currentTime() {
             return _M_t;
+        }
+
+        const Dof& dof(){
+            return _M_dof;
         }
 
         /**
@@ -192,7 +190,7 @@ namespace LifeV {
         /**
            \Initialize the solver
         */
-        void initialize(const function_type& u0);
+        void initialize(const function_type& lsfunction0, Real t0, Real delta_t);
 
         /**
            \Update the right hand side for time advancement
@@ -212,6 +210,9 @@ namespace LifeV {
         void iterate();
        
     protected:
+        //! Mesh
+        mesh_type& _M_mesh;
+
         //! Data file
         const GetPot& _M_data_file;
 
@@ -318,16 +319,16 @@ namespace LifeV {
         */
 
         void compute_stabilization_parameters() {
-            _M_h2pK.resize( _mesh.numVolumes() );
+            _M_h2pK.resize( _M_mesh.numVolumes() );
 
             Real measure;
 
-            for(UInt i = _mesh.numBFaces() + 1; i <= _mesh.numFaces(); i++){
-                _M_fe_bd.updateMeasQuadPt( _mesh.faceList(i) );
+            for(UInt i = _M_mesh.numBFaces() + 1; i <= _M_mesh.numFaces(); i++){
+                _M_fe_bd.updateMeasQuadPt( _M_mesh.faceList(i) );
                 measure = _M_fe_bd.measure();
 
-                _M_h2pK[_mesh.faceList(i).ad_first() - 1] += measure * 0.5;
-                _M_h2pK[_mesh.faceList(i).ad_second() - 1] += measure * 0.5;
+                _M_h2pK[_M_mesh.faceList(i).ad_first() - 1] += measure * 0.5;
+                _M_h2pK[_M_mesh.faceList(i).ad_second() - 1] += measure * 0.5;
             }
         }
 
@@ -345,12 +346,10 @@ namespace LifeV {
 
         inline void evaluate_velocity(UInt fe_id, ElemVec& elvec) {
             UInt dim = _M_dof_velocity.numTotalDof();
-
             for(UInt j = 0; j < (UInt)_M_fe_velocity.nbNode; j++) {
-                UInt jloc = _M_fe_velocity.patternFirst(j);
                 for(UInt i_comp = 0; i_comp < NDIM; i_comp++) {
-                    UInt jglo = _M_dof_velocity.localToGlobal(fe_id, jloc + 1) - 1 + i_comp * dim;
-                    elvec.vec()[jloc + i_comp * _M_fe_velocity.nbNode] = _M_velocity[jglo];
+                    UInt jglo = _M_dof_velocity.localToGlobal(fe_id, j + 1) - 1 + i_comp * dim;
+                    elvec.vec()[j + i_comp * _M_fe_velocity.nbNode] = _M_velocity[jglo];
                 }
             }
         }
@@ -379,8 +378,8 @@ namespace LifeV {
 
         Real coeff = _M_bdf.coeff_der(0) / _M_delta_t;
 
-        for(UInt i = 1; i <= _mesh.numVolumes(); i++){
-            _M_fe.updateJac( _mesh.volumeList(i) );
+        for(UInt i = 1; i <= _M_mesh.numVolumes(); i++){
+            _M_fe.updateJac( _M_mesh.volumeList(i) );
 
             elmat.zero();
             mass(coeff, elmat, _M_fe, 0, 0);
@@ -394,18 +393,18 @@ namespace LifeV {
         CurrentFE fe2(_M_fe);
         Real stab_coeff;
 
-        for(UInt i = _mesh.numBFaces() + 1; i <= _mesh.numFaces(); i++){
+        for(UInt i = _M_mesh.numBFaces() + 1; i <= _M_mesh.numFaces(); i++){
             elmat.zero();
 
-            UInt ad_first = _mesh.faceList(i).ad_first();
-            UInt ad_second = _mesh.faceList(i).ad_second();
+            UInt ad_first = _M_mesh.faceList(i).ad_first();
+            UInt ad_second = _M_mesh.faceList(i).ad_second();
 
             stab_coeff = _M_gamma * ( pow(_M_h2pK[ad_first - 1], 2) * pow(_M_h2pK[ad_second - 1], 2) );
 
-            _M_fe.updateFirstDerivQuadPt( _mesh.volumeList(ad_first) );
-            fe2.updateFirstDerivQuadPt( _mesh.volumeList(ad_second) );
+            _M_fe.updateFirstDerivQuadPt( _M_mesh.volumeList(ad_first) );
+            fe2.updateFirstDerivQuadPt( _M_mesh.volumeList(ad_second) );
 
-            _M_fe_bd.updateMeasQuadPt( _mesh.faceList(i) );
+            _M_fe_bd.updateMeasQuadPt( _M_mesh.faceList(i) );
 
             ipstab_grad(stab_coeff, elmat, _M_fe, fe2, _M_fe_bd, 0, 0, 1);
             assemb_mat(_M_A_steady, elmat, _M_fe, fe2, _M_dof);
@@ -415,16 +414,15 @@ namespace LifeV {
     template<typename MeshType>
     void HyperbolicSolverIP<MeshType>::add_A_unsteady() {
         ElemMat elmat(_M_fe.nbNode, 1, 1);
-        ElemVec elvec(_M_fe.nbNode, NDIM); //DDP: corretto? o elvec(1, NDIM)?
+        ElemVec elvec(_M_fe_velocity.nbNode, NDIM);
 
-        for(UInt i = 1; i <= _mesh.numVolumes(); i++){
-            _M_fe.updateFirstDeriv( _mesh.volumeList(i) );
+        for(UInt i = 1; i <= _M_mesh.numVolumes(); i++){
+            _M_fe.updateFirstDeriv( _M_mesh.volumeList(i) );
             elmat.zero();
 
             evaluate_velocity(i, elvec);
-
             for(UInt i_comp = 0; i_comp < NDIM; i_comp++) {
-                grad(i_comp, elvec, elmat, _M_fe, _M_fe, 0, 0);
+                grad(i_comp, elvec, _M_fe_velocity, elmat, _M_fe, _M_fe, 0, 0);
             }
 
             assemb_mat(_M_A, elmat, _M_fe, _M_dof, 0, 0);
@@ -438,20 +436,28 @@ namespace LifeV {
     }
    
     template<typename MeshType>
-    void HyperbolicSolverIP<MeshType>::initialize(const function_type& u0) {
+    void HyperbolicSolverIP<MeshType>::initialize(const function_type& u0, Real t0, Real delta_t) {
+        // Set initial time and time step
+        _M_t0 = t0;
+        _M_delta_t = delta_t;
+
         // Initialize bdf
 
-        _M_bdf.initialize_unk(u0, _mesh, _M_reffe, _M_fe, _M_dof, _M_t0, _M_delta_t, 1);
-        
+        _M_bdf.initialize_unk(u0, _M_mesh, _M_reffe, _M_fe, _M_dof, _M_t0, _M_delta_t, 1);
+        _M_u = *_M_bdf.unk().begin();
+                
         // Check if mesh has internal faces. If not, build them
 
-        if( !_mesh.hasInternalFaces() ) {
-            UInt num_b_faces = _mesh.numBFaces();
-            UInt num_i_faces = _mesh.numFaces() - _mesh.numBFaces();
+        if( !_M_mesh.hasInternalFaces() ) 
+            std::cerr << "ERROR: Mesh must store internal faces" << std::endl;
+        /*
+          {
+          UInt num_b_faces = _M_mesh.numBFaces();
+          UInt num_i_faces = _M_mesh.numFaces() - _M_mesh.numBFaces();
 
-            buildFaces(_mesh, std::cout, std::cerr, num_b_faces, num_i_faces, true, true, false);
-        }
-            
+          buildFaces(_M_mesh, std::cout, std::cerr, num_b_faces, num_i_faces, true, true, false);
+          }
+        */  
         // Compute the stabilization parameters
 
         compute_stabilization_parameters();
@@ -473,12 +479,10 @@ namespace LifeV {
     template<typename MeshType>
     void HyperbolicSolverIP<MeshType>::timeAdvance() {
         // Update left hand side
-
         _M_A = _M_A_steady;
         add_A_unsteady();
 
         // Update right hand side
-
         _M_b = ZeroVector( _M_b.size() );
         _M_b += _M_M * _M_bdf.time_der(_M_delta_t);
 

@@ -26,19 +26,28 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
    \author Daniele Antonio Di Pietro <dipietro@unibg.it>
    \date 1-26-2005
 */
-#ifndef _LEVELSETSOLVERUTILS_H_
-#define _LEVELSETSOLVERUTILS_H_
+#ifndef _LEVELSETSOLVERUTILS_HPP_
+#define _LEVELSETSOLVERUTILS_HPP_
 
 #include <functional>
 
 namespace LifeV {
     
     /**
+       \Return the signum of a number
+    */
+    inline Real signum(Real x) {
+        Real s;
+        (x >= 0) ? s = 1. : s = -1.;
+        return s;
+    }
+
+    /**
        \Compute cross product of two vectors
     */
 
     template<class Vector>
-    Vector crossProd(Vector& v1, Vector& v2) {
+    Vector crossProd(const Vector& v1, const Vector& v2) {
         Vector v;
         v[0] = v1[1] * v2[2] - v2[1] * v1[2];
         v[1] = - v1[0] * v2[2] + v2[0] * v1[2];
@@ -52,7 +61,7 @@ namespace LifeV {
     */
 
     template<class Point>
-    inline Real pointToPointDistance(Point& P1, Point& P2) {
+    inline Real pointToPointDistance(const Point& P1, const Point& P2) {
         return boost::numeric::ublas::norm_2(P2 - P1);
     }
 
@@ -65,9 +74,7 @@ namespace LifeV {
 
     template<class Point, class Vector>
     inline Real pointToPlaneDistance(Point& P, Point& P0, Vector& n) {
-        Real d = - inner_prod(n, P0);
-     
-        return fabs( ( inner_prod(n, P) + d ) / boost::numeric::ublas::norm_2(n) );
+        return fabs( ( inner_prod(n, P - P0) ) / boost::numeric::ublas::norm_2(n) );
     }
 
     /**
@@ -77,47 +84,14 @@ namespace LifeV {
        \P0 : point the plane passes through
        \n  : normal to the plane
        \Q  : point projection on the plane
+       \d  : the distance between point P and the plane (P0, n)
     */
 
     template<class Point, class Vector>
-    void pointProjectionOnPlane(Point& P, Point& P0, Vector& n, Point& Q) {
-        Real d = - inner_prod(n, P0);
-
-        Real D = pow(boost::numeric::ublas::norm_2(n), 2);
-
-        Real a = n[0];
-        Real b = n[1];
-        Real c = n[2];
-
-        Real B2 = b * P[0] - a * P[1];
-        Real B3 = c * P[0] - a * P[2];
-
-        Q[0] = (- a * d + b * B2 + c * B3) / D;
-        Q[1] = (- a * b * d - a * a * B2 + b * c * B3 - c * c * B2) / (a * D);
-        Q[2] = (- a * c * d - a * a * B3 - b * b * B3 + b * c * B2) / (a * D);
-    }
-
-    /**
-       \Determine whether a point belongs to a (triangular) face.
-    */
-
-    template<class Point, class FACE>
-    bool pointIsOnFace(Point& P, FACE& f) {
-
-        Real a11 = f.point(2)[0] - f.point(1)[0];
-        Real a12 = f.point(3)[0] - f.point(1)[0];
-        Real a21 = f.point(2)[1] - f.point(1)[1];
-        Real a22 = f.point(3)[1] - f.point(1)[1];
-
-        Real b1 = P[0] - f.point(1)[0];
-        Real b2 = P[1] - f.point(1)[1];
-
-        Real D = a11 * a22 - a12 * a21;
-
-        Real xi = ( b2 * a12 - b1 * a22 ) / D;
-        Real eta = ( b2 * a11 - b1 * a12 ) / D;
-
-        return (xi >= 0 && xi <= 1 && eta >= 0 && eta <= 1 - xi);
+    void pointProjectionOnPlane(const Point& P, const Point& P0, const Vector& n, Point& Q, Real& d) {
+        Vector versor_n = n / boost::numeric::ublas::norm_2(n);
+        d = pointToPlaneDistance(P, P0, versor_n);
+        Q = P - signum(inner_prod(versor_n, P - P0)) * d * versor_n;
     }
 
     /**
@@ -128,7 +102,7 @@ namespace LifeV {
     */
 
     template<class Point>
-    inline void findZeroOnEdge(Point& P1, Real u1, Point& P2, Real u2, Point& P) {
+    inline void findZeroOnEdge(const Point& P1, const Real u1, const Point& P2, const Real u2, Point& P) {
         Real s = fabs(u1) / (fabs(u1) + fabs(u2));
 
         P = s * P2 + (1 - s) * P1;
@@ -154,7 +128,7 @@ namespace LifeV {
     */
 
     template<class PointType1, class PointType2>
-    void convertPointType(PointType1& Ppt1, PointType2& Ppt2){
+    void convertPointType(PointType1& Ppt1, const PointType2& Ppt2){
         Ppt1[0] = Ppt2.x();
         Ppt1[1] = Ppt2.y();
         Ppt1[2] = Ppt2.z();
