@@ -47,18 +47,18 @@ BCHandler::BCHandler() : _bdUpdateDone( 0 ), _fullEssential( 0 )
 
 //! Constructor taking the number of BC to be stored
 BCHandler::BCHandler( const ID& nbc, const bool& fullEssential )
+    : _bdUpdateDone( 0 ),
+      _fullEssential( fullEssential )
 {
     _bcList.reserve( nbc );
-    _bdUpdateDone = 0;
-    _fullEssential = fullEssential;
 }
 
 //! Constructor taking the number of BC to be stored
 BCHandler::BCHandler( const ID& nbc )
+    : _bdUpdateDone( 0 ),
+      _fullEssential( 0 )
 {
     _bcList.reserve( nbc );
-    _bdUpdateDone = 0;
-    _fullEssential = 0;
 }
 
 //! How many BC stored?
@@ -220,7 +220,29 @@ bool BCHandler::bdUpdateDone() const
 //! returns true if all the stored BC are of Essential type
 bool BCHandler::fullEssential() const
 {
-    return _fullEssential;
+    if ( empty() )
+    {
+        return _fullEssential;
+    }
+    else
+    {
+        bool listFullEssential = true;
+        for( ConstIterator it=_bcList.begin(); it!=_bcList.end(); ++it )
+        {
+            listFullEssential &=
+                ( it->type() == Essential ) &&
+                ( it->mode() == Full );
+        }
+        if ( listFullEssential != _fullEssential )
+        {
+            std::ostringstream __ex;
+            __ex << "BCHandler::fullEssential(): state is not consistent:\n"
+                 << "flag from constructor says    " << _fullEssential << "\n"
+                 << "added boundary conditions say " << listFullEssential;
+            throw std::logic_error( __ex.str() );
+        }
+        return listFullEssential;
+    }
 }
 
 //! Extracting BC from the list
