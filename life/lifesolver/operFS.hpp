@@ -50,7 +50,7 @@ namespace LifeV
 
         // virtual memeber functions
 
-        virtual void evalResidual(const Vector &_sol,
+        virtual void evalResidual(const Vector &_disp,
                                   const int     _iter,
                                   Vector       &res) = 0;
 

@@ -61,7 +61,7 @@ void fixedPoint::evalResidual(const Vector &_disp,
 
     if(_iter == 0) status = 1;
 
-    std::cout << "*** Residual computation g(x_" << _iter <<")";
+    std::cout << "*** Residual computation g(x_" << _iter <<") at time " << time();
     if (status) std::cout << " [NEW TIME STEP] ";
     std::cout << std::endl;
 

@@ -96,8 +96,6 @@ void steklovPoincare::evalResidual(const Vector &_disp,
               << std::endl;
     std::cout << "Max ResidualFSI = " << maxnorm(M_residualFSI)
               << std::endl;
-    std::cout << "Max ResidualSol = " << maxnorm(_res)
-              << std::endl;
 }
 
 

@@ -61,7 +61,7 @@ int newton( Vector& sol, Fct& f, Norm& norm, Real abstol, Real reltol,
     Vector residual = sol, step = sol;
     step = 0.;
     Real normResOld = 1, lambda, slope;
-    f.evalResidual( residual, sol, iter );
+    f.evalResidual( sol, iter, residual );
     Real normRes = norm( residual ), normStep = 0,
                    stop_tol = abstol + reltol * normRes,
                               ratio;
@@ -86,7 +86,7 @@ int newton( Vector& sol, Fct& f, Norm& norm, Real abstol, Real reltol,
         normRes = norm( residual );
         if (iter != 1) f.updateJac( sol, iter );
         linres = linear_rel_tol;
-        f.solveJac( step, -1. * residual, linres ); // residual = f(sol)
+        f.solveJac( -1. * residual, linres, step ); // residual = f(sol)
         /*
           linres contains the relative linear tolerance achieved by the
           linear solver, i.e linear_rel_tol = | -f(sol) - J step | / |-f(sol)|
@@ -108,14 +108,14 @@ int newton( Vector& sol, Fct& f, Norm& norm, Real abstol, Real reltol,
         {
         case 0: // no linesearch
             sol += step;
-            f.evalResidual( residual, sol, iter );
+            f.evalResidual( sol, iter, residual );
             normRes = norm( residual );
             break;
         case 1:
-            lineSearch_parab( f, norm, residual, sol, step, normRes, lambda, iter );
+//            lineSearch_parab( f, norm, residual, sol, step, normRes, lambda, iter );
             break;
         case 2:  // recommended
-            lineSearch_cubic( f, norm, residual, sol, step, normRes, lambda, slope, iter );
+//            lineSearch_cubic( f, norm, residual, sol, step, normRes, lambda, slope, iter );
             break;
         default:
             std::cout << "Unknown linesearch \n";
