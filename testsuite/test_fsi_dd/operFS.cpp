@@ -16,6 +16,7 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
+
 #include "operFS.hpp"
 
 namespace LifeV
@@ -39,10 +40,10 @@ namespace LifeV
     }
 
 
-    void operFS::eval(Vector& dispNew,
-                      Vector& velo,
+    void operFS::eval(Vector&       dispNew,
+                      Vector&       velo,
                       const Vector& disp,
-                      int status)
+                      int           status)
     {
         if(status) M_nbEval = 0; // new time step
         M_nbEval++ ;
@@ -52,7 +53,7 @@ namespace LifeV
         M_fluid.updateMesh(M_time);
         M_fluid.iterate   (M_time);
 
-        M_solid._recur=0;
+        M_solid._recur = 0;
         
         M_solid.iterate();
 
@@ -65,7 +66,6 @@ namespace LifeV
              << maxnorm(dispNew) << endl;
         cout << "                ::: norm(velo     ) = "
              << maxnorm(velo) << endl;
-
     }
 
 
@@ -76,25 +76,29 @@ namespace LifeV
                               int iter)
     {
         int status = 0;
+
         if(iter == 0) status = 1;
+
         cout << "*** Residual computation g(x_" << iter <<" )";
         if (status) cout << " [NEW TIME STEP] ";
         cout << endl;
-        eval(M_dispStruct,M_velo,disp,status);
-        res = disp - M_dispStruct;
+        
+        eval(M_dispStruct, M_velo, disp, status);
 
+        res = disp - M_dispStruct;
     }
 
-
 //
-    void  operFS::updateJac(Vector& sol,int iter)
+
+    void  operFS::updatePrec(Vector& sol,int iter)
     {
     }
 
 
 //
-    void  operFS::solveJac(Vector& step, const Vector& res, double& linear_rel_tol) {
 
+    void  operFS::solvePrec(Vector& step, const Vector& res, double& linear_rel_tol)
+    {
         // AZTEC specifications for the second system
         int    data_org[AZ_COMM_SIZE];   // data organisation for J
         int    proc_config[AZ_PROC_SIZE];  // Processor information:
@@ -105,6 +109,7 @@ namespace LifeV
         AZ_set_proc_config(proc_config, AZ_NOT_MPI);
 
         // data_org assigned "by hands": no parallel computation is performed
+
         UInt dim_res = res.size();
 
         data_org[AZ_N_internal] = dim_res;
@@ -117,6 +122,7 @@ namespace LifeV
         AZ_defaults(options,params);
 
         // Fixed Aztec options for this linear system
+
         options[AZ_solver  ] = AZ_gmres;
         options[AZ_output  ] = 1;
         options[AZ_poly_ord] = 5;
@@ -149,7 +155,6 @@ namespace LifeV
 
         cout << "done in " << chrono.diff() << " s." << endl;
 
-
         AZ_matrix_destroy(&J);
     }
 
@@ -165,27 +170,26 @@ namespace LifeV
     void  operFS::solveLinearSolid()
     {
         M_rhs_dz = 0.0;
-
+        
         if ( !M_BCh_dz.bdUpdateDone() )
             M_BCh_dz.bdUpdate(M_solid._mesh, M_solid._feBd,
                               M_solid._dof);
-
+        
         bc_manage_vector(M_rhs_dz, M_solid._mesh, M_solid._dof,
                          M_BCh_dz, M_solid._feBd, 1.0, 1.0);
-
+        
         Real tol       = 1.e-10;
-
+        
         M_solid._recur = 1;
         M_solid.solveJac(M_dz, M_rhs_dz, tol);
-
     }
-
-
+    
+    
     UInt operFS::nbEval()
     {
         return M_nbEval;
     }
-
+    
     void operFS::setTime(const Real& time)
     {
         M_time = time;
@@ -200,21 +204,22 @@ namespace LifeV
 
         double xnorm =  AZ_gvector_norm(dim,-1,z,proc_config);
         cout << " ***** norm (z)= " << xnorm << endl<< endl;
-
-        if ( xnorm == 0.0 ) {
+        
+        if ( xnorm == 0.0 )
             for (int i=0; i <(int)dim; ++i)
                 Jz[i] =  0.0;
-        }
-        else {
-            for (int i=0; i <(int)dim; ++i) {
+        else
+        {
+            for (int i=0; i <(int)dim; ++i) 
                 my_data->_pFS->M_solid.d()[i] =  z[i];
-            }
+            
             my_data->_pFS->M_fluid.updateDispVelo();
             my_data->_pFS->solveLinearFluid();
             my_data->_pFS->solveLinearSolid();
             for (int i = 0; i < (int) dim; ++i)
                 Jz[i] =  z[i] - my_data->_pFS->M_dz[i];
         }
-        cout << " ***** norm (Jz)= " << AZ_gvector_norm(dim,-1,Jz,proc_config)<< endl<< endl;
+        cout << " ***** norm (Jz)= " << AZ_gvector_norm(dim,-1,Jz,proc_config)
+             << endl << endl;
     }
 }

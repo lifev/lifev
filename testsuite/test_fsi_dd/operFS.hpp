@@ -20,85 +20,98 @@
 #include "VenantKirchhofSolver.hpp"
 #include "vectorNorms.hpp"
 #include "regionMesh3D_ALE.hpp"
+
 #ifndef _OPERFS
 #define _OPERFS
 
 namespace LifeV
 {
-class operFS;
+    class operFS;
 
 
-class DataJacobian {
-
- public:
-
-  DataJacobian(operFS* oper):
-    _pFS(oper){}
-
-  operFS* _pFS;
-
-};
-
+    class DataJacobian
+    {
+    public:
+        
+        DataJacobian(operFS* oper):
+            _pFS(oper){}
+        
+        operFS* _pFS;
+    };
+    
 
 //
 // Fluid-Structure operator Class
 //
-class operFS {
+    class operFS {
+        
+    public:
 
- public:
-
-  operFS(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
-	 VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
-	 BC_Handler& BCh_du, BC_Handler& BCh_dz);
-
-  //
-  void eval(Vector& dispNew, Vector& veloStruct, const Vector& disp,int status);
-
-  //
-  void evalResidual(Vector&res, const Vector& sol, int iter);
-
-  //
-  void updateJac(Vector& sol,int iter);
-
-  //
-  void solveJac(Vector& step, const Vector& res, double& linear_rel_tol);
-
-  //
-  void solveLinearFluid();
-
-  //
-  void solveLinearSolid();
-
-  //
-  UInt nbEval();
+        // constructors
+        
+        operFS(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
+               VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
+               BC_Handler& BCh_du, BC_Handler& BCh_dz);
 
 
-  NavierStokesAleSolverPC
-  < RegionMesh3D_ALE<LinearTetra> >& M_fluid;
+        // member functions
+        
+        //
+        void eval         (Vector &dispNew,
+                           Vector &veloStruct,
+                           const Vector &disp,
+                           int status);
+        
+        //
+        void evalResidual (Vector &res,
+                           const Vector &sol,
+                           int iter);
 
-  VenantKirchhofSolver
-  < RegionMesh3D_ALE<LinearTetra> >& M_solid;
+        //
+        void updatePrec   (Vector& sol,
+                           int iter);
 
-  Vector       M_dispStruct;
-  Vector       M_velo;
-  Vector       M_dz;
-  Vector       M_rhs_dz;
+        //
+        void solvePrec    (Vector &step,
+                           const Vector &res,
+                           double &linear_rel_tol);
 
-  UInt         M_nbEval;
+        //
+        void solveLinearFluid();
 
-  BC_Handler&  M_BCh_du;
-  BC_Handler&  M_BCh_dz;
+        //
+        void solveLinearSolid();
 
-  DataJacobian M_dataJacobian;
+        //
+        UInt nbEval();
 
-  void setTime(const Real& time);
 
- private:
+        NavierStokesAleSolverPC
+        < RegionMesh3D_ALE<LinearTetra> >& M_fluid;
 
-  Real         M_time;
+        VenantKirchhofSolver
+        < RegionMesh3D_ALE<LinearTetra> >& M_solid;
 
-};
+        Vector       M_dispStruct;
+        Vector       M_velo;
+        Vector       M_dz;
+        Vector       M_rhs_dz;
 
-void my_matvecJacobian(double *z, double *Jz, AZ_MATRIX* J, int proc_config[]);
+        UInt         M_nbEval;
+
+        BC_Handler&  M_BCh_du;
+        BC_Handler&  M_BCh_dz;
+
+        DataJacobian M_dataJacobian;
+
+        void setTime(const Real& time);
+
+    private:
+
+        Real         M_time;
+
+    };
+
+    void my_matvecJacobian(double *z, double *Jz, AZ_MATRIX* J, int proc_config[]);
 }
 #endif

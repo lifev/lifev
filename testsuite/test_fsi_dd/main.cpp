@@ -19,6 +19,7 @@
 #include "lifeV.hpp"
 #include "NavierStokesAleSolverPC.hpp"
 #include "VenantKirchhofSolver.hpp"
+#include "nonLinRichardson.hpp"
 #include "operFS.hpp"
 #include "vectorNorms.hpp"
 #include "dofInterface3Dto3D.hpp"
@@ -34,7 +35,9 @@ Domain Decomposition method.
 
 The present test simulates the pressure wave propagation in a curved cylindrical vessel
 
-Based on Miguel Fernandez's test_fsi_newton
+Based on Miguel Fernandez's test_fsi_newton. See:
+A Newton method using exact jacobians for solving fluid-structure coupling
+Miguel Fernandez, Marwan Moubachir
 */
 
 
@@ -220,7 +223,9 @@ int main(int argc, char** argv)
 
         // the newton solver
 
-        status = newton(disp,oper, maxnorm, abstol, reltol, maxiter, etamax,linesearch,out_res,time);
+        status = nonLinRichardson(disp, oper, maxnorm, abstol, reltol,
+                                  maxiter, etamax, linesearch, out_res,
+                                  time, 0.1);
 
         if(status == 1)
         {
