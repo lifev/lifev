@@ -27,7 +27,7 @@ viscosity = 0.03              # viscosity
 
 
 [../discretization]
-mesh_dir  = ./Mesh/ # the directory where the mesh file is
+mesh_dir  = ../data/mesh/inria/ # the directory where the mesh file is
 mesh_file = tube20.mesh  # mesh file
 timestep  = 0.001             # timestep
 
@@ -46,7 +46,7 @@ poisson   = 0.3
 endtime   = 0.02
 
 [../discretization]
-mesh_dir  = ./Mesh/   # the directory where the mesh file is
+mesh_dir  = ../data/mesh/inria/   # the directory where the mesh file is
 mesh_file = vessel20.mesh  # mesh file
 timestep  = 0.001             # timestep
 
