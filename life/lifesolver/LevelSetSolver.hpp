@@ -286,6 +286,7 @@ namespace LifeV {
         void directReinitialization() {
             build_interface();
 #ifdef DEBUG_REINI
+            std::cout << "Found " << _M_face_list.size() << " faces" << std::endl;
             std::cout << "DEBUG MESSAGE: reinitializing the interface" << std::endl;
             exportToMatlab("./results/before.m");
 #endif
@@ -297,6 +298,7 @@ namespace LifeV {
 
                 for(face_list_iterator faces_it = _M_face_list.begin(); faces_it != _M_face_list.end(); faces_it++)
                     d = std::min(d, faces_it->pointToFaceDistance(P));
+
 
                 _M_u[iP - 1] = signum(_M_u[iP - 1]) * d;
             }
