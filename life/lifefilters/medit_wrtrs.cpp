@@ -28,7 +28,7 @@ void wr_medit_ascii_scalar( std::string fname, Real* U, int Usize, int type )
     ASSERT( ofile, "Error: Output file cannot be opened." );
 
   ofile << nDimensions << " 1 " << Usize << " " << type << std::endl;
-  ofile.setf(ios::scientific,ios::floatfield);
+  ofile.setf(std::ios::scientific,std::ios::floatfield);
   ofile.precision(12);
   for(int i = 0; i< Usize; i++){
     ofile << U[i] << std::endl;
@@ -43,7 +43,7 @@ void wr_medit_ascii_vector( std::string fname, Real* U, int Usize, int type )
 
   ofile << nDimensions << " " << nDimensions << " "
 	<< Usize/nDimensions << " "  << type << std::endl;
-  ofile.setf(ios::scientific,ios::floatfield);
+  ofile.setf(std::ios::scientific,std::ios::floatfield);
   ofile.precision(12);
   for (int i=0;i<(int)Usize/(int)nDimensions; i++){
     for (int j=0; j<(int)nDimensions; j++)

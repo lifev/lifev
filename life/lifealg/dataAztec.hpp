@@ -118,9 +118,9 @@ public:
 			    MSRPatt& pattern,int* options,double* params,
 			    int& az_name,bool flag);
   /*! to see a little help */
-  void dataAztecHelp(ostream& c=std::cout);
+  void dataAztecHelp(std::ostream& c=std::cout);
   /*! to see the values of the items (including the default ones) */
-  void dataAztecShowMe(ostream& c=std::cout);
+  void dataAztecShowMe(std::ostream& c=std::cout);
 };
 }
 #endif
