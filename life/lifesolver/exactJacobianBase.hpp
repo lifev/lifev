@@ -44,9 +44,6 @@ class exactJacobian : public operFS
 {
 public:
 
-    typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID
-                                   & )> function_type;
-
     // constructors
     exactJacobian(GetPot &_dataFile);
 

@@ -214,9 +214,7 @@ void  steklovPoincare::solveJac(Vector &muk,
                                 const Vector  &_res,
                                 double        _linearRelTol)
 {
-    UInt precChoice = 0;
-
-    switch(precChoice)
+    switch(M_precond)
     {
         case 0:
             // Neumann-Dirichlet preconditioner
@@ -316,12 +314,6 @@ void  steklovPoincare::invSfPrime(const Vector& res,
 
     Vector deltaLambda = this->M_fluid.getDeltaLambda();
 
-//    Vector deltaL = deltaLambda;
-//    deltaL = 0.;
-//     transferOnInterface(deltaLambda,
-//                         M_BCh_du,
-//                         "Wall",
-//                         deltaL);
     transferOnInterface(deltaLambda,
                         M_fluid.BC_fluid(),
                         "Interface",

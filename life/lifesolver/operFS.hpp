@@ -38,7 +38,8 @@ namespace LifeV
     class operFS {
 
     public:
-
+        typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID
+                                       & )> function_type;
         // constructors
 
         operFS(GetPot &data_file);
@@ -59,6 +60,8 @@ namespace LifeV
 
         // member functions
 
+        virtual void setUpBC(function_type _bcf,
+                             function_type _vel) = 0;
         void updateJac (Vector& sol,
                         int     iter);
 

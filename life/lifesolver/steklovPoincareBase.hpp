@@ -42,8 +42,6 @@ class DataJacobianSP {
 class steklovPoincare : public operFS
 {
 public:
-    typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID
-                                   & )> function_type;
 
     // constructors
     steklovPoincare(GetPot &_dataFile);
