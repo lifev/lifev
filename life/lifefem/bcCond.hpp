@@ -702,6 +702,7 @@ void BC_Handler::bdUpdate(Mesh& mesh, CurrentBdFE& feBd, const Dof& dof) {
 	      if ( where->dataVector()  ) { // With data vector         
 	      	where->addIdentifier( new Identifier_Natural(gDof) );   
 	      }           
+	      break;
             case Mixte:
 	      // Why kind of data ?
               // vincent please check again for your Mixte-FE it doesn't work for Q1
@@ -763,7 +764,7 @@ void BC_Handler::bdUpdate(Mesh& mesh, CurrentBdFE& feBd, const Dof& dof) {
                     if ( where->dataVector() ) { // With data vector
                         where->addIdentifier( new Identifier_Natural(gDof) );
                     }
-                    
+                    break; 
                 case Mixte:
                     // Why kind of data ?
                     if ( where->dataVector() ) { // With data vector
