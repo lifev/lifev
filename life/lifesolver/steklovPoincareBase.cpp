@@ -344,23 +344,6 @@ void  steklovPoincare::solveJac(Vector &muk,
 
             std::cout << "norm_inf muS = " << norm_inf(muS) << std::endl;
             std::cout << "norm_inf muF = " << norm_inf(muF) << std::endl;
-
-            // indeed, Here we should call Aitken (a different instance than
-            // the one defined in nonLinRichardson) and
-            // we should replace the defaultOmega for he nonLinRichardson
-            // to -1, such that there is no relaxation at all there.
-            //
-            // Maybe we have to define precChoice as Memeber -> M_precChoice
-            // and get the choice as input parameter with the constructor
-            // and add a memeber
-            // generalizedAitken aitkDN(...) (DN for Dirichlet Neumann)
-            // then
-            //
-//            muk = M_aitkFS.computeDeltaLambda(getResidualFSIOnSolid(), muS, muF );
-            // muk = muS + muF;
-            // muk = .9*muS + .1*muF;
-
-//            std::cout << "maxnorm muk = " << norm_inf(muk) << std::endl;
         }
         break;
         case NO_PRECONDITIONER:
