@@ -116,6 +116,371 @@ void mass(Real coef,ElemMat& elmat,const CurrentFE& fe,
   }
 }
 
+// Miguel 12/2003
+//
+void ipstab_grad(const Real coef,ElemMat& elmat,const CurrentFE& fe1,const CurrentFE& fe2, 
+	    const CurrentBdFE& bdfe, int iblock,int jblock) {
+  /*
+    Interior penalty stabilization: coef*\int_{face} grad u1_i . grad v1_j
+  */
+
+  ASSERT_PRE(fe1.hasFirstDeriv(),
+  	     "ipstab11 needs at least the first derivatives");
+  ASSERT_PRE(fe2.hasFirstDeriv(),
+	     "ipstab11 needs at least the first derivatives");
+
+  Tab2dView mat = elmat.block(iblock,jblock);
+
+ 
+
+  Real sum,sum1,sum2;
+  int i,j,ig,icoor,jcoor;
+  Real x[3],rx1[3],drp1[3],rx2[3],drp2[3];
+  Real phid1[fe1.nbNode][fe1.nbCoor][bdfe.nbQuadPt];
+  Real phid2[fe2.nbNode][fe2.nbCoor][bdfe.nbQuadPt];
+  Real b1[3],b2[3];
+
+  fe1.coorMap(b1[0],b1[1],b1[2],0,0,0); // translation fe1
+  fe2.coorMap(b2[0],b2[1],b2[2],0,0,0); // translation fe2
+  
+  for (int ig=0; ig < bdfe.nbQuadPt; ++ig) {  // first derivatives on quadrature points
+    bdfe.coorQuadPt(x[0],x[1],x[2],ig);       // quadrature points coordinates
+    
+    // local coordonates of the quadrature point
+    for(icoor=0; icoor<fe1.nbCoor; ++icoor) {
+      sum1 = 0;
+      sum2 = 0;
+      for(jcoor=0; jcoor<fe1.nbCoor; ++jcoor) {
+	sum1 += fe1.tInvJac(jcoor,icoor,0)*(x[jcoor]-b1[jcoor]);
+	sum2 += fe2.tInvJac(jcoor,icoor,0)*(x[jcoor]-b2[jcoor]);
+      }
+      rx1[icoor] = sum1;
+      rx2[icoor] = sum2;
+    }
+
+    for (i=0; i< fe1.nbNode; ++i) {
+  
+      // first derivative on the reference element 
+      for(icoor=0; icoor<fe1.nbCoor; ++icoor) {
+	drp1[icoor] = fe1.refFE.dPhi(i,icoor,rx1[0],rx1[1],rx1[2]);
+	drp2[icoor] = fe2.refFE.dPhi(i,icoor,rx2[0],rx2[1],rx2[2]);
+      }
+      
+      // first derivative on the current element
+      for(icoor=0; icoor<fe1.nbCoor; ++icoor) {
+	sum1 = 0;
+	sum2 = 0;
+	for(jcoor=0; jcoor<fe1.nbCoor; ++jcoor) {
+	  sum1 += fe1.tInvJac(icoor,jcoor,0)*drp1[jcoor];
+	  sum2 += fe2.tInvJac(icoor,jcoor,0)*drp2[jcoor];
+	}
+	phid1[i][icoor][ig]= sum1;
+	phid2[i][icoor][ig]= sum2;
+      }  
+    }
+  }
+
+  
+
+  // Loop on rows
+  for (i=0; i< fe1.nbNode; ++i) {
+    // Loop on columns
+    for (j=0; j< fe2.nbNode; ++j) { 
+      sum = 0.0;
+      // Loop on coordinates
+      for(icoor=0; icoor<fe1.nbCoor; ++icoor)
+	for(ig=0; ig<bdfe.nbQuadPt ; ++ig)
+	  sum += phid1[i][icoor][ig]*phid2[j][icoor][ig]*bdfe.weightMeas(ig);  
+      mat(i,j)=coef*sum;
+    }
+  }
+
+}
+
+
+
+
+
+// Miguel 12/2003
+//
+void ipstab_grad(const Real coef,ElemMat& elmat,const CurrentFE& fe1,const CurrentFE& fe2, 
+	    const CurrentBdFE& bdfe, int iblock,int jblock, int nb) {
+  /*
+    Interior penalty stabilization: coef*\int_{face} grad u1_i . grad v1_j
+  */
+
+  ASSERT_PRE(fe1.hasFirstDeriv(),
+  	     "ipstab11 needs at least the first derivatives");
+  ASSERT_PRE(fe2.hasFirstDeriv(),
+	     "ipstab11 needs at least the first derivatives");
+
+  Tab2d mat_tmp(fe1.nbNode,fe2.nbNode);
+
+    
+  Real sum,sum1,sum2;
+  int i,j,ig,icoor,jcoor;
+  Real x[3],rx1[3],drp1[3],rx2[3],drp2[3];
+  Real phid1[fe1.nbNode][fe1.nbCoor][bdfe.nbQuadPt];
+  Real phid2[fe2.nbNode][fe2.nbCoor][bdfe.nbQuadPt];
+  Real b1[3],b2[3];
+
+  fe1.coorMap(b1[0],b1[1],b1[2],0,0,0); // translation fe1
+  fe2.coorMap(b2[0],b2[1],b2[2],0,0,0); // translation fe2
+  
+  for (int ig=0; ig < bdfe.nbQuadPt; ++ig) {  // first derivatives on quadrature points
+    bdfe.coorQuadPt(x[0],x[1],x[2],ig);       // quadrature points coordinates
+    
+    // local coordonates of the quadrature point
+    for(icoor=0; icoor<fe1.nbCoor; ++icoor) {
+      sum1 = 0;
+      sum2 = 0;
+      for(jcoor=0; jcoor<fe1.nbCoor; ++jcoor) {
+	sum1 += fe1.tInvJac(jcoor,icoor,0)*(x[jcoor]-b1[jcoor]);
+	sum2 += fe2.tInvJac(jcoor,icoor,0)*(x[jcoor]-b2[jcoor]);
+      }
+      rx1[icoor] = sum1;
+      rx2[icoor] = sum2;
+    }
+
+    for (i=0; i< fe1.nbNode; ++i) {
+  
+      // first derivative on the reference element 
+      for(icoor=0; icoor<fe1.nbCoor; ++icoor) {
+	drp1[icoor] = fe1.refFE.dPhi(i,icoor,rx1[0],rx1[1],rx1[2]);
+	drp2[icoor] = fe2.refFE.dPhi(i,icoor,rx2[0],rx2[1],rx2[2]);
+      }
+      
+      // first derivative on the current element
+      for(icoor=0; icoor<fe1.nbCoor; ++icoor) {
+	sum1 = 0;
+	sum2 = 0;
+	for(jcoor=0; jcoor<fe1.nbCoor; ++jcoor) {
+	  sum1 += fe1.tInvJac(icoor,jcoor,0)*drp1[jcoor];
+	  sum2 += fe2.tInvJac(icoor,jcoor,0)*drp2[jcoor];
+	}
+	phid1[i][icoor][ig]= sum1;
+	phid2[i][icoor][ig]= sum2;
+      }  
+    }
+  }
+
+
+  // Loop on rows
+  for (i=0; i< fe1.nbNode; ++i) {
+    // Loop on columns
+    for (j=0; j< fe2.nbNode; ++j) { 
+      sum = 0.0;
+      // Loop on coordinates
+      for(icoor=0; icoor<fe1.nbCoor; ++icoor)
+	for(ig=0; ig<bdfe.nbQuadPt ; ++ig)
+	  sum += phid1[i][icoor][ig]*phid2[j][icoor][ig]*bdfe.weightMeas(ig);  
+      mat_tmp(i,j)=coef*sum;
+    }
+  }
+
+
+  // copy on the components
+  for(int icomp=0;icomp<nb;icomp++){
+    Tab2dView mat_icomp = elmat.block(iblock+icomp,jblock+icomp);
+    mat_icomp = mat_tmp;
+  }
+}
+
+
+
+
+// Miguel 2/2004
+//
+void ipstab_bgrad(const Real coef, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2, 
+		  const ElemVec& beta, const CurrentBdFE& bdfe, int iblock, 
+		  int jblock, int nb) {
+  /*
+    Interior penalty stabilization: coef*\int_{face} (\beta1 . grad u1_i) . (\beta2 . grad v2_j)
+  */
+
+  ASSERT_PRE(fe1.hasFirstDeriv(),
+  	     "ipstab_bgrad needs at least the first derivatives");
+  ASSERT_PRE(fe2.hasFirstDeriv(),
+	     "ipstab_bgrad needs at least the first derivatives");
+ 
+  Tab2d mat_tmp(fe1.nbNode,fe2.nbNode);
+
+  Real sum,sum1,sum2;
+  int i,j,icoor,jcoor,ig;
+  
+  //
+  // convection velocity \beta on the boundary quadrature points
+  //
+  Real b[fe1.nbCoor][bdfe.nbQuadPt];
+
+  for(icoor=0; icoor<fe1.nbCoor; ++icoor) {
+    for(ig=0;ig<bdfe.nbQuadPt;ig++) {
+      sum = 0;
+      for (i=0; i< bdfe.nbNode; ++i) {
+	sum += bdfe.phi(i,ig)*beta.vec()[icoor*bdfe.nbNode + i]; 
+      }
+      b[icoor][ig] = sum;
+    }
+  } 
+
+ 
+  //
+  // shape fonction first derivaties on the boundary quadrature points
+  //
+  // this should be improved!!!
+  //
+  Real x[3],rx1[3],drp1[3],rx2[3],drp2[3];
+  Real phid1[fe1.nbNode][fe1.nbCoor][bdfe.nbQuadPt];
+  Real phid2[fe2.nbNode][fe2.nbCoor][bdfe.nbQuadPt];
+  Real b1[3],b2[3];
+
+  fe1.coorMap(b1[0],b1[1],b1[2],0,0,0); // translation fe1
+  fe2.coorMap(b2[0],b2[1],b2[2],0,0,0); // translation fe2
+  
+  for (int ig=0; ig < bdfe.nbQuadPt; ++ig) {  // first derivatives on quadrature points
+    bdfe.coorQuadPt(x[0],x[1],x[2],ig);       // quadrature points coordinates
+    
+    // local coordonates of the quadrature point
+    for(icoor=0; icoor<fe1.nbCoor; ++icoor) {
+      sum1 = 0;
+      sum2 = 0;
+      for(jcoor=0; jcoor<fe1.nbCoor; ++jcoor) {
+	sum1 += fe1.tInvJac(jcoor,icoor,0)*(x[jcoor]-b1[jcoor]);
+	sum2 += fe2.tInvJac(jcoor,icoor,0)*(x[jcoor]-b2[jcoor]);
+      }
+      rx1[icoor] = sum1;
+      rx2[icoor] = sum2;
+    }
+
+    for (i=0; i< fe1.nbNode; ++i) {
+  
+      // first derivative on the reference element 
+      for(icoor=0; icoor<fe1.nbCoor; ++icoor) {
+	drp1[icoor] = fe1.refFE.dPhi(i,icoor,rx1[0],rx1[1],rx1[2]);
+	drp2[icoor] = fe2.refFE.dPhi(i,icoor,rx2[0],rx2[1],rx2[2]);
+      }
+      
+      // first derivative on the current element
+      for(icoor=0; icoor<fe1.nbCoor; ++icoor) {
+	sum1 = 0;
+	sum2 = 0;
+	for(jcoor=0; jcoor<fe1.nbCoor; ++jcoor) {
+	  sum1 += fe1.tInvJac(icoor,jcoor,0)*drp1[jcoor];
+	  sum2 += fe2.tInvJac(icoor,jcoor,0)*drp2[jcoor];
+	}
+	phid1[i][icoor][ig]= sum1;
+	phid2[i][icoor][ig]= sum2;
+      }  
+    }
+  }
+
+  // Loop on rows
+  for (i=0; i< fe1.nbNode; ++i) {
+    // Loop on columns
+    for (j=0; j< fe2.nbNode; ++j) { 
+      sum = 0.0;
+      // Loop on coordinates
+      for(icoor=0; icoor<fe1.nbCoor; ++icoor)
+	for(jcoor=0; jcoor<fe1.nbCoor; ++jcoor)
+	  for(ig=0;ig<bdfe.nbQuadPt;ig++)
+	    sum += 	phid1[i][icoor][ig]*phid2[j][jcoor][ig]*b[icoor][ig]
+	      *b[jcoor][ig]*bdfe.weightMeas(ig);
+      mat_tmp(i,j)=coef*sum;
+    }
+  }
+
+  // copy on the components
+  for(int icomp=0;icomp<nb;icomp++){
+    Tab2dView mat_icomp = elmat.block(iblock+icomp,jblock+icomp);
+    mat_icomp = mat_tmp;
+  } 
+
+}
+
+
+
+
+// Miguel 2/2004
+//
+void ipstab_div(const Real coef,ElemMat& elmat,const CurrentFE& fe1,const CurrentFE& fe2, 
+		const CurrentBdFE& bdfe, int iblock,int jblock) {
+  /*
+    Interior penalty stabilization: coef*\int_{face} div u . div v
+  */
+
+  ASSERT_PRE(fe1.hasFirstDeriv(),
+  	     "ipstab_div needs at least the first derivatives");
+  ASSERT_PRE(fe2.hasFirstDeriv(),
+	     "ipstab_div needs at least the first derivatives");
+
+
+  Real sum,sum1,sum2;
+  int i,j,ig,icoor,jcoor;
+  Real x[3],rx1[3],drp1[3],rx2[3],drp2[3];
+  Real phid1[fe1.nbNode][fe1.nbCoor][bdfe.nbQuadPt];
+  Real phid2[fe2.nbNode][fe2.nbCoor][bdfe.nbQuadPt];
+  Real b1[3],b2[3];
+
+  fe1.coorMap(b1[0],b1[1],b1[2],0,0,0); // translation fe1
+  fe2.coorMap(b2[0],b2[1],b2[2],0,0,0); // translation fe2
+  
+  for (int ig=0; ig < bdfe.nbQuadPt; ++ig) {  // first derivatives on quadrature points
+    bdfe.coorQuadPt(x[0],x[1],x[2],ig);       // quadrature points coordinates
+    
+    // local coordonates of the quadrature point
+    for(icoor=0; icoor<fe1.nbCoor; ++icoor) {
+      sum1 = 0;
+      sum2 = 0;
+      for(jcoor=0; jcoor<fe1.nbCoor; ++jcoor) {
+	sum1 += fe1.tInvJac(jcoor,icoor,0)*(x[jcoor]-b1[jcoor]);
+	sum2 += fe2.tInvJac(jcoor,icoor,0)*(x[jcoor]-b2[jcoor]);
+      }
+      rx1[icoor] = sum1;
+      rx2[icoor] = sum2;
+    }
+
+    for (i=0; i< fe1.nbNode; ++i) {
+  
+      // first derivative on the reference element 
+      for(icoor=0; icoor<fe1.nbCoor; ++icoor) {
+	drp1[icoor] = fe1.refFE.dPhi(i,icoor,rx1[0],rx1[1],rx1[2]);
+	drp2[icoor] = fe2.refFE.dPhi(i,icoor,rx2[0],rx2[1],rx2[2]);
+      }
+      
+      // first derivative on the current element
+      for(icoor=0; icoor<fe1.nbCoor; ++icoor) {
+	sum1 = 0;
+	sum2 = 0;
+	for(jcoor=0; jcoor<fe1.nbCoor; ++jcoor) {
+	  sum1 += fe1.tInvJac(icoor,jcoor,0)*drp1[jcoor];
+	  sum2 += fe2.tInvJac(icoor,jcoor,0)*drp2[jcoor];
+	}
+	phid1[i][icoor][ig]= sum1;
+	phid2[i][icoor][ig]= sum2;
+      }  
+    }
+  }
+  
+  for(icoor=0; icoor<fe1.nbCoor; ++icoor) {
+    for(jcoor=0; jcoor<fe1.nbCoor; ++jcoor) {
+      Tab2dView mat_icomp= elmat.block(iblock+icoor,jblock+jcoor);
+      // Loop on rows
+      for (i=0; i< fe1.nbNode; ++i) {
+	// Loop on columns
+	for (j=0; j< fe2.nbNode; ++j) {
+	  sum = 0.0;
+	  for(ig=0;ig<bdfe.nbQuadPt;ig++)
+	    sum += phid1[i][icoor][ig]*phid2[j][jcoor][ig]*bdfe.weightMeas(ig);
+	  mat_icomp(i,j) += coef *sum;
+	}
+      }
+    } 
+  }
+  
+}
+
+
+
 
 
 void stiff(Real coef,ElemMat& elmat,const CurrentFE& fe,

@@ -50,7 +50,7 @@ void
 assemble(Oper oper, const RegionMesh& mesh, CurrentFE& fe,
 	 const DOF& dof, const UsrSourceFct& source_fct, Matrix& A, Vector& b)
 {
-  UInt i;
+  UInt i, ic, jc;
   UInt nc = b.size()/dof.numTotalDof();
   ElemMat elmat(fe.nbNode,nc,nc);
   ElemVec elvec(fe.nbNode,nc);
@@ -61,8 +61,8 @@ assemble(Oper oper, const RegionMesh& mesh, CurrentFE& fe,
     elmat.zero();
     //
     elvec.zero();
-    for ( uint ic=0; ic<nc; ++ic){
-      for ( uint jc=0; jc<nc; ++jc){
+    for (ic=0; ic<nc; ++ic){
+      for (jc=0; jc<nc; ++jc){
 	compute_mat(elmat,oper,fe,ic,jc); // compute local matrix
 	// the previous line would become:  compute_mat(elmat,oper.comp(ic,jc),fe); ****
 	assemb_mat(A,elmat,fe,dof,ic,jc); // assemble local matrix into global one
@@ -372,6 +372,31 @@ assemb_mat(Matrix& M,ElemMat& elmat,const CurrentFE& fe,const DOF& dof,int ibloc
   }
 }
 
+
+//
+/////////////////////////////////
+//
+// Miguel 01/2004: matrix assembling of interior penalty terms
+//
+template<typename Matrix, typename DOF>
+void
+assemb_mat(Matrix& M,ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2, const DOF& dof,int iblock=0,int jblock=0) 
+{
+  Tab2dView mat=elmat.block(iblock,jblock);
+  UInt totdof = dof.numTotalDof();
+  int i,j,k;
+  UInt ig,jg;
+  UInt eleId1 = fe1.currentId();
+  UInt eleId2 = fe2.currentId();
+  for( k=0 ; k<fe1.nbPattern ; k++){
+    i = fe1.patternFirst(k);
+    j = fe2.patternSecond(k);
+    ig = dof.localToGlobal(eleId1,i+1)-1+iblock*totdof;  
+    jg = dof.localToGlobal(eleId2,j+1)-1+jblock*totdof; 
+    M.set_mat_inc(ig,jg,mat(i,j));
+  }
+}
+
 //
 /////////////////////////////////
 //
@@ -576,8 +601,7 @@ void compute_vec(Real constant,ElemVec& elvec,const CurrentFE& fe,int iblock=0);
 //////////////////
 //
 template<typename UsrFct>
-void compute_vec(const UsrFct& fct,ElemVec& elvec,const CurrentFE& fe,
-		 int iblock){
+void compute_vec(const UsrFct& fct,ElemVec& elvec,const CurrentFE& fe,int iblock=0){
   int i,ig;
   Tab1dView vec = elvec.block(iblock);
   Real s,x,y,z;
@@ -614,6 +638,7 @@ void compute_vec_stab(OperFct& fct,ElemVec& elvec,const CurrentFE& fe,
     vec(i) += s;
   }
 }
+
 // version with source term depending on time
 template<typename UsrFct>
 void compute_vec(const UsrFct& fct,ElemVec& elvec,const CurrentFE& fe, const Real& t, int iblock=0){
@@ -623,8 +648,10 @@ void compute_vec(const UsrFct& fct,ElemVec& elvec,const CurrentFE& fe, const Rea
   for(i=0;i<fe.nbNode;i++){
     s = 0;
     for(ig=0;ig<fe.nbQuadPt;ig++){
-      fe.coorQuadPt(x,y,z,ig);
-      s += fe.phi(i,ig) * fct(x,y,z,t,iblock+1) * fe.weightDet(ig);
+      x = fe.quadPt(ig,0);
+      y = fe.quadPt(ig,1);
+      z = fe.quadPt(ig,2);
+      s += fe.phi(i,ig) * fct(t,x,y,z,iblock+1) * fe.weightDet(ig);
       //the previous line would become: s += fe.phi(i,ig) * fct(x,y,z,t) * fe.weightDet(ig); ****
     }
     vec(i) += s;
