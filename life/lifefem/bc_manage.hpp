@@ -598,7 +598,9 @@ void bcMixteManage(MatrixType& A, VectorType& b, const MeshType& mesh, const Dof
 	  sum = 0;
 
 	  // Global Dof
-	  idDof  =  BCb(i)->id() + (BCb.component(j)-1)*totalDof;
+          //vincent please check again for your Mixte-FE it doesn't work for Q1:
+//	  idDof  =  BCb(i)->id() + (BCb.component(j)-1)*totalDof;
+	  idDof = pId->bdLocalToGlobal(idofF) + (BCb.component(j)-1)*totalDof;
 
 	  // Loop on quadrature points
 	  for(int l=0; l<bdfem.nbQuadPt; ++l) {
@@ -608,7 +610,9 @@ void bcMixteManage(MatrixType& A, VectorType& b, const MeshType& mesh, const Dof
 	      bdfem.weightMeas(l);
 
 	    // Adding right hand side contribution
-	    b[idDof-1] += bdfem.phi(int(idofF-1),l) * BCb(BCb(i)->id(),BCb.component(j)) *
+            //vincent please check again for your Mixte-FE it doesn't work for Q1:
+//	    b[idDof-1] += bdfem.phi(int(idofF-1),l) * BCb(BCb(i)->id(),BCb.component(j)) *
+            b[idDof-1] += bdfem.phi(int(idofF-1),l) * BCb(idDof,BCb.component(j)) *
 	      bdfem.weightMeas(l);
 	  }
 
@@ -633,8 +637,11 @@ void bcMixteManage(MatrixType& A, VectorType& b, const MeshType& mesh, const Dof
 	    }
 
 	    // Glogals Dof: row and columns
-	    idDof  =  BCb(i)->id() + (BCb.component(j)-1)*totalDof;
-	    jdDof  =  BCb(k)->id() + (BCb.component(j)-1)*totalDof;
+            //vincent please check again for your Mixte-FE it doesn't work for Q1:
+//	    idDof  =  BCb(i)->id() + (BCb.component(j)-1)*totalDof;
+//	    jdDof  =  BCb(k)->id() + (BCb.component(j)-1)*totalDof;
+            idDof =   pId->bdLocalToGlobal(idofF) + (BCb.component(j)-1)*totalDof;
+	    jdDof =   pId->bdLocalToGlobal(k) + (BCb.component(j)-1)*totalDof;
 
 	    // Assembling upper entry.  The boundary mass matrix is symetric
 	    A.set_mat_inc(idDof-1, jdDof-1, sum);
