@@ -40,7 +40,7 @@ refEle.hpp refFE.hpp refHdivFE.hpp refHybridFE.hpp \
 sobolevNorms.hpp staticBdFE.hpp regionMesh3D_ALE.hpp v2elemVec.hpp values.hpp \
 refEleDG.hpp geoMapDG.hpp refFEDG.hpp \
 currentFEDG.hpp currentBdDG.hpp currentBFDG.hpp currentIFDG.hpp \
-dofDG.hpp
+dofDG.hpp dofByFace.hpp
 
 lib_LTLIBRARIES		= liblifefem.la
 liblifefem_la_SOURCES	= assemb.cpp\
@@ -53,7 +53,7 @@ localDofPattern.cpp meshMotion.cpp quadRule.cpp refEle.cpp refFE.cpp \
 refHdivFE.cpp refHybridFE.cpp staticBdFE.cpp regionMesh3D_ALE.cpp v2elemVec.cpp \
 refEleDG.cpp geoMapDG.cpp refFEDG.cpp \
 currentFEDG.cpp currentBdDG.cpp currentBFDG.cpp currentIFDG.cpp \
-dofDG.cpp
+dofDG.cpp dofByFace.cpp
 
 liblifefem_la_LIBADD	= ../lifemesh/liblifemesh.la ../lifealg/liblifealg.la 
 
