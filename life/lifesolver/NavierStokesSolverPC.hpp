@@ -107,6 +107,7 @@ public:
     // ! Shear stress computation
     void ShearStressCompute( std::string filename_sstress, std::string fe_type );
 
+    int yesFlux(int yesflux);
 
 private:
 
@@ -179,6 +180,7 @@ private:
     // dealing only with the submatrices involved in the Dirichlet elimination.
     // This is a good idea....still to be done
 
+    int flag_flux;
 
     DataAztec _dataAztec_i;
     DataAztec _dataAztec_ii;
@@ -256,7 +258,8 @@ NavierStokesSolverPC( const GetPot& data_file, const RefFE& refFE_u, const RefFE
     //inverse of dt:
     Real dti = 1. / this->_dt;
 
-
+    flag_flux=0;
+  
     // *******************************************************
     // Coefficient of the mass term at time t^{n+1}
     Real first_coeff = this->_bdf.bdf_u().coeff_der( 0 );
@@ -321,6 +324,14 @@ NavierStokesSolverPC( const GetPot& data_file, const RefFE& refFE_u, const RefFE
 }
 
 template <typename Mesh>
+int NavierStokesSolverPC<Mesh>::
+yesFlux( int yesflux )
+{
+  flag_flux=yesflux;
+  return flag_flux;
+}
+
+template <typename Mesh>
 void NavierStokesSolverPC<Mesh>::
 timeAdvance( source_type const& source, Real const& time )
 {
@@ -354,8 +365,12 @@ timeAdvance( source_type const& source, Real const& time )
     }
 
     // *******************************************************
+    if (flag_flux==0){
     _f_u += _M_u * this->_bdf.bdf_u().time_der(); //_M_u is the mass matrix divided by the time step
-    //  _f_u += _M_u * _u;
+    }
+    if (flag_flux==1){
+     _f_u += _M_u * this->_u;
+    }
     chrono.stop();
     Debug( 6020 ) << "  o-  Updating mass term on right hand side... done in " << chrono.diff() << " s." << "\n";
 }
@@ -369,8 +384,16 @@ iterate( const Real& time )
 
     // Number of velocity components
     UInt nc_u = this->_u.nbcomp();
-    Vector u_extrap = this->_bdf.bdf_u().extrap();
 
+    Vector u_extrap; 
+ 
+    if (flag_flux==0){
+      u_extrap = this->_bdf.bdf_u().extrap();
+    }
+    if (flag_flux==1){
+      u_extrap = this->_u; 
+    }
+    
     Chrono chrono;
 
     // C = CStokes + convective term
@@ -423,9 +446,11 @@ iterate( const Real& time )
     _f_u_noBc = _f_u;
     //for (UInt myindex=0;myindex<_dim_u;myindex++) _f_u_noBc[myindex] = _f_u[myindex];
 
-    // INCREMENTAL correction for the pressure: IT MUST BE AFTER THE INITIALIZATION of _f_u_noBC
-    _f_u -= _trD * this->_bdf.bdf_p().extrap();
-
+    if (flag_flux==0){
+      //INCREMENTAL correction for the pressure: IT MUST BE AFTER THE INITIALIZATION of _f_u_noBC
+      _f_u -= _trD * this->_bdf.bdf_p().extrap();
+    }
+    
     // for BC treatment (done at each time-step)
     Real tgv = 1.e02;
 
@@ -600,6 +625,7 @@ iterate( const Real& time )
     Debug( 6020 ) << "  o-  Solving second system... \n";
 
     chrono.start();
+
     AZ_iterate( this->_p.giveVec(), &vec_DV[ 0 ], options_ii, params_ii, status_ii,
                 proc_config_ii, A_ii, pILU_ii, NULL );
 
@@ -616,10 +642,13 @@ iterate( const Real& time )
     Debug( 6020 ) << "  o-  Velocity updated" << "\n";
 
     // *******************************************************
-    // This is the REAL pressure (not the increment)
-    this->_p += this->_bdf.bdf_p().extrap();
-    Debug( 6020 ) << "  o-  Pressure updated" << "\n";
-
+    
+    if (flag_flux==0){
+      // This is the REAL pressure (not the increment)
+      this->_p += this->_bdf.bdf_p().extrap();
+      Debug( 6020 ) << "  o-  Pressure updated" << "\n";
+    }
+ 
     // *******************************************************
     // update the array of the previous solutions
     this->_bdf.bdf_u().shift_right( this->_u );
