@@ -17,12 +17,14 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 /*!
-  \file oneDModelSolver.hpp
-  \author Vincent Martin
-  \date 07/2004
+  \file zeroDModelSolver.hpp
+  \author Alexandra Moura
+  \date 09/2004
   \version 1.0
 
-  \brief This file contains a solver class for the 1D model. 
+  \brief This file contains a solver for a very specific case of the 0D model 
+         (small electrical network whitch forcing term is a coseno) to be coupled
+         with a 3D model (NS), i.e., a part of the network is substituted by the 3D model 
 */
 
 #ifndef _ZERODMODELSOLVER_H_
@@ -36,66 +38,66 @@
 #include "chrono.hpp"
 #include "GetPot.hpp"
 
-
-//#include <iostream>
+#define pi 3.14159265
 
 namespace LifeV
 {
 template<typename SOLVER>
-class getPressureFromQ
+class zeroDModelSolver // getPressureFromQ
 {
 
 public:
-  getPressureFromQ(SOLVER  & solver, GetPot & data, Real Length, 
-		   Real Radius, Real Thick);
+  
+  //! Constructor
+  /*!
+    \param solver (containing a member flux(int)) 
+    \param time step
+  */
+  zeroDModelSolver(SOLVER  & solver, Real & dt);
 
+  //! Computes the pressure of the network, to give to the 3D NS
+  //! \param current time stepx
   Real pression(Real & time);
 
 private:
-  Real C, R, L; //Variables related to the 3D Part
-  Real C1, C2, C3, C4; //Capacities in the network
-  Real L5, L6, L7, L8; //Induntances in the network
-  Real R5, R6, R7, R8; //Resitences in the network
-  Real U; //Forcing term
-  Real dt;
-  Real x[8], y[8];
-  SOLVER  * _solver;
-  Real pi;
 
-  std::ofstream outfile;
+  SOLVER  * _M_solver;
+  Real _M_dt;
+ 
+  Real _M_C1, _M_C2, _M_C3, _M_C4; //Capacities in the network
+  Real _M_L5, _M_L6, _M_L7, _M_L8; //Induntances in the network
+  Real _M_R5, _M_R6, _M_R7, _M_R8; //Resitences in the network
+  Real _M_U;                              //Forcing term
+  Real _M_Q;                              //Flux from the 3D NS
+
+  Real x[8], y[8];  
+
+  std::ofstream _M_outfile;
 
 };
 
-//***************************************************************//
-//                         IMPLEMENTATION                        //
-//***************************************************************//
+//***************************************************************************************//
+//                                     IMPLEMENTATION                                    //
+//***************************************************************************************//
 
 template<typename SOLVER>
-getPressureFromQ<SOLVER>::getPressureFromQ(SOLVER  & solver, GetPot & dfile, Real Length, 
-					   Real Radius, Real Thick/*, Real Pinit*/):
-  _solver(&solver)
+zeroDModelSolver<SOLVER>::zeroDModelSolver(SOLVER  & solver, Real & dt):
+  //getPressureFromQ<SOLVER>::getPressureFromQ(SOLVER  & solver, Real & dt):
+  _M_solver(&solver),
+  _M_dt(dt),
+
+  _M_C1(0.05), 
+  _M_C2(0.5), 
+  _M_C3(0.02), 
+  _M_C4(0.001),
+  _M_L5(0.5), 
+  _M_L6(0.1),  
+  _M_L8(0.1),
+  _M_R5(5), 
+  _M_R6(6), 
+  _M_R8(5.001)
+
 {
-  Real rho       = dfile("fluid/physics/density",1.);
-  Real mu        = dfile("fluid/physics/viscosity",1.);
-  Real E         = dfile("solid/physics/young",1.);
-  dt             = dfile("fluid/discretization/timestep",0.); 
-  if (Thick!=0)
-    C=3*3.1415*pow(Radius,3)*Length/(2*E*Thick);  
-  R= rho*8*3.1415*mu*Length/(pow(3.1415*Radius*Radius,2));
-  L= (rho*Length)/(3.1415*pow(Radius,2));
-
-  C1=0.05; 
-  C2=0.5; 
-  C3=0.02; 
-  C4=0.001;
-  L5=0.5; 
-  L6=0.1;  
-  L8=0.1;
-  R5=5; R6=6; 
-  R8=5.001;
- 
-  pi=acos(-1.);
-
   x[0]=0.0178;
   x[1]=0.3740;
   x[2]=0.3346;
@@ -105,44 +107,44 @@ getPressureFromQ<SOLVER>::getPressureFromQ(SOLVER  & solver, GetPot & dfile, Rea
   x[6]=0.0211;
   x[7]=0.0257;
 
-  outfile.open("res_Q.m", std::ios::app);
-  outfile << "Q = [ " << std::endl;
-  outfile.close();
+  _M_outfile.open("res_Q.m", std::ios::app);
+  _M_outfile << "Q = [ " << std::endl;
+  _M_outfile.close();
 
-  outfile.open("res_DP.m", std::ios::app);
-  outfile << "DP = [ " << std::endl;
-  outfile.close();
+  _M_outfile.open("res_DP.m", std::ios::app);
+  _M_outfile << "DP = [ " << std::endl;
+  _M_outfile.close();
 
 }
 
 template<typename SOLVER>
 Real
-getPressureFromQ<SOLVER>::pression(Real & time)
+zeroDModelSolver<SOLVER>::pression(Real & time)
+  //getPressureFromQ<SOLVER>::pression(Real & time)
 { 
-  Real Q=_solver->flux(1);
-  U=0.1+cos(2*pi*time);
+  _M_Q=_M_solver->flux(1); //flux coming from the 3D Model
+  _M_U=0.1+cos(2*pi*time);
 
-  y[0]=x[0]+(1/C1*x[4]-1/C1*x[7])*dt;
-  y[1]=x[1]+(-1/C2*x[4]+1/C2*x[5])*dt;
-  y[2]=x[2]+(-1/C3*x[5]+1/C3*x[6])*dt;
-  y[3]=x[3]+(1/C4*x[7]-1/C4*x[6])*dt;
-  y[4]=x[4]+(-1/L5*x[0]+1/L5*x[1]-R5/L5*x[4]+U/L5)*dt;
-  y[5]=x[5]+(-1/L6*x[1]+1/L6*x[2]-R6/L6*x[5]-U/L6)*dt;
-  //y[6]=x[6] +(x[3]/L-delta_P/L-x[2]/L)*dt;
-  y[6]=Q;
-  y[7]=x[7]+(1/L8*x[0]-1/L8*x[3]-R8/L8*x[7])*dt;
+  y[0]=x[0]+(1/_M_C1*x[4]-1/_M_C1*x[7])*_M_dt;
+  y[1]=x[1]+(-1/_M_C2*x[4]+1/_M_C2*x[5])*_M_dt;
+  y[2]=x[2]+(-1/_M_C3*x[5]+1/_M_C3*x[6])*_M_dt;
+  y[3]=x[3]+(1/_M_C4*x[7]-1/_M_C4*x[6])*_M_dt;
+  y[4]=x[4]+(-1/_M_L5*x[0]+1/_M_L5*x[1]-_M_R5/_M_L5*x[4]+_M_U/_M_L5)*_M_dt;
+  y[5]=x[5]+(-1/_M_L6*x[1]+1/_M_L6*x[2]-_M_R6/_M_L6*x[5]-_M_U/_M_L6)*_M_dt;
+  y[6]=-_M_Q;  //The flux is now given from the 3D Model -- y[6]=x[6] +(x[3]/L-delta_P/L-x[2]/L)*_dt
+  y[7]=x[7]+(1/_M_L8*x[0]-1/_M_L8*x[3]-_M_R8/_M_L8*x[7])*_M_dt;
     
   for(UInt i=0; i<8; ++i){
     x[i]=y[i];
   };
 
-  outfile.open("res_Q.m", std::ios::app);
-  outfile << "     " << y[7] << ";" << std::endl;
-  outfile.close();
+  _M_outfile.open("res_Q.m", std::ios::app);
+  _M_outfile << "     " << y[6] << ";" << std::endl;
+  _M_outfile.close();
 
-  outfile.open("res_DP.m", std::ios::app);
-  outfile << "      " <<  y[3]-y[2] << ";" << std::endl;
-  outfile.close();
+  _M_outfile.open("res_DP.m", std::ios::app);
+  _M_outfile << "      " <<  y[3]-y[2] << ";" << std::endl;
+  _M_outfile.close();
 
   return y[3]-y[2];
 }

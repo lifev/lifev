@@ -16,6 +16,7 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
+
 #include "lifeV.hpp"
 #include "NavierStokesSolverPC.hpp"
 #include "chrono.hpp"
@@ -23,7 +24,14 @@
 #include "GetPot.hpp"
 #include "zeroDModelSolver.hpp"
 
+/*
+  
+    This test couples the Navier-Stokes equations (3D Model) with a lumped parameter model 
+    (0D Model - electric network). 
+    It is used a couple strategy where the 3D Model gives the flux information to the 
+    0D Model wereas the 0D Model passes the pressure to the 3D.
 
+*/
 
 int main(int argc, char** argv)
 {
@@ -47,6 +55,8 @@ int main(int argc, char** argv)
 	quadRuleTria3pt, quadRuleTetra5pt, quadRuleTria3pt, BCh_u);
   ns.showMe();
 
+  // BC Definition
+  //
   UInt dim_fluid = ns.uDof().numTotalDof();
   Vector vec_press(dim_fluid);
   BCVector bcvec(vec_press,dim_fluid,1);
@@ -59,7 +69,6 @@ int main(int argc, char** argv)
 
   // Initialization
   //
-
   std::ofstream outfile;
 
   Real dt = ns.timestep();
@@ -87,28 +96,17 @@ int main(int argc, char** argv)
      ns.initialize(u0,p0,0.0,dt);
   }
 
-  getPressureFromQ< NS > press(ns, data_file, 5, 0.5, 0);
+  zeroDModelSolver< NS > getPressureFromQ(ns, dt);
 
   // Temporal loop
   //
   for (Real time=startT+dt ; time <= T; time+=dt) {
 
-    vec_press = -press.pression(time);
+    // pressure coming from the 0D Model
+    vec_press = -getPressureFromQ.pression(time);
 
     ns.timeAdvance(f,time);
     ns.iterate(time);
-
-// ************* saving result on file *****************************************
-    std::ostringstream indexout;
-    indexout << (time*1000);
-    std::string voutname;
-    voutname = "fluid.res"+indexout.str();
-    std::fstream Resfile(voutname.c_str(),std::ios::out | std::ios::binary);
-    Resfile.write((char*)&ns.u()(1),ns.u().size()*sizeof(double));
-    Resfile.write((char*)&ns.p()(1),ns.p().size()*sizeof(double));
-    Resfile.close();
-
-
 
     ns.postProcess();
   }
