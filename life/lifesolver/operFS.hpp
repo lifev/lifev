@@ -54,7 +54,7 @@ namespace LifeV
                                   const int     _iter,
                                   Vector       &res) = 0;
 
-        virtual void solvePrec (const Vector &_res,
+        virtual void solveJac (const Vector &_res,
                                 const double  _linearRelTol,
                                 Vector       &_muk) = 0;
 
