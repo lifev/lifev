@@ -319,11 +319,16 @@ dot( Vector const &ex_v1, Vector const &ex_v2 )
     return boost::numeric::ublas::inner_prod( ex_v1, ex_v2 );
 }
 
+/* reduce operations */
 using boost::numeric::ublas::sum;
 using boost::numeric::ublas::norm_1;
 using boost::numeric::ublas::norm_2;
 using boost::numeric::ublas::norm_inf;
 using boost::numeric::ublas::index_norm_inf;
+
+/* binary operations */
+using boost::numeric::ublas::outer_prod;
+using boost::numeric::ublas::inner_prod;
 
 struct norm_inf_adaptor
 {
