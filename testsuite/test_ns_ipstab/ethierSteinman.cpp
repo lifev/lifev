@@ -42,7 +42,7 @@ Real EthierSteinmanUnsteady::xexact( const Real& t,
                                      const Real& z,
                                      const ID& i )
 {
-    Real tau = kinematicViscosity * t;
+    Real tau = nu * t;
 
     switch(i) {
         case 1:
@@ -101,7 +101,7 @@ Real EthierSteinmanUnsteady::u0( const Real& t, const Real& x, const Real& y,
 Real EthierSteinmanUnsteady::ux( const Real& t, const Real& x, const Real& y,
                                  const Real& z, const ID& i )
 {
-    Real tau = kinematicViscosity * t;
+    Real tau = nu * t;
 
     switch(i) {
         case 1:
@@ -127,7 +127,7 @@ Real EthierSteinmanUnsteady::ux( const Real& t, const Real& x, const Real& y,
 Real EthierSteinmanUnsteady::uy( const Real& t, const Real& x, const Real& y,
                                  const Real& z, const ID& i )
 {
-    Real tau = kinematicViscosity * t;
+    Real tau = nu * t;
 
     switch(i) {
         case 1:
@@ -153,7 +153,7 @@ Real EthierSteinmanUnsteady::uy( const Real& t, const Real& x, const Real& y,
 Real EthierSteinmanUnsteady::uz( const Real& t, const Real& x, const Real& y,
                                  const Real& z, const ID& i )
 {
-    Real tau = kinematicViscosity * t;
+    Real tau = nu * t;
 
     switch(i) {
         case 1:
@@ -187,26 +187,26 @@ Real EthierSteinmanUnsteady::fNeumann( const Real& t,
     Real nz=-1.;
     switch(i) {
         case 1:
-            return pexact(t, x, y, z, 1) * nx
-                - ux(t, x, y, z, 1) * nx * 2
-                - ux(t, x, y, z, 2) * ny
-                - ux(t, x, y, z, 3) * nz
-                - uy(t, x, y, z, 1) * ny
-                - uz(t, x, y, z, 1) * nz;
+            return pexact(t, x, y, z, 1) * nx 
+                - mu * ( ux(t, x, y, z, 1) * nx * 2 +
+                         ux(t, x, y, z, 2) * ny +
+                         ux(t, x, y, z, 3) * nz +
+                         uy(t, x, y, z, 1) * ny +
+                         uz(t, x, y, z, 1) * nz );
         case 2:
             return pexact(t, x, y, z, 1) * ny
-                - uy(t, x, y, z, 1) * nx
-                - uy(t, x, y, z, 2) * ny * 2
-                - uy(t, x, y, z, 3) * nz
-                - ux(t, x, y, z, 2) * nx
-                - uz(t, x, y, z, 2) * nz;
+                - mu * ( uy(t, x, y, z, 1) * nx +
+                         uy(t, x, y, z, 2) * ny * 2 +
+                         uy(t, x, y, z, 3) * nz +
+                         ux(t, x, y, z, 2) * nx +
+                         uz(t, x, y, z, 2) * nz );
         case 3:
             return pexact(t, x, y, z, 1) * nz
-                - uz(t, x, y, z, 1) * nx
-                - uz(t, x, y, z, 2) * ny
-                - uz(t, x, y, z, 3) * nz * 2
-                - ux(t, x, y, z, 3) * nx
-                - uy(t, x, y, z, 3) * ny;
+                - mu * ( uz(t, x, y, z, 1) * nx +
+                         uz(t, x, y, z, 2) * ny +
+                         uz(t, x, y, z, 3) * nz * 2 +
+                         ux(t, x, y, z, 3) * nx +
+                         uy(t, x, y, z, 3) * ny);
         default:
             exit(1);
     }
@@ -216,13 +216,13 @@ void EthierSteinmanUnsteady::setParamsFromGetPot( const GetPot& dataFile )
 {
     a = dataFile( "fluid/problem/a", 1. );
     d = dataFile( "fluid/problem/d", 1. );
-    kinematicViscosity =
-        dataFile( "fluid/physics/viscosity", 1. ) /
-        dataFile( "fluid/physics/density", 1. );
+    mu = dataFile( "fluid/physics/viscosity", 1. );
+    nu = mu / dataFile( "fluid/physics/density", 1. );
 }
 
 Real EthierSteinmanUnsteady::a;
 Real EthierSteinmanUnsteady::d;
-Real EthierSteinmanUnsteady::kinematicViscosity;
+Real EthierSteinmanUnsteady::nu;
+Real EthierSteinmanUnsteady::mu;
 
 } // namespace LifeV

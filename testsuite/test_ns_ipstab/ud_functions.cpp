@@ -92,6 +92,75 @@ Real EthierSteinmanSteady::uexact(const Real& t, const Real& x, const Real& y,
     exit(1);
 }
 
+Real EthierSteinmanSteady::ux( const Real& t, const Real& x, const Real& y,
+                               const Real& z, const ID& i) {
+    switch(i) {
+        case 1:
+            return
+                a * b*exp(a*(x-z)+b*(y-z))-
+                b * a*exp(a*(z-y)+b*(x-y));
+            break;
+        case 2:
+            return
+                (-a-b) * b*exp(a*(y-x)+b*(z-x))-
+                 a * a*exp(a*(x-z)+b*(y-z));
+            break;
+        case 3:
+            return
+                b * b*exp(a*(z-y)+b*(x-y))-
+                (-a-b) * a*exp(a*(y-x)+b*(z-x));
+            break;
+    }
+
+    exit(1);
+}
+
+Real EthierSteinmanSteady::uy( const Real& t, const Real& x, const Real& y,
+                               const Real& z, const ID& i) {
+    switch(i) {
+        case 1:
+            return
+                b * b*exp(a*(x-z)+b*(y-z))-
+                (-a-b) * a*exp(a*(z-y)+b*(x-y));
+            break;
+        case 2:
+            return
+                a * b*exp(a*(y-x)+b*(z-x))-
+                b * a*exp(a*(x-z)+b*(y-z));
+            break;
+        case 3:
+            return
+                (-a-b) * b*exp(a*(z-y)+b*(x-y))-
+                a * a*exp(a*(y-x)+b*(z-x));
+            break;
+    }
+
+    exit(1);
+}
+
+Real EthierSteinmanSteady::uz( const Real& t, const Real& x, const Real& y,
+                               const Real& z, const ID& i) {
+    switch(i) {
+        case 1:
+            return
+                (-a-b) * b*exp(a*(x-z)+b*(y-z))-
+                a * a*exp(a*(z-y)+b*(x-y));
+            break;
+        case 2:
+            return
+                b * b*exp(a*(y-x)+b*(z-x))-
+                (-a-b) * a*exp(a*(x-z)+b*(y-z));
+            break;
+        case 3:
+            return
+                a * b*exp(a*(z-y)+b*(x-y))-
+                b * a*exp(a*(y-x)+b*(z-x));
+            break;
+    }
+
+    exit(1);
+}
+
 
 Real EthierSteinmanSteady::pexact(const Real& t, const Real& x, const Real& y,
                                   const Real& z, const ID& i) {
@@ -131,19 +200,46 @@ Real EthierSteinmanSteady::fNeumann(const Real& t, const Real& x,
                                     const Real& y,
                                     const Real& z, const ID& i)
 {
-    return 0.0;
+    Real nx=0.;
+    Real ny=0.;
+    Real nz=-1.;
+    switch(i) {
+        case 1:
+            return pexact(t, x, y, z, 1) * nx
+                - mu * ( ux(t, x, y, z, 1) * nx * 2 +
+                         ux(t, x, y, z, 2) * ny +
+                         ux(t, x, y, z, 3) * nz +
+                         uy(t, x, y, z, 1) * ny +
+                         uz(t, x, y, z, 1) * nz );
+        case 2:
+            return pexact(t, x, y, z, 1) * ny
+                - mu * ( uy(t, x, y, z, 1) * nx +
+                         uy(t, x, y, z, 2) * ny * 2 +
+                         uy(t, x, y, z, 3) * nz +
+                         ux(t, x, y, z, 2) * nx +
+                         uz(t, x, y, z, 2) * nz );
+        case 3:
+            return pexact(t, x, y, z, 1) * nz
+                - mu * ( uz(t, x, y, z, 1) * nx +
+                         uz(t, x, y, z, 2) * ny +
+                         uz(t, x, y, z, 3) * nz * 2 +
+                         ux(t, x, y, z, 3) * nx +
+                         uy(t, x, y, z, 3) * ny);
+        default:
+            exit(1);
+    }
 }
 
 void EthierSteinmanSteady::setParamsFromGetPot( const GetPot& dataFile )
 {
     a = dataFile( "fluid/problem/a", 0.75 );
     b = dataFile( "fluid/problem/b", 0.75 );
-    nu =
-        dataFile( "fluid/physics/viscosity", 0.0001 ) /
-        dataFile( "fluid/physics/density", 1. );
+    mu = dataFile( "fluid/physics/viscosity", 0.0001 );
+    nu = mu / dataFile( "fluid/physics/density", 1. );
 }
 
 Real EthierSteinmanSteady::nu;
+Real EthierSteinmanSteady::mu;
 Real EthierSteinmanSteady::sigma;
 Real EthierSteinmanSteady::a;
 Real EthierSteinmanSteady::b;

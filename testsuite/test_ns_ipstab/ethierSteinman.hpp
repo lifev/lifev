@@ -67,7 +67,8 @@ private:
 
     static Real a;
     static Real d;
-    static Real kinematicViscosity;
+    static Real mu;
+    static Real nu;
 }; // class EthierSteinmanUnsteady
 
 } // namespace LifeV

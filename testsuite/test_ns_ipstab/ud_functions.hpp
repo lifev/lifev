@@ -55,9 +55,17 @@ public:
 
 private:
     static Real nu;
+    static Real mu;
     static Real sigma;
     static Real a;
     static Real b;
+    // derivatives for neumann
+    static Real ux( const Real& t, const Real& x, const Real& y,
+                    const Real& z, const ID& i );
+    static Real uy( const Real& t, const Real& x, const Real& y,
+                    const Real& z, const ID& i );
+    static Real uz( const Real& t, const Real& x, const Real& y,
+                    const Real& z, const ID& i );
 };
 
 } // namespace LifeV
