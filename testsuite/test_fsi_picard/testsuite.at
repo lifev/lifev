@@ -88,5 +88,7 @@ kspace          = 40
 tol             = 1.00e-6
 drop            = 1.00e-4
 ]])
-AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria//tube2x4x20.mesh &&  $top_builddir/testsuite/test_fsi_picard/test_fsi_picard],[0],[ignore],[ignore])
+AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria/tube2x4x20.mesh &&
+          ln -sf $top_builddir/testsuite/data/mesh/inria/vessel2x4x20.mesh &&
+          $top_builddir/testsuite/test_fsi_picard/test_fsi_picard],[0],[ignore],[ignore])
 AT_CLEANUP([num_iter  out_iter_solid  out_res_solid])
