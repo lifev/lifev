@@ -17,7 +17,7 @@ endtime         = 0.02              # endtime --> two steps for testing purposes
 
 
 [../discretization]
-mesh_dir  = ../data/mesh/inria/  # the directory where the mesh file is
+mesh_dir = ./
 mesh_file = cyltetra.mesh     # mesh file
 timestep  = 0.01               # timestep
 
@@ -55,5 +55,5 @@ kspace          = 40
 tol             = 1.00e-6
 drop            = 1.00e-4
 ]])
-AT_CHECK([$top_builddir/testsuite/test_ns_cyl/test_ns_cyl],[0],[ignore],[ignore])
+AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria//cyltetra.mesh &&  $top_builddir/testsuite/test_ns_cyl/test_ns_cyl],[0],[ignore],[ignore])
 AT_CLEANUP

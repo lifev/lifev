@@ -16,6 +16,7 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
+#include <GetPot.hpp>
 
 #include "markers.hpp"
 #include "readMesh3D.hpp"
@@ -43,10 +44,10 @@
  */
 
 int main()
-  {
-
-    string dirname="../data/mesh/mesh++/";
-    string fname=dirname+"cube_47785.m++";
+{
+    GetPot datafile( "data" );
+    string dirname=datafile( "mesh_dir","." );//"../data/mesh/mesh++/";
+    string fname=dirname+datafile( "mesh_file","cube_47785.m++" );//dirname+"cube_47785.m++";
     string outfile="testBuilders.dat";
     ofstream ofile(outfile.c_str());
     if (ofile.fail()) {cerr<<" Error: Cannot creat output file"<<endl; abort();}
@@ -74,8 +75,8 @@ int main()
     aMesh.faceList.clear();
 
     checkMesh3D(aMesh, sw,
-		       true, true,
-		cerr, cout, ofile);
+                true, true,
+                cerr, cout, ofile);
 
 
     aMesh.showMe();
@@ -94,14 +95,14 @@ int main()
 
     cout<< "  ****************** BUILDING ALL EDGES"<<endl;
     buildEdges(aMesh, ofile, cerr, bedges_found,
-	       iedges_found, true, true,true);
+               iedges_found, true, true,true);
 
     cout <<" **********************************************************"<<endl;
 
     cout<< "  ****************** BUILDING ALL FACES"<<endl;
     UInt bfaces_found, ifaces_found;
     buildFaces(aMesh, ofile, cerr, bfaces_found,
-	       ifaces_found, true,true,true);
+               ifaces_found, true,true,true);
 
     aMesh.showMe();
 
@@ -110,41 +111,41 @@ int main()
     aMesh.updateElementFaces();
     aMesh.showMe();
     checkMesh3D(aMesh, sw,
-		       true, true,
-		cerr, cout, ofile);
+                true, true,
+                cerr, cout, ofile);
     ofile.close();
 
     ///THIS PART IS ONLY TO VERIFY IF THESE ROUTINES COMPILE PROPERLY
-      cerr<<"Fixing bpoints"<<endl;
+    cerr<<"Fixing bpoints"<<endl;
 
-      fixBPoints(aMesh, ofile,cerr, true);
-      cerr<<"Fixing edge markers"<<endl;
-      setBEdgesMarker(aMesh, ofile,cerr, true);
-      cerr<<"Fixing faces marker"<<endl;
-      setBFacesMarker(aMesh, ofile,cerr, true);
-      cerr<<"Fixing points marker"<<endl;
-      setBPointsMarker(aMesh, ofile,cerr, true);
-      cerr<<endl;
-      vector<Real> disp(3*aMesh.numPoints());
-      aMesh.moveMesh(disp);
+    fixBPoints(aMesh, ofile,cerr, true);
+    cerr<<"Fixing edge markers"<<endl;
+    setBEdgesMarker(aMesh, ofile,cerr, true);
+    cerr<<"Fixing faces marker"<<endl;
+    setBFacesMarker(aMesh, ofile,cerr, true);
+    cerr<<"Fixing points marker"<<endl;
+    setBPointsMarker(aMesh, ofile,cerr, true);
+    cerr<<endl;
+    vector<Real> disp(3*aMesh.numPoints());
+    aMesh.moveMesh(disp);
 
-      //    SimpleVect<bool>elsign;
+    //    SimpleVect<bool>elsign;
     //aMesh.volume(2).swapPoints(1,3);
     //UInt lp=GeoND<QuadraticTetra>::numLocalPoints;
     //    UInt lp=GeoND<QuadraticTetra>::numLocalPoints;
     //for(UInt i = 1; i<=aMesh.numVolumes(); i++){
-      //      for(UInt j=1; j<=lp;j++){
-      //cout << "Point " << j << ":"
-      //
-      //     << "("<< aMesh.volumeList(i).point(j).id() << ") ,"
-      //     << aMesh.volumeList(i).point(j).coordinate(1) <<","
-      //     << aMesh.volumeList(i).point(j).coordinate(2) <<","
-      //     << aMesh.volumeList(i).point(j).coordinate(3) << endl;}}
+    //      for(UInt j=1; j<=lp;j++){
+    //cout << "Point " << j << ":"
+    //
+    //     << "("<< aMesh.volumeList(i).point(j).id() << ") ,"
+    //     << aMesh.volumeList(i).point(j).coordinate(1) <<","
+    //     << aMesh.volumeList(i).point(j).coordinate(2) <<","
+    //     << aMesh.volumeList(i).point(j).coordinate(3) << endl;}}
     //    UInt i1,i2,i3,i4;
 
     //for (UInt i=1; i<=aMesh.numVolumes(); ++i){
-      //  cout << "Element # "<< i << ": "<<aMesh.volume(i).point(1).id()<<","
-      //   <<aMesh.volume(i).point(2).id()
+    //  cout << "Element # "<< i << ": "<<aMesh.volume(i).point(1).id()<<","
+    //   <<aMesh.volume(i).point(2).id()
     //   <<","<<aMesh.volume(i).point(3).id()<<","
     //   <<aMesh.volume(i).point(4).id()<<endl;
     //for(UInt k=1;k<=aMesh.numLocalEdges();++k){
@@ -169,7 +170,7 @@ int main()
     // TESTING FIELDS
     //Dof<FE_P1_Tetra_Base,LinearTetra> dof;
     //Dof<FE_P2_Tetra_Base,LinearTetra> dof;
-      //FiniteEle<FE_P2_Tetra_4pt> fe;
+    //FiniteEle<FE_P2_Tetra_4pt> fe;
     ///Dof<FE_P2_Tetra_Base,QuadraticTetra> dof;
     //Dof<FE_P2_Tetra,QuadraticTetra> dof();
     //dof.update(aMesh);
@@ -186,9 +187,9 @@ int main()
     //cout<<endl;
     //}
     /*
-    RegionMesh3D<LinearTetra> aMesh;
-    aMesh.test3DBuilder();
-    aMesh.showMe();
+      RegionMesh3D<LinearTetra> aMesh;
+      aMesh.test3DBuilder();
+      aMesh.showMe();
     */
-  }
+}
 

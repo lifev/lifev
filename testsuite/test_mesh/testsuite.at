@@ -1,4 +1,13 @@
 AT_SETUP([test_mesh])
 AT_KEYWORDS([mesh])
-AT_CHECK([$top_builddir/testsuite/test_mesh/test_mesh],[0],[ignore],[ignore])
+AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file for Mesh test
+#-------------------------------------------------
+
+mesh_dir = ./
+mesh_file  = 'cube_47785.m++'        # mesh file
+mesh_faces = all                   # update all faces elements
+]])
+AT_CHECK([ln -sf $top_builddir/testsuite/'data/mesh/mesh++/'/'cube_47785.m++' &&  $top_builddir/testsuite/test_mesh/test_mesh],[0],[ignore],[ignore])
 AT_CLEANUP

@@ -16,7 +16,7 @@ endtime         = 0.0002            # endtime --> two time step for testing purp
 
 
 [../discretization]
-mesh_dir  = ../data/mesh/inria/  # the directory where the mesh file is
+mesh_dir = ./
 mesh_file = cyltetra.mesh       # mesh file
 timestep  = 0.0001              # timestep
 order_bdf = 3                   # order of the time integration scheme
@@ -53,5 +53,5 @@ kspace          = 40
 tol             = 1.00e-6
 drop            = 1.00e-4
 ]])
-AT_CHECK([$top_builddir/testsuite/test_ns_bdf/test_ns_bdf],[0],[ignore],[ignore])
+AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria//cyltetra.mesh &&  $top_builddir/testsuite/test_ns_bdf/test_ns_bdf],[0],[ignore],[ignore])
 AT_CLEANUP

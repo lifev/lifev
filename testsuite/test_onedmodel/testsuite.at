@@ -21,7 +21,7 @@ timestep = 0.001		# timestep
 
 [discretization]
 mesh_file	= cylhexa.mesh	# mesh file name
-mesh_dir	= ../data/mesh/inria 
+mesh_dir = ./
 		# the directory where the mesh file is
 x_left	= 0.
 x_right	= 10.
@@ -31,6 +31,7 @@ nx	= 99	# (nx+1) = number of elements (0,...,nx)
 post_dir = ./Post                 # the directory for postprocessing files
 verbose = 5
 post_proc_format = medit          # vtk or medit
+show_graceplot = true
 
 [aztec]  
 solver = cg  #cg , gmres, cgs, tfqmr, bicgstab, slu, symmlq, fixed_pt, lu
@@ -39,5 +40,5 @@ subdomain_solve = icc
 output = warnings    #warnings , none , all, all_res, last
 tol = 1e-6
 ]])
-AT_CHECK([$top_builddir/testsuite/test_onedmodel/test_onedmodel],[0],[ignore],[ignore])
+AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria/cylhexa.mesh	 &&  $top_builddir/testsuite/test_onedmodel/test_onedmodel],[0],[ignore],[ignore])
 AT_CLEANUP

@@ -17,7 +17,7 @@ diffusion_tensor  = '1. 0. 0.  0. 1. 0  0. 0. 1.' # diffusion tensor
 theLinearSolver   = 0    # 0: Aztec, 1: UMFPack (UMFPack not implemented yet)
 
 [miscellaneous]
-mesh_dir = ../data/mesh/inria # the directory where the mesh file is
+mesh_dir = ./
 post_dir = ./                 # the directory for postprocessing files
 verbose = 1
 post_proc_format = medit          # vtk or medit
@@ -29,5 +29,5 @@ subdomain_solve = icc
 output = warnings    #warnings , none , all, all_res, last
 tol = 1e-6
 ]])
-AT_CHECK([$top_builddir/testsuite/test_darcy/test_darcy],[0],[ignore],[ignore])
+AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria/cylhexa.mesh &&  $top_builddir/testsuite/test_darcy/test_darcy],[0],[ignore],[ignore])
 AT_CLEANUP

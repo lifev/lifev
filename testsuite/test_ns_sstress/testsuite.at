@@ -16,7 +16,7 @@ endtime         = 0.02              # endtime --> two time steps for testing pur
 
 
 [../discretization]
-mesh_dir  = ../data/mesh/mesh++/ # the directory where the mesh file is
+mesh_dir = ./
 mesh_file = carotide.m++         # mesh file
 mesh_type = .m++                 # mesh type
 timestep  = 0.01                 # timestep
@@ -55,5 +55,5 @@ kspace          = 40
 tol             = 1.00e-9
 drop            = 1.00e-6
 ]])
-AT_CHECK([$top_builddir/testsuite/test_ns_sstress/test_ns_sstress],[0],[ignore],[ignore])
+AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/mesh++//carotide.m++ &&  $top_builddir/testsuite/test_ns_sstress/test_ns_sstress],[0],[ignore],[ignore])
 AT_CLEANUP

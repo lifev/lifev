@@ -1,17 +1,17 @@
 /* -*- mode: c++ -*-
-   This program is part of the LifeV library 
+   This program is part of the LifeV library
    Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politechnico di Milano
 
    This program is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public License
    as published by the Free Software Foundation; either version 2
    of the License, or (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -23,7 +23,7 @@
 #include "oneDModelSolver.hpp"
 #include "ud_functions.hpp"
 #include "GetPot.hpp"
-#include <sstream> 
+#include <sstream>
 
 
 int main(int argc, char** argv)
@@ -42,7 +42,7 @@ int main(int argc, char** argv)
 
   // Initialization
   //
-  Real dt     = onedm.timestep();  
+  Real dt     = onedm.timestep();
   Real startT = onedm.inittime();
   Real T      = onedm.endtime();
 
@@ -57,15 +57,15 @@ int main(int argc, char** argv)
      vinname = "fluid.res"+indexin.str();
      onedm.initialize(vinname);}
   else{
-     std::cout << "initialize velocity and pressure with u0 and p0" << std::endl;	
+     std::cout << "initialize velocity and pressure with u0 and p0" << std::endl;
       onedm.initialize(u0,p0,0.0,dt);
   }
   */
 
-  std::cout << "initialize with constant u0" << std::endl;	
+  std::cout << "initialize with constant u0" << std::endl;
   onedm.initialize(u0);
 
-  std::cout << "startT T dt " << startT << " " <<  T << " " << dt << std::endl;	
+  std::cout << "startT T dt " << startT << " " <<  T << " " << dt << std::endl;
 
   char ch;
   cout << "Hit return to continue" << endl;
@@ -76,9 +76,10 @@ int main(int argc, char** argv)
   for (Real time=startT+dt ; time <= T; time+=dt) {
 
     onedm.timeAdvance();
-    onedm.iterate(); 
+    onedm.iterate();
 
-    onedm.gplot();
+    if ( data_file( "miscellaneous/show_graceplot", false ) )
+        onedm.gplot();
 
 // ************* saving result on file *****************************************
     ostringstream indexout;
@@ -92,7 +93,7 @@ int main(int argc, char** argv)
 		  onedm.U_nexttime().size()*sizeof(double));
     Resfile.close();
 
- 
+
     //onedm.postProcess();
   }
 

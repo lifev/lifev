@@ -1,4 +1,13 @@
 AT_SETUP([test_q1])
 AT_KEYWORDS([q1])
-AT_CHECK([$top_builddir/testsuite/test_q1/test_q1],[0],[ignore],[ignore])
+AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file for Mesh test
+#-------------------------------------------------
+
+mesh_dir = ./
+mesh_file  = 'cylhexa.mesh'       # mesh file
+mesh_faces = all                    # update all faces elements
+]])
+AT_CHECK([ln -sf $top_builddir/testsuite/'data/mesh/inria/'/'cylhexa.mesh' &&  $top_builddir/testsuite/test_q1/test_q1],[0],[ignore],[ignore])
 AT_CLEANUP

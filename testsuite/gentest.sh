@@ -35,13 +35,25 @@ do
       echo "AT_SETUP([$i])" >> $i/testsuite.at
       echo "AT_KEYWORDS([$keywords])" >> $i/testsuite.at
       if test -f $i/data; then
-	  datafile=`cat $i/data`
+	  top_builddir=`cat Makefile.in| grep top_builddir | head -1 | sed "s/top_builddir = //g"`
+	  
+	  meshfile=`cat $i/data | grep mesh_file | head -1 | sed "s/ //g" | awk 'BEGIN{FS="="}{print $2}'|awk 'BEGIN{FS="#"}{print $1}'`
+	  meshdir=`cat $i/data | grep mesh_dir | head -1 | sed "s/ //g" |sed "s/\.\.\///g" | awk 'BEGIN{FS="="}{print $2}'|awk 'BEGIN{FS="#"}{print $1}'`
+	  datafile=`cat $i/data | sed "s/mesh_dir[ \t]*=.*$/mesh_dir = .\//g"`
+
 	  cat >> $i/testsuite.at <<EOF
 AT_DATA([data],[[$datafile
 ]])
 EOF
       fi
-      echo "AT_CHECK([\$top_builddir/testsuite/$i/$i],[0],[ignore],[ignore])" >> $i/testsuite.at
+      echo "mesh: $meshdir/$meshfile"
+      if test -z $meshfile -a -z $meshdir; then
+
+	  echo "AT_CHECK([\$top_builddir/testsuite/$i/$i],[0],[ignore],[ignore])" >> $i/testsuite.at
+
+      else
+	  echo "AT_CHECK([ln -sf \$top_builddir/testsuite/$meshdir/$meshfile &&  \$top_builddir/testsuite/$i/$i],[0],[ignore],[ignore])" >> $i/testsuite.at
+      fi
       echo "AT_CLEANUP" >> $i/testsuite.at
       echo "done."
   fi

@@ -1,4 +1,4 @@
 AT_SETUP([test_fe])
 AT_KEYWORDS([fe])
-AT_CHECK([$top_builddir/testsuite/test_fe/test_fe],[0],[ignore],[ignore])
+AT_CHECK([ln -sf $top_builddir/testsuite/'data/mesh/mesh++/'/'cube_384.m++' &&  $top_builddir/testsuite/test_fe/test_fe],[0],[ignore],[ignore])
 AT_CLEANUP

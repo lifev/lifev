@@ -1,4 +1,4 @@
 AT_SETUP([test_postproc])
 AT_KEYWORDS([postproc])
-AT_CHECK([$top_builddir/testsuite/test_postproc/test_postproc],[0],[ignore],[ignore])
+AT_CHECK([ln -sf $top_builddir/testsuite/'data/mesh/mesh++/'/'cube_48.m++' &&  $top_builddir/testsuite/test_postproc/test_postproc],[0],[ignore],[ignore])
 AT_CLEANUP

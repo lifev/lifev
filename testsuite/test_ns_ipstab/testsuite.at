@@ -14,7 +14,7 @@ viscosity = 0.0001       # viscosity
 
 
 [../discretization]
-mesh_dir   = ../data/mesh/inria/           # the directory where the mesh file is
+mesh_dir = ./
 mesh_file  = hexa4x4.mesh # mesh file
 mesh_faces = all          # update all faces elements
 timestep   = 1.0          # timestep
@@ -32,5 +32,5 @@ ilut_fill = 6
 drop      = 1.e-5
 tol       = 1.00e-10
 ]])
-AT_CHECK([$top_builddir/testsuite/test_ns_ipstab/test_ns_ipstab],[0],[ignore],[ignore])
+AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria//hexa4x4.mesh &&  $top_builddir/testsuite/test_ns_ipstab/test_ns_ipstab],[0],[ignore],[ignore])
 AT_CLEANUP

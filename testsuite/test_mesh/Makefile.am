@@ -22,9 +22,6 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-include $(top_srcdir)/testsuite/Makefile.testsuite
-
-
 check_PROGRAMS		= test_mesh
 
 test_mesh_SOURCES	= test_mesh.cpp
@@ -32,3 +29,7 @@ test_mesh_SOURCES	= test_mesh.cpp
 test_mesh_LDFLAGS       =-lg2c
 
 MOSTLYCLEANFILES	= testBuilders.dat
+
+EXTRA_DIST          = data
+
+include $(top_srcdir)/testsuite/Makefile.testsuite

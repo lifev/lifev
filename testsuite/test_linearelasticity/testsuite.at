@@ -15,7 +15,7 @@ poisson   = 0.3
 endtime   = 2.0
 
 [../discretization]
-mesh_dir  = ../data/mesh/inria/     # the directory where the mesh file is
+mesh_dir = ./
 mesh_file = vessel2x4x20.mesh # mesh file
 timestep  = 0.01                   # timestep
 
@@ -39,5 +39,5 @@ drop            = 1.00e-4
 ilut_fill       = 4
 tol             = 1.e-16
 ]])
-AT_CHECK([$top_builddir/testsuite/test_linearelasticity/test_linearelasticity],[0],[ignore],[ignore])
+AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria//vessel2x4x20.mesh &&  $top_builddir/testsuite/test_linearelasticity/test_linearelasticity],[0],[ignore],[ignore])
 AT_CLEANUP

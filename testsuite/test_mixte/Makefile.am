@@ -22,9 +22,12 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-include $(top_srcdir)/testsuite/Makefile.testsuite
 
 noinst_HEADERS = main.hpp ud_functions.hpp 
 
 check_PROGRAMS = test_mixte 
 test_mixte_SOURCES = main.cpp 
+
+EXTRA_DIST      = data
+
+include $(top_srcdir)/testsuite/Makefile.testsuite

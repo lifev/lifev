@@ -1,40 +1,40 @@
 /* -*- mode: c++ -*-
-   This program is part of the LifeV library 
+   This program is part of the LifeV library
    Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politechnico di Milano
 
    This program is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public License
    as published by the Free Software Foundation; either version 2
    of the License, or (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 /* ========================================================
-  
-  Simple Laplacian test with Natural Boundary condition
- 
-  Solve the problem  
 
-               - \Delta u = f in [0,1]^3 
-	       
+  Simple Laplacian test with Natural Boundary condition
+
+  Solve the problem
+
+               - \Delta u = f in [0,1]^3
+
                     du/dn = h on {z = 1}
-                               
+
 		        u = g on the other faces
 
 
-   Data: 
-   
+   Data:
+
       f(x,y,z)    = -6
-      h(x,y,z)    = 2 * z 
+      h(x,y,z)    = 2 * z
       g(x,y,z)    = x^2+y^2+z^2
-	
+
    the exact solution is u(x,y,z) = x^2+y^2+z^2
 
    ========================================================
@@ -42,6 +42,7 @@
 
 #include <cassert>
 
+#include <GetPot.hpp>
 
 #include "main.hpp"
 #include "ud_functions.hpp"
@@ -49,8 +50,8 @@
 
 
 
-int main() { 
-  Chrono chrono; 
+int main() {
+  Chrono chrono;
 
 
   // ===================================================
@@ -59,20 +60,20 @@ int main() {
 
 
   BCFunction_Base gv(g); // Functor storing the user definded function g
-  
+
   BCFunction_Base hv(h); // Functor storing the user definded function h
- 
-  BC_Handler BCh(2); // We impose two boundary conditions 
-   
- 
-  BCh.addBC("Inlet",  10, Essential, Scalar, gv); 
-  BCh.addBC("Outlet", 20, Natural, Scalar, hv); 
+
+  BC_Handler BCh(2); // We impose two boundary conditions
+
+
+  BCh.addBC("Inlet",  10, Essential, Scalar, gv);
+  BCh.addBC("Outlet", 20, Natural, Scalar, hv);
 
 
   // Ouput
-  BCh.showMe();  
-  
-  
+  BCh.showMe();
+
+
 
 
   // ===================================================
@@ -80,7 +81,7 @@ int main() {
   // ===================================================
   const GeoMap& geoMap  = geoLinearTetra;
   const QuadRule& qr    = quadRuleTetra4pt;
- 
+
   const GeoMap& geoMapBd = geoMap.boundaryMap();
   const QuadRule& qrBd   = quadRuleTria3pt;
 
@@ -91,22 +92,20 @@ int main() {
   // P2 elements
   const RefFE& refFE    = feTetraP2;
   const RefFE& refBdFE   = refFE.boundaryFE();
-    
-    
+
+
   // ===================================================
   // Mesh staff
   // ===================================================
-  RegionMesh3D<LinearTetra> aMesh; 
-  string mesh_dir = "../data/mesh/mesh++/";
+  RegionMesh3D<LinearTetra> aMesh;
 
-
-  // Avaliable meshes
-  //  string fname=mesh_dir+"cube_48_neumann.m++";
-  string fname=mesh_dir+"cube_384.m++";
+  GetPot datafile( "data" );
+  string mesh_dir = datafile( "mesh_dir", "." );//../data/mesh/mesh++/";
+  string fname=mesh_dir+datafile( "mesh_file", "cube_384.m++" );
 
   long int  m=1;
   readMppFile(aMesh,fname,m);
-  aMesh.showMe();  
+  aMesh.showMe();
 
   cout<< "Now building local Edges/faces Stuff"<<endl<<endl;
   aMesh.updateElementEdges();
@@ -125,14 +124,14 @@ int main() {
   // Update of the Dof for the particular FE problem
   // and for the boundary conditions
   // ===============================================
- 
-  Dof dof(refFE); 
+
+  Dof dof(refFE);
   dof.update(aMesh);
 
   BCh.bdUpdate( aMesh,  feBd, dof );
 
-  UInt dim = dof.numTotalDof(); 
- 
+  UInt dim = dof.numTotalDof();
+
   dof.showMe();
 
   // initialization of vector of unknowns and rhs
@@ -143,7 +142,7 @@ int main() {
   // Pattern construction and matrix assembling
   // ==========================================
   cout << "dim                    = " << dim     << endl << endl;
-  
+
   // pattern for stiff operator
   MSRPatt pattA(dof);
 
@@ -166,7 +165,7 @@ int main() {
 
   chrono.stop();
   //cout << chrono.diff() << "s." << endl;
-   
+
   // ====================================
   // Treatment of the Boundary conditions
   // ====================================
@@ -177,59 +176,59 @@ int main() {
   Real tgv=1.;
 
   chrono.start();
-  bc_manage(A,F,aMesh,dof,BCh,feBd,tgv,0.0); 
+  bc_manage(A,F,aMesh,dof,BCh,feBd,tgv,0.0);
 
   chrono.stop();
   //cout << chrono.diff() << "s." << endl;
-  
+
   // ==============================
   // Reolution of the linear system
   // ==============================
-  int    proc_config[AZ_PROC_SIZE];// Processor information:                 
-  //  proc_config[AZ_node] = node name      
-  //  proc_config[AZ_N_procs] = # of nodes  
-  int    options[AZ_OPTIONS_SIZE]; // Array used to select solver options.     
-  double params[AZ_PARAMS_SIZE];   // User selected solver paramters.          
-  int    *data_org;                // Array to specify data layout   
+  int    proc_config[AZ_PROC_SIZE];// Processor information:
+  //  proc_config[AZ_node] = node name
+  //  proc_config[AZ_N_procs] = # of nodes
+  int    options[AZ_OPTIONS_SIZE]; // Array used to select solver options.
+  double params[AZ_PARAMS_SIZE];   // User selected solver paramters.
+  int    *data_org;                // Array to specify data layout
   double status[AZ_STATUS_SIZE];   // Information returned from AZ_solve()
-                                   // indicating success or failure.           
-  // altre dichiarazioni per AZTEC  
-  int    *update,                  // vector elements updated on this node. 
-         *external;                // vector elements needed by this node.    
-  int    *update_index;            // ordering of update[] and external[]     
-  int    *extern_index;            // locally on this processor.              
-  //  int    *bindx;                 // Sparse matrix to be solved is stored    
-  //  double *val;                   // in these MSR arrays.                    
-  int    N_update;                 // # of unknowns updated on this node      
+                                   // indicating success or failure.
+  // altre dichiarazioni per AZTEC
+  int    *update,                  // vector elements updated on this node.
+         *external;                // vector elements needed by this node.
+  int    *update_index;            // ordering of update[] and external[]
+  int    *extern_index;            // locally on this processor.
+  //  int    *bindx;                 // Sparse matrix to be solved is stored
+  //  double *val;                   // in these MSR arrays.
+  int    N_update;                 // # of unknowns updated on this node
   //
   cout << "*** Linear System Solving (AZTEC)" << endl;
   AZ_set_proc_config(proc_config, AZ_NOT_MPI );
   //   cout << AZ_PROC_SIZE << " " << AZ_node << " " << AZ_N_procs << endl;
   //   for (UInt ii=0; ii<AZ_PROC_SIZE; ++ii)
   //     cout << proc_config[ii] << endl;
-  
+
   AZ_read_update(&N_update, &update, proc_config, U.size(), 1, AZ_linear);
 
   AZ_defaults(options,params);
-  
-  AZ_transform(proc_config, &external, 
-	       (int *)pattA.giveRaw_bindx(), A.giveRaw_value(), 
+
+  AZ_transform(proc_config, &external,
+	       (int *)pattA.giveRaw_bindx(), A.giveRaw_value(),
 	       update, &update_index,
 	       &extern_index, &data_org, N_update, NULL, NULL, NULL, NULL,
 	       AZ_MSR_MATRIX);
-  
+
   chrono.start();
   init_options(options,params);
   options[AZ_output]=AZ_warnings;
-  
-  AZ_solve(U.giveVec(), F.giveVec(), options, params, NULL, 
-	   (int *)pattA.giveRaw_bindx(), NULL, NULL, NULL, 
+
+  AZ_solve(U.giveVec(), F.giveVec(), options, params, NULL,
+	   (int *)pattA.giveRaw_bindx(), NULL, NULL, NULL,
 	   A.giveRaw_value(), data_org,
 	   status, proc_config);
   //
   chrono.stop();
   //cout << "*** Solution computed in " << chrono.diff() << "s." << endl;
-  
+
   //
 
   // =======================================
