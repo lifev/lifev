@@ -83,11 +83,11 @@ public NavierStokesAleHandler<Mesh> {
   void timeAdvance(const Function source, const Real& time);
 
   //! Update convective term, bc treatment and solve the linearized ns system
-  void iterate();
+  void iterate(const Real& time);
 
-  void iterateTransp();
+  void iterateTransp(const Real& time);
 
-  void iterateLin(BC_Handler& BCh_du);
+  void iterateLin(const Real& time, BC_Handler& BCh_du);
 
   Vector& residual();
 
@@ -291,10 +291,8 @@ template<typename Mesh>
 void NavierStokesAleSolverPC<Mesh>::
 timeAdvance(const Function source, const Real& time) {
 
-  _time = time;
-
   cout << endl;
-  cout << "O== FLUID: Now we are at time "<< _time << " s." << endl;
+  cout << "O== FLUID: Now we are at time "<< time << " s." << endl;
 
   // Number of velocity components
   UInt nc_u=_u.nbcomp();
@@ -312,7 +310,7 @@ timeAdvance(const Function source, const Real& time) {
     _elvec.zero();
     _fe_u.updateFirstDerivQuadPt(_mesh.volumeList(i));
     for (UInt ic=0; ic<nc_u; ++ic){
-      compute_vec(source,_elvec,_fe_u,_time,ic); // compute local vector
+      compute_vec(source,_elvec,_fe_u,time,ic); // compute local vector
       assemb_vec(_f_uWithOutBC,_elvec,_fe_u,_dof_u,ic); // assemble local vector into global one
     }
   }
@@ -329,7 +327,7 @@ timeAdvance(const Function source, const Real& time) {
 
 template<typename Mesh>
 void NavierStokesAleSolverPC<Mesh>::
-iterate() {
+iterate(const Real& time) {
 
   Chrono chrono;
 
@@ -423,7 +421,7 @@ iterate() {
   chrono.start();
   _f_u=_f_uWithOutBC;
   _BCh_u.bdUpdate(_mesh, _feBd_u, _dof_u);
-  bc_manage(_C, _trD, _f_u, _mesh, _dof_u, _BCh_u, _feBd_u, tgv, _time);
+  bc_manage(_C, _trD, _f_u, _mesh, _dof_u, _BCh_u, _feBd_u, tgv, time);
   chrono.stop();
   cout << "done in " << chrono.diff() << "s." << endl;
 
@@ -563,7 +561,7 @@ iterate() {
 
 template<typename Mesh>
 void NavierStokesAleSolverPC<Mesh>::
-iterateTransp() {
+iterateTransp(const Real& time) {
 
   Chrono chrono;
 
@@ -576,7 +574,7 @@ iterateTransp() {
   chrono.start();
   _f_u=_f_uWithOutBC;
   _BCh_u.bdUpdate(_mesh, _feBd_u, _dof_u);
-  bc_manage(_C, _trD, _f_u, _mesh, _dof_u, _BCh_u, _feBd_u, tgv, _time);
+  bc_manage(_C, _trD, _f_u, _mesh, _dof_u, _BCh_u, _feBd_u, tgv, time);
   chrono.stop();
   cout << "done in " << chrono.diff() << "s." << endl;
 
@@ -713,7 +711,7 @@ iterateTransp() {
 //
 template<typename Mesh>
 void NavierStokesAleSolverPC<Mesh>::
-iterateLin(BC_Handler& BCh_du) {
+iterateLin(const Real& time, BC_Handler& BCh_du) {
 
   Chrono chrono;
 
@@ -814,7 +812,7 @@ iterateLin(BC_Handler& BCh_du) {
 
 
   BCh_du.bdUpdate(_mesh, _feBd_u, _dof_u);
-  bc_manage(_C, _trD, _f_u, _mesh, _dof_u, BCh_du, _feBd_u, tgv, _time);
+  bc_manage(_C, _trD, _f_u, _mesh, _dof_u, BCh_du, _feBd_u, tgv, time);
 
 
   chrono.stop();
