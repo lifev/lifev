@@ -22,9 +22,8 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .cc
 
 include_HEADERS		= GetPot.hpp  debug.hpp\
 chrono.hpp dataString.hpp  fortran_wrap.hpp \
-lifeV.hpp switch.hpp \
-util_string.hpp \
-singleton.hpp policy.hpp typeInfo.hpp
+lifeV.hpp switch.hpp util_string.hpp \
+factory.hpp singleton.hpp policy.hpp typeInfo.hpp
 
 lib_LTLIBRARIES		= liblifecore.la
 
