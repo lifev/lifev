@@ -62,7 +62,7 @@ nb_elem	= 60	#   number of elements
 post_dir = ./Post                 # the directory for postprocessing files
 verbose = 5
 post_proc_format = medit          # vtk or medit
-show_graceplot = 1                # 0: no grace plot, 1: show grace plots
+show_graceplot = 0                # 0: no grace plot, 1: show grace plots
 
 
 [aztec]  

@@ -48,7 +48,7 @@ changelog:
 	@if test -x /usr/bin/cvs2cl -a -d $(srcdir)/CVS; then\
 	 (cd $(srcdir) && cvs2cl -b -t  -S --utc -P);\
     else \
-     touch $(srcdir)/ChangeLog;\
+     test -w $(srcdir)/ChangeLog && touch $(srcdir)/ChangeLog;\
     fi
 
 apidox-all:

@@ -31,7 +31,7 @@ SUBDIRS		= data  \
 		      test_linearelasticity \
 		      test_darcy test_darcytetra test_onedmodel\
 		      test_ns_bdf test_ns_cyl test_ns_bcvec test_ns_sstress \
-		      test_fsi_newton test_fsi_picard \
+		      test_fsi_newton test_fsi_picard test_fsi_dd\
 		      test_masstransport test_mass_coupling test_ns_ipstab
 
 TESTSUITES=$(srcdir)/lifecore/testsuite.at \
