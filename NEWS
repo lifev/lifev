@@ -1,28 +1,45 @@
 # -*- readme-debian -*-
-Bugs fixed in 0.4.1modified_by_mm:
-====================
-* this release version is wrong and someone should try to insert other older
-  changes, I have applied changes to a .tar.bz2 0.4.1 version, later
-  I have had cvs login and to submit this version I did a
-  cp -R mydir lastcvs, but in this way changes between 0.4.1 and the
-  last are lost, please fix this !
-* In this version I added support for reading
-  netgen meshes for tetraedra functions
-  readNetgenMesh(), saveNetgenSolution()	(MM)
-  there is an usage example in testsuite/test_netgen
-* You can do a 'grep -r meneghin .' to see some
-  changes that I applied, fixed some bugs. Do you agree about 
-  strongerFlag(),weakerFlag() ?
-  On amd64 UInt and Index_t if = int are 4 bytes, if = size_t are 8 bytes
-  giving a cast problem in AZ_transform (MM)
-* NOTE: if you have problems compiling try autoconf before (MM)
 
-Bugs fixed in 0.4.1:
+Bugs fixed in 0.5.0:
 ====================
 [configure]
 * Fixed umfpack check when umfpack is not installed (CP)
 
-
+New in 0.5.0:
+=============
+[configure]
+* Added support for boost which is mandatory now (CP)
+
+[lifecore]
+* Added the Cloning Factory pattern (aka Abstract Factory)
+  implementation (CP)  
+
+[lifefem]
+* Added discontinuous finite element(discontinuous galerkin) (DADP)
+* Sanitized/revamped the boundary conditions classes (CP)
+  ** split BC classes into their own files 
+  ** improved documentation 
+  ** reduced code redundancy and code size
+  ** use clone factory for BCFunction
+  ** use clone factory for BCVector
+  ** use boost::shared_ptr<> for safe memory management
+
+[lifesolver]
+* Templated the darcy classes.(VM)
+  ** use of DataMesh class requires a change in data files
+* Abstraction and interface for darcy Solver (CP, VM)
+* Factorized and merged FSI::operFS (GF)
+* Added NavierStokesWithFlux solver to impose fluxes (CV, CP)
+
+[testsuite]
+* Added test for 3D/0D coupling (AM)
+* Moved files of test_darcy in lifesolver (VM, CP)
+  ** hex and tet tests
+  ** tensor and scalar diffusion tests
+* Removed test_darcytetra (VM)
+* oned solver can solve 2 coupled tubes (VM)
+* Centralized all FSI tests in test_fsi (GF)
+
 Bugs fixed in 0.4.0:
 ====================
 [all]
@@ -169,4 +186,4 @@ New in 0.1.0pre3:
 * fixed some bugs and miscompilation in a few places
 
 
- -- Christophe Prud'homme <prudhomm@mit.edu>, Tue Oct  5 15:33:07 2004
+ -- Christophe Prud'homme <prudhomm@debian.org>, Thu Oct 28 19:18:06 2004
