@@ -25,9 +25,12 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 INCLUDES 	= -I$(top_srcdir)/life/lifecore  -I$(top_srcdir)/life/lifearray -I$(top_srcdir)/life/lifealg \
              -I$(top_srcdir)/life/lifemesh -I$(top_srcdir)/life/lifefem 
 
-include_HEADERS	= ElasticStructureHandler.hpp NavierStokesAleHandler.hpp NavierStokesAleSolverPC.hpp NavierStokesHandler.hpp \
-NavierStokesSolverPC.hpp VenantKirchhofSolver.hpp dataElasticStructure.hpp \
-dataNavierStokes.hpp dataSimplifiedStructure.hpp simplifiedStructure.hpp convDiffReactHandler.hpp convDiffReactSolverPC.hpp dataConvDiffReact.hpp
+include_HEADERS	= ElasticStructureHandler.hpp NavierStokesAleHandler.hpp \
+                NavierStokesAleSolverPC.hpp NavierStokesHandler.hpp \
+                NavierStokesSolverPC.hpp VenantKirchhofSolver.hpp dataElasticStructure.hpp \
+                dataNavierStokes.hpp dataSimplifiedStructure.hpp simplifiedStructure.hpp \
+                convDiffReactHandler.hpp convDiffReactSolverPC.hpp dataConvDiffReact.hpp \
+                dataDarcy.hpp darcyHandler.hpp darcySolver.hpp
 
 
 #lib_LTLIBRARIES	= lifesolver.la
