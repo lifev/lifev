@@ -3,7 +3,7 @@ Bugs fixed in 0.3.90:
 * OpenDX filter got revamped (CW)
 
 [testsuite]
-* Avoid multiple copies of classes/files around (CP)
+* remove/centralize multiple copies of classes/files (CP)
 
 New in 0.3.90:
 [configure]
@@ -12,6 +12,7 @@ New in 0.3.90:
 
 [lifecore]
 * Added an implementation of the Singleton design pattern (CP)
+* Added policies for creation and lifetime of objects (CP)
 
 [lifearray]
 * Added helpers for the Fitzhugh-Nagumo solver (JFG)
@@ -26,7 +27,7 @@ New in 0.3.90:
 * Got rid of NavierStokesHandler_miguel.hpp (CW)
 
 [lifefilters]
-* Added Ensight7 writer (MP)
+* Added Ensight7 writer (99% MP & 1% CP)
 
 [testsuite]
 * Added test case for coupled mass transport solvers (MP)
