@@ -112,23 +112,13 @@ int main(int argc, char** argv)
                                1,
                                0.0);
 
-    BCVector_Interface g_wall(fluid.residual(),
-                              dim_fluid,
-                              dofFluidToStructure);
-
-//     BCVector_Interface g_wall(fluid.residual(),
-//                               dim_fluid,
-//                               dofFluidToStructure);
-
-
     //
     // Passing data from structure to the solid mesh: motion of the solid domain
     //
-
     DofInterface3Dto3D dofStructureToSolid(feTetraP1,
-                                      solid.dDof(),
-                                      feTetraP1,
-                                      solid.dDof() );
+                                           solid.dDof(),
+                                           feTetraP1,
+                                           solid.dDof() );
     dofStructureToSolid.update(solid.mesh(),
                                1,
                                solid.mesh(),
@@ -138,11 +128,9 @@ int main(int argc, char** argv)
     BCVector_Interface d_wall(solid.d(),
                               dim_solid,
                               dofStructureToSolid);
-
     //
     // Passing data from structure to the fluid mesh: motion of the fluid domain
     //
-
     DofInterface3Dto3D dofStructureToFluidMesh(fluid.mesh().getRefFE(),
                                                fluid.dofMesh(),
                                                feTetraP1,
@@ -170,8 +158,6 @@ int main(int argc, char** argv)
     BCVector_Interface u_wall(fluid.wInterpolated(),
                               dim_fluid,
                               dofMeshToFluid);
-
-
     //========================================================================================
     //  BOUNDARY CONDITIONS
     //========================================================================================
@@ -191,7 +177,6 @@ int main(int argc, char** argv)
     BCh_u.addBC("Edges",  20, Essential, Full, bcf,     3);
 
     // Boundary conditions for the solid displacement
-//    BCh_d.addBC("Interface", 1, Natural, Full, g_wall, 3);
     BCh_d.addBC("Interface", 1, Essential, Full, d_wall, 3);
     BCh_d.addBC("Top",       3, Essential, Full, bcf,  3);
     BCh_d.addBC("Base",      2, Essential, Full, bcf,  3);
@@ -211,13 +196,18 @@ int main(int argc, char** argv)
     // rem: for now: no fluid.dwInterpolated().
     //      In the future this could be relevant
 
-    BCVector_Interface du_wall(oper.residualFSI(), dim_fluid, dofMeshToFluid);
-
-    // Passing the residual to the linearized structure: \sigma -> dz
-
-//    BCVector_Interface dg_wall(fluid.residual(), dim_fluid, dofFluidToStructure);
-    BCVector_Interface dg_wall(solid.residual(),
+    BCVector_Interface du_wall(oper.residualFSI(),
                                dim_solid,
+                               dofMeshToFluid);
+    // Passing the residual to the linearized structure: \sigma -> dz
+//    BCVector_Interface dg_wall(oper.residualFSI(),
+//                               dim_fluid,
+//                               dofFluidToStructure);
+//     BCVector_Interface dg_wall(oper.residualS(),
+//                                dim_solid,
+//                                dofStructureToSolid);
+    BCVector_Interface dg_wall(oper.residualFSI(),
+                               dim_fluid,
                                dofFluidToStructure);
     // Boundary conditions for du
 
