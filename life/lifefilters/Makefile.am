@@ -30,3 +30,5 @@ lib_LTLIBRARIES	= liblifefilters.la
 
 liblifefilters_la_SOURCES	= medit_wrtrs.cpp vtk_wrtrs.cpp 
 liblifefilters_la_LIBADD	= ../lifefem/liblifefem.la 
+
+include $(top_srcdir)/admin/Doxyfile.am

@@ -38,3 +38,8 @@ MAINTAINERCLEANFILES = configure.files subdirs
 
 
 SUBDIRS = admin doc life testsuite
+
+include $(top_srcdir)/admin/Doxyfile.am
+
+apidox-all:
+	cd life && make apidox

@@ -45,3 +45,6 @@ refHdivFE.cpp refHybridFE.cpp staticBdFE.cpp
 
 
 liblifefem_la_LIBADD	= ../lifemesh/liblifemesh.la ../lifealg/liblifealg.la 
+
+
+include $(top_srcdir)/admin/Doxyfile.am

@@ -33,3 +33,5 @@ dataTime.cpp subDomainNeighbors.cpp switch.cpp util_string.cpp
 
 
 liblifecore_la_LIBADD	= $(aztec_libs)
+
+include $(top_srcdir)/admin/Doxyfile.am

@@ -1,0 +1,41 @@
+/**
+	* @mainpage The LifeV API Reference
+	*
+	* This section contains the LifeV online class reference for the current
+	* development version of LifeV. Additionally, you 
+        * can subscribe or read the <a href="http://www.lifev.org/mailinglists.php">mailing lists</a> for any additions and/or 
+        * modifications to the API.
+	*
+	* - <a href="life/lifecore/html/index.html"><b>lifecore</b></a>
+        *   (<a href="life/lifecore/html/classes.html">classes</a>)\n
+	*   <i>Core LifeV classes that are not related to spcific scientific computing.</i>
+	* - <a href="life/lifemesh/html/index.html"><b>lifemesh</b></a>
+        *   (<a href="life/lifemesh/html/classes.html">classes</a>)\n
+	*   <i>Mesh library.</i>
+	* - <a href="life/lifearray/html/index.html"><b>lifearray</b></a>
+        *   (<a href="life/lifearray/html/classes.html">classes</a>)\n
+	*   <i>Array classes libray.</i>
+	* - <a href="life/lifealg/html/index.html"><b>lifealg</b></a>
+        *   (<a href="life/lifealg/html/classes.html">classes</a>)\n
+	*   <i>Algebra libray.</i>
+	* - <a href="life/lifefem/html/index.html"><b>lifefem</b></a>
+        *   (<a href="life/lifefem/html/classes.html">classes</a>)\n
+	*   <i>Finite Element libray.</i>
+	* - <a href="life/lifesolver/html/index.html"><b>lifesolver</b></a>
+        *   (<a href="life/lifesolver/html/classes.html">classes</a>)\n
+	*   <i>Solver libray.</i>
+	* - <a href="life/lifefilters/html/index.html"><b>lifefilter</b></a>
+        *   (<a href="life/lifefilters/html/classes.html">classes</a>)\n
+	*   <i>Filters libray.</i>
+	*
+	* More information about the LifeV architecture, check
+	* the <a href="http://www.lifev.org/doc.php">LifeV Web Site</a>.
+	*/
+
+/**
+	* @page search Search the API documentation
+	*
+	* <br>Under construction.
+	*
+	*/
+

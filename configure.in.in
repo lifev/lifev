@@ -29,6 +29,9 @@ AC_PROG_F77( g77-3.3 g77-3.2 g77 )
 AC_PROG_F77_C_O
 AC_PROG_LIBTOOL
 
+# doxygen
+AC_CHECK_PROG(DOXYGEN, doxygen, [doxygen], [no-doxygen] )
+AC_CHECK_PROG(LIFE_HAS_DOT, dot, [yes] )
 
 
 dnl Check debugging mode for compilation.

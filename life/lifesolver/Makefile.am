@@ -29,3 +29,5 @@ dataNavierStokes.hpp dataSimplifiedStructure.hpp simplifiedStructure.hpp
 #lib_LTLIBRARIES	= lifesolver.la
 
 #lifesolver_la_SOURCES	= 
+
+include $(top_srcdir)/admin/Doxyfile.am

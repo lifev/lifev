@@ -33,3 +33,6 @@ liblifemesh_la_SOURCES	= bareItems.cpp basisElSh.cpp geo0D.cpp identifier.cpp \
 markers_base.cpp readMesh3D.cpp regionMesh3D.cpp mesh_util.cpp mesh_util_base.cpp
 
 liblifemesh_la_LIBADD	= ../lifecore/liblifecore.la
+
+
+include $(top_srcdir)/admin/Doxyfile.am

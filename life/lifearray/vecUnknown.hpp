@@ -117,6 +117,7 @@ public:
 
     //! gives the front of the vector
     inline Real * giveVec(){return &((*this)[0]);}
+
     inline UInt size() const {return _size;}
     inline UInt nbcomp() const {return _nbcomp;}
 };
@@ -363,6 +364,7 @@ template<typename VectorType>
 PhysVectUnknown<VectorType>::PhysVectUnknown(UInt const Ndof)
     :
     super(nDimensions*Ndof),
+    //@}
     _size(nDimensions*Ndof)
 {
 }

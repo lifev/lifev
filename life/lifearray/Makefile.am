@@ -32,3 +32,5 @@ include_HEADERS	= RNM.hpp RNM_op.hpp RNM_opc.hpp RNM_tpl.hpp tab.hpp \
 #lib_LTLIBRARIES	= lifearray.la
 
 #lifearray_la_SOURCES	= dummy.cpp
+
+include $(top_srcdir)/admin/Doxyfile.am
