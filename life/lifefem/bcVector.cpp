@@ -87,6 +87,15 @@ BCVectorBase::operator() ( const ID& iDof, const ID& iComp ) const
     return ( *_M_vec ) ( ( iComp - 1 ) * _M_nbTotalDof + iDof - 1 );
 }
 
+//! This method returns the value of the mixte coefficient to be imposed in the component iComp of the dof iDof
+Real 
+BCVectorBase::MixteVec ( const ID& iDof, const ID& iComp ) const
+{
+    ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
+    return ( *_M_vec_mixte ) ( ( iComp - 1 ) * _M_nbTotalDof + iDof - 1 );
+}
+
+
 void
 BCVectorBase::setVector( Vector& __vec, UInt __nbTotalDof )
 {
@@ -186,6 +195,16 @@ BCVectorInterface::operator() ( const ID& iDof, const ID& iComp ) const
     ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
     return ( *_M_vec ) ( ( iComp - 1 ) * _M_nbTotalDof + _M_dofIn->getInterfaceDof( iDof ) - 1 );
 }
+
+
+//! This method returns the value of the mixte coefficient to be imposed in the component iComp of the dof iDof
+Real 
+BCVectorInterface::MixteVec( const ID& iDof, const ID& iComp ) const
+{
+    ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
+    return ( *_M_vec_mixte ) ( ( iComp - 1 ) * _M_nbTotalDof + _M_dofIn->getInterfaceDof( iDof ) - 1 );
+}
+
 
 //! Assignment operator for BCVectorInterface
 BCVectorInterface&

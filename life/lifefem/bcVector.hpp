@@ -96,6 +96,10 @@ public:
       \param iComp the number of the component
     */
     virtual Real operator() ( const ID& iDof, const ID& iComp ) const;
+
+    //! Return the value of the Mixte coefficient vector to be imposed in the component iComp of the dof iDof
+    virtual Real MixteVec( const ID& iDof, const ID& iComp ) const;
+
     //@}
 
 
@@ -155,6 +159,13 @@ public:
             _M_mixteCoef = coef;
         }
 
+    //! set the Mixte coefficient data vector
+    void setMixteVec( Vector& vec_mixte )
+        {
+	    _M_vec_mixte= &vec_mixte;
+	}
+
+
     //! set the vector
     void setVector( Vector& __vec, UInt nbDOF );
 
@@ -171,6 +182,9 @@ protected:
 
     //! The data vector
     Vector* _M_vec;
+
+    //! The data vector of the mixte coefficient
+    Vector* _M_vec_mixte;
 
     //! Number of total dof in the vector of data
     UInt _M_nbTotalDof;
@@ -297,6 +311,9 @@ public:
       \param iComp the number of the component
     */
     Real operator() ( const ID& iDof, const ID& iComp ) const;
+
+    //! This method returns the value of the mixte coefficient to be imposed in the component iComp of the dof iDof
+    Real MixteVec( const ID& iDof, const ID& iComp ) const;
 
     //! Assignment operator for BCVectorInterface
     BCVectorInterface & operator=( const BCVectorInterface & BCv );

@@ -669,7 +669,7 @@ void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Do
     {   //! If BC is given under a vectorial form
 
         //! for the moment, only one coefficient per BCvector.
-        DataType mcoef = BCb.mixteCoef();   //!< the mixte coefficient
+//        DataType mcoef = BCb.mixteCoef();   //!< the mixte coefficient implement mixte vector M.Prosi
 
         // Loop on BC identifiers
         for ( ID i = 1; i <= BCb.list_size(); ++i )
@@ -705,8 +705,10 @@ void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Do
                     {
 
                         // Contribution to the diagonal entry of the elementary boundary mass matrix
-                        sum += mcoef * bdfem.phi( int( idofF - 1 ), l ) * bdfem.phi( int( idofF - 1 ), l ) *
-                               bdfem.weightMeas( l );
+//                        sum += mcoef * bdfem.phi( int( idofF - 1 ), l ) * bdfem.phi( int( idofF - 1 ), l ) *
+//                               bdfem.weightMeas( l );
+	                sum += BCb.MixteVec( idDof, BCb.component( j ) )* bdfem.phi( int( idofF - 1 ), l ) *
+                               bdfem.phi( int( idofF - 1 ), l ) *bdfem.weightMeas( l );
 
                         // Adding right hand side contribution
                         //vincent please check again for your Mixte-FE it doesn't work for Q1:
@@ -729,21 +731,24 @@ void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Do
 
                         sum = 0;
 
-                        // Loop on quadrature points
-                        for ( int l = 0; l < bdfem.nbQuadPt; ++l )
-                        {
-
-                            // Upper diagonal entry of the elementary boundary mass matrix
-                            sum += mcoef * bdfem.phi( int( idofF - 1 ), l ) * bdfem.phi( int( k - 1 ), l ) *
-                                   bdfem.weightMeas( l );
-                        }
-
                         // Glogals Dof: row and columns
                         //vincent please check again for your Mixte-FE it doesn't work for Q1:
                         //     idDof  =  BCb(i)->id() + (BCb.component(j)-1)*totalDof;
                         //     jdDof  =  BCb(k)->id() + (BCb.component(j)-1)*totalDof;
                         idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof;
                         jdDof = pId->bdLocalToGlobal( k ) + ( BCb.component( j ) - 1 ) * totalDof;
+
+                        // Loop on quadrature points
+                        for ( int l = 0; l < bdfem.nbQuadPt; ++l )
+                        {
+
+                            // Upper diagonal entry of the elementary boundary mass matrix
+//                            sum += mcoef * bdfem.phi( int( idofF - 1 ), l ) * bdfem.phi( int( k - 1 ), l ) *
+//                                   bdfem.weightMeas( l );
+                            sum += BCb.MixteVec( idDof, BCb.component( j ) )*bdfem.phi( int( idofF - 1 ), l ) * 
+                                   bdfem.phi( int( k - 1 ), l ) * bdfem.weightMeas( l );
+ 
+                        }
 
                         // Assembling upper entry.  The boundary mass matrix is symetric
                         A.set_mat_inc( idDof - 1, jdDof - 1, sum );

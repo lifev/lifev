@@ -330,6 +330,9 @@ public:
     //! Returns the value of the mixte coefficient (in BC Vector)
     Real mixteCoef() const;
 
+    //! Returns the value of the mixte coefficient vector (in BC Vector) 
+    Real MixteVec( const ID& iDof, const ID& iComp ) const;
+
     //! Returns a pointer to the i-th elements in the (finalised) list
     //! (counting from 0 ' a la C')
     const IdentifierBase* operator[] ( const Index_t& i ) const;

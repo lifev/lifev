@@ -475,6 +475,19 @@ Real BCBase::mixteCoef() const
 
 }
 
+
+//! Returns the value of the mixte coefficient vector (in BC Vector) M.Prosi
+Real BCBase::MixteVec( const ID& iDof, const ID& iComp ) const
+{
+    if ( _dataVector )
+        return ( *_bcv).MixteVec( iDof, iComp );
+    else
+    {
+        ERROR_MSG( "A data vector must be specified before calling this method" );
+        return 0.;
+    }
+
+}
 //! Returns a pointer  to the i-th elements in the (finalised) list
 //! (counting from 1 ' a la FORTRAN')
 const IdentifierBase* BCBase::operator() ( const ID& i ) const
