@@ -20,7 +20,7 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .cc
 
-include_HEADERS		= life.hpp lifeversion.hpp lifemacros.hpp\
+include_HEADERS		= life.hpp lifeversion.hpp lifemacros.hpp lifeassert.hpp\
 GetPot.hpp  debug.hpp\
 chrono.hpp dataString.hpp  fortran_wrap.hpp \
 switch.hpp util_string.hpp \
