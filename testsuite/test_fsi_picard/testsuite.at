@@ -8,7 +8,7 @@ AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 [fluid]
 
 [./physics]
-endtime   = 0.0002             # endtime
+endtime   = 0.0001             # endtime
 density   = 1.0               # density
 viscosity = 0.03              # viscosity
 
@@ -28,7 +28,7 @@ verbose   = 1
 density   = 1.2               # density
 young     = 3.0E6
 poisson   = 0.3
-endtime   = 0.0002
+endtime   = 0.0001
 
 [../discretization]
 mesh_dir = ./
