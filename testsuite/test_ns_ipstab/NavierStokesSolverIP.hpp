@@ -117,6 +117,10 @@ private:
     Real M_time;
 
     bool M_steady;
+    
+    Real M_gammaBeta;
+    Real M_gammaDiv;
+    Real M_gammaPress;
 }; // class NavierStokesSolverIP
 
 
@@ -159,6 +163,9 @@ NavierStokesSolverIP( const GetPot& dataFile,
     M_sol( ( nDimensions+1 )*_dim_u )
 {
     M_steady = dataFile( "fluid/miscellaneous/steady", 1 );
+    M_gammaBeta = dataFile( "fluid/ipstab/gammaBeta", 0. );
+    M_gammaDiv = dataFile( "fluid/ipstab/gammaDiv", 0. );
+    M_gammaPress = dataFile( "fluid/ipstab/gammaPress", 0. );
 
     M_linearSolver.setOptionsFromGetPot( dataFile, "fluid/aztec" );
     //M_linearSolver.setOptionsFromGetPot( dataFile, "fluid/petsc" );
@@ -179,8 +186,6 @@ NavierStokesSolverIP( const GetPot& dataFile,
 
     // Number of velocity components
     UInt nbCompU = _u.nbcomp();
-
-    Real gamma;
 
     Real bdfCoeff = _bdf.bdf_u().coeff_der( 0 )/_dt;
 
@@ -238,7 +243,7 @@ NavierStokesSolverIP( const GetPot& dataFile,
 
     IPStabilization<Mesh, Dof>
         pressureStab(_mesh, _dof_u, _refFE_u, _feBd_u, _Qr_u,
-                     0, 0, 1./32, this->viscosity() );
+                     0, 0, M_gammaPress, this->viscosity() );
     pressureStab.apply(M_matrStokes, this->_u);
 
     if ( M_steady )
@@ -415,9 +420,9 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
 
     IPStabilization<Mesh, Dof>
         velocityStab(_mesh, _dof_u, _refFE_u, _feBd_u, _Qr_u,
-                     1./8, 1./8, 0, this->viscosity() );
+                     M_gammaBeta, M_gammaDiv, 0, this->viscosity());
     velocityStab.apply(M_matrFull, this->_u);
-    
+
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 

@@ -51,3 +51,8 @@ reltol = 0.0
 maxiter = 300
 method = 1 # 0: constant relaxation, 1: Aitken, 2: Irons & Tuck
 omega  = 0
+
+[../ipstab]
+gammaBeta  = 0.125
+gammaDiv   = 0.125
+gammaPress = 0.03125
