@@ -1,5 +1,6 @@
 .deps
 .libs
+Doxyfile
 Makefile
 Makefile.in
 SolverPETSC.lo

@@ -1,5 +1,6 @@
 .deps
 .libs
+Doxyfile
 Makefile
 Makefile.in
 assemb.lo
@@ -28,4 +29,6 @@ refEle.lo
 refFE.lo
 refHdivFE.lo
 refHybridFE.lo
+regionMesh3D_ALE.lo
 staticBdFE.lo
+v2elemVec.lo

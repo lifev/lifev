@@ -1,2 +1,10 @@
+.deps
+.libs
+Doxyfile
 Makefile
 Makefile.in
+elemMat.lo
+elemVec.lo
+liblifearray.la
+pattern.lo
+sparseArray.lo

@@ -1,7 +1,10 @@
 .deps
 .libs
+Doxyfile
 Makefile
 Makefile.in
 liblifefilters.la
 medit_wrtrs.lo
+mesh_util.lo
+readMesh3D.lo
 vtk_wrtrs.lo
