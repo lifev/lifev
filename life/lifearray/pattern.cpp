@@ -77,6 +77,71 @@ CSRPatt::CSRPatt(const CSRPatt &RightHandCSRP):BasePattern(RightHandCSRP),
 					       _ia(RightHandCSRP.ia()),_ja(RightHandCSRP.ja()){}
 
 
+CSRPatt::CSRPatt(MSRPatt const& msrPatt)
+    : BasePattern(msrPatt.nNz(), msrPatt.nRows(), msrPatt.nCols()) {
+    Container const& bindx = msrPatt.give_bindx();
+    _ja.resize(_nnz);
+    _ia.resize(_nrows+1);
+    _jaT.resize(_nnz);
+    UInt nOffset = 0;
+
+    _ia[0] = 0;
+    for(UInt iRow=0; iRow<_nrows; ++iRow) {
+        UInt rowLength = bindx[iRow+1] - bindx[iRow];
+        //std::cout << nOffset << "/" << _ja.size() << std::endl;
+        //std::cout << iRow << "," << bindx[bindx[iRow]] << std::endl;
+        _ja[nOffset++] = iRow;
+        for(UInt ii=0; ii<rowLength; ++ii) {
+            //std::cout << nOffset << "/" << _ja.size() << std::endl;
+            _ja[nOffset++] = bindx[ii+bindx[iRow]-PatternOffset]-PatternOffset;
+            //std::cout << iRow << "," << bindx[ii+bindx[iRow]] << std::endl;
+        }
+        _ia[iRow+1] = rowLength+1+_ia[iRow];
+    }
+
+    // fill _jaT
+
+    Container iaT(_ncols+1, 0);
+    // in a first step, fill iaT[k+1] with the number of entries in column k
+    for(UInt i=0; i<_nnz; ++i) {
+        iaT[_ja[i]+1]++;
+    }
+    // then update iaT to store absolute positions of in _jaT
+    for(UInt iCol=2; iCol<_ncols+1; ++iCol) {
+        iaT[iCol] = iaT[iCol]+iaT[iCol-1];
+    }
+
+    // fill diagonal entries
+    // update iaT[iCol] to hold next position in _jaT for column iCol
+    for(UInt iCol=0; iCol<_ncols; ++iCol) {
+        if (iaT[iCol] >= _nnz) {
+            std::cout << iaT[iCol] << ">=" << _nnz << std::endl;
+        }
+        _jaT[iaT[iCol]++] = _ia[iCol];
+    }
+
+    for(UInt i=0; i<_nnz; ++i) {
+        if ( i != _ia[_ja[i]] ) {
+            _jaT[iaT[_ja[i]]++] = i;
+        }
+    }
+
+    // take PatternOffset into account
+    if (PatternOffset != 0) {
+        for (Container::iterator ip=_ia.begin(); ip != _ia.end(); ++ip) {
+            *ip += PatternOffset;
+        }
+        for (Container::iterator ip=_ja.begin(); ip != _ja.end(); ++ip) {
+            *ip += PatternOffset;
+        }
+        for (Container::iterator ip=_jaT.begin(); ip != _jaT.end(); ++ip) {
+            *ip += PatternOffset;
+        }
+   }
+    _filled = true;
+    _diagfirst = true;
+}
+
 CSRPatt& CSRPatt::operator= (const CSRPatt& RhCsr){
   if (&RhCsr != this)
     {
@@ -225,7 +290,7 @@ CSRPatt colUnify(CSRPatt const &patt1, CSRPatt const &patt2)
 
   CSRPatt ans(nnz, nrows, ncols);
 
-  ans._ja.resize(nnz,0+PatternOffset);
+  ans._ja.resize(nnz,PatternOffset);
 
   Iter ja_start = ans._ja.begin();
 
@@ -304,10 +369,10 @@ CSRPatt colUnify(CSRPatt const &patt1, CSRPatt const &patt2)
       Iter ja_start1 = ja_start + ans._i2o(ans._ia[row]);
       Iter ja_end1 = ja_start + ans._i2o(ans._ia[row+1]);
 
-      // Ricerca dell'elemento diagonale
+      // find diagonal element
       Iter ja_diag = find(ja_start1, ja_end1, row);
 
-      // Ordinamento
+      // reorder
       rotate(ja_start1, ja_diag, ja_diag + 1);
     }
 
@@ -488,10 +553,10 @@ CSRPatt rowUnify(CSRPatt const &patt1, CSRPatt const &patt2)
       Iter ja_start1 = ans._ja.begin() + ans._i2o(ans._ia[row]);
       Iter ja_end1 = ans._ja.begin() + ans._i2o(ans._ia[row+1]);
 
-      // Ricerca dell'elemento diagonale
+      // find diagonal element
       Iter ja_diag = find(ja_start1, ja_end1, row);
 
-      // Ordinamento
+      // reorder
       rotate(ja_start1, ja_diag, ja_diag + 1);
     }
 
@@ -535,7 +600,7 @@ CSRPatt rowUnify(UInt const nrowZero, CSRPatt const &patt1)
 
   // nothing changes but the number of rows of the matrix
   CSRPatt ans(nnz, nrows, ncols);
-  ans._ia.resize(nrows+1,0+PatternOffset); // points at the begining !
+  ans._ia.resize(nrows+1,PatternOffset); // points at the begining !
 
   //copy of patt1._ia
   for (UInt i=0; i < patt1._ia.size(); i++)
@@ -561,7 +626,7 @@ CSRPatt rowUnify(UInt const nrowZero, CSRPatt const &patt1)
   return ans;
 }
 
-// Costruzione di una Matrice diagonale a blocchi
+// construction of a block diagonal matrix
 CSRPatt diagblockMatrix(CSRPatt const &patt, UInt const nblock)
 {
   typedef PatternDefs::Container::const_iterator ConstIter;
@@ -588,7 +653,7 @@ CSRPatt diagblockMatrix(CSRPatt const &patt, UInt const nblock)
     {
       for (i = 0; i < nrowsblock; ++i)
 	{
-	  // numero attuale di riga della matrice globale
+	  // current row number of global matrix
 	  nrow = i + nrowsblock*(block-1);
 
 	  ans._ia[nrow] = patt._ia[i] + brow - PatternOffset;
@@ -607,7 +672,7 @@ CSRPatt diagblockMatrix(CSRPatt const &patt, UInt const nblock)
 	  for (Iter ip = ja_start1; ip != ja_end1; ++ip)
 	    *ip += nrowsblock*(block-1);
 	};
-      // numero di riga della matrice globale in cui inizia il blocco numero block+1
+      // row number of global matrix where block number block+1 begins
       brow = ans._ia[nrow] + patt._ia[i] - patt._ia[i-1] - PatternOffset;
     };
 
@@ -993,7 +1058,8 @@ MSRPatt::MSRPatt(UInt ex_nnz, UInt ex_nrow, UInt ex_ncol, const vector<Index_t> 
 MSRPatt::MSRPatt(const MSRPatt &RightHandMSRP):BasePattern(RightHandMSRP),
 					       _bindx(RightHandMSRP.bindx()),_ybind(RightHandMSRP.ybind()) {};
 
-// TODO:Sarebbe utile fare una serie di convertitori... non solo come costruttori ma come funzioni
+// TODO: It would be useful to write some convertors, not only as constructors
+//       but also as functions
 
 // version assuming that the CSR pattern has all its diagonal terms non null
 MSRPatt::MSRPatt(const CSRPatt &RightHandCSRP):BasePattern(RightHandCSRP),

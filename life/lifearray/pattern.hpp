@@ -18,7 +18,7 @@
 */
 /*----------------------------------------------------------------------*
 |
-| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.8 2004-09-09 15:18:13 winkelma Exp $
+| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.9 2004-09-24 13:57:23 winkelma Exp $
 |
 |
 | #Version  0.1 Experimental   07/7/00. Luca Formaggia & Alessandro Veneziani  |
@@ -159,6 +159,8 @@ public:
 ///
 //////////////////////////////////////////////////
 
+class MSRPatt;
+
 class CSRPatt:
   public BasePattern
 {
@@ -203,6 +205,8 @@ public:
     CSRPatt(DOF1 const  & dof1,DOF2 const  & dof2,
 	    UInt const bRows= 1, UInt const bCols= 1);
 
+    CSRPatt(const MSRPatt& msrPatt);
+    
   template<typename DOF1,typename DOF2>
     bool buildPattern(DOF1 const& dof1,DOF2 const  & dof2,
 		      UInt const bRows= 1, UInt const bCols= 1);
