@@ -1,0 +1,61 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#        Data file for NavierStokes ACT PC
+#-------------------------------------------------
+
+[problem]
+
+strategy = 2   # coupling strategy : 1 -> mean pressure; 2 -> Flow rate
+
+[fluid]
+
+[./physics]
+density         = 1.0               # density
+viscosity       = 0.035             # viscosity
+inittime        = 0.00              # starttime
+endtime         = 0.002             # endtime --> two steps for testing purposes
+
+[../geometry]
+length = 5.0                        # length of the cylinder
+radius = 0.5	                    # radius of the cylinder
+
+
+[../discretization]
+mesh_dir  = ../data/mesh/inria/  # the directory where the mesh file is
+mesh_file =  cyltetra.mesh       # hexa8x8.mesh     # mesh file
+timestep  = 0.001                # timestep
+
+
+[../miscellaneous]
+verbose         = 1
+
+
+[../aztec_i]
+output          = warnings #all_res
+max_iter        = 1550
+poly_ord        = 5
+kspace          = 40
+precond         = dom_decomp
+tol             = 1.00e-6
+drop            = 1.00e-4
+ilut_fill       = 1.5
+
+[../aztec_ii]
+output          = all_res
+conv            = rhs
+max_iter        = 1550
+poly_ord        = 5
+kspace          = 40
+tol             = 1.00e-6
+drop            = 1.00e-4
+ilut_fill       = 1.5
+
+
+[../aztec_s]
+output          = warnings #all_res
+conv            = rhs
+poly_ord        = 5
+max_iter        = 1550
+kspace          = 40
+tol             = 1.00e-6
+drop            = 1.00e-4
