@@ -60,12 +60,17 @@ In order to compile \lifev, certain requirements must be met in terms
 of compilation tools, and libraries to link to.
 
 \noindent In this document, we shall use \verb+$(top_srcdir)+ (aka \verb+$LIFEV_HOME+) to designate the top level \emph{source} directory 
-and \verb+$(top_builddir)+ to designate the top level \emph{build} directory where \lifev has been \emph{configured} for a compilation environment.
-\verb+$(top_builddir)+ may be different from  \verb+$(top_srcdir)+, see for example the configure hint in section~\ref{hint:configure}.
+and \verb+$(top_builddir)+ to designate the top level \emph{build}
+directory where \lifev has been \emph{configured}(see
+sections~\ref{sec:compile-cvs} and~\ref{sec:comp-from-offic}) for a
+compilation environment.  \verb+$(top_builddir)+ may be different from
+\verb+$(top_srcdir)+, see for example the configure hint in
+section~\ref{hint:configure}.
 
 \subsection{Requirements}
 
 \subsubsection{Compilation Environment}
+\label{sec:comp-envir}
 
 \lifev depends on a number of tools at compilation time, they are part
 of the \ix{autotools} from the GNU
@@ -163,7 +168,7 @@ Here we have \verb+$(top_builddir) == $LIFEV_HOME/optimized+.
 
 
 \subsection{Compilation from Official Distribution}
-
+\label{sec:comp-from-offic}
 The \lifev project provides releases, they are named using the following convention:
 \begin{center}
 \verb!lifev-x.y.z.tar.gz!
