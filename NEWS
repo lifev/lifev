@@ -38,6 +38,7 @@ New in 0.4.0:
 
 [testsuite]
 * Added test case for coupled mass transport solvers (MP)
+* Added NS test case for boundary condition given as a vector (AM)
 
 
 Bugs fixed in 0.3.0:
