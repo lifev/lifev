@@ -47,12 +47,6 @@ int main(int argc, char** argv)
     BCh_u.addBC("Wall-outflow", 5, Essential, Full, u_wall,   3);
     BCh_u.addBC("InFlow",       1, Essential, Full, in_flow,  3);
     BCh_u.addBC("OutFlow",      3, Natural,   Full, out_flow, 3);
-/*
-    BCh_u.addBC("InFlow",       2, Essential, Full, in_flow,   3);
-    BCh_u.addBC("Wall",         1, Essential, Full, u_wall,   3);
-    BCh_u.addBC("OutFlow",      3, Natural,   Full, out_flow, 3);
-    BCh_u.addBC("Edges",       20, Essential, Full, u_wall,     3);
-*/
 
     // Navier-Stokes Solver
     //
