@@ -25,22 +25,40 @@
 #include <lifeconfig.h>
 
 #include <life/lifecore/GetPot.hpp>
+
 #include <life/lifealg/SolverAztec.hpp>
-#include <life/lifesolver/LevelSetSolver.hpp>
+
 #include <life/lifefem/bcManage.hpp>
-#include <life/lifearray/elemMat.hpp>
 #include <life/lifefem/elemOper.hpp>
+#include <life/lifefem/bdf.hpp>
+
+#include <life/lifearray/elemMat.hpp>
+
 #include <life/lifefilters/importer.hpp>
 #include <life/lifefilters/openDX_wrtrs.hpp>
 #include <life/lifefilters/vtk_wrtrs.hpp>
-#include <life/lifefem/bdf.hpp>
 
+#include <life/lifesolver/LevelSetSolver.hpp>
 
 #include <main.hpp>
 
 
 int main() {
     using namespace LifeV;
+
+    GetPot datafile( "data" );
+
+    //vortex analyticalVelocityField;
+    uniform analyticalVelocityField;
+    Real ux = datafile("levelset/problem-data/ux", 1.);
+    Real uy = datafile("levelset/problem-data/uy", 1.);
+    Real uz = datafile("levelset/problem-data/uz", 1.);
+    Real x0 = datafile("levelset/problem-data/x0", -0.4);
+    Real y0 = datafile("levelset/problem-data/y0", -0.4);
+    Real z0 = datafile("levelset/problem-data/z0", -0.4);
+    Real r = datafile("levelset/problem-data/r", 0.4);
+    uniform::set( ux, uy, uz );
+    sphere::init( x0, y0, z0, r, ux, uy, uz );
 
     // Boundary conditions definition
 
@@ -49,22 +67,22 @@ int main() {
       component of velocity is zero all over the boundary and hence no inlet
       boundary exists. This part of the code is however only commented out
       since it may serve as a template.
-
-      BCFunctionBase gv1(g1); // Functor storing the user definded function g
-      BCFunctionBase gv2(g2); // Functor storing the user definded function g
-      BCHandler BCh(2); // We impose two boundary conditions
-
-      BCh.addBC("Inlet",  10, Essential, Scalar, gv1);
-      BCh.addBC("Outlet",  20, Essential, Scalar, gv2);
     */
+
+    BCFunctionBase gd(sphere::phi); // Functor storing the user defined function g
     BCHandler BCh;
+
+    BCh.addBC("Inlet",  1, Essential, Scalar, gd);
+    BCh.addBC("Outlet", 2, Essential, Scalar, gd);
+    BCh.addBC("Inlet",  3, Essential, Scalar, gd);
+    BCh.addBC("Outlet", 4, Essential, Scalar, gd);
+    BCh.addBC("Inlet",  5, Essential, Scalar, gd);
+    BCh.addBC("Outlet", 6, Essential, Scalar, gd);
 
     // Finite element stuff
 
     const GeoMap& geoMap = geoLinearTetra;
     const GeoMap& geoMapBd = geoLinearTria;
-
-    GetPot datafile( "data" );
 
     std::string __fe_name = datafile("levelset/discretization/FEM", "P1");
     const RefFE& refFE = __fe_name == "P1" ? feTetraP1 : feTetraP2;
@@ -122,7 +140,7 @@ int main() {
     // boundary exists. This part of the code is however only commented out
     // since it may serve as a template.
 
-    //BCh.bdUpdate( __mesh,  feBd, __dof );
+    BCh.bdUpdate( __mesh,  feBd, __dof );
 
     UInt dim = __dof.numTotalDof();
 
@@ -159,7 +177,6 @@ int main() {
             }
 
         std::cout << "** LS test ** Solving mass matrix system" << std::endl;
-        vortex analyticalVelocityField;
         projectVelocityField(__mesh, __fe, __dof, betaVec, analyticalVelocityField,
                              NDIM, M_NDIM, solverMass);
 
@@ -182,48 +199,57 @@ int main() {
     Real t0 = datafile("levelset/bdf/t0", 0.);
     Real delta_t = datafile("levelset/bdf/delta_t", 0.01);
     Real T = datafile("levelset/bdf/T", 0.04);
+    UInt nSteps = static_cast<UInt>( ( T - t0 ) / delta_t + 0.5 );
 
     // Solver initialization
 
     LevelSetSolver<meshType> lss(__mesh, datafile, "levelset", refFE,
                                  qr, qrBd, BCh, __fe, __dof, betaVec);
-    lss.initialize(sphere, t0, delta_t);
+    lss.initialize(sphere::phi, t0, delta_t);
     lss.setVerboseMode();
 
     const LevelSetSolver<meshType>::lsfunction_type& U = lss.lsfunction();
     std::string outputFileRoot = "./results/ls_ip";
 
+    // Initialize ostream to save mass information
+
+    std::ofstream __ofile("results/mass.txt");
+
     // Save initial conditions
 
     wr_opendx_header(outputFileRoot + "0000.dx", __mesh, __dof, lss.fe(), __fe_name );
     wr_opendx_scalar(outputFileRoot + "0000.dx", "levelset_ipstab", U);
+    __ofile << t0 << "\t"
+            << lss.computeMass( LevelSetSolver<meshType>::fluid1 )
+            << std::endl;
 
     // Reinitialize and save re-initialized IC
 
     lss.directReinitialization();
     wr_opendx_header(outputFileRoot + "0000r.dx", __mesh, __dof, lss.fe(), __fe_name );
     wr_opendx_scalar(outputFileRoot + "0000r.dx", "levelset_ipstab", U);
+    __ofile << t0 << "\t"
+            << lss.computeMass( LevelSetSolver<meshType>::fluid1 )
+            << std::endl;
 
     // Retrieve parameters from data file
 
     UInt save_every = datafile("levelset/parameters/save_every", 1);
     UInt reini_every = datafile("levelset/parameters/reinit_every", 10);
 
-    // Initialize ostream to save mass information
-
-    std::ofstream __ofile("results/mass.txt");
-
     // Initialize counters
 
-    UInt current_step = 1;
     UInt steps_after_last_reini = 1;
     UInt steps_after_last_save = 1;
 
-    for(Real t = t0; t < T; t += delta_t) {
+    for(UInt current_step = 1; current_step <= nSteps; ++current_step ) {
+        Real t = t0 + current_step * delta_t;
         std::cout << "** LS test ** Step: " << current_step << ", t = " << t
                   << std::endl;
         lss.timeAdvance();
-        __ofile << t << "\t" << lss.computeMass( LevelSetSolver<meshType>::fluid1 ) << std::endl;
+        __ofile << t << "\t"
+                << lss.computeMass( LevelSetSolver<meshType>::fluid1 )
+                << std::endl;
         std::cout << lss;
         lss.spy("./results/");
 
@@ -233,7 +259,8 @@ int main() {
         number << current_step;
 
         if(steps_after_last_save == save_every) {
-            wr_opendx_header(outputFileRoot + number.str() + ".dx", __mesh, __dof, lss.fe(), __fe_name );
+            wr_opendx_header(outputFileRoot + number.str() + ".dx",
+                             __mesh, __dof, lss.fe(), __fe_name );
             wr_opendx_scalar(outputFileRoot + number.str() + ".dx",
                              "levelset_ipstab", U);
 
@@ -245,6 +272,9 @@ int main() {
             std::cout << "** LS test ** Reinitializing signed distance function"
                       << std::endl;
             lss.directReinitialization();
+            __ofile << t << "\t"
+                    << lss.computeMass( LevelSetSolver<meshType>::fluid1 )
+                    << std::endl;
 
             steps_after_last_reini = 1;
 
@@ -255,8 +285,6 @@ int main() {
         }
         else
             steps_after_last_reini++;
-
-        current_step++;
     }
 
     __ofile.close();
