@@ -134,6 +134,10 @@ protected:
 
     //! This method interpolates the mesh velocity when necessary (refFE_u.nbNodes > _mesh.getRefFE().nbNodes)
     void _interpolate( const UInt nbcomp, const Vector& w, Vector& wInterp );
+
+private:
+
+    Real _factor; // amplification factor for deformed mesh
 };
 
 
@@ -168,6 +172,7 @@ NavierStokesAleHandler( const GetPot& data_file, const RefFE& refFE_u,
         _dInterp( _dim_u ),
         _dwInterp( _dim_u )
 {
+    _factor = data_file( "fluid/miscellaneous/factor", 1.0 );
     _dispOld = ZeroVector( _dispOld.size() );
     _w = ZeroVector( _w.size() );
     _wInterp = ZeroVector( _wInterp.size() );
@@ -258,7 +263,8 @@ void
 NavierStokesAleHandler<Mesh>::initialize( const std::string& velName,
                                           const std::string& pressName)
 {
-    std::cout "  F- restarting ... " << std::endl
+    std::cout << "  F- restarting ... " << std::endl;
+
     NavierStokesHandler<Mesh>::initialize( velName, pressName);
 
     UInt nnode = _mesh.pointList.size();
@@ -369,7 +375,7 @@ NavierStokesAleHandler<Mesh>::postProcess()
 
 
         //wr_medit_ascii("press."+name+".mesh", _mesh);
-        wr_medit_ascii( "press." + name + ".mesh", _mesh, _disp, 12 );
+        wr_medit_ascii( "press." + name + ".mesh", _mesh, _disp, _factor );
         // wr_medit_ascii_vector("veloc."+name+".bb",_u.giveVec(),_mesh.numVertices(),_dim_u);
         system( ( "ln -s press." + name + ".mesh vel_x." + name + ".mesh" ).data() );
         system( ( "ln -s press." + name + ".mesh vel_y." + name + ".mesh" ).data() );
