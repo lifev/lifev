@@ -1,19 +1,20 @@
-#include <iostream.h>
+#include <iostream>
 #include <utility>
+
 /*
   a stupid code that generates automatically  the pattern of a
   "standard" finite element (just cut and past the result in the file
   feDef.h, and don't forget to delete the last "," ).
                                                Jean-Fred Gerbeau 11/99.
 */
-main()
+int main()
 {
   int nbNode  = 10;
   int nbPattern = nbNode*nbNode;
   int nbDiag  = nbNode;
   int nbUpper = nbNode*(nbNode-1)/2;
   int ip,i,j;
-  pair<int,int> _pattern[nbPattern];
+  std::pair<int,int> _pattern[nbPattern];
   // first : diagonal terms
   for(ip=1;ip<=nbDiag;ip++)
     _pattern[ip-1].first = _pattern[ip-1].second = ip;
@@ -27,23 +28,23 @@ main()
     }
   }
 
-  cout << "// First : rows " << endl;
-  cout << "static int _pf[" << nbPattern << "] = {";
-  for(ip=0;ip<nbDiag;ip++) cout << _pattern[ip].first << "," ;
-  cout << "// diag  entries" << endl;
-  for(ip=nbDiag;ip<nbDiag+nbUpper;ip++) cout << _pattern[ip].first << "," ;
-  cout << "// upper  entries" << endl;
-  for(ip=nbDiag+nbUpper;ip<nbPattern;ip++)cout << _pattern[ip].first << "," ;
-  cout << "}; // lower  entries" << endl << endl;
+  std::cout << "// First : rows " << std::endl;
+  std::cout << "static int _pf[" << nbPattern << "] = {";
+  for(ip=0;ip<nbDiag;ip++) std::cout << _pattern[ip].first << "," ;
+  std::cout << "// diag  entries" << std::endl;
+  for(ip=nbDiag;ip<nbDiag+nbUpper;ip++) std::cout << _pattern[ip].first << "," ;
+  std::cout << "// upper  entries" << std::endl;
+  for(ip=nbDiag+nbUpper;ip<nbPattern;ip++)std::cout << _pattern[ip].first << "," ;
+  std::cout << "}; // lower  entries" << std::endl << std::endl;
 
-  cout << "// Second : column " << endl;
-  cout << "static int _ps[" << nbPattern << "] = {";
-  for(ip=0;ip<nbDiag;ip++) cout << _pattern[ip].second << "," ;
-  cout << "// diag  entries" << endl;
-  for(ip=nbDiag;ip<nbDiag+nbUpper;ip++) cout << _pattern[ip].second << "," ;
-  cout << "// upper  entries" << endl;
-  for(ip=nbDiag+nbUpper;ip<nbPattern;ip++)cout << _pattern[ip].second << "," ;
-  cout << "}; // lower  entries" << endl;
+  std::cout << "// Second : column " << std::endl;
+  std::cout << "static int _ps[" << nbPattern << "] = {";
+  for(ip=0;ip<nbDiag;ip++) std::cout << _pattern[ip].second << "," ;
+  std::cout << "// diag  entries" << std::endl;
+  for(ip=nbDiag;ip<nbDiag+nbUpper;ip++) std::cout << _pattern[ip].second << "," ;
+  std::cout << "// upper  entries" << std::endl;
+  for(ip=nbDiag+nbUpper;ip<nbPattern;ip++)std::cout << _pattern[ip].second << "," ;
+  std::cout << "}; // lower  entries" << std::endl;
 
 }
 
