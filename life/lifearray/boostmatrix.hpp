@@ -116,18 +116,7 @@ public:
         }
 
     //! set to zero without erasing pattern
-    void zeros()
-        {
-            for ( typename BoostMatrix::iterator1 i1=begin1();
-                  i1!=end1(); ++i1 )
-            {
-                for ( typename BoostMatrix::iterator2 i2=i1.begin();
-                      i2!=i1.end(); ++i2 )
-                {
-                    *i2 = 0;
-                }
-            }
-        }
+    void zeros();
 
     /** Diagonalization of row r of the system. Done by setting A(r,r) = coeff,
      *  A(r,j) = 0 for j!=r.
@@ -218,6 +207,34 @@ public:
 
 }; // class BoostMatrix
 
+template<>
+void BoostMatrix<boost::numeric::ublas::row_major>::zeros()
+{
+    for ( BoostMatrix::iterator1 i1=begin1();
+          i1!=end1(); ++i1 )
+    {
+        for ( BoostMatrix::iterator2 i2=i1.begin();
+              i2!=i1.end(); ++i2 )
+        {
+            *i2 = 0;
+        }
+    }
+}
+
+template<>
+void BoostMatrix<boost::numeric::ublas::column_major>::zeros()
+{
+    for ( BoostMatrix::iterator2 i2=begin2();
+          i2!=end2(); ++i2 )
+    {
+        for ( BoostMatrix::iterator1 i1=i2.begin();
+              i1!=i2.end(); ++i1 )
+        {
+            *i1 = 0;
+        }
+    }
+}
+
 class DiagonalBoostMatrix : public boost::numeric::ublas::compressed_matrix<double, boost::numeric::ublas::row_major>
 {
 public:
@@ -279,6 +296,43 @@ public:
         }
 
 }; // class DiagonalBoostMatrix
+
+/** efficient (Schur) product of sparse, diagonal, and sparse matrix D*H*G
+    @param D first matrix
+    @param H second matrix, diagonal
+    @param G third matrix
+    @param S schur product matrix, empty sparse matrix at input
+*/
+void schurProduct( const BoostMatrix<boost::numeric::ublas::row_major>& D,
+                   const DiagonalBoostMatrix& H,
+                   const BoostMatrix<boost::numeric::ublas::column_major>& G,
+                   BoostMatrix<boost::numeric::ublas::row_major>& S )
+{
+    using namespace boost::numeric::ublas;
+    ASSERT( D.size2() == H.size1() && H.size2() == G.size1() &&
+            D.size1() == S.size1() && G.size2() == S.size2(),
+            "[schurProduct] ERROR: cannot multiply " << D.size1() << "x" <<
+            D.size2() << " matrix by " << H.size1() << "x" << H.size2() <<
+            " matrix by " << G.size1() "x" << G.size2() << " matrix into " <<
+            S.size1() << "x" << S.size2() << " matrix." );
+    for ( BoostMatrix<row_major>::const_iterator1 iD1=D.begin1();
+          iD1!=D.end1(); ++iD1 )
+    {
+        for ( BoostMatrix<column_major>::const_iterator2 iG2=G.begin2();
+              iG2!=G.end2(); ++iG2 )
+        {
+            BoostMatrix<row_major>::const_iterator2 iD2=iD1.begin();
+            BoostMatrix<column_major>::const_iterator1 iG1=iG2.begin();
+            for ( ; iD2!=iD1.end(); ++iD2 )
+            {
+                while ( iG1.index1() < iD2.index2() ) ++iG1;
+                if ( iD2.index1() == iG1.index2() )
+                    S( iD1.index1(), iG2.index2() ) += *iD2 *
+                        H.value_data()[iD2.index1()] * *iG1;
+            }
+        }
+    }
+}
 
 } // namespace LifeV
 
