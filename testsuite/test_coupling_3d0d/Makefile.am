@@ -26,13 +26,13 @@ AM_CPPFLAGS	= -DNO_BLASLAPACK
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-check_HEADERS  = ud_functions.hpp operFS.hpp zeroDModelSolver.hpp meanPressure.hpp flowRate.hpp C3d0d.hpp
+check_HEADERS  = ud_functions.hpp zeroDModelSolver.hpp meanPressure.hpp flowRate.hpp C3d0d.hpp
 
 check_PROGRAMS  = test_coupling_NS0d test_coupling_FSI0d
 
 test_coupling_NS0d_SOURCES = main_NS0d.cpp
 
-test_coupling_FSI0d_SOURCES = main_FSI0d.cpp operFS.cpp
+test_coupling_FSI0d_SOURCES = main_FSI0d.cpp
 
 EXTRA_DIST = data_NS0d data_FSI0d testsuite.at
 
