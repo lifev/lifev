@@ -133,9 +133,6 @@ int main( int argc, char** argv )
     LifeV::test_petsc ( convdiff );
     LifeV::test_umfpack ( convdiff );
 
-#if defined(HAVE_PETSC_H)
-    PetscFinalize();
-#endif /* HAVE_PETSC_H */
     }
     catch( std::exception const& __e )
     {
