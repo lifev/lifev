@@ -53,9 +53,6 @@ namespace LifeV
           to the linear solver is therefore eta. eta is determined
           by the modified Eisenstat-Walker formula if etamax > 0.
 
-          If eta_max < 0, then eta = |etamax| for the entire
-          iteration (e.g. etamax = -1e-6 ensures that the linear
-          tolerance would be always 1e-6). Default value = 0.9
           linesearch     :  for now consider only the case linesearch=0
           (coded but not theoretically analysed)
 
@@ -85,11 +82,11 @@ namespace LifeV
         Vector residual     = sol;
         Vector step         = sol;
 
-        Vector muS          = sol;
-        Vector muF          = sol;
+        Vector muS(f.solid().dDof().numTotalDof());
+        Vector muF(f.fluid().uDof().numTotalDof());
 
-        muS                 = 0.;
-//        muF                 = 0.;
+        muS                 = -2.;
+        muF                 = -1.;
         step                = 0.;
 
         Real   normResOld   = 1;
@@ -97,7 +94,7 @@ namespace LifeV
         Real   omegaS       = omega;
         Real   omegaF       = omega;
 
-        f.evalResidual(residual, sol, iter);
+        f.evalResidual(sol, iter, residual);
 
         Real normRes        = norm(residual);
         Real stop_tol       = abstol + reltol*normRes;
@@ -108,7 +105,6 @@ namespace LifeV
 //
 
         out_res << time << "    " << iter << "   " << normRes << std::endl;
-
         
 
         while( normRes > stop_tol && iter < maxit)
@@ -126,25 +122,29 @@ namespace LifeV
             normResOld = normRes;
             normRes    = norm(residual);
 
-            //f.updateJac(sol, iter);
-//            f.solveJac(muF, -1.*residual, linres);
-            //muF = 0.;
+//            muS        = residual;
             
-            linres     = linear_rel_tol;
+            step       = aitken.computeDeltaLambda(sol, residual);
 
-            muS        = residual;
-            
-            step       = aitken.computeDeltaLambda(sol, muS);
-
-            //f.solveJac(step,-1.*residual,linres); // residual = f(sol)
-            
             std::cout << "Step norm = " << norm(step) << std::endl;
-            out_res << "Step norm = " << norm(step);
-            
-            muS        = residual;
 
+            out_res << "Step norm = " << norm(step);
+            out_res << "size d = " << f.solid().dDof().numTotalDof() << std::endl;
+            out_res << "size f = " << f.fluid().uDof().numTotalDof() << std::endl;
+            
+            muS        = f.residualS();
+            muF        = f.residualF();
+
+            for (UInt ii = 0; ii < muF.size(); ++ii)
+            {
+                out_res << std::fabs(muF[ii]) << " ";
+                    if (ii < muS.size()) out_res << std::fabs(muS[ii]);
+                out_res << std::endl;
+            }
+            
             sol       += step;
-            f.evalResidual(residual, sol, iter);
+            
+            f.evalResidual(sol, iter, residual);
 
             out_res << " Res norm = " << norm(residual) << std::endl;
             
