@@ -44,8 +44,9 @@ $(srcdir)/test_darcytetra/testsuite.at \
 $(srcdir)/test_essentialbc/testsuite.at \
 $(srcdir)/test_fe/testsuite.at \
 $(srcdir)/test_fsi_newton/testsuite.at \
-$(srcdir)/test_fsi_picard/testsuite.at \
 $(srcdir)/test_linearelasticity/testsuite.at \
+$(srcdir)/test_fsi_picard/testsuite.at \
+$(srcdir)/test_fsi_dd/testsuite.at \
 $(srcdir)/test_masstransport/testsuite.at \
 $(srcdir)/test_mass_coupling/testsuite.at \
 $(srcdir)/test_laplacian/testsuite.at \
