@@ -73,6 +73,8 @@ public:
 
     void eval( Vector& fx0, Vector& gx0, Vector x0, int status );
 
+    void initialize( const Function& x0, Real t0=0., Real dt=0. );
+
 private:
 
     //! Block pattern of M_u
@@ -121,6 +123,7 @@ private:
     Real M_gammaBeta;
     Real M_gammaDiv;
     Real M_gammaPress;
+
 }; // class NavierStokesSolverIP
 
 
@@ -246,52 +249,14 @@ NavierStokesSolverIP( const GetPot& dataFile,
                      0, 0, M_gammaPress, this->viscosity() );
     pressureStab.apply(M_matrStokes, this->_u);
 
-    if ( M_steady )
-    {
-        M_sol = 0.0;
-    }
-    else
-    {
-        _bdf.bdf_u().initialize_unk( xexact, _mesh, _refFE_u, _fe_u, _dof_u,
-                                      0., _dt, nDimensions+1 );
-
-        // write initial values (for debugging only)
-        const std::vector<Vector>& unk = _bdf.bdf_u().unk();
-        for ( UInt iUnk=0; iUnk<unk.size(); ++iUnk )
-        {
-            for ( UInt iDof=0; iDof<nDimensions*_dim_u; ++iDof )
-            {
-                _u[ iDof ] = unk[ iUnk ][ iDof ];
-            }
-            for ( UInt iDof = 0; iDof<_dim_u; ++iDof )
-            {
-                _p[ iDof ] = unk[ iUnk ][ iDof+nDimensions*_dim_u ];
-            }
-            this->postProcess();
-        }
-
-        M_sol = *( _bdf.bdf_u().unk().begin() );
-        for ( UInt iDof = 0; iDof<nDimensions*_dim_u; ++iDof )
-        {
-            _u[ iDof ] = M_sol[ iDof ];
-            //   std::cout << iDof+1 << ": " << M_sol[ iDof ] << std::endl;
-        }
-
-        for ( UInt iDof = 0; iDof<_dim_u; ++iDof )
-        {
-            _p[ iDof ] = M_sol[ iDof+nDimensions*_dim_u ];
-            // std::cout << iDof+1 << ": " << M_sol[ iDof+nDimensions*_dim_u ]
-            //           << std::endl;
-        }
-
-    }
+    M_sol = 0.0;
 
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
     // M_matrStokes.spy( "CS.m" );
 
 
-}
+} // NavierStokesSolverIP() [Constructor]
 
 template<typename Mesh>
 void NavierStokesSolverIP<Mesh>::
@@ -330,23 +295,15 @@ timeAdvance( const Function source, const Real& time )
         }
     }
 
-    //  For the moment steady: without mass term
-    //
-    //  M_rhsU += M_matrMassU * _u;
-
     if ( !M_steady )
     {
-        //std::cout << std::endl << "||~p|| = "
-        //          << maxnorm( _bdf.bdf_u().time_der( _dt ) ) << std::endl;
         M_rhsU += M_matrMass * _bdf.bdf_u().time_der( _dt );
         //_bdf.bdf_u().shift_right( M_sol );
     }
 
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
-}
-
-
+} // timeAdvance()
 
 
 template<typename Mesh>
@@ -450,11 +407,11 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
 
 
     //if ( _BCh_u.fullEssential() )
-    M_matrFull.diagonalize( nDimensions*_dim_u, 1.0, M_rhsFull,
-                            pexact( M_time,
-                                    _mesh.point( 1 ).x(),
-                                    _mesh.point( 1 ).y(),
-                                    _mesh.point( 1 ).z(), 1 ) );
+//     M_matrFull.diagonalize( nDimensions*_dim_u, 1.0, M_rhsFull, 0);
+//                             pexact( M_time,
+//                                     _mesh.point( 1 ).x(),
+//                                     _mesh.point( 1 ).y(),
+//                                     _mesh.point( 1 ).z(), 1 ) );
     //  M_matrFull.diagonalize_row( nDimensions*_dim_u, 1.0 );
     //M_rhsFull[ nDimensions*_dim_u ] = pexact( _mesh.point( 1 ).x(),
     //                                        _mesh.point( 1 ).y(),
@@ -494,37 +451,52 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
     for ( UInt iDof = 0; iDof<nDimensions*_dim_u; ++iDof )
     {
         _u[ iDof ] = M_sol[ iDof ];
-        //   std::cout << iDof+1 << ": " << M_sol[ iDof ] << std::endl;
     }
-
     for ( UInt iDof = 0; iDof<_dim_u; ++iDof )
     {
         _p[ iDof ] = M_sol[ iDof+nDimensions*_dim_u ];
-        // std::cout << iDof+1 << ": " << M_sol[ iDof+nDimensions*_dim_u ]
-        //           << std::endl;
     }
-
-    Real norm_p = 0.0;
-    Real norm_u = 0.0;
-
-    for ( UInt iVol = 1; iVol <= _mesh.numVolumes(); iVol++ )
-    {
-        _fe_u.updateFirstDeriv( _mesh.volumeList( iVol ) );
-
-        norm_p += elem_L2_diff_2( _p, pexact, _fe_u, _dof_u, M_time, 1 );
-        norm_u += elem_L2_diff_2( _u, uexact, _fe_u, _dof_u, M_time,
-                                   int( nbCompU ) );
-    }
-
-    std::cout << "      - L2 pressure error = " << sqrt( norm_p ) << std::endl;
-    std::cout << "      - L2 velocity error = " << sqrt( norm_u ) << std::endl;
 
     if ( !M_steady )
     {
         _bdf.bdf_u().shift_right( M_sol );
     }
 
-}
+} // iterate()
+
+template <typename Mesh>
+void NavierStokesSolverIP<Mesh>::initialize( const Function& x0,
+                                             Real t0, Real dt )
+{
+    ID nbComp = _u.nbcomp(); // Number of components of the velocity
+    _bdf.bdf_u().initialize_unk( x0, this->_mesh, _refFE_u, _fe_u, _dof_u, t0,
+                                 dt, nbComp+1 );
+    // initialize M_sol with the first element in bdf_u.unk (=last value)
+    M_sol = *( _bdf.bdf_u().unk().begin() );
+    for ( UInt iDof = 0; iDof<nDimensions*_dim_u; ++iDof )
+    {
+        _u[ iDof ] = M_sol[ iDof ];
+    }
+    for ( UInt iDof = 0; iDof<_dim_u; ++iDof )
+    {
+        _p[ iDof ] = M_sol[ iDof+nDimensions*_dim_u ];
+    }
+
+    // write initial values (for debugging only)
+    const std::vector<Vector>& unk = _bdf.bdf_u().unk();
+    for ( UInt iUnk=0; iUnk<unk.size(); ++iUnk )
+    {
+        for ( UInt iDof=0; iDof<nDimensions*_dim_u; ++iDof )
+        {
+            _u[ iDof ] = unk[ iUnk ][ iDof ];
+        }
+        for ( UInt iDof = 0; iDof<_dim_u; ++iDof )
+        {
+            _p[ iDof ] = unk[ iUnk ][ iDof+nDimensions*_dim_u ];
+        }
+        this->postProcess();
+    }
+} // initialize()
 
 } // namespace LifeV
 
