@@ -28,7 +28,7 @@
  */
 #include <lifeV.hpp>
 #include <NavierStokesSolverPC.hpp>
-#include <NavierStokesWithFlux_new.hpp>
+#include <NavierStokesWithFlux.hpp>
 #include <chrono.hpp>
 #include <ud_functions.hpp>
 #include <GetPot.hpp>
@@ -68,13 +68,14 @@ main(int argc, char** argv)
     //
     BCFunctionBase u_wall(u1);
     BCFunctionBase out_flow(u1);
-    BCFunctionBase in_flow(u1); // needs for two fluxes imposed at outlets
-    //BCFunctionBase in_flow(uo);
-    BCHandler BCh_u(4);
-    BCh_u.addBC("Wall",   4, Essential, Full, u_wall,  3);
+    //BCFunctionBase in_flow(u1); // needs for two fluxes imposed at outlets
+    BCFunctionBase in_flow(uo);
+    BCHandler BCh_u(5);
+    BCh_u.addBC("Wall",   2, Essential, Full, u_wall,  3);
     BCh_u.addBC("InFlow", 1, Natural,   Full, in_flow, 3);
-    BCh_u.addBC("OutFlow1", 2, Natural,   Full, out_flow, 3);
-    BCh_u.addBC("OutFlow2", 3, Natural,   Full, out_flow, 3);
+    BCh_u.addBC("OutFlow", 3, Natural,   Full, out_flow, 3);
+    BCh_u.addBC("InFlowWall", 4, Essential,   Full, out_flow, 3);
+    BCh_u.addBC("OutFlowWall", 5, Essential,   Full, out_flow, 3);
 
     // Navier-Stokes Solver
     //
@@ -92,12 +93,12 @@ main(int argc, char** argv)
 
     // Impose the fluxes for initialize
     //
-    __ns_with_flux.setFlux(2, my_flux_cos);
-    __ns_with_flux.setFlux(3, my_flux_cos2);
+    __ns_with_flux.setFlux(1, my_flux_cost);
+    //__ns_with_flux.setFlux(3, my_flux_cos2);
 
     //Set the strategy: 0 for the exact version; 1 for the inexact one. If flux imposed is one, the two versions are the same
     //
-    __ns_with_flux.setStrategy(1);
+    __ns_with_flux.setStrategy(0);
 
     toEnsight EnsightFilter;
     __ns_with_flux.doOnIterationFinish( EnsightFilter  );
@@ -115,8 +116,8 @@ main(int argc, char** argv)
 
        // Impose the fluxes
        //
-       __ns_with_flux.setFlux(2, my_flux_cos); //costant
-       __ns_with_flux.setFlux(3, my_flux_cos2); //costant
+       __ns_with_flux.setFlux(1, my_flux_cost); //costant
+       //__ns_with_flux.setFlux(3, my_flux_cos2); //costant
        //__ns_with_flux.setFlux(1, my_flux_cos); //cosinusoidal
        //__ns_with_flux.setFlux(1, my_flux_physio); // physiological
 
