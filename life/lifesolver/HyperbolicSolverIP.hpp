@@ -24,8 +24,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 /*!
   \file HyperbolicSolverIP.hpp
   \author Daniele Antonio Di Pietro <dipietro@unibg.it>
+  \author Christoph Winkelmann <christoph.winkelmann@epfl.ch>
+
   \date 1-26-2005
 */
+
+#define USE_AZTEC_SOLVER 1
 
 #ifndef _HYPERBOLICSOLVERIP_HPP_
 #define _HYPERBOLICSOLVERIP_HPP_
@@ -44,36 +48,29 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <GetPot.hpp>
 #include <bdf.hpp>
 
-#ifdef USE_AZTEC_SOLVER
+#if USE_AZTEC_SOLVER
 #include <SolverAztec.hpp>
 #else
-#include <lifeconfig.h>
-#if defined( HAVE_PETSC_H )
-#include <SolverPETSC.hpp>
+#include <SolverUMFPACK.hpp>
 #endif
-#endif
-
 
 #include <bcHandler.hpp>
+
 #include <dof.hpp>
+
 #include <elemOper.hpp>
 #include <elemOper2Fluids.hpp>
 
+#include <chrono.hpp>
+
 namespace LifeV {
-    /*!
-      A type for points and vectors. Points are defined by their position
-      vectors.
-    */
-    typedef boost::numeric::ublas::bounded_vector<Real, 3> geo_point_type;
-
-
     /*!
       \class HyperbolicSolverIP
       \brief hyperbolic solver class
 
       Hyperbolic solver with IP stabilization
 
-      @author Daniele Antonio Di Pietro <dipietro@unibg.it>
+      \author Daniele Antonio Di Pietro <dipietro@unibg.it>
     */
 
     template<typename MeshType>
@@ -81,19 +78,22 @@ namespace LifeV {
     public:
         /*! @name Typedefs */
         //@{
-        typedef geo_point_type vector_type;
 
         typedef MeshType mesh_type;
-#ifdef USE_AZTEC_SOLVER
+
+#if USE_AZTEC_SOLVER
         typedef SolverAztec solver_type;
 #else
-        //typedef SolverPETSC solver_type;
+        typedef SolverUMFPACK solver_type;
 #endif
 
-
+#if USE_AZTEC_SOLVER
         typedef MSRPatt pattern_type;
-
         typedef MSRMatr<Real> matrix_type;
+#else
+        typedef CSRPatt pattern_type;
+        typedef CSRMatr<CSRPatt, Real> matrix_type;
+#endif
 
         typedef Vector u_type;
         typedef Vector velocity_type;
@@ -113,7 +113,8 @@ namespace LifeV {
                            const BCHandler& bc_h,
                            CurrentFE& fe_velocity,
                            const Dof& dof_velocity,
-                           velocity_type& velocity0)
+                           velocity_type& velocity0,
+                           UInt nbComp = 1)
             :
             _M_mesh(mesh),
             _M_data_file(data_file),
@@ -123,12 +124,17 @@ namespace LifeV {
             _M_qr(qr),
             _M_qr_bd(qr_bd),
             _M_fe(_M_reffe, getGeoMap(_M_mesh), _M_qr),
+            _M_fe_2(_M_reffe, getGeoMap(_M_mesh), _M_qr),
             _M_fe_bd(_M_reffe_bd, getGeoMap(_M_mesh).boundaryMap(), _M_qr_bd),
             _M_fe_velocity(fe_velocity),
             _M_dof(_M_mesh, _M_reffe),
-            _M_M_pattern(_M_dof, 1),
+            _M_M_pattern(_M_dof, nbComp),
             _M_M(_M_M_pattern),
+#if USE_AZTEC_SOLVER
             _M_A_pattern(_M_dof, _M_mesh, 1),
+#else
+            _M_A_pattern(_M_dof, nbComp, _M_mesh),
+#endif
             _M_A_steady(_M_A_pattern),
             _M_A(_M_A_pattern),
             _M_dim( _M_dof.numTotalDof() ),
@@ -139,9 +145,17 @@ namespace LifeV {
             _M_dim_velocity( _M_dof_velocity.numTotalDof() ),
             _M_velocity(velocity0),
             _M_bdf_order( data_file((data_section + "/bdf/order").data(), 2) ),
-            _M_bdf(_M_bdf_order)
-        {            
+            _M_bdf(_M_bdf_order),
+            _M_monitored_times(5)
+        {
+#if USE_AZTEC_SOLVER
+            _M_solver.setOptionsFromGetPot(_M_data_file, (_M_data_section + "/solver").data());        
+            std::cout << "** HSIP ** Using AZTEC solver" << std::endl;
+#else
+            std::cout << "** HSIP ** Using UMFPACK solver" << std::endl;
+#endif
             _M_gamma = _M_data_file((_M_data_section + "/ipstab/gamma").data(), 0.125);
+
             switch( _M_fe.nbNode )
             {
                 case 4:
@@ -160,6 +174,8 @@ namespace LifeV {
                     ERROR_MSG( "This refFE is not allowed with IP stabilisation" );
                     break;
             }
+
+            _M_verbose = false;
         }
 
         //@}
@@ -188,9 +204,14 @@ namespace LifeV {
         /*! @name Mutators */
         //@{
 
+        //! Set verbose mode
+        void setVerboseMode() {
+            _M_verbose = true;
+        }
+
         //! Set advection field
-        void setVelocity(velocity_type& velocity) const {
-            _M_velocity = velocity;
+        void setVelocity(velocity_type& __velocity) {
+            _M_velocity = __velocity;
         }
 
         //@}
@@ -205,13 +226,35 @@ namespace LifeV {
         //! Update the right hand side for time advancement
         void timeAdvance();
 
-        /*! \return the current numeric solution */
+        //! Return the current numeric solution
         u_type const & u() const {
             return _M_u;
         }
 
         //! Update left hand side and solve the system
         void iterate();
+
+        /*!
+          Export matrices A and M in a format suitable for use with 
+          Matlab's spy function
+        */
+        void spy(std::string __path) {
+            _M_A.spy(__path + "spyA");
+            _M_M.spy(__path + "spyM");
+        }
+        //@}
+
+        /**
+           @name Friend operators
+        */
+        //@{
+
+        /**
+           \Report the result of last call to timeAdvance() method
+        */
+        template<typename _MeshType>
+        friend std::ostream& operator<<(std::ostream&, HyperbolicSolverIP<_MeshType>&);
+        //@}
 
     protected:
         //! Mesh
@@ -238,6 +281,9 @@ namespace LifeV {
         //! Current finite element for the unknown
         CurrentFE _M_fe;
 
+        //! Second current finite element for the unknown (IP terms)
+        CurrentFE _M_fe_2;
+
         //! Current boundary element for the unknown
         CurrentBdFE _M_fe_bd;
 
@@ -251,7 +297,7 @@ namespace LifeV {
         pattern_type _M_M_pattern;
 
         //! The mass matrix
-        MSRMatr<Real> _M_M;
+        matrix_type _M_M;
 
         //! Pattern for the problem matrix
         pattern_type _M_A_pattern;
@@ -281,7 +327,7 @@ namespace LifeV {
         UInt _M_dim_velocity;
 
         //! The advection field
-        velocity_type& _M_velocity;
+        velocity_type _M_velocity;
 
         //! Order of BDF time discretization scheme
         UInt _M_bdf_order;
@@ -304,8 +350,14 @@ namespace LifeV {
         //! The vector of stabilization parameters
         std::vector<Real> _M_hpK;
 
+        //! The linear solver
+        solver_type _M_solver;
+
         //! The coefficient for stabilization parameters scaling
         Real _M_gamma;
+
+        //! Time for matrix assembling
+        std::vector<Real> _M_monitored_times;
 
         /*! @name Methods
          */
@@ -335,7 +387,7 @@ namespace LifeV {
         /*!
           Evaluate velocity field on qn_id-th quadrature node of fe_id-th
           element. It is assumed that the same mesh is used for both the
-          velocity field and the unknown
+          velocity field and the unknown.
         */
         inline void evaluate_velocity(UInt fe_id, ElemVec& elvec) {
             UInt dim = _M_dof_velocity.numTotalDof();
@@ -349,9 +401,16 @@ namespace LifeV {
 
         /*!
           Compute the advection part of problem matrix, which is
-          time-dependent in non-steady multi-fluid problems
+          time-dependent in non-steady multi-fluid problems.
         */
         void add_A_unsteady();
+
+        /*!
+          Add the stabilization terms. It may be necessary to re-calculate 
+          stabilization terms at every time step because the stabilization
+          parameter depends on the velocity field.
+        */
+        void add_stabilization();
 
         /*!
           Apply boundary conditions. Only Dirichlet (essential) boundary
@@ -361,116 +420,111 @@ namespace LifeV {
 
         void apply_bc();
         //@}
+
     private:
         typedef ID ( *FTOP )( ID const localFace, ID const point );
         FTOP _M_fToP;
 
     };
 
+// Implementations
+
     template<typename MeshType>
     void HyperbolicSolverIP<MeshType>::compute_M_A_steady() {
-        
-        // Local contributions from other terms
-        ElemMat elmat(_M_fe.nbNode, 1, 1);
-        ElemVec elvec(_M_fe.nbNode, NDIM);
+        ElemMat __elmat(_M_fe.nbNode, 1, 1);
+        ElemVec __elvec(_M_fe.nbNode, NDIM);
 
         Real coeff = _M_bdf.coeff_der(0) / _M_delta_t;
 
         for(UInt i = 1; i <= _M_mesh.numVolumes(); i++){
             _M_fe.updateJac( _M_mesh.volumeList(i) );
 
-            elmat.zero();
-            mass(coeff, elmat, _M_fe, 0, 0);
-            assemb_mat(_M_A_steady, elmat, _M_fe, _M_dof, 0, 0);
+            __elmat.zero();
+            mass(coeff, __elmat, _M_fe, 0, 0);
+            assemb_mat(_M_A_steady, __elmat, _M_fe, _M_dof, 0, 0);
 
-            elmat.zero();
-            mass(1., elmat, _M_fe, 0, 0);
-            assemb_mat(_M_M, elmat, _M_fe, _M_dof, 0, 0);
+            __elmat.zero();
+            mass(1., __elmat, _M_fe, 0, 0);
+            assemb_mat(_M_M, __elmat, _M_fe, _M_dof, 0, 0);
         }
-
-
     }
 
     template<typename MeshType>
     void HyperbolicSolverIP<MeshType>::add_A_unsteady() {
-        ElemVec elvec(_M_fe_velocity.nbNode, NDIM);
-        ElemMat elmat(_M_fe.nbNode, 1, 1);
-
-        // Advection term
+        ElemVec __elvec(_M_fe_velocity.nbNode, NDIM);
+        ElemMat __elmat(_M_fe.nbNode, 1, 1);
 
         for(UInt i = 1; i <= _M_mesh.numVolumes(); i++){
             _M_fe.updateFirstDeriv( _M_mesh.volumeList(i) );
-            elmat.zero();
+            __elmat.zero();
 
-            evaluate_velocity(i, elvec);
+            evaluate_velocity(i, __elvec);
             for(UInt i_comp = 0; i_comp < NDIM; i_comp++) {
-                grad(i_comp, elvec, _M_fe_velocity, elmat, _M_fe, _M_fe, 0, 0);
+                grad(i_comp, __elvec, _M_fe_velocity, __elmat, _M_fe, _M_fe, 0, 0);
             }
 
-            assemb_mat(_M_A, elmat, _M_fe, _M_dof, 0, 0);
-        }
-
-        // Local contributions from the stabilization term. WARNING: only
-        // works if _M_fe and fe2 are of the same type
-
-        ElemMat elmat11(_M_fe.nbNode, 1, 1);
-        ElemMat elmat12(_M_fe.nbNode, 1, 1);
-        ElemMat elmat21(_M_fe.nbNode, 1, 1);
-        ElemMat elmat22(_M_fe.nbNode, 1, 1);
-
-        CurrentFE fe2(_M_fe);
-        Real stab_coeff;
-
-        // Local trace of the velocity
-
-        ElemVec beta( _M_fe_bd.nbNode, NDIM );
-
-        for(UInt i = _M_mesh.numBFaces() + 1; i <= _M_mesh.numFaces(); i++){
-            elmat11.zero();
-            elmat12.zero();
-            elmat21.zero();
-            elmat22.zero();
-
-            UInt ad_first = _M_mesh.faceList(i).ad_first();
-            UInt ad_second = _M_mesh.faceList(i).ad_second();
-
-            stab_coeff = .5 * _M_gamma * ( pow(_M_hpK[ad_first - 1], 2) + pow(_M_hpK[ad_second - 1], 2) );
-
-            _M_fe.updateFirstDerivQuadPt( _M_mesh.volumeList(ad_first) );
-            fe2.updateFirstDerivQuadPt( _M_mesh.volumeList(ad_second) );
-
-            _M_fe_bd.updateMeasNormalQuadPt( _M_mesh.faceList(i) );
-
-            
-            // Get the local trace of the velocity into beta
-            beta.zero();
-        
-            // Get the position of the face on the first element sharing it
-
-            UInt iFaEl = _M_mesh.faceList( i ).pos_first();
-            
-            for ( int iNode = 0; iNode < _M_fe_bd.nbNode; ++iNode ) {
-                UInt iloc = _M_fToP( iFaEl, iNode+1 );
-                for ( int iCoor = 0; iCoor < _M_fe.nbCoor; ++iCoor ) {
-                    UInt ig = _M_dof.localToGlobal( ad_first, iloc ) - 1 +
-                        iCoor * _M_dof.numTotalDof();
-                    beta.vec()[ iCoor*_M_fe_bd.nbNode + iNode ] = _M_velocity( ig );
-                }
-            }
-            
-            ipstab_bagrad(stab_coeff, elmat11, _M_fe, _M_fe, beta, _M_fe_bd, 0, 0);
-            ipstab_bagrad(stab_coeff, elmat12, _M_fe, fe2, beta, _M_fe_bd, 0, 0);
-            ipstab_bagrad(stab_coeff, elmat21, fe2, _M_fe, beta, _M_fe_bd, 0, 0);
-            ipstab_bagrad(stab_coeff, elmat22, fe2, fe2, beta, _M_fe_bd, 0, 0);
-
-            assemb_mat(_M_A, elmat11, _M_fe, _M_fe, _M_dof);
-            assemb_mat(_M_A, elmat12, _M_fe, fe2, _M_dof);
-            assemb_mat(_M_A, elmat21, fe2, _M_fe, _M_dof);
-            assemb_mat(_M_A, elmat22, fe2, fe2, _M_dof);
-
+            assemb_mat(_M_A, __elmat, _M_fe, _M_dof, 0, 0);
         }
     }
 
+    template<typename MeshType>
+    void HyperbolicSolverIP<MeshType>::add_stabilization(){
+        ElemMat __elmat11(_M_fe.nbNode, 1, 1);
+        ElemMat __elmat12(_M_fe.nbNode, 1, 1);
+        ElemMat __elmat21(_M_fe.nbNode, 1, 1);
+        ElemMat __elmat22(_M_fe.nbNode, 1, 1);
+        
+        //CurrentFE _M_fe_2(_M_fe);
+        Real __stab_coeff;
+
+        ElemVec __beta( _M_fe_bd.nbNode, NDIM );
+        
+        for(UInt __face_id = _M_mesh.numBFaces() + 1; __face_id <= _M_mesh.numFaces(); __face_id++){
+            __elmat11.zero();
+            __elmat12.zero();
+            __elmat21.zero();
+            __elmat22.zero();
+
+            UInt __ad_first = _M_mesh.faceList(__face_id).ad_first();
+            UInt __ad_secnd = _M_mesh.faceList(__face_id).ad_second();
+
+            __stab_coeff = .5 * _M_gamma * ( pow(_M_hpK[__ad_first - 1], 2) + pow(_M_hpK[__ad_secnd - 1], 2) );
+
+            _M_fe.updateFirstDerivQuadPt( _M_mesh.volumeList(__ad_first) );
+            _M_fe_2.updateFirstDerivQuadPt( _M_mesh.volumeList(__ad_secnd) );
+
+            _M_fe_bd.updateMeasNormalQuadPt( _M_mesh.faceList(__face_id) );
+
+            // Retrieve local velocity dofs
+
+            __beta.zero();
+        
+            // Get the position of the face on the first element sharing it
+
+            UInt iFaEl = _M_mesh.faceList(__face_id).pos_first();
+            
+            for (int __node_id = 0; __node_id < _M_fe_bd.nbNode; ++__node_id) {
+                UInt iloc = _M_fToP(iFaEl, __node_id + 1);
+
+                for ( int __coor_id = 0; __coor_id < _M_fe.nbCoor; ++__coor_id ) {
+                    UInt __iglo = _M_dof_velocity.localToGlobal(__ad_first, iloc) - 1 +
+                        __coor_id * _M_dof.numTotalDof();
+                    __beta.vec()[__coor_id * _M_fe_bd.nbNode + __node_id] = _M_velocity[__iglo];
+                }
+            }
+
+            ipstab_bagrad(__stab_coeff, __elmat11, _M_fe, _M_fe, __beta, _M_fe_bd);
+            ipstab_bagrad(__stab_coeff, __elmat12, _M_fe, _M_fe_2, __beta, _M_fe_bd);
+            ipstab_bagrad(__stab_coeff, __elmat21, _M_fe_2, _M_fe, __beta, _M_fe_bd);
+            ipstab_bagrad(__stab_coeff, __elmat22, _M_fe_2, _M_fe_2, __beta, _M_fe_bd);
+
+            assemb_mat(_M_A, __elmat11, _M_fe, _M_dof);
+            assemb_mat(_M_A, __elmat12, _M_fe, _M_fe_2, _M_dof);
+            assemb_mat(_M_A, __elmat21, _M_fe_2, _M_fe, _M_dof);
+            assemb_mat(_M_A, __elmat22, _M_fe_2, _M_dof);
+        }
+
+    }
 
     template<typename MeshType>
     void HyperbolicSolverIP<MeshType>::apply_bc() {
@@ -479,6 +533,8 @@ namespace LifeV {
 
     template<typename MeshType>
     void HyperbolicSolverIP<MeshType>::initialize(const function_type& u0, Real t0, Real delta_t) {
+        Chrono __chrono;
+        __chrono.start();
         // Set initial time and time step
         _M_t0 = t0;
         _M_delta_t = delta_t;
@@ -490,17 +546,17 @@ namespace LifeV {
 
         // Check if mesh has internal faces. If not, build them
 
-        if( !_M_mesh.hasInternalFaces() )
-            std::cerr << "ERROR: Mesh must store internal faces" << std::endl;
-        /*
-          {
-          UInt num_b_faces = _M_mesh.numBFaces();
-          UInt num_i_faces = _M_mesh.numFaces() - _M_mesh.numBFaces();
+        if( !_M_mesh.hasInternalFaces() ) {
+            std::cerr << "WARNING: mesh did not have internal faces." << std::endl;
+            std::cerr << "         The pattern might not have been constructed properly" << std::endl;
 
-          buildFaces(_M_mesh, std::cout, std::cerr, num_b_faces, num_i_faces, true, true, false);
-          }
-        */
-        // Compute the stabilization parameters
+            UInt num_b_faces = _M_mesh.numBFaces();
+            UInt num_i_faces = _M_mesh.numFaces() - _M_mesh.numBFaces();
+
+            buildFaces(_M_mesh, std::cout, std::cerr, num_b_faces, num_i_faces, true, true, false);
+        }
+
+        // Compute stabilization parameters
 
         compute_stabilization_parameters();
 
@@ -511,6 +567,9 @@ namespace LifeV {
         // Compute the steady part of problem matrix
 
         compute_M_A_steady();
+        __chrono.stop();
+
+        _M_monitored_times[0] = __chrono.diff();
 
     }
 
@@ -520,29 +579,77 @@ namespace LifeV {
 
     template<typename MeshType>
     void HyperbolicSolverIP<MeshType>::timeAdvance() {
-        // Update left hand side
+        Chrono __chrono;
+
+        if(_M_verbose) std::cout << "** HSIP ** Computing problem matrix" << std::endl;
 
         _M_A = _M_A_steady;
-        add_A_unsteady();
 
-        // Update right hand side
+        __chrono.start();
+        add_A_unsteady();
+        __chrono.stop();
+        _M_monitored_times[1] = __chrono.diff();
+
+        if(_M_verbose) std::cout << "** HSIP ** Adding stabilization" << std::endl;
+
+        __chrono.start();
+        add_stabilization();
+        __chrono.stop();
+        _M_monitored_times[2] = __chrono.diff();
+
         _M_b = ZeroVector( _M_b.size() );
         _M_b += _M_M * _M_bdf.time_der(_M_delta_t);
 
-        // Apply boundary conditions
+        if(_M_verbose) std::cout << "** HSIP ** Applying boundary conditions" << std::endl;
+
+        __chrono.start();
         apply_bc();
+        __chrono.stop();
+        _M_monitored_times[3] = __chrono.diff();
 
-        // Solve the system
-        SolverAztec __solver;
-        __solver.setOptionsFromGetPot(_M_data_file, (_M_data_section + "/solver").data());
-        __solver.setMatrix(_M_A);
-        __solver.solve(_M_u, _M_b);
 
-        // Update bdf object
+        __chrono.start();
+        if(_M_verbose) std::cout << "** HSIP ** Passing matrix to linear solver" << std::endl;
+        _M_solver.setMatrix(_M_A);
+
+        if(_M_verbose) std::cout << "** HSIP ** Solving linear system" << std::endl;
+        _M_solver.solve(_M_u, _M_b);
+
+        if(_M_verbose) std::cout << "** HSIP ** Updating bdf object" << std::endl;
+
+        __chrono.stop();
+        _M_monitored_times[4] = __chrono.diff();
+
         _M_bdf.shift_right(_M_u);
 
-        // Update current time
         _M_t += _M_delta_t;
     }
+
+template<typename _MeshType>
+std::ostream& operator<<(std::ostream& __ostr, HyperbolicSolverIP<_MeshType>& __HS) {
+    __ostr << "==================================================" << std::endl;
+    __ostr << "** HSIP ** Report" << std::endl;
+    __ostr << "==================================================" << std::endl;
+#if USE_AZTEC_SOLVER
+    __ostr << "Convergence                         ";
+    __HS._M_solver.converged() ? __ostr << "YES" : __ostr << "NO";
+    __ostr << std::endl;
+    __ostr << "--------------------------------------------------" << std::endl;
+#endif
+    __ostr << "Timings" << std::endl << std::endl;
+    __ostr << "Solver initialization               " << 
+        __HS._M_monitored_times[0] << " s" << std::endl;
+    __ostr << "Unsteady contribution assembling    " <<
+        __HS._M_monitored_times[1] << " s" << std::endl;
+    __ostr << "Stabilization terms assembling      " <<
+        __HS._M_monitored_times[2] << " s" << std::endl;
+    __ostr << "Boundary conditions handling        " <<
+        __HS._M_monitored_times[3] << " s" << std::endl;
+    __ostr << "System solution                     " << 
+        __HS._M_monitored_times[4] << " s" << std::endl;
+    __ostr << "==================================================" << std::endl;
+
+    return __ostr;
+}
 }
 #endif

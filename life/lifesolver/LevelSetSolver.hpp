@@ -39,6 +39,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <subelements.hpp>
 
 namespace LifeV {
+    /*
+      A type for points and vectors. Points are defined by their position
+      vectors.
+    */
+    typedef boost::numeric::ublas::bounded_vector<Real, 3> geo_point_type;
+
     /*!
       \class LevelSetSolver
       \brief Level set solver class
@@ -284,6 +290,7 @@ namespace LifeV {
 
         //! reinitialize the interface using direct method
         void directReinitialization() {
+            std::cout << "starting to build the interface" << std::endl;
             build_interface();
 #ifdef DEBUG_REINI
             std::cout << "Found " << _M_face_list.size() << " faces" << std::endl;
@@ -309,27 +316,26 @@ namespace LifeV {
         }
 
         //! Compute the mass of i-th fluid
-        Real computeMassOfFluid(fluid_type fluid_id) {
-            Real mass = 0.;
-            Real ls_fun;
-            int jg;
+        Real computeMass(fluid_type __fluid_id) {
+            Real __mass = 0.;
+            Real __ls_fun;
+            UInt __jglo;
 
             for(UInt i = 1; i <= _M_mesh.numVolumes(); i++) {
                 _M_fe.updateJac( _M_mesh.volumeList(i) );
 
                 for(int iq = 0; iq < _M_fe.nbQuadPt; iq++) {
-                    ls_fun = 0.;
+                    __ls_fun = 0.;
                     for(int j = 0; j < _M_fe.nbNode; j++) {
-                        jglo = _M_dof.localToGlobal(i, j + 1) - 1;
-                        ls_fun += _M_fe.phi(j, iq) * U(jglo);
+                        __jglo = _M_dof.localToGlobal(i, j + 1) - 1;
+                        __ls_fun += _M_fe.phi(j, iq) * _M_u(__jglo);
                     }
-                    if(fluid_id == fluid1)
-                        mass += (ls_fun < 0 ? 1. : 0.) * _M_fe.weightDet(iq);
-                    else
-                        mass += (ls_fun >= 0 ? 1. : 0.) * _M_fe.weightDet(iq);
+                    __mass += (__fluid_id == fluid1) ? 
+                        (__ls_fun < 0 ? 1. : 0.) * _M_fe.weightDet(iq) :
+                        (__ls_fun >= 0 ? 1. : 0.) * _M_fe.weightDet(iq);
                 }
             }
-            return mass;
+            return __mass;
         }
 
         /*!
