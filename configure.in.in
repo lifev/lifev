@@ -33,7 +33,8 @@ AC_PROG_F77_C_O
 # check for libtool
 AC_PROG_LIBTOOL
 AC_ARG_WITH([aztec], 
- AS_HELP_STRING([--with-aztec],[tell where aztec resides]),
+ #AS_HELP_STRING([--with-aztec],[tell where aztec resides]),
+ [[--with-aztec=PATH              tell the path where aztec resides]
  [
   # AZTEC check
   AC_MSG_CHECKING([Aztec headers files presence])
