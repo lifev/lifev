@@ -14,7 +14,7 @@ viscosity = 0.03              # viscosity
 [../discretization]
 mesh_dir  = ../data/mesh/inria/ # the directory where the mesh file is
 mesh_file = tube_curve20.mesh  # mesh file
-timestep  = 0.001              # timestep
+timestep  = 0.0001              # timestep
 
 [../miscellaneous]
 verbose   = 1
@@ -31,7 +31,7 @@ endtime   = 0.002
 [../discretization]
 mesh_dir  = ../data/mesh/inria/   # the directory where the mesh file is
 mesh_file = vessel_curve20.mesh  # mesh file
-timestep  = 0.001             # timestep
+timestep  = 0.0001             # timestep
 
 [../miscellaneous]
 factor    = 10
