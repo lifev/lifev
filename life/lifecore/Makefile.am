@@ -27,7 +27,8 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .cc
 
 SUBDIRS		= . testsuite
 
-include_HEADERS		= ElasticStructureHandler.hpp GetPot.hpp NavierStokesAleHandler.hpp NavierStokesAleSolverPC.hpp \
+include_HEADERS		= clapack.h cblas.h \
+ElasticStructureHandler.hpp GetPot.hpp NavierStokesAleHandler.hpp NavierStokesAleSolverPC.hpp \
 NavierStokesHandler.hpp NavierStokesHandler_miguel.hpp NavierStokesSolverPC.hpp Operator01.hpp \
 RNM.hpp RNM_op.hpp RNM_opc.hpp RNM_tpl.hpp \
 SimpleVect.hpp VenantKirchhofSolver.hpp algebraic_facto.hpp assemb.hpp \
