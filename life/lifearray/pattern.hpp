@@ -18,7 +18,7 @@
 */
 /*----------------------------------------------------------------------*
 |
-| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.7 2004-09-06 11:03:49 winkelma Exp $
+| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.8 2004-09-09 15:18:13 winkelma Exp $
 |
 |
 | #Version  0.1 Experimental   07/7/00. Luca Formaggia & Alessandro Veneziani  |
@@ -185,6 +185,16 @@ public:
   template<typename DOF> CSRPatt(DOF const  & dof, UInt const nbcomp = 1);
   template<typename DOF>
   bool buildPattern(DOF const  & dof, const UInt nbcomp);
+
+  /*! Constructors for single DOF (square matrix), possibly with more than
+   *  one component, version handling patterns coming from IP stabilization.
+   *  @author Christoph Winkelmann, Sep 2004
+   */
+  template<typename DOF, typename MESH>
+  CSRPatt(const DOF& dof, const UInt nbcomp, const MESH& mesh);
+  template<typename DOF, typename MESH>
+  bool buildPattern(DOF const& dof, const UInt nbcomp, const MESH& mesh);
+
   //! Constructors for two DOF (in general non-square matrix)
   //! This constructors are required if we want to use the pattern in a
   //! MixedPattern. It may be useful also stand alone. Look at the
@@ -274,6 +284,11 @@ protected:
   Container _ia; //!< point to the rows entries
   Container _ja; //!< contain col indices for each row
   Container _jaT;//!< point to the col entries of the transpose pattern
+
+private:
+  template<typename DOF>
+  void _buildPattern(DOF const & dof, DynPattern const & dynpatt,
+                     UInt const nbcomp);
 };
 
 ///////////////////////////////////////////////////
@@ -459,7 +474,7 @@ class CSRPattSymm:
 
 
   // DOF are ALWAYS numbered a la Fortran: the following definition set the correct numbering
-  // as a funtion of current numbering (specified by PATTERN_OFFET)
+  // as a function of current numbering (specified by PATTERN_OFFSET)
 
 protected:
   Diff_t _row_off(Index_t i)const {// Row offset for row index i
@@ -945,7 +960,7 @@ CSRPatt::CSRPatt(DOF1 const & dof1, UInt const nbcomp) {
   bool built = buildPattern(dof1, nbcomp);
   ASSERT_PRE(built,"Error in CSR Pattern construction from DOF object");
 #else
-  bool built = buildPattern(dof1, nbcomp);
+  buildPattern(dof1, nbcomp);
 #endif
 };
 
@@ -953,21 +968,48 @@ CSRPatt::CSRPatt(DOF1 const & dof1, UInt const nbcomp) {
 template<typename DOF1>
 bool CSRPatt::buildPattern(DOF1 const & dof1, UInt const nbcomp)
 {
+  DynPattern dynpatt;
+  bool built = setpatt(dof1, dynpatt, nbcomp);
+  if (built) {
+    _buildPattern(dof1, dynpatt, nbcomp);
+    dynpatt.clear(); // not sure if this helps...
+  }
+  return built;
+}
+
+// CW Sep 2004: version for nbcomp X nbcomp block matrix with IP stabilization
+template<typename DOF, typename MESH>
+CSRPatt::CSRPatt(DOF const& dof,  UInt const nbcomp, MESH const& mesh) {
+#ifdef TEST_PRE
+  bool built = buildPattern(dof, nbcomp, mesh);
+  ASSERT_PRE(built,"Error in CSR Pattern construction from DOF object");
+#else
+  buildPattern(dof, nbcomp, mesh);
+#endif
+};
+
+template<typename DOF, typename MESH>
+bool CSRPatt::buildPattern(DOF const& dof, const UInt nbcomp,
+                           const MESH& mesh) {
+  DynPattern dynpatt;
+  bool built = setpatt(dof, mesh, dynpatt, nbcomp);
+  if (built) {
+    _buildPattern(dof, dynpatt, nbcomp);
+    dynpatt.clear(); // not sure if this helps...
+  }
+  return built;
+}
+
+// factored out by CW, Sep 2004
+template<typename DOF1>
+void CSRPatt::_buildPattern(DOF1 const & dof1, DynPattern const & dynpatt,
+                            UInt const nbcomp) {
 
   // This is the real constuctor.
   // It builds a FE type pattern from A SINGLE FE DOF, in CSR format;
   // I change to the actual index (i.e. I take into account of
   // PatternOffset) only at the end.
 
-  DynPattern dynpatt;
-
-  bool built = setpatt(dof1, dynpatt, nbcomp);
-
-  if (! built) {
-    _filled=false;
-    return built;
-  }
-  
   Diff_t ig,jg,cur;
 
   // I use a modified version of CSR (compatible with the standard one), where:
@@ -1061,10 +1103,6 @@ bool CSRPatt::buildPattern(DOF1 const & dof1, UInt const nbcomp)
 
   _filled=true;
   _diagfirst=true;
-
-  dynpatt.clear(); // not sure if this helps...
-
-  return built;
 };
 
 template<typename DOF1,typename DOF2>
@@ -1613,7 +1651,7 @@ bool MSRPatt::buildPattern(DOF1 const & dof1, UInt const nbcomp) {
   DynPattern dynpatt;
   bool built = setpatt(dof1, dynpatt, nbcomp);
   if (built) {
-      _buildPattern<DOF1>(dof1, dynpatt, nbcomp);
+      _buildPattern(dof1, dynpatt, nbcomp);
       dynpatt.clear(); // not sure if this helps...
   }
   return built;
@@ -1715,7 +1753,7 @@ bool MSRPatt::buildPattern(const DOF&  dof, const MESH& mesh,
   DynPattern dynpatt;
   bool built = setpatt(dof, mesh, dynpatt, nbcomp);
   if (built) {
-      _buildPattern<DOF>(dof, dynpatt, nbcomp);
+      _buildPattern(dof, dynpatt, nbcomp);
       dynpatt.clear();
   }
   return built;
