@@ -160,7 +160,7 @@ void steklovPoincare::evalResidual(Vector       &res,
               << std::endl;
     std::cout << "max ResidualFSI = " << norm_inf(M_residualFSI)
               << std::endl;
-    std::cout << "max ResidualFSI = " << norm_inf(M_strongResidualFSI)
+    std::cout << "max ResidualFSI = " << norm_2(M_strongResidualFSI)
               << std::endl;
 
 //    M_solid->postProcess();
@@ -482,12 +482,14 @@ void my_matvecSfSsPrime(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
             double dt = my_data->M_pFS->fluid().timestep();
             double dti2 = 1.0/(dt*dt) ;
 
-            Vector zSolidPrec = my_data->M_pFS->DDNprecond(zSolid);
-
+            Vector zSolidPrec(dim);
+            zSolidPrec = my_data->M_pFS->DDNprecond(zSolid);
             da = - dti2*my_data->M_pFS->fluid().density()*zSolidPrec;
 
+            if (my_data->M_pFS->nbEval() == 1) my_data->M_pFS->getReducedLinFluid()->setComputedMatrix(false);
+
             my_data->M_pFS->getReducedLinFluid()->setDacc(da);
-            my_data->M_pFS->getReducedLinFluid()->solveReducedLinearFluid();
+            my_data->M_pFS->getReducedLinFluid()->solveInvReducedLinearFluid();
 
             my_data->M_pFS->solid().d() = zSolidPrec;
             my_data->M_pFS->solveLinearSolid();
@@ -653,6 +655,7 @@ void steklovPoincare::setBC()
     M_BCh_dp_inv->addBC("OutFlow",     3, Essential, Scalar, bcf);
 
     M_reducedLinFluid->setUpBC(M_BCh_dp);
+    M_reducedLinFluid->setUpInvBC(M_BCh_dp_inv);
 
 }
 
@@ -725,6 +728,8 @@ void steklovPoincare::computeStrongResidualFSI()
 {
 
     Chrono chrono;
+    chrono.start();
+
     std::cout << "  SP- Computing strong residual ... ";
     MSRPatt         fullPattern( M_fluid->uDof(), nDimensions );
     ElemMat         elMassMatrix( M_fluid->fe_u().nbNode, nDimensions, nDimensions ); //velocity mass

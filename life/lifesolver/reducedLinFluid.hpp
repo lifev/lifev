@@ -60,7 +60,8 @@ public:
 
     //! bondary conditions setup
 
-    void setUpBC(bchandler_type _BCh_dp);
+    void setUpBC   (bchandler_type _BCh_dp);
+    void setUpInvBC(bchandler_type _BCh_dp_inv);
 
     //! jacobian computation
 
@@ -71,7 +72,6 @@ public:
     const Vector& dacc()    {return M_dacc;}
     void setDacc(Vector const &_vec){M_dacc = _vec;}
     void setComputedMatrix(bool pred){M_computedC = pred;}
-
     Vector& minusdp() {return M_minusdp;}
 
     const Vector& residual();

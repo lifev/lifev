@@ -51,7 +51,13 @@ reducedLinFluid::reducedLinFluid(FSIOperator* const _op,
 
 void reducedLinFluid::setUpBC(bchandler_type _BCh_dp)
 {
-    M_BCh_dp_inv = _BCh_dp;
+    M_BCh_dp     = _BCh_dp;
+}
+
+
+void reducedLinFluid::setUpInvBC(bchandler_type _BCh_dp_inv)
+{
+    M_BCh_dp_inv = _BCh_dp_inv;
 }
 
 
@@ -60,6 +66,7 @@ void reducedLinFluid::setLinearSolver(GetPot const &_data_file)
     M_linearSolver.setOptionsFromGetPot( _data_file, "reducedfluid/aztec" );
     M_linearSolver.setMatrix( M_C );
 }
+
 
 const Vector& reducedLinFluid::residual()
 {
@@ -72,6 +79,50 @@ const Vector& reducedLinFluid::residual()
 
 
 void reducedLinFluid::solveReducedLinearFluid()
+{
+    if (!M_computedC) { // computing laplacien fe matrix (begining of the time step)
+
+        // Initializing matrix
+        M_CAux.zeros();
+
+        // Loop on elements
+        for ( UInt i = 1; i <= M_fluid->mesh().numVolumes(); i++ )
+        {
+            M_fe.updateFirstDerivQuadPt( M_fluid->mesh().volumeList( i ) );
+
+            M_elmatC.zero();
+
+            stiff(1.0, M_elmatC, M_fe );
+            assemb_mat(M_CAux, M_elmatC, M_fe, M_dof, 0, 0);
+        }
+
+        M_BCh_dp->bdUpdate(M_fluid->mesh(), M_feBd, M_dof);
+        M_computedC = true;
+    }
+
+    M_C = M_CAux;
+    M_f = ZeroVector( M_f.size() );
+
+    M_BCh_dp_inv->showMe();
+    M_BCh_dp->showMe();
+
+    bcManage(M_C, M_f, M_fluid->mesh(),
+             M_dof,
+             *M_BCh_dp,
+             M_feBd, 1.0,
+             M_FSIOperator->time());
+
+    M_linearSolver.setRecursionLevel( 1 );
+    M_dp = ZeroVector( M_dp.size() );
+
+    M_linearSolver.solve( M_dp, M_f, SolverAztec::SAME_PRECONDITIONER );
+
+    M_computedResidual = false;
+    M_minusdp = -1.0*M_dp;
+}
+
+
+void reducedLinFluid::solveInvReducedLinearFluid()
 {
     if (!M_computedC) { // computing laplacien fe matrix (begining of the time step)
 
@@ -102,21 +153,10 @@ void reducedLinFluid::solveReducedLinearFluid()
     M_dp = ZeroVector( M_dp.size() );
 
     M_linearSolver.solve( M_dp, M_f, SolverAztec::SAME_PRECONDITIONER );
-
-    M_computedResidual = false;
-    M_minusdp = -1.0*M_dp;
-}
-
-
-void reducedLinFluid::solveInvReducedLinearFluid()
-{
-    
-
 }
 
 
 void reducedLinFluid::evalResidual()
-
 {
     M_residual_dp= ZeroVector(M_residual_dp.size());
     BCHandler BCh;
@@ -149,7 +189,6 @@ void reducedLinFluid::evalResidual()
 
     std::cout << "dp residual = " << norm_2(M_residual_dp) << std::endl;
     std::cout << "dp          = " << norm_2(M_dp) << std::endl;
-
 }
 
 }
