@@ -96,8 +96,10 @@ Factor( TriDiagMat & __mat )
     ASSERT_PRE( !_M_isFactorized, "Lapack factorization already performed!");
 
     //! solve with lapack (for tridiagonal matrices)
-    dgttrf_( &OrderMat, __mat.LowDiag(), __mat.Diag(),
-             __mat.UpDiag(), & _M_massupdiag2(0), & _M_massipiv(0), &INFO);
+    dgttrf_( &OrderMat,
+             __mat.LowDiag(), __mat.Diag(), __mat.UpDiag(),
+             _M_massupdiag2.data().begin(), _M_massipiv.data().begin(),
+             &INFO);
     ASSERT_PRE(!INFO,"Lapack factorization of tridiagonal matrix not achieved.");
 
     _M_isFactorized = true;
@@ -137,9 +139,10 @@ Solve( TriDiagMat const& __mat, TriDiagVect& __x )
                 "The right-hand side must have the same dimensions as the tridiag matrix.");
 
     //! solve with lapack (for tridiagonal matrices)
-    dgttrs_( "N", &OrderMat, &NBRHS, __mat.LowDiag(), __mat.Diag(),
-             __mat.UpDiag(), & _M_massupdiag2(0), & _M_massipiv(0),
-             & __x(0), &OrderMat, &INFO);
+    dgttrs_( "N", &OrderMat, &NBRHS,
+             __mat.LowDiag(), __mat.Diag(), __mat.UpDiag(),
+             _M_massupdiag2.data().begin(), _M_massipiv.data().begin(),
+             __x.data().begin(), &OrderMat, &INFO);
     ASSERT_PRE(!INFO,"Lapack solve of tridiagonal matrix not achieved.");
 
 }
