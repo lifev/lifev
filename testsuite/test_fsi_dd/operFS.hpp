@@ -63,15 +63,15 @@ namespace LifeV
 
         // member functions
         
-        void eval         (Vector &dispNew,
-                           Vector &veloStruct,
-                           const  Vector &disp,
-                           int    status);
+        void eval         (const  Vector &disp,
+                           int    status,
+                           Vector &dispNew,
+                           Vector &veloStruct);
         
-        void evalResidual (Vector &res,
-                           Vector &sol,
-                           int    iter);
-
+        void evalResidual (Vector &sol,
+                           int    iter,
+                           Vector &res);
+            
         void updatePrec   (Vector& sol,
                            int     iter);
 
@@ -83,9 +83,12 @@ namespace LifeV
 
         // mutators and setters
 
-        UInt   const & nbEval() const {return M_nbEval;};
+        UInt   const & nbEval()    const {return M_nbEval;};
 
-        Vector const & dz()     const {return M_dz;};
+        Vector const & dz()        const {return M_dz;};
+
+        Vector const & residualS() const {return M_residualS;};
+        Vector const & residualF() const {return M_residualS;};
         
         NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >
         &fluid() {return M_fluid;};
@@ -113,6 +116,9 @@ namespace LifeV
         Vector       M_dz;
         Vector       M_rhs_dz;
 
+        Vector       M_residualS;
+        Vector       M_residualF;
+        
         UInt         M_nbEval;
 
         BC_Handler&  M_BCh_du;

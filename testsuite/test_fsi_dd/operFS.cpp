@@ -35,6 +35,8 @@ namespace LifeV
         M_velo        ( 3*M_solid.dDof().numTotalDof() ),
         M_dz          ( 3*M_solid.dDof().numTotalDof() ),
         M_rhs_dz      ( 3*M_solid.dDof().numTotalDof() ),
+        M_residualS   ( 3*M_solid.dDof().numTotalDof() ),
+        M_residualF   ( 1*M_fluid.uDof().numTotalDof() ),
         M_nbEval      (0),
         M_BCh_du      (BCh_du),
         M_BCh_dz      (BCh_dz),
@@ -52,10 +54,10 @@ namespace LifeV
 // Member functions
     
     
-    void operFS::eval(Vector&       dispNew,
-                      Vector&       velo,
-                      const Vector& disp,
-                      int           status)
+    void operFS::eval(const Vector& disp,
+                      int           status,
+                      Vector&       dispNew,
+                      Vector&       velo)
     {
         if(status) M_nbEval = 0; // new time step
         M_nbEval++;
@@ -88,9 +90,9 @@ namespace LifeV
 
 // Residual evaluation
 //
-    void operFS::evalResidual(Vector& res,
-                              Vector& disp,
-                              int iter)
+    void operFS::evalResidual(Vector &disp,
+                              int iter,
+                              Vector &res)
     {
         int status = 0;
 
@@ -100,12 +102,15 @@ namespace LifeV
         if (status) std::cout << " [NEW TIME STEP] ";
         std::cout << std::endl;
 
-        eval(M_dispStruct, M_velo, disp, status);
+        eval(disp, status, M_dispStruct, M_velo);
         
         res = disp - M_dispStruct;
 
+        M_residualS = M_solid.residual();
+
+        M_residualF = M_fluid.residual();
+        
         //disp = M_dispStruct;
-                
     }
 
 //
