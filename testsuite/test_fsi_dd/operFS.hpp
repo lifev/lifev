@@ -56,6 +56,10 @@ namespace LifeV
                BC_Handler& BCh_du, BC_Handler& BCh_dz,
                GetPot &data_file);
 
+        // destructor
+
+        ~operFS();
+        
 
         // member functions
         
@@ -65,7 +69,7 @@ namespace LifeV
                            int    status);
         
         void evalResidual (Vector &res,
-                           const  Vector &sol,
+                           Vector &sol,
                            int    iter);
 
         void updatePrec   (Vector& sol,

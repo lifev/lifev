@@ -21,6 +21,9 @@
 
 namespace LifeV
 {
+
+// Constructors
+
     operFS::operFS(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
                    VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
                    BC_Handler &BCh_du,
@@ -40,7 +43,15 @@ namespace LifeV
         M_solverAztec.setOptionsFromGetPot(data_file,"jacobian/aztec");
     }
 
+// Destructor
+    
+    operFS::~operFS()
+    {
+    }
 
+// Member functions
+    
+    
     void operFS::eval(Vector&       dispNew,
                       Vector&       velo,
                       const Vector& disp,
@@ -73,7 +84,7 @@ namespace LifeV
 // Residual evaluation
 //
     void operFS::evalResidual(Vector& res,
-                              const Vector& disp,
+                              Vector& disp,
                               int iter)
     {
         int status = 0;
@@ -85,8 +96,11 @@ namespace LifeV
         std::cout << std::endl;
 
         eval(M_dispStruct, M_velo, disp, status);
-
+        
         res = disp - M_dispStruct;
+
+        disp = M_dispStruct;
+                
     }
 
 //
@@ -180,3 +194,4 @@ namespace LifeV
                   << std::endl << std::endl;
     }
 }
+ 
