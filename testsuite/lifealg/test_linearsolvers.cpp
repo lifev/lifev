@@ -64,10 +64,10 @@ bool test_umfpack( Mat& __mat )
     __x = 0;
     //__petsc.solve( __x, __b );
 
-    std::cout << "norm(x) = " << norm( __x ) << "\n";
+    std::cout << "l2 norm(x) = " << l2norm( __x ) << "\n";
 
     __x -= __sol;
-    std::cout << "norm(error) = " << norm( __x ) << "\n";
+    std::cout << "l2 norm(error) = " << l2norm( __x ) << "\n";
 #else
     return true;
 #endif
@@ -94,11 +94,11 @@ bool test_petsc( Mat& __mat )
     __x = 0;
     __petsc.solve( __x, __b );
 
-    std::cout << "norm(x) = " << norm( __x ) << "\n";
+    std::cout << "l2 norm(x) = " << l2norm( __x ) << "\n";
 
     __x -= __sol;
-    std::cout << "norm(error) = " << norm( __x ) << "\n";
-    return norm(__x) < 1e-10;
+    std::cout << "l2 norm(error) = " << l2norm( __x ) << "\n";
+    return l2norm(__x) < 1e-10;
 #else
     return 1;
 #endif
@@ -123,11 +123,11 @@ bool test_aztec( Mat& __mat )
     __x = 0;
     __aztec.solve( __x, __b );
 
-    std::cout << "norm(x) = " << norm( __x ) << "\n";
+    std::cout << "l2 norm(x) = " << l2norm( __x ) << "\n";
 
     __x -= __sol;
-    std::cout << "norm(error) = " << norm( __x ) << "\n";
-    return norm(__x) < 1e-10;
+    std::cout << "l2 norm(error) = " << l2norm( __x ) << "\n";
+    return l2norm(__x) < 1e-10;
 }
 
 } // namespace LifeV

@@ -15,13 +15,13 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /* -------------------------------------------------------------------------*/
 /*!
   \file vecUnknown.h
- 
+
   Vector classes
- 
+
   #purpose: provides vector classes handler useful in case of solving
    vector problem.
    Provides Vector and VectorBlock class necessary for IML++ library
@@ -234,7 +234,7 @@ public:
     Modification of RNM vector: It adds the default
     constructor.
     15/11/01
-*/ 
+*/
 ///////////////////////////////////////////////////////////
 
 class Vector
@@ -312,7 +312,7 @@ public:
     //! vector inner product
     friend double dot( Vector const &ex_v1, Vector const &ex_v2 );
     //! norm derived from dot:
-    friend inline double norm( Vector const &ex_v )
+    friend inline double l2norm( Vector const &ex_v )
     {
         return sqrt( dot( ex_v, ex_v ) );
     }
@@ -412,7 +412,7 @@ public:
     //! vector inner product
     friend double dot( VectorBlock const &ex_v1, VectorBlock const &ex_v2 );
     //! norm derived from dot:
-    friend inline double norm( VectorBlock const &ex_v )
+    friend inline double l2norm( VectorBlock const &ex_v )
     {
         return sqrt( dot( ex_v, ex_v ) );
     }
