@@ -324,23 +324,43 @@ Real elem_integral_diff( VectorType & u,
 {
     int i, inod, ig;
     UInt eleID = fe.currentId();
-    int ic;
     Real s = 0., u_ig, u_minus_f, x, y, z;
     for ( ig = 0;ig < fe.nbQuadPt;ig++ )
     {
         fe.coorQuadPt( x, y, z, ig );
-        for ( ic = 0; ic < nbcomp; ic++ )
+        u_ig = 0.;
+        for ( i = 0;i < fe.nbNode;i++ )
         {
-            u_ig = 0.;
-            for ( i = 0;i < fe.nbNode;i++ )
-            {
-                inod = dof.localToGlobal( eleID, i + 1 )
-                    - 1 + ic * dof.numTotalDof();
-                u_ig += u( inod ) * fe.phi( i, ig );
-            }
-            u_minus_f = u_ig - fct( t, x, y, z, ic + 1 );
-            s += u_minus_f * fe.weightDet( ig );
+            inod = dof.localToGlobal( eleID, i + 1 )
+                - 1 + (nbcomp-1) * dof.numTotalDof();
+            u_ig += u( inod ) * fe.phi( i, ig );
         }
+        u_minus_f = u_ig - fct( t, x, y, z, nbcomp );
+        s += u_minus_f * fe.weightDet( ig );
+    }
+    return s;
+}
+
+//! returns the integral of u on the current element
+//! for time dependent+vectorial
+template <typename VectorType>
+Real elem_integral( VectorType & u,
+                    const CurrentFE& fe,
+                    const Dof& dof, const int nbcomp )
+{
+    int i, inod, ig;
+    UInt eleID = fe.currentId();
+    Real s = 0., u_ig;
+    for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+    {
+        u_ig = 0.;
+        for ( i = 0;i < fe.nbNode;i++ )
+        {
+            inod = dof.localToGlobal( eleID, i + 1 )
+                - 1 + (nbcomp-1) * dof.numTotalDof();
+            u_ig += u( inod ) * fe.phi( i, ig );
+        }
+        s += u_ig * fe.weightDet( ig );
     }
     return s;
 }
@@ -352,15 +372,11 @@ Real elem_integral( boost::function<double( double, double, double,
                     const CurrentFE& fe, const Real t, const int nbcomp )
 {
     int ig;
-    int ic;
     Real s = 0., x, y, z;
     for ( ig = 0;ig < fe.nbQuadPt;ig++ )
     {
         fe.coorQuadPt( x, y, z, ig );
-        for ( ic = 0; ic < nbcomp; ic++ )
-        {
-            s += fct( t, x, y, z, ic + 1 ) * fe.weightDet( ig );
-        }
+        s += fct( t, x, y, z, nbcomp ) * fe.weightDet( ig );
     }
     return s;
 }
