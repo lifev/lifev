@@ -33,6 +33,8 @@ New in 0.5.0:
 
 [lifefilters]
 * Added netgen reader/writer(solution) (MM) 
+* Added gmsh reader (CP) 
+* Added frontend for mesh readers (CP) 
 
 [testsuite]
 * Added test for 3D/0D coupling (AM)
@@ -189,4 +191,4 @@ New in 0.1.0pre3:
 * fixed some bugs and miscompilation in a few places
 
 
- -- Christophe Prud'homme <prudhomm@debian.org>, Mon Nov  8 14:55:09 2004
+ -- Christophe Prud'homme <prudhomm@debian.org>, Tue Nov  9 17:09:24 2004
