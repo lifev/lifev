@@ -37,3 +37,6 @@ check-qmtest:
 	qmtest -D $(srcdir) run
 	qmtest -D $(srcdir) summarize
 
+
+include $(top_srcdir)/admin/Doxyfile.am
+
