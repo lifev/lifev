@@ -292,7 +292,10 @@ void CurrentFE::_update_point( const GEOELE& geoele )
         }
         break;
     default:
-        ERROR_MSG( "Dimension: only 1, 2 or 3!" );
+        std::ostringstream err_msg;
+        err_msg << "Dimension " << nbCoor << " not available.";
+
+        ERROR_MSG( err_msg.str() );
     }
 
 }
