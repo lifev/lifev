@@ -209,7 +209,6 @@ NavierStokesSolverIP(const GetPot& data_file, const RefFE& refFE, const QuadRule
 
     
     cout << endl;
-    cout << "PARTIE STANDARD ok !!!!!!!!!!!! \n";
     
     UInt iElAd1, iElAd2;
     CurrentFE fe1(_refFE_u,getGeoMap(_mesh),_Qr_u);
@@ -225,9 +224,9 @@ NavierStokesSolverIP(const GetPot& data_file, const RefFE& refFE, const QuadRule
     // Updating face staff
     _feBd_u.updateMeas( _mesh.face(i) );
 
-    
-    gamma = _feBd_u.measure()/32.0;
-   
+    gamma = _feBd_u.measure()/32.0;   // P1
+    //  gamma = _feBd_u.measure()/128.0; // P2
+    // gamma = _feBd_u.measure()*sqrt(_feBd_u.measure())/8.0; // P1 p non smooth
   
     iElAd1 = _mesh.face(i).ad_first(); 
     iElAd2 = _mesh.face(i).ad_second(); 
@@ -247,12 +246,8 @@ NavierStokesSolverIP(const GetPot& data_file, const RefFE& refFE, const QuadRule
     ipstab_grad(-gamma,_elmatP, fe2, fe1, _feBd_u,3,3);
     assemb_mat(_CStokes,_elmatP,fe2,fe1,_dof_u,3,3);
    
-
   }
 
-  cout << "PARTIE FACES ok !!!!!!!!!!!! \n";
- 
-  
   _x = 0.0;
  
   chrono.stop();
@@ -281,7 +276,7 @@ timeAdvance(const Function source, const Real& time) {
   chrono.start();
 
   // Right hand side for the velocity at time
-  _f_u=0.;
+  _f_u=0.0;
 
   // loop on volumes: assembling source term
   for(UInt i=1; i<=_mesh.numVolumes(); ++i){
@@ -361,13 +356,13 @@ void NavierStokesSolverIP<Mesh>::iterate(const Real& time) {
   UInt iElAd1, iElAd2, ig, iFaEl,iloc;
   CurrentFE fe1(_refFE_u,getGeoMap(_mesh),_Qr_u);
   CurrentFE fe2(_refFE_u,getGeoMap(_mesh),_Qr_u);
-  Real gamma_b,gamma_u ,bmax; 
+  Real gamma_b,gamma_u ,bmax,bmax_u; 
 
   ElemVec beta(_feBd_u.nbNode,nDimensions); // local trace of the velocity
 
   typedef ID (*FTOP)(ID const _localFace, ID const _point);
 
-  FTOP ftop;
+  FTOP ftop=0;
 
   switch( _fe_u.nbNode ) {
   case 4:
@@ -418,24 +413,26 @@ void NavierStokesSolverIP<Mesh>::iterate(const Real& time) {
       if ( bmax < abs(beta.vec()[l]) )
 	bmax = abs(beta.vec()[l]);
     }
-    if ( bmax < _feBd_u.measure() )
-      bmax = _feBd_u.measure();
     
-    gamma_b = 0.125*_feBd_u.measure()/bmax;   
-    gamma_u = 0.125*_feBd_u.measure()*bmax; 
-
+    bmax_u = bmax;
+    if ( bmax_u < _feBd_u.measure() )
+      bmax_u = _feBd_u.measure();
+    
+    gamma_b = 0.125*_feBd_u.measure()/bmax_u;
+    gamma_u = 0.125*_feBd_u.measure()*bmax;
+    //gamma_u = 0.125*sqrt(_feBd_u.measure())*bmax; 
    
     
     _elmatC.zero();
-    //ipstab_grad(gamma,_elmatC, fe1, fe1, _feBd_u,0,0,3); 
+    //ipstab_grad(gamma_u,_elmatC, fe1, fe1, _feBd_u,0,0,3); 
     ipstab_bgrad(gamma_b,_elmatC, fe1, fe1,beta,_feBd_u,0,0,3);
     ipstab_div(gamma_u,_elmatC, fe1, fe1, _feBd_u);
     for (UInt ic=0; ic<3; ++ic)
       for (UInt jc=0; jc<3; ++jc)    
 	assemb_mat(_C,_elmatC,fe1,_dof_u,ic,jc);
-    
+     
     _elmatC.zero();
-    //ipstab_grad(gamma,_elmatC, fe2, fe2, _feBd_u,0,0,3);
+    //ipstab_grad(gamma_u,_elmatC, fe2, fe2, _feBd_u,0,0,3);
     ipstab_bgrad(gamma_b,_elmatC, fe2, fe2,beta,_feBd_u,0,0,3);
     ipstab_div(gamma_u,_elmatC, fe2, fe2, _feBd_u);
     for (UInt ic=0; ic<3; ++ic)
@@ -443,7 +440,7 @@ void NavierStokesSolverIP<Mesh>::iterate(const Real& time) {
 	assemb_mat(_C,_elmatC,fe2,_dof_u,ic,jc);
 
     _elmatC.zero();
-    //ipstab_grad(-gamma,_elmatC, fe1, fe2, _feBd_u,0,0,3); 
+    //ipstab_grad(-gamma_u,_elmatC, fe1, fe2, _feBd_u,0,0,3); 
     ipstab_bgrad(-gamma_b,_elmatC,fe1,fe2,beta,_feBd_u,0,0,3); 
     ipstab_div(  -gamma_u,_elmatC,fe1,fe2,_feBd_u); 
     for (UInt ic=0; ic<3; ++ic) 
@@ -451,7 +448,7 @@ void NavierStokesSolverIP<Mesh>::iterate(const Real& time) {
 	assemb_mat(_C,_elmatC,fe1,fe2,_dof_u,ic,jc);
 
     _elmatC.zero();
-    //ipstab_grad(-gamma,_elmatC, fe2, fe1, _feBd_u,0,0,3);
+    //ipstab_grad(-gamma_u,_elmatC, fe2, fe1, _feBd_u,0,0,3);
     ipstab_bgrad(-gamma_b,_elmatC, fe2, fe1,beta,_feBd_u,0,0,3);
     ipstab_div(-gamma_u,_elmatC, fe2, fe1, _feBd_u);
     for (UInt ic=0; ic<3; ++ic) 
