@@ -2,13 +2,13 @@
 // and mass transport in the arterial lumen
 
 // author:M. Prosi                                march/04
-#include "life.hpp"
-#include "NavierStokesSolverPC.hpp"
-#include "convDiffReactSolverPC.hpp"
-#include "chrono.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifesolver/NavierStokesSolverPC.hpp>
+#include <life/lifesolver/convDiffReactSolverPC.hpp>
+#include <life/lifecore/chrono.hpp>
 #include "ud_functions.hpp"
-#include "GetPot.hpp"
-#include "ensight7Writer.hpp"
+#include <life/lifecore/GetPot.hpp>
+#include <life/lifefilters/ensight7Writer.hpp>
 
 int main(int argc, char** argv)
 {

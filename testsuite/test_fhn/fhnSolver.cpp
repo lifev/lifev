@@ -24,9 +24,9 @@
 */
 
 #include "fhnSolver.hpp"
-#include "bcManage.hpp"
-#include "medit_wrtrs.hpp"
-#include "sobolevNorms.hpp"
+#include <life/lifefem/bcManage.hpp>
+#include <life/lifefilters/medit_wrtrs.hpp>
+#include <life/lifefem/sobolevNorms.hpp>
 
 namespace LifeV{
 //====================================================
@@ -60,25 +60,25 @@ namespace LifeV{
       reffile >> nbt;
       reffile >> nbd;
       if ( (nbt != nb_ref_time) || (nbd != dimdof) ){
-	flag_ref_solution = false;
-	std::cout << "WARNING : " << std::endl;
-	std::cout << "   On your reference file : nb_ref_time = " << nbt
-	     << " and dim = " << nbd << std::endl;
-	std::cout << "   It should be : nb_ref_time = " << nb_ref_time
-	     << " and dim = " << dimdof << std::endl;
+    flag_ref_solution = false;
+    std::cout << "WARNING : " << std::endl;
+    std::cout << "   On your reference file : nb_ref_time = " << nbt
+         << " and dim = " << nbd << std::endl;
+    std::cout << "   It should be : nb_ref_time = " << nb_ref_time
+         << " and dim = " << dimdof << std::endl;
       } else {
-	double dummy;
-	reffile >> dummy; // t=0.
-	for(int ip=0;ip<(int)dimdof;ip++){
-	  reffile >> dummy; //  0.
-	}
-	for(int it=0;it<nb_ref_time;it++){
-	  reffile >> ref_time(it);
-	  for(int ip=0;ip<(int)dimdof;ip++){
-	    reffile >> uv_ref(it,ip);
-	  }
-	}
-	std::cout << "Reference solution ok." << std::endl;
+    double dummy;
+    reffile >> dummy; // t=0.
+    for(int ip=0;ip<(int)dimdof;ip++){
+      reffile >> dummy; //  0.
+    }
+    for(int it=0;it<nb_ref_time;it++){
+      reffile >> ref_time(it);
+      for(int ip=0;ip<(int)dimdof;ip++){
+        reffile >> uv_ref(it,ip);
+      }
+    }
+    std::cout << "Reference solution ok." << std::endl;
       }
     } else {
       std::cout << "WARNING : cannot read the reference file " << refname << std::endl;
@@ -98,13 +98,13 @@ namespace LifeV{
       mass(1.,elmat,fe,0,1);
       switch(fhn_diff_fct){
       case 0:
-	stiff(fhn_diff,elmat,fe,0,0);
-	break;
+    stiff(fhn_diff,elmat,fe,0,0);
+    break;
       case 1:
-	stiff(fhn_diff,diff_fct_1,elmat,fe,0,0);
-	break;
+    stiff(fhn_diff,diff_fct_1,elmat,fe,0,0);
+    break;
       default:
-	std::cout << "FhNSolver::compute_mat(): Unknown diffusion function "<< std::endl;
+    std::cout << "FhNSolver::compute_mat(): Unknown diffusion function "<< std::endl;
       }
       // second equation:
       // \dt v + fhn_eps fhn_gamma v - fhn_eps fhn_beta u = 0
@@ -131,8 +131,8 @@ namespace LifeV{
       source_fhn(fhn_f0,fhn_alpha,elvec_uv,elvec,fe,0,0);
       switch(test_case){
       case 2:case 3:
-	source(vol_source,elvec,fe,time,0);
-	break;
+    source(vol_source,elvec,fe,time,0);
+    break;
       }
       assemb_vec(rhs,elvec,fe,dof,0);
 
@@ -150,63 +150,63 @@ namespace LifeV{
     switch(init_data){
     case 0: // initial solution computed 
       for(UInt i=1;i<=mesh.numPoints();i++){
-	Geo0D& pt = mesh.pointList(i);
-	switch(test_case){
-	case 1:
-	  uv[i-1] = u_init1(pt.x(),pt.y(),pt.z());
-	  break;
-	case 2:case 3:
-	  uv[i-1] = u_init2(pt.x(),pt.y(),pt.z());
-	  break;
-	default:
-	  std::cout << "initial_data() : test case = " << test_case << " ?? " << std::endl;
-	  exit(1);
-	}
+    Geo0D& pt = mesh.pointList(i);
+    switch(test_case){
+    case 1:
+      uv[i-1] = u_init1(pt.x(),pt.y(),pt.z());
+      break;
+    case 2:case 3:
+      uv[i-1] = u_init2(pt.x(),pt.y(),pt.z());
+      break;
+    default:
+      std::cout << "initial_data() : test case = " << test_case << " ?? " << std::endl;
+      exit(1);
+    }
       }
       break;
     case 1:
       // initial solution read on a file
       {
-	UInt dummy;
-	string init_file_name_u = post_dir +"/"+ init_file_name;
-	string init_file_name_v =  post_dir +"/" +init_file_name;
-	init_file_name_u.replace(init_file_name_u.find(".bb"),3,"_u.bb");
-	init_file_name_v.replace(init_file_name_v.find(".bb"),3,"_v.bb");
-	std::cout << "*** The initial solutions are read on the files " ;
-	std::cout << init_file_name_u << " and " << init_file_name_v << std::endl;
-	//--------
-	ifstream init_file_u(init_file_name_u.c_str());
-	init_file_u >> dummy ; // dimension
-	init_file_u >> dummy ; // 1 
-	init_file_u >> dummy ; // size
-	if(dummy != dimdof){
-	  std::cout << "FhNSolver::initial_data() Critical error : "
-	       << dimdof << " != " << dummy << std::endl;
-	  exit(1);
-	}
-	init_file_u >> dummy ; // type
-	for(UInt i=0;i<mesh.numPoints();i++){
-	  init_file_u >> uv[i];
-	}
-	//--------
-	ifstream init_file_v(init_file_name_v.c_str());
-	init_file_v >> dummy ; // dimension
-	init_file_v >> dummy ; // 1 
-	init_file_v >> dummy ; // size
-	if(dummy != dimdof){
-	  std::cout << "FhNSolver::initial_data() Critical error : "
-	       << dimdof << " != " << dummy << std::endl;
-	  exit(1);
-	}
-	init_file_v >> dummy ; // type
-	std::cout << "dimdof = " << dimdof << std::endl;
-	std::cout << "meshnumpts = " << mesh.numPoints() << std::endl;
-	
-	for(UInt i=0;i<mesh.numPoints();i++){
-	  init_file_v >> uv[dimdof + i];
-	}
-	//--------
-	break;
+    UInt dummy;
+    string init_file_name_u = post_dir +"/"+ init_file_name;
+    string init_file_name_v =  post_dir +"/" +init_file_name;
+    init_file_name_u.replace(init_file_name_u.find(".bb"),3,"_u.bb");
+    init_file_name_v.replace(init_file_name_v.find(".bb"),3,"_v.bb");
+    std::cout << "*** The initial solutions are read on the files " ;
+    std::cout << init_file_name_u << " and " << init_file_name_v << std::endl;
+    //--------
+    ifstream init_file_u(init_file_name_u.c_str());
+    init_file_u >> dummy ; // dimension
+    init_file_u >> dummy ; // 1 
+    init_file_u >> dummy ; // size
+    if(dummy != dimdof){
+      std::cout << "FhNSolver::initial_data() Critical error : "
+           << dimdof << " != " << dummy << std::endl;
+      exit(1);
+    }
+    init_file_u >> dummy ; // type
+    for(UInt i=0;i<mesh.numPoints();i++){
+      init_file_u >> uv[i];
+    }
+    //--------
+    ifstream init_file_v(init_file_name_v.c_str());
+    init_file_v >> dummy ; // dimension
+    init_file_v >> dummy ; // 1 
+    init_file_v >> dummy ; // size
+    if(dummy != dimdof){
+      std::cout << "FhNSolver::initial_data() Critical error : "
+           << dimdof << " != " << dummy << std::endl;
+      exit(1);
+    }
+    init_file_v >> dummy ; // type
+    std::cout << "dimdof = " << dimdof << std::endl;
+    std::cout << "meshnumpts = " << mesh.numPoints() << std::endl;
+    
+    for(UInt i=0;i<mesh.numPoints();i++){
+      init_file_v >> uv[dimdof + i];
+    }
+    //--------
+    break;
       }
     }
   }
@@ -230,7 +230,7 @@ namespace LifeV{
       std::cout << "*** Aztec: old preconditioner" << std::endl;
       options[AZ_keep_info] = 1;
       options[AZ_pre_calc] = AZ_reuse;
-    }					     
+    }                         
     // next, we may overload some of them
     /*
       params[AZ_tol] = 1e-9;
@@ -239,7 +239,7 @@ namespace LifeV{
       options[AZ_subdomain_solve] = AZ_ilu;
     */
     aztecSolveLinearSyst(mat,uv.giveVec(),rhs.giveVec(),uv.size(),
-			 msrPattern,options,params,az_name,flag);  
+             msrPattern,options,params,az_name,flag);  
     flag = false; // to avoid the re-computation of the preconditionner
     //
   }
@@ -259,7 +259,7 @@ namespace LifeV{
       if  (!(iter % post_proc_period)) post_process();
       if  (!(iter % adapt_period)) write_adapt();
       if( max_time_iter / nb_ref_time ){
-	if  (!(iter % ( max_time_iter / nb_ref_time))) store_solution();
+    if  (!(iter % ( max_time_iter / nb_ref_time))) store_solution();
       }
     }
     
@@ -297,36 +297,36 @@ namespace LifeV{
     case 1:
       mtvname = post_dir + "/u.mtv";
       if(iter_post==0){
-	fmtv.open(mtvname.c_str());
+    fmtv.open(mtvname.c_str());
       } else {
-	fmtv.open(mtvname.c_str(),ios::app);
+    fmtv.open(mtvname.c_str(),ios::app);
       }
       fmtv << "$ DATA = CURVE2D\n\n";
       fmtv << "%toplabel = 't=" << time << "'\n\n";
       fmtv << "% boundary = True \n";
       fmtv << "% ymax = 1.2 ymin = -0.5 \n";
       for(UInt i=0;i<pts_proc.size();i++){
-	ipts = pts_proc[i];
-	Geo0D& pt = mesh.pointList(ipts);
-	fmtv << pt.z() << "\t" << uv[ipts-1] << std::endl;
+    ipts = pts_proc[i];
+    Geo0D& pt = mesh.pointList(ipts);
+    fmtv << pt.z() << "\t" << uv[ipts-1] << std::endl;
       }
       //
       fmtv.close();
 
       mtvname = post_dir + "/v.mtv";
       if(iter_post==0){
-	fmtv.open(mtvname.c_str());
+    fmtv.open(mtvname.c_str());
       } else {
-	fmtv.open(mtvname.c_str(),ios::app);
+    fmtv.open(mtvname.c_str(),ios::app);
       }
       fmtv << "$ DATA = CURVE2D\n\n";
       fmtv << "%toplabel = 't=" << time << "'\n\n";
       fmtv << "% boundary = True \n";
       fmtv << "% ymax = 1.2 ymin = -0.5 \n";
       for(UInt i=0;i<pts_proc.size();i++){
-	ipts = pts_proc[i];
-	Geo0D& pt = mesh.pointList(ipts);
-	fmtv << pt.z() << "\t" << uv[dimdof+ipts-1] << std::endl;
+    ipts = pts_proc[i];
+    Geo0D& pt = mesh.pointList(ipts);
+    fmtv << pt.z() << "\t" << uv[dimdof+ipts-1] << std::endl;
       }
       //
       fmtv.close();
@@ -339,13 +339,13 @@ namespace LifeV{
       z= mesh.pointList(ipts).z();
       mtvname = post_dir + "/u_appex.mtv";
       if(iter_post==0){
-	fmtv.open(mtvname.c_str());
-	fmtv << "$ DATA = CURVE2D\n\n";
-	fmtv << "% toplabel = 'points (" << x <<","<< y <<"," << z << ")'\n";
-	fmtv << "% boundary = True \n";
-	fmtv << "% ymax = 1.1 ymin = -0.3 \n";
+    fmtv.open(mtvname.c_str());
+    fmtv << "$ DATA = CURVE2D\n\n";
+    fmtv << "% toplabel = 'points (" << x <<","<< y <<"," << z << ")'\n";
+    fmtv << "% boundary = True \n";
+    fmtv << "% ymax = 1.1 ymin = -0.3 \n";
       } else {
-	fmtv.open(mtvname.c_str(),ios::app);
+    fmtv.open(mtvname.c_str(),ios::app);
       }
       fmtv << time << "\t" << uv[ipts-1] << std::endl;
       fmtv.close();
@@ -356,13 +356,13 @@ namespace LifeV{
       z= mesh.pointList(ipts).z();
       mtvname = post_dir + "/u_mid.mtv";
       if(iter_post==0){
-	fmtv.open(mtvname.c_str());
-	fmtv << "$ DATA = CURVE2D\n\n";
-	fmtv << "% toplabel = 'points (" << x <<","<< y <<"," << z << ")'\n";
-	fmtv << "% boundary = True \n";
-	fmtv << "% ymax = 1.1 ymin = -0.3 \n";
+    fmtv.open(mtvname.c_str());
+    fmtv << "$ DATA = CURVE2D\n\n";
+    fmtv << "% toplabel = 'points (" << x <<","<< y <<"," << z << ")'\n";
+    fmtv << "% boundary = True \n";
+    fmtv << "% ymax = 1.1 ymin = -0.3 \n";
       } else {
-	fmtv.open(mtvname.c_str(),ios::app);
+    fmtv.open(mtvname.c_str(),ios::app);
       }
       fmtv << time << "\t" << uv[ipts-1] << std::endl;
       fmtv.close();      
@@ -373,13 +373,13 @@ namespace LifeV{
       z= mesh.pointList(ipts).z();
       mtvname = post_dir + "/u_base.mtv";
       if(iter_post==0){
-	fmtv.open(mtvname.c_str());
-	fmtv << "$ DATA = CURVE2D\n\n";
-	fmtv << "% toplabel = 'points (" << x <<","<< y <<"," << z << ")'\n";
-	fmtv << "% boundary = True \n";
-	fmtv << "% ymax = 1.1 ymin = -0.3 \n";
+    fmtv.open(mtvname.c_str());
+    fmtv << "$ DATA = CURVE2D\n\n";
+    fmtv << "% toplabel = 'points (" << x <<","<< y <<"," << z << ")'\n";
+    fmtv << "% boundary = True \n";
+    fmtv << "% ymax = 1.1 ymin = -0.3 \n";
       } else {
-	fmtv.open(mtvname.c_str(),ios::app);
+    fmtv.open(mtvname.c_str(),ios::app);
       }
       fmtv << time << "\t" << uv[ipts-1] << std::endl;
       fmtv.close();
@@ -411,14 +411,14 @@ namespace LifeV{
     static int iter_save=0;
     for(UInt ipts=0;ipts<mesh.numPoints();ipts++){
       if(iter_save == nb_ref_time){
-	std::cout << "pb de dim" << std::endl;
-	exit(1);
+    std::cout << "pb de dim" << std::endl;
+    exit(1);
       }
       if(flag_ref_solution && fabs(time-1000*ref_time(iter_save))>1.e-6){// ref time in milliseconds
-	std::cout << "t        = " << time << std::endl;
-	std::cout << "ref_time = " << ref_time(iter_save)*1000 << std::endl;
-	std::cout << "WARNING : the current time is different from the corresponding reference time. The current solution will not be compared to the reference one." << std::endl;
-	flag_ref_solution = false;
+    std::cout << "t        = " << time << std::endl;
+    std::cout << "ref_time = " << ref_time(iter_save)*1000 << std::endl;
+    std::cout << "WARNING : the current time is different from the corresponding reference time. The current solution will not be compared to the reference one." << std::endl;
+    flag_ref_solution = false;
       }
       if(!flag_ref_solution) ref_time(iter_save) = 0.001*time; // convert in milliseconds
       uv_stored(iter_save,(int)ipts) = uv[ipts];
@@ -443,8 +443,8 @@ namespace LifeV{
     for(int i=0;i<nb_ref_time; i++){
       fref << ref_time(i);
       for(int ipts=0;ipts<(int)mesh.numPoints();ipts++){
-	fref.precision(9);
-	fref << " " << uv_stored(i,ipts);
+    fref.precision(9);
+    fref << " " << uv_stored(i,ipts);
       }
       fref << std::endl;
     }
@@ -463,30 +463,30 @@ namespace LifeV{
     for(int it=0;it<nb_ref_time;it++){
       fcomp << ref_time(it) << "\t";
       for(int ip=0;ip<(int)mesh.numPoints();ip++){
-	tmp(ip) = (uv_stored(it,ip) - uv_ref(it,ip));
+    tmp(ip) = (uv_stored(it,ip) - uv_ref(it,ip));
       }
       L2_and_H1_norms(tmp,L2x,H1x);
       for(int ip=0;ip<(int)mesh.numPoints();ip++){
-	tmp(ip) = uv_ref(it,ip);
+    tmp(ip) = uv_ref(it,ip);
       }
       L2_and_H1_norms(tmp,L2x_ref,H1x_ref);
       if(it){
-	L2tL2x += 0.5*(L2x+L2x_1)*(ref_time(it) - ref_time(it-1));
-	L2tL2x_ref += 0.5*(L2x_ref+L2x_ref_1)*(ref_time(it) - ref_time(it-1));
-	L2tH1x += 0.5*(H1x+H1x_1)*(ref_time(it) - ref_time(it-1));
-	L2tH1x_ref += 0.5*(H1x_ref+H1x_ref_1)*(ref_time(it) - ref_time(it-1));
+    L2tL2x += 0.5*(L2x+L2x_1)*(ref_time(it) - ref_time(it-1));
+    L2tL2x_ref += 0.5*(L2x_ref+L2x_ref_1)*(ref_time(it) - ref_time(it-1));
+    L2tH1x += 0.5*(H1x+H1x_1)*(ref_time(it) - ref_time(it-1));
+    L2tH1x_ref += 0.5*(H1x_ref+H1x_ref_1)*(ref_time(it) - ref_time(it-1));
       }
       L2x_1 = L2x;
       H1x_1 = H1x;
       L2x_ref_1 = L2x_ref;
       H1x_ref_1 = H1x_ref;
       fcomp << sqrt(L2x)
-	    <<"\t" << sqrt(L2x/L2x_ref) << "\t" << sqrt(H1x/H1x_ref) << std::endl;
+        <<"\t" << sqrt(L2x/L2x_ref) << "\t" << sqrt(H1x/H1x_ref) << std::endl;
     }
     fcomp << "# Relative difference in L^2_t(0,T;L^2_x) " <<  sqrt(L2tL2x/L2tL2x_ref)
-	  << std::endl;
+      << std::endl;
     fcomp << "# Relative difference in L^2_t(0,T;semi H^1_x) "
-	  <<  sqrt(L2tH1x/L2tH1x_ref) << std::endl;
+      <<  sqrt(L2tH1x/L2tH1x_ref) << std::endl;
     fcomp.close();
   }
 

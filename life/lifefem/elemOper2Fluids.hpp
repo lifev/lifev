@@ -30,12 +30,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #ifndef _ELEMOPER2FLUIDS_H_
 #define _ELEMOPER2FLUIDS_H_
 
-#include <life.hpp>
-#include <elemMat.hpp>
-#include <elemVec.hpp>
-#include <currentFE.hpp>
-#include <currentBdFE.hpp>
-#include <dof.hpp>
+#include <life/lifecore/life.hpp>
+#include <life/lifearray/elemMat.hpp>
+#include <life/lifearray/elemVec.hpp>
+#include <life/lifefem/currentFE.hpp>
+#include <life/lifefem/currentBdFE.hpp>
+#include <life/lifefem/dof.hpp>
 
 namespace LifeV {
 

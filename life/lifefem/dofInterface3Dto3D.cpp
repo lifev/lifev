@@ -18,7 +18,7 @@
 */
 #include <cmath>
 
-#include <dofInterface3Dto3D.hpp>
+#include <life/lifefem/dofInterface3Dto3D.hpp>
 
 namespace LifeV
 {

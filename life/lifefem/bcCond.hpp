@@ -53,15 +53,15 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "life.hpp"
-#include "identifier.hpp"
-#include "markers.hpp"
-#include "dof.hpp"
-#include "currentFE.hpp"
-#include "currentBdFE.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifemesh/identifier.hpp>
+#include <life/lifemesh/markers.hpp>
+#include <life/lifefem/dof.hpp>
+#include <life/lifefem/currentFE.hpp>
+#include <life/lifefem/currentBdFE.hpp>
 
-#include "bcVector.hpp"
-#include "bcFunction.hpp"
+#include <life/lifefem/bcVector.hpp>
+#include <life/lifefem/bcFunction.hpp>
 
 
 namespace LifeV
@@ -70,7 +70,7 @@ namespace LifeV
     Essential, Natural or Mixte
 */
 enum BCType{Essential, Natural, Mixte};
-//	,UDepEssential,UDepNatural,UDepMixte};
+//    ,UDepEssential,UDepNatural,UDepMixte};
 
 /** Type for boundary conditions application modes
 

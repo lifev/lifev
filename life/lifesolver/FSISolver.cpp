@@ -26,9 +26,9 @@
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
    \date 2004-11-18
  */
-#include <life.hpp>
+#include <life/lifecore/life.hpp>
 
-#include <FSISolver.hpp>
+#include <life/lifesolver/FSISolver.hpp>
 
 namespace LifeV
 {

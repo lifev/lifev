@@ -21,9 +21,9 @@
 
 #include <vector>
 
-#include "life.hpp"
+#include <life/lifecore/life.hpp>
 #include <iomanip>
-#include "tab.hpp"
+#include <life/lifearray/tab.hpp>
 
 namespace LifeV
 {

@@ -24,10 +24,10 @@
 
                - \Delta u = f
 
-	                u = g on the boundary
+                    u = g on the boundary
 
 
-			on a cube
+            on a cube
 */
 
 /* Mauro Meneghin: note, I've taken the test_p2 example and
@@ -35,22 +35,22 @@
    this files recognizes old meshes too anyway, so you could
    use this file as a template instead of the old ones */
 
-#include <GetPot.hpp>
+#include <life/lifecore/GetPot.hpp>
 
 #include "main.hpp"
 #include "ud_functions.hpp"
-//#include "bc_manage.hpp"	bc_manage.hpp changed to bcManage.hpp, 
+//#include "bc_manage.hpp"    bc_manage.hpp changed to bcManage.hpp, 
 //BCFunction_Base to BCFunctionBase, BC_Handler to BCHandler
-#include "bcManage.hpp"
-#include "elemMat.hpp"
-#include "elemOper.hpp"
-#include "openDX_wrtrs.hpp"
-#include "vtk_wrtrs.hpp"
-//#include "sobolevNorms.hpp"
+#include <life/lifefem/bcManage.hpp>
+#include <life/lifearray/elemMat.hpp>
+#include <life/lifefem/elemOper.hpp>
+#include <life/lifefilters/openDX_wrtrs.hpp>
+#include <life/lifefilters/vtk_wrtrs.hpp>
+//#include <life/lifefem/sobolevNorms.hpp>
 
 #undef  OPER_TEMPLATE
 //#define P1
-#define P2			
+#define P2            
 #undef INRIA
 
 int main() {
@@ -122,7 +122,7 @@ int main() {
     else if (mesh_type=="NETGEN"){
         string mesh_dir = datafile( "mesh_dir", "." );
         string fname=mesh_dir+datafile( "mesh_file", "." );
-	std::cout<<"opening mesh file "<<fname<<std::endl;
+    std::cout<<"opening mesh file "<<fname<<std::endl;
         readNetgenMesh(aMesh,fname,m);
     }
     else

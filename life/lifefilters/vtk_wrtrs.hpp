@@ -60,8 +60,8 @@
 
 #include <fstream>
 #include <vector>
-#include "life.hpp"
-#include "currentFE.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifefem/currentFE.hpp>
 
 namespace LifeV
 {

@@ -18,8 +18,8 @@
 */
 
 
-#include "steklovPoincareBase.hpp"
-#include "reducedLinFluid.hpp"
+#include <life/lifesolver/steklovPoincareBase.hpp>
+#include <life/lifesolver/reducedLinFluid.hpp>
 
 
 namespace LifeV

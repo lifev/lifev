@@ -16,21 +16,21 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#include "geoMapDG.hpp"
+#include <life/lifefem/geoMapDG.hpp>
 
 namespace LifeV
 {
   GeoMapDG::GeoMapDG(std::string _name,
-		 ReferenceShapes _shape,
-		 int _nbDof,
-		 int _nbCoor,
-		 const Fct* phi, const Fct* dPhi, const Fct* d2Phi, 
-		 const Real* refCoor, 
-		 const SetOfQuadRule& sqr,
-		 ReferenceShapes _shapeFaces, 
-		 int _nbFaces, int _nbGeoNodeFaces, 
-		 const Real* refCoorFaces, 
-		 const SetOfQuadRule& sqrFaces, const GeoMap& _geoMap, const GeoMap* bdMap):
+         ReferenceShapes _shape,
+         int _nbDof,
+         int _nbCoor,
+         const Fct* phi, const Fct* dPhi, const Fct* d2Phi, 
+         const Real* refCoor, 
+         const SetOfQuadRule& sqr,
+         ReferenceShapes _shapeFaces, 
+         int _nbFaces, int _nbGeoNodeFaces, 
+         const Real* refCoorFaces, 
+         const SetOfQuadRule& sqrFaces, const GeoMap& _geoMap, const GeoMap* bdMap):
   RefEleDG( _name, _shape, _nbDof, _nbCoor, phi, dPhi, d2Phi, refCoor, sqr, _shapeFaces, _nbFaces, _nbGeoNodeFaces, refCoorFaces, sqrFaces, _geoMap),
   _boundaryMap(bdMap)
 {
@@ -58,16 +58,16 @@ std::ostream& operator << (std::ostream& f,const GeoMapDG& geomap)
     for(int ig=0;ig<qr.nbQuadPt;ig++){
       f << "    - Quadrature point : " << ig << std::endl;
       for(int i=0;i<geomap.nbDof;i++){
-	f << "      Basif fct " << i << std::endl;
-	f << "         Value = " << geomap.phi(i,ig,qr) << std::endl;
-	f << "         Derivatives = " ;
-	for(int icoor=0;icoor<geomap.nbCoor;icoor++) f << " " << geomap.dPhi(i,icoor,ig,qr);
-	f << std::endl;
-	f << "         Second derivatives = " ;
-	for(int icoor=0;icoor<geomap.nbCoor;icoor++)
-	  for(int jcoor=0;jcoor<geomap.nbCoor;jcoor++)
-	  f << " " << geomap.d2Phi(i,icoor,jcoor,ig,qr);
-	f << std::endl;
+    f << "      Basif fct " << i << std::endl;
+    f << "         Value = " << geomap.phi(i,ig,qr) << std::endl;
+    f << "         Derivatives = " ;
+    for(int icoor=0;icoor<geomap.nbCoor;icoor++) f << " " << geomap.dPhi(i,icoor,ig,qr);
+    f << std::endl;
+    f << "         Second derivatives = " ;
+    for(int icoor=0;icoor<geomap.nbCoor;icoor++)
+      for(int jcoor=0;jcoor<geomap.nbCoor;jcoor++)
+      f << " " << geomap.d2Phi(i,icoor,jcoor,ig,qr);
+    f << std::endl;
       }
     }
   }

@@ -38,8 +38,8 @@ namespace LifeV
   //======================================================================
   
   double stim_coef(const double& t,
-		   const double& x, const double& y, const double& z,
-		   const ID& i) {
+           const double& x, const double& y, const double& z,
+           const ID& i) {
     /*
       N.B. : this term is in the matrix -> independant of time (in
       the present implementation)
@@ -66,8 +66,8 @@ namespace LifeV
     return 0.;
   }
   double stim_g(const double& t,
-		const double& x, const double& y, const double& z,
-		const ID& i) {
+        const double& x, const double& y, const double& z,
+        const ID& i) {
     /*
       N.B. : this term is in the r.h.s which is updated at each time step
     */
@@ -136,9 +136,9 @@ namespace LifeV
     //    cout << x << " " << y << " " << z << endl;
     if( ( sqrt((94.-x)*(94.-x) + (98.-y)*(98.-y) + (114.-z)*(114.-z))) < 30. )
       {
-	return .0000001;
+    return .0000001;
       } else {
-	return 1.;
+    return 1.;
       }
   }
   

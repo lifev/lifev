@@ -26,7 +26,7 @@
    \author Christoph Winkelmann <christoph.winkelmann@epfl.ch>
    \date 2004-12-16
 */
-#include <bcHandler.hpp>
+#include <life/lifefem/bcHandler.hpp>
 
 using namespace LifeV;
 

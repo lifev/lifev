@@ -17,11 +17,11 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 //! \author:Vincent Martin 09/04
-#include <life.hpp>
-#include <chrono.hpp>
+#include <life/lifecore/life.hpp>
+#include <life/lifecore/chrono.hpp>
 #include <dataOneDModel.hpp>
 #include <oneDModelSolver.hpp>
-#include <GetPot.hpp>
+#include <life/lifecore/GetPot.hpp>
 
 #include <sstream>
 
@@ -96,7 +96,7 @@ int main(int argc, char** argv)
   for (Real time=startT+dt ; time <= T; time+=dt) {
     count++;
     std::cout << "Iteration " <<  count  << ", t = " << time
-	      << "s... \n";
+          << "s... \n";
     chrono.start();
 
     onedm.timeAdvance( time );

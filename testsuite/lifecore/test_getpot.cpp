@@ -20,7 +20,7 @@
 #include <string>
 using namespace std;
 
-#include "GetPot.hpp"
+#include <life/lifecore/GetPot.hpp>
 
 using getpot::StringVector;
 

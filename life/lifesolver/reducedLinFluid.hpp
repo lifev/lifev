@@ -33,11 +33,11 @@
 #define _QNEWTON
 
 
-#include <life.hpp>
-#include "FSIOperator.hpp"
-#include "NavierStokesAleSolverPC.hpp"
-#include "VenantKirchhofSolver.hpp"
-#include "regionMesh3D_ALE.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifesolver/FSIOperator.hpp>
+#include <life/lifesolver/NavierStokesAleSolverPC.hpp>
+#include <life/lifesolver/VenantKirchhofSolver.hpp>
+#include <life/lifefem/regionMesh3D_ALE.hpp>
 
 
 namespace LifeV

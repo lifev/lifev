@@ -22,23 +22,22 @@
   \After Burman-Hansbo, Comput. Methods Appl. Mech. Engrg. 193 (2004)
   \pp. 1437-1453
 */
+#include <lifeconfig.h>
 
-#include <GetPot.hpp>
-#include <SolverAztec.hpp>
-#include <LevelSetSolver.hpp>
+#include <life/lifecore/GetPot.hpp>
+#include <life/lifealg/SolverAztec.hpp>
+#include <life/lifesolver/LevelSetSolver.hpp>
+#include <life/lifefem/bcManage.hpp>
+#include <life/lifearray/elemMat.hpp>
+#include <life/lifefem/elemOper.hpp>
+#include <life/lifefilters/importer.hpp>
+#include <life/lifefilters/openDX_wrtrs.hpp>
+#include <life/lifefilters/vtk_wrtrs.hpp>
+#include <life/lifefem/bdf.hpp>
+
 
 #include <main.hpp>
 
-#include <importer.hpp>
-
-#include <bcManage.hpp>
-
-#include <elemMat.hpp>
-#include <elemOper.hpp>
-
-#include <openDX_wrtrs.hpp>
-#include <vtk_wrtrs.hpp>
-#include <bdf.hpp>
 
 int main() {
     using namespace LifeV;
@@ -109,7 +108,7 @@ int main() {
 
     CurrentFE __fe(refFE, geoMap, qr);
     CurrentBdFE feBd(refBdFE, geoMapBd, qrBd);
-    
+
     // Update of the Dof for the particular FE problem and for the boundary
     // conditions
 
@@ -219,7 +218,7 @@ int main() {
     UInt current_step = 1;
     UInt steps_after_last_reini = 1;
     UInt steps_after_last_save = 1;
-    
+
     for(Real t = t0; t < T; t += delta_t) {
         std::cout << "** LS test ** Step: " << current_step << ", t = " << t
                   << std::endl;
@@ -259,10 +258,10 @@ int main() {
 
         current_step++;
     }
-    
+
     __ofile.close();
 
     std::cout << "** LS test ** Done" << std::endl;
-    
+
     return 0;
 }

@@ -4,8 +4,8 @@
 #define _DATAFHN_H_
 #include <string>
 #include <iostream>
-#include "GetPot.hpp"
-#include "tab.hpp"
+#include <life/lifecore/GetPot.hpp>
+#include <life/lifearray/tab.hpp>
 
 namespace LifeV
 {
@@ -18,8 +18,8 @@ namespace LifeV
     // Physics
     //
     /*    
-	  du/dt - diff \lapl u = f0 u(1-u)(u-alpha) - v
-	  dv/dt = eps (beta u - gamma v)
+      du/dt - diff \lapl u = f0 u(1-u)(u-alpha) - v
+      dv/dt = eps (beta u - gamma v)
     */
     static int test_case;
     string mesh_file;

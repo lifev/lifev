@@ -21,7 +21,7 @@
 #ifndef _EJ_HPP
 #define _EJ_HPP
 
-#include "FSIOperator.hpp"
+#include <life/lifesolver/FSIOperator.hpp>
 
 namespace LifeV
 {

@@ -29,8 +29,8 @@
 #ifndef SolverAztec_H
 #define SolverAztec_H 1
 
-#include <dataAztec.hpp>
-#include <vecUnknown.hpp>
+#include <life/lifealg/dataAztec.hpp>
+#include <life/lifearray/vecUnknown.hpp>
 
 class GetPot;
 

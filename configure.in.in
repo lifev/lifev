@@ -59,7 +59,10 @@ AC_CHECK_PROG(LIFE_HAS_DOT, dot, [yes] )
 AC_CHECK_BOOST
 AC_CHECK_BOOST_GRAPH
 AC_CHECK_BOOST_SIGNALS
+AC_CHECK_BOOST_REGEX
+AC_CHECK_BOOST_FILESYSTEM
 AC_CHECK_BOOST_TEST
+
 
 
 dnl
@@ -92,13 +95,10 @@ AC_CHECK_LIB([grace_np],GraceClose,[grace_libs="-lgrace_np"],[grace_libs=""])
 AC_SUBST(grace_libs)
 
 
-all_includes="-I\$(top_srcdir)/life/lifecore -I\$(top_srcdir)/life/lifearray  -I\$(top_srcdir)/life/lifemesh -I\$(top_srcdir)/life/lifealg  -I\$(top_srcdir)/life/lifefem -I\$(top_srcdir)/life/lifesolver -I\$(top_srcdir)/life/lifefilters"
-AC_SUBST(all_includes)
+#all_includes="-I\$(top_srcdir) -I\$(top_srcdir)/life/lifecore -I\$(top_srcdir)/life/lifearray  -I\$(top_srcdir)/life/lifemesh -I\$(top_srcdir)/life/lifealg  -I\$(top_srcdir)/life/lifefem -I\$(top_srcdir)/life/lifesolver -I\$(top_srcdir)/life/lifefilters"
+#AC_SUBST(all_includes)
 
-CPPFLAGS="-DTHREEDIM ${CPPFLAGS}"
-
-CXXFLAGS="-Wall ${CXXFLAGS}"
-
+CPPFLAGS="-I\$(top_srcdir) ${CPPFLAGS}"
 
 life_libs="\$(top_builddir)/life/lifefilters/liblifefilters.la \$(top_builddir)/life/lifesolver/liblifesolver.la  \$(top_builddir)/life/lifefem/liblifefem.la \$(top_builddir)/life/lifealg/liblifealg.la \$(top_builddir)/life/lifemesh/liblifemesh.la \$(top_builddir)/life/lifearray/liblifearray.la \$(top_builddir)/life/lifecore/liblifecore.la"
 
@@ -107,6 +107,7 @@ life_libs="\$(top_builddir)/life/lifefilters/liblifefilters.la \$(top_builddir)/
 #life_libs="\$(top_builddir)/life/lifefilters/liblifefilters.la  \$(top_builddir)/life/lifefem/liblifefem.la \$(top_builddir)/life/lifealg/liblifealg.la \$(top_builddir)/life/lifearray/liblifearray.la \$(top_builddir)/life/lifemesh/liblifemesh.la \$(top_builddir)/life/lifecore/liblifecore.la"
 
 AC_SUBST(life_libs)
+LIFEV_LIBS="-llifefilters -llifesolver -llifefem -llifealg -llifemesh -llifearray -llifecore"
 
 
 #
@@ -120,3 +121,6 @@ fi
 
 dnl testdir
 AC_CONFIG_TESTDIR(testsuite)
+
+dnl pkgconfig
+AX_CREATE_PKGCONFIG_INFO(life.pc,,[${LIFEV_LIBS} $LIBS],[Finite Element Library and more],[$CPPFLAGS $CFLAGS])

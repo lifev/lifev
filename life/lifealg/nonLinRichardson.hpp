@@ -20,9 +20,9 @@
 #define _NONLINRICHARDSON_HPP
 
 #include <algorithm> // for min and max
-#include "linesearch_parabolic.hpp"
-#include "linesearch_cubic.hpp"
-#include "generalizedAitken.hpp"
+#include <life/lifealg/linesearch_parabolic.hpp>
+#include <life/lifealg/linesearch_cubic.hpp>
+#include <life/lifealg/generalizedAitken.hpp>
 
 namespace LifeV
 {

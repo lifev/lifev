@@ -29,10 +29,10 @@
 #define _DATAMESH_H_
 #include <string>
 #include <iostream>
-#include "GetPot.hpp"
-#include "life.hpp"
-#include "regionMesh3D.hpp"
-#include "readMesh3D.hpp"
+#include <life/lifecore/GetPot.hpp>
+#include <life/lifecore/life.hpp>
+#include <life/lifemesh/regionMesh3D.hpp>
+#include <life/lifefilters/readMesh3D.hpp>
 
 namespace LifeV
 {

@@ -20,7 +20,7 @@
 #ifndef _GMV_WRTRS_H
 #define _GMV_WRTRS_H
 #include <fstream>
-#include "life.hpp"
+#include <life/lifecore/life.hpp>
 
 namespace LifeV
 {

@@ -19,9 +19,9 @@
 #ifndef _REFFE_H
 #define _REFFE_H
 
-#include "life.hpp"
-#include "refEle.hpp"
-#include "localDofPattern.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifefem/refEle.hpp>
+#include <life/lifefem/localDofPattern.hpp>
 
 /*!
   \file refFE.h

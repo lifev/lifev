@@ -1,4 +1,4 @@
-#include "currentIFDG.hpp"
+#include <life/lifefem/currentIFDG.hpp>
 
 namespace LifeV
 {
@@ -42,16 +42,16 @@ void CurrentIFDG::_comp_corresp_node_op() {
     for(int j = 0; j < nbGeoNodeAd; j++){
  
       for(int icoor = 0; icoor < nbCoorAd; icoor++){
-	same_point = false;
+    same_point = false;
 
-	if(point(i, icoor) == pointOp(j, icoor)) same_point = true;
+    if(point(i, icoor) == pointOp(j, icoor)) same_point = true;
 
-	if(!same_point) break;
+    if(!same_point) break;
       }
 
       if(same_point){
-	correspNodeOp(i) = j;
-	break;
+    correspNodeOp(i) = j;
+    break;
       }
     }
   }
@@ -88,7 +88,7 @@ void CurrentIFDG::_comp_phi_dphi_op(){
       phiGeoOp(i, ig) = geoMapAd.phi(i, xi, eta, zeta);
 
       for(int icoor = 0; icoor < nbCoorAd; icoor++){
-	dPhiGeoOp(i, icoor, ig) = geoMapAd.dPhi(i, icoor, xi, eta, zeta);
+    dPhiGeoOp(i, icoor, ig) = geoMapAd.dPhi(i, icoor, xi, eta, zeta);
       }
 
     }
@@ -103,7 +103,7 @@ void CurrentIFDG::_comp_phi_dphi_op(){
       phiOp(i, ig) = refFEDG.phi(i, xi, eta, zeta);
 
       for(int icoor = 0; icoor < nbCoorAd; icoor++){
-	dPhiOp(i, icoor, ig) = refFEDG.dPhi(i, icoor, xi, eta, zeta);
+    dPhiOp(i, icoor, ig) = refFEDG.dPhi(i, icoor, xi, eta, zeta);
       }
 
     }
@@ -118,13 +118,13 @@ void CurrentIFDG::_comp_inv_jacobian_op()
   for(int ig = 0; ig < nbQuadPt; ig++){
     for(int icoor = 0; icoor < nbCoorAd; icoor++){
       for(int jcoor = 0; jcoor < nbCoorAd; jcoor++){
-	fctDer = 0.;
+    fctDer = 0.;
 
-	for(int j = 0; j < nbGeoNodeAd; j++){
-	  fctDer += pointOp(j , icoor) * dPhiGeoOp(j, jcoor, ig);
-	} // for j
+    for(int j = 0; j < nbGeoNodeAd; j++){
+      fctDer += pointOp(j , icoor) * dPhiGeoOp(j, jcoor, ig);
+    } // for j
 
-	jacobianOp(icoor, jcoor, ig) = fctDer;
+    jacobianOp(icoor, jcoor, ig) = fctDer;
       } // for jcoor
     } // for icoor
   } // for ig
@@ -206,27 +206,27 @@ void CurrentIFDG::_comp_inv_jacobian_op()
 
 //     for(int j = 0; j < 2 * nbNodeAd; j++){
 //       for(int icoor = 0; icoor < nbCoorAd; icoor++){
-// 	rhs = 0.;
+//     rhs = 0.;
 
-// 	// Compute right hand side vector
-// 	  for(int i = 0; i < 2 * nbNodeAd; i++){
-// 	    for(int ig = 0; ig < nbQuadPt; ig++){
-// 	      if(j < nbNodeAd){
-// 		n = normal(icoor, ig);
-// 	      }else{
-// 		n = - normal(icoor, ig);
-// 	      }
-// 	      rhs(i) += - phiAdOp(j, ig) * n * phiAdOp(i, ig) * weightMeas(ig);
-// 	    } // for ig
-// 	  } // for i
+//     // Compute right hand side vector
+//       for(int i = 0; i < 2 * nbNodeAd; i++){
+//         for(int ig = 0; ig < nbQuadPt; ig++){
+//           if(j < nbNodeAd){
+//         n = normal(icoor, ig);
+//           }else{
+//         n = - normal(icoor, ig);
+//           }
+//           rhs(i) += - phiAdOp(j, ig) * n * phiAdOp(i, ig) * weightMeas(ig);
+//         } // for ig
+//       } // for i
 
-// 	// Solve the system
-// 	rhs = invMassAdOp * rhs;
+//     // Solve the system
+//     rhs = invMassAdOp * rhs;
 
-// 	// Store the solution
-// 	for(int i = 0; i < 2 * nbNodeAd; i++){
-// 	  re(i, j, icoor) = rhs(i);
-// 	}
+//     // Store the solution
+//     for(int i = 0; i < 2 * nbNodeAd; i++){
+//       re(i, j, icoor) = rhs(i);
+//     }
 
 //       } // for icoor
 //     } // for j

@@ -166,10 +166,10 @@ public:
     inline bool isMarkerUnset() const;
 
     //! Put marker to nullflag
-    inline void unsetMarker() const;	
-    				
+    inline void unsetMarker() const;    
+                    
     //! Put marker to nullflag
-    inline void markerUnset() const;	
+    inline void markerUnset() const;    
 
     //! Helper function that prints a marker Flag
     std::ostream & printFlag( EntityFlag const f, std::ostream & out ) const;
@@ -284,7 +284,7 @@ typename MarkerTraits::EntityFlag Marker_Base<MarkerTraits>::setWeakerMarker( En
 template <typename MarkerTraits>
 typename MarkerTraits::EntityFlag Marker_Base<MarkerTraits>::setStrongerMarker( EntityFlag const & p )
 {
-    if ( isMarkerUnset() )	
+    if ( isMarkerUnset() )    
         return flag = p;
     return setMarker( MarkerTraits::strongerFlag( this->marker(), p ) );
 }
@@ -292,7 +292,7 @@ typename MarkerTraits::EntityFlag Marker_Base<MarkerTraits>::setStrongerMarker( 
 template <typename MarkerTraits>
 typename MarkerTraits::EntityFlag Marker_Base<MarkerTraits>::setWeakerMarker( EntityFlag const & p )
 {
-    if ( isMarkerUnset() )	
+    if ( isMarkerUnset() )    
         return flag = p;
     return setMarker( MarkerTraits::weakerFlag( this->marker(), p ) );
 }
@@ -310,7 +310,7 @@ bool Marker_Base<MarkerTraits>::isMarkerUnset() const
 }
 
 template <typename MarkerTraits>
-void Marker_Base<MarkerTraits>::unsetMarker() const	
+void Marker_Base<MarkerTraits>::unsetMarker() const    
 {
     flag=nullFlag();
 }

@@ -31,9 +31,9 @@
 /                                                                            /
 /                                                                            /
 /---------------------------------------------------------------------------*/
-#include "life.hpp"
+#include <life/lifecore/life.hpp>
 #include <vector>
-#include "openDX_wrtrs.hpp"
+#include <life/lifefilters/openDX_wrtrs.hpp>
 
 namespace LifeV
 {

@@ -28,8 +28,8 @@
  */
 #include <cassert>
 
-#include <life.hpp>
-#include <typeInfo.hpp>
+#include <life/lifecore/life.hpp>
+#include <life/lifecore/typeInfo.hpp>
 
 namespace LifeV
 {

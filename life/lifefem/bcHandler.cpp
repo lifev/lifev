@@ -33,7 +33,7 @@
 #include <boost/lambda/bind.hpp>
 #include <boost/lambda/if.hpp>
 
-#include <bcHandler.hpp>
+#include <life/lifefem/bcHandler.hpp>
 
 namespace LifeV
 {

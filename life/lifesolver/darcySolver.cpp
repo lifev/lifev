@@ -27,7 +27,7 @@
    \date 2004-10-25
  */
 
-#include <darcySolver.hpp>
+#include <life/lifesolver/darcySolver.hpp>
 
 
 namespace LifeV

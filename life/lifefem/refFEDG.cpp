@@ -16,22 +16,22 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#include "refFEDG.hpp"
+#include <life/lifefem/refFEDG.hpp>
 #include <set>
 
 namespace LifeV
 {
   RefFEDG::RefFEDG(std::string _name, int _type,
-	  ReferenceShapes _shape,
-	  int _nbDofPerVertex, int _nbDofPerEdge, int _nbDofPerFace, int _nbDofPerVolume, int _nbDof,
-	  int _nbCoor,
-	  const Fct* phi, const Fct* dPhi, const Fct* d2Phi, 
-	  const Real* refCoor, 
-	  const SetOfQuadRule& sqr, const LocalDofPattern& _elPattern, const RefFE* boundaryFE,
-	  ReferenceShapes _shapeFaces, 
-	  int _nbFaces, int _nbGeoNodeFaces, 
-	  const Real* refCoorFaces, 
-	  const SetOfQuadRule& sqrFaces, const LocalDofPattern& _facePattern, const GeoMap _geoMap):
+      ReferenceShapes _shape,
+      int _nbDofPerVertex, int _nbDofPerEdge, int _nbDofPerFace, int _nbDofPerVolume, int _nbDof,
+      int _nbCoor,
+      const Fct* phi, const Fct* dPhi, const Fct* d2Phi, 
+      const Real* refCoor, 
+      const SetOfQuadRule& sqr, const LocalDofPattern& _elPattern, const RefFE* boundaryFE,
+      ReferenceShapes _shapeFaces, 
+      int _nbFaces, int _nbGeoNodeFaces, 
+      const Real* refCoorFaces, 
+      const SetOfQuadRule& sqrFaces, const LocalDofPattern& _facePattern, const GeoMap _geoMap):
   RefEleDG( _name, _shape, _nbDof, _nbCoor, phi, dPhi, d2Phi, refCoor, sqr, _shapeFaces, _nbFaces, _nbGeoNodeFaces, refCoorFaces, sqrFaces, _geoMap),
   _boundaryFE(boundaryFE), 
   elPattern(_elPattern),
@@ -79,16 +79,16 @@ std::ostream& operator << (std::ostream& f, const RefFEDG& fe)
       f << "    - Quadrature point : " << ig << std::endl;
       //      f << "     number and values of basis functions = " << fe.phiQuadPt(ig,qr) << std::endl;
       for(int i=0;i<fe.nbDof;i++){
-	f << "      Basif fct " << i << std::endl;
-	f << "         Value = " << fe.phi(i,ig,qr) << std::endl;
-	f << "         Derivatives = " ;
-	for(int icoor=0;icoor<fe.nbCoor;icoor++) f << " " << fe.dPhi(i,icoor,ig,qr);
-	f << std::endl;
-	f << "         Second derivatives = " ;
-	for(int icoor=0;icoor<fe.nbCoor;icoor++)
-	  for(int jcoor=0;jcoor<fe.nbCoor;jcoor++)
-	  f << " " << fe.d2Phi(i,icoor,jcoor,ig,qr);
-	f << std::endl;
+    f << "      Basif fct " << i << std::endl;
+    f << "         Value = " << fe.phi(i,ig,qr) << std::endl;
+    f << "         Derivatives = " ;
+    for(int icoor=0;icoor<fe.nbCoor;icoor++) f << " " << fe.dPhi(i,icoor,ig,qr);
+    f << std::endl;
+    f << "         Second derivatives = " ;
+    for(int icoor=0;icoor<fe.nbCoor;icoor++)
+      for(int jcoor=0;jcoor<fe.nbCoor;jcoor++)
+      f << " " << fe.d2Phi(i,icoor,jcoor,ig,qr);
+    f << std::endl;
       }
     }
   }
@@ -106,20 +106,20 @@ std::ostream& operator << (std::ostream& f, const RefFEDG& fe)
       const QuadRule& qrFaces = fe._sqrFaces -> quadRule(k);
       f << std::endl << "*** Quadrature rule : " << qrFaces.name << std::endl;
       for(int ig = 0; ig < qrFaces.nbQuadPt; ig++){
-	f << "   - Quadrature point : " << ig << std::endl;
-	for(int i = 0; i < fe.nbDof; i++){
-	  f << "      Basis fct " << i << std::endl;
-	  f << "         Value = " << fe.phiFace(iFace, i, ig, qrFaces) << std::endl;
-	  f << "         Derivatives = ";
-	  for(int icoor = 0; icoor < fe.nbCoor; icoor++)
-	    f << " " << fe.dPhiFace(iFace, i, icoor, ig, qrFaces);
-	  f << std::endl;
-	  f << "         Second derivatives = ";
-	  for(int icoor = 0; icoor < fe.nbCoor; icoor++)
-	    for(int jcoor = 0; jcoor < fe.nbCoor; jcoor++)
-	      f << " " << fe.d2PhiFace(iFace, i, icoor, jcoor, ig, qrFaces);
-	  f << std::endl;
-	} // for i
+    f << "   - Quadrature point : " << ig << std::endl;
+    for(int i = 0; i < fe.nbDof; i++){
+      f << "      Basis fct " << i << std::endl;
+      f << "         Value = " << fe.phiFace(iFace, i, ig, qrFaces) << std::endl;
+      f << "         Derivatives = ";
+      for(int icoor = 0; icoor < fe.nbCoor; icoor++)
+        f << " " << fe.dPhiFace(iFace, i, icoor, ig, qrFaces);
+      f << std::endl;
+      f << "         Second derivatives = ";
+      for(int icoor = 0; icoor < fe.nbCoor; icoor++)
+        for(int jcoor = 0; jcoor < fe.nbCoor; jcoor++)
+          f << " " << fe.d2PhiFace(iFace, i, icoor, jcoor, ig, qrFaces);
+      f << std::endl;
+    } // for i
       } // for ig
     } // for k
   } // for iFace

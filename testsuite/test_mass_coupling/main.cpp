@@ -2,13 +2,13 @@
 // (the arterial lumen and the arterial wall)
 
 // author:M. Prosi                                august/04
-#include "life.hpp"
-#include "convDiffReactSolverPC.hpp"
-#include "dofInterface3Dto3D.hpp"
-#include "chrono.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifesolver/convDiffReactSolverPC.hpp>
+#include <life/lifefem/dofInterface3Dto3D.hpp>
+#include <life/lifecore/chrono.hpp>
 #include "ud_functions.hpp"
-#include "GetPot.hpp"
-#include "ensight7Writer.hpp"
+#include <life/lifecore/GetPot.hpp>
+#include <life/lifefilters/ensight7Writer.hpp>
 
 int main(int argc, char** argv)
 {
@@ -71,17 +71,17 @@ int main(int argc, char** argv)
      Pw_var(ii)=P;}
   for(UInt ii=3; ii < 4; ii++){
      for(UInt jj=749; jj < 768; jj++){
-	Pw_var(jj+ii*777)=10*P;}}
+    Pw_var(jj+ii*777)=10*P;}}
 
   for(UInt ii=0; ii < dim_cl; ii++){
      Pl_var(ii)=P;}
   for(UInt ii=5; ii < 6; ii++){
      Pl_var(44+ii*992)=10*P;
      for(UInt jj=717; jj < 725; jj++){
-	Pl_var(jj+ii*992)=10*P;}
+    Pl_var(jj+ii*992)=10*P;}
      Pl_var(45+ii*992)=10*P;
      for(UInt jj=806; jj < 814; jj++){
-	Pl_var(jj+ii*992)=10*P;}
+    Pl_var(jj+ii*992)=10*P;}
      Pl_var(46+ii*992)=10*P;}
 
 //========================================================================================
@@ -177,26 +177,26 @@ int main(int argc, char** argv)
 
      for(Int iter=0; iter < 4; iter ++){
 
-	std::cout << iter << std::endl;
+    std::cout << iter << std::endl;
 
-	for(UInt ii=0; ii < dim_cw; ii++){
-	   cw_interface(ii)=cdrwall.c()(ii)*(1/epsilon)*(Pw_var(ii)-u_filt*((s*kappa)/2));}
+    for(UInt ii=0; ii < dim_cw; ii++){
+       cw_interface(ii)=cdrwall.c()(ii)*(1/epsilon)*(Pw_var(ii)-u_filt*((s*kappa)/2));}
 
-	cdrlumen.iterate(time);
+    cdrlumen.iterate(time);
 
-	for(UInt ii=0; ii < dim_cl; ii++){
-	   cl_interface(ii)=cdrlumen.c()(ii)*(Pl_var(ii)+u_filt*((s*kappa)/2));}
+    for(UInt ii=0; ii < dim_cl; ii++){
+       cl_interface(ii)=cdrlumen.c()(ii)*(Pl_var(ii)+u_filt*((s*kappa)/2));}
 
-	cdrwall.iterate(time);
+    cdrwall.iterate(time);
 
-	cw_delta=cdrwall.c()-cw_old;
-	cl_delta=cdrlumen.c()-cl_old;
+    cw_delta=cdrwall.c()-cw_old;
+    cl_delta=cdrlumen.c()-cl_old;
 
-	std::cout << "difference in the wall: " << norm_inf(cw_delta) << std::endl;
-	std::cout << "difference in the lumen: " << norm_inf(cl_delta) << std::endl;
+    std::cout << "difference in the wall: " << norm_inf(cw_delta) << std::endl;
+    std::cout << "difference in the lumen: " << norm_inf(cl_delta) << std::endl;
 
-	cw_old=cdrwall.c();
-	cl_old=cdrlumen.c();
+    cw_old=cdrwall.c();
+    cl_old=cdrlumen.c();
      }
 
 
@@ -218,14 +218,14 @@ int main(int argc, char** argv)
     for(int i=0; i<4;i++){
     cout <<  sqrt(cdrlumen.mesh().point(5234+i*9).x()*cdrlumen.mesh().point(5234+i*9).x()+
                      cdrlumen.mesh().point(5234+i*9).y()*cdrlumen.mesh().point(5234+i*9).y())
-	 << ", " << cdrlumen.c()(5234+i*9) << endl;}
+     << ", " << cdrlumen.c()(5234+i*9) << endl;}
     cout <<  sqrt(cdrlumen.mesh().point(4999).x()*cdrlumen.mesh().point(4999).x()+
                      cdrlumen.mesh().point(4999).y()*cdrlumen.mesh().point(4999).y())
             << ", " << cdrlumen.c()(4999) << endl;
     for(int i=0; i<9;i++){
     cout <<  sqrt(cdrlumen.mesh().point(5597+i*9).x()*cdrlumen.mesh().point(5597+i*9).x()+
                      cdrlumen.mesh().point(5597+i*9).y()*cdrlumen.mesh().point(5597+i*9).y())
-	 << ", " << cdrlumen.c()(5597+i*9) << endl;}
+     << ", " << cdrlumen.c()(5597+i*9) << endl;}
     cout <<  sqrt(cdrlumen.mesh().point(5006).x()*cdrlumen.mesh().point(5006).x()+
                      cdrlumen.mesh().point(5006).y()*cdrlumen.mesh().point(5006).y())
             << ", " << cdrlumen.c()(5006) << endl;

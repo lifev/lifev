@@ -29,19 +29,19 @@
 #ifndef _VENANTKIRCHHOFSOLVER_H_
 #define _VENANTKIRCHHOFSOLVER_H_
 
-#include "ElasticStructureHandler.hpp"
-#include "elemMat.hpp"
-#include "elemVec.hpp"
-#include "elemOper.hpp"
-#include "values.hpp"
-#include "pattern.hpp"
-#include "assemb.hpp"
-#include "bcManage.hpp"
-#include "bcHandler.hpp"
-#include "chrono.hpp"
-#include "SolverAztec.hpp"
-#include "dataNewton.hpp"
-#include "newton.hpp"
+#include <life/lifesolver/ElasticStructureHandler.hpp>
+#include <life/lifearray/elemMat.hpp>
+#include <life/lifearray/elemVec.hpp>
+#include <life/lifefem/elemOper.hpp>
+#include <life/lifefem/values.hpp>
+#include <life/lifearray/pattern.hpp>
+#include <life/lifefem/assemb.hpp>
+#include <life/lifefem/bcManage.hpp>
+#include <life/lifefem/bcHandler.hpp>
+#include <life/lifecore/chrono.hpp>
+#include <life/lifealg/SolverAztec.hpp>
+#include <life/lifealg/dataNewton.hpp>
+#include <life/lifealg/newton.hpp>
 
 namespace LifeV
 {
@@ -211,7 +211,7 @@ VenantKirchhofSolver( const GetPot& data_file, const RefFE& refFE, const QuadRul
     _rhsWithoutBC( this->_dim ),
     _f( this->_dim ),
     _residual_d( this->_dim ),
-	_out_iter( "out_iter_solid" ),
+    _out_iter( "out_iter_solid" ),
     _out_res( "out_res_solid" ),
     _time( 0.0 ),
     _recur( 0 )

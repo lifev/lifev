@@ -22,10 +22,10 @@
 #include <vector>
 
 
-#include <life.hpp>
-#include <geoMap.hpp>
-#include <refFE.hpp>
-#include <geoMap.hpp>
+#include <life/lifecore/life.hpp>
+#include <life/lifefem/geoMap.hpp>
+#include <life/lifefem/refFE.hpp>
+#include <life/lifefem/geoMap.hpp>
 /*!
   \file staticBdFE.h
   \brief Structure for a Static boundary finite element

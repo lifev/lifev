@@ -18,7 +18,7 @@
 */
 #include<iostream>
 
-#include "SimpleVect.hpp"
+#include <life/lifearray/SimpleVect.hpp>
 
 int
 main()

@@ -19,14 +19,14 @@
 #ifndef HH_MARKERS_HH_
 #define HH_MARKERS_HH_
 
-#include "markers_base.hpp"
+#include <life/lifemesh/markers_base.hpp>
 
 namespace LifeV
 {
 /*! \file markers.h
   \brief A Simple implementation of Markers
   \author Luca Formaggia
-  \Version $Revision: 1.6 $
+  \Version $Revision: 1.7 $
  
   This is the simplest implementation of the markers, which just adopts the
   basis marker classes defined in marker_base.h.

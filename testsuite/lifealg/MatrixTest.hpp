@@ -29,7 +29,7 @@
 #ifndef __MatrixTest_H
 #define __MatrixTest_H 1
 
-#include <sparseArray.hpp>
+#include <life/lifearray/sparseArray.hpp>
 
 namespace LifeV
 {

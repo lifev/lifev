@@ -30,13 +30,13 @@
 */
 #include <lifeconfig.h>
 
-#include <debug.hpp>
+#include <life/lifecore/debug.hpp>
 
-#include <vecUnknown.hpp>
-#include <GetPot.hpp>
-#include <singleton.hpp>
+#include <life/lifearray/vecUnknown.hpp>
+#include <life/lifecore/GetPot.hpp>
+#include <life/lifecore/singleton.hpp>
 
-#include <SolverPETSC.hpp>
+#include <life/lifealg/SolverPETSC.hpp>
 
 namespace LifeV
 {

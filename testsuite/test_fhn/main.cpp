@@ -17,9 +17,9 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 #include <iostream>
-#include "GetPot.hpp"
+#include <life/lifecore/GetPot.hpp>
 #include "fhnSolver.hpp"
-#include "chrono.hpp"
+#include <life/lifecore/chrono.hpp>
 
 /*
 
@@ -29,8 +29,8 @@
   
   usage: test_fhn              : read the data file "data" and run the solver
          test_fhn -f otherdata : read the data file "otherdata" and run the solver
-	 test_fhn -h           : read the data file, print help and exit
-	 test_fhn -i           : read the data file, print the read values and exit
+     test_fhn -h           : read the data file, print help and exit
+     test_fhn -i           : read the data file, print the read values and exit
 
 */
 int main(int argc, char** argv)

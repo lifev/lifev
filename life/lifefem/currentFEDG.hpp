@@ -1,10 +1,10 @@
 #ifndef _CURRENTFEDG_H
 #define _CURRENTFEDG_H
 
-#include "life.hpp"
-#include "geoMap.hpp"
-#include "refFEDG.hpp"
-#include "geoMap.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifefem/geoMap.hpp>
+#include <life/lifefem/refFEDG.hpp>
+#include <life/lifefem/geoMap.hpp>
 /*!
   \file currentFEDG.h
   \brief Structure for the current discontinuous finite element
@@ -109,8 +109,8 @@ public:
     (if the code is compiled in 2D mode then z=0 and zeta is disregarded)
   */
   void coorMap(Real& x,Real& y,Real& z,
-	       const Real & xi,const Real & eta, const Real &
-	       zeta) const;
+           const Real & xi,const Real & eta, const Real &
+           zeta) const;
   /*!  return (x,y,z) = the global coordinates of the quadrature point ig
     in the current element. \warning this function is almost obsolete since if
     you call the function updateFirstDerivQuadPt rather than updateFirstDeriv
@@ -121,7 +121,7 @@ public:
   inline void coorQuadPt(Real& x,Real& y,Real& z,const int ig) const
   {
     coorMap(x,y,z,qr.quadPointCoor(ig,0),qr.quadPointCoor(ig,1),
-	    qr.quadPointCoor(ig,2));
+        qr.quadPointCoor(ig,2));
   }
   //!  patternFirst(i): row index in the element matrix of the i-th term of the pattern
   inline int patternFirst(int i) const{
@@ -270,13 +270,13 @@ template<class GEOELE>
     Real x;
     for(int ig=0;ig<nbQuadPt;ig++){
       for(int j=0;j<nbNode;j++){
-	for(int icoor=0;icoor<nbCoor;icoor++){
-	  x = 0.;
-	  for(int jcoor=0;jcoor<nbCoor;jcoor++){
-	    x += tInvJac(icoor,jcoor,ig)*dPhiRef(j,jcoor,ig) ;
-	  }
-	  phiDer(j,icoor,ig)=x;
-	}
+    for(int icoor=0;icoor<nbCoor;icoor++){
+      x = 0.;
+      for(int jcoor=0;jcoor<nbCoor;jcoor++){
+        x += tInvJac(icoor,jcoor,ig)*dPhiRef(j,jcoor,ig) ;
+      }
+      phiDer(j,icoor,ig)=x;
+    }
       }
     }
   }
@@ -308,13 +308,13 @@ template<class GEOELE>
     Real x;
     for(int ig=0;ig<nbQuadPt;ig++){
       for(int j=0;j<nbNode;j++){
-	for(int icoor=0;icoor<nbCoor;icoor++){
-	  x = 0.;
-	  for(int jcoor=0;jcoor<nbCoor;jcoor++){
-	    x += tInvJac(icoor,jcoor,ig)*dPhiRef(j,jcoor,ig) ;
-	  }
-	  phiDer(j,icoor,ig)=x;
-	}
+    for(int icoor=0;icoor<nbCoor;icoor++){
+      x = 0.;
+      for(int jcoor=0;jcoor<nbCoor;jcoor++){
+        x += tInvJac(icoor,jcoor,ig)*dPhiRef(j,jcoor,ig) ;
+      }
+      phiDer(j,icoor,ig)=x;
+    }
       }
     }
     // and the coordinates of the quadrature points
@@ -344,13 +344,13 @@ template<class GEOELE>
     Real x;
     for(int ig=0;ig<nbQuadPt;ig++){
       for(int j=0;j<nbNode;j++){
-	for(int icoor=0;icoor<nbCoor;icoor++){
-	  x = 0.;
-	  for(int jcoor=0;jcoor<nbCoor;jcoor++){
-	    x += tInvJac(icoor,jcoor,ig)*dPhiRef(j,jcoor,ig) ;
-	  }
-	  phiDer(j,icoor,ig)=x;
-	}
+    for(int icoor=0;icoor<nbCoor;icoor++){
+      x = 0.;
+      for(int jcoor=0;jcoor<nbCoor;jcoor++){
+        x += tInvJac(icoor,jcoor,ig)*dPhiRef(j,jcoor,ig) ;
+      }
+      phiDer(j,icoor,ig)=x;
+    }
       }
     }
     // and the coordinates of the quadrature points
@@ -479,7 +479,7 @@ template<class GEOELE>
     for(int ig=0;ig<nbQuadPt;ig++){
      for(int j=0;j<nbNode;j++){
       for(int icoor=0;icoor<nbCoor;icoor++){
-	x1=0.;
+    x1=0.;
         for(int jcoor=0;jcoor<nbCoor;jcoor++){
           x2=0.;
           for (int k1=0;k1<nbCoor;k1++){
@@ -524,7 +524,7 @@ template<class GEOELE>
     for(int ig=0;ig<nbQuadPt;ig++){
      for(int j=0;j<nbNode;j++){
       for(int icoor=0;icoor<nbCoor;icoor++){
-	x1=0.;
+    x1=0.;
         for(int jcoor=0;jcoor<nbCoor;jcoor++){
           x2=0.;
           for (int k1=0;k1<nbCoor;k1++){
@@ -568,7 +568,7 @@ template<class GEOELE>
     for(int ig=0;ig<nbQuadPt;ig++){
      for(int j=0;j<nbNode;j++){
       for(int icoor=0;icoor<nbCoor;icoor++){
-	x1=0.;
+    x1=0.;
         for(int jcoor=0;jcoor<nbCoor;jcoor++){
           x2=0.;
           for (int k1=0;k1<nbCoor;k1++){

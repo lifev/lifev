@@ -27,9 +27,9 @@
 #ifndef _DOFINTERFACEHANDLER_HH
 #define _DOFINTERFACEHANDLER_HH
 
-#include "life.hpp"
-#include "dofInterface3Dto2D.hpp"
-#include "bcVector.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifefem/dofInterface3Dto2D.hpp>
+#include <life/lifefem/bcVector.hpp>
 
 #include <vector>  //STL vector class
 

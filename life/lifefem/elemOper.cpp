@@ -16,7 +16,7 @@
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#include "elemOper.hpp"
+#include <life/lifefem/elemOper.hpp>
 
 namespace LifeV
 {
@@ -47,7 +47,7 @@ void mass( Real (*coef)(Real,Real,Real,Real,Real),
     std::vector<Real> locU(fe.nbNode);
     for (i=0;i<fe.nbNode;i++)
     {
-        locU[i]=U[dof.localToGlobal(eleId,i+1)-1];	//(one component)
+        locU[i]=U[dof.localToGlobal(eleId,i+1)-1];    //(one component)
     }
 
     //
@@ -117,7 +117,7 @@ void stiff( Real (*coef)(Real,Real,Real,Real,Real),
     std::vector<Real> locU(fe.nbNode);
     for (i=0;i<fe.nbNode;i++)
     {
-        locU[i]=U[dof.localToGlobal(eleId,i+1)-1];	//(one component)
+        locU[i]=U[dof.localToGlobal(eleId,i+1)-1];    //(one component)
     }
     //
     // diagonal
@@ -188,7 +188,7 @@ void source( Real (*fct)(Real,Real,Real,Real,Real),
     std::vector<Real> locU(fe.nbNode);
     for (i=0;i<fe.nbNode;i++)
     {
-        locU[i]=U[dof.localToGlobal(eleId,i+1)-1];	//(one component)
+        locU[i]=U[dof.localToGlobal(eleId,i+1)-1];    //(one component)
     }
     for ( i = 0;i < fe.nbNode;i++ )
     {

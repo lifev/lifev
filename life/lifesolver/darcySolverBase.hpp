@@ -31,10 +31,10 @@
 
 #include <boost/signal.hpp>
 
-#include <life.hpp>
-#include <singleton.hpp>
-#include <factory.hpp>
-#include <bcHandler.hpp>
+#include <life/lifecore/life.hpp>
+#include <life/lifecore/singleton.hpp>
+#include <life/lifecore/factory.hpp>
+#include <life/lifefem/bcHandler.hpp>
 
 
 namespace LifeV

@@ -35,9 +35,9 @@
 #define _BDF_H
 #include <string>
 #include <iostream>
-#include "GetPot.hpp"
-#include "life.hpp"
-#include "vecUnknown.hpp"
+#include <life/lifecore/GetPot.hpp>
+#include <life/lifecore/life.hpp>
+#include <life/lifearray/vecUnknown.hpp>
 
 namespace LifeV
 {

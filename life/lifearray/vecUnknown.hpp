@@ -30,10 +30,10 @@
 #ifndef _VEC_UNKNOWN_HH
 #define _VEC_UNKNOWN_HH
 
-#include <life.hpp>
+#include <life/lifecore/life.hpp>
 #include <vector>
 
-#include "tab.hpp"
+#include <life/lifearray/tab.hpp>
 
 namespace LifeV
 {

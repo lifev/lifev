@@ -29,10 +29,10 @@
 #ifndef __FSISolver_H
 #define __FSISolver_H 1
 
-#include <tab.hpp>
-#include <FSIOperator.hpp>
-#include <nonLinRichardson.hpp>
-#include <newton.hpp>
+#include <life/lifearray/tab.hpp>
+#include <life/lifesolver/FSIOperator.hpp>
+#include <life/lifealg/nonLinRichardson.hpp>
+#include <life/lifealg/newton.hpp>
 
 namespace LifeV
 {

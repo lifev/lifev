@@ -26,12 +26,12 @@
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
    \date 2004-10-12
  */
-#include <life.hpp>
-#include <NavierStokesSolverPC.hpp>
+#include <life/lifecore/life.hpp>
+#include <life/lifesolver/NavierStokesSolverPC.hpp>
 #include <NavierStokesWithTwoFluxes.hpp>
-#include <chrono.hpp>
+#include <life/lifecore/chrono.hpp>
 #include <ud_functions.hpp>
-#include <GetPot.hpp>
+#include <life/lifecore/GetPot.hpp>
 
 namespace LifeV
 {

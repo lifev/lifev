@@ -26,9 +26,9 @@
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
    \date 2004-10-04
  */
-#include <debug.hpp>
+#include <life/lifecore/debug.hpp>
 
-#include <SolverUMFPACK.hpp>
+#include <life/lifealg/SolverUMFPACK.hpp>
 
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <boost/numeric/ublas/io.hpp>

@@ -30,9 +30,9 @@
 #include <string>
 #include <iostream>
 
-#include <life.hpp>
-#include <GetPot.hpp>
-#include <tab.hpp>
+#include <life/lifecore/life.hpp>
+#include <life/lifecore/GetPot.hpp>
+#include <life/lifearray/tab.hpp>
 
 namespace LifeV
 {

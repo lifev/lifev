@@ -118,7 +118,7 @@ detailed documentation.
 #include<algorithm>
 #include<iostream>
 
-#include "life.hpp"
+#include <life/lifecore/life.hpp>
 
 namespace LifeV
 {

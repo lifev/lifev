@@ -29,7 +29,7 @@
 #ifndef __interpolate_H
 #define __interpolate_H 1
 
-#include <tab.hpp>
+#include <life/lifearray/tab.hpp>
 #include <boost/function.hpp>
 
 #warning SHOULD NOT BE USED YET

@@ -16,8 +16,8 @@
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#include "medit_wrtrs.hpp"
-#include "currentFE.hpp"
+#include <life/lifefilters/medit_wrtrs.hpp>
+#include <life/lifefem/currentFE.hpp>
 
 namespace LifeV
 {
@@ -42,7 +42,7 @@ void wr_medit_ascii_vector( std::string fname, Real const* U, int Usize, int typ
     ASSERT( ofile, "Error: Output file cannot be opened." );
 
   ofile << nDimensions << " " << nDimensions << " "
-	<< Usize/nDimensions << " "  << type << std::endl;
+    << Usize/nDimensions << " "  << type << std::endl;
   ofile.setf(std::ios::scientific,std::ios::floatfield);
   ofile.precision(12);
   for (int i=0;i<(int)Usize/(int)nDimensions; i++){

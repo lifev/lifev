@@ -17,7 +17,7 @@
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include <climits>
-#include "markers_base.hpp"
+#include <life/lifemesh/markers_base.hpp>
 
 namespace LifeV
 {
@@ -28,7 +28,7 @@ namespace LifeV
 const MarkerTraits_Base::EntityFlag MarkerTraits_Base::NULLFLAG = LONG_MIN;
 
 //MM: if you modity these changes here recheck function readNetgenMesh
-//	    becouse it uses this changes
+//        becouse it uses this changes
 
 MarkerTraits_Base::EntityFlag MarkerTraits_Base::strongerFlag( EntityFlag const & a, EntityFlag const & b )
 {
@@ -37,8 +37,8 @@ MarkerTraits_Base::EntityFlag MarkerTraits_Base::strongerFlag( EntityFlag const 
 
 MarkerTraits_Base::EntityFlag MarkerTraits_Base::weakerFlag( EntityFlag const & a, EntityFlag const & b )
 {
-    if(a==NULLFLAG)return b;			
-    if(b==NULLFLAG)return a;			
+    if(a==NULLFLAG)return b;            
+    if(b==NULLFLAG)return a;            
     return a < b ? a : b ;
 }
 }

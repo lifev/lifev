@@ -33,16 +33,16 @@
 #ifndef _DOFINTERFACE3DTO2D_HH
 #define _DOFINTERFACE3DTO2D_HH
 
-#include "dofInterfaceBase.hpp"
+#include <life/lifefem/dofInterfaceBase.hpp>
 
-#include "localDofPattern.hpp"
-#include "dof.hpp"
+#include <life/lifefem/localDofPattern.hpp>
+#include <life/lifefem/dof.hpp>
 #include <iostream>
 #include <map>
 #include <list>   //necessary to write vertices in order.
 #include <vector>   //necessary to write faces and access them arbitrarily.
 
-#include "markers.hpp"
+#include <life/lifemesh/markers.hpp>
 #include <ext/slist> 
 //using namespace __gnu_cxx;
 

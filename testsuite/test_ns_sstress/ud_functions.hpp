@@ -95,7 +95,7 @@ Real calc_g(const Real& time)
 
 // velocity imposed on the walls
 Real u_in(const Real& t, const Real& x, const Real& y, const Real& z,
-	const ID& i)
+    const ID& i)
 {
   Real coef = calc_g(t);
   Real peak = 150; // mm/s
@@ -113,13 +113,13 @@ Real u_in(const Real& t, const Real& x, const Real& y, const Real& z,
 
 //
 Real u_w(const Real& t, const Real& x, const Real& y, const Real& z,
-	const ID& i)
+    const ID& i)
 {
   return 0.;
 }
 //
 Real u_out(const Real& t, const Real& x, const Real& y, const Real& z,
-	const ID& i)
+    const ID& i)
 {
   return 0.;
 }
@@ -163,17 +163,17 @@ Real f(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
 Real u0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
 {
  switch(i) {
-	 case 1:
+     case 1:
            return 0.0;
            break;
-	 case 2:
+     case 2:
            return 0.0;
            break;
-	 case 3:
-	  return (0.25-(x*x+y*y))/0.14;
+     case 3:
+      return (0.25-(x*x+y*y))/0.14;
          break;
         }
-  	return 0.0;
+      return 0.0;
 }
 
 // Initial pressure

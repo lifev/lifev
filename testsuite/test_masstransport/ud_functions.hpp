@@ -38,9 +38,9 @@ Real u2(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
     break;
   case 3:
      if(t <= 1.0)
-	return 10.0*t*(1.0-4.0*(x*x+y*y));
+    return 10.0*t*(1.0-4.0*(x*x+y*y));
      else
-	return 10.0*(1.0-4.0*(x*x+y*y));
+    return 10.0*(1.0-4.0*(x*x+y*y));
      break;
   }
   return 0.0;

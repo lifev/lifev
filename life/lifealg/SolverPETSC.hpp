@@ -40,10 +40,10 @@
 #include <petscpc.h>
 #endif /* HAVE_PETSC_H */
 
-#include <singleton.hpp>
+#include <life/lifecore/singleton.hpp>
 
-#include <vecUnknown.hpp>
-#include <sparseArray.hpp>
+#include <life/lifearray/vecUnknown.hpp>
+#include <life/lifearray/sparseArray.hpp>
 
 class GetPot;
 

@@ -9,9 +9,9 @@
 #ifndef _DOFDG_HH
 #define _DOFDG_HH
 
-#include "life.hpp"
-#include "SimpleVect.hpp"
-#include "localDofPattern.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifearray/SimpleVect.hpp>
+#include <life/lifefem/localDofPattern.hpp>
 #include <algorithm>
 
 namespace LifeV
@@ -173,10 +173,10 @@ void DofDG::update(Mesh& M){
     for (ie=1; ie<= _nEl; ++ie){
       lc=0;
       for (i=1; i<=nlv; ++i)
-	for (l=0; l<nldpv; ++l)
-	  // Discontinuous Elements require that the degrees of freedom of geometrically corresponding
-	  // nodes belonging to adjacent elements be decoupled
-	  _ltg(++lc,ie) = gcount + (ie - 1) * nlv * nldpv + (i - 1) * nldpv + l;
+    for (l=0; l<nldpv; ++l)
+      // Discontinuous Elements require that the degrees of freedom of geometrically corresponding
+      // nodes belonging to adjacent elements be decoupled
+      _ltg(++lc,ie) = gcount + (ie - 1) * nlv * nldpv + (i - 1) * nldpv + l;
     }
 
   // Edge Based Dof
@@ -189,8 +189,8 @@ void DofDG::update(Mesh& M){
     for (ie=1; ie<= _nEl; ++ie){
       lc=lcount;
       for (i=1; i<=nle; ++i)
-	for (l=0; l<nldpe; ++l)
-	  _ltg(++lc,ie) = gcount + (ie - 1) * nle * nldpe + (i - 1) * nldpe + l;
+    for (l=0; l<nldpe; ++l)
+      _ltg(++lc,ie) = gcount + (ie - 1) * nle * nldpe + (i - 1) * nldpe + l;
     }
 
   // Face  Based Dof
@@ -203,8 +203,8 @@ void DofDG::update(Mesh& M){
     for (ie=1; ie<= _nEl; ++ie){
       lc=lcount;
       for (i=1; i<=nlf; ++i)
-	for (l=0; l<nldpf; ++l)
-	  _ltg(++lc,ie) = gcount + (ie - 1) * nlf * nldpf + (i - 1) * nldpf + l;
+    for (l=0; l<nldpf; ++l)
+      _ltg(++lc,ie) = gcount + (ie - 1) * nlf * nldpf + (i - 1) * nldpf + l;
     }
 
   // Volume  Based Dof
@@ -216,7 +216,7 @@ void DofDG::update(Mesh& M){
     for (ie=1; ie<= _nEl; ++ie) {
       lc=lcount;
       for (l=0; l<nldpV; ++l)
-	_ltg(++lc,ie)=gcount+(ie-1)*nldpV +l;
+    _ltg(++lc,ie)=gcount+(ie-1)*nldpV +l;
     }
   gcount += _nEl * nldpV;
 

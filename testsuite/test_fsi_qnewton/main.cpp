@@ -16,13 +16,13 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-#include "life.hpp"
-#include "NavierStokesAleSolverPC.hpp"
-#include "VenantKirchhofSolver.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifesolver/NavierStokesAleSolverPC.hpp>
+#include <life/lifesolver/VenantKirchhofSolver.hpp>
 #include "operFS.hpp"
-#include "dofInterface3Dto3D.hpp"
+#include <life/lifefem/dofInterface3Dto3D.hpp>
 #include "ud_functions.hpp"
-#include "regionMesh3D_ALE.hpp"
+#include <life/lifefem/regionMesh3D_ALE.hpp>
 
 
 /*
@@ -63,21 +63,21 @@ int main(int argc, char** argv)
     // fluid solver
     //
     NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> > fluid(data_file,
-								   feTetraP1bubble,
-								   feTetraP1,
-								   quadRuleTetra64pt,
+                                   feTetraP1bubble,
+                                   feTetraP1,
+                                   quadRuleTetra64pt,
                                                                    quadRuleTria3pt,
-								   quadRuleTetra64pt,
-								   quadRuleTria3pt,
+                                   quadRuleTetra64pt,
+                                   quadRuleTria3pt,
                                                                    BCh_u,BCh_mesh);
 
     // structural solver
     //
     VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> > solid(data_file,
-								feTetraP1,
-								quadRuleTetra4pt,
+                                feTetraP1,
+                                quadRuleTetra4pt,
                                                                 quadRuleTria3pt,
-								BCh_d);
+                                BCh_d);
 
 
     // Outputs
@@ -92,17 +92,17 @@ int main(int argc, char** argv)
     // passing data from the fluid to the structure: fluid load at the interface
     //
     dof_interface_type  dofFluidToStructure( new DofInterface3Dto3D(feTetraP1,
-								    solid.dDof(),
-								    feTetraP1bubble,
-								    fluid.uDof()) );
+                                    solid.dDof(),
+                                    feTetraP1bubble,
+                                    fluid.uDof()) );
     dofFluidToStructure->update(solid.mesh(), 1, fluid.mesh(), 1, 0.0);
 
     // passing data from structure to the fluid mesh: motion of the fluid domain
     //
     dof_interface_type dofStructureToFluidMesh( new  DofInterface3Dto3D(fluid.mesh().getRefFE(),
-									fluid.dofMesh(),
-									feTetraP1,
-									solid.dDof()) );
+                                    fluid.dofMesh(),
+                                    feTetraP1,
+                                    solid.dDof()) );
     dofStructureToFluidMesh->update(fluid.mesh(), 1, solid.mesh(), 1, 0.0);
 
 
@@ -140,16 +140,16 @@ int main(int argc, char** argv)
     // passing data bettwen the reduced linearized fluid to the linearized solver solid:
     // reduced fluid pressure
     dof_interface_type dofReducedFluidToStructure( new DofInterface3Dto3D(feTetraP1,
-									  solid.dDof(),
-									  feTetraP1,
-									  fluid.pDof()) );
+                                      solid.dDof(),
+                                      feTetraP1,
+                                      fluid.pDof()) );
     dofReducedFluidToStructure->update(solid.mesh(), 1, fluid.mesh(), 1, 0.0);
 
     // solid acceleration
     dof_interface_type dofStructureToReducedFluid( new DofInterface3Dto3D(feTetraP1,
-									  fluid.pDof(),
-									  feTetraP1,
-									  solid.dDof()) );
+                                      fluid.pDof(),
+                                      feTetraP1,
+                                      solid.dDof()) );
     dofStructureToReducedFluid->update(fluid.mesh(), 1, solid.mesh(), 1, 0.0);
 
 

@@ -18,8 +18,8 @@
 */
 
 
-#include "exactJacobianBase.hpp"
-#include "reducedLinFluid.hpp"
+#include <life/lifesolver/exactJacobianBase.hpp>
+#include <life/lifesolver/reducedLinFluid.hpp>
 
 
 namespace LifeV

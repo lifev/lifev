@@ -62,11 +62,10 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 # include <iosfwd>
 # include <string>
 
-#include <lifeconfig.h>
-#include <lifemacros.hpp>
-#include <lifeversion.hpp>
-#include <lifeassert.hpp>
-#include <debug.hpp>
+#include <life/lifecore/lifemacros.hpp>
+#include <life/lifecore/lifeversion.hpp>
+#include <life/lifecore/lifeassert.hpp>
+#include <life/lifecore/debug.hpp>
 
 
 namespace LifeV
@@ -241,26 +240,18 @@ typedef std::string BCName;
 const BCName nullBCName; // The empty string!
 #endif
 
-// Marker is used for storing attributes normally related to boundary condition
-// application. At the moment is just an integer
+#define THREEDIM 1
 
-//typedef int Marker;
-//const Marker NULLMARKER=0; // 0 is reserved for the NULLMARKER
-// global variables
-/* -------------------------------------------------------
- I want to know wheter I am working in 2 or 3 Dimensions
- I will set both a constant global variable (nDimensions)
- and a cpp macro (NDIM) to the correct values, for later use.
----------------------------------------------------------*/
-#if defined(TWODIM) && defined(THREEDIM)
-#error Dont be silly. Either Two or Three dimensions.
-#endif
 #if defined(TWODIM)
-#define NDIM 2
+
+# define NDIM 2
 const UInt nDimensions = 2;
+
 #elif defined(THREEDIM)
+
 #define NDIM 3
 const UInt nDimensions = 3;
+
 #else
 #error You MUST compile with either -DTWODIM of -DTHREEDIM set, sorry.
 #endif

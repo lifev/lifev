@@ -31,7 +31,7 @@
 #ifndef __TRIDIAGCHOLESKY_H_
 #define __TRIDIAGCHOLESKY_H_
 
-#include <life.hpp>
+#include <life/lifecore/life.hpp>
 #include <cmath>
 
 namespace LifeV

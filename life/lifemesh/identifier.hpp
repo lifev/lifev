@@ -37,8 +37,8 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "life.hpp"
-#include "SimpleVect.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifearray/SimpleVect.hpp>
 
 namespace LifeV
 {

@@ -16,22 +16,22 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#include "dofDG.hpp"
+#include <life/lifefem/dofDG.hpp>
 
 namespace LifeV
 {
  //! Constructor
 DofDG::DofDG(const LocalDofPattern& _fe, UInt off):fe(_fe),_offset(off),_totalDof(0),
-					       _nEl(0),nlv(0),nle(0),nlf(0),_ltg()
+                           _nEl(0),nlv(0),nle(0),nlf(0),_ltg()
 {
   for (UInt i=0; i<5; ++i)_ncount[i]=0;
 }
 
 //! Copy constructor
 DofDG::DofDG(const DofDG & dof2 ):fe(dof2.fe),_offset(dof2._offset),
-			    _totalDof(dof2._totalDof),_nEl(dof2._nEl),
-			    nlv(dof2.nlv), nle(dof2.nle), nlf(dof2.nlf),
-			    _ltg(dof2._ltg)
+                _totalDof(dof2._totalDof),_nEl(dof2._nEl),
+                nlv(dof2.nlv), nle(dof2.nle), nlf(dof2.nlf),
+                _ltg(dof2._ltg)
 {
   if (&dof2 == this) return;
   
@@ -60,16 +60,16 @@ void DofDG::showMe(std::ostream  & out, bool verbose) const{
       
     for (UInt i=0; i<_nEl;++i){
       for (UInt j=0; j<numLocalDof();++j)
-	{
-	  out.width(10);
-	  out<<i+1;
-	  out.width(10);
-	  out<<j+1;
-	  out.width(10);
-	  out<<localToGlobal(i+1,j+1);
-	  out<<" # ";
-	  if(j % 2!=0)out<<std::endl;
-	}
+    {
+      out.width(10);
+      out<<i+1;
+      out.width(10);
+      out<<j+1;
+      out.width(10);
+      out<<localToGlobal(i+1,j+1);
+      out<<" # ";
+      if(j % 2!=0)out<<std::endl;
+    }
       
     }
     

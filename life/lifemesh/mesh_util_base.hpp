@@ -22,8 +22,8 @@
 #include <algorithm>
 #include <set>
 
-#include "life.hpp"
-#include "regionMesh3D.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifemesh/regionMesh3D.hpp>
 
 namespace LifeV
 {

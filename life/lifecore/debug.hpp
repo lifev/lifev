@@ -54,28 +54,28 @@ public:
 
     template<typename T>
     std::ostream& operator<< ( T const& __t )
-		{
-		    __print ( __t, St::SInt2Type<St::STypeTraits<T>::isFundamental>() );
-		    return _M_os;
-		}
+        {
+            __print ( __t, St::SInt2Type<St::STypeTraits<T>::isFundamental>() );
+            return _M_os;
+        }
     template<typename T>
     std::ostream& operator<< ( T const* __t )
-		{
-		    //__print ( __t, St::SInt2Type<St::STypeTraits<T>::isFundamental>() );
-		    _M_os << __t;
-		    return _M_os;
-		}
+        {
+            //__print ( __t, St::SInt2Type<St::STypeTraits<T>::isFundamental>() );
+            _M_os << __t;
+            return _M_os;
+        }
 private:
     template<typename T>
     void __print ( T const& __t, St::SInt2Type<true> )
-		{
-		    _M_os << __t;
-		}
+        {
+            _M_os << __t;
+        }
     template<typename T>
     void __print ( T const& __t, St::SInt2Type<false> )
-		{
+        {
 
-		}
+        }
 private:
     std::ostream& _M_os;
 };
@@ -87,63 +87,63 @@ class DebugStream
 public:
 
 
-	/** @name Internal Structures
-	 */
-	//@{
+    /** @name Internal Structures
+     */
+    //@{
 
-	struct Private;
+    struct Private;
 
-	typedef int (*stprintf)( const char* format, ... );
-	//@}
+    typedef int (*stprintf)( const char* format, ... );
+    //@}
 
-	/** @name Constructors, destructor
-	 */
-	//@{
+    /** @name Constructors, destructor
+     */
+    //@{
 
-	DebugStream(int area = 0, int level = 1, bool print = true);
-	DebugStream(const char* initialString, int area = 0, int level = 1, bool print = true);
-	DebugStream( DebugStream const& );
-	~DebugStream();
+    DebugStream(int area = 0, int level = 1, bool print = true);
+    DebugStream(const char* initialString, int area = 0, int level = 1, bool print = true);
+    DebugStream( DebugStream const& );
+    ~DebugStream();
 
-	//@}
+    //@}
 
-	void setFlush( stprintf = 0 );
+    void setFlush( stprintf = 0 );
 
-	/** @name  Methods
-	 */
-	//@{
+    /** @name  Methods
+     */
+    //@{
 
-	static void attach( std::string const& __logfile );
-	static void attach( std::string const& __logfile, int area );
-	static void detach( std::string const& __logfile, int area );
-	static void detachAll();
-	void flush();
+    static void attach( std::string const& __logfile );
+    static void attach( std::string const& __logfile, int area );
+    static void detach( std::string const& __logfile, int area );
+    static void detachAll();
+    void flush();
 
 
-	DebugStream& operator<<( char const* );
+    DebugStream& operator<<( char const* );
 
-	DebugStream& operator<<( double );
+    DebugStream& operator<<( double );
 
-	DebugStream& operator<<( std::string const& );
-	DebugStream& operator<<( LManipFunction f );
-	//@}
+    DebugStream& operator<<( std::string const& );
+    DebugStream& operator<<( LManipFunction f );
+    //@}
 
 
 
 protected:
 
 private:
-	Private* __p;
+    Private* __p;
 
 };
 
 template<typename T>
 DebugStream& operator<< ( DebugStream& __s, T const* __t )
 {
-	std::ostringstream __os;
-	__os << __t;
-	__s << __os.str();
-	return __s;
+    std::ostringstream __os;
+    __os << __t;
+    __s << __os.str();
+    return __s;
 }
 std::string backtrace ();
 std::string backtrace ( int );
@@ -151,25 +151,25 @@ std::string backtrace ( int );
 class NdebugStream
 {
 public:
-	/** @name Constructors, destructor
-	 */
-	//@{
-	typedef int (*stprintf)( const char* format, ... );
+    /** @name Constructors, destructor
+     */
+    //@{
+    typedef int (*stprintf)( const char* format, ... );
 
-	NdebugStream(){}
-	~NdebugStream(){}
+    NdebugStream(){}
+    ~NdebugStream(){}
 
-	//@}
+    //@}
 
-	/** @name  Methods
-	 */
-	//@{
-	void flush( stprintf = 0 ) {}
-	NdebugStream& operator<<( char const* ) { return *this; }
-	NdebugStream& operator<<( std::string const& ) { return *this; }
-	NdebugStream& operator<<( double ) { return *this; }
-	NdebugStream& operator<<( LNManipFunction f ) { return *this; }
-	//@}
+    /** @name  Methods
+     */
+    //@{
+    void flush( stprintf = 0 ) {}
+    NdebugStream& operator<<( char const* ) { return *this; }
+    NdebugStream& operator<<( std::string const& ) { return *this; }
+    NdebugStream& operator<<( double ) { return *this; }
+    NdebugStream& operator<<( LNManipFunction f ) { return *this; }
+    //@}
 };
 
 inline NdebugStream& perror( NdebugStream& s ) { return s; }

@@ -19,19 +19,19 @@
 /*! file regionMesh3D_ALE.h
   \brief Extension of the  mesh classes interfaces for ALE schemes
 
-  \version $Revision: 1.5 $ Miguel Fernandez
+  \version $Revision: 1.6 $ Miguel Fernandez
 
   Introduces the RegionMesh3D class
 */
 
 #ifndef _REGIONMESH3DALE_HH_
 #define _REGIONMESH3DALE_HH_
-#include "life.hpp"
-#include "regionMesh3D.hpp"
-#include "basisElSh.hpp"
-#include "refFE.hpp"
-#include "geoMap.hpp"
-#include "quadRule.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifemesh/regionMesh3D.hpp>
+#include <life/lifemesh/basisElSh.hpp>
+#include <life/lifefem/refFE.hpp>
+#include <life/lifefem/geoMap.hpp>
+#include <life/lifefem/quadRule.hpp>
 
 namespace LifeV
 {

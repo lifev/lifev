@@ -16,19 +16,19 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#include "refEleDG.hpp"
+#include <life/lifefem/refEleDG.hpp>
 #include <set>
 
 namespace LifeV
 {
 
 RefEleDG::RefEleDG(std::string _name, ReferenceShapes _shape,
-		   int _nbDof, int _nbCoor, 
-		   const Fct* phi, const Fct* dPhi, const Fct* d2Phi, 
-		   const Real* refCoor, const SetOfQuadRule& sqr, 
-		   ReferenceShapes _shapeFaces, 
-		   int _nbFaces, int _nbGeoNodeFaces, 
-		   const Real* refCoorFaces, const SetOfQuadRule& sqrFaces, const GeoMap& _geoMap):
+           int _nbDof, int _nbCoor, 
+           const Fct* phi, const Fct* dPhi, const Fct* d2Phi, 
+           const Real* refCoor, const SetOfQuadRule& sqr, 
+           ReferenceShapes _shapeFaces, 
+           int _nbFaces, int _nbGeoNodeFaces, 
+           const Real* refCoorFaces, const SetOfQuadRule& sqrFaces, const GeoMap& _geoMap):
   RefEle(_name, _shape, _nbDof, _nbCoor, phi, dPhi, d2Phi, refCoor, sqr),
   _sqrFaces(&sqrFaces),
   _refCoorFaces(refCoorFaces),
@@ -56,23 +56,23 @@ RefEleDG::RefEleDG(std::string _name, ReferenceShapes _shape,
       _idxD2QuadFaces(sqrFaces.quadRule(k).id) = idxD2;
 
       for(int ig = 0; ig < sqrFaces.quadRule(k).nbQuadPt; ig++){
-	const QuadPoint& pt = sqrFaces.quadRule(k).quadPoint(ig);
+    const QuadPoint& pt = sqrFaces.quadRule(k).quadPoint(ig);
         FaceToElCoord(xi, eta, zeta, pt.x(), pt.y(), iFace);
 
-	for(int i = 0; i < nbDof; i++){
-	  _phiQuadFaces(iFace, idx) = this -> phi(i,xi,eta,zeta);
-	  idx++;
+    for(int i = 0; i < nbDof; i++){
+      _phiQuadFaces(iFace, idx) = this -> phi(i,xi,eta,zeta);
+      idx++;
 
-	  for(int icoor = 0; icoor < nbCoor; icoor++){
-	    _dPhiQuadFaces(iFace, idxD) = this -> dPhi(i, icoor, xi, eta, zeta);
-	    idxD++;
+      for(int icoor = 0; icoor < nbCoor; icoor++){
+        _dPhiQuadFaces(iFace, idxD) = this -> dPhi(i, icoor, xi, eta, zeta);
+        idxD++;
 
-	    for(int jcoor = 0; jcoor < nbCoor; jcoor++){
-	      _d2PhiQuadFaces(iFace, idxD2) = this -> d2Phi(i, icoor, jcoor, xi, eta, zeta);
-	      idxD2++;
-	    } //for jcoor
-	  } // for icoor
-	} // for i
+        for(int jcoor = 0; jcoor < nbCoor; jcoor++){
+          _d2PhiQuadFaces(iFace, idxD2) = this -> d2Phi(i, icoor, jcoor, xi, eta, zeta);
+          idxD2++;
+        } //for jcoor
+      } // for icoor
+    } // for i
       } // for ig
     } // for k
   } // for iFace
@@ -94,17 +94,17 @@ void RefEleDG::check() const
       const QuadRule& qr = _sqrFaces->quadRule(k);
       std::cout << std::endl << "    " << qr.name << std::endl;
       for(int ig = 0; ig < qr.nbQuadPt; ig++){
-	for(int i = 0; i < nbDof; i++){
-	  sumphi += phiFace(iFace, i, ig, qr) * qr.weight(ig);
-	  for(int icoor = 0; icoor < nbCoor; icoor++){
-	    sumdphi += dPhiFace(iFace, i, icoor, ig, qr) * qr.weight(ig);
-	  } // for icoor
-	  for(int icoor = 0; icoor < nbCoor; icoor++){
-	    for(int jcoor = 0; jcoor < nbCoor; jcoor++){
-	      sumd2phi += d2PhiFace(iFace, i, icoor, jcoor, ig, qr) * qr.weight(ig);
-	    } // for jcoor
-	  } // for icoor
-	} // for i
+    for(int i = 0; i < nbDof; i++){
+      sumphi += phiFace(iFace, i, ig, qr) * qr.weight(ig);
+      for(int icoor = 0; icoor < nbCoor; icoor++){
+        sumdphi += dPhiFace(iFace, i, icoor, ig, qr) * qr.weight(ig);
+      } // for icoor
+      for(int icoor = 0; icoor < nbCoor; icoor++){
+        for(int jcoor = 0; jcoor < nbCoor; jcoor++){
+          sumd2phi += d2PhiFace(iFace, i, icoor, jcoor, ig, qr) * qr.weight(ig);
+        } // for jcoor
+      } // for icoor
+    } // for i
       } // for ig
 
       std::cout << "    sum_i integral_Face" << iFace << " phi_i                                        = " << sumphi << std::endl;
@@ -133,16 +133,16 @@ std::ostream& operator << (std::ostream& f, const RefEleDG& ele)
       f << "    - Quadrature point : " << ig << std::endl;
       //      f << "     number and values of basis functions = " << ele.phiQuadPt(ig,qr) << std::endl;
       for(int i=0;i<ele.nbDof;i++){
-	f << "      Basif fct " << i << std::endl;
-	f << "         Value = " << ele.phi(i,ig,qr) << std::endl;
-	f << "         Derivatives = " ;
-	for(int icoor=0;icoor<ele.nbCoor;icoor++) f << " " << ele.dPhi(i,icoor,ig,qr);
-	f << std::endl;
-	f << "         Second derivatives = " ;
-	for(int icoor=0;icoor<ele.nbCoor;icoor++)
-	  for(int jcoor=0;jcoor<ele.nbCoor;jcoor++)
-	  f << " " << ele.d2Phi(i,icoor,jcoor,ig,qr);
-	f << std::endl;
+    f << "      Basif fct " << i << std::endl;
+    f << "         Value = " << ele.phi(i,ig,qr) << std::endl;
+    f << "         Derivatives = " ;
+    for(int icoor=0;icoor<ele.nbCoor;icoor++) f << " " << ele.dPhi(i,icoor,ig,qr);
+    f << std::endl;
+    f << "         Second derivatives = " ;
+    for(int icoor=0;icoor<ele.nbCoor;icoor++)
+      for(int jcoor=0;jcoor<ele.nbCoor;jcoor++)
+      f << " " << ele.d2Phi(i,icoor,jcoor,ig,qr);
+    f << std::endl;
       } // for i
     } // for ig
   } // for k
@@ -160,20 +160,20 @@ std::ostream& operator << (std::ostream& f, const RefEleDG& ele)
       const QuadRule& qrFaces = ele._sqrFaces -> quadRule(k);
       f << std::endl << "*** Quadrature rule : " << qrFaces.name << std::endl;
       for(int ig = 0; ig < qrFaces.nbQuadPt; ig++){
-	f << "   - Quadrature point : " << ig << std::endl;
-	for(int i = 0; i < ele.nbDof; i++){
-	  f << "      Basis fct " << i << std::endl;
-	  f << "         Value = " << ele.phiFace(iFace, i, ig, qrFaces) << std::endl;
-	  f << "         Derivatives = ";
-	  for(int icoor = 0; icoor < ele.nbCoor; icoor++)
-	    f << " " << ele.dPhiFace(iFace, i, icoor, ig, qrFaces);
-	  f << std::endl;
-	  f << "         Second derivatives = ";
-	  for(int icoor = 0; icoor < ele.nbCoor; icoor++)
-	    for(int jcoor = 0; jcoor < ele.nbCoor; jcoor++)
-	      f << " " << ele.d2PhiFace(iFace, i, icoor, jcoor, ig, qrFaces);
-	  f << std::endl;
-	} // for i
+    f << "   - Quadrature point : " << ig << std::endl;
+    for(int i = 0; i < ele.nbDof; i++){
+      f << "      Basis fct " << i << std::endl;
+      f << "         Value = " << ele.phiFace(iFace, i, ig, qrFaces) << std::endl;
+      f << "         Derivatives = ";
+      for(int icoor = 0; icoor < ele.nbCoor; icoor++)
+        f << " " << ele.dPhiFace(iFace, i, icoor, ig, qrFaces);
+      f << std::endl;
+      f << "         Second derivatives = ";
+      for(int icoor = 0; icoor < ele.nbCoor; icoor++)
+        for(int jcoor = 0; jcoor < ele.nbCoor; jcoor++)
+          f << " " << ele.d2PhiFace(iFace, i, icoor, jcoor, ig, qrFaces);
+      f << std::endl;
+    } // for i
       } // for ig
     } // for k
   } // for iFace

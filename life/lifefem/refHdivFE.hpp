@@ -19,11 +19,11 @@
 #ifndef _REFHDIVFE_H_INCLUDE
 #define _REFHDIVFE_H_INCLUDE
 
-#include "life.hpp"
-#include "tab.hpp"
-#include "basisElSh.hpp"
-#include "quadRule.hpp"
-#include "localDofPattern.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifearray/tab.hpp>
+#include <life/lifemesh/basisElSh.hpp>
+#include <life/lifefem/quadRule.hpp>
+#include <life/lifefem/localDofPattern.hpp>
 
 /*!
   \file refHdivFE.h

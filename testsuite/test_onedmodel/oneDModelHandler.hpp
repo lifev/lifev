@@ -33,12 +33,12 @@
 #include <cmath>
 #include <utility>
 
-#include <life.hpp>
+#include <life/lifecore/life.hpp>
 #include <dataOneDModel.hpp>
 #include <basicOneDMesh.hpp>
-#include <geoMap.hpp>
-#include <currentFE.hpp>
-#include <refFE.hpp>
+#include <life/lifefem/geoMap.hpp>
+#include <life/lifefem/currentFE.hpp>
+#include <life/lifefem/refFE.hpp>
 #include <dofOneD.hpp>
 
 #include <gracePlot.hpp>

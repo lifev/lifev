@@ -29,22 +29,22 @@
 
 #include <boost/numeric/ublas/vector.hpp>
 
-#include "life.hpp"
-#include "readMesh3D.hpp"
-#include "chrono.hpp"
-#include "elemMat.hpp"
-#include "elemVec.hpp"
-#include "refFE.hpp"
-#include "elemOper_ext.hpp"
-#include "dof.hpp"
-#include "dofDG.hpp"
-#include "markers.hpp"
-#include "basisElSh.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifefilters/readMesh3D.hpp>
+#include <life/lifecore/chrono.hpp>
+#include <life/lifearray/elemMat.hpp>
+#include <life/lifearray/elemVec.hpp>
+#include <life/lifefem/refFE.hpp>
+#include <life/lifefem/elemOper_ext.hpp>
+#include <life/lifefem/dof.hpp>
+#include <life/lifefem/dofDG.hpp>
+#include <life/lifemesh/markers.hpp>
+#include <life/lifemesh/basisElSh.hpp>
 
-#include "values.hpp"
-#include "assemb.hpp"
+#include <life/lifefem/values.hpp>
+#include <life/lifefem/assemb.hpp>
 
-#include "dataAztec.hpp"
+#include <life/lifealg/dataAztec.hpp>
 
 namespace LifeV
 {

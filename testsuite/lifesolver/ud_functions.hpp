@@ -21,20 +21,20 @@ namespace LifeV
 
 
   Real gu1 (const Real & t, const Real & x, const Real & y, const Real & z,
-	    const ID & i, const Real & u)
+        const ID & i, const Real & u)
   {
-    return u * (z + y);		//convection
+    return u * (z + y);        //convection
   }
   Real gu3 (const Real & t, const Real & x, const Real & y, const Real & z,
-	    const ID & i, const Real & u)
+        const ID & i, const Real & u)
   {
     return 0.0;
   }
   Real gu2 (const Real & t, const Real & x, const Real & y, const Real & z,
-	    const ID & i, const Real & u)
+        const ID & i, const Real & u)
   {
     if (t < 1.0)
-      return 10.0 * t;		//not a d dirac
+      return 10.0 * t;        //not a d dirac
     return 10.0;
   }
   Real nu (Real t, Real x, Real y, Real z, Real u)

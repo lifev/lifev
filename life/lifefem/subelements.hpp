@@ -30,8 +30,8 @@
 #define SUBELEMENT_HPP 1
 
 #include <vector>
-#include <basisElSh.hpp> // for eToP
-#include <currentFE.hpp>
+#include <life/lifemesh/basisElSh.hpp> // for eToP
+#include <life/lifefem/currentFE.hpp>
 
 namespace LifeV
 {

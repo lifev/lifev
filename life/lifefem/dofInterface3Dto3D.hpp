@@ -31,16 +31,16 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "dofInterfaceBase.hpp"
+#include <life/lifefem/dofInterfaceBase.hpp>
 
 
-#include "refFE.hpp"
-#include "dof.hpp"
+#include <life/lifefem/refFE.hpp>
+#include <life/lifefem/dof.hpp>
 #include <iostream>
 #include <map>
-#include "tab.hpp"
-#include "markers.hpp"
-#include "currentBdFE.hpp"
+#include <life/lifearray/tab.hpp>
+#include <life/lifemesh/markers.hpp>
+#include <life/lifefem/currentBdFE.hpp>
 #include <ext/slist>
 //using namespace __gnu_cxx;
 
@@ -589,7 +589,7 @@ void DofInterface3Dto3D::update( Mesh& mesh1, const EntityFlag& flag1,
                             sum += vLoc( icmp * nDofElem + idof ) * _refFE2->phi( idof, x, y, z );
 
                         // Updating interpolating vector
-			vI ( icmp * _dof->numTotalDof() + _dof->localToGlobal( iElAd, lDof ) - 1 ) = sum;
+            vI ( icmp * _dof->numTotalDof() + _dof->localToGlobal( iElAd, lDof ) - 1 ) = sum;
                     }
                 }
             }

@@ -28,6 +28,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
    \brief This file implements a Taylor-Galerkin solver for 1D model.
 */
+#include <life/lifealg/clapack.hpp>
 
 #include "interface2Vessels.hpp"
 
@@ -112,7 +113,7 @@ int Interface2Vessels::computeInterface2TubesValues()
         //! compute f(x) and its jacobian df(x)
         f_jac( x, f, jac);
 
-	//  std::cout << "---After call of f_jac:\nx : " << x << "\nf : " << f << "\njac : " << jac << std::endl;
+    //  std::cout << "---After call of f_jac:\nx : " << x << "\nf : " << f << "\njac : " << jac << std::endl;
 
         //! transpose to pass to fortran storage (lapack!)
         jac_trans = trans(jac);
@@ -124,7 +125,7 @@ int Interface2Vessels::computeInterface2TubesValues()
 
         // std::cout << "---After lapack inversion:\nx : " << x << "\ndf(x)^{-1}f(x) : " << f << std::endl;
 
-	/* //Write a correct test here!
+    /* //Write a correct test here!
         //! convergence if Q_alpha == Q_beta
         if ( std::fabs( x[1] - x[3] ) < 1e-12 ) {
             _M_bcDir_alpha( 0 ) = x[0];
@@ -135,7 +136,7 @@ int Interface2Vessels::computeInterface2TubesValues()
             std::cout << "\n\tNewton finished : iter =" << iter << "\n========" << std::endl;
             return 0;
         }
-	*/
+    */
     }
     //! dummy convergence test ( if Q_alpha == Q_beta )
     if ( std::fabs( x[1] - x[3] ) < 1e-12 ) {
@@ -143,7 +144,7 @@ int Interface2Vessels::computeInterface2TubesValues()
       _M_bcDir_alpha( 1 ) = x[1];
       _M_bcDir_beta( 0 )  = x[2];
       _M_bcDir_beta( 1 )  = x[3];
-      
+
       // std::cout << "\n\tNewton finished\n========" << std::endl;
       return 0;
     }
@@ -299,7 +300,7 @@ f_jac( const Vector& x, Vector& f, Matrix& jac ) const
     jac( 2, 3 ) =  0.; //!< df2/dQ_beta
 
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  
+
     // *******************************************************
     //! 3/ BETA : left compatibility condition (for tube beta).
     // *******************************************************
@@ -366,7 +367,7 @@ Real Interface2Vessels::dot(const Vec2D& vec1, const Vec2D& vec2) const
     return vec1.first * vec2.first + vec1.second * vec2.second;
 }
 
-Interface2Vessels::Vec2D 
+Interface2Vessels::Vec2D
 Interface2Vessels::interpolLinear(const Real& point_bound, const Real& point_internal,
                                   const Real& deltaT, const Real& eigenvalue,
                                   const Vec2D& U_bound, const Vec2D& U_intern) const

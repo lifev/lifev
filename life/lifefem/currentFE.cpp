@@ -16,7 +16,7 @@
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#include "currentFE.hpp"
+#include <life/lifefem/currentFE.hpp>
 
 namespace LifeV
 {
@@ -511,7 +511,7 @@ void CurrentFE::_comp_phiDerDer2()
                 x1 = 0.;
                 for ( int jcoor = 0;jcoor < nbCoor;jcoor++ )
                 {
-		    x1 += tInvJac(icoor,jcoor,ig)*dPhiRef(j,jcoor,ig); 
+            x1 += tInvJac(icoor,jcoor,ig)*dPhiRef(j,jcoor,ig); 
                     x2 = 0.;
                     for ( int k1 = 0;k1 < nbCoor;k1++ )
                     {

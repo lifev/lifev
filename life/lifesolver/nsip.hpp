@@ -12,28 +12,28 @@
 
 #define USE_AZTEC_SOLVER 1
 
-#include <NavierStokesHandler.hpp>
-#include <elemMat.hpp>
-#include <elemVec.hpp>
-#include <elemOper.hpp>
-#include <values.hpp>
-#include <pattern.hpp>
-#include <assemb.hpp>
-#include <bcManage.hpp>
+#include <life/lifesolver/NavierStokesHandler.hpp>
+#include <life/lifearray/elemMat.hpp>
+#include <life/lifearray/elemVec.hpp>
+#include <life/lifefem/elemOper.hpp>
+#include <life/lifefem/values.hpp>
+#include <life/lifearray/pattern.hpp>
+#include <life/lifefem/assemb.hpp>
+#include <life/lifefem/bcManage.hpp>
 
 #if USE_AZTEC_SOLVER
-#include <SolverAztec.hpp>
+#include <life/lifealg/SolverAztec.hpp>
 #else
 #include <lifeconfig.h>
 #if defined( HAVE_PETSC_H )
-#include <SolverPETSC.hpp>
+#include <life/lifealg/SolverPETSC.hpp>
 #endif /* HAVE_PETSC_H */
 #endif /* USE_AZTEC_SOLVER */
 
-#include <bcHandler.hpp>
-#include <chrono.hpp>
-#include <sobolevNorms.hpp>
-#include <geoMap.hpp>
+#include <life/lifefem/bcHandler.hpp>
+#include <life/lifecore/chrono.hpp>
+#include <life/lifefem/sobolevNorms.hpp>
+#include <life/lifefem/geoMap.hpp>
 #include <ipStabilization.hpp>
 
 namespace LifeV

@@ -29,9 +29,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #define _POST_PROC_H
 #include <string>
 #include <iostream>
-#include "GetPot.hpp"
-#include "life.hpp"
-#include "vecUnknown.hpp"
+#include <life/lifecore/GetPot.hpp>
+#include <life/lifecore/life.hpp>
+#include <life/lifearray/vecUnknown.hpp>
 
 namespace LifeV
 {

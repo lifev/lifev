@@ -28,20 +28,20 @@
 #ifndef _CONVDIFFREACTSOLVERPC_H_
 #define _CONVDIFFREACTSOLVERPC_H_
 
-#include "convDiffReactHandler.hpp"
-#include "elemMat.hpp"
-#include "elemVec.hpp"
-#include "elemOper.hpp"
-#include "values.hpp"
-#include "pattern.hpp"
-#include "assemb.hpp"
-#include "bcManage.hpp"
-#include "algebraic_facto.hpp"
-#include "bcHandler.hpp"
-#include "chrono.hpp"
-#include "dataAztec.hpp"
-#include "bdf.hpp"
-#include "openDX_wrtrs.hpp"
+#include <life/lifesolver/convDiffReactHandler.hpp>
+#include <life/lifearray/elemMat.hpp>
+#include <life/lifearray/elemVec.hpp>
+#include <life/lifefem/elemOper.hpp>
+#include <life/lifefem/values.hpp>
+#include <life/lifearray/pattern.hpp>
+#include <life/lifefem/assemb.hpp>
+#include <life/lifefem/bcManage.hpp>
+#include <life/lifealg/algebraic_facto.hpp>
+#include <life/lifefem/bcHandler.hpp>
+#include <life/lifecore/chrono.hpp>
+#include <life/lifealg/dataAztec.hpp>
+#include <life/lifefem/bdf.hpp>
+#include <life/lifefilters/openDX_wrtrs.hpp>
 #include <string>
 
 namespace LifeV
@@ -472,7 +472,7 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
 
    for ( UInt i = 0; i < _mesh.numVertices(); i++ )
     {
-	tetrapoints( 1 ) = _mesh.point( i + 1 );
+    tetrapoints( 1 ) = _mesh.point( i + 1 );
 
         if ( _mesh.point( i + 1 ).boundary() )
         {
@@ -505,10 +505,10 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
                 for ( UInt jj = 1; jj <= umesh.numLocalFaces();jj++ )
                 {
 
-		    tetrapoints( 2 ) = umesh.point( ( iv->point( ele.fToP( jj, 1 ) ) ).id() );
-		    tetrapoints( 3 ) = umesh.point( ( iv->point( ele.fToP( jj, 2 ) ) ).id() );
-		    tetrapoints( 4 ) = umesh.point( ( iv->point( ele.fToP( jj, 3 ) ) ).id() );
-		    volume = calcvol( tetrapoints );
+            tetrapoints( 2 ) = umesh.point( ( iv->point( ele.fToP( jj, 1 ) ) ).id() );
+            tetrapoints( 3 ) = umesh.point( ( iv->point( ele.fToP( jj, 2 ) ) ).id() );
+            tetrapoints( 4 ) = umesh.point( ( iv->point( ele.fToP( jj, 3 ) ) ).id() );
+            volume = calcvol( tetrapoints );
 
                         if ( umesh.faceList( umesh.localFaceId( vid, jj ) ).ad_first() == vid )
                             {
@@ -521,8 +521,8 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
 
                        if (volume < minminvolume)
                         {
-			   minminvolume = volume;
-			}
+               minminvolume = volume;
+            }
                        if (volume < minvolume)
                         {
                             if (adjacent != 0) 
@@ -532,7 +532,7 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
                                     jk = jj;
                                 }
                         }
-		}
+        }
 
                 if ( minvolume < -1.0e-15 )
                     {
@@ -557,12 +557,12 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
                             {
 
                                 found = 1;
-				tetrapoints_found( 1 ) = umesh.point( ( iv->point( 1 ) ).id() );
-				tetrapoints_found( 2 ) = umesh.point( ( iv->point( 2 ) ).id() );
-				tetrapoints_found( 3 ) = umesh.point( ( iv->point( 3 ) ).id() );
-				tetrapoints_found( 4 ) = umesh.point( ( iv->point( 4 ) ).id() );
+                tetrapoints_found( 1 ) = umesh.point( ( iv->point( 1 ) ).id() );
+                tetrapoints_found( 2 ) = umesh.point( ( iv->point( 2 ) ).id() );
+                tetrapoints_found( 3 ) = umesh.point( ( iv->point( 3 ) ).id() );
+                tetrapoints_found( 4 ) = umesh.point( ( iv->point( 4 ) ).id() );
 
-				test( tetrapoints_found, tetrapoints, b1, b2, b3 );
+                test( tetrapoints_found, tetrapoints, b1, b2, b3 );
                                
                                 localcoord.b[ 0 ] = 1.0 - b1 - b2 - b3;
                                 localcoord.b[ 1 ] = b1;
@@ -573,7 +573,7 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
                                
                             }
                     }
-	    }
+        }
 
                    break;
             }
@@ -588,10 +588,10 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
                 for ( UInt jj = 1; jj <= umesh.numLocalFaces();jj++ )
                 {
 
-		    tetrapoints( 2 ) = umesh.point( ( iv->point( ele.fToP( jj, 1 ) ) ).id() );
-		    tetrapoints( 3 ) = umesh.point( ( iv->point( ele.fToP( jj, 2 ) ) ).id() );
-		    tetrapoints( 4 ) = umesh.point( ( iv->point( ele.fToP( jj, 3 ) ) ).id() );
-		    volume = calcvol( tetrapoints );
+            tetrapoints( 2 ) = umesh.point( ( iv->point( ele.fToP( jj, 1 ) ) ).id() );
+            tetrapoints( 3 ) = umesh.point( ( iv->point( ele.fToP( jj, 2 ) ) ).id() );
+            tetrapoints( 4 ) = umesh.point( ( iv->point( ele.fToP( jj, 3 ) ) ).id() );
+            volume = calcvol( tetrapoints );
 
                         if ( umesh.faceList( umesh.localFaceId( vid, jj ) ).ad_first() == vid )
                             {
@@ -604,8 +604,8 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
 
                        if (volume < minminvolume)
                         {
-			   minminvolume = volume;
-			}
+               minminvolume = volume;
+            }
                        if (volume < minvolume)
                         {
                             if (adjacent != 0) 
@@ -641,12 +641,12 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
                         else
                             {
                                 found = 1;
-				tetrapoints_found( 1 ) = umesh.point( ( iv->point( 1 ) ).id() );
-				tetrapoints_found( 2 ) = umesh.point( ( iv->point( 2 ) ).id() );
-				tetrapoints_found( 3 ) = umesh.point( ( iv->point( 3 ) ).id() );
-				tetrapoints_found( 4 ) = umesh.point( ( iv->point( 4 ) ).id() );
+                tetrapoints_found( 1 ) = umesh.point( ( iv->point( 1 ) ).id() );
+                tetrapoints_found( 2 ) = umesh.point( ( iv->point( 2 ) ).id() );
+                tetrapoints_found( 3 ) = umesh.point( ( iv->point( 3 ) ).id() );
+                tetrapoints_found( 4 ) = umesh.point( ( iv->point( 4 ) ).id() );
 
-				test( tetrapoints_found, tetrapoints, b1, b2, b3 );
+                test( tetrapoints_found, tetrapoints, b1, b2, b3 );
                                
                                 localcoord.b[ 0 ] = 1.0 - b1 - b2 - b3;
                                 localcoord.b[ 1 ] = b1;
@@ -796,10 +796,10 @@ checkallvolumes( RegionMesh3D & umesh, SimpleVect<GeoElement0D<DefMarkerCommon> 
 
        if( (b1 >= bmin) && (b2 >= bmin) && (b3 >= bmin) && (1.0-b1-b2-b3 >= bmin))
        {
-	  b1r = b1;
-	  b2r = b2;
-	  b3r = b3;
-	  bmin = std::min<Real>(b1,std::min<Real>(b2,std::min<Real>(b3,1.0-b1-b2-b3)));
+      b1r = b1;
+      b2r = b2;
+      b3r = b3;
+      bmin = std::min<Real>(b1,std::min<Real>(b2,std::min<Real>(b3,1.0-b1-b2-b3)));
        }
 
     }

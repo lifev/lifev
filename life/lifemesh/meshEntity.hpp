@@ -19,7 +19,7 @@
 /*! file MeshEntity.h */
 #ifndef _MESHENTITY_HH_
 #define _MESHENTITY_HH_
-#include "life.hpp"
+#include <life/lifecore/life.hpp>
 
 namespace LifeV
 {

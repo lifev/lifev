@@ -29,14 +29,14 @@
  Adaptation to the new f.e. JFG 04/2002 (remark : several class
  implementation should now be put in a .cc)
 *****************************************************************/
-#include "life.hpp"
-#include "elemMat.hpp"
-#include "elemVec.hpp"
-#include "currentFE.hpp"
-#include "currentFEDG.hpp"
-#include "currentIFDG.hpp"
-#include "currentBFDG.hpp"
-#include "bcHandler.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifearray/elemMat.hpp>
+#include <life/lifearray/elemVec.hpp>
+#include <life/lifefem/currentFE.hpp>
+#include <life/lifefem/currentFEDG.hpp>
+#include <life/lifefem/currentIFDG.hpp>
+#include <life/lifefem/currentBFDG.hpp>
+#include <life/lifefem/bcHandler.hpp>
 
 namespace LifeV
 {
@@ -212,9 +212,9 @@ class JumpIF {
     {
       // returns the coor-th component of jump(phi^H_i)
       if(H == 0)
-	return _fe -> phiAd(i, iq) * _fe -> normal(icoor, iq);
+    return _fe -> phiAd(i, iq) * _fe -> normal(icoor, iq);
       else
-	return - _fe -> phiOp(i, iq) * _fe -> normal(icoor, iq);
+    return - _fe -> phiOp(i, iq) * _fe -> normal(icoor, iq);
     }
 
  private:
@@ -244,9 +244,9 @@ class AvgIF {
     {
       // returns the average of phi^H_i
       if(H == 0)
-	return 0.5 * _fe -> phiAd(i, iq);
+    return 0.5 * _fe -> phiAd(i, iq);
       else
-	return 0.5 * _fe -> phiOp(i, iq);
+    return 0.5 * _fe -> phiOp(i, iq);
     }
 
  private:
@@ -620,7 +620,7 @@ public:
     P s=0;
     for(int icoor=0; icoor<NDIM; icoor++) {
       for(int jcoor=0; jcoor<NDIM; jcoor++) {
-	s += Op::apply(_a(i, j, iq, icoor, jcoor, K, H, ic, jc), _t(icoor, jcoor, x, y, z));
+    s += Op::apply(_a(i, j, iq, icoor, jcoor, K, H, ic, jc), _t(icoor, jcoor, x, y, z));
       }
     }
     return s;
@@ -631,7 +631,7 @@ public:
     P s=0;
     for(int icoor=0; icoor<NDIM; icoor++) {
       for(int jcoor=0; jcoor<NDIM; jcoor++) {
-	s += Op::apply(_a(i, j, iq, icoor, jcoor, K, H, ic, jc), _t(icoor, jcoor, x, y, z));
+    s += Op::apply(_a(i, j, iq, icoor, jcoor, K, H, ic, jc), _t(icoor, jcoor, x, y, z));
       }
     }
     return s;
@@ -671,7 +671,7 @@ public:
     P s=0;
     for(int icoor=0; icoor<NDIM; icoor++) {
       for(int jcoor=0; jcoor<NDIM; jcoor++) {
-	s+=Op::apply(_a(i, j, iq, icoor, jcoor, K, H, ic, jc), _t(icoor, jcoor));
+    s+=Op::apply(_a(i, j, iq, icoor, jcoor, K, H, ic, jc), _t(icoor, jcoor));
       }
     }
     return s;
@@ -682,7 +682,7 @@ public:
     P s=0;
     for(int icoor=0; icoor<NDIM; icoor++) {
       for(int jcoor=0; jcoor<NDIM; jcoor++) {
-	s+=Op::apply(_a(i, j, iq, icoor, jcoor, K, H, ic, jc), _t(icoor, jcoor));
+    s+=Op::apply(_a(i, j, iq, icoor, jcoor, K, H, ic, jc), _t(icoor, jcoor));
       }
     }
     return s;

@@ -5,27 +5,27 @@
   the solution of M\partial u/\partial t + Au=b
   I've generalized the method introducing a parameter \theta,
   so:
-  theta=0	Euler esplicit
-  theta=1	Euler implicit
-  theta=0.5	Crank Nicolson (best method)
+  theta=0    Euler esplicit
+  theta=1    Euler implicit
+  theta=0.5    Crank Nicolson (best method)
 
 */
 
 #ifndef _TIME_SOLVER_HPP_
 #define _TIME_SOLVER_HPP_
 
-#include "SolverAztec.hpp"
-#include "vecUnknown.hpp"
-#include "elemMat.hpp"
-#include "elemVec.hpp"
-#include "elemOper.hpp"
+#include <life/lifealg/SolverAztec.hpp>
+#include <life/lifearray/vecUnknown.hpp>
+#include <life/lifearray/elemMat.hpp>
+#include <life/lifearray/elemVec.hpp>
+#include <life/lifefem/elemOper.hpp>
 #include <vector>
-#include "bcHandler.hpp"
-#include "currentFE.hpp"
-#include "currentBdFE.hpp"
-#include "dof.hpp"
-#include "pattern.hpp"
-#include <stdio.h>	//for NULL
+#include <life/lifefem/bcHandler.hpp>
+#include <life/lifefem/currentFE.hpp>
+#include <life/lifefem/currentBdFE.hpp>
+#include <life/lifefem/dof.hpp>
+#include <life/lifearray/pattern.hpp>
+#include <stdio.h>    //for NULL
 
 
 #include <boost/shared_ptr.hpp>
@@ -55,7 +55,7 @@ public:
   typedef const MSRMatr<Real> & const_matrix_type;
 
   TimeSolver():SolverAztec("data"),P(),q(),u_k(),
-  		b_k(),b_k_1(),u_k_1(),M_k(),M_k_1(),A_k(),
+          b_k(),b_k_1(),u_k_1(),M_k(),M_k_1(),A_k(),
                 A_k_1(),theta(0.5),dt(1.0)
 
   {
@@ -66,25 +66,25 @@ public:
     DESTRUCTOR("TimeSolver");
   }
   TimeSolver(UInt _dim):SolverAztec("data"),
-  		P(),q(_dim),u_k(_dim),
-  		b_k(_dim),b_k_1(_dim),u_k_1(_dim),M_k(),M_k_1(),A_k(),
+          P(),q(_dim),u_k(_dim),
+          b_k(_dim),b_k_1(_dim),u_k_1(_dim),M_k(),M_k_1(),A_k(),
                 A_k_1(),theta(0.5),dt(1.0)
   {
     CONSTRUCTOR("TimeSolver 3");
   }
 
-  	
+      
   /* solves u_k on a generic equation of the type:
      (M/dt+A_k*theta)u_k=theta*b_k+(1-theta)b_k_1-A_k_1(1-theta)u_k_1+M/dt*u_k_1
    */
   TimeSolver(Real _dt,const_matrix_type _M_k,const_matrix_type _M_k_1
-		,const_matrix_type _A_k,const_matrix_type _A_k_1,
-             	const_vector_type _b_k,const_vector_type _b_k_1,
-		const_vector_type _u_k_1,Real _theta);
+        ,const_matrix_type _A_k,const_matrix_type _A_k_1,
+                 const_vector_type _b_k,const_vector_type _b_k_1,
+        const_vector_type _u_k_1,Real _theta);
   void setM_k(const_matrix_type _M_k)
   {
     M_k=_M_k;
-    initPq(M_k);	
+    initPq(M_k);    
   }
   void setM_k_1(const_matrix_type _M_k_1)
   {
@@ -105,9 +105,9 @@ public:
   void setu_k_1(const_vector_type _u_k_1)
   {
     u_k_1=_u_k_1;
-    u_k=_u_k_1;		//to initialize size
+    u_k=_u_k_1;        //to initialize size
   }
-  void initPq(const_matrix_type _M)	
+  void initPq(const_matrix_type _M)    
   {
     //just in case of empty constructor
     P=matrix_type(*_M.Patt());
@@ -136,7 +136,7 @@ public:
     M_k_1=M_k;
   }
 
-  void update()	//update the matrices/vectors of the equation to solve
+  void update()    //update the matrices/vectors of the equation to solve
   {
 Debug(6013)<<"entering call to TimeSolver::update()\n";
     dti=1/dt;

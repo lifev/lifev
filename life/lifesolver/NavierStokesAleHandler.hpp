@@ -29,8 +29,8 @@
 
 #ifndef _NAVIERSTOKESALEHANDLER_H_
 #define _NAVIERSTOKESALEHANDLER_H_
-#include "NavierStokesHandler.hpp"
-#include "meshMotion.hpp"
+#include <life/lifesolver/NavierStokesHandler.hpp>
+#include <life/lifefem/meshMotion.hpp>
 
 namespace LifeV
 {

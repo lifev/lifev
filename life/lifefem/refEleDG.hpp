@@ -20,8 +20,8 @@
 #define _REFELEDG_H_INCLUDE
 
 
-#include "refEle.hpp"
-#include "geoMap.hpp"
+#include <life/lifefem/refEle.hpp>
+#include <life/lifefem/geoMap.hpp>
 
 /*!
   \file refEleDG.h
@@ -60,12 +60,12 @@ class RefEleDG:public RefEle{
  public:
 
   RefEleDG(std::string _name, ReferenceShapes _shape,
-	   int _nbDof, int _nbCoor, 
-	   const Fct* phi, const Fct* dPhi, const Fct* d2Phi, 
-	   const Real* refCoor, const SetOfQuadRule& sqr, 
-	   ReferenceShapes _shapeFaces, 
-	   int _nbFaces, int _nbGeoNodeFaces, 
-	   const Real* refCoorFaces, const SetOfQuadRule& sqrFaces, const GeoMap& _geoMap);
+       int _nbDof, int _nbCoor, 
+       const Fct* phi, const Fct* dPhi, const Fct* d2Phi, 
+       const Real* refCoor, const SetOfQuadRule& sqr, 
+       ReferenceShapes _shapeFaces, 
+       int _nbFaces, int _nbGeoNodeFaces, 
+       const Real* refCoorFaces, const SetOfQuadRule& sqrFaces, const GeoMap& _geoMap);
   ~RefEleDG();
 
   inline Real xiFace(int iFace, int i) const{
@@ -149,23 +149,23 @@ class RefEleDG:public RefEle{
 
 //
 static const Real refCoorFaces_P1_DG_3D[36] = {0., 0., 0.,
-					       0., 1., 0.,
-					       1., 0., 0.,
+                           0., 1., 0.,
+                           1., 0., 0.,
 
-					       0., 0., 0.,
-					       1., 0., 0.,
-					       0., 0., 1.,
+                           0., 0., 0.,
+                           1., 0., 0.,
+                           0., 0., 1.,
 
-					       1., 0., 0.,
-					       0., 1., 0.,
-					       0., 0., 1.,
+                           1., 0., 0.,
+                           0., 1., 0.,
+                           0., 0., 1.,
 
-					       0., 0., 0.,
-					       0., 0., 1.,
-					       0., 1., 0.};
-					    
+                           0., 0., 0.,
+                           0., 0., 1.,
+                           0., 1., 0.};
+                        
 
 /* static const GeoMap& geoMap_P1_DG_3D = geoLinearTria; */
 }
 #endif
-				 
+                 

@@ -24,8 +24,8 @@ namespace LifeV
   using namespace std;
   
   operFS::operFS(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
-		 VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
-		 BCHandler& BCh_dp, BCHandler& BCh_dz, const GetPot& data_file):
+         VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
+         BCHandler& BCh_dp, BCHandler& BCh_dz, const GetPot& data_file):
     _fluid(fluid),
     _solid(solid),
     _dispStruct( 3*_solid.dDof().numTotalDof() ),
@@ -168,16 +168,16 @@ namespace LifeV
       
       // Loop on elements
       for ( UInt i = 1; i <= _fluid.mesh().numVolumes(); i++ )
-	{
-	  
-	  _fe.updateFirstDerivQuadPt( _fluid.mesh().volumeList( i ) );
-	  
-	  _elmatC.zero();
-	  
-	  stiff(1.0, _elmatC, _fe );
-	  assemb_mat( _CAux, _elmatC, _fe, _dof, 0, 0);
-	  
-	}
+    {
+      
+      _fe.updateFirstDerivQuadPt( _fluid.mesh().volumeList( i ) );
+      
+      _elmatC.zero();
+      
+      stiff(1.0, _elmatC, _fe );
+      assemb_mat( _CAux, _elmatC, _fe, _dof, 0, 0);
+      
+    }
       
       _BCh_dp.bdUpdate(_fluid.mesh(),_feBd,_dof);
       _computedC = 1;
@@ -237,7 +237,7 @@ namespace LifeV
     
     if ( xnorm == 0.0 ) {
       for (int i=0; i <(int)dim; ++i)
-	Jz[i] =  0.0;
+    Jz[i] =  0.0;
     }
     else {
       
@@ -245,13 +245,13 @@ namespace LifeV
       double dti2 = 1.0/( dt * dt) ;
       
       for (int i=0; i <(int)dim; ++i) 
-	my_data->_pFS->_da[i] =  - my_data->_pFS->_fluid.density() * z[i] * dti2;
+    my_data->_pFS->_da[i] =  - my_data->_pFS->_fluid.density() * z[i] * dti2;
     
       my_data->_pFS->solveReducedLinearFluid(); 
       my_data->_pFS->solveLinearSolid();
       
       for (int i=0; i <(int)dim; ++i)
-	Jz[i] =  z[i]-my_data->_pFS->_dz[i];
+    Jz[i] =  z[i]-my_data->_pFS->_dz[i];
 
     }
     std::cout << " ***** norm (Jz)= " << AZ_gvector_norm(dim,-1,Jz,proc_config)<< std::endl<< std::endl;

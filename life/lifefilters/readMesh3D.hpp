@@ -26,12 +26,12 @@
 #include <boost/lambda/bind.hpp>
 #include <boost/lambda/if.hpp>
 
-#include <debug.hpp>
+#include <life/lifecore/debug.hpp>
 
 
-#include "regionMesh3D.hpp"
-#include "util_string.hpp"
-#include "mesh_util.hpp"
+#include <life/lifemesh/regionMesh3D.hpp>
+#include <life/lifecore/util_string.hpp>
+#include <life/lifefilters/mesh_util.hpp>
 
 namespace LifeV
 {
@@ -636,11 +636,11 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
     std::map<int,int> itoii;
     for( uint __i = 0; __i < __n;++__i )
     {
-		uint __ni;
-		__is >> __ni
-		     >> __x[3*__i]
-		     >> __x[3*__i+1]
-		     >> __x[3*__i+2];
+        uint __ni;
+        __is >> __ni
+             >> __x[3*__i]
+             >> __x[3*__i+1]
+             >> __x[3*__i+2];
 
         itoii[__ni-1] = __i;
     }
@@ -667,27 +667,27 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
 
     for( uint __i = 0; __i < __nele;++__i )
     {
-		int __ne, __t, __tag, __np, __dummy;
-		__is >> __ne
-		     >> __t
-		     >> __tag
-		     >> __dummy
-		     >> __np;
+        int __ne, __t, __tag, __np, __dummy;
+        __is >> __ne
+             >> __t
+             >> __tag
+             >> __dummy
+             >> __np;
 
 
-		++__gt[ __t ];
-		__etype[__i] = __t;
-		__et[__i] = __tag;
-		__e[__i].resize( __np );
-		int __p = 0;
-		while ( __p != __np )
-		{
-		    __is >> __e[__i][__p];
+        ++__gt[ __t ];
+        __etype[__i] = __t;
+        __et[__i] = __tag;
+        __e[__i].resize( __np );
+        int __p = 0;
+        while ( __p != __np )
+        {
+            __is >> __e[__i][__p];
             __e[__i][__p] = itoii[ __e[__i][__p]-1];
             __e[__i][__p] += 1;
 
-		    ++__p;
-		}
+            ++__p;
+        }
     }
     std::for_each( __gt.begin(), __gt.end(),  std::cout << boost::lambda::_1 << " " );
     std::cout << "\n";
@@ -865,7 +865,7 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
 #include "mesh_util.h"
 */
 
-#include "bareItems.hpp"
+#include <life/lifemesh/bareItems.hpp>
 
 template<typename GeoShape, typename MC>
 bool
@@ -1003,8 +1003,8 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
   {
     fstream3>>line;
     if(line=="edgesegmentsgi2" && flag&2){
-      fstream3>>fake;		//this is not really the nBEd
-      fake*=2;		//there are twice the num of lines told, test if prob
+      fstream3>>fake;        //this is not really the nBEd
+      fake*=2;        //there are twice the num of lines told, test if prob
       for(i=0;i<fake;i++){
         fstream3>>surf1>>surf2>>p1>>p2>>t>>t>>t>>t>>t>>t>>t>>t;
       }
@@ -1040,11 +1040,11 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
   if (GeoShape::numPoints > 4 ){
     std::cout << "Quadratic Tetra  Mesh (from Linear geometry)" <<std::endl;
     nPo=nVe+nEd;
-    nBPo=nBVe+nBEd;	// I calculated the real nBEd before
+    nBPo=nBVe+nBEd;    // I calculated the real nBEd before
   } else {
     std::cout << "Linear Tetra Mesh" <<std::endl;
     nPo=nVe;
-    nBPo=nBVe;		
+    nBPo=nBVe;        
   }
 
   //points can be only vertices or on edges too
@@ -1069,7 +1069,7 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
   // Only Boundary Edges (in a next version I will allow for different choices)
   mesh.setMaxNumEdges(nBEd);
   mesh.numEdges()=nEd; // Here the REAL number of edges (all of them)
-  mesh.setNumBEdges(nBEd);	/////////????????????
+  mesh.setNumBEdges(nBEd);    /////////????????????
   // Only Boundary Faces
   mesh.setMaxNumFaces(nBFa);
   mesh.numFaces()=nFa; // Here the REAL number of edges (all of them)
@@ -1111,13 +1111,13 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
   std::ifstream  fstream5(filename.c_str()); 
 
   while(flag && !fstream5.eof())  //fstream after using .seekg sometimes never reaches eof, 
-  				//entering infinite loop, why????? damn STL I reopen the file and put the flag to fix
+                  //entering infinite loop, why????? damn STL I reopen the file and put the flag to fix
   {
     fstream5>>line;
 
     if(line=="edgesegmentsgi2" && flag&2){
-      fstream5>>fake;	//this is not really the nBEd
-      fake*=2;		//there are twice the num of lines told, test if prob
+      fstream5>>fake;    //this is not really the nBEd
+      fake*=2;        //there are twice the num of lines told, test if prob
       for(i=0;i<fake;i++){
         fstream5>>surf1>>surf2>>p1>>p2>>t>>t>>t>>t>>t>>t>>t>>t;
       }

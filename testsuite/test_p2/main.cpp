@@ -24,21 +24,21 @@
 
                - \Delta u = f
 
-	                u = g on the boundary
+                    u = g on the boundary
 
 
-			on a cube
+            on a cube
 */
-#include <GetPot.hpp>
+#include <life/lifecore/GetPot.hpp>
 
 #include "main.hpp"
 #include "ud_functions.hpp"
-#include "bcManage.hpp"
-#include "elemMat.hpp"
-#include "elemOper.hpp"
-#include "openDX_wrtrs.hpp"
-#include "vtk_wrtrs.hpp"
-//#include "sobolevNorms.hpp"
+#include <life/lifefem/bcManage.hpp>
+#include <life/lifearray/elemMat.hpp>
+#include <life/lifefem/elemOper.hpp>
+#include <life/lifefilters/openDX_wrtrs.hpp>
+#include <life/lifefilters/vtk_wrtrs.hpp>
+//#include <life/lifefem/sobolevNorms.hpp>
 
 #undef  OPER_TEMPLATE
 #define P2

@@ -20,8 +20,8 @@
 #define _NEWTON_H
 
 #include <algorithm> // for min and max
-#include "linesearch_parabolic.hpp"
-#include "linesearch_cubic.hpp"
+#include <life/lifealg/linesearch_parabolic.hpp>
+#include <life/lifealg/linesearch_cubic.hpp>
 
 namespace LifeV
 {

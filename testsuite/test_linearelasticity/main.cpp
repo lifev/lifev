@@ -17,9 +17,9 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 #include <cstdlib>
-#include "life.hpp"
-#include "regionMesh3D_ALE.hpp"
-#include "VenantKirchhofSolver.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifefem/regionMesh3D_ALE.hpp>
+#include <life/lifesolver/VenantKirchhofSolver.hpp>
 #include "ud_functions.hpp"
 
 /*

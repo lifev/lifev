@@ -18,9 +18,9 @@
 */
 #ifndef V2ELEMVEC_H
 #define V2ELEMVEC_H
-#include "life.hpp"
-#include "elemVec.hpp"
-#include "currentFE.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifearray/elemVec.hpp>
+#include <life/lifefem/currentFE.hpp>
 
 namespace LifeV
 {

@@ -20,9 +20,9 @@
 #define _DATADARCY_H_
 #include <string>
 #include <iostream>
-#include "dataMesh.hpp"
-#include "GetPot.hpp"
-#include "tab.hpp"
+#include <life/lifemesh/dataMesh.hpp>
+#include <life/lifecore/GetPot.hpp>
+#include <life/lifearray/tab.hpp>
 
 namespace LifeV
 {

@@ -48,7 +48,7 @@ namespace LifeV
   
   // Initial velocity 
   Real u0(const Real& t, const Real& x, const Real& y, const Real& z,
-	  const ID& i)
+      const ID& i)
   {
     return 0;
   }
@@ -63,16 +63,16 @@ namespace LifeV
       break;
     case 3:
       if ( t < 0.005)
-	return 1.3332e4;
+    return 1.3332e4;
       else 
-	return 0;
+    return 0;
       break; 
     }  
     return 0;
   }
 
   Real bdDisp(const Real& t, const Real& x, const Real& y, const Real& z,
-	      const ID& i) {
+          const ID& i) {
     
     Real R=sqrt(x*x+y*y);
     Real omega = acos(-1.0)*40;

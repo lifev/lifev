@@ -16,7 +16,7 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-#include "currentBFDG.hpp"
+#include <life/lifefem/currentBFDG.hpp>
 
 namespace LifeV
 {
@@ -43,9 +43,9 @@ void CurrentBFDG::_comp_re()
 
       // Compute right hand side vector
       for(int i = 0; i < nbNodeAd; i++){
-	for(int ig = 0; ig < nbQuadPt; ig++){
-	  rhs(i) += - (phiAd(j, ig) * normal(icoor, ig)) * phiAd(i, ig) * weightMeas(ig);
-	} // for ig
+    for(int ig = 0; ig < nbQuadPt; ig++){
+      rhs(i) += - (phiAd(j, ig) * normal(icoor, ig)) * phiAd(i, ig) * weightMeas(ig);
+    } // for ig
       } // for i
 
       // Solve the system
@@ -53,7 +53,7 @@ void CurrentBFDG::_comp_re()
 
       // Store the solution
       for(int index = 0; index < nbNodeAd; index++){
-	re(index, j, icoor) = rhs(index);
+    re(index, j, icoor) = rhs(index);
       }
 
     } // for icoor

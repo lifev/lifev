@@ -23,20 +23,20 @@
 
 #include <vector>
 #include <algorithm>
-#include "life.hpp"
-#include "readMesh3D.hpp"
-#include "chrono.hpp"
-#include "elemMat.hpp"
-#include "elemVec.hpp"
-#include "refFE.hpp"
-#include "elemOper_ext.hpp"
-#include "dof.hpp"
-#include "markers.hpp"
-#include "sobolevNorms.hpp"
-#include "values.hpp"
-#include "assemb.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifefilters/readMesh3D.hpp>
+#include <life/lifecore/chrono.hpp>
+#include <life/lifearray/elemMat.hpp>
+#include <life/lifearray/elemVec.hpp>
+#include <life/lifefem/refFE.hpp>
+#include <life/lifefem/elemOper_ext.hpp>
+#include <life/lifefem/dof.hpp>
+#include <life/lifemesh/markers.hpp>
+#include <life/lifefem/sobolevNorms.hpp>
+#include <life/lifefem/values.hpp>
+#include <life/lifefem/assemb.hpp>
 
-#include "dataAztec.hpp"
+#include <life/lifealg/dataAztec.hpp>
 
 namespace LifeV
 {

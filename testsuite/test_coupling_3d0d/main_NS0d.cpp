@@ -17,16 +17,16 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include "life.hpp"
-#include "chrono.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifecore/chrono.hpp>
 #include "ud_functions.hpp"
-#include "GetPot.hpp"
+#include <life/lifecore/GetPot.hpp>
 
 #include "meanPressure.hpp"
 #include "flowRate.hpp"
 
-#include <ensight7Writer.hpp>
-#include <medit_wrtrs.hpp>
+#include <life/lifefilters/ensight7Writer.hpp>
+#include <life/lifefilters/medit_wrtrs.hpp>
 
 namespace LifeV
 {

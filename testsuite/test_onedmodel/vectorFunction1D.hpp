@@ -19,7 +19,7 @@
 #ifndef _VECTORFUNCTION1D_H_
 #define _VECTORFUNCTION1D_H_
 
-#include <life.hpp>
+#include <life/lifecore/life.hpp>
 #include <oneDNonLinModelParam.hpp>
 
 namespace LifeV
@@ -192,7 +192,7 @@ public:
     Sql source term of the equation under its quasi-linear
     formulation :
 
-	dU/dt + H(U) dU/dz + Sql(U) = 0
+    dU/dt + H(U) dU/dz + Sql(U) = 0
 
     \param indz : is the index position for the parameter
     */
@@ -314,11 +314,11 @@ public:
     Sql source term of the equation under its quasi-linear
     formulation :
 
-	dU/dt + H(U) dU/dz + Sql(U) = 0
+    dU/dt + H(U) dU/dz + Sql(U) = 0
 
-	Here H is constant w.r. to U.
-	And Sql = S(U), because there is no variation of
-	the coefficients.
+    Here H is constant w.r. to U.
+    And Sql = S(U), because there is no variation of
+    the coefficients.
 
     \param indz : is the index position for the parameter
     */

@@ -23,17 +23,17 @@
 #ifndef _DARCY_SOLVER_H
 #define _DARCY_SOLVER_H
 
-#include <debug.hpp>
+#include <life/lifecore/debug.hpp>
 
-#include <darcySolverBase.hpp>
+#include <life/lifesolver/darcySolverBase.hpp>
 
-#include "darcyHandler.hpp"
-#include "bcManage.hpp"
+#include <life/lifesolver/darcyHandler.hpp>
+#include <life/lifefem/bcManage.hpp>
 
-#include "clapack.h"
-#include "medit_wrtrs.hpp"
-#include "ensight7Writer.hpp"
-#include "sobolevNorms.hpp"
+#include <life/lifealg/clapack.hpp>
+#include <life/lifefilters/medit_wrtrs.hpp>
+#include <life/lifefilters/ensight7Writer.hpp>
+#include <life/lifefem/sobolevNorms.hpp>
 
 
 namespace LifeV

@@ -2,7 +2,7 @@
 #
 # Author: Christophe Prud'homme
 #
-# Copyright (C) 2004 @COPYRIGHT@
+# Copyright (C) 2004 EPFL
 #
 # Distributed under the GPL(GNU Public License):
 # This program is free software; you can redistribute it and/or modify
@@ -24,21 +24,6 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 AM_CPPFLAGS = -DNO_BLASLAPACK
 #AM_CXXFLAGS = $(LIFEV_CXX_PERMISSIVE)
-
-INCLUDES 	= -I$(top_srcdir)/life/lifecore  -I$(top_srcdir)/life/lifearray -I$(top_srcdir)/life/lifealg \
-             -I$(top_srcdir)/life/lifemesh -I$(top_srcdir)/life/lifefem -I$(top_srcdir)/life/lifefilters 
-
-include_HEADERS	= ElasticStructureHandler.hpp NavierStokesAleHandler.hpp \
-                NavierStokesAleSolverPC.hpp NavierStokesHandler.hpp NavierStokesWithFlux.hpp \
-                NavierStokesSolverPC.hpp VenantKirchhofSolver.hpp dataElasticStructure.hpp \
-                dataNavierStokes.hpp dataSimplifiedStructure.hpp simplifiedStructure.hpp \
-                convDiffReactHandler.hpp convDiffReactSolverPC.hpp dataConvDiffReact.hpp \
-                dataDarcy.hpp darcyHandler.hpp darcySolverBase.hpp darcySolver.hpp \
-                FSIOperator.hpp steklovPoincareBase.hpp fixedPointBase.hpp exactJacobianBase.hpp \
-                FSISolver.hpp timeSolver.hpp parabolicSolver.hpp reducedLinFluid.hpp \
-                LevelSetSolver.hpp LevelSetSolverUtils.hpp \
-                HyperbolicSolverIP.hpp
-
 
 lib_LTLIBRARIES	= liblifesolver.la
 

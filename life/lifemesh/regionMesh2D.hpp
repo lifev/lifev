@@ -18,7 +18,7 @@
 */
 /*! file regionMesh2D.h
   \brief The 2D mesh classes interfaces
-  \version $Revision: 1.7 $ Luca Formaggia
+  \version $Revision: 1.8 $ Luca Formaggia
 
   Introduces the RegionMesh2D class
 */
@@ -26,15 +26,15 @@
 #ifndef _REGIONMESH2D_HH_
 #define _REGIONMESH2D_HH_
 
-#include "life.hpp"
-#include "geoElement.hpp"
-#include "switch.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifemesh/geoElement.hpp>
+#include <life/lifecore/switch.hpp>
 
-#include "bareItems.hpp"
+#include <life/lifemesh/bareItems.hpp>
 #include <iomanip>
 #include <fstream>
 #include <cstdlib>
-#include "SimpleVect.hpp"  /* stl wrap of vector class template.
+#include <life/lifearray/SimpleVect.hpp>  /* stl wrap of vector class template.
 It supports numbering from one* /
 
 namespace LifeV

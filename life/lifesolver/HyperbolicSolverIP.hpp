@@ -41,27 +41,27 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <list>
 #include <set>
 
-#include <tab.hpp>
+#include <life/lifearray/tab.hpp>
 
-#include <dataMesh.hpp>
+#include <life/lifemesh/dataMesh.hpp>
 
-#include <GetPot.hpp>
-#include <bdf.hpp>
+#include <life/lifecore/GetPot.hpp>
+#include <life/lifefem/bdf.hpp>
 
 #if USE_AZTEC_SOLVER
-#include <SolverAztec.hpp>
+#include <life/lifealg/SolverAztec.hpp>
 #else
-#include <SolverUMFPACK.hpp>
+#include <life/lifealg/SolverUMFPACK.hpp>
 #endif
 
-#include <bcHandler.hpp>
+#include <life/lifefem/bcHandler.hpp>
 
-#include <dof.hpp>
+#include <life/lifefem/dof.hpp>
 
-#include <elemOper.hpp>
-#include <elemOper2Fluids.hpp>
+#include <life/lifefem/elemOper.hpp>
+#include <life/lifefem/elemOper2Fluids.hpp>
 
-#include <chrono.hpp>
+#include <life/lifecore/chrono.hpp>
 
 namespace LifeV {
     /*!
@@ -149,7 +149,7 @@ namespace LifeV {
             _M_monitored_times(5)
         {
 #if USE_AZTEC_SOLVER
-            _M_solver.setOptionsFromGetPot(_M_data_file, (_M_data_section + "/solver").data());        
+            _M_solver.setOptionsFromGetPot(_M_data_file, (_M_data_section + "/solver").data());
             std::cout << "** HSIP ** Using AZTEC solver" << std::endl;
 #else
             std::cout << "** HSIP ** Using UMFPACK solver" << std::endl;
@@ -235,7 +235,7 @@ namespace LifeV {
         void iterate();
 
         /*!
-          Export matrices A and M in a format suitable for use with 
+          Export matrices A and M in a format suitable for use with
           Matlab's spy function
         */
         void spy(std::string __path) {
@@ -406,7 +406,7 @@ namespace LifeV {
         void add_A_unsteady();
 
         /*!
-          Add the stabilization terms. It may be necessary to re-calculate 
+          Add the stabilization terms. It may be necessary to re-calculate
           stabilization terms at every time step because the stabilization
           parameter depends on the velocity field.
         */
@@ -473,12 +473,12 @@ namespace LifeV {
         ElemMat __elmat12(_M_fe.nbNode, 1, 1);
         ElemMat __elmat21(_M_fe.nbNode, 1, 1);
         ElemMat __elmat22(_M_fe.nbNode, 1, 1);
-        
+
         //CurrentFE _M_fe_2(_M_fe);
         Real __stab_coeff;
 
         ElemVec __beta( _M_fe_bd.nbNode, NDIM );
-        
+
         for(UInt __face_id = _M_mesh.numBFaces() + 1; __face_id <= _M_mesh.numFaces(); __face_id++){
             __elmat11.zero();
             __elmat12.zero();
@@ -498,11 +498,11 @@ namespace LifeV {
             // Retrieve local velocity dofs
 
             __beta.zero();
-        
+
             // Get the position of the face on the first element sharing it
 
             UInt iFaEl = _M_mesh.faceList(__face_id).pos_first();
-            
+
             for (int __node_id = 0; __node_id < _M_fe_bd.nbNode; ++__node_id) {
                 UInt iloc = _M_fToP(iFaEl, __node_id + 1);
 
@@ -637,7 +637,7 @@ std::ostream& operator<<(std::ostream& __ostr, HyperbolicSolverIP<_MeshType>& __
     __ostr << "--------------------------------------------------" << std::endl;
 #endif
     __ostr << "Timings" << std::endl << std::endl;
-    __ostr << "Solver initialization               " << 
+    __ostr << "Solver initialization               " <<
         __HS._M_monitored_times[0] << " s" << std::endl;
     __ostr << "Unsteady contribution assembling    " <<
         __HS._M_monitored_times[1] << " s" << std::endl;
@@ -645,7 +645,7 @@ std::ostream& operator<<(std::ostream& __ostr, HyperbolicSolverIP<_MeshType>& __
         __HS._M_monitored_times[2] << " s" << std::endl;
     __ostr << "Boundary conditions handling        " <<
         __HS._M_monitored_times[3] << " s" << std::endl;
-    __ostr << "System solution                     " << 
+    __ostr << "System solution                     " <<
         __HS._M_monitored_times[4] << " s" << std::endl;
     __ostr << "==================================================" << std::endl;
 

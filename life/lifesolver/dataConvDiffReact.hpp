@@ -29,10 +29,10 @@
 #define _DATACONVDIFFREACT_H_
 #include <string>
 #include <iostream>
-#include "GetPot.hpp"
-#include "life.hpp"
-#include "dataMesh.hpp"
-#include "dataTime.hpp"
+#include <life/lifecore/GetPot.hpp>
+#include <life/lifecore/life.hpp>
+#include <life/lifemesh/dataMesh.hpp>
+#include <life/lifefem/dataTime.hpp>
 
 namespace LifeV
 {

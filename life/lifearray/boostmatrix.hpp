@@ -35,15 +35,15 @@
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <boost/lambda/lambda.hpp>
 
-#include <pattern.hpp>
-#include <tab.hpp>
+#include <life/lifefem/pattern.hpp>
+#include <life/lifearray/tab.hpp>
 
 namespace LifeV
 {
 
 /**
    \class BoostMatrix
-   
+
    Wrapper class which allows for using boost uBlas matrices in existing LifeV
    routines. WARNING: Quite a few parts are slow at the moment.
 */
@@ -175,7 +175,7 @@ public:
             operator()( r, r ) = coeff; // A(r,r) = coeff
             b[ r ] = coeff * datum; // correct right hand side for row r
         }
-    
+
     //! save matrix to file. Should be matlab format, but is not yet.
     //! Matlab format can be achieved though.
     void spy( std::string const &filename )

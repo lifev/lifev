@@ -26,7 +26,7 @@
 */
 
 
-#include "bcCond.hpp"
+#include <life/lifefem/bcCond.hpp>
 
 namespace LifeV
 {
@@ -202,8 +202,8 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& t
 }
 
 BCBase::BCBase( const std::string& name, const EntityFlag& flag,
-		const BCType& type, const BCMode& mode,
-		BCFunctionUDepBase& bcf, const std::vector<ID>& comp )
+        const BCType& type, const BCMode& mode,
+        BCFunctionUDepBase& bcf, const std::vector<ID>& comp )
     :
     _M_isUDep(true),
     _M_name( name ),
@@ -219,8 +219,8 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag,
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
 }
 BCBase::BCBase( const std::string& name, const EntityFlag& flag,
-		const BCType& type, const BCMode& mode,
-		BCFunctionUDepBase& bcf)
+        const BCType& type, const BCMode& mode,
+        BCFunctionUDepBase& bcf)
     :
     _M_isUDep(true),
     _M_name( name ),
@@ -256,8 +256,8 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag,
     }
 }
 BCBase::BCBase( const std::string& name, const EntityFlag& flag,
-		const BCType& type, const BCMode& mode,
-		BCFunctionUDepBase& bcf, const UInt& nComp )
+        const BCType& type, const BCMode& mode,
+        BCFunctionUDepBase& bcf, const UInt& nComp )
     :
     _M_isUDep(true),
     _M_name( name ),

@@ -62,10 +62,10 @@
 #ifndef OFFSET
 #define OFFSET 0 // for the Fortran vs C numbering
 #endif
-#include <life.hpp>
+#include <life/lifecore/life.hpp>
 
-#include <pattern.hpp>
-#include <vecUnknown.hpp>
+#include <life/lifearray/pattern.hpp>
+#include <life/lifearray/vecUnknown.hpp>
 
 namespace LifeV
 {
@@ -85,10 +85,10 @@ double zero( double /*val*/ ) {return 0.0;}
 
 }
 
-#include <MSRMatrix.hpp>
-#include <CSRMatrix.hpp>
-#include <VBRMatrix.hpp>
-#include <MixedMatrix.hpp>
+#include <life/lifearray/MSRMatrix.hpp>
+#include <life/lifearray/CSRMatrix.hpp>
+#include <life/lifearray/VBRMatrix.hpp>
+#include <life/lifearray/MixedMatrix.hpp>
 
 namespace LifeV
 {

@@ -18,7 +18,7 @@
 */
 
 
-#include "fixedPointBase.hpp"
+#include <life/lifesolver/fixedPointBase.hpp>
 
 
 namespace LifeV

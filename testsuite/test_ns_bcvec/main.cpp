@@ -16,11 +16,11 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-#include "life.hpp"
-#include "NavierStokesSolverPC.hpp"
-#include "chrono.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifesolver/NavierStokesSolverPC.hpp>
+#include <life/lifecore/chrono.hpp>
 #include "ud_functions.hpp"
-#include "GetPot.hpp"
+#include <life/lifecore/GetPot.hpp>
 
 
 
@@ -41,13 +41,13 @@ int main(int argc, char** argv)
   //Classical grad-grad version: put nothing or 0 in last argument
   //
   //NavierStokesSolverPC< RegionMesh3D<LinearTetra> > ns(data_file, feTetraP1bubble, feTetraP1,quadRuleTetra64pt,
-  //				       quadRuleTria3pt, quadRuleTetra5pt, quadRuleTria3pt, BCh_u );
+  //                       quadRuleTria3pt, quadRuleTetra5pt, quadRuleTria3pt, BCh_u );
   //
   //
   // Curl-curl version: put 1 in last argument
   //
   NavierStokesSolverPC< RegionMesh3D<LinearTetra> > ns(data_file, feTetraP1bubble, feTetraP1,quadRuleTetra64pt,
-						       quadRuleTria3pt, quadRuleTetra5pt, quadRuleTria3pt, BCh_u, 1 );
+                               quadRuleTria3pt, quadRuleTetra5pt, quadRuleTria3pt, BCh_u, 1 );
   ns.showMe();
 
   // boundary conditions definition

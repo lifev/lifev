@@ -1,8 +1,8 @@
-#include "life.hpp"
+#include <life/lifecore/life.hpp>
 #include "NavierStokesAleSolverPC.new.hpp"
-#include "regionMesh3D_ALE.hpp"
+#include <life/lifefem/regionMesh3D_ALE.hpp>
 #include "ud_functions.hpp"
-#include "bcVector.hpp"
+#include <life/lifefem/bcVector.hpp>
 
 #define PVM
 //#undef PVM
@@ -48,9 +48,9 @@ int main(int argc, char** argv)
 
   // NavierStokes ALE solver
   NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> > nsAle(data_file, feTetraP1bubble,
-								 feTetraP1,quadRuleTetra64pt,
-								 quadRuleTria3pt, quadRuleTetra64pt,
-								 quadRuleTria3pt, BCh_u,BCh_mesh);
+                                 feTetraP1,quadRuleTetra64pt,
+                                 quadRuleTria3pt, quadRuleTetra64pt,
+                                 quadRuleTria3pt, BCh_u,BCh_mesh);
 
   nsAle.showMe();
 
@@ -151,7 +151,7 @@ do{
     if(fsiStatus == 1) { // nouveau pas de temps
 #ifdef PVM
       if ( iter >= 1 )
-	nsAle.postProcess();
+    nsAle.postProcess();
 #endif
       nsAle.timeAdvance(f,time);
       cout << "PVM's timeAdvance ok!" << endl << flush;
@@ -160,15 +160,15 @@ do{
       nsAle.dep_fluid_interf(analytic_disp);
 #else
       for (UInt i=0; i < dim_mesh; ++i) {
-	if ( nsAle.mesh().point(i+1).marker() == 1 ||
-	     nsAle.mesh().point(i+1).marker() == 20 ||
-	     nsAle.mesh().point(i+1).marker() == 10   ) { // only on lateral points
-	  x=nsAle.mesh().point(i+1).x();
-	  y=nsAle.mesh().point(i+1).y();
-	  z=nsAle.mesh().point(i+1).z();
-	  for (UInt j=0; j<3; ++j)
-	    analytic_disp(i + j*dim_mesh) = bdDisp(time, x, y, z, j+1);
-	}
+    if ( nsAle.mesh().point(i+1).marker() == 1 ||
+         nsAle.mesh().point(i+1).marker() == 20 ||
+         nsAle.mesh().point(i+1).marker() == 10   ) { // only on lateral points
+      x=nsAle.mesh().point(i+1).x();
+      y=nsAle.mesh().point(i+1).y();
+      z=nsAle.mesh().point(i+1).z();
+      for (UInt j=0; j<3; ++j)
+        analytic_disp(i + j*dim_mesh) = bdDisp(time, x, y, z, j+1);
+    }
       }
 #endif
       cout << "analytic_disp ok!" << endl << flush;

@@ -22,8 +22,8 @@
 
 #include <boost/array.hpp>
 
-#include "meshEntity.hpp"
-#include "basisElSh.hpp"
+#include <life/lifemesh/meshEntity.hpp>
+#include <life/lifemesh/basisElSh.hpp>
 
 namespace LifeV
 {

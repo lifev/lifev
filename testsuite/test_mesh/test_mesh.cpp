@@ -16,12 +16,12 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-#include <GetPot.hpp>
+#include <life/lifecore/GetPot.hpp>
 
-#include "markers.hpp"
-#include "readMesh3D.hpp"
-#include "regionMesh3D.hpp"
-#include "bareItems.hpp"
+#include <life/lifemesh/markers.hpp>
+#include <life/lifefilters/readMesh3D.hpp>
+#include <life/lifemesh/regionMesh3D.hpp>
+#include <life/lifemesh/bareItems.hpp>
 
 
 int main()

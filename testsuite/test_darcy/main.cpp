@@ -18,9 +18,9 @@
 */
 #include <iostream>
 
-#include <GetPot.hpp>
-#include <darcySolverBase.hpp>
-#include <chrono.hpp>
+#include <life/lifecore/GetPot.hpp>
+#include <life/lifesolver/darcySolverBase.hpp>
+#include <life/lifecore/chrono.hpp>
 
 #include "user_diffusion.hpp"
 #include "user_fct.hpp"
@@ -273,7 +273,7 @@ int main(int argc, char** argv)
         std::cout << std::endl << std::endl;
         std::cout <<"usage: darcy              : read the data file 'data' \n";
         std::cout <<"       darcy -f otherdata : read the data file 'otherdata' \n";
-        std::cout <<"	    darcy -h           : help and exit\n";
+        std::cout <<"        darcy -h           : help and exit\n";
         std::cout <<"       darcy -i           : : read the data file, print the read values and exit\n";
         std::cout << std::endl;
         exit(0);

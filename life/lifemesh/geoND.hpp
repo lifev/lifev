@@ -20,8 +20,8 @@
 #ifndef _GEOND_HH_
 #define _GEOND_HH_
 
-#include "geo0D.hpp"
-#include "meshEntity.hpp"
+#include <life/lifemesh/geo0D.hpp>
+#include <life/lifemesh/meshEntity.hpp>
 
 namespace LifeV
 {

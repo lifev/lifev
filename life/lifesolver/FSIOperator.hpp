@@ -22,19 +22,19 @@
 #ifndef _OPERFS
 #define _OPERFS
 
-#include <factory.hpp>
-#include <singleton.hpp>
+#include <life/lifecore/factory.hpp>
+#include <life/lifecore/singleton.hpp>
 
-#include "dofInterface3Dto3D.hpp"
-#include "NavierStokesAleSolverPC.hpp"
-#include "VenantKirchhofSolver.hpp"
-//#include "reducedLinFluid.hpp"
-#include "regionMesh3D_ALE.hpp"
-#include "SolverAztec.hpp"
-#include "generalizedAitken.hpp"
-#include "bcHandler.hpp"
-#include "bcFunction.hpp"
-#include "dof.hpp"
+#include <life/lifefem/dofInterface3Dto3D.hpp>
+#include <life/lifesolver/NavierStokesAleSolverPC.hpp>
+#include <life/lifesolver/VenantKirchhofSolver.hpp>
+//#include <life/lifesolver/reducedLinFluid.hpp>
+#include <life/lifefem/regionMesh3D_ALE.hpp>
+#include <life/lifealg/SolverAztec.hpp>
+#include <life/lifealg/generalizedAitken.hpp>
+#include <life/lifefem/bcHandler.hpp>
+#include <life/lifefem/bcFunction.hpp>
+#include <life/lifefem/dof.hpp>
 
 
 namespace LifeV

@@ -33,10 +33,10 @@
 #include <string>
 #include <iostream>
 #include <algorithm>
-#include "GetPot.hpp"
-#include "life.hpp"
-#include "vecUnknown.hpp"
-#include "bdf.hpp"
+#include <life/lifecore/GetPot.hpp>
+#include <life/lifecore/life.hpp>
+#include <life/lifearray/vecUnknown.hpp>
+#include <life/lifefem/bdf.hpp>
 
 namespace LifeV
 {

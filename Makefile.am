@@ -29,7 +29,8 @@ $(top_srcdir)/configure.in: $(top_srcdir)/subdirs $(top_srcdir)/configure.files 
 	cd $(top_srcdir) && $(MAKE) -f admin/Makefile.common configure.in
 
 
-EXTRA_DIST = configure.in.in configure.in.bot  configure.in.mid subdirs configure.files Mainpage.dox BUGS
+EXTRA_DIST = configure.in.in configure.in.bot  configure.in.mid subdirs configure.files\
+             Mainpage.dox BUGS Makefile.headers
 
 MAINTAINERCLEANFILES = configure.files subdirs
 
@@ -37,6 +38,8 @@ MAINTAINERCLEANFILES = configure.files subdirs
 SUBDIRS = admin doc life testsuite
 
 include $(top_srcdir)/admin/Doxyfile.am
+
+include $(top_srcdir)/Makefile.headers
 
 dist-hook: changelog
 # make sure that we have an up-to-date ChangeLog
@@ -88,3 +91,6 @@ $(top_srcdir)/acinclude.m4:
 	@echo 'm4_include([admin/lifev_check_compilers.m4])'>>acinclude.m4
 	@echo 'm4_include([admin/lifev_default_paths.m4])'>>acinclude.m4
 
+
+Makefile.headers: tools/update-headers
+	$(SHELL) tools/update-headers

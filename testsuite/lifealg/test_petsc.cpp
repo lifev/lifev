@@ -31,7 +31,7 @@
 
 #include <lifeconfig.h>
 
-#include <vecUnknown.hpp>
+#include <life/lifearray/vecUnknown.hpp>
 
 #if defined(HAVE_BOOST_TEST)
 // Boost.Test
@@ -39,13 +39,13 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/bind.hpp>
 
-#include <debug.hpp>
+#include <life/lifecore/debug.hpp>
 
 using boost::unit_test_framework::test_suite;
 
 
 #if defined(HAVE_PETSC_H)
-#include <SolverPETSC.hpp>
+#include <life/lifealg/SolverPETSC.hpp>
 
 void petsc_manager()
 {

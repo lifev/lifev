@@ -24,19 +24,19 @@
 
   \brief This file contains a very basic one dimensional dof class.
          The principle is to mimic the behaviour of the "real"
-	 Dof class of dof.hpp, without creating it.
-	 Thus one can use, with this DofOneD class, the assemblage
-	 function which already exists in assemb.hpp.
-	 To be used for instance with a mesh handler like BasicOneDMesh.
+     Dof class of dof.hpp, without creating it.
+     Thus one can use, with this DofOneD class, the assemblage
+     function which already exists in assemb.hpp.
+     To be used for instance with a mesh handler like BasicOneDMesh.
 
-	 In fact I can't use the "dof::update()" that requires
-	 a format of mesh that I did not build. So I turn around
-	 this difficulty, and create my own simple DofOneD class.
+     In fact I can't use the "dof::update()" that requires
+     a format of mesh that I did not build. So I turn around
+     this difficulty, and create my own simple DofOneD class.
 
-	 \TODO
-	 The next improvement would be to construct in lifeV a mesh
-	 handler that could also take care of 1D meshes,
-	 and then to use the "real" Dof.
+     \TODO
+     The next improvement would be to construct in lifeV a mesh
+     handler that could also take care of 1D meshes,
+     and then to use the "real" Dof.
 
 */
 
@@ -44,7 +44,7 @@
 #define _DOFONED_H_
 
 
-#include "life.hpp"
+#include <life/lifecore/life.hpp>
 
 namespace LifeV
 {

@@ -38,7 +38,7 @@
 #include <boost/function.hpp>
 #include <boost/signal.hpp>
 
-#include <debug.hpp>
+#include <life/lifecore/debug.hpp>
 
 
 namespace LifeV
@@ -208,7 +208,7 @@ public:
 
     int setStrategy( int setstrategy)    
         {
-	  flag_strategy=setstrategy;
+      flag_strategy=setstrategy;
           return flag_strategy; 
         }
 
@@ -311,12 +311,12 @@ NavierStokesWithFlux<NSSolver>::initialize( const Function& u0, const Function& 
             initialize_one_flux(u0,p0,t0,dt);
             break;
         case 2:
-	  if (flag_strategy==0){  
+      if (flag_strategy==0){  
             initialize_two_fluxes(u0,p0,t0,dt);
-	  }
+      }
           if (flag_strategy==1){  
             initialize_two_fluxes_inexact(u0,p0,t0,dt);
-	  }
+      }
             break;
         default:
             std::ostringstream __ex;
@@ -452,10 +452,10 @@ NavierStokesWithFlux<NSSolver>::iterate( const Real& time )
         case 2:
           if (flag_strategy==0){  
             iterate_two_fluxes( time );
-	  }
+      }
           if (flag_strategy==1){  
             iterate_two_fluxes_inexact( time );
-	  }
+      }
             break;
         default:
             std::ostringstream __ex;

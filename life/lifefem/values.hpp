@@ -50,11 +50,11 @@
 /---------------------------------------------------------------------------*/
 #ifndef _ASSEMBLE_MATRIX_HH
 #define _ASSEMBLE_MATRIX_HH
-#include "life.hpp"
-#include "elemMat.hpp"
-#include "elemVec.hpp"
-#include  "sparseArray.hpp"
-#include "dof.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifearray/elemMat.hpp>
+#include <life/lifearray/elemVec.hpp>
+#include  <life/lifearray/sparseArray.hpp>
+#include <life/lifefem/dof.hpp>
 
 #ifndef _LIFEV_HH_
 //more correct version
@@ -64,7 +64,7 @@ typedef std::vector<UInt>::iterator UIIter;
 #endif
 
 #ifndef _VEC_UNKNOWN_HH
-#include "vecUnknown.hpp"
+#include <life/lifearray/vecUnknown.hpp>
 #endif
 
 namespace LifeV

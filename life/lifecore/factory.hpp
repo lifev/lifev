@@ -36,8 +36,8 @@
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 
-#include <debug.hpp>
-#include <typeInfo.hpp>
+#include <life/lifecore/debug.hpp>
+#include <life/lifecore/typeInfo.hpp>
 
 namespace LifeV
 {
@@ -89,7 +89,7 @@ struct factoryDefaultError
   \sa factoryDefaultError, factoryClone, TypeInfo
 
   @author Christophe Prud'homme
-  @version $Id: factory.hpp,v 1.2 2004-10-13 10:17:38 prudhomm Exp $
+  @version $Id: factory.hpp,v 1.3 2005-02-24 14:08:28 prudhomm Exp $
 */
 template
 <

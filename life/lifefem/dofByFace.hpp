@@ -1,10 +1,10 @@
 #ifndef _DOFBYFACE_HH
 #define _DOFBYFACE_HH
 
-#include "life.hpp"
-#include "SimpleVect.hpp"
-#include "localDofPattern.hpp"
-#include "dof.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifearray/SimpleVect.hpp>
+#include <life/lifefem/localDofPattern.hpp>
+#include <life/lifefem/dof.hpp>
 #include <algorithm>
 
 /*!
@@ -105,8 +105,8 @@ void DofByFace::update(Mesh& mesh, DOF& dof){
       iOp = (ID)mesh.faceList(j).ad_second(); //! ID of the opposite element
 
       for(UInt i = 1; i <= numLocalDof; i++){
-	_ltg(i, j - numBFaces) = dof.localToGlobal(iAd, i);
-	_ltg(i + numLocalDof, j - numBFaces) = dof.localToGlobal(iOp, i);
+    _ltg(i, j - numBFaces) = dof.localToGlobal(iAd, i);
+    _ltg(i + numLocalDof, j - numBFaces) = dof.localToGlobal(iOp, i);
 
       }
     }

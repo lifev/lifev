@@ -1,4 +1,4 @@
-#include "currentBdDG.hpp"
+#include <life/lifefem/currentBdDG.hpp>
 
 namespace LifeV
 {
@@ -39,14 +39,14 @@ void CurrentBdDG::_comp_phi_ad_d_phi_face() {
     for(int i = 0; i < nbNodeAd; i++){
       phiAd(i, ig) = refFEDG.phiFace(faceIDAd, i, ig, qr);
       for(int icoor = 0; icoor < nbCoorAd; icoor++){
-	dPhiRefAd(i, icoor, ig) = refFEDG.dPhiFace(faceIDAd, i, icoor, ig, qr);
+    dPhiRefAd(i, icoor, ig) = refFEDG.dPhiFace(faceIDAd, i, icoor, ig, qr);
       } // for icoor
     } // for i
 
     for(int k = 0; k < nbGeoNodeAd; k++){
       phiGeoAd(k, ig) = geoMapAd.phiFace(faceIDAd, k, ig, qr);
       for(int icoor = 0; icoor < nbCoorAd; icoor++){
-	dPhiGeoAd(k, icoor, ig) = geoMapAd.dPhiFace(faceIDAd, k, icoor, ig, qr);
+    dPhiGeoAd(k, icoor, ig) = geoMapAd.dPhiFace(faceIDAd, k, icoor, ig, qr);
       } // for icoor
     } // for k
 
@@ -63,11 +63,11 @@ void CurrentBdDG::_comp_inv_jacobian_ad()
   for(int ig = 0; ig < nbQuadPt; ig++){
     for(int icoor = 0; icoor < nbCoorAd; icoor++){
       for(int jcoor = 0; jcoor < nbCoorAd; jcoor++){
-	fctDer = 0.;
-	for(int j = 0; j < nbGeoNodeAd; j++){
-	  fctDer += pointAd(j, icoor) * dPhiGeoAd(j, jcoor, ig);
-	} // for j
-	jacobianAd(icoor, jcoor, ig) = fctDer;
+    fctDer = 0.;
+    for(int j = 0; j < nbGeoNodeAd; j++){
+      fctDer += pointAd(j, icoor) * dPhiGeoAd(j, jcoor, ig);
+    } // for j
+    jacobianAd(icoor, jcoor, ig) = fctDer;
       } // for jcoor
     } // for icoor
   } // for ig

@@ -26,8 +26,8 @@
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
    \date 2004-11-06
  */
-#include <readMesh3D.hpp>
-#include <importer.hpp>
+#include <life/lifefilters/readMesh3D.hpp>
+#include <life/lifefilters/importer.hpp>
 
 
 namespace LifeV

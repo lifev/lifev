@@ -24,7 +24,7 @@
   \date 07/2002
 
 */
-#include "identifier.hpp"
+#include <life/lifemesh/identifier.hpp>
 
 namespace LifeV
 {

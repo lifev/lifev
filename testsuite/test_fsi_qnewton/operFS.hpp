@@ -16,9 +16,9 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-#include "NavierStokesAleSolverPC.hpp"
-#include "VenantKirchhofSolver.hpp"
-#include "regionMesh3D_ALE.hpp"
+#include <life/lifesolver/NavierStokesAleSolverPC.hpp>
+#include <life/lifesolver/VenantKirchhofSolver.hpp>
+#include <life/lifefem/regionMesh3D_ALE.hpp>
 #ifndef _OPERFS
 #define _OPERFS
 
@@ -47,8 +47,8 @@ namespace LifeV
   public:
     
     operFS(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
-	   VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
-	   BCHandler& BCh_dp, BCHandler& BCh_dz, const GetPot& data_file);
+       VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
+       BCHandler& BCh_dp, BCHandler& BCh_dz, const GetPot& data_file);
     
     //
     void eval(Vector& dispNew, Vector& veloStruct, const Vector& disp,int status);

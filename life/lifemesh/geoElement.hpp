@@ -18,7 +18,7 @@
 */
 /*! file geoElement.h
 \brief Geometric elements
-\version $Revision: 1.9 $ Luca Formaggia
+\version $Revision: 1.10 $ Luca Formaggia
 
   Introduces all the geometric elements
 */
@@ -26,10 +26,10 @@
 #ifndef _GEOELEMENT_HH_
 #define _GEOELEMENT_HH_
 
-#include "life.hpp"
-#include "markers.hpp"
-#include "geoND.hpp"
-#include "bareItems.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifemesh/markers.hpp>
+#include <life/lifemesh/geoND.hpp>
+#include <life/lifemesh/bareItems.hpp>
 
 namespace LifeV
 {

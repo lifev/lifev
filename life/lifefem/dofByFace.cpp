@@ -1,4 +1,4 @@
-#include "dofByFace.hpp"
+#include <life/lifefem/dofByFace.hpp>
 
 namespace LifeV
 {
@@ -22,14 +22,14 @@ void DofByFace::showMe(std::ostream& out, bool verbose) const{
     
     for(UInt i = 0; i < _numIFaces; ++i){
       for(UInt j = 0; j < _numLocalDofByFace; ++j){
-	out.width(12);
-	out << i + 1;
-	out.width(12);
-	out << j + 1;
-	out.width(12);
-	out << localToGlobal(i+1, j+1);
-	out << " # ";
-	if(j % 2 != 0) out << std::endl;
+    out.width(12);
+    out << i + 1;
+    out.width(12);
+    out << j + 1;
+    out.width(12);
+    out << localToGlobal(i+1, j+1);
+    out << " # ";
+    if(j % 2 != 0) out << std::endl;
       } // for j
     } //for i
   } // if verbose

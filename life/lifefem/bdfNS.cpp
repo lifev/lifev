@@ -18,7 +18,7 @@
 */
 #include <algorithm>
 
-#include "bdfNS.hpp"
+#include <life/lifefem/bdfNS.hpp>
 
 namespace LifeV
 {

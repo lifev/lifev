@@ -19,8 +19,8 @@
 #ifndef _GEOMAP_H
 #define _GEOMAP_H
 
-#include "life.hpp"
-#include "refEle.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifefem/refEle.hpp>
 /*!
   \file geoMap.h
   \brief Structure for the geometrical mapping

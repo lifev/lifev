@@ -21,10 +21,10 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "mesh_util_base.hpp"
-#include "geoMap.hpp"
-#include "currentFE.hpp"
-#include "currentBdFE.hpp"
+#include <life/lifemesh/mesh_util_base.hpp>
+#include <life/lifefem/geoMap.hpp>
+#include <life/lifefem/currentFE.hpp>
+#include <life/lifefem/currentBdFE.hpp>
 
 //! \file mesh_util.h
 //! \file mesh_util.h

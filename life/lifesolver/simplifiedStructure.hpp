@@ -30,11 +30,11 @@
 #ifndef HH_SIMPLIFIEDSTRUCTURE_HH_
 #define HH_SIMPLIFIEDSTRUCTURE_HH_
 
-#include "life.hpp"
-#include "markers.hpp"
-#include "vecUnknown.hpp"
-#include "dof.hpp"
-#include "dataSimplifiedStructure.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifemesh/markers.hpp>
+#include <life/lifearray/vecUnknown.hpp>
+#include <life/lifefem/dof.hpp>
+#include <life/lifesolver/dataSimplifiedStructure.hpp>
 
 namespace LifeV
 {

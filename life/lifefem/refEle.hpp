@@ -19,10 +19,10 @@
 #ifndef _REFELE_H_INCLUDE
 #define _REFELE_H_INCLUDE
 
-#include "life.hpp"
-#include "tab.hpp"
-#include "basisElSh.hpp"
-#include "quadRule.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifearray/tab.hpp>
+#include <life/lifemesh/basisElSh.hpp>
+#include <life/lifefem/quadRule.hpp>
 
 /*!
   \file refEle.h

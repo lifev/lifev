@@ -29,7 +29,7 @@
 #ifndef __importer_H
 #define __importer_H 1
 
-#include <regionMesh3D.hpp>
+#include <life/lifemesh/regionMesh3D.hpp>
 
 
 namespace LifeV

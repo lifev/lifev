@@ -33,17 +33,17 @@
 #include <sstream>
 
 
-#include "life.hpp"
-#include "dataConvDiffReact.hpp"
-#include "geoMap.hpp"
-#include "dataAztec.hpp"
-#include "refFE.hpp"
-#include "dof.hpp"
-#include "medit_wrtrs.hpp"
-#include "bcHandler.hpp"
-#include "bdf.hpp"
-#include "postProc.hpp"
-#include "openDX_wrtrs.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifesolver/dataConvDiffReact.hpp>
+#include <life/lifefem/geoMap.hpp>
+#include <life/lifealg/dataAztec.hpp>
+#include <life/lifefem/refFE.hpp>
+#include <life/lifefem/dof.hpp>
+#include <life/lifefilters/medit_wrtrs.hpp>
+#include <life/lifefem/bcHandler.hpp>
+#include <life/lifefem/bdf.hpp>
+#include <life/lifefem/postProc.hpp>
+#include <life/lifefilters/openDX_wrtrs.hpp>
 
 
 namespace LifeV

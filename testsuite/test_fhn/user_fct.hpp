@@ -18,21 +18,21 @@
 */
 #ifndef _USERFUNCTION_H
 #define _USERFUNCTION_H
-#include "tab.hpp"
+#include <life/lifearray/tab.hpp>
 
 namespace LifeV
 {
 
   double zero(const double& t, const double& x, const double& y, const double& z,
-	      const ID& i);
+          const ID& i);
   double one(const double& t, const double& x, const double& y, const double& z,
-	     const ID& i);
+         const ID& i);
   double stim_inlet(const double& t, const double& x, const double& y, const double& z,
-		    const ID& i);
+            const ID& i);
   double stim_coef(const double& t, const double& x, const double& y, const double& z,
-	     const ID& i);
+         const ID& i);
   double stim_g(const double& t, const double& x, const double& y, const double& z,
-	     const ID& i);
+         const ID& i);
   double u_init1(const double& x,const double& y,const double& z);
   double u_init2(const double& x,const double& y,const double& z);
   

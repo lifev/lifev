@@ -39,9 +39,9 @@
 #ifndef _DOF_HH
 #define _DOF_HH
 
-#include "life.hpp"
-#include "SimpleVect.hpp"
-#include "localDofPattern.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifearray/SimpleVect.hpp>
+#include <life/lifefem/localDofPattern.hpp>
 #include <algorithm>
 
 namespace LifeV

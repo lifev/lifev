@@ -28,9 +28,9 @@
  */
 #include <stdio.h>
 
-#include <vecUnknown.hpp>
+#include <life/lifearray/vecUnknown.hpp>
 #include <lifeconfig.h>
-#include <debug.hpp>
+#include <life/lifecore/debug.hpp>
 
 #if defined(HAVE_BOOST_TEST)
 // Boost.Test
@@ -42,7 +42,7 @@ using boost::unit_test_framework::test_suite;
 
 #if defined(HAVE_UMFPACK_H)
 
-#include <SolverUMFPACK.hpp>
+#include <life/lifealg/SolverUMFPACK.hpp>
 
 
 void test_umfpack()

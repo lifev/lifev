@@ -18,7 +18,7 @@
 */
 /*----------------------------------------------------------------------*
 |
-| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.21 2005-02-19 21:46:10 prudhomm Exp $
+| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.22 2005-02-24 14:08:30 prudhomm Exp $
 |
 |
 | #Version  0.1 Experimental   07/7/00. Luca Formaggia & Alessandro Veneziani
@@ -46,13 +46,13 @@
 #endif
 #ifndef _PATTERN_HH
 #define _PATTERN_HH
-#include "life.hpp"
+#include <life/lifecore/life.hpp>
 #ifndef INDEX_T
 #define INDEX_T UInt
 #endif
 
 #ifndef _VEC_UNKNOWN_HH
-#include "vecUnknown.hpp"
+#include <life/lifearray/vecUnknown.hpp>
 #endif
 
 
@@ -61,7 +61,7 @@
 #include<algorithm>
 #include<string>
 //#include<functional>
-#include "bareItems.hpp"
+#include <life/lifemesh/bareItems.hpp>
 
 
 namespace LifeV
@@ -193,7 +193,7 @@ protected:
 
     /*!
       It builds a mixed pattern. It is the standard routine for a
-      pattern associated to two degrees of	 freedom object.
+      pattern associated to two degrees of     freedom object.
       it uses the MixedLocalPattern class for the local patterns.
       See the documentation in the implementation part for more details
     */

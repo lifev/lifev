@@ -1,4 +1,4 @@
-#include "currentFEDG.hpp"
+#include <life/lifefem/currentFEDG.hpp>
 
 namespace LifeV
 {
@@ -40,7 +40,7 @@ CurrentFEDG::CurrentFEDG(const RefFEDG& _refFE, const GeoMap& _geoMap, const Qua
     for(int i = 0; i < nbNode; i++){
       phi(i, ig) = refFE.phi(i, ig, qr);
       for(int icoor = 0; icoor < nbCoor; icoor++){
-	dPhiRef(i, icoor, ig) = refFE.dPhi(i, icoor, ig, qr);
+    dPhiRef(i, icoor, ig) = refFE.dPhi(i, icoor, ig, qr);
         for(int jcoor = 0; jcoor < nbCoor; jcoor++)
           dPhiRef2(i, icoor, jcoor, ig) = refFE.d2Phi(i, icoor, jcoor, ig, qr);
       } // for icoor
@@ -49,7 +49,7 @@ CurrentFEDG::CurrentFEDG(const RefFEDG& _refFE, const GeoMap& _geoMap, const Qua
     for(int k = 0; k < nbGeoNode; k++){
       phiGeo(k, ig) = geoMap.phi(k, ig, qr);
       for(int icoor = 0; icoor < nbCoor; icoor++){
-	dPhiGeo(k, icoor, ig) = geoMap.dPhi(k, icoor, ig, qr);
+    dPhiGeo(k, icoor, ig) = geoMap.dPhi(k, icoor, ig, qr);
       } // for icoor
     } // for k
   }// for ig
@@ -65,7 +65,7 @@ CurrentFEDG::CurrentFEDG(const RefFEDG& _refFE, const GeoMap& _geoMap, const Qua
 //==============================================================================
 
 void CurrentFEDG::coorMap(Real& x,Real& y,Real& z,
-			const Real & xi,const Real & eta, const Real & zeta) const
+            const Real & xi,const Real & eta, const Real & zeta) const
 {
   x = y = z = 0.;
   for(int i = 0; i < nbGeoNode; i++){
@@ -95,7 +95,7 @@ Real CurrentFEDG::diameter() const
     for(j = i + 1; j < nbGeoNode; j++){
       s = 0.;
       for(icoor = 0; icoor < 3; icoor++){
-	s += fabs(point(i, icoor) - point(j, icoor));
+    s += fabs(point(i, icoor) - point(j, icoor));
       }
       if(s > h) h = s;
     }
@@ -109,7 +109,7 @@ void CurrentFEDG::_comp_quad_point_coor()
 {
   for(int ig = 0;ig < nbQuadPt;ig++){
     coorMap(quadPt(ig,0), quadPt(ig,1), quadPt(ig,2),
-	    qr.quadPointCoor(ig,0), qr.quadPointCoor(ig,1), qr.quadPointCoor(ig,2));
+        qr.quadPointCoor(ig,0), qr.quadPointCoor(ig,1), qr.quadPointCoor(ig,2));
   }
 }
 
@@ -124,11 +124,11 @@ void CurrentFEDG::_comp_jacobian()
   for(int ig = 0; ig < nbQuadPt; ig++){
     for(int icoor = 0; icoor < nbCoor; icoor++){
       for(int jcoor = 0; jcoor < nbCoor; jcoor++){
-	fctDer = 0.;
-	for(int j = 0; j < nbGeoNode; j++){
-	  fctDer += point(j, icoor) * dPhiGeo(j, jcoor, ig);
-	}
-	jacobian(icoor, jcoor, ig) = fctDer;
+    fctDer = 0.;
+    for(int j = 0; j < nbGeoNode; j++){
+      fctDer += point(j, icoor) * dPhiGeo(j, jcoor, ig);
+    }
+    jacobian(icoor, jcoor, ig) = fctDer;
       }
     }
   }
@@ -179,13 +179,13 @@ void CurrentFEDG::_comp_inv_jacobian()
     // derivatives of geo map:
     for(int ig=0;ig<nbQuadPt;ig++){
       for(int icoor=0;icoor<nbCoor;icoor++){
-	for(int jcoor=0;jcoor<nbCoor;jcoor++){
-	  fctDer = 0.;
-	  for(int j=0;j<nbGeoNode;j++){
-	    fctDer += point(j,icoor)*dPhiGeo(j,jcoor,ig);
-	  }
-	  jacobian(icoor,jcoor,ig) = fctDer;
-	}
+    for(int jcoor=0;jcoor<nbCoor;jcoor++){
+      fctDer = 0.;
+      for(int j=0;j<nbGeoNode;j++){
+        fctDer += point(j,icoor)*dPhiGeo(j,jcoor,ig);
+      }
+      jacobian(icoor,jcoor,ig) = fctDer;
+    }
       }
     }
 
@@ -256,12 +256,12 @@ void CurrentFEDG::_comp_mass()
 
     for(int i = 0; i < nbNode; i++){
       for(int j = 0; j < nbNode; j++){
-	s = 0.;
+    s = 0.;
 
-	for(int ig = 0; ig < nbQuadPt; ig++){
-	  s += phi(i, ig) * phi(j, ig) * weightDet(ig);
-	}
-	mass(i, j) = s;
+    for(int ig = 0; ig < nbQuadPt; ig++){
+      s += phi(i, ig) * phi(j, ig) * weightDet(ig);
+    }
+    mass(i, j) = s;
       }
     }
 }
@@ -279,12 +279,12 @@ void CurrentFEDG::_comp_inv_mass()
 
     for(int i = 0; i < nbNode; i++){
       for(int j = 0; j < nbNode; j++){
-	s = 0.;
-	for(int ig = 0; ig < nbQuadPt; ig++){
-	  s += phi(i, ig) * phi(j, ig) * weightDet(ig);
-	}
+    s = 0.;
+    for(int ig = 0; ig < nbQuadPt; ig++){
+      s += phi(i, ig) * phi(j, ig) * weightDet(ig);
+    }
 
-	mass(i, j) = s;
+    mass(i, j) = s;
       }
     }
 
@@ -314,9 +314,9 @@ void Leverrier(KNM<P>& A, KNM<P>& invA)
   for(int i = 0; i < n; i++){
     for(int j = 0; j < n; j++){
       if(i == j){
-	B_k_minus_1(i, j) = 1.;
+    B_k_minus_1(i, j) = 1.;
       }else{
-	B_k_minus_1(i, j) = 0.;
+    B_k_minus_1(i, j) = 0.;
       }
     }
   }
@@ -329,10 +329,10 @@ void Leverrier(KNM<P>& A, KNM<P>& invA)
     // B_k = - A * B_k_minus_1 + alpha_k * I
     for(int i = 0; i < n; i++){
       for(int j = 0; j < n; j++){
-	B_k(i, j) = - Temp(i, j);
-	if(i == j){
-	  B_k(i, j) += alpha_k;
-	}
+    B_k(i, j) = - Temp(i, j);
+    if(i == j){
+      B_k(i, j) += alpha_k;
+    }
       }
     }
     B_k_minus_1 = B_k;
@@ -358,9 +358,9 @@ void MatMult(MATRIX& A, MATRIX& B, MATRIX& C){
 
     for(int i = 0; i < A.N(); i++){
       for(int j = 0; j < B.M(); j++){
-	for(int k = 0; k < A.M(); k++){
-	  C(i, j) += A(i, k) * B(k, j);
-	}
+    for(int k = 0; k < A.M(); k++){
+      C(i, j) += A(i, k) * B(k, j);
+    }
       }
     }
 }

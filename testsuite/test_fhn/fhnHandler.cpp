@@ -18,7 +18,7 @@
 */
 #include <iostream>
 #include "fhnHandler.hpp"
-#include "chrono.hpp"
+#include <life/lifecore/chrono.hpp>
 
 namespace LifeV
 {
@@ -69,16 +69,16 @@ FhNHandler::FhNHandler(const GetPot& data_file):
   case 2:
     {
       /*
-	example of mesh : coeur1959.mesh
-	Homogeneous Neumann b.c.
+    example of mesh : coeur1959.mesh
+    Homogeneous Neumann b.c.
       */
       break;
     }
   case 3:
     {
       /*
-	example of mesh : coeur1959.mesh
-	Robin b.c. to take into account the position of an electrode
+    example of mesh : coeur1959.mesh
+    Robin b.c. to take into account the position of an electrode
       */
       nb_bc = 1;
       vector<ID> comp(1);

@@ -19,7 +19,7 @@
 
 #ifndef _USERDIFFUSION_H
 #define _USERDIFFUSION_H
-#include "tab.hpp"
+#include <life/lifearray/tab.hpp>
 
 namespace LifeV
 {

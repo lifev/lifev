@@ -17,7 +17,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 #include <vector>
-#include "elemOper_ext.hpp"
+#include <life/lifefem/elemOper_ext.hpp>
 namespace LifeV
 {
 Real g1(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i) {

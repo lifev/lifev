@@ -1,12 +1,12 @@
 #ifndef _CURRENTBDDG_H
 #define _CURRENTBDDG_H
 
-#include "life.hpp"
-#include "geoMap.hpp"
-#include "geoMapDG.hpp"
-#include "refFEDG.hpp"
-#include "staticBdFE.hpp"
-#include "currentFEDG.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifefem/geoMap.hpp>
+#include <life/lifefem/geoMapDG.hpp>
+#include <life/lifefem/refFEDG.hpp>
+#include <life/lifefem/staticBdFE.hpp>
+#include <life/lifefem/currentFEDG.hpp>
 
 /*!
   \file currentBdDG.h
@@ -116,9 +116,9 @@ class CurrentBdDG:public StaticBdFE{
       _currentId = geoele.id();
       // update the definition of the geo points
       for(int i=0;i<nbGeoNode;i++){
-	point(i,0) = geoele.point(i+1).x();
-	point(i,1) = geoele.point(i+1).y();
-	point(i,2) = geoele.point(i+1).z();
+    point(i,0) = geoele.point(i+1).x();
+    point(i,1) = geoele.point(i+1).y();
+    point(i,2) = geoele.point(i+1).z();
       }
     }
 
@@ -142,9 +142,9 @@ class CurrentBdDG:public StaticBdFE{
       _currentId = geoele.id();
       // update the definition of the geo points
       for(int i=0;i<nbGeoNode;i++){
-	point(i,0) = geoele.point(i+1).x();
-	point(i,1) = geoele.point(i+1).y();
-	point(i,2) = geoele.point(i+1).z();
+    point(i,0) = geoele.point(i+1).x();
+    point(i,1) = geoele.point(i+1).y();
+    point(i,2) = geoele.point(i+1).z();
       }
       // compute the measure
       _comp_meas();
@@ -170,9 +170,9 @@ class CurrentBdDG:public StaticBdFE{
       _currentId = geoele.id();
       // update the definition of the geo points
       for(int i=0;i<nbGeoNode;i++){
-	point(i,0) = geoele.point(i+1).x();
-	point(i,1) = geoele.point(i+1).y();
-	point(i,2) = geoele.point(i+1).z();
+    point(i,0) = geoele.point(i+1).x();
+    point(i,1) = geoele.point(i+1).y();
+    point(i,2) = geoele.point(i+1).z();
       }
       // compute the measure
       _comp_meas();
@@ -200,9 +200,9 @@ class CurrentBdDG:public StaticBdFE{
       _currentId = geoele.id();
       // update the definition of the geo points
       for(int i=0;i<nbGeoNode;i++){
-	point(i,0) = geoele.point(i+1).x();
-	point(i,1) = geoele.point(i+1).y();
-	point(i,2) = geoele.point(i+1).z();
+    point(i,0) = geoele.point(i+1).x();
+    point(i,1) = geoele.point(i+1).y();
+    point(i,2) = geoele.point(i+1).z();
       }
       // compute the measure and the normal
       _comp_meas_normal();
@@ -228,9 +228,9 @@ class CurrentBdDG:public StaticBdFE{
       _currentId = geoele.id();
       // update the definition of the geo points
       for(int i=0;i<nbGeoNode;i++){
-	point(i,0) = geoele.point(i+1).x();
-	point(i,1) = geoele.point(i+1).y();
-	point(i,2) = geoele.point(i+1).z();
+    point(i,0) = geoele.point(i+1).x();
+    point(i,1) = geoele.point(i+1).y();
+    point(i,2) = geoele.point(i+1).z();
       }
       // compute the measure and the normal
       _comp_meas_normal();
@@ -261,9 +261,9 @@ class CurrentBdDG:public StaticBdFE{
 
       // update the definition of the geo points
       for(int i = 0; i < nbGeoNode; i++){
-	point(i,0) = geoele.point(i+1).x();
-	point(i,1) = geoele.point(i+1).y();
-	point(i,2) = geoele.point(i+1).z();
+    point(i,0) = geoele.point(i+1).x();
+    point(i,1) = geoele.point(i+1).y();
+    point(i,2) = geoele.point(i+1).z();
       }
 
       // update the value of adjacent element's basis functions
@@ -277,9 +277,9 @@ class CurrentBdDG:public StaticBdFE{
 
       // update the definition of the geo points of the adjacent element
       for(int i = 0; i < nbGeoNodeAd; i++){
-	pointAd(i, 0) = geoelead.point(i+1).x();
-	pointAd(i, 1) = geoelead.point(i+1).y();
-	pointAd(i, 2) = geoelead.point(i+1).z();
+    pointAd(i, 0) = geoelead.point(i+1).x();
+    pointAd(i, 1) = geoelead.point(i+1).y();
+    pointAd(i, 2) = geoelead.point(i+1).z();
       }
 
       // compute the jacobian on quadrature points
@@ -288,15 +288,15 @@ class CurrentBdDG:public StaticBdFE{
       // product tInvJacAd by dPhiRefAd
       Real x;
       for(int ig = 0; ig < nbQuadPt; ig++){
-	for(int j = 0; j < nbNodeAd; j++){
-	  for(int icoor = 0; icoor < nbCoorAd; icoor++){
-	    x = 0.;
-	    for(int jcoor = 0; jcoor < nbCoorAd; jcoor++){
-	      x += tInvJacAd(icoor, jcoor, ig) * dPhiRefAd(j, jcoor, ig);
-	    } // for jcoor
-	    phiDerAd(j, icoor, ig) = x;
-	  } // for icoor
-	} // for j
+    for(int j = 0; j < nbNodeAd; j++){
+      for(int icoor = 0; icoor < nbCoorAd; icoor++){
+        x = 0.;
+        for(int jcoor = 0; jcoor < nbCoorAd; jcoor++){
+          x += tInvJacAd(icoor, jcoor, ig) * dPhiRefAd(j, jcoor, ig);
+        } // for jcoor
+        phiDerAd(j, icoor, ig) = x;
+      } // for icoor
+    } // for j
       } // for ig
     }
 
@@ -323,9 +323,9 @@ class CurrentBdDG:public StaticBdFE{
 
       // update the definition of the geo points
       for(int i = 0; i < nbGeoNode; i++){
-	point(i,0) = geoele.point(i+1).x();
-	point(i,1) = geoele.point(i+1).y();
-	point(i,2) = geoele.point(i+1).z();
+    point(i,0) = geoele.point(i+1).x();
+    point(i,1) = geoele.point(i+1).y();
+    point(i,2) = geoele.point(i+1).z();
       }
 
       // update the value of adjacent element's basis functions
@@ -339,9 +339,9 @@ class CurrentBdDG:public StaticBdFE{
 
       // update the definition of the geo points of the adjacent element
       for(int i = 0; i < nbGeoNodeAd; i++){
-	pointAd(i, 0) = geoelead.point(i+1).x();
-	pointAd(i, 1) = geoelead.point(i+1).y();
-	pointAd(i, 2) = geoelead.point(i+1).z();
+    pointAd(i, 0) = geoelead.point(i+1).x();
+    pointAd(i, 1) = geoelead.point(i+1).y();
+    pointAd(i, 2) = geoelead.point(i+1).z();
       }
 
       // compute the jacobian on quadrature points
@@ -350,15 +350,15 @@ class CurrentBdDG:public StaticBdFE{
       // product tInvJacAd by dPhiRefAd
       Real x;
       for(int ig = 0; ig < nbQuadPt; ig++){
-	for(int j = 0; j < nbNodeAd; j++){
-	  for(int icoor = 0; icoor < nbCoorAd; icoor++){
-	    x = 0.;
-	    for(int jcoor = 0; jcoor < nbCoorAd; jcoor++){
-	      x += tInvJacAd(icoor, jcoor, ig) * dPhiRefAd(j, jcoor, ig);
-	    } // for jcoor
-	    phiDerAd(j, icoor, ig) = x;
-	  } // for icoor
-	} // for j
+    for(int j = 0; j < nbNodeAd; j++){
+      for(int icoor = 0; icoor < nbCoorAd; icoor++){
+        x = 0.;
+        for(int jcoor = 0; jcoor < nbCoorAd; jcoor++){
+          x += tInvJacAd(icoor, jcoor, ig) * dPhiRefAd(j, jcoor, ig);
+        } // for jcoor
+        phiDerAd(j, icoor, ig) = x;
+      } // for icoor
+    } // for j
       } // for ig
 
       // update massAd and invMassAd arrays

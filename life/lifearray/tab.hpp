@@ -29,9 +29,9 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
-#include <life.hpp>
+#include <life/lifecore/life.hpp>
 
-#include <RNM.hpp>
+#include <life/lifearray/RNM.hpp>
 
 
 namespace LifeV
@@ -276,8 +276,8 @@ inline R Norme_infty( const R3 & A )
 // inline R Theta(R2 P){ return atan2(P.y,P.x);}
 }
 
-//# include "RNM.hpp"
-//# include "RNM.hpp"
+//# include <life/lifearray/RNM.hpp>
+//# include <life/lifearray/RNM.hpp>
 
 namespace LifeV
 {

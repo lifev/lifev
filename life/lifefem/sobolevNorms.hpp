@@ -21,9 +21,9 @@
 
 #include <boost/function.hpp>
 
-#include "life.hpp"
-#include "dof.hpp"
-#include "currentFE.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifefem/dof.hpp>
+#include <life/lifefem/currentFE.hpp>
 
 namespace LifeV
 {

@@ -22,26 +22,12 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-INCLUDES 	= -I$(top_srcdir)/life/lifecore  -I$(top_srcdir)/life/lifearray -I$(top_srcdir)/life/lifemesh
-#INCLUDES 	= -I$(top_srcdir)/life/lifecore -I$(top_srcdir)/life/lifearray 
-
 if HAVE_PETSC
-PETSC_SRCS	= SolverPETSC.cpp
-PETSC_HDRS	= SolverPETSC.hpp
+PETSC_SRCS=SolverPETSC.cpp
 endif
 if HAVE_UMFPACK
-UMFPACK_SRCS	= SolverUMFPACK.cpp
-UMFPACK_HDRS	= SolverUMFPACK.hpp
+UMFPACK_SRCS=SolverUMFPACK.cpp
 endif
-BLASLAPACK      = cblas.h clapack.h
-
-include_HEADERS	= $(BLASLAPACK) algebraic_facto.hpp dataAztec.hpp \
-dataNewton.hpp inexactLU.hpp \
-linesearch_cubic.hpp linesearch_parabolic.hpp newton.hpp \
-picard.hpp saddlePointCG.hpp SolverAztec.hpp \
-generalizedAitken.hpp nonLinRichardson.hpp \
-$(PETSC_HDRS) $(UMFPACK_HDRS)
-
 
 lib_LTLIBRARIES	= liblifealg.la 
 

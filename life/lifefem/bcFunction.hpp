@@ -33,8 +33,8 @@
 
 #include <boost/function.hpp>
 
-#include <singleton.hpp>
-#include <factory.hpp>
+#include <life/lifecore/singleton.hpp>
+#include <life/lifecore/factory.hpp>
 
 namespace LifeV
 {

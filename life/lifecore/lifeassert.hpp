@@ -56,7 +56,7 @@
 */
 
 // access to smart assertion from lifeV.hpp
-#include <SmartAssert.hpp>
+#include <life/lifecore/SmartAssert.hpp>
 
 #define ABORT() std::abort()
 

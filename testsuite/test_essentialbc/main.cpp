@@ -24,7 +24,7 @@
 
                - \Delta u = f in [0,1]^3
 
-	                u = g on the boundary
+                    u = g on the boundary
 
 
    Data:
@@ -36,13 +36,13 @@
 
    ========================================================
 */
-#include <GetPot.hpp>
+#include <life/lifecore/GetPot.hpp>
 
 
 
 #include "main.hpp"
 #include "ud_functions.hpp"
-#include "bcManage.hpp"
+#include <life/lifefem/bcManage.hpp>
 
 
 int main()

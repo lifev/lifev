@@ -26,7 +26,7 @@
 
          du/dn + coef * u = h on {z = 1}
 
-		        u = g on the other faces
+                u = g on the other faces
 
 
    Data:
@@ -41,13 +41,13 @@
    ========================================================
 */
 
-#include <GetPot.hpp>
+#include <life/lifecore/GetPot.hpp>
 
 
 #include "main.hpp"
 #include "ud_functions.hpp"
-#include "bcManage.hpp"
-#include "vtk_wrtrs.hpp"
+#include <life/lifefem/bcManage.hpp>
+#include <life/lifefilters/vtk_wrtrs.hpp>
 
 
 int main()

@@ -22,10 +22,10 @@
   by iterations the problem
 
          \nu(t,x,y,z,u)\partial u/\partial t - \nabla\cdot(k(t,x,y,z,u)u)+
-                      	       \sigma(t,x,y,z,u)u=f(t,x,z,y,t)
+                                 \sigma(t,x,y,z,u)u=f(t,x,z,y,t)
 
   with on boundary
-	 u = guD(t,x,y,z,u)
+     u = guD(t,x,y,z,u)
   or
          \paritial u/\partial n=guN(t,x,y,z,u)
 
@@ -33,26 +33,26 @@
 */
 
 
-#include <GetPot.hpp>
+#include <life/lifecore/GetPot.hpp>
 
-#include "elemMat.hpp"
-#include "elemOper.hpp"
-#include "openDX_wrtrs.hpp"
-#include "vtk_wrtrs.hpp"
+#include <life/lifearray/elemMat.hpp>
+#include <life/lifefem/elemOper.hpp>
+#include <life/lifefilters/openDX_wrtrs.hpp>
+#include <life/lifefilters/vtk_wrtrs.hpp>
 #include <vector>
 #include <algorithm>
-#include "life.hpp"
+#include <life/lifecore/life.hpp>
 
-#include "vtk_wrtrs.hpp"
-#include "readMesh3D.hpp"
-#include "chrono.hpp"
-#include "dof.hpp"
-#include "markers.hpp"
-#include "dataAztec.hpp"
+#include <life/lifefilters/vtk_wrtrs.hpp>
+#include <life/lifefilters/readMesh3D.hpp>
+#include <life/lifecore/chrono.hpp>
+#include <life/lifefem/dof.hpp>
+#include <life/lifemesh/markers.hpp>
+#include <life/lifealg/dataAztec.hpp>
 
 
-#include "timeSolver.hpp"
-#include "parabolicSolver.hpp"
+#include <life/lifesolver/timeSolver.hpp>
+#include <life/lifesolver/parabolicSolver.hpp>
 #include "ud_functions.hpp"
 
 #undef  OPER_TEMPLATE
@@ -140,8 +140,8 @@ main ()
   else
     {
       std::
-	cerr << "wrong mesh type. It can be either MESH++ or INRIA or NETGEN"
-	<< std::endl;
+    cerr << "wrong mesh type. It can be either MESH++ or INRIA or NETGEN"
+    << std::endl;
       return EXIT_FAILURE;
     }
 
@@ -193,7 +193,7 @@ main ()
 
   chrono.start ();
   ParabolicSolver < mesh_type > pSolver (nu, mu, mesh, fe, feBd, dof, BCh,
-					 fct, U0, timeStep, 8);
+                     fct, U0, timeStep, 8);
   //here it solves, note that first iteration is the most heavy, next
   //are enought tuned to converge easily
   pSolver.automaticSolver (0.01, 12);

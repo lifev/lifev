@@ -21,7 +21,7 @@
 #ifndef _STEKLOV_HPP
 #define _STEKLOV_HPP
 
-#include "FSIOperator.hpp"
+#include <life/lifesolver/FSIOperator.hpp>
 
 namespace LifeV
 {

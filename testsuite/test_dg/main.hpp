@@ -25,32 +25,32 @@
 
 #include "ud_functions.hpp"
 
-#include "geoMap.hpp"
+#include <life/lifefem/geoMap.hpp>
 
-#include "refEleDG.hpp"
-#include "refFEDG.hpp"
+#include <life/lifefem/refEleDG.hpp>
+#include <life/lifefem/refFEDG.hpp>
 
-#include "currentFEDG.hpp"
-#include "currentIFDG.hpp"
-#include "currentBFDG.hpp"
+#include <life/lifefem/currentFEDG.hpp>
+#include <life/lifefem/currentIFDG.hpp>
+#include <life/lifefem/currentBFDG.hpp>
 
-#include "regionMesh3D.hpp"
-#include "readMesh3D.hpp"
+#include <life/lifemesh/regionMesh3D.hpp>
+#include <life/lifefilters/readMesh3D.hpp>
 
-#include "dofDG.hpp"
-#include "dofByFace.hpp"
+#include <life/lifefem/dofDG.hpp>
+#include <life/lifefem/dofByFace.hpp>
 //#include "elementAdjacency.hpp"
 
-#include "pattern.hpp"
+#include <life/lifearray/pattern.hpp>
 
-#include "values.hpp" // Contiene la definizione della classe MSRMatr
+#include <life/lifefem/values.hpp> // Contiene la definizione della classe MSRMatr
 
-#include "elemMat.hpp"
-#include "elemVec.hpp"
+#include <life/lifearray/elemMat.hpp>
+#include <life/lifearray/elemVec.hpp>
 
-#include "elemOper_ext.hpp"
+#include <life/lifefem/elemOper_ext.hpp>
 
-#include "assemb.hpp"
+#include <life/lifefem/assemb.hpp>
 
 namespace LifeV
 {
@@ -112,7 +112,7 @@ class AdvecDG{
       Real s = 0.;
 
       for(int icoor = 0; icoor < (int)_fe -> nbCoor; icoor++){
-	s += (- _fe -> phi(j, iq) * _fe -> phiDer(i, icoor, iq) * u(x, y, z, icoor));
+    s += (- _fe -> phi(j, iq) * _fe -> phiDer(i, icoor, iq) * u(x, y, z, icoor));
       }
 
       return s;
@@ -137,7 +137,7 @@ class AdvecIFUW1DG {
       AvgIF avg(_fe);
 
       for(int icoor = 0; icoor < _fe -> nbCoorAd; icoor++){
-	s += u(x, y, z, icoor) * jump(i, icoor, iq, H) * avg(j, iq, K); 
+    s += u(x, y, z, icoor) * jump(i, icoor, iq, H) * avg(j, iq, K); 
       }
 
       return s;
@@ -163,12 +163,12 @@ class AdvecIFUW2DG{
       JumpIF jump(_fe);
 
       for(int icoor = 0; icoor < _fe -> nbCoorAd; icoor++)
-	provv += u(x, y, z, icoor) * _fe -> normal(icoor, iq);
+    provv += u(x, y, z, icoor) * _fe -> normal(icoor, iq);
 
       provv = 0.5 * fabs(provv);
 
       for(int icoor = 0; icoor < _fe -> nbCoorAd; icoor++)
-	s += provv * jump(i, icoor, iq, H) * jump(j, icoor, iq, K);
+    s += provv * jump(i, icoor, iq, H) * jump(j, icoor, iq, K);
 
       return s;
     }
@@ -193,11 +193,11 @@ class AdvecBFUWDG{
       JumpBF jump(_fe);
 
       for(int icoor = 0; icoor < _fe -> nbCoorAd; icoor++)
-	provv += u(x, y, z, icoor) * _fe -> normal(icoor, iq);
+    provv += u(x, y, z, icoor) * _fe -> normal(icoor, iq);
 
       if(provv >= 0){
-	for(int icoor = 0; icoor < _fe -> nbCoorAd; icoor++)
-	  s += provv * jump(i, icoor, iq, H) * jump(j, icoor, iq, K);
+    for(int icoor = 0; icoor < _fe -> nbCoorAd; icoor++)
+      s += provv * jump(i, icoor, iq, H) * jump(j, icoor, iq, K);
       }
 
       return s;
@@ -213,32 +213,32 @@ class AdvecBFUWDG{
 //============================================================================
 
 const GeoMapDG geoLinearTetraDG("Linear mapping on a tri (DG)", TETRA, 4, 3,
-				fct_P1_3D, derfct_P1_3D, der2fct_P1_3D,
-				refcoor_P1_3D,
-				allQuadRuleTetra, TRIANGLE,
-				4, 3,
-				refCoorFaces_P1_DG_3D,
-				allQuadRuleTria, geoLinearTria, &geoLinearTria);
-			   
+                fct_P1_3D, derfct_P1_3D, der2fct_P1_3D,
+                refcoor_P1_3D,
+                allQuadRuleTetra, TRIANGLE,
+                4, 3,
+                refCoorFaces_P1_DG_3D,
+                allQuadRuleTria, geoLinearTria, &geoLinearTria);
+               
 RefEleDG MyRefEleDG("My Ref Ele DG", TETRA, 4, 3, 
-		    fct_P1_3D, derfct_P1_3D, der2fct_P1_3D, refcoor_P1_3D, 
-		    allQuadRuleTetra, TRIANGLE, 4, 3, refCoorFaces_P1_DG_3D, 
-		    allQuadRuleTria, geoLinearTria);
+            fct_P1_3D, derfct_P1_3D, der2fct_P1_3D, refcoor_P1_3D, 
+            allQuadRuleTetra, TRIANGLE, 4, 3, refCoorFaces_P1_DG_3D, 
+            allQuadRuleTria, geoLinearTria);
 
 const LocalDofPattern elPattern_P1_DG_3D(4, 1, 0, 0, 0, STANDARD_PATTERN); 
 
 const LocalDofPattern facePattern_P1_DG_3D(8, 1, 0, 0, 0, STANDARD_PATTERN);
 
 const RefFEDG feDGTetraP1("DG P1 on a tetrahedra", FE_DG_P1_3D, TETRA,
-			  1, 0, 0, 0, 4, 3,
-			  fct_P1_3D, derfct_P1_3D, der2fct_P1_3D, 
-			  refcoor_P1_3D, 
-			  allQuadRuleTetra, elPattern_P1_DG_3D, &feTriaP1,
-			  TRIANGLE,
-			  4, 3,
-			  refCoorFaces_P1_DG_3D,
-			  allQuadRuleTria, facePattern_P1_DG_3D, geoLinearTria);
-			  
+              1, 0, 0, 0, 4, 3,
+              fct_P1_3D, derfct_P1_3D, der2fct_P1_3D, 
+              refcoor_P1_3D, 
+              allQuadRuleTetra, elPattern_P1_DG_3D, &feTriaP1,
+              TRIANGLE,
+              4, 3,
+              refCoorFaces_P1_DG_3D,
+              allQuadRuleTria, facePattern_P1_DG_3D, geoLinearTria);
+              
 //============================================================================
 // Operators' stuff
 //============================================================================

@@ -31,18 +31,18 @@
 #ifndef __MESHMOTION_HH__
 #define __MESHMOTION_HH__
 
-#include <life.hpp>
+#include <life/lifecore/life.hpp>
 
-#include <dataAztec.hpp>
+#include <life/lifealg/dataAztec.hpp>
 
-#include <dof.hpp>
-#include <pattern.hpp>
-#include <elemMat.hpp>
-#include <elemOper.hpp>
-#include <refFE.hpp>
-#include <values.hpp>
-#include <assemb.hpp>
-#include <bcManage.hpp>
+#include <life/lifefem/dof.hpp>
+#include <life/lifearray/pattern.hpp>
+#include <life/lifearray/elemMat.hpp>
+#include <life/lifefem/elemOper.hpp>
+#include <life/lifefem/refFE.hpp>
+#include <life/lifefem/values.hpp>
+#include <life/lifefem/assemb.hpp>
+#include <life/lifefem/bcManage.hpp>
 
 
 namespace LifeV

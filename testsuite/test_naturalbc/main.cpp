@@ -26,7 +26,7 @@
 
                     du/dn = h on {z = 1}
 
-		        u = g on the other faces
+                u = g on the other faces
 
 
    Data:
@@ -42,11 +42,11 @@
 
 #include <cassert>
 
-#include <GetPot.hpp>
+#include <life/lifecore/GetPot.hpp>
 
 #include "main.hpp"
 #include "ud_functions.hpp"
-#include "bcManage.hpp"
+#include <life/lifefem/bcManage.hpp>
 
 
 

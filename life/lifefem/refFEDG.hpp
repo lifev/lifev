@@ -19,10 +19,10 @@
 #ifndef _REFFEDG_H
 #define _REFFEDG_H
 
-#include "life.hpp"
-#include "refEleDG.hpp"
-#include "refFE.hpp"
-#include "localDofPattern.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifefem/refEleDG.hpp>
+#include <life/lifefem/refFE.hpp>
+#include <life/lifefem/localDofPattern.hpp>
 
 /*!
   \file refFEDG.h
@@ -80,16 +80,16 @@ public RefEleDG
     Notice that geoMap property is used to map faces onto the reference element.
   */
   RefFEDG(std::string _name, int _type,
-	  ReferenceShapes _shape,
-	  int _nbDofPerVertex, int _nbDofPerEdge, int _nbDofPerFace, int _nbDofPerVolume, int _nbDof,
-	  int _nbCoor,
-	  const Fct* phi, const Fct* dPhi, const Fct* d2Phi,
-	  const Real* refCoor,
-	  const SetOfQuadRule& sqr, const LocalDofPattern& _elPattern, const RefFE* boundaryFE,
-	  ReferenceShapes _shapeFaces,
-	  int _nbFaces, int _nbGeoNodeFaces,
-	  const Real* refCoorFaces,
-	  const SetOfQuadRule& sqrFaces, const LocalDofPattern& _facePattern, const GeoMap _geoMap);
+      ReferenceShapes _shape,
+      int _nbDofPerVertex, int _nbDofPerEdge, int _nbDofPerFace, int _nbDofPerVolume, int _nbDof,
+      int _nbCoor,
+      const Fct* phi, const Fct* dPhi, const Fct* d2Phi,
+      const Real* refCoor,
+      const SetOfQuadRule& sqr, const LocalDofPattern& _elPattern, const RefFE* boundaryFE,
+      ReferenceShapes _shapeFaces,
+      int _nbFaces, int _nbGeoNodeFaces,
+      const Real* refCoorFaces,
+      const SetOfQuadRule& sqrFaces, const LocalDofPattern& _facePattern, const GeoMap _geoMap);
   ~RefFEDG();
 
   friend std::ostream& operator << (std::ostream& f, const RefFEDG& fe);

@@ -19,9 +19,9 @@
 #ifndef _CURRENTHDIVFE_H
 #define _CURRENTHDIVFE_H
 
-#include "life.hpp"
-#include "geoMap.hpp"
-#include "refHdivFE.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifefem/geoMap.hpp>
+#include <life/lifefem/refHdivFE.hpp>
 /*!
   \file CurrentHdivFE.h
   \brief Structure for the current finite element

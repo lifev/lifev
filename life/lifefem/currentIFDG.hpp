@@ -1,7 +1,7 @@
 #ifndef _CURRENTIFDG_H
 #define _CURRENTIFDG_H
 
-#include "currentBdDG.hpp"
+#include <life/lifefem/currentBdDG.hpp>
 
 namespace LifeV
 {
@@ -84,16 +84,16 @@ class CurrentIFDG: public CurrentBdDG{
 
       // update the definition of the geo points 
       for(int i = 0; i < nbGeoNode; i++){
-	point(i,0) = geoele.point(i+1).x();
-	point(i,1) = geoele.point(i+1).y();
-	point(i,2) = geoele.point(i+1).z();
+    point(i,0) = geoele.point(i+1).x();
+    point(i,1) = geoele.point(i+1).y();
+    point(i,2) = geoele.point(i+1).z();
       }
 
       // update the definition of the geo points of the adjacent element
       for(int i = 0; i < nbGeoNodeAd; i++){
-	pointOp(i, 0) = geoeleop.point(i+1).x();
-	pointOp(i, 1) = geoeleop.point(i+1).y();
-	pointOp(i, 2) = geoeleop.point(i+1).z();
+    pointOp(i, 0) = geoeleop.point(i+1).x();
+    pointOp(i, 1) = geoeleop.point(i+1).y();
+    pointOp(i, 2) = geoeleop.point(i+1).z();
       }
 
       // Compute the corresponding nodes on the opposite element
@@ -108,15 +108,15 @@ class CurrentIFDG: public CurrentBdDG{
       // product tInvJacOp by dPhiRefAd
       Real x;
       for(int ig = 0; ig < nbQuadPt; ig++){
-	for(int j = 0; j < nbNodeAd; j++){
-	  for(int icoor = 0; icoor < nbCoorAd; icoor++){
-	    x = 0.;
-	    for(int jcoor = 0; jcoor < nbCoorAd; jcoor++){
-	      x += tInvJacOp(icoor, jcoor, ig) * dPhiOp(j, jcoor, ig);
-	    } // for jcoor
-	    phiDerOp(j, icoor, ig) = x;
-	  } // for icoor
-	} // for j
+    for(int j = 0; j < nbNodeAd; j++){
+      for(int icoor = 0; icoor < nbCoorAd; icoor++){
+        x = 0.;
+        for(int jcoor = 0; jcoor < nbCoorAd; jcoor++){
+          x += tInvJacOp(icoor, jcoor, ig) * dPhiOp(j, jcoor, ig);
+        } // for jcoor
+        phiDerOp(j, icoor, ig) = x;
+      } // for icoor
+    } // for j
       } // for ig
     }
 
@@ -137,9 +137,9 @@ class CurrentIFDG: public CurrentBdDG{
 
 /*       // update the definition of the geo points  */
 /*       for(int i = 0; i < nbGeoNode; i++){ */
-/* 	point(i,0) = geoele.point(i+1).x(); */
-/* 	point(i,1) = geoele.point(i+1).y(); */
-/* 	point(i,2) = geoele.point(i+1).z(); */
+/*     point(i,0) = geoele.point(i+1).x(); */
+/*     point(i,1) = geoele.point(i+1).y(); */
+/*     point(i,2) = geoele.point(i+1).z(); */
 /*       } */
 
 /*       // compute the measure and the normal */
@@ -150,9 +150,9 @@ class CurrentIFDG: public CurrentBdDG{
 
 /*       // update the definition of the geo points of the adjacent element */
 /*       for(int i = 0; i < nbGeoNodeAd; i++){ */
-/* 	pointOp(i, 0) = geoeleop.point(i+1).x(); */
-/* 	pointOp(i, 1) = geoeleop.point(i+1).y(); */
-/* 	pointOp(i, 2) = geoeleop.point(i+1).z(); */
+/*     pointOp(i, 0) = geoeleop.point(i+1).x(); */
+/*     pointOp(i, 1) = geoeleop.point(i+1).y(); */
+/*     pointOp(i, 2) = geoeleop.point(i+1).z(); */
 /*       } */
 
 /*       // compute the jacobian on quadrature points */
@@ -161,15 +161,15 @@ class CurrentIFDG: public CurrentBdDG{
 /*       // product tInvJacOp by dPhiRefAd */
 /*       Real x; */
 /*       for(int ig = 0; ig < nbQuadPt; ig++){ */
-/* 	for(int j = 0; j < nbNodeAd; j++){ */
-/* 	  for(int icoor = 0; icoor < nbCoorAd; icoor++){ */
-/* 	    x = 0.; */
-/* 	    for(int jcoor = 0; jcoor < nbCoorAd; jcoor++){ */
-/* 	      x += tInvJacOp(icoor, jcoor, ig) * dPhiRefAd(faceIDOp, j, jcoor, ig); */
-/* 	    } // for jcoor */
-/* 	    phiDerOp(j, icoor, ig) = x; */
-/* 	  } // for icoor */
-/* 	} // for j */
+/*     for(int j = 0; j < nbNodeAd; j++){ */
+/*       for(int icoor = 0; icoor < nbCoorAd; icoor++){ */
+/*         x = 0.; */
+/*         for(int jcoor = 0; jcoor < nbCoorAd; jcoor++){ */
+/*           x += tInvJacOp(icoor, jcoor, ig) * dPhiRefAd(faceIDOp, j, jcoor, ig); */
+/*         } // for jcoor */
+/*         phiDerOp(j, icoor, ig) = x; */
+/*       } // for icoor */
+/*     } // for j */
 /*       } // for ig */
 
 /*       // update massOp and invMassOp arrays */

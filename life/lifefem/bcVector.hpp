@@ -38,12 +38,12 @@
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include "life.hpp"
-#include "dofInterfaceBase.hpp"
-#include "vecUnknown.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifefem/dofInterfaceBase.hpp>
+#include <life/lifearray/vecUnknown.hpp>
 
-#include <singleton.hpp>
-#include <factory.hpp>
+#include <life/lifecore/singleton.hpp>
+#include <life/lifecore/factory.hpp>
 
 
 

@@ -18,11 +18,11 @@
 */
 #include <cassert>
 
-#include <life.hpp>
+#include <life/lifecore/life.hpp>
 
 #include <boost/timer.hpp>
 
-#include <FSISolver.hpp>
+#include <life/lifesolver/FSISolver.hpp>
 
 #include "ud_functions.hpp"
 

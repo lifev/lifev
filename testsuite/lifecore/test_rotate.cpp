@@ -25,17 +25,17 @@ int main()
     std::vector<int> a;
     a.resize(10,int(1));
     for (std::vector<int>::iterator i=a.begin()+1; i != a.end(); ++i){
-	*i += *(i-1);
+    *i += *(i-1);
     }
     for (std::vector<int>::iterator i=a.begin(); i != a.end();++i){
-	std::cout<< *i <<", ";
+    std::cout<< *i <<", ";
     }
     std::cout<<std::endl;
     std::cout<<std::endl;
     std::cout<<std::endl;
     std::rotate(a.begin(),a.end()-1,a.end());
     for (std::vector<int>::iterator i=a.begin(); i != a.end();++i){
-	std::cout<< *i <<", ";
+    std::cout<< *i <<", ";
     }
     std::cout<<std::endl;
 }

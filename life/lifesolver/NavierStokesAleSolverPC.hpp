@@ -31,17 +31,17 @@
 #ifndef _NAVIERSTOKESALESOLVERPC_HH
 #define _NAVIERSTOKESALESOLVERPC_HH
 
-#include "NavierStokesAleHandler.hpp"
-#include "elemMat.hpp"
-#include "elemVec.hpp"
-#include "elemOper.hpp"
-#include "values.hpp"
-#include "pattern.hpp"
-#include "assemb.hpp"
-#include "bcManage.hpp"
-#include "algebraic_facto.hpp"
-#include "chrono.hpp"
-#include "dataAztec.hpp"
+#include <life/lifesolver/NavierStokesAleHandler.hpp>
+#include <life/lifearray/elemMat.hpp>
+#include <life/lifearray/elemVec.hpp>
+#include <life/lifefem/elemOper.hpp>
+#include <life/lifefem/values.hpp>
+#include <life/lifearray/pattern.hpp>
+#include <life/lifefem/assemb.hpp>
+#include <life/lifefem/bcManage.hpp>
+#include <life/lifealg/algebraic_facto.hpp>
+#include <life/lifecore/chrono.hpp>
+#include <life/lifealg/dataAztec.hpp>
 
 namespace LifeV
 {

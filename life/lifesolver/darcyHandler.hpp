@@ -22,19 +22,19 @@
 */
 #ifndef _DARCYHANDLER_H_
 #define _DARCYHANDLER_H_
-#include "dataDarcy.hpp"
-#include "dataAztec.hpp"
-#include "readMesh3D.hpp"
-#include "refFE.hpp"
-#include "refHdivFE.hpp"
-#include "refHybridFE.hpp"
-#include "elemOper.hpp"
-#include "bcHandler.hpp"
-#include "dof.hpp"
-#include "pattern.hpp"
-#include "values.hpp"
-#include "assemb.hpp"
-#include "vtk_wrtrs.hpp"
+#include <life/lifesolver/dataDarcy.hpp>
+#include <life/lifealg/dataAztec.hpp>
+#include <life/lifefilters/readMesh3D.hpp>
+#include <life/lifefem/refFE.hpp>
+#include <life/lifefem/refHdivFE.hpp>
+#include <life/lifefem/refHybridFE.hpp>
+#include <life/lifefem/elemOper.hpp>
+#include <life/lifefem/bcHandler.hpp>
+#include <life/lifefem/dof.hpp>
+#include <life/lifearray/pattern.hpp>
+#include <life/lifefem/values.hpp>
+#include <life/lifefem/assemb.hpp>
+#include <life/lifefilters/vtk_wrtrs.hpp>
 
 namespace LifeV
 {

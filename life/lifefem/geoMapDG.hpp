@@ -19,8 +19,8 @@
 #ifndef _GEOMAPDG_H
 #define _GEOMAPDG_H
 
-#include "life.hpp"
-#include "refEleDG.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifefem/refEleDG.hpp>
 
 /*!
   \file geoMapDG.h
@@ -73,16 +73,16 @@ class GeoMapDG:public RefEleDG{
     bdMap : a pointer on the natural associated mapping for the boundary of the element
   */
   GeoMapDG::GeoMapDG(std::string _name,
-		     ReferenceShapes _shape,
-		     int _nbDof,
-		     int _nbCoor,
-		     const Fct* phi, const Fct* dPhi, const Fct* d2Phi,
-		     const Real* refCoor,
-		     const SetOfQuadRule& sqr,
-		     ReferenceShapes _shapeFaces,
-		     int _nbFaces, int _nbGeoNodeFaces,
-		     const Real* refCoorFaces,
-		     const SetOfQuadRule& sqrFaces, const GeoMap& _geoMap, const GeoMap* bdMap);
+             ReferenceShapes _shape,
+             int _nbDof,
+             int _nbCoor,
+             const Fct* phi, const Fct* dPhi, const Fct* d2Phi,
+             const Real* refCoor,
+             const SetOfQuadRule& sqr,
+             ReferenceShapes _shapeFaces,
+             int _nbFaces, int _nbGeoNodeFaces,
+             const Real* refCoorFaces,
+             const SetOfQuadRule& sqrFaces, const GeoMap& _geoMap, const GeoMap* bdMap);
   ~GeoMapDG();
 
   friend std::ostream& operator << (std::ostream& f,const GeoMapDG& geomap);

@@ -114,14 +114,14 @@ diffSrc(U) = sum_{i+1/2 in elements} 1/2 { dS/dU(U_i) + dS/dU(U_i+1) } 1_{i+1/2}
 #include <string>
 
 #include <oneDModelHandler.hpp>
-#include <elemMat.hpp>
-#include <elemVec.hpp>
-#include <elemOper.hpp>
+#include <life/lifearray/elemMat.hpp>
+#include <life/lifearray/elemVec.hpp>
+#include <life/lifefem/elemOper.hpp>
 
-#include <assemb.hpp>
-#include <chrono.hpp>
+#include <life/lifefem/assemb.hpp>
+#include <life/lifecore/chrono.hpp>
 
-#include <tridiagMatrix.hpp>
+#include <life/lifearray/tridiagMatrix.hpp>
 #include <triDiagCholesky.hpp>
 #include <triDiagLU.hpp>
 #include <oneDNonLinModelParam.hpp>

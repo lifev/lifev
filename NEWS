@@ -26,7 +26,8 @@ New in 0.7.0:
   ** Renamed lifeV.hpp to life.hpp and split it
   ** lifeversion.hpp to handle macros and functions to interrogate
      life version
-  ** lifemacros.hpp for assertions macros 
+  ** lifemacros.hpp for deprecation, (no)export macros 
+  ** lifeassert.hpp for assertions macros
 * Added SmartAssert class and LIFEV_ASSERT macro (CP)
 
 [lifefem]
@@ -36,6 +37,10 @@ New in 0.7.0:
 
 [testsuite]
 * Added levelset tests (DADP)
+
+[tools]
+* Added inspect: a tool to check for issues like missing copyright, 
+  missing license, tabs in file, minmax issues, ...
 
 
 New in 0.6.0:
@@ -277,4 +282,4 @@ New in 0.1.0pre3:
 * fixed some bugs and miscompilation in a few places
 
 
- -- Christophe Prud'homme <prudhomm@debian.org>, Sat Feb 19 22:49:20 2005
+ -- Christophe Prud'homme <prudhomm@debian.org>, Tue Feb 22 10:15:24 2005

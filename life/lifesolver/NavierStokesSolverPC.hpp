@@ -34,20 +34,20 @@
 #ifndef _NAVIERSTOKESSOLVERPC_H_
 #define _NAVIERSTOKESSOLVERPC_H_
 
-#include "NavierStokesHandler.hpp"
-#include "elemMat.hpp"
-#include "elemVec.hpp"
-#include "elemOper.hpp"
-#include "values.hpp"
-#include "pattern.hpp"
-#include "assemb.hpp"
-#include "bcManage.hpp"
-#include "algebraic_facto.hpp"
-#include "bcHandler.hpp"
-#include "chrono.hpp"
-#include "dataAztec.hpp"
-#include "bdfNS.hpp"
-#include "openDX_wrtrs.hpp"
+#include <life/lifesolver/NavierStokesHandler.hpp>
+#include <life/lifearray/elemMat.hpp>
+#include <life/lifearray/elemVec.hpp>
+#include <life/lifefem/elemOper.hpp>
+#include <life/lifefem/values.hpp>
+#include <life/lifearray/pattern.hpp>
+#include <life/lifefem/assemb.hpp>
+#include <life/lifefem/bcManage.hpp>
+#include <life/lifealg/algebraic_facto.hpp>
+#include <life/lifefem/bcHandler.hpp>
+#include <life/lifecore/chrono.hpp>
+#include <life/lifealg/dataAztec.hpp>
+#include <life/lifefem/bdfNS.hpp>
+#include <life/lifefilters/openDX_wrtrs.hpp>
 #include <string>
 
 namespace LifeV

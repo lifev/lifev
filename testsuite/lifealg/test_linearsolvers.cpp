@@ -27,15 +27,15 @@
 
 #include <lifeconfig.h>
 
-#include <debug.hpp>
-#include <SolverAztec.hpp>
+#include <life/lifecore/debug.hpp>
+#include <life/lifealg/SolverAztec.hpp>
 
 #if defined(HAVE_PETSC_H)
-#include <SolverPETSC.hpp>
+#include <life/lifealg/SolverPETSC.hpp>
 #endif /* HAVE_PETSC_H */
 
 #if defined(HAVE_UMFPACK_H)
-#include <SolverUMFPACK.hpp>
+#include <life/lifealg/SolverUMFPACK.hpp>
 #endif /* HAVE_UMFPACK_H */
 
 #include <MatrixTest.hpp>

@@ -31,7 +31,7 @@
 
 #include <boost/utility.hpp>
 
-#include <SolverAztec.hpp>
+#include <life/lifealg/SolverAztec.hpp>
 
 class GetPot;
 

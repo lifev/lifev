@@ -32,8 +32,8 @@
 
 #include <cmath>
 #include <vector>
-#include "life.hpp"
-#include "GetPot.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifecore/GetPot.hpp>
 
 namespace LifeV
 {

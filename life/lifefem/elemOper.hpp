@@ -18,14 +18,14 @@
 */
 #ifndef _ELEMOPER_H_INCLUDED
 #define _ELEMOPER_H_INCLUDED
-#include "life.hpp"
-#include "elemMat.hpp"
-#include "elemVec.hpp"
-#include "currentFE.hpp"
-#include "currentBdFE.hpp"
-#include "currentHdivFE.hpp"
-#include "refHybridFE.hpp"
-#include "dof.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifearray/elemMat.hpp>
+#include <life/lifearray/elemVec.hpp>
+#include <life/lifefem/currentFE.hpp>
+#include <life/lifefem/currentBdFE.hpp>
+#include <life/lifefem/currentHdivFE.hpp>
+#include <life/lifefem/refHybridFE.hpp>
+#include <life/lifefem/dof.hpp>
 
 namespace LifeV
 {
@@ -37,17 +37,17 @@ namespace LifeV
 //coef(t,x,y,z,u)
 void mass( Real (*coef)(Real,Real,Real,Real,Real),
            ElemMat& elmat, const CurrentFE& fe,
-	   const Dof& dof,
-	   const ScalUnknown<Vector>& U,Real t);
+       const Dof& dof,
+       const ScalUnknown<Vector>& U,Real t);
 
 void stiff( Real (*coef)(Real,Real,Real,Real,Real),
-	   ElemMat& elmat, const CurrentFE& fe,
-	   const Dof& dof,
-	   const ScalUnknown<Vector>& U,Real t);
+       ElemMat& elmat, const CurrentFE& fe,
+       const Dof& dof,
+       const ScalUnknown<Vector>& U,Real t);
 void source( Real (*fct)(Real,Real,Real,Real,Real),
            ElemVec& elvec, const CurrentFE& fe,
-	   const Dof& dof,
-	   const ScalUnknown<Vector>& U,Real t);
+       const Dof& dof,
+       const ScalUnknown<Vector>& U,Real t);
 
 void mass( Real coef, ElemMat& elmat, const CurrentFE& fe,
            int iblock = 0, int jblock = 0 );

@@ -20,7 +20,7 @@
 #include <vector>
 #include <fstream>
 
-#include "dataAztec.hpp"
+#include <life/lifealg/dataAztec.hpp>
 
 namespace LifeV
 {
@@ -255,25 +255,25 @@ void DataAztec::aztecSolveLinearSyst( MSRMatr<double>& mat,
 
   //  cout << "1) data_org[AZ_name] = " << data_org[AZ_name] << endl;
   AZ_transform(proc_config, &external,
-	       (int *)pattern.giveRaw_bindx(), mat.giveRaw_value(),
-	       update, &update_index,
-	       &extern_index, &data_org, N_update, NULL, NULL, NULL, NULL,
-	       AZ_MSR_MATRIX);
+           (int *)pattern.giveRaw_bindx(), mat.giveRaw_value(),
+           update, &update_index,
+           &extern_index, &data_org, N_update, NULL, NULL, NULL, NULL,
+           AZ_MSR_MATRIX);
   //  cout << "2) data_org[AZ_name] = " << data_org[AZ_name] << endl;
   // data_org[AZ_name] = 1;
   //Here, Aztec options and parameters are provided by the calling function
   AZ_solve(unknown, rhs, options, params, NULL,
-	   (int *)pattern.giveRaw_bindx(), NULL, NULL, NULL,
-	   mat.giveRaw_value(), data_org,status, proc_config);
+       (int *)pattern.giveRaw_bindx(), NULL, NULL, NULL,
+       mat.giveRaw_value(), data_org,status, proc_config);
   //cout << "3) data_org[AZ_name] = " << data_org[AZ_name] << endl;
 }
 
 
 void DataAztec::aztecSolveLinearSyst(MSRMatr<double>& mat,
-				     Real* unknown,Real* rhs,
-				     int unknown_size,MSRPatt& pattern,
-				     int* options,double* params,
-				     int& az_name,bool flag)
+                     Real* unknown,Real* rhs,
+                     int unknown_size,MSRPatt& pattern,
+                     int* options,double* params,
+                     int& az_name,bool flag)
 {
   /*
     if flag=true  : return az_name
@@ -291,9 +291,9 @@ void DataAztec::aztecSolveLinearSyst(MSRMatr<double>& mat,
     } else {
       options[AZ_keep_info] = 1;
       options[AZ_pre_calc] = AZ_reuse;
-    }					     
+    }                         
     aztecSolveLinearSyst(mat,u.giveVec(),rhs.giveVec(),u.size(),
-			 msrPattern,options,params,az_name,flag);  
+             msrPattern,options,params,az_name,flag);  
     flag = false;
     
   */
@@ -309,16 +309,16 @@ void DataAztec::aztecSolveLinearSyst(MSRMatr<double>& mat,
   AZ_read_update(&N_update, &update, proc_config, unknown_size,1,AZ_linear);
 
   AZ_transform(proc_config, &external,
-	       (int *)pattern.giveRaw_bindx(), mat.giveRaw_value(),
-	       update, &update_index,
-	       &extern_index, &data_org, N_update, NULL, NULL, NULL, NULL,
-	       AZ_MSR_MATRIX);
+           (int *)pattern.giveRaw_bindx(), mat.giveRaw_value(),
+           update, &update_index,
+           &extern_index, &data_org, N_update, NULL, NULL, NULL, NULL,
+           AZ_MSR_MATRIX);
   if(flag) az_name = data_org[AZ_name];
   else data_org[AZ_name]=az_name;
   //Here, Aztec options and parameters are provided by the calling function
   AZ_solve(unknown, rhs, options, params, NULL,
-	   (int *)pattern.giveRaw_bindx(), NULL, NULL, NULL,
-	   mat.giveRaw_value(), data_org,status, proc_config);
+       (int *)pattern.giveRaw_bindx(), NULL, NULL, NULL,
+       mat.giveRaw_value(), data_org,status, proc_config);
 }
 
 void DataAztec::dataAztecHelp( std::ostream& c )

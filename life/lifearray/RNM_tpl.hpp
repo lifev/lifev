@@ -19,7 +19,7 @@
 #ifndef  RNM_tpl_
 #define  RNM_tpl_
 
-#include "RNM.hpp"
+#include <life/lifearray/RNM.hpp>
 
 namespace LifeV
 {
@@ -168,17 +168,17 @@ KN_<R>& KN_<R>::map( R ( *f ) ( R ) )
 }
 ///////////////// definition des operateurs d'affectation /////////////////////////
 #define oper =
-#include "RNM_op.hpp"
-#include "RNM_opc.hpp"
+#include <life/lifearray/RNM_op.hpp>
+#include <life/lifearray/RNM_opc.hpp>
 #define oper +=
-#include "RNM_op.hpp"
-#include "RNM_opc.hpp"
+#include <life/lifearray/RNM_op.hpp>
+#include <life/lifearray/RNM_opc.hpp>
 #define oper -=
-#include "RNM_op.hpp"
-#include "RNM_opc.hpp"
+#include <life/lifearray/RNM_op.hpp>
+#include <life/lifearray/RNM_opc.hpp>
 #define oper *=
-#include "RNM_opc.hpp"
+#include <life/lifearray/RNM_opc.hpp>
 #define oper /=
-#include "RNM_opc.hpp"
+#include <life/lifearray/RNM_opc.hpp>
 
 #endif

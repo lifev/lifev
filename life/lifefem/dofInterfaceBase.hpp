@@ -33,8 +33,8 @@
 #include <fstream>
 
 
-#include <life.hpp>
-#include <vecUnknown.hpp>
+#include <life/lifecore/life.hpp>
+#include <life/lifearray/vecUnknown.hpp>
 
 namespace LifeV
 {

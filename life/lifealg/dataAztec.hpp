@@ -30,9 +30,9 @@ extern "C"
 #include "az_aztec.h"
 }
 
-#include <GetPot.hpp>
-#include <sparseArray.hpp>
-#include <dataString.hpp>
+#include <life/lifecore/GetPot.hpp>
+#include <life/lifearray/sparseArray.hpp>
+#include <life/lifecore/dataString.hpp>
 
 namespace LifeV
 {
@@ -107,16 +107,16 @@ public:
   void aztecOptionsFromDataFile(int* option,double* param);
   /*! solve a linear system with the parameters given in the data file */
   void aztecSolveLinearSyst(MSRMatr<double>& mat,Real* unknown,Real* rhs,
-			    int unknown_size,MSRPatt& pattern);
+                int unknown_size,MSRPatt& pattern);
   /*! solve a linear system with the parameters given by the users and the data file */
   void aztecSolveLinearSyst(MSRMatr<double>& mat,
-			    Real* unknown,Real* rhs,int unknown_size,
-			    MSRPatt& pattern,int* options,double* params);
+                Real* unknown,Real* rhs,int unknown_size,
+                MSRPatt& pattern,int* options,double* params);
   /*! solve a linear system with the parameters given by the users and the data file and with the array data_org (for reuse of previous factorisation for example) */
   void aztecSolveLinearSyst(MSRMatr<double>& mat,
-			    Real* unknown,Real* rhs,int unknown_size,
-			    MSRPatt& pattern,int* options,double* params,
-			    int& az_name,bool flag);
+                Real* unknown,Real* rhs,int unknown_size,
+                MSRPatt& pattern,int* options,double* params,
+                int& az_name,bool flag);
   /*! to see a little help */
   void dataAztecHelp(std::ostream& c=std::cout);
   /*! to see the values of the items (including the default ones) */

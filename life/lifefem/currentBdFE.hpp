@@ -19,11 +19,11 @@
 #ifndef _CURRENTBDFE_H
 #define _CURRENTBDFE_H
 
-#include "life.hpp"
-#include "geoMap.hpp"
-#include "refFE.hpp"
-#include "geoMap.hpp"
-#include "staticBdFE.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifefem/geoMap.hpp>
+#include <life/lifefem/refFE.hpp>
+#include <life/lifefem/geoMap.hpp>
+#include <life/lifefem/staticBdFE.hpp>
 /*!
   \file currentBdFE.h
   \brief Structure for a current finite element on the boundary

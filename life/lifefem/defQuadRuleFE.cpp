@@ -16,11 +16,11 @@
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#include "quadRule.hpp"
-#include "refFE.hpp"
-#include "geoMap.hpp"
-#include "refHdivFE.hpp"
-#include "refHybridFE.hpp"
+#include <life/lifefem/quadRule.hpp>
+#include <life/lifefem/refFE.hpp>
+#include <life/lifefem/geoMap.hpp>
+#include <life/lifefem/refHdivFE.hpp>
+#include <life/lifefem/refHybridFE.hpp>
 
 namespace LifeV
 {

@@ -21,9 +21,9 @@
 class pluto{
 public:
     static int p1(int i)
-	{ return i;}
+    { return i;}
     static int p2(int i)
-	{ return i*2;}
+    { return i*2;}
 };
 
 template<class T>
@@ -31,11 +31,11 @@ class prova{
 public:
     typedef int (*Pfun)(int );
     Pfun pippo(int i){
-	if (i ==1 ) {
-	    return T::p1;
-	}else {
-	    return T::p2;
-	}
+    if (i ==1 ) {
+        return T::p1;
+    }else {
+        return T::p2;
+    }
     }
 };
 

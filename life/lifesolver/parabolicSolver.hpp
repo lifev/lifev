@@ -15,11 +15,11 @@ where you enter epsilon in the call to automaticSolver.
 */
 
 
-#include "timeSolver.hpp"
-#include "bcManage.hpp"
-#include "assemb.hpp"
-#include "readMesh3D.hpp"	//if someone moves saveNetgenSolution from here, plz update
-#include <stdio.h>	//for NULL
+#include <life/lifesolver/timeSolver.hpp>
+#include <life/lifefem/bcManage.hpp>
+#include <life/lifefem/assemb.hpp>
+#include <life/lifefilters/readMesh3D.hpp>    //if someone moves saveNetgenSolution from here, plz update
+#include <stdio.h>    //for NULL
 
 
 
@@ -40,7 +40,7 @@ class ParabolicSolver
 {
 public:
     typedef Real (*function_type)(Real t,Real x,Real y,Real z,Real u);
-    typedef ScalUnknown<Vector>	vector_type;
+    typedef ScalUnknown<Vector>    vector_type;
     typedef MSRMatr<Real> matrix_type;
     typedef MESHTYPE mesh_type;
 
@@ -102,8 +102,8 @@ private:
     Real _m_timeCur;
     UInt _m_nSteps;
     UInt _m_nStepCur;
-    vector_type	_m_Uin;
-    TimeSolver	_m_solver;
+    vector_type    _m_Uin;
+    TimeSolver    _m_solver;
 
     MSRPatt _m_msrPatt;
     matrix_type _m_Mt;
@@ -113,7 +113,7 @@ private:
     vector_type _m_bt_1;
     vector_type _m_bt;
 public:
-    std::vector<vector_type> _m_Ut;	//solution
+    std::vector<vector_type> _m_Ut;    //solution
 
 };
 
@@ -186,7 +186,7 @@ ParabolicSolver<MESHTYPE>::ParabolicSolver(function_type _nu,
     _m_solver(_m_dim),
     _m_Mt(),_m_Mt_1(),_m_At_1(),_m_At(),
     _m_bt_1(_m_dim),_m_bt(_m_dim),
-    _m_Ut(_nSteps,_U0)	//ZeroVector(_m_dim)),
+    _m_Ut(_nSteps,_U0)    //ZeroVector(_m_dim)),
 {
     init();
 }
@@ -199,7 +199,7 @@ ParabolicSolver<MESHTYPE>::init()
     _m_dim=_m_dof.numTotalDof();
     _m_Ut[0]=_m_Uin;
     for(UInt i=1;i<_m_nSteps;i++){
-        _m_Ut[i]=ZeroVector(_m_dim);	//do you like more initial value as default?
+        _m_Ut[i]=ZeroVector(_m_dim);    //do you like more initial value as default?
     }
     _m_bt_1=ZeroVector(_m_dim);
     _m_bt=ZeroVector(_m_dim);
@@ -326,14 +326,14 @@ template <typename MESHTYPE>
 void
 ParabolicSolver<MESHTYPE>::assemble()
 {
-    if(_m_nStepCur==0){	//for time0 there is no iteration as U0 is known
+    if(_m_nStepCur==0){    //for time0 there is no iteration as U0 is known
         assembleM();
         assembleAt();
         assembleBt();
         bcManage(_m_mu,_m_At,_m_bt,_m_mesh,_m_dof,_m_BCh,_m_feBd,1.0,_m_timeCur,_m_Uin);
         timeInc();
     }
-    assembleM();	
+    assembleM();    
     assembleAt();
     assembleBt();
     bcManage(_m_mu,_m_At,_m_bt,_m_mesh,_m_dof,_m_BCh,_m_feBd,1.0,_m_timeCur,_m_Uin);

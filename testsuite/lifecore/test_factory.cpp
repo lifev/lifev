@@ -28,8 +28,8 @@
  */
 #include <iostream>
 
-#include <factory.hpp>
-#include <singleton.hpp>
+#include <life/lifecore/factory.hpp>
+#include <life/lifecore/singleton.hpp>
 
 class A
 {

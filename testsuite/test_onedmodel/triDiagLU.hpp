@@ -31,8 +31,8 @@
 #define __TRIDIAGLU_H_
 
 
-#include <life.hpp>
-#include <tab.hpp>
+#include <life/lifecore/life.hpp>
+#include <life/lifearray/tab.hpp>
 #include <clapack.h>
 
 

@@ -16,21 +16,21 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-#include "life.hpp"
-#include "NavierStokesAleSolverPC.hpp"
-#include "VenantKirchhofSolver.hpp"
-#include "nonLinRichardson.hpp"
-#include "steklovPoincareBase.hpp"
-#include "fixedPointBase.hpp"
-#include "exactJacobianBase.hpp"
-#include "dofInterface3Dto3D.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifesolver/NavierStokesAleSolverPC.hpp>
+#include <life/lifesolver/VenantKirchhofSolver.hpp>
+#include <life/lifealg/nonLinRichardson.hpp>
+#include <life/lifesolver/steklovPoincareBase.hpp>
+#include <life/lifesolver/fixedPointBase.hpp>
+#include <life/lifesolver/exactJacobianBase.hpp>
+#include <life/lifefem/dofInterface3Dto3D.hpp>
 #include "ud_functions.hpp"
-#include "regionMesh3D_ALE.hpp"
+#include <life/lifefem/regionMesh3D_ALE.hpp>
 #include "zeroDModelSolver.hpp"
 
 
-#include <ensight7Writer.hpp>
-#include <medit_wrtrs.hpp>
+#include <life/lifefilters/ensight7Writer.hpp>
+#include <life/lifefilters/medit_wrtrs.hpp>
 
 namespace LifeV
 {

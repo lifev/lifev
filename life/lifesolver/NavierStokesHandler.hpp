@@ -34,22 +34,22 @@
 #include <boost/function.hpp>
 
 
-#include "life.hpp"
-#include "refFE.hpp"
-#include "dof.hpp"
-#include "geoMap.hpp"
-#include "dataNavierStokes.hpp"
-#include "dataAztec.hpp"
-#include "medit_wrtrs.hpp"
-#include "gmv_wrtrs.hpp"
-#include "bcHandler.hpp"
-#include "bdfNS.hpp"
-#include "postProc.hpp"
-#include "openDX_wrtrs.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifefem/refFE.hpp>
+#include <life/lifefem/dof.hpp>
+#include <life/lifefem/geoMap.hpp>
+#include <life/lifesolver/dataNavierStokes.hpp>
+#include <life/lifealg/dataAztec.hpp>
+#include <life/lifefilters/medit_wrtrs.hpp>
+#include <life/lifefilters/gmv_wrtrs.hpp>
+#include <life/lifefem/bcHandler.hpp>
+#include <life/lifefem/bdfNS.hpp>
+#include <life/lifefem/postProc.hpp>
+#include <life/lifefilters/openDX_wrtrs.hpp>
 #include <cmath>
 #include <sstream>
 #include <ext/slist>
-#include "SimpleVect.hpp"
+#include <life/lifearray/SimpleVect.hpp>
 #include <utility>
 using std::pair;
 

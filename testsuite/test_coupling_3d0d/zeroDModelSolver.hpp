@@ -34,13 +34,13 @@
 #ifndef _ZERODMODELSOLVER_H_
 #define _ZERODMODELSOLVER_H_
 #include <string>
-#include "elemMat.hpp"
-#include "elemVec.hpp"
-#include "elemOper.hpp"
-#include "RNM.hpp"
+#include <life/lifearray/elemMat.hpp>
+#include <life/lifearray/elemVec.hpp>
+#include <life/lifefem/elemOper.hpp>
+#include <life/lifearray/RNM.hpp>
 
-#include "chrono.hpp"
-#include "GetPot.hpp"
+#include <life/lifecore/chrono.hpp>
+#include <life/lifecore/GetPot.hpp>
 
 #define pi 3.14159265
 

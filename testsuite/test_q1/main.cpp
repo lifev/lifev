@@ -23,20 +23,20 @@
   Solve the problem
 
                - \Delta u = f
-	       u = g on the boundary
-	       with hexa
+           u = g on the boundary
+           with hexa
 
 */
 
-#include <GetPot.hpp>
+#include <life/lifecore/GetPot.hpp>
 
 
 #include "main.hpp"
 #include "ud_functions.hpp"
-#include "bcManage.hpp"
-#include "vtk_wrtrs.hpp"
-#include "elemMat.hpp"
-#include "elemOper.hpp"
+#include <life/lifefem/bcManage.hpp>
+#include <life/lifefilters/vtk_wrtrs.hpp>
+#include <life/lifearray/elemMat.hpp>
+#include <life/lifefem/elemOper.hpp>
 
 #undef OPER_TEMPLATE
 

@@ -29,7 +29,7 @@
 
   \brief This file contains an interface for graceplot.
          Useful for plotting 1D solutions.
-	 See http://graceplot.sourceforge.net/
+     See http://graceplot.sourceforge.net/
 
      When grace is not installed/available, then a dummy class that won't do
      anything is instantiated, a warning is written on the standard error output.
@@ -47,11 +47,11 @@
 #include <grace_np.h>
 #endif /* HAVE_GRACE_NP_H */
 
-#include <GetPot.hpp>
+#include <life/lifecore/GetPot.hpp>
 
 
-#include "RNM.hpp"
-#include "vecUnknown.hpp"
+#include <life/lifearray/RNM.hpp>
+#include <life/lifearray/vecUnknown.hpp>
 #include "basicOneDMesh.hpp"
 
 

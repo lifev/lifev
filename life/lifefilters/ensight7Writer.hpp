@@ -34,7 +34,7 @@
 #include <cstdio>
 #include <string>
 
-#include "life.hpp"
+#include <life/lifecore/life.hpp>
 
 namespace LifeV
 {

@@ -24,10 +24,10 @@
 
            \partial_t u - \nu(t) \Delta u + sigma(t) u = f(t)
 
-	                u = g on the boundary
+                    u = g on the boundary
                         u(t=0) = u0 initial condition
 
-			on a cube
+            on a cube
 \nu, \sigma and \source can be function of time
 (which implies that the matrix needs to be reassembled each time)
 
@@ -37,14 +37,14 @@
 
 #include "main.hpp"
 #include "ud_functions.hpp"
-#include "bcManage.hpp"
-#include "elemMat.hpp"
-#include "elemOper.hpp"
-#include "bdf.hpp"
-#include "openDX_wrtrs.hpp"
-#include "vtk_wrtrs.hpp"
-#include "sobolevNorms.hpp"
-#include "postProc.hpp"
+#include <life/lifefem/bcManage.hpp>
+#include <life/lifearray/elemMat.hpp>
+#include <life/lifefem/elemOper.hpp>
+#include <life/lifefem/bdf.hpp>
+#include <life/lifefilters/openDX_wrtrs.hpp>
+#include <life/lifefilters/vtk_wrtrs.hpp>
+#include <life/lifefem/sobolevNorms.hpp>
+#include <life/lifefem/postProc.hpp>
 
 #define  OPER_TEMPLATE
 #undef P2

@@ -21,9 +21,9 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <GetPot.hpp>
+#include <life/lifecore/GetPot.hpp>
 #include "main.hpp"
-#include "SolverAztec.hpp"
+#include <life/lifealg/SolverAztec.hpp>
 
 int main(){
   using namespace LifeV;
@@ -190,7 +190,7 @@ int main(){
   //============================================================================
 
   assemble_AdvecDG(advecDG, advecIFUW1DG + advecIFUW2DG, advecBFUWDG, mesh,
-  		   BCh, velocity, feDG, ifDG, bfDG, dof, dofByFace, sourceFct, A, M, F);
+             BCh, velocity, feDG, ifDG, bfDG, dof, dofByFace, sourceFct, A, M, F);
 
 
   cout << "** Finished to assemble matrices A and M" << endl;

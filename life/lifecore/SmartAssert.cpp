@@ -33,7 +33,7 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <SmartAssert.hpp>
+#include <life/lifecore/SmartAssert.hpp>
 
 
 void breakIntoDebugger()

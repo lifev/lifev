@@ -18,8 +18,8 @@
 */
 #ifndef QUADRULE_H
 #define QUADRULE_H
-#include "life.hpp"
-#include "basisElSh.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifemesh/basisElSh.hpp>
 
 namespace LifeV
 {

@@ -40,8 +40,8 @@ extern "C"
 #include <boost/utility.hpp>
 #include <boost/numeric/ublas/vector.hpp>
 
-#include <sparseArray.hpp>
-#include <vecUnknown.hpp>
+#include <life/lifearray/sparseArray.hpp>
+#include <life/lifearray/vecUnknown.hpp>
 
 namespace LifeV
 {
@@ -123,7 +123,7 @@ public:
     /*!
 
     \param __X  the solution
-    \param __B	the right hand side
+    \param __B    the right hand side
     \return the number of iterations
     */
     void solve( array_type& __X, array_type const& __B );

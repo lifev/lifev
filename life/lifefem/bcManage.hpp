@@ -46,8 +46,8 @@
 
 #ifndef _BCMANAGE_
 #define _BCMANAGE_
-#include "bcHandler.hpp"
-#include "dof.hpp"
+#include <life/lifefem/bcHandler.hpp>
+#include <life/lifefem/dof.hpp>
 
 
 namespace LifeV
@@ -59,9 +59,9 @@ namespace LifeV
    a class PointSolution would be useful */
 template <typename MatrixType, typename VectorType, typename MeshType, typename DataType>
 void bcManage( Real (*mu)(Real t,Real x, Real y, Real z, Real u),
-		MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& dof,
+        MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& dof,
                 const BCHandler& BCh, CurrentBdFE& bdfem, const DataType coef,
-		const DataType& t, VectorType& U )
+        const DataType& t, VectorType& U )
 {
 
 
@@ -72,22 +72,22 @@ void bcManage( Real (*mu)(Real t,Real x, Real y, Real z, Real u),
         switch ( BCh[ i ].type() )
         {
         case Essential:  // Essential boundary conditions (Dirichlet)
-	    if(BCh[ i ].isUDep())
-	      bcEssentialManageUDep(A, b, mesh, dof, BCh[ i ], bdfem, coef, t,U);
-	    else
+        if(BCh[ i ].isUDep())
+          bcEssentialManageUDep(A, b, mesh, dof, BCh[ i ], bdfem, coef, t,U);
+        else
               bcEssentialManage( A, b, mesh, dof, BCh[ i ], bdfem, coef, t );
             break;
         case Natural:  // Natural boundary conditions (Neumann)
-	    if(BCh[ i ].isUDep())
-	      bcNaturalManageUDep(mu, b, mesh, dof, BCh[ i ], bdfem, t,U);
+        if(BCh[ i ].isUDep())
+          bcNaturalManageUDep(mu, b, mesh, dof, BCh[ i ], bdfem, t,U);
             else
-	      //in this case mu must be a constant, think about (not still implemented)
+          //in this case mu must be a constant, think about (not still implemented)
               bcNaturalManage( b, mesh, dof, BCh[ i ], bdfem, t );
             break;
         case Mixte:  // Mixte boundary conditions (Robin)
-	    if(BCh[ i ].isUDep())
-	      bcMixteManageUDep( A, b, mesh, dof, BCh[ i ], bdfem, t, U);	//not still implemented
-	    else
+        if(BCh[ i ].isUDep())
+          bcMixteManageUDep( A, b, mesh, dof, BCh[ i ], bdfem, t, U);    //not still implemented
+        else
               bcMixteManage( A, b, mesh, dof, BCh[ i ], bdfem, t );
             break;
         default:
@@ -107,7 +107,7 @@ void bcManageMtimeUDep( MatrixType& M, const Dof& dof,
 
         if( BCh[ i ].type()==Essential )
         {
-	  const BCBase& BCb=BCh[i];
+      const BCBase& BCb=BCh[i];
           ID idDof;
 
           // Number of components involved in this boundary condition
@@ -306,8 +306,8 @@ void bcManage( MatrixType1& C, MatrixType2& trD, MatrixType3& D,
 // ===================================================
 template <typename MatrixType, typename VectorType, typename MeshType, typename DataType>
 void bcEssentialManageUDep( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& dof,
-	const BCBase& BCb, const CurrentBdFE& bdfem, const DataType& coef,
-	const DataType& t, const VectorType& U )
+    const BCBase& BCb, const CurrentBdFE& bdfem, const DataType& coef,
+    const DataType& t, const VectorType& U )
 {
 
     ID idDof;
@@ -661,9 +661,9 @@ void bcEssentialManage( MatrixType1& A, MatrixType2& trD, MatrixType3& D,
 // ===================================================
 template <typename VectorType, typename MeshType, typename DataType>
 void bcNaturalManageUDep( Real (*mu)(Real t,Real x, Real y, Real z, Real u),
-			VectorType& b, const MeshType& mesh, const Dof& dof,
-			const BCBase& BCb, CurrentBdFE& bdfem,
-			const DataType& t, const VectorType& U )
+            VectorType& b, const MeshType& mesh, const Dof& dof,
+            const BCBase& BCb, CurrentBdFE& bdfem,
+            const DataType& t, const VectorType& U )
 {
 
     // Number of local Dof (i.e. nodes) in this face
@@ -687,10 +687,10 @@ void bcNaturalManageUDep( Real (*mu)(Real t,Real x, Real y, Real z, Real u),
 
         DataType x, y, z;
 
-	if(nComp!=1)
-	{
-	  ERROR_MSG("For now bcNaturalManageUDep cannot handle non scalar solutions\n");
-	}
+    if(nComp!=1)
+    {
+      ERROR_MSG("For now bcNaturalManageUDep cannot handle non scalar solutions\n");
+    }
 
         // Loop on BC identifiers
         for ( ID i = 1; i <= BCb.list_size(); ++i )
@@ -705,12 +705,12 @@ void bcNaturalManageUDep( Real (*mu)(Real t,Real x, Real y, Real z, Real u),
             // Updating face stuff
             bdfem.updateMeas( mesh.boundaryFace( ibF ) );
 
-	    std::vector<Real> locU(nDofF+1);	//assumes U is a vec of reals, TODO: deal with more comp
-	    Real uPt;			//value in the point
-	    for(ID idofLocU=0;idofLocU<nDofF;idofLocU++)
-	    {
-	        ID idGDofU=pId->bdLocalToGlobal(idofLocU+1)+( BCb.component( 1 ) - 1 ) * totalDof;
-		locU[idofLocU]=U[idGDofU-1];
+        std::vector<Real> locU(nDofF+1);    //assumes U is a vec of reals, TODO: deal with more comp
+        Real uPt;            //value in the point
+        for(ID idofLocU=0;idofLocU<nDofF;idofLocU++)
+        {
+            ID idGDofU=pId->bdLocalToGlobal(idofLocU+1)+( BCb.component( 1 ) - 1 ) * totalDof;
+        locU[idofLocU]=U[idGDofU-1];
             }
 
 
@@ -732,16 +732,16 @@ void bcNaturalManageUDep( Real (*mu)(Real t,Real x, Real y, Real z, Real u),
                         bdfem.coorQuadPt( x, y, z, l ); // quadrature point coordinates
 
                         uPt=0.0;
-			for(ID idofLocU=0;idofLocU<nDofF;idofLocU++)
-			{
+            for(ID idofLocU=0;idofLocU<nDofF;idofLocU++)
+            {
 //    Debug(800)<<"debug* naturalManageUDep entering ulocU\n";
-		          uPt+=locU[idofLocU]*bdfem.phi( int( idofLocU  ),l );
+                  uPt+=locU[idofLocU]*bdfem.phi( int( idofLocU  ),l );
 //    Debug(800)<<"debug* naturalManageUDep exiting ulocU\n";
-			}
+            }
 
                         // Adding right hand side contribution
                         b[ idDof - 1 ] += bdfem.phi( int( idofF - 1 ), l ) * BCb( t, x, y, z, BCb.component( j ),uPt ) *
-					mu(t,x,y,z,uPt)*bdfem.weightMeas( l );
+                    mu(t,x,y,z,uPt)*bdfem.weightMeas( l );
 //    Debug(800)<<"debug* naturalManageUDep done one ulocU\n";
                     }
                 }
@@ -823,41 +823,41 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
                 }
             }
             break;
-	case 2:  // if the BC is a vector of values with components to be integrated
-	  // Loop on BC identifiers
-	  for ( ID i = 1; i <= BCb.list_size(); ++i )
+    case 2:  // if the BC is a vector of values with components to be integrated
+      // Loop on BC identifiers
+      for ( ID i = 1; i <= BCb.list_size(); ++i )
             {
 
-	      // Pointer to the i-th itdentifier in the list
-	      pId = static_cast< const IdentifierNatural* >( BCb( i ) );
+          // Pointer to the i-th itdentifier in the list
+          pId = static_cast< const IdentifierNatural* >( BCb( i ) );
 
-	      // Number of the current boundary face
-	      ibF = pId->id();
+          // Number of the current boundary face
+          ibF = pId->id();
 
-	      // Updating face stuff
-	      bdfem.updateMeasNormalQuadPt( mesh.boundaryFace( ibF ) );
+          // Updating face stuff
+          bdfem.updateMeasNormalQuadPt( mesh.boundaryFace( ibF ) );
 
-	      // Loop on total Dof per Face
-	      for ( ID l = 1; l <= nDofF; ++l )
+          // Loop on total Dof per Face
+          for ( ID l = 1; l <= nDofF; ++l )
                 {
 
-		  gDof = pId->bdLocalToGlobal( l );
+          gDof = pId->bdLocalToGlobal( l );
 
-		  // Loop on space dimensions condition
-		  for ( UInt ic = 0; ic < nDimensions; ++ic )
+          // Loop on space dimensions condition
+          for ( UInt ic = 0; ic < nDimensions; ++ic )
                     {
-		      // Loop on quadrature points
-		      for ( int iq = 0; iq < bdfem.nbQuadPt; ++iq )
+              // Loop on quadrature points
+              for ( int iq = 0; iq < bdfem.nbQuadPt; ++iq )
                         {
-			  // Adding right hand side contribution
-			  b[ gDof - 1 ] += BCb( gDof , ic+1 ) * bdfem.phi( int( l - 1 ), iq ) * bdfem.normal( int( ic ), iq ) * bdfem.weightMeas( iq );
+              // Adding right hand side contribution
+              b[ gDof - 1 ] += BCb( gDof , ic+1 ) * bdfem.phi( int( l - 1 ), iq ) * bdfem.normal( int( ic ), iq ) * bdfem.weightMeas( iq );
                         }
                     }
                 }
             }
-	  break;
+      break;
         default:
-	  ERROR_MSG( "This type of BCVector does not exists" );
+      ERROR_MSG( "This type of BCVector does not exists" );
         }
     }
     /*
@@ -988,7 +988,7 @@ void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Do
     {   //! If BC is given under a vectorial form
 
         //! for the moment, only one coefficient per BCvector.
-        DataType mcoef, mbcb;   
+        DataType mcoef, mbcb;
 
         // Loop on BC identifiers
         for ( ID i = 1; i <= BCb.list_size(); ++i )

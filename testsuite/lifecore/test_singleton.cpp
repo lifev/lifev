@@ -28,7 +28,7 @@
  */
 #include <iostream>
 
-#include <singleton.hpp>
+#include <life/lifecore/singleton.hpp>
 
 class A
 {

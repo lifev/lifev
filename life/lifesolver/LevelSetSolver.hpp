@@ -32,11 +32,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 #define DEBUG_REINI
 
-#include <tab.hpp>
+#include <life/lifearray/tab.hpp>
 
-#include <HyperbolicSolverIP.hpp>
-#include <LevelSetSolverUtils.hpp>
-#include <subelements.hpp>
+#include <life/lifesolver/HyperbolicSolverIP.hpp>
+#include <life/lifesolver/LevelSetSolverUtils.hpp>
+#include <life/lifefem/subelements.hpp>
 
 namespace LifeV {
     /*

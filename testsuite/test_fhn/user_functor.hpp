@@ -18,7 +18,7 @@
 */
 #ifndef _USRFUNCTOR_H
 #define _USRFUNCTOR_H
-#include "tab.hpp"
+#include <life/lifearray/tab.hpp>
 
 #include "fhnHandler.hpp"
 
@@ -32,7 +32,7 @@ class Vol_source
 public:
   Vol_source(const FhNHandler& _fhn);
   double operator()(const double& x, const double& y,
-		    const double& z, const double& t, const ID& i) const;
+            const double& z, const double& t, const ID& i) const;
 };
 }
 #endif

@@ -20,7 +20,7 @@ namespace LifeV
 {
 // velocity imposed on the walls
 Real u_in(const Real& t, const Real& x, const Real& y, const Real& z,
-	const ID& i)
+    const ID& i)
 {
   switch(i){
   case 3:
@@ -35,13 +35,13 @@ Real u_in(const Real& t, const Real& x, const Real& y, const Real& z,
 
 //
 Real u_w(const Real& t, const Real& x, const Real& y, const Real& z,
-	const ID& i)
+    const ID& i)
 {
   return 0.;
 }
 //
 Real u_out(const Real& t, const Real& x, const Real& y, const Real& z,
-	const ID& i)
+    const ID& i)
 {
   return 0.;
 }

@@ -18,8 +18,8 @@
 */
 /*! file regionMesh3D.h
   \brief The mesh classes interfaces
-  \version $Revision: 1.12 $ Luca Formaggia
-  \version $Revision: 1.12 $ Miguel Fernandez
+  \version $Revision: 1.13 $ Luca Formaggia
+  \version $Revision: 1.13 $ Miguel Fernandez
 
   Introduces the RegionMesh3D class
 */
@@ -33,19 +33,19 @@
 # include <stdlib.h>
 #endif
 
-#include "life.hpp"
-#include "geoElement.hpp"
-#include "switch.hpp"
-#include "bareItems.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifemesh/geoElement.hpp>
+#include <life/lifecore/switch.hpp>
+#include <life/lifemesh/bareItems.hpp>
 #include <iomanip>
 #include <fstream>
-#include "vecUnknown.hpp"
-#include "SimpleVect.hpp"
+#include <life/lifearray/vecUnknown.hpp>
+#include <life/lifearray/SimpleVect.hpp>
 
 
 /* stl wrap of vector class template.
    It supports numbering from one */
-#include "basisElSh.hpp"
+#include <life/lifemesh/basisElSh.hpp>
 
 namespace LifeV
 {

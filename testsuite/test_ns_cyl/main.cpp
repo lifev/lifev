@@ -16,11 +16,11 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-#include "life.hpp"
-#include "NavierStokesSolverPC.hpp"
-#include "chrono.hpp"
+#include <life/lifecore/life.hpp>
+#include <life/lifesolver/NavierStokesSolverPC.hpp>
+#include <life/lifecore/chrono.hpp>
 #include "ud_functions.hpp"
-#include "GetPot.hpp"
+#include <life/lifecore/GetPot.hpp>
 
 
 

@@ -19,8 +19,8 @@
 #ifndef _CURRENTBFDG_H
 #define _CURRENTBFDG_H
 
-#include "currentBdDG.hpp"
-#include "bcHandler.hpp"
+#include <life/lifefem/currentBdDG.hpp>
+#include <life/lifefem/bcHandler.hpp>
 
 namespace LifeV
 {

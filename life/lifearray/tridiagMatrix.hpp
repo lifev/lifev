@@ -30,7 +30,7 @@
 
 #include <cmath>
 
-#include "RNM.hpp"
+#include <life/lifearray/RNM.hpp>
 
 
 namespace LifeV

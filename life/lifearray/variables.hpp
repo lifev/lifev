@@ -21,7 +21,7 @@
 #include<vector>
 #include<string>
 #include<typeinfo>
-#include "tab.hpp"
+#include <life/lifearray/tab.hpp>
 
 namespace LifeV
 {

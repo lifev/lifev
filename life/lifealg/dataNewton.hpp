@@ -30,8 +30,8 @@
 #include <string>
 #include <iostream>
 
-#include "GetPot.hpp"
-#include "life.hpp"
+#include <life/lifecore/GetPot.hpp>
+#include <life/lifecore/life.hpp>
 
 namespace LifeV
 {

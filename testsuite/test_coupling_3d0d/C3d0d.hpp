@@ -26,9 +26,9 @@
    \date 2004-11-05
  */
 
-#include "NavierStokesSolverPC.hpp"
+#include <life/lifesolver/NavierStokesSolverPC.hpp>
 #include "zeroDModelSolver.hpp"
-#include "NavierStokesWithFlux.hpp"
+#include <life/lifesolver/NavierStokesWithFlux.hpp>
 
 
 #ifndef _C3D0D
