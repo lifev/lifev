@@ -93,10 +93,7 @@ public:
     BC_Handler const & BC_solid() const {return _BCh;}
 
     //! residual getter
-    Vector& residual()
-    {
-        return _residual_d;
-    };
+    Vector& residual() {return _residual_d;}
 
     //! friends classes related to the newton solver
     template <class Fct, class Vector, class Real, class Norm>
@@ -168,6 +165,9 @@ private:
 
     //! solves the tangent problem for newton iterations
     void solveJac( Vector& step, const Vector& res, double& linear_rel_tol );
+
+    //! solves the tangent problem with custom BC
+    void solveJac( Vector& step, const Vector& res, double& linear_rel_tol, BC_Handler &_BCd );
 
     //! files for lists of iterations and residuals per timestep
     std::ofstream _out_iter;
@@ -272,7 +272,6 @@ VenantKirchhofSolver( const GetPot& data_file, const RefFE& refFE, const QuadRul
 
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
-
 }
 
 template <typename Mesh>
@@ -388,7 +387,12 @@ iterate()
 
     _w = ( 2.0 / this->_dt ) * this->_d - _rhs_w;
 
-    _residual_d = _K * this->_d - _rhs;
+    _residual_d = _C*this->_d - _rhsWithoutBC;
+//    _residual_d = _K * this->_d;// - _rhsWithoutBC;
+
+    
+//     for (UInt ii = 0; ii < _residual_d.size(); ++ii)
+//         std::cout << _residual_d[ii] << std::endl;
 
 }
 
@@ -464,9 +468,11 @@ evalResidual( Vector&res, const Vector& sol, int iter )
 
     if ( !_BCh.bdUpdateDone() )
         _BCh.bdUpdate( _mesh, _feBd, this->_dof );
+
     bc_manage_matrix( _K, _mesh, this->_dof, _BCh, _feBd, 1.0 );
 
     _rhs = _rhsWithoutBC;
+
     bc_manage_vector( _rhs, _mesh, this->_dof, _BCh, _feBd, _time, 1.0 );
 
     res = _K * sol - _rhs;
@@ -563,6 +569,81 @@ solveJac( Vector& step, const Vector& res, double& linear_rel_tol )
         _BCh.bdUpdate( _mesh, _feBd, this->_dof );
 
     bc_manage_matrix( _J, _mesh, this->_dof, _BCh, _feBd, tgv );
+    chrono.stop();
+    std::cout << "done in " << chrono.diff() << "s." << std::endl;
+
+    // AZTEC specifications for the first system
+    int data_org[ AZ_COMM_SIZE ];   // data organisation for C
+    int proc_config[ AZ_PROC_SIZE ]; // Processor information:
+    int options[ AZ_OPTIONS_SIZE ]; // Array used to select solver options.
+    double params[ AZ_PARAMS_SIZE ];   // User selected solver paramters.
+    double status[ AZ_STATUS_SIZE ];   // Information returned from AZ_solve()
+    // indicating success or failure.
+    AZ_set_proc_config( proc_config, AZ_NOT_MPI );
+
+    //AZTEC matrix and preconditioner
+    AZ_MATRIX *J;
+    AZ_PRECOND *prec_J;
+
+    int N_eq = 3 * this->_dim; // number of DOF for each component
+    // data_org assigned "by hands" while no parallel computation is performed
+    data_org[ AZ_N_internal ] = N_eq;
+    data_org[ AZ_N_border ] = 0;
+    data_org[ AZ_N_external ] = 0;
+    data_org[ AZ_N_neigh ] = 0;
+    data_org[ AZ_name ] = 0;
+
+    // create matrix and preconditionner
+    J = AZ_matrix_create( N_eq );
+    prec_J = AZ_precond_create( J, AZ_precondition, NULL );
+
+    AZ_set_MSR( J, ( int* ) _pattK.giveRaw_bindx(), ( double* ) _J.giveRaw_value(), data_org, 0, NULL, AZ_LOCAL );
+
+    _dataAztec.aztecOptionsFromDataFile( options, params );
+
+    options[ AZ_recursion_level ] = _recur;
+
+
+    //keep  factorisation and preconditioner reused in my_matvec
+    // options_i[AZ_keep_info]= 1;
+
+    //params[AZ_tol]       = linear_rel_tol;
+
+    std::cout << "  o-  Solving system...  ";
+    chrono.start();
+    AZ_iterate( &step[ 0 ], _f.giveVec(), options, params, status,
+                proc_config, J, prec_J, NULL );
+    chrono.stop();
+    std::cout << "done in " << chrono.diff() << " s." << std::endl;
+
+    //--options[AZ_recursion_level];
+
+    AZ_matrix_destroy( &J );
+    AZ_precond_destroy( &prec_J );
+
+}
+
+
+template <typename Mesh>
+void VenantKirchhofSolver<Mesh>::
+solveJac(Vector& step, const Vector& res, double& linear_rel_tol, BC_Handler &_BCd )
+{
+
+    Chrono chrono;
+
+
+    _f = res;
+
+    // for BC treatment (done at each time-step)
+    Real tgv = 1.0;
+    std::cout << "  o-  Applying boundary conditions... ";
+    chrono.start();
+
+    // BC manage for the velocity
+    if ( !_BCd.bdUpdateDone() )
+        _BCd.bdUpdate( _mesh, _feBd, this->_dof );
+
+    bc_manage_matrix( _J, _mesh, this->_dof, _BCd, _feBd, tgv );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
