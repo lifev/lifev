@@ -62,7 +62,7 @@ public:
 
     typedef boost::shared_ptr<NSSolver> solver_type;
 
-    typedef boost::function<double ( double, double, double )> flux_type;
+    typedef boost::function< Real ( Real ) > flux_type;
     typedef std::map<std::string, flux_type> flux_map_type;
     typedef typename flux_map_type::iterator flux_map_iterator;
     typedef typename flux_map_type::const_iterator flux_map_const_iterator;
@@ -131,8 +131,8 @@ public:
 
     void setFlux( std::string const& __id, flux_type const& __flux )
         {
-            Debug( 6010 ) << "imposing flux on boundary" << __id << "\n";
-            _M_fluxes[__id]=__flux;
+	  Debug( 6010 ) << "imposing flux on boundary" << __id << "\n";
+         _M_fluxes[__id]=__flux;
         }
 
     //@}
@@ -181,34 +181,113 @@ template<typename NSSolver>
 void
 NavierStokesWithFlux<NSSolver>::solve()
 {
-    // \warning TO BE REMOVED
-    // christian: put your algorithm here the idea is to have one NS
-    // solver to avoid duplicating the matrices and you change the BC
-    // conditions with modifyBC() which you may have to change if it
-    // is not satisfactory, for example:
-    // _M_solver->bcHandler().modifyBC( bcname, bcvec);
-    // the idea is to pass the id of the boundaries where fluxes will be imposed
-    // using the setFlux() memeber function
-
+    // Definition of GMRes alghoritm variables and constants
+    //
+    Real lambda0,Q,Qno,Qn;
+    Real lambda;
+    Real r0,y,z;
+    Real absr0;
+    Real pi=3.14159265358979;
+    int v;
+   
     // Initialization
     //
     Real dt = _M_solver->timestep();
     Real startT = _M_solver->inittime();
     Real T  = _M_solver->endtime();
 
-    _M_solver->initialize(u0,p0,0.0,dt);
+    // Stationary Navier-Stokes (NSo)
+    //
+    _M_solver->initialize(u0o,p0,0.0,dt);
 
-    // simple NS solve that you have to replace with your stuff
+    for (Real time=startT+dt ; time <= startT+dt; time+=dt) {
+      std::cout << "\n";
+      std::cout << "start NSo\n";
+      _M_solver->timeAdvance(f,time);
+      _M_solver->iterate(time);
+    }
+
+    // Store the solutions of NSo
+    //
+    PhysVectUnknown<Vector> u_nso(_M_solver->uDof().numTotalDof());
+    PhysVectUnknown<Vector> p_nso(_M_solver->pDof().numTotalDof());
+     
+    // compute the flux of NSo  
+    u_nso=_M_solver->u();
+    //p_nso=_M_solver->p();
+    
+    // compute the flux of NSo  
+    //  
+    Qno=_M_solver->flux(1); 
+    std::cout << "\n";
+    std::cout << "end NSo\n";
+    
+    // Change the BC for the non stationary NS
+    //
+    UInt dim_lambda = _M_solver->uDof().numTotalDof();
+    Vector vec_lambda(dim_lambda);
+    BCVector bcvec(vec_lambda,dim_lambda,1);
+    _M_solver->bcHandler().modifyBC("InFlow",bcvec);
+
+    // Navier Stokes in temporal loop
+    //
+    _M_solver->initialize(u0,p0,0.0,dt);
+    
+    // Temporal loop
+    //
     for (Real time=startT+dt ; time <= T; time+=dt)
     {
-        _M_solver->timeAdvance(f,time);
-        _M_solver->iterate(time);
+      Q=(_M_fluxes["InFlow"])(time);
+      lambda0=-Q;
 
-        _M_iteration_finish_signal( ( uint )time*100,
+      // Costruction of vector vec_lambda
+      //
+      for (UInt i=0 ; i < dim_lambda; ++i) {
+        vec_lambda[i]=-lambda0;
+      }
+  
+      std::cout << "\n";
+      std::cout << "start NS time" << " " << time << "\n";
+      _M_solver->timeAdvance(f,time);
+      _M_solver->iterate(time);
+
+      _M_iteration_finish_signal( ( uint )time*100,
                                     _M_solver->mesh(),
                                     _M_solver->u(),
                                     _M_solver->p(),
-                                    1 );
+                               1 );
+
+      //compute the flux of NS
+      //
+      Qn=_M_solver->flux(1); 
+
+      // compute the variables to update lambda
+      r0=Qn-Q;
+      if(r0>0){
+        absr0=r0;
+        v=1;
+      }
+      else{
+        absr0=-r0;
+        v=-1;
+      }
+      y=absr0/Qno;
+      z=v*y;
+      lambda=lambda0+z;
+
+      // update the velocity and the pressure
+      _M_solver->u()=_M_solver->u()-z*u_nso;
+      //_M_solver->p()=_M_solver->p()-z*p_nso;
+
+      // Save the final solutions
+      // 
+      _M_solver->postProcess();   
+
+      //compute the flux of NS: the definitive one
+      //
+      Qn=_M_solver->flux(1);
+      std::cout << "imposed flux" << " " << Q << "\n"; 
+      std::cout << "numerical flux" << " " << Qn << "\n";
     }
 }
 }
