@@ -1,0 +1,9 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file for Mesh test
+#-------------------------------------------------
+
+mesh_type  = 'MESH++'
+mesh_dir   = '../data/mesh/mesh++/'  # the directory where the mesh file is
+mesh_file  = 'cube_48.m++'       # mesh file
+mesh_faces = all                    # update all faces elements
