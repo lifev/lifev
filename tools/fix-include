@@ -1,0 +1,55 @@
+#! /bin/sh
+
+findallhpp()
+{
+ find life -name '*.hpp' | xargs -istr basename str
+}
+
+findhpp()
+{
+# find life/$1 -name '*.hpp' | xargs -ithehppheader echo "thehppheader \\ "
+ find life/$1 -name '*.hpp' | xargs -istr basename str
+}
+
+lifecore=`findhpp  "lifecore"`
+lifearray=`findhpp  "lifearray"`
+lifealg=`findhpp  "lifealg"`
+lifemesh=`findhpp  "lifemesh"`
+lifefem=`findhpp  "lifefem"`
+lifesolver=`findhpp  "lifesolver"`
+lifefilters=`findhpp  "lifefilters"`
+
+allhpp=`findallhpp`
+
+fixinclude(){
+echo "includes: $1"
+echo "     dir: $2"
+for i in $1
+do
+ echo "fix include \"$i\""
+ find . -name '*.[ch]pp' | xargs -itheheaderfilename sed -ibackup "s/\"$i\"/<life\/$2\/$i>/g" theheaderfilename
+ echo "fix include <$i>"
+ find . -name '*.[ch]pp' | xargs -itheheaderfilename sed -ibackup "s/<$i>/<life\/$2\/$i>/g" theheaderfilename
+
+ find . -name '*.[ch]pp' | xargs grep "$i" | grep "$i"
+done
+}
+
+fixinclude "$lifecore" "lifecore"
+fixinclude "$lifearray" "lifearray"
+fixinclude "$lifemesh" "lifemesh"
+fixinclude "$lifealg" "lifealg"
+fixinclude "$lifefem" "lifefem"
+fixinclude "$lifesolver" "lifesolver"
+fixinclude "$lifefilters" "lifefilters"
+
+
+
+
+
+exit 0;
+# Local variables:
+# eval: (add-hook 'write-file-hooks 'time-stamp)
+# time-stamp-start: "timestamp='"
+# time-stamp-format: "%:y-%02m-%02d"
+# time-stamp-end: "'"

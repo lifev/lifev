@@ -1,0 +1,56 @@
+#! /bin/sh
+
+findhpp()
+{
+# find life/$1 -name '*.hpp' | xargs -ithehppheader echo "thehppheader \\ "
+ find life/$1 -name '*.hpp' | xargs -ithehppheader echo -n "thehppheader "
+}
+
+cp /dev/null Makefile.headers
+
+lifecore=`findhpp  "lifecore"`
+lifearray=`findhpp  "lifearray"`
+lifealg=`findhpp  "lifealg"`
+lifemesh=`findhpp  "lifemesh"`
+lifefem=`findhpp  "lifefem"`
+lifesolver=`findhpp  "lifesolver"`
+lifefilters=`findhpp  "lifefilters"`
+
+echo -n "creating Makefile.headers..."
+    cat > Makefile.headers <<EOF
+#
+# DO NOT EDIT : generated automatically by update-headers
+#
+
+LIFECORE_HDRS=$lifecore
+
+LIFEARRAY_HDRS=$lifearray
+
+LIFEALG_HDRS=$lifealg
+
+LIFEMESH_HDRS=$lifemesh
+
+LIFEFEM_HDRS=$lifefem
+
+LIFESOLVER_HDRS=$lifesolver
+
+LIFEFILTERS_HDRS=$lifefilters
+
+nobase_include_HEADERS=lifeconfig.h\\
+\$(LIFECORE_HDRS)\\
+\$(LIFEARRAY_HDRS)\\
+\$(LIFEALG_HDRS)\\
+\$(LIFEMESH_HDRS)\\
+\$(LIFEFEM_HDRS)\\
+\$(LIFESOLVER_HDRS)\\
+\$(LIFEFILTERS_HDRS)
+EOF
+echo " done."
+
+
+exit 0;
+# Local variables:
+# eval: (add-hook 'write-file-hooks 'time-stamp)
+# time-stamp-start: "timestamp='"
+# time-stamp-format: "%:y-%02m-%02d"
+# time-stamp-end: "'"
