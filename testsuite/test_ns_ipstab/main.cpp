@@ -32,6 +32,7 @@ P1/P1 or P2/P2 FEM with Interior Penalty (IP) stabilization
 #include <NavierStokesSolverIP.hpp>
 #include <ud_functions.hpp>
 #include <ethierSteinman.hpp>
+// #include <simple.hpp>
 #include <picard.hpp>
 
 #include <iostream>
@@ -46,22 +47,17 @@ int main( int argc, char** argv )
     const char* dataFileName = commandLine.follow( "data", 2, "-f", "--file" );
     GetPot dataFile( dataFileName );
 
-    typedef EthierSteinmanSteady Problem;
+    // Problem definition
+    typedef EthierSteinmanUnsteady Problem;
     Problem::setParamsFromGetPot( dataFile );
 
+    // Boundary conditions
     bool neumann = dataFile( "fluid/miscellaneous/neumann", 0 );
 
     BCHandler::BCHints hint =
         neumann ? BCHandler::HINT_BC_NONE : BCHandler::HINT_BC_ONLY_ESSENTIAL;
     BCHandler bcH( 0, hint );
 
-    NavierStokesSolverIP< RegionMesh3D<LinearTetra> >
-        fluid( dataFile, feTetraP1, quadRuleTetra4pt, quadRuleTria3pt, bcH );
-    //fluid.showMe();
-
-    // Boundary conditions for the fluid velocity
-    //vector<ID> icomp( 1 );
-    //icomp[0] = 1;
     BCFunctionBase uWall( Problem::uexact );
     BCFunctionBase uNeumann( Problem::fNeumann );
     bcH.addBC( "Wall", 1, Essential, Full, uWall, 3 );
@@ -81,6 +77,14 @@ int main( int argc, char** argv )
     //bcH.addBC( "Edges", 20, Essential, Full, bcf, 3 );
 
     //bcH.showMe();
+    // fluid solver
+    const RefFE& refFE = feTetraP1;
+    const QuadRule& qR = quadRuleTetra4pt;
+    const QuadRule& bdQr = quadRuleTria3pt;
+
+    NavierStokesSolverIP< RegionMesh3D<LinearTetra> >
+        fluid( dataFile, refFE, qR, bdQr, bcH );
+    //fluid.showMe();
 
     // linearization of fluid
     if ( dataFile( "fluid/discretization/linearized", 0 ) )
@@ -88,6 +92,7 @@ int main( int argc, char** argv )
         fluid.linearize( Problem::uexact );
     }
 
+    // steady or unsteady solve
     if ( dataFile( "fluid/miscellaneous/steady", 1 ) != 0 )
     {
         // Picard-Aitken iterations: steady version
@@ -154,7 +159,7 @@ int main( int argc, char** argv )
 
         // Temporal loop
 
-        for ( Real time = t0+dt ; time <= tFinal; time+=dt )
+        for ( Real time = t0+dt ; time <= tFinal+dt/2; time+=dt )
         {
             fluid.timeAdvance( Problem::f, time );
             fluid.iterate( time );
@@ -187,9 +192,36 @@ int main( int argc, char** argv )
             resFile.close();
 
             fluid.postProcess();
-        }
 
-    }
+            //// save exact solution and error
+            Vector uExactVec( fluid.u().size() );
+
+            fluid.uInterpolate( Problem::pexact, uExactVec, time );
+            Vector pExactVec( fluid.p().size() );
+            for( UInt i=0; i<pExactVec.size(); ++i )
+            {
+                pExactVec[ i ] = uExactVec[ i ];
+            }
+            fluid.removeMean( pExactVec, 1 );
+
+            fluid.uInterpolate( Problem::uexact, uExactVec, time );
+
+            wr_gmv_ascii( "test_exact_" + indexout.str() + ".inp",
+                          fluid.mesh(),
+                          fluid.uDof().numTotalDof(),
+                          &(*uExactVec.begin()), &(*pExactVec.begin()) );
+
+            uExactVec -= fluid.u();
+            uExactVec *= -1;
+            pExactVec -= fluid.p();
+            pExactVec *= -1;
+            wr_gmv_ascii( "test_error_" + indexout.str() + ".inp",
+                          fluid.mesh(),
+                          fluid.uDof().numTotalDof(),
+                          &(*uExactVec.begin()), &(*pExactVec.begin()) );
+        } // temporal loop
+
+    } // steady or unsteady
 
     return 0;
 
