@@ -62,7 +62,7 @@
 #ifndef OFFSET
 #define OFFSET 0 // for the Fortran vs C numbering
 #endif
-#include <lifeV.hpp>
+#include <life.hpp>
 
 #include <pattern.hpp>
 #include <vecUnknown.hpp>
@@ -80,7 +80,7 @@ class CSRMatr;
 
 // hide zero to the external world
 namespace{
-double zero( double val ) {return 0.0;}
+double zero( double /*val*/ ) {return 0.0;}
 }
 
 }

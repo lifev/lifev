@@ -34,7 +34,7 @@ int nonLinRichardson( VectorType& sol,
                       Real reltol,
                       int& maxit,
                       Real eta_max,
-                      int linesearch,
+                      int /*linesearch*/,
                       std::ofstream& out_res,
                       const Real& time,
                       const Real omega )

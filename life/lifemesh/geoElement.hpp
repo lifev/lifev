@@ -15,18 +15,18 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*! file geoElement.h
 \brief Geometric elements
-\version $Revision: 1.8 $ Luca Formaggia
- 
+\version $Revision: 1.9 $ Luca Formaggia
+
   Introduces all the geometric elements
 */
 
 #ifndef _GEOELEMENT_HH_
 #define _GEOELEMENT_HH_
 
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "markers.hpp"
 #include "geoND.hpp"
 #include "bareItems.hpp"

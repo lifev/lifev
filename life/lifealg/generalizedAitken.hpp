@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #define _GENERALIZEDAITKEN_HPP
 
 #include <lifeconfig.h>
-//#include "lifeV.hpp"
+//#include "life.hpp"
 #include <cstdlib>
 
 namespace LifeV

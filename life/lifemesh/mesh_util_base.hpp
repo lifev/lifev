@@ -22,7 +22,7 @@
 #include <algorithm>
 #include <set>
 
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "regionMesh3D.hpp"
 
 namespace LifeV
@@ -565,7 +565,7 @@ bool checkMarkerSet( const MeshEntityList & list )
 template <typename RegionMesh>
 void
 setBEdgesMarker( RegionMesh & mesh, std::ostream & clog = std::cout,
-                 std::ostream & err = std::cerr, bool verbose = true )
+                 std::ostream & /*err*/ = std::cerr, bool verbose = true )
 {
     typename RegionMesh::EdgeType * fp = 0;
     unsigned int count( 0 );
@@ -607,7 +607,7 @@ setBEdgesMarker( RegionMesh & mesh, std::ostream & clog = std::cout,
 template <typename RegionMesh>
 void
 setBFacesMarker( RegionMesh & mesh, std::ostream & clog = std::cout,
-                 std::ostream & err = std::cerr, bool verbose = true )
+                 std::ostream & /*err*/ = std::cerr, bool verbose = true )
 {
     typename RegionMesh::FaceType * fp = 0;
     unsigned int count( 0 );
@@ -645,7 +645,7 @@ setBFacesMarker( RegionMesh & mesh, std::ostream & clog = std::cout,
 template <typename RegionMesh>
 void
 setBPointsMarker( RegionMesh & mesh, std::ostream & clog = std::cout,
-                  std::ostream& err = std::cerr, bool verbose = false )
+                  std::ostream& /*err*/ = std::cerr, bool verbose = false )
 {
     // First looks at points whose marker has already been set
     std::vector<bool> markset( mesh.storedPoints(), false );
@@ -796,7 +796,7 @@ setBPointsCounters( RegionMesh & mesh )
 template <typename RegionMesh>
 void
 fixBPoints( RegionMesh & mesh, std::ostream & clog = std::cout,
-            std::ostream & err = std::cerr, bool verbose = true )
+            std::ostream & /*err*/ = std::cerr, bool verbose = true )
 {
     ASSERT_PRE( mesh.numPoints() > 0, "The point list should not be empty" );
     ASSERT_PRE( mesh.numBElements() > 0,
@@ -946,7 +946,7 @@ bool fixBoundaryFaces( RegionMesh3D & mesh,
                        Switch & sw,
                        UInt & numFaces,
                        UInt & bfaces_found,
-                       bool fixMarker = false,
+                       bool /*fixMarker */ = false,
                        bool verbose = false,
                        TempFaceContainer * ext_container )
 {
@@ -1061,7 +1061,7 @@ bool fixBoundaryFaces( RegionMesh3D & mesh,
             // Correct extra info
             fit->ad_first() = vol;
             fit->pos_first() = j;
-            if ( fit->isMarkerUnset() )	
+            if ( fit->isMarkerUnset() )
             {
                 inheritWeakerMarker( *fit );
                 if ( verbose )
@@ -1097,7 +1097,7 @@ bool fixBoundaryFaces( RegionMesh3D & mesh,
 
     if ( mesh.numFaces() != numFaces )
     {
-        err << "WARNING: faces counter in mesh should be " << numFaces 
+        err << "WARNING: faces counter in mesh should be " << numFaces
             << std::endl;
         err << "         (bfaces->size()+numInternalFaces)" << std::endl;
         err << "         it is instead " << mesh.numFaces() << std::endl;
@@ -1255,7 +1255,7 @@ bool buildFaces( RegionMesh3D & mesh,
 
     /*
       I may get rid of the bfaces container. Unfortunately now I need a more
-      complex structure, a BareItemsHandel, in order to generate the internal 
+      complex structure, a BareItemsHandel, in order to generate the internal
       faces id. An alternative would be to use the point data to identify
       boundary faces as the ones with all point on the boundary. Yet in this
       function we do not want to use a priori infromation, so that it might
@@ -1591,7 +1591,7 @@ p1top2( RegionMesh & mesh, std::ostream & out = std::cout )
         //#define JFG
         //#ifndef JFG
         // original version: DOES NOT work when the edges are not give in the mesh file
-        if ( pe->isMarkerUnset() )	
+        if ( pe->isMarkerUnset() )
             inheritWeakerMarker( *pe );
         pp->setMarker( pe->marker() );
         //#else

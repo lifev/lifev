@@ -34,7 +34,7 @@
 #include <boost/function.hpp>
 
 
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "refFE.hpp"
 #include "dof.hpp"
 #include "geoMap.hpp"
@@ -810,7 +810,7 @@ NavierStokesHandler<Mesh>::initialize( const std::string& velName,
 /*! Computes the flux on a given part of the boundary
     call of function AreaAndFlux( )
     NOT optimal! recompute the connectivity at each time step.
-    (To do something faster, call once FacesOnFlag and store the 
+    (To do something faster, call once FacesOnFlag and store the
     connectivity... see ex. with FacesOnSection)
 */
 template <typename Mesh>
@@ -1237,7 +1237,8 @@ NavierStokesHandler<Mesh>::MeanPressure( const face_dof_type & __faces_on_sectio
     //! unknows
     Real __pressure = 0.0;
 
-    ID gDof, numTotalDof = _dof_p.numTotalDof();
+    ID gDof;
+    //ID numTotalDof = _dof_p.numTotalDof();
 
     typedef face_dof_type::const_iterator constFaceDofIterator;
 

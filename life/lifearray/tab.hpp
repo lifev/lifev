@@ -29,7 +29,7 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
-#include <lifeV.hpp>
+#include <life.hpp>
 
 #include <RNM.hpp>
 

@@ -761,7 +761,7 @@ void ipstab_bagrad( const Real coef, ElemMat& elmat,
     fe1.coorMap( b1[ 0 ], b1[ 1 ], b1[ 2 ], 0, 0, 0 ); // translation fe1
     fe2.coorMap( b2[ 0 ], b2[ 1 ], b2[ 2 ], 0, 0, 0 ); // translation fe2
     const KNM<Real>& normal = bdfe.normal;
-    
+
     //
     // convection velocity term |\beta . n|^2 / |\beta|
     // on the boundary quadrature points
@@ -784,7 +784,7 @@ void ipstab_bagrad( const Real coef, ElemMat& elmat,
         }
         ba2[ ig ] = sum2 == 0 ? 0 : sum1 * sum1 / pow( sum2, 0.5 );
     }
-    
+
     for ( int ig = 0; ig < bdfe.nbQuadPt; ++ig )
     {  // first derivatives on quadrature points
         bdfe.coorQuadPt( x[ 0 ], x[ 1 ], x[ 2 ], ig );       // quadrature points coordinates
@@ -841,7 +841,7 @@ void ipstab_bagrad( const Real coef, ElemMat& elmat,
             // Loop on coordinates
             for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
                 for ( ig = 0; ig < bdfe.nbQuadPt ; ++ig )
-                    sum += ba2[ ig ] * 
+                    sum += ba2[ ig ] *
                         phid1[ i ][ icoor ][ ig ] *
                         phid2[ j ][ icoor ][ ig ] *
                         bdfe.weightMeas( ig );
@@ -1060,7 +1060,7 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
 
 
     int iloc, jloc;
-    int i, icoor, ig;
+    int i, ig;
     double s, coef_s;
 
     // diagonal 11
@@ -2054,7 +2054,7 @@ void stab_stokes( Real visc, Real coef_stab, ElemMat& elmat,
     }
 }
 
-void advection( Real coef, ElemVec& vel,
+void advection( Real /*coef*/, ElemVec& vel,
                 ElemMat& elmat, const CurrentFE& fe, int iblock, int jblock, int nb )
 {
     ASSERT_PRE( fe.hasFirstDeriv(),

@@ -15,16 +15,16 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*!
   \file dataSimplifiedStructure.h
   \author M.A. Fernandez
   \date 01/2003
   \version 1.0
- 
+
   \brief File containing a class for handling data for reduced
          structural models (algegraic law and independent ring model)
- 
+
 */
 
 #ifndef _DATASIMPLIFIEDSTRUCTURE_H_
@@ -32,16 +32,16 @@
 #include <string>
 #include <iostream>
 #include "GetPot.hpp"
-#include "lifeV.hpp"
+#include "life.hpp"
 
 namespace LifeV
 {
 /*!
   \class DataNavierStokes
- 
+
   Base class which holds usual data for reduced
   structural models (algegraic law and independent ring model)
- 
+
 */
 template <typename Mesh>
 class DataSimplifiedStructure:

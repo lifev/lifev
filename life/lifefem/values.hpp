@@ -50,7 +50,7 @@
 /---------------------------------------------------------------------------*/
 #ifndef _ASSEMBLE_MATRIX_HH
 #define _ASSEMBLE_MATRIX_HH
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "elemMat.hpp"
 #include "elemVec.hpp"
 #include  "sparseArray.hpp"

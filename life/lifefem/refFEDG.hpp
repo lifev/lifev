@@ -19,7 +19,7 @@
 #ifndef _REFFEDG_H
 #define _REFFEDG_H
 
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "refEleDG.hpp"
 #include "refFE.hpp"
 #include "localDofPattern.hpp"
@@ -38,7 +38,7 @@ namespace LifeV
   \date 12/2003
 
   \par Remark
-  This class differs from RefFE in that you must declare two local 
+  This class differs from RefFE in that you must declare two local
   patterns before creating a new finite elements,referring to integrals
   on volumes and on faces respectively.
 
@@ -83,12 +83,12 @@ public RefEleDG
 	  ReferenceShapes _shape,
 	  int _nbDofPerVertex, int _nbDofPerEdge, int _nbDofPerFace, int _nbDofPerVolume, int _nbDof,
 	  int _nbCoor,
-	  const Fct* phi, const Fct* dPhi, const Fct* d2Phi, 
-	  const Real* refCoor, 
+	  const Fct* phi, const Fct* dPhi, const Fct* d2Phi,
+	  const Real* refCoor,
 	  const SetOfQuadRule& sqr, const LocalDofPattern& _elPattern, const RefFE* boundaryFE,
-	  ReferenceShapes _shapeFaces, 
-	  int _nbFaces, int _nbGeoNodeFaces, 
-	  const Real* refCoorFaces, 
+	  ReferenceShapes _shapeFaces,
+	  int _nbFaces, int _nbGeoNodeFaces,
+	  const Real* refCoorFaces,
 	  const SetOfQuadRule& sqrFaces, const LocalDofPattern& _facePattern, const GeoMap _geoMap);
   ~RefFEDG();
 

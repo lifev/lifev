@@ -38,7 +38,7 @@
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "dofInterfaceBase.hpp"
 #include "vecUnknown.hpp"
 
@@ -283,7 +283,7 @@ public:
     /*!
       \param vec data vector holding data
       \param nbTotalDof number of total dof in the vector of data
-      \param dofIn dofInterfaceBase object holding the connections between the interface dofs of the 
+      \param dofIn dofInterfaceBase object holding the connections between the interface dofs of the
       data vector and those of the associated to the boundary conditions
       \param type must be
       -# 0:  boundary integration done (ex. residual of a variational problem)

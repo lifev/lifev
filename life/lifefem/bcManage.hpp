@@ -60,7 +60,7 @@ namespace LifeV
 template <typename MatrixType, typename VectorType, typename MeshType, typename DataType>
 void bcManage( Real (*mu)(Real t,Real x, Real y, Real z, Real u),
 		MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& dof,
-                const BCHandler& BCh, CurrentBdFE& bdfem, const DataType coef, 
+                const BCHandler& BCh, CurrentBdFE& bdfem, const DataType coef,
 		const DataType& t, VectorType& U )
 {
 
@@ -95,7 +95,7 @@ void bcManage( Real (*mu)(Real t,Real x, Real y, Real z, Real u),
         }
     }
 }
-/* needed for ParabolicSolver due to the fact that 
+/* needed for ParabolicSolver due to the fact that
    essential bc are handled doing a trick on the matrix */
 template <typename MatrixType, typename DataType>
 void bcManageMtimeUDep( MatrixType& M, const Dof& dof,
@@ -140,7 +140,7 @@ void bcManageMtimeUDep( MatrixType& M, const Dof& dof,
                 mr *= 0;
                 M( idDof-1, idDof-1 ) = coef;
 #else
-                // Modifying matrix 
+                // Modifying matrix
                 M.diagonalize_row( idDof - 1, coef);
 #endif
               }
@@ -149,7 +149,7 @@ void bcManageMtimeUDep( MatrixType& M, const Dof& dof,
         }
     }
 }
-		
+
 
 
 template <typename MatrixType, typename VectorType, typename MeshType, typename DataType>
@@ -305,8 +305,8 @@ void bcManage( MatrixType1& C, MatrixType2& trD, MatrixType3& D,
 // Essential BC
 // ===================================================
 template <typename MatrixType, typename VectorType, typename MeshType, typename DataType>
-void bcEssentialManageUDep( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& dof, 
-	const BCBase& BCb, const CurrentBdFE& bdfem, const DataType& coef, 
+void bcEssentialManageUDep( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& dof,
+	const BCBase& BCb, const CurrentBdFE& bdfem, const DataType& coef,
 	const DataType& t, const VectorType& U )
 {
 
@@ -362,8 +362,8 @@ void bcEssentialManageUDep( MatrixType& A, VectorType& b, const MeshType& mesh, 
     }
 }
 template <typename MatrixType, typename VectorType, typename MeshType, typename DataType>
-void bcEssentialManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& dof, const BCBase& BCb,
-                        const CurrentBdFE& bdfem, const DataType& coef, const DataType& t )
+void bcEssentialManage( MatrixType& A, VectorType& b, const MeshType& /*mesh*/, const Dof& dof, const BCBase& BCb,
+                        const CurrentBdFE& /*bdfem*/, const DataType& coef, const DataType& t )
 {
 
     ID idDof;
@@ -532,10 +532,15 @@ void bcEssentialManageVector( VectorType& b, const Dof& dof, const BCBase& BCb, 
 //! Alain, 07/08/02
 template <typename MatrixType1, typename MatrixType2, typename VectorType,
 typename MeshType, typename DataType>
-void bcEssentialManage( MatrixType1& A, MatrixType2& trD, VectorType& b,
-                        const MeshType& mesh, const Dof& dof,
-                        const BCBase& BCb, const CurrentBdFE& bdfem,
-                        const DataType& coef, const DataType& t )
+void bcEssentialManage( MatrixType1& A,
+                        MatrixType2& trD,
+                        VectorType& b,
+                        const MeshType& /*mesh*/,
+                        const Dof& dof,
+                        const BCBase& BCb,
+                        const CurrentBdFE& /*bdfem*/,
+                        const DataType& coef,
+                        const DataType& t )
 {
     ID idDof;
     DataType x, y, z;
@@ -656,8 +661,8 @@ void bcEssentialManage( MatrixType1& A, MatrixType2& trD, MatrixType3& D,
 // ===================================================
 template <typename VectorType, typename MeshType, typename DataType>
 void bcNaturalManageUDep( Real (*mu)(Real t,Real x, Real y, Real z, Real u),
-			VectorType& b, const MeshType& mesh, const Dof& dof, 
-			const BCBase& BCb, CurrentBdFE& bdfem, 
+			VectorType& b, const MeshType& mesh, const Dof& dof,
+			const BCBase& BCb, CurrentBdFE& bdfem,
 			const DataType& t, const VectorType& U )
 {
 
@@ -707,7 +712,7 @@ void bcNaturalManageUDep( Real (*mu)(Real t,Real x, Real y, Real z, Real u),
 	        ID idGDofU=pId->bdLocalToGlobal(idofLocU+1)+( BCb.component( 1 ) - 1 ) * totalDof;
 		locU[idofLocU]=U[idGDofU-1];
             }
-                
+
 
             // Loop on total Dof per Face
             for ( ID idofF = 1; idofF <= nDofF; ++idofF )
@@ -822,22 +827,22 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
 	  // Loop on BC identifiers
 	  for ( ID i = 1; i <= BCb.list_size(); ++i )
             {
-	      
+
 	      // Pointer to the i-th itdentifier in the list
 	      pId = static_cast< const IdentifierNatural* >( BCb( i ) );
-	      
+
 	      // Number of the current boundary face
 	      ibF = pId->id();
-	      
+
 	      // Updating face stuff
 	      bdfem.updateMeasNormalQuadPt( mesh.boundaryFace( ibF ) );
-	      
+
 	      // Loop on total Dof per Face
 	      for ( ID l = 1; l <= nDofF; ++l )
                 {
 
 		  gDof = pId->bdLocalToGlobal( l );
-		  
+
 		  // Loop on space dimensions condition
 		  for ( UInt ic = 0; ic < nDimensions; ++ic )
                     {

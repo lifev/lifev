@@ -36,7 +36,7 @@
 #include <string>
 #include <iostream>
 #include "GetPot.hpp"
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "vecUnknown.hpp"
 
 namespace LifeV

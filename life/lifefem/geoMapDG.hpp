@@ -19,7 +19,7 @@
 #ifndef _GEOMAPDG_H
 #define _GEOMAPDG_H
 
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "refEleDG.hpp"
 
 /*!
@@ -35,7 +35,7 @@ namespace LifeV
   \brief Structure for the geometrical mapping
   \author D. A. Di Pietro
   \date 12/2004
-  
+
   This class contains the geometrical transformation that maps the reference
   discontinuos element on the current element, and its values on quadrature nodes.
 
@@ -46,12 +46,12 @@ namespace LifeV
 
 class GeoMapDG:public RefEleDG{
  protected:
-  const GeoMap* _boundaryMap; 
+  const GeoMap* _boundaryMap;
  public:
   //! Constructor of a geo map
   /*!
     Constructor of a geo map. The arguments are:
-    
+
     _name : the name of the f.e.
 
     _shape : the geometry belongs to enum ReferenceShapes {NONE, POINT, LINE, TRIANGLE, QUAD, HEXA, PRISM, TETRA}; (see basisElSh.h)
@@ -76,12 +76,12 @@ class GeoMapDG:public RefEleDG{
 		     ReferenceShapes _shape,
 		     int _nbDof,
 		     int _nbCoor,
-		     const Fct* phi, const Fct* dPhi, const Fct* d2Phi, 
-		     const Real* refCoor, 
+		     const Fct* phi, const Fct* dPhi, const Fct* d2Phi,
+		     const Real* refCoor,
 		     const SetOfQuadRule& sqr,
-		     ReferenceShapes _shapeFaces, 
-		     int _nbFaces, int _nbGeoNodeFaces, 
-		     const Real* refCoorFaces, 
+		     ReferenceShapes _shapeFaces,
+		     int _nbFaces, int _nbGeoNodeFaces,
+		     const Real* refCoorFaces,
 		     const SetOfQuadRule& sqrFaces, const GeoMap& _geoMap, const GeoMap* bdMap);
   ~GeoMapDG();
 

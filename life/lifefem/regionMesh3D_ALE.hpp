@@ -15,18 +15,18 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*! file regionMesh3D_ALE.h
   \brief Extension of the  mesh classes interfaces for ALE schemes
- 
-  \version $Revision: 1.4 $ Miguel Fernandez
- 
+
+  \version $Revision: 1.5 $ Miguel Fernandez
+
   Introduces the RegionMesh3D class
 */
 
 #ifndef _REGIONMESH3DALE_HH_
 #define _REGIONMESH3DALE_HH_
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "regionMesh3D.hpp"
 #include "basisElSh.hpp"
 #include "refFE.hpp"

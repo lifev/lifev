@@ -19,7 +19,7 @@
 #ifndef _REFELE_H_INCLUDE
 #define _REFELE_H_INCLUDE
 
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "tab.hpp"
 #include "basisElSh.hpp"
 #include "quadRule.hpp"
@@ -36,7 +36,7 @@ namespace LifeV
   \brief Base class for RefGeo and RefFE
   \author J.-F. Gerbeau
   \date 04/2002
- 
+
   It contains the basis functions and their values on quadrature points.
   These functions will be used either by RefFE (finite element) or by
   GeoMap (geometrical mapping).
@@ -242,7 +242,7 @@ static const Fct der2fct_P2_1D[ 3 ] =
 //
 //======================================================================
 /*
- 
+
                            |\
                            | \
                            | 1\
@@ -434,7 +434,7 @@ static const Fct der2fct_P2_2D[ 24 ] =
                            |   1   |
                            |       |
                             -------
- 
+
 */
 Real fct1_Q0_2D( cRRef , cRRef , cRRef );
 Real derfct1_Q0_2D( cRRef , cRRef , cRRef );
@@ -659,7 +659,7 @@ static const Fct der2fct_Q2_2D[ 36 ] =
 //
 //======================================================================
 /*
- 
+
                / .
               /  \.
              /  . \\
@@ -1374,7 +1374,7 @@ static const Fct der2fct_P2tilde_3D[ 99 ] =
      | .     | /
      |.      |/
      |_______|
- 
+
 */
 Real fct1_Q0_3D( cRRef , cRRef , cRRef );
 Real derfct1_Q0_3D( cRRef , cRRef , cRRef );

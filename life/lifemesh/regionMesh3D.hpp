@@ -18,8 +18,8 @@
 */
 /*! file regionMesh3D.h
   \brief The mesh classes interfaces
-  \version $Revision: 1.11 $ Luca Formaggia
-  \version $Revision: 1.11 $ Miguel Fernandez
+  \version $Revision: 1.12 $ Luca Formaggia
+  \version $Revision: 1.12 $ Miguel Fernandez
 
   Introduces the RegionMesh3D class
 */
@@ -33,7 +33,7 @@
 # include <stdlib.h>
 #endif
 
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "geoElement.hpp"
 #include "switch.hpp"
 #include "bareItems.hpp"
@@ -595,7 +595,7 @@ protected:
     template < typename T >
     UInt maxNumItems( SimpleVect< T> const & list ) const;
     template < typename T >
-    void setMaxNumItems( SimpleVect< T> & list, UInt n, char * title );
+    void setMaxNumItems( SimpleVect< T> & list, UInt n, std::string title );
     //@}
 
     // Internal counters
@@ -810,7 +810,7 @@ template <typename GEOSHAPE, typename MC>
 template <typename T>
 void
 RegionMesh3D<GEOSHAPE, MC>::
-setMaxNumItems( SimpleVect< T> & list, UInt n, char * title )
+setMaxNumItems( SimpleVect< T> & list, UInt n, std::string title )
 {
     if ( list.capacity() == 0 )
     {
@@ -818,11 +818,8 @@ setMaxNumItems( SimpleVect< T> & list, UInt n, char * title )
     }
     else if ( list.capacity() < n )
     {
-#ifdef VERBOSE
-        std::cerr << "WARNING: Resetting " << title << " list size to " << n << std::endl;
-        std::cerr << "         ALL PREVIOUS POINTERS TO THE LIST (IF ANY) ARE NOW INVALID" << std::endl;
-#endif
-
+        Debug(4000) << "WARNING: Resetting " << title << " list size to " << n << "\n";
+        Debug(4000) << "         ALL PREVIOUS POINTERS TO THE LIST (IF ANY) ARE NOW INVALID\n";
         list.reserve( n );
     }
 }
@@ -1150,7 +1147,7 @@ RegionMesh3D<GEOSHAPE, MC>::addEdge( bool const boundary )
 template <typename GEOSHAPE, typename MC>
 INLINE
 typename RegionMesh3D<GEOSHAPE, MC>::EdgeType &
-RegionMesh3D<GEOSHAPE, MC>::addEdge( EdgeType const & f, bool const boundary )
+RegionMesh3D<GEOSHAPE, MC>::addEdge( EdgeType const & f, bool const /*boundary*/ )
 {
     ASSERT_PRE( edgeList.size() < edgeList.capacity(), "Edge list size exceeded" <<
                 edgeList.size() + 1 << " " << edgeList.capacity() ) ;
@@ -1330,8 +1327,7 @@ RegionMesh3D<GEOSHAPE, MC>::addPoint( bool const boundary, bool const vertex )
 template <typename GEOSHAPE, typename MC>
 INLINE
 typename RegionMesh3D<GEOSHAPE, MC>::PointType &
-RegionMesh3D<GEOSHAPE, MC>::addPoint
-( PointType const & p, bool const boundary, bool const vertex )
+RegionMesh3D<GEOSHAPE, MC>::addPoint( PointType const & p, bool const boundary, bool const /*vertex*/ )
 {
     ASSERT_PRE( pointList.size() < pointList.capacity(), "Point list size exceeded" <<
                 pointList.size() + 1 << " " << pointList.capacity() ) ;
@@ -1351,8 +1347,7 @@ RegionMesh3D<GEOSHAPE, MC>::addPoint
 template <typename GEOSHAPE, typename MC>
 INLINE
 typename RegionMesh3D<GEOSHAPE, MC>::PointType &
-RegionMesh3D<GEOSHAPE, MC>::setPoint
-( PointType const & p, ID position, bool const boundary, bool const vertex )
+RegionMesh3D<GEOSHAPE, MC>::setPoint( PointType const & p, ID position, bool const boundary, bool const /*vertex*/ )
 {
     ASSERT_PRE( position <= pointList.capacity(), "Position  exceed lpoint list capacity" <<
                 position << " " << pointList.capacity() ) ;

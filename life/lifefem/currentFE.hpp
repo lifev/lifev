@@ -19,10 +19,10 @@
 #ifndef _CURRENTFE_H
 #define _CURRENTFE_H
 
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "geoMap.hpp"
 #include "refFE.hpp"
-#include "geoMap.hpp" 
+#include "geoMap.hpp"
 /*!
   \file currentFE.h
   \brief Structure for the current finite element
@@ -35,15 +35,15 @@ namespace LifeV
   \brief The class for a finite element
   \author J.-F. Gerbeau
   \date 04/2002
- 
+
   modified: the update methods to have
             them dependent on the dimension (lifev becomes multiscale...)
      (nbCoor = Nb Dimension = 1, 2 or 3).
- 
+
      I removed the Macro "#if defined(THREEDIM)" to
      use a normal switch.
      Question: IS IT TOO SLOW???
- 
+
      I also factorized some code, and
      postponed the implementation of template methods
      after the class declaration.

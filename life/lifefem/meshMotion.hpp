@@ -31,7 +31,7 @@
 #ifndef __MESHMOTION_HH__
 #define __MESHMOTION_HH__
 
-#include <lifeV.hpp>
+#include <life.hpp>
 
 #include <dataAztec.hpp>
 

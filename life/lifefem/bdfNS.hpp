@@ -15,13 +15,13 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*!
   \file bdfNS.h
   \author A. Veneziani
   \date 04/2003
   \version 1.0
- 
+
   \brief File containing a class for an easy handling of different order time discretizations/extrapolations
          BDF based SPECIFIC FOR THE NAVIER-STOKES PROBLEM
          The idea is to couple a BDF of order q with a pressure incremental approach of order q-1 (see Van Kan, Prohl, Guermond, ecc.)
@@ -34,7 +34,7 @@
 #include <iostream>
 #include <algorithm>
 #include "GetPot.hpp"
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "vecUnknown.hpp"
 #include "bdf.hpp"
 

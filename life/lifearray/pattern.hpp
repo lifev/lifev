@@ -18,7 +18,7 @@
 */
 /*----------------------------------------------------------------------*
 |
-| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.20 2004-11-08 09:45:37 prudhomm Exp $
+| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.21 2005-02-19 21:46:10 prudhomm Exp $
 |
 |
 | #Version  0.1 Experimental   07/7/00. Luca Formaggia & Alessandro Veneziani
@@ -46,7 +46,7 @@
 #endif
 #ifndef _PATTERN_HH
 #define _PATTERN_HH
-#include "lifeV.hpp"
+#include "life.hpp"
 #ifndef INDEX_T
 #define INDEX_T UInt
 #endif
@@ -68,7 +68,6 @@ namespace LifeV
 {
 const INDEX_T PatternOffset = PATTERN_OFFSET;
 
-// We DEFINITIVELY need NAMESPACES (LUCA)
 /*!
   \class PatternDefs
   This class containes some useful functions and typedefs which will be
@@ -1743,10 +1742,8 @@ CSRPatt::row( Diff_t const row, Iter coldata, Iter position ) const
 inline
 bool CSRPatt::isThere( Index_t const i, Index_t const j ) const
 {
-    ASSERT_BD( i >= PatternOffset &&
-               i < static_cast<Index_t>( _nrows ) + PatternOffset );
-    ASSERT_BD( j >= PatternOffset &&
-               j < static_cast<Index_t>( _ncols ) + PatternOffset );
+    ASSERT_BD( i < static_cast<Index_t>( _nrows ) + PatternOffset );
+    ASSERT_BD( j < static_cast<Index_t>( _ncols ) + PatternOffset );
     if ( ! _filled )
         return false;
 
@@ -2506,10 +2503,8 @@ bool MSRPatt::isThere( Index_t i, Index_t j ) const
 {
     if ( isEmpty() )
         return false;
-    ASSERT_BD( i >= PatternOffset &&
-               i < static_cast<Index_t>( _nrows ) + PatternOffset );
-    ASSERT_BD( j >= PatternOffset &&
-               j < static_cast<Index_t>( _ncols ) + PatternOffset );
+    ASSERT_BD( i < static_cast<Index_t>( _nrows ) + PatternOffset );
+    ASSERT_BD( j < static_cast<Index_t>( _ncols ) + PatternOffset );
     if ( i == j )
         return true;
     Container::const_iterator start = _bindx.begin() + _row_off( i );
@@ -2680,8 +2675,8 @@ inline
 UInt
 MixedPattern<BROWS, BCOLS, PATTERN>::nRows( Diff_t m, Diff_t n ) const
 {
-    ASSERT_PRE( m < BROWS && m >= 0, " Invalid block row address" );
-    ASSERT_PRE( n < BCOLS && n >= 0, " Invalid block column address" );
+    ASSERT_PRE( m < BROWS, " Invalid block row address" );
+    ASSERT_PRE( n < BCOLS, " Invalid block column address" );
     return _nrows[ m ][ n ];
 }
 
@@ -2691,8 +2686,8 @@ inline
 UInt
 MixedPattern<BROWS, BCOLS, PATTERN>::nCols( Diff_t m, Diff_t n ) const
 {
-    ASSERT_PRE( m < BROWS && m >= 0, " Invalid block row address" );
-    ASSERT_PRE( n < BCOLS && n >= 0, " Invalid block column address" );
+    ASSERT_PRE( m < BROWS, " Invalid block row address" );
+    ASSERT_PRE( n < BCOLS, " Invalid block column address" );
     return _ncols[ m ][ n ];
 }
 
@@ -2703,8 +2698,8 @@ inline
 UInt
 MixedPattern<BROWS, BCOLS, PATTERN>::nNz( Diff_t m, Diff_t n ) const
 {
-    ASSERT_PRE( m < BROWS && m >= 0, " Invalid block row address" );
-    ASSERT_PRE( n < BCOLS && n >= 0, " Invalid block column address" );
+    ASSERT_PRE( m < BROWS, " Invalid block row address" );
+    ASSERT_PRE( n < BCOLS, " Invalid block column address" );
 
     return _blocks[ m ][ n ] ? _blocks[ m ][ n ] ->nNz() : 0;
 }
@@ -2756,8 +2751,8 @@ MixedPattern<BROWS, BCOLS, PATTERN>::nbNeighbours( Diff_t const m,
                                                    Diff_t const n,
                                                    ID const d ) const
 {
-    ASSERT_PRE( m < BROWS && m >= 0, " Invalid block row address" );
-    ASSERT_PRE( n < BCOLS && n >= 0, " Invalid block column address" );
+    ASSERT_PRE( m < BROWS, " Invalid block row address" );
+    ASSERT_PRE( n < BCOLS, " Invalid block column address" );
     return ( _blocks[ m ][ n ] ? _blocks[ m ][ n ] ->nbNeighbours( d ) : 0 );
 }
 
@@ -2767,8 +2762,8 @@ ID
 MixedPattern<BROWS, BCOLS, PATTERN>::neighbour( Diff_t const m, Diff_t const n,
                                                 ID const i, ID const d ) const
 {
-    ASSERT_PRE( m < BROWS && m >= 0, " Invalid block row address" );
-    ASSERT_PRE( n < BCOLS && n >= 0, " Invalid block column address" );
+    ASSERT_PRE( m < BROWS, " Invalid block row address" );
+    ASSERT_PRE( n < BCOLS, " Invalid block column address" );
     ASSERT_PRE( _blocks[ m ][ n ] != 0 , "Cannot access an empty block" ) ;
     return _blocks[ m ][ n ] ->neighbour( i, d );
 }
@@ -2782,8 +2777,8 @@ MixedPattern<BROWS, BCOLS, PATTERN>::neighbours( Diff_t const m,
                                                  ID const d,
                                                  Container & neighs ) const
 {
-    ASSERT_PRE( m < BROWS && m >= 0, " Invalid block row address" );
-    ASSERT_PRE( n < BCOLS && n >= 0, " Invalid block column address" );
+    ASSERT_PRE( m < BROWS, " Invalid block row address" );
+    ASSERT_PRE( n < BCOLS, " Invalid block column address" );
     ASSERT_PRE( _blocks[ m ][ n ] != 0 , "Cannot access an empty block" ) ;
     return _blocks[ m ][ n ] ->neighbours( d, neighs );
 }
@@ -2943,8 +2938,8 @@ MixedPattern<BROWS, BCOLS, PATTERN>::block_ptr( Diff_t const m,
                                                 Diff_t const n )
 {
     // VERY DANGEROUS
-    ASSERT_PRE( m < BROWS && m >= 0, " Invalid block row address" );
-    ASSERT_PRE( n < BCOLS && n >= 0, " Invalid block column address" );
+    ASSERT_PRE( m < BROWS, " Invalid block row address" );
+    ASSERT_PRE( n < BCOLS, " Invalid block column address" );
     return _blocks[ m ][ n ]; // Beware of null pointers!!
 }
 // const qualifyer version
@@ -2957,8 +2952,8 @@ MixedPattern<BROWS, BCOLS, PATTERN>::
 block_ptr( Diff_t const m, Diff_t const n ) const
 {
     // VERY DANGEROUS
-    ASSERT_PRE( m < BROWS && m >= 0, " Invalid block row address" );
-    ASSERT_PRE( n < BCOLS && n >= 0, " Invalid block column address" );
+    ASSERT_PRE( m < BROWS, " Invalid block row address" );
+    ASSERT_PRE( n < BCOLS, " Invalid block column address" );
     return _blocks[ m ][ n ]; // Beware of null pointers!!
 }
 
@@ -2969,8 +2964,8 @@ std::pair<UInt, UInt>
 MixedPattern<BROWS, BCOLS, PATTERN>::blockOffset( UInt const m,
                                                   UInt const n ) const
 {
-    ASSERT_PRE( m < BROWS && m >= 0, " Invalid block row address" );
-    ASSERT_PRE( n < BCOLS && n >= 0, " Invalid block column address" );
+    ASSERT_PRE( m < BROWS, " Invalid block row address" );
+    ASSERT_PRE( n < BCOLS, " Invalid block column address" );
     return std::make_pair( _rowoff[ m ][ n ], _coloff[ m ][ n ] );
 }
 
@@ -3029,8 +3024,8 @@ MixedPattern<BROWS, BCOLS, PATTERN>::localNumber( Diff_t const m,
                                                   ID const i_g,
                                                   ID const j_g ) const
 {
-    ASSERT_PRE( m < BROWS && m >= 0, " Invalid block row address" );
-    ASSERT_PRE( n < BCOLS && n >= 0, " Invalid block column address" );
+    ASSERT_PRE( m < BROWS, " Invalid block row address" );
+    ASSERT_PRE( n < BCOLS, " Invalid block column address" );
 
     return std::make_pair( i_g - _rowoff[ m ][ n ], j_g - _coloff[ m ][ n ] );
 }
@@ -3044,8 +3039,8 @@ MixedPattern<BROWS, BCOLS, PATTERN>::globalNumber( Diff_t const m,
                                                    ID const i,
                                                    ID const j ) const
 {
-    ASSERT_PRE( m < BROWS && m >= 0, " Invalid block row address" );
-    ASSERT_PRE( n < BCOLS && n >= 0, " Invalid block column address" );
+    ASSERT_PRE( m < BROWS, " Invalid block row address" );
+    ASSERT_PRE( n < BCOLS, " Invalid block column address" );
     return std::make_pair( i + _rowoff[ m ][ n ], j + _coloff[ m ][ n ] );
 }
 
@@ -3057,8 +3052,8 @@ MixedPattern<BROWS, BCOLS, PATTERN>::locateIndex( Diff_t const m,
                                                   Index_t const i,
                                                   Index_t const j ) const
 {
-    ASSERT_PRE( m < BROWS && m >= 0, " Invalid block row address" );
-    ASSERT_PRE( n < BCOLS && n >= 0, " Invalid block column address" );
+    ASSERT_PRE( m < BROWS, " Invalid block row address" );
+    ASSERT_PRE( n < BCOLS, " Invalid block column address" );
     if ( _blocks[ m ][ n ] == 0 )
         return std::make_pair( 0, false );
     return _blocks[ m ][ n ] ->locateIndex( i, j );
@@ -3104,8 +3099,8 @@ linkBlockToPattern( UInt const m, UInt const n, PATTERN & pattern )
         ASSERT_PRE( isSet( m, n - 1 ),
                     "pattern must be set starting from block col=0" );
 
-    ASSERT_PRE( m < BROWS && m >= 0, " Invalid block row address" );
-    ASSERT_PRE( n < BCOLS && n >= 0, " Invalid block column address" );
+    ASSERT_PRE( m < BROWS, " Invalid block row address" );
+    ASSERT_PRE( n < BCOLS, " Invalid block column address" );
     if ( _blocks[ m ][ n ] != 0 && !_linked[ m ][ n ] )
         delete _blocks[ m ][ n ];
 
@@ -3123,8 +3118,8 @@ PATTERN * MixedPattern<BROWS, BCOLS, PATTERN>::buildBlock( Diff_t m,
                                                            DOF1 dof1,
                                                            DOF2 dof2 )
 {
-    ASSERT_PRE( m < BROWS && m >= 0, " Invalid block row address" );
-    ASSERT_PRE( n < BCOLS && n >= 0, " Invalid block column address" );
+    ASSERT_PRE( m < BROWS, " Invalid block row address" );
+    ASSERT_PRE( n < BCOLS, " Invalid block column address" );
 
     if ( _blocks[ m ][ n ] != 0 && !_linked[ m ][ n ] )
         delete _blocks[ m ][ n ];
@@ -3143,8 +3138,8 @@ PATTERN * MixedPattern<BROWS, BCOLS, PATTERN>::buildBlock( Diff_t m,
                                                            Diff_t n,
                                                            DOF1 dof1 )
 {
-    ASSERT_PRE( m < BROWS && m >= 0, " Invalid block row address" );
-    ASSERT_PRE( n < BCOLS && n >= 0, " Invalid block column address" );
+    ASSERT_PRE( m < BROWS, " Invalid block row address" );
+    ASSERT_PRE( n < BCOLS, " Invalid block column address" );
 
     if ( _blocks[ m ][ n ] != 0 && !_linked[ m ][ n ] )
         delete _blocks[ m ][ n ];
@@ -3168,10 +3163,10 @@ MixedPattern<BROWS, BCOLS, PATTERN>::linkBlocks( Diff_t const m_from,
                                                  Diff_t const n_to )
 {
     // ASSERT_PRE if it is ok!
-    ASSERT_PRE( m_from < BROWS && m_from >= 0," Invalid block row address" );
-    ASSERT_PRE( n_from < BCOLS && n_from >= 0," Invalid block column address");
-    ASSERT_PRE( m_to < BROWS && m_to >= 0, " Invalid block row address" );
-    ASSERT_PRE( n_to < BCOLS && n_to >= 0, " Invalid block column address" );
+    ASSERT_PRE( m_from < BROWS," Invalid block row address" );
+    ASSERT_PRE( n_from < BCOLS," Invalid block column address");
+    ASSERT_PRE( m_to < BROWS, " Invalid block row address" );
+    ASSERT_PRE( n_to < BCOLS, " Invalid block column address" );
 
     _blocks[ m_to ][ n_to ] = _blocks[ m_from ][ n_from ];
     _nrows[ m_to ][ n_to ] = _nrows[ m_from ][ n_from ];
@@ -3187,8 +3182,8 @@ void
 MixedPattern<BROWS, BCOLS, PATTERN>::deleteBlock( Diff_t const m,
                                                   Diff_t const n )
 {
-    ASSERT_PRE( m < BROWS && m >= 0, " Invalid block row address" );
-    ASSERT_PRE( n < BCOLS && n >= 0, " Invalid block column address" );
+    ASSERT_PRE( m < BROWS, " Invalid block row address" );
+    ASSERT_PRE( n < BCOLS, " Invalid block column address" );
     if ( _blocks[ m ][ n ] != 0 && ! _linked[ m ][ n ] )
         delete _blocks[ m ][ n ];
     _blocks[ m ][ n ] = 0;
@@ -3207,8 +3202,8 @@ bool
 MixedPattern<BROWS, BCOLS, PATTERN>::isZero( Diff_t const m,
                                              Diff_t const n ) const
 {
-    ASSERT_PRE( m < BROWS && m >= 0, " Invalid block row address" );
-    ASSERT_PRE( n < BCOLS && n >= 0, " Invalid block column address" );
+    ASSERT_PRE( m < BROWS, " Invalid block row address" );
+    ASSERT_PRE( n < BCOLS, " Invalid block column address" );
     return _blocks[ m ][ n ] = 0 && _nrows[ m ][ n ] + _ncols[ m ][ n ] != 0;
 }
 
@@ -3219,8 +3214,8 @@ bool
 MixedPattern<BROWS, BCOLS, PATTERN>::isSet( Diff_t const m,
                                             Diff_t const n ) const
 {
-    ASSERT_PRE( m < BROWS && m >= 0, " Invalid block row address" );
-    ASSERT_PRE( n < BCOLS && n >= 0, " Invalid block column address" );
+    ASSERT_PRE( m < BROWS, " Invalid block row address" );
+    ASSERT_PRE( n < BCOLS, " Invalid block column address" );
     return _blocks[ m ][ n ] != 0 ||
         _nrows[ m ][ n ] != 0 ||
         _ncols[ m ][ n ] != 0 ||

@@ -19,7 +19,7 @@
 #ifndef _LOCAL_DOF_PATTERN_HH
 #define _LOCAL_DOF_PATTERN_HH
 
-#include "lifeV.hpp"
+#include "life.hpp"
 #include <utility>
 
 namespace LifeV

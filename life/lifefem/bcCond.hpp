@@ -53,7 +53,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "identifier.hpp"
 #include "markers.hpp"
 #include "dof.hpp"
@@ -325,7 +325,7 @@ public:
     */
     Real operator() ( const Real& t, const Real& x, const Real& y,
                       const Real& z, const ID& i ) const;
- 
+
     /* new overloading for BCFunctionUDepending */
     Real operator() ( const Real& t, const Real& x, const Real& y,
                       const Real& z, const ID& i, const Real& u ) const;

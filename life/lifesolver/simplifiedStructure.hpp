@@ -15,22 +15,22 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*!
   \file simplifiedStructure.h
   \author M.A. Fernandez
   \date 01/2003
   \version 1.0
- 
+
   \brief File containing a classes handling reduced
          structural models (algegraic law and independent ring model)
- 
+
 */
 
 #ifndef HH_SIMPLIFIEDSTRUCTURE_HH_
 #define HH_SIMPLIFIEDSTRUCTURE_HH_
 
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "markers.hpp"
 #include "vecUnknown.hpp"
 #include "dof.hpp"
@@ -40,9 +40,9 @@ namespace LifeV
 {
 /*!
   \class AlegbraicLaw
- 
+
   Base class for reduced algegraic law structural model.
- 
+
 */
 template <typename Mesh>
 class AlgebraicLaw:
@@ -97,10 +97,10 @@ private:
 
 /*!
   \class IndependentRing
- 
+
   Base class which implements the independent ring structural model
        using a mid-point rule time-stepping
- 
+
 */
 template <typename Mesh>
 class IndependentRing:

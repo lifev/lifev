@@ -15,18 +15,18 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*! file regionMesh2D.h
   \brief The 2D mesh classes interfaces
-  \version $Revision: 1.6 $ Luca Formaggia
- 
+  \version $Revision: 1.7 $ Luca Formaggia
+
   Introduces the RegionMesh2D class
 */
 
 #ifndef _REGIONMESH2D_HH_
 #define _REGIONMESH2D_HH_
 
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "geoElement.hpp"
 #include "switch.hpp"
 
@@ -42,7 +42,7 @@ namespace LifeV
 
 /* ---------------------------------------------------------------------
                             RegionMesh 2D
------------------------------------------------------------------------*/ 
+-----------------------------------------------------------------------*/
 //! The Region Mesh Class for 2D elements
 /*!
   This is the class that stores the mesh entities for a single 2D region In
@@ -86,7 +86,7 @@ public:
 
     //! \name GeoElement_Container_Types
     /*! Typedefs for STL compliant containers of mesh geometric entities
-      I Use SimpleVect for addressing from 1. */ 
+      I Use SimpleVect for addressing from 1. */
     //@{
     //! Points Container
     typedef SimpleVect<PointType> Points;
@@ -99,7 +99,7 @@ public:
      * Generic types for all regionmeshXX These are part
      * of the generic generic interface common for all RegionMeshes (3D --
      * 1D).
-     */ 
+     */
     //@{
     typedef GEOSHAPE ElementShape;
     typedef typename GEOSHAPE::GeoBShape BElementShape;
@@ -147,7 +147,7 @@ public:
      * These are the generic methods to get information about the number of
      * elements.  It is a generic interface common for all RegionMeshes (3D --
      * 1D)
-     */ 
+     */
     //@{
     UInt numElements() const; //!< Number of elements in mesh (alias to numFaces())
     UInt & numElements(); //!< Number of 3D elements
@@ -161,7 +161,7 @@ public:
 
     /* ============================================
                       Face Related Methods
-       ============================================*/ 
+       ============================================*/
     //! \name Face_Methods All methods which operates on 2D elements
     //@{
     UInt numFaces() const;    /*!< Returns number of Face elements in the mesh
@@ -255,7 +255,7 @@ public:
 
     /* ============================================
                       Points/Vertices Related Methods
-       ============================================*/ 
+       ============================================*/
     //! \name PointMethods Methods to access/create/modify Points/Vertices
     //!data
     /*!  There are different Point counters which may be interrogated or set
@@ -317,7 +317,7 @@ public:
 
      Often, it is NOT required to have the full information about edges and faces:
      The ID of the Face and Edge entities may be calculated without
-     contructing the corresponding Edge of Face Object. This saves memory.  */ 
+     contructing the corresponding Edge of Face Object. This saves memory.  */
     //@{
 
     //! Is the array for local Edges set up?
@@ -344,7 +344,7 @@ public:
 
      * Stl compliant containers for basic structure I expose them since they
      * are standard containers
-     */ 
+     */
     //@{
     Points pointList; //!< Container of mesh points/verices
     Faces faceList;  //!< Container of mesh  Faces

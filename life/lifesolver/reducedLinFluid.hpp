@@ -33,7 +33,7 @@
 #define _QNEWTON
 
 
-#include <lifeV.hpp>
+#include <life.hpp>
 #include "FSIOperator.hpp"
 #include "NavierStokesAleSolverPC.hpp"
 #include "VenantKirchhofSolver.hpp"

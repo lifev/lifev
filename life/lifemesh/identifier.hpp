@@ -37,7 +37,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "SimpleVect.hpp"
 
 namespace LifeV

@@ -21,7 +21,7 @@
 
 #include <boost/function.hpp>
 
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "dof.hpp"
 #include "currentFE.hpp"
 

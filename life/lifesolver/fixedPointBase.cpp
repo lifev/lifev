@@ -159,7 +159,7 @@ void fixedPoint::setUpBC()
 
 void  fixedPoint::solveJac(Vector        &_muk,
                            const Vector  &_res,
-                           const double   _linearRelTol)
+                           const double   /*_linearRelTol*/)
 {
     if (M_nbEval == 1) M_aitkFS.restart();
     _muk = M_aitkFS.computeDeltaLambda(M_dispStructOld, -1.*_res);

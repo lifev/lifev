@@ -1,7 +1,7 @@
 #ifndef _DOFBYFACE_HH
 #define _DOFBYFACE_HH
 
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "SimpleVect.hpp"
 #include "localDofPattern.hpp"
 #include "dof.hpp"

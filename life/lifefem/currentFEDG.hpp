@@ -1,7 +1,7 @@
 #ifndef _CURRENTFEDG_H
 #define _CURRENTFEDG_H
 
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "geoMap.hpp"
 #include "refFEDG.hpp"
 #include "geoMap.hpp"
@@ -15,7 +15,7 @@ namespace LifeV
 
 /*!
   \class CurrentFEDG
-  \brief The class for a discontinuous finite element 
+  \brief The class for a discontinuous finite element
   \author D. A. Di Pietro
   \date 12/2003
 */
@@ -48,8 +48,8 @@ public:
   const RefFEDG& refFE;
   const GeoMap& geoMap;
   const QuadRule& qr;
-  KNM<Real> phi; 
-  KNMK<Real> dPhiRef; 
+  KNM<Real> phi;
+  KNMK<Real> dPhiRef;
   KNMKL<Real> dPhiRef2;
   //
   KNMK<Real> phiDer;
@@ -176,7 +176,7 @@ public:
     _hasMass = false;
 #endif
     _currentId = geoele.id();
-    // update the definition of the geo points 
+    // update the definition of the geo points
     for(int i=0;i<nbGeoNode;i++){
       point(i,0) = geoele.point(i+1).x();
       point(i,1) = geoele.point(i+1).y();
@@ -201,7 +201,7 @@ template<class GEOELE>
     _hasMass = false;
 #endif
     _currentId = geoele.id();
-    // update the definition of the geo points 
+    // update the definition of the geo points
     for(int i=0;i<nbGeoNode;i++){
       point(i,0) = geoele.point(i+1).x();
       point(i,1) = geoele.point(i+1).y();
@@ -229,7 +229,7 @@ template<class GEOELE>
     _hasMass = false;
 #endif
     _currentId = geoele.id();
-    // update the definition of the geo points 
+    // update the definition of the geo points
     for(int i=0;i<nbGeoNode;i++){
       point(i,0) = geoele.point(i+1).x();
       point(i,1) = geoele.point(i+1).y();
@@ -256,7 +256,7 @@ template<class GEOELE>
     _hasMass = false;
 #endif
     _currentId = geoele.id();
-    // update the definition of the geo points 
+    // update the definition of the geo points
     for(int i=0;i<nbGeoNode;i++){
       // for(int icoor=0;icoor<nbCoor;icoor++)
       // point(i,icoor) =  geoele.coor(i+1,icoor+1);
@@ -296,7 +296,7 @@ template<class GEOELE>
     _hasMass = false;
 #endif
     _currentId = geoele.id();
-    // update the definition of the geo points 
+    // update the definition of the geo points
     for(int i=0;i<nbGeoNode;i++){
       point(i,0) = geoele.point(i+1).x();
       point(i,1) = geoele.point(i+1).y();
@@ -332,7 +332,7 @@ template<class GEOELE>
     _hasMass = false;
 #endif
     _currentId = geoele.id();
-    // update the definition of the geo points 
+    // update the definition of the geo points
     for(int i=0;i<nbGeoNode;i++){
       point(i,0) = geoele.point(i+1).x();
       point(i,1) = geoele.point(i+1).y();
@@ -375,7 +375,7 @@ template<class GEOELE>
     _hasMass = false;
 #endif
     _currentId = geoele.id();
-    // update the definition of the geo points 
+    // update the definition of the geo points
     for(int i=0;i<nbGeoNode;i++){
       // for(int icoor=0;icoor<nbCoor;icoor++)
       // point(i,icoor) =  geoele.coor(i+1,icoor+1);
@@ -419,7 +419,7 @@ template<class GEOELE>
     _hasMass = false;
 #endif
     _currentId = geoele.id();
-    // update the definition of the geo points 
+    // update the definition of the geo points
     for(int i=0;i<nbGeoNode;i++){
       // for(int icoor=0;icoor<nbCoor;icoor++)
       // point(i,icoor) =  geoele.coor(i+1,icoor+1);
@@ -464,7 +464,7 @@ template<class GEOELE>
     _hasMass = false;
 #endif
     _currentId = geoele.id();
-    // update the definition of the geo points 
+    // update the definition of the geo points
     for(int i=0;i<nbGeoNode;i++){
       // for(int icoor=0;icoor<nbCoor;icoor++)
       // point(i,icoor) =  geoele.coor(i+1,icoor+1);
@@ -475,7 +475,7 @@ template<class GEOELE>
     // compute the inverse jacobian...
     _comp_inv_jacobian();
 
-    Real x1,x2; 
+    Real x1,x2;
     for(int ig=0;ig<nbQuadPt;ig++){
      for(int j=0;j<nbNode;j++){
       for(int icoor=0;icoor<nbCoor;icoor++){
@@ -509,7 +509,7 @@ template<class GEOELE>
     _hasMass = false;
 #endif
     _currentId = geoele.id();
-    // update the definition of the geo points 
+    // update the definition of the geo points
     for(int i=0;i<nbGeoNode;i++){
       // for(int icoor=0;icoor<nbCoor;icoor++)
       // point(i,icoor) =  geoele.coor(i+1,icoor+1);
@@ -520,7 +520,7 @@ template<class GEOELE>
     // compute the inverse jacobian...
     _comp_inv_jacobian();
 
-    Real x1,x2; 
+    Real x1,x2;
     for(int ig=0;ig<nbQuadPt;ig++){
      for(int j=0;j<nbNode;j++){
       for(int icoor=0;icoor<nbCoor;icoor++){
@@ -553,7 +553,7 @@ template<class GEOELE>
     _hasMass = true;
 #endif
     _currentId = geoele.id();
-    // update the definition of the geo points 
+    // update the definition of the geo points
     for(int i=0;i<nbGeoNode;i++){
       // for(int icoor=0;icoor<nbCoor;icoor++)
       // point(i,icoor) =  geoele.coor(i+1,icoor+1);
@@ -564,7 +564,7 @@ template<class GEOELE>
     // compute the inverse jacobian...
     _comp_inv_jacobian();
 
-    Real x1,x2; 
+    Real x1,x2;
     for(int ig=0;ig<nbQuadPt;ig++){
      for(int j=0;j<nbNode;j++){
       for(int icoor=0;icoor<nbCoor;icoor++){

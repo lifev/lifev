@@ -19,9 +19,9 @@
 #ifndef _CURRENTHDIVFE_H
 #define _CURRENTHDIVFE_H
 
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "geoMap.hpp"
-#include "refHdivFE.hpp" 
+#include "refHdivFE.hpp"
 /*!
   \file CurrentHdivFE.h
   \brief Structure for the current finite element
@@ -34,8 +34,8 @@ namespace LifeV
   \brief The class for a finite element
   \author J.-F. Gerbeau & M. Belhadj & V. Martin
   \date 04/2002 - 08/2002
- 
- 
+
+
 */
 
 class CurrentHdivFE

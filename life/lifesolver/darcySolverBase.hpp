@@ -31,7 +31,7 @@
 
 #include <boost/signal.hpp>
 
-#include <lifeV.hpp>
+#include <life.hpp>
 #include <singleton.hpp>
 #include <factory.hpp>
 #include <bcHandler.hpp>

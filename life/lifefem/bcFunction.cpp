@@ -28,7 +28,7 @@
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
    \date 2004-10-12
  */
-#include <lifeV.hpp>
+#include <life.hpp>
 
 #include <bcFunction.hpp>
 
@@ -137,7 +137,7 @@ BCFunctionUDepBase::BCFunctionUDepBase(const BCFunctionUDepBase& bcf ):
 				_M_g(bcf._M_g)
 {
 }
-void 
+void
 BCFunctionUDepBase::setFunction(function_type g)
 {
   _M_g=g;
@@ -154,7 +154,7 @@ createBCFunctionUDep( BCFunctionUDepBase const* __bc )
 {
   return new BCFunctionUDepBase( ( BCFunctionUDepBase const& )*__bc );
 }
-const bool __bcUDepBase = FactoryCloneBCFunctionUDep::instance().registerProduct( 
+const bool __bcUDepBase = FactoryCloneBCFunctionUDep::instance().registerProduct(
 		typeid(BCFunctionUDepBase), &createBCFunctionUDep );
 
 
@@ -176,7 +176,7 @@ BCFunctionUDepMixte::setFunctions_Mixte(function_type g, function_type coef )
   setFunction(g);
   _M_coef=coef;
 }
-Real 
+Real
 BCFunctionUDepMixte::coef(const Real& t, const Real& x, const Real& y,
             const Real& z, const ID& icomp, const Real& u ) const
 {
@@ -188,7 +188,7 @@ createBCFunctionUDepMixte( BCFunctionUDepBase const* __bc )
 {
   return new BCFunctionUDepMixte( ( BCFunctionUDepMixte const& )*__bc );
 }
-const bool __bcUDepMixte = FactoryCloneBCFunctionUDep::instance().registerProduct( 
+const bool __bcUDepMixte = FactoryCloneBCFunctionUDep::instance().registerProduct(
 		typeid(BCFunctionUDepMixte), &createBCFunctionUDepMixte );
 
 

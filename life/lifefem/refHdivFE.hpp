@@ -19,7 +19,7 @@
 #ifndef _REFHDIVFE_H_INCLUDE
 #define _REFHDIVFE_H_INCLUDE
 
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "tab.hpp"
 #include "basisElSh.hpp"
 #include "quadRule.hpp"
@@ -42,23 +42,23 @@ typedef Real ( * FCT ) ( cRRef, cRRef , cRRef );
   \brief Class for H(div,*) vectorial functions.
   \author M. Belhadj & V. Martin
   \date 07/2002
- 
+
   This is a duplication-modification of both RefEle and RefFE
   in order to take into account Mixed Finite Elements, which are
   based on a (RT0 - Q0) like discretization of H(div, .) - L2(.).
- 
+
   Here follows commentaries from refEle and refFE :
- 
+
   This class contains the basis functions and their values on quadrature points.
- 
+
   \par How to add a new reference element:
- 
+
   in refHdiv.h : you declare the functions you need (fct1_Pipo_2D,
   derfct1_1_Pipo_2D, etc...), the static arrays containing these functions
   and the coordinates of the nodes on the reference element.
- 
+
   and in defQuadRuleFE.cc : you define these functions (fct1_Pipo_2D, etc...)
- 
+
 */
 
 class RefHdivFE:
@@ -202,7 +202,7 @@ public:
 //!
 //!======================================================================
 /*!
- 
+
 8-------7
 /.      /|
 / .     / |
@@ -212,14 +212,14 @@ public:
 | .     | /
 |.      |/
 1_______2
- 
+
 face 1: 1,4,3,2
 face 2: 1,5,8,4
 face 3: 1,2,6,5
 face 4: 2,3,7,6
 face 5: 3,4,8,7
 face 6: 5,6,7,8
- 
+
 */
 
 Real fct1_RT0_1_3D( cRRef x, cRRef y, cRRef z );
@@ -287,7 +287,7 @@ static const FCT fct_DIV_RT0_3D[ 6 ] =
 //!
 //!======================================================================
 /*
- 
+
 4
 / .
 /  \.3
@@ -295,13 +295,13 @@ static const FCT fct_DIV_RT0_3D[ 6 ] =
 / .    \\
 /.       \!
 1 ----------2
- 
+
 SEE basisElSh.cc   for the ORIENTATION CONVENTIONS
 point 1: 0, 0, 0
 point 2: 1, 0, 0
 point 3: 0, 1, 0
 point 4: 0, 0, 1
- 
+
 face 1: 2, 3, 4
 face 2: 1, 4, 3
 face 3: 1, 2, 4

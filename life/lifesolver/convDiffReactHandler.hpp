@@ -33,7 +33,7 @@
 #include <sstream>
 
 
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "dataConvDiffReact.hpp"
 #include "geoMap.hpp"
 #include "dataAztec.hpp"

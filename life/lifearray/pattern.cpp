@@ -52,13 +52,13 @@ BasePattern::BasePattern( BasePattern const &rightHandPattern ) :
 {}
 
 void
-BasePattern::showMe( bool const verbose, ostream & out ) const
+BasePattern::showMe( bool const /*verbose*/, ostream & out ) const
 {
-    out << "==== BASE Pattern Class (BasePattern)====" << endl;
-    out << "Number of rows :" << nRows() << endl;
-    out << "Number of cols :" << nCols() << endl;
-    out << "Non zero terms :" << nNz() << endl;
-    out << "Empty          :" << isEmpty() << endl;
+    out << "==== BASE Pattern Class (BasePattern)====" << std::endl;
+    out << "Number of rows :" << nRows() << std::endl;
+    out << "Number of cols :" << nCols() << std::endl;
+    out << "Non zero terms :" << nNz() << std::endl;
+    out << "Empty          :" << isEmpty() << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -96,7 +96,7 @@ CSRPatt::CSRPatt( UInt ex_nnz, UInt ex_nrow, UInt ex_ncol,
     }
 }
 
-CSRPatt::CSRPatt( const CSRPatt &RightHandCSRP ) : 
+CSRPatt::CSRPatt( const CSRPatt &RightHandCSRP ) :
     BasePattern( RightHandCSRP ),
     _ia( RightHandCSRP.ia() ),
     _ja( RightHandCSRP.ja() )
@@ -200,10 +200,8 @@ CSRPatt& CSRPatt::operator= ( const CSRPatt& RhCsr )
 pair<PatternDefs::Diff_t, bool>
 CSRPatt::locate_pattern( Index_t const i, Index_t const j ) const
 {
-    ASSERT_BD( i >= PatternOffset &&
-               i < static_cast<Index_t>( _nrows ) + PatternOffset );
-    ASSERT_BD( j >= PatternOffset &&
-               j < static_cast<Index_t>( _ncols ) + PatternOffset );
+    ASSERT_BD( i < static_cast<Index_t>( _nrows ) + PatternOffset );
+    ASSERT_BD( j < static_cast<Index_t>( _ncols ) + PatternOffset );
     if ( ! _filled )
     {
         return make_pair( 0, false );
@@ -219,13 +217,13 @@ CSRPatt::locate_pattern( Index_t const i, Index_t const j ) const
     }
     //the real end (remember STL convention for ranges!)
     Container::const_iterator finish = _ja.begin() + _row_off( i + 1 );
-    
+
     Container::const_iterator current = start + 1;
-    
+
     // search in the rest (the first position has been already checked)
     current = search_binary( current, finish, j );
-    
-    // difference of pointers should return distance, 
+
+    // difference of pointers should return distance,
     // which is of integral type, like Diff_t
     return make_pair( current -_ja.begin(), current != finish );
 }
@@ -237,9 +235,9 @@ void CSRPatt::showMe( bool verbose, ostream& c ) const
     typedef vector<Index_t>::iterator found;
     int i_first;
     string pare = "[";
-    c << "**************************" << endl;
-    c << "     CSR Matrix Pattern   " << endl;
-    c << endl;
+    c << "**************************" << std::endl;
+    c << "     CSR Matrix Pattern   " << std::endl;
+    c << std::endl;
     if ( verbose )
     {
 
@@ -249,7 +247,7 @@ void CSRPatt::showMe( bool verbose, ostream& c ) const
         {
             c << pare;
             pare = " [";
-            
+
             // In _ia[i_index] there is the diagonal entry
             i_first = _i2o( _ia[ i_index ] ) + 1;
             UInt jj = 0;
@@ -269,12 +267,12 @@ void CSRPatt::showMe( bool verbose, ostream& c ) const
                 }
             }
             if ( i_index == static_cast<Diff_t>( _nrows - 1 ) )
-                c << " ]] " << endl;
+                c << " ]] " << std::endl;
             else
-                c << " ]  " << endl;
+                c << " ]  " << std::endl;
         }
     }
-    c << "**************************" << endl;
+    c << "**************************" << std::endl;
     return ;
 }
 
@@ -306,13 +304,13 @@ void CSRPatt::spy( string const &filename ) const
     {
         for ( Index_t ii = _ia[ i ] - PatternOffset;
               ii < _ia[ i + 1 ] - PatternOffset; ++ii )
-            file_out << i + 1 << uti << _ja[ ii ] + 1 - PatternOffset << uti 
-                     << "1.0" << endl; /* */
+            file_out << i + 1 << uti << _ja[ ii ] + 1 - PatternOffset << uti
+                     << "1.0" << std::endl; /* */
     }
-    file_out << "];" << endl;
+    file_out << "];" << std::endl;
 
-    file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);" 
-             << endl;
+    file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"
+             << std::endl;
 }
 
 // column-concatenation of two CSR block patterns
@@ -321,7 +319,7 @@ CSRPatt colUnify( CSRPatt const &patt1, CSRPatt const &patt2 )
 {
 
     cout << "colUnify: OBSOLETE function ==> "
-         << "use CSRPatt constructor or MixedPattern class" << endl;
+         << "use CSRPatt constructor or MixedPattern class" << std::endl;
 
     typedef PatternDefs::Container::const_iterator ConstIter;
     typedef PatternDefs::Container::iterator Iter;
@@ -374,7 +372,7 @@ CSRPatt colUnify( CSRPatt const &patt1, CSRPatt const &patt2 )
             ans._ia.push_back( patt1._ia[ i ] + patt2._ia[ i ] -PatternOffset);
 
             // construction of ja
-            ConstIter ja1_start = 
+            ConstIter ja1_start =
                 patt1._ja.begin() + patt1._i2o( patt1._ia[ i ] );
             ConstIter ja2_start =
                 patt2._ja.begin() + patt2._i2o( patt2._ia[ i ] );
@@ -466,7 +464,7 @@ CSRPatt colUnify( CSRPatt const &patt1, CSRPatt const &patt2 )
 CSRPatt colUnify( CSRPatt const &patt1, UInt const ncolZero )
 {
     cout << "colUnify: OBSOLETE function ==> "
-         << "use CSRPatt constructor or MixedPattern class" << endl;
+         << "use CSRPatt constructor or MixedPattern class" << std::endl;
     UInt nnz = patt1._nnz;
     UInt nrows = patt1._nrows;
     UInt ncols = patt1._ncols + ncolZero;
@@ -483,7 +481,7 @@ CSRPatt colUnify( CSRPatt const &patt1, UInt const ncolZero )
 CSRPatt colUnify( UInt const ncolZero, CSRPatt const &patt1 )
 {
     cout << "colunify: OBSOLETE function ==> "
-         << "use CSRPatt constructor or MixedPattern class" << endl;
+         << "use CSRPatt constructor or MixedPattern class" << std::endl;
     typedef PatternDefs::Container::iterator Iter;
     UInt nnz = patt1._nnz;
     UInt nrows = patt1._nrows;
@@ -514,7 +512,7 @@ CSRPatt colUnify( UInt const ncolZero, CSRPatt const &patt1 )
 CSRPatt rowUnify( CSRPatt const &patt1, CSRPatt const &patt2 )
 {
     cout << "rowUnify: OBSOLETE function ==> "
-         << "use CSRPatt constructor or MixedPattern class" << endl;
+         << "use CSRPatt constructor or MixedPattern class" << std::endl;
     typedef PatternDefs::Container::const_iterator ConstIter;
     typedef PatternDefs::Container::iterator Iter;
 
@@ -652,7 +650,7 @@ CSRPatt rowUnify( CSRPatt const &patt1, CSRPatt const &patt2 )
 CSRPatt rowUnify( CSRPatt const &patt1, UInt const nrowZero )
 {
     cout << "rowUnify: OBSOLETE function ==> "
-         << "use CSRPatt constructor or MixedPattern class" << endl;
+         << "use CSRPatt constructor or MixedPattern class" << std::endl;
     UInt nnz = patt1._nnz;
     UInt nrows = patt1._nrows + nrowZero;
     UInt ncols = patt1._ncols;
@@ -678,7 +676,7 @@ CSRPatt rowUnify( CSRPatt const &patt1, UInt const nrowZero )
 CSRPatt rowUnify( UInt const nrowZero, CSRPatt const &patt1 )
 {
     cout << "rowUnify: OBSOLETE function ==> "
-         << "use CSRPatt constructor or MixedPattern class" << endl;
+         << "use CSRPatt constructor or MixedPattern class" << std::endl;
     typedef PatternDefs::Container::iterator Iter;
     UInt nnz = patt1._nnz;
     UInt nrows = patt1._nrows + nrowZero;
@@ -796,12 +794,12 @@ VBRPatt::VBRPatt( UInt ex_nnz, UInt ex_nrow, UInt ex_ncol, const
                   && ex_cpntr.size() == ex_ncol + 1 ),
                 "Error in VBR Pattern Life V" );
 }
-//Alain (23/10/02)
-// Copy constructor of CSR might be not necessary to call ?
-// I will test it soon.
-VBRPatt::VBRPatt( const VBRPatt &RightHandVBRP ) : //CSRPatt(RightHandVBRP),
-        _indx( RightHandVBRP.indx() ), _rpntr( RightHandVBRP.rpntr() ),
-        _cpntr( RightHandVBRP.cpntr() )
+VBRPatt::VBRPatt( const VBRPatt &RightHandVBRP )
+    :
+    //CSRPatt(RightHandVBRP),
+    _indx( RightHandVBRP.indx() ),
+    _rpntr( RightHandVBRP.rpntr() ),
+    _cpntr( RightHandVBRP.cpntr() )
 {
     //CSRPatt::CSRPatt(RightHandVBRP);
 }
@@ -858,9 +856,9 @@ void VBRPatt::showMe( bool verbose, ostream& c ) const
     UInt blsize = _rpntr[ 1 ] - _rpntr[ 0 ]; // block size
     int i_first;
     string pare = "[";
-    c << "**************************" << endl;
-    c << "     VBR Matrix Pattern   " << endl;
-    c << endl;
+    c << "**************************" << std::endl;
+    c << "     VBR Matrix Pattern   " << std::endl;
+    c << std::endl;
     if ( verbose )
     {
 
@@ -871,7 +869,7 @@ void VBRPatt::showMe( bool verbose, ostream& c ) const
             {
                 c << pare;
                 pare = " [";
-                
+
                 // In _ia[i_index] there is the diagonal entry
                 i_first = _i2o( _ia[ i_index ] ) + 1;
                 UInt jj = 0;
@@ -894,13 +892,13 @@ void VBRPatt::showMe( bool verbose, ostream& c ) const
                     }
                 }
                 if ( i_index == static_cast<Diff_t>( _nrows - 1 ) )
-                    c << " ]] " << endl;
+                    c << " ]] " << std::endl;
                 else
-                    c << " ]  " << endl;
-                c << endl;
+                    c << " ]  " << std::endl;
+                c << std::endl;
             }
     }
-    c << "**************************" << endl;
+    c << "**************************" << std::endl;
     return ;
 }
 
@@ -935,13 +933,13 @@ void VBRPatt::spy( string const &filename ) const
         for ( UInt ic = _ia[ irb ];ic < _ia[ irb + 1 ];++ic )
             for ( UInt i = 0;i < blocsize;++i )
                 for ( UInt j = 0;j < blocsize;++j )
-                    file_out << irb*blocsize + i - PatternOffset + 1 << uti 
-                             << _ja[ ic ] * blocsize + j - PatternOffset + 1 
-                             << uti << "1.0" << endl;
+                    file_out << irb*blocsize + i - PatternOffset + 1 << uti
+                             << _ja[ ic ] * blocsize + j - PatternOffset + 1
+                             << uti << "1.0" << std::endl;
     }
-    file_out << "];" << endl;
-    file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);" 
-             << endl;
+    file_out << "];" << std::endl;
+    file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"
+             << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -958,7 +956,7 @@ CSRPattSymm::CSRPattSymm( UInt ex_nnz, UInt ex_nrow, UInt ex_ncol ) :
         BasePattern( ex_nnz, ex_nrow, ex_ncol )
 {
     _ia.reserve( ex_nrow + 1 );
-    
+
     // Notice that in the symmetric pattern....
     _ja.reserve( ( ex_nnz + ex_nrow ) / 2 );
 }
@@ -987,10 +985,8 @@ bool CSRPattSymm::isThere( Index_t i, Index_t j ) const
 {
     if ( i <= j )
     {
-        ASSERT_BD( i >= PatternOffset &&
-                   i < static_cast<Index_t>( _nrows ) + PatternOffset );
-        ASSERT_BD( j >= PatternOffset &&
-                   j < static_cast<Index_t>( _ncols ) + PatternOffset );
+        ASSERT_BD( i < static_cast<Index_t>( _nrows ) + PatternOffset );
+        ASSERT_BD( j < static_cast<Index_t>( _ncols ) + PatternOffset );
 
         Container::const_iterator start = _ja.begin() + _row_off( i );
         Container::const_iterator finish = _ja.begin() + _row_off( i + 1 );
@@ -1003,10 +999,8 @@ bool CSRPattSymm::isThere( Index_t i, Index_t j ) const
 pair<PatternDefs::Diff_t, bool>
 CSRPattSymm::locate_pattern( Index_t const i, Index_t const j ) const
 {
-    ASSERT_BD( i >= PatternOffset &&
-               i < static_cast<Index_t>( _nrows ) + PatternOffset );
-    ASSERT_BD( j >= PatternOffset &&
-               j < static_cast<Index_t>( _ncols ) + PatternOffset );
+    ASSERT_BD( i < static_cast<Index_t>( _nrows ) + PatternOffset );
+    ASSERT_BD( j < static_cast<Index_t>( _ncols ) + PatternOffset );
 
     if ( ! _filled )
     {
@@ -1016,7 +1010,7 @@ CSRPattSymm::locate_pattern( Index_t const i, Index_t const j ) const
     {
         Diff_t _off = _row_off( i );
         Container::const_iterator finish = _ja.begin() + _row_off( i + 1 );
-        
+
         // search with a binary search
         Container::const_iterator current = search_binary( _ja.begin() + _off,
                                                            finish, j );
@@ -1080,7 +1074,7 @@ CSRPattSymm::neighbour( ID const n, ID const d ) const
     {
         // no need to search diag
         start = _ja.begin() + ( _i2o( _ia[ i ] ) + 1 );
-        
+
         finish = _ja.begin() + _i2o( _ia[ i + 1 ] );
         if ( binary_search( start, finish, _ind ) )
             ++counter;
@@ -1132,9 +1126,9 @@ void CSRPattSymm::showMe( bool verbose, ostream& c ) const
     typedef vector<Index_t>::iterator found;
     int i_first;
     string pare = "[";
-    c << "********************************" << endl;
-    c << "  CSR Matrix Symmetric Pattern   " << endl;
-    c << endl;
+    c << "********************************" << std::endl;
+    c << "  CSR Matrix Symmetric Pattern   " << std::endl;
+    c << std::endl;
     c << pare;
     if ( verbose )
     {
@@ -1142,7 +1136,7 @@ void CSRPattSymm::showMe( bool verbose, ostream& c ) const
         {
             c << pare;
             pare = " [";
-            
+
             // In _ia[i_index] there is the diagonal entry
             i_first = _ia[ i_index ] + 1 - PatternOffset;
             for ( unsigned int j = 0;j < _ncols;j++ )
@@ -1160,12 +1154,12 @@ void CSRPattSymm::showMe( bool verbose, ostream& c ) const
                 }
             }
             if ( i_index == _nrows - 1 )
-                c << " ]] " << endl;
+                c << " ]] " << std::endl;
             else
-                c << " ]  " << endl;
+                c << " ]  " << std::endl;
         }
     }
-    c << "********************************" << endl;
+    c << "********************************" << std::endl;
     return ;
 }
 
@@ -1185,7 +1179,7 @@ void CSRPattSymm::spy( string const &filename ) const
     {
         if ( i != filename.size() - 2 || filename[ i + 1 ] != 'm' )
         {
-            cerr << "Wrong file name " << i << endl;
+            cerr << "Wrong file name " << i << std::endl;
             nome = filename + ".m";
         }
     }
@@ -1199,17 +1193,17 @@ void CSRPattSymm::spy( string const &filename ) const
         for ( Index_t ii = _ia[ i ] - PatternOffset;
               ii < _ia[ i + 1 ] - PatternOffset; ++ii )
         {
-            file_out << i + 1 << uti << _ja[ ii ] + 1 - PatternOffset << uti 
-                     << "1.0" << endl;
+            file_out << i + 1 << uti << _ja[ ii ] + 1 - PatternOffset << uti
+                     << "1.0" << std::endl;
             if ( i != _i2o( _ja[ ii ] ) )
-                file_out << _i2o( _ja[ ii ] + 1 ) << uti << i + 1 << uti 
-                         << "1.0" << endl;
+                file_out << _i2o( _ja[ ii ] + 1 ) << uti << i + 1 << uti
+                         << "1.0" << std::endl;
         }
     }
-    file_out << "];" << endl;
+    file_out << "];" << std::endl;
 
-    file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);" 
-             << endl;
+    file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"
+             << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -1345,13 +1339,13 @@ MSRPatt::locate_pattern( Index_t const i, Index_t const j ) const
     {
         // the real start
         Container::const_iterator start = _bindx.begin() + _row_off( i );
-        
+
         // the real end (remember STL convention for ranges!)
         Container::const_iterator finish = _bindx.begin() + _row_off( i + 1 );
-        
+
         // the off-diagonal terms have been ordered
         Container::const_iterator current = search_binary( start, finish, j );
-        
+
         // difference of pointers should return distance,
         // which is of integral type
         return make_pair( current -_bindx.begin(), current != finish );
@@ -1363,9 +1357,9 @@ void MSRPatt::showMe( bool verbose, ostream& c ) const
     unsigned int i_first;
     string pare = "[";
     BasePattern::showMe( verbose, c );
-    cout << "**************************" << endl;
-    cout << "     MSR Matrix Pattern   " << endl;
-    cout << endl;
+    cout << "**************************" << std::endl;
+    cout << "     MSR Matrix Pattern   " << std::endl;
+    cout << std::endl;
     if ( verbose )
     {
         cout << pare;
@@ -1391,9 +1385,9 @@ void MSRPatt::showMe( bool verbose, ostream& c ) const
                 }
             }
             if ( i_index == _nrows - 1 )
-                cout << " ]]; " << endl;
+                cout << " ]]; " << std::endl;
             else
-                cout << " ]  " << endl;
+                cout << " ]  " << std::endl;
         }
     }
     return ;
@@ -1426,15 +1420,15 @@ void MSRPatt::spy( string const &filename ) const
     for ( UInt i = 0;i < _nrows;++i )
     {
         if ( i < _ncols )
-            file_out << i + 1 << uti << i + 1 << uti << "1.0" << endl;
+            file_out << i + 1 << uti << i + 1 << uti << "1.0" << std::endl;
         for ( Index_t ii = _bindx[ i ];ii < _bindx[ i + 1 ];++ii )
             file_out << i + 1 << uti << _bindx[ ii ] + 1 - PatternOffset
-                     << uti << "1.0" << endl;
+                     << uti << "1.0" << std::endl;
     }
-    file_out << "];" << endl;
+    file_out << "];" << std::endl;
 
     file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"
-             << endl;
+             << std::endl;
 }
 
 // Construction of diagonal block matrix. Done by A. Gilardi.

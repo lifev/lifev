@@ -20,7 +20,7 @@
 #define _MEDIT_WRTRS_H
 #include <fstream>
 
-#include <lifeV.hpp>
+#include <life.hpp>
 #include <basisElSh.hpp>
 
 namespace LifeV

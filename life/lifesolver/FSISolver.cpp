@@ -26,7 +26,7 @@
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
    \date 2004-11-18
  */
-#include <lifeV.hpp>
+#include <life.hpp>
 
 #include <FSISolver.hpp>
 
@@ -92,7 +92,7 @@ FSISolver::setFSIOperator( std::string const& __op )
     M_oper->setFluid( M_fluid );
     M_oper->setSolid( M_solid );
 
-    UInt dim_solid = M_oper->solid().dDof().numTotalDof();
+    //UInt dim_solid = M_oper->solid().dDof().numTotalDof();
     UInt dim_fluid = M_oper->fluid().uDof().numTotalDof();
 
 
@@ -115,8 +115,8 @@ FSISolver::iterate( Real time )
     Debug( 6220 ) << "============================================================\n";
     Debug( 6220 ) << "Solving FSI at time " << time << " with FSIOperator: " << M_method  << "\n";
 
-    UInt dim_solid = M_oper->solid().dDof().numTotalDof();
-    UInt dim_fluid = M_oper->fluid().uDof().numTotalDof();
+    //UInt dim_solid = M_oper->solid().dDof().numTotalDof();
+    //UInt dim_fluid = M_oper->fluid().uDof().numTotalDof();
 
 
     M_oper->fluid().timeAdvance( M_oper->fluid().sourceTerm(), time);

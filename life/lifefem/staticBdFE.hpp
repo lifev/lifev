@@ -22,10 +22,10 @@
 #include <vector>
 
 
-#include <lifeV.hpp>
+#include <life.hpp>
 #include <geoMap.hpp>
 #include <refFE.hpp>
-#include <geoMap.hpp> 
+#include <geoMap.hpp>
 /*!
   \file staticBdFE.h
   \brief Structure for a Static boundary finite element
@@ -37,13 +37,13 @@ namespace LifeV
   \brief A class for static boundary finite element
   \author J.-F. Gerbeau & V. Martin
   \date 09/2002
- 
+
   This class has two purposes:
   \par
   (1) it is a base class for standard boundary element (see CurrentBdFE.h)
   \par
   (2) it is used by refHybridFE as static boundary for a reference element
- 
+
 */
 
 class StaticBdFE

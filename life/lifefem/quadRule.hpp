@@ -18,7 +18,7 @@
 */
 #ifndef QUADRULE_H
 #define QUADRULE_H
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "basisElSh.hpp"
 
 namespace LifeV

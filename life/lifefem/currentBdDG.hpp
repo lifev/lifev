@@ -1,7 +1,7 @@
 #ifndef _CURRENTBDDG_H
 #define _CURRENTBDDG_H
 
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "geoMap.hpp"
 #include "geoMapDG.hpp"
 #include "refFEDG.hpp"
@@ -20,7 +20,7 @@ namespace LifeV
   \brief A class for boundary finite element (discontinuous elements)
   \author D. A. Di Pietro
   \date 12/2003
-  
+
   This class provides basic data structures to handle face integration
   in discontinuous finite elements. Child classes are then provided to handle
   integration on internal and boundary faces.
@@ -50,7 +50,7 @@ class CurrentBdDG:public StaticBdFE{
  public:
   CurrentBdDG(const RefFEDG& _refFEDG, const RefFE& _refFE, const GeoMap& _geoMap, const GeoMapDG& _geoMapAd, const QuadRule& _qr);
   ~CurrentBdDG();
-  
+
   int faceIDAd;
   const RefFEDG& refFEDG;
 
@@ -89,7 +89,7 @@ class CurrentBdDG:public StaticBdFE{
   inline int patternFirst(int i) const{
     return refFEDG.facePattern.patternFirst(i);
   }
-  
+
   /*!
     patternSecond(i): column index in the element matrix of the i-th term of the pattern
   */
@@ -114,7 +114,7 @@ class CurrentBdDG:public StaticBdFE{
       _hasMassAd     = false;
 #endif
       _currentId = geoele.id();
-      // update the definition of the geo points 
+      // update the definition of the geo points
       for(int i=0;i<nbGeoNode;i++){
 	point(i,0) = geoele.point(i+1).x();
 	point(i,1) = geoele.point(i+1).y();
@@ -140,7 +140,7 @@ class CurrentBdDG:public StaticBdFE{
       _hasMassAd     = false;
 #endif
       _currentId = geoele.id();
-      // update the definition of the geo points 
+      // update the definition of the geo points
       for(int i=0;i<nbGeoNode;i++){
 	point(i,0) = geoele.point(i+1).x();
 	point(i,1) = geoele.point(i+1).y();
@@ -168,7 +168,7 @@ class CurrentBdDG:public StaticBdFE{
       _hasMassAd     = false;
 #endif
       _currentId = geoele.id();
-      // update the definition of the geo points 
+      // update the definition of the geo points
       for(int i=0;i<nbGeoNode;i++){
 	point(i,0) = geoele.point(i+1).x();
 	point(i,1) = geoele.point(i+1).y();
@@ -198,14 +198,14 @@ class CurrentBdDG:public StaticBdFE{
       _hasMassAd     = false;
 #endif
       _currentId = geoele.id();
-      // update the definition of the geo points 
+      // update the definition of the geo points
       for(int i=0;i<nbGeoNode;i++){
 	point(i,0) = geoele.point(i+1).x();
 	point(i,1) = geoele.point(i+1).y();
 	point(i,2) = geoele.point(i+1).z();
       }
       // compute the measure and the normal
-      _comp_meas_normal();    
+      _comp_meas_normal();
     }
 
   //----------------------------------------------------------------------------
@@ -226,7 +226,7 @@ class CurrentBdDG:public StaticBdFE{
       _hasMassAd     = false;
 #endif
       _currentId = geoele.id();
-      // update the definition of the geo points 
+      // update the definition of the geo points
       for(int i=0;i<nbGeoNode;i++){
 	point(i,0) = geoele.point(i+1).x();
 	point(i,1) = geoele.point(i+1).y();
@@ -259,7 +259,7 @@ class CurrentBdDG:public StaticBdFE{
       _currentId = geoele.id();
       faceIDAd = geoele.pos_first() - 1; // 0-base!!
 
-      // update the definition of the geo points 
+      // update the definition of the geo points
       for(int i = 0; i < nbGeoNode; i++){
 	point(i,0) = geoele.point(i+1).x();
 	point(i,1) = geoele.point(i+1).y();
@@ -321,7 +321,7 @@ class CurrentBdDG:public StaticBdFE{
       _currentId = geoele.id();
       faceIDAd = geoele.pos_first() - 1; // 0-base!!
 
-      // update the definition of the geo points 
+      // update the definition of the geo points
       for(int i = 0; i < nbGeoNode; i++){
 	point(i,0) = geoele.point(i+1).x();
 	point(i,1) = geoele.point(i+1).y();

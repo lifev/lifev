@@ -15,22 +15,22 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*!
   \file dataConvDiffReact.hpp
   \author M. Prosi
   \date 03/2004
   \version 1.0
- 
+
   \brief File containing a class for handling Convection-Diffusion-Reaktion processes data with GetPot
- 
+
 */
 #ifndef _DATACONVDIFFREACT_H_
 #define _DATACONVDIFFREACT_H_
 #include <string>
 #include <iostream>
 #include "GetPot.hpp"
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "dataMesh.hpp"
 #include "dataTime.hpp"
 
@@ -38,9 +38,9 @@ namespace LifeV
 {
 /*!
   \class DataConvDiffReact
- 
+
   Base class which holds usual data for the Convection-Diffusion-Reaction equation solvers
- 
+
 */
 template <typename Mesh>
 class DataConvDiffReact: public DataMesh<Mesh>, public DataTime

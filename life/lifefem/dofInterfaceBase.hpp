@@ -33,7 +33,7 @@
 #include <fstream>
 
 
-#include <lifeV.hpp>
+#include <life.hpp>
 #include <vecUnknown.hpp>
 
 namespace LifeV

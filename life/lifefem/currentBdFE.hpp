@@ -19,11 +19,11 @@
 #ifndef _CURRENTBDFE_H
 #define _CURRENTBDFE_H
 
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "geoMap.hpp"
 #include "refFE.hpp"
 #include "geoMap.hpp"
-#include "staticBdFE.hpp" 
+#include "staticBdFE.hpp"
 /*!
   \file currentBdFE.h
   \brief Structure for a current finite element on the boundary
@@ -36,7 +36,7 @@ namespace LifeV
   \brief The class for a boundary finite element
   \author J.-F. Gerbeau
   \date 09/2002
- 
+
   This class is used for a current boundary elements, i.e. the boundary of
   a CurrentFE. As for the CurrentFE (and contrarily to StaticBdFE) on must
   update this element with a geometrical element before using it. If only

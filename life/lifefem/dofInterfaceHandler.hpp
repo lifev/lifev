@@ -27,7 +27,7 @@
 #ifndef _DOFINTERFACEHANDLER_HH
 #define _DOFINTERFACEHANDLER_HH
 
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "dofInterface3Dto2D.hpp"
 #include "bcVector.hpp"
 

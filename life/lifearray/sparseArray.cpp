@@ -553,7 +553,7 @@ DiagPreconditioner<VectorBlock>::solve( const VectorBlock &x ) const
     VectorBlock y( x.size(), x.numBlock( 0 ).size() );
 
     for ( UInt i = 0; i < x.size(); i++ )
-        for ( int j = 0; j < x.numBlock( 0 ).size(); j++ )
+        for ( UInt j = 0; j < x.numBlock( 0 ).size(); j++ )
             y.numBlock( i ) ( j ) = x.numBlock( i ) ( j ) * diagBlock( i ) ( j );
 
     return y;

@@ -37,7 +37,7 @@
 #include "dataAztec.hpp"
 #include "refFE.hpp"
 #include "dof.hpp"
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "medit_wrtrs.hpp"
 #include "bcHandler.hpp"
 

@@ -547,7 +547,7 @@ typename MatrixTypeDtr,
 typename MatrixTypeH,
 typename MatrixTypeMpLp,
 typename VectorType>
-void my_matvec( double *p, double *ap, AZ_MATRIX * Amat, int proc_config[] )
+void my_matvec( double *p, double *ap, AZ_MATRIX * Amat, int /*proc_config*/[] )
 {
     // Extraction of C, D and trD stored in the structure AZ_MATRIX
     DataFactorisation < MSRMatr<double>, MatrixTypeD, MatrixTypeDtr, MatrixTypeH,
@@ -659,7 +659,7 @@ typename MatrixTypeH,
 typename MatrixTypeMpLp,
 typename VectorType>
 void my_matvec_block( double *p, double *ap, AZ_MATRIX * Amat,
-                      int proc_config[] )
+                      int /*proc_config*/[] )
 {
     // Extraction of C, D and trD stored in the structure AZ_MATRIX
     DataFactorisation < MatrixTypeC, MatrixTypeD, MatrixTypeDtr, MatrixTypeH,
@@ -802,7 +802,7 @@ typename MatrixTypeDtr,
 typename MatrixTypeH,
 typename MatrixTypeMpLp,
 typename VectorType>
-void my_approxmatvec( double *p, double *ap, AZ_MATRIX * Amat, int proc_config[] )
+void my_approxmatvec( double *p, double *ap, AZ_MATRIX * Amat, int /*proc_config*/[] )
 {
     // Extraction of H, , HinvDtr, D and trD stored in the structure AZ_MATRIX
     DataFactorisation < MatrixTypeC, MatrixTypeD, MatrixTypeDtr, MatrixTypeH,
@@ -922,8 +922,8 @@ typename MatrixTypeDtr,
 typename MatrixTypeH,
 typename MatrixTypeMpLp,
 typename VectorType>
-void my_precSchur_PC( double *z, int *options, int *proc_config, double *params,
-                      AZ_MATRIX *Amat, AZ_PRECOND *prec )
+void my_precSchur_PC( double *z, int */*options*/, int *proc_config, double */*params*/,
+                      AZ_MATRIX */*Amat*/, AZ_PRECOND *prec )
 {
     // Extraction of H, D, HinvC, HinvDtr and trD stored in
     // the structure AZ_MATRIX

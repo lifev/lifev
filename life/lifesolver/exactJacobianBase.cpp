@@ -25,11 +25,11 @@
 namespace LifeV
 {
 
-Real fzeroEJ(const Real& t,
-             const Real& x,
-             const Real& y,
-             const Real& z,
-             const ID& i)
+Real fzeroEJ(const Real& /*t*/,
+             const Real& /*x*/,
+             const Real& /*y*/,
+             const Real& /*z*/,
+             const ID& /*i*/)
 {return 0.0;}
 
 

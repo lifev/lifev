@@ -29,7 +29,7 @@
 #include <string>
 #include <iostream>
 #include "GetPot.hpp"
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "dataMesh.hpp"
 #include "dataTime.hpp"
 

@@ -92,7 +92,7 @@ FSIOperator::setDataFromGetPot( GetPot const& data_file )
 //
 
 void
-FSIOperator::updateJac(Vector& sol,int iter)
+FSIOperator::updateJac(Vector& /*sol*/,int /*iter*/)
 {
 }
 

@@ -29,7 +29,7 @@
  Adaptation to the new f.e. JFG 04/2002 (remark : several class
  implementation should now be put in a .cc)
 *****************************************************************/
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "elemMat.hpp"
 #include "elemVec.hpp"
 #include "currentFE.hpp"

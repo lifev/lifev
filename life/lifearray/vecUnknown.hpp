@@ -30,7 +30,7 @@
 #ifndef _VEC_UNKNOWN_HH
 #define _VEC_UNKNOWN_HH
 
-#include <lifeV.hpp>
+#include <life.hpp>
 #include <vector>
 
 #include "tab.hpp"

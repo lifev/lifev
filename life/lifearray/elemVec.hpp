@@ -21,7 +21,7 @@
 
 #include <vector>
 
-#include "lifeV.hpp"
+#include "life.hpp"
 #include <iomanip>
 #include "tab.hpp"
 

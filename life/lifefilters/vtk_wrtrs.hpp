@@ -60,7 +60,7 @@
 
 #include <fstream>
 #include <vector>
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "currentFE.hpp"
 
 namespace LifeV
@@ -71,8 +71,8 @@ namespace LifeV
   we need to compute the coordinates of all the supplementary nodes
   For "iso" cases (whenever we have ALL the coordinates of the nodes, it is recommended using the other subroutine
   with the same name but with a different signature.
- 
- 
+
+
   NB: it works with P1, P2, but it needs probably to be adapted to more general cases...
 */
 template <typename TheMesh, typename TheDof>

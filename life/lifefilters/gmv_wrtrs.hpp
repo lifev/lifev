@@ -2,17 +2,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
- 
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
- 
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
- 
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -20,7 +20,7 @@
 #ifndef _GMV_WRTRS_H
 #define _GMV_WRTRS_H
 #include <fstream>
-#include "lifeV.hpp"
+#include "life.hpp"
 
 namespace LifeV
 {
@@ -29,11 +29,11 @@ namespace LifeV
   \file gmv_wrtrs.hpp
   \author M.A. Fernandez
   \date 01/01/2004
- 
+
   \brief Write a mesh and the Navier-Stokes solution for GMV Visualization Software
          http://www.mathematik.uni-dortmund.de/mirror/gmv/
- 
- 
+
+
 */
 
 template <typename Mesh>

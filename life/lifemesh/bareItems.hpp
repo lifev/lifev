@@ -118,7 +118,7 @@ detailed documentation.
 #include<algorithm>
 #include<iostream>
 
-#include "lifeV.hpp"
+#include "life.hpp"
 
 namespace LifeV
 {
@@ -134,9 +134,9 @@ typedef size_t id_type;
 //typedef unsigned int id_type;
 //! I define UInt=unsigned int. This allow to use this stuff also outside lifeV
 // more correct version
-//typedef size_t UInt;	
+//typedef size_t UInt;
 // original version
-typedef unsigned int UInt;	
+typedef unsigned int UInt;
 #endif
 
 //! The Edge basis class

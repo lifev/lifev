@@ -24,11 +24,11 @@
 
 namespace LifeV
 {
-Real fzeroSP(const Real& t,
-             const Real& x,
-             const Real& y,
-             const Real& z,
-             const ID& i)
+Real fzeroSP(const Real& /*t*/,
+             const Real& /*x*/,
+             const Real& /*y*/,
+             const Real& /*z*/,
+             const ID& /*i*/)
 {return 0.0;}
 
 steklovPoincare::steklovPoincare():
@@ -325,7 +325,7 @@ void steklovPoincare::solveInvLinearSolid()
 
 
 void  steklovPoincare::invSfPrime(const Vector& res,
-                                  double linear_rel_tol,
+                                  double /*linear_rel_tol*/,
                                   Vector& step)
 {
     setResidualFSI(res);
@@ -354,7 +354,7 @@ void  steklovPoincare::invSfPrime(const Vector& res,
 
 
 void  steklovPoincare::invSsPrime(const Vector& res,
-                                  double linear_rel_tol,
+                                  double /*linear_rel_tol*/,
                                   Vector& step)
 {
     setResidualFSI(res);
@@ -554,7 +554,7 @@ void steklovPoincare::setBC()
 {
     UInt dim_solid        = this->M_solid->dDof().numTotalDof();
     UInt dim_fluid        = this->M_fluid->uDof().numTotalDof();
-    UInt dim_reducedfluid = this->M_fluid->pDof().numTotalDof();
+    //UInt dim_reducedfluid = this->M_fluid->pDof().numTotalDof();
 
     // Boundary conditions for du and inverse
 
@@ -635,9 +635,9 @@ void steklovPoincare::setBC()
 
 void steklovPoincare::setInterfaceBC()
 {
-    UInt dim_solid        = this->M_solid->dDof().numTotalDof();
+    //UInt dim_solid        = this->M_solid->dDof().numTotalDof();
     UInt dim_fluid        = this->M_fluid->uDof().numTotalDof();
-    UInt dim_reducedfluid = this->M_fluid->pDof().numTotalDof();
+    //UInt dim_reducedfluid = this->M_fluid->pDof().numTotalDof();
 
     BCVectorInterface du_wall(M_residualFSI,
                               dim_fluid,
@@ -657,7 +657,7 @@ void steklovPoincare::setInterfaceNewtonBC()
 {
     UInt dim_solid        = this->M_solid->dDof().numTotalDof();
     UInt dim_fluid        = this->M_fluid->uDof().numTotalDof();
-    UInt dim_reducedfluid = this->M_fluid->pDof().numTotalDof();
+    //UInt dim_reducedfluid = this->M_fluid->pDof().numTotalDof();
 
     std::cout << "Steklov-Poincare: NEWTON boundary conditions" << std::endl;
 

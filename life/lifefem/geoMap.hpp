@@ -19,8 +19,8 @@
 #ifndef _GEOMAP_H
 #define _GEOMAP_H
 
-#include "lifeV.hpp"
-#include "refEle.hpp" 
+#include "life.hpp"
+#include "refEle.hpp"
 /*!
   \file geoMap.h
   \brief Structure for the geometrical mapping
@@ -33,12 +33,12 @@ namespace LifeV
   \brief Structure for the geometrical mapping
   \author J.-F. Gerbeau
   \date 04/2002
- 
+
   This class contains the geometrical transformation that maps the reference
   element on the current element, and its values on integration points
- 
+
   \par How to add a new geometrical mapping
- 
+
   The way is very similar to a reference finite element see refFE.h
 */
 
@@ -92,11 +92,11 @@ extern const GeoMap geoLinearTetra;
 extern const GeoMap geoBilinearHexa;
 //
 /*! Helper function that returns the geomap associated to a mesh
- 
+
 \note To be completed!
 */
 template <typename RegionMesh>
-const GeoMap& getGeoMap( RegionMesh & mesh )
+const GeoMap& getGeoMap( RegionMesh & /*mesh*/ )
 {
     typedef typename RegionMesh::ElementShape ElementShape;
     switch ( ElementShape::Shape )

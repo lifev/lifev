@@ -9,7 +9,7 @@
 #ifndef _DOFDG_HH
 #define _DOFDG_HH
 
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "SimpleVect.hpp"
 #include "localDofPattern.hpp"
 #include <algorithm>
@@ -34,11 +34,11 @@ class DofDG {
 public:
   //! Type for the localToGlobal table.
   typedef SimpleArray<UInt> Container;
-  
+
   //! The pattern of the local degrees of freedom.
   /*! It is exposed so that is is possible to interrogate it directly.*/
   const LocalDofPattern& fe; // be careful : use fe.nbLocalDof (fe.nbDof does not exist !)
-  
+
   /*! The minimal constructor
     \param _fe is the LocalDofPattern on which the ref FE is built
     \param Offset: the smallest Dof numbering. It might be used if we want the
@@ -47,7 +47,7 @@ public:
   DofDG(const LocalDofPattern& _fe, UInt offSet=1);
 
   DofDG(const DofDG & dof2);
-  
+
   //! Constructor accepting a mesh as parameter
   /*!
     \param mesh a RegionMesh3D
@@ -55,7 +55,7 @@ public:
     \param Offset: the smalest Dof numbering. It might be used if we want the
     degrees of freedom numbering start from a specific value.
   */
-  template<typename Mesh> 
+  template<typename Mesh>
     DofDG(Mesh& mesh, const LocalDofPattern& _fe, UInt offSet=1);
 
   //! Build the localToGlobal table
@@ -63,9 +63,9 @@ public:
     \param mesh A RegionMesh3D
     Updates the LocaltoGlobal array
   */
-  template <typename Mesh> 
+  template <typename Mesh>
     void update(Mesh &);
-  
+
   //! The total number of Dof
   inline UInt numTotalDof() const {return _totalDof;}
 
@@ -83,32 +83,32 @@ public:
     return _ltg(localNode,ElId);
   }
 
-  //! Number of elements in mesh 
+  //! Number of elements in mesh
   UInt numElements() const {return _nEl;}
-  
+
   //! Number of local vertices (in a elment)
   UInt numLocalVertices() const {return nlv;}
-  
+
   //! Number of local edges (in a elment)
   UInt numLocalEdges() const {return nle;}
-  
+
   //! Number of local faces (in a elment)
   UInt numLocalFaces() const {return nlf;}
-  
+
   //! Ouput
   void showMe(std::ostream  & out=std::cout, bool verbose=false) const;
 
 private:
   UInt _offset;
   UInt _totalDof;
-  UInt _nEl;  
+  UInt _nEl;
   UInt nlv;
   UInt nle;
   UInt nlf;
   Container _ltg;
   UInt _ncount[5];
 };
- 
+
 
 
 /********************************************************************
@@ -116,13 +116,13 @@ private:
 ********************************************************************/
 
 //! Constructor that builds the localToglobal table
-template <typename Mesh> 
+template <typename Mesh>
 DofDG::DofDG(Mesh& mesh, const LocalDofPattern& _fe, UInt off):DofDG(_fe,off)
 {update(mesh);}
 
 
 //! Build the localToGlobal table
-template<typename Mesh> 
+template<typename Mesh>
 void DofDG::update(Mesh& M){
 
   typedef  typename Mesh::VolumeShape GeoShape;
@@ -142,30 +142,30 @@ void DofDG::update(Mesh& M){
   UInt nV = M.numVolumes();
 
   UInt i,l,ie;
-  
+
   UInt nldof = nldpV + nldpe * nle + nldpv * nlv + nldpf * nlf;
 
   ASSERT_PRE( nldof == UInt(fe.nbLocalDof), "Something wrong in FE specification") ;
 
   _totalDof = _nEl * (nldpV + nle * nldpe + nlv * nldpv + nlf * nldpf);
   _ltg.reshape(nldof,nV);
-  
+
   // Make sure the mesh has everything needed
   bool update_edges(nldpe !=0 && ! M.hasLocalEdges());
   bool update_faces(nldpf !=0 && ! M.hasLocalFaces());
-  
+
   if (update_edges) M.updateElementEdges();
   if (update_faces) M.updateElementFaces();
   //  ASSERT_PRE( !(nldpe !=0 && M.hasLocalEdges()) , "Element edges stuff have not been updated") ;
   //  ASSERT_PRE( !(nldpf !=0 && M.hasLocalFaces()) , "Element faces stuff have not been updated") ;
   //ASSERT_PRE( (nldpe == 0 || M.hasLocalEdges()) , "Element edges stuff have not been updated") ;
   //ASSERT_PRE( (nldpf == 0 || M.hasLocalFaces()) , "Element faces stuff have not been updated") ;
-  
+
 
   unsigned int gcount(_offset);
   unsigned int lcount = 0;
   unsigned int lc;
-  
+
   // Vertex Based Dof
   _ncount[0]=gcount;
 
@@ -192,7 +192,7 @@ void DofDG::update(Mesh& M){
 	for (l=0; l<nldpe; ++l)
 	  _ltg(++lc,ie) = gcount + (ie - 1) * nle * nldpe + (i - 1) * nldpe + l;
     }
- 
+
   // Face  Based Dof
 
   gcount += _nEl * nldpe* nle;

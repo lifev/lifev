@@ -306,7 +306,7 @@ const BCBase& BCHandler::GetBCWithFlag(const EntityFlag& aFlag) const {
 
 UInt BCHandler::getBCbyName(const std::string __BCName) const
 {
-    UInt iBC( -1 );
+    UInt iBC( ( UInt )-1 );
 
     for (UInt jBC = 0; jBC < M_bcList.size(); jBC++)
         if (M_bcList[jBC].name() == __BCName)

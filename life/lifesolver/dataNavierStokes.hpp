@@ -30,7 +30,7 @@
 #include <string>
 #include <iostream>
 #include "GetPot.hpp"
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "dataMesh.hpp"
 #include "dataTime.hpp"
 
@@ -73,8 +73,8 @@ public:
     Real ZSectionInit() const;
     Real ZSectionFinal() const;
     UInt NbPolygonEdges() const;
-  
-    
+
+
 protected:
     //! Physics
     Real _rho; // density
@@ -136,7 +136,7 @@ DataNavierStokes( const GetPot& dfile ) :
     M_ZSectionInit =
       dfile( "fluid/valuespersection/z_section_init", -1. );
     M_ZSectionFinal =
-      dfile( "fluid/valuespersection/z_section_final", 0. ); 
+      dfile( "fluid/valuespersection/z_section_final", 0. );
     M_NbPolygonEdges =
       dfile( "fluid/valuespersection/nb_polygon_edges", 10 );
 }
@@ -238,7 +238,7 @@ computeMeanValuesPerSection() const
 {
     return M_computeMeanValuesPerSection;
 }
-//! number of sections 
+//! number of sections
 template <typename Mesh>
 UInt DataNavierStokes<Mesh>::
 NbZSections() const

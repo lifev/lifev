@@ -508,7 +508,7 @@ const IdentifierBase*
 BCBase::operator[] ( const Index_t& i ) const
 {
     ASSERT_PRE( _M_finalised, "BC List should be finalised before being accessed" );
-    ASSERT_BD( i >= 0 && i < _M_idList.size() );
+    ASSERT_BD( i < _M_idList.size() );
     return _M_idList[ i ].get();
 }
 

@@ -18,7 +18,7 @@
 */
 #ifndef V2ELEMVEC_H
 #define V2ELEMVEC_H
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "elemVec.hpp"
 #include "currentFE.hpp"
 

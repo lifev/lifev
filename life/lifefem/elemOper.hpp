@@ -18,7 +18,7 @@
 */
 #ifndef _ELEMOPER_H_INCLUDED
 #define _ELEMOPER_H_INCLUDED
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "elemMat.hpp"
 #include "elemVec.hpp"
 #include "currentFE.hpp"

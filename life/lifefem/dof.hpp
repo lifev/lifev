@@ -15,31 +15,31 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*!
   \file dof.h
   \brief Degrees of freedom, the class that provides the localtoglobal table
   \version 1.0
   \author M.A. Fernandez & Luca Formaggia
   \date 07/2002
- 
+
   The numbering of the degrees of freedom follow the order
   Vertices - Edges - Faces - Volumes
   If more than one degree of freedon is associated to a geometrical entity, the
   global numbering associated to two "consecutive" degree of freedom  on the given
   entity is consecutive, and the order is according to the entity orientation.
- 
- 
+
+
   \author Modified by Vincent MARTIN & Mohamed BELHADJ
   \date 19/07/2002
- 
+
   We added the HdivFE element here.
 */
 
 #ifndef _DOF_HH
 #define _DOF_HH
 
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "SimpleVect.hpp"
 #include "localDofPattern.hpp"
 #include <algorithm>
@@ -47,16 +47,16 @@
 namespace LifeV
 {
 /*! Local-to-global table
- 
+
  This class provides the localtoglobal table that relates the local DOF of
  a finite element to its global numbering. It needs a LocalDofPattern in
  order to obtain all the necessary information about the local pattern. In
  fact it stores a copy of it so to make the local pattern available, if
  needed.
- 
+
  It is useless until is has not been set up on a specific RegionMesh. This is accomplished either by
  passing the mesh to the constructor, or calling the method Dof::update().
- 
+
  \note The methods bulds the table for ALL degrees of freedom, i.e. it does not handle any essential
  boundary condition.
 */

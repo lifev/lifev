@@ -442,7 +442,7 @@ showMe( std::ostream& c ) const
 
 template <typename Mesh>
 void VenantKirchhofSolver<Mesh>::
-evalResidual( Vector &res, const Vector& sol, int iter)
+evalResidual( Vector &res, const Vector& sol, int /*iter*/)
 {
     std::cout << "O-    Computing residual... ";
 
@@ -577,7 +577,7 @@ updateJac( Vector& sol, int iter )
 template <typename Mesh>
 void VenantKirchhofSolver<Mesh>::
 //solveJac( const Vector& res, double& linear_rel_tol, Vector &step)
-solveJac( Vector &step, const Vector& res, double& linear_rel_tol)
+solveJac( Vector &step, const Vector& res, double& /*linear_rel_tol*/)
 {
     Chrono chrono;
 
@@ -656,7 +656,7 @@ solveJac(Vector &step, const Vector& res, double& linear_rel_tol, BCHandler &BCd
 
 template <typename Mesh>
 void VenantKirchhofSolver<Mesh>::
-solveLin( Vector &step, const Vector& res, double linear_rel_tol, BCHandler &BCd )
+solveLin( Vector &step, const Vector& res, double /*linear_rel_tol*/, BCHandler &BCd )
 {
     Chrono chrono;
 

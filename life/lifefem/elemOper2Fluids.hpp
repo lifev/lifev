@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #ifndef _ELEMOPER2FLUIDS_H_
 #define _ELEMOPER2FLUIDS_H_
 
-#include <lifeV.hpp>
+#include <life.hpp>
 #include <elemMat.hpp>
 #include <elemVec.hpp>
 #include <currentFE.hpp>
@@ -40,7 +40,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 namespace LifeV {
 
     /**
-       \This file contains elementary operators for 2 fluid Navier-Stokes 
+       \This file contains elementary operators for 2 fluid Navier-Stokes
        \problems. The user is warned that the following routines assume that
        \THE SAME QUADRATURE RULE is used for pressure, velocity and level set
        \function elements.
@@ -50,7 +50,7 @@ namespace LifeV {
        \Two-fluid mass contribution
     */
 
-    void mass_2f(Real coef1, Real coef2, 
+    void mass_2f(Real coef1, Real coef2,
                  const ElemVec& ls_fun_loc, const CurrentFE& fe_ls,
                  ElemMat& elmat, const CurrentFE& fe,
                  int iblock, int jblock);
@@ -80,7 +80,7 @@ namespace LifeV {
     template<typename UsrFct>
     void compute_vec_2f(Real coef1, Real coef2,
                         const ElemVec& ls_fun_loc, const CurrentFE& fe_ls,
-                        const UsrFct& fct, ElemVec& elvec, const CurrentFE& fe, 
+                        const UsrFct& fct, ElemVec& elvec, const CurrentFE& fe,
                         const Real& t, int iblock = 0);
 
     /**
@@ -93,7 +93,7 @@ namespace LifeV {
 
     // Implementations
 
-    void mass_2f(Real coef1, Real coef2, 
+    void mass_2f(Real coef1, Real coef2,
                  const ElemVec& ls_fun_loc, const CurrentFE& fe_ls,
                  ElemMat& elmat, const CurrentFE& fe,
                  int iblock = 0, int jblock = 0) {
@@ -129,7 +129,7 @@ namespace LifeV {
     void stiff_strain_2f(Real coef1, Real coef2,
                          const ElemVec& ls_fun_loc, const CurrentFE& fe_ls,
                          ElemMat& elmat, const CurrentFE& fe) {
-    
+
         ASSERT_PRE( fe.hasFirstDeriv(),
                     "Stiffness Strain matrix needs at least the first derivatives" );
         Real s, coef_s;
@@ -224,7 +224,7 @@ namespace LifeV {
 
                         for(int k = 0; k < fe.nbNode; k++)
                             coef_v += vel_loc.vec() [k + icoor * fe.nbNode] * fe.phi(k, iq);
-                        
+
                         // Add local contribution
 
                         s += coef_s * coef_v * fe.phiDer(j, icoor, iq) * fe.phi(i, iq) * fe.weightDet(iq);
@@ -239,7 +239,7 @@ namespace LifeV {
     template<typename UsrFct>
     void compute_vec_2f(Real coef1, Real coef2,
                         const ElemVec& ls_fun_loc, const CurrentFE& fe_ls,
-                        const UsrFct& fct, ElemVec& elvec, const CurrentFE& fe, 
+                        const UsrFct& fct, ElemVec& elvec, const CurrentFE& fe,
                         const Real& t, int iblock = 0) {
         ElemVec::vector_view vec = elvec.block( iblock );
         Real s, x, y, z;

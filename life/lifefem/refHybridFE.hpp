@@ -19,7 +19,7 @@
 #ifndef _REFHYBRIDFE_H_INCLUDE
 #define _REFHYBRIDFE_H_INCLUDE
 
-#include "lifeV.hpp"
+#include "life.hpp"
 #include "tab.hpp"
 #include "basisElSh.hpp"
 #include "refFE.hpp"
@@ -43,11 +43,11 @@ typedef Real ( * FCT ) ( cRRef, cRRef , cRRef );
   \brief Class for Hybrid functions i.e. defined on the boundary of an element.
   \author V. Martin
   \date 08/2002
- 
+
   This is a duplication-modification of both RefEle and RefFE
   in order to implement Mixed Hybrid Finite Elements, which are
   based on a (RT0 - Q0) like discretization of H(div, .) - L2(.).
- 
+
   This class contains a list of boundary elements.
                   Thanks to the Piola transform, the computations are performed
     on the boundary of the REFERENCE Element. But in general, the
@@ -56,15 +56,15 @@ typedef Real ( * FCT ) ( cRRef, cRRef , cRRef );
     REFERENCE TETRA -> 3 REFERENCE TRIA + 1 EQUILATERAL TRIANGLE...
     REFERENCE PRISM -> 2 TRIA + 3 QUAD...?
     REFERENCE HEXA  -> 6 REFERENCE QUAD.
- 
+
   \par How to add a new reference element:
- 
+
   in refHybridFE.h : you declare the functions you need (fct1_Pipo_2D,
   derfct1_1_Pipo_2D, etc...), the static arrays containing these functions
   and the coordinates of the nodes on the reference element.
- 
+
   and in defQuadRuleFE.cc : you define these functions (fct1_Pipo_2D, etc...)
- 
+
 */
 class RefHybridFE:
             public LocalDofPattern
@@ -185,7 +185,7 @@ extern const RefHybridFE feTetraRT0VdotNHyb;
 //
 //======================================================================
 /*!
- 
+
                       8-------7
                      /.      /|
       / .     / |
@@ -195,7 +195,7 @@ extern const RefHybridFE feTetraRT0VdotNHyb;
      | .     | /
      |.      |/
      1_______2
- 
+
 SEE basisElSh.cc   for the ORIENTATION CONVENTIONS
    point 1: 0, 0, 0
    point 2: 1, 0, 0
@@ -205,14 +205,14 @@ SEE basisElSh.cc   for the ORIENTATION CONVENTIONS
    point 6: 1, 0, 1
    point 7: 1, 1, 1
    point 8: 1, 0, 1
- 
+
    face 1: 1,4,3,2
    face 2: 1,5,8,4
    face 3: 1,2,6,5
    face 4: 2,3,7,6
    face 5: 3,4,8,7
    face 6: 5,6,7,8
- 
+
 */
 
 // not really useful(?). to be  removed? in this case, remove also xi, eta, zeta, etc. in the class.
@@ -233,7 +233,7 @@ static const Real refcoor_RT0HYB_HEXA[ 18 ] =
   \param refcoor_HYB_HEXA_FACE_I
        Coordinates of the vertices of the 6 faces.
        They are used for the definition of the POINT in the bdfe.
- 
+
        The same arrays can be used for all the Hybrid elements that have the same shape.
        ex. :  refcoor_HYB_HEXA_FACE_I are used for all the HEXA Hybrid elements.
 */
@@ -335,7 +335,7 @@ static const Real refcoor_RT1HYB_HEXA[ 72 ] =
 //
 //======================================================================
 /*!
- 
+
                 4
                / .
               /  \.3
@@ -343,19 +343,19 @@ static const Real refcoor_RT1HYB_HEXA[ 72 ] =
             / .    \\
            /.       \!
          1 ----------2
- 
+
 SEE basisElSh.cc   for the ORIENTATION CONVENTIONS
    point 1: 0, 0, 0
    point 2: 1, 0, 0
    point 3: 0, 1, 0
    point 4: 0, 0, 1
- 
+
    face 1: 1, 3, 2
    face 2: 1, 2, 4
    face 3: 2, 3, 4
    face 4: 1, 4, 3
- 
- 
+
+
 */
 
 // not really useful(?). to be  removed? in this case, remove also xi, eta, zeta, etc. in the class.
@@ -374,7 +374,7 @@ static const Real refcoor_RT0HYB_TETRA[ 12 ] =
   \param refcoor_HYB_TETRA_FACE_I
        Coordinates of the vertices of the 6 faces.
        They are used for the definition of the POINT in the bdfe.
- 
+
        The same arrays can be used for all the Hybrid elements that have the same shape.
        ex. :  refcoor_HYB_TETRA_FACE_I are used for all the TETRA Hybrid elements.
 */
