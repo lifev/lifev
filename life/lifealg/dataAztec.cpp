@@ -242,7 +242,6 @@ void DataAztec::aztecSolveLinearSyst( MSRMatr<double>& mat,
                                       int unknown_size, MSRPatt& pattern,
                                       int* options, double* params )
 {
-<<<<<<< dataAztec.cpp
   int    proc_config[AZ_PROC_SIZE];// Processor information:
   int    *data_org;                // Array to specify data layout
   double status[AZ_STATUS_SIZE];   // Information returned from AZ_solve()
