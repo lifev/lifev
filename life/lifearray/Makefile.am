@@ -1,8 +1,7 @@
 # -*- makefile -*-
 #
 # Author: Christophe Prud'homme
-#
-# Copyright (C) 2004 EPFL, INRIA and Politechnico di Milano
+# Copyright (C) 2004 EPFL, INRIA, Politechnico di Milano
 #
 # Distributed under the GPL(GNU Public License):
 # This program is free software; you can redistribute it and/or modify
@@ -23,8 +22,8 @@
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
 
-include_HEADERS	= gmsh_wrtrs.hpp medit_wrtrs.hpp openDX_wrtrs.hpp vtk_wrtrs.hpp 
+include_HEADERS	= RNM.hpp RNM_op.hpp RNM_opc.hpp RNM_tpl.hpp
 
-lib_LTLIBRARIES	= lifefilters.la
+lib_LTLIBRARIES	= lifearray.la
 
-lifefilters_la_SOURCES	= medit_wrtrs.cpp vtk_wrtrs.cpp 
+lifearray_la_SOURCES	= dummy.cpp
