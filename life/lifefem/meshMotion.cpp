@@ -19,9 +19,10 @@
 #include "meshMotion.hpp"
 
 // This method gives a reference to the computed harmonic extension.
-Vector& HarmonicExtension
-::getDisplacement() { 
-  return _disp.vec();
+Vector& 
+HarmonicExtension::getDisplacement() 
+{ 
+    return _disp;
 }
 
 const Dof& HarmonicExtension::

@@ -23,8 +23,10 @@
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
 SUBDIRS         =  
-check_PROGRAMS = test_fe 
-noinst_HEADERS = 
-LDADD = $(life_libs)
+
+TESTS		= test_fe
+
+check_PROGRAMS 	= test_fe 
+
+LDADD 		= $(life_libs)
 test_fe_SOURCES = build_pattern.cpp 
-EXTRA_DIST = 

@@ -214,7 +214,7 @@ ElasticStructureHandler<Mesh>::postProcess() {
     wr_medit_ascii_scalar("dep_x."+name+".bb",_d.giveVec(),_mesh.numVertices());
     wr_medit_ascii_scalar("dep_y."+name+".bb",_d.giveVec() + _dim,_mesh.numVertices());
     wr_medit_ascii_scalar("dep_z."+name+".bb",_d.giveVec() + 2*_dim,_mesh.numVertices());
-    wr_medit_ascii2(namedef, _mesh, _d.vec(), _factor);
+    wr_medit_ascii2(namedef, _mesh, _d, _factor);
     // wr_medit_ascii_vector("veloc."+name+".bb",_u.giveVec(),_mesh.numVertices(),_dim_u);
     system(("ln -s "+namedef  +" dep_x."+name+".mesh").data());
     system(("ln -s "+namedef  +" dep_y."+name+".mesh").data());
@@ -272,8 +272,8 @@ ElasticStructureHandler<Mesh>::initialize(const Function& d0, const Function& w0
 	  
 	  // Loop on data vector components
 	  for (UInt icmp=0; icmp < nbComp; ++icmp) {
-       	    _d.vec()( icmp*_dim + _dof.localToGlobal(iElem,lDof) - 1 ) = d0(0.0,x,y,z,icmp+1);
-	    _w.vec()( icmp*_dim + _dof.localToGlobal(iElem,lDof) - 1 ) = w0(0.0,x,y,z,icmp+1);    
+       	    _d( icmp*_dim + _dof.localToGlobal(iElem,lDof) - 1 ) = d0(0.0,x,y,z,icmp+1);
+	    _w( icmp*_dim + _dof.localToGlobal(iElem,lDof) - 1 ) = w0(0.0,x,y,z,icmp+1);    
 	  }
 	}
       }
@@ -294,8 +294,8 @@ ElasticStructureHandler<Mesh>::initialize(const Function& d0, const Function& w0
 	
 	  // Loop on data vector components
 	  for (UInt icmp=0; icmp < nbComp; ++icmp) {
-	    _d.vec()( icmp*_dim + _dof.localToGlobal(iElem,lDof) - 1 ) = d0(0.0,x,y,z,icmp+1);
-	    _w.vec()( icmp*_dim + _dof.localToGlobal(iElem,lDof) - 1 ) = w0(0.0,x,y,z,icmp+1);
+	    _d( icmp*_dim + _dof.localToGlobal(iElem,lDof) - 1 ) = d0(0.0,x,y,z,icmp+1);
+	    _w( icmp*_dim + _dof.localToGlobal(iElem,lDof) - 1 ) = w0(0.0,x,y,z,icmp+1);
 	  }
 	}
       }
@@ -317,8 +317,8 @@ ElasticStructureHandler<Mesh>::initialize(const Function& d0, const Function& w0
 		  
 	  // Loop on data vector components
 	  for (UInt icmp=0; icmp < nbComp; ++icmp) {
-	    _d.vec()( icmp*_dim + _dof.localToGlobal(iElem,lDof) - 1) = d0(0.0,x,y,z,icmp+1);  
-	    _w.vec()( icmp*_dim + _dof.localToGlobal(iElem,lDof) - 1) = w0(0.0,x,y,z,icmp+1);    
+	    _d( icmp*_dim + _dof.localToGlobal(iElem,lDof) - 1) = d0(0.0,x,y,z,icmp+1);  
+	    _w( icmp*_dim + _dof.localToGlobal(iElem,lDof) - 1) = w0(0.0,x,y,z,icmp+1);    
 	  }
 	}
       }
@@ -333,8 +333,8 @@ ElasticStructureHandler<Mesh>::initialize(const Function& d0, const Function& w0
 	      
       // Loop on data vector components
       for (UInt icmp=0; icmp < nbComp; ++icmp) {
-	_d.vec()( icmp*_dim + _dof.localToGlobal(iElem,lDof) - 1) =   d0(0.0,x,y,z,icmp+1); 
-	_w.vec()( icmp*_dim + _dof.localToGlobal(iElem,lDof) - 1) =   w0(0.0,x,y,z,icmp+1);     
+	_d( icmp*_dim + _dof.localToGlobal(iElem,lDof) - 1) =   d0(0.0,x,y,z,icmp+1); 
+	_w( icmp*_dim + _dof.localToGlobal(iElem,lDof) - 1) =   w0(0.0,x,y,z,icmp+1);     
       }
     }
   }

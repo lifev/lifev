@@ -262,7 +262,7 @@ template<typename Mesh> void
 NavierStokesHandler<Mesh>::initialize(const Function& u0) {
   
   // Initialize pressure
-  _p.vec()=0.0;
+  _p=0.0;
 
   // Initialize velocity
 
@@ -307,7 +307,7 @@ NavierStokesHandler<Mesh>::initialize(const Function& u0) {
 	  
 	  // Loop on data vector components
 	  for (UInt icmp=0; icmp < nbComp; ++icmp)
-       	    _u.vec()( icmp*_dim_u + _dof_u.localToGlobal(iElem,lDof) - 1 ) = u0(0.0,x,y,z,icmp+1);  
+       	    _u( icmp*_dim_u + _dof_u.localToGlobal(iElem,lDof) - 1 ) = u0(0.0,x,y,z,icmp+1);  
 	}
       }
     }
@@ -327,7 +327,7 @@ NavierStokesHandler<Mesh>::initialize(const Function& u0) {
 	
 	  // Loop on data vector components
 	  for (UInt icmp=0; icmp < nbComp; ++icmp) 
-	    _u.vec()( icmp*_dim_u + _dof_u.localToGlobal(iElem,lDof) - 1 ) = u0(0.0,x,y,z,icmp+1);
+	    _u( icmp*_dim_u + _dof_u.localToGlobal(iElem,lDof) - 1 ) = u0(0.0,x,y,z,icmp+1);
 	}
       }
     }  
@@ -348,7 +348,7 @@ NavierStokesHandler<Mesh>::initialize(const Function& u0) {
 		  
 	  // Loop on data vector components
 	  for (UInt icmp=0; icmp < nbComp; ++icmp) 
-	    _u.vec()( icmp*_dim_u + _dof_u.localToGlobal(iElem,lDof) - 1) = u0(0.0,x,y,z,icmp+1);   
+	    _u( icmp*_dim_u + _dof_u.localToGlobal(iElem,lDof) - 1) = u0(0.0,x,y,z,icmp+1);   
 	}
       }
     }
@@ -363,7 +363,7 @@ NavierStokesHandler<Mesh>::initialize(const Function& u0) {
 	      
       // Loop on data vector components
       for (UInt icmp=0; icmp < nbComp; ++icmp)
-	_u.vec()( icmp*_dim_u + _dof_u.localToGlobal(iElem,lDof) - 1) =   u0(0.0,x,y,z,icmp+1);      
+	_u( icmp*_dim_u + _dof_u.localToGlobal(iElem,lDof) - 1) =   u0(0.0,x,y,z,icmp+1);      
     }
   }
 }

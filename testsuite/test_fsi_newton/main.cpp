@@ -96,7 +96,7 @@ int main(int argc, char** argv)
   DofInterface3Dto3D dofStructureToFluidMesh(fluid.mesh().getRefFE(), fluid.dofMesh(), 
 				       feTetraP1, solid.dDof()); 
   dofStructureToFluidMesh.update(fluid.mesh(), 1, solid.mesh(), 1, 0.0);                                                     
-  BCVector_Interface displ(solid.d().vec(), dim_solid, dofStructureToFluidMesh);
+  BCVector_Interface displ(solid.d(), dim_solid, dofStructureToFluidMesh);
  
 
 
@@ -104,7 +104,7 @@ int main(int argc, char** argv)
   //
   DofInterface3Dto3D dofMeshToFluid(feTetraP1bubble, fluid.uDof(), feTetraP1bubble, fluid.uDof() );
   dofMeshToFluid.update(fluid.mesh(), 1, fluid.mesh(), 1, 0.0);                                                     
-  BCVector_Interface u_wall(fluid.wInterpolated().vec(), dim_fluid,dofMeshToFluid);
+  BCVector_Interface u_wall(fluid.wInterpolated(), dim_fluid,dofMeshToFluid);
  
 
   //========================================================================================
@@ -143,7 +143,7 @@ int main(int argc, char** argv)
 
   // Passing data from structure to the fluid: z -> du
   //
-  BCVector_Interface du_wall(fluid.dwInterpolated().vec(), dim_fluid, dofMeshToFluid);
+  BCVector_Interface du_wall(fluid.dwInterpolated(), dim_fluid, dofMeshToFluid);
  
   // Passing data from fluid to the structure: du -> dz
   //
@@ -194,9 +194,9 @@ int main(int argc, char** argv)
     solid.timeAdvance(f,time);
 
     // displacement prediction
-    disp = solid.d().vec() + dt*(1.5*solid.w().vec() - 0.5*velo_1);
+    disp = solid.d() + dt*(1.5*solid.w() - 0.5*velo_1);
 
-    velo_1 = solid.w().vec();
+    velo_1 = solid.w();
     
     cout << "norm( disp ) init = " << maxnorm(disp) << endl;
     cout << "norm( velo_! ) init = " << maxnorm(velo_1) << endl;

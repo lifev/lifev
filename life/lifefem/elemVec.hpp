@@ -27,27 +27,45 @@
 #include "currentFE.hpp"
 
 class ElemVec
+    :
+    public Tab1d
 {
-  Tab1d _vec; // the array
-  int _nBlockRow; // number of block rows
-  vector<int> _nRow; // _nRow[i]=nb of rows in the i-th block row 
-  vector<int> _firstRow;//_firstRow[i]=index of first row of i-th block row
+    int _nBlockRow; // number of block rows
+    std::vector<int> _nRow; // _nRow[i]=nb of rows in the i-th block row 
+    std::vector<int> _firstRow;//_firstRow[i]=index of first row of i-th block row
 public:
-  ElemVec(int nNode1,int nbr1);
-  ElemVec(int nNode1,int nbr1,
-	  int nNode2,int nbr2);
-  ElemVec(int nNode1,int nbr1,
-	  int nNode2,int nbr2,
-	  int nNode3,int nbr3);
-  inline Tab1d& vec(){return _vec;};
-  inline const Tab1d& vec() const {return _vec;};
-  inline int nBlockRow()const{return _nBlockRow;}
-  inline Tab1dView block(int i){
-    return _vec(SubArray(_nRow[i],_firstRow[i]));
-  }
-  //  inline void zero(){_vec=Tab1d(_nBlockRow*_vec.N(),0.0);};
-  inline void zero(){_vec=Tab1d(_vec.N(),0.0);};//Alex 11/01/02: _vec.N() accounts for the number of block, doesn't it ?
-  void showMe(ostream& c=cout);
+    typedef Tab1d super;
+
+    ElemVec(int nNode1,int nbr1);
+    ElemVec(int nNode1,int nbr1,
+	    int nNode2,int nbr2);
+    ElemVec(int nNode1,int nbr1,
+	    int nNode2,int nbr2,
+	    int nNode3,int nbr3);
+
+    ElemVec& operator=( super const& __v )
+	{
+	    if ( this == &__v )
+		return *this;
+	    super& __super = (super&)*this;
+	    __super = super(*this);
+	    return *this;
+	}
+
+    Tab1d& vec(){return *this;};
+    const Tab1d& vec() const {return *this;};
+    int nBlockRow()const{return _nBlockRow;}
+    Tab1dView block(int i)
+	{
+	    return (*this)(SubArray(_nRow[i],_firstRow[i]));
+	}
+    //  inline void zero(){_vec=Tab1d(_nBlockRow*_vec.N(),0.0);};
+    inline void zero() 
+	{ 
+	    super& __super = (super&)*this;
+	    __super = super(this->N(),0.0);
+	}
+    void showMe(ostream& c=cout);
 };
 
 
@@ -77,17 +95,17 @@ void
 vec2elemVec(Vector& V,ElemVec& elvec,const CurrentFE& fe, const DOF& dof,
 	    int iblock=0,int nb=1) 
 {
-  UInt totdof = dof.numTotalDof();
-  int i;
-  UInt ig;
-  UInt eleId = fe.currentId();
-  for(int ib = iblock ; ib <iblock+nb ; ib++){
-    Tab1dView vec=elvec.block(ib);
-    for(i=0 ; i<fe.nbNode ; i++){
-      ig = dof.localToGlobal(eleId,i+1) - 1+ib*totdof;
-      vec(i) = V[ig];
+    UInt totdof = dof.numTotalDof();
+    int i;
+    UInt ig;
+    UInt eleId = fe.currentId();
+    for(int ib = iblock ; ib <iblock+nb ; ib++){
+	Tab1dView vec=elvec.block(ib);
+	for(i=0 ; i<fe.nbNode ; i++){
+	    ig = dof.localToGlobal(eleId,i+1) - 1+ib*totdof;
+	    vec(i) = V[ig];
+	}
     }
-  }
 };
 
 #endif

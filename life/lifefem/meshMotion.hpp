@@ -180,7 +180,7 @@ HarmonicExtension(Mesh& mesh, const Real& diffusion, const QuadRule& Qr, const Q
   } 
 
   // Initializations 
-  _disp.vec()  = 0.0;
+  _disp  = 0.0;
 }
 
 // This method updates the extension of the displacement, i.e. it solves the laplacian proglem 
@@ -200,10 +200,10 @@ void HarmonicExtension::updateExtension(Mesh& mesh, const Real& time, const UInt
   UInt dim = _dof_mesh.numTotalDof();
  
   // Initializations 
-  _f.vec()=0.0;
+  _f=0.0;
    
   // Boundary conditions treatment
-  bc_manage_vector(_f.vec(), mesh, _dof_mesh, _mesh_BCh, _feBd, time,1.0);
+  bc_manage_vector(_f, mesh, _dof_mesh, _mesh_BCh, _feBd, time,1.0);
 
   // AZTEC stuff
   int    proc_config[AZ_PROC_SIZE];// Processor information:                 
@@ -269,7 +269,7 @@ template<typename Mesh>
 void HarmonicExtension::updateExtensionTransp(Mesh& mesh, const Real& time) {
    
   // Boundary conditions treatment
-  bc_manage_vector(_disp.vec(), mesh, _dof_mesh, _mesh_BCh, _feBd, time);
+  bc_manage_vector(_disp, mesh, _dof_mesh, _mesh_BCh, _feBd, time);
 }
 
 #endif

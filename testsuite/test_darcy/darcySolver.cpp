@@ -41,10 +41,10 @@ DarcySolver::DarcySolver(const GetPot& data_file):
   BtC(pfe.nbNode, refTPFE.nbDof),
   signLocalFace(mesh.numVolumes(),numFacesPerVolume)
 {
-  globalTP.vec()=0.0; 
-  globalF.vec()=0.0;
-  globalP.vec() = 0.0;
-  globalFlux.vec() = 0.0;
+  globalTP=0.0; 
+  globalF=0.0;
+  globalP = 0.0;
+  globalFlux = 0.0;
   elvecHyb.zero();
   signLocalFace = -1.;
   elvecSource.zero();
@@ -243,7 +243,7 @@ void DarcySolver::computeHybridMatrix()
 				   Everything is stored in the Lower part */
     assemb_mat_symm_lower(mat,elmatHyb,refTPFE,tpdof,
                           mesh.volumeList(i).id(),0,0);
-    assemb_vec(globalF.vec(),elvecHyb,refTPFE,tpdof,
+    assemb_vec(globalF,elvecHyb,refTPFE,tpdof,
                mesh.volumeList(i).id(), 0);
     //-----------------------------------
     // END OF LOOP ON THE VOLUME ELEMENTS
@@ -253,7 +253,7 @@ void DarcySolver::computeHybridMatrix()
 
 void DarcySolver::applyBC()
 {
-  bc_manage(mat,globalF.vec(),mesh,tpdof,bc,feBd,1.,0.0);
+  bc_manage(mat,globalF,mesh,tpdof,bc,feBd,1.,0.0);
 }
 
 void DarcySolver::solveDarcy()
@@ -282,7 +282,7 @@ void DarcySolver::computePresFlux()
     and the velocity (RTk / element) => 2 (opposite) velocities / face
     ==========================================*/
 
-  Vector& global_flux  = globalFlux.vec();
+  Vector& global_flux  = globalFlux;
   
   // No need for CtC in this part: only difference. (+ last dsyrk)
   Tab2d AA = elmatMix.block(0,0);
@@ -368,7 +368,7 @@ void DarcySolver::computePresFlux()
     ASSERT_PRE(!INFO[0],
 	       "Lapack Computation rhs = LB^{-1} rhs is not achieved.");
     // extract the resulting TP for the current fe and put it into elvecHyb. 
-    extract_vec(globalTP.vec(), elvecHyb, refTPFE, tpdof,iglobvol, 0);
+    extract_vec(globalTP, elvecHyb, refTPFE, tpdof,iglobvol, 0);
     Tab1dView RHSTP = elvecHyb.block(0);
     // RHSTP = elvecHyb.block(0)  contains the local TP for the current fe.
     // rhs = BtC * RHSTP + rhs <- LB^{-1} Bt A^{-1} C * L + LB^{-1} F2 
@@ -386,7 +386,7 @@ void DarcySolver::computePresFlux()
     // contains the pressure for the current element.
     /* Put the pressure of the current fe ("elvecSource")
       in the global vector globalP.*/
-    assemb_vec( globalP.vec(), elvecSource, refPFE, pdof,iglobvol, 0);    
+    assemb_vec( globalP, elvecSource, refPFE, pdof,iglobvol, 0);    
     //__________________________________
     // 2/ Computation of the VELOCITIES
     //__________________________________

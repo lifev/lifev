@@ -136,7 +136,7 @@ int main() {
 
   // initialization of vector of unknowns and rhs
   ScalUnknown<Vector> U(dim), F(dim);
-  U.vec()=0.0; F.vec()=0.0;
+  U=0.0; F=0.0;
 
   // ==========================================
   // Pattern construction and matrix assembling
@@ -160,7 +160,7 @@ int main() {
   SourceFct source;
 
   // assembling of A: stiff operator
-  assemble(stiff,aMesh,fe,dof,source,A,F.vec());
+  assemble(stiff,aMesh,fe,dof,source,A,F);
   cout << "A has been constructed" << endl;
 
   chrono.stop();
@@ -176,7 +176,7 @@ int main() {
   Real tgv=1.;
 
   chrono.start();
-  bc_manage(A,F.vec(),aMesh,dof,BCh,feBd,tgv,0.0); 
+  bc_manage(A,F,aMesh,dof,BCh,feBd,tgv,0.0); 
 
   chrono.stop();
   cout << chrono.diff() << "s." << endl;
@@ -233,7 +233,7 @@ int main() {
 
   cout << "The approximation at the nodes ( node, u(node) ): " << endl;
   for (UInt i=0; i < U.size() ; ++i) 
-    cout << i+1 << " " << U.vec()[i] << endl;
+    cout << i+1 << " " << U[i] << endl;
 
  
   wr_vtk_ascii_header("post.vtk","Title",aMesh, dof, fe);

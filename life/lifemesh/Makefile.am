@@ -20,7 +20,9 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .cc
 
-INCLUDES 	= -I$(top_srcdir)/life/lifecore -I$(top_srcdir)/life/lifearray
+# CP temporary to make it compile
+#INCLUDES 	= -I$(top_srcdir)/life/lifecore -I$(top_srcdir)/life/lifearray 
+INCLUDES 	= -I$(top_srcdir)/life/lifecore -I$(top_srcdir)/life/lifearray -I$(top_srcdir)/life/lifefem
 
 include_HEADERS		= bareItems.hpp basisElSh.hpp dataMesh.hpp geo0D.hpp \
 geoElement.hpp geoND.hpp identifier.hpp markers.hpp mesh_util.hpp mesh_util_base.hpp\

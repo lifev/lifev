@@ -48,14 +48,14 @@ operFS::operFS(NavierStokesAleSolverPC< RegionMesh3D<LinearTetra> >& fluid,
 
 void operFS::eval(Vector& dispNew, Vector& velo, const Vector& disp, int status) {
 
-  _solid.d().vec() = disp;
+  _solid.d() = disp;
 
   _fluid.updateMesh(); 
   _fluid.iterate();  
   _solid.iterate(); 
  
-  dispNew = _solid.d().vec(); 
-  velo    = _solid.w().vec(); 
+  dispNew = _solid.d(); 
+  velo    = _solid.w(); 
 
   cout << "                ::: norm(disp     ) = " << maxnorm(disp)    << endl;
   cout << "                ::: norm(dispNew  ) = " << maxnorm(dispNew) << endl;

@@ -137,7 +137,7 @@ int main() {
 
   // initialization of vector of unknowns and rhs
   ScalUnknown<Vector> U(dim), F(dim);
-  U.vec()=0.0; F.vec()=0.0;
+  U=0.0; F=0.0;
 
   // ==========================================
   // Pattern construction and matrix assembling
@@ -161,7 +161,7 @@ int main() {
   SourceFct source;
 
   // assembling of A: stiff operator
-  assemble(stiff,aMesh,fe,dof,source,A,F.vec());
+  assemble(stiff,aMesh,fe,dof,source,A,F);
   cout << "A has been constructed" << endl;
 
   chrono.stop();
@@ -177,7 +177,7 @@ int main() {
   Real tgv=1.;
 
   chrono.start();
-  bc_manage(A,F.vec(),aMesh,dof,BCh,feBd,tgv,0.0); 
+  bc_manage(A,F,aMesh,dof,BCh,feBd,tgv,0.0); 
 
   chrono.stop();
   //cout << chrono.diff() << "s." << endl;
@@ -245,13 +245,13 @@ int main() {
     //
     fe.updateFirstDeriv(aMesh.volumeList(i));
 
-    normL2     += elem_L2_2(U.vec(),fe,dof);
+    normL2     += elem_L2_2(U,fe,dof);
     normL2sol  += elem_L2_2(analyticSol,fe);
-    normL2diff += elem_L2_diff_2(U.vec(),analyticSol,fe,dof);
+    normL2diff += elem_L2_diff_2(U,analyticSol,fe,dof);
 
-    normH1     += elem_H1_2(U.vec(),fe,dof);
+    normH1     += elem_H1_2(U,fe,dof);
     normH1sol  += elem_H1_2(analyticSol,fe);
-    normH1diff += elem_H1_diff_2(U.vec(),analyticSol,fe,dof);
+    normH1diff += elem_H1_diff_2(U,analyticSol,fe,dof);
   }
 
   normL2     = sqrt(normL2);

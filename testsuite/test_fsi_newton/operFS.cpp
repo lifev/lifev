@@ -40,7 +40,7 @@ void operFS::eval(Vector& dispNew, Vector& velo, const Vector& disp, int status)
   if(status) _nbEval = 0; // new time step
   _nbEval++ ;
   
-  _solid.d().vec() = disp;
+  _solid.d() = disp;
 
   _fluid.updateMesh(); 
   _fluid.iterate();  
@@ -48,8 +48,8 @@ void operFS::eval(Vector& dispNew, Vector& velo, const Vector& disp, int status)
   _solid._recur=0;
   _solid.iterate(); 
  
-  dispNew = _solid.d().vec(); 
-  velo    = _solid.w().vec(); 
+  dispNew = _solid.d(); 
+  velo    = _solid.w(); 
  
   cout << "                ::: norm(disp     ) = " << maxnorm(disp) << endl;
   cout << "                ::: norm(dispNew  ) = " << maxnorm(dispNew) << endl;
@@ -180,7 +180,7 @@ void my_matvecJacobian(double *z, double *Jz, AZ_MATRIX* J, int proc_config[]) {
   }
   else {
     for (int i=0; i <(int)dim; ++i) {
-      my_data->_pFS->_solid.d().vec()[i] =  z[i];
+      my_data->_pFS->_solid.d()[i] =  z[i];
     } 
     my_data->_pFS->_fluid.updateDispVelo();
     my_data->_pFS->solveLinearFluid();

@@ -250,8 +250,8 @@ NavierStokesAleSolverPC(const GetPot& data_file, const RefFE& refFE_u, const Ref
      _dataAztec_i(data_file,"fluid/aztec_i"),
      _dataAztec_ii(data_file,"fluid/aztec_ii"),
      _dataAztec_s(data_file,"fluid/aztec_s"),
-     _factor_data(_C,_D,_trD,_H,_HinvC,_HinvDtr,_invCtrDP.vec(),_dataAztec_i,_dataAztec_s,_BCh_u.fullEssential(),1), 
-     _factor_data_jacobian(_C,_D,_trD,_H,_HinvC,_HinvDtr,_invCtrDP.vec(),_dataAztec_i,_dataAztec_s,_BCh_u.fullEssential(),2) {
+     _factor_data(_C,_D,_trD,_H,_HinvC,_HinvDtr,_invCtrDP,_dataAztec_i,_dataAztec_s,_BCh_u.fullEssential(),1), 
+     _factor_data_jacobian(_C,_D,_trD,_H,_HinvC,_HinvDtr,_invCtrDP,_dataAztec_i,_dataAztec_s,_BCh_u.fullEssential(),2) {
 
   
   cout << endl;
@@ -304,7 +304,7 @@ timeAdvance(const Function source, const Real& time) {
   chrono.start();
 
    // Right hand side for the velocity at time
-  _f_uWithOutBC.vec()=0.;
+  _f_uWithOutBC=0.;
   
   // loop on volumes: assembling source term
   for(UInt i=1; i<=_mesh.numVolumes(); ++i){
@@ -312,14 +312,14 @@ timeAdvance(const Function source, const Real& time) {
     _fe_u.updateFirstDerivQuadPt(_mesh.volumeList(i));
     for (UInt ic=0; ic<nc_u; ++ic){ 
       compute_vec(source,_elvec,_fe_u,_time,ic); // compute local vector
-      assemb_vec(_f_uWithOutBC.vec(),_elvec,_fe_u,_dof_u,ic); // assemble local vector into global one       
+      assemb_vec(_f_uWithOutBC,_elvec,_fe_u,_dof_u,ic); // assemble local vector into global one       
     }
   }
-  _f_uWithOutBC.vec() += _M_u * _u.vec();
+  _f_uWithOutBC += _M_u * _u;
 
   // Save last mesh displacement and fluid velocity
-  _dispOld.vec() = _disp.vec();
-  _un.vec() = _u.vec();
+  _dispOld = _disp;
+  _un = _u;
 
   chrono.stop();
   cout << "done in " << chrono.diff() << " s." << endl;
@@ -372,7 +372,7 @@ iterate() {
       UInt  iloc = _fe_u.patternFirst(k);
       for (UInt ic=0; ic<nc_u; ++ic){     
 	UInt ig=_dof_u.localToGlobal(i,iloc+1)-1+ic*_dim_u;       
-	_elvec.vec()[iloc+ic*_fe_u.nbNode] = _rho*(_un.vec()(ig)-_wInterp.vec()(ig)); 
+	_elvec[iloc+ic*_fe_u.nbNode] = _rho*(_un(ig)-_wInterp(ig)); 
       }
     }
 
@@ -418,9 +418,9 @@ iterate() {
 
   cout << "  o-  Applying boundary conditions... ";
   chrono.start();  
-  _f_u.vec()=_f_uWithOutBC.vec(); 
+  _f_u=_f_uWithOutBC; 
   _BCh_u.bdUpdate(_mesh, _feBd_u, _dof_u);
-  bc_manage(_C, _trD, _f_u.vec(), _mesh, _dof_u, _BCh_u, _feBd_u, tgv, _time);
+  bc_manage(_C, _trD, _f_u, _mesh, _dof_u, _BCh_u, _feBd_u, tgv, _time);
   chrono.stop();
   cout << "done in " << chrono.diff() << "s." << endl;
  
@@ -521,12 +521,12 @@ iterate() {
  
   
   // RHS of the linear system (ii)
-  vec_DV = _D*_u.vec();
+  vec_DV = _D*_u;
 
    // case of pure Dirichlet BCs:
   if (_BCh_u.fullEssential()) {
     vec_DV[_dim_p-1]   = 1.0; // correction of the right hand side.
-    _p.vec()[_dim_p-1] = 1.0; // pressure value at the last node.
+    _p[_dim_p-1] = 1.0; // pressure value at the last node.
   }
 
   cout << "  o-  Solving pressure system... ";
@@ -543,7 +543,7 @@ iterate() {
   // ----------------------------
 
   // everything is done...
-  _u.vec() = _u.vec() - _invCtrDP.vec();
+  _u = _u - _invCtrDP;
   cout << "  o-  Velocity updated" << endl; 
 
   AZ_matrix_destroy(&A_ii);
@@ -551,7 +551,7 @@ iterate() {
   AZ_matrix_destroy(&C);
   AZ_precond_destroy(&prec_C);
 
-  _residual_u.vec() = _f_uWithOutBC.vec() - _CAux * _u.vec() - _trDAux   * _p.vec(); 
+  _residual_u = _f_uWithOutBC - _CAux * _u - _trDAux   * _p; 
 
  
 }
@@ -571,9 +571,9 @@ iterateTransp() {
 
   cout << "  o-  Applying boundary conditions... ";
   chrono.start();  
-  _f_u.vec()=_f_uWithOutBC.vec(); 
+  _f_u=_f_uWithOutBC; 
   _BCh_u.bdUpdate(_mesh, _feBd_u, _dof_u);
-  bc_manage(_C, _trD, _f_u.vec(), _mesh, _dof_u, _BCh_u, _feBd_u, tgv, _time);
+  bc_manage(_C, _trD, _f_u, _mesh, _dof_u, _BCh_u, _feBd_u, tgv, _time);
   chrono.stop();
   cout << "done in " << chrono.diff() << "s." << endl;
  
@@ -669,12 +669,12 @@ iterateTransp() {
 
    
   // RHS of the linear system (ii)
-  vec_DV = _D*_u.vec();
+  vec_DV = _D*_u;
 
    // case of pure Dirichlet BCs:
   if (_BCh_u.fullEssential()) {
     vec_DV[_dim_p-1]   = 1.0; // correction of the right hand side.
-    _p.vec()[_dim_p-1] = 1.0; // pressure value at the last node.
+    _p[_dim_p-1] = 1.0; // pressure value at the last node.
   }
 
   cout << "  o-  Solving pressure system... ";
@@ -691,7 +691,7 @@ iterateTransp() {
   // ----------------------------
 
   // everything is done...
-  _u.vec() = _u.vec() - _invCtrDP.vec();
+  _u = _u - _invCtrDP;
   cout << "  o-  Velocity updated" << endl; 
 
   AZ_matrix_destroy(&A_ii);
@@ -727,8 +727,8 @@ iterateLin(BC_Handler& BCh_du) {
   chrono.start();
     
   //initialize right hand side
-  _f_duWithOutBC.vec()=0.0; 
-  _f_p.vec()=0.0; 
+  _f_duWithOutBC=0.0; 
+  _f_p=0.0; 
 
   // Loop on elements
   for(UInt i = 1; i <= _mesh.numVolumes(); i++){
@@ -744,18 +744,18 @@ iterateLin(BC_Handler& BCh_du) {
       iloc = _fe_u.patternFirst(k);
       for (UInt ic=0; ic<nc_u; ++ic){     
 	ig=_dof_u.localToGlobal(i,iloc+1)-1+ic*_dim_u;       
-	_convect.vec()[iloc + ic*_fe_u.nbNode] = _un.vec()(ig)-_wInterp.vec()(ig);  // u^n - w^k local
-	_w_loc.vec(  )[iloc + ic*_fe_u.nbNode] = _wInterp.vec()(ig);                // w^k local
-	_uk_loc.vec( )[iloc + ic*_fe_u.nbNode] = _u.vec()(ig);                      // u^k local
-	_d_loc.vec(  )[iloc + ic*_fe_u.nbNode] = _dInterp.vec()(ig);                // d local
-	_dw_loc.vec( )[iloc + ic*_fe_u.nbNode] = _dwInterp.vec()(ig);               // dw local
+	_convect[iloc + ic*_fe_u.nbNode] = _un(ig)-_wInterp(ig);  // u^n - w^k local
+	_w_loc.vec(  )[iloc + ic*_fe_u.nbNode] = _wInterp(ig);                // w^k local
+	_uk_loc.vec( )[iloc + ic*_fe_u.nbNode] = _u(ig);                      // u^k local
+	_d_loc.vec(  )[iloc + ic*_fe_u.nbNode] = _dInterp(ig);                // d local
+	_dw_loc.vec( )[iloc + ic*_fe_u.nbNode] = _dwInterp(ig);               // dw local
       }
     }
     
     for (UInt k=0 ; k<(UInt)_fe_p.nbNode ; k++){
       iloc = _fe_p.patternFirst(k);
       ig   = _dof_p.localToGlobal(i,iloc+1)-1;
-      _pk_loc.vec()[iloc] = _p.vec()(ig);  // p^k local
+      _pk_loc[iloc] = _p(ig);  // p^k local
     }
     
     //
@@ -785,18 +785,18 @@ iterateLin(BC_Handler& BCh_du) {
     // 
     
     // assembling presssure right hand side
-    assemb_vec(_f_p.vec(),_elvec_dp,_fe_p,_dof_p,0);
+    assemb_vec(_f_p,_elvec_dp,_fe_p,_dof_p,0);
   
     // loop on velocity components
     for(UInt ic=0;ic<nc_u;ic++)
       // assembling velocity right hand side
-      assemb_vec(_f_duWithOutBC.vec(),_elvec_du,_fe_u,_dof_u,ic);
+      assemb_vec(_f_duWithOutBC,_elvec_du,_fe_u,_dof_u,ic);
   }
   
   chrono.stop();
   cout << "done in "<< chrono.diff() << "s." << endl;
 
-  cout << "  maxnorm (_f_duWithOutBC.vec()) = " <<  maxnorm(_f_duWithOutBC.vec())   << endl; 
+  cout << "  maxnorm (_f_duWithOutBC) = " <<  maxnorm(_f_duWithOutBC)   << endl; 
   
   // for BC treatment (done at each time-step)
   Real tgv=1.e02; 
@@ -806,18 +806,18 @@ iterateLin(BC_Handler& BCh_du) {
   _C   = _CAux;
   _trD = _trDAux;
 
-  _f_u.vec() = _f_duWithOutBC.vec();
+  _f_u = _f_duWithOutBC;
 
 
 
   BCh_du.bdUpdate(_mesh, _feBd_u, _dof_u);
-  bc_manage(_C, _trD, _f_u.vec(), _mesh, _dof_u, BCh_du, _feBd_u, tgv, _time);
+  bc_manage(_C, _trD, _f_u, _mesh, _dof_u, BCh_du, _feBd_u, tgv, _time);
 
 
   chrono.stop();
   cout << "done in " << chrono.diff() << "s." << endl;
-  cout << "  maxnorm (_f_du.vec()) after BC= " <<  maxnorm(_f_u.vec())   << endl; 
-  cout << "  maxnorm ( difference ) after BC= " <<  maxnorm( _f_duWithOutBC.vec() - _f_u.vec())   << endl; 
+  cout << "  maxnorm (_f_du) after BC= " <<  maxnorm(_f_u)   << endl; 
+  cout << "  maxnorm ( difference ) after BC= " <<  maxnorm( _f_duWithOutBC - _f_u)   << endl; 
   
   //matrices HinvDtr:
   MultInvDiag(_H, _trD, _HinvDtr);
@@ -863,7 +863,7 @@ iterateLin(BC_Handler& BCh_du) {
   // ---------------
   options_i[AZ_recursion_level]=1;
 
-  _du.vec()=0.0;
+  _du=0.0;
 
   // intermediate velocity computation   
   cout << "  o-  Solving system (i)... "; 
@@ -922,20 +922,20 @@ iterateLin(BC_Handler& BCh_du) {
  
   
   // RHS of the linear system (ii)
-  vec_DV = _D*_du.vec()-_f_p.vec();
+  vec_DV = _D*_du-_f_p;
 
    // case of pure Dirichlet BCs:
   if (BCh_du.fullEssential()) {
     vec_DV[_dim_p-1]    = 1.0; // correction of the right hand side.
   }
   
-  _dp.vec()=0.0;
+  _dp=0.0;
 
  
   cout << "  o-  Solving pressure system... \n";
   cout << "  maxnorm (vec_DV) = " <<  maxnorm(vec_DV) << endl; 
-  cout << "  maxnorm (_f_p.vec()) = " <<  maxnorm(_f_p.vec())   << endl; 
-  cout << "  maxnorm (_D*_du.vec() ) = " <<  maxnorm(_D*_du.vec()) << endl; 
+  cout << "  maxnorm (_f_p) = " <<  maxnorm(_f_p)   << endl; 
+  cout << "  maxnorm (_D*_du ) = " <<  maxnorm(_D*_du) << endl; 
   
   chrono.start(); 
   options_ii[AZ_recursion_level]=1;
@@ -951,7 +951,7 @@ iterateLin(BC_Handler& BCh_du) {
   // ----------------------------
   // (iii) V = V-(C^(-1)*trD) * P
   // ----------------------------
-  _du.vec() = _du.vec() - _invCtrDP.vec();
+  _du = _du - _invCtrDP;
   cout << "  o-  Velocity updated" << endl; 
 
   AZ_matrix_destroy(&A_ii);
@@ -959,9 +959,9 @@ iterateLin(BC_Handler& BCh_du) {
   AZ_matrix_destroy(&C);
   AZ_precond_destroy(&prec_C);
 
-  _residual_u.vec() = _f_duWithOutBC.vec() - _CAux * _du.vec() - _trDAux   * _dp.vec(); 
+  _residual_u = _f_duWithOutBC - _CAux * _du - _trDAux   * _dp; 
 
-  cout << "  maxnorm (_residual_du ) = " <<  maxnorm( _residual_u.vec() ) << endl; 
+  cout << "  maxnorm (_residual_du ) = " <<  maxnorm( _residual_u ) << endl; 
 }
 
 
@@ -969,7 +969,7 @@ iterateLin(BC_Handler& BCh_du) {
 template<typename Mesh>    
 Vector& NavierStokesAleSolverPC<Mesh>::
 residual() {
-  return _residual_u.vec(); 
+  return _residual_u; 
 }
 
 

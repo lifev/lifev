@@ -41,8 +41,8 @@ void DarcySolver::postProcessPressureQ1()
   dof_q1.update(mesh);
   UInt dim_q1 = dof_q1.numTotalDof();
   ScalUnknown<Vector> p_q1(dim_q1), f_q1(dim_q1);
-  p_q1.vec()=0.0;
-  f_q1.vec()=0.0;
+  p_q1=0.0;
+  f_q1=0.0;
   MSRPatt pattA_q1(dof_q1);
   MSRMatr<double> A_q1(pattA_q1);
   ElemMat elmat(fe_q1.nbNode,1,1);
@@ -52,9 +52,9 @@ void DarcySolver::postProcessPressureQ1()
     elmat.zero();
     elvec.zero();
     mass(1.,elmat,fe_q1);
-    source(globalP.vec()(i-1),elvec,fe_q1,0);
+    source(globalP(i-1),elvec,fe_q1,0);
     assemb_mat(A_q1,elmat,fe_q1,dof_q1,0,0);
-    assemb_vec(f_q1.vec(),elvec,fe_q1,dof_q1,0);
+    assemb_vec(f_q1,elvec,fe_q1,dof_q1,0);
   }
   int    options[AZ_OPTIONS_SIZE]; 
   double params[AZ_PARAMS_SIZE];
@@ -87,8 +87,8 @@ void DarcySolver::postProcessVelocityQ1()
   dof_q1.update(mesh);
   UInt dim_q1 = dof_q1.numTotalDof();
   PhysVectUnknown<Vector> u_q1(dim_q1), f_q1(dim_q1);
-  u_q1.vec()=0.0;
-  f_q1.vec()=0.0;
+  u_q1=0.0;
+  f_q1=0.0;
   MSRPatt pattA_q1(dof_q1,nbCoor);
   MSRMatr<double> A_q1(pattA_q1);
   ElemMat elmat_hdiv(fe_q1.nbNode,nbCoor,0,
@@ -105,7 +105,7 @@ void DarcySolver::postProcessVelocityQ1()
     elmat_hdiv.zero();
     mass(1.,elmat,fe_q1,0,0,nbCoor);
     mass_Mixed_Hdiv(1.,elmat_hdiv,fe_q1,vfe,0,0);
-    extract_vec(globalFlux.vec(),elvec_hdiv,refVFE,vdof,mesh.volumeList(i).id(),0);
+    extract_vec(globalFlux,elvec_hdiv,refVFE,vdof,mesh.volumeList(i).id(),0);
     //
     for(int j=0;j<(int) mesh.volumeList(i).numLocalFaces;j++){
       elvec_hdiv_vec[j] *= signLocalFace( (int)mesh.volumeList(i).id() - 1, j);
@@ -114,7 +114,7 @@ void DarcySolver::postProcessVelocityQ1()
     elvec.vec() = elmat_hdiv.mat() * elvec_hdiv.vec();
     for(UInt icoor = 0; icoor < nbCoor; icoor++){
       assemb_mat(A_q1,elmat,fe_q1,dof_q1,icoor,icoor);
-      assemb_vec(f_q1.vec(),elvec,fe_q1,dof_q1,icoor);
+      assemb_vec(f_q1,elvec,fe_q1,dof_q1,icoor);
     }
   }
   int    options[AZ_OPTIONS_SIZE];

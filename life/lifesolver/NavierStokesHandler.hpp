@@ -316,10 +316,10 @@ NavierStokesHandler<Mesh>::dx_write_sol(string file_sol, string fe_type_vel, str
   string file_pre=file_sol+"_pre.dx";
  
   wr_opendx_header(file_pre,_mesh,_dof_p,_fe_p,fe_type_pre);
-  wr_opendx_scalar(file_pre,"pression",_p.vec());
+  wr_opendx_scalar(file_pre,"pression",_p);
 
   wr_opendx_header(file_vel,_mesh,_dof_u,_fe_u,fe_type_vel);
-  wr_opendx_vector(file_vel, "velocity", _u.vec(), _u.nbcomp());
+  wr_opendx_vector(file_vel, "velocity", _u, _u.nbcomp());
   
 }
 
@@ -329,10 +329,10 @@ template<typename Mesh> void
 NavierStokesHandler<Mesh>::initialize(const Function& u0) {
   
   // Initialize pressure
-  _p.vec()=0.0;
+  _p=0.0;
 
   // ********** initialize in the pressure BDF structure
-  _bdf.bdf_p().initialize_unk(_p.vec());
+  _bdf.bdf_p().initialize_unk(_p);
 
   // Initialize velocity
 
@@ -377,7 +377,7 @@ NavierStokesHandler<Mesh>::initialize(const Function& u0) {
 	  
 	  // Loop on data vector components
 	  for (UInt icmp=0; icmp < nbComp; ++icmp)
-       	    _u.vec()( icmp*_dim_u + _dof_u.localToGlobal(iElem,lDof) - 1 ) = u0(0.0,x,y,z,icmp+1);  
+       	    _u( icmp*_dim_u + _dof_u.localToGlobal(iElem,lDof) - 1 ) = u0(0.0,x,y,z,icmp+1);  
 	}
       }
     }
@@ -397,7 +397,7 @@ NavierStokesHandler<Mesh>::initialize(const Function& u0) {
 	
 	  // Loop on data vector components
 	  for (UInt icmp=0; icmp < nbComp; ++icmp) 
-	    _u.vec()( icmp*_dim_u + _dof_u.localToGlobal(iElem,lDof) - 1 ) = u0(0.0,x,y,z,icmp+1);
+	    _u( icmp*_dim_u + _dof_u.localToGlobal(iElem,lDof) - 1 ) = u0(0.0,x,y,z,icmp+1);
 	}
       }
     }  
@@ -418,7 +418,7 @@ NavierStokesHandler<Mesh>::initialize(const Function& u0) {
 		  
 	  // Loop on data vector components
 	  for (UInt icmp=0; icmp < nbComp; ++icmp) 
-	    _u.vec()( icmp*_dim_u + _dof_u.localToGlobal(iElem,lDof) - 1) = u0(0.0,x,y,z,icmp+1);   
+	    _u( icmp*_dim_u + _dof_u.localToGlobal(iElem,lDof) - 1) = u0(0.0,x,y,z,icmp+1);   
 	}
       }
     }
@@ -433,11 +433,11 @@ NavierStokesHandler<Mesh>::initialize(const Function& u0) {
 	      
       // Loop on data vector components
       for (UInt icmp=0; icmp < nbComp; ++icmp)
-	_u.vec()( icmp*_dim_u + _dof_u.localToGlobal(iElem,lDof) - 1) =   u0(0.0,x,y,z,icmp+1);      
+	_u( icmp*_dim_u + _dof_u.localToGlobal(iElem,lDof) - 1) =   u0(0.0,x,y,z,icmp+1);      
     }
   }
   //****** Initialize in the BDF structure
-  _bdf.bdf_u().initialize_unk(_u.vec());
+  _bdf.bdf_u().initialize_unk(_u);
 
   _bdf.bdf_u().showMe();
   _bdf.bdf_p().showMe();
@@ -453,10 +453,10 @@ NavierStokesHandler<Mesh>::initialize(const Function& u0, const Function& p0, Re
 
 
   _bdf.bdf_u().initialize_unk(u0,_mesh,_refFE_u,_fe_u,_dof_u,t0,dt,nbComp);  
-  _u.vec()=*(_bdf.bdf_u().unk().begin()); // initialize _u with the first element in bdf_u.unk (=last value)
+  _u=*(_bdf.bdf_u().unk().begin()); // initialize _u with the first element in bdf_u.unk (=last value)
 
   _bdf.bdf_p().initialize_unk(p0,_mesh,_refFE_p,_fe_p,_dof_p,t0,dt,1);  
-  _p.vec()=*(_bdf.bdf_p().unk().begin()); // initialize _u with the first element in bdf_u.unk (=last value)
+  _p=*(_bdf.bdf_p().unk().begin()); // initialize _u with the first element in bdf_u.unk (=last value)
 
 
   _bdf.bdf_u().showMe();

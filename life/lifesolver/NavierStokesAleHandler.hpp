@@ -127,11 +127,11 @@ NavierStokesAleHandler(const GetPot& data_file,  const RefFE& refFE_u,
   _dInterp(_dim_u),
   _dwInterp(_dim_u)
  {
-  _dispOld.vec() = 0.0; 
-  _w.vec()   = 0.0;
-  _wInterp.vec() = 0.0;
-  _dInterp.vec() = 0.0;
-  _dwInterp.vec()= 0.0;
+  _dispOld = 0.0; 
+  _w   = 0.0;
+  _wInterp = 0.0;
+  _dInterp = 0.0;
+  _dwInterp= 0.0;
 }
 
 
@@ -142,10 +142,10 @@ updateMesh() {
   updateExtension(_mesh,_time);
 
   Real dti = 1.0/_dt;
-  _w.vec()=( _disp.vec()-_dispOld.vec() )*dti;
-  _interpolate(_w.nbcomp(),_w.vec(), _wInterp.vec());
+  _w=( _disp-_dispOld )*dti;
+  _interpolate(_w.nbcomp(),_w, _wInterp);
   // Updating mesh points
-  _mesh.moveMesh( _disp.vec() ); 
+  _mesh.moveMesh( _disp ); 
 }
 
 
@@ -155,7 +155,7 @@ updateMeshTransp() {
 
   updateExtensionTransp(_mesh,_time);
   Real dti = 1.0/_dt;
-  _w.vec()=( _disp.vec()-_dispOld.vec() )*dti;
+  _w=( _disp-_dispOld )*dti;
   _interpMeshVelocity();
 }
 
@@ -169,15 +169,15 @@ updateDispVelo() {
 
   Real dti = 1.0/_dt; 
 
-  cout << " max norm dx = " << maxnorm( _disp.vec() ) << endl;
+  cout << " max norm dx = " << maxnorm( _disp ) << endl;
 
-  _interpolate(_w.nbcomp(),_disp.vec(),_dInterp.vec());
+  _interpolate(_w.nbcomp(),_disp,_dInterp);
 
-  cout << " max norm dxInterp = " << maxnorm( _dInterp.vec() ) << endl;
+  cout << " max norm dxInterp = " << maxnorm( _dInterp ) << endl;
 
-  _dwInterp.vec() = _dInterp.vec()*dti;
+  _dwInterp = _dInterp*dti;
   
-  cout << " max norm dwInterp = " << maxnorm( _dwInterp.vec() ) << endl;
+  cout << " max norm dwInterp = " << maxnorm( _dwInterp ) << endl;
   
 }
 
@@ -216,7 +216,7 @@ NavierStokesAleHandler<Mesh>::postProcess() {
 
 
     //wr_medit_ascii("press."+name+".mesh", _mesh);
-    wr_medit_ascii("press."+name+".mesh",_mesh,_disp.vec(),12);
+    wr_medit_ascii("press."+name+".mesh",_mesh,_disp,12);
     // wr_medit_ascii_vector("veloc."+name+".bb",_u.giveVec(),_mesh.numVertices(),_dim_u);
     system(("ln -s press."+name+".mesh vel_x."+name+".mesh").data());
     system(("ln -s press."+name+".mesh vel_y."+name+".mesh").data());

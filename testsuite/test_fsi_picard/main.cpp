@@ -97,7 +97,7 @@ int main(int argc, char** argv)
   DofInterface3Dto3D dofStructureToFluidMesh(fluid.mesh().getRefFE(), fluid.dofMesh(), 
 				       feTetraP1, solid.dDof()); 
   dofStructureToFluidMesh.update(fluid.mesh(), 1, solid.mesh(), 1, 0.0);                                                     
-  BCVector_Interface displ(solid.d().vec(), dim_solid, dofStructureToFluidMesh);
+  BCVector_Interface displ(solid.d(), dim_solid, dofStructureToFluidMesh);
  
 
 
@@ -105,7 +105,7 @@ int main(int argc, char** argv)
   //
   DofInterface3Dto3D dofMeshToFluid(feTetraP1bubble, fluid.uDof(), feTetraP1bubble, fluid.uDof() );
   dofMeshToFluid.update(fluid.mesh(), 1, fluid.mesh(), 1, 0.0);                                                     
-  BCVector_Interface u_wall(fluid.wInterpolated().vec(),fluid.uDof().numTotalDof(),dofMeshToFluid);
+  BCVector_Interface u_wall(fluid.wInterpolated(),fluid.uDof().numTotalDof(),dofMeshToFluid);
 
 
   //========================================================================================

@@ -287,7 +287,7 @@ timeAdvance(const Function source, const Real& time) {
       for (UInt j=0 ; j<(UInt)_fe.nbNode ; ++j) {
 	for (UInt ic=0; ic<nc; ++ic){     
 	  ig=_dof.localToGlobal(i,j+1)-1+ic*_dim;       
-	  _dk_loc.vec()[j+ic*_fe.nbNode] = _d.vec()(ig); 
+	  _dk_loc[j+ic*_fe.nbNode] = _d(ig); 
 	}
       }
       
@@ -306,7 +306,7 @@ timeAdvance(const Function source, const Real& time) {
   }
   
   // Right hand side for the velocity at time
-  _rhsWithoutBC.vec()=0.;
+  _rhsWithoutBC=0.;
   
   // loop on volumes: assembling source term
   for(UInt i=1; i<=_mesh.numVolumes(); ++i){
@@ -317,15 +317,15 @@ timeAdvance(const Function source, const Real& time) {
           
     for (UInt ic=0; ic<nc; ++ic){ 
       compute_vec(source,_elvec,_fe,_time,ic); // compute local vector
-      assemb_vec(_rhsWithoutBC.vec(),_elvec,_fe,_dof,ic); // assemble local vector into global one     
+      assemb_vec(_rhsWithoutBC,_elvec,_fe,_dof,ic); // assemble local vector into global one     
     }
   }
   
   // right hand side without boundary load terms
-  _rhsWithoutBC.vec() += _M * ( _d.vec() + _dt * _w.vec() );
-  _rhsWithoutBC.vec() -= _K * _d.vec();
+  _rhsWithoutBC += _M * ( _d + _dt * _w );
+  _rhsWithoutBC -= _K * _d;
 
-  _rhs_w.vec() =  (2.0/_dt) * _d.vec()  +  _w.vec();
+  _rhs_w =  (2.0/_dt) * _d  +  _w;
   
   //
   chrono.stop();
@@ -342,7 +342,7 @@ iterate() {
 
   int maxiter = _maxiter;
 
-  status = newton( _d.vec(), *this, maxnorm,_abstol, _reltol, maxiter, _etamax, (int)_linesearch, _out_res, _time);  
+  status = newton( _d, *this, maxnorm,_abstol, _reltol, maxiter, _etamax, (int)_linesearch, _out_res, _time);  
 
   if(status == 1) {
     cout << "Inners iterations failed\n";
@@ -353,7 +353,7 @@ iterate() {
     _out_iter << _time << " " << maxiter << endl; 
   }
 
-  _w.vec() = (2.0/_dt) *  _d.vec() - _rhs_w.vec();
+  _w = (2.0/_dt) *  _d - _rhs_w;
 
 }
  
@@ -400,7 +400,7 @@ evalResidual(Vector&res, const Vector& sol, int iter) {
       for (UInt j=0 ; j<(UInt)_fe.nbNode ; ++j) {
 	for (UInt ic=0; ic<nc; ++ic){     
 	  ig=_dof.localToGlobal(i,j+1)-1+ic*_dim;       
-	  _dk_loc.vec()[j+ic*_fe.nbNode] = sol(ig); 
+	  _dk_loc[j+ic*_fe.nbNode] = sol(ig); 
 	}
       }
       // stiffness for non-linear terms 
@@ -425,10 +425,10 @@ evalResidual(Vector&res, const Vector& sol, int iter) {
     _BCh.bdUpdate(_mesh, _feBd, _dof);
   bc_manage_matrix(_K, _mesh, _dof, _BCh, _feBd,   1.0);
   
-  _rhs.vec() = _rhsWithoutBC.vec();
-  bc_manage_vector(_rhs.vec(), _mesh, _dof, _BCh, _feBd, _time, 1.0);
+  _rhs = _rhsWithoutBC;
+  bc_manage_vector(_rhs, _mesh, _dof, _BCh, _feBd, _time, 1.0);
     
-  res  = _K*sol - _rhs.vec();
+  res  = _K*sol - _rhs;
 
   chrono.stop();
   cout << "done in " << chrono.diff() << " s." << endl;
@@ -469,7 +469,7 @@ updateJac(Vector& sol,int iter) {
       for (UInt j=0 ; j<(UInt)_fe.nbNode ; ++j) {
 	for (UInt ic=0; ic<nc; ++ic){     
 	  ig=_dof.localToGlobal(i,j+1)-1+ic*_dim;       
-	  _dk_loc.vec()[j+ic*_fe.nbNode] = sol[ig]; 
+	  _dk_loc[j+ic*_fe.nbNode] = sol[ig]; 
 	}
       }
     
@@ -504,7 +504,7 @@ solveJac(Vector& step, const Vector& res, double& linear_rel_tol){
  Chrono  chrono;
 
 
- _f.vec() = res;
+ _f = res;
   
   // for BC treatment (done at each time-step)
   Real tgv=1.0; 

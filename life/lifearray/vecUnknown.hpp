@@ -27,113 +27,148 @@
    Provides Vector and VectorBlock class necessary for IML++ library
    Alain Gauthier.
 */
-/*--------------------------------------------------------------------------*/
-///////////////////////////////////////////////////
-///
-///      3 classes for vector unknown handling
-///      15/10/01
-/// 
-//////////////////////////////////////////////////
 #ifndef _VEC_UNKNOWN_HH
 #define _VEC_UNKNOWN_HH
 
 #include <vector>
 #include "tab.hpp"
-//---------------------------------------------------------------//
 
-template<typename VectorType>
-class PhysVectUnknown
 /*! \class PhysVectUnknown
-   vector unknown which has the dimension of the physical domain
+  vector unknown which has the dimension of the physical domain
    The type VectorType could be a Vector, or a VectorBlock or a
    vector<double> depending on the choice of the linear system solver and
-   on the case of scalar or vectorial problem */
-{
-  VectorType _vec;
-  const UInt _size;
-  static const UInt _nbcomp= nDimensions;
- public:
-  //  PhysVectUnknown(){}
-  PhysVectUnknown(UInt const Ndof);
-  PhysVectUnknown(PhysVectUnknown<VectorType> const &RhPhysVectUnknown);
+   on the case of scalar or vectorial problem 
+*/
+template<typename VectorType>
+class PhysVectUnknown
+    :
+    public VectorType
 
-  inline VectorType & vec() {return _vec;}
-  inline VectorType vec() const {return _vec;}
-  //! gives the front of the vector
-  inline Real * giveVec(){return &(_vec[0]);}
-  inline UInt size() const {return _size;}
-  inline UInt nbcomp() const {return _nbcomp;}
+{
+    UInt _size;
+    static const UInt _nbcomp= nDimensions;
+public:
+
+    typedef VectorType super;
+
+    //  PhysVectUnknown(){}
+    PhysVectUnknown(UInt const Ndof);
+    PhysVectUnknown(PhysVectUnknown<VectorType> const &RhPhysVectUnknown);
+
+    PhysVectUnknown& operator=( double const __val )
+	{
+	    super & __super = (*this) ;
+	    __super = __val;
+	    return *this;
+	}
+
+    PhysVectUnknown& operator=( VectorType const& __v )
+	{
+	    if ( this == &__v )
+		return *this;
+	    super & __super = (*this) ;
+	    __super = __v;
+	    return *this;
+	}
+
+    //! gives the front of the vector
+    inline Real * giveVec() {return &((*this)[0]);}
+    inline UInt size() const {return _size;}
+    inline UInt nbcomp() const {return _nbcomp;}
 };
 
 //---------------------------------------------------------------//
 
-template<typename VectorType>
-class ScalUnknown
 /*! \class ScalUnknown
    scalar unknown of dimension=1
    The type VectorType could be a Vector, or a VectorBlock or a
    vector<double> depending on the choice of the linear system solver and
-   on the case of scalar or vectorial problem */
+   on the case of scalar or vectorial problem 
+*/
+template<typename VectorType>
+class ScalUnknown
+    :
+    public VectorType
 {
-  VectorType _scal;
-  const UInt _size;
-  static const UInt _nbcomp= 1;
- public:
-  ScalUnknown(){};
-  ScalUnknown(UInt const Ndof);
-  ScalUnknown(const ScalUnknown<VectorType> &RhScalUnknown);
+    UInt _size;
+    static const UInt _nbcomp= 1;
+public:
 
-  inline VectorType & vec() {return _scal;}
-  inline VectorType vec() const {return _scal;}
-  //! gives the front of the vector
-  inline Real * giveVec(){return &(_scal[0]);}
-  inline UInt size() const {return _size;}
-  inline UInt nbcomp() const {return _nbcomp;}
+    typedef VectorType super;
+
+    ScalUnknown(){};
+    ScalUnknown(UInt const Ndof);
+    ScalUnknown(const ScalUnknown<VectorType> &RhScalUnknown);
+
+    ScalUnknown& operator=( double const __val )
+	{
+	    super & __super = (*this) ;
+		__super = __val;
+	    return *this;
+	}
+    ScalUnknown& operator=( VectorType const& __v )
+	{
+	    if ( this == &__v )
+		return *this;
+	    super & __super = (*this) ;
+	    __super = __v;
+	    return *this;
+	}
+
+    //! gives the front of the vector
+    inline Real * giveVec(){return &((*this)[0]);}
+    inline UInt size() const {return _size;}
+    inline UInt nbcomp() const {return _nbcomp;}
 };
 
 //---------------------------------------------------------------//
 
-template<typename VectorType>
-class GenericVecHdl
 /*! \class GenericVecHdl
    vector problem handler
    The type VectorType could be a Vector, or a VectorBlock or a
    vector<double> depending on the choice of the linear system solver and
-   on the case of scalar or vectorial problem */
+   on the case of scalar or vectorial problem 
+*/
+template<typename VectorType>
+class GenericVecHdl
+    :
+    public VectorType
 {
-  VectorType _vec;
-  UInt _size;
-  UInt _nbcomp;
- public:
-  GenericVecHdl(){}
-  GenericVecHdl(UInt ex_size, UInt ex_nbcomp):
-    _vec(ex_size),_size(ex_size),_nbcomp(ex_nbcomp){};
-  GenericVecHdl(const GenericVecHdl<VectorType> &RhGenVec);
-  //! construction from a scalar unknown:
-  GenericVecHdl(const ScalUnknown<VectorType> &RhScalUnknown);
-  //! construction from two scalar unknowns:
-  GenericVecHdl(const ScalUnknown<VectorType> &RhScU1,
-		const ScalUnknown<VectorType> &RhScU2);
-  //! construction from a physical vectorial unknown:
-  GenericVecHdl(const PhysVectUnknown<VectorType> &RhPhVU);
-  //! construction from a physical vectorial unknown and a scalar unknown:
-  GenericVecHdl(const PhysVectUnknown<VectorType> &RhPhVU,
-		const ScalUnknown<VectorType> &RhScU);
-  GenericVecHdl(const ScalUnknown<VectorType> &RhScU,
-		const PhysVectUnknown<VectorType> &RhPhVU);
-  //! construction from a physical vectorial unknown and a generic unknown:
-  GenericVecHdl(const PhysVectUnknown<VectorType> &RhPhVU,
-		const GenericVecHdl<VectorType> &RhGenVec);
-  GenericVecHdl(const GenericVecHdl<VectorType> &RhGenVec,
-		const PhysVectUnknown<VectorType> &RhPhVU);
+    UInt _size;
+    UInt _nbcomp;
+public:
 
-  inline VectorType vec() const {return _vec;}
-  inline VectorType & vec() {return _vec;}
-  //! gives the front of the vector
-  inline Real * giveVec(){return &(_vec[0]);}
-  inline UInt size() const {return _size;}
-  //! gives the size of one block
-  inline UInt nbcomp() const {return _nbcomp;}
+    typedef VectorType super;
+
+    GenericVecHdl(){}
+
+    GenericVecHdl(UInt ex_size, UInt ex_nbcomp):
+	super(ex_size),_size(ex_size),_nbcomp(ex_nbcomp){};
+
+    GenericVecHdl(const GenericVecHdl<VectorType> &RhGenVec);
+    //! construction from a scalar unknown:
+    GenericVecHdl(const ScalUnknown<VectorType> &RhScalUnknown);
+    //! construction from two scalar unknowns:
+    GenericVecHdl(const ScalUnknown<VectorType> &RhScU1,
+		  const ScalUnknown<VectorType> &RhScU2);
+    //! construction from a physical vectorial unknown:
+    GenericVecHdl(const PhysVectUnknown<VectorType> &RhPhVU);
+    //! construction from a physical vectorial unknown and a scalar unknown:
+    GenericVecHdl(const PhysVectUnknown<VectorType> &RhPhVU,
+		  const ScalUnknown<VectorType> &RhScU);
+    GenericVecHdl(const ScalUnknown<VectorType> &RhScU,
+		  const PhysVectUnknown<VectorType> &RhPhVU);
+    //! construction from a physical vectorial unknown and a generic unknown:
+    GenericVecHdl(const PhysVectUnknown<VectorType> &RhPhVU,
+		  const GenericVecHdl<VectorType> &RhGenVec);
+    GenericVecHdl(const GenericVecHdl<VectorType> &RhGenVec,
+		  const PhysVectUnknown<VectorType> &RhPhVU);
+
+    //! gives the front of the vector
+    inline Real * giveVec(){return &((*this)[0]);}
+    inline UInt size() const {return _size;}
+    //! gives the size of one block
+    inline UInt nbcomp() const {return _nbcomp;}
 
   
 };
@@ -220,7 +255,7 @@ class Vector
 */
 class VectorBlock
 {
-  vector<Tab1d> _v; //!< container of block vector
+    std::vector<Tab1d> _v; //!< container of block vector
  public:
   // Default constructor we need for IML++
   VectorBlock(){}
@@ -325,82 +360,99 @@ point2Vector(double const * point, VectorType & v)
 /////////////////////////////
 
 template<typename VectorType>
-PhysVectUnknown<VectorType>::
-PhysVectUnknown(UInt const Ndof):
-  _vec(nDimensions*Ndof),_size(nDimensions*Ndof){}
+PhysVectUnknown<VectorType>::PhysVectUnknown(UInt const Ndof)
+    :
+    super(nDimensions*Ndof),
+    _size(nDimensions*Ndof)
+{
+}
 
 //! the case of VectorBlock type
-PhysVectUnknown<VectorBlock>::
-PhysVectUnknown(UInt const Ndof);
+PhysVectUnknown<VectorBlock>::PhysVectUnknown(UInt const Ndof);
 
 template<typename VectorType>
-PhysVectUnknown<VectorType>::
-PhysVectUnknown(PhysVectUnknown<VectorType> const &RhPhysVectUnknown):
-    _vec(RhPhysVectUnknown.vec()), _size(RhPhysVectUnknown.size()){}
+PhysVectUnknown<VectorType>::PhysVectUnknown(PhysVectUnknown<VectorType> const &RhPhysVectUnknown)
+    :
+    super(RhPhysVectUnknown),
+    _size(RhPhysVectUnknown.size())
+{
+}
 
 //////////////////////////////
 // class ScalUnknown
 /////////////////////////////
 
 template<typename VectorType>
-ScalUnknown<VectorType>::
-ScalUnknown(UInt const Ndof):_scal(Ndof), _size(Ndof){}
+ScalUnknown<VectorType>::ScalUnknown(UInt const Ndof)
+    :
+    super(Ndof),
+    _size(Ndof)
+{}
 
 template<typename VectorType>
-ScalUnknown<VectorType>::
-ScalUnknown(const ScalUnknown<VectorType> &RhScalUnknown):
-    _scal(RhScalUnknown.vec()), _size(RhScalUnknown.size()){}
+ScalUnknown<VectorType>::ScalUnknown(const ScalUnknown<VectorType> &RhScalUnknown)
+    :
+    super(RhScalUnknown), 
+    _size(RhScalUnknown.size())
+{}
 
 //////////////////////////////
 // class GenericVecHdl
 /////////////////////////////
 
 template<typename VectorType>
-GenericVecHdl<VectorType>::
-GenericVecHdl(const GenericVecHdl<VectorType> &RhGenVec):
-  _vec(RhGenVec.vec()), _size(RhGenVec.size()), _nbcomp(RhGenVec.nbcomp()){}
+GenericVecHdl<VectorType>::GenericVecHdl(const GenericVecHdl<VectorType> &RhGenVec)
+    :
+    super(RhGenVec), 
+    _size(RhGenVec.size()), 
+    _nbcomp(RhGenVec.nbcomp()){}
 
 //! construction from a scalar unknown:
 template<typename VectorType>
 GenericVecHdl<VectorType>::
-GenericVecHdl(const ScalUnknown<VectorType> &RhScalUnknown):
-    _vec(RhScalUnknown.vec()), _size(RhScalUnknown.size()),
-    _nbcomp(RhScalUnknown.nbcomp()){}
+GenericVecHdl(const ScalUnknown<VectorType> &RhScalUnknown)
+    :
+    super(RhScalUnknown),
+    _size(RhScalUnknown.size()),
+    _nbcomp(RhScalUnknown.nbcomp())
+{}
 
 //! construction from two scalar unknowns:
 template<typename VectorType>
-GenericVecHdl<VectorType>::
-GenericVecHdl(const ScalUnknown<VectorType> &RhScU1,
-	      const ScalUnknown<VectorType> &RhScU2):
-  _vec(RhScU1.size()+RhScU2.size()),_size(RhScU1.size()+RhScU2.size()),
-  _nbcomp(RhScU1.nbcomp()+RhScU2.nbcomp())
+GenericVecHdl<VectorType>::GenericVecHdl(const ScalUnknown<VectorType> &RhScU1, const ScalUnknown<VectorType> &RhScU2 )
+    :
+    super(RhScU1.size()+RhScU2.size()),
+    _size(RhScU1.size()+RhScU2.size()),
+    _nbcomp(RhScU1.nbcomp()+RhScU2.nbcomp())
 {
-  for (UInt i=0; i<RhScU1.size(); ++i) _vec[i]=RhScU1.vec()[i];
-  for (UInt i=0; i<RhScU2.size(); ++i) _vec[i+RhScU1.size()]=RhScU2.vec()[i];
+  for (UInt i=0; i<RhScU1.size(); ++i) (*this)[i]=RhScU1[i];
+  for (UInt i=0; i<RhScU2.size(); ++i) (*this)[i+RhScU1.size()]=RhScU2[i];
 }
 //! the case of VectorBlock type
-GenericVecHdl<VectorBlock>::
-GenericVecHdl(const ScalUnknown<VectorBlock> &RhScU1,
-	      const ScalUnknown<VectorBlock> &RhScU2);
+GenericVecHdl<VectorBlock>::GenericVecHdl(const ScalUnknown<VectorBlock> &RhScU1,
+					  const ScalUnknown<VectorBlock> &RhScU2);
 
 
 //! construction from a physical vectorial unknown:
 template<typename VectorType>
-GenericVecHdl<VectorType>::
-GenericVecHdl(const PhysVectUnknown<VectorType>
-	      &RhPhVU):_vec(RhPhVU.vec()),_size(RhPhVU.size()),
-		_nbcomp(RhPhVU.nbcomp()){}
+GenericVecHdl<VectorType>::GenericVecHdl(const PhysVectUnknown<VectorType> &RhPhVU)
+    :
+    super(RhPhVU),
+    _size(RhPhVU.size()),
+    _nbcomp(RhPhVU.nbcomp())
+{}
 
 //! construction from a physical vectorial unknown and a scalar unknown:
 template<typename VectorType>
-GenericVecHdl<VectorType>::
-GenericVecHdl(const PhysVectUnknown<VectorType> &RhPhVU,
-	      const ScalUnknown<VectorType> &RhScU):
-  _vec(RhPhVU.size()+RhScU.size()),_size(RhPhVU.size()+RhScU.size()),
-  _nbcomp(RhPhVU.nbcomp()+RhScU.nbcomp())
+GenericVecHdl<VectorType>::GenericVecHdl(const PhysVectUnknown<VectorType> &RhPhVU,
+					 const ScalUnknown<VectorType> &RhScU)
+    :
+    super(RhPhVU.size()+RhScU.size()),
+    _size(RhPhVU.size()+RhScU.size()),
+    _nbcomp(RhPhVU.nbcomp()+RhScU.nbcomp())
 {
-  for (UInt i=0; i<RhPhVU.size(); ++i) _vec[i]=RhPhVU.vec()[i];
-  for (UInt i=0; i<RhScU.size(); ++i) _vec[RhPhVU.size()+i]=RhScU.vec()[i];
+  for (UInt i=0; i<RhPhVU.size(); ++i) (*this)[i]=RhPhVU[i];
+  for (UInt i=0; i<RhScU.size(); ++i) (*this)[RhPhVU.size()+i]=RhScU[i];
 }
 //! the case of VectorBlock type
 GenericVecHdl<VectorBlock>::
@@ -409,49 +461,48 @@ GenericVecHdl(const PhysVectUnknown<VectorBlock> &RhPhVU,
 
 
 template<typename VectorType>
-GenericVecHdl<VectorType>::
-GenericVecHdl(const ScalUnknown<VectorType> &RhScU,
-	      const PhysVectUnknown<VectorType> &RhPhVU):
-  _vec(RhPhVU.size()+RhScU.size()),_size(RhPhVU.size()+RhScU.size()),
-  _nbcomp(RhPhVU.nbcomp()+RhScU.nbcomp())
+GenericVecHdl<VectorType>::GenericVecHdl(const ScalUnknown<VectorType> &RhScU,
+					 const PhysVectUnknown<VectorType> &RhPhVU)
+    :
+    super(RhPhVU.size()+RhScU.size()),
+    _size(RhPhVU.size()+RhScU.size()),
+    _nbcomp(RhPhVU.nbcomp()+RhScU.nbcomp())
 {
-  for (UInt i=0; i<RhScU.size(); ++i) _vec[i]=RhScU.vec()[i];
-  for (UInt i=0; i<RhPhVU.size(); ++i) _vec[RhScU.size()+i]=RhPhVU.vec()[i];
+  for (UInt i=0; i<RhScU.size(); ++i) (*this)[i]=RhScU[i];
+  for (UInt i=0; i<RhPhVU.size(); ++i) (*this)[RhScU.size()+i]=RhPhVU[i];
 }
 //! the case of VectorBlock type
 GenericVecHdl<VectorBlock>::
-GenericVecHdl(const ScalUnknown<VectorBlock> &RhScU,
-	      const PhysVectUnknown<VectorBlock> &RhPhVU);
+GenericVecHdl(const ScalUnknown<VectorBlock> &RhScU, const PhysVectUnknown<VectorBlock> &RhPhVU);
 
 
 //! construction from a physical vectorial unknown and a generic unknown:
 template<typename VectorType>
-GenericVecHdl<VectorType>::
-GenericVecHdl(const PhysVectUnknown<VectorType> &RhPhVU,
-	      const GenericVecHdl<VectorType> &RhGenVec):
-  _vec(RhPhVU.size()+RhGenVec.size()),
-  _size(RhPhVU.size()+RhGenVec.size()),
-  _nbcomp(RhPhVU.nbcomp()+RhGenVec.nbcomp())
+GenericVecHdl<VectorType>::GenericVecHdl(const PhysVectUnknown<VectorType> &RhPhVU,
+					 const GenericVecHdl<VectorType> &RhGenVec)
+    :
+    super(RhPhVU.size()+RhGenVec.size()),
+    _size(RhPhVU.size()+RhGenVec.size()),
+    _nbcomp(RhPhVU.nbcomp()+RhGenVec.nbcomp())
 {
-  for (UInt i=0;i<RhPhVU.size();++i) _vec[i]=RhPhVU.vec()[i];
-  for (UInt i=0;i<RhGenVec.size();++i) _vec[RhPhVU.size()+i]=RhGenVec.vec()[i];
+  for (UInt i=0;i<RhPhVU.size();++i) (*this)[i]=RhPhVU[i];
+  for (UInt i=0;i<RhGenVec.size();++i) (*this)[RhPhVU.size()+i]=RhGenVec[i];
 }
 //! the case of VectorBlock type
-GenericVecHdl<VectorBlock>::
-GenericVecHdl(const PhysVectUnknown<VectorBlock> &RhPhVU,
-	      const GenericVecHdl<VectorBlock> &RhGenVec);
+GenericVecHdl<VectorBlock>::GenericVecHdl(const PhysVectUnknown<VectorBlock> &RhPhVU,
+					  const GenericVecHdl<VectorBlock> &RhGenVec);
 
 
 template<typename VectorType>
 GenericVecHdl<VectorType>::
 GenericVecHdl(const GenericVecHdl<VectorType> &RhGenVec,
 	      const PhysVectUnknown<VectorType> &RhPhVU):
-  _vec(RhPhVU.size()+RhGenVec.size()),
+  super(RhPhVU.size()+RhGenVec.size()),
   _size(RhPhVU.size()+RhGenVec.size()),
   _nbcomp(RhPhVU.nbcomp()+RhGenVec.nbcomp())
 {
-  for (UInt i=0;i<RhGenVec.size();++i) _vec[i]=RhGenVec.vec()[i];
-  for (UInt i=0;i<RhPhVU.size();++i) _vec[i+RhGenVec.size()]=RhPhVU.vec()[i];
+  for (UInt i=0;i<RhGenVec.size();++i) (*this)[i]=RhGenVec[i];
+  for (UInt i=0;i<RhPhVU.size();++i) (*this)[i+RhGenVec.size()]=RhPhVU[i];
 }
 //! the case of VectorBlock type
 GenericVecHdl<VectorBlock>::

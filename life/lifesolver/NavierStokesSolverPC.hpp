@@ -215,7 +215,7 @@ NavierStokesSolverPC(const GetPot& data_file, const RefFE& refFE_u, const RefFE&
      _dataAztec_i(data_file,"fluid/aztec_i"),
      _dataAztec_ii(data_file,"fluid/aztec_ii"),
      _dataAztec_s(data_file,"fluid/aztec_s"),
-     _factor_data(_C,_D,_trD,_H,_HinvC,_HinvDtr,_invCtrDP.vec(),_dataAztec_i,_dataAztec_s,_BCh_u.fullEssential()) {
+     _factor_data(_C,_D,_trD,_H,_HinvC,_HinvDtr,_invCtrDP,_dataAztec_i,_dataAztec_s,_BCh_u.fullEssential()) {
   
   cout << endl;
   cout << "O-  Pressure unknowns: " << _dim_p     << endl; 
@@ -321,7 +321,7 @@ timeAdvance(const Function source, const Real& time) {
   chrono.start();
 
   // Right hand side for the velocity at time
-  _f_u.vec()=0.;
+  _f_u=0.;
 
   // loop on volumes: assembling source term
   for(UInt i=1; i<=_mesh.numVolumes(); ++i){
@@ -330,13 +330,13 @@ timeAdvance(const Function source, const Real& time) {
 
     for (UInt ic=0; ic<nc_u; ++ic){ 
       compute_vec(source,_elvec,_fe_u,time,ic); // compute local vector
-      assemb_vec(_f_u.vec(),_elvec,_fe_u,_dof_u,ic); // assemble local vector into global one       
+      assemb_vec(_f_u,_elvec,_fe_u,_dof_u,ic); // assemble local vector into global one       
     }
   }
 
   // ******************************************************* 
-  _f_u.vec() += _M_u*_bdf.bdf_u().time_der(); //_M_u is the mass matrix divided by the time step
-  //  _f_u.vec() += _M_u * _u.vec();
+  _f_u += _M_u*_bdf.bdf_u().time_der(); //_M_u is the mass matrix divided by the time step
+  //  _f_u += _M_u * _u;
   chrono.stop();
   cout << "done in " << chrono.diff() << " s." << endl;
 }
@@ -377,7 +377,7 @@ iterate(const Real& time) {
 	UInt  iloc = _fe_u.patternFirst(k);
 	for (UInt ic=0; ic<nc_u; ++ic){     
 	  UInt ig=_dof_u.localToGlobal(eleID,iloc+1)-1+ic*_dim_u;       
-	  _elvec.vec()[iloc+ic*_fe_u.nbNode] = u_extrap(ig); 
+	  _elvec[iloc+ic*_fe_u.nbNode] = u_extrap(ig); 
 	}
     }
 
@@ -396,10 +396,10 @@ iterate(const Real& time) {
   // QUI VENGONO APPLICATE LE BC
   _CnoBc=_C;
   _trDnoBc=_trD;
-  _f_u_noBc.vec()=_f_u.vec(); 
-  //for (UInt myindex=0;myindex<_dim_u;myindex++) _f_u_noBc.vec()[myindex] = _f_u.vec()[myindex];
+  _f_u_noBc=_f_u; 
+  //for (UInt myindex=0;myindex<_dim_u;myindex++) _f_u_noBc[myindex] = _f_u[myindex];
  
-  _f_u.vec() -= _trD*_bdf.bdf_p().extrap(); // INCREMENTAL correction for the pressure: IT MUST BE AFTER THE INITIALIZATION of _f_u_noBC
+  _f_u -= _trD*_bdf.bdf_p().extrap(); // INCREMENTAL correction for the pressure: IT MUST BE AFTER THE INITIALIZATION of _f_u_noBC
 
   // for BC treatment (done at each time-step)
   Real tgv=1.e02; 
@@ -409,7 +409,7 @@ iterate(const Real& time) {
   // BC manage for the velocity
   if ( !_BCh_u.bdUpdateDone() )  
     _BCh_u.bdUpdate(_mesh, _feBd_u, _dof_u);
-  bc_manage(_C, _trD, _f_u.vec(), _mesh, _dof_u, _BCh_u, _feBd_u, tgv, time);
+  bc_manage(_C, _trD, _f_u, _mesh, _dof_u, _BCh_u, _feBd_u, tgv, time);
   chrono.stop();
   cout << "done in " << chrono.diff() << "s." << endl;
  
@@ -562,13 +562,13 @@ iterate(const Real& time) {
   // ---------------------------------------------------
 
   // RHS of the linear system (ii)
-  vec_DV = _D*_u.vec();
-  _p.vec() = 0.0; // AT this point, this vector stands for the "pressure increment"
+  vec_DV = _D*_u;
+  _p = 0.0; // AT this point, this vector stands for the "pressure increment"
   
   // case of pure Dirichlet BCs:
   if (_BCh_u.fullEssential()) {
     vec_DV[_dim_p-1]   = 0.0; // correction of the right hand side.
-    _p.vec()[_dim_p-1] = 0.0; // pressure value at the last node.
+    _p[_dim_p-1] = 0.0; // pressure value at the last node.
   }
 
   cout << "  o-  Solving second system... ";
@@ -586,18 +586,18 @@ iterate(const Real& time) {
 
   
   // everything is done...
-  _u.vec() = _u.vec() - _invCtrDP.vec();
+  _u = _u - _invCtrDP;
   cout << "  o-  Velocity updated" << endl;
 
   // ******************************************************* 
   // This is the REAL pressure (not the increment)
-  _p.vec() += _bdf.bdf_p().extrap();
+  _p += _bdf.bdf_p().extrap();
   cout << "  o-  Pressure updated" << endl;
 
   // *******************************************************
   // update the array of the previous solutions
-  _bdf.bdf_u().shift_right(_u.vec());
-  _bdf.bdf_p().shift_right(_p.vec());
+  _bdf.bdf_u().shift_right(_u);
+  _bdf.bdf_p().shift_right(_p);
   
 
   // destroy Ci and prec_Ci
@@ -622,7 +622,7 @@ PhysVectUnknown<Vector> NavierStokesSolverPC<Mesh>::residual()
   PhysVectUnknown<Vector> r(_dim_u);
   cout << "  o- Computing the residual...";
   chrono.start();
-  r.vec() = _f_u_noBc.vec()-_CnoBc*_u.vec() - _trDnoBc*_p.vec();
+  r = _f_u_noBc-_CnoBc*_u - _trDnoBc*_p;
   chrono.stop();
   cout << "done in " << chrono.diff() << "s" << endl;
   return r;
@@ -631,7 +631,7 @@ PhysVectUnknown<Vector> NavierStokesSolverPC<Mesh>::residual()
 template<typename Mesh>  
 void NavierStokesSolverPC<Mesh>::ShearStressCompute(string filename_stress, string fe_type)
 {
-  Vector residual(this->residual().vec());
+  Vector residual(this->residual());
   UInt ss = residual.size()/NDIM;
   Vector sstress(_ns_post_proc.compute_sstress(residual,(UInt)NDIM));
   // just a stupid way for writing the shear stress in OpenDx or Medit formats,

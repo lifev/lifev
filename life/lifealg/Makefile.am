@@ -22,7 +22,8 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-INCLUDES 	= -I$(top_srcdir)/life/lifecore -I$(top_srcdir)/life/lifearray
+INCLUDES 	= -I$(top_srcdir)/life/lifecore -I$(top_srcdir)/life/lifearray -I$(top_srcdir)/life/lifefem -I$(top_srcdir)/life/lifemesh
+#INCLUDES 	= -I$(top_srcdir)/life/lifecore -I$(top_srcdir)/life/lifearray 
 
 include_HEADERS	= algebraic_facto.hpp dataAztec.hpp dataNewton.hpp inexactLU.hpp \
 linesearch_cubic.hpp linesearch_parabolic.hpp mixed_pattern.hpp newton.hpp \

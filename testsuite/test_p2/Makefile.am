@@ -26,5 +26,8 @@ include $(top_srcdir)/testsuite/Makefile.testsuite
 
 noinst_HEADERS = main.hpp ud_functions.hpp 
 
-check_PROGRAMS = test_p2
+TESTS		= test_p2
+
+check_PROGRAMS 	= test_p2
 test_p2_SOURCES = main.cpp 
+

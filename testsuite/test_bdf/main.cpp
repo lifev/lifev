@@ -140,8 +140,8 @@ int main() {
 
   // initialization of vector of unknowns and rhs
   ScalUnknown<Vector> U(dim), F(dim);
-  U.vec()=0.0;
-  F.vec()=0.0;
+  U=0.0;
+  F=0.0;
  
   // ==========================================
   // Definition of the time integration stuff
@@ -181,8 +181,8 @@ int main() {
   EOStiff stiff(Ostiff);
   Mass Omass(&fe);
   EOMass mass(Omass);
-  assemble_symm(mass,aMesh,fe,dof,sourceFct,M,F.vec(),t0); //mass matrix
-  //  assemble(coeff*mass+stiff,aMesh,fe,dof,sourceFct,A,F.vec());
+  assemble_symm(mass,aMesh,fe,dof,sourceFct,M,F,t0); //mass matrix
+  //  assemble(coeff*mass+stiff,aMesh,fe,dof,sourceFct,A,F);
 #else
   ElemMat elmat(fe.nbNode,1,1);
   ElemVec elvec(fe.nbNode,1);
@@ -252,7 +252,7 @@ int main() {
       cout << "Now we are at time " << t << endl;
 
       A.zeros();
-      F.vec()=0;   
+      F=0;   
   // ======================================================================
   // Update of the right hand sied with the solution at the previous steps
   // ======================================================================
@@ -261,7 +261,7 @@ int main() {
       Real s=sigma(t);
 #ifdef OPER_TEMPLATE 
   // assembling of A
-  assemble_symm((coeff+s)*mass+visc*stiff,aMesh,fe,dof,sourceFct,A,F.vec(),t);
+  assemble_symm((coeff+s)*mass+visc*stiff,aMesh,fe,dof,sourceFct,A,F,t);
 #else
   for(UInt i = 1; i<=aMesh.numVolumes(); i++){
     fe.updateFirstDerivQuadPt(aMesh.volumeList(i));
@@ -271,7 +271,7 @@ int main() {
     stiff(visc,elmat,fe);
     source(sourceFct,elvec,fe,t,0);
     assemb_mat(A,elmat,fe,dof,0,0);
-    assemb_vec(F.vec(),elvec,fe,dof,0);
+    assemb_vec(F,elvec,fe,dof,0);
   }
 #endif
   chrono.stop();
@@ -279,7 +279,7 @@ int main() {
   cout << chrono.diff() << "s." << endl;
 
   // Handling of the right hand side
-  F.vec() = F.vec()+M*bdf.time_der(delta_t);
+  F += M*bdf.time_der(delta_t);
 
   // ====================================
   // Treatment of the Boundary conditions
@@ -289,7 +289,7 @@ int main() {
   Real tgv=1.;
 
   chrono.start();
-  bc_manage(A,F.vec(),aMesh,dof,BCh,feBd,tgv,t); 
+  bc_manage(A,F,aMesh,dof,BCh,feBd,tgv,t); 
 
   chrono.stop();
   cout << chrono.diff() << "s." << endl;
@@ -302,7 +302,7 @@ int main() {
   chrono.stop();
   cout << "*** Solution computed in " << chrono.diff() << "s." << endl;
   
-  wr_opendx_scalar(NameFile,"scalar",U.vec());
+  wr_opendx_scalar(NameFile,"scalar",U);
   
   //  wr_vtk_ascii_header("scal.vtk","Scalar output",aMesh, dof, fe);
   //wr_vtk_ascii_scalar("scal.vtk","scalar",U.giveVec(),U.size());
@@ -324,13 +324,13 @@ int main() {
     //
     fe.updateFirstDeriv(aMesh.volumeList(i));
 
-    normL2     += elem_L2_2(U.vec(),fe,dof);
+    normL2     += elem_L2_2(U,fe,dof);
     normL2sol  += elem_L2_2(analyticSol,fe,t,U.nbcomp());// U.nbcomp()=1 for a scalar problem
-    normL2diff += elem_L2_diff_2(U.vec(),analyticSol,fe,dof,t,U.nbcomp());
+    normL2diff += elem_L2_diff_2(U,analyticSol,fe,dof,t,U.nbcomp());
 
-    normH1     += elem_H1_2(U.vec(),fe,dof);
+    normH1     += elem_H1_2(U,fe,dof);
     normH1sol  += elem_H1_2(analyticSol,fe,t,U.nbcomp());
-    normH1diff += elem_H1_diff_2(U.vec(),analyticSol,fe,dof,t,U.nbcomp());
+    normH1diff += elem_H1_diff_2(U,analyticSol,fe,dof,t,U.nbcomp());
   }
 
   normL2     = sqrt(normL2);
@@ -355,7 +355,7 @@ int main() {
   
 
 
-  bdf.shift_right(U.vec());
+  bdf.shift_right(U);
 
 
     } // END OF TIME LOOP

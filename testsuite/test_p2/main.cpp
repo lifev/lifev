@@ -134,8 +134,8 @@ int main() {
 
   // initialization of vector of unknowns and rhs
   ScalUnknown<Vector> U(dim), F(dim);
-  U.vec()=0.0;
-  F.vec()=0.0;
+  U=0.0;
+  F=0.0;
 
   // ==========================================
   // Pattern construction and matrix assembling
@@ -158,7 +158,7 @@ int main() {
   // assembling of A: stiff operator
   Stiff Ostiff(&fe);
   EOStiff stiff(Ostiff);
-  assemble(mu*stiff+sigma*mass,aMesh,fe,dof,sourceFct,A,F.vec());
+  assemble(mu*stiff+sigma*mass,aMesh,fe,dof,sourceFct,A,F);
 #else
   ElemMat elmat(fe.nbNode,1,1);
   ElemVec elvec(fe.nbNode,1);
@@ -169,7 +169,7 @@ int main() {
     stiff(1.,elmat,fe);
     source(sourceFct,elvec,fe,0);
     assemb_mat(A,elmat,fe,dof,0,0);
-    assemb_vec(F.vec(),elvec,fe,dof,0);
+    assemb_vec(F,elvec,fe,dof,0);
   }
 #endif
   chrono.stop();
@@ -186,7 +186,7 @@ int main() {
   Real tgv=1.;
 
   chrono.start();
-  bc_manage(A,F.vec(),aMesh,dof,BCh,feBd,tgv,0.0); 
+  bc_manage(A,F,aMesh,dof,BCh,feBd,tgv,0.0); 
 
   chrono.stop();
   cout << chrono.diff() << "s." << endl;
@@ -243,7 +243,7 @@ int main() {
   /*
   string NameFile= "outputU.dx";
   wr_opendx_header(NameFile,aMesh,dof,fe,"P2");
-  wr_opendx_scalar(NameFile,"scalar",U.vec());
+  wr_opendx_scalar(NameFile,"scalar",U);
   */
   wr_vtk_ascii_header("scal.vtk","Scalar output",aMesh, dof, fe);
   wr_vtk_ascii_scalar("scal.vtk","scalar",U.giveVec(),U.size());
@@ -265,13 +265,13 @@ int main() {
     //
     fe.updateFirstDeriv(aMesh.volumeList(i));
 
-    normL2     += elem_L2_2(U.vec(),fe,dof);
+    normL2     += elem_L2_2(U,fe,dof);
     normL2sol  += elem_L2_2(analyticSol,fe);
-    normL2diff += elem_L2_diff_2(U.vec(),analyticSol,fe,dof);
+    normL2diff += elem_L2_diff_2(U,analyticSol,fe,dof);
 
-    normH1     += elem_H1_2(U.vec(),fe,dof);
+    normH1     += elem_H1_2(U,fe,dof);
     normH1sol  += elem_H1_2(analyticSol,fe);
-    normH1diff += elem_H1_diff_2(U.vec(),analyticSol,fe,dof);
+    normH1diff += elem_H1_diff_2(U,analyticSol,fe,dof);
   }
 
   normL2     = sqrt(normL2);
@@ -295,7 +295,7 @@ int main() {
        << endl;
   */
   for (UInt jj=0;jj<dim;jj++)
-   cout << U.vec()(jj) << " ** ";
+   cout << U(jj) << " ** ";
 
   cout << " " << endl;  
 

@@ -20,7 +20,7 @@
 
 
 ElemVec::ElemVec(int nNode1,int nbr1):
-  _vec(nNode1*nbr1)
+  super(nNode1*nbr1)
 {
   _nBlockRow = nbr1;
   _nRow.resize(_nBlockRow);
@@ -35,7 +35,7 @@ ElemVec::ElemVec(int nNode1,int nbr1):
 
 ElemVec::ElemVec(int nNode1,int nbr1,
 		 int nNode2,int nbr2):
-  _vec(nNode1*nbr1+nNode2*nbr2)
+  super(nNode1*nbr1+nNode2*nbr2)
 {
   _nBlockRow = nbr1+nbr2;
   _nRow.resize(_nBlockRow);
@@ -56,7 +56,7 @@ ElemVec::ElemVec(int nNode1,int nbr1,
 ElemVec::ElemVec(int nNode1,int nbr1,
 		 int nNode2,int nbr2,
 		 int nNode3,int nbr3):
-  _vec(nNode1*nbr1+nNode2*nbr2+nNode3*nbr3)
+  super(nNode1*nbr1+nNode2*nbr2+nNode3*nbr3)
 {
   _nBlockRow = nbr1+nbr2+nbr3;
   _nRow.resize(_nBlockRow);
