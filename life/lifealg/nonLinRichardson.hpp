@@ -29,7 +29,7 @@ namespace LifeV
 template <class Fct, class Vector, class Real, class Norm>
 int nonLinRichardson( Vector& sol,
                       Fct& f,
-                      Norm& norm,
+                      const Norm& norm,
                       Real abstol,
                       Real reltol,
                       int& maxit,
@@ -63,11 +63,13 @@ int nonLinRichardson( Vector& sol,
     /*
       max_increase_res: maximum number of successive increases in residual
       before failure is reported
-    */ 
+    */
+
     //        const int max_increase_res = 5;
+
     /*
       Parameters for the linear solver, gamma: Default value = 0.9
-    */ 
+    */
     //        const Real gamma   = 0.9;
 
     //----------------------------------------------------------------------
@@ -78,69 +80,67 @@ int nonLinRichardson( Vector& sol,
 
     int nDofFS = sol.size();
 
-    Vector residual = sol;
-    Vector step = sol;
+    Vector residual ( sol.size() );
+    Vector step     ( sol.size() );
+    Vector muk      ( sol.size() );
 
-    Vector muS( f.solid().dDof().numTotalDof() );
-    Vector muF( f.fluid().uDof().numTotalDof() );
-
-    muS = -2.;
-    muF = -1.;
-    step = 0.;
+    step = ZeroVector( step.size() );
+    muk  = ZeroVector( muk.size() );
 
     Real normResOld = 1;
 
     Real omegaS = omega;
     Real omegaF = omega;
 
-    f.evalResidual( sol, iter, residual );
+    std::cout << "------------------------------------------------------------------" << std::endl;
+    std::cout << "  NonLinRichardson: starting " << std::endl;
+    std::cout << "------------------------------------------------------------------" << std::endl;
+    f.evalResidual( residual, sol, iter );
 
-    Real normRes = norm( residual );
-    Real stop_tol = abstol + reltol * normRes;
-    //        Real linear_rel_tol = fabs(eta_max);
+    Real normRes      = norm( residual );
+    Real normMuk      = normRes;
+    Real stop_tol     = abstol + reltol*normRes;
+    Real linearRelTol = fabs(eta_max);
 
     generalizedAitken<Vector, Real> aitken( nDofFS, omegaS, omegaF );
 
     //
 
-    out_res << time << "    " << iter << "   " << normRes << std::endl;
-
+    out_res << "# time = ";
+    out_res << time << "   " << "initial norm_res " <<  normRes
+            << " stop tol = " << stop_tol << std::endl;
+    out_res << "#iter      disp_norm       step_norm       muk_norm   residual_norm" << std::endl;
 
     while ( normRes > stop_tol && iter < maxit )
     {
-
         std::cout << std::endl;
         std::cout << "------------------------------------------------------------------" << std::endl;
-        std::cout << "  NonLinRichardson: residual = " << normRes
-        << ", stoping tolerance = " << stop_tol << std::endl;
+        std::cout << "  NonLinRichardson: iter = " << iter
+                  << ", residual = " << normRes
+                  << ", stoping tolerance = " << stop_tol << std::endl;
         std::cout << "------------------------------------------------------------------" << std::endl;
         std::cout << std::endl;
 
         iter++;
 
         normResOld = normRes;
-        normRes = norm( residual );
 
-        //            muS        = residual;
+        f.solveJac(muk, residual, linearRelTol);
+        step = aitken.computeDeltaLambda( sol, muk );
 
-        step = aitken.computeDeltaLambda( sol, residual );
+        normMuk  = norm( muk );
 
-        std::cout << "Step norm = " << norm( step ) << std::endl;
-
-        out_res << "Step norm = " << norm( step );
-        out_res << "size d = " << f.solid().dDof().numTotalDof() << std::endl;
-        out_res << "size f = " << f.fluid().uDof().numTotalDof() << std::endl;
-
-        muS = f.residualS();
-        muF = f.residualF();
+        std::cout << "Muk norm = " << normMuk << std::endl;
+        out_res   << iter
+                  << std::setw(15) << norm(sol)
+                  << std::setw(15) << norm_inf(step)
+                  << std::setw(15) << normMuk;
 
         sol += step;
 
-        f.evalResidual( sol, iter, residual );
-
-        out_res << " Res norm = " << norm( residual ) << std::endl;
-
+        f.evalResidual( residual, sol, iter );
         normRes = norm( residual );
+        out_res << std::setw(15) << normRes << std::endl;
 
     }
 
@@ -151,7 +151,10 @@ int nonLinRichardson( Vector& sol,
         return 1;
     }
 
-    std::cout << "--- NonLinRichardson: convergence in " << iter << " iterations\n\n";
+    std::cout << "------------------------------------------------------------------" << std::endl;
+    std::cout << "--- NonLinRichardson: convergence (" << normRes
+              <<") in " << iter << " iterations\n\n";
+    std::cout << "------------------------------------------------------------------" << std::endl;
 
     maxit = iter;
 
@@ -159,5 +162,3 @@ int nonLinRichardson( Vector& sol,
 }
 }
 #endif
-
-

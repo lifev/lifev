@@ -20,7 +20,7 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /**
    \file SolverAztec.cpp
    \author Christoph Winkelmann <christoph.winkelmann@epfl.ch>
@@ -28,6 +28,8 @@
 */
 #include <iostream>
 #include <fstream>
+
+#include <boost/utility.hpp>
 
 #include <SolverAztec.hpp>
 
@@ -52,6 +54,10 @@ SolverAztec::SolverAztec()
     GetPot dataFile;
     DataAztec dataAztec( dataFile, "aztec" );
     dataAztec.aztecOptionsFromDataFile( M_options, M_params );
+    
+    // use ilu by default
+    M_options[ AZ_precond ] = AZ_dom_decomp;
+    M_options[ AZ_subdomain_solve ] = AZ_ilu;
 }
 
 SolverAztec::~SolverAztec()
@@ -73,12 +79,22 @@ SolverAztec* SolverAztec::New()
 
 /*!
   \brief Gets the last residual norm that has been computed.
- 
+
   \return last residual norm
 */
 double SolverAztec::residualNorm() const
 {
     return M_status[ AZ_r ];
+}
+
+int SolverAztec::iterations() const
+{
+    return (int)M_status[ AZ_its ];
+}
+
+bool SolverAztec::converged() const
+{
+    return M_status[ AZ_why ] == AZ_normal;
 }
 
 void SolverAztec::setMatrix( MSRMatr<value_type> const& newMatrix )
@@ -134,17 +150,16 @@ void SolverAztec::F_setMatrix( MSRMatr<value_type> const& newMatrix )
 
 void SolverAztec::solve( array_type& x, array_type const& b )
 {
-    if ( M_matrix != 0 )
+    if ( M_matrix == 0 )
     {
-        std::cerr << "[SolverAztec::solve]  Solving primal" << std::endl;
-        AZ_iterate( &x[ 0 ], &b[ 0 ], M_options, M_params, M_status, M_procConfig,
-                    M_matrix, M_precond, NULL );
+        std::ostringstream __ex;
+        __ex << "[SolverAztec::solve]  ERROR: Matrix not set";
+        throw std::logic_error( __ex.str() );
     }
-    else
-    {
-        std::cerr << "[SolverAztec::solve]  ERROR: Matrix not set"
-        << std::endl;
-    }
+    AZ_iterate( &x[ 0 ],
+                const_cast<double*>( &b[0] ),
+                M_options, M_params, M_status,
+                M_procConfig, M_matrix, M_precond, NULL );
 }
 
 void SolverAztec::setOptionsFromGetPot( GetPot const& dataFile,

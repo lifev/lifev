@@ -19,31 +19,31 @@
 namespace LifeV
 {
 /*
- 
+
   Fixed point algorithms with relaxation
- 
+
   input: f  : operator that must have a function
               eval(double fx0,double gx0,double x0,int status)
        where fx0 = f(x0), gx0 is not used here, and status
        indicate whether it is the first iterate (status=1)
        or not (status=0).
   x0 : initial guess (modified)
- 
+
   method:
        0: constant relaxation factor given by omega
               (if omega=1 : stantard fixed point without relaxation)
        1: a heuristic extension of Aitken formula (omega not used)
        2: Aitken formula due to Irons & Tuck (omega not used)
                  (in exact arithmetic 1 and 2 coincide)
- 
+
    output: x1: the last iterate (i.e. |x1 - fx1| < stopping tolerance)
                (x0 is the iterate before the last)
- 
+
    N.B.: the initial values of x1, fx0, fx1  are not used at
          the first iteration. x0 is the only initial guess
 */
 template <typename Vector, typename Oper, typename Norm>
-int picard( Oper* f, Norm& norm, Vector& fx1, Vector& fx0,
+int picard( Oper* f, Norm norm, Vector& fx1, Vector& fx0,
             Vector& gx1, Vector& gx0, Vector& x1, Vector& x0,
             double abstol, double reltol, int& maxit, int method, double omega )
 {

@@ -3,6 +3,7 @@
  This file is part of the LifeV library
 
  Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+            Christoph Winkelmann <christoph.winkelmann@epfl.ch>
       Date: 2004-08-29
 
  Copyright (C) 2004 EPFL
@@ -20,10 +21,11 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /**
    \file SolverPETSC.hpp
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+   \author Christoph Winkelmann <christoph.winkelmann@epfl.ch>
    \date 2004-08-29
 */
 #ifndef __SolverPETSC_H
@@ -38,8 +40,10 @@
 #include <petscpc.h>
 #endif /* HAVE_PETSC_H */
 
+#include <singleton.hpp>
+
 #include <vecUnknown.hpp>
-#include "sparseArray.hpp"
+#include <sparseArray.hpp>
 
 class GetPot;
 
@@ -59,13 +63,13 @@ typedef enum PetscMonitorType
 /*!
   \class SolverPETSC
   \brief wrap petsc linear solvers
- 
+
   You should have a look at PETSC documentation for further details.
- 
+
   By default the solver is gmres and the preconditioner is ilu.
- 
+
   Here is the list of solvers available:
- 
+
   -# "richardson"
   -# "chebychev"
   -# "cg"
@@ -83,9 +87,9 @@ typedef enum PetscMonitorType
   -# "minres"
   -# "symmlq"
   -# "lgmres"
- 
+
   Here is the list of preconditioners available:
- 
+
   -# "none"
   -# "jacobi"
   -# "sor"
@@ -113,8 +117,9 @@ typedef enum PetscMonitorType
   -# "petscesi"
   -# "mat"
   -# "hypre"
- 
-  @author Christophe Prud'homme
+
+  \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+  \author Christoph Winkelmann <christoph.winkelmann@epfl.ch>
   @see
 */
 class SolverPETSC
@@ -123,7 +128,7 @@ public:
 
 
     /** @name Typedefs
-     */ 
+     */
     //@{
 
     typedef double value_type;
@@ -136,7 +141,7 @@ public:
     //@}
 
     /** @name Constructors, destructor
-     */ 
+     */
     //@{
 
     //! default constructor
@@ -144,6 +149,7 @@ public:
       The solver and preconditionner are the ones defined in petsc/petscksp.h
       \param ksp krylov subspace method
       \param pc preconditionner
+      \param monitor Petsc monitor called at each iteration
     */
     SolverPETSC( std::string const& ksp = "gmres",
                  std::string const& pc = "ilu",
@@ -158,11 +164,36 @@ public:
     //@}
 
     /** @name Accessors
-     */ 
+     */
     //@{
 
+    /*!
+      \brief Gets the last (approximate preconditioned) residual norm that has
+      been computed.
+
+      \return last (approximate preconditioned) residual norm
+    */
     double residualNorm() const;
 
+    /*!
+      \brief Gets a condition number estimate of the preconditioned system.
+
+      The estimate is the quotient of the minimal and the maximal singular
+      value found in the Krylov space used in the last solve.
+
+      Note: The necessary data is only computed during the solve if the option
+      ksp_set_compute_singular_values is set to true in the data file.
+
+      \return estimated condition number
+    */
+    double condEst() const;
+
+    //! Gets the number of iterations performed in the last solve.
+    int iterations() const;
+
+    //! Returns whether the last solve converged
+    bool converged() const;
+    
     //! get the petsc preconditioner
     PC const& preconditioner() const;
 
@@ -172,7 +203,7 @@ public:
     //@}
 
     /** @name  Mutators
-     */ 
+     */
     //@{
 
     //! set matrix from raw CSR arrays
@@ -182,8 +213,8 @@ public:
     template <typename PatternType>
     void setMatrix( const CSRMatr<PatternType, value_type>& m )
     {
-        _tempPattern.reset( 0 );
-        _tempMatrix.reset( 0 );
+        _M_tempPattern.reset( 0 );
+        _M_tempMatrix.reset( 0 );
         setMatrix( m.Patt() ->nRows(),
                    m.Patt() ->giveRawCSR_ia(),
                    m.Patt() ->giveRawCSR_ja(),
@@ -198,7 +229,28 @@ public:
     void setMatrix( const MSRMatr<value_type>& m );
 
     void setMatrixTranspose( uint, const uint*, const uint*, const double* );
-    void setTolerances( double = PETSC_DEFAULT, double = PETSC_DEFAULT, double = PETSC_DEFAULT, int = PETSC_DEFAULT );
+    /*!
+      \brief Sets the relative, absolute, divergence, and maximum iteration
+      tolerances used by the default KSP convergence testers.
+
+      Use PETSC_DEFAULT to retain the default value of any of the tolerances.
+
+      See KSPDefaultConverged() for details on the use of these parameters in
+      the default convergence test. See also KSPSetConvergenceTest() for
+      setting user-defined stopping criteria.
+
+      \arg rtol - the relative convergence tolerance (relative decrease in the
+      residual norm)
+      \arg atol - the absolute convergence tolerance (absolute size of the
+      residual norm)
+      \arg dtol - the divergence tolerance (amount residual can increase before
+      KSPDefaultConverged() concludes that the method is diverging)
+      \arg maxits - maximum number of iterations to use
+*/
+void setTolerances( double = PETSC_DEFAULT,
+                        double = PETSC_DEFAULT,
+                        double = PETSC_DEFAULT,
+                        int = PETSC_DEFAULT );
 
     //! get the petsc preconditioner
     PC & preconditioner();
@@ -209,7 +261,7 @@ public:
     //@}
 
     /** @name  Methods
-     */ 
+     */
     //@{
 
     /*
@@ -235,7 +287,9 @@ public:
       -# \c DIFFERENT_NONZERO_PATTERN -
       Pmat does not have the same nonzero structure.
     */
-    void solve( array_type& __X, array_type const& __B, MatStructure __ptype = SAME_NONZERO_PATTERN );
+    void solve( array_type& __X,
+                array_type const& __B,
+                MatStructure __ptype = SAME_NONZERO_PATTERN );
 
     /*
       solve the transpose problem \f$ A^T x = b  \f$
@@ -252,7 +306,6 @@ public:
       saves work by not recomputing incomplete factorization
       for ILU/ICC preconditioners.
 
-
       -# \c SAME_NONZERO_PATTERN :
       Pmat has the same nonzero structure during
       successive linear solves.
@@ -260,59 +313,147 @@ public:
       -# \c DIFFERENT_NONZERO_PATTERN -
       Pmat does not have the same nonzero structure.
     */
-    void solveTranspose( array_type& __X, array_type const& __B, MatStructure __ptype = SAME_NONZERO_PATTERN );
+    void solveTranspose( array_type& __X,
+                         array_type const& __B,
+                         MatStructure __ptype = SAME_NONZERO_PATTERN );
 
 
     //@}
 
-    /*! Adds options from data file to PETSC database and sets these new
-     *  options for this solver. Any option of the form
-     *  NAME = VALUE is passed to PETSC as command line option -NAME VALUE.
-     *  Example: ksp_type = gmres. See the PETSC documentation for more
-     *  available options.
-     *  @param dataFile GetPot object containing the options from the data file
-     *  @param section section in the GetPot object containing the PETSC stuff
-     *
-     *  You should have a look at PETSC documentation for further details.
-     *  @author Christoph Winkelmann
-     *  @see http://www.mcs.anl.gov/petsc/
+    /*!
+      @brief Adds options from data file to PETSC database and sets these new
+      options for this solver.
+
+      Any option of the form NAME = VALUE is passed to PETSC as command line
+      option -NAME VALUE.
+
+      Example: ksp_type = gmres. See the PETSC documentation for more
+      available options.
+
+      In addition, there are the following options:
+
+      @arg nokspview = false | true - Do not show parameters of Krylov space
+      solver. Default: false
+      @arg quiet = false | true - Do not show log messages. Only error
+      messages are printed to standard error. Default: false
+      @arg ksp_set_compute_singular_values = false | true - Calculate singular
+      values when solving. Needed if condEst shall not return NaN. Default:
+      false
+
+      @param dataFile GetPot object containing the options from the data file
+      @param section section in the GetPot object containing the PETSC stuff
+
+      You should have a look at PETSC documentation for further details.
+      @author Christoph Winkelmann
+      @see http://www.mcs.anl.gov/petsc/
      */
     void setOptionsFromGetPot( const GetPot& dataFile,
                                std::string section = "petsc" );
 
 private:
-    Private* _M_p;
+    std::auto_ptr<Private> _M_p;
 
     //! CSRPatt converted from MSRPatt if matrix given as MSRMatr
-    std::auto_ptr<CSRPatt> _tempPattern;
+    std::auto_ptr<CSRPatt> _M_tempPattern;
 
     //! CSRMatr converted from MSRMatr if given as such
-    std::auto_ptr<CSRMatr<CSRPatt, value_type> > _tempMatrix;
+    std::auto_ptr<CSRMatr<CSRPatt, value_type> > _M_tempMatrix;
+
+    //! common code for solve and solveTranspose
+    void _F_solveCommon( Mat const& __A,
+                         array_type& __X,
+                         array_type const& __B,
+                         MatStructure __ptype = SAME_NONZERO_PATTERN);
 };
 
 /*!
-  \class PETSC
+  \class PETSCManager
   \brief initialization and finalization for PETSC linear solvers
- 
-  Should be used as LifeV::singleton<PETSC>
- 
+
+  Should be used as PETSC, which is a typedef to LifeV::singleton<PETSCManager>
+
   @author Christoph Winkelmann
   @see http://www.mcs.anl.gov/petsc/
 */
-class PETSC
+class PETSCManager
 {
 public:
-    //! Initializes PETSC
-    PETSC()
-    {
-        PetscInitialize( 0, 0, 0, 0 );
-    }
-    //! Finalizes PETSC
-    ~PETSC()
-    {
-        PetscFinalize();
-    }
-};
 
+    PETSCManager()
+        :
+        _M_initialized( false )
+        {
+        }
+    /**
+       initialized PETSC
+    */
+    bool initialize()
+        {
+            if ( !isInitialized() )
+            {
+                Debug( 7010 ) << "initialize PETSC with dummy arguments\n";
+
+                // dummy arguments for PetscInitialize
+                int __argc = 1;
+                char** __argv = ( char** )malloc( 2*sizeof( char* ) );
+                __argv[0] = ( char* )malloc( 2*sizeof( char ) );
+                __argv[0][0] = 't';
+                __argv[0][1] = '\0';
+
+                // needed to avoid segmentation fault in PETSc 2.2.1
+                __argv[1] = 0;
+
+                _M_initialized = initialize( __argc, __argv );
+
+                free( __argv[0] );
+                free( __argv );
+
+            }
+            return _M_initialized;
+        }
+
+    /**
+       initialized PETSC
+    */
+    bool initialize( int __argc, char** __argv )
+        {
+            if ( !isInitialized() )
+            {
+                Debug( 7010 ) << "initialize PETSC\n";
+                //MPI_Init( &__argc, &__argv );
+                PetscInitialize( &__argc, &__argv,PETSC_NULL,PETSC_NULL);
+
+                _M_initialized = true;
+
+            }
+            return _M_initialized;
+        }
+
+    //! return \c true if PETSC manager is initialized, \c false otherwise
+    bool isInitialized() const
+        {
+            return _M_initialized;
+        }
+
+    //! finalize PETSC environment
+    void finalize()
+        {
+            if ( isInitialized() )
+            {
+                //MPI_Finalize();
+                PetscFinalize();
+                _M_initialized = false;
+            }
+        }
+    //! Finalizes PETSC
+    ~PETSCManager()
+        {
+            if ( isInitialized() )
+                finalize();
+        }
+private:
+    bool _M_initialized;
+};
+typedef singleton<PETSCManager> PETSC;
 }
 #endif /* __SolverPETSC_H */

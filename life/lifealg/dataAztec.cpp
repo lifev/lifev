@@ -242,26 +242,83 @@ void DataAztec::aztecSolveLinearSyst( MSRMatr<double>& mat,
                                       int unknown_size, MSRPatt& pattern,
                                       int* options, double* params )
 {
-    int proc_config[ AZ_PROC_SIZE ]; // Processor information:
-    int *data_org;                // Array to specify data layout
-    double status[ AZ_STATUS_SIZE ];   // Information returned from AZ_solve()
-    int *update;                  // vector elements updated on this node.
-    int *external;                // vector elements needed by this node.
-    int *update_index;            // ordering of update[] and external[]
-    int *extern_index;            // locally on this processor.
-    int N_update;                 // # of unknowns updated on this node
-    AZ_set_proc_config( proc_config, AZ_NOT_MPI );
-    AZ_read_update( &N_update, &update, proc_config, unknown_size, 1, AZ_linear );
+  int    proc_config[AZ_PROC_SIZE];// Processor information:
+  int    *data_org;                // Array to specify data layout
+  double status[AZ_STATUS_SIZE];   // Information returned from AZ_solve()
+  int    *update;                  // vector elements updated on this node.
+  int    *external;                // vector elements needed by this node.
+  int    *update_index;            // ordering of update[] and external[]
+  int    *extern_index;            // locally on this processor.
+  int    N_update;                 // # of unknowns updated on this node
+  AZ_set_proc_config(proc_config, AZ_NOT_MPI);
+  AZ_read_update(&N_update, &update, proc_config, unknown_size,1,AZ_linear);
 
-    AZ_transform( proc_config, &external,
-                  ( int * ) pattern.giveRaw_bindx(), mat.giveRaw_value(),
-                  update, &update_index,
-                  &extern_index, &data_org, N_update, NULL, NULL, NULL, NULL,
-                  AZ_MSR_MATRIX );
-    //Here, Aztec options and parameters are provided by the calling function
-    AZ_solve( unknown, rhs, options, params, NULL,
-              ( int * ) pattern.giveRaw_bindx(), NULL, NULL, NULL,
-              mat.giveRaw_value(), data_org, status, proc_config );
+  //  cout << "1) data_org[AZ_name] = " << data_org[AZ_name] << endl;
+  AZ_transform(proc_config, &external,
+	       (int *)pattern.giveRaw_bindx(), mat.giveRaw_value(),
+	       update, &update_index,
+	       &extern_index, &data_org, N_update, NULL, NULL, NULL, NULL,
+	       AZ_MSR_MATRIX);
+  //  cout << "2) data_org[AZ_name] = " << data_org[AZ_name] << endl;
+  // data_org[AZ_name] = 1;
+  //Here, Aztec options and parameters are provided by the calling function
+  AZ_solve(unknown, rhs, options, params, NULL,
+	   (int *)pattern.giveRaw_bindx(), NULL, NULL, NULL,
+	   mat.giveRaw_value(), data_org,status, proc_config);
+  //cout << "3) data_org[AZ_name] = " << data_org[AZ_name] << endl;
+}
+
+
+void DataAztec::aztecSolveLinearSyst(MSRMatr<double>& mat,
+				     Real* unknown,Real* rhs,
+				     int unknown_size,MSRPatt& pattern,
+				     int* options,double* params,
+				     int& az_name,bool flag)
+{
+  /*
+    if flag=true  : return az_name
+    if flag=false : use the given az_name (to reuse previous information like
+    preconditioner factorization)
+
+    Typical use in the calling function:
+    
+    ...
+    static bool flag = true;
+    static int az_name;
+    ...
+    if(flag){
+      options[AZ_keep_info] = 1;
+    } else {
+      options[AZ_keep_info] = 1;
+      options[AZ_pre_calc] = AZ_reuse;
+    }					     
+    aztecSolveLinearSyst(mat,u.giveVec(),rhs.giveVec(),u.size(),
+			 msrPattern,options,params,az_name,flag);  
+    flag = false;
+    
+  */
+  int    proc_config[AZ_PROC_SIZE];// Processor information:
+  int    *data_org;                // Array to specify data layout
+  double status[AZ_STATUS_SIZE];   // Information returned from AZ_solve()
+  int    *update;                  // vector elements updated on this node.
+  int    *external;                // vector elements needed by this node.
+  int    *update_index;            // ordering of update[] and external[]
+  int    *extern_index;            // locally on this processor.
+  int    N_update;                 // # of unknowns updated on this node
+  AZ_set_proc_config(proc_config, AZ_NOT_MPI);
+  AZ_read_update(&N_update, &update, proc_config, unknown_size,1,AZ_linear);
+
+  AZ_transform(proc_config, &external,
+	       (int *)pattern.giveRaw_bindx(), mat.giveRaw_value(),
+	       update, &update_index,
+	       &extern_index, &data_org, N_update, NULL, NULL, NULL, NULL,
+	       AZ_MSR_MATRIX);
+  if(flag) az_name = data_org[AZ_name];
+  else data_org[AZ_name]=az_name;
+  //Here, Aztec options and parameters are provided by the calling function
+  AZ_solve(unknown, rhs, options, params, NULL,
+	   (int *)pattern.giveRaw_bindx(), NULL, NULL, NULL,
+	   mat.giveRaw_value(), data_org,status, proc_config);
 }
 
 void DataAztec::dataAztecHelp( std::ostream& c )
