@@ -35,6 +35,8 @@ steklovPoincare::steklovPoincare(GetPot &_dataFile,
                                  BCHandler &BCh_d,
                                  BCHandler &BCh_mesh):
     operFS(_dataFile, BCh_u, BCh_d, BCh_mesh),
+    M_BCh_du      (),
+    M_BCh_dz      (),
     M_dz          ( 3*M_solid.dDof().numTotalDof() ),
     M_rhs_dz      ( 3*M_solid.dDof().numTotalDof() ),
     M_residualS   ( M_solid.dDof().numTotalDof() ),
@@ -344,7 +346,7 @@ void  steklovPoincare::invSfPrime(const Vector& res,
     setResidualFSI(res);
 
     M_solid.d() = ZeroVector(M_solid.d().size());
-    std::cout << "norm_inf residual FSI = " << norm_inf(M_residualFSI); 
+    std::cout << "norm_inf residual FSI = " << norm_inf(M_residualFSI);
     this->M_fluid.updateDispVelo();
     solveLinearFluid();
 

@@ -36,6 +36,8 @@ exactJacobian::exactJacobian(GetPot    &_dataFile,
                              BCHandler &BCh_d,
                              BCHandler &BCh_mesh):
     operFS(_dataFile, BCh_u, BCh_d, BCh_mesh),
+    M_BCh_du (0, BCHandler::HINT_BC_ONLY_ESSENTIAL),
+    M_BCh_dz (),
     M_dz     (3*M_solid.dDof().numTotalDof()),
     M_rhs_dz (3*M_solid.dDof().numTotalDof()),
     M_dataJacobian(this)

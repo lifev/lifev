@@ -92,9 +92,6 @@ namespace LifeV
         BCHandler               &M_BCh_d;
         BCHandler               &M_BCh_mesh;
 
-        BCHandler               M_BCh_du;
-        BCHandler               M_BCh_dz;
-
         NavierStokesAleSolverPC
         < RegionMesh3D_ALE<LinearTetra> > M_fluid;
 

@@ -79,6 +79,9 @@ public:
 
 private:
 
+    BCHandler               M_BCh_du;
+    BCHandler               M_BCh_dz;
+
     Vector                  M_dz;
     Vector                  M_rhs_dz;
 
