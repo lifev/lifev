@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -19,7 +19,7 @@
 /*!
   \file post_proc.h
   \author A. Veneziani
-  \date 06/2003 
+  \date 06/2003
   \version 1.0
 
   \brief File containing a class with all the methods for a post processing of the solution.
@@ -34,6 +34,8 @@
 #include "lifeV.hpp"
 #include "vecUnknown.hpp"
 
+namespace LifeV
+{
 template<typename Mesh>
 class PostProc{
 
@@ -43,67 +45,67 @@ class PostProc{
   void set_area(CurrentBdFE& feBd, const Dof& dof);
   void set_normal(CurrentBdFE& feBd, const Dof& dof);
   void set_phi(CurrentBdFE& feBd, const Dof& dof);
-  
+
   void show_bdLtoG();
-  
+
   void show_area();
 
   void show_normal();
 
   void show_phi();
-  
+
   vector< ID > fBdToIn(){return _fBdToIn;}
 
   Vector compute_sstress(Vector r, UInt ncomp);
-  
+
 
  private:
   UInt _nBdDof;
-  vector<Real> _area; // vector whose ith-component is the area of the patch of the ith-node on the boundary 
-  vector<Real> _normal; // vector with the components of the average  normal vector of each boundary node 
-  vector<Real> _phi;  // vector with \int_{Patch(i)} \phi_i dx where \phi_i is the basis function. 
-  
+  vector<Real> _area; // vector whose ith-component is the area of the patch of the ith-node on the boundary
+  vector<Real> _normal; // vector with the components of the average  normal vector of each boundary node
+  vector<Real> _phi;  // vector with \int_{Patch(i)} \phi_i dx where \phi_i is the basis function.
+
   vector< SimpleVect<ID> > _bdLtoG; // for each boundary face, it contains the numbering of the dof of the face
   vector< ID > _fBdToIn; // it converts from a local numeration over the boundary faces on the global numeration of the mesh
   Mesh& _mesh;
-  
+
 };
 
 //
 // IMPLEMENTATIONS
 //
 // Construction of _bdLtoG
-template <typename Mesh> 
+template <typename Mesh>
 PostProc<Mesh>::PostProc(Mesh& mesh, CurrentBdFE& feBd, const Dof& dof, UInt ncomp=1):_mesh(mesh)
 {
-  
+
   typedef  typename Mesh::VolumeShape GeoShape;
-  
-  // Some useful local variables, to save some typing  
+
+  // Some useful local variables, to save some typing
   UInt nDofpV = dof.fe.nbDofPerVertex; // number of Dof per vertices
   UInt nDofpE = dof.fe.nbDofPerEdge;   // number of Dof per edges
   UInt nDofpF = dof.fe.nbDofPerFace;   // number of Dof per faces
-  
+
   UInt bdnF  = _mesh.numBFaces();    // number of faces on boundary
- 
+
   typedef typename GeoShape::GeoBShape  GeoBShape;
-  
-  UInt nFaceV = GeoBShape::numVertices; // Number of face's vertices 
-  UInt nFaceE = GeoBShape::numEdges;    // Number of face's edges 
-  
-  UInt nElemV = GeoShape::numVertices; // Number of element's vertices 
+
+  UInt nFaceV = GeoBShape::numVertices; // Number of face's vertices
+  UInt nFaceE = GeoBShape::numEdges;    // Number of face's edges
+
+  UInt nElemV = GeoShape::numVertices; // Number of element's vertices
   UInt nElemE = GeoShape::numEdges;    // Number of element's edges
-  
-  UInt nDofFV = nDofpV * nFaceV; // number of vertex's Dof on a face 
-  UInt nDofFE = nDofpE * nFaceE; // number of edge's Dof on a face 
-  
-  UInt nDofF  = nDofFV+nDofFE+nDofpF; // number of total Dof on a face 
-  
+
+  UInt nDofFV = nDofpV * nFaceV; // number of vertex's Dof on a face
+  UInt nDofFE = nDofpE * nFaceE; // number of edge's Dof on a face
+
+  UInt nDofF  = nDofFV+nDofFE+nDofpF; // number of total Dof on a face
+
   UInt nDofElemV = nElemV*nDofpV; // number of vertex's Dof on a Element
   UInt nDofElemE = nElemE*nDofpE; // number of edge's Dof on a Element
-  
+
   SimpleVect<ID> bdltg(nDofF);
-  
+
 
 
   UInt iElAd, iVeEl, iFaEl, iEdEl;
@@ -114,47 +116,47 @@ PostProc<Mesh>::PostProc(Mesh& mesh, CurrentBdFE& feBd, const Dof& dof, UInt nco
   // Loop on boundary faces
   // ===================================================
   for (ID ibF=1 ; ibF<=bdnF; ++ibF) {
-    
-    iElAd = mesh.boundaryFace(ibF).ad_first();  // id of the element adjacent to the face 
+
+    iElAd = mesh.boundaryFace(ibF).ad_first();  // id of the element adjacent to the face
     iFaEl = mesh.boundaryFace(ibF).pos_first(); // local id of the face in its adjacent element
     feBd.updateMeas( mesh.boundaryFace(ibF) );  // updating finite element information
-    
+
     // ===================================================
-    // Vertex based Dof  
+    // Vertex based Dof
     // ===================================================
-    if ( nDofpV ) { 
-      
-      // loop on face vertices 
+    if ( nDofpV ) {
+
+      // loop on face vertices
       for (ID iVeFa=1; iVeFa<=nFaceV; ++iVeFa){
       	iVeEl = GeoShape::fToP(iFaEl,iVeFa); // local vertex number (in element)
 
 	// Loop number of Dof per vertex
-	for (ID l=1; l<=nDofpV; ++l) {	  
-	  lDof =   (iVeFa-1) * nDofpV + l ; // local Dof 
+	for (ID l=1; l<=nDofpV; ++l) {
+	  lDof =   (iVeFa-1) * nDofpV + l ; // local Dof
 	  gDof =  dof.localToGlobal( iElAd, (iVeEl-1)*nDofpV + l); // global Dof
           vidit = find(_fBdToIn.begin(),_fBdToIn.end(),gDof);
           if (vidit==_fBdToIn.end()){ // the gDof has been encountered for the first time
             bdltg( lDof ) =  bDof;
             _fBdToIn.push_back(gDof); // local to boundary global on this face
-            bDof++;            
+            bDof++;
          }
          else { // the gDof has been already inserted in the _fBdToIn vector
 	  auxDof = (ID)((vidit-_fBdToIn.begin()))+1;
-	  bdltg( lDof ) =  auxDof; // local to boundary global on this face	  
+	  bdltg( lDof ) =  auxDof; // local to boundary global on this face
 	}
        }
       }
-    }    
+    }
     // ===================================================
-    // Edge based Dof 
-    // =================================================== 
-    if (nDofpE) {       
-      // loop on face edges 
+    // Edge based Dof
+    // ===================================================
+    if (nDofpE) {
+      // loop on face edges
       for (ID iEdFa=1; iEdFa<=nFaceV; ++iEdFa) {
-       	iEdEl  = GeoShape::fToE(iFaEl,iEdFa).first; // local edge number (in element)	
+       	iEdEl  = GeoShape::fToE(iFaEl,iEdFa).first; // local edge number (in element)
  	// Loop number of Dof per edge
-	for (ID l=1; l<=nDofpE; ++l) {	  
-	  lDof =  nDofFV + (iEdFa-1) * nDofpE + l ; // local Dof 
+	for (ID l=1; l<=nDofpE; ++l) {
+	  lDof =  nDofFV + (iEdFa-1) * nDofpE + l ; // local Dof
 	  gDof =  dof.localToGlobal( iElAd, nDofElemV + (iEdEl-1)*nDofpE + l); // global Dof
           vidit = find(_fBdToIn.begin(),_fBdToIn.end(),gDof);
           if (vidit==_fBdToIn.end()){ // the gDof has been encountered for the first time
@@ -164,17 +166,17 @@ PostProc<Mesh>::PostProc(Mesh& mesh, CurrentBdFE& feBd, const Dof& dof, UInt nco
          }
          else { // the gDof has been already inserted in the _fBdToIn vector
 	  auxDof = (ID)(vidit-_fBdToIn.begin())+1;
-	  bdltg( lDof ) =  auxDof; // local to boundary global on this face	  
+	  bdltg( lDof ) =  auxDof; // local to boundary global on this face
 	}
        }
       }
-    }    
+    }
     // ===================================================
     // Face based Dof
     // ===================================================
 	// Loop on number of Dof per face
-	for (ID l=1; l<=nDofpF; ++l) {  
-	  lDof = nDofFE + nDofFV + l; // local Dof 
+	for (ID l=1; l<=nDofpF; ++l) {
+	  lDof = nDofFE + nDofFV + l; // local Dof
 	  gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + (iFaEl-1)*nDofpF + l); // global Dof
           vidit = find(_fBdToIn.begin(),_fBdToIn.end(),gDof);
           if (vidit==_fBdToIn.end()){ // the gDof has been encountered for the first time
@@ -184,10 +186,10 @@ PostProc<Mesh>::PostProc(Mesh& mesh, CurrentBdFE& feBd, const Dof& dof, UInt nco
          }
          else { // the gDof has been already inserted in the _fBdToIn vector
 	  auxDof = (ID)(vidit-_fBdToIn.begin())+1;
-	  bdltg( lDof ) =  auxDof; // local to boundary global on this face	  
+	  bdltg( lDof ) =  auxDof; // local to boundary global on this face
 	}
        }
-  
+
      _bdLtoG.push_back(bdltg);
   }
 
@@ -195,7 +197,7 @@ PostProc<Mesh>::PostProc(Mesh& mesh, CurrentBdFE& feBd, const Dof& dof, UInt nco
   _area.resize(_nBdDof);
   for (vector<Real>::iterator it=_area.begin();it<_area.end();it++)
     *it = 0.0;
- 
+
   _normal.resize(_nBdDof*NDIM);
   for (vector<Real>::iterator it=_normal.begin();it<_normal.end();it++)
     *it = 0.0;
@@ -211,65 +213,65 @@ PostProc<Mesh>::PostProc(Mesh& mesh, CurrentBdFE& feBd, const Dof& dof, UInt nco
 
 
 // Area of patches on the boundary
-template<typename Mesh> 
+template<typename Mesh>
 void PostProc<Mesh>::set_area(CurrentBdFE& feBd, const Dof& dof){
-  
-  
+
+
   typedef  typename Mesh::VolumeShape GeoShape;
-  
+
   UInt nDofpV = dof.fe.nbDofPerVertex; // number of Dof per vertices
   UInt nDofpE = dof.fe.nbDofPerEdge;   // number of Dof per edges
   UInt nDofpF = dof.fe.nbDofPerFace;   // number of Dof per faces
-  
+
   UInt bdnF  = _mesh.numBFaces();    // number of faces on boundary
- 
+
   typedef typename GeoShape::GeoBShape  GeoBShape;
-  
-  UInt nFaceV = GeoBShape::numVertices; // Number of face's vertices 
-  UInt nFaceE = GeoBShape::numEdges;    // Number of face's edges 
-  
-  UInt nDofFV = nDofpV * nFaceV; // number of vertex's Dof on a face 
-  UInt nDofFE = nDofpE * nFaceE; // number of edge's Dof on a face 
-  
-  UInt nDofF  = nDofFV+nDofFE+nDofpF; // number of total Dof on a face 
-  
-  Real loc_area;  
+
+  UInt nFaceV = GeoBShape::numVertices; // Number of face's vertices
+  UInt nFaceE = GeoBShape::numEdges;    // Number of face's edges
+
+  UInt nDofFV = nDofpV * nFaceV; // number of vertex's Dof on a face
+  UInt nDofFE = nDofpE * nFaceE; // number of edge's Dof on a face
+
+  UInt nDofF  = nDofFV+nDofFE+nDofpF; // number of total Dof on a face
+
+  Real loc_area;
 
   ID idGlobalDof;
-  
-  
+
+
   // ===================================================
   // Loop on boundary faces
   // ===================================================
   for (ID ibF=1 ; ibF<=bdnF; ++ibF) {
-    
-    //    iElAd = _mesh.boundaryFace(ibF).ad_first();  // id of the element adjacent to the face 
+
+    //    iElAd = _mesh.boundaryFace(ibF).ad_first();  // id of the element adjacent to the face
     //    iFaEl = _mesh.boundaryFace(ibF).pos_first(); // local id of the face in its adjacent element
     feBd.updateMeas( _mesh.boundaryFace(ibF) );  // updating finite element information
- 
-    loc_area=feBd.measure();   
-  // Loop on the total Dof per Face 
-   for (ID idofF=1; idofF<= nDofF; ++idofF) { 
+
+    loc_area=feBd.measure();
+  // Loop on the total Dof per Face
+   for (ID idofF=1; idofF<= nDofF; ++idofF) {
      // global dof
-     idGlobalDof = _bdLtoG[(UInt)ibF-1][idofF-1]; // 
-     _area[idGlobalDof-1]+=loc_area;   
+     idGlobalDof = _bdLtoG[(UInt)ibF-1][idofF-1]; //
+     _area[idGlobalDof-1]+=loc_area;
     }
   }
 }
 
 
-template<typename Mesh> 
+template<typename Mesh>
 void PostProc<Mesh>::show_area(){
 
   ID count=1;
 
   for (vector<Real>::iterator it=_area.begin();it<_area.end();it++){
-    cout << "Boundary Dof: " << count << ", corresponding to Global Dof: " << _fBdToIn[count-1] << " has patch area: " << *it << endl;  
+    cout << "Boundary Dof: " << count << ", corresponding to Global Dof: " << _fBdToIn[count-1] << " has patch area: " << *it << endl;
     count++;
   }
 }
 
-template<typename Mesh> 
+template<typename Mesh>
 void PostProc<Mesh>::show_bdLtoG(){
 
   int count=0;
@@ -288,7 +290,7 @@ void PostProc<Mesh>::show_bdLtoG(){
   cout << _fBdToIn.size() << endl;
 
   for (vector<ID>::iterator it3=_fBdToIn.begin();it3<_fBdToIn.end();it3++) {
-    cout << "Index :" << it3-_fBdToIn.begin() << ", Global Dof: " << *it3 << endl; 
+    cout << "Index :" << it3-_fBdToIn.begin() << ", Global Dof: " << *it3 << endl;
   }
 }
 
@@ -298,54 +300,54 @@ void PostProc<Mesh>::show_bdLtoG(){
 
 
 // Normal vectors of patches on the boundary
-template<typename Mesh> 
+template<typename Mesh>
 void PostProc<Mesh>::set_normal(CurrentBdFE& feBd, const Dof& dof){
-  
-  
+
+
   typedef  typename Mesh::VolumeShape GeoShape;
-  
+
   UInt nDofpV = dof.fe.nbDofPerVertex; // number of Dof per vertices
   UInt nDofpE = dof.fe.nbDofPerEdge;   // number of Dof per edges
   UInt nDofpF = dof.fe.nbDofPerFace;   // number of Dof per faces
-  
+
   UInt bdnF  = _mesh.numBFaces();    // number of faces on boundary
- 
+
   typedef typename GeoShape::GeoBShape  GeoBShape;
-  
-  UInt nFaceV = GeoBShape::numVertices; // Number of face's vertices 
-  UInt nFaceE = GeoBShape::numEdges;    // Number of face's edges 
-  
-  UInt nDofFV = nDofpV * nFaceV; // number of vertex's Dof on a face 
-  UInt nDofFE = nDofpE * nFaceE; // number of edge's Dof on a face 
-  
-  UInt nDofF  = nDofFV+nDofFE+nDofpF; // number of total Dof on a face 
-  
-  Real sum;  
+
+  UInt nFaceV = GeoBShape::numVertices; // Number of face's vertices
+  UInt nFaceE = GeoBShape::numEdges;    // Number of face's edges
+
+  UInt nDofFV = nDofpV * nFaceV; // number of vertex's Dof on a face
+  UInt nDofFE = nDofpE * nFaceE; // number of edge's Dof on a face
+
+  UInt nDofF  = nDofFV+nDofFE+nDofpF; // number of total Dof on a face
+
+  Real sum;
 
   ID idGlobalDof;
-  
-  
+
+
   // ===================================================
   // Loop on boundary faces
   // ===================================================
   for (ID ibF=1 ; ibF<=bdnF; ++ibF) {
-    
-    //    iElAd = _mesh.boundaryFace(ibF).ad_first();  // id of the element adjacent to the face 
+
+    //    iElAd = _mesh.boundaryFace(ibF).ad_first();  // id of the element adjacent to the face
     //    iFaEl = _mesh.boundaryFace(ibF).pos_first(); // local id of the face in its adjacent element
     feBd.updateMeasNormal( _mesh.boundaryFace(ibF) );  // updating finite element information
- 
+
     // Loop on the components
     for (int icomp=0; icomp<NDIM;icomp++) {
-      sum=0.; 
-    // Loop on the quadrature points 
-       for(int l=0; l<feBd.nbQuadPt; ++l) {	  
-	    sum +=  feBd.normal(icomp,l) * feBd.weightMeas(l); 
+      sum=0.;
+    // Loop on the quadrature points
+       for(int l=0; l<feBd.nbQuadPt; ++l) {
+	    sum +=  feBd.normal(icomp,l) * feBd.weightMeas(l);
 	  }
-       for (ID idofF=1; idofF<= nDofF; ++idofF) { 
+       for (ID idofF=1; idofF<= nDofF; ++idofF) {
             // global dof
-         idGlobalDof = _bdLtoG[(UInt)ibF-1][idofF-1]; // 
-         _normal[icomp*_nBdDof+idGlobalDof-1]+=sum;   
-        }       
+         idGlobalDof = _bdLtoG[(UInt)ibF-1][idofF-1]; //
+         _normal[icomp*_nBdDof+idGlobalDof-1]+=sum;
+        }
     }
   }
   // Normalization of the averaged normals with the patch area
@@ -353,24 +355,24 @@ void PostProc<Mesh>::set_normal(CurrentBdFE& feBd, const Dof& dof){
     Real loc_area=_area[inorm];
     for (int icc=0;icc<NDIM;icc++)
      _normal[icc*_nBdDof+inorm]=_normal[icc*_nBdDof+inorm]/loc_area;
-  
-  }   
+
+  }
 
 
 }
 
 
-template<typename Mesh> 
+template<typename Mesh>
 void PostProc<Mesh>::show_normal(){
 
   ID count=1;
 
   for (vector<Real>::iterator it=_area.begin();it<_area.end();it++){
-    cout << "Boundary Dof: " << count << ", corresponding to Global Dof: " << _fBdToIn[count-1] << " has patch area: " << *it << endl; 
+    cout << "Boundary Dof: " << count << ", corresponding to Global Dof: " << _fBdToIn[count-1] << " has patch area: " << *it << endl;
     cout << "and normal components " ;
-    for (int icomp=0; icomp<NDIM; icomp++) 
+    for (int icomp=0; icomp<NDIM; icomp++)
      cout << _normal[icomp*_nBdDof+count-1] << " ";
-   
+
     cout << endl;
     count++;
   }
@@ -383,64 +385,64 @@ void PostProc<Mesh>::show_normal(){
 ///////////////////////////////////////////////////
 
 // Vector with the integral of the shape functions on the patches on the boundary
-template<typename Mesh> 
+template<typename Mesh>
 void PostProc<Mesh>::set_phi(CurrentBdFE& feBd, const Dof& dof){
-  
-  
+
+
   typedef  typename Mesh::VolumeShape GeoShape;
-  
+
   UInt nDofpV = dof.fe.nbDofPerVertex; // number of Dof per vertices
   UInt nDofpE = dof.fe.nbDofPerEdge;   // number of Dof per edges
   UInt nDofpF = dof.fe.nbDofPerFace;   // number of Dof per faces
-  
+
   UInt bdnF  = _mesh.numBFaces();    // number of faces on boundary
- 
+
   typedef typename GeoShape::GeoBShape  GeoBShape;
-  
-  UInt nFaceV = GeoBShape::numVertices; // Number of face's vertices 
-  UInt nFaceE = GeoBShape::numEdges;    // Number of face's edges 
-  
-  UInt nDofFV = nDofpV * nFaceV; // number of vertex's Dof on a face 
-  UInt nDofFE = nDofpE * nFaceE; // number of edge's Dof on a face 
-  
-  UInt nDofF  = nDofFV+nDofFE+nDofpF; // number of total Dof on a face 
-  
-  Real sum;  
+
+  UInt nFaceV = GeoBShape::numVertices; // Number of face's vertices
+  UInt nFaceE = GeoBShape::numEdges;    // Number of face's edges
+
+  UInt nDofFV = nDofpV * nFaceV; // number of vertex's Dof on a face
+  UInt nDofFE = nDofpE * nFaceE; // number of edge's Dof on a face
+
+  UInt nDofF  = nDofFV+nDofFE+nDofpF; // number of total Dof on a face
+
+  Real sum;
 
   ID idGlobalDof;
-  
-  
+
+
   // ===================================================
   // Loop on boundary faces
   // ===================================================
   for (ID ibF=1 ; ibF<=bdnF; ++ibF) {
-    
+
     feBd.updateMeas( _mesh.boundaryFace(ibF) );  // updating finite element information
- 
-     for (ID idofF=1; idofF<= nDofF; ++idofF) { 
+
+     for (ID idofF=1; idofF<= nDofF; ++idofF) {
        sum=0.0;
             // global dof
-         idGlobalDof = _bdLtoG[(UInt)ibF-1][idofF-1]; // 
+         idGlobalDof = _bdLtoG[(UInt)ibF-1][idofF-1]; //
 
-     // Loop on the quadrature points 
-       for(int l=0; l<feBd.nbQuadPt; ++l) {	  
-	    sum +=  feBd.phi((int)(idofF-1),l) * feBd.weightMeas(l); 
-       }	  
-         _phi[idGlobalDof-1]+=sum;   
-      
+     // Loop on the quadrature points
+       for(int l=0; l<feBd.nbQuadPt; ++l) {
+	    sum +=  feBd.phi((int)(idofF-1),l) * feBd.weightMeas(l);
+       }
+         _phi[idGlobalDof-1]+=sum;
+
      }
    }
 
 }
 
 
-template<typename Mesh> 
+template<typename Mesh>
 void PostProc<Mesh>::show_phi(){
 
   ID count=0;
 
   for (vector<Real>::iterator it=_area.begin();it<_area.end();it++){
-    cout << "Boundary Dof: " << count+1 << ", corresponding to Global Dof: " << _fBdToIn[count] << " has patch area: " << *it << endl; 
+    cout << "Boundary Dof: " << count+1 << ", corresponding to Global Dof: " << _fBdToIn[count] << " has patch area: " << *it << endl;
     cout << "and average phi  " << _phi[count]<<endl ;
     count++;
   }
@@ -453,7 +455,7 @@ void PostProc<Mesh>::show_phi(){
 ////////////////////////////////
 ////////////////////////////////
 ///////////////////////////////
-template<typename Mesh> 
+template<typename Mesh>
 Vector  PostProc<Mesh>::compute_sstress(Vector r, UInt ncomp){
 
 
@@ -464,21 +466,21 @@ Vector  PostProc<Mesh>::compute_sstress(Vector r, UInt ncomp){
   ID count=0;
   ID glodof;
   UInt dim=r.size()/ncomp;
- 
+
   //// (Average) stress computation: from residual to stress
   for (vector<Real>::iterator it=_phi.begin();it<_phi.end();it++){
     glodof =  _fBdToIn[count];
     for (UInt ind_comp=0;ind_comp<ncomp;ind_comp++)
       stress[count+ind_comp*_nBdDof]=r[glodof-1+ind_comp*dim]/(*it);//damned conventions trouble : 0 or 1
-    
+
     count++;
    }
-  
+
    count=0;
    Real sn=0.;
   ///// Normal stress
   for (count=0;count<_nBdDof;count++){
-   sn=0.;   
+   sn=0.;
    for (UInt ind_comp=0;ind_comp<ncomp;ind_comp++)
     sn+=stress[count+ind_comp*_nBdDof]*_normal[count+ind_comp*_nBdDof];
 
@@ -491,11 +493,11 @@ Vector  PostProc<Mesh>::compute_sstress(Vector r, UInt ncomp){
   // count=0;
   // for (vector<Real>::iterator it=sstress.begin();it<sstress.end();it++)
   // {
-  //  *it = stress[count]-nstress[count];  
+  //  *it = stress[count]-nstress[count];
   //  count++;}
 
   return sstress;
 }
-/////
+}
 #endif
 

@@ -1,29 +1,29 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 /*!
   \file algebraic_facto.h
-  \author Alain Gauthier. 
+  \author Alain Gauthier.
   \date 04/02
 
   \brief Matrices-vector product for AZTEC. Preconditioner for AZTEC
 
-  \version 18/09/02, addition of: other pointers in DataFactorisation, two other Schur 
+  \version 18/09/02, addition of: other pointers in DataFactorisation, two other Schur
   complement preconditionner my_precSchur_PC anc my_precSchur_CC, Alain.
 
   \version 18/01/03, fully Dirichlet bc conditions treatment (without define). New treatment of the
@@ -60,6 +60,8 @@
 #include "values.hpp"
 #include "dataAztec.hpp"
 
+namespace LifeV
+{
 //////////////////////
 //!class for passing matrix factorisation information to AZTEC
 /*!
@@ -71,7 +73,7 @@ template <typename MatrixTypeC, typename MatrixTypeD, typename MatrixTypeDtr,
 class DataFactorisation
 {
 public:
-  
+
   //! Constructor which points on external data, version for Cahouet-Chabart
   /*!
     \param ex_C       Bloc C of the Stokes matrix
@@ -92,7 +94,7 @@ public:
   		    MatrixTypeDtr const & ex_trD, MatrixTypeH const & ex_H,
 		    MatrixTypeC const & ex_HinvC, MatrixTypeDtr const & ex_HinvDtr,
 		    MatrixTypeMpLp const & ex_Mp, VectorType & ex_vec,
-		    UInt & ex_idFacto, double const ex_mu, DataAztec& dataAztec_i, 
+		    UInt & ex_idFacto, double const ex_mu, DataAztec& dataAztec_i,
 		    DataAztec& dataAztec_s, bool fullEssential, const UInt recur);
 
   //! Constructor which points on external data, version for ACT pressure-corrected
@@ -105,17 +107,17 @@ public:
     \param ex_HinvDtr Matrix H^{-1}*D^T
     \param ex_vec     Vector which can be use to exchange informations with AZTEC matrix-vector product
     \param dataAztec_i  points to a DataAztec object holding options and parameters for the linear system
-    \param dataAztec_s  points to a DataAztec object holding options and parameters for the linear system 
+    \param dataAztec_s  points to a DataAztec object holding options and parameters for the linear system
     \param fullEssential true if full Dirichlet conditions are involved
    */
   DataFactorisation(MatrixTypeC const & ex_C, MatrixTypeD const & ex_D,
   		    MatrixTypeDtr const & ex_trD, MatrixTypeH const & ex_H,
 		    MatrixTypeC const & ex_HinvC, MatrixTypeDtr const & ex_HinvDtr,
-		    VectorType & ex_vec, DataAztec& dataAztec_i, 
+		    VectorType & ex_vec, DataAztec& dataAztec_i,
 		    DataAztec& dataAztec_s, bool fullEssential, const UInt recur);
-  
 
-  //! Constructor which points on external data, version for pressure matrix method  
+
+  //! Constructor which points on external data, version for pressure matrix method
   //------------NOT USED YET--------------
   /*!
     \param ex_C       Bloc C of the Stokes matrix
@@ -124,7 +126,7 @@ public:
     \param ex_H       Approximation of C, can be stored in a Vector type if diagonal
     \param ex_Lp      Matrix of Laplacian of pressure (useful for preconditioning S=D*H^{-1}D^T)
     \param ex_vec     Vector which can be use to exchange informations with AZTEC matrix-vector product
-    \param ex_idFacto  identifier equal to 1 if a former factorization of Lp was already performed, equal to 0 otherwise 
+    \param ex_idFacto  identifier equal to 1 if a former factorization of Lp was already performed, equal to 0 otherwise
    \param dataAztec_i  points to a DataAztec object holding options and parameters for the linear system
    \param dataAztec_s  points to a DataAztec object holding options and parameters for the linear system
    \param fullEssential true if full Dirichlet conditions are involved
@@ -132,10 +134,10 @@ public:
   DataFactorisation(MatrixTypeC const & ex_C, MatrixTypeD const & ex_D,
   		    MatrixTypeDtr const & ex_trD, MatrixTypeH const & ex_H,
 		    MatrixTypeMpLp const & ex_Lp, VectorType & ex_vec,
-		    UInt & ex_idFacto, DataAztec& dataAztec_i, 
+		    UInt & ex_idFacto, DataAztec& dataAztec_i,
 		    DataAztec& dataAztec_s, bool fullEssential, const UInt recur);
 
-  //! Constructor which points on external data, version for pressure matrix method    
+  //! Constructor which points on external data, version for pressure matrix method
   //------------ will be replaced by the previous one ------------
   /*!
     \param ex_C       Bloc C of the Stokes matrix
@@ -149,7 +151,7 @@ public:
    */
   DataFactorisation(MatrixTypeC const & ex_C, MatrixTypeD const & ex_D,
   		    MatrixTypeDtr const & ex_trD, MatrixTypeH const & ex_H,
-		    VectorType & ex_vec, DataAztec& dataAztec_i, 
+		    VectorType & ex_vec, DataAztec& dataAztec_i,
 		    DataAztec& dataAztec_s, bool fullEssential, const UInt recur);
 
   //! point to matrix C or an equivalent approximation
@@ -190,7 +192,7 @@ public:
 
   //! points to a DataAztec object holding options and parameters for the linear system
   DataAztec* _dataAztec_i;
- 
+
   //! points to a DataAztec object holding options and parameters for the linear system
   DataAztec* _dataAztec_s;
 
@@ -202,14 +204,14 @@ public:
 
 };
 
-template <typename MatrixTypeC, typename MatrixTypeD, typename MatrixTypeDtr, 
-	  typename MatrixTypeH, typename MatrixTypeMpLp, typename VectorType> 
+template <typename MatrixTypeC, typename MatrixTypeD, typename MatrixTypeDtr,
+	  typename MatrixTypeH, typename MatrixTypeMpLp, typename VectorType>
 DataFactorisation<MatrixTypeC,MatrixTypeD,MatrixTypeDtr,MatrixTypeH,MatrixTypeMpLp,VectorType>
 ::DataFactorisation(MatrixTypeC const & ex_C, MatrixTypeD const & ex_D,
   		    MatrixTypeDtr const & ex_trD, MatrixTypeH const & ex_H,
 		    MatrixTypeC const & ex_HinvC, MatrixTypeDtr const & ex_HinvDtr,
 		    MatrixTypeMpLp const & ex_Mp, VectorType & ex_vec,
-		    UInt & ex_idFacto, double const ex_mu, DataAztec& dataAztec_i, 
+		    UInt & ex_idFacto, double const ex_mu, DataAztec& dataAztec_i,
 		    DataAztec& dataAztec_s, bool fullEssential, const UInt recur=1) {
     _C=&ex_C;
     _D=&ex_D;
@@ -221,44 +223,44 @@ DataFactorisation<MatrixTypeC,MatrixTypeD,MatrixTypeDtr,MatrixTypeH,MatrixTypeMp
     _vec=&ex_vec;
     _idFacto=&ex_idFacto;
     _mu=ex_mu;
-    _dataAztec_i=&dataAztec_i;  
+    _dataAztec_i=&dataAztec_i;
     _dataAztec_s=&dataAztec_s;
-    _fullEssential = fullEssential; 
+    _fullEssential = fullEssential;
     _recur=recur;
 }
 
 
-template <typename MatrixTypeC, typename MatrixTypeD, typename MatrixTypeDtr, 
-	  typename MatrixTypeH, typename MatrixTypeMpLp, typename VectorType> 
+template <typename MatrixTypeC, typename MatrixTypeD, typename MatrixTypeDtr,
+	  typename MatrixTypeH, typename MatrixTypeMpLp, typename VectorType>
 DataFactorisation<MatrixTypeC,MatrixTypeD,MatrixTypeDtr,MatrixTypeH,MatrixTypeMpLp,VectorType>
 ::DataFactorisation(MatrixTypeC const & ex_C, MatrixTypeD const & ex_D,
   		    MatrixTypeDtr const & ex_trD, MatrixTypeH const & ex_H,
 		    MatrixTypeC const & ex_HinvC, MatrixTypeDtr const & ex_HinvDtr,
-		    VectorType & ex_vec, DataAztec& dataAztec_i, 
+		    VectorType & ex_vec, DataAztec& dataAztec_i,
 		    DataAztec& dataAztec_s, bool fullEssential, const UInt recur=1) {
-    _C=&ex_C; 
-    _D=&ex_D; 
-    _trD=&ex_trD; 
-    _H=&ex_H; 
+    _C=&ex_C;
+    _D=&ex_D;
+    _trD=&ex_trD;
+    _H=&ex_H;
     _HinvC=&ex_HinvC;
-    _HinvDtr=&ex_HinvDtr; 
-    _vec=&ex_vec; 
+    _HinvDtr=&ex_HinvDtr;
+    _vec=&ex_vec;
     _idFacto=0;
-    _mu = 1.;   
-    _dataAztec_i=&dataAztec_i;  
+    _mu = 1.;
+    _dataAztec_i=&dataAztec_i;
     _dataAztec_s=&dataAztec_s;
-    _fullEssential = fullEssential; 
+    _fullEssential = fullEssential;
     _recur=recur;
 }
 
 
-template <typename MatrixTypeC, typename MatrixTypeD, typename MatrixTypeDtr, 
-	  typename MatrixTypeH, typename MatrixTypeMpLp, typename VectorType> 
-DataFactorisation<MatrixTypeC,MatrixTypeD,MatrixTypeDtr,MatrixTypeH,MatrixTypeMpLp,VectorType>  
+template <typename MatrixTypeC, typename MatrixTypeD, typename MatrixTypeDtr,
+	  typename MatrixTypeH, typename MatrixTypeMpLp, typename VectorType>
+DataFactorisation<MatrixTypeC,MatrixTypeD,MatrixTypeDtr,MatrixTypeH,MatrixTypeMpLp,VectorType>
 ::DataFactorisation(MatrixTypeC const & ex_C, MatrixTypeD const & ex_D,
   		    MatrixTypeDtr const & ex_trD, MatrixTypeH const & ex_H,
 		    MatrixTypeMpLp const & ex_Lp, VectorType & ex_vec,
-		    UInt & ex_idFacto, DataAztec& dataAztec_i, 
+		    UInt & ex_idFacto, DataAztec& dataAztec_i,
 		    DataAztec& dataAztec_s, bool fullEssential, const UInt recur=1) {
     _C=&ex_C;
     _D=&ex_D;
@@ -268,27 +270,27 @@ DataFactorisation<MatrixTypeC,MatrixTypeD,MatrixTypeDtr,MatrixTypeH,MatrixTypeMp
     _vec=&ex_vec;
     _idFacto=&ex_idFacto;
     _mu=1.;
-    _dataAztec_i=&dataAztec_i;  
+    _dataAztec_i=&dataAztec_i;
     _dataAztec_s=&dataAztec_s;
-    _fullEssential=fullEssential; 
+    _fullEssential=fullEssential;
     _recur=recur;
 }
 
 
-template <typename MatrixTypeC, typename MatrixTypeD, typename MatrixTypeDtr, 
-	  typename MatrixTypeH, typename MatrixTypeMpLp, typename VectorType> 
-DataFactorisation<MatrixTypeC,MatrixTypeD,MatrixTypeDtr,MatrixTypeH,MatrixTypeMpLp,VectorType>  
+template <typename MatrixTypeC, typename MatrixTypeD, typename MatrixTypeDtr,
+	  typename MatrixTypeH, typename MatrixTypeMpLp, typename VectorType>
+DataFactorisation<MatrixTypeC,MatrixTypeD,MatrixTypeDtr,MatrixTypeH,MatrixTypeMpLp,VectorType>
 ::DataFactorisation(MatrixTypeC const & ex_C, MatrixTypeD const & ex_D,
   		    MatrixTypeDtr const & ex_trD, MatrixTypeH const & ex_H,
-		    VectorType & ex_vec, DataAztec& dataAztec_i, 
+		    VectorType & ex_vec, DataAztec& dataAztec_i,
 		    DataAztec& dataAztec_s, bool fullEssential, const UInt recur=1) {
     _C=&ex_C;
-    _D=&ex_D; 
+    _D=&ex_D;
     _trD=&ex_trD;
     _H=&ex_H;
     _vec=&ex_vec;
     _mu=1.;
-    _dataAztec_i=&dataAztec_i;  
+    _dataAztec_i=&dataAztec_i;
     _dataAztec_s=&dataAztec_s;
     _fullEssential=fullEssential;
     _recur=recur;
@@ -301,7 +303,7 @@ DataFactorisation<MatrixTypeC,MatrixTypeD,MatrixTypeDtr,MatrixTypeH,MatrixTypeMp
    Computes the product C * p where
    the matrix C is stored in the class DataFactorisation.
 
-   \param p           
+   \param p
    \param ap
    \param Amat
    \param proc_config contains information on processor for AZTEC, initialized by the function AZ_set_proc_config.
@@ -318,7 +320,7 @@ void my_Cmatvec(double *p, double *ap, AZ_MATRIX * Amat,
 		     int proc_config[])
 {
   // Extraction of informations stored in the structure AZ_MATRIX
-  DataFactorisation<MatrixTypeC,MatrixTypeD,MatrixTypeDtr,MatrixTypeH,MatrixTypeMpLp,VectorType>* 
+  DataFactorisation<MatrixTypeC,MatrixTypeD,MatrixTypeDtr,MatrixTypeH,MatrixTypeMpLp,VectorType>*
     my_data = static_cast< DataFactorisation<MatrixTypeC,MatrixTypeD,MatrixTypeDtr,
     MatrixTypeH,MatrixTypeMpLp,VectorType>* >(AZ_get_matvec_data(Amat));
 
@@ -329,21 +331,21 @@ void my_Cmatvec(double *p, double *ap, AZ_MATRIX * Amat,
 ////////////////////////
 /*!
    Supply local matrix (without ghost node columns) for rows given by
-   requested_rows[0 ... N_requested_rows-1].  Return this information in 
-   'row_lengths, columns, values'.  If there is not enough space to complete 
+   requested_rows[0 ... N_requested_rows-1].  Return this information in
+   'row_lengths, columns, values'.  If there is not enough space to complete
    this operation, return 0. Otherwise, return 1.
 
    Purpose : necessary for using AZTEC preconditioner with USER-DEFINED
              matrix.
 
-   \param Amat             On input, points to user's data containing 
+   \param Amat             On input, points to user's data containing
                            matrix values.
-   \param N_requested_rows On input, number of rows for which nonzero are 
+   \param N_requested_rows On input, number of rows for which nonzero are
                            to be returned.
    \param requested_rows   On input, requested_rows[0...N_requested_rows-1]
                            give the row indices of the rows for which nonzero
 			   values are returned.
-   \param row_lengths      On output, row_lengths[i] is the number of 
+   \param row_lengths      On output, row_lengths[i] is the number of
                            nonzeros in the row 'requested_rows[i]'
    \param columns,
    \param values           On output, columns[k] and values[k] contains
@@ -351,7 +353,7 @@ void my_Cmatvec(double *p, double *ap, AZ_MATRIX * Amat,
                            where all nonzeros for requested_rows[i] appear
 			   before requested_rows[i+1]'s nonzeros.
 			   NOTE: Arrays are of size 'allocated_space'.
-   \param allocated_space  On input, indicates the space available in 
+   \param allocated_space  On input, indicates the space available in
                            'columns' and 'values' for storing nonzeros.
 			   If more space is needed, return 0.
    \return An integer value, 0 if more memory space is needed, 1 otherwise.
@@ -493,7 +495,7 @@ void my_matvec(double *p, double *ap, AZ_MATRIX * Amat, int proc_config[])
 
   std::vector<double> p1(A_i->data_org[AZ_N_internal]+A_i->data_org[AZ_N_border]+A_i->data_org[AZ_N_external]);
   std::vector<double> p2(A_i->data_org[AZ_N_internal]+A_i->data_org[AZ_N_border]);
-  p1.assign( p1.size(), 0.0 );  
+  p1.assign( p1.size(), 0.0 );
   p2.assign( p1.size(), 0.0 );
 
   // product trD*p:
@@ -502,7 +504,7 @@ void my_matvec(double *p, double *ap, AZ_MATRIX * Amat, int proc_config[])
   // solve the system C*p2= p1 with AZTEC.
   AZ_iterate( &p2.front(), &p1.front(), options_i, params_i, status_i,
 	     proc_config_i, A_i, prec_i, NULL);
-  
+
   //return to zero recursion level for AZTEC memory manager
   //--options_i[AZ_recursion_level];
 
@@ -603,12 +605,12 @@ void my_matvec(double *p, double *ap, AZ_MATRIX * Amat, int proc_config[])
   p2.assign( dim_u, 0.0 );
 
   // product trD*p:
-  operMatVec( &p1.front(), *(my_data->_trD), p); 
+  operMatVec( &p1.front(), *(my_data->_trD), p);
 
   // solve the system C*p2= p1 with AZTEC.
   AZ_iterate( &p2.front(), &p1.front(), options_i, params_i, status_i,proc_config_i, A_i, prec_i, NULL);
 
- 
+
 
   // destroy A_i and prec_i
   AZ_matrix_destroy(&A_i);
@@ -623,11 +625,11 @@ void my_matvec(double *p, double *ap, AZ_MATRIX * Amat, int proc_config[])
   operMatVec(ap, *(my_data->_D), &p2.front());
 
   if ( my_data->_fullEssential ) {
-    const UInt dim  = my_data->_trD->Patt()->nCols(); 
+    const UInt dim  = my_data->_trD->Patt()->nCols();
     ap[dim-1]=p[dim-1]; // diagonalisation of the last row.
   }
 
-  
+
 }
 
 ////////////////////////
@@ -732,7 +734,7 @@ void my_matvec_block(double *p, double *ap, AZ_MATRIX * Amat,
   prec_C3= AZ_precond_create(C3, AZ_precondition, NULL);
 
   my_data->_dataAztec_i->aztecOptionsFromDataFile(options_i,params_i);
-   
+
   //initialisation of first recursion level for AZTEC memory manager
   options_i[AZ_recursion_level]=my_data->_recur;
   //without writing output
@@ -802,7 +804,7 @@ void my_approxmatvec(double *p, double *ap, AZ_MATRIX * Amat, int proc_config[])
 
   // introduction of vectors
   UInt dim2 = my_data->_trD->Patt()->nRows();
- 
+
   std::vector<double> p1(dim2);
 
   // product p1= H^{-1}*trD * p :
@@ -811,7 +813,7 @@ void my_approxmatvec(double *p, double *ap, AZ_MATRIX * Amat, int proc_config[])
   // product D*p1 :
   operMatVec(ap, *(my_data->_D), &p1.front());
 
- 
+
   if(my_data->_fullEssential) {
     UInt dim  = my_data->_trD->Patt()->nCols();
     ap[dim-1]=p[dim-1]; // diagonalisation of the last row.
@@ -945,7 +947,7 @@ void my_precSchur_PC(double *z, int *options, int *proc_config, double *params,
 		 VectorType>);
 
   my_data->_dataAztec_s->aztecOptionsFromDataFile(options_s,params_s);
- 
+
   //----------------------------
   //(i) Solve the system S*z1= z
   //----------------------------
@@ -962,11 +964,11 @@ void my_precSchur_PC(double *z, int *options, int *proc_config, double *params,
   //initialisation of first recursion level for AZTEC memory manager
   options_s[AZ_recursion_level]=my_data->_recur;
 
- 
+
   AZ_iterate(&z1[0], z, options_s, params_s, status_s,
 	     proc_config, matS, NULL, NULL);
 
-  
+
   //-------------------------------
   //(ii) Solve the system S*z= B*z1
   //-------------------------------
@@ -981,7 +983,7 @@ void my_precSchur_PC(double *z, int *options, int *proc_config, double *params,
   matS->data_org[AZ_name]= DATA_NAME_AZTEC_MATS;
   options_s[AZ_keep_info]= 0;
 
-  
+
   AZ_iterate(z, &Bz1[0], options_s, params_s, status_s,
 	     proc_config, matS, NULL, NULL);
 
@@ -991,7 +993,7 @@ void my_precSchur_PC(double *z, int *options, int *proc_config, double *params,
   // destroy matS
   AZ_matrix_destroy(&matS);
 
-  if (my_data->_fullEssential) 
+  if (my_data->_fullEssential)
     z[dim-1]=lastz; // diagonalisation of the last row.
 
 }
@@ -1083,7 +1085,7 @@ void my_precSchur_CC(double *z, int *options, int *proc_config, double *params,
   AZ_set_proc_config(proc_config_ii, AZ_NOT_MPI);
 
   AZ_defaults(options_ii, params_ii);
-  
+
   options_ii[AZ_output]=AZ_none;
   options_ii[AZ_precond] =  AZ_dom_decomp;
   options_ii[AZ_subdomain_solve] = AZ_ilut;
@@ -1146,7 +1148,7 @@ void my_precSchur_CC(double *z, int *options, int *proc_config, double *params,
   if (my_data->_fullEssential)
     z[dim-1]=lastz; // diagonalisation of the last row.
 }
-
+}
 
 #endif
 

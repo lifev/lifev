@@ -1,36 +1,39 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#ifndef _READMESH2D_HH_ 
-#define _READMESH2D_HH_  
+#ifndef _READMESH2D_HH_
+#define _READMESH2D_HH_
 #include "regionMesh2D.hpp"
 #include "util_string.hpp"
 #include "mesh_util.hpp"
 #include "fortran_wrap.hpp"
+
+namespace LifeV
+{
 /*----------------------------------------------------------------------*
-| 
-| 
-| #Version 0.1 Experimental 19/8/99. Luca Formaggia 
-| 
-| Added support for numbering from 1 
+|
+|
+| #Version 0.1 Experimental 19/8/99. Luca Formaggia
+|
+| Added support for numbering from 1
 ! Added markers
-| 
-| #Mesh readers 
+|
+| #Mesh readers
 |
 *----------------------------------------------------------------------*/
 /*****************************************************************
@@ -65,7 +68,7 @@ readMesh2d(RegionMesh2D & mesh, const string & fname, EntityFlag regionFlag)
   UInt i,i1,i2,i3;
   bool p2meshstored, p2meshwanted;
   typedef typename RegionMesh2D::ElementShape ElementShape;
-  
+
   if (ElementShape::Shape != TRIANGLE){
     cerr<< "Sorry, Readmesh2d reads only triangle meshes"<<endl;
     abort();
@@ -74,7 +77,7 @@ readMesh2d(RegionMesh2D & mesh, const string & fname, EntityFlag regionFlag)
     cerr<< "Sorry, ReadMppFiles handles only liner&quad triangles"<<endl;
     abort();
   }
-  
+
   CHARACTER filename(const_cast<char *>(fname.c_str()),fname.length());
   I_F77 ne,np,nptot,npe,nb,nx,npc,ierr,nps,ndimn,npb;
   F77NAME(readmesh2dhead)(ne,np,nptot,npe,nb,nps,nx,npc,ierr,filename);
@@ -122,7 +125,7 @@ readMesh2d(RegionMesh2D & mesh, const string & fname, EntityFlag regionFlag)
 
   // I use explicit constructors instead of relying on implicit conversion rules
   // This to make things more explicit: mesh2d files are (so far) single precision!
-  
+
   nFa=UInt(ne);
   nBEd=UInt(nb);
   nVe=UInt(np);
@@ -143,7 +146,7 @@ readMesh2d(RegionMesh2D & mesh, const string & fname, EntityFlag regionFlag)
     cout << "Construction of 2D P2 mesh from P1 data not yet implemented"<<endl;
     abort();
   }
-  
+
   if (!p2meshwanted){
     nPo=nVe;
     nBPo=nBVe;
@@ -161,7 +164,7 @@ readMesh2d(RegionMesh2D & mesh, const string & fname, EntityFlag regionFlag)
   cout<< "#BEdges   = "<<nBEd<<endl;
   cout<< "#Points   = "<<nPo;
   cout<< "#BPoints  = "<<nBPo<<endl;
- 
+
   // I store all Points
   mesh.setMaxNumPoints(nPo,true);
   mesh.setNumBPoints(nBPo);
@@ -181,8 +184,8 @@ readMesh2d(RegionMesh2D & mesh, const string & fname, EntityFlag regionFlag)
   typename RegionMesh2D::PointType * pp=0;
   typename RegionMesh2D::EdgeType * pe=0;
   typename RegionMesh2D::FaceType * pf=0;
-  
-  
+
+
   // first the vertices
   for(i=0;i<nVe;i++) {
     pp=&mesh.addPoint(i<nBVe);
@@ -205,7 +208,7 @@ readMesh2d(RegionMesh2D & mesh, const string & fname, EntityFlag regionFlag)
     p1=ID(ib(0,i)); // Explicit conversion to ID
     p2=ID(ib(1,i));
     ibc=EntityFlag(bc(i)); //Explicit conversion to entity flag
-    // Boundary condition marker 
+    // Boundary condition marker
     pe->setMarker(ibc);
     pe->setPoint(1,mesh.point(p1)); // set edge conn.
     pe->setPoint(2,mesh.point(p2)); // set edge conn.
@@ -228,14 +231,14 @@ readMesh2d(RegionMesh2D & mesh, const string & fname, EntityFlag regionFlag)
       cerr<< "Information on adjacency of boundary edge is wrong!"<<endl;
   }
   cout<< "Boundary Edges Created "<<endl;
-  
+
   // Finally the triangular faces!
   for(i=0;i<nFa;i++){
     p1=ID(iel(0,i));
     p2=ID(iel(1,i));
     p3=ID(iel(2,i));
     pf=&(mesh.addFace()); // Only boundary faces
-    
+
     pf->setMarker(EntityFlag(ibc));
     pf->setPoint(1,mesh.point(p1)); // set face conn.
     pf->setPoint(2,mesh.point(p2)); // set face conn.
@@ -253,36 +256,5 @@ readMesh2d(RegionMesh2D & mesh, const string & fname, EntityFlag regionFlag)
   cout<< "Triangular Faces Created "<<endl;
   return ierr==0;
 }
+}
 #endif
-
-// 1.1 2002/04/03 09:36:23 forma Exp $
-// Revision 1.1  2002/04/03 09:36:23  forma
-// region2d stuff added
-//
-// Revision 1.3  2002/01/18 12:49:13  forma
-// Bug fixes
-//
-// Revision 1.2  2001/10/23 10:24:24  forma
-// New handling of BC
-// Fixed some problems with non C++ standard compliant code
-// Added new features to FE classes
-//
-// Revision 1.1.1.1  2001/05/20 08:32:30  forma
-// LifeV library. New structure after meeting May 2001
-//
-// Revision 1.1.1.1  2000/10/23 16:54:21  soflife
-// NSCode October 2000
-//
-// Revision 1.7  2000/07/11 18:17:17  forma
-// intermediate version:
-// corrected bugs in p1top2
-// new construuction for DOF
-// mixed patterns half way through.
-//
-// Revision 1.6  2000/05/30 15:15:28  forma
-// This is the new version, aftre the modifications by JFG and the
-// MArkers/bccond by Luca.
-//
-// Revision 1.5  2000/04/14 14:59:48  forma
-// Version with new MArkers and BC
-//

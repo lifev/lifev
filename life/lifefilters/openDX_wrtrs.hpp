@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -50,6 +50,8 @@
 #include <cstdlib>
 #include <string>
 
+namespace LifeV
+{
 /*! This subroutines writes the header part of a OPENDX file (which is constant in a time-dependent but fixed-mesh problem)
     for a general problem, in particular for instance for a P2 on LinearTetra Mesh: in such a case
     we need to compute the coordinates of all the supplementary nodes
@@ -62,7 +64,7 @@ void wr_opendx_header(string fname, const TheMesh& mesh, const TheDof& dof, TheF
 
  ofstream ofile(fname.c_str());
 
- ASSERT(ofile,"Error: Output file cannot be open"); // 
+ ASSERT(ofile,"Error: Output file cannot be open"); //
 
   UInt nldpe=fem.refFE.nbDofPerEdge;
   UInt nldpv=fem.refFE.nbDofPerVertex;
@@ -84,9 +86,9 @@ void wr_opendx_header(string fname, const TheMesh& mesh, const TheDof& dof, TheF
  vector<Real> supp_z(num_points_supp,0.0);
  Real x,y,z;
  char virgole='"';
- 
+
  // Coordinates writing
-  
+
   ofile << endl; // Aggiunta Diego
   ofile << "object " << virgole << "pos" << virgole << endl;
   ofile << "class array ";
@@ -101,15 +103,15 @@ void wr_opendx_header(string fname, const TheMesh& mesh, const TheDof& dof, TheF
 
   // Vertex based Dof: the coordinates are available from the Pont List
  for(i=0;i<nv;++i)
-  ofile << mesh.pointList[i].x() << " " <<  mesh.pointList[i].y() << " " <<  mesh.pointList[i].z() << endl; 
- 
+  ofile << mesh.pointList[i].x() << " " <<  mesh.pointList[i].y() << " " <<  mesh.pointList[i].z() << endl;
+
  // Now I store the coordinates of the supplementary nodes in a temporary vector
   // Edge Based Dof
   gcount = 0;
   lcount = nlv-1;
   if (nldpe >0 ){
     for (ie=1; ie<= nV; ++ie){
-      fem.updateJac(mesh.volumeList(ie)); 
+      fem.updateJac(mesh.volumeList(ie));
       for (i=1; i<=nle; ++i){
 	fem.coorMap(x,y,z,fem.refFE.xi(i+lcount),fem.refFE.eta(i+lcount),fem.refFE.zeta(i+lcount));
 	index = mesh.localEdgeId(ie,i);
@@ -117,17 +119,17 @@ void wr_opendx_header(string fname, const TheMesh& mesh, const TheDof& dof, TheF
       }
     }
     gcount+=ne;
-    lcount+=nle;    
+    lcount+=nle;
   }
-  // Face  Based Dof 
+  // Face  Based Dof
   if (nldpf >0){
     for (ie=1; ie<= nV; ++ie){
-      fem.updateJac(mesh.volumeList(ie)); 
+      fem.updateJac(mesh.volumeList(ie));
       for (i=1; i<=nlf; ++i){
 	fem.coorMap(x,y,z,fem.refFE.xi(i+lcount),fem.refFE.eta(i+lcount),fem.refFE.zeta(i+lcount));
 	index = mesh.localFaceId(ie,i)+gcount;
 	supp_x[index-1]=x;supp_y[index-1]=y;supp_z[index-1]=z;
-	
+
       }
     }
     gcount+=nf;
@@ -137,7 +139,7 @@ void wr_opendx_header(string fname, const TheMesh& mesh, const TheDof& dof, TheF
   // Volume  Based Dof
   if (nldpV >0 ){
     for (ie=1; ie<= nV; ++ie){
-      fem.updateJac(mesh.volumeList(ie)); 
+      fem.updateJac(mesh.volumeList(ie));
       //Alain (11/07/02) just one dof on volume ! change if there is more...
       for (i=1; i<=1; ++i){
 	fem.coorMap(x,y,z,fem.refFE.xi(i+lcount),fem.refFE.eta(i+lcount),fem.refFE.zeta(i+lcount));
@@ -151,7 +153,7 @@ void wr_opendx_header(string fname, const TheMesh& mesh, const TheDof& dof, TheF
     if (abs(supp_x[i])<EPS_DX)  supp_x[i]=0.; // needed due to dx bugs
     if (abs(supp_y[i])<EPS_DX)  supp_y[i]=0.; // needed due to dx bugs
     if (abs(supp_z[i])<EPS_DX)  supp_z[i]=0.; // needed due to dx bugs
-    ofile << supp_x[i] << " " <<  supp_y[i] << " " <<  supp_z[i] << endl; 
+    ofile << supp_x[i] << " " <<  supp_y[i] << " " <<  supp_z[i] << endl;
   }
 
   ofile << endl;
@@ -184,11 +186,11 @@ void wr_opendx_header(string fname, const TheMesh& mesh, const TheDof& dof, TheF
     ofile << " items " <<  nV*8;
   //#endif
   ofile << " data follows" << endl;
- 
+
   //#if defined(LINEAR_P1)
   if (nam_fe == "P1"){
     for (i=0;i<nV;++i){
-      for (j=0;j<nldof;++j)   
+      for (j=0;j<nldof;++j)
 	ofile << dof.localToGlobal(i+1,j+1)-1 << " ";//damned (C vs) Fortran
 
       ofile << endl;
@@ -197,7 +199,7 @@ void wr_opendx_header(string fname, const TheMesh& mesh, const TheDof& dof, TheF
 
   else if (nam_fe == "P1bubble"){
     for (i=0;i<nV;++i){
-      for (j=0;j<nldof-1;++j)   
+      for (j=0;j<nldof-1;++j)
 	ofile << dof.localToGlobal(i+1,j+1)-1 << " ";//damned (C vs) Fortran
 
       ofile << endl;
@@ -210,7 +212,7 @@ void wr_opendx_header(string fname, const TheMesh& mesh, const TheDof& dof, TheF
   else if (nam_fe == "P2" || nam_fe == "P2tilde"){
 /*
 for (i=0;i<nV;++i){
- for (j=0;j<nldof-6;++j)   
+ for (j=0;j<nldof-6;++j)
   ofile << dof.localToGlobal(i+1,j+1)-1 << " ";//damned (C vs) Fortran
 
  ofile << endl;
@@ -221,7 +223,7 @@ for (i=0;i<nV;++i){
     int  MyCon[nldof];
 
     for (i=0;i<nV;++i){
-      for (j=0;j<nldof;++j){ 
+      for (j=0;j<nldof;++j){
 	MyCon[j]= dof.localToGlobal(i+1,j+1)-1;//damned (C vs) Fortran
       }
       ofile << MyCon[4] << " ";
@@ -274,7 +276,7 @@ for (i=0;i<nV;++i){
 
     }
   }
-  //#endif 
+  //#endif
 
   ofile << "attribute " << virgole << "element type" << virgole << " string " << virgole << CELL << virgole << endl;
   ofile << "attribute " << virgole << "ref" << virgole << " string " << virgole << "positions" << virgole << endl;
@@ -294,7 +296,7 @@ void wr_opendx_header(string fname, const RegionMesh& mesh, const Dof& dof)
 {
  ofstream ofile(fname.c_str());
 
- ASSERT(ofile,"Error: Output file cannot be open"); // 
+ ASSERT(ofile,"Error: Output file cannot be open"); //
 
   UInt nlv=dof.numLocalVertices();
   UInt nle=dof.numLocalEdges();
@@ -305,7 +307,7 @@ void wr_opendx_header(string fname, const RegionMesh& mesh, const Dof& dof)
   UInt nldof = mesh.numLocalVertices();;
  //  _totalDof=nV*nldpV+ne*nldpe+nv*nldpv+nf*nldpf;
  char virgole='"';
- 
+
  // Coordinates writing
 
   ofile << "object " << virgole << "pos" << virgole << endl;
@@ -323,7 +325,7 @@ void wr_opendx_header(string fname, const RegionMesh& mesh, const Dof& dof)
    if (abs(mesh.pointList[i].y())<EPS_DX)  mesh.pointList[i].y()=0. ; // needed due to dx bugs
    if (abs(mesh.pointList[i].z())<EPS_DX)  mesh.pointList[i].z()=0. ; // needed due to dx bugs
 
-  ofile << mesh.pointList[i].x() << " " <<  mesh.pointList[i].y() << " " <<  mesh.pointList[i].z() << endl; 
+  ofile << mesh.pointList[i].x() << " " <<  mesh.pointList[i].y() << " " <<  mesh.pointList[i].z() << endl;
   }
 
  // connectivity
@@ -333,10 +335,10 @@ void wr_opendx_header(string fname, const RegionMesh& mesh, const Dof& dof)
   ofile << "rank " << VRANK << " shape " << nldof;
   ofile << " items " <<  nV;
   ofile << " data follows" << endl;
- 
+
 
  for (i=0;i<nV;++i){
-  for (j=0;j<nldof;++j)   
+  for (j=0;j<nldof;++j)
    ofile << dof.localToGlobal(i+1,j+1)-1 << " ";//damned (C vs) Fortran
 
   ofile << endl;
@@ -363,7 +365,7 @@ void wr_opendx_scalar(string fname, string name, VectorType U)
  string Ext = ".data"; // Aggiunta Diego
  string nameExt = name + Ext; // Aggiunta Diego
 
- ASSERT(ofile,"Error: Output file cannot be open"); 
+ ASSERT(ofile,"Error: Output file cannot be open");
 
 
   ofile << "object " << virgole << nameExt << virgole << endl; // Modificata Diego
@@ -386,7 +388,7 @@ void wr_opendx_scalar(string fname, string name, VectorType U)
   ofile << "component " << virgole << "data" << virgole << " value " << virgole << nameExt << virgole << endl; // Modificata Diego
   ofile << endl; // Aggiunta Diego
   ofile << "end";// Aggiunta Diego: Attenzione deve essere posizionato una sola volta alla fine del file !
-  ofile << endl; 
+  ofile << endl;
 }
 
 void wr_opendx_vector(string fname, string name, vector<Real> U, vector<Real> V, vector<Real> W)
@@ -397,7 +399,7 @@ void wr_opendx_vector(string fname, string name, vector<Real> U, vector<Real> V,
  string Ext = ".data";
  string nameExt = name + Ext;
 
- ASSERT(ofile,"Error: Output file cannot be open"); 
+ ASSERT(ofile,"Error: Output file cannot be open");
 
 
   ofile << "object " << virgole << nameExt << virgole << endl;
@@ -422,7 +424,7 @@ void wr_opendx_vector(string fname, string name, vector<Real> U, vector<Real> V,
   ofile << "component " << virgole << "data" << virgole << " value " << virgole << nameExt << virgole << endl;
   ofile << endl;
   ofile << "end";
-  ofile << endl; 
+  ofile << endl;
 }
 
 // Version accepting various vector types, Alain 21/01/02
@@ -435,7 +437,7 @@ void wr_opendx_vector(string fname, string name, VectorType U, UInt nbcomp)
  string Ext = ".data";
  string nameExt = name + Ext;
 
- ASSERT(ofile,"Error: Output file cannot be open"); 
+ ASSERT(ofile,"Error: Output file cannot be open");
 
  udim=U.size();
 
@@ -463,7 +465,7 @@ void wr_opendx_vector(string fname, string name, VectorType U, UInt nbcomp)
   ofile << "component " << virgole << "data" << virgole << " value " << virgole << nameExt << virgole << endl;
   ofile << endl;
   ofile << "end";
-  ofile << endl; 
+  ofile << endl;
 }
-
+}
 #endif

@@ -1,40 +1,43 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#ifndef _READMESH3D_HH_ 
-#define _READMESH3D_HH_  
+#ifndef _READMESH3D_HH_
+#define _READMESH3D_HH_
 #include "regionMesh3D.hpp"
 #include "util_string.hpp"
 #include "mesh_util.hpp"
+
+namespace LifeV
+{
 // IT NEEDS THE NEW mesh_util.h (V 0.2 onwards)
 // #define OLDMPPFILE // UNCOMMENT IF YOU HAVE AN OLD Mesh++ file!
 /*----------------------------------------------------------------------*
-| 
-| 
-| 
-| 
-| 
-| #Version 0.2 Experimental 19/8/99. Luca Formaggia 
-| 
-| Added support for numbering from 1 
+|
+|
+|
+|
+|
+| #Version 0.2 Experimental 19/8/99. Luca Formaggia
+|
+| Added support for numbering from 1
 ! Added markers
-| 
-| #Mesh readers 
+|
+| #Mesh readers
 |
 *----------------------------------------------------------------------*/
 /********************************************************************************
@@ -50,7 +53,7 @@ readMppFileHead(ifstream & mystream, UInt & numVertices, UInt & numBVertices, UI
 // Quadratic Tetra if needed it return false if  mesh check is uncessessfull
 //
 template<typename GeoShape, typename MC>
-bool 
+bool
 readMppFile(RegionMesh3D<GeoShape,MC> & mesh, const string  & filename,
 	    EntityFlag regionFlag){
   unsigned done=0;
@@ -61,9 +64,9 @@ readMppFile(RegionMesh3D<GeoShape,MC> & mesh, const string  & filename,
   UInt nVe(0), nBVe(0),nFa(0),nBFa(0),nPo(0),nBPo(0);
   UInt nVo(0),nEd(0),nBEd(0);
   UInt i;
-  
+
   ASSERT_PRE0(GeoShape::Shape == TETRA , "ReadMppFiles reads only tetra meshes") ;
-  
+
   ASSERT_PRE0(GeoShape::Shape == TETRA, "Sorry, ReadMppFiles reads only tetra meshes");
 
   ASSERT_PRE0(GeoShape::numVertices <= 6, "Sorry, ReadMppFiles handles only liner&quad tetras");
@@ -89,14 +92,14 @@ readMppFile(RegionMesh3D<GeoShape,MC> & mesh, const string  & filename,
 
   // Be a little verbose
   if (GeoShape::numPoints > 4 ){
-    
+
     cout << "Quadratic Tetra  Mesh (from Linear geometry)" <<endl;
     nPo=nVe+nEd;
     nBPo=nBVe+nBEd;
   } else {
     cout << "Linear Tetra Mesh" <<endl;
     nPo=nVe;
-    nBPo=nBVe;  
+    nBPo=nBVe;
   }
   cout<< "#Vertices= "<<nVe;
   cout<< " #BVertices= "<<nBVe<<endl;
@@ -107,7 +110,7 @@ readMppFile(RegionMesh3D<GeoShape,MC> & mesh, const string  & filename,
   cout<< "#Points= "<<nPo;
   cout<< " #Boundary Points= "<<nBPo<<endl;
   cout<< "#Volumes= "<<nVo<<endl;
-  
+
   // Set all basic data structure
 
   // I store all Points
@@ -127,7 +130,7 @@ readMppFile(RegionMesh3D<GeoShape,MC> & mesh, const string  & filename,
   mesh.setMaxNumVolumes(nVo,true);
 
   mesh.setMarker(regionFlag); // Mark the region
-  
+
   typename RegionMesh3D<GeoShape,MC>::PointType * pp=0;
   typename RegionMesh3D<GeoShape,MC>::EdgeType * pe=0;
   typename RegionMesh3D<GeoShape,MC>::FaceType * pf=0;
@@ -174,7 +177,7 @@ readMppFile(RegionMesh3D<GeoShape,MC> & mesh, const string  & filename,
 	mystream>>p1 >> p2 >> p3 >> ity >> ity_id>> ibc;
 #endif
 	pf=&(mesh.addFace(true)); // Only boundary faces
-	
+
         pf->setMarker(EntityFlag(ibc));
 	pf->setPoint(1,mesh.point(p1)); // set face conn.
 	pf->setPoint(2,mesh.point(p2)); // set face conn.
@@ -218,19 +221,19 @@ readMppFile(RegionMesh3D<GeoShape,MC> & mesh, const string  & filename,
       cout<< count <<" Volume elements Read"<<endl;
       done++;
     }
-    
+
   }
   // This part is to build a P2 mesh from a P1 geometry
-  
+
   if (GeoShape::numPoints > 4 )p1top2(mesh);
   mystream.close();
-  
+
   // Test mesh
   Switch sw;
-  
+
   ///// CORRECTION JFG
   //if (mesh.check(1, true,true))done=0;
-  
+
   if(!checkMesh3D(mesh, sw, true,true,cout,cout,cout)) abort(); // CORRECTION JFG
 
   Real vols[3];
@@ -240,12 +243,12 @@ readMppFile(RegionMesh3D<GeoShape,MC> & mesh, const string  & filename,
   cout << "INT(X)     INT(Y)      INT(Z) <- they should be equal and equal to"<<endl<<
     "                                 the voulume enclosed by the mesh "<<endl;
   cout<<vols[0]<<" "<<vols[1]<<" "<<vols[2]<<endl;
-  
+
   cout<< "   BOUNDARY FACES ARE DEFINING A CLOSED SURFACE IF "<<testClosedDomain(mesh,cout)<< endl<<
     " IS (ALMOST) ZERO"<<endl;
-  
+
   return done==4 ;
-  
+
 }
 
 /*
@@ -270,18 +273,18 @@ readINRIAMeshFileHead(ifstream & mystream, UInt & numVertices, UInt & numBVertic
 // Quadratic Tetra if needed it return false if  mesh check is uncessessfull
 //
 template<typename GeoShape, typename MC>
-bool 
+bool
 readINRIAMeshFile(RegionMesh3D<GeoShape,MC> & mesh, string  const & filename, EntityFlag regionFlag){
   unsigned done=0;
   string line;
   Real x,y,z;
   UInt p1,p2,p3,p4,p5,p6,p7,p8;
   UInt nVe(0), nBVe(0),nFa(0),nBFa(0),nPo(0),nBPo(0);
-  
+
   UInt nVo(0),nEd(0),nBEd(0);
   UInt i;
   ReferenceShapes shape;
-  
+
   // open stream to read header
 
   ifstream hstream(filename.c_str());
@@ -298,19 +301,19 @@ readINRIAMeshFile(RegionMesh3D<GeoShape,MC> & mesh, string  const & filename, En
   if (mystream.fail()) {cerr<<" Error in readINRIAMeshFile: File not found or locked"<<endl; abort();}
 
   ASSERT_PRE0(GeoShape::Shape == shape, "INRIA Mesh file and mesh element shape is not consistent");
-  
+
   // Euler formulas to get number of faces and number of edges
   nFa=2*nVo+(nBFa/2);
   nEd=nVo+nVe+(3*nBFa-2*nBVe)/4;
 
   // Be a little verbose
   switch(shape){
-    
+
   case HEXA:
     ASSERT_PRE0(GeoShape::numPoints == 8, "Sorry I can read only bilinear Hexa meshes");
     cout << "Linear Hexa Mesh" <<endl;
     nPo=nVe;
-    nBPo=nBVe;  
+    nBPo=nBVe;
     break;
   case TETRA:
     if (GeoShape::numPoints > 4 ){
@@ -323,13 +326,13 @@ readINRIAMeshFile(RegionMesh3D<GeoShape,MC> & mesh, string  const & filename, En
     } else {
       cout << "Linear Tetra Mesh" <<endl;
       nPo=nVe;
-      nBPo=nBVe;  
+      nBPo=nBVe;
     }
     break;
   default:
     ERROR_MSG("Current version of INRIA Mesh file reader only accepts TETRA and HEXA");
   }
-  
+
   cout<< "#Vertices= "<<nVe;
   cout<< " #BVertices= "<<nBVe<<endl;
   cout<< "#Faces= "<<nFa;
@@ -339,7 +342,7 @@ readINRIAMeshFile(RegionMesh3D<GeoShape,MC> & mesh, string  const & filename, En
   cout<< "#Points= "<<nPo;
   cout<< " #Boundary Points= "<<nBPo<<endl;
   cout<< "#Volumes= "<<nVo<<endl;
-  
+
   // Set all basic data structure
 
   // I store all Points
@@ -359,7 +362,7 @@ readINRIAMeshFile(RegionMesh3D<GeoShape,MC> & mesh, string  const & filename, En
   mesh.setMaxNumVolumes(nVo,true);
 
   mesh.setMarker(regionFlag); // Add Marker to list of Markers
-  
+
   typename RegionMesh3D<GeoShape,MC>::PointType * pp=0;
   typename RegionMesh3D<GeoShape,MC>::EdgeType * pe=0;
   typename RegionMesh3D<GeoShape,MC>::FaceType * pf=0;
@@ -397,7 +400,7 @@ readINRIAMeshFile(RegionMesh3D<GeoShape,MC> & mesh, string  const & filename, En
 	mystream>>p1 >> p2 >> p3 >> ibc;
 
 	pf=&(mesh.addFace(true)); // Only boundary faces
-	
+
         pf->setMarker(EntityFlag(ibc));
 	pf->setPoint(1,mesh.point(p1)); // set face conn.
 	pf->setPoint(2,mesh.point(p2)); // set face conn.
@@ -414,7 +417,7 @@ readINRIAMeshFile(RegionMesh3D<GeoShape,MC> & mesh, string  const & filename, En
 	mystream>>p1 >> p2 >> p3 >> p4>> ibc;
 
 	pf=&(mesh.addFace(true)); // Only boundary faces
-	
+
         pf->setMarker(EntityFlag(ibc));
 	pf->setPoint(1,mesh.point(p1)); // set face conn.
 	pf->setPoint(2,mesh.point(p2)); // set face conn.
@@ -424,7 +427,7 @@ readINRIAMeshFile(RegionMesh3D<GeoShape,MC> & mesh, string  const & filename, En
       cout<< "Boundary Faces Read "<<endl;
       done++;
     }
-    
+
     if (line.find("Edges") != string::npos) {
       nextIntINRIAMeshField(line.substr(line.find_last_of("a")+1),mystream);
       cout<< "Reading Bedges "<<endl;
@@ -478,18 +481,18 @@ readINRIAMeshFile(RegionMesh3D<GeoShape,MC> & mesh, string  const & filename, En
       cout<< count <<" Volume elements Read"<<endl;
       done++;
     }
-    
+
   }
 
   // Test mesh
   Switch sw;
-  
+
   ///// CORRECTION JFG
   //if (mesh.check(1, true,true))done=0;
   if(!checkMesh3D(mesh, sw, true,true, cout,cout,cout)) abort(); // CORRECTION JFG
-  
+
   // This part is to build a P2 mesh from a P1 geometry
-  
+
   if (shape== TETRA && GeoShape::numPoints > 4 )p1top2(mesh);
   mystream.close();
 
@@ -500,16 +503,16 @@ readINRIAMeshFile(RegionMesh3D<GeoShape,MC> & mesh, string  const & filename, En
   cout << "INT(X)     INT(Y)      INT(Z) <- they should be equal and equal to"<<endl<<
     "                                 the voulume enclosed by the mesh "<<endl;
   cout<<vols[0]<<" "<<vols[1]<<" "<<vols[2]<<endl;
-  
+
   cout<< "   BOUNDARY FACES ARE DEFINING A CLOSED SURFACE IF "<<testClosedDomain(mesh,cout)<< endl<<
     " IS (ALMOST) ZERO"<<endl;
-  
+
   return done==4 ;
-  
+
 }
 
 //----------------------------------------------------------------------
-// 
+//
 // Problem: the functions that follows should be in a readMesh3D.cc
 // nevertheless, if I do that, I can compile the library, but I
 // obtain several errors during the linking with a main.cc.
@@ -529,35 +532,5 @@ int nextIntINRIAMeshField(string const & line, istream & mystream);
 bool
 readINRIAMeshFileHead(ifstream & mystream, UInt & numVertices, UInt & numBVertices, UInt & numBFaces, UInt & numBEdges, UInt & numVolumes, ReferenceShapes & shape);
 
+}
 #endif
-
-// Revision 1.4  2002/04/03 09:24:05  forma
-// Meny methods now use the generic interface of Region Mesh
-//
-// Revision 1.3  2002/01/18 12:49:13  forma
-// Bug fixes
-//
-// Revision 1.2  2001/10/23 10:24:24  forma
-// New handling of BC
-// Fixed some problems with non C++ standard compliant code
-// Added new features to FE classes
-//
-// Revision 1.1.1.1  2001/05/20 08:32:30  forma
-// LifeV library. New structure after meeting May 2001
-//
-// Revision 1.1.1.1  2000/10/23 16:54:21  soflife
-// NSCode October 2000
-//
-// Revision 1.7  2000/07/11 18:17:17  forma
-// intermediate version:
-// corrected bugs in p1top2
-// new construuction for DOF
-// mixed patterns half way through.
-//
-// Revision 1.6  2000/05/30 15:15:28  forma
-// This is the new version, aftre the modifications by JFG and the
-// MArkers/bccond by Luca.
-//
-// Revision 1.5  2000/04/14 14:59:48  forma
-// Version with new MArkers and BC
-//

@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -19,7 +19,7 @@
 /*!
   \file dofInterfaceHandler.h
   \brief Class for connecting the dof of a mesh (3D) and an interface (2D)
-         that lives on the boundary of the mesh.  
+         that lives on the boundary of the mesh.
   \version 1.0
   \author V. Martin
   \date 02/2003
@@ -33,6 +33,8 @@
 
 #include <vector>  //STL vector class
 
+namespace LifeV
+{
 using namespace std;
 
 class DofInterfaceHandler{
@@ -41,7 +43,7 @@ class DofInterfaceHandler{
 
   /*! Default Constructor (call addNeigbor() after for each interface)
     \param NbNeigh  number of neighbouring subdomains
-  */  
+  */
   DofInterfaceHandler( const UInt & NbNeigh );
 
   //! Constructor
@@ -50,30 +52,30 @@ class DofInterfaceHandler{
       \param dof1 the Dof object of the mesh in which we want to make the computations
   */
   DofInterfaceHandler( const UInt & NbNeigh, const LocalDofPattern & refFE, const Dof & dof1 );
-  
+
   //!  Add a DofInterface3Dto2D to the list of neighbors
-  /*! 
+  /*!
     \param refFe the part of the reference FE that contains the dof patterns (nbDofPerEdge...)
     \param dof1 the Dof object of the mesh in which we want to make the computations
    */
   void addNeighbor( const LocalDofPattern& refFE, const Dof& dof1 );
 
-  //! creates the list of Interface BC Vectors 
-  //! (that store the interface values) : 
+  //! creates the list of Interface BC Vectors
+  //! (that store the interface values) :
   //! InIBC , OutIBC
   void initVectors();
 
-  //! creates the list of the classes of BCVector_Interface 
+  //! creates the list of the classes of BCVector_Interface
   void initBCVector_Interface();
 
   //! How many neighbors stored?
   UInt NbNeigh() const;
 
-  //! Sum of the sizes of the Interface vectors 
+  //! Sum of the sizes of the Interface vectors
   //!  (it is the same for InIBC, OutIBC)
-  //! It corresponds to the total size of the interface unknowns 
+  //! It corresponds to the total size of the interface unknowns
   //! for the current subdomain.
-  UInt NbInterfaceUnknowns() const;  
+  UInt NbInterfaceUnknowns() const;
 
   //! extracting a neighbor in the _neighList list (starts from 0)
   const DofInterface3Dto2D & operator[]( const UInt & i ) const;
@@ -102,7 +104,7 @@ class DofInterfaceHandler{
   BCVector_Interface & BCvec( const UInt & i ) ;
 
   /*! This method returns the corresponding index number in the vectors
-    (_neighList, _InIBCList ...) living on the interfaces 
+    (_neighList, _InIBCList ...) living on the interfaces
     for a specific reference interface number.
     \param interfref : the reference of the interface.
   */
@@ -122,14 +124,14 @@ class DofInterfaceHandler{
 
   //! list of INPUT Vectors that live on the interfaces (one per interface)
   //! INPUT interface Boundary Conditions values.
-  //! (This is the vector of unknows that lives on the interfaces of the 
-  //! current subdomain in a domain decomposition method). 
+  //! (This is the vector of unknows that lives on the interfaces of the
+  //! current subdomain in a domain decomposition method).
   //! It is also the vector that contains the interface boundary conditions data.
   vector< Vector > _InIBCList;
 
   //! list of OUTPUT Vectors that live on the interfaces (one per interface)
   //! OUTPUT interface Boundary Conditions values.
-  //! (This is the vector of unknows that live on the interfaces of the 
+  //! (This is the vector of unknows that live on the interfaces of the
   //! current subdomain in a domain decomposition method).
   vector< Vector > _OutIBCList;
 
@@ -137,10 +139,10 @@ class DofInterfaceHandler{
   vector< BCVector_Interface > _bcvList;
 
   //! map between the index number (second) in the vectors
-  //!  (_neighList, _InIBCList ...) 
+  //!  (_neighList, _InIBCList ...)
   //!  and its reference interface number (first).
   map<Int, UInt> _indexInterfRefMap;
 
 };
-
+}
 #endif

@@ -1,34 +1,34 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 /*!
   \file bcVector.h
-  \brief classes to handle data vectors for boundary conditions.  
+  \brief classes to handle data vectors for boundary conditions.
   \version 1.0
-  \author M.A. Fernandez 
-  \date 11/2002 
-  
+  \author M.A. Fernandez
+  \date 11/2002
+
   \version 1.1
-  \author V. Martin 
-  \date 02/2003 
+  \author V. Martin
+  \date 02/2003
 
   This file contains the classes which may be used to store boundary
-  conditions. 
+  conditions.
 */
 
 #ifndef __BCVECTOR__
@@ -39,11 +39,12 @@
 #include "vecUnknown.hpp"
 
 
+namespace LifeV
+{
 
+// ============ BCVecto_Base ================
 
-// ============ BCVecto_Base ================ 
-
-/*! 
+/*!
 
  \class BCVector_Base
 
@@ -62,10 +63,10 @@ class BCVector_Base {
            data vector and those of the associated to the boundary conditions
   */
   BCVector_Base(Vector& vec, const UInt nbTotalDof);
-   
+
   //! Default Constructor (the user must call setBCVector(..))
   BCVector_Base();
- 
+
   //! Do nothing destructor
   virtual ~BCVector_Base() {}
 
@@ -82,19 +83,19 @@ class BCVector_Base {
    //! Return the value of the Mixte coefficient
    Real MixteCoef() const;
 
-  
+
    //! Output
    virtual ostream &  showMe(bool verbose=false, ostream & out=cout) const =0;
 
  protected:
 
-   //! The data vector 
+   //! The data vector
    Vector* _vec;
-   
+
    //! Number of total dof in the vector of data
    UInt _nbTotalDof;
 
-   //! Coefficient for mixte boundary conditions (Robin) 
+   //! Coefficient for mixte boundary conditions (Robin)
    /*! For the moment, it is the same for all the entries of the data vector.
     */
    Real _MixteCoef;
@@ -106,9 +107,9 @@ class BCVector_Base {
 
 
 
-// ============ BCVector ================ 
+// ============ BCVector ================
 
-/*! 
+/*!
 
  \class BCVector
 
@@ -127,7 +128,7 @@ class BCVector:
            data vector and those of the associated to the boundary conditions
   */
   BCVector( Vector& vec, UInt nbTotalDof);
-   
+
   //! Default Constructor (the user must call setvector(..))
   BCVector();
 
@@ -141,7 +142,7 @@ class BCVector:
   */
   Real operator()(const ID& iDof, const ID& iComp) const;
 
-  
+
   //! Assignment operator for BCVector_Interface
   BCVector & operator=(const BCVector & BCv);
 
@@ -149,9 +150,9 @@ class BCVector:
   ostream &  showMe(bool verbose=false, ostream & out=cout) const;
 };
 
-// ============ BCVector_Interface ================ 
+// ============ BCVector_Interface ================
 
-/*! 
+/*!
 
  \class BCVector_Interface
 
@@ -173,7 +174,7 @@ class BCVector_Interface:
            data vector and those of the associated to the boundary conditions
   */
   BCVector_Interface( Vector& vec, UInt nbTotalDof, DofInterfaceBase& dofIn);
-   
+
   //! Default Constructor (the user must call setBCVector(..))
   BCVector_Interface ();
 
@@ -187,7 +188,7 @@ class BCVector_Interface:
   */
    Real operator()(const ID& iDof, const ID& iComp) const;
 
-  
+
    //! Assignment operator for BCVector_Interface
    BCVector_Interface & operator=(const BCVector_Interface & BCv);
 
@@ -201,5 +202,5 @@ class BCVector_Interface:
   DofInterfaceBase* _dofIn;
 
 };
-
+}
 #endif

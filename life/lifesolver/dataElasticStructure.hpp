@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -19,10 +19,10 @@
 /*!
   \file dataElasticStructure.h
   \author M.A. Fernandez
-  \date 10/2003 
+  \date 10/2003
   \version 1.0
 
-  \brief 
+  \brief
 
 
 */
@@ -35,21 +35,24 @@
 #include "lifeV.hpp"
 #include "dataMesh.hpp"
 #include "dataTime.hpp"
-/*! 
+
+namespace LifeV
+{
+/*!
   \class DataElasticStructure
 
- 
+
 
 */
 template<typename Mesh>
 class DataElasticStructure:
-public DataMesh<Mesh>, 
+public DataMesh<Mesh>,
 public DataTime {
  public:
 
   //! Constructor
   DataElasticStructure(const GetPot& dfile);
-  
+
   //! Ouptut
   void showMe(ostream& c=cout) const;
 
@@ -64,7 +67,7 @@ public DataTime {
   Real _lambda, _mu; // Lame coefficients
   Real _endtime; // end time
 
-  //! Miscellaneous  
+  //! Miscellaneous
   Real _factor; // amplification factor for deformed mesh
   UInt _verbose; // temporal output verbose
 
@@ -83,7 +86,7 @@ DataElasticStructure<Mesh>::
 DataElasticStructure(const GetPot& dfile):
   DataMesh<Mesh>(dfile,"solid/discretization"),
   DataTime(dfile,"solid/discretization") {
-  // physics 
+  // physics
   _rho       = dfile("solid/physics/density",1.);
   _E       = dfile("solid/physics/young"    ,1.);
   _nu      = dfile("solid/physics/poisson"   ,0.25);
@@ -92,7 +95,7 @@ DataElasticStructure(const GetPot& dfile):
   // miscellaneous
   _factor    = dfile("solid/miscellaneous/factor",1.0);
   _verbose   = dfile("solid/miscellaneous/verbose",1);
-  
+
   // Lame coefficients
   _lambda = _E*_nu / ( (1.0+_nu)*(1.0-2.0*_nu) );
   _mu     = _E /( 2.0*(1.0+_nu) );
@@ -107,10 +110,10 @@ showMe(ostream& c) const
 {
   // physics
   c << "\n*** Values for data [solid/physics]\n\n";
-  c << "density                          = " << _rho << endl; 
-  c << "young                            = " << _E   << endl; 
-  c << "poisson                          = " << _nu  << endl; 
-  c << "lame constants (lambda, mu)      = " << _lambda << " " << _mu  << endl;  
+  c << "density                          = " << _rho << endl;
+  c << "young                            = " << _E   << endl;
+  c << "poisson                          = " << _nu  << endl;
+  c << "lame constants (lambda, mu)      = " << _lambda << " " << _mu  << endl;
   c << "endtime                          = " << _endtime << endl;
 
   c << "\n*** Values for data [solid/miscellaneous]\n\n";
@@ -129,6 +132,6 @@ Real DataElasticStructure<Mesh>::
 endtime() const {
   return  _endtime;
 }
-
+}
 
 #endif

@@ -1,28 +1,29 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "bareItems.hpp"
 
-
+namespace LifeV
+{
 /*! \ingroup BareItemsBuilder
  \brief It creates Bare Face objects from three Point ID's
   \param  bool is false if orientation  has been changed.
-  \param i is a Point ID 
+  \param i is a Point ID
   \param j is a Point ID
   \param k is a Point ID
 
@@ -48,7 +49,7 @@ makeBareFace(ID const i, ID  const j, ID const k) {
       return std::make_pair(BareFace(j,i,k),false);
     }
   }
-  else 
+  else
     {
       if(i<j){
 	return std::make_pair(BareFace(k,i,j),true);
@@ -62,12 +63,12 @@ makeBareFace(ID const i, ID  const j, ID const k) {
 /*! \ingroup BareItemsBuilder
  \brief It creates Bare Face objects from four Point ID's
   \param  bool is false if orientation  has been changed.
-  \param i is a Point ID 
+  \param i is a Point ID
   \param j is a Point ID
   \param k is a Point ID
   \param l is a Point ID
   \pre i, j, k and l >0. i!=j!=k!=l
-  
+
   To be used with Quad faces.
 
 \remarks For quad faces the construction process is more complex. We start from
@@ -82,4 +83,5 @@ makeBareFace(ID const i, ID  const j, ID const k, ID const l) {
   std::vector<ID>::iterator vi=std::max_element(helper.begin(),helper.end());
   std::rotate(helper.begin(),vi,helper.end());
   return makeBareFace(helper[1],helper[2],helper[3]);
+}
 }

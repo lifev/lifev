@@ -1,23 +1,25 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "staticBdFE.hpp"
 
+namespace LifeV
+{
 
 /*!
  This constructor is typically used for the currentBdFE (derived class)
@@ -159,7 +161,7 @@ void StaticBdFE::coorMap(Real& x,Real& y,Real& z,
 
 Real StaticBdFE::measure() const
 {
-  ASSERT_PRE(_hasMeas,"Needs measure. Call an update function") 
+  ASSERT_PRE(_hasMeas,"Needs measure. Call an update function")
 
   Real meas = 0.;
   for(int ig=0;ig<nbQuadPt;ig++) meas += weightMeas(ig);
@@ -189,14 +191,14 @@ void StaticBdFE::_comp_meas()
     for(int icoor=0;icoor<2;icoor++){
       fctDer=0.;
       for(int i=0;i<nbGeoNode;i++)
-	fctDer += point(i,icoor)*dPhiGeo(i,0,ig); 
-      // local basis (non-unit tangent) at integration points: 
+	fctDer += point(i,icoor)*dPhiGeo(i,0,ig);
+      // local basis (non-unit tangent) at integration points:
       tangent(0,icoor,ig)=fctDer;
     }
     s=0.;
     for(int icoor=0;icoor<2;icoor++)
       s += tangent(0,icoor,ig)*tangent(0,icoor,ig);
-    // metric tensor  
+    // metric tensor
     metric(0,0,ig) = s;
     meas(ig) = sqrt( metric(0,0,ig) );
     weightMeas(ig) = meas(ig) * qr.weight(ig);
@@ -207,9 +209,9 @@ void StaticBdFE::_comp_meas()
       for(int k=0;k<2;k++){
 	fctDer=0.;
 	for(int i=0;i<nbGeoNode;i++){
-	  fctDer += point(i,icoor)*dPhiGeo(i,k,ig); 
+	  fctDer += point(i,icoor)*dPhiGeo(i,k,ig);
 	}
-	// local basis (non-unit tangents) at integration points 
+	// local basis (non-unit tangents) at integration points
 	tangent(k,icoor,ig) = fctDer;
       }
     }
@@ -263,5 +265,7 @@ void StaticBdFE::_comp_meas_normal()
     normal(1,ig)=n2/norm;
     normal(2,ig)=n3/norm;
   }
+
 #endif
+}
 }

@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -38,6 +38,8 @@
 #include "elemVec.hpp"
 #include "localDofPattern.hpp"
 
+namespace LifeV
+{
 // For the moment, the selection of the components of the differential operators to be computed is carried out
 // inside the differential operator. This is simpler, but not the best: indeed an "if" is processed
 // for every integral computation. It would be better to set up a table of simple operators
@@ -73,7 +75,7 @@ assemble(Oper oper, const RegionMesh& mesh, CurrentFE& fe,
       compute_vec(source_fct,elvec,fe,(int)ic); // compute local vector
 #endif
        // the previous line would become:  compute_vec(source_fct.comp(ic),elvec,fe); ****
-      assemb_vec(b,elvec,fe,dof,ic); // assebmle local vector into global one      
+      assemb_vec(b,elvec,fe,dof,ic); // assebmle local vector into global one
      }
   }
 }
@@ -107,7 +109,7 @@ assemble(Oper oper, const RegionMesh& mesh, CurrentFE& fe, const DOF& dof,
       compute_vec(source_fct,elvec,fe,t,ic); // compute local vector
 #endif
        // the previous line would become:  compute_vec(source_fct.comp(ic),elvec,fe); ****
-      assemb_vec(b,elvec,fe,dof,ic); // assebmle local vector into global one      
+      assemb_vec(b,elvec,fe,dof,ic); // assebmle local vector into global one
      }
   }
 }
@@ -211,7 +213,7 @@ assemble_symm(Oper oper, const RegionMesh& mesh, CurrentFE& fe, const DOF& dof,
       }
       compute_vec(source_fct,elvec,fe,t,ic); // compute local vector
        // the previous line would become:  compute_vec(source_fct.comp(ic),elvec,fe); ****
-      assemb_vec(b,elvec,fe,dof,ic); // assebmle local vector into global one      
+      assemb_vec(b,elvec,fe,dof,ic); // assebmle local vector into global one
      }
   }
 }
@@ -228,7 +230,7 @@ assemble_symm_block_diagonal(Oper oper, const RegionMesh& mesh, CurrentFE& fe, c
 {
   UInt i, ic=0;
   UInt nc = b.size()/dof.numTotalDof(); // it should be F.Size() if F is for instance a Physical Vector (like the unknown....)
-  ElemMat elmat(fe.nbNode,nc,nc); 
+  ElemMat elmat(fe.nbNode,nc,nc);
   ElemVec elvec(fe.nbNode,nc);
   //
   for(i=1; i<=mesh.numVolumes(); ++i){
@@ -238,11 +240,11 @@ assemble_symm_block_diagonal(Oper oper, const RegionMesh& mesh, CurrentFE& fe, c
     //
     elvec.zero();
      compute_mat_symm(elmat,oper,fe); // compute local matrix expoiting symmetry of the operator
-    
+
   ic=0;
   assemb_mat(A,elmat,fe,dof,ic,ic); // assemble local matrix into global one
   compute_vec(source_fct,elvec,fe,t,ic); // compute local vector
-  assemb_vec(b,elvec,fe,dof,ic); // assebmle local vector into global one      
+  assemb_vec(b,elvec,fe,dof,ic); // assebmle local vector into global one
 
   for (ic=1; ic<nc; ++ic){
      elmat.block(ic,ic)=elmat.block(0,0);
@@ -250,7 +252,7 @@ assemble_symm_block_diagonal(Oper oper, const RegionMesh& mesh, CurrentFE& fe, c
 
      compute_vec(source_fct,elvec,fe,t,ic); // compute local vector
        // the previous line would become:  compute_vec(source_fct.comp(ic),elvec,fe); ****
-      assemb_vec(b,elvec,fe,dof,ic); // assebmle local vector into global one      
+      assemb_vec(b,elvec,fe,dof,ic); // assebmle local vector into global one
      }
   }
 }
@@ -276,7 +278,7 @@ void compute_mat(ElemMat& elmat, Oper& oper,
 	s += oper(i,j,ig,x,y,z,iblock,jblock)*fe.weightDet(ig);
        // the previous line would become:  oper(i,j,ig,x,y,z)*fe.weightDet(ig); ****
        }
-      mat((int)i,(int)j) += s;     
+      mat((int)i,(int)j) += s;
     }
   }
 }
@@ -331,7 +333,7 @@ void compute_mat_symm(ElemMat& elmat, Oper& oper,
 #endif
       s += oper(iloc,iloc,ig,x,y,z,iblock,jblock)*fe.weightDet(ig);
     }
-    mat((int)iloc,(int)iloc) += s;    
+    mat((int)iloc,(int)iloc) += s;
   }
   //
   // extra diagonal
@@ -356,7 +358,7 @@ void compute_mat_symm(ElemMat& elmat, Oper& oper,
 //
 template<typename Matrix, typename DOF>
 void
-assemb_mat(Matrix& M,ElemMat& elmat,const CurrentFE& fe,const DOF& dof,int iblock=0,int jblock=0) 
+assemb_mat(Matrix& M,ElemMat& elmat,const CurrentFE& fe,const DOF& dof,int iblock=0,int jblock=0)
 {
   Tab2dView mat=elmat.block(iblock,jblock);
   UInt totdof = dof.numTotalDof();
@@ -380,7 +382,7 @@ assemb_mat(Matrix& M,ElemMat& elmat,const CurrentFE& fe,const DOF& dof,int ibloc
 //
 template<typename Matrix, typename DOF>
 void
-assemb_mat(Matrix& M,ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2, const DOF& dof,int iblock=0,int jblock=0) 
+assemb_mat(Matrix& M,ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2, const DOF& dof,int iblock=0,int jblock=0)
 {
   Tab2dView mat=elmat.block(iblock,jblock);
   UInt totdof = dof.numTotalDof();
@@ -391,8 +393,8 @@ assemb_mat(Matrix& M,ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2,
   for( k=0 ; k<fe1.nbPattern ; k++){
     i = fe1.patternFirst(k);
     j = fe2.patternSecond(k);
-    ig = dof.localToGlobal(eleId1,i+1)-1+iblock*totdof;  
-    jg = dof.localToGlobal(eleId2,j+1)-1+jblock*totdof; 
+    ig = dof.localToGlobal(eleId1,i+1)-1+iblock*totdof;
+    jg = dof.localToGlobal(eleId2,j+1)-1+jblock*totdof;
     M.set_mat_inc(ig,jg,mat(i,j));
   }
 }
@@ -403,8 +405,8 @@ assemb_mat(Matrix& M,ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2,
 //! Added by V. Martin 09/2002 (slightly different from the previous function...)
 //!    Works with a reference hybrid element, and a given number of the current geo element.
 template<typename DOF, typename Matrix>
-void assemb_mat(Matrix& M, ElemMat& elmat, const LocalDofPattern& fe, const DOF& dof, 
-		const UInt feId, int iblock=0,int jblock=0) 
+void assemb_mat(Matrix& M, ElemMat& elmat, const LocalDofPattern& fe, const DOF& dof,
+		const UInt feId, int iblock=0,int jblock=0)
 {
   //  if(elmat.nBlockRow()!=1 || elmat.nBlockCol() != 1){
   //    cout << "assemble for vector elem mat not yet implemented\n";
@@ -415,7 +417,7 @@ void assemb_mat(Matrix& M, ElemMat& elmat, const LocalDofPattern& fe, const DOF&
   int i,j,k;
   UInt ig,jg;
   UInt eleId = feId; //! direct use of the fe identity number. (different from the other assemb_mat)
-  
+
   for( k=0 ; k<fe.nbPattern() ; k++){ //! instead of currentFE::nbPattern  ...
     i = fe.patternFirst(k);
     j = fe.patternSecond(k);
@@ -435,8 +437,8 @@ void assemb_mat(Matrix& M, ElemMat& elmat, const LocalDofPattern& fe, const DOF&
 //! CAUTION: TESTED ONLY WITH THE STANDARD PATTERN...
 //! V. Martin.
 template<typename DOF, typename Matrix>
-void assemb_mat_symm_lower(Matrix& M, ElemMat& elmat, const LocalDofPattern& fe, 
-			   const DOF& dof, const UInt feId, int iblock=0,int jblock=0) 
+void assemb_mat_symm_lower(Matrix& M, ElemMat& elmat, const LocalDofPattern& fe,
+			   const DOF& dof, const UInt feId, int iblock=0,int jblock=0)
 {
   //  if(elmat.nBlockRow()!=1 || elmat.nBlockCol() != 1){
   //    cout << "assemble for vector elem mat not yet implemented\n";
@@ -446,8 +448,8 @@ void assemb_mat_symm_lower(Matrix& M, ElemMat& elmat, const LocalDofPattern& fe,
   UInt totdof = dof.numTotalDof();
   int i,j,k;
   UInt ig,jg;
-  UInt eleId = feId; //! direct use of the fe identity number. 
-  
+  UInt eleId = feId; //! direct use of the fe identity number.
+
   //  cout << " Lower case " << endl;
   //  cout << mat << endl;
 
@@ -486,8 +488,8 @@ void assemb_mat_symm_lower(Matrix& M, ElemMat& elmat, const LocalDofPattern& fe,
 //! CAUTION: TESTED ONLY WITH THE STANDARD PATTERN...
 //! V. Martin.
 template<typename DOF, typename Matrix>
-void assemb_mat_symm_upper(Matrix& M, ElemMat& elmat, const LocalDofPattern& fe, 
-			   const DOF& dof, const UInt feId, int iblock=0,int jblock=0) 
+void assemb_mat_symm_upper(Matrix& M, ElemMat& elmat, const LocalDofPattern& fe,
+			   const DOF& dof, const UInt feId, int iblock=0,int jblock=0)
 {
   //  if(elmat.nBlockRow()!=1 || elmat.nBlockCol() != 1){
   //    cout << "assemble for vector elem mat not yet implemented\n";
@@ -497,8 +499,8 @@ void assemb_mat_symm_upper(Matrix& M, ElemMat& elmat, const LocalDofPattern& fe,
   UInt totdof = dof.numTotalDof();
   int i,j,k;
   UInt ig,jg;
-  UInt eleId = feId; //! direct use of the fe identity number. 
-  
+  UInt eleId = feId; //! direct use of the fe identity number.
+
   //  cout << " Upper case " << endl;
 
   //
@@ -592,7 +594,7 @@ void compute_vec(Real constant,ElemVec& elvec,const CurrentFE& fe,int iblock=0);
 //
 // Suggestion by Luca F.
 /*
-  Why dont we let CurrentFE to store the time as well? 
+  Why dont we let CurrentFE to store the time as well?
   we may choose then a common layout for the user functions that always has
   the time as entry point.
  */
@@ -656,8 +658,8 @@ void compute_vec(const UsrFct& fct,ElemVec& elvec,const CurrentFE& fe, const Rea
     }
     vec(i) += s;
   }
-} 
-// ! Stabilized case with time dependence 
+}
+// ! Stabilized case with time dependence
 template<typename OperFct>
 void compute_vec_stab(OperFct& fct,ElemVec& elvec,const CurrentFE& fe, Real t,
 		 int iblock){
@@ -678,8 +680,8 @@ void compute_vec_stab(OperFct& fct,ElemVec& elvec,const CurrentFE& fe, Real t,
 
 
 template<typename DOF, typename Vector, typename ElemVec>
-void 
-assemb_vec(Vector& V,ElemVec& elvec,const CurrentFE& fe, const DOF& dof, int iblock) 
+void
+assemb_vec(Vector& V,ElemVec& elvec,const CurrentFE& fe, const DOF& dof, int iblock)
 {
   UInt totdof = dof.numTotalDof();
   Tab1dView vec=elvec.block(iblock);
@@ -699,9 +701,9 @@ assemb_vec(Vector& V,ElemVec& elvec,const CurrentFE& fe, const DOF& dof, int ibl
 /// V. Martin  09/2002
 //! version of assemb_vec that works with a LocalDofPattern (and also a RefHybridFE)...
 template<typename DOF, typename Vector, typename ElemVec>
-void 
-assemb_vec( Vector& V, ElemVec& elvec, const LocalDofPattern& fe, const DOF& dof, 
-	    const UInt feId, int iblock) 
+void
+assemb_vec( Vector& V, ElemVec& elvec, const LocalDofPattern& fe, const DOF& dof,
+	    const UInt feId, int iblock)
 {
   //  if(elvec.nBlockRow()!=1){
   //    cout << "assemble for vector elem vec not yet implemented\n";
@@ -713,7 +715,7 @@ assemb_vec( Vector& V, ElemVec& elvec, const LocalDofPattern& fe, const DOF& dof
   //  cout << "in assemb_vec" << endl;
   UInt ig;
   //  UInt eleId = feId;  //simplify.
-  for(i=0 ; i<fe.nbLocalDof ; i++){    //! instead of CurrentFE::nbNode 
+  for(i=0 ; i<fe.nbLocalDof ; i++){    //! instead of CurrentFE::nbNode
     ig = dof.localToGlobal(feId,i+1) - 1+iblock*totdof;
     //    cout << "i= " << i << endl;
     //    cout << "ig= " << ig << endl;
@@ -725,13 +727,13 @@ assemb_vec( Vector& V, ElemVec& elvec, const LocalDofPattern& fe, const DOF& dof
 ///
 //////////////////
 /// V. Martin  09/2002
-//! \function extract_vec 
-//! \brief from a global vector, extract a vector corresponding to the element feId. 
+//! \function extract_vec
+//! \brief from a global vector, extract a vector corresponding to the element feId.
 //! works with a LocalDofPattern (and also a RefHybridFE)...
 template<typename DOF, typename Vector, typename ElemVec>
-void 
-extract_vec( Vector& V, ElemVec& elvec, const LocalDofPattern& fe, const DOF& dof, 
-	     const UInt feId, int iblock) 
+void
+extract_vec( Vector& V, ElemVec& elvec, const LocalDofPattern& fe, const DOF& dof,
+	     const UInt feId, int iblock)
 {
   //  if(elvec.nBlockRow()!=1){
   //    cout << "assemble for vector elem vec not yet implemented\n";
@@ -743,14 +745,13 @@ extract_vec( Vector& V, ElemVec& elvec, const LocalDofPattern& fe, const DOF& do
   int i;
   //  cout << "in assemb_vec" << endl;
   UInt ig;
-  for(i=0 ; i<fe.nbLocalDof ; i++){ 
+  for(i=0 ; i<fe.nbLocalDof ; i++){
     ig = dof.localToGlobal(feId,i+1) - 1+iblock*totdof;
     //    cout << "i= " << i << endl;
     //    cout << "ig= " << ig << endl;
     vec(i) = V[ig];
   }
 };
-///
-
+}
 
 #endif

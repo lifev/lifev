@@ -28,7 +28,7 @@
 #include <string>
 #include <sstream>
 
-namespace Life
+namespace LifeV
 {
     class LDebugStream;
     class LNDebugStream;
@@ -199,9 +199,9 @@ namespace Life
 
 
 
-Life::LDebugStream& perror( Life::LDebugStream& s );
-Life::LDebugStream& endl( Life::LDebugStream& s );
-Life::LDebugStream& flush( Life::LDebugStream& );
+LifeV::LDebugStream& perror( LifeV::LDebugStream& s );
+LifeV::LDebugStream& endl( LifeV::LDebugStream& s );
+LifeV::LDebugStream& flush( LifeV::LDebugStream& );
 
 
 #endif /* __LDebug_H */

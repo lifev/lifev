@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -23,10 +23,12 @@
 #include "lifeV.hpp"
 
 
-using namespace std;
 
 #define PREFIX 666
 #define ANUMBER 1000
+
+namespace LifeV
+{
 
 /*!
   \file subDomainNeighbors.h
@@ -38,19 +40,19 @@ using namespace std;
 	common interfaces.
 */
 
-/*! \class SDomNeighborData contains the data that a subdomain needs to see one 
+/*! \class SDomNeighborData contains the data that a subdomain needs to see one
     neighbor:
-  
+
     - the Identity of the neighbor,
     - the names (references) of the interface between the subdomain
-      and its neighbor. 
+      and its neighbor.
 */
 /* We don't need a class : we use a struct instead...
 class SDomNeighborData{
  public:
   //! constructor
   SDomNeighborData();
-  
+
   //! output
   ostream & showMe( ostream  & out=cout ) const;
 
@@ -58,7 +60,7 @@ class SDomNeighborData{
 */
 
 //! useful function to sort a list and remove multiple numbers.
-void RemoveMultiple(const vector<ID> & list0, vector<ID> & listf );
+void RemoveMultiple(const std::vector<ID> & list0, std::vector<ID> & listf );
 
 struct SDomNeighborData{
   //! identity of the neighbor (it is a subdomain!)
@@ -69,47 +71,47 @@ struct SDomNeighborData{
 };
 
 
-/*! \class SubDomainNeighbors contains the data that a subdomain needs to see all 
+/*! \class SubDomainNeighbors contains the data that a subdomain needs to see all
     its neighbors:
-    
+
     - the Identity of the subdomain,
     - the number of subdomains,
-    - a list of SDomNeighborData. 
+    - a list of SDomNeighborData.
 
-    \note 
+    \note
     The same neighbor can appear more than once in the list, but with different
     interface references.
-    Reason: an interface between one subdomain and one neighbor can be made 
+    Reason: an interface between one subdomain and one neighbor can be made
     of more than one planar surface, it may have more than one reference.
-    
+
 */
 class SubDomainNeighbors{
  public:
 
-  //! Constructor 
+  //! Constructor
   SubDomainNeighbors(ID SDomID);
 
   //! Constructor taking the connectivity table in a file as input
-  SubDomainNeighbors(ID SDomID, string fname);
+  SubDomainNeighbors(ID SDomID, std::string fname);
 
   //! Destructor
   ~SubDomainNeighbors();
 
-  //! Fill the lists _faceList and _vertexList 
-  template<typename Mesh> 
+  //! Fill the lists _faceList and _vertexList
+  template<typename Mesh>
     void fillSubDomainNeighbors(const Mesh& mesh);
 
   //! How many neighbors stored?
   Index_t sizeNeigh() const;
-  
+
   //! Is there no neighbors?
   bool emptyNeigh() const;
 
   //! Return the reference of the interface i in the neighbors' list. (Beware: i starts from 0).
   Int NeighInterfaceRef( const Index_t & i ) const;
-   
+
   //! output
-  ostream & showMe(bool verbose=false, ostream  & out=cout) const;
+  std::ostream & showMe(bool verbose=false, std::ostream  & out=std::cout) const;
 
  private:
   //! Identity of the SubDomain
@@ -121,11 +123,11 @@ class SubDomainNeighbors{
   //! number of neighboring subdomains
   Index_t _nbNeigh;
 
-  //! vector list holding the neihgboring subdomains and the reference of the common interface.
-  vector<SDomNeighborData> _neighList;
+  //! std::vector list holding the neihgboring subdomains and the reference of the common interface.
+  std::vector<SDomNeighborData> _neighList;
 
-  //! vector list holding the reference of the interfaces.
-  vector<ID> _interfList;
+  //! std::vector list holding the reference of the interfaces.
+  std::vector<ID> _interfList;
 
   //! True if the lists are complete.
   bool _finalized;
@@ -136,26 +138,26 @@ class SubDomainNeighbors{
                       IMPLEMENTATIONS
 ********************************************************************/
 
-// ============ fillSubDomainNeighbors ================ 
+// ============ fillSubDomainNeighbors ================
 
 /*! Fill the lists _interfList and _neighList.
-    
+
     Use the following rule for interface numbering:
-    "666007024"  is the interface reference (PREFIX=666) 
+    "666007024"  is the interface reference (PREFIX=666)
     between the subdomain "7" (=007) and its neighbor "24" (=024).
     This interface is seen from the subdomain "7" (it comes first).
     Modify PREFIX and ANUMBER (10, 100, 1000...) to change the rule.
-   
+
     Of course, to use this function, you have to properly define the mesh.
 
     Another possibility is to provide the connectivity table directly
     through a file that should be read. (not implemented yet).
- 
+
  Should be called once (and only once).
 */
 template<typename Mesh>
 void SubDomainNeighbors::fillSubDomainNeighbors(const Mesh& mesh)
-{ 
+{
   ASSERT_PRE( !_finalized , "The lists of neighbors are already finalized." );
 
   typedef  typename Mesh::FaceShape FaceShape;
@@ -163,27 +165,27 @@ void SubDomainNeighbors::fillSubDomainNeighbors(const Mesh& mesh)
   UInt nBdF = mesh.numBFaces();
   UInt  icounter = 0;  //! interface counter
 
-  vector<ID> _tmpList;
-  
+  std::vector<ID> _tmpList;
+
   //! loop on boundary faces
-  for (ID k = 1 ; k <= nBdF ; ++ k ) { 
+  for (ID k = 1 ; k <= nBdF ; ++ k ) {
     //! Is the face on the interface?
-    if ( mesh.boundaryFace( k ).marker() > PREFIX*ANUMBER*ANUMBER ) { 
-      //! This number (666000000) relies on my numbering of the interfaces... 
+    if ( mesh.boundaryFace( k ).marker() > PREFIX*ANUMBER*ANUMBER ) {
+      //! This number (666000000) relies on my numbering of the interfaces...
       //! Fill the list of Faces on the interface :
       _tmpList.push_back( mesh.boundaryFace( k ).marker() );
       icounter ++ ;
     }
   }
-  
+
   //! To avoid troubles: you must provide a non empty interface.
   ASSERT_PRE( icounter > 0 , \
 	      "There is no Boundary face with a relevant interface reference. (> 666000000)");
- 
+
   /*
   // Sorting list of vertices.
   sort(_tmpList.begin(), _tmpList.end());
-  
+
   _interfList.push_back( _tmpList[0] );
   icounter = 0;
 
@@ -206,7 +208,7 @@ void SubDomainNeighbors::fillSubDomainNeighbors(const Mesh& mesh)
 
   ID neigh;
   SDomNeighborData sdneighdata;
-  
+
   //! loop on faces on the interface.
   for (Index_t i = 0 ;  i < _interfList.size() ; i++){
     neigh = _interfList[ i ] - PREFIX*ANUMBER*ANUMBER - _SDomID * ANUMBER ;
@@ -221,7 +223,7 @@ void SubDomainNeighbors::fillSubDomainNeighbors(const Mesh& mesh)
 
   _finalized = true;    //! You can't touch the lists after this point.
 }
-  
+}
 
 #endif
 

@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -33,11 +33,14 @@
 #include <vector>
 #include "tab.hpp"
 
+namespace LifeV
+{
+
 /*! \class PhysVectUnknown
   vector unknown which has the dimension of the physical domain
    The type VectorType could be a Vector, or a VectorBlock or a
    vector<double> depending on the choice of the linear system solver and
-   on the case of scalar or vectorial problem 
+   on the case of scalar or vectorial problem
 */
 template<typename VectorType>
 class PhysVectUnknown
@@ -83,7 +86,7 @@ public:
    scalar unknown of dimension=1
    The type VectorType could be a Vector, or a VectorBlock or a
    vector<double> depending on the choice of the linear system solver and
-   on the case of scalar or vectorial problem 
+   on the case of scalar or vectorial problem
 */
 template<typename VectorType>
 class ScalUnknown
@@ -128,7 +131,7 @@ public:
    vector problem handler
    The type VectorType could be a Vector, or a VectorBlock or a
    vector<double> depending on the choice of the linear system solver and
-   on the case of scalar or vectorial problem 
+   on the case of scalar or vectorial problem
 */
 template<typename VectorType>
 class GenericVecHdl
@@ -171,7 +174,7 @@ public:
     //! gives the size of one block
     inline UInt nbcomp() const {return _nbcomp;}
 
-  
+
 };
 
 //---------------------------------------------------------------//
@@ -182,7 +185,7 @@ public:
     Modification of RNM vector: It adds the default
     constructor.
     15/11/01
-*/ 
+*/
 ///////////////////////////////////////////////////////////
 
 class Vector
@@ -394,7 +397,7 @@ ScalUnknown<VectorType>::ScalUnknown(UInt const Ndof)
 template<typename VectorType>
 ScalUnknown<VectorType>::ScalUnknown(const ScalUnknown<VectorType> &RhScalUnknown)
     :
-    super(RhScalUnknown), 
+    super(RhScalUnknown),
     _size(RhScalUnknown.size())
 {}
 
@@ -405,8 +408,8 @@ ScalUnknown<VectorType>::ScalUnknown(const ScalUnknown<VectorType> &RhScalUnknow
 template<typename VectorType>
 GenericVecHdl<VectorType>::GenericVecHdl(const GenericVecHdl<VectorType> &RhGenVec)
     :
-    super(RhGenVec), 
-    _size(RhGenVec.size()), 
+    super(RhGenVec),
+    _size(RhGenVec.size()),
     _nbcomp(RhGenVec.nbcomp()){}
 
 //! construction from a scalar unknown:
@@ -591,5 +594,5 @@ inline double dot(VectorBlock const &ex_v1, VectorBlock const &ex_v2)
     ans+=(ex_v1.numBlock(i),ex_v2.numBlock(i));
   return ans;
 }
-
+}
 #endif

@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -22,6 +22,8 @@
 #include "dof.hpp"
 #include "currentFE.hpp"
 
+namespace LifeV
+{
 //! returns the square of the L2 norm of u on the current element
 template<typename VectorType,typename DOF>
 Real elem_L2_2(const VectorType & u,const CurrentFE& fe,const DOF& dof)
@@ -62,7 +64,7 @@ Real elem_L2_2(const VectorType & u,const CurrentFE& fe,const DOF& dof,
   return s;
 }
 
-//! returns the square of the L2 norm of fct on the current element  
+//! returns the square of the L2 norm of fct on the current element
 template<typename UsrFct>
 Real elem_L2_2(const UsrFct& fct,const CurrentFE& fe)
 {
@@ -155,7 +157,7 @@ Real elem_H1_2(const UsrFct& fct,const CurrentFE& fe,const Real t, const UInt nb
 }
 
 
-//! returns the square of the L2 norm of (u-fct) on the current element  
+//! returns the square of the L2 norm of (u-fct) on the current element
 template<typename VectorType,typename UsrFct,typename DOF>
 Real elem_L2_diff_2(VectorType & u,UsrFct& fct,const CurrentFE& fe,
 		    const DOF& dof)
@@ -181,7 +183,7 @@ template<typename VectorType,typename UsrFct,typename DOF>
 Real elem_L2_diff_2(VectorType & u, UsrFct& fct,const CurrentFE& fe,
 		    const DOF& dof, const Real t, const int nbcomp)
 {
-  // returns the square of the L2 norm of (u-fct) on the current element  
+  // returns the square of the L2 norm of (u-fct) on the current element
   int i,inod,ig;
   UInt eleID=fe.currentId();
   int ic;
@@ -201,7 +203,7 @@ Real elem_L2_diff_2(VectorType & u, UsrFct& fct,const CurrentFE& fe,
   return s;
 }
 
-//! returns the square of the H1 norm of (u-fct) on the current element  
+//! returns the square of the H1 norm of (u-fct) on the current element
 template<typename VectorType,typename UsrFct,typename DOF>
 Real elem_H1_diff_2(const VectorType & u,const UsrFct& fct,const CurrentFE& fe,
 		    const DOF& dof)
@@ -237,7 +239,7 @@ Real elem_H1_diff_2(const VectorType & u,const UsrFct& fct,const CurrentFE& fe,
   return s;
 }
 
-//! returns the square of the H1 norm of (u-fct) on the current element  (time-dependent case) 
+//! returns the square of the H1 norm of (u-fct) on the current element  (time-dependent case)
 template<typename VectorType,typename UsrFct,typename DOF>
 Real elem_H1_diff_2(const VectorType & u,const UsrFct& fct,const CurrentFE& fe,
 		    const DOF& dof, const Real t, const UInt nbcomp)
@@ -275,5 +277,5 @@ Real elem_H1_diff_2(const VectorType & u,const UsrFct& fct,const CurrentFE& fe,
   }
   return s;
 }
-
+}
 #endif

@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -19,7 +19,7 @@
 /*!
   \file dataNavierStokes.h
   \author M.A. Fernandez
-  \date 01/2003 
+  \date 01/2003
   \version 1.0
 
   \brief File containing a class for handling NavierStokes data with GetPot
@@ -34,7 +34,9 @@
 #include "dataMesh.hpp"
 #include "dataTime.hpp"
 
-/*! 
+namespace LifeV
+{
+/*!
   \class DataNavierStokes
 
   Base class which holds usual data for the NavierStokes equations solvers
@@ -48,7 +50,7 @@ public DataTime {
 
   //! Constructor
   DataNavierStokes(const GetPot& dfile);
-  
+
   //! Ouptut
   void showMe(ostream& c=cout);
   //! End time
@@ -69,7 +71,7 @@ public DataTime {
   Real _endtime; // end time
 
 
-  //! Miscellaneous 
+  //! Miscellaneous
   UInt _verbose; // temporal output verbose
   Real _dump_init; // time for starting the dumping of the results (Alex December 2003)
   UInt _dump_period; // frequency of the dumping (one dump after _dump_period time steps) (Alex December 2003)
@@ -87,7 +89,7 @@ DataNavierStokes<Mesh>::
 DataNavierStokes(const GetPot& dfile):
   DataMesh<Mesh>(dfile,"fluid/discretization"),
   DataTime(dfile,"fluid/discretization") {
-  
+
   // physics
   _rho       = dfile("fluid/physics/density",1.);
   _mu        = dfile("fluid/physics/viscosity",1.);
@@ -107,7 +109,7 @@ showMe(ostream& c)
 {
   // physics
   c << "\n*** Values for data [fluid/physics]\n\n";
-  c << "density   = " << _rho << endl; 
+  c << "density   = " << _rho << endl;
   c << "viscosity = " << _mu << endl;
   c << "initial time = " << _inittime << endl;
   c << "endtime   = " << _endtime << endl;
@@ -171,5 +173,5 @@ UInt DataNavierStokes<Mesh>::
 dump_period() const {
   return  _dump_period;
 }
-
+}
 #endif

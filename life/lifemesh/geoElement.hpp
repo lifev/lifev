@@ -1,28 +1,28 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 /*! file geoElement.h
 \brief Geometric elements
-\version $Revision: 1.3 $ Luca Formaggia
+\version $Revision: 1.4 $ Luca Formaggia
 
   Introduces all the geometric elements
 */
-  
+
 #ifndef _GEOELEMENT_HH_
 #define _GEOELEMENT_HH_
 
@@ -31,6 +31,8 @@
 #include "geoND.hpp"
 #include "bareItems.hpp"
 
+namespace LifeV
+{
 using namespace std; //Pretty useless
 
 //     *********** Geometrical Elements *****************
@@ -55,7 +57,7 @@ GeoElement0D: public Geo0D, public MC::PointMarker
   //! Declares item id and if it is on boundary, and provides coordinate
   //! data.
   GeoElement0D(ID id,Real x, Real y, Real z, bool boundary=false);
-  
+
   GeoElement0D(GeoElement0D const & g);
   GeoElement0D(Geo0D const & g, MC const & m);
   GeoElement0D & operator = (GeoElement0D const & g);
@@ -68,7 +70,7 @@ GeoElement0D: public Geo0D, public MC::PointMarker
 //!  Class for edges.
 /*! In the 2D case, we store the IDs of the adjacent
   2Delements and their relative position.*/
-template 
+template
 <typename GEOSHAPE, typename MC=DefMarkerCommon>
 class GeoElement1D : public GeoND<GEOSHAPE,GeoElement0D<MC> >, public MC::EdgeMarker
 {
@@ -79,7 +81,7 @@ class GeoElement1D : public GeoND<GEOSHAPE,GeoElement0D<MC> >, public MC::EdgeMa
   typedef typename MC::EdgeMarker Marker;
   typedef GeoElement0D<MC> GeoBElement;
   typedef GeoElement0D<MC> PointType;
-  
+
 #ifdef TWODIM
   //! ID of first adjacent 2D element
   ID ad_first()const {return efirst;};
@@ -109,24 +111,24 @@ class GeoElement1D : public GeoND<GEOSHAPE,GeoElement0D<MC> >, public MC::EdgeMa
 
 /*! In the 3D case, we store the IDs of the adjacent
   3Delements and their relative position.*/
-template 
+template
 <typename GEOSHAPE, typename MC=DefMarkerCommon>
 class GeoElement2D : public GeoND<GEOSHAPE,GeoElement0D<MC> >, public MC::FaceMarker
 {
  public:
-  
+
   GeoElement2D(ID id=0);
   //! Number of element edges
   static const UInt numLocalEdges=numEdges; //For compatibility
-  
+
   typedef GEOSHAPE GeoShape;
   typedef typename MC::FaceMarker Marker;
   typedef typename GEOSHAPE::GeoBShape EdgeShape;
   typedef  GeoElement1D<EdgeShape,MC> EdgeType;
   typedef  GeoElement0D<MC> PointType;
   typedef  EdgeType GeoBElement;
-  
-  
+
+
 #ifdef THREEDIM
   //! ID of first adjacent 2D element
   ID ad_first()const {return efirst;};
@@ -154,19 +156,19 @@ class GeoElement2D : public GeoND<GEOSHAPE,GeoElement0D<MC> >, public MC::FaceMa
 
 
 //! Class for 3D elements
-template 
+template
 <typename GEOSHAPE, typename MC=DefMarkerCommon>
 class GeoElement3D : public GeoND<GEOSHAPE,GeoElement0D<MC> >, public MC::VolumeMarker
 {
 public:
-  
+
   GeoElement3D(ID id=0);
 
   typedef GEOSHAPE GeoShape;
   typedef typename MC::VolumeMarker Marker;
   typedef typename GEOSHAPE::GeoBShape FaceShape;
   typedef typename FaceShape::GeoBShape EdgeShape;
-  
+
   typedef  GeoElement1D<EdgeShape,MC> EdgeType;
   typedef  GeoElement2D<FaceShape,MC> FaceType;
   typedef  GeoElement0D<MC> PointType;
@@ -206,7 +208,7 @@ GeoElement0D<MC>::GeoElement0D(GeoElement0D<MC> const & g):
 
 //! It calls operator= of base classes, just to be sure to do the right thing.
 template <typename MC>
-GeoElement0D<MC> & 
+GeoElement0D<MC> &
 GeoElement0D<MC>::operator = (GeoElement0D<MC> const & g)
 {
   if (this != &g ){
@@ -217,7 +219,7 @@ GeoElement0D<MC>::operator = (GeoElement0D<MC> const & g)
 }
 
 /*-------------------------------------------------------------------------
-  GeoElement1D 
+  GeoElement1D
   --------------------------------------------------------------------------*/
 
 #ifdef TWODIM
@@ -237,7 +239,7 @@ GeoElement1D<GEOSHAPE,MC>::GeoElement1D(ID id):GeoND<GEOSHAPE,GeoElement0D<MC> >
 };
 
 /*-------------------------------------------------------------------------
-  GeoElement2D 
+  GeoElement2D
   --------------------------------------------------------------------------*/
 template<typename GEOSHAPE, typename MC>
 const UInt GeoElement2D<GEOSHAPE,MC>::numLocalEdges;
@@ -253,7 +255,7 @@ GeoElement2D<GEOSHAPE,MC>::GeoElement2D(ID id):
 #else
   template<typename GEOSHAPE, typename MC>
 GeoElement2D<GEOSHAPE,MC>::GeoElement2D(ID id):
-  GeoND<GEOSHAPE,GeoElement0D<MC> >(id)  
+  GeoND<GEOSHAPE,GeoElement0D<MC> >(id)
 #endif
 {
   ASSERT_PRE( GEOSHAPE::nDim == 2 , "geoElement2D with incorrect GeoSHape" ) ;
@@ -275,6 +277,6 @@ GeoElement3D<GEOSHAPE,MC>::GeoElement3D(ID id): GeoND<GEOSHAPE,GeoElement0D<MC> 
 {
   ASSERT_PRE(GEOSHAPE::nDim==3 , "geoElement3D with incorrect GeoSHape")
 }
-
+}
 #endif
 

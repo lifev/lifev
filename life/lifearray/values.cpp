@@ -1,27 +1,28 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "values.hpp"
 
-
+namespace LifeV
+{
 //Realizza l'inversa di una matrice diagonale e la moltiplica per un'altra matrice
-void MultInvDiag(const vector<Real> &Diag, 
-		 const CSRMatr<CSRPatt,Real> &Mat, CSRMatr<CSRPatt,Real> &ans) 
+void MultInvDiag(const vector<Real> &Diag,
+		 const CSRMatr<CSRPatt,Real> &Mat, CSRMatr<CSRPatt,Real> &ans)
 {
   ASSERT(find(Diag.begin(),Diag.end(),0) == Diag.end(), "La matrice diagonale deve essere invertibile");
 
@@ -29,7 +30,7 @@ void MultInvDiag(const vector<Real> &Diag,
 
   // Esecuzione del prodotto
   for (UInt row = 0; row < Mat._Patt->nRows(); ++row)
-    for (UInt pos = Mat._Patt->ia()[row]; pos < Mat._Patt->ia()[row+1]; ++pos) 
+    for (UInt pos = Mat._Patt->ia()[row]; pos < Mat._Patt->ia()[row+1]; ++pos)
       ans._value[pos] = (Mat._value[pos] / Diag[row]);
 
   return;
@@ -92,7 +93,7 @@ operator*(const VectorBlock &v) const
 void CSRMatr<CSRPatt,Tab2d>::
 spy(string  const &filename)
 {
-  // Purpose: Matlab dumping and spy 
+  // Purpose: Matlab dumping and spy
   string nome=filename, uti=" , ";
   UInt nrows=_Patt->nRows();
   Container ia=_Patt->ia(), ja=_Patt->ja();
@@ -110,7 +111,7 @@ spy(string  const &filename)
   }
 
   ofstream file_out(nome.c_str());
-  ASSERT(file_out,"Error: Output Matrix (Values) file cannot be open"); 
+  ASSERT(file_out,"Error: Output Matrix (Values) file cannot be open");
 
 
   file_out << "S = [ ";
@@ -120,7 +121,7 @@ spy(string  const &filename)
       for (int rloc=0; rloc<blsize; ++rloc)
 	for (int cloc=0; cloc<blsize; ++cloc)
 	  file_out << rblock*blsize + rloc +1 << uti << cblock*blsize
-	    + cloc +1 << uti << _value[ii](rloc,cloc) << endl; /* */  
+	    + cloc +1 << uti << _value[ii](rloc,cloc) << endl; /* */
     }
   }
   file_out << "];" << endl;
@@ -226,7 +227,7 @@ void colUnify(CSRMatr<CSRPatt,double> &ans, const CSRMatr<CSRPatt,double> &Mat1,
 	  PaConstIter ja_pos_diag = find_if(ja1_start, ja1_end, bind2nd(greater<UInt>(),*ja1_start));
 
 	  ConstIter value_pos_diag = value1_start + (ja_pos_diag - ja1_start);
-		
+
 	  // copy of the first block
 	  Iter value_start1_part2 = rotate_copy(value1_start, value1_start + 1, value_pos_diag, value_start1_part1);
 	  copy(value_pos_diag, value1_end, value_start1_part2);
@@ -262,14 +263,14 @@ void colUnify(CSRMatr<CSRPatt,double> &ans, const CSRMatr<CSRPatt,double> &Mat1,
       PatternDefs::Container ja = ans._Patt->ja();
       PaIter ja_start = ja.begin() + ans._Patt->_i2o(ans._Patt->give_ia()[i]);
       PaIter ja_end = ja.begin() + ans._Patt->_i2o(ans._Patt->give_ia()[i+1]);
-	
+
       PaIter ja_pos_diag = find_if(ja_start, ja_end, bind2nd(greater<UInt>(),*ja_start));
 
       Iter value_pos_diag = value_start + (ja_pos_diag - ja_start) - 1;
 
       // ordinamento
       rotate(value_start, value_pos_diag, value_pos_diag + 1);
-	
+
     };
 
   ans._value.resize(val.size(),0.0);
@@ -331,7 +332,7 @@ void rowUnify(CSRMatr<CSRPatt,double> &ans, const CSRMatr<CSRPatt,double> &Mat1,
     {
       ConstIter value1_start = Mat1._value.begin();
       ConstIter value1_end = Mat1._value.end();
-	
+
       //the starting place of the first block
       Iter value_start1 = val.begin();
 
@@ -387,7 +388,7 @@ void rowUnify(CSRMatr<CSRPatt,double> &ans, const CSRMatr<CSRPatt,double> &Mat1,
       PatternDefs::Container ja = ans._Patt->ja();
       PaIter ja_start = ja.begin() + ans._Patt->_i2o(ans._Patt->give_ia()[i]);
       PaIter ja_end = ja.begin() + ans._Patt->_i2o(ans._Patt->give_ia()[i+1]);
-	
+
       PaIter ja_pos_diag = find_if(ja_start, ja_end, bind2nd(greater<UInt>(),*ja_start));
 
       Iter value_pos_diag = value_start + (ja_pos_diag - ja_start) - 1;
@@ -432,7 +433,7 @@ void CSRmat2MSRmat(MSRMatr<double> &MSRmat,
 
 //Inversion of a diagonal matrix and multiplication with a sparse matrix
 //Miguel: 4/2003, the last version was too expensive.
-void MultInvDiag(const vector<Real> &Diag, const MSRMatr<Real> &Mat, MSRMatr<Real> &ans) 
+void MultInvDiag(const vector<Real> &Diag, const MSRMatr<Real> &Mat, MSRMatr<Real> &ans)
 {
   ASSERT(find(Diag.begin(),Diag.end(),0) == Diag.end(), "La matrice diagonale deve essere invertibile");
 
@@ -448,7 +449,7 @@ void MultInvDiag(const vector<Real> &Diag, const MSRMatr<Real> &Mat, MSRMatr<Rea
       end   = *(start+row+1);
       diag  = 1.0/Diag[row];
       ans._value[row] = Mat._value[row]*diag;
-      for (UInt pos = begin; pos < end; ++pos) 
+      for (UInt pos = begin; pos < end; ++pos)
 	ans._value[pos] = Mat._value[pos]*diag;
     }
 }
@@ -511,7 +512,7 @@ DiagPreconditioner(const VBRMatr<double> &M)
       loc_val=M.get_value(i,i);
       ASSERT(loc_val != 0. , "zero detected in diagonal preconditioner");
       _diag(i) = 1./loc_val ;
-    };  
+    };
 }
 
 //for CSR block pattern
@@ -616,4 +617,4 @@ VectorBlock
 IDPreconditioner<VectorBlock>::
 solve(const VectorBlock &x) const
 {return x;}
-
+}

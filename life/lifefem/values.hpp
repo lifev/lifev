@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -62,7 +62,7 @@
 //#include<string>
 //#include<utility>
 
-#ifndef _LIFEV_HH_ 
+#ifndef _LIFEV_HH_
 //more correct version
 typedef size_t  UInt;
 //original version
@@ -73,14 +73,17 @@ typedef vector<UInt>::iterator UIIter;
 #include "vecUnknown.hpp"
 #endif
 
+namespace LifeV
+{
 using namespace std;
+
 
 /*---------------------------------------------------------------------------------/
  / I M P L E M E N T A T I O N S                                                    /
- /---------------------------------------------------------------------------------*/ 
+ /---------------------------------------------------------------------------------*/
 template<typename FE1,typename GeoMap,typename MatrixType>
 void assemble_first(MatrixType& M,ElemMat& elmat,
-		    const FE1& fe1,const GeoMap& geo,const Dof& dof) 
+		    const FE1& fe1,const GeoMap& geo,const Dof& dof)
 {
   if(elmat.nBlockRow()!=1 || elmat.nBlockCol() != 1){
     cout << "assemble for vector elem mat not yet implemented\n";
@@ -100,7 +103,7 @@ void assemble_first(MatrixType& M,ElemMat& elmat,
 
 template<typename Vector,typename FE1,typename GeoMap>
 void assemble_vec(Vector& V,ElemVec& elvec,const FE1& fe1,const GeoMap& geo,
-		  const Dof& dof) 
+		  const Dof& dof)
 {
   if(elvec.nBlockRow()!=1){
     cout << "assemble for vector elem vec not yet implemented\n";
@@ -114,4 +117,5 @@ void assemble_vec(Vector& V,ElemVec& elvec,const FE1& fe1,const GeoMap& geo,
     V[ig] += vec(i);
   }
 };
+}
 #endif

@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -19,10 +19,12 @@
 #ifndef _LINESEARCH_PARAB_H_
 #define _LINESEARCH_PARAB_H_
 
+namespace LifeV
+{
 /*
   This line search algorithm comes from C.T. Kelley, Iterative methods for linear
   and nonlinear equations, SIAM 1995 (Chap. 8).
-  
+
     (i)   lambda given (usually 1 when Newton method is used)
     (ii)  sol_test = sol + lambda step_test
     (iii) if residu_test < (1 - alpha lambda) residu
@@ -33,19 +35,19 @@
                      if lambda > sigma1 lambda_cur then lambda = sigma1 lamnda_cur
 
     Constant parameters:
-    
+
     sigma0, sigma1: safeguarding bounds (default values 0.1 and 0.5)
     alpha         : parameter to measure sufficient decrease (default 1e-4)
     max_linesearch: maximum number of steplength reductions before
                     failure is reported (default 50)
-    
-    
+
+
   */
 
 template<class Fct,class Vector,class Real, class Norm>
 void lineSearch_parab(Fct& f,Norm& norm, Vector& residual,Vector& sol,Vector& step,Real& normRes,
 		 Real& lambda,int iter)
-{  
+{
   //----------------------------------------------------------------------
   const Real sigma0         = 0.1;
   const Real sigma1         = 0.5;
@@ -95,5 +97,6 @@ void lineSearch_parab(Fct& f,Norm& norm, Vector& residual,Vector& sol,Vector& st
     }
   }
   normRes = normRes_test;
+}
 }
 #endif

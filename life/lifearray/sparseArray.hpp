@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -54,7 +54,7 @@
 #define OFFSET 0 // for the Fortran vs C numbering
 #endif
 #include "lifeV.hpp"
-#ifndef _LIFEV_HH_ 
+#ifndef _LIFEV_HH_
 //more correct version
 typedef size_t  UInt;
 typedef vector<UInt>::iterator UIIter;
@@ -69,6 +69,8 @@ typedef vector<UInt>::iterator UIIter;
 #include "vecUnknown.hpp"
 #endif
 
+namespace LifeV
+{
 //more correct version
 typedef vector<INDEX_T> Container;
 typedef Container::iterator ContIter;
@@ -88,16 +90,16 @@ using namespace std;
 // The matrix is: a reference to a Pattern and a values vector
 // Each of them is a template: the Pattern could be symmetric or not
 // The values: obviously !
-// 
+//
 // So I can handle non symmetric matrices with a symmetric pattern
-// 
+//
 
 template<typename PatternType, typename DataType>
 class CSRMatr
 {
 public:
   CSRMatr(); // default constructor : NULL pattern
-  // 
+  //
   // Note that the constructors MUST be based on an existing pattern
   //
   CSRMatr(const PatternType &ex_pattern);
@@ -105,7 +107,7 @@ public:
   CSRMatr(const CSRMatr<PatternType,DataType> &RightHandCSR);
   const PatternType * Patt() const {return _Patt;};
   vector<DataType> & value()  {return _value;};
-  DataType * giveRawCSR_value() {return &(_values.front());}    
+  DataType * giveRawCSR_value() {return &(_values.front());}
 
   CSRMatr& operator= (const CSRMatr<PatternType,DataType> &RhCsr  );// Warning: the two matrices will point to the same pattern
   void set_mat(UInt where, DataType loc_val);
@@ -120,9 +122,9 @@ public:
 private:
   vector<DataType> _value;
   const PatternType *_Patt; // I want to link the values to a pattern, NOT to change the pattern itself  (which is const)
-  //     static const DataType _DefaultValue = 0; 
+  //     static const DataType _DefaultValue = 0;
 };
- 
+
 ////////////////////////////////////////////////////////////////
 //
 // CSR Format SPECIALIZATION FOR Usual CSR
@@ -135,7 +137,7 @@ class CSRMatr<CSRPatt,DataType>
 {
 public:
   CSRMatr(); //!< default constructor : NULL pattern
-  // 
+  //
   // Note that the constructors MUST be based on an existing pattern
   //
   CSRMatr(const CSRPatt &ex_pattern);
@@ -146,7 +148,7 @@ public:
   const CSRPatt * Patt() const {return _Patt;};
   const vector<DataType> & value() const {return _value;};
   vector<DataType> & value()  {return _value;};
-  DataType * giveRawCSR_value() {return &(_value.front());}    
+  DataType * giveRawCSR_value() {return &(_value.front());}
 
   CSRMatr& operator= (const CSRMatr<CSRPatt,DataType> &RhCsr  );
   // Warning: the two matrices will point to the same pattern
@@ -179,7 +181,7 @@ public:
   // Determina la matrice lampata per P1
   vector<DataType> MassDiagP1() const;
   // Realizza l'inversa di una matrice diagonale e la moltiplica per un'altra matrice
-  friend void MultInvDiag(const vector<Real> &Diag, 
+  friend void MultInvDiag(const vector<Real> &Diag,
 			  const CSRMatr<CSRPatt,Real> &Mat,
 			  CSRMatr<CSRPatt,Real> &ans);
 
@@ -220,7 +222,7 @@ public:
  private:
   vector<DataType> _value;
   const CSRPatt *_Patt; // I want to link the values to a pattern, NOT to change the pattern itself  (which is const)
-  //  static const DataType _DefaultValue = 0; 
+  //  static const DataType _DefaultValue = 0;
 };
 
 ////////////////////////////////////////////////////////////////
@@ -234,14 +236,14 @@ class VBRMatr
 {
 public:
   VBRMatr():_Patt(0){}; // default constructor : NULL pattern
-  // 
+  //
   // Note that the constructors MUST be based on an existing pattern
   //
   VBRMatr(const VBRPatt &ex_pattern);
   VBRMatr(const VBRPatt& ex_pattern, const vector<DataType> &ex_value);
   VBRMatr(const VBRMatr<DataType> &RightHandVBR):
     _Patt(RightHandVBR.Patt()), _value(RightHandVBR.value()){}
-  
+
   const VBRPatt *Patt() const {return _Patt;}
   vector<DataType> value() const {return _value;}
   DataType* giveRaw_value() {return &(_value.front());} // give the
@@ -273,19 +275,19 @@ public:
   { return _value[_Patt->locate_index(i,j).first];};
   //  void ShowMe() const;
   void spy(string  const &filename);
-  //  void diagonalize_row ( UInt const r, DataType const coeff);   
-  //  void diagonalize ( UInt const r, DataType const coeff, vector<DataType> &b, DataType datum);   
- 
+  //  void diagonalize_row ( UInt const r, DataType const coeff);
+  //  void diagonalize ( UInt const r, DataType const coeff, vector<DataType> &b, DataType datum);
+
 private:
   vector<DataType> _value;
   const VBRPatt *_Patt; // I want to link the values to a pattern, NOT
   // changing the pattern itself  (which is const)
-  //  static const DataType _DefaultValue = 0; 
+  //  static const DataType _DefaultValue = 0;
 };
 
 ////////////////////////////////////////////////////////////////
 //
-// MSR Format 
+// MSR Format
 //
 ///////////////////////////////////////////////////////////////
 
@@ -294,7 +296,7 @@ class MSRMatr
 {
 public:
   MSRMatr(); // default constructor : NULL pattern
-  // 
+  //
   // Note that the constructors MUST be based on an existing pattern
   //
   MSRMatr(const MSRPatt &ex_pattern);
@@ -304,7 +306,7 @@ public:
   MSRMatr(const MSRMatr<DataType> &RightHandMSR);
   MSRMatr(const MSRPatt &ex_pattern,const CSRMatr<CSRPatt,DataType> &RightHandCSR);
   // CSR_values -> MSR_values
-  /* to convert from CSR to MSR: 
+  /* to convert from CSR to MSR:
      MSRPatt nameMSRP(CSRPatt nameCSRP);
      MSRMatr nameMSR_matrix(nameMSRP,nameCSR_matrix);*/
 
@@ -340,10 +342,10 @@ public:
   { return _value[_Patt->locate_index(i,j).first];};
   void ShowMe();
   void spy(string  const &filename);
-  void diagonalize_row ( UInt const r, DataType const coeff);   
-  void diagonalize ( UInt const r, DataType const coeff, vector<DataType> &b, DataType datum);   
+  void diagonalize_row ( UInt const r, DataType const coeff);
+  void diagonalize ( UInt const r, DataType const coeff, vector<DataType> &b, DataType datum);
   //Version for the type Vector
-  void diagonalize( UInt const r, DataType const coeff, Vector &b, DataType datum);   
+  void diagonalize( UInt const r, DataType const coeff, Vector &b, DataType datum);
   vector<DataType>  operator* (const vector<DataType> &v) const; //Matrix-vector product
   //Matrix-vector product for the class Vector (useful for IML++)
   Vector operator*(const Vector &v) const;
@@ -363,11 +365,11 @@ public:
 
   //! set to zero the matrix;
   void zeros();
- 
+
 private:
   vector<DataType> _value;
   const MSRPatt *_Patt; // I want to link the values to a pattern, NOT to change the pattern itself  (which is const)
-  //     static const DataType _DefaultValue = 0; 
+  //     static const DataType _DefaultValue = 0;
 };
 
 ////////////////////////////////////////////////////////////////
@@ -799,9 +801,9 @@ CSRMatr(const PatternType &ex_pattern, const vector<DataType> &ex_value)
   // no default constructor for class KNM
   _Patt = &ex_pattern;
   ASSERT( _Patt->nNz() == ex_value.size(),
-	  "Error in CSR Matrix Values LifeV"); 
+	  "Error in CSR Matrix Values LifeV");
   // Warning: if PatternType = CSRPattSymm => _ja.size() != _nnz.===> remember: _ja.size() = (_nnz+_nrows)/2
-  _value = ex_value;   
+  _value = ex_value;
 }
 
 template<typename PatternType, typename DataType>
@@ -810,7 +812,7 @@ CSRMatr(const CSRMatr<PatternType,DataType> &RightHandCSR):
   _Patt(RightHandCSR.Patt()),_value(RightHandCSR.value()) {};
 
 template<typename PatternType, typename DataType>
-CSRMatr<PatternType,DataType>& 
+CSRMatr<PatternType,DataType>&
 CSRMatr<PatternType,DataType>::operator= (const CSRMatr<PatternType,DataType> &RhCsr)
 {
   if (&RhCsr != this)
@@ -882,9 +884,9 @@ CSRMatr(const CSRPatt &ex_pattern, const vector<DataType> &ex_value)
   // no default constructor for class KNM
   _Patt = &ex_pattern;
   ASSERT( _Patt->nNz() == ex_value.size(),
-	  "Error in CSR Matrix Values LifeV"); 
+	  "Error in CSR Matrix Values LifeV");
   // Warning: if PatternType = CSRPattSymm => _ja.size() != _nnz.===> remember: _ja.size() = (_nnz+_nrows)/2
-  _value = ex_value;   
+  _value = ex_value;
 }
 
 template<typename DataType>
@@ -893,7 +895,7 @@ CSRMatr(const CSRMatr<CSRPatt,DataType> &RightHandCSR):
   _Patt(RightHandCSR.Patt()),_value(RightHandCSR.value()) {};
 
 template<typename DataType>
-CSRMatr<CSRPatt,DataType>& 
+CSRMatr<CSRPatt,DataType>&
 CSRMatr<CSRPatt,DataType>::operator= (const CSRMatr<CSRPatt,DataType> &RhCsr)
 {
   if (&RhCsr != this)
@@ -945,7 +947,7 @@ CSRMatr<CSRPatt,DataType>::MassDiagP1() const
 
 
 //Realizza l'inversa di una matrice diagonale e la moltiplica per un'altra matrice
-void MultInvDiag(const vector<Real> &Diag, 
+void MultInvDiag(const vector<Real> &Diag,
 		 const CSRMatr<CSRPatt,Real> &Mat, CSRMatr<CSRPatt,Real> &ans) ;
 
 
@@ -1034,7 +1036,7 @@ CSRMatr<CSRPatt,DataType>::
 diagonalize(UInt const r, DataType const coeff, Vector &b, DataType datum)
 {
   // AIM: Diagonalization of a row of the system, by setting:
-  // A(i,i) = coeff, 
+  // A(i,i) = coeff,
   // A(i,j) = 0,  A(j,i) = 0 for j!=i
   // and suitably correcting the right hand side of the system
 
@@ -1049,7 +1051,7 @@ diagonalize(UInt const r, DataType const coeff, Vector &b, DataType datum)
     *(_Patt->give_ia().begin()+r+1-OFFSET);
 
   transform(start,end,start,nihil);
- 
+
   b[r-OFFSET] = coeff*datum;
 
   //Remark: in processing a list of Dirichlet nodes, there is no need to check a posteriori the right hand side
@@ -1086,7 +1088,7 @@ CSRMatr<CSRPatt,DataType>::ShowMe()
   UInt i_first,nrows=_Patt->nRows(),ncols=_Patt->nCols(),nnz=_Patt->nNz();
   Container ja = _Patt->ja();
 
-  string pare="[";  
+  string pare="[";
   cout << "**************************" << endl;
   cout << "     CSR Matrix           " << endl;
   cout << endl;
@@ -1099,29 +1101,29 @@ CSRMatr<CSRPatt,DataType>::ShowMe()
 
       UInt jj=0;
       for(UInt j=0;j<ncols;j++)
-	{ 
+	{
 	  if (j==i_index) {cout << " " <<_value[i_first+jj]<<" "; jj++;}
 	  else {
 	    if (j==ja[i_first+jj]-OFFSET){
 	      cout <<" "<< _value[i_first+jj]<<" "; jj++;}
 	    else
-	      cout << " 0 "; 
-	  } 
+	      cout << " 0 ";
+	  }
 	}
       if (i_index==nrows-1)
         cout << " ]] " << endl;
       else
         cout << " ]  " << endl;
     }
-  cout << "nnz = " << nnz << ", nrow = " << nrows << ", ncol = " << ncols << endl;  
+  cout << "nnz = " << nnz << ", nrow = " << nrows << ", ncol = " << ncols << endl;
   return;
-}; 
+};
 
 template<typename DataType>
 void CSRMatr<CSRPatt,DataType>::
 spy(string  const &filename)
 {
-  // Purpose: Matlab dumping and spy 
+  // Purpose: Matlab dumping and spy
   string nome=filename, uti=" , ";
   UInt nrows=_Patt->nRows();
   Container ia=_Patt->ia(), ja=_Patt->ja();
@@ -1138,14 +1140,14 @@ spy(string  const &filename)
   }
 
   ofstream file_out(nome.c_str());
-  ASSERT(file_out,"Error: Output Matrix (Values) file cannot be open"); 
+  ASSERT(file_out,"Error: Output Matrix (Values) file cannot be open");
 
 
   file_out << "S = [ ";
   for (UInt i=0;i<nrows;++i){
     for (UInt ii=ia[i]-OFFSET;ii<ia[i+1]-OFFSET;++ii)
-      file_out << i+1 << uti << ja[ii]+1-OFFSET << uti << _value[ii] << endl; /* */  
-  }	 
+      file_out << i+1 << uti << ja[ii]+1-OFFSET << uti << _value[ii] << endl; /* */
+  }
   file_out << "];" << endl;
 
   file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"<<endl;
@@ -1318,7 +1320,7 @@ VBRMatr<DataType>::operator*=(const DataType num)
   UInt blockSize_c=blockSize_r; // we work with square blocks !!!
   UInt stop=_Patt->nNz()*blockSize_r*blockSize_r;
   for (UInt i=0;i<stop;++i)
-    _value[i]*=num;   
+    _value[i]*=num;
 
   return *this;
 }
@@ -1470,7 +1472,7 @@ void
 VBRMatr<DataType>::
 spy(string  const &filename)
 {
-  // Purpose: Matlab dumping and spy 
+  // Purpose: Matlab dumping and spy
   string nome=filename, uti=" , ";
   UInt nblocrow=_Patt->nRows(), blocsize=_Patt->rpntr()[1]-_Patt->rpntr()[0];
   Container ia=_Patt->ia(), ja=_Patt->ja(), indx=_Patt->indx();
@@ -1485,7 +1487,7 @@ spy(string  const &filename)
       {cerr << "Wrong file name ";
       nome=filename+".m";}
   };
-  
+
   ofstream file_out(nome.c_str());
   ASSERT(file_out,"Error: Output Matrix (Values) file cannot be open");
 
@@ -1534,7 +1536,7 @@ showMe() const
 	      for (UInt ib=0;ib<blsize;ib++) cout << " * ";
 	      jj++;
 	    };
-	    else for (UInt ib=0;ib<blsize;ib++) cout << " 0 "; 
+	    else for (UInt ib=0;ib<blsize;ib++) cout << " 0 ";
 	  };
 	};
       if (i_index==static_cast<PatternDefs::Diff_t>(_Patt->nRows()-1))
@@ -1549,7 +1551,7 @@ showMe() const
 */
 
 //-------------------------------------------------------------------------------------------------------
-// MSR - VALUES 
+// MSR - VALUES
 //-------------------------------------------------------------------------------------------------------
 
 template<class DataType>
@@ -1606,7 +1608,7 @@ MSRMatr(const MSRMatr<DataType> &RightHandMSR):
   _Patt(RightHandMSR.Patt()),_value(RightHandMSR.value()) {};
 
 template<class DataType>
-MSRMatr<DataType>& 
+MSRMatr<DataType>&
 MSRMatr<DataType>::operator= (const MSRMatr<DataType> &RhMsr)
 {
   if (&RhMsr != this)
@@ -1634,7 +1636,7 @@ MSRMatr<DataType>::operator* (const vector<DataType> &v) const
   for (UInt i=0+OFFSET;i<nrows+OFFSET;++i){
     ans[i]=_value[i]*v[i];
     for (UInt j=_Patt->give_bindx()[i];j < _Patt->give_bindx()[i+1];++j)
-      ans[i]+=_value[j]*v[_Patt->give_bindx()[j]]; 
+      ans[i]+=_value[j]*v[_Patt->give_bindx()[j]];
   }
   return ans;
 };
@@ -1653,7 +1655,7 @@ operator*(const Vector &v) const
   for (UInt i=0+OFFSET;i<nrows+OFFSET;++i){
     ans(i)=_value[i]*v(i);
     for (UInt j=_Patt->give_bindx()[i];j < _Patt->give_bindx()[i+1];++j)
-      ans(i)+=_value[j]*v(_Patt->give_bindx()[j]); 
+      ans(i)+=_value[j]*v(_Patt->give_bindx()[j]);
   }
   return ans;
 }
@@ -1669,7 +1671,7 @@ void operMatVec(DataType * const mv,
   for (UInt i=0+OFFSET;i<nrows+OFFSET;++i){
     mv[i]=Mat._value[i]*v[i];
     for (UInt j=Mat._Patt->give_bindx()[i];j < Mat._Patt->give_bindx()[i+1];++j)
-      mv[i]+=Mat._value[j]*v[Mat._Patt->give_bindx()[j]]; 
+      mv[i]+=Mat._value[j]*v[Mat._Patt->give_bindx()[j]];
   }
 }
 
@@ -1687,7 +1689,7 @@ trans_mult(const Vector &v) const
   for (UInt i=0+OFFSET;i<nrows+OFFSET;++i){
     ans(i)=_value[i]*v(i);
     for (UInt j=_Patt->give_bindx()[i];j < _Patt->give_bindx()[i+1];++j)
-      ans(_Patt->give_bindx()[j])+=_value[j]*v(i); 
+      ans(_Patt->give_bindx()[j])+=_value[j]*v(i);
   }
   return ans;
 }
@@ -1696,7 +1698,7 @@ template<class DataType>
 MSRMatr<DataType>&
 MSRMatr<DataType>::operator*=(const DataType num)
 {
-  UInt stop=_Patt->nNz()+1; 
+  UInt stop=_Patt->nNz()+1;
   for (UInt i=0;i<stop;++i) _value[i]*=num;
   return *this;
 };
@@ -1705,7 +1707,7 @@ template<class DataType>
 MSRMatr<DataType>
 MSRMatr<DataType>::operator*(const DataType num)
 {
-  UInt stop=_Patt->nNz(); 
+  UInt stop=_Patt->nNz();
   MSRMatr<DataType> ans(*this);
 
   for (UInt i=0;i<stop;++i)
@@ -1719,7 +1721,7 @@ MSRMatr<DataType>&
 MSRMatr<DataType>::flop(const DataType num, MSRMatr<DataType>& M, MSRMatr<DataType>& A)
 {
   /* AIM: Matrix = num*M + A */
-  UInt stop=_Patt->nNz(); 
+  UInt stop=_Patt->nNz();
   //   ASSERT(M.Patt()==A.Patt,"Error in summing matrices");
 
   for (UInt i=0;i<stop;++i)
@@ -1733,7 +1735,7 @@ MSRMatr<DataType>&
 MSRMatr<DataType>::flop(const DataType num, MSRMatr<DataType>& M)
 {
   /* AIM: Matrix = num*M + Matrix */
-  UInt stop=_Patt->nNz(); 
+  UInt stop=_Patt->nNz();
   //   ASSERT(M.Patt()==A.Patt,"Error in summing matrices");
 
   for (UInt i=0;i<stop;++i)
@@ -1750,7 +1752,7 @@ MSRMatr<DataType>::operator* (const DataType num, MSRMatr<DataType>& M)
     UInt stop=_Patt->nNz();
 
     for (UInt i=0;i<stop;++i)
-      _value[i]=num*M.value()[i];    
+      _value[i]=num*M.value()[i];
 
    return *this;
   };
@@ -1767,7 +1769,7 @@ void MSRMatr<DataType>::ShowMe()
   UInt _ncols= _Patt->nCols();
   UInt _nnz  = _Patt->nNz();
 
-  string pare="[";  
+  string pare="[";
   cout << "**************************" << endl;
   cout << "     MSR Matrix           " << endl;
   cout << endl;
@@ -1780,7 +1782,7 @@ void MSRMatr<DataType>::ShowMe()
       i_last =_Patt->bindx()[i_index+1];
       //      cout << i_first << " " << i_last << endl;
       for(int j=0;j<_ncols;++j)
-	{ 
+	{
 	  if (j==i_index)
 	    cout << " " << _value[i_index] << " ";
 	  else
@@ -1792,23 +1794,23 @@ void MSRMatr<DataType>::ShowMe()
 		{
 		  UInt j_index=found-&vec_temp[0];
 		  cout << " " << _value[j_index] << " ";
-		} 
+		}
 	    }
-        } 
+        }
       if (i_index==_nrows-1)
         cout << " ]] " << endl;
       else
         cout << " ]  " << endl;
     }
-  cout << "nnz = " << _nnz << ", nrow = " << _nrows << ", ncol = " << _ncols << endl;  
+  cout << "nnz = " << _nnz << ", nrow = " << _nrows << ", ncol = " << _ncols << endl;
   return;
-}; 
+};
 
 template<typename DataType>
 void
 MSRMatr<DataType>::spy(string  const &filename)
 {
-  // Purpose: Matlab dumping and spy 
+  // Purpose: Matlab dumping and spy
   string nome=filename, uti=" , ";
   //
   // check on the file name
@@ -1821,7 +1823,7 @@ MSRMatr<DataType>::spy(string  const &filename)
       cerr << "Wrong file name ";
       nome=filename+".m";}
   }
-  
+
   ofstream file_out(nome.c_str());
 
   file_out << "S = [ ";
@@ -1831,7 +1833,7 @@ MSRMatr<DataType>::spy(string  const &filename)
       file_out << i << uti << _Patt->give_bindx()[ii]+1-OFFSET <<
 	uti << _value[ii] << endl;
   }
-  
+
     file_out << "];" << endl;
 
   file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"<<endl;
@@ -1844,9 +1846,9 @@ set_mat_inc(UInt row, UInt col, DataType loc_val)
 {
 
   pair<UInt,bool> where = _Patt->locate_index(row,col);
-  if (where.second) 
+  if (where.second)
     _value[where.first] += loc_val;
-  else { 
+  else {
     cout << row +1<< "," << col +1<< endl;
     ERROR_MSG("problem in MSR::set_mat_inc");
   }
@@ -1924,7 +1926,7 @@ diagonalize_row(UInt const r, DataType const coeff)
 
   for (i=start;i<end;++i) {
     _value[i-OFFSET]=0;
-    // Miguel: Why this ?. 
+    // Miguel: Why this ?.
     //_value[_Patt->give_ybind()[i-disp]] = 0;
   }
 
@@ -1937,7 +1939,7 @@ MSRMatr<DataType>::
 diagonalize(UInt const r, DataType const coeff, vector<DataType> &b, DataType datum)
 {
   // AIM: Diagonalization of a row of the system, by setting:
-  // A(i,i) = coeff, 
+  // A(i,i) = coeff,
   // A(i,j) = 0,  A(j,i) = 0 for j!=i
   // and suitably correcting the right hand side of the system
   _value[r-OFFSET] = coeff;
@@ -1951,7 +1953,7 @@ diagonalize(UInt const r, DataType const coeff, vector<DataType> &b, DataType da
   UInt row,col;
 
   transform(start,end,start,nihil);
- 
+
   for (UInt i=istart;i<iend;++i)
     {
       row= _Patt->give_bindx()[i]-OFFSET;
@@ -1959,7 +1961,7 @@ diagonalize(UInt const r, DataType const coeff, vector<DataType> &b, DataType da
       b[row] -= _value[col] * datum;
       _value[col]=0.;
     }
-  
+
   b[r-OFFSET] = coeff*datum;
 
   //Remark: in processing a list of Dirichlet nodes, there is no need to check a posteriori the right hand side
@@ -1973,22 +1975,22 @@ MSRMatr<DataType>::
 diagonalize(UInt const r, DataType const coeff, Vector &b, DataType datum)
 {
   // AIM: Diagonalization of a row of the system, by setting:
-  // A(i,i) = coeff, 
+  // A(i,i) = coeff,
   // A(i,j) = 0,  A(j,i) = 0 for j!=i
   // and suitably correcting the right hand side of the system
   _value[r-OFFSET] = coeff;
 
   UInt istart= *(_Patt->give_bindx().begin()+r-OFFSET);
   UInt iend  = *(_Patt->give_bindx().begin()+r+1-OFFSET);
-  
+
   typename vector<DataType>::iterator start=_value.begin() + istart;
   typename vector<DataType>::iterator end=_value.begin() + iend;
-  
+
   UInt row,col;
- 
+
   transform(start,end,start,nihil);
-  
-  
+
+
   // Miguel: There is a buh using ybind. Alex, did you fix it?.
   // This code works without ybind.
   //
@@ -1998,17 +2000,17 @@ diagonalize(UInt const r, DataType const coeff, Vector &b, DataType datum)
       UInt Rend  = *(_Patt->give_bindx().begin()+row+1-OFFSET);
       for (UInt j=Rstart;j<Rend;++j) {
 	if ( (_Patt->give_bindx()[j]-OFFSET) == r ) {
-	  col = j; 
-	  b[row-OFFSET] -= _value[col] * datum; 
+	  col = j;
+	  b[row-OFFSET] -= _value[col] * datum;
 	  _value[col]=0.;
 	  break;
 	}
       }
   }
-     
+
 
   b[r-OFFSET] = coeff*datum;
- 
+
   //Remark: in processing a list of Dirichlet nodes, there is no need to check a posteriori the right hand side
   return;
 }
@@ -2316,7 +2318,7 @@ void
 MixedMatr<BRows, BCols, PatternType, DataType>::
 spy(string  const &filename)
 {
-  // Purpose: Matlab dumping and spy 
+  // Purpose: Matlab dumping and spy
   string nome=filename, uti=" , ";
   //
   // check on the file name
@@ -2894,7 +2896,7 @@ void
 MixedMatr<BRows, BCols, MSRPatt, double>::
 spy(string  const &filename)
 {
-  // Purpose: Matlab dumping and spy 
+  // Purpose: Matlab dumping and spy
   string nome=filename, uti=" , ";
   //
   // check on the file name
@@ -3479,7 +3481,7 @@ void
 MixedMatr<BRows, BCols, CSRPatt, double>::
 spy(string  const &filename)
 {
-  // Purpose: Matlab dumping and spy 
+  // Purpose: Matlab dumping and spy
   string nome=filename, uti=" , ";
   //
   // check on the file name
@@ -3887,5 +3889,5 @@ solve(const Vector &x) const;
 VectorBlock
 IDPreconditioner<VectorBlock>::
 solve(const VectorBlock &x) const;
-
+}
 #endif

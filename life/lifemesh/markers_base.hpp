@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -19,9 +19,12 @@
 #ifndef HH_MARKERSBASE_HH_
 #define HH_MARKERSBASE_HH_
 #include <iostream>
+
+namespace LifeV
+{
 /*            ************************ MARKER BASE **************************/
 /*! \file marker_base.h Basic definition of markers
-  
+
 Here we define the basic markers. Markers have two purposes:
 
 <ul>
@@ -43,13 +46,13 @@ Here we define the basic markers. Markers have two purposes:
 </ul>
 
 The flag in the base class+some utilities to select between two flags
-is provided by traits. In particular, <ul> 
+is provided by traits. In particular, <ul>
 
 <li> The MarkerTraits_Base define the basic (compulsory) interface of
 any user defined Marker class.
 
   <li> The Marker is a class template whose template argument is a
-  MarkerTrait, defaulted to MarkerTraits_Base.  
+  MarkerTrait, defaulted to MarkerTraits_Base.
 
 <li>A user may change some basic behaviour of the Marker class by providing a special Traits.
 </ul>
@@ -65,14 +68,14 @@ class MarkerTraits_Base
 public:
   //! EntityFlag is the type used to store the geometric entity flags
   /*!  It is a signed long int so thet we have a lot of room */
-  
+
   typedef signed long int EntityFlag;
-  
+
   /*! Nullflag is the value indicating a null flag, i.e a flag not yet
     set to a usable value*/
-  
+
   static const EntityFlag NULLFLAG;
-  
+
   //! Selects the stronger between two flags
   /*! A dimensional geometric entity G_i may inherit the stronger flag
     among adiacent geometric entities of greater dimensions.  For
@@ -80,9 +83,9 @@ public:
     strongerst Flag of the adjacent boundary faces.
     It returns NULLFLAG if any of the entity a or b is a NULLFLAG.
   */
-  
+
   static EntityFlag strongerFlag(EntityFlag const & a,EntityFlag const & b);
-  
+
   //! Selects the weaker between two flags
   /*
     ! A lower dimensional geometric entity G_i may inherit the weaker
@@ -97,11 +100,11 @@ public:
 
 // const MarkerTraits_Base::EntityFlag MarkerTraits_Base::NULLFLAG=LONG_MIN;
 
-  
+
 
 
 //! Base marker class.
-/*! 
+/*!
   It stores an integral type, aliased to EntityFlag, which may be used
   for marking a geometrical entity. The typical use is to specify
   boundary conditions or material properties associated with the entity.
@@ -115,35 +118,35 @@ class Marker_Base {
 public:
 
   typedef typename MarkerTraits::EntityFlag EntityFlag;
-  
+
   //! Null flag as default
   explicit Marker_Base();
-  
-  //! Give the flag 
+
+  //! Give the flag
   explicit Marker_Base(EntityFlag & p);
-  
+
   Marker_Base(Marker_Base<MarkerTraits> const & m);
-  
+
   //! Extract marker flag
   inline EntityFlag marker() const;
 
   //! Returns the null flag (cannot be modified)
   inline EntityFlag const & nullFlag() const;
-  
+
   //! Set marker to given value
   inline EntityFlag setMarker(EntityFlag const & c);
-  
+
   //! Set marker to given value only if unset
   EntityFlag updateMarker(EntityFlag const & c);
 
   //! Sets the flag to the stronger flag of two given markers
-  
+
   EntityFlag setStrongerMarker(EntityFlag const & p1, EntityFlag const & p2);
 
   //! Sets the flag to the weaker flag of two given markers
-  
+
   EntityFlag setWeakerMarker(EntityFlag const & p1, EntityFlag const & p2);
-  
+
   //! If marker flag is unset, is stes it to that of the argument, otherwise
   //! is sets it to  the stronger flag between the stored one
   //! and the one provided by the argument.
@@ -152,16 +155,16 @@ public:
   //! If marker flag is unset , it sets it to that of the argument, otherwise
   //! is sets it to  the weaker flag between the stored one
   //! and the one provided by the argument.
-   
+
   EntityFlag setWeakerMarker(EntityFlag const & p);
 
   //! It enquires if marker flag is different than the nullflag
   inline bool isMarkerSet() const;
-  
+
   //! It enquires if marker flag is different than the nullflag
   inline bool isMarkerUnset() const;
-  
-  //! Put marker to nullflag   
+
+  //! Put marker to nullflag
   inline bool unsetMarker() const;
 
   //! Put marker to nullflag
@@ -169,10 +172,10 @@ public:
 
   //! Helper function that prints a marker Flag
   std::ostream & printFlag(EntityFlag const f, std::ostream & out) const;
-  
+
   //! Helper function that prints "this" marker flag
   std::ostream &  printFlag(std::ostream & out) const;
-  
+
 protected:
   EntityFlag flag;
 };
@@ -236,10 +239,10 @@ typename MarkerTraits::EntityFlag Marker_Base<MarkerTraits>::marker() const {ret
 
 template<typename MarkerTraits>
 typename MarkerTraits::EntityFlag const & Marker_Base<MarkerTraits>::nullFlag() const {return MarkerTraits::NULLFLAG;}
-  
+
 template<typename MarkerTraits>
 typename MarkerTraits::EntityFlag Marker_Base<MarkerTraits>::setMarker(EntityFlag const & c){return flag=c;}
-  
+
 template<typename MarkerTraits>
 typename MarkerTraits::EntityFlag Marker_Base<MarkerTraits>::updateMarker(EntityFlag const & c){if (flag==nullFlag())
   return setMarker(c); }
@@ -293,7 +296,7 @@ template<typename MarkerTraits>
 std::ostream & Marker_Base<MarkerTraits>::printFlag(std::ostream & out) const{
   return printFlag(flag,out);
 }
-
+}
 
 #endif
 

@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -21,13 +21,16 @@
 
 #include "RNM.hpp"
 
+namespace LifeV
+{
+
 //   version du 22 nov 1999
-//   Voila une debut de class vecteur + matrice 
-//   les class avec termine avec un _ ne travail que sur 
+//   Voila une debut de class vecteur + matrice
+//   les class avec termine avec un _ ne travail que sur
 //   un pointeur existant => pas de new et delete de pointeur
 //   la class correspondant sans de _ genere les pointeurs
-//  
-//   avec ses classes on peut prendre une ligne 
+//
+//   avec ses classes on peut prendre une ligne
 //   ou une colonne d'une matrice
 // -----------------------
 
@@ -55,7 +58,7 @@ inline ostream & operator<<(ostream & f,const ShapeOfArray & s)
   { f << s.n ;
     if(s.step != 1)
       f << ":" << s.step ;
-    if (s.step*s.n  !=  s.next ) 
+    if (s.step*s.n  !=  s.next )
       f << " n: " << setw(3) << s.next ;
     f << ",";
      return f;
@@ -70,26 +73,26 @@ template<class R> ostream & operator<<(ostream & f,const KN_<const_R> & v)
    };
 
 template<class R> ostream & operator<<(ostream & f,const KNM_<const_R> & v)
-  {  //f << " KNM_ "<<v.N()<<"x"<<v.M()<< ": " << (ShapeOfArray) v  
+  {  //f << " KNM_ "<<v.N()<<"x"<<v.M()<< ": " << (ShapeOfArray) v
      //<< " i "  << v.shapei
      // << " j "  << v.shapej
      // << " " << &v(0,0) << " :\n\t";
      f << v.N()<<'x'<<v.M() /*<< "  n" << v.next<<" :"<< v.shapei.next << "," << v.shapej.next */<< "\t:\n\t" ;
     for (int i=0;i<v.N();i++) {
-      for (int j=0;j<v.M();j++) 
+      for (int j=0;j<v.M();j++)
         cout << " " << setw(3) << v(i,j);
        cout << "\n\t";}
   return f;
-    
+
    };
 
 template<class R> ostream & operator<<(ostream & f,const KNMK_<const_R> & v)
-  { //f << " KNM_" <<v.N()<<"x"<<v.M()<<"x"<<v.K()<< " : " << (ShapeOfArray) v  
+  { //f << " KNM_" <<v.N()<<"x"<<v.M()<<"x"<<v.K()<< " : " << (ShapeOfArray) v
     // << " i "  << v.shapei
     // << " j "  << v.shapej
     // << " k "  << v.shapek << endl;
     // << " " << (void *) & v(0,0,0) << "\n\t" ;
-   f << v.N()<< 'x' <<v.M()<< 'x'<<v.K() << "\t:\n\t" ;    
+   f << v.N()<< 'x' <<v.M()<< 'x'<<v.K() << "\t:\n\t" ;
   for (int i=0;i<v.shapei.n;i++){
     for (int j=0;j<v.shapej.n;j++){
       for (int k=0;k<v.shapek.n;k++)
@@ -97,15 +100,15 @@ template<class R> ostream & operator<<(ostream & f,const KNMK_<const_R> & v)
       cout << "\n\t";}
     cout << "\n\t";}
   return f;
-    
+
    };
 
 template<class R>
  R  KN_<R>::operator,(const KN_<const_R> & u) const {
     K_assert(u.n == n);
-    double  s=0; 
+    double  s=0;
     R * l(v);
-    R  *r(u.v);    
+    R  *r(u.v);
     for (int i=0;i<n;i++,l += step, r += u.step) s += *l * *r;
     return s;
   }
@@ -125,7 +128,7 @@ R  KN_<R>::KNMmax() const {
       maxv = maxv > v[index(i)] ? maxv : v[index(i)];
     return maxv;
   }
-  
+
 template<class R>
 R  KN_<R>::sum() const {
     R s = v[index(0)];
@@ -141,7 +144,7 @@ template<class R>
     return *this;
   }
 
-
+}
 ///////////////// definition des operateurs d'affectation /////////////////////////
 #define oper =
 #include "RNM_op.hpp"

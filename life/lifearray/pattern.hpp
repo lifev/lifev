@@ -18,7 +18,7 @@
 */
 /*----------------------------------------------------------------------*
 |
-| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.5 2004-06-23 12:12:58 simone Exp $
+| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.6 2004-08-29 15:53:20 prudhomm Exp $
 |
 |
 | #Version  0.1 Experimental   07/7/00. Luca Formaggia & Alessandro Veneziani  |
@@ -47,12 +47,6 @@
 #ifndef _PATTERN_HH
 #define _PATTERN_HH
 #include "lifeV.hpp"
-#ifndef _LIFEV_HH_
-//more correct version
-typedef uint UInt;
-typedef UInt ID;
-typedef vector<UInt>::iterator UIIter;
-#endif
 #ifndef INDEX_T
 #define INDEX_T UInt
 #endif
@@ -62,13 +56,16 @@ typedef vector<UInt>::iterator UIIter;
 #endif
 
 
-const INDEX_T PatternOffset= PATTERN_OFFSET;
 
 #include<set>
 #include<algorithm>
 #include<string>
 //#include<functional>
 #include "bareItems.hpp"
+
+namespace LifeV
+{
+const INDEX_T PatternOffset= PATTERN_OFFSET;
 
 // We DEFINITIVELY need NAMESPACES (LUCA)
 class PatternDefs
@@ -2657,7 +2654,7 @@ MixedLocalPattern<FE1,FE2>::patternSecond(UInt const i) const
   // Along columns (changes fast)
   return i % FE2::nbNode;
 }
-
+}
 
 #endif
 

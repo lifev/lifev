@@ -45,7 +45,7 @@
 
 #include <LDebug.hpp>
 
-namespace Life
+namespace LifeV
 {
 /*!
   \class LDebug
@@ -306,7 +306,7 @@ LDebugStream::operator<<( std::string const& s)
 
 
 LDebugStream&
-LDebugStream::operator<<( Life::LManipFunction __f )
+LDebugStream::operator<<( LifeV::LManipFunction __f )
 {
 	if ( __p->debug )
 	{
@@ -485,18 +485,18 @@ LBacktrace ( int __levels )
 }
 }
 
-Life::LDebugStream&
-perror( Life::LDebugStream& s )
+LifeV::LDebugStream&
+perror( LifeV::LDebugStream& s )
 {
     s << " " << strerror( errno ); return s;
 }
-Life::LDebugStream&
-endl( Life::LDebugStream& s )
+LifeV::LDebugStream&
+endl( LifeV::LDebugStream& s )
 {
     s << "\n"; return s;
 }
-Life::LDebugStream&
-flush( Life::LDebugStream& s )
+LifeV::LDebugStream&
+flush( LifeV::LDebugStream& s )
 {
     s.flush(); return s;
 }

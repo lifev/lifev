@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -30,6 +30,8 @@
 
 #include "bcVector.hpp"
 
+namespace LifeV
+{
 //
 // Implementation for BCVector_Base
 //
@@ -54,7 +56,7 @@ void BCVector_Base::setMixteCoef( const Real& coef ){
   _MixteCoef = coef;
 }
 
-  
+
 //! Return the value of the Mixte coefficient
 Real BCVector_Base::MixteCoef() const{
   return _MixteCoef;
@@ -73,16 +75,16 @@ BCVector::BCVector() {
 //! Constructor
 BCVector::BCVector(Vector& vec, UInt nbTotalDof):
   BCVector_Base(vec, nbTotalDof)
-{   _finalized = true; 
+{   _finalized = true;
 }
 
 
 //!set the BC vector (after default construction)
 void BCVector::setvector(Vector& vec, UInt nbTotalDof)
 {
-  ASSERT_PRE( !_finalized, "BC Vector cannot be set twice."); 
+  ASSERT_PRE( !_finalized, "BC Vector cannot be set twice.");
   _vec        = &vec ;
-  _nbTotalDof = nbTotalDof; 
+  _nbTotalDof = nbTotalDof;
   _finalized  = true;
 }
 
@@ -90,16 +92,16 @@ void BCVector::setvector(Vector& vec, UInt nbTotalDof)
 //! This method returns the value to be imposed in the component iComp of the dof iDof
 Real BCVector::operator()(const ID& iDof, const ID& iComp) const {
   ASSERT_PRE(_finalized, "BC Vector should be finalized before being accessed.");
-  return (*_vec)( (iComp-1)* _nbTotalDof + iDof - 1 ); 
-} 
-  
-//! Assignment operator for BCVector_Interface 
+  return (*_vec)( (iComp-1)* _nbTotalDof + iDof - 1 );
+}
+
+//! Assignment operator for BCVector_Interface
 BCVector & BCVector::operator=(const BCVector& BCv) {
   _vec        = BCv._vec;
   _nbTotalDof = BCv._nbTotalDof;
   _MixteCoef  = BCv._MixteCoef;
   _finalized  = BCv._finalized;
-  
+
   return *this;
 }
 
@@ -113,7 +115,7 @@ ostream& BCVector::showMe(bool verbose, ostream & out) const {
   out << "==>Interface Dof :\n";
   out << "+++++++++++++++++++++++++++++++" << endl;
   return out;
-} 
+}
 
 
 //
@@ -125,21 +127,21 @@ BCVector_Interface::BCVector_Interface() {
 }
 
 //! Constructor
-BCVector_Interface::BCVector_Interface(Vector& vec, UInt nbTotalDof, 
+BCVector_Interface::BCVector_Interface(Vector& vec, UInt nbTotalDof,
 				       DofInterfaceBase& dofIn):
   BCVector_Base(vec, nbTotalDof),
-  _dofIn(&dofIn) { 
-    _finalized = true; 
+  _dofIn(&dofIn) {
+    _finalized = true;
   }
 
 
 //!set the BC vector (after default construction)
 void BCVector_Interface::setvector(Vector& vec, UInt nbTotalDof, DofInterfaceBase& dofIn)
 {
-  ASSERT_PRE( !_finalized, "BC Vector cannot be set twice."); 
+  ASSERT_PRE( !_finalized, "BC Vector cannot be set twice.");
   _vec        = &vec ;
   _dofIn      = &dofIn;
-  _nbTotalDof = nbTotalDof; 
+  _nbTotalDof = nbTotalDof;
   _finalized  = true;
 }
 
@@ -147,17 +149,17 @@ void BCVector_Interface::setvector(Vector& vec, UInt nbTotalDof, DofInterfaceBas
 //! This method returns the value to be imposed in the component iComp of the dof iDof
 Real BCVector_Interface::operator()(const ID& iDof, const ID& iComp) const {
   ASSERT_PRE(_finalized, "BC Vector should be finalized before being accessed.");
-  return (*_vec)( (iComp-1)* _nbTotalDof + _dofIn->getInterfaceDof(iDof) - 1 ); 
-} 
-  
-//! Assignment operator for BCVector_Interface 
+  return (*_vec)( (iComp-1)* _nbTotalDof + _dofIn->getInterfaceDof(iDof) - 1 );
+}
+
+//! Assignment operator for BCVector_Interface
 BCVector_Interface & BCVector_Interface::operator=(const BCVector_Interface & BCv) {
   _vec        = BCv._vec;
   _dofIn      = BCv._dofIn;
   _nbTotalDof = BCv._nbTotalDof;
   _MixteCoef  = BCv._MixteCoef;
   _finalized  = BCv._finalized;
-  
+
   return *this;
 }
 
@@ -172,5 +174,5 @@ ostream& BCVector_Interface::showMe(bool verbose, ostream & out) const {
   _dofIn->showMe( verbose, out );  // no showMe(..) in Miguel's DofInterface
   out << "+++++++++++++++++++++++++++++++" << endl;
   return out;
-} 
-
+}
+}

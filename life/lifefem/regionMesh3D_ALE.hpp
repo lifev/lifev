@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -19,11 +19,11 @@
 /*! file regionMesh3D_ALE.h
   \brief Extension of the  mesh classes interfaces for ALE schemes
 
-  \version $Revision: 1.1 $ Miguel Fernandez
+  \version $Revision: 1.2 $ Miguel Fernandez
 
   Introduces the RegionMesh3D class
 */
-  
+
 #ifndef _REGIONMESH3DALE_HH_
 #define _REGIONMESH3DALE_HH_
 #include "lifeV.hpp"
@@ -33,6 +33,8 @@
 #include "geoMap.hpp"
 #include "quadRule.hpp"
 
+namespace LifeV
+{
 template <typename GEOSHAPE, typename MC=DefMarkerCommon >
 class RegionMesh3D_ALE : public RegionMesh3D<GEOSHAPE,MC>
 {
@@ -42,7 +44,7 @@ public:
   explicit RegionMesh3D_ALE(ID id);
   //! Copy contructor: not implemented yet!
   explicit RegionMesh3D_ALE(RegionMesh3D_ALE<GEOSHAPE,MC> const & m);
-  
+
   RegionMesh3D_ALE<GEOSHAPE,MC> operator=(RegionMesh3D_ALE<GEOSHAPE,MC> const & m);
 
   ~RegionMesh3D_ALE <GEOSHAPE,MC>();
@@ -51,7 +53,7 @@ public:
   It is necessary when implementing mesh movement routines based on
   harmonic reconstruction, in order to build the finite element discretisation.
   */
-  const RefFE& getRefFE() const; 
+  const RefFE& getRefFE() const;
   /*! Get the reference GeoMap object associated to this mesh.
   It is necessary when implementing mesh movement routines based on
   harmonic reconstruction, in order to build the finite element discretisation.
@@ -90,18 +92,18 @@ template<typename GEOSHAPE, typename MC>
 RegionMesh3D_ALE<GEOSHAPE,MC>::~RegionMesh3D_ALE()
 {}
 
-//! Modif Miguel:11/2002 
+//! Modif Miguel:11/2002
 //!< Get the reference RefFE object associated to the mes
 template<typename GEOSHAPE, typename MC>
 const RefFE& RegionMesh3D_ALE<GEOSHAPE,MC>::getRefFE() const {
   switch(ElementShape::Shape) {
-  case HEXA: 
+  case HEXA:
     if (ElementShape::numPoints == 8)
       return feHexaQ1;
-    else 
+    else
       ERROR_MSG("Finite Element not implemented for the mesh motion");
     break;
-  case TETRA: 
+  case TETRA:
     if (ElementShape::numPoints == 4)
       return feTetraP1;
     else
@@ -110,19 +112,19 @@ const RefFE& RegionMesh3D_ALE<GEOSHAPE,MC>::getRefFE() const {
   default:
     ERROR_MSG("Finite Element not implemented for the mesh motion");
   }
-} 
+}
 
 //!< Get the reference GeoMap object  associated to the mesh
 template<typename GEOSHAPE, typename MC>
 const GeoMap& RegionMesh3D_ALE<GEOSHAPE,MC>::getGeoMap() const {
   switch(ElementShape::Shape) {
-  case HEXA: 
+  case HEXA:
     if (ElementShape::numPoints == 8)
       return geoBilinearHexa;
-    else 
+    else
       ERROR_MSG("Finite Element not implemented for the mesh motion");
     break;
-  case TETRA: 
+  case TETRA:
     if (ElementShape::numPoints == 4)
       return geoLinearTetra;
     else
@@ -131,5 +133,6 @@ const GeoMap& RegionMesh3D_ALE<GEOSHAPE,MC>::getGeoMap() const {
   default:
     ERROR_MSG("Finite Element not implemented for ALE");
   }
+}
 }
 #endif

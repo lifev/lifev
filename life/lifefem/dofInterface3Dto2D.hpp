@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -19,12 +19,12 @@
 /*!
   \file dofInterface3Dto2D.h
   \brief Class for connecting the dof of a mesh (3D) and an interface (2D)
-         that lives on the boundary of the mesh.  
+         that lives on the boundary of the mesh.
   \version 1.0
   \author V. Martin (copy-modif of M.A. Fernandez )
   \date 02/2003
 
-  This file contains the class which may be used to update and hold 
+  This file contains the class which may be used to update and hold
   the connections between the dof of a mesh (3D) and an interface (2D)
   that lives on the boundary of the mesh. The interface is referenced
   by a flag.
@@ -43,19 +43,21 @@
 #include <vector>   //necessary to write faces and access them arbitrarily.
 
 #include "markers.hpp"
-#include <ext/slist> 
+#include <ext/slist>
 using namespace __gnu_cxx;
 
-/*! 
+namespace LifeV
+{
+/*!
   \class DofInterface3Dto2D
 
   Base class which holds the connections of the dof between a 3D mesh and its 2D interface
-  
+
   The connections may be built by calling the update method.
-  
+
 */
-class DofInterface3Dto2D: 
-  public DofInterfaceBase 
+class DofInterface3Dto2D:
+  public DofInterfaceBase
 {
  public:
 
@@ -65,23 +67,23 @@ class DofInterface3Dto2D:
     \param dof1 the Dof object of the mesh in which we want to make the computations
    */
   DofInterface3Dto2D( const LocalDofPattern& refFE, const Dof& dof1 );
-  
+
   //! This method builds the Dof connections at the interface
   /*!
     \param mesh1 the mesh in which we want to make the computations
     \param flag1 the marker of the interface in the mesh1
    */
-  template<typename Mesh> 
+  template<typename Mesh>
     void update( const Mesh& mesh1, const EntityFlag& flag1 );
 
   //! Creates an Inria medit type mesh for the interface (pseudo 3D)
-  template<typename Mesh> 
+  template<typename Mesh>
     void Generate2DMesh( string fname, const Mesh& mesh1 ) const;
-  
+
   //! Returns the reference of the interface
   EntityFlag InterfaceRef() const;
 
-  //! Returns the identity of the i-th elements in the (finalised) face list 
+  //! Returns the identity of the i-th elements in the (finalised) face list
   //! (counting from 0 ' a la C')
   ID operator[](const UInt& i) const;
 
@@ -100,7 +102,7 @@ class DofInterface3Dto2D:
  private:
   //! reference of the interface
   EntityFlag _interfRef;
-  
+
   //! LocalDofPattern object used in the mesh in which we want to make the computations
   const LocalDofPattern * _refFE1;
 
@@ -111,41 +113,41 @@ class DofInterface3Dto2D:
         -> first  : global (3D) face number
         -> second : interface (2D) face number
 
-  The name has changed : it was _elc before. (V.M.) 
+  The name has changed : it was _elc before. (V.M.)
   */
-  vector< pair<ID,ID> > _faceList;  
+  vector< pair<ID,ID> > _faceList;
 
   /*! Auxiliary STL list which holds the connections between vertices at the interface
-  (vertices appear more than once. (Mathematically, it is a family))  
+  (vertices appear more than once. (Mathematically, it is a family))
   Empty after calling update
   */
   list<ID> _vertexPerFaceList;
 
-  /*! STL list which holds the connections between vertices at the interface 
+  /*! STL list which holds the connections between vertices at the interface
         -> first  : global (3D) vertex number
         -> second : interface (2D) vertex number
   */
-  list< pair<ID,ID> > _vertexList;  
+  list< pair<ID,ID> > _vertexList;
 
   /*! Auxiliary STL list which holds the connections between edges at the interface
-  (edges appear more than once. (Mathematically, it is a family))  
+  (edges appear more than once. (Mathematically, it is a family))
   Empty after calling update
   */
   // list<ID> _edgePerFaceList;
 
-  /*! STL list which holds the connections between edges at the interface 
+  /*! STL list which holds the connections between edges at the interface
         -> first  : global (3D) edge number
         -> second : interface (2D) edge number
   */
-  // list< pair<ID,ID> > _edgeList;  
+  // list< pair<ID,ID> > _edgeList;
 
-  //!  Auxiliary STL list which holds the connections between Dof at the interface   
+  //!  Auxiliary STL list which holds the connections between Dof at the interface
   //! Empty after calling update
   slist< pair<ID,ID> > _locDof;
 
   //!  STL iterator type for the lists
   typedef slist< pair<ID,ID> >::iterator Iterator;
-  
+
   //! Transforms the 3d index of a vertex into its 2d (interface) index.
   //! This is a simple algorithm... Find out something better some day...?
   ID _Vtx3Dto2D( const ID& idpoint3D ) const;
@@ -162,24 +164,24 @@ class DofInterface3Dto2D:
   /*!
     \param mesh1 the mesh in which we want to make the computations
   */
-  template<typename Mesh> 
+  template<typename Mesh>
     void _updateVertices(const Mesh& mesh1);
 
   //! This method builds the list of edges at the interface (_edgeList container)
   /*!
     \param mesh1 the mesh in which we want to make the computations
   */
-  // template<typename Mesh> 
+  // template<typename Mesh>
   // void _updateEdges(const Mesh& mesh1);
-  
+
   //! This method builds the connections between Dof at the interface (_locDof container)
   /*!
     \param mesh1 the mesh in which we want to make the computations
     \param dof1 the Dof object of the mesh in which we want to make the computations
    */
-  template<typename Mesh> 
+  template<typename Mesh>
     void _updateDofConnections( const Mesh& mesh1 );
-  
+
   //! true if the lists have been updated.
   bool _finalized;
 
@@ -190,15 +192,15 @@ class DofInterface3Dto2D:
 /*!
   \param mesh1 the mesh in which we want to make the computations
   \param flag1 the marker of the interface in the mesh1
-  \param tol tolerance for connecting points of both meshes at the interface 
+  \param tol tolerance for connecting points of both meshes at the interface
 */
-template<typename Mesh> 
+template<typename Mesh>
 void DofInterface3Dto2D::_updateFaceConnections(const Mesh& mesh1, const EntityFlag& flag1) {
 
   UInt bdnF1  = mesh1.numBFaces(); // Number of boundary faces in mesh1
 
   EntityFlag marker1;
-  
+
   typedef  typename Mesh::FaceShape GeoBShape; // Shape of the faces
 
   ID fcounter = 1;  //! Face on the interface counter
@@ -208,12 +210,12 @@ void DofInterface3Dto2D::_updateFaceConnections(const Mesh& mesh1, const EntityF
 
     //! The face marker
     marker1 = mesh1.boundaryFace(ibF1).marker();
-    
+
     //! Is the face on the interface?
     if (marker1 == flag1) {
 
       pair<ID,ID> fp( ibF1, fcounter );
-      _faceList.push_back( fp ); 
+      _faceList.push_back( fp );
       fcounter ++;  //! local face number
 
     }
@@ -226,7 +228,7 @@ void DofInterface3Dto2D::_updateFaceConnections(const Mesh& mesh1, const EntityF
 /*!
   \param mesh1 the mesh in which we want to make the computations
 */
-template<typename Mesh> 
+template<typename Mesh>
 void DofInterface3Dto2D::_updateVertices(const Mesh& mesh1) {
 
   typedef  typename Mesh::FaceShape GeoBShape; // Shape of the faces
@@ -234,12 +236,12 @@ void DofInterface3Dto2D::_updateVertices(const Mesh& mesh1) {
   UInt nVpF = GeoBShape::numVertices;
 
   // ID vcounter = 1;
-  
+
   // Loop on faces at the interface (matching faces)
   for (vector< pair<ID,ID> >::iterator i=_faceList.begin(); i != _faceList.end(); ++i) {
     for (ID jvtx = 1 ; jvtx <= nVpF ; ++ jvtx ) {
 
-      _vertexPerFaceList.push_back( mesh1.boundaryFace(i->first).point(jvtx).id() );      
+      _vertexPerFaceList.push_back( mesh1.boundaryFace(i->first).point(jvtx).id() );
       //vcounter ++;  //! number of vertices (multiple appearances)
     }
   }
@@ -255,18 +257,18 @@ void DofInterface3Dto2D::_updateVertices(const Mesh& mesh1) {
   \param mesh1 the mesh in which we want to make the computations
 */
 /*
-template<typename Mesh> 
+template<typename Mesh>
 void DofInterface3Dto2D::_updateEdges(const Mesh& mesh1) {
 
   typedef  typename Mesh::VolumeShape GeoShape;
   typedef  typename Mesh::FaceShape GeoBShape; // Shape of the faces
 
-  UInt nFaceE = GeoBShape::numEdges;    // Number of face's edges 
+  UInt nFaceE = GeoBShape::numEdges;    // Number of face's edges
 
   ID ecounter = 1;
 
   ID iFaEl1, iEdEl1;
-  
+
   // Loop on faces at the interface (matching faces)
   for (vector< pair<ID,ID> >::iterator i=_faceList.begin(); i != _faceList.end(); ++i) {
 
@@ -274,10 +276,10 @@ void DofInterface3Dto2D::_updateEdges(const Mesh& mesh1) {
 
     // loop on face edges (mesh1)
     for (ID iEdFa1=1; iEdFa1<=nFaceE; ++iEdFa1) {
-      
+
       iEdEl1  = GeoShape::fToE(iFaEl1,iEdFa1).first; // local edge number (in element)
-	
-      _edgePerFaceList.push_back( mesh1.boundaryFace(i->first).edge(iEdFa1).id() );      
+
+      _edgePerFaceList.push_back( mesh1.boundaryFace(i->first).edge(iEdFa1).id() );
       ecounter ++;  //! number of vertices (multiple appearances)
     }
   }
@@ -294,15 +296,15 @@ void DofInterface3Dto2D::_updateEdges(const Mesh& mesh1) {
   \param mesh1 the mesh in which we want to make the computations
   \param dof1 the Dof object of the mesh in which we want to make the computations
 */
-template<typename Mesh> 
+template<typename Mesh>
 void DofInterface3Dto2D::_updateDofConnections( const Mesh& mesh1 ) {
 
   typedef  typename Mesh::VolumeShape GeoShape;
   typedef  typename Mesh::FaceShape GeoBShape;
-  
+
   UInt nFaceV = GeoBShape::numVertices; // Number of face's vertices
-  UInt nFaceE = GeoBShape::numEdges;    // Number of face's edges 
-  
+  UInt nFaceE = GeoBShape::numEdges;    // Number of face's edges
+
   // UInt nDofpV1 = _refFE1.nbDofPerVertex; // number of Dof per vertices on mesh1
   // UInt nDofpE1 = _refFE1nbDofPerEdge;   // number of Dof per edges on mesh1
   // UInt nDofpF1 = _refFE1.nbDofPerFace;   // number of Dof per faces on mesh1
@@ -310,7 +312,7 @@ void DofInterface3Dto2D::_updateDofConnections( const Mesh& mesh1 ) {
   UInt nDofpE1 = _refFE1->nbDofPerEdge;   // number of Dof per edges on mesh1
   UInt nDofpF1 = _refFE1->nbDofPerFace;   // number of Dof per faces on mesh1
 
-  UInt nElemV = GeoShape::numVertices; // Number of element's vertices 
+  UInt nElemV = GeoShape::numVertices; // Number of element's vertices
   UInt nElemE = GeoShape::numEdges;    // Number of element's edges
 
   //  UInt nDofFV1 = nDofpV1 * nFaceV; // number of vertex's Dof on a face on mesh1
@@ -325,72 +327,72 @@ void DofInterface3Dto2D::_updateDofConnections( const Mesh& mesh1 ) {
 
   // Loop on faces at the interface (matching faces)
   for (vector< pair<ID,ID> >::iterator i=_faceList.begin(); i != _faceList.end(); ++i) {
-    
-    iElAd1 = mesh1.boundaryFace(i->first).ad_first();  // id of the element adjacent to the face (mesh1) 
-    
+
+    iElAd1 = mesh1.boundaryFace(i->first).ad_first();  // id of the element adjacent to the face (mesh1)
+
     iFaEl1 = mesh1.boundaryFace(i->first).pos_first(); // local id of the face in its adjacent element (mesh1)
-        
+
     // Vertex based Dof on mesh1
-    if ( nDofpV1 ) { 
-      
+    if ( nDofpV1 ) {
+
       // loop on face vertices (mesh1)
       for (ID iVeFa1=1; iVeFa1<=nFaceV; ++iVeFa1){
-	
+
 	iVeEl1 = GeoShape::fToP(iFaEl1,iVeFa1); // local vertex number (in element)
-	
+
 	// Loop number of Dof per vertex (mesh1)
 	for (ID l=1; l<=nDofpV1; ++l) {
 
           gDof1 = _dof1->localToGlobal(iElAd1,(iVeEl1-1)*nDofpV1 + l); // Global Dof on mesh1
-          
+
           pair<ID,ID> locDof( gDof1, locDofCounter1 );   //! May be : invert the 2 ??
           _locDof.push_front( locDof ); // Updating the list of dof connections
 
           locDofCounter1 ++;  //! local Dof (total dof on the interface)
-        }        
-      }    
-    }       
-    
+        }
+      }
+    }
+
     // Edge based Dof on mesh1
-    if (nDofpE1) { 
-	
+    if (nDofpE1) {
+
       // loop on face edges (mesh1)
       for (ID iEdFa1=1; iEdFa1<=nFaceE; ++iEdFa1) {
-	
+
 	iEdEl1  = GeoShape::fToE(iFaEl1,iEdFa1).first; // local edge number (in element)
-	
+
 	// Loop number of Dof per edge (mesh1)
 	for (ID l=1; l<=nDofpE1; ++l) {
-	  
+
           gDof1 = _dof1->localToGlobal(iElAd1, nDofElemV1 + (iEdEl1-1)*nDofpE1 + l); // Global Dof on mesh1
-          
-          pair<ID,ID> locDof( gDof1, locDofCounter1 ); 
+
+          pair<ID,ID> locDof( gDof1, locDofCounter1 );
           _locDof.push_front( locDof ); // Updating the list of dof connections
 
            locDofCounter1 ++;  //! local Dof (total dof on the interface)
 	}
-      }      
+      }
     }
-        
-    // Face based Dof on mesh1
-    for (ID l=1; l<=nDofpF1; ++l) {  
 
-      gDof1 = _dof1->localToGlobal(iElAd1, nDofElemE1 + nDofElemV1 + (iFaEl1-1)*nDofpF1 + l); // Global Dof in mesh1 
-      
+    // Face based Dof on mesh1
+    for (ID l=1; l<=nDofpF1; ++l) {
+
+      gDof1 = _dof1->localToGlobal(iElAd1, nDofElemE1 + nDofElemV1 + (iFaEl1-1)*nDofpF1 + l); // Global Dof in mesh1
+
       pair<ID,ID> locDof( gDof1, locDofCounter1 );
       _locDof.push_front( locDof ); // Updating the list of dof connections
 
       locDofCounter1 ++;  //! local Dof (total dof on the interface)
     }
-  }   
+  }
 
-  
-  
+
+
   // Updating the map containter with the connections
   for (slist< pair<ID,ID> >::iterator i=_locDof.begin(); i!=_locDof.end(); ++i) {
-    _locDofMap[i->first] = i->second; 
+    _locDofMap[i->first] = i->second;
   }
-  
+
   // Saving memory
   _locDof.clear();
 }
@@ -401,12 +403,12 @@ void DofInterface3Dto2D::_updateDofConnections( const Mesh& mesh1 ) {
   \param mesh1 the mesh in which we want to make the computations
   \param flag1 the marker of the interface in the mesh1
 */
-template<typename Mesh>  
+template<typename Mesh>
 void DofInterface3Dto2D::update( const Mesh& mesh1, const EntityFlag& flag1 ) {
 
   // Updating face connections at the interface
   _updateFaceConnections( mesh1, flag1 );
-  
+
   // Updating vertex connections at the interface
   _updateVertices( mesh1 );
 
@@ -420,23 +422,23 @@ void DofInterface3Dto2D::update( const Mesh& mesh1, const EntityFlag& flag1 ) {
   _finalized = true; //! the lists are updated
 }
 
-// ============ Generate2DMesh ================ 
+// ============ Generate2DMesh ================
 /*! Write the 2D Inria mesh of the interface (pseudo 3D)
-    referenced by the number _interfRef. 
-    
+    referenced by the number _interfRef.
+
     It uses a inria "me.hpp" format. (for medit)
-    
+
     You should have filled the lists of vertices and faces before.
     (Call fillmyinterface once previously).
 */
-template<typename Mesh> 
-void DofInterface3Dto2D::Generate2DMesh(string fname, const Mesh& mesh1) const {  
-  
+template<typename Mesh>
+void DofInterface3Dto2D::Generate2DMesh(string fname, const Mesh& mesh1) const {
+
   ASSERT_PRE(_finalized, "The lists of vertices and faces must be finalized before generating the interface mesh." );
 
-  ofstream ofile(fname.c_str());  
-  ASSERT(ofile,"Error: Output file cannot be open"); 
-  
+  ofstream ofile(fname.c_str());
+  ASSERT(ofile,"Error: Output file cannot be open");
+
   ID idpoint3D;
   ID idpoint2D;
   ID idface3D;
@@ -456,16 +458,16 @@ void DofInterface3Dto2D::Generate2DMesh(string fname, const Mesh& mesh1) const {
     idpoint3D = i2D->first;
     ofile << mesh1.pointList(idpoint3D).x() << " "
 	  << mesh1.pointList(idpoint3D).y() << " "
-	  << mesh1.pointList(idpoint3D).z() << " " 
-          << mesh1.pointList(idpoint3D).marker() << endl; 
+	  << mesh1.pointList(idpoint3D).z() << " "
+          << mesh1.pointList(idpoint3D).marker() << endl;
   }
   ofile << endl;
-  
+
   switch(FaceShape::Shape) {
-  case QUAD: 
+  case QUAD:
     ofile << "Quadrilaterals\n";
     break;
-  case TRIANGLE: 
+  case TRIANGLE:
     ofile << "Triangles\n";
     break;
   default:
@@ -486,11 +488,11 @@ void DofInterface3Dto2D::Generate2DMesh(string fname, const Mesh& mesh1) const {
     ofile << mesh1.boundaryFace( idface3D ).marker() << endl;
   }
 }
-  
+
 
 
 //! useful function to sort a list and remove multiple numbers.
 void RemoveMultiple(const list<ID> & list0, list< pair<ID,ID> > & listf );
 
- 
+}
 #endif

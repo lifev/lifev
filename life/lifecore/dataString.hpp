@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -22,7 +22,8 @@
 #include <vector>
 #include <string>
 
-using namespace std;
+namespace LifeV
+{
 /*!
   \file dataSting.h
   \author J.-F. Gerbeau
@@ -32,24 +33,24 @@ using namespace std;
 
 /*!
   \class DataString
-  
-  A data string contains a string (the name used 
+
+  A data string contains a string (the name used
   in a data file), a integer value (the value used inside
   the code), a small help text
 */
 class DataString
 {
-  string _str;
+  std::string _str;
   int    _val;
-  string _help;
+  std::string _help;
 public:
-  DataString(string str,int val,string help);
-  inline const string& str () const {return _str;};
+  DataString(std::string str,int val,std::string help);
+  inline const std::string& str () const {return _str;};
   inline const int&    val () const {return _val;};
-  inline const string& help() const {return _help;};
-  inline  string& str ()  {return _str;};
+  inline const std::string& help() const {return _help;};
+  inline  std::string& str ()  {return _str;};
   inline  int&    val ()  {return _val;};
-  inline  string& help()  {return _help;};
+  inline  std::string& help()  {return _help;};
 };
 
 /*!
@@ -58,12 +59,12 @@ public:
   To build a list of data string.
 
   Example:
-  
+
   You want to propose to the user three solvers: cg, gmres, cgs
   inside the code these solvers are identified by the values 1, 2, 3
 
   You first create the list:
-  
+
   DataStringList solver_list("My solvers");
   solver_list.add("cg",1,"preconditioned conjugate gradient method");
   solver_list.add("gmres",2,"preconditioned gmres method");
@@ -82,13 +83,13 @@ public:
 */
 class DataStringList
 {
-  string _title;
-  vector<DataString> _list;
+    std::string _title;
+    std::vector<DataString> _list;
 public:
-  DataStringList::DataStringList(string title);
-  void add(string str,int val,string help);
-  void showMe(ostream& c=cout,bool val=false) const;//!<val=true:the values are shown
-  int  value(const string& str) const;
+    DataStringList::DataStringList(std::string title);
+    void add(std::string str,int val,std::string help);
+    void showMe(std::ostream& c= std::cout,bool val=false) const;//!<val=true:the values are shown
+    int  value(const std::string& str) const;
 };
-
+}
 #endif

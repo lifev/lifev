@@ -1,23 +1,25 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "currentHdivFE.hpp"
 
+namespace LifeV
+{
 CurrentHdivFE::CurrentHdivFE(const RefHdivFE& _refHdivFE,const GeoMap& _geoMap,const QuadRule& _qr):
   nbGeoNode(_geoMap.nbDof),nbNode(_refHdivFE.nbDof),nbCoor(_refHdivFE.nbCoor),
   nbQuadPt(_qr.nbQuadPt), nbDiag( _refHdivFE.nbDiag() ),
@@ -48,7 +50,7 @@ CurrentHdivFE::CurrentHdivFE(const RefHdivFE& _refHdivFE,const GeoMap& _geoMap,c
 }
 
 CurrentHdivFE::~CurrentHdivFE()
-{ 
+{
   DESTRUCTOR("CurrentHdivFE");
 }
 
@@ -90,7 +92,7 @@ void CurrentHdivFE::_comp_jacobian()
   }
   // determinant on integrations points
 #if defined(TWODIM)
-  // *** 2D code *** 
+  // *** 2D code ***
   Real a,b,c,d;
   for(int ig=0;ig<nbQuadPt;ig++){
     a = jacobian(0,0,ig);
@@ -101,7 +103,7 @@ void CurrentHdivFE::_comp_jacobian()
     weightDet(ig) = detJac(ig) * qr.weight(ig);
   }
 #elif defined(THREEDIM)
-  // *** 3D code *** 
+  // *** 3D code ***
   Real a,b,c,d,e,f,g,h,i,ei,fh,bi,ch,bf,ce;
   for(int ig=0;ig<nbQuadPt;ig++){
     a = jacobian(0,0,ig);
@@ -124,5 +126,5 @@ void CurrentHdivFE::_comp_jacobian()
   }
 #endif
 }
-
+}
 

@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -21,9 +21,11 @@
 #include "geoMap.hpp"
 #include "refHdivFE.hpp"
 #include "refHybridFE.hpp"
-//! UNKNOWN means: replace me with the degree of exactness of the quadrature rule !
-#define UNKNOWN -1 
 
+namespace LifeV
+{
+//! UNKNOWN means: replace me with the degree of exactness of the quadrature rule !
+const size_t UNKNOWN = size_t( -1 );
 
 /*======================================================================
  *
@@ -31,11 +33,11 @@
  *
  *=======================================================================*/
 //! total number of quadrature rules on segments
-#define NB_QUAD_RULE_SEG 3
+const size_t NB_QUAD_RULE_SEG = 3;
 //! id of the quadrature rules on segments
-#define QUAD_RULE_SEG_1PT       1
-#define QUAD_RULE_SEG_2PT       2
-#define QUAD_RULE_SEG_3PT       3
+const size_t QUAD_RULE_SEG_1PT = 1;
+const size_t QUAD_RULE_SEG_2PT = 2;
+const size_t QUAD_RULE_SEG_3PT = 3;
 //----------------------------------------------------------------------
 
 static const QuadPoint pt_seg_1pt[1] = {
@@ -86,7 +88,7 @@ const SetOfQuadRule allQuadRuleSeg(quad_rule_seg,NB_QUAD_RULE_SEG);
  *                     Quadrature Rules 2D on triangles
  *
  *=======================================================================*/
-//! total number of quadrature rules in 2D on triangle  
+//! total number of quadrature rules in 2D on triangle
 #define NB_QUAD_RULE_TRIA 3
 //! id of the quadrature rules on triangles
 #define QUAD_RULE_TRIA_1PT     1
@@ -115,7 +117,7 @@ const QuadRule quadRuleTria3pt(pt_tria_3pt,
 // 4 points Integration rule for triangle (Ref. e.g. Comincioli pag. 234) D of Ex = 3
 const Real t4pt_xb1 = 3./5.,
   t4pt_xb2 = 1./5.,
-  t4pt_w1 = 25./96.,  
+  t4pt_w1 = 25./96.,
   t4pt_w2 = -9./32.,
   t4pt_a = 1./3.;
 
@@ -145,7 +147,7 @@ const SetOfQuadRule allQuadRuleTria(quad_rule_tria,NB_QUAD_RULE_TRIA);
  *                     Quadrature Rules 2D on quadrangles
  *
  *=======================================================================*/
-//! total number of quadrature rules in 2D on quadrangle  
+//! total number of quadrature rules in 2D on quadrangle
 #define NB_QUAD_RULE_QUAD 3
 //! id of the quadrature rules on quadrangles
 #define QUAD_RULE_QUAD_1PT     1
@@ -205,7 +207,7 @@ const SetOfQuadRule allQuadRuleQuad(quad_rule_quad,NB_QUAD_RULE_QUAD);
  *                     Quadrature Rules 3D on tetraedras
  *
  *=======================================================================*/
-//! total number of quadrature rules in 3D on tetraedra  
+//! total number of quadrature rules in 3D on tetraedra
 #define NB_QUAD_RULE_TETRA 5
 //! id of the quadrature rules on tetraedra
 #define QUAD_RULE_TETRA_1PT     1
@@ -236,7 +238,7 @@ const QuadRule quadRuleTetra4pt(pt_tetra_4pt,
 			  QUAD_RULE_TETRA_4PT,
 			  "Quadrature rule 4 points on a tetraedra",TETRA,4,UNKNOWN);
 //----------------------------------------------------------------------
-// 5 points Integration rule for tetraedra (Ref. e.g. Comincioli pag. 236) 
+// 5 points Integration rule for tetraedra (Ref. e.g. Comincioli pag. 236)
 const Real tet5ptx1 = 1./6. , tet5ptx2 = 1./2., tet5ptx3 = 1./4.;
 
 static const QuadPoint pt_tetra_5pt[5]=
@@ -283,7 +285,7 @@ static const QuadPoint pt_tetra_15pt[15]=
   QuadPoint(t5[1], s5[1], s5[1], B5[1]),
   QuadPoint(s5[1], t5[1], s5[1], B5[1]),
   QuadPoint(s5[1], s5[1], t5[1], B5[1]),
-  QuadPoint(u5, u5, v5, C5),  
+  QuadPoint(u5, u5, v5, C5),
   QuadPoint(u5, v5, u5, C5),
   QuadPoint(v5, u5, u5, C5),
   QuadPoint(v5, v5, u5, C5),
@@ -303,7 +305,7 @@ const QuadRule quadRuleTetra15pt(pt_tetra_15pt,
 const Real t[4]= { 0.0485005494, 0.2386007376, 0.5170472951, 0.7958514179 };
 // s
 const Real s[4]= { 0.0571041961, 0.2768430136, 0.5835904324, 0.8602401357 };
-// r    
+// r
 const Real r[4]= { 0.0694318422, 0.3300094782, 0.6699905218, 0.9305681558 };
 // A
 const Real A[4]= { 0.1739274226, 0.3260725774, 0.3260725774, 0.1739274226 };
@@ -411,7 +413,7 @@ const SetOfQuadRule allQuadRuleTetra(quad_rule_tetra,NB_QUAD_RULE_TETRA);
  *                     Quadrature Rules 3D on hexaedras
  *
  *=======================================================================*/
-//! total number of quadrature rules in 3D on hexa 
+//! total number of quadrature rules in 3D on hexa
 #define NB_QUAD_RULE_HEXA 2
 //! id of the quadrature rules on quadrangles
 #define QUAD_RULE_HEXA_1PT     1
@@ -453,8 +455,8 @@ const SetOfQuadRule allQuadRuleHexa(quad_rule_hexa,NB_QUAD_RULE_HEXA);
 //                            P1  (1D)
 //
 //======================================================================
-/*                 
-                           1-----2    
+/*
+                           1-----2
 */
 Real fct1_P1_1D(cRRef x,cRRef,cRRef ) {return 1-x;}
 Real fct2_P1_1D(cRRef x,cRRef,cRRef ) {return x;}
@@ -462,15 +464,15 @@ Real fct2_P1_1D(cRRef x,cRRef,cRRef ) {return x;}
 Real derfct1_1_P1_1D(cRRef,cRRef,cRRef ) {return -1;}
 Real derfct2_1_P1_1D(cRRef,cRRef,cRRef ) {return 1;}
 
-Real der2fct1_P1_1D(cRRef,cRRef,cRRef) {return 0;} 
+Real der2fct1_P1_1D(cRRef,cRRef,cRRef) {return 0;}
 
 //======================================================================
 //
 //                            P2  (1D)
 //
 //======================================================================
-/*                 
-                           1--3--2    
+/*
+                           1--3--2
 */
 Real fct1_P2_1D(cRRef x,cRRef,cRRef ) {return 2.*(x-1.)*(x-0.5);}
 Real fct2_P2_1D(cRRef x,cRRef,cRRef ) {return 4.*x*(1.-x);}
@@ -490,29 +492,29 @@ Real der2fct3_11_P2_1D(cRRef x,cRRef  ,cRRef ) {return  4;}
 //                            P0  (2D)
 //
 //======================================================================
-/*                 
-                           
-                           |\      
-                           | \     
-                           | 1\    
-                            ---    
+/*
+
+                           |\
+                           | \
+                           | 1\
+                            ---
 */
 Real fct1_P0_2D(cRRef ,cRRef ,cRRef ) {return 1. ;}   //check this : 1. or 2. (\int fct1 = 0.5 or 1.)  ???
-// First and Second derivatives are both equal (to 0). 
+// First and Second derivatives are both equal (to 0).
 Real derfct1_P0_2D(cRRef,cRRef,cRRef ) {return 0. ;}
-Real der2fct1_P0_2D(cRRef,cRRef,cRRef) {return 0. ;} 
+Real der2fct1_P0_2D(cRRef,cRRef,cRRef) {return 0. ;}
 
 //======================================================================
 //
 //                            P1  (2D)
 //
 //======================================================================
-/*                 
+/*
                            3
-                           |\      
-                           | \     
-                           |  \    
-                           1---2    
+                           |\
+                           | \
+                           |  \
+                           1---2
 */
 Real fct1_P1_2D(cRRef x,cRRef y,cRRef ) {return (1. - x - y);}
 Real fct2_P1_2D(cRRef x,cRRef  ,cRRef ) {return  x          ;}
@@ -526,7 +528,7 @@ Real derfct3_1_P1_2D(cRRef,cRRef,cRRef ) {return   0    ;}
 Real derfct3_2_P1_2D(cRRef,cRRef,cRRef ) {return   1    ;}
 
 // Second derivatives
-Real der2fctx_xx_P1_2D(cRRef,cRRef,cRRef) {return 0;} 
+Real der2fctx_xx_P1_2D(cRRef,cRRef,cRRef) {return 0;}
 
 
 
@@ -535,12 +537,12 @@ Real der2fctx_xx_P1_2D(cRRef,cRRef,cRRef) {return 0;}
 //                            P2  (2D)
 //
 //======================================================================
-/*                
+/*
                            3
-                           |\      
-                           6 5     
-                           |  \    
-                           1-4-2    
+                           |\
+                           6 5
+                           |  \
+                           1-4-2
 */
 Real fct1_P2_2D(cRRef x,cRRef y,cRRef ) {return (1-x-y)*(1-x-x-y-y);}
 Real fct2_P2_2D(cRRef x,cRRef y,cRRef ) {return -x*(1-x-x);}
@@ -596,7 +598,7 @@ Real der2fct6_22_P2_2D(cRRef x,cRRef y,cRRef ) {return -8;}
 //                            Q0  (2D)
 //
 //======================================================================
-/*                 
+/*
                             -------
                            |       |
                            |   1   |
@@ -605,7 +607,7 @@ Real der2fct6_22_P2_2D(cRRef x,cRRef y,cRRef ) {return -8;}
 */
 Real fct1_Q0_2D(cRRef x,cRRef y,cRRef ) {return 1. ;}
 Real derfct1_Q0_2D(cRRef x,cRRef y,cRRef ) {return 0. ;}
-// The second derivative is equal to the first : both are equal to 0. 
+// The second derivative is equal to the first : both are equal to 0.
 Real der2fct1_Q0_2D(cRRef x,cRRef y,cRRef ) {return 0. ;}
 
 //======================================================================
@@ -613,7 +615,7 @@ Real der2fct1_Q0_2D(cRRef x,cRRef y,cRRef ) {return 0. ;}
 //                            Q1  (2D)
 //
 //======================================================================
-/*                 
+/*
                            4-------3
                            |       |
                            |       |
@@ -641,7 +643,7 @@ Real der2fctx_xx_Q1_2D(cRRef,cRRef,cRRef) {return 0;}
 //                            Q2  (2D)
 //
 //======================================================================
-/*                 
+/*
                            4---7---3
                            |       |
                            8   9   6
@@ -686,7 +688,7 @@ Real der2fct5_11_Q2_2D(cRRef x,cRRef y,cRRef ) {return -8.*(2.*y-1.)*(y-1.);}
 Real der2fct5_12_Q2_2D(cRRef x,cRRef y,cRRef ) {return -4.*(2.*x-1)*(4.*y-3);}
 Real der2fct5_21_Q2_2D(cRRef x,cRRef y,cRRef ) {return -4.*(2.*x-1)*(4.*y-3);;}
 Real der2fct5_22_Q2_2D(cRRef x,cRRef y,cRRef ) {return -16.*x*(x-1.);}
-      
+
 Real der2fct2_11_Q2_2D(cRRef x,cRRef y,cRRef ) {return (2.*y-1.)*(y-1.)*4.;}
 Real der2fct2_12_Q2_2D(cRRef x,cRRef y,cRRef ) {return (4.*x-1)*(4.*y-3.);}
 Real der2fct2_21_Q2_2D(cRRef x,cRRef y,cRRef ) {return (4.*y-3.)*(4.*x-1.);}
@@ -726,9 +728,9 @@ Real der2fct9_22_Q2_2D(cRRef x,cRRef y,cRRef ) {return 32.*x*(x-1.);}
 //                            P1  (3D)
 //
 //======================================================================
-/*                 
+/*
                 4
-               / .  
+               / .
               /  \.3
              /  . \\
             / .    \\
@@ -739,7 +741,7 @@ Real fct1_P1_3D(cRRef x,cRRef y,cRRef z){return 1-x-y-z;}
 Real fct2_P1_3D(cRRef x,cRRef  ,cRRef  ){return x;}
 Real fct3_P1_3D(cRRef  ,cRRef y,cRRef  ){return y;}
 Real fct4_P1_3D(cRRef  ,cRRef  ,cRRef z){return z;}
- 
+
 Real derfct1_1_P1_3D(cRRef,cRRef,cRRef ) {return -1;}
 Real derfct1_2_P1_3D(cRRef,cRRef,cRRef ) {return -1;}
 Real derfct1_3_P1_3D(cRRef,cRRef,cRRef ) {return -1;}
@@ -754,16 +756,16 @@ Real derfct4_2_P1_3D(cRRef,cRRef,cRRef ) {return 0;}
 Real derfct4_3_P1_3D(cRRef,cRRef,cRRef ) {return 1;}
 
 // Second derivatives
-Real der2fctx_xx_P1_3D(cRRef,cRRef,cRRef) {return 0;} 
+Real der2fctx_xx_P1_3D(cRRef,cRRef,cRRef) {return 0;}
 //======================================================================
 //======================================================================
 //
 //                            P1bubble  (3D)
 //
 //======================================================================
-/*                 
+/*
                 4
-               / .  
+               / .
               /  \.3
              /  . \\
             / . .5 \\
@@ -775,7 +777,7 @@ Real fct2_P1bubble_3D(cRRef x,cRRef  ,cRRef  ){return x;}
 Real fct3_P1bubble_3D(cRRef  ,cRRef y,cRRef  ){return y;}
 Real fct4_P1bubble_3D(cRRef  ,cRRef  ,cRRef z){return z;}
 Real fct5_P1bubble_3D(cRRef x,cRRef y,cRRef z){return (1-x-y-z)*x*y*z;}
- 
+
 Real derfct1_1_P1bubble_3D(cRRef,cRRef,cRRef ) {return -1;}
 Real derfct1_2_P1bubble_3D(cRRef,cRRef,cRRef ) {return -1;}
 Real derfct1_3_P1bubble_3D(cRRef,cRRef,cRRef ) {return -1;}
@@ -793,23 +795,23 @@ Real derfct5_2_P1bubble_3D(cRRef x,cRRef y,cRRef z) {return (1-x-2*y-z)*x*z;}
 Real derfct5_3_P1bubble_3D(cRRef x,cRRef y,cRRef z) {return (1-x-y-2*z)*x*y;}
 
 // Second derivatives
-Real der2fctx_xx_P1bubble_3D(cRRef,cRRef,cRRef) {return 0;} 
-Real der2fct5_11_P1bubble_3D(cRRef x,cRRef y,cRRef z) {return -2*y*z;} 
-Real der2fct5_12_P1bubble_3D(cRRef x,cRRef y,cRRef z) {return (1-2*x-2*y-z)*z;} 
-Real der2fct5_13_P1bubble_3D(cRRef x,cRRef y,cRRef z) {return (1-2*x-y-2*z)*y;} 
-Real der2fct5_21_P1bubble_3D(cRRef x,cRRef y,cRRef z) {return (1-2*x-2*y-z)*z;} 
-Real der2fct5_22_P1bubble_3D(cRRef x,cRRef y,cRRef z) {return -2*x*z;} 
-Real der2fct5_23_P1bubble_3D(cRRef x,cRRef y,cRRef z) {return (1-x-2*y-2*z)*x;} 
-Real der2fct5_31_P1bubble_3D(cRRef x,cRRef y,cRRef z) {return (1-2*x-y-2*z)*y;} 
-Real der2fct5_32_P1bubble_3D(cRRef x,cRRef y,cRRef z) {return (1-x-2*y-2*z)*x;} 
-Real der2fct5_33_P1bubble_3D(cRRef x,cRRef y,cRRef z) {return -2*x*y;} 
+Real der2fctx_xx_P1bubble_3D(cRRef,cRRef,cRRef) {return 0;}
+Real der2fct5_11_P1bubble_3D(cRRef x,cRRef y,cRRef z) {return -2*y*z;}
+Real der2fct5_12_P1bubble_3D(cRRef x,cRRef y,cRRef z) {return (1-2*x-2*y-z)*z;}
+Real der2fct5_13_P1bubble_3D(cRRef x,cRRef y,cRRef z) {return (1-2*x-y-2*z)*y;}
+Real der2fct5_21_P1bubble_3D(cRRef x,cRRef y,cRRef z) {return (1-2*x-2*y-z)*z;}
+Real der2fct5_22_P1bubble_3D(cRRef x,cRRef y,cRRef z) {return -2*x*z;}
+Real der2fct5_23_P1bubble_3D(cRRef x,cRRef y,cRRef z) {return (1-x-2*y-2*z)*x;}
+Real der2fct5_31_P1bubble_3D(cRRef x,cRRef y,cRRef z) {return (1-2*x-y-2*z)*y;}
+Real der2fct5_32_P1bubble_3D(cRRef x,cRRef y,cRRef z) {return (1-x-2*y-2*z)*x;}
+Real der2fct5_33_P1bubble_3D(cRRef x,cRRef y,cRRef z) {return -2*x*y;}
 
 //======================================================================
 //
 //                            P2  (3D)
 //
 //======================================================================
-/*                 
+/*
                 4
                / .10
               /  \.3
@@ -975,7 +977,7 @@ Real der2fct10_33_P2_3D(cRRef x,cRRef y,cRRef z){return 0;}
 //                            P2tilde  (3D)
 // NAVIER-STOKES P2 Basis Oriented to the mass lumping
 //======================================================================
-/*                 
+/*
                 4
                / .10
               /  \.3
@@ -984,7 +986,7 @@ Real der2fct10_33_P2_3D(cRRef x,cRRef y,cRRef z){return 0;}
            /.       \!
          1 -----5----2
 */
-Real fct1_P2tilde_3D(cRRef x,cRRef y,cRRef z){return -(1-x-y-z)*(1-2*(1-x-y-z))+32*x*y*z*(1-x-y-z);} 
+Real fct1_P2tilde_3D(cRRef x,cRRef y,cRRef z){return -(1-x-y-z)*(1-2*(1-x-y-z))+32*x*y*z*(1-x-y-z);}
 Real fct2_P2tilde_3D(cRRef x,cRRef y,cRRef z){return -x*(1-2*x)+32*x*y*z*(1-x-y-z);}
 Real fct3_P2tilde_3D(cRRef x,cRRef y,cRRef z){return -y*(1-2*y)+32*x*y*z*(1-x-y-z);}
 Real fct4_P2tilde_3D(cRRef x,cRRef y,cRRef z){return -z*(1-2*z)+32*x*y*z*(1-x-y-z);}
@@ -994,7 +996,7 @@ Real fct6_P2tilde_3D(cRRef x,cRRef y,cRRef z){return 4*x*y-64*x*y*z*(1-x-y-z);}
 Real fct7_P2tilde_3D(cRRef x,cRRef y,cRRef z){return 4*y*(1-x-y-z)-64*x*y*z*(1-x-y-z);}
 Real fct8_P2tilde_3D(cRRef x,cRRef y,cRRef z){return 4*z*(1-x-y-z)-64*x*y*z*(1-x-y-z);}
 Real fct9_P2tilde_3D(cRRef x,cRRef y,cRRef z){return 4*x*z-64*x*y*z*(1-x-y-z);}
-Real fct10_P2tilde_3D(cRRef x,cRRef y,cRRef z){return 4*y*z-64*x*y*z*(1-x-y-z);} 
+Real fct10_P2tilde_3D(cRRef x,cRRef y,cRRef z){return 4*y*z-64*x*y*z*(1-x-y-z);}
 
 Real fct11_P2tilde_3D(cRRef x,cRRef y,cRRef z){return 256*x*y*z*(1-x-y-z);}
 
@@ -1003,7 +1005,7 @@ Real derfct1_1_P2tilde_3D(cRRef x,cRRef y,cRRef z){return -3 + 4*x + 4*y + 4*z +
 Real derfct1_2_P2tilde_3D(cRRef x,cRRef y,cRRef z){return -3 + 4*x + 4*y + 4*z + 32*x*z*(1-x-2*y-z);}
 Real derfct1_3_P2tilde_3D(cRRef x,cRRef y,cRRef z){return -3 + 4*x + 4*y + 4*z + 32*x*y*(1-x-y-2*z);}
 
-Real derfct2_1_P2tilde_3D(cRRef x,cRRef y,cRRef z){return -1 + 4*x + 32*y*z*(1-2*x-y-z);} 
+Real derfct2_1_P2tilde_3D(cRRef x,cRRef y,cRRef z){return -1 + 4*x + 32*y*z*(1-2*x-y-z);}
 Real derfct2_2_P2tilde_3D(cRRef x,cRRef y,cRRef z){return 32*x*z*(1-x-2*y-z);}
 Real derfct2_3_P2tilde_3D(cRRef x,cRRef y,cRRef z){return 32*x*y*(1-x-y-2*z);}
 
@@ -1159,20 +1161,20 @@ Real der2fct11_33_P2tilde_3D(cRRef x,cRRef y,cRRef z){return -512*x*y*z;}
 //
 //======================================================================
 /*
-                      ________ 
+                      ________
                      /.      /|
-		    / .     / | 
+		    / .     / |
 		   /_______/  |
 		   |  .  1 |  |
 		   |  .....|..|
 		   | .     | /
 		   |.      |/
-		   |_______| 
+		   |_______|
 
 */
 Real fct1_Q0_3D(cRRef x,cRRef y,cRRef z){return 1.;}
 Real derfct1_Q0_3D(cRRef x,cRRef y,cRRef z) {return 0.;}
-// The second derivative is equal to the first : both are equal to 0. 
+// The second derivative is equal to the first : both are equal to 0.
 Real der2fct1_Q0_3D(cRRef x,cRRef y,cRRef z) {return 0.;}
 
 //======================================================================
@@ -1181,9 +1183,9 @@ Real der2fct1_Q0_3D(cRRef x,cRRef y,cRRef z) {return 0.;}
 //
 //======================================================================
 /*
-                      8-------7 
+                      8-------7
                      /.      /|
-		    / .     / | 
+		    / .     / |
 		   5_______6  |
 		   |  .    |  |
 		   |  4....|..3
@@ -1312,10 +1314,10 @@ Real der2fct8_33_Q1_3D(cRRef x,cRRef y,cRRef z){return 0;}
 //
 //======================================================================
 /*
-  
-                      8-------7 
+
+                      8-------7
                      /.      /|
-		    / .     / | 
+		    / .     / |
 		   5_______6  |
 		   |  .    |  |
 		   |  4....|..3
@@ -1323,12 +1325,12 @@ Real der2fct8_33_Q1_3D(cRRef x,cRRef y,cRRef z){return 0;}
 		   |.      |/
 		   1_______2
 
-   face 1: 1,4,3,2 
+   face 1: 1,4,3,2
    face 2: 1,5,8,4
    face 3: 1,2,6,5
    face 4: 2,3,7,6
    face 5: 3,4,8,7
-   face 6: 5,6,7,8 
+   face 6: 5,6,7,8
 
 */
 
@@ -1369,8 +1371,8 @@ Real fct6_DIV_RT0_3D(cRRef x,cRRef y,cRRef z) {return 1 ;}
 //                            P1  (1D)
 //
 //======================================================================
-/*                 
-                           1-----2    
+/*
+                           1-----2
 */
 const RefFE feSegP1("Lagrange P1 on a segment",FE_P1_1D,LINE,1,0,0,0,2,1,
 		    fct_P1_1D,derfct_P1_1D,der2fct_P1_1D,refcoor_P1_1D,
@@ -1381,8 +1383,8 @@ const RefFE feSegP1("Lagrange P1 on a segment",FE_P1_1D,LINE,1,0,0,0,2,1,
 //                            P2  (1D)
 //
 //======================================================================
-/*                 
-                           1--3--2    
+/*
+                           1--3--2
 */
 const RefFE feSegP2("Lagrange P2 on a segment",FE_P2_1D,LINE,1,1,0,0,3,1,
 		    fct_P2_1D,derfct_P2_1D,der2fct_P2_1D,refcoor_P2_1D,allQuadRuleSeg,
@@ -1393,12 +1395,12 @@ const RefFE feSegP2("Lagrange P2 on a segment",FE_P2_1D,LINE,1,1,0,0,3,1,
 //                            P0  (2D)
 //
 //======================================================================
-/*                 
-                           
-                           |\      
-                           | \     
-                           | 1\    
-                            ---    
+/*
+
+                           |\
+                           | \
+                           | 1\
+                            ---
 */
 const RefFE feTriaP0("Lagrange P0 on a triangle",FE_P0_2D,TRIANGLE,0,0,0,1,1,2,
 		    fct_P0_2D,derfct_P0_2D,der2fct_P0_2D,refcoor_P0_2D,allQuadRuleTria,
@@ -1409,12 +1411,12 @@ const RefFE feTriaP0("Lagrange P0 on a triangle",FE_P0_2D,TRIANGLE,0,0,0,1,1,2,
 //                            P1  (2D)
 //
 //======================================================================
-/*                 
+/*
                            3
-                           |\      
-                           | \     
-                           |  \    
-                           1---2    
+                           |\
+                           | \
+                           |  \
+                           1---2
 */
 const RefFE feTriaP1("Lagrange P1 on a triangle",FE_P1_2D,TRIANGLE,1,0,0,0,3,2,
 		    fct_P1_2D,derfct_P1_2D,der2fct_P1_2D,refcoor_P1_2D,allQuadRuleTria,
@@ -1425,12 +1427,12 @@ const RefFE feTriaP1("Lagrange P1 on a triangle",FE_P1_2D,TRIANGLE,1,0,0,0,3,2,
 //                            P2  (2D)
 //
 //======================================================================
-/*                
+/*
                            3
-                           |\      
-                           6 5     
-                           |  \    
-                           1-4-2    
+                           |\
+                           6 5
+                           |  \
+                           1-4-2
 */
 
 const RefFE feTriaP2("Lagrange P2 on a triangle",FE_P2_2D,TRIANGLE,1,1,0,0,6,2,
@@ -1442,7 +1444,7 @@ const RefFE feTriaP2("Lagrange P2 on a triangle",FE_P2_2D,TRIANGLE,1,1,0,0,6,2,
 //                            Q0  (2D)
 //
 //======================================================================
-/*                 
+/*
                             -------
                            |       |
                            |   1   |
@@ -1459,7 +1461,7 @@ const RefFE feQuadQ0("Lagrange Q0 on a quadrangle",FE_Q0_2D,QUAD,0,0,1,0,1,2,
 //                            Q1  (2D)
 //
 //======================================================================
-/*                 
+/*
                            4-------3
                            |       |
                            |       |
@@ -1477,7 +1479,7 @@ const RefFE feQuadQ1("Lagrange Q1 on a quadrangle",FE_Q1_2D,QUAD,1,0,0,0,4,2,
 //                            Q2  (2D)
 //
 //======================================================================
-/*                 
+/*
                            4---7---3
                            |       |
                            8   9   6
@@ -1495,9 +1497,9 @@ const RefFE feQuadQ2("Lagrange Q2 on a quadrangle",FE_Q2_2D,QUAD,1,1,1,0,9,2,
 //                            P1  (3D)
 //
 //======================================================================
-/*                 
+/*
                 4
-               / .  
+               / .
               /  \.3
              /  . \\
             / .    \\
@@ -1513,9 +1515,9 @@ const RefFE feTetraP1("Lagrange P1 on a tetraedra",FE_P1_3D,TETRA,1,0,0,0,4,3,
 //                            P1bubble  (3D)
 //
 //======================================================================
-/*                 
+/*
                 4
-               / .  
+               / .
               /  \.3
              /  . \\
             / . .5 \\
@@ -1532,7 +1534,7 @@ const RefFE feTetraP1bubble("Lagrange P1bubble on a tetraedra",FE_P1bubble_3D,TE
 //                            P2  (3D)
 //
 //======================================================================
-/*                 
+/*
                 4
                / .10
               /  \.3
@@ -1549,7 +1551,7 @@ const RefFE feTetraP2("Lagrange P2 on a tetraedra",FE_P2_3D,TETRA,1,1,0,0,10,3,
 //                            P2tilde  (3D)
 // NAVIER-STOKES P2 Basis Oriented to the mass lumping
 //======================================================================
-/*                 
+/*
                 4
                / .10
               /  \.3
@@ -1572,15 +1574,15 @@ const RefFE feTetraP2tilde("Lagrange P2tilde on a tetraedra",FE_P2tilde_3D,
 //
 //======================================================================
 /*
-                      ________ 
+                      ________
                      /.      /|
-		    / .     / | 
+		    / .     / |
 		   /_______/  |
 		   |  .  1 |  |
 		   |  .....|..|
 		   | .     | /
 		   |.      |/
-		   |_______| 
+		   |_______|
 */
 const RefFE feHexaQ0("Lagrange Q0 on a hexaedra",FE_Q0_3D,HEXA,0,0,0,1,1,3,
                      fct_Q0_3D,derfct_Q0_3D,der2fct_Q0_3D,refcoor_Q0_3D,
@@ -1592,9 +1594,9 @@ const RefFE feHexaQ0("Lagrange Q0 on a hexaedra",FE_Q0_3D,HEXA,0,0,0,1,1,3,
 //
 //======================================================================
 /*
-                      8-------7 
+                      8-------7
                      /.      /|
-		    / .     / | 
+		    / .     / |
 		   5_______6  |
 		   |  .    |  |
 		   |  4....|..3
@@ -1612,10 +1614,10 @@ const RefFE feHexaQ1("Lagrange Q1 on a hexaedra",FE_Q1_3D,HEXA,1,0,0,0,8,3,
 //
 //======================================================================
 /*
-  
-                      8-------7 
+
+                      8-------7
                      /.      /|
-		    / .     / | 
+		    / .     / |
 		   5_______6  |
 		   |  .    |  |
 		   |  4....|..3
@@ -1623,12 +1625,12 @@ const RefFE feHexaQ1("Lagrange Q1 on a hexaedra",FE_Q1_3D,HEXA,1,0,0,0,8,3,
 		   |.      |/
 		   1_______2
 
-   face 1: 1,4,3,2 
+   face 1: 1,4,3,2
    face 2: 1,5,8,4
    face 3: 1,2,6,5
    face 4: 2,3,7,6
    face 5: 3,4,8,7
-   face 6: 5,6,7,8 
+   face 6: 5,6,7,8
 
 */
 const RefHdivFE feHexaRT0("RT0 on a hexaedra",FE_RT0_HEXA_3D,HEXA,0,0,1,0,6,3,
@@ -1666,13 +1668,13 @@ const GeoMap geoBilinearHexa("Bilinear mapping on an hexaedra",HEXA,8,3,
 //
 //                           RT0 HYBRID (3D)
 //                Element defined on FACES :  Q0 on each QUAD face.
-//                       
+//
 //======================================================================
 /*!
-  
-                      8-------7 
+
+                      8-------7
                      /.      /|
-		    / .     / | 
+		    / .     / |
 		   5_______6  |
 		   |  .    |  |
 		   |  4....|..3
@@ -1680,33 +1682,33 @@ const GeoMap geoBilinearHexa("Bilinear mapping on an hexaedra",HEXA,8,3,
 		   |.      |/
 		   1_______2
 
-   face 1: 1,4,3,2 
+   face 1: 1,4,3,2
    face 2: 1,5,8,4
    face 3: 1,2,6,5
    face 4: 2,3,7,6
    face 5: 3,4,8,7
-   face 6: 5,6,7,8 
+   face 6: 5,6,7,8
 
 
 */
 
-// N.B. : the hybrid classes and arrays depend on the quadrature rules, 
+// N.B. : the hybrid classes and arrays depend on the quadrature rules,
 //        geometrical mappings and other reference elements :
 //        thus they must be defined AFTER the definitions of quadrule, geomap, refFE...
 
-//! Total number of Boundary elements for the hybrid MFE for HEXA (= Number of faces, common for RT0,RT1...) 
+//! Total number of Boundary elements for the hybrid MFE for HEXA (= Number of faces, common for RT0,RT1...)
 #define NB_BDFE_HYB_HEXA 6
-static const StaticBdFE BdFE_RT0_HYB_HEXA_1(feQuadQ0, geoBilinearQuad, quadRuleQuad4pt, 
+static const StaticBdFE BdFE_RT0_HYB_HEXA_1(feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
 					refcoor_HYB_HEXA_FACE_1, 0);
-static const StaticBdFE BdFE_RT0_HYB_HEXA_2(feQuadQ0, geoBilinearQuad, quadRuleQuad4pt, 
+static const StaticBdFE BdFE_RT0_HYB_HEXA_2(feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
 					refcoor_HYB_HEXA_FACE_2, 1);
-static const StaticBdFE BdFE_RT0_HYB_HEXA_3(feQuadQ0, geoBilinearQuad, quadRuleQuad4pt, 
+static const StaticBdFE BdFE_RT0_HYB_HEXA_3(feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
 					refcoor_HYB_HEXA_FACE_3, 2);
-static const StaticBdFE BdFE_RT0_HYB_HEXA_4(feQuadQ0, geoBilinearQuad, quadRuleQuad4pt, 
+static const StaticBdFE BdFE_RT0_HYB_HEXA_4(feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
 					refcoor_HYB_HEXA_FACE_4, 3);
-static const StaticBdFE BdFE_RT0_HYB_HEXA_5(feQuadQ0, geoBilinearQuad, quadRuleQuad4pt, 
+static const StaticBdFE BdFE_RT0_HYB_HEXA_5(feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
 					refcoor_HYB_HEXA_FACE_5, 4);
-static const StaticBdFE BdFE_RT0_HYB_HEXA_6(feQuadQ0, geoBilinearQuad, quadRuleQuad4pt, 
+static const StaticBdFE BdFE_RT0_HYB_HEXA_6(feQuadQ0, geoBilinearQuad, quadRuleQuad4pt,
 					refcoor_HYB_HEXA_FACE_6, 5);
 
 static const StaticBdFE HybRT0HexaList[NB_BDFE_HYB_HEXA] = {
@@ -1715,7 +1717,7 @@ static const StaticBdFE HybRT0HexaList[NB_BDFE_HYB_HEXA] = {
   BdFE_RT0_HYB_HEXA_5, BdFE_RT0_HYB_HEXA_6
 };
 
-const RefHybridFE feHexaRT0Hyb(NB_BDFE_HYB_HEXA,HybRT0HexaList,"Hybrid RT0 elements on a hexaedra", 
+const RefHybridFE feHexaRT0Hyb(NB_BDFE_HYB_HEXA,HybRT0HexaList,"Hybrid RT0 elements on a hexaedra",
 			       FE_RT0_HYB_HEXA_3D, HEXA, 0,0,1,0,6,3,
 			       refcoor_RT0HYB_HEXA,STANDARD_PATTERN);
 
@@ -1724,13 +1726,13 @@ const RefHybridFE feHexaRT0Hyb(NB_BDFE_HYB_HEXA,HybRT0HexaList,"Hybrid RT0 eleme
 //
 //                           RT1 HYBRID (3D)
 //                Element defined on FACES :  Q1 on each QUAD face.
-//                       
+//
 //======================================================================
 /*!
-  
-                      8-------7 
+
+                      8-------7
                      /.      /|
-		    / .     / | 
+		    / .     / |
 		   5_______6  |
 		   |  .    |  |
 		   |  4....|..3
@@ -1748,26 +1750,26 @@ SEE basisElSh.cc   for the ORIENTATION CONVENTIONS
    point 7: 1, 1, 1
    point 8: 1, 0, 1
 
-   face 1: 1,4,3,2 
+   face 1: 1,4,3,2
    face 2: 1,5,8,4
    face 3: 1,2,6,5
    face 4: 2,3,7,6
    face 5: 3,4,8,7
-   face 6: 5,6,7,8 
+   face 6: 5,6,7,8
 
 
 */
-static const StaticBdFE BdFE_RT1_HYB_1(feQuadQ1, geoBilinearQuad, quadRuleQuad4pt, 
+static const StaticBdFE BdFE_RT1_HYB_1(feQuadQ1, geoBilinearQuad, quadRuleQuad4pt,
 					refcoor_HYB_HEXA_FACE_1, 0);
-static const StaticBdFE BdFE_RT1_HYB_2(feQuadQ1, geoBilinearQuad, quadRuleQuad4pt, 
+static const StaticBdFE BdFE_RT1_HYB_2(feQuadQ1, geoBilinearQuad, quadRuleQuad4pt,
 					refcoor_HYB_HEXA_FACE_2, 1);
-static const StaticBdFE BdFE_RT1_HYB_3(feQuadQ1, geoBilinearQuad, quadRuleQuad4pt, 
+static const StaticBdFE BdFE_RT1_HYB_3(feQuadQ1, geoBilinearQuad, quadRuleQuad4pt,
 					refcoor_HYB_HEXA_FACE_3, 2);
-static const StaticBdFE BdFE_RT1_HYB_4(feQuadQ1, geoBilinearQuad, quadRuleQuad4pt, 
+static const StaticBdFE BdFE_RT1_HYB_4(feQuadQ1, geoBilinearQuad, quadRuleQuad4pt,
 					refcoor_HYB_HEXA_FACE_4, 3);
-static const StaticBdFE BdFE_RT1_HYB_5(feQuadQ1, geoBilinearQuad, quadRuleQuad4pt, 
+static const StaticBdFE BdFE_RT1_HYB_5(feQuadQ1, geoBilinearQuad, quadRuleQuad4pt,
 					refcoor_HYB_HEXA_FACE_5, 4);
-static const StaticBdFE BdFE_RT1_HYB_6(feQuadQ1, geoBilinearQuad, quadRuleQuad4pt, 
+static const StaticBdFE BdFE_RT1_HYB_6(feQuadQ1, geoBilinearQuad, quadRuleQuad4pt,
 					refcoor_HYB_HEXA_FACE_6, 5);
 
 // NB_BDFE_HYB_HEXA previously defined (in RT0)
@@ -1777,7 +1779,7 @@ static const StaticBdFE HybRT1HexaList[NB_BDFE_HYB_HEXA] = {
   BdFE_RT1_HYB_5, BdFE_RT1_HYB_6
 };
 
-const RefHybridFE feHexaRT1Hyb(NB_BDFE_HYB_HEXA,HybRT1HexaList,"Hybrid RT1 elements on a hexaedra", 
+const RefHybridFE feHexaRT1Hyb(NB_BDFE_HYB_HEXA,HybRT1HexaList,"Hybrid RT1 elements on a hexaedra",
 			       FE_RT1_HYB_HEXA_3D, HEXA, 0,0,4,0,24,3,
 			       refcoor_RT1HYB_HEXA,STANDARD_PATTERN);
 
@@ -1787,12 +1789,12 @@ const RefHybridFE feHexaRT1Hyb(NB_BDFE_HYB_HEXA,HybRT1HexaList,"Hybrid RT1 eleme
 //
 //                           RT0 TETRA HYBRID (3D)
 //                Element defined on FACES :  Q0 on each QUAD face.
-//                       
+//
 //======================================================================
 /*!
-  
+
                 4
-               / .  
+               / .
               /  \.3
              /  . \\
             / .    \\
@@ -1805,26 +1807,26 @@ SEE basisElSh.cc   for the ORIENTATION CONVENTIONS
    point 3: 0, 1, 0
    point 4: 0, 0, 1
 
-   face 1: 1, 3, 2 
-   face 2: 1, 2, 4 
-   face 3: 2, 3, 4 
-   face 4: 1, 4, 3 
+   face 1: 1, 3, 2
+   face 2: 1, 2, 4
+   face 3: 2, 3, 4
+   face 4: 1, 4, 3
 
 
 */
-// N.B. : the hybrid classes and arrays depend on the quadrature rules, 
+// N.B. : the hybrid classes and arrays depend on the quadrature rules,
 //        geometrical mappings and other reference elements :
 //        thus they must be defined AFTER the definitions of quadrule, geomap, refFE...
 
 //! Total number of Boundary elements for the hybrid MFE for TETRA (= Number of faces. common for RT0,RT1...)
 #define NB_BDFE_RT0_HYB_TETRA 4
-static const StaticBdFE BdFE_RT0_HYB_TETRA_1(feTriaP0, geoLinearTria, quadRuleTria4pt, 
+static const StaticBdFE BdFE_RT0_HYB_TETRA_1(feTriaP0, geoLinearTria, quadRuleTria4pt,
 					      refcoor_HYB_TETRA_FACE_1, 0);
-static const StaticBdFE BdFE_RT0_HYB_TETRA_2(feTriaP0, geoLinearTria, quadRuleTria4pt, 
+static const StaticBdFE BdFE_RT0_HYB_TETRA_2(feTriaP0, geoLinearTria, quadRuleTria4pt,
 					      refcoor_HYB_TETRA_FACE_2, 1);
-static const StaticBdFE BdFE_RT0_HYB_TETRA_3(feTriaP0, geoLinearTria, quadRuleTria4pt, 
+static const StaticBdFE BdFE_RT0_HYB_TETRA_3(feTriaP0, geoLinearTria, quadRuleTria4pt,
 					      refcoor_HYB_TETRA_FACE_3, 2);
-static const StaticBdFE BdFE_RT0_HYB_TETRA_4(feTriaP0, geoLinearTria, quadRuleTria4pt, 
+static const StaticBdFE BdFE_RT0_HYB_TETRA_4(feTriaP0, geoLinearTria, quadRuleTria4pt,
 					      refcoor_HYB_TETRA_FACE_4, 3);
 
 static const StaticBdFE HybRT0TetraList[NB_BDFE_RT0_HYB_TETRA] = {
@@ -1832,9 +1834,8 @@ static const StaticBdFE HybRT0TetraList[NB_BDFE_RT0_HYB_TETRA] = {
   BdFE_RT0_HYB_TETRA_3, BdFE_RT0_HYB_TETRA_4
 };
 
-const RefHybridFE feTetraRT0Hyb(NB_BDFE_RT0_HYB_TETRA,HybRT0TetraList,"Hybrid RT0 elements on a tetraedra", 
+const RefHybridFE feTetraRT0Hyb(NB_BDFE_RT0_HYB_TETRA,HybRT0TetraList,"Hybrid RT0 elements on a tetraedra",
 				FE_RT0_HYB_TETRA_3D, TETRA, 0,0,1,0,4,3,
 				refcoor_RT0HYB_TETRA,STANDARD_PATTERN);
 
-
-
+}

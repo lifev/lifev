@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -27,19 +27,20 @@
   \file staticBdFE.h
   \brief Structure for a Static boundary finite element
 */
-
+namespace LifeV
+{
 /*!
   \class StaticBdFE
   \brief A class for static boundary finite element
   \author J.-F. Gerbeau & V. Martin
   \date 09/2002
-  
+
   This class has two purposes:
   \par
   (1) it is a base class for standard boundary element (see CurrentBdFE.h)
   \par
   (2) it is used by refHybridFE as static boundary for a reference element
-  
+
 */
 
 class StaticBdFE{
@@ -63,7 +64,7 @@ public:
 	     const Real* refcoor, UInt currentid);
   ~StaticBdFE();
 
-  const int nbGeoNode; //!< Number of geometrical nodes 
+  const int nbGeoNode; //!< Number of geometrical nodes
   const int nbNode;//!< Number of finite element node
   const int nbCoor;//!< Number of coordinates
   const int nbQuadPt;//!< Number of quadrature points
@@ -74,7 +75,7 @@ public:
   KNM<Real> phi;//!< Values of the basis functions on quadrature points
   KNMK<Real> dPhiRef;//! Values of the derivatives of the basis functions on quadrature points on the reference finite element
   KNMK<Real> dPhi; //!<Values of the derivatives of the basis functions on quadrature points on the current finite element \warning NOT YET IMPLEMENTED
-  KNM<Real> phiGeo; //!<Values of the geometric basis functions on quadrature points 
+  KNM<Real> phiGeo; //!<Values of the geometric basis functions on quadrature points
   KNMK<Real> dPhiGeo;//!< Values of the derivatives of the geometric basis functions on quadrature points
   KN<Real> weightMeas; //!< Values of the weight times the measure on the quadrature points
   KN<Real> meas;//!< Values of the measures on the quadrature points
@@ -85,7 +86,7 @@ public:
   //--------------------------------------------------------------------------
 #ifdef TEST_PRE
   /*!
-    return true if a quadrature rule has been given 
+    return true if a quadrature rule has been given
     (can ONLY be used if TEST_PRE is defined at compilation time)
    */
   inline bool hasQR() const {return _hasQR;}
@@ -147,14 +148,14 @@ public:
   */
   Real measure() const;//!< Return the measure of the current element
   /*!
-    compute the integral over the current boundary element 
+    compute the integral over the current boundary element
     \warning either updateMeas(...) or updateMeasNormal(...)
     must have been called before
   */
   template<typename functor>
   Real  integral(const functor & f) const
   {
-    ASSERT_PRE(_hasMeas,"integral needs measure. Call an update function") 
+    ASSERT_PRE(_hasMeas,"integral needs measure. Call an update function")
     Real integ(0.0);
     Real x,y,z;
     for(int ig=0;ig<nbQuadPt;ig++){
@@ -164,13 +165,13 @@ public:
     return integ;
   }
   /*!
-    compute the integral of f . n over the current boundary element 
+    compute the integral of f . n over the current boundary element
     \warning  updateMeasNormal(...) must have been called before
   */
   template<typename functor>
     Real integral_n(const functor & f) const
     {
-      ASSERT_PRE(_hasNormal,"integral_n needs measure and normal. Call the appropriate update function") 
+      ASSERT_PRE(_hasNormal,"integral_n needs measure and normal. Call the appropriate update function")
       Real integ(0.0);
       Real x,y,z;
       Real ret[nbCoor+1];
@@ -187,4 +188,5 @@ public:
       return integ;
     }
 };
+}
 #endif

@@ -1,24 +1,25 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "dofInterface3Dto2D.hpp"
 
-
+namespace LifeV
+{
 //! Constructor for interfacing Dof of the same type (RefFE)
 /*!
   \param refFe the part of the reference FE that contains the dof patterns (nbDofPerEdge...)
@@ -35,7 +36,7 @@ EntityFlag DofInterface3Dto2D::InterfaceRef() const{
   return _interfRef;
 }
 
-//! Returns the identity of the i-th elements in the (finalised) face list 
+//! Returns the identity of the i-th elements in the (finalised) face list
 //! (counting from 0 ' a la C')
 ID DofInterface3Dto2D::operator[](const UInt& i) const {
   ASSERT_PRE(_finalized, "The face List should be finalised before being accessed");
@@ -47,8 +48,8 @@ ID DofInterface3Dto2D::operator[](const UInt& i) const {
 //! Assignment operator (we have a vector of DofInterface3Dto2D)
 DofInterface3Dto2D & DofInterface3Dto2D::operator=(const DofInterface3Dto2D& dofi){
   _interfRef = dofi._interfRef;
-  _refFE1 = dofi._refFE1;   
-  _dof1   = dofi._dof1;     
+  _refFE1 = dofi._refFE1;
+  _dof1   = dofi._dof1;
   _faceList          = dofi._faceList;
   _vertexPerFaceList = dofi._vertexPerFaceList; // (empty)
   _vertexList        = dofi._vertexList;
@@ -87,11 +88,11 @@ ID  DofInterface3Dto2D::_Vtx3Dto2D( const ID& idpoint3D ) const {
   ERROR_MSG("There is no such 3D index of vertex in the _vertexList.");
 }
 
-   
-//! Output 
+
+//! Output
 std::ostream& DofInterface3Dto2D::showMe2D(bool verbose, std::ostream& out) const  {
   out << "------------------------------"<< std::endl;
-  out << "myDofInterface reference: " << _interfRef  << std::endl;  
+  out << "myDofInterface reference: " << _interfRef  << std::endl;
   out << "Number of face connections (_faceList): " << _faceList.size() << std::endl;
   if ( verbose ){
     unsigned int count(0),lines(10);
@@ -107,14 +108,14 @@ std::ostream& DofInterface3Dto2D::showMe2D(bool verbose, std::ostream& out) cons
   out << "Number of connections between Vertices (_vertexList): " <<  _vertexList.size() << std::endl;
   if ( verbose ){
     unsigned int count(0),lines(10);
-    out << "\tList of connections between Vertices: (global, local)"; 
+    out << "\tList of connections between Vertices: (global, local)";
     for (list< pair<ID,ID> >::const_iterator it = _vertexList.begin(); it!=_vertexList.end(); ++it) {
       if (count++ % lines ==0){
 	out << std::endl;
       }
       out << "(" << it->first << "," << it->second << ")\t";
     }
-    out << std::endl;  
+    out << std::endl;
   }
   //! print _locDofMap
   showMe(verbose, out);
@@ -133,7 +134,7 @@ void RemoveMultiple(const list<ID> & list0, list< pair<ID,ID> > & listf){
 
   //! Sort the list
   tmplist.sort();
-  
+
   //! initialize the new list
   pair <ID,ID>  p0( tmplist.front() , counter );
   listf.push_back( p0 );
@@ -147,4 +148,5 @@ void RemoveMultiple(const list<ID> & list0, list< pair<ID,ID> > & listf){
       listf.push_back( p );
     }
   }
+}
 }

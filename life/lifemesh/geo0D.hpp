@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -20,11 +20,17 @@
 #ifndef _GEO0D_HH_
 #define _GEO0D_HH_
 
+
+#include "meshEntity.hpp"
+#include "basisElSh.hpp"
+
+namespace LifeV
+{
 //! \defgroup GeoXD Basis Geometrical Entities Geo0D and GeoND.
 /*!
 
   They are intermediate classes used to build the actual Geometry classes
-  
+
   \warning Geo1D/2D/3D are template classes because some of the info is not
   known a priori and I want all vector dimensions determined at compile time
   to enhance memory access time. IT IS UP TO THE USER to provide a coherent
@@ -32,16 +38,12 @@
 
 /*@{*/
 
-#include "meshEntity.hpp"
-#include "basisElSh.hpp"
-
-
 //! Zero dimensional entity. It stores boundary information
 class Geo0D:
   public MeshEntityWithBoundary
 {
  public:
-  
+
   Geo0D();
   //! constructor where I give the id and declare if Geo0D object is on a
   //!boundary
@@ -52,13 +54,13 @@ class Geo0D:
 
   Geo0D(Geo0D const & G);
   Geo0D & operator=(Geo0D const & G);
-  
+
   typedef GeoPoint GeoShape;
-  
-  
-  //! returns a pointer to a Real[3] containing the coordinates  
-  Real * coor()  {return _coor;};  
-  Real const * coor() const   {return _coor;};  
+
+
+  //! returns a pointer to a Real[3] containing the coordinates
+  Real * coor()  {return _coor;};
+  Real const * coor() const   {return _coor;};
 
 
   //! Used to provide coords to object created using
@@ -82,7 +84,7 @@ class Geo0D:
     return 0;
 #endif
   }
-  
+
   //!Another way to access coordinate data
   INLINE Real coordinate (ID const i) const
   {
@@ -97,8 +99,9 @@ class Geo0D:
   }
   //! Useful for debugging
   ostream &  showMe(bool verbose=false, ostream & c=cout) const;
-  
+
 private:
   Real _coor[nDimensions];
 };
+}
 #endif

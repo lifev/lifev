@@ -120,6 +120,8 @@ detailed documentation.
 
 #include "lifeV.hpp"
 
+namespace LifeV
+{
 #ifndef _LIFEV_HH_
 /*! \typedef typedef unsigned int ID
 \brief type used for Identifiers (Integral type in the range [1, MAX_INT]).
@@ -512,6 +514,7 @@ void BareItemsHandler<BareItem>::showMe() const{
   std::cout << "Number of Items stored: "<< this->size() <<std::endl;
   std::cout << "Max Id stored         : "<< this->maxId()<<std::endl;
   std::cout << "End of Information";
+}
 }
 #endif
 

@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -20,6 +20,8 @@
 
 #include "basisElSh.hpp"
 
+namespace LifeV
+{
 /*******************************************************************
           IMPLEMENTATION
 *******************************************************************/
@@ -27,7 +29,7 @@
 /*
           -- LinearTriangle
                 3
-               / 
+               /
               /  \
              /    \
             /      \
@@ -36,9 +38,9 @@
 
 */
 
-ID 
+ID
 LinearTriangle::eToP(ID const _localEdge, ID const _point) // indexing from 1!!!
-  // ID eToP(i,j) = localId of jth point on ith local edge 
+  // ID eToP(i,j) = localId of jth point on ith local edge
 {
   static const ID _eToP[2*numEdges]=
   {1,2,  2,3,  3,1};
@@ -50,7 +52,7 @@ LinearTriangle::eToP(ID const _localEdge, ID const _point) // indexing from 1!!!
 /*
           -- QuadraticTriangle
                 3
-               / 
+               /
               /  \
              5    \
             /      4
@@ -59,7 +61,7 @@ LinearTriangle::eToP(ID const _localEdge, ID const _point) // indexing from 1!!!
 */
 ID
 QuadraticTriangle::eToP(ID const _localEdge, ID const _point) // indexing from 1!!!
-  // eToP(i,j) = localId of jth point on ith local edge 
+  // eToP(i,j) = localId of jth point on ith local edge
 {
   static const ID _eToP[3*numEdges]=
   {1,2,4,  2,3,5,  3,1,6};
@@ -70,17 +72,17 @@ QuadraticTriangle::eToP(ID const _localEdge, ID const _point) // indexing from 1
 
 /*
           -- LinearQuad
-  
+
         4-------3
          !     !
          !     !
         1-------2
-             
+
 
 */
-ID 
+ID
 LinearQuad::eToP(ID const _localEdge, ID const _point) // indexing from 1!!!
-  // eToP(i,j) = localId of jth point on ith local edge 
+  // eToP(i,j) = localId of jth point on ith local edge
 {
   static const ID _eToP[2*numEdges]=
   {1,2,  2,3,  3,4,  4,1};
@@ -93,15 +95,15 @@ LinearQuad::eToP(ID const _localEdge, ID const _point) // indexing from 1!!!
           -- QuadraticQuad
 
         4---7---3
-        !       ! 
+        !       !
         8   9   6
         !       !
         1---5---2
-             
+
 */
-ID 
+ID
 QuadraticQuad::eToP(ID const _localEdge, ID const _point) // indexing from 1!!!
-  // eToP(i,j) = localId of jth point on ith local edge 
+  // eToP(i,j) = localId of jth point on ith local edge
 {
   static const ID _eToP[3*numEdges]=
   {1,2,5,  2,3,6,  3,4,7,  4,1,8};
@@ -114,18 +116,18 @@ QuadraticQuad::eToP(ID const _localEdge, ID const _point) // indexing from 1!!!
           -- LinearTetra
 
                 4
-               / .  
+               / .
               /  \.3
              /  . \\
             / .    \\
            /.       \!
          1 ----------2
 
-          
+
 */
-ID 
+ID
 LinearTetra::eToP(ID const _localEdge, ID const _point) // indexing from 1!!!
-  // eToP(i,j) = localId of jth point on ith local edge 
+  // eToP(i,j) = localId of jth point on ith local edge
 {
   static const ID _eToP[2*numEdges]=
   {1,2,  2,3,  3,1, 1,4,  2,4, 3,4 };
@@ -134,9 +136,9 @@ LinearTetra::eToP(ID const _localEdge, ID const _point) // indexing from 1!!!
   return _eToP[2*_localEdge+_point-3];
 }
 
-ID 
+ID
 LinearTetra::fToP(ID const _localFace, ID const _point) // indexing from 1!!!
-  // fToP(i,j) = localId of jth point on ith local face 
+  // fToP(i,j) = localId of jth point on ith local face
 {
   static const ID _fToP[3*numFaces]=
   {1,3,2, 1,2,4, 2,3,4, 1,4,3}; // AV - November 2000: fixed a little bug
@@ -145,9 +147,9 @@ LinearTetra::fToP(ID const _localFace, ID const _point) // indexing from 1!!!
   ASSERT_BD( _localFace>0 && _localFace <= numFaces ) ;
   return _fToP[3*_localFace + _point -4];
 }
-pair<ID,bool> 
+pair<ID,bool>
 LinearTetra::fToE(ID const _localFace, ID const _edge) // indexing from 1!!!
-  // fToE(i,j) = localId of jth edge on ith local face 
+  // fToE(i,j) = localId of jth edge on ith local face
 {
   static const ID _fToE[3*numFaces]=
   {3,2,1, 1,5,4, 2,6,5, 4,6,3};
@@ -156,7 +158,7 @@ LinearTetra::fToE(ID const _localFace, ID const _edge) // indexing from 1!!!
 
   ASSERT_BD( _edge>0 && _edge < 4) ;
   ASSERT_BD( _localFace>0 && _localFace <= numFaces ) ;
-  
+
   return
     make_pair(_fToE[3*_localFace + _edge -4],_orient[3*_localFace + _edge -4]);
 }
@@ -175,9 +177,9 @@ LinearTetra::fToE(ID const _localFace, ID const _edge) // indexing from 1!!!
            /.       \!
          1 -----5----2
 */
-ID 
+ID
 QuadraticTetra::eToP(ID const _localEdge, ID const _point) // indexing from 1!!!
-  // eToP(i,j) = localId of jth point on ith local edge 
+  // eToP(i,j) = localId of jth point on ith local edge
 {
   static const ID _eToP[3*numEdges]=
   {1,2,5,  2,3,6,  3,1,7, 1,4,8, 2,4,9, 3,4,10 };
@@ -186,12 +188,12 @@ QuadraticTetra::eToP(ID const _localEdge, ID const _point) // indexing from 1!!!
   return _eToP[3*_localEdge+_point-4];
 }
 
-ID 
+ID
 QuadraticTetra::fToP(ID const _localFace, ID const _point) // indexing from 1!!!
-  // fToP(i,j) = localId of jth point on ith local face 
+  // fToP(i,j) = localId of jth point on ith local face
 {
   static const ID _fToP[6*numFaces]=
-  {1,3,2,7,6,5, 
+  {1,3,2,7,6,5,
    1,2,4,5,9,8,
    2,3,4,6,10,9,
    1,4,3,8,10,7};
@@ -200,7 +202,7 @@ QuadraticTetra::fToP(ID const _localFace, ID const _point) // indexing from 1!!!
   return _fToP[6*_localFace + _point - 7];
 }
 
-pair<ID,bool> 
+pair<ID,bool>
 QuadraticTetra::fToE(ID const _localFace, ID const _edge) // indexing from 1!!!
 {
   return LinearTetra::fToE(_localFace,_edge);
@@ -210,9 +212,9 @@ QuadraticTetra::fToE(ID const _localFace, ID const _edge) // indexing from 1!!!
           -- LinearHexa
 */
 /*
-                      8-------7 
+                      8-------7
                      /.      /|
-		    / .     / | 
+		    / .     / |
 		   5_______6  |
 		   |  .    |  |
 		   |  4....|..3
@@ -220,12 +222,12 @@ QuadraticTetra::fToE(ID const _localFace, ID const _edge) // indexing from 1!!!
 		   |.      |/
 		   1_______2
 */
-ID 
+ID
 LinearHexa::eToP(ID const _localEdge, ID const _point) // indexing from 1!!!
-  // eToP(i,j) = localId of jth point on ith local edge 
+  // eToP(i,j) = localId of jth point on ith local edge
 {
   static const ID _eToP[2*numEdges]=
-  {1,2,  2,3,  3,4, 4,1, 
+  {1,2,  2,3,  3,4, 4,1,
    1,5,  2,6,  3,7, 4,8,
    5,6,  6,7,  7,8, 8,5
   };
@@ -234,12 +236,12 @@ LinearHexa::eToP(ID const _localEdge, ID const _point) // indexing from 1!!!
   return _eToP[2*_localEdge+_point-3];
 }
 
-ID 
+ID
 LinearHexa::fToP(ID const _localFace, ID const _point) // indexing from 1!!!
-  // fToP(i,j) = localId of jth point on ith local face 
+  // fToP(i,j) = localId of jth point on ith local face
 {
   static const ID _fToP[4*numFaces]=
-  {1,4,3,2, 
+  {1,4,3,2,
    1,5,8,4,
    1,2,6,5,
    2,3,7,6,
@@ -251,24 +253,24 @@ LinearHexa::fToP(ID const _localFace, ID const _point) // indexing from 1!!!
   return _fToP[4*_localFace + _point - 5];
 }
 
-pair<ID,bool> 
+pair<ID,bool>
 LinearHexa::fToE(ID const _localFace, ID const _edge) // indexing from 1!!!
-  // fToE(i,j) = localId of jth edge on ith local face 
+  // fToE(i,j) = localId of jth edge on ith local face
 {
   static const ID _fToE[4*numFaces]={
     4, 3, 2, 1,  5,12, 8, 4,  1, 6, 9, 5,
     2, 7,10, 6,  3, 8,11, 7,  9,10,11,12
   };
-  
+
   static const bool _orient[4*numFaces]={
     0,0,0,0, 1,0,0,1,  1,1,0,0,
     1,1,0,0, 1,1,0,0,  1,1,1,1
   };
-  
+
 
   ASSERT_BD( _edge>0 && _edge < 5) ;
   ASSERT_BD( _localFace>0 && _localFace <= numFaces ) ;
-  
+
   return
     make_pair(_fToE[4*_localFace + _edge -5],_orient[4*_localFace + _edge -5]);
 }
@@ -289,11 +291,11 @@ QuadraticHexa::eToP(ID const _localEdge, ID const  _point)
   return _eToP[3*_localEdge+_point-4];
 }
 
-ID 
+ID
 QuadraticHexa::fToP(ID const _localFace, ID const _point)
 {
   static const ID _fToP[9*numFaces]=
-  {1,4,3,2,12,11,10,9,21, 
+  {1,4,3,2,12,11,10,9,21,
    1,5,8,4,13,20,16,12,22,
    1,2,6,5,9,14,17,13,23,
    2,3,7,6,10,15,18,14,24,
@@ -305,9 +307,10 @@ QuadraticHexa::fToP(ID const _localFace, ID const _point)
   return _fToP[9*_localFace + _point - 10];
 }
 
-pair<ID,bool> 
+pair<ID,bool>
 QuadraticHexa::fToE(ID const _localFace, ID const _edge) // indexing from 1!!!
-  // fToE(i,j) = localId of jth edge on ith local face 
+  // fToE(i,j) = localId of jth edge on ith local face
 {
   return LinearHexa::fToE(_localFace, _edge);
+}
 }

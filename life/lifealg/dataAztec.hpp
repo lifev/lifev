@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -29,12 +29,14 @@
 #include "values.hpp"
 #include "dataString.hpp"
 
+namespace LifeV
+{
 /*!
   \file dataAztec.h
   \author J.-F. Gerbeau
   \date 11/2002
         01/2003 M.A. Fernandez, GetPot sections as parameter
-  
+
   \brief To use Aztec with GetPot
 
   All the parameters and options can be selected from a GetPot
@@ -43,8 +45,8 @@
 
   To see the values (including the default ones): dataAztecShowMe()
 
-  To see all the possible choices:  dataAztecHelp() 
-  
+  To see all the possible choices:  dataAztecHelp()
+
   \todo dataAztecHelp() is not complete, and other items could
   be named with a string rather than with an integer
 */
@@ -96,13 +98,13 @@ public:
   DataStringList aztec_conv_list;
   DataStringList aztec_output_list;
   DataStringList aztec_subdomain_solve_list;
-  // 
+  //
   DataAztec(const GetPot& dfile, const string& section="aztec");
- 
+
   void aztecOptionsFromDataFile(int* option,double* param);
   /*! solve a linear system with the parameters given in the data file */
   void aztecSolveLinearSyst(MSRMatr<double>& mat,Real* unknown,Real* rhs,
-			    int unknown_size,MSRPatt& pattern); 
+			    int unknown_size,MSRPatt& pattern);
   /*! solve a linear system with the parameters given by the users and the data file */
   void aztecSolveLinearSyst(MSRMatr<double>& mat,
 			    Real* unknown,Real* rhs,int unknown_size,
@@ -112,4 +114,5 @@ public:
   /*! to see the values of the items (including the default ones) */
   void dataAztecShowMe(ostream& c=cout);
 };
+}
 #endif

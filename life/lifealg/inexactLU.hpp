@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -19,21 +19,23 @@
 #ifndef _INEXACTLU_H
 #define _INEXACTLU_H
 
+namespace LifeV
+{
 /*----------------------------------------------------------------------
 
   A class to manage the three steps of the resolution of the problem
-  
+
   [ A  B^T ] [ x ]    [ f ]
   [        ] [   ]  = [   ]
   [ B  0   ] [ y ]    [ g ]
-  
+
   by inexact LU factorization.
 
   We denote by A1, \tilde A and A2 three approximations of A
 
   Step 1:                   A1 x0 = f
   Step 2: B (\tilde A)^{-1} B^T y = B x0 - g
-  Step 3:                       x = x0 +  A2^{-1} B^T y 
+  Step 3:                       x = x0 +  A2^{-1} B^T y
 
   The operator of Step 2 is a class "SaddlePoint" (see saddlePointCG.h)
 
@@ -47,14 +49,14 @@
   )
   Remark: the Uzawa algorithm can be performed directly on the class
           SaddlePoint.
-	  
+
 	                                          J.-F. Gerbeau, 01/2000
   ----------------------------------------------------------------------*/
 /*
   Methods required for the template classes:
-  
+
   *** OpA1 and OpA2:
-  
+
       1) int solve(Vector& x,const Vector& f) const;
          --> solve Ax=f with initial guess x. Return 0 if ok, 1 if ko.
 
@@ -65,9 +67,9 @@
 
       2)    int solveDual(Vector& y,const Vector& x) const;
          --->  B (\tilde A)^{-1} B^T y = B x0
-	 
-  *** OpB: 
-  
+
+  *** OpB:
+
       1) Vector trans_mul(const Vector& y) const ;
          --> compute and return B^{T}y
 
@@ -136,7 +138,7 @@ int InexactLU<OpA1,OpA2,SaddlePoint,OpB,Vector>::step2(Vector& y,
   return(  _saddle->solveDual( y , x0 ) );
 }
 //__________________________________
-//  step 3 : x = x0 +  A2^{-1} B^T y 
+//  step 3 : x = x0 +  A2^{-1} B^T y
 //__________________________________
 //
 template<class OpA1,class OpA2,class SaddlePoint,class OpB,class Vector>
@@ -150,7 +152,7 @@ step3(Vector& x, const Vector& x0,const Vector y) const
   return(i);
 }
 //_______________________________
-// allSteps : step1, step2, step3 
+// allSteps : step1, step2, step3
 //_______________________________
 //
 template<class OpA1,class OpA2,class SaddlePoint,class OpB,class Vector>
@@ -170,7 +172,7 @@ allSteps(Vector& x,Vector& y,const Vector& f,const Vector& g) const
     i=4 : step3 failed
     i=3 : step1 & step2 failed,
     i=5 : step1 & step3 failed,
-    and so on ... 
+    and so on ...
   */
 }
 //__________________
@@ -187,6 +189,6 @@ allSteps(Vector& x,Vector& y,const Vector& f) const
   i += 4*step3(x,x0,y);
   return(i);
 }
-//
+}
 #endif
 

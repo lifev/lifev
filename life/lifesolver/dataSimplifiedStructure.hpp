@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -19,10 +19,10 @@
 /*!
   \file dataSimplifiedStructure.h
   \author M.A. Fernandez
-  \date 01/2003 
+  \date 01/2003
   \version 1.0
 
-  \brief File containing a class for handling data for reduced 
+  \brief File containing a class for handling data for reduced
          structural models (algegraic law and independent ring model)
 
 */
@@ -34,10 +34,12 @@
 #include "GetPot.hpp"
 #include "lifeV.hpp"
 
-/*! 
+namespace LifeV
+{
+/*!
   \class DataNavierStokes
 
-  Base class which holds usual data for reduced 
+  Base class which holds usual data for reduced
   structural models (algegraic law and independent ring model)
 
 */
@@ -48,7 +50,7 @@ public DataMesh<Mesh> {
 
   //! Constructor
   DataSimplifiedStructure(const GetPot& dfile);
-  
+
   //! Ouptut
   void showMe(ostream& c=cout) const;
 
@@ -90,13 +92,13 @@ showMe(ostream& c) const
 {
   // physics
   c << "\n*** Values for data [solid/physics]\n\n";
-  c << "density   = " << _rho << endl; 
+  c << "density   = " << _rho << endl;
   c << "thickness = " << _h   << endl;
-  c << "young     = " << _E   << endl; 
-  c << "poisson   = " << _nu  << endl; 
-  c << "radius    = " << _R0  << endl; 
+  c << "young     = " << _E   << endl;
+  c << "poisson   = " << _nu  << endl;
+  c << "radius    = " << _R0  << endl;
   c << "\n*** Values for data [solid/discretization]\n\n";
   DataMesh<Mesh>::showMe();
 }
-
+}
 #endif

@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -26,6 +26,8 @@
 #include "currentHdivFE.hpp"
 #include "refHybridFE.hpp"
 
+namespace LifeV
+{
 //----------------------------------------------------------------------
 //
 //               Operators for classical finite elements
@@ -45,12 +47,12 @@ void stiff(Real coef,ElemMat& elmat,const CurrentFE& fe,
 // coef * ( e(u) , e(v) )
 void stiff_strain(Real coef,ElemMat& elmat,const CurrentFE& fe);
 
-// coef * ( div u , div v ) 
+// coef * ( div u , div v )
 void stiff_div(Real coef, ElemMat& elmat, const CurrentFE& fe);
 
-// coef * ( [\grad u^k]^T \grad u : \grad v  ) 
+// coef * ( [\grad u^k]^T \grad u : \grad v  )
 void stiff_dergradbis(Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe);
-     
+
 // coef * ( [\grad u]^T \grad u^k + [\grad u^k]^T \grad u : \grad v  ) for Newton on St-Venant
 void stiff_dergrad(Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe);
 
@@ -89,19 +91,19 @@ void source(Real constant,ElemVec& elvec,const CurrentFE& fe,Real t, int iblock)
 //
 
 // coef < \grad p1, \gra q2 >
-void ipstab_grad(const Real coef, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2, 
+void ipstab_grad(const Real coef, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2,
 		 const CurrentBdFE& bdfe, int iblock=0,int jblock=0);
 
 // coef < \grad u1, [\grad v2 >
-void ipstab_grad(const Real coef, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2, 
+void ipstab_grad(const Real coef, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2,
 		 const CurrentBdFE& bdfe, int iblock,int jblock, int nb);
 
 // coef < \div u1, \div v2 >
-void ipstab_div(const Real coef, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2, 
+void ipstab_div(const Real coef, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2,
 		const CurrentBdFE& bdfe, int iblock=0,int jblock=0);
-// coef < \beta1 . \grad u1, \beta2 . \grad v2 >   
-void ipstab_bgrad(const Real coef, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2, 
-		  const ElemVec& beta, const CurrentBdFE& bdfe, int iblock, 
+// coef < \beta1 . \grad u1, \beta2 . \grad v2 >
+void ipstab_bgrad(const Real coef, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2,
+		  const ElemVec& beta, const CurrentBdFE& bdfe, int iblock,
 		  int jblock, int nb);
 
 ///////////////////////////////////////
@@ -172,39 +174,39 @@ void source(const UsrFct& fct,ElemVec& elvec,const CurrentFE& fe,Real t,int iblo
 // Miguel & Marwan 06/2003:
 //
 // coef * ( \grad (convect):[I\div d - (\grad d)^T] u^k + convect^T[I\div d - (\grad d)^T] (\grad u^k)^T , v  ) for Newton FSI
-// 
+//
 // Remark: convect = u^n-u^k
 //
-void source_mass1(Real coef, const ElemVec& uk_loc, const ElemVec& convect_loc, 
+void source_mass1(Real coef, const ElemVec& uk_loc, const ElemVec& convect_loc,
 		 const ElemVec& d_loc, ElemVec& elvec, const CurrentFE& fe);
 
 // Miguel & Marwan 06/2003:
 //
 // coef * ( \grad u^k dw, v  ) for Newton FSI
-// 
 //
-void source_mass2(Real coef, const ElemVec& uk_loc, const ElemVec& dw_loc, 
+//
+void source_mass2(Real coef, const ElemVec& uk_loc, const ElemVec& dw_loc,
 		  ElemVec& elvec, const CurrentFE& fe);
 
 // Miguel & Marwan 06/2003:
 //
 // coef * ( [-p^k I + 2*mu e(u^k)] [I\div d - (\grad d)^T] , \grad v  ) for Newton FSI
-// 
-void source_stress(Real coef, Real mu, const ElemVec& uk_loc, const ElemVec& pk_loc, 
-		   const ElemVec& d_loc, ElemVec& elvec, const CurrentFE& fe_u, 
+//
+void source_stress(Real coef, Real mu, const ElemVec& uk_loc, const ElemVec& pk_loc,
+		   const ElemVec& d_loc, ElemVec& elvec, const CurrentFE& fe_u,
 		   const CurrentFE& fe_p);
 
 // Miguel & Marwan 10/2003:
 //
-// + \mu ( \grad u^k \grad d + [\grad d]^T[\grad u^k]^T : \grad v ) 
+// + \mu ( \grad u^k \grad d + [\grad d]^T[\grad u^k]^T : \grad v )
 //
 void source_stress2(Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, ElemVec& elvec, const CurrentFE& fe_u);
 
 // Miguel & Marwan 06/2003:
 //
 // coef * (  (\grad u^k):[I\div d - (\grad d)^T] , q  ) for Newton FSI
-// 
-void source_press(Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, ElemVec& elvec, 
+//
+void source_press(Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, ElemVec& elvec,
 		  const CurrentFE& fe_u, const CurrentFE& fe_p);
 
 
@@ -229,17 +231,17 @@ void TP_TP_Hdiv(Real coef, ElemMat& elmat, const RefHybridFE& tpfe, int iblock,i
 
 //-------------Mass matrix---------------------------------------
 /*!
- Weighted Mass matrix with a permeability tensor which is a constant scalar matrix 
+ Weighted Mass matrix with a permeability tensor which is a constant scalar matrix
 (i.e. = coef * id).
-*/ 
+*/
 void mass_Hdiv( Real coef,ElemMat& elmat,const CurrentHdivFE& fe,
 		int iblock=0,int jblock=0);
 
-// Miguel 05/2003: 
+// Miguel 05/2003:
 void mass_divw(Real coef, const ElemVec& w_loc, ElemMat& elmat,const CurrentFE& fe,
 	       int iblock,int jblock,int nb);
 
-// Miguel 05/2003: 
+// Miguel 05/2003:
 void mass_gradu(Real coef, const ElemVec& u0_loc, ElemMat& elmat,const CurrentFE& fe);
 
 
@@ -247,10 +249,10 @@ void mass_gradu(Real coef, const ElemVec& u0_loc, ElemMat& elmat,const CurrentFE
 
 //-------------Mass matrix---------------------------------------
 /*!
- Weighted Mass matrix with permeability matrix which is a constant per element symmetric 
+ Weighted Mass matrix with permeability matrix which is a constant per element symmetric
  positive definite matrix (non diagonal a priori).
-*/ 
-void mass_Hdiv(KNM<Real> &Kperm, ElemMat& elmat, const CurrentHdivFE& fe, 
+*/
+void mass_Hdiv(KNM<Real> &Kperm, ElemMat& elmat, const CurrentHdivFE& fe,
 	       int iblock=0,int jblock=0);
 
 
@@ -261,8 +263,8 @@ void mass_Mixed_Hdiv(Real coef, ElemMat& elmat,const CurrentFE& fe,
 //-------------Cholesky---------------------------------------
 /*!
  Cholesky decomposition and solution for a KNM matrix.
-*/ 
+*/
 void choldc(KNM<Real> &a, KN<Real> &p);
 void cholsl(KNM<Real> &a, KN<Real> &p, KN<Real> &b, KN<Real> &x);
-
+}
 #endif

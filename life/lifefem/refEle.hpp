@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -29,13 +29,15 @@
   \brief Base class for RefFE and GeoMap
 */
 
+namespace LifeV
+{
 /*!
   \class RefEle
   \brief Base class for RefGeo and RefFE
   \author J.-F. Gerbeau
   \date 04/2002
 
-  It contains the basis functions and their values on quadrature points.  
+  It contains the basis functions and their values on quadrature points.
   These functions will be used either by RefFE (finite element) or by
   GeoMap (geometrical mapping).
 */
@@ -50,7 +52,7 @@ class RefEle{
 protected:
   const SetOfQuadRule* _sqr; //!< pointer on the set of quadrature rules
   const Fct*  _phi; //!< pointer on the basis functions
-  const Fct*  _dPhi;//!< pointer on the derivatives of the basis functions 
+  const Fct*  _dPhi;//!< pointer on the derivatives of the basis functions
   const Fct*  _d2Phi;//!< pointer on the second derivatives of the basis functions
   const Real* _refCoor;//!< reference coordinates. Order: xi_1,eta_1,zeta_1,xi_2,eta_2,zeta_2,...
 public:
@@ -67,7 +69,7 @@ private:
   KN<Real> _d2PhiQuad;
   //! values of the second derivatives of the basis functions on all quadrature points
   KN<int> _idxQuad;//!< _idxQuad[t] = index of the quadrature rules of id t in _phiQuad
-  KN<int> _idxDQuad;//!< _idxDQuad[t] = index of the quadrature rules of id t in _dPhiQuad  
+  KN<int> _idxDQuad;//!< _idxDQuad[t] = index of the quadrature rules of id t in _dPhiQuad
   KN<int> _idxD2Quad;//!< _idxD2Quad[t] = index of the quadrature rules of id t in _d2PhiQuad
 public:
   //! constructor
@@ -131,7 +133,7 @@ public:
     ASSERT_BD(i < nbDof && ig < qr.nbQuadPt && icoor < nbCoor)
       return _dPhiQuad( _idxDQuad(qr.id) + (ig*nbDof+ i) * nbCoor + icoor );
   }
-  //!  return the value of the (icoor,jcoor)-th second derivative of the i-th basis function on point (x,y,z)    
+  //!  return the value of the (icoor,jcoor)-th second derivative of the i-th basis function on point (x,y,z)
   inline double d2Phi(int i,int icoor,int jcoor,cRRef x,cRRef y,cRRef z) const{
     ASSERT_BD(i<nbDof && icoor <nbCoor && jcoor < nbCoor)
       return  _d2Phi[(i*nbCoor+icoor)*nbCoor + jcoor](x,y,z);
@@ -141,7 +143,7 @@ public:
     ASSERT_BD(i < nbDof && ig < qr.nbQuadPt && icoor < nbCoor)
       return _d2PhiQuad( _idxD2Quad(qr.id) + ((ig*nbDof+ i) * nbCoor + icoor)*nbCoor + jcoor );
   }
-  void check() const;//!< A simple check function 
+  void check() const;//!< A simple check function
   friend ostream& operator << (ostream& f,const RefEle& fe);
 };
 
@@ -151,8 +153,8 @@ public:
 //                            P1  (1D)
 //
 //======================================================================
-/*                 
-                           1-----2    
+/*
+                           1-----2
 */
 Real fct1_P1_1D(cRRef x,cRRef,cRRef );
 Real fct2_P1_1D(cRRef x,cRRef,cRRef );
@@ -174,8 +176,8 @@ static const Fct der2fct_P1_1D[2] = {der2fct1_P1_1D,der2fct1_P1_1D};
 //                            P2  (1D)
 //
 //======================================================================
-/*                 
-                           1--3--2    
+/*
+                           1--3--2
 */
 Real fct1_P2_1D(cRRef x,cRRef,cRRef );
 Real fct2_P2_1D(cRRef x,cRRef,cRRef );
@@ -201,15 +203,15 @@ static const Fct der2fct_P2_1D[3] = {der2fct1_11_P2_1D,der2fct2_11_P2_1D,der2fct
 //                            P0  (2D)
 //
 //======================================================================
-/*                 
-                           
-                           |\      
-                           | \     
-                           | 1\    
-                            ---    
+/*
+
+                           |\
+                           | \
+                           | 1\
+                            ---
 */
 Real fct1_P0_2D(cRRef ,cRRef ,cRRef );
-// First and Second derivatives are both equal (to 0). 
+// First and Second derivatives are both equal (to 0).
 Real derfct1_P0_2D(cRRef,cRRef,cRRef );
 Real der2fct1_P0_2D(cRRef,cRRef,cRRef);
 
@@ -227,12 +229,12 @@ static const Fct der2fct_P0_2D[4] = {der2fct1_P0_2D, der2fct1_P0_2D,
 //                            P1  (2D)
 //
 //======================================================================
-/*                 
+/*
                            3
-                           |\      
-                           | \     
-                           |  \    
-                           1---2    
+                           |\
+                           | \
+                           |  \
+                           1---2
 */
 Real fct1_P1_2D(cRRef x,cRRef y,cRRef );
 Real fct2_P1_2D(cRRef x,cRRef  ,cRRef );
@@ -266,12 +268,12 @@ static const Fct der2fct_P1_2D[12] =
 //                            P2  (2D)
 //
 //======================================================================
-/*                
+/*
                            3
-                           |\      
-                           6 5     
-                           |  \    
-                           1-4-2    
+                           |\
+                           6 5
+                           |  \
+                           1-4-2
 */
 Real fct1_P2_2D(cRRef x,cRRef y,cRRef );
 Real fct2_P2_2D(cRRef x,cRRef y,cRRef );
@@ -353,7 +355,7 @@ static const Fct der2fct_P2_2D[24] =
 //                            Q0  (2D)
 //
 //======================================================================
-/*                 
+/*
                             -------
                            |       |
                            |   1   |
@@ -363,7 +365,7 @@ static const Fct der2fct_P2_2D[24] =
 */
 Real fct1_Q0_2D(cRRef , cRRef , cRRef );
 Real derfct1_Q0_2D(cRRef  , cRRef , cRRef );
-// The second derivative is equal to the first : both = 0. 
+// The second derivative is equal to the first : both = 0.
 Real der2fct1_Q0_2D(cRRef , cRRef , cRRef );
 
 static const Real refcoor_Q0_2D[3] = {0.5, 0.5, 0. };
@@ -380,7 +382,7 @@ static const Fct der2fct_Q0_2D[4] = {der2fct1_Q0_2D,der2fct1_Q0_2D,
 //                            Q1  (2D)
 //
 //======================================================================
-/*                 
+/*
                            4-------3
                            |       |
                            |       |
@@ -426,7 +428,7 @@ static const Fct der2fct_Q1_2D[16] =
 //                            Q2  (2D)
 //
 //======================================================================
-/*                 
+/*
                            4---7---3
                            |       |
                            8   9   6
@@ -471,7 +473,7 @@ Real der2fct5_11_Q2_2D(cRRef x,cRRef y,cRRef );
 Real der2fct5_12_Q2_2D(cRRef x,cRRef y,cRRef );
 Real der2fct5_21_Q2_2D(cRRef x,cRRef y,cRRef );
 Real der2fct5_22_Q2_2D(cRRef x,cRRef y,cRRef );
-      
+
 Real der2fct2_11_Q2_2D(cRRef x,cRRef y,cRRef );
 Real der2fct2_12_Q2_2D(cRRef x,cRRef y,cRRef );
 Real der2fct2_21_Q2_2D(cRRef x,cRRef y,cRRef );
@@ -552,9 +554,9 @@ static const Fct der2fct_Q2_2D[36] =
 //                            P1  (3D)
 //
 //======================================================================
-/*                 
+/*
                 4
-               / .  
+               / .
               /  \.3
              /  . \\
             / .    \\
@@ -565,7 +567,7 @@ Real fct1_P1_3D(cRRef x,cRRef y,cRRef z);
 Real fct2_P1_3D(cRRef x,cRRef  ,cRRef  );
 Real fct3_P1_3D(cRRef  ,cRRef y,cRRef  );
 Real fct4_P1_3D(cRRef  ,cRRef  ,cRRef z);
- 
+
 Real derfct1_1_P1_3D(cRRef,cRRef,cRRef );
 Real derfct1_2_P1_3D(cRRef,cRRef,cRRef );
 Real derfct1_3_P1_3D(cRRef,cRRef,cRRef );
@@ -608,9 +610,9 @@ static const Fct der2fct_P1_3D[36] =
 //                            P1 Bubble (3D)
 //
 //======================================================================
-/*                 
+/*
                 4
-               / .  
+               / .
               /  \.3
              /  . \\
             / . .5 \\
@@ -622,7 +624,7 @@ Real fct2_P1bubble_3D(cRRef x,cRRef  ,cRRef  );
 Real fct3_P1bubble_3D(cRRef  ,cRRef y,cRRef  );
 Real fct4_P1bubble_3D(cRRef  ,cRRef  ,cRRef z);
 Real fct5_P1bubble_3D(cRRef  ,cRRef  ,cRRef z);
- 
+
 Real derfct1_1_P1bubble_3D(cRRef,cRRef,cRRef );
 Real derfct1_2_P1bubble_3D(cRRef,cRRef,cRRef );
 Real derfct1_3_P1bubble_3D(cRRef,cRRef,cRRef );
@@ -688,7 +690,7 @@ static const Fct der2fct_P1bubble_3D[45] =
 //                            P2  (3D)
 //
 //======================================================================
-/*                 
+/*
                 4
                / .10
               /  \.3
@@ -851,9 +853,9 @@ Real der2fct10_32_P2_3D(cRRef x,cRRef y,cRRef z);
 Real der2fct10_33_P2_3D(cRRef x,cRRef y,cRRef z);
 
 
-static const Real refcoor_P2_3D[30] = {0.  ,0.  ,0. , 
+static const Real refcoor_P2_3D[30] = {0.  ,0.  ,0. ,
 				       1.  ,0.  ,0. ,
-				       0.  ,1.  ,0. , 
+				       0.  ,1.  ,0. ,
 				       0.  ,0.  ,1. ,
 				       0.5 ,0.  ,0. ,
 				       0.5, 0.5 ,0. ,
@@ -923,7 +925,7 @@ static const Fct der2fct_P2_3D[90] =
 // NAVIER-STOKES P2 Basis Oriented to the mass lumping
 //
 //======================================================================
-/*                 
+/*
                 4
                / .10
               /  \.3
@@ -1101,9 +1103,9 @@ Real der2fct11_32_P2tilde_3D(cRRef x,cRRef y,cRRef z);
 Real der2fct11_33_P2tilde_3D(cRRef x,cRRef y,cRRef z);
 
 
-static const Real refcoor_P2tilde_3D[33] = {0.  ,0.  ,0. , 
+static const Real refcoor_P2tilde_3D[33] = {0.  ,0.  ,0. ,
 				       1.  ,0.   ,0. ,
-				       0.  ,1.   ,0. , 
+				       0.  ,1.   ,0. ,
 				       0.  ,0.   ,1. ,
 				       0.5 ,0.   ,0. ,
 				       0.5 , 0.5 , 0. ,
@@ -1181,15 +1183,15 @@ static const Fct der2fct_P2tilde_3D[99] =
 //
 //======================================================================
 /*
-                      ________ 
+                      ________
                      /.      /|
-		    / .     / | 
+		    / .     / |
 		   /_______/  |
 		   |  .  1 |  |
 		   |  .....|..|
 		   | .     | /
 		   |.      |/
-		   |_______| 
+		   |_______|
 
 */
 Real fct1_Q0_3D(cRRef ,cRRef ,cRRef );
@@ -1215,9 +1217,9 @@ static const Fct der2fct_Q0_3D[9] ={
 //
 //======================================================================
 /*
-                      8-------7 
+                      8-------7
                      /.      /|
-		    / .     / | 
+		    / .     / |
 		   5_______6  |
 		   |  .    |  |
 		   |  4....|..3
@@ -1339,13 +1341,13 @@ Real der2fct8_31_Q1_3D(cRRef x,cRRef y,cRRef z);
 Real der2fct8_32_Q1_3D(cRRef x,cRRef y,cRRef z);
 Real der2fct8_33_Q1_3D(cRRef x,cRRef y,cRRef z);
 
-static const Real refcoor_Q1_3D[24] = {0.  ,0.  ,0. , 
+static const Real refcoor_Q1_3D[24] = {0.  ,0.  ,0. ,
 				       1.  ,0.  ,0. ,
-				       1.  ,1.  ,0. , 
+				       1.  ,1.  ,0. ,
 				       0.  ,1.  ,0. ,
-                                       0.  ,0.  ,1. , 
+                                       0.  ,0.  ,1. ,
 				       1.  ,0.  ,1. ,
-				       1.  ,1.  ,1. , 
+				       1.  ,1.  ,1. ,
 				       0.  ,1.  ,1.};
 
 
@@ -1395,5 +1397,5 @@ static const Fct der2fct_Q1_3D[72] =
   der2fct8_11_Q1_3D, der2fct8_12_Q1_3D, der2fct8_13_Q1_3D,
   der2fct8_21_Q1_3D, der2fct8_22_Q1_3D, der2fct8_23_Q1_3D,
   der2fct8_31_Q1_3D, der2fct8_32_Q1_3D, der2fct8_33_Q1_3D};
-
+}
 #endif

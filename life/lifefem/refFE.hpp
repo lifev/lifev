@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -27,13 +27,14 @@
   \file refFE.h
   \brief Structure for a reference Lagrangian finite element
 */
-
+namespace LifeV
+{
 /*!
   \class RefFE
-  \brief The class for a reference Lagrangian finite element 
+  \brief The class for a reference Lagrangian finite element
   \author J.-F. Gerbeau
   \date 04/2002
-  
+
   \par How to add a new finite element ?
 
   (1) in refEle.h : you declare the functions you need (fct1_Pipo_2D,
@@ -56,10 +57,10 @@
                          fct_Pipo_2D,derfct_Pipo_2D,der2fct_Pipo_2D,refcoor_Pipo_2D,allQuadRuleTria,STANDARD_PATTERN,&feSegP1);
   \endcode
   See documentation of RefFE::RefFE(...) for a precise description of all arguments
-  
+
 */
 /* Unique FE identifier*/
-  
+
 #define FE_P1_1D 1
 #define FE_P2_1D 2
 
@@ -83,8 +84,8 @@
 #define FE_RT0_HEXA_3D 31         //!< Vectorial space for Mixed FE
 
 #define FE_RT0_HYB_HEXA_3D 41     //!< for hybrid Mixed FE.
-#define FE_RT1_HYB_HEXA_3D 42     
-#define FE_RT0_HYB_TETRA_3D 44     
+#define FE_RT1_HYB_HEXA_3D 42
+#define FE_RT0_HYB_TETRA_3D 44
 
 
 class RefFE:
@@ -94,7 +95,7 @@ class RefFE:
   const RefFE* _boundaryFE;
 public:
   //! Type of finite element (FE_P1_2D, ..., see the #define at the beginning of refFE.h
-  const int type; 
+  const int type;
   //! Constructor of a reference Lagrangian finite element.
   /*!
     Constructor of a reference finite element. The arguments are:
@@ -135,12 +136,12 @@ public:
   inline const RefFE& boundaryFE() const {
     ASSERT_PRE( _boundaryFE , "No boundary FE defined");
     return *_boundaryFE;
-  }    
+  }
 };
 
 //--------------------------------------------------
 
-extern const RefFE feSegP1; 
+extern const RefFE feSegP1;
 extern const RefFE feSegP2;
 
 extern const RefFE feTriaP0;
@@ -158,4 +159,5 @@ extern const RefFE feTetraP2tilde;
 
 extern const RefFE feHexaQ0;
 extern const RefFE feHexaQ1;
+}
 #endif

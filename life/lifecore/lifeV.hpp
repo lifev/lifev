@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -19,7 +19,7 @@
 /*---------------------------------------------------------------------*
 | LifeV main header file                                               |
 |                                                                      |
-| $Header: /cvsroot/lifev/lifev/life/lifecore/Attic/lifeV.hpp,v 1.8 2004-03-30 12:25:40 prudhomm Exp $                                                             |
+| $Header: /cvsroot/lifev/lifev/life/lifecore/Attic/lifeV.hpp,v 1.9 2004-08-29 15:53:20 prudhomm Exp $                                                             |
 |                                                                      |
 | #Version  0.0 Experimental   9/7/99. Luca Formaggia                  |
 |           0.1 Experimental  10/8/99. Jean-Fred Gerbeau.              |
@@ -28,19 +28,19 @@
 |           it must be includes in all translation units.              |
 *----------------------------------------------------------------------*/
 
-# ifndef __cplusplus 
+# ifndef __cplusplus
 # error You must use C++ for LifeV
-# endif 
- 
-# ifndef _LIFEV_HH_ 
-# define _LIFEV_HH_ 
+# endif
+
+# ifndef _LIFEV_HH_
+# define _LIFEV_HH_
 
 # include <cstdlib>
 
 # include <iostream>
 # include <cmath>
 # include <numeric>
-# include <iosfwd> 
+# include <iosfwd>
 # include <string>
 
 #define ABORT() std::abort()
@@ -51,7 +51,7 @@
    do { std::cerr << std::endl << std::endl << A << std::endl << std::endl ; ABORT() ; } while (0)
 
 
-  
+
 # define ASSERT0(X,A) if ( !(X) ) \
 ERROR_MSG(A << std::endl << "Error in file" << __FILE__ << " line " << __LINE__) ;
 
@@ -79,47 +79,47 @@ ERROR_MSG("Array bound error " << "in file " << __FILE__  \
 
 #ifdef  TEST_ALL
 #define CHECK_KN
-#define TEST_PRE 
-#define TEST_POS 
-#define TEST_INV 
+#define TEST_PRE
+#define TEST_POS
+#define TEST_INV
 #define TEST_BOUNDS
-#define NOINLINE 
-#undef  NDEBUG 
-#endif 
+#define NOINLINE
+#undef  NDEBUG
+#endif
 
-#ifdef NDEBUG 
-#define ASSERT(X,A) 
-#else 
-#define ASSERT(X,A) ASSERT0(X,A) 
-#endif 
+#ifdef NDEBUG
+#define ASSERT(X,A)
+#else
+#define ASSERT(X,A) ASSERT0(X,A)
+#endif
 
 #ifdef TEST_PRE
 #define ASSERT_PRE(X,A) ASSERT_PRE0(X,A)
-#else 
+#else
 #define ASSERT_PRE(X,A)
-#endif 
+#endif
 
 #ifdef TEST_POS
 #define ASSERT_POS(X,A) ASSERT_POS0(X,A)
-#else 
+#else
 #define ASSERT_POS(X,A)
-#endif 
+#endif
 
 #ifdef TEST_INV
 #define ASSERT_INV(X,A) ASSERT_INV0(X,A)
-#else 
+#else
 #define ASSERT_INV(X,A)
 #endif
 
 #ifdef TEST_BOUNDS
 #define ASSERT_BD(X) ASSERT_BD0(X)
-#else 
+#else
 #define ASSERT_BD(X)
-#endif 
+#endif
 
 #ifdef NOINLINE
 #define INLINE
-#else 
+#else
 #define INLINE inline
 #endif
 
@@ -130,7 +130,8 @@ ERROR_MSG("Array bound error " << "in file " << __FILE__  \
 #else
 #define RESTRICT
 #endif
-
+namespace LifeV
+{
 // Typedefs
 
 //! Real data
@@ -145,10 +146,10 @@ typedef unsigned short int USInt;
 typedef UInt ID;
 //! specialised version of ID for Degree of Freedom ID
 typedef ID ID_Dof;
-//! Indices (starting from 0) 
+//! Indices (starting from 0)
 typedef UInt Index_t;
 
-// typedef for indices 
+// typedef for indices
 
 #ifdef INT_BCNAME
 typedef int  BCName;
@@ -165,10 +166,9 @@ const BCName nullBCName; // The empty string!
 //typedef int Marker;
 //const Marker NULLMARKER=0; // 0 is reserved for the NULLMARKER
 // global variables
-
 /* -------------------------------------------------------
  I want to know wheter I am working in 2 or 3 Dimensions
- I will set both a constant global variable (nDimensions) 
+ I will set both a constant global variable (nDimensions)
  and a cpp macro (NDIM) to the correct values, for later use.
 ---------------------------------------------------------*/
 #if defined(TWODIM) && defined(THREEDIM)
@@ -200,6 +200,7 @@ const UInt nDimensions=3;
 #else
 #define DESTRUCTOR(A)
 #endif
+} // end namespace LifeV
 
 #endif
 

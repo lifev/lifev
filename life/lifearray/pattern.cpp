@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -19,6 +19,8 @@
 #include "pattern.hpp"
 #include <fstream>
 
+namespace LifeV
+{
 using namespace std;
 
 //////////////////////////////////////////////////////////////
@@ -54,22 +56,22 @@ BasePattern::showMe(bool const verbose,ostream & out) const{
 // C S R Pattern
 //
 ////////////////////////////////////////////////////////////////////////
-CSRPatt::CSRPatt() {}; 
+CSRPatt::CSRPatt() {};
 
 CSRPatt::CSRPatt(UInt ex_nnz, UInt ex_nrow, UInt ex_ncol):
   BasePattern(ex_nnz,ex_nrow,ex_ncol)
 {
   _ia.reserve(ex_nrow+1);
-  _ja.reserve(ex_nnz); 
+  _ja.reserve(ex_nnz);
 }
 
 CSRPatt::CSRPatt(UInt ex_nnz, UInt ex_nrow, UInt ex_ncol, const vector<Index_t> &ex_ia, const vector<Index_t> &ex_ja):
-  BasePattern(ex_nnz,ex_nrow,ex_ncol),_ia(ex_ia),_ja(ex_ja) 
+  BasePattern(ex_nnz,ex_nrow,ex_ncol),_ia(ex_ia),_ja(ex_ja)
 {
   ASSERT_PRE(ex_ia.size()==ex_nrow+1 && ex_ja.size()==ex_nnz,"Error in CSR Pattern Life V"); // check on the compatibility of the external data
   _filled = !ex_ia.empty(); // Test if the given containers are empty!
   if(_filled)_diagfirst=_i2o(_ja[_i2o(_ia[_nrows-1])])==_nrows-1; //stupid test
-}; 
+};
 
 CSRPatt::CSRPatt(const CSRPatt &RightHandCSRP):BasePattern(RightHandCSRP),
 					       _ia(RightHandCSRP.ia()),_ja(RightHandCSRP.ja()){}
@@ -113,15 +115,15 @@ CSRPatt::locate_pattern(Index_t const i,Index_t const j) const {
 void  CSRPatt::showMe(bool verbose, ostream& c) const
 {
   BasePattern::showMe(verbose,c);
-  
+
   typedef vector<Index_t>::iterator found;
   int i_first;
-  string pare="[";  
+  string pare="[";
   c << "**************************" << endl;
   c << "     CSR Matrix Pattern   " << endl;
   c << endl;
   if (verbose){
-    
+
     c << pare;
     for (Diff_t i_index=0; i_index < static_cast<Diff_t>(_nrows); i_index++)
       {
@@ -130,13 +132,13 @@ void  CSRPatt::showMe(bool verbose, ostream& c) const
 	i_first=_i2o(_ia[i_index])+1; // In _ia[i_index] there is the diagonal entry
 	UInt jj=0;
 	for(Diff_t j=0;j<static_cast<Diff_t>(_ncols);j++)
-	  { 
+	  {
 	    if (j==i_index) c << " * ";
 	    else {
 	      if (j==_i2o(_ja[i_first+jj])){
 		c << " * "; jj++;}
-	      else c << " 0 "; 
-	    } 
+	      else c << " 0 ";
+	    }
 	  }
 	if (i_index==static_cast<Diff_t>(_nrows-1))
 	  c << " ]] " << endl;
@@ -150,32 +152,32 @@ void  CSRPatt::showMe(bool verbose, ostream& c) const
 
 void  CSRPatt::spy(string  const &filename) const
 {
-  // Purpose: Matlab dumping and spy 
+  // Purpose: Matlab dumping and spy
   string nome=filename, uti=" , ";
   //
   // check on the file name
   //
   unsigned int i=filename.find(".");
-  
+
   if (i<=0) nome=filename+".m";
   else {
     if (i!=filename.size()-2  || filename[i+1]!='m')
       {cerr << "Wrong file name ";
       nome=filename+".m";}
   }
-  
+
   ofstream file_out(nome.c_str());
-  
-  
+
+
   file_out << "S = [ ";
   for (UInt i=0;i<_nrows;++i){
     for (Index_t ii=_ia[i]-PatternOffset;ii<_ia[i+1]-PatternOffset;++ii)
-      file_out << i+1 << uti << _ja[ii]+1-PatternOffset << uti << "1.0" << endl; /* */  
-  }	 
+      file_out << i+1 << uti << _ja[ii]+1-PatternOffset << uti << "1.0" << endl; /* */
+  }
   file_out << "];" << endl;
-  
+
   file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"<<endl;
-};	
+};
 
 // column-concatenation of two CSR block patterns
 
@@ -710,14 +712,14 @@ void  VBRPatt::showMe(bool verbose, ostream& c) const
 	                              // diagonal entry
 	UInt jj=0;
 	for(Diff_t j=0;j<static_cast<Diff_t>(_ncols);j++)
-	  { 
+	  {
 	    if (j==i_index) for (UInt ib=0;ib<blsize;ib++) c << " * ";
 	    else {
 	      if (j==_i2o(_ja[i_first+jj])){
 		for (UInt ib=0;ib<blsize;ib++) c << " * ";
 		jj++;
 	      }
-	      else for (UInt ib=0;ib<blsize;ib++) c << " 0 "; 
+	      else for (UInt ib=0;ib<blsize;ib++) c << " 0 ";
 	    }
 	  }
 	if (i_index==static_cast<Diff_t>(_nrows-1))
@@ -733,7 +735,7 @@ void  VBRPatt::showMe(bool verbose, ostream& c) const
 
 void VBRPatt::spy(string  const &filename) const
 {
-  // Purpose: Matlab dumping and spy 
+  // Purpose: Matlab dumping and spy
   string nome=filename, uti=" , ";
   UInt nblocrow=_nrows, blocsize=_rpntr[1]-_rpntr[0];
   //
@@ -747,7 +749,7 @@ void VBRPatt::spy(string  const &filename) const
       {cerr << "Wrong file name ";
       nome=filename+".m";}
   };
-  
+
   ofstream file_out(nome.c_str());
   ASSERT(file_out,"Error: Output Matrix (Values) file cannot be open");
 
@@ -769,7 +771,7 @@ void VBRPatt::spy(string  const &filename) const
 // C S R Symmetric Pattern
 //
 ////////////////////////////////////////////////////////////////////////
-CSRPattSymm::CSRPattSymm() {}; 
+CSRPattSymm::CSRPattSymm() {};
 
 CSRPattSymm::CSRPattSymm(UInt ex_nnz, UInt ex_nrow, UInt ex_ncol):
   BasePattern(ex_nnz,ex_nrow,ex_ncol)
@@ -779,12 +781,12 @@ CSRPattSymm::CSRPattSymm(UInt ex_nnz, UInt ex_nrow, UInt ex_ncol):
 }
 
 CSRPattSymm::CSRPattSymm(UInt ex_nnz, UInt ex_nrow, UInt ex_ncol,  const vector<Index_t> &ex_ia, const vector<Index_t> &ex_ja):
-  BasePattern(ex_nnz,ex_nrow,ex_ncol),_ia(ex_ia),_ja(ex_ja) 
+  BasePattern(ex_nnz,ex_nrow,ex_ncol),_ia(ex_ia),_ja(ex_ja)
 {
   ASSERT_PRE(ex_ia.size()==ex_nrow+1,"Error in CSR Pattern Life V"); // check on the compatibility of the external data
   _filled=ex_ia.size()>0;
   _diagfirst=true;
-}; 
+};
 
 CSRPattSymm::CSRPattSymm(const CSRPattSymm &RightHandCSRP):BasePattern(RightHandCSRP),
 							   _ia(RightHandCSRP.ia()),_ja(RightHandCSRP.ja()) {};
@@ -798,7 +800,7 @@ bool CSRPattSymm::isThere(Index_t i,Index_t j) const
     {
       ASSERT_BD(i>=PatternOffset && i<static_cast<Index_t>(_nrows)+PatternOffset);
       ASSERT_BD(j>=PatternOffset && j<static_cast<Index_t>(_ncols)+PatternOffset);
-      
+
       Container::const_iterator start=_ja.begin()+_row_off(i);
       Container::const_iterator finish=_ja.begin()+_row_off(i+1);
       return binary_search(start, finish, j);
@@ -865,12 +867,12 @@ CSRPattSymm::neighbour(ID const n, ID const d) const{
   Container::const_iterator start;
   Container::const_iterator finish;
   UInt counter=1;
-    
+
   for(UInt i=0; i<_d2o(d);++i){
     start=_ja.begin()+(_i2o(_ia[i]) +1); // no need to search diag
     finish=_ja.begin()+_i2o(_ia[i+1]);
     if(binary_search(start, finish, _ind)) ++counter;
-    if (counter==n) return i+1;// Number from 1 
+    if (counter==n) return i+1;// Number from 1
   }
   counter=n-counter;
 
@@ -886,14 +888,14 @@ CSRPattSymm::neighbours(ID const d, Container & neighs) const
 {
   ASSERT_BD(d>0 && d<=_nrows);
   ASSERT_PRE(_filled, "Cannot access an empty pattern");
-  
+
   Container::const_iterator finish;
   Container::const_iterator start;
   //neighs.clear();
   neighs.reserve(nbNeighbours(d));
   neighs.push_back(d);// Diagonal first
   Index_t _row=_d2i(d);
-  
+
   for(UInt i=0; i<d-1;++i){
     start=_ja.begin()+_i2o(_ia[i]) +1; // no need to search diag
     finish=_ja.begin()+_i2o(_ia[i+1]);
@@ -904,10 +906,10 @@ CSRPattSymm::neighbours(ID const d, Container & neighs) const
 
 void  CSRPattSymm::showMe(bool verbose, ostream& c) const{
   BasePattern::showMe(verbose,c);
-  
+
   typedef vector<Index_t>::iterator found;
   int i_first;
-  string pare="[";  
+  string pare="[";
   c << "********************************" << endl;
   c << "  CSR Matrix Symmetric Pattern   " << endl;
   c << endl;
@@ -917,14 +919,14 @@ void  CSRPattSymm::showMe(bool verbose, ostream& c) const{
       c << pare;
       pare = " [";
       i_first=_ia[i_index]+1 - PatternOffset; // In _ia[i_index] there is the diagonal entry
-      for(unsigned int j=0;j<_ncols;j++){ 
+      for(unsigned int j=0;j<_ncols;j++){
 	if (j == i_index) c << " * ";
 	else {
 	  if (isThere(i_index,j)==true){
 	    c << " * ";}
 	  else
-	    c << " 0 "; 
-	} 
+	    c << " 0 ";
+	}
       }
       if (i_index==_nrows-1)
 	c << " ]] " << endl;
@@ -934,59 +936,59 @@ void  CSRPattSymm::showMe(bool verbose, ostream& c) const{
   }
   c << "********************************" << endl;
   return;
-}; 
+};
 
 void  CSRPattSymm::spy(string  const &filename) const{
-  // Purpose: Matlab dumping and spy 
+  // Purpose: Matlab dumping and spy
   string nome=filename, uti=" , ";
   //
   // check on the file name
   //
   unsigned int i=filename.find(".");
-  
-  
+
+
   if (i<=0) nome=filename+".m";
   else {
     if (i!=filename.size()-2  || filename[i+1]!='m'){
       cerr << "Wrong file name " << i << endl;
       nome=filename+".m";}
   }
-  
+
   ofstream file_out(nome.c_str());
-  
-  
+
+
   file_out << "S = [ ";
   for (Diff_t i=0;i<_nrows;++i){
     for (Index_t ii=_ia[i]-PatternOffset;ii<_ia[i+1]-PatternOffset;++ii){
-      file_out << i+1 << uti << _ja[ii]+1-PatternOffset << uti << "1.0" << endl;  
+      file_out << i+1 << uti << _ja[ii]+1-PatternOffset << uti << "1.0" << endl;
       if (i!=_i2o(_ja[ii])) file_out <<  _i2o(_ja[ii]+1)<< uti << i+1 << uti << "1.0" << endl; }
-  }	 
+  }
   file_out << "];" << endl;
-  
+
   file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"<<endl;
-};	
+};
 /////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 //
 // M S R Pattern
 //
 ////////////////////////////////////////////////////////////////////////
-MSRPatt::MSRPatt() {}; 
+MSRPatt::MSRPatt() {};
 
 MSRPatt::MSRPatt(UInt ex_nnz, UInt ex_nrow, UInt ex_ncol):
-  BasePattern(ex_nnz,ex_nrow,ex_ncol) 
+  BasePattern(ex_nnz,ex_nrow,ex_ncol)
 {
-  _bindx.reserve(ex_nnz+1); 
+  _bindx.reserve(ex_nnz+1);
   _diagfirst=true;// default for MSR
   _ybind.reserve(ex_nnz-ex_nrow);
 }
 MSRPatt::MSRPatt(UInt ex_nnz, UInt ex_nrow, UInt ex_ncol, const vector<Index_t> &ex_bindx, const vector<Index_t> &ex_ybind):
-  BasePattern(ex_nnz,ex_nrow,ex_ncol),_bindx(ex_bindx),_ybind(ex_ybind) 
+  BasePattern(ex_nnz,ex_nrow,ex_ncol),_bindx(ex_bindx),_ybind(ex_ybind)
 {
   ASSERT_PRE(ex_bindx.size()==ex_nnz+1,"Compatibility error in MSR Pattern "); // check on the compatibility of the external data
   _filled=!ex_bindx.empty();
   _diagfirst=true; // default for MSR
-}; 
+};
 
 MSRPatt::MSRPatt(const MSRPatt &RightHandMSRP):BasePattern(RightHandMSRP),
 					       _bindx(RightHandMSRP.bindx()),_ybind(RightHandMSRP.ybind()) {};
@@ -995,7 +997,7 @@ MSRPatt::MSRPatt(const MSRPatt &RightHandMSRP):BasePattern(RightHandMSRP),
 
 // version assuming that the CSR pattern has all its diagonal terms non null
 MSRPatt::MSRPatt(const CSRPatt &RightHandCSRP):BasePattern(RightHandCSRP),
-					       _bindx(RightHandCSRP.nNz()+1) 
+					       _bindx(RightHandCSRP.nNz()+1)
 {
   PatternDefs::Container::const_iterator ia=RightHandCSRP.give_ia().begin();
   PatternDefs::Container::const_iterator ja=RightHandCSRP.give_ja().begin();
@@ -1060,7 +1062,7 @@ void MSRPatt::neighbours(ID const d, Container & neigh) const
   neigh.push_back(d); // diagonal, which is NOT explicitely stored.
   for(Container::const_iterator start1=_bindx.begin()+_i2o(_bindx[d-1]);
       start1!=_bindx.begin()+_i2o(_bindx[d]);++start1)neigh.push_back(_i2d(*start1));
-} 
+}
 // locate function for CSR Pattern. It returns a pair. First member
 // is the position in the array correponding to (i,j), the second
 // is a bool telling if that position exists (i.e. if i,j is in the
@@ -1071,10 +1073,10 @@ MSRPatt::locate_pattern(Index_t const i,Index_t const j)const
   if (i==j)
     { return make_pair(_i2o(i),true);} // In MSR Format the diagonal entries are alway part of the pattern
   else
-    {	 
+    {
       Container::const_iterator start=_bindx.begin()+_row_off(i); // the real start
       Container::const_iterator finish=_bindx.begin()+_row_off(i+1); //the real end (remember STL convention for ranges!)
-      Container::const_iterator current= search_binary(start, finish, j); // the off-diagonal terms have been ordered 
+      Container::const_iterator current= search_binary(start, finish, j); // the off-diagonal terms have been ordered
       // difference of pointers should  return distance, which is of integral type
       return make_pair(current-_bindx.begin(),current !=finish);
     }
@@ -1082,7 +1084,7 @@ MSRPatt::locate_pattern(Index_t const i,Index_t const j)const
 
 void  MSRPatt::showMe(bool verbose, ostream& c) const{
   unsigned int i_first;
-  string pare="[";  
+  string pare="[";
   BasePattern::showMe(verbose, c);
   cout << "**************************" << endl;
   cout << "     MSR Matrix Pattern   " << endl;
@@ -1094,15 +1096,15 @@ void  MSRPatt::showMe(bool verbose, ostream& c) const{
       pare = " [";
       i_first=_bindx[i_index];
       UInt jj=0;
-      for(unsigned int j=0;j<_ncols;j++){ 
+      for(unsigned int j=0;j<_ncols;j++){
 	if (j==i_index)
 	  cout << " * ";
-	else{ 
+	else{
 	  if (j==_i2o(_bindx[i_first+jj])){
 	    c << " * "; jj++;}
 	  else
-	    c << " 0 "; 
-	} 
+	    c << " 0 ";
+	}
       }
       if (i_index==_nrows-1)
 	cout << " ]]; " << endl;
@@ -1111,38 +1113,38 @@ void  MSRPatt::showMe(bool verbose, ostream& c) const{
     }
   }
   return;
-}; 
+};
 
 void  MSRPatt::spy(string  const &filename)const
 {
-  // Purpose: Matlab dumping and spy 
+  // Purpose: Matlab dumping and spy
   string nome=filename, uti=" , ";
   //
   // check on the file name
   //
   unsigned int i=filename.find(".");
-  
+
   if (i<=0) nome=filename+".m";
   else {
     if (i!=filename.size()-2  || filename[i+1]!='m'){
       cerr << "Wrong file name ";
       nome=filename+".m";}
   }
-  
+
   ofstream file_out(nome.c_str());
-  
-  
+
+
   file_out << "S = [ ";
   for (UInt i=0;i<_nrows;++i){
     if (i < _ncols)
       file_out << i+1 << uti << i+1 << uti << "1.0" << endl;
     for (Index_t ii=_bindx[i];ii<_bindx[i+1];++ii)
-      file_out << i+1 << uti << _bindx[ii]+1-PatternOffset << uti << "1.0" << endl;  
-  }	 
+      file_out << i+1 << uti << _bindx[ii]+1-PatternOffset << uti << "1.0" << endl;
+  }
   file_out << "];" << endl;
-  
+
   file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);"<<endl;
-};	
+};
 
 // Construction of diagonal block matrix. Done by A. Gilardi.
 // Alain (nov. 2002), update of ybind as well !
@@ -1191,4 +1193,5 @@ void diagblockMatrix(MSRPatt &ans, MSRPatt const &patt, UInt const nblock)
 
   ans._filled=true;
   ans._diagfirst = true; //default for MSR
+}
 }

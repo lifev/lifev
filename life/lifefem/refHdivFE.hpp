@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -30,6 +30,8 @@
   \brief Classes RefHdivFE and RefHdivHybridFE
 */
 
+namespace LifeV
+{
 
 //! Indicates the LOCAL (reference element) coordinates
 typedef const Real & cRRef;
@@ -42,13 +44,13 @@ typedef Real (* FCT)(cRRef,cRRef ,cRRef);
   \date 07/2002
 
   This is a duplication-modification of both RefEle and RefFE
-  in order to take into account Mixed Finite Elements, which are 
+  in order to take into account Mixed Finite Elements, which are
   based on a (RT0 - Q0) like discretization of H(div, .) - L2(.).
-  
+
   Here follows commentaries from refEle and refFE :
 
-  This class contains the basis functions and their values on quadrature points.  
-  
+  This class contains the basis functions and their values on quadrature points.
+
   \par How to add a new reference element:
 
   in refHdiv.h : you declare the functions you need (fct1_Pipo_2D,
@@ -64,7 +66,7 @@ class RefHdivFE:
 private:
   const SetOfQuadRule* _sqr; //!< pointer on the set of quadrature rules
   const FCT*  _phi; //!< pointer on the basis functions
-  const FCT*  _divPhi;//!< pointer on the divergence of the basis functions 
+  const FCT*  _divPhi;//!< pointer on the divergence of the basis functions
   const Real* _refCoor;//!< reference coordinates. Order: xi_1,eta_1,zeta_1,xi_2,eta_2,zeta_2,...
 
   //! values of the basis functions on all quadrature points
@@ -75,7 +77,7 @@ private:
   KN<int> _idxDQuad;//!< _idxDQuad[t] = index of the quadrature rules of id t in _divPhiQuad
 public:
   const string name; //!< name of the reference element
-  const int type; //!< Type of finite element (FE_P1_2D, ..., see the #define at the beginning of refFE.h) 
+  const int type; //!< Type of finite element (FE_P1_2D, ..., see the #define at the beginning of refFE.h)
   const ReferenceShapes shape; //!< geometrical shape of the element
   const int nbDof;   //!< Total number of degrees of freedom
   const int nbCoor;  //!< Number of local coordinates
@@ -83,7 +85,7 @@ public:
   //! Constructor of a reference finite element.
   /*!
     Constructor of a reference finite element. The arguments are:
-    
+
     _name : the name of the f.e.
 
     _type : the type of the f.e. (FE_P1_2D,... see the #define at the begining of refFE.h)
@@ -113,7 +115,7 @@ public:
 
      _patternType : in most of cases STANDARD_PATTERN, except for elements like P1isoP2
     (to define a new pattern, add a new #define in refFE.h and code it in refFE.cc following the
-    example of P1ISOP2_TRIA_PATTERN)  
+    example of P1ISOP2_TRIA_PATTERN)
    */
   RefHdivFE(string _name, int _type, ReferenceShapes _shape,
 	    int _nbDofPerVertex,int _nbDofPerEdge,int _nbDofPerFace,int _nbDofPerVolume,
@@ -178,7 +180,7 @@ public:
     ASSERT_BD(i < nbDof && ig < qr.nbQuadPt)
       return _divPhiQuad( _idxDQuad(qr.id) + ig*nbDof+ i );
   }
-  void RefHdivFE::check() const;//!< A simple check function 
+  void RefHdivFE::check() const;//!< A simple check function
   friend ostream& operator << (ostream& f,const RefHdivFE& fe);
 };
 
@@ -192,10 +194,10 @@ extern const RefHdivFE feHexaRT0;
 //!
 //!======================================================================
 /*!
-  
-                      8-------7 
+
+                      8-------7
                      /.      /|
-		    / .     / | 
+		    / .     / |
 		   5_______6  |
 		   |  .    |  |
 		   |  4....|..3
@@ -203,12 +205,12 @@ extern const RefHdivFE feHexaRT0;
 		   |.      |/
 		   1_______2
 
-   face 1: 1,4,3,2 
+   face 1: 1,4,3,2
    face 2: 1,5,8,4
    face 3: 1,2,6,5
    face 4: 2,3,7,6
    face 5: 3,4,8,7
-   face 6: 5,6,7,8 
+   face 6: 5,6,7,8
 
 */
 
@@ -243,22 +245,22 @@ Real fct4_DIV_RT0_3D(cRRef x,cRRef y,cRRef z);
 Real fct5_DIV_RT0_3D(cRRef x,cRRef y,cRRef z);
 Real fct6_DIV_RT0_3D(cRRef x,cRRef y,cRRef z);
 
-static const Real refcoor_RT0_3D[18] = {0.5  ,0.5  ,0. , 
+static const Real refcoor_RT0_3D[18] = {0.5  ,0.5  ,0. ,
 				        0.  ,0.5   ,0.5 ,
-				        0.5  ,0.  ,0.5 , 
+				        0.5  ,0.  ,0.5 ,
 				        1.  ,0.5  ,0.5 ,
 				        0.5  ,1.  ,0.5 ,
 				        0.5  ,0.5  ,1.};
 
-static const FCT fct_RT0_3D[18] = {fct1_RT0_1_3D,fct1_RT0_2_3D,fct1_RT0_3_3D, 
+static const FCT fct_RT0_3D[18] = {fct1_RT0_1_3D,fct1_RT0_2_3D,fct1_RT0_3_3D,
                                    fct2_RT0_1_3D,fct2_RT0_2_3D,fct2_RT0_3_3D,
                                    fct3_RT0_1_3D,fct3_RT0_2_3D,fct3_RT0_3_3D,
                                    fct4_RT0_1_3D,fct4_RT0_2_3D,fct4_RT0_3_3D,
                                    fct5_RT0_1_3D,fct5_RT0_2_3D,fct5_RT0_3_3D,
                                    fct6_RT0_1_3D,fct6_RT0_2_3D,fct6_RT0_3_3D};
 
-static const FCT fct_DIV_RT0_3D[6] = {fct1_DIV_RT0_3D, fct2_DIV_RT0_3D,  
+static const FCT fct_DIV_RT0_3D[6] = {fct1_DIV_RT0_3D, fct2_DIV_RT0_3D,
 				      fct3_DIV_RT0_3D, fct4_DIV_RT0_3D,
 				      fct5_DIV_RT0_3D, fct6_DIV_RT0_3D};
-
+}
 #endif

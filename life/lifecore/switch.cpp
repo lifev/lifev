@@ -1,32 +1,36 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+#include "lifeV.hpp" // only for ASSERTs
+
 #include "switch.hpp"
 
+namespace LifeV
+{
 bool
-Switch::set(string const & a)
+Switch::set(std::string const & a)
 {
   iterator i=find(a);
   if (i == end())
     {
       return false;
     }
-  
+
   else{
     i->second=true;
     return true;
@@ -36,107 +40,107 @@ Switch::set(string const & a)
 bool
 Switch::set(const char *  a)
 {
-  string temp(a);
-  return set(temp);
+    std::string temp(a);
+    return set(temp);
 }
 
-	      
+
 
 
 bool
-Switch::unset(string const & a)
+Switch::unset(std::string const & a)
 {
-  iterator i=find(a);
-  if (i == end())
+    iterator i=find(a);
+    if (i == end())
     {
-      return false;
+        return false;
     }
-  
-  else{
-    i->second=false;
-    return true;
-  }
+
+    else{
+        i->second=false;
+        return true;
+    }
 }
 
 bool
 Switch::unset(const char *  a)
 {
-  string temp(a);
-  return unset(temp);
-  
+    std::string temp(a);
+    return unset(temp);
+
 }
 
 
 bool
-Switch::toggle(string const & a)
+Switch::toggle(std::string const & a)
 {
-  iterator i=find(a);
-  if (i == end())
+    iterator i=find(a);
+    if (i == end())
     {
-      return false;
+        return false;
     }
-  
-  else{
-    i->second=! (i->second);
-    return true;
-  }
+
+    else{
+        i->second=! (i->second);
+        return true;
+    }
 }
 
 bool
 Switch::toggle(const char *  a)
 {
-  string temp(a);
-  return toggle(temp);
-  
+    std::string temp(a);
+    return toggle(temp);
+
 }
 
 
 void
-Switch::create(string const & a, bool status)
+Switch::create(std::string const & a, bool status)
 {
-  iterator i=find(a);
-  if (i == end())
+    iterator i=find(a);
+    if (i == end())
     {
-      insert(make_pair(a,status));
+        insert(std::make_pair(a,status));
     }
-  
-  else{
-    i->second=status;
-  }
+
+    else{
+        i->second=status;
+    }
 }
 
 void
 Switch::create(const char *  a, bool status)
 {
-  string temp(a);
-  create(temp,status);
+    std::string temp(a);
+    create(temp,status);
 }
 
 
-pair<bool,bool>
-Switch::status(string const & a) const
+std::pair<bool,bool>
+Switch::status(std::string const & a) const
 {
-  const_iterator i=find(a);
-  if (i == end())
+    const_iterator i=find(a);
+    if (i == end())
     {
-      return make_pair(false,false);
+        return std::make_pair(false,false);
     }
-  
-  else{
-    return make_pair(true,i->second);
-  }
+
+    else{
+        return std::make_pair(true,i->second);
+    }
 }
 
-pair<bool,bool>
+std::pair<bool,bool>
 Switch::status(const char *  a) const
 {
-  string temp(a);
+  std::string temp(a);
   return status(temp);
 }
 
-  
+
 bool
-Switch::test(string const & a) const
+Switch::test(std::string const & a) const
 {
   const_iterator i=find(a);
   if (i == end())
@@ -151,16 +155,18 @@ Switch::test(string const & a) const
   bool
 Switch::test(const char *  a) const
 {
-  string temp(a);
+  std::string temp(a);
   return test(temp);
 }
 
-ostream & Switch::showMe(bool verbose, ostream & out) const
+std::ostream & Switch::showMe(bool verbose, std::ostream & out) const
 {
-  out<<endl<< " Status of switches"<<endl;
-  for (const_iterator i=begin(); i != end(); ++i) {
-    out<< "Switch named: " <<i->first<<" Value= "<<i->second<<endl;
-  }
-  return out;
-  
+    out<<std::endl<< " Status of switches"<<std::endl;
+    for (const_iterator i=begin(); i != end(); ++i)
+    {
+        out<< "Switch named: " <<i->first<<" Value= "<<i->second<<std::endl;
+    }
+    return out;
+
+}
 }

@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -32,8 +32,8 @@
 
   \author Modified by Vincent MARTIN & Mohamed BELHADJ
   \date 19/07/2002
-   
-  We added the HdivFE element here. 
+
+  We added the HdivFE element here.
 */
 
 #ifndef _DOF_HH
@@ -44,6 +44,8 @@
 #include "localDofPattern.hpp"
 #include <algorithm>
 
+namespace LifeV
+{
 /*! Local-to-global table
 
  This class provides the localtoglobal table that relates the local DOF of
@@ -62,11 +64,11 @@ class Dof {
 public:
   //! Type for the localToGlobal table.
   typedef SimpleArray<UInt> Container;
-  
+
   //! The pattern of the local degrees of freedom.
   /*! It is exposed so that is is possible to interrogate it directly.*/
   const LocalDofPattern& fe; // be careful : use fe.nbLocalDof (fe.nbDof does not exist !)
-  
+
   /*! The minimal constructor
     \param _fe is the LocalDofPattern on which the ref FE is built
     \param Offset: the smallest Dof numbering. It might be used if we want the
@@ -75,7 +77,7 @@ public:
   Dof(const LocalDofPattern& _fe, UInt offSet=1);
 
   Dof(const Dof & dof2);
-  
+
   //! Constructor accepting a mesh as parameter
   /*!
     \param mesh a RegionMesh3D
@@ -83,7 +85,7 @@ public:
     \param Offset: the smalest Dof numbering. It might be used if we want the
     degrees of freedom numbering start from a specific value.
   */
-  template<typename Mesh> 
+  template<typename Mesh>
     Dof(Mesh& mesh, const LocalDofPattern& _fe, UInt offSet=1);
 
   //! Build the localToGlobal table
@@ -91,9 +93,9 @@ public:
     \param mesh A RegionMesh3D
     Updates the LocaltoGlobal array
   */
-  template <typename Mesh> 
+  template <typename Mesh>
     void update(Mesh &);
-  
+
   //! The total number of Dof
   inline UInt numTotalDof() const {return _totalDof;}
 
@@ -111,32 +113,32 @@ public:
     return _ltg(localNode,ElId);
   }
 
-  //! Number of elements in mesh 
+  //! Number of elements in mesh
   UInt numElements() const {return _nEl;}
-  
+
   //! Number of local vertices (in a elment)
   UInt numLocalVertices() const {return nlv;}
-  
+
   //! Number of local edges (in a elment)
   UInt numLocalEdges() const {return nle;}
-  
+
   //! Number of local faces (in a elment)
   UInt numLocalFaces() const {return nlf;}
-  
+
   //! Ouput
   void showMe(std::ostream  & out=std::cout, bool verbose=false) const;
 
 private:
   UInt _offset;
   UInt _totalDof;
-  UInt _nEl;  
+  UInt _nEl;
   UInt nlv;
   UInt nle;
   UInt nlf;
   Container _ltg;
   UInt _ncount[5];
 };
- 
+
 
 
 /********************************************************************
@@ -144,7 +146,7 @@ private:
 ********************************************************************/
 
 //! Constructor that builds the localToglobal table
-template <typename Mesh> 
+template <typename Mesh>
 Dof::Dof(Mesh& mesh, const LocalDofPattern& _fe, UInt off):fe(_fe),_offset(off),_totalDof(0),
 					       _nEl(0),nlv(0),nle(0),nlf(0),_ltg()
 { for (UInt i=0; i<5; ++i)_ncount[i]=0;
@@ -153,7 +155,7 @@ Dof::Dof(Mesh& mesh, const LocalDofPattern& _fe, UInt off):fe(_fe),_offset(off),
 
 
 //! Build the localToGlobal table
-template<typename Mesh> 
+template<typename Mesh>
 void Dof::update(Mesh& M){
 
   typedef  typename Mesh::VolumeShape GeoShape;
@@ -176,31 +178,31 @@ void Dof::update(Mesh& M){
   UInt nf=M.numFaces();
 
   UInt i,l,ie;
-  
+
   UInt nldof=nldpV+nldpe*nle+nldpv*nlv+nldpf*nlf;
 
   ASSERT_PRE( nldof == UInt(fe.nbLocalDof), "Something wrong in FE specification") ;
-  
+
   _totalDof=nV*nldpV+ne*nldpe+nv*nldpv+nf*nldpf;
-  
+
   _ltg.reshape(nldof,nV);
-  
+
   // Make sure the mesh has everything needed
   bool update_edges(nldpe !=0 && ! M.hasLocalEdges());
   bool update_faces(nldpf !=0 && ! M.hasLocalFaces());
-  
+
   if (update_edges) M.updateElementEdges();
   if (update_faces) M.updateElementFaces();
   //  ASSERT_PRE( !(nldpe !=0 && M.hasLocalEdges()) , "Element edges stuff have not been updated") ;
   //  ASSERT_PRE( !(nldpf !=0 && M.hasLocalFaces()) , "Element faces stuff have not been updated") ;
   //ASSERT_PRE( (nldpe == 0 || M.hasLocalEdges()) , "Element edges stuff have not been updated") ;
   //ASSERT_PRE( (nldpf == 0 || M.hasLocalFaces()) , "Element faces stuff have not been updated") ;
-  
+
 
   unsigned int gcount(_offset);
   unsigned int lcount;
   unsigned int lc;
-  
+
   // Vertex Based Dof
   _ncount[0]=gcount;
   if (nldpv >0 )
@@ -221,9 +223,9 @@ void Dof::update(Mesh& M){
 	for (l=0; l<nldpe; ++l)
 	  _ltg(++lc,ie)=gcount +(M.localEdgeId(ie,i)-1)*nldpe + l;
     }
- 
+
   // Face  Based Dof
-  
+
   gcount+=ne*nldpe;
   lcount+=nldpe*nle;
   _ncount[2]=gcount;
@@ -251,5 +253,5 @@ void Dof::update(Mesh& M){
   if (update_edges) M.cleanElementEdges();
   if (update_faces) M.cleanElementFaces();
 }
-
+}
 #endif

@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -41,12 +41,14 @@
 #include <cstdlib>
 #include <string>
 
+namespace LifeV
+{
 template<typename TheMesh, typename TheDof, typename TheFem, typename GeoMap>
 void wr_gmsh_parsed(string fname, string title,const  TheMesh& mesh, const TheDof& dof, const TheFem& fem, const GeoMap& geo, vector<Real> U)
 {
  ofstream ofile(fname.c_str());
 
- ASSERT(ofile,"Error: Output file cannot be open"); // 
+ ASSERT(ofile,"Error: Output file cannot be open"); //
 
   UInt nldpe=fem.nbDofPerEdge;
   UInt nldpv=fem.nbDofPerVertex;
@@ -61,7 +63,7 @@ void wr_gmsh_parsed(string fname, string title,const  TheMesh& mesh, const TheDo
   UInt nf=mesh.numFaces();
   UInt nldof = nle*nldpe+nlv*nldpv+nlf*nldpf+nldpV;
  //  _totalDof=nV*nldpV+ne*nldpe+nv*nldpv+nf*nldpf;
- UInt cells_size; 
+ UInt cells_size;
  UInt num_points =  dof.numTotalDof(); // discuterne con Luca
  UInt num_points_supp =  dof.numTotalDof() - nv; // discuterne con Luca
  vector<Real> supp_x(num_points_supp,0.0);
@@ -71,15 +73,15 @@ void wr_gmsh_parsed(string fname, string title,const  TheMesh& mesh, const TheDo
  char virgole='"';
 
  ofile << "View "<< virgole<<title<<virgole<< "{" << endl;
-   
+
   UInt i,ie,index,j;
   UInt gcount;
   UInt lcount;
 
   // Vertex based Dof: the coordinates are available from the Pont List
  for(i=0;i<nv;++i)
-  ofile << "SP("<<mesh.pointList[i].x() << "," <<  mesh.pointList[i].y() << "," <<  mesh.pointList[i].z()<<")"<<"{"<<U[i]<<"};" << endl; 
- 
+  ofile << "SP("<<mesh.pointList[i].x() << "," <<  mesh.pointList[i].y() << "," <<  mesh.pointList[i].z()<<")"<<"{"<<U[i]<<"};" << endl;
+
  // Now I store the coordinates of the supplementary nodes in a temporary vector
   // Edge Based Dof
   gcount = 0;
@@ -87,7 +89,7 @@ void wr_gmsh_parsed(string fname, string title,const  TheMesh& mesh, const TheDo
   if (nldpe >0 ){
     for (ie=1; ie<= nV; ++ie){
       geo.update(mesh.volumeList(ie),1);
-      fem.update(mesh.volumeList(ie),1); 
+      fem.update(mesh.volumeList(ie),1);
       for (i=1; i<=nle; ++i){
 	  geo.coorMap(x,y,z,fem.xi(i+lcount),fem.eta(i+lcount),fem.zeta(i+lcount));
 	  index = mesh.localEdgeId(ie,i);
@@ -95,18 +97,18 @@ void wr_gmsh_parsed(string fname, string title,const  TheMesh& mesh, const TheDo
      }
     }
   }
-  // Face  Based Dof 
+  // Face  Based Dof
   gcount+=ne;
   lcount+=nle;
   if (nldpf >0){
     for (ie=1; ie<= nV; ++ie){
       geo.update(mesh.volumeList(ie),1);
-      fem.update(mesh.volumeList(ie),1); 
+      fem.update(mesh.volumeList(ie),1);
       for (i=1; i<=nlf; ++i){
           geo.coorMap(x,y,z,fem.xi(i+lcount),fem.eta(i+lcount),fem.zeta(i+lcount));
           index = mesh.localFaceId(ie,i)+gcount;
           supp_x[index-1]=x;supp_y[index-1]=y;supp_z[index-1]=z;
-       
+
      }
     }
   }
@@ -117,7 +119,7 @@ void wr_gmsh_parsed(string fname, string title,const  TheMesh& mesh, const TheDo
   if (nldpV >0 ){
     for (ie=1; ie<= nV; ++ie){
       geo.update(mesh.volumeList(ie),1);
-      fem.update(mesh.volumeList(ie),1); 
+      fem.update(mesh.volumeList(ie),1);
       for (i=1; i<=nV; ++i){
           geo.coorMap(x,y,z,fem.xi(i+lcount),fem.eta(i+lcount),fem.zeta(i+lcount));
           index = ie+gcount;
@@ -127,7 +129,7 @@ void wr_gmsh_parsed(string fname, string title,const  TheMesh& mesh, const TheDo
   }
 
  for(i=nv;i<nv+num_points_supp;++i){
-  ofile << "SP("<<supp_x[i-nv] << "," << supp_y[i-nv] << "," << supp_z[i-nv]<<")"<<"{"<<U[i]<<"};" << endl; 
+  ofile << "SP("<<supp_x[i-nv] << "," << supp_y[i-nv] << "," << supp_z[i-nv]<<")"<<"{"<<U[i]<<"};" << endl;
  }
 
  for (ie=1; ie<= nV; ++ie){
@@ -138,6 +140,6 @@ void wr_gmsh_parsed(string fname, string title,const  TheMesh& mesh, const TheDo
  ofile << endl;
  ofile << "};" << endl;
 }
-
+}
 #endif
 

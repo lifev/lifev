@@ -1,26 +1,26 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 //! \file basisElSh.h
 /*! Contains the basic element shapes, to be used by Geometric and Finite
-  Elements 
+  Elements
 
-  $Header: /cvsroot/lifev/lifev/life/lifecore/Attic/basisElSh.hpp,v 1.1 2004-05-27 14:14:16 lformaggia Exp $
+  $Header: /cvsroot/lifev/lifev/life/lifecore/Attic/basisElSh.hpp,v 1.2 2004-08-29 15:53:20 prudhomm Exp $
 
  \version 0.0 Experimental   19/8/99. Luca Formaggia
 
@@ -47,7 +47,7 @@
   which returns the local ID corresponding and edge on the face _localface.
   It returna also if the orientation of the edge on the face is consistent
   with that of the same edge on the element
-  
+
 
  \note The methods edge to point-ID (EtoP) and Face to point-ID (FtoP)
  return the local id number of points on faces and edges (when relevant)
@@ -67,7 +67,8 @@
 using std::pair;
 using std::make_pair;
 
-
+namespace LifeV
+{
 //! An utility to  invert point numbering on a GeoShape
 template <typename GeoShape>
 class reversePoint
@@ -89,7 +90,7 @@ class Point
 public:
   static const ReferenceShapes Shape=POINT; //!< Identify the shape
   static const ReferenceGeometry Geometry=VERTEX;
-  static const UInt nDim=0;   //!< Dimensionality  
+  static const UInt nDim=0;   //!< Dimensionality
   static const UInt numFaces=0;//!< Number of faces
   static const UInt numEdges=0;//!< Number of faces
   static const UInt numVertices=1; //!< Number of vertices.
@@ -172,10 +173,10 @@ class LinearHexa;
 class QuadraticHexa;
 
 //! \ingroup GeoShape
-class GeoPoint: 
+class GeoPoint:
 public Point
 {
-public: 
+public:
   typedef Point BasRefSha;
   static const UInt numPoints=1;//!< Number of points
 };
@@ -216,7 +217,7 @@ public:
   static const UInt  nbPtsPerVertex  = 1;
   static const UInt  nbPtsPerEdge    = 0;
   static const UInt  nbPtsPerFace    = 0;
-  static ID eToP(ID const _localEdge, ID const _point); 
+  static ID eToP(ID const _localEdge, ID const _point);
 };
 
 //! \ingroup GeoShape
@@ -339,7 +340,7 @@ operate(ID const & point)
 {
   return point <=GeoShape::numVertices? GeoShape::numVertices-point+1:GeoShape::numPoints-point+GeoShape::numVertices+1;
 };
-
+}
 
 #endif
 

@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -19,8 +19,8 @@
 #include <iostream>
 #include "dataAztec.hpp"
 
-using namespace std;
-
+namespace LifeV
+{
 
 DataAztec::DataAztec(const GetPot& dfile, const string& section):
   aztec_solver_list(section+"/solver"),
@@ -93,7 +93,7 @@ DataAztec::DataAztec(const GetPot& dfile, const string& section):
   aztec_output_list.add("last",AZ_last,"Print out final residual and warnings");
   aztec_output_list.add("warnings",AZ_warnings,"Print out only warning messages");
   aztec_output_list.add("all_res",1,"Print out all residuals and warnings (default)");
-  
+
   aztec_output_str   = dfile((section+"/output").data(),"all_res");
   aztec_output = aztec_output_list.value(aztec_output_str);
   aztec_pre_calc = dfile((section+"/pre_calc").data(), AZ_calc);
@@ -129,7 +129,7 @@ DataAztec::DataAztec(const GetPot& dfile, const string& section):
   aztec_orth_kvecs = dfile((section+"/orth_kvecs").data(),AZ_FALSE);
   aztec_ignore_scaling = dfile((section+"/ignore_scaling").data(),AZ_FALSE);
   aztec_check_update_size = dfile((section+"/check_update_size").data(),AZ_FALSE);
-  // 
+  //
   aztec_tol  = dfile((section+"/tol").data(), 1.0e-06);
   aztec_drop = dfile((section+"/drop").data(),0.0);
   aztec_ilut_fill = dfile((section+"/ilut_fill").data(),1.);
@@ -150,9 +150,9 @@ void DataAztec::aztecOptionsFromDataFile(int* options,double* params)
     GetPot default parameters).
   */
   AZ_defaults(options,params);
-  
+
   // Next, we overload with the users parameters from the data file:
-  
+
   options[AZ_solver]   = aztec_solver;
   options[AZ_scaling]  = aztec_scaling;
   options[AZ_precond]  = aztec_precond;
@@ -176,7 +176,7 @@ void DataAztec::aztecOptionsFromDataFile(int* options,double* params)
   options[AZ_orth_kvecs] = aztec_orth_kvecs;
   options[AZ_ignore_scaling] = aztec_ignore_scaling;
   options[AZ_check_update_size] = aztec_check_update_size;
-  // 
+  //
   params[AZ_tol]  = aztec_tol;
   params[AZ_drop] = aztec_drop;
   params[AZ_ilut_fill] = aztec_ilut_fill;
@@ -189,26 +189,26 @@ void DataAztec::aztecSolveLinearSyst(MSRMatr<double>& mat,
 				     int unknown_size,MSRPatt& pattern)
 {
   int    proc_config[AZ_PROC_SIZE];// Processor information:
-  int    options[AZ_OPTIONS_SIZE]; // Array used to select solver options.     
-  double params[AZ_PARAMS_SIZE];   // User selected solver paramters.          
-  int    *data_org;                // Array to specify data layout   
+  int    options[AZ_OPTIONS_SIZE]; // Array used to select solver options.
+  double params[AZ_PARAMS_SIZE];   // User selected solver paramters.
+  int    *data_org;                // Array to specify data layout
   double status[AZ_STATUS_SIZE];   // Information returned from AZ_solve()
-  int    *update;                  // vector elements updated on this node. 
-  int    *external;                // vector elements needed by this node.    
-  int    *update_index;            // ordering of update[] and external[]     
+  int    *update;                  // vector elements updated on this node.
+  int    *external;                // vector elements needed by this node.
+  int    *update_index;            // ordering of update[] and external[]
   int    *extern_index;            // locally on this processor.
   int    N_update;                 // # of unknowns updated on this node
   AZ_set_proc_config(proc_config, AZ_NOT_MPI);
   AZ_read_update(&N_update, &update, proc_config, unknown_size,1,AZ_linear);
-  AZ_transform(proc_config, &external, 
-	       (int *)pattern.giveRaw_bindx(), mat.giveRaw_value(), 
+  AZ_transform(proc_config, &external,
+	       (int *)pattern.giveRaw_bindx(), mat.giveRaw_value(),
 	       update, &update_index,
 	       &extern_index, &data_org, N_update, NULL, NULL, NULL, NULL,
 	       AZ_MSR_MATRIX);
   // We initialize Aztec options and parameters from the data file:
   aztecOptionsFromDataFile(options,params);
-  AZ_solve(unknown, rhs, options, params, NULL, 
-	   (int *)pattern.giveRaw_bindx(), NULL, NULL, NULL, 
+  AZ_solve(unknown, rhs, options, params, NULL,
+	   (int *)pattern.giveRaw_bindx(), NULL, NULL, NULL,
 	   mat.giveRaw_value(), data_org,status, proc_config);
 }
 
@@ -218,24 +218,24 @@ void DataAztec::aztecSolveLinearSyst(MSRMatr<double>& mat,
 				     int* options,double* params)
 {
   int    proc_config[AZ_PROC_SIZE];// Processor information:
-  int    *data_org;                // Array to specify data layout   
+  int    *data_org;                // Array to specify data layout
   double status[AZ_STATUS_SIZE];   // Information returned from AZ_solve()
-  int    *update;                  // vector elements updated on this node. 
-  int    *external;                // vector elements needed by this node.    
-  int    *update_index;            // ordering of update[] and external[]     
+  int    *update;                  // vector elements updated on this node.
+  int    *external;                // vector elements needed by this node.
+  int    *update_index;            // ordering of update[] and external[]
   int    *extern_index;            // locally on this processor.
   int    N_update;                 // # of unknowns updated on this node
   AZ_set_proc_config(proc_config, AZ_NOT_MPI);
   AZ_read_update(&N_update, &update, proc_config, unknown_size,1,AZ_linear);
 
-  AZ_transform(proc_config, &external, 
-	       (int *)pattern.giveRaw_bindx(), mat.giveRaw_value(), 
+  AZ_transform(proc_config, &external,
+	       (int *)pattern.giveRaw_bindx(), mat.giveRaw_value(),
 	       update, &update_index,
 	       &extern_index, &data_org, N_update, NULL, NULL, NULL, NULL,
 	       AZ_MSR_MATRIX);
   //Here, Aztec options and parameters are provided by the calling function
-  AZ_solve(unknown, rhs, options, params, NULL, 
-	   (int *)pattern.giveRaw_bindx(), NULL, NULL, NULL, 
+  AZ_solve(unknown, rhs, options, params, NULL,
+	   (int *)pattern.giveRaw_bindx(), NULL, NULL, NULL,
 	   mat.giveRaw_value(), data_org,status, proc_config);
 }
 
@@ -245,7 +245,7 @@ void DataAztec::dataAztecHelp(ostream& c)
   c << endl;
   aztec_solver_list.showMe();
   c << endl;
-  aztec_precond_list.showMe(); 
+  aztec_precond_list.showMe();
   c << endl;
   aztec_subdomain_solve_list.showMe();
   c << endl;
@@ -254,34 +254,35 @@ void DataAztec::dataAztecHelp(ostream& c)
 
 void DataAztec::dataAztecShowMe(ostream& c)
 {
-  c << "\n*** Values for data [aztec]\n\n";
-  c << "aztec_solver            = "<<aztec_solver<<" ("<<aztec_solver_str<< ")"<< endl;
-  c << "aztec_scaling           = "<<aztec_scaling<<" ("<<aztec_scaling_str<< ")"<< endl;
-  c << "aztec_precond           = "<<aztec_precond<<" ("<<aztec_precond_str<< ")"<< endl;
-  c << "aztec_tol               = " << aztec_tol << endl;
-  c << "aztec_conv              = "<<aztec_conv<<" ("<<aztec_conv_str<< ")"<< endl;
-  c << "aztec_output            = "<<aztec_output<<" ("<<aztec_output_str<< ")"<< endl;
-  c << "aztec_pre_calc          = " << aztec_pre_calc << endl; 
-  c << "aztec_max_iter          = " << aztec_max_iter << endl; 
-  c << "aztec_poly_ord          = " << aztec_poly_ord << endl; 
-  c << "aztec_overlap           = " << aztec_overlap << endl; 
-  c << "aztec_type_overlap      = " << aztec_type_overlap << endl; 
-  c << "aztec_kspace            = " << aztec_kspace << endl; 
-  c << "aztec_orthog            = " << aztec_orthog << endl; 
-  c << "aztec_aux_vec           = " << aztec_aux_vec << endl; 
-  c << "aztec_reorder           = " << aztec_reorder << endl; 
-  c << "aztec_keep_info         = " << aztec_keep_info << endl; 
-  c << "aztec_subdomain_solve   = "<<aztec_subdomain_solve
-    <<" ("<<aztec_subdomain_solve_str<< ")"<< endl;
-  c << "aztec_graph_fill        = " << aztec_graph_fill << endl; 
-  c << "aztec_init_guess        = " << aztec_init_guess << endl; 
-  c << "aztec_keep_kvecs        = " << aztec_keep_kvecs << endl; 
-  c << "aztec_apply_kvecs       = " << aztec_apply_kvecs << endl; 
-  c << "aztec_orth_kvecs        = " << aztec_orth_kvecs << endl; 
-  c << "aztec_ignore_scaling    = " << aztec_ignore_scaling << endl; 
-  c << "aztec_check_update_size = " << aztec_check_update_size << endl;
-  c << "aztec_drop              = " << aztec_drop << endl;
-  c << "aztec_ilut_fill         = " << aztec_ilut_fill<< endl;
-  c << "aztec_omega             = " << aztec_omega << endl;
-  c << "aztec_update_reduction  = " << aztec_update_reduction << endl;
+    c << "\n*** Values for data [aztec]\n\n";
+    c << "aztec_solver            = "<<aztec_solver<<" ("<<aztec_solver_str<< ")"<< endl;
+    c << "aztec_scaling           = "<<aztec_scaling<<" ("<<aztec_scaling_str<< ")"<< endl;
+    c << "aztec_precond           = "<<aztec_precond<<" ("<<aztec_precond_str<< ")"<< endl;
+    c << "aztec_tol               = " << aztec_tol << endl;
+    c << "aztec_conv              = "<<aztec_conv<<" ("<<aztec_conv_str<< ")"<< endl;
+    c << "aztec_output            = "<<aztec_output<<" ("<<aztec_output_str<< ")"<< endl;
+    c << "aztec_pre_calc          = " << aztec_pre_calc << endl;
+    c << "aztec_max_iter          = " << aztec_max_iter << endl;
+    c << "aztec_poly_ord          = " << aztec_poly_ord << endl;
+    c << "aztec_overlap           = " << aztec_overlap << endl;
+    c << "aztec_type_overlap      = " << aztec_type_overlap << endl;
+    c << "aztec_kspace            = " << aztec_kspace << endl;
+    c << "aztec_orthog            = " << aztec_orthog << endl;
+    c << "aztec_aux_vec           = " << aztec_aux_vec << endl;
+    c << "aztec_reorder           = " << aztec_reorder << endl;
+    c << "aztec_keep_info         = " << aztec_keep_info << endl;
+    c << "aztec_subdomain_solve   = "<<aztec_subdomain_solve
+      <<" ("<<aztec_subdomain_solve_str<< ")"<< endl;
+    c << "aztec_graph_fill        = " << aztec_graph_fill << endl;
+    c << "aztec_init_guess        = " << aztec_init_guess << endl;
+    c << "aztec_keep_kvecs        = " << aztec_keep_kvecs << endl;
+    c << "aztec_apply_kvecs       = " << aztec_apply_kvecs << endl;
+    c << "aztec_orth_kvecs        = " << aztec_orth_kvecs << endl;
+    c << "aztec_ignore_scaling    = " << aztec_ignore_scaling << endl;
+    c << "aztec_check_update_size = " << aztec_check_update_size << endl;
+    c << "aztec_drop              = " << aztec_drop << endl;
+    c << "aztec_ilut_fill         = " << aztec_ilut_fill<< endl;
+    c << "aztec_omega             = " << aztec_omega << endl;
+    c << "aztec_update_reduction  = " << aztec_update_reduction << endl;
+}
 }

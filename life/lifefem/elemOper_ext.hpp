@@ -1,17 +1,18 @@
+
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -19,6 +20,7 @@
 
 #ifndef _ELEM_OPER_EXT
 #define _ELEM_OPER_EXT
+
 /******************************************************************
  Definition of ElementarOperators and all the utilities
  for the assembly via Expression Templates (See Veldhuizen, Haney, Furnish)
@@ -32,12 +34,14 @@
 #include "elemVec.hpp"
 #include "currentFE.hpp"
 
+namespace LifeV
+{
 typedef double Real;
 
 class Function {
 public:
   virtual Real operator()(Real x, Real y, Real z){return 0;}
-}; 
+};
 
 
 template<typename A>
@@ -45,19 +49,19 @@ class Tensor {
 public:
   Tensor(int n=NDIM){
     m.resize(n);
-    for(int i=0;i<n;i++){m[i].resize(n);}	  
+    for(int i=0;i<n;i++){m[i].resize(n);}
   }
-  
+
   //Operatore di assegnamento
   void operator()(int i,int j,A a){m[i][j]=a;}
-  
+
   //Operatori di restituzione
   A operator()(int i,int j){return (m[i][j]);}
-  
+
   Real operator()(int i,int j,Real x,Real y,Real z){
     return (*m[i][j])(x,y,z);
   }
-  
+
 private:
   vector<vector<A> > m;
 };
@@ -69,9 +73,9 @@ typedef Tensor<Real> RTens;
 // Available elementar operators
 /////////////////////
 class Mass {
-public: 
+public:
   Mass(CurrentFE* fe):_fe(fe){};
-  
+
   CurrentFE* fe_ptr() {return _fe;};
 
   Real  operator()(int i, int j, int iq, Real x, Real y, Real z,int ic=0, int jc=0)
@@ -84,9 +88,9 @@ private:
 
 // December 2001: Vector formulation
 class VMass {
- public: 
+ public:
   VMass(CurrentFE* fe, int ncomp):_fe(fe),_ncomp(ncomp){};
- 
+
   CurrentFE* fe_ptr() {return _fe;};
 
  // Versione semplice: DOVREBBE ANDARE BENE PER MOLTE COSE
@@ -103,7 +107,7 @@ class VMass {
   vector<Real>  operator()(int i, int j, int iq, Real x, Real y, Real z)
     { vector<Real> v(_ncomp*_ncomp);
     for (int jc=1;jc<=_ncomp;++jc){
-      for (int ic=1;ic<=_ncomp;++ic) 
+      for (int ic=1;ic<=_ncomp;++ic)
        {
         // [[a,b,c][d,e,f][g,h,i]] => [a,d,g,b,e,h,c,f,i];
         ic==jc ? v[(jc-1)*_ncomp+ic]=_fe->phi(i,iq)*_fe->phi(j,iq) : v[(jc-1)*_ncomp+ic]= 0.;
@@ -117,16 +121,16 @@ class VMass {
 };
 
 /////
-class Stiff { 
- public: 
+class Stiff {
+ public:
   Stiff(CurrentFE* fe):_fe(fe){};
   // Stiff()
   //   { ASSERT_PRE(FE::getDerivSwitch(FirstDeriv),
   //	     "stiffness matrix needs first derivatives");
-  //   } 
- 
+  //   }
+
   CurrentFE* fe_ptr() {return _fe;};
- 
+
  Real operator()(int i, int j, int iq, Real x, Real y, Real z, int ic=0, int jc=0)
    {
      Real s=0;
@@ -139,7 +143,7 @@ class Stiff {
    {
      return _fe->phiDer(i,icoor,iq)*_fe->phiDer(j,jcoor,iq);
    }
- 
+
 
  private:
  CurrentFE* _fe; // MUST be a pointer
@@ -148,9 +152,9 @@ class Stiff {
 
 // December 2001: Vector formulation
 class VStiff {
- public: 
+ public:
   VStiff(CurrentFE* fe, int ncomp):_fe(fe),_ncomp(ncomp){};
- 
+
   CurrentFE* fe_ptr() {return _fe;};
 
   Real by_comp(int i, int j, int iq, Real x, Real y, Real z)
@@ -158,9 +162,9 @@ class VStiff {
     Real s=0;
     for (int icoor=0; icoor<_fe->nbCoor;icoor++)
       s+=_fe->phiDer(i,icoor,iq)*_fe->phiDer(j,icoor,iq);
-    
+
     return s;}
-  
+
   // Versione semplice: DOVREBBE ANDARE BENE PER MOLTE COSE
   Real operator()(int i, int j, int iq, Real x, Real y, Real z,int ic, int jc)
   {
@@ -169,7 +173,7 @@ class VStiff {
        for (int icoor=0; icoor<_fe->nbCoor;icoor++){
 	 s+=_fe->phiDer(i,icoor,iq)*_fe->phiDer(j,icoor,iq);
        }
-       return s;      
+       return s;
      }
      else
        return 0;
@@ -182,7 +186,7 @@ class VStiff {
   vector<Real>  operator()(int i, int j, int iq, Real x, Real y, Real z)
     { vector<Real> v(_ncomp*_ncomp);
     for (int jc=1;jc<=_ncomp;++jc){
-      for (int ic=1;ic<=_ncomp;++ic) 
+      for (int ic=1;ic<=_ncomp;++ic)
        {
         // [[a,b,c][d,e,f][g,h,i]] => [a,d,g,b,e,h,c,f,i];
         ic==jc ? v[(jc-1)*_ncomp+ic]=by_comp(i,j,iq,x,y,z) : v[(jc-1)*_ncomp+ic]= 0.;
@@ -199,9 +203,9 @@ class VStiff {
 // A glance to the mixed (and NS) problems.....
 template<int coor>
 class Grad{
- public: 
+ public:
   Grad<coor>(CurrentFE* fe):_fe1(fe),_fe2(fe){};
- 
+
   CurrentFE* fe1_ptr() {return _fe1;};
   CurrentFE* fe2_ptr() {return _fe2;};
 
@@ -209,7 +213,7 @@ class Grad{
   // Grad()
   //   { ASSERT_PRE(FE::getDerivSwitch(FirstDeriv),
   //	     "stiffness matrix needs first derivatives");
-  //   } 
+  //   }
 
   // Correction Alain, 25/01/02, ic and jc were missing.
  Real operator()(int i, int j, int iq, Real x, Real y, Real z, int ic=0, int jc=0)
@@ -292,7 +296,7 @@ class EOExpr {
 
    P operator()(int i, int j, int iq, int icoor, int jcoor)
      { return _a(i,j,iq,icoor,jcoor);}
-   
+
    P operator()(int i, int j, int iq, Real x, Real y, Real z,int ic,int jc)
      { return _a(i,j,iq,x,y,z,ic,jc);}
 
@@ -346,9 +350,9 @@ class EOBinOp{
   //  int _ncomp;
  public:
   EOBinOp(const A& a, const B& b):_a(a),_b(b)
-    { 
+    {
       //     if (a.nc()!=b.nc()) {cerr << "Error: you can't compose differential operators with different components"<<endl; exit(1);}
-      //     _ncomp=a.nc(); 
+      //     _ncomp=a.nc();
     };
 
   P operator()(int i, int j, int iq, Real x, Real y, Real z,int ic=0, int jc=0)
@@ -375,7 +379,7 @@ class EORBinOp{
   EORBinOp(const Real  b,const A& a):_a(a),_b(b)
     {};
 
-  P operator()(int i, int j, int iq, Real x, Real y, Real z,int ic=0, int jc=0) 
+  P operator()(int i, int j, int iq, Real x, Real y, Real z,int ic=0, int jc=0)
     {return Op::apply(_a(i,j,iq,x,y,z,ic,jc),_b);};
 };
 
@@ -400,7 +404,7 @@ class EOFTBinOp{
     }
     return s;
   }
-      
+
 };
 
 template <typename P, typename A, typename Op>
@@ -424,7 +428,7 @@ class EORTBinOp{
     }
     return s;
   }
-      
+
 };
 
 template <typename P, typename A, typename Op>
@@ -452,7 +456,7 @@ class EOFBinOp{
 //
 ////////////////////////////////
 //
-// Addition 
+// Addition
 //
 template<typename P>
 class EOAdd{
@@ -543,7 +547,7 @@ template < typename T >
 inline T TSquare(T InValue)
 {
    return (InValue*InValue);
-} 
+}
 
 //===========================================
 // Class PhiFct: Serve per l`assemblaggio del vettore dei termini noti del sistema lineare
@@ -552,7 +556,7 @@ template<typename FCT>
 class PhiFct
 {
 public:
-  
+
   PhiFct<FCT>(CurrentFE* fe,FCT& fcT):_fe(fe),_fcT(fcT){};
   CurrentFE* fe_ptr() {return _fe;};
 
@@ -587,13 +591,13 @@ public:
 // Class PurePhi
 //===========================================
 class PurePhi
-{ 
-public: 
+{
+public:
 
 PurePhi(CurrentFE* fe): _fe(fe){};
- 
+
 CurrentFE* fe_ptr() {return _fe;};
- 
+
 Real operator()(UInt k,UInt iq)
 {
 	return _fe->phi(k,iq);
@@ -601,7 +605,7 @@ Real operator()(UInt k,UInt iq)
 
 private:
 
-CurrentFE* _fe; 
+CurrentFE* _fe;
 };
 
 //===========================================
@@ -609,12 +613,12 @@ CurrentFE* _fe;
 //===========================================
 class PureGrad
 {
-public: 
+public:
 
  PureGrad(CurrentFE* fe): _fe(fe){};
- 
+
  CurrentFE* fe_ptr() {return _fe;};
- 
+
  Real operator()(int k,int icoor,int iq)
  {
 	return _fe->phiDer(k,icoor,iq);
@@ -622,20 +626,20 @@ public:
 
 private:
 
- CurrentFE* _fe; 
+ CurrentFE* _fe;
 };
 
 //===========================================
 // Class PureDer2
 //===========================================
 class PureDer2
-{ 
- public: 
+{
+ public:
 
   PureDer2( CurrentFE* fe ): _fe( fe ){} ;
- 
+
   CurrentFE* fe_ptr() {return _fe;};
- 
+
   Real operator()( UInt k ,UInt icoor,UInt jcoor,UInt iq )
     {
       return _fe->phiDer2((int)k,(int)icoor,(int)jcoor,(int)iq);
@@ -643,24 +647,24 @@ class PureDer2
 
  private:
 
-  CurrentFE* _fe; 
+  CurrentFE* _fe;
 };
 
 // Operatori da usare nell`implementazione dei metodi di stabilizzazione:
 //===========================================
-// Class Laplacian 
+// Class Laplacian
 //===========================================
 template< typename PHD >
 class Laplacian
 {
- public: 
+ public:
 
   Laplacian<  PHD > (PHD& phD): _phD(phD){};
- 
+
   Real operator()(UInt k ,UInt iq)
     {
       Real s=0;
-    
+
       for( int icoor=0;icoor<_phD.fe_ptr()->nbCoor;icoor++)
 	{
 	  s+= _phD(k,icoor,icoor,iq);
@@ -675,24 +679,24 @@ class Laplacian
 };
 
 //===========================================
-// Class LS 
+// Class LS
 //===========================================
 template< typename L>
 class LS
 {
- public: 
+ public:
 
   LS<L>(L &Lap,CurrentFE* fe,Real sigma,Real mu):_Lap(Lap),_fe(fe),_sigma(sigma),_mu(mu){};
-  CurrentFE* fe_ptr() {return _fe;}; 
+  CurrentFE* fe_ptr() {return _fe;};
   Real operator()(UInt i,UInt iq)
     {
       return _mu*_Lap(i,iq)+_sigma*_fe->phi(i,iq);
-     
-    } 
+
+    }
 
  private:
 
-  L _Lap; 
+  L _Lap;
   CurrentFE* _fe;
   Real _sigma;
   Real _mu;
@@ -700,42 +704,42 @@ class LS
 };
 
 //===========================================
-// Class LSS 
+// Class LSS
 //===========================================
 template<typename PHD,typename VT>
 class LSS
 {
- public: 
+ public:
 
   LSS<PHD,VT>(PHD& phD,VT& Beta):_phD(phD),_Beta(Beta){};
 
   Real operator()(UInt k,UInt iq)
     {
       Real s=0;
-	
+
       for (int icoor=0;icoor<_phD.fe_ptr()->nbCoor;icoor++)
 	{
 	  s+=_Beta[icoor]*_phD(k,icoor,iq);
 	}
-    
+
       return s;
     }
 
  private:
- 
+
   PHD _phD;
   VT _Beta;
 };
 
 //===========================================
-// Class Stab 
+// Class Stab
 //===========================================
 // The Stab class has to be used for problems which have a regular mesh.
 // In fact, the parameter delta which serves for the stabilization is fixed at the beginning of the program. You have to calculate it before (depending on the mesh).
 template<typename LS,typename LSS,typename FCT>
 class Stab
 {
- public: 
+ public:
 
   Stab<LS,LSS,FCT>(LS& ols,LSS& olss,FCT& fct,Real Delta,Real Ro): _ols(ols),_olss(olss),_fct(fct),_Delta(Delta),_Ro(Ro){};
 
@@ -751,7 +755,7 @@ class Stab
     }
 
  private:
- 
+
     LS _ols;
     LSS _olss;
     FCT _fct;
@@ -765,24 +769,24 @@ class Stab
 template<typename LS,typename LSS,typename FCT>
 class VStab
 {
- public: 
+ public:
   VStab<LS,LSS,FCT>(LS& ols,LSS& olss,FCT& fct,Real Delta,Real Ro): _ols(ols),_olss(olss),_fct(fct),_Delta(Delta),_Ro(Ro){};
 
  Real operator()(UInt i,UInt j,UInt iq,Real x,Real y,Real z,UInt ic,UInt jc)
    {
-     if (ic==jc)   
+     if (ic==jc)
        return _Delta*((_ols(i,iq)+_olss(i,iq))*( _olss(j,iq)+_Ro*( _ols(j,iq))));
      else
        return 0.;
    }
 
  Real operator()(UInt j,UInt iq,Real x,Real y,Real z,UInt ic=0,UInt jc=0)
-   { 
+   {
        return _Delta*((_fct(x,y,z))*(_olss(j,iq)+_Ro*(_ols(j,iq))));
    }
- 
+
  private:
- 
+
     LS _ols;
     LSS _olss;
     FCT _fct;
@@ -795,26 +799,26 @@ class VStab
 //=====================================================================================================
 // Operator HMStab
 //=====================================================================================================
-// The HmStab class  has the same goal as the Stab class but it allows the user to stabilize the problem even if the mesh is non-regular. 
+// The HmStab class  has the same goal as the Stab class but it allows the user to stabilize the problem even if the mesh is non-regular.
 // In fact, in this case the parameter of stabilization delta is calculated for each tetraedre.
 template<typename OLS,typename OLSS,typename FCT,typename MESH>
 class HMStab
 {
-public: 
+public:
 
   HMStab<OLS,OLSS,FCT,MESH>(OLS& ols,OLSS& olss,FCT& fct,MESH& Me,CurrentFE* fe,Real& Mu,int& Ro,vector<double>& Tv);
 
   void updateLocalElement();
- 
+
   Real operator()(UInt i,UInt j,UInt ig,Real x,Real y,Real z,UInt ic=0,UInt jc=0)
     {
       if (ic==jc) // da verificare !!!!!!!!!! A. Veneziani - Novembre 2002
 	{
 	  if(i==0 && j==0 && ig==0)
 	    {
-	      updateLocalElement();	
+	      updateLocalElement();
 
-	    }	
+	    }
 	  return (_Delta*((_ols(i,ig)+_olss(i,ig))*(_olss(j,ig)+_Ro*(_ols(j,ig)))));
 	}
       else return 0.;
@@ -834,12 +838,12 @@ private:
   Real _Delta;			        // Parametro di stabilizzazione da calcolare
   int _Ro;				// Seleziono il metodo di stabilizzazione (costruttore)
   Real _V;				// Volume Tetraedro (calcolare con geomap)
-  Real _T;				// Modulo del trasporto (calcolare dal vettore di trasporto: costruttore) 	
+  Real _T;				// Modulo del trasporto (calcolare dal vettore di trasporto: costruttore)
   Real _S;				// Sfericita' (calcolare per ogni tetraedro)
   Real _At;				// Area totale del tetraedro in esame
   Real _Pe;				// Peclet (viene calcolato per ogni tetredro)
   Real _Mu;				// Diffusione (inizializzata dal costruttore)
-  int _Cn;				// Contatore tetredri (inizializzata dal costruttore a 1)  
+  int _Cn;				// Contatore tetredri (inizializzata dal costruttore a 1)
 
   vector<double> _Tv;	        // Vettore componenti trasporto (costruttore)
 
@@ -858,9 +862,9 @@ private:
 //---------------------------------------------------------------------------------------------------------------------------
 template<typename OLS,typename OLSS,typename FCT,typename MESH>
 inline HMStab<OLS,OLSS,FCT,MESH>::HMStab(OLS& ols,OLSS& olss,FCT& fct,MESH& Me,CurrentFE* fe,Real& Mu,int& Ro,vector<double>& Tv):_ols(ols),_olss(olss),_fct(fct),_Me(Me),_fe(fe) //,_Tv(Tv), _Mu(Mu),_Ro(Ro),_V(0.0) ,_T(0.),_S(0.0) ,_Delta(Delta),_At(0.0) ,_Pe(0.0) ,_Cn(1)
-{      
+{
         _Cn=1;   _Pe=0.0;  _At=0.0;  _Delta=0.0; _S=0.0;     _T=0.0;
-        _V=0.0;  _Ro=Ro;   _Mu=Mu;   _Tv=Tv;      int i=0;   int j=0;    
+        _V=0.0;  _Ro=Ro;   _Mu=Mu;   _Tv=Tv;      int i=0;   int j=0;
         Real somma=0;
 
 	// Inizializzo la matrice di connessione
@@ -868,8 +872,8 @@ inline HMStab<OLS,OLSS,FCT,MESH>::HMStab(OLS& ols,OLSS& olss,FCT& fct,MESH& Me,C
 	_C[0][1] = 2 ;         	_C[1][1] = 4 ;   	_C[2][1] = 1 ;  	_C[3][1] = 2 ;
 	_C[0][2] = 4 ;         	_C[1][2] = 5 ;  	_C[2][2] = 3 ;  	_C[3][2] = 5 ;
 
-	// Inizializzo le coordinate dei vertici	
-	for(i=0;i<4;i++)		
+	// Inizializzo le coordinate dei vertici
+	for(i=0;i<4;i++)
 	  {
 	    for(j=0;j<3;j++)
 	      {
@@ -878,25 +882,25 @@ inline HMStab<OLS,OLSS,FCT,MESH>::HMStab(OLS& ols,OLSS& olss,FCT& fct,MESH& Me,C
 	  }
 
 	// Inizializzo le lunghezze dei lati
-	for(i=0;i<6;i++)		
+	for(i=0;i<6;i++)
 	  {
 	    _L[i]=0.;
 	  }
 
 	// Inizializzo i semiperimetri e le Aree
-	for(i=0;i<4;i++)		
+	for(i=0;i<4;i++)
 	  {
 	    _P[i]=0.;
 	    _A[i]=0.;
 	  }
 
 	// Inizializzo il modulo del trasporto
-	for(i=0;i<3;i++)		
+	for(i=0;i<3;i++)
 	  {
 	    somma +=TSquare(_Tv[i]);               //pow(_Tv[i],2);
-	  }	
-	_T=pow(somma,.5); 		
-} 
+	  }
+	_T=pow(somma,.5);
+}
 
 //---------------------------------------------------------------------------------------------------------------------------
 // inline void HMStab<OLS,OLSS,FCT>::updateLocalElement()
@@ -908,7 +912,7 @@ inline void HMStab<OLS,OLSS,FCT,MESH>::updateLocalElement()
 	 int j=0;
 	 int k=0;
 	 Real somma=0;
-	       
+
 	 _fe->updateJac(_Me.volumeList(_Cn));
 	 _V = _fe->measure();
 	 //cout << "Volume " << _V << endl;
@@ -919,17 +923,17 @@ inline void HMStab<OLS,OLSS,FCT,MESH>::updateLocalElement()
 	     _Vcoor[j-1][1]=_Me.volumeList(_Cn).point(j).y();
 	     _Vcoor[j-1][2]=_Me.volumeList(_Cn).point(j).z();
 	   }
-	
+
 	// Calcolo i lati del tetredro in esame:
-	
-	for (j=0;j<3;j++)	
+
+	for (j=0;j<3;j++)
 	  {
 	    somma=0;
 	    for (i=0;i<3;i++)
 	      somma +=TSquare(_Vcoor[0][i]-_Vcoor[j+1][i]);    // pow(_Vcoor[0][i]-_Vcoor[ j + 1 ][i],2) ;
 	    _L[j]=sqrt(somma);                               // pow(somma,.5) ;
 	  }
-	
+
 	for(j=1;j<3;j++)
 	  {
 	    somma=0;
@@ -937,7 +941,7 @@ inline void HMStab<OLS,OLSS,FCT,MESH>::updateLocalElement()
 	      somma +=TSquare(_Vcoor[1][i]-_Vcoor[j+1][i]);    // pow(_Vcoor[1][i]-_Vcoor[ j + 1 ][i],2) ;
 	    _L[j+2]=sqrt(somma);                            // pow(somma,.5);
 	  }
-	
+
 	for (j=1;j<2;j++)
 	  {
 	    somma=0;
@@ -945,22 +949,22 @@ inline void HMStab<OLS,OLSS,FCT,MESH>::updateLocalElement()
 	      somma +=TSquare(_Vcoor[2][i]-_Vcoor[j+2][i]);    // pow(_Vcoor[2][i]-_Vcoor[ j + 2 ][i],2) ;
 	    _L[ 5 ] = sqrt(somma) ;                                // pow(somma,.5);
 	  }
-	
+
 	// Calcolo i semiperimetri del tetredro in esame:
-	
+
 	for (i=0;i<4;i++)
 	  {
-	    somma=0;		
+	    somma=0;
 	    for (j=0;j<3;j++)
 	      {
 		k =_C[i][j];
 		somma +=_L[k];
-	      }		
+	      }
 	    _P[i]=somma/2;
 	  }
-	
+
 	// Calcolo le aree delle facce del tetredro in esame:
-	
+
 	for (i=0;i<4;i++)
 	  {
 	    somma=1;
@@ -968,32 +972,32 @@ inline void HMStab<OLS,OLSS,FCT,MESH>::updateLocalElement()
 	      {
 		k=_C[i][j];
 		somma*= _P[i]-_L[k];
-	      }		
+	      }
 	    _A[i]=sqrt(_P[i]*somma);                          // pow(_P[i] * somma,.5)  ;
 	  }
-	
+
 	// Calcolo l'area totale:
-	
-	_At=0;	
+
+	_At=0;
 	for (i=0;i<4;i++)
 	  _At+=_A[i];
-      	
-	// Calcolo la sfericita':	
+
+	// Calcolo la sfericita':
 	_S=6*_V/_At;
 	//_S = 0.042265;
-		
-	// Calcolo il numero di Peclet:	
+
+	// Calcolo il numero di Peclet:
 	_Pe=(_T*_S)/(2*_Mu);
-	//	cout <<  " valeur du numero de Peclet :  " <<  _Pe << endl;  
+	//	cout <<  " valeur du numero de Peclet :  " <<  _Pe << endl;
 	//cout << endl << "Peclet " << _Pe ;
-	
-	// Assegno il valore del parametro di stabilizzazione:	
-	if(_Pe>=1)	
-	  _Delta=0.5*(_S*TSquare(_T))/(sqrt(TSquare(_T)*_V));	
-	else	
-	  _Delta=0;       
-	_Cn++;	
-	//	cout <<  " valeur de delta :  " <<  _Delta << endl;  
+
+	// Assegno il valore del parametro di stabilizzazione:
+	if(_Pe>=1)
+	  _Delta=0.5*(_S*TSquare(_T))/(sqrt(TSquare(_T)*_V));
+	else
+	  _Delta=0;
+	_Cn++;
+	//	cout <<  " valeur de delta :  " <<  _Delta << endl;
 }
 
 
@@ -1004,12 +1008,12 @@ inline void HMStab<OLS,OLSS,FCT,MESH>::updateLocalElement()
 template<typename STIFF,typename MESH>
 class StabUP
 {
-public: 
+public:
 
   StabUP<STIFF,MESH>(STIFF& stiff,MESH& Me,CurrentFE* fe,vector<double>& Tv);
 
   void updateLocalElementUP();
- 
+
   Real operator()(UInt i ,UInt j,UInt ig,Real x,Real y,Real z,UInt ic=0,UInt jc=0)
     {
       if (i==0 && j==0 && ig==0)
@@ -1028,11 +1032,11 @@ private:
   STIFF  _stiff;				// Parte simmetrica dell'operatore
 
   Real _V;				// Volume Tetraedro (calcolare con geomap)
-  Real _T;				// Modulo del trasporto (calcolare dal vettore di trasporto: costruttore) 	
+  Real _T;				// Modulo del trasporto (calcolare dal vettore di trasporto: costruttore)
   Real _S;				// Sfericita' (calcolare per ogni tetraedro)
   Real _At;				// Area totale del tetraedro in esame
 
-  int _Cn;				// Contatore tetredri (inizializzata dal costruttore a 1)  
+  int _Cn;				// Contatore tetredri (inizializzata dal costruttore a 1)
 
   vector<double> _Tv;	        // Vettore componenti trasporto (costruttore)
 
@@ -1051,19 +1055,19 @@ private:
 // inline StabUP<OLS,OLSS,FCT>::StabUP(OLS& ols,OLSS& olss,FCT& fct,int Ro)
 //-----------------------------------------------------------------------------------------------------------------
 template<typename STIFF,typename MESH>
-inline StabUP<STIFF,MESH>::StabUP (STIFF& stiff,MESH& Me,CurrentFE* fe ,vector<double>& Tv):_stiff(stiff),_Me(Me),_fe(fe) 
-{      
-        _Cn=1;       _At=0.0;      _S=0.0;  
+inline StabUP<STIFF,MESH>::StabUP (STIFF& stiff,MESH& Me,CurrentFE* fe ,vector<double>& Tv):_stiff(stiff),_Me(Me),_fe(fe)
+{
+        _Cn=1;       _At=0.0;      _S=0.0;
         _T=0.0;      _V=0.0;       _Tv=Tv;
       	int i=0;     int j=0;	   Real somma=0;
 
-      	// Inizializzo la matrice di connessione				      
-	_C[0][0]=0;	_C[1][0]=3;	_C[2][0]=0;	_C[3][0]=1;			
+      	// Inizializzo la matrice di connessione
+	_C[0][0]=0;	_C[1][0]=3;	_C[2][0]=0;	_C[3][0]=1;
 	_C[0][1]=2;	_C[1][1]=4;	_C[2][1]=1;	_C[3][1]=2;
 	_C[0][2]=4;	_C[1][2]=5;	_C[2][2]=3;	_C[3][2]=5;
 
       	// Inizializzo le coordinate dei vertici
-	for (i=0;i<4;i++)	
+	for (i=0;i<4;i++)
 	  {
 	    for(j=0;j<3;j++)
 	      {
@@ -1071,24 +1075,24 @@ inline StabUP<STIFF,MESH>::StabUP (STIFF& stiff,MESH& Me,CurrentFE* fe ,vector<d
 	      }
 	  }
       	// Inizializzo le lunghezze dei lati
-	for (i=0;i<6;i++)		
+	for (i=0;i<6;i++)
 	  {
 	    _L[i]=0.;
 	  }
      	// Inizializzo i semiperimetri e le Aree
-	for (i=0;i<4;i++)		
+	for (i=0;i<4;i++)
 	  {
 	    _P[i]=0.;
 	    _A[i]=0.;
 	  }
 	// Inizializzo il modulo del trasporto
-	for (i=0;i<3;i++)			
+	for (i=0;i<3;i++)
 	  {
 	    somma +=TSquare(_Tv[i]);               //pow(_Tv[i],2);
-	  }	
-	_T=pow(somma,.5); 
-		
-} 
+	  }
+	_T=pow(somma,.5);
+
+}
 
 //---------------------------------------------------------------------------------------------------------------------------
 // inline void StabUP<OLS,OLSS,FCT>::updateLocalElementUP()
@@ -1100,7 +1104,7 @@ inline void StabUP<STIFF,MESH>::updateLocalElementUP()
 	 int j=0;
 	 int k=0;
 	 Real somma=0;
-	 
+
 	 _fe->updateJac(_Me.volumeList(_Cn));
 	 _V = _fe->measure();
 
@@ -1110,17 +1114,17 @@ inline void StabUP<STIFF,MESH>::updateLocalElementUP()
 	     _Vcoor[j-1][1]=_Me.volumeList(_Cn).point(j).y();
 	     _Vcoor[j-1][2]=_Me.volumeList(_Cn).point(j).z();
 	   }
-	
+
 	// Calcolo i lati del tetredro in esame:
-	
-	for (j=0;j<3;j++)	
+
+	for (j=0;j<3;j++)
 	  {
 	    somma=0;
 	    for (i=0;i<3;i++)
 	      somma +=TSquare(_Vcoor[0][i]-_Vcoor[j+1][i]);    // pow(_Vcoor[0][i]-_Vcoor[ j + 1 ][i],2) ;
 	    _L[j]= sqrt(somma);                               // pow(somma,.5) ;
 	  }
-	
+
 	for (j=1;j<3;j++)
 	  {
 	    somma=0;
@@ -1128,7 +1132,7 @@ inline void StabUP<STIFF,MESH>::updateLocalElementUP()
 	      somma +=TSquare(_Vcoor[1][i]-_Vcoor[j+1][i]);    // pow(_Vcoor[1][i]-_Vcoor[ j + 1 ][i],2) ;
 	    _L[j+2]=sqrt(somma);                            // pow(somma,.5);
 	  }
-	
+
 	for (j=1;j<2;j++)
 	  {
 	    somma=0;
@@ -1136,19 +1140,19 @@ inline void StabUP<STIFF,MESH>::updateLocalElementUP()
 	      somma += TSquare(_Vcoor[2][i]-_Vcoor[j+2][i]);    // pow(_Vcoor[2][i]-_Vcoor[ j + 2 ][i],2) ;
 	    _L[5]=sqrt(somma);                                // pow(somma,.5);
 	  }
-	
-	// Calcolo i semiperimetri del tetredro in esame:	
+
+	// Calcolo i semiperimetri del tetredro in esame:
 	for (i=0;i<4;i++)
 	  {
-	    somma=0;		
+	    somma=0;
 	    for (j=0;j<3;j++)
 	      {
 		k=_C[i][j];
 		somma +=_L[k];
-	      }		
+	      }
 	    _P[i]=somma/2;
 	  }
-	
+
 	// Calcolo le aree delle facce del tetredro in esame:
       	for ( i = 0 ; i < 4 ; i ++ )
 	  {
@@ -1160,21 +1164,16 @@ inline void StabUP<STIFF,MESH>::updateLocalElementUP()
 	      }
 	    _A[i]=sqrt(_P[i]*somma);                          // pow(_P[i] * somma,.5)  ;
 	  }
-	
-	// Calcolo l'area totale:	
-	_At=0;	
+
+	// Calcolo l'area totale:
+	_At=0;
 	for (i=0;i<4;i++)
 	_At +=_A[i];
-       	
-	// Calcolo la sfericita':	
+
+	// Calcolo la sfericita':
 	_S=6*_V/_At;
 	_Cn++;
 }
-
-/////FIN DE L'AJOUT/////////////
-
-
-
-
+}
 #endif
- 
+

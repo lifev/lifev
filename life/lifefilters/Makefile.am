@@ -28,7 +28,7 @@ include_HEADERS	= gmsh_wrtrs.hpp medit_wrtrs.hpp openDX_wrtrs.hpp vtk_wrtrs.hpp 
 
 lib_LTLIBRARIES	= liblifefilters.la
 
-liblifefilters_la_SOURCES	= medit_wrtrs.cpp vtk_wrtrs.cpp  mesh_util.cpp readMesh3D.cpp
+liblifefilters_la_SOURCES	= medit_wrtrs.cpp vtk_wrtrs.cpp readMesh3D.cpp
 liblifefilters_la_LIBADD	= ../lifefem/liblifefem.la
 
 include $(top_srcdir)/admin/Doxyfile.am

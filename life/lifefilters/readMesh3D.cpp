@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -20,10 +20,12 @@
 # include <stdlib.h>
 # include <stdio.h>
 
+namespace LifeV
+{
 // here I should cut and paste the end of the readMesh3D.h
 // but I have troubles when linking (see the comments in readMesh3D.h)
 //----------------------------------------------------------------------
-// 
+//
 // Problem: the functions that follows should be in a readMesh3D.cc
 // nevertheless, if I do that, I can compile the library, but I
 // obtain several errors during the linking with a main.cc.
@@ -40,7 +42,7 @@ readMppFileHead(ifstream & mystream, UInt & numVertices, UInt & numBVertices, UI
   UInt p1,p2,p3;
   UInt i,ibc;
   //streampos start=mystream.tellg();
-  
+
   while (next_good_line(mystream,line).good()){
     if (line.find("odes") != string::npos){
       string node_s=line.substr(line.find_last_of(":")+1);
@@ -57,8 +59,8 @@ readMppFileHead(ifstream & mystream, UInt & numVertices, UInt & numBVertices, UI
 	}
       }
     }
-    
-    
+
+
     if (line.find("iangular") != string::npos){
       string node_s=line.substr(line.find_last_of(":")+1);
       numBFaces=atoi(node_s);
@@ -71,7 +73,7 @@ readMppFileHead(ifstream & mystream, UInt & numVertices, UInt & numBVertices, UI
 #endif
       }
     }
-    
+
     if (line.find("oundary") != string::npos) {
       string node_s=line.substr(line.find_last_of(":")+1);
       numBEdges=atoi(node_s);
@@ -120,11 +122,11 @@ readINRIAMeshFileHead(ifstream & mystream, UInt & numVertices, UInt & numBVertic
   Real x,y,z;
   UInt p1,p2,p3,p4,p5,p6,p7,p8;
   UInt i,ibc;
-  
+
   int idummy;
   shape=NONE;
   //streampos start=mystream.tellg();
-  
+
   while (next_good_line(mystream,line).good()){
 
     if (line.find("MeshVersionFormatted") != string:: npos){
@@ -147,8 +149,8 @@ readINRIAMeshFileHead(ifstream & mystream, UInt & numVertices, UInt & numBVertic
 	if(ibc !=0 ) numBVertices++;
       }
     }
-    
-    // I am assuming we are storing only boundary faces    
+
+    // I am assuming we are storing only boundary faces
     if (line.find("Triangles") != string::npos){
       ASSERT_PRE0(shape != HEXA," Cannot have triangular faces in an HEXA INRIA  MESH");
       shape=TETRA;
@@ -158,7 +160,7 @@ readINRIAMeshFileHead(ifstream & mystream, UInt & numVertices, UInt & numBVertic
 	mystream>>p1 >> p2 >> p3 >> ibc;
       }
     }
-    
+
     if (line.find("Quadrilaterals") != string::npos){
       ASSERT_PRE0(shape != TETRA," Cannot have quad faces in an TETRA INRIA MESH");
       shape=HEXA;
@@ -168,7 +170,7 @@ readINRIAMeshFileHead(ifstream & mystream, UInt & numVertices, UInt & numBVertic
 	mystream>>p1 >> p2 >> p3 >> p4>> ibc;
       }
     }
-    // To cope with a mistake int INRIA Mesh files    
+    // To cope with a mistake int INRIA Mesh files
     if (line.find("Tetrahedra") != string::npos){
       ASSERT_PRE0(shape != HEXA," Cannot have tetras  in a HEXA INRIA MESH");
       shape=TETRA;
@@ -178,7 +180,7 @@ readINRIAMeshFileHead(ifstream & mystream, UInt & numVertices, UInt & numBVertic
 	mystream>>p1 >> p2 >> p3 >> p4>>ibc;
       }
     }
-    
+
     if (line.find("Hexahedra") != string::npos){
       ASSERT_PRE0(shape != TETRA," Cannot have Hexahedra in a TETRA INRIA MESH");
       shape=HEXA;
@@ -199,4 +201,4 @@ readINRIAMeshFileHead(ifstream & mystream, UInt & numVertices, UInt & numBVertic
   }
   return true ;
 }
-
+}

@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -23,6 +23,8 @@
 #include "linesearch_parabolic.hpp"
 #include "linesearch_cubic.hpp"
 
+namespace LifeV
+{
 template<class Fct,class Vector,class Real, class Norm>
 int newton(Vector& sol,Fct& f,Norm& norm,Real abstol,Real reltol,int& maxit,
 	   Real eta_max,int linesearch=0, ofstream& out_res, const Real& time)
@@ -39,7 +41,7 @@ int newton(Vector& sol,Fct& f,Norm& norm,Real abstol,Real reltol,int& maxit,
 		      by the modified Eisenstat-Walker formula if etamax > 0.
 		      If eta_max < 0, then eta = |etamax| for the entire
 		      iteration (e.g. etamax = -1e-6 ensures that the linear
-		      tolerance would be always 1e-6). Default value = 0.9 
+		      tolerance would be always 1e-6). Default value = 0.9
   */
 
   /*
@@ -50,7 +52,7 @@ int newton(Vector& sol,Fct& f,Norm& norm,Real abstol,Real reltol,int& maxit,
   /*
      Parameters for the linear solver, gamma: Default value = 0.9
   */
-  const Real gamma   = 0.9;  
+  const Real gamma   = 0.9;
   //----------------------------------------------------------------------
   Real linres;
 
@@ -69,10 +71,10 @@ int newton(Vector& sol,Fct& f,Norm& norm,Real abstol,Real reltol,int& maxit,
   cout << "    Newton 0: residual=" << normRes << ", stoping tolerance = "
        << stop_tol << endl;
   cout << "------------------------------------------------------------------"
-       << endl; 
-  
+       << endl;
+
   out_res << time << "    " << iter << "   " << normRes << endl;
-  
+
   while( normRes > stop_tol && iter < maxit){
     iter++;
     ratio = normRes / normResOld;
@@ -100,7 +102,7 @@ int newton(Vector& sol,Fct& f,Norm& norm,Real abstol,Real reltol,int& maxit,
     //
     switch(linesearch){
     case 0:// no linesearch
-      sol += step;    
+      sol += step;
       f.evalResidual(residual,sol,iter);
       normRes = norm(residual);
       break;
@@ -136,10 +138,10 @@ int newton(Vector& sol,Fct& f,Norm& norm,Real abstol,Real reltol,int& maxit,
     cout << "    Newton " << iter << ": residual=" << normRes << ",  step="
 	 << normStep << endl;
     cout << "------------------------------------------------------------------"
-	 << endl;  
-    
+	 << endl;
+
     out_res << time << "    " << iter << "   " << normRes << endl;
-   
+
     //
     //-- forcing term computation (Eisenstat-Walker)
     //
@@ -164,7 +166,7 @@ int newton(Vector& sol,Fct& f,Norm& norm,Real abstol,Real reltol,int& maxit,
   maxit = iter;
   return 0;
 }
-
-#endif  
+}
+#endif
 
 

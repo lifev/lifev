@@ -1,24 +1,26 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "dof.hpp"
 
- //! Constructor
+namespace LifeV
+{
+//! Constructor
 Dof::Dof(const LocalDofPattern& _fe, UInt off):fe(_fe),_offset(off),_totalDof(0),
 					       _nEl(0),nlv(0),nle(0),nlf(0),_ltg()
 {
@@ -32,7 +34,7 @@ Dof::Dof(const Dof & dof2 ):fe(dof2.fe),_offset(dof2._offset),
 			    _ltg(dof2._ltg)
 {
   if (&dof2 == this) return;
-  
+
   //fe=dof2.fe;
   //  _offset=dof2._offset;
   //  _ltg=dof2._ltg;
@@ -55,7 +57,7 @@ void Dof::showMe( std::ostream  & out, bool verbose) const{
     out<<"************************************************************"<<std::endl;
     out<<"Element Id   Loc. N.   Global N.  #  Element Id  Loc. N. Global N. "<<std::endl;
 
-      
+
     for (UInt i=0; i<_nEl;++i){
       for (UInt j=0; j<numLocalDof();++j)
 	{
@@ -68,9 +70,10 @@ void Dof::showMe( std::ostream  & out, bool verbose) const{
 	  out<<" # ";
 	  if(j % 2!=0)out<<std::endl;
 	}
-      
+
     }
-    
+
   }
-  
+
+}
 }

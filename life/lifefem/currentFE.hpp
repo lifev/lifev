@@ -1,17 +1,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -28,21 +28,23 @@
   \brief Structure for the current finite element
 */
 
+namespace LifeV
+{
 /*!
   \class CurrentFE
-  \brief The class for a finite element 
+  \brief The class for a finite element
   \author J.-F. Gerbeau
-  \date 04/2002  
+  \date 04/2002
 
   modified: the update methods to have
             them dependent on the dimension (lifev becomes multiscale...)
 	    (nbCoor = Nb Dimension = 1, 2 or 3).
 
 	    I removed the Macro "#if defined(THREEDIM)" to
-	    use a normal switch. 
+	    use a normal switch.
 	    Question: IS IT TOO SLOW???
 
-	    I also factorized some code, and 
+	    I also factorized some code, and
 	    postponed the implementation of template methods
 	    after the class declaration.
   \author Vincent Martin
@@ -52,10 +54,10 @@
 class CurrentFE{
 private:
   //! compute only the jacobian matrix
-  void _comp_jacobian();  
+  void _comp_jacobian();
   //! call _comp_jacobian() and compute its determinant
-  void _comp_jacobian_and_det(); 
-  //! call _comp_jacobian() and compute its inverse and its determinant 
+  void _comp_jacobian_and_det();
+  //! call _comp_jacobian() and compute its inverse and its determinant
   void _comp_inv_jacobian_and_det();
   void _comp_quad_point_coor();
 
@@ -91,7 +93,7 @@ public:
   const RefFE& refFE;
   const GeoMap& geoMap;
   const QuadRule& qr;
-  KNM<Real> phi; 
+  KNM<Real> phi;
   KNMK<Real> dPhiRef;
   KNMKL<Real> dPhiRef2;
   //
@@ -145,7 +147,7 @@ public:
   void coorMap(Real& x,Real& y,Real& z,
 	       const Real & xi,const Real & eta, const Real &
 	       zeta) const;
-  /*! 
+  /*!
     return the barycenter of the element
    */
   void barycenter(Real& x, Real& y, Real& z);
@@ -227,7 +229,7 @@ public:
 
 
 //----------------------------------------------------------------------
-//! IMPLEMENTATION 
+//! IMPLEMENTATION
 //----------------------------------------------------------------------
 //! update the definition of the geo points (VM 07/04)
 template<class GEOELE>
@@ -295,7 +297,7 @@ void CurrentFE::updateJac(const GEOELE& geoele)
   _hasQuadPtCoor = false;
 #endif
   _currentId = geoele.id();
-  //! update the definition of the geo points 
+  //! update the definition of the geo points
   _update_point( geoele );
   //! compute the jacobian and its determinant...
   _comp_jacobian_and_det();
@@ -315,7 +317,7 @@ void CurrentFE::updateJacQuadPt(const GEOELE& geoele)
   _hasQuadPtCoor = true;
 #endif
   _currentId = geoele.id();
-  //! update the definition of the geo points 
+  //! update the definition of the geo points
   _update_point( geoele );
   //! compute the jacobian and its determinant...
   _comp_jacobian_and_det();
@@ -337,7 +339,7 @@ void CurrentFE::updateFirstDeriv(const GEOELE& geoele)
   _hasQuadPtCoor = false;
 #endif
   _currentId = geoele.id();
-  //! update the definition of the geo points 
+  //! update the definition of the geo points
   _update_point( geoele );
   //! compute the inverse jacobian...
   _comp_inv_jacobian_and_det();
@@ -359,7 +361,7 @@ void CurrentFE::updateFirstDerivQuadPt(const GEOELE& geoele)
   _hasQuadPtCoor = true;
 #endif
   _currentId = geoele.id();
-  //! update the definition of the geo points 
+  //! update the definition of the geo points
   _update_point( geoele );
   //! compute the inverse jacobian...
   _comp_inv_jacobian_and_det();
@@ -384,7 +386,7 @@ void CurrentFE::updateSecondDeriv(const GEOELE& geoele)
   _hasQuadPtCoor = false;
 #endif
   _currentId = geoele.id();
-  //! update the definition of the geo points 
+  //! update the definition of the geo points
   _update_point( geoele );
   //! compute the inverse jacobian...
   _comp_inv_jacobian_and_det();
@@ -406,7 +408,7 @@ void CurrentFE::updateSecondDerivQuadPt(const GEOELE& geoele)
   _hasQuadPtCoor = true;
 #endif
   _currentId = geoele.id();
-  //! update the definition of the geo points 
+  //! update the definition of the geo points
   _update_point( geoele );
   //! compute the inverse jacobian...
   _comp_inv_jacobian_and_det();
@@ -429,7 +431,7 @@ void CurrentFE::updateFirstSecondDeriv(const GEOELE& geoele)
   _hasQuadPtCoor = false;
 #endif
   _currentId = geoele.id();
-  //! update the definition of the geo points 
+  //! update the definition of the geo points
   _update_point( geoele );
   //! compute the inverse jacobian...
   _comp_inv_jacobian_and_det();
@@ -450,7 +452,7 @@ void CurrentFE::updateFirstSecondDerivQuadPt(const GEOELE& geoele)
   _hasQuadPtCoor = true;
 #endif
   _currentId = geoele.id();
-  //! update the definition of the geo points 
+  //! update the definition of the geo points
   _update_point( geoele );
   //! compute the inverse jacobian...
   _comp_inv_jacobian_and_det();
@@ -459,6 +461,6 @@ void CurrentFE::updateFirstSecondDerivQuadPt(const GEOELE& geoele)
   //! and the coordinates of the quadrature points
   _comp_quad_point_coor();
 }
-
+}
 
 #endif

@@ -1,23 +1,25 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "currentFE.hpp"
 
+namespace LifeV
+{
 CurrentFE::CurrentFE(const RefFE& _refFE,const GeoMap& _geoMap,const QuadRule& _qr)
   :
   nbGeoNode(_geoMap.nbDof),nbNode(_refFE.nbDof),nbCoor(_refFE.nbCoor),
@@ -40,7 +42,7 @@ CurrentFE::CurrentFE(const RefFE& _refFE,const GeoMap& _geoMap,const QuadRule& _
       for(int icoor=0;icoor<nbCoor;icoor++){
 	dPhiRef(i,icoor,ig) = refFE.dPhi(i,icoor,ig,qr);
         for(int jcoor=0;jcoor<nbCoor;jcoor++)
-          dPhiRef2(i,icoor,jcoor,ig) = refFE.d2Phi(i,icoor,jcoor,ig,qr); 
+          dPhiRef2(i,icoor,jcoor,ig) = refFE.d2Phi(i,icoor,jcoor,ig,qr);
       }
     }
     for(int k=0;k<nbGeoNode;k++){
@@ -103,15 +105,15 @@ void CurrentFE::coorMap(Real& x,Real& y,Real& z,
 void CurrentFE::barycenter(Real& x,Real& y,Real& z)
 {
   x = y = z = 0.;
-  /* 
+  /*
   // former code using THREEDIM (commented out VM 07/04)
   // remove it permanently if the switch seems ok.
-  for(int i=0;i<nbGeoNode;i++){ 
+  for(int i=0;i<nbGeoNode;i++){
     x += point(i,0);
     y += point(i,1);
 #if defined(THREEDIM)
     z += point(i,2);
-#endif  
+#endif
   }
   */
   switch (nbCoor) {
@@ -136,7 +138,7 @@ void CurrentFE::barycenter(Real& x,Real& y,Real& z)
   default:
     ERROR_MSG("Dimension (nbCoor): only 1, 2 or 3!" );
   }
-  
+
   x /= nbGeoNode;
   y /= nbGeoNode;
   z /= nbGeoNode;
@@ -154,7 +156,7 @@ Real CurrentFE::measure() const
 //----------------------------------------------------------------------
 Real CurrentFE::diameter() const
 {
-  ASSERT_PRE( nbCoor == 3 , 
+  ASSERT_PRE( nbCoor == 3 ,
 	      "diameter() cannot be called for a dimension != 3");
 
   int i,j,icoor;
@@ -208,10 +210,10 @@ void CurrentFE::_comp_jacobian_and_det()
   /*
   // former code using THREEDIM (commented out VM 07/04)
   // remove it permanently if the switch seems ok.
- 
+
   // determinant on integrations points
 #if defined(TWODIM)
-  // *** 2D code *** 
+  // *** 2D code ***
   Real a,b,c,d;
   for(int ig=0;ig<nbQuadPt;ig++){
     a = jacobian(0,0,ig);
@@ -222,7 +224,7 @@ void CurrentFE::_comp_jacobian_and_det()
     weightDet(ig) = detJac(ig) * qr.weight(ig);
   }
 #elif defined(THREEDIM)
-  // *** 3D code *** 
+  // *** 3D code ***
   Real a,b,c,d,e,f,g,h,i,ei,fh,bi,ch,bf,ce;
   for(int ig=0;ig<nbQuadPt;ig++){
     a = jacobian(0,0,ig);
@@ -288,7 +290,7 @@ void CurrentFE::_comp_jacobian_and_det()
   default:
     ERROR_MSG("Dimension (nbCoor): only 1, 2 or 3!" );
   }
-  
+
 }
 //----------------------------------------------------------------------
 void CurrentFE::_comp_inv_jacobian_and_det()
@@ -299,10 +301,10 @@ void CurrentFE::_comp_inv_jacobian_and_det()
   /*
   // former code using THREEDIM (commented out VM 07/04)
   // remove it permanently if the switch seems ok.
- 
+
 // determinant on integrations points an inverse tranpose jacobian
 #if defined(TWODIM)
-  // *** 2D code *** 
+  // *** 2D code ***
   Real a,b,c,d,det;
   for(int ig=0;ig<nbQuadPt;ig++){
     a = jacobian(0,0,ig);
@@ -313,12 +315,12 @@ void CurrentFE::_comp_inv_jacobian_and_det()
     detJac(ig) = det;
     weightDet(ig) = detJac(ig) * qr.weight(ig);
     tInvJac(0,0,ig) = d/det ;
-    tInvJac(0,1,ig) =-c/det ;   
+    tInvJac(0,1,ig) =-c/det ;
     tInvJac(1,0,ig) =-b/det ;
     tInvJac(1,1,ig) = a/det ;
   }
 #elif defined(THREEDIM)
-  // *** 3D code *** 
+  // *** 3D code ***
   Real a,b,c,d,e,f,g,h,i,ei,fh,bi,ch,bf,ce,det;
   for(int ig=0;ig<nbQuadPt;ig++){
     a = jacobian(0,0,ig);
@@ -342,11 +344,11 @@ void CurrentFE::_comp_inv_jacobian_and_det()
     tInvJac(0,0,ig) = (  ei - fh )/det ;
     tInvJac(0,1,ig) = (-d*i + f*g)/det ;
     tInvJac(0,2,ig) = ( d*h - e*g)/det ;
-    
+
     tInvJac(1,0,ig) = ( -bi + ch )/det ;
     tInvJac(1,1,ig) = ( a*i - c*g)/det ;
     tInvJac(1,2,ig) = (-a*h + b*g)/det ;
-    
+
     tInvJac(2,0,ig) = (  bf - ce )/det ;
     tInvJac(2,1,ig) = (-a*f + c*d)/det ;
     tInvJac(2,2,ig) = ( a*e - b*d)/det ;
@@ -375,7 +377,7 @@ void CurrentFE::_comp_inv_jacobian_and_det()
       detJac(ig) = det;
       weightDet(ig) = detJac(ig) * qr.weight(ig);
       tInvJac(0,0,ig) = d/det ;
-      tInvJac(0,1,ig) =-c/det ;   
+      tInvJac(0,1,ig) =-c/det ;
       tInvJac(1,0,ig) =-b/det ;
       tInvJac(1,1,ig) = a/det ;
     }
@@ -403,11 +405,11 @@ void CurrentFE::_comp_inv_jacobian_and_det()
       tInvJac(0,0,ig) = (  ei - fh )/det ;
       tInvJac(0,1,ig) = (-d*i + f*g)/det ;
       tInvJac(0,2,ig) = ( d*h - e*g)/det ;
-    
+
       tInvJac(1,0,ig) = ( -bi + ch )/det ;
       tInvJac(1,1,ig) = ( a*i - c*g)/det ;
       tInvJac(1,2,ig) = (-a*h + b*g)/det ;
-    
+
       tInvJac(2,0,ig) = (  bf - ce )/det ;
       tInvJac(2,1,ig) = (-a*f + c*d)/det ;
       tInvJac(2,2,ig) = ( a*e - b*d)/det ;
@@ -458,7 +460,7 @@ void CurrentFE::_comp_phiDer2()
 //----------------------------------------------------------------------
 void CurrentFE::_comp_phiDerDer2()
 {
-  Real x1,x2; 
+  Real x1,x2;
   for(int ig=0;ig<nbQuadPt;ig++){
     for(int j=0;j<nbNode;j++){
       for(int icoor=0;icoor<nbCoor;icoor++){
@@ -477,7 +479,4 @@ void CurrentFE::_comp_phiDerDer2()
     }
   }
 }
-
-
-
-
+}

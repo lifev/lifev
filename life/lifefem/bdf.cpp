@@ -21,16 +21,17 @@
 
 #include "bdf.hpp"
 
-
+namespace LifeV
+{
 Bdf::Bdf(const UInt n):
   _n(n),_s(0),_alpha(n+1),_beta(n)
 {
-    if ( n <=0 || n > MAX_ORDER )
+    if ( n <=0 || n > BDF_MAX_ORDER )
     {
         std::ostringstream __ex;
         __ex << "Error: wrong BDF order\n"
              << " you want to use BDF order " << n << "\n"
-             << " we support BDF order from 1 to " << MAX_ORDER << "\n";
+             << " we support BDF order from 1 to " << BDF_MAX_ORDER << "\n";
         throw std::invalid_argument( __ex.str() );
     }
     switch (n){
@@ -225,4 +226,4 @@ Vector Bdf::extrap()
 
   return ue;
 }
-
+}

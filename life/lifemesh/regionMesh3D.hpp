@@ -1,38 +1,31 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 /*! file regionMesh3D.h
   \brief The mesh classes interfaces
-  \version $Revision: 1.5 $ Luca Formaggia
-  \version $Revision: 1.5 $ Miguel Fernandez
+  \version $Revision: 1.6 $ Luca Formaggia
+  \version $Revision: 1.6 $ Miguel Fernandez
 
   Introduces the RegionMesh3D class
 */
-  
+
 #ifndef _REGIONMESH3D_HH_
 #define _REGIONMESH3D_HH_
-#include "lifeV.hpp"
-#include "geoElement.hpp"
-#include "switch.hpp"
-#include "bareItems.hpp"
-#include <iomanip>
-#include <fstream>
-#include "vecUnknown.hpp"
 
 #if defined(__Linux)
 # include <cstdlib>
@@ -40,9 +33,19 @@
 # include <stdlib.h>
 #endif
 
+#include "lifeV.hpp"
+#include "geoElement.hpp"
+#include "switch.hpp"
+#include "bareItems.hpp"
+#include <iomanip>
+#include <fstream>
+#include "vecUnknown.hpp"
 #include "SimpleVect.hpp"  /* stl wrap of vector class template.
-			    It supports numbering from one*/
+                              It supports numbering from one*/
 #include "basisElSh.hpp"
+
+namespace LifeV
+{
 /* ---------------------------------------------------------------------
    RegionMesh 3D
    -----------------------------------------------------------------------*/
@@ -54,18 +57,18 @@
 template <typename GEOSHAPE, typename MC=DefMarkerCommon >
 class RegionMesh3D : public MeshEntity, public MC::RegionMarker
 {
-  
+
 public:
   explicit RegionMesh3D();
   //! Constructor providing ID
   explicit RegionMesh3D(ID id);
   //! Copy contructor: not implemented yet!
   explicit RegionMesh3D(RegionMesh3D<GEOSHAPE,MC> const & m);
-  
+
   RegionMesh3D<GEOSHAPE,MC>  operator=(RegionMesh3D<GEOSHAPE,MC> const & m);
 
   ~RegionMesh3D<GEOSHAPE,MC>();
-  
+
   //! \name Markers Types
   /*! From Marker Common (MC) template parameter */
   //@{
@@ -75,35 +78,35 @@ public:
   typedef typename MC::FaceMarker FaceMarker;
   typedef typename MC::VolumeMarker VolumeMarker;
   typedef typename MC::RegionMarker RegionMarker;
-  typedef typename MC::RegionMarker Marker; 
+  typedef typename MC::RegionMarker Marker;
   //@}
- 
+
   //! \name Basic Element Shapes
   //@{
-  typedef GEOSHAPE VolumeShape; 
-  typedef typename GEOSHAPE::GeoBShape FaceShape; 
+  typedef GEOSHAPE VolumeShape;
+  typedef typename GEOSHAPE::GeoBShape FaceShape;
   typedef typename FaceShape::GeoBShape EdgeShape;
   //@}
-  
+
   //! \name Geometric Entities
   /*! Are the ones actually stored in the containers
    */
   //@{
-  typedef GeoElement3D<GEOSHAPE,MC> VolumeType; 
-  typedef GeoElement2D<FaceShape,MC> FaceType; 
-  typedef GeoElement1D<EdgeShape,MC> EdgeType; 
+  typedef GeoElement3D<GEOSHAPE,MC> VolumeType;
+  typedef GeoElement2D<FaceShape,MC> FaceType;
+  typedef GeoElement1D<EdgeShape,MC> EdgeType;
   typedef GeoElement0D<MC> PointType;
   //@}
-  
+
   //! \name GeoElemen Containers
   /*! Typedefs for STL compliant containers of mesh geometric entities
     I Use SimpleVect<> for addressing from 1. See SimpleVect.h
   */
   //!@{
   //! Points Container
-  typedef SimpleVect<PointType>    Points;  
+  typedef SimpleVect<PointType>    Points;
   //! Elements Container
-  typedef SimpleVect<VolumeType >  Volumes; 
+  typedef SimpleVect<VolumeType >  Volumes;
   //! Faces Container: it may contain only Boundary faces
   typedef SimpleVect<FaceType> Faces;
   //! Edges Container: it may be empty
@@ -118,11 +121,11 @@ public:
    * and 3D meshes
    */
   //@{
-  typedef GEOSHAPE ElementShape; 
-  typedef typename GEOSHAPE::GeoBShape BElementShape; 
-  typedef GeoElement3D<GEOSHAPE,MC> ElementType; 
+  typedef GEOSHAPE ElementShape;
+  typedef typename GEOSHAPE::GeoBShape BElementShape;
+  typedef GeoElement3D<GEOSHAPE,MC> ElementType;
   typedef GeoElement2D<FaceShape,MC> BElementType;
-  typedef SimpleVect<VolumeType >  Elements; 
+  typedef SimpleVect<VolumeType >  Elements;
   //! Faces Container: it may contain only Boundary faces
   typedef SimpleVect<FaceType> BElements;
   //@}
@@ -131,18 +134,18 @@ public:
    *   A switch is used to store the status of the RegionMesh
    *   It is  used internally to control whether
    *   some data structures have been set up.
-   *   
+   *
    *   The possible values for the "switches" are
    *
    *   \verbatim
-      
+
       HAS_ALL_FACES            HAS_VOLUME_TO_FACES
       HAS_ALL_EDGES            HAS_VOLUME_TO_EDGES
       HAS_BOUNDARY_FACES       HAS_BEEN_CHECKED
       HAS_BOUNDARY_EDGES       FACES_HAVE_ADIACENCY
-   
+
       \endverbatim
-   *   
+   *
    */
   //@{
   //! Returns the number of switches which have been set
@@ -158,13 +161,13 @@ public:
   void unsetLinkSwitch(string const & _s);
   //! output switches contents
   ostream & showLinkSwitch(bool verbose=false, ostream & out=cout)
-  {return switches.showMe(verbose,out);}  
+  {return switches.showMe(verbose,out);}
   //@}
-  
-  
-  
+
+
+
   //! \name Mesh movement utilities
-  
+
   /*! \author Miguel Fenrandez:11/2002
     Utilities to implement mesh movement
   */
@@ -176,37 +179,37 @@ public:
   template<typename VECTOR>
   void moveMesh(const VECTOR & disp);
   //@}
-  
+
   UInt numLocalVertices() const; //!< Number of local faces for each 3Delement
   UInt numLocalFaces() const; //!< Number of local faces for each 3Delement
   UInt numLocalEdges() const;  //!< Number of local edges for each 3DElement
   UInt numLocalEdgesOfFace() const; //!< Number of edges on each face
-  
+
 /*! \name Generic Methods Generic methods for all regionmeshXX
  * These are the generic methods to get information about the number of elements.
  * It is a generic interface common for all RegionMeshes (3D -- 1D).
  */
 //@{
   UInt numElements() const; //!< Number of elements (volumes)
-  UInt & numElements();//!< Number of elements (volumes) 
+  UInt & numElements();//!< Number of elements (volumes)
   UInt numBElements() const; //!< Number of Boundary elements (faces)
   UInt & numBElements(); //!< Number of boundary elements (faces)
   ElementType & element(ID const & i );
   ElementType const & element(ID const & i ) const;
   BElementType & bElement(ID const & i );
   BElementType const & bElement(ID const & i ) const;
-  
+
   //@}
   /* ============================================
                     Volume Related Methods
      ============================================*/
   /*! \name Volume Methods
-    
+
     \anchor volume_methods
   Methods which operates on 3D elements
-  
+
     There are different way of counting gemetry entities
-    
+
     <UL>
 
     <LI><b>Counter</b> A counter stored the number of entities (element, faces
@@ -227,33 +230,33 @@ public:
   */
   //@{
   /*! Returns number of Volume elements in the mesh as given by the internal counter.*/
-    UInt numVolumes() const;    
+    UInt numVolumes() const;
     UInt & numVolumes();    /*!< Access number of Volumes (internal counter)*/
     UInt storedVolumes() const; //!< volumes actully stored in list
   /*! Current capacity of Volumes  Container, i.e. how many elements may be stored */
   UInt maxNumVolumes() const;
   /*! Changes Current capacity of Volumes  (Optionally sets internal counter.) */
-  void  setMaxNumVolumes(UInt const n, bool const setcounter=false); 
+  void  setMaxNumVolumes(UInt const n, bool const setcounter=false);
   /*! Adds volumes.
     Volume Id is computed automatically. Return ref to added Volume
   */
-  VolumeType & addVolume(); 
+  VolumeType & addVolume();
   VolumeType & addVolume(VolumeType const & v);
   VolumeType & setVolume(VolumeType const & v,ID const pos);
   void setVolumeCounter();//<! set numVolumes counter
   VolumeType & lastVolume(); //!< Reference to last volume stored in list. Useful for mesh readers
-  
+
   VolumeType const & volume(ID const i) const; //!< ith mesh 3Delement
   VolumeType & volume(ID const i); //!<ith mesh 3Delement
   //@}
-  
+
   /*! \name Element Adiacency Methods
-     
+
      Methods to obtain the ID of Face and Edge belonging to an element.
      Accessing this information requires that the appropriate data
      structures have been set by using the updateElementEdges() or
      updateElementFaces() methods.
-     
+
      It is NOT required to have the full information about edges and faces:
      The ID of the Face and Edge entities may be calculated withoud
      contructing the corresponding Edge of Face Object. This saves
@@ -275,13 +278,13 @@ public:
     \param estimateFaceNumber is a guess provided by the user of the total
     number of faces. It is relevant only when createFaces=true. Setting it
     to a proper value helps in reducing time and memory.
-    
+
     \pre The routine assumes that the boundary faces are properly set, if not use the
     methods in mesh_util.h.
    */
-  void updateElementFaces(bool createFaces=false, UInt estimateFaceNumber=0); 
+  void updateElementFaces(bool createFaces=false, UInt estimateFaceNumber=0);
   //! Destroys element-to-face container. Useful to save memory!
-  void cleanElementFaces(); 
+  void cleanElementFaces();
   //!local Face
   /*! \param volId Id of volume (element)
       \param locF local face number 1<LocF<=numLocalFaces()
@@ -304,13 +307,13 @@ public:
     \param estimateEdgeNumber is a guess provided by the user of the total
     number of edges. It is relevant only when createFaces=true. Setting it
     to a proper value helps in reducing time and memory.
-    
+
     \note This method does not assume that bounrary edges are stores, since
     this condition is NOT a a paradigm for a RegionMesh3D.
   */
   void updateElementEdges(bool createEdges=false, UInt estimateEdgeNumber=0);
   //! Destroys element-to-face container
-  void cleanElementEdges(); 
+  void cleanElementEdges();
   //!local Edge
   /*! \param volId Id of volume (element)
       \param locE local edge number 1<LocE<=numLocalEdges()
@@ -319,7 +322,7 @@ public:
   UInt localEdgeId(UInt const volId, UInt const locE) const;
   UInt localEdgeId(const VolumeType & iv, UInt const locE) const;
   //@}
-  
+
   /*! \name Face Methods
 
   Methods to access/create/modify faces data  \anchor face_methods
@@ -338,7 +341,7 @@ public:
 
     <LI>Number of Boundary Faces: is the declared number of boundary faces
     in the mesh. It uses an internal counter.
-    
+
     <b>WARNING</b> A value different from zero does NOT imply that the
     boundary faces are actually stored.</LI>
 
@@ -354,23 +357,23 @@ public:
     <\UL>
     See also \ref volume_methods
   */
-    
+
   //@{
-  UInt numFaces() const; //!<Number of total faces in mesh (uses counter). 
+  UInt numFaces() const; //!<Number of total faces in mesh (uses counter).
   UInt & numFaces();    //!<Number of total faces (may modify)
-  UInt storedFaces() const; //!< Number of stored faces 
+  UInt storedFaces() const; //!< Number of stored faces
   UInt maxNumFaces() const;  //!< Max number of faces that can be stored
   //! Set Maximum Number of Faces in the Faces container
   void setMaxNumFaces(UInt const n, bool const setcounter=false);
   //! Adds a face to list (optionally a boundary face)
-  FaceType & addFace(bool const boundary=false); 
+  FaceType & addFace(bool const boundary=false);
   //! Adds a face (optionally a boundary face) and adjourn its ID
   FaceType & addFace(FaceType const & f,bool const boundary=false);
   //! Adds a face (optionally a boundary face) and adjourn its ID
   FaceType & setFace(FaceType const & f,ID position, bool const boundary=false);
   //! The last face in the container
   FaceType & lastFace();
-  FaceType const & face(ID const i) const; //<! ith mesh face 
+  FaceType const & face(ID const i) const; //<! ith mesh face
   FaceType & face(ID const i); //!< ith mesh face (may  modify!)
   FaceType  const & boundaryFace(ID const i) const; //!< ith boundary face.
   FaceType  & boundaryFace(ID const i); //!< ith boundary  face.
@@ -380,12 +383,12 @@ public:
   UInt numBFaces() const;  //<! Number of Boundary Faces
   bool isBoundaryFace(FaceType const & f) const;  //<!Is this face on boundary?
   bool isBoundaryFace(ID const & id) const;  //<!Is  face whose ID is id on boundary?
-  
+
   /*! Does this ID corresponds to a full face? A FULL FACE is a 2DElement  that is actually
     stored in the Face container.
     \return false if id does not corresponfd to a boundary face and internal faces are not stored
   */
-  bool isFullFace(UInt const & id) const;  
+  bool isFullFace(UInt const & id) const;
   //@}
 
   /*@{*/
@@ -400,14 +403,14 @@ public:
   \param Pos is equal to 1 or 2 and indicates   first or second element.
   \return ID of adjacent volume element or 0 if none.
   */
-  ID  faceElement(ID const faceId, UInt const Pos) const; 
+  ID  faceElement(ID const faceId, UInt const Pos) const;
   //! 3DElement adjacent to a FACE. Face reference given.
-  ID  faceElement(FaceType const & f, UInt const Pos) const;  
+  ID  faceElement(FaceType const & f, UInt const Pos) const;
   /*@}*/
-  
+
   /*! \name  Edge Methods
 
-  Methods to access/create/modify edges data   
+  Methods to access/create/modify edges data
 
     There are different point counters which may bi interrogated or set:
 
@@ -434,20 +437,20 @@ public:
 
   /*                          EDGES METHODS                           */
   //@{
-  UInt numEdges() const; 
+  UInt numEdges() const;
   UInt & numEdges();
   UInt storedEdges() const;
   UInt maxNumEdges() const;
   void setMaxNumEdges(UInt const n, bool const setcounter=false);
-  EdgeType & addEdge(bool const boundary=false); 
+  EdgeType & addEdge(bool const boundary=false);
   EdgeType & addEdge(EdgeType const & f,bool const boundary=false);
   EdgeType & setEdge(EdgeType const & f,ID position, bool const boundary=false);
   EdgeType & lastEdge();
-  EdgeType const & edge(ID const i) const; //!< ith mesh edge 
-  EdgeType & edge(ID const i); // ith mesh edge 
+  EdgeType const & edge(ID const i) const; //!< ith mesh edge
+  EdgeType & edge(ID const i); // ith mesh edge
   EdgeType  const & boundaryEdge(ID const i) const; //!< ith b. edge.
   EdgeType  & boundaryEdge(ID const i); //!< ith b. edge.
-  UInt numBEdges() const; 
+  UInt numBEdges() const;
   void setNumBEdges(ID const n) ;//<! Set counter of boundary edges
   bool hasEdges() const;         //<! Do I store edges?
   bool hasInternalEdges() const;         //<! Do I store internal edges?
@@ -455,36 +458,36 @@ public:
   bool isBoundaryEdge(ID const & id) const;  //<!Is  edge with ID id on boundary?
   bool isFullEdge(ID const & id) const;  //<!Is edge "id" a full edge?
   //@}
-  
+
   /*                           POINTS/VERTICES METHODS */
   /*! \name PointMethods
 
   Methods to access/create/modify Points/Vertices data
-  
+
   There are different Point counters which may be interrogated or set
   <UL> <LI>Number of Points: is the declared number of total points in
   the mesh.</LI>
-  
+
   <LI>Number of Boundary Points: is the declared number of boundary
   points in the mesh.  does NOT imply that the boundary points are
   actually stored.</LI>
-  
+
   <LI>Number of Stored Points: It is the number of Points actually stored
   on the points container.</LI>
-  
+
   <LI>Maximum number of stored points. The number of points that may
     stored before the container is resized.  \b Very \b Important: This
     parameter has to be set \b BEFORE inserting points in the
     container. since all mesh entities (a part the Point)
     will contain POINTERS into the Points container!
     </LI> </UL>
-    
+
     \note To have more information on the Point methods look at the
     documentation of the analogous Faces method (\ref face_methods).
   */
   //@{
   //! Returns number of points in the mesh (interrogate counter)
-  UInt numPoints() const; 
+  UInt numPoints() const;
   //! Changes number of points in the mesh (interrogate counter)
   UInt & numPoints();
   //! Returns number of points currently stored in Points container
@@ -496,7 +499,7 @@ public:
   /*! Add a point
     Point ID is computed automatically. We may speciy isf the point is on the boundary or
     if it is a vertex */
-  PointType & addPoint(bool const boundary=false,bool const vertices=false); 
+  PointType & addPoint(bool const boundary=false,bool const vertices=false);
   /*! Add a point
     This version taked a reference to a point
   */
@@ -507,10 +510,10 @@ public:
   PointType & setPoint(PointType const & p,ID const position, bool const boundary=false,bool const vertices=false);
 
   //!< adds point
-  UInt addPoint(ID const iden, bool const boundary=false, UInt const start=1); 
-  PointType & lastPoint();//!< last mesh point 
-  PointType const & point(ID const i) const; //!< ith mesh point 
-  PointType & point(ID const i); //!< ith mesh point 
+  UInt addPoint(ID const iden, bool const boundary=false, UInt const start=1);
+  PointType & lastPoint();//!< last mesh point
+  PointType const & point(ID const i) const; //!< ith mesh point
+  PointType & point(ID const i); //!< ith mesh point
   PointType  const & boundaryPoint(ID const i) const; //!< ith b. point.
   PointType  & boundaryPoint(ID const i); //!< ith b. point.
   UInt numBPoints() const; //!< counter of boundary points
@@ -524,27 +527,27 @@ public:
   bool isBoundaryPoint(PointType const & p) const;  //<!Is this point on boundary?
   bool isBoundaryPoint(ID const & id) const;  //<!Is this point on boundary?
   //@}
-  
+
   //! Prints some mesh info
-  ostream &  showMe(bool verbose=false, ostream & out=cout); 
+  ostream &  showMe(bool verbose=false, ostream & out=cout);
   //! Basic tests for mesh consistency.
   /*! For more estensive test see \link mesh_util.h */
-  int check(int level=0,bool const fix=false,bool const verbose=true, ostream & out=std::cerr); 
-  
+  int check(int level=0,bool const fix=false,bool const verbose=true, ostream & out=std::cerr);
+
 
   /*! \name RegionContainers
     Stl compliant containers for basic structure I
     expose them since they are standard containers
   */
   //@{
-  Points  pointList; //!< Container of mesh points/vertices  
+  Points  pointList; //!< Container of mesh points/vertices
   /*! Container of mesh points/vertices (mesh movement)
 
   Used only by mesh node movement routines. It contains the
-  mesh nodes with the previous value 
+  mesh nodes with the previous value
   */
-  Points  _pointList; 
-  Volumes volumeList; //!< Container of mesh 3DElements 
+  Points  _pointList;
+  Volumes volumeList; //!< Container of mesh 3DElements
   Faces   faceList;  //!< Container of mesh  Faces
   Edges   edgeList;  //!< Container of mesh Edges.
   SimpleVect<PointType * > _bPoints; //!< Boundary points list
@@ -554,9 +557,9 @@ public:
   // \sa Switch
   Switch switches;
 
-protected:   
+protected:
   /*! Arrays containing the ids of Edges and Faces of each element
-  I use a Define to use localto global array or directly the 
+  I use a Define to use localto global array or directly the
   bareedges */
 #ifdef SAVEMEMORY
   BareItemsHandler<BareFace> _VToF;
@@ -577,11 +580,11 @@ protected:
   */
   //@{
   template< typename T >
-  UInt numItems(SimpleVect< T> const &   list) const; 
+  UInt numItems(SimpleVect< T> const &   list) const;
   template< typename T >
-  UInt maxNumItems(SimpleVect< T> const &   list) const; 
+  UInt maxNumItems(SimpleVect< T> const &   list) const;
   template< typename T >
-  void setMaxNumItems(SimpleVect< T> &   list, UInt n, char * title); 
+  void setMaxNumItems(SimpleVect< T> &   list, UInt n, char * title);
   //@}
 
   // Internal counters
@@ -595,8 +598,8 @@ protected:
   UInt _numEdges;
   UInt _numBEdges;
 
-  // Modif Miguel:11/2002 
-  bool _moved; // True whenever the mesh has been moved 
+  // Modif Miguel:11/2002
+  bool _moved; // True whenever the mesh has been moved
 };
 
 
@@ -644,14 +647,14 @@ RegionMesh3D<GEOSHAPE,MC>::RegionMesh3D(ID id):
 template<typename GEOSHAPE, typename MC>
 RegionMesh3D<GEOSHAPE,MC>::RegionMesh3D(RegionMesh3D<GEOSHAPE,MC> const & m)
 {
-ASSERT0(true, "Copy Costructor Not Yet Implemented for RegionMesh3D") ; 
+ASSERT0(true, "Copy Costructor Not Yet Implemented for RegionMesh3D") ;
 }
 
 template<typename GEOSHAPE, typename MC>
 RegionMesh3D<GEOSHAPE,MC>
 RegionMesh3D<GEOSHAPE,MC>::operator=(RegionMesh3D<GEOSHAPE,MC> const & m)
 {
-ASSERT0(true, "Assignement Operator  Yet Not Implemented for RegionMesh3d") ; 
+ASSERT0(true, "Assignement Operator  Yet Not Implemented for RegionMesh3d") ;
 }
 
 template<typename GEOSHAPE, typename MC>
@@ -667,14 +670,14 @@ void RegionMesh3D<GEOSHAPE,MC>::moveMesh(const VECTOR & disp) {
 
   if (disp.size() != nDimensions*_numPoints)
     ERROR_MSG("We can not move the mesh with this displacement");
- 
+
   if ( !_moved ) { // We store the reference position of the mesh
     _moved = 1;
     _pointList.reserve(_numPoints);
     for (typename Points::const_iterator ip=pointList.begin();ip!=pointList.end();++ip)
       _pointList.push_back(*ip);
   }
-    
+
   for (unsigned int i=0;i<pointList.size();++i){
     for (ID j=1; j <= nDimensions; ++j) {
       pointList[i].coordinate(j) = _pointList[i].coordinate(j) + disp[ (j-1)*_numPoints + i];
@@ -708,15 +711,15 @@ template<typename GEOSHAPE, typename MC>
 UInt
 RegionMesh3D<GEOSHAPE,MC>::numElements() const
 {return _numVolumes;}
- 
+
 template<typename GEOSHAPE, typename MC>
 UInt &  RegionMesh3D<GEOSHAPE,MC>::numElements()
-{return _numVolumes;} 
+{return _numVolumes;}
 
 template<typename GEOSHAPE, typename MC>
 UInt RegionMesh3D<GEOSHAPE,MC>::numBElements() const
 {return _numBFaces;}
- 
+
 template<typename GEOSHAPE, typename MC>
 UInt & RegionMesh3D<GEOSHAPE,MC>::numBElements()
 {return _numBFaces;}
@@ -740,20 +743,20 @@ template<typename GEOSHAPE, typename MC>
 typename RegionMesh3D<GEOSHAPE,MC>::BElementType const &
 RegionMesh3D<GEOSHAPE,MC>:: bElement(ID const & i ) const
 {return boundaryFace(i);}
- 
 
-// Templates for interrogate and modify list capacities 
+
+// Templates for interrogate and modify list capacities
 
 template<typename GEOSHAPE, typename MC>
 template <typename T>
-UInt 
-RegionMesh3D<GEOSHAPE,MC>::numItems(SimpleVect< T> const &   list) const 
+UInt
+RegionMesh3D<GEOSHAPE,MC>::numItems(SimpleVect< T> const &   list) const
 {return list.size();}
 
 template<typename GEOSHAPE, typename MC>
 template <typename T>
-UInt 
-RegionMesh3D<GEOSHAPE,MC>::maxNumItems(SimpleVect< T> const &   list) const 
+UInt
+RegionMesh3D<GEOSHAPE,MC>::maxNumItems(SimpleVect< T> const &   list) const
 {return list.capacity();}
 
 template<typename GEOSHAPE, typename MC>
@@ -776,23 +779,23 @@ setMaxNumItems(SimpleVect< T> &   list, UInt n, char * title) {
 
 // ***************************** VOLUMES
 template<typename GEOSHAPE, typename MC>
-UInt 
-RegionMesh3D<GEOSHAPE,MC>::numVolumes() const 
+UInt
+RegionMesh3D<GEOSHAPE,MC>::numVolumes() const
 {return _numVolumes;}
 
 template<typename GEOSHAPE, typename MC>
-UInt & 
+UInt &
 RegionMesh3D<GEOSHAPE,MC>::numVolumes()
 {return _numVolumes;}
 
 template<typename GEOSHAPE, typename MC>
-UInt 
-RegionMesh3D<GEOSHAPE,MC>::maxNumVolumes() const 
+UInt
+RegionMesh3D<GEOSHAPE,MC>::maxNumVolumes() const
 {return maxNumItems(volumeList);}
 
 template<typename GEOSHAPE, typename MC>
-UInt 
-RegionMesh3D<GEOSHAPE,MC>::storedVolumes() const 
+UInt
+RegionMesh3D<GEOSHAPE,MC>::storedVolumes() const
 {return numItems(volumeList);}
 
 template<typename GEOSHAPE, typename MC>
@@ -811,7 +814,7 @@ RegionMesh3D<GEOSHAPE,MC>::addVolume(){
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-typename RegionMesh3D<GEOSHAPE,MC>::VolumeType & 
+typename RegionMesh3D<GEOSHAPE,MC>::VolumeType &
 RegionMesh3D<GEOSHAPE,MC>::addVolume(VolumeType const & v){
   ASSERT_PRE(volumeList.size()<volumeList.capacity() , "Volume list size exceeded" <<
 	     volumeList.size()+1<< " " <<volumeList.capacity()) ;
@@ -822,7 +825,7 @@ RegionMesh3D<GEOSHAPE,MC>::addVolume(VolumeType const & v){
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-typename RegionMesh3D<GEOSHAPE,MC>::VolumeType & 
+typename RegionMesh3D<GEOSHAPE,MC>::VolumeType &
 RegionMesh3D<GEOSHAPE,MC>::setVolume(VolumeType const & v, ID const pos){
   ASSERT_PRE(pos<=volumeList.capacity() , "position requested exceed capacity" <<
 	     pos<< " " <<volumeList.capacity()) ;
@@ -840,32 +843,32 @@ RegionMesh3D<GEOSHAPE,MC>::setVolumeCounter(){
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-typename RegionMesh3D<GEOSHAPE,MC>::VolumeType & 
+typename RegionMesh3D<GEOSHAPE,MC>::VolumeType &
 RegionMesh3D<GEOSHAPE,MC>::lastVolume()
 { return volumeList.back();}
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-typename RegionMesh3D<GEOSHAPE,MC>::VolumeType const & 
-RegionMesh3D<GEOSHAPE,MC>::volume(ID const i) const 
-{ 
+typename RegionMesh3D<GEOSHAPE,MC>::VolumeType const &
+RegionMesh3D<GEOSHAPE,MC>::volume(ID const i) const
+{
   ASSERT_BD( i> 0 && i<=  volumeList.size()) ;
-  return volumeList(i); 
+  return volumeList(i);
 }
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-typename RegionMesh3D<GEOSHAPE,MC>::VolumeType & 
-RegionMesh3D<GEOSHAPE,MC>::volume(ID const i) 
-{ 
+typename RegionMesh3D<GEOSHAPE,MC>::VolumeType &
+RegionMesh3D<GEOSHAPE,MC>::volume(ID const i)
+{
   ASSERT_BD( i> 0 && i<=volumeList.size()) ;
-  return volumeList(i); 
+  return volumeList(i);
 }
 
 // ************************* FACES ******************************
 template<typename GEOSHAPE, typename MC>
-UInt 
-RegionMesh3D<GEOSHAPE,MC>::numFaces() const 
+UInt
+RegionMesh3D<GEOSHAPE,MC>::numFaces() const
 {return _numFaces;}
 
 template<typename GEOSHAPE, typename MC>
@@ -874,13 +877,13 @@ RegionMesh3D<GEOSHAPE,MC>::numFaces()
 {return _numFaces;}
 
 template<typename GEOSHAPE, typename MC>
-UInt 
-RegionMesh3D<GEOSHAPE,MC>::storedFaces() const 
+UInt
+RegionMesh3D<GEOSHAPE,MC>::storedFaces() const
 {return numItems(faceList);}
 
 template<typename GEOSHAPE, typename MC>
-UInt 
-RegionMesh3D<GEOSHAPE,MC>::maxNumFaces() const 
+UInt
+RegionMesh3D<GEOSHAPE,MC>::maxNumFaces() const
 {return maxNumItems(faceList);}
 
 template<typename GEOSHAPE, typename MC>
@@ -892,7 +895,7 @@ if(setcounter) _numFaces=n;
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-typename RegionMesh3D<GEOSHAPE,MC>::FaceType & 
+typename RegionMesh3D<GEOSHAPE,MC>::FaceType &
 RegionMesh3D<GEOSHAPE,MC>::addFace(bool const boundary){
   return addFace(FaceType(),boundary);
 }
@@ -900,7 +903,7 @@ RegionMesh3D<GEOSHAPE,MC>::addFace(bool const boundary){
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-typename RegionMesh3D<GEOSHAPE,MC>::FaceType & 
+typename RegionMesh3D<GEOSHAPE,MC>::FaceType &
 RegionMesh3D<GEOSHAPE,MC>::addFace(FaceType const & f, bool const boundary){
   ASSERT_PRE(faceList.size()<faceList.capacity(), "Face list size exceeded" <<
 	     faceList.size()+1<< " " <<faceList.capacity()) ;
@@ -909,7 +912,7 @@ RegionMesh3D<GEOSHAPE,MC>::addFace(FaceType const & f, bool const boundary){
   if(boundary){
 #ifdef NOT_BDATA_FIRST
     ASSERT_PRE(_bFaces.size()<_bFaces.capacity(), "Boundary Face list size exceeded" <<
-	     _bFaces.size()+<< " " <<bFaces.capacity()) ;  
+	     _bFaces.size()+<< " " <<bFaces.capacity()) ;
  _bFaces.push_back(&faceList.back());
 #endif
   }
@@ -918,7 +921,7 @@ RegionMesh3D<GEOSHAPE,MC>::addFace(FaceType const & f, bool const boundary){
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-typename RegionMesh3D<GEOSHAPE,MC>::FaceType & 
+typename RegionMesh3D<GEOSHAPE,MC>::FaceType &
 RegionMesh3D<GEOSHAPE,MC>::setFace(FaceType const & f, ID position, bool const boundary){
   ASSERT_PRE(position<=faceList.capacity(), "Face list size exceeded" <<
 	     position<< " " <<faceList.capacity()) ;
@@ -927,7 +930,7 @@ RegionMesh3D<GEOSHAPE,MC>::setFace(FaceType const & f, ID position, bool const b
 #ifdef NOT_BDATA_FIRST
   if(boundary){
     ASSERT_PRE(position<=_bFaces.capacity(), "Boundary Face list size exceeded" <<
-	     _bFaces.size()<< " " <<bFaces.capacity()) ;  
+	     _bFaces.size()<< " " <<bFaces.capacity()) ;
  _bFaces.push_back(&(faceList(position)));
   }
 #endif
@@ -936,64 +939,64 @@ RegionMesh3D<GEOSHAPE,MC>::setFace(FaceType const & f, ID position, bool const b
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-typename RegionMesh3D<GEOSHAPE,MC>::FaceType & 
+typename RegionMesh3D<GEOSHAPE,MC>::FaceType &
 RegionMesh3D<GEOSHAPE,MC>::lastFace()
 { return faceList.back();}
 
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-typename RegionMesh3D<GEOSHAPE,MC>::FaceType const & 
-RegionMesh3D<GEOSHAPE,MC>::face(ID const i) const 
-{ 
+typename RegionMesh3D<GEOSHAPE,MC>::FaceType const &
+RegionMesh3D<GEOSHAPE,MC>::face(ID const i) const
+{
 ASSERT_BD( i> 0 && i<= faceList.size() ) ;
-return faceList(i); 
+return faceList(i);
 }
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-typename RegionMesh3D<GEOSHAPE,MC>::FaceType & 
+typename RegionMesh3D<GEOSHAPE,MC>::FaceType &
 RegionMesh3D<GEOSHAPE,MC>::face(ID const i)
-{ 
+{
 ASSERT_BD( i> 0 && i<= faceList.size() ) ;
-return faceList(i); 
+return faceList(i);
 }
 
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-typename RegionMesh3D<GEOSHAPE,MC>::FaceType const & 
-RegionMesh3D<GEOSHAPE,MC>::boundaryFace(ID const i) const 
-{ 
+typename RegionMesh3D<GEOSHAPE,MC>::FaceType const &
+RegionMesh3D<GEOSHAPE,MC>::boundaryFace(ID const i) const
+{
 #ifdef NOT_BDATA_FIRST
   ASSERT_PRE( _bFaces.size() != 0 " Boundary Faces not Stored" ) ;
   ASSERT_BD( i>0 && i<=   _bFaces.size() ) ;
-  return *(_bFaces(i)); 
+  return *(_bFaces(i));
 #else
   ASSERT_PRE( faceList.size() != 0, "Boundary Faces not stored" ) ;
   ASSERT_BD( i> 0 && i<=  faceList.size()) ;
-  return faceList(i); 
+  return faceList(i);
 #endif
 }
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-typename RegionMesh3D<GEOSHAPE,MC>::FaceType & 
+typename RegionMesh3D<GEOSHAPE,MC>::FaceType &
 RegionMesh3D<GEOSHAPE,MC>::boundaryFace(ID const i)
-{ 
+{
 #ifdef NOT_BDATA_FIRST
   ASSERT_PRE( _bFaces.size() != 0 " Boundary Faces not Stored" ) ;
   ASSERT_BD( i>0 && i<=   _bFaces.size() ) ;
-  return *(_bFaces(i)); 
+  return *(_bFaces(i));
 #else
   ASSERT_PRE( faceList.size() != 0, "Boundary Faces not stored" ) ;
   ASSERT_BD( i> 0 && i<=  faceList.size()) ;
-  return faceList(i); 
+  return faceList(i);
 #endif
 }
 
 template<typename GEOSHAPE, typename MC>
-UInt 
+UInt
 RegionMesh3D<GEOSHAPE,MC>::numBFaces() const {
   return _numBFaces;}
 
@@ -1008,8 +1011,8 @@ RegionMesh3D<GEOSHAPE,MC>::setNumBFaces(UInt const n) {
 
 // ************************* EDGES ******************************
 template<typename GEOSHAPE, typename MC>
-UInt 
-RegionMesh3D<GEOSHAPE,MC>::numEdges() const 
+UInt
+RegionMesh3D<GEOSHAPE,MC>::numEdges() const
 {return _numEdges;}
 
 template<typename GEOSHAPE, typename MC>
@@ -1018,13 +1021,13 @@ RegionMesh3D<GEOSHAPE,MC>::numEdges()
 {return _numEdges;}
 
 template<typename GEOSHAPE, typename MC>
-UInt 
-RegionMesh3D<GEOSHAPE,MC>::storedEdges() const 
+UInt
+RegionMesh3D<GEOSHAPE,MC>::storedEdges() const
 {return numItems(edgeList);}
 
 template<typename GEOSHAPE, typename MC>
-UInt 
-RegionMesh3D<GEOSHAPE,MC>::maxNumEdges() const 
+UInt
+RegionMesh3D<GEOSHAPE,MC>::maxNumEdges() const
 {return maxNumItems(edgeList);}
 
 template<typename GEOSHAPE, typename MC>
@@ -1035,25 +1038,25 @@ if(setcounter) _numEdges=n;}
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-typename RegionMesh3D<GEOSHAPE,MC>::EdgeType & 
+typename RegionMesh3D<GEOSHAPE,MC>::EdgeType &
 RegionMesh3D<GEOSHAPE,MC>::addEdge(bool const boundary){
   return addEdge(EdgeType(),boundary);
 }
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-typename RegionMesh3D<GEOSHAPE,MC>::EdgeType & 
+typename RegionMesh3D<GEOSHAPE,MC>::EdgeType &
 RegionMesh3D<GEOSHAPE,MC>::addEdge(EdgeType const & f, bool const boundary){
   ASSERT_PRE(edgeList.size()<edgeList.capacity(), "Edge list size exceeded" <<
 	     edgeList.size()+1<< " " <<edgeList.capacity()) ;
-  
+
   edgeList.push_back(f);
   (edgeList.back()).id()=edgeList.size();
-  
+
 #ifdef NOT_BDATA_FIRST
   if(boundary){
     ASSERT_PRE(_bEdges.size()<_bEdges.capacity(), "Boundary Edge list size exceeded" <<
-	       _bEdges.size()+1<< " " <<bEdges.capacity()) ;  
+	       _bEdges.size()+1<< " " <<bEdges.capacity()) ;
     _bEdges.push_back(&edgeList.back());
   }
 #endif
@@ -1062,7 +1065,7 @@ RegionMesh3D<GEOSHAPE,MC>::addEdge(EdgeType const & f, bool const boundary){
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-typename RegionMesh3D<GEOSHAPE,MC>::EdgeType & 
+typename RegionMesh3D<GEOSHAPE,MC>::EdgeType &
 RegionMesh3D<GEOSHAPE,MC>::setEdge(EdgeType const & f, ID position, bool const boundary){
   ASSERT_PRE(position<=edgeList.capacity(), "Edge list size exceeded" <<
 	     position<< " " <<edgeList.capacity()) ;
@@ -1071,7 +1074,7 @@ RegionMesh3D<GEOSHAPE,MC>::setEdge(EdgeType const & f, ID position, bool const b
 #ifdef NOT_BDATA_FIRST
   if(boundary){
     ASSERT_PRE(position<=_bEdges.capacity(), "Boundary Edge list size exceeded" <<
-	     _bEdges.size()<< " " <<bEdges.capacity()) ;  
+	     _bEdges.size()<< " " <<bEdges.capacity()) ;
  _bEdges.push_back(&(edgeList(position)));
   }
 #endif
@@ -1081,7 +1084,7 @@ RegionMesh3D<GEOSHAPE,MC>::setEdge(EdgeType const & f, ID position, bool const b
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-typename RegionMesh3D<GEOSHAPE,MC>::EdgeType & 
+typename RegionMesh3D<GEOSHAPE,MC>::EdgeType &
 RegionMesh3D<GEOSHAPE,MC>::lastEdge()
 { return edgeList.back();}
 
@@ -1089,57 +1092,57 @@ RegionMesh3D<GEOSHAPE,MC>::lastEdge()
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-typename RegionMesh3D<GEOSHAPE,MC>::EdgeType const & 
-RegionMesh3D<GEOSHAPE,MC>::edge(ID const i) const 
-{ 
+typename RegionMesh3D<GEOSHAPE,MC>::EdgeType const &
+RegionMesh3D<GEOSHAPE,MC>::edge(ID const i) const
+{
 ASSERT_BD( i> 0 && i<= edgeList.size() ) ;
-return edgeList(i); 
+return edgeList(i);
 }
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-typename RegionMesh3D<GEOSHAPE,MC>::EdgeType & 
+typename RegionMesh3D<GEOSHAPE,MC>::EdgeType &
 RegionMesh3D<GEOSHAPE,MC>::edge(ID const i)
-{ 
+{
 ASSERT_BD( i> 0 && i<= edgeList.size() ) ;
-return edgeList(i); 
+return edgeList(i);
 }
 
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-typename RegionMesh3D<GEOSHAPE,MC>::EdgeType const & 
-RegionMesh3D<GEOSHAPE,MC>::boundaryEdge(ID const i) const 
-{ 
+typename RegionMesh3D<GEOSHAPE,MC>::EdgeType const &
+RegionMesh3D<GEOSHAPE,MC>::boundaryEdge(ID const i) const
+{
 #ifdef NOT_BDATA_FIRST
   ASSERT_PRE( _bEdges.size() != 0 " Boundary Edges not Stored" ) ;
   ASSERT_BD( i>0 && i<=   _bEdges.size() ) ;
-  return *(_bEdges(i)); 
+  return *(_bEdges(i));
 #else
   ASSERT_PRE( edgeList.size() != 0, "Boundary Edges not stored" ) ;
   ASSERT_BD( i> 0 && i<=  edgeList.size()) ;
-  return edgeList(i); 
+  return edgeList(i);
 #endif
 }
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-typename RegionMesh3D<GEOSHAPE,MC>::EdgeType & 
+typename RegionMesh3D<GEOSHAPE,MC>::EdgeType &
 RegionMesh3D<GEOSHAPE,MC>::boundaryEdge(ID const i)
-{ 
+{
 #ifdef NOT_BDATA_FIRST
   ASSERT_PRE( _bEdges.size() != 0 " Boundary Edges not Stored" ) ;
   ASSERT_BD( i>0 && i<=   _bEdges.size() ) ;
-  return *(_bEdges(i)); 
+  return *(_bEdges(i));
 #else
   ASSERT_PRE( edgeList.size() != 0, "Boundary Edges not stored" ) ;
   ASSERT_BD( i> 0 && i<=  edgeList.size()) ;
-  return edgeList(i); 
+  return edgeList(i);
 #endif
 }
 
 template<typename GEOSHAPE, typename MC>
-UInt 
+UInt
 RegionMesh3D<GEOSHAPE,MC>::numBEdges() const {
   return _numBEdges;}
 
@@ -1155,8 +1158,8 @@ RegionMesh3D<GEOSHAPE,MC>::setNumBEdges(UInt const n) {
 // ************************ Points/Vertices
 
 template<typename GEOSHAPE, typename MC>
-UInt 
-RegionMesh3D<GEOSHAPE,MC>::numPoints() const 
+UInt
+RegionMesh3D<GEOSHAPE,MC>::numPoints() const
 {return _numPoints;}
 
 template<typename GEOSHAPE, typename MC>
@@ -1165,18 +1168,18 @@ RegionMesh3D<GEOSHAPE,MC>::numPoints()
 {return _numPoints;}
 
 template<typename GEOSHAPE, typename MC>
-UInt 
-RegionMesh3D<GEOSHAPE,MC>::storedPoints() const 
+UInt
+RegionMesh3D<GEOSHAPE,MC>::storedPoints() const
 {return numItems(pointList);}
 
 template<typename GEOSHAPE, typename MC>
-UInt 
-RegionMesh3D<GEOSHAPE,MC>::storedBPoints() const 
+UInt
+RegionMesh3D<GEOSHAPE,MC>::storedBPoints() const
 {return _bPoints.size();}
 
 template<typename GEOSHAPE, typename MC>
-UInt 
-RegionMesh3D<GEOSHAPE,MC>::maxNumPoints() const 
+UInt
+RegionMesh3D<GEOSHAPE,MC>::maxNumPoints() const
 {return maxNumItems(pointList);}
 
 template<typename GEOSHAPE, typename MC>
@@ -1187,14 +1190,14 @@ if(setcounter) _numPoints=n;}
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-typename RegionMesh3D<GEOSHAPE,MC>::PointType & 
+typename RegionMesh3D<GEOSHAPE,MC>::PointType &
 RegionMesh3D<GEOSHAPE,MC>::addPoint(bool const boundary, bool const vertex){
   return addPoint(PointType(),boundary,vertex);
 }
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-typename RegionMesh3D<GEOSHAPE,MC>::PointType & 
+typename RegionMesh3D<GEOSHAPE,MC>::PointType &
 RegionMesh3D<GEOSHAPE,MC>::addPoint
 (PointType const & p, bool const boundary,bool const vertex){
   ASSERT_PRE(pointList.size()<pointList.capacity(), "Point list size exceeded" <<
@@ -1204,7 +1207,7 @@ RegionMesh3D<GEOSHAPE,MC>::addPoint
   pp->id()=pointList.size();
   if(boundary){
     ASSERT_PRE(_bPoints.size()<_bPoints.capacity(), "Boundary Point list size exceeded" <<
-	       _bPoints.size()+1<< " " <<_bPoints.capacity()) ;  
+	       _bPoints.size()+1<< " " <<_bPoints.capacity()) ;
     _bPoints.push_back(pp);
     pp->boundary()=true;
   }
@@ -1213,7 +1216,7 @@ RegionMesh3D<GEOSHAPE,MC>::addPoint
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-typename RegionMesh3D<GEOSHAPE,MC>::PointType & 
+typename RegionMesh3D<GEOSHAPE,MC>::PointType &
 RegionMesh3D<GEOSHAPE,MC>::setPoint
 (PointType const & p, ID position, bool const boundary, bool const vertex){
   ASSERT_PRE(position<=pointList.capacity(), "Position  exceed lpoint list capacity" <<
@@ -1227,7 +1230,7 @@ RegionMesh3D<GEOSHAPE,MC>::setPoint
     // This is rather complex, since I do not know a priori
     // if point was already stored in the list!
     // No way to avoid it, sorry
-    
+
     for (typename SimpleVect<PointType *>::iterator bp = _bPoints.begin(); bp!=_bPoints.end(); ++bp){
       if((*bp)->id()==position){
 	found=true;
@@ -1241,7 +1244,7 @@ RegionMesh3D<GEOSHAPE,MC>::setPoint
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-//RegionMesh3D<GEOSHAPE,MC>::PointType & 
+//RegionMesh3D<GEOSHAPE,MC>::PointType &
 UInt
 RegionMesh3D<GEOSHAPE,MC>::addPoint(UInt const iden, bool const boundary, UInt const start){
   ASSERT_PRE(pointList.size()<=pointList.capacity(), "Point list size exceeded" <<
@@ -1254,7 +1257,7 @@ RegionMesh3D<GEOSHAPE,MC>::addPoint(UInt const iden, bool const boundary, UInt c
   pp->id()=iden;
   if(boundary){
     ASSERT_PRE(_bPoints.size()<=_bPoints.capacity(), "Boundary Point list size exceeded" <<
-	       _bPoints.size()<< " " <<_bPoints.capacity()) ;  
+	       _bPoints.size()<< " " <<_bPoints.capacity()) ;
     _bPoints.push_back(pp);
     pp->boundary()=true;
   }
@@ -1263,52 +1266,52 @@ RegionMesh3D<GEOSHAPE,MC>::addPoint(UInt const iden, bool const boundary, UInt c
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-typename RegionMesh3D<GEOSHAPE,MC>::PointType & 
+typename RegionMesh3D<GEOSHAPE,MC>::PointType &
 RegionMesh3D<GEOSHAPE,MC>::lastPoint()
 { return pointList.back();}
 
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-typename RegionMesh3D<GEOSHAPE,MC>::PointType const & 
-RegionMesh3D<GEOSHAPE,MC>::point(UInt const i) const 
-{ 
+typename RegionMesh3D<GEOSHAPE,MC>::PointType const &
+RegionMesh3D<GEOSHAPE,MC>::point(UInt const i) const
+{
 ASSERT_BD( i> 0 && i<= pointList.size() ) ;
-return pointList(i); 
+return pointList(i);
 }
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-typename RegionMesh3D<GEOSHAPE,MC>::PointType & 
+typename RegionMesh3D<GEOSHAPE,MC>::PointType &
 RegionMesh3D<GEOSHAPE,MC>::point(UInt const i)
-{ 
+{
 ASSERT_BD( i> 0 && i<= pointList.size() ) ;
-return pointList(i); 
+return pointList(i);
 }
 
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-typename RegionMesh3D<GEOSHAPE,MC>::PointType const & 
-RegionMesh3D<GEOSHAPE,MC>::boundaryPoint(ID const i) const 
-{ 
+typename RegionMesh3D<GEOSHAPE,MC>::PointType const &
+RegionMesh3D<GEOSHAPE,MC>::boundaryPoint(ID const i) const
+{
   ASSERT_PRE( _bPoints.size() != 0, " Boundary Points not Stored" ) ;
   ASSERT_BD( i>0 && i<=   _bPoints.size() ) ;
-  return *(_bPoints(i)); 
+  return *(_bPoints(i));
 }
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-typename RegionMesh3D<GEOSHAPE,MC>::PointType & 
+typename RegionMesh3D<GEOSHAPE,MC>::PointType &
 RegionMesh3D<GEOSHAPE,MC>::boundaryPoint(ID const i)
-{ 
+{
   ASSERT_PRE( _bPoints.size() != 0, " Boundary Points not Stored" ) ;
   ASSERT_BD( i>0 && i<=   _bPoints.size() ) ;
-  return *(_bPoints(i)); 
+  return *(_bPoints(i));
 }
 
 template<typename GEOSHAPE, typename MC>
-UInt 
+UInt
 RegionMesh3D<GEOSHAPE,MC>::numBPoints() const {
   return _numBPoints;}
 
@@ -1333,12 +1336,12 @@ RegionMesh3D<GEOSHAPE,MC>::numVertices(){
 
 
 template<typename GEOSHAPE, typename MC>
-UInt 
+UInt
 RegionMesh3D<GEOSHAPE,MC>::numBVertices() const {
   return _numBVertices;}
 
 template<typename GEOSHAPE, typename MC>
-UInt & 
+UInt &
 RegionMesh3D<GEOSHAPE,MC>::numBVertices() {
   return _numBVertices;}
 
@@ -1360,7 +1363,7 @@ ostream &  RegionMesh3D<GEOSHAPE,MC>::showMe(bool verbose, ostream & out){
   //out <<"Volumes adjacent to Faces stored: "<<switches.test("FACEtoVOLUME")<<endl;
   //out <<"Faces adjacent to Edges stored: "<<switches.test("EDGEtoFACE")<<endl<<endl;
   //out <<"Internal Faces Stored: " << hasInternalFaces()<<endl;
-  //out <<"Edges Stored: " << hasEdges()<<" Internal: " 
+  //out <<"Edges Stored: " << hasEdges()<<" Internal: "
   //    << hasInternalEdges()<<endl;
   out << "**************** COUNTERS ********************"<<endl;
   out <<"NumPoints="<< numPoints()<<"  "<<"numBPoints="<<numBPoints()<<endl;
@@ -1382,10 +1385,10 @@ ostream &  RegionMesh3D<GEOSHAPE,MC>::showMe(bool verbose, ostream & out){
       cout << "Verbose version not implemented yet";
     }
   return out;
-  
+
 }
 /*! Check mesh
-  
+
  \param level Indicates level. <ul><li>0 => minimal level, just sets the switches to the appropriate value</li>
                                    <li>1 => launch an external function from mesh_util.h which performs a series of
 				            sophisticated tests.
@@ -1403,7 +1406,7 @@ extern
 bool checkMesh3D(RegionMesh3D & mesh, Switch & sw, bool fix, bool verbose,
 		 ostream & out, ostream & err, ostream & clog);
 
-   
+
 template<typename GEOSHAPE, typename MC>
 int
 RegionMesh3D<GEOSHAPE,MC>::check(int level, bool const fix, bool const verb, ostream & out)
@@ -1424,13 +1427,13 @@ RegionMesh3D<GEOSHAPE,MC>::check(int level, bool const fix, bool const verb, ost
       testsw.showMe(true,out);
       out<< "**********************************************"<<endl<<endl;
       if (testsw.test("ABORT_CONDITION")) return 1;
-      
+
     }
   }
-  
-  
+
+
   if(pointList.size() != _numPoints) {
-    out<< " Point list size " << pointList.size() <<" not equal to internal counter value " 
+    out<< " Point list size " << pointList.size() <<" not equal to internal counter value "
 	<< _numPoints<<endl;
     if(fix) {
       _numPoints=pointList.size();
@@ -1438,7 +1441,7 @@ RegionMesh3D<GEOSHAPE,MC>::check(int level, bool const fix, bool const verb, ost
       out.flush();
     }
   }
-  
+
   if(edgeList.size()==0){
     if(verb) out<< "WARNING: No Edges Stored"<<endl;
     if(verb) out<< "MAY NOT WORK IF WE HAVE DOF ON EDGES AND ESSENTIAL BC!!!!"<<endl;
@@ -1446,7 +1449,7 @@ RegionMesh3D<GEOSHAPE,MC>::check(int level, bool const fix, bool const verb, ost
     unsetLinkSwitch("HAS_ALL_EDGES");
     unsetLinkSwitch("HAS_BOUNDARY_EDGES");
   } else if (edgeList.size()==numBEdges()){
-    
+
     setLinkSwitch("HAS_BOUNDARY_EDGES");
     unsetLinkSwitch("HAS_ALL_EDGES");
     if(verb) out<< "INFORMATION: Only Boundary Edges Stored"<<endl;
@@ -1461,7 +1464,7 @@ RegionMesh3D<GEOSHAPE,MC>::check(int level, bool const fix, bool const verb, ost
 	out<< "Stored =" <<edgeList.size()<<endl;
 	severity=1;
       }
-      
+
     }
 
   if(faceList.size()==0){
@@ -1486,13 +1489,13 @@ RegionMesh3D<GEOSHAPE,MC>::check(int level, bool const fix, bool const verb, ost
 	severity=1;
       }
     }
-  
-  
+
+
   UInt count=0;
   for (typename Points::iterator i=pointList.begin(); i != pointList.end(); ++i) if(i->boundary())++count;
   if(count==0) severity=4;
   if(count != _numBPoints) {
-    out<< "Num Boundary points " << count <<" not equal to internal counter value " 
+    out<< "Num Boundary points " << count <<" not equal to internal counter value "
 	<< _numBPoints<<endl;
     if(count !=0 & fix) {
       _numBPoints=count;
@@ -1508,30 +1511,30 @@ RegionMesh3D<GEOSHAPE,MC>::check(int level, bool const fix, bool const verb, ost
     severity=5;
     out<< " ERROR:" << badid << "Points ids are wrong";
   }
-  
+
 
   badid=0;
   for (UInt i=1; i<= storedEdges(); ++i)
     if(edge(i).id()!=i)++badid;
   if (badid != 0){
     severity=5;
-    
+
     out<< " SEVERITY ERROR:" << badid << "Edges ids are wrong";
   }
-  
+
 
   badid=0;
   unsigned int adib(0);
   unsigned int adisb(0);
   unsigned int adi(0);
   for (UInt i=1; i<= storedFaces(); ++i){
-    
+
     if(face(i).id()!=i)++badid;
     if(i<=numBFaces()) {
       if (face(i).ad_first()==0)++adib;
       if (face(i).ad_second()!=0)++adisb;
     } else {
-      
+
       if (face(i).ad_first()==0)++adi;
       if (face(i).ad_second()==0)++adi;
     }
@@ -1558,13 +1561,13 @@ RegionMesh3D<GEOSHAPE,MC>::check(int level, bool const fix, bool const verb, ost
     }
   }
   if(adib==0 & adi ==0)setLinkSwitch("FACES_HAVE_ADIACENCY");
-  
-  
+
+
   if (badid != 0){
     severity=5;
     out<< " SEVERITY ERROR:" << badid << "Faces ids are wrong";
   }
-  
+
   badid=0;
   for (UInt i=1; i<= storedVolumes(); ++i)
     if(volume(i).id()!=i)++badid;
@@ -1572,14 +1575,14 @@ RegionMesh3D<GEOSHAPE,MC>::check(int level, bool const fix, bool const verb, ost
     severity=5;
     out<< " SEVERITY ERROR:" << badid << "Volumes ids are wrong";
   }
-  
-  
+
+
   if (_numVertices == 0){
     severity=6;
-    
+
     out<< " SEVERITY ERROR: internal Vertices Counter unset";
   }
-  
+
   if (_numPoints == 0){
     severity=6;
     out<< " SEVERITY ERROR: internal Points Counter unset"; }
@@ -1597,15 +1600,15 @@ RegionMesh3D<GEOSHAPE,MC>::check(int level, bool const fix, bool const verb, ost
     out << "   Check Finished              "<<endl<<
 	"***********************************************"<<endl;
   setLinkSwitch("HAS_BEEN_CHECKED");
-  
+
   return severity;
-  
+
 }
 
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-UInt 
+UInt
 RegionMesh3D<GEOSHAPE,MC>::faceElement(ID const i, UInt const Pos) const {
 ASSERT_PRE( i <= faceList.size(), "Not enough faces stored" ) ;
 ASSERT_PRE( Pos==1 || Pos==2 , "Wrong position (1 or 2)" ) ;
@@ -1616,7 +1619,7 @@ else { return (faceList[i-1]).ad_second();}
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-UInt 
+UInt
 RegionMesh3D<GEOSHAPE,MC>::faceElement(FaceType const &  f, UInt const Pos) const
 {
 ASSERT_BD( ! faceList.empty()) ;
@@ -1629,7 +1632,7 @@ else { return f.ad_second();}
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-void 
+void
 RegionMesh3D<GEOSHAPE,MC>::setLinkSwitch(string const & _s)
 {
   ASSERT0(switches.set(_s),"Switch named " << _s <<" is not allowed");
@@ -1637,7 +1640,7 @@ RegionMesh3D<GEOSHAPE,MC>::setLinkSwitch(string const & _s)
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-void 
+void
 RegionMesh3D<GEOSHAPE,MC>::unsetLinkSwitch(string const & _s)
 {
   ASSERT0(switches.unset(_s),"Switch named " << _s <<" is not allowed");
@@ -1645,7 +1648,7 @@ RegionMesh3D<GEOSHAPE,MC>::unsetLinkSwitch(string const & _s)
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-bool 
+bool
 RegionMesh3D<GEOSHAPE,MC>::getLinkSwitch(string const & _s) const
 {
   return switches.test(_s);
@@ -1653,39 +1656,39 @@ RegionMesh3D<GEOSHAPE,MC>::getLinkSwitch(string const & _s) const
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-bool 
+bool
 RegionMesh3D<GEOSHAPE,MC>::hasInternalFaces() const
-{ 
-return faceList.size() > _numBFaces; 
+{
+return faceList.size() > _numBFaces;
 }
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-bool 
+bool
 RegionMesh3D<GEOSHAPE,MC>::hasInternalEdges() const
-{ 
-return edgeList.size() >  _numBEdges; 
-}
-
-template<typename GEOSHAPE, typename MC>
-INLINE
-bool 
-RegionMesh3D<GEOSHAPE,MC>::hasEdges() const 
 {
-return ! edgeList.empty(); 
+return edgeList.size() >  _numBEdges;
 }
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-bool 
-RegionMesh3D<GEOSHAPE,MC>::hasFaces() const 
+bool
+RegionMesh3D<GEOSHAPE,MC>::hasEdges() const
 {
-return ! faceList.empty(); 
+return ! edgeList.empty();
 }
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-bool 
+bool
+RegionMesh3D<GEOSHAPE,MC>::hasFaces() const
+{
+return ! faceList.empty();
+}
+
+template<typename GEOSHAPE, typename MC>
+INLINE
+bool
 RegionMesh3D<GEOSHAPE,MC>::isVertex(PointType const & p) const
 {
 return p.id() <= _numVertices;
@@ -1693,7 +1696,7 @@ return p.id() <= _numVertices;
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-bool 
+bool
 RegionMesh3D<GEOSHAPE,MC>::isVertex(ID const & id) const
 {
 return id <= _numVertices;
@@ -1702,7 +1705,7 @@ return id <= _numVertices;
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-bool 
+bool
 RegionMesh3D<GEOSHAPE,MC>::isBoundaryPoint(ID const & id) const
 {
 return point(id).boundary();
@@ -1710,7 +1713,7 @@ return point(id).boundary();
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-bool 
+bool
 RegionMesh3D<GEOSHAPE,MC>::isBoundaryPoint(PointType const & p) const
 {
 return p.boundary();
@@ -1718,7 +1721,7 @@ return p.boundary();
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-bool 
+bool
 RegionMesh3D<GEOSHAPE,MC>::isBoundaryEdge(EdgeType const & e) const
 {
 #ifdef NOT_BDATA_FIRST
@@ -1730,7 +1733,7 @@ RegionMesh3D<GEOSHAPE,MC>::isBoundaryEdge(EdgeType const & e) const
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-bool 
+bool
 RegionMesh3D<GEOSHAPE,MC>::isBoundaryEdge(ID const & id) const
 {
 #ifdef NOT_BDATA_FIRST
@@ -1742,7 +1745,7 @@ RegionMesh3D<GEOSHAPE,MC>::isBoundaryEdge(ID const & id) const
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-bool 
+bool
 RegionMesh3D<GEOSHAPE,MC>::isBoundaryFace(FaceType const & f) const {
 #ifdef NOT_BDATA_FIRST
   ASSERT(false,"In this version Boundary faces must be stored first");
@@ -1753,7 +1756,7 @@ RegionMesh3D<GEOSHAPE,MC>::isBoundaryFace(FaceType const & f) const {
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-bool 
+bool
 RegionMesh3D<GEOSHAPE,MC>::isBoundaryFace(ID const & id) const {
 #ifdef NOT_BDATA_FIRST
   ASSERT(false,"In this version Boundary faces must be stored first");
@@ -1765,14 +1768,14 @@ RegionMesh3D<GEOSHAPE,MC>::isBoundaryFace(ID const & id) const {
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-bool 
+bool
 RegionMesh3D<GEOSHAPE,MC>::hasLocalFaces() const{
 return ! _VToF.empty();
 }
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-bool 
+bool
 RegionMesh3D<GEOSHAPE,MC>::hasLocalEdges() const{
 return ! _VToE.empty();
 }
@@ -1796,7 +1799,7 @@ ASSERT_BD( locF >0 && locF <= VolumeType::numLocalFaces );
  i1=(iv.point(i1)).id();
  i2=(iv.point(i2)).id();
  i3=(iv.point(i3)).id();
- 
+
  if (FaceShape::numVertices == 4){
    i4=GEOSHAPE::fToP(locF,4);
    i4=(iv.point(i4)).id();
@@ -1841,7 +1844,7 @@ ASSERT_BD( locF >0 && locF <= VolumeType::numLocalFaces );
  i1=(iv.point(i1)).id();
  i2=(iv.point(i2)).id();
  i3=(iv.point(i3)).id();
- 
+
  if (FaceShape::numVertices == 4){
    i4=GEOSHAPE::fToP(locF,4);
    i4=(iv.point(i4)).id();
@@ -1914,18 +1917,18 @@ return _VToE.operator()(locE,iv.id());
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-bool 
+bool
 RegionMesh3D<GEOSHAPE,MC>::isFullEdge(ID const & id) const
-{ 
-return edgeList.size() >=  id; 
+{
+return edgeList.size() >=  id;
 }
 
 template<typename GEOSHAPE, typename MC>
 INLINE
-bool 
+bool
 RegionMesh3D<GEOSHAPE,MC>::isFullFace(UInt const & id) const
-{ 
-return faceList.size() >=  id; 
+{
+return faceList.size() >=  id;
 }
 
 
@@ -1939,14 +1942,14 @@ RegionMesh3D<GEOSHAPE,MC>::updateElementEdges(bool ce, UInt ee){
   // If the counter is set we trust it! Otherwise we use Euler formula
   // this is ok for domains with at most 1 hole!
   if (ce && ee == 0) ee = _numEdges > _numBEdges? _numEdges :(GEOSHAPE::numFaces/2-1)*numVolumes()+_numBFaces/2+numVertices();
-  
+
 
   if (ce) {
     // We want to create the edges, yet we need to clear existing edges, since we start from scratch!
     edgeList.reserve(ee);
     edgeList.resize(0);
   }
-#ifndef SAVEMEMORY 
+#ifndef SAVEMEMORY
   BareItemsHandler<BareEdge> _be;
   pair<UInt,bool> e;
   _VToE.reshape(numLocalEdges(),numVolumes());// DIMENSION ARRAY
@@ -1986,7 +1989,7 @@ RegionMesh3D<GEOSHAPE,MC>::updateElementEdges(bool ce, UInt ee){
     }
   }
   EdgeType edg;
-  
+
   if(edgeList.empty()){
     // We want that the first edges be those on the boundary, in order to obay the paradigm for
     // a RegionMesh3D
@@ -2007,12 +2010,12 @@ RegionMesh3D<GEOSHAPE,MC>::updateElementEdges(bool ce, UInt ee){
       }
     }
   }
-  
+
   if (ce){
     _numBEdges=edgeList.size();
     setLinkSwitch("HAS_BOUNDARY_EDGES");
   }
-  
+
   for (typename Volumes::iterator iv=volumeList.begin();
        iv != volumeList.end(); ++iv){
     vid=iv->id();
@@ -2041,7 +2044,7 @@ RegionMesh3D<GEOSHAPE,MC>::updateElementEdges(bool ce, UInt ee){
     _numEdges=edgeList.size();
     setLinkSwitch("HAS_ALL_EDGES");
   }
-  
+
 #ifdef SAVEMEMORY
   UInt n=_VToE.maxId();
 #else
@@ -2056,22 +2059,22 @@ template<typename GEOSHAPE, typename MC>
 void
 RegionMesh3D<GEOSHAPE,MC>::updateElementFaces(bool cf, UInt ef){
 
-  
+
   ASSERT0( ! cf ||   _numBFaces >0, "Boundary Faces Must have been set"<<
 	   "in order to call updateElementFaces with createFaces=true"<<endl<<
 	   "Use buildBoundaryFaces(..) from mesh_util.h");
   // If the counter is set we trust it! Otherwise we use Euler formula
-  
+
   if (cf && ef == 0) ef = _numFaces > _numBFaces? _numFaces :(GEOSHAPE::numFaces*numVolumes()+_numBFaces)/2;
 
   ASSERT( cf||  numFaces()>0 , "Mesh is not properly set!");
 
   if (cf) faceList.reserve(ef);
-  
+
   FaceType face;
 
-  
-#ifndef SAVEMEMORY 
+
+#ifndef SAVEMEMORY
   BareItemsHandler<BareFace> _be;
   pair<UInt,bool> e;
   _VToF.reshape(numLocalFaces(),numVolumes());// DIMENSION ARRAY
@@ -2106,7 +2109,7 @@ RegionMesh3D<GEOSHAPE,MC>::updateElementFaces(bool cf, UInt ef){
   }
 
   // If I have only boundary faces I need to process them first to keep the correct numbering
-  
+
   // First We check if we have already Faces stored
   if (! faceList.empty()){
     // dump all faces in the container, to maintain the correct numbering
@@ -2115,7 +2118,7 @@ RegionMesh3D<GEOSHAPE,MC>::updateElementFaces(bool cf, UInt ef){
     // the internal faces I need to make sure that I am processing only the
     // boundary ones. So I resize the container!
     if(cf)faceList.resize(_numBFaces);
-    
+
     pair<UInt,bool> _check;
     for (UInt j=0; j<faceList.size();++j){
       i1=(faceList[j].point(1)).id();
@@ -2153,7 +2156,7 @@ RegionMesh3D<GEOSHAPE,MC>::updateElementFaces(bool cf, UInt ef){
 #endif
     }
   }
-  
+
   for (typename Volumes::iterator iv=volumeList.begin();
        iv != volumeList.end(); ++iv){
     vid=iv->id();
@@ -2184,13 +2187,13 @@ RegionMesh3D<GEOSHAPE,MC>::updateElementFaces(bool cf, UInt ef){
 	{
 	  if(e.second)
 	    {
-	      // a new face It must be internal. 
+	      // a new face It must be internal.
 	      for (UInt k=1;k<=FaceType::numPoints;++k) face.setPoint(k,iv->point(ele.fToP(j,k)));
 	      face.ad_first()=vid;
 	      face.pos_first()=j;
 	      // gets the marker from the RegionMesh
 	      face.setMarker(marker());
-	      addFace(face,false); //The id should be correct 
+	      addFace(face,false); //The id should be correct
 	    }
 	  else
 	    {
@@ -2200,7 +2203,7 @@ RegionMesh3D<GEOSHAPE,MC>::updateElementFaces(bool cf, UInt ef){
 		{
 		  faceList(e.first).ad_second()=vid;
 		  faceList(e.first).pos_second()=j;
-		}	      
+		}
 	    }
 	}
     }
@@ -2212,7 +2215,7 @@ RegionMesh3D<GEOSHAPE,MC>::updateElementFaces(bool cf, UInt ef){
 #endif
   // Fix _numfaces if it was not set or set to just the # of Bfaces
   if (_numFaces == 0 || _numFaces == _numBFaces) _numFaces=n;
-  ASSERT_POS( n == _numFaces , "#Faces found inconsistent with that stored in RegionMesh") ;  
+  ASSERT_POS( n == _numFaces , "#Faces found inconsistent with that stored in RegionMesh") ;
   setLinkSwitch("HAS_VOLUME_TO_FACES");
   if(cf)setLinkSwitch("HAS_ALL_FACES");
   if(cf)setLinkSwitch("FACES_HAVE_ADIACENCY");
@@ -2239,5 +2242,5 @@ RegionMesh3D<GEOSHAPE,MC>::cleanElementEdges(){
 #endif
   unsetLinkSwitch("HAS_VOLUME_TO_EDGES");
 }
-
+}
 #endif
