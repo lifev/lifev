@@ -27,6 +27,7 @@
 # 
 AT_INIT([lifev testsuite])
 
+
 #lifecore tests
 m4_include([lifecore/testsuite.at])
 
@@ -50,6 +51,7 @@ m4_include([test_dg/testsuite.at])
 
 # solver tests
 AT_BANNER([life/lifesolver testsuite ...])
+m4_include([lifesolver/testsuite.at])
 m4_include([test_laplacian/testsuite.at])
 m4_include([test_postproc/testsuite.at])
 m4_include([test_essentialbc/testsuite.at])
@@ -63,6 +65,7 @@ m4_include([test_ns_bcvec/testsuite.at])
 m4_include([test_ns_cyl/testsuite.at])
 m4_include([test_ns_cyl_flux/testsuite.at])
 m4_include([test_ns_ipstab/testsuite.at])
+#m4_include([lifesolver/testsuite.at])
 
 AT_BANNER([test_ns_sstress test is broken, skipping/disabling it for now])
 #m4_include([test_ns_sstress/testsuite.at])

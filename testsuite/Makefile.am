@@ -28,13 +28,14 @@ SUBDIRS		= data  \
               test_mesh test_laplacian test_naturalbc test_essentialbc \
               test_q1 test_p2 test_mixte test_fe test_dg \
               test_postproc test_bdf \
-		      test_linearelasticity \
-		      test_darcy test_onedmodel\
-		      test_ns_bdf test_ns_cyl test_ns_cyl_flux test_ns_bcvec test_ns_sstress \
-		      test_fsi \
-		      test_masstransport test_mass_coupling test_ns_ipstab \
+	      test_linearelasticity \
+	      test_darcy test_onedmodel\
+	      test_ns_bdf test_ns_cyl test_ns_cyl_flux test_ns_bcvec test_ns_sstress \
+	      test_fsi \
+	      test_masstransport test_mass_coupling test_ns_ipstab \
               test_coupling_3d0d \
-              test_fhn
+              test_fhn \
+	      lifesolver
 
 TESTSUITES=$(srcdir)/lifecore/testsuite.at \
 $(srcdir)/lifearray/testsuite.at \
@@ -63,7 +64,8 @@ $(srcdir)/test_onedmodel/testsuite.at \
 $(srcdir)/test_p2/testsuite.at \
 $(srcdir)/test_postproc/testsuite.at \
 $(srcdir)/test_q1/testsuite.at \
-$(srcdir)/lifefilters/testsuite.at 
+$(srcdir)/lifefilters/testsuite.at \
+$(srcdir)/lifesolver/testsuite.at 
 
 
 $(srcdir)/package.m4: $(top_srcdir)/configure.in.in

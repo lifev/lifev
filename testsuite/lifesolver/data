@@ -1,0 +1,19 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file for Mesh test
+#-------------------------------------------------
+
+mesh_format  = 'NETGEN'
+mesh_dir   = '../data/mesh/netgen/'  # the directory where the mesh file is
+mesh_file  = 'cubeBc312_x4.vol'       # mesh file
+#mesh_file  = 'cubeBc312_x16.vol'       # mesh file
+mesh_faces = all                    # update all faces elements
+
+timeStep = 0.4
+
+
+[aztec]
+
+max_iter        = 1000
+
+

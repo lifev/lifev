@@ -74,3 +74,15 @@ upload-api:
 	-cd doc/ && rsync -avz api/ `whoami`@cmcsforge.epfl.ch:/var/lib/gforge/chroot/home/groups/lifev/htdocs/api-$(LIFEV_MAJOR_VERSION).$(LIFEV_MINOR_VERSION).$(LIFEV_MICRO_VERSION)
 
 MOSTLYCLEANFILES	= ChangeLog
+
+$(top_srcdir)/acinclude.m4:
+	@echo 'm4_include([admin/ac_check_aztec.m4])' > acinclude.m4
+	@echo 'm4_include([admin/ac_check_boost.m4])' >> acinclude.m4
+	@echo 'm4_include([admin/ac_check_lapack.m4])' >> acinclude.m4
+	@echo 'm4_include([admin/ac_check_mpi.m4])' >> acinclude.m4
+	@echo 'm4_include([admin/ac_check_parmetis.m4])' >> acinclude.m4
+	@echo 'm4_include([admin/ac_check_petsc.m4])' >> acinclude.m4
+	@echo 'm4_include([admin/ac_check_umfpack.m4])' >> acinclude.m4
+	@echo 'm4_include([admin/ac_find_file.m4])' >> acinclude.m4
+	@echo 'm4_include([admin/lifev_check_compilers.m4])'>>acinclude.m4
+

@@ -25,6 +25,7 @@
 #include "currentBdFE.hpp"
 #include "currentHdivFE.hpp"
 #include "refHybridFE.hpp"
+#include "dof.hpp"
 
 namespace LifeV
 {
@@ -33,6 +34,21 @@ namespace LifeV
 //               Operators for classical finite elements
 //
 //----------------------------------------------------------------------
+//coef(t,x,y,z,u)
+void mass( Real (*coef)(Real,Real,Real,Real,Real),
+           ElemMat& elmat, const CurrentFE& fe,
+	   const Dof& dof,
+	   const ScalUnknown<Vector> U,Real t);
+
+void stiff( Real (*coef)(Real,Real,Real,Real,Real),
+	   ElemMat& elmat, const CurrentFE& fe,
+	   const Dof& dof,
+	   const ScalUnknown<Vector> U,Real t);
+void source( Real (*fct)(Real,Real,Real,Real,Real),
+           ElemVec& elvec, const CurrentFE& fe,
+	   const Dof& dof,
+	   const ScalUnknown<Vector> U,Real t);
+
 void mass( Real coef, ElemMat& elmat, const CurrentFE& fe,
            int iblock = 0, int jblock = 0 );
 void mass( Real coef, ElemMat& elmat, const CurrentFE& fe,

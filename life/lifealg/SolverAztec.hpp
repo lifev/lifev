@@ -63,7 +63,7 @@ public:
     //@{
 
     //! default constructor
-    SolverAztec();
+    SolverAztec(std::string filename="data");
 
     //! create a new instance
     static SolverAztec* New();

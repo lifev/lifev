@@ -40,7 +40,7 @@ namespace LifeV
 
 UInt SolverAztec::S_solverNumber = 100;
 
-SolverAztec::SolverAztec()
+SolverAztec::SolverAztec(std::string filename)
         : M_matrix( 0 ), M_precond( 0 ), M_tempPattern( 0 ), M_tempMatrix( 0 )
 {
     M_dataOrg[ AZ_N_internal ] = 0;
@@ -51,7 +51,7 @@ SolverAztec::SolverAztec()
     AZ_set_proc_config( M_procConfig, AZ_NOT_MPI );
 
     // let dataAztec set the defaults
-    GetPot dataFile;
+    GetPot dataFile(filename.c_str());
     DataAztec dataAztec( dataFile, "aztec" );
     dataAztec.aztecOptionsFromDataFile( M_options, M_params );
 

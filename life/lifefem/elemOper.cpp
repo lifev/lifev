@@ -24,6 +24,201 @@ namespace LifeV
 //----------------------------------------------------------------------
 //                      Element matrix operator
 //----------------------------------------------------------------------
+//Real coef(t,x,y,z,u)
+/*
+  Mass matrix: \int coef(t,x,y,z,u) v_i v_j
+*/
+void mass( Real (*coef)(Real,Real,Real,Real,Real),
+           ElemMat& elmat, const CurrentFE& fe,
+	   const Dof& dof,
+	   const ScalUnknown<Vector> U,Real t)
+{ 
+    ASSERT_PRE( fe.hasJac(), "Mass matrix needs at least the jacobian" );
+    int iblock=0,jblock=0;
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    int i, ig;
+    int iloc, jloc;
+    Real s, coef_s;
+    ID eleId=fe.currentId();
+    int iu;
+    double uPt;
+    Real x,y,z;
+
+    std::vector<Real> locU(fe.nbNode);
+    for (i=0;i<fe.nbNode;i++)
+    {
+      locU[i]=U[dof.localToGlobal(eleId,i+1)-1];	//(one component)
+    }
+
+    //
+    // diagonal
+    //
+    for ( i = 0;i < fe.nbDiag;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        {
+	    uPt=0.0;
+	    for(iu=0;iu<fe.nbNode;iu++){
+	      uPt+=locU[iu]*fe.phi(iu,ig);
+	    }
+	    fe.coorQuadPt(x,y,z,ig);
+            s += fe.phi( iloc, ig ) * fe.phi( iloc, ig ) * fe.weightDet( ig )*
+	    	coef(t,x,y,z,uPt);
+        }
+        mat( iloc, iloc ) += s;
+    }
+    //
+    // extra diagonal
+    //
+    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        jloc = fe.patternSecond( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+	{
+	    uPt=0.0;
+	    for(iu=0;iu<fe.nbNode;iu++){
+	      uPt+=locU[iu]*fe.phi(iu,ig);
+	    }
+	    fe.coorQuadPt(x,y,z,ig);
+            s += fe.phi( iloc, ig ) * fe.phi( jloc, ig ) * fe.weightDet( ig )*
+	    	coef(t,x,y,z,uPt);
+	}
+        coef_s = s;
+        mat( iloc, jloc ) += coef_s;
+        mat( jloc, iloc ) += coef_s;
+    }
+}
+
+
+/*
+  Stiffness matrix: \int coef(t,x,y,z,u) grad v_i . grad v_j
+*/
+void stiff( Real (*coef)(Real,Real,Real,Real,Real),
+           ElemMat& elmat, const CurrentFE& fe,
+	   const Dof& dof,
+	   const ScalUnknown<Vector> U,Real t)
+{
+    int iblock=0,jblock=0;
+    ASSERT_PRE( fe.hasFirstDeriv(),
+                "Stiffness matrix needs at least the first derivatives" );
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    int iloc, jloc;
+    int i, icoor, ig;
+    double s, coef_s;
+    ID eleId=fe.currentId();
+    int iu;
+    double uPt;
+    Real x,y,z;
+
+    std::vector<Real> locU(fe.nbNode);
+    for (i=0;i<fe.nbNode;i++)
+    {
+      locU[i]=U[dof.localToGlobal(eleId,i+1)-1];	//(one component)
+    }
+    //
+    // diagonal
+    //
+    for ( i = 0;i < fe.nbDiag;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        {
+	    uPt=0.0;
+	    for(iu=0;iu<fe.nbNode;iu++){
+	      uPt+=locU[iu]*fe.phi(iu,ig);
+	    }
+	    fe.coorQuadPt(x,y,z,ig);
+            for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+                s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( iloc, icoor, ig )
+                     * fe.weightDet( ig )*coef(t,x,y,z,uPt);
+        }
+        mat( iloc, iloc ) += s;
+    }
+    //
+    // extra diagonal
+    //
+    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        jloc = fe.patternSecond( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        {
+	    uPt=0.0;
+	    for(iu=0;iu<fe.nbNode;iu++){
+	      uPt+=locU[iu]*fe.phi(iu,ig);
+	    }
+	    fe.coorQuadPt(x,y,z,ig);
+            for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+                s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( jloc, icoor, ig ) *
+                     fe.weightDet( ig )*coef(t,x,y,z,uPt);
+        }
+        coef_s = s;
+        mat( iloc, jloc ) += coef_s;
+        mat( jloc, iloc ) += coef_s;
+    }
+}
+
+
+/*
+  compute \int fct(t,x,y,z,u) \phi_i
+ */
+void source( Real (*fct)(Real,Real,Real,Real,Real),
+           ElemVec& elvec, const CurrentFE& fe,
+	   const Dof& dof,
+	   const ScalUnknown<Vector> U,Real t)
+{
+  int iblock=0;
+  ASSERT_PRE( fe.hasQuadPtCoor(), 
+  	"Source with space dependent fonction need updated quadrature "
+	"point coordinates. Call for example updateFirstDerivQuadPt() "
+	"instead of updateFirstDeriv()." );
+  int i, ig;
+  ElemVec::vector_view vec = elvec.block( iblock );
+  Real s;
+  ID eleId=fe.currentId();
+  int iu;
+  double uPt;
+
+  std::vector<Real> locU(fe.nbNode);
+  for (i=0;i<fe.nbNode;i++)
+  {
+    locU[i]=U[dof.localToGlobal(eleId,i+1)-1];	//(one component)
+  }
+  for ( i = 0;i < fe.nbNode;i++ )
+  {
+    s = 0.0;
+    for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+    {
+      uPt=0.0;
+      for(iu=0;iu<fe.nbNode;iu++){
+        uPt+=locU[iu]*fe.phi(iu,ig);
+      }
+      s += fe.phi( i, ig ) * 
+      	   fct(t, fe.quadPt( ig, 0 ), 
+	   	fe.quadPt( ig, 1 ), 
+		fe.quadPt( ig, 2 ), uPt) *
+           fe.weightDet( ig );
+    }
+    vec( i ) += s;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
 //
 // coeff*Mass
 //

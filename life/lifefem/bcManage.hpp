@@ -55,6 +55,103 @@ namespace LifeV
 // ===================================================
 // Boundary conditions treatment
 // ===================================================
+/* bcManage for boundary conditions depending on the solution U too,
+   a class PointSolution would be useful */
+template <typename MatrixType, typename VectorType, typename MeshType, typename DataType>
+void bcManage( Real (*mu)(Real t,Real x, Real y, Real z, Real u),
+		MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& dof,
+                const BCHandler& BCh, CurrentBdFE& bdfem, const DataType coef, 
+		const DataType& t, VectorType& U )
+{
+
+
+    // Loop on boundary conditions
+    for ( Index_t i = 0; i < BCh.size(); ++i )
+    {
+
+        switch ( BCh[ i ].type() )
+        {
+        case Essential:  // Essential boundary conditions (Dirichlet)
+	    if(BCh[ i ].isUDep())
+	      bcEssentialManageUDep(A, b, mesh, dof, BCh[ i ], bdfem, coef, t,U);
+	    else
+              bcEssentialManage( A, b, mesh, dof, BCh[ i ], bdfem, coef, t );
+            break;
+        case Natural:  // Natural boundary conditions (Neumann)
+	    if(BCh[ i ].isUDep())
+	      bcNaturalManageUDep(mu, b, mesh, dof, BCh[ i ], bdfem, t,U);
+            else
+	      //in this case mu must be a constant, think about (not still implemented)
+              bcNaturalManage( b, mesh, dof, BCh[ i ], bdfem, t );
+            break;
+        case Mixte:  // Mixte boundary conditions (Robin)
+	    if(BCh[ i ].isUDep())
+	      bcMixteManageUDep( A, b, mesh, dof, BCh[ i ], bdfem, t, U);	//not still implemented
+	    else
+              bcMixteManage( A, b, mesh, dof, BCh[ i ], bdfem, t );
+            break;
+        default:
+            ERROR_MSG( "This BC type is not yet implemented" );
+        }
+    }
+}
+/* needed for ParabolicSolver due to the fact that 
+   essential bc are handled doing a trick on the matrix */
+template <typename MatrixType, typename DataType>
+void bcManageMtimeUDep( MatrixType& M, const Dof& dof,
+                const BCHandler& BCh, const DataType coef)
+{
+    // Loop on boundary conditions
+    for ( Index_t i = 0; i < BCh.size(); ++i )
+    {
+
+        if( BCh[ i ].type()==Essential )
+        {
+	  const BCBase& BCb=BCh[i];
+          ID idDof;
+
+          // Number of components involved in this boundary condition
+          UInt nComp = BCb.numberOfComponents();
+
+          // Number of total scalar Dof
+          UInt totalDof = dof.numTotalDof();
+
+          if ( BCb.dataVector() )
+          { //! If BC is given under a vectorial form
+
+            //not possible
+            ERROR_MSG( "This type of BCVector does not exists on bc depentent on solution" );
+          }
+          else
+          { //! If BC is given under a functional form
+
+            // Loop on BC identifiers
+            for ( ID i = 1; i <= BCb.list_size(); ++i )
+            {
+              // Loop on components involved in this boundary condition
+              for ( ID j = 1; j <= nComp; ++j )
+              {
+                // Glogal Dof
+                idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
+
+#if USE_BOOST_MATRIX
+                using namespace boost::numeric::ublas;
+                matrix_row<MatrixType> mr (M, idDof-1);
+                mr *= 0;
+                M( idDof-1, idDof-1 ) = coef;
+#else
+                // Modifying matrix 
+                M.diagonalize_row( idDof - 1, coef);
+#endif
+              }
+            }
+          }
+        }
+    }
+}
+		
+
+
 template <typename MatrixType, typename VectorType, typename MeshType, typename DataType>
 void bcManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& dof,
                 const BCHandler& BCh,
@@ -207,6 +304,63 @@ void bcManage( MatrixType1& C, MatrixType2& trD, MatrixType3& D,
 // ===================================================
 // Essential BC
 // ===================================================
+template <typename MatrixType, typename VectorType, typename MeshType, typename DataType>
+void bcEssentialManageUDep( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& dof, 
+	const BCBase& BCb, const CurrentBdFE& bdfem, const DataType& coef, 
+	const DataType& t, const VectorType& U )
+{
+
+    ID idDof;
+
+    // Number of components involved in this boundary condition
+    UInt nComp = BCb.numberOfComponents();
+
+    // Number of total scalar Dof
+    UInt totalDof = dof.numTotalDof();
+
+    if ( BCb.dataVector() )
+    { //! If BC is given under a vectorial form
+
+      //not possible
+      ERROR_MSG( "This type of BCVector does not exists on bc depentent on solution" );
+    }
+    else
+    { //! If BC is given under a functional form
+
+        DataType x, y, z;
+        // Loop on BC identifiers
+        for ( ID i = 1; i <= BCb.list_size(); ++i )
+        {
+            // Loop on components involved in this boundary condition
+            for ( ID j = 1; j <= nComp; ++j )
+            {
+                // Glogal Dof
+                idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
+                // Coordinates of the node where we impose the value
+                x = static_cast< const IdentifierEssential* >( BCb( i ) ) ->x();
+                y = static_cast< const IdentifierEssential* >( BCb( i ) ) ->y();
+                z = static_cast< const IdentifierEssential* >( BCb( i ) ) ->z();
+
+                Real datum = BCb( t, x, y, z, BCb.component( j ) ,U[idDof-1]);
+
+
+#if USE_BOOST_MATRIX
+                using namespace boost::numeric::ublas;
+                matrix_row<MatrixType> mr (A, idDof-1);
+                mr *= 0;
+                matrix_column<MatrixType> mc (A, idDof-1);
+                b -= mc*datum; // correct rhs
+                mc *= 0;
+                A( idDof-1, idDof-1 ) = coef;
+                b( idDof-1 ) = coef*datum;
+#else
+                // Modifying matrix and right hand side
+                A.diagonalize( idDof - 1, coef, b, datum );
+#endif
+            }
+        }
+    }
+}
 template <typename MatrixType, typename VectorType, typename MeshType, typename DataType>
 void bcEssentialManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& dof, const BCBase& BCb,
                         const CurrentBdFE& bdfem, const DataType& coef, const DataType& t )
@@ -501,6 +655,99 @@ void bcEssentialManage( MatrixType1& A, MatrixType2& trD, MatrixType3& D,
 // Natural BC
 // ===================================================
 template <typename VectorType, typename MeshType, typename DataType>
+void bcNaturalManageUDep( Real (*mu)(Real t,Real x, Real y, Real z, Real u),
+			VectorType& b, const MeshType& mesh, const Dof& dof, 
+			const BCBase& BCb, CurrentBdFE& bdfem, 
+			const DataType& t, const VectorType& U )
+{
+
+    // Number of local Dof (i.e. nodes) in this face
+    UInt nDofF = bdfem.nbNode;
+
+    // Number of total scalar Dof
+    UInt totalDof = dof.numTotalDof();
+
+    // Number of components involved in this boundary condition
+    UInt nComp = BCb.numberOfComponents();
+
+    const IdentifierNatural* pId;
+    ID ibF, idDof ;
+
+    if ( BCb.dataVector() )
+    { //! If BC is given under a vectorial form
+      ERROR_MSG( "This type of BCVector does not exists on bc depentent on solution\n" );
+    }
+    else
+    {  //! If BC is given under a functionnal form
+
+        DataType x, y, z;
+
+	if(nComp!=1)
+	{
+	  ERROR_MSG("For now bcNaturalManageUDep cannot handle non scalar solutions\n");
+	}
+
+        // Loop on BC identifiers
+        for ( ID i = 1; i <= BCb.list_size(); ++i )
+        {
+
+            // Pointer to the i-th itdentifier in the list
+            pId = static_cast< const IdentifierNatural* >( BCb( i ) );
+
+            // Number of the current boundary face
+            ibF = pId->id();
+
+            // Updating face stuff
+            bdfem.updateMeas( mesh.boundaryFace( ibF ) );
+
+	    std::vector<Real> locU(nDofF+1);	//assumes U is a vec of reals, TODO: deal with more comp
+	    Real uPt;			//value in the point
+	    for(ID idofLocU=0;idofLocU<nDofF;idofLocU++)
+	    {
+	        ID idGDofU=pId->bdLocalToGlobal(idofLocU+1)+( BCb.component( 1 ) - 1 ) * totalDof;
+		locU[idofLocU]=U[idGDofU-1];
+            }
+                
+
+            // Loop on total Dof per Face
+            for ( ID idofF = 1; idofF <= nDofF; ++idofF )
+            {  //! fixed a possible BUG(??): it was the same variable : i for list and nDofF! (V. Martin)
+                //! Checked only for RT0-Q0 fe. (to be tested with Q1 or Q2...)
+
+                // Loop on components involved in this boundary condition
+                for ( ID j = 1; j <= nComp; ++j )
+                {
+
+                    //glogal Dof
+                    idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof;
+
+                    // Loop on quadrature points
+                    for ( int l = 0; l < bdfem.nbQuadPt; ++l )
+                    {
+                        bdfem.coorQuadPt( x, y, z, l ); // quadrature point coordinates
+
+                        uPt=0.0;
+			for(ID idofLocU=0;idofLocU<nDofF;idofLocU++)
+			{
+//    Debug(800)<<"debug* naturalManageUDep entering ulocU\n";
+		          uPt+=locU[idofLocU]*bdfem.phi( int( idofLocU  ),l );
+//    Debug(800)<<"debug* naturalManageUDep exiting ulocU\n";
+			}
+
+                        // Adding right hand side contribution
+                        b[ idDof - 1 ] += bdfem.phi( int( idofF - 1 ), l ) * BCb( t, x, y, z, BCb.component( j ),uPt ) *
+					mu(t,x,y,z,uPt)*bdfem.weightMeas( l );
+//    Debug(800)<<"debug* naturalManageUDep done one ulocU\n";
+                    }
+                }
+            }
+        }
+    }
+//    Debug(800)<<"debug* end of naturalManageUDep\n";
+}
+
+
+template <typename VectorType, typename MeshType, typename DataType>
 void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const BCBase& BCb,
                       CurrentBdFE& bdfem, const DataType& t )
 {
@@ -674,6 +921,12 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
 // ===================================================
 // Mixte BC
 // ===================================================
+template <typename MatrixType, typename VectorType, typename DataType, typename MeshType>
+void bcMixteManageUDep( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& dof, const BCBase& BCb,
+                    CurrentBdFE& bdfem, const DataType& t ,const VectorType& U)
+{
+  ERROR_MSG("error bcMixteManageUDep not still implemented\n");
+}
 template <typename MatrixType, typename VectorType, typename DataType, typename MeshType>
 void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& dof, const BCBase& BCb,
                     CurrentBdFE& bdfem, const DataType& t )

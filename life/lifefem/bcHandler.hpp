@@ -248,6 +248,13 @@ public:
                 const BCMode& mode,
                 BCVectorBase& bcv,
                 const UInt& nComp );
+    
+    void addBC( const std::string& name,
+                const EntityFlag& flag,
+                const BCType& type,
+                const BCMode& mode,
+                BCFunctionUDepBase& bcf );
+
 
     //! modify the boundary condition \c name with condition \c bcv
     void modifyBC( std::string const& name, BCFunctionBase& bcv );
@@ -255,11 +262,16 @@ public:
     //! modify the boundary condition \c name with condition \c bcv
     void modifyBC( std::string const& name, BCVectorBase& bcv );
 
+    void modifyBC( std::string const& __name, BCFunctionUDepBase& __bcf );
+
     //! modify the boundary condition \c lab with condition \c bcv
     void modifyBC( int lab, BCFunctionBase& bcv );
 
     //! modify the boundary condition \c lab with condition \c bcv
     void modifyBC( int lab, BCVectorBase& bcv );
+
+    void modifyBC( int lab, BCFunctionUDepBase& __bcf );
+
 
     //! Build the boundary stuff
     /*!

@@ -47,6 +47,7 @@ New in 0.5.0:
   ** use boost::shared_ptr<> for safe memory management
 
 [lifesolver]
+* Added ParabolicSolver, TimeSolver, *UDep (MM)
 * Templated the darcy classes.(VM)
   ** use of DataMesh class requires a change in data files
 * Abstraction and interface for darcy Solver (CP, VM)
@@ -60,6 +61,7 @@ New in 0.5.0:
 * Added frontend for mesh readers (CP) 
 
 [testsuite]
+* Added test for ParabolicSolver in lifesolver
 * Added test for 3D/0D coupling (AM)
 * Moved files of test_darcy in lifesolver (VM, CP)
   ** hex and tet tests

@@ -26,6 +26,8 @@
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
    \date 2004-10-26
  */
+
+
 namespace LifeV
 {
 
@@ -195,6 +197,12 @@ public:
 
     //! in place scaling operator
     MSRMatr & operator*=( const DataType num );
+
+    /*! set this matrix to numM*M + numA*A of two matrices scaling plus addition
+     *  @return numM*M + numA*A
+     */
+    MSRMatr & flop( const DataType numM, MSRMatr<DataType> & M,
+                    const DataType numA,MSRMatr<DataType> & A );
 
     /*! set this matrix to num*M + A of two matrices scaling plus addition
      *  @return num*M + A
@@ -433,7 +441,7 @@ template <class DataType>
 MSRMatr<DataType>
 MSRMatr<DataType>::operator*( const DataType num )
 {
-    UInt stop = _Patt->nNz();
+    UInt stop = _Patt->nNz()+1;
     MSRMatr<DataType> ans( *this );
 
     for ( UInt i = 0;i < stop;++i )
@@ -441,13 +449,25 @@ MSRMatr<DataType>::operator*( const DataType num )
 
     return ans;
 }
+template <class DataType>
+MSRMatr<DataType>&
+MSRMatr<DataType>::flop( const DataType numM, MSRMatr<DataType> & M,
+                    const DataType numA,MSRMatr<DataType> & A )
+{
+    UInt stop = _Patt->nNz()+1;
+    //   ASSERT(M.Patt()==A.Patt,"Error in summing matrices");
 
+    for ( UInt i = 0;i < stop;++i )
+        _value[ i ] = numM * M.value() [ i ] + numA*A.value() [ i ];
+
+    return *this;
+}
 template <class DataType>
 MSRMatr<DataType>&
 MSRMatr<DataType>::flop( const DataType num, MSRMatr<DataType>& M, MSRMatr<DataType>& A )
 {
     /* AIM: Matrix = num*M + A */
-    UInt stop = _Patt->nNz();
+    UInt stop = _Patt->nNz()+1;
     //   ASSERT(M.Patt()==A.Patt,"Error in summing matrices");
 
     for ( UInt i = 0;i < stop;++i )
@@ -461,7 +481,7 @@ MSRMatr<DataType>&
 MSRMatr<DataType>::flop( const DataType num, MSRMatr<DataType>& M )
 {
     /* AIM: Matrix = num*M + Matrix */
-    UInt stop = _Patt->nNz();
+    UInt stop = _Patt->nNz()+1;
     //   ASSERT(M.Patt()==A.Patt,"Error in summing matrices");
 
     for ( UInt i = 0;i < stop;++i )
@@ -475,7 +495,7 @@ template<class DataType>
 MSRMatr<DataType>&
 MSRMatr<DataType>::operator* (const DataType num, MSRMatr<DataType>& M)
   {
-    UInt stop=_Patt->nNz();
+    UInt stop=_Patt->nNz()+1;
 
     for (UInt i=0;i<stop;++i)
       _value[i]=num*M.value()[i];
@@ -761,5 +781,8 @@ MSRMatr<DataType>::zeros()
     typename std::vector<DataType>::iterator end = _value.end();
     fill( start, end, 0.0 );
 }
+
+
+
 
 }

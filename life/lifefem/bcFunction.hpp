@@ -170,8 +170,74 @@ private:
     function_type _M_coef;
 };
 
+
+
+
+
+
 typedef LifeV::singleton< LifeV::factoryClone< BCFunctionBase > > FactoryCloneBCFunction;
+
+
 
 }
 
-#endif /* __bcFunction_H */
+
+namespace LifeV
+{
+
+/* much similar to BCFunctionBase but different func prototipe
+   for bc, I derive BCFunctionBaseUDepending from BCFunctionBase
+   only becouse BCBase and BCHandler can work with us with little change,
+   really I don't like that class BCFunctionBase has fixed function_type 
+   prototype in the base class, but I conform 
+ */
+class BCFunctionUDepBase
+{
+public:
+  //Real g(t,x,y,z,ID,U)
+  typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID&, const Real& )> function_type;
+
+  BCFunctionUDepBase(function_type g );
+  BCFunctionUDepBase(const BCFunctionUDepBase& bcf );
+
+  void setFunction(function_type g);
+  Real operator()(const Real& t, const Real& x, const Real& y,
+                  const Real& z, const ID& i, const Real& U ) const;
+
+protected:
+  function_type _M_g;
+};
+
+
+class BCFunctionUDepMixte: public BCFunctionUDepBase
+{
+public:
+  typedef BCFunctionUDepBase::function_type function_type;
+
+  BCFunctionUDepMixte(function_type g,function_type coef);
+  BCFunctionUDepMixte(const BCFunctionUDepMixte& bcf);
+
+  void setFunctions_Mixte(function_type g, function_type coef );
+
+  Real coef(const Real& t, const Real& x, const Real& y,
+            const Real& z, const ID& i, const Real& U ) const;
+private:
+  function_type _M_coef;
+};
+
+typedef LifeV::singleton< LifeV::factoryClone< BCFunctionUDepBase > > FactoryCloneBCFunctionUDep;
+
+
+
+
+
+/* now I can store this in a BCBase */
+
+
+}
+#endif
+
+
+
+
+

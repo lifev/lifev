@@ -114,5 +114,84 @@ createBCFunctionMixte( BCFunctionBase const* __bc )
 // register BCFunctionMixte in factory for cloning
 const bool __bcmixte = FactoryCloneBCFunction::instance().registerProduct( typeid(BCFunctionMixte), &createBCFunctionMixte );
 
+
+
+
 }
 
+
+
+
+
+
+namespace LifeV
+{
+
+
+
+
+BCFunctionUDepBase::BCFunctionUDepBase(function_type g ):_M_g(g)
+{
+}
+BCFunctionUDepBase::BCFunctionUDepBase(const BCFunctionUDepBase& bcf ):
+				_M_g(bcf._M_g)
+{
+}
+void 
+BCFunctionUDepBase::setFunction(function_type g)
+{
+  _M_g=g;
+}
+Real
+BCFunctionUDepBase::operator()(const Real& t, const Real& x, const Real& y,
+                        const Real& z, const ID& i, const Real& u ) const
+{
+  return _M_g(t,x,y,z,i,u);
+}
+
+BCFunctionUDepBase*
+createBCFunctionUDep( BCFunctionUDepBase const* __bc )
+{
+  return new BCFunctionUDepBase( ( BCFunctionUDepBase const& )*__bc );
+}
+const bool __bcUDepBase = FactoryCloneBCFunctionUDep::instance().registerProduct( 
+		typeid(BCFunctionUDepBase), &createBCFunctionUDep );
+
+
+
+
+
+BCFunctionUDepMixte::BCFunctionUDepMixte(function_type g,function_type coef):
+				BCFunctionUDepBase(g),_M_coef(coef)
+{
+}
+
+BCFunctionUDepMixte::BCFunctionUDepMixte(const BCFunctionUDepMixte& bcf):
+				BCFunctionUDepBase(bcf),_M_coef(bcf._M_coef)
+{
+}
+void
+BCFunctionUDepMixte::setFunctions_Mixte(function_type g, function_type coef )
+{
+  setFunction(g);
+  _M_coef=coef;
+}
+Real 
+BCFunctionUDepMixte::coef(const Real& t, const Real& x, const Real& y,
+            const Real& z, const ID& icomp, const Real& u ) const
+{
+  return _M_coef( t, x, y, z, icomp, u );
+}
+
+BCFunctionUDepBase*
+createBCFunctionUDepMixte( BCFunctionUDepBase const* __bc )
+{
+  return new BCFunctionUDepMixte( ( BCFunctionUDepMixte const& )*__bc );
+}
+const bool __bcUDepMixte = FactoryCloneBCFunctionUDep::instance().registerProduct( 
+		typeid(BCFunctionUDepMixte), &createBCFunctionUDepMixte );
+
+
+
+
+}

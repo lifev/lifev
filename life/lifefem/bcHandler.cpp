@@ -133,6 +133,16 @@ BCHandler::addBC( const std::string& name,
     M_bcList.push_back( BCBase( name, flag, type, mode, bcv, nComp ) );
     std::sort( M_bcList.begin(), M_bcList.end() );
 }
+void BCHandler::addBC( const std::string& name,
+                       const EntityFlag& flag,
+                       const BCType& type,
+                       const BCMode& mode,
+                       BCFunctionUDepBase& bcf )
+{
+    // Adding BC
+    M_bcList.push_back( BCBase( name, flag, type, mode, bcf ) );
+    std::sort( M_bcList.begin(), M_bcList.end() );
+}
 
 
 BCBase*
@@ -189,6 +199,13 @@ BCHandler::modifyBC( std::string const& __name, BCVectorBase& __bcv )
 
     __bc->setBCVector( __bcv );
 }
+void
+BCHandler::modifyBC( std::string const& __name, BCFunctionUDepBase& __bcf )
+{
+    BCBase* __bc = findBC( __name );
+
+    __bc->setBCFunction( __bcf );
+}
 
 
 void
@@ -206,6 +223,13 @@ BCHandler::modifyBC( int lab, BCVectorBase& __bcv )
     BCBase* __bc = findBC( lab );
 
     __bc->setBCVector( __bcv );
+}
+void
+BCHandler::modifyBC( int lab, BCFunctionUDepBase& __bcf )
+{
+    BCBase* __bc = findBC( lab );
+
+    __bc->setBCFunction( __bcf );
 }
 
 

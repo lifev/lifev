@@ -835,9 +835,7 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
         throw std::logic_error( __ex.str() );
     }
 
-
-
-
+    return true;
 }
 
 
@@ -1203,10 +1201,9 @@ MM I've looked to this source, easy func
 /usr/local/src/ng431/libsrc/interface/importsolution.cpp
 */
 template <typename VectorType>
-void saveNetgenSolution(std::string filename,VectorType U)
+void saveNetgenSolution(std::string filename,const VectorType& U,std::string fctname="u")
 {
   std::ofstream of(filename.c_str());
-  std::string fctname=std::string("f");
   of<<"solution "<<fctname<<" -size="<<U.size()
     <<" -components=1 -type=nodal"<<std::endl;
   for(UInt i=0;i<U.size();i++)

@@ -70,6 +70,7 @@ namespace LifeV
     Essential, Natural or Mixte
 */
 enum BCType{Essential, Natural, Mixte};
+//	,UDepEssential,UDepNatural,UDepMixte};
 
 /** Type for boundary conditions application modes
 
@@ -198,7 +199,6 @@ public:
             BCFunctionBase& bcf,
             const UInt& nComp );
 
-
     //! Constructor for BC with data vector
     /*!
       \param name the name of the boundary condition
@@ -244,6 +244,26 @@ public:
             const BCMode& mode,
             BCVectorBase& bcv,
             const UInt& nComp );
+
+/* constructors for BCFunctionUDepBase ... */
+    BCBase( const std::string& name,
+            const EntityFlag& flag,
+            const BCType& type,
+            const BCMode& mode,
+            BCFunctionUDepBase& bcf,
+            const std::vector<ID>& comp );
+    BCBase( const std::string& name,
+            const EntityFlag& flag,
+            const BCType& type,
+            const BCMode& mode,
+            BCFunctionUDepBase& bcf);
+    BCBase( const std::string& name,
+            const EntityFlag& flag,
+            const BCType& type,
+            const BCMode& mode,
+            BCFunctionUDepBase& bcf,
+            const UInt& nComp );
+
 
 
     //! Copy constructor for BC (we have a vector of pointers to ID's and a pointer to user defined functions)
@@ -305,6 +325,10 @@ public:
     */
     Real operator() ( const Real& t, const Real& x, const Real& y,
                       const Real& z, const ID& i ) const;
+ 
+    /* new overloading for BCFunctionUDepending */
+    Real operator() ( const Real& t, const Real& x, const Real& y,
+                      const Real& z, const ID& i, const Real& u ) const;
 
 
     //! Returns a pointer  to the user defined STL functor
@@ -312,6 +336,8 @@ public:
 
     //! Returns a pointer to the BCVector
     const BCVectorBase* pointerToBCVector() const;
+
+    const BCFunctionUDepBase* pointerToFunctorUDep() const;
 
     //! True if a data vector has been provided
     bool dataVector() const;
@@ -321,6 +347,11 @@ public:
 
     //! use function boundary conditions
     void setBCFunction( BCFunctionBase& __f );
+
+    //! use function boundary conditions
+    void setBCFunction( BCFunctionUDepBase& __f );
+
+    bool isUDep() const;
 
 
     //! Returns a pointer  to the i-th elements in the (finalised) list
@@ -368,6 +399,8 @@ public:
         }
 
 private:
+    bool _M_isUDep;
+
     //! name identifying a specific BC
     std::string _M_name;
 
@@ -382,6 +415,8 @@ private:
 
     //! Pointer to a user defined functor
     boost::shared_ptr<BCFunctionBase> _M_bcf;
+
+    boost::shared_ptr<BCFunctionUDepBase> _M_bcfUDep;
 
 
     //! Pointer to a user given data vector

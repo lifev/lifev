@@ -1193,7 +1193,7 @@ void compute_vec_stab( OperFct& fct, ElemVec& elvec, const CurrentFE& fe, Real t
 
 template <typename DOF, typename Vector, typename ElemVec>
 void
-assemb_vec( Vector& V, ElemVec& elvec, const CurrentFE& fe, const DOF& dof, int iblock )
+assemb_vec( Vector& V, ElemVec& elvec, const CurrentFE& fe, const DOF& dof, int iblock=0 )
 {
     UInt totdof = dof.numTotalDof();
     typename ElemVec::vector_view vec = elvec.block( iblock );

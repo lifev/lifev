@@ -74,11 +74,11 @@ void Dof::showMe( std::ostream & out, bool verbose ) const
                 out.width( 10 );
                 out << localToGlobal( i + 1, j + 1 );
                 out << " # ";
-                if ( j % 2 != 0 )
+                if ( (i*numLocalDof()+j) % 2 != 0 )
                     out << std::endl;
             }
 
-        }
+        }out << std::endl;
 
     }
 

@@ -37,6 +37,7 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag,
                   const BCType& type, const BCMode& mode,
                   BCFunctionBase& bcf, const std::vector<ID>& comp )
     :
+    _M_isUDep(false),
     _M_name( name ),
     _M_flag( flag ),
     _M_type( type ),
@@ -54,6 +55,7 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag,
 BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
                   BCFunctionBase& bcf )
     :
+    _M_isUDep(false),
     _M_name( name ),
     _M_flag( flag ),
     _M_type( type ),
@@ -93,6 +95,7 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& t
                   const BCMode& mode, BCFunctionBase& bcf, const UInt& nComp )
 
     :
+    _M_isUDep(false),
     _M_name( name ),
     _M_flag( flag ),
     _M_type( type ),
@@ -117,11 +120,12 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& t
 BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
                   BCVectorBase& bcv, const std::vector<ID>& comp )
     :
+    _M_isUDep(false),
     _M_name( name ),
     _M_flag( flag ),
     _M_type( type ),
     _M_mode( mode ),
-    _M_bcf(),
+    _M_bcf(),_M_bcfUDep(),
     _M_bcv( FactoryCloneBCVector::instance().createObject( &bcv )  ),
     _M_dataVector( true ),
     _M_comp(comp),
@@ -135,11 +139,12 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& t
 BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
                   BCVectorBase& bcv )
     :
+    _M_isUDep(false),
     _M_name( name ),
     _M_flag( flag ),
     _M_type( type ),
     _M_mode( mode ),
-    _M_bcf(),
+    _M_bcf(),_M_bcfUDep(),
     _M_bcv( FactoryCloneBCVector::instance().createObject( &bcv ) ),
     _M_dataVector( true ),
     _M_comp(),
@@ -177,11 +182,12 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& t
 BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& type,
                   const BCMode& mode, BCVectorBase& bcv, const UInt& nComp )
     :
+    _M_isUDep(false),
     _M_name( name ),
     _M_flag( flag ),
     _M_type( type ),
     _M_mode( mode ),
-    _M_bcf(),
+    _M_bcf(),_M_bcfUDep(),
     _M_bcv( FactoryCloneBCVector::instance().createObject( &bcv ) ),
     _M_dataVector( true ),
     _M_comp(),
@@ -194,6 +200,86 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& t
     for ( ID i = 1; i <= nComp; ++i )
         _M_comp.push_back( i );
 }
+
+BCBase::BCBase( const std::string& name, const EntityFlag& flag, 
+		const BCType& type, const BCMode& mode, 
+		BCFunctionUDepBase& bcf, const std::vector<ID>& comp )
+    :
+    _M_isUDep(true),
+    _M_name( name ),
+    _M_flag( flag ),
+    _M_type( type ),
+    _M_mode( mode ),
+    _M_bcfUDep( FactoryCloneBCFunctionUDep::instance().createObject( &bcf ) ),
+    _M_dataVector( false ),
+    _M_comp( comp ),
+    _M_finalised( false )
+{
+    if ( _M_mode != Component )
+        ERROR_MSG( "You should use a more specific constructor for this mode" );
+}
+BCBase::BCBase( const std::string& name, const EntityFlag& flag, 
+		const BCType& type, const BCMode& mode, 
+		BCFunctionUDepBase& bcf)
+    :
+    _M_isUDep(true),
+    _M_name( name ),
+    _M_flag( flag ),
+    _M_type( type ),
+    _M_mode( mode ),
+    _M_bcfUDep( FactoryCloneBCFunctionUDep::instance().createObject( &bcf ) ),
+    _M_dataVector( false ),
+    _M_comp(),
+    _M_finalised( false )
+{
+    UInt nComp;
+    switch ( _M_mode = mode )
+    {
+        case Scalar:
+            nComp = 1;
+            _M_comp.reserve( nComp );
+            _M_comp.push_back( 1 );
+            break;
+        case Tangential:
+            nComp = nDimensions - 1;
+            _M_comp.reserve( nComp );
+            for ( ID i = 1; i <= nComp; ++i )
+                _M_comp.push_back( i );
+            break;
+        case Normal:
+            nComp = 1;
+            _M_comp.reserve( nComp );
+            _M_comp.push_back( nDimensions );
+            break;
+        default:
+            ERROR_MSG( "You should use a more specific constructor for this mode" );
+    }
+}
+BCBase::BCBase( const std::string& name, const EntityFlag& flag, 
+		const BCType& type, const BCMode& mode, 
+		BCFunctionUDepBase& bcf, const UInt& nComp )
+    :
+    _M_isUDep(true),
+    _M_name( name ),
+    _M_flag( flag ),
+    _M_type( type ),
+    _M_mode( mode ),
+    _M_bcfUDep( FactoryCloneBCFunctionUDep::instance().createObject( &bcf ) ),
+    _M_dataVector( false ),
+    _M_comp(),
+    _M_finalised( false )
+{
+    if ( _M_mode != Full )
+        ERROR_MSG( "You should use a more specific constructor for this mode" );
+
+    _M_comp.reserve( nComp );
+    for ( ID i = 1; i <= nComp; ++i )
+        _M_comp.push_back( i );
+
+}
+
+
+
 
 
 //! Destructor (we have a vector of pointers to ID's and Functors)
@@ -214,10 +300,12 @@ BCBase & BCBase::operator=( const BCBase& BCb )
     _M_mode = BCb._M_mode;
     _M_finalised = BCb._M_finalised;
     _M_dataVector = BCb._M_dataVector;
+    _M_bcfUDep=BCb._M_bcfUDep;
     _M_bcv = BCb._M_bcv;
     _M_bcf = BCb._M_bcf;
 
     _M_comp = BCb._M_comp;
+    _M_isUDep=BCb._M_isUDep;
 
     // Important!!: The set member list0 is always empty at this
     // point, it is just an auxiliary container used at the moment of
@@ -233,11 +321,13 @@ BCBase & BCBase::operator=( const BCBase& BCb )
 //! Copy constructor for BC (we have a vector of pointers to ID's and a pointer to user defined functions)
 BCBase::BCBase( const BCBase& BCb )
     :
+    _M_isUDep(BCb._M_isUDep),
     _M_name( BCb._M_name ),
     _M_flag( BCb._M_flag ),
     _M_type( BCb._M_type ),
     _M_mode( BCb._M_mode ),
     _M_bcf( BCb._M_bcf ),
+    _M_bcfUDep(BCb._M_bcfUDep),
     _M_bcv( BCb._M_bcv ),
     _M_dataVector( BCb._M_dataVector ),
     _M_comp( BCb._M_comp ),
@@ -274,6 +364,10 @@ BCMode BCBase::mode() const
 {
     return _M_mode;
 }
+bool BCBase::isUDep() const
+{
+  return _M_isUDep;
+}
 
 //! Returns the number of components involved in this boundary condition
 UInt BCBase::numberOfComponents() const
@@ -301,6 +395,17 @@ Real BCBase::operator() ( const Real& t, const Real& x, const Real& y,
     return _M_bcf->operator() ( t,x, y, z, i );
 }
 
+//! Overloading function operator by calling the (*_M_bcf)() user specified function
+/* new overloading for BCFunctionUDepending */
+Real BCBase::operator() ( const Real& t, const Real& x, const Real& y,
+                           const Real& z, const ID& i, const Real& u ) const
+{
+    /* is there a better way ? */
+Debug(800)<<"debug800 in BCBase::operator(6x)\n";
+   return _M_bcfUDep->operator()(t,x, y, z, i, u); 
+Debug(800)<<"debug800 out BCBase::operator(6x)\n";
+}
+
 
 
 //! Returns a pointer  to the user defined STL functor
@@ -315,6 +420,12 @@ const BCVectorBase* BCBase::pointerToBCVector() const
     return _M_bcv.get();
 }
 
+//! Returns a pointer  to the user defined STL functor
+const BCFunctionUDepBase* BCBase::pointerToFunctorUDep() const
+{
+    return _M_bcfUDep.get();
+}
+
 //! True is a data vector has been provided
 bool BCBase::dataVector() const
 {
@@ -326,6 +437,7 @@ BCBase::setBCVector( BCVectorBase& __v )
 {
     _M_bcv = boost::shared_ptr<BCVectorBase>( FactoryCloneBCVector::instance().createObject( &__v ) );
     _M_dataVector = true;
+    _M_isUDep=false;
 }
 
 void
@@ -333,6 +445,15 @@ BCBase::setBCFunction( BCFunctionBase& __f )
 {
     _M_bcf = boost::shared_ptr<BCFunctionBase>( FactoryCloneBCFunction::instance().createObject( &__f ) );
     _M_dataVector = false;
+    _M_isUDep=false;
+}
+
+void
+BCBase::setBCFunction( BCFunctionUDepBase& __f )
+{
+    _M_bcfUDep = boost::shared_ptr<BCFunctionUDepBase>( FactoryCloneBCFunctionUDep::instance().createObject( &__f ) );
+    _M_dataVector = false;
+    _M_isUDep=true;
 }
 
 Real BCBase::operator() ( const ID& iDof, const ID& iComp ) const
