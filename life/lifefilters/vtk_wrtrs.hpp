@@ -1,20 +1,20 @@
 /*
-  This file is part of the LifeV library
-  Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
+ This file is part of the LifeV library
+ Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
 /*! --------------------------------------------------------------------------*
@@ -71,149 +71,162 @@ namespace LifeV
   we need to compute the coordinates of all the supplementary nodes
   For "iso" cases (whenever we have ALL the coordinates of the nodes, it is recommended using the other subroutine
   with the same name but with a different signature.
-
-
+ 
+ 
   NB: it works with P1, P2, but it needs probably to be adapted to more general cases...
 */
-template<typename TheMesh, typename TheDof>
-void wr_vtk_ascii_header(std::string fname, std::string title,
-                         const TheMesh& mesh, const TheDof& dof, CurrentFE& fe)
+template <typename TheMesh, typename TheDof>
+void wr_vtk_ascii_header( std::string fname, std::string title,
+                          const TheMesh& mesh, const TheDof& dof, CurrentFE& fe )
 {
-  // Note: it is assumed that all the (volume) element of the mesh are associated to the same reference finite element
- std::ofstream ofile(fname.c_str());
+    // Note: it is assumed that all the (volume) element of the mesh are associated to the same reference finite element
+    std::ofstream ofile( fname.c_str() );
 
- const RefFE& refFE = fe.refFE;
- //  const GeoMap& geoMap = fe.geoMap;
- //  const QuadRule& qr = fe.qr;
- UInt cell_type;
+    const RefFE& refFE = fe.refFE;
+    //  const GeoMap& geoMap = fe.geoMap;
+    //  const QuadRule& qr = fe.qr;
+    UInt cell_type;
 
- switch(refFE.type){
- case FE_P1_3D:
-   cell_type = VTK_TETRA;
-   break;
- case FE_P2_3D:case FE_P2tilde_3D:
-   cell_type = VTK_QUADRATIC_TETRA; // maybe to be modified (P2 on linear tetra...) see also the geomap...
-   break;
- case FE_Q1_3D:case FE_Q0_3D:
-   cell_type = VTK_HEXAHEDRON;
-   break;
- default:
-   std::cout << "WARNING: the element is not yet implemented in vtk_wrtrs.h\n";
-   return;
- }
-
- ASSERT(ofile,"Error: Output file cannot be open"); //
-
- UInt nldpe=refFE.nbDofPerEdge;
- UInt nldpv=refFE.nbDofPerVertex;
- UInt nldpf=refFE.nbDofPerFace;
- UInt nldpV=refFE.nbDofPerVolume;
- UInt nlv=dof.numLocalVertices();
- UInt nle=dof.numLocalEdges();
- UInt nlf=dof.numLocalFaces();
- UInt nV=mesh.numVolumes();
- UInt ne=mesh.numEdges();
- UInt nv=mesh.numVertices();
- UInt nf=mesh.numFaces();
- UInt nldof = nle*nldpe+nlv*nldpv+nlf*nldpf+nldpV;
- //  _totalDof=nV*nldpV+ne*nldpe+nv*nldpv+nf*nldpf;
- UInt cells_size;
- UInt num_points =  dof.numTotalDof(); // discuterne con Luca
- UInt num_points_supp =  dof.numTotalDof() - nv; // discuterne con Luca
- std::vector<Real> supp_x(num_points_supp,0.0);
- std::vector<Real> supp_y(num_points_supp,0.0);
- std::vector<Real> supp_z(num_points_supp,0.0);
- Real x,y,z;
-
- ofile << "# vtk DataFile Version " << VTK_VERSION << std::endl;
- ofile << title << std::endl;
- ofile << "ASCII" << std::endl;
- ofile << std::endl;
- ofile << "DATASET UNSTRUCTURED_GRID" << std::endl;
- ofile << "POINTS " << num_points  << " " << "float" << std::endl; // forse si puo' fare una RTTI sul dato contenuto nella point list
-
-  UInt i,ie,index,j;
-  UInt gcount;
-  UInt lcount;
-
-  // Vertex based Dof: the coordinates are available from the Pont List
-  std::cout << "nv = " << nv << std::endl;
-  for(i=0;i<nv;++i) // BUG ???????? i=1 ... !!!!!! (jfg 20/10/2002)
-    ofile << mesh.pointList[i].x() << " "
-	  <<  mesh.pointList[i].y() << " "
-	  <<  mesh.pointList[i].z() << std::endl;
-
- // Now I store the coordinates of the supplementary nodes in a temporary vector
-  // Edge Based Dof
-  gcount = 0;
-  lcount = nlv;
-  if (nldpe >0 ){
-    for (ie=0; ie< nV; ++ie){
-      fe.updateJac(mesh.volumeList(ie+1));
-      for (i=0; i<nle; ++i){
-	fe.coorMap(x,y,z,refFE.xi(i+lcount),refFE.eta(i+lcount),refFE.zeta(i+lcount));
-	index = mesh.localEdgeId(ie+1,i+1) - 1;
-	supp_x[index]=x;
-	supp_y[index]=y;
-	supp_z[index]=z;
-     }
+    switch ( refFE.type )
+    {
+    case FE_P1_3D:
+        cell_type = VTK_TETRA;
+        break;
+    case FE_P2_3D:
+    case FE_P2tilde_3D:
+        cell_type = VTK_QUADRATIC_TETRA; // maybe to be modified (P2 on linear tetra...) see also the geomap...
+        break;
+    case FE_Q1_3D:
+    case FE_Q0_3D:
+        cell_type = VTK_HEXAHEDRON;
+        break;
+    default:
+        std::cout << "WARNING: the element is not yet implemented in vtk_wrtrs.h\n";
+        return ;
     }
-    gcount+=ne;
-    lcount+=nle;
-  }
-  // Face  Based Dof
-  if (nldpf >0){
-    for (ie=0; ie<nV; ++ie){
-      fe.updateJac(mesh.volumeList(ie+1));
-      for (i=0; i<nlf; ++i){
-          fe.coorMap(x,y,z,refFE.xi(i+lcount),refFE.eta(i+lcount),refFE.zeta(i+lcount));
-          index = mesh.localFaceId(ie+1,i+1)+gcount - 1;
-          supp_x[index]=x;
-	  supp_y[index]=y;
-	  supp_z[index]=z;
-      }
+
+    ASSERT( ofile, "Error: Output file cannot be open" ); //
+
+    UInt nldpe = refFE.nbDofPerEdge;
+    UInt nldpv = refFE.nbDofPerVertex;
+    UInt nldpf = refFE.nbDofPerFace;
+    UInt nldpV = refFE.nbDofPerVolume;
+    UInt nlv = dof.numLocalVertices();
+    UInt nle = dof.numLocalEdges();
+    UInt nlf = dof.numLocalFaces();
+    UInt nV = mesh.numVolumes();
+    UInt ne = mesh.numEdges();
+    UInt nv = mesh.numVertices();
+    UInt nf = mesh.numFaces();
+    UInt nldof = nle * nldpe + nlv * nldpv + nlf * nldpf + nldpV;
+    //  _totalDof=nV*nldpV+ne*nldpe+nv*nldpv+nf*nldpf;
+    UInt cells_size;
+    UInt num_points = dof.numTotalDof(); // discuterne con Luca
+    UInt num_points_supp = dof.numTotalDof() - nv; // discuterne con Luca
+    std::vector<Real> supp_x( num_points_supp, 0.0 );
+    std::vector<Real> supp_y( num_points_supp, 0.0 );
+    std::vector<Real> supp_z( num_points_supp, 0.0 );
+    Real x, y, z;
+
+    ofile << "# vtk DataFile Version " << VTK_VERSION << std::endl;
+    ofile << title << std::endl;
+    ofile << "ASCII" << std::endl;
+    ofile << std::endl;
+    ofile << "DATASET UNSTRUCTURED_GRID" << std::endl;
+    ofile << "POINTS " << num_points << " " << "float" << std::endl; // forse si puo' fare una RTTI sul dato contenuto nella point list
+
+    UInt i, ie, index, j;
+    UInt gcount;
+    UInt lcount;
+
+    // Vertex based Dof: the coordinates are available from the Pont List
+    std::cout << "nv = " << nv << std::endl;
+    for ( i = 0;i < nv;++i )  // BUG ???????? i=1 ... !!!!!! (jfg 20/10/2002)
+        ofile << mesh.pointList[ i ].x() << " "
+        << mesh.pointList[ i ].y() << " "
+        << mesh.pointList[ i ].z() << std::endl;
+
+    // Now I store the coordinates of the supplementary nodes in a temporary vector
+    // Edge Based Dof
+    gcount = 0;
+    lcount = nlv;
+    if ( nldpe > 0 )
+    {
+        for ( ie = 0; ie < nV; ++ie )
+        {
+            fe.updateJac( mesh.volumeList( ie + 1 ) );
+            for ( i = 0; i < nle; ++i )
+            {
+                fe.coorMap( x, y, z, refFE.xi( i + lcount ), refFE.eta( i + lcount ), refFE.zeta( i + lcount ) );
+                index = mesh.localEdgeId( ie + 1, i + 1 ) - 1;
+                supp_x[ index ] = x;
+                supp_y[ index ] = y;
+                supp_z[ index ] = z;
+            }
+        }
+        gcount += ne;
+        lcount += nle;
     }
-    gcount+=nf;
-    lcount+=nlf;
-  }
-  // Volume  Based Dof
-  if (nldpV >0 ){
-    for (ie=0; ie<nV; ++ie){
-      fe.updateJac(mesh.volumeList(ie+1));
-      fe.coorMap(x,y,z,refFE.xi(lcount),refFE.eta(lcount),refFE.zeta(lcount));
-      index = ie + gcount - 1;
-      supp_x[index]=x;
-      supp_y[index]=y;
-      supp_z[index]=z;
+    // Face  Based Dof
+    if ( nldpf > 0 )
+    {
+        for ( ie = 0; ie < nV; ++ie )
+        {
+            fe.updateJac( mesh.volumeList( ie + 1 ) );
+            for ( i = 0; i < nlf; ++i )
+            {
+                fe.coorMap( x, y, z, refFE.xi( i + lcount ), refFE.eta( i + lcount ), refFE.zeta( i + lcount ) );
+                index = mesh.localFaceId( ie + 1, i + 1 ) + gcount - 1;
+                supp_x[ index ] = x;
+                supp_y[ index ] = y;
+                supp_z[ index ] = z;
+            }
+        }
+        gcount += nf;
+        lcount += nlf;
     }
-  }
-  for(i=0;i<num_points_supp;++i){
-    ofile << supp_x[i] << " " <<  supp_y[i] << " " <<  supp_z[i] << std::endl;
-  }
+    // Volume  Based Dof
+    if ( nldpV > 0 )
+    {
+        for ( ie = 0; ie < nV; ++ie )
+        {
+            fe.updateJac( mesh.volumeList( ie + 1 ) );
+            fe.coorMap( x, y, z, refFE.xi( lcount ), refFE.eta( lcount ), refFE.zeta( lcount ) );
+            index = ie + gcount - 1;
+            supp_x[ index ] = x;
+            supp_y[ index ] = y;
+            supp_z[ index ] = z;
+        }
+    }
+    for ( i = 0;i < num_points_supp;++i )
+    {
+        ofile << supp_x[ i ] << " " << supp_y[ i ] << " " << supp_z[ i ] << std::endl;
+    }
 
-  // connectivity
-  // cells_size = nldof*(nV+1);
-  cells_size = (nldof+1)*nV;
-
-  ofile << std::endl;
-
-  ofile << "CELLS " << nV << " " << cells_size << std::endl;
-  for (i=0;i<nV;++i){
-    ofile << nldof << " ";
-    for (j=0;j<nldof;++j)
-      ofile << dof.localToGlobal(i+1,j+1)-1 << " ";//damned (C vs) Fortran
+    // connectivity
+    // cells_size = nldof*(nV+1);
+    cells_size = ( nldof + 1 ) * nV;
 
     ofile << std::endl;
-  }
 
-  ofile << std::endl;
+    ofile << "CELLS " << nV << " " << cells_size << std::endl;
+    for ( i = 0;i < nV;++i )
+    {
+        ofile << nldof << " ";
+        for ( j = 0;j < nldof;++j )
+            ofile << dof.localToGlobal( i + 1, j + 1 ) - 1 << " "; //damned (C vs) Fortran
 
-  // elements type
-  ofile << "CELL_TYPES " << nV << std::endl;
-  for (i=0;i<nV;++i)
-    ofile << cell_type << std::endl;
-  ofile << std::endl;
-   ofile << "POINT_DATA " << num_points << std::endl;
+        ofile << std::endl;
+    }
+
+    ofile << std::endl;
+
+    // elements type
+    ofile << "CELL_TYPES " << nV << std::endl;
+    for ( i = 0;i < nV;++i )
+        ofile << cell_type << std::endl;
+    ofile << std::endl;
+    ofile << "POINT_DATA " << num_points << std::endl;
 }
 
 /* ! {\tt  wr_vtk_ascii_scalar} is a subrotuine for writing SCALARS unknown in ASCII for VTK
@@ -223,11 +236,11 @@ void wr_vtk_ascii_header(std::string fname, std::string title,
    there is the user defined table.
 */
 
-void wr_vtk_ascii_scalar(std::string fname, std::string name, Real* U,
-                         int Usize, std::string look_up_table="default");
+void wr_vtk_ascii_scalar( std::string fname, std::string name, Real* U,
+                          int Usize, std::string look_up_table = "default" );
 
-void wr_vtk_ascii_vector(std::string fname, std::string name, Real* U,
-                         int Usize);
+void wr_vtk_ascii_vector( std::string fname, std::string name, Real* U,
+                          int Usize );
 
 
 
@@ -236,9 +249,9 @@ void wr_vtk_ascii_vector(std::string fname, std::string name, Real* U,
 
 //----------------------------------------------------------------------
 // obsolete ?
-void wr_vtk_ascii_scalar(std::string fname, std::string name,
-                         std::vector<Real> U,
-                         std::string look_up_table="default");
+void wr_vtk_ascii_scalar( std::string fname, std::string name,
+                          std::vector<Real> U,
+                          std::string look_up_table = "default" );
 
 
 /* ! This subroutine considers the "iso" cases, whenever the points of the mesh actually coincide with the ones
@@ -246,53 +259,55 @@ void wr_vtk_ascii_scalar(std::string fname, std::string name,
  and there is no need of recomputing or rereading the other coordinates
  (which on the base of the McKoy algorithm are not explicitly computed so far (see fields...update))
 */
-template<typename RegionMesh, typename Dof>
-void wr_vtk_ascii_header(std::string fname, std::string title,
-                         const RegionMesh& mesh, const Dof& dof,
-                         UInt cell_type)
+template <typename RegionMesh, typename Dof>
+void wr_vtk_ascii_header( std::string fname, std::string title,
+                          const RegionMesh& mesh, const Dof& dof,
+                          UInt cell_type )
 {
 
- std::ofstream ofile(fname.c_str());
- UInt cells_size;
- UInt i,j;
+    std::ofstream ofile( fname.c_str() );
+    UInt cells_size;
+    UInt i, j;
 
-  UInt nV=mesh.numVolumes();
-  UInt nv=mesh.numVertices();
-  UInt nldof=mesh.numLocalVertices();
+    UInt nV = mesh.numVolumes();
+    UInt nv = mesh.numVertices();
+    UInt nldof = mesh.numLocalVertices();
 
- ASSERT(ofile,"Error: Output file cannot be open");
+    ASSERT( ofile, "Error: Output file cannot be open" );
 
- ofile << "# vtk DataFile Version " << VTK_VERSION << std::endl;
- ofile << title << std::endl;
- ofile << "ASCII" << std::endl; // capire come scrivere in binario in C++
- ofile << std::endl;
- ofile << "DATASET UNSTRUCTURED_GRID" << std::endl;
- ofile << "POINTS " << nv  << " " << "float" << std::endl; // forse si puo' fare una RTTI sul dato contenuto nella point list
+    ofile << "# vtk DataFile Version " << VTK_VERSION << std::endl;
+    ofile << title << std::endl;
+    ofile << "ASCII" << std::endl; // capire come scrivere in binario in C++
+    ofile << std::endl;
+    ofile << "DATASET UNSTRUCTURED_GRID" << std::endl;
+    ofile << "POINTS " << nv << " " << "float" << std::endl; // forse si puo' fare una RTTI sul dato contenuto nella point list
 
- // nodes coordinates (they are all available in the Point List)
- for(i=0;i<nv;++i){
-  ofile << mesh.pointList[i].x() << " " <<  mesh.pointList[i].y() << " " <<  mesh.pointList[i].z() << std::endl;
- }
+    // nodes coordinates (they are all available in the Point List)
+    for ( i = 0;i < nv;++i )
+    {
+        ofile << mesh.pointList[ i ].x() << " " << mesh.pointList[ i ].y() << " " << mesh.pointList[ i ].z() << std::endl;
+    }
 
- // connectivity
- // cells_size = nldof*(nV+1);
- cells_size = (nldof+1)*nV;
- ofile << std::endl;
+    // connectivity
+    // cells_size = nldof*(nV+1);
+    cells_size = ( nldof + 1 ) * nV;
+    ofile << std::endl;
 
- ofile << "CELLS " << nV << " " << cells_size << std::endl;
- for (i=0;i<nV;++i){
-  ofile << nldof << " ";
-  for (j=0;j<nldof;++j)
-    ofile << dof.localToGlobal(i+1,j+1)-1 << " "; //damned (C vs) Fortran
-  ofile << std::endl;
- }
- ofile << std::endl;
- // elements type
- ofile << "CELL_TYPES " << nV << std::endl;
- for (i=0;i<nV;++i)
-  ofile << cell_type << std::endl;
+    ofile << "CELLS " << nV << " " << cells_size << std::endl;
+    for ( i = 0;i < nV;++i )
+    {
+        ofile << nldof << " ";
+        for ( j = 0;j < nldof;++j )
+            ofile << dof.localToGlobal( i + 1, j + 1 ) - 1 << " "; //damned (C vs) Fortran
+        ofile << std::endl;
+    }
+    ofile << std::endl;
+    // elements type
+    ofile << "CELL_TYPES " << nV << std::endl;
+    for ( i = 0;i < nV;++i )
+        ofile << cell_type << std::endl;
 
- ofile << std::endl;
+    ofile << std::endl;
 
 }
 }

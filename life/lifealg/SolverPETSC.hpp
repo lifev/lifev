@@ -1,26 +1,26 @@
 /* -*- mode: c++ -*-
 
-  This file is part of the LifeV library
+ This file is part of the LifeV library
 
-  Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-       Date: 2004-08-29
+ Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+      Date: 2004-08-29
 
-  Copyright (C) 2004 EPFL
+ Copyright (C) 2004 EPFL
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/ 
 /**
    \file SolverPETSC.hpp
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
@@ -51,21 +51,21 @@ namespace LifeV
 */
 typedef enum PetscMonitorType
 {
-    KSP_NO_MONITOR = 0,  /**< no monitor */
-    KSP_DEFAULT_MONITOR,  /**< preconditionned error monitor */
+    KSP_NO_MONITOR = 0,   /**< no monitor */
+    KSP_DEFAULT_MONITOR,   /**< preconditionned error monitor */
     KSP_TRUE_MONITOR     /**< preconditionned error and true error monitor */
 };
 
 /*!
   \class SolverPETSC
   \brief wrap petsc linear solvers
-
+ 
   You should have a look at PETSC documentation for further details.
-
+ 
   By default the solver is gmres and the preconditioner is ilu.
-
+ 
   Here is the list of solvers available:
-
+ 
   -# "richardson"
   -# "chebychev"
   -# "cg"
@@ -83,9 +83,9 @@ typedef enum PetscMonitorType
   -# "minres"
   -# "symmlq"
   -# "lgmres"
-
+ 
   Here is the list of preconditioners available:
-
+ 
   -# "none"
   -# "jacobi"
   -# "sor"
@@ -113,7 +113,7 @@ typedef enum PetscMonitorType
   -# "petscesi"
   -# "mat"
   -# "hypre"
-
+ 
   @author Christophe Prud'homme
   @see
 */
@@ -123,7 +123,7 @@ public:
 
 
     /** @name Typedefs
-     */
+     */ 
     //@{
 
     typedef double value_type;
@@ -136,7 +136,7 @@ public:
     //@}
 
     /** @name Constructors, destructor
-     */
+     */ 
     //@{
 
     //! default constructor
@@ -158,7 +158,7 @@ public:
     //@}
 
     /** @name Accessors
-     */
+     */ 
     //@{
 
     double residualNorm() const;
@@ -172,23 +172,24 @@ public:
     //@}
 
     /** @name  Mutators
-     */
+     */ 
     //@{
 
     //! set matrix from raw CSR arrays
     void setMatrix( uint, const uint*, const uint*, const double* );
 
     //! set matrix from CSRMatr
-    template<typename PatternType>
-    void setMatrix( const CSRMatr<PatternType, value_type>& m ) {
-        _tempPattern.reset(0);
-        _tempMatrix.reset(0);
-        setMatrix(m.Patt()->nRows(),
-                  m.Patt()->giveRawCSR_ia(),
-                  m.Patt()->giveRawCSR_ja(),
-                  m.giveRawCSR_value());
+    template <typename PatternType>
+    void setMatrix( const CSRMatr<PatternType, value_type>& m )
+    {
+        _tempPattern.reset( 0 );
+        _tempMatrix.reset( 0 );
+        setMatrix( m.Patt() ->nRows(),
+                   m.Patt() ->giveRawCSR_ia(),
+                   m.Patt() ->giveRawCSR_ja(),
+                   m.giveRawCSR_value() );
     }
-    
+
     /** set matrix from MSRMatr
      *
      *  Warning: The matrix is converted to CSR. This method provides ease of
@@ -208,7 +209,7 @@ public:
     //@}
 
     /** @name  Methods
-     */
+     */ 
     //@{
 
     /*
@@ -276,8 +277,8 @@ public:
      *  @author Christoph Winkelmann
      *  @see http://www.mcs.anl.gov/petsc/
      */
-    void setOptionsFromGetPot(const GetPot& dataFile,
-                              std::string section = "petsc");
+    void setOptionsFromGetPot( const GetPot& dataFile,
+                               std::string section = "petsc" );
 
 private:
     Private* _M_p;
@@ -292,18 +293,25 @@ private:
 /*!
   \class PETSC
   \brief initialization and finalization for PETSC linear solvers
-
+ 
   Should be used as LifeV::singleton<PETSC>
-
+ 
   @author Christoph Winkelmann
   @see http://www.mcs.anl.gov/petsc/
 */
-class PETSC {
+class PETSC
+{
 public:
     //! Initializes PETSC
-    PETSC() { PetscInitialize(0, 0, 0, 0); }
+    PETSC()
+    {
+        PetscInitialize( 0, 0, 0, 0 );
+    }
     //! Finalizes PETSC
-    ~PETSC() { PetscFinalize(); }
+    ~PETSC()
+    {
+        PetscFinalize();
+    }
 };
 
 }

@@ -1,29 +1,29 @@
 /*
-  This file is part of the LifeV library
-  Copyright (C) 2004 EPFL, INRIA and Politechnico di Milano
+ This file is part of the LifeV library
+ Copyright (C) 2004 EPFL, INRIA and Politechnico di Milano
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/ 
 /*!
   \file dataConvDiffReact.hpp
   \author M. Prosi
   \date 03/2004
   \version 1.0
-
+ 
   \brief File containing a class for handling Convection-Diffusion-Reaktion processes data with GetPot
-
+ 
 */
 #ifndef _DATACONVDIFFREACT_H_
 #define _DATACONVDIFFREACT_H_
@@ -38,35 +38,36 @@ namespace LifeV
 {
 /*!
   \class DataConvDiffReact
-
+ 
   Base class which holds usual data for the Convection-Diffusion-Reaction equation solvers
-
+ 
 */
 template <typename Mesh>
-class DataConvDiffReact:public DataMesh<Mesh>,public DataTime {
- public:
+class DataConvDiffReact: public DataMesh<Mesh>, public DataTime
+{
+public:
 
-  //! Constructor
-  DataConvDiffReact(const GetPot& dfile);
+    //! Constructor
+    DataConvDiffReact( const GetPot& dfile );
 
-  //! Ouptut
-  void showMe(std::ostream& c=std::cout);
-  //! Diffusivity
-  Real diffusivity() const;
-  //! Reaction coefficient
-  Real react() const;
-  //! time variables
-  Real inittime() const;
-  Real endtime() const;
-  int stationary() const;
+    //! Ouptut
+    void showMe( std::ostream& c = std::cout );
+    //! Diffusivity
+    Real diffusivity() const;
+    //! Reaction coefficient
+    Real react() const;
+    //! time variables
+    Real inittime() const;
+    Real endtime() const;
+    int stationary() const;
 
- protected:
-  //! Physics
-  Real _diffusivity; // Diffusivity
-  Real _react; // Reaction coefficient
-  Real _inittime; // initialisation time
-  Real _endtime; // end time
-  int _stationary; // switch stationary/instationary calculation
+protected:
+    //! Physics
+    Real _diffusivity; // Diffusivity
+    Real _react; // Reaction coefficient
+    Real _inittime; // initialisation time
+    Real _endtime; // end time
+    int _stationary; // switch stationary/instationary calculation
 };
 
 
@@ -78,70 +79,76 @@ class DataConvDiffReact:public DataMesh<Mesh>,public DataTime {
 // Constructor
 template <typename Mesh>
 DataConvDiffReact<Mesh>::
-DataConvDiffReact(const GetPot& dfile):
-  DataMesh<Mesh>(dfile,"masstransport/discretization"),
-  DataTime(dfile,"fluid/discretization") {
+DataConvDiffReact( const GetPot& dfile ) :
+        DataMesh<Mesh>( dfile, "masstransport/discretization" ),
+        DataTime( dfile, "fluid/discretization" )
+{
 
-  // physics
-  _diffusivity = dfile("masstransport/physics/diffusivity",1.);
-  _react = dfile("masstransport/physics/react",1.);
-  _inittime = dfile("masstransport/physics/inittime",0.);
-  _endtime = dfile("masstransport/physics/endtime",1.);
-  _stationary = dfile("masstransport/physics/stationary",0);
+    // physics
+    _diffusivity = dfile( "masstransport/physics/diffusivity", 1. );
+    _react = dfile( "masstransport/physics/react", 1. );
+    _inittime = dfile( "masstransport/physics/inittime", 0. );
+    _endtime = dfile( "masstransport/physics/endtime", 1. );
+    _stationary = dfile( "masstransport/physics/stationary", 0 );
 }
 
 // Output
 template <typename Mesh>
 void DataConvDiffReact<Mesh>::
-showMe(std::ostream& c)
+showMe( std::ostream& c )
 {
-  // physics
-  c << "\n*** Values for data [masstransport/physics]\n\n";
-  c << "diffusivity   = " << _diffusivity << std::endl;
-  c << "reaction coefficient  = " << _react << std::endl;
-  c << "initialisation time = " << _inittime << std::endl;
-  c << "endtime = " << _endtime << std::endl;
-  c << "stationary = " << _stationary << std::endl;
+    // physics
+    c << "\n*** Values for data [masstransport/physics]\n\n";
+    c << "diffusivity   = " << _diffusivity << std::endl;
+    c << "reaction coefficient  = " << _react << std::endl;
+    c << "initialisation time = " << _inittime << std::endl;
+    c << "endtime = " << _endtime << std::endl;
+    c << "stationary = " << _stationary << std::endl;
 
-  c << "\n*** Values for data [masstransport/discretization]\n\n";
-  DataMesh<Mesh>::showMe(c);
-  DataTime::showMe(c);
+    c << "\n*** Values for data [masstransport/discretization]\n\n";
+    DataMesh<Mesh>::showMe( c );
+    DataTime::showMe( c );
 
 }
 ////////////////////
 // The diffusivity
 template <typename Mesh>
 Real DataConvDiffReact<Mesh>::
-diffusivity() const {
-  return  _diffusivity;
+diffusivity() const
+{
+    return _diffusivity;
 }
 
 // The reaction coefficient
 template <typename Mesh>
 Real DataConvDiffReact<Mesh>::
-react() const {
-  return  _react;
+react() const
+{
+    return _react;
 }
 
 // The initialisation time
 template <typename Mesh>
 Real DataConvDiffReact<Mesh>::
-inittime() const {
-  return  _inittime;
+inittime() const
+{
+    return _inittime;
 }
 
 // The end time
 template <typename Mesh>
 Real DataConvDiffReact<Mesh>::
-endtime() const {
-  return  _endtime;
+endtime() const
+{
+    return _endtime;
 }
 
 // The switch stationary/unstationary
 template <typename Mesh>
 int DataConvDiffReact<Mesh>::
-stationary() const {
-  return  _stationary;
+stationary() const
+{
+    return _stationary;
 }
 }
 #endif

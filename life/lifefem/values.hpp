@@ -1,21 +1,21 @@
 /*
-  This file is part of the LifeV library
-  Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
+ This file is part of the LifeV library
+ Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/ 
 /* --------------------------------------------------------------------------*
 /                                                                            /
 /      ...                                                                   /
@@ -54,7 +54,7 @@
 #include "elemMat.hpp"
 #include "elemVec.hpp"
 #include  "sparseArray.hpp"
-#include "dof.hpp"
+#include "dof.hpp" 
 //#include "pattern.hpp"
 //#include <fstream>
 //#include<set>
@@ -62,9 +62,9 @@
 //#include<string>
 //#include<utility>
 
-#ifndef _LIFEV_HH_
+#ifndef _LIFEV_HH_ 
 //more correct version
-typedef size_t  UInt;
+typedef size_t UInt;
 //original version
 typedef std::vector<UInt>::iterator UIIter;
 #endif
@@ -81,41 +81,45 @@ namespace LifeV
 /*---------------------------------------------------------------------------------/
  / I M P L E M E N T A T I O N S                                                    /
  /---------------------------------------------------------------------------------*/
-template<typename FE1,typename GeoMap,typename MatrixType>
-void assemble_first(MatrixType& M,ElemMat& elmat,
-		    const FE1& fe1,const GeoMap& geo,const Dof& dof)
+template <typename FE1, typename GeoMap, typename MatrixType>
+void assemble_first( MatrixType& M, ElemMat& elmat,
+                     const FE1& fe1, const GeoMap& geo, const Dof& dof )
 {
-  if(elmat.nBlockRow()!=1 || elmat.nBlockCol() != 1){
-    std::cout << "assemble for vector elem mat not yet implemented\n";
-    exit(1);
-  }
-  Tab2dView mat=elmat.block(0,0);
-  int i,j;
-  UInt ig,jg,eleID=geo.currentID();
-  for(UInt k=0 ; k<FE1::nbPattern ; k++){
-    i = FE1::patternFirst(k);
-    j = FE1::patternSecond(k);
-    ig = dof.localToGlobal(eleID,i+1)-1;  // damned 1-base vs 0-base !
-    jg = dof.localToGlobal(eleID,j+1)-1;  // damned 1-base vs 0-base !
-    M.set_mat_inc(ig,jg,mat(i,j));
-  }
+    if ( elmat.nBlockRow() != 1 || elmat.nBlockCol() != 1 )
+    {
+        std::cout << "assemble for vector elem mat not yet implemented\n";
+        exit( 1 );
+    }
+    Tab2dView mat = elmat.block( 0, 0 );
+    int i, j;
+    UInt ig, jg, eleID = geo.currentID();
+    for ( UInt k = 0 ; k < FE1::nbPattern ; k++ )
+    {
+        i = FE1::patternFirst( k );
+        j = FE1::patternSecond( k );
+        ig = dof.localToGlobal( eleID, i + 1 ) - 1;  // damned 1-base vs 0-base !
+        jg = dof.localToGlobal( eleID, j + 1 ) - 1;  // damned 1-base vs 0-base !
+        M.set_mat_inc( ig, jg, mat( i, j ) );
+    }
 }
 
-template<typename Vector,typename FE1,typename GeoMap>
-void assemble_vec(Vector& V,ElemVec& elvec,const FE1& fe1,const GeoMap& geo,
-		  const Dof& dof)
+template <typename Vector, typename FE1, typename GeoMap>
+void assemble_vec( Vector& V, ElemVec& elvec, const FE1& fe1, const GeoMap& geo,
+                   const Dof& dof )
 {
-  if(elvec.nBlockRow()!=1){
-    std::cout << "assemble for vector elem vec not yet implemented\n";
-    exit(1);
-  }
-  Tab1dView vec=elvec.block(0);
-  UInt i;
-  UInt ig,eleID=geo.currentID();
-  for(i=0 ; i<FE1::nbNode ; i++){
-    ig = dof.localToGlobal(eleID,i+1) - 1;
-    V[ig] += vec(i);
-  }
+    if ( elvec.nBlockRow() != 1 )
+    {
+        std::cout << "assemble for vector elem vec not yet implemented\n";
+        exit( 1 );
+    }
+    Tab1dView vec = elvec.block( 0 );
+    UInt i;
+    UInt ig, eleID = geo.currentID();
+    for ( i = 0 ; i < FE1::nbNode ; i++ )
+    {
+        ig = dof.localToGlobal( eleID, i + 1 ) - 1;
+        V[ ig ] += vec( i );
+    }
 }
 }
 #endif

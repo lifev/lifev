@@ -1,29 +1,29 @@
 /*
-  This file is part of the LifeV library
-  Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
+This file is part of the LifeV library
+Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/ 
 /*
   \file lifeV.hpp
-
+ 
   LifeV main header file
-
+ 
   \author Luca Formaggia
   \author Jean-Fred Gerbeau.
-
+ 
   #Purposes Defines typedefs and macros common to ALL lifeV.h software
   it must be includes in all translation units.
 */
@@ -57,21 +57,21 @@ ERROR_MSG(A << std::endl << "Error in file" << __FILE__ << " line " << __LINE__)
 
 # define ASSERT_PRE0(X,A) if ( !(X) ) \
 ERROR_MSG(A << std::endl << "Precondition Error " << "in file " << __FILE__ \
-	    << " line " << __LINE__) ;
+     << " line " << __LINE__) ;
 
 
 # define ASSERT_POS0(X,A) if ( !(X) ) \
 ERROR_MSG(A << std::endl <<"Postcondition Error " << "in file " << __FILE__ \
-	    << " line " << __LINE__) ;
+     << " line " << __LINE__) ;
 
 
 # define ASSERT_INV0(X,A)  if ( !(X) ) \
 ERROR_MSG(A <<std::endl <<  "Invariant Error " << "in file " << __FILE__  \
-	  << " line " << __LINE__) ;
+   << " line " << __LINE__) ;
 
 # define ASSERT_BD0(X)  if ( !(X) ) \
 ERROR_MSG("Array bound error " << "in file " << __FILE__  \
-	  << " line " << __LINE__) ;
+   << " line " << __LINE__) ;
 
 //
 // switch all debugging on if LIFEV_CHECK_ALL is set
@@ -138,7 +138,7 @@ typedef double Real;
 //! Generic integer data
 typedef int Int;
 //! generic unsigned integer (used mainly for addressing)
-typedef uint  UInt;
+typedef uint UInt;
 typedef unsigned short int USInt;
 
 //! IDs (which starts ALWAYS from 1)
@@ -151,9 +151,9 @@ typedef UInt Index_t;
 // typedef for indices
 
 #ifdef INT_BCNAME
-typedef int  BCName;
+typedef int BCName;
 //! nullBCName identify a NULL Bundary condition
-const BCName nullBCName=0;
+const BCName nullBCName = 0;
 #else
 typedef std::string BCName;
 const BCName nullBCName; // The empty string!
@@ -175,10 +175,10 @@ const BCName nullBCName; // The empty string!
 #endif
 #if defined(TWODIM)
 #define NDIM 2
-const UInt nDimensions=2;
+const UInt nDimensions = 2;
 #elif defined(THREEDIM)
 #define NDIM 3
-const UInt nDimensions=3;
+const UInt nDimensions = 3;
 #else
 #error You MUST compile with either -DTWODIM of -DTHREEDIM set, sorry.
 #endif

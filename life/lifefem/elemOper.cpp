@@ -1,20 +1,20 @@
 /*-*- mode: c++ -*-
-  This file is part of the LifeV library
-  Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
+ This file is part of the LifeV library
+ Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include "elemOper.hpp"
 
@@ -27,159 +27,175 @@ namespace LifeV
 //
 // coeff*Mass
 //
-void mass(Real coef,ElemMat& elmat,const CurrentFE& fe,
-	  int iblock,int jblock)
-  /*
-    Mass matrix: \int v_i v_j
-  */
+void mass( Real coef, ElemMat& elmat, const CurrentFE& fe,
+           int iblock, int jblock )
+/*
+  Mass matrix: \int v_i v_j
+*/
 {
-  ASSERT_PRE(fe.hasJac(),"Mass matrix needs at least the jacobian");
-  Tab2dView mat = elmat.block(iblock,jblock);
-  int i,ig;
-  int iloc,jloc;
-  Real s,coef_s;
-  //
-  // diagonal
-  //
-  for(i=0;i<fe.nbDiag;i++){
-    iloc = fe.patternFirst(i);
-    s = 0;
-    for(ig=0;ig<fe.nbQuadPt;ig++){
-      s += fe.phi(iloc,ig)*fe.phi(iloc,ig)*fe.weightDet(ig);
+    ASSERT_PRE( fe.hasJac(), "Mass matrix needs at least the jacobian" );
+    Tab2dView mat = elmat.block( iblock, jblock );
+    int i, ig;
+    int iloc, jloc;
+    Real s, coef_s;
+    //
+    // diagonal
+    //
+    for ( i = 0;i < fe.nbDiag;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        {
+            s += fe.phi( iloc, ig ) * fe.phi( iloc, ig ) * fe.weightDet( ig );
+        }
+        mat( iloc, iloc ) += coef * s;
     }
-    mat(iloc,iloc) += coef*s;
-  }
-  //
-  // extra diagonal
-  //
-  for(i=fe.nbDiag;i<fe.nbDiag+fe.nbUpper;i++){
-    iloc = fe.patternFirst(i);
-    jloc = fe.patternSecond(i);
-    s = 0;
-    for(ig=0;ig<fe.nbQuadPt;ig++)
-      s += fe.phi(iloc,ig)*fe.phi(jloc,ig)*fe.weightDet(ig);
-    coef_s = coef*s;
-    mat(iloc,jloc) += coef_s;
-    mat(jloc,iloc) += coef_s;
-  }
+    //
+    // extra diagonal
+    //
+    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        jloc = fe.patternSecond( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+            s += fe.phi( iloc, ig ) * fe.phi( jloc, ig ) * fe.weightDet( ig );
+        coef_s = coef * s;
+        mat( iloc, jloc ) += coef_s;
+        mat( jloc, iloc ) += coef_s;
+    }
 }
 //
 // coeff*Mass
 //
-void mass(Real coef,ElemMat& elmat,const CurrentFE& fe,
-	  int iblock,int jblock,int nb)
-  /*
-    Mass matrix: \int v_i v_j (nb blocks on the diagonal, nb>1)
-  */
+void mass( Real coef, ElemMat& elmat, const CurrentFE& fe,
+           int iblock, int jblock, int nb )
+/*
+  Mass matrix: \int v_i v_j (nb blocks on the diagonal, nb>1)
+*/
 {
-  ASSERT_PRE(fe.hasJac(),"Mass matrix needs at least the jacobian");
-  ASSERT_PRE(nb>1,"if nb = 1, use the other mass function");
-  Tab2d mat_tmp(fe.nbNode,fe.nbNode);
-  int i,ig;
-  int iloc,jloc;
-  Real s,coef_s;
-  mat_tmp = 0.;
-  //
-  // diagonal
-  //
-  for(i=0;i<fe.nbDiag;i++){
-    iloc = fe.patternFirst(i);
-    s = 0;
-    for(ig=0;ig<fe.nbQuadPt;ig++){
-      s += fe.phi(iloc,ig)*fe.phi(iloc,ig)*fe.weightDet(ig);
+    ASSERT_PRE( fe.hasJac(), "Mass matrix needs at least the jacobian" );
+    ASSERT_PRE( nb > 1, "if nb = 1, use the other mass function" );
+    Tab2d mat_tmp( fe.nbNode, fe.nbNode );
+    int i, ig;
+    int iloc, jloc;
+    Real s, coef_s;
+    mat_tmp = 0.;
+    //
+    // diagonal
+    //
+    for ( i = 0;i < fe.nbDiag;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        {
+            s += fe.phi( iloc, ig ) * fe.phi( iloc, ig ) * fe.weightDet( ig );
+        }
+        mat_tmp( iloc, iloc ) += coef * s;
     }
-    mat_tmp(iloc,iloc) += coef*s;
-  }
-  //
-  // extra diagonal
-  //
-  for(i=fe.nbDiag;i<fe.nbDiag+fe.nbUpper;i++){
-    iloc = fe.patternFirst(i);
-    jloc = fe.patternSecond(i);
-    s = 0;
-    for(ig=0;ig<fe.nbQuadPt;ig++)
-      s += fe.phi(iloc,ig)*fe.phi(jloc,ig)*fe.weightDet(ig);
-    coef_s = coef*s;
-    mat_tmp(iloc,jloc) += coef_s;
-    mat_tmp(jloc,iloc) += coef_s;
-  }
-  // copy on the components
-  for(int icomp=0;icomp<nb;icomp++){
-    Tab2dView mat_icomp = elmat.block(iblock+icomp,jblock+icomp);
-    for(i=0;i<fe.nbDiag;i++){
-      iloc = fe.patternFirst(i);
-      mat_icomp(iloc,iloc) += mat_tmp(iloc,iloc);
+    //
+    // extra diagonal
+    //
+    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        jloc = fe.patternSecond( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+            s += fe.phi( iloc, ig ) * fe.phi( jloc, ig ) * fe.weightDet( ig );
+        coef_s = coef * s;
+        mat_tmp( iloc, jloc ) += coef_s;
+        mat_tmp( jloc, iloc ) += coef_s;
     }
-    for(i=fe.nbDiag;i<fe.nbDiag+fe.nbUpper;i++){
-      iloc = fe.patternFirst(i);
-      jloc = fe.patternSecond(i);
-      mat_icomp(iloc,jloc) += mat_tmp(iloc,jloc);
-      mat_icomp(jloc,iloc) += mat_tmp(jloc,iloc);
+    // copy on the components
+    for ( int icomp = 0;icomp < nb;icomp++ )
+    {
+        Tab2dView mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
+        for ( i = 0;i < fe.nbDiag;i++ )
+        {
+            iloc = fe.patternFirst( i );
+            mat_icomp( iloc, iloc ) += mat_tmp( iloc, iloc );
+        }
+        for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+        {
+            iloc = fe.patternFirst( i );
+            jloc = fe.patternSecond( i );
+            mat_icomp( iloc, jloc ) += mat_tmp( iloc, jloc );
+            mat_icomp( jloc, iloc ) += mat_tmp( jloc, iloc );
+        }
     }
-  }
 }
 
 // Miguel 12/2003
 //
-void ipstab_grad(const Real coef,ElemMat& elmat,const CurrentFE& fe1,const CurrentFE& fe2,
-                 const CurrentBdFE& bdfe, int iblock,int jblock)
+void ipstab_grad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2,
+                  const CurrentBdFE& bdfe, int iblock, int jblock )
 {
     /*
       Interior penalty stabilization: coef*\int_{face} grad u1_i . grad v1_j
     */
 
-    ASSERT_PRE(fe1.hasFirstDeriv(),
-               "ipstab11 needs at least the first derivatives");
-    ASSERT_PRE(fe2.hasFirstDeriv(),
-               "ipstab11 needs at least the first derivatives");
+    ASSERT_PRE( fe1.hasFirstDeriv(),
+                "ipstab11 needs at least the first derivatives" );
+    ASSERT_PRE( fe2.hasFirstDeriv(),
+                "ipstab11 needs at least the first derivatives" );
 
-    Tab2dView mat = elmat.block(iblock,jblock);
+    Tab2dView mat = elmat.block( iblock, jblock );
 
 
 
-    Real sum,sum1,sum2;
-    int i,j,ig,icoor,jcoor;
-    Real x[3],rx1[3],drp1[3],rx2[3],drp2[3];
-    Real phid1[fe1.nbNode][fe1.nbCoor][bdfe.nbQuadPt];
-    Real phid2[fe2.nbNode][fe2.nbCoor][bdfe.nbQuadPt];
-    Real b1[3],b2[3];
+    Real sum, sum1, sum2;
+    int i, j, ig, icoor, jcoor;
+    Real x[ 3 ], rx1[ 3 ], drp1[ 3 ], rx2[ 3 ], drp2[ 3 ];
+    Real phid1[ fe1.nbNode ][ fe1.nbCoor ][ bdfe.nbQuadPt ];
+    Real phid2[ fe2.nbNode ][ fe2.nbCoor ][ bdfe.nbQuadPt ];
+    Real b1[ 3 ], b2[ 3 ];
 
-    fe1.coorMap(b1[0],b1[1],b1[2],0,0,0); // translation fe1
-    fe2.coorMap(b2[0],b2[1],b2[2],0,0,0); // translation fe2
+    fe1.coorMap( b1[ 0 ], b1[ 1 ], b1[ 2 ], 0, 0, 0 ); // translation fe1
+    fe2.coorMap( b2[ 0 ], b2[ 1 ], b2[ 2 ], 0, 0, 0 ); // translation fe2
 
-    for (int ig=0; ig < bdfe.nbQuadPt; ++ig) {  // first derivatives on quadrature points
-        bdfe.coorQuadPt(x[0],x[1],x[2],ig);       // quadrature points coordinates
+    for ( int ig = 0; ig < bdfe.nbQuadPt; ++ig )
+    {  // first derivatives on quadrature points
+        bdfe.coorQuadPt( x[ 0 ], x[ 1 ], x[ 2 ], ig );       // quadrature points coordinates
 
         // local coordonates of the quadrature point
-        for(icoor=0; icoor<fe1.nbCoor; ++icoor) {
+        for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
+        {
             sum1 = 0;
             sum2 = 0;
-            for(jcoor=0; jcoor<fe1.nbCoor; ++jcoor) {
-                sum1 += fe1.tInvJac(jcoor,icoor,0)*(x[jcoor]-b1[jcoor]);
-                sum2 += fe2.tInvJac(jcoor,icoor,0)*(x[jcoor]-b2[jcoor]);
+            for ( jcoor = 0; jcoor < fe1.nbCoor; ++jcoor )
+            {
+                sum1 += fe1.tInvJac( jcoor, icoor, 0 ) * ( x[ jcoor ] - b1[ jcoor ] );
+                sum2 += fe2.tInvJac( jcoor, icoor, 0 ) * ( x[ jcoor ] - b2[ jcoor ] );
             }
-            rx1[icoor] = sum1;
-            rx2[icoor] = sum2;
+            rx1[ icoor ] = sum1;
+            rx2[ icoor ] = sum2;
         }
 
-        for (i=0; i< fe1.nbNode; ++i) {
+        for ( i = 0; i < fe1.nbNode; ++i )
+        {
 
             // first derivative on the reference element
-            for(icoor=0; icoor<fe1.nbCoor; ++icoor) {
-                drp1[icoor] = fe1.refFE.dPhi(i,icoor,rx1[0],rx1[1],rx1[2]);
-                drp2[icoor] = fe2.refFE.dPhi(i,icoor,rx2[0],rx2[1],rx2[2]);
+            for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
+            {
+                drp1[ icoor ] = fe1.refFE.dPhi( i, icoor, rx1[ 0 ], rx1[ 1 ], rx1[ 2 ] );
+                drp2[ icoor ] = fe2.refFE.dPhi( i, icoor, rx2[ 0 ], rx2[ 1 ], rx2[ 2 ] );
             }
 
             // first derivative on the current element
-            for(icoor=0; icoor<fe1.nbCoor; ++icoor) {
+            for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
+            {
                 sum1 = 0;
                 sum2 = 0;
-                for(jcoor=0; jcoor<fe1.nbCoor; ++jcoor) {
-                    sum1 += fe1.tInvJac(icoor,jcoor,0)*drp1[jcoor];
-                    sum2 += fe2.tInvJac(icoor,jcoor,0)*drp2[jcoor];
+                for ( jcoor = 0; jcoor < fe1.nbCoor; ++jcoor )
+                {
+                    sum1 += fe1.tInvJac( icoor, jcoor, 0 ) * drp1[ jcoor ];
+                    sum2 += fe2.tInvJac( icoor, jcoor, 0 ) * drp2[ jcoor ];
                 }
-                phid1[i][icoor][ig]= sum1;
-                phid2[i][icoor][ig]= sum2;
+                phid1[ i ][ icoor ][ ig ] = sum1;
+                phid2[ i ][ icoor ][ ig ] = sum2;
             }
         }
     }
@@ -187,15 +203,17 @@ void ipstab_grad(const Real coef,ElemMat& elmat,const CurrentFE& fe1,const Curre
 
 
     // Loop on rows
-    for (i=0; i< fe1.nbNode; ++i) {
+    for ( i = 0; i < fe1.nbNode; ++i )
+    {
         // Loop on columns
-        for (j=0; j< fe2.nbNode; ++j) {
+        for ( j = 0; j < fe2.nbNode; ++j )
+        {
             sum = 0.0;
             // Loop on coordinates
-            for(icoor=0; icoor<fe1.nbCoor; ++icoor)
-                for(ig=0; ig<bdfe.nbQuadPt ; ++ig)
-                    sum += phid1[i][icoor][ig]*phid2[j][icoor][ig]*bdfe.weightMeas(ig);
-            mat(i,j)=coef*sum;
+            for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
+                for ( ig = 0; ig < bdfe.nbQuadPt ; ++ig )
+                    sum += phid1[ i ][ icoor ][ ig ] * phid2[ j ][ icoor ][ ig ] * bdfe.weightMeas( ig );
+            mat( i, j ) = coef * sum;
         }
     }
 
@@ -207,87 +225,98 @@ void ipstab_grad(const Real coef,ElemMat& elmat,const CurrentFE& fe1,const Curre
 
 // Miguel 12/2003
 //
-void ipstab_grad(const Real coef,ElemMat& elmat,const CurrentFE& fe1,const CurrentFE& fe2,
-	    const CurrentBdFE& bdfe, int iblock,int jblock, int nb) {
-  /*
-    Interior penalty stabilization: coef*\int_{face} grad u1_i . grad v1_j
-  */
+void ipstab_grad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2,
+                  const CurrentBdFE& bdfe, int iblock, int jblock, int nb )
+{
+    /*
+      Interior penalty stabilization: coef*\int_{face} grad u1_i . grad v1_j
+    */
 
-  ASSERT_PRE(fe1.hasFirstDeriv(),
-  	     "ipstab11 needs at least the first derivatives");
-  ASSERT_PRE(fe2.hasFirstDeriv(),
-	     "ipstab11 needs at least the first derivatives");
+    ASSERT_PRE( fe1.hasFirstDeriv(),
+                "ipstab11 needs at least the first derivatives" );
+    ASSERT_PRE( fe2.hasFirstDeriv(),
+                "ipstab11 needs at least the first derivatives" );
 
-  Tab2d mat_tmp(fe1.nbNode,fe2.nbNode);
+    Tab2d mat_tmp( fe1.nbNode, fe2.nbNode );
 
 
-  Real sum,sum1,sum2;
-  int i,j,ig,icoor,jcoor;
-  Real x[3],rx1[3],drp1[3],rx2[3],drp2[3];
-  Real phid1[fe1.nbNode][fe1.nbCoor][bdfe.nbQuadPt];
-  Real phid2[fe2.nbNode][fe2.nbCoor][bdfe.nbQuadPt];
-  Real b1[3],b2[3];
+    Real sum, sum1, sum2;
+    int i, j, ig, icoor, jcoor;
+    Real x[ 3 ], rx1[ 3 ], drp1[ 3 ], rx2[ 3 ], drp2[ 3 ];
+    Real phid1[ fe1.nbNode ][ fe1.nbCoor ][ bdfe.nbQuadPt ];
+    Real phid2[ fe2.nbNode ][ fe2.nbCoor ][ bdfe.nbQuadPt ];
+    Real b1[ 3 ], b2[ 3 ];
 
-  fe1.coorMap(b1[0],b1[1],b1[2],0,0,0); // translation fe1
-  fe2.coorMap(b2[0],b2[1],b2[2],0,0,0); // translation fe2
+    fe1.coorMap( b1[ 0 ], b1[ 1 ], b1[ 2 ], 0, 0, 0 ); // translation fe1
+    fe2.coorMap( b2[ 0 ], b2[ 1 ], b2[ 2 ], 0, 0, 0 ); // translation fe2
 
-  for (int ig=0; ig < bdfe.nbQuadPt; ++ig) {  // first derivatives on quadrature points
-    bdfe.coorQuadPt(x[0],x[1],x[2],ig);       // quadrature points coordinates
+    for ( int ig = 0; ig < bdfe.nbQuadPt; ++ig )
+    {  // first derivatives on quadrature points
+        bdfe.coorQuadPt( x[ 0 ], x[ 1 ], x[ 2 ], ig );       // quadrature points coordinates
 
-    // local coordonates of the quadrature point
-    for(icoor=0; icoor<fe1.nbCoor; ++icoor) {
-      sum1 = 0;
-      sum2 = 0;
-      for(jcoor=0; jcoor<fe1.nbCoor; ++jcoor) {
-	sum1 += fe1.tInvJac(jcoor,icoor,0)*(x[jcoor]-b1[jcoor]);
-	sum2 += fe2.tInvJac(jcoor,icoor,0)*(x[jcoor]-b2[jcoor]);
-      }
-      rx1[icoor] = sum1;
-      rx2[icoor] = sum2;
+        // local coordonates of the quadrature point
+        for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
+        {
+            sum1 = 0;
+            sum2 = 0;
+            for ( jcoor = 0; jcoor < fe1.nbCoor; ++jcoor )
+            {
+                sum1 += fe1.tInvJac( jcoor, icoor, 0 ) * ( x[ jcoor ] - b1[ jcoor ] );
+                sum2 += fe2.tInvJac( jcoor, icoor, 0 ) * ( x[ jcoor ] - b2[ jcoor ] );
+            }
+            rx1[ icoor ] = sum1;
+            rx2[ icoor ] = sum2;
+        }
+
+        for ( i = 0; i < fe1.nbNode; ++i )
+        {
+
+            // first derivative on the reference element
+            for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
+            {
+                drp1[ icoor ] = fe1.refFE.dPhi( i, icoor, rx1[ 0 ], rx1[ 1 ], rx1[ 2 ] );
+                drp2[ icoor ] = fe2.refFE.dPhi( i, icoor, rx2[ 0 ], rx2[ 1 ], rx2[ 2 ] );
+            }
+
+            // first derivative on the current element
+            for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
+            {
+                sum1 = 0;
+                sum2 = 0;
+                for ( jcoor = 0; jcoor < fe1.nbCoor; ++jcoor )
+                {
+                    sum1 += fe1.tInvJac( icoor, jcoor, 0 ) * drp1[ jcoor ];
+                    sum2 += fe2.tInvJac( icoor, jcoor, 0 ) * drp2[ jcoor ];
+                }
+                phid1[ i ][ icoor ][ ig ] = sum1;
+                phid2[ i ][ icoor ][ ig ] = sum2;
+            }
+        }
     }
 
-    for (i=0; i< fe1.nbNode; ++i) {
 
-      // first derivative on the reference element
-      for(icoor=0; icoor<fe1.nbCoor; ++icoor) {
-	drp1[icoor] = fe1.refFE.dPhi(i,icoor,rx1[0],rx1[1],rx1[2]);
-	drp2[icoor] = fe2.refFE.dPhi(i,icoor,rx2[0],rx2[1],rx2[2]);
-      }
-
-      // first derivative on the current element
-      for(icoor=0; icoor<fe1.nbCoor; ++icoor) {
-	sum1 = 0;
-	sum2 = 0;
-	for(jcoor=0; jcoor<fe1.nbCoor; ++jcoor) {
-	  sum1 += fe1.tInvJac(icoor,jcoor,0)*drp1[jcoor];
-	  sum2 += fe2.tInvJac(icoor,jcoor,0)*drp2[jcoor];
-	}
-	phid1[i][icoor][ig]= sum1;
-	phid2[i][icoor][ig]= sum2;
-      }
+    // Loop on rows
+    for ( i = 0; i < fe1.nbNode; ++i )
+    {
+        // Loop on columns
+        for ( j = 0; j < fe2.nbNode; ++j )
+        {
+            sum = 0.0;
+            // Loop on coordinates
+            for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
+                for ( ig = 0; ig < bdfe.nbQuadPt ; ++ig )
+                    sum += phid1[ i ][ icoor ][ ig ] * phid2[ j ][ icoor ][ ig ] * bdfe.weightMeas( ig );
+            mat_tmp( i, j ) = coef * sum;
+        }
     }
-  }
 
 
-  // Loop on rows
-  for (i=0; i< fe1.nbNode; ++i) {
-    // Loop on columns
-    for (j=0; j< fe2.nbNode; ++j) {
-      sum = 0.0;
-      // Loop on coordinates
-      for(icoor=0; icoor<fe1.nbCoor; ++icoor)
-	for(ig=0; ig<bdfe.nbQuadPt ; ++ig)
-	  sum += phid1[i][icoor][ig]*phid2[j][icoor][ig]*bdfe.weightMeas(ig);
-      mat_tmp(i,j)=coef*sum;
+    // copy on the components
+    for ( int icomp = 0;icomp < nb;icomp++ )
+    {
+        Tab2dView mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
+        mat_icomp = mat_tmp;
     }
-  }
-
-
-  // copy on the components
-  for(int icomp=0;icomp<nb;icomp++){
-    Tab2dView mat_icomp = elmat.block(iblock+icomp,jblock+icomp);
-    mat_icomp = mat_tmp;
-  }
 }
 
 
@@ -295,109 +324,123 @@ void ipstab_grad(const Real coef,ElemMat& elmat,const CurrentFE& fe1,const Curre
 
 // Miguel 2/2004
 //
-void ipstab_bgrad(const Real coef, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2,
-		  const ElemVec& beta, const CurrentBdFE& bdfe, int iblock,
-		  int jblock, int nb) {
-  /*
-    Interior penalty stabilization: coef*\int_{face} (\beta1 . grad u1_i) . (\beta2 . grad v2_j)
-  */
+void ipstab_bgrad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2,
+                   const ElemVec& beta, const CurrentBdFE& bdfe, int iblock,
+                   int jblock, int nb )
+{
+    /*
+      Interior penalty stabilization: coef*\int_{face} (\beta1 . grad u1_i) . (\beta2 . grad v2_j)
+    */
 
-  ASSERT_PRE(fe1.hasFirstDeriv(),
-  	     "ipstab_bgrad needs at least the first derivatives");
-  ASSERT_PRE(fe2.hasFirstDeriv(),
-	     "ipstab_bgrad needs at least the first derivatives");
+    ASSERT_PRE( fe1.hasFirstDeriv(),
+                "ipstab_bgrad needs at least the first derivatives" );
+    ASSERT_PRE( fe2.hasFirstDeriv(),
+                "ipstab_bgrad needs at least the first derivatives" );
 
-  Tab2d mat_tmp(fe1.nbNode,fe2.nbNode);
+    Tab2d mat_tmp( fe1.nbNode, fe2.nbNode );
 
-  Real sum,sum1,sum2;
-  int i,j,icoor,jcoor,ig;
+    Real sum, sum1, sum2;
+    int i, j, icoor, jcoor, ig;
 
-  //
-  // convection velocity \beta on the boundary quadrature points
-  //
-  Real b[fe1.nbCoor][bdfe.nbQuadPt];
+    //
+    // convection velocity \beta on the boundary quadrature points
+    //
+    Real b[ fe1.nbCoor ][ bdfe.nbQuadPt ];
 
-  for(icoor=0; icoor<fe1.nbCoor; ++icoor) {
-    for(ig=0;ig<bdfe.nbQuadPt;ig++) {
-      sum = 0;
-      for (i=0; i< bdfe.nbNode; ++i) {
-	sum += bdfe.phi(i,ig)*beta.vec()[icoor*bdfe.nbNode + i];
-      }
-      b[icoor][ig] = sum;
-    }
-  }
-
-
-  //
-  // shape fonction first derivaties on the boundary quadrature points
-  //
-  // this should be improved!!!
-  //
-  Real x[3],rx1[3],drp1[3],rx2[3],drp2[3];
-  Real phid1[fe1.nbNode][fe1.nbCoor][bdfe.nbQuadPt];
-  Real phid2[fe2.nbNode][fe2.nbCoor][bdfe.nbQuadPt];
-  Real b1[3],b2[3];
-
-  fe1.coorMap(b1[0],b1[1],b1[2],0,0,0); // translation fe1
-  fe2.coorMap(b2[0],b2[1],b2[2],0,0,0); // translation fe2
-
-  for (int ig=0; ig < bdfe.nbQuadPt; ++ig) {  // first derivatives on quadrature points
-    bdfe.coorQuadPt(x[0],x[1],x[2],ig);       // quadrature points coordinates
-
-    // local coordonates of the quadrature point
-    for(icoor=0; icoor<fe1.nbCoor; ++icoor) {
-      sum1 = 0;
-      sum2 = 0;
-      for(jcoor=0; jcoor<fe1.nbCoor; ++jcoor) {
-	sum1 += fe1.tInvJac(jcoor,icoor,0)*(x[jcoor]-b1[jcoor]);
-	sum2 += fe2.tInvJac(jcoor,icoor,0)*(x[jcoor]-b2[jcoor]);
-      }
-      rx1[icoor] = sum1;
-      rx2[icoor] = sum2;
+    for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
+    {
+        for ( ig = 0;ig < bdfe.nbQuadPt;ig++ )
+        {
+            sum = 0;
+            for ( i = 0; i < bdfe.nbNode; ++i )
+            {
+                sum += bdfe.phi( i, ig ) * beta.vec() [ icoor * bdfe.nbNode + i ];
+            }
+            b[ icoor ][ ig ] = sum;
+        }
     }
 
-    for (i=0; i< fe1.nbNode; ++i) {
 
-      // first derivative on the reference element
-      for(icoor=0; icoor<fe1.nbCoor; ++icoor) {
-	drp1[icoor] = fe1.refFE.dPhi(i,icoor,rx1[0],rx1[1],rx1[2]);
-	drp2[icoor] = fe2.refFE.dPhi(i,icoor,rx2[0],rx2[1],rx2[2]);
-      }
+    //
+    // shape fonction first derivaties on the boundary quadrature points
+    //
+    // this should be improved!!!
+    //
+    Real x[ 3 ], rx1[ 3 ], drp1[ 3 ], rx2[ 3 ], drp2[ 3 ];
+    Real phid1[ fe1.nbNode ][ fe1.nbCoor ][ bdfe.nbQuadPt ];
+    Real phid2[ fe2.nbNode ][ fe2.nbCoor ][ bdfe.nbQuadPt ];
+    Real b1[ 3 ], b2[ 3 ];
 
-      // first derivative on the current element
-      for(icoor=0; icoor<fe1.nbCoor; ++icoor) {
-	sum1 = 0;
-	sum2 = 0;
-	for(jcoor=0; jcoor<fe1.nbCoor; ++jcoor) {
-	  sum1 += fe1.tInvJac(icoor,jcoor,0)*drp1[jcoor];
-	  sum2 += fe2.tInvJac(icoor,jcoor,0)*drp2[jcoor];
-	}
-	phid1[i][icoor][ig]= sum1;
-	phid2[i][icoor][ig]= sum2;
-      }
+    fe1.coorMap( b1[ 0 ], b1[ 1 ], b1[ 2 ], 0, 0, 0 ); // translation fe1
+    fe2.coorMap( b2[ 0 ], b2[ 1 ], b2[ 2 ], 0, 0, 0 ); // translation fe2
+
+    for ( int ig = 0; ig < bdfe.nbQuadPt; ++ig )
+    {  // first derivatives on quadrature points
+        bdfe.coorQuadPt( x[ 0 ], x[ 1 ], x[ 2 ], ig );       // quadrature points coordinates
+
+        // local coordonates of the quadrature point
+        for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
+        {
+            sum1 = 0;
+            sum2 = 0;
+            for ( jcoor = 0; jcoor < fe1.nbCoor; ++jcoor )
+            {
+                sum1 += fe1.tInvJac( jcoor, icoor, 0 ) * ( x[ jcoor ] - b1[ jcoor ] );
+                sum2 += fe2.tInvJac( jcoor, icoor, 0 ) * ( x[ jcoor ] - b2[ jcoor ] );
+            }
+            rx1[ icoor ] = sum1;
+            rx2[ icoor ] = sum2;
+        }
+
+        for ( i = 0; i < fe1.nbNode; ++i )
+        {
+
+            // first derivative on the reference element
+            for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
+            {
+                drp1[ icoor ] = fe1.refFE.dPhi( i, icoor, rx1[ 0 ], rx1[ 1 ], rx1[ 2 ] );
+                drp2[ icoor ] = fe2.refFE.dPhi( i, icoor, rx2[ 0 ], rx2[ 1 ], rx2[ 2 ] );
+            }
+
+            // first derivative on the current element
+            for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
+            {
+                sum1 = 0;
+                sum2 = 0;
+                for ( jcoor = 0; jcoor < fe1.nbCoor; ++jcoor )
+                {
+                    sum1 += fe1.tInvJac( icoor, jcoor, 0 ) * drp1[ jcoor ];
+                    sum2 += fe2.tInvJac( icoor, jcoor, 0 ) * drp2[ jcoor ];
+                }
+                phid1[ i ][ icoor ][ ig ] = sum1;
+                phid2[ i ][ icoor ][ ig ] = sum2;
+            }
+        }
     }
-  }
 
-  // Loop on rows
-  for (i=0; i< fe1.nbNode; ++i) {
-    // Loop on columns
-    for (j=0; j< fe2.nbNode; ++j) {
-      sum = 0.0;
-      // Loop on coordinates
-      for(icoor=0; icoor<fe1.nbCoor; ++icoor)
-	for(jcoor=0; jcoor<fe1.nbCoor; ++jcoor)
-	  for(ig=0;ig<bdfe.nbQuadPt;ig++)
-	    sum += 	phid1[i][icoor][ig]*phid2[j][jcoor][ig]*b[icoor][ig]
-	      *b[jcoor][ig]*bdfe.weightMeas(ig);
-      mat_tmp(i,j)=coef*sum;
+    // Loop on rows
+    for ( i = 0; i < fe1.nbNode; ++i )
+    {
+        // Loop on columns
+        for ( j = 0; j < fe2.nbNode; ++j )
+        {
+            sum = 0.0;
+            // Loop on coordinates
+            for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
+                for ( jcoor = 0; jcoor < fe1.nbCoor; ++jcoor )
+                    for ( ig = 0;ig < bdfe.nbQuadPt;ig++ )
+                        sum += phid1[ i ][ icoor ][ ig ] * phid2[ j ][ jcoor ][ ig ] * b[ icoor ][ ig ]
+                               * b[ jcoor ][ ig ] * bdfe.weightMeas( ig );
+            mat_tmp( i, j ) = coef * sum;
+        }
     }
-  }
 
-  // copy on the components
-  for(int icomp=0;icomp<nb;icomp++){
-    Tab2dView mat_icomp = elmat.block(iblock+icomp,jblock+icomp);
-    mat_icomp = mat_tmp;
-  }
+    // copy on the components
+    for ( int icomp = 0;icomp < nb;icomp++ )
+    {
+        Tab2dView mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
+        mat_icomp = mat_tmp;
+    }
 
 }
 
@@ -406,80 +449,92 @@ void ipstab_bgrad(const Real coef, ElemMat& elmat, const CurrentFE& fe1, const C
 
 // Miguel 2/2004
 //
-void ipstab_div(const Real coef,ElemMat& elmat,const CurrentFE& fe1,const CurrentFE& fe2,
-		const CurrentBdFE& bdfe, int iblock,int jblock) {
-  /*
-    Interior penalty stabilization: coef*\int_{face} div u . div v
-  */
+void ipstab_div( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2,
+                 const CurrentBdFE& bdfe, int iblock, int jblock )
+{
+    /*
+      Interior penalty stabilization: coef*\int_{face} div u . div v
+    */
 
-  ASSERT_PRE(fe1.hasFirstDeriv(),
-  	     "ipstab_div needs at least the first derivatives");
-  ASSERT_PRE(fe2.hasFirstDeriv(),
-	     "ipstab_div needs at least the first derivatives");
+    ASSERT_PRE( fe1.hasFirstDeriv(),
+                "ipstab_div needs at least the first derivatives" );
+    ASSERT_PRE( fe2.hasFirstDeriv(),
+                "ipstab_div needs at least the first derivatives" );
 
 
-  Real sum,sum1,sum2;
-  int i,j,ig,icoor,jcoor;
-  Real x[3],rx1[3],drp1[3],rx2[3],drp2[3];
-  Real phid1[fe1.nbNode][fe1.nbCoor][bdfe.nbQuadPt];
-  Real phid2[fe2.nbNode][fe2.nbCoor][bdfe.nbQuadPt];
-  Real b1[3],b2[3];
+    Real sum, sum1, sum2;
+    int i, j, ig, icoor, jcoor;
+    Real x[ 3 ], rx1[ 3 ], drp1[ 3 ], rx2[ 3 ], drp2[ 3 ];
+    Real phid1[ fe1.nbNode ][ fe1.nbCoor ][ bdfe.nbQuadPt ];
+    Real phid2[ fe2.nbNode ][ fe2.nbCoor ][ bdfe.nbQuadPt ];
+    Real b1[ 3 ], b2[ 3 ];
 
-  fe1.coorMap(b1[0],b1[1],b1[2],0,0,0); // translation fe1
-  fe2.coorMap(b2[0],b2[1],b2[2],0,0,0); // translation fe2
+    fe1.coorMap( b1[ 0 ], b1[ 1 ], b1[ 2 ], 0, 0, 0 ); // translation fe1
+    fe2.coorMap( b2[ 0 ], b2[ 1 ], b2[ 2 ], 0, 0, 0 ); // translation fe2
 
-  for (int ig=0; ig < bdfe.nbQuadPt; ++ig) {  // first derivatives on quadrature points
-    bdfe.coorQuadPt(x[0],x[1],x[2],ig);       // quadrature points coordinates
+    for ( int ig = 0; ig < bdfe.nbQuadPt; ++ig )
+    {  // first derivatives on quadrature points
+        bdfe.coorQuadPt( x[ 0 ], x[ 1 ], x[ 2 ], ig );       // quadrature points coordinates
 
-    // local coordonates of the quadrature point
-    for(icoor=0; icoor<fe1.nbCoor; ++icoor) {
-      sum1 = 0;
-      sum2 = 0;
-      for(jcoor=0; jcoor<fe1.nbCoor; ++jcoor) {
-	sum1 += fe1.tInvJac(jcoor,icoor,0)*(x[jcoor]-b1[jcoor]);
-	sum2 += fe2.tInvJac(jcoor,icoor,0)*(x[jcoor]-b2[jcoor]);
-      }
-      rx1[icoor] = sum1;
-      rx2[icoor] = sum2;
+        // local coordonates of the quadrature point
+        for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
+        {
+            sum1 = 0;
+            sum2 = 0;
+            for ( jcoor = 0; jcoor < fe1.nbCoor; ++jcoor )
+            {
+                sum1 += fe1.tInvJac( jcoor, icoor, 0 ) * ( x[ jcoor ] - b1[ jcoor ] );
+                sum2 += fe2.tInvJac( jcoor, icoor, 0 ) * ( x[ jcoor ] - b2[ jcoor ] );
+            }
+            rx1[ icoor ] = sum1;
+            rx2[ icoor ] = sum2;
+        }
+
+        for ( i = 0; i < fe1.nbNode; ++i )
+        {
+
+            // first derivative on the reference element
+            for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
+            {
+                drp1[ icoor ] = fe1.refFE.dPhi( i, icoor, rx1[ 0 ], rx1[ 1 ], rx1[ 2 ] );
+                drp2[ icoor ] = fe2.refFE.dPhi( i, icoor, rx2[ 0 ], rx2[ 1 ], rx2[ 2 ] );
+            }
+
+            // first derivative on the current element
+            for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
+            {
+                sum1 = 0;
+                sum2 = 0;
+                for ( jcoor = 0; jcoor < fe1.nbCoor; ++jcoor )
+                {
+                    sum1 += fe1.tInvJac( icoor, jcoor, 0 ) * drp1[ jcoor ];
+                    sum2 += fe2.tInvJac( icoor, jcoor, 0 ) * drp2[ jcoor ];
+                }
+                phid1[ i ][ icoor ][ ig ] = sum1;
+                phid2[ i ][ icoor ][ ig ] = sum2;
+            }
+        }
     }
 
-    for (i=0; i< fe1.nbNode; ++i) {
-
-      // first derivative on the reference element
-      for(icoor=0; icoor<fe1.nbCoor; ++icoor) {
-	drp1[icoor] = fe1.refFE.dPhi(i,icoor,rx1[0],rx1[1],rx1[2]);
-	drp2[icoor] = fe2.refFE.dPhi(i,icoor,rx2[0],rx2[1],rx2[2]);
-      }
-
-      // first derivative on the current element
-      for(icoor=0; icoor<fe1.nbCoor; ++icoor) {
-	sum1 = 0;
-	sum2 = 0;
-	for(jcoor=0; jcoor<fe1.nbCoor; ++jcoor) {
-	  sum1 += fe1.tInvJac(icoor,jcoor,0)*drp1[jcoor];
-	  sum2 += fe2.tInvJac(icoor,jcoor,0)*drp2[jcoor];
-	}
-	phid1[i][icoor][ig]= sum1;
-	phid2[i][icoor][ig]= sum2;
-      }
+    for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
+    {
+        for ( jcoor = 0; jcoor < fe1.nbCoor; ++jcoor )
+        {
+            Tab2dView mat_icomp = elmat.block( iblock + icoor, jblock + jcoor );
+            // Loop on rows
+            for ( i = 0; i < fe1.nbNode; ++i )
+            {
+                // Loop on columns
+                for ( j = 0; j < fe2.nbNode; ++j )
+                {
+                    sum = 0.0;
+                    for ( ig = 0;ig < bdfe.nbQuadPt;ig++ )
+                        sum += phid1[ i ][ icoor ][ ig ] * phid2[ j ][ jcoor ][ ig ] * bdfe.weightMeas( ig );
+                    mat_icomp( i, j ) += coef * sum;
+                }
+            }
+        }
     }
-  }
-
-  for(icoor=0; icoor<fe1.nbCoor; ++icoor) {
-    for(jcoor=0; jcoor<fe1.nbCoor; ++jcoor) {
-      Tab2dView mat_icomp= elmat.block(iblock+icoor,jblock+jcoor);
-      // Loop on rows
-      for (i=0; i< fe1.nbNode; ++i) {
-	// Loop on columns
-	for (j=0; j< fe2.nbNode; ++j) {
-	  sum = 0.0;
-	  for(ig=0;ig<bdfe.nbQuadPt;ig++)
-	    sum += phid1[i][icoor][ig]*phid2[j][jcoor][ig]*bdfe.weightMeas(ig);
-	  mat_icomp(i,j) += coef *sum;
-	}
-      }
-    }
-  }
 
 }
 
@@ -487,153 +542,168 @@ void ipstab_div(const Real coef,ElemMat& elmat,const CurrentFE& fe1,const Curren
 
 
 
-void stiff(Real coef,ElemMat& elmat,const CurrentFE& fe,
-	   int iblock,int jblock)
-  /*
-    Stiffness matrix: coef*\int grad v_i . grad v_j
-  */
+void stiff( Real coef, ElemMat& elmat, const CurrentFE& fe,
+            int iblock, int jblock )
+/*
+  Stiffness matrix: coef*\int grad v_i . grad v_j
+*/
 {
-  ASSERT_PRE(fe.hasFirstDeriv(),
-	     "Stiffness matrix needs at least the first derivatives");
-  Tab2dView mat = elmat.block(iblock,jblock);
-  int iloc,jloc;
-  int i,icoor,ig;
-  double s,coef_s;
-  //
-  // diagonal
-  //
-  for(i=0;i<fe.nbDiag;i++){
-    iloc = fe.patternFirst(i);
-    s = 0;
-    for(ig=0;ig<fe.nbQuadPt;ig++){
-      for(icoor=0;icoor<fe.nbCoor;icoor++)
-	s += fe.phiDer(iloc,icoor,ig)*fe.phiDer(iloc,icoor,ig)
-	  *fe.weightDet(ig);
+    ASSERT_PRE( fe.hasFirstDeriv(),
+                "Stiffness matrix needs at least the first derivatives" );
+    Tab2dView mat = elmat.block( iblock, jblock );
+    int iloc, jloc;
+    int i, icoor, ig;
+    double s, coef_s;
+    //
+    // diagonal
+    //
+    for ( i = 0;i < fe.nbDiag;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        {
+            for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+                s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( iloc, icoor, ig )
+                     * fe.weightDet( ig );
+        }
+        mat( iloc, iloc ) += coef * s;
     }
-    mat(iloc,iloc) += coef*s;
-  }
-  //
-  // extra diagonal
-  //
-  for(i=fe.nbDiag;i<fe.nbDiag+fe.nbUpper;i++){
-    iloc = fe.patternFirst(i);
-    jloc = fe.patternSecond(i);
-    s = 0;
-    for(ig=0;ig<fe.nbQuadPt;ig++){
-      for(icoor=0;icoor<fe.nbCoor;icoor++)
-	s += fe.phiDer(iloc,icoor,ig)*fe.phiDer(jloc,icoor,ig)*
-	  fe.weightDet(ig);
+    //
+    // extra diagonal
+    //
+    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        jloc = fe.patternSecond( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        {
+            for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+                s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( jloc, icoor, ig ) *
+                     fe.weightDet( ig );
+        }
+        coef_s = coef * s;
+        mat( iloc, jloc ) += coef_s;
+        mat( jloc, iloc ) += coef_s;
     }
-    coef_s = coef*s;
-    mat(iloc,jloc) += coef_s;
-    mat(jloc,iloc) += coef_s;
-  }
 }
 
 
-void stiff(Real coef,Real (*fct)(Real,Real,Real),ElemMat& elmat,
-	   const CurrentFE& fe,int iblock,int jblock)
-  /*
-    Stiffness matrix: coef*\int grad v_i . grad v_j
-  */
+void stiff( Real coef, Real ( *fct ) ( Real, Real, Real ), ElemMat& elmat,
+            const CurrentFE& fe, int iblock, int jblock )
+/*
+  Stiffness matrix: coef*\int grad v_i . grad v_j
+*/
 {
-  ASSERT_PRE(fe.hasFirstDeriv() && fe.hasQuadPtCoor(),
-	     "Stiffness matrix with a diffusion function needs the first derivatives and the coordinates of the quadrature points.  Call for example updateFirstDerivQuadPt() instead of updateFirstDeriv()");
-  Tab2dView mat = elmat.block(iblock,jblock);
-  int iloc,jloc;
-  int i,icoor,ig;
-  double s,coef_s,coef_f;
-  //
-  // diagonal
-  //
-  for(i=0;i<fe.nbDiag;i++){
-    iloc = fe.patternFirst(i);
-    s = 0;
-    for(ig=0;ig<fe.nbQuadPt;ig++){
-      coef_f = fct(fe.quadPt(ig,0),fe.quadPt(ig,1),fe.quadPt(ig,2));
-      for(icoor=0;icoor<fe.nbCoor;icoor++)
-	s += coef_f * fe.phiDer(iloc,icoor,ig)*fe.phiDer(iloc,icoor,ig)
-	  *fe.weightDet(ig);
+    ASSERT_PRE( fe.hasFirstDeriv() && fe.hasQuadPtCoor(),
+                "Stiffness matrix with a diffusion function needs the first derivatives and the coordinates of the quadrature points.  Call for example updateFirstDerivQuadPt() instead of updateFirstDeriv()" );
+    Tab2dView mat = elmat.block( iblock, jblock );
+    int iloc, jloc;
+    int i, icoor, ig;
+    double s, coef_s, coef_f;
+    //
+    // diagonal
+    //
+    for ( i = 0;i < fe.nbDiag;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        {
+            coef_f = fct( fe.quadPt( ig, 0 ), fe.quadPt( ig, 1 ), fe.quadPt( ig, 2 ) );
+            for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+                s += coef_f * fe.phiDer( iloc, icoor, ig ) * fe.phiDer( iloc, icoor, ig )
+                     * fe.weightDet( ig );
+        }
+        mat( iloc, iloc ) += coef * s;
     }
-    mat(iloc,iloc) += coef*s;
-  }
-  //
-  // extra diagonal
-  //
-  for(i=fe.nbDiag;i<fe.nbDiag+fe.nbUpper;i++){
-    iloc = fe.patternFirst(i);
-    jloc = fe.patternSecond(i);
-    s = 0;
-    for(ig=0;ig<fe.nbQuadPt;ig++){
-      coef_f = fct(fe.quadPt(ig,0),fe.quadPt(ig,1),fe.quadPt(ig,2));
-      for(icoor=0;icoor<fe.nbCoor;icoor++)
-	s += coef_f * fe.phiDer(iloc,icoor,ig)*fe.phiDer(jloc,icoor,ig)*
-	  fe.weightDet(ig);
+    //
+    // extra diagonal
+    //
+    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        jloc = fe.patternSecond( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        {
+            coef_f = fct( fe.quadPt( ig, 0 ), fe.quadPt( ig, 1 ), fe.quadPt( ig, 2 ) );
+            for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+                s += coef_f * fe.phiDer( iloc, icoor, ig ) * fe.phiDer( jloc, icoor, ig ) *
+                     fe.weightDet( ig );
+        }
+        coef_s = coef * s;
+        mat( iloc, jloc ) += coef_s;
+        mat( jloc, iloc ) += coef_s;
     }
-    coef_s = coef*s;
-    mat(iloc,jloc) += coef_s;
-    mat(jloc,iloc) += coef_s;
-  }
 }
 //
 
-void stiff(Real coef,ElemMat& elmat,const CurrentFE& fe,
-	       int iblock,int jblock,int nb)
-  /*
-    Stiffness matrix: coef*\int grad v_i . grad v_j (nb blocks on the diagonal, nb>1)
-  */
+void stiff( Real coef, ElemMat& elmat, const CurrentFE& fe,
+            int iblock, int jblock, int nb )
+/*
+  Stiffness matrix: coef*\int grad v_i . grad v_j (nb blocks on the diagonal, nb>1)
+*/
 {
-  ASSERT_PRE(fe.hasFirstDeriv(),
-	     "Stiffness (vect) matrix needs at least the first derivatives");
-  ASSERT_PRE(nb>1,"if nb = 1, use the other stiff function");
-  Tab2d mat_tmp(fe.nbNode,fe.nbNode);
-  int iloc,jloc;
-  int i,icoor,ig;
-  double s,coef_s;
-  mat_tmp = 0.;
-  //
-  // diagonal
-  //
-  for(i=0;i<fe.nbDiag;i++){
-    iloc = fe.patternFirst(i);
-    s = 0;
-    for(ig=0;ig<fe.nbQuadPt;ig++){
-      for(icoor=0;icoor<fe.nbCoor;icoor++)
-	s += fe.phiDer(iloc,icoor,ig)*fe.phiDer(iloc,icoor,ig)
-	  *fe.weightDet(ig);
+    ASSERT_PRE( fe.hasFirstDeriv(),
+                "Stiffness (vect) matrix needs at least the first derivatives" );
+    ASSERT_PRE( nb > 1, "if nb = 1, use the other stiff function" );
+    Tab2d mat_tmp( fe.nbNode, fe.nbNode );
+    int iloc, jloc;
+    int i, icoor, ig;
+    double s, coef_s;
+    mat_tmp = 0.;
+    //
+    // diagonal
+    //
+    for ( i = 0;i < fe.nbDiag;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        {
+            for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+                s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( iloc, icoor, ig )
+                     * fe.weightDet( ig );
+        }
+        mat_tmp( iloc, iloc ) += coef * s;
     }
-    mat_tmp(iloc,iloc) += coef*s;
-  }
-  //
-  // extra diagonal
-  //
-  for(i=fe.nbDiag;i<fe.nbDiag+fe.nbUpper;i++){
-    iloc = fe.patternFirst(i);
-    jloc = fe.patternSecond(i);
-    s = 0;
-    for(ig=0;ig<fe.nbQuadPt;ig++){
-      for(icoor=0;icoor<fe.nbCoor;icoor++)
-	s += fe.phiDer(iloc,icoor,ig)*fe.phiDer(jloc,icoor,ig)*
-	  fe.weightDet(ig);
+    //
+    // extra diagonal
+    //
+    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        jloc = fe.patternSecond( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        {
+            for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+                s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( jloc, icoor, ig ) *
+                     fe.weightDet( ig );
+        }
+        coef_s = coef * s;
+        mat_tmp( iloc, jloc ) += coef_s;
+        mat_tmp( jloc, iloc ) += coef_s;
     }
-    coef_s = coef*s;
-    mat_tmp(iloc,jloc) += coef_s;
-    mat_tmp(jloc,iloc) += coef_s;
-  }
-  // copy on the components
-  for(int icomp=0;icomp<nb;icomp++){
-    Tab2dView mat_icomp = elmat.block(iblock+icomp,jblock+icomp);
-    for(i=0;i<fe.nbDiag;i++){
-      iloc = fe.patternFirst(i);
-      mat_icomp(iloc,iloc) += mat_tmp(iloc,iloc);
+    // copy on the components
+    for ( int icomp = 0;icomp < nb;icomp++ )
+    {
+        Tab2dView mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
+        for ( i = 0;i < fe.nbDiag;i++ )
+        {
+            iloc = fe.patternFirst( i );
+            mat_icomp( iloc, iloc ) += mat_tmp( iloc, iloc );
+        }
+        for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+        {
+            iloc = fe.patternFirst( i );
+            jloc = fe.patternSecond( i );
+            mat_icomp( iloc, jloc ) += mat_tmp( iloc, jloc );
+            mat_icomp( jloc, iloc ) += mat_tmp( jloc, iloc );
+        }
     }
-    for(i=fe.nbDiag;i<fe.nbDiag+fe.nbUpper;i++){
-      iloc = fe.patternFirst(i);
-      jloc = fe.patternSecond(i);
-      mat_icomp(iloc,jloc) += mat_tmp(iloc,jloc);
-      mat_icomp(jloc,iloc) += mat_tmp(jloc,iloc);
-    }
-  }
 }
 
 
@@ -642,30 +712,35 @@ void stiff(Real coef,ElemMat& elmat,const CurrentFE& fe,
 /*
   Stiffness matrix: coef * ( div u , div v )
 */
-void stiff_div(Real coef, ElemMat& elmat, const CurrentFE& fe) {
+void stiff_div( Real coef, ElemMat& elmat, const CurrentFE& fe )
+{
 
-  ASSERT_PRE(fe.hasFirstDeriv(),
-	     "Stiffness div matrix needs at least the first derivatives");
-  double s;
+    ASSERT_PRE( fe.hasFirstDeriv(),
+                "Stiffness div matrix needs at least the first derivatives" );
+    double s;
 
-  //
-  // blocks (icoor,jcoor) of elmat
-  //
-  for(int icoor=0; icoor<fe.nbCoor; ++icoor){
-    for(int jcoor=0; jcoor<fe.nbCoor; ++jcoor){
+    //
+    // blocks (icoor,jcoor) of elmat
+    //
+    for ( int icoor = 0; icoor < fe.nbCoor; ++icoor )
+    {
+        for ( int jcoor = 0; jcoor < fe.nbCoor; ++jcoor )
+        {
 
-      Tab2dView mat = elmat.block(icoor,jcoor);
+            Tab2dView mat = elmat.block( icoor, jcoor );
 
-      for(int i=0; i<fe.nbNode; ++i){
-	for(int j=0; j<fe.nbNode; ++j){
-	  s = 0;
-	  for(int ig=0; ig<fe.nbQuadPt; ++ig)
-	    s += fe.phiDer(i,icoor,ig)*fe.phiDer(j,jcoor,ig)*fe.weightDet(ig);
-	  mat(i,j) += coef*s;
-	}
-      }
+            for ( int i = 0; i < fe.nbNode; ++i )
+            {
+                for ( int j = 0; j < fe.nbNode; ++j )
+                {
+                    s = 0;
+                    for ( int ig = 0; ig < fe.nbQuadPt; ++ig )
+                        s += fe.phiDer( i, icoor, ig ) * fe.phiDer( j, jcoor, ig ) * fe.weightDet( ig );
+                    mat( i, j ) += coef * s;
+                }
+            }
+        }
     }
-  }
 }
 
 
@@ -674,50 +749,58 @@ void stiff_div(Real coef, ElemMat& elmat, const CurrentFE& fe) {
 /*
   Stiffness matrix: coef * ( [\grad u^k]^T \grad d : \grad v  )
 */
-void stiff_dergradbis(Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe) {
+void stiff_dergradbis( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
+{
 
-  ASSERT_PRE(fe.hasFirstDeriv(),
-	     "Stiffness dergradbis matrix needs at least the first derivatives");
+    ASSERT_PRE( fe.hasFirstDeriv(),
+                "Stiffness dergradbis matrix needs at least the first derivatives" );
 
-  double s;
-  Real guk[fe.nbCoor][fe.nbCoor][fe.nbQuadPt];      // \grad u^k at each quadrature point
+    double s;
+    Real guk[ fe.nbCoor ][ fe.nbCoor ][ fe.nbQuadPt ];      // \grad u^k at each quadrature point
 
 
-  // loop on quadrature points
-  for(int ig=0;ig<fe.nbQuadPt;ig++) {
+    // loop on quadrature points
+    for ( int ig = 0;ig < fe.nbQuadPt;ig++ )
+    {
 
-    // loop on space coordinates
-    for(int icoor=0;icoor<fe.nbCoor;icoor++) {
+        // loop on space coordinates
+        for ( int icoor = 0;icoor < fe.nbCoor;icoor++ )
+        {
 
-      // loop  on space coordinates
-      for(int jcoor=0;jcoor<fe.nbCoor;jcoor++) {
-	s = 0.0;
-	for(int i=0;i<fe.nbNode;i++)
-	  s += fe.phiDer(i,jcoor,ig) * uk_loc.vec()[i+icoor*fe.nbNode]; //  \grad u^k at a quadrature point
-	guk[icoor][jcoor][ig] = s;
-      }
+            // loop  on space coordinates
+            for ( int jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
+            {
+                s = 0.0;
+                for ( int i = 0;i < fe.nbNode;i++ )
+                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbNode ]; //  \grad u^k at a quadrature point
+                guk[ icoor ][ jcoor ][ ig ] = s;
+            }
+        }
     }
-  }
-  //
-  // blocks (icoor,jcoor) of elmat
-  //
+    //
+    // blocks (icoor,jcoor) of elmat
+    //
 
-  for(int icoor=0; icoor<fe.nbCoor; ++icoor){
-    for(int jcoor=0; jcoor<fe.nbCoor; ++jcoor){
+    for ( int icoor = 0; icoor < fe.nbCoor; ++icoor )
+    {
+        for ( int jcoor = 0; jcoor < fe.nbCoor; ++jcoor )
+        {
 
-      Tab2dView mat = elmat.block(icoor,jcoor);
+            Tab2dView mat = elmat.block( icoor, jcoor );
 
-      for(int i=0; i<fe.nbNode; ++i){
-	for(int j=0; j<fe.nbNode; ++j){
-	  s = 0;
-	  for(int k=0; k<fe.nbCoor; ++k)
-	    for(int ig=0;ig<fe.nbQuadPt; ++ig)
-	      s +=  fe.phiDer(i,k,ig) * guk[jcoor][icoor][ig]*fe.phiDer(j,k,ig) * fe.weightDet(ig);
-	  mat(i,j) += coef*s;
-	}
-      }
+            for ( int i = 0; i < fe.nbNode; ++i )
+            {
+                for ( int j = 0; j < fe.nbNode; ++j )
+                {
+                    s = 0;
+                    for ( int k = 0; k < fe.nbCoor; ++k )
+                        for ( int ig = 0;ig < fe.nbQuadPt; ++ig )
+                            s += fe.phiDer( i, k, ig ) * guk[ jcoor ][ icoor ][ ig ] * fe.phiDer( j, k, ig ) * fe.weightDet( ig );
+                    mat( i, j ) += coef * s;
+                }
+            }
+        }
     }
-  }
 }
 
 
@@ -726,52 +809,61 @@ void stiff_dergradbis(Real coef, const ElemVec& uk_loc, ElemMat& elmat, const Cu
 /*
   Stiffness matrix: coef * ( [\grad u]^T \grad u^k [\grad u^k]^T \grad u : \grad v  ) for Newton on St-Venant
 */
-void stiff_dergrad(Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe) {
+void stiff_dergrad( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
+{
 
-  ASSERT_PRE(fe.hasFirstDeriv(),
-	     "Stiffness dergrad matrix needs at least the first derivatives");
+    ASSERT_PRE( fe.hasFirstDeriv(),
+                "Stiffness dergrad matrix needs at least the first derivatives" );
 
-  double s;
-  Real guk[fe.nbCoor][fe.nbCoor][fe.nbQuadPt];      // \grad u^k at each quadrature point
+    double s;
+    Real guk[ fe.nbCoor ][ fe.nbCoor ][ fe.nbQuadPt ];      // \grad u^k at each quadrature point
 
 
-  // loop on quadrature points
-  for(int ig=0;ig<fe.nbQuadPt;ig++) {
+    // loop on quadrature points
+    for ( int ig = 0;ig < fe.nbQuadPt;ig++ )
+    {
 
-    // loop on space coordinates
-    for(int icoor=0;icoor<fe.nbCoor;icoor++) {
+        // loop on space coordinates
+        for ( int icoor = 0;icoor < fe.nbCoor;icoor++ )
+        {
 
-      // loop  on space coordinates
-      for(int jcoor=0;jcoor<fe.nbCoor;jcoor++) {
-	s = 0.0;
-	for(int i=0;i<fe.nbNode;i++)
-	  s += fe.phiDer(i,jcoor,ig) * uk_loc.vec()[i+icoor*fe.nbNode]; //  \grad u^k at a quadrature point
-	guk[icoor][jcoor][ig] = s;
-      }
+            // loop  on space coordinates
+            for ( int jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
+            {
+                s = 0.0;
+                for ( int i = 0;i < fe.nbNode;i++ )
+                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbNode ]; //  \grad u^k at a quadrature point
+                guk[ icoor ][ jcoor ][ ig ] = s;
+            }
+        }
     }
-  }
-  //
-  // blocks (icoor,jcoor) of elmat
-  //
+    //
+    // blocks (icoor,jcoor) of elmat
+    //
 
-  for(int icoor=0; icoor<fe.nbCoor; ++icoor){
-    for(int jcoor=0; jcoor<fe.nbCoor; ++jcoor){
+    for ( int icoor = 0; icoor < fe.nbCoor; ++icoor )
+    {
+        for ( int jcoor = 0; jcoor < fe.nbCoor; ++jcoor )
+        {
 
-      Tab2dView mat = elmat.block(icoor,jcoor);
+            Tab2dView mat = elmat.block( icoor, jcoor );
 
-      for(int i=0; i<fe.nbNode; ++i){
-	for(int j=0; j<fe.nbNode; ++j){
-	  s = 0;
-	  for(int k=0; k<fe.nbCoor; ++k)
-	    for(int ig=0;ig<fe.nbQuadPt; ++ig) {
-	      s +=  fe.phiDer(i,k,ig) * ( guk[jcoor][k][ig]*fe.phiDer(j,icoor,ig)
-					  + guk[jcoor][icoor][ig]*fe.phiDer(j,k,ig) ) * fe.weightDet(ig);
-	    }
-	  mat(i,j) += coef*s;
-	}
-      }
+            for ( int i = 0; i < fe.nbNode; ++i )
+            {
+                for ( int j = 0; j < fe.nbNode; ++j )
+                {
+                    s = 0;
+                    for ( int k = 0; k < fe.nbCoor; ++k )
+                        for ( int ig = 0;ig < fe.nbQuadPt; ++ig )
+                        {
+                            s += fe.phiDer( i, k, ig ) * ( guk[ jcoor ][ k ][ ig ] * fe.phiDer( j, icoor, ig )
+                                                           + guk[ jcoor ][ icoor ][ ig ] * fe.phiDer( j, k, ig ) ) * fe.weightDet( ig );
+                        }
+                    mat( i, j ) += coef * s;
+                }
+            }
+        }
     }
-  }
 }
 
 
@@ -782,204 +874,232 @@ void stiff_dergrad(Real coef, const ElemVec& uk_loc, ElemMat& elmat, const Curre
 // coef * ( \tr { [\grad u^k]^T \grad u }, \div v  ) for Newton on St-Venant
 //
 //
-void stiff_derdiv(Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe) {
+void stiff_derdiv( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe )
+{
 
-  ASSERT_PRE(fe.hasFirstDeriv(),
-	     "stiff_derdiv needs at least the first derivatives");
+    ASSERT_PRE( fe.hasFirstDeriv(),
+                "stiff_derdiv needs at least the first derivatives" );
 
-  Real guk[fe.nbCoor][fe.nbCoor][fe.nbQuadPt];      // \grad u^k at each quadrature point
-  Real s;
+    Real guk[ fe.nbCoor ][ fe.nbCoor ][ fe.nbQuadPt ];      // \grad u^k at each quadrature point
+    Real s;
 
-  // loop on quadrature points
-  for(int ig=0;ig<fe.nbQuadPt;ig++) {
+    // loop on quadrature points
+    for ( int ig = 0;ig < fe.nbQuadPt;ig++ )
+    {
 
-    // loop on space coordinates
-    for(int icoor=0;icoor<fe.nbCoor;icoor++) {
+        // loop on space coordinates
+        for ( int icoor = 0;icoor < fe.nbCoor;icoor++ )
+        {
 
-      // loop  on space coordinates
-      for(int jcoor=0;jcoor<fe.nbCoor;jcoor++) {
-	s = 0.0;
-	for(int i=0;i<fe.nbNode;i++)
-	  s += fe.phiDer(i,jcoor,ig) * uk_loc.vec()[i+icoor*fe.nbNode]; //  \grad u^k at a quadrature point
-	guk[icoor][jcoor][ig] = s;
-      }
+            // loop  on space coordinates
+            for ( int jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
+            {
+                s = 0.0;
+                for ( int i = 0;i < fe.nbNode;i++ )
+                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbNode ]; //  \grad u^k at a quadrature point
+                guk[ icoor ][ jcoor ][ ig ] = s;
+            }
+        }
     }
-  }
-  //
-  // blocks (icoor,jcoor) of elmat
-  //
-  for(int icoor=0; icoor<fe.nbCoor; ++icoor){
-    for(int jcoor=0; jcoor<fe.nbCoor; ++jcoor){
+    //
+    // blocks (icoor,jcoor) of elmat
+    //
+    for ( int icoor = 0; icoor < fe.nbCoor; ++icoor )
+    {
+        for ( int jcoor = 0; jcoor < fe.nbCoor; ++jcoor )
+        {
 
-      Tab2dView mat = elmat.block(icoor,jcoor);
+            Tab2dView mat = elmat.block( icoor, jcoor );
 
-      for(int i=0; i<fe.nbNode; ++i){
-	for(int j=0; j<fe.nbNode; ++j){
-	  s = 0;
-	  for(int k=0; k<fe.nbCoor; ++k)
-	    for(int ig=0;ig<fe.nbQuadPt;ig++)
-	      s += fe.phiDer(i,icoor,ig)*guk[jcoor][k][ig]*fe.phiDer(j,k,ig)*fe.weightDet(ig);
-	  mat(i,j) += coef*s;
-	}
-      }
+            for ( int i = 0; i < fe.nbNode; ++i )
+            {
+                for ( int j = 0; j < fe.nbNode; ++j )
+                {
+                    s = 0;
+                    for ( int k = 0; k < fe.nbCoor; ++k )
+                        for ( int ig = 0;ig < fe.nbQuadPt;ig++ )
+                            s += fe.phiDer( i, icoor, ig ) * guk[ jcoor ][ k ][ ig ] * fe.phiDer( j, k, ig ) * fe.weightDet( ig );
+                    mat( i, j ) += coef * s;
+                }
+            }
+        }
     }
-  }
 }
 
 
 
 // Miguel 26/03/2003:
-void stiff_strain(Real coef, ElemMat& elmat, const CurrentFE& fe)
-  /*
-    Stiffness matrix: coef * ( e(u) , e(v) )
-  */
+void stiff_strain( Real coef, ElemMat& elmat, const CurrentFE& fe )
+/*
+  Stiffness matrix: coef * ( e(u) , e(v) )
+*/
 {
-  ASSERT_PRE(fe.hasFirstDeriv(),
-	     "Stiffness Strain matrix needs at least the first derivatives");
-  double s;
-  double tmp=coef*0.5;
+    ASSERT_PRE( fe.hasFirstDeriv(),
+                "Stiffness Strain matrix needs at least the first derivatives" );
+    double s;
+    double tmp = coef * 0.5;
 
-  Tab2d mat_tmp(fe.nbNode,fe.nbNode);
+    Tab2d mat_tmp( fe.nbNode, fe.nbNode );
 
-  for(int i=0; i<fe.nbNode; ++i){
-    for(int j=0; j<fe.nbNode; ++j){
-      s = 0;
-      for(int ig=0; ig<fe.nbQuadPt; ++ig)
-	for(int icoor=0; icoor<fe.nbCoor; ++icoor)
-	  s += fe.phiDer(i,icoor,ig)*fe.phiDer(j,icoor,ig)*fe.weightDet(ig);
-      mat_tmp(i,j) =  tmp*s;
+    for ( int i = 0; i < fe.nbNode; ++i )
+    {
+        for ( int j = 0; j < fe.nbNode; ++j )
+        {
+            s = 0;
+            for ( int ig = 0; ig < fe.nbQuadPt; ++ig )
+                for ( int icoor = 0; icoor < fe.nbCoor; ++icoor )
+                    s += fe.phiDer( i, icoor, ig ) * fe.phiDer( j, icoor, ig ) * fe.weightDet( ig );
+            mat_tmp( i, j ) = tmp * s;
+        }
     }
-  }
-  for(int icoor=0; icoor<fe.nbCoor; ++icoor){
-    Tab2dView mat = elmat.block(icoor,icoor);
-    mat += mat_tmp;
-  }
-
-  for(int icoor=0; icoor<fe.nbCoor; ++icoor){
-    for(int jcoor=0; jcoor<fe.nbCoor; ++jcoor){
-      Tab2dView mat = elmat.block(icoor,jcoor);
-      for(int i=0; i<fe.nbNode; ++i){
-	for(int j=0; j<fe.nbNode; ++j){
-	  s = 0;
-	  for(int ig=0; ig<fe.nbQuadPt; ++ig)
-	    s += fe.phiDer(i,jcoor,ig)*fe.phiDer(j,icoor,ig)*fe.weightDet(ig);
-	  mat(i,j) += tmp*s;
-	}
-      }
+    for ( int icoor = 0; icoor < fe.nbCoor; ++icoor )
+    {
+        Tab2dView mat = elmat.block( icoor, icoor );
+        mat += mat_tmp;
     }
-  }
+
+    for ( int icoor = 0; icoor < fe.nbCoor; ++icoor )
+    {
+        for ( int jcoor = 0; jcoor < fe.nbCoor; ++jcoor )
+        {
+            Tab2dView mat = elmat.block( icoor, jcoor );
+            for ( int i = 0; i < fe.nbNode; ++i )
+            {
+                for ( int j = 0; j < fe.nbNode; ++j )
+                {
+                    s = 0;
+                    for ( int ig = 0; ig < fe.nbQuadPt; ++ig )
+                        s += fe.phiDer( i, jcoor, ig ) * fe.phiDer( j, icoor, ig ) * fe.weightDet( ig );
+                    mat( i, j ) += tmp * s;
+                }
+            }
+        }
+    }
 }
 
 
 // Miguel 05/2003:
-void mass_divw(Real coef, const ElemVec& w_loc, ElemMat& elmat,const CurrentFE& fe,
-	  int iblock,int jblock,int nb)
-  /*
-    modified mass matrix: ( div w u,v )
-  */
+void mass_divw( Real coef, const ElemVec& w_loc, ElemMat& elmat, const CurrentFE& fe,
+                int iblock, int jblock, int nb )
+/*
+  modified mass matrix: ( div w u,v )
+*/
 {
 
-  ASSERT_PRE(fe.hasFirstDeriv(),
-	     "Mass matrix, (div w u, v) needs at least the first derivatives");
-  Tab2d mat_tmp(fe.nbNode,fe.nbNode);
-  int i,icomp,ig,icoor,iloc,jloc;
-  Real s,coef_s,divw[fe.nbQuadPt];
-  mat_tmp = 0.;
+    ASSERT_PRE( fe.hasFirstDeriv(),
+                "Mass matrix, (div w u, v) needs at least the first derivatives" );
+    Tab2d mat_tmp( fe.nbNode, fe.nbNode );
+    int i, icomp, ig, icoor, iloc, jloc;
+    Real s, coef_s, divw[ fe.nbQuadPt ];
+    mat_tmp = 0.;
 
-  // divw at quadrature nodes
-  for(ig=0;ig<fe.nbQuadPt;ig++){
-    divw[ig] = 0.0;
-    for(icoor=0; icoor<fe.nbCoor; ++icoor)
-      for(i=0; i<fe.nbNode; ++i)
-	divw[ig] += fe.phiDer(i,icoor,ig)*w_loc.vec()[i+icoor*fe.nbNode];
-  }
+    // divw at quadrature nodes
+    for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+    {
+        divw[ ig ] = 0.0;
+        for ( icoor = 0; icoor < fe.nbCoor; ++icoor )
+            for ( i = 0; i < fe.nbNode; ++i )
+                divw[ ig ] += fe.phiDer( i, icoor, ig ) * w_loc.vec() [ i + icoor * fe.nbNode ];
+    }
 
-  //
-  // diagonal
-  //
-  for(i=0;i<fe.nbDiag;i++){
-    iloc = fe.patternFirst(i);
-    s = 0;
-    for(ig=0;ig<fe.nbQuadPt;ig++){
-      s += divw[ig]*fe.phi(iloc,ig)*fe.phi(iloc,ig)*fe.weightDet(ig);
+    //
+    // diagonal
+    //
+    for ( i = 0;i < fe.nbDiag;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        {
+            s += divw[ ig ] * fe.phi( iloc, ig ) * fe.phi( iloc, ig ) * fe.weightDet( ig );
+        }
+        mat_tmp( iloc, iloc ) += coef * s;
     }
-    mat_tmp(iloc,iloc) += coef*s;
-  }
-  //
-  // extra diagonal
-  //
-  for(i=fe.nbDiag;i<fe.nbDiag+fe.nbUpper;i++){
-    iloc = fe.patternFirst(i);
-    jloc = fe.patternSecond(i);
-    s = 0;
-    for(ig=0;ig<fe.nbQuadPt;ig++)
-      s += divw[ig]*fe.phi(iloc,ig)*fe.phi(jloc,ig)*fe.weightDet(ig);
-    coef_s = coef*s;
-    mat_tmp(iloc,jloc) += coef_s;
-    mat_tmp(jloc,iloc) += coef_s;
-  }
-  // copy on the components
-  for(icomp=0;icomp<nb;icomp++){
-    Tab2dView mat_icomp = elmat.block(iblock+icomp,jblock+icomp);
-    for(i=0;i<fe.nbDiag;i++){
-      iloc = fe.patternFirst(i);
-      mat_icomp(iloc,iloc) += mat_tmp(iloc,iloc);
+    //
+    // extra diagonal
+    //
+    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        jloc = fe.patternSecond( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+            s += divw[ ig ] * fe.phi( iloc, ig ) * fe.phi( jloc, ig ) * fe.weightDet( ig );
+        coef_s = coef * s;
+        mat_tmp( iloc, jloc ) += coef_s;
+        mat_tmp( jloc, iloc ) += coef_s;
     }
-    for(i=fe.nbDiag;i<fe.nbDiag+fe.nbUpper;i++){
-      iloc = fe.patternFirst(i);
-      jloc = fe.patternSecond(i);
-      mat_icomp(iloc,jloc) += mat_tmp(iloc,jloc);
-      mat_icomp(jloc,iloc) += mat_tmp(jloc,iloc);
+    // copy on the components
+    for ( icomp = 0;icomp < nb;icomp++ )
+    {
+        Tab2dView mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
+        for ( i = 0;i < fe.nbDiag;i++ )
+        {
+            iloc = fe.patternFirst( i );
+            mat_icomp( iloc, iloc ) += mat_tmp( iloc, iloc );
+        }
+        for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+        {
+            iloc = fe.patternFirst( i );
+            jloc = fe.patternSecond( i );
+            mat_icomp( iloc, jloc ) += mat_tmp( iloc, jloc );
+            mat_icomp( jloc, iloc ) += mat_tmp( jloc, iloc );
+        }
     }
-  }
 }
 
 
 
 // Miguel 05/2003:
-void mass_gradu(Real coef, const ElemVec& u0_loc, ElemMat& elmat,const CurrentFE& fe)
-  /*
-    modified mass matrix: ( grad u0 u,v )
-  */
+void mass_gradu( Real coef, const ElemVec& u0_loc, ElemMat& elmat, const CurrentFE& fe )
+/*
+  modified mass matrix: ( grad u0 u,v )
+*/
 {
 
-  ASSERT_PRE(fe.hasFirstDeriv(),
-	     "Mass matrix, (grad u_0 u, v) needs at least the first derivatives");
+    ASSERT_PRE( fe.hasFirstDeriv(),
+                "Mass matrix, (grad u_0 u, v) needs at least the first derivatives" );
 
-  int ig, icoor, jcoor, i, j;
-  Real s;
-  Real gu0[fe.nbQuadPt][fe.nbCoor][fe.nbCoor];
+    int ig, icoor, jcoor, i, j;
+    Real s;
+    Real gu0[ fe.nbQuadPt ][ fe.nbCoor ][ fe.nbCoor ];
 
 
-  //
-  // grad u0 at quadrature nodes
-  //
-  for(ig=0;ig<fe.nbQuadPt;ig++){
-    for(icoor=0; icoor<fe.nbCoor; ++icoor)
-      for(jcoor=0; jcoor<fe.nbCoor; ++jcoor) {
-	gu0[ig][icoor][jcoor] = 0.0;
-	for(i=0; i<fe.nbNode; ++i)
-	  gu0[ig][icoor][jcoor] += fe.phiDer(i,jcoor,ig)*u0_loc.vec()[i+icoor*fe.nbNode];
-      }
-  }
-  //
-  // blocks (icoor,jcoor) of elmat
-  //
-  for(icoor=0; icoor<fe.nbCoor; ++icoor){
-    for(jcoor=0; jcoor<fe.nbCoor; ++jcoor){
-
-      Tab2dView mat = elmat.block(icoor,jcoor);
-
-      for(i=0; i<fe.nbNode; ++i){
-	for(j=0; j<fe.nbNode; ++j){
-	  s = 0;
-	  for(ig=0; ig<fe.nbQuadPt; ++ig)
-	    s += gu0[ig][icoor][jcoor] * fe.phi(i,ig) * fe.phi(j,ig) * fe.weightDet(ig);
-	  mat(i,j) += coef*s;
-	}
-      }
+    //
+    // grad u0 at quadrature nodes
+    //
+    for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+    {
+        for ( icoor = 0; icoor < fe.nbCoor; ++icoor )
+            for ( jcoor = 0; jcoor < fe.nbCoor; ++jcoor )
+            {
+                gu0[ ig ][ icoor ][ jcoor ] = 0.0;
+                for ( i = 0; i < fe.nbNode; ++i )
+                    gu0[ ig ][ icoor ][ jcoor ] += fe.phiDer( i, jcoor, ig ) * u0_loc.vec() [ i + icoor * fe.nbNode ];
+            }
     }
-  }
+    //
+    // blocks (icoor,jcoor) of elmat
+    //
+    for ( icoor = 0; icoor < fe.nbCoor; ++icoor )
+    {
+        for ( jcoor = 0; jcoor < fe.nbCoor; ++jcoor )
+        {
+
+            Tab2dView mat = elmat.block( icoor, jcoor );
+
+            for ( i = 0; i < fe.nbNode; ++i )
+            {
+                for ( j = 0; j < fe.nbNode; ++j )
+                {
+                    s = 0;
+                    for ( ig = 0; ig < fe.nbQuadPt; ++ig )
+                        s += gu0[ ig ][ icoor ][ jcoor ] * fe.phi( i, ig ) * fe.phi( j, ig ) * fe.weightDet( ig );
+                    mat( i, j ) += coef * s;
+                }
+            }
+        }
+    }
 }
 
 
@@ -988,261 +1108,301 @@ void mass_gradu(Real coef, const ElemVec& u0_loc, ElemMat& elmat,const CurrentFE
 // \! Streamline diffusion
 //
 //
-void stiff_sd(Real coef,const ElemVec& vec_loc, ElemMat& elmat,const CurrentFE& fe, const CurrentFE& fe2,
-	   int iblock,int jblock,int nb)
-  /*
-    Stiffness matrix for SD Stabilization
-  */
+void stiff_sd( Real coef, const ElemVec& vec_loc, ElemMat& elmat, const CurrentFE& fe, const CurrentFE& fe2,
+               int iblock, int jblock, int nb )
+/*
+  Stiffness matrix for SD Stabilization
+*/
 {
-  ASSERT_PRE(fe.hasFirstDeriv(),
-	     "Stiffness matrix needs at least the first derivatives");
-  Tab2dView mat = elmat.block(iblock,jblock);
-  int iloc,jloc;
-  int i,icoor,ig,jcoor;
-  double s,coef_s,coef_v[3];
-  //    int nbN1=fe.nbNode;
-    int nbN2=fe2.nbNode;
-  //
-  // diagonal
-  //
-  for(i=0;i<fe.nbDiag;i++){
-    iloc = fe.patternFirst(i);
-    s = 0;
-    for(ig=0;ig<fe.nbQuadPt;ig++){
-    for (icoor=0;icoor<NDIM;icoor++) coef_v[icoor]=0.;
+    ASSERT_PRE( fe.hasFirstDeriv(),
+                "Stiffness matrix needs at least the first derivatives" );
+    Tab2dView mat = elmat.block( iblock, jblock );
+    int iloc, jloc;
+    int i, icoor, ig, jcoor;
+    double s, coef_s, coef_v[ 3 ];
+    //    int nbN1=fe.nbNode;
+    int nbN2 = fe2.nbNode;
+    //
+    // diagonal
+    //
+    for ( i = 0;i < fe.nbDiag;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        {
+            for ( icoor = 0;icoor < NDIM;icoor++ )
+                coef_v[ icoor ] = 0.;
 
-    // computation of the convection term in the quadrature nodes
-    for (icoor=0;icoor<fe.nbCoor;icoor++){
-     for (int iloc=0;iloc<nbN2;iloc++)
-      coef_v[icoor] += vec_loc.vec()[iloc+icoor*nbN2]*fe2.phi(iloc,ig);
-    }
+            // computation of the convection term in the quadrature nodes
+            for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+            {
+                for ( int iloc = 0;iloc < nbN2;iloc++ )
+                    coef_v[ icoor ] += vec_loc.vec() [ iloc + icoor * nbN2 ] * fe2.phi( iloc, ig );
+            }
 
-    for(icoor=0;icoor<fe.nbCoor;icoor++){
-     for(jcoor=0;jcoor<fe.nbCoor;jcoor++){
-	s += coef_v[icoor]*fe.phiDer(iloc,icoor,ig)*coef_v[jcoor]*fe.phiDer(iloc,jcoor,ig)
-	  *fe.weightDet(ig);
-     }
+            for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+            {
+                for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
+                {
+                    s += coef_v[ icoor ] * fe.phiDer( iloc, icoor, ig ) * coef_v[ jcoor ] * fe.phiDer( iloc, jcoor, ig )
+                         * fe.weightDet( ig );
+                }
+            }
+        }
+        mat( iloc, iloc ) += coef * s;
     }
-    }
-    mat(iloc,iloc) += coef*s;
-  }
-  //
-  // extra diagonal
-  //
-  for(i=fe.nbDiag;i<fe.nbDiag+fe.nbUpper;i++){
-    iloc = fe.patternFirst(i);
-    jloc = fe.patternSecond(i);
-    s = 0;
-    for(ig=0;ig<fe.nbQuadPt;ig++){
-    for (icoor=0;icoor<NDIM;icoor++) coef_v[icoor]=0.;
+    //
+    // extra diagonal
+    //
+    for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+    {
+        iloc = fe.patternFirst( i );
+        jloc = fe.patternSecond( i );
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        {
+            for ( icoor = 0;icoor < NDIM;icoor++ )
+                coef_v[ icoor ] = 0.;
 
-    for (icoor=0;icoor<fe.nbCoor;icoor++){
-     for (int iloc=0;iloc<nbN2;iloc++)
-      coef_v[icoor] += vec_loc.vec()[iloc+icoor*nbN2]*fe2.phi(iloc,ig);
-    }
+            for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+            {
+                for ( int iloc = 0;iloc < nbN2;iloc++ )
+                    coef_v[ icoor ] += vec_loc.vec() [ iloc + icoor * nbN2 ] * fe2.phi( iloc, ig );
+            }
 
-    for(icoor=0;icoor<fe.nbCoor;icoor++){
-     for(jcoor=0;jcoor<fe.nbCoor;jcoor++){
-	s += coef_v[icoor]*fe.phiDer(iloc,icoor,ig)*coef_v[jcoor]*fe.phiDer(jloc,jcoor,ig)
-	  *fe.weightDet(ig);
-     }
+            for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+            {
+                for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
+                {
+                    s += coef_v[ icoor ] * fe.phiDer( iloc, icoor, ig ) * coef_v[ jcoor ] * fe.phiDer( jloc, jcoor, ig )
+                         * fe.weightDet( ig );
+                }
+            }
+        }
+        coef_s = coef * s;
+        mat( iloc, jloc ) += coef_s;
+        mat( jloc, iloc ) += coef_s;
     }
+    // copy on the other components (if necessary, i.e. if nb>1)
+    for ( int icomp = 1;icomp < nb;icomp++ )
+    {
+        Tab2dView mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
+        for ( i = 0;i < fe.nbDiag;i++ )
+        {
+            iloc = fe.patternFirst( i );
+            mat_icomp( iloc, iloc ) += mat( iloc, iloc );
+        }
+        for ( i = fe.nbDiag;i < fe.nbDiag + fe.nbUpper;i++ )
+        {
+            iloc = fe.patternFirst( i );
+            jloc = fe.patternSecond( i );
+            mat_icomp( iloc, jloc ) += mat( iloc, jloc );
+            mat_icomp( jloc, iloc ) += mat( jloc, iloc );
+        }
     }
-    coef_s = coef*s;
-    mat(iloc,jloc) += coef_s;
-    mat(jloc,iloc) += coef_s;
-  }
-  // copy on the other components (if necessary, i.e. if nb>1)
-  for(int icomp=1;icomp<nb;icomp++){
-    Tab2dView mat_icomp = elmat.block(iblock+icomp,jblock+icomp);
-    for(i=0;i<fe.nbDiag;i++){
-      iloc = fe.patternFirst(i);
-      mat_icomp(iloc,iloc) += mat(iloc,iloc);
-    }
-    for(i=fe.nbDiag;i<fe.nbDiag+fe.nbUpper;i++){
-      iloc = fe.patternFirst(i);
-      jloc = fe.patternSecond(i);
-      mat_icomp(iloc,jloc) += mat(iloc,jloc);
-      mat_icomp(jloc,iloc) += mat(jloc,iloc);
-    }
-  }
 }
 
 
 //
-void grad(const int icoor,Real coef,ElemMat& elmat,
-	  const CurrentFE& fe_u,const CurrentFE& fe_p,
-	  int iblock,int jblock)
-  /*
-    \int q_j \frac{\partial v_i}{\partial x_icoor}
-  */
+void grad( const int icoor, Real coef, ElemMat& elmat,
+           const CurrentFE& fe_u, const CurrentFE& fe_p,
+           int iblock, int jblock )
+/*
+  \int q_j \frac{\partial v_i}{\partial x_icoor}
+*/
 {
-  ASSERT_PRE(fe_u.hasFirstDeriv(),
-	     "Gradient matrix needs at least the first derivatives");
-  Tab2dView mat = elmat.block(iblock,jblock);
-  int ig;
-  int i,j;
-  double s;
-  for(i=0;i<fe_u.nbNode;i++){
-    for(j=0;j<fe_p.nbNode;j++){
-      s = 0;
-      for(ig=0;ig<fe_u.nbQuadPt;ig++)
-	// Be careful the minus is here and not in coef!!!!
+    ASSERT_PRE( fe_u.hasFirstDeriv(),
+                "Gradient matrix needs at least the first derivatives" );
+    Tab2dView mat = elmat.block( iblock, jblock );
+    int ig;
+    int i, j;
+    double s;
+    for ( i = 0;i < fe_u.nbNode;i++ )
+    {
+        for ( j = 0;j < fe_p.nbNode;j++ )
+        {
+            s = 0;
+            for ( ig = 0;ig < fe_u.nbQuadPt;ig++ )
+                // Be careful the minus is here and not in coef!!!!
 
-// wrong for different quadrules of fe_u and fe_p !!   Martin P.
-//	s -= fe_p.phi(j,ig)*fe_u.phiDer(i,icoor,ig)*fe_u.weightDet(ig);
+                // wrong for different quadrules of fe_u and fe_p !!   Martin P.
+                // s -= fe_p.phi(j,ig)*fe_u.phiDer(i,icoor,ig)*fe_u.weightDet(ig);
 
-	s -= fe_p.refFE.phi(j,fe_u.qr.quadPointCoor(ig,0),fe_u.qr.quadPointCoor(ig,1),
-			    fe_u.qr.quadPointCoor(ig,2))*fe_u.phiDer(i,icoor,ig)*fe_u.weightDet(ig);
-      mat(i,j) += coef*s;
+                s -= fe_p.refFE.phi( j, fe_u.qr.quadPointCoor( ig, 0 ), fe_u.qr.quadPointCoor( ig, 1 ),
+                                     fe_u.qr.quadPointCoor( ig, 2 ) ) * fe_u.phiDer( i, icoor, ig ) * fe_u.weightDet( ig );
+            mat( i, j ) += coef * s;
+        }
     }
-  }
 }
 
-void div(const int icoor,Real coef,ElemMat& elmat,
-	  const CurrentFE& fe_u,const CurrentFE& fe_p,
-	  int iblock,int jblock)
-  /*
-    \int q_i \frac{\partial v_j}{\partial x_icoor}
-  */
+void div( const int icoor, Real coef, ElemMat& elmat,
+          const CurrentFE& fe_u, const CurrentFE& fe_p,
+          int iblock, int jblock )
+/*
+  \int q_i \frac{\partial v_j}{\partial x_icoor}
+*/
 {
-  ASSERT_PRE(fe_u.hasFirstDeriv(),
-	     "Gradient matrix needs at least the first derivatives");
-  Tab2dView mat = elmat.block(iblock,jblock);
-  int ig;
-  int i,j;
-  double s;
-  for(i=0;i<fe_u.nbNode;i++){
-    for(j=0;j<fe_p.nbNode;j++){
-      s = 0;
-      for(ig=0;ig<fe_u.nbQuadPt;ig++)
-	s -= fe_p.phi(i,ig)*fe_u.phiDer(j,icoor,ig)*fe_u.weightDet(ig);
-      mat(i,j) += coef*s;
+    ASSERT_PRE( fe_u.hasFirstDeriv(),
+                "Gradient matrix needs at least the first derivatives" );
+    Tab2dView mat = elmat.block( iblock, jblock );
+    int ig;
+    int i, j;
+    double s;
+    for ( i = 0;i < fe_u.nbNode;i++ )
+    {
+        for ( j = 0;j < fe_p.nbNode;j++ )
+        {
+            s = 0;
+            for ( ig = 0;ig < fe_u.nbQuadPt;ig++ )
+                s -= fe_p.phi( i, ig ) * fe_u.phiDer( j, icoor, ig ) * fe_u.weightDet( ig );
+            mat( i, j ) += coef * s;
+        }
     }
-  }
 }
 
-void grad_div(Real coef_grad,Real coef_div,ElemMat& elmat,
-	      const CurrentFE& fe_u,const CurrentFE& fe_p,
-	      int block_pres)
-  /*
-    \int q_j \frac{\partial v_i}{\partial x_icoor}
-  */
+void grad_div( Real coef_grad, Real coef_div, ElemMat& elmat,
+               const CurrentFE& fe_u, const CurrentFE& fe_p,
+               int block_pres )
+/*
+  \int q_j \frac{\partial v_i}{\partial x_icoor}
+*/
 {
-  ASSERT_PRE(fe_u.hasFirstDeriv(),
-	     "grad_div: Gradient matrix needs at least the first derivatives");
-  double s;
-  int iblock = block_pres - nDimensions;
-  for(int icoor = 0;icoor<3;icoor++){
-    Tab2dView mat_grad = elmat.block(iblock + icoor, block_pres            );
-    Tab2dView mat_div  = elmat.block(block_pres    , iblock + icoor        );
-    for(int i=0;i<fe_u.nbNode;i++){
-      for(int j=0;j<fe_p.nbNode;j++){
-	s = 0;
-	for(int ig=0;ig<fe_u.nbQuadPt;ig++)
-	  s -= fe_p.phi(j,ig)*fe_u.phiDer(i,icoor,ig)*fe_u.weightDet(ig);
-	mat_grad(i,j) += coef_grad*s;
-	mat_div(j,i)  += coef_div*s;
-      }
+    ASSERT_PRE( fe_u.hasFirstDeriv(),
+                "grad_div: Gradient matrix needs at least the first derivatives" );
+    double s;
+    int iblock = block_pres - nDimensions;
+    for ( int icoor = 0;icoor < 3;icoor++ )
+    {
+        Tab2dView mat_grad = elmat.block( iblock + icoor, block_pres );
+        Tab2dView mat_div = elmat.block( block_pres , iblock + icoor );
+        for ( int i = 0;i < fe_u.nbNode;i++ )
+        {
+            for ( int j = 0;j < fe_p.nbNode;j++ )
+            {
+                s = 0;
+                for ( int ig = 0;ig < fe_u.nbQuadPt;ig++ )
+                    s -= fe_p.phi( j, ig ) * fe_u.phiDer( i, icoor, ig ) * fe_u.weightDet( ig );
+                mat_grad( i, j ) += coef_grad * s;
+                mat_div( j, i ) += coef_div * s;
+            }
+        }
     }
-  }
 }
 //
-void stab_stokes(Real visc,Real coef_stab,ElemMat& elmat,
-		 const CurrentFE& fe,int block_pres)
+void stab_stokes( Real visc, Real coef_stab, ElemMat& elmat,
+                  const CurrentFE& fe, int block_pres )
 {
-  Tab2dView mat  = elmat.block(block_pres,block_pres);
-  Real s,h = fe.diameter();
-  Real fh2 = coef_stab*h*h/(2*visc);
-  for(int i=0;i<fe.nbNode;i++){
-    for(int j=0;j<fe.nbNode;j++){
-      s = 0;
-      for(int ig=0;ig<fe.nbQuadPt;ig++){
-	for(int icoor=0;icoor<3;icoor++){
-	  s += fe.phiDer(i,icoor,ig)*fe.phiDer(j,icoor,ig)*fe.weightDet(ig);
-	}
-      }
-      mat(i,j) -= fh2*s;
+    Tab2dView mat = elmat.block( block_pres, block_pres );
+    Real s, h = fe.diameter();
+    Real fh2 = coef_stab * h * h / ( 2 * visc );
+    for ( int i = 0;i < fe.nbNode;i++ )
+    {
+        for ( int j = 0;j < fe.nbNode;j++ )
+        {
+            s = 0;
+            for ( int ig = 0;ig < fe.nbQuadPt;ig++ )
+            {
+                for ( int icoor = 0;icoor < 3;icoor++ )
+                {
+                    s += fe.phiDer( i, icoor, ig ) * fe.phiDer( j, icoor, ig ) * fe.weightDet( ig );
+                }
+            }
+            mat( i, j ) -= fh2 * s;
+        }
     }
-  }
 }
 
-void advection(Real coef,ElemVec& vel,
-	       ElemMat& elmat,const CurrentFE& fe,int iblock,int jblock,int nb)
+void advection( Real coef, ElemVec& vel,
+                ElemMat& elmat, const CurrentFE& fe, int iblock, int jblock, int nb )
 {
-  ASSERT_PRE(fe.hasFirstDeriv(),
-	     "advection (vect) matrix needs at least the first derivatives");
-  //ASSERT_PRE(nb>1,"if nb = 1, use the other advection function");
+    ASSERT_PRE( fe.hasFirstDeriv(),
+                "advection (vect) matrix needs at least the first derivatives" );
+    //ASSERT_PRE(nb>1,"if nb = 1, use the other advection function");
 
-  Tab2d mat_tmp(fe.nbNode,fe.nbNode);
-  Real v_grad,s;
-  Real v[nDimensions];
-  for(int ig=0;ig<fe.nbQuadPt;ig++){
-    for(int icoor=0;icoor<(int)nDimensions;icoor++){
-      Tab1dView velicoor=vel.block(icoor);
-      v[icoor]=0.;
-      for(int k=0;k<fe.nbNode;k++){
-	v[icoor] += velicoor(k)*fe.phi(k,ig); // velocity on the intgt point
-      }
+    Tab2d mat_tmp( fe.nbNode, fe.nbNode );
+    Real v_grad, s;
+    Real v[ nDimensions ];
+    for ( int ig = 0;ig < fe.nbQuadPt;ig++ )
+    {
+        for ( int icoor = 0;icoor < ( int ) nDimensions;icoor++ )
+        {
+            Tab1dView velicoor = vel.block( icoor );
+            v[ icoor ] = 0.;
+            for ( int k = 0;k < fe.nbNode;k++ )
+            {
+                v[ icoor ] += velicoor( k ) * fe.phi( k, ig ); // velocity on the intgt point
+            }
+        }
+        for ( int i = 0;i < fe.nbNode;i++ )
+        {
+            for ( int j = 0;j < fe.nbNode;j++ )
+            {
+                s = 0.;
+                for ( int ig = 0;ig < fe.nbQuadPt;ig++ )
+                {
+                    v_grad = 0.;
+                    for ( int icoor = 0;icoor < ( int ) nDimensions;icoor++ )
+                    {
+                        v_grad += v[ icoor ] * fe.phiDer( j, icoor, ig );
+                    }
+                    s += v_grad * fe.phi( i, ig ) * fe.weightDet( ig );
+                }
+                mat_tmp( i, j ) = s;
+            }
+        }
     }
-    for(int i=0;i<fe.nbNode;i++){
-      for(int j=0;j<fe.nbNode;j++){
-	s = 0.;
-	for(int ig=0;ig<fe.nbQuadPt;ig++){
-	  v_grad=0.;
-	  for(int icoor=0;icoor<(int)nDimensions;icoor++){
-	    v_grad += v[icoor]*fe.phiDer(j,icoor,ig);
-	  }
-	  s += v_grad*fe.phi(i,ig)*fe.weightDet(ig);
-	}
-	mat_tmp(i,j) = s;
-      }
+    // copy on the components
+    for ( int icomp = 0;icomp < nb;icomp++ )
+    {
+        Tab2dView mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
+        for ( int i = 0;i < fe.nbDiag;i++ )
+        {
+            for ( int j = 0;j < fe.nbDiag;j++ )
+            {
+                mat_icomp( i, j ) += mat_tmp( i, j );
+            }
+        }
     }
-  }
-  // copy on the components
-  for(int icomp=0;icomp<nb;icomp++){
-    Tab2dView mat_icomp = elmat.block(iblock+icomp,jblock+icomp);
-    for(int i=0;i<fe.nbDiag;i++){
-      for(int j=0;j<fe.nbDiag;j++){
-	mat_icomp(i,j) += mat_tmp(i,j);
-      }
-    }
-  }
 }
 
 // there should be a const in front of ElemVec !
 //
 //void grad(const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
-void grad(const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
-	  const CurrentFE& fe1,const CurrentFE& fe2,
-	  int iblock,int jblock)
-  /*
-    \int q_j \frac{\partial v_i}{\partial x_icoor}
-  */
+void grad( const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
+           const CurrentFE& fe1, const CurrentFE& fe2,
+           int iblock, int jblock )
+/*
+  \int q_j \frac{\partial v_i}{\partial x_icoor}
+*/
 {
-  //
-  Tab2dView mat = elmat.block(iblock,jblock);
+    //
+    Tab2dView mat = elmat.block( iblock, jblock );
 
-  if (iblock==jblock){
-    int iq;
-    int i,j;
-    double s,coef;
-    int nbN1=fe1.nbNode;
-    for(i=0;i<nbN1;i++){
-      for(j=0;j<fe2.nbNode;j++){
-	s = 0;
-	for(iq=0;iq<fe1.nbQuadPt;iq++){
-	  coef=0;
-	  for (int iloc=0;iloc<nbN1;iloc++)
-	    coef += vec_loc.vec()[iloc+icoor*nbN1]*fe1.phi(iloc,iq);
+    if ( iblock == jblock )
+    {
+        int iq;
+        int i, j;
+        double s, coef;
+        int nbN1 = fe1.nbNode;
+        for ( i = 0;i < nbN1;i++ )
+        {
+            for ( j = 0;j < fe2.nbNode;j++ )
+            {
+                s = 0;
+                for ( iq = 0;iq < fe1.nbQuadPt;iq++ )
+                {
+                    coef = 0;
+                    for ( int iloc = 0;iloc < nbN1;iloc++ )
+                        coef += vec_loc.vec() [ iloc + icoor * nbN1 ] * fe1.phi( iloc, iq );
 
-	  s += coef*fe2.phi(i,iq)*fe1.phiDer(j,icoor,iq)*fe1.weightDet(iq);
-	} // Loop on quadrature nodes
+                    s += coef * fe2.phi( i, iq ) * fe1.phiDer( j, icoor, iq ) * fe1.weightDet( iq );
+                } // Loop on quadrature nodes
 
-	mat(i,j) += s;
-      } //Loop on j
-    } // Loop on i
-  } // if
+                mat( i, j ) += s;
+            } //Loop on j
+        } // Loop on i
+    } // if
 
 }
 
@@ -1250,39 +1410,45 @@ void grad(const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
 // \! Gradient operator in the skew-symmetric form for NS Problems
 //  A. Veneziani - December 2002
 // \!
-void grad_ss(const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
-	  const CurrentFE& fe1,const CurrentFE& fe2,
-	  int iblock,int jblock)
-  /*
-    \int vloc(icoor) \frac{\partial v_i}{\partial x_icoor} v_j + 1/2*\frac{\partial v_icoor}{\partial x_icoor} v_i v_j
-  */
+void grad_ss( const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
+              const CurrentFE& fe1, const CurrentFE& fe2,
+              int iblock, int jblock )
+/*
+  \int vloc(icoor) \frac{\partial v_i}{\partial x_icoor} v_j + 1/2*\frac{\partial v_icoor}{\partial x_icoor} v_i v_j
+*/
 {
-  //
-  Tab2dView mat = elmat.block(iblock,jblock);
+    //
+    Tab2dView mat = elmat.block( iblock, jblock );
 
-  if (iblock==jblock){
-    int iq;
-    int i,j;
-    double s,coef,coef_div;
-    int nbN1=fe1.nbNode;
-    for(i=0;i<nbN1;i++){
-      for(j=0;j<fe2.nbNode;j++){
-	s = 0;
-	for(iq=0;iq<fe1.nbQuadPt;iq++){
-	  coef=0; coef_div=0;
+    if ( iblock == jblock )
+    {
+        int iq;
+        int i, j;
+        double s, coef, coef_div;
+        int nbN1 = fe1.nbNode;
+        for ( i = 0;i < nbN1;i++ )
+        {
+            for ( j = 0;j < fe2.nbNode;j++ )
+            {
+                s = 0;
+                for ( iq = 0;iq < fe1.nbQuadPt;iq++ )
+                {
+                    coef = 0;
+                    coef_div = 0;
 
-	  for (int iloc=0;iloc<nbN1;iloc++){
-	    coef += vec_loc.vec()[iloc+icoor*nbN1]*fe1.phi(iloc,iq);
-            coef_div += vec_loc.vec()[iloc+icoor*nbN1]*fe1.phiDer(iloc,icoor,iq);
-	  }
+                    for ( int iloc = 0;iloc < nbN1;iloc++ )
+                    {
+                        coef += vec_loc.vec() [ iloc + icoor * nbN1 ] * fe1.phi( iloc, iq );
+                        coef_div += vec_loc.vec() [ iloc + icoor * nbN1 ] * fe1.phiDer( iloc, icoor, iq );
+                    }
 
-	  s += (coef*fe1.phiDer(j,icoor,iq)+0.5*coef_div*fe1.phi(j,iq))*fe2.phi(i,iq)*fe1.weightDet(iq);
-	} // Loop on quadrature nodes
+                    s += ( coef * fe1.phiDer( j, icoor, iq ) + 0.5 * coef_div * fe1.phi( j, iq ) ) * fe2.phi( i, iq ) * fe1.weightDet( iq );
+                } // Loop on quadrature nodes
 
-	mat(i,j) += s;
-      } //Loop on j
-    } // Loop on i
-  } // if
+                mat( i, j ) += s;
+            } //Loop on j
+        } // Loop on i
+    } // if
 
 }
 
@@ -1291,38 +1457,42 @@ void grad_ss(const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
 // living on the basis given by fe3
 // It is useful for advection diffusion problems driven by a NS problem
 // !/
-void grad(const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
-	  const CurrentFE& fe1,const CurrentFE& fe2,const CurrentFE& fe3,
-	  int iblock,int jblock)
-  /*
-    \int q_j \frac{\partial v_i}{\partial x_icoor}
-  */
+void grad( const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
+           const CurrentFE& fe1, const CurrentFE& fe2, const CurrentFE& fe3,
+           int iblock, int jblock )
+/*
+  \int q_j \frac{\partial v_i}{\partial x_icoor}
+*/
 {
-  //
-  Tab2dView mat = elmat.block(iblock,jblock);
+    //
+    Tab2dView mat = elmat.block( iblock, jblock );
 
-  if (iblock==jblock){
-    int iq;
-    int i,j;
-    double s,coef;
-    int nbN1=fe1.nbNode;
-    int nbN3=fe3.nbNode;
-    for(i=0;i<nbN1;i++){
-      for(j=0;j<fe2.nbNode;j++){
-	s = 0;
-	for(iq=0;iq<fe1.nbQuadPt;iq++){
-	  coef=0;
+    if ( iblock == jblock )
+    {
+        int iq;
+        int i, j;
+        double s, coef;
+        int nbN1 = fe1.nbNode;
+        int nbN3 = fe3.nbNode;
+        for ( i = 0;i < nbN1;i++ )
+        {
+            for ( j = 0;j < fe2.nbNode;j++ )
+            {
+                s = 0;
+                for ( iq = 0;iq < fe1.nbQuadPt;iq++ )
+                {
+                    coef = 0;
 
-	  for (int iloc=0;iloc<nbN3;iloc++)
-	    coef += vec_loc.vec()[iloc+icoor*nbN3]*fe3.phi(iloc,iq);
+                    for ( int iloc = 0;iloc < nbN3;iloc++ )
+                        coef += vec_loc.vec() [ iloc + icoor * nbN3 ] * fe3.phi( iloc, iq );
 
-	  s += coef*fe2.phi(i,iq)*fe1.phiDer(j,icoor,iq)*fe1.weightDet(iq);
-	} // Loop on quadrature nodes
+                    s += coef * fe2.phi( i, iq ) * fe1.phiDer( j, icoor, iq ) * fe1.weightDet( iq );
+                } // Loop on quadrature nodes
 
-	mat(i,j) += s;
-      } //Loop on j
-    } // Loop on i
-  } // if
+                mat( i, j ) += s;
+            } //Loop on j
+        } // Loop on i
+    } // if
 
 }
 
@@ -1348,7 +1518,7 @@ void grad(const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
   Real s,coef_s;
   siz=coef.size();
   ASSERT(siz==fe.nbDiag,
-	 "Error in building Local Matrix of the quadratic term");
+  "Error in building Local Matrix of the quadratic term");
   //
   // diagonal
   //
@@ -1359,7 +1529,7 @@ void grad(const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
     qloc = fe.patternFirst(iq);
     for(ig=0;ig<fe.nbQuadPt;ig++)
       s += coef(iq)*fe.phi(qloc,ig)*fe.phi(iloc,ig)*fe.phi(iloc,ig)*
-	fe.weightDet(ig);
+ fe.weightDet(ig);
    }
     mat(iloc,iloc) += 2*s;
     elvec(iloc) += coef(iloc)*s;
@@ -1375,75 +1545,84 @@ void grad(const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
     qloc = fe.patternFirst(iq);
     for(ig=0;ig<fe.nbQuadPt;ig++)
       s += coef(iq)*fe.phi(qloc,ig)*
-	fe.phi(iloc,ig)*fe.phi(jloc,ig)*fe.weightDet(ig);
+ fe.phi(iloc,ig)*fe.phi(jloc,ig)*fe.weightDet(ig);
     }
     mat(iloc,jloc) += 2*s;
     mat(jloc,iloc) += 2*s;
     }
     }
-*/
+*/ 
 //----------------------------------------------------------------------
 //                      Element vector operator
 //----------------------------------------------------------------------
-void source(Real constant,ElemVec& elvec,const CurrentFE& fe,int iblock){
-  int i,ig;
-  ASSERT_PRE(fe.hasJac(),"Source vector needs at least the jacobian");
-  Tab1dView vec = elvec.block(iblock);
-  Real s;
-  for(i=0;i<fe.nbNode;i++){
-    s = 0;
-    for(ig=0;ig<fe.nbQuadPt;ig++) s += fe.phi(i,ig)*fe.weightDet(ig);
-    vec(i) += constant*s;
-  }
+void source( Real constant, ElemVec& elvec, const CurrentFE& fe, int iblock )
+{
+    int i, ig;
+    ASSERT_PRE( fe.hasJac(), "Source vector needs at least the jacobian" );
+    Tab1dView vec = elvec.block( iblock );
+    Real s;
+    for ( i = 0;i < fe.nbNode;i++ )
+    {
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+            s += fe.phi( i, ig ) * fe.weightDet( ig );
+        vec( i ) += constant * s;
+    }
 }
 
-void source(Real coef,ElemVec& f, ElemVec& elvec, const CurrentFE& fe,
-	    int fblock,int eblock)
-  /*
-    compute \int f \phi_i
-    where f is given on the dof of this element
-    fblock is the block of the values read in f
-    eblock is the block where the result is writen in the elvec
-  */
+void source( Real coef, ElemVec& f, ElemVec& elvec, const CurrentFE& fe,
+             int fblock, int eblock )
+/*
+  compute \int f \phi_i
+  where f is given on the dof of this element
+  fblock is the block of the values read in f
+  eblock is the block where the result is writen in the elvec
+*/
 {
-  int i,ig;
-  ASSERT_PRE(fe.hasJac(),"Source vector (f) needs at least the jacobian");
-  Tab1dView vec = elvec.block(eblock);
-  Tab1dView vecf = f.block(fblock);
-  Real f_ig;
+    int i, ig;
+    ASSERT_PRE( fe.hasJac(), "Source vector (f) needs at least the jacobian" );
+    Tab1dView vec = elvec.block( eblock );
+    Tab1dView vecf = f.block( fblock );
+    Real f_ig;
 
-  for(ig=0;ig<fe.nbQuadPt;ig++){
-    f_ig = 0.;
-    for(i=0;i<fe.nbNode;i++) f_ig += vecf(i)*fe.phi(i,ig);
-    for(i=0;i<fe.nbNode;i++){
-       vec(i) += coef*f_ig*fe.phi(i,ig)*fe.weightDet(ig);
+    for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+    {
+        f_ig = 0.;
+        for ( i = 0;i < fe.nbNode;i++ )
+            f_ig += vecf( i ) * fe.phi( i, ig );
+        for ( i = 0;i < fe.nbNode;i++ )
+        {
+            vec( i ) += coef * f_ig * fe.phi( i, ig ) * fe.weightDet( ig );
+        }
     }
-  }
 }
 
-void source_fhn(Real coef_f,Real coef_a,ElemVec& u, ElemVec& elvec, const CurrentFE& fe,
-	    int fblock,int eblock)
-  /*
-    compute \int coef_f u(1-u)(u-coef_a) \phi_i
-    (right-hand side for the Fitzhugh-Nagumo equations)
-    where u is given on the dof of this element
-    fblock is the block of the values read in f
-    eblock is the block where the result is writen in the elvec
-  */
+void source_fhn( Real coef_f, Real coef_a, ElemVec& u, ElemVec& elvec, const CurrentFE& fe,
+                 int fblock, int eblock )
+/*
+  compute \int coef_f u(1-u)(u-coef_a) \phi_i
+  (right-hand side for the Fitzhugh-Nagumo equations)
+  where u is given on the dof of this element
+  fblock is the block of the values read in f
+  eblock is the block where the result is writen in the elvec
+*/
 {
-  int i,ig;
-  ASSERT_PRE(fe.hasJac(),"elemOper.cpp source_fhn: FHN source vector (f) needs at least the jacobian");
-  Tab1dView vec = elvec.block(eblock);
-  Tab1dView vecu = u.block(fblock);
-  Real f_ig;
+    int i, ig;
+    ASSERT_PRE( fe.hasJac(), "elemOper.cpp source_fhn: FHN source vector (f) needs at least the jacobian" );
+    Tab1dView vec = elvec.block( eblock );
+    Tab1dView vecu = u.block( fblock );
+    Real f_ig;
 
-  for(ig=0;ig<fe.nbQuadPt;ig++){
-    f_ig = 0.;
-    for(i=0;i<fe.nbNode;i++) f_ig += vecu(i)*fe.phi(i,ig);
-    for(i=0;i<fe.nbNode;i++){
-       vec(i) += coef_f*f_ig*(1-f_ig)*(f_ig-coef_a)*fe.phi(i,ig)*fe.weightDet(ig);
+    for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+    {
+        f_ig = 0.;
+        for ( i = 0;i < fe.nbNode;i++ )
+            f_ig += vecu( i ) * fe.phi( i, ig );
+        for ( i = 0;i < fe.nbNode;i++ )
+        {
+            vec( i ) += coef_f * f_ig * ( 1 - f_ig ) * ( f_ig - coef_a ) * fe.phi( i, ig ) * fe.weightDet( ig );
+        }
     }
-  }
 
 }
 
@@ -1455,113 +1634,122 @@ void source_fhn(Real coef_f,Real coef_a,ElemVec& u, ElemVec& elvec, const Curren
 //
 // Remark: convect = u^n-u^k
 //
-void source_mass1(Real coef, const ElemVec& uk_loc, const ElemVec& convect_loc,
-		 const ElemVec& d_loc, ElemVec& elvec, const CurrentFE& fe) {
-  ASSERT_PRE(fe.hasFirstDeriv(),
-	     "source_mass needs at least the first derivatives");
+void source_mass1( Real coef, const ElemVec& uk_loc, const ElemVec& convect_loc,
+                   const ElemVec& d_loc, ElemVec& elvec, const CurrentFE& fe )
+{
+    ASSERT_PRE( fe.hasFirstDeriv(),
+                "source_mass needs at least the first derivatives" );
 
 
-  Real B[fe.nbCoor][fe.nbCoor];                 // \grad (convect) at a quadrature point
-  Real A[fe.nbCoor][fe.nbCoor];                 // I\div d - (\grad d)^T at a quadrature point
-  Real aux[fe.nbQuadPt];                        // grad (convect):[I\div d - (\grad d)^T] at  quadrature points
-  Real uk[fe.nbQuadPt][fe.nbCoor];              // u^k quadrature points
-  Real guk[fe.nbQuadPt][fe.nbCoor][fe.nbCoor];  // \grad u^k at quadrature points
-  Real convect[fe.nbCoor];                      // convect at quadrature points
-  Real convect_A[fe.nbQuadPt][fe.nbCoor];       // (convect)^T [I\div d - (\grad d)^T] at quadrature points
+    Real B[ fe.nbCoor ][ fe.nbCoor ];                 // \grad (convect) at a quadrature point
+    Real A[ fe.nbCoor ][ fe.nbCoor ];                 // I\div d - (\grad d)^T at a quadrature point
+    Real aux[ fe.nbQuadPt ];                        // grad (convect):[I\div d - (\grad d)^T] at  quadrature points
+    Real uk[ fe.nbQuadPt ][ fe.nbCoor ];              // u^k quadrature points
+    Real guk[ fe.nbQuadPt ][ fe.nbCoor ][ fe.nbCoor ];  // \grad u^k at quadrature points
+    Real convect[ fe.nbCoor ];                      // convect at quadrature points
+    Real convect_A[ fe.nbQuadPt ][ fe.nbCoor ];       // (convect)^T [I\div d - (\grad d)^T] at quadrature points
 
-  Real s, sA, sB,sG;
-
-
-  int icoor, jcoor, ig, i;
-  // loop on quadrature points
-  for(ig=0;ig<fe.nbQuadPt;ig++) {
-
-    // loop on space coordindates
-    for(icoor=0;icoor<fe.nbCoor;icoor++) {
-
-      // each compontent of uk at each quadrature points
-      s=0.0;
-      for(i=0;i<fe.nbNode;i++)
-    	s+= fe.phi(i,ig)*uk_loc.vec()[i+icoor*fe.nbNode];
-      uk[ig][icoor] = s;
-
-      // each compontent of convect at this quadrature point
-      s=0.0;
-      for(i=0;i<fe.nbNode;i++)
-    	s += fe.phi(i,ig)*convect_loc.vec()[i+icoor*fe.nbNode];
-      convect[icoor] = s;
+    Real s, sA, sB, sG;
 
 
-      // loop  on space coordindates
-      for(jcoor=0;jcoor<fe.nbCoor;jcoor++) {
-	sB = 0.0;
-	sA = 0.0;
-	sG = 0.0;
-	for(i=0;i<fe.nbNode;i++) {
-	  sG += fe.phiDer(i,jcoor,ig) * uk_loc.vec()[i+icoor*fe.nbNode]; //  \grad u^k at each quadrature point
-	  sB += fe.phiDer(i,jcoor,ig) * convect_loc.vec()[i+icoor*fe.nbNode]; //  \grad (convect) at this quadrature point
-	  sA -= fe.phiDer(i,icoor,ig) * d_loc.vec()[i+jcoor*fe.nbNode]; //  - (\grad d) ^T at this quadrature point
-	}
-	guk[ig][icoor][jcoor] = sG; // \grad u^k at each quadrature point
-	B[icoor][jcoor]       = sB; // \grad (convect) at this quadrature point
-	A[icoor][jcoor]       = sA; // -(\grad d) ^T at this quadrature point
-      }
+    int icoor, jcoor, ig, i;
+    // loop on quadrature points
+    for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+    {
+
+        // loop on space coordindates
+        for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+        {
+
+            // each compontent of uk at each quadrature points
+            s = 0.0;
+            for ( i = 0;i < fe.nbNode;i++ )
+                s += fe.phi( i, ig ) * uk_loc.vec() [ i + icoor * fe.nbNode ];
+            uk[ ig ][ icoor ] = s;
+
+            // each compontent of convect at this quadrature point
+            s = 0.0;
+            for ( i = 0;i < fe.nbNode;i++ )
+                s += fe.phi( i, ig ) * convect_loc.vec() [ i + icoor * fe.nbNode ];
+            convect[ icoor ] = s;
+
+
+            // loop  on space coordindates
+            for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
+            {
+                sB = 0.0;
+                sA = 0.0;
+                sG = 0.0;
+                for ( i = 0;i < fe.nbNode;i++ )
+                {
+                    sG += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbNode ]; //  \grad u^k at each quadrature point
+                    sB += fe.phiDer( i, jcoor, ig ) * convect_loc.vec() [ i + icoor * fe.nbNode ]; //  \grad (convect) at this quadrature point
+                    sA -= fe.phiDer( i, icoor, ig ) * d_loc.vec() [ i + jcoor * fe.nbNode ]; //  - (\grad d) ^T at this quadrature point
+                }
+                guk[ ig ][ icoor ][ jcoor ] = sG; // \grad u^k at each quadrature point
+                B[ icoor ][ jcoor ] = sB; // \grad (convect) at this quadrature point
+                A[ icoor ][ jcoor ] = sA; // -(\grad d) ^T at this quadrature point
+            }
+        }
+
+        s = 0.0;
+        for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
+            s -= A[ jcoor ][ jcoor ];  // \div d at this quadrature point ( - trace( A ) )
+
+        for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
+            A[ jcoor ][ jcoor ] += s;  // I\div d - (\grad d)^T at this quadrature point
+
+        s = 0;
+        for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+            for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
+                s += B[ icoor ][ jcoor ] * A[ icoor ][ jcoor ]; // \grad (convect):[I\div d - (\grad d)^T] at each quadrature point
+        aux[ ig ] = s;
+
+        s = 0;
+        for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
+        {
+            for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+                s += convect[ icoor ] * A[ icoor ][ jcoor ]; // convect^T [I\div d - (\grad d)^T]
+            convect_A[ ig ][ jcoor ] = s;
+        }
     }
 
-    s=0.0;
-    for(jcoor=0;jcoor<fe.nbCoor;jcoor++)
-      s -= A[jcoor][jcoor];  // \div d at this quadrature point ( - trace( A ) )
+    // At this point we have:
+    //    v  \grad u^k at each quadrature point: guk
+    //    v  convect^T [I\div d - (\grad d)^T] at each quadrature point: convect_A
+    //    v  \grad (convect):[I\div d - (\grad d)^T]: aux
 
-    for(jcoor=0;jcoor<fe.nbCoor;jcoor++)
-      A[jcoor][jcoor]+= s;  // I\div d - (\grad d)^T at this quadrature point
 
-    s = 0;
-    for(icoor=0;icoor<fe.nbCoor;icoor++)
-      for(jcoor=0;jcoor<fe.nbCoor;jcoor++)
-	s += B[icoor][jcoor]*A[icoor][jcoor]; // \grad (convect):[I\div d - (\grad d)^T] at each quadrature point
-    aux[ig] = s;
+    //
+    // Numerical integration
+    //
 
-    s = 0;
-    for(jcoor=0;jcoor<fe.nbCoor;jcoor++) {
-      for(icoor=0;icoor<fe.nbCoor;icoor++)
-	s += convect[icoor]* A[icoor][jcoor]; // convect^T [I\div d - (\grad d)^T]
-      convect_A[ig][jcoor] = s;
+    // loop on coordinates, i.e. loop on elementary vector blocks
+    for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+    {
+
+        // the block iccor of the elementary vector
+        Tab1dView vec = elvec.block( icoor );
+
+        // loop on nodes, i.e. loop on components of this block
+        for ( i = 0;i < fe.nbNode;i++ )
+        {
+
+            // loop on quadrature points
+            s = 0;
+            for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+            {
+
+                // \grad (convect):[I\div d - (\grad d)^T] \phi_i
+                s += aux[ ig ] * uk[ ig ][ icoor ] * fe.phi( i, ig ) * fe.weightDet( ig );
+
+                // convect^T [I\div d - (\grad d)^T] (\grad u^k)^T \phi_i
+                for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
+                    s += convect_A[ ig ][ jcoor ] * guk[ ig ][ icoor ][ jcoor ] * fe.phi( i, ig ) * fe.weightDet( ig );
+            }
+            vec( i ) += coef * s;
+        }
     }
-  }
-
-  // At this point we have:
-  //    v  \grad u^k at each quadrature point: guk
-  //    v  convect^T [I\div d - (\grad d)^T] at each quadrature point: convect_A
-  //    v  \grad (convect):[I\div d - (\grad d)^T]: aux
-
-
-  //
-  // Numerical integration
-  //
-
-  // loop on coordinates, i.e. loop on elementary vector blocks
-  for(icoor=0;icoor<fe.nbCoor;icoor++){
-
-    // the block iccor of the elementary vector
-    Tab1dView vec = elvec.block(icoor);
-
-    // loop on nodes, i.e. loop on components of this block
-    for(i=0;i<fe.nbNode;i++){
-
-      // loop on quadrature points
-      s = 0;
-      for(ig=0;ig<fe.nbQuadPt;ig++) {
-
-	// \grad (convect):[I\div d - (\grad d)^T] \phi_i
-	s += aux[ig] * uk[ig][icoor] * fe.phi(i,ig) * fe.weightDet(ig);
-
-	// convect^T [I\div d - (\grad d)^T] (\grad u^k)^T \phi_i
-	for(jcoor=0;jcoor<fe.nbCoor;jcoor++)
-	  s +=  convect_A[ig][jcoor] * guk[ig][icoor][jcoor] * fe.phi(i,ig) * fe.weightDet(ig);
-      }
-      vec(i) += coef*s;
-    }
-  }
 }
 
 
@@ -1570,68 +1758,75 @@ void source_mass1(Real coef, const ElemVec& uk_loc, const ElemVec& convect_loc,
 // coef * ( \grad u^k dw, v  ) for Newton FSI
 //
 //
-void source_mass2(Real coef, const ElemVec& uk_loc, const ElemVec& dw_loc,
-		  ElemVec& elvec, const CurrentFE& fe) {
+void source_mass2( Real coef, const ElemVec& uk_loc, const ElemVec& dw_loc,
+                   ElemVec& elvec, const CurrentFE& fe )
+{
 
-  ASSERT_PRE(fe.hasFirstDeriv(),
-	     "source_mass needs at least the first derivatives");
+    ASSERT_PRE( fe.hasFirstDeriv(),
+                "source_mass needs at least the first derivatives" );
 
-  Real guk[fe.nbCoor][fe.nbCoor];      // \grad u^k at a quadrature point
-  Real dw[fe.nbCoor];                  // dw at a quadrature point
-  Real aux[fe.nbQuadPt][fe.nbCoor];    // (\grad u^k)dw at each quadrature point
-  Real s;
+    Real guk[ fe.nbCoor ][ fe.nbCoor ];      // \grad u^k at a quadrature point
+    Real dw[ fe.nbCoor ];                  // dw at a quadrature point
+    Real aux[ fe.nbQuadPt ][ fe.nbCoor ];    // (\grad u^k)dw at each quadrature point
+    Real s;
 
-  int ig, icoor, jcoor, i;
+    int ig, icoor, jcoor, i;
 
-  // loop on quadrature points
-  for(ig=0;ig<fe.nbQuadPt;ig++) {
+    // loop on quadrature points
+    for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+    {
 
-    // loop on space coordinates
-    for(icoor=0;icoor<fe.nbCoor;icoor++) {
+        // loop on space coordinates
+        for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+        {
 
-      // each compontent (icoor) of dw at this quadrature point
-      s=0.0;
-      for(i=0;i<fe.nbNode;i++)
-    	s += fe.phi(i,ig)*dw_loc.vec()[i+icoor*fe.nbNode];
-      dw[icoor] = s;
+            // each compontent (icoor) of dw at this quadrature point
+            s = 0.0;
+            for ( i = 0;i < fe.nbNode;i++ )
+                s += fe.phi( i, ig ) * dw_loc.vec() [ i + icoor * fe.nbNode ];
+            dw[ icoor ] = s;
 
-      // loop  on space coordinates
-      for(jcoor=0;jcoor<fe.nbCoor;jcoor++) {
-	s = 0.0;
-	for(i=0;i<fe.nbNode;i++)
-	  s += fe.phiDer(i,jcoor,ig) * uk_loc.vec()[i+icoor*fe.nbNode]; //  \grad u^k at a quadrature point
-	guk[icoor][jcoor] = s;
-      }
+            // loop  on space coordinates
+            for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
+            {
+                s = 0.0;
+                for ( i = 0;i < fe.nbNode;i++ )
+                    s += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbNode ]; //  \grad u^k at a quadrature point
+                guk[ icoor ][ jcoor ] = s;
+            }
+        }
+
+        // (\grad u^k)dw at each quadrature point
+        for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+        {
+            s = 0.0;
+            for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
+                s += guk[ icoor ][ jcoor ] * dw[ jcoor ];
+            aux[ ig ][ icoor ] = s;
+        }
     }
 
-    // (\grad u^k)dw at each quadrature point
-    for(icoor=0;icoor<fe.nbCoor;icoor++) {
-      s = 0.0;
-      for(jcoor=0;jcoor<fe.nbCoor;jcoor++)
-	s += guk[icoor][jcoor]*dw[jcoor];
-      aux[ig][icoor] = s;
+    //
+    // Numerical integration
+    //
+
+    // loop on coordinates, i.e. loop on elementary vector blocks
+    for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+    {
+
+        Tab1dView vec = elvec.block( icoor );
+
+        // loop on nodes, i.e. loop on components of this block
+        for ( i = 0;i < fe.nbNode;i++ )
+        {
+
+            // loop on quadrature points
+            s = 0;
+            for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+                s += aux[ ig ][ icoor ] * fe.phi( i, ig ) * fe.weightDet( ig );
+            vec( i ) += coef * s;
+        }
     }
-  }
-
-  //
-  // Numerical integration
-  //
-
-  // loop on coordinates, i.e. loop on elementary vector blocks
-  for(icoor=0;icoor<fe.nbCoor;icoor++){
-
-    Tab1dView vec = elvec.block(icoor);
-
-    // loop on nodes, i.e. loop on components of this block
-    for(i=0;i<fe.nbNode;i++){
-
-      // loop on quadrature points
-      s = 0;
-      for(ig=0;ig<fe.nbQuadPt;ig++)
-	s += aux[ig][icoor] * fe.phi(i,ig) * fe.weightDet(ig);
-      vec(i) += coef*s;
-    }
-  }
 }
 
 
@@ -1639,90 +1834,99 @@ void source_mass2(Real coef, const ElemVec& uk_loc, const ElemVec& dw_loc,
 //
 // coef * ( [-p^k I + 2*mu e(u^k)] [I\div d - (\grad d)^T] , \grad v  ) for Newton FSI
 //
-void source_stress(Real coef, Real mu, const ElemVec& uk_loc, const ElemVec& pk_loc,
-		   const ElemVec& d_loc, ElemVec& elvec, const CurrentFE& fe_u,
-		   const CurrentFE& fe_p) {
+void source_stress( Real coef, Real mu, const ElemVec& uk_loc, const ElemVec& pk_loc,
+                    const ElemVec& d_loc, ElemVec& elvec, const CurrentFE& fe_u,
+                    const CurrentFE& fe_p )
+{
 
-  ASSERT_PRE(fe_u.hasFirstDeriv(),
-	     "source_stress needs at least the velocity shape fonctions first derivatives");
+    ASSERT_PRE( fe_u.hasFirstDeriv(),
+                "source_stress needs at least the velocity shape fonctions first derivatives" );
 
-  Real A[fe_u.nbCoor][fe_u.nbCoor];                 // I\div d - (\grad d)^T at a quadrature point
-  Real guk[fe_u.nbCoor][fe_u.nbCoor];               // \grad u^k at a quadrature point
-  Real sigma[fe_u.nbCoor][fe_u.nbCoor];             // [-p^k I + 2*mu e(u^k)] a quadrature point
-  Real B[fe_u.nbQuadPt][fe_u.nbCoor][fe_u.nbCoor];  // [-p^k I + 2*mu e(u^k)] [I\div d - (\grad d)^T] at each quadrature point
-  Real s, sA, sG, pk;
+    Real A[ fe_u.nbCoor ][ fe_u.nbCoor ];                 // I\div d - (\grad d)^T at a quadrature point
+    Real guk[ fe_u.nbCoor ][ fe_u.nbCoor ];               // \grad u^k at a quadrature point
+    Real sigma[ fe_u.nbCoor ][ fe_u.nbCoor ];             // [-p^k I + 2*mu e(u^k)] a quadrature point
+    Real B[ fe_u.nbQuadPt ][ fe_u.nbCoor ][ fe_u.nbCoor ];  // [-p^k I + 2*mu e(u^k)] [I\div d - (\grad d)^T] at each quadrature point
+    Real s, sA, sG, pk;
 
-  int icoor, jcoor, kcoor, ig, i;
+    int icoor, jcoor, kcoor, ig, i;
 
-  // loop on quadrature points
-  for(ig=0;ig<fe_u.nbQuadPt;ig++) {
+    // loop on quadrature points
+    for ( ig = 0;ig < fe_u.nbQuadPt;ig++ )
+    {
 
-    // loop on space coordinates
-    for(icoor=0;icoor<fe_u.nbCoor;icoor++) {
+        // loop on space coordinates
+        for ( icoor = 0;icoor < fe_u.nbCoor;icoor++ )
+        {
 
-      // loop  on space coordindates
-      for(jcoor=0;jcoor<fe_u.nbCoor;jcoor++) {
-	sA = 0.0;
-	sG = 0.0;
-	for(i=0;i<fe_u.nbNode;i++) {
-	  sG += fe_u.phiDer(i,jcoor,ig) * uk_loc.vec()[i+icoor*fe_u.nbNode]; //  \grad u^k at this quadrature point
-	  sA -= fe_u.phiDer(i,icoor,ig) *  d_loc.vec()[i+jcoor*fe_u.nbNode]; //  - (\grad d) ^T at this quadrature point
-	}
-	guk[icoor][jcoor] = sG;
-	A[icoor][jcoor]   = sA;
-      }
+            // loop  on space coordindates
+            for ( jcoor = 0;jcoor < fe_u.nbCoor;jcoor++ )
+            {
+                sA = 0.0;
+                sG = 0.0;
+                for ( i = 0;i < fe_u.nbNode;i++ )
+                {
+                    sG += fe_u.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe_u.nbNode ]; //  \grad u^k at this quadrature point
+                    sA -= fe_u.phiDer( i, icoor, ig ) * d_loc.vec() [ i + jcoor * fe_u.nbNode ]; //  - (\grad d) ^T at this quadrature point
+                }
+                guk[ icoor ][ jcoor ] = sG;
+                A[ icoor ][ jcoor ] = sA;
+            }
+        }
+
+        s = 0.0;
+        for ( jcoor = 0;jcoor < fe_u.nbCoor;jcoor++ )
+            s -= A[ jcoor ][ jcoor ];  // \div d at a quadrature point ( - trace( A ) )
+
+        for ( jcoor = 0;jcoor < fe_u.nbCoor;jcoor++ )
+            A[ jcoor ][ jcoor ] += s;  // I\div d  - (\grad d)^T
+
+        pk = 0.0;
+        for ( i = 0;i < fe_p.nbNode;i++ )
+            pk += fe_p.phi( i, ig ) * pk_loc.vec() [ i ]; // p^k at this quadrature point
+
+
+        // sigma = [-p^k I + 2*mu e(u^k)] a quadrature point
+        for ( icoor = 0;icoor < fe_u.nbCoor;icoor++ )
+        {
+            for ( jcoor = 0;jcoor < fe_u.nbCoor;jcoor++ )
+                sigma[ icoor ][ jcoor ] = mu * ( guk[ icoor ][ jcoor ] + guk[ jcoor ][ icoor ] );
+            sigma[ icoor ][ icoor ] -= pk;
+        }
+
+        // [-p^k I + 2*mu e(u^k)] [I\div d - (\grad d)^T] at each quadrature point
+        for ( icoor = 0;icoor < fe_u.nbCoor;icoor++ )
+            for ( jcoor = 0;jcoor < fe_u.nbCoor;jcoor++ )
+            {
+                s = 0;
+                for ( kcoor = 0;kcoor < fe_u.nbCoor;kcoor++ )
+                    s += sigma[ icoor ][ kcoor ] * A[ kcoor ][ jcoor ];
+                B[ ig ][ icoor ][ jcoor ] = s;
+            }
     }
 
-    s=0.0;
-    for(jcoor=0;jcoor<fe_u.nbCoor;jcoor++)
-      s -= A[jcoor][jcoor];  // \div d at a quadrature point ( - trace( A ) )
+    //
+    // Numerical integration
+    //
 
-    for(jcoor=0;jcoor<fe_u.nbCoor;jcoor++)
-      A[jcoor][jcoor]+= s;  // I\div d  - (\grad d)^T
+    // loop on coordinates, i.e. loop on elementary vector blocks
+    for ( icoor = 0;icoor < fe_u.nbCoor;icoor++ )
+    {
 
-    pk = 0.0;
-    for(i=0;i<fe_p.nbNode;i++)
-      pk += fe_p.phi(i,ig)*pk_loc.vec()[i]; // p^k at this quadrature point
+        Tab1dView vec = elvec.block( icoor );
 
+        // loop on nodes, i.e. loop on components of this block
+        for ( i = 0;i < fe_u.nbNode;i++ )
+        {
 
-    // sigma = [-p^k I + 2*mu e(u^k)] a quadrature point
-    for(icoor=0;icoor<fe_u.nbCoor;icoor++) {
-      for(jcoor=0;jcoor<fe_u.nbCoor;jcoor++)
-	sigma[icoor][jcoor] = mu * (  guk[icoor][jcoor] + guk[jcoor][icoor]  );
-      sigma[icoor][icoor] -= pk;
+            // loop on quadrature points
+            s = 0;
+            for ( ig = 0;ig < fe_u.nbQuadPt;ig++ )
+
+                for ( jcoor = 0;jcoor < fe_u.nbCoor;jcoor++ )
+                    s += B[ ig ][ icoor ][ jcoor ] * fe_u.phiDer( i, jcoor, ig ) * fe_u.weightDet( ig );
+            vec( i ) += coef * s;
+        }
     }
-
-    // [-p^k I + 2*mu e(u^k)] [I\div d - (\grad d)^T] at each quadrature point
-    for(icoor=0;icoor<fe_u.nbCoor;icoor++)
-      for(jcoor=0;jcoor<fe_u.nbCoor;jcoor++) {
-	s = 0;
-	for(kcoor=0;kcoor<fe_u.nbCoor;kcoor++)
-	  s += sigma[icoor][kcoor] * A[kcoor][jcoor];
-	B[ig][icoor][jcoor] = s;
-      }
-  }
-
-  //
-  // Numerical integration
-  //
-
-  // loop on coordinates, i.e. loop on elementary vector blocks
-  for(icoor=0;icoor<fe_u.nbCoor;icoor++) {
-
-    Tab1dView vec = elvec.block(icoor);
-
-    // loop on nodes, i.e. loop on components of this block
-    for(i=0;i<fe_u.nbNode;i++){
-
-      // loop on quadrature points
-      s = 0;
-      for(ig=0;ig<fe_u.nbQuadPt;ig++)
-
-	for(jcoor=0;jcoor<fe_u.nbCoor;jcoor++)
-	  s += 	B[ig][icoor][jcoor]*fe_u.phiDer(i,jcoor,ig)*fe_u.weightDet(ig);
-      vec(i) += coef*s;
-    }
-  }
 }
 
 
@@ -1730,69 +1934,78 @@ void source_stress(Real coef, Real mu, const ElemVec& uk_loc, const ElemVec& pk_
 //
 // + \mu ( \grad u^k \grad d + [\grad d]^T[\grad u^k]^T : \grad v )
 //
-void source_stress2(Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, ElemVec& elvec, const CurrentFE& fe_u) {
+void source_stress2( Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, ElemVec& elvec, const CurrentFE& fe_u )
+{
 
-  ASSERT_PRE(fe_u.hasFirstDeriv(),
-	     "source_stress needs at least the velocity shape fonctions first derivatives");
+    ASSERT_PRE( fe_u.hasFirstDeriv(),
+                "source_stress needs at least the velocity shape fonctions first derivatives" );
 
 
-  Real guk[fe_u.nbCoor][fe_u.nbCoor];               // \grad u^k at a quadrature point
-  Real gd[fe_u.nbCoor][fe_u.nbCoor];                // \grad d at a quadrature point
-  Real A[fe_u.nbQuadPt][fe_u.nbCoor][fe_u.nbCoor];  // \grad u^k \grad d + [\grad d]^T[\grad u^k]^T  at each quadrature point
-  Real su, sd, s;
+    Real guk[ fe_u.nbCoor ][ fe_u.nbCoor ];               // \grad u^k at a quadrature point
+    Real gd[ fe_u.nbCoor ][ fe_u.nbCoor ];                // \grad d at a quadrature point
+    Real A[ fe_u.nbQuadPt ][ fe_u.nbCoor ][ fe_u.nbCoor ];  // \grad u^k \grad d + [\grad d]^T[\grad u^k]^T  at each quadrature point
+    Real su, sd, s;
 
-  int icoor, jcoor, kcoor, ig, i;
+    int icoor, jcoor, kcoor, ig, i;
 
-  // loop on quadrature points
-  for(ig=0;ig<fe_u.nbQuadPt;ig++) {
+    // loop on quadrature points
+    for ( ig = 0;ig < fe_u.nbQuadPt;ig++ )
+    {
 
-    // loop on space coordinates
-    for(icoor=0;icoor<fe_u.nbCoor;icoor++) {
+        // loop on space coordinates
+        for ( icoor = 0;icoor < fe_u.nbCoor;icoor++ )
+        {
 
-      // loop  on space coordindates
-      for(jcoor=0;jcoor<fe_u.nbCoor;jcoor++) {
-	su = 0.0;
-	sd = 0.0;
-	for(i=0;i<fe_u.nbNode;i++) {
-	  su += fe_u.phiDer(i,jcoor,ig) * uk_loc.vec()[i+icoor*fe_u.nbNode]; //  \grad u^k at this quadrature point
-	  sd += fe_u.phiDer(i,jcoor,ig) * d_loc.vec()[i+icoor*fe_u.nbNode];  //  \grad d at this quadrature point
-	}
-	guk[icoor][jcoor] = su;
-       	gd[icoor][jcoor] = sd;
-      }
+            // loop  on space coordindates
+            for ( jcoor = 0;jcoor < fe_u.nbCoor;jcoor++ )
+            {
+                su = 0.0;
+                sd = 0.0;
+                for ( i = 0;i < fe_u.nbNode;i++ )
+                {
+                    su += fe_u.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe_u.nbNode ]; //  \grad u^k at this quadrature point
+                    sd += fe_u.phiDer( i, jcoor, ig ) * d_loc.vec() [ i + icoor * fe_u.nbNode ];  //  \grad d at this quadrature point
+                }
+                guk[ icoor ][ jcoor ] = su;
+                gd[ icoor ][ jcoor ] = sd;
+            }
+        }
+
+
+        for ( icoor = 0;icoor < fe_u.nbCoor;icoor++ )
+        {
+            for ( jcoor = 0;jcoor < fe_u.nbCoor;jcoor++ )
+            {
+                s = 0;
+                for ( kcoor = 0;kcoor < fe_u.nbCoor;kcoor++ )
+                    s += guk[ icoor ][ kcoor ] * gd[ kcoor ][ jcoor ] + gd[ kcoor ][ icoor ] * guk[ jcoor ][ kcoor ];
+                A[ ig ][ icoor ][ jcoor ] = s;
+            }
+        }
     }
 
+    //
+    // Numerical integration
+    //
+    // loop on coordinates, i.e. loop on elementary vector blocks
+    for ( icoor = 0;icoor < fe_u.nbCoor;icoor++ )
+    {
 
-    for(icoor=0;icoor<fe_u.nbCoor;icoor++) {
-      for(jcoor=0;jcoor<fe_u.nbCoor;jcoor++) {
-	s=0;
-	for(kcoor=0;kcoor<fe_u.nbCoor;kcoor++)
-	  s += guk[icoor][kcoor]*gd[kcoor][jcoor]  +  gd[kcoor][icoor]*guk[jcoor][kcoor];
-	A[ig][icoor][jcoor] = s;
-      }
+        Tab1dView vec = elvec.block( icoor );
+
+        // loop on nodes, i.e. loop on components of this block
+        for ( i = 0;i < fe_u.nbNode;i++ )
+        {
+
+            // loop on quadrature points
+            s = 0;
+            for ( ig = 0;ig < fe_u.nbQuadPt;ig++ )
+
+                for ( jcoor = 0;jcoor < fe_u.nbCoor;jcoor++ )
+                    s += fe_u.phiDer( i, jcoor, ig ) * A[ ig ][ icoor ][ jcoor ] * fe_u.weightDet( ig );
+            vec( i ) += coef * s;
+        }
     }
-  }
-
-  //
-  // Numerical integration
-  //
-  // loop on coordinates, i.e. loop on elementary vector blocks
-  for(icoor=0;icoor<fe_u.nbCoor;icoor++) {
-
-    Tab1dView vec = elvec.block(icoor);
-
-    // loop on nodes, i.e. loop on components of this block
-    for(i=0;i<fe_u.nbNode;i++){
-
-      // loop on quadrature points
-      s = 0;
-      for(ig=0;ig<fe_u.nbQuadPt;ig++)
-
-	for(jcoor=0;jcoor<fe_u.nbCoor;jcoor++)
-	  s += 	fe_u.phiDer(i,jcoor,ig)*A[ig][icoor][jcoor]*fe_u.weightDet(ig);
-      vec(i) += coef*s;
-    }
-  }
 }
 
 
@@ -1803,66 +2016,73 @@ void source_stress2(Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, Elem
 //
 // coef * (  (\grad u^k):[I\div d - (\grad d)^T] , q  ) for Newton FSI
 //
-void source_press(Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, ElemVec& elvec,
-		 const CurrentFE& fe_u, const CurrentFE& fe_p) {
+void source_press( Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, ElemVec& elvec,
+                   const CurrentFE& fe_u, const CurrentFE& fe_p )
+{
 
-  ASSERT_PRE(fe_u.hasFirstDeriv(),
-	     "source_stress needs at least the velocity shape fonctions first derivatives");
-  Real A[fe_u.nbCoor][fe_u.nbCoor];     //  I\div d - (\grad d)^T at a quadrature point
-  Real guk[fe_u.nbCoor][fe_u.nbCoor];   // \grad u^k at a quadrature point
-  Real aux[fe_u.nbQuadPt];              // grad u^k:[I\div d - (\grad d)^T] at each quadrature point
+    ASSERT_PRE( fe_u.hasFirstDeriv(),
+                "source_stress needs at least the velocity shape fonctions first derivatives" );
+    Real A[ fe_u.nbCoor ][ fe_u.nbCoor ];     //  I\div d - (\grad d)^T at a quadrature point
+    Real guk[ fe_u.nbCoor ][ fe_u.nbCoor ];   // \grad u^k at a quadrature point
+    Real aux[ fe_u.nbQuadPt ];              // grad u^k:[I\div d - (\grad d)^T] at each quadrature point
 
-  Real s, sA, sG;
-  int icoor, jcoor, ig, i;
+    Real s, sA, sG;
+    int icoor, jcoor, ig, i;
 
-
-  // loop on quadrature points
-  for(ig=0;ig<fe_u.nbQuadPt;ig++) {
-
-    // loop on space coordinates
-    for(icoor=0;icoor<fe_u.nbCoor;icoor++) {
-
-      // loop  on space coordinates
-      for(jcoor=0;jcoor<fe_u.nbCoor;jcoor++) {
-	sA = 0.0;
-	sG = 0.0;
-	for(i=0;i<fe_u.nbNode;i++) {
-	  sG += fe_u.phiDer(i,jcoor,ig) * uk_loc.vec()[i+icoor*fe_u.nbNode]; //  \grad u^k at a quadrature point
-	  sA -= fe_u.phiDer(i,icoor,ig) * d_loc.vec()[i+jcoor*fe_u.nbNode]; //  - (\grad d) ^T at a quadrature point
-	}
-	guk[icoor][jcoor] = sG;
-	A[icoor][jcoor]   = sA;
-      }
-    }
-
-    s=0.0;
-    for(jcoor=0;jcoor<fe_u.nbCoor;jcoor++)
-      s -= A[jcoor][jcoor];  // \div d at this quadrature point ( - trace( A ) )
-
-    for(jcoor=0;jcoor<fe_u.nbCoor;jcoor++)
-      A[jcoor][jcoor]+= s;  // I\div d - (\grad d)^T at this quadrature point
-
-    s = 0;
-    for(icoor=0;icoor<fe_u.nbCoor;icoor++)
-      for(jcoor=0;jcoor<fe_u.nbCoor;jcoor++)
-	s += guk[icoor][jcoor] * A[icoor][jcoor]; // \grad u^k : [I\div d - (\grad d)^T] at each quadrature point
-    aux[ig] = s;
-  }
-
-  //
-  // Numerical integration
-  //
-
-  // Loop on nodes, i.e. loop on elementary vector components
-  for(i=0;i<fe_p.nbNode;i++){
 
     // loop on quadrature points
-    s = 0;
-    for(ig=0;ig<fe_u.nbQuadPt;ig++) {
-      s += aux[ig] * fe_p.phi(i,ig) * fe_u.weightDet(ig);
+    for ( ig = 0;ig < fe_u.nbQuadPt;ig++ )
+    {
+
+        // loop on space coordinates
+        for ( icoor = 0;icoor < fe_u.nbCoor;icoor++ )
+        {
+
+            // loop  on space coordinates
+            for ( jcoor = 0;jcoor < fe_u.nbCoor;jcoor++ )
+            {
+                sA = 0.0;
+                sG = 0.0;
+                for ( i = 0;i < fe_u.nbNode;i++ )
+                {
+                    sG += fe_u.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe_u.nbNode ]; //  \grad u^k at a quadrature point
+                    sA -= fe_u.phiDer( i, icoor, ig ) * d_loc.vec() [ i + jcoor * fe_u.nbNode ]; //  - (\grad d) ^T at a quadrature point
+                }
+                guk[ icoor ][ jcoor ] = sG;
+                A[ icoor ][ jcoor ] = sA;
+            }
+        }
+
+        s = 0.0;
+        for ( jcoor = 0;jcoor < fe_u.nbCoor;jcoor++ )
+            s -= A[ jcoor ][ jcoor ];  // \div d at this quadrature point ( - trace( A ) )
+
+        for ( jcoor = 0;jcoor < fe_u.nbCoor;jcoor++ )
+            A[ jcoor ][ jcoor ] += s;  // I\div d - (\grad d)^T at this quadrature point
+
+        s = 0;
+        for ( icoor = 0;icoor < fe_u.nbCoor;icoor++ )
+            for ( jcoor = 0;jcoor < fe_u.nbCoor;jcoor++ )
+                s += guk[ icoor ][ jcoor ] * A[ icoor ][ jcoor ]; // \grad u^k : [I\div d - (\grad d)^T] at each quadrature point
+        aux[ ig ] = s;
     }
-    elvec.vec()[i] += coef*s;
-  }
+
+    //
+    // Numerical integration
+    //
+
+    // Loop on nodes, i.e. loop on elementary vector components
+    for ( i = 0;i < fe_p.nbNode;i++ )
+    {
+
+        // loop on quadrature points
+        s = 0;
+        for ( ig = 0;ig < fe_u.nbQuadPt;ig++ )
+        {
+            s += aux[ ig ] * fe_p.phi( i, ig ) * fe_u.weightDet( ig );
+        }
+        elvec.vec() [ i ] += coef * s;
+    }
 }
 
 
@@ -1870,239 +2090,260 @@ void source_press(Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, ElemVe
 /*! \function grad_Hdiv : compute
        - coef * \int_{current element} q_j * div w_i
                  where w_j is a vectorial H(div) basis function,
-		 and q_j is a L2 basis function.
+   and q_j is a L2 basis function.
 \param coef  : constant coefficient.
 \param elmat : (mixed) element matrix.
 \param fe_u  : current vectorial element (in H(div))
 \param fe_p  : current scalar element (in L2)
 \param iblock, \param jblock : subarray indexes where to store the integral just computed.
 */
-void grad_Hdiv(Real coef, ElemMat& elmat,const CurrentHdivFE& fe_u,
-              const CurrentFE& fe_p,int iblock,int jblock)
+void grad_Hdiv( Real coef, ElemMat& elmat, const CurrentHdivFE& fe_u,
+                const CurrentFE& fe_p, int iblock, int jblock )
 {
-  Tab2dView mat = elmat.block(iblock,jblock);
-  int ig,i,j;
-  Real sumdivphi;
-  for(i=0;i<fe_u.nbNode;i++){
-    for(j=0;j<fe_p.nbNode;j++){
-      sumdivphi  = 0;
-      for(ig=0;ig<fe_u.nbQuadPt;ig++){
-        sumdivphi -= fe_p.phi(j,ig)*fe_u.divPhi(i,ig)*fe_u.qr.weight(ig);
-        //! there is no jacobian because of property of Piola transformation
-      }
-      mat(i,j) += coef*sumdivphi;
+    Tab2dView mat = elmat.block( iblock, jblock );
+    int ig, i, j;
+    Real sumdivphi;
+    for ( i = 0;i < fe_u.nbNode;i++ )
+    {
+        for ( j = 0;j < fe_p.nbNode;j++ )
+        {
+            sumdivphi = 0;
+            for ( ig = 0;ig < fe_u.nbQuadPt;ig++ )
+            {
+                sumdivphi -= fe_p.phi( j, ig ) * fe_u.divPhi( i, ig ) * fe_u.qr.weight( ig );
+                //! there is no jacobian because of property of Piola transformation
+            }
+            mat( i, j ) += coef * sumdivphi;
+        }
     }
-  }
 }
 
 //----------------------------------------------------------------------
 /*! \function div_Hdiv : compute
        coef * \int_{current element} q_j * div w_i
                   where w_j is a vectorial H(div) basis function,
-		  and q_j is a scalar L2 basis function.
+    and q_j is a scalar L2 basis function.
 \param coef  : constant coefficient.
 \param elmat : (mixed) element matrix.
 \param fe_u  : current vectorial element (in H(div))
 \param fe_p  : current scalar element (in L2)
 \param iblock, \param jblock : subarray indexes where to store the integral just computed.
 */
-void div_Hdiv(Real coef, ElemMat& elmat,const CurrentHdivFE& fe_u,
-              const CurrentFE& fe_p,int iblock,int jblock)
+void div_Hdiv( Real coef, ElemMat& elmat, const CurrentHdivFE& fe_u,
+               const CurrentFE& fe_p, int iblock, int jblock )
 {
-  Tab2dView mat = elmat.block(iblock,jblock);
-  int ig,i,j;
-  Real sumdivphi;
-  for(i=0;i<fe_u.nbNode;i++){
-    for(j=0;j<fe_p.nbNode;j++){
-      sumdivphi  = 0;
-      for(ig=0;ig<fe_u.nbQuadPt;ig++){
-        sumdivphi += fe_p.phi(j,ig)*fe_u.divPhi(i,ig)*fe_u.qr.weight(ig);
-        //! there is no jacobian because of property of Piola transformation
-      }
-      mat(j,i) += coef*sumdivphi;
+    Tab2dView mat = elmat.block( iblock, jblock );
+    int ig, i, j;
+    Real sumdivphi;
+    for ( i = 0;i < fe_u.nbNode;i++ )
+    {
+        for ( j = 0;j < fe_p.nbNode;j++ )
+        {
+            sumdivphi = 0;
+            for ( ig = 0;ig < fe_u.nbQuadPt;ig++ )
+            {
+                sumdivphi += fe_p.phi( j, ig ) * fe_u.divPhi( i, ig ) * fe_u.qr.weight( ig );
+                //! there is no jacobian because of property of Piola transformation
+            }
+            mat( j, i ) += coef * sumdivphi;
+        }
     }
-  }
 }
 
 //----------------------------------------------------------------------
 /*! \function TP_VdotN_Hdiv : compute
-
+ 
        coef * \int_{BOUNDARY of current element} lambda_j * { w_i \cdot n }
-
+ 
                   where w_j is a vectorial H(div) basis function,
-		  and lambda_j are the Lagrange multiplier basis functions
-		  that enforce continuity of the normal component of
-		  the vectorial functions across two neighbouring elements.
-		  Interprated as trace of pressure... (TP)
-		  See Hybridization for Mixed Hybrid Finite Element Method.
-
-		  Thanks to the Piola transform, the computation is performed
-		  on the boundary of the REFERENCE Element. But in general, the
-		  boundary of a 3D Reference element is not a 2D Reference element.
-		  Example:
-		  REFERENCE TETRA -> 3 REFERENCE TRIA + 1 EQUILATERAL TRIANGLE...
-		  REFERENCE PRISM -> 2 TRIA + 3 QUAD...?
-		  REFERENCE HEXA  -> 6 REFERENCE QUAD.
-
-		  n : is the normal unit vector oriented outward of the current element.
-
+    and lambda_j are the Lagrange multiplier basis functions
+    that enforce continuity of the normal component of
+    the vectorial functions across two neighbouring elements.
+    Interprated as trace of pressure... (TP)
+    See Hybridization for Mixed Hybrid Finite Element Method.
+ 
+    Thanks to the Piola transform, the computation is performed
+    on the boundary of the REFERENCE Element. But in general, the
+    boundary of a 3D Reference element is not a 2D Reference element.
+    Example:
+    REFERENCE TETRA -> 3 REFERENCE TRIA + 1 EQUILATERAL TRIANGLE...
+    REFERENCE PRISM -> 2 TRIA + 3 QUAD...?
+    REFERENCE HEXA  -> 6 REFERENCE QUAD.
+ 
+    n : is the normal unit vector oriented outward of the current element.
+ 
 \param coef  : constant coefficient.
 \param elmat : (mixed) element matrix.
 \param tpfe  : reference lagrange multiplier element (for hybrid MFE)
 \param iblock, \param jblock : subarray indexes where to store the integral just computed.
 */
-void TP_VdotN_Hdiv(Real coef, ElemMat& elmat, const RefHybridFE& tpfe,
-		   const RefHybridFE& vdotnfe, int iblock,int jblock)
+void TP_VdotN_Hdiv( Real coef, ElemMat& elmat, const RefHybridFE& tpfe,
+                    const RefHybridFE& vdotnfe, int iblock, int jblock )
 {
-  //! previous way of construction (worked only for RTO hexa)
-  // TP_TP_Hdiv(coef, elmat, tpfe, iblock, jblock);
+    //! previous way of construction (worked only for RTO hexa)
+    // TP_TP_Hdiv(coef, elmat, tpfe, iblock, jblock);
 
-  Tab2dView mat = elmat.block(iblock,jblock);
-  Int ig,i,j, nbnode;
-  UInt nf;
-  Real tpvn;
-  // Real a[4] = {2./sqrt(3.),2,2,2};
+    Tab2dView mat = elmat.block( iblock, jblock );
+    Int ig, i, j, nbnode;
+    UInt nf;
+    Real tpvn;
+    // Real a[4] = {2./sqrt(3.),2,2,2};
 
-  for( nf = 0 ; nf < tpfe.nBdFE() ; nf ++ ){
-    //! use the static boundary element of the reference element.
-    const StaticBdFE &   bdtpfe = tpfe[ nf ];
- const StaticBdFE &   bdvdotnfe = vdotnfe[ nf ];
-    nbnode =  bdtpfe.nbNode;
+    for ( nf = 0 ; nf < tpfe.nBdFE() ; nf ++ )
+    {
+        //! use the static boundary element of the reference element.
+        const StaticBdFE & bdtpfe = tpfe[ nf ];
+        const StaticBdFE & bdvdotnfe = vdotnfe[ nf ];
+        nbnode = bdtpfe.nbNode;
 
-    for( i = 0 ; i < nbnode ; i ++ ){
-      for( j = 0 ; j < nbnode ; j ++ ){
-	tpvn = 0.;
-	for( ig = 0 ; ig < bdtpfe.nbQuadPt ; ig ++ )
-	  tpvn +=/*a[nf]*/ bdtpfe.phi(j , ig) * bdvdotnfe.phi(i , ig) * bdtpfe.weightMeas( ig );
-	//! using the Piola transform properties.
+        for ( i = 0 ; i < nbnode ; i ++ )
+        {
+            for ( j = 0 ; j < nbnode ; j ++ )
+            {
+                tpvn = 0.;
+                for ( ig = 0 ; ig < bdtpfe.nbQuadPt ; ig ++ )
+                    tpvn += /*a[nf]*/ bdtpfe.phi( j , ig ) * bdvdotnfe.phi( i , ig ) * bdtpfe.weightMeas( ig );
+                //! using the Piola transform properties.
 
-	//! Matrix : block diagonal. size of the blocks = bdfe.nbNode.
-	mat(nf * nbnode + i, nf * nbnode + j) += tpvn * coef;
-      }
+                //! Matrix : block diagonal. size of the blocks = bdfe.nbNode.
+                mat( nf * nbnode + i, nf * nbnode + j ) += tpvn * coef;
+            }
+        }
     }
-  }
 }
 
 //----------------------------------------------------------------------
 /*! \function TP_TP_Hdiv : compute
-
+ 
        coef * \int_{BOUNDARY of current element} lambda_j * lambda_i
-
+ 
                   where lambda_j are the Lagrange multiplier basis functions
-		  that enforce continuity of the normal component of
-		  the vectorial functions across two neighbouring elements.
-		  Interprated as trace of pressure... (TP)
-		  See Hybridization for Mixed Hybrid Finite Element Method.
-
-		  Thanks to the Piola transform, the computation is performed
-		  on the boundary of the REFERENCE Element. But in general, the
-		  boundary of a 3D Reference element is not a 2D Reference element.
-		  Example:
-		  REFERENCE TETRA -> 3 REFERENCE TRIA + 1 EQUILATERAL TRIANGLE...
-		  REFERENCE PRISM -> 2 TRIA + 3 QUAD...?
-		  REFERENCE HEXA  -> 6 REFERENCE QUAD.
-
-		  n : is the normal unit vector oriented outward of the current element.
-
+    that enforce continuity of the normal component of
+    the vectorial functions across two neighbouring elements.
+    Interprated as trace of pressure... (TP)
+    See Hybridization for Mixed Hybrid Finite Element Method.
+ 
+    Thanks to the Piola transform, the computation is performed
+    on the boundary of the REFERENCE Element. But in general, the
+    boundary of a 3D Reference element is not a 2D Reference element.
+    Example:
+    REFERENCE TETRA -> 3 REFERENCE TRIA + 1 EQUILATERAL TRIANGLE...
+    REFERENCE PRISM -> 2 TRIA + 3 QUAD...?
+    REFERENCE HEXA  -> 6 REFERENCE QUAD.
+ 
+    n : is the normal unit vector oriented outward of the current element.
+ 
 \param coef  : constant coefficient.
 \param elmat : (mixed) element matrix.
 \param tpfe  : reference lagrange multiplier element (for hybrid MFE)
 \param iblock, \param jblock : subarray indexes where to store the integral just computed.
 */
-void TP_TP_Hdiv(Real coef, ElemMat& elmat, const RefHybridFE& tpfe, int iblock,int jblock)
+void TP_TP_Hdiv( Real coef, ElemMat& elmat, const RefHybridFE& tpfe, int iblock, int jblock )
 {
-  Tab2dView mat = elmat.block(iblock,jblock);
-  Int ig,i,j, nbnode;
-  UInt nf;
-  Real tpvn;
+    Tab2dView mat = elmat.block( iblock, jblock );
+    Int ig, i, j, nbnode;
+    UInt nf;
+    Real tpvn;
 
-  for( nf = 0 ; nf < tpfe.nBdFE() ; nf ++ ){
-    //! use the static boundary element of the reference element.
-    const StaticBdFE &   bdfe = tpfe[ nf ];
-    nbnode =  bdfe.nbNode;
+    for ( nf = 0 ; nf < tpfe.nBdFE() ; nf ++ )
+    {
+        //! use the static boundary element of the reference element.
+        const StaticBdFE & bdfe = tpfe[ nf ];
+        nbnode = bdfe.nbNode;
 
-    for( i = 0 ; i < nbnode ; i ++ ){
-      for( j = 0 ; j < nbnode ; j ++ ){
-	tpvn = 0.;
-	for( ig = 0 ; ig < bdfe.nbQuadPt ; ig ++ )
-	  tpvn += bdfe.phi(j , ig) * bdfe.phi(i , ig) * bdfe.weightMeas( ig );
-	//! using the Piola transform properties.
+        for ( i = 0 ; i < nbnode ; i ++ )
+        {
+            for ( j = 0 ; j < nbnode ; j ++ )
+            {
+                tpvn = 0.;
+                for ( ig = 0 ; ig < bdfe.nbQuadPt ; ig ++ )
+                    tpvn += bdfe.phi( j , ig ) * bdfe.phi( i , ig ) * bdfe.weightMeas( ig );
+                //! using the Piola transform properties.
 
-	//! Matrix : block diagonal. size of the blocks = bdfe.nbNode.
-	mat(nf * nbnode + i, nf * nbnode + j) += tpvn * coef;
-      }
+                //! Matrix : block diagonal. size of the blocks = bdfe.nbNode.
+                mat( nf * nbnode + i, nf * nbnode + j ) += tpvn * coef;
+            }
+        }
     }
-  }
 }
 
 //----------------------------------------------------------------------
 /*! \function mass_Hdiv : compute
-
+ 
        coef *  \int_{current element} w_j * w_i
                   where w_j is a vectorial H(div) basis function
-
+ 
 Here the permeability matrix is a CONSTANT SCALAR tensor (i.e. = coef * Id).
-
+ 
 BEWARE  :   it is "coef" that is used (and NOT ITS INVERSE!!).
-
+ 
 \param coef  : constant coefficient.
 \param elmat : (mixed) element matrix.
 \param fe_u  : current vectorial element (in H(div))
 \param iblock, \param jblock : subarray indexes where to store the integral just computed.
 */
-void mass_Hdiv(Real coef, ElemMat& elmat,const CurrentHdivFE& fe,int iblock,int jblock)
+void mass_Hdiv( Real coef, ElemMat& elmat, const CurrentHdivFE& fe, int iblock, int jblock )
 {
-  Tab2dView mat = elmat.block(iblock,jblock);
-  int ig,i,j,icoor;
-  Real x;
-  for( j = 0 ; j < fe.nbNode ; j ++ ){
-    for( i = 0 ; i <  fe.nbNode/* by symmetry j+1 */ ; i ++ ){
-      x =0.;
-      for( ig = 0 ; ig < fe.nbQuadPt ; ig ++ ){
-        for( icoor = 0 ; icoor < fe.nbCoor ; icoor ++ ){
-          x += fe.phi( j , icoor , ig ) * fe.phi( i , icoor , ig ) * fe.weightDet( ig );
+    Tab2dView mat = elmat.block( iblock, jblock );
+    int ig, i, j, icoor;
+    Real x;
+    for ( j = 0 ; j < fe.nbNode ; j ++ )
+    {
+        for ( i = 0 ; i < fe.nbNode /* by symmetry j+1 */ ; i ++ )
+        {
+            x = 0.;
+            for ( ig = 0 ; ig < fe.nbQuadPt ; ig ++ )
+            {
+                for ( icoor = 0 ; icoor < fe.nbCoor ; icoor ++ )
+                {
+                    x += fe.phi( j , icoor , ig ) * fe.phi( i , icoor , ig ) * fe.weightDet( ig );
+                }
+            }
+            //! coef is the inverse of the permeability
+            mat( i, j ) += x * coef;
         }
-      }
-      //! coef is the inverse of the permeability
-      mat(i,j) += x * coef;
     }
-  }
 }
 
 //----------------------------------------------------------------------
 /*! \function mass_Hdiv : compute
   \int_{current element} ((Invperm* w_j) * w_i
   where w_j is a vectorial H(div) basis function
-
+ 
   Here the permeability matrix "Invperm" is a CONSTANT symmetric positive definite
   matrix (NON DIAGONAL a priori). The matrix is constant over the
   whole current element and is already inverted by LU or Choleski Lapack.
-
+ 
   \param Invperm : constant coefficient TENSOR. (CONSTANT over the current element).
   \param elmat   : (mixed) element matrix.
   \param fe      : current vectorial element (in H(div))
   \param iblock, \param jblock : subarray indexes where to store the integral just computed.
 */
-void mass_Hdiv(KNM<Real>& Invperm, ElemMat& elmat, const CurrentHdivFE& fe,
-	       int iblock, int jblock)
+void mass_Hdiv( KNM<Real>& Invperm, ElemMat& elmat, const CurrentHdivFE& fe,
+                int iblock, int jblock )
 {
-  Tab2dView mat = elmat.block(iblock,jblock);
-  int ig,i,j,icoor,jcoor;
-  Real x;
-  for( j = 0 ; j < fe.nbNode ; j ++ ){
-    for( i = 0 ; i <  fe.nbNode/* by symmetry j+1 */ ; i ++ ){
-      x =0.;
-      for( ig = 0 ; ig < fe.nbQuadPt ; ig ++ ){
-        for( icoor = 0 ; icoor < fe.nbCoor ; icoor ++ ){
-	  for( jcoor = 0 ; jcoor < fe.nbCoor ; jcoor ++ ){
-	    //! Invperm is the inverse of the permeability
-	    x += Invperm(icoor,jcoor) * fe.phi( j, jcoor, ig ) * fe.phi( i, icoor, ig ) * fe.weightDet(ig);
-	  }
-	}
-      }
-      mat(i,j) += x ;
+    Tab2dView mat = elmat.block( iblock, jblock );
+    int ig, i, j, icoor, jcoor;
+    Real x;
+    for ( j = 0 ; j < fe.nbNode ; j ++ )
+    {
+        for ( i = 0 ; i < fe.nbNode /* by symmetry j+1 */ ; i ++ )
+        {
+            x = 0.;
+            for ( ig = 0 ; ig < fe.nbQuadPt ; ig ++ )
+            {
+                for ( icoor = 0 ; icoor < fe.nbCoor ; icoor ++ )
+                {
+                    for ( jcoor = 0 ; jcoor < fe.nbCoor ; jcoor ++ )
+                    {
+                        //! Invperm is the inverse of the permeability
+                        x += Invperm( icoor, jcoor ) * fe.phi( j, jcoor, ig ) * fe.phi( i, icoor, ig ) * fe.weightDet( ig );
+                    }
+                }
+            }
+            mat( i, j ) += x ;
+        }
     }
-  }
 }
 
 
@@ -2110,51 +2351,55 @@ void mass_Hdiv(KNM<Real>& Invperm, ElemMat& elmat, const CurrentHdivFE& fe,
 /*! \function mass_Hdiv : compute
   \int_{current element} ((Invperm* w_j) * w_i
   where w_j is a vectorial H(div) basis function
-
+ 
   Here the permeability is a NON-CONSTANT scalar function
   whose inverse is "Invperm".
-
+ 
   We note again that it is the inverse of the permeability that
   is provided directly (Invperm = K^{-1}).
-
+ 
   \param Invperm : scalar function inverse of the permeability.
   \param elmat   : (mixed) element matrix.
   \param fe      : current vectorial element (in H(div))
   \param iblock, \param jblock : subarray indexes where to store the integral just computed.
 */
-void mass_Hdiv(Real (*Invperm)(const Real&, const Real&,const Real&),
-	       ElemMat& elmat,const CurrentHdivFE& fe,int iblock,int jblock)
+void mass_Hdiv( Real ( *Invperm ) ( const Real&, const Real&, const Real& ),
+                ElemMat& elmat, const CurrentHdivFE& fe, int iblock, int jblock )
 {
-  Tab2dView mat = elmat.block(iblock,jblock);
-  int ig,i,j,icoor;
-  Real intg,x,y,z;
-  for( j = 0 ; j < fe.nbNode ; j ++ ){
-    for( i = 0 ; i <  fe.nbNode/* by symmetry j+1 */ ; i ++ ){
-      intg =0.;
-      for( ig = 0 ; ig < fe.nbQuadPt ; ig ++ ){
-        fe.coorQuadPt(x,y,z,ig);
-        for( icoor = 0 ; icoor < fe.nbCoor ; icoor ++ ){
-          //! caution inverse of the permeability
-          intg += 1. * Invperm(x,y,z) * fe.phi( j , icoor , ig )
-	    * fe.phi( i , icoor , ig ) * fe.weightDet( ig );
+    Tab2dView mat = elmat.block( iblock, jblock );
+    int ig, i, j, icoor;
+    Real intg, x, y, z;
+    for ( j = 0 ; j < fe.nbNode ; j ++ )
+    {
+        for ( i = 0 ; i < fe.nbNode /* by symmetry j+1 */ ; i ++ )
+        {
+            intg = 0.;
+            for ( ig = 0 ; ig < fe.nbQuadPt ; ig ++ )
+            {
+                fe.coorQuadPt( x, y, z, ig );
+                for ( icoor = 0 ; icoor < fe.nbCoor ; icoor ++ )
+                {
+                    //! caution inverse of the permeability
+                    intg += 1. * Invperm( x, y, z ) * fe.phi( j , icoor , ig )
+                            * fe.phi( i , icoor , ig ) * fe.weightDet( ig );
+                }
+            }
+            mat( i, j ) += intg;
         }
-      }
-      mat(i,j) += intg;
     }
-  }
 }
 
 /*
   \int_{current element} w_j * w_i where w_j is a H(div) basis function.
-
+ 
   Here the permeability matrix is a NON-CONSTANT symmetric positive definite
   matrix (NON DIAGONAL a priori).
 */
 
 /*
-
+ 
 TO BE DONE LATER... IN ELEMOPER.H
-
+ 
 void mass_Hdiv(KNM<Real> &Kperm, ElemMat& elmat, const CurrentHdivFE& fe,
 int iblock=0, int jblock=0)
 {
@@ -2165,14 +2410,14 @@ int iblock=0, int jblock=0)
   KN<Real> b(fe.nbCoor);
   KN<Real> x(fe.nbCoor);
   KN<Real> y(fe.nbCoor);
-
+ 
   for(int j=0;j<fe.nbNode;j++){
     for(int i=0;i<fe.nbNode;i++){
       s =0.;
       for(int ig=0;ig<fe.nbQuadPt;ig++){
         choldc(Kperm, p);
-	for(int lcoor=0;lcoor<fe.nbCoor;lcoor++){
-	b(lcoor) = fe.phi(j,lcoor,ig);
+ for(int lcoor=0;lcoor<fe.nbCoor;lcoor++){
+ b(lcoor) = fe.phi(j,lcoor,ig);
         }
         cholsl(Kperm,p, b, y);
         for(int icoor=0;icoor<fe.nbCoor;icoor++){
@@ -2186,60 +2431,73 @@ int iblock=0, int jblock=0)
 */
 
 
-void mass_Mixed_Hdiv(Real coef, ElemMat& elmat,const CurrentFE& fe,
-		     const CurrentHdivFE& hdivfe,int iblock,int jblock)
+void mass_Mixed_Hdiv( Real coef, ElemMat& elmat, const CurrentFE& fe,
+                      const CurrentHdivFE& hdivfe, int iblock, int jblock )
 {
-  // to be improved: symmetry not used
-  Real x;
-  for(int icoor = 0;icoor < fe.nbCoor; icoor ++){
-    Tab2dView mat = elmat.block(iblock+icoor,jblock);
-    for(int j = 0 ; j < hdivfe.nbNode ; j ++ ){
-      for(int i = 0 ; i <  fe.nbNode ; i ++ ){
-	x =0.;
-	for(int ig = 0 ; ig < fe.nbQuadPt ; ig ++ ){
-	  x += hdivfe.phi( j , icoor , ig )*fe.phi( i , ig )*fe.weightDet( ig );
-	}
-	mat(i,j) += coef*x;
-      }
+    // to be improved: symmetry not used
+    Real x;
+    for ( int icoor = 0;icoor < fe.nbCoor; icoor ++ )
+    {
+        Tab2dView mat = elmat.block( iblock + icoor, jblock );
+        for ( int j = 0 ; j < hdivfe.nbNode ; j ++ )
+        {
+            for ( int i = 0 ; i < fe.nbNode ; i ++ )
+            {
+                x = 0.;
+                for ( int ig = 0 ; ig < fe.nbQuadPt ; ig ++ )
+                {
+                    x += hdivfe.phi( j , icoor , ig ) * fe.phi( i , ig ) * fe.weightDet( ig );
+                }
+                mat( i, j ) += coef * x;
+            }
+        }
     }
-  }
 }
 
 
 //
 //Cholesky decomposition
-void choldc(KNM<Real> &a, KN<Real> &p)
+void choldc( KNM<Real> &a, KN<Real> &p )
 {
-  int i,j,k;
-  Real sum;
+    int i, j, k;
+    Real sum;
 
-  int n = a.N();
-  for (i=0;i<n;i++) {
-    for (j=i;j<n;j++) {
-      for (sum=a(i,j),k=i-1;k>=0;k--) sum -= a(i,k)*a(j,k);
-      if (i == j) {
-        p(i)=sqrt(sum);
-      }
-      else a(j,i)=sum/p(i);
+    int n = a.N();
+    for ( i = 0;i < n;i++ )
+    {
+        for ( j = i;j < n;j++ )
+        {
+            for ( sum = a( i, j ), k = i - 1;k >= 0;k-- )
+                sum -= a( i, k ) * a( j, k );
+            if ( i == j )
+            {
+                p( i ) = sqrt( sum );
+            }
+            else
+                a( j, i ) = sum / p( i );
+        }
     }
-  }
 }
 //
 //Cholesky solution
-void cholsl(KNM<Real> &a,  KN<Real> &p,  KN<Real> &b, KN<Real> &x)
+void cholsl( KNM<Real> &a, KN<Real> &p, KN<Real> &b, KN<Real> &x )
 {
-   int i,k;
-   Real sum;
+    int i, k;
+    Real sum;
 
-   int n = a.N();
-   for (i=0;i<n;i++){
-     for (sum=b(i),k=i-1;k>=0;k--) sum -= a(i,k)*x(k);
-          x(i) = sum/p(i);
-   }
-   for (i=n-1;i>=0;i--){
-     for (sum = x(i), k=i+1;k<n;k++) sum -= a(k,i)*x(k);
-     x(i)= sum/p(i);
-   }
+    int n = a.N();
+    for ( i = 0;i < n;i++ )
+    {
+        for ( sum = b( i ), k = i - 1;k >= 0;k-- )
+            sum -= a( i, k ) * x( k );
+        x( i ) = sum / p( i );
+    }
+    for ( i = n - 1;i >= 0;i-- )
+    {
+        for ( sum = x( i ), k = i + 1;k < n;k++ )
+            sum -= a( k, i ) * x( k );
+        x( i ) = sum / p( i );
+    }
 }
 
 
