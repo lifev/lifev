@@ -93,11 +93,13 @@ public:
     void getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u );
 
     //! Calculate the volume of a tetrahedra given by its corner nodes
-    Real calcvol( Real x[ 4 ], Real y[ 4 ], Real z[ 4 ] );
+    Real calcvol( SimpleVect<GeoElement0D<DefMarkerCommon> > points  );
 
     //! tests if point (xp, yp, zp) is in the tetrahedra (x[4], y[4], z[4]) and returns
     //! interpolation coefficents (1-b1-b2-b3, b1, b2, b3)
-    int test( Real x[ 4 ], Real y[ 4 ], Real z[ 4 ], Real & xp, Real & yp, Real & zp, Real & b1, Real & b2, Real & b3 );
+      void test( SimpleVect<GeoElement0D<DefMarkerCommon> > points_tet, SimpleVect<GeoElement0D<DefMarkerCommon> > point, Real & b1, Real & b2, Real & b3 );
+    template <typename RegionMesh3D>
+    void checkallvolumes( RegionMesh3D & umesh, SimpleVect<GeoElement0D<DefMarkerCommon> > point, Real & b1r, Real & b2r, Real & b3r );
 
 protected:
 
@@ -192,6 +194,7 @@ ConvDiffReactSolverPC( const GetPot& data_file, const RefFE& refFE_c, const Quad
         if ( _stationary )
         {
             mass( ( -_react ), _elmatMR_c, _fe_c );
+            abort();
         }
         else
         {
@@ -391,7 +394,7 @@ iterate( const Real& time )
     AZ_solve( _c.giveVec(), _f_c.giveVec(), options_o, params_o, NULL,
               ( int * ) _pattM.giveRaw_bindx(), NULL, NULL, NULL,
               _CDR.giveRaw_value(), data_org_o, status_o, proc_config_o );
-    //
+    
     chrono.stop();
     std::cout << "*** Solution (Concentration) computed in " << chrono.diff() << "s." << std::endl;
     _bdf.shift_right( _c );
@@ -406,18 +409,13 @@ void ConvDiffReactSolverPC<Mesh>::
 getvel( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u, const Real& time )
 {
 
-    //   for (UInt j=0; j<3; j++){
-    //       for(UInt i=0; i< _dim_c; i++){
-    //   _u_c(i+j*_dim_c)=u(i+j*u.size()/3);
-    //       }}
 
     for ( UInt i = 0; i < _mesh.numVertices(); i++ )
     {
 
-
         if ( _u_to_c[ i ].ele == 0 )
         {
-            // Dirichlet boundary for the velocity -> get velocity for boundary function
+       // Dirichlet boundary for the velocity -> get velocity for boundary function
             Real xp = _mesh.point( i + 1 ).x();
             Real yp = _mesh.point( i + 1 ).y();
             Real zp = _mesh.point( i + 1 ).z();
@@ -427,7 +425,7 @@ getvel( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u, con
         }
         else
         {
-            // Velocity interpolation
+       // Velocity interpolation
             _u_c( i ) = _u_to_c[ i ].b[ 0 ] * u( umesh.volume( _u_to_c[ i ].ele ).point( 1 ).id() - 1 ) +
                         _u_to_c[ i ].b[ 1 ] * u( umesh.volume( _u_to_c[ i ].ele ).point( 2 ).id() - 1 ) +
                         _u_to_c[ i ].b[ 2 ] * u( umesh.volume( _u_to_c[ i ].ele ).point( 3 ).id() - 1 ) +
@@ -442,6 +440,7 @@ getvel( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u, con
                                      _u_to_c[ i ].b[ 1 ] * u( umesh.volume( _u_to_c[ i ].ele ).point( 2 ).id() - 1 + 2 * u.size() / 3 ) +
                                      _u_to_c[ i ].b[ 2 ] * u( umesh.volume( _u_to_c[ i ].ele ).point( 3 ).id() - 1 + 2 * u.size() / 3 ) +
                                      _u_to_c[ i ].b[ 3 ] * u( umesh.volume( _u_to_c[ i ].ele ).point( 4 ).id() - 1 + 2 * u.size() / 3 );
+
         }
 
 
@@ -463,22 +462,21 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
 
     _u_c = ScalarVector( _u_c.size(), -100 );
 
-    Real x[ 4 ], y[ 4 ], z[ 4 ], xt[ 4 ], yt[ 4 ], zt[ 4 ];
-    UInt vid, i1, i2, i3, v1, v2, v3, v4;
+    UInt vid, adjacent, minadjacent;
     LinearTetra ele;
+
+    SimpleVect<GeoElement0D<DefMarkerCommon> > tetrapoints, tetrapoints_found;
+    tetrapoints.resize( 4 );
+    tetrapoints_found.resize( 4 );
 
     SimpleVect<GeoElement3D<LinearTetra> >::iterator iv = umesh.volumeList.begin();
 
-    for ( UInt i = 0; i < _mesh.numVertices(); i++ )
+   for ( UInt i = 0; i < _mesh.numVertices(); i++ )
     {
-
-        x[ 0 ] = _mesh.point( i + 1 ).x();
-        y[ 0 ] = _mesh.point( i + 1 ).y();
-        z[ 0 ] = _mesh.point( i + 1 ).z();
+	tetrapoints( 1 ) = _mesh.point( i + 1 );
 
         if ( _mesh.point( i + 1 ).boundary() )
         {
-
             UInt l;
 
             for ( UInt k = 0; k < BCh_u.size(); k++ )
@@ -500,89 +498,85 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
                 _u_to_c.push_back( localcoord );
                 break;
             default:
-                for ( Int found = 0;found == 0; )
+            for ( Int found = 0;found == 0; )
+            {
+                vid = iv -> id();
+                Real volume, minvolume = 100.0, minminvolume = 100.0;
+                UInt jk = UInt( -1 );
+                for ( UInt jj = 1; jj <= umesh.numLocalFaces();jj++ )
                 {
-                    vid = iv -> id();
-                    Real volume[ umesh.numLocalFaces() ], minvolume = 100.0;
-                    UInt jk = UInt( -1 ); // initialized to max UInt+1 (trick for debugging if needed )
-                    for ( UInt jj = 1; jj <= umesh.numLocalFaces();jj++ )
-                    {
-                        i1 = ele.fToP( jj, 1 );
-                        i2 = ele.fToP( jj, 2 );
-                        i3 = ele.fToP( jj, 3 );
 
-                        i1 = ( iv->point( i1 ) ).id();
-                        i2 = ( iv->point( i2 ) ).id();
-                        i3 = ( iv->point( i3 ) ).id();
+		    tetrapoints( 2 ) = umesh.point( ( iv->point( ele.fToP( jj, 1 ) ) ).id() );
+		    tetrapoints( 3 ) = umesh.point( ( iv->point( ele.fToP( jj, 2 ) ) ).id() );
+		    tetrapoints( 4 ) = umesh.point( ( iv->point( ele.fToP( jj, 3 ) ) ).id() );
+		    volume = calcvol( tetrapoints );
 
-                        x[ 1 ] = umesh.point( i1 ).x();
-                        x[ 2 ] = umesh.point( i2 ).x();
-                        x[ 3 ] = umesh.point( i3 ).x();
-                        y[ 1 ] = umesh.point( i1 ).y();
-                        y[ 2 ] = umesh.point( i2 ).y();
-                        y[ 3 ] = umesh.point( i3 ).y();
-                        z[ 1 ] = umesh.point( i1 ).z();
-                        z[ 2 ] = umesh.point( i2 ).z();
-                        z[ 3 ] = umesh.point( i3 ).z();
-                        volume[ jj-1 ] = calcvol( x, y, z );	
-                        if ( volume[ jj-1 ] < minvolume )
-                        {
-                            minvolume = volume[ jj-1 ];	 
-                            jk = jj;
-                        }
-                    }
-                    if ( minvolume < -0.0000000001 )
-                    {
-                        if ( umesh.faceList( umesh.localFaceId( vid, jk ) ).ad_first() == vid )
-                        {
-                            iv = iv + umesh.faceList( umesh.localFaceId( vid, jk ) ).ad_second() - vid;
-                        }
+                        if ( umesh.faceList( umesh.localFaceId( vid, jj ) ).ad_first() == vid )
+                            {
+                                adjacent = umesh.faceList( umesh.localFaceId( vid, jj ) ).ad_second();
+                            }
                         else
-                        {
-                            iv = iv + umesh.faceList( umesh.localFaceId( vid, jk ) ).ad_first() - vid;
-                        }
-                    }
-                    else
-                    {
-                        found = 1;
-                        v1 = ( iv->point( 1 ) ).id();
-                        v2 = ( iv->point( 2 ) ).id();
-                        v3 = ( iv->point( 3 ) ).id();
-                        v4 = ( iv->point( 4 ) ).id();
-                        xt[ 0 ] = umesh.point( v1 ).x();
-                        yt[ 0 ] = umesh.point( v1 ).y();
-                        zt[ 0 ] = umesh.point( v1 ).z();
-                        xt[ 1 ] = umesh.point( v2 ).x();
-                        yt[ 1 ] = umesh.point( v2 ).y();
-                        zt[ 1 ] = umesh.point( v2 ).z();
-                        xt[ 2 ] = umesh.point( v3 ).x();
-                        yt[ 2 ] = umesh.point( v3 ).y();
-                        zt[ 2 ] = umesh.point( v3 ).z();
-                        xt[ 3 ] = umesh.point( v4 ).x();
-                        yt[ 3 ] = umesh.point( v4 ).y();
-                        zt[ 3 ] = umesh.point( v4 ).z();
+                            {
+                                adjacent = umesh.faceList( umesh.localFaceId( vid, jj ) ).ad_first();
+                            }
 
-                        if ( test( xt, yt, zt, x[ 0 ], y[ 0 ], z[ 0 ], b1, b2, b3 ) )
+                       if (volume < minminvolume)
                         {
-                            localcoord.b[ 0 ] = 1.0 - b1 - b2 - b3;
-                            localcoord.b[ 1 ] = b1;
-                            localcoord.b[ 2 ] = b2;
-                            localcoord.b[ 3 ] = b3;
-                            localcoord.ele = vid;
-                            _u_to_c.push_back( localcoord );
-                        }
-                        else
+			   minminvolume = volume;
+			}
+                       if (volume < minvolume)
                         {
-                            localcoord.b[ 0 ] = 1.0 - b1 - b2 - b3;
-                            localcoord.b[ 1 ] = b1;
-                            localcoord.b[ 2 ] = b2;
-                            localcoord.b[ 3 ] = b3;
-                            localcoord.ele = vid;
-                            _u_to_c.push_back( localcoord );
+                            if (adjacent != 0) 
+                                {
+                                    minvolume = volume;
+                                    minadjacent=adjacent;
+                                    jk = jj;
+                                }
                         }
+		}
+
+                if ( minvolume < -1.0e-15 )
+                    {
+                        iv = iv + minadjacent - vid;
                     }
-                }
-                break;
+
+                else
+                    {
+                        if(minminvolume < -1.0e-15)
+                            {
+                                found = 1;
+                                checkallvolumes( umesh, tetrapoints, b1, b2, b3 );
+                                localcoord.b[ 0 ] = 1.0 - b1 - b2 - b3;
+                                localcoord.b[ 1 ] = b1;
+                                localcoord.b[ 2 ] = b2;
+                                localcoord.b[ 3 ] = b3;
+                                localcoord.ele = vid;
+                                _u_to_c.push_back( localcoord );
+                              
+                            }
+                        else
+                            {
+
+                                found = 1;
+				tetrapoints_found( 1 ) = umesh.point( ( iv->point( 1 ) ).id() );
+				tetrapoints_found( 2 ) = umesh.point( ( iv->point( 2 ) ).id() );
+				tetrapoints_found( 3 ) = umesh.point( ( iv->point( 3 ) ).id() );
+				tetrapoints_found( 4 ) = umesh.point( ( iv->point( 4 ) ).id() );
+
+				test( tetrapoints_found, tetrapoints, b1, b2, b3 );
+                               
+                                localcoord.b[ 0 ] = 1.0 - b1 - b2 - b3;
+                                localcoord.b[ 1 ] = b1;
+                                localcoord.b[ 2 ] = b2;
+                                localcoord.b[ 3 ] = b3;
+                                localcoord.ele = vid;
+                                _u_to_c.push_back( localcoord );
+                               
+                            }
+                    }
+	    }
+
+                   break;
             }
         }
         else
@@ -590,87 +584,83 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
             for ( Int found = 0;found == 0; )
             {
                 vid = iv -> id();
-                Real volume[ umesh.numLocalFaces() ], minvolume = 100.0;
+                Real volume, minvolume = 100.0, minminvolume = 100.0;
                 UInt jk = UInt( -1 );
                 for ( UInt jj = 1; jj <= umesh.numLocalFaces();jj++ )
                 {
-                    i1 = ele.fToP( jj, 1 );
-                    i2 = ele.fToP( jj, 2 );
-                    i3 = ele.fToP( jj, 3 );
 
-                    i1 = ( iv->point( i1 ) ).id();
-                    i2 = ( iv->point( i2 ) ).id();
-                    i3 = ( iv->point( i3 ) ).id();
+		    tetrapoints( 2 ) = umesh.point( ( iv->point( ele.fToP( jj, 1 ) ) ).id() );
+		    tetrapoints( 3 ) = umesh.point( ( iv->point( ele.fToP( jj, 2 ) ) ).id() );
+		    tetrapoints( 4 ) = umesh.point( ( iv->point( ele.fToP( jj, 3 ) ) ).id() );
+		    volume = calcvol( tetrapoints );
 
-                    x[ 1 ] = umesh.point( i1 ).x();
-                    x[ 2 ] = umesh.point( i2 ).x();
-                    x[ 3 ] = umesh.point( i3 ).x();
-                    y[ 1 ] = umesh.point( i1 ).y();
-                    y[ 2 ] = umesh.point( i2 ).y();
-                    y[ 3 ] = umesh.point( i3 ).y();
-                    z[ 1 ] = umesh.point( i1 ).z();
-                    z[ 2 ] = umesh.point( i2 ).z();
-                    z[ 3 ] = umesh.point( i3 ).z();
-                    volume[ jj-1 ] = calcvol( x, y, z );	
-                    if ( volume[ jj-1 ] < minvolume )	
-                    {
-                        minvolume = volume[ jj-1 ];
-                        jk = jj;
-                    }
+                        if ( umesh.faceList( umesh.localFaceId( vid, jj ) ).ad_first() == vid )
+                            {
+                                adjacent = umesh.faceList( umesh.localFaceId( vid, jj ) ).ad_second();
+                            }
+                        else
+                            {
+                                adjacent = umesh.faceList( umesh.localFaceId( vid, jj ) ).ad_first();
+                            }
+
+                       if (volume < minminvolume)
+                        {
+			   minminvolume = volume;
+			}
+                       if (volume < minvolume)
+                        {
+                            if (adjacent != 0) 
+                                {
+                                    minvolume = volume;
+                                    minadjacent=adjacent;
+                                    jk = jj;
+                                }
+                        }
+
+
                 }
-                if ( minvolume < -0.00000001 )
-                {
-                    if ( umesh.faceList( umesh.localFaceId( vid, jk ) ).ad_first() == vid )
+
+                if ( minvolume < -1.0e-15 )
                     {
-                        iv = iv + umesh.faceList( umesh.localFaceId( vid, jk ) ).ad_second() - vid;
+                        iv = iv + minadjacent - vid;
                     }
-                    else
-                    {
-                        iv = iv + umesh.faceList( umesh.localFaceId( vid, jk ) ).ad_first() - vid;
-                    }
-                }
+
                 else
-                {
-                    found = 1;
-                    v1 = ( iv->point( 1 ) ).id();
-                    v2 = ( iv->point( 2 ) ).id();
-                    v3 = ( iv->point( 3 ) ).id();
-                    v4 = ( iv->point( 4 ) ).id();
-                    xt[ 0 ] = umesh.point( v1 ).x();
-                    yt[ 0 ] = umesh.point( v1 ).y();
-                    zt[ 0 ] = umesh.point( v1 ).z();
-                    xt[ 1 ] = umesh.point( v2 ).x();
-                    yt[ 1 ] = umesh.point( v2 ).y();
-                    zt[ 1 ] = umesh.point( v2 ).z();
-                    xt[ 2 ] = umesh.point( v3 ).x();
-                    yt[ 2 ] = umesh.point( v3 ).y();
-                    zt[ 2 ] = umesh.point( v3 ).z();
-                    xt[ 3 ] = umesh.point( v4 ).x();
-                    yt[ 3 ] = umesh.point( v4 ).y();
-                    zt[ 3 ] = umesh.point( v4 ).z();
+                    {
+                        if(minminvolume < -1.0e-15)
+                            {
+                                found = 1;
+                                checkallvolumes( umesh, tetrapoints, b1, b2, b3 );
+                                localcoord.b[ 0 ] = 1.0 - b1 - b2 - b3;
+                                localcoord.b[ 1 ] = b1;
+                                localcoord.b[ 2 ] = b2;
+                                localcoord.b[ 3 ] = b3;
+                                localcoord.ele = vid;
+                                _u_to_c.push_back( localcoord );
+                              
+                            }
+                        else
+                            {
+                                found = 1;
+				tetrapoints_found( 1 ) = umesh.point( ( iv->point( 1 ) ).id() );
+				tetrapoints_found( 2 ) = umesh.point( ( iv->point( 2 ) ).id() );
+				tetrapoints_found( 3 ) = umesh.point( ( iv->point( 3 ) ).id() );
+				tetrapoints_found( 4 ) = umesh.point( ( iv->point( 4 ) ).id() );
 
-                    if ( test( xt, yt, zt, x[ 0 ], y[ 0 ], z[ 0 ], b1, b2, b3 ) )
-                    {
-                        localcoord.b[ 0 ] = 1.0 - b1 - b2 - b3;
-                        localcoord.b[ 1 ] = b1;
-                        localcoord.b[ 2 ] = b2;
-                        localcoord.b[ 3 ] = b3;
-                        localcoord.ele = vid;
-                        _u_to_c.push_back( localcoord );
+				test( tetrapoints_found, tetrapoints, b1, b2, b3 );
+                               
+                                localcoord.b[ 0 ] = 1.0 - b1 - b2 - b3;
+                                localcoord.b[ 1 ] = b1;
+                                localcoord.b[ 2 ] = b2;
+                                localcoord.b[ 3 ] = b3;
+                                localcoord.ele = vid;
+                                _u_to_c.push_back( localcoord );
+                               
+                            }
                     }
-                    else
-                    {
-                        localcoord.b[ 0 ] = 1.0 - b1 - b2 - b3;
-                        localcoord.b[ 1 ] = b1;
-                        localcoord.b[ 2 ] = b2;
-                        localcoord.b[ 3 ] = b3;
-                        localcoord.ele = vid;
-                        _u_to_c.push_back( localcoord );
-                    }
-                }
             }
-        }
 
+        }
     }
 
     chrono.stop();
@@ -680,40 +670,40 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
 
 template <typename Mesh>
 Real ConvDiffReactSolverPC<Mesh>::
-calcvol( Real x[ 4 ], Real y[ 4 ], Real z[ 4 ] )
+calcvol( SimpleVect<GeoElement0D<DefMarkerCommon> > points  )
 {
     Real volume = 0.0;
-    volume += ( ( x[ 1 ] - x[ 2 ] ) * ( y[ 1 ] - y[ 3 ] ) * ( z[ 1 ] - z[ 0 ] ) );
-    volume += ( ( y[ 1 ] - y[ 2 ] ) * ( z[ 1 ] - z[ 3 ] ) * ( x[ 1 ] - x[ 0 ] ) );
-    volume += ( ( z[ 1 ] - z[ 2 ] ) * ( x[ 1 ] - x[ 3 ] ) * ( y[ 1 ] - y[ 0 ] ) );
-    volume -= ( ( x[ 1 ] - x[ 0 ] ) * ( y[ 1 ] - y[ 3 ] ) * ( z[ 1 ] - z[ 2 ] ) );
-    volume -= ( ( y[ 1 ] - y[ 0 ] ) * ( z[ 1 ] - z[ 3 ] ) * ( x[ 1 ] - x[ 2 ] ) );
-    volume -= ( ( z[ 1 ] - z[ 0 ] ) * ( x[ 1 ] - x[ 3 ] ) * ( y[ 1 ] - y[ 2 ] ) );
+    volume += ( ( points(2).x() - points(3).x() ) * ( points(2).y() - points(4).y() ) * ( points(2).z() - points(1).z() ) );
+    volume += ( ( points(2).y() - points(3).y() ) * ( points(2).z() - points(4).z() ) * ( points(2).x() - points(1).x() ) );
+    volume += ( ( points(2).z() - points(3).z() ) * ( points(2).x() - points(4).x() ) * ( points(2).y() - points(1).y() ) );
+    volume -= ( ( points(2).x() - points(1).x() ) * ( points(2).y() - points(4).y() ) * ( points(2).z() - points(3).z() ) );
+    volume -= ( ( points(2).y() - points(1).y() ) * ( points(2).z() - points(4).z() ) * ( points(2).x() - points(3).x() ) );
+    volume -= ( ( points(2).z() - points(1).z() ) * ( points(2).x() - points(4).x() ) * ( points(2).y() - points(3).y() ) );
     return volume;
 }
 
 
+
 template <typename Mesh>
-int ConvDiffReactSolverPC<Mesh>::
-test( Real x[ 4 ], Real y[ 4 ], Real z[ 4 ], Real & xp, Real & yp, Real & zp, Real & b1, Real & b2, Real & b3 )
+void ConvDiffReactSolverPC<Mesh>::
+test( SimpleVect<GeoElement0D<DefMarkerCommon> > points_tet, SimpleVect<GeoElement0D<DefMarkerCommon> > point, Real & b1, Real & b2, Real & b3 )
 {
 
     Real a11, a12, a13, a21, a22, a23, a31, a32, a33, zw;
-    int found;
 
-    a11 = x[ 1 ] - x[ 0 ];
-    a12 = x[ 2 ] - x[ 0 ];
-    a13 = x[ 3 ] - x[ 0 ];
-    a21 = y[ 1 ] - y[ 0 ];
-    a22 = y[ 2 ] - y[ 0 ];
-    a23 = y[ 3 ] - y[ 0 ];
-    a31 = z[ 1 ] - z[ 0 ];
-    a32 = z[ 2 ] - z[ 0 ];
-    a33 = z[ 3 ] - z[ 0 ];
+    a11 = points_tet(2).x() - points_tet(1).x();
+    a12 = points_tet(3).x() - points_tet(1).x();
+    a13 = points_tet(4).x() - points_tet(1).x();
+    a21 = points_tet(2).y() - points_tet(1).y();
+    a22 = points_tet(3).y() - points_tet(1).y();
+    a23 = points_tet(4).y() - points_tet(1).y();
+    a31 = points_tet(2).z() - points_tet(1).z();
+    a32 = points_tet(3).z() - points_tet(1).z();
+    a33 = points_tet(4).z() - points_tet(1).z();
 
-    b1 = xp - x[ 0 ];
-    b2 = yp - y[ 0 ];
-    b3 = zp - z[ 0 ];
+    b1 = point(1).x() - points_tet(1).x();
+    b2 = point(1).y() - points_tet(1).y();
+    b3 = point(1).z() - points_tet(1).z();
 
     //  Solve the equation system (without loop - faster)
 
@@ -781,13 +771,41 @@ test( Real x[ 4 ], Real y[ 4 ], Real z[ 4 ], Real & xp, Real & yp, Real & zp, Re
     b2 = ( b2 - a23 * b3 ) / a22;
     b1 = ( b1 - a12 * b2 - a13 * b3 ) / a11;
 
-    if ( ( b1 >= 0.0 ) && ( b2 >= 0.0 ) && ( b3 >= 0.0 ) && ( b1 + b2 + b3 <= 1.0 ) )
-        found = 1;
-    else
-        found = 0;
+ }
 
-    return found;
+template <typename Mesh>
+template <typename RegionMesh3D>
+void ConvDiffReactSolverPC<Mesh>::
+checkallvolumes( RegionMesh3D & umesh, SimpleVect<GeoElement0D<DefMarkerCommon> > point, Real & b1r, Real & b2r, Real & b3r )
+{
+    Real b1, b2, b3, bmin = -100.0;
+    SimpleVect<GeoElement0D<DefMarkerCommon> > tetrapoints;
+    tetrapoints.resize(4);
+
+    b1r=100.0;
+    b2r=100.0;
+    b3r=100.0;
+
+    for ( UInt i = 1; i <= umesh.numVolumes(); i++ )
+    {
+       tetrapoints( 1 ) = umesh.point( umesh.volume(i).point(1).id() );
+       tetrapoints( 2 ) = umesh.point( umesh.volume(i).point(2).id() );
+       tetrapoints( 3 ) = umesh.point( umesh.volume(i).point(3).id() );
+       tetrapoints( 4 ) = umesh.point( umesh.volume(i).point(4).id() );
+
+       test( tetrapoints, point, b1, b2, b3 );
+
+       if( (b1 >= bmin) && (b2 >= bmin) && (b3 >= bmin) && (1.0-b1-b2-b3 >= bmin))
+       {
+	  b1r = b1;
+	  b2r = b2;
+	  b3r = b3;
+	  bmin = std::min<Real>(b1,std::min<Real>(b2,std::min<Real>(b3,1.0-b1-b2-b3)));
+       }
+
+    }
 }
+
 }
 
 #endif
