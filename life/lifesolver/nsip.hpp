@@ -229,7 +229,7 @@ NavierStokesSolverIP( const GetPot& dataFile,
 #else
     M_linearSolver.setOptionsFromGetPot( dataFile, "fluid/petsc" );
 
-    if ( _BCh_u.hasOnlyEssential() && !M_diagonalize )
+    if ( this->BCh_fluid().hasOnlyEssential() && !M_diagonalize )
     {
         Real constPress = 1. / sqrt( _dim_u );
         for( UInt i=0; i<_dim_u*nDimensions; ++i )
@@ -495,12 +495,12 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
     M_rhsFull = M_rhsU;
 
     // BC manage for the velocity
-    if ( !_BCh_u.bdUpdateDone() )
-        _BCh_u.bdUpdate( _mesh, _feBd_u, _dof_u );
-    bcManage( M_matrFull, M_rhsFull, _mesh, _dof_u, _BCh_u, _feBd_u, 1.0,
+    if ( !this->BCh_fluid().bdUpdateDone() )
+        this->BCh_fluid().bdUpdate( _mesh, _feBd_u, _dof_u );
+    bcManage( M_matrFull, M_rhsFull, _mesh, _dof_u, this->BCh_fluid(), _feBd_u, 1.0,
                M_time );
 
-    if ( _BCh_u.hasOnlyEssential() && M_diagonalize )
+    if ( this->BCh_fluid().hasOnlyEssential() && M_diagonalize )
     {
          M_matrFull.diagonalize( nDimensions*_dim_u, M_diagonalize,
                                  M_rhsFull, 0);
