@@ -114,8 +114,8 @@ public:
             the accuracy of the unknowns on mesh1, i.e., when refFE1 is more accurate
      than refFE2
      */
-    template <typename Mesh, typename VecUnknown>
-    void interpolate( Mesh& mesh2, const VecUnknown& v, VecUnknown& vI );
+    template <typename Mesh>
+    void interpolate( Mesh& mesh2, const UInt nbComp, const Vector& v, Vector& vI );
 
     //! This method returns the corrresponding dof number of the mesh2 at the interface
     //! for a specific dof number at the interface in mesh1
@@ -123,6 +123,9 @@ public:
       \param i a dof number in mesh1
     */
     // ID getInterfaceDof(const ID& i) const;
+
+    //! This method returns the corrresponding dof object when interpolation is used
+    UInt numTotalDof() const {return _dof->numTotalDof();}
 
 private:
 
@@ -513,10 +516,10 @@ void DofInterface3Dto3D::update( Mesh& mesh1, const EntityFlag& flag1,
   the accuracy of the unknowns on mesh1, i.e., when refFE1 is more accurate
   than refFE2
 */
-template <typename Mesh, typename VecUnknown>
-void DofInterface3Dto3D::interpolate( Mesh& mesh2, const VecUnknown& v, VecUnknown& vI )
-{
-
+  template <typename Mesh>
+  void DofInterface3Dto3D::interpolate( Mesh& mesh2, const UInt nbComp, const Vector& v, Vector& vI )
+  {
+    
     typedef typename Mesh::VolumeShape GeoShape; // Element shape
     typedef typename Mesh::FaceShape GeoBShape;  // Face Shape
 
@@ -537,8 +540,6 @@ void DofInterface3Dto3D::interpolate( Mesh& mesh2, const VecUnknown& v, VecUnkno
 
     ID ibF, iElAd, iFaEl, iVeEl, lDof, iEdEl;
 
-    ID nbComp = v.nbcomp(); // Number of components of the data vector
-
     Real x, y, z, sum;
 
     KN<Real> vLoc( nDofElem * nbComp );
@@ -556,7 +557,7 @@ void DofInterface3Dto3D::interpolate( Mesh& mesh2, const VecUnknown& v, VecUnkno
         // Updating the local dof of the data vector in the adjacent element
         for ( UInt icmp = 0; icmp < nbComp; ++icmp )
             for ( ID idof = 0; idof < nDofElem; ++idof )
-                vLoc( icmp * nDofElem + idof ) = ( v.vec() ) ( icmp * _dof2->numTotalDof() + _dof2->localToGlobal( iElAd, idof + 1 ) - 1 );
+                vLoc( icmp * nDofElem + idof ) = v ( icmp * _dof2->numTotalDof() + _dof2->localToGlobal( iElAd, idof + 1 ) - 1 );
 
         // Vertex based Dof
         if ( nDofpV )
@@ -588,7 +589,7 @@ void DofInterface3Dto3D::interpolate( Mesh& mesh2, const VecUnknown& v, VecUnkno
                             sum += vLoc( icmp * nDofElem + idof ) * _refFE2->phi( idof, x, y, z );
 
                         // Updating interpolating vector
-                        ( vI.vec() ) ( icmp * _dof->numTotalDof() + _dof->localToGlobal( iElAd, lDof ) - 1 ) = sum;
+			vI ( icmp * _dof->numTotalDof() + _dof->localToGlobal( iElAd, lDof ) - 1 ) = sum;
                     }
                 }
             }
@@ -624,7 +625,7 @@ void DofInterface3Dto3D::interpolate( Mesh& mesh2, const VecUnknown& v, VecUnkno
                             sum += vLoc( icmp * nDofElem + idof ) * _refFE2->phi( idof, x, y, z );
 
                         // Updating interpolating vector
-                        ( vI.vec() ) ( icmp * _dof->numTotalDof() + _dof->localToGlobal( iElAd, lDof ) - 1 ) = sum;
+                        vI ( icmp * _dof->numTotalDof() + _dof->localToGlobal( iElAd, lDof ) - 1 ) = sum;
                     }
                 }
             }
@@ -650,7 +651,7 @@ void DofInterface3Dto3D::interpolate( Mesh& mesh2, const VecUnknown& v, VecUnkno
                     sum += vLoc( icmp * nDofElem + idof ) * _refFE2->phi( idof, x, y, z );
 
                 // Updating interpolating vector
-                ( vI.vec() ) ( icmp * _dof->numTotalDof() + _dof->localToGlobal( iElAd, lDof ) - 1 ) = sum;
+                vI ( icmp * _dof->numTotalDof() + _dof->localToGlobal( iElAd, lDof ) - 1 ) = sum;
             }
         }
     }
