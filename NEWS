@@ -20,10 +20,17 @@ New in 0.5.0:
   ** use clone factory for BCFunction
   ** use boost::shared_ptr<> for better memory management
 
+[lifesolver]
+* Templated the darcy classes.(VM)
+  ** use of DataMesh class requires a change in data files
+
 [testsuite]
 * Added test for 3D/0D coupling (AM)
+* Moved files of test_darcy in lifesolver (VM)
+  ** data files are changed
+* Removed test_darcytetra (VM)
 
-
+
 Bugs fixed in 0.4.0:
 ====================
 [all]
