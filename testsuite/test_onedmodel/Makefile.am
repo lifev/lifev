@@ -39,7 +39,7 @@ test_onedmodel_SOURCES = dataOneDModel.cpp  basicOneDMesh.cpp \
 
 test_onedmodel_LDADD    = $(grace_libs) $(life_libs)
 
-EXTRA_DIST = data testsuite.at 
+EXTRA_DIST = data datalin2 datalin3 datanl testsuite.at 
 
 #
 
