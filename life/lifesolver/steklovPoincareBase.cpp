@@ -160,7 +160,7 @@ void steklovPoincare::evalResidual(Vector       &res,
               << std::endl;
     std::cout << "max ResidualFSI = " << norm_inf(M_residualFSI)
               << std::endl;
-    std::cout << "max ResidualFSI = " << norm_2(M_strongResidualFSI)
+    std::cout << "max ResidualFSI = " << norm_inf(M_strongResidualFSI)
               << std::endl;
 
 //    M_solid->postProcess();
@@ -489,7 +489,7 @@ void my_matvecSfSsPrime(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
             if (my_data->M_pFS->nbEval() == 1) my_data->M_pFS->getReducedLinFluid()->setComputedMatrix(false);
 
             my_data->M_pFS->getReducedLinFluid()->setDacc(da);
-            my_data->M_pFS->getReducedLinFluid()->solveInvReducedLinearFluid();
+            my_data->M_pFS->getReducedLinFluid()->solveReducedLinearFluid();
 
             my_data->M_pFS->solid().d() = zSolidPrec;
             my_data->M_pFS->solveLinearSolid();
@@ -790,12 +790,20 @@ void steklovPoincare::computeStrongResidualFSI()
                   NULL, NULL, NULL, NULL,
                   AZ_MSR_MATRIX );
 
-    AZ_solve( M_strongResidualFSI.giveVec(), M_residualFSI.giveVec(),
+    PhysVectUnknown<Vector> strongResidual;
+    strongResidual.resize( M_fluid->uDof().numTotalDof() );
+    strongResidual  = ZeroVector(M_strongResidualFSI.size());
+
+    AZ_solve( strongResidual.giveVec(), M_residualFSI.giveVec(),
               options, params, NULL,
               ( int * ) fullPattern.giveRaw_bindx(), NULL, NULL, NULL,
               massMatrix.giveRaw_value(),
               data_org, status, proc_config );
 
+    transferOnInterface(strongResidual,
+                        M_fluid->BC_fluid(),
+                        "Interface",
+                        M_strongResidualFSI);
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 }
