@@ -284,27 +284,24 @@ void operFS::eval(const Vector& disp,
               << maxnorm(velo) << std::endl;
 }
 
-Vector operFS::evalResidual(Vector &disp,
-                            int iter)
+Vector operFS::evalResidual(Vector &_disp,
+                            int     _iter,
+                            Vector &_res)
 {
-    Vector res(disp.size());
-
     int status = 0;
 
-    if(iter == 0) status = 1;
+    if(_iter == 0) status = 1;
 
-    std::cout << "*** Residual computation g(x_" << iter <<" )";
+    std::cout << "*** Residual computation g(x_" << _iter <<" )";
     if (status) std::cout << " [NEW TIME STEP] ";
     std::cout << std::endl;
 
-    eval(disp, status, M_dispStruct, M_velo);
+    eval(_disp, status, M_dispStruct, M_velo);
 
     M_residualS = M_solid.residual();
     M_residualF = M_fluid.residual();
 
     computeResidualFSI();
-
-    res = getResidualFSIOnSolid();
 
     std::cout << "Max ResidualF   = " << maxnorm(M_residualF)
               << std::endl;
@@ -313,7 +310,9 @@ Vector operFS::evalResidual(Vector &disp,
     std::cout << "Max ResidualFSI = " << maxnorm(M_residualFSI)
               << std::endl;
 
-    return res;
+    _res = getResidualFSIOnSolid();
+
+    return _res;
 }
 
 //
@@ -353,10 +352,9 @@ void  operFS::updateJac(Vector& sol,int iter) {
 
 
 Vector  operFS::solvePrec(const Vector  &_res,
-                          double        _linearRelTol)
+                          double        _linearRelTol,
+                          Vector        &_muk)
 {
-    Vector muk(_res.size());
-
     M_linearRelTol = _linearRelTol;
 
     std::cout << "  o-  Solving the preconditionned system... ";
@@ -367,11 +365,11 @@ Vector  operFS::solvePrec(const Vector  &_res,
     {
         case 0:
             // Dirichlet-Neumann preconditioner
-            muk = invSfPrime(_res);
+            _muk = invSfPrime(_res);
             break;
         case 1:
             // Dirichlet-Neumann preconditioner
-            muk = invSsPrime(_res);
+            _muk = invSsPrime(_res);
             break;
         case 2:
             // Dirichlet-Neumann preconditioner
@@ -382,19 +380,17 @@ Vector  operFS::solvePrec(const Vector  &_res,
             muF = invSfPrime(_res);
             muS = invSsPrime(_res);
 
-            muk = muS + muF;
+            _muk = muS + muF;
         }
         break;
         default:
             // Newton preconditioner
-            muk = invSfSsPrime(_res);
+            _muk = invSfSsPrime(_res);
     }
 
     chrono.stop();
 
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
-
-    return muk;
 }
 
 //

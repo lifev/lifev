@@ -69,8 +69,9 @@ namespace LifeV
                              Vector &dispNew,
                              Vector &veloStruct);
 
-        Vector evalResidual (Vector &sol,
-                             int    iter);
+        Vector evalResidual (Vector &_disp,
+                             int     _iter,
+                             Vector &_res);
 
         void updateJac      (Vector& sol,
                              int     iter);
@@ -78,7 +79,8 @@ namespace LifeV
         void solvePrec      (Vector &);
 
         Vector solvePrec    (const Vector &,
-                             double);
+                             double,
+                             Vector &);
 
         void solveLinearFluid();
 
