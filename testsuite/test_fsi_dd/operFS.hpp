@@ -71,9 +71,7 @@ namespace LifeV
         void updatePrec   (Vector& sol,
                            int     iter);
 
-        void solvePrec    (Vector &step,
-                           const  Vector &res,
-                           double linear_rel_tol);
+        void solvePrec    (Vector &);
 
         void solveLinearFluid();
 
@@ -91,7 +89,7 @@ namespace LifeV
         VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >
         &solid() {return M_solid;};
 
-        void setTime(const Real &time);
+        void setTime(const Real &time) {M_time = time;};
         
     private:
 

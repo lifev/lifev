@@ -98,25 +98,25 @@ namespace LifeV
 
 //
 
-    void  operFS::solvePrec(Vector &step, const Vector &res, double linear_rel_tol)
+    void  operFS::solvePrec(Vector &_uBarS)
     {
         // data_org assigned "by hands": no parallel computation is performed
 
-        UInt dim_res = res.size();
+        UInt dim = _uBarS.size();
 
-        M_solverAztec.setTolerance(linear_rel_tol);
-        M_solverAztec.setMatrixFree(dim_res, &M_dataJacobian, my_matvecJacobian);
-
-        cout << "  o-  Solving Jacobian system... ";
+        cout << "  o-  Solving the preconditionned system... ";
         Chrono chrono;
 
-        for (UInt i = 0; i < dim_res; ++i)
-            step[i] = 0.0;
-
-        chrono.start();
-
-        M_solverAztec.solve(step, res);
-
+        for (int ii = 0; ii < (int) dim; ++ii) 
+            solid().d()[ii] =  _uBarS[ii];
+        
+        fluid().updateDispVelo();
+        solveLinearFluid();
+        solveLinearSolid();
+        
+        for (int i = 0; i < (int) dim; ++i)
+            _uBarS[i] =  dz()[i] - _uBarS[i];
+        
         chrono.stop();
 
         cout << "done in " << chrono.diff() << " s." << endl;
@@ -150,16 +150,6 @@ namespace LifeV
     }
     
     
-//     UInt operFS::nbEval()
-//     {
-//         return M_nbEval;
-//     }
-    
-    void operFS::setTime(const Real& time)
-    {
-        M_time = time;
-    }
-
     void my_matvecJacobian(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
     {
         // Extraction of data from J
@@ -181,7 +171,7 @@ namespace LifeV
             my_data->M_pFS->fluid().updateDispVelo();
             my_data->M_pFS->solveLinearFluid();
             my_data->M_pFS->solveLinearSolid();
-
+            
             for (int i = 0; i < (int) dim; ++i)
                 Jz[i] =  z[i] - my_data->M_pFS->dz()[i];
         }
