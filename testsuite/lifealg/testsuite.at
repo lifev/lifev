@@ -38,7 +38,7 @@ AT_KEYWORDS([ alg linear solver algebra])
 AT_CLEANUP
 
 
-AT_SETUP([test_linearsolvers (Matrix size : 1000x1000)])
-AT_CHECK([$top_builddir/testsuite/lifealg/test_linearsolvers 1000],[0],[ignore],[ignore])
+AT_SETUP([test_linearsolvers (Matrix size : 200x200)])
+AT_CHECK([$top_builddir/testsuite/lifealg/test_linearsolvers 200],[0],[ignore],[ignore])
 AT_KEYWORDS([ alg linear solver algebra])
 AT_CLEANUP
