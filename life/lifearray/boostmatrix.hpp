@@ -24,6 +24,7 @@
 /**
    \file boostmatrix.hpp
    \author Christoph Winkelmann <christoph.winkelmann@epfl.ch>
+   \author Daniele A. Di Pietro <dipietro@unibg.it>
    \date 2005-02-22
  */
 
@@ -309,12 +310,14 @@ void schurProduct( const BoostMatrix<boost::numeric::ublas::row_major>& D,
                    BoostMatrix<boost::numeric::ublas::row_major>& S )
 {
     using namespace boost::numeric::ublas;
-    ASSERT( D.size2() == H.size1() && H.size2() == G.size1() &&
-            D.size1() == S.size1() && G.size2() == S.size2(),
+    
+    ASSERT( ( D.size2() == H.size1() && H.size2() == G.size1() &&
+              D.size1() == S.size1() && G.size2() == S.size2() ),
             "[schurProduct] ERROR: cannot multiply " << D.size1() << "x" <<
             D.size2() << " matrix by " << H.size1() << "x" << H.size2() <<
-            " matrix by " << G.size1() "x" << G.size2() << " matrix into " <<
+            " matrix by " << G.size1() << "x" << G.size2() << " matrix into " <<
             S.size1() << "x" << S.size2() << " matrix." );
+
     for ( BoostMatrix<row_major>::const_iterator1 iD1=D.begin1();
           iD1!=D.end1(); ++iD1 )
     {
