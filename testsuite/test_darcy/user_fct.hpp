@@ -92,7 +92,7 @@ public:
       return -( VfctDer1(0., x, y, z, 3) );
       break;
     default:
-      cerr <<" AnalyticalSolFlux icomp ?????" << endl;
+      std::cerr <<" AnalyticalSolFlux icomp ?????" << std::endl;
       exit(1);
     }
   }
