@@ -92,6 +92,7 @@ steklovPoincare::setup()
     M_residualF.resize( M_fluid->uDof().numTotalDof() );
     M_residualFSI.resize( M_fluid->uDof().numTotalDof() );
 
+    std::cout << "residual fluid size = " << M_residualF.size() << std::endl;
     M_aitkFS.setup( 3*M_solid->dDof().numTotalDof() );
 
     M_reducedLinFluid.reset(new reducedLinFluid(this, M_fluid, M_solid));
@@ -156,6 +157,8 @@ void steklovPoincare::evalResidual(Vector       &res,
     std::cout << "max ResidualFSI = " << norm_inf(M_residualFSI)
               << std::endl;
 
+//    M_solid->postProcess();
+//    M_fluid->postProcess();
 //      Vector muk = disp;
 //      muk = ZeroVector( muk.size() );
 //      invSsPrime(M_residualS, 1e-08, muk);
@@ -407,7 +410,7 @@ void steklovPoincare::invSfSsPrime(const Vector& _res,
 
     AZ_set_MATFREE(J, &M_dataJacobian, my_matvecSfSsPrime);
 
-    std::cout << "  o-  Solving Jacobian system... ";
+    std::cout << "  N-  Solving Jacobian system... ";
     Chrono chrono;
 
     for (UInt i=0;i<dim_res; ++i)
@@ -467,7 +470,7 @@ void my_matvecSfSsPrime(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
         {
             Vector da(dim);
             double dt = my_data->M_pFS->fluid().timestep();
-            double dti2 = 1.0/( dt * dt) ;
+            double dti2 = 1.0/(dt*dt) ;
 
             da = - dti2*my_data->M_pFS->fluid().density()*my_data->M_pFS->DDNprecond(zSolid);
 
@@ -481,7 +484,9 @@ void my_matvecSfSsPrime(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
             my_data->M_pFS->setResidualF(my_data->M_pFS->getReducedLinFluid()->residual());
         }
 
+        std::cout << "retrieving residual on FS interface ..." << std::flush;
         my_data->M_pFS->getResidualFSIOnSolid(jz);
+        std::cout << "ok." << std::endl;
 
         for (int i = 0; i < (int) dim; ++i)
             Jz[i] =  jz[i];
@@ -495,7 +500,7 @@ void my_matvecSfSsPrime(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
 
 Vector steklovPoincare::DDNprecond(Vector const &_z)
 {
-    std::cout << "Domain Decompostion Newton Precond. using ";
+    std::cout << "DD-Newton Precond. using ";
 
     Vector Pz(_z.size());
 
@@ -726,6 +731,7 @@ void steklovPoincare::setResidualFSI( Vector const&  _res)
 Vector steklovPoincare::getResidualFSIOnSolid()
 {
     Vector vec(M_residualS.size());
+    vec = ZeroVector( vec.size() );
 
     FOR_EACH_INTERFACE_DOF( vec[IDsolid - 1 + jDim*totalDofSolid] =
                             M_residualF[IDfluid - 1 + jDim*totalDofFluid] -
