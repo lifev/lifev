@@ -239,9 +239,9 @@ NavierStokesAleHandler<Mesh>::postProcess()
 
 
         wr_medit_ascii_scalar( "press." + name + ".bb", _p.giveVec(), _p.size() );
-        wr_medit_ascii_scalar( "vel_x." + name + ".bb", _u.giveVec(), _mesh.numVertices() );
-        wr_medit_ascii_scalar( "vel_y." + name + ".bb", _u.giveVec() + _dim_u, _mesh.numVertices() );
-        wr_medit_ascii_scalar( "vel_z." + name + ".bb", _u.giveVec() + 2 * _dim_u, _mesh.numVertices() );
+        wr_medit_ascii_scalar( "velF_x." + name + ".bb", _u.giveVec(), _mesh.numVertices() );
+        wr_medit_ascii_scalar( "velF_y." + name + ".bb", _u.giveVec() + _dim_u, _mesh.numVertices() );
+        wr_medit_ascii_scalar( "velF_z." + name + ".bb", _u.giveVec() + 2 * _dim_u, _mesh.numVertices() );
         //   wr_medit_ascii_scalar("velw_x."+name+".bb",_w.giveVec(),_mesh.numVertices());
         // wr_medit_ascii_scalar("velw_y."+name+".bb",_w.giveVec() + _mesh.numVertices(),_mesh.numVertices());
         //wr_medit_ascii_scalar("velw_z."+name+".bb",_w.giveVec() + 2*_mesh.numVertices(),_mesh.numVertices());
@@ -250,9 +250,9 @@ NavierStokesAleHandler<Mesh>::postProcess()
         //wr_medit_ascii("press."+name+".mesh", _mesh);
         wr_medit_ascii( "press." + name + ".mesh", _mesh, _disp, 12 );
         // wr_medit_ascii_vector("veloc."+name+".bb",_u.giveVec(),_mesh.numVertices(),_dim_u);
-        system( ( "ln -s press." + name + ".mesh vel_x." + name + ".mesh" ).data() );
-        system( ( "ln -s press." + name + ".mesh vel_y." + name + ".mesh" ).data() );
-        system( ( "ln -s press." + name + ".mesh vel_z." + name + ".mesh" ).data() );
+        system( ( "ln -s press." + name + ".mesh velF_x." + name + ".mesh" ).data() );
+        system( ( "ln -s press." + name + ".mesh velF_y." + name + ".mesh" ).data() );
+        system( ( "ln -s press." + name + ".mesh velF_z." + name + ".mesh" ).data() );
         //system(("ln -s press."+name+".mesh velw_x."+name+".mesh").data());
         //system(("ln -s press."+name+".mesh velw_y."+name+".mesh").data());
         //system(("ln -s press."+name+".mesh velw_z."+name+".mesh").data());
