@@ -51,16 +51,16 @@ namespace LifeV
 
         // Destructor
 
-        ~generalizedAitken();
+        // ~generalizedAitken();
 
         // Member functions
 
         void   restart();
 
-        inline void   setNuS      (const Vector&, const int);
-        inline Real   getNuS      (const int    , const int);
-        inline void   setNuF      (const Vector&, const int);
-        inline Real   getNuF      (const int    , const int);
+        inline void   setMuS      (const Vector&, const int);
+        inline Real   getMuS      (const int    , const int);
+        inline void   setMuF      (const Vector&, const int);
+        inline Real   getMuF      (const int    , const int);
 
         inline Real   getNewOmegaS(){return M_omegaS;};
         inline Real   getNewOmegaF(){return M_omegaF;};
@@ -78,11 +78,11 @@ namespace LifeV
         Vector M_lambda0;
         Vector M_lambda1;
 
-        //! array formed by the vectors [\nu_s^k, \nu_s^{k-1}]
-        Vector M_nuS;
+        //! array formed by the vectors [\mu_s^k, \mu_s^{k-1}]
+        Vector M_muS;
 
-        //! array formed by the vectors [\nu_f^k, \nu_f^{k-1}]
-        Vector M_nuF;
+        //! array formed by the vectors [\mu_f^k, \mu_f^{k-1}]
+        Vector M_muF;
 
         //! new step coefficients
         Real   M_omegaS;
@@ -102,8 +102,8 @@ namespace LifeV
         M_nDof         (  dof),
         M_lambda0      (  dof),
         M_lambda1      (  dof),
-        M_nuS          (2*dof),
-        M_nuF          (2*dof),
+        M_muS          (2*dof),
+        M_muF          (2*dof),
         M_omegaS       (defOmegaS),
         M_omegaF       (defOmegaS)
     {
@@ -112,40 +112,44 @@ namespace LifeV
     //
     // Destructor
     //
-    
+    /*template<class Vector, class Real>
+    generalizedAitken<Vector,  Real>::
+    ~generalizedAitken()
+    {
+    }*/
     //
     // Member functions
     //
 
 
-    // setter and getter for nuS and nuF
+    // setter and getter for muS and muF
 
     template<class Vector, class Real>
-    inline void generalizedAitken<Vector, Real>::setNuS(const Vector& _nu, const int _pos)
+    inline void generalizedAitken<Vector, Real>::setMuS(const Vector& _mu, const int _pos)
     {
         int jt = _pos*M_nDof;
-        for (int it = 0; it < _lamdba.size(); ++it, ++jt)
-            M_nuS[jt] = _nu[it];
+        for (int it = 0; it < _mu.size(); ++it, ++jt)
+            M_muS[jt] = _mu[it];
     }
     
     template<class Vector, class Real>
-    inline Real generalizedAitken<Vector, Real>::getNuS(const int _i, const int _j)
+    inline Real generalizedAitken<Vector, Real>::getMuS(const int _i, const int _j)
     {
-        return M_nuS[_j*dof + _i];
+        return M_muS[_j*dof + _i];
     }
         
     template<class Vector, class Real>
-    inline void generalizedAitken<Vector, Real>::setNuF(const Vector& _nu, const int _pos)
+    inline void generalizedAitken<Vector, Real>::setMuF(const Vector& _mu, const int _pos)
     {
         int jt = _pos*M_nDof;
-        for (int it = 0; it < _lamdba.size(); ++it, ++jt)
-            M_nuF[jt] = _nu[it];
+        for (int it = 0; it < _mu.size(); ++it, ++jt)
+            M_muF[jt] = _mu[it];
     }
     
     template<class Vector, class Real>
-    inline Real generalizedAitken<Vector, Real>::getNuF(const int _i, const int _j)
+    inline Real generalizedAitken<Vector, Real>::getMuF(const int _i, const int _j)
     {
-        return M_nuF[_j*dof + _i];
+        return M_muF[_j*dof + _i];
     }
     
     //
@@ -157,7 +161,7 @@ namespace LifeV
     {
         Vector lambda(M_nDof);
         
-        lambda = M_lamdba0 - M_lambda1;
+        lambda = M_lambda0 - M_lambda1;
 
         Real   a11 = 0.;
         Real   a12 = 0.;
@@ -165,20 +169,20 @@ namespace LifeV
         Real   b1  = 0.;
         Real   b2  = 0.;
 
-        Vector nuS   (M_nDof);
-        Vector nuF   (M_nDof);
+        Vector muS   (M_nDof);
+        Vector muF   (M_nDof);
 
         for (int ii = 0; ii < M_nDof; ++ii)
         {
-            nuS[ii] = getNuS(ii, 0) - getNuS(ii, 1);
-            nuF[ii] = getNuF(ii, 0) - getNuF(ii, 1);
+            muS[ii] = getMuS(ii, 0) - getMuS(ii, 1);
+            muF[ii] = getMuF(ii, 0) - getMuF(ii, 1);
 
-            a11    += nuF[ii]*nuF[ii];
-            a21    += nuF[ii]*nuS[ii];
-            a22    += nuS[ii]*nuS[ii];
+            a11    += muF[ii]*muF[ii];
+            a21    += muF[ii]*muS[ii];
+            a22    += muS[ii]*muS[ii];
 
-            b1     += nuF[ii]*lambda[ii];
-            b2     += nuS[ii]*lambda[ii];
+            b1     += muF[ii]*lambda[ii];
+            b2     += muS[ii]*lambda[ii];
         }
             
         Real omega1, omega2;
@@ -192,10 +196,10 @@ namespace LifeV
         }
 
         for (int ii = 0; ii < M_nDof; ++ii)
-            lambda = lamdba + omega1*getNuF[ii] + omega2*getNuS[ii];
+            lambda = lambda + omega1*getMuF[ii] + omega2*getMuS[ii];
                 
         lambda1 = lambda0;
-        lambda0 = lamdba;
+        lambda0 = lambda;
 
         return lambda;
         
