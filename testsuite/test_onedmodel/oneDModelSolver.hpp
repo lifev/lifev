@@ -113,21 +113,19 @@ diffSrc(U) = sum_{i+1/2 in elements} 1/2 { dS/dU(U_i) + dS/dU(U_i+1) } 1_{i+1/2}
 
 #include <string>
 
-#include "clapack.h"
+#include <clapack.h>
 
-#include "oneDModelHandler.hpp"
-#include "elemMat.hpp"
-#include "elemVec.hpp"
-#include "elemOper.hpp"
-#include "RNM.hpp"
+#include <oneDModelHandler.hpp>
+#include <elemMat.hpp>
+#include <elemVec.hpp>
+#include <elemOper.hpp>
 
-#include "values.hpp"
-#include "assemb.hpp"
-#include "chrono.hpp"
+#include <assemb.hpp>
+#include <chrono.hpp>
 
-#include "tridiagMatrix.hpp"
-#include "oneDNonLinModelParam.hpp"
-#include "vectorFunction1D.hpp"
+#include <tridiagMatrix.hpp>
+#include <oneDNonLinModelParam.hpp>
+#include <vectorFunction1D.hpp>
 
 
 namespace LifeV
