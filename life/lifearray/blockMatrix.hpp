@@ -43,21 +43,21 @@ class BlockMatrix
 {
 public:
     //! constructor
-    BlockMatrix( const MSRMatr* matrix11,
+    BlockMatrix( const MSRMatr<double>* matrix11,
                  const CSRMatr<CSRPatt, double>* matrix12,
                  const CSRMatr<CSRPatt, double>* matrix21,
-                 const MSRMatr* matrix22 = 0);
+                 const MSRMatr<double>* matrix22 = 0);
     //! matrix vector product
     Vector operator*( const Vector& v ) const;
     //! matrix vector product for aztec
-    void matrixVectorProductAztec( double* p, double* ap) const;
+    void matrixVectorProductAztec( double* p, double* ap ) const;
     //! (total) number of rows
     UInt nRows() const { return M_nRows1 + M_nRows2; }
     //! (total) number of columns
     UInt nCols() const { return M_nCols1 + M_nCols2; }
 private:
     //! submatrix 1,1
-    const MSRMatr* M_matrix11;
+    const MSRMatr<double>* M_matrix11;
 
     //! submatrix 1,2
     const CSRMatr<CSRPatt, double>* M_matrix12;
@@ -66,7 +66,7 @@ private:
     const CSRMatr<CSRPatt, double>* M_matrix21;
 
     //! submatrix 2,2
-    const MSRMatr* M_matrix22;
+    const MSRMatr<double>* M_matrix22;
 
     //! number of rows of submatrices 1,1 and 1,2
     const UInt M_nRows1;
@@ -83,16 +83,16 @@ private:
 
 //! matrix vector product function with interface for Aztec
 //! usage: BlockMatrix a(a11, a12, a21, a22);
-//!        SolverAztec.setMatrixFree(a.nRows(), &a, &blockMatrixVectorProduct)
+//!        SolverAztec.setMatrixFree(a.nRows(), &a, &blockMatrixVectorProduct);
 void blockMatrixVectorProduct( double* p, double* ap,
                                AZ_MATRIX* aMat, int proc_config[] );
 
 // IMPLEMENTATIONS
 
-BlockMatrix::BlockMatrix( const MSRMatr* matrix11,
+BlockMatrix::BlockMatrix( const MSRMatr<double>* matrix11,
                           const CSRMatr<CSRPatt, double>* matrix12,
                           const CSRMatr<CSRPatt, double>* matrix21,
-                          const MSRMatr* matrix22 )
+                          const MSRMatr<double>* matrix22 )
     : M_matrix11( matrix11 ), M_matrix12( matrix12 ),
       M_matrix21( matrix21 ), M_matrix22( matrix22 ),
       M_nRows1( matrix11->Patt()->nRows() ),
@@ -136,7 +136,7 @@ void BlockMatrix::matrixVectorProductAztec( double* p, double* ap) const
     Vector v2( M_nCols2 );
     for ( UInt i=0; i<M_nCols2; ++i)
         v2[i] = p[i+M_nCols1];
-    
+
     Vector av1( M_nRows1 );
     av1 = (*M_matrix11) * v1 + (*M_matrix12) * v2;
     for ( UInt i=0; i<M_nRows1; ++i )
