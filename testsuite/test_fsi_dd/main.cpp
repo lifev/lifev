@@ -40,7 +40,6 @@ A Newton method using exact jacobians for solving fluid-structure coupling
 Miguel Fernandez, Marwan Moubachir
 */
 
-
 int main(int argc, char** argv)
 {
     using namespace LifeV;
@@ -50,7 +49,6 @@ int main(int argc, char** argv)
     GetPot command_line(argc,argv);
     const char* data_file_name = command_line.follow("data", 2, "-f","--file");
     GetPot data_file(data_file_name);
-
 
 
     // Number of boundary conditions for the fluid velocity,
@@ -191,7 +189,7 @@ int main(int argc, char** argv)
     BCHandler BCh_du(2);
     BCHandler BCh_dz(3);
 
-    operFS oper(fluid, solid, BCh_du, BCh_dz);
+    operFS oper(fluid, solid, BCh_du, BCh_dz, data_file);
 
     // Passing the residue to the linearized fluid: \sigma -> du
     //
@@ -199,12 +197,12 @@ int main(int argc, char** argv)
     //      In the future this could be relevant
 
     BCVectorInterface du_wall(oper.residualFSI(),
-                               dim_fluid,
-                               dofStructureToFluidMesh);
+                              dim_fluid,
+                              dofStructureToFluidMesh);
     // Passing the residual to the linearized structure: \sigma -> dz
     BCVectorInterface dg_wall(oper.residualFSI(),
-                               dim_fluid,
-                               dofFluidToStructure);
+                              dim_fluid,
+                              dofFluidToStructure);
     // Boundary conditions for du
 
     BCh_du.addBC("Wall",   1,  Natural  , Full, du_wall,  3);
@@ -229,8 +227,8 @@ int main(int argc, char** argv)
     fluid.initialize(u0);
     solid.initialize(d0,w0);
 
-    Real abstol = 1.e-6;
-    Real reltol = 1.e-4;
+    Real abstol = 1.e-7;
+    Real reltol = 0.;
     Real etamax = 1.e-3;
 
     int status;
@@ -261,7 +259,7 @@ int main(int argc, char** argv)
 
         // displacement prediction
 
-        disp   = solid.d() + dt*(1.5*solid.w() - 0.5*velo_1);
+        disp   = 0.;//solid.d();// + dt*(1.5*solid.w() - 0.5*velo_1);
 
         velo_1 = solid.w();
 

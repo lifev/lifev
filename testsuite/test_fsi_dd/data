@@ -46,9 +46,9 @@ linesearch = 0
 
 [../aztec]
 output          = none #all_res
-max_iter        = 300
+max_iter        = 30
 poly_ord        = 5
-kspace          = 40
+kspace          = 30
 precond         = dom_decomp
 drop            = 1.00e-4
 ilut_fill       = 2
@@ -79,10 +79,23 @@ ilut_fill       = 1.5
 
 
 [../aztec_s]
-output          = none
+output          = none #all_res
 conv            = rhs
 poly_ord        = 5
 kspace          = 40
 tol             = 1.00e-6
 drop            = 1.00e-4
+
+
+[jacobian]
+
+[../aztec]
+output          = none #all_res
+max_iter        = 30
+poly_ord        = 5
+kspace          = 30
+precond         = dom_decomp
+drop            = 1.00e-4
+ilut_fill       = 2
+tol             = 1.e-16
 
