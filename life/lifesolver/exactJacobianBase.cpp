@@ -19,6 +19,7 @@
 
 
 #include "exactJacobianBase.hpp"
+#include "quasiNewton.hpp"
 
 
 namespace LifeV
@@ -31,36 +32,26 @@ Real fzeroEJ(const Real& t,
              const ID& i)
 {return 0.0;}
 
-exactJacobian::exactJacobian( fluid_type& fluid,
-                              solid_type& solid,
-                              GetPot    &_dataFile,
-                              bchandler_type &BCh_u,
-                              bchandler_type &BCh_d,
-                              bchandler_type &BCh_mesh):
-    super(fluid, solid, _dataFile, BCh_u, BCh_d, BCh_mesh),
-    M_BCh_du ( new BCHandler() ),
-    M_BCh_dz ( new BCHandler ),
-    M_dz     (3*M_solid->dDof().numTotalDof()),
-    M_rhs_dz (3*M_solid->dDof().numTotalDof()),
-    M_dataJacobian(this)
-{
-    setUpBC();
-}
 
 exactJacobian::~exactJacobian()
 {}
+
+// void
+// exactJacobian::setDataFromGetPot( GetPot const& data )
+// {
+//     // call the super class to setup the data from getpot file if needed
+//     super::setDataFromGetPot( data );
+// }
 
 
 void
 exactJacobian::setup()
 {
-    // call operFS setup()
     super::setup();
 
     M_dz.resize(3*M_solid->dDof().numTotalDof());
     M_rhs_dz.resize(3*M_solid->dDof().numTotalDof());
-
-//    setUpBC();
+    M_quasiNewton.reset(new quasiNewton(M_fluid, this));
 }
 //
 // Residual computation
@@ -81,7 +72,6 @@ void exactJacobian::eval(const Vector &_disp,
     this->M_solid->iterate();
 
 }
-
 
 void exactJacobian::evalResidual(Vector &_res,
                                  const Vector &_disp,
@@ -122,8 +112,9 @@ void exactJacobian::setUpBC()
 {
     std::cout << "Boundary Conditions setup ... ";
 
-    UInt dim_solid = this->M_solid->dDof().numTotalDof();
-    UInt dim_fluid = this->M_fluid->uDof().numTotalDof();
+    UInt dim_solid        = this->M_solid->dDof().numTotalDof();
+    UInt dim_fluid        = this->M_fluid->uDof().numTotalDof();
+    UInt dim_reducedfluid = this->M_fluid->pDof().numTotalDof();
 
     //========================================================================================
     //  DATA INTERFACING BETWEEN BOTH SOLVERS
@@ -147,7 +138,7 @@ void exactJacobian::setUpBC()
                              dim_fluid,
                              M_dofMeshToFluid );
     //========================================================================================
-    //  BOUNDARY CONDITIONS
+    //  Interface BOUNDARY CONDITIONS
     //========================================================================================
 
     BCFunctionBase bcf(fzeroEJ);
@@ -159,23 +150,52 @@ void exactJacobian::setUpBC()
     // Boundary conditions for the solid displacement
     M_BCh_d->addBC("Interface", 1, Natural,   Full, g_wall, 3);
 
-    BCVectorInterface du_wall(M_fluid->dwInterpolated(), dim_fluid, M_dofMeshToFluid );
 
-    // Passing data from fluid to the structure: du -> dz
-    //
-    BCVectorInterface dg_wall(M_fluid->residual(), dim_fluid, M_dofFluidToStructure );
+    //========================================================================================
+    //  Linear operators BOUNDARY CONDITIONS
+    //========================================================================================
 
-    // Boundary conditions for du
-    M_BCh_du->addBC("Wall",   1,  Essential, Full, du_wall,  3);
-    M_BCh_du->addBC("Edges",  20, Essential, Full, bcf,      3);
-    M_BCh_du->addBC("InFlow", 2,  Natural,   Full, bcf,      3);
-    M_BCh_du->addBC("OutFlow",3,  Natural,   Full, bcf,      3);
+    std::cout << "reducedFluid " << reducedFluid() << std::endl;
+    if (!reducedFluid())
+    {
+        BCVectorInterface du_wall(M_fluid->dwInterpolated(), dim_fluid, M_dofMeshToFluid );
+
+        // Passing data from fluid to the structure: du -> dz
+        //
+        BCVectorInterface dg_wall(M_fluid->residual(), dim_fluid, M_dofFluidToStructure );
+
+        // Boundary conditions for du
+        M_BCh_du->addBC("Wall",   1,  Essential, Full, du_wall,  3);
+        M_BCh_du->addBC("Edges",  20, Essential, Full, bcf,      3);
+        M_BCh_du->addBC("InFlow", 2,  Natural,   Full, bcf,      3);
+        M_BCh_du->addBC("OutFlow",3,  Natural,   Full, bcf,      3);
 
 
-    // Boundary conditions for dz
-    M_BCh_dz->addBC("Interface", 1, Natural,   Full, dg_wall, 3);
-    M_BCh_dz->addBC("Top",       3, Essential, Full, bcf,  3);
-    M_BCh_dz->addBC("Base",      2, Essential, Full, bcf,  3);
+        // Boundary conditions for dz
+        M_BCh_dz->addBC("Interface", 1, Natural,   Full, dg_wall, 3);
+        M_BCh_dz->addBC("Top",       3, Essential, Full, bcf,  3);
+        M_BCh_dz->addBC("Base",      2, Essential, Full, bcf,  3);
+    }
+    else
+    {
+        // Boundary conditions for the reduced fluid
+        BCVectorInterface da_wall(M_quasiNewton->dacc(),
+                                  dim_solid,
+                                  M_dofStructureToReducedFluid,
+                                  2); // type  = 2
+        M_BCh_dp->addBC("Wall",        1, Natural,   Scalar, da_wall);
+        M_BCh_dp->addBC("Wall_Edges", 20, Essential, Scalar, bcf);
+        M_BCh_dp->addBC("InFlow",      2, Essential, Scalar, bcf);
+        M_BCh_dp->addBC("OutFlow",     3, Essential, Scalar, bcf);
+
+        M_quasiNewton->setUpBC(M_BCh_dp);
+
+        // Boundary conditions for dz
+        BCVectorInterface dg_wall(M_quasiNewton->minusdp(), dim_reducedfluid, M_dofReducedFluidToStructure, 1); // type = 1
+        M_BCh_dz->addBC("Interface", 1, Natural,   Full, dg_wall, 3);
+        M_BCh_dz->addBC("Top",       3, Essential, Full, bcf,     3);
+        M_BCh_dz->addBC("Base",      2, Essential, Full, bcf,     3);
+    }
 }
 
 
@@ -265,9 +285,10 @@ void  exactJacobian::solveLinearSolid()
                    1., 1.);
 
     Real tol       = 1.e-10;
-
+    std::cout << "rhs_dz norm = " << norm_inf(M_rhs_dz) << std::endl;
     this->M_solid->setRecur(1);
     this->M_solid->solveJac(M_dz, M_rhs_dz, tol);
+    std::cout << "dz norm     = " << norm_inf(M_dz) << std::endl;
 }
 
 
@@ -288,17 +309,34 @@ void my_matvecJacobianEJ(double *z, double *Jz, AZ_MATRIX* J, int proc_config[])
     }
     else
     {
-        for (int i=0; i <(int)dim; ++i)
+        if (!my_data->M_pFS->reducedFluid())
         {
-            my_data->M_pFS->solid().d()[i] =  z[i];
+            for (int i=0; i <(int)dim; ++i)
+            {
+                my_data->M_pFS->solid().d()[i] =  z[i];
+            }
+            my_data->M_pFS->fluid().updateDispVelo();
+            my_data->M_pFS->solveLinearFluid();
+            my_data->M_pFS->solveLinearSolid();
         }
-        my_data->M_pFS->fluid().updateDispVelo();
-        my_data->M_pFS->solveLinearFluid();
-        my_data->M_pFS->solveLinearSolid();
+        else
+        {
+            Vector da(dim);
+            double dt   = my_data->M_pFS->fluid().timestep();
+            double dti2 = 1.0/( dt * dt);
+
+            for (int i=0; i <(int)dim; ++i)
+                da[i] =  - my_data->M_pFS->fluid().density() * z[i] * dti2;
+
+            my_data->M_pFS->getQuasiNewton()->setDacc(da);
+            my_data->M_pFS->getQuasiNewton()->solveReducedLinearFluid();
+            my_data->M_pFS->solveLinearSolid();
+        }
         for (int i=0; i <(int)dim; ++i)
             Jz[i] =  z[i] - my_data->M_pFS->dz()[i];
     }
-    std::cout << " ***** norm (Jz)= " << AZ_gvector_norm(dim,-1,Jz,proc_config)
+
+    std::cout << " ***** norm (Jz)= " << AZ_gvector_norm(dim, -1, Jz, proc_config)
               << std::endl << std::endl;
 }
 
