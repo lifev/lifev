@@ -32,7 +32,7 @@ SUBDIRS		= data  \
 		      test_darcy test_onedmodel\
 		      test_ns_bdf test_ns_cyl test_ns_sstress \
 		      test_fsi_newton test_fsi_picard \
-		      test_masstransport test_ns_ipstab
+		      test_masstransport test_mass_coupling test_ns_ipstab
 
 TESTSUITES=$(srcdir)/lifecore/testsuite.at \
 $(srcdir)/lifearray/testsuite.at \
@@ -46,6 +46,7 @@ $(srcdir)/test_fsi_newton/testsuite.at \
 $(srcdir)/test_fsi_picard/testsuite.at \
 $(srcdir)/test_linearelasticity/testsuite.at \
 $(srcdir)/test_masstransport/testsuite.at \
+$(srcdir)/test_mass_coupling/testsuite.at \
 $(srcdir)/test_laplacian/testsuite.at \
 $(srcdir)/test_mesh/testsuite.at \
 $(srcdir)/test_mixte/testsuite.at \
