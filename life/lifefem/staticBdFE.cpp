@@ -37,7 +37,8 @@ StaticBdFE::StaticBdFE(const RefFE& _refFE,const GeoMap& _geoMap,
   weightMeas((int)nbQuadPt),meas((int)nbQuadPt),
   normal((int)nbCoor+1,(int)nbQuadPt),
   tangent((int)nbCoor,(int)nbCoor+1,(int)nbQuadPt),
-  metric((int)nbCoor,(int)nbCoor,(int)nbQuadPt),quadPt((int)nbQuadPt,3)
+  metric((int)nbCoor,(int)nbCoor,(int)nbQuadPt),quadPt((int)nbQuadPt,3),
+  invArea(1.)
 {
   CONSTRUCTOR("StaticBdFE");
   for(int ig=0;ig<nbQuadPt;ig++){
@@ -76,7 +77,8 @@ StaticBdFE::StaticBdFE(const RefFE& _refFE,const GeoMap& _geoMap):
   weightMeas((int)nbQuadPt),meas((int)nbQuadPt),
   normal((int)nbCoor+1,(int)nbQuadPt),
   tangent((int)nbCoor,(int)nbCoor+1,(int)nbQuadPt),
-  metric((int)nbCoor,(int)nbCoor,(int)nbQuadPt),quadPt((int)nbQuadPt,3)
+  metric((int)nbCoor,(int)nbCoor,(int)nbQuadPt),quadPt((int)nbQuadPt,3),
+  invArea(1.)
 {
   CONSTRUCTOR("StaticBdFE (without quadrature rule)");
   // be carefull : dPhiRef, dPhiGeo are not initialized
