@@ -322,24 +322,44 @@ Real elem_integral_diff( VectorType & u,
                          const CurrentFE& fe,
                          const Dof& dof, const Real t, const int nbcomp )
 {
-    // returns the integral of (u-fct) on the current element
     int i, inod, ig;
     UInt eleID = fe.currentId();
     int ic;
     Real s = 0., u_ig, u_minus_f, x, y, z;
     for ( ig = 0;ig < fe.nbQuadPt;ig++ )
     {
+        fe.coorQuadPt( x, y, z, ig );
         for ( ic = 0; ic < nbcomp; ic++ )
         {
             u_ig = 0.;
             for ( i = 0;i < fe.nbNode;i++ )
             {
-                inod = dof.localToGlobal( eleID, i + 1 ) - 1 + ic * dof.numTotalDof();
+                inod = dof.localToGlobal( eleID, i + 1 )
+                    - 1 + ic * dof.numTotalDof();
                 u_ig += u( inod ) * fe.phi( i, ig );
             }
-            fe.coorQuadPt( x, y, z, ig );
             u_minus_f = u_ig - fct( t, x, y, z, ic + 1 );
             s += u_minus_f * fe.weightDet( ig );
+        }
+    }
+    return s;
+}
+
+//! returns the integral of fct on the current element
+//! for time dependent+vectorial
+Real elem_integral( boost::function<double( double, double, double,
+                                            double, UInt )> fct,
+                    const CurrentFE& fe, const Real t, const int nbcomp )
+{
+    int ig;
+    int ic;
+    Real s = 0., x, y, z;
+    for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+    {
+        fe.coorQuadPt( x, y, z, ig );
+        for ( ic = 0; ic < nbcomp; ic++ )
+        {
+            s += fct( t, x, y, z, ic + 1 ) * fe.weightDet( ig );
         }
     }
     return s;
