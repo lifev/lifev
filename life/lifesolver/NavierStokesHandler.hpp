@@ -111,6 +111,11 @@ public:
     //! Update convective term, bc treatment and solve the linearized ns system
     virtual void iterate( const Real& time ) = 0;
 
+    //! returns the BCHandler
+    BCHandler& bcHandler()
+        {
+            return _BCh_u;
+        }
     //! Returns the velocity vector
     PhysVectUnknown<Vector>& u();
 

@@ -316,6 +316,12 @@ public:
     //! True if a data vector has been provided
     bool dataVector() const;
 
+    //! use vector boundary conditions
+    void setBCVector( BCVectorBase& __v );
+
+    //! use function boundary conditions
+    void setBCFunction( BCFunctionBase& __f );
+
 
     //! Returns a pointer  to the i-th elements in the (finalised) list
     //! (counting from 1 ' a la FORTRAN')

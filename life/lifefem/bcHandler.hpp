@@ -251,7 +251,7 @@ public:
 
     //! output
     std::ostream& showMe( bool verbose = false, std::ostream & out = std::cout ) const;
-    
+
     //@}
 
 
@@ -268,6 +268,20 @@ protected:
 
     //! vector list holding the stored BC
     std::vector<BCBase> _bcList;
+
+private:
+
+    /**
+       look for the BC named \c name.
+
+       It throws an \c invalid_argument exception if \c name is not
+       found.
+
+       \return a pointer to \c BCBase
+     */
+    BCBase* findBC( std::string const& __name );
+
+
 };
 
 /********************************************************************

@@ -185,33 +185,42 @@ BCHandler::addBC( const std::string& name, const EntityFlag& flag,
         // Sorting list of BC. Essential BC must be treated at the end !!!!
         std::sort( _bcList.begin(), _bcList.end() );
 }
-
-void
-BCHandler::modifyBC( std::string const& __name, BCFunctionBase& __bcv )
+BCBase*
+BCHandler::findBC( std::string const& __name )
 {
-
-}
-void
-BCHandler::modifyBC( std::string const& __name, BCVectorBase& __bcv )
-{
-    using namespace boost::lambda;
     BCBase* __bc = 0;
     std::for_each( _bcList.begin(),
                    _bcList.end(),
-                   if_( bind( &BCBase::name, boost::lambda::_1 ) == __name )[var( __bc ) = &boost::lambda::_1] );
+                   boost::lambda::if_then( boost::lambda::bind( &BCBase::name, boost::lambda::_1 ) == __name,
+                                           boost::lambda::var( __bc ) = &boost::lambda::_1 ) );
 
     //! handle invalid name case: ie we didnot find the name in the _bcList
     if ( !__bc )
     {
         std::ostringstream __ex;
-        __ex << "invalid name for BC to be modified : " << __name << "\n"
+        __ex << "Invalid name for BC to be modified : " << __name << "\n"
              << "The list of available BCs is:\n";
         std::for_each( _bcList.begin(),
                        _bcList.end(),
-                       std::cout << bind( &BCBase::name, boost::lambda::_1 ) << constant( "\n" ) );
+                       std::cout << boost::lambda::bind( &BCBase::name, boost::lambda::_1 )
+                       << boost::lambda::constant( "\n" ) );
         throw std::invalid_argument( __ex.str() );
     }
+    return __bc;
+}
+void
+BCHandler::modifyBC( std::string const& __name, BCFunctionBase& __bcf )
+{
+    BCBase* __bc = findBC( __name );
 
+    __bc->setBCFunction( __bcf );
+}
+void
+BCHandler::modifyBC( std::string const& __name, BCVectorBase& __bcv )
+{
+    BCBase* __bc = findBC( __name );
+
+    __bc->setBCVector( __bcv );
 }
 // returns true if the bdUpdate has been done before
 bool BCHandler::bdUpdateDone() const

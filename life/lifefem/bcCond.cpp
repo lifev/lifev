@@ -321,7 +321,19 @@ bool BCBase::dataVector() const
     return _M_dataVector;
 }
 
+void
+BCBase::setBCVector( BCVectorBase& __v )
+{
+    _M_bcv = &__v;
+    _M_dataVector = true;
+}
 
+void
+BCBase::setBCFunction( BCFunctionBase& __f )
+{
+    _M_bcf = boost::shared_ptr<BCFunctionBase>( FactoryCloneBC::instance().createObject( &__f ) );
+    _M_dataVector = false;
+}
 
 Real BCBase::operator() ( const ID& iDof, const ID& iComp ) const
 {
