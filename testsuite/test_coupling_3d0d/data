@@ -27,7 +27,7 @@ timestep  = 0.001                # timestep
 
 
 [../miscellaneous]
-verbose         = 1000
+verbose         = 1
 
 
 [../aztec_i]
