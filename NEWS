@@ -11,9 +11,14 @@ New in 0.6.0:
 
 [lifesolver]
 * Added ParabolicSolver, TimeSolver, *UDep (MM)
+* Added preconditoned Domain Decomposition Newton algorithm (SP GF)
+* Class operFS renamed to FSIOperator (GF)
+* Added class reducedLinFluid that computes the reduced fluid for the jacobian
+  in steklovPoincare and exactJacobian framework (GF)
 
 [testsuite]
 * Added test for ParabolicSolver in lifesolver (MM)
+* Added quasi Newton testsuite (MF)
 
 
 Bugs fixed in 0.5.0:
@@ -22,19 +27,19 @@ Bugs fixed in 0.5.0:
 * Fixed umfpack check when umfpack is not installed (CP)
 
 [lifecore]
-* Cleaned lifecore: nothing belongs to lifecore that should 
+* Cleaned lifecore: nothing belongs to lifecore that should
   belong elsewhere (CP)
 
 [lifefem]
 * Fixed little bugs in basisElSh,currentFE,defQuadRuleFE (MM)
-* Fixed bug in dofInterface3Dto3D constructor: reference to 
+* Fixed bug in dofInterface3Dto3D constructor: reference to
   temporary object (CP)
 
 [lifesolver]
 * Bug #33: random crash in convDiffReactSolverPC::getcoord (MM)
 * Sanitized the FSI related classes especially wrt BC (CP)
 
-[testsuite] 
+[testsuite]
 * Fixed inhomogeneous Neumann conditions test. The test was supposed
 to test these BCs but it was only testing Dirichlet BCs (CW)
 
@@ -54,8 +59,8 @@ New in 0.5.0:
 [lifefem]
 * Added discontinuous finite element(discontinuous galerkin) (DADP)
 * Sanitized/revamped the boundary conditions classes (CP)
-  ** split BC classes into their own files 
-  ** improved documentation 
+  ** split BC classes into their own files
+  ** improved documentation
   ** reduced code redundancy and code size
   ** use clone factory for BCFunction
   ** use clone factory for BCVector
