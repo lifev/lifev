@@ -1,0 +1,404 @@
+/* -*- mode: c++ -*-
+   This program is part of the LifeV library
+   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politechnico di Milano
+
+   This program is free software; you can redistribute it and/or
+   modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2
+   of the License, or (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+*/
+
+//==============================================================================
+//
+//  D. A. Di Pietro
+//  2/2003
+//  
+//  Deforming and streching of a sphere (after Aulisa, Manservisi, Scardovelli)
+// 
+// =============================================================================
+
+#define N_STEPS 100
+#define N_STEP_STORE 9
+#define LAMBDA 0.005
+#define OUTPUTFILE "result.dat"
+#define MESHFILE "../../Meshes/Mesh++/cube_6000.m++"
+
+#define COMPUTE_MATRIX_PRODUCT
+#undef PRINT_MATRICES
+#define COMPUTE_SOLUTION
+#define STORE_INITIAL_CONDITIONS
+#define STORE_SOLUTION
+
+
+#include "main.hpp"
+
+
+typedef EOExpr< Real, AdvecDG<Vortex> > EOAdvecDG;
+
+typedef EOExpr<Real, AdvecIFUW1DG<Vortex> > EOAdvecIFUW1DG;
+
+typedef EOExpr<Real, AdvecIFUW2DG<Vortex> > EOAdvecIFUW2DG;
+
+typedef EOExpr<Real, AdvecBFUWDG<Vortex> > EOAdvecBFUWDG;
+
+int main(){
+  bool built;
+
+  Vortex velocity;
+
+  fstream out(OUTPUTFILE, ios::out);
+
+  //============================================================================
+  // Boundary conditions
+  //============================================================================
+
+  BCFunction_Base gv1(g1);
+  BC_Handler BCh(1);
+   
+  BCh.addBC("Inlet", 10, Essential, Scalar, gv1);
+
+  //============================================================================
+  // Finite element stuff
+  //============================================================================
+
+  const GeoMap & geoMap      = geoLinearTetra;
+  const QuadRule & qr        = quadRuleTetra64pt;
+
+  const GeoMap & geoMapBd    = geoLinearTria;
+  const QuadRule & qrBd      = quadRuleTria4pt;
+
+  const GeoMapDG & geoMapDG  = geoLinearTetraDG;
+
+  const RefFEDG & refFEDG    = feDGTetraP1;
+
+  const RefFE & refBdFE      = feTriaP1;
+
+  //============================================================================
+  // Mesh stuff
+  //============================================================================
+
+  RegionMesh3D<LinearTetra> aMesh;
+
+  long int m = 1;
+
+  readMppFile(aMesh, MESHFILE, m);
+
+  UInt numIFaces = aMesh.numFaces() - aMesh.numBFaces();
+  UInt numBFaces = aMesh.numBFaces();
+
+  built =  buildFaces(aMesh, cout, cerr, numBFaces, numIFaces, true, true, false);
+
+  //============================================================================
+  // Current discontinuous FE, IF, BF classes for the problem under study
+  //============================================================================
+
+  CurrentFEDG feDG(refFEDG, geoMap, qr);
+  cout << "** CurrentFEDG created " << endl;
+
+  CurrentIFDG ifDG(refFEDG, refBdFE, geoMapBd, geoMapDG, qrBd);
+  cout << "** CurrentIFDG created " << endl;
+
+  CurrentBFDG bfDG(refFEDG, refBdFE, geoMapBd, geoMapDG, qrBd);
+  cout << "** CurrentBFDG created " << endl;
+
+  //============================================================================
+  // Update of the Dof and DofByFace for the particular FE problem and for
+  // the boundary conditions (WARNING: bc not yet included)
+  //============================================================================
+
+  Dof dof(elPattern_P1_DG_3D);
+
+  cout << "** DOF created" << endl;
+
+  dof.update(aMesh);
+
+  cout << "** DOF updated" << endl;
+
+  DofByFace dofByFace(facePattern_P1_DG_3D);
+
+  cout << "** DOF by face created" << endl;
+
+  dofByFace.update(aMesh, dof);
+
+  cout << "** DOF by face updated" << endl;
+
+  ElementAdjacency elementAdjacency(aMesh);
+
+  //============================================================================
+  // Initialization of vector unknowns and rhs
+  //============================================================================
+
+  UInt dim = dof.numTotalDof();
+
+  SourceFct sourceFct;
+
+  ScalUnknown<Vector> U(dim), U_old(dim), F(dim), K1(dim), K2(dim), K3(dim), K4(dim);
+  U.vec() = 0.0;
+  F.vec() = 0.0;
+
+  cout << "** Vector unknown and rhs initializated" << endl;
+
+  //============================================================================
+  // Pattern construction and matrix assembling
+  //============================================================================
+
+  MSRPatt pattA(dof, dofByFace);
+
+  MSRPatt pattM(dof);
+
+  MSRMatr<double> A(pattA);
+  MSRMatr<double> B(pattA);
+  MSRMatr<double> invM(pattM);
+
+  cout << "** Pattern for the problem matrices created" << endl;
+
+  //============================================================================
+  // Differential operators we want to solve for, wrapped in a suitable class
+  //============================================================================
+
+  AdvecDG<Vortex> OadvecDG(&feDG);
+
+  EOAdvecDG advecDG(OadvecDG);
+
+  AdvecIFUW1DG<Vortex> OadvecIFUW1DG(&ifDG);
+  AdvecIFUW2DG<Vortex> OadvecIFUW2DG(&ifDG);
+
+  EOAdvecIFUW1DG advecIFUW1DG(OadvecIFUW1DG);
+  EOAdvecIFUW2DG advecIFUW2DG(OadvecIFUW2DG);
+
+  AdvecBFUWDG<Vortex> OadvecBFUWDG(&bfDG);
+  EOAdvecBFUWDG advecBFUWDG(OadvecBFUWDG);
+
+  //============================================================================
+  // Assembling problem matrix
+  //============================================================================
+
+  assemble_AdvecDG(advecDG,
+		   advecIFUW1DG + advecIFUW2DG,
+		   advecBFUWDG,
+		   aMesh,
+		   BCh,
+		   velocity,
+		   feDG, ifDG, bfDG,
+		   dof, dofByFace,
+		   sourceFct,
+		   A, invM, F.vec());
+
+  cout << "** Finished to assemble matrices A and invM" << endl;
+
+#ifdef PRINT_MATRICES
+  A.ShowMe();
+  invM.ShowMe();
+#endif
+
+#ifdef COMPUTE_MATRIX_PRODUCT
+  
+  //============================================================================
+  // Computation of M^(-1) * A and M^(-1) * F
+  //============================================================================
+
+  F.vec() = invM * F.vec();
+
+  cout << "** Finished computation of M^(-1) * F" << endl;
+
+  UInt nV = (UInt)aMesh.numVolumes();
+  UInt nLD =(UInt)dof.numLocalDof();
+
+  UInt igloInvM, jgloInvM;
+  UInt igloA, jgloA, kgloA;
+
+  Real s = 0.;
+  Real locInvM[nLD][nLD];
+
+  UInt jVol, nni;
+
+  for(UInt iVol = 1; iVol <= nV; iVol++){
+
+    // Stores the iVol-th block element of invM
+    for(UInt i = 0; i < nLD; i++){
+      igloInvM = (iVol - 1) * nLD + i;
+      for(UInt j = 0; j < nLD; j++){
+	jgloInvM = (iVol - 1) * nLD + j;
+	locInvM[(int)i][(int)j] = invM.get_value(igloInvM, jgloInvM);
+      }
+    }
+    // Product of diagonal blocks
+    for(UInt i = 0; i < nLD; i++){
+      igloA = (iVol - 1) * nLD + i;
+
+      for(UInt j = 0; j < nLD; j++){
+	jgloA = (iVol - 1) * nLD + j;
+
+	s = 0.;
+
+	for(UInt k = 0; k < nLD; k++){
+	  kgloA = (iVol - 1) * nLD + k;
+
+	  s += locInvM[(int)i][(int)k] * A.get_value(kgloA, jgloA);
+	}
+
+	B.set_mat(igloA, jgloA, s);
+      }
+    }
+
+    // Product of off-diagonal blocks
+    nni = elementAdjacency.nNeighbours(iVol);
+
+    for(UInt jElAdj = 1; jElAdj <= nni; jElAdj++){
+      jVol = elementAdjacency.elToAd(iVol, jElAdj);
+
+      for(UInt i = 0; i < nLD; i++){
+	igloA = (iVol - 1) * nLD + i;
+
+	for(UInt j = 0; j < nLD; j++){
+	  jgloA = (jVol - 1) * nLD + j;
+
+	  s = 0.;
+
+	  for(UInt k = 0; k < nLD; k++){
+	    kgloA = (iVol - 1) * nLD + k;
+
+	    s += locInvM[(int)i][(int)k] * A.get_value(kgloA, jgloA);
+	  }
+
+	  B.set_mat(igloA, jgloA, s);
+	}
+      }
+    }
+  }
+
+  cout << "** Finished computation of M^(-1) * A" << endl;
+
+#ifdef PRINT_MATRICES
+  B.ShowMe();
+#endif
+
+#endif
+
+  UInt globalDof;
+  Real xDof, yDof, zDof;
+
+  //============================================================================
+  // Initial conditions
+  //============================================================================
+  Sphere IC;
+
+  for(UInt jEl = 1; jEl <= dof.numElements(); jEl++){
+    for(UInt jLocalDof = 1; jLocalDof <= dof.numLocalDof(); jLocalDof++){
+      globalDof = dof.localToGlobal(jEl, jLocalDof);
+
+      xDof = aMesh.volumeList(jEl).point(jLocalDof).x();
+      yDof = aMesh.volumeList(jEl).point(jLocalDof).y();
+      zDof = aMesh.volumeList(jEl).point(jLocalDof).z();
+
+      U_old.vec()(globalDof - 1) = IC(xDof, yDof, zDof);
+
+    }
+  }
+
+#ifdef STORE_INITIAL_CONDITIONS
+
+
+  out << "TITLE = \"DG Levelset - Example\"" << endl;
+  out << "VARIABLES = \"X\", \"Y\", \"Z\", \"fi\"" << endl;
+  out << "ZONE T=\"step0\", N =" << dof.numTotalDof() << ", E=" << aMesh.numVolumes() << ", F=FEPOINT, ET=TETRAHEDRON" << endl;
+
+  // Store point coordinate and solution value
+  for(UInt jEl = 1; jEl <= dof.numElements(); jEl++){
+    for(UInt jLocalDof = 1; jLocalDof <= dof.numLocalDof(); jLocalDof++){
+
+      globalDof = dof.localToGlobal(jEl, jLocalDof);
+
+      xDof = aMesh.volumeList(jEl).point(jLocalDof).x();
+      yDof = aMesh.volumeList(jEl).point(jLocalDof).y();
+      zDof = aMesh.volumeList(jEl).point(jLocalDof).z();
+
+      out << xDof << " " << yDof << " " << zDof << " " << U_old.vec()(globalDof - 1) << endl;
+    }
+  }
+
+  // Store connectivities
+  for(UInt jEl = 1; jEl <= dof.numElements(); jEl++){
+    for(UInt jLocalDof = 1; jLocalDof <= dof.numLocalDof(); jLocalDof++){
+
+      globalDof = dof.localToGlobal(jEl, jLocalDof);
+
+      out << globalDof << " ";
+    }
+    out << endl;
+  }
+#endif
+
+#ifdef COMPUTE_SOLUTION
+  UInt step_store = 0;
+
+  //============================================================================
+  // Problem solution with explicit 4-stage Runge Kutta method
+  // The time step must be determined according to the CFL condition
+  //============================================================================
+  for(UInt istep = 0; istep < N_STEPS; istep ++) {
+    K1.vec() = (-1) * (B * U_old.vec()) + F.vec();
+    K2.vec() = (-1) * (B * (U_old.vec() + (LAMBDA / 2) * K1.vec())) + F.vec();
+    K3.vec() = (-1) * (B * (U_old.vec() + (LAMBDA / 2) * K2.vec())) + F.vec();
+    K3.vec() = (-1) * (B * (U_old.vec() + LAMBDA * K3.vec())) + F.vec();
+
+    U.vec() = U_old.vec() + (LAMBDA / 6) * (K1.vec() + 2 * K2.vec() + 2 * K3.vec() + K4.vec());
+
+    U_old.vec() = U.vec();
+    cout << "** End of step " << istep + 1 << endl;
+
+#ifdef STORE_SOLUTION
+    if(step_store == N_STEP_STORE){
+      step_store = 0;
+
+      out << "ZONE T=\"step" << istep + 1 << "\", N =" << dof.numTotalDof() << ", E=" << aMesh.numVolumes() << ", F=FEPOINT, ET=TETRAHEDRON" << endl;
+
+      // Store point coordinate and solution value
+      for(UInt jEl = 1; jEl <= dof.numElements(); jEl++){
+	for(UInt jLocalDof = 1; jLocalDof <= dof.numLocalDof(); jLocalDof++){
+
+	  globalDof = dof.localToGlobal(jEl, jLocalDof);
+
+	  xDof = aMesh.volumeList(jEl).point(jLocalDof).x();
+	  yDof = aMesh.volumeList(jEl).point(jLocalDof).y();
+	  zDof = aMesh.volumeList(jEl).point(jLocalDof).z();
+
+	  out << xDof << " " << yDof << " " << zDof << " " << U.vec()(globalDof - 1) << endl;
+	}
+      }
+
+      // Store connectivities
+      for(UInt jEl = 1; jEl <= dof.numElements(); jEl++){
+	for(UInt jLocalDof = 1; jLocalDof <= dof.numLocalDof(); jLocalDof++){
+
+	  globalDof = dof.localToGlobal(jEl, jLocalDof);
+
+	  out << globalDof << " ";
+	}
+	out << endl;
+      }
+    }else{
+      step_store++;
+    }
+
+#endif
+
+  }
+
+#ifdef COMPUTE_SOLUTION
+  out.close();
+#endif
+
+#endif
+
+  return 0;
+}
