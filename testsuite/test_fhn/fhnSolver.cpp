@@ -122,7 +122,7 @@ namespace LifeV{
   void FhNSolver::compute_rhs()
   {
     std::cout <<"*** RHS computation..." << std::flush;
-    rhs = 0.;
+    rhs = ZeroVector(2*dimdof);
     for(UInt i=1; i<=mesh.numVolumes(); ++i){
       elvec.zero();
       fe.updateFirstDerivQuadPt(mesh.volumeList(i));
