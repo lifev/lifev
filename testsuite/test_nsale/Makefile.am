@@ -29,6 +29,6 @@ include $(top_srcdir)/testsuite/Makefile.testsuite
 #
 
 check_PROGRAMS = #test_nsale
-noinst_HEADERS = ud_functions.hpp 
+noinst_HEADERS = ud_functions.hpp pvm3.h
 #test_nsale_SOURCES = main.cpp
-EXTRA_DIST = data 
+EXTRA_DIST = data main.cpp imp3dt2.mesh 
