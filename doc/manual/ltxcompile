@@ -1,0 +1,28 @@
+#!/bin/sh
+
+logfile="ltxcompile.log"
+# redirect errors to a file in user's home directory if we can
+if cp /dev/null "$logfile" 2> /dev/null ; then
+    chmod a+r "$logfile"
+    exec > "$logfile" 2>&1
+fi
+
+showlog(){
+  # print 5 lines of leading context before each error
+  # pint the line of ltxcompile.log
+  cat ltxcompile.log | grep -B 5 -n Error
+}
+trap "showlog" 1 2 3 4 5 6 7 8 9 10 11
+
+TEXINPUTS=$srcdir:$top_srcdir/doc/tex//:$TEXINPUTS BIBINPUTS=$BIBINPUTS:$srcdir:$top_srcdir/doc/tex//:$BIBINPUTS 
+
+prefix=`basename $1 .tex`
+
+ltxcmdlines="--interaction nonstopmode --file-line-error-style"
+
+pdflatex $ltxcmdlines $prefix
+bibtex $prefix
+makeindex $prefix
+pdflatex $ltxcmdlines $prefix
+pdflatex $ltxcmdlines $prefix
+
