@@ -70,8 +70,8 @@ namespace LifeV
                            Vector &veloStruct);
         
         void evalResidual (Vector &sol,
-                           Vector &res,
-                           int    iter);
+                           int    iter,
+                           Vector &res);
             
         void updatePrec   (Vector& sol,
                            int     iter);
