@@ -1594,7 +1594,7 @@ MSRMatr(const MSRPatt* ex_pattern, const vector<DataType> &ex_value):
 template<class DataType>
 MSRMatr<DataType>::
 MSRMatr(const MSRMatr<DataType> &RightHandMSR):
-  _Patt(RightHandMSR.Patt()),_value(RightHandMSR.value()) {};
+  _value(RightHandMSR.value()),_Patt(RightHandMSR.Patt()) {};
 
 template<class DataType>
 MSRMatr<DataType>&
