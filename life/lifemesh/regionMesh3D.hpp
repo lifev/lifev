@@ -1,64 +1,65 @@
 /*
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
+  This file is part of the LifeV library
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+  Authors: Luca Formaggia
+           Miguel Fernandez
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+  Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-/*! file regionMesh3D.h
+/*!
+  \file regionMesh3D.hpp
   \brief The mesh classes interfaces
-  \version $Revision: 1.13 $ Luca Formaggia
-  \version $Revision: 1.13 $ Miguel Fernandez
-
   Introduces the RegionMesh3D class
 */
 
 #ifndef _REGIONMESH3D_HH_
 #define _REGIONMESH3D_HH_
 
-#if defined(__Linux)
-# include <cstdlib>
-#elif defined(__OSF1)
-# include <stdlib.h>
-#endif
+#include <cstdlib>
+#include <iomanip>
+#include <fstream>
 
 #include <life/lifecore/life.hpp>
 #include <life/lifemesh/geoElement.hpp>
 #include <life/lifecore/switch.hpp>
 #include <life/lifemesh/bareItems.hpp>
-#include <iomanip>
-#include <fstream>
+
 #include <life/lifearray/vecUnknown.hpp>
 #include <life/lifearray/SimpleVect.hpp>
 
-
-/* stl wrap of vector class template.
-   It supports numbering from one */
 #include <life/lifemesh/basisElSh.hpp>
 
 namespace LifeV
 {
-/* ---------------------------------------------------------------------
-   RegionMesh 3D
-   -----------------------------------------------------------------------*/
+/**
+  \class RegionMesh3D
+  \brief The Region Mesh Class
 
-//! The Region Mesh Class
-/*!  This is the class that stores the mesh entities for a single region In
-  a region elements are all of the same type */
+  This is the class that stores the mesh entities for a single region In
+  a region elements are all of the same type
 
+  \author Luca Formaggia
+  \author Miguel Fernandez
+*/
 template <typename GEOSHAPE, typename MC = DefMarkerCommon >
-class RegionMesh3D : public MeshEntity, public MC::RegionMarker
+class RegionMesh3D
+    :
+    public MeshEntity,
+    public MC::RegionMarker
 {
 
 public:
