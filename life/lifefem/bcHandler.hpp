@@ -663,18 +663,18 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
 		// vincent please check again for your Mixte-FE it doesn't work for Q1
 		if ( where->dataVector() )
 		  { // With data vector
-		    UInt type = where->pointerToBCVector() ->type() ; 
+		    UInt type = where->pointerToBCVector()->type() ; 
 		    if ( type = 0 )
 		      {
-                          // if the BC is a function or a vector which values don't need to be integrated
+                          // if the BC is a vector which values don't need to be integrated
 			for ( ID l = 1; l <= nDofpF; ++l )
 			  {
 			    lDof = nDofFE + nDofFV + l; // local Dof
 			    gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iFaEl - 1 ) * nDofpF + l ); // global Dof
 			    where->addIdentifier( new IdentifierNatural( gDof ) );
-			    }
+			  }
 		      }
-		    else if ( type = 1 || type == 2 ) 
+		    else if ( (type == 1) || (type == 2) ) 
 			{
 			  // Loop on number of Dof per face
 			  for ( ID l = 1; l <= nDofpF; ++l )
