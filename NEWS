@@ -3,6 +3,8 @@ Bugs fixed in 0.3.0:
 * Fixed testsuite/test_linearsolvers (CP)
 
 New in 0.3.0:
+* Added more tests in testsuite/lifealg for linearsolvers (CP)
+* Replaced values.{h,c}pp with sparseArray.{h,c}pp (LF & CP)
 * Added 1D model solver for blood flow simulation (VM)
 * Added vector norms in lifealg/vectorNorms.{h,c}pp (CP)
 * Added reaction term in masstransport (MP)
