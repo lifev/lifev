@@ -76,10 +76,9 @@ namespace LifeV
 
 //----------------------------------------------------------------------
 
-        Real linres;
+        Real linres = 1.e-3;
 
         int    iter         = 0;
-        int    increase_res = 0;
 
         int    nDofFS       = sol.size();
 
@@ -94,23 +93,15 @@ namespace LifeV
         step                = 0.;
 
         Real   normResOld   = 1;
-        Real   slope;
 
         Real   omegaS       = omega;
         Real   omegaF       = omega;
 
         f.evalResidual(residual, sol, iter);
 
-        f.fluid().postProcess();
-        f.solid().postProcess();
-        
         Real normRes        = norm(residual);
-        Real normStep       = 0;
         Real stop_tol       = abstol + reltol*normRes;
         Real linear_rel_tol = fabs(eta_max);
-
-        Real eta_old;
-        Real eta_new;
 
         generalizedAitken<Vector,Real> aitken(nDofFS, omegaS, omegaF);
 
@@ -135,27 +126,25 @@ namespace LifeV
             normResOld = normRes;
             normRes    = norm(residual);
 
-            f.updatePrec(sol, iter);
-
+            //f.updateJac(sol, iter);
+            //f.solveJac(step, -1.*residual, linres);
+            muF = 0.;
+            
             linres     = linear_rel_tol;
 
             muS        = residual - muS;
             
-            step       = aitken.computeDeltaLambda(sol, muS, muF);
+            //step       = aitken.computeDeltaLambda(sol, muS);
+
+            f.solveJac(step,-1.*residual,linres); // residual = f(sol)
 
             
             std::cout << "Step norm = " << norm(step) << std::endl;
             
             muS        = residual;
-            sol       -= step;
 
-            
-//            sol = 0.;
+            sol       += step;
             f.evalResidual(residual, sol, iter);
-
-            f.fluid().postProcess();
-            f.solid().postProcess();
-            
             
             normRes    = norm(residual);
 
