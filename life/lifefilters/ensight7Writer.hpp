@@ -35,7 +35,6 @@
 #include <string>
 
 #include "lifeV.hpp"
-#include "NavierStokesSolverPC.hpp"
 
 namespace LifeV
 {
@@ -79,7 +78,6 @@ bool outensight7Mesh3D( RegionMesh3D const & mesh,
     std::vector<Coord> grid; // coordinates of Grid nodes
     grid.resize( mesh.numVertices() + mesh.numVolumes() );
     //  grid.resize(mesh.numVertices()+mesh.numEdges());
-
 
     for ( ID i = 0; i < mesh.numVertices(); i++ )
     {
