@@ -24,6 +24,8 @@
 AM_CXXFLAGS		= -DTHREEDIM -gstabs
 LDADD			= $(life_libs)
 
+INCLUDES		= $(all_includes)
+
 test: $(TESTINGS)
 
 

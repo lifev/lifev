@@ -22,9 +22,9 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-SUBDIRS         =  
-check_PROGRAMS = test_p2
+include $(top_srcdir)/testsuite/Makefile.testsuite
+
 noinst_HEADERS = main.hpp ud_functions.hpp 
-LDADD = $(life_libs)
+
+check_PROGRAMS = test_p2
 test_p2_SOURCES = main.cpp 
-EXTRA_DIST = 
