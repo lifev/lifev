@@ -141,7 +141,7 @@ int main(int argc, char** argv)
     //
     BCHandler BCh_u(4);
     BCHandler BCh_d(4);
-    BCHandler BCh_mesh(7);
+    BCHandler BCh_mesh(7, true);
 
 
     //========================================================================================
@@ -228,7 +228,7 @@ int main(int argc, char** argv)
     //========================================================================================
     //
 
-    BCHandler BCh_du(3);
+    BCHandler BCh_du(3, true);
     BCHandler BCh_dz(4);
 
     operFS oper(fluid, solid, BCh_du, BCh_dz);
