@@ -383,8 +383,9 @@ iterate()
 
     if ( status == 1 )
     {
-        std::cout << "Inners iterations failed\n";
-        exit( 1 );
+        std::ostringstream __ex;
+        __ex << "VenantKirchhofSolver::iterate() Inners newton iterations failed to converge\n";
+        throw std::logic_error( __ex.str() );
     }
     else
     {
@@ -412,8 +413,9 @@ iterate(Vector &_sol)
 
     if ( status == 1 )
     {
-        std::cout << "Inners iterations failed\n";
-        exit( 1 );
+        std::ostringstream __ex;
+        __ex << "VenantKirchhofSolver::iterate( Vector ) Inners newton iterations failed to converge\n";
+        throw std::logic_error( __ex.str() );
     }
     else
     {
