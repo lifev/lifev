@@ -147,12 +147,10 @@ public:
 
     //! calculate L2 pressure error for given exact pressure function
     //! takes into account a possible offset by a constant
-    template<typename UsrFct>
-    Real pErrorL2( UsrFct& pexact );
+    Real pErrorL2( const Function& pexact, Real time );
 
     //! calculate L2 velocity error for given exact velocity function
-    template<typename UsrFct>
-    Real uErrorL2( UsrFct& uexact );
+    Real uErrorL2( const Function& uexact, Real time );
 
     //! Do nothing destructor
     virtual ~NavierStokesHandler()
@@ -728,8 +726,7 @@ NavierStokesHandler<Mesh>::flux( const EntityFlag& flag )
 }
 
 template<typename Mesh>
-template<typename UsrFct>
-Real NavierStokesHandler<Mesh>::pErrorL2( UsrFct& pexact )
+Real NavierStokesHandler<Mesh>::pErrorL2( const Function& pexact, Real time )
 {
     Real sum2 = 0.;
     Real sum1 = 0.;
@@ -737,23 +734,22 @@ Real NavierStokesHandler<Mesh>::pErrorL2( UsrFct& pexact )
     for ( UInt iVol = 1; iVol <= _mesh.numVolumes(); iVol++ )
     {
         _fe_p.updateFirstDeriv( _mesh.volumeList( iVol ) );
-        sum2 += elem_L2_diff_2( _p, pexact, _fe_p, _dof_p, M_time, 1 );
-        sum1 += elem_integral_diff( _p, pexact, _fe_p, _dof_p, M_time, 1 );
+        sum2 += elem_L2_diff_2( _p, pexact, _fe_p, _dof_p, time, 1 );
+        sum1 += elem_integral_diff( _p, pexact, _fe_p, _dof_p, time, 1 );
         sum0 += _fe_p.measure();
     }
     return sqrt( sum2 - sum1*sum1/sum0 );
 }
 
 template<typename Mesh>
-template<typename UsrFct>
-Real NavierStokesHandler<Mesh>::uErrorL2( UsrFct& uexact )
+Real NavierStokesHandler<Mesh>::uErrorL2( const Function& uexact, Real time )
 {
     Real normU = 0.;
     UInt nbCompU = _u.nbcomp();
     for ( UInt iVol = 1; iVol <= _mesh.numVolumes(); iVol++ )
     {
         _fe_u.updateFirstDeriv( _mesh.volumeList( iVol ) );
-        normU += elem_L2_diff_2( _u, uexact, _fe_u, _dof_u, M_time,
+        normU += elem_L2_diff_2( _u, uexact, _fe_u, _dof_u, time,
                                  int( nbCompU ) );
     }
     return sqrt( normU );
