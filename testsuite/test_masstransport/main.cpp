@@ -67,6 +67,13 @@ int main(int argc, char** argv)
     Real T  = ns.endtime();
     Real startT = ns.inittime();
 
+    if( dt != cdr.timestep())
+    {	
+       std::cerr << "Time steps of fluid und mass transport class are different" << std::endl;
+       std::cerr << "Please check data file" << std::endl;
+       abort();
+    }
+
     if(startT > 0.0){
         std::cout << "initialize velocity and pressure with data from file" << std::endl;
         ostringstream indexin;
