@@ -21,10 +21,10 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-/**
-   \file HyperbolicSolverIP.hpp
-   \author Daniele Antonio Di Pietro <dipietro@unibg.it>
-   \date 1-26-2005
+/*!
+  \file HyperbolicSolverIP.hpp
+  \author Daniele Antonio Di Pietro <dipietro@unibg.it>
+  \date 1-26-2005
 */
 
 #ifndef _HYPERBOLICSOLVERIP_HPP_
@@ -60,28 +60,26 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <elemOper2Fluids.hpp>
 
 namespace LifeV {
-    /**
-       \A type for points and vectors. Points are defined by their position 
-       \vectors.
+    /*!
+      A type for points and vectors. Points are defined by their position
+      vectors.
     */
     typedef boost::numeric::ublas::bounded_vector<Real, 3> geo_point_type;
 
 
     /*!
       \class HyperbolicSolverIP
-      \brief Level set solver class
+      \brief hyperbolic solver class
 
-      \c Hyperbolic solver with IP stabilization
+      Hyperbolic solver with IP stabilization
 
       @author Daniele Antonio Di Pietro <dipietro@unibg.it>
-      @see
     */
 
     template<typename MeshType>
     class HyperbolicSolverIP {
     public:
-        /** @name Typedefs
-         */
+        /*! @name Typedefs */
         //@{
         typedef geo_point_type vector_type;
 
@@ -103,19 +101,19 @@ namespace LifeV {
 
         typedef Funct function_type;
 
-        /** @name Constructors
-         */
+        /*! @name Constructors */
         //@{
+
         HyperbolicSolverIP(mesh_type& mesh,
                            const GetPot& data_file,
                            const std::string& data_section,
-                           const RefFE& reffe, 
-                           const QuadRule& qr, 
-                           const QuadRule& qr_bd, 
+                           const RefFE& reffe,
+                           const QuadRule& qr,
+                           const QuadRule& qr_bd,
                            const BCHandler& bc_h,
                            CurrentFE& fe_velocity,
                            const Dof& dof_velocity,
-                           velocity_type& velocity0) 
+                           velocity_type& velocity0)
             :
             _M_mesh(mesh),
             _M_data_file(data_file),
@@ -146,69 +144,58 @@ namespace LifeV {
             _M_solver.setOptionsFromGetPot(_M_data_file, (_M_data_section + "/solver").data());
             _M_gamma = _M_data_file((_M_data_section + "/ipstab/gamma").data(), 0.125);
         }
+        
         //@}
 
-        /** @name Accessors
+        /*! @name Accessors
          */
         //@{
-        /**
-           \Return current time
-        */
 
+        /*! \return current time */
         inline Real currentTime() {
             return _M_t;
         }
 
-        const Dof& dof(){
+        /*! \return the dof table */
+        const Dof& dof() const {
             return _M_dof;
         }
 
-        /**
-           \Return time at next step
-        */
-
+        /*! \return time at next step */
         inline Real nextStepTime() {
             return _M_t + _M_delta_t;
         }
+
         //@}
 
-        /** @name Mutators
-         */
+        /*! @name Mutators */
         //@{
-        /**
-           \Set advection field
-        */
+
+        //! Set advection field
         void setVelocity(velocity_type& velocity) const {
             _M_velocity = velocity;
         }
+
         //@}
-        
-        /** @name Methods
-         */
+
+        /*! @name Methods */
         //@{
 
-        /**
-           \Initialize the solver
-        */
-        void initialize(const function_type& lsfunction0, Real t0, Real delta_t);
+        //! Initialize the solver
+        void initialize(const function_type& lsfunction0,
+                        Real t0, Real delta_t);
 
-        /**
-           \Update the right hand side for time advancement
-        */
+        //! Update the right hand side for time advancement
         void timeAdvance();
 
-        /**
-           \Return the level set function
-        */
+        /*! \return the current numeric solution */
         u_type const & u() const {
             return _M_u;
         }
 
-        /**
-           \Update left hand side and solve the system
-        */
+        //! Update left hand side and solve the system
         void iterate();
-       
+
     protected:
         //! Mesh
         mesh_type& _M_mesh;
@@ -310,14 +297,11 @@ namespace LifeV {
         //! The coefficient for stabilization parameters scaling
         Real _M_gamma;
 
-        /** @name Methods
+        /*! @name Methods
          */
         //@{
 
-        /**
-           \Compute the stabilization parameters
-        */
-
+        //! Compute the stabilization parameters
         void compute_stabilization_parameters() {
             _M_h2pK.resize( _M_mesh.numVolumes() );
 
@@ -332,18 +316,14 @@ namespace LifeV {
             }
         }
 
-        /**
-           \Compute the mass matrix and the constant part of problem matrix
-        */
-
+        //! Compute the mass matrix and the constant part of problem matrix
         void compute_M_A_steady();
 
-        /**
-           \Evaluate velocity field on qn_id-th quadrature node of fe_id-th
-           \element. It is assumed that the same mesh is used for both the
-           \velocity field and the unknown
+        /*!
+          Evaluate velocity field on qn_id-th quadrature node of fe_id-th
+          element. It is assumed that the same mesh is used for both the
+          velocity field and the unknown
         */
-
         inline void evaluate_velocity(UInt fe_id, ElemVec& elvec) {
             UInt dim = _M_dof_velocity.numTotalDof();
             for(UInt j = 0; j < (UInt)_M_fe_velocity.nbNode; j++) {
@@ -354,17 +334,16 @@ namespace LifeV {
             }
         }
 
-        /**
-           \Compute the advection part of problem matrix, which is 
-           \time-dependent in non-steady multi-fluid problems
+        /*!
+          Compute the advection part of problem matrix, which is
+          time-dependent in non-steady multi-fluid problems
         */
-
         void add_A_unsteady();
 
-        /**
-           \Apply boundary conditions. Only Dirichelet (essential) boundary 
-           \conditions are considered on the sole inflow boundary nodes. At
-           \present time only bc given in functional form are considered.
+        /*!
+          Apply boundary conditions. Only Dirichlet (essential) boundary
+          conditions are considered on the sole inflow boundary nodes. At
+          present time only bc given in functional form are considered.
         */
 
         void apply_bc();
@@ -434,7 +413,7 @@ namespace LifeV {
     void HyperbolicSolverIP<MeshType>::apply_bc() {
         // To be completed
     }
-   
+
     template<typename MeshType>
     void HyperbolicSolverIP<MeshType>::initialize(const function_type& u0, Real t0, Real delta_t) {
         // Set initial time and time step
@@ -445,10 +424,10 @@ namespace LifeV {
 
         _M_bdf.initialize_unk(u0, _M_mesh, _M_reffe, _M_fe, _M_dof, _M_t0, _M_delta_t, 1);
         _M_u = *_M_bdf.unk().begin();
-                
+
         // Check if mesh has internal faces. If not, build them
 
-        if( !_M_mesh.hasInternalFaces() ) 
+        if( !_M_mesh.hasInternalFaces() )
             std::cerr << "ERROR: Mesh must store internal faces" << std::endl;
         /*
           {
@@ -457,7 +436,7 @@ namespace LifeV {
 
           buildFaces(_M_mesh, std::cout, std::cerr, num_b_faces, num_i_faces, true, true, false);
           }
-        */  
+        */
         // Compute the stabilization parameters
 
         compute_stabilization_parameters();
