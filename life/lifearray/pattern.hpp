@@ -18,7 +18,7 @@
 */
 /*----------------------------------------------------------------------*
 |
-| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.4 2004-06-22 14:42:33 simone Exp $
+| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.5 2004-06-23 12:12:58 simone Exp $
 |
 |
 | #Version  0.1 Experimental   07/7/00. Luca Formaggia & Alessandro Veneziani  |
@@ -633,7 +633,7 @@ public:
   inline const PATTERN * block_ptr(Diff_t const m, Diff_t const n) const; // Pointer to a a local pattern
 
   inline pair<UInt,UInt> blockOffset(UInt const m, UInt const n) const;// The row/col offsets of the block
-  pair<Diff_t,Diff_t> locateElBlock(Index_t const i_g, Index_t const j_g) const;
+  pair<UInt,UInt> locateElBlock(Index_t const i_g, Index_t const j_g) const;
   //  Gives the block numbering corresponding to the  GLOBAL matrix index (i_g,j_g) Returns
   // (BROWS,BCOLS) if element not found
   pair<Diff_t,Diff_t> locateDofBlock(ID const di_g, ID const dj_g) const;
@@ -2244,7 +2244,7 @@ MixedPattern<BROWS,BCOLS,PATTERN>::blockOffset(UInt const m, UInt const n) const
 
 template
 <UInt BROWS, UInt BCOLS, typename PATTERN>
-pair<PatternDefs::Diff_t,PatternDefs::Diff_t>
+pair<UInt,UInt>
 MixedPattern<BROWS,BCOLS,PATTERN>::
 locateElBlock(Index_t const i_g, Index_t const j_g) const
 {
