@@ -211,8 +211,10 @@ NavierStokesWithFlux<NSSolver>::solve()
     PhysVectUnknown<Vector> u_nso(_M_solver->uDof().numTotalDof());
     PhysVectUnknown<Vector> p_nso(_M_solver->pDof().numTotalDof());
     u_nso=_M_solver->u();
-    //p_nso=_M_solver->p();
-    
+    for (UInt jj=0 ; jj<_M_solver->pDof().numTotalDof(); jj+=1) {
+      p_nso[jj]=_M_solver->p()[jj];
+    }
+
     // compute the flux of NSo  
     //  
     Qno=_M_solver->flux(1); 
@@ -275,7 +277,9 @@ NavierStokesWithFlux<NSSolver>::solve()
 
       // update the velocity and the pressure
       _M_solver->u()=_M_solver->u()-z*u_nso;
-      //_M_solver->p()=_M_solver->p()-z*p_nso;
+      for (UInt jj=0 ; jj<_M_solver->pDof().numTotalDof(); jj+=1) {
+        _M_solver->p()[jj]=_M_solver->p()[jj]-z*p_nso[jj];
+      }
 
       // Save the final solutions
       // 
