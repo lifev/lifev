@@ -60,6 +60,10 @@ namespace LifeV
         Vector        computeDeltaLambda(const Vector &,
                                          const Vector &,
                                          const Vector &);
+
+        Vector        computeDeltaLambda(const Vector &,
+                                         const Vector &);
+
         
     private:
 
@@ -211,6 +215,20 @@ namespace LifeV
         
         return deltaLambda;
     }
+
+
+    /*! one parameter version.*/    
+    template<class Vector, class Real>
+    Vector generalizedAitken<Vector, Real>::computeDeltaLambda(const Vector &_lambda,
+                                                               const Vector &_mu)
+    {
+        Vector    deltaLambda;
+        Vector muF(_mu);
+        muF=0;
+        
+        return computeDeltaLambda(_lambda, _mu, muF);
+    }
+    
 
     
 }
