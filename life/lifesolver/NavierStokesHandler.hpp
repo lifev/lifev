@@ -375,12 +375,17 @@ protected:
     std::vector< face_dof_type > M_list_of_faces_on_section_velocity;
     std::vector< face_dof_type > M_list_of_faces_on_section_pressure;
     //! points that are on the external boundary (used to compute the area)
-    std::vector< std::pair<ID, ID> > M_list_of_points_on_boundary;
+    std::vector< std::pair<ID, ID> >  M_list_of_points_on_boundary;
 
     std::ofstream M_out_areas;
     std::ofstream M_out_areas_polygon;
     std::ofstream M_out_fluxes;
     std::ofstream M_out_pressure;
+
+
+private:
+
+    bool          M_setBC;
 
 };
 

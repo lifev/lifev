@@ -83,7 +83,9 @@ public:
       \todo allow to change the FSI operator on the fly
      */
     FSISolver( GetPot const& datafile,
-               bchandler_type& __bcu, bchandler_type& __bcd, bchandler_type& __bchext,
+               bchandler_type __bcu,
+               bchandler_type __bcd,
+               bchandler_type __bchext,
                std::string __oper = "" );
 
     //@}
