@@ -23,4 +23,4 @@
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
 
-SUBDIRS		= data official development
+SUBDIRS		= data test_mesh test_matrix test_naturalbc test_essentialbc
