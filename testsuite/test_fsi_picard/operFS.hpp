@@ -33,11 +33,19 @@ class operFS {
   operFS(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
 	 VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid);
 
+  void setTime(const Real time) {
+    _time = time;
+  }
+
   void eval(Vector& dispNew, Vector& veloStruct, const Vector& disp,int status);
 
   NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& _fluid;
 
   VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& _solid;
+
+ private:
+
+  Real _time;
 
 };
 
@@ -52,8 +60,8 @@ void operFS::eval(Vector& dispNew, Vector& velo, const Vector& disp, int status)
 
   _solid.d() = disp;
 
-  _fluid.updateMesh();
-  _fluid.iterate();
+  _fluid.updateMesh(_time);
+  _fluid.iterate(_time);
   _solid.iterate();
 
   dispNew = _solid.d();

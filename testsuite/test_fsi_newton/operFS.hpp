@@ -89,6 +89,12 @@ class operFS {
 
   DataJacobian _dataJacobian;
 
+  void setTime(const Real& time);
+
+ private:
+
+  Real _time;
+
 };
 
 void my_matvecJacobian(double *z, double *Jz, AZ_MATRIX* J, int proc_config[]);

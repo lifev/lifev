@@ -43,8 +43,8 @@ void operFS::eval(Vector& dispNew, Vector& velo, const Vector& disp, int status)
 
   _solid.d() = disp;
 
-  _fluid.updateMesh();
-  _fluid.iterate();
+  _fluid.updateMesh(_time);
+  _fluid.iterate(_time);
 
   _solid._recur=0;
   _solid.iterate();
@@ -137,7 +137,7 @@ void  operFS::solveJac(Vector& step, const Vector& res, double& linear_rel_tol) 
 //
 void  operFS::solveLinearFluid() {
 
-  _fluid.iterateLin(_BCh_du);
+  _fluid.iterateLin(_time, _BCh_du);
 
 }
 
@@ -163,6 +163,9 @@ UInt operFS::nbEval() {
   return _nbEval;
 }
 
+void operFS::setTime(const Real& time) {
+    _time = time;
+}
 
 void my_matvecJacobian(double *z, double *Jz, AZ_MATRIX* J, int proc_config[]) {
 
