@@ -1,19 +1,24 @@
-Bugs fixed in 0.1.90
-* Bug #23: fixed wrong assembly in elemOper.cpp in stiff_sd (MP)
-* Bug #27: "No rule to make target `admin/acinclude.m4.in'"
+Bugs fixed in 0.2.0-pre1:
+* Bug #23: "fixed wrong assembly in elemOper.cpp in stiff_sd" (MP)
+* Bug #27: "No rule to make target `admin/acinclude.m4.in'" (CP)
+* Bug #19: "Missing mesh (carotid.m++) in test_ns_sstress" (AV)
 
-New in 0.1.90:
-* Task #xx completed (LF & CP)
-* Task #xx added preliminary mass transport support (MP)
-* added area debugging see LDebug class (CP)
-* added a petsc interface in lifealfg, see SolverPETSC class (CP)
-* chenged interface to vecUnknown classes: no need to use .vec() anymore
+Tasks completed in 0.2.0-pre1:
+* Task #104: "Generate new directory layout" (CP)
+* Task #105: "move files into proper new directories" (CP & LF)
+* Task #109: "Convection Reaction Diffusion solver implementation" (MP)
+
+New in 0.2.0-pre1:
+* Added area debugging see LDebug class (CP)
+* Added a petsc interface in lifealfg, see SolverPETSC class (CP)
+* Changed interface to vecUnknown classes: no need to use .vec() anymore
   fixed speed issues at the same time (CP)
-* updated libtool scripts (CP)
-* added configure check for parmetis (at least 3.1) (CP)
-* added configure check for petsc (at least 2.1.6) (CP)
-* added configure check for umfpack (at least 4.3) (CP)
-* added configure check for mpi (CP)
+* Updated libtool scripts (CP)
+* Added configure check for parmetis (at least 3.1) (CP)
+* Added configure check for petsc (at least 2.1.6) (CP)
+* Added configure check for umfpack (at least 4.3) (CP)
+* Added configure check for mpi (CP)
+* Updated api documentation generation(CP)
 
 
 Bugs fixed in 0.1.0pre5:
