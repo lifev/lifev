@@ -37,6 +37,7 @@
 #include "bdf.hpp"
 
 #undef INRIA
+#define USE_AZTEC_SOLVER
 
 int main() {
     using namespace LifeV;
@@ -185,10 +186,10 @@ int main() {
 
     SolverAztec solver;
 
-    LevelSetSolver<meshType> lss(datafile, solver, refFE, qr, qrBd, BCh, fe, dof, betaVec);
+    LevelSetSolver<meshType> lss(datafile, refFE, qr, qrBd, BCh, fe, dof, betaVec);
     lss.initialize(sphere);
 
-    LevelSetSolver<meshType>::lsfunction_type U = lss.lsfunction();
+    const LevelSetSolver<meshType>::lsfunction_type& U = lss.lsfunction();
     std::string outputFileRoot = "./results/ls_ip";
 
     // Save initial conditions
@@ -218,8 +219,6 @@ int main() {
             number.width(4);
             number.fill('0');
             number << current_step;
-
-            U = lss.lsfunction();
 
             wr_opendx_header(outputFileRoot + number.str() + ".dx", mesh, dof); 
             wr_opendx_scalar(outputFileRoot + number.str() + ".dx", "levelset_ipstab", U);

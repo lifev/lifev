@@ -45,8 +45,11 @@ namespace LifeV {
       @author Daniele Antonio Di Pietro <dipietro@unibg.it>
       @see
     */
-    template<typename MeshType, typename SolverType = SolverAztec>
-    class LevelSetSolver : public HyperbolicSolverIP<MeshType> {
+    template<typename MeshType>
+    class LevelSetSolver 
+        : 
+        public HyperbolicSolverIP<MeshType> 
+    {
     public:
         /**
            @name Subclasses
@@ -210,9 +213,7 @@ namespace LifeV {
          */
         //@{
         typedef MeshType mesh_type;
-        typedef SolverType solver_type;
-
-        typedef typename HyperbolicSolverIP<mesh_type, solver_type>::velocity_type velocity_type;
+        typedef typename HyperbolicSolverIP<mesh_type>::velocity_type velocity_type;
 
         typedef geo_point_type point_type;
         typedef geo_point_type vector_type;
@@ -234,7 +235,6 @@ namespace LifeV {
          */
         //@{
         LevelSetSolver(const GetPot& datafile,
-                       solver_type& solver,
                        const RefFE& reffe, 
                        const QuadRule& qr, 
                        const QuadRule& qr_bd, 
@@ -243,15 +243,14 @@ namespace LifeV {
                        const Dof& dof_velocity,
                        velocity_type& velocity0)
             :
-            HyperbolicSolverIP<mesh_type, solver_type>(datafile,
-                                                       solver,
-                                                       reffe, 
-                                                       qr, 
-                                                       qr_bd, 
-                                                       bc_h,
-                                                       fe_velocity,
-                                                       dof_velocity,
-                                                       velocity0) 
+            HyperbolicSolverIP<mesh_type>(datafile,
+                                          reffe, 
+                                          qr, 
+                                          qr_bd, 
+                                          bc_h,
+                                          fe_velocity,
+                                          dof_velocity,
+                                          velocity0) 
         {
             _M_tol = 1e-6;
         }
@@ -266,7 +265,7 @@ namespace LifeV {
            \Return the level set function
         */
 
-        const lsfunction_type lsfunction() {
+        lsfunction_type const & lsfunction() const {
             return u();
         }
         //@}

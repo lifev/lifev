@@ -42,8 +42,17 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <dataMesh.hpp>
 
 #include <GetPot.hpp>
-#include <SolverAztec.hpp>
 #include <bdf.hpp>
+
+#ifdef USE_AZTEC_SOLVER
+#include <SolverAztec.hpp>
+#else
+#include <lifeconfig.h>
+#if defined( HAVE_PETSC_H )
+#include <SolverPETSC.hpp>
+#endif
+#endif
+
 
 #include <bcHandler.hpp>
 #include <dof.hpp>
@@ -69,7 +78,7 @@ namespace LifeV {
       @see
     */
 
-    template<typename MeshType, typename SolverType = SolverAztec>
+    template<typename MeshType>
     class HyperbolicSolverIP
         :
         public DataMesh<MeshType> {
@@ -80,7 +89,12 @@ namespace LifeV {
         typedef geo_point_type vector_type;
 
         typedef MeshType mesh_type;
-        typedef SolverType solver_type;
+#ifdef USE_AZTEC_SOLVER
+        typedef SolverAztec solver_type;
+#else
+        //typedef SolverPETSC solver_type;
+#endif
+
 
         typedef MSRPatt pattern_type;
 
@@ -96,7 +110,6 @@ namespace LifeV {
          */
         //@{
         HyperbolicSolverIP(const GetPot& datafile,
-                           solver_type& solver,
                            const RefFE& reffe, 
                            const QuadRule& qr, 
                            const QuadRule& qr_bd, 
@@ -107,7 +120,6 @@ namespace LifeV {
             :
             DataMesh<MeshType>(datafile, "hyp/discretization"),
             _M_datafile(datafile),
-            _M_solver(solver),
             _M_reffe(reffe),
             _M_reffe_bd( _M_reffe.boundaryFE() ),
             _M_qr(qr),
@@ -188,8 +200,8 @@ namespace LifeV {
         /**
            \Return the level set function
         */
-        const u_type u() {
-            return _M_bdf.extrap();
+        u_type const & u() const {
+            return _M_u;
         }
 
         /**
@@ -203,8 +215,12 @@ namespace LifeV {
         const GetPot& _M_datafile;
 
         //! The linear solver
-        solver_type _M_solver;
-        
+        //#if USE_AZTEC_SOLVER
+        SolverAztec _M_solver;
+        //#else
+        //SolverPETSC _M_solver;
+        //#endif
+
         //! Reference FE
         const RefFE& _M_reffe;
 
@@ -352,8 +368,8 @@ namespace LifeV {
         //@}
     };
 
-    template<typename MeshType, typename SolverType>
-    void HyperbolicSolverIP<MeshType, SolverType>::compute_M_A_steady() {
+    template<typename MeshType>
+    void HyperbolicSolverIP<MeshType>::compute_M_A_steady() {
         ElemMat elmat(_M_fe.nbNode, 1, 1);
         ElemVec elvec(_M_fe.nbNode, NDIM);
 
@@ -392,8 +408,8 @@ namespace LifeV {
         }
     }
 
-    template<typename MeshType, typename SolverType>
-    void HyperbolicSolverIP<MeshType, SolverType>::add_A_unsteady() {
+    template<typename MeshType>
+    void HyperbolicSolverIP<MeshType>::add_A_unsteady() {
         ElemMat elmat(_M_fe.nbNode, 1, 1);
         ElemVec elvec(_M_fe.nbNode, NDIM); //DDP: corretto? o elvec(1, NDIM)?
 
@@ -412,13 +428,13 @@ namespace LifeV {
     }
 
 
-    template<typename MeshType, typename SolverType>
-    void HyperbolicSolverIP<MeshType, SolverType>::apply_bc() {
+    template<typename MeshType>
+    void HyperbolicSolverIP<MeshType>::apply_bc() {
         // To be completed
     }
    
-    template<typename MeshType, typename SolverType>
-    void HyperbolicSolverIP<MeshType, SolverType>::initialize(const function_type& u0) {
+    template<typename MeshType>
+    void HyperbolicSolverIP<MeshType>::initialize(const function_type& u0) {
         // Initialize bdf
 
         _M_bdf.initialize_unk(u0, _mesh, _M_reffe, _M_fe, _M_dof, _M_t0, _M_delta_t, 1);
@@ -446,12 +462,12 @@ namespace LifeV {
 
     }
 
-    template<typename MeshType, typename SolverType>
-    void HyperbolicSolverIP<MeshType, SolverType>::iterate() {
+    template<typename MeshType>
+    void HyperbolicSolverIP<MeshType>::iterate() {
     }
 
-    template<typename MeshType, typename SolverType>
-    void HyperbolicSolverIP<MeshType, SolverType>::timeAdvance() {
+    template<typename MeshType>
+    void HyperbolicSolverIP<MeshType>::timeAdvance() {
         // Update left hand side
 
         _M_A = _M_A_steady;
