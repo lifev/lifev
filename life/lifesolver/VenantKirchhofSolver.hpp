@@ -567,14 +567,12 @@ updateJac( Vector& sol, int iter )
             for ( UInt ic = 0; ic < nc; ++ic )
                 for ( UInt jc = 0; jc < nc; jc++ )
                     assemb_mat( _J, _elmatK, _fe, this->_dof, ic, jc );
-
         }
-
     }
-    if (iter == 1)
-    {
-        _J.spy("Jacobian");
-    }
+//     if (iter == 1)
+//     {
+//         _J.spy("Jacobian");
+//     }
 
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
