@@ -28,3 +28,5 @@ check_PROGRAMS     = test_ns_ipstab
 noinst_HEADERS     = ud_functions.hpp norm.hpp NavierStokesSolverIP.hpp
 test_ns_ipstab_SOURCES = main.cpp  norm.cpp
 EXTRA_DIST         = data 
+
+TESTS		    = test_ns_ipstab

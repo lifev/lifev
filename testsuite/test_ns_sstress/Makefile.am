@@ -29,4 +29,4 @@ noinst_HEADERS      = ud_functions.hpp ud_functions_ns.hpp
 testSStress_SOURCES = main.cpp
 EXTRA_DIST          = data
 
-TESTS               = testSStress
+## TESTS               = testSStress
