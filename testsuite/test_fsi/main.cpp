@@ -45,6 +45,7 @@ public:
 
             // Boundary conditions for the harmonic extension of the
             // interface solid displacement
+            Debug( 10000 ) << "Boundary condition for the harmonic extension\n";
             BCFunctionBase bcf(fZero);
             FSISolver::bchandler_type BCh_mesh( new BCHandler );
             BCh_mesh->addBC("Top",       3, Essential, Full, bcf,   3);
@@ -52,17 +53,19 @@ public:
             BCh_mesh->addBC("Edges",    20, Essential, Full, bcf,   3);
 
             // Boundary conditions for the fluid velocity
+            Debug( 10000 ) << "Boundary condition for the fluid\n";
             BCFunctionBase in_flow(u2);
             FSISolver::bchandler_type BCh_u( new BCHandler );
             BCh_u->addBC("InFlow", 2,  Natural,   Full, in_flow, 3);
             BCh_u->addBC("Edges",  20, Essential, Full, bcf,     3);
 
             // Boundary conditions for the solid displacement
-            //    BCh_d.addBC("Interface", 1, Natural, Full, g_wall, 3);
+            Debug( 10000 ) << "Boundary condition for the solid\n";
             FSISolver::bchandler_type BCh_d( new BCHandler );
             BCh_d->addBC("Top",       3, Essential, Full, bcf,  3);
             BCh_d->addBC("Base",      2, Essential, Full, bcf,  3);
 
+            Debug( 10000 ) << "creating FSISolver with operator :  " << __oper << "\n";
             _M_fsi = fsi_solver_ptr(  new FSISolver( data_file, BCh_u, BCh_d, BCh_mesh, __oper ) );
             _M_fsi->showMe();
             _M_fsi->setSourceTerms( fZero, fZero );
@@ -104,7 +107,7 @@ check( GetPot const& data_file,  std::string __oper, LifeV::OperFSPreconditioner
 {
     try
     {
-        Problem fsip( data_file, "steklovPoincare" );
+        Problem fsip( data_file, __oper );
         fsip.fsiSolver()->FSIOperator()->setPreconditioner( __prec );
 
         fsip.run( fsip.fsiSolver()->timeStep(), fsip.fsiSolver()->timeStep() ); // only one iteration
