@@ -8,28 +8,28 @@
 	*
 	* - <a href="life/lifecore/html/index.html"><b>lifecore</b></a>
         *   (<a href="life/lifecore/html/classes.html">classes</a>)\n
-	*   <i>Core LifeV classes that are not related to spcific scientific computing.</i>
+	*   <i>Core LifeV classes that are not related to specific scientific computing.</i>
 	* - <a href="life/lifemesh/html/index.html"><b>lifemesh</b></a>
         *   (<a href="life/lifemesh/html/classes.html">classes</a>)\n
 	*   <i>Mesh library.</i>
 	* - <a href="life/lifearray/html/index.html"><b>lifearray</b></a>
         *   (<a href="life/lifearray/html/classes.html">classes</a>)\n
-	*   <i>Array classes libray.</i>
+	*   <i>Array classes library.</i>
 	* - <a href="life/lifealg/html/index.html"><b>lifealg</b></a>
         *   (<a href="life/lifealg/html/classes.html">classes</a>)\n
-	*   <i>Algebra libray.</i>
+	*   <i>Algebra library.</i>
 	* - <a href="life/lifefem/html/index.html"><b>lifefem</b></a>
         *   (<a href="life/lifefem/html/classes.html">classes</a>)\n
-	*   <i>Finite Element libray.</i>
+	*   <i>Finite Element library.</i>
 	* - <a href="life/lifesolver/html/index.html"><b>lifesolver</b></a>
         *   (<a href="life/lifesolver/html/classes.html">classes</a>)\n
-	*   <i>Solver libray.</i>
+	*   <i>Solver library.</i>
 	* - <a href="life/lifefilters/html/index.html"><b>lifefilter</b></a>
         *   (<a href="life/lifefilters/html/classes.html">classes</a>)\n
-	*   <i>Filters libray.</i>
+	*   <i>Filters library.</i>
 	*
 	* More information about the LifeV architecture, check
-	* the <a href="http://www.lifev.org/doc.php">LifeV Web Site</a>.
+	* the <a href="http://www.lifev.org/documentation">LifeV Web Site</a>.
 	*/
 
 /**
