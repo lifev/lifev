@@ -21,3 +21,6 @@
 #
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
+
+include_HEADERS	= cblas.h clapack.h \
+		  inexactLU.hpp picard.hpp saddlePointCG.hpp 
