@@ -187,7 +187,7 @@ public:
         }
     UInt size() const
         {
-            return this->size();
+            return super::size();
         }
     static UInt nbcomp()
         {
@@ -251,7 +251,7 @@ public:
 
     UInt size() const
         {
-            return this->size();
+            return super::size();
         }
     static UInt nbcomp()
         {
