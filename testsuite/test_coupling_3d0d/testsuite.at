@@ -32,6 +32,9 @@ AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 #        Data file for NavierStokes ACT PC
 #-------------------------------------------------
 
+[problem]
+
+strategy = 2   # coupling strategy : 1 -> mean pressure; 2 -> Flow rate
 
 
 [fluid]
@@ -42,6 +45,9 @@ viscosity       = 0.035             # viscosity
 inittime        = 0.00              # starttime
 endtime         = 0.002             # endtime --> two steps for testing purposes
 
+[../geometry]
+length = 5.0                        # length of the cylinder
+radius = 0.5	                    # radius of the cylinder
 
 [../discretization]
 mesh_dir = ./
