@@ -81,6 +81,9 @@ namespace LifeV
 
         void solveLinearSolid();
 
+        void computeResidualFSI();
+
+        
         // mutators and setters
 
         UInt   const & nbEval()    const {return M_nbEval;};
@@ -118,6 +121,8 @@ namespace LifeV
 
         PhysVectUnknown<Vector>       M_residualS;
         PhysVectUnknown<Vector>       M_residualF;
+
+        PhysVectUnknown<Vector>       M_residualFSI;
         
         UInt         M_nbEval;
 

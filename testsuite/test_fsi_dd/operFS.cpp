@@ -37,6 +37,7 @@ namespace LifeV
         M_rhs_dz      ( 3*M_solid.dDof().numTotalDof() ),
         M_residualS   ( M_solid.dDof().numTotalDof() ),
         M_residualF   ( M_fluid.uDof().numTotalDof() ),
+        M_residualFSI ( M_fluid.uDof().numTotalDof() ),
         M_nbEval      (0),
         M_BCh_du      (BCh_du),
         M_BCh_dz      (BCh_dz),
@@ -87,7 +88,18 @@ namespace LifeV
                   << maxnorm(velo) << std::endl;
     }
 
+//! Computing the residual on the fluid/structure interface
+    void operFS::computeResidualFSI()
+    {
+        for (UInt ifsi = 0; ifsi < M_residualFSI.size(); ++ifsi)
+        {
+        }
+    }
+        
 
+
+    
+//
 // Residual evaluation
 //
     void operFS::evalResidual(Vector &disp,
@@ -113,8 +125,16 @@ namespace LifeV
         //disp = M_dispStruct;
     }
 
-//
 
+    
+
+    
+
+    
+//    
+// Preconditionner computation using AZTEC
+//
+    
     void  operFS::updatePrec(Vector& sol,int iter)
     {
     }
