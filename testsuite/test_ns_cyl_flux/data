@@ -16,7 +16,7 @@ endtime         = 0.02              # endtime --> two steps for testing purposes
 
 [../discretization]
 mesh_dir  = ../data/mesh/inria/  # the directory where the mesh file is
-//mesh_file = rado2.mesh     # mesh file
+//mesh_file = stenosi.mesh     # mesh file
 //mesh_file = tube_curve20.mesh
 mesh_file = cyltetra.mesh
 timestep  = 0.01               # timestep

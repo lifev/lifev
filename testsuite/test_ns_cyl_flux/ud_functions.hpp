@@ -40,7 +40,7 @@ Real u0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
     return 0.0;
     break;
   case 3:
-    // initial condition for flux=1
+    // initial condition for flux=1 for the cylinder
      return 32/pi*(1.0/4-(x*x+y*y));
      //return 2.5774*(1-16/25*x*x+y*y);
      //return 0.0;
@@ -48,7 +48,7 @@ Real u0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
   }
 }
 
-Real u02(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
+Real u0o(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
 {
   return 0.0;
 }
@@ -59,8 +59,8 @@ Real p0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
  return 1.0;
 }
 
-// Neumann conditions for ns2
-Real u2(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
+// Neumann conditions for nso
+Real uo(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
 {
   //Real pi = 3.14159265358979;  
   switch(i) {
