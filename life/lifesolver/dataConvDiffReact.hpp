@@ -55,11 +55,18 @@ class DataConvDiffReact:public DataMesh<Mesh>,public DataTime {
   Real diffusivity() const;
   //! Reaction coefficient
   Real react() const;
+  //! time variables
+  Real inittime() const;
+  Real endtime() const;
+  int stationary() const;
 
  protected:
   //! Physics
   Real _diffusivity; // Diffusivity
   Real _react; // Reaction coefficient
+  Real _inittime; // initialisation time 
+  Real _endtime; // end time 
+  int _stationary; // switch stationary/instationary calculation
 };
 
 
@@ -78,6 +85,9 @@ DataConvDiffReact(const GetPot& dfile):
   // physics
   _diffusivity = dfile("masstransport/physics/diffusivity",1.);
   _react = dfile("masstransport/physics/react",1.);
+  _inittime = dfile("masstransport/physics/inittime",0.);
+  _endtime = dfile("masstransport/physics/endtime",1.);
+  _stationary = dfile("masstransport/physics/stationary",0);
 }
 
 // Output
@@ -87,8 +97,11 @@ showMe(ostream& c)
 {
   // physics
   c << "\n*** Values for data [masstransport/physics]\n\n";
-  c << "diffusivity   = " << _diffusivity << endl;
-  c << "reaction coefficient  = " << _react << endl;
+  c << "diffusivity   = " << _diffusivity << std::endl;
+  c << "reaction coefficient  = " << _react << std::endl;
+  c << "initialisation time = " << _inittime << std::endl;
+  c << "endtime = " << _endtime << std::endl;
+  c << "stationary = " << _stationary << std::endl;
 
   c << "\n*** Values for data [masstransport/discretization]\n\n";
   DataMesh<Mesh>::showMe(c);
@@ -108,6 +121,27 @@ template <typename Mesh>
 Real DataConvDiffReact<Mesh>::
 react() const {
   return  _react;
+}
+
+// The initialisation time
+template <typename Mesh>
+Real DataConvDiffReact<Mesh>::
+inittime() const {
+  return  _inittime;
+}
+
+// The end time
+template <typename Mesh>
+Real DataConvDiffReact<Mesh>::
+endtime() const {
+  return  _endtime;
+}
+
+// The switch stationary/unstationary
+template <typename Mesh>
+int DataConvDiffReact<Mesh>::
+stationary() const {
+  return  _stationary;
 }
 }
 #endif
