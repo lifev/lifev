@@ -39,7 +39,7 @@ int main(int argc, char** argv)
     //
     BCFunctionBase u_wall(u1);
     BCFunctionBase in_flow(u2);
-    BCHandler BCh_u(4);
+    BCHandler BCh_u(4, true);
     BCh_u.addBC("Wall",   2, Essential, Full, u_wall,  3);
     BCh_u.addBC("Wall-inflow",   4, Essential, Full, u_wall,  3);
     BCh_u.addBC("Wall-outflow",   5, Essential, Full, u_wall,  3);
@@ -49,8 +49,9 @@ int main(int argc, char** argv)
 
     // Navier-Stokes Solver
     //
-    NavierStokesSolverPC< RegionMesh3D<LinearTetra> > ns(data_file, feTetraP1bubble, feTetraP1,quadRuleTetra64pt,
-                                                         quadRuleTria3pt, quadRuleTetra5pt, quadRuleTria3pt, BCh_u);
+    NavierStokesSolverPC< RegionMesh3D<LinearTetra> >
+        ns(data_file, feTetraP1bubble, feTetraP1,quadRuleTetra64pt,
+           quadRuleTria3pt, quadRuleTetra5pt, quadRuleTria3pt, BCh_u);
     ns.showMe();
 
 
@@ -60,11 +61,13 @@ int main(int argc, char** argv)
     Real startT = ns.inittime();
     Real T  = ns.endtime();
 
-    if(startT > 0.0){
-        cout << "initialize velocity and pressure with data from file" << std::endl;
+    if (startT > 0.0)
+    {
+        cout << "initialize velocity and pressure with data from file"
+             << std::endl;
         ostringstream indexin;
         string vinname, cinname;
-        indexin << (startT*100);
+        indexin << (int)(startT/dt+0.5) ;
         vinname = "fluid.res"+indexin.str();
         ns.initialize(vinname);}
     else{
@@ -80,9 +83,9 @@ int main(int argc, char** argv)
         ns.timeAdvance(f,time);
         ns.iterate(time);
 
-// ************* saving result on file *****************************************
+// ************* saving result on file ****************************************
         ostringstream indexout;
-        indexout << (time*100);
+        indexout << (int)(time/dt+0.5);
         string voutname;
         voutname = "fluid.res"+indexout.str();
         fstream Resfile(voutname.c_str(),ios::out | ios::binary);
