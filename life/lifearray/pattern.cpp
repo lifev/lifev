@@ -28,18 +28,27 @@ using namespace std;
 //////////////////////////////////////////
 
 BasePattern::BasePattern() :
-        _nnz( _defaultsize ), _nrows( _defaultsize ), _ncols( _defaultsize ), _filled( false ), _diagfirst( false )
+        _nnz( _defaultsize ),
+        _nrows( _defaultsize ),
+        _ncols( _defaultsize ),
+        _filled( false ),
+        _diagfirst( false )
 {}
 
 BasePattern::BasePattern( UInt ex_nnz, UInt ex_nrow, UInt ex_ncol ) :
-        _nnz( ex_nnz ), _nrows( ex_nrow ), _ncols( ex_ncol ), _filled( false ), _diagfirst( false )
+        _nnz( ex_nnz ),
+        _nrows( ex_nrow ),
+        _ncols( ex_ncol ),
+        _filled( false ),
+        _diagfirst( false )
 {}
 
-// ALAIN : this constructor should exist as well for other matrix classes
-BasePattern::BasePattern( CSRPatt const &RightHandCSRP ) :
-        _nnz( RightHandCSRP.nNz() ), _nrows( RightHandCSRP.nRows() ),
-        _ncols( RightHandCSRP.nCols() ), _filled( !RightHandCSRP.isEmpty() ),
-        _diagfirst( RightHandCSRP.diagFirst() )
+BasePattern::BasePattern( BasePattern const &rightHandPattern ) :
+        _nnz( rightHandPattern.nNz() ),
+        _nrows( rightHandPattern.nRows() ),
+        _ncols( rightHandPattern.nCols() ),
+        _filled( !rightHandPattern.isEmpty() ),
+        _diagfirst( rightHandPattern.diagFirst() )
 {}
 
 void

@@ -15,10 +15,10 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*----------------------------------------------------------------------*
 |
-| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.14 2004-10-13 10:26:02 ddipietro Exp $
+| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.15 2004-10-22 13:19:34 winkelma Exp $
 |
 |
 | #Version  0.1 Experimental   07/7/00. Luca Formaggia & Alessandro Veneziani  |
@@ -59,7 +59,7 @@
 
 #include<set>
 #include<algorithm>
-#include<string> 
+#include<string>
 //#include<functional>
 #include "bareItems.hpp"
 
@@ -104,7 +104,7 @@ public:
 
     BasePattern();
     BasePattern( UInt ex_nnz, UInt ex_nrow, UInt ex_ncol ); //!< Here I give the n. of non zeros and matrix dimensions.
-    BasePattern( class CSRPatt const &RightHandCSRP );
+    BasePattern( BasePattern const &rightHandPattern );
 
     inline UInt nRows() const; //!< Numer of Rows
     inline UInt nCols() const; //!< Number of Columns
@@ -145,7 +145,7 @@ protected:
     //! and its adjacent neighbours.
 
     template<typename DOF, typename DOFBYFACE>
-    bool setpattDG(DOF const & dof, DOFBYFACE const & dofbyface, DynPattern & dynpatt, 
+    bool setpattDG(DOF const & dof, DOFBYFACE const & dofbyface, DynPattern & dynpatt,
                    UInt const nbcomp = 1);
 
     //! Version for mixed patterns
@@ -386,13 +386,13 @@ class VBRPatt: public CSRPatt
                _ia : points to the location in _ja of the first block
                      entry in each block row.
                _ja : contains the block column indices of the block pattern.
-             
+
                BEWARE : the interpretation of _nnz, _nrows and _ncols of the class
                BasePattern is valid for the BLOCK pattern, that is
                _nnz : number of non zero BLOCKS,
                _nrows : number of BLOCK rows,
                _ncols : number of BLOCK columns.
-             
+
                VBRPatt: VBR format accepts blocks of variable size.
                         This pattern is more general than needed. In fact we work
                  with blocks having a fixed size.
@@ -661,7 +661,7 @@ public:
     MSRPatt( const DOF& dof, const MESH& mesh, const UInt nbcomp );
 
     // D. A. Di Pietro 10/2004
-    template<typename DOF, typename DOFBYFACE> 
+    template<typename DOF, typename DOFBYFACE>
     MSRPatt(DOF const & dof, DOFBYFACE const & dofbyface, const std::string& type, UInt const nbcomp = 1);
 
     template <typename DOF>
@@ -672,7 +672,7 @@ public:
     bool buildPattern( const DOF& dof, const MESH& mesh, const UInt nbcomp );
 
     // D. A. Di Pietro 10/2004
-    template<typename DOF, typename DOFBYFACE> 
+    template<typename DOF, typename DOFBYFACE>
     bool buildPattern(DOF const & dof, DOFBYFACE const & dofbyface, const std::string& type, UInt const nbcomp = 1);
 
     Container bindx() const
@@ -1146,7 +1146,7 @@ bool BasePattern::setpatt( const DOF& dof, const MESH& mesh, DynPattern & dynpat
 
 // Daniele A. Di Pietro: useful for DG
 template<typename DOF, typename DOFBYFACE>
- bool BasePattern::setpattDG(DOF const & dof, DOFBYFACE const & dofbyface, DynPattern & dynpatt, 
+ bool BasePattern::setpattDG(DOF const & dof, DOFBYFACE const & dofbyface, DynPattern & dynpatt,
                              UInt const nbcomp){
 
  Diff_t ig, jg;
@@ -1155,7 +1155,7 @@ template<typename DOF, typename DOFBYFACE>
  // and dofbyface.fe will be refEleDG.facePattern...
 
  for(UInt el = 1; el <= dof.numElements(); el++){
-   for (int l = dof.fe.nbDiag(); l < dof.fe.nbPattern(); ++l){      
+   for (int l = dof.fe.nbDiag(); l < dof.fe.nbPattern(); ++l){
      ID i  = dof.fe.patternFirst(l) + 1;
      ID j  = dof.fe.patternSecond(l) + 1;
 
@@ -1174,7 +1174,7 @@ template<typename DOF, typename DOFBYFACE>
      ig = dofbyface.localToGlobal(face, i) - 1;
      jg = dofbyface.localToGlobal(face, j) - 1;
 
-     dynpatt.insert(setBareEdge(ig, jg)); 
+     dynpatt.insert(setBareEdge(ig, jg));
    }
  }
 
@@ -2137,21 +2137,21 @@ bool MSRPatt::buildPattern( const DOF& dof, const MESH& mesh,
 template<typename DOF, typename DOFBYFACE>
 bool MSRPatt::buildPattern(DOF const & dof, DOFBYFACE const & dofbyface, const std::string& type, UInt const nbcomp){
  ASSERT_PRE(type == "dg", "Error: for DG elements only");
- DynPattern  dynpatt; 
- bool built = setpattDG(dof, dofbyface, dynpatt, nbcomp); 
+ DynPattern  dynpatt;
+ bool built = setpattDG(dof, dofbyface, dynpatt, nbcomp);
  if(!built)return false;
 
  Index_t ig, jg, cur;
 
- _bindx.resize(_nnz + 1, 0);  
- _ybind.resize(_nnz - _nrows, 0);  
+ _bindx.resize(_nnz + 1, 0);
+ _ybind.resize(_nnz - _nrows, 0);
 
  // Count
  for (DynPattern::iterator d = dynpatt.begin(); d != dynpatt.end(); ++d){
    ig = d -> first;
    jg = d -> second;
 
-   _bindx[ig] += nbcomp; 
+   _bindx[ig] += nbcomp;
    _bindx[jg] += nbcomp; // D. A. Di Pietro: questo, suppongo, per la simmetria del pattern
  }
 
@@ -2180,7 +2180,7 @@ bool MSRPatt::buildPattern(DOF const & dof, DOFBYFACE const & dofbyface, const s
  for (ig = 1; ig < static_cast<Index_t>(_nrows) + 1; ++ig)
    _bindx[ig] += _bindx[ig - 1];
 
- 
+
  // for each component
  for (icomp=0; icomp< nbcomp; icomp++){
    for (jcomp=0; jcomp< nbcomp; jcomp++){
@@ -2196,27 +2196,27 @@ bool MSRPatt::buildPattern(DOF const & dof, DOFBYFACE const & dofbyface, const s
 	ig=d->first+icomp*offset;
 	jg=d->second+jcomp*offset;
 	_ybind[_bindx[ig]-_nrows-1]=_bindx[jg];
-	_ybind[_bindx[jg]-_nrows-1]=_bindx[ig]; 
+	_ybind[_bindx[jg]-_nrows-1]=_bindx[ig];
 	_bindx[_bindx[ig]++]=jg;
 	_bindx[_bindx[jg]++]=ig;
      }
    }
  }
- 
+
  // shift right 1 position
  rotate(_bindx.begin(),_bindx.begin()+_nrows,_bindx.begin()+_nrows+1);
  _bindx[0]=_nrows+1;
 
  for (ig=0; ig <static_cast<Index_t>(_nrows); ++ig){
    // We now sort the off diagonal entries
-   jg=_bindx[ig]; 
+   jg=_bindx[ig];
    cur = _bindx[ig+1];
    sort(_bindx.begin()+jg,_bindx.begin()+cur);
  }
- 
+
  // do we need it 'a la Fortran?'
  if (PatternOffset != 0) for (Container::iterator ip=_bindx.begin();ip!=_bindx.end();++ip)*ip+=PatternOffset;
- 
+
  dynpatt.clear(); // Non sono sicuro che serva....
  _diagfirst=true;// default for MSR
  _filled=true;
