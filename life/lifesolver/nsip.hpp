@@ -19,11 +19,13 @@
 #include "pattern.hpp"
 #include "assemb.hpp"
 #include "bc_manage.hpp"
-#include "az_aztec.h"
-#include "algebraic_facto.hpp"
+#include "SolverAztec.hpp"
+//#include "lifeconfig.h"
+//#if defined(HAVE_PETSC_H)
+//#include "SolverPETSC.hpp"
+//#endif /* HAVE_PETSC_H */
 #include "bcCond.hpp"
 #include "chrono.hpp"
-#include "dataAztec.hpp"
 #include "sobolevNorms.hpp"
 #include "geoMap.hpp"
 
@@ -106,7 +108,8 @@ public NavierStokesHandler<Mesh> {
   //! Global solution _u and _p
   Vector _diff;
 
-  DataAztec _dataAztec;
+  SolverAztec _solver;
+  //SolverPETSC _solver;
 
   Real _time;
 };
@@ -143,10 +146,11 @@ NavierStokesSolverIP(const GetPot& data_file, const RefFE& refFE, const QuadRule
   _f_u(_dim_u),
   _b(4*_dim_u),
   _x(4*_dim_u),
-  _diff(4*_dim_u),
-  _dataAztec(data_file,"fluid/aztec") {
+  _diff(4*_dim_u) {
 
 
+    _solver.setOptionsFromGetPot(data_file, "fluid/aztec");
+    //_solver.setOptionsFromGetPot(data_file, "fluid/petsc");
 
     cout << endl;
     cout << "O-  Pressure unknowns: " << _dim_p     << endl;
@@ -492,36 +496,8 @@ void NavierStokesSolverIP<Mesh>::iterate(const Real& time) {
   chrono.stop();
   cout << "done in " << chrono.diff() << "s." << endl;
 
+  _solver.setMatrix(_C);
 
-
-  // AZTEC specifications for the first system
-  int    data_org[AZ_COMM_SIZE];   // data organisation for C
-  int    proc_config[AZ_PROC_SIZE];// Processor information:
-  int    options[AZ_OPTIONS_SIZE]; // Array used to select solver options.
-  double params[AZ_PARAMS_SIZE];   // User selected solver paramters.
-  double status[AZ_STATUS_SIZE];   // Information returned from AZ_solve()
-                                     // indicating success or failure.
-  AZ_set_proc_config(proc_config, AZ_NOT_MPI);
-
-  //AZTEC matrix and preconditioner
-  AZ_MATRIX *C;
-  AZ_PRECOND *prec_C;
-
-  int N_eq= 4*_dim_u; // number of DOF for each component
- // data_org assigned "by hands" while no parallel computation is performed
-  data_org[AZ_N_internal]= N_eq;
-  data_org[AZ_N_border]= 0;
-  data_org[AZ_N_external]= 0;
-  data_org[AZ_N_neigh]= 0;
-  data_org[AZ_name]= DATA_NAME_AZTEC;
-
-  // create matrix and preconditionner
-  C= AZ_matrix_create(N_eq);
-  prec_C= AZ_precond_create(C, AZ_precondition, NULL);
-
-  AZ_set_MSR( C, (int*)_pattC.giveRaw_bindx(), (double*)_C.giveRaw_value(), data_org, 0, NULL, AZ_LOCAL);
-
-  _dataAztec.aztecOptionsFromDataFile(options,params);
 
 
   // ---------------
@@ -535,7 +511,7 @@ void NavierStokesSolverIP<Mesh>::iterate(const Real& time) {
 
   cout << "  o-  Solving system...  ";
   chrono.start();
-  AZ_iterate(&_x[0], &_b[0], options, params, status, proc_config, C, prec_C, NULL);
+  _solver.solve(_x, _b);
   chrono.stop();
   cout << "done in " << chrono.diff() << " s." << endl;
 
@@ -565,8 +541,6 @@ void NavierStokesSolverIP<Mesh>::iterate(const Real& time) {
   cout << " - L2 velocity error = " << sqrt(norm_u) << endl;
   cout << endl;
 
-  AZ_matrix_destroy(&C);
-  AZ_precond_destroy(&prec_C);
 }
 }
 #endif
