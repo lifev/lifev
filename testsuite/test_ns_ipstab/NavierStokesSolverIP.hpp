@@ -83,6 +83,9 @@ public:
 
     void initialize( const Function& x0, Real t0=0., Real dt=0. );
 
+    //! linearize convective term around given (exact) velocity function
+    void linearize( const Function& betaFct ) { M_betaFct = &betaFct; }
+    
 private:
 
     //! Block pattern of M_u
@@ -135,6 +138,8 @@ private:
     Real M_gammaDiv;
     Real M_gammaPress;
 
+    const Function* M_betaFct;
+
 }; // class NavierStokesSolverIP
 
 
@@ -174,7 +179,8 @@ NavierStokesSolverIP( const GetPot& dataFile,
     M_elvec( _fe_u.nbNode, nDimensions ),
     M_rhsU( ( nDimensions+1 )*_dim_u ),
     M_rhsFull( ( nDimensions+1 )*_dim_u ),
-    M_sol( ( nDimensions+1 )*_dim_u )
+    M_sol( ( nDimensions+1 )*_dim_u ),
+    M_betaFct( 0 )
 {
     M_steady = dataFile( "fluid/miscellaneous/steady", 1 );
     M_gammaBeta = dataFile( "fluid/ipstab/gammaBeta", 0. );
@@ -325,9 +331,24 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
 {
     Chrono chrono;
 
-    // velocity vector for linearization
-    Vector& beta = _u;
-    //Vector beta(_bdf.bdf_u().extrap());
+    // velocity vector for linearization of convective term
+    Vector betaVec(_u.size());
+
+    if ( M_betaFct )
+    {
+        this->uInterpolate( *M_betaFct, betaVec, time );
+    }
+    else
+    {
+        if ( M_steady )
+        {
+            betaVec = _u; // last iteration
+        }
+        else
+        {
+            betaVec = _bdf.bdf_u().extrap(); // bdf extrapolation
+        }
+    }
 
     M_time = time;
 
@@ -358,14 +379,14 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
 
         UInt eleID = _fe_u.currentId();
         // Non linear term, Semi-implicit approach
-        // ULoc contains the velocity values in the nodes
+        // M_elvec contains the velocity values in the nodes
         for ( UInt iNode = 0 ; iNode<( UInt )_fe_u.nbNode ; iNode++ )
         {
             UInt  iloc = _fe_u.patternFirst( iNode );
             for ( UInt iComp = 0; iComp<nbCompU; ++iComp )
             {
                 UInt ig = _dof_u.localToGlobal( eleID, iloc+1 )-1+iComp*_dim_u;
-                M_elvec.vec()[ iloc+iComp*_fe_u.nbNode ] = _rho * beta( ig );
+                M_elvec.vec()[ iloc+iComp*_fe_u.nbNode ] = _rho * betaVec(ig);
             }
         }
 
@@ -396,7 +417,7 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
     IPStabilization<Mesh, Dof>
         allStab( _mesh, _dof_u, _refFE_u, _feBd_u, _Qr_u,
                  M_gammaBeta, M_gammaDiv, M_gammaPress, this->viscosity() );
-    allStab.apply( M_matrFull, beta );
+    allStab.apply( M_matrFull, betaVec );
 
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
@@ -425,7 +446,7 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
 
 
     //if ( _BCh_u.fullEssential() )
-    M_matrFull.diagonalize( nDimensions*_dim_u, 1.0, M_rhsFull, 0);
+//    M_matrFull.diagonalize( nDimensions*_dim_u, 1.0, M_rhsFull, 0);
 //                             pexact( M_time,
 //                                     _mesh.point( 1 ).x(),
 //                                     _mesh.point( 1 ).y(),
@@ -478,8 +499,10 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
     {
         _u[ iDof ] = M_sol[ iDof ];
     }
+    Real pNode0 = M_sol[ nDimensions*_dim_u ];
     for ( UInt iDof = 0; iDof<_dim_u; ++iDof )
     {
+        M_sol[ iDof+nDimensions*_dim_u ] -= pNode0;
         _p[ iDof ] = M_sol[ iDof+nDimensions*_dim_u ];
     }
 
@@ -510,7 +533,7 @@ void NavierStokesSolverIP<Mesh>::initialize( const Function& x0,
 
     // write initial values (for debugging only)
     const std::vector<Vector>& unk = _bdf.bdf_u().unk();
-    for ( UInt iUnk=0; iUnk<unk.size(); ++iUnk )
+    for ( int iUnk=unk.size()-1; iUnk>=0; --iUnk )
     {
         for ( UInt iDof=0; iDof<nDimensions*_dim_u; ++iDof )
         {
