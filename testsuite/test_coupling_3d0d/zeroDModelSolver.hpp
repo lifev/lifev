@@ -55,7 +55,7 @@ public:
     \param Radius of the 3D tube
     \param Thicknes of the wall (only in the case where 3D is compliant - FSI)
   */
-  zeroDModelSolver(GetPot & data_file, Real Length, Real Radius, Real Thick);
+  zeroDModelSolver(GetPot & data_file);
 
   //! Computes the pressure of the network, given the flux from 3D 
   //! \param current time step
@@ -67,16 +67,15 @@ public:
   //! \param pressure from 3D
   Real getQFromPressure(Real & time, Real & deltaP);
 
-  //! Indicates the coupling strategy (acording to data file)
-  bool isMeanPressProb();
-
 private:
 
+  Real _M_Length;
+  Real _M_Radius;
+  Real _M_Thickness;
   Real _M_dt;
   Real _M_rho;
   Real _M_nu;
   Real _M_E;
-  UInt _M_isMeanPressProb;
  
   Real _M_C1, _M_C2, _M_C3, _M_C4; // Capacities in the network
   Real _M_L5, _M_L6, _M_L7, _M_L8; // Induntances in the network
@@ -96,7 +95,7 @@ private:
 //                                     IMPLEMENTATION                                    //
 //***************************************************************************************//
 
-zeroDModelSolver::zeroDModelSolver(GetPot & data_file, Real Length, Real Radius, Real Thick):
+zeroDModelSolver::zeroDModelSolver(GetPot & data_file):
 
   _M_C1(0.05), 
   _M_C2(0.5), 
@@ -110,16 +109,19 @@ zeroDModelSolver::zeroDModelSolver(GetPot & data_file, Real Length, Real Radius,
   _M_R8(5.001)
 
 {
-  _M_dt  =data_file("fluid/discretization/timestep", 0. );
-  _M_rho =data_file("fluid/physics/density", 1. );
-  _M_nu  =data_file("fluid/physics/viscosity", 1. );
-  _M_E   =data_file("solid/physics/young", 1. );
-  _M_isMeanPressProb = data_file("fluid/miscellaneous/coupStrategy", 1 );
+  _M_Length     = data_file( "fluid/geometry/length", 0. );
+  _M_Radius     = data_file( "fluid/geometry/radius", 1. );
+  _M_Thickness  = data_file( "fluid/geometry/thickness", 0. );
 
-  if (Thick!=0)
-    _M_C=3*pi*pow(Radius,3)*Length/(2*_M_E*Thick);  
-  _M_R= _M_rho*8*pi*_M_nu*Length/(pow(pi*Radius*Radius,2));
-  _M_L= (_M_rho*Length)/(pi*pow(Radius,2));
+  _M_dt  = data_file("fluid/discretization/timestep", 0. );
+  _M_rho = data_file("fluid/physics/density", 1. );
+  _M_nu  = data_file("fluid/physics/viscosity", 1. );
+  _M_E   = data_file("solid/physics/young", 1. );
+
+  if (_M_Thickness!=0)
+    _M_C=3*pi*pow(_M_Radius,3)*_M_Length/(2*_M_E*_M_Thickness);  
+  _M_R= _M_rho*8*pi*_M_nu*_M_Length/(pow(pi*_M_Radius*_M_Radius,2));
+  _M_L= (_M_rho*_M_Length)/(pi*pow(_M_Radius,2));
 
   x[0]=0.0178;
   x[1]=0.3740;
@@ -200,16 +202,6 @@ Real zeroDModelSolver::getQFromPressure(Real & time, Real & deltaP)
   return -y[6];
 }
 
-bool zeroDModelSolver::isMeanPressProb()
-{ 
-
-  if (_M_isMeanPressProb == 1)
-    return true;
-  else
-    return false;
-
-}
- 
 }
 
 #endif

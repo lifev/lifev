@@ -123,6 +123,8 @@ int main(int argc, char** argv)
     const char* data_file_name = command_line.follow("data", 2, "-f","--file");
     GetPot data_file(data_file_name);
 
+    int strategy = data_file("problem/strategy", 1 );
+
     BCFunctionBase u_wall(u1);
     BCFunctionBase out_flow(u1);
     BCHandler BCh_u(5);
@@ -178,17 +180,22 @@ int main(int argc, char** argv)
         ns->initialize(u0,p0,0.0,dt);
     }
 
-    zeroDModelSolver network(data_file, 5., 0.5, 0);
+    zeroDModelSolver network(data_file);
 
     // Temporal loop
     //
-    if (network.isMeanPressProb()){
+    switch(strategy) 
+      {
+      case 1:
+	{
+        std::cout << "Mean Pressure problem \n";
+        std::cout <<" -----------------------------------------------\n";
 
         BCh_u.addBC("InFlow", 1, Natural,  Full, bcvec , 3);
         Real Q;
 
         for (Real time=startT+dt ; time <= T; time+=dt)
-        {
+	  {
 
             Q = ns->flux(1);
             // pressure coming from the 0D Model
@@ -198,35 +205,45 @@ int main(int argc, char** argv)
             ns->iterate(time);
 
             ns->postProcess();
-        }
-    } else {
+	  }
+	}
+	break;
+	
+      case 2:
+	{
+	std::cout << "Flow Rate problem \n";
+	std::cout <<" -----------------------------------------------\n";
 
-        BCFunctionBase in_flow(uo);
-        BCh_u.addBC("InFlow", 1, Natural,   Full, in_flow, 3);
+	BCFunctionBase in_flow(uo);
+	BCh_u.addBC("InFlow", 1, Natural,   Full, in_flow, 3);
 
-        Real deltaP;
+	Real deltaP;
 
-        NavierStokesWithFlux<NS> ns_with_flux(ns);
+	NavierStokesWithFlux<NS> ns_with_flux(ns);
+	ns_with_flux.setFlux( 1, flux_adaptor( 0 ) );
+	ns_with_flux.setSourceTerm( f );
+	ns_with_flux.initialize(u0,p0,0.0,dt);
 
-        ns_with_flux.setFlux( 1, flux_adaptor( 0 ) );
-        ns_with_flux.setSourceTerm( f );
-        ns_with_flux.initialize(u0,p0,0.0,dt);
+	toEnsight EnsightFilter;
+	ns_with_flux.doOnIterationFinish( EnsightFilter  );
+	toMedit MeditFilter( data_file );
+	ns_with_flux.doOnIterationFinish( MeditFilter  );
+	  
+	for (Real time=startT+dt ; time <= T; time+=dt){
 
-        toEnsight EnsightFilter;
-        ns_with_flux.doOnIterationFinish( EnsightFilter  );
-        toMedit MeditFilter( data_file );
-        ns_with_flux.doOnIterationFinish( MeditFilter  );
+	  deltaP = ns_with_flux.pressure();
 
-        for (Real time=startT+dt ; time <= T; time+=dt){
-
-            deltaP = ns_with_flux.pressure();
-
-            ns_with_flux.setFlux(1, flux_adaptor( network.getQFromPressure(time, deltaP) ) );
-
-            ns_with_flux.timeAdvance( f, time );
-            ns_with_flux.iterate( time );
-        }
-    }
+	  ns_with_flux.setFlux(1, flux_adaptor( network.getQFromPressure(time, deltaP) ) );
+	      
+	  ns_with_flux.timeAdvance( f, time );
+	  ns_with_flux.iterate( time );
+	}
+	}
+	break;
+	
+      default: 
+        ERROR_MSG("No coupling strategy defined \n");
+      }
 
     outfile.open("res_Q.m", std::ios::app);
     outfile << "    ]; " << std::endl;
