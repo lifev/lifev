@@ -65,7 +65,7 @@ precond         = dom_decomp
 drop            = 1.00e-4
 ilut_fill       = 2
 tol             = 1.e-16
-keep_info       = 1
+#keep_info       = 1
 
 
 [fluid]
