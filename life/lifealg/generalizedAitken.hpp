@@ -47,6 +47,18 @@ public:
 
     // Constructors
 
+    generalizedAitken()
+        :
+        M_nDof ( 0 ),
+        M_lambda (),
+        M_muS (),
+        M_muF (),
+        M_defOmegaS ( 0.1 ),
+        M_defOmegaF ( 0.1 ),
+        M_firstCall( true ),
+        M_issetup( false )
+        {}
+
     generalizedAitken( const int _nDof,
                        const Real _defOmegaS = 0.1,
                        const Real _defOmegaF = 0.1 );
@@ -57,6 +69,8 @@ public:
     ~generalizedAitken();
 
     // Member functions
+
+    void setup( const int _nDof );
 
     void setDefault( const Real _defOmegaS = 0.1,
                      const Real _defOmegaF = 0.1 );
@@ -91,6 +105,8 @@ private:
     //! first time call boolean
     bool M_firstCall;
 
+    bool M_issetup;
+
     //! If default omega is negative, then always use the
     // absolute value of the default omega. In this case
     //  M_usedefault=true
@@ -110,9 +126,9 @@ generalizedAitken<Vector, Real>::generalizedAitken( const int _nDof,
     M_muS ( ZeroVector( _nDof ) ),
     M_muF ( ZeroVector( _nDof ) ),
     M_defOmegaS ( _defOmegaS ),
-    M_defOmegaF ( _defOmegaF )
+    M_defOmegaF ( _defOmegaF ),
+    M_firstCall( true )
 {
-    M_firstCall = true;
     if (( M_defOmegaS < 0 ) || ( M_defOmegaF< 0 ))
     {
         M_useDefault = true;
@@ -121,6 +137,7 @@ generalizedAitken<Vector, Real>::generalizedAitken( const int _nDof,
     } else {
         M_useDefault = false;
     }
+    M_issetup = true;
 }
 
 //
@@ -135,7 +152,16 @@ generalizedAitken<Vector, Real>::~generalizedAitken()
 //
 // Member functions
 //
-
+template <class Vector, class Real>
+void generalizedAitken<Vector, Real>::
+setup( const int _nDof )
+{
+    M_nDof =  _nDof;
+    M_lambda =  ZeroVector( _nDof );
+    M_muS = ZeroVector( _nDof );
+    M_muF = ZeroVector( _nDof );
+    M_issetup = true;
+}
 template <class Vector, class Real>
 void generalizedAitken<Vector, Real>::
 setDefault( const Real _defOmegaS,
