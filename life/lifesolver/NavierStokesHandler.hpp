@@ -403,51 +403,50 @@ NavierStokesHandler( const GetPot& data_file, const RefFE& refFE_u,
     M_out_areas("Areas.res"), M_out_areas_polygon("AreasPolygon.res"),
     M_out_fluxes("Fluxes.res")
 {
-  if ( this->computeMeanValuesPerSection() == 1 ) {
-    //---------------
-    //! stuff to compute the fluxes at each section for a cylindrical tube
-    //! (ex. of mesh: tube20.mesh)
-    //---------------
-    
-    /*
-      M_out_areas = std::ofstream("Areas.res");
-    ASSERT( M_out_areas, "Error: Output areas file cannot be open" );
-    M_out_areas_polygon = std::ofstream("AreasPolygon.res");
-    ASSERT( M_out_areas_polygon, "Error: Output Polygon areas file cannot be open" ); 
-    M_out_fluxes = std::ofstream("Fluxes.res");
-    ASSERT( M_out_areas, "Error: Output fluxes file cannot be open" ); 
-    */
-    
-    
-    if ( ! this->_mesh.hasInternalFaces() )
-        ERROR_MSG("The mesh must have all internal faces built up. Check that 'mesh_faces = all' in the data file.");
-    if ( M_nb_sections < 2 )
-        ERROR_MSG("We can't compute the mean values on less than 2 sections.");
-    ASSERT( ZSectionFinal() - ZSectionInit() > 0,
-	    "We can't compute the mean values on less than 2 sections.");
+    if ( this->computeMeanValuesPerSection() == 1 ) {
+        //---------------
+        //! stuff to compute the fluxes at each section for a cylindrical tube
+        //! (ex. of mesh: tube20.mesh)
+        //---------------
 
-    for ( int izs = 0; izs < M_nb_sections ; izs ++  ){
-        M_z_section[ izs ] = ZSectionInit() + Real(izs) * ( ZSectionFinal() - ZSectionInit() )
-	  / Real(M_nb_sections-1); // mesh dependent (length of tube=5)
-    }
+        /*
+          M_out_areas = std::ofstream("Areas.res");
+          ASSERT( M_out_areas, "Error: Output areas file cannot be open" );
+          M_out_areas_polygon = std::ofstream("AreasPolygon.res");
+          ASSERT( M_out_areas_polygon, "Error: Output Polygon areas file cannot be open" );
+          M_out_fluxes = std::ofstream("Fluxes.res");
+          ASSERT( M_out_areas, "Error: Output fluxes file cannot be open" );
+        */
 
-    for ( int izs = 0; izs < M_nb_sections ; izs ++  ){
-        this->FacesOnSection( M_z_section[izs], M_list_of_faces_on_section[izs], ToleranceSection(),
-                              XSectionFrontier(), M_list_of_points_on_boundary[izs] );
-        if ( M_list_of_faces_on_section[izs].size() == 0) {
-            std::cout << "section z=" << M_z_section[izs] << " size="
-                      << M_list_of_faces_on_section[izs].size() << std::endl;
-            ERROR_MSG("For this section, no faces found.");
+        if ( ! this->_mesh.hasInternalFaces() )
+            ERROR_MSG("The mesh must have all internal faces built up. Check that 'mesh_faces = all' in the data file.");
+        if ( M_nb_sections < 2 )
+            ERROR_MSG("We can't compute the mean values on less than 2 sections.");
+        ASSERT( ZSectionFinal() - ZSectionInit() > 0,
+                "We can't compute the mean values on less than 2 sections.");
+
+        for ( int izs = 0; izs < M_nb_sections ; izs ++  ){
+            M_z_section[ izs ] = ZSectionInit() + Real(izs) * ( ZSectionFinal() - ZSectionInit() )
+                / Real(M_nb_sections-1); // mesh dependent (length of tube=5)
         }
+
+        for ( int izs = 0; izs < M_nb_sections ; izs ++  ){
+            this->FacesOnSection( M_z_section[izs], M_list_of_faces_on_section[izs], ToleranceSection(),
+                                  XSectionFrontier(), M_list_of_points_on_boundary[izs] );
+            if ( M_list_of_faces_on_section[izs].size() == 0) {
+                std::cout << "section z=" << M_z_section[izs] << " size="
+                          << M_list_of_faces_on_section[izs].size() << std::endl;
+                ERROR_MSG("For this section, no faces found.");
+            }
+        }
+        if ( M_list_of_faces_on_section.size() == 0) {
+            ERROR_MSG("No list of faces found.");
+        }
+        //---------------
+        //! end of stuff to compute the fluxes
+        //---------------
     }
-    if ( M_list_of_faces_on_section.size() == 0) {
-        ERROR_MSG("No list of faces found.");
-    }
-    //---------------
-    //! end of stuff to compute the fluxes
-    //---------------
-  }
-  
+
 }
 
 
@@ -1106,9 +1105,6 @@ std::pair< Real, Real >
 NavierStokesHandler<Mesh>::AreaAndFlux( const face_dof_type & __faces_on_section,
                                         const bool & modify_sign_normal )
 {
-    ASSERT( computeMeanValuesPerSection() == 1,
-	    "AreaAndFlux() is disabled if you don't ask to compute the Mean Values." );
-    
     typedef typename Mesh::FaceShape GeoBShape;
 
     // Some useful local variables, to save some typing
@@ -1196,6 +1192,9 @@ NavierStokesHandler<Mesh>::AreaAndFlux( const face_dof_type & __faces_on_section
 template <typename Mesh>
 void NavierStokesHandler<Mesh>::PostProcessAreaAndFlux( const Real & __time )
 {
+    if ( computeMeanValuesPerSection() != 1 )
+        ERROR_MSG("This function is disabled, if you don't ask to compute the Mean Values. (in data file)");
+
     M_out_areas  << "$ DATA = CURVE2D\n %% xlabel='z'\n"
                  << "%% toplabel='Section,time=" << __time << "'\n %% ylabel='Area'\n";
     M_out_fluxes << "$ DATA = CURVE2D\n %% xlabel='z'\n"
@@ -1209,7 +1208,7 @@ void NavierStokesHandler<Mesh>::PostProcessAreaAndFlux( const Real & __time )
         M_out_areas  << M_z_section[izs] << "\t" << AQmid.first << "\n";
         M_out_fluxes << M_z_section[izs] << "\t" << AQmid.second << "\n";
 
-        Real area_polygon = this->AreaCylindric( M_list_of_points_on_boundary[izs], NbPolygonEdges() ); 
+        Real area_polygon = this->AreaCylindric( M_list_of_points_on_boundary[izs], NbPolygonEdges() );
         M_out_areas_polygon  << M_z_section[izs] << "\t" << area_polygon << "\n";
     }
     M_out_areas << std::endl;
