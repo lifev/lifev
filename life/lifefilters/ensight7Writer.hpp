@@ -70,7 +70,10 @@ private:
 
 
 template <typename RegionMesh3D>
-bool outensight7Mesh3D( RegionMesh3D & mesh, PhysVectUnknown<Vector> & u, ScalUnknown<Vector> & p, Real & time )
+bool outensight7Mesh3D( RegionMesh3D const & mesh,
+                        PhysVectUnknown<Vector> const& u,
+                        ScalUnknown<Vector> const & p,
+                        Real const & time )
 {
 
     std::vector<Coord> grid; // coordinates of Grid nodes
@@ -157,7 +160,8 @@ bool outensight7Mesh3D( RegionMesh3D & mesh, PhysVectUnknown<Vector> & u, ScalUn
     {
         for ( ID j = 0; j < mesh.numLocalVertices(); j++ )
         {
-            File3.write( ( char * ) & mesh.volume( k + 1 ).point( j + 1 ).id(), sizeof( ID ) );
+            int __id = mesh.volume( k + 1 ).point( j + 1 ).id();
+            File3.write( ( char * ) & __id , sizeof( ID ) );
         }
     }
 

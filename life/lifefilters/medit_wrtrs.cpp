@@ -21,7 +21,7 @@
 
 namespace LifeV
 {
-void wr_medit_ascii_scalar( std::string fname, Real* U, int Usize, int type )
+void wr_medit_ascii_scalar( std::string fname, Real const* U, int Usize, int type )
 {
     std::ofstream ofile( fname.c_str() );
 
@@ -35,7 +35,7 @@ void wr_medit_ascii_scalar( std::string fname, Real* U, int Usize, int type )
   }
 }
 
-void wr_medit_ascii_vector( std::string fname, Real* U, int Usize, int type )
+void wr_medit_ascii_vector( std::string fname, Real const* U, int Usize, int type )
 {
     std::ofstream ofile( fname.c_str() );
 
@@ -53,7 +53,7 @@ void wr_medit_ascii_vector( std::string fname, Real* U, int Usize, int type )
 }
 
 
-void rd_medit_ascii_scalar( std::string fname, Real* U, const UInt& Usize, UInt& type )
+void rd_medit_ascii_scalar( std::string fname, Real * U, const UInt& Usize, UInt& type )
 {
 
     UInt theDim, theSize, nCol;
@@ -74,7 +74,7 @@ void rd_medit_ascii_scalar( std::string fname, Real* U, const UInt& Usize, UInt&
     }
 }
 
-void rd_medit_ascii_vector( std::string fname, Real* U, const UInt& Usize, UInt& type )
+void rd_medit_ascii_vector( std::string fname, Real * U, const UInt& Usize, UInt& type )
 {
     UInt theDim, theSize, nCol;
     std::ifstream ifile( fname.c_str() );

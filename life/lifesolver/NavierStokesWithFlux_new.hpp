@@ -50,6 +50,13 @@ struct default_source_term
             return 0;
         }
 };
+struct default_velocity
+{
+    Real operator()( Real __t, Real __x,  Real __y,  Real __z, ID __id )
+        {
+            return 0;
+        }
+};
 }
 /*!
   \class NavierStokesWithFlux
@@ -82,7 +89,7 @@ public:
     typedef typename flux_map_type::const_iterator flux_map_const_iterator;
 
     typedef typename NSSolver::mesh_type mesh_type;
-    typedef boost::signal<void ( uint, mesh_type const&, Vector const&, Vector const&, value_type )> iteration_signal_type;
+    typedef boost::signal<void ( uint, mesh_type const&, PhysVectUnknown<Vector> const&, ScalUnknown<Vector> const&, value_type )> iteration_signal_type;
 
     //@}
 
@@ -237,27 +244,11 @@ private:
     source_type _M_source;
 };
 
-#if 0
-Real u0o(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
-{
-  switch(i) {
-  case 1:
-  case 2:
-    return 0.0;
-    break;
-  case 3:
-     return 0.0;
-     break;
-  }
-  return 0;
-}
-#endif
-
 template<typename NSSolver>
 void
 NavierStokesWithFlux<NSSolver>::initialize( const Function& u0, const Function& p0, Real t0, Real dt )
 {
-  Debug( 6010 ) << "start NSo\n";
+    Debug( 6010 ) << "start NSo\n";
 
     // if one flux do the NSo solves
     // Stationary Navier-Stokes (NSo)
@@ -350,8 +341,8 @@ NavierStokesWithFlux<NSSolver>::iterate( const Real& time )
      //compute the flux of NS: the definitive one
      //
      Qn=_M_solver->flux(_M_fluxes.begin()->first);
-     std::cout << "imposed flux" << " " << Q << "\n";
-     std::cout << "numerical flux" << " " << Qn << "\n";
+     Debug( 6010 ) << "imposed flux" << " " << Q << "\n";
+     Debug( 6010 ) << "numerical flux" << " " << Qn << "\n";
 
 
 }

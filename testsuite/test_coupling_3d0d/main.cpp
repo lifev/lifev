@@ -25,8 +25,64 @@
 #include "zeroDModelSolver.hpp"
 #include "NavierStokesWithFlux_new.hpp"
 
+#include <ensight7Writer.hpp>
+#include <medit_wrtrs.hpp>
+
 namespace LifeV
 {
+struct toEnsight
+{
+    void
+    operator()( uint __it,
+                RegionMesh3D<LinearTetra> const& __mesh,
+                PhysVectUnknown<Vector> const& __u,
+                ScalUnknown<Vector> const& __p,
+                Real __flux ) const
+        {
+            std::cout << "============================================================\n"
+                      << "Call ensight writer here to save the data \n"
+                      << "============================================================\n";
+            outensight7Mesh3D( __mesh, __u, __p, __it/100 );
+        }
+};
+struct toMedit
+{
+    toMedit( GetPot __data )
+        :
+        _M_data( __data )
+        {
+        }
+    void
+    operator()( uint __it,
+                RegionMesh3D<LinearTetra> const& __mesh,
+                PhysVectUnknown<Vector> const& __u,
+                ScalUnknown<Vector> const& __p,
+                Real __flux ) const
+        {
+            std::cout << "============================================================\n"
+                      << "Call medit writer here to save the data \n"
+                      << "============================================================\n";
+            std::string name;
+            name +=  __it;
+            int __dim_u = __u.size()/__u.nbcomp();
+            // postprocess data file for medit
+            wr_medit_ascii_scalar( "press." + name + ".bb", __p.giveVec(), __p.size() );
+            wr_medit_ascii_scalar( "vel_x." + name + ".bb", __u.giveVec(), __mesh.numVertices() );
+            wr_medit_ascii_scalar( "vel_y." + name + ".bb", __u.giveVec() + __dim_u, __mesh.numVertices() );
+            wr_medit_ascii_scalar( "vel_z." + name + ".bb", __u.giveVec() + 2 * __dim_u, __mesh.numVertices() );
+
+            std::string __dir = _M_data( "fluid/discretization/mesh_dir", "." );
+            std::string __file = _M_data( "fluid/discretization/mesh_file", "mesh.mesh" );
+
+            system( ( "ln -s " + __dir + __file + " press." + name + ".mesh" ).data() );
+            system( ( "ln -s " + __dir + __file + " vel_x." + name + ".mesh" ).data() );
+            system( ( "ln -s " + __dir + __file + " vel_y." + name + ".mesh" ).data() );
+            system( ( "ln -s " + __dir + __file + " vel_z." + name + ".mesh" ).data() );
+        }
+private:
+    GetPot _M_data;
+};
+
 class flux_adaptor
 {
 public:
@@ -149,13 +205,17 @@ int main(int argc, char** argv)
         BCh_u.addBC("InFlow", 1, Natural,   Full, in_flow, 3);
 
         Real deltaP;
-        Real Qaux;
 
         NavierStokesWithFlux<NS> ns_with_flux(ns);
 
         ns_with_flux.setFlux( 1, flux_adaptor( 0 ) );
         ns_with_flux.setSourceTerm( f );
         ns_with_flux.initialize(u0,p0,0.0,dt);
+
+        toEnsight EnsightFilter;
+        ns_with_flux.doOnIterationFinish( EnsightFilter  );
+        toMedit MeditFilter( data_file );
+        ns_with_flux.doOnIterationFinish( MeditFilter  );
 
         for (Real time=startT+dt ; time <= T; time+=dt){
 
@@ -165,9 +225,6 @@ int main(int argc, char** argv)
 
             ns_with_flux.timeAdvance( f, time );
             ns_with_flux.iterate( time );
-
-            ns->postProcess();
-
         }
     }
 

@@ -185,6 +185,11 @@ public:
         {
             return & ( ( *this ) [ 0 ] );
         }
+    //! gives the front of the vector
+    Real const* giveVec() const
+        {
+            return & ( ( *this ) [ 0 ] );
+        }
     UInt size() const
         {
             return super::size();
@@ -245,6 +250,11 @@ public:
         }
     //! gives the front of the vector
     Real * giveVec()
+        {
+            return & ( ( *this ) [ 0 ] );
+        }
+    //! gives the front of the vector
+    Real const* giveVec() const
         {
             return & ( ( *this ) [ 0 ] );
         }
