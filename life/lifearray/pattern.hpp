@@ -18,7 +18,7 @@
 */
 /*----------------------------------------------------------------------*
 |
-| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.17 2004-10-25 08:02:27 winkelma Exp $
+| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.18 2004-10-28 10:32:29 winkelma Exp $
 |
 |
 | #Version  0.1 Experimental   07/7/00. Luca Formaggia & Alessandro Veneziani
@@ -310,13 +310,13 @@ public:
     CSRPatt & operator= ( const CSRPatt& RhCsr );
 
     //! return a copy of ia as a container
-    Container ia() const { return _ia; };
+    const Container& ia() const { return _ia; };
 
     //! return a copy of ja as a container
-    Container ja() const { return _ja; };
+    const Container& ja() const { return _ja; };
 
     //! return a copy of jaT as a container
-    Container jaT() const { return _jaT; };
+    const Container& jaT() const { return _jaT; };
 
     //! Give ia (in a raw form)
     Index_t * giveRawCSR_ia() { return & ( _ia.front() ); }
@@ -495,13 +495,13 @@ public:
     VBRPatt & operator= ( const VBRPatt& RhVbr );
 
     //! return a copy of indx as a container
-    inline Container indx() const { return _indx; }
+    inline const Container& indx() const { return _indx; }
 
     //! return a copy of rpntr as a container
-    inline Container rpntr() const { return _rpntr; }
+    inline const Container& rpntr() const { return _rpntr; }
 
     //! return a copy of cpntr as a container
-    inline Container cpntr() const { return _cpntr; }
+    inline const Container& cpntr() const { return _cpntr; }
 
     //! Give ia (in a raw form)
     inline Index_t* giveRawVBR_ia() { return giveRawCSR_ia(); }
@@ -652,9 +652,9 @@ public:
     template <typename DOF>
     bool buildPattern( DOF const & dof );
 
-    Container ia() const { return _ia; };
+    const Container& ia() const { return _ia; };
 
-    Container ja() const { return _ja; };
+    const Container& ja() const { return _ja; };
 
     //! Give ia (in a raw form)
     Index_t * giveRawCSR_ia() { return & ( _ia.front() ); }
@@ -778,9 +778,9 @@ public:
                       const std::string& type,
                       UInt const nbcomp = 1);
 
-    Container bindx() const { return _bindx; };
+    const Container& bindx() const { return _bindx; };
 
-    Container ybind() const { return _ybind; };
+    const Container& ybind() const { return _ybind; };
 
     //! Give _bindx (in a raw form)
     Index_t * giveRaw_bindx() { return & ( _bindx.front() ); }
@@ -1002,7 +1002,7 @@ public:
     //! (i_g,j_g). Returns (BROWS,BCOLS) if element not found
     std::pair<UInt, UInt> locateElBlock( Index_t const i_g,
                                          Index_t const j_g ) const;
-    
+
     //! Gives the block correponding to the GLOBAL DOF (di_g,dj_g)
     //! Returns (BROWS,BCOLS) if dofs not found
     std::pair<Diff_t, Diff_t> locateDofBlock( ID const di_g,
@@ -1059,13 +1059,13 @@ public:
     //! (viewer paradigm).
     void deleteBlock( Diff_t const m, Diff_t const n );
 
-    //! Checking and probing. This is true if a block is set but not linked 
+    //! Checking and probing. This is true if a block is set but not linked
     //! to a pattern (zero matrix)
     inline bool isZero( Diff_t const m, Diff_t const n ) const;
 
     //! True iff a block has been set to a local pattern
     inline bool isSet( Diff_t const m, Diff_t const n ) const;
-    
+
     void showMe( bool verbose = false, std::ostream & c = std::cout ) const;
 
     //! Tests if offsets are consistent with those of a global matrix
@@ -1081,16 +1081,16 @@ private:
 
     //! indicates whether a block is actually a link to another block
     bool _linked[ BROWS ][ BCOLS ];
-    
+
     // rows offset
     UInt _rowoff[ BROWS ][ BCOLS ];
-    
+
     // cols offset
     UInt _coloff[ BROWS ][ BCOLS ];
-    
+
     // rows in block
     UInt _nrows[ BROWS ][ BCOLS ];
-    
+
     // cols in block
     UInt _ncols[ BROWS ][ BCOLS ];
 
@@ -1495,7 +1495,7 @@ void CSRPatt::_buildPattern( DOF1 const & dof1, DynPattern const & dynpatt,
 
     // "nbcomp" stands for the diagonal terms of all blocks
     _ia.resize( _nrows + 1, nbcomp );
-    
+
     // Count
     for ( DynPattern::iterator d = dynpatt.begin(); d != dynpatt.end(); ++d )
     {
@@ -1743,9 +1743,9 @@ CSRPatt::row( Diff_t const row, Iter coldata, Iter position ) const
 inline
 bool CSRPatt::isThere( Index_t const i, Index_t const j ) const
 {
-    ASSERT_BD( i >= PatternOffset && 
+    ASSERT_BD( i >= PatternOffset &&
                i < static_cast<Index_t>( _nrows ) + PatternOffset );
-    ASSERT_BD( j >= PatternOffset && 
+    ASSERT_BD( j >= PatternOffset &&
                j < static_cast<Index_t>( _ncols ) + PatternOffset );
     if ( ! _filled )
         return false;
@@ -2004,10 +2004,10 @@ inline UInt VBRPatt::row( Diff_t const row,
 
     Diff_t start = _i2o( _ia[ blockr ] );
     Diff_t end = _i2o( _ia[ blockr + 1 ] );
-    
+
     // initial block number
     Container::const_iterator istart = _ja.begin() + start;
-    
+
     // end block number (excluded)
     Container::const_iterator iend = _ja.begin() + end;
 
@@ -2055,7 +2055,7 @@ bool CSRPattSymm::buildPattern( DOF1 const & dof1 )
     }
 
     UInt ig, jg, cur;
-    
+
     // actual size of _ja when exploiting the symmetry:
     UInt nnz_symm = _nrows + dynpatt.size();
 
@@ -2070,9 +2070,9 @@ bool CSRPattSymm::buildPattern( DOF1 const & dof1 )
 
     // "Index_t(1)" stands for the diagonal terms
     _ia.resize( _nrows + 1, Index_t( 1 ) );
-    
+
     // Container temp(_nrows+1,Index_t(1));
-    
+
     // Count
     for ( DynPattern::iterator d = dynpatt.begin(); d != dynpatt.end(); ++d )
     {
@@ -2386,7 +2386,7 @@ bool MSRPatt::buildPattern(DOF const & dof, DOFBYFACE const & dofbyface,
         jg = d -> second;
 
         _bindx[ig] += nbcomp;
-        
+
         // assumed by symmetry of the pattern
         _bindx[jg] += nbcomp;
  }
@@ -2506,9 +2506,9 @@ bool MSRPatt::isThere( Index_t i, Index_t j ) const
 {
     if ( isEmpty() )
         return false;
-    ASSERT_BD( i >= PatternOffset && 
+    ASSERT_BD( i >= PatternOffset &&
                i < static_cast<Index_t>( _nrows ) + PatternOffset );
-    ASSERT_BD( j >= PatternOffset && 
+    ASSERT_BD( j >= PatternOffset &&
                j < static_cast<Index_t>( _ncols ) + PatternOffset );
     if ( i == j )
         return true;
@@ -2588,7 +2588,7 @@ MixedPattern()
 // construct and link to an external pattern (type = "diag")
 // (Alain: type="full")
 template <UInt BROWS, UInt BCOLS, typename PATTERN>
-MixedPattern<BROWS, BCOLS, PATTERN>::MixedPattern( PATTERN & ex_patt, 
+MixedPattern<BROWS, BCOLS, PATTERN>::MixedPattern( PATTERN & ex_patt,
                                                    const std::string& type )
 {
 
@@ -2655,7 +2655,7 @@ template
 void MixedPattern<BROWS, BCOLS, PATTERN>::
 makeDiagPattern( PATTERN & ex_patt )
 {
-    ASSERT_PRE( BROWS == BCOLS, 
+    ASSERT_PRE( BROWS == BCOLS,
                 "attempt to make a diagonal pattern for non square matrix" );
     for ( UInt j = 0; j < BCOLS; j++ )
         for ( UInt i = 0; i < BROWS; i++ )
@@ -2812,7 +2812,7 @@ MixedPattern<BROWS, BCOLS, PATTERN>::nbNeighbours( ID const d_g ) const
 {
     // This is MORE complicated
     //Locate line corresponding to dof d_g in block
-    
+
     // Remember that dofs are ALWAYS numbered from 1
     std::pair<UInt, UInt> _b = locateDofBlock( d_g, 1 );
     // line local nomber
@@ -2985,12 +2985,12 @@ locateElBlock( Index_t const i_g, Index_t const j_g ) const
     UInt _itest = _i2o( i_g );
     UInt _jtest = _i2o( j_g );
 
-    while ( m < BROWS && 
-            ( _itest < _rowoff[ m ][ 0 ] || 
+    while ( m < BROWS &&
+            ( _itest < _rowoff[ m ][ 0 ] ||
               _itest >= _rowoff[ m ][ 0 ] + _nrows[ m ][ n ] ) )
         ++m;
-    while ( n < BCOLS && 
-            ( _jtest < _coloff[ 0 ][ n ] || 
+    while ( n < BCOLS &&
+            ( _jtest < _coloff[ 0 ][ n ] ||
               _jtest >= _coloff[ 0 ][ n ] + _ncols[ m ][ n ] ) )
         ++n;
 
@@ -3008,8 +3008,8 @@ locateDofBlock( ID const i_g, ID const j_g ) const
     UInt _itest = _d2o( i_g );
     UInt _jtest = _d2o( j_g );
 
-    while ( m < BROWS && 
-            ( _itest < _rowoff[ m ][ 0 ] || 
+    while ( m < BROWS &&
+            ( _itest < _rowoff[ m ][ 0 ] ||
               _itest >= _rowoff[ m ][ 0 ] + _nrows[ m ][ n ] ) )
         ++m;
     while ( n < BCOLS &&
@@ -3267,7 +3267,7 @@ MixedPattern<BROWS, BCOLS, PATTERN>::check( bool verbose,
     {
         for ( Diff_t n = 0; n < BCOLS; n++ )
         {
-            ok = ok && 
+            ok = ok &&
                 _rowoff[ m ][ n ] == _rowoff[ m ][ n - 1 ] &&
                 _coloff[ m ][ n ] == _coloff[ m - 1 ][ n ];
         }
@@ -3281,7 +3281,7 @@ MixedPattern<BROWS, BCOLS, PATTERN>::check( bool verbose,
                  _ncols[ m ][ n ] == 0 )
             {
                 ok = false;
-                c << "Block " << "(" << m << ", " << n << ") unset" 
+                c << "Block " << "(" << m << ", " << n << ") unset"
                   << std::endl;
             }
         }
@@ -3307,13 +3307,13 @@ MixedPattern<BROWS, BCOLS, PATTERN>::check( bool verbose,
                      _coloff[ m ][ n ] != _coloff[ m - 1 ][ n ] )
                 {
                     c << "Inconsistent Offsets of Blocks:" << std::endl;
-                    c << "(" << m << ", " << n << ") Row offset= " 
-                      << _rowoff[ m ][ n ] 
-                      << "(" << m << ", " << n - 1 << ") Row offset= " 
+                    c << "(" << m << ", " << n << ") Row offset= "
+                      << _rowoff[ m ][ n ]
+                      << "(" << m << ", " << n - 1 << ") Row offset= "
                       << _rowoff[ m ][ n - 1 ] << std::endl;
-                    c << "(" << m << ", " << n << ") Col offset= " 
+                    c << "(" << m << ", " << n << ") Col offset= "
                       << _coloff[ m ][ n ]
-                      << "(" << m - 1 << ", " << n << ") Col offset= " 
+                      << "(" << m - 1 << ", " << n << ") Col offset= "
                       << _coloff[ m - 1 ][ n ] << std::endl;
                 }
             }
@@ -3328,7 +3328,7 @@ MixedPattern<BROWS, BCOLS, PATTERN>::check( bool verbose,
                      _ncols[ m ][ n - 1 ] != 0 )
                 {
                     c << "Inconsistent Number of cols/rows:" << std::endl;
-                    c << "(" << m << ", " << n << ") Row offset= " 
+                    c << "(" << m << ", " << n << ") Row offset= "
                       << _rowoff[ m ][ n ];
                     c << "(" << m - 1 << ", " << n << ") Row offset= "
                       << _rowoff[ m - 1 ][ n ] << std::endl;
@@ -3363,8 +3363,8 @@ MixedPattern<BROWS, BCOLS, PATTERN>::showMe( bool verbose,
     {
         for ( Diff_t n = 0; n < BCOLS; n++ )
         {
-            c << "(" << m << ", " << n << ") " 
-              << _rowoff[ m ][ n ] << " " << _coloff[ m ][ n ] << " " 
+            c << "(" << m << ", " << n << ") "
+              << _rowoff[ m ][ n ] << " " << _coloff[ m ][ n ] << " "
               << _nrows[ m ][ n ] << " " << _ncols[ m ][ n ] << " ";
             c << isSet( m, n ) << " " << _linked[ m ][ n ] << std::endl;
         }
@@ -3387,7 +3387,7 @@ MixedPattern<BROWS, BCOLS, PATTERN>::showMe( bool verbose,
                     if ( _ncols[ m ][ n ] == 0 && _nrows[ m ][ n ] == 0 )
                         c << " UNSET" << std::endl;
                     else
-                        c << "Zero Pattern " 
+                        c << "Zero Pattern "
                           << _nrows[ m ][ n ] << " X " << _ncols[ m ][ n ]
                           << std::endl;
                 }
