@@ -79,7 +79,7 @@ namespace LifeV
 
             boost::numeric::ublas::unbounded_array<double> __val( __nnz );
 
-            std::for_each( __val.begin(), __val.end(), boost::lambda::_1 = 0.0 );
+            std::for_each( __val.begin(), __val.end(), boost::lambda::_1 = 1 );
             std::copy( this->value_data().begin(), this->value_data().end(), __val.begin() );
 
             // Make room for non-zero elements
@@ -188,7 +188,7 @@ namespace LifeV
         }
 
         //! Dump matrix to file in Matlab format and spy
-        void spy( std::string const &filename )
+        void spy( std::string const &filename ) const
         {
             std::string name = filename;
             std::string separator = " , ";
@@ -213,10 +213,10 @@ namespace LifeV
                     " cannot be opened for writing.");
 
             file_out << "S = [ ";
-            for ( typename BoostMatrix::iterator1 i1=begin1();
+            for ( typename BoostMatrix::const_iterator1 i1=begin1();
                   i1!=end1(); ++i1 )
                 {
-                    for ( typename BoostMatrix::iterator2 i2=i1.begin();
+                    for ( typename BoostMatrix::const_iterator2 i2=i1.begin();
                           i2!=i1.end(); ++i2 )
                         file_out << i2.index1() + 1 << separator
                                  << i2.index2() + 1 << separator
@@ -428,7 +428,7 @@ namespace LifeV
         }
 
         //! Dump matrix to file in Matlab format and spy
-        void spy( std::string const &filename )
+        void spy( std::string const &filename ) const
         {
             std::string name = filename;
             std::string separator = " , ";
@@ -454,10 +454,10 @@ namespace LifeV
 
             file_out << "S = [ ";
 
-            for ( DiagonalBoostMatrix::iterator1 i1=begin1();
+            for ( DiagonalBoostMatrix::const_iterator1 i1=begin1();
                   i1!=end1(); ++i1 )
                 {
-                    for ( DiagonalBoostMatrix::iterator2 i2=i1.begin();
+                    for ( DiagonalBoostMatrix::const_iterator2 i2=i1.begin();
                           i2!=i1.end(); ++i2 )
                         file_out << i2.index1() + 1 << separator
                                  << i2.index2() + 1 << separator
@@ -490,28 +490,25 @@ namespace LifeV
                 H.size1() << "x" << H.size2() << " matrix by " <<
                 G.size1() << "x" << G.size2() << " matrix into " <<
                 S.size1() << "x" << S.size2() << " matrix." );
-        for ( BoostMatrix<row_major>::const_iterator1 iD1=D.begin1();
-              iD1!=D.end1(); ++iD1 )
-            {
-                for ( BoostMatrix<column_major>::const_iterator2 iG2=G.begin2();
-                      iG2!=G.end2(); ++iG2 )
-                    {
-                        double sij = 0;
-                        BoostMatrix<column_major>::const_iterator1 iG1=iG2.begin();
-                        for ( BoostMatrix<row_major>::const_iterator2 iD2 = iD1.begin();
-                              iD2!=iD1.end(); ++iD2 )
-                            {
-                                while ( iG1.index1() < iD2.index2() ) ++iG1;
 
-                                if ( iD2.index2() == iG1.index1() )
-                                    sij += (*iD2) * H.value_data()[iD2.index2()] * (*iG1);
+        // Chain multiplication
+        S = prod(D,  prod<compressed_matrix<double, column_major> >(H, G) );
+        /*
+          for ( BoostMatrix<row_major>::const_iterator1 iD1=D.begin1(); iD1!=D.end1(); ++iD1 ) {
+          for ( BoostMatrix<column_major>::const_iterator2 iG2=G.begin2(); iG2!=G.end2(); ++iG2 ) {
+          double sij = 0;
+          BoostMatrix<column_major>::const_iterator1 iG1=iG2.begin();
+          for ( BoostMatrix<row_major>::const_iterator2 iD2 = iD1.begin(); iD2!=iD1.end(); ++iD2 ) {
+          while ( iG1.index1() < iD2.index2() ) ++iG1;
+          if ( iD2.index2() == iG1.index1() )
+          sij += (*iD2) * H.value_data()[iD2.index2()] * (*iG1);
 
-                            }
-                        S.insert( iD1.index1(), iG2.index2(), sij );
-                    }
-            }
+          }
+          S.insert( iD1.index1(), iG2.index2(), sij );
+          }
+          }
+        */
     }
-
 } // namespace LifeV
 
 #endif /* _BOOSTMATRIX_HPP_ */
