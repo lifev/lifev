@@ -199,10 +199,15 @@ void SolverAztec::solve( array_type& x,
 }
 
 void SolverAztec::setOptionsFromGetPot( GetPot const& dataFile,
-                                        std::string section )
+                                        std::string section,
+                                        bool printOptions )
 {
     DataAztec dataAztec( dataFile, section );
     dataAztec.aztecOptionsFromDataFile( M_options, M_params );
+    if ( printOptions )
+    {
+        dataAztec.dataAztecShowMe();
+    }
 }
 
 } // namespace LifeV

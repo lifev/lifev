@@ -62,7 +62,7 @@ public:
     enum PreCalc { SAME_PRECONDITIONER,
                    SAME_NONZERO_PATTERN,
                    DIFFERENT_NONZERO_PATTERN };
-    
+
     /** @name Constructors, destructor
      */
     //@{
@@ -164,12 +164,14 @@ public:
     /*! Sets options from data file for this solver.
      *  @param dataFile GetPot object containing the options from the data file
      *  @param section section in the GetPot object containing the Aztec stuff
+     *  @param printOptions whether to print the options set
      *
      *  @author Christoph Winkelmann
      */
     void setOptionsFromGetPot( GetPot const& dataFile,
-                               std::string section = "aztec" );
-
+                               std::string section = "aztec",
+                               bool printOptions = false );
+    
 private:
     //! private method containing code shared by public setMatrix methods
     void F_setMatrix( MSRMatr<value_type> const& newMatrix );
@@ -203,7 +205,7 @@ private:
 
     //! MSRMatr converted from CSRMatr if given as such
     std::auto_ptr<MSRMatr<value_type> > M_tempMatrix;
-    
+
 };
 
 }
