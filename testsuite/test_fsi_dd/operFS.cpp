@@ -60,6 +60,11 @@ namespace LifeV
         if(status) M_nbEval = 0; // new time step
         M_nbEval++;
 
+        std::cout << "dim solid.d = " << M_solid.d().size()
+                  << std::endl;
+        std::cout << "dim disp    = " << disp.size()
+                  << std::endl;
+        
         M_solid.d() = disp;
 
         M_fluid.updateMesh(M_time);
@@ -99,7 +104,7 @@ namespace LifeV
         
         res = disp - M_dispStruct;
 
-        disp = M_dispStruct;
+        //disp = M_dispStruct;
                 
     }
 

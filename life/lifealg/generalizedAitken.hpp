@@ -177,11 +177,11 @@ namespace LifeV
             else if (a22 == 0) 
             {
                 omegaS = 0.;
-                omegaF = b1/(a11*a11);
+                omegaF = b1/a11;
             }
             else if (a11 == 0)
             {
-                omegaS = b2/(a22*a22);
+                omegaS = b2/a22;
                 omegaF = 0.;
             }
 
@@ -189,6 +189,7 @@ namespace LifeV
                       << " omegaF = " << omegaF << std::endl;
                 
             deltaLambda = omegaF*muF + omegaS*muS;
+            deltaLambda = 0.05*muF + 0.05*muS;
             
             M_lambda    = _lambda;
             M_muF       = _muF;
