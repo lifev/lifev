@@ -247,11 +247,11 @@ namespace Private
 
 void initAssert()
 {
-    ::LifeV::Assert::set_log( &::LifeV::SmartAssert::defaultLogger);
-    ::LifeV::Assert::set_handler( lvl_warn, &::LifeV::SmartAssert::defaultWarnHandler);
-    ::LifeV::Assert::set_handler( lvl_debug, &::LifeV::SmartAssert::defaultDebugHandler);
-    ::LifeV::Assert::set_handler( lvl_error, &::LifeV::SmartAssert::defaultErrorHandler);
-    ::LifeV::Assert::set_handler( lvl_fatal, &::LifeV::SmartAssert::defaultFatalHandler);
+    ::LifeV::Assert::setLog( &::LifeV::SmartAssert::defaultLogger);
+    ::LifeV::Assert::setHandler( lvl_warn, &::LifeV::SmartAssert::defaultWarnHandler);
+    ::LifeV::Assert::setHandler( lvl_debug, &::LifeV::SmartAssert::defaultDebugHandler);
+    ::LifeV::Assert::setHandler( lvl_error, &::LifeV::SmartAssert::defaultErrorHandler);
+    ::LifeV::Assert::setHandler( lvl_fatal, &::LifeV::SmartAssert::defaultFatalHandler);
 }
 
 // sets the default logger to write to this stream

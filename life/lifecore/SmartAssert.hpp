@@ -215,7 +215,7 @@ struct Assert
     ~Assert()
         {
             if ( _M_needs_handling)
-                handle_assert();
+                handleAssert();
         }
 
     template< class type>
@@ -275,7 +275,7 @@ struct Assert
 
     // in this case, we set the default logger, and make it
     // write everything to this file
-    static void set_log( const char * strFileName)
+    static void setLog( const char * strFileName)
         {
             Private::setDefaultLogName( strFileName);
             logger() = &SmartAssert::defaultLogger;
@@ -283,25 +283,25 @@ struct Assert
 
     // in this case, we set the default logger, and make it
     // write everything to this log
-    static void set_log( std::ostream & out)
+    static void setLog( std::ostream & out)
         {
             Private::setDefaultLogStream( out);
             logger() = &SmartAssert::defaultLogger;
         }
 
-    static void set_log( assert_function_type log)
+    static void setLog( assert_function_type log)
         {
             logger() = log;
         }
 
-    static void set_handler( int nLevel, assert_function_type handler)
+    static void setHandler( int nLevel, assert_function_type handler)
         {
             handlers()[ nLevel] = handler;
         }
 
 private:
     // handles the current assertion.
-    void handle_assert()
+    void handleAssert()
         {
             logger()( _M_context);
             get_handler( _M_context.get_level() )( _M_context);
