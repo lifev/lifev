@@ -175,7 +175,7 @@ void source( Real (*fct)(Real,Real,Real,Real,Real),
 {
     int iblock=0;
     ASSERT_PRE( fe.hasQuadPtCoor(),
-                "Source with space dependent fonction need updated quadrature "
+                "Source with space dependent function need updated quadrature "
                 "point coordinates. Call for example updateFirstDerivQuadPt() "
                 "instead of updateFirstDeriv()." );
     int i, ig;
@@ -355,7 +355,7 @@ void ipstab_grad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const C
     {  // first derivatives on quadrature points
         bdfe.coorQuadPt( x[ 0 ], x[ 1 ], x[ 2 ], ig );       // quadrature points coordinates
 
-        // local coordonates of the quadrature point
+        // local coordinates of the quadrature point
         for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
         {
             sum1 = 0;
@@ -449,7 +449,7 @@ void ipstab_grad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const C
     {  // first derivatives on quadrature points
         bdfe.coorQuadPt( x[ 0 ], x[ 1 ], x[ 2 ], ig );       // quadrature points coordinates
 
-        // local coordonates of the quadrature point
+        // local coordinates of the quadrature point
         for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
         {
             sum1 = 0;
@@ -557,7 +557,7 @@ void ipstab_bgrad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const 
 
 
     //
-    // shape fonction first derivaties on the boundary quadrature points
+    // shape function first derivaties on the boundary quadrature points
     //
     // this should be improved!!!
     //
@@ -573,7 +573,7 @@ void ipstab_bgrad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const 
     {  // first derivatives on quadrature points
         bdfe.coorQuadPt( x[ 0 ], x[ 1 ], x[ 2 ], ig );       // quadrature points coordinates
 
-        // local coordonates of the quadrature point
+        // local coordinates of the quadrature point
         for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
         {
             sum1 = 0;
@@ -671,7 +671,7 @@ void ipstab_div( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const Cu
     {  // first derivatives on quadrature points
         bdfe.coorQuadPt( x[ 0 ], x[ 1 ], x[ 2 ], ig );       // quadrature points coordinates
 
-        // local coordonates of the quadrature point
+        // local coordinates of the quadrature point
         for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
         {
             sum1 = 0;
@@ -733,6 +733,123 @@ void ipstab_div( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const Cu
 
 }
 
+void ipstab_bagrad( const Real coef, ElemMat& elmat,
+                    const CurrentFE& fe1, const CurrentFE& fe2,
+                    const ElemVec& beta,  const CurrentBdFE& bdfe,
+                    int iblock, int jblock )
+{
+    /*
+      Interior penalty stabilization: coef*\int_{face} grad u1_i . grad v1_j
+    */
+
+    ASSERT_PRE( fe1.hasFirstDeriv(),
+                "ipstab11 needs at least the first derivatives" );
+    ASSERT_PRE( fe2.hasFirstDeriv(),
+                "ipstab11 needs at least the first derivatives" );
+
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+
+
+
+    Real sum, sum1, sum2;
+    int i, j, ig, icoor, jcoor;
+    Real x[ 3 ], rx1[ 3 ], drp1[ 3 ], rx2[ 3 ], drp2[ 3 ];
+    Real phid1[ fe1.nbNode ][ fe1.nbCoor ][ bdfe.nbQuadPt ];
+    Real phid2[ fe2.nbNode ][ fe2.nbCoor ][ bdfe.nbQuadPt ];
+    Real b1[ 3 ], b2[ 3 ];
+
+    fe1.coorMap( b1[ 0 ], b1[ 1 ], b1[ 2 ], 0, 0, 0 ); // translation fe1
+    fe2.coorMap( b2[ 0 ], b2[ 1 ], b2[ 2 ], 0, 0, 0 ); // translation fe2
+    const KNM<Real>& normal = bdfe.normal;
+    
+    //
+    // convection velocity term |\beta . n|^2 / |\beta|
+    // on the boundary quadrature points
+    //
+    Real ba2[ bdfe.nbQuadPt ];
+
+    for ( ig = 0; ig < bdfe.nbQuadPt; ig++ )
+    {
+        sum1 = 0;
+        sum2 = 0;
+        for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
+        {
+            for ( i = 0; i < bdfe.nbNode; ++i )
+            {
+                Real betaLoc = bdfe.phi( i, ig ) *
+                    beta.vec() [ icoor * bdfe.nbNode + i ];
+                sum1 += betaLoc * normal(i, icoor);
+                sum2 += betaLoc * betaLoc;
+            }
+        }
+        ba2[ ig ] = sum2 == 0 ? 0 : sum1 * sum1 / pow( sum2, 0.5 );
+    }
+    
+    for ( int ig = 0; ig < bdfe.nbQuadPt; ++ig )
+    {  // first derivatives on quadrature points
+        bdfe.coorQuadPt( x[ 0 ], x[ 1 ], x[ 2 ], ig );       // quadrature points coordinates
+
+        // local coordinates of the quadrature point
+        for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
+        {
+            sum1 = 0;
+            sum2 = 0;
+            for ( jcoor = 0; jcoor < fe1.nbCoor; ++jcoor )
+            {
+                sum1 += fe1.tInvJac( jcoor, icoor, 0 ) * ( x[ jcoor ] - b1[ jcoor ] );
+                sum2 += fe2.tInvJac( jcoor, icoor, 0 ) * ( x[ jcoor ] - b2[ jcoor ] );
+            }
+            rx1[ icoor ] = sum1;
+            rx2[ icoor ] = sum2;
+        }
+
+        for ( i = 0; i < fe1.nbNode; ++i )
+        {
+
+            // first derivative on the reference element
+            for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
+            {
+                drp1[ icoor ] = fe1.refFE.dPhi( i, icoor, rx1[ 0 ], rx1[ 1 ], rx1[ 2 ] );
+                drp2[ icoor ] = fe2.refFE.dPhi( i, icoor, rx2[ 0 ], rx2[ 1 ], rx2[ 2 ] );
+            }
+
+            // first derivative on the current element
+            for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
+            {
+                sum1 = 0;
+                sum2 = 0;
+                for ( jcoor = 0; jcoor < fe1.nbCoor; ++jcoor )
+                {
+                    sum1 += fe1.tInvJac( icoor, jcoor, 0 ) * drp1[ jcoor ];
+                    sum2 += fe2.tInvJac( icoor, jcoor, 0 ) * drp2[ jcoor ];
+                }
+                phid1[ i ][ icoor ][ ig ] = sum1;
+                phid2[ i ][ icoor ][ ig ] = sum2;
+            }
+        }
+    }
+
+
+
+    // Loop on rows
+    for ( i = 0; i < fe1.nbNode; ++i )
+    {
+        // Loop on columns
+        for ( j = 0; j < fe2.nbNode; ++j )
+        {
+            sum = 0.0;
+            // Loop on coordinates
+            for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
+                for ( ig = 0; ig < bdfe.nbQuadPt ; ++ig )
+                    sum += ba2[ ig ] * 
+                        phid1[ i ][ icoor ][ ig ] *
+                        phid2[ j ][ icoor ][ ig ] *
+                        bdfe.weightMeas( ig );
+            mat( i, j ) = coef * sum;
+        }
+    }
+
+}
 
 
 
@@ -2464,7 +2581,7 @@ void source_stress( Real coef, Real mu, const ElemVec& uk_loc, const ElemVec& pk
 {
 
     ASSERT_PRE( fe_u.hasFirstDeriv(),
-                "source_stress needs at least the velocity shape fonctions first derivatives" );
+                "source_stress needs at least the velocity shape functions first derivatives" );
 
     Real A[ fe_u.nbCoor ][ fe_u.nbCoor ];                 // I\div d - (\grad d)^T at a quadrature point
     Real guk[ fe_u.nbCoor ][ fe_u.nbCoor ];               // \grad u^k at a quadrature point
@@ -2562,7 +2679,7 @@ void source_stress2( Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, Ele
 {
 
     ASSERT_PRE( fe_u.hasFirstDeriv(),
-                "source_stress needs at least the velocity shape fonctions first derivatives" );
+                "source_stress needs at least the velocity shape functions first derivatives" );
 
 
     Real guk[ fe_u.nbCoor ][ fe_u.nbCoor ];               // \grad u^k at a quadrature point
@@ -2645,7 +2762,7 @@ void source_press( Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, ElemV
 {
 
     ASSERT_PRE( fe_u.hasFirstDeriv(),
-                "source_stress needs at least the velocity shape fonctions first derivatives" );
+                "source_stress needs at least the velocity shape functions first derivatives" );
     Real A[ fe_u.nbCoor ][ fe_u.nbCoor ];     //  I\div d - (\grad d)^T at a quadrature point
     Real guk[ fe_u.nbCoor ][ fe_u.nbCoor ];   // \grad u^k at a quadrature point
     Real aux[ fe_u.nbQuadPt ];              // grad u^k:[I\div d - (\grad d)^T] at each quadrature point

@@ -112,22 +112,30 @@ void source( Real constant, ElemVec& elvec, const CurrentFE& fe, Real t, int ibl
 // Miguel 12/2003 / 2/2004
 //
 
-// coef < \grad p1, \gra q2 >
-void ipstab_grad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2,
+// coef < \grad p1, \grad q2 >
+void ipstab_grad( const Real coef, ElemMat& elmat,
+                  const CurrentFE& fe1, const CurrentFE& fe2,
                   const CurrentBdFE& bdfe, int iblock = 0, int jblock = 0 );
 
 // coef < \grad u1, [\grad v2 >
-void ipstab_grad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2,
+void ipstab_grad( const Real coef, ElemMat& elmat,
+                  const CurrentFE& fe1, const CurrentFE& fe2,
                   const CurrentBdFE& bdfe, int iblock, int jblock, int nb );
 
 // coef < \div u1, \div v2 >
-void ipstab_div( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2,
+void ipstab_div( const Real coef, ElemMat& elmat,
+                 const CurrentFE& fe1, const CurrentFE& fe2,
                  const CurrentBdFE& bdfe, int iblock = 0, int jblock = 0 );
 // coef < \beta1 . \grad u1, \beta2 . \grad v2 >
-void ipstab_bgrad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2,
-                   const ElemVec& beta, const CurrentBdFE& bdfe, int iblock,
-                   int jblock, int nb );
-
+void ipstab_bgrad( const Real coef, ElemMat& elmat,
+                   const CurrentFE& fe1, const CurrentFE& fe2,
+                   const ElemVec& beta, const CurrentBdFE& bdfe,
+                   int iblock, int jblock, int nb );
+// coef < |\beta . n|^2 / |\beta| \grad p1, \grad q2 >
+void ipstab_bagrad( const Real coef, ElemMat& elmat,
+                    const CurrentFE& fe1, const CurrentFE& fe2,
+                    const ElemVec& beta, const CurrentBdFE& bdfe,
+                    int iblock = 0, int jblock = 0 );
 ///////////////////////////////////////
 
 
