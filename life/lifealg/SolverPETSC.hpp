@@ -1,8 +1,9 @@
-/* -*- Mode : c++;  -*-
+/* -*- mode: c++ -*-
 
-  This file is part of the LifeV libraries.
+  This file is part of the LifeV library
 
-  Author: Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+  Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+       Date: 2004-08-29
 
   Copyright (C) 2004 EPFL
 
@@ -20,9 +21,10 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-/** \file SolverPETSC.hpp
-    Header file for the LifeV-PETSC interface.
-
+/**
+   \file SolverPETSC.hpp
+   \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+   \date 2004-08-29
 */
 #ifndef __SolverPETSC_H
 #define __SolverPETSC_H 1
@@ -31,19 +33,22 @@
 
 extern "C"
 {
+#if defined(HAVE_PETSC_H)
 #include <petsc.h>
-#include <petscsles.h>
+#include <petscksp.h>
+#include <petscpc.h>
+#endif /* HAVE_PETSC_H */
 }
 
 #include <vecUnknown.hpp>
 
-namespace Life
+namespace LifeV
 {
 /*!
   \typedef enum SMonitorType
   Define the monitor type for the Krylov Space Solvers
 */
-typedef enum SMonitorType
+typedef enum PetscMonitorType
 {
     KSP_NO_MONITOR = 0,  /**< no monitor */
     KSP_DEFAULT_MONITOR,  /**< preconditionned error monitor */
@@ -141,7 +146,7 @@ public:
     */
     SolverPETSC( std::string const& ksp = "gmres",
                  std::string const& pc = "ilu",
-                 SMonitorType monitor = KSP_DEFAULT_MONITOR );
+                 PetscMonitorType monitor = KSP_DEFAULT_MONITOR );
 
     //! create a new instance
     static SolverPETSC* New();
@@ -169,8 +174,8 @@ public:
      */
     //@{
 
-    void setMatrix( uint, uint*, uint*, double* );
-    void setMatrixTranspose( uint, uint*, uint*, double* );
+    void setMatrix( uint, const uint*, const uint*, const double* );
+    void setMatrixTranspose( uint, const uint*, const uint*, const double* );
     void setTolerances( double = PETSC_DEFAULT, double = PETSC_DEFAULT, double = PETSC_DEFAULT, int = PETSC_DEFAULT );
 
     //! get the petsc preconditioner

@@ -1,8 +1,9 @@
-/* -*- Mode : c++; c-tab-always-indent: t; indent-tabs-mode: nil; -*-
+/* -*- mode: c++ -*-
 
-  This file is part of the LifeV libraries.
+  This file is part of the LifeV library
 
-  Author: Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+  Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+       Date: 2004-08-29
 
   Copyright (C) 2004 EPFL
 
@@ -20,25 +21,26 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-/** \file SolverPETSC.cpp
-    Implementation file for the LifeV-PETSC interface.
-
+/**
+   \file SolverPETSC.hpp
+   \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+   \date 2004-08-29
 */
-#if defined(__GNUG__)
-#pragma implementation
-#endif /* __GNUG__ */
+#include <lifeconfig.h>
 
 #include <SolverPETSC.hpp>
 
 extern "C"
 {
+#if defined(HAVE_PETSC_H)
 #include <petsc.h>
-#include <petscmat.h>
-#include <petscsles.h>
+#include <petscksp.h>
+#include <petscvec.h>
+#endif /* HAVE_PETSC_H */
 };
 
 
-namespace Life
+namespace LifeV
 {
 
 class SolverPETSC::Private
@@ -55,7 +57,6 @@ public:
     Mat __A;
     Mat __A_t;
 
-    SLES __sles;
     PC __pc;
     KSP __ksp;
 
@@ -68,15 +69,13 @@ public:
 
 SolverPETSC::SolverPETSC( std::string const& __ksp_type,
                           std::string const& __pc_type,
-                          SMonitorType __monitor )
+                          PetscMonitorType __monitor )
     :
     _M_p ( new Private )
 {
-    int ierr = SLESCreate( PETSC_COMM_WORLD, &_M_p->__sles ); //CHKERRQ(ierr);
+    int ierr = KSPCreate( PETSC_COMM_WORLD, &_M_p->__ksp ); //CHKERRQ(ierr);
 
-    ierr = SLESGetKSP( _M_p->__sles, & _M_p->__ksp ); //CHKERRQ(ierr);
-
-    ierr = SLESGetPC( _M_p->__sles, &_M_p->__pc ); //CHKERRQ(ierr);
+    ierr = KSPGetPC( _M_p->__ksp, &_M_p->__pc ); //CHKERRQ(ierr);
 
     ierr = KSPSetType( _M_p->__ksp, const_cast<char*> ( __ksp_type.c_str() ) ); //CHKERRQ(ierr);
 
@@ -108,7 +107,7 @@ SolverPETSC::SolverPETSC( std::string const& __ksp_type,
     }
     ierr = KSPSetTolerances( _M_p->__ksp, _M_p->__tolerance, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT ); //CHKERRQ(ierr);
 
-    ierr = SLESSetFromOptions( _M_p->__sles ); //CHKERRQ(ierr);
+    ierr = KSPSetFromOptions( _M_p->__ksp ); //CHKERRQ(ierr);
 }
 
 SolverPETSC::~SolverPETSC()
@@ -171,26 +170,26 @@ SolverPETSC::setTolerances( double __rtol, double __atol, double __dtol, int __m
 }
 
 void
-SolverPETSC::setMatrix( uint __nrows, uint* __r, uint *__i, double* __v )
+SolverPETSC::setMatrix( uint __nrows, const uint* __r, const uint *__i, const double* __v )
 {
     MatCreateSeqAIJWithArrays(PETSC_COMM_SELF,
                               __nrows, __nrows,
                               (int*)__r,
                               (int*)__i,
-                              __v,
+                              const_cast<PetscScalar*>( __v ),
                               &_M_p->__A );
 
     _M_p->_M_use_A = true;
 }
 
 void
-SolverPETSC::setMatrixTranspose( uint __nrows, uint* __r, uint *__i, double* __v )
+SolverPETSC::setMatrixTranspose( uint __nrows, const uint* __r, const uint *__i, const double* __v )
 {
     MatCreateSeqAIJWithArrays(PETSC_COMM_SELF,
                               __nrows, __nrows,
                               (int*)__r,
                               (int*)__i,
-                              __v,
+                              const_cast<PetscScalar*>( __v ),
                               //const_cast<int*>( __M.getRowIndices() ),
                               //const_cast<int*>( __M.getMatrixIndices() ),
                               //const_cast<double*>( __M.getMatrixValues() ),
@@ -223,14 +222,27 @@ SolverPETSC::solve( array_type& __X, array_type const& __B, MatStructure  __ptyp
     VecCreateSeqWithArray( PETSC_COMM_SELF, __B.size(), &__B[0], &__b );
 
 
-    SLESSetOperators( _M_p->__sles, _M_p->__A, _M_p->__A, __ptype  ); //CHKERRQ(__ierr);
-    SLESSolve( _M_p->__sles, __b, __x , &__iterations ); //CHKERRQ(__ierr);
+    KSPSetOperators( _M_p->__ksp, _M_p->__A, _M_p->__A, __ptype  ); //CHKERRQ(__ierr);
+
+    KSPSetRhs(_M_p->__ksp,__b);
+    KSPSetSolution(_M_p->__ksp,__x);
+    KSPSolve( _M_p->__ksp ); //CHKERRQ(__ierr);
 
     /*
-      View solver info; we could instead use the option -sles_view to
-      print this info to the screen at the conclusion of SLESSolve().
+      View info about the solver
     */
-    SLESView( _M_p->__sles, PETSC_VIEWER_STDOUT_WORLD );
+    PetscTruth __flag;
+    PetscOptionsHasName(PETSC_NULL,"-nokspview",&__flag);
+    if (!__flag)
+    {
+        KSPView(_M_p->__ksp,PETSC_VIEWER_STDOUT_WORLD);
+    }
+
+    /*
+      View solver info; we could instead use the option -ksp_view to
+      print this info to the screen at the conclusion of KSPSolve().
+    */
+    KSPView( _M_p->__ksp, PETSC_VIEWER_STDOUT_WORLD );
 
     // Petsc won't deallocate the memory so __X and __B contains the informations
     VecDestroy( __x );
@@ -256,8 +268,21 @@ SolverPETSC::solveTranspose( array_type& __X, array_type const& __B, MatStructur
     Vec __b;
     VecCreateSeqWithArray( PETSC_COMM_SELF, __B.size(), &__B[0], &__b );
 
-    SLESSetOperators( _M_p->__sles, _M_p->__A_t, _M_p->__A_t, __ptype ); ////CHKERRQ(__ierr);
-    SLESSolve( _M_p->__sles, __b, __x , &__iterations ); ////CHKERRQ(__ierr);
+    KSPSetOperators( _M_p->__ksp, _M_p->__A_t, _M_p->__A_t, __ptype ); ////CHKERRQ(__ierr);
+
+    KSPSetRhs(_M_p->__ksp,__b);
+    KSPSetSolution(_M_p->__ksp,__x);
+    KSPSolve( _M_p->__ksp ); ////CHKERRQ(__ierr);
+
+    /*
+      View info about the solver
+    */
+    PetscTruth __flag;
+    PetscOptionsHasName(PETSC_NULL,"-nokspview",&__flag);
+    if (!__flag)
+    {
+        KSPView(_M_p->__ksp,PETSC_VIEWER_STDOUT_WORLD);
+    }
 
     // Petsc won't deallocate the memory so __X and __B contains the informations
     VecDestroy( __x );

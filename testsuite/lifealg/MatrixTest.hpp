@@ -1,29 +1,30 @@
-/* -*- Mode : c++; c-tab-always-indent: t; indent-tabs-mode: nil; -*-
+/* -*- mode: c++ -*-
 
-  This file is part of the LifeV library.
+  This file is part of the LifeV library
 
-  Author: Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+  Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+       Date: 2004-08-29
 
   Copyright (C) 2004 EPFL
 
-  Distributed under the GPL(GNU Public License):
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-  
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-  
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
 
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-/** \file MatrixTest.hpp
-    
+/**
+   \file MatrixTest.hpp
+   \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+   \date 2004-08-29
 */
 #ifndef __MatrixTest_H
 #define __MatrixTest_H 1
@@ -49,7 +50,7 @@ public:
 
     matrix_type const& matrix() const { return *_M_mat; }
     matrix_type &      matrix()       { return *_M_mat; }
-    
+
 private:
     matrix_type* _M_mat;
     CSRPatt* _M_pattern;
@@ -58,20 +59,20 @@ private:
 
 /*!
       \class MatrixConvectionDiffusion
-    
-    
+
+
     | T -I          |
     |-I  T -I       |
 A = |   -I  T       |
     |        ...  -I|
     |           -I T|
-    
+
     derived from the standard central difference discretization of the
      2-dimensional convection-diffusion operator (Laplacian u) + rho*(du/dx)
     on a unit square with zero Dirichlet boundary conditions.
     When rho*h/2 <= 1, the discrete convection-diffusion operator has real
     eigenvalues.  When rho*h/2 > 1, it has COMPLEX eigenvalues.
-    
+
     */
 class MatrixConvectionDiffusion
 {
@@ -92,7 +93,7 @@ public:
 
     matrix_type const& matrix() const { return *_M_mat; }
     matrix_type &      matrix()       { return *_M_mat; }
-    
+
 private:
     value_type _M_rho;
     matrix_type* _M_mat;

@@ -75,7 +75,7 @@ bool test_petsc( Mat& __mat )
 
     int Nrows = __mat.matrix().Patt()->nRows();
 
-    Life::SolverPETSC __petsc( "gmres", "ilu" );
+    LifeV::SolverPETSC __petsc( "gmres", "ilu" );
     __petsc.setMatrix( Nrows, __mat.iaData(), __mat.jaData(), __mat.valueData() );
 
     Vector __x( Nrows );
