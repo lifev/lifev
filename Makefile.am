@@ -40,7 +40,7 @@ include $(top_srcdir)/admin/Doxyfile.am
 
 dist-hook: changelog
 # make sure that we have an up-to-date ChangeLog
-	if test $(top_srcdir) != $(top_builddir); then\
+	if test -w . -a $(top_srcdir) != $(top_builddir); then\
 	  cp $(srcdir)/ChangeLog .;\
 	fi
 
