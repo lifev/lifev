@@ -1,0 +1,47 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file for Mesh test
+#-------------------------------------------------
+
+[hyp]
+
+[./bdf]
+delta_t     = .02
+t0          = .0
+T           = .02
+order       = 2
+
+[../ipstab]
+gamma       = .0625
+
+[../solver]
+solver_name     = aztec
+solver          = gmres
+scaling         = none
+output          = none              # none, all, all_res
+conv            = r0
+max_iter        = 400
+kspace          = 50
+precond         = none              # none, jacobi, sym_gs, neumann, ls, smoother, dom_decomp
+tol             = 1.00e-6
+
+[levelset]
+
+[./parameters]
+save_every      = 1
+reinit_every    = 1
+analytical_beta = 0
+
+[../discretization]
+mesh_type   = 'MESH++'
+mesh_dir    = '../data/mesh/mesh++/' # the directory where the mesh file is
+mesh_file   = 'cube_6000.m++'        # mesh file
+
+[../solver-mass]
+solver_name     = aztec
+solver          = cg
+output          = none
+conv            = r0
+
+[../post-processing]
+output_file     = 'ls_ip'
