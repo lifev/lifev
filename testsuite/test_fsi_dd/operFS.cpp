@@ -47,7 +47,6 @@ operFS::operFS(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
 }
 
 // Destructor
-  
 
 
 operFS::~operFS()
@@ -94,8 +93,8 @@ void operFS::computeResidualFSI()
         for (UInt jDim = 0; jDim < nDimF; ++jDim)
         {
             M_residualFSI[IDfluid - 1 + jDim*totalDofFluid] =
-               std::fabs(M_residualF[IDfluid - 1 + jDim*totalDofFluid] +
-                         M_residualS[IDsolid - 1 + jDim*totalDofSolid]);
+                M_residualF[IDfluid - 1 + jDim*totalDofFluid] +
+                M_residualS[IDsolid - 1 + jDim*totalDofSolid];
         }
     }
 }
@@ -128,7 +127,7 @@ void operFS::setResidualFSI(double *_res)
         for (UInt jDim = 0; jDim < nDimF; ++jDim)
         {
             M_residualFSI[IDfluid - 1 + jDim*totalDofFluid] =
-                std::fabs(_res[IDsolid - 1 + jDim*totalDofSolid]);
+                _res[IDsolid - 1 + jDim*totalDofSolid];
         }
     }
 }
@@ -160,7 +159,7 @@ void operFS::setResidualFSI(const Vector _res)
         for (UInt jDim = 0; jDim < nDimF; ++jDim)
         {
             M_residualFSI[IDfluid - 1 + jDim*totalDofFluid] =
-                std::fabs(_res[IDsolid - 1 + jDim*totalDofSolid]);
+                _res[IDsolid - 1 + jDim*totalDofSolid];
         }
     }
 }
@@ -196,8 +195,8 @@ Vector operFS::getResidualFSIOnSolid()
         for (UInt jDim = 0; jDim < nDimF; ++jDim)
         {
             vec[IDsolid - 1 + jDim*totalDofSolid] =
-                std::fabs(M_residualF[IDfluid - 1 + jDim*totalDofFluid] -
-                          M_residualS[IDsolid - 1 + jDim*totalDofSolid]);
+                M_residualF[IDfluid - 1 + jDim*totalDofFluid] +
+                M_residualS[IDsolid - 1 + jDim*totalDofSolid];
         }
     }
 
@@ -232,9 +231,6 @@ void operFS::eval(const Vector& disp,
     dispNew = M_solid.d();
     velo    = M_solid.w();
 
-    M_fluid.postProcess();
-    M_solid.postProcess();
-    
     std::cout << "                ::: norm(disp     ) = "
               << maxnorm(disp) << std::endl;
     std::cout << "                ::: norm(dispNew  ) = "
@@ -247,7 +243,7 @@ Vector operFS::evalResidual(Vector &disp,
                             int iter)
 {
     Vector res(disp.size());
-    
+
     int status = 0;
 
     if(iter == 0) status = 1;
@@ -264,9 +260,6 @@ Vector operFS::evalResidual(Vector &disp,
     computeResidualFSI();
 
     res = getResidualFSIOnSolid();
-
-    //solveLinearSolid();
-
 
     std::cout << "Max ResidualF   = " << maxnorm(M_residualF)
               << std::endl;
@@ -323,7 +316,7 @@ Vector  operFS::solvePrec(const Vector  &_res,
                           double        _linearRelTol)
 {
     Vector muk(_res.size());
-    
+
     UInt precChoice = 1;
     switch(precChoice)
     {

@@ -111,11 +111,9 @@ int main(int argc, char** argv)
                                fluid.mesh(),
                                1,
                                0.);
-
     BCVector_Interface g_wall(fluid.residual(),
                               dim_fluid,
                               dofFluidToStructure);
-    
     //
     // Passing data from structure to the solid mesh: motion of the solid domain
     //
@@ -128,7 +126,6 @@ int main(int argc, char** argv)
                                solid.mesh(),
                                1,
                                0.);
-
     BCVector_Interface d_wall(solid.d(),
                               dim_solid,
                               dofStructureToSolid);
@@ -232,7 +229,7 @@ int main(int argc, char** argv)
     solid.initialize(d0,w0);
 
     Real abstol = 1.e-6;
-    Real reltol = 0.0;
+    Real reltol = 1.e-4;
     Real etamax = 1.e-3;
 
     int status;
