@@ -235,7 +235,8 @@ HarmonicExtension( Mesh& mesh,
         _feBd     ( mesh.getRefFE().boundaryFE(), mesh.getGeoMap().boundaryMap(), _bdQr ),
         _elmat    ( _fe.nbNode, nDimensions, nDimensions ),
         _disp     ( _dof_mesh.numTotalDof() ),
-        _f        ( _dof_mesh.numTotalDof() )
+        _f        ( _dof_mesh.numTotalDof() ),
+        M_BCh_HarmonicExtension ( 0 )
 {
     // Loop on elements
     for ( UInt i = 1; i <= mesh.numVolumes(); ++i )
