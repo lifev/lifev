@@ -29,12 +29,15 @@
 #include <cstdlib>
 #include <cassert>
 
+#include <lifeconfig.h>
+
+#if defined(HAVE_BOOST_TEST)
+
 // Boost.Test
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>
 #include <boost/bind.hpp>
 
-#include <lifeconfig.h>
 
 #include <debug.hpp>
 #include <SolverAztec.hpp>
@@ -76,3 +79,9 @@ init_unit_test_suite( int argc, char** argv )
 
     return test;
 }
+#else
+int main( int argc, char** argv )
+{
+    return EXIT_SUCCESS;
+}
+#endif
