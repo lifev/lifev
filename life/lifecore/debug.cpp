@@ -326,7 +326,6 @@ DebugStream::flush(  )
 {
 	if ( !__p->_M_output.str().empty() )
 	{
-	    __p->_M_output << std::ends;
 	    if ( Private::_S_attached )
 	    {
             Private::_S_logfile << __p->_M_output.str();
@@ -351,7 +350,7 @@ std::ofstream DebugStream::Private::_S_logfile;
 void DebugStream::attach( std::string const& __logfile )
 {
 	std::ostringstream __filename;
-	__filename <<  __logfile << std::ends;
+	__filename <<  __logfile;
 
 	if ( Private::_S_logfile.is_open() )
 	{
