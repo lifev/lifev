@@ -25,11 +25,14 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 check_HEADERS  = ud_functions.hpp
 
-check_PROGRAMS  = test_ns_cyl_flux test_ns_flux test_new
+check_PROGRAMS  = test_ns_cyl_flux test_ns_flux test_new test_ns_twofluxes
 test_ns_cyl_flux_SOURCES = main.cpp
 
 test_ns_flux_SOURCES    = main_ns_flux.cpp
 test_ns_flux_LDADD      = $(life_libs) $(boost_libs)
+
+test_ns_twofluxes_SOURCES    = main_ns_twofluxes.cpp
+test_ns_twofluxes_LDADD      = $(life_libs) $(boost_libs)
 
 test_new_SOURCES    = main_new.cpp
 test_new_LDADD      = $(life_libs) $(boost_libs)
