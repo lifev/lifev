@@ -38,12 +38,15 @@ namespace LifeV
     Real zero(const Real& /* t */, const Real& /* x */, const Real& /* y */, const Real& /* z */, const ID& /* i */) {
         return 0.;
     }
-
+    
     Real gravity(const Real& /* t */, const Real& /* x */, const Real& /* y */, const Real& /* z */, const ID& i) {
         const Real g = - 9.81;
         if(i == 3)
             return g;
         else
             return 0.;
+        return 0.;
     }
+
+    
 }
