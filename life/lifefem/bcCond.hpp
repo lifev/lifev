@@ -103,7 +103,7 @@ enum BCMode{Scalar, Full, Component, Normal, Tangential};
   -# a data BCFuncion,
 
   -# three (or two in 2D) bools describing the components involved in
-     this boundary condition.
+  this boundary condition.
 
   Finally the list of pointers to identifiers will be updated in the
   Dof class (\c BCHandler::bdUpdate method).
@@ -127,76 +127,76 @@ public:
     /**
        Constructor for BC
 
-      \param name the name of the boundary condition
+       \param name the name of the boundary condition
 
-      \param flag the mesh flag identifying the part of the mesh where
-      the boundary condition applies
+       \param flag the mesh flag identifying the part of the mesh where
+       the boundary condition applies
 
-      \param type the boundary condition type: Natural, Essential, Mixte
+       \param type the boundary condition type: Natural, Essential, Mixte
 
-      \param mode the boundary condition mode: Scalar, Full,
-      Component, Normal, Tangential
+       \param mode the boundary condition mode: Scalar, Full,
+       Component, Normal, Tangential
 
-      \param bcf the function holding the user defined function
-      involved in this boundary condition
+       \param bcf the function holding the user defined function
+       involved in this boundary condition
 
-      \param std::vector<ID> storing the list of components involved
-      in this boundary condition
-     */
+       \param std::vector<ID> storing the list of components involved
+       in this boundary condition
+    */
     BCBase( const std::string& name,
-             const EntityFlag& flag,
-             const BCType& type,
-             const BCMode& mode,
-             BCFunctionBase& bcf,
-             const std::vector<ID>& comp );
+            const EntityFlag& flag,
+            const BCType& type,
+            const BCMode& mode,
+            BCFunctionBase& bcf,
+            const std::vector<ID>& comp );
 
     /**
        Constructor for BC without components for Scalar, Tangential or
        Normal mode problems
 
-      \param name the name of the boundary condition
+       \param name the name of the boundary condition
 
-      \param flag the mesh flag identifying the part of the mesh where
-      the boundary condiion applies
+       \param flag the mesh flag identifying the part of the mesh where
+       the boundary condiion applies
 
-      \param type the boundary condition type: Natural, Essential, Mixte
+       \param type the boundary condition type: Natural, Essential, Mixte
 
-      \param mode the boundary condition mode: Scalar, Full, Normal, Tangential
+       \param mode the boundary condition mode: Scalar, Full, Normal, Tangential
 
-      \param bcf the function holding the user defined function
-      involved in this boundary condition
+       \param bcf the function holding the user defined function
+       involved in this boundary condition
     */
     BCBase( const std::string& name,
-             const EntityFlag& flag,
-             const BCType& type,
-             const BCMode& mode,
-             BCFunctionBase& bcf );
+            const EntityFlag& flag,
+            const BCType& type,
+            const BCMode& mode,
+            BCFunctionBase& bcf );
 
     /**
        Constructor for BC without list of components for Full mode problems
 
        \param name the name of the boundary condition
 
-      \param flag the mesh flag identifying the part of the mesh where
-      the boundary condiion applies
+       \param flag the mesh flag identifying the part of the mesh where
+       the boundary condiion applies
 
-      \param type the boundary condition type: Natural, Essential,
-      Mixte
+       \param type the boundary condition type: Natural, Essential,
+       Mixte
 
-      \param mode the boundary condition mode: Scalar, Full, Normal, Tangential
+       \param mode the boundary condition mode: Scalar, Full, Normal, Tangential
 
-      \param bcf the function holding the user defined function
-      involved in this boundary condition
+       \param bcf the function holding the user defined function
+       involved in this boundary condition
 
-      \param nComp the number of componets involved in this boundary
-      condition
+       \param nComp the number of componets involved in this boundary
+       condition
     */
     BCBase( const std::string& name,
-             const EntityFlag& flag,
-             const BCType& type,
-             const BCMode& mode,
-             BCFunctionBase& bcf,
-             const UInt& nComp );
+            const EntityFlag& flag,
+            const BCType& type,
+            const BCMode& mode,
+            BCFunctionBase& bcf,
+            const UInt& nComp );
 
 
     //! Constructor for BC with data vector
@@ -207,13 +207,13 @@ public:
       \param mode the boundary condition mode: Scalar, Full, Component, Normal, Tangential
       \param bcv data vector
       \param std::vector<ID> storing the list of components involved in this boundary condition
-     */
+    */
     BCBase( const std::string& name,
-             const EntityFlag& flag,
-             const BCType& type,
-             const BCMode& mode,
-             BCVectorBase& bcv,
-             const std::vector<ID>& comp );
+            const EntityFlag& flag,
+            const BCType& type,
+            const BCMode& mode,
+            BCVectorBase& bcv,
+            const std::vector<ID>& comp );
 
     //! Constructor for BC with data vector, without components for Scalar, Tangential or Normal  mode problems
     /*!
@@ -224,10 +224,10 @@ public:
       \param bcv data vector
     */
     BCBase( const std::string& name,
-             const EntityFlag& flag,
-             const BCType& type,
-             const BCMode& mode,
-             BCVectorBase& bcv );
+            const EntityFlag& flag,
+            const BCType& type,
+            const BCMode& mode,
+            BCVectorBase& bcv );
 
     //! Constructor for BC with data vector, without list of components for Full mode problems
     /*!
@@ -239,11 +239,11 @@ public:
       \param nComp the number of componets involved in this boundary condition
     */
     BCBase( const std::string& name,
-             const EntityFlag& flag,
-             const BCType& type,
-             const BCMode& mode,
-             BCVectorBase& bcv,
-             const UInt& nComp );
+            const EntityFlag& flag,
+            const BCType& type,
+            const BCMode& mode,
+            BCVectorBase& bcv,
+            const UInt& nComp );
 
 
     //! Copy constructor for BC (we have a vector of pointers to ID's and a pointer to user defined functions)
@@ -283,8 +283,8 @@ public:
        \param i the specified "local" component (from 1 to
        numberOfComponents)
 
-      \return true if the specified component component is involved in
-      the BC
+       \return true if the specified component component is involved in
+       the BC
     */
     ID component( const ID i ) const;
 
@@ -357,15 +357,15 @@ public:
 
     //! overloaded operator allowing decreasing ordering operations
     friend bool operator<( const BCBase& a, const BCBase& b )
-    {
-        return ( a.type() > b.type() );
-    }
+        {
+            return ( a.type() > b.type() );
+        }
 
     //! overloaded operator allowing finding operations
     friend bool operator==( const BCBase& a, const EntityFlag flag )
-    {
-        return a.flag() == flag;
-    }
+        {
+            return a.flag() == flag;
+        }
 
 private:
     //! name identifying a specific BC

@@ -49,9 +49,9 @@ namespace LifeV
 {
 /*!
 
- \class BCVectorBase
+\class BCVectorBase
 
- Base class that holding data vector for boundary conditions
+Base class that holding data vector for boundary conditions
 
 */
 class BCVectorBase
@@ -166,8 +166,8 @@ public:
     //! set the Mixte coefficient data vector
     void setMixteVec( Vector& vec_mixte )
         {
-	    _M_vec_mixte= &vec_mixte;
-	}
+            _M_vec_mixte= &vec_mixte;
+        }
 
 
     //! set the vector
@@ -223,14 +223,14 @@ private:
 
 /*!
 
- \class BCVector
+\class BCVector
 
- Class that holds a user data vector for boundary conditions
+Class that holds a user data vector for boundary conditions
 
 */
 
 class BCVector:
-            public BCVectorBase
+        public BCVectorBase
 {
 public:
 
@@ -241,7 +241,7 @@ public:
     /*!
       \param vec data vector holding data
       \param nbTotalDof number of total dof in the vector of data
-             data vector and those of the associated to the boundary conditions
+      data vector and those of the associated to the boundary conditions
     */
     BCVector( Vector& vec, UInt nbTotalDof );
 
@@ -250,9 +250,9 @@ public:
       \param vec data vector holding data
       \param nbTotalDof number of total dof in the vector of data
       \param type must be
-       -# boundary integration done (ex. residual of a variational problem)
-       -# needs boundary integration of \f$\lambda n \cdot  \mathbf{\phi}_i\f$ \warning (not yet implemented - AM 10/2004)
-       -# needs boundary integration of \f$\mathbf{\lambda} \cdot n \phi_i\f$ \warning (implemented only for the Natural BC - AM 10/2004)
+      -# boundary integration done (ex. residual of a variational problem)
+      -# needs boundary integration of \f$\lambda n \cdot  \mathbf{\phi}_i\f$ \warning (not yet implemented - AM 10/2004)
+      -# needs boundary integration of \f$\mathbf{\lambda} \cdot n \phi_i\f$ \warning (implemented only for the Natural BC - AM 10/2004)
     */
     BCVector( Vector& vec, UInt const nbTotalDof, UInt type );
 
@@ -270,18 +270,18 @@ public:
 
 /*!
 
- \class BCVectorInterface
+\class BCVectorInterface
 
- Class that holds a user data vector for boundary conditions on
- interfaces
+Class that holds a user data vector for boundary conditions on
+interfaces
 
- The data functions given by the user must have the following
- declaration
+The data functions given by the user must have the following
+declaration
 
- \verbatim
- Real g( const Real& time, const Real& x, const Real& y,
-         const Real& z, const ID& icomp)
- \endverbatim
+\verbatim
+Real g( const Real& time, const Real& x, const Real& y,
+const Real& z, const ID& icomp)
+\endverbatim
 */
 
 class BCVectorInterface
@@ -298,7 +298,7 @@ public:
       \param vec data vector holding data
       \param nbTotalDof number of total dof in the vector of data
       \param dofIn dofInterfaceBase object holding the connections between the interface dofs of the
-             data vector and those of the associated to the boundary conditions
+      data vector and those of the associated to the boundary conditions
     */
     BCVectorInterface( Vector& vec, UInt nbTotalDof, DofInterfaceBase& dofIn );
 

@@ -24,8 +24,8 @@
 */
 /**
    \file bcHandler.hpp
-   \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
    \author Miguel Fernandez
+   \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
 
    \date 2004-10-11
  */
@@ -75,6 +75,7 @@ public:
     /** @name Constructors, destructor
      */
     //@{
+
     //! Constructor doing nothing (the user must call setNumber(..))
     BCHandler();
 
@@ -295,7 +296,8 @@ private:
    Build the boundary stuff
 */
 template <typename Mesh>
-void BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
+void
+BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
 {
 
     typedef typename Mesh::VolumeShape GeoShape;

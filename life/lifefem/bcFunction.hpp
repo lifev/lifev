@@ -2,7 +2,8 @@
 
   This file is part of the LifeV library
 
-  Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+  Author(s): M.A. Fernandez
+             Christophe Prud'homme <christophe.prudhomme@epfl.ch>
        Date: 2004-10-12
 
   Copyright (C) 2004 EPFL, INRIA, Politecnico di Milano
@@ -23,6 +24,7 @@
 */
 /**
    \file bcFunction.hpp
+   \author M.A Fernandez
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
    \date 2004-10-12
  */
