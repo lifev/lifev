@@ -69,6 +69,7 @@ public:
     //@{
 
     typedef std::vector<BCBase>::iterator Iterator;
+    typedef std::vector<BCBase>::const_iterator ConstIterator;
 
     //@}
 
