@@ -1,31 +1,31 @@
 /* -*- mode: c++ -*-
 
-  This file is part of the LifeV library
+This file is part of the LifeV library
 
-  Author(s): Daniele Antonio Di Pietro <dipietro@unibg.it>
-       Date: 2-1-2005
+Author(s): Daniele Antonio Di Pietro <dipietro@unibg.it>
+Date: 2-1-2005
 
-  Copyright (C) 2005 Università degli Studi di Bergamo
+Copyright (C) 2005 Università degli Studi di Bergamo
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 /**
    \file NSSolver2FluidsMixed
    \author Daniele A. Di Pietro <dipietro@unibg.it>
    \date 2-1-2005
- */
+*/
 
 #ifndef _NSSOLVER2FLUIDSMIXED_HPP_
 #define _NSSOLVER2FLUIDSMIXED_HPP_
@@ -33,7 +33,17 @@
 #define L_NS2F_UMFPACK 0
 #define L_NS2F_PETSC 1
 
-#define L_NS2F_LINEAR_SOLVER L_NS2F_PETSC
+#define L_NS2F_LINEAR_SOLVER_U L_NS2F_PETSC
+#define L_NS2F_LINEAR_SOLVER_P L_NS2F_PETSC
+
+#define L_STOKES 0
+#define L_NAVIER_STOKES 1
+
+#define L_NS2F_PROBLEM L_STOKES
+
+#define L_DEBUG_MODE 1
+
+#include <fstream>
 
 #include <life/lifecore/chrono.hpp>
 
@@ -52,11 +62,8 @@
 #include <life/lifefem/bcHandler.hpp>
 #include <life/lifefem/assemb.hpp>
 
-#if L_NS2F_LINEAR_SOLVER == L_NS2F_PETSC
 #include <life/lifealg/SolverPETSC.hpp>
-#elif L_NS2F_LINEAR_SOLVER == L_NS2F_UMFPACK
 #include <life/lifealg/SolverUMFPACK.hpp>
-#endif
 
 #include <life/lifesolver/AFSolvers.hpp>
 
@@ -96,21 +103,25 @@ namespace LifeV {
         typedef BoostMatrix<boost::numeric::ublas::row_major> matrix_type_C;
         typedef BoostMatrix<boost::numeric::ublas::row_major> matrix_type_M;
         typedef BoostMatrix<boost::numeric::ublas::row_major> matrix_type_D;
-        typedef BoostMatrix<boost::numeric::ublas::column_major> matrix_type_Dtr;
+        typedef BoostMatrix<boost::numeric::ublas::column_major> matrix_type_G;
         typedef DiagonalBoostMatrix matrix_type_M_L;
 
-#if L_NS2F_LINEAR_SOLVER == L_NS2F_PETSC
+#if L_NS2F_LINEAR_SOLVER_U == L_NS2F_PETSC
         typedef SolverPETSC linear_solver_u_type;
-        typedef SolverPETSC linear_solver_p_type;
-#elif L_NS2F_LINEAR_SOLVER == L_NS2F_UMFPACK
+#elif L_NS2F_LINEAR_SOLVER_U == L_NS2F_UMFPACK
         typedef SolverUMFPACK linear_solver_u_type;
+#endif
+
+#if L_NS2F_LINEAR_SOLVER_P == L_NS2F_PETSC
+        typedef SolverPETSC linear_solver_p_type;
+#elif L_NS2F_LINEAR_SOLVER_P == L_NS2F_UMFPACK
         typedef SolverUMFPACK linear_solver_p_type;
 #endif
 
         typedef Yosida<matrix_type_M_L,
                        matrix_type_C,
                        matrix_type_D,
-                       matrix_type_Dtr,
+                       matrix_type_G,
                        linear_solver_u_type,
                        linear_solver_p_type> solver_type;
         //@}
@@ -205,8 +216,8 @@ namespace LifeV {
         //! Pattern for the p-u block (D)
         CSRPatt _M_pattern_D_block;
 
-        //! Pattern for the u-p block (Dtr)
-        CSRPatt _M_pattern_Dtr_block;
+        //! Pattern for the u-p block (G)
+        CSRPatt _M_pattern_G_block;
 
         //! Pattern for C
         MSRPatt _M_pattern_C;
@@ -214,8 +225,8 @@ namespace LifeV {
         //! Pattern for D
         MixedPattern<1, NDIM, CSRPatt> _M_pattern_D;
 
-        //! Pattern for Dtr
-        MixedPattern<NDIM, 1, CSRPatt> _M_pattern_Dtr;
+        //! Pattern for G
+        MixedPattern<NDIM, 1, CSRPatt> _M_pattern_G;
 
         //! Velocity mass matrix
         matrix_type_M _M_M;
@@ -232,14 +243,14 @@ namespace LifeV {
         //! Matrix D
         matrix_type_D _M_D;
 
-        //! Matrix Dtr
-        matrix_type_Dtr _M_Dtr;
+        //! Matrix G
+        matrix_type_G _M_G;
 
         //! Elementary matrices
         ElemMat _M_elmat_C;
         ElemMat _M_elmat_M;
         ElemMat _M_elmat_D;
-        ElemMat _M_elmat_Dtr;
+        ElemMat _M_elmat_G;
         ElemMat _M_elmat_P;
 
         //! Elementary vector
@@ -263,7 +274,7 @@ namespace LifeV {
         //!
         Vector _M_constant_pressure;
 
-         //! Reference to the level set function
+        //! Reference to the level set function
         const lsfunction_type& _M_lsfunction;
 
         //! Saddle point system solver
@@ -283,9 +294,6 @@ namespace LifeV {
 
         //! The current time
         Real _M_time;
-
-        //! A flag for steady problems
-        bool _M_steady;
 
         /**
            \Advance the Navier-Stokes equations one step in time
@@ -315,20 +323,20 @@ namespace LifeV {
         NavierStokesHandler<mesh_type, data_type>(data_file, refFE_u, refFE_p, qr, bd_qr, qr, bd_qr, bc_h_u),
         _M_data_file(data_file),
         _M_pattern_D_block(pDof(), uDof()),
-        _M_pattern_Dtr_block(uDof(), pDof()),
+        _M_pattern_G_block(uDof(), pDof()),
         _M_pattern_C(uDof(), NDIM),
         _M_pattern_D(_M_pattern_D_block),
-        _M_pattern_Dtr(_M_pattern_Dtr_block),
+        _M_pattern_G(_M_pattern_G_block),
         _M_M(_M_pattern_C),
         _M_M_L(_dim_u * NDIM),
         _M_M_L_w(_dim_u * NDIM),
         _M_C(_M_pattern_C),
         _M_D(_M_pattern_D),
-        _M_Dtr(_M_pattern_Dtr),
+        _M_G(_M_pattern_G),
         _M_elmat_C(fe_u().nbNode, NDIM, NDIM),
         _M_elmat_M(fe_u().nbNode, NDIM, NDIM),
         _M_elmat_D(fe_p().nbNode, 1, 0, fe_u().nbNode, 0, NDIM),
-        _M_elmat_Dtr(fe_u().nbNode, NDIM, 0, fe_p().nbNode, 0, 1),
+        _M_elmat_G(fe_u().nbNode, NDIM, 0, fe_p().nbNode, 0, 1),
         _M_elmat_P(fe_u().nbNode, NDIM + 1, NDIM + 1),
         _M_elvec(fe_u().nbNode, NDIM),
         _M_lss(_mesh, data_file, "levelset", refFE_lss, qr, bd_qr, bc_h_lss, _fe_u, _dof_u, _u),
@@ -338,13 +346,19 @@ namespace LifeV {
         _M_beta_fct(0),
         _M_constant_pressure( _dim_p ),
         _M_lsfunction(_M_lss.lsfunction()),
-        _M_solver(_M_M_L_w, _M_C, _M_D, _M_Dtr, _M_data_file, "navier-stokes/yosida", _M_solver_u, _M_solver_p)
+        _M_solver(_M_M_L_w, _M_C, _M_D, _M_G, _M_data_file, "navier-stokes/yosida", _M_solver_u, _M_solver_p)
     {
         if(_M_verbose)
-            std::cout << "** NS2F ** Using boost matrix" << std::endl;
-#if L_NS2F_LINEAR_SOLVER == L_NS2F_PETSC
-        std::cout << "** NS2F ** Using PETSC linear solver" << std::endl;
+            std::cout << "[NSSolver2FluidsMixed::constructor] Using boost matrix" << std::endl;
+#if L_NS2F_LINEAR_SOLVER_U == L_NS2F_PETSC
+        std::cout << "[NSSolver2FluidsMixed::constructor] Using PETSC linear solver for u" << std::endl;
         _M_solver_u.setOptionsFromGetPot(_M_data_file, "navier-stokes/yosida/solver-u");
+#elif L_NS2F_LINEAR_SOLVER_U == L_NS2F_UMFPACK
+        std::cout << "[NSSolver2FluidsMixed::constructor] Using UMFPACK linear solver for u" << std::endl;
+#endif
+
+#if L_NS2F_LINEAR_SOLVER_P == L_NS2F_PETSC
+        std::cout << "[NSSolver2FluidsMixed::constructor] Using PETSC linear solver for p" << std::endl;
         _M_solver_p.setOptionsFromGetPot(_M_data_file, "navier-stokes/yosida/solver-p");
         if ( _BCh_u.hasOnlyEssential() ) {
             Real constPress = 1. / sqrt( _dim_p );
@@ -355,11 +369,10 @@ namespace LifeV {
             nullSpace[ 0 ] = &_M_constant_pressure;
             _M_solver_p.setNullSpace(nullSpace);
         }
-#elif L_NS2F_LINEAR_SOLVER == L_NS2F_UMFPACK
-        std::cout << "** NS2F ** Using UMFPACK linear solver" << std::endl;
+#elif L_NS2F_LINEAR_SOLVER_P == L_NS2F_UMFPACK
+        std::cout << "[NSSolver2FluidsMixed::constructor] Using UMFPACK linear solver for p" << std::endl;
 #endif
         _M_verbose = _M_data_file("navier-stokes/miscellaneous/verbose", false);
-        _M_steady = _M_data_file("navier-stokes/miscellaneous/steady", false);
     }
 
     template<typename MeshType>
@@ -376,24 +389,18 @@ namespace LifeV {
         if(_M_beta_fct)
             uInterpolate(*_M_beta_fct, betaVec, time);
         else
-            if(_M_steady)
-                betaVec = _u;
-            else
-                betaVec = _bdf.bdf_u().extrap();
+            betaVec = _bdf.bdf_u().extrap();
 
-        // Matrices initialization
+        // LSH and RHS initialization
         _M_M.zeros();
         _M_C.zeros();
         _M_D.zeros();
-        _M_Dtr.zeros();
+        _M_G.zeros();
 
-        // u-RHS vector reinitialization
         _M_rhs_u = ZeroVector( _M_rhs_u.size() );
-
-        // p-RHS vector reinitialization
         _M_rhs_p = ZeroVector( _M_rhs_p.size() );
 
-        // Elementary computation and matrix assembling
+        // Timing stuff
         Chrono __chrono;
 
         // Total time for elementar contribution computation
@@ -406,44 +413,42 @@ namespace LifeV {
         Real __cumul3 = 0.;
 
         if(_M_verbose)
-            std::cout << "** NS2F ** Assembling matrices" << std::endl;
+            std::cout << "[NSSolver2FluidsMixed::advance_NS] Assembling matrices" << std::endl;
 
         for(UInt iVol = 1; iVol <= _mesh.numVolumes(); iVol++) {
             __chrono.start();
 
-            fe_u().updateFirstDeriv(_mesh.volumeList(iVol));
-            fe_p().updateFirstDeriv(_mesh.volumeList(iVol));
-            _M_lss.fe().updateJac(_mesh.volumeList(iVol));
+            fe_u().updateFirstDeriv( _mesh.volumeList( iVol ) );
+            fe_p().updateFirstDeriv( _mesh.volumeList( iVol ) );
+            _M_lss.fe().updateJac( _mesh.volumeList( iVol ) );
 
             _M_elmat_C.zero();
             _M_elmat_M.zero();
             _M_elmat_D.zero();
-            _M_elmat_Dtr.zero();
+            _M_elmat_G.zero();
 
             _M_elvec_lss.zero();
             _M_elvec.zero();
 
             // Extract the vector of local lsfunction dofs
-            ElemVec ls_fun_loc();
             UInt element_id = _M_lss.fe().currentId();
 
             for(int node_id = 0; node_id < _M_lss.fe().nbNode; node_id++) {
                 UInt iglo = _M_lss.dof().localToGlobal(element_id, node_id + 1) - 1;
-                _M_elvec_lss.vec()[node_id] = _M_lsfunction[iglo];
+                _M_elvec_lss.vec()[ node_id ] = _M_lsfunction[ iglo ];
             }
 
+            // Compute local contributions
             element_id = _fe_u.currentId();
             
             // Stiffness strain
             stiff_strain_2f(2. * viscosity(fluid1), 2. * viscosity(fluid2), _M_elvec_lss, _M_lss.fe(), _M_elmat_C, fe_u());
 
-
             // Mass
-            if(!_M_steady) {
-                for(UInt iComp = 0; iComp < nbCompU; iComp++)
-                        mass_2f(density(fluid1), density(fluid2), _M_elvec_lss, _M_lss.fe(), _M_elmat_C, fe_u(), iComp, iComp);
-            }
+            for(UInt iComp = 0; iComp < nbCompU; iComp++)
+                mass_2f(density(fluid1), density(fluid2), _M_elvec_lss, _M_lss.fe(), _M_elmat_M, fe_u(), iComp, iComp);
 
+#if L_NS2F_PROBLEM == L_NAVIER_STOKES
             //  Extract the vector of local velocity dofs
             for(UInt node_id = 0; node_id < (UInt)fe_u().nbNode; node_id++) {
                 for(UInt comp_id = 0; comp_id < nbCompU; comp_id++) {
@@ -454,7 +459,7 @@ namespace LifeV {
 
             // Advection
             advection_2f(density(fluid1), density(fluid2), _M_elvec_lss, _M_lss.fe(), _M_elvec, _M_elmat_C, fe_u());
-
+#endif
             __chrono.stop();
             __cumul1 += __chrono.diff();
 
@@ -464,33 +469,21 @@ namespace LifeV {
                 __chrono.start();
                 for(UInt jComp = 0; jComp < nbCompU; jComp++) {
                     assemb_mat(_M_C, _M_elmat_C, fe_u(), uDof(), iComp, jComp);
-
-                    if(!_M_steady)
-                        assemb_mat(_M_M, _M_elmat_M, fe_u(), uDof(), iComp, jComp);
+                    assemb_mat(_M_M, _M_elmat_M, fe_u(), uDof(), iComp, jComp);
                 }
                 __chrono.stop(); __cumul2 += __chrono.diff();
 
                 // Off-diagonal blocks
                 __chrono.start();
-                grad(iComp, 1.0, _M_elmat_Dtr, fe_u(), fe_p(), iComp, 0);
+                grad(iComp, 1.0, _M_elmat_G, fe_u(), fe_p(), iComp, 0);
                 __chrono.stop();
                 __cumul1 += __chrono.diff();
 
-                /**
-                   The separate computation of discrete div operator was removed
-                   div(iComp, -1.0, _M_elmat_D, fe_p(), fe_u(), 0, iComp);
-                */
-
                 // Assembling
                 __chrono.start();
-                assemb_mat_mixed(_M_Dtr, _M_elmat_Dtr, fe_u(), fe_p(), uDof(), pDof(), iComp, 0);
+                assemb_mat_mixed(_M_G, _M_elmat_G, fe_u(), fe_p(), uDof(), pDof(), iComp, 0);
                 __chrono.stop();
                 __cumul3 += __chrono.diff();
-
-                /**
-                   The separate computation of discrete div operator was removed
-                   assemb_mat_mixed(_M_D, _M_elmat_D, fe_p(), fe_u(), pDof(), uDof(), 0, iComp);
-                */
 
                 // Source term
                 _M_elvec.zero();
@@ -507,48 +500,56 @@ namespace LifeV {
         // Add unsteady contribution
         _M_C += _M_M_L_w;
 
-        __chrono.stop();
-
         if(_M_verbose) {
-            std::cout << "** NS2F ** Elementary constributions computation : "
+            std::cout << "[NSSolver2FluidsMixed::advance_NS] Elementary constributions computation : "
                       << __cumul1 << " s" << std::endl;
-            std::cout << "** NS2F ** Diagonal block assembling: "
+            std::cout << "[NSSolver2FluidsMixed::advance_NS] Diagonal block assembling: "
                       << __cumul2 << " s" << std::endl;
-            std::cout << "** NS2F ** Off-diagonal block assembling: "
+            std::cout << "[NSSolver2FluidsMixed::advance_NS] Off-diagonal block assembling: "
                       << __cumul3 << " s" << std::endl;
         }
 
         // Add RHS terms stemming from the time derivative
-        if(!_M_steady)
-            _M_rhs_u += prod( _M_M_L, _bdf.bdf_u().time_der(_dt) );
+        _M_rhs_u += prod( _M_M_L, _bdf.bdf_u().time_der(_dt) );
 
         // Apply boundary conditions
         if(_M_verbose)
-            std::cout << "** NS2F ** Applying boundary conditions"
+            std::cout << "[NSSolver2FluidsMixed::advance_NS] Applying boundary conditions"
                       << std::endl;
 
         if (!_BCh_u.bdUpdateDone())
             _BCh_u.bdUpdate(_mesh, _feBd_u, uDof());
 
-        bcManage(_M_C, _M_Dtr, _M_rhs_u, _mesh, uDof(), _BCh_u, _feBd_u, 1.0, _M_time );
+        bcManage(_M_C, _M_G, _M_rhs_u, _mesh, uDof(), _BCh_u, _feBd_u, 1.0, _M_time );
 
         if(_M_verbose)
-            std::cout << "** NS2F ** Computing discrete divergence operator"
+            std::cout << "[NSSolver2FluidsMixed::advance_NS] Computing discrete divergence operator"
                       << std::endl;
-        _M_D = trans( _M_Dtr );
+        _M_D = trans( _M_G );
 
+#if L_DEBUG_MODE
         // Export matrices to Matlab format for debugging purposes
-//         if(_M_verbose) {
-//             std::cout << "** NS2F ** Exporting matrices to Matlab format"
-//                       << std::endl;
-//             _M_C.spy( "./results/spyC" );
-//             _M_D.spy( "./results/spyD" );
-//             _M_Dtr.spy( "./results/spyDtr" );
-//         }
+        if(_M_verbose)
+            std::cout << "[NSSolver2FluidsMixed::advance_NS] Exporting matrices to Matlab format"
+                      << std::endl;
+        _M_C.spy( "./results/spyC" );
+        _M_D.spy( "./results/spyD" );
+        _M_G.spy( "./results/spyG" );
+        _M_M.spy( "./results/spyM" );
+        _M_M_L.spy( "./results/spyML" );
+        _M_M_L_w.spy( "./results/spyMLw" );
 
+        std::cout << "[NSSolver2FluidsMixed::advance_NS] Exporting rhs vectors to Matlab format"
+                  << std::endl;
+        std::ofstream __ofile("./results/rhsu.m");
+        __ofile << "bU = [..." << std::endl;
+        for(UInt i = 0; i < NDIM * _dim_u - 1; i++)
+            __ofile << _M_rhs_u( i ) << ";..." << std::endl;
+        __ofile << _M_rhs_u( _dim_u - 1 ) << "];" << std::endl;
+#endif
         // Solve the system
         if(_M_verbose)
-            std::cout << "** NS2F ** Solving the system" << std::endl;
+            std::cout << "[NSSolver2FluidsMixed::advance_NS] Solving the system" << std::endl;
         _M_solver.solve(_u, _p, _M_rhs_u, _M_rhs_p);
 
         // Update bdf
@@ -585,10 +586,10 @@ namespace LifeV {
     template<typename MeshType>
     void NSSolver2FluidsMixed<MeshType>::timeAdvance(source_type const& source, Real const& time) {
         if(_M_verbose)
-            std::cout << "** NS2F ** Advancing Navier-Stokes solver" << std::endl;
+            std::cout << "[NSSolver2FluidsMixed::timeAdvance] Advancing Navier-Stokes solver" << std::endl;
         advance_NS(source, time);
         if(_M_verbose)
-            std::cout << "** NS2F ** Advancing Level Set solver" << std::endl;
+            std::cout << "[NSSolver2FluidsMixed::timeAdvance] Advancing Level Set solver" << std::endl;
         advance_LS();
     }
 }

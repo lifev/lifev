@@ -185,7 +185,8 @@ namespace LifeV {
         typedef __solver_u_type solver_u_type;
         typedef __solver_p_type solver_p_type;
 
-        typedef boost::numeric::ublas::compressed_matrix<Real, boost::numeric::ublas::row_major> matrix_type;
+        typedef BoostMatrix<boost::numeric::ublas::row_major> matrix_type;
+
         //@}
         /**!
            @name Constructors
@@ -353,6 +354,10 @@ namespace LifeV {
             chrono.stop();
             std::cout << "in " << chrono.diff() << " s" << std::endl;
 
+            std::cout << "[Yosida::solve] exporting S to Matlab format"
+                      << std::endl;
+            __S.spy( "./results/spyS" );
+
             // Set matrices for the linear solvers
             _M_solver_u.setMatrix(_M_C);
             _M_solver_p.setMatrix(__S);
@@ -383,21 +388,6 @@ namespace LifeV {
             std::cout << " in " << chrono.diff() << " s" << std::endl;
         }
     };
-
-//     template<typename D_type,
-//              typename H_type,
-//              typename D_T_type,
-//              typename S_type>
-//     void schur(const D_type& D,
-//                const H_type& H,
-//                const D_T_type& D_T,
-//                S_type& S) {
-//         UInt N = D.size1();
-//         for(UInt i = 0; i < N; i++)
-//             for(UInt j = 0; j < N; j++)
-//                 for(UInt k = 0; k < N; k++)
-//                     S(i, j) += D(i, k) * H(k, k) * D_T(k, j);
-//     }
 }
 
 #endif
