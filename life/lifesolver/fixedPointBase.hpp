@@ -33,6 +33,7 @@ public:
     typedef operFS super;
     typedef super::fluid_type fluid_type;
     typedef super::solid_type solid_type;
+    typedef super::bchandler_type bchandler_type;
     // default constructor
     fixedPoint()
         :
@@ -43,9 +44,9 @@ public:
     fixedPoint( fluid_type& fluid,
                 solid_type& solid,
                 GetPot    &_dataFile,
-                BCHandler &BCh_u,
-                BCHandler &BCh_d,
-                BCHandler &BCh_mesh);
+                bchandler_type &BCh_u,
+                bchandler_type &BCh_d,
+                bchandler_type &BCh_mesh);
 
     // destructor
     ~fixedPoint();

@@ -34,12 +34,12 @@ Real fzeroEJ(const Real& t,
 exactJacobian::exactJacobian( fluid_type& fluid,
                               solid_type& solid,
                               GetPot    &_dataFile,
-                              BCHandler &BCh_u,
-                              BCHandler &BCh_d,
-                              BCHandler &BCh_mesh):
+                              bchandler_type &BCh_u,
+                              bchandler_type &BCh_d,
+                              bchandler_type &BCh_mesh):
     super(fluid, solid, _dataFile, BCh_u, BCh_d, BCh_mesh),
-    M_BCh_du (0, BCHandler::HINT_BC_ONLY_ESSENTIAL),
-    M_BCh_dz (),
+    M_BCh_du ( new BCHandler( 0, BCHandler::HINT_BC_ONLY_ESSENTIAL) ),
+    M_BCh_dz ( new BCHandler ),
     M_dz     (3*M_solid->dDof().numTotalDof()),
     M_rhs_dz (3*M_solid->dDof().numTotalDof()),
     M_dataJacobian(this)
@@ -157,10 +157,10 @@ void exactJacobian::setUpBC()
 
     // Boundary conditions for the harmonic extension of the
     // interface solid displacement
-    M_BCh_mesh.addBC("Interface", 1, Essential, Full, displ, 3);
+    M_BCh_mesh->addBC("Interface", 1, Essential, Full, displ, 3);
 
     // Boundary conditions for the solid displacement
-    M_BCh_d.addBC("Interface", 1, Natural,   Full, g_wall, 3);
+    M_BCh_d->addBC("Interface", 1, Natural,   Full, g_wall, 3);
 
     __di = M_dofMeshToFluid;
     BCVectorInterface du_wall(M_fluid->dwInterpolated(), dim_fluid, __di );
@@ -171,14 +171,14 @@ void exactJacobian::setUpBC()
     BCVectorInterface dg_wall(M_fluid->residual(), dim_fluid, __di );
 
     // Boundary conditions for du
-    M_BCh_du.addBC("Wall",   1,  Essential, Full, du_wall,  3);
-    M_BCh_du.addBC("Edges",  20, Essential, Full, bcf,      3);
+    M_BCh_du->addBC("Wall",   1,  Essential, Full, du_wall,  3);
+    M_BCh_du->addBC("Edges",  20, Essential, Full, bcf,      3);
 
 
     // Boundary conditions for dz
-    M_BCh_dz.addBC("Interface", 1, Natural,   Full, dg_wall, 3);
-    M_BCh_dz.addBC("Top",       3, Essential, Full, bcf,  3);
-    M_BCh_dz.addBC("Base",      2, Essential, Full, bcf,  3);
+    M_BCh_dz->addBC("Interface", 1, Natural,   Full, dg_wall, 3);
+    M_BCh_dz->addBC("Top",       3, Essential, Full, bcf,  3);
+    M_BCh_dz->addBC("Base",      2, Essential, Full, bcf,  3);
 }
 
 
@@ -243,7 +243,7 @@ void  exactJacobian::solveJac(Vector         &_muk,
 
 void  exactJacobian::solveLinearFluid()
 {
-    this->M_fluid->iterateLin(time(), M_BCh_du);
+    this->M_fluid->iterateLin(time(), *M_BCh_du);
 }
 
 
@@ -255,15 +255,15 @@ void  exactJacobian::solveLinearSolid()
     M_rhs_dz = ZeroVector( M_rhs_dz.size() );
     M_dz     = ZeroVector( M_dz.size() );
 
-    if ( !M_BCh_dz.bdUpdateDone() )
-        M_BCh_dz.bdUpdate(this->M_solid->mesh(),
+    if ( !M_BCh_dz->bdUpdateDone() )
+        M_BCh_dz->bdUpdate(this->M_solid->mesh(),
                           this->M_solid->feBd(),
                           this->M_solid->dof());
 
     bcManageVector(M_rhs_dz,
                    this->M_solid->mesh(),
                    this->M_solid->dof(),
-                   M_BCh_dz,
+                   *M_BCh_dz,
                    this->M_solid->feBd(),
                    1., 1.);
 

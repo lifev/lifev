@@ -26,26 +26,13 @@ namespace LifeV
 operFS::operFS( fluid_type& fluid,
                 solid_type& solid,
                 GetPot    &data_file,
-                BCHandler &BCh_u,
-                BCHandler &BCh_d,
-                BCHandler &BCh_mesh)
+                bchandler_type& BCh_u,
+                bchandler_type& BCh_d,
+                bchandler_type& BCh_mesh)
     :
     M_BCh_u       (BCh_u),
     M_BCh_d       (BCh_d),
     M_BCh_mesh    (BCh_mesh),
-//     M_fluid       (data_file,
-//                    feTetraP1bubble,
-//                    feTetraP1,
-//                    quadRuleTetra64pt,
-//                    quadRuleTria3pt,
-//                    quadRuleTetra64pt,
-//                    quadRuleTria3pt,
-//                    M_BCh_u, M_BCh_mesh),
-//     M_solid       (data_file,
-//                    feTetraP1,
-//                    quadRuleTetra4pt,
-//                    quadRuleTria3pt,
-//                    M_BCh_d),
     M_fluid(fluid),
     M_solid(solid),
     M_dofFluidToStructure( new DofInterface3Dto3D( feTetraP1,
@@ -103,6 +90,9 @@ operFS::setup()
 {
     if ( M_solid && M_fluid )
     {
+        M_dispStruct.resize( 3*M_solid->dDof().numTotalDof() );
+        M_velo.resize( 3*M_solid->dDof().numTotalDof() );
+
         M_dofFluidToStructure->setup(feTetraP1,M_solid->dDof(),feTetraP1bubble,M_fluid->uDof());
         M_dofFluidToStructure->update(M_solid->mesh(),
                                      1,
@@ -143,51 +133,24 @@ operFS::setDataFromGetPot( GetPot const& data_file )
 
 //
 
-void  operFS::updateJac(Vector& sol,int iter)
+void
+operFS::updateJac(Vector& sol,int iter)
 {
 }
 
 //
 
 
-void operFS::displacementOnInterface()
+void
+operFS::displacementOnInterface()
 {
-    UInt iBCf = M_fluid->BC_fluid().getBCbyName("Interface");
-    UInt iBCd = M_solid->BC_solid().getBCbyName("Interface");
-
-    BCBase const &BC_fluidInterface = M_fluid->BC_fluid()[iBCf];
-    BCBase const &BC_solidInterface = M_solid->BC_solid()[iBCd];
-
-    UInt nDofInterface = BC_fluidInterface.list_size();
-
-    UInt nDimF = BC_fluidInterface.numberOfComponents();
-    UInt nDimS = BC_solidInterface.numberOfComponents();
-
-    UInt totalDofFluid = M_fluid->getDisplacement().size()/ nDimF;
-    UInt totalDofSolid = M_solid->d().size()/ nDimS;
 
     Vector dispOnInterface(M_solid->d().size());
     dispOnInterface = ZeroVector(dispOnInterface.size());
 
-    for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)
-    {
-        ID IDfluid = BC_fluidInterface(iBC)->id();
-
-        BCVectorInterface const *BCVInterface =
-            static_cast <BCVectorInterface const *>
-            (BC_fluidInterface.pointerToBCVector());
-
-        ID IDsolid = BCVInterface->
-            dofInterface().getInterfaceDof(IDfluid);
-
-
-        for (UInt jDim = 0; jDim < nDimF; ++jDim)
-        {
-            dispOnInterface[IDsolid - 1 + jDim*totalDofSolid] =
-                M_solid->d()              [IDsolid - 1 + jDim*totalDofSolid] -
-                M_fluid->getDisplacement()[IDfluid - 1 + jDim*totalDofFluid];
-        }
-    }
+    FOR_EACH_INTERFACE_DOF( dispOnInterface[IDsolid - 1 + jDim*totalDofSolid] =
+                            M_solid->d()              [IDsolid - 1 + jDim*totalDofSolid] -
+                            M_fluid->getDisplacement()[IDfluid - 1 + jDim*totalDofFluid] );
 
     std::cout << "max norm disp = " << norm_inf(dispOnInterface);
     std::cout << std::endl;

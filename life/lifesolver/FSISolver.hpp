@@ -66,13 +66,25 @@ public:
     //@{
     typedef operFS::fluid_type::value_type::source_type fluid_source_type;
     typedef operFS::fluid_type::value_type::source_type solid_source_type;
+    typedef operFS::bchandler_type bchandler_type;
     //@}
 
     /** @name Constructors, destructor
      */
     //@{
 
-    FSISolver( GetPot const& datafile, BCHandler const& __bcu, BCHandler const& __bcd, BCHandler const& __bchext );
+    /*!
+      \brief default/only constructor for the FSI solver
+
+      \attention the last argument of the constructor gives a
+      possibility to override the operator that is given by the \c
+      data_file. An empty string (default) means that it uses the
+      operator defined in \c data_file
+      \todo allow to change the FSI operator on the fly
+     */
+    FSISolver( GetPot const& datafile,
+               bchandler_type& __bcu, bchandler_type& __bcd, bchandler_type& __bchext,
+               std::string __oper = "" );
 
     //@}
 
@@ -102,14 +114,14 @@ public:
     //! get the displacement
     Vector const& displacement() const { return M_disp; }
 
-    //! get access to the \c BCHandler for the velocity
-    BCHandler& bcHandlerU() { return M_BCh_u; }
+    //! get access to the \c bchandler_type for the velocity
+    bchandler_type& bcHandlerU() { return M_BCh_u; }
 
-    //! get access to the \c BCHandler for the velocity
-    BCHandler const& bcHandlerU() const { return M_BCh_u; }
+    //! get access to the \c bchandler_type for the velocity
+    bchandler_type const& bcHandlerU() const { return M_BCh_u; }
 
-    //! get access to the \c BCHandler for the displacement
-    BCHandler const& bcHandlerD() const { return M_BCh_d; }
+    //! get access to the \c bchandler_type for the displacement
+    bchandler_type const& bcHandlerD() const { return M_BCh_d; }
 
     //@}
 
@@ -170,9 +182,9 @@ private:
 private:
 
     // be careful here: the BCs must be constructed before the solvers
-    BCHandler M_BCh_u;
-    BCHandler M_BCh_d;
-    BCHandler M_BCh_mesh;
+    bchandler_type M_BCh_u;
+    bchandler_type M_BCh_d;
+    bchandler_type M_BCh_mesh;
 
     oper_fsi_ptr M_oper;
 

@@ -40,7 +40,8 @@ namespace LifeV
 //
 typedef enum OperFSPreconditioner
 {
-    NEUMANN_DIRICHLET = 0,
+    NO_PRECONDITIONER=-1,
+    NEUMANN_DIRICHLET,
     DIRICHLET_NEUMANN,
     NEUMANN_NEUMANN
 };
@@ -55,27 +56,31 @@ public:
                                    & )> function_type;
 
     typedef boost::shared_ptr<DofInterface3Dto3D> dof_interface_type;
+    typedef boost::shared_ptr<BCHandler> bchandler_type;
 
     // constructors
     operFS()
         :
-        M_BCh_u( *new BCHandler),
-        M_BCh_d( *new BCHandler),
-        M_BCh_mesh( *new BCHandler),
+        M_BCh_u(),
+        M_BCh_d(),
+        M_BCh_mesh(),
         M_fluid(),
         M_solid(),
         M_dofFluidToStructure( new DofInterface3Dto3D ),
         M_dofStructureToSolid( new DofInterface3Dto3D ),
         M_dofStructureToFluidMesh( new DofInterface3Dto3D ),
-        M_dofMeshToFluid( new DofInterface3Dto3D )
+        M_dofMeshToFluid( new DofInterface3Dto3D ),
+        M_dispStruct(),
+        M_velo(),
+        M_nbEval( 0 )
         {}
 
     operFS(fluid_type & fluid,
            solid_type &solid,
            GetPot    &data_file,
-           BCHandler &BCh_u,
-           BCHandler &BCh_d,
-           BCHandler &BCh_mesh);
+           bchandler_type& BCh_u,
+           bchandler_type& BCh_d,
+           bchandler_type& BCh_mesh);
 
     // destructor
 
@@ -124,7 +129,7 @@ public:
 
     virtual void setDataFromGetPot( GetPot const& data );
 
-    void setBC( BCHandler& bc_u,  BCHandler& bc_d, BCHandler& bc_m )
+    void setBC( bchandler_type& bc_u,  bchandler_type& bc_d, bchandler_type& bc_m )
         {
             M_BCh_u = bc_u;
             M_BCh_d = bc_d;
@@ -138,9 +143,9 @@ public:
 
 protected:
 
-    BCHandler               &M_BCh_u;
-    BCHandler               &M_BCh_d;
-    BCHandler               &M_BCh_mesh;
+    bchandler_type          M_BCh_u;
+    bchandler_type          M_BCh_d;
+    bchandler_type          M_BCh_mesh;
 
     fluid_type              M_fluid;
     solid_type              M_solid;
@@ -165,7 +170,50 @@ private:
     UInt                    M_method;
     OperFSPreconditioner    M_precond;
 };
+
 typedef boost::shared_ptr<operFS> oper_fsi_ptr;
 typedef singleton<factory<operFS,  std::string> > FSIFactory;
+
+/*!
+   \def  FOR_EACH_INTERFACE_DOF( Expr )
+
+   \c FOR_EACH_INTERFACE_DOF is an helper macro to ease the
+   the computation of quantities like the residual on the interface
+   of the Fluid and Structure.
+
+ */
+#define FOR_EACH_INTERFACE_DOF( Expr )                              \
+{                                                                   \
+    UInt iBCf = M_fluid->BC_fluid().getBCbyName("Interface");       \
+                                                                    \
+    BCBase const &BC_fluidInterface = M_fluid->BC_fluid()[iBCf];    \
+                                                                    \
+    UInt nDofInterface = BC_fluidInterface.list_size();             \
+                                                                    \
+    UInt nDimF = BC_fluidInterface.numberOfComponents();            \
+                                                                    \
+    UInt totalDofFluid = M_fluid->uDof().numTotalDof();             \
+    UInt totalDofSolid = M_solid->dDof().numTotalDof();             \
+                                                                    \
+    for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)                 \
+    {                                                               \
+        ID IDfluid = BC_fluidInterface(iBC)->id();                  \
+                                                                    \
+        BCVectorInterface const *BCVInterface =                     \
+            dynamic_cast <BCVectorInterface const *>                \
+            (BC_fluidInterface.pointerToBCVector());                \
+                                                                    \
+        assert( BCVInterface != 0 );                                \
+                                                                    \
+        ID IDsolid = BCVInterface->                                 \
+            dofInterface().getInterfaceDof(IDfluid);                \
+                                                                    \
+        for (UInt jDim = 0; jDim < nDimF; ++jDim)                   \
+        {                                                           \
+            ( Expr );                                               \
+        }                                                           \
+    }                                                               \
+}
+
 }
 #endif

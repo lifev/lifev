@@ -32,16 +32,18 @@
 
 namespace LifeV
 {
-FSISolver::FSISolver( GetPot const& data_file, BCHandler const& __bcu, BCHandler const& __bcd, BCHandler const& __bchext )
+FSISolver::FSISolver( GetPot const& data_file,
+                      bchandler_type& __bcu, bchandler_type& __bcd, bchandler_type& __bchext,
+                      std::string __oper )
     :
     M_BCh_u( __bcu ),
     M_BCh_d( __bcd ),
     M_BCh_mesh( __bchext ),
     M_fluid( new operFS::fluid_type::value_type (data_file, feTetraP1bubble, feTetraP1,quadRuleTetra64pt,
                                                  quadRuleTria3pt, quadRuleTetra64pt, quadRuleTria3pt,
-                                                 M_BCh_u,M_BCh_mesh) ),
+                                                 *M_BCh_u,*M_BCh_mesh) ),
     M_solid( new operFS::solid_type::value_type (data_file, feTetraP1, quadRuleTetra4pt,
-                                                 quadRuleTria3pt, M_BCh_d) ),
+                                                 quadRuleTria3pt, *M_BCh_d) ),
     M_disp(3*M_solid->dDof().numTotalDof()),
     M_velo(3*M_solid->dDof().numTotalDof()),
     M_method( data_file("problem/method"    , "steklovPoincare") ),
@@ -74,15 +76,29 @@ FSISolver::FSISolver( GetPot const& data_file, BCHandler const& __bcu, BCHandler
     std::cout << "Fluid/Structure interactions";
     std::cout << std::scientific;
 
-    this->setFSIOperator( M_method );
+    if (  !__oper.empty() )
+    {
+        M_method = __oper;
+        this->setFSIOperator( __oper );
+    }
+    else
+        this->setFSIOperator( M_method );
+
     M_oper->setPreconditioner( precond );
 
+    M_BCh_u->showMe();
+    M_BCh_d->showMe();
+    M_BCh_mesh->showMe();
 
+    M_solid->showMe();
+    M_fluid->showMe();
 }
 void
 FSISolver::setFSIOperator( std::string const& __op )
 {
-    M_oper = oper_fsi_ptr( FSIFactory::instance().createObject( M_method ) );
+    Debug( 6220 ) << "FSISolver::setFSIOperator with operator " << __op << "\n";
+
+    M_oper = oper_fsi_ptr( FSIFactory::instance().createObject( __op ) );
     M_oper->setFluid( M_fluid );
     M_oper->setSolid( M_solid );
 
@@ -98,11 +114,11 @@ FSISolver::setFSIOperator( std::string const& __op )
                               __di );
 
     // Boundary conditions for the fluid velocity
-    M_BCh_u.addBC("Wall",   1,  Essential, Full, u_wall,  3);
+    M_BCh_u->addBC("Wall",   1,  Essential, Full, u_wall,  3);
 
-    M_BCh_u.showMe();
-    M_BCh_d.showMe();
-    M_BCh_mesh.showMe();
+    M_BCh_u->showMe();
+    M_BCh_d->showMe();
+    M_BCh_mesh->showMe();
 
     M_oper->setBC( M_BCh_u, M_BCh_d, M_BCh_mesh );
     M_oper->setup();
@@ -110,6 +126,9 @@ FSISolver::setFSIOperator( std::string const& __op )
 void
 FSISolver::iterate( Real time )
 {
+    Debug( 6220 ) << "============================================================\n";
+    Debug( 6220 ) << "Solving FSI at time " << time << " with FSIOperator: " << M_method  << "\n";
+
     UInt dim_solid = M_oper->solid().dDof().numTotalDof();
     UInt dim_fluid = M_oper->fluid().uDof().numTotalDof();
 
@@ -146,8 +165,9 @@ FSISolver::iterate( Real time )
 
     if(status == 1)
     {
-        std::cout << "Inners iterations failed\n";
-        exit(1);
+        std::ostringstream __ex;
+        __ex << "FSISolver::iterate ( " << time << " ) Inners iterations failed to converge\n";
+        throw std::logic_error( __ex.str() );
     }
     else
     {
@@ -160,5 +180,8 @@ FSISolver::iterate( Real time )
         M_oper->fluid().postProcess();
         M_oper->solid().postProcess();
     }
+
+    Debug( 6220 ) << "FSISolver iteration at time " << time << " done\n";
+    Debug( 6220 ) << "============================================================\n";
 }
 }

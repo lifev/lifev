@@ -26,9 +26,9 @@ namespace LifeV
 fixedPoint::fixedPoint( fluid_type& fluid,
                         solid_type& solid,
                         GetPot &_dataFile,
-                        BCHandler &BCh_u,
-                        BCHandler &BCh_d,
-                        BCHandler &BCh_mesh):
+                        bchandler_type &BCh_u,
+                        bchandler_type &BCh_d,
+                        bchandler_type &BCh_mesh):
     operFS(fluid, solid, _dataFile, BCh_u, BCh_d, BCh_mesh)
 {
     M_defOmega =  _dataFile("problem/defOmega",0.01);
@@ -128,10 +128,10 @@ void fixedPoint::setUpBC()
 
     // Boundary conditions for the harmonic extension of the
     // interface solid displacement
-    M_BCh_mesh.addBC("Interface", 1, Essential, Full, displ, 3);
+    M_BCh_mesh->addBC("Interface", 1, Essential, Full, displ, 3);
 
     // Boundary conditions for the solid displacement
-    M_BCh_d.addBC("Interface", 1, Natural, Full, g_wall, 3);
+    M_BCh_d->addBC("Interface", 1, Natural, Full, g_wall, 3);
 }
 
 

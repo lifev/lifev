@@ -33,19 +33,18 @@ public:
     typedef operFS super;
     typedef super::fluid_type fluid_type;
     typedef super::solid_type solid_type;
+    typedef super::bchandler_type bchandler_type;
+
     // default constructor
-    steklovPoincare()
-        :
-        super()
-        {}
+    steklovPoincare();
 
     // constructors
     steklovPoincare(fluid_type& fluid,
                     solid_type& solid,
                     GetPot    &_dataFile,
-                    BCHandler &BCh_u,
-                    BCHandler &BCh_d,
-                    BCHandler &BCh_mesh);
+                    bchandler_type &BCh_u,
+                    bchandler_type &BCh_d,
+                    bchandler_type &BCh_mesh);
 
     // destructor
     ~steklovPoincare();
@@ -70,8 +69,8 @@ public:
     Vector dz()       {return M_dz;}
     Real   defOmega() {return M_defOmega;}
 
-    void setResidualFSI(double *_res);
-    void setResidualFSI(const Vector _res);
+    void setResidualFSI( double const* _res );
+    void setResidualFSI( Vector const& _res );
 
     void setup();
 
@@ -91,8 +90,8 @@ public:
 
 private:
 
-    BCHandler               M_BCh_du;
-    BCHandler               M_BCh_dz;
+    bchandler_type          M_BCh_du;
+    bchandler_type          M_BCh_dz;
 
     Vector                  M_dz;
     Vector                  M_rhs_dz;
@@ -133,8 +132,8 @@ private:
 
     Vector getResidualFSIOnSolid();
 
-    Vector getSolidInterfaceOnFluid(Vector &_vec);
-    Vector getFluidInterfaceOnSolid(Vector &_vec);
+    Vector getSolidInterfaceOnFluid(Vector const& _vec);
+    Vector getFluidInterfaceOnSolid(Vector const& _vec);
 
     void transferOnInterface(const Vector      &_vec1,
                              const BCHandler   &_BC,

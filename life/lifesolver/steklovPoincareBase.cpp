@@ -30,15 +30,30 @@ Real fzeroSP(const Real& t,
              const ID& i)
 {return 0.0;}
 
+steklovPoincare::steklovPoincare()
+    :
+    super(),
+    M_BCh_du( new BCHandler ),
+    M_BCh_dz( new BCHandler ),
+    M_dz(),
+    M_rhs_dz(),
+    M_residualS(),
+    M_residualF(),
+    M_residualFSI(),
+    M_aitkFS(),
+    M_dataJacobian( this )
+{}
+
 steklovPoincare::steklovPoincare( fluid_type& fluid,
                                   solid_type& solid,
                                   GetPot &_dataFile,
-                                  BCHandler &BCh_u,
-                                  BCHandler &BCh_d,
-                                  BCHandler &BCh_mesh):
+                                  bchandler_type& BCh_u,
+                                  bchandler_type& BCh_d,
+                                  bchandler_type& BCh_mesh)
+    :
     operFS(fluid, solid, _dataFile, BCh_u, BCh_d, BCh_mesh),
-    M_BCh_du      (),
-    M_BCh_dz      (),
+    M_BCh_du      ( new BCHandler ),
+    M_BCh_dz      ( new BCHandler ),
     M_dz          ( 3*M_solid->dDof().numTotalDof() ),
     M_rhs_dz      ( 3*M_solid->dDof().numTotalDof() ),
     M_residualS   ( M_solid->dDof().numTotalDof() ),
@@ -192,9 +207,9 @@ void steklovPoincare::setUpBC()
     // Passing data from the fluid to the structure: fluid load at the interface
     //
     boost::shared_ptr<DofInterfaceBase> __dibase( M_dofFluidToStructure );
-    BCVectorInterface g_wall(( Vector& )this->M_fluid->residual(),
-                             dim_fluid,
-                             __dibase );
+    BCVectorInterface g_wall( this->M_fluid->residual(),
+                              dim_fluid,
+                              __dibase );
 
     //
     // Passing data from structure to the solid mesh: motion of the solid domain
@@ -224,11 +239,11 @@ void steklovPoincare::setUpBC()
     // Boundary conditions for the harmonic extension of the
     // interface solid displacement
 
-    M_BCh_mesh.addBC("Interface", 1, Essential, Full, displ, 3);
+    M_BCh_mesh->addBC("Interface", 1, Essential, Full, displ, 3);
 
     // Boundary conditions for the solid displacement
 
-    M_BCh_d.addBC("Interface", 1, Essential, Full, d_wall, 3);
+    M_BCh_d->addBC("Interface", 1, Essential, Full, d_wall, 3);
 
     //========================================================================================
     //  COUPLED FSI LINEARIZED OPERATORS
@@ -250,15 +265,27 @@ void steklovPoincare::setUpBC()
 
     // Boundary conditions for du
 
-    M_BCh_du.addBC("Wall",   1,  Natural  , Full, du_wall,  3);
-    M_BCh_du.addBC("Edges",  20, Essential, Full, bcf,      3);
+    M_BCh_du->addBC("Wall",   1,  Natural  , Full, du_wall,  3);
+    M_BCh_du->addBC("Edges",  20, Essential, Full, bcf,      3);
 
     // Boundary conditions for dz
 
-    M_BCh_dz.addBC("Interface", 1, Natural  , Full, dg_wall, 3);
-    M_BCh_dz.addBC("Top",       3, Essential, Full, bcf,     3);
-    M_BCh_dz.addBC("Base",      2, Essential, Full, bcf,     3);
+    M_BCh_dz->addBC("Interface", 1, Natural  , Full, dg_wall, 3);
+    M_BCh_dz->addBC("Top",       3, Essential, Full, bcf,     3);
+    M_BCh_dz->addBC("Base",      2, Essential, Full, bcf,     3);
     std::cout << "ok." << std::endl;
+
+    std::cout << "BC U\n";
+    M_BCh_u->showMe();
+    std::cout << "BC D\n";
+    M_BCh_d->showMe();
+
+    std::cout << "BC mesh\n";
+    M_BCh_mesh->showMe();
+#if 0
+    UInt iBCd = M_solid->BC_solid().getBCbyName("Interface");
+    UInt iBCf = M_fluid->BC_fluid().getBCbyName("Interface");
+#endif
 }
 
 
@@ -324,7 +351,7 @@ void  steklovPoincare::solveJac(Vector &muk,
 
 void steklovPoincare::solveLinearFluid()
 {
-    this->M_fluid->iterateLin(time(), M_BCh_du);
+    this->M_fluid->iterateLin(time(), *M_BCh_du);
 }
 
 //
@@ -334,15 +361,15 @@ void steklovPoincare::solveLinearSolid()
     M_rhs_dz = ZeroVector( M_rhs_dz.size() );
     M_dz     = ZeroVector( M_dz.size() );
 
-    if ( !M_BCh_dz.bdUpdateDone() )
-        M_BCh_dz.bdUpdate(this->M_solid->mesh(),
+    if ( !M_BCh_dz->bdUpdateDone() )
+        M_BCh_dz->bdUpdate(this->M_solid->mesh(),
                           this->M_solid->feBd(),
                           this->M_solid->dof());
 
     bcManageVector(M_rhs_dz,
                    this->M_solid->mesh(),
                    this->M_solid->dof(),
-                   M_BCh_dz,
+                   *M_BCh_dz,
                    this->M_solid->feBd(),
                    1., 1.);
 
@@ -351,7 +378,7 @@ void steklovPoincare::solveLinearSolid()
     std::cout << "rhs_dz norm = " << norm_inf(M_rhs_dz) << std::endl;
     this->M_solid->setRecur(1);
     this->M_solid->updateJac(M_dz, 0);
-    this->M_solid->solveJac(M_dz, M_rhs_dz, tol, M_BCh_dz);
+    this->M_solid->solveJac(M_dz, M_rhs_dz, tol, *M_BCh_dz);
     std::cout << "dz norm     = " << norm_inf(M_dz) << std::endl;
 }
 
@@ -479,222 +506,53 @@ void steklovPoincare::computeResidualFSI()
 {
     M_residualFSI = ZeroVector( M_residualFSI.size() );
 
-    UInt iBCf = M_fluid->BC_fluid().getBCbyName("Interface");
-    UInt iBCd = M_solid->BC_solid().getBCbyName("Interface");
-
-    BCBase const &BC_fluidInterface = M_fluid->BC_fluid()[iBCf];
-    BCBase const &BC_solidInterface = M_solid->BC_solid()[iBCd];
-
-    UInt nDofInterface = BC_fluidInterface.list_size();
-
-    UInt nDimF = BC_fluidInterface.numberOfComponents();
-    UInt nDimS = BC_solidInterface.numberOfComponents();
-
-    UInt totalDofFluid = M_residualF.size()/ nDimF;
-    UInt totalDofSolid = M_residualS.size()/ nDimS;
-
-    for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)
-    {
-        ID IDfluid = BC_fluidInterface(iBC)->id();
-
-        BCVectorInterface const *BCVInterface =
-            static_cast <BCVectorInterface const *>
-            (BC_fluidInterface.pointerToBCVector());
-
-        ID IDsolid = BCVInterface->
-            dofInterface().getInterfaceDof(IDfluid);
-
-        for (UInt jDim = 0; jDim < nDimF; ++jDim)
-        {
-            M_residualFSI[IDfluid - 1 + jDim*totalDofFluid] =
-                M_residualF[IDfluid - 1 + jDim*totalDofFluid] -
-                M_residualS[IDsolid - 1 + jDim*totalDofSolid];
-        }
-    }
+    FOR_EACH_INTERFACE_DOF( M_residualFSI[IDfluid - 1 + jDim*totalDofFluid] =
+                            M_residualF[IDfluid - 1 + jDim*totalDofFluid] -
+                            M_residualS[IDsolid - 1 + jDim*totalDofSolid] );
 }
 
 
-void steklovPoincare::setResidualFSI(double *_res)
+void steklovPoincare::setResidualFSI(double const* _res)
 {
-    UInt iBCf = M_fluid->BC_fluid().getBCbyName("Interface");
-    UInt iBCd = M_solid->BC_solid().getBCbyName("Interface");
+    FOR_EACH_INTERFACE_DOF( M_residualFSI[IDfluid - 1 + jDim*totalDofFluid] =
+                            _res[IDsolid - 1 + jDim*totalDofSolid] );
 
-    BCBase const &BC_fluidInterface = M_fluid->BC_fluid()[iBCf];
-    BCBase const &BC_solidInterface = M_solid->BC_solid()[iBCd];
-
-    UInt nDofInterface = BC_fluidInterface.list_size();
-
-    UInt nDimF = BC_fluidInterface.numberOfComponents();
-    UInt nDimS = BC_solidInterface.numberOfComponents();
-
-    UInt totalDofFluid = M_residualF.size()/ nDimF;
-    UInt totalDofSolid = M_residualS.size()/ nDimS;
-
-    for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)
-    {
-        ID IDfluid = BC_fluidInterface(iBC)->id();
-
-        BCVectorInterface const *BCVInterface =
-            static_cast <BCVectorInterface const *>
-            (BC_fluidInterface.pointerToBCVector());
-
-        ID IDsolid = BCVInterface->
-            dofInterface().getInterfaceDof(IDfluid);
-
-        for (UInt jDim = 0; jDim < nDimF; ++jDim)
-        {
-            M_residualFSI[IDfluid - 1 + jDim*totalDofFluid] =
-                _res[IDsolid - 1 + jDim*totalDofSolid];
-        }
-    }
 }
 
-void steklovPoincare::setResidualFSI(const Vector _res)
+void steklovPoincare::setResidualFSI( Vector const&  _res)
 {
-    UInt iBCf = M_fluid->BC_fluid().getBCbyName("Interface");
-    UInt iBCd = M_solid->BC_solid().getBCbyName("Interface");
+    FOR_EACH_INTERFACE_DOF( M_residualFSI[IDfluid - 1 + jDim*totalDofFluid] =
+                            _res[IDsolid - 1 + jDim*totalDofSolid] );
 
-    BCBase const &BC_fluidInterface = M_fluid->BC_fluid()[iBCf];
-    BCBase const &BC_solidInterface = M_solid->BC_solid()[iBCd];
-
-    UInt nDofInterface = BC_fluidInterface.list_size();
-
-    UInt nDimF = BC_fluidInterface.numberOfComponents();
-    UInt nDimS = BC_solidInterface.numberOfComponents();
-
-    UInt totalDofFluid = M_residualF.size()/ nDimF;
-    UInt totalDofSolid = M_residualS.size()/ nDimS;
-
-    for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)
-    {
-        ID IDfluid = BC_fluidInterface(iBC)->id();
-
-        BCVectorInterface const *BCVInterface =
-            static_cast <BCVectorInterface const *>
-            (BC_fluidInterface.pointerToBCVector());
-
-        ID IDsolid = BCVInterface->
-            dofInterface().getInterfaceDof(IDfluid);
-
-        for (UInt jDim = 0; jDim < nDimF; ++jDim)
-        {
-            M_residualFSI[IDfluid - 1 + jDim*totalDofFluid] =
-                _res[IDsolid - 1 + jDim*totalDofSolid];
-        }
-    }
 }
 
 
 Vector steklovPoincare::getResidualFSIOnSolid()
 {
     Vector vec = M_residualS;
-    vec = ZeroVector( vec.size() );
 
-    BCBase const &BC_fluidInterface = M_fluid->BC_fluid()[0];
-    BCBase const &BC_solidInterface = M_solid->BC_solid()[0];
-
-    UInt nDofInterface = BC_fluidInterface.list_size();
-
-    UInt nDimF = BC_fluidInterface.numberOfComponents();
-    UInt nDimS = BC_solidInterface.numberOfComponents();
-
-    UInt totalDofFluid = M_residualF.size()/ nDimF;
-    UInt totalDofSolid = M_residualS.size()/ nDimS;
-
-    std::cout << "total dof fluid = " << totalDofFluid << std::endl;
-    std::cout << "total dof solid = " << totalDofSolid << std::endl;
-
-    for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)
-    {
-        ID IDfluid = BC_fluidInterface(iBC)->id();
-
-        BCVectorInterface const *BCVInterface =
-            static_cast <BCVectorInterface const *>
-            (BC_fluidInterface.pointerToBCVector());
-
-        ID IDsolid = BCVInterface->
-            dofInterface().getInterfaceDof(IDfluid);
-
-        for (UInt jDim = 0; jDim < nDimF; ++jDim)
-        {
-            vec[IDsolid - 1 + jDim*totalDofSolid] =
-                M_residualF[IDfluid - 1 + jDim*totalDofFluid] -
-                M_residualS[IDsolid - 1 + jDim*totalDofSolid];
-        }
-    }
-
+    FOR_EACH_INTERFACE_DOF( vec[IDsolid - 1 + jDim*totalDofSolid] =
+                            M_residualF[IDfluid - 1 + jDim*totalDofFluid] -
+                            M_residualS[IDsolid - 1 + jDim*totalDofSolid] );
     return vec;
 }
 
-Vector steklovPoincare::getSolidInterfaceOnFluid(Vector &_vec)
+Vector steklovPoincare::getSolidInterfaceOnFluid(Vector const& _vec)
 {
     Vector vec(M_residualF.size());
 
-    BCBase const &BC_fluidInterface = M_fluid->BC_fluid()[0];
-    BCBase const &BC_solidInterface = M_solid->BC_solid()[0];
-
-    UInt nDofInterface = BC_fluidInterface.list_size();
-
-    UInt nDimF = BC_fluidInterface.numberOfComponents();
-    UInt nDimS = BC_solidInterface.numberOfComponents();
-
-    UInt totalDofFluid = M_residualF.size()/ nDimF;
-    UInt totalDofSolid = M_residualS.size()/ nDimS;
-
-    for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)
-    {
-        ID IDfluid = BC_fluidInterface(iBC)->id();
-
-        BCVectorInterface const *BCVInterface =
-            static_cast <BCVectorInterface const *>
-            (BC_fluidInterface.pointerToBCVector());
-
-        ID IDsolid = BCVInterface->
-            dofInterface().getInterfaceDof(IDfluid);
-
-        for (UInt jDim = 0; jDim < nDimF; ++jDim)
-        {
-            vec[IDfluid - 1 + jDim*totalDofSolid] =
-                _vec[IDsolid - 1 + jDim*totalDofSolid];
-        }
-    }
-
+    FOR_EACH_INTERFACE_DOF( vec[IDfluid - 1 + jDim*totalDofSolid] =
+                            _vec[IDsolid - 1 + jDim*totalDofSolid] );
     return vec;
 }
 
 
-Vector steklovPoincare::getFluidInterfaceOnSolid(Vector &_vec)
+Vector steklovPoincare::getFluidInterfaceOnSolid(Vector const& _vec)
 {
     Vector vec(M_residualS.size());
 
-    BCBase const &BC_fluidInterface = M_fluid->BC_fluid()[0];
-    BCBase const &BC_solidInterface = M_solid->BC_solid()[0];
-
-    UInt nDofInterface = BC_fluidInterface.list_size();
-
-    UInt nDimF = BC_fluidInterface.numberOfComponents();
-    UInt nDimS = BC_solidInterface.numberOfComponents();
-
-    UInt totalDofFluid = M_residualF.size()/ nDimF;
-    UInt totalDofSolid = M_residualS.size()/ nDimS;
-
-    for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)
-    {
-        ID IDfluid = BC_fluidInterface(iBC)->id();
-
-        BCVectorInterface const *BCVInterface =
-            static_cast <BCVectorInterface const *>
-            (BC_fluidInterface.pointerToBCVector());
-
-        ID IDsolid = BCVInterface->
-            dofInterface().getInterfaceDof(IDfluid);
-
-        for (UInt jDim = 0; jDim < nDimF; ++jDim)
-        {
-            vec[IDsolid - 1 + jDim*totalDofSolid] =
-                _vec[IDfluid - 1 + jDim*totalDofSolid];
-        }
-    }
+    FOR_EACH_INTERFACE_DOF( vec[IDsolid - 1 + jDim*totalDofSolid] =
+                            _vec[IDfluid - 1 + jDim*totalDofSolid] );
 
     return vec;
 }

@@ -38,13 +38,14 @@ public:
     typedef operFS super;
     typedef super::fluid_type fluid_type;
     typedef super::solid_type solid_type;
+    typedef super::bchandler_type bchandler_type;
 
     // default constructor
     exactJacobian()
         :
         super(),
-        M_BCh_du (0, BCHandler::HINT_BC_ONLY_ESSENTIAL),
-        M_BCh_dz (),
+        M_BCh_du ( new BCHandler( 0, BCHandler::HINT_BC_ONLY_ESSENTIAL) ),
+        M_BCh_dz ( new BCHandler ),
         M_dz     (),
         M_rhs_dz (),
         M_dataJacobian(this)
@@ -54,9 +55,9 @@ public:
     exactJacobian( fluid_type& fluid,
                    solid_type& solid,
                    GetPot &_dataFile,
-                   BCHandler &BCh_u,
-                   BCHandler &BCh_d,
-                   BCHandler &BCh_mesh);
+                   bchandler_type &BCh_u,
+                   bchandler_type &BCh_d,
+                   bchandler_type &BCh_mesh);
 
     // destructor
     ~exactJacobian();
@@ -97,8 +98,8 @@ public:
 
 private:
 
-    BCHandler         M_BCh_du;
-    BCHandler         M_BCh_dz;
+    bchandler_type         M_BCh_du;
+    bchandler_type         M_BCh_dz;
 
     Vector            M_dz;
     Vector            M_rhs_dz;
