@@ -39,12 +39,13 @@ int main(int argc, char** argv)
     //
     BCFunctionBase u_wall(u1);
     BCFunctionBase in_flow(u2);
-    BCHandler BCh_u(4, BCHandler::HINT_BC_ONLY_ESSENTIAL);
-    BCh_u.addBC("Wall",   2, Essential, Full, u_wall,  3);
-    BCh_u.addBC("Wall-inflow",   4, Essential, Full, u_wall,  3);
-    BCh_u.addBC("Wall-outflow",   5, Essential, Full, u_wall,  3);
-    BCh_u.addBC("InFlow", 1, Essential,   Full, in_flow, 3);
-
+    BCFunctionBase out_flow(fZero);
+    BCHandler BCh_u;
+    BCh_u.addBC("Wall",         2, Essential, Full, u_wall,   3);
+    BCh_u.addBC("Wall-inflow",  4, Essential, Full, u_wall,   3);
+    BCh_u.addBC("Wall-outflow", 5, Essential, Full, u_wall,   3);
+    BCh_u.addBC("InFlow",       1, Essential, Full, in_flow,  3);
+    BCh_u.addBC("OutFlow",      3, Natural,   Full, out_flow, 3);
 
 
     // Navier-Stokes Solver
