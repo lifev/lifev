@@ -16,8 +16,6 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-#define MESH_INRIA
-
 #include "lifeV.hpp"
 #include "NavierStokesSolverPC.hpp"
 #include "chrono.hpp"
@@ -61,7 +59,7 @@ int main(int argc, char** argv)
   for (Real time=dt ; time <= T; time+=dt) {
     ns.timeAdvance(f,time);
     ns.iterate(time);  
-    ns.postProcessPressure();
+    ns.postProcess();
   }
   
   return 0;

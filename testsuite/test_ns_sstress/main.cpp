@@ -23,8 +23,6 @@
 #include "GetPot.hpp"
 #include <string> 
 
-#undef MESH_INRIA
-#define MESH_MOX
 #undef FULLY_DIRICHLET
 
 int main(int argc, char** argv)
@@ -99,7 +97,7 @@ int main(int argc, char** argv)
     index++;  
     ns.timeAdvance(f,time);
     ns.iterate(time);  
-    ns.postProcessPressure();
+    ns.postProcess();
     //    PhysVectUnknown<Vector> r(ns.residual());
     //    cout << "Residual" << endl;
     //    for (UInt index=0;index<r.size();index++) cout << index << " " << r.vec()(index) << endl;

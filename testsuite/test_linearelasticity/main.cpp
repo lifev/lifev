@@ -17,9 +17,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 #include <cstdlib>
-
-#define MESH_INRIA
-
 #include "lifeV.hpp"
 #include "norm.hpp"
 #include "regionMesh3D_ALE.hpp"

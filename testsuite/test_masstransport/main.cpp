@@ -2,8 +2,6 @@
 // and mass transport in the arterial lumen  
 
 // author:M. Prosi                                march/04
-
-#define MESH_INRIA
 #include "lifeV.hpp"
 #include "NavierStokesSolverPC.hpp"
 #include "convDiffReactSolverPC.hpp" 
