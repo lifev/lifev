@@ -33,7 +33,7 @@ lifev_dev_TEX	= lifev-dev.tex lifev-dev_generalities.tex lifev-dev_conventions.t
 all:$(PDF)
 
 .tex.pdf: 
-	@if test "x$(PDFLATEX)" = "xpdflatex"; then\
+	-@if test "x$(PDFLATEX)" = "xpdflatex"; then\
      echo "*** PDFLatex compiling $< ...";\
 	 srcdir=$(srcdir) top_srcdir=$(top_srcdir) /bin/sh $(srcdir)/ltxcompile `basename $< .tex`;\
      test $$? -eq 0 || (cat ltxcompile.log | grep -B 5 -n Error); \
