@@ -14,8 +14,8 @@ Kr	= 6.0		# friction parameter (source term)
 
 [time]
 timebeg	 = 0.0		# inittime
-timeend	 = 7.0		# endtime
-timestep = 0.001		# timestep		
+timeend	 = 6.0		# endtime
+timestep = 0.0005		# timestep		
 
 [discretization]
 mesh_file	= cylhexa.mesh	# mesh file name
@@ -23,13 +23,14 @@ mesh_dir	= ../data/mesh/inria
 		# the directory where the mesh file is
 x_left	= 0.
 x_right	= 10.
-nx	= 99	# (nx+1) = number of elements (0,...,nx)
+nx	= 9	# (nx+1) = number of elements (0,...,nx)
 
 [miscellaneous]
 post_dir = ./Post                 # the directory for postprocessing files
 verbose = 5
 post_proc_format = medit          # vtk or medit
-show_graceplot = 0                # 0: do show grace plot, 1: show grace plots
+show_graceplot = 0                # 0: no grace plot, 1: show grace plots
+
 
 [aztec]  
 solver = cg  #cg , gmres, cgs, tfqmr, bicgstab, slu, symmlq, fixed_pt, lu

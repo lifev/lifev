@@ -78,8 +78,8 @@ int main(int argc, char** argv)
         onedm.timeAdvance();
         onedm.iterate();
 
-        if ( data_file( "miscellaneous/show_graceplot", false ) )
-            onedm.gplot();
+    if ( data_file( "miscellaneous/show_graceplot", 0 ) )
+      onedm.gplot();
 
 // ************* saving result on file *****************************************
         ostringstream indexout;
