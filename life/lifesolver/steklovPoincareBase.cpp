@@ -271,7 +271,7 @@ void  steklovPoincare::solveLinearSolid()
 
     std::cout << "rhs_dz norm = " << maxnorm(M_rhs_dz) << std::endl;
     this->M_solid.setRecur(1);
-    this->M_solid.solveJac(M_dz, M_rhs_dz, tol, M_BCh_dz);
+    this->M_solid.solveJac(M_dz, tol, M_rhs_dz, M_BCh_dz);
     std::cout << "dz norm     = " << maxnorm(M_dz) << std::endl;
 }
 

@@ -45,8 +45,8 @@ void exactJacobian::eval(const Vector &_disp,
 {
     this->M_solid.d() = _disp;
 
-    for (int ii = 0; ii < M_solid().d().size(); ++ii)
-        std::cout << M_solid().d()[ii] << std::endl;
+//     for (int ii = 0; ii < M_solid().d().size(); ++ii)
+//         std::cout << M_solid().d()[ii] << std::endl;
 
     this->M_fluid.updateMesh(time());
     this->M_fluid.iterate   (time());

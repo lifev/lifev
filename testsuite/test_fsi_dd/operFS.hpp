@@ -54,15 +54,18 @@ namespace LifeV
                                   const int     _iter,
                                   Vector       &res) = 0;
 
-        virtual void solveJac (const Vector &_res,
+        virtual void solvePrec (const Vector &_res,
                                 const double  _linearRelTol,
                                 Vector       &_muk) = 0;
 
         // member functions
 
-        Vector solvePrec    (const Vector &,
-                             double,
-                             Vector &);
+
+        void  updateJac(Vector& sol,int iter);
+
+//         Vector solvePrec    (const Vector &,
+//                              double,
+//                              Vector &);
         void solveLinearFluid();
 
         void solveLinearSolid();
