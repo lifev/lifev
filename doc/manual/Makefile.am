@@ -35,7 +35,7 @@ all:$(PDF)
 .tex.pdf: 
 	-(TEXINPUTS=$(srcdir):$(top_srcdir)/doc/tex//:$$TEXINPUTS  pdflatex `basename $< .tex`)
 	-(BIBINPUTS=$$BIBINPUTS:$(srcdir):$(top_srcdir)/doc/tex//:$$BIBINPUTS  bibtex `basename $< .tex`)
-	-makeindex `basename $< .tex`)
+	-(BIBINPUTS=$$BIBINPUTS:$(srcdir):$(top_srcdir)/doc/tex//:$$BIBINPUTS  makeindex `basename $< .tex`)
 	-(TEXINPUTS=$(srcdir):$(top_srcdir)/doc/tex//:$$TEXINPUTS  pdflatex `basename $< .tex`)
 	-(TEXINPUTS=$(srcdir):$(top_srcdir)/doc/tex//:$$TEXINPUTS  pdflatex `basename $< .tex`)
 
