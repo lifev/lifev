@@ -151,8 +151,7 @@ class PhysVectUnknown
         public VectorType
 
 {
-    UInt _size;
-    static const UInt _nbcomp = nDimensions;
+    static const UInt _S_nbcomp = nDimensions;
 public:
 
     typedef VectorType super;
@@ -160,24 +159,27 @@ public:
     //  PhysVectUnknown(){}
     explicit PhysVectUnknown( UInt const Ndof )
         :
-        super( nDimensions*Ndof ),
-        _size( nDimensions*Ndof )
+        super( nDimensions*Ndof )
         {}
 
     PhysVectUnknown( PhysVectUnknown<VectorType> const &RhPhysVectUnknown )
         :
-        super( RhPhysVectUnknown ),
-        _size( RhPhysVectUnknown.size() )
+        super( RhPhysVectUnknown )
         {}
 
-    PhysVectUnknown& operator=( VectorType const& __v )
+    PhysVectUnknown& operator=( PhysVectUnknown const& __v )
         {
             if ( this == &__v )
                 return * this;
             super::operator=( ( super const& )__v );
             return *this;
         }
-
+    template<typename VectorExpr>
+    PhysVectUnknown& operator=( VectorExpr const& __v )
+        {
+            super::operator=( __v );
+            return *this;
+        }
     //! gives the front of the vector
     Real * giveVec()
         {
@@ -185,11 +187,11 @@ public:
         }
     UInt size() const
         {
-            return _size;
+            return this->size();
         }
-    UInt nbcomp() const
+    static UInt nbcomp()
         {
-            return _nbcomp;
+            return _S_nbcomp;
         }
 };
 
