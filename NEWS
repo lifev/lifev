@@ -1,4 +1,7 @@
 Bugs fixed in 0.4.0:
+[all]
+* Banished using directives from _all_ header files (CW, CP, VM)
+
 [lifefilters]
 * OpenDX filter got revamped (CW)
 
@@ -9,6 +12,7 @@ New in 0.4.0:
 [configure]
 * Added --with-petsc=<top level petsc directory> configure option (CP)
 * Added support for automake 1.9 (CP)
+* Added check for the boost libraries and their installation sanity (CP)
 
 [lifecore]
 * Added an implementation of the Singleton design pattern (CP)
