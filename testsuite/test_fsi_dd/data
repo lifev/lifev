@@ -1,0 +1,88 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file for Fluid Structure Solver 
+#-------------------------------------------------
+
+[fluid]
+
+[./physics]
+endtime   = 0.002             # endtime
+density   = 1.0               # density
+viscosity = 0.03              # viscosity
+
+
+[../discretization]
+mesh_dir  = ../data/mesh/inria/ # the directory where the mesh file is
+mesh_file = tube_curve20.mesh  # mesh file
+timestep  = 0.001              # timestep
+
+[../miscellaneous]
+verbose   = 1
+
+
+[solid]
+
+[./physics]
+density   = 1.2               # density
+young     = 3.0E6
+poisson   = 0.3
+endtime   = 0.002
+
+[../discretization]
+mesh_dir  = ../data/mesh/inria/   # the directory where the mesh file is
+mesh_file = vessel_curve20.mesh  # mesh file
+timestep  = 0.001             # timestep
+
+[../miscellaneous]
+factor    = 10
+verbose   = 1
+
+
+[../newton]
+maxiter = 1
+abstol  = 1.e-8
+linesearch = 0
+
+
+[../aztec]
+output          = none #all_res
+max_iter        = 300
+poly_ord        = 5
+kspace          = 40
+precond         = dom_decomp
+drop            = 1.00e-4
+ilut_fill       = 2
+tol             = 1.e-16
+
+
+[fluid]
+
+[./aztec_i]
+output          = all_res
+max_iter        = 1550
+poly_ord        = 5
+kspace          = 40
+precond         = dom_decomp
+tol             = 1.00e-6
+drop            = 1.00e-4
+ilut_fill       = 1.5
+
+[../aztec_ii]
+output          = all_res
+conv            = rhs
+max_iter        = 1550
+poly_ord        = 5
+kspace          = 40
+tol             = 1.00e-6
+drop            = 1.00e-4
+ilut_fill       = 1.5
+
+
+[../aztec_s]
+output          = none
+conv            = rhs
+poly_ord        = 5
+kspace          = 40
+tol             = 1.00e-6
+drop            = 1.00e-4
+
