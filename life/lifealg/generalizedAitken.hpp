@@ -39,29 +39,28 @@ namespace LifeV
         /*!
           Compute the acceleration with the vector variant of Aitken.
           See "A domain decompostion framework for fluid/structure interaction problems"
-          by Simone Deparis, Marco Discacciati and Alfio Quarteroni for reference
+          by Simone Deparis, Marco Discacciati and Alfio Quarteroni for references
         */
+        
     public:
-
+        
         // Constructors
         
         generalizedAitken(const int  _nDof,
                           const Real _defOmegaS = 0.1,
                           const Real _defOmegaF = 0.1);
-
-
+        
+        
         // Destructor
-
+        
         ~generalizedAitken();
         
         // Member functions
-
+        
         Vector        computeDeltaLambda(const Vector &,
                                          const Vector &,
                                          const Vector &);
         
-        // in this case, omega is taken as the default value
-
     private:
 
         //! fluid/structure interface dof count
@@ -85,9 +84,10 @@ namespace LifeV
         bool   M_firstCall;
     };
 
-
+//
 // Constructors
-
+//
+    
     generalizedAitken::generalizedAitken(const int _nDof,
                                          const Real _defOmegaS,
                                          const Real _defOmegaF):
@@ -103,10 +103,10 @@ namespace LifeV
         M_lambda    = 0.;
         M_firstCall = true;
     }
-    
-    //
-    // Destructor
-    //
+
+//
+// Destructor
+//
 
     generalizedAitken::~generalizedAitken()
     { //nothing needs to be done
@@ -127,7 +127,6 @@ namespace LifeV
                                                  const Vector &_muS,
                                                  const Vector &_muF)
     {
-
         Vector    deltaLambda;
 
         if (!M_firstCall)
@@ -142,7 +141,10 @@ namespace LifeV
             Vector muS   (M_nDof);
             Vector muF   (M_nDof);
             
-            //! bulding the matrix and the right hdand side
+            /*! bulding the matrix and the right hand side
+              see eq. (16) page 10
+            */
+            
             for (UInt ii = 0; ii < M_nDof; ++ii)
             {
                 muS[ii] = _muS[ii] - M_muS[ii];
@@ -168,6 +170,7 @@ namespace LifeV
             }
             else if (a22 == 0)
             {
+                //! eq. (12) page 8
                 omegaS = 0.;
                 omegaF = b1/a11*a11;
             }
@@ -180,7 +183,7 @@ namespace LifeV
         }
         else
         {
-            /*! first time aitken is called, the coefficient must be 
+            /*! first time aitken is called, the coefficients must be 
                 set to their default values
             */
 
