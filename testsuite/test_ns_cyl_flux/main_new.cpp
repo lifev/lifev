@@ -38,7 +38,7 @@ namespace LifeV
 struct toEnsight
 {
     void
-    operator()( uint __it,
+    operator()( Real __time,
                 RegionMesh3D<LinearTetra> const& __mesh,
                 Vector const& __u,
                 Vector const& __p,
@@ -85,12 +85,14 @@ main(int argc, char** argv)
                                                   quadRuleTetra5pt, quadRuleTria3pt,
                                                   BCh_u) );
     __ns->showMe();
+    __ns->setSourceTerm( f );
+
     NavierStokesWithFlux<ns_type> __ns_with_flux( __ns );
 
-    // Impose the fluxes for initialize 
+    // Impose the fluxes for initialize
     //
-    __ns_with_flux.setFlux(1, my_flux_cost); 
-       
+    __ns_with_flux.setFlux(1, my_flux_cost);
+
     toEnsight EnsightFilter;
     __ns_with_flux.doOnIterationFinish( EnsightFilter  );
 
@@ -98,7 +100,6 @@ main(int argc, char** argv)
     Real startT = __ns_with_flux.inittime();
     Real T  = __ns_with_flux.endtime();
 
-    __ns_with_flux.setSourceTerm( f );
     __ns_with_flux.initialize(u0,p0,0.0,dt);
 
     for (Real time=startT+dt ; time <= T; time+=dt)
@@ -110,7 +111,6 @@ main(int argc, char** argv)
        __ns_with_flux.setFlux(1, my_flux_cos); //cosinusoidal
        //__ns_with_flux.setFlux(1, my_flux_physio); // physiological
 
-       __ns_with_flux.timeAdvance( f, time );
        __ns_with_flux.iterate( time );
        __ns->postProcess();
     }
