@@ -85,7 +85,7 @@ public:
       \param bdQr_u surface quadrature rule for the velocity
       \param Qr_p volumic quadrature rule for the pressure
       \param bdQr_p surface quadrature rule for the pressure
-      \param BCh_u boundary conditions for the velocity
+      \param BCh_fluid boundary conditions for the fluid
       \param ord_bdf order of the Bdf time advancing scheme + incremental for the pressure
     */
     NavierStokesSolverPC( const GetPot& data_file, const RefFE& refFE_u, const RefFE& refFE_p, const QuadRule& Qr_u,
@@ -230,7 +230,7 @@ NavierStokesSolverPC( const GetPot& data_file, const RefFE& refFE_u, const RefFE
         _dataAztec_i( data_file, "fluid/aztec_i" ),
         _dataAztec_ii( data_file, "fluid/aztec_ii" ),
         _dataAztec_s( data_file, "fluid/aztec_s" ),
-        _factor_data( _C, _D, _trD, _H, _HinvC, _HinvDtr, _invCtrDP, _dataAztec_i, _dataAztec_s, this->_BCh_u.hasOnlyEssential() )
+        _factor_data( _C, _D, _trD, _H, _HinvC, _HinvDtr, _invCtrDP, _dataAztec_i, _dataAztec_s, BCh_u.hasOnlyEssential() )
 {
 
     Debug( 6020 ) << "\n";
@@ -463,9 +463,9 @@ iterate( const Real& time )
     Debug( 6020 ) << "  o-  Applying boundary conditions... \n";
     chrono.start();
     // BC manage for the velocity
-    if ( !this->_BCh_u.bdUpdateDone() )
-        this->_BCh_u.bdUpdate( this->_mesh, this->_feBd_u, this->_dof_u );
-    bcManage( _C, _trD, _f_u, this->_mesh, this->_dof_u, this->_BCh_u, this->_feBd_u, tgv, time );
+    if ( !this->BCh_fluid().bdUpdateDone() )
+        this->BCh_fluid().bdUpdate( this->_mesh, this->_feBd_u, this->_dof_u );
+    bcManage( _C, _trD, _f_u, this->_mesh, this->_dof_u, this->BCh_fluid(), this->_feBd_u, tgv, time );
     chrono.stop();
     Debug( 6020 ) << "  o-  Applying boundary conditions done in " << chrono.diff() << "s." << "\n";
 
@@ -622,7 +622,7 @@ iterate( const Real& time )
     this->_p = ZeroVector( this->_p.size() ); // AT this point, this vector stands for the "pressure increment"
 
     // case of pure Dirichlet BCs:
-    if ( this->_BCh_u.hasOnlyEssential() )
+    if ( this->BCh_fluid().hasOnlyEssential() )
     {
         vec_DV[ this->_dim_p - 1 ] = 0.0; // correction of the right hand side.
         this->_p[ this->_dim_p - 1 ] = 0.0; // pressure value at the last node.

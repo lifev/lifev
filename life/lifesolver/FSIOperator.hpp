@@ -237,12 +237,14 @@ typedef singleton<factory<FSIOperator,  std::string> > FSIFactory;
    of the Fluid and Structure.
 
  */
+//    UInt iBCf = M_fluid->BCh_fluid().getBCbyName("Wall");
 
 #define FOR_EACH_INTERFACE_DOF( Expr )                              \
-{                                                                   \
-    UInt iBCf = M_fluid->BC_fluid().getBCbyName("Interface");       \
+{\
                                                                     \
-    BCBase const &BC_fluidInterface = M_fluid->BC_fluid()[iBCf];    \
+    UInt iBCf = M_fluid->BCh_HarmonicExtension().getBCbyName("Interface"); \
+                                                                    \
+    BCBase const &BC_fluidInterface = M_fluid->BCh_HarmonicExtension()[iBCf];   \
                                                                     \
     UInt nDofInterface = BC_fluidInterface.list_size();             \
                                                                     \
@@ -263,7 +265,6 @@ typedef singleton<factory<FSIOperator,  std::string> > FSIFactory;
                                                                     \
         ID IDsolid = BCVInterface->                                 \
             dofInterface().getInterfaceDof(IDfluid);                \
-                                                                    \
         for (UInt jDim = 0; jDim < nDimF; ++jDim)                   \
         {                                                           \
             ( Expr );                                               \

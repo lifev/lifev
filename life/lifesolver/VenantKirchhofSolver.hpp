@@ -100,8 +100,8 @@ public:
 
     //! BCHandler getter and setter
 
-    BCHandler const & BC_solid() const {return _BCh;}
-    void setBCSolid(const BCHandler & BCd) {_BCh = BCd;}
+    LIFEV_DEPRECATED BCHandler const & BC_solid() const {return BCh_solid();}
+//     void setBCSolid(const BCHandler & BCd) {_BCh = BCd;}
     //! residual getter
     Vector& residual() {return _residual_d;}
 
@@ -599,14 +599,14 @@ evalResidual( Vector &res, const Vector& sol, int /*iter*/)
         }
     }
 
-    if ( !_BCh.bdUpdateDone() )
-        _BCh.bdUpdate( _mesh, _feBd, this->_dof );
+    if ( !this->BCh_solid().bdUpdateDone() )
+        this->BCh_solid().bdUpdate( _mesh, _feBd, this->_dof );
 
-    bcManageMatrix( _K, _mesh, this->_dof, _BCh, _feBd, 1.0 );
+    bcManageMatrix( _K, _mesh, this->_dof, this->BCh_solid(), _feBd, 1.0 );
 
     _rhs = _rhsWithoutBC;
 
-    bcManageVector( _rhs, _mesh, this->_dof, _BCh, _feBd, _time, 1.0 );
+    bcManageVector( _rhs, _mesh, this->_dof, this->BCh_solid(), _feBd, _time, 1.0 );
 
     res = _K * sol - _rhs;
 
@@ -695,10 +695,10 @@ solveJac( Vector &step, const Vector& res, double& /*linear_rel_tol*/)
     chrono.start();
 
     // BC manage for the velocity
-    if ( !_BCh.bdUpdateDone() )
-        _BCh.bdUpdate( _mesh, _feBd, this->_dof );
+    if ( !this->BCh_solid().bdUpdateDone() )
+        this->BCh_solid().bdUpdate( _mesh, _feBd, this->_dof );
 
-    bcManageMatrix( _J, _mesh, this->_dof, _BCh, _feBd, tgv );
+    bcManageMatrix( _J, _mesh, this->_dof, this->BCh_solid(), _feBd, tgv );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 

@@ -124,6 +124,7 @@ void FSIOperator::transferOnInterface(const Vector      &_vec1,
                                       Vector            &_vec2)
 {
     _vec2 = ZeroVector(_vec2.size());
+
     int iBC = _BC.getBCbyName(_BCName);
 
     BCBase const &BCInterface = _BC[(UInt) iBC];

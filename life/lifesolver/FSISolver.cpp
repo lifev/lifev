@@ -178,7 +178,7 @@ FSISolver::setFSIOperator( std::string const& __op )
                               M_oper->dofMeshToFluid() );
 
     // Boundary conditions for the fluid velocity
-    M_BCh_u->addBC("Wall",   1,  Essential, Full, u_wall,  3);
+    M_BCh_u->addBC("Interface",   1,  Essential, Full, u_wall,  3);
 
     M_oper->setBC( M_BCh_u, M_BCh_d, M_BCh_mesh );
     M_oper->setup();

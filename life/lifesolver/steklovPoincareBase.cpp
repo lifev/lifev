@@ -355,7 +355,7 @@ void  steklovPoincare::invSfPrime(const Vector& res,
     Vector deltaLambda = this->M_fluid->getDeltaLambda();
 
     transferOnInterface(deltaLambda,
-                        M_fluid->BC_fluid(),
+                        M_fluid->BCh_fluid(),
                         "Interface",
                         step);
 
@@ -378,7 +378,7 @@ void  steklovPoincare::invSsPrime(const Vector& res,
     solveLinearSolid();
 
     transferOnInterface(M_dzSolid,
-                        M_solid->BC_solid(),
+                        M_solid->BCh_solid(),
                         "Interface",
                         step);
 }
@@ -435,7 +435,7 @@ void steklovPoincare::invSfSsPrime(const Vector& _res,
                status, proc_config, J, NULL, NULL);
 
     transferOnInterface(DDNprecond(_muk),
-                        M_solid->BC_solid(),
+                        M_solid->BCh_solid(),
                         "Interface",
                         _muk);
     chrono.stop();
@@ -536,7 +536,7 @@ Vector steklovPoincare::DDNprecond(Vector const &_z)
                 solveInvLinearFluid();
                 Vector deltaLambda = this->M_fluid->getDeltaLambda();
                 transferOnInterface(deltaLambda,
-                                    M_fluid->BC_fluid(),
+                                    M_fluid->BCh_fluid(),
                                     "Interface",
                                     Pz);
             }
@@ -807,7 +807,7 @@ void steklovPoincare::computeStrongResidualFSI()
               data_org, status, proc_config );
 
     transferOnInterface(strongResidual,
-                        M_fluid->BC_fluid(),
+                        M_fluid->BCh_fluid(),
                         "Interface",
                         M_strongResidualFSI);
     chrono.stop();
