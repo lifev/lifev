@@ -59,43 +59,54 @@ namespace LifeV
 
         // member functions
         
-        //
         void eval         (Vector &dispNew,
                            Vector &veloStruct,
                            const  Vector &disp,
                            int    status);
         
-        //
         void evalResidual (Vector &res,
                            const  Vector &sol,
                            int    iter);
 
-        //
         void updatePrec   (Vector& sol,
                            int     iter);
 
-        //
         void solvePrec    (Vector &step,
                            const  Vector &res,
                            double linear_rel_tol);
 
-        //
         void solveLinearFluid();
 
-        //
         void solveLinearSolid();
 
-        //
-        UInt nbEval();
+        // mutators and setters
 
+        UInt   const & nbEval() const {return M_nbEval;};
+
+        Vector const & dz()     const {return M_dz;};
+        
+        NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >
+        &fluid() {return M_fluid;};
+        
+        VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >
+        &solid() {return M_solid;};
+
+        void setTime(const Real &time);
+        
+    private:
 
         NavierStokesAleSolverPC
-        < RegionMesh3D_ALE<LinearTetra> >& M_fluid;
+        < RegionMesh3D_ALE<LinearTetra> > &M_fluid;
 
         VenantKirchhofSolver
-        < RegionMesh3D_ALE<LinearTetra> >& M_solid;
+        < RegionMesh3D_ALE<LinearTetra> > &M_solid;
 
         Vector       M_dispStruct;
+        
+        Real         M_time;
+
+        SolverAztec  M_solverAztec;
+        
         Vector       M_velo;
         Vector       M_dz;
         Vector       M_rhs_dz;
@@ -106,18 +117,6 @@ namespace LifeV
         BC_Handler&  M_BCh_dz;
 
         DataJacobian M_dataJacobian;
-
-
-        
-        void setTime(const Real &time);
-
-    private:
-
-        Real         M_time;
-
-        SolverAztec  M_solverAztec;
-        
-        
     };
 
     void my_matvecJacobian(double *z, double *Jz, AZ_MATRIX* J, int proc_config[]);

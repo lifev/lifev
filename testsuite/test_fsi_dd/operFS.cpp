@@ -47,7 +47,7 @@ namespace LifeV
                       int           status)
     {
         if(status) M_nbEval = 0; // new time step
-        M_nbEval++ ;
+        M_nbEval++;
 
         M_solid.d() = disp;
 
@@ -150,10 +150,10 @@ namespace LifeV
     }
     
     
-    UInt operFS::nbEval()
-    {
-        return M_nbEval;
-    }
+//     UInt operFS::nbEval()
+//     {
+//         return M_nbEval;
+//     }
     
     void operFS::setTime(const Real& time)
     {
@@ -165,7 +165,7 @@ namespace LifeV
         // Extraction of data from J
         DataJacobian* my_data = static_cast< DataJacobian* >(AZ_get_matvec_data(J));
 
-        UInt dim = my_data->M_pFS->M_dz.size();
+        UInt dim = my_data->M_pFS->dz().size();
 
         double xnorm =  AZ_gvector_norm(dim, -1, z, proc_config);
         cout << " ***** norm (z)= " << xnorm << endl<< endl;
@@ -176,14 +176,14 @@ namespace LifeV
         else
         {
             for (int i=0; i <(int)dim; ++i) 
-                my_data->M_pFS->M_solid.d()[i] =  z[i];
+                my_data->M_pFS->solid().d()[i] =  z[i];
             
-            my_data->M_pFS->M_fluid.updateDispVelo();
+            my_data->M_pFS->fluid().updateDispVelo();
             my_data->M_pFS->solveLinearFluid();
             my_data->M_pFS->solveLinearSolid();
 
             for (int i = 0; i < (int) dim; ++i)
-                Jz[i] =  z[i] - my_data->M_pFS->M_dz[i];
+                Jz[i] =  z[i] - my_data->M_pFS->dz()[i];
         }
         cout << " ***** norm (Jz)= " << AZ_gvector_norm(dim, -1, Jz, proc_config)
              << endl << endl;
