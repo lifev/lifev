@@ -74,21 +74,6 @@ steklovPoincare::steklovPoincare( fluid_type& fluid,
     M_defOmegaF = _dataFile("problem/defOmegaF",0.005);
     M_aitkFS.setDefault(M_defOmegaS, M_defOmegaF);
 
-    // for the NN case, aitken is inside the step
-    // computation routine
-//     if (this->preconditioner() == 2)
-//     {
-//         M_defOmega  = -1.;
-//         M_defOmegaS = _dataFile("problem/defOmegaS",0.005);
-//         M_defOmegaF = _dataFile("problem/defOmegaF",0.005);
-//         M_aitkFS.setDefault(M_defOmegaS, M_defOmegaF);
-//     }
-//     else
-//     {
-//         M_defOmega =  _dataFile("problem/defOmega",0.01);
-//         std::cout << "Default aikten start value = " << M_defOmega
-//                   << std::endl;
-//     }
     setUpBC();
 }
 
@@ -155,12 +140,8 @@ void steklovPoincare::eval(const Vector& disp,
 
     M_solid->setRecur(0);
     M_solid->iterate();
-//    M_solid->solveLin(dispNew, disp, 1.e-8);
-//    M_solid->postProcess();
-//    M_fluid->postProcess();
 
     dispNew = M_solid->d();
-    //M_solid->d() = dispNew;
     velo    = M_solid->w();
 
     std::cout << "                ::: norm(disp     ) = "
@@ -212,8 +193,6 @@ void steklovPoincare::evalResidual(Vector &res,
 //
 
 
-// void steklovPoincare::setUpBC(function_type _bcf,
-//                               function_type _vel)
 void steklovPoincare::setUpBC()
 {
     std::cout << "Boundary Conditions setup ... ";
@@ -439,8 +418,6 @@ void  steklovPoincare::invSsPrime(const Vector& res,
 
 //    step = setDispOnInterface(M_dz);
 
-//    step = M_dz;
-
     transferOnInterface(M_dz,
                         M_solid->BC_solid(),
                         "Interface",
@@ -542,7 +519,7 @@ void steklovPoincare::setResidualFSI( Vector const&  _res)
 
 Vector steklovPoincare::getResidualFSIOnSolid()
 {
-    Vector vec = M_residualS;
+    Vector vec(M_residualS.size());
 
     FOR_EACH_INTERFACE_DOF( vec[IDsolid - 1 + jDim*totalDofSolid] =
                             M_residualF[IDfluid - 1 + jDim*totalDofFluid] -
@@ -580,8 +557,6 @@ void steklovPoincare::transferOnInterface(const Vector      &_vec1,
     BCBase const &BCInterface = _BC[(UInt) iBC];
 
     UInt nDofInterface = BCInterface.list_size();
-
-//     std::cout << "nDofInterface = " << nDofInterface << std::endl;
 
     UInt nDim = BCInterface.numberOfComponents();
 
