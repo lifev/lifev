@@ -126,7 +126,7 @@ void  operFS::solveJac(Vector &step, const Vector& res, double& linear_rel_tol) 
     step[i]=0.0;
 
   chrono.start();
-  AZ_iterate(&step[0], &res[0], options, params, status, proc_config, J, NULL, NULL);
+  AZ_iterate(&step[0], const_cast<double*>( &res[0] ), options, params, status, proc_config, J, NULL, NULL);
   chrono.stop();
   std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
@@ -146,11 +146,11 @@ void  operFS::solveLinearFluid() {
 //
 void  operFS::solveLinearSolid() {
 
-  _rhs_dz = 0.0;
+  _rhs_dz = ZeroVector( _rhs_dz.size() );
 
   if ( !_BCh_dz.bdUpdateDone() )
-    _BCh_dz.bdUpdate(_solid._mesh,_solid._feBd,_solid._dof);
-  bcManageVector(_rhs_dz,_solid._mesh,_solid._dof,_BCh_dz,_solid._feBd, 1.0, 1.0);
+    _BCh_dz.bdUpdate(_solid.mesh(),_solid.feBd(),_solid.dof());
+  bcManageVector(_rhs_dz,_solid.mesh(),_solid.dof(),_BCh_dz,_solid.feBd(), 1.0, 1.0);
 
   Real tol=1.e-10;
 

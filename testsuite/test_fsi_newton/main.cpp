@@ -139,7 +139,8 @@ int main(int argc, char** argv)
     BCHandler BCh_du(2);
     BCHandler BCh_dz(3);
 
-    operFS oper(fluid, solid, BCh_du, BCh_dz);
+
+    operFS oper(fluid,solid,BCh_du,BCh_dz);
 
     // Passing data from structure to the fluid: z -> du
     //
