@@ -93,7 +93,7 @@
 
 
 \newcommand{\cppobj}[1]{\index{C++ Objects!#1}}
-\newcommand{\lifetitle}[2]{\raggedright{\HUGE #1}\\
+\newcommand{\lifetitle}[2]{\raggedright{\Huge #1}\\
  \rule[2ex]{\linewidth}{1mm}\\
  {\hfill\lifedraftdate}\\
  \vfill{\Large #2}\\
@@ -116,7 +116,7 @@
 % % \rule[2ex]{\linewidth}{1mm}\\
 % }{\end{framed}}
 \makeatletter
-\renewenvironment{hint}[1]{%
+\newenvironment{hint}[1]{%
 
   \def\FrameCommand{%
     % \setlength{\fboxrule}{\FrameRule}%
