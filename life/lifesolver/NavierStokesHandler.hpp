@@ -83,6 +83,9 @@ public DataNavierStokes<Mesh> {
   //! Sets initial condition for the velocity and the pressure (incremental approach): the initial time is t0, the time step dt
   void initialize(const Function& u0, const Function& p0, Real t0, Real dt); 
 
+  //! Sets initial condition for the velocity and the pressure from file
+  void initialize(const string & vname);
+
   //! Update the right  hand side  for time advancing   
   /*! 
     \param source volumic source  
@@ -464,7 +467,22 @@ NavierStokesHandler<Mesh>::initialize(const Function& u0, const Function& p0, Re
 
 }
 
+// ! Initialize when initial values for the velocity and the pressure are read from file (M. Prosi)
+template<typename Mesh> void 
+NavierStokesHandler<Mesh>::initialize(const string & vname) {
+  
+    fstream resfile(vname.c_str(),ios::in | ios::binary);
+    if (resfile.fail()) {cerr<<" Error in initialization: File not found or locked"<<endl; abort();}
+    resfile.read((char*)&_u(1),_u.size()*sizeof(double));
+    resfile.read((char*)&_p(1),_p.size()*sizeof(double));
+    resfile.close();
 
+   _bdf.bdf_u().initialize_unk(_u);
+   _bdf.bdf_p().initialize_unk(_p);
 
+   _bdf.bdf_u().showMe();
+   _bdf.bdf_p().showMe();
+
+}
 
 #endif
