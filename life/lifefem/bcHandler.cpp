@@ -41,20 +41,14 @@ namespace LifeV
 // ============ BCHandler ================
 
 //! Constructor doing nothing (the user must call setNumber(..))
-BCHandler::BCHandler() : _nbc( 0 ), _bdUpdateDone( 0 ), _fullEssential( 0 )
+BCHandler::BCHandler() : _bdUpdateDone( 0 ), _fullEssential( 0 )
 {}
 
-
-//! Set the number of BC to be stored
-void BCHandler::setNumber( const ID& nbc )
-{
-    _bcList.reserve( _nbc = nbc );
-}
 
 //! Constructor taking the number of BC to be stored
 BCHandler::BCHandler( const ID& nbc, const bool& fullEssential )
 {
-    _bcList.reserve( _nbc = nbc );
+    _bcList.reserve( nbc );
     _bdUpdateDone = 0;
     _fullEssential = fullEssential;
 }
@@ -62,7 +56,7 @@ BCHandler::BCHandler( const ID& nbc, const bool& fullEssential )
 //! Constructor taking the number of BC to be stored
 BCHandler::BCHandler( const ID& nbc )
 {
-    _bcList.reserve( _nbc = nbc );
+    _bcList.reserve( nbc );
     _bdUpdateDone = 0;
     _fullEssential = 0;
 }
@@ -80,110 +74,75 @@ bool BCHandler::empty() const
 }
 
 //! Adding new BC to the list with user defined functions
-void BCHandler::addBC( const std::string& name, const EntityFlag& flag,
-                        const BCType& type, const BCMode& mode,
-                        BCFunctionBase& bcf, const std::vector<ID>& comp )
+void BCHandler::addBC( const std::string& name,
+                       const EntityFlag& flag,
+                       const BCType& type,
+                       const BCMode& mode,
+                       BCFunctionBase& bcf,
+                       const std::vector<ID>& comp )
 {
-    if ( _nbc == _bcList.size() )
-        ERROR_MSG( "You cannot add another BC, the list of BC in the Handler is full" );
-    else if ( _nbc == 0 )
-        ERROR_MSG( "Before adding BCs, you must specify the number of BC to be stored" );
-
     // Adding BC
     _bcList.push_back( BCBase( name, flag, type, mode, bcf, comp ) );
-
-
-    if ( _nbc == _bcList.size() )
-        // Sorting list of BC. Essential BC must be treated at the end !!!!
-        std::sort( _bcList.begin(), _bcList.end() );
+    std::sort( _bcList.begin(), _bcList.end() );
 }
-void BCHandler::addBC( const std::string& name, const EntityFlag& flag,
-                        const BCType& type, const BCMode& mode,
-                        BCFunctionBase& bcf )
+void BCHandler::addBC( const std::string& name,
+                       const EntityFlag& flag,
+                       const BCType& type,
+                       const BCMode& mode,
+                       BCFunctionBase& bcf )
 {
-    if ( _nbc == _bcList.size() )
-        ERROR_MSG( "You cannot add another BC, the list of BC in the Handler is full" );
-    else if ( _nbc == 0 )
-        ERROR_MSG( "Before adding BCs, you must specify the number of BC to be stored" );
-
     // Adding BC
     _bcList.push_back( BCBase( name, flag, type, mode, bcf ) );
-
-
-    if ( _nbc == _bcList.size() )
-        // Sorting list of BC. Essential BC must be treated at the end !!!!
-        std::sort( _bcList.begin(), _bcList.end() );
+    std::sort( _bcList.begin(), _bcList.end() );
 }
 
-void BCHandler::addBC( const std::string& name, const EntityFlag& flag,
-                        const BCType& type, const BCMode& mode,
-                        BCFunctionBase& bcf, const UInt& nComp )
+void BCHandler::addBC( const std::string& name,
+                       const EntityFlag& flag,
+                       const BCType& type,
+                       const BCMode& mode,
+                       BCFunctionBase& bcf,
+                       const UInt& nComp )
 {
-    if ( _nbc == _bcList.size() )
-        ERROR_MSG( "You cannot add another BC, the list of BC in the Handler is full" );
-    else if ( _nbc == 0 )
-        ERROR_MSG( "Before adding BCs, you must specify the number of BC to be stored" );
-
     // Adding BC
     _bcList.push_back( BCBase( name, flag, type, mode, bcf, nComp ) );
-
-
-    if ( _nbc == _bcList.size() )
-        // Sorting list of BC. Essential BC must be treated at the end !!!!
-        std::sort( _bcList.begin(), _bcList.end() );
+    std::sort( _bcList.begin(), _bcList.end() );
 }
 
 
 //! Adding new BC to the list with data vectors
-void BCHandler::addBC( const std::string& name, const EntityFlag& flag,
-                        const BCType& type, const BCMode& mode,
-                        BCVectorBase& bcv, const std::vector<ID>& comp )
+void BCHandler::addBC( const std::string& name,
+                       const EntityFlag& flag,
+                       const BCType& type,
+                       const BCMode& mode,
+                       BCVectorBase& bcv,
+                       const std::vector<ID>& comp )
 {
-    if ( _nbc == _bcList.size() )
-        ERROR_MSG( "You cannot add another BC, the list of BC in the Handler is full" );
-    else if ( _nbc == 0 )
-        ERROR_MSG( "Before adding BCs, you must specify the number of BC to be stored" );
-
     // Adding BC
     _bcList.push_back( BCBase( name, flag, type, mode, bcv, comp ) );
-
-    if ( _nbc == _bcList.size() )
-        // Sorting list of BC. Essential BC must be treated at the end !!!!
-        std::sort( _bcList.begin(), _bcList.end() );
+    std::sort( _bcList.begin(), _bcList.end() );
 }
-void BCHandler::addBC( const std::string& name, const EntityFlag& flag,
-                        const BCType& type, const BCMode& mode,
-                        BCVectorBase& bcv )
+void BCHandler::addBC( const std::string& name,
+                       const EntityFlag& flag,
+                       const BCType& type,
+                       const BCMode& mode,
+                       BCVectorBase& bcv )
 {
-    if ( _nbc == _bcList.size() )
-        ERROR_MSG( "You cannot add another BC, the list of BC in the Handler is full" );
-    else if ( _nbc == 0 )
-        ERROR_MSG( "Before adding BCs, you must specify the number of BC to be stored" );
-
     // Adding BC
     _bcList.push_back( BCBase( name, flag, type, mode, bcv ) );
-
-    if ( _nbc == _bcList.size() )
-        // Sorting list of BC. Essential BC must be treated at the end !!!!
-        std::sort( _bcList.begin(), _bcList.end() );
+    std::sort( _bcList.begin(), _bcList.end() );
 }
 
 void
-BCHandler::addBC( const std::string& name, const EntityFlag& flag,
-                  const BCType& type, const BCMode& mode,
-                  BCVectorBase& bcv, const UInt& nComp )
+BCHandler::addBC( const std::string& name,
+                  const EntityFlag& flag,
+                  const BCType& type,
+                  const BCMode& mode,
+                  BCVectorBase& bcv,
+                  const UInt& nComp )
 {
-    if ( _nbc == _bcList.size() )
-        ERROR_MSG( "You cannot add another BC, the list of BC in the Handler is full" );
-    else if ( _nbc == 0 )
-        ERROR_MSG( "Before adding BCs, you must specify the number of BC to be stored" );
-
     // Adding BC
     _bcList.push_back( BCBase( name, flag, type, mode, bcv, nComp ) );
-
-    if ( _nbc == _bcList.size() )
-        // Sorting list of BC. Essential BC must be treated at the end !!!!
-        std::sort( _bcList.begin(), _bcList.end() );
+    std::sort( _bcList.begin(), _bcList.end() );
 }
 
 BCBase*
@@ -267,23 +226,20 @@ bool BCHandler::fullEssential() const
 //! Extracting BC from the list
 BCBase& BCHandler::operator[] ( const Index_t& i )
 {
-    ASSERT_PRE( _nbc == _bcList.size(), "Some BC have not been added to the list" );
     return _bcList[ i ];
 }
 
 
 const BCBase& BCHandler::operator[] ( const Index_t& i ) const
 {
-    ASSERT_PRE( _nbc == _bcList.size(), "Some BC have not added to the list" );
     return _bcList[ i ];
 }
 
 BCBase& BCHandler::GetBCWithFlag(const EntityFlag& aFlag){
-  ASSERT_PRE(_nbc == _bcList.size(), "Some BC have not been added to the list");
 
   Index_t i;
 
-  for(i = 0; i <= _nbc; i++){
+  for(i = 0; i <= _bcList.size(); i++){
     if(aFlag == _bcList[i].flag()){
       break;
     }
@@ -293,11 +249,10 @@ BCBase& BCHandler::GetBCWithFlag(const EntityFlag& aFlag){
 }
 
 const BCBase& BCHandler::GetBCWithFlag(const EntityFlag& aFlag) const {
-  ASSERT_PRE(_nbc == _bcList.size(), "Some BC have not added to the list");
 
   Index_t i;
 
-  for(i = 0; i <= _nbc; i++){
+  for(i = 0; i <= _bcList.size(); i++){
     if(aFlag == _bcList[i].flag()){
       break;
     }
@@ -305,10 +260,23 @@ const BCBase& BCHandler::GetBCWithFlag(const EntityFlag& aFlag) const {
   return _bcList[i];
 }
 
-BCType BCHandler::boundaryType(const EntityFlag& aFlag) const{
+
+UInt BCHandler::getBCbyName(const std::string _BCName) const
+{
+    int iBC = -1;
+
+    for (UInt jBC = 0; jBC < _bcList.size(); jBC++)
+        if (_bcList[jBC].name() == _BCName) iBC = jBC;
+
+    return iBC;
+}
+
+
+BCType BCHandler::boundaryType(const EntityFlag& aFlag) const
+{
   BCType CurrType;
 
-  for(UInt i = 0; i <= _nbc; i++){
+  for(UInt i = 0; i <= _bcList.size(); i++){
     if(aFlag == _bcList[i].flag()){
       CurrType = _bcList[i].type();
       break;
@@ -321,12 +289,10 @@ BCType BCHandler::boundaryType(const EntityFlag& aFlag) const{
 std::ostream & BCHandler::showMe( bool verbose, std::ostream & out ) const
 {
     out << " Boundary Conditions Handler ====>" << std::endl;
-    if ( _nbc != _bcList.size() )
-        out << " Some BC have not been added to the list\n";
     out << " Number of BC stored " << size() << std::endl;
-    ;
+
     out << " List => " << std::endl;
-    for ( UInt i = 0; i < _nbc; ++i )
+    for ( UInt i = 0; i < _bcList.size(); ++i )
     {
         _bcList[ i ].showMe( verbose, out );
     }

@@ -151,8 +151,12 @@ public:
       \param bcf the function holding the user defined function involved in this boundary condition
       \param std::vector<ID> storing the list of components involved in this boundary condition
     */
-    void addBC( const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
-                BCFunctionBase& bcf, const std::vector<ID>& comp );
+    void addBC( const std::string& name,
+                const EntityFlag& flag,
+                const BCType& type,
+                const BCMode& mode,
+                BCFunctionBase& bcf,
+                const std::vector<ID>& comp );
 
     /**
       Add new BC to the list without specified components for Scalar,
@@ -164,7 +168,10 @@ public:
       \param mode the boundary condition mode: Scalar, Full, Component, Normal, Tangential
       \param bcf the function holding the user defined function involved in this boundary condition
     */
-    void addBC( const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
+    void addBC( const std::string& name,
+                const EntityFlag& flag,
+                const BCType& type,
+                const BCMode& mode,
                 BCFunctionBase& bcf );
 
 
@@ -177,8 +184,12 @@ public:
       \param bcf the function holding the user defined function involved in this boundary condition
       \param nComp the number of componets involved in this boundary condition
     */
-    void addBC( const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
-                BCFunctionBase& bcf, const UInt& nComp );
+    void addBC( const std::string& name,
+                const EntityFlag& flag,
+                const BCType& type,
+                const BCMode& mode,
+                BCFunctionBase& bcf,
+                const UInt& nComp );
 
 
     //! add new BC to the list (data vector)
@@ -190,8 +201,12 @@ public:
       \param bcv data vector
       \param std::vector<ID> storing the list of components involved in this boundary condition
     */
-    void addBC( const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
-                BCVectorBase& bcv, const std::vector<ID>& comp );
+    void addBC( const std::string& name,
+                const EntityFlag& flag,
+                const BCType& type,
+                const BCMode& mode,
+                BCVectorBase& bcv,
+                const std::vector<ID>& comp );
 
 
     //! add new BC to the list  without specified components for Scalar, Tangential or Normal  mode problemst (data vector)
@@ -202,7 +217,10 @@ public:
       \param mode the boundary condition mode: Scalar, Full, Component, Normal, Tangential
       \param bcv data vector
     */
-    void addBC( const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
+    void addBC( const std::string& name,
+                const EntityFlag& flag,
+                const BCType& type,
+                const BCMode& mode,
                 BCVectorBase& bcv );
 
 
@@ -256,6 +274,10 @@ public:
     BCBase& GetBCWithFlag(const EntityFlag& );
     const BCBase& GetBCWithFlag(const EntityFlag&) const;
 
+    // get the BC number from the list using its name
+
+    UInt BCHandler::getBCbyName(const std::string _BCName) const;
+
     //! output
     std::ostream& showMe( bool verbose = false, std::ostream & out = std::cout ) const;
 
@@ -265,7 +287,6 @@ public:
 
 protected:
     //! number of BC to be stored
-    ID _nbc;
 
     //! true if the bdUpdate has been done
     bool _bdUpdateDone;
