@@ -1,2 +1,5 @@
 
+AC_CONFIG_FILES([ testsuite/atlocal ])
+
+
 AC_DEFINE_UNQUOTED(LIFE_PREFIX, "${prefix:-\"/usr\"}",[define prefix dir for life installation])

@@ -24,9 +24,10 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-check_PROGRAMS = test_mass
-noinst_HEADERS = ud_functions.hpp 
-test_mass_SOURCES = main.cpp 
+check_HEADERS = ud_functions.hpp 
+
+check_PROGRAMS = test_masstransport
+test_masstransport_SOURCES = main.cpp 
 EXTRA_DIST = data 
 
 

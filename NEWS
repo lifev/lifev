@@ -1,3 +1,10 @@
+New in 0.2.90:
+* use AutoTest (from autoconf) as testing framework
+  ported all tests to this framework
+  ported all tests to GetPot
+
+
+
 Bugs fixed in 0.2.0-pre1:
 * Bug #23: "fixed wrong assembly in elemOper.cpp in stiff_sd" (MP)
 * Bug #27: "No rule to make target `admin/acinclude.m4.in'" (CP)

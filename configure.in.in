@@ -82,7 +82,7 @@ else
  if test $ac_use_opt_code = "yes"; then
   CXXFLAGS="-O2 -funroll-all-loops -fargument-noalias-global -fno-gcse -Wall"
   CFLAGS="-O2 -funroll-all-loops -fargument-noalias-global -fno-gcse -Wall"
-  CPPFLAGS="-DNDEBUG"
+  CPPFLAGS="-DNDEBUG ${CPPFLAGS}"
  fi
 fi
 

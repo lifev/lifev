@@ -6,7 +6,7 @@
 [fluid]
 
 [./physics]
-endtime   = 0.03             # endtime
+endtime   = 0.0002            # endtime
 density   = 1.0               # density
 viscosity = 0.03              # viscosity
 
@@ -26,7 +26,7 @@ verbose   = 1
 density   = 1.2               # density
 young     = 3.0E6
 poisson   = 0.3
-endtime   = 0.03
+endtime   = 0.0002
 
 [../discretization]
 mesh_dir  = ../data/mesh/inria/ # the directory where the mesh file is

@@ -24,7 +24,9 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-check_PROGRAMS = Picard 
-noinst_HEADERS = norm.hpp operFS.hpp ud_functions.hpp 
-Picard_SOURCES = main.cpp norm.cpp 
+check_HEADERS = norm.hpp operFS.hpp ud_functions.hpp 
+
+check_PROGRAMS = test_fsi_picard
+test_fsi_picard_SOURCES = main.cpp norm.cpp 
+
 EXTRA_DIST = data 

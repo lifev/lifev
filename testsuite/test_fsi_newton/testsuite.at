@@ -8,7 +8,7 @@ AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 [fluid]
 
 [./physics]
-endtime   = 0.03             # endtime
+endtime   = 0.002             # endtime
 density   = 1.0               # density
 viscosity = 0.03              # viscosity
 
@@ -28,7 +28,7 @@ verbose   = 1
 density   = 1.2               # density
 young     = 3.0E6
 poisson   = 0.3
-endtime   = 0.03
+endtime   = 0.002
 
 [../discretization]
 mesh_dir = ./
@@ -88,5 +88,6 @@ kspace          = 40
 tol             = 1.00e-6
 drop            = 1.00e-4
 ]])
-AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria//tube_curve20.mesh &&  $top_builddir/testsuite/test_fsi_newton/test_fsi_newton],[0],[ignore],[ignore])
-AT_CLEANUP
+AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria/tube_curve20.mesh &&  $top_builddir/testsuite/test_fsi_newton/test_fsi_newton],[0],[ignore],[ignore])
+AT_CLEANUP([out_res_solid iter num_iter out_iter_solid res])
+

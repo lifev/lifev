@@ -13,7 +13,7 @@ AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 density         = 1.0               # density
 viscosity       = 0.035             # viscosity
 inittime        = 0.00              # inittime
-endtime         = 0.10              # endtime
+endtime         = 0.2              # endtime
 
 
 [../discretization]
