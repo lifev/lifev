@@ -28,6 +28,7 @@ check_HEADERS = ud_functions.hpp ensight7-write.hpp
 
 check_PROGRAMS = test_masstransport
 test_masstransport_SOURCES = main.cpp 
-EXTRA_DIST = data testsuite.at testsuite.at
+EXTRA_DIST = data testsuite.at
+
 
 

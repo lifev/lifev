@@ -38,3 +38,4 @@ test_linearsolvers_SOURCES	= test_linearsolvers.cpp
 test_linearsolvers_LDADD	= liblifealg_testsuite.la
 
 
+EXTRA_DIST  = testsuite.at

@@ -52,7 +52,7 @@ test_getpot_SOURCES	= test_getpot.cpp
 
 POTFILES			= mesh.pot mesh2.pot mesh3.pot
 
-EXTRA_DIST			= $(POTFILES)
+EXTRA_DIST			= $(POTFILES) testsuite.at
 
 check-local: $(POTFILES)
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\

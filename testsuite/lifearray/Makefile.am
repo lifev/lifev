@@ -27,3 +27,5 @@ INCLUDES	= -I$(top_srcdir)/life/lifearray
 check_PROGRAMS	= test_simple_vect
 
 test_simple_vect_SOURCES= test_simple_vect.cpp
+
+EXTRA_DIST  = testsuite.at
