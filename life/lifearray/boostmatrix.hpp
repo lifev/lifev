@@ -33,6 +33,7 @@
 #include <fstream>
 
 #include <boost/numeric/ublas/matrix_sparse.hpp>
+/* #include <boost/numeric/ublas/banded.hpp> */
 #include <boost/lambda/lambda.hpp>
 
 #include <life/lifearray/tab.hpp>
@@ -139,7 +140,7 @@ public:
     void zero_row( typename BoostMatrix::size_type iRow )
         {
             typename BoostMatrix::iterator1 row = begin1();
-            for ( UInt i=0; i<r; ++i, ++row );
+            for ( UInt i=0; i<iRow; ++i, ++row );
             std::for_each( row.begin(), row.end(), boost::lambda::_1 = 0.0 );
         }
 
@@ -208,6 +209,68 @@ public:
         }
 
 }; // class BoostMatrix
+
+class DiagonalBoostMatrix : public boost::numeric::ublas::compressed_matrix<double, boost::numeric::ublas::row_major>
+{
+public:
+    DiagonalBoostMatrix( size_type n )
+        : boost::numeric::ublas::compressed_matrix<double, boost::numeric::ublas::row_major>( n, n, n )
+        {
+            for( size_type i=0; i<this->size1(); ++i )
+            {
+                this->push_back(i, i, 0);
+            }
+        }
+
+    DiagonalBoostMatrix inverse() const
+        {
+            DiagonalBoostMatrix theInverse( this->size1() );
+            for ( size_type i=0; i<this->size1(); ++i )
+            {
+                theInverse( i, i ) = 1. / this->operator()( i, i );
+            }
+            return theInverse;
+        }
+
+    template<typename matrix_type>
+    void lumpRowSum( const matrix_type m )
+        {
+            for ( typename matrix_type::const_iterator1 i1=m.begin1();
+                  i1!=m.end1(); ++i1 )
+            {
+                double rowSum = 0;
+                for ( typename matrix_type::const_iterator2 i2=i1.begin();
+                      i2!=i1.end(); ++i2)
+                {
+                    rowSum += *i2;
+                }
+                this->operator()( i1.index1(), i1.index1() ) = rowSum;
+            }
+        }
+
+    template<typename matrix_type>
+    void lumpSpecial( const matrix_type m )
+        {
+            double totalMass = 0;
+            double diagonalMass = 0;
+            for ( typename matrix_type::const_iterator1 i1=m.begin1();
+                  i1!=m.end1(); ++i1 )
+            {
+                for ( typename matrix_type::const_iterator2 i2=i1.begin();
+                      i2!=i1.end(); ++i2)
+                {
+                    totalMass += *i2;
+                }
+                diagonalMass += m( i1.index1(), i1.index1() );
+            }
+            double factor = totalMass / diagonalMass;
+            for ( size_type i=0; i<size1(); ++i )
+            {
+                this->operator()( i, i ) = m( i, i ) * factor;
+            }
+        }
+
+}; // class DiagonalBoostMatrix
 
 } // namespace LifeV
 
