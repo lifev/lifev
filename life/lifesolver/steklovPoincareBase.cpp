@@ -81,10 +81,12 @@ void steklovPoincare::eval(const Vector& disp,
 
 //    M_solid.d() = setDispOnInterface(disp);
 
-    transferOnInterface(disp,
-                        M_solid.BC_solid(),
-                        "Interface",
-                        M_solid.d());
+//     transferOnInterface(disp,
+//                         M_solid.BC_solid(),
+//                         "Interface",
+//                         M_solid.d());
+
+    M_solid.d() = disp;
 
     M_fluid.updateMesh(M_time);
     M_fluid.iterate   (M_time);
@@ -125,14 +127,13 @@ void steklovPoincare::evalResidual(Vector &res,
     M_residualF = M_fluid.residual();
 
     computeResidualFSI();
-
     res = getResidualFSIOnSolid();
 
-    std::cout << "Max ResidualF   = " << norm_inf(M_residualF)
+    std::cout << "max ResidualF   = " << norm_inf(M_residualF)
               << std::endl;
-    std::cout << "Max ResidualS   = " << norm_inf(M_residualS)
+    std::cout << "max ResidualS   = " << norm_inf(M_residualS)
               << std::endl;
-    std::cout << "Max ResidualFSI = " << norm_inf(M_residualFSI)
+    std::cout << "max ResidualFSI = " << norm_inf(M_residualFSI)
               << std::endl;
 
 //     M_dispStruct = setDispOnInterface(disp);
@@ -198,12 +199,10 @@ void steklovPoincare::setUpBC()
     // Boundary conditions for the harmonic extension of the
     // interface solid displacement
 
-    std::cout << "BCh_mesh" << std::endl;
     M_BCh_mesh.addBC("Interface", 1, Essential, Full, displ, 3);
 
     // Boundary conditions for the solid displacement
 
-    std::cout << "BCh_d" << std::endl;
     M_BCh_d.addBC("Interface", 1, Essential, Full, d_wall, 3);
 
     //========================================================================================
@@ -225,13 +224,11 @@ void steklovPoincare::setUpBC()
 
     // Boundary conditions for du
 
-    std::cout << "BCh_du" << std::endl;
     M_BCh_du.addBC("Wall",   1,  Natural  , Full, du_wall,  3);
     M_BCh_du.addBC("Edges",  20, Essential, Full, bcf,      3);
 
     // Boundary conditions for dz
 
-    std::cout << "BCh_dz" << std::endl;
     M_BCh_dz.addBC("Interface", 1, Natural  , Full, dg_wall, 3);
     M_BCh_dz.addBC("Top",       3, Essential, Full, bcf,     3);
     M_BCh_dz.addBC("Base",      2, Essential, Full, bcf,     3);
@@ -324,9 +321,11 @@ void steklovPoincare::solveLinearSolid()
 
     Real tol       = 1.e-10;
 
+    std::cout << "rhs_dz norm = " << norm_inf(M_rhs_dz) << std::endl;
     this->M_solid.setRecur(1);
     this->M_solid.updateJac(M_dz, 0);
     this->M_solid.solveJac(M_dz, M_rhs_dz, tol, M_BCh_dz);
+    std::cout << "dz norm     = " << norm_inf(M_dz) << std::endl;
 }
 
 
@@ -365,26 +364,21 @@ void  steklovPoincare::invSsPrime(const Vector& res,
                                   double linear_rel_tol,
                                   Vector& step)
 {
-//    setResidualFSI(res);
+    setResidualFSI(res);
     solveLinearSolid();
 
 //    step = setDispOnInterface(M_dz);
 
-    step = M_dz;
+//    step = M_dz;
 
     transferOnInterface(M_dz,
                         M_solid.BC_solid(),
                         "Interface",
                         step);
+
 //     for (int ii = 0; ii < step.size(); ++ii)
 //         std::cout << step[ii] << std::endl;
 
-//      for (int i = 0; i < (int) M_dz.size(); ++i)
-//          step[i] = dz()[i];
-//     for (int ii = 0; ii < step.size(); ++ii)
-//         std::cout << step[ii] << std::endl;
-
-//     return;
 }
 
 
