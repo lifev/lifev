@@ -136,18 +136,16 @@ void SolverAztec::F_setMatrix( MSRMatr<value_type> const& newMatrix )
 
 void SolverAztec::solve( array_type& x, array_type const& b )
 {
-    if ( M_matrix != 0 )
+    if ( M_matrix == 0 )
     {
-        AZ_iterate( &x[ 0 ],
-                    const_cast<double*>( boost::addressof( b[ 0 ] ) ),
-                    M_options, M_params, M_status,
-                    M_procConfig, M_matrix, M_precond, NULL );
+        std::ostringstream __ex;
+        __ex << "[SolverAztec::solve]  ERROR: Matrix not set";
+        throw std::logic_error( __ex.str() );
     }
-    else
-    {
-        std::cerr << "[SolverAztec::solve]  ERROR: Matrix not set"
-                  << std::endl;
-    }
+    AZ_iterate( &x[ 0 ],
+                const_cast<double*>( &b[0] ),
+                M_options, M_params, M_status,
+                M_procConfig, M_matrix, M_precond, NULL );
 }
 
 void SolverAztec::setOptionsFromGetPot( GetPot const& dataFile,
