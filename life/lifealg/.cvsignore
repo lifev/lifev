@@ -1,11 +1,13 @@
 .deps
 .libs
 Doxyfile
+Doxylog
 Makefile
 Makefile.in
 SolverPETSC.lo
 dataAztec.lo
 dataNewton.lo
+doxylog
 liblifealg.la
 pattern.lo
 values.lo

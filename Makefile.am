@@ -23,7 +23,7 @@
 # DESCRIP-END.
 #
 
-AUTOMAKE_OPTIONS = foreign 1.7
+AUTOMAKE_OPTIONS = foreign 1.7 dist-bzip2
 
 $(top_srcdir)/configure.in: $(top_srcdir)/subdirs $(top_srcdir)/configure.files $(CONF_FILES)
 	cd $(top_srcdir) && $(MAKE) -f admin/Makefile.common configure.in

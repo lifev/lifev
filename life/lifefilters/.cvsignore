@@ -1,8 +1,10 @@
 .deps
 .libs
 Doxyfile
+Doxylog
 Makefile
 Makefile.in
+doxylog
 liblifefilters.la
 medit_wrtrs.lo
 mesh_util.lo

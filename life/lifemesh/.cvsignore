@@ -1,10 +1,12 @@
 .deps
 .libs
 Doxyfile
+Doxylog
 Makefile
 Makefile.in
 bareItems.lo
 basisElSh.lo
+doxylog
 geo0D.lo
 identifier.lo
 liblifemesh.la

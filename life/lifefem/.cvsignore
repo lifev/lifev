@@ -1,6 +1,7 @@
 .deps
 .libs
 Doxyfile
+Doxylog
 Makefile
 Makefile.in
 assemb.lo
@@ -17,6 +18,7 @@ dofInterface3Dto2D.lo
 dofInterface3Dto3D.lo
 dofInterfaceBase.lo
 dofInterfaceHandler.lo
+doxylog
 elemMat.lo
 elemOper.lo
 elemVec.lo

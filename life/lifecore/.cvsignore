@@ -1,6 +1,7 @@
 .deps
 .libs
 Doxyfile
+Doxylog
 GetPot.lo
 LDebug.lo
 Makefile
@@ -9,6 +10,7 @@ bareItems.lo
 basisElSh.lo
 dataString.lo
 dataTime.lo
+doxylog
 liblifecore.la
 subDomainNeighbors.lo
 switch.lo

@@ -1,8 +1,10 @@
 .deps
 .libs
 Doxyfile
+Doxylog
 Makefile
 Makefile.in
+doxylog
 elemMat.lo
 elemVec.lo
 liblifearray.la
