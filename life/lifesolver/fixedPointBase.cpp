@@ -44,8 +44,10 @@ fixedPoint::fixedPoint( fluid_type& fluid,
               << std::endl;
 }
 
+
 fixedPoint::~fixedPoint()
 {}
+
 
 void
 fixedPoint::setDataFromGetPot( GetPot const& data )
@@ -57,7 +59,7 @@ fixedPoint::setDataFromGetPot( GetPot const& data )
 
     Debug( 6205 ) << "steklovPoincare::setDataFromGetPot(GetPot) OmegaS = " << M_defOmega << "\n";
 
-    M_aitkFS.setDefault(M_defOmega);
+    M_aitkFS.setDefault(M_defOmega, 0.001);
 }
 
 
@@ -66,7 +68,7 @@ fixedPoint::setup()
 {
     // call operFS setup()
     super::setup();
-
+    M_aitkFS.setup( 3*M_solid->dDof().numTotalDof() );
     setUpBC();
 }
 
@@ -86,9 +88,14 @@ void fixedPoint::eval(Vector& dispNew, Vector& velo, const Vector& disp, int sta
     dispNew = M_solid->d();
     velo    = M_solid->w();
 
-    std::cout << "                ::: norm(disp     ) = " << norm_inf(disp) << std::endl;
-    std::cout << "                ::: norm(dispNew  ) = " << norm_inf(dispNew) << std::endl;
-    std::cout << "                ::: norm(velo     ) = " << norm_inf(velo) << std::endl;
+    std::cout << " ::: norm(disp     ) = " << norm_2(disp) << std::endl;
+    std::cout << " ::: norm(dispNew  ) = " << norm_2(dispNew) << std::endl;
+    std::cout << " ::: norm(velo     ) = " << norm_2(velo) << std::endl;
+
+    std::cout << "Max ResidualF        = " << norm_inf(M_fluid->residual())
+              << std::endl;
+    std::cout << "Max ResidualS        = " << norm_inf(M_solid->residual())
+              << std::endl;
 }
 
 
@@ -105,8 +112,12 @@ void fixedPoint::evalResidual(Vector &res, const Vector& disp, int iter)
     eval(M_dispStruct, M_velo, disp, status);
 
     res = M_dispStruct - disp;
-}
 
+//     transferOnInterface(res,
+//                         M_solid->BC_solid(),
+//                         "Interface",
+//                         res);
+}
 
 
 //
@@ -160,14 +171,59 @@ void  fixedPoint::solveJac(Vector        &_muk,
                            const Vector  &_res,
                            const double   _linearRelTol)
 {
-    Vector muF(_res.size());
+//     Vector muF(_res.size());
+//     Vector muS(_res.size());
+
+//     muS = _res;
+
     if (M_nbEval == 1) M_aitkFS.restart();
-    _muk = M_aitkFS.computeDeltaLambda(M_dispStruct, muF, -1.*_res);
+//    _muk = M_aitkFS.computeDeltaLambda(M_dispStruct, muF, muS);
+    _muk = M_aitkFS.computeDeltaLambda(M_dispStruct, _res);
 }
+
+
+void fixedPoint::transferOnInterface(const Vector      &_vec1,
+                                     const BCHandler   &_BC,
+                                     const std::string &_BCName,
+                                     Vector            &_vec2)
+{
+    int iBC = _BC.getBCbyName(_BCName);
+
+    BCBase const &BCInterface = _BC[(UInt) iBC];
+
+    UInt nDofInterface = BCInterface.list_size();
+
+    UInt nDim = BCInterface.numberOfComponents();
+
+    UInt totalDof1 = _vec1.size()/ nDim;
+    UInt totalDof2 = _vec2.size()/ nDim;
+
+    for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)
+    {
+        ID ID1 = BCInterface(iBC)->id();
+
+        BCVectorInterface const *BCVInterface =
+            static_cast <BCVectorInterface const *>
+            (BCInterface.pointerToBCVector());
+
+        ID ID2 = BCVInterface->
+            dofInterface().getInterfaceDof(ID1);
+
+        for (UInt jDim = 0; jDim < nDim; ++jDim)
+        {
+            _vec2[ID2 - 1 + jDim*totalDof2] =
+                _vec1[ID1 - 1 + jDim*totalDof1];
+        }
+    }
+}
+
+
 
 //
 // add fixedPoint to factory
 //
+
+
 namespace
 {
 operFS* createFP(){ return new fixedPoint(); }
