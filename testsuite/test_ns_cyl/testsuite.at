@@ -25,8 +25,8 @@
 # \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
 # \date 2004-08-29
 # 
-AT_SETUP([test_ns_bcvec])
-AT_KEYWORDS([ns bcvec])
+AT_SETUP([test_ns_cyl])
+AT_KEYWORDS([ns cyl])
 AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 #-------------------------------------------------
 #        Data file for NavierStokes ACT PC
@@ -40,12 +40,12 @@ AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 density         = 1.0               # density
 viscosity       = 0.035             # viscosity
 inittime        = 0.00              # starttime
-endtime         = 0.02                 # endtime --> two steps for testing purposes
+endtime         = 0.02              # endtime --> two steps for testing purposes
 
 
 [../discretization]
 mesh_dir = ./
-mesh_file = cyltetra.mesh      # mesh file
+mesh_file = cyltetra.mesh     # mesh file
 timestep  = 0.01               # timestep
 
 
@@ -82,5 +82,5 @@ kspace          = 40
 tol             = 1.00e-6
 drop            = 1.00e-4
 ]])
-AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria//cyltetra.mesh &&  $top_builddir/testsuite/test_ns_bcvec/test_ns_bcvec],[0],[ignore],[ignore])
+AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria//cyltetra.mesh &&  $top_builddir/testsuite/test_ns_cyl/test_ns_cyl],[0],[ignore],[ignore])
 AT_CLEANUP
