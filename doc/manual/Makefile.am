@@ -33,8 +33,10 @@ lifev_dev_TEX	= lifev-dev.tex lifev-dev_generalities.tex lifev-dev_conventions.t
 all:$(PDF)
 
 .tex.pdf: 
-    -(chmod +x ltxcompile)
-	-(srcdir=$(srcdir) top_srcdir=$(top_srcdir) ltxcompile `basename $< .tex` )
+	@echo "*** PDFLatex compiling $< ...";\
+    chmod +x ltxcompile; \
+	srcdir=$(srcdir) top_srcdir=$(top_srcdir) ltxcompile `basename $< .tex`;\
+    test $$? -eq 0 || (cat ltxcompile.log | grep -B 5 -n Error)
 
 lifev-dev.pdf: $(lifev_dev_TEX)
 
