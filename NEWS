@@ -1,4 +1,7 @@
+# -*- readme-debian -*-
+
 Bugs fixed in 0.4.0:
+====================
 [all]
 * Banished using directives from _all_ header files (CW, CP, VM)
 * More C++ standard compliance (CP)
@@ -17,6 +20,7 @@ Bugs fixed in 0.4.0:
 * remove/centralize multiple copies of classes/files (CP)
 
 New in 0.4.0:
+=============
 [configure]
 * Added --with-petsc=<top level petsc directory> configure option (CP)
 * Added support for automake 1.9 (CP)
@@ -53,11 +57,13 @@ New in 0.4.0:
 
 
 Bugs fixed in 0.3.0:
+====================
 * Fixed (hopefully) mpi autoconf check (CP)
 * Fixed petsc support, require petsc2.2 now (CP)
 * Fixed testsuite/test_linearsolvers (CP)
 
 New in 0.3.0:
+=============
 * Added more tests in testsuite/lifealg for linearsolvers (CP)
 * Replaced values.{h,c}pp with sparseArray.{h,c}pp (LF & CP)
 * Added 1D model solver for blood flow simulation (VM)
@@ -73,16 +79,19 @@ New in 0.3.0:
 
 
 Bugs fixed in 0.2.0-pre1:
+=========================
 * Bug #23: "fixed wrong assembly in elemOper.cpp in stiff_sd" (MP)
 * Bug #27: "No rule to make target `admin/acinclude.m4.in'" (CP)
 * Bug #19: "Missing mesh (carotid.m++) in test_ns_sstress" (AV)
 
 Tasks completed in 0.2.0-pre1:
+==============================
 * Task #104: "Generate new directory layout" (CP)
 * Task #105: "move files into proper new directories" (CP & LF)
 * Task #109: "Convection Reaction Diffusion solver implementation" (MP)
 
 New in 0.2.0-pre1:
+==================
 * Added area debugging see LDebug class (CP)
 * Added a petsc interface in lifealfg, see SolverPETSC class (CP)
 * Changed interface to vecUnknown classes: no need to use .vec() anymore
@@ -96,11 +105,13 @@ New in 0.2.0-pre1:
 
 
 Bugs fixed in 0.1.0pre5:
+========================
 * Bug #2 : documentation update to lifev-dev manual
 * Bug #17: fixed segfault in medium size NavierStokes problem
 * Bug #20: fixed data files in testsuite to reflect the tests location
 
 New in 0.1.0pre5:
+=================
 * added --enable-debug and --enable-opt to configure script
 * LifeV is finally copyrighted properly
 * LifeV libraries are now LGPL. Header and implementation have 
@@ -110,11 +121,13 @@ New in 0.1.0pre5:
 
 
 Bugs fixed in 0.1.0pre4:
+========================
 * Bug #8 : wrong (?) assert in regionMesh3D.hpp
 * Bug #9 : updateElementFaces(true) requires updateElementEdges() first.
 * Bug #15: data directory in testsuite
 
 New in 0.1.0pre4:
+=================
 * 'make distcheck' works from start to finish properly
 * lifev compiles entirely included all testsuite tests
 * removed entirely testsuite/development: either created a proper 
@@ -127,7 +140,10 @@ New in 0.1.0pre4:
 
 
 New in 0.1.0pre3:
+=================
 * new architecture using the autotools from the GNU
 * new standard directory layout
 * fixed some bugs and miscompilation in a few places
 
+
+ -- Christophe Prud'homme <prudhomm@mit.edu>, Tue Oct  5 15:33:07 2004
