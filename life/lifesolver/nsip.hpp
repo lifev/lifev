@@ -41,7 +41,7 @@ namespace LifeV
 /*!
   \class NavierStokesSolverIP
 
-  This class implements an NavierStokes solver via interior penalty
+  This class implements a NavierStokes solver via interior penalty
   stabilization. The resulting linear systems are solved by GMRES on the full
   matrix ( u and p coupled ).
 
@@ -85,6 +85,9 @@ public:
 
     //! linearize convective term around given (exact) velocity function
     void linearize( const Function& betaFct ) { M_betaFct = &betaFct; }
+
+    //! removes mean of component comp of vector x
+    void removeMean( Vector& x, UInt comp=1 );
 
 private:
 
@@ -140,6 +143,11 @@ private:
 
     const Function* M_betaFct;
 
+    bool M_divBetaUv;
+    double M_diagonalize;
+
+    Vector M_constantPressure;
+
 }; // class NavierStokesSolverIP
 
 
@@ -148,8 +156,9 @@ eval( Vector& fx0, Vector& gx0, Vector x0, int status )
 {
     iterate( 0.0 );
     for ( UInt iDof = 0; iDof < nDimensions*_dim_u ; ++iDof )
+    {
         fx0[ iDof ] = _u[ iDof ];
-
+    }
 }
 
 //
@@ -180,17 +189,36 @@ NavierStokesSolverIP( const GetPot& dataFile,
     M_rhsU( ( nDimensions+1 )*_dim_u ),
     M_rhsFull( ( nDimensions+1 )*_dim_u ),
     M_sol( ( nDimensions+1 )*_dim_u ),
-    M_betaFct( 0 )
+    M_betaFct( 0 ),
+    M_constantPressure( ( nDimensions+1 )*_dim_u )
 {
     M_steady = dataFile( "fluid/miscellaneous/steady", 1 );
     M_gammaBeta = dataFile( "fluid/ipstab/gammaBeta", 0. );
     M_gammaDiv = dataFile( "fluid/ipstab/gammaDiv", 0. );
     M_gammaPress = dataFile( "fluid/ipstab/gammaPress", 0. );
+    M_divBetaUv = dataFile( "fluid/discretization/div_beta_u_v", 0);
+    M_diagonalize = dataFile( "fluid/discretization/diagonalize", 1.);
 
 #if USE_AZTEC_SOLVER
     M_linearSolver.setOptionsFromGetPot( dataFile, "fluid/aztec" );
 #else
     M_linearSolver.setOptionsFromGetPot( dataFile, "fluid/petsc" );
+
+    if ( _BCh_u.hasOnlyEssential() && !M_diagonalize )
+    {
+        Real constPress = 1. / sqrt( _dim_u );
+        for( UInt i=0; i<_dim_u*nDimensions; ++i )
+        {
+            M_constantPressure[ i ] = 0;
+        }
+        for( UInt i=_dim_u*nDimensions; i<_dim_u*(1+nDimensions); ++i )
+        {
+            M_constantPressure[ i ] = constPress;
+        }
+        std::vector<const Vector*> nullSpace(1);
+        nullSpace[ 0 ] = &M_constantPressure;
+        M_linearSolver.setNullSpace(nullSpace);
+    }
 #endif
 
     std::cout << std::endl;
@@ -210,7 +238,7 @@ NavierStokesSolverIP( const GetPot& dataFile,
     // Number of velocity components
     UInt nbCompU = _u.nbcomp();
 
-    Real bdfCoeff = _bdf.bdf_u().coeff_der( 0 )/_dt;
+    Real bdfCoeff = _bdf.bdf_u().coeff_der( 0 ) / _dt;
 
     // Elementary computation and matrix assembling
     // Loop on elements
@@ -391,7 +419,10 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
         }
 
         // Stabilising term: div u^n u v
-        //    mass_divw( 0.5*_rho, M_elvec, M_elmatC, _fe_u, 0, 0, nbCompU );
+        if ( M_divBetaUv )
+        {
+            mass_divw( 0.5*_rho, M_elvec, M_elmatC, _fe_u, 0, 0, nbCompU );
+        }
 
         // loop on components
         for ( UInt iComp = 0; iComp<nbCompU; ++iComp )
@@ -444,17 +475,19 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
     bcManage( M_matrFull, M_rhsFull, _mesh, _dof_u, _BCh_u, _feBd_u, 1.0,
                M_time );
 
-
-    //if ( _BCh_u.hasOnlyEssential() )
-//    M_matrFull.diagonalize( nDimensions*_dim_u, 1.0, M_rhsFull, 0);
-//                             pexact( M_time,
-//                                     _mesh.point( 1 ).x(),
-//                                     _mesh.point( 1 ).y(),
-//                                     _mesh.point( 1 ).z(), 1 ) );
-    //  M_matrFull.diagonalize_row( nDimensions*_dim_u, 1.0 );
-    //M_rhsFull[ nDimensions*_dim_u ] = pexact( _mesh.point( 1 ).x(),
-    //                                        _mesh.point( 1 ).y(),
-    //                                        _mesh.point( 1 ).z() );
+    if ( _BCh_u.hasOnlyEssential() && M_diagonalize )
+    {
+         M_matrFull.diagonalize( nDimensions*_dim_u, M_diagonalize,
+                                 M_rhsFull, 0);
+        //                         pexact( M_time,
+        //                                 _mesh.point( 1 ).x(),
+        //                                 _mesh.point( 1 ).y(),
+        //                                 _mesh.point( 1 ).z(), 1 ) );
+        // M_matrFull.diagonalize_row( nDimensions*_dim_u, 1.0 );
+        // M_rhsFull[ nDimensions*_dim_u ] = pexact( _mesh.point( 1 ).x(),
+        //                                         _mesh.point( 1 ).y(),
+        //                                         _mesh.point( 1 ).z() );
+    }
 
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
@@ -472,13 +505,16 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
     {
         // use last iteration value as initial guess
         for ( UInt i = 0; i<nDimensions*_dim_u; ++i )
+        {
             M_sol[ i ] = _u[ i ];
+        }
     }
     else
     {
         // use bdf based extrapolation as initial guess
         M_sol = _bdf.bdf_u().extrap();
     }
+    removeMean( M_sol, 4 );
 
     std::cout << "  o-  Solving system...                        "
               << std::flush;
@@ -487,6 +523,11 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
+    if ( !M_linearSolver.converged() )
+    {
+        std::cerr << "        WARNING: Solver failed to converge."
+                  << std::endl;
+    }
 #if USE_AZTEC_SOLVER
 #else
     std::cout << "        estimated condition number (preconditioned) = "
@@ -495,14 +536,13 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
     std::cout << "        number of iterations                        = "
               << M_linearSolver.iterations() << std::endl;
 
+    removeMean( M_sol, 4 );
     for ( UInt iDof = 0; iDof<nDimensions*_dim_u; ++iDof )
     {
         _u[ iDof ] = M_sol[ iDof ];
     }
-    Real pNode0 = M_sol[ nDimensions*_dim_u ];
     for ( UInt iDof = 0; iDof<_dim_u; ++iDof )
     {
-        M_sol[ iDof+nDimensions*_dim_u ] -= pNode0;
         _p[ iDof ] = M_sol[ iDof+nDimensions*_dim_u ];
     }
 
@@ -520,8 +560,10 @@ void NavierStokesSolverIP<Mesh>::initialize( const Function& x0,
     ID nbComp = _u.nbcomp(); // Number of components of the velocity
     _bdf.bdf_u().initialize_unk( x0, this->_mesh, _refFE_u, _fe_u, _dof_u, t0,
                                  dt, nbComp+1 );
+
     // initialize M_sol with the first element in bdf_u.unk (=last value)
     M_sol = *( _bdf.bdf_u().unk().begin() );
+    removeMean( M_sol, 4 );
     for ( UInt iDof = 0; iDof<nDimensions*_dim_u; ++iDof )
     {
         _u[ iDof ] = M_sol[ iDof ];
@@ -546,6 +588,25 @@ void NavierStokesSolverIP<Mesh>::initialize( const Function& x0,
         this->postProcess();
     }
 } // initialize()
+
+template <typename Mesh>
+void NavierStokesSolverIP<Mesh>::removeMean( Vector& x, UInt comp )
+{
+    Real sum1 = 0.;
+    Real sum0 = 0.;
+    for ( UInt iVol = 1; iVol <= _mesh.numVolumes(); iVol++ )
+    {
+        _fe_p.updateFirstDeriv( _mesh.volumeList( iVol ) );
+        sum1 += elem_integral( x, _fe_p, _dof_p, comp );
+        sum0 += _fe_p.measure();
+    }
+    Real mean = sum1/sum0;
+    for ( UInt iNode = (comp-1)*_dim_u; iNode<comp*_dim_u; ++iNode )
+    {
+        x[ iNode ] -= mean;
+    }
+
+} // removeMean()
 
 } // namespace LifeV
 
