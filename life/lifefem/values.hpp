@@ -15,7 +15,7 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /* --------------------------------------------------------------------------*
 /                                                                            /
 /      ...                                                                   /
@@ -54,14 +54,14 @@
 #include "elemMat.hpp"
 #include "elemVec.hpp"
 #include  "sparseArray.hpp"
-#include "dof.hpp" 
-//#include "pattern.hpp"
-//#include <fstream>
-//#include<set>
-//#include<algorithm>
-//#include<string>
-//#include<utility>
+#include "dof.hpp"
 
+#ifndef _LIFEV_HH_
+//more correct version
+typedef size_t UInt;
+//original version
+typedef std::vector<UInt>::iterator UIIter;
+#endif
 
 #ifndef _VEC_UNKNOWN_HH
 #include "vecUnknown.hpp"
@@ -69,8 +69,6 @@
 
 namespace LifeV
 {
-//using namespace std;
-
 
 /*---------------------------------------------------------------------------------/
  / I M P L E M E N T A T I O N S                                                    /

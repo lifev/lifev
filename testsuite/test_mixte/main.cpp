@@ -46,7 +46,7 @@
 
 #include "main.hpp"
 #include "ud_functions.hpp"
-#include "bc_manage.hpp"
+#include "bcManage.hpp"
 #include "vtk_wrtrs.hpp"
 
 
@@ -62,11 +62,11 @@ int main()
     // ===================================================
 
 
-    BCFunction_Base gv(g); // Functor storing the user definded function g
+    BCFunctionBase gv(g); // Functor storing the user definded function g
 
-    BCFunction_Mixte hv(h,coef); // Functor for Robin conditions with user defined function h and coef
+    BCFunctionMixte hv(h,coef); // Functor for Robin conditions with user defined function h and coef
 
-    BC_Handler BCh(2); // We impose tow  boundary conditions
+    BCHandler BCh(2); // We impose tow  boundary conditions
 
     BCh.addBC("Inlet",  10, Essential, Scalar, gv);
     BCh.addBC("Outlet", 20, Mixte, Scalar, hv);
@@ -138,7 +138,8 @@ int main()
 
     // initialization of vector of unknowns and rhs
     ScalUnknown<Vector> U(dim), F(dim);
-    U=0.0; F=0.0;
+    U=ZeroVector( dim );
+    F=ZeroVector( dim );
 
     // ==========================================
     // Pattern construction and matrix assembling
@@ -178,7 +179,7 @@ int main()
     Real tgv=1.;
 
     chrono.start();
-    bc_manage(A,F,aMesh,dof,BCh,feBd,tgv,0.0);
+    bcManage(A,F,aMesh,dof,BCh,feBd,tgv,0.0);
 
     chrono.stop();
     cout << chrono.diff() << "s." << endl;

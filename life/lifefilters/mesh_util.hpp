@@ -18,6 +18,9 @@
 */
 #ifndef __MESH_UTILITIES__
 #define __MESH_UTILITIES__
+
+#include <boost/shared_ptr.hpp>
+
 #include "mesh_util_base.hpp"
 #include "geoMap.hpp"
 #include "currentFE.hpp"
@@ -28,7 +31,7 @@
 /*! This file contains a set of functions to be used to test a 3D mesh and
   fix some possible problems. Some methods are general (2D and 3D meshes), some are
   specific to 3D meshes.
- 
+
   They sametimes
   require in input  a Switch parementer sw and ostreams references.
   The switch valueas are
@@ -54,7 +57,7 @@
 <LI>"POINT_MARKER_UNSET" "FIXED_POINT_MARKER"</LI>
 <LI>"FIXED_BPOINTS_COUNTER" "NOT_EULER_OK"</LI>
 </UL>
- 
+
 \pre All functions contained in this file require as precondition a mesh
 with the points and volumes connectivity set. Some functions have also
 other preconditions, which will be then specified in the function
@@ -66,24 +69,24 @@ namespace LifeV
 *****************************************************************************
                                 GEOMETRY TESTS
 *****************************************************************************
-*/ 
+*/
 //!  \brief Report 3D element orientation
 /*!  It uses a linear representation of the Tetra/Hexa: it is only a
   orientation check.  The orientation is considered positive if it
   obeys the right-hand rule (right-hand orientation).
- 
+
   \param mesh A region mesh of 3D elements
- 
+
   \param elSign A vector of bool: true means positive orientation.
- 
+
   \param sw The switch used to communicate test results. This function may
   set the conditions
   <TT>HAS_NEGATIVE_VOLUMES,SKIP_ORIENTATION_TEST</TT>
- 
+
   The first reports that some mesh elements have negative volume, the
   second that the test has been skipped because has not yet beem
   implemented for the element under consideration.
- 
+
   \return It returns the mesh computed volume.
 */
 template <typename RegionMesh3D>
@@ -135,15 +138,15 @@ Real checkVolumes( RegionMesh3D const & mesh, SimpleVect<bool> & elSign, Switch 
 
 /*!
   \brief Fixes  negative volume elements.
- 
+
   Given a std::vector<bool> indicating negative elements, it inverts those that
   have been found negative.
- 
+
   \param mesh A 3D mesh. It will be modified.
- 
+
   \param elSign a vector of bools. The value false correspond to the elements that have to be swapped. It is created by
   checkVolumes().
- 
+
   \post A mesh with all volumes with positive oreintation.
 */
 template <typename RegionMesh3D>
@@ -185,7 +188,7 @@ void fixVolumes( RegionMesh3D & mesh, const SimpleVect<bool> & elSign, Switch & 
   d\gamma \f$, \f$n_i\f$ being the i-th component of the boundary normal. If the
   domain boundary is properly disretised they should all return (within
   discretisation and truncation errors) the quantity \f$\vert\Omega\vert\f$.
- 
+
   \warning Not to be used for accurate computations (it always adopts
   linear or bilinear elements, with a simple integration rule) \param mesh
   A 3D mesh \param vols returns 3 Real corresponding to the 3 integrals
@@ -201,11 +204,14 @@ void getVolumeFromFaces( RegionMesh3D const & mesh, Real vols[ 3 ], std::ostream
     vols[ 2 ] = 0.0;
     typedef typename RegionMesh3D::FaceShape GeoBShape;
     typedef typename RegionMesh3D::FaceType FaceType;
-    CurrentBdFE* bdfe;
+    typedef boost::shared_ptr<CurrentBdFE> current_fe_type;
+
+    current_fe_type bdfe;
+
     switch ( GeoBShape::Shape )
     {
     case TRIANGLE:
-        bdfe = new CurrentBdFE( feTriaP1, geoLinearTria, quadRuleTria1pt );
+        bdfe = current_fe_type( new CurrentBdFE( feTriaP1, geoLinearTria, quadRuleTria1pt ) );
         for ( ID i = 1; i <= mesh.numBFaces(); i++ )
         {
             bdfe->updateMeasNormal( mesh.face( i ) );
@@ -215,7 +221,7 @@ void getVolumeFromFaces( RegionMesh3D const & mesh, Real vols[ 3 ], std::ostream
         }
         break;
     case QUAD:
-        bdfe = new CurrentBdFE( feQuadQ1, geoBilinearQuad, quadRuleQuad1pt );
+        bdfe = current_fe_type( new CurrentBdFE( feQuadQ1, geoBilinearQuad, quadRuleQuad1pt ) );
         for ( ID i = 1; i <= mesh.numBFaces(); i++ )
         {
             bdfe->updateMeasNormal( mesh.face( i ) );
@@ -239,7 +245,8 @@ Real testClosedDomain( RegionMesh3D const & mesh, std::ostream & err = std::cerr
 {
     typedef typename RegionMesh3D::FaceType FaceType;
 
-    CurrentBdFE* bdfe;
+    typedef boost::shared_ptr<CurrentBdFE> current_fe_type;
+    current_fe_type bdfe;
 
     GetOnes ones;
     Real test( 0.0 );
@@ -247,7 +254,7 @@ Real testClosedDomain( RegionMesh3D const & mesh, std::ostream & err = std::cerr
     switch ( RegionMesh3D::FaceShape::Shape )
     {
     case TRIANGLE:
-        bdfe = new CurrentBdFE( feTriaP1, geoLinearTria, quadRuleTria1pt );
+        bdfe = current_fe_type( new CurrentBdFE( feTriaP1, geoLinearTria, quadRuleTria1pt ) );
         for ( ID i = 1; i <= mesh.numBFaces(); i++ )
         {
             bdfe->updateMeasNormal( mesh.face( i ) );
@@ -255,7 +262,7 @@ Real testClosedDomain( RegionMesh3D const & mesh, std::ostream & err = std::cerr
         }
         break;
     case QUAD:
-        bdfe = new CurrentBdFE( feQuadQ1, geoBilinearQuad, quadRuleQuad1pt );
+        bdfe = current_fe_type( new CurrentBdFE( feQuadQ1, geoBilinearQuad, quadRuleQuad1pt ) );
         for ( ID i = 1; i <= mesh.numBFaces(); i++ )
         {
             bdfe->updateMeasNormal( mesh.face( i ) );
@@ -357,8 +364,7 @@ bool checkMesh3D( RegionMesh3D & mesh, Switch & sw,
             for ( typename RegionMesh3D::Volumes::iterator iv = mesh.volumeList.begin();
                     iv != mesh.volumeList.end();++iv )
             {
-                if ( iv->isMarkerUnset() )		//meneghin
-//                if ( iv->markerUnset() )
+                if ( iv->markerUnset() )
                     iv->setMarker( mesh.marker() );
             }
         }
@@ -375,7 +381,7 @@ bool checkMesh3D( RegionMesh3D & mesh, Switch & sw,
 
     // test now orientation
 
-    SimpleVect<bool> * elSign = new SimpleVect<bool>;
+    boost::shared_ptr<SimpleVect<bool> > elSign( new SimpleVect<bool> );
 
     Real meshMeasure = checkVolumes( mesh, *elSign, sw );
     UInt positive;
@@ -412,7 +418,6 @@ bool checkMesh3D( RegionMesh3D & mesh, Switch & sw,
             }
         }
     }
-    delete elSign; // free some memory
 
     clog << "Volume enclosed by the mesh= " << meshMeasure << std::endl
     << "(Computed by integrating mesh elements measures)" << std::endl
@@ -422,7 +427,7 @@ bool checkMesh3D( RegionMesh3D & mesh, Switch & sw,
     //                                    BOUNDARY FACES
     //-----------------------------------------------------
 
-    TempFaceContainer * bfaces = new TempFaceContainer;
+    boost::shared_ptr<TempFaceContainer> bfaces(  new TempFaceContainer );
     UInt numInternalFaces, numFaces;
 
     UInt bFacesFound = findBoundaryFaces( mesh, *bfaces, numInternalFaces );
@@ -438,7 +443,7 @@ bool checkMesh3D( RegionMesh3D & mesh, Switch & sw,
         if ( fix )
             sw.create( "BUILD_BFACES", true );
         if ( fix )
-            buildFaces( mesh, clog, err, bFacesFound, numInternalFaces, true, false, verbose, bfaces );
+            buildFaces( mesh, clog, err, bFacesFound, numInternalFaces, true, false, verbose, bfaces.get() );
     }
     else
     {
@@ -470,7 +475,7 @@ bool checkMesh3D( RegionMesh3D & mesh, Switch & sw,
         // Check Consistency with the mesh. Beware that this method changes *bfaces!
 
         if ( fix )
-            fixBoundaryFaces( mesh, clog, err, sw, numFaces, bFacesFound, true, verbose, bfaces );
+            fixBoundaryFaces( mesh, clog, err, sw, numFaces, bFacesFound, true, verbose, bfaces.get() );
 
         if ( mesh.storedFaces() == 0 )
         {
@@ -526,14 +531,12 @@ bool checkMesh3D( RegionMesh3D & mesh, Switch & sw,
     out << " Boundary faces found:" << bFacesFound << std::endl;
     out << " Num Faces Stored stored:" << mesh.storedFaces() << std::endl;
     out << " Boundary faces counter gives:" << mesh.numBFaces() << std::endl;
-    delete bfaces;
-
 
     //-----------------------------------------------------
     //                                    BOUNDARY EDGES
     //-----------------------------------------------------
 
-    TempEdgeContainer * bedges = new TempEdgeContainer;
+    boost::shared_ptr<TempEdgeContainer> bedges( new TempEdgeContainer );
 
     UInt bEdgesFound = findBoundaryEdges( mesh, *bedges );
     EnquireBEdge<RegionMesh3D> enquireBEdge( mesh, *bedges );
@@ -547,7 +550,7 @@ bool checkMesh3D( RegionMesh3D & mesh, Switch & sw,
         err << "WARNING: mesh does not store all boundary edges" << std::endl;
         sw.create( "NOT_HAS_EDGES", true );
         if ( fix )
-            buildEdges( mesh, clog, err, bEdgesFound, intedge, true, false, verbose, bedges );
+            buildEdges( mesh, clog, err, bEdgesFound, intedge, true, false, verbose, bedges.get() );
         Ned = bEdgesFound + intedge;
         if ( fix )
             sw.create( "BUILD_BEDGES", true );
@@ -592,7 +595,6 @@ bool checkMesh3D( RegionMesh3D & mesh, Switch & sw,
             Ned = bEdgesFound + findInternalEdges( mesh, *bedges, iedges );
     }
     iedges.clear();
-    delete bedges;
 
     if ( mesh.numBEdges() != bEdgesFound )
     {

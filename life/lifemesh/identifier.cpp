@@ -15,26 +15,26 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*!
   \file identifier.cc
   \brief Implementations for identifier.h
   \version 1.0
   \author M.A. Fernandez
   \date 07/2002
- 
+
 */
 #include "identifier.hpp"
 
 namespace LifeV
 {
-Identifier_Natural::Identifier_Natural( const ID& id, const SimpleVect<ID>& bdltg ) : Identifier_Base( id )
+IdentifierNatural::IdentifierNatural( const ID& id, const SimpleVect<ID>& bdltg ) : IdentifierBase( id )
 {
     _bdltg.reserve( bdltg.size() );
     _bdltg.insert( _bdltg.end(), bdltg.begin(), bdltg.end() );
 }
 
 
-Identifier_Natural::Identifier_Natural( const ID& id ) : Identifier_Base( id )
+IdentifierNatural::IdentifierNatural( const ID& id ) : IdentifierBase( id )
 {}
 }

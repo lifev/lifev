@@ -107,4 +107,19 @@ double minusLaplaceVfct(const double& t, const double& x, const double& y, const
 {
   return - ( VfctDer2(t,x,y,z,1) + VfctDer2(t,x,y,z,2) + VfctDer2(t,x,y,z,3) );
 }
+
+//////////////////////////////////////////////////////////////////////
+
+//! Functions (constants) for the plasma transport in the arterial wall
+double alpha(const double& t, const double& x, const double& y, const double& z, const ID& i) {
+  return 2.535e-6;
+}
+double beta(const double& t, const double& x, const double& y, const double& z, const ID& i) {
+  return -7.596;
+}
+double p_adv(const double& t, const double& x, const double& y, const double& z, const ID& i) {
+  return 7.4226e-8;
+}
+
+
 }

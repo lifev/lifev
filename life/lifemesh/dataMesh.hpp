@@ -15,15 +15,15 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*!
   \file dataMesh.h
   \author M.A. Fernandez
   \date 01/2003
   \version 1.0
- 
+
   \brief File containing a class for handling spatial discretization with GetPot
- 
+
 */
 #ifndef _DATAMESH_H_
 #define _DATAMESH_H_
@@ -39,9 +39,9 @@ namespace LifeV
 
 /*!
   \class DataMesh
- 
+
   Base class which holds data concerning spatial discretization
- 
+
 */
 template <typename Mesh>
 class DataMesh
@@ -90,12 +90,13 @@ DataMesh( const GetPot& dfile, const std::string& section )
     _mesh_type = dfile( ( section + "/mesh_type" ).data(), ".mesh" );
     _mesh_faces = dfile( ( section + "/mesh_faces" ).data(), "boundary" );
     _mesh_edges = dfile( ( section + "/mesh_edges" ).data(), "boundary" );
+    bool verbose = dfile( ( section + "/verbose" ).data(), 0 );
 
 
     if ( _mesh_type == ".mesh" )
-        readINRIAMeshFile( _mesh, _mesh_dir + _mesh_file, 1 ); // mesh readding
+        readINRIAMeshFile( _mesh, _mesh_dir + _mesh_file, 1, verbose );
     else if ( _mesh_type == ".m++" )
-        readMppFile( _mesh, _mesh_dir + _mesh_file, 1 );
+        readMppFile( _mesh, _mesh_dir + _mesh_file, 1, verbose );
     else
         ERROR_MSG( "Sorry, this mesh file can not be loaded" );
 

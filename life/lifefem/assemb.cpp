@@ -24,7 +24,7 @@ namespace LifeV
 void compute_vec( Real constant, ElemVec& elvec, const CurrentFE& fe, int iblock )
 {
     int i, ig;
-    Tab1dView vec = elvec.block( iblock );
+    ElemVec::vector_view vec = elvec.block( iblock );
     Real s;
     for ( i = 0;i < fe.nbNode;i++ )
     {

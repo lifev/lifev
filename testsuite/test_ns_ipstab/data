@@ -6,32 +6,36 @@
 [fluid]
 
 [./physics]
-endtime   = 5.0          # endtime
-density   = 1.0          # density
-viscosity = 0.0001       # viscosity
+endtime         = 0.1          # endtime
+density         = 1.0          # density
+viscosity       = 0.0001       # viscosity
 
 
 [../discretization]
-mesh_dir   = ../data/mesh/inria/           # the directory where the mesh file is
-mesh_file  = hexa4x4.mesh # mesh file
-mesh_faces = all          # update all faces elements
-timestep   = 1.0          # timestep
+mesh_dir        = ../data/mesh/inria/   # the directory where the mesh file is
+mesh_file       = hexa8x8.mesh          # mesh file
+mesh_faces      = all                   # update all faces elements
+timestep        = 0.01                   # timestep
+verbose         = 0
+order_bdf       = 1
 
 [../miscellaneous]
-verbose   = 1
+verbose         = 1
+steady          = 1
 
 [../aztec]
-solver    = gmres
-scaling   = none
-output    = all_res
-conv      = r0
-max_iter  = 1550
-kspace    = 200
-precond   = dom_decomp
+solver          = gmres
+scaling         = none
+output          = none # all_res
+conv            = r0
+max_iter        = 1550
+kspace          = 300
+precond         = dom_decomp #none,jacobi,sym_gs,neumann,ls,smoother,dom_decomp
 subdomain_solve = ilu
-ilut_fill = 6   
-drop      = 1.e-5
-tol       = 1.00e-10
+ilut_fill       = 6   
+drop            = 1.e-5
+tol             = 1.00e-10
+keep_info       = 1
 
 [../petsc]
 ksp_type                  = gmres
@@ -40,3 +44,15 @@ ksp_rtol                  = 1.e-10
 ksp_max_it                = 1550
 pc_type                   = ilu
 pc_ilu_use_drop_tolerance = 1.e-1,0.1,100 # activates SPARSKIT routine
+
+[../picard]
+abstol = 1.e6
+reltol = 0.0
+maxiter = 300
+method = 1 # 0: constant relaxation, 1: Aitken, 2: Irons & Tuck
+omega  = 0
+
+[../ipstab]
+gammaBeta  = 0.125
+gammaDiv   = 0.125
+gammaPress = 0.03125

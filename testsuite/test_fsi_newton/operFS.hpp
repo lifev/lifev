@@ -18,7 +18,6 @@
 */
 #include "NavierStokesAleSolverPC.hpp"
 #include "VenantKirchhofSolver.hpp"
-#include "vectorNorms.hpp"
 #include "regionMesh3D_ALE.hpp"
 #ifndef _OPERFS
 #define _OPERFS
@@ -49,19 +48,19 @@ class operFS {
 
   operFS(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
 	 VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
-	 BC_Handler& BCh_du, BC_Handler& BCh_dz);
+	 BCHandler& BCh_du, BCHandler& BCh_dz);
 
   //
   void eval(Vector& dispNew, Vector& veloStruct, const Vector& disp,int status);
 
   //
-  void evalResidual(Vector&res, const Vector& sol, int iter);
+  void evalResidual(Vector &res, const Vector& sol, int iter);
 
   //
   void updateJac(Vector& sol,int iter);
 
   //
-  void solveJac(Vector& step, const Vector& res, double& linear_rel_tol);
+  void solveJac(Vector &step, const Vector& res, double& linear_rel_tol);
 
   //
   void solveLinearFluid();
@@ -84,8 +83,8 @@ class operFS {
 
   UInt _nbEval;
 
-  BC_Handler& _BCh_du;
-  BC_Handler& _BCh_dz;
+  BCHandler& _BCh_du;
+  BCHandler& _BCh_dz;
 
   DataJacobian _dataJacobian;
 

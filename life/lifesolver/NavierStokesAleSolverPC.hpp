@@ -15,17 +15,17 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*!
   \file NavierStokesAleSolverPC.h
   \author M.A. Fernandez and A. Gauthier
   \date 05/2003
   \version 1.0
- 
+
   \brief This file contains a NavierStokes ALE solver  class which implements  a semi-implicit scheme with
          an exact factorization. Preconditioning of the  Schur Complement is done by an algebraic
          Chorin-Temam pressure-corrected preconditioner
- 
+
 */
 
 #ifndef _NAVIERSTOKESALESOLVERPC_HH
@@ -38,7 +38,7 @@
 #include "values.hpp"
 #include "pattern.hpp"
 #include "assemb.hpp"
-#include "bc_manage.hpp"
+#include "bcManage.hpp"
 #include "algebraic_facto.hpp"
 #include "chrono.hpp"
 #include "dataAztec.hpp"
@@ -47,10 +47,10 @@ namespace LifeV
 {
 /*!
   \class NavierStokesSolverPC
- 
+
    This class implements an NavierStokes ALE solver via exact factorization. Preconditioning of the
    Schur Complement is done by an algebraic Chorin-Temam pressure-corrected preconditioner
- 
+
 */
 template <typename Mesh>
 class NavierStokesAleSolverPC:
@@ -60,6 +60,8 @@ class NavierStokesAleSolverPC:
 public:
 
     typedef typename NavierStokesHandler<Mesh>::Function Function;
+    typedef typename NavierStokesHandler<Mesh>::source_type source_type;
+
     //! Constructor
     /*!
       \param data_file GetPot data file
@@ -72,25 +74,34 @@ public:
       \param BCh_u boundary conditions for the velocity
       \param BCh_mesh boundary conditions for the motion harmonic extension
     */
-    NavierStokesAleSolverPC( const GetPot& data_file, const RefFE& refFE_u, const RefFE& refFE_p, const QuadRule& Qr_u,
-                             const QuadRule& bdQr_u, const QuadRule& Qr_p, const QuadRule& bdQr_p, BC_Handler& BCh_u,
-                             BC_Handler& BCh_mesh );
+    NavierStokesAleSolverPC( const GetPot& data_file,
+                             const RefFE& refFE_u,
+                             const RefFE& refFE_p,
+                             const QuadRule& Qr_u,
+                             const QuadRule& bdQr_u,
+                             const QuadRule& Qr_p,
+                             const QuadRule& bdQr_p,
+                             BCHandler& BCh_u,
+                             BCHandler& BCh_mesh );
 
     //! Update the right  hand side  for time advancing
     /*!
       \param source volumic source
       \param time present time
     */
-    void timeAdvance( const Function source, const Real& time );
+    void timeAdvance( source_type const& source, const Real& time );
 
     //! Update convective term, bc treatment and solve the linearized ns system
     void iterate( const Real& time );
 
     void iterateTransp( const Real& time );
 
-    void iterateLin( const Real& time, BC_Handler& BCh_du );
+    void iterateLin( const Real& time, BCHandler& BCh_du );
+
+    BCHandler const & BC_fluid() const {return _mesh_BCh;}
 
     Vector& residual();
+    Vector  getDeltaLambda() {return _dt*_du;}
 
 private:
 
@@ -209,9 +220,17 @@ private:
 template <typename Mesh>
 NavierStokesAleSolverPC<Mesh>::
 NavierStokesAleSolverPC( const GetPot& data_file, const RefFE& refFE_u, const RefFE& refFE_p, const QuadRule& Qr_u,
-                         const QuadRule& bdQr_u, const QuadRule& Qr_p, const QuadRule& bdQr_p, BC_Handler& BCh_u,
-                         BC_Handler& BCh_mesh ) :
-        NavierStokesAleHandler<Mesh>( data_file, refFE_u, refFE_p, Qr_u, bdQr_u, Qr_p, bdQr_p, BCh_u, BCh_mesh ),
+                         const QuadRule& bdQr_u, const QuadRule& Qr_p, const QuadRule& bdQr_p, BCHandler& BCh_u,
+                         BCHandler& BCh_mesh ) :
+        NavierStokesAleHandler<Mesh>( data_file,
+                                      refFE_u,
+                                      refFE_p,
+                                      Qr_u,
+                                      bdQr_u,
+                                      Qr_p,
+                                      bdQr_p,
+                                      BCh_u,
+                                      BCh_mesh ),
         _pattM_u_block( _dof_u ),
         _pattM_u( _pattM_u_block, "diag" ),
         _pattC( _dof_u, 3 ),
@@ -294,7 +313,7 @@ NavierStokesAleSolverPC( const GetPot& data_file, const RefFE& refFE_u, const Re
 
 template <typename Mesh>
 void NavierStokesAleSolverPC<Mesh>::
-timeAdvance( const Function source, const Real& time )
+timeAdvance( source_type const& source, const Real& time )
 {
 
     std::cout << std::endl;
@@ -309,7 +328,7 @@ timeAdvance( const Function source, const Real& time )
     chrono.start();
 
     // Right hand side for the velocity at time
-    _f_uWithOutBC = 0.;
+    _f_uWithOutBC = ZeroVector( _f_uWithOutBC.size() );
 
     // loop on volumes: assembling source term
     for ( UInt i = 1; i <= _mesh.numVolumes(); ++i )
@@ -396,11 +415,11 @@ iterate( const Real& time )
         for ( UInt ic = 0;ic < nc_u;ic++ )
         {
 
-            for ( UInt jc = 0;jc < nc_u;jc++ )
-            {
-                grad( jc, _elvec, _elmatC, _fe_u, _fe_u, ic, ic );
-                assemb_mat( _C, _elmatC, _fe_u, _dof_u, ic, jc );
-            }
+             for ( UInt jc = 0;jc < nc_u;jc++ )
+             {
+                 grad( jc, _elvec, _elmatC, _fe_u, _fe_u, ic, ic );
+                 assemb_mat( _C, _elmatC, _fe_u, _dof_u, ic, jc );
+             }
 
             // mass
             assemb_mat( _M_u, _elmatM_u, _fe_u, _dof_u, ic, ic );
@@ -435,7 +454,7 @@ iterate( const Real& time )
     chrono.start();
     _f_u = _f_uWithOutBC;
     _BCh_u.bdUpdate( _mesh, _feBd_u, _dof_u );
-    bc_manage( _C, _trD, _f_u, _mesh, _dof_u, _BCh_u, _feBd_u, tgv, time );
+    bcManage( _C, _trD, _f_u, _mesh, _dof_u, _BCh_u, _feBd_u, tgv, time );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
@@ -591,7 +610,7 @@ iterateTransp( const Real& time )
     chrono.start();
     _f_u = _f_uWithOutBC;
     _BCh_u.bdUpdate( _mesh, _feBd_u, _dof_u );
-    bc_manage( _C, _trD, _f_u, _mesh, _dof_u, _BCh_u, _feBd_u, tgv, time );
+    bcManage( _C, _trD, _f_u, _mesh, _dof_u, _BCh_u, _feBd_u, tgv, time );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
@@ -730,7 +749,7 @@ iterateTransp( const Real& time )
 //
 template <typename Mesh>
 void NavierStokesAleSolverPC<Mesh>::
-iterateLin( const Real& time, BC_Handler& BCh_du )
+iterateLin( const Real& time, BCHandler& BCh_du )
 {
 
     Chrono chrono;
@@ -748,8 +767,8 @@ iterateLin( const Real& time, BC_Handler& BCh_du )
     chrono.start();
 
     //initialize right hand side
-    _f_duWithOutBC = 0.0;
-    _f_p = 0.0;
+    _f_duWithOutBC = ZeroVector( _f_duWithOutBC.size() );
+    _f_p = ZeroVector( _f_p.size() );
 
     // Loop on elements
     for ( UInt i = 1; i <= _mesh.numVolumes(); i++ )
@@ -821,7 +840,7 @@ iterateLin( const Real& time, BC_Handler& BCh_du )
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
-    std::cout << "  maxnorm (_f_duWithOutBC) = " << maxnorm( _f_duWithOutBC ) << std::endl;
+    std::cout << "  norm_inf (_f_duWithOutBC) = " << norm_inf( _f_duWithOutBC ) << std::endl;
 
     // for BC treatment (done at each time-step)
     Real tgv = 1.e02;
@@ -836,13 +855,13 @@ iterateLin( const Real& time, BC_Handler& BCh_du )
 
 
     BCh_du.bdUpdate( _mesh, _feBd_u, _dof_u );
-    bc_manage( _C, _trD, _f_u, _mesh, _dof_u, BCh_du, _feBd_u, tgv, time );
+    bcManage( _C, _trD, _f_u, _mesh, _dof_u, BCh_du, _feBd_u, tgv, time );
 
 
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
-    std::cout << "  maxnorm (_f_du) after BC= " << maxnorm( _f_u ) << std::endl;
-    std::cout << "  maxnorm ( difference ) after BC= " << maxnorm( _f_duWithOutBC - _f_u ) << std::endl;
+    std::cout << "  norm_inf (_f_du) after BC= " << norm_inf( _f_u ) << std::endl;
+    std::cout << "  norm_inf ( difference ) after BC= " << norm_inf( _f_duWithOutBC - _f_u ) << std::endl;
 
     //matrices HinvDtr:
     MultInvDiag( _H, _trD, _HinvDtr );
@@ -888,7 +907,7 @@ iterateLin( const Real& time, BC_Handler& BCh_du )
     // ---------------
     options_i[ AZ_recursion_level ] = 1;
 
-    _du = 0.0;
+    _du = ZeroVector( _du.size() );
 
     // intermediate velocity computation
     std::cout << "  o-  Solving system (i)... ";
@@ -956,13 +975,13 @@ iterateLin( const Real& time, BC_Handler& BCh_du )
         vec_DV[ _dim_p - 1 ] = 1.0; // correction of the right hand side.
     }
 
-    _dp = 0.0;
+    _dp = ZeroVector( _dp.size() );
 
 
     std::cout << "  o-  Solving pressure system... \n";
-    std::cout << "  maxnorm (vec_DV) = " << maxnorm( vec_DV ) << std::endl;
-    std::cout << "  maxnorm (_f_p) = " << maxnorm( _f_p ) << std::endl;
-    std::cout << "  maxnorm (_D*_du ) = " << maxnorm( _D * _du ) << std::endl;
+    std::cout << "  norm_inf (vec_DV) = " << norm_inf( vec_DV ) << std::endl;
+    std::cout << "  norm_inf (_f_p) = " << norm_inf( _f_p ) << std::endl;
+    std::cout << "  norm_inf (_D*_du ) = " << norm_inf( _D * _du ) << std::endl;
 
     chrono.start();
     options_ii[ AZ_recursion_level ] = 1;
@@ -988,7 +1007,8 @@ iterateLin( const Real& time, BC_Handler& BCh_du )
 
     _residual_u = _f_duWithOutBC - _CAux * _du - _trDAux * _dp;
 
-    std::cout << "  maxnorm (_residual_du ) = " << maxnorm( _residual_u ) << std::endl;
+    std::cout << "  norm_inf (_residual_du ) = " << norm_inf( _residual_u ) << std::endl;
+    std::cout << "  norm_inf (_du )          = " << norm_inf( _du ) << std::endl;
 }
 
 

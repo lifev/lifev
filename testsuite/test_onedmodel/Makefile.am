@@ -26,20 +26,29 @@ AM_CPPFLAGS	= -DNO_BLASLAPACK
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-check_PROGRAMS = test_onedmodel
+check_PROGRAMS = test_onedmodel test_twotubes
+
 noinst_HEADERS = dataOneDModel.hpp basicOneDMesh.hpp dofOneD.hpp \
 		 oneDNonLinModelParam.hpp vectorFunction1D.hpp \
 		 oneDModelHandler.hpp oneDModelSolver.hpp \
-		 ud_functions.hpp gracePlot.hpp 
+         interface2Vessels.hpp \
+		 ud_functions.hpp gracePlot.hpp
 
 test_onedmodel_SOURCES = dataOneDModel.cpp  basicOneDMesh.cpp \
 			 oneDNonLinModelParam.cpp vectorFunction1D.cpp \
 			 oneDModelHandler.cpp oneDModelSolver.cpp \
-			 main.cpp gracePlot.cpp 
+			 main.cpp gracePlot.cpp
+
+test_twotubes_SOURCES = dataOneDModel.cpp  basicOneDMesh.cpp \
+			 oneDNonLinModelParam.cpp vectorFunction1D.cpp \
+			 oneDModelHandler.cpp oneDModelSolver.cpp \
+             interface2Vessels.cpp \
+			 main_twotubes.cpp gracePlot.cpp
 
 test_onedmodel_LDADD    = $(grace_libs) $(life_libs)
+test_twotubes_LDADD     = $(grace_libs) $(life_libs)
 
-EXTRA_DIST = data datalin2 datalin3 datanl testsuite.at 
+EXTRA_DIST = data datalin2 datalin3 datanl datanl2 testsuite.at 
 
 #
 

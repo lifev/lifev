@@ -21,39 +21,39 @@
 
 namespace LifeV
 {
-void wr_medit_ascii_scalar( std::string fname, Real* U, int Usize, int type )
+void wr_medit_ascii_scalar( std::string fname, Real const* U, int Usize, int type )
 {
     std::ofstream ofile( fname.c_str() );
 
     ASSERT( ofile, "Error: Output file cannot be opened." );
 
-    ofile << nDimensions << " 1 " << Usize << " " << type << std::endl;
-
-    for ( int i = 0; i < Usize; i++ )
-    {
-        ofile << U[ i ] << std::endl;
-    }
+  ofile << nDimensions << " 1 " << Usize << " " << type << std::endl;
+  ofile.setf(std::ios::scientific,std::ios::floatfield);
+  ofile.precision(12);
+  for(int i = 0; i< Usize; i++){
+    ofile << U[i] << std::endl;
+  }
 }
 
-void wr_medit_ascii_vector( std::string fname, Real* U, int Usize, int type )
+void wr_medit_ascii_vector( std::string fname, Real const* U, int Usize, int type )
 {
     std::ofstream ofile( fname.c_str() );
 
     ASSERT( ofile, "Error: Output file cannot be opened." );
 
-    ofile << nDimensions << " " << nDimensions << " "
-    << Usize / nDimensions << " " << type << std::endl;
-
-    for ( int i = 0;i < ( int ) Usize / ( int ) nDimensions; i++ )
-    {
-        for ( int j = 0; j < ( int ) nDimensions; j++ )
-            ofile << U[ i + j * Usize / nDimensions ] << " ";
-        ofile << std::endl;
-    }
+  ofile << nDimensions << " " << nDimensions << " "
+	<< Usize/nDimensions << " "  << type << std::endl;
+  ofile.setf(std::ios::scientific,std::ios::floatfield);
+  ofile.precision(12);
+  for (int i=0;i<(int)Usize/(int)nDimensions; i++){
+    for (int j=0; j<(int)nDimensions; j++)
+      ofile << U[i+j*Usize/nDimensions] << " ";
+    ofile << std::endl;
+  }
 }
 
 
-void rd_medit_ascii_scalar( std::string fname, Real* U, const UInt& Usize, UInt& type )
+void rd_medit_ascii_scalar( std::string fname, Real * U, const UInt& Usize, UInt& type )
 {
 
     UInt theDim, theSize, nCol;
@@ -74,7 +74,7 @@ void rd_medit_ascii_scalar( std::string fname, Real* U, const UInt& Usize, UInt&
     }
 }
 
-void rd_medit_ascii_vector( std::string fname, Real* U, const UInt& Usize, UInt& type )
+void rd_medit_ascii_vector( std::string fname, Real * U, const UInt& Usize, UInt& type )
 {
     UInt theDim, theSize, nCol;
     std::ifstream ifile( fname.c_str() );

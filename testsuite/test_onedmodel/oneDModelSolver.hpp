@@ -113,21 +113,19 @@ diffSrc(U) = sum_{i+1/2 in elements} 1/2 { dS/dU(U_i) + dS/dU(U_i+1) } 1_{i+1/2}
 
 #include <string>
 
-#include "clapack.h"
+#include <clapack.h>
 
-#include "oneDModelHandler.hpp"
-#include "elemMat.hpp"
-#include "elemVec.hpp"
-#include "elemOper.hpp"
-#include "RNM.hpp"
+#include <oneDModelHandler.hpp>
+#include <elemMat.hpp>
+#include <elemVec.hpp>
+#include <elemOper.hpp>
 
-#include "values.hpp"
-#include "assemb.hpp"
-#include "chrono.hpp"
+#include <assemb.hpp>
+#include <chrono.hpp>
 
-#include "tridiagMatrix.hpp"
-#include "oneDNonLinModelParam.hpp"
-#include "vectorFunction1D.hpp"
+#include <tridiagMatrix.hpp>
+#include <oneDNonLinModelParam.hpp>
+#include <vectorFunction1D.hpp>
 
 
 namespace LifeV
@@ -135,248 +133,290 @@ namespace LifeV
 /*!
   \class OneDModelSolver
 
-   This class contains a solver class for the 1D model.
+  This class contains a solver class for the 1D model.
 
 */
 class OneDModelSolver:
-  public OneDModelHandler
+        public OneDModelHandler
 {
 
 public:
 
-  //! Constructor
-  /*!
-    \param data_file GetPot data file
-  */
-  OneDModelSolver(const GetPot& data_file, 
-		  const OneDNonLinModelParam& onedparam);
-  // const LinearSimpleParam& onedparam);
+    //! Constructor
+    /*!
+      \param data_file GetPot data file
+    */
+    OneDModelSolver(const GetPot& data_file, 
+                    const OneDNonLinModelParam& onedparam);
+    // const LinearSimpleParam& onedparam);
 
-  //! return the solution at current time step
-  const ScalUnknown<Vector>& U1_thistime() const { return _M_U1_thistime;}
+    //! return the solution at current time step
+    const ScalUnknown<Vector>& U1_thistime() const { return _M_U1_thistime;}
 
-  //! return the solution at current time step
-  const ScalUnknown<Vector>& U2_thistime() const { return _M_U2_thistime;}
+    //! return the solution at current time step
+    const ScalUnknown<Vector>& U2_thistime() const { return _M_U2_thistime;}
 
-  //! Sets initial condition for the concentration
-  void initialize(const Real& u10, const Real& u20);
+    //! Sets initial condition for the concentration
+    void initialize(const Real& u10, const Real& u20);
 
-  //! Sets initial condition for the concentration
-  //! (incremental approach): the initial time is t0, the time step dt
-  void initialize(const Function& c0, Real t0, Real dt);
+    //! Sets initial condition for the concentration
+    //! (incremental approach): the initial time is t0, the time step dt
+    void initialize(const Function& c0, Real t0, Real dt);
 
-  //! Sets initial condition for the concentration from file
-  void initialize(const std::string & vname);
+    //! Sets initial condition for the concentration from file
+    void initialize(const std::string & vname);
 
-  //! Update the right  hand side  for time advancing
-  void timeAdvance( const Real& time );
+    //! Update the right  hand side  for time advancing
+    void timeAdvance( const Real& time );
 
-  //! Update convective term, bc treatment and solve the linearized ns system
-  void iterate( const Real& time , const int& count);
+    //! Update convective term, bc treatment and solve the linearized ns system
+    void iterate( const Real& time , const int& count);
 
-  //! simple cfl computation (correct for constant mesh)
-  void CheckCFL() const;
+    //! get the Dirichlet boundary conditions (left)
+    Vec2D BCValuesLeft() const;
+    //! get the value at neighboring node (left)
+    Vec2D BCValuesInternalLeft() const;
+    //! get the Dirichlet boundary conditions (right)
+    Vec2D BCValuesRight() const;
+    //! get the value at neighboring node (right)
+    Vec2D BCValuesInternalRight() const;
 
-  //! plotting
-  void gplot();
+    //! set the Dirichlet boundary conditions (left)
+    void setBCValuesLeft( const Real& bcL1, const Real& bcL2 );
+    //! set the Dirichlet boundary conditions (right)
+    void setBCValuesRight( const Real& bcR1, const Real& bcR2 );
 
-  //! writer
-  void output_to_plotmtv(std::string fname, Real time_val, 
-			 const std::vector< Point1D >& ptlist, 
-			 const ScalUnknown<Vector>& U,
-			 const int& count);
+    //! get the flux function
+    NonLinearFluxFun1D const& FluxFun() const;
+    //! get the source function
+    NonLinearSourceFun1D const& SourceFun() const;
+
+    //! get the left edge
+    Edge1D LeftEdge() const;
+    //! get the right edge
+    Edge1D RightEdge() const;
+
+    //! get the left node
+    UInt LeftNodeId() const;
+    //! get the left internal node (neighboring node)
+    UInt LeftInternalNodeId() const;
+    //! get the right node
+    UInt RightNodeId() const;
+    //! get the right internal node (neighboring node)
+    UInt RightInternalNodeId() const;
+
+    //! simple cfl computation (correct for constant mesh)
+    void CheckCFL() const;
+
+    //! plotting
+    void gplot();
+
+    //! writer
+    void output_to_plotmtv(std::string fname, Real time_val, 
+                           const std::vector< Point1D >& ptlist, 
+                           const ScalUnknown<Vector>& U,
+                           const int& count);
 
 
 private:
 
-  //! the parameters
-  const OneDNonLinModelParam& _M_oneDParam;
-  // const LinearSimpleParam& _M_oneDParam;
+    //! the parameters
+    const OneDNonLinModelParam& _M_oneDParam;
+    // const LinearSimpleParam& _M_oneDParam;
 
 
-  //! the flux function
-  NonLinearFluxFun1D _M_fluxFun;
-  //! the source function 
-  NonLinearSourceFun1D _M_sourceFun ;
-  /*
-  //! the flux function
-  LinearSimpleFluxFun1D _M_fluxFun;
-  //! the source function 
-  LinearSimpleSourceFun1D _M_sourceFun ;
-  */
+    //! the flux function
+    NonLinearFluxFun1D _M_fluxFun;
+    //! the source function 
+    NonLinearSourceFun1D _M_sourceFun ;
+    /*
+    //! the flux function
+    LinearSimpleFluxFun1D _M_fluxFun;
+    //! the source function
+    LinearSimpleSourceFun1D _M_sourceFun ;
+    */
 
-  //! coefficient in front of the corresponding _M_elmat*
-  Real _M_coeffMass;
-  Real _M_coeffStiff;
-  Real _M_coeffGrad;
-  Real _M_coeffDiv;
+    const UInt _M_leftNodeId;
+    const UInt _M_leftInternalNodeId;
+    const UInt _M_rightNodeId;
+    const UInt _M_rightInternalNodeId;
 
+    //! boundary edges
+    const Edge1D _M_leftEdge;
+    const Edge1D _M_rightEdge;
 
-  ElemMat _M_elmatMass;  //!< element mass matrix
-  ElemMat _M_elmatStiff; //!< element stiffness matrix
-  ElemMat _M_elmatGrad;  //!< element gradient matrix
-  ElemMat _M_elmatDiv;   //!< element divergence matrix
-
-  //  ElemVec _M_elvec; // Elementary right hand side
-
-  //! Unknown at present time step
-  ScalUnknown<Vector> _M_U1_thistime;
-  ScalUnknown<Vector> _M_U2_thistime;
-
-  //! Exact solution
-  // ScalUnknown<Vector> _M_U_exact;
-
-  //! Right hand sides of the linear system i: "mass * _M_Ui = _M_rhsi"
-  ScalUnknown<Vector> _M_rhs1;
-  ScalUnknown<Vector> _M_rhs2;
-
-  //! Flux F(U) (in P1)
-  ScalUnknown<Vector> _M_Flux1;
-  ScalUnknown<Vector> _M_Flux2;
-  //! diffFlux = dF(U)/dU (in P0) 
-  ScalUnknown<Vector> _M_diffFlux11;
-  ScalUnknown<Vector> _M_diffFlux12;
-  ScalUnknown<Vector> _M_diffFlux21;
-  ScalUnknown<Vector> _M_diffFlux22;
-
-  //! Source term S (in P1)
-  ScalUnknown<Vector> _M_Source1;
-  ScalUnknown<Vector> _M_Source2;
-  //! diffSrc = dSource(U)/dU (in P0)
-  ScalUnknown<Vector> _M_diffSrc11;
-  ScalUnknown<Vector> _M_diffSrc12;
-  ScalUnknown<Vector> _M_diffSrc21;
-  ScalUnknown<Vector> _M_diffSrc22;
+    //! coefficient in front of the corresponding _M_elmat*
+    Real _M_coeffMass;
+    Real _M_coeffStiff;
+    Real _M_coeffGrad;
+    Real _M_coeffDiv;
 
 
+    ElemMat _M_elmatMass;  //!< element mass matrix
+    ElemMat _M_elmatStiff; //!< element stiffness matrix
+    ElemMat _M_elmatGrad;  //!< element gradient matrix
+    ElemMat _M_elmatDiv;   //!< element divergence matrix
 
-  //! tridiagonal mass matrix
-  TriDiagMatrix<Real> _M_massMatrix;
+    //  ElemVec _M_elvec; // Elementary right hand side
 
-  //! lapack LU factorized tridiagonal mass matrix
-  TriDiagMatrix<Real> _M_factorMassMatrix;
-  //! vectors used by lapack for factorization:
-  KN<Real> _M_massupdiag2; //!< second upper diagonal (used by lapack) (size _M_order-2)
-  KN<int>  _M_massipiv;   //!< indices of pivot in the lapack LU (size _M_order)
+    //! Unknown at present time step
+    ScalUnknown<Vector> _M_U1_thistime;
+    ScalUnknown<Vector> _M_U2_thistime;
 
+    //! Exact solution
+    // ScalUnknown<Vector> _M_U_exact;
 
-  //! tridiagonal mass matrices multiplied by diffSrcij
-  TriDiagMatrix<Real> _M_massMatrixDiffSrc11;
-  TriDiagMatrix<Real> _M_massMatrixDiffSrc12;
-  TriDiagMatrix<Real> _M_massMatrixDiffSrc21;
-  TriDiagMatrix<Real> _M_massMatrixDiffSrc22;
+    //! Right hand sides of the linear system i: "mass * _M_Ui = _M_rhsi"
+    ScalUnknown<Vector> _M_rhs1;
+    ScalUnknown<Vector> _M_rhs2;
 
-  //! tridiagonal stiffness matrices multiplied by diffFluxij
-  TriDiagMatrix<Real> _M_stiffMatrixDiffFlux11;
-  TriDiagMatrix<Real> _M_stiffMatrixDiffFlux12;
-  TriDiagMatrix<Real> _M_stiffMatrixDiffFlux21;
-  TriDiagMatrix<Real> _M_stiffMatrixDiffFlux22;
+    //! Flux F(U) (in P1)
+    ScalUnknown<Vector> _M_Flux1;
+    ScalUnknown<Vector> _M_Flux2;
+    //! diffFlux = dF(U)/dU (in P0) 
+    ScalUnknown<Vector> _M_diffFlux11;
+    ScalUnknown<Vector> _M_diffFlux12;
+    ScalUnknown<Vector> _M_diffFlux21;
+    ScalUnknown<Vector> _M_diffFlux22;
 
-  //! tridiagonal gradient matrix
-  TriDiagMatrix<Real> _M_gradMatrix;
-  //! tridiagonal gradient matrices multiplied by diffFluxij 
-  TriDiagMatrix<Real> _M_gradMatrixDiffFlux11;
-  TriDiagMatrix<Real> _M_gradMatrixDiffFlux12;
-  TriDiagMatrix<Real> _M_gradMatrixDiffFlux21;
-  TriDiagMatrix<Real> _M_gradMatrixDiffFlux22;
-
-  //! tridiagonal divergence matrices multiplied by diffSrcij
-  TriDiagMatrix<Real> _M_divMatrixDiffSrc11;
-  TriDiagMatrix<Real> _M_divMatrixDiffSrc12;
-  TriDiagMatrix<Real> _M_divMatrixDiffSrc21;
-  TriDiagMatrix<Real> _M_divMatrixDiffSrc22;
+    //! Source term S (in P1)
+    ScalUnknown<Vector> _M_Source1;
+    ScalUnknown<Vector> _M_Source2;
+    //! diffSrc = dSource(U)/dU (in P0)
+    ScalUnknown<Vector> _M_diffSrc11;
+    ScalUnknown<Vector> _M_diffSrc12;
+    ScalUnknown<Vector> _M_diffSrc21;
+    ScalUnknown<Vector> _M_diffSrc22;
 
 
-  //! Update the coefficients 
-  //! (from the flux, source functions and their derivatives)
-  void _updateMatrixCoefficients(const UInt& ii, const UInt& jj,
-				 const UInt& iedge);
 
-  //! Update the element matrices with the current element
-  void _updateElemMatrices();
+    //! tridiagonal mass matrix
+    TriDiagMatrix<Real> _M_massMatrix;
 
-  //! assemble the matrices
-  int _assemble_matrices(const UInt& ii, const UInt& jj );
+    //! lapack LU factorized tridiagonal mass matrix
+    TriDiagMatrix<Real> _M_factorMassMatrix;
+    //! vectors used by lapack for factorization:
+    KN<Real> _M_massupdiag2; //!< second upper diagonal (used by lapack) (size _M_order-2)
+    KN<int>  _M_massipiv;   //!< indices of pivot in the lapack LU (size _M_order)
 
-  /*! update the matrices  
-    _M_massMatrixDiffSrcij, _M_stiffMatrixDiffFluxij
-    _M_gradMatrixDiffFluxij, and _M_divMatrixDiffSrcij (i,j=1,2)
 
-    from the values of diffFlux(Un) and diffSrc(Un) 
-    that are computed with _updateMatrixCoefficients.
+    //! tridiagonal mass matrices multiplied by diffSrcij
+    TriDiagMatrix<Real> _M_massMatrixDiffSrc11;
+    TriDiagMatrix<Real> _M_massMatrixDiffSrc12;
+    TriDiagMatrix<Real> _M_massMatrixDiffSrc21;
+    TriDiagMatrix<Real> _M_massMatrixDiffSrc22;
 
-    call of  _updateMatrixCoefficients,
-         _updateElemMatrices and _assemble_matrices.
-  */
-  void _updateMatrices();
+    //! tridiagonal stiffness matrices multiplied by diffFluxij
+    TriDiagMatrix<Real> _M_stiffMatrixDiffFlux11;
+    TriDiagMatrix<Real> _M_stiffMatrixDiffFlux12;
+    TriDiagMatrix<Real> _M_stiffMatrixDiffFlux21;
+    TriDiagMatrix<Real> _M_stiffMatrixDiffFlux22;
 
-  /*! modify the matrix to take into account
-    the Dirichlet boundary conditions
-    (works for P1Seg and canonic numbering!)
-  */
-  void _updateBCDirichletMatrix( TriDiagMatrix<Real>& mat );
+    //! tridiagonal gradient matrix
+    TriDiagMatrix<Real> _M_gradMatrix;
+    //! tridiagonal gradient matrices multiplied by diffFluxij 
+    TriDiagMatrix<Real> _M_gradMatrixDiffFlux11;
+    TriDiagMatrix<Real> _M_gradMatrixDiffFlux12;
+    TriDiagMatrix<Real> _M_gradMatrixDiffFlux21;
+    TriDiagMatrix<Real> _M_gradMatrixDiffFlux22;
 
-  /*! modify the vector to take into account
-    the Dirichlet boundary conditions
-    (works for P1Seg and canonic numbering!)
-  */
-  void _updateBCDirichletVector();
+    //! tridiagonal divergence matrices multiplied by diffSrcij
+    TriDiagMatrix<Real> _M_divMatrixDiffSrc11;
+    TriDiagMatrix<Real> _M_divMatrixDiffSrc12;
+    TriDiagMatrix<Real> _M_divMatrixDiffSrc21;
+    TriDiagMatrix<Real> _M_divMatrixDiffSrc22;
 
-  /*! compute the _M_bcDirLeft and _M_bcDirRight
+
+    //! Update the coefficients 
+    //! (from the flux, source functions and their derivatives)
+    void _updateMatrixCoefficients(const UInt& ii, const UInt& jj,
+                                   const UInt& iedge);
+
+    //! Update the element matrices with the current element
+    void _updateElemMatrices();
+
+    //! assemble the matrices
+    int _assemble_matrices(const UInt& ii, const UInt& jj );
+
+    /*! update the matrices  
+      _M_massMatrixDiffSrcij, _M_stiffMatrixDiffFluxij
+      _M_gradMatrixDiffFluxij, and _M_divMatrixDiffSrcij (i,j=1,2)
+
+      from the values of diffFlux(Un) and diffSrc(Un) 
+      that are computed with _updateMatrixCoefficients.
+
+      call of  _updateMatrixCoefficients,
+      _updateElemMatrices and _assemble_matrices.
+    */
+    void _updateMatrices();
+
+    /*! modify the matrix to take into account
+      the Dirichlet boundary conditions
+      (works for P1Seg and canonic numbering!)
+    */
+    void _updateBCDirichletMatrix( TriDiagMatrix<Real>& mat );
+
+    /*! modify the vector to take into account
+      the Dirichlet boundary conditions
+      (works for P1Seg and canonic numbering!)
+    */
+    void _updateBCDirichletVector();
+
+    /*! compute the _M_bcDirLeft and _M_bcDirRight
       from the external boundary condition
-           and the compatibility condition.
+      and the compatibility condition.
 
-    use the extrapolation of the pseudo-characteristics 
+      use the extrapolation of the pseudo-characteristics 
 
       (from the solution at time n, obtain the 
       value of the linearized characteristics
       at time n+1.)
       Used as Compatibility condition.
-  */
-  void _computeBCValues( const Real& time_val );
+    */
+    void _computeBCValues( const Real& time_val );
 
-  //! linear interpolation at the foot of the characteristic
-  //! determined by the given eigenvalue
-  Vec2D _interpolLinear(const Real& point_bound, const Real& point_internal,
-			const Real& deltaT, const Real& eigenvalue, 
-			const Vec2D& U_bound, const Vec2D& U_intern) const;
+    //! linear interpolation at the foot of the characteristic
+    //! determined by the given eigenvalue
+    Vec2D _interpolLinear(const Real& point_bound, const Real& point_internal,
+                          const Real& deltaT, const Real& eigenvalue, 
+                          const Vec2D& U_bound, const Vec2D& U_intern) const;
 
-  //! solve a 2x2 linear system by the Cramer method (for the boundary systems)
-  //! (beware of ill-conditioning!...).
-  Vec2D _solveLinearSyst2x2(const Vec2D& line1, const Vec2D& line2,
-			    const Vec2D& rhs2d) const;
+    //! solve a 2x2 linear system by the Cramer method (for the boundary systems)
+    //! (beware of ill-conditioning!...).
+    Vec2D _solveLinearSyst2x2(const Vec2D& line1, const Vec2D& line2,
+                              const Vec2D& rhs2d) const;
 
-  //! Axpy product for 2D vectors (pairs)
-  //! Axpy(alpha, x, beta, y) -> y = a*A*x + beta*y
-  void Axpy(const Vec2D& line1, const Vec2D& line2,
-	    const Real& alpha,  const Vec2D& x,
-	    const Real& beta,   Vec2D& y) const;
+    //! Axpy product for 2D vectors (pairs)
+    //! Axpy(alpha, x, beta, y) -> y = a*A*x + beta*y
+    void Axpy(const Vec2D& line1, const Vec2D& line2,
+              const Real& alpha,  const Vec2D& x,
+              const Real& beta,   Vec2D& y) const;
 
-  //! 2D dot product
-  Real dot(const Vec2D& vec1, const Vec2D& vec2) const;
+    //! 2D dot product
+    Real dot(const Vec2D& vec1, const Vec2D& vec2) const;
 
-  //! update the P1 flux vector from U: _M_Fluxi = F_h(Un) i=1,2
-  void _updateFlux();
-  //! update the P1 source vector from U: _M_Sourcei = S_h(Un) i=1,2
-  void _updateSource();
+    //! update the P1 flux vector from U: _M_Fluxi = F_h(Un) i=1,2
+    void _updateFlux();
+    //! update the P1 source vector from U: _M_Sourcei = S_h(Un) i=1,2
+    void _updateSource();
 
-  //! call _updateFlux and update the P0 derivative of flux vector from U: 
-  //! _M_diffFluxij = dF_h/dU(Un) i,j=1,2
-  void _updateFluxDer();
-  //! call _updateSource and update the P0 derivative of source vector from U: 
-  //! _M_diffSrcij = dS_h/dU(Un) i,j=1,2
-  void _updateSourceDer();
+    //! call _updateFlux and update the P0 derivative of flux vector from U: 
+    //! _M_diffFluxij = dF_h/dU(Un) i,j=1,2
+    void _updateFluxDer();
+    //! call _updateSource and update the P0 derivative of source vector from U: 
+    //! _M_diffSrcij = dS_h/dU(Un) i,j=1,2
+    void _updateSourceDer();
 
-  //! lapack LU factorization for tridiag matrices
-  //! (modifies _M_factorMassMatrix, _M_massupdiag2 and _M_massipiv.)
-  void _factorizeMassMatrix();
-  //! lapack LU solve for tridiag matrices (AFTER factorization)
-  void _solveMassMatrix( ScalUnknown<Vector>& vec );
+    //! lapack LU factorization for tridiag matrices
+    //! (modifies _M_factorMassMatrix, _M_massupdiag2 and _M_massipiv.)
+    void _factorizeMassMatrix();
+    //! lapack LU solve for tridiag matrices (AFTER factorization)
+    void _solveMassMatrix( ScalUnknown<Vector>& vec );
 
-  //! direct lapack LU solve for tridiag matrices
-  //! quite useless as you can call it only once!
-  //! REMOVE it some day... (just an example)
-  void _directsolveMassMatrix( ScalUnknown<Vector>& vec );
+    //! direct lapack LU solve for tridiag matrices
+    //! quite useless as you can call it only once!
+    //! REMOVE it some day... (just an example)
+    void _directsolveMassMatrix( ScalUnknown<Vector>& vec );
 
 };
 }

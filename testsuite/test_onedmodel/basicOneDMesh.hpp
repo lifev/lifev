@@ -82,6 +82,9 @@ public:
     //! Default constructor
     Edge1D();
 
+    //! Copy constructor
+    Edge1D(const Edge1D & edg);
+
     //! Constructor with two end abscissae
     Edge1D( const Real& x1, const Real& x2, const UInt& id=0 );
 

@@ -34,7 +34,7 @@ void mass( Real coef, ElemMat& elmat, const CurrentFE& fe,
 */
 {
     ASSERT_PRE( fe.hasJac(), "Mass matrix needs at least the jacobian" );
-    Tab2dView mat = elmat.block( iblock, jblock );
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     int i, ig;
     int iloc, jloc;
     Real s, coef_s;
@@ -81,7 +81,7 @@ void mass( Real coef, ElemMat& elmat, const CurrentFE& fe,
     int i, ig;
     int iloc, jloc;
     Real s, coef_s;
-    mat_tmp = 0.;
+    mat_tmp = ZeroMatrix( fe.nbNode, fe.nbNode );
     //
     // diagonal
     //
@@ -112,7 +112,7 @@ void mass( Real coef, ElemMat& elmat, const CurrentFE& fe,
     // copy on the components
     for ( int icomp = 0;icomp < nb;icomp++ )
     {
-        Tab2dView mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
+        ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
         for ( i = 0;i < fe.nbDiag;i++ )
         {
             iloc = fe.patternFirst( i );
@@ -142,7 +142,7 @@ void ipstab_grad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const C
     ASSERT_PRE( fe2.hasFirstDeriv(),
                 "ipstab11 needs at least the first derivatives" );
 
-    Tab2dView mat = elmat.block( iblock, jblock );
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
 
 
 
@@ -237,7 +237,7 @@ void ipstab_grad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const C
     ASSERT_PRE( fe2.hasFirstDeriv(),
                 "ipstab11 needs at least the first derivatives" );
 
-    Tab2d mat_tmp( fe1.nbNode, fe2.nbNode );
+    ElemMat::matrix_type mat_tmp( fe1.nbNode, fe2.nbNode );
 
 
     Real sum, sum1, sum2;
@@ -314,7 +314,7 @@ void ipstab_grad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const C
     // copy on the components
     for ( int icomp = 0;icomp < nb;icomp++ )
     {
-        Tab2dView mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
+        ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
         mat_icomp = mat_tmp;
     }
 }
@@ -337,7 +337,7 @@ void ipstab_bgrad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const 
     ASSERT_PRE( fe2.hasFirstDeriv(),
                 "ipstab_bgrad needs at least the first derivatives" );
 
-    Tab2d mat_tmp( fe1.nbNode, fe2.nbNode );
+    ElemMat::matrix_type mat_tmp( fe1.nbNode, fe2.nbNode );
 
     Real sum, sum1, sum2;
     int i, j, icoor, jcoor, ig;
@@ -438,7 +438,7 @@ void ipstab_bgrad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const 
     // copy on the components
     for ( int icomp = 0;icomp < nb;icomp++ )
     {
-        Tab2dView mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
+        ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
         mat_icomp = mat_tmp;
     }
 
@@ -520,7 +520,7 @@ void ipstab_div( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const Cu
     {
         for ( jcoor = 0; jcoor < fe1.nbCoor; ++jcoor )
         {
-            Tab2dView mat_icomp = elmat.block( iblock + icoor, jblock + jcoor );
+            ElemMat::matrix_view mat_icomp = elmat.block( iblock + icoor, jblock + jcoor );
             // Loop on rows
             for ( i = 0; i < fe1.nbNode; ++i )
             {
@@ -550,7 +550,7 @@ void stiff( Real coef, ElemMat& elmat, const CurrentFE& fe,
 {
     ASSERT_PRE( fe.hasFirstDeriv(),
                 "Stiffness matrix needs at least the first derivatives" );
-    Tab2dView mat = elmat.block( iblock, jblock );
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     int iloc, jloc;
     int i, icoor, ig;
     double s, coef_s;
@@ -598,7 +598,7 @@ void stiff( Real coef, Real ( *fct ) ( Real, Real, Real ), ElemMat& elmat,
 {
     ASSERT_PRE( fe.hasFirstDeriv() && fe.hasQuadPtCoor(),
                 "Stiffness matrix with a diffusion function needs the first derivatives and the coordinates of the quadrature points.  Call for example updateFirstDerivQuadPt() instead of updateFirstDeriv()" );
-    Tab2dView mat = elmat.block( iblock, jblock );
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     int iloc, jloc;
     int i, icoor, ig;
     double s, coef_s, coef_f;
@@ -650,10 +650,11 @@ void stiff( Real coef, ElemMat& elmat, const CurrentFE& fe,
                 "Stiffness (vect) matrix needs at least the first derivatives" );
     ASSERT_PRE( nb > 1, "if nb = 1, use the other stiff function" );
     Tab2d mat_tmp( fe.nbNode, fe.nbNode );
+    mat_tmp = ZeroMatrix( fe.nbNode, fe.nbNode );
+
     int iloc, jloc;
     int i, icoor, ig;
     double s, coef_s;
-    mat_tmp = 0.;
     //
     // diagonal
     //
@@ -690,7 +691,7 @@ void stiff( Real coef, ElemMat& elmat, const CurrentFE& fe,
     // copy on the components
     for ( int icomp = 0;icomp < nb;icomp++ )
     {
-        Tab2dView mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
+        ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
         for ( i = 0;i < fe.nbDiag;i++ )
         {
             iloc = fe.patternFirst( i );
@@ -727,7 +728,7 @@ void stiff_div( Real coef, ElemMat& elmat, const CurrentFE& fe )
         for ( int jcoor = 0; jcoor < fe.nbCoor; ++jcoor )
         {
 
-            Tab2dView mat = elmat.block( icoor, jcoor );
+            ElemMat::matrix_view mat = elmat.block( icoor, jcoor );
 
             for ( int i = 0; i < fe.nbNode; ++i )
             {
@@ -786,7 +787,7 @@ void stiff_dergradbis( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const C
         for ( int jcoor = 0; jcoor < fe.nbCoor; ++jcoor )
         {
 
-            Tab2dView mat = elmat.block( icoor, jcoor );
+            ElemMat::matrix_view mat = elmat.block( icoor, jcoor );
 
             for ( int i = 0; i < fe.nbNode; ++i )
             {
@@ -846,7 +847,7 @@ void stiff_dergrad( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const Curr
         for ( int jcoor = 0; jcoor < fe.nbCoor; ++jcoor )
         {
 
-            Tab2dView mat = elmat.block( icoor, jcoor );
+            ElemMat::matrix_view mat = elmat.block( icoor, jcoor );
 
             for ( int i = 0; i < fe.nbNode; ++i )
             {
@@ -909,7 +910,7 @@ void stiff_derdiv( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const Curre
         for ( int jcoor = 0; jcoor < fe.nbCoor; ++jcoor )
         {
 
-            Tab2dView mat = elmat.block( icoor, jcoor );
+            ElemMat::matrix_view mat = elmat.block( icoor, jcoor );
 
             for ( int i = 0; i < fe.nbNode; ++i )
             {
@@ -939,7 +940,7 @@ void stiff_strain( Real coef, ElemMat& elmat, const CurrentFE& fe )
     double s;
     double tmp = coef * 0.5;
 
-    Tab2d mat_tmp( fe.nbNode, fe.nbNode );
+    ElemMat::matrix_type mat_tmp( fe.nbNode, fe.nbNode );
 
     for ( int i = 0; i < fe.nbNode; ++i )
     {
@@ -954,7 +955,7 @@ void stiff_strain( Real coef, ElemMat& elmat, const CurrentFE& fe )
     }
     for ( int icoor = 0; icoor < fe.nbCoor; ++icoor )
     {
-        Tab2dView mat = elmat.block( icoor, icoor );
+        ElemMat::matrix_view mat = elmat.block( icoor, icoor );
         mat += mat_tmp;
     }
 
@@ -962,7 +963,7 @@ void stiff_strain( Real coef, ElemMat& elmat, const CurrentFE& fe )
     {
         for ( int jcoor = 0; jcoor < fe.nbCoor; ++jcoor )
         {
-            Tab2dView mat = elmat.block( icoor, jcoor );
+            ElemMat::matrix_view mat = elmat.block( icoor, jcoor );
             for ( int i = 0; i < fe.nbNode; ++i )
             {
                 for ( int j = 0; j < fe.nbNode; ++j )
@@ -989,9 +990,10 @@ void mass_divw( Real coef, const ElemVec& w_loc, ElemMat& elmat, const CurrentFE
     ASSERT_PRE( fe.hasFirstDeriv(),
                 "Mass matrix, (div w u, v) needs at least the first derivatives" );
     Tab2d mat_tmp( fe.nbNode, fe.nbNode );
+    mat_tmp = ZeroMatrix( fe.nbNode, fe.nbNode );
+
     int i, icomp, ig, icoor, iloc, jloc;
     Real s, coef_s, divw[ fe.nbQuadPt ];
-    mat_tmp = 0.;
 
     // divw at quadrature nodes
     for ( ig = 0;ig < fe.nbQuadPt;ig++ )
@@ -1032,7 +1034,7 @@ void mass_divw( Real coef, const ElemVec& w_loc, ElemMat& elmat, const CurrentFE
     // copy on the components
     for ( icomp = 0;icomp < nb;icomp++ )
     {
-        Tab2dView mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
+        ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
         for ( i = 0;i < fe.nbDiag;i++ )
         {
             iloc = fe.patternFirst( i );
@@ -1086,7 +1088,7 @@ void mass_gradu( Real coef, const ElemVec& u0_loc, ElemMat& elmat, const Current
         for ( jcoor = 0; jcoor < fe.nbCoor; ++jcoor )
         {
 
-            Tab2dView mat = elmat.block( icoor, jcoor );
+            ElemMat::matrix_view mat = elmat.block( icoor, jcoor );
 
             for ( i = 0; i < fe.nbNode; ++i )
             {
@@ -1116,7 +1118,7 @@ void stiff_sd( Real coef, const ElemVec& vec_loc, ElemMat& elmat, const CurrentF
 {
     ASSERT_PRE( fe.hasFirstDeriv(),
                 "Stiffness matrix needs at least the first derivatives" );
-    Tab2dView mat = elmat.block( iblock, jblock );
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     int iloc, jloc;
     int i, icoor, ig, jcoor;
     double s, coef_s, coef_v[ 3 ];
@@ -1187,7 +1189,7 @@ void stiff_sd( Real coef, const ElemVec& vec_loc, ElemMat& elmat, const CurrentF
     // copy on the other components (if necessary, i.e. if nb>1)
     for ( int icomp = 1;icomp < nb;icomp++ )
     {
-        Tab2dView mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
+        ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
         for ( i = 0;i < fe.nbDiag;i++ )
         {
             iloc = fe.patternFirst( i );
@@ -1214,7 +1216,7 @@ void grad( const int icoor, Real coef, ElemMat& elmat,
 {
     ASSERT_PRE( fe_u.hasFirstDeriv(),
                 "Gradient matrix needs at least the first derivatives" );
-    Tab2dView mat = elmat.block( iblock, jblock );
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     int ig;
     int i, j;
     double s;
@@ -1245,7 +1247,7 @@ void div( const int icoor, Real coef, ElemMat& elmat,
 {
     ASSERT_PRE( fe_u.hasFirstDeriv(),
                 "Gradient matrix needs at least the first derivatives" );
-    Tab2dView mat = elmat.block( iblock, jblock );
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     int ig;
     int i, j;
     double s;
@@ -1274,8 +1276,8 @@ void grad_div( Real coef_grad, Real coef_div, ElemMat& elmat,
     int iblock = block_pres - nDimensions;
     for ( int icoor = 0;icoor < 3;icoor++ )
     {
-        Tab2dView mat_grad = elmat.block( iblock + icoor, block_pres );
-        Tab2dView mat_div = elmat.block( block_pres , iblock + icoor );
+        ElemMat::matrix_view mat_grad = elmat.block( iblock + icoor, block_pres );
+        ElemMat::matrix_view mat_div = elmat.block( block_pres , iblock + icoor );
         for ( int i = 0;i < fe_u.nbNode;i++ )
         {
             for ( int j = 0;j < fe_p.nbNode;j++ )
@@ -1293,7 +1295,7 @@ void grad_div( Real coef_grad, Real coef_div, ElemMat& elmat,
 void stab_stokes( Real visc, Real coef_stab, ElemMat& elmat,
                   const CurrentFE& fe, int block_pres )
 {
-    Tab2dView mat = elmat.block( block_pres, block_pres );
+    ElemMat::matrix_view mat = elmat.block( block_pres, block_pres );
     Real s, h = fe.diameter();
     Real fh2 = coef_stab * h * h / ( 2 * visc );
     for ( int i = 0;i < fe.nbNode;i++ )
@@ -1327,7 +1329,7 @@ void advection( Real coef, ElemVec& vel,
     {
         for ( int icoor = 0;icoor < ( int ) nDimensions;icoor++ )
         {
-            Tab1dView velicoor = vel.block( icoor );
+            ElemVec::vector_view velicoor = vel.block( icoor );
             v[ icoor ] = 0.;
             for ( int k = 0;k < fe.nbNode;k++ )
             {
@@ -1355,7 +1357,7 @@ void advection( Real coef, ElemVec& vel,
     // copy on the components
     for ( int icomp = 0;icomp < nb;icomp++ )
     {
-        Tab2dView mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
+        ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
         for ( int i = 0;i < fe.nbDiag;i++ )
         {
             for ( int j = 0;j < fe.nbDiag;j++ )
@@ -1377,7 +1379,7 @@ void grad( const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
 */
 {
     //
-    Tab2dView mat = elmat.block( iblock, jblock );
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
 
     if ( iblock == jblock )
     {
@@ -1418,7 +1420,7 @@ void grad_ss( const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
 */
 {
     //
-    Tab2dView mat = elmat.block( iblock, jblock );
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
 
     if ( iblock == jblock )
     {
@@ -1465,7 +1467,7 @@ void grad( const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
 */
 {
     //
-    Tab2dView mat = elmat.block( iblock, jblock );
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
 
     if ( iblock == jblock )
     {
@@ -1512,7 +1514,7 @@ void grad( const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
   void quad(std::vector<Real> coef, ElemMat& elmat, ElemVec& elvec,
   const CurrentFE& fe,int iblock=0,int jblock=0)
   {
-  Tab2dView mat = elmat.block(iblock,jblock);
+  ElemMat::matrix_view mat = elmat.block(iblock,jblock);
   int i,ig,iq,siz;
   int iloc,jloc,qloc;
   Real s,coef_s;
@@ -1551,7 +1553,7 @@ void grad( const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
     mat(jloc,iloc) += 2*s;
     }
     }
-*/ 
+*/
 //----------------------------------------------------------------------
 //                      Element vector operator
 //----------------------------------------------------------------------
@@ -1559,7 +1561,7 @@ void source( Real constant, ElemVec& elvec, const CurrentFE& fe, int iblock )
 {
     int i, ig;
     ASSERT_PRE( fe.hasJac(), "Source vector needs at least the jacobian" );
-    Tab1dView vec = elvec.block( iblock );
+    ElemVec::vector_view vec = elvec.block( iblock );
     Real s;
     for ( i = 0;i < fe.nbNode;i++ )
     {
@@ -1581,8 +1583,8 @@ void source( Real coef, ElemVec& f, ElemVec& elvec, const CurrentFE& fe,
 {
     int i, ig;
     ASSERT_PRE( fe.hasJac(), "Source vector (f) needs at least the jacobian" );
-    Tab1dView vec = elvec.block( eblock );
-    Tab1dView vecf = f.block( fblock );
+    ElemVec::vector_view vec = elvec.block( eblock );
+    ElemVec::vector_view vecf = f.block( fblock );
     Real f_ig;
 
     for ( ig = 0;ig < fe.nbQuadPt;ig++ )
@@ -1609,8 +1611,8 @@ void source_fhn( Real coef_f, Real coef_a, ElemVec& u, ElemVec& elvec, const Cur
 {
     int i, ig;
     ASSERT_PRE( fe.hasJac(), "elemOper.cpp source_fhn: FHN source vector (f) needs at least the jacobian" );
-    Tab1dView vec = elvec.block( eblock );
-    Tab1dView vecu = u.block( fblock );
+    ElemVec::vector_view vec = elvec.block( eblock );
+    ElemVec::vector_view vecu = u.block( fblock );
     Real f_ig;
 
     for ( ig = 0;ig < fe.nbQuadPt;ig++ )
@@ -1729,7 +1731,7 @@ void source_mass1( Real coef, const ElemVec& uk_loc, const ElemVec& convect_loc,
     {
 
         // the block iccor of the elementary vector
-        Tab1dView vec = elvec.block( icoor );
+        ElemVec::vector_view vec = elvec.block( icoor );
 
         // loop on nodes, i.e. loop on components of this block
         for ( i = 0;i < fe.nbNode;i++ )
@@ -1814,7 +1816,7 @@ void source_mass2( Real coef, const ElemVec& uk_loc, const ElemVec& dw_loc,
     for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
     {
 
-        Tab1dView vec = elvec.block( icoor );
+        ElemVec::vector_view vec = elvec.block( icoor );
 
         // loop on nodes, i.e. loop on components of this block
         for ( i = 0;i < fe.nbNode;i++ )
@@ -1912,7 +1914,7 @@ void source_stress( Real coef, Real mu, const ElemVec& uk_loc, const ElemVec& pk
     for ( icoor = 0;icoor < fe_u.nbCoor;icoor++ )
     {
 
-        Tab1dView vec = elvec.block( icoor );
+        ElemVec::vector_view vec = elvec.block( icoor );
 
         // loop on nodes, i.e. loop on components of this block
         for ( i = 0;i < fe_u.nbNode;i++ )
@@ -1991,7 +1993,7 @@ void source_stress2( Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, Ele
     for ( icoor = 0;icoor < fe_u.nbCoor;icoor++ )
     {
 
-        Tab1dView vec = elvec.block( icoor );
+        ElemVec::vector_view vec = elvec.block( icoor );
 
         // loop on nodes, i.e. loop on components of this block
         for ( i = 0;i < fe_u.nbNode;i++ )
@@ -2100,7 +2102,7 @@ void source_press( Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, ElemV
 void grad_Hdiv( Real coef, ElemMat& elmat, const CurrentHdivFE& fe_u,
                 const CurrentFE& fe_p, int iblock, int jblock )
 {
-    Tab2dView mat = elmat.block( iblock, jblock );
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     int ig, i, j;
     Real sumdivphi;
     for ( i = 0;i < fe_u.nbNode;i++ )
@@ -2132,7 +2134,7 @@ void grad_Hdiv( Real coef, ElemMat& elmat, const CurrentHdivFE& fe_u,
 void div_Hdiv( Real coef, ElemMat& elmat, const CurrentHdivFE& fe_u,
                const CurrentFE& fe_p, int iblock, int jblock )
 {
-    Tab2dView mat = elmat.block( iblock, jblock );
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     int ig, i, j;
     Real sumdivphi;
     for ( i = 0;i < fe_u.nbNode;i++ )
@@ -2152,16 +2154,16 @@ void div_Hdiv( Real coef, ElemMat& elmat, const CurrentHdivFE& fe_u,
 
 //----------------------------------------------------------------------
 /*! \function TP_VdotN_Hdiv : compute
- 
+
        coef * \int_{BOUNDARY of current element} lambda_j * { w_i \cdot n }
- 
+
                   where w_j is a vectorial H(div) basis function,
     and lambda_j are the Lagrange multiplier basis functions
     that enforce continuity of the normal component of
     the vectorial functions across two neighbouring elements.
     Interprated as trace of pressure... (TP)
     See Hybridization for Mixed Hybrid Finite Element Method.
- 
+
     Thanks to the Piola transform, the computation is performed
     on the boundary of the REFERENCE Element. But in general, the
     boundary of a 3D Reference element is not a 2D Reference element.
@@ -2169,9 +2171,9 @@ void div_Hdiv( Real coef, ElemMat& elmat, const CurrentHdivFE& fe_u,
     REFERENCE TETRA -> 3 REFERENCE TRIA + 1 EQUILATERAL TRIANGLE...
     REFERENCE PRISM -> 2 TRIA + 3 QUAD...?
     REFERENCE HEXA  -> 6 REFERENCE QUAD.
- 
+
     n : is the normal unit vector oriented outward of the current element.
- 
+
 \param coef  : constant coefficient.
 \param elmat : (mixed) element matrix.
 \param tpfe  : reference lagrange multiplier element (for hybrid MFE)
@@ -2183,7 +2185,7 @@ void TP_VdotN_Hdiv( Real coef, ElemMat& elmat, const RefHybridFE& tpfe,
     //! previous way of construction (worked only for RTO hexa)
     // TP_TP_Hdiv(coef, elmat, tpfe, iblock, jblock);
 
-    Tab2dView mat = elmat.block( iblock, jblock );
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     Int ig, i, j, nbnode;
     UInt nf;
     Real tpvn;
@@ -2214,15 +2216,15 @@ void TP_VdotN_Hdiv( Real coef, ElemMat& elmat, const RefHybridFE& tpfe,
 
 //----------------------------------------------------------------------
 /*! \function TP_TP_Hdiv : compute
- 
+
        coef * \int_{BOUNDARY of current element} lambda_j * lambda_i
- 
+
                   where lambda_j are the Lagrange multiplier basis functions
     that enforce continuity of the normal component of
     the vectorial functions across two neighbouring elements.
     Interprated as trace of pressure... (TP)
     See Hybridization for Mixed Hybrid Finite Element Method.
- 
+
     Thanks to the Piola transform, the computation is performed
     on the boundary of the REFERENCE Element. But in general, the
     boundary of a 3D Reference element is not a 2D Reference element.
@@ -2230,9 +2232,9 @@ void TP_VdotN_Hdiv( Real coef, ElemMat& elmat, const RefHybridFE& tpfe,
     REFERENCE TETRA -> 3 REFERENCE TRIA + 1 EQUILATERAL TRIANGLE...
     REFERENCE PRISM -> 2 TRIA + 3 QUAD...?
     REFERENCE HEXA  -> 6 REFERENCE QUAD.
- 
+
     n : is the normal unit vector oriented outward of the current element.
- 
+
 \param coef  : constant coefficient.
 \param elmat : (mixed) element matrix.
 \param tpfe  : reference lagrange multiplier element (for hybrid MFE)
@@ -2240,7 +2242,7 @@ void TP_VdotN_Hdiv( Real coef, ElemMat& elmat, const RefHybridFE& tpfe,
 */
 void TP_TP_Hdiv( Real coef, ElemMat& elmat, const RefHybridFE& tpfe, int iblock, int jblock )
 {
-    Tab2dView mat = elmat.block( iblock, jblock );
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     Int ig, i, j, nbnode;
     UInt nf;
     Real tpvn;
@@ -2269,14 +2271,14 @@ void TP_TP_Hdiv( Real coef, ElemMat& elmat, const RefHybridFE& tpfe, int iblock,
 
 //----------------------------------------------------------------------
 /*! \function mass_Hdiv : compute
- 
+
        coef *  \int_{current element} w_j * w_i
                   where w_j is a vectorial H(div) basis function
- 
+
 Here the permeability matrix is a CONSTANT SCALAR tensor (i.e. = coef * Id).
- 
+
 BEWARE  :   it is "coef" that is used (and NOT ITS INVERSE!!).
- 
+
 \param coef  : constant coefficient.
 \param elmat : (mixed) element matrix.
 \param fe_u  : current vectorial element (in H(div))
@@ -2284,7 +2286,7 @@ BEWARE  :   it is "coef" that is used (and NOT ITS INVERSE!!).
 */
 void mass_Hdiv( Real coef, ElemMat& elmat, const CurrentHdivFE& fe, int iblock, int jblock )
 {
-    Tab2dView mat = elmat.block( iblock, jblock );
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     int ig, i, j, icoor;
     Real x;
     for ( j = 0 ; j < fe.nbNode ; j ++ )
@@ -2309,37 +2311,41 @@ void mass_Hdiv( Real coef, ElemMat& elmat, const CurrentHdivFE& fe, int iblock, 
 /*! \function mass_Hdiv : compute
   \int_{current element} ((Invperm* w_j) * w_i
   where w_j is a vectorial H(div) basis function
- 
+
   Here the permeability matrix "Invperm" is a CONSTANT symmetric positive definite
   matrix (NON DIAGONAL a priori). The matrix is constant over the
   whole current element and is already inverted by LU or Choleski Lapack.
- 
+
   \param Invperm : constant coefficient TENSOR. (CONSTANT over the current element).
   \param elmat   : (mixed) element matrix.
   \param fe      : current vectorial element (in H(div))
   \param iblock, \param jblock : subarray indexes where to store the integral just computed.
 */
-void mass_Hdiv( KNM<Real>& Invperm, ElemMat& elmat, const CurrentHdivFE& fe,
+void mass_Hdiv( Matrix const&  Invperm, ElemMat& elmat, const CurrentHdivFE& fe,
                 int iblock, int jblock )
 {
-    Tab2dView mat = elmat.block( iblock, jblock );
-    int ig, i, j, icoor, jcoor;
-    Real x;
-    for ( j = 0 ; j < fe.nbNode ; j ++ )
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+
+    for (Int j = 0 ; j < fe.nbNode ; j ++ )
     {
-        for ( i = 0 ; i < fe.nbNode /* by symmetry j+1 */ ; i ++ )
+        for (Int i = 0 ; i < fe.nbNode /* by symmetry j+1 */ ; i ++ )
         {
-            x = 0.;
-            for ( ig = 0 ; ig < fe.nbQuadPt ; ig ++ )
+            Real x = 0.;
+            for (Int ig = 0 ; ig < fe.nbQuadPt ; ig ++ )
             {
-                for ( icoor = 0 ; icoor < fe.nbCoor ; icoor ++ )
+                double __t = 0;
+                //x = phi[icoor]^T * K^-1 * phi[jcoor]
+                for (Int icoor = 0 ; icoor < fe.nbCoor ; icoor ++ )
                 {
-                    for ( jcoor = 0 ; jcoor < fe.nbCoor ; jcoor ++ )
+                    for (Int jcoor = 0 ; jcoor < fe.nbCoor ; jcoor ++ )
                     {
                         //! Invperm is the inverse of the permeability
-                        x += Invperm( icoor, jcoor ) * fe.phi( j, jcoor, ig ) * fe.phi( i, icoor, ig ) * fe.weightDet( ig );
+                        __t += (  Invperm( icoor, jcoor ) *
+                                  fe.phi( j, jcoor, ig ) *
+                                  fe.phi( i, icoor, ig ) );
                     }
                 }
+                x += __t*fe.weightDet( ig );
             }
             mat( i, j ) += x ;
         }
@@ -2351,13 +2357,13 @@ void mass_Hdiv( KNM<Real>& Invperm, ElemMat& elmat, const CurrentHdivFE& fe,
 /*! \function mass_Hdiv : compute
   \int_{current element} ((Invperm* w_j) * w_i
   where w_j is a vectorial H(div) basis function
- 
+
   Here the permeability is a NON-CONSTANT scalar function
   whose inverse is "Invperm".
- 
+
   We note again that it is the inverse of the permeability that
   is provided directly (Invperm = K^{-1}).
- 
+
   \param Invperm : scalar function inverse of the permeability.
   \param elmat   : (mixed) element matrix.
   \param fe      : current vectorial element (in H(div))
@@ -2366,7 +2372,7 @@ void mass_Hdiv( KNM<Real>& Invperm, ElemMat& elmat, const CurrentHdivFE& fe,
 void mass_Hdiv( Real ( *Invperm ) ( const Real&, const Real&, const Real& ),
                 ElemMat& elmat, const CurrentHdivFE& fe, int iblock, int jblock )
 {
-    Tab2dView mat = elmat.block( iblock, jblock );
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     int ig, i, j, icoor;
     Real intg, x, y, z;
     for ( j = 0 ; j < fe.nbNode ; j ++ )
@@ -2380,8 +2386,10 @@ void mass_Hdiv( Real ( *Invperm ) ( const Real&, const Real&, const Real& ),
                 for ( icoor = 0 ; icoor < fe.nbCoor ; icoor ++ )
                 {
                     //! caution inverse of the permeability
-                    intg += 1. * Invperm( x, y, z ) * fe.phi( j , icoor , ig )
-                            * fe.phi( i , icoor , ig ) * fe.weightDet( ig );
+                    intg += 1. * Invperm( x, y, z ) *
+                        fe.phi( j , icoor , ig ) *
+                        fe.phi( i , icoor , ig ) *
+                        fe.weightDet( ig );
                 }
             }
             mat( i, j ) += intg;
@@ -2391,26 +2399,26 @@ void mass_Hdiv( Real ( *Invperm ) ( const Real&, const Real&, const Real& ),
 
 /*
   \int_{current element} w_j * w_i where w_j is a H(div) basis function.
- 
+
   Here the permeability matrix is a NON-CONSTANT symmetric positive definite
   matrix (NON DIAGONAL a priori).
 */
 
 /*
- 
+
 TO BE DONE LATER... IN ELEMOPER.H
- 
+
 void mass_Hdiv(KNM<Real> &Kperm, ElemMat& elmat, const CurrentHdivFE& fe,
 int iblock=0, int jblock=0)
 {
-  Tab2dView mat = elmat.block(iblock,jblock);
+  ElemMat::matrix_view mat = elmat.block(iblock,jblock);
   // int ig,i,j,icoor;
   Real s;
   KN<Real> p(fe.nbCoor);
   KN<Real> b(fe.nbCoor);
   KN<Real> x(fe.nbCoor);
   KN<Real> y(fe.nbCoor);
- 
+
   for(int j=0;j<fe.nbNode;j++){
     for(int i=0;i<fe.nbNode;i++){
       s =0.;
@@ -2438,7 +2446,7 @@ void mass_Mixed_Hdiv( Real coef, ElemMat& elmat, const CurrentFE& fe,
     Real x;
     for ( int icoor = 0;icoor < fe.nbCoor; icoor ++ )
     {
-        Tab2dView mat = elmat.block( iblock + icoor, jblock );
+        ElemMat::matrix_view mat = elmat.block( iblock + icoor, jblock );
         for ( int j = 0 ; j < hdivfe.nbNode ; j ++ )
         {
             for ( int i = 0 ; i < fe.nbNode ; i ++ )

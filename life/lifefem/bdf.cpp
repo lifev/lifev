@@ -23,8 +23,12 @@
 
 namespace LifeV
 {
-Bdf::Bdf( const UInt n ) :
-        _n( n ), _s( 0 ), _alpha( n + 1 ), _beta( n )
+Bdf::Bdf( const UInt n )
+    :
+    _M_order( n ),
+    _M_size( 0 ),
+    _M_alpha( n + 1 ),
+    _M_beta( n )
 {
     if ( n <= 0 || n > BDF_MAX_ORDER )
     {
@@ -37,28 +41,28 @@ Bdf::Bdf( const UInt n ) :
     switch ( n )
     {
     case 1:
-        _alpha[ 0 ] = 1.; // Backward Euler
-        _alpha[ 1 ] = 1.;
-        _beta[ 0 ] = 1.; // u^{n+1} \approx u^n
+        _M_alpha[ 0 ] = 1.; // Backward Euler
+        _M_alpha[ 1 ] = 1.;
+        _M_beta[ 0 ] = 1.; // u^{n+1} \approx u^n
         break;
     case 2:
-        _alpha[ 0 ] = 3. / 2.;
-        _alpha[ 1 ] = 2.;
-        _alpha[ 2 ] = -1. / 2.;
-        _beta[ 0 ] = 2.;
-        _beta[ 1 ] = -1.;
+        _M_alpha[ 0 ] = 3. / 2.;
+        _M_alpha[ 1 ] = 2.;
+        _M_alpha[ 2 ] = -1. / 2.;
+        _M_beta[ 0 ] = 2.;
+        _M_beta[ 1 ] = -1.;
         break;
     case 3:
-        _alpha[ 0 ] = 11. / 6.;
-        _alpha[ 1 ] = 3.;
-        _alpha[ 2 ] = -3. / 2.;
-        _alpha[ 3 ] = 1. / 3.;
-        _beta[ 0 ] = 3.;
-        _beta[ 1 ] = -3.;
-        _beta[ 2 ] = 1.;
+        _M_alpha[ 0 ] = 11. / 6.;
+        _M_alpha[ 1 ] = 3.;
+        _M_alpha[ 2 ] = -3. / 2.;
+        _M_alpha[ 3 ] = 1. / 3.;
+        _M_beta[ 0 ] = 3.;
+        _M_beta[ 1 ] = -3.;
+        _M_beta[ 2 ] = 1.;
         break;
     }
-    _unk.resize( n );
+    _M_unknowns.resize( n );
 }
 
 
@@ -69,12 +73,12 @@ Bdf::~Bdf()
 
 void Bdf::initialize_unk( Vector u0 )
 {
-    std::vector< Vector >::iterator iter = _unk.begin();
-    std::vector< Vector >::iterator iter_end = _unk.end();
+    std::vector< Vector >::iterator iter = _M_unknowns.begin();
+    std::vector< Vector >::iterator iter_end = _M_unknowns.end();
 
-    _s = u0.size();
+    _M_size = u0.size();
 
-    for ( iter = _unk.begin() ; iter != iter_end; iter++ )
+    for ( iter = _M_unknowns.begin() ; iter != iter_end; iter++ )
     {
         *iter = u0;
     }
@@ -85,27 +89,27 @@ void Bdf::initialize_unk( Vector u0 )
 
 void Bdf::initialize_unk( std::vector<Vector> uv0 )
 {
-    std::vector< Vector >::iterator iter = _unk.begin();
-    std::vector< Vector >::iterator iter_end = _unk.end();
+    std::vector< Vector >::iterator iter = _M_unknowns.begin();
+    std::vector< Vector >::iterator iter_end = _M_unknowns.end();
 
     std::vector< Vector >::iterator iter0 = uv0.begin();
 
-    _s = iter0->size();
+    _M_size = iter0->size();
 
     UInt n0 = uv0.size();
 
     // Check if uv0 has the right dimensions
-    ASSERT( n0 >= _n, "Initial data are not enough for the selected BDF" )
+    ASSERT( n0 >= _M_order, "Initial data are not enough for the selected BDF" )
 
     // if n0>n, only the first n inital data will be considered
-    if ( n0 > _n )
+    if ( n0 > _M_order )
     {
         std::cout << "The initial data set is larger than needed by the BDF."
         << std::endl;
-        std::cout << "Only the first " << _n << " data will be considered. "
+        std::cout << "Only the first " << _M_order << " data will be considered. "
         << std::endl;
     }
-    for ( iter = _unk.begin() ; iter != iter_end; iter++ )
+    for ( iter = _M_unknowns.begin() ; iter != iter_end; iter++ )
     {
         *iter = *iter0;
         iter0++;
@@ -122,38 +126,47 @@ void Bdf::initialize_unk( std::vector<Vector> uv0 )
 
 
 
-std::vector<Vector> Bdf::unk()
+const
+std::vector<Vector>& Bdf::unk() const
 {
-    return _unk;
+    return _M_unknowns;
 }
 
 
-double Bdf::coeff_der( UInt i )
+double
+Bdf::coeff_der( UInt i ) const
 {
     // Pay attention: i is c-based indexed
-    ASSERT( i >= 0 & i < _n + 1, "Error in specification of the time derivative coefficient for the BDF formula (out of range error)" );
-    return _alpha[ i ];
+    ASSERT( i >= 0 & i < _M_order + 1,
+            "Error in specification of the time derivative coefficient for the BDF formula (out of range error)" );
+    return _M_alpha[ i ];
 }
 
-double Bdf::coeff_ext( UInt i )
+double
+Bdf::coeff_ext( UInt i ) const
 {
     // Pay attention: i is c-based indexed
-    ASSERT( i >= 0 & i < _n, "Error in specification of the time derivative coefficient for the BDF formula (out of range error)" );
-    return _beta[ i ];
+    ASSERT( i >= 0 & i < _M_order,
+            "Error in specification of the time derivative coefficient for the BDF formula (out of range error)" );
+    return _M_beta[ i ];
 }
 
-void Bdf::showMe()
+void
+Bdf::showMe() const
 {
-    std::cout << "*** BDF Time discretization of order " << _n << "***" << std::endl;
-    std::cout << std::endl;
-    std::cout << "*** Coefficients: " << std::endl;
-    std::cout << std::endl;
-    for ( UInt i = 0;i < _n + 1;++i )
-        std::cout << "alpha(" << i << ") = " << _alpha[ i ] << std::endl;
-    for ( UInt i = 0;i < _n;++i )
-        std::cout << "beta(" << i << ") = " << _beta[ i ] << std::endl;
+    std::cout << "*** BDF Time discretization of order " << _M_order << " ***"
+              << std::endl;
+    std::cout << "    Coefficients: " << std::endl;
+    for ( UInt i = 0;i < _M_order + 1;++i )
+        std::cout << "       alpha(" << i << ") = " << _M_alpha[ i ]
+                  << std::endl;
+    for ( UInt i = 0;i < _M_order;++i )
+        std::cout << "       beta (" << i << ") = " << _M_beta[ i ]
+                  << std::endl;
 
-    std::cout << "Length unknown vectors:" << _unk.size() << "," << _s << std::endl;
+    std::cout << "    " << _M_unknowns.size() << " unknown vector"
+              << (_M_unknowns.size() == 1 ? "" : "s") << " of length "
+              << _M_size << std::endl;
 
     /*   std::vector< Vector >::iterator itg=_u_prec.begin(); */
     /*   std::vector< Vector >::iterator itge=_u_prec.end(); */
@@ -172,11 +185,13 @@ void Bdf::showMe()
     return ;
 }
 
-void Bdf::shift_right( Vector unk_curr )
+void
+Bdf::shift_right( Vector const& unk_curr )
 {
-    std::vector< Vector >::iterator it = _unk.end() - 1;
-    std::vector< Vector >::iterator itm1 = _unk.end() - 1;
-    std::vector< Vector >::iterator itb = _unk.begin();
+#if 1
+    std::vector< Vector >::iterator it = _M_unknowns.end() - 1;
+    std::vector< Vector >::iterator itm1 = _M_unknowns.end() - 1;
+    std::vector< Vector >::iterator itb = _M_unknowns.begin();
 
     for ( ; it != itb; --it )
     {
@@ -185,52 +200,67 @@ void Bdf::shift_right( Vector unk_curr )
     }
     *itb = unk_curr;
 
-    return ;
+#else
+    std::vector< Vector >::reverse_iterator it = _M_unknowns.rbegin();
+    std::vector< Vector >::reverse_iterator itm1 = _M_unknowns.rbegin();
+    std::vector< Vector >::reverse_iterator itb = _M_unknowns.rend();
+
+    for ( ; it != itb; ++it )
+    {
+        ++itm1;
+        *it = *itm1;
+    }
+    _M_unknowns.front() = unk_curr;
+#endif
+
 }
 
 
-Vector Bdf::time_der( Real dt )
+Vector
+Bdf::time_der( Real dt ) const
 {
-    Vector ut( _s );
+    Vector ut( _M_size );
 
-    for ( UInt j = 0;j < _s;++j )
+    for ( UInt j = 0;j < _M_size;++j )
         ut[ j ] = 0.;
 
-    for ( UInt j = 0;j < _s;++j )
+    for ( UInt j = 0;j < _M_size;++j )
     {
-        for ( UInt i = 0;i < _n;++i )
-            ut[ j ] = ut[ j ] + _alpha[ i + 1 ] / dt * _unk[ i ][ j ];
+        for ( UInt i = 0;i < _M_order;++i )
+            ut[ j ] = ut[ j ] + _M_alpha[ i + 1 ] / dt * _M_unknowns[ i ][ j ];
     }
 
     return ut;
 }
 
-Vector Bdf::time_der()
+Vector
+Bdf::time_der() const
 {
-    Vector ut( _s );
+    Vector ut( _M_size );
 
-    for ( UInt j = 0;j < _s;++j )
+    for ( UInt j = 0;j < _M_size;++j )
         ut[ j ] = 0.;
 
-    for ( UInt j = 0;j < _s;++j )
+    for ( UInt j = 0;j < _M_size;++j )
     {
-        for ( UInt i = 0;i < _n;++i )
-            ut[ j ] = ut[ j ] + _alpha[ i + 1 ] * _unk[ i ][ j ];
+        for ( UInt i = 0;i < _M_order;++i )
+            ut[ j ] = ut[ j ] + _M_alpha[ i + 1 ] * _M_unknowns[ i ][ j ];
     }
 
     return ut;
 }
 
-Vector Bdf::extrap()
+Vector
+Bdf::extrap() const
 {
-    Vector ue( _s );
-    for ( UInt j = 0;j < _s;++j )
+    Vector ue( _M_size );
+    for ( UInt j = 0;j < _M_size;++j )
         ue[ j ] = 0.;
 
-    for ( UInt j = 0;j < _s;++j )
+    for ( UInt j = 0;j < _M_size;++j )
     {
-        for ( UInt i = 0;i < _n;++i )
-            ue[ j ] = ue[ j ] + _beta[ i ] * _unk[ i ][ j ];
+        for ( UInt i = 0;i < _M_order;++i )
+            ue[ j ] = ue[ j ] + _M_beta[ i ] * _M_unknowns[ i ][ j ];
     }
 
     return ue;

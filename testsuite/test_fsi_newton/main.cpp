@@ -20,7 +20,6 @@
 #include "NavierStokesAleSolverPC.hpp"
 #include "VenantKirchhofSolver.hpp"
 #include "operFS.hpp"
-#include "vectorNorms.hpp"
 #include "dofInterface3Dto3D.hpp"
 #include "ud_functions.hpp"
 #include "regionMesh3D_ALE.hpp"
@@ -53,9 +52,9 @@ int main(int argc, char** argv)
     // Number of boundary conditions for the fluid velocity,
     // solid displacement, and fluid mesh motion
     //
-    BC_Handler BCh_u(3);
-    BC_Handler BCh_d(3);
-    BC_Handler BCh_mesh(4);
+    BCHandler BCh_u(3);
+    BCHandler BCh_d(3);
+    BCHandler BCh_mesh(4);
 
 
     //========================================================================================
@@ -89,7 +88,7 @@ int main(int argc, char** argv)
     //
     DofInterface3Dto3D dofFluidToStructure(feTetraP1, solid.dDof(), feTetraP1bubble, fluid.uDof());
     dofFluidToStructure.update(solid.mesh(), 1, fluid.mesh(), 1, 0.0);
-    BCVector_Interface g_wall(fluid.residual(), dim_fluid, dofFluidToStructure);
+    BCVectorInterface g_wall(fluid.residual(), dim_fluid, dofFluidToStructure);
 
 
     // Passing data from structure to the fluid mesh: motion of the fluid domain
@@ -97,7 +96,7 @@ int main(int argc, char** argv)
     DofInterface3Dto3D dofStructureToFluidMesh(fluid.mesh().getRefFE(), fluid.dofMesh(),
                                                feTetraP1, solid.dDof());
     dofStructureToFluidMesh.update(fluid.mesh(), 1, solid.mesh(), 1, 0.0);
-    BCVector_Interface displ(solid.d(), dim_solid, dofStructureToFluidMesh);
+    BCVectorInterface displ(solid.d(), dim_solid, dofStructureToFluidMesh);
 
 
 
@@ -105,7 +104,7 @@ int main(int argc, char** argv)
     //
     DofInterface3Dto3D dofMeshToFluid(feTetraP1bubble, fluid.uDof(), feTetraP1bubble, fluid.uDof() );
     dofMeshToFluid.update(fluid.mesh(), 1, fluid.mesh(), 1, 0.0);
-    BCVector_Interface u_wall(fluid.wInterpolated(), dim_fluid,dofMeshToFluid);
+    BCVectorInterface u_wall(fluid.wInterpolated(), dim_fluid,dofMeshToFluid);
 
 
     //========================================================================================
@@ -114,14 +113,14 @@ int main(int argc, char** argv)
     //
     // Boundary conditions for the harmonic extension of the
     // interface solid displacement
-    BCFunction_Base bcf(fZero);
+    BCFunctionBase bcf(fZero);
     BCh_mesh.addBC("Interface", 1, Essential, Full, displ, 3);
     BCh_mesh.addBC("Top",       3, Essential, Full, bcf,   3);
     BCh_mesh.addBC("Base",      2, Essential, Full, bcf,   3);
     BCh_mesh.addBC("Edges",    20, Essential, Full, bcf,   3);
 
     // Boundary conditions for the fluid velocity
-    BCFunction_Base in_flow(u2);
+    BCFunctionBase in_flow(u2);
     BCh_u.addBC("Wall",   1,  Essential, Full, u_wall,  3);
     BCh_u.addBC("InFlow", 2,  Natural,   Full, in_flow, 3);
     BCh_u.addBC("Edges",  20, Essential, Full, bcf,     3);
@@ -137,18 +136,19 @@ int main(int argc, char** argv)
     //========================================================================================
     //
     //
-    BC_Handler BCh_du(2);
-    BC_Handler BCh_dz(3);
+    BCHandler BCh_du(2);
+    BCHandler BCh_dz(3);
 
-    operFS oper(fluid, solid, BCh_du, BCh_dz);
+
+    operFS oper(fluid,solid,BCh_du,BCh_dz);
 
     // Passing data from structure to the fluid: z -> du
     //
-    BCVector_Interface du_wall(fluid.dwInterpolated(), dim_fluid, dofMeshToFluid);
+    BCVectorInterface du_wall(fluid.dwInterpolated(), dim_fluid, dofMeshToFluid);
 
     // Passing data from fluid to the structure: du -> dz
     //
-    BCVector_Interface dg_wall(fluid.residual(), dim_fluid, dofFluidToStructure);
+    BCVectorInterface dg_wall(fluid.residual(), dim_fluid, dofFluidToStructure);
 
     // Boundary conditions for du
     BCh_du.addBC("Wall",   1,  Essential, Full, du_wall,  3);
@@ -179,10 +179,10 @@ int main(int argc, char** argv)
     ASSERT(nout,"Error: Output file cannot be opened.");
 
     Vector disp(3*dim_solid);
-    disp =0.0;
+    disp = ZeroVector( disp.size() );
 
     Vector velo_1(3*dim_solid);
-    velo_1 =0.0;
+    velo_1 = ZeroVector( velo_1.size() );
 
     ofstream out_iter("iter");
     ofstream out_res("res");
@@ -200,13 +200,13 @@ int main(int argc, char** argv)
 
         velo_1 = solid.w();
 
-        cout << "norm( disp ) init = " << maxnorm(disp) << endl;
-        cout << "norm( velo_! ) init = " << maxnorm(velo_1) << endl;
+        cout << "norm( disp ) init = " << norm_inf(disp) << endl;
+        cout << "norm( velo_! ) init = " << norm_inf(velo_1) << endl;
 
         maxiter = maxpf;
 
         // the newton solver
-        status = newton(disp,oper, maxnorm, abstol, reltol, maxiter, etamax,linesearch,out_res,time);
+        status = newton(disp,oper, norm_inf_adaptor(), abstol, reltol, maxiter, etamax,linesearch,out_res,time);
 
         if(status == 1) {
             cout << "Inners iterations failed\n";

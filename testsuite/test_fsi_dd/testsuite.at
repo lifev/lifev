@@ -25,8 +25,8 @@
 # \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
 # \date 2004-08-29
 # 
-AT_SETUP([test_fsi_dd])
-AT_KEYWORDS([fsi dd])
+AT_SETUP([test_fsi_newton])
+AT_KEYWORDS([fsi newton])
 AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 #-------------------------------------------------
 #      Data file for Fluid Structure Solver 

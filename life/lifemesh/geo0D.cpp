@@ -23,44 +23,53 @@ namespace LifeV
 /*--------------------------------------------------------------
                                  Geo0D
   ---------------------------------------------------------------*/
-Geo0D::Geo0D() :
-        MeshEntityWithBoundary( 0 )
-{}
+Geo0D::Geo0D()
+    :
+    MeshEntityWithBoundary( 0 ),
+    _coor()
+{
+    _coor.assign( 0 );
+}
 
-Geo0D::Geo0D( ID id, bool boundary ) :
-        MeshEntityWithBoundary( id, boundary )
-{}
+Geo0D::Geo0D( ID id, bool boundary )
+    :
+    MeshEntityWithBoundary( id, boundary ),
+    _coor()
+{
+    _coor.assign( 0 );
+}
 
-Geo0D::Geo0D( ID id, Real x, Real y, Real z, bool boundary ) :
-        MeshEntityWithBoundary( id, boundary )
+Geo0D::Geo0D( ID id, Real x, Real y, Real z, bool boundary )
+    :
+    MeshEntityWithBoundary( id, boundary ),
+    _coor()
 {
     _coor[ 0 ] = x;
     _coor[ 1 ] = y;
     _coor[ 2 ] = z;
 }
 
-Geo0D::Geo0D( Geo0D const & G ) :
-        MeshEntityWithBoundary( G._id, G._boundary )
+Geo0D::Geo0D( Geo0D const & G )
+    :
+    MeshEntityWithBoundary( G._id, G._boundary ),
+    _coor( G._coor )
 {
-    for ( UInt i = 0; i < nDimensions; ++i )
-        _coor[ i ] = G._coor[ i ];
 }
 
 Geo0D &
 Geo0D::operator=( Geo0D const & G )
-// Assignement operator
 {
+    if (  this == &G )
+        return *this;
     _id = G._id;
     _boundary = G._boundary;
-    for ( UInt i = 0; i < nDimensions; ++i )
-    {
-        _coor[ i ] = G._coor[ i ];
-    }
+    _coor = G._coor;
     return *this;
 }
 
 
-std::ostream & Geo0D::showMe( bool verbose, std::ostream & out ) const
+std::ostream &
+Geo0D::showMe( bool verbose, std::ostream & out ) const
 {
     out.setf( std::ios::scientific, std::ios::floatfield );
     out << " Geo0D object " << std::endl;
@@ -68,12 +77,11 @@ std::ostream & Geo0D::showMe( bool verbose, std::ostream & out ) const
     {
         out << " Coordinates:" << std::endl;
         Real const * c = coor();
-	unsigned i;				//meneghin: remove ending comma
-        for ( i = 0; i < nDimensions-1; i++ )	//
+        for ( unsigned i = 0; i < nDimensions; i++ )
         {
             out << c[ i ] << ",  ";
         }
-        out << c[i] << std::endl << std::endl;	//
+        out << std::endl << std::endl;
     }
     out << "ID= " << id() << "  ";
     out << "----- END OF Geo0D data ---" << std::endl << std::endl;

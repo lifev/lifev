@@ -33,18 +33,15 @@
 #include <cmath>
 #include <utility>
 
-#include "lifeV.hpp"
-#include "dataOneDModel.hpp"
-#include "basicOneDMesh.hpp"
-#include "dataAztec.hpp"
-#include "geoMap.hpp"
-#include "currentFE.hpp"
-#include "refFE.hpp"
-#include "dofOneD.hpp"
-#include "bcCond.hpp"
-#include "medit_wrtrs.hpp"
+#include <lifeV.hpp>
+#include <dataOneDModel.hpp>
+#include <basicOneDMesh.hpp>
+#include <geoMap.hpp>
+#include <currentFE.hpp>
+#include <refFE.hpp>
+#include <dofOneD.hpp>
 
-#include "gracePlot.hpp"
+#include <gracePlot.hpp>
 
 namespace LifeV
 {
@@ -54,8 +51,7 @@ namespace LifeV
 */
 
 class OneDModelHandler:
-  public DataOneDModel,
-  public DataAztec
+  public DataOneDModel
 {
 public:
 
@@ -107,7 +103,7 @@ protected:
   CurrentFE _M_fe;     //!< current finite element
 
 
-  //! Dirichlet boundary value at left and right boundaries (NO bc_handler)
+  //! Dirichlet boundary value at left and right boundaries (NO BCHandler)
   Vec2D _M_bcDirLeft; //! first -> U1, second ->U2
   Vec2D _M_bcDirRight;
 

@@ -15,15 +15,15 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*!
   \file convDiffReactHandler.h
   \author M. Prosi
   \date 03/2004
   \version 1.0
- 
+
   \brief This file contains an abstract class for the Convection-Diffusion-Reaktion equation  solvers.
- 
+
 */
 
 #ifndef _CONVDIFFREACTHANDLER_H_
@@ -37,7 +37,7 @@
 #include "refFE.hpp"
 #include "dof.hpp"
 #include "medit_wrtrs.hpp"
-#include "bcCond.hpp"
+#include "bcHandler.hpp"
 #include "bdf.hpp"
 #include "post_proc.hpp"
 #include "openDX_wrtrs.hpp"
@@ -49,11 +49,11 @@ namespace LifeV
 {
 /*!
   \class convDiffReactHandler
- 
+
   Abstract class which defines the general structure of a Convection-Diffusion-Reaction solver.
   For each new Convection-Diffusion-Reaction solver  we have to implement the corresponding
   timeAdvance and an iterate methods
- 
+
 */
 
 template <typename Mesh>
@@ -64,6 +64,7 @@ class ConvDiffReactHandler:
 public:
 
     typedef Real ( *Function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
+    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> source_type;
 
     //! Constructor
     /*!
@@ -75,7 +76,7 @@ public:
       \param ord_bdf order of the bdf time advancing scheme (default: Backward Euler)
     */
     ConvDiffReactHandler( const GetPot& data_file, const RefFE& refFE_c,
-                          const QuadRule& Qr_c, const QuadRule& bdQr_c, BC_Handler& BCh_c );
+                          const QuadRule& Qr_c, const QuadRule& bdQr_c, BCHandler& BCh_c );
 
     //! Sets initial condition for the concentration (incremental approach): the initial time is t0, the time step dt
     void initialize( const Function& c0, Real t0, Real dt );
@@ -88,7 +89,7 @@ public:
       \param source volumic source
       \param time present time
     */
-    virtual void timeAdvance( const Function source, const Real& time ) = 0;
+    virtual void timeAdvance( source_type const& source, const Real& time ) = 0;
 
     //! Update convective term, bc treatment and solve the linearized cdr system
     virtual void iterate( const Real& time ) = 0;
@@ -147,7 +148,7 @@ protected:
     std::vector<intpolcoord> _u_to_c;
 
     //! The BC handler
-    BC_Handler& _BCh_c;
+    BCHandler& _BCh_c;
 
     // ! The BDF Time Advance Method
     Bdf _bdf;
@@ -165,7 +166,7 @@ protected:
 template <typename Mesh>
 ConvDiffReactHandler<Mesh>::
 ConvDiffReactHandler( const GetPot& data_file, const RefFE& refFE_c,
-                      const QuadRule& Qr_c, const QuadRule& bdQr_c, BC_Handler& BCh_c ) :
+                      const QuadRule& Qr_c, const QuadRule& bdQr_c, BCHandler& BCh_c ) :
         DataConvDiffReact<Mesh>( data_file ),
         _refFE_c( refFE_c ),
         _dof_c( _mesh, _refFE_c ),

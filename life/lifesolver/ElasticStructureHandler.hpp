@@ -15,15 +15,15 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*!
   \file ElasticStructureHandler.h
   \author M.A. Fernandez
   \date 06/2003
   \version 1.0
- 
+
   \brief This file contains an abstract class for Elastic Structures.
- 
+
 */
 
 #ifndef _ELASTICSTRUCTUREHANDLER_H_
@@ -39,7 +39,7 @@
 #include "dof.hpp"
 #include "lifeV.hpp"
 #include "medit_wrtrs.hpp"
-#include "bcCond.hpp"
+#include "bcHandler.hpp"
 
 namespace LifeV
 {
@@ -55,6 +55,7 @@ class ElasticStructureHandler:
 public:
 
     typedef Real ( *Function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
+    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> source_type;
 
     //! Constructor
     /*!
@@ -65,7 +66,7 @@ public:
       \param BCh boundary conditions for the displacement
     */
     ElasticStructureHandler( const GetPot& data_file, const RefFE& refFE,
-                             const QuadRule& Qr, const QuadRule& bdQr, BC_Handler& BCh );
+                             const QuadRule& Qr, const QuadRule& bdQr, BCHandler& BCh );
 
     //! Sets initial condition for the displacment en velocity
     void initialize( const Function& d0, const Function& w0 );
@@ -75,7 +76,7 @@ public:
       \param source volumic force
       \param time present time
     */
-    virtual void timeAdvance( const Function source, const Real& time ) = 0;
+    virtual void timeAdvance( source_type const& , const Real& time ) = 0;
 
     //! Solve the non-linear problem
     virtual void iterate() = 0;
@@ -98,6 +99,11 @@ public:
     //! Do nothing destructor
     virtual ~ElasticStructureHandler()
     {}
+
+    //! getters and setters
+
+    CurrentBdFE & feBd(){return _feBd;}
+    Dof         & dof() {return _dof;}
 
 protected:
 
@@ -129,7 +135,7 @@ protected:
     PhysVectUnknown<Vector> _w;
 
     //! The BC handler
-    BC_Handler& _BCh;
+    BCHandler& _BCh;
 
     //! The actual time
     Real _time;
@@ -149,7 +155,7 @@ protected:
 template <typename Mesh>
 ElasticStructureHandler<Mesh>::
 ElasticStructureHandler( const GetPot& data_file, const RefFE& refFE,
-                         const QuadRule& Qr, const QuadRule& bdQr, BC_Handler& BCh )
+                         const QuadRule& Qr, const QuadRule& bdQr, BCHandler& BCh )
         :
         DataElasticStructure<Mesh>( data_file ),
         _refFE( refFE ),
@@ -169,7 +175,7 @@ ElasticStructureHandler( const GetPot& data_file, const RefFE& refFE,
 
 // Returns the displacement vector
 template <typename Mesh>
-PhysVectUnknown<Vector>&
+PhysVectUnknown<Vector> &
 ElasticStructureHandler<Mesh>::d()
 {
     return _d;
@@ -178,7 +184,7 @@ ElasticStructureHandler<Mesh>::d()
 
 // Returns the velocity vector
 template <typename Mesh>
-PhysVectUnknown<Vector>&
+PhysVectUnknown<Vector> &
 ElasticStructureHandler<Mesh>::w()
 {
     return _w;

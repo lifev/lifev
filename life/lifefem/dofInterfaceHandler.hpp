@@ -15,7 +15,7 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*!
   \file dofInterfaceHandler.h
   \brief Class for connecting the dof of a mesh (3D) and an interface (2D)
@@ -35,8 +35,6 @@
 
 namespace LifeV
 {
-//using namespace std;
-
 class DofInterfaceHandler
 {
 
@@ -66,8 +64,8 @@ public:
     //! InIBC , OutIBC
     void initVectors();
 
-    //! creates the list of the classes of BCVector_Interface
-    void initBCVector_Interface();
+    //! creates the list of the classes of BCVectorInterface
+    void initBCVectorInterface();
 
     //! How many neighbors stored?
     UInt NbNeigh() const;
@@ -101,8 +99,8 @@ public:
     Vector & OutIBC_byRefInterf( const Int & refinterf ) ;
 
     //! extracting a BCVector in the _bcvList list (starts from 0)
-    const BCVector_Interface & BCvec( const UInt & i ) const;
-    BCVector_Interface & BCvec( const UInt & i ) ;
+    const BCVectorInterface & BCvec( const UInt & i ) const;
+    BCVectorInterface & BCvec( const UInt & i ) ;
 
     /*! This method returns the corresponding index number in the vectors
       (_neighList, _InIBCList ...) living on the interfaces
@@ -136,8 +134,8 @@ private:
     //! current subdomain in a domain decomposition method).
     std::vector< Vector > _OutIBCList;
 
-    //! list of classes of BCVector_Interface (one per interface)
-    std::vector< BCVector_Interface > _bcvList;
+    //! list of classes of BCVectorInterface (one per interface)
+    std::vector< BCVectorInterface > _bcvList;
 
     //! map between the index number (second) in the vectors
     //!  (_neighList, _InIBCList ...)
