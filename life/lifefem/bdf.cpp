@@ -92,11 +92,15 @@ void Bdf::initialize_unk(std::vector<Vector> uv0)
   UInt n0 = uv0.size();
 
   // Check if uv0 has the right dimensions
-  ASSERT(n0<_n,"Initial data are not enough for the selected BDF")
+  ASSERT(n0>=_n,"Initial data are not enough for the selected BDF")
 
-  // if n0>n, only the first n unital data will be considered
-  if (_n>n0) std::cout << "The initial data set is larger than needed by the BDF. Only the first n data will be considered. " << std::endl;
-
+  // if n0>n, only the first n inital data will be considered
+  if (n0>_n) {
+    std::cout << "The initial data set is larger than needed by the BDF."
+              << std::endl;
+    std::cout << "Only the first " << _n <<" data will be considered. "
+              << std::endl;
+  }
   for (iter=_unk.begin() ; iter != iter_end; iter++){
     *iter=*iter0;
     iter0++;
@@ -181,8 +185,6 @@ void Bdf::shift_right(Vector unk_curr)
 
 Vector Bdf::time_der(Real dt)
 {
-  // ! Compute the right hand side of the time derivative formula, i.e.
-  // ! \alpha[0] u^{n+1} = right hand side
   Vector ut(_s);
 
   for (UInt j=0;j<_s;++j) ut[j]=0.;
@@ -197,9 +199,6 @@ Vector Bdf::time_der(Real dt)
 
 Vector Bdf::time_der()
 {
-  // ! Compute the right hand side of the time derivative formula, i.e.
-  // ! \alpha[0] u^{n+1} = right hand side
-  // ! In this case, the time step is considered elsewhere (e.g. included in the mass matrix)
   Vector ut(_s);
 
   for (UInt j=0;j<_s;++j) ut[j]=0.;
@@ -214,8 +213,6 @@ Vector Bdf::time_der()
 
 Vector Bdf::extrap()
 {
-  // ! Compute the approximation of u^{n+1}
-  // ! extrapolated
   Vector ue(_s);
   for (UInt j=0;j<_s;++j) ue[j]=0.;
 

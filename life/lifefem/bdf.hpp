@@ -22,8 +22,8 @@
   \date 04/2003
   \version 1.0
 
-  \brief File containing a class for an easy handling of different order time discretizations/extrapolations
-         BDF based
+  \brief File containing a class for an easy handling of different order time
+  discretizations/extrapolations BDF based
 
 */
 #ifndef _BDF_H
@@ -38,41 +38,102 @@ namespace LifeV
 {
 const uint BDF_MAX_ORDER =  3;
 
-typedef Real (*Funct)(const Real&, const Real&, const Real&, const Real&, const ID&);
+typedef Real (*Funct)(const Real&, const Real&, const Real&, const Real&,
+                      const ID&);
 
+/*!
+  \class Bdf
+  \brief Backward differencing formula time discretization
+  
+  A differential equation of the form
+  
+  \f$ M u' = A u + f \f$
+  
+  is discretized in time as
+  
+  \f$ M p'(t_{k+1}) = A u_{k+1} + f_{k+1} \f$
+  
+  where p denotes the polynomial of order n in t that interpolates
+  (t_i,u_i) for i = k-n+1,...,k+1.
+  
+  The approximative time derivative \f$ p'(t_{k+1}) \f$ is a linear
+  combination of state vectors u_i:
+  
+  \f$ p'(t_{k+1}) = \frac{1}{\Delta t} (\alpha_0 u_{k+1} - \sum_{i=0}^n \alpha_i u_{k+1-i} )\f$
+  
+  Thus we have
+  
+  \f$ \frac{\alpha_0}{\Delta t} M u_{k+1} = A u_{k+1} + f + \bar{p} \f$
+  
+  with
+  
+  \f$ \bar{p} = \frac{1}{\Delta t} \sum_{i=1}^n \alpha_i u_{k+1-i} \f$
+  
+  This class stores the n last state vectors in order to be able to
+  calculate \f$ \bar{p} \f$. It also provides alpha_i
+  and can extrapolate the the new state from the n last states with a
+  polynomial of order n-1:
+  
+  \f$ u_{k+1} \approx \sum_{i=0}^{n-1} \beta_i u_{k-i} \f$
+*/
 class Bdf
 {
-
  public:
-  // !Constructor
+  /*! Constructor
+   *  @param n order of the BDF
+   */
   Bdf(const UInt n);
-  // ! Inizialize all the entries of the unknown vector to be derived with the vector u0 (duplicated)
+
+  //! Initialize all the entries of the unknown vector to be derived with the
+  //! vector u0 (duplicated)
   void initialize_unk(Vector u0);
-  // ! Inizialize all the entries of the unknown vector to be derived with a set of vectors uv0
-  void initialize_unk(std::vector<Vector > uv0);
-  // ! Initialize alle the entries of the unknonwn vectors with a given function
-template<typename Mesh,typename RefFE, typename CurrFE, typename Dof>
-  void initialize_unk(const Funct& u0,Mesh& mesh,RefFE& refFE, CurrFE& currFE, Dof& dof, Real t0, Real dt, UInt nbComp);
 
+  //! Initialize all the entries of the unknown vector to be derived with a
+  //! set of vectors uv0
+  void initialize_unk(std::vector<Vector> uv0);
 
-  // ! Update the vectors of the previous time steps by shifting on the right the old values
+  /*! Initialize all the entries of the unknonwn vectors with a given function
+      The array of initial conditions needed by the selected BDF is
+      initialized as follows: _unk=[ u0(t0), u0(t0-dt), u0(t0-2*dt), ...]
+      For the space dependence of the initial conditions we need informations
+      on:
+      -# the mesh (coordinates of points)
+      -# the reference and the current FE (basis functions)
+      -# is it a vector or a scalar problem ? bdf doesn't know it
+      -# which is the initial time (t0) and the time step (for solutions
+         before the initial instant)
+      Based on the NavierStokesHandler::initialize by M. Fernandez
+  */
+  template<typename Mesh, typename RefFE, typename CurrFE, typename Dof>
+  void initialize_unk(const Funct& u0,Mesh& mesh,RefFE& refFE, CurrFE& currFE,
+                      Dof& dof, Real t0, Real dt, UInt nbComp);
+
+  /*! Update the vectors of the previous time steps by shifting on the right
+   *  the old values.
+   *  @param u_curr current (new) value of the state vector
+   */
   void shift_right(Vector u_curr);
 
-  // ! Carry out the time derivative (BDF of order q)
+  //! Returns the right hand side \f$ \bar{p} \f$ of the time derivative
+  //! formula
   Vector time_der(Real dt);
 
-  // ! Carry out the time derivative (BDF of order q) whenever the time step is considered elsewhere
+  //! Returns the right hand side \f$ \bar{p} \Delta t \f$ of the time
+  //! derivative formula. The timestep is taken into account elsewhere,
+  //! e. g. in the mass matrix.
   Vector time_der();
 
-  // ! Carry out the time extrapolation (BDF based)
+  //! Compute the polynomial extrapolation approximation of order n-1 of
+  //! u^{n+1} defined by the n stored state vectors
   Vector extrap();
 
-  // ! Return the i-th coefficient of the time derivative
+  //! Return the i-th coefficient of the time derivative alpha_i
   double coeff_der(UInt i);
 
-  // ! Return the i-th coefficient of the time extrapolation
+  //! Return the i-th coefficient of the time extrapolation beta_i
   double coeff_ext(UInt i);
 
+  //! Return a vector with the last n state vectors
   std::vector<Vector> unk();
 
   void showMe();
@@ -80,17 +141,21 @@ template<typename Mesh,typename RefFE, typename CurrFE, typename Dof>
   ~Bdf();
 
  private:
-  // ! Order of the BDF derivative/extrapolation: the time-derivative coefficients vector has size n+1,
-  // ! the extrapolation vector has size n
+  //! Order of the BDF derivative/extrapolation: the time-derivative
+  //! coefficients vector has size n+1, the extrapolation vector has size n
   UInt _n;
-  // ! Size of the unknown vector
+
+  //! Size of the unknown vector
   UInt _s;
-  // ! Coefficients of the time bdf discretization: u_t (t^{n+1}) = alpha(0) u^{n+1}-alpha(1) u^{n} - alpha(2) u^{n-1} ...
+
+  //! Coefficients \f$ \alpha_i \f$ of the time bdf discretization
   Vector _alpha;
-  // ! Coefficients of the  extrapolation: u(t^{n+1}) = beta(0) u^{n}+beta(1) u^{n-1} + beta(2) u^{n-2} + ...
+  
+  //! Coefficients \f$ \beta_i \f$ of the extrapolation
   Vector _beta;
 
-  std::vector<Vector > _unk; // Unknown solutions stored
+  //! Last n state vectors
+  std::vector<Vector> _unk;
 };
 
 
@@ -99,15 +164,9 @@ template<typename Mesh,typename RefFE, typename CurrFE, typename Dof>
 //
 
 template<typename Mesh, typename RefFE, typename CurrFE, typename Dof>
-void Bdf::initialize_unk(const Funct& u0,Mesh& mesh,RefFE& refFE, CurrFE& currFE, Dof& dof, Real t0, Real dt, UInt nbComp=1)
-  // The array of initial conditions needed by the selected BDF is initialized as follows
-  // _unk=[ u0(t0), u0(t0-dt), u0(t0-2*dt), ...]
-  // For the space dependence of the initial conditions we need informations on:
-  // 1) the mesh (coordinates of points)
-  // 2) the reference and the current FE (basis functions)
-  // 3) is it a vector or a scalar problem ? bdf doesn't know it
-  // 4) which is the initial time (t0) and the time step (for solutions before the initial instant)
-  // Based on the NavierStokesHandler::initialize by M. Fernandez
+void Bdf::initialize_unk(const Funct& u0, Mesh& mesh, RefFE& refFE, 
+                         CurrFE& currFE, Dof& dof, Real t0, Real dt,
+                         UInt nbComp=1)
 {
   typedef  typename Mesh::VolumeShape GeoShape; // Element shape
 
@@ -154,23 +213,27 @@ void Bdf::initialize_unk(const Funct& u0,Mesh& mesh,RefFE& refFE, CurrFE& currFE
       // loop on element vertices
       for (ID iVe=1; iVe<=nElemV; ++iVe){
 
-	// Loop number of Dof per vertex
-	for (ID l=1; l<=nDofpV; ++l) {
-	  lDof = (iVe-1)*nDofpV + l; // Local dof in this element
+        // Loop number of Dof per vertex
+        for (ID l=1; l<=nDofpV; ++l) {
+          lDof = (iVe-1)*nDofpV + l; // Local dof in this element
 
-	  // Nodal coordinates
-	  currFE.coorMap(x, y, z, currFE.refFE.xi(lDof-1), currFE.refFE.eta(lDof-1), currFE.refFE.zeta(lDof-1));
+          // Nodal coordinates
+          currFE.coorMap(x, y, z, currFE.refFE.xi(lDof-1),
+                         currFE.refFE.eta(lDof-1),
+                         currFE.refFE.zeta(lDof-1));
 
-	  // Loop on data vector components ****************
+          // Loop on data vector components ****************
           backtime=0;
-          for (std::vector<Vector>::iterator it=_unk.begin();it<_unk.end();it++){
-	    for (UInt icmp=0; icmp < nbComp; ++icmp){
-	      //              std::cout << "comp " << icmp*size_comp + dof.localToGlobal(iElem,lDof) - 1 << std::endl;
-	     (*it)( icmp*size_comp + dof.localToGlobal(iElem,lDof) - 1 ) = u0(t0-backtime*dt,x,y,z,icmp+1);
-             backtime++;
-	    }
-	  }
-	}
+          for (std::vector<Vector>::iterator it=_unk.begin(); it<_unk.end();
+               it++){
+            for (UInt icmp=0; icmp < nbComp; ++icmp) {
+              // std::cout << "comp " << icmp*size_comp + dof.localToGlobal(iElem,lDof) - 1 << std::endl;
+              (*it)( icmp*size_comp + dof.localToGlobal(iElem,lDof) - 1 ) =
+                  u0(t0-backtime*dt, x, y, z, icmp+1);
+              backtime++;
+            }
+          }
+        }
       }
     }
 
@@ -180,22 +243,27 @@ void Bdf::initialize_unk(const Funct& u0,Mesh& mesh,RefFE& refFE, CurrFE& currFE
       // loop on element edges
       for (ID iEd=1; iEd <=nElemE; ++iEd) {
 
-	// Loop number of Dof per edge
-	for (ID l=1; l<=nDofpE; ++l) {
-	  lDof = nDofElemV + (iEd-1)*nDofpE + l; // Local dof in the adjacent Element
+        // Loop number of Dof per edge
+        for (ID l=1; l<=nDofpE; ++l) {
+          // Local dof in the adjacent Element
+          lDof = nDofElemV + (iEd-1)*nDofpE + l;
 
-	  // Nodal coordinates
-	  currFE.coorMap(x, y, z, currFE.refFE.xi(lDof-1), currFE.refFE.eta(lDof-1), currFE.refFE.zeta(lDof-1));
+          // Nodal coordinates
+          currFE.coorMap(x, y, z, currFE.refFE.xi(lDof-1),
+                         currFE.refFE.eta(lDof-1),
+                         currFE.refFE.zeta(lDof-1));
 
-	  // Loop on data vector components
+          // Loop on data vector components
           backtime=0;
-          for (std::vector<Vector>::iterator it=_unk.begin();it<_unk.end();it++){
-	    for (UInt icmp=0; icmp < nbComp; ++icmp){
-	     (*it)( icmp*size_comp + dof.localToGlobal(iElem,lDof) - 1 ) = u0(t0-backtime*dt,x,y,z,icmp+1);
-             backtime++;
-	    }
-	  }
-	}
+          for (std::vector<Vector>::iterator it=_unk.begin(); it<_unk.end();
+               it++){
+            for (UInt icmp=0; icmp < nbComp; ++icmp) {
+              (*it)( icmp*size_comp + dof.localToGlobal(iElem,lDof) - 1 ) =
+                  u0(t0-backtime*dt,x,y,z,icmp+1);
+              backtime++;
+            }
+          }
+        }
       }
     }
 
