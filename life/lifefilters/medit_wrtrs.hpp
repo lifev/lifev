@@ -23,7 +23,7 @@
 
 namespace LifeV
 {
-using namespace std;
+
 /*!
   \file medit_wrtrs.h
   \author J.-F. Gerbeau & V. Martin
@@ -57,7 +57,7 @@ using namespace std;
   wr_medit_ascii_scalar("meshname.bb",pressure.giveVec(),pressure.size());
 */
 
-void wr_medit_ascii_scalar(string fname, Real* U, int Usize,int type=2);
+void wr_medit_ascii_scalar(std::string fname, Real* U, int Usize,int type=2);
 
 /*!
   A simple medit vector writer.
@@ -77,7 +77,7 @@ void wr_medit_ascii_scalar(string fname, Real* U, int Usize,int type=2);
   PhysVectUnknown<Vector> velocity(nbDof);
   wr_medit_ascii_vector("meshname.bb",velocity.giveVec(),velocity.size());
 */
-void wr_medit_ascii_vector(string fname, Real* U, int Usize,int type=2);
+void wr_medit_ascii_vector(std::string fname, Real* U, int Usize,int type=2);
 
 /*!
   A simple medit scalar reader.
@@ -100,7 +100,7 @@ void wr_medit_ascii_vector(string fname, Real* U, int Usize,int type=2);
   wr_medit_ascii_scalar("meshname.bb",pressure.giveVec(),pressure.size());
 */
 
-void rd_medit_ascii_scalar(string fname, Real* U, const UInt& Usize, UInt& type);
+void rd_medit_ascii_scalar(std::string fname, Real* U, const UInt& Usize, UInt& type);
 
 /*!
   A simple medit vector reader.
@@ -122,7 +122,7 @@ void rd_medit_ascii_scalar(string fname, Real* U, const UInt& Usize, UInt& type)
   PhysVectUnknown<Vector> velocity(nbDof);
   wr_medit_ascii_vector("meshname.bb",velocity.giveVec(),velocity.size());
 */
-void rd_medit_ascii_vector(string fname, Real* U, const UInt& Usize, UInt& type);
+void rd_medit_ascii_vector(std::string fname, Real* U, const UInt& Usize, UInt& type);
 
 
 /*!
@@ -132,26 +132,26 @@ void rd_medit_ascii_vector(string fname, Real* U, const UInt& Usize, UInt& type)
   \param mesh : the Mesh object
 */
 template<typename Mesh>
-void wr_medit_ascii(string fname, const Mesh& mesh) {
+void wr_medit_ascii(std::string fname, const Mesh& mesh) {
 
-  ofstream ofile(fname.c_str());
+  std::ofstream ofile(fname.c_str());
 
   ASSERT(ofile,"Error: Output file cannot be open");
 
   ofile << "MeshVersionFormatted 1\n";
   ofile << "Dimension 3\n";
-  ofile << endl;
+  ofile << std::endl;
   ofile << "Vertices\n";
 
   UInt nV = mesh.numVertices();
-  ofile << nV << endl;
+  ofile << nV << std::endl;
 
   for(UInt i=1; i <= nV; ++i)
     ofile << mesh.pointList(i).x() << " "
 	  << mesh.pointList(i).y() << " "
 	  << mesh.pointList(i).z() << " "
-          << mesh.pointList(i).marker() << endl;
-  ofile << endl;
+          << mesh.pointList(i).marker() << std::endl;
+  ofile << std::endl;
 
   typedef  typename Mesh::FaceShape FaceShape;
 
@@ -167,7 +167,7 @@ void wr_medit_ascii(string fname, const Mesh& mesh) {
   }
 
   UInt nBdF = mesh. numBFaces();
-  ofile << nBdF << endl;
+  ofile << nBdF << std::endl;
 
   UInt nVpF = FaceShape::numVertices;
 
@@ -175,9 +175,9 @@ void wr_medit_ascii(string fname, const Mesh& mesh) {
   for (ID k=1; k<=nBdF; ++k) {
     for (ID i=1; i<= nVpF; ++i)
       ofile << mesh.boundaryFace(k).point(i).id() << " ";
-    ofile << mesh.boundaryFace(k).marker() << endl;
+    ofile << mesh.boundaryFace(k).marker() << std::endl;
   }
-  ofile << endl;
+  ofile << std::endl;
 
   typedef typename Mesh::VolumeShape ElementShape;
 
@@ -193,14 +193,14 @@ void wr_medit_ascii(string fname, const Mesh& mesh) {
   }
 
   UInt nE = mesh.numVolumes();
-  ofile << nE << endl;
+  ofile << nE << std::endl;
 
   UInt nVpE = ElementShape::numVertices;
 
   for (ID k=1; k<=nE; ++k) {
     for (ID i=1; i<= nVpE; ++i)
       ofile << mesh.volume(k).point(i).id() << " ";
-    ofile << mesh.volume(k).marker() << endl;
+    ofile << mesh.volume(k).marker() << std::endl;
   }
 
 }
@@ -213,26 +213,26 @@ void wr_medit_ascii(string fname, const Mesh& mesh) {
   \param mesh : the Mesh object
 */
 template<typename Mesh, typename Vector>
-void wr_medit_ascii(string fname, const Mesh& mesh, const Vector& disp, const Real& factor) {
+void wr_medit_ascii(std::string fname, const Mesh& mesh, const Vector& disp, const Real& factor) {
 
-  ofstream ofile(fname.c_str());
+  std::ofstream ofile(fname.c_str());
 
   ASSERT(ofile,"Error: Output file cannot be open");
 
   ofile << "MeshVersionFormatted 1\n";
   ofile << "Dimension 3\n";
-  ofile << endl;
+  ofile << std::endl;
   ofile << "Vertices\n";
 
   UInt nV = mesh.numVertices();
-  ofile << nV << endl;
+  ofile << nV << std::endl;
 
   for(UInt i=1; i <= nV; ++i)
     ofile << (mesh.pointList(i).x()-disp[i-1     ]) + factor*disp[i-1     ] << " "
 	  << (mesh.pointList(i).y()-disp[i-1+nV  ]) + factor*disp[i-1+nV  ] << " "
 	  << (mesh.pointList(i).z()-disp[i-1+2*nV]) + factor*disp[i-1+2*nV] << " "
-          << mesh.pointList(i).marker() << endl;
-  ofile << endl;
+          << mesh.pointList(i).marker() << std::endl;
+  ofile << std::endl;
 
   typedef  typename Mesh::FaceShape FaceShape;
 
@@ -248,7 +248,7 @@ void wr_medit_ascii(string fname, const Mesh& mesh, const Vector& disp, const Re
   }
 
   UInt nBdF = mesh. numBFaces();
-  ofile << nBdF << endl;
+  ofile << nBdF << std::endl;
 
   UInt nVpF = FaceShape::numVertices;
 
@@ -256,9 +256,9 @@ void wr_medit_ascii(string fname, const Mesh& mesh, const Vector& disp, const Re
   for (ID k=1; k<=nBdF; ++k) {
     for (ID i=1; i<= nVpF; ++i)
       ofile << mesh.boundaryFace(k).point(i).id() << " ";
-    ofile << mesh.boundaryFace(k).marker() << endl;
+    ofile << mesh.boundaryFace(k).marker() << std::endl;
   }
-  ofile << endl;
+  ofile << std::endl;
 
   typedef typename Mesh::VolumeShape ElementShape;
 
@@ -274,14 +274,14 @@ void wr_medit_ascii(string fname, const Mesh& mesh, const Vector& disp, const Re
   }
 
   UInt nE = mesh.numVolumes();
-  ofile << nE << endl;
+  ofile << nE << std::endl;
 
   UInt nVpE = ElementShape::numVertices;
 
   for (ID k=1; k<=nE; ++k) {
     for (ID i=1; i<= nVpE; ++i)
       ofile << mesh.volume(k).point(i).id() << " ";
-    ofile << mesh.volume(k).marker() << endl;
+    ofile << mesh.volume(k).marker() << std::endl;
   }
 
 }
@@ -294,26 +294,26 @@ void wr_medit_ascii(string fname, const Mesh& mesh, const Vector& disp, const Re
   \param mesh : the Mesh object
 */
 template<typename Mesh, typename Vector>
-void wr_medit_ascii2(string fname, const Mesh& mesh, const Vector& disp, const Real& factor) {
+void wr_medit_ascii2(std::string fname, const Mesh& mesh, const Vector& disp, const Real& factor) {
 
-  ofstream ofile(fname.c_str());
+  std::ofstream ofile(fname.c_str());
 
   ASSERT(ofile,"Error: Output file cannot be open");
 
   ofile << "MeshVersionFormatted 1\n";
   ofile << "Dimension 3\n";
-  ofile << endl;
+  ofile << std::endl;
   ofile << "Vertices\n";
 
   UInt nV = mesh.numVertices();
-  ofile << nV << endl;
+  ofile << nV << std::endl;
 
   for(UInt i=1; i <= nV; ++i)
     ofile << mesh.pointList(i).x() + factor*disp[i-1     ] << " "
 	  << mesh.pointList(i).y() + factor*disp[i-1+nV  ] << " "
 	  << mesh.pointList(i).z() + factor*disp[i-1+2*nV] << " "
-          << mesh.pointList(i).marker() << endl;
-  ofile << endl;
+          << mesh.pointList(i).marker() << std::endl;
+  ofile << std::endl;
 
   typedef  typename Mesh::FaceShape FaceShape;
 
@@ -329,7 +329,7 @@ void wr_medit_ascii2(string fname, const Mesh& mesh, const Vector& disp, const R
   }
 
   UInt nBdF = mesh. numBFaces();
-  ofile << nBdF << endl;
+  ofile << nBdF << std::endl;
 
   UInt nVpF = FaceShape::numVertices;
 
@@ -337,9 +337,9 @@ void wr_medit_ascii2(string fname, const Mesh& mesh, const Vector& disp, const R
   for (ID k=1; k<=nBdF; ++k) {
     for (ID i=1; i<= nVpF; ++i)
       ofile << mesh.boundaryFace(k).point(i).id() << " ";
-    ofile << mesh.boundaryFace(k).marker() << endl;
+    ofile << mesh.boundaryFace(k).marker() << std::endl;
   }
-  ofile << endl;
+  ofile << std::endl;
 
   typedef typename Mesh::VolumeShape ElementShape;
 
@@ -355,14 +355,14 @@ void wr_medit_ascii2(string fname, const Mesh& mesh, const Vector& disp, const R
   }
 
   UInt nE = mesh.numVolumes();
-  ofile << nE << endl;
+  ofile << nE << std::endl;
 
   UInt nVpE = ElementShape::numVertices;
 
   for (ID k=1; k<=nE; ++k) {
     for (ID i=1; i<= nVpE; ++i)
       ofile << mesh.volume(k).point(i).id() << " ";
-    ofile << mesh.volume(k).marker() << endl;
+    ofile << mesh.volume(k).marker() << std::endl;
   }
 
 }
