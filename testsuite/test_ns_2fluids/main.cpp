@@ -40,8 +40,10 @@
 #include <main.hpp>
 #include <ud_functions.hpp>
 
+/* #include <ethierSteinman.hpp> */
+
 #define ONE_QUARTER 0
-#define P1BUBBLE 1
+#define P1BUBBLE 0
 
 int main() {
     using namespace LifeV;
@@ -50,47 +52,7 @@ int main() {
 
     Chrono chrono;
 
-    // Boundary conditions
-
-    BCFunctionBase gv(g);
-
-    BCHandler BCh(6);
-    /*
-      BCh.addBC("Wall", 1, Essential, Full, gv, 3);
-      BCh.addBC("Wall", 2, Essential, Full, gv, 3);
-      BCh.addBC("Wall", 3, Essential, Full, gv, 3);
-      BCh.addBC("Wall", 4, Essential, Full, gv, 3);
-      BCh.addBC("Wall", 5, Essential, Full, gv, 3);
-      BCh.addBC("Wall", 6, Essential, Full, gv, 3);
-    */
-
-    BCh.addBC("Wall", 10, Essential, Full, gv, 3);
-    BCh.addBC("Wall", 10, Essential, Full, gv, 3);
-    BCh.addBC("Wall", 10, Essential, Full, gv, 3);
-    BCh.addBC("Wall", 10, Essential, Full, gv, 3);
-    BCh.addBC("Wall", 10, Essential, Full, gv, 3);
-    BCh.addBC("Wall", 10, Essential, Full, gv, 3);
-
-    // Source term
-
-    srcfct f;
-
-    // Finite element stuff
-
-#if P1BUBBLE
-    const RefFE& refFE_u = feTetraP1bubble;
-#else
-    const RefFE& refFE_u = feTriaP2;
-#endif
-
-    const RefFE& refFE_p = feTetraP1;
-    const RefFE& refFE_lss = feTetraP1;
-
-    const QuadRule& qr = quadRuleTetra15pt;
-    const QuadRule& qr_bd = quadRuleTria4pt;
-
     // Retriving data from data file
-
     GetPot datafile("data");
     Real t0 = datafile("navier-stokes/time-discretization/inittime", 0.);
     Real T = datafile("navier-stokes/time-discretization/endtime", 1.);
@@ -101,19 +63,54 @@ int main() {
     std::cout << "T          " << T << std::endl;
     std::cout << "==================================================" << std::endl;
 
+    // Boundary conditions
+
+    //EthierSteinmanUnsteady::setParamsFromGetPot( datafile );
+    //BCFunctionBase gv(EthierSteinmanUnsteady::uexact);
+    BCFunctionBase gv(g);
+
+    BCHandler BCh( 6, BCHandler::HINT_BC_ONLY_ESSENTIAL );
+    BCh.addBC("Wall", 1, Essential, Full, gv, 3);
+    BCh.addBC("Wall", 2, Essential, Full, gv, 3);
+    BCh.addBC("Wall", 3, Essential, Full, gv, 3);
+    BCh.addBC("Wall", 4, Essential, Full, gv, 3);
+    BCh.addBC("Wall", 5, Essential, Full, gv, 3);
+    BCh.addBC("Wall", 6, Essential, Full, gv, 3);
+
+    //BCh.addBC("Wall", 10, Essential, Full, gv, 3);
+
+    // Source term
+
+    srcfct f;
+
+    // Finite element stuff
+
+#if P1BUBBLE
+    const RefFE& refFE_u = feTetraP1bubble;
+#else
+    const RefFE& refFE_u = feTetraP2;
+#endif
+
+    const RefFE& refFE_p = feTetraP1;
+    const RefFE& refFE_lss = feTetraP2;
+
+    const QuadRule& qr = quadRuleTetra15pt;
+    const QuadRule& qr_bd = quadRuleTria4pt;
+
     // Post-processing
 
     std::string ofile_root_ls = "./results/2f";
     std::string ofile_root_velocity = "./results/v";
+    std::string ofile_root_pressure = "./results/p";
 
     // Solving the problem
 
     std::cout << "** NS2F test ** Initializing 2 fluid solver" << std::endl;
 
-    NSSolver2FluidsMixed<mesh_type> NSS("data", 
-                                        refFE_u, 
+    NSSolver2FluidsMixed<mesh_type> NSS("data",
+                                        refFE_u,
                                         refFE_p,
-                                        BCh, 
+                                        BCh,
                                         refFE_lss,
                                         BCh,
                                         qr, qr_bd);
@@ -123,12 +120,15 @@ int main() {
 
     // Export initial conditions to OpenDX format
 
-    wr_opendx_header(ofile_root_ls + "0000.dx", NSS.mesh(), NSS.dofLSFunction()); 
+    wr_opendx_header(ofile_root_ls + "0000.dx", NSS.mesh(), NSS.lsDof(), NSS.fe_ls(), "P2" );
     wr_opendx_scalar(ofile_root_ls + "0000.dx", "levelset_ipstab", NSS.lsfunction());
-
+#if P1BUBBLE
     wr_opendx_header(ofile_root_velocity + "0000.dx", NSS.mesh(), NSS.uDof(), NSS.fe_u(), "P1bubble");
+#else
+    wr_opendx_header(ofile_root_velocity + "0000.dx", NSS.mesh(), NSS.uDof(), NSS.fe_u(), "P2");
+#endif
     wr_opendx_vector(ofile_root_velocity + "0000.dx", "u", NSS.velocity(), 3);
-    
+
     std::cout << "** NS2F test ** Advancing in time" << std::endl;
 
     UInt current_step = 1;
@@ -150,10 +150,17 @@ int main() {
             number.fill('0');
             number << current_step;
 
-            wr_opendx_header(ofile_root_ls + number.str() + ".dx", NSS.mesh(), NSS.dofLSFunction()); 
+            wr_opendx_header(ofile_root_ls + number.str() + ".dx", NSS.mesh(), NSS.lsDof(), NSS.fe_ls(), "P2" );
             wr_opendx_scalar(ofile_root_ls + number.str() + ".dx", "ls", NSS.lsfunction());
 
+            wr_opendx_header(ofile_root_pressure + number.str() + ".dx", NSS.mesh(), NSS.pDof());
+            wr_opendx_scalar(ofile_root_pressure + number.str() + ".dx", "p", NSS.pressure());
+            
+#if P1BUBBLE
             wr_opendx_header(ofile_root_velocity + number.str() + ".dx", NSS.mesh(), NSS.uDof(), NSS.fe_u(), "P1bubble");
+#else
+            wr_opendx_header(ofile_root_velocity + number.str() + ".dx", NSS.mesh(), NSS.uDof(), NSS.fe_u(), "P2");
+#endif
             wr_opendx_vector(ofile_root_velocity + number.str() + ".dx", "u", NSS.velocity(), 3);
 
             steps_after_last_save = 1;
