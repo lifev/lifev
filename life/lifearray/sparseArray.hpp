@@ -23,9 +23,7 @@
 /                                                                            /
 / MATRIX VALUES                                                              /
 /                                                                            /
-/ #Version 0.0 Experimental:   21/06/2000 Alessandro Veneziani               /
-/                                                                            /
-/  I am sorry for my C++ at a very beginner level !!!!                       /
+/ 21/06/2000 Alessandro Veneziani                                            /
 /                                                                            /
 / #Purpose: Provides the basic classes for sparse matrix handling            /
 / including common formats (CSR,MSR),                                        /
@@ -38,13 +36,13 @@
 / #attempt to define the VBR matrix class in order to handle vectorial       /
 /  problems. 26/10/01, Alain Gauthier.                                       /
 /                                                                            /
-/ #modification of CSR matrice: _value can be a vector of matrices, each     /
+/ #modification of CSR matrix: _value can be a vector of matrices, each      /
 /  matrix being a RNM class. Attempt of 15/11/01.                            /
 /                                                                            /
 / #class used in IML++: construction of a DiagPreconditioner class.          /
 /  21/11/01.                                                                 /
 /                                                                            /
-/ #defintest_fe/Neumann/vition of MixedMatr class: holds the values of block matrix           /
+/ #definition of MixedMatr class: holds the values of block matrix           /
 /  stored under a MixedPattern format. 30/04/02.                             /
 /                                                                            /
 /---------------------------------------------------------------------------*/
@@ -178,9 +176,9 @@ public:
   //! account the rhs of the linear system as well)
   void diagonalize_row(UInt const r, DataType const coeff);
 
-  // Determina la matrice lampata per P1
+  //! determine the lumped matrix for P1
   vector<DataType> MassDiagP1() const;
-  // Realizza l'inversa di una matrice diagonale e la moltiplica per un'altra matrice
+  //! build the inverse of a diagonal matrix and multiply it by another matrix
   friend void MultInvDiag(const vector<Real> &Diag,
 			  const CSRMatr<CSRPatt,Real> &Mat,
 			  CSRMatr<CSRPatt,Real> &ans);
@@ -323,9 +321,9 @@ public:
   DataType * giveRaw_value() {return &(_value.front());} // give the value vector in Raw format (suitable for C)
   DataType const * giveRaw_value() const {return &(_value.front());} // give the value vector in Raw format (suitable for C)
 
-  // Determina la matrice lampata P1
+  //! determine the lumped matrix for P1
   vector<DataType> MassDiagP1() const;
-  // Realizza l'inversa di una matrice diagonale e la moltiplica per un'altra matrice
+  //! build the inverse of a diagonal matrix and multiply it by another matrix
   friend void MultInvDiag(const vector<Real> &Diag,
 			  const MSRMatr<Real> &Mat, MSRMatr<Real> &ans);
 
@@ -441,7 +439,7 @@ public:
   //! Returns the matrix element (i,j) value of block (ib,jb).
   DataType get_value(UInt ib, UInt jb, UInt i, UInt j);
   const DataType get_value(UInt ib, UInt jb, UInt i, UInt j) const;
-  //! Shows the matrice (only the pattern here).
+  //! Shows the matrix (only the pattern here).
   void ShowMe()
   {return _Patt->showMe(true);}
   //! Matrix visualization a la matlab.
@@ -553,7 +551,7 @@ class MixedMatr<BRows, BCols, MSRPatt, double>
   //! Returns the matrix element (i,j) value of block (ib,jb).
   double get_value(UInt ib, UInt jb, UInt i, UInt j);
   const double get_value(UInt ib, UInt jb, UInt i, UInt j) const;
-  //! Shows the matrice (only the pattern here).
+  //! Shows the matrix (only the pattern here).
   void ShowMe()
   {return _Patt->showMe(true);}
   //! Matrix visualization a la matlab.
@@ -663,7 +661,7 @@ class MixedMatr<BRows, BCols, CSRPatt, double>
   //! Returns the matrix element (i,j) value of block (ib,jb).
   double get_value(UInt ib, UInt jb, UInt i, UInt j);
   const double get_value(UInt ib, UInt jb, UInt i, UInt j) const;
-  //! Shows the matrice (only the pattern here).
+  //! Shows the matrix (only the pattern here).
   void ShowMe()
   {return _Patt->showMe(true);}
   //! Matrix visualization a la matlab.
@@ -928,14 +926,14 @@ set_mat_inc(UInt row, UInt col, DataType loc_val)
   return;
 };
 
-// Determina la matrice lampata per P1
+// determine the lumped matrix for P1
 template<typename DataType>
 vector<DataType>
 CSRMatr<CSRPatt,DataType>::MassDiagP1() const
 {
   UInt nrows = _Patt->nRows();
   UInt ncols = _Patt->nCols();
-  ASSERT(ncols == nrows, "La matrice deve essere quadrata per poter determinare la sua lampata");
+  ASSERT(ncols == nrows, "The matrix must be square to be lumped");
   vector<DataType> diag(nrows);
   for (UInt nrow = 0; nrow < nrows; ++nrow)
     {
@@ -946,7 +944,7 @@ CSRMatr<CSRPatt,DataType>::MassDiagP1() const
 }
 
 
-//Realizza l'inversa di una matrice diagonale e la moltiplica per un'altra matrice
+// build the inverse of a diagonal matrix and multiply it by another matrix
 void MultInvDiag(const vector<Real> &Diag,
 		 const CSRMatr<CSRPatt,Real> &Mat, CSRMatr<CSRPatt,Real> &ans) ;
 
@@ -1028,42 +1026,34 @@ void operMatVec(DataType * const mv,
   };
 }
 
-//first attempt for diagonalize (24/10/02), diagfirst is assumed !
-//version for type Vector
+/*! Diagonalization of row r of the system. Done by setting A(r,r) = coeff,
+ *  A(r,j) = 0 and A(j,r) = 0 for j!=r, and suitably correcting the right hand
+ *  side of the system.
+ *  @param r row to diagonalize
+ *  @param coeff value to set the diagonal entry A(r,r) to
+ *  @param datum value to set the fix the solution entry x(r) at
+ */
 template<typename DataType>
-void
-CSRMatr<CSRPatt,DataType>::
-diagonalize(UInt const r, DataType const coeff, Vector &b, DataType datum)
-{
-  // AIM: Diagonalization of a row of the system, by setting:
-  // A(i,i) = coeff,
-  // A(i,j) = 0,  A(j,i) = 0 for j!=i
-  // and suitably correcting the right hand side of the system
+void CSRMatr<CSRPatt,DataType>::diagonalize(UInt const r, DataType const coeff,
+                                            Vector &b, DataType datum) {
 
-  ASSERT(_Patt->nRows() >= _Patt->nCols(), "nRow must be > to nCols for diagonalization");
-  ASSERT(_Patt->diagFirst(),"Not yet implemented if not diagfirst in CSR");
+    for(UInt j=0; j<_Patt->nCols(); ++j) {
+        set_mat(r, j, 0.); // A(r,j) = 0
+    }
+    for(UInt i=0; i<_Patt->nRows(); ++i) {
+        b[i-OFFSET] -= get_value(i,r) * datum; // correct right hand side
+        set_mat(i, r, 0.); // A(j,r) = 0
+    }
 
-  _value[_Patt->give_ia()[r]-OFFSET] = coeff;
-
-  typename vector<DataType>::iterator start=_value.begin()+
-    *(_Patt->give_ia().begin()+r-OFFSET)+1; //diagfirst is assumed
-  typename vector<DataType>::iterator end=_value.begin()+
-    *(_Patt->give_ia().begin()+r+1-OFFSET);
-
-  transform(start,end,start,nihil);
-
-  b[r-OFFSET] = coeff*datum;
-
-  //Remark: in processing a list of Dirichlet nodes, there is no need to check a posteriori the right hand side
-  return;
+    set_mat(r, r, coeff); // A(r,r) = coeff
+  
+    b[r-OFFSET] = coeff*datum; // correct right hand side for row r
 }
 
 //Alain (25/10/02): works only for diagfirst case at the moment.
 template<typename DataType>
-void
-CSRMatr<CSRPatt, DataType>::
-diagonalize_row(UInt const r, DataType const coeff)
-{
+void CSRMatr<CSRPatt, DataType>::diagonalize_row(UInt const r,
+                                                 DataType const coeff) {
   ASSERT(_Patt->nRows() >= _Patt->nCols(), "nRow must be > to nCols for diagonalization");
   ASSERT(_Patt->diagFirst(),"Not yet implemented if not diagfirst in CSR");
 
@@ -1877,7 +1867,7 @@ set_mat(UInt where, DataType loc_val)
   return;
 };
 
-// Determina la matrice lampata per P1
+// determine the lumped matrix for P1
 template<typename DataType>
 vector<DataType> MSRMatr<DataType>::MassDiagP1() const
 {
@@ -1895,7 +1885,7 @@ vector<DataType> MSRMatr<DataType>::MassDiagP1() const
   return diag;
 }
 
-//Realizza l'inversa di una matrice diagonale e la moltiplica per un'altra matrice
+// build the inverse of a diagonal matrix and multiply it by another matrix
 void MultInvDiag(const vector<Real> &Diag, const MSRMatr<Real> &Mat, MSRMatr<Real> &ans) ;
 
 // give the diagonal of an MSR matrix
@@ -2113,7 +2103,7 @@ MultInvDiag(const vector<Real> &Diag,
 {
   ASSERT(find(Diag.begin(),Diag.end(),0) == Diag.end(), "Diagonal matrix Diag must be invertible");
 
-  ASSERT(Diag.size() == Mat._Patt->nRows(), "Matrices size not compatible");
+  ASSERT(Diag.size() == Mat._Patt->nRows(), "Matrix sizes not compatible");
 
   // Product:
   UInt nrows = 0;
@@ -2691,7 +2681,7 @@ MultInvDiag(const vector<Real> &Diag,
 {
   ASSERT(find(Diag.begin(),Diag.end(),0) == Diag.end(), "Diagonal matrix Diag must be invertible");
 
-  ASSERT(Diag.size() == Mat._Patt->nRows(), "Matrices size not compatible");
+  ASSERT(Diag.size() == Mat._Patt->nRows(), "Matrix sizes not compatible");
 
   // Product:
   UInt nrows = 0;
