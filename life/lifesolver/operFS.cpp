@@ -23,26 +23,30 @@ namespace LifeV
 {
 // Constructors
 
-operFS::operFS(GetPot    &data_file,
+operFS::operFS(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
+               VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
+               GetPot    &data_file,
                BCHandler &BCh_u,
                BCHandler &BCh_d,
                BCHandler &BCh_mesh):
     M_BCh_u       (BCh_u),
     M_BCh_d       (BCh_d),
     M_BCh_mesh    (BCh_mesh),
-    M_fluid       (data_file,
-                   feTetraP1bubble,
-                   feTetraP1,
-                   quadRuleTetra64pt,
-                   quadRuleTria3pt,
-                   quadRuleTetra64pt,
-                   quadRuleTria3pt,
-                   M_BCh_u, M_BCh_mesh),
-    M_solid       (data_file,
-                   feTetraP1,
-                   quadRuleTetra4pt,
-                   quadRuleTria3pt,
-                   M_BCh_d),
+//     M_fluid       (data_file,
+//                    feTetraP1bubble,
+//                    feTetraP1,
+//                    quadRuleTetra64pt,
+//                    quadRuleTria3pt,
+//                    quadRuleTetra64pt,
+//                    quadRuleTria3pt,
+//                    M_BCh_u, M_BCh_mesh),
+//     M_solid       (data_file,
+//                    feTetraP1,
+//                    quadRuleTetra4pt,
+//                    quadRuleTria3pt,
+//                    M_BCh_d),
+    M_fluid(fluid),
+    M_solid(solid),
     M_dofFluidToStructure(feTetraP1,
                           M_solid.dDof(),
                           feTetraP1bubble,
@@ -117,12 +121,6 @@ void operFS::displacementOnInterface()
     UInt totalDofFluid = M_fluid.getDisplacement().size()/ nDimF;
     UInt totalDofSolid = M_solid.d().size()/ nDimS;
 
-//     std::cout << totalDofFluid << " ";
-//     std::cout << M_fluid.uDof().numTotalDof() << " ";
-//     std::cout << totalDofSolid << " ";
-//     std::cout << nDimF << " ";
-//     std::cout << nDimS << " ";
-
     Vector dispOnInterface(M_solid.d().size());
     dispOnInterface = ZeroVector(dispOnInterface.size());
 
@@ -143,21 +141,8 @@ void operFS::displacementOnInterface()
             dispOnInterface[IDsolid - 1 + jDim*totalDofSolid] =
                 M_solid.d()              [IDsolid - 1 + jDim*totalDofSolid] -
                 M_fluid.getDisplacement()[IDfluid - 1 + jDim*totalDofFluid];
-//             std::cout << M_solid.d()[IDsolid - 1 + jDim*totalDofSolid];
-//             std::cout << " -> ";
-//             std::cout << M_fluid.getDisplacement()[IDfluid - 1 + jDim*totalDofFluid];
-//             std::cout << "(";
-//             std::cout << M_solid.d().size() << ",";
-//             std::cout << M_fluid.getDisplacement().size();
-//             std::cout << ")";
-//             std::cout << IDsolid - 1 + jDim*totalDofSolid << " ";
-//             std::cout << IDfluid - 1 + jDim*totalDofFluid;
-//             std::cout << std::endl;
         }
     }
-
-//     for (int ii = 0; ii < M_fluid.getDisplacement().size(); ++ii)
-//         std::cout << M_fluid.getDisplacement()[ii] << std::endl;
 
     std::cout << "max norm disp = " << norm_inf(dispOnInterface);
     std::cout << std::endl;

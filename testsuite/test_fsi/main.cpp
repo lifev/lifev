@@ -54,9 +54,30 @@ int main(int argc, char** argv)
     // solid displacement, and fluid mesh motion
     //
 
+
+
     BCHandler BCh_u;
     BCHandler BCh_d;
     BCHandler BCh_mesh;
+
+    //========================================================================================
+    // FLUID AND SOLID SOLVERS
+    //========================================================================================
+    //
+    // The NavierStokes ALE solver
+    //
+    NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> > fluid(data_file, feTetraP1bubble, feTetraP1,quadRuleTetra64pt,
+                                                                   quadRuleTria3pt, quadRuleTetra64pt, quadRuleTria3pt,
+                                                                   BCh_u,BCh_mesh);
+
+    // The structural solver
+    //
+    VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> > solid(data_file, feTetraP1, quadRuleTetra4pt,
+                                                                quadRuleTria3pt, BCh_d);
+
+    // Outputs
+    fluid.showMe();
+    solid.showMe();
 
     UInt method   = data_file("problem/method"    , 0);
     UInt maxpf    = data_file("problem/maxSubIter", 300);
@@ -75,7 +96,9 @@ int main(int argc, char** argv)
             std::cout << "--------------------------------------------------"
                       << std::endl;
             std::cout << std::endl;
-            p_oper.reset(new fixedPoint(data_file,
+            p_oper.reset(new fixedPoint(fluid,
+                                        solid,
+                                        data_file,
                                         BCh_u,
                                         BCh_d,
                                         BCh_mesh));
@@ -85,7 +108,9 @@ int main(int argc, char** argv)
             std::cout << "------------------------------------------------------"
                       << std::endl;
             std::cout << std::endl;
-            p_oper.reset(new steklovPoincare(data_file,
+            p_oper.reset(new steklovPoincare(fluid,
+                                             solid,
+                                             data_file,
                                              BCh_u,
                                              BCh_d,
                                              BCh_mesh));
@@ -96,13 +121,17 @@ int main(int argc, char** argv)
             std::cout << "----------------------------------------------------"
                       << std::endl;
             std::cout << std::endl;
-            p_oper.reset(new exactJacobian(data_file,
+            p_oper.reset(new exactJacobian(fluid,
+                                           solid,
+                                           data_file,
                                            BCh_u,
                                            BCh_d,
                                            BCh_mesh));
             break;
         default:
-            p_oper.reset(new steklovPoincare(data_file,
+            p_oper.reset(new steklovPoincare(fluid,
+                                             solid,
+                                             data_file,
                                              BCh_u,
                                              BCh_d,
                                              BCh_mesh));

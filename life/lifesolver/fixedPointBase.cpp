@@ -23,11 +23,13 @@
 
 namespace LifeV
 {
-fixedPoint::fixedPoint(GetPot &_dataFile,
+fixedPoint::fixedPoint(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
+                       VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
+                       GetPot &_dataFile,
                        BCHandler &BCh_u,
                        BCHandler &BCh_d,
                        BCHandler &BCh_mesh):
-    operFS(_dataFile, BCh_u, BCh_d, BCh_mesh)
+    operFS(fluid, solid, _dataFile, BCh_u, BCh_d, BCh_mesh)
 {
     M_defOmega =  _dataFile("problem/defOmega",0.01);
     std::cout << "Default aikten start value = " << M_defOmega

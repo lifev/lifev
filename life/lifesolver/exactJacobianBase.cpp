@@ -31,11 +31,13 @@ Real fzeroEJ(const Real& t,
            const ID& i)
 {return 0.0;}
 
-exactJacobian::exactJacobian(GetPot    &_dataFile,
+exactJacobian::exactJacobian(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
+                             VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
+                             GetPot    &_dataFile,
                              BCHandler &BCh_u,
                              BCHandler &BCh_d,
                              BCHandler &BCh_mesh):
-    operFS(_dataFile, BCh_u, BCh_d, BCh_mesh),
+    operFS(fluid, solid, _dataFile, BCh_u, BCh_d, BCh_mesh),
     M_BCh_du (0, BCHandler::HINT_BC_ONLY_ESSENTIAL),
     M_BCh_dz (),
     M_dz     (3*M_solid.dDof().numTotalDof()),

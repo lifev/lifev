@@ -42,7 +42,9 @@ namespace LifeV
                                        & )> function_type;
         // constructors
 
-        operFS(GetPot    &data_file,
+        operFS(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
+               VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
+               GetPot    &data_file,
                BCHandler &BCh_u,
                BCHandler &BCh_d,
                BCHandler &BCh_mesh);
@@ -95,10 +97,10 @@ namespace LifeV
         BCHandler               &M_BCh_mesh;
 
         NavierStokesAleSolverPC
-        < RegionMesh3D_ALE<LinearTetra> > M_fluid;
+        < RegionMesh3D_ALE<LinearTetra> > &M_fluid;
 
         VenantKirchhofSolver
-        < RegionMesh3D_ALE<LinearTetra> > M_solid;
+        < RegionMesh3D_ALE<LinearTetra> > &M_solid;
 
         DofInterface3Dto3D      M_dofFluidToStructure;
         DofInterface3Dto3D      M_dofStructureToSolid;

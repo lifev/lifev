@@ -31,7 +31,9 @@ class fixedPoint : public operFS
 public:
 
     // constructors
-    fixedPoint(GetPot    &_dataFile,
+    fixedPoint(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
+               VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
+               GetPot    &_dataFile,
                BCHandler &BCh_u,
                BCHandler &BCh_d,
                BCHandler &BCh_mesh);
