@@ -48,7 +48,7 @@ int main( int argc, char** argv )
     GetPot dataFile( dataFileName );
 
     // Problem definition
-    typedef EthierSteinmanUnsteady Problem;
+    typedef EthierSteinmanSteady Problem;
     Problem::setParamsFromGetPot( dataFile );
 
     // Boundary conditions
