@@ -9,6 +9,7 @@ New in 0.5.0:
 =============
 [lifefem]
 * Added discontinuous finite element(discontinuous galerkin) (DADP)
+* Sanitized/revamped the boundary conditions classes (CP)
 
 [testsuite]
 * Added test for 3D/0D coupling (AM)
@@ -160,4 +161,4 @@ New in 0.1.0pre3:
 * fixed some bugs and miscompilation in a few places
 
 
- -- Christophe Prud'homme <prudhomm@debian.org>, Wed Oct  6 21:05:44 2004
+ -- Christophe Prud'homme <prudhomm@debian.org>, Mon Oct 11 16:24:19 2004
