@@ -27,17 +27,14 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .cc
 
 SUBDIRS		= . testsuite
 
-include_HEADERS		= clapack.h cblas.h \
-ElasticStructureHandler.hpp GetPot.hpp NavierStokesAleHandler.hpp NavierStokesAleSolverPC.hpp \
-NavierStokesHandler.hpp NavierStokesHandler_miguel.hpp NavierStokesSolverPC.hpp Operator01.hpp \
-SimpleVect.hpp VenantKirchhofSolver.hpp algebraic_facto.hpp assemb.hpp \
+include_HEADERS		= ElasticStructureHandler.hpp GetPot.hpp Operator01.hpp \
+SimpleVect.hpp  algebraic_facto.hpp assemb.hpp \
 bc_manage.hpp bdf.hpp bdfNS.hpp chrono.hpp \
 dataAztec.hpp dataElasticStructure.hpp dataMesh.hpp dataNavierStokes.hpp \
 dataNewton.hpp dataSimplifiedStructure.hpp dataString.hpp dataTime.hpp \
 elemMat.hpp elemVec.hpp fortran_wrap.hpp  \
-inexactLU.hpp lifeV.hpp linesearch_cubic.hpp linesearch_parabolic.hpp \
- mixed_pattern.hpp newton.hpp  \
-pattern.hpp picard.hpp post_proc.hpp saddlePointCG.hpp \
+lifeV.hpp linesearch_cubic.hpp linesearch_parabolic.hpp \
+ mixed_pattern.hpp newton.hpp  post_proc.hpp  \
 simplifiedStructure.hpp subDomainNeighbors.hpp switch.hpp tab.hpp \
 util_string.hpp values.hpp variables.hpp vecUnknown.hpp 
 
@@ -45,7 +42,7 @@ util_string.hpp values.hpp variables.hpp vecUnknown.hpp
 lib_LTLIBRARIES		= liblifecore.la
 liblifecore_la_SOURCES	= GetPot.cpp assemb.cpp bdf.cpp bdfNS.cpp \
 dataAztec.cpp dataNewton.cpp dataString.cpp dataTime.cpp \
-elemMat.cpp elemVec.cpp  pattern.cpp \
+elemMat.cpp elemVec.cpp  \
 subDomainNeighbors.cpp switch.cpp util_string.cpp values.cpp \
 vecUnknown.cpp  
 
