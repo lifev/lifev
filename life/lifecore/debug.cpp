@@ -192,7 +192,7 @@ getDescription ( uint __area )
 //
 // DebugStream
 //
-DebugStream::DebugStream( int area, int level, bool print )
+DebugStream::DebugStream( int area, int /*level*/, bool print )
 	:
 	__p( new Private )
 {
@@ -212,7 +212,7 @@ DebugStream::DebugStream( int area, int level, bool print )
 	    __p->_M_output << getDescription ( area ) << ": ";
 
 }
-DebugStream::DebugStream( const char* initialString, int area, int level, bool print )
+DebugStream::DebugStream( const char* initialString, int area, int /*level*/, bool print )
 	:
 	__p( new Private )
 {
@@ -372,12 +372,12 @@ void DebugStream::attach( std::string const& __logfile )
 	}
 }
 void
-DebugStream::attach( std::string const& __logfile, int __area )
+DebugStream::attach( std::string const& /*__logfile*/, int /*__area*/ )
 {
 
 }
 void
-DebugStream::detach( std::string const& __logfile, int __area )
+DebugStream::detach( std::string const& /*__logfile*/, int /*__area*/ )
 {}
 
 void
@@ -396,7 +396,7 @@ Debug( int area, DebugStream::stprintf func )
 }
 
 DebugStream
-Debug( bool cond, int area, DebugStream::stprintf func )
+Debug( bool cond, int area, DebugStream::stprintf /*func*/ )
 {
 	if ( cond )
 	    return DebugStream( area, DEBUG_INFO );
