@@ -22,7 +22,7 @@
   \date 07/2004
   \version 1.0
 
-  \brief This file implements a solver for 1D model.
+  \brief This file implements a Taylor-Galerkin solver for 1D model.
 */
 
 #include "oneDModelSolver.hpp"
@@ -30,130 +30,173 @@
 
 namespace LifeV
 {
-OneDModelSolver::OneDModelSolver(const GetPot& data_file):
+OneDModelSolver::OneDModelSolver(const GetPot& data_file,
+				 // const OneDNonLinModelParam& onedparam):
+				 const LinearSimpleParam& onedparam):
   OneDModelHandler(data_file),
+  _M_oneDParam(onedparam),
+  _M_fluxFun(_M_oneDParam),
+  _M_sourceFun(_M_oneDParam),
+  //! elementary matrices
   _M_elmatMass (_M_fe.nbNode,1,1),
   _M_elmatStiff(_M_fe.nbNode,1,1),
   _M_elmatGrad (_M_fe.nbNode,1,1),
   _M_elmatDiv  (_M_fe.nbNode,1,1),
-  _M_elvec     (_M_fe.nbNode,1),
-  _M_U_thistime(_M_dimDof),
-  _M_U_nexttime(_M_dimDof),
-  _M_FluxU(_M_dimDof),
-  _M_rhs(_M_dimDof),
+  //! vectorial unknowns and rhs
+  _M_U1_thistime(_M_dimDof),
+  _M_U2_thistime(_M_dimDof),
+  _M_rhs1(_M_dimDof),
+  _M_rhs2(_M_dimDof),
+  //! vectors and matrices of the non-linear function
+  _M_Flux1(_M_dimDof),
+  _M_Flux2(_M_dimDof),
+  _M_diffFlux11(_M_nb_elem),
+  _M_diffFlux12(_M_nb_elem),
+  _M_diffFlux21(_M_nb_elem),
+  _M_diffFlux22(_M_nb_elem),
+  _M_Source1(_M_dimDof),
+  _M_Source2(_M_dimDof),
+  _M_diffSrc11(_M_nb_elem),
+  _M_diffSrc12(_M_nb_elem),
+  _M_diffSrc21(_M_nb_elem),
+  _M_diffSrc22(_M_nb_elem),
+  //! mass matrix (to be inverted)
   _M_massMatrix(_M_dimDof),
-  _M_stiffMatrix(_M_dimDof),
-  _M_gradMatrix(_M_dimDof),
-  _M_divMatrix(_M_dimDof),
   _M_factorMassMatrix(_M_dimDof),
   _M_massupdiag2( _M_dimDof - 2 ),
-  _M_massipiv( _M_dimDof )
+  _M_massipiv( _M_dimDof ),
+  //! matrices used to build the rhs
+  _M_massMatrixDiffSrc11(_M_dimDof),
+  _M_massMatrixDiffSrc12(_M_dimDof),
+  _M_massMatrixDiffSrc21(_M_dimDof),
+  _M_massMatrixDiffSrc22(_M_dimDof),
+  _M_stiffMatrixDiffFlux11(_M_dimDof),
+  _M_stiffMatrixDiffFlux12(_M_dimDof),
+  _M_stiffMatrixDiffFlux21(_M_dimDof),
+  _M_stiffMatrixDiffFlux22(_M_dimDof),
+  _M_gradMatrix(_M_dimDof),
+  _M_gradMatrixDiffFlux11(_M_dimDof),
+  _M_gradMatrixDiffFlux12(_M_dimDof),
+  _M_gradMatrixDiffFlux21(_M_dimDof),
+  _M_gradMatrixDiffFlux22(_M_dimDof),
+  _M_divMatrixDiffSrc11(_M_dimDof),
+  _M_divMatrixDiffSrc12(_M_dimDof),
+  _M_divMatrixDiffSrc21(_M_dimDof),
+  _M_divMatrixDiffSrc22(_M_dimDof)
 {
 
-  cout << endl;
-  cout << "O-  Nb of unknowns: " << _M_dimDof     << endl;
-  cout << "O-  Computing mass matrix... \n";
+  std::cout << "\n";
+  std::cout << "O-  Nb of unknowns: " << _M_dimDof     << "\n";
+  std::cout << "O-  Computing mass matrix... \n" << std::endl;
+
+  std::string fname1 = "solA.mtv";
+  std::string fname2 = "solQ.mtv";
+  output_to_plotmtv( fname1, 0., _M_mesh.pointList(), _M_U1_thistime, 0);
+  output_to_plotmtv( fname2, 0., _M_mesh.pointList(), _M_U2_thistime, 0);
 
   Chrono chrono;
   chrono.start();
 
   //! Matrices initialization
   _M_massMatrix.zero();
-  _M_stiffMatrix.zero();
-  _M_gradMatrix.zero();
-  _M_divMatrix.zero();
   _M_factorMassMatrix.zero();
 
-  //  _M_massMatrix.showMe(std::cout, _M_verbose);
+  _M_gradMatrix.zero();
 
-  _M_rhs = 1.;
-  _M_bcDirLeft  = 1.;
-  _M_bcDirRight = 0;
+  //-------------------------------------------
+  //! update first the constant matrices (cst w.r. to time iter)
 
-  _M_coeffMass  = 1.;
-  _M_coeffStiff = 1.;
-  _M_coeffGrad  = 1.;
-  _M_coeffDiv   = 1.;
+  //! set the coeff to 1.
+  _M_coeffMass = 1.;
+  _M_coeffGrad = 1.;
 
   //! Elementary computation and matrix assembling
   //! Loop on elements
   for(UInt iedge = 1; iedge <= _M_mesh.numEdges(); iedge++){
 
-    //! update _M_fe and _M_elmat*
-    _updateElemMatrices( iedge );
+    //! set the elementary matrices to 0.
+    _M_elmatMass.zero();
+    _M_elmatGrad.zero();
 
-    //! assemble the mass matrix
-    assemb_mat( _M_massMatrix, _M_elmatMass, _M_fe, _M_dof , 0, 0 );
+    //! update the current element
+    _M_fe.updateFirstDerivQuadPt(_M_mesh.edgeList(iedge));
+    //std::cout << _M_fe.currentId() << std::endl;
 
-    //! assemble the stiffness matrix
-    assemb_mat( _M_stiffMatrix, _M_elmatStiff, _M_fe, _M_dof , 0, 0 );
+    //! update the mass and grad matrices
+    mass( _M_coeffMass, _M_elmatMass, _M_fe,0, 0 );
+    grad( 0 , - _M_coeffGrad, _M_elmatGrad, _M_fe, _M_fe, 0, 0 );
 
-    //! assemble the gradient matrix
-    assemb_mat( _M_gradMatrix, _M_elmatGrad, _M_fe, _M_dof , 0, 0 );
+    //! assemble the mass and grad matrices
+    assemb_mat( _M_massMatrix, _M_elmatMass, _M_fe, _M_dof1D , 0, 0 );  
+    assemb_mat( _M_gradMatrix, _M_elmatGrad, _M_fe, _M_dof1D , 0, 0 );
 
-    //! assemble the divergence matrix
-    assemb_mat( _M_divMatrix, _M_elmatDiv, _M_fe, _M_dof , 0, 0 );
   } //! end loop on elements
 
   //! Dirichlet boundary conditions set in matrices
   _updateBCDirichletMatrix( _M_massMatrix );
-  _updateBCDirichletMatrix( _M_stiffMatrix );
+
+  //! usefull ??????
   _updateBCDirichletMatrix( _M_gradMatrix );
-  _updateBCDirichletMatrix( _M_divMatrix );
+
 
   _M_factorMassMatrix = _M_massMatrix;
   //! factorization of the mass matrix
   _factorizeMassMatrix();
 
   /*
-  cout << "\n\n\tMass matrix " << endl;
+  std::cout << "\n\n\tMass matrix " << std::endl;
   _M_massMatrix.showMe( std::cout , _M_verbose );
-  cout << "\n\n\tStiffness matrix " << endl;
-  _M_stiffMatrix.showMe( std::cout , _M_verbose );
-  cout << "\n\n\tGradient matrix " << endl;
+  std::cout << "\n\n\tGradient matrix " << std::endl;
   _M_gradMatrix.showMe( std::cout , _M_verbose );
-  cout << "\n\n\tDivergence matrix " << endl;
-  _M_divMatrix.showMe( std::cout , _M_verbose );
-  cout << "\n\n\tFACTORIZED Mass matrix " << endl;
-  _M_factorMassMatrix.showMe( std::cout , _M_verbose );
-
-  ScalUnknown<Vector> vec( _M_dimDof );
-  for (int ii=0; ii < _M_stiffMatrix.OrderMatrix() ; ii++ ) {
-    vec( ii ) = ii;
-    cout <<  ii << " " << vec(ii) << endl;;
-  }
-
-  _solveMassMatrix( vec );
-  cout << "solve " << endl;
-  for (int ii=0; ii < _M_stiffMatrix.OrderMatrix() ; ii++ ) {
-    cout <<  ii << " " << vec(ii) << endl;;
-  }
-
-  vec = 1000.;
-  _M_stiffMatrix.Axpy( 1., _M_rhs , 1., vec );
-  cout << "matvec " << endl;
-  for (int ii=0; ii < _M_stiffMatrix.OrderMatrix() ; ii++ ) {
-    cout <<  ii << " " << vec(ii) << endl;;
-  }
   */
 
   chrono.stop();
-  cout << "done in " << chrono.diff() << " s." << endl;
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
 }
 
-//! Update the element matrices with the current element (from 1)
-void OneDModelSolver::_updateElemMatrices( const UInt& iedge )
+/*! Update the coefficients 
+  (from the flux, source functions and their derivatives)
+*/
+void OneDModelSolver::
+_updateMatrixCoefficients(const UInt& ii, const UInt& jj , const UInt& iedge)
+{
+  Real dFluxdUelem, dSrcdUelem;
+
+  ASSERT_BD( 0 < ii && ii < 3 && 0 < jj && jj < 3 );
+
+  if( ii == 1 && jj == 1 ) {
+    dFluxdUelem = _M_diffFlux11( iedge - 1 ); //! iedge starts from 1...
+    dSrcdUelem  = _M_diffSrc11( iedge - 1 );
+  }
+  if( ii == 1 && jj == 2 ) {
+    dFluxdUelem = _M_diffFlux12( iedge - 1 );
+    dSrcdUelem  = _M_diffSrc12( iedge - 1 );
+  }
+  if( ii == 2 && jj == 1 ) {
+    dFluxdUelem = _M_diffFlux21( iedge - 1 );
+    dSrcdUelem  = _M_diffSrc21( iedge - 1 );
+  }
+  if( ii == 2 && jj == 2 ) {
+    dFluxdUelem = _M_diffFlux22( iedge - 1 );
+    dSrcdUelem  = _M_diffSrc22( iedge - 1 );
+  }  
+
+  _M_coeffGrad  = dFluxdUelem; //! term gradDiffFlux(U) [* S(U)]
+  _M_coeffDiv   = dSrcdUelem;  //! term  divDiffSrc(U) [* F(U)]
+  _M_coeffStiff = dFluxdUelem; //! term stiffDiffFlux(U) [* F(U)]
+  _M_coeffMass  = dSrcdUelem;  //! term  massDiffSrc(U) [* S(U)]
+}
+
+//! Update the element matrices with the updated 
+//! current element and updated coefficients
+void OneDModelSolver::_updateElemMatrices()
 {
   //! set the elementary matrices to 0.
   _M_elmatMass.zero();
   _M_elmatStiff.zero();
   _M_elmatGrad.zero();
   _M_elmatDiv.zero();
-
-  //! update the current element
-  _M_fe.updateFirstDerivQuadPt(_M_mesh.edgeList(iedge));
-  //  std::cout << _M_fe.currentId() << std::endl;
 
   //! update the mass matrix
   mass( _M_coeffMass, _M_elmatMass, _M_fe,0, 0 );
@@ -196,54 +239,865 @@ void OneDModelSolver::_updateElemMatrices( const UInt& iedge )
   //  _M_elmatDiv.showMe( std::cout );
 }
 
+
+//! assemble the matrices
+int OneDModelSolver::
+_assemble_matrices(const UInt& ii, const UInt& jj )
+{
+   ASSERT_BD( 0 < ii && ii < 3 && 0 < jj && jj < 3 );
+
+  if( ii == 1 && jj == 1 ) {
+    //! assemble the mass matrix
+    assemb_mat( _M_massMatrixDiffSrc11, _M_elmatMass, _M_fe, _M_dof1D , 0, 0 );  
+  
+    //! assemble the stiffness matrix
+    assemb_mat( _M_stiffMatrixDiffFlux11, _M_elmatStiff, _M_fe, _M_dof1D , 0, 0 );
+
+    //! assemble the gradient matrix
+    assemb_mat( _M_gradMatrixDiffFlux11, _M_elmatGrad, _M_fe, _M_dof1D , 0, 0 );
+
+    //! assemble the divergence matrix
+    assemb_mat( _M_divMatrixDiffSrc11, _M_elmatDiv, _M_fe, _M_dof1D , 0, 0 );
+
+    return 0;
+  }
+  if( ii == 1 && jj == 2 ) {
+    //! assemble the mass matrix
+    assemb_mat( _M_massMatrixDiffSrc12, _M_elmatMass, _M_fe, _M_dof1D , 0, 0 );  
+
+    //! assemble the stiffness matrix
+    assemb_mat( _M_stiffMatrixDiffFlux12, _M_elmatStiff, _M_fe, _M_dof1D , 0, 0 );
+
+    //! assemble the gradient matrix
+    assemb_mat( _M_gradMatrixDiffFlux12, _M_elmatGrad, _M_fe, _M_dof1D , 0, 0 );
+
+    //! assemble the divergence matrix
+    assemb_mat( _M_divMatrixDiffSrc12, _M_elmatDiv, _M_fe, _M_dof1D , 0, 0 );
+
+    return 0;
+  }
+  if( ii == 2 && jj == 1 ) {
+    //! assemble the mass matrix
+    assemb_mat( _M_massMatrixDiffSrc21, _M_elmatMass, _M_fe, _M_dof1D , 0, 0 );  
+
+    //! assemble the stiffness matrix
+    assemb_mat( _M_stiffMatrixDiffFlux21, _M_elmatStiff, _M_fe, _M_dof1D , 0, 0 );
+
+    //! assemble the gradient matrix
+    assemb_mat( _M_gradMatrixDiffFlux21, _M_elmatGrad, _M_fe, _M_dof1D , 0, 0 );
+
+    //! assemble the divergence matrix
+    assemb_mat( _M_divMatrixDiffSrc21, _M_elmatDiv, _M_fe, _M_dof1D , 0, 0 );
+
+    return 0;
+  }
+  if( ii == 2 && jj == 2 ) {
+    //! assemble the mass matrix
+    assemb_mat( _M_massMatrixDiffSrc22, _M_elmatMass, _M_fe, _M_dof1D , 0, 0 );  
+
+    //! assemble the stiffness matrix
+    assemb_mat( _M_stiffMatrixDiffFlux22, _M_elmatStiff, _M_fe, _M_dof1D , 0, 0 );
+
+    //! assemble the gradient matrix
+    assemb_mat( _M_gradMatrixDiffFlux22, _M_elmatGrad, _M_fe, _M_dof1D , 0, 0 );
+
+    //! assemble the divergence matrix
+    assemb_mat( _M_divMatrixDiffSrc22, _M_elmatDiv, _M_fe, _M_dof1D , 0, 0 );
+
+    return 0;
+  }
+  
+  ERROR_MSG("Invalid values for the _assemble_matrices method.");
+}
+
+/*! update the matrices  
+  _M_massMatrixDiffSrcij, _M_stiffMatrixDiffFluxij
+  _M_gradMatrixDiffFluxij, and _M_divMatrixDiffSrcij (i,j=1,2)
+
+  from the values of diffFlux(Un) and diffSrc(Un) 
+  that are computed with _updateMatrixCoefficients.
+*/
+void OneDModelSolver::_updateMatrices()
+{
+  /*
+  //! speed test
+  std::cout << "\no-  updating the matrices... ";
+  Chrono chrono;
+
+  //---------------------------------------------------------------------------------------
+  chrono.start();
+  std::cout << "o-loop over the matrices DERIVQUADPOINT update... ";
+  //! Elementary computation and matrix assembling
+  //! Loop on elements
+  for(UInt iedge = 1; iedge <= _M_mesh.numEdges(); iedge++){
+    
+    //! update the current element
+    _M_fe.updateFirstDerivQuadPt(_M_mesh.edgeList(iedge));
+    //  std::cout << _M_fe.currentId() << std::endl;
+
+  } //! end loop on elements
+
+  chrono.stop();
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
+  //---------------------------------------------------------------------------------------
+
+  //---------------------------------------------------------------------------------------
+  chrono.start();
+  std::cout << "o-loop over the matrices COEFFICIENT update... ";
+  //! Elementary computation and matrix assembling
+  //! Loop on elements
+  for(UInt iedge = 1; iedge <= _M_mesh.numEdges(); iedge++){
+    for(UInt ii = 1; ii <= 2; ii ++) {
+      for(UInt jj = 1; jj <= 2; jj ++) {
+    
+	//! update the _M_coeff*
+	_updateMatrixCoefficients( ii , jj, iedge);
+
+      }
+    }
+  } //! end loop on elements
+
+  chrono.stop();
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
+  //---------------------------------------------------------------------------------------
+
+  //---------------------------------------------------------------------------------------
+  chrono.start();
+  std::cout << "o-loop over the matrices ELEMENT MATRIX update... ";
+
+  //! Elementary computation and matrix assembling
+  //! Loop on elements
+  for(UInt iedge = 1; iedge <= _M_mesh.numEdges(); iedge++){
+    for(UInt ii = 1; ii <= 2; ii ++) {
+      for(UInt jj = 1; jj <= 2; jj ++) {
+	//! update the _M_elmat*
+	_updateElemMatrices();
+      }
+    }
+  } //! end loop on elements
+
+  chrono.stop();
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
+  //---------------------------------------------------------------------------------------
+
+  //---------------------------------------------------------------------------------------
+  chrono.start();
+  std::cout << "o-loop over the matrices ASSEMBLE... ";
+
+  //! Elementary computation and matrix assembling
+  //! Loop on elements
+  for(UInt iedge = 1; iedge <= _M_mesh.numEdges(); iedge++){
+    for(UInt ii = 1; ii <= 2; ii ++) {
+      for(UInt jj = 1; jj <= 2; jj ++) {
+	//! assemble the global matrices
+	_assemble_matrices( ii, jj );
+      }
+    }
+  } //! end loop on elements
+
+  chrono.stop();
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
+  //---------------------------------------------------------------------------------------
+  */
+
+
+  //---------------------------------------------------------------------------------------
+  // Chrono chrono;
+  // chrono.start();
+  // std::cout << "o-loop over the matrices INIT... ";
+
+  //! Matrices initialization
+  _M_massMatrixDiffSrc11.zero();
+  _M_massMatrixDiffSrc12.zero();
+  _M_massMatrixDiffSrc21.zero();
+  _M_massMatrixDiffSrc22.zero();
+
+  _M_stiffMatrixDiffFlux11.zero();
+  _M_stiffMatrixDiffFlux12.zero();
+  _M_stiffMatrixDiffFlux21.zero();
+  _M_stiffMatrixDiffFlux22.zero();
+
+  _M_gradMatrixDiffFlux11.zero();
+  _M_gradMatrixDiffFlux12.zero();
+  _M_gradMatrixDiffFlux21.zero();
+  _M_gradMatrixDiffFlux22.zero();
+
+  _M_divMatrixDiffSrc11.zero();
+  _M_divMatrixDiffSrc12.zero();
+  _M_divMatrixDiffSrc21.zero();
+  _M_divMatrixDiffSrc22.zero();
+
+  /*
+  chrono.stop();
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
+  chrono.start();
+  std::cout << "o-loop over the matrices... ";
+  */
+
+  //! Elementary computation and matrix assembling
+  //! Loop on elements
+  for(UInt iedge = 1; iedge <= _M_mesh.numEdges(); iedge++){
+    
+    //! update the current element
+    _M_fe.updateFirstDerivQuadPt(_M_mesh.edgeList(iedge));
+    //  std::cout << _M_fe.currentId() << std::endl;
+
+    for(UInt ii = 1; ii <= 2; ii ++) {
+      for(UInt jj = 1; jj <= 2; jj ++) {
+    
+	//! update the _M_coeff*
+	_updateMatrixCoefficients( ii , jj, iedge);
+
+	//! update the _M_elmat*
+	_updateElemMatrices();
+
+	//! assemble the global matrices
+	_assemble_matrices( ii, jj );
+      }
+    }
+  } //! end loop on elements
+
+  /*
+  chrono.stop();
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
+  chrono.start();
+  std::cout << "o-loop over the matrices BC DIR... ";
+  */
+
+  //! usefull ??????
+  //! taking into account the dirichlet bc 
+  _updateBCDirichletMatrix( _M_massMatrixDiffSrc11 );
+  _updateBCDirichletMatrix( _M_massMatrixDiffSrc12 );
+  _updateBCDirichletMatrix( _M_massMatrixDiffSrc21 );
+  _updateBCDirichletMatrix( _M_massMatrixDiffSrc22 );
+
+  _updateBCDirichletMatrix( _M_stiffMatrixDiffFlux11 );
+  _updateBCDirichletMatrix( _M_stiffMatrixDiffFlux12 );
+  _updateBCDirichletMatrix( _M_stiffMatrixDiffFlux21 );
+  _updateBCDirichletMatrix( _M_stiffMatrixDiffFlux22 );
+
+  _updateBCDirichletMatrix( _M_gradMatrixDiffFlux11 );
+  _updateBCDirichletMatrix( _M_gradMatrixDiffFlux12 );
+  _updateBCDirichletMatrix( _M_gradMatrixDiffFlux21 );
+  _updateBCDirichletMatrix( _M_gradMatrixDiffFlux22 );
+
+  _updateBCDirichletMatrix( _M_divMatrixDiffSrc11 );
+  _updateBCDirichletMatrix( _M_divMatrixDiffSrc12 );
+  _updateBCDirichletMatrix( _M_divMatrixDiffSrc21 );
+  _updateBCDirichletMatrix( _M_divMatrixDiffSrc22 );
+  // chrono.stop();
+  // std::cout << "done in " << chrono.diff() << " s." << std::endl;
+
+}
+
+
 /*! modify the matrix to take into account
   the Dirichlet boundary conditions
   (works for P1Seg and canonic numbering!)
 */
 void OneDModelSolver::
-_updateBCDirichletMatrix( TriDiagMatrix<double>& mat )
+_updateBCDirichletMatrix( TriDiagMatrix<Real>& mat )
 {
   UInt firstDof = 0;
   UInt lastDof  = mat.OrderMatrix()-1;
+
   //! modify the first row
   mat.Diag()( firstDof )   = 1.;
   mat.UpDiag()( firstDof ) = 0.;
+
   //! modify the last row
-
-  //! FOR NEUMANN!!!!!!
-  //  mat.Diag()( lastDof )      = 1.;
-  //  mat.LowDiag()( lastDof-1 ) = 0.;
-
-
+  mat.Diag()( lastDof )      = 1.;
+  mat.LowDiag()( lastDof-1 ) = 0.;
 }
 
 /*! modify the vector to take into account
   the Dirichlet boundary conditions
   (works for P1Seg and canonic numbering!)
 
-  \param vec : the rhs vector
   \param val_left  : Dirichlet value inserted to the left
   \param val_right : Dirichlet value inserted to the right
 */
 void  OneDModelSolver::
-_updateBCDirichletVector( ScalUnknown<Vector>& vec,
-			  const double& val_left,
-			  const double& val_right )
+_updateBCDirichletVector()
 {
   UInt firstDof = 0;
-  UInt lastDof  = vec.size()-1;
-  //! first row and last row are modified
-  vec( firstDof ) = val_left;
-  //! FOR NEUMANN!!!!!!
-  //  vec( lastDof  ) = val_right;
+  UInt lastDof  = _M_rhs1.size()-1;
+  //! first row modified
+  _M_rhs1( firstDof ) = _M_bcDirLeft.first;
+  _M_rhs2( firstDof ) = _M_bcDirLeft.second;
+
+  //! last row modified
+  _M_rhs1( lastDof ) = _M_bcDirRight.first;
+  _M_rhs2( lastDof ) = _M_bcDirRight.second;
 }
 
-//! update the flux from the current unknown: FfluxU = F_h(U_h^n)
+
+//! compute the _M_bcDirLeft and _M_bcDirRight
+void OneDModelSolver::_computeBCValues( const Real& time_val )
+{
+  //! node on the left boundary
+  UInt leftDof = 0;
+  //! node on the right boundary
+  UInt rightDof  = _M_rhs1.size()-1;
+  
+  Edge1D leftedge  = _M_mesh.edgeList( 1 ); //! from 1 to nb_elem
+  Edge1D rightedge = _M_mesh.edgeList( _M_nb_elem ); //! from 1 to nb_elem
+
+  //! eigen values of the jacobian diffFlux (= dF/dU)
+  Real  eigval1, eigval2;
+  //! left eigen vectors for the eigen values eigval1 and eigval2
+  Vec2D left_eigvec1, left_eigvec2;
+
+  //! first and second line of the identity matrix
+  Vec2D line1_id( 1. , 0. );
+  Vec2D line2_id( 0. , 1. );
+
+  //! right hand side for the 2x2 linear system to be solved at each side
+  Vec2D rhsBC;
+  //! result of the 2x2 linear system to be solved at each side
+  Vec2D resBC;
+
+  //! quasi linear source term
+  Vec2D qlSource;
+
+  //! value of U at the boundary, at the neighboring internal node
+  //!            and at the foot of the characteristics
+  Vec2D U_boundary, U_internalBd, U_charact_pt;
+  Real  boundaryPoint, internalBdPoint;
+
+  switch ( _M_test_case ) {
+  case 1: //! simple linear test case: both eigenvalues are > 0
+    // *******************************************************
+    //! left BC. 
+    // *******************************************************
+    rhsBC.first  = std::sin( 2 * M_PI * time_val ); //! Dirichlet bc.
+    rhsBC.second = 1.; //! Dirichlet bc.
+    
+    //! solve the linear system Id * U(tn+1, z=z_right) = rhsBC (a bit artificial...)
+    resBC = _solveLinearSyst2x2( line1_id, line2_id, rhsBC );
+
+    _M_bcDirLeft = resBC;
+
+    // *******************************************************
+    //! right BC. 
+    // *******************************************************
+    //-------------------------------------
+    //!compatibility conditions
+
+    boundaryPoint   = rightedge.pt2().x(); //!< point on the boundary (on the right of the edge!)
+    internalBdPoint = rightedge.pt1().x(); //!< neighboring point (internal)
+
+    //! values of U on the boundary
+    U_boundary   = Vec2D ( _M_U1_thistime( rightDof ) , 
+			   _M_U2_thistime( rightDof ) );
+    //! values of U on the neighboring node of the boundary point 
+    U_internalBd = Vec2D ( _M_U1_thistime( rightDof - 1 ) , 
+			   _M_U2_thistime( rightDof - 1 ) );
+
+    //! compute the eigenvalues/eigenvectors of the flux jacobian (computed at the boundary point)
+    _M_fluxFun.jacobian_EigenValues_Vectors(U_boundary.first, U_boundary.second, 
+					    eigval1, eigval2, 
+					    left_eigvec1.first, left_eigvec1.second, 
+					    left_eigvec2.first, left_eigvec2.second, 
+					    rightDof);
+
+    ASSERT( eigval1 > 0. && eigval2 > 0. ,
+	    "The eigenvalues do not have the expected signs.");
+
+    //-------------------------------------
+    //! first characteristics    
+    //! interpolation of U at the foot of the 1rst characteristics
+    U_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint, 
+				   _M_time_step, eigval1, 
+				   U_boundary, U_internalBd);
+
+    //! rhsBC1 = left_eigvec1 dot U(tn, z = charact_pt1)
+    rhsBC.first = dot( left_eigvec1 , U_charact_pt );
+
+    //! take into account the (quasi linear) source term
+    /*!BEWARE: HERE THE PARAMETERS ARE TAKEN AT rightDof
+               THEY SHOULD BE TAKEN AT THE CHARACTERISTICS!!
+    */ 
+    qlSource.first  = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+						     1, rightDof);
+    qlSource.second = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+						     2, rightDof);
+
+    //! rhsBC1 = rhsBC1 - deltaT * left_eigvec1 dot qlSource(tn, z = charact_pt1)
+    rhsBC.first -= _M_time_step * dot( left_eigvec1 , qlSource );
+
+    //-------------------------------------
+    //! second characteristics    
+    //! interpolation of U at the foot of the 2nd characteristics
+    U_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint, 
+				   _M_time_step, eigval2, 
+				   U_boundary, U_internalBd);
+    
+    //! rhsBC2 = left_eigvec2 dot U(tn, z = charact_pt2)
+    rhsBC.second = dot( left_eigvec2 , U_charact_pt );
+
+    //! take into account the (quasi linear) source term
+    /*!BEWARE: HERE THE PARAMETERS ARE TAKEN AT rightDof
+               THEY SHOULD BE TAKEN AT THE CHARACTERISTICS!!
+    */ 
+    qlSource.first  = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+						     1, rightDof);
+    qlSource.second = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+						     2, rightDof);
+
+    //! rhsBC2 = rhsBC2 - deltaT * left_eigvec2 dot qlSource(tn, z = charact_pt2)
+    rhsBC.second -= _M_time_step * dot( left_eigvec2 , qlSource );
+
+
+    /*!-------------------------------------
+      solve the linear system L * U(tn+1, z=z_right) = rhsBC
+      i.e.
+  [ left_eigvec1^T;  [U1(tn+1,z_right);   = [ left_eigvec1^T * U(tn, charact_pt1);   
+    left_eigvec2^T ]  U2(tn+1,z_right) ]      left_eigvec2^T * U(tn, charact_pt2) ]
+	
+                                          - dt * [ left_eigvec1^T * qlSource(tn, charact_pt1);
+					           left_eigvec2^T * qlSource(tn, charact_pt2) ]
+
+	  
+	 with L such that L * dF/dU * L^{-1} = diag(eigval1, eigval2)
+      -------------------------------------
+     */
+    resBC = _solveLinearSyst2x2( left_eigvec1, left_eigvec2, rhsBC );
+
+    _M_bcDirRight = resBC;
+    break;
+  case 2: //! simple linear test case: both eigenvalues are < 0
+    // *******************************************************
+    //! left BC. 
+    // *******************************************************
+    //-------------------------------------
+    //!compatibility conditions
+
+    boundaryPoint   = leftedge.pt1().x(); //!< point on the boundary (on the left of the edge!)
+    internalBdPoint = leftedge.pt2().x(); //!< neighboring point (internal)
+
+    //! values of U on the boundary
+    U_boundary   = Vec2D ( _M_U1_thistime( leftDof ) , 
+			   _M_U2_thistime( leftDof ) );
+    //! values of U on the neighboring node of the boundary point 
+    U_internalBd = Vec2D ( _M_U1_thistime( leftDof + 1 ) , 
+			   _M_U2_thistime( leftDof + 1 ) );
+
+    //! compute the eigenvalues/eigenvectors of the flux jacobian (computed on the boundary point)
+    _M_fluxFun.jacobian_EigenValues_Vectors(U_boundary.first, U_boundary.second, 
+					    eigval1, eigval2, 
+					    left_eigvec1.first, left_eigvec1.second, 
+					    left_eigvec2.first, left_eigvec2.second, 
+					    leftDof);
+
+
+    ASSERT( eigval1 < 0. &&  eigval2 < 0.  ,
+	    "The eigenvalues do not have the expected signs.");
+
+
+   //-------------------------------------
+    //! first characteristics    
+    //! interpolation of U at the foot of the 1rst characteristics
+    U_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint, 
+				   _M_time_step, eigval1, 
+				   U_boundary, U_internalBd);
+
+    //! rhsBC1 = left_eigvec1 dot U(tn, z = charact_pt1)
+    rhsBC.first = dot( left_eigvec1 , U_charact_pt );
+
+    //! take into account the (quasi linear) source term
+    /*!BEWARE: HERE THE PARAMETERS ARE TAKEN AT rightDof
+               THEY SHOULD BE TAKEN AT THE CHARACTERISTICS!!
+    */ 
+    qlSource.first  = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+						     1, leftDof);
+    qlSource.second = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+						     2, leftDof);
+
+    //! rhsBC1 = rhsBC1 - deltaT * left_eigvec1 dot qlSource(tn, z = charact_pt1)
+    rhsBC.first -= _M_time_step * dot( left_eigvec1 , qlSource );
+
+    //-------------------------------------
+    //! second characteristics    
+    //! interpolation of U at the foot of the 2nd characteristics
+    U_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint, 
+				   _M_time_step, eigval2, 
+				   U_boundary, U_internalBd);
+    
+    //! rhsBC2 = left_eigvec2 dot U(tn, z = charact_pt2)
+    rhsBC.second = dot( left_eigvec2 , U_charact_pt );
+
+    //! take into account the (quasi linear) source term
+    /*!BEWARE: HERE THE PARAMETERS ARE TAKEN AT rightDof
+               THEY SHOULD BE TAKEN AT THE CHARACTERISTICS!!
+    */ 
+    qlSource.first  = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+						     1, leftDof);
+    qlSource.second = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+						     2, leftDof);
+
+    //! rhsBC2 = rhsBC2 - deltaT * left_eigvec2 dot qlSource(tn, z = charact_pt2)
+    rhsBC.second -= _M_time_step * dot( left_eigvec2 , qlSource );
+
+    /*!-------------------------------------
+      solve the linear system L * U(tn+1, z=z_left) = rhsBC
+      i.e.
+        [ left_eigvec1^T;  [U1(tn+1,z_left);   = [ left_eigvec1^T * U(tn, charact_pt1); 
+	  left_eigvec2^T ]  U2(tn+1,z_left) ]      left_eigvec2^T * U(tn, charact_pt2) ]
+
+	  
+	 with L such that L * dF/dU * L^{-1} = diag(eigval1, eigval2)
+      -------------------------------------
+     */
+    resBC = _solveLinearSyst2x2( left_eigvec1, left_eigvec2, rhsBC );
+
+    _M_bcDirLeft = resBC;
+
+
+    // *******************************************************
+    //! right BC. 
+    // *******************************************************
+    rhsBC.first  = std::sin( 2 * M_PI * time_val ); //! Dirichlet bc.
+    rhsBC.second = 1.; //! Dirichlet bc.
+    
+    //! solve the linear system Id * U(tn+1, z=z_right) = rhsBC (a bit artificial...)
+    resBC = _solveLinearSyst2x2( line1_id, line2_id, rhsBC );
+
+    _M_bcDirRight = resBC;
+    break;
+
+  case 3: //! simple linear test case: eig1 > 0 and eig2 < 0.
+    // *******************************************************
+    //! left BC. 
+    // *******************************************************
+    //-------------------------------------
+    //! Dirichlet bc.
+    rhsBC.first = std::sin( 2 * M_PI * time_val );
+
+    //-------------------------------------
+    //!compatibility condition
+
+    boundaryPoint   = leftedge.pt1().x(); //!< point on the boundary (on the left of the edge!)
+    internalBdPoint = leftedge.pt2().x(); //!< neighboring point (internal)
+
+    //! values of U on the boundary
+    U_boundary   = Vec2D ( _M_U1_thistime( leftDof ) , 
+			   _M_U2_thistime( leftDof ) );
+    //! values of U on the neighboring node of the boundary point 
+    U_internalBd = Vec2D ( _M_U1_thistime( leftDof + 1 ) , 
+			   _M_U2_thistime( leftDof + 1 ) );
+
+    //! compute the eigenvalues/eigenvectors of the flux jacobian (computed on the boundary point)
+    _M_fluxFun.jacobian_EigenValues_Vectors(U_boundary.first, U_boundary.second, 
+					    eigval1, eigval2, 
+					    left_eigvec1.first, left_eigvec1.second, 
+					    left_eigvec2.first, left_eigvec2.second, 
+					    leftDof);
+
+
+    ASSERT( eigval1 > 0. &&  eigval2 < 0.  ,
+	    "The eigenvalues do not have the expected signs.");
+
+
+    //-------------------------------------
+    //! second characteristics    
+    //! interpolation of U at the foot of the 2nd characteristics
+    U_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint, 
+				   _M_time_step, eigval2, 
+				   U_boundary, U_internalBd);
+    
+    //! rhsBC2 = left_eigvec2 dot U(tn, z = charact_pt2)
+    rhsBC.second = dot( left_eigvec2 , U_charact_pt );
+    
+    //! take into account the (quasi linear) source term
+    /*!BEWARE: HERE THE PARAMETERS ARE TAKEN AT rightDof
+               THEY SHOULD BE TAKEN AT THE CHARACTERISTICS!!
+    */ 
+    qlSource.first  = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+						     1, leftDof);
+    qlSource.second = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+						     2, leftDof);
+
+    //! rhsBC2 = rhsBC2 - deltaT * left_eigvec2 dot qlSource(tn, z = charact_pt2)
+    rhsBC.second -= _M_time_step * dot( left_eigvec2 , qlSource );
+
+    /*!-------------------------------------
+      solve the linear system Theta_left * U(tn+1, z=z_left) = rhsBC
+      i.e.
+        [  1  0         ;  [U1(tn+1,z_left);   = [ dirichlet_value1;
+	  left_eigvec2^T ]  U2(tn+1,z_left) ]      left_eigvec2^T * U(tn, charact_pt2) ]
+      -------------------------------------
+     */
+    resBC = _solveLinearSyst2x2( line1_id, left_eigvec2, rhsBC );
+
+    _M_bcDirLeft = resBC;
+
+
+    // *******************************************************
+    //! right BC. 
+    // *******************************************************
+    //-------------------------------------
+    //! Dirichlet bc.
+    rhsBC.second = 0.;
+
+    //-------------------------------------
+    //!compatibility condition
+    boundaryPoint   = rightedge.pt2().x(); //!< point on the boundary (on the right of the edge!)
+    internalBdPoint = rightedge.pt1().x(); //!< neighboring point (internal)
+
+    //! values of U on the boundary
+    U_boundary   = Vec2D ( _M_U1_thistime( rightDof ) , 
+			   _M_U2_thistime( rightDof ) );
+    //! values of U on the neighboring node of the boundary point 
+    U_internalBd = Vec2D ( _M_U1_thistime( rightDof - 1 ) , 
+			   _M_U2_thistime( rightDof - 1 ) );
+
+    //! compute the eigenvalues/eigenvectors of the flux jacobian (computed on the boundary point)
+    _M_fluxFun.jacobian_EigenValues_Vectors(U_boundary.first, U_boundary.second, 
+					    eigval1, eigval2, 
+					    left_eigvec1.first, left_eigvec1.second, 
+					    left_eigvec2.first, left_eigvec2.second, 
+					    rightDof);
+
+    ASSERT( eigval1 > 0. && eigval2 < 0. ,
+	    "The eigenvalues do not have the expected signs.");
+
+    //-------------------------------------
+    //! first characteristics    
+    //! interpolation of U at the foot of the 1rst characteristics
+    U_charact_pt = _interpolLinear(boundaryPoint, internalBdPoint, 
+				   _M_time_step, eigval1, 
+				   U_boundary, U_internalBd);
+
+    //! rhsBC1 = left_eigvec1 dot U(tn, z = charact_pt1)
+    rhsBC.first = dot( left_eigvec1 , U_charact_pt );
+
+    //! take into account the (quasi linear) source term
+    /*!BEWARE: HERE THE PARAMETERS ARE TAKEN AT rightDof
+               THEY SHOULD BE TAKEN AT THE CHARACTERISTICS!!
+    */ 
+    qlSource.first  = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+						     1, rightDof);
+    qlSource.second = _M_sourceFun.QuasiLinearSource(U_charact_pt.first, U_charact_pt.second, 
+						     2, rightDof);
+
+    //! rhsBC1 = rhsBC1 - deltaT * left_eigvec1 dot qlSource(tn, z = charact_pt1)
+    rhsBC.first -= _M_time_step * dot( left_eigvec1 , qlSource );
+
+    resBC = _solveLinearSyst2x2( left_eigvec1, line2_id, rhsBC );
+
+    _M_bcDirRight = resBC;
+    break;
+  default:
+    ERROR_MSG("No such test case.");
+  }
+}
+
+//! linear interpolation at the foot of the characteristic
+//! determined by the given eigenvalue
+OneDModelSolver::Vec2D 
+OneDModelSolver::_interpolLinear(const Real& point_bound, const Real& point_internal,
+				 const Real& deltaT, const Real& eigenvalue, 
+				 const Vec2D& U_bound, const Vec2D& U_intern) const
+{
+  Real deltaX = std::abs(point_bound - point_internal);
+  
+  Real cfl =  eigenvalue * deltaT / deltaX;
+
+  Real weight;   //!< weight in the linear approximation
+
+  if ( point_bound < point_internal ) { //! the edge is on the left of the domain
+    ASSERT( -1. < cfl && cfl < 0. , 
+	    "This characteristics is wrong!\nEither it is not outcoming (eigenvalue>0 at the left of the domain),\n or CFL is too high.");
+
+    weight = - cfl;
+  }
+  else {  //! the edge is on the right of the domain
+    ASSERT( 0. < cfl && cfl < 1. , 
+	    "This characteristics is wrong!\nEither it is not outcoming (eigenvalue<0 at the right of the domain),\n or CFL is too high.");
+
+    weight = cfl;
+  }
+    
+  Vec2D u_interp( ( 1 - weight ) * U_bound.first  + weight * U_intern.first ,
+		  ( 1 - weight ) * U_bound.second + weight * U_intern.second );
+  return u_interp;
+
+}
+
+/*! solve a 2x2 linear system by the Cramer method (for the boundary systems)
+  (beware of ill-conditioning!...).
+  Matrix A is given by two pairs corresponding to the 2 lines.
+    A = [line1;
+         line2 ]
+  return A^{-1} * rhs2d
+*/
+OneDModelSolver::Vec2D 
+OneDModelSolver::_solveLinearSyst2x2(const Vec2D& line1, const Vec2D& line2,
+				     const Vec2D& rhs2d) const
+{
+  Real aa11, aa12, aa21, aa22;
+
+  aa11 = line1.first;  aa12 = line1.second;
+  aa21 = line2.first;  aa22 = line2.second;
+
+  Real determinant = aa11 * aa22 - aa12 * aa21;
+
+  ASSERT( determinant != 0, 
+	  "Error: the 2x2 system on the boundary is not invertible. \nCheck the boundary conditions.");
+  Vec2D res( (   aa22 * rhs2d.first - aa12 * rhs2d.second ) / determinant,
+	     ( - aa21 * rhs2d.first + aa11 * rhs2d.second ) / determinant );
+
+  return res;
+}
+
+/*! Axpy product for 2D vectors (pairs)
+    Axpy(alpha, x, beta, y) -> y = a*A*x + beta*y
+
+  A is given by two pairs corresponding to the 2 lines.
+    A = [line1;
+         line2 ]
+*/
+void OneDModelSolver::Axpy(const Vec2D& line1, const Vec2D& line2,
+			   const Real& alpha,  const Vec2D& x,
+			   const Real& beta,   Vec2D& y) const
+{
+  y.first  = alpha * ( line1.first * x.first + line1.second * x.second ) + beta * y.first;
+  y.second = alpha * ( line2.first * x.first + line2.second * x.second ) + beta * y.second;
+}
+
+//! 2D dot product
+Real OneDModelSolver::dot(const Vec2D& vec1, const Vec2D& vec2) const
+{
+  return vec1.first * vec2.first + vec1.second * vec2.second; 
+}
+
+
+//! update the P1 flux vector from U: _M_Fluxi = F_h(Un) i=1,2
+//! BEWARE: works only for P1Seg elements
 void OneDModelSolver::_updateFlux()
 {
-  double celerity = 2.;
+  Real Aii, Qii;
+
   for ( UInt ii=0; ii < _M_dimDof ; ii++ ) {
-    _M_FluxU( ii ) = celerity * _M_U_thistime( ii );
+    Aii = _M_U1_thistime( ii );
+    Qii = _M_U2_thistime( ii );
+    _M_Flux1( ii ) = _M_fluxFun( Aii, Qii, 1, ii );
+    _M_Flux2( ii ) = _M_fluxFun( Aii, Qii, 2, ii );
+  }
+}
+
+/*! call _updateFlux and update the P0 derivative of flux vector from U: 
+  _M_diffFluxij = dF_h/dU(Un) i,j=1,2
+  
+  _M_diffFluxij(elem) = 1/2 [ dF/dU(U(node1(elem))) + dF/dU(U(node2(elem))) ]
+
+  (mean value of the two extremal values of dF/dU)
+
+  BEWARE: works only for P1Seg elements
+*/
+void OneDModelSolver::_updateFluxDer()
+{
+  //! first update the Flux vector
+  _updateFlux();
+
+  //! then update the derivative of the Flux vector
+  Real tmp;
+  Real Aii, Qii;
+  Real Aiip1, Qiip1;
+  UInt ii, iip1;
+
+  for ( UInt ielem=0; ielem < _M_nb_elem ; ielem++ ) {
+    //! for P1Seg and appropriate mesh only!
+    ii = ielem;        //! left node of current element
+    iip1 = ielem + 1;  //! right node of current element
+
+    Aii = _M_U1_thistime( ielem );
+    Qii = _M_U2_thistime( ielem );
+    Aiip1 = _M_U1_thistime( ielem + 1 );
+    Qiip1 = _M_U2_thistime( ielem + 1 );
+
+    //! diffFlux11
+    tmp =  _M_fluxFun.diff(   Aii,   Qii, 1, 1, ii );
+    tmp += _M_fluxFun.diff( Aiip1, Qiip1, 1, 1, iip1 );
+    _M_diffFlux11( ielem ) = 0.5 * tmp;
+    //! diffFlux12
+    tmp =  _M_fluxFun.diff(   Aii,   Qii, 1, 2, ii );
+    tmp += _M_fluxFun.diff( Aiip1, Qiip1, 1, 2, iip1 );
+    _M_diffFlux12( ielem ) = 0.5 * tmp;
+    //! diffFlux21
+    tmp =  _M_fluxFun.diff(   Aii,   Qii, 2, 1, ii );
+    tmp += _M_fluxFun.diff( Aiip1, Qiip1, 2, 1, iip1 );
+    _M_diffFlux21( ielem ) = 0.5 * tmp;
+    //! diffFlux22
+    tmp =  _M_fluxFun.diff(   Aii,   Qii, 2, 2, ii );
+    tmp += _M_fluxFun.diff( Aiip1, Qiip1, 2, 2, iip1 );
+    _M_diffFlux22( ielem ) = 0.5 * tmp;
+
+  }
+}
+
+//! update the P1 source vector from U: _M_Sourcei = S_h(Un) i=1,2
+//! BEWARE: works only for P1Seg elements
+void OneDModelSolver::_updateSource()
+{
+  Real Aii, Qii;
+
+  for ( UInt ii=0; ii < _M_dimDof ; ii++ ) {
+    Aii = _M_U1_thistime( ii );
+    Qii = _M_U2_thistime( ii );
+    _M_Source1( ii ) = _M_sourceFun( Aii, Qii, 1, ii );
+    _M_Source2( ii ) = _M_sourceFun( Aii, Qii, 2, ii );
+  }
+}
+
+/*! call _updateSource and update the P0 derivative of source vector from U: 
+  _M_diffSrcij = dS_h/dU(Un) i,j=1,2
+  
+  _M_diffSrcij(elem) = 1/2 [ dS/dU(U(node1(elem))) + dS/dU(U(node2(elem))) ]
+
+  (mean value of the two extremal values of dS/dU)
+
+  BEWARE: works only for P1Seg elements
+*/
+void OneDModelSolver::_updateSourceDer()
+{
+  //! first update the Source vector
+  _updateSource();
+
+  //! then update the derivative of the Source vector
+  Real tmp;
+  Real Aii, Qii;
+  Real Aiip1, Qiip1;
+  UInt ii, iip1;
+
+  for ( UInt ielem=0; ielem < _M_nb_elem ; ielem++ ) {
+    //! for P1Seg and appropriate mesh only!
+    ii = ielem;        //! left node of current element
+    iip1 = ielem + 1;  //! right node of current element
+
+    Aii = _M_U1_thistime( ielem );
+    Qii = _M_U2_thistime( ielem );
+    Aiip1 = _M_U1_thistime( ielem + 1 );
+    Qiip1 = _M_U2_thistime( ielem + 1 );
+
+    //! diffSrc11
+    tmp =  _M_sourceFun.diff(   Aii,   Qii, 1, 1, ii );
+    tmp += _M_sourceFun.diff( Aiip1, Qiip1, 1, 1, iip1 );
+    _M_diffSrc11( ielem ) = 0.5 * tmp;
+    //! diffSrc12
+    tmp =  _M_sourceFun.diff(   Aii,   Qii, 1, 2, ii );
+    tmp += _M_sourceFun.diff( Aiip1, Qiip1, 1, 2, iip1 );
+    _M_diffSrc12( ielem ) = 0.5 * tmp;
+    //! diffSrc21
+    tmp =  _M_sourceFun.diff(   Aii,   Qii, 2, 1, ii );
+    tmp += _M_sourceFun.diff( Aiip1, Qiip1, 2, 1, iip1 );
+    _M_diffSrc21( ielem ) = 0.5 * tmp;
+    //! diffSrc22
+    tmp =  _M_sourceFun.diff(   Aii,   Qii, 2, 2, ii );
+    tmp += _M_sourceFun.diff( Aiip1, Qiip1, 2, 2, iip1 );
+    _M_diffSrc22( ielem ) = 0.5 * tmp;
+
   }
 }
 
@@ -311,65 +1165,257 @@ void OneDModelSolver::_directsolveMassMatrix( ScalUnknown<Vector>& vec )
 }
 
 //! Update the right hand side for time advancing
-void OneDModelSolver::timeAdvance()
+void OneDModelSolver::timeAdvance( const Real& time_val )
 {
-  cout << "  o-  Updating right hand side... ";
-
   Chrono chrono;
+
+  Real dt2over2 = _M_time_step * _M_time_step * 0.5;
+
+  std::cout << "  o-  updates of flux and sources... ";
   chrono.start();
+  //! update the vector containing the values of the flux at the nodes 
+  //! and its jacobian
+  _updateFluxDer();
+  //! update the vector containing the values of the source term at the nodes 
+  //! and its jacobian
+  _updateSourceDer();
+  chrono.stop();
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
-  double dt2over2 = _M_time_step * _M_time_step * 0.5;
+  std::cout << "  o-  updates of matrices... ";
+  chrono.start();
+   //! update the matrices for the non-linear terms
+  _updateMatrices();
+  chrono.stop();
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
-  //! _M_FluxU = F_h( U_h^n )
-  _updateFlux();
+  /*
+  std::cout << "\n\n\tMass matrix " << std::endl;
+  _M_massMatrix.showMe( std::cout , _M_verbose );
+  std::cout << "\n\n\tGradient matrix " << std::endl;
+  _M_gradMatrix.showMe( std::cout , _M_verbose );
+
+  std::cout << "\n\n\tGradientDiffFlux11 matrix " << std::endl;
+  _M_gradMatrixDiffFlux11.showMe( std::cout , _M_verbose );
+  std::cout << "\n\n\tGradientDiffFlux12 matrix " << std::endl;
+  _M_gradMatrixDiffFlux12.showMe( std::cout , _M_verbose );
+
+  std::cout << "\n\n\tStiffnessDiffFlux11 matrix " << std::endl;
+  _M_stiffMatrixDiffFlux11.showMe( std::cout , _M_verbose );
+  std::cout << "\n\n\tStiffnessDiffFlux12 matrix " << std::endl;
+  _M_stiffMatrixDiffFlux12.showMe( std::cout , _M_verbose );
+
+  std::cout << "\n\n\tDivergenceDiffSrc11 matrix " << std::endl;
+  _M_divMatrixDiffSrc11.showMe( std::cout , _M_verbose );
+  std::cout << "\n\n\tDivergenceDiffSrc12 matrix " << std::endl;
+  _M_divMatrixDiffSrc12.showMe( std::cout , _M_verbose );
+
+  std::cout << "\n\n\tMassDiffSrc11 matrix " << std::endl;
+  _M_massMatrixDiffSrc11.showMe( std::cout , _M_verbose );
+  std::cout << "\n\n\tMassDiffSrc12 matrix " << std::endl;
+  _M_massMatrixDiffSrc12.showMe( std::cout , _M_verbose );
+  */
+  /*
+  std::cout << "\n\n\tFACTORIZED Mass matrix " << std::endl;
+  _M_factorMassMatrix.showMe( std::cout , _M_verbose );
+  ScalUnknown<Vector> vec( _M_dimDof );
+  for (int ii=0; ii < _M_stiffMatrix.OrderMatrix() ; ii++ ) {
+    vec( ii ) = ii;
+    std::cout <<  ii << " " << vec(ii) << std::endl;;
+  }
+
+  _solveMassMatrix( vec );
+  std::cout << "solve " << std::endl;
+  for (int ii=0; ii < _M_stiffMatrix.OrderMatrix() ; ii++ ) {
+    std::cout <<  ii << " " << vec(ii) << std::endl;;
+  }
+
+  vec = 1000.;
+  _M_stiffMatrix.Axpy( 1., _M_rhs , 1., vec );
+  std::cout << "matvec " << std::endl;
+  for (int ii=0; ii < _M_stiffMatrix.OrderMatrix() ; ii++ ) {
+    std::cout <<  ii << " " << vec(ii) << std::endl;;
+  }
+  */
+
+
+  /*!
+    ---------------------------------------------------
+    Taylor-Galerkin scheme: (explicit, U = [U1,U2]^T )
+    ---------------------------------------------------
+
+    (Un+1, phi) =                             //! massFactor^{-1} * Un+1
+            (Un, phi)                         //!            mass * U
+ + dt     * (       Fh(Un), dphi/dz )         //!            grad * F(U)
+ - dt^2/2 * (diffFh(Un) Sh(Un), dphi/dz )     //! gradDiffFlux(U) * S(U)
+ + dt^2/2 * (diffSh(Un) dFh/dz(Un), phi )     //!   divDiffSrc(U) * F(U)
+ - dt^2/2 * (diffFh(Un) dFh/dz(Un), dphi/dz ) //!stiffDiffFlux(U) * F(U)
+ - dt     * (       Sh(Un), phi )             //!            mass * S(U)
+ + dt^2/2 * (diffSh(Un) Sh(Un), phi )         //!  massDiffSrc(U) * S(U)
+    ---------------------------------------------------
+   */
+
+  std::cout << "  o-  Matrix vector products... ";
+  chrono.start();
 
   //! Reminder of the function Axpy:
   //! Axpy(alpha, x, beta, y) -> y = alpha*A*x + beta*y
 
-  //! rhs = mass * Un
-  _M_massMatrix.Axpy( 1., _M_U_thistime , 0., _M_rhs );
+  //!---------------------------------------------------
+  //! 1/ compute _M_rhs1 (system in U1=A)
+  //!---------------------------------------------------
+  //! rhs1 = mass * Un1
+  _M_massMatrix.Axpy( 1., _M_U1_thistime , 0., _M_rhs1 );
 
-  //! rhs = rhs + dt * grad * F_h(Un)
-  _M_gradMatrix.Axpy( _M_time_step, _M_FluxU , 1., _M_rhs );
+  //! rhs1 = rhs1 + dt * grad * F1(Un)
+  _M_gradMatrix.Axpy( _M_time_step, _M_Flux1 , 1., _M_rhs1 );
 
-  //! rhs = rhs - dt^2/2 * stiff * F_h(Un)
-  _M_stiffMatrix.Axpy( -dt2over2, _M_FluxU , 1., _M_rhs );
+  //! rhs1 = rhs1 - dt^2/2 * gradDiffFlux11 * S1(Un)
+  _M_gradMatrixDiffFlux11.Axpy( -dt2over2, _M_Source1 , 1., _M_rhs1 );
+  //! rhs1 = rhs1 - dt^2/2 * gradDiffFlux12 * S2(Un)
+  _M_gradMatrixDiffFlux12.Axpy( -dt2over2, _M_Source2 , 1., _M_rhs1 );
 
+  //! rhs1 = rhs1 + dt^2/2 * divDiffSrc11 * F1(Un)
+  _M_divMatrixDiffSrc11.Axpy( dt2over2, _M_Flux1 , 1., _M_rhs1 );
+  //! rhs1 = rhs1 + dt^2/2 * divDiffSrc12 * F2(Un)
+  _M_divMatrixDiffSrc12.Axpy( dt2over2, _M_Flux2 , 1., _M_rhs1 );
+
+  //! rhs1 = rhs1 - dt^2/2 * stiffDiffFlux11 * F1(Un)
+  _M_stiffMatrixDiffFlux11.Axpy( -dt2over2, _M_Flux1 , 1., _M_rhs1 );
+  //! rhs1 = rhs1 - dt^2/2 * stiffDiffFlux12 * F2(Un)
+  _M_stiffMatrixDiffFlux12.Axpy( -dt2over2, _M_Flux2 , 1., _M_rhs1 );
+
+  //! rhs1 = rhs1 - dt * mass * S1(Un)
+  _M_massMatrix.Axpy( - _M_time_step, _M_Source1 , 1., _M_rhs1 );
+
+  //! rhs1 = rhs1 + dt^2/2 * massDiffSrc11 * S1(Un)
+  _M_massMatrixDiffSrc11.Axpy( dt2over2, _M_Source1 , 1., _M_rhs1 );
+  //! rhs1 = rhs1 + dt^2/2 * divDiffSrc12 * S2(Un)
+  _M_massMatrixDiffSrc12.Axpy( dt2over2, _M_Source2 , 1., _M_rhs1 );
+
+
+  //!---------------------------------------------------
+  //! 2/ compute _M_rhs2 (system in U2=Q)
+  //!---------------------------------------------------
+  //! rhs2 = mass * Un2
+  _M_massMatrix.Axpy( 1., _M_U2_thistime , 0., _M_rhs2 );
+
+  //! rhs2 = rhs2 + dt * grad * F2(Un)
+  _M_gradMatrix.Axpy( _M_time_step, _M_Flux2 , 1., _M_rhs2 );
+
+  //! rhs2 = rhs2 - dt^2/2 * gradDiffFlux21 * S1(Un)
+  _M_gradMatrixDiffFlux21.Axpy( -dt2over2, _M_Source1 , 1., _M_rhs2 );
+  //! rhs2 = rhs2 - dt^2/2 * gradDiffFlux22 * S2(Un)
+  _M_gradMatrixDiffFlux22.Axpy( -dt2over2, _M_Source2 , 1., _M_rhs2 );
+
+  //! rhs2 = rhs2 + dt^2/2 * divDiffSrc21 * F1(Un)
+  _M_divMatrixDiffSrc21.Axpy( dt2over2, _M_Flux1 , 1., _M_rhs2 );
+  //! rhs2 = rhs2 + dt^2/2 * divDiffSrc22 * F2(Un)
+  _M_divMatrixDiffSrc22.Axpy( dt2over2, _M_Flux2 , 1., _M_rhs2 );
+
+  //! rhs2 = rhs2 - dt^2/2 * stiffDiffFlux21 * F1(Un)
+  _M_stiffMatrixDiffFlux21.Axpy( -dt2over2, _M_Flux1 , 1., _M_rhs2 );
+  //! rhs2 = rhs2 - dt^2/2 * stiffDiffFlux22 * F2(Un)
+  _M_stiffMatrixDiffFlux22.Axpy( -dt2over2, _M_Flux2 , 1., _M_rhs2 );
+
+  //! rhs2 = rhs2 - dt * mass * S2(Un)
+  _M_massMatrix.Axpy( - _M_time_step, _M_Source2 , 1., _M_rhs2 );
+
+  //! rhs2 = rhs2 + dt^2/2 * massDiffSrc21 * S1(Un)
+  _M_massMatrixDiffSrc21.Axpy( dt2over2, _M_Source1 , 1., _M_rhs2 );
+  //! rhs2 = rhs2 + dt^2/2 * divDiffSrc22 * S2(Un)
+  _M_massMatrixDiffSrc22.Axpy( dt2over2, _M_Source2 , 1., _M_rhs2 );
+
+  //!---------------------------------------------------
+  //! 3/ take into account the BOUNDARY CONDITIONS
+  //!---------------------------------------------------
+  //! compute the values for the boundary conditions
+  _computeBCValues( time_val );
   //! take into account the bc
-  _updateBCDirichletVector( _M_rhs, _M_bcDirLeft, _M_bcDirRight );
+  _updateBCDirichletVector();
 
   // *******************************************************
   chrono.stop();
-  cout << "done in " << chrono.diff() << " s." << endl;
+  std::cout << "rhs computed in " << chrono.diff() << " s." << std::endl;
+
 }
 
-void OneDModelSolver::iterate()
+void OneDModelSolver::iterate( const Real& time_val , const int& count)
 {
-  cout << "  o-  Solving the system... ";
+  std::cout << "  o-  Solving the system... t = " << time_val 
+	    << ", iter = " << count  << "... ";
   Chrono chrono;
   chrono.start();
 
-  //! solve the mass matrix and return the result in _M_rhs
-  _solveMassMatrix( _M_rhs );
+  //! solve the system: rhs1 = massFactor^{-1} * rhs1
+  _solveMassMatrix( _M_rhs1 );
+
+  //! solve the system: rhs2 = massFactor^{-1} * rhs2
+  _solveMassMatrix( _M_rhs2 );
 
   /*
-  cout << "\n\tsolution at time n+1 " << endl;
+  std::cout << "\n\tsolution at time n+1 " << std::endl;
   for ( UInt ii=0; ii < _M_dimDof ; ii++ ) {
-    cout <<  ii << " " << _M_rhs(ii) << endl;;
+    std::cout <<  ii << " " << _M_rhs1(ii) << std::endl;;
   }
   */
 
-  //! solution for the next time step
-  _M_U_thistime = _M_rhs;
-   // *******************************************************
+  //! update the solution for the next time step
+  _M_U1_thistime = _M_rhs1;
+  _M_U2_thistime = _M_rhs2;
+
+  /*
+  //! exact solution
+  Real celerity =2., xii;
+  for ( UInt ii=0; ii < _M_dimDof ; ii++ ) {
+    xii = ii * (_M_x_right - _M_x_left) / _M_nb_elem;
+    if ( xii <= celerity * time_val ) {
+      _M_U2_thistime[ii] = _M_U1_thistime[ii] - sin( 2*M_PI * ( time_val - xii / celerity ) );
+    }
+    else {
+      _M_U2_thistime[ii] = _M_U1_thistime[ii] - 0.;
+    }
+  }
+  */
+  if( !(count % 10) ){
+    std::string fname1 = "solA.mtv";
+    std::string fname2 = "solQ.mtv";
+    output_to_plotmtv( fname1, time_val, _M_mesh.pointList(), _M_U1_thistime, count);
+    output_to_plotmtv( fname2, time_val, _M_mesh.pointList(), _M_U2_thistime, count);
+  }
+  // *******************************************************
   chrono.stop();
-  cout << "done in " << chrono.diff() << " s." << endl;
+  std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
 }
 
 
 void OneDModelSolver::gplot( )
 {
-  _M_GracePlot.Plot( _M_mesh.pointList(), _M_U_thistime );
+  _M_GracePlot.Plot( _M_mesh.pointList(), _M_U1_thistime );
 }
+
+//! output for Plotmtv.
+void OneDModelSolver::output_to_plotmtv(std::string fname, Real time_val, 
+					const std::vector< Point1D >& ptlist, 
+					const ScalUnknown<Vector>& U,
+					const int& count )
+{
+
+  FILE *fp;
+  if (count==0){
+    fp = fopen(fname.c_str(),"w");
+  } else {
+    fp = fopen(fname.c_str(),"a");
+  }
+  fprintf(fp,"$ DATA = CURVE2D\n %% xlabel='z'\n");
+  fprintf(fp,"%% toplabel='Section,time=%f'\n %% ylabel='A'\n",time_val);
+
+  for(UInt ii = 0; ii < U.size(); ii++){
+    fprintf(fp,"%10.6f %10.6f\n", ptlist[ii].x(), U[ii]);
+  }
+  fclose(fp);
+  
+}
+
 }

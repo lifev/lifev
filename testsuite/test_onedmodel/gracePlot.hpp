@@ -58,7 +58,7 @@
 namespace LifeV
 {
 typedef KN<double> Rn;
-using namespace std;
+
 
 #if defined(HAVE_GRACE_NP_H)
 class GracePlot {

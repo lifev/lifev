@@ -31,11 +31,10 @@
 namespace LifeV
 {
 #if defined(HAVE_GRACE_NP_H)
-void
-GracePlot::GraceInit()
+void GracePlot::GraceInit()
 {
     if ( GraceOpenVA("xmgrace", 2048, "-nosafe", "-noask", NULL)== -1) {
-        cerr << "Can't run grace" << endl;
+        std::cerr << "Can't run grace" << std::endl;
         exit (EXIT_FAILURE);
     }
     GracePrintf("g0 on");                     /* Activate graph 0 */
@@ -140,7 +139,7 @@ int main(int argc, char* argv[]) {
         for (int i=0; i<n; i++) {
             y(i) = solex1(x(i), t);
         }
-        ostringstream str;
+        std::ostringstream str;
         str << "Time= " << t;
         p.Title(str.str());
         p.Xlabel("x"); p.Ylabel("f(x)");
@@ -149,7 +148,7 @@ int main(int argc, char* argv[]) {
         p.Sleep(0.5);
     }
 
-    cout << "Hit return to close plot" << endl;
+    std::cout << "Hit return to close plot" << std::endl;
     char ch;
     cin.get(ch);
 }

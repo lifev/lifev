@@ -22,7 +22,7 @@
   \date 07/2004
   \version 1.0
 
-  \brief This file contains the implementation for the OneD model solver.
+  \brief This file contains the implementation for the OneD model handler.
 
 */
 
@@ -35,13 +35,15 @@ OneDModelHandler::OneDModelHandler(const GetPot& data_file):
      DataOneDModel(data_file),
      DataAztec(data_file),
      _M_nbCoor(1),
-     _M_mesh(_M_x_left,_M_x_right,_M_nx),
+     _M_mesh(_M_x_left,_M_x_right,_M_nb_elem),
      _M_geoMap(geoLinearSeg),
      _M_qr(quadRuleSeg3pt),
      _M_refFE(feSegP1),
-     _M_dof(_M_mesh.numVertices()),
-     _M_dimDof(_M_mesh.numVertices()),
+     _M_dof1D(_M_mesh.numVertices()),
+     _M_dimDof(_M_dof1D.numTotalDof()),
      _M_fe(_M_refFE,_M_geoMap,_M_qr),
+     _M_U1_initial(_M_dimDof),
+     _M_U2_initial(_M_dimDof),
      _M_GracePlot( data_file )
 {
   /* Useless as long as we don't have a 1d mesh reader and handler...
@@ -50,13 +52,12 @@ OneDModelHandler::OneDModelHandler(const GetPot& data_file):
   //  _M_mesh.check(true,true);
   _M_mesh.updateElementEdges();
 
-  _M_dimDof = _M_dof.numTotalDof();
+  _M_dimDof = _M_dof1D.numTotalDof();
   */
 
   std::cout << "dimDof = "  << _M_dimDof << std::endl;
 
 }
-
 
 void OneDModelHandler::showMeHandler(std::ostream& c, UInt verbose)
 {
@@ -66,16 +67,11 @@ void OneDModelHandler::showMeHandler(std::ostream& c, UInt verbose)
 
 }
 
-//! Returns the concentration
-ScalUnknown<Vector>& OneDModelHandler::AreaUnkn()
-{
-  return _M_AreaUnkn;
-}
-
 // ! Initialize with constant initial conditions concentration
-void OneDModelHandler::initialize(const double& u0)
+void OneDModelHandler::initialize(const Real& u10, const Real& u20)
 {
-  _M_U_initial = u0;
+  _M_U1_initial = u10;
+  _M_U2_initial = u20;
 }
 
 // ! Initialize when  initial conditions concentration
@@ -89,8 +85,11 @@ void OneDModelHandler::initialize(const std::string & vname)
 {
 
   std::fstream Resfile(vname.c_str(),ios::in | ios::binary);
-  if (Resfile.fail()) {std::cerr<<" Error in initialize: File not found or locked"<<std::endl; abort();}
-  Resfile.read((char*)&_M_AreaUnkn(1),_M_AreaUnkn.size()*sizeof(double));
+  if (Resfile.fail()) {
+    std::cerr<<" Error in initialize: File not found or locked"<<std::endl; 
+    abort();
+  }
+  Resfile.read((char*)&_M_U1_initial(1),_M_U1_initial.size()*sizeof(Real));
   Resfile.close();
 }
 

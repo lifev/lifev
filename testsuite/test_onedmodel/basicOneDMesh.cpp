@@ -40,7 +40,7 @@ Point1D::Point1D():
 {
 }
 //! Constructor
-Point1D::Point1D(const double& x, const UInt& id):
+Point1D::Point1D(const Real& x, const UInt& id):
   _M_x(x),
   _M_id(id)
 {
@@ -71,7 +71,7 @@ Edge1D::Edge1D():
 {}
 
 //! Constructor with two end abscissae
-Edge1D::Edge1D( const double& x1, const double& x2, const UInt& id ):
+Edge1D::Edge1D( const Real& x1, const Real& x2, const UInt& id ):
   _M_pt1(std::min(x1,x2)),
   _M_pt2(std::max(x2,x1)),
   _M_length(std::abs(x2-x1)),
@@ -85,7 +85,7 @@ Edge1D::Edge1D( const double& x1, const double& x2, const UInt& id ):
 Edge1D::Edge1D( const Point1D& pt1, const Point1D& pt2, const UInt& id ):
   _M_id(id)
 {
-  if ( double diff = pt2.x() - pt1.x() > 0 ) {
+  if ( Real diff = pt2.x() - pt1.x() > 0 ) {
     _M_pt1 = pt1;  _M_pt2 = pt2;
     _M_length = diff;
   }
@@ -106,7 +106,7 @@ Edge1D & Edge1D::operator= (const Edge1D & edg)
 }
 
 // return one of the end points (i=1 or 2)
-Point1D Edge1D::point( int i ) const
+Point1D Edge1D::point( const UInt& i ) const
 {
   switch(i){
   case 1:
@@ -127,15 +127,15 @@ BasicOneDMesh::BasicOneDMesh(const std::string& mesh_file,
 {}
 
 //! constructor for regular meshes
-BasicOneDMesh::BasicOneDMesh(const double& xl, const double& xr,
-			     const int& nx):
-  _M_pointList( nx + 2 ),
-  _M_edgeList( nx + 1 )
+BasicOneDMesh::BasicOneDMesh(const Real& xl, const Real& xr,
+			     const UInt& nb_elem):
+  _M_pointList( nb_elem + 1 ),
+  _M_edgeList( nb_elem )
 {
-  ASSERT_PRE( nx > 0, "The number of elements must be positive!");
+  ASSERT_PRE( nb_elem > 0, "The number of elements must be positive!");
 
-  double x_current = xl;
-  double deltax = ( xr - xl ) / (nx+1);
+  Real x_current = xl;
+  Real deltax = ( xr - xl ) / _M_edgeList.size();
   ASSERT_PRE( deltax > 0 ,
 	      "The left point is on the right..." );
 
@@ -154,13 +154,20 @@ BasicOneDMesh::BasicOneDMesh(const double& xl, const double& xr,
 }
 
 //! return one edge of the list (iedg starts at 1)
-Edge1D BasicOneDMesh::edgeList( UInt iedg )
+Edge1D BasicOneDMesh::edgeList( const UInt& iedg ) const
 {
   ASSERT_BD(0 < iedg && iedg < _M_edgeList.size() + 1 );
   return _M_edgeList[ iedg - 1 ];
 }
 
-void BasicOneDMesh::showMe(std::ostream& c, UInt verbose)
+//! return the one point of the list (BEWARE: start at 1)
+Point1D BasicOneDMesh::pointList( const UInt& ipt ) const 
+{
+  ASSERT_BD(0 < ipt && ipt < _M_pointList.size() + 1 );
+  return _M_pointList[ ipt - 1 ];
+}
+
+void BasicOneDMesh::showMe(std::ostream& c, const UInt& verbose)
 {
   c << "\n*** Basic 1D Mesh \n";
   c << "number of points = " << numVertices() << "\n";

@@ -32,13 +32,8 @@ namespace LifeV
 //! constructor using a data file.
 DataOneDModel::DataOneDModel(const GetPot& dfile)
 {
-  //! Physics/BCs
-  _M_test_case = dfile("physics/BCs/test_case",1);
-  //! Physics/parameters
-  _M_alphaCor = dfile("physics/parameters/alphaCor",1.);
-  _M_beta0 = dfile("physics/parameters/beta0",1.);
-  _M_beta1 = dfile("physics/parameters/beta1",0.5);
-  _M_Kr = dfile("physics/parameters/Kr",1.);
+  //! boundcond
+  _M_test_case = dfile("boundcond/test_case",1);
 
   //! Time
   _M_time_beg = dfile("time/timebeg",0.0);
@@ -49,38 +44,32 @@ DataOneDModel::DataOneDModel(const GetPot& dfile)
   _M_mesh_dir  = dfile("discretization/mesh_dir","./");
   _M_x_left    = dfile("discretization/x_left",0.);
   _M_x_right   = dfile("discretization/x_right",1.);
-  _M_nx        = dfile("discretization/nx",10);
+  _M_nb_elem        = dfile("discretization/nb_elem",10);
   //! Miscellaneous
   _M_post_dir  = dfile("miscellaneous/post_dir","./");
   _M_verbose   = dfile("miscellaneous/verbose",0);
   _M_post_proc_format   = dfile("miscellaneous/post_proc_format","medit");
 }
 
-double DataOneDModel::timestep() const
+Real DataOneDModel::timestep() const
 {
   return _M_time_step;
 }
-double DataOneDModel::inittime() const
+Real DataOneDModel::inittime() const
 {
   return _M_time_beg;
 }
-double DataOneDModel::endtime() const
+Real DataOneDModel::endtime() const
 {
   return _M_time_end;
 }
 
 void DataOneDModel::showMeData(std::ostream& c) const
 {
-  c << "\n*** Values for data [physics]\n";
-  // Physics/BCs
-  c << "\t[physics/BCs]\n";
+  c << "\n*** Values for data [boundcond]\n";
+  //! boundcond
+  c << "\t[boundcond]\n";
   c << "test_case = " << _M_test_case << "\n";
-   //! Physics/parameters
-  c << "\t[physics/parameters]\n";
-  c << "alphaCor = " << _M_alphaCor << "\n";
-  c << "beta0 = " << _M_beta0 << "\n";
-  c << "beta1 = " << _M_beta1 << "\n";
-  c << "Kr    = " << _M_Kr << "\n";
 
   //! Time
   c << "\n*** Values for data [time]\n";
@@ -94,7 +83,7 @@ void DataOneDModel::showMeData(std::ostream& c) const
   c << "mesh_dir  = " << _M_mesh_dir << "\n";
   c << "x_left = " << _M_x_left << "\n";
   c << "x_right = " << _M_x_right << "\n";
-  c << "nx = " << _M_nx << "\n";
+  c << "nb_elem = " << _M_nb_elem << "\n";
 
   //! Miscellaneous
   c << "\n*** Values for data [miscellaneous]\n\n";

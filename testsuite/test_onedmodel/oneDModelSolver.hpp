@@ -23,6 +23,89 @@
   \version 1.0
 
   \brief This file contains a solver class for the 1D model.
+
+  ---------------------------------------------------
+  1 dimensional hyperbolic equation:
+  ---------------------------------------------------
+      dU/dt  +  dF(U)/dz  +  S(U) = 0
+  ---------------------------------------------------
+
+  with U = [U1,U2]^T in R^2.
+
+  The non linear flux function F(U) and source function S(U)
+  are quite independant of this solver : they are taken into 
+  account only via two classes that define a vectorial function
+  and its derivatives.
+
+  More precisely:
+  two functions (_M_fluxFun and _M_sourceFun) have to be defined
+  separately to allow the update (_updateFluxDer, _updateSourceDer) 
+  of the corresponding vectors (_M_Fluxi, _M_diffFluxij,
+  _M_Sourcei, _M_diffSrcij). I also separated the treatment of the
+  parameters that exist in the functions.
+  Normally, one should be able to create a template to allow
+  the user to select between different problems (linear, non-linear,
+  etc.). 
+
+
+    -----------------------------------------------------
+    Solver based on the 2nd order Taylor-Galerkin scheme.
+    -----------------------------------------------------
+    (see for instance Formaggia-Veneziani, Mox report no 21 june 2003)
+
+    ---------------------------------------------------
+    Taylor-Galerkin scheme: (explicit, U = [U1,U2]^T )
+    ---------------------------------------------------
+
+    (Un+1, phi) =                             //! massFactor^{-1} * Un+1
+            (Un, phi)                         //!            mass * U
+ + dt     * (       Fh(Un), dphi/dz )         //!            grad * F(U)
+ - dt^2/2 * (diffFh(Un) Sh(Un), dphi/dz )     //! gradDiffFlux(U) * S(U)
+ + dt^2/2 * (diffSh(Un) dFh/dz(Un), phi )     //!   divDiffSrc(U) * F(U)
+ - dt^2/2 * (diffFh(Un) dFh/dz(Un), dphi/dz ) //!stiffDiffFlux(U) * F(U)
+ - dt     * (       Sh(Un), phi )             //!            mass * S(U)
+ + dt^2/2 * (diffSh(Un) Sh(Un), phi )         //!  massDiffSrc(U) * S(U)
+    ---------------------------------------------------
+
+    Approximation of the unknowns and non-linearities:
+
+    Let's define:
+    a) (phi_i)_{i in nodes} is the basis of P1 (the "hat" functions)
+    b) (1_{i+1/2})_{i+1/2 in elements} is the basis of P0 (constant per
+        element). The vertices of the element "i+1/2" are the nodes "i" and "i+1".
+	
+    Then:
+
+    c) Uh    is in P1 : U = sum_{i in nodes} U_i phi_i
+
+    d) Fh(U) is in P1 : F(U) = sum_{i in nodes} F(U_i) phi_i 
+    e) diffFh(U) is in P0 : 
+diffFlux(U) = sum_{i+1/2 in elements} 1/2 { dF/dU(U_i) + dF/dU(U_i+1) } 1_{i+1/2}
+    (means of the two extremal values of the cell)
+   
+    We note that d) allows us to define easily
+    f) dF/dz(U) = sum_{i in nodes} F(U_i) d(phi_i)/dz 
+
+    g) Sh(U) is in P1 : S(U) = sum_{i in nodes} S(U_i) phi_i
+    h) diffSh(U) is in P0 : 
+diffSrc(U) = sum_{i+1/2 in elements} 1/2 { dS/dU(U_i) + dS/dU(U_i+1) } 1_{i+1/2}
+    (means of the two extremal values of the cell)
+
+
+    -----------------------------------------------------
+    The option taken here is to define the different tridiagonal matrix
+    operators (div, grad, mass, stiff) and reconstruct them at each time
+    step (as they depend on diffFlux and diffSrc). They are thus rebuilt
+    at the element level and reassembled.
+    Afterwards, there remains to do only some tridiagonal matrix vector
+    products to obtain the right hand side.
+    
+    This procedure might appear a bit memory consuming (there are 18
+    tridiagonal matrices stored), but it has the advantage of being
+    very clear. If it is too costly, it should be quite easy to improve 
+    it.
+
+    -----------------------------------------------------
 */
 
 #ifndef _ONEDMODELSOLVER_H_
@@ -43,6 +126,9 @@
 #include "chrono.hpp"
 
 #include "tridiagMatrix.hpp"
+#include "oneDNonLinModelParam.hpp"
+#include "vectorFunction1D.hpp"
+
 
 namespace LifeV
 {
@@ -62,30 +148,55 @@ public:
   /*!
     \param data_file GetPot data file
   */
-  OneDModelSolver(const GetPot& data_file);
+  OneDModelSolver(const GetPot& data_file, 
+		  //		  const OneDNonLinModelParam& onedparam);
+		  const LinearSimpleParam& onedparam);
 
   //! return the solution at current time step
-  const ScalUnknown<Vector>& U_thistime() const { return _M_U_thistime;}
+  const ScalUnknown<Vector>& U1_thistime() const { return _M_U1_thistime;}
 
-  //! return the solution at next time step
-  const ScalUnknown<Vector>& U_nexttime() const{ return _M_U_nexttime;}
+  //! return the solution at current time step
+  const ScalUnknown<Vector>& U2_thistime() const { return _M_U2_thistime;}
 
   //! Update the right  hand side  for time advancing
-  void timeAdvance();
+  void timeAdvance( const Real& time );
 
   //! Update convective term, bc treatment and solve the linearized ns system
-  void iterate();
+  void iterate( const Real& time , const int& count);
 
   //! plotting
   void gplot();
 
+  //! writer
+  void output_to_plotmtv(std::string fname, Real time_val, 
+			 const std::vector< Point1D >& ptlist, 
+			 const ScalUnknown<Vector>& U,
+			 const int& count);
+
+
 private:
 
+  //! the parameters
+  //  const OneDNonLinModelParam& _M_oneDParam;
+  const LinearSimpleParam& _M_oneDParam;
+
+  /*
+  //! the flux function
+  NonLinearFluxFun1D _M_fluxFun;
+  //! the source function 
+  NonLinearSourceFun1D _M_sourceFun ;
+  */
+  //! the flux function
+  LinearSimpleFluxFun1D _M_fluxFun;
+  //! the source function 
+  LinearSimpleSourceFun1D _M_sourceFun ;
+
+
   //! coefficient in front of the corresponding _M_elmat*
-  double _M_coeffMass;
-  double _M_coeffStiff;
-  double _M_coeffGrad;
-  double _M_coeffDiv;
+  Real _M_coeffMass;
+  Real _M_coeffStiff;
+  Real _M_coeffGrad;
+  Real _M_coeffDiv;
 
 
   ElemMat _M_elmatMass;  //!< element mass matrix
@@ -93,55 +204,155 @@ private:
   ElemMat _M_elmatGrad;  //!< element gradient matrix
   ElemMat _M_elmatDiv;   //!< element divergence matrix
 
-  ElemVec _M_elvec; // Elementary right hand side
+  //  ElemVec _M_elvec; // Elementary right hand side
 
   //! Unknown at present time step
-  ScalUnknown<Vector> _M_U_thistime; //! not used??
-  //! Unknown at next time step
-  ScalUnknown<Vector> _M_U_nexttime;
-  //! Flux (at present time step: F_h(U_h^n) )
-  ScalUnknown<Vector> _M_FluxU;
-  //! Right hand side
-  ScalUnknown<Vector> _M_rhs;
+  ScalUnknown<Vector> _M_U1_thistime;
+  ScalUnknown<Vector> _M_U2_thistime;
+
+  //! Exact solution
+  // ScalUnknown<Vector> _M_U_exact;
+
+  //! Right hand sides of the linear system i: "mass * _M_Ui = _M_rhsi"
+  ScalUnknown<Vector> _M_rhs1;
+  ScalUnknown<Vector> _M_rhs2;
+
+  //! Flux F(U) (in P1)
+  ScalUnknown<Vector> _M_Flux1;
+  ScalUnknown<Vector> _M_Flux2;
+  //! diffFlux = dF(U)/dU (in P0) 
+  ScalUnknown<Vector> _M_diffFlux11;
+  ScalUnknown<Vector> _M_diffFlux12;
+  ScalUnknown<Vector> _M_diffFlux21;
+  ScalUnknown<Vector> _M_diffFlux22;
+
+  //! Source term S (in P1)
+  ScalUnknown<Vector> _M_Source1;
+  ScalUnknown<Vector> _M_Source2;
+  //! diffSrc = dSource(U)/dU (in P0)
+  ScalUnknown<Vector> _M_diffSrc11;
+  ScalUnknown<Vector> _M_diffSrc12;
+  ScalUnknown<Vector> _M_diffSrc21;
+  ScalUnknown<Vector> _M_diffSrc22;
+
+
 
   //! tridiagonal mass matrix
-  TriDiagMatrix<double> _M_massMatrix;
-   //! tridiagonal stiffness matrix
-  TriDiagMatrix<double> _M_stiffMatrix;
-  //! tridiagonal gradient matrix
-  TriDiagMatrix<double> _M_gradMatrix;
-  //! tridiagonal divergence matrix
-  TriDiagMatrix<double> _M_divMatrix;
+  TriDiagMatrix<Real> _M_massMatrix;
 
   //! lapack LU factorized tridiagonal mass matrix
-  TriDiagMatrix<double> _M_factorMassMatrix;
+  TriDiagMatrix<Real> _M_factorMassMatrix;
   //! vectors used by lapack for factorization:
-  KN<double> _M_massupdiag2; //!< second upper diagonal (used by lapack) (size _M_order-2)
-  KN<int>    _M_massipiv;   //!< indices of pivot in the lapack LU (size _M_order)
+  KN<Real> _M_massupdiag2; //!< second upper diagonal (used by lapack) (size _M_order-2)
+  KN<int>  _M_massipiv;   //!< indices of pivot in the lapack LU (size _M_order)
 
-  //! Update the element matrices with the current element (from 1)
-  void _updateElemMatrices( const UInt& iedge );
+
+  //! tridiagonal mass matrices multiplied by diffSrcij
+  TriDiagMatrix<Real> _M_massMatrixDiffSrc11;
+  TriDiagMatrix<Real> _M_massMatrixDiffSrc12;
+  TriDiagMatrix<Real> _M_massMatrixDiffSrc21;
+  TriDiagMatrix<Real> _M_massMatrixDiffSrc22;
+
+  //! tridiagonal stiffness matrices multiplied by diffFluxij
+  TriDiagMatrix<Real> _M_stiffMatrixDiffFlux11;
+  TriDiagMatrix<Real> _M_stiffMatrixDiffFlux12;
+  TriDiagMatrix<Real> _M_stiffMatrixDiffFlux21;
+  TriDiagMatrix<Real> _M_stiffMatrixDiffFlux22;
+
+  //! tridiagonal gradient matrix
+  TriDiagMatrix<Real> _M_gradMatrix;
+  //! tridiagonal gradient matrices multiplied by diffFluxij 
+  TriDiagMatrix<Real> _M_gradMatrixDiffFlux11;
+  TriDiagMatrix<Real> _M_gradMatrixDiffFlux12;
+  TriDiagMatrix<Real> _M_gradMatrixDiffFlux21;
+  TriDiagMatrix<Real> _M_gradMatrixDiffFlux22;
+
+  //! tridiagonal divergence matrices multiplied by diffSrcij
+  TriDiagMatrix<Real> _M_divMatrixDiffSrc11;
+  TriDiagMatrix<Real> _M_divMatrixDiffSrc12;
+  TriDiagMatrix<Real> _M_divMatrixDiffSrc21;
+  TriDiagMatrix<Real> _M_divMatrixDiffSrc22;
+
+
+  //! Update the coefficients 
+  //! (from the flux, source functions and their derivatives)
+  void _updateMatrixCoefficients(const UInt& ii, const UInt& jj,
+				 const UInt& iedge);
+
+  //! Update the element matrices with the current element
+  void _updateElemMatrices();
+
+  //! assemble the matrices
+  int _assemble_matrices(const UInt& ii, const UInt& jj );
+
+  /*! update the matrices  
+    _M_massMatrixDiffSrcij, _M_stiffMatrixDiffFluxij
+    _M_gradMatrixDiffFluxij, and _M_divMatrixDiffSrcij (i,j=1,2)
+
+    from the values of diffFlux(Un) and diffSrc(Un) 
+    that are computed with _updateMatrixCoefficients.
+
+    call of  _updateMatrixCoefficients,
+         _updateElemMatrices and _assemble_matrices.
+  */
+  void _updateMatrices();
 
   /*! modify the matrix to take into account
     the Dirichlet boundary conditions
     (works for P1Seg and canonic numbering!)
   */
-  void _updateBCDirichletMatrix( TriDiagMatrix<double>& mat );
+  void _updateBCDirichletMatrix( TriDiagMatrix<Real>& mat );
 
   /*! modify the vector to take into account
     the Dirichlet boundary conditions
     (works for P1Seg and canonic numbering!)
+  */
+  void _updateBCDirichletVector();
 
-     \param vec : the rhs vector
-     \param val_left  : Dirichlet value inserted to the left
-     \param val_right : Dirichlet value inserted to the right
- */
-  void _updateBCDirichletVector( ScalUnknown<Vector>& vec,
-				 const double& val_left,
-				 const double& val_right );
+  /*! compute the _M_bcDirLeft and _M_bcDirRight
+      from the external boundary condition
+           and the compatibility condition.
 
-  //! update the flux from the current unknown: FfluxU = F_h(U_h^n)
+    use the extrapolation of the pseudo-characteristics 
+
+      (from the solution at time n, obtain the 
+      value of the linearized characteristics
+      at time n+1.)
+      Used as Compatibility condition.
+  */
+  void _computeBCValues( const Real& time_val );
+
+  //! linear interpolation at the foot of the characteristic
+  //! determined by the given eigenvalue
+  Vec2D _interpolLinear(const Real& point_bound, const Real& point_internal,
+			const Real& deltaT, const Real& eigenvalue, 
+			const Vec2D& U_bound, const Vec2D& U_intern) const;
+
+  //! solve a 2x2 linear system by the Cramer method (for the boundary systems)
+  //! (beware of ill-conditioning!...).
+  Vec2D _solveLinearSyst2x2(const Vec2D& line1, const Vec2D& line2,
+			    const Vec2D& rhs2d) const;
+
+  //! Axpy product for 2D vectors (pairs)
+  //! Axpy(alpha, x, beta, y) -> y = a*A*x + beta*y
+  void Axpy(const Vec2D& line1, const Vec2D& line2,
+	    const Real& alpha,  const Vec2D& x,
+	    const Real& beta,   Vec2D& y) const;
+
+  //! 2D dot product
+  Real dot(const Vec2D& vec1, const Vec2D& vec2) const;
+
+  //! update the P1 flux vector from U: _M_Fluxi = F_h(Un) i=1,2
   void _updateFlux();
+  //! update the P1 source vector from U: _M_Sourcei = S_h(Un) i=1,2
+  void _updateSource();
+
+  //! call _updateFlux and update the P0 derivative of flux vector from U: 
+  //! _M_diffFluxij = dF_h/dU(Un) i,j=1,2
+  void _updateFluxDer();
+  //! call _updateSource and update the P0 derivative of source vector from U: 
+  //! _M_diffSrcij = dS_h/dU(Un) i,j=1,2
+  void _updateSourceDer();
 
   //! lapack LU factorization for tridiag matrices
   //! (modifies _M_factorMassMatrix, _M_massupdiag2 and _M_massipiv.)

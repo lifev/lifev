@@ -22,7 +22,7 @@
   \date 07/2004
   \version 1.0
 
-  \brief This file contains a class for the OneD model solver.
+  \brief This file contains a class for the OneD model handler.
 
 */
 
@@ -31,6 +31,8 @@
 
 
 #include <cmath>
+#include <utility>
+
 #include "lifeV.hpp"
 #include "dataOneDModel.hpp"
 #include "basicOneDMesh.hpp"
@@ -57,15 +59,18 @@ class OneDModelHandler:
 {
 public:
 
+  typedef pair< Real, Real > Vec2D;
+
+
   typedef Real (*Function)(const Real&, const Real&, const Real&, const Real&, const ID&);
 
   //! Constructor
   /*!
     \param data_file GetPot data file
-    \param refFE_c reference FE for the concentration
-    \param Qr_c volumic quadrature rule for the concentration
-    \param bdQr_c surface quadrature rule for the concentration
-    \param BCh_c boundary conditions for the concentration
+    \param refFE reference FE
+    \param Qr volumic quadrature rule
+    \param bdQr surface quadrature rule
+    \param BCh boundary conditions
   */
   OneDModelHandler(const GetPot& data_file);
 
@@ -73,7 +78,7 @@ public:
   ~OneDModelHandler() {};
 
   //! Sets initial condition for the concentration
-  void initialize(const double& u0);
+  void initialize(const Real& u10, const Real& u20);
 
   //! Sets initial condition for the concentration
   //! (incremental approach): the initial time is t0, the time step dt
@@ -92,12 +97,6 @@ public:
   //! Update convective term, bc treatment and solve the linearized cdr system
   //  virtual void iterate(const Real& time, PhysVectUnknown<Vector> & u) = 0;
 
-  //! Returns the Area vector
-  ScalUnknown<Vector>& AreaUnkn();
-
-  //! Returns the dof
-  //  const Dof& theDof() const;
-
    //! Output
   void showMeHandler(std::ostream& c=std::cout, UInt verbose=0);
 
@@ -112,23 +111,19 @@ protected:
 
   const RefFE& _M_refFE;   //!< Reference Finite Element
 
-  DofOneD _M_dof;       //!< the simplified degrees of freedom
-  UInt _M_dimDof;   //!< number of dof  := nb of vertices
+  DofOneD _M_dof1D; //!< the simplified degrees of freedom
+  const UInt _M_dimDof;   //!< number of dof  := nb of vertices
 
   CurrentFE _M_fe;     //!< current finite element
 
 
-  //! Dirichlet boundary value at left and right (NO bc_handler)
-  double _M_bcDirLeft;
-  double _M_bcDirRight;
+  //! Dirichlet boundary value at left and right boundaries (NO bc_handler)
+  Vec2D _M_bcDirLeft; //! first -> U1, second ->U2
+  Vec2D _M_bcDirRight;
 
   //! initial value for the unknown
-  ScalUnknown<Vector> _M_U_initial;
-
-  //! Area unknown
-  ScalUnknown<Vector> _M_AreaUnkn;
-  //! Flux unknown
-  ScalUnknown<Vector> _M_FluxUnkn;
+  ScalUnknown<Vector> _M_U1_initial;
+  ScalUnknown<Vector> _M_U2_initial;
 
   //! boundary conditions functions
   BCFunction_Base _M_bc_fct1;  //!< low  X

@@ -48,9 +48,9 @@ public:
   DataOneDModel(const GetPot& dfile);
 
   // return the different time data
-  double timestep() const;
-  double inittime() const;
-  double endtime()  const;
+  Real timestep() const;
+  Real inittime() const;
+  Real endtime()  const;
 
   const std::string PostDirectory() const {return _M_post_dir;};
 
@@ -58,31 +58,24 @@ public:
   void showMeData(std::ostream& c=std::cout) const;
 
 protected:
-  //
-  //! Physics
-  //
-  //! Physics/BCs (boundary conditions)
+
+  //! boundcond (boundary conditions)
   int _M_test_case; //! test case
-  //! Physics/parameters
-  double _M_alphaCor; //! coriolis coeff
-  double _M_beta0;  //! pressure law factor
-  double _M_beta1;  //! pressure law exponent
-  double _M_Kr;     //! friction parameter (source term)
 
   //
   //! Time
   //
-  double _M_time_beg;  //! starting time
-  double _M_time_end; //! finishing time
-  double _M_time_step; //! time step
+  Real _M_time_beg;  //! starting time
+  Real _M_time_end; //! finishing time
+  Real _M_time_step; //! time step
   //
   //! Discretization
   //
   std::string _M_mesh_file;
   std::string _M_mesh_dir;
-  double _M_x_left;  //! left coordinate
-  double _M_x_right; //! right coordinate
-  int _M_nx; //! such that (nx+1)=number of elements (0,1,..,nx)
+  Real _M_x_left;  //! left coordinate
+  Real _M_x_right; //! right coordinate
+  UInt _M_nb_elem;    //! number of elements
   //
   //! Miscellaneous
   //

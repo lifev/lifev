@@ -48,7 +48,7 @@ public:
   Point1D();
 
   //! Constructor
-  Point1D(const double& x, const UInt& id=0);
+  Point1D(const Real& x, const UInt& id=0);
 
   //! Copy constructor
   Point1D(const Point1D& pt);
@@ -60,13 +60,13 @@ public:
   INLINE UInt id() const {return _M_id;};
 
   //! return the abscissae (and other coordinates :=0)
-  INLINE double x() const {return _M_x;};
-  INLINE double y() const {return 0.;};
-  INLINE double z() const {return 0.;};
+  INLINE Real x() const {return _M_x;};
+  INLINE Real y() const {return 0.;};
+  INLINE Real z() const {return 0.;};
 
 protected:
   //! abscissa
-  double _M_x;
+  Real _M_x;
 
   //! identity
   UInt _M_id;
@@ -83,7 +83,7 @@ public:
   Edge1D::Edge1D();
 
   //! Constructor with two end abscissae
-  Edge1D( const double& x1, const double& x2, const UInt& id=0 );
+  Edge1D( const Real& x1, const Real& x2, const UInt& id=0 );
 
   //! Constructor with two end points
   Edge1D( const Point1D& pt1, const Point1D& pt2, const UInt& id=0 );
@@ -96,14 +96,14 @@ public:
   INLINE UInt id() const {return _M_id;};
 
   //! return the length of the edge
-  INLINE double length() const {return _M_length;};
+  INLINE Real length() const {return _M_length;};
 
   //! return the end points
   Point1D pt1() const {return _M_pt1;};
   Point1D pt2() const {return _M_pt2;};
 
   // return one of the end points (i=1 or 2)
-  Point1D point( int i ) const;
+  Point1D point( const UInt& i ) const;
 
 protected:
   //! first end point
@@ -112,7 +112,7 @@ protected:
   Point1D _M_pt2;
 
   //! edge length (always positive)
-  double _M_length;
+  Real _M_length;
 
   //! identity
   UInt _M_id;
@@ -133,11 +133,14 @@ public:
 		const std::string& mesh_dir);
 
   //! constructor for regular meshes
-  BasicOneDMesh(const double& xl, const double& xr,
-		const int& nx);
+  BasicOneDMesh(const Real& xl, const Real& xr,
+		const UInt& nb_elem);
 
   //! return one edge of the list (BEWARE: start at 1)
-  Edge1D edgeList( UInt iedg );
+  Edge1D edgeList( const UInt& iedg ) const;
+
+  //! return the one point of the list (BEWARE: start at 1)
+  Point1D pointList( const UInt& iedg ) const ;
 
   //! return the full list of points
   const std::vector< Point1D >& pointList() const {return _M_pointList;};
@@ -149,7 +152,7 @@ public:
   UInt numEdges() const {return _M_edgeList.size();};
 
   //! Output
-  void showMe(std::ostream& c=std::cout, UInt verbose = 0);
+  void showMe(std::ostream& c=std::cout, const UInt& verbose = 0);
 
 protected:
 
