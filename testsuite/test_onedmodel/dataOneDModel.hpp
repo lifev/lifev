@@ -51,6 +51,7 @@ public:
   double inittime() const;
   double endtime()  const;
   
+  const std::string PostDirectory() const {return _M_post_dir;};
 
   //! Output 
   void showMeData(std::ostream& c=std::cout) const;

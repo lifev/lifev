@@ -42,6 +42,7 @@
 #include "bcCond.hpp"
 #include "medit_wrtrs.hpp"
 
+#include "gracePlot.hpp"
 
 
 /*! 
@@ -99,7 +100,7 @@ public:
    //! Output 
   void showMeHandler(std::ostream& c=std::cout, UInt verbose=0);
 
- protected:
+protected:
   
   const UInt _M_nbCoor; //!< := 1 (ONE dimensional model...)
 
@@ -132,6 +133,7 @@ public:
   BCFunction_Base _M_bc_fct1;  //!< low  X
   BCFunction_Base _M_bc_fct2;  //!< high X
    
+  GracePlot _M_GracePlot; //!< for plotting
 
 };
 

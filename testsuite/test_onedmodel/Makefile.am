@@ -24,14 +24,19 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 AM_CPPFLAGS	= -DNO_BLASLAPACK
 
+LDFLAGS_EXTRA	= -L/usr/local/grace/lib 
+LDFLAGS =  $(LDFLAGS_EXTRA)
+LIBS =    -lgrace_np 
+
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
 check_PROGRAMS = test_onedmodel
 noinst_HEADERS = dataOneDModel.hpp basicOneDMesh.hpp dofOneD.hpp \
 		 oneDModelHandler.hpp oneDModelSolver.hpp \
-		 ud_functions.hpp 
-test_onedmodel_SOURCES = dataOneDModel.cpp  basicOneDMesh.cpp\
-		oneDModelHandler.cpp oneDModelSolver.cpp main.cpp 
+		 ud_functions.hpp gracePlot.hpp
+test_onedmodel_SOURCES = dataOneDModel.cpp  basicOneDMesh.cpp \
+			oneDModelHandler.cpp oneDModelSolver.cpp main.cpp\
+			gracePlot.cpp 
 EXTRA_DIST = data 
 
-TESTS=test_onedmodel
+#TESTS=test_onedmodel

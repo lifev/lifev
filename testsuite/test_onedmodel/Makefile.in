@@ -102,7 +102,7 @@ CONFIG_HEADER = $(top_builddir)/lifeconfig.h
 CONFIG_CLEAN_FILES =
 am_test_onedmodel_OBJECTS = dataOneDModel.$(OBJEXT) \
 	basicOneDMesh.$(OBJEXT) oneDModelHandler.$(OBJEXT) \
-	oneDModelSolver.$(OBJEXT) main.$(OBJEXT)
+	oneDModelSolver.$(OBJEXT) main.$(OBJEXT) gracePlot.$(OBJEXT)
 test_onedmodel_OBJECTS = $(am_test_onedmodel_OBJECTS)
 test_onedmodel_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
@@ -111,7 +111,8 @@ DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/admin/depcomp
 am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/basicOneDMesh.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/dataOneDModel.Po ./$(DEPDIR)/main.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dataOneDModel.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/gracePlot.Po ./$(DEPDIR)/main.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/oneDModelHandler.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/oneDModelSolver.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
@@ -166,9 +167,9 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
-LDFLAGS = @LDFLAGS@
+LDFLAGS = $(LDFLAGS_EXTRA)
 LIBOBJS = @LIBOBJS@
-LIBS = @LIBS@
+LIBS = -lgrace_np 
 LIBTOOL = @LIBTOOL@
 LIFEV_EXTRA_VERSION = @LIFEV_EXTRA_VERSION@
 LIFEV_MAJOR_VERSION = @LIFEV_MAJOR_VERSION@
@@ -246,6 +247,7 @@ target_os = @target_os@
 target_vendor = @target_vendor@
 SUFFIXES = .cpp .hpp .idl .c .h .f .F .o .moc 
 AM_CPPFLAGS = -DNO_BLASLAPACK
+LDFLAGS_EXTRA = -L/usr/local/grace/lib 
 
 #AM_CXXFLAGS		= -DTEST_ALL -gstabs -DTHREEDIM
 AM_CXXFLAGS = -DTHREEDIM -gstabs
@@ -253,10 +255,11 @@ LDADD = $(life_libs)
 INCLUDES = $(all_includes)
 noinst_HEADERS = dataOneDModel.hpp basicOneDMesh.hpp dofOneD.hpp \
 		 oneDModelHandler.hpp oneDModelSolver.hpp \
-		 ud_functions.hpp 
+		 ud_functions.hpp gracePlot.hpp
 
-test_onedmodel_SOURCES = dataOneDModel.cpp  basicOneDMesh.cpp\
-		oneDModelHandler.cpp oneDModelSolver.cpp main.cpp 
+test_onedmodel_SOURCES = dataOneDModel.cpp  basicOneDMesh.cpp \
+			oneDModelHandler.cpp oneDModelSolver.cpp main.cpp\
+			gracePlot.cpp 
 
 EXTRA_DIST = data 
 TESTS = test_onedmodel
@@ -312,6 +315,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basicOneDMesh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dataOneDModel.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gracePlot.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/oneDModelHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/oneDModelSolver.Po@am__quote@

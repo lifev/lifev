@@ -73,7 +73,10 @@ public:
 
   //! Update convective term, bc treatment and solve the linearized ns system
   void iterate();
-  
+
+  //! plotting 
+  void gplot();
+
 private:
 
   //! coefficient in front of the corresponding _M_elmat*

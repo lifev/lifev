@@ -39,7 +39,8 @@ OneDModelHandler::OneDModelHandler(const GetPot& data_file):
      _M_refFE(feSegP1),
      _M_dof(_M_mesh.numVertices()),
      _M_dimDof(_M_mesh.numVertices()),
-     _M_fe(_M_refFE,_M_geoMap,_M_qr)
+     _M_fe(_M_refFE,_M_geoMap,_M_qr),
+     _M_GracePlot()
 {
   /* Useless as long as we don't have a 1d mesh reader and handler...
   //! read mesh

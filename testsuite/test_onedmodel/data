@@ -14,8 +14,8 @@ Kr	= 6.0		# friction parameter (source term)
 
 [time]
 timebeg	 = 0.0		# inittime
-timeend	 = 5.0		# endtime
-timestep = 0.05		# timestep		
+timeend	 = 7.0		# endtime
+timestep = 0.001		# timestep		
 
 [discretization]
 mesh_file	= cylhexa.mesh	# mesh file name
@@ -23,7 +23,7 @@ mesh_dir	= ../data/mesh/inria
 		# the directory where the mesh file is
 x_left	= 0.
 x_right	= 10.
-nx	= 9	# (nx+1) = number of elements (0,...,nx)
+nx	= 99	# (nx+1) = number of elements (0,...,nx)
 
 [miscellaneous]
 post_dir = ./Post                 # the directory for postprocessing files

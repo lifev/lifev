@@ -63,7 +63,7 @@ OneDModelSolver::OneDModelSolver(const GetPot& data_file):
   _M_divMatrix.zero();
   _M_factorMassMatrix.zero();
 
-  _M_massMatrix.showMe(std::cout, _M_verbose);
+  //  _M_massMatrix.showMe(std::cout, _M_verbose);
 
   _M_rhs = 1.;
   _M_bcDirLeft  = 1.;
@@ -152,17 +152,17 @@ void OneDModelSolver::_updateElemMatrices( const UInt& iedge )
 
   //! update the current element 
   _M_fe.updateFirstDerivQuadPt(_M_mesh.edgeList(iedge)); 
-  std::cout << _M_fe.currentId() << std::endl;
+  //  std::cout << _M_fe.currentId() << std::endl;
 
   //! update the mass matrix
   mass( _M_coeffMass, _M_elmatMass, _M_fe,0, 0 );
-  std::cout << "Elem Mass matrix :" << std::endl;
-  _M_elmatMass.showMe( std::cout );
+  //  std::cout << "Elem Mass matrix :" << std::endl;
+  //  _M_elmatMass.showMe( std::cout );
 
   //! update the stiffness matrix
   stiff( _M_coeffStiff, _M_elmatStiff, _M_fe,0 ,0 );
-  std::cout << "Elem Stiff matrix :" << std::endl;
-  _M_elmatStiff.showMe( std::cout );
+  // std::cout << "Elem Stiff matrix :" << std::endl;
+  // _M_elmatStiff.showMe( std::cout );
 
   /*! update the gradient matrix 
       gradient operator: 
@@ -177,8 +177,8 @@ void OneDModelSolver::_updateElemMatrices( const UInt& iedge )
       (There is a minus in the elemOper implementation).
   */
   grad( 0 , - _M_coeffGrad, _M_elmatGrad, _M_fe, _M_fe, 0, 0 );
-  std::cout << "Elem Grad matrix :" << std::endl;
-  _M_elmatGrad.showMe( std::cout );
+  //  std::cout << "Elem Grad matrix :" << std::endl;
+  //  _M_elmatGrad.showMe( std::cout );
 
   /*! update the divergence matrix 
       divergence operator: (transpose of the gradient) 
@@ -191,8 +191,8 @@ void OneDModelSolver::_updateElemMatrices( const UInt& iedge )
       BEWARE : same remarks as grad (see above).
   */
   div( 0 , - _M_coeffDiv, _M_elmatDiv, _M_fe, _M_fe, 0, 0 );
-  std::cout << "Elem Div matrix :" << std::endl;
-  _M_elmatDiv.showMe( std::cout );
+  //  std::cout << "Elem Div matrix :" << std::endl;
+  //  _M_elmatDiv.showMe( std::cout );
 }
 
 /*! modify the matrix to take into account 
@@ -208,8 +208,12 @@ _updateBCDirichletMatrix( TriDiagMatrix<double>& mat )
   mat.Diag()( firstDof )   = 1.;
   mat.UpDiag()( firstDof ) = 0.;
   //! modify the last row
-  mat.Diag()( lastDof )      = 1.;
-  mat.LowDiag()( lastDof-1 ) = 0.;
+
+  //! FOR NEUMANN!!!!!!
+  //  mat.Diag()( lastDof )      = 1.;
+  //  mat.LowDiag()( lastDof-1 ) = 0.;
+
+
 }
 
 /*! modify the vector to take into account 
@@ -229,7 +233,8 @@ _updateBCDirichletVector( ScalUnknown<Vector>& vec,
   UInt lastDof  = vec.size()-1;
   //! first row and last row are modified
   vec( firstDof ) = val_left;
-  vec( lastDof  ) = val_right;
+  //! FOR NEUMANN!!!!!!
+  //  vec( lastDof  ) = val_right;
 }
 
 //! update the flux from the current unknown: FfluxU = F_h(U_h^n)
@@ -343,17 +348,26 @@ void OneDModelSolver::iterate()
   Chrono chrono;
   chrono.start();
   
+  //! solve the mass matrix and return the result in _M_rhs
   _solveMassMatrix( _M_rhs );
    
+  /*
   cout << "\n\tsolution at time n+1 " << endl;
   for ( UInt ii=0; ii < _M_dimDof ; ii++ ) {
     cout <<  ii << " " << _M_rhs(ii) << endl;;
   }
-  
+  */
+
   //! solution for the next time step 
   _M_U_thistime = _M_rhs;
    // ******************************************************* 
   chrono.stop();
   cout << "done in " << chrono.diff() << " s." << endl;
 
+}
+
+
+void OneDModelSolver::gplot( ) 
+{
+  _M_GracePlot.Plot( _M_mesh.pointList(), _M_U_thistime );
 }

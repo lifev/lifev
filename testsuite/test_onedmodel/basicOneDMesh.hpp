@@ -17,7 +17,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 /*!
-  \file oneDModelHandler.hpp
+  \file basicOneDMesh.hpp
   \author Vincent Martin
   \date 07/2004 
   \version 1.0
@@ -136,6 +136,9 @@ public:
 
   //! return one edge of the list (BEWARE: start at 1)
   Edge1D edgeList( UInt iedg ); 
+
+  //! return the full list of points
+  const std::vector< Point1D >& pointList() const {return _M_pointList;}; 
 
   //! number of points
   UInt numVertices() const {return _M_pointList.size();};
