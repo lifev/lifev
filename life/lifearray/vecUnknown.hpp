@@ -156,6 +156,12 @@ public:
 
     typedef VectorType super;
 
+    PhysVectUnknown()
+        :
+        super(),
+        _M_name("vector_unknown")
+        {}
+
     //  PhysVectUnknown(){}
     explicit PhysVectUnknown( std::string const& __s )
         :
