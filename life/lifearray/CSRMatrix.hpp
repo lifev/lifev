@@ -465,11 +465,11 @@ CSRMatr<CSRPatt, DataType>::operator= ( const MSRMatr<DataType>& msrMatr )
     for ( UInt iRow = 0; ia != endia && iRow < nrows; ++iRow, ++ia )
     {
         Container::const_iterator nextia = boost::next( ia );
-        for ( int i = *ia;
-              nextia != endia && i < *nextia;
+        for ( UInt i = *ia - OFFSET;
+              nextia != endia && i < *nextia - OFFSET;
               ++i, ++value )
         {
-            int iCol = ja[ i ];
+            UInt iCol = ja[ i ];
             *value = msrMatr.get_value( iRow, iCol );
         }
     }

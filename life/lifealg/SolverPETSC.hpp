@@ -40,6 +40,8 @@
 #include <petscpc.h>
 #endif /* HAVE_PETSC_H */
 
+#include <singleton.hpp>
+
 #include <vecUnknown.hpp>
 #include <sparseArray.hpp>
 
@@ -370,20 +372,88 @@ private:
   @author Christoph Winkelmann
   @see http://www.mcs.anl.gov/petsc/
 */
-class PETSC
+class PETSCManager
 {
 public:
-    //! Initializes PETSC
-    PETSC()
-    {
-        PetscInitialize( 0, 0, 0, 0 );
-    }
-    //! Finalizes PETSC
-    ~PETSC()
-    {
-        PetscFinalize();
-    }
-};
 
+    PETSCManager()
+        :
+        _M_initialized( false )
+        {
+        }
+    /**
+       initialized PETSC
+
+       \param force if \c true it will force the initialization even
+       if PETSC had already been initialized
+    */
+    bool initialize( bool __force = false )
+        {
+            if ( !isInitialized() )
+            {
+                // dummy arguments for PetscInitialize
+                int __argc = 1;
+                char** __argv = ( char** )malloc( sizeof( char* ) );
+                __argv[0] = ( char* )malloc( 2*sizeof( char ) );
+                __argv[0][0] = 't';
+                __argv[0][1] = '\0';
+
+                _M_initialized = initialize( __argc, __argv, __force );
+
+                free( __argv[0] );
+                free( __argv );
+
+            }
+            return _M_initialized;
+        }
+
+    /**
+       initialized PETSC
+
+       \param force if \c true it will force the initialization even
+       if PETSC had already been initialized.
+    */
+    bool initialize( int __argc, char** __argv, bool __force = false )
+        {
+            if ( __force && isInitialized() )
+            {
+                finalize();
+            }
+
+            if ( !isInitialized() )
+            {
+                PetscInitialize( &__argc, &__argv,PETSC_NULL,PETSC_NULL);
+
+                _M_initialized = true;
+
+            }
+            return _M_initialized;
+        }
+
+    //! return \c true if PETSC manager is initialized, \c false otherwise
+    bool isInitialized() const
+        {
+            return _M_initialized;
+        }
+
+    //! finalize PETSC environment
+    void finalize()
+        {
+            if ( isInitialized() )
+            {
+                PetscFinalize();
+                _M_initialized = false;
+            }
+        }
+    //! Finalizes PETSC
+    ~PETSCManager()
+        {
+            if ( isInitialized() )
+                finalize();
+        }
+private:
+    bool _M_initialized;
+};
+typedef singleton<PETSCManager> PETSC;
 }
 #endif /* __SolverPETSC_H */

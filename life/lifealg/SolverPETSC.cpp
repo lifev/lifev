@@ -69,8 +69,6 @@ SolverPETSC::SolverPETSC( std::string const& __ksp_type,
         :
         _M_p ( new Private )
 {
-    const PETSC & petsc = singleton<PETSC>::instance();
-
     int ierr = KSPCreate( PETSC_COMM_WORLD, &_M_p->__ksp );
     //CHKERRQ(ierr);
 
@@ -407,5 +405,7 @@ void SolverPETSC::setOptionsFromGetPot( const GetPot& dataFile,
                             &__compute, &__found );
     KSPSetComputeSingularValues( _M_p->__ksp, __compute );
 }
+
+static const bool __petsc_initialize = PETSC::instance().initialize();
 
 } // namespace LifeV

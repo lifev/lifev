@@ -27,7 +27,8 @@
 
 #include <lifeconfig.h>
 
-#include "SolverAztec.hpp"
+#include <debug.hpp>
+#include <SolverAztec.hpp>
 
 #if defined(HAVE_PETSC_H)
 #include <SolverPETSC.hpp>
@@ -64,10 +65,10 @@ bool test_umfpack( Mat& __mat )
     __x = 0;
     //__petsc.solve( __x, __b );
 
-    std::cout << "norm_2(x) = " << norm_2( __x ) << "\n";
+    LifeV::Debug( 10000 )  << "norm_2(x) = " << norm_2( __x ) << "\n";
 
     __x -= __sol;
-    std::cout << "norm_2(error) = " << norm_2( __x ) << "\n";
+    LifeV::Debug( 10000 )  << "norm_2(error) = " << norm_2( __x ) << "\n";
 #else
     return true;
 #endif
@@ -77,7 +78,7 @@ template<typename Mat>
 bool test_petsc( Mat& __mat )
 {
 #if defined(HAVE_PETSC_H)
-
+    LifeV::Debug( 10000 ) << "PETSC solver test\n";
     int Nrows = __mat.matrix().Patt()->nRows();
 
     LifeV::SolverPETSC __petsc( "gmres", "ilu" );
@@ -94,10 +95,12 @@ bool test_petsc( Mat& __mat )
     __x = ZeroVector( Nrows );
     __petsc.solve( __x, __b );
 
-    std::cout << "norm_2(x) = " << norm_2( __x ) << "\n";
+    LifeV::Debug( 10000 ) << "norm_2(x) = " << norm_2( __x ) << "\n";
 
     __x -= __sol;
-    std::cout << "norm_2(error) = " << norm_2( __x ) << "\n";
+    LifeV::Debug( 10000 ) << "norm_2(error) = " << norm_2( __x ) << "\n";
+    LifeV::Debug( 10000 ) << "PETSC solver test done\n";
+
     return norm_2(__x) < 1e-10;
 #else
     return 1;
@@ -123,10 +126,10 @@ bool test_aztec( Mat& __mat )
     __x = ZeroVector( Nrows );
     __aztec.solve( __x, __b );
 
-    std::cout << "l2 norm(x) = " << norm_2( __x ) << "\n";
+    LifeV::Debug( 10000 )  << "norm_2(x) = " << norm_2( __x ) << "\n";
 
     __x -= __sol;
-    std::cout << "l2 norm(error) = " << norm_2( __x ) << "\n";
+    LifeV::Debug( 10000 )  << "norm_2(error) = " << norm_2( __x ) << "\n";
     return norm_2(__x) < 1e-10;
 }
 
@@ -137,48 +140,48 @@ int main( int argc, char** argv )
     bool success = true;
     try
     {
-    int N = 100;
+        int N = 100;
 
 #if defined(HAVE_PETSC_H)
-    PetscInitialize(&argc,&argv,(char *)0,help);
-    PetscOptionsGetInt(PETSC_NULL,"-N",&N,PETSC_NULL);
+        PetscInitialize(&argc,&argv,(char *)0,help);
+        PetscOptionsGetInt(PETSC_NULL,"-N",&N,PETSC_NULL);
 #endif /* HAVE_PETSC_H */
 
 
-    //
-    // Mass matrix
-    //
-    std::cout << "mass matrix...\n";
-    LifeV::MatrixMass mass( N );
-    mass.matrix().spy( "mass.m" );
+        //
+        // Mass matrix
+        //
+        LifeV::Debug( 10000 ) << "mass matrix...\n";
+        LifeV::MatrixMass mass( N );
+        mass.matrix().spy( "mass.m" );
 
-    success &= LifeV::test_petsc ( mass );
-    success &= LifeV::test_umfpack ( mass );
-    success &= LifeV::test_aztec( mass );
+        success &= LifeV::test_petsc ( mass );
+        success &= LifeV::test_umfpack ( mass );
+        success &= LifeV::test_aztec( mass );
 
-    //
-    // convdiff matrix
-    //
-    std::cout << "convection diffusion matrix...\n";
-    LifeV::MatrixConvectionDiffusion convdiff((int)std::sqrt((double)N), 1.0);
-    convdiff.matrix().spy( "convdiff.m" );
+        //
+        // convdiff matrix
+        //
+        LifeV::Debug( 10000 ) << "convection diffusion matrix...\n";
+        LifeV::MatrixConvectionDiffusion convdiff((int)std::sqrt((double)N), 1.0);
+        convdiff.matrix().spy( "convdiff.m" );
 
-    success &= LifeV::test_petsc ( convdiff );
-    success &= LifeV::test_umfpack ( convdiff );
-    success &= LifeV::test_aztec( convdiff );
+        success &= LifeV::test_petsc ( convdiff );
+        success &= LifeV::test_umfpack ( convdiff );
+        success &= LifeV::test_aztec( convdiff );
 
     }
     catch( std::exception const& __e )
     {
-        std::cout << "std::exception: " << __e.what() << "\n";
+        std::cerr << "std::exception: " << __e.what() << "\n";
         return EXIT_FAILURE;
     }
     catch( ... )
     {
-        std::cout << "unknown exception caught\n";
+        std::cerr << "unknown exception caught\n";
         return EXIT_FAILURE;
     }
-    std::cout << (success ? "success" : "solve failed") << std::endl;
+    std::cerr << (success ? "success" : "solve failed") << std::endl;
     return (success ? EXIT_SUCCESS : EXIT_FAILURE);
     //return EXIT_SUCCESS;
 }
