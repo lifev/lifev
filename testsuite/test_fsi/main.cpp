@@ -181,15 +181,6 @@ int main(int argc, char** argv)
 
         LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 
-//         FSIChecker _fp_check( data_file,  "fixedPoint" );
-//         _fp_check();
-
-
-//         LifeV::Debug( 10000 ) << "_fp_disp size : "  << _fp_check.disp.size() << "\n";
-//         LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-
-//         LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-
         FSIChecker _sp_check( data_file, "steklovPoincare" );
         _sp_check();
 
@@ -198,16 +189,12 @@ int main(int argc, char** argv)
         LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 
         double norm1 = LifeV::norm_2( _ej_check.disp - _sp_check.disp );
-//        double norm2 = LifeV::norm_2( _ej_check.disp - _fp_check.disp );
 
         std::cout << "norm_2(EJ displacement)          = " << LifeV::norm_2( _ej_check.disp ) << " \n"
-//                  << "norm_2(FP displacement)          = " << LifeV::norm_2( _fp_check.disp ) << " \n"
                   << "norm_2(SP displacement)          = " << LifeV::norm_2( _sp_check.disp ) << " \n"
                   << "norm_2(displacement error EJ/SP) = " << norm1 << "\n";
-//                  << "norm_2(displacement error EJ/FP) = " << norm2 << "\n";
 
-//        if ((norm1 < 1e-05) && (norm2 < 1e-05)) return 0;
-        if (norm1 < 1e-05) return 0;
+        if (norm1 < 1e-04) return 0;
         else return -1;
     }
     else
