@@ -157,8 +157,6 @@ ConvDiffReactSolverPC(const GetPot& data_file, const RefFE& refFE_c, const QuadR
   chrono.stop();
   cout << "done in " << chrono.diff() << " s." << endl;
 
-  calc_local_elemsize();
-
 }
 
 template<typename Mesh>  
@@ -251,9 +249,9 @@ iterate(const Real& time, PhysVectUnknown<Vector> & u) {
       VLoc_mean=VLoc_mean/_fe_c.nbNode;
 
       Real coef_stab, Pe_loc;
-//      coef_stab=_h(i)*VLoc_infty; // Alessandro - method
+//      coef_stab=_fe_c.diameter()*VLoc_infty; // Alessandro - method
 
-      Pe_loc=VLoc_infty*_h(i)/(2.0*_diffusivity);
+      Pe_loc=VLoc_infty*_fe_c.diameter()/(2.0*_diffusivity);
 
 //      coef_stab=(1.0/tanh(Pe_loc))-(1.0/Pe_loc); // classical approach
 
@@ -311,6 +309,7 @@ iterate(const Real& time, PhysVectUnknown<Vector> & u) {
 
     AZ_read_update(&N_update_o, &update_o, proc_config_o, _dim_c, 1, AZ_linear);
     AZ_defaults(options_o,params_o);
+    _dataAztec_o.aztecOptionsFromDataFile(options_o,params_o);
     AZ_transform(proc_config_o, &external_o, 
 	       (int *)_pattM.giveRaw_bindx(), _CDR.giveRaw_value(), 
 	       update_o, &update_index_o,
