@@ -79,9 +79,7 @@ void SolverAztec::setMatrix(MSRMatr<value_type> const& m) {
 
 void SolverAztec::setMatrix(CSRMatr<CSRPatt, value_type> const& m) {
     _tempPattern.reset(new MSRPatt(*(m.Patt())));
-    // _tempMatrix.reset(new MSRMatr<value_type>(*_tempPattern, m));
-    _tempMatrix.reset(new MSRMatr<value_type>(*_tempPattern));
-    CSRmat2MSRmat(*_tempMatrix, m);
+    _tempMatrix.reset(new MSRMatr<value_type>(*_tempPattern, m));
     _setMatrix(*_tempMatrix);
 }
 
