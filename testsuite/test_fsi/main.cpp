@@ -16,6 +16,7 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
+
 #include "lifeV.hpp"
 #include "NavierStokesAleSolverPC.hpp"
 #include "VenantKirchhofSolver.hpp"
@@ -65,6 +66,7 @@ int main(int argc, char** argv)
 
     std::cout << std::endl;
     std::cout << "Fluid/Structure interactions";
+    std::cout << std::scientific;
     std::auto_ptr<operFS> p_oper;
     switch(method)
     {
@@ -174,12 +176,18 @@ int main(int argc, char** argv)
     Real dt     = oper.fluid().timestep();
     Real T      = oper.fluid().endtime();
 
-    Real abstol = 1.e-7;
-    Real reltol = 0.;
-    Real etamax = 1.e-3;
+//     Real abstol = 1.e-7;
+//     Real reltol = 1.e-4;
+//     Real etamax = 1.e-3;
+
+    Real abstol = data_file("problem/abstol"  , 1.e-07);
+    Real reltol = data_file("problem/reltol"  , 1.e-04);
+    Real etamax = data_file("problem/etamax"  , 1.e-03);
+
     int status;
     int maxiter;
-    int linesearch = 0;
+
+    int linesearch = data_file("problem/linesearch"  , 0);
 
     std::ofstream nout("num_iter");
     ASSERT(nout,"Error: Output file cannot be opened.");
@@ -192,7 +200,6 @@ int main(int argc, char** argv)
 
     std::ofstream out_iter("iter");
     std::ofstream out_res ("res");
-
 
     oper.fluid().initialize(u0);
     oper.solid().initialize(d0,w0);
@@ -225,13 +232,15 @@ int main(int argc, char** argv)
 
         if (method == 2)
         {
-            status = newton(disp,oper, norm_inf_adaptor(), abstol, reltol, maxiter, etamax,linesearch,out_res,time);
+            status = newton(disp, oper, norm_inf_adaptor(),
+                        abstol, reltol, maxiter, etamax,
+                        linesearch, out_res, time);
         }
         else
         {
-            status = nonLinRichardson(disp, oper, norm_inf_adaptor(), abstol, reltol,
-                                      maxiter, etamax, linesearch, out_res,
-                                      time, defOmega);
+            status = nonLinRichardson(disp, oper, norm_inf_adaptor(),
+                                      abstol, reltol, maxiter, etamax,
+                                      linesearch, out_res, time, defOmega);
         }
 
         if(status == 1)
