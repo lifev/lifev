@@ -63,13 +63,13 @@ int main() {
     // Finite element stuff
 
     const GeoMap& geoMap = geoLinearTetra;
-    const GeoMap& geoMapBd = geoMap.boundaryMap();//geoLinearTria;
+    const GeoMap& geoMapBd = geoMap.boundaryMap();
     
     const QuadRule& qr = quadRuleTetra5pt;
     const QuadRule& qrBd = quadRuleTria3pt;
 
     const RefFE& refFE = feTetraP1;
-    const RefFE& refBdFE = refFE.boundaryFE();//feTriaP1;
+    const RefFE& refBdFE = refFE.boundaryFE();
 
     // Mesh stuff
 
@@ -185,8 +185,30 @@ int main() {
 
     SolverAztec solver;
 
-    LevelSetSolver<meshType> lss(datafile, "levelset", refFE, qr, qrBd, BCh, fe, dof, betaVec);
-    lss.initialize(sphere);
+    /*
+      LevelSetSolver(mesh_type& mesh,
+      const GetPot& data_file,
+      const std::string& data_section,
+      const RefFE& reffe, 
+      const QuadRule& qr, 
+      const QuadRule& qr_bd, 
+      const BCHandler& bc_h,
+      CurrentFE& fe_velocity,
+      const Dof& dof_velocity,
+      velocity_type& velocity0)
+    */
+
+
+    // Retrieve time advancement parameters
+
+    Real t0 = datafile("levelset/bdf/t0", 0.);
+    Real delta_t = datafile("levelset/bdf/delta_t", 0.01);
+    Real T = datafile("levelset/bdf/T", 0.04);
+
+    // Solver initialization
+
+    LevelSetSolver<meshType> lss(mesh, datafile, "levelset", refFE, qr, qrBd, BCh, fe, dof, betaVec);
+    lss.initialize(sphere, t0, delta_t);
 
     const LevelSetSolver<meshType>::lsfunction_type& U = lss.lsfunction();
     std::string outputFileRoot = "./results/ls_ip";
@@ -196,11 +218,13 @@ int main() {
     wr_opendx_header(outputFileRoot + "0000.dx", mesh, dof); 
     wr_opendx_scalar(outputFileRoot + "0000.dx", "levelset_ipstab", U);
 
-    // Retrieve time advancement parameters
+    // Reinitialize and save re-initialized IC
 
-    Real t0 = datafile("levelset/bdf/t0", 0.);
-    Real delta_t = datafile("levelset/bdf/delta_t", 0.01);
-    Real T = datafile("levelset/bdf/T", 0.04);
+    lss.directReinitialization();
+    wr_opendx_header(outputFileRoot + "0000r.dx", mesh, dof); 
+    wr_opendx_scalar(outputFileRoot + "0000r.dx", "levelset_ipstab", U);
+
+    // Retrieve parameters from data file
 
     UInt save_every = datafile("levelset/parameters/save_every", 1);
     UInt reini_every = datafile("levelset/parameters/reinit_every", 10);
@@ -212,21 +236,28 @@ int main() {
     for(Real t = t0; t < T; t += delta_t) {
         std::cout << " o-> Step: " << current_step << ", t = " << t << std::endl;
         lss.timeAdvance();
-        
-        if(steps_after_last_save == save_every) {
-            std::ostringstream number;
-            number.width(4);
-            number.fill('0');
-            number << current_step;
 
+        std::ostringstream number;
+        number.width(4);
+        number.fill('0');
+        number << current_step;
+
+        if(steps_after_last_save == save_every) {
             wr_opendx_header(outputFileRoot + number.str() + ".dx", mesh, dof); 
             wr_opendx_scalar(outputFileRoot + number.str() + ".dx", "levelset_ipstab", U);
+
+            steps_after_last_save = 1;
         } else
             steps_after_last_save++;
 
         if(steps_after_last_reini == reini_every) {
             std::cout << "  - reinitializing signed distance function" << std::endl;
             lss.directReinitialization();
+
+            steps_after_last_reini = 1;
+
+            wr_opendx_header(outputFileRoot + number.str() + "r.dx", mesh, dof); 
+            wr_opendx_scalar(outputFileRoot + number.str() + "r.dx", "levelset_ipstab", U);
         }
         else
             steps_after_last_reini++;
