@@ -26,14 +26,14 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef _GENERALIZEDAITKEN_H
-#define _GENERALIZEDAITKEN_H
+#ifndef _GENERALIZEDAITKEN_HPP
+#define _GENERALIZEDAITKEN_HPP
 
 #include "lifeV.hpp"
 
 namespace LifeV
 {
-    
+    template<class Vector, class Real>
     class generalizedAitken
     {
         /*!
@@ -83,14 +83,15 @@ namespace LifeV
 
         bool   M_firstCall;
     };
-
-//
-// Constructors
-//
     
-    generalizedAitken::generalizedAitken(const int _nDof,
-                                         const Real _defOmegaS,
-                                         const Real _defOmegaF):
+    //
+    // Constructors
+    //
+    
+    template<class Vector, class Real>
+    generalizedAitken<Vector, Real>::generalizedAitken(const int _nDof,
+                                                       const Real _defOmegaS,
+                                                       const Real _defOmegaF):
         M_nDof         (_nDof),
         M_lambda       (_nDof),
         M_muS          (_nDof),
@@ -103,12 +104,13 @@ namespace LifeV
         M_lambda    = 0.;
         M_firstCall = true;
     }
+    
+    //
+    // Destructor
+    //
 
-//
-// Destructor
-//
-
-    generalizedAitken::~generalizedAitken()
+    template<class Vector, class Real>
+    generalizedAitken<Vector, Real>::~generalizedAitken()
     { //nothing needs to be done
     }
         
@@ -123,7 +125,8 @@ namespace LifeV
         _muF    is \mu_f^{k}
     */
     
-    Vector generalizedAitken::computeDeltaLambda(const Vector &_lambda, 
+    template<class Vector, class Real>
+    Vector generalizedAitken<Vector, Real>::computeDeltaLambda(const Vector &_lambda, 
                                                  const Vector &_muS,
                                                  const Vector &_muF)
     {
@@ -131,7 +134,6 @@ namespace LifeV
 
         if (!M_firstCall)
         {
-            M_firstCall = false;
             Real   a11 = 0.;
             Real   a21 = 0.;
             Real   a22 = 0.;
@@ -161,7 +163,7 @@ namespace LifeV
             Real omegaS = M_defOmegaS;
             Real omegaF = M_defOmegaF;
             
-            Real det = a21*a21 - a22*a11;
+            Real det    = a21*a21 - a22*a11;
             
             if (det != 0.)
             {
@@ -187,6 +189,8 @@ namespace LifeV
                 set to their default values
             */
 
+            M_firstCall = false;
+                        
             deltaLambda = M_defOmegaF*_muF + M_defOmegaS*_muS;            
 
             M_lambda    = _lambda;
@@ -196,6 +200,8 @@ namespace LifeV
         
         return deltaLambda;
     }
+
+    
 }
 
 #endif
