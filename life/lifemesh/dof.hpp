@@ -106,7 +106,7 @@ public:
   UInt numLocalFaces() const {return nlf;}
   
   //! Ouput
-  void showMe(ostream  & out=cout, bool verbose=false) const;
+  void showMe(std::ostream  & out=std::cout, bool verbose=false) const;
 
 private:
   UInt _offset;

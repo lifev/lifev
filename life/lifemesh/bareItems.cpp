@@ -12,31 +12,31 @@
   \pre i, j and k >0. i!=j!=k
 
 */
-pair<BareFace,bool>
+std::pair<BareFace,bool>
 makeBareFace(ID const i, ID  const j, ID const k) {
   if(i<j && i < k) {
     if(j<k){
-      return pair<BareFace,bool>(BareFace(i,j,k),true);
+      return std::make_pair(BareFace(i,j,k),true);
     }
     else{
-      return pair<BareFace,bool>(BareFace(i,k,j),false);
+      return std::make_pair(BareFace(i,k,j),false);
     }
   }
   else if(j<k && j < i) {
     if(k<i){
-      return pair<BareFace,bool>(BareFace(j,k,i),true);
+      return std::make_pair(BareFace(j,k,i),true);
     }
     else{
-      return pair<BareFace,bool>(BareFace(j,i,k),false);
+      return std::make_pair(BareFace(j,i,k),false);
     }
   }
   else 
     {
       if(i<j){
-	return pair<BareFace,bool>(BareFace(k,i,j),true);
+	return std::make_pair(BareFace(k,i,j),true);
       }
       else{
-	return pair<BareFace,bool>(BareFace(k,j,i),false);
+	return std::make_pair(BareFace(k,j,i),false);
       }
     }
 }
@@ -57,11 +57,11 @@ makeBareFace(ID const i, ID  const j, ID const k) {
    sequence. We then procede as for the triangles.
 */
 
-pair<BareFace,bool>
+std::pair<BareFace,bool>
 makeBareFace(ID const i, ID  const j, ID const k, ID const l) {
-  vector<ID> helper(4);
+  std::vector<ID> helper(4);
   helper[0]=i;  helper[1]=j;  helper[2]=k;  helper[3]=l;
-  vector<ID>::iterator vi=max_element(helper.begin(),helper.end());
-  rotate(helper.begin(),vi,helper.end());
+  std::vector<ID>::iterator vi=std::max_element(helper.begin(),helper.end());
+  std::rotate(helper.begin(),vi,helper.end());
   return makeBareFace(helper[1],helper[2],helper[3]);
 }
