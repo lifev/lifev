@@ -88,7 +88,7 @@ namespace LifeV
         Vector muS          = sol;
         Vector muF          = sol;
 
-//        muS                 = 0.;
+        muS                 = 0.;
 //        muF                 = 0.;
         step                = 0.;
 
@@ -127,24 +127,26 @@ namespace LifeV
             normRes    = norm(residual);
 
             //f.updateJac(sol, iter);
-            //f.solveJac(step, -1.*residual, linres);
-            muF = 0.;
+//            f.solveJac(muF, -1.*residual, linres);
+            //muF = 0.;
             
             linres     = linear_rel_tol;
 
-            muS        = residual - muS;
+            muS        = residual;
             
-            //step       = aitken.computeDeltaLambda(sol, muS);
+            step       = aitken.computeDeltaLambda(sol, muS);
 
-            f.solveJac(step,-1.*residual,linres); // residual = f(sol)
-
+            //f.solveJac(step,-1.*residual,linres); // residual = f(sol)
             
             std::cout << "Step norm = " << norm(step) << std::endl;
+            out_res << "Step norm = " << norm(step);
             
             muS        = residual;
 
             sol       += step;
             f.evalResidual(residual, sol, iter);
+
+            out_res << " Res norm = " << norm(residual) << std::endl;
             
             normRes    = norm(residual);
 
