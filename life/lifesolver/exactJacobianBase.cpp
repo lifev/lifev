@@ -38,7 +38,7 @@ exactJacobian::exactJacobian( fluid_type& fluid,
                               bchandler_type &BCh_d,
                               bchandler_type &BCh_mesh):
     super(fluid, solid, _dataFile, BCh_u, BCh_d, BCh_mesh),
-    M_BCh_du ( new BCHandler( 0, BCHandler::HINT_BC_ONLY_ESSENTIAL) ),
+    M_BCh_du ( new BCHandler() ),
     M_BCh_dz ( new BCHandler ),
     M_dz     (3*M_solid->dDof().numTotalDof()),
     M_rhs_dz (3*M_solid->dDof().numTotalDof()),
@@ -168,6 +168,8 @@ void exactJacobian::setUpBC()
     // Boundary conditions for du
     M_BCh_du->addBC("Wall",   1,  Essential, Full, du_wall,  3);
     M_BCh_du->addBC("Edges",  20, Essential, Full, bcf,      3);
+    M_BCh_du->addBC("InFlow", 2,  Natural,   Full, bcf,      3);
+    M_BCh_du->addBC("OutFlow",3,  Natural,   Full, bcf,      3);
 
 
     // Boundary conditions for dz

@@ -44,7 +44,7 @@ public:
     exactJacobian()
         :
         super(),
-        M_BCh_du ( new BCHandler( 0, BCHandler::HINT_BC_ONLY_ESSENTIAL) ),
+        M_BCh_du ( new BCHandler() ),
         M_BCh_dz ( new BCHandler ),
         M_dz     (),
         M_rhs_dz (),
