@@ -94,7 +94,8 @@ int nonLinRichardson( Vector& sol,
 
     residual = f.evalResidual( sol, iter );
 
-    Real normRes      = norm( residual );
+//@    Real normRes      = norm( residual );
+    Real normRes      = norm( step );
     Real stop_tol     = abstol + reltol*normRes;
     Real linearRelTol = fabs(eta_max);
 
@@ -104,6 +105,7 @@ int nonLinRichardson( Vector& sol,
 
     out_res << time << "    " << iter << "   " << normRes << std::endl;
 
+    normRes = 1.;
 
     while ( normRes > stop_tol && iter < maxit )
     {
@@ -117,7 +119,8 @@ int nonLinRichardson( Vector& sol,
         iter++;
 
         normResOld = normRes;
-        normRes = norm( residual );
+//@        normRes = norm( residual );
+//@        normRes = norm( step );
 
         muk  = f.solvePrec(residual, linearRelTol);
         step = aitken.computeDeltaLambda( sol, muk );
@@ -130,9 +133,10 @@ int nonLinRichardson( Vector& sol,
 
         residual = f.evalResidual( sol, iter );
 
-        out_res << " Res norm = " << norm( residual ) << std::endl;
+        out_res << " Res norm = " << norm( step ) << std::endl;
 
-        normRes  = norm( residual );
+//@        normRes  = norm( residual );
+        normRes  = norm( step );
     }
 
     if ( normRes > stop_tol )
