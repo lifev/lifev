@@ -38,7 +38,7 @@ They should be listed by numbers like below
 
  * Issues:
    a- RNM<> is badly designed and with no documentation. g++-3.4 which is
-      very close to the C++ standard cannot conmpile code with RNM<>. 
+      very close to the C++ standard cannot compile code with RNM<>. 
    b- no small array classes
 
  * Proposals:
@@ -48,8 +48,27 @@ They should be listed by numbers like below
    d- boost::ublas vectors and matrices
    e- a mix of above ?
 
-
-2-
+
+2- Pattern Classes
+==================
+
+ * Objectives:
+   a- redesign the pattern classes
+   b- remove duplicate code
+   c- increase flexibility
+
+ * Issues:
+   a- current patterns define both sparsity pattern and storage scheme, so
+      any new sparsity pattern or storage scheme to be supported must
+      duplicate code to remain flexible
+
+ * Proposals:
+   a- sparsity pattern in pattern classes, storage scheme in matrix classes
+   b- sparsity pattern in pattern classes, storage scheme in new classes
+   c- sparsity pattern in class Dof, storage scheme in matrix classes
+
+
+3- 
 
 
 # Local Variables:
