@@ -1,0 +1,452 @@
+/*!
+  \file NavierStokesHandler.h
+  \author M.A. Fernandez
+  \date 01/2003 
+  \version 1.0
+
+  \brief This file contains an abstract class for NavierStokes solvers.  
+
+*/
+
+#ifndef _NAVIERSTOKESHANDLER_H_
+#define _NAVIERSTOKESHANDLER_H_
+
+
+#include "dataNavierStokes.hpp"
+#include "dataAztec.hpp"
+#include "refFE.hpp"
+#include "dof.hpp"
+#include "lifeV.hpp"
+#include "medit_wrtrs.hpp"
+#include "bcCond.hpp"
+#include "bdfNS.hpp"
+#include "post_proc.hpp"
+#include "openDX_wrtrs.hpp"
+#include <cmath>
+#include <sstream> 
+
+
+
+/*! 
+  \class NavierStokesHandler
+
+  Abstract class which defines the general structure of a NavierStokes solver.
+  For each new NavierStokes solver  we have to implement the corresponding timeAdvance and an iterate methods 
+  
+*/
+
+template <typename Mesh>
+class NavierStokesHandler:
+public DataNavierStokes<Mesh> { 
+ 
+ public:
+
+  typedef Real (*Function)(const Real&, const Real&, const Real&, const Real&, const ID&);
+
+  //! Constructor   
+  /*!
+    \param data_file GetPot data file
+    \param refFE_u reference FE for the velocity
+    \param refFE_p reference FE for the pressure
+    \param Qr_u volumic quadrature rule for the velocity
+    \param bdQr_u surface quadrature rule for the velocity 
+    \param Qr_p volumic quadrature rule for the pressure
+    \param bdQr_p surface quadrature rule for the pressure
+    \param BCh_u boundary conditions for the velocity
+    \param ord_bdf order of the bdf time advancing scheme and incremental pressure approach (default: Backward Euler) 
+  */
+  NavierStokesHandler(const GetPot& data_file,  const RefFE& refFE_u, 
+		      const RefFE& refFE_p, const QuadRule& Qr_u, const QuadRule& bdQr_u, 
+		      const QuadRule& Qr_p, const QuadRule& bdQr_p, BC_Handler& BCh_u);
+    
+  //! Sets initial condition for the velocity (here the initial time is 0.0)
+  void initialize(const Function& u0); 
+
+  //! Sets initial condition for the velocity and the pressure (incremental approach): the initial time is t0, the time step dt
+  void initialize(const Function& u0, const Function& p0, Real t0, Real dt); 
+
+  //! Update the right  hand side  for time advancing   
+  /*! 
+    \param source volumic source  
+    \param time present time
+  */
+  virtual void timeAdvance(const Function source, const Real& time) = 0; 
+
+  //! Update convective term, bc treatment and solve the linearized ns system
+  virtual void iterate(const Real& time) = 0;
+
+  //! Returns the velocity vector
+  PhysVectUnknown<Vector>& u();
+  
+  //! Returns the pressure
+  ScalUnknown<Vector>& p();
+
+  //! Returns the velocity Dof 
+  const Dof& uDof() const;
+
+  //! Returns the pressure Dof 
+  const Dof& pDof() const;
+
+  //! Postprocessing pressure
+  void postProcessPressure();
+
+  //! OpenDX writers
+  void dx_write_sol(string file_sol, string fe_type_vel, string fe_type_pre);
+
+  //! Returns the BDF Time Advancing stuff
+  const BdfNS& bdf() const;
+
+  //! Returns the  Post Processing  stuff
+  PostProc<Mesh>& post_proc();
+
+  //! Initialization of Post Processing structures
+  void post_proc_set_area();
+  void post_proc_set_normal();
+  void post_proc_set_phi();
+
+
+  //! Do nothing destructor
+  virtual ~NavierStokesHandler() {}
+
+  
+ protected:
+  
+  //! Reference FE for the velocity
+  const RefFE& _refFE_u;
+  
+  //! Reference FE for the pressure
+  const RefFE& _refFE_p;
+ 
+  //! The Dof object associated with the velocity
+  Dof _dof_u;
+
+  //! The Dof object associated with the pressure
+  Dof _dof_p;
+
+  //! The number of total velocity dofs  
+  UInt _dim_u;
+
+  //! The number of total pressure dofs  
+  UInt _dim_p;
+
+  //! Quadrature rule for velocity volumic elementary computations
+  const QuadRule& _Qr_u;
+  
+  //! Quadrature rule for velocity surface elementary computations
+  const QuadRule& _bdQr_u;
+
+  //! Quadrature rule for pressure volumic elementary computations
+  const QuadRule& _Qr_p;
+  
+  //! Quadrature rule for pressure surface elementary computations
+  const QuadRule& _bdQr_p;
+
+  //! Current FE for the velocity u
+  CurrentFE _fe_u;
+  CurrentBdFE _feBd_u;
+
+  //! Current FE for the pressure p
+  CurrentFE _fe_p;
+
+  //! The velocity
+  PhysVectUnknown<Vector> _u;
+
+  //! The pressure
+  ScalUnknown<Vector> _p;
+   
+  //! The BC handler
+  BC_Handler& _BCh_u;
+
+  // ! The BDF Time Advance Method + Incremental Pressure
+  BdfNS _bdf;
+
+
+  //***** Prova di Agosto 2003
+  PostProc<Mesh> _ns_post_proc; 
+
+ private:
+
+  //! Aux. var. for PostProc
+  UInt _count;
+};
+
+
+
+//
+// IMPLEMENTATION
+//
+
+
+// Constructor
+template <typename Mesh> 
+NavierStokesHandler<Mesh>::
+NavierStokesHandler(const GetPot& data_file,  const RefFE& refFE_u, 
+		    const RefFE& refFE_p, const QuadRule& Qr_u, const QuadRule& bdQr_u, 
+		    const QuadRule& Qr_p, const QuadRule& bdQr_p, BC_Handler& BCh_u):
+     DataNavierStokes<Mesh>(data_file),    
+     _refFE_u(refFE_u),
+     _refFE_p(refFE_p),
+     _dof_u(_mesh,_refFE_u),
+     _dof_p(_mesh,_refFE_p),
+     _dim_u(_dof_u.numTotalDof()),
+     _dim_p(_dof_p.numTotalDof()), 
+     _Qr_u(Qr_u),
+     _bdQr_u(bdQr_u),
+     _Qr_p(Qr_p),
+     _bdQr_p(bdQr_p),
+     _fe_u(_refFE_u,_mesh.getGeoMap(),_Qr_u),
+     _feBd_u(_refFE_u.boundaryFE(),_mesh.getGeoMap().boundaryMap(),_bdQr_u),
+     _fe_p(_refFE_p,_mesh.getGeoMap(),_Qr_p),
+     _u(_dim_u),
+     _p(_dim_p),
+     _BCh_u(BCh_u),
+     _bdf(_order_bdf),_ns_post_proc(_mesh,_feBd_u,_dof_u,NDIM), // /******************
+     _count(0) {}
+
+
+// Returns the velocity vector
+template<typename Mesh> PhysVectUnknown<Vector>& 
+NavierStokesHandler<Mesh>::u() {
+  return _u;
+}
+
+// Returns the pressure
+template<typename Mesh> ScalUnknown<Vector>&
+NavierStokesHandler<Mesh>::p() {
+  return _p;
+}
+
+// Returns the velocity Dof 
+template<typename Mesh> const Dof& 
+NavierStokesHandler<Mesh>::uDof() const {
+  return _dof_u;
+}
+
+// Returns the pressure Dof 
+template<typename Mesh>  const Dof& 
+NavierStokesHandler<Mesh>::pDof() const {
+  return _dof_p;
+}
+
+// Returns the BDF Time Advancing stuff
+template<typename Mesh>  const BdfNS& 
+NavierStokesHandler<Mesh>::bdf() const {
+  return _bdf;
+}
+
+// Returns the Post Processing structure
+template<typename Mesh>  PostProc<Mesh>& 
+NavierStokesHandler<Mesh>::post_proc()  {
+  return _ns_post_proc;
+}
+
+// Set up of post processing structures
+template<typename Mesh>  void 
+NavierStokesHandler<Mesh>::post_proc_set_area()
+{
+  _ns_post_proc.set_area(_feBd_u,_dof_u);
+}
+
+template<typename Mesh>  void 
+NavierStokesHandler<Mesh>::post_proc_set_normal()
+{
+  _ns_post_proc.set_normal(_feBd_u,_dof_u);
+}
+
+template<typename Mesh>  void 
+NavierStokesHandler<Mesh>::post_proc_set_phi()
+{
+  _ns_post_proc.set_phi(_feBd_u,_dof_u);
+}
+
+// Postprocessing pressure
+template<typename Mesh>  void 
+NavierStokesHandler<Mesh>::postProcessPressure() {
+
+  ostringstream index;
+  string name;
+
+  ++_count;
+
+  if (fmod(float(_count),float(_verbose)) == 0.0) {
+    cout << "  o-  Post-processing pressure\n";
+    index << (_count/_verbose);
+  
+    switch( index.str().size() ) {
+    case 1:
+      name = "sol.00"+index.str();
+      break;
+    case 2:   
+      name = "sol.0"+index.str();
+      break;
+    case 3:   
+      name = "sol."+index.str();
+      break;
+    }
+    
+    wr_medit_ascii(name+".mesh", _mesh);
+    wr_medit_ascii_scalar(name+".bb",_p.giveVec(),_p.size()); 
+  }
+}
+
+// Writing (DX)
+// ! Write the solution in DX format
+template<typename Mesh>  void 
+NavierStokesHandler<Mesh>::dx_write_sol(string file_sol, string fe_type_vel, string fe_type_pre) {
+
+  string file_vel=file_sol+"_vel.dx";
+  string file_pre=file_sol+"_pre.dx";
+ 
+  wr_opendx_header(file_pre,_mesh,_dof_p,_fe_p,fe_type_pre);
+  wr_opendx_scalar(file_pre,"pression",_p.vec());
+
+  wr_opendx_header(file_vel,_mesh,_dof_u,_fe_u,fe_type_vel);
+  wr_opendx_vector(file_vel, "velocity", _u.vec(), _u.nbcomp());
+  
+}
+
+// Set the initial condition
+// ! Initialize when only initial conditions on the velocity are given
+template<typename Mesh> void 
+NavierStokesHandler<Mesh>::initialize(const Function& u0) {
+  
+  // Initialize pressure
+  _p.vec()=0.0;
+
+  // ********** initialize in the pressure BDF structure
+  _bdf.bdf_p().initialize_unk(_p.vec());
+
+  // Initialize velocity
+
+  typedef  typename Mesh::VolumeShape GeoShape; // Element shape
+   
+  UInt nDofpV  = _refFE_u.nbDofPerVertex; // number of Dof per vertex
+  UInt nDofpE  = _refFE_u.nbDofPerEdge;   // number of Dof per edge
+  UInt nDofpF  = _refFE_u.nbDofPerFace;   // number of Dof per face
+  UInt nDofpEl = _refFE_u.nbDofPerVolume; // number of Dof per Volume
+  
+  UInt nElemV = GeoShape::numVertices; // Number of element's vertices 
+  UInt nElemE = GeoShape::numEdges;    // Number of element's edges
+  UInt nElemF = GeoShape::numFaces;    // Number of element's faces
+  
+  UInt nDofElemV = nElemV*nDofpV; // number of vertex's Dof on a Element
+  UInt nDofElemE = nElemE*nDofpE; // number of edge's Dof on a Element
+  UInt nDofElemF = nElemF*nDofpF; // number of face's Dof on a Element
+    
+  ID nbComp = _u.nbcomp(); // Number of components of the mesh velocity
+
+  Real x, y, z;
+ 
+  ID lDof;
+
+  // Loop on elements of the mesh
+  for (ID iElem=1; iElem <= _mesh.numVolumes(); ++iElem){
+       
+    _fe_u.updateJac( _mesh.volume(iElem) );
+
+    // Vertex based Dof 
+    if ( nDofpV ) { 
+      
+      // loop on element vertices 
+      for (ID iVe=1; iVe<=nElemV; ++iVe){
+	
+	// Loop number of Dof per vertex
+	for (ID l=1; l<=nDofpV; ++l) {
+	  lDof = (iVe-1)*nDofpV + l; // Local dof in this element
+	  
+	  // Nodal coordinates
+	  _fe_u.coorMap(x, y, z, _fe_u.refFE.xi(lDof-1), _fe_u.refFE.eta(lDof-1), _fe_u.refFE.zeta(lDof-1));  
+	  
+	  // Loop on data vector components
+	  for (UInt icmp=0; icmp < nbComp; ++icmp)
+       	    _u.vec()( icmp*_dim_u + _dof_u.localToGlobal(iElem,lDof) - 1 ) = u0(0.0,x,y,z,icmp+1);  
+	}
+      }
+    }
+    
+    // Edge based Dof 
+    if (nDofpE) { 
+	
+      // loop on element edges 
+      for (ID iEd=1; iEd <=nElemE; ++iEd) {
+	
+	// Loop number of Dof per edge
+	for (ID l=1; l<=nDofpE; ++l) {
+	  lDof = nDofElemV + (iEd-1)*nDofpE + l; // Local dof in the adjacent Element
+	
+	  // Nodal coordinates
+	  _fe_u.coorMap(x, y, z, _fe_u.refFE.xi(lDof-1), _fe_u.refFE.eta(lDof-1), _fe_u.refFE.zeta(lDof-1));
+	
+	  // Loop on data vector components
+	  for (UInt icmp=0; icmp < nbComp; ++icmp) 
+	    _u.vec()( icmp*_dim_u + _dof_u.localToGlobal(iElem,lDof) - 1 ) = u0(0.0,x,y,z,icmp+1);
+	}
+      }
+    }  
+    
+    // Face based Dof 
+    if (nDofpF) { 
+      
+      // loop on element faces
+      for (ID iFa=1; iFa <=nElemF; ++iFa) {
+	
+	// Loop on number of Dof per face
+	for (ID l=1; l<=nDofpF; ++l) {
+	  
+	  lDof = nDofElemE + nDofElemV + (iFa-1)*nDofpF + l; // Local dof in the adjacent Element
+     
+	  // Nodal coordinates
+	  _fe_u.coorMap(x, y, z, _fe_u.refFE.xi(lDof-1), _fe_u.refFE.eta(lDof-1), _fe_u.refFE.zeta(lDof-1));
+		  
+	  // Loop on data vector components
+	  for (UInt icmp=0; icmp < nbComp; ++icmp) 
+	    _u.vec()( icmp*_dim_u + _dof_u.localToGlobal(iElem,lDof) - 1) = u0(0.0,x,y,z,icmp+1);   
+	}
+      }
+    }
+
+    // Element based Dof 
+    // Loop on number of Dof per Element
+    for (ID l=1; l<=nDofpEl; ++l) {
+      lDof = nDofElemF + nDofElemE + nDofElemV + l; // Local dof in the Element
+        
+      // Nodal coordinates
+      _fe_u.coorMap(x, y, z, _fe_u.refFE.xi(lDof-1), _fe_u.refFE.eta(lDof-1), _fe_u.refFE.zeta(lDof-1));
+	      
+      // Loop on data vector components
+      for (UInt icmp=0; icmp < nbComp; ++icmp)
+	_u.vec()( icmp*_dim_u + _dof_u.localToGlobal(iElem,lDof) - 1) =   u0(0.0,x,y,z,icmp+1);      
+    }
+  }
+  //****** Initialize in the BDF structure
+  _bdf.bdf_u().initialize_unk(_u.vec());
+
+  _bdf.bdf_u().showMe();
+  _bdf.bdf_p().showMe();
+
+}
+
+// ! Initialize when  initial conditions both on the velocity and the pressure (for incremental schemes) are given
+// ! Useful for test cases when the analytical solution is known
+template<typename Mesh> void 
+NavierStokesHandler<Mesh>::initialize(const Function& u0, const Function& p0, Real t0, Real dt) {
+  
+  ID nbComp = _u.nbcomp(); // Number of components of the velocity
+
+
+  _bdf.bdf_u().initialize_unk(u0,_mesh,_refFE_u,_fe_u,_dof_u,t0,dt,nbComp);  
+  _u.vec()=*(_bdf.bdf_u().unk().begin()); // initialize _u with the first element in bdf_u.unk (=last value)
+
+  _bdf.bdf_p().initialize_unk(p0,_mesh,_refFE_p,_fe_p,_dof_p,t0,dt,1);  
+  _p.vec()=*(_bdf.bdf_p().unk().begin()); // initialize _u with the first element in bdf_u.unk (=last value)
+
+
+  _bdf.bdf_u().showMe();
+  _bdf.bdf_p().showMe();
+
+}
+
+
+
+
+#endif

@@ -1,0 +1,86 @@
+/*! file geo0D.h */
+#ifndef _GEO0D_HH_
+#define _GEO0D_HH_
+
+//! \defgroup GeoXD Basis Geometrical Entities Geo0D and GeoND.
+/*!
+
+  They are intermediate classes used to build the actual Geometry classes
+  
+  \warning Geo1D/2D/3D are template classes because some of the info is not
+  known a priori and I want all vector dimensions determined at compile time
+  to enhance memory access time. IT IS UP TO THE USER to provide a coherent
+  GeoShape!.  */
+
+/*@{*/
+
+#include "meshEntity.hpp"
+#include "basisElSh.hpp"
+
+
+//! Zero dimensional entity. It stores boundary information
+class Geo0D:
+  public MeshEntityWithBoundary
+{
+ public:
+  
+  Geo0D();
+  //! constructor where I give the id and declare if Geo0D object is on a
+  //!boundary
+  explicit Geo0D(ID id,bool boundary=false);
+  //! constructor where I give the id, the point coordinate and I declare
+  //! if the Geo0D object is on a boundary
+  explicit Geo0D(ID id,Real x, Real y, Real z, bool boundary=false);
+
+  Geo0D(Geo0D const & G);
+  Geo0D & operator=(Geo0D const & G);
+  
+  typedef GeoPoint GeoShape;
+  
+  
+  //! returns a pointer to a Real[3] containing the coordinates  
+  Real * coor()  {return _coor;};  
+  Real const * coor() const   {return _coor;};  
+
+
+  //! Used to provide coords to object created using
+  //! a constructor with no coordinates given, or to
+  //! modify existing coordinates.
+  INLINE Real & x(){return _coor[0];}
+  INLINE Real & y(){return _coor[1];}
+  INLINE Real & z(){
+#if defined(THREEDIM)
+    return _coor[2];
+#else
+    ERROR_MSG("z coordinate may be modified only in a 3D problem");
+#endif
+  }
+  INLINE Real x() const { return _coor[0];}
+  INLINE Real y() const {return _coor[1];};
+  INLINE Real z() const {
+#if defined(THREEDIM)
+    return _coor[2];
+#else
+    return 0;
+#endif
+  }
+  
+  //!Another way to access coordinate data
+  INLINE Real coordinate (ID const i) const
+  {
+    ASSERT_BD( i>0 && i<= NDIM ) ;
+    return _coor[i-1]; // indexing from 1
+  }
+  //!Another way to modify coordinate data
+  INLINE Real  & coordinate (ID const i)
+  {
+    ASSERT_BD( i>0 && i<= NDIM ) ;
+    return _coor[i-1];
+  }
+  //! Useful for debugging
+  ostream &  showMe(bool verbose=false, ostream & c=cout) const;
+  
+private:
+  Real _coor[nDimensions];
+};
+#endif

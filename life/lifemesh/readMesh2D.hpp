@@ -1,0 +1,270 @@
+#ifndef _READMESH2D_HH_ 
+#define _READMESH2D_HH_  
+#include "regionMesh2D.hpp"
+#include "util_string.hpp"
+#include "mesh_util.hpp"
+#include "fortran_wrap.hpp"
+/*----------------------------------------------------------------------*
+| 
+| 
+| #Version 0.1 Experimental 19/8/99. Luca Formaggia 
+| 
+| Added support for numbering from 1 
+! Added markers
+| 
+| #Mesh readers 
+|
+*----------------------------------------------------------------------*/
+/*****************************************************************
+     MESH READER form MESH2D files (unformatted)
+******************************************************************/
+// Macros for Fortran interface
+
+SUBROUTINE_F77  F77NAME(readmesh2d) (I_F77 & ne, I_F77 & np,
+				     I_F77 & nptot,I_F77 & nb,I_F77 & nps, I_F77 & nx,
+				     I_F77 & ndimn,I_F77 & npe,I_F77 & npb,
+				     I_F77 & npc,I_F77 * iel,
+				     I_F77 & nd,R4_F77 * coor,I_F77 & ndc,
+				     R4_F77 & xmin,R4_F77 & xmax,R4_F77 & ymin,
+				     R4_F77 & ymax, I_F77 * ib, I_F77 & nbd,
+				     I_F77 * ic, I_F77 * bc, I_F77 * ie,
+				     I_F77 * cpl, R4_F77 * xmed, I_F77 & isw,
+				     I_F77 & ierr,CHARACTER filename);
+
+// subroutine read_mesh2d_head(filename,ne,np,nptot,npe,nb,nx,npc,ierr)
+
+SUBROUTINE_F77  F77NAME(readmesh2dhead) (I_F77 & ne, I_F77 & np,
+					 I_F77 & nptot,  I_F77 & npe, I_F77 & nb,
+					 I_F77 & nps, I_F77 & nx,
+					 I_F77 & npc, I_F77 & ierr, CHARACTER filename);
+//! Reeads a mesh in MEsh2d (LF) format.
+template <typename RegionMesh2D>
+bool
+readMesh2d(RegionMesh2D & mesh, const string & fname, EntityFlag regionFlag)
+{
+  UInt p1,p2,p3;
+  UInt nVe, nBVe,nFa,nPo,nBPo,nEd,nBEd;
+  UInt i,i1,i2,i3;
+  bool p2meshstored, p2meshwanted;
+  typedef typename RegionMesh2D::ElementShape ElementShape;
+  
+  if (ElementShape::Shape != TRIANGLE){
+    cerr<< "Sorry, Readmesh2d reads only triangle meshes"<<endl;
+    abort();
+  }
+  if (ElementShape::numPoints > 6 ){
+    cerr<< "Sorry, ReadMppFiles handles only liner&quad triangles"<<endl;
+    abort();
+  }
+  
+  CHARACTER filename(const_cast<char *>(fname.c_str()),fname.length());
+  I_F77 ne,np,nptot,npe,nb,nx,npc,ierr,nps,ndimn,npb;
+  F77NAME(readmesh2dhead)(ne,np,nptot,npe,nb,nps,nx,npc,ierr,filename);
+  if (ierr != 0){
+    cout << " Error in readmesh2d: file "<< fname<<endl;
+    cout << " not accessible or incorrectly formatted"<<endl;
+    abort();
+  }
+
+  cout << "INFORMATION ON 2D MESH AS READ FROM MESH2D FILE"<<endl;
+  cout << " See mesh2d docs for explanation"<<endl;
+  cout << "ne,np,nptot,npe,nb,nx,npc,nps,ierr" <<endl;
+  cout <<ne<<" "<< np<<" "<< nptot<<" "<<npe<<" "<<nb<<" "<<nx<<" "<<npc<<" "<<nps<<" "<<ierr<<endl;
+
+  // Dimensioning all arrays
+  I_F77 nd(npe);
+  I_F77 nbd(nps);
+  I_F77 ndc(3);
+  I_F77 isw(0);
+  FMATRIX<I_F77>  iel(npe,ne);
+  FMATRIX<I_F77>  ib(nps,nb);
+  FMATRIX<I_F77>  ic(nb);
+  FMATRIX<I_F77>  bc(nb);
+  FMATRIX<I_F77>  ie(nb);
+  FMATRIX<I_F77>  cpl(npc);
+  FMATRIX<R4_F77>  coor(3,nptot);
+  FMATRIX<R4_F77>  xmed(3,nb);
+  R4_F77 xmin,xmax,ymin,ymax;
+
+  // Reading
+  F77NAME(readmesh2d) (ne, np,nptot, nb, nps, nx, ndimn, npe, npb,
+		       npc, iel, nd, coor, ndc, xmin, xmax, ymin, ymax, ib, nbd,
+		       ic, bc, ie, cpl, xmed, isw, ierr, filename);
+  switch (ierr){
+  case 1:
+    cerr<<" Error in readmesh2d: file incorrectly formatted"<<endl;
+    abort();
+  case 0:
+    cout<<" File succesfully read"<<endl;
+    break;
+  default:
+    cerr<<" Error in readmesh2d: file incomplete"<<endl;
+    abort();
+  }
+
+  // I use explicit constructors instead of relying on implicit conversion rules
+  // This to make things more explicit: mesh2d files are (so far) single precision!
+  
+  nFa=UInt(ne);
+  nBEd=UInt(nb);
+  nVe=UInt(np);
+  nBVe=UInt(nb);
+
+  /* I Assume that the mesh is OK, so the number of boundary vertices coincides
+     with the number of boundary sides: mesh checkers have still to be implemented */
+  // Do I want a P2 mesh?
+  p2meshwanted=(ElementShape::numPoints == 6);
+  // Do I have a P2 mesh?
+  p2meshstored=(npe==6);
+
+  // I still have not yet implemented converters p1->p2 for 2d meshes...
+  if (p2meshwanted && ! p2meshstored ){
+    cerr<<" Warning in readmesh2d:"<<endl;
+    cout<< "file "<<fname<<endl;
+    cout<< "contains a P1 mesh, while we request a P2 mesh"<<endl;
+    cout << "Construction of 2D P2 mesh from P1 data not yet implemented"<<endl;
+    abort();
+  }
+  
+  if (!p2meshwanted){
+    nPo=nVe;
+    nBPo=nBVe;
+  } else {
+    nPo=UInt(nptot);
+    nBPo=2*nBVe;
+  }
+  cout << "Using Euler formula to compute number of internal edges, assuming connected domain"<<endl;
+  cout << "(More precise technique still to be implemented)"<<endl;
+  nEd=3*(nFa-nBEd)/2;
+  cout<< "#Vertices = "<<nVe;
+  cout<< "#BVertices= "<<nBVe<<endl;
+  cout<< "#Faces    = "<<nFa;
+  cout<< "#Edges    = "<<nEd;
+  cout<< "#BEdges   = "<<nBEd<<endl;
+  cout<< "#Points   = "<<nPo;
+  cout<< "#BPoints  = "<<nBPo<<endl;
+ 
+  // I store all Points
+  mesh.setMaxNumPoints(nPo,true);
+  mesh.setNumBPoints(nBPo);
+  mesh.numVertices()=nVe;
+  mesh.numBVertices()=nBVe;
+  // Only Boundary Edges (in a next version I will allow for different choices)
+  mesh.setMaxNumEdges(nBEd);
+  mesh.numEdges()=nEd; /* Here the REAL number of edges (all of them)
+			  even if I store only BEdges.*/
+  mesh.setNumBEdges(nBEd);
+  //Triangular faces
+  mesh.setMaxNumFaces(nFa,true);
+ // Add Marker to mesh
+  mesh.setMarker(regionFlag);
+
+  // Now put the whole lot into the RegionMesh2D structure
+  typename RegionMesh2D::PointType * pp=0;
+  typename RegionMesh2D::EdgeType * pe=0;
+  typename RegionMesh2D::FaceType * pf=0;
+  
+  
+  // first the vertices
+  for(i=0;i<nVe;i++) {
+    pp=&mesh.addPoint(i<nBVe);
+    pp->x()=Real(coor(0,i));
+    pp->y()=Real(coor(1,i));
+  }
+  // now the points
+  for(i=nVe;i<nPo;i++) {
+    pp=&mesh.addPoint(i-nVe<nBPo);
+    pp->x()=Real(coor(0,i));
+    pp->y()=Real(coor(1,i));
+  }
+  cout<< "Vertices and Points Created "<<endl;
+  // now the boundary edges
+  ID ia1;
+  long int test;
+  EntityFlag ibc;
+  for(i=0;i<nBEd;i++){
+    pe=&mesh.addEdge(true); // Only boundary edges.
+    p1=ID(ib(0,i)); // Explicit conversion to ID
+    p2=ID(ib(1,i));
+    ibc=EntityFlag(bc(i)); //Explicit conversion to entity flag
+    // Boundary condition marker 
+    pe->setMarker(ibc);
+    pe->setPoint(1,mesh.point(p1)); // set edge conn.
+    pe->setPoint(2,mesh.point(p2)); // set edge conn.
+    if (p2meshwanted)pe->setPoint(2,mesh.point(ID(ib(2,i))));
+    // fix bedge adjacency information
+    ia1=ID(ie(i));
+    pe->ad_first()=ia1--;/* Later I use ia1 to have an offset
+			    so I postdecrement it by 1*/
+    i1=iel(0,ia1);
+    i2=iel(1,ia1);
+    i3=iel(2,ia1);
+    test=i1-p1+i2-p2+i3;// Get the other node
+    if (test == i1)
+      pe->pos_first()=2;
+    else if (test ==i2)
+      pe->pos_first()=3;
+    else if (test ==i3)
+      pe->pos_first()=1;
+    else
+      cerr<< "Information on adjacency of boundary edge is wrong!"<<endl;
+  }
+  cout<< "Boundary Edges Created "<<endl;
+  
+  // Finally the triangular faces!
+  for(i=0;i<nFa;i++){
+    p1=ID(iel(0,i));
+    p2=ID(iel(1,i));
+    p3=ID(iel(2,i));
+    pf=&(mesh.addFace()); // Only boundary faces
+    
+    pf->setMarker(EntityFlag(ibc));
+    pf->setPoint(1,mesh.point(p1)); // set face conn.
+    pf->setPoint(2,mesh.point(p2)); // set face conn.
+    pf->setPoint(3,mesh.point(p3)); // set face conn.
+    if (p2meshwanted)
+      {
+	p1=ID(iel(3,i));
+	p2=ID(iel(4,i));
+	p3=ID(iel(5,i));
+	pf->setPoint(4,mesh.point(p1)); // set face conn.
+	pf->setPoint(5,mesh.point(p2)); // set face conn.
+	pf->setPoint(6,mesh.point(p3)); // set face conn.
+      }
+  }
+  cout<< "Triangular Faces Created "<<endl;
+  return ierr==0;
+}
+#endif
+
+// 1.1 2002/04/03 09:36:23 forma Exp $
+// Revision 1.1  2002/04/03 09:36:23  forma
+// region2d stuff added
+//
+// Revision 1.3  2002/01/18 12:49:13  forma
+// Bug fixes
+//
+// Revision 1.2  2001/10/23 10:24:24  forma
+// New handling of BC
+// Fixed some problems with non C++ standard compliant code
+// Added new features to FE classes
+//
+// Revision 1.1.1.1  2001/05/20 08:32:30  forma
+// LifeV library. New structure after meeting May 2001
+//
+// Revision 1.1.1.1  2000/10/23 16:54:21  soflife
+// NSCode October 2000
+//
+// Revision 1.7  2000/07/11 18:17:17  forma
+// intermediate version:
+// corrected bugs in p1top2
+// new construuction for DOF
+// mixed patterns half way through.
+//
+// Revision 1.6  2000/05/30 15:15:28  forma
+// This is the new version, aftre the modifications by JFG and the
+// MArkers/bccond by Luca.
+//
+// Revision 1.5  2000/04/14 14:59:48  forma
+// Version with new MArkers and BC
+//
