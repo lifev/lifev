@@ -327,7 +327,7 @@ using boost::numeric::ublas::index_norm_inf;
 struct norm_inf_adaptor
 {
     template<typename E>
-    Real operator()( E const& __v )
+    Real operator()( E const& __v ) const
         {
             return norm_inf( __v );
         }
