@@ -24,7 +24,7 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 
 SUBDIRS		= data  \
-              lifecore lifearray lifealg lifefilters \
+              lifecore lifearray lifealg lifefem lifefilters lifesolver \
               test_mesh test_laplacian test_naturalbc test_essentialbc \
               test_q1 test_p2 test_mixte test_fe test_dg \
               test_postproc test_bdf \
@@ -35,7 +35,7 @@ SUBDIRS		= data  \
 	      test_masstransport test_mass_coupling test_ns_ipstab \
               test_coupling_3d0d \
               test_fhn \
-	      lifesolver lifefem
+              test_levelset_ipstab
 
 TESTSUITES=$(srcdir)/lifecore/testsuite.at \
 $(srcdir)/lifearray/testsuite.at \
