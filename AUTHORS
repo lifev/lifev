@@ -1,19 +1,19 @@
-This library is a joint effort of several people.
+This library is a joint effort of several people between EPFL (CMCS),
+Politecnico (MOX) and INRIA (BANG).
 
-* Main Developers:
+* Active Developers:
+====================
 
-Miguel Fernandez
-Luca Formaggia
-Alain Gauthier
-Jean Federich Gerbeau
-Alessandro Veneziani
-Vincent Martin
-Christophe Prud'homme    
+M.   Fernandez
+L.   Formaggia
+J.F. Gerbeau
+V.   Martin
+M.   Prosi
+C.   Prud'homme <christophe.prudhomme@epfl.ch> 
+A.   Veneziani
 
-* Release Coordinator:
+* Former Developers
+===================
 
-Christophe Prud'homme   
-
-* Many others have contributed to some parts
-
-
+A. Gauthier
+D. Mastalli
