@@ -40,15 +40,17 @@ include $(top_srcdir)/admin/Doxyfile.am
 
 dist-hook: changelog
 # make sure that we have an up-to-date ChangeLog
-	if test -w . -a $(top_srcdir) != $(top_builddir); then\
+	if test -w . -a $(top_srcdir) != $(top_builddir) -a ! -f ChangeLog; then\
 	  cp $(srcdir)/ChangeLog .;\
 	fi
 
 changelog:
-	@if test -x /usr/bin/cvs2cl -a -d $(srcdir)/CVS; then\
+	if test -x /usr/bin/cvs2cl -a -d $(srcdir)/CVS; then\
 	 (cd $(srcdir) && cvs2cl -b -t  -S --utc -P);\
     else \
-     test -w $(srcdir)/ChangeLog && touch $(srcdir)/ChangeLog;\
+     if test -w $(srcdir)/ChangeLog; then\
+       touch $(srcdir)/ChangeLog;\
+     fi;\
     fi
 
 apidox-all:
