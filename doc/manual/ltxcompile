@@ -18,7 +18,8 @@ TEXINPUTS=$srcdir:$top_srcdir/doc/tex//:$TEXINPUTS BIBINPUTS=$BIBINPUTS:$srcdir:
 
 prefix=`basename $1 .tex`
 
-ltxcmdlines="--interaction nonstopmode --file-line-error-style"
+#ltxcmdlines="--interaction nonstopmode --file-line-error-style"
+ltxcmdlines="--interaction nonstopmode"
 
 pdflatex $ltxcmdlines $prefix
 bibtex $prefix
