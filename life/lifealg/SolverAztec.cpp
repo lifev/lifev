@@ -20,7 +20,7 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /**
    \file SolverAztec.cpp
    \author Christoph Winkelmann <christoph.winkelmann@epfl.ch>
@@ -73,7 +73,7 @@ SolverAztec* SolverAztec::New()
 
 /*!
   \brief Gets the last residual norm that has been computed.
- 
+
   \return last residual norm
 */
 double SolverAztec::residualNorm() const
@@ -136,14 +136,13 @@ void SolverAztec::solve( array_type& x, array_type const& b )
 {
     if ( M_matrix != 0 )
     {
-        std::cerr << "[SolverAztec::solve]  Solving primal" << std::endl;
-        AZ_iterate( &x[ 0 ], &b[ 0 ], M_options, M_params, M_status, M_procConfig,
-                    M_matrix, M_precond, NULL );
+        AZ_iterate( &x[ 0 ], &b[ 0 ], M_options, M_params, M_status,
+                    M_procConfig, M_matrix, M_precond, NULL );
     }
     else
     {
         std::cerr << "[SolverAztec::solve]  ERROR: Matrix not set"
-        << std::endl;
+                  << std::endl;
     }
 }
 
