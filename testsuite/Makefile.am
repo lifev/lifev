@@ -20,7 +20,7 @@
 #  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
+SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 
 SUBDIRS		= data  \
@@ -46,6 +46,7 @@ $(srcdir)/test_coupling_3d0d/testsuite.at \
 $(srcdir)/test_darcy/testsuite.at \
 $(srcdir)/test_essentialbc/testsuite.at \
 $(srcdir)/test_fe/testsuite.at \
+$(srcdir)/test_fhn/testsuite.at \
 $(srcdir)/test_linearelasticity/testsuite.at \
 $(srcdir)/test_fsi/testsuite.at \
 $(srcdir)/test_masstransport/testsuite.at \
