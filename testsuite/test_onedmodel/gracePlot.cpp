@@ -1,17 +1,17 @@
 /* -*- mode: c++ -*-
-   This program is part of the LifeV library 
+   This program is part of the LifeV library
    Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politechnico di Milano
 
    This program is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public License
    as published by the Free Software Foundation; either version 2
    of the License, or (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -23,12 +23,14 @@
   \version 1.0
 */
 
-#include "gracePlot.hpp"
 #include <cmath>
 #include <sstream>
 
+#include "gracePlot.hpp"
+
+#if defined(HAVE_GRACE_NP_H)
 GracePlot::GracePlot() {
-  
+
   if ( GraceOpenVA("xmgrace", 2048, "-nosafe", "-noask", NULL)== -1) {
     cerr << "Can't run grace" << endl;
     exit (EXIT_FAILURE);
@@ -37,41 +39,41 @@ GracePlot::GracePlot() {
   GracePrintf("g0 on");                     /* Activate graph 0 */
   GracePrintf("with g0");                   /* reset the current graph to graph 0 */
   GracePrintf("view 0.1, 0.1, 1.2, 0.9");
-  
+
 }
 
-void GracePlot::Plot(const Rn& x, const Rn& y) 
+void GracePlot::Plot(const Rn& x, const Rn& y)
 {
   int n = x.N();
-  ASSERT( y.N() == n, 
-	  "Plot: x and y should have same size." ); 
+  ASSERT( y.N() == n,
+	  "Plot: x and y should have same size." );
 
   GracePrintf("with g0");
   GracePrintf("kill s0");
-  for (int i=0; i<n; i++) 
+  for (int i=0; i<n; i++)
      GracePrintf ("g0.s0 point %g, %g", x(i), y(i));
   GracePrintf(" ");
 
 
-  GracePrintf("autoscale");  
+  GracePrintf("autoscale");
   GracePrintf("redraw");
 }
 
 void GracePlot::Plot(const std::vector< Point1D >& x,
-		     const ScalUnknown<Vector>& y) 
+		     const ScalUnknown<Vector>& y)
 {
   UInt n = x.size();
-  ASSERT( y.size() == n, 
-	  "Plot: x and y should have same size." ); 
+  ASSERT( y.size() == n,
+	  "Plot: x and y should have same size." );
 
   GracePrintf("with g0");
   GracePrintf("kill s0");
-  for (UInt ii=0; ii<n; ii++) 
+  for (UInt ii=0; ii<n; ii++)
      GracePrintf ("g0.s0 point %g, %g", x[ii].x(), y(ii));
   GracePrintf(" ");
 
 
-  GracePrintf("autoscale");  
+  GracePrintf("autoscale");
   GracePrintf("redraw");
 }
 
@@ -97,15 +99,15 @@ double solex1(double x, double t) {
 
 int main(int argc, char* argv[]) {
 
-  int n=64; 
+  int n=64;
   double L=6;
   double dx=L/(n-1);
   double tf=1;
   double dt=dx/a;
-  
+
   Rn x(n), y(n);
   GracePlot p;
-  
+
   for (int i=0; i<n; i++) {
     x(i) = i*dx;
   }
@@ -122,10 +124,13 @@ int main(int argc, char* argv[]) {
     p.Plot(x, y);
     p.Sleep(0.5);
   }
-  
+
   cout << "Hit return to close plot" << endl;
   char ch;
   cin.get(ch);
 }
 
+
 #endif
+
+#endif /* HAVE_GRACE_NP_H */
