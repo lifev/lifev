@@ -260,7 +260,7 @@ class BC_Base{
     \param STL vector<ID> storing the list of components involved in this boundary condition
    */
   BC_Base(const string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode, 
-	  BCVector_Interface& bcv, const vector<ID>& comp);
+	  BCVector_Base& bcv, const vector<ID>& comp);
  
   //! Constructor for BC with data vector, without components for Scalar, Tangential or Normal  mode problems
   /*!
@@ -271,7 +271,7 @@ class BC_Base{
     \param bcv data vector
   */
   BC_Base(const string& name, const EntityFlag& flag, const BCType& type, 
-	  const BCMode& mode, BCVector_Interface& bcv);
+	  const BCMode& mode, BCVector_Base& bcv);
 
   //! Constructor for BC with data vector, without list of components for Full mode problems
   /*!
@@ -283,7 +283,7 @@ class BC_Base{
     \param nComp the number of componets involved in this boundary condition
   */
   BC_Base(const string& name, const EntityFlag& flag, const BCType& type, 
-	  const BCMode& mode, BCVector_Interface& bcv, const UInt& nComp);
+	  const BCMode& mode, BCVector_Base& bcv, const UInt& nComp);
 
   
   //! Copy constructor for BC (we have a vector of pointers to ID's and a pointer to user defined functions)
@@ -402,7 +402,7 @@ class BC_Base{
 
 
   //! Pointer to a user given data vector
-  BCVector_Interface* _bcv;
+  BCVector_Base* _bcv;
 
   //! True is a data vector has been provided
   bool _dataVector;
@@ -532,7 +532,7 @@ class BC_Handler
     \param STL vector<ID> storing the list of components involved in this boundary condition 
   */
   void addBC(const string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode, 
-	     BCVector_Interface& bcv, const vector<ID>& comp);
+	     BCVector_Base& bcv, const vector<ID>& comp);
 
 
   //! add new BC to the list  without specified components for Scalar, Tangential or Normal  mode problemst (data vector)
@@ -544,7 +544,7 @@ class BC_Handler
     \param bcv data vector
   */
   void addBC(const string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode, 
-	     BCVector_Interface& bcv);
+	     BCVector_Base& bcv);
   
   
   //! add new BC to the list without list of components for Full mode problems t (data vector)
@@ -557,7 +557,7 @@ class BC_Handler
     \param nComp the number of componets involved in this boundary condition
   */
   void addBC(const string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode, 
-	     BCVector_Interface& bcv, const UInt& nComp);
+	     BCVector_Base& bcv, const UInt& nComp);
 
 
   //! Build the boundary stuff

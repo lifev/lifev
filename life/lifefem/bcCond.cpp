@@ -181,7 +181,7 @@ BC_Base::BC_Base(const string& name, const EntityFlag& flag, const BCType& type,
 
 //! Constructor for BC with data vector
 BC_Base::BC_Base(const string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode, 
-		 BCVector_Interface& bcv, const vector<ID>& comp){
+		 BCVector_Base& bcv, const vector<ID>& comp){
   _name = name;
   _flag = flag;
   _type = type;
@@ -202,7 +202,7 @@ BC_Base::BC_Base(const string& name, const EntityFlag& flag, const BCType& type,
 
 //! Constructor for BC with data vector, without components for Scalar, Tangential or Normal  mode problems
 BC_Base::BC_Base(const string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode, 
-		 BCVector_Interface& bcv) {
+		 BCVector_Base& bcv) {
   _name = name;
   _flag = flag;
   _type = type;
@@ -246,7 +246,7 @@ BC_Base::BC_Base(const string& name, const EntityFlag& flag, const BCType& type,
 
 //! Constructor for BC with data vector, without list of components for Full mode problems
 BC_Base::BC_Base(const string& name, const EntityFlag& flag, const BCType& type, 
-	const BCMode& mode, BCVector_Interface& bcv, const UInt& nComp){
+	const BCMode& mode, BCVector_Base& bcv, const UInt& nComp){
   _name = name;
   _flag = flag;
   _type = type; 
@@ -604,7 +604,7 @@ void BC_Handler::addBC(const string& name, const EntityFlag& flag, const BCType&
 
 //! Adding new BC to the list with data vectors
 void BC_Handler::addBC(const string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode, 
-		       BCVector_Interface& bcv, const vector<ID>& comp) {
+		       BCVector_Base& bcv, const vector<ID>& comp) {
   if ( _nbc == _bcList.size() ) 
     ERROR_MSG("You cannot add another BC, the list of BC in the Handler is full");
   else if (_nbc == 0)
@@ -618,7 +618,7 @@ void BC_Handler::addBC(const string& name, const EntityFlag& flag, const BCType&
     sort(_bcList.begin(), _bcList.end());
 }
 void BC_Handler::addBC(const string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode, 
-		        BCVector_Interface& bcv){ 
+		        BCVector_Base& bcv){ 
   if ( _nbc == _bcList.size() ) 
     ERROR_MSG("You cannot add another BC, the list of BC in the Handler is full");
   else if (_nbc == 0)
@@ -633,7 +633,7 @@ void BC_Handler::addBC(const string& name, const EntityFlag& flag, const BCType&
 }
 
 void BC_Handler::addBC(const string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode, 
-		       BCVector_Interface& bcv, const UInt& nComp){ 
+		       BCVector_Base& bcv, const UInt& nComp){ 
   if ( _nbc == _bcList.size() ) 
     ERROR_MSG("You cannot add another BC, the list of BC in the Handler is full");
   else if (_nbc == 0)

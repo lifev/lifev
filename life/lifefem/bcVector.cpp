@@ -30,24 +30,113 @@
 
 #include "bcVector.hpp"
 
+//
+// Implementation for BCVector_Base
+//
+
+
 //! Default Constructor (the user must call setBCVector(..))
-BCVector_Interface::BCVector_Interface():
+BCVector_Base::BCVector_Base():
   _MixteCoef(0.0),_finalized(false)
 {}
 
 //! Constructor
-BCVector_Interface::BCVector_Interface(Vector& vec, UInt nbTotalDof, 
-				       DofInterfaceBase& dofIn):
-  _vec(&vec),_dofIn(&dofIn),_nbTotalDof(nbTotalDof),
-  _MixteCoef(0.0),_finalized(true)
+BCVector_Base::BCVector_Base(Vector& vec, UInt nbTotalDof):
+  _vec(&vec),_nbTotalDof(nbTotalDof),
+  _MixteCoef(0.0),_finalized(false)
 {}
 
 
+
+
+//! set the Mixte coefficient
+void BCVector_Base::setMixteCoef( const Real& coef ){
+  _MixteCoef = coef;
+}
+
+  
+//! Return the value of the Mixte coefficient
+Real BCVector_Base::MixteCoef() const{
+  return _MixteCoef;
+}
+
+
+
+//
+// Implementation for BCVector
+//
+
+//! Default Constructor (the user must call setBCVector(..))
+BCVector::BCVector() {
+}
+
+//! Constructor
+BCVector::BCVector(Vector& vec, UInt nbTotalDof):
+  BCVector_Base(vec, nbTotalDof)
+{   _finalized = true; 
+}
+
+
 //!set the BC vector (after default construction)
-void BCVector_Interface::setBCVector_Interface(Vector& vec, UInt nbTotalDof, 
-					       DofInterfaceBase& dofIn)
+void BCVector::setvector(Vector& vec, UInt nbTotalDof)
 {
-  ASSERT_PRE( !_finalized, "BC Vector cannot be set twice."); //!remove this...
+  ASSERT_PRE( !_finalized, "BC Vector cannot be set twice."); 
+  _vec        = &vec ;
+  _nbTotalDof = nbTotalDof; 
+  _finalized  = true;
+}
+
+
+//! This method returns the value to be imposed in the component iComp of the dof iDof
+Real BCVector::operator()(const ID& iDof, const ID& iComp) const {
+  ASSERT_PRE(_finalized, "BC Vector should be finalized before being accessed.");
+  return (*_vec)( (iComp-1)* _nbTotalDof + iDof - 1 ); 
+} 
+  
+//! Assignment operator for BCVector_Interface 
+BCVector & BCVector::operator=(const BCVector& BCv) {
+  _vec        = BCv._vec;
+  _nbTotalDof = BCv._nbTotalDof;
+  _MixteCoef  = BCv._MixteCoef;
+  _finalized  = BCv._finalized;
+  
+  return *this;
+}
+
+
+//! Output
+ostream& BCVector::showMe(bool verbose, ostream & out) const {
+  ASSERT_PRE(_finalized, "BC Vector should be finalized before being accessed.");
+  out << "+++++++++++++++++++++++++++++++"<<endl;
+  out << "BC Vector Interface: "  << endl;
+  out << "number of interface vector Dof : " << _nbTotalDof << endl;
+  out << "==>Interface Dof :\n";
+  out << "+++++++++++++++++++++++++++++++" << endl;
+  return out;
+} 
+
+
+//
+// Implementation for BCVector_Interface
+//
+
+//! Default Constructor (the user must call setBCVector(..))
+BCVector_Interface::BCVector_Interface() {
+}
+
+//! Constructor
+BCVector_Interface::BCVector_Interface(Vector& vec, UInt nbTotalDof, 
+				       DofInterfaceBase& dofIn):
+  BCVector_Base(vec, nbTotalDof),
+  _dofIn(&dofIn) { 
+    _finalized = true; 
+  }
+
+
+//!set the BC vector (after default construction)
+void BCVector_Interface::setvector(Vector& vec, UInt nbTotalDof, DofInterfaceBase& dofIn)
+{
+  ASSERT_PRE( !_finalized, "BC Vector cannot be set twice."); 
   _vec        = &vec ;
   _dofIn      = &dofIn;
   _nbTotalDof = nbTotalDof; 
@@ -55,23 +144,12 @@ void BCVector_Interface::setBCVector_Interface(Vector& vec, UInt nbTotalDof,
 }
 
 
-//! set the Mixte coefficient
-void BCVector_Interface::setBCVec_MixteCoef( const Real& coef ){
-  _MixteCoef = coef;
-}
-
 //! This method returns the value to be imposed in the component iComp of the dof iDof
 Real BCVector_Interface::operator()(const ID& iDof, const ID& iComp) const {
   ASSERT_PRE(_finalized, "BC Vector should be finalized before being accessed.");
   return (*_vec)( (iComp-1)* _nbTotalDof + _dofIn->getInterfaceDof(iDof) - 1 ); 
 } 
   
-//! Return the value of the Mixte coefficient
-Real BCVector_Interface::MixteCoef() const{
-  return _MixteCoef;
-}
-
-
 //! Assignment operator for BCVector_Interface 
 BCVector_Interface & BCVector_Interface::operator=(const BCVector_Interface & BCv) {
   _vec        = BCv._vec;
