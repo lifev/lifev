@@ -16,18 +16,17 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-/*---------------------------------------------------------------------*
-| LifeV main header file                                               |
-|                                                                      |
-| $Header: /cvsroot/lifev/lifev/life/lifecore/Attic/lifeV.hpp,v 1.9 2004-08-29 15:53:20 prudhomm Exp $                                                             |
-|                                                                      |
-| #Version  0.0 Experimental   9/7/99. Luca Formaggia                  |
-|           0.1 Experimental  10/8/99. Jean-Fred Gerbeau.              |
-|                                                                      |
-| #Purposes Defines typedefs and macros common to ALL lifeV.h software |
-|           it must be includes in all translation units.              |
-*----------------------------------------------------------------------*/
+/*
+  \file lifeV.hpp
 
+  LifeV main header file
+
+  \author Luca Formaggia
+  \author Jean-Fred Gerbeau.
+
+  #Purposes Defines typedefs and macros common to ALL lifeV.h software
+  it must be includes in all translation units.
+*/
 # ifndef __cplusplus
 # error You must use C++ for LifeV
 # endif
