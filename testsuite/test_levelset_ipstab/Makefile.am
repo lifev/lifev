@@ -23,7 +23,7 @@
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
 
-noinst_HEADERS = main.hpp ud_functions.hpp
+noinst_HEADERS = main.hpp 
 
 
 check_PROGRAMS 	= test_levelset_ipstab
