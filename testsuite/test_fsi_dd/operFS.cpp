@@ -385,8 +385,8 @@ void  operFS::solveLinearSolid()
 
     std::cout << "rhs_dz norm = " << maxnorm(M_rhs_dz) << std::endl;
     M_solid._recur = 1;
-//    M_solid.solveJac(M_dz, M_rhs_dz, tol, M_BCh_dz);
-    M_solid.solveJac(M_dz, M_rhs_dz, tol);
+    M_solid.solveJac(M_dz, M_rhs_dz, tol, M_BCh_dz);
+//    M_solid.solveJac(M_dz, M_rhs_dz, tol);
     std::cout << "dz norm     = " << maxnorm(M_dz) << std::endl;
 
 //     for (int ii = 0; ii < M_dz .size(); ++ii)

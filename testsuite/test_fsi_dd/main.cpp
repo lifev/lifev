@@ -16,516 +16,285 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-
+#include "lifeV.hpp"
+#include "NavierStokesAleSolverPC.hpp"
+#include "VenantKirchhofSolver.hpp"
+#include "nonLinRichardson.hpp"
 #include "operFS.hpp"
+#include "vectorNorms.hpp"
+#include "dofInterface3Dto3D.hpp"
+#include "ud_functions.hpp"
+#include "regionMesh3D_ALE.hpp"
 
-namespace LifeV
+
+/*
+
+This programs couples the Navier-Stokes and (linear) Elastodynamic equations
+At each time step the resulting non-linear coupled problem is solved via
+Domain Decomposition method.
+
+The present test simulates the pressure wave propagation in a curved cylindrical vessel
+
+Based on Miguel Fernandez's test_fsi_newton. See:
+A Newton method using exact jacobians for solving fluid-structure coupling
+Miguel Fernandez, Marwan Moubachir
+*/
+
+
+int main(int argc, char** argv)
 {
+    using namespace LifeV;
 
-// Constructors
-
-operFS::operFS(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
-               VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
-               BCHandler &BCh_du,
-               BCHandler &BCh_dz):
-//                   GetPot     &data_file):
-    M_fluid       (fluid),
-    M_solid       (solid),
-    M_dispStruct  ( 3*M_solid.dDof().numTotalDof() ),
-    M_velo        ( 3*M_solid.dDof().numTotalDof() ),
-    M_dz          ( 3*M_solid.dDof().numTotalDof() ),
-    M_rhs_dz      ( 3*M_solid.dDof().numTotalDof() ),
-    M_residualS   ( M_solid.dDof().numTotalDof() ),
-    M_residualF   ( M_fluid.uDof().numTotalDof() ),
-    M_residualFSI ( M_fluid.uDof().numTotalDof() ),
-    M_nbEval      (0),
-    M_BCh_du      (BCh_du),
-    M_BCh_dz      (BCh_dz),
-    M_dataJacobian(this)
-{
-//        M_solverAztec.setOptionsFromGetPot(data_file,"jacobian/aztec");
-}
-
-// Destructor
-operFS::~operFS()
-{
-}
-
-// Setters and getters
+    // Reading from data file
+    //
+    GetPot command_line(argc,argv);
+    const char* data_file_name = command_line.follow("data", 2, "-f","--file");
+    GetPot data_file(data_file_name);
 
 
 
+    // Number of boundary conditions for the fluid velocity,
+    // solid displacement, and fluid mesh motion
 
-// Member functions
+    BCHandler BCh_u(3);
+    BCHandler BCh_d(3);
+    BCHandler BCh_mesh(4);
 
 
+    //========================================================================================
+    // FLUID AND SOLID SOLVERS
+    //========================================================================================
 
-//! Computing the residual on the fluid/structure interface
+    //
+    // The NavierStokes ALE solver
+    //
+    NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >
+        fluid(data_file,
+              feTetraP1bubble,
+              feTetraP1,
+              quadRuleTetra64pt,
+              quadRuleTria3pt,
+              quadRuleTetra64pt,
+              quadRuleTria3pt,
+              BCh_u, BCh_mesh);
+    //
+    // The structural solver
+    //
+    VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >
+        solid(data_file,
+              feTetraP1,
+              quadRuleTetra4pt,
+              quadRuleTria3pt,
+              BCh_d);
+    // Outputs
+    fluid.showMe();
+    solid.showMe();
 
-void operFS::computeResidualFSI()
-{
-    M_residualFSI = 0.;
+    UInt dim_solid = solid.dDof().numTotalDof();
+    UInt dim_fluid = fluid.uDof().numTotalDof();
 
-    BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[0];
-    BCBase const &BC_solidInterface = M_solid.BC_solid()[0];
 
-    UInt nDofInterface = BC_fluidInterface.list_size();
+    //========================================================================================
+    //  DATA INTERFACING BETWEEN BOTH SOLVERS
+    //========================================================================================
 
-    UInt nDimF = BC_fluidInterface.numberOfComponents();
-    UInt nDimS = BC_solidInterface.numberOfComponents();
+    //
+    // Passing data from the fluid to the structure: fluid load at the interface
+    //
 
-    UInt totalDofFluid = M_residualF.size()/ nDimF;
-    UInt totalDofSolid = M_residualS.size()/ nDimS;
+    DofInterface3Dto3D dofFluidToStructure(feTetraP1,
+                                           solid.dDof(),
+                                           feTetraP1bubble,
+                                           fluid.uDof());
+    dofFluidToStructure.update(solid.mesh(),
+                               1,
+                               fluid.mesh(),
+                               1,
+                               0.);
+    BCVectorInterface g_wall(fluid.residual(),
+                              dim_fluid,
+                              dofFluidToStructure);
+    //
+    // Passing data from structure to the solid mesh: motion of the solid domain
+    //
+    DofInterface3Dto3D dofStructureToSolid(feTetraP1,
+                                           solid.dDof(),
+                                           feTetraP1,
+                                           solid.dDof() );
+    dofStructureToSolid.update(solid.mesh(),
+                               1,
+                               solid.mesh(),
+                               1,
+                               0.);
 
-    for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)
+    BCVectorInterface d_wall(solid.d(),
+                             dim_solid,
+                             dofStructureToSolid);
+    //
+    // Passing data from structure to the fluid mesh: motion of the fluid domain
+    //
+    DofInterface3Dto3D dofStructureToFluidMesh(fluid.mesh().getRefFE(),
+                                               fluid.dofMesh(),
+                                               feTetraP1,
+                                               solid.dDof());
+    dofStructureToFluidMesh.update(fluid.mesh(),
+                                   1,
+                                   solid.mesh(),
+                                   1,
+                                   0.0);
+    BCVectorInterface displ(solid.d(),
+                             dim_solid,
+                             dofStructureToFluidMesh);
+    //
+    // Passing data from structure to the fluid: solid velocity at the interface velocity
+    //
+    DofInterface3Dto3D dofMeshToFluid(feTetraP1bubble,
+                                      fluid.uDof(),
+                                      feTetraP1bubble,
+                                      fluid.uDof() );
+    dofMeshToFluid.update(fluid.mesh(),
+                          1,
+                          fluid.mesh(),
+                          1,
+                          0.0);
+    BCVectorInterface u_wall(fluid.wInterpolated(),
+                              dim_fluid,
+                              dofMeshToFluid);
+    //========================================================================================
+    //  BOUNDARY CONDITIONS
+    //========================================================================================
+
+    // Boundary conditions for the harmonic extension of the
+    // interface solid displacement
+    BCFunctionBase bcf(fZero);
+    BCh_mesh.addBC("Interface", 1, Essential, Full, displ, 3);
+    BCh_mesh.addBC("Top",       3, Essential, Full, bcf,   3);
+    BCh_mesh.addBC("Base",      2, Essential, Full, bcf,   3);
+    BCh_mesh.addBC("Edges",    20, Essential, Full, bcf,   3);
+
+    // Boundary conditions for the fluid velocity
+    BCFunctionBase in_flow(u2);
+    BCh_u.addBC("Wall",   1,  Essential, Full, u_wall,  3);
+    BCh_u.addBC("InFlow", 2,  Natural,   Full, in_flow, 3);
+    BCh_u.addBC("Edges",  20, Essential, Full, bcf,     3);
+
+    // Boundary conditions for the solid displacement
+    BCh_d.addBC("Interface", 1, Essential, Full, d_wall, 3);
+    BCh_d.addBC("Top",       3, Essential, Full, bcf,  3);
+    BCh_d.addBC("Base",      2, Essential, Full, bcf,  3);
+
+
+    //========================================================================================
+    //  COUPLED FSI LINEARIZED OPERATORS
+    //========================================================================================
+
+    BCHandler BCh_du(2);
+    BCHandler BCh_dz(3);
+
+    operFS oper(fluid, solid, BCh_du, BCh_dz);
+
+    // Passing the residue to the linearized fluid: \sigma -> du
+    //
+    // rem: for now: no fluid.dwInterpolated().
+    //      In the future this could be relevant
+
+    BCVectorInterface du_wall(oper.residualFSI(),
+                              dim_fluid,
+                              dofStructureToFluidMesh);
+    // Passing the residual to the linearized structure: \sigma -> dz
+    BCVectorInterface dg_wall(oper.residualFSI(),
+                              dim_fluid,
+                              dofFluidToStructure);
+    // Boundary conditions for du
+
+    BCh_du.addBC("Wall",   1,  Natural  , Full, du_wall,  3);
+    BCh_du.addBC("Edges",  20, Essential, Full, bcf,      3);
+
+    // Boundary conditions for dz
+
+    BCh_dz.addBC("Interface", 1, Natural  , Full, dg_wall, 3);
+    BCh_dz.addBC("Top",       3, Essential, Full, bcf,     3);
+    BCh_dz.addBC("Base",      2, Essential, Full, bcf,     3);
+
+
+    //========================================================================================
+    //  TEMPORAL LOOP
+    //========================================================================================
+
+
+    UInt maxpf  = 100;
+    Real dt     = fluid.timestep();
+    Real T      = fluid.endtime();
+
+    fluid.initialize(u0);
+    solid.initialize(d0,w0);
+
+    Real abstol = 5.e-7;
+    Real reltol = 1.e-4;
+    Real etamax = 1.e-3;
+
+    int status;
+    int maxiter;
+    int linesearch = 0;
+
+    std::ofstream nout("num_iter");
+    ASSERT(nout,"Error: Output file cannot be opened.");
+
+    Vector disp(3*dim_solid);
+    disp   = 0.0;
+
+    Vector velo_1(3*dim_solid);
+    velo_1 = 0.0;
+
+    std::ofstream out_iter("iter");
+    std::ofstream out_res ("res");
+
+    //
+    // Temporal loop
+    //
+
+    for (Real time=dt; time <= T; time+=dt)
     {
-        ID IDfluid = BC_fluidInterface(iBC)->id();
+        fluid.timeAdvance(f,time);
+        solid.timeAdvance(f,time);
+        oper.setTime(time);
 
-        BCVectorInterface const *BCVInterface =
-            static_cast <BCVectorInterface const *>
-            (BC_fluidInterface.pointerToBCVector());
+        // displacement prediction
 
-        ID IDsolid = BCVInterface->
-            dofInterface().getInterfaceDof(IDfluid);
+        disp   = solid.d() + dt*(1.5*solid.w() - 0.5*velo_1);
 
-        for (UInt jDim = 0; jDim < nDimF; ++jDim)
+        velo_1 = solid.w();
+
+        std::cout << "norm( disp   ) init = " << maxnorm(disp)   << std::endl;
+        std::cout << "norm( velo_1 ) init = " << maxnorm(velo_1) << std::endl;
+
+        maxiter = maxpf;
+
+        // the newton solver
+
+        status = nonLinRichardson(disp, oper, maxnorm, abstol, reltol,
+                        maxiter, etamax, linesearch, out_res,
+                        time, 0.1);
+//        status = newton(disp,oper, maxnorm, abstol, reltol, maxiter, etamax,linesearch,out_res,time);
+
+        if(status == 1)
         {
-            M_residualFSI[IDfluid - 1 + jDim*totalDofFluid] =
-                M_residualF[IDfluid - 1 + jDim*totalDofFluid] +
-                M_residualS[IDsolid - 1 + jDim*totalDofSolid];
+            std::cout << "Inners iterations failed\n";
+            exit(1);
+        }
+        else
+        {
+            std::cout << "End of time "<< time << std::endl;
+            std::cout << "Number of inner iterations       : "
+                      << maxiter << std::endl;
+            out_iter << time << " " << maxiter << " "
+                     << oper.nbEval() << std::endl;
+
+            fluid.postProcess();
+            solid.postProcess();
         }
     }
+
+    return 0;
 }
 
-
-void operFS::setResidualFSI(double *_res)
-{
-    BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[0];
-    BCBase const &BC_solidInterface = M_solid.BC_solid()[0];
-
-    UInt nDofInterface = BC_fluidInterface.list_size();
-
-    UInt nDimF = BC_fluidInterface.numberOfComponents();
-    UInt nDimS = BC_solidInterface.numberOfComponents();
-
-    UInt totalDofFluid = M_residualF.size()/ nDimF;
-    UInt totalDofSolid = M_residualS.size()/ nDimS;
-
-    for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)
-    {
-        ID IDfluid = BC_fluidInterface(iBC)->id();
-
-        BCVectorInterface const *BCVInterface =
-            static_cast <BCVectorInterface const *>
-            (BC_fluidInterface.pointerToBCVector());
-
-        ID IDsolid = BCVInterface->
-            dofInterface().getInterfaceDof(IDfluid);
-
-        for (UInt jDim = 0; jDim < nDimF; ++jDim)
-        {
-            M_residualFSI[IDfluid - 1 + jDim*totalDofFluid] =
-                _res[IDsolid - 1 + jDim*totalDofSolid];
-        }
-    }
-}
-
-void operFS::setResidualFSI(const Vector _res)
-{
-    BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[0];
-    BCBase const &BC_solidInterface = M_solid.BC_solid()[0];
-
-    UInt nDofInterface = BC_fluidInterface.list_size();
-
-    UInt nDimF = BC_fluidInterface.numberOfComponents();
-    UInt nDimS = BC_solidInterface.numberOfComponents();
-
-    UInt totalDofFluid = M_residualF.size()/ nDimF;
-    UInt totalDofSolid = M_residualS.size()/ nDimS;
-
-    for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)
-    {
-        ID IDfluid = BC_fluidInterface(iBC)->id();
-
-        BCVectorInterface const *BCVInterface =
-            static_cast <BCVectorInterface const *>
-            (BC_fluidInterface.pointerToBCVector());
-
-        ID IDsolid = BCVInterface->
-            dofInterface().getInterfaceDof(IDfluid);
-
-        for (UInt jDim = 0; jDim < nDimF; ++jDim)
-        {
-            M_residualFSI[IDfluid - 1 + jDim*totalDofFluid] =
-                _res[IDsolid - 1 + jDim*totalDofSolid];
-        }
-    }
-}
-
-
-Vector operFS::getResidualFSIOnSolid()
-{
-    Vector vec = M_residualS;
-    vec = 0.;
-
-    BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[0];
-    BCBase const &BC_solidInterface = M_solid.BC_solid()[0];
-
-    UInt nDofInterface = BC_fluidInterface.list_size();
-
-    UInt nDimF = BC_fluidInterface.numberOfComponents();
-    UInt nDimS = BC_solidInterface.numberOfComponents();
-
-    UInt totalDofFluid = M_residualF.size()/ nDimF;
-    UInt totalDofSolid = M_residualS.size()/ nDimS;
-
-    for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)
-    {
-        ID IDfluid = BC_fluidInterface(iBC)->id();
-
-        BCVectorInterface const *BCVInterface =
-            static_cast <BCVectorInterface const *>
-            (BC_fluidInterface.pointerToBCVector());
-
-        ID IDsolid = BCVInterface->
-            dofInterface().getInterfaceDof(IDfluid);
-
-        for (UInt jDim = 0; jDim < nDimF; ++jDim)
-        {
-            vec[IDsolid - 1 + jDim*totalDofSolid] =
-                M_residualF[IDfluid - 1 + jDim*totalDofFluid] +
-                M_residualS[IDsolid - 1 + jDim*totalDofSolid];
-        }
-    }
-
-    return vec;
-}
-
-
-Vector operFS::setDispOnInterface(const Vector &_disp)
-{
-    Vector vec = _disp.size();
-    vec = 0.;
-
-        BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[0];
-    BCBase const &BC_solidInterface = M_solid.BC_solid()[0];
-
-    UInt nDofInterface = BC_fluidInterface.list_size();
-
-    UInt nDimF = BC_fluidInterface.numberOfComponents();
-    UInt nDimS = BC_solidInterface.numberOfComponents();
-
-    UInt totalDofFluid = M_residualF.size()/ nDimF;
-    UInt totalDofSolid = M_residualS.size()/ nDimS;
-
-    for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)
-    {
-        ID IDfluid = BC_fluidInterface(iBC)->id();
-
-        BCVectorInterface const *BCVInterface =
-            static_cast <BCVectorInterface const *>
-            (BC_fluidInterface.pointerToBCVector());
-
-        ID IDsolid = BCVInterface->
-            dofInterface().getInterfaceDof(IDfluid);
-
-        for (UInt jDim = 0; jDim < nDimF; ++jDim)
-        {
-            vec[IDsolid - 1 + jDim*totalDofSolid] =
-                _disp[IDsolid - 1 + jDim*totalDofSolid];
-        }
-    }
-
-    return vec;
-}
-
-//
-// Residual evaluation
-//
-
-
-void operFS::eval(const Vector& disp,
-                  int           status,
-                  Vector&       dispNew,
-                  Vector&       velo)
-{
-    if(status) M_nbEval = 0; // new time step
-    M_nbEval++;
-
-    UInt nDofInterface;
-    nDofInterface = M_fluid.BC_fluid()[1].list_size();
-
-
-    Vector sol(disp.size());
-
-    M_solid.d() = setDispOnInterface(disp);
-
-    M_solid._recur = 0;
-    M_solid.iterate(sol);
-
-    M_solid.postProcess();
-
-    M_fluid.updateMesh(M_time);
-    M_fluid.iterate   (M_time);
-
-    M_fluid.postProcess();
-
-    dispNew = M_solid.d();
-    velo    = M_solid.w();
-
-    std::cout << "                ::: norm(disp     ) = "
-              << maxnorm(disp) << std::endl;
-    std::cout << "                ::: norm(dispNew  ) = "
-              << maxnorm(dispNew) << std::endl;
-    std::cout << "                ::: norm(velo     ) = "
-              << maxnorm(velo) << std::endl;
-}
-
-void operFS::evalResidual(Vector &res,
-                          Vector &disp,
-                          int iter)
-{
-    int status = 0;
-
-    if(iter == 0) status = 1;
-
-    std::cout << "*** Residual computation g(x_" << iter <<" )";
-    if (status) std::cout << " [NEW TIME STEP] ";
-    std::cout << std::endl;
-
-    eval(disp, status, M_dispStruct, M_velo);
-
-    M_residualS = M_solid.residual();
-    M_residualF = M_fluid.residual();
-
-    computeResidualFSI();
-
-    res = getResidualFSIOnSolid();
-
-    std::cout << "Max ResidualF   = " << maxnorm(M_residualF)
-              << std::endl;
-    std::cout << "Max ResidualS   = " << maxnorm(M_residualS)
-              << std::endl;
-    std::cout << "Max ResidualFSI = " << maxnorm(M_residualFSI)
-              << std::endl;
-}
-
-//
-// Preconditionner computation using AZTEC
-//
-
-// void  operFS::updateJac(Vector& sol,int iter)
-// {
-// }
-
-
-//
-
-void  operFS::updateJac(Vector& sol,int iter) {
-}
-
-
-
-void  operFS::solveJac(Vector &muk,
-                       const Vector  &_res,
-                       double        _linearRelTol)
-{
-    UInt precChoice = 1;
-    switch(precChoice)
-    {
-        case 0:
-            // Dirichlet-Neumann preconditioner
-            invSfPrime(_res, _linearRelTol, muk);
-            break;
-        case 1:
-            // Dirichlet-Neumann preconditioner
-            invSsPrime(_res, _linearRelTol, muk);
-            break;
-        case 2:
-            // Dirichlet-Neumann preconditioner
-        {
-            Vector muF(_res.size());
-            Vector muS(_res.size());
-
-            invSfPrime(_res, _linearRelTol, muF);
-            invSsPrime(_res, _linearRelTol, muS);
-
-            muk = muS + muF;
-        }
-        break;
-        default:
-            // Newton preconditioner
-            invSfSsPrime(_res, _linearRelTol, muk);
-    }
-
-}
-
-//
-
-void  operFS::solveLinearFluid()
-{
-    M_fluid.iterateLin(M_time, M_BCh_du);
-}
-
-//
-
-void  operFS::solveLinearSolid()
-{
-    M_rhs_dz = 0.;
-    M_dz     = 0.;
-
-    if ( !M_BCh_dz.bdUpdateDone() )
-        M_BCh_dz.bdUpdate(M_solid._mesh, M_solid._feBd,
-                          M_solid._dof);
-
-    bcManageVector(M_rhs_dz, M_solid._mesh, M_solid._dof,
-                     M_BCh_dz, M_solid._feBd, 1., 1.);
-
-    Real tol       = 1.e-10;
-
-    std::cout << "rhs_dz norm = " << maxnorm(M_rhs_dz) << std::endl;
-    M_solid._recur = 1;
-//    M_solid.solveJac(M_dz, M_rhs_dz, tol, M_BCh_dz);
-    M_solid.solveJac(M_dz, M_rhs_dz, tol);
-    std::cout << "dz norm     = " << maxnorm(M_dz) << std::endl;
-
-//     for (int ii = 0; ii < M_dz .size(); ++ii)
-//         std::cout << M_rhs_dz[ii] << " " << M_dz[ii] << std::endl;
-
-//    M_BCh_dz.showMe();
-}
-
-
-
-//
-//
-//
-
-
-void  operFS::invSfPrime(const Vector& res,
-                         double linear_rel_tol,
-                         Vector& step)
-{
-    // step = S'_f^{-1} \cdot res
-
-
-}
-
-
-//
-//
-//
-
-
-
-void  operFS::invSsPrime(const Vector& res,
-                         double linear_rel_tol,
-                         Vector& step)
-{
-    setResidualFSI(res);
-    solveLinearSolid();
-
-     for (int i = 0; i < (int) M_dz.size(); ++i)
-         step[i] = dz()[i];
-
-     return;
-}
-
-
-//
-//
-//
-
-
-void  operFS::invSfSsPrime(const Vector& res,
-                           double linear_rel_tol,
-                           Vector& step)
-{
-    // AZTEC specifications for the second system
-    int    data_org[AZ_COMM_SIZE];   // data organisation for J
-    int    proc_config[AZ_PROC_SIZE];  // Processor information:
-    int    options[AZ_OPTIONS_SIZE];   // Array used to select solver options.
-    double params[AZ_PARAMS_SIZE];     // User selected solver paramters.
-    double status[AZ_STATUS_SIZE];     // Information returned from AZ_solve()
-
-    AZ_set_proc_config(proc_config, AZ_NOT_MPI);
-
-    // data_org assigned "by hands": no parallel computation is performed
-    UInt dim_res = res.size();
-    data_org[AZ_N_internal]= dim_res;
-    data_org[AZ_N_border]= 0;
-    data_org[AZ_N_external]= 0;
-    data_org[AZ_N_neigh]= 0;
-
-    // Recovering AZTEC defaults options and params
-    AZ_defaults(options,params);
-
-    // Fixed Aztec options for this linear system
-    options[AZ_solver]   = AZ_gmres;
-    options[AZ_output]   = 1;
-    options[AZ_poly_ord] = 5;
-    options[AZ_kspace]   = 40;
-    options[AZ_conv]     = AZ_rhs;
-    params[AZ_tol]       = linear_rel_tol;
-
-    //AZTEC matrix for the jacobian
-    AZ_MATRIX *J;
-    J = AZ_matrix_create(dim_res);
-
-    // data containing the matrices C, D, trD and H as pointers
-    // are passed through A_ii and pILU_ii:
-    AZ_set_MATFREE(J, &M_dataJacobian, my_matvecSfSsPrime);
-
-    std::cout << "  o-  Solving Jacobian system... ";
-    Chrono chrono;
-
-    for (UInt i=0;i<dim_res; ++i)
-        step[i]=0.0;
-
-    chrono.start();
-    AZ_iterate(&step[0], &res[0], options, params, status, proc_config, J, NULL, NULL);
-    chrono.stop();
-    std::cout << "done in " << chrono.diff() << " s." << std::endl;
-
-
-    AZ_matrix_destroy(&J);
-}
-
-
-void my_matvecSfSsPrime(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
-{
-    // Extraction of data from J
-    DataJacobian* my_data = static_cast< DataJacobian* >(AZ_get_matvec_data(J));
-
-    UInt dim = my_data->M_pFS->dz().size();
-
-    double xnorm =  AZ_gvector_norm(dim, -1, z, proc_config);
-    std::cout << " ***** norm (z)= " << xnorm << std::endl<< std::endl;
-
-    if ( xnorm == 0.0 )
-        for (int i=0; i <(int)dim; ++i)
-            Jz[i] =  0.0;
-    else
-    {
-        my_data->M_pFS->setResidualFSI(z);
-
-        // Here we have to replace steps
-        //               S'_s^{-1}\circ S'_f  z
-        // by
-        //               S'_s \cdot z  +  S'_f \cdot z
-
-        my_data->M_pFS->fluid().updateDispVelo();
-        my_data->M_pFS->solveLinearFluid();
-        my_data->M_pFS->solveLinearSolid();
-
-        // Here we have to get rid of z[i]
-        // Jz = to the computations just above.
-
-        for (int i = 0; i < (int) dim; ++i)
-            Jz[i] =  z[i] - my_data->M_pFS->dz()[i];
-    }
-    std::cout << " ***** norm (Jz)= "
-              << AZ_gvector_norm(dim, -1, Jz, proc_config)
-              << std::endl << std::endl;
-}
-}
