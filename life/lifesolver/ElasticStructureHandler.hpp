@@ -221,7 +221,8 @@ ElasticStructureHandler( const GetPot& data_file,
     _w( _dim ),
 //    _BCh( new BCHandler(0)),
     _time( 0 ),
-    _count( 0 )
+    _count( 0 ),
+    M_BCh_solid( 0 )
 {}
 
 

@@ -494,7 +494,6 @@ NavierStokesHandler( const GetPot&   data_file,
                                          _Qr_p ),
     _u                                 ( _dim_u ),
     _p                                 ( _dim_p ),
-    M_BCh_fluid                        ( 0 ),
     _bdf                               ( this->_order_bdf ),
     _ns_post_proc                      ( this->_mesh, _feBd_u, _dof_u, NDIM ),
     _count                             ( 0 ),
@@ -507,7 +506,9 @@ NavierStokesHandler( const GetPot&   data_file,
     M_out_areas                        ("Areas.res"),
     M_out_areas_polygon                ("AreasPolygon.res"),
     M_out_fluxes                       ("Fluxes.res"),
-    M_out_pressure                     ("Pressure.res")
+    M_out_pressure                     ("Pressure.res"),
+    // fluid Bc conditions
+    M_BCh_fluid                        ( 0 )
 {
     if ( this->computeMeanValuesPerSection() == 1 )
         initializeMeanValuesPerSection();
