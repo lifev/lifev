@@ -318,7 +318,7 @@ namespace LifeV {
 
     protected:
 
-        //! \return a reference the current numeric solution
+        /*! \return a reference the current numeric solution */
         u_type & u() {
             return _M_u;
         }
@@ -597,7 +597,7 @@ namespace LifeV {
 
     template<typename MeshType>
     void HyperbolicSolverIP<MeshType>::apply_bc() {
-        // To be completed
+        bcManage( _M_A, _M_b, _M_mesh, _M_dof, _M_bc_h, _M_fe_bd, 1.0, _M_t );
     }
 
     template<typename MeshType>
