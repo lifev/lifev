@@ -21,10 +21,10 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-/**
-   \file LevelSetSolver.hpp
-   \author Daniele Antonio Di Pietro <dipietro@unibg.it>
-   \date 1-28-2005
+/*!
+  \file LevelSetSolver.hpp
+  \author Daniele Antonio Di Pietro <dipietro@unibg.it>
+  \date 1-28-2005
 */
 
 #ifndef _LEVELSETSOLVER_HPP_
@@ -36,32 +36,27 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 #include <HyperbolicSolverIP.hpp>
 #include <LevelSetSolverUtils.hpp>
+#include <subelement.hpp>
 
 namespace LifeV {
     /*!
-      \class Level set solver
+      \class LevelSetSolver
       \brief Level set solver class
 
-      \c A level set solver
-
-      @author Daniele Antonio Di Pietro <dipietro@unibg.it>
-      @see
+      \author Daniele Antonio Di Pietro <dipietro@unibg.it>
     */
     template<typename MeshType>
-    class LevelSetSolver 
-        : 
-        public HyperbolicSolverIP<MeshType> 
+    class LevelSetSolver
+        :
+        public HyperbolicSolverIP<MeshType>
     {
     public:
-        /**
-           @name Subclasses
-        */
+        /*! \name Subclasses */
         //@{
         template<int NUMNODES = 3, typename PointType = geo_point_type>
         class Face{
         public:
-            /** @name Typedefs
-             */
+            /*! \name Typedefs */
             //@{
             typedef geo_point_type point_type;
             typedef geo_point_type vector_type;
@@ -72,8 +67,7 @@ namespace LifeV {
             typedef UInt id_type;
             //@}
 
-            /** @name Constructors, destructor
-             */
+            /*! \name Constructors, destructor */
             //@{
             Face() {
                 _M_points.resize(NUMNODES);
@@ -85,59 +79,44 @@ namespace LifeV {
             }
             //@}
 
-            /** @name Accessors
-             */
+            /*! \name Accessors */
             //@{
 
-            /**
-               \Return the number of local nodes
-            */
+            /*! \return the number of local nodes */
             const int numLocalNodes() const {
                 return NUMNODES;
             }
 
-            /**
-               \Return a const reference to the i-th point
-            */
+            /*! \return a const reference to the i-th point */
             const point_type& point(const id_type i) const {
                 return _M_points[i - 1];
             }
             //@}
 
-            /** @name Mutators
-             */
+            /*! \name Mutators */
             //@{
-            /**
-               \Return the i-th point
-            */
+
+            /*! \return the i-th point */
             point_type& point(const id_type i) {
                 return _M_points[i - 1];
             }
 
-            /**
-               \Return the id
-            */
+            /*! \return the id */
             id_type& id() {
                 return _M_id;
             }
 
-            /**
-               \Set i-th point
-            */
+            //! Set i-th point
             void setPoint(const id_type i, const point_type& P) {
                 _M_points[i - 1] = P;
             }
 
             //@}
 
-            /** @name Methods
-             */
+            /*! \name Methods */
             //@{
 
-            /**
-               \Return the normal versor
-            */
-
+            /*! \return the normal versor */
             inline vector_type normal() {
                 vector_type n;
 
@@ -148,7 +127,7 @@ namespace LifeV {
                     vector_type v2 = _M_points[2] - _M_points[0];
                     vector_type n = crossProd(v1, v2);
 
-                    Real d = boost::numeric::ublas::norm_2(n);            
+                    Real d = boost::numeric::ublas::norm_2(n);
                     n /= d;
                     _M_normal = n;
                     _M_has_normal = true;
@@ -156,10 +135,7 @@ namespace LifeV {
                 return n;
             }
 
-            /**
-               \Compute the distance between point P and the face
-            */
-
+            //! Compute the distance between point P and the face
             inline Real pointToFaceDistance(point_type& P) {
                 point_type P0 = _M_points[0];
                 vector_type n = normal();
@@ -182,11 +158,11 @@ namespace LifeV {
                 return d;
             }
 
-            /**
-               \Determine whether the point P belongs to the face. It is assumed
-               \that point P belongs to the plane the face is a subset of.
+            /*!
+              Determine whether the point P belongs to the face.
+              It is assumed that point P belongs to the plane the face is
+              a subset of.
             */
-
             bool pointIsOnFace(const point_type& P) {
                 Real D = _M_points[0][0] * (_M_points[2][1] - _M_points[1][1]) +
                     _M_points[1][0] * (_M_points[0][1] - _M_points[2][1]) +
@@ -203,10 +179,7 @@ namespace LifeV {
                 return (xi >= 0 && xi <= 1 && eta >= 0 && eta <= 1 - xi);
             }
 
-            /**
-               \Display the face
-            */
-
+            //! Display the face
             void showMe() {
                 std::cout << "Face " << _M_id << ":" <<std::endl;
                 std::cout << " points" << std::endl
@@ -230,8 +203,7 @@ namespace LifeV {
         };
         //@}
 
-        /** @name Typedefs
-         */
+        /*! \name Typedefs */
         //@{
         typedef MeshType mesh_type;
         typedef typename HyperbolicSolverIP<mesh_type>::velocity_type velocity_type;
@@ -252,15 +224,14 @@ namespace LifeV {
 
         //@}
 
-        /** @name Constructors and destructors
-         */
+        /*! \name Constructors and destructors */
         //@{
         LevelSetSolver(mesh_type& mesh,
                        const GetPot& data_file,
                        const std::string& data_section,
-                       const RefFE& reffe, 
-                       const QuadRule& qr, 
-                       const QuadRule& qr_bd, 
+                       const RefFE& reffe,
+                       const QuadRule& qr,
+                       const QuadRule& qr_bd,
                        const BCHandler& bc_h,
                        CurrentFE& fe_velocity,
                        const Dof& dof_velocity,
@@ -269,68 +240,49 @@ namespace LifeV {
             HyperbolicSolverIP<mesh_type>(mesh,
                                           data_file,
                                           data_section,
-                                          reffe, 
-                                          qr, 
-                                          qr_bd, 
+                                          reffe,
+                                          qr,
+                                          qr_bd,
                                           bc_h,
                                           fe_velocity,
                                           dof_velocity,
-                                          velocity0) 
-        {
-            _M_tol = 1e-10;
-        }
+                                          velocity0),
+            _M_tol(1e-10) {}
         //@}
 
-        /** @name Accessors
-         */
+        /*! \name Accessors */
         //@{
 
-        /**
-           \Return the level set function
-        */
-
+        /*! \return the level set function */
         lsfunction_type const & lsfunction() const {
             return u();
         }
 
-        /**
-           \Return the current finite element
-        */
-
+        /*! \return the current finite element */
         const CurrentFE& fe() const {
             return _M_fe;
         }
 
-        /**
-           \Return the dof table
-        */
-
-        const Dof& dof() const {
-            return _M_dof;
-        }
         //@}
 
-        /** @name Mutators
-         */
+        /*! \name Mutators */
         //@{
 
+        /*! \return a reference to the current finite element */
         CurrentFE& fe() {
             return _M_fe;
         }
 
+        //! set the tolerance on interface position
         void setTol(Real tol) {
             _M_tol = tol;
         }
         //@}
 
-        /** @name Methods
-         */
+        /*! \name Methods */
         //@{
 
-        /**
-           \Reinitialize the interface using direct method
-        */
-
+        //! reinitialize the interface using direct method
         void directReinitialization() {
             build_interface();
 #ifdef DEBUG_REINI
@@ -342,7 +294,7 @@ namespace LifeV {
                 convertPointType(P, _M_mesh.pointList(iP));
 
                 Real d = _M_face_list.begin()->pointToFaceDistance(P);
-            
+
                 for(face_list_iterator faces_it = _M_face_list.begin(); faces_it != _M_face_list.end(); faces_it++)
                     d = std::min(d, faces_it->pointToFaceDistance(P));
 
@@ -353,11 +305,8 @@ namespace LifeV {
             exportToMatlab("./results/after.m");
 #endif
         }
-  
-        /**
-           \Compute the mass of i-th fluid
-        */
 
+        //! Compute the mass of i-th fluid
         Real computeMassOfFluid(fluid_type fluid_id) {
             Real mass = 0.;
             Real ls_fun;
@@ -381,11 +330,10 @@ namespace LifeV {
             return mass;
         }
 
-        /**
-           \Export the interface to a Matlab script for debugging/visualization 
-           \purposes
+        /*!
+          Export the interface to a Matlab script for debugging/visualization
+          purposes
         */
-
         void exportToMatlab(std::string __file_name) {
             std::ofstream ofile(__file_name.c_str());
             ASSERT( __file_name, "Error exporting interface to Matlab format: Output file cannot be open" );
@@ -444,111 +392,130 @@ namespace LifeV {
         //! Tolerance on interface position
         Real _M_tol;
 
-        /**
-           \Build the interface given the level set function
-        */
-
+        //! Build the interface given the level set function
         inline void build_interface() {
             // Clear the face list
 
             _M_face_list.clear();
 
+            Subelements se( _M_fe );
+
             // A loop on the volumes to find the local intersection with the
             // interface
             for(UInt iV = 1; iV <= _M_mesh.numVolumes(); iV++) {
 
-                point_list_type locPointList;
+                _M_fe.update( _M_mesh.volumeList( iV ) );
 
-                for(UInt ie = 1; ie <= _M_mesh.numLocalEdges(); ie++) {
-                    
-                    UInt j1 = mesh_type::ElementShape::eToP(ie, 1);
-                    UInt j2 = mesh_type::ElementShape::eToP(ie, 2);
+                for(UInt iSe = 0; iSe < se.numSubelements(); ++iSe ) {
 
-                    UInt jg1 = _M_dof.localToGlobal(iV, j1) - 1;
-                    UInt jg2 = _M_dof.localToGlobal(iV, j2) - 1;
+                    point_list_type locPointList;
 
-                    Real u1 = _M_u[jg1];
-                    Real u2 = _M_u[jg2];
-                  
-                    if(u1 * u2 < 0) { // If the solution is zero somewhere on the segment
-                        point_type P;
-                        point_type P1;
-                        point_type P2;
-                        
-                        P1[0] = _M_mesh.pointList(jg1 + 1).x();
-                        P1[1] = _M_mesh.pointList(jg1 + 1).y(); 
-                        P1[2] = _M_mesh.pointList(jg1 + 1).z();
+                    for(UInt ie = 1; ie <= se.numLocalEdges(); ie++) {
 
-                        P2[0] = _M_mesh.pointList(jg2 + 1).x();
-                        P2[1] = _M_mesh.pointList(jg2 + 1).y(); 
-                        P2[2] = _M_mesh.pointList(jg2 + 1).z();
+                        UInt j1 = se.edge2Point( iSe, ie, 1 );
+                        UInt j2 = se.edge2Point( iSe, ie, 2 );
 
-                        findZeroOnEdge(P1, u1, P2, u2, P);
+                        UInt jg1 = _M_dof.localToGlobal(iV, j1) - 1;
+                        UInt jg2 = _M_dof.localToGlobal(iV, j2) - 1;
 
-                        pointsCoincide<point_type> compare(_M_tol);
-                        bool isAlreadyThere = false;
+                        Real u1 = _M_u[jg1];
+                        Real u2 = _M_u[jg2];
 
-                        for(point_list_type::iterator point_it = locPointList.begin(); point_it != locPointList.end(); point_it++)
-                            if(compare(P, *point_it)) {
-                                isAlreadyThere = true;
-                                break;
+                        // If the solution is zero somewhere on the segment
+                        if(u1 * u2 < 0) {
+                            point_type P;
+                            point_type P1;
+                            point_type P2;
+
+                            se.coord( P1[0], P1[1], P1[2], j1 );
+                            se.coord( P2[0], P2[1], P2[2], j2 );
+
+                            //_M_fe.coorMap( P1[0], P1[1], P1[2], se.xi(j1),
+                            //               se.eta(j1), se.zeta(j1) );
+                            //_M_fe.coorMap( P2[0], P2[1], P2[2], se.xi(j2),
+                            //               se.eta(j2), se.zeta(j2) );
+
+                            //P1[0] = _M_mesh.pointList(jg1 + 1).x();
+                            //P1[1] = _M_mesh.pointList(jg1 + 1).y();
+                            //P1[2] = _M_mesh.pointList(jg1 + 1).z();
+
+                            //P2[0] = _M_mesh.pointList(jg2 + 1).x();
+                            //P2[1] = _M_mesh.pointList(jg2 + 1).y();
+                            //P2[2] = _M_mesh.pointList(jg2 + 1).z();
+
+                            findZeroOnEdge(P1, u1, P2, u2, P);
+
+                            pointsCoincide<point_type> compare(_M_tol);
+                            bool isAlreadyThere = false;
+
+                            for(point_list_type::iterator point_it =
+                                    locPointList.begin();
+                                point_it != locPointList.end(); point_it++)
+                                if(compare(P, *point_it)) {
+                                    isAlreadyThere = true;
+                                    break;
+                                }
+
+                            if(!isAlreadyThere)
+                                locPointList.push_back(P);
+                        }
+                    }
+
+                    // Handle several cases according to the number of local
+                    // interface points found in the previous step
+
+                    switch( locPointList.size() ) {
+                        case 3: {
+                            face_type face;
+
+                            int i = 1;
+                            for(point_list_type::iterator point_it =
+                                    locPointList.begin();
+                                point_it != locPointList.end(); point_it++) {
+                                point_type P(*point_it);
+                                face.setPoint(i, P);
+                                i++;
                             }
 
-                        if(!isAlreadyThere)
-                            locPointList.push_back(P);
-                    }
-                }
+                            _M_face_list.push_back(face);
 
-                // Handle several cases according to the number of local 
-                // interface points found in the previous step
+                            break;
+                        }
+                        case 4: {
+                            face_type face1;
+                            face_type face2;
 
-                switch( locPointList.size() ) {
-                case 3: {
-                    face_type face;
+                            std::vector<UInt> orientation(4);
+                            establish_orientation_4pt(locPointList,
+                                                      orientation);
 
-                    int i = 1;
-                    for(point_list_type::iterator point_it = locPointList.begin(); point_it != locPointList.end(); point_it++) {
-                        point_type P(*point_it);
-                        face.setPoint(i, P);
-                        i++;
-                    }
+                            face1.setPoint(1, locPointList[orientation[0]]);
+                            face1.setPoint(2, locPointList[orientation[1]]);
+                            face1.setPoint(3, locPointList[orientation[2]]);
 
-                    _M_face_list.push_back(face);
+                            face2.setPoint(1, locPointList[orientation[2]]);
+                            face2.setPoint(2, locPointList[orientation[3]]);
+                            face2.setPoint(3, locPointList[orientation[0]]);
 
-                    break;
-                }
-                case 4: {
-                    face_type face1;
-                    face_type face2;
+                            _M_face_list.push_back(face1);
+                            _M_face_list.push_back(face2);
 
-                    std::vector<UInt> orientation(4);
-                    estabilish_orientation_4pt(locPointList, orientation);
+                            break;
+                        } // case 4:
+                    } // switch
+                } // loop over local edges
+            } // loop over subelements
+        } // loop over mesh volumes
 
-                    face1.setPoint(1, locPointList[orientation[0]]);
-                    face1.setPoint(2, locPointList[orientation[1]]);
-                    face1.setPoint(3, locPointList[orientation[2]]);
-
-                    face2.setPoint(1, locPointList[orientation[2]]);
-                    face2.setPoint(2, locPointList[orientation[3]]);
-                    face2.setPoint(3, locPointList[orientation[0]]);
-
-                    _M_face_list.push_back(face1);
-                    _M_face_list.push_back(face2);
-
-                    break;
-                }
-                }
-            }
-        }
-
-        /**
-           \Given a vector of 4 nodes, it returns a point ordering suitable
-           \to obtain a proper quadrilateral. Orientation list is given below:
-           \1 : [P0, P1, P2, P3]
-           \2 : [P0, P1, P3, P2]
-           \3 : [P0, P2, P1, P3]
+        /*!
+           Given a vector of 4 nodes, it returns a point ordering suitable
+           to obtain a proper quadrilateral. Orientation list is given below:<br>
+           1 : [P0, P1, P2, P3]<br>
+           2 : [P0, P1, P3, P2]<br>
+           3 : [P0, P2, P1, P3]<br>
          */
-        inline void estabilish_orientation_4pt(point_list_type& v, orientation_type& orientation) {
+        inline void establish_orientation_4pt(point_list_type& v,
+                                              orientation_type& orientation) {
             point_type P0 = v[0];
             point_type P1 = v[1];
             point_type P2 = v[2];
@@ -581,9 +548,12 @@ namespace LifeV {
                 orientation[1] = 2;
                 orientation[2] = 1;
                 orientation[3] = 3;
-         
+
             }
         }
-    };
-}
-#endif
+
+    }; // class LevelSetSolver
+
+} // namespace LifeV
+
+#endif /* _LEVELSETSOLVER_HPP_ */
