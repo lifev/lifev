@@ -248,7 +248,7 @@ template<typename NSSolver>
 void
 NavierStokesWithFlux<NSSolver>::initialize( const Function& u0, const Function& p0, Real t0, Real dt )
 {
-    Debug( 6010 ) << "start NSo\n";
+  Debug( 6010 ) << "start NSo\n";
 
     // if one flux do the NSo solves
     // Stationary Navier-Stokes (NSo)
@@ -257,7 +257,7 @@ NavierStokesWithFlux<NSSolver>::initialize( const Function& u0, const Function& 
 
     Real startT = _M_solver->inittime();
     Real time=startT+dt;
-    _M_solver->timeAdvance( f, time ); // problem with source term here
+    _M_solver->timeAdvance( f, time ); 
     _M_solver->iterate( time );
 
     // Store the solutions of NSo
@@ -337,6 +337,13 @@ NavierStokesWithFlux<NSSolver>::iterate( const Real& time )
                                 _M_solver->u(),
                                 _M_solver->p(),
                                 1 );
+     //compute the flux of NS: the definitive one
+     //
+     Qn=_M_solver->flux(_M_fluxes.begin()->first);
+     std::cout << "imposed flux" << " " << Q << "\n"; 
+     std::cout << "numerical flux" << " " << Qn << "\n";
+    
+
 }
 }
 #endif /* __NavierStokesWithFlux_H */
