@@ -23,6 +23,14 @@
 
 namespace LifeV
 {
+fixedPoint::fixedPoint():
+    super(),
+    M_defOmega( 0.001 ),
+    M_aitkFS()
+{
+    M_aitkFS.setDefault( M_defOmega );
+}
+
 fixedPoint::fixedPoint( fluid_type& fluid,
                         solid_type& solid,
                         GetPot &_dataFile,
@@ -31,14 +39,27 @@ fixedPoint::fixedPoint( fluid_type& fluid,
                         bchandler_type &BCh_mesh):
     operFS(fluid, solid, _dataFile, BCh_u, BCh_d, BCh_mesh)
 {
-    M_defOmega =  _dataFile("problem/defOmega",0.01);
+    M_defOmega =  _dataFile("problem/defOmega",0.001);
     std::cout << "Default aikten start value = " << M_defOmega
               << std::endl;
-    setUpBC();
 }
 
 fixedPoint::~fixedPoint()
 {}
+
+void
+fixedPoint::setDataFromGetPot( GetPot const& data )
+{
+    // call the super class to setup the data from getpot file if needed
+    super::setDataFromGetPot( data );
+
+    M_defOmega = data("problem/defOmega", 0.001);
+
+    Debug( 6205 ) << "steklovPoincare::setDataFromGetPot(GetPot) OmegaS = " << M_defOmega << "\n";
+
+    M_aitkFS.setDefault(M_defOmega);
+}
+
 
 void
 fixedPoint::setup()
@@ -80,7 +101,9 @@ void fixedPoint::evalResidual(Vector &res, const Vector& disp, int iter)
     std::cout << "*** Residual computation g(x_" << iter <<" )";
     if (status) std::cout << " [NEW TIME STEP] ";
     std::cout << std::endl;
+
     eval(M_dispStruct, M_velo, disp, status);
+
     res = M_dispStruct - disp;
 }
 
@@ -115,13 +138,6 @@ void fixedPoint::setUpBC()
     BCVectorInterface displ(this->M_solid->d(),
                             dim_solid,
                             __di );
-    //
-    // Passing data from structure to the fluid: solid velocity at the interface velocity
-    //
-    __di = M_dofMeshToFluid;
-    BCVectorInterface u_wall(this->M_fluid->wInterpolated(),
-                             dim_fluid,
-                             __di );
     //========================================================================================
     //  BOUNDARY CONDITIONS
     //========================================================================================
@@ -144,7 +160,9 @@ void  fixedPoint::solveJac(Vector        &_muk,
                            const Vector  &_res,
                            const double   _linearRelTol)
 {
-    _muk = _res;
+    Vector muF(_res.size());
+    if (M_nbEval == 1) M_aitkFS.restart();
+    _muk = M_aitkFS.computeDeltaLambda(M_dispStruct, muF, -1.*_res);
 }
 
 //

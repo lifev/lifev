@@ -35,12 +35,14 @@ public:
     typedef super::solid_type solid_type;
     typedef super::bchandler_type bchandler_type;
     // default constructor
-    fixedPoint()
-        :
-        super()
-        {}
+//     fixedPoint()
+//         :
+//         super()
+//         {}
 
     // constructors
+    fixedPoint();
+
     fixedPoint( fluid_type& fluid,
                 solid_type& solid,
                 GetPot    &_dataFile,
@@ -64,16 +66,18 @@ public:
 
     Real   defOmega() {return M_defOmega;}
 
+    void setDataFromGetPot( GetPot const& data );
+
     void setup();
 
 private:
 
 //     void eval        (const Vector &_disp,
 //                       const int     _status);
+    Real                    M_defOmega;
+    generalizedAitken<Vector, Real> M_aitkFS;
 
     void eval(Vector& dispNew, Vector& velo, const Vector& disp, int status);
-
-    Real                    M_defOmega;
 
 };
 
