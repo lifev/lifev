@@ -23,6 +23,9 @@
 #include "regionMesh3D_ALE.hpp"
 #include "SolverAztec.hpp"
 #include "generalizedAitken.hpp"
+#include "bcCond.hpp"
+#include "dof.hpp"
+
 
 #ifndef _OPERFS
 #define _OPERFS
@@ -35,23 +38,23 @@ namespace LifeV
     class DataJacobian
     {
     public:
-        
+
         DataJacobian(operFS* oper):
             M_pFS(oper){}
-        
+
         operFS* M_pFS;
     };
-    
+
 
 //
 // Fluid-Structure operator Class
 //
     class operFS {
-        
+
     public:
 
         // constructors
-        
+
         operFS(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
                VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
                BC_Handler& BCh_du, BC_Handler& BCh_dz);
@@ -60,19 +63,18 @@ namespace LifeV
         // destructor
 
         ~operFS();
-        
 
         // member functions
-        
+
         void eval         (const  Vector &disp,
                            int    status,
                            Vector &dispNew,
                            Vector &veloStruct);
-        
+
         void evalResidual (Vector &sol,
                            int    iter,
                            Vector &res);
-            
+
         void updatePrec   (Vector& sol,
                            int     iter);
 
@@ -88,25 +90,24 @@ namespace LifeV
 
         void computeResidualFSI();
 
-        
         // mutators and setters
 
         UInt   const & nbEval()    const {return M_nbEval;};
 
         Vector const & dz()        const {return M_dz;};
 
-        PhysVectUnknown<Vector> const & residualS() const {return M_residualS;};
-        PhysVectUnknown<Vector> const & residualF() const {return M_residualF;};
-        PhysVectUnknown<Vector> & residualFSI()  {return M_residualFSI;};
-        
+        PhysVectUnknown<Vector> const & residualS()   const {return M_residualS;};
+        PhysVectUnknown<Vector> const & residualF()   const {return M_residualF;};
+        PhysVectUnknown<Vector> & residualFSI() {return M_residualFSI;};
+
         NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >
         &fluid() {return M_fluid;};
-        
+
         VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >
         &solid() {return M_solid;};
 
         void setTime(const Real &time) {M_time = time;};
-        
+
     private:
 
         NavierStokesAleSolverPC
@@ -115,40 +116,39 @@ namespace LifeV
         VenantKirchhofSolver
         < RegionMesh3D_ALE<LinearTetra> > &M_solid;
 
-        Vector       M_dispStruct;
-        
-        Real         M_time;
+        Vector                  M_dispStruct;
 
-        SolverAztec  M_solverAztec;
-        
-        Vector       M_velo;
-        Vector       M_dz;
-        Vector       M_rhs_dz;
+        Real                    M_time;
 
-        PhysVectUnknown<Vector>       M_residualS;
-        PhysVectUnknown<Vector>       M_residualF;
-        PhysVectUnknown<Vector>       M_residualFSI;
-        
-        UInt         M_nbEval;
+        SolverAztec             M_solverAztec;
 
-        BC_Handler&  M_BCh_du;
-        BC_Handler&  M_BCh_dz;
+        Vector                  M_velo;
+        Vector                  M_dz;
+        Vector                  M_rhs_dz;
 
-        DataJacobian M_dataJacobian;
-      
-      
+        PhysVectUnknown<Vector> M_residualS;
+        PhysVectUnknown<Vector> M_residualF;
+        PhysVectUnknown<Vector> M_residualFSI;
+
+        UInt                    M_nbEval;
+
+        BC_Handler&             M_BCh_du;
+        BC_Handler&             M_BCh_dz;
+
+        DataJacobian            M_dataJacobian;
+
         void  invSfPrime(const Vector &res,
                          double       linear_rel_tol,
                          Vector       &step);
-        
+
         void  invSsPrime(const Vector &res,
                          double       linear_rel_tol,
                          Vector       &step);
-        
+
         void  invSfSsPrime(const Vector &res,
                            double       linear_rel_tol,
                            Vector       &step);
-        
+
     };
 
     void my_matvecJacobian(double *z,
