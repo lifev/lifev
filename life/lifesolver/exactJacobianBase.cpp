@@ -191,7 +191,10 @@ void exactJacobian::setUpBC()
         M_quasiNewton->setUpBC(M_BCh_dp);
 
         // Boundary conditions for dz
-        BCVectorInterface dg_wall(M_quasiNewton->minusdp(), dim_reducedfluid, M_dofReducedFluidToStructure, 1); // type = 1
+        BCVectorInterface dg_wall(M_quasiNewton->minusdp(),
+                                  dim_reducedfluid,
+                                  M_dofReducedFluidToStructure,
+                                  1); // type = 1
         M_BCh_dz->addBC("Interface", 1, Natural,   Full, dg_wall, 3);
         M_BCh_dz->addBC("Top",       3, Essential, Full, bcf,     3);
         M_BCh_dz->addBC("Base",      2, Essential, Full, bcf,     3);

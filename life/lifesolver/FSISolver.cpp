@@ -76,6 +76,7 @@ FSISolver::FSISolver( GetPot const& data_file,
     this->setFSIOperator( M_method );
 
     M_oper->setDataFromGetPot( data_file );
+
     M_oper->setPreconditioner( precond );
 
     M_oper->setUpBC();

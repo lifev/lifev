@@ -70,8 +70,8 @@ operFS::setup()
 
         M_dofReducedFluidToStructure->setup(feTetraP1, M_solid->dDof(),
                                             feTetraP1, M_fluid->pDof());
-        M_dofReducedFluidToStructure->update(M_fluid->mesh(), 1,
-                                             M_solid->mesh(), 1,
+        M_dofReducedFluidToStructure->update(M_solid->mesh(), 1,
+                                             M_fluid->mesh(), 1,
                                              0.0);
     }
 }

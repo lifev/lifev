@@ -611,7 +611,7 @@ solveJac( Vector &step, const Vector& res, double& linear_rel_tol)
 //    AZ_matrix_destroy( &J );
 //    AZ_precond_destroy( &prec_J );
 
-    _residual_d = _C*step - _rhsWithoutBC;
+    _residual_d = _C*step;// - _rhsWithoutBC;
 }
 
 
@@ -654,7 +654,6 @@ solveJac(Vector &step, const Vector& res, double& linear_rel_tol, BCHandler &BCd
 //    AZ_precond_destroy( &prec_J );
 
     _residual_d = _C*step;
-//    bcManageMatrix( _J, _mesh, this->_dof, _BCh, _feBd, tgv );
 }
 
 
