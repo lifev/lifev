@@ -89,9 +89,8 @@ namespace LifeV
         Vector muS          = sol;
         Vector muF          = sol;
 
-        muS                 = 0.;
-        muF                 = 0.;
-
+//        muS                 = 0.;
+//        muF                 = 0.;
         step                = 0.;
 
         Real   normResOld   = 1;
@@ -118,11 +117,11 @@ namespace LifeV
 
         std::cout << "------------------------------------------------------------------" << std::endl;
         std::cout << "  NonLinRichardson: residual = " << normRes
-             << ", stoping tolerance = "          << stop_tol << std::endl;
+                  << ", stoping tolerance = "          << stop_tol << std::endl;
         std::cout << "------------------------------------------------------------------" << std::endl;
-
+        
         out_res << time << "    " << iter << "   " << normRes << std::endl;
-
+        
 
         while( normRes > stop_tol && iter < maxit)
         {
@@ -136,110 +135,24 @@ namespace LifeV
 
             linres     = linear_rel_tol;
 
+            muS        = sol - muS;
+            
+            step       = aitken.computeDeltaLambda(sol, muS, muF);
 
-            //f.solvePrec(sol);
-
+            muS        = sol;
+            sol        = sol + step;
+            
             f.evalResidual(residual, sol, iter);
-
-/*
-              linres contains the relative linear tolerance achieved by the
-              linear solver, i.e linear_rel_tol = | -f(sol) - P step | / |-f(sol)|
-*/
-
-            step  = aitken.computeDeltaLambda(sol, muS, muF);
-
-            muS   = sol;
-
-            sol   = sol - step;
-
-//            slope = normRes*normRes*(linres*linres - 1);
-
-//            std::cout << "### slope = " << slope << std::endl;
-
-/*
-              slope denotes the quantity f^T J step, which is generally used by
-              line search algorithms. This formula comes form Brown & Saad (1990),
-              formula (3.4). BE CAREFUL: it assumes that the linear solver is GMRES,
-              with zero as initial guess (in particular it does not work with restart
-              gmres, see formula (3.7) and (3.9) of Brown & Saad (1990))
-*/
-
-//             lambda = 1.;
-
-//             //
-//             // -- line search
-//             //
-
-//             switch(linesearch)
-//             {
-//                 case 0:// no linesearch
-//                     sol += step;
-//                     f.evalResidual(residual, sol, iter);
-//                     normRes = norm(residual);
-//                     break;
-//                 case 1:
-//                     lineSearch_parab(f, norm, residual, sol, step, normRes, lambda, iter);
-//                     break;
-//                 case 2: // recommended
-//                     lineSearch_cubic(f, norm, residual, sol, step, normRes, lambda, slope, iter);
-//                     break;
-//                 default:
-//                     std::cout << "Unknown linesearch \n";
-//                     exit(1);
-//             }
-
-//             //
-//             //-- end of line search
-//             //
-
-//             normStep = lambda*norm(step);
-//             ratio    = normRes/normResOld;
-
-//             if(ratio > 1)
-//             {
-//                 increase_res ++;
-//                 std::cout << "!!! NonLinRichardson warning: increase in residual \n";
-
-//                 if(increase_res == max_increase_res)
-//                 {
-//                     std::cout << "!!! NonLinRichardson:" << max_increase_res
-//                          << " consecutive increases in residual" << std::endl;
-//                     maxit = iter;
-//                     return 1;
-//                 }
-//             }
-//             else increase_res=0;
-
-//             std::cout << "------------------------------------------------------------------"
-//                  << std::endl;
-//             std::cout << "    NonLinRichardson " << iter << ": residual=" << normRes << ",  step="
-//                  << normStep << std::endl;
-//             std::cout << "------------------------------------------------------------------"
-//                  << std::endl;
-
-//             out_res << time << "    " << iter << "   " << normRes << std::endl;
-
-//             //
-//             //-- forcing term computation (Eisenstat-Walker)
-//             //
-
-//             if (eta_max > 0)
-//             {
-//                 eta_old = linear_rel_tol;
-//                 eta_new = gamma*ratio*ratio;
-
-//                 if(gamma*eta_old*eta_old > .1)
-//                     eta_new = std::max<Real>(eta_new, gamma*eta_old*eta_old);
-
-//                 linear_rel_tol = min(eta_new,eta_max);
-//                 linear_rel_tol = min(eta_max,std::max<Real>(linear_rel_tol,.5*stop_tol/normRes));
-
-//                 std::cout <<"    NonLinRichardson: forcing term eta = " << linear_rel_tol << std::endl;
-//             }
-
-//             //
-//             //-- end of forcing term computation
-//             //
+            
+            normRes    = norm(residual);
+            
+            std::cout << "------------------------------------------------------------------"<< std::endl;
+            std::cout << "    NonLinRichardson " << iter
+                      << ": residual=" << normRes << ",  step="
+                      << normStep << std::endl;
+            std::cout << "------------------------------------------------------------------"<< std::endl;
+            
+            
         }
 
         if(normRes > stop_tol)
