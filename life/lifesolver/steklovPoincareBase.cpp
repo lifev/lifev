@@ -71,8 +71,8 @@ void steklovPoincare::eval(const Vector& disp,
     M_solid.setRecur(0);
     M_solid.iterate();
 
-    M_solid.postProcess();
-    M_fluid.postProcess();
+//    M_solid.postProcess();
+//    M_fluid.postProcess();
 
     dispNew = M_solid.d();
     velo    = M_solid.w();
@@ -111,6 +111,16 @@ void steklovPoincare::evalResidual(Vector &res,
               << std::endl;
     std::cout << "Max ResidualFSI = " << norm_inf(M_residualFSI)
               << std::endl;
+
+
+//    M_residualS = M_solid.residual();
+//     Vector muk = disp;
+//     muk = ZeroVector( muk.size() );
+//     invSsPrime(-1*M_residualS, 1e-08, muk);
+//     std::cout << "Norm_max d_disp = " << norm_inf(disp - muk) << std::endl;
+//     muk = ZeroVector( muk.size() );
+//     invSfPrime(0.*M_residualF, 1e-08, muk);
+//     std::cout << "Norm_max f_disp = " << norm_inf(disp - muk) << std::endl;
 }
 
 //
@@ -234,8 +244,8 @@ void  steklovPoincare::solveJac(Vector &muk,
             Vector muF(_res.size());
             Vector muS(_res.size());
 
-            invSsPrime(_res, _linearRelTol, muS);
-            invSfPrime(_res, _linearRelTol, muF);
+            invSsPrime(-1.*_res, _linearRelTol, muS);
+            invSfPrime(-1.*_res, _linearRelTol, muF);
 
             std::cout << "norm_inf muS = " << norm_inf(muS) << std::endl;
             std::cout << "norm_inf muF = " << norm_inf(muF) << std::endl;
@@ -311,7 +321,6 @@ void  steklovPoincare::invSfPrime(const Vector& res,
                                   double linear_rel_tol,
                                   Vector& step)
 {
-
     setResidualFSI(res);
     this->M_fluid.updateDispVelo();
     solveLinearFluid();
@@ -668,9 +677,9 @@ Vector steklovPoincare::setDispOnInterface(const Vector &_disp)
 
 
 void steklovPoincare::transferOnInterface(const Vector      &_vec1,
-                                 const BCHandler   &_BC,
-                                 const std::string &_BCName,
-                                 Vector            &_vec2)
+                                          const BCHandler   &_BC,
+                                          const std::string &_BCName,
+                                          Vector            &_vec2)
 {
     int iBC = -1;
     for (UInt jBC = 0; jBC < _BC.size(); jBC++)
