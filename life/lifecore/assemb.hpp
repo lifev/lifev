@@ -50,9 +50,9 @@ assemble(Oper oper, const RegionMesh& mesh, CurrentFE& fe,
 	assemb_mat(A,elmat,fe,dof,ic,jc); // assemble local matrix into global one
       }
 #ifdef STABILIZED
-      compute_vec_stab(source_fct,elvec,fe,ic); // compute local vector
+      compute_vec_stab(source_fct,elvec,fe,(int)ic); // compute local vector
 #else
-      compute_vec(source_fct,elvec,fe,ic); // compute local vector
+      compute_vec(source_fct,elvec,fe,(int)ic); // compute local vector
 #endif
        // the previous line would become:  compute_vec(source_fct.comp(ic),elvec,fe); ****
       assemb_vec(b,elvec,fe,dof,ic); // assebmle local vector into global one      
