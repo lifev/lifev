@@ -44,9 +44,6 @@ void exactJacobian::eval(const Vector &_disp,
 {
     this->M_solid.d() = _disp;
 
-//     for (int ii = 0; ii < M_solid().d().size(); ++ii)
-//         std::cout << M_solid().d()[ii] << std::endl;
-
     this->M_fluid.updateMesh(time());
     this->M_fluid.iterate   (time());
 
@@ -163,8 +160,6 @@ void exactJacobian::setUpBC(function_type _bcf,
     M_BCh_dz.addBC("Interface", 1, Natural,   Full, dg_wall, 3);
     M_BCh_dz.addBC("Top",       3, Essential, Full, bcf,  3);
     M_BCh_dz.addBC("Base",      2, Essential, Full, bcf,  3);
-
-
 }
 
 
@@ -175,55 +170,55 @@ void exactJacobian::setUpBC(function_type _bcf,
 
 void  exactJacobian::solveJac(Vector         &_muk,
                               const Vector  &_res,
-                               const double   _linearRelTol)
+                              const double   _linearRelTol)
 {
- // AZTEC specifications for the second system
-  int    data_org[AZ_COMM_SIZE];   // data organisation for J
-  int    proc_config[AZ_PROC_SIZE];  // Processor information:
-  int    options[AZ_OPTIONS_SIZE];   // Array used to select solver options.
-  double params[AZ_PARAMS_SIZE];     // User selected solver paramters.
-  double status[AZ_STATUS_SIZE];     // Information returned from AZ_solve()
+    // AZTEC specifications for the second system
+    int    data_org[AZ_COMM_SIZE];   // data organisation for J
+    int    proc_config[AZ_PROC_SIZE];  // Processor information:
+    int    options[AZ_OPTIONS_SIZE];   // Array used to select solver options.
+    double params[AZ_PARAMS_SIZE];     // User selected solver paramters.
+    double status[AZ_STATUS_SIZE];     // Information returned from AZ_solve()
 
-  AZ_set_proc_config(proc_config, AZ_NOT_MPI);
+    AZ_set_proc_config(proc_config, AZ_NOT_MPI);
 
-  // data_org assigned "by hands": no parallel computation is performed
-  UInt dim_res = _res.size();
-  data_org[AZ_N_internal]= dim_res;
-  data_org[AZ_N_border]= 0;
-  data_org[AZ_N_external]= 0;
-  data_org[AZ_N_neigh]= 0;
+    // data_org assigned "by hands": no parallel computation is performed
+    UInt dim_res = _res.size();
+    data_org[AZ_N_internal]= dim_res;
+    data_org[AZ_N_border]= 0;
+    data_org[AZ_N_external]= 0;
+    data_org[AZ_N_neigh]= 0;
 
- // Recovering AZTEC defaults options and params
-  AZ_defaults(options,params);
+    // Recovering AZTEC defaults options and params
+    AZ_defaults(options,params);
 
-  // Fixed Aztec options for this linear system
-  options[AZ_solver]   = AZ_gmres;
-  options[AZ_output]   = 1;
-  options[AZ_poly_ord] = 5;
-  options[AZ_kspace]   = 40;
-  options[AZ_conv]     = AZ_rhs;
-  params[AZ_tol]       = _linearRelTol;
+    // Fixed Aztec options for this linear system
+    options[AZ_solver]   = AZ_gmres;
+    options[AZ_output]   = 1;
+    options[AZ_poly_ord] = 5;
+    options[AZ_kspace]   = 40;
+    options[AZ_conv]     = AZ_rhs;
+    params[AZ_tol]       = _linearRelTol;
 
-  //AZTEC matrix for the jacobian
-  AZ_MATRIX *J;
-  J = AZ_matrix_create(dim_res);
+    //AZTEC matrix for the jacobian
+    AZ_MATRIX *J;
+    J = AZ_matrix_create(dim_res);
 
-  // data containing the matrices C, D, trD and H as pointers
-  // are passed through A_ii and pILU_ii:
-  AZ_set_MATFREE(J, &M_dataJacobian, my_matvecJacobianEJ);
+    // data containing the matrices C, D, trD and H as pointers
+    // are passed through A_ii and pILU_ii:
+    AZ_set_MATFREE(J, &M_dataJacobian, my_matvecJacobianEJ);
 
-  std::cout << "  o-  Solving Jacobian system... ";
-  Chrono chrono;
+    std::cout << "  o-  Solving Jacobian system... ";
+    Chrono chrono;
 
-  for (UInt i=0;i<dim_res; ++i)
-    _muk[i]=0.0;
+    for (UInt i=0;i<dim_res; ++i)
+        _muk[i]=0.0;
 
-  chrono.start();
-  AZ_iterate(&_muk[0], &_res[0], options, params, status, proc_config, J, NULL, NULL);
-  chrono.stop();
-  std::cout << "done in " << chrono.diff() << " s." << std::endl;
+    chrono.start();
+    AZ_iterate(&_muk[0], &_res[0], options, params, status, proc_config, J, NULL, NULL);
+    chrono.stop();
+    std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
-  AZ_matrix_destroy(&J);
+    AZ_matrix_destroy(&J);
 }
 
 
@@ -262,33 +257,35 @@ void  exactJacobian::solveLinearSolid()
 }
 
 
-void my_matvecJacobianEJ(double *z, double *Jz, AZ_MATRIX* J, int proc_config[]) {
+void my_matvecJacobianEJ(double *z, double *Jz, AZ_MATRIX* J, int proc_config[])
+{
+    // Extraction of data from J
+    dataJacobianEJ* my_data = static_cast< dataJacobianEJ* >(AZ_get_matvec_data(J));
 
+    UInt dim = my_data->M_pFS->dz().size();
 
-  // Extraction of data from J
-  dataJacobianEJ* my_data = static_cast< dataJacobianEJ* >(AZ_get_matvec_data(J));
+    double xnorm =  AZ_gvector_norm(dim,-1,z,proc_config);
+    std::cout << " ***** norm (z)= " << xnorm << std::endl << std::endl;
 
-  UInt dim = my_data->M_pFS->dz().size();
-
-  double xnorm =  AZ_gvector_norm(dim,-1,z,proc_config);
-  std::cout << " ***** norm (z)= " << xnorm << std::endl << std::endl;
-
-  if ( xnorm == 0.0 ) {
-    for (int i=0; i <(int)dim; ++i)
-      Jz[i] =  0.0;
-  }
-  else {
-    for (int i=0; i <(int)dim; ++i) {
-      my_data->M_pFS->solid().d()[i] =  z[i];
+    if ( xnorm == 0.0 )
+    {
+        for (int i=0; i <(int)dim; ++i)
+            Jz[i] =  0.0;
     }
-    my_data->M_pFS->fluid().updateDispVelo();
-    my_data->M_pFS->solveLinearFluid();
-    my_data->M_pFS->solveLinearSolid();
-    for (int i=0; i <(int)dim; ++i)
-      Jz[i] =  z[i] - my_data->M_pFS->dz()[i];
-  }
-  std::cout << " ***** norm (Jz)= " << AZ_gvector_norm(dim,-1,Jz,proc_config)
-            << std::endl << std::endl;
+    else
+    {
+        for (int i=0; i <(int)dim; ++i)
+        {
+            my_data->M_pFS->solid().d()[i] =  z[i];
+        }
+        my_data->M_pFS->fluid().updateDispVelo();
+        my_data->M_pFS->solveLinearFluid();
+        my_data->M_pFS->solveLinearSolid();
+        for (int i=0; i <(int)dim; ++i)
+            Jz[i] =  z[i] - my_data->M_pFS->dz()[i];
+    }
+    std::cout << " ***** norm (Jz)= " << AZ_gvector_norm(dim,-1,Jz,proc_config)
+              << std::endl << std::endl;
 }
 
 }

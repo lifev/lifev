@@ -47,14 +47,21 @@ steklovPoincare::~steklovPoincare()
 void steklovPoincare::eval(const Vector &_disp,
                            const int     _status)
 {
-    this->M_solid.d() = _disp;
+//     this->M_solid.d() = _disp;
 
-    this->M_solid.setRecur(0);
-    this->M_solid.iterate();
+    if(_status) M_nbEval = 0; // new time step
+    M_nbEval++;
 
-    this->M_fluid.updateMesh(time());
-    this->M_fluid.iterate   (time());
+    M_solid.d() = setDispOnInterface(_disp);
 
+    M_fluid.updateMesh(M_time);
+    M_fluid.iterate   (M_time);
+
+    M_solid.setRecur(0);
+    M_solid.iterate();
+
+//     M_solid.postProcess();
+//     M_fluid.postProcess();
 }
 
 
@@ -76,15 +83,15 @@ void steklovPoincare::evalResidual(Vector       &_res,
     Vector dispNew = this->M_solid.d();
     Vector velo    = this->M_solid.w();
 
-    std::cout << "                ::: norm(disp     ) = "
+    std::cout << "norm(disp     ) = "
               << maxnorm(_disp) << std::endl;
-    std::cout << "                ::: norm(dispNew  ) = "
+    std::cout << "norm(dispNew  ) = "
               << maxnorm(dispNew) << std::endl;
-    std::cout << "                ::: norm(velo     ) = "
+    std::cout << "norm(velo     ) = "
               << maxnorm(velo) << std::endl;
 
-    this->M_residualS = this->M_solid.residual();
-    this->M_residualF = this->M_fluid.residual();
+    M_residualS = this->M_solid.residual();
+    M_residualF = this->M_fluid.residual();
 
     computeResidualFSI();
 
@@ -201,8 +208,8 @@ void steklovPoincare::setUpBC(function_type _bcf,
 
 
 void  steklovPoincare::solveJac(Vector         &_muk,
-                                const Vector  &_res,
-                                 const double   _linearRelTol)
+                                const Vector   &_res,
+                                const double    _linearRelTol)
 {
     M_linearRelTol = _linearRelTol;
 
@@ -251,7 +258,6 @@ void  steklovPoincare::solveLinearFluid()
 
 void  steklovPoincare::solveLinearSolid()
 {
-
     M_rhs_dz = 0.;
     M_dz     = 0.;
 
@@ -271,6 +277,7 @@ void  steklovPoincare::solveLinearSolid()
 
     std::cout << "rhs_dz norm = " << maxnorm(M_rhs_dz) << std::endl;
     this->M_solid.setRecur(1);
+    this->M_solid.updateJac(M_dz, 0);
     this->M_solid.solveJac(M_dz, M_rhs_dz, tol, M_BCh_dz);
     std::cout << "dz norm     = " << maxnorm(M_dz) << std::endl;
 }
@@ -586,6 +593,44 @@ Vector steklovPoincare::getFluidInterfaceOnSolid(Vector &_vec)
         {
             vec[IDsolid - 1 + jDim*totalDofSolid] =
                 _vec[IDfluid - 1 + jDim*totalDofSolid];
+        }
+    }
+
+    return vec;
+}
+
+
+Vector steklovPoincare::setDispOnInterface(const Vector &_disp)
+{
+    Vector vec = _disp.size();
+    vec = 0.;
+
+    BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[0];
+    BCBase const &BC_solidInterface = M_solid.BC_solid()[0];
+
+    UInt nDofInterface = BC_fluidInterface.list_size();
+
+    UInt nDimF = BC_fluidInterface.numberOfComponents();
+    UInt nDimS = BC_solidInterface.numberOfComponents();
+
+    UInt totalDofFluid = M_residualF.size()/ nDimF;
+    UInt totalDofSolid = M_residualS.size()/ nDimS;
+
+    for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)
+    {
+        ID IDfluid = BC_fluidInterface(iBC)->id();
+
+        BCVectorInterface const *BCVInterface =
+            static_cast <BCVectorInterface const *>
+            (BC_fluidInterface.pointerToBCVector());
+
+        ID IDsolid = BCVInterface->
+            dofInterface().getInterfaceDof(IDfluid);
+
+        for (UInt jDim = 0; jDim < nDimF; ++jDim)
+        {
+            vec[IDsolid - 1 + jDim*totalDofSolid] =
+                _disp[IDsolid - 1 + jDim*totalDofSolid];
         }
     }
 

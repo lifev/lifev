@@ -104,6 +104,7 @@ private:
 
     Vector getSolidInterfaceOnFluid(Vector &_vec);
     Vector getFluidInterfaceOnSolid(Vector &_vec);
+    Vector setDispOnInterface(const Vector &_disp);
 
     DataJacobianSP            M_dataJacobian;
 };

@@ -68,25 +68,21 @@ operFS::operFS(GetPot     &data_file):
                                M_fluid.mesh(),
                                1,
                                0.);
-
     M_dofStructureToSolid.update(M_solid.mesh(),
                                1,
                                M_solid.mesh(),
                                1,
                                0.);
-
     M_dofStructureToFluidMesh.update(M_fluid.mesh(),
                                    1,
                                    M_solid.mesh(),
                                    1,
                                    0.0);
-
     M_dofMeshToFluid.update(M_fluid.mesh(),
                           1,
                           M_fluid.mesh(),
                           1,
                           0.0);
-
     M_solverAztec.setOptionsFromGetPot(data_file,"jacobian/aztec");
     M_method  = data_file("problem/method" ,0);
 }

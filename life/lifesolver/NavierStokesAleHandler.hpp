@@ -190,7 +190,6 @@ template <typename Mesh>
 void NavierStokesAleHandler<Mesh>::
 updateDispVelo()
 {
-
     // Updating mesh displacement and velocity
     updateExtension( _mesh, 0.0, 1 );
 
@@ -205,8 +204,8 @@ updateDispVelo()
     _dwInterp = _dInterp * dti;
 
     std::cout << " max norm dwInterp = " << maxnorm( _dwInterp ) << std::endl;
-
 }
+
 
 // Postprocessing pressure
 template <typename Mesh>
