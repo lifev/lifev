@@ -37,6 +37,7 @@
 #include <boost/bind.hpp>
 
 #include <debug.hpp>
+#include <typeInfo.hpp>
 
 namespace LifeV
 {
@@ -60,7 +61,8 @@ struct factoryDefaultError
             _M_ex()
             {
                 std::ostringstream __ex_str;
-                __ex_str << "[factory] Unknown Type : " << id;
+                //__ex_str << "[factory] Unknown Type : " << id;
+                __ex_str << "[factory] Unknown Type : ";
                 _M_ex = __ex_str.str();
 
             }
@@ -84,10 +86,10 @@ struct factoryDefaultError
   \class factory
   \brief Implements a generic object factory
 
-  \sa factoryDefaultError, factoryClone, STypeInfo
+  \sa factoryDefaultError, factoryClone, TypeInfo
 
   @author Christophe Prud'homme
-  @version $Id: factory.hpp,v 1.1 2004-10-05 13:07:19 prudhomm Exp $
+  @version $Id: factory.hpp,v 1.2 2004-10-13 10:17:38 prudhomm Exp $
 */
 template
 <
@@ -151,5 +153,95 @@ private:
     id_to_product_type _M_associations;
 
 };
+
+/*!
+  \class factoryClone
+  \brief Implements a generic cloning object factory
+
+  \sa factory, factoryDefaultError
+
+  \author Christophe Prud'homme
+*/
+template <
+   class AbstractProduct,
+   class ProductCreator = boost::function<AbstractProduct* (const AbstractProduct*)>,
+   template<typename, class> class FactoryErrorPolicy = factoryDefaultError
+>
+class factoryClone
+   :
+   public FactoryErrorPolicy<TypeInfo, AbstractProduct>
+{
+public:
+
+
+   /** @name Typedefs
+    */
+   //@{
+
+   typedef FactoryErrorPolicy<TypeInfo,AbstractProduct> super;
+
+   //@}
+
+   /** @name Constructors, destructor
+    */
+   //@{
+
+   //@}
+
+   /** @name Operator overloads
+    */
+   //@{
+
+
+   //@}
+
+   /** @name Accessors
+    */
+   //@{
+
+
+   //@}
+
+   /** @name  Mutators
+    */
+   //@{
+
+
+   //@}
+
+   /** @name  Methods
+    */
+   //@{
+
+   bool registerProduct(const TypeInfo& id, ProductCreator creator)
+      {
+         return _M_associations.insert( typename id_to_product_type::value_type( id, creator ) ).second;
+      }
+
+   bool unregisterProduct( const TypeInfo& id )
+      {
+         return _M_associations.erase(id) == 1;
+      }
+
+   AbstractProduct* createObject( const AbstractProduct* model )
+      {
+         if ( model == 0 ) return 0;
+
+         typename id_to_product_type::const_iterator i = _M_associations.find( typeid(*model) );
+         if ( i != _M_associations.end() )
+         {
+            return (i->second)(model);
+         }
+         return super::onUnknownType(typeid(*model));
+      }
+
+   //@}
+
+private:
+   typedef std::map<TypeInfo, ProductCreator> id_to_product_type;
+   id_to_product_type _M_associations;
+};
+
+
 }
 #endif /* __factory_H */

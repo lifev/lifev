@@ -24,12 +24,12 @@ include_HEADERS		= GetPot.hpp  debug.hpp\
 chrono.hpp dataString.hpp dataTime.hpp fortran_wrap.hpp \
 lifeV.hpp post_proc.hpp subDomainNeighbors.hpp switch.hpp \
 util_string.hpp bareItems.hpp basisElSh.hpp dataTransient.hpp \
-singleton.hpp policy.hpp
+singleton.hpp policy.hpp typeInfo.hpp
 
 lib_LTLIBRARIES		= liblifecore.la
 
 liblifecore_la_SOURCES	= bareItems.cpp basisElSh.cpp GetPot.cpp  dataString.cpp debug.cpp \
-dataTime.cpp subDomainNeighbors.cpp switch.cpp util_string.cpp dataTransient.cpp
+dataTime.cpp subDomainNeighbors.cpp switch.cpp util_string.cpp dataTransient.cpp typeInfo.cpp
 
 
 liblifecore_la_LIBADD	= $(aztec_libs)

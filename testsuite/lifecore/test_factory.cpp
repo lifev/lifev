@@ -79,13 +79,15 @@ public:
     F( const F& f )
         :
         str( f.str )
-        {}
+        {
+            LifeV::Debug() << "calling F::copy constructor\n";
+        }
     const char* hello() const { return str.c_str(); }
     std::string str;
 };
 
 typedef LifeV::singleton< LifeV::factory< A, std::string > > AFactory;
-
+typedef LifeV::singleton< LifeV::factoryClone< A > > AFactoryClone;
 
 namespace {
 A* createB() { return new B; }
@@ -98,6 +100,10 @@ const bool regC = AFactory::instance().registerProduct( "C", &createC );
 const bool regD = AFactory::instance().registerProduct( "D", &createD );
 const bool regE = AFactory::instance().registerProduct( "E", &createE );
 const bool regF = AFactory::instance().registerProduct( "F", &createF );
+
+// cloning: dolly is not far away ;)
+A* createFc( A const* f ) { return new F( ( F const& )*f ); }
+const bool regFc = AFactoryClone::instance().registerProduct( typeid(F), &createFc );
 }
 
 int
@@ -108,4 +114,7 @@ main( int argc, char** argv )
   std::cerr << "D hello must be Yo    : " << AFactory::instance().createObject( "D" )->hello() << "\n";
   std::cerr << "E hello must be Ciao  : " << AFactory::instance().createObject( "E" )->hello() << "\n";
   std::cerr << "F hello must be salut : " << AFactory::instance().createObject( "F" )->hello() << "\n";
+
+  F f;
+  std::cerr << "Clone F hello must be salut : " << AFactoryClone::instance().createObject( &f )->hello() << "\n";
 }
