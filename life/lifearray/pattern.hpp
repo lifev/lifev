@@ -18,27 +18,27 @@
 */
 /*----------------------------------------------------------------------*
 |
-| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.15 2004-10-22 13:19:34 winkelma Exp $
+| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.16 2004-10-22 16:28:38 winkelma Exp $
 |
 |
-| #Version  0.1 Experimental   07/7/00. Luca Formaggia & Alessandro Veneziani  |
+| #Version  0.1 Experimental   07/7/00. Luca Formaggia & Alessandro Veneziani
 |
 | #Attempt to define a pattern for vectorial problems 12/10/01. Alain Gauthier
 |  Construction of a class VBRPatt which is required for the interface
 |  with AZTEC.
 |
 | #Purposes Defines Patterns for normal and mixed matrices
-|  A pattern defines the graph of a sparse matrix. The pattern class builds that
-|  graph starting from a Degree of Freedom (DOF) object.
+|  A pattern defines the graph of a sparse matrix. The pattern class builds
+|  that graph starting from a Degree of Freedom (DOF) object.
 |
-|  The patterns are meant to be used also as way of interrogating the local connectivities of
-|  degrees of freedom. In order to avoid ambiguities the degrees of freedom ARE ALWAYS numbered
-|  from 1 and they are indicated by using the type name ID (in this way we avoid ambiguity with UInt).
-|  On the other hand, we may have a FORTRAN or C-like style for the RAW data storig the pattern
-|  which may be CSR of MSR format. In this way we hopefully will be able to better interface external
-|  Linear Algebra packages Fortran-style (like SPARSEKIT).
-|
-|
+|  The patterns are meant to be used also as way of interrogating the local
+|  connectivities of degrees of freedom. In order to avoid ambiguities the
+|  degrees of freedom ARE ALWAYS numbered from 1 and they are indicated by
+|  using the type name ID (in this way we avoid ambiguity with UInt).
+|  On the other hand, we may have a FORTRAN or C-like style for the RAW data
+|  storing the pattern which may be CSR of MSR format. In this way we hopefully
+|  will be able to better interface external Linear Algebra packages
+|  Fortran-style (like SPARSEKIT).
 |
 *----------------------------------------------------------------------*/
 #ifndef PATTERN_OFFSET
@@ -69,7 +69,8 @@ namespace LifeV
 const INDEX_T PatternOffset = PATTERN_OFFSET;
 
 // We DEFINITIVELY need NAMESPACES (LUCA)
-/*! \class PatternDefs
+/*!
+  \class PatternDefs
   This class containes some useful functions and typedefs which will be
   common to ALL patterns (base and mixed ones). I use BareEdges for the
   dynamic pattern, because I have provided the comparison function. Actually,
@@ -78,81 +79,125 @@ const INDEX_T PatternOffset = PATTERN_OFFSET;
 class PatternDefs
 {
 public:
-    typedef INDEX_T Index_t; //!< Type for indices
-    typedef std::vector<Index_t> Container; //!< Container for the actual (raw) pattern
-    typedef Container::size_type Diff_t; //!< type for differences (offsets)
-    /* Some useful converters */
-    Index_t _d2i( ID const d ) const; //!< From Identifier (DOF) to Index
-    ID _i2d( Index_t const i ) const; //!< Form Index to Identifier
-    Diff_t _i2o( Index_t const i ) const; //!< From index to differences (offsets)
-    Diff_t _d2o( ID const d ) const; //!< from identifier to differences.
-    Container & _i2d( Container & list_of_indices ) const; // as Before, yet working on containers
+    //! Type for indices
+    typedef INDEX_T Index_t;
+    
+    //! Container for the actual (raw) pattern
+    typedef std::vector<Index_t> Container;
+    
+    //! type for differences (offsets)
+    typedef Container::size_type Diff_t;
+    
+    //! convert from Identifier (DOF) to Index
+    Index_t _d2i( ID const d ) const;
+    
+    //! convert from Index to Identifier
+    ID _i2d( Index_t const i ) const;
+    
+    //! convert from index to differences (offsets)
+    Diff_t _i2o( Index_t const i ) const;
+    
+    //! convert from identifier to differences
+    Diff_t _d2o( ID const d ) const; 
+    
+    //! convert container of indices to identifiers (in place)
+    Container & _i2d( Container & list_of_indices ) const;
+    
+    //! convert container of identifiers to indices (in place)
     Container & _d2i( Container & list_of_dof ) const;
+
+    //! convert container of identifiers to differences (in place)
     Container & _d2o( Container & list_of_dof ) const;
 protected:
-    typedef std::set
-        <BareEdge, cmpBareItem<BareEdge> > DynPattern; //!< Container for the dynamic pattern
+    //! Container for the dynamic pattern
+    typedef std::set<BareEdge, cmpBareItem<BareEdge> > DynPattern;
 };
 
 
-/*!\class BasePattern
+/*!
+  \class BasePattern
   This is the building block for the pattern classes.
 */
 class BasePattern : public PatternDefs
 {
 public:
 
+    //! Default constructor (size zero)
     BasePattern();
-    BasePattern( UInt ex_nnz, UInt ex_nrow, UInt ex_ncol ); //!< Here I give the n. of non zeros and matrix dimensions.
+    
+    /*!
+      Constructor for given pattern size
+      @param ex_nnz number of nonzero entries
+      @param ex_nrow number of rows
+      @param ex_ncol number of columns
+    */
+    BasePattern( UInt ex_nnz, UInt ex_nrow, UInt ex_ncol );
+    
+    //! Copy constructor
     BasePattern( BasePattern const &rightHandPattern );
 
-    inline UInt nRows() const; //!< Numer of Rows
-    inline UInt nCols() const; //!< Number of Columns
-    inline UInt nNz() const;   //!< Total nnz
+    //! Number of Rows
+    inline UInt nRows() const;
+    
+    //! Number of Columns
+    inline UInt nCols() const;
+    
+    //! Total number of nonzero entries
+    inline UInt nNz() const;
 
-    inline bool isEmpty() const; //!< Empty pattern
+    //! returns true iff pattern is empty
+    inline bool isEmpty() const;
 
+    //! returns true iff the first item furnished by the raw pattern data
+    //! is the diagonal entry
     bool diagFirst() const
     {
         return _diagfirst;
     }
-    ; //!< Diagonal is the first item furnished by  the raw pattern data
-
-    void showMe( bool const verbose = false, std::ostream & out = std::cout ) const; //!< some info for the curious
+    
+    //! some info for the curious
+    void showMe( bool const verbose = false, 
+                 std::ostream & out = std::cout ) const;
 
 protected:
-    //! It builds the dynamic pattern. It is the standard routine for a
-    //! SYMMETRIC pattern associated to a single degree of freedom object.
-    //! It uses the local pattern provided through the DOF object.
-    //! If nbcomp > 1, it reproduces the pattern for (nbcomp X nbcomp) blocks
+    /*!
+      Builds the dynamic pattern. It is the standard routine for a
+      SYMMETRIC pattern associated to a single degree of freedom object.
+      It uses the local pattern provided through the DOF object.
+      If nbcomp > 1, it reproduces the pattern for (nbcomp X nbcomp) blocks
+    */
     template <typename DOF1>
-    bool setpatt( DOF1 const & dof1, DynPattern & dynpatt,
+    bool setpatt( DOF1 const & dof1,
+                  DynPattern & dynpatt,
                   UInt const nbcomp = 1 );
 
-    // Miguel 12/2003: new version handling patterns coming from IP stabilization
-    /*! It builds the dynamic pattern. It uses the local pattern provided through
-     *  the DOF object, augmented by the couplings needed for IP stabilization.
-     *  If nbcomp > 1, it reproduces the pattern for (nbcomp X nbcomp) blocks.
+    /*!
+      Builds the dynamic pattern. It uses the local pattern provided through
+      the DOF object, augmented by the couplings needed for IP stabilization.
+      If nbcomp > 1, it reproduces the pattern for (nbcomp X nbcomp) blocks.
+      @author Miguel Fernandez, 12/2003
      */
     template <typename DOF, typename MESH>
     bool setpatt( const DOF& dof, const MESH& mesh, DynPattern & dynpatt,
                   UInt const nbcomp );
 
-    //! Added by D. A. Di Pietro (01/2004)
-    //! It builds the SYMMETRIC pattern associated to StiffDG operators.
-    //! This pattern should work with several penalization terms (IP,
-    //! Bassi et al., ecc...). Boundary integrals involve one element
-    //! and its adjacent neighbours.
-
+    /*!
+      Builds the SYMMETRIC pattern associated to StiffDG operators.
+      This pattern should work with several penalization terms (IP,
+      Bassi et al., ecc...). Boundary integrals involve one element
+      and its adjacent neighbours.
+      @author Daniele A. di Pietro, 01/2004
+    */
     template<typename DOF, typename DOFBYFACE>
-    bool setpattDG(DOF const & dof, DOFBYFACE const & dofbyface, DynPattern & dynpatt,
-                   UInt const nbcomp = 1);
+    bool setpattDG(DOF const & dof, DOFBYFACE const & dofbyface,
+                   DynPattern & dynpatt, UInt const nbcomp = 1);
 
-    //! Version for mixed patterns
-    //! It builds the dynamic pattern. It is the standard routine for a
-    //! pattern associated to two degrees of	 freedom object.
-    //! it uses the MixedLocalPattern class for the local patterns.
-    //! See the documentation in the implementation part for more details
+    /*!
+      It builds a mixed pattern. It is the standard routine for a
+      pattern associated to two degrees of	 freedom object.
+      it uses the MixedLocalPattern class for the local patterns.
+      See the documentation in the implementation part for more details
+    */
     template <typename DOF1, typename DOF2>
     bool setpatt( DOF1 const & dof1, DOF2 const & dof2, DynPattern & dynpatt,
                   UInt const bRows = 1, UInt const bCols = 1 );
@@ -166,74 +211,96 @@ protected:
     bool _diagfirst; //!< True if the pattern has diagfirst!
 };
 
-/*                         SPECIALISED PATTERNS                    */
-
-
 ///////////////////////////////////////////////////
-///
-///      C S R Pattern
-///
-//////////////////////////////////////////////////
+//
+//      C S R Pattern
+//
+///////////////////////////////////////////////////
 
 class MSRPatt;
 
-class CSRPatt:
-            public BasePattern
+class CSRPatt : public BasePattern
 {
 public:
 
+    //! Default constructor
     CSRPatt();
+    
+    /*!
+      Constructor
+      @param ex_nnz number of nonzero entries
+      @param ex_nrow number of rows
+      @param ex_ncol number of columns
+    */
     CSRPatt( UInt ex_nnz, UInt ex_nrow, UInt ex_ncol );
 
-    //! Constructor where I give the raw data from the exterior TODO: As it
-    //! stands, This is a pretty useless contructor, unless we build a smarter
-    //! version which takes in input raw data also in a other types. This
-    //! indeed will help interfacing with external libraries We will need to
-    //! change it to something of the type
-    //
-    //! template<typename Const_Iter>
-    //! CSRPatt(Const_Iter &ex_ia, Const_Iter  &ex_ja )
-    //! where Const_iter is an iterator to a sequence (then  a pointer as well)
-    //! LUCA: I will do it soon!
+    //! Constructor where raw data are given from outside
     CSRPatt( UInt ex_nnz, UInt ex_nrow, UInt ex_ncol,
              const std::vector<Index_t> &ex_ia,
              const std::vector<Index_t> &ex_ja );
+    /*
+      TODO: As it
+      stands, This is a pretty useless contructor, unless we build a smarter
+      version which takes in input raw data also in a other types. This
+      indeed will help interfacing with external libraries We will need to
+      change it to something of the type
+      
+      template<typename Const_Iter>
+      CSRPatt(Const_Iter &ex_ia, Const_Iter  &ex_ja )
+      where Const_iter is an iterator to a sequence (then  a pointer as well)
+      LUCA: I will do it soon!
+    */
 
+    //! Copy constructor
     CSRPatt( const CSRPatt &RightHandCSRP );
-    //! Constructors for single DOF (square matrix), possibly with more than
+    
+    //! Constructor for single DOF (square matrix), possibly with more than
     //! one component
     template <typename DOF>
     CSRPatt( DOF const & dof, UInt const nbcomp = 1 );
+
+    //! build function for single DOF (square matrix), possibly with more than
+    //! one component
     template <typename DOF>
     bool buildPattern( DOF const & dof, const UInt nbcomp );
 
-    /*! Constructors for single DOF (square matrix), possibly with more than
-     *  one component, version handling patterns coming from IP stabilization.
-     *  @author Christoph Winkelmann, Sep 2004
-     */
+    /*!
+      Constructor for single DOF (square matrix), possibly with more than
+      one component; version handling patterns coming from IP stabilization.
+      @author Christoph Winkelmann, 09/2004
+    */
     template <typename DOF, typename MESH>
     CSRPatt( const DOF& dof, const UInt nbcomp, const MESH& mesh );
+    
+    /* build function for single dof(square matrix), possibly with more than
+       one component; version handling patterns coming from IP stabilization.
+       @author Christoph Winkelmann, 09/2004
+    */
     template <typename DOF, typename MESH>
     bool buildPattern( DOF const& dof, const UInt nbcomp, const MESH& mesh );
 
-    //! Constructors for two DOF (in general non-square matrix)
-    //! This constructors are required if we want to use the pattern in a
-    //! MixedPattern. It may be useful also stand alone. Look at the
-    //! documentation of buildPattern<DOF1,DOF2> to have details.
+    /*!
+      Constructors for two DOF (in general non-square matrix)
+      This constructors are required if we want to use the pattern in a
+      MixedPattern. It may be useful also stand alone. Look at the
+      documentation of buildPattern<DOF1,DOF2> to have details.
+    */
     template <typename DOF1, typename DOF2>
     CSRPatt( DOF1 const & dof1, DOF2 const & dof2,
              UInt const bRows = 1, UInt const bCols = 1 );
-
-    CSRPatt( const MSRPatt& msrPatt );
 
     template <typename DOF1, typename DOF2>
     bool buildPattern( DOF1 const& dof1, DOF2 const & dof2,
                        UInt const bRows = 1, UInt const bCols = 1 );
 
-    //! Version which construct two patterns: patt and its transpose one,
-    //! in addition an other Container for the access to
-    //! the columns of the transpose matrix is built.
-    //! @author Alain, Nov. 2002
+    CSRPatt( const MSRPatt& msrPatt );
+
+    /*!
+      Version which construct two patterns: patt and its transpose one,
+      in addition an other Container for the access to
+      the columns of the transpose matrix is built.
+      @author Alain, Nov. 2002
+    */
     template <typename DOF1, typename DOF2>
     friend void
     buildPattTpatt( DOF1 const& dof1, DOF2 const & dof2,
@@ -242,114 +309,110 @@ public:
 
     CSRPatt & operator= ( const CSRPatt& RhCsr );
 
-    //! Methods that returns row data in different fashions.
-    Container ia() const
-    {
-        return _ia;
-    };
-    Container ja() const
-    {
-        return _ja;
-    };
-    Container jaT() const
-    {
-        return _jaT;
-    };
-    Index_t * giveRawCSR_ia()
-    {
-        return & ( _ia.front() );
-    }
-    ; //!< Give ia (in a raw form)
-    Index_t * giveRawCSR_ja()
-    {
-        return & ( _ja.front() );
-    }
-    ; //!< Give ja (in a raw form)
-    Index_t * giveRawCSR_jaT()
-    {
-        return & ( _jaT.front() );
-    }
-    ; //!< Give jaT (in a raw form)
-    Index_t const * giveRawCSR_ia() const
-    {
-        return & ( _ia.front() );
-    }
-    ; //!< Give ia (in a raw form)
-    Index_t const * giveRawCSR_ja() const
-    {
-        return & ( _ja.front() );
-    }
-    ; //!< Give ja (in a raw form)
-    Index_t const * giveRawCSR_jaT() const
-    {
-        return & ( _jaT.front() );
-    }
-    ; //!< Give jaT (in a raw form)
-    Container & give_ia()
-    {
-        return _ia;
-    }
-    ; //!< Give ia (as container)
-    Container & give_ja()
-    {
-        return _ja;
-    }
-    ; //!< Give ja (as container)
-    Container & give_jaT()
-    {
-        return _jaT;
-    }
-    ; //!< Give jaT (as container)
-    Container const & give_ia() const
-    {
-        return _ia;
-    }
-    ; //!< Give ia (as container)
-    Container const & give_ja() const
-    {
-        return _ja;
-    }
-    ; //!< Give ja (as container)
-    Container const & give_jaT() const
-    {
-        return _jaT;
-    }
-    ; //!< Give jaT (as container)
+    //! return a copy of ia as a container
+    Container ia() const { return _ia; };
+    
+    //! return a copy of ja as a container
+    Container ja() const { return _ja; };
+    
+    //! return a copy of jaT as a container
+    Container jaT() const { return _jaT; };
 
-    inline std::pair<UInt, UInt> giveMinMax() const; //!< Min and Max elements in a row.
-    inline UInt nbNeighbours( ID const d ) const; //!< N of neighbours of the DOF numbeered d . BEWARE d is INCLUDED!
-    inline ID neighbour( ID const i, ID const d ) const; //!< the i-th (start from 1) neighbour of dof d. The first is d itself
-    inline void neighbours( ID const d, Container & start ) const; //!< put neighbours of dof d in a list
+    //! Give ia (in a raw form)
+    Index_t * giveRawCSR_ia() { return & ( _ia.front() ); }
 
-    //! The following template function extracts a row (useful to implement A*b), returning two sequences:
-    //! One with the column numbering (coldata) of one with the corresponding offsets in the vector holding
-    //! the matrix value. coldata   is given as a sequence of Index_t (i.e. the content depend by the value of PATETRN_OFFSET), while
-    //! the position sequence are always offsets (i.e. starting from 0)
-    //! Iter is either an iterator to a container or a pointer. The function Returns the
-    //! n. or row elements.
-    //! IMPORTANT: for efficency reason the sequences pointed by coldata and position MUST have been
-    //! dimensioned boforehand in order to have the sufficient dimension (use giveMinMax) NO CHECKS
-    //! ARE MADE!!!!!!!!!
+    //! Give ja (in a raw form)
+    Index_t * giveRawCSR_ja() { return & ( _ja.front() ); }
+    
+    //! Give jaT (in a raw form)
+    Index_t * giveRawCSR_jaT() { return & ( _jaT.front() ); }
+    
+    //! Give ia (in a raw form)
+    Index_t const * giveRawCSR_ia() const { return & ( _ia.front() ); }
+
+    //! Give ja (in a raw form)
+    Index_t const * giveRawCSR_ja() const { return & ( _ja.front() ); }
+
+    //! Give jaT (in a raw form)
+    Index_t const * giveRawCSR_jaT() const { return & ( _jaT.front() ); }
+
+    //! Give ia (as container)
+    Container & give_ia() { return _ia; }
+    
+    //! Give ja (as container)
+    Container & give_ja() { return _ja; }
+
+    //! Give jaT (as container)
+    Container & give_jaT() { return _jaT; }
+
+    //! Give ia (as container)
+    Container const & give_ia() const { return _ia; }
+
+    //! Give ja (as container)
+    Container const & give_ja() const { return _ja; }
+
+    //! Give jaT (as container)
+    Container const & give_jaT() const { return _jaT; }
+
+    //! Min and Max elements in a row.
+    inline std::pair<UInt, UInt> giveMinMax() const;
+    
+    //! N of neighbours of the DOF numbeered d . BEWARE d is INCLUDED!
+    inline UInt nbNeighbours( ID const d ) const;
+    
+    //! the i-th (start from 1) neighbour of dof d. The first is d itself
+    inline ID neighbour( ID const i, ID const d ) const;
+    
+    //! put neighbours of dof d in a list
+    inline void neighbours( ID const d, Container & start ) const;
+
+    /*!
+      The following template function extracts a row (useful to implement A*b),
+      returning two sequences: One with the column numbering (coldata) of one
+      with the corresponding offsets in the vector holding the matrix value.
+      coldata is given as a sequence of Index_t (i.e. the content depend by
+      the value of PATETRN_OFFSET), while the position sequence are always 
+      offsets (i.e. starting from 0) Iter is either an iterator to a container
+      or a pointer. The function Returns the n. or row elements.
+      
+      IMPORTANT: for efficency reason the sequences pointed by coldata and
+      position MUST have been dimensioned boforehand in order to have the
+      sufficient dimension (use giveMinMax) NO CHECKS ARE MADE!
+    */
     template <typename Iter>
     inline UInt row( Diff_t const row, Iter coldata, Iter position ) const;
 
-    //! Here the routines whcih locate the position in the vector containing the matrix value of an entry (i,j), which may be a couple
-    //! of indices or of ID's (degree of freedoms identifiers)
-    inline std::pair<Diff_t, bool> locate_dof( ID const i, ID const j ) const; //!< Locate position of DOF ID couple (i,j)
-    inline std::pair<Diff_t, bool> locate_index( Index_t const i, Index_t const j ) const; //!< Locate position of index couple (i,j)
+    //! Locate position in vector containing DOF ID couple (i,j)
+    inline std::pair<Diff_t, bool> locate_dof( ID const i,
+                                               ID const j ) const;
+    
+    //! Locate position in vector containing index couple (i,j)
+    inline std::pair<Diff_t, bool> locate_index( Index_t const i,
+                                                 Index_t const j ) const;
 
-    void showMe( bool const verbose = false, std::ostream& c = std::cout ) const ; //!< pattern visualization
-    void spy( std::string const & filname = "matrice.m" ) const; //!< pattern visualization a la Matlab
+    //! pattern visualization
+    void showMe( bool const verbose = false,
+                 std::ostream& c = std::cout ) const ;
+    
+    //! pattern visualization a la Matlab
+    void spy( std::string const & filename = "matrice.m" ) const;
 
     //! column-concatenation of two CSR block patterns
     friend CSRPatt colUnify( CSRPatt const &patt1, CSRPatt const &patt2 );
-    //! column-concatenation of one CSR block patterns and ncolZero null columns
+
+    //! column-concatenation of one CSR block pattern and ncolZero null columns
     friend CSRPatt colUnify( CSRPatt const &patt1, UInt const ncolZero );
+
+    //! column-concatenation of one ncolZero null columns and CSR block pattern
     friend CSRPatt colUnify( UInt const ncolZero, CSRPatt const &patt1 );
+    
     //! row-concatenation of two CSR block patterns
     friend CSRPatt rowUnify( CSRPatt const &patt1, CSRPatt const &patt2 );
-    //! row-concatenation of one CSR block patterns and nrowZero null rows
+    
+    //! row-concatenation of one CSR block pattern and nrowZero null rows
     friend CSRPatt rowUnify( CSRPatt const &patt1, UInt const nrowZero );
+
+    //! row-concatenation of nrowZero null rows and one CSR block pattern
     friend CSRPatt rowUnify( UInt const nrowZero, CSRPatt const &patt1 );
 
     //! Return a block diagonal pattern of nblock blocks
@@ -357,55 +420,63 @@ public:
 
 
 protected:
-    Diff_t _row_off( Index_t i ) const
-    { //!< Row offset for row index i
-        return _i2o( _ia[ _i2o( i ) ] );
-    }
-    inline bool isThere( Index_t const i, Index_t const j ) const; //!< Are indices (i,j) in the pattern
-    std::pair<Diff_t, bool> locate_pattern( Index_t const i, Index_t const j ) const; //!< Are indices (i,j) in the pattern
+    //! Row offset for row index i
+    Diff_t _row_off( Index_t i ) const { return _i2o( _ia[ _i2o( i ) ] ); }
+    
+    //! Returns true if the indices (i,j) are in the pattern
+    inline bool isThere( Index_t const i, Index_t const j ) const;
+    
+    //! Locate position in vector containing index couple (i,j)
+    std::pair<Diff_t, bool> locate_pattern( Index_t const i,
+                                            Index_t const j ) const;
+    
     Container _ia; //!< point to the rows entries
     Container _ja; //!< contain col indices for each row
     Container _jaT; //!< point to the col entries of the transpose pattern
 
 private:
     template <typename DOF>
-    void _buildPattern( DOF const & dof, DynPattern const & dynpatt,
+    void _buildPattern( DOF const & dof,
+                        DynPattern const & dynpatt,
                         UInt const nbcomp );
 };
 
 ///////////////////////////////////////////////////
-///
-///      V B R Pattern
-/// It holds a CSR pattern of variable size blocks
-///
+//
+//      V B R Pattern
+// It holds a CSR pattern of variable size blocks
+//
 //////////////////////////////////////////////////
 
+/*!
+  \class VBRPatt
+  The block pattern is given by the class CSRPatt:
+  _ia : points to the location in _ja of the first block
+  entry in each block row.
+  _ja : contains the block column indices of the block pattern.
+  
+  BEWARE : the interpretation of _nnz, _nrows and _ncols of the class
+  BasePattern is valid for the BLOCK pattern, that is
+  _nnz : number of non zero BLOCKS,
+  _nrows : number of BLOCK rows,
+  _ncols : number of BLOCK columns.
+  
+  VBRPatt: VBR format accepts blocks of variable size.
+  This pattern is more general than needed. In fact we work
+  with blocks having a fixed size.
+*/
 class VBRPatt: public CSRPatt
-            /*!\class VBRPatt
-               The block pattern is given by the class CSRPatt:
-               _ia : points to the location in _ja of the first block
-                     entry in each block row.
-               _ja : contains the block column indices of the block pattern.
-
-               BEWARE : the interpretation of _nnz, _nrows and _ncols of the class
-               BasePattern is valid for the BLOCK pattern, that is
-               _nnz : number of non zero BLOCKS,
-               _nrows : number of BLOCK rows,
-               _ncols : number of BLOCK columns.
-
-               VBRPatt: VBR format accepts blocks of variable size.
-                        This pattern is more general than needed. In fact we work
-                 with blocks having a fixed size.
-            */
 {
 public:
     VBRPatt()
     {}
     VBRPatt( UInt ex_nnz, UInt ex_nrow, UInt ex_ncol );
-    VBRPatt( UInt ex_nnz, UInt ex_nrow, UInt ex_ncol, const
-             std::vector<Index_t> &ex_ia, const std::vector<Index_t> &ex_ja, const
-             std::vector<Index_t> &ex_indx, const std::vector<Index_t> &ex_rpntr, const
-             std::vector<Index_t> &ex_cpntr );
+    VBRPatt( UInt ex_nnz, UInt ex_nrow, UInt ex_ncol,
+             const std::vector<Index_t> &ex_ia,
+             const std::vector<Index_t> &ex_ja,
+             const std::vector<Index_t> &ex_indx,
+             const std::vector<Index_t> &ex_rpntr,
+             const std::vector<Index_t> &ex_cpntr );
 
     VBRPatt( const VBRPatt &RightHandVBRP );
 
@@ -423,105 +494,101 @@ public:
 
     VBRPatt & operator= ( const VBRPatt& RhVbr );
 
-    //! Methods that returns row data in different fashions.
-    inline Container indx() const
-    {
-        return _indx;
-    }
-    inline Container rpntr() const
-    {
-        return _rpntr;
-    }
-    inline Container cpntr() const
-    {
-        return _cpntr;
-    }
+    //! return a copy of indx as a container
+    inline Container indx() const { return _indx; }
+    
+    //! return a copy of rpntr as a container
+    inline Container rpntr() const { return _rpntr; }
+    
+    //! return a copy of cpntr as a container
+    inline Container cpntr() const { return _cpntr; }
 
-    inline Index_t* giveRawVBR_ia()
-    {
-        return giveRawCSR_ia();
-    } //!< Give ia (in a raw form)
-    inline Index_t* giveRawVBR_ja()
-    {
-        return giveRawCSR_ja();
-    } //!< Give ja (in a raw form)
-    inline Index_t* giveRawVBR_indx()
-    {
-        return & ( _indx.front() );
-    } //!< Give indx (in a raw form)
-    inline Index_t* giveRawVBR_rpntr()
-    {
-        return & ( _rpntr.front() );
-    } //!< Give rpntr (in a raw form)
-    inline Index_t* giveRawVBR_cpntr()
-    {
-        return & ( _cpntr.front() );
-    } //!< Give cpntr (in a raw form)
+    //! Give ia (in a raw form)
+    inline Index_t* giveRawVBR_ia() { return giveRawCSR_ia(); }
+    
+    //! Give ja (in a raw form)
+    inline Index_t* giveRawVBR_ja() { return giveRawCSR_ja(); }
 
+    //! Give indx (in a raw form)
+    inline Index_t* giveRawVBR_indx() { return & ( _indx.front() ); }
+    
+    //! Give rpntr (in a raw form)
+    inline Index_t* giveRawVBR_rpntr() { return & ( _rpntr.front() ); }
+    
+    //! Give cpntr (in a raw form)
+    inline Index_t* giveRawVBR_cpntr() { return & ( _cpntr.front() ); }
 
-    inline Container & give_indx()
-    {
-        return _indx;
-    }
-    ; //!< Give indx (as container)
-    inline Container & give_rpntr()
-    {
-        return _rpntr;
-    }
-    ; //!< Give rpntr (as container)
-    inline Container & give_cpntr()
-    {
-        return _cpntr;
-    }
-    ; //!< Give cpntr (as container)
+    //! Give indx (as container)
+    inline Container & give_indx() { return _indx; }
 
-    // No check of _rpntr size !
+    //! Give rpntr (as container)
+    inline Container & give_rpntr() { return _rpntr; }
+    
+    //! Give cpntr (as container)
+    inline Container & give_cpntr() { return _cpntr; }
+
+    //! Give the block row to which row belongs. No check of _rpntr size!
     inline Diff_t rbloc( Diff_t const row ) const
-    //!< Give the block row to which
-    //!< belong row
     {
-        UInt blsize = _rpntr[ 1 ] - _rpntr[ 0 ]; // size of square block
-        return row / blsize + PatternOffset; // block row offset in which is row
+        // size of square block
+        UInt blsize = _rpntr[ 1 ] - _rpntr[ 0 ];
+        
+        // block row offset in which is row
+        return row / blsize + PatternOffset;
     }
 
+    //! Give the block column to which col belongs
     inline Diff_t cbloc( Diff_t const col ) const
-    //!< Give the block column to
-    //!< which belong col
     {
-        UInt blsize = _rpntr[ 1 ] - _rpntr[ 0 ]; // size of square block
-        return col / blsize + PatternOffset; // block row offset in which is row
+        // size of square block
+        UInt blsize = _rpntr[ 1 ] - _rpntr[ 0 ];
+        
+        // block row offset in which is row
+        return col / blsize + PatternOffset;
     }
 
+    //! Give the local row numbering
+    //! of row in the corresponding block (given by rbloc)
     inline Diff_t locr( Diff_t const row ) const
-    //!< Give the local row numbering
-    //!< of row in the corresponding block (given by rbloc)
     {
-        UInt blsize = _rpntr[ 1 ] - _rpntr[ 0 ]; // size of square block
-        return row % blsize + PatternOffset;  // local row number into the block
+        // size of square block
+        UInt blsize = _rpntr[ 1 ] - _rpntr[ 0 ];
+        
+        // local row number into the block
+        return row % blsize + PatternOffset;
     }
 
+    //! Give the local column numbering
+    //! of row in the corresponding block (given by cbloc)
     inline Diff_t locc( Diff_t const col ) const
-    //!< Give the local column numbering
-    //!< of row in the corresponding block (given by cbloc)
     {
-        UInt blsize = _rpntr[ 1 ] - _rpntr[ 0 ]; // size of square block
-        return col % blsize + PatternOffset;  // local col number into the block
+        // size of square block
+        UInt blsize = _rpntr[ 1 ] - _rpntr[ 0 ];
+        
+        // local col number into the block
+        return col % blsize + PatternOffset;
     }
 
-
-    //! The following template function extracts a row (useful to
-    //! implement A*b), returning two sequences:
-    //! coldata : column numbering (of elements and NOT blocks)
-    //! position: coldata corresponding offsets in the vector holding the matrix
-    //!           value.
-    //! coldata is given as a sequence of Index_t (i.e. the
-    //! content depends on the value of PATTERN_OFFSET), while
-    //! the position sequence are always offsets (i.e. starting from 0)
-    //! Iter is either an iterator to a container or a pointer. The
-    //! function Returns the n. or row elements.
-    //! IMPORTANT: for efficiency reason the sequences pointed by coldata
-    //! and position MUST have been dimensioned before in order to
-    //! have the sufficient dimension (use giveMinMax) NO CHECKS ARE MADE!!!!!
+    /*!
+      The following template function extracts a row (useful to implement A*b),
+      returning two sequences:
+      
+      coldata : column numbering (of elements and NOT blocks)
+      
+      position: coldata corresponding offsets in the vector holding the matrix
+      value.
+      
+      coldata is given as a sequence of Index_t (i.e. the
+      content depends on the value of PATTERN_OFFSET), while
+      the position sequence are always offsets (i.e. starting from 0)
+      
+      Iter is either an iterator to a container or a pointer. The
+      function returns the n. or row elements.
+      
+      IMPORTANT: for efficiency reason the sequences pointed by coldata
+      and position MUST have been dimensioned before in order to
+      have the sufficient dimension (use giveMinMax) NO CHECKS ARE MADE!
+    */
     inline UInt row( Diff_t const row, Container & coldata, Container & position ) const;
 
     // Here the routines which locate the position in the vector
@@ -531,101 +598,117 @@ public:
     // information on the block position (element (1,1) of the block).
 
     //! pattern visualization
-    void showMe( bool const verbose = false, std::ostream& c = std::cout ) const ;
-    void spy( std::string const & filname = "matrice.m" ) const; //!< pattern visualization
-    //!< a la Matlab
+    void showMe( bool const verbose = false,
+                 std::ostream& c = std::cout ) const ;
+    
+    //! pattern visualization a la Matlab
+    void spy( std::string const & filename = "matrice.m" ) const;
 
 private:
-    Container _indx; //!< _indx(i) points to the location in the pattern
-    //!< of the (1,1) element of the i-th block entry.
-    //!< _indx(_nnz+1)=1+number of non zeros elements of the pattern.
-    Container _rpntr; //!< _rpntr(i)-_rpntr(0) is the row index of the
-    //!< first point row in the i-th block row.
-    //!< _rpntr(_nrows+1)=_rpntr(0)+number of element rows.
-    Container _cpntr; //!<  the column index of the first point column in
-    //!< the i-th block column.
-    //!< _cpntr=_rpntr FOR SQUARE PATTERN of SQUARE BLOCKS.
-    //!< _cpntr(_ncols+1)=_cpntr(0)+number of element columns.
+    //! _indx(i) points to the location in the pattern
+    //! of the (1,1) element of the i-th block entry.
+    //! _indx(_nnz+1)=1+number of non zeros elements of the pattern.
+    Container _indx;
+
+    //! _rpntr(i)-_rpntr(0) is the row index of the
+    //! first point row in the i-th block row.
+    //! _rpntr(_nrows+1)=_rpntr(0)+number of element rows.
+    Container _rpntr;
+        
+    //!  the column index of the first point column in
+    //! the i-th block column.
+    //! _cpntr=_rpntr FOR SQUARE PATTERN of SQUARE BLOCKS.
+    //! _cpntr(_ncols+1)=_cpntr(0)+number of element columns.
+    Container _cpntr;
 };
 
 //////////////////////////////////////////////////
-///
-///      C S R Symmetric Pattern
-/// It holds only the upper triangular part
-///
+//
+//      C S R Symmetric Pattern
+// It holds only the upper triangular part
+//
 //////////////////////////////////////////////////
 
-class CSRPattSymm:
-            public BasePattern
+class CSRPattSymm : public BasePattern
 {
 public:
     CSRPattSymm();
+    
     CSRPattSymm( UInt ex_nnz, UInt ex_nrow, UInt ex_ncol );
+    
     CSRPattSymm( UInt ex_nnz, UInt ex_nrow, UInt ex_ncol,
                  const std::vector<Index_t> &ex_ia,
                  const std::vector<Index_t> &ex_ja );
+    
     CSRPattSymm( const CSRPattSymm &RightHandCSRP );
+    
     template <typename DOF>
     CSRPattSymm( DOF const & dof );
+    
     CSRPattSymm & operator= ( const CSRPattSymm& RhCsr );
 
     template <typename DOF>
-    bool buildPattern( DOF const & dof );  // Pattern builder
+    bool buildPattern( DOF const & dof );
 
-    Container ia() const
-    {
-        return _ia;
-    };
-    Container ja() const
-    {
-        return _ja;
-    };
-    Index_t * giveRawCSR_ia()
-    {
-        return & ( _ia.front() );
-    }
-    ; // Give ia (in a raw form)
-    Index_t * giveRawCSR_ja()
-    {
-        return & ( _ja.front() );
-    }
-    ; // Give ja (in a raw form)
-    Container & give_ia()
-    {
-        return _ia;
-    }
-    ; // Give ia (as container)
-    Container & give_ja()
-    {
-        return _ja;
-    }
-    ; // Give ja (as container)
+    Container ia() const { return _ia; };
+    
+    Container ja() const { return _ja; };
+
+    //! Give ia (in a raw form)
+    Index_t * giveRawCSR_ia() { return & ( _ia.front() ); }
+    
+    //! Give ja (in a raw form)
+    Index_t * giveRawCSR_ja() { return & ( _ja.front() ); }
+    
+    //! Give ia (as container)
+    Container & give_ia() { return _ia; }
+    
+    //! Give ja (as container)
+    Container & give_ja() { return _ja; }
+    
     inline std::pair<UInt, UInt> giveMinMax() const;
 
-    // DO NOt use them (are very inefficient)
+    //! N of neighbours of the DOF numbeered d . BEWARE d is INCLUDED!
+    //! Note: this function is inefficient
     UInt nbNeighbours( ID const d ) const;
+
+    //! the i-th (start from 1) neighbour of dof d. The first is d itself
+    //! Note: this function is inefficient
     ID neighbour( ID const i, ID const d ) const ;
+    
+    //! put neighbours of dof d in a list
+    //! Note: this function is inefficient
     void neighbours( ID const d, Container & start ) const;
+    
+    //! extracts a row (useful to implement A*b)
     template <typename Iter>
-    inline UInt row( Diff_t const row, Iter coldata, Iter position ) const; // extracts a row (useful to implement A*b)
+    inline UInt row( Diff_t const row, Iter coldata, Iter position ) const;
 
     inline std::pair<Diff_t, bool> locate_dof( ID const i, ID const j ) const;
 
-    inline std::pair<Diff_t, bool> locate_index( Index_t const i, Index_t const j ) const;
+    inline std::pair<Diff_t, bool> locate_index( Index_t const i,
+                                                 Index_t const j ) const;
 
-    void showMe( bool verbose = false, std::ostream& c = std::cout ) const; // pattern visualization
-    void spy( std::string const & filname = "matrice.m" ) const; //pattern visualization a la Matlab
+    //! pattern visualization
+    void showMe( bool verbose = false, std::ostream& c = std::cout ) const;
+    
+    //! pattern visualization a la Matlab
+    void spy( std::string const & filename = "matrice.m" ) const;
 
 
-    // DOF are ALWAYS numbered a la Fortran: the following definition set the correct numbering
-    // as a function of current numbering (specified by PATTERN_OFFSET)
+    /*
+      DOF are ALWAYS numbered from 1: the following definition set the correct
+      numbering as a function of current numbering (specified by
+      PATTERN_OFFSET)
+    */
 
 protected:
-    Diff_t _row_off( Index_t i ) const
-    { // Row offset for row index i
-        return _i2o( _ia[ _i2o( i ) ] );
-    }
-    std::pair<Diff_t, bool> locate_pattern( Index_t const i, Index_t const j ) const;
+    //! Row offset for row index i
+    Diff_t _row_off( Index_t i ) const { return _i2o( _ia[ _i2o( i ) ] ); }
+    
+    std::pair<Diff_t, bool> locate_pattern( Index_t const i,
+                                            Index_t const j ) const;
+    
     bool isThere( Index_t i, Index_t j ) const;
 
 private:
@@ -635,123 +718,134 @@ private:
 
 
 ///////////////////////////////////////////////////
-///
-///      M S R Pattern
-///  It implements the MSR format
-///
+//
+//      M S R Pattern
+//  It implements the MSR format
+//
 //////////////////////////////////////////////////
 
-class MSRPatt:
-            public BasePattern
+class MSRPatt : public BasePattern
 {
 public:
+    
     MSRPatt();
+    
     MSRPatt( UInt ex_nnz, UInt ex_nrow, UInt ex_ncol );
+    
     MSRPatt( UInt ex_nnz, UInt ex_nrow, UInt ex_ncol,
              const std::vector<Index_t> &bindx,
              const std::vector<Index_t> &ybind );
+    
     MSRPatt( const MSRPatt &RightHandMSRP );
+    
     MSRPatt( const CSRPatt &RightHandCSRP );
+    
     MSRPatt & operator= ( const MSRPatt& RhMsr );
+    
+    //! Constructor for standard FEM
     template <typename DOF>
     MSRPatt( DOF const & dof, UInt const nbcomp = 1 );
 
-    // Miguel 12/2003: new version handling patterns coming from IP stabilization
+    //! Constructor for continuous FEM with IP stabilization
+    //! @author Miguel Fernandez, 12/2003
     template <typename DOF, typename MESH>
     MSRPatt( const DOF& dof, const MESH& mesh, const UInt nbcomp );
 
-    // D. A. Di Pietro 10/2004
+    //! Constructor for DG FEM
+    //! @author Daniele A. Di Pietro, 10/2004
     template<typename DOF, typename DOFBYFACE>
-    MSRPatt(DOF const & dof, DOFBYFACE const & dofbyface, const std::string& type, UInt const nbcomp = 1);
+    MSRPatt(DOF const & dof,
+            DOFBYFACE const & dofbyface,
+            const std::string& type, 
+            UInt const nbcomp = 1);
 
+    //! build function for standard FEM
     template <typename DOF>
     bool buildPattern( DOF const & dof, UInt const nbcomp );
 
-    // Miguel 12/2003: new version handling patterns coming from IP stabilization
+    //! build function for continuous FEM with IP stabilization
+    //! @author Miguel Fernandez, 12/2003
     template <typename DOF, typename MESH>
     bool buildPattern( const DOF& dof, const MESH& mesh, const UInt nbcomp );
 
-    // D. A. Di Pietro 10/2004
+    //! build function for DG FEM
+    //! @author Daniele A. Di Pietro, 10/2004
     template<typename DOF, typename DOFBYFACE>
-    bool buildPattern(DOF const & dof, DOFBYFACE const & dofbyface, const std::string& type, UInt const nbcomp = 1);
+    bool buildPattern(DOF const & dof,
+                      DOFBYFACE const & dofbyface,
+                      const std::string& type,
+                      UInt const nbcomp = 1);
 
-    Container bindx() const
-    {
-        return _bindx;
-    };
-    Container ybind() const
-    {
-        return _ybind;
-    };
-    Index_t * giveRaw_bindx()
-    {
-        return & ( _bindx.front() );
-    }
-    ; // Give _bindx (in a raw form)
-    Index_t * giveRaw_ybind()
-    {
-        return & ( _ybind.front() );
-    }
-    ; // Give _ybind (in a raw form)
-    Index_t const * giveRaw_bindx() const
-    {
-        return & ( _bindx.front() );
-    }
-    ; // Give _bindx (in a raw form)
-    Index_t const * giveRaw_ybind() const
-    {
-        return & ( _ybind.front() );
-    }
-    ; // Give _ybind (in a raw form)
-    Container & give_bindx()
-    {
-        return _bindx;
-    }
-    ; // Give _bindx (as container)
-    Container & give_ybind()
-    {
-        return _ybind;
-    }
-    ; // Give _ybind (as container)
-    Container const & give_bindx() const
-    {
-        return _bindx;
-    }
-    ; // Give _bindx (as container)
-    Container const & give_ybind() const
-    {
-        return _ybind;
-    }
-    ; // Give _ybind (as container)
-    //
+    Container bindx() const { return _bindx; };
+
+    Container ybind() const { return _ybind; };
+
+    //! Give _bindx (in a raw form)
+    Index_t * giveRaw_bindx() { return & ( _bindx.front() ); }
+
+    //! Give _ybind (in a raw form)
+    Index_t * giveRaw_ybind() { return & ( _ybind.front() ); }
+    
+    //! Give _bindx (in a raw form)
+    Index_t const * giveRaw_bindx() const { return & ( _bindx.front() ); }
+    
+    //! Give _ybind (in a raw form)
+    Index_t const * giveRaw_ybind() const { return & ( _ybind.front() ); }
+    
+    //! Give _bindx (as container)
+    Container & give_bindx() { return _bindx; }
+    
+    //! Give _ybind (as container)
+    Container & give_ybind() { return _ybind; }
+    
+    //! Give _bindx (as container)
+    Container const & give_bindx() const { return _bindx; }
+    
+    //! Give _ybind (as container)
+    Container const & give_ybind() const { return _ybind; }
+
     inline UInt nbNeighbours( ID const d ) const;
+    
     inline ID neighbour( ID const i, ID const d ) const;
+    
     void neighbours( ID const d, Container & start ) const;
+    
+    //! extracts a row (useful to implement A*b)
     template <typename Iter>
-    inline UInt row( Diff_t const row, Iter coldata, Iter position ) const; // extracts a row (useful to implement A*b)
+    inline UInt row( Diff_t const row, Iter coldata, Iter position ) const;
 
     inline std::pair<Diff_t, bool> locate_dof( ID const i, ID const j ) const;
-    //
+
     inline std::pair<UInt, UInt> giveMinMax() const;
-    inline std::pair<Diff_t, bool> locate_index( Index_t const i, Index_t const j ) const;
 
-    void showMe( bool verbose = false, std::ostream& c = std::cout ) const ; // pattern visualization
-    void spy( std::string const & filname = "matrice.m" ) const ; //pattern visualization a la Matlab
+    inline std::pair<Diff_t, bool> locate_index( Index_t const i,
+                                                 Index_t const j ) const;
 
-    // Construction of a diagonal matrix of n blocks
-    friend void diagblockMatrix( MSRPatt &ans, MSRPatt const &patt, UInt const nblock );
+    //! pattern visualization
+    void showMe( bool verbose = false, std::ostream& c = std::cout ) const ;
+    
+    //! pattern visualization a la Matlab
+    void spy( std::string const & filename = "matrice.m" ) const ;
+
+    //! Construction of a diagonal matrix of n blocks
+    friend void diagblockMatrix( MSRPatt &ans,
+                                 MSRPatt const &patt,
+                                 UInt const nblock );
 
 protected:
-    Diff_t _row_off( Index_t i ) const
-    { // Row offset for row index i
-        return _i2o( _bindx[ _i2o( i ) ] );
-    }
-    std::pair<Diff_t, bool> locate_pattern( Index_t const i, Index_t const j ) const;
-    inline bool isThere( Index_t i, Index_t j ) const ; // superata dalla locate
+    //! Row offset for row index i
+    Diff_t _row_off( Index_t i ) const { return _i2o( _bindx[ _i2o( i ) ] ); }
+
+    std::pair<Diff_t, bool> locate_pattern( Index_t const i,
+                                            Index_t const j ) const;
+    
+    // superata dalla locate
+    inline bool isThere( Index_t i, Index_t j ) const;
 
 private:
     Container _bindx;
-    Container _ybind; // WARNING: AV January 2001: it helps in reading the matrix by columns ;
+    Container _ybind;
+    // WARNING: AV January 2001: ybind helps in reading the matrix by columns;
     // a counterpart of ybind should be added also to the CSR format
     // ybind should facilitate also the locate_pattern subroutines
     // IT IS BASED ON THE ASSUMPTION THAT THE PATTERN IS SYMMETRIC
@@ -762,21 +856,25 @@ private:
 };
 
 ///////////////////////////////////////////////////
-///
-///      Mixed Local Patterns
-//////////////////////////////////////////////////
 //
-/* This class mixedLocalPattern<FE1, FE2> is used to provide the local
-  pattern for two BasisFInite element, it corresponds to the pattern
-  required to build element matrices of the type $m_{ij}=\int_K
-  \phi_i^1\phi^2_j$. The number of Rows correspond to the number of local
-  degrees of freedon for the finite elemnt of type 1, i.e FE1::nbNode,
+//      Mixed Local Patterns
+//
+//////////////////////////////////////////////////
+
+/*!
+  \class MixedLocalPattern
+  This class MixedLocalPattern<FE1, FE2> is used to provide the local
+  pattern for two basis finite element, it corresponds to the pattern
+  required to build element matrices of the type
+  \f$ m_{ij}=\int_K \phi_i^1\phi^2_j \f$.
+  The number of rows correspond to the number of local
+  degrees of freedom for the finite element of type 1, i.e FE1::nbNode,
   while the number of colums are FE2::nbNode. The major assumption is that
-  $\forall K$ and $i,j\in K$, the support of $\phi_i^1\vert_K$ and
-  $\phi_j^2\vert_K$ has non-null intersection. In other words, the local
-  matrix has a  full pattern.
+  \f$ \forall K \f$ and \f$ i,j\in K \f$, the support of
+  \f$ \phi_i^1\vert_K \f$ and \f$ \phi_j^2\vert_K \f$ has non-null
+  intersection. In other words, the local matrix has a full pattern.
   The pattern follows the rule of numbering
-  */
+*/
 template <typename FE1, typename FE2>
 class MixedLocalPattern: public PatternDefs
 {
@@ -784,72 +882,118 @@ public:
     UInt nRows() const;
     UInt nCols() const;
     UInt nbPattern() const;
-    UInt patternFirst( UInt const i ) const; //Numbering from 0
-    UInt patternSecond( UInt const i ) const; //Numbering from 0
+    UInt patternFirst( UInt const i ) const; // Numbering from 0
+    UInt patternSecond( UInt const i ) const; // Numbering from 0
 };
+
 ///////////////////////////////////////////////////
-///
-///      Mixed Patterns
-///
+//
+//      Mixed Pattern
+//
 //////////////////////////////////////////////////
-/*
-  The mixed pattern class is a very general class able to held
-  multiblock matrix patterns.
-  The block numbering starts from (0,0). Each block contains a pointer to a Pattern class and a couple of
-  offsets, which indicate how the LOCAL block row/cols numbering has to be increased to get the
-  GLOBAL numbering (i.e. the numbering associated to to the global matrix).
+
+/*!
+  \class MixedPattern
+  The class MixedPattern is a very general class able to held multiblock
+  matrix patterns. The block numbering starts from (0,0). Each block contains
+  a pointer to a Pattern class and a couple of offsets, which indicate how the
+  LOCAL block row/cols numbering has to be increased to get the GLOBAL
+  numbering (i.e. the numbering associated to to the global matrix).
+  
   It may be used in two forms
-  1) as a viewer, then the local patterns are contructued externally and then "linked"
-  to the mixed patter object, or
-  2) by delegating to contruction of  the local patterns to the mixed pattern object.
-  In the first case the destruction of the mixed pattern object will NOT imply the destruction of the
-  local patterns, while in the other case everithing is destroied.
+  
+  1) as a viewer, then the local patterns are contructued externally and then
+  "linked" to the mixed patter object, or
+  
+  2) by delegating to contruction of  the local patterns to the mixed pattern
+  object.
+  
+  In the first case the destruction of the mixed pattern object will NOT imply
+  the destruction of the local patterns, while in the other case everything
+  is destroyed.
 */
 template <UInt BROWS, UInt BCOLS, typename PATTERN = CSRPatt>
-class
-            MixedPattern : public PatternDefs
+class MixedPattern : public PatternDefs
 {
 public:
 
+    //! default constructor
     MixedPattern();
 
-    // Miguel 11/02: I want to construct a diagonal pattern
-    // in the initialisation list, so I need a constructor which makes the pattern
-    // construct and link to an external pattern (type = "diag") (Alain: type="full")
+    /*!
+      constructor which makes the pattern construct and link to an external
+      pattern, useful to construct a diagonal pattern
+      @arg type "full" or "diag"
+      @author Miguel Fernandez, 11/2002
+    */
     MixedPattern( PATTERN & ex_patt, const std::string& type = "full" );
 
+    //! destructor
     ~MixedPattern();
 
-    // make a diagonal pattern for vectorial problem
+    //! make a diagonal pattern for vectorial problem
     void makeDiagPattern( PATTERN & ex_patt );
 
-    inline std::pair<UInt, UInt> nBlocks() const; // Number of blocks (rows and columns)
+    //! Number of blocks (rows and columns)
+    inline std::pair<UInt, UInt> nBlocks() const;
 
-    inline UInt nRows( Diff_t const m, Diff_t const n ) const; // Number of rows in block (m,n)
+    //! Number of rows in block (m,n)
+    inline UInt nRows( Diff_t const m, Diff_t const n ) const;
+    
     inline UInt nCols( Diff_t const m, Diff_t const n ) const;
-    inline UInt nNz( Diff_t m, Diff_t n ) const; // Non zeros on Block (m,n)
-    inline UInt nRows() const; // Global number of rows
-    inline UInt nCols() const; // Global number of cols.
-    UInt nNz() const; // Non zeros in global matrix
-
-    // Neighbours at block level. (local ID numbering)
+    
+    //! Nonzeros on block (m,n)
+    inline UInt nNz( Diff_t m, Diff_t n ) const;
+    
+    //! Global number of rows
+    inline UInt nRows() const;
+    
+    //! Global number of cols
+    inline UInt nCols() const;
+    
+    //! Non zeros in global matrix
+    UInt nNz() const;
+    
+    //! Number of neighbours at block level. (local ID numbering)
     UInt nbNeighbours( Diff_t const m, Diff_t const n, ID const d ) const ;
-    ID neighbour( Diff_t const m, Diff_t const n, ID const i, ID const d ) const;
-    inline void neighbours( Diff_t const m, Diff_t const n, ID const d, Container & neighs ) const;
+    
+    //! i-th neighbour of dof d at block level. (local ID numbering)
+    ID neighbour( Diff_t const m, Diff_t const n,
+                  ID const i, ID const d ) const;
+    
+    //! put neighbours of dof d at block level. (local ID numbering) in a list
+    inline void neighbours( Diff_t const m, Diff_t const n,
+                            ID const d, Container & neighs ) const;
+    
+    //! extracts a row (useful to implement A*b) at block level.
+    //! (local ID numbering)
     template <typename Iter>
-    inline UInt row( Diff_t const m, Diff_t const n, Diff_t const row, Iter coldata, Iter Position ) const; // extracts a row (useful to implement A*b)
+    inline UInt row( Diff_t const m, Diff_t const n,
+                     Diff_t const row, Iter coldata, Iter Position ) const;
 
-    // Neighbours at global level (global ID numbering)
+    //! Number of neighbours at global level. (global ID numbering)
     UInt nbNeighbours( ID const d_g ) const ;
-    ID neighbour( ID const i_g, ID const d_g ) const;
-    void neighbours( ID const d_g, Container & neighs ) const;
-    template <typename Iter>
-    inline UInt row( Diff_t const row, Iter coldata, Iter position ) const; // extracts a row (useful to implement A*b)
 
-    inline PATTERN * block_ptr( Diff_t const m, Diff_t const n ); // Pointer to a a local pattern
-    inline const PATTERN * block_ptr( Diff_t const m, Diff_t const n ) const; // Pointer to a a local pattern
+    //! i-th neighbour of dof d at global level. (global ID numbering)
+    ID neighbour( ID const i_g, ID const d_g ) const;
+    
+    //! put neighbours of dof d at global level. (global ID numbering)
+    //! in a list
+    void neighbours( ID const d_g, Container & neighs ) const;
+    
+    //! extracts a row (useful to implement A*b) at global level.
+    //! (global ID numbering)
+    template <typename Iter>
+    inline UInt row( Diff_t const row, Iter coldata, Iter position ) const;
+
+    //! Pointer to a a local pattern
+    inline PATTERN * block_ptr( Diff_t const m, Diff_t const n );
+    
+    //! Pointer to a a local pattern
+    inline const PATTERN * block_ptr( Diff_t const m, Diff_t const n ) const;
 
     inline std::pair<UInt, UInt> blockOffset( UInt const m, UInt const n ) const; // The row/col offsets of the block
+    
     std::pair<UInt, UInt> locateElBlock( Index_t const i_g, Index_t const j_g ) const;
     //  Gives the block numbering corresponding to the  GLOBAL matrix index (i_g,j_g) Returns
     // (BROWS,BCOLS) if element not found
@@ -943,9 +1087,9 @@ extract_pair( std::pair<T1, T2> const & p, T1 & t1, T2 & t2 )
     t2 = p.second;
 }
 
-//=========================================================================================
-//I M P L E M E N T A T I O N S ===========================
-//=====================================================================================
+//=============================================================================
+// I M P L E M E N T A T I O N S ===========================
+//=============================================================================
 
 inline
 PatternDefs::Index_t PatternDefs::_d2i( ID const d ) const
@@ -1843,7 +1987,7 @@ bool CSRPattSymm::buildPattern( DOF1 const & dof1 )
     UInt ig, jg, cur;
     UInt nnz_symm = _nrows + dynpatt.size(); // actual size of _ja when exploiting the symmetry:
 
-    ////////////////////////////////////// Please, observe that nnz_symm = (_nnz-_nrows)/2
+    // Please, observe that nnz_symm = (_nnz-_nrows)/2
 
     // I use a modified version of CSR (compatible with the standard one), where:
     // 1) ia is dimensioned nrows+1, so that I do not have to treat the
