@@ -58,10 +58,14 @@ run
 make clean
 make
 
-
+good luck
 
 
 #$Log: README,v $
-#Revision 1.1  2002-10-08 16:26:33  cvs
+#Revision 1.2  2002-10-29 17:31:23  cvs
+#Una prova
+#
+#Revision 1.1  2002/10/08 16:26:33  cvs
 #*** empty log message ***
 #
+od Luck
