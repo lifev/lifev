@@ -43,7 +43,13 @@
 /* #include <ethierSteinman.hpp> */
 
 #define ONE_QUARTER 0
-#define P1BUBBLE 0
+
+#define P1 0
+#define P1BUBBLE 1
+#define P2 2
+
+#define LS_ELEMENT P1
+#define U_ELEMENT P1BUBBLE
 
 int main() {
     using namespace LifeV;
@@ -68,7 +74,6 @@ int main() {
     //EthierSteinmanUnsteady::setParamsFromGetPot( datafile );
     //BCFunctionBase gv(EthierSteinmanUnsteady::uexact);
     BCFunctionBase gv(g);
-
     BCHandler BCh( 6, BCHandler::HINT_BC_ONLY_ESSENTIAL );
     BCh.addBC("Wall", 1, Essential, Full, gv, 3);
     BCh.addBC("Wall", 2, Essential, Full, gv, 3);
@@ -77,7 +82,10 @@ int main() {
     BCh.addBC("Wall", 5, Essential, Full, gv, 3);
     BCh.addBC("Wall", 6, Essential, Full, gv, 3);
 
-    //BCh.addBC("Wall", 10, Essential, Full, gv, 3);
+    /*
+      BCHandler BCh( 1, BCHandler::HINT_BC_ONLY_ESSENTIAL );;
+      BCh.addBC("Wall", 10, Essential, Full, gv, 3);
+    */
 
     // Source term
 
@@ -85,9 +93,9 @@ int main() {
 
     // Finite element stuff
 
-#if P1BUBBLE
+#if U_ELEMENT == P1BUBBLE
     const RefFE& refFE_u = feTetraP1bubble;
-#else
+#elif U_ELEMENT == P2
     const RefFE& refFE_u = feTetraP2;
 #endif
 
@@ -120,15 +128,19 @@ int main() {
 
     // Export initial conditions to OpenDX format
 
+    // Level set function
     wr_opendx_header(ofile_root_ls + "0000.dx", NSS.mesh(), NSS.lsDof(), NSS.fe_ls(), "P2" );
     wr_opendx_scalar(ofile_root_ls + "0000.dx", "levelset_ipstab", NSS.lsfunction());
-#if P1BUBBLE
+
+    // Velocity
+#if U_ELEMENT == P1BUBBLE
     wr_opendx_header(ofile_root_velocity + "0000.dx", NSS.mesh(), NSS.uDof(), NSS.fe_u(), "P1bubble");
-#else
+#elif U_ELEMENT == P2
     wr_opendx_header(ofile_root_velocity + "0000.dx", NSS.mesh(), NSS.uDof(), NSS.fe_u(), "P2");
 #endif
     wr_opendx_vector(ofile_root_velocity + "0000.dx", "u", NSS.velocity(), 3);
 
+    // Advancing in time
     std::cout << "** NS2F test ** Advancing in time" << std::endl;
 
     UInt current_step = 1;
@@ -150,15 +162,18 @@ int main() {
             number.fill('0');
             number << current_step;
 
+            // Level set function
             wr_opendx_header(ofile_root_ls + number.str() + ".dx", NSS.mesh(), NSS.lsDof(), NSS.fe_ls(), "P2" );
             wr_opendx_scalar(ofile_root_ls + number.str() + ".dx", "ls", NSS.lsfunction());
 
+            // Pressure
             wr_opendx_header(ofile_root_pressure + number.str() + ".dx", NSS.mesh(), NSS.pDof());
             wr_opendx_scalar(ofile_root_pressure + number.str() + ".dx", "p", NSS.pressure());
             
-#if P1BUBBLE
+            // Velocity
+#if U_ELEMENT == P1BUBBLE
             wr_opendx_header(ofile_root_velocity + number.str() + ".dx", NSS.mesh(), NSS.uDof(), NSS.fe_u(), "P1bubble");
-#else
+#elif U_ELEMENT == P2
             wr_opendx_header(ofile_root_velocity + number.str() + ".dx", NSS.mesh(), NSS.uDof(), NSS.fe_u(), "P2");
 #endif
             wr_opendx_vector(ofile_root_velocity + number.str() + ".dx", "u", NSS.velocity(), 3);
