@@ -27,7 +27,7 @@ include $(top_srcdir)/testsuite/Makefile.testsuite
 check_HEADERS = ud_functions.hpp ensight7-write.hpp
 
 check_PROGRAMS = test_mass_coupling
-test_masstransport_SOURCES = main.cpp 
+test_mass_coupling_SOURCES = main.cpp 
 EXTRA_DIST = data-lumen data-wall testsuite.at
 
 
