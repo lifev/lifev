@@ -26,7 +26,7 @@
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
 
-SUBDIRS		= lifecore lifearray lifemesh lifealg  lifefem lifesolver lifefilters
+SUBDIRS		= lifecore lifearray lifemesh lifealg  lifefem lifefilters lifesolver
 
 
 apidox:
