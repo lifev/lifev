@@ -161,7 +161,8 @@ namespace LifeV
         }
         else if (a22 == 0)
         {
-            
+            omega2 = 0.;
+            omega1 = b1/a11*a11;
         }
 
         for (int ii = 0; ii < M_nDof; ++ii)
