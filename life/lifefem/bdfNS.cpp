@@ -16,11 +16,16 @@
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+#include <algorithm>
+
 #include "bdfNS.hpp"
 
 namespace LifeV
 {
-BdfNS::BdfNS( const UInt n ) : _bdf_u( n ), _bdf_p( std::max( ( UInt ) 1, n - 1 ) )
+BdfNS::BdfNS( const UInt n )
+    :
+    _bdf_u( n ),
+    _bdf_p( std::max( UInt( 1 ), n - 1 ) )
 {}
 
 Bdf& BdfNS::bdf_u()
