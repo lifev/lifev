@@ -143,17 +143,15 @@ void fixedPoint::setUpBC()
     //
     // Passing data from the fluid to the structure: fluid load at the interface
     //
-    BCVectorInterface::dof_interface_type __di( M_dofFluidToStructure );
     BCVectorInterface g_wall(this->M_fluid->residual(),
                              dim_fluid,
-                             __di );
+                             M_dofFluidToStructure  );
     //
     // Passing data from structure to the fluid mesh: motion of the fluid domain
     //
-    __di = M_dofStructureToFluidMesh;
     BCVectorInterface displ(this->M_solid->d(),
                             dim_solid,
-                            __di );
+                            M_dofStructureToFluidMesh );
     //========================================================================================
     //  BOUNDARY CONDITIONS
     //========================================================================================

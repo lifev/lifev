@@ -131,24 +131,21 @@ void exactJacobian::setUpBC()
     //
     // Passing data from the fluid to the structure: fluid load at the interface
     //
-    BCVectorInterface::dof_interface_type __di( M_dofFluidToStructure );
     BCVectorInterface g_wall(this->M_fluid->residual(),
                              dim_fluid,
-                             __di );
+                             M_dofFluidToStructure );
     //
     // Passing data from structure to the fluid mesh: motion of the fluid domain
     //
-    __di = M_dofStructureToFluidMesh;
     BCVectorInterface displ(this->M_solid->d(),
                             dim_solid,
-                            __di );
+                            M_dofStructureToFluidMesh );
     //
     // Passing data from structure to the fluid: solid velocity at the interface velocity
     //
-    __di = M_dofMeshToFluid;
     BCVectorInterface u_wall(this->M_fluid->wInterpolated(),
                              dim_fluid,
-                             __di );
+                             M_dofMeshToFluid );
     //========================================================================================
     //  BOUNDARY CONDITIONS
     //========================================================================================
@@ -162,13 +159,11 @@ void exactJacobian::setUpBC()
     // Boundary conditions for the solid displacement
     M_BCh_d->addBC("Interface", 1, Natural,   Full, g_wall, 3);
 
-    __di = M_dofMeshToFluid;
-    BCVectorInterface du_wall(M_fluid->dwInterpolated(), dim_fluid, __di );
+    BCVectorInterface du_wall(M_fluid->dwInterpolated(), dim_fluid, M_dofMeshToFluid );
 
     // Passing data from fluid to the structure: du -> dz
     //
-    __di = M_dofFluidToStructure;
-    BCVectorInterface dg_wall(M_fluid->residual(), dim_fluid, __di );
+    BCVectorInterface dg_wall(M_fluid->residual(), dim_fluid, M_dofFluidToStructure );
 
     // Boundary conditions for du
     M_BCh_du->addBC("Wall",   1,  Essential, Full, du_wall,  3);

@@ -23,6 +23,8 @@
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
 AM_CPPFLAGS = -DNO_BLASLAPACK
+#AM_CXXFLAGS = $(LIFEV_CXX_PERMISSIVE)
+
 INCLUDES 	= -I$(top_srcdir)/life/lifecore  -I$(top_srcdir)/life/lifearray -I$(top_srcdir)/life/lifealg \
              -I$(top_srcdir)/life/lifemesh -I$(top_srcdir)/life/lifefem -I$(top_srcdir)/life/lifefilters 
 

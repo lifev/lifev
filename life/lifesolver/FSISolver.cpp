@@ -93,10 +93,9 @@ FSISolver::setFSIOperator( std::string const& __op )
 
     // Passing data from structure to the fluid: solid velocity at the interface velocity
     //
-    BCVectorInterface::dof_interface_type __di( M_oper->dofMeshToFluid() );
     BCVectorInterface u_wall( M_oper->fluid().wInterpolated(),
                               dim_fluid,
-                              __di );
+                              M_oper->dofMeshToFluid() );
 
     // Boundary conditions for the fluid velocity
     M_BCh_u->addBC("Wall",   1,  Essential, Full, u_wall,  3);

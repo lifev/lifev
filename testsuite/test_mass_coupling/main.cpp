@@ -94,8 +94,7 @@ int main(int argc, char** argv)
                                                                                feHexaQ1,
                                                                                cdrlumen.cDof()) );
   dofLumentoWall->update(cdrwall.mesh(), 3, cdrlumen.mesh(), 6, tol);
-  BCVectorInterface::dof_interface_type __di = dofLumentoWall;
-  BCVectorInterface cl_coupling(cl_interface, dim_cl, __di);
+  BCVectorInterface cl_coupling(cl_interface, dim_cl, dofLumentoWall );
 //  cl_coupling.setMixteCoef((-1.0/epsilon)*(u_filt*(((s*kappa)/2)-Klag)-P));
   for(UInt ii=0; ii < dim_cl; ii++){
      cl_mixte(ii)=(-1.0/epsilon)*(u_filt*(((s*kappa)/2)-Klag)-Pl_var(ii));}
@@ -107,8 +106,7 @@ int main(int argc, char** argv)
                                                                                feHexaQ1,
                                                                                cdrwall.cDof()) );
   dofWalltoLumen->update(cdrlumen.mesh(), 6, cdrwall.mesh(), 3, tol);
-  __di = dofWalltoLumen;
-  BCVectorInterface cw_coupling(cw_interface, dim_cw, __di );
+  BCVectorInterface cw_coupling(cw_interface, dim_cw, dofWalltoLumen );
 //  cw_coupling.setMixteCoef(P-u_filt*(1.0-((s*kappa)/2)));
   for(UInt ii=0; ii < dim_cw; ii++){
      cw_mixte(ii)=Pw_var(ii)-u_filt*(1.0-((s*kappa)/2));}
