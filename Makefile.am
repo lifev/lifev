@@ -29,7 +29,7 @@ $(top_srcdir)/configure.in: $(top_srcdir)/subdirs $(top_srcdir)/configure.files 
 	cd $(top_srcdir) && $(MAKE) -f admin/Makefile.common configure.in
 
 
-EXTRA_DIST = configure.in.in configure.in.bot  configure.in.mid subdirs configure.files Mainpage.dox
+EXTRA_DIST = configure.in.in configure.in.bot  configure.in.mid subdirs configure.files Mainpage.dox BUGS
 
 MAINTAINERCLEANFILES = configure.files subdirs
 
