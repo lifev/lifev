@@ -29,3 +29,4 @@ clean: clean-am clean-local
 
 clean-local:
 	-if test -d life; then rm -rf life; fi
+	-if test -d testsuite; then rm -rf testsuite; fi
