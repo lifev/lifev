@@ -23,6 +23,10 @@
 */
 /**
    \file lifeversion.hpp
+
+   The file was created from KDE/kdelibs/kdecore/kdeversion.hpp and
+   accomodated to LifeV needs.
+
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
    \date 2005-02-19
  */
