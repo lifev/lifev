@@ -33,7 +33,8 @@ BLASLAPACK      = cblas.h clapack.h
 
 include_HEADERS	= $(BLASLAPACK) algebraic_facto.hpp dataAztec.hpp dataNewton.hpp inexactLU.hpp \
 linesearch_cubic.hpp linesearch_parabolic.hpp mixed_pattern.hpp newton.hpp \
-picard.hpp saddlePointCG.hpp vectorNorms.hpp $(PETSC_HDRS)
+picard.hpp saddlePointCG.hpp vectorNorms.hpp \
+generalizedAitken.hpp nonLinRichardson.hpp  $(PETSC_HDRS) 
 
 
 lib_LTLIBRARIES	= liblifealg.la
