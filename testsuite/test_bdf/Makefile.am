@@ -24,9 +24,7 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
+noinst_HEADERS = main.hpp ud_functions.hpp 
 
 check_PROGRAMS = test_bdf 
-noinst_HEADERS = main.hpp ud_functions.hpp 
-LDADD = $(life_libs)
 test_bdf_SOURCES = main.cpp 
-EXTRA_DIST = 
