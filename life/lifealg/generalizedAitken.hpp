@@ -83,7 +83,7 @@ generalizedAitken<class Vector, class Real>::~generalizedAitken()
 }
 
 template<class Vector, class Real>
-generalizedAitken<class Vector, class Real>::~generalizedAitken()
+generalizedAitken<class Vector, class Real>::restart()
 {
   delete[] lk;
   delete[] lk1;
