@@ -117,6 +117,8 @@ generalizedAitken<Vector, Real>::generalizedAitken( const int _nDof,
     if (( M_defOmegaS < 0 ) || ( M_defOmegaF< 0 ))
     {
         M_useDefault = true;
+	M_defOmegaS = std::fabs(M_defOmegaS);
+	M_defOmegaF = std::fabs(M_defOmegaF);
     } else {
         M_useDefault = false;
     }
