@@ -338,8 +338,8 @@ CSRMatr<PatternType, DataType>&
 CSRMatr<PatternType, DataType>::operator= ( const MSRMatr<DataType>& msrMatr )
 {
     typename std::vector<DataType>::iterator value = _value.begin();
-    const Container& ja = _Patt->ja();
-    Container::const_iterator ia = _Patt->ia().begin();
+    const Container& ja = _Patt->give_ja();
+    Container::const_iterator ia = _Patt->give_ia().begin();
     UInt nrows = _Patt->nRows();
     for ( UInt iRow = 0; iRow < nrows; ++iRow, ++ia )
     {
@@ -458,9 +458,9 @@ CSRMatr<CSRPatt, DataType>&
 CSRMatr<CSRPatt, DataType>::operator= ( const MSRMatr<DataType>& msrMatr )
 {
     typename std::vector<DataType>::iterator value = _value.begin();
-    const Container& ja = _Patt->ja();
-    Container::const_iterator ia = _Patt->ia().begin();
-    Container::const_iterator endia = _Patt->ia().end();
+    const Container& ja = _Patt->give_ja();
+    Container::const_iterator ia = _Patt->give_ia().begin();
+    Container::const_iterator endia = _Patt->give_ia().end();
     UInt nrows = _Patt->nRows();
     for ( UInt iRow = 0; ia != endia && iRow < nrows; ++iRow, ++ia )
     {
@@ -510,7 +510,8 @@ CSRMatr<CSRPatt, DataType>::MassDiagP1() const
     std::vector<DataType> diag( nrows );
     for ( UInt nrow = 0; nrow < nrows; ++nrow )
     {
-        for ( UInt ii = _Patt->ia() [ nrow ]; ii < _Patt->ia() [ nrow + 1 ]; ++ii )
+        for ( UInt ii = _Patt->give_ia() [ nrow ];
+              ii < _Patt->give_ia() [ nrow + 1 ]; ++ii )
             diag[ nrow ] += _value[ ii ];
     }
     return diag;
@@ -535,8 +536,9 @@ trans_mult( const Vector &v ) const
 
     for ( UInt ir = 0 + OFFSET;ir < nrows + OFFSET;++ir )
     {
-        for ( UInt ii = _Patt->ia() [ ir ] - OFFSET;ii < _Patt->ia() [ ir + 1 ] - OFFSET;++ii )
-            ans( _Patt->ja() [ ii ] - OFFSET ) += _value[ ii ] * v( ir );
+        for ( UInt ii = _Patt->give_ia() [ ir ] - OFFSET;
+              ii < _Patt->give_ia() [ ir + 1 ] - OFFSET; ++ii )
+            ans( _Patt->give_ja() [ ii ] - OFFSET ) += _value[ ii ] * v( ir );
     }
     return ans;
 }
@@ -576,7 +578,8 @@ operator*( const Vector &v ) const
 
     for ( UInt ir = 0 + OFFSET;ir < nrows + OFFSET;++ir )
     {
-        for ( UInt ii = _Patt->give_ia() [ ir ] - OFFSET;ii < _Patt->give_ia() [ ir + 1 ] - OFFSET;++ii )
+        for ( UInt ii = _Patt->give_ia() [ ir ] - OFFSET;
+              ii < _Patt->give_ia() [ ir + 1 ] - OFFSET;++ii )
             ans( ir ) += _value[ ii ] * v( _Patt->give_ja() [ ii ] - OFFSET );
     }
     return ans;
@@ -599,7 +602,8 @@ void operMatVec( DataType * const mv,
     for ( UInt ir = 0 + OFFSET;ir < nrows + OFFSET;++ir )
     {
         mv[ ir ] = 0.;
-        for ( UInt ii = Mat._Patt->give_ia() [ ir ] - OFFSET;ii < Mat._Patt->give_ia() [ ir + 1 ] - OFFSET;++ii )
+        for ( UInt ii = Mat._Patt->give_ia() [ ir ] - OFFSET;
+              ii < Mat._Patt->give_ia() [ ir + 1 ] - OFFSET; ++ii )
             mv[ ir ] += Mat._value[ ii ] * v[ Mat._Patt->give_ja() [ ii ] - OFFSET ];
     }
 }
@@ -659,7 +663,7 @@ void
 CSRMatr<CSRPatt, DataType>::ShowMe()
 {
     UInt i_first, nrows = _Patt->nRows(), ncols = _Patt->nCols(), nnz = _Patt->nNz();
-    Container ja = _Patt->ja();
+    const Container& ja = _Patt->give_ja();
 
     std::string pare = "[";
     std::cout << "**************************" << std::endl;
@@ -707,7 +711,8 @@ spy( std::string const &filename )
     // Purpose: Matlab dumping and spy
     std::string nome = filename, uti = " , ";
     UInt nrows = _Patt->nRows();
-    Container ia = _Patt->ia(), ja = _Patt->ja();
+    const Container& ia = _Patt->give_ia();
+    const Container& ja = _Patt->give_ja();
     //
     // check on the file name
     //
