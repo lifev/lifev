@@ -31,3 +31,4 @@ test_ns_ipstab_SOURCES = main.cpp
 EXTRA_DIST = data testsuite.at
 
 
+MOSTLYCLEANFILES=test.001.inp press.001.bb vel_x.001.bb vel_y.001.bb vel_z.001.bb

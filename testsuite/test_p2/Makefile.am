@@ -32,4 +32,6 @@ test_p2_SOURCES = main.cpp
 
 EXTRA_DIST = data testsuite.at
 
+MOSTLYCLEANFILES=scal.vtk
+
 include $(top_srcdir)/testsuite/Makefile.testsuite

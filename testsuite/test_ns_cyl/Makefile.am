@@ -33,3 +33,7 @@ EXTRA_DIST = data testsuite.at
 
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
+
+MOSTLYCLEANFILES=fluid.res1 test.001.inp press.001.bb \
+                 vel_x.001.bb vel_y.001.bb vel_z.001.bb fluid.res2 test.002.inp\
+                 press.002.bb vel_x.002.bb vel_y.002.bb vel_z.002.bb

@@ -10,7 +10,7 @@ http://www.lifev.org contains lots of useful information about LifeV.
 You are strongly encouraged to use the site and eventually participate
 to its development.
 
-* Installations tips
+* Installations Tips
 --------------------
 
 See INSTALL for intructions on how to use configure.
@@ -20,6 +20,16 @@ install it and configure LifeV with aztec:
 
 configure --with-aztec=<path to prefix directory of aztec installation>
 
+See the section 1.4 of the LifeV book [1] for more information about
+compiling LifeV.
 
+[1] file: doc/manual/manual.tex
+     www: http://www.lifev.org/documentation/book/book.pdf
 
- -- Christophe Prud'homme <prudhomm@mit.edu>, Sun Aug 29 18:29:34 2004
+* Testing Framework
+-------------------
+
+LifeV uses AutoTest testing framework from Autoconf.
+See testsuite/README for more details.
+
+ -- Christophe Prud'homme <prudhomm@mit.edu>, Sun Aug 29 23:28:48 2004
