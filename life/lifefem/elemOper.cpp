@@ -1868,18 +1868,18 @@ void div( const int icoor, Real coef, ElemMat& elmat,
 */
 {
     ASSERT_PRE( fe_u.hasFirstDeriv(),
-                "Gradient matrix needs at least the first derivatives" );
+                "Divergence matrix needs at least the first derivatives" );
     ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     int ig;
     int i, j;
     double s;
-    for ( i = 0;i < fe_u.nbNode;i++ )
+    for (i = 0; i < fe_u.nbNode; i++)
     {
-        for ( j = 0;j < fe_p.nbNode;j++ )
+        for (j = 0; j < fe_p.nbNode; j++)
         {
             s = 0;
             for ( ig = 0;ig < fe_u.nbQuadPt;ig++ )
-                s -= fe_p.phi( i, ig ) * fe_u.phiDer( j, icoor, ig ) * fe_u.weightDet( ig );
+                s -= fe_u.phi(i, ig) * fe_p.phiDer(j, icoor, ig) * fe_u.weightDet( ig );
             mat( i, j ) += coef * s;
         }
     }
