@@ -378,7 +378,7 @@ namespace LifeV {
             chrono.start();
             std::cout << "[Yosida::solve] compute final velocity        "
                       << std::flush;
-            _M_solver_u.solve( __u, prod(_M_C, __u_tilde) - prod(_M_D_T, __p));
+            _M_solver_u.solve( __u, __b_u - prod(_M_D_T, __p));
             chrono.stop();
             std::cout << " in " << chrono.diff() << " s" << std::endl;
         }
