@@ -1,2 +1,6 @@
+.deps
+.libs
+Makefile
 Makefile.in
 Makefile.in
+test_ns_ipstab

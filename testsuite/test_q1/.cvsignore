@@ -1,5 +1,7 @@
 
 .depend
 .deps
+.libs
 Makefile
 Makefile.in
+test_q1

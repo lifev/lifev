@@ -25,9 +25,6 @@
 
 AUTOMAKE_OPTIONS = foreign 1.6
 
-$(top_srcdir)/acinclude.m4: $(top_srcdir)/admin/acinclude.m4.in $(top_srcdir)/admin/libtool.m4.in $(top_srcdir)/libltdl/ltdl.m4
-	@cd $(top_srcdir) && cat admin/acinclude.m4.in admin/libtool.m4.in libltdl/ltdl.m4 > acinclude.m4
-
 $(top_srcdir)/configure.in: $(top_srcdir)/subdirs $(top_srcdir)/configure.files $(CONF_FILES)
 	cd $(top_srcdir) && $(MAKE) -f admin/Makefile.common configure.in
 
@@ -47,4 +44,4 @@ apidox-all:
 
 
 upload-api:
-	cd doc/ && scp -r api prudhomm@cmcsforge.epfl.ch:/var/lib/gforge/chroot/home/groups/lifev/htdocs/api-$(VERSION)
+	-cd doc/ && rsync -avz api/ `whoami`@cmcsforge.epfl.ch:/var/lib/gforge/chroot/home/groups/lifev/htdocs/api-$(LIFEV_MAJOR_VERSION).$(LIFEV_MINOR_VERSION).$(LIFEV_MICRO_VERSION)

@@ -1,5 +1,7 @@
 
 .depend
 .deps
+.libs
+DarcySolver
 Makefile
 Makefile.in

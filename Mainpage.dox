@@ -3,7 +3,7 @@
 	*
 	* This section contains the LifeV online class reference for the current
 	* development version of LifeV. Additionally, you 
-        * can subscribe or read the <a href="http://www.lifev.org/mailinglists.php">mailing lists</a> for any additions and/or 
+        * can subscribe or read the <a href="http://www.lifev.org/lists">mailing lists</a> for any additions and/or 
         * modifications to the API.
 	*
 	* - <a href="life/lifecore/html/index.html"><b>lifecore</b></a>
@@ -30,12 +30,5 @@
 	*
 	* More information about the LifeV architecture, check
 	* the <a href="http://www.lifev.org/documentation">LifeV Web Site</a>.
-	*/
-
-/**
-	* @page search Search the API documentation
-	*
-	* <br>Under construction.
-	*
 	*/
 
