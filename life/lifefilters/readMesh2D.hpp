@@ -269,5 +269,203 @@ readMesh2d( RegionMesh2D & mesh, const std::string & fname, EntityFlag regionFla
     std::cout << "Triangular Faces Created " << std::endl;
     return ierr == 0;
 }
+
+//
+// GMSH
+//
+
+/**
+  read a gmsh mesh (2D) file and store it in a RegionMesh2D
+ 
+  @param mesh mesh data structure to fill in
+  @param filename name of the gmsh mesh file  to read
+  @param regionFlag identifier for the region
+  @return true if everything went fine, false otherwise
+*/
+template <typename GeoShape, typename MC>
+bool
+readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
+             const std::string & filename,
+             EntityFlag regionFlag )
+{
+    std::ifstream __is ( filename.c_str() );
+
+    char __buf[256];
+    __is >> __buf;
+    Debug() << "buf: "<< __buf << "\n";
+    uint __n;
+    __is >> __n;
+    Debug() << "number of nodes: " << __n;
+
+    // Add Marker to list of Markers
+    mesh.setMarker( regionFlag );
+
+
+    std::vector<double> __x(3*__n);
+    std::vector<bool> __isonboundary(__n);
+    std::vector<uint> __whichboundary(__n);
+    Debug() << "reading "<< __n << " nodes\n";
+    std::map<int,int> itoii;
+    for( uint __i = 0; __i < __n;++__i )
+    {
+        uint __ni;
+        __is >> __ni
+             >> __x[3*__i]
+             >> __x[3*__i+1]
+             >> __x[3*__i+2];
+
+        itoii[__ni-1] = __i;
+    }
+    __is >> __buf;
+    Debug() << "buf: "<< __buf << "\n";
+    __is >> __buf;
+    Debug() << "buf: "<< __buf << "\n";
+    uint __nele;
+    __is >> __nele;
+
+    typename RegionMesh2D<GeoShape, MC>::EdgeType * pe = 0;
+    typename RegionMesh2D<GeoShape, MC>::FaceType * pf = 0;
+
+    Debug() << "number of elements: " << __nele << "\n";
+    std::vector<std::vector<int> > __e(__nele);
+    std::vector<int> __et(__nele);
+    std::vector<int> __etype( __nele );
+    std::vector<int> __gt(16);
+    __gt.assign( 16, 0 );
+
+    for( uint __i = 0; __i < __nele;++__i )
+    {
+        int __ne, __t, __tag, __np, __dummy;
+        __is >> __ne
+             >> __t
+             >> __tag
+             >> __dummy
+             >> __np;
+
+
+        ++__gt[ __t ];
+        __etype[__i] = __t;
+        __et[__i] = __tag;
+        __e[__i].resize( __np );
+        int __p = 0;
+        while ( __p != __np )
+        {
+            __is >> __e[__i][__p];
+            __e[__i][__p] = itoii[ __e[__i][__p]-1];
+            __e[__i][__p] += 1;
+
+            ++__p;
+        }
+    }
+    std::for_each( __gt.begin(), __gt.end(),  std::cout << boost::lambda::_1 << " " );
+    std::cout << "\n";
+
+    // Euler formulas
+    uint n_elements = __gt[2];
+ 
+    // Only Boundary Edges (in a next version I will allow for different choices)
+    mesh.setMaxNumEdges( __gt[1] );
+    // Here the REAL number of edges (all of them)
+    mesh.numEdges() = __gt[1]; 
+    mesh.setNumBEdges( __gt[1] );
+
+    Debug() << "number of edges= " << __gt[1] << "\n";
+    
+    // Only Boundary Faces
+    mesh.setMaxNumFaces( n_elements);
+    
+    // Here the REAL number of edges (all of them)
+    mesh.numFaces() = n_elements; 
+    Debug() << "number of faces= " << n_elements << "\n";
+    
+//     mesh.setMaxNumVolumes( n_volumes, true );
+//     Debug() << "number of volumes= " << n_volumes << "\n";
+
+    __isonboundary.assign( __n, false );
+    __whichboundary.assign( __n, 0 );
+    for( uint __i = 0; __i < __nele;++__i )
+    {
+        switch( __etype[__i] )
+        {
+            // triangular faces (linear)
+            case 2:
+            {
+                __isonboundary[ __e[__i][0]-1 ] = true;
+                __isonboundary[ __e[__i][1]-1 ] = true;
+                __isonboundary[ __e[__i][2]-1 ] = true;
+
+                __whichboundary[__e[__i][0]-1 ] = __et[__i];
+                __whichboundary[__e[__i][1]-1 ] = __et[__i];
+                __whichboundary[__e[__i][2]-1 ] = __et[__i];
+            }
+        }
+    }
+    // add the point to the mesh
+    typename RegionMesh2D<GeoShape, MC>::PointType * pp = 0;
+
+    mesh.setMaxNumPoints( __n, true );
+    mesh.numVertices() = __n;
+    mesh.numBVertices() = std::count( __isonboundary.begin(), __isonboundary.end(), true );
+    mesh.setNumBPoints( mesh.numBVertices() );
+
+    Debug() << "number of points : " << mesh.numPoints() << "\n";
+    Debug() << "number of boundary points : " << mesh.numBPoints() << "\n";
+    Debug() << "number of vertices : " << mesh.numVertices() << "\n";
+    Debug() << "number of boundary vertices : " << mesh.numBVertices() << "\n";
+
+    for( uint __i = 0; __i < __n;++__i )
+    {
+        pp = &mesh.addPoint( __isonboundary[ __i ] );
+        pp->setMarker( __whichboundary[__i] );
+        pp->x() = __x[2*__i];
+        pp->y() = __x[2*__i+1];
+    }
+
+    // add the element to the mesh
+    for( uint __i = 0; __i < __nele;++__i )
+    {
+        switch( __etype[__i] )
+        {
+            // segment(linear)
+            case 1:
+            {
+                pe = &( mesh.addEdge( true ) );
+                pe->setMarker( EntityFlag( __et[__i] ) );
+                pe->setPoint( 1, mesh.point( __e[__i][0] ) );
+                pe->setPoint( 2, mesh.point( __e[__i][1] ) );
+
+
+
+            }
+            break;
+            // triangular faces (linear)
+            case 2:
+            {
+                pf = &( mesh.addFace() );
+                pf->setMarker( EntityFlag( __et[__i] ) );
+                pf->setPoint( 1, mesh.point( __e[__i][0] ) );
+                pf->setPoint( 2, mesh.point( __e[__i][1] ) );
+                pf->setPoint( 3, mesh.point( __e[__i][2] ) );
+
+            }
+            break;
+            // quadrangular faces(linear)
+            case 3:
+            {
+                pf = &( mesh.addFace() );
+                pf->setMarker( EntityFlag( __et[__i] ) );
+                pf->setPoint( 1, mesh.point( __e[__i][0] ) );
+                pf->setPoint( 2, mesh.point( __e[__i][1] ) );
+                pf->setPoint( 3, mesh.point( __e[__i][2] ) );
+                pf->setPoint( 4, mesh.point( __e[__i][3] ) );
+            }
+            break;
+        }
+    }
+    return true;
+}
+
+
+
 }
 #endif
