@@ -11,14 +11,15 @@
 density         = 1.0               # density
 viscosity       = 0.035             # viscosity
 inittime        = 0.00              # starttime
-endtime         = 0.02              # endtime --> two steps for testing purposes
+endtime         = 1.00              # endtime --> two steps for testing purposes
 
 
 [../discretization]
 mesh_dir  = ../data/mesh/inria/  # the directory where the mesh file is
-//mesh_file = stenosi.mesh     # mesh file
-//mesh_file = tube_curve20.mesh
-mesh_file = cyltetra.mesh
+#mesh_file = stenosi2.mesh       # mesh file   
+#mesh_file = tube_curve20.mesh 
+#mesh_file = cyltetra.mesh
+mesh_file = karotis-TUG_course.mesh   
 timestep  = 0.01               # timestep
 
 
