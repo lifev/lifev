@@ -35,7 +35,7 @@ dataNavierStokes.hpp dataSimplifiedStructure.hpp simplifiedStructure.hpp convDif
 #lifesolver_la_SOURCES	= 
 
 bin_PROGRAMS=multiscale
-multiscale_SOURCES  = multiscale.cpp
+multiscale_SOURCES  = #multiscale.cpp
 multiscale_LDADD    = ../lifecore/liblifecore.la 
 
 include $(top_srcdir)/admin/Doxyfile.am
