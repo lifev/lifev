@@ -10,6 +10,7 @@ mesh_type   = '.m++'
 mesh_dir    = '../data/mesh/mesh++/'
 mesh_file   = 'cube_6000.m++'
 mesh_faces  = all
+FEM         = P1
 
 [../bdf]
 delta_t     = .02
@@ -20,7 +21,7 @@ order       = 1
 [../ipstab]
 gamma       = 1e-4
 
-[../solver]
+[../solver_aztec]
 solver_name     = aztec
 solver          = gmres
 scaling         = none
@@ -30,6 +31,18 @@ max_iter        = 400
 kspace          = 50
 precond         = none              # none, jacobi, sym_gs, neumann, ls, smoother, dom_decomp
 tol             = 1.00e-6
+
+[../solver_petsc]
+solver_name               = petsc
+ksp_type                  = gmres
+ksp_gmres_restart         = 50
+ksp_rtol                  = 1.e-6
+ksp_max_it                = 400
+pc_type                   = ilu
+pc_ilu_use_drop_tolerance = 1.e-5,0.03,20 # activates SPARSKIT routine
+ksp_cancelmonitors        = 1
+nokspview                 = true
+quiet                     = true
 
 [../parameters]
 save_every      = 1
