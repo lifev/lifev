@@ -296,6 +296,10 @@ public:
     //! Default Constructor (the user must call setBCVector(..))
     BCVectorInterface ();
 
+    //! setup after default constructor
+
+    void setup ( const Vector& vec, UInt nbTotalDof, dof_interface_type dofIn, UInt type=0 );
+
     //! set the BC vector (after default construction)
     void setVector( Vector& vec, UInt nbTotalDof, dof_interface_type dofIn, UInt type=0);
 

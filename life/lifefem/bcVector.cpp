@@ -164,6 +164,17 @@ BCVectorInterface::BCVectorInterface( const Vector& vec, UInt nbTotalDof,
     this->setFinalized( true );
 }
 
+//! setup after default constructor
+
+void BCVectorInterface::setup( const Vector& vec, UInt nbTotalDof, dof_interface_type dofIn, UInt type )
+{
+    _M_vec        = &vec;
+    _M_nbTotalDof = nbTotalDof;
+    _M_mixteCoef  = 0.0;
+    _M_type       = type;
+    _M_dofIn      = dofIn;
+    this->setFinalized( true );
+}
 
 //!set the BC vector (after default construction)
 void
