@@ -69,18 +69,43 @@ Say that you want to create the 'foo' test
     test_foo/testsuite.at should look like this
 
    AT_SETUP([test_foo])
+   AT_KEYWORDS([test_foo foo])
    AT_DATA([data],[[
-   put here the data file for the test
+   # put here the data file for the test
+   [./discretization]
+   mesh_dir    = ./ # the directory where the mesh file is
+   mesh_file   = foo.mesh
+   post_dir = ./    # the directory for postprocessing files
+
    ]])
-   AT_CHECK([\$top_builddir/testsuite/test_foo/test_foo],[0],
+   AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria/foo.mesh
+             && $top_builddir/testsuite/test_foo/test_foo],[0],
             [put here the expected standard output],
             [put here the expected standard error output])
    AT_CLEANUP([put here any files that were created by the test])
- 
+
  7- edit testsuite/testsuite.at to add the new into its proper category
     follow what has been done for the other tests.
  8- make sure to regenerate the 'testsuite' script (see previous section)
  9- run all the tests(see previous section) and go drink a coffee/beer
 10- check that everything went fine
+
+11- In case of problems in the automatic testing:
+    Look at testsuite/testsuite.log file
+    Go in the testsuite/testsuite.dir directory :
+    all failed tests are listed in directories, according to their number.
+    Let's say that toto has the number 42
+    cd testsuite/testsuite.dir/42
+    Explore the problems!
+    Known problems:
+    a) check that your meshes are correctly treated (the symbolic
+    link must exist in testsuite.dir/42)
+    b) check that you don't read your mesh in a "../data/mesh/inria/"
+    directory: it does NOT exist in testsuite.dir/42!! Check
+    "AT_DATA([data],...)".
+    c) check that you don't write result files in a "./Post" directory that
+    does NOT exist! Advice: in the "AT_DATA([data],...)" of testsuite.at, DO
+    NOT use "./Post" directories but "./" directory to write results files.
+    d) ...?
 
  -- Christophe Prud'homme <prudhomm@mit.edu>, Tue Aug 17 17:30:12 2004
