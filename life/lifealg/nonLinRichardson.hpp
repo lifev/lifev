@@ -34,7 +34,7 @@ int nonLinRichardson( Vector& sol,
                       Real reltol,
                       int& maxit,
                       Real eta_max,
-                      int linesearch = 0,
+                      int linesearch,
                       std::ofstream& out_res,
                       const Real& time,
                       const Real omega )
@@ -89,6 +89,7 @@ int nonLinRichardson( Vector& sol,
 
     Real normResOld = 1;
 
+//    Real omega  = f.defOmega();
     Real omegaS = omega;
     Real omegaF = omega;
 
@@ -129,20 +130,46 @@ int nonLinRichardson( Vector& sol,
         normResOld = normRes;
 
         f.solveJac(muk, residual, linearRelTol);
-
-        step = aitken.computeDeltaLambda( sol, muk );
-
-        normMuk  = norm_2( muk );
+//        step = aitken.computeDeltaLambda( sol, muk );
+        step = muk;
+        normMuk  = norm( muk );
 
         std::cout << "Muk norm = " << normMuk << std::endl;
-        out_res   << iter
-                  << std::setw(15) << norm_2(sol)
-                  << std::setw(15) << norm_2(step)
+
+        out_res   << std::setw(5) << iter
+                  << std::setw(15) << norm_2  (sol)
+                  << std::setw(15) << norm_2  (step)
                   << std::setw(15) << normMuk;
 
-        sol += step;
+        if (norm_2(step) > 1e-7)
+        {
+            sol += step;
+            f.evalResidual( residual, sol, iter);
+//            f.evalResidual( sol, iter, residual );
+            normRes = norm( residual );
+        }
+        else
+        {
+            switch ( linesearch )
+            {
+                case 0: // no linesearch
+                    sol += step;
+                    f.evalResidual( residual, sol, iter);
+//            f.evalResidual( sol, iter, residual );
+                    normRes = norm( residual );
+                    break;
+                case 1:
+                    lineSearch_parab( f, norm, residual, sol, step, normRes, lambda, iter );
+                    break;
+                case 2:  // recommended
+                    lineSearch_cubic( f, norm, residual, sol, step, normRes, lambda, slope, iter );
+                    break;
+                default:
+                    std::cout << "Unknown linesearch \n";
+                    exit( 1 );
+            }
+        }
 
-        f.evalResidual( residual, sol, iter );
         normRes = norm( residual );
         out_res << std::setw(15) << normRes << std::endl;
     }
