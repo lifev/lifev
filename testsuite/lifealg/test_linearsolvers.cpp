@@ -98,7 +98,7 @@ bool test_petsc( Mat& __mat )
 
     __x -= __sol;
     std::cout << "norm(error) = " << norm( __x ) << "\n";
-    return norm(__x) < 1e-6;
+    return norm(__x) < 1e-10;
 #else
     return 1;
 #endif
@@ -111,6 +111,7 @@ bool test_aztec( Mat& __mat )
 
     LifeV::SolverAztec __aztec;
     __aztec.setMatrix(__mat.matrix());
+    __aztec.setTolerance( 1e-16 );
 
     Vector __x( Nrows );
     Vector __sol( Nrows );
@@ -126,7 +127,7 @@ bool test_aztec( Mat& __mat )
 
     __x -= __sol;
     std::cout << "norm(error) = " << norm( __x ) << "\n";
-    return norm(__x) < 1e-6;
+    return norm(__x) < 1e-10;
 }
 
 } // namespace LifeV
@@ -178,6 +179,6 @@ int main( int argc, char** argv )
         return EXIT_FAILURE;
     }
     std::cout << (success ? "success" : "solve failed") << std::endl;
-    //return (success ? EXIT_SUCCESS : EXIT_FAILURE);
-    return EXIT_SUCCESS;
+    return (success ? EXIT_SUCCESS : EXIT_FAILURE);
+    //return EXIT_SUCCESS;
 }
