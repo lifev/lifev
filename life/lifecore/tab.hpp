@@ -45,9 +45,9 @@ public:
   friend R2 operator*(R c,R2 P) {return P*c;}
   friend R2 operator/(R c,R2 P) {return P/c;}
   
-  friend ostream& operator << (ostream& f, const R2 & P )
+  friend std::ostream& operator << (std::ostream& f, const R2 & P )
   { f << P.x << ' ' << P.y   ; return f; }
-  friend istream& operator >>(istream& f,  R2 & P)
+  friend std::istream& operator >>(std::istream& f,  R2 & P)
   { f >>  P.x >>  P.y  ; return f; }
 };
 
@@ -71,9 +71,9 @@ public:
   R  &  operator[](int i){ return (&x)[i];}
   friend R3 operator*(R c,R3 P) {return P*c;}
   friend R3 operator/(R c,R3 P) {return P/c;}
-  friend ostream& operator <<(ostream& f, const R3 & P )
+  friend std::ostream& operator <<(std::ostream& f, const R3 & P )
   { f << P.x << ' ' << P.y << ' ' << P.z   ; return f; }
-  friend istream& operator >>(istream& f,  R3 & P)
+  friend std::istream& operator >>(std::istream& f,  R3 & P)
   { f >>  P.x >>  P.y >>  P.z  ; return f; }
 };
 

@@ -26,10 +26,10 @@ class DataTime
  public:
 
   //! Constructor
-  DataTime(const GetPot& dfile, const string& section="discretization");
+  DataTime(const GetPot& dfile, const std::string& section="discretization");
   
   //! Ouptut
-  virtual void showMe(ostream& c=cout) const;
+  virtual void showMe( std::ostream& c = std::cout) const;
 
   //! Time step
   Real timestep() const;

@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------*
 | LifeV main header file                                               |
 |                                                                      |
-| $Header: /cvsroot/lifev/lifev/life/lifecore/Attic/lifeV.hpp,v 1.4 2004-02-25 14:52:31 prudhomm Exp $                                                             |
+| $Header: /cvsroot/lifev/lifev/life/lifecore/Attic/lifeV.hpp,v 1.5 2004-02-25 15:16:04 prudhomm Exp $                                                             |
 |                                                                      |
 | #Version  0.0 Experimental   9/7/99. Luca Formaggia                  |
 |           0.1 Experimental  10/8/99. Jean-Fred Gerbeau.              |
@@ -17,13 +17,9 @@
 # ifndef _LIFEV_HH_ 
 # define _LIFEV_HH_ 
 
-// Alain: added for version g++3.0x, 20/06/02 (is it necessary to
-//  always include those ? )
 # include <iostream>
 # include <cmath>
 # include <numeric>
-
-// standard IO (always included)
 
 # include <iosfwd> 
 
@@ -196,18 +192,6 @@ const UInt nDimensions=3;
 #else
 #define DESTRUCTOR(A)
 #endif
-
-
-
-//
-//  ****   WARNING *****
-// DEPRECATED DEPRECATED DEPRECATED => Change it soon (Luca July 2001)
-//
-// Use selective using statement and namespaces!!!
-
-using namespace std;
-
-// END DEPRECATED
 
 #endif
 

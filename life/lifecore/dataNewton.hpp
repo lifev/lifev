@@ -27,7 +27,7 @@ class DataNewton
  public:
 
   //! Constructor
-  DataNewton(const GetPot& dfile, const string& section="newton");
+  DataNewton(const GetPot& dfile, const std::string& section="newton");
   // The max number of interations
 
   //! The max number of interations
@@ -46,7 +46,7 @@ class DataNewton
   UInt linesearch() const;
 
   //! Ouptut
-  virtual void showMe(ostream& c=cout) const;
+  virtual void showMe(std::ostream& c = std::cout) const;
  
   //! Virtual destructor
   virtual ~DataNewton();

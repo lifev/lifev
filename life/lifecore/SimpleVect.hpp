@@ -1,6 +1,8 @@
 #ifndef _SIMPLEVECT_HH_
 #define _SIMPLEVECT_HH_
+
 #include <vector>
+
 /******************************************************************
 /#Version Luca Formaggia 30 Agu 1999 Experimental
 /
@@ -17,10 +19,10 @@
 ******************************************************************/
 
 template<typename T, int OFFSETVEC=1> 
-class SimpleVect : public vector<T>
+class SimpleVect : public std::vector<T>
 {
  public:
-  typedef vector<T> raw_container;
+  typedef std::vector<T> raw_container;
   typedef typename raw_container::size_type size_type;
   typedef typename raw_container::reference reference;
   typedef typename raw_container::const_reference const_reference;
@@ -38,11 +40,11 @@ class SimpleVect : public vector<T>
 };
 
 template<typename T, int OFFSETVEC=1> 
-class SimpleArray : public vector<T>
+class SimpleArray : public std::vector<T>
 {
  public:
 
-  typedef vector<T> raw_container;
+  typedef std::vector<T> raw_container;
   typedef typename raw_container::size_type size_type;
   typedef typename raw_container::reference reference;
   typedef typename raw_container::const_reference const_reference;
@@ -112,22 +114,26 @@ SimpleVect<T, OFFSETVEC>::operator=(const SimpleVect<T, OFFSETVEC> & v)
 
 // SIMPLE ARRAYS
 
-template<typename T,int OFFSETVEC> SimpleArray<T, OFFSETVEC>::SimpleArray() : 
-vector<T>(),
-_nrows(0),
-_ncols(1)
+template<typename T,int OFFSETVEC> 
+SimpleArray<T, OFFSETVEC>::SimpleArray() 
+    : 
+    std::vector<T>(),
+    _nrows(0),
+    _ncols(1)
 {}
 
-template<typename T,int OFFSETVEC> SimpleArray<T, OFFSETVEC>::SimpleArray(size_type ntot) : 
-vector<T>(ntot),
-_nrows(nrows),
-_ncols(1)
+template<typename T,int OFFSETVEC> SimpleArray<T, OFFSETVEC>::SimpleArray(size_type ntot) 
+    : 
+    std::vector<T>(ntot),
+    _nrows(nrows),
+    _ncols(1)
 {}
 
-template<typename T, int OFFSETVEC> SimpleArray<T, OFFSETVEC>::SimpleArray(size_type nrows, size_type ncols) : 
-vector<T>(nrows*ncols),
-_nrows(nrows),
-_ncols(ncols)
+template<typename T, int OFFSETVEC> SimpleArray<T, OFFSETVEC>::SimpleArray(size_type nrows, size_type ncols) 
+    : 
+    std::vector<T>(nrows*ncols),
+    _nrows(nrows),
+    _ncols(ncols)
 {}
 
 template<typename T, int OFFSETVEC> 

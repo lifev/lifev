@@ -1,7 +1,7 @@
 #include "dataNewton.hpp"
 
 // Constructor
-DataNewton::DataNewton(const GetPot& dfile, const string& section)
+DataNewton::DataNewton(const GetPot& dfile, const std::string& section)
 {
   _maxiter      =  dfile((section+"/maxiter").data(),100);
   _abstol       =  dfile((section+"/abstol").data(),0.0);
@@ -40,13 +40,13 @@ UInt DataNewton::linesearch() const {
 }
 
 // Output
-void DataNewton::showMe(ostream& c) const
+void DataNewton::showMe( std::ostream& c) const
 {
   // 
-  c << "maxiter        = " << _maxiter << endl; 
-  c << "abstol         = " << _abstol << endl; 
-  c << "reltol         = " << _reltol << endl; 
-  c << "etamax         = " << _reltol << endl; 
-  c << "linesearch     = " << _linesearch << endl; 
+  c << "maxiter        = " << _maxiter << std::endl; 
+  c << "abstol         = " << _abstol << std::endl; 
+  c << "reltol         = " << _reltol << std::endl; 
+  c << "etamax         = " << _reltol << std::endl; 
+  c << "linesearch     = " << _linesearch << std::endl; 
 }
 

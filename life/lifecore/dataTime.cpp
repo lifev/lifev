@@ -1,7 +1,7 @@
 #include "dataTime.hpp"
 
 // Constructor
-DataTime::DataTime(const GetPot& dfile, const string& section)
+DataTime::DataTime(const GetPot& dfile, const std::string& section)
 {
   _dt      =  dfile((section+"/timestep").data(),1.); 
   _order_bdf = dfile((section+"/order_bdf").data(),1);
@@ -22,10 +22,10 @@ unsigned int DataTime::order_bdf() const {
 }	
 
 // Output
-void DataTime::showMe(ostream& c) const
+void DataTime::showMe( std::ostream& c ) const
 {
   // time step
-  c << "timestep  = " << _dt << endl; 
-  c << "order bdf = " << _order_bdf << endl; 
+  c << "timestep  = " << _dt << std::endl; 
+  c << "order bdf = " << _order_bdf << std::endl; 
 }
 
