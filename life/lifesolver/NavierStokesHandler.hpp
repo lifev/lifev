@@ -525,14 +525,17 @@ void
 NavierStokesHandler<Mesh>::initialize( const std::string& velName,
                                        const std::string& pressName)
 {
-    std::string dummy;
-    int nsx, nsy, nsz;
+    std::string sdummy;
+    std::string ext;
+    int nsx, nsy, nsz, nsp;
     int ndim;
 
-    int nDof = uDof.numTotalDof();
+    int nDof = uDof().numTotalDof();
 
     std::string filenamex = velName;
-    filenamex.insert(filenamex.end(), "_x.bb");
+
+    ext = "_x.bb";
+    filenamex.insert(filenamex.end(), ext.begin(), ext.end());
 
     std::cout << "Reading INRIA fluid file   (" << filenamex << ")"
               << ":" << std::endl;
@@ -557,7 +560,8 @@ NavierStokesHandler<Mesh>::initialize( const std::string& velName,
     filex.close();
 
     std::string filenamey = velName;
-    filenamey.insert(filenamey.end(), "_y.bb");
+    ext = "_y.bb";
+    filenamey.insert(filenamey.end(), ext.begin(), ext.end());
 
     std::cout << "Reading INRIA fluid file   (" << filenamey << ")"
               << ":" << std::endl;
@@ -582,9 +586,11 @@ NavierStokesHandler<Mesh>::initialize( const std::string& velName,
     filey.close();
 
     std::string filenamez = velName;
-    filenamez.insert(filenamez.end(), "_z.bb");
 
-    std::cout << "Reading INRIA fluid mesh file   (" << filenamez << ")"
+    ext = "_z.bb";
+    filenamez.insert(filenamez.end(), ext.begin(), ext.end());
+
+    std::cout << "Reading INRIA fluid file   (" << filenamez << ")"
               << ":" << std::endl;
 
     std::ifstream filez(filenamez.c_str(), std::ios::in);
@@ -607,8 +613,8 @@ NavierStokesHandler<Mesh>::initialize( const std::string& velName,
     filez.close();
 
     std::string filenamep = pressName;
-    filenamep.insert(filenamep.end(), ".bb");
-
+    ext = ".bb";
+    filenamep.insert(filenamep.end(), ext.begin(), ext.end());
     std::cout << "Reading INRIA fluid file   (" << filenamep << ")"
               << ":" << std::endl;
 
@@ -623,7 +629,7 @@ NavierStokesHandler<Mesh>::initialize( const std::string& velName,
 
     filep >> ndim;
     filep >> sdummy;
-    filep >> nsy;
+    filep >> nsp;
     filep >> sdummy;
 
     for (int ip = 0; ip < nsp; ++ip)
