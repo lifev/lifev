@@ -60,6 +60,8 @@ class NavierStokesAleSolverPC:
 public:
 
     typedef typename NavierStokesHandler<Mesh>::Function Function;
+    typedef typename NavierStokesHandler<Mesh>::source_type source_type;
+
     //! Constructor
     /*!
       \param data_file GetPot data file
@@ -87,7 +89,7 @@ public:
       \param source volumic source
       \param time present time
     */
-    void timeAdvance( const Function source, const Real& time );
+    void timeAdvance( source_type const& source, const Real& time );
 
     //! Update convective term, bc treatment and solve the linearized ns system
     void iterate( const Real& time );
@@ -311,7 +313,7 @@ NavierStokesAleSolverPC( const GetPot& data_file, const RefFE& refFE_u, const Re
 
 template <typename Mesh>
 void NavierStokesAleSolverPC<Mesh>::
-timeAdvance( const Function source, const Real& time )
+timeAdvance( source_type const& source, const Real& time )
 {
 
     std::cout << std::endl;

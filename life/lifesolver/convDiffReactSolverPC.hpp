@@ -60,6 +60,7 @@ class ConvDiffReactSolverPC:
 public:
 
     typedef typename ConvDiffReactHandler<Mesh>::Function Function;
+    typedef typename ConvDiffReactHandler<Mesh>::source_type source_type;
 
     //! Constructor
     /*!
@@ -77,7 +78,7 @@ public:
       \param source volumic source
       \param time present time
     */
-    void timeAdvance( const Function source, const Real& time );
+    void timeAdvance( source_type const& source, const Real& time );
 
     //! Update convective term, bc treatment and solve the linearized ns system
     void iterate( const Real& time );
@@ -215,7 +216,7 @@ ConvDiffReactSolverPC( const GetPot& data_file, const RefFE& refFE_c, const Quad
 
 template <typename Mesh>
 void ConvDiffReactSolverPC<Mesh>::
-timeAdvance( const Function source, const Real& time )
+timeAdvance( source_type const& source, const Real& time )
 {
 
     std::cout << "  o-  Updating mass term on right hand side (concentration)... ";

@@ -63,6 +63,7 @@ class VenantKirchhofSolver:
 public:
 
     typedef typename ElasticStructureHandler<Mesh>::Function Function;
+    typedef typename ElasticStructureHandler<Mesh>::source_type source_type;
 
     //! Constructor
     /*!
@@ -80,7 +81,7 @@ public:
       \param source volumic source
       \param time present time
     */
-    void timeAdvance( const Function source, const Real& time );
+    void timeAdvance( source_type const& source, const Real& time );
 
     //! Solve the non-linear system
     void iterate();
@@ -272,7 +273,7 @@ VenantKirchhofSolver( const GetPot& data_file, const RefFE& refFE, const QuadRul
 
 template <typename Mesh>
 void VenantKirchhofSolver<Mesh>::
-timeAdvance( const Function source, const Real& time )
+timeAdvance( source_type const& source, const Real& time )
 {
 
     UInt ig;

@@ -50,6 +50,8 @@ class NavierStokesAleHandler:
 {
 public:
 
+    typedef typename NavierStokesHandler<Mesh>::source_type source_type;
+
     //! Constructor
     /*!
       \param data_file GetPot data file

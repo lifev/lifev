@@ -31,6 +31,8 @@
 
 #include <sstream>
 
+#include <boost/function.hpp>
+
 
 #include "lifeV.hpp"
 #include "refFE.hpp"
@@ -70,6 +72,7 @@ class NavierStokesHandler:
 public:
 
     typedef Real ( *Function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
+    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> source_type;
 
     //! Constructor
     /*!
@@ -101,12 +104,24 @@ public:
     //! Sets initial condition for the velocity and the pressure from file
     void initialize( const std::string & vname );
 
+    //! set the source term functor
+    void setSourceTerm( source_type __s )
+        {
+            _M_source = __s;
+        }
+
+    //! get the source term functor
+    source_type sourceTerm() const
+        {
+            return _M_source;
+        }
+
     //! Update the right  hand side  for time advancing
     /*!
       \param source volumic source
       \param time present time
     */
-    virtual void timeAdvance( const Function source, const Real& time ) = 0;
+    virtual void timeAdvance( source_type const& source, Real const& time ) = 0;
 
     //! Update convective term, bc treatment and solve the linearized ns system
     virtual void iterate( const Real& time ) = 0;
@@ -163,6 +178,9 @@ public:
 
 
 protected:
+
+    //! source term for NS
+    source_type _M_source;
 
     //! Reference FE for the velocity
     const RefFE& _refFE_u;

@@ -55,6 +55,7 @@ class ElasticStructureHandler:
 public:
 
     typedef Real ( *Function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
+    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> source_type;
 
     //! Constructor
     /*!
@@ -75,7 +76,7 @@ public:
       \param source volumic force
       \param time present time
     */
-    virtual void timeAdvance( const Function source, const Real& time ) = 0;
+    virtual void timeAdvance( source_type const& , const Real& time ) = 0;
 
     //! Solve the non-linear problem
     virtual void iterate() = 0;

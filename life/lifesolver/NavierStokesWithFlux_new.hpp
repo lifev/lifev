@@ -89,7 +89,10 @@ public:
     typedef typename flux_map_type::const_iterator flux_map_const_iterator;
 
     typedef typename NSSolver::mesh_type mesh_type;
-    typedef boost::signal<void ( uint, mesh_type const&, PhysVectUnknown<Vector> const&, ScalUnknown<Vector> const&, value_type )> iteration_signal_type;
+    typedef boost::signal<void ( Real,
+                                 mesh_type const&,
+                                 PhysVectUnknown<Vector> const&, ScalUnknown<Vector> const&,
+                                 value_type )> iteration_signal_type;
 
     //@}
 
@@ -105,8 +108,7 @@ public:
         _M_p_nso( _M_solver->pDof().numTotalDof() ),
         _M_Qno( 0 ),
         _M_vec_lambda( _M_solver->uDof().numTotalDof() ),
-        _M_lambda( 0 ),
-        _M_source( default_source_term() )
+        _M_lambda( 0 )
         {
             Debug( 6010 ) << "constructor from a NavierStokes solver\n";
         }
@@ -119,8 +121,7 @@ public:
         _M_p_nso( __nswf._M_p_nso ),
         _M_Qno( __nswf._M_Qno ),
         _M_vec_lambda( __nswf._M_vec_lambda ),
-        _M_lambda( __nswf._M_lambda ),
-        _M_source( __nswf._M_source )
+        _M_lambda( __nswf._M_lambda )
         {
             Debug( 6010 ) << "copy constructor\n";
         }
@@ -170,11 +171,6 @@ public:
      */
     //@{
 
-    void setSourceTerm( source_type __source )
-        {
-            _M_source = __source;
-        }
-
     void setFlux( int lab, flux_type const& __flux )
         {
             Debug( 6010 ) << "imposing flux on boundary" << lab << "\n";
@@ -201,7 +197,7 @@ public:
 
     void initialize( const Function& u0, const Function& p0, Real t0, Real dt );
 
-    void timeAdvance( const Function __source, const Real& __time );
+    void timeAdvance( source_type const& __source, const Real& __time );
 
     void iterate( const Real& time );
     //@}
@@ -212,6 +208,11 @@ protected:
 
 private:
 
+    //! one flux version of the algorithm
+    void iterate_one_flux( Real const& );
+
+    //! two fluxes version of the algorithm
+    void iterate_two_fluxes( Real const& );
 
 private:
 
@@ -241,7 +242,6 @@ private:
 
     Real _M_lambda;
 
-    source_type _M_source;
 };
 
 template<typename NSSolver>
@@ -257,7 +257,7 @@ NavierStokesWithFlux<NSSolver>::initialize( const Function& u0, const Function& 
 
     Real startT = _M_solver->inittime();
     Real time=startT+dt;
-    _M_solver->timeAdvance( f, time );
+    _M_solver->timeAdvance( _M_solver->sourceTerm(), time );
     _M_solver->iterate( time );
 
     // Store the solutions of NSo
@@ -284,7 +284,7 @@ NavierStokesWithFlux<NSSolver>::initialize( const Function& u0, const Function& 
 }
 template<typename NSSolver>
 void
-NavierStokesWithFlux<NSSolver>::timeAdvance( const Function __source, const Real& __time )
+NavierStokesWithFlux<NSSolver>::timeAdvance( source_type const& __source, Real const& __time )
 {
     // update right hand side for NS solves for new time step
     _M_solver->timeAdvance( __source,__time );
@@ -294,6 +294,21 @@ NavierStokesWithFlux<NSSolver>::timeAdvance( const Function __source, const Real
 template<typename NSSolver>
 void
 NavierStokesWithFlux<NSSolver>::iterate( const Real& time )
+{
+    switch ( _M_fluxes.size() == 1 )
+    {
+        case 1:
+            timeAdvance( _M_solver->sourceTerm(), time );
+            iterate_one_flux( time );
+        break;
+        case 2:
+            iterate_two_fluxes( time );
+            break;
+    }
+}
+template<typename NSSolver>
+void
+NavierStokesWithFlux<NSSolver>::iterate_one_flux( const Real& time )
 {
     // update the left hand side and solve the system at time \c time
     Real Q=_M_fluxes.begin()->second( time );
@@ -333,7 +348,7 @@ NavierStokesWithFlux<NSSolver>::iterate( const Real& time )
     _M_solver->u()-=z * _M_u_nso;
     _M_solver->p()-=z * _M_p_nso;
 
-    _M_iteration_finish_signal( ( uint )time*100,
+    _M_iteration_finish_signal( time,
                                 _M_solver->mesh(),
                                 _M_solver->u(),
                                 _M_solver->p(),
@@ -344,6 +359,183 @@ NavierStokesWithFlux<NSSolver>::iterate( const Real& time )
      Debug( 6010 ) << "imposed flux" << " " << Q << "\n";
      Debug( 6010 ) << "numerical flux" << " " << Qn << "\n";
 
+
+}
+template<typename NSSolver>
+void
+NavierStokesWithFlux<NSSolver>::iterate_two_fluxes( const Real& time )
+{
+    Debug( 6010 ) << "starting two fluxes version at time " << time << "\n";
+#if 0
+    int label0 = _M_fluxes.begin().first;
+    int label1 = boost::next( _M_fluxes.begin() ).first;
+    Q[0] = _M_fluxes[label0](time);
+    Q[1] = _M_fluxes[label1](time);
+    lambda[0]=-Q[0];
+    lambda[1]=-Q[1];
+    std::cout << "imposed flux 0" << " " << Q[0] << "\n";
+    std::cout << "imposed flux 1" << " " << Q[1] << "\n";
+
+    // NS1
+    //
+    // Costruction of vectors vec_lambda
+    //
+    vec_lambda0 = ScalarVector( dim_lambda, -lambda[0] );
+    vec_lambda1 = ScalarVector( dim_lambda,  lambda[1] );
+
+    //std::cout << "\n";
+    Debug( 6010 ) << "start NS1 time" << " " << time << "\n";
+    _M_solver->timeAdvance(_M_solver->sourceTerm(),time);
+    _M_solver->iterate(time);
+
+    //_M_iteration_finish_signal( ( uint )time*100,
+    //                             _M_solver->mesh(),
+    //                             _M_solver->u(),
+    //                             _M_solver->p(),
+    //                        1 );
+
+
+
+    // Store the solution
+    //
+    uns1=_M_solver->u();
+    pns1=_M_solver->p();
+
+
+
+    // Compute the fluxes of NS1
+    //
+    Qn[0]=_M_solver->flux(label0);
+    Qn[1]=_M_solver->flux(label1);
+    debug( 6010 ) << "flux 0 before the update" << " " << Qn[0] << "\n";
+    Debug( 6010 ) << "flux 1 before the update" << " " << Qn[1] << "\n";
+
+    // GMRes algorithm
+    //
+    r0 = Qn - Q;
+    absr0 = norm_2( r0 );
+    v1 = r0/absr0;
+
+    // NSo1
+    //
+    // Changing BC
+    //
+    vec_lambda0 = ScalarVector( dim_lambda, v1[0] );
+    vec_lambda1 = ScalarVector( dim_lambda, v1[1] );
+
+    Debug( 6010 ) << "start NSo1 time" << " " << time << "\n";
+
+    _M_solver->u()=uzero;
+    _M_solver->timeAdvance(_M_solver->sourceTerm(),time);
+    //_M_solver->f()=uzero;
+    _M_solver->u()=uprec;
+    _M_solver->iterate(time);
+
+
+    // _M_iteration_finish_signal( ( uint )time*100,
+    //                             _M_solver->mesh(),
+    //                            _M_solver->u(),
+    //                            _M_solver->p(),
+    //                       1 );
+
+    // Store the solution
+    //
+    unso1=_M_solver->u();
+    pnso1=_M_solver->p();
+
+    // Compute the fluxes of NSo1
+    //
+    w1[0]=_M_solver->flux(label0);
+    w1[1]=_M_solver->flux(label1);
+
+    std::cout << "w1" << " " << w1 << "\n";
+
+    h( 0, 0 ) = sum( w1*v1 );
+    w1 -= h( 0, 0 )*v1;
+    h( 1, 0 ) = norm_2( w1 );
+    v2 = w1/h1( 1, 0 );
+
+    std::cout << "h  = " << h << "\n";
+    std::cout << "v1 = " << v1 << "\n";
+    std::cout << "v2 = " << v2 << "\n";
+    std::cout << "w1 = " << w1 << "\n";
+
+
+    // NSo2
+    //
+    // Changing BC
+    //
+    vec_lambda0 = ScalarVector( dim_lambda, v2[0] );
+    vec_lambda1 = ScalarVector( dim_lambda, v2[1] );
+
+    Debug( 6010 ) << "start NSo2 time" << " " << time << "\n";
+
+    _M_solver->u()=uzero;
+    _M_solver->timeAdvance(_M_solver->sourceTerm(),time);
+    //_M_solver->f()=uzero;
+    _M_solver->u()=uprec;
+    _M_solver->iterate(time);
+
+    //      _M_iteration_finish_signal( ( uint )time*100,
+    //                            _M_solver->mesh(),
+    //                            _M_solver->u(),
+    //                            _M_solver->p(),
+    //                       1 );
+
+    // Store the solution
+    //
+    unso2=_M_solver->u();
+    pnso2=_M_solver->p();
+
+    // Compute the fluxes of NSo2
+    //
+    w2[0]=_M_solver->flux(label0);
+    w2[1]=_M_solver->flux(label1);
+
+    h( 0, 1 ) = sum( w2*v1 );
+    w2 -= h( 0, 1 )*v1;
+    h( 1, 1 ) = sum( w2*v2 );
+    w2 -= h( 1, 1 )*v2;
+
+    //
+    // check
+    //
+    std::cout << "w2 = " << w2 << "\n"
+              << "h  = " << h << "\n";
+
+    //
+    // Update lambda
+    //
+    Real __v = absr0/( h( 1, 0 )*h( 0, 1 ) - h( 0, 0 )*h( 1, 1 ) );
+    z[0] = -h( 1, 1 )*__v;
+    z[1] = -h( 1, 0 )*__v;
+    lambda += v1*z[0] + v2*z[1];
+    std::cout << "z      = " << z << "\n"
+              << "lambda = " << lambda << "\n";
+
+    //
+    // Update the velocity and the pressure
+    //
+    _M_solver->u()=uns1-z[0]*unso1-z[1]*unso2;
+    _M_solver->p()=pns1-z[0]*pnso1-z[1]*pnso2;
+
+    // Store the velocity
+    //
+    uprec=_M_solver->u();
+
+    // Save the final solutions
+    //
+    _M_solver->postProcess();
+
+    // Compute the fluxes of NS: the definitive one
+    //
+    Qn[0]=_M_solver->flux(label0);
+    Qn[1]=_M_solver->flux(label1);
+    std::cout << "imposed flux 0" << " " << Q[0] << "\n";
+    std::cout << "numerical flux 0" << " " << Qn[0] << "\n";
+    std::cout << "imposed flux 1" << " " << Q[1] << "\n";
+    std::cout << "numerical flux 1" << " " << Qn[1] << "\n";
+#endif
 
 }
 }

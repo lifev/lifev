@@ -75,6 +75,7 @@ public:
     typedef DarcySolverBase::velocity_solution_type velocity_solution_type;
     typedef DarcySolverBase::error_signal_type error_signal_type;
 
+
     //! Constructor
     /*!
       \param data_file GetPot data file
@@ -121,14 +122,21 @@ public:
     void solve();//!< solve the linear system for TP with Aztec
     void computePresFlux();//!< Compute P and U (once TP known)
 
+    //! projection of P (Q0/P0) on Q1/P1.
+    void projectPressureQ1( ScalUnknown<Vector>& nodalPres );
+
+    //!< projection of U (RT0) on Q1/P1.
+    void projectVelocityQ1( PhysVectUnknown<Vector>& nodalVel );
+
+#if 0
     void postProcessTraceOfPressureRT0();//!< postprocess TP constant per face
     void postProcessVelocityRT0();//!< postprocess Velocity (RT0 per element)
     void postProcessPressureQ0();//!< postprocess P constant per element
-    void projectPressureQ1( ScalUnknown<Vector>& nodalPres ); //!< projection of P (Q0/P0) on Q1/P1.
     void postProcessPressureQ1(); //!< postproc of Q1/P1 pressure.
-    void projectVelocityQ1( PhysVectUnknown<Vector>& nodalVel ); //!< projection of U (RT0) on Q1/P1.
     void postProcessVelocityQ1();//!<  postproc of Q1/P1 velocity.
     void postProcessEnsight(); //!< postprocessing in ensight format of P and U
+#endif
+
     Real computeFluxFlag(int flag);
 
     //! L2 error for pressure wrt analytical solution
@@ -438,9 +446,22 @@ void DarcySolver<Mesh>::solve()
     aztecSolveLinearSyst(mat,globalTP.giveVec(),globalF.giveVec(),
                          globalTP.size(),msrPattern);
     computePresFlux();
-    postProcessPressureQ1();
-    postProcessVelocityQ1();
-    postProcessEnsight();
+
+    // ********** P1 computation of the velocity **********************
+    CurrentFE fe_q1( refPFEnodal , geoMap , qr );
+    Dof dof_q1( refPFEnodal );
+    dof_q1.update( this->_mesh );
+    UInt dim_q1 = dof_q1.numTotalDof();
+    ScalUnknown<Vector> nodalPres( dim_q1 );
+    projectPressureQ1( nodalPres );
+    PhysVectUnknown<Vector> nodalVel( dim_q1 );
+    projectVelocityQ1( nodalVel );
+
+    //solve_signal_type _M_solve_signal;
+
+    Real time = 0.01; // needed for the index of the result-files
+    outensight7Mesh3D( this->_mesh, nodalVel, nodalPres,time );
+
 }
 
 template <typename Mesh>
@@ -805,6 +826,7 @@ void DarcySolver<Mesh>::projectVelocityQ1( PhysVectUnknown<Vector>& u_q1 )
                          pattA_q1,options,params);
 }
 
+#if 0
 
 //-------------------------------------------------
 //! post processing part.
@@ -938,6 +960,6 @@ void DarcySolver<Mesh>::postProcessEnsight()
     outensight7Mesh3D( this->_mesh, nodalVel, nodalPres,time );
 
 }
-
+#endif
 }
 #endif
