@@ -26,95 +26,95 @@
 
 #include "ud_functions.hpp"
 
-typedef boost::shared_ptr<LifeV::FSISolver> fsi_solver_ptr;
-
-/*!
-  This routine sets up the problem:
-
-  -# create the standard boundary conditions for the fluid and
-     structure problems.
-
-  -# initialize and setup the FSIsolver
- */
-fsi_solver_ptr
-fsi_setup( GetPot const& data_file )
+class Problem
 {
-    using namespace LifeV;
+public:
+    typedef boost::shared_ptr<LifeV::FSISolver> fsi_solver_ptr;
 
-    // Boundary conditions for the harmonic extension of the
-    // interface solid displacement
-    BCFunctionBase bcf(fZero);
-    BCHandler BCh_mesh;
-    BCh_mesh.addBC("Top",       3, Essential, Full, bcf,   3);
-    BCh_mesh.addBC("Base",      2, Essential, Full, bcf,   3);
-    BCh_mesh.addBC("Edges",    20, Essential, Full, bcf,   3);
+    /*!
+      This routine sets up the problem:
 
-    // Boundary conditions for the fluid velocity
-    BCFunctionBase in_flow(u2);
-    BCHandler BCh_u;
-    BCh_u.addBC("InFlow", 2,  Natural,   Full, in_flow, 3);
-    BCh_u.addBC("Edges",  20, Essential, Full, bcf,     3);
+      -# create the standard boundary conditions for the fluid and
+      structure problems.
 
-    // Boundary conditions for the solid displacement
-    //    BCh_d.addBC("Interface", 1, Natural, Full, g_wall, 3);
-    BCHandler BCh_d;
-    BCh_d.addBC("Top",       3, Essential, Full, bcf,  3);
-    BCh_d.addBC("Base",      2, Essential, Full, bcf,  3);
+      -# initialize and setup the FSIsolver
+    */
+    Problem( GetPot const& data_file, std::string __oper = "" )
+        {
+            using namespace LifeV;
 
-    fsi_solver_ptr fsi(  new FSISolver( data_file, BCh_u, BCh_d, BCh_mesh ) );
-    fsi->showMe();
-    fsi->setSourceTerms( fZero, fZero );
-    fsi->initialize( u0, d0, w0 );
+            // Boundary conditions for the harmonic extension of the
+            // interface solid displacement
+            BCFunctionBase bcf(fZero);
+            FSISolver::bchandler_type BCh_mesh( new BCHandler );
+            BCh_mesh->addBC("Top",       3, Essential, Full, bcf,   3);
+            BCh_mesh->addBC("Base",      2, Essential, Full, bcf,   3);
+            BCh_mesh->addBC("Edges",    20, Essential, Full, bcf,   3);
 
-    return fsi;
-}
-/*!
-  This routine runs the temporal loop
-*/
+            // Boundary conditions for the fluid velocity
+            BCFunctionBase in_flow(u2);
+            FSISolver::bchandler_type BCh_u( new BCHandler );
+            BCh_u->addBC("InFlow", 2,  Natural,   Full, in_flow, 3);
+            BCh_u->addBC("Edges",  20, Essential, Full, bcf,     3);
+
+            // Boundary conditions for the solid displacement
+            //    BCh_d.addBC("Interface", 1, Natural, Full, g_wall, 3);
+            FSISolver::bchandler_type BCh_d( new BCHandler );
+            BCh_d->addBC("Top",       3, Essential, Full, bcf,  3);
+            BCh_d->addBC("Base",      2, Essential, Full, bcf,  3);
+
+            _M_fsi = fsi_solver_ptr(  new FSISolver( data_file, BCh_u, BCh_d, BCh_mesh, __oper ) );
+            _M_fsi->showMe();
+            _M_fsi->setSourceTerms( fZero, fZero );
+            _M_fsi->initialize( u0, d0, w0 );
+        }
+
+    fsi_solver_ptr fsiSolver() { return _M_fsi; }
+
+    /*!
+      This routine runs the temporal loop
+    */
+    void
+    run( double dt, double T)
+        {
+            boost::timer __overall_timer;
+
+            int __i = 1;
+            for (double time=dt; time <= T; time+=dt, ++__i)
+            {
+                boost::timer __timer;
+
+                _M_fsi->iterate( time );
+
+                std::cout << "[fsi_run] Iteration " << __i << " was done in : "
+                          << __timer.elapsed() << "\n";
+            }
+            std::cout << "Total computation time = "
+                      << __overall_timer.elapsed() << "s" << "\n";
+
+        }
+
+private:
+
+    fsi_solver_ptr _M_fsi;
+};
+
 LifeV::Vector
-fsi_run( fsi_solver_ptr __fsi )
+check( GetPot const& data_file,  std::string __oper, LifeV::OperFSPreconditioner __prec = LifeV::NO_PRECONDITIONER )
 {
-    double dt     = __fsi->timeStep();
-    double T      = __fsi->timeEnd();
-
-    boost::timer __overall_timer;
-
-    int __i = 1;
-    for (double time=dt; time <= T; time+=dt, ++__i)
+    try
     {
-        boost::timer __timer;
+        Problem fsip( data_file, "steklovPoincare" );
+        fsip.fsiSolver()->FSIOperator()->setPreconditioner( __prec );
 
-        __fsi->iterate( time );
+        fsip.run( fsip.fsiSolver()->timeStep(), fsip.fsiSolver()->timeStep() ); // only one iteration
 
-        std::cout << "[fsi_run] Iteration " << __i << " was done in : "
-                  << __timer.elapsed() << "\n";
+        return fsip.fsiSolver()->displacement();
     }
-    std::cout << "Total computation time = "
-              << __overall_timer.elapsed() << "s" << "\n";
-
-    return __fsi->displacement();
-}
-
-/*
-  This routine checks that the results given by the different
-  FSIOperator are actually the same.
-*/
-double
-fsi_check( GetPot const& data_file)
-{
-    fsi_solver_ptr __fsi = fsi_setup( data_file );
-
-    __fsi->setFSIOperator( "steklovPoincare" );
-    __fsi->FSIOperator()->setPreconditioner( LifeV::DIRICHLET_NEUMANN );
-
-    LifeV::Vector __sp_disp = fsi_run( __fsi );
-
-    __fsi->setFSIOperator( "exactJacobian" );
-
-    LifeV::Vector __ej_disp = fsi_run( __fsi );
-
-    return LifeV::norm_2( __sp_disp - __ej_disp );
-
+    catch ( std::exception const& __ex )
+    {
+        std::cout << "caught exception :  " << __ex.what() << "\n";
+    }
 }
 int main(int argc, char** argv)
 {
@@ -122,9 +122,10 @@ int main(int argc, char** argv)
     const char* data_file_name = command_line.follow("data", 2, "-f","--file");
     GetPot data_file(data_file_name);
 
-    fsi_solver_ptr __fsi = fsi_setup( data_file );
-    fsi_run( __fsi );
+    LifeV::Vector __ej_disp = check( data_file,  "fixedPoint" );
+    LifeV::Vector __sp_disp = check( data_file,  "steklovPoincare",  LifeV::DIRICHLET_NEUMANN );
 
+    std::cout << "norm_2(displacement error) = " << LifeV::norm_2( __sp_disp - __ej_disp ) << "\n";
     return 0;
 }
 
