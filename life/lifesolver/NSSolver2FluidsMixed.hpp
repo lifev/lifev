@@ -148,8 +148,12 @@ namespace LifeV {
             return _mesh;
         }
 
-        const Dof& dofLSFunction() {
+        const Dof& lsDof() {
             return _M_lss.dof();
+        }
+        
+        CurrentFE& fe_ls() {
+            return _M_lss.fe();
         }
         //@}
 
@@ -336,8 +340,8 @@ namespace LifeV {
             std::cout << "** NS2F ** Using boost matrix" << std::endl;
 #if L_NS2F_LINEAR_SOLVER==L_NS2F_PETSC
         std::cout << "** NS2F ** Using PETSC linear solver" << std::endl;
-        _M_solver_u.setOptionsFromGetPot(_M_data_file, "navier-stokes/solver-u");
-        _M_solver_p.setOptionsFromGetPot(_M_data_file, "navier-stokes/solver-p");
+        _M_solver_u.setOptionsFromGetPot(_M_data_file, "navier-stokes/yosida/solver-u");
+        _M_solver_p.setOptionsFromGetPot(_M_data_file, "navier-stokes/yosida/solver-p");
         if ( _BCh_u.hasOnlyEssential() ) {
             Real constPress = 1. / sqrt( _dim_p );
             for(UInt i = 0; i < _dim_p; ++i) {
@@ -530,13 +534,13 @@ namespace LifeV {
         _M_D = trans( _M_Dtr );
 
         // Export matrices to Matlab format for debugging purposes
-        if(_M_verbose) {
-            std::cout << "** NS2F ** Exporting matrices to Matlab format"
-                      << std::endl;
-            _M_C.spy( "./results/spyC" );
-            _M_D.spy( "./results/spyD" );
-            _M_Dtr.spy( "./results/spyDtr" );
-        }
+//         if(_M_verbose) {
+//             std::cout << "** NS2F ** Exporting matrices to Matlab format"
+//                       << std::endl;
+//             _M_C.spy( "./results/spyC" );
+//             _M_D.spy( "./results/spyD" );
+//             _M_Dtr.spy( "./results/spyDtr" );
+//         }
 
         // Solve the system
         if(_M_verbose)
