@@ -3,4 +3,9 @@
 Makefile
 Makefile.in
 Makefile.in
+press.001.bb
+test.001.inp
 test_ns_ipstab
+vel_x.001.bb
+vel_y.001.bb
+vel_z.001.bb

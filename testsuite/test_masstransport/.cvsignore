@@ -2,4 +2,9 @@
 .libs
 Makefile
 Makefile.in
+concentration.res10
+fluid.res10
+pressure.res010
+test.geo
 test_mass
+velocity.res010
