@@ -20,6 +20,8 @@
 #  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
+AM_CXXFLAGS=-O1
+
 SUFFIXES		= .cpp .hpp .idl .c .h .f .F .o .moc 
 
 INCLUDES        = -I$(top_srcdir)/life/lifecore
@@ -30,7 +32,8 @@ check_PROGRAMS 	= test_casts test_copy test_mark_to_bc test_getpot\
                   test_pairs test_pf test_prova test_rotate \
                   test_seq test_size test_typedefs test_using \
                   test_valarray test_vsize test_debug \
-                  test_singleton test_factory
+                  test_singleton test_factory \
+                  test_boost
 
 
 
@@ -53,6 +56,10 @@ test_getpot_SOURCES	= test_getpot.cpp
 
 test_singleton_SOURCES	= test_singleton.cpp
 test_factory_SOURCES	= test_factory.cpp
+
+test_boost_SOURCES = test_boost.cpp
+test_boost_LDADD = 
+#test_boost_LDADD = $(boost_test_lib)
 
 POTFILES			= mesh.pot mesh2.pot mesh3.pot
 
