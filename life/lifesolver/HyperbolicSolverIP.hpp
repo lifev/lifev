@@ -140,8 +140,7 @@ namespace LifeV {
             _M_velocity(velocity0),
             _M_bdf_order( data_file((data_section + "/bdf/order").data(), 2) ),
             _M_bdf(_M_bdf_order)
-        {
-            _M_solver.setOptionsFromGetPot(_M_data_file, (_M_data_section + "/solver").data());
+        {            
             _M_gamma = _M_data_file((_M_data_section + "/ipstab/gamma").data(), 0.125);
             switch( _M_fe.nbNode )
             {
@@ -223,13 +222,6 @@ namespace LifeV {
 
         //! Data section
         const std::string _M_data_section;
-
-        //! The linear solver
-        //#if USE_AZTEC_SOLVER
-        SolverAztec _M_solver;
-        //#else
-        //SolverPETSC _M_solver;
-        //#endif
 
         //! Reference FE
         const RefFE& _M_reffe;
@@ -402,6 +394,21 @@ namespace LifeV {
     template<typename MeshType>
     void HyperbolicSolverIP<MeshType>::add_A_unsteady() {
         ElemVec elvec(_M_fe_velocity.nbNode, NDIM);
+        ElemMat elmat(_M_fe.nbNode, 1, 1);
+
+        // Advection term
+
+        for(UInt i = 1; i <= _M_mesh.numVolumes(); i++){
+            _M_fe.updateFirstDeriv( _M_mesh.volumeList(i) );
+            elmat.zero();
+
+            evaluate_velocity(i, elvec);
+            for(UInt i_comp = 0; i_comp < NDIM; i_comp++) {
+                grad(i_comp, elvec, _M_fe_velocity, elmat, _M_fe, _M_fe, 0, 0);
+            }
+
+            assemb_mat(_M_A, elmat, _M_fe, _M_dof, 0, 0);
+        }
 
         // Local contributions from the stabilization term. WARNING: only
         // works if _M_fe and fe2 are of the same type
@@ -414,8 +421,9 @@ namespace LifeV {
         CurrentFE fe2(_M_fe);
         Real stab_coeff;
 
-        // local trace of the velocity
-        ElemVec beta( _M_fe_bd.nbNode, nDimensions );
+        // Local trace of the velocity
+
+        ElemVec beta( _M_fe_bd.nbNode, NDIM );
 
         for(UInt i = _M_mesh.numBFaces() + 1; i <= _M_mesh.numFaces(); i++){
             elmat11.zero();
@@ -433,21 +441,23 @@ namespace LifeV {
 
             _M_fe_bd.updateMeasNormalQuadPt( _M_mesh.faceList(i) );
 
-            // get the local trace of the velocity into beta
+            
+            // Get the local trace of the velocity into beta
+            beta.zero();
         
-            // local id of the face in its adjacent element
-            UInt iFaEl = _M_mesh.face( i ).pos_first();
-            for ( int iNode = 0; iNode < _M_fe_bd.nbNode; ++iNode )
-                {
-                    UInt iloc = _M_fToP( iFaEl, iNode+1 );
-                    for ( int iCoor = 0; iCoor < _M_fe.nbCoor; ++iCoor )
-                        {
-                            UInt ig = _M_dof.localToGlobal( ad_first, iloc+1 ) - 1 +
-                                iCoor * _M_dof.numTotalDof();
-                            beta.vec()[ iCoor*_M_fe_bd.nbNode + iNode ] = _M_velocity( ig );
-                        }
-                }
+            // Get the position of the face on the first element sharing it
 
+            UInt iFaEl = _M_mesh.faceList( i ).pos_first();
+            
+            for ( int iNode = 0; iNode < _M_fe_bd.nbNode; ++iNode ) {
+                UInt iloc = _M_fToP( iFaEl, iNode+1 );
+                for ( int iCoor = 0; iCoor < _M_fe.nbCoor; ++iCoor ) {
+                    UInt ig = _M_dof.localToGlobal( ad_first, iloc ) - 1 +
+                        iCoor * _M_dof.numTotalDof();
+                    beta.vec()[ iCoor*_M_fe_bd.nbNode + iNode ] = _M_velocity( ig );
+                }
+            }
+            
             ipstab_bagrad(stab_coeff, elmat11, _M_fe, _M_fe, beta, _M_fe_bd, 0, 0);
             ipstab_bagrad(stab_coeff, elmat12, _M_fe, fe2, beta, _M_fe_bd, 0, 0);
             ipstab_bagrad(stab_coeff, elmat21, fe2, _M_fe, beta, _M_fe_bd, 0, 0);
@@ -457,20 +467,7 @@ namespace LifeV {
             assemb_mat(_M_A, elmat12, _M_fe, fe2, _M_dof);
             assemb_mat(_M_A, elmat21, fe2, _M_fe, _M_dof);
             assemb_mat(_M_A, elmat22, fe2, fe2, _M_dof);
-        }
 
-        ElemMat elmat(_M_fe.nbNode, 1, 1);
-
-        for(UInt i = 1; i <= _M_mesh.numVolumes(); i++){
-            _M_fe.updateFirstDeriv( _M_mesh.volumeList(i) );
-            elmat.zero();
-
-            evaluate_velocity(i, elvec);
-            for(UInt i_comp = 0; i_comp < NDIM; i_comp++) {
-                grad(i_comp, elvec, _M_fe_velocity, elmat, _M_fe, _M_fe, 0, 0);
-            }
-
-            assemb_mat(_M_A, elmat, _M_fe, _M_dof, 0, 0);
         }
     }
 
@@ -524,6 +521,7 @@ namespace LifeV {
     template<typename MeshType>
     void HyperbolicSolverIP<MeshType>::timeAdvance() {
         // Update left hand side
+
         _M_A = _M_A_steady;
         add_A_unsteady();
 
@@ -532,18 +530,18 @@ namespace LifeV {
         _M_b += _M_M * _M_bdf.time_der(_M_delta_t);
 
         // Apply boundary conditions
-
         apply_bc();
 
         // Solve the system
+        SolverAztec __solver;
+        __solver.setOptionsFromGetPot(_M_data_file, (_M_data_section + "/solver").data());
+        __solver.setMatrix(_M_A);
+        __solver.solve(_M_u, _M_b);
 
-        _M_solver.setMatrix(_M_A);
-        _M_solver.solve(_M_u, _M_b);
-
+        // Update bdf object
         _M_bdf.shift_right(_M_u);
 
         // Update current time
-
         _M_t += _M_delta_t;
     }
 }
