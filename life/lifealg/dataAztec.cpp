@@ -16,6 +16,7 @@
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+#include <sstream>
 #include <iostream>
 #include <vector>
 #include <fstream>
@@ -281,7 +282,7 @@ void DataAztec::aztecSolveLinearSyst(MSRMatr<double>& mat,
     preconditioner factorization)
 
     Typical use in the calling function:
-    
+
     ...
     static bool flag = true;
     static int az_name;
@@ -291,11 +292,11 @@ void DataAztec::aztecSolveLinearSyst(MSRMatr<double>& mat,
     } else {
       options[AZ_keep_info] = 1;
       options[AZ_pre_calc] = AZ_reuse;
-    }                         
+    }
     aztecSolveLinearSyst(mat,u.giveVec(),rhs.giveVec(),u.size(),
-             msrPattern,options,params,az_name,flag);  
+             msrPattern,options,params,az_name,flag);
     flag = false;
-    
+
   */
   int    proc_config[AZ_PROC_SIZE];// Processor information:
   int    *data_org;                // Array to specify data layout
