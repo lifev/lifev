@@ -33,7 +33,7 @@
 #define L_NS2F_UMFPACK 0
 #define L_NS2F_PETSC 1
 
-#define L_NS2F_LINEAR_SOLVER L_HSIP_PETSC
+#define L_NS2F_LINEAR_SOLVER L_NS2F_PETSC
 
 #include <life/lifecore/chrono.hpp>
 
@@ -215,7 +215,7 @@ namespace LifeV {
 
         //! Velocity mass matrix
         matrix_type_M _M_M;
-        
+
         //! Lumped velocity mass matrix
         matrix_type_M_L _M_M_L;
 
@@ -495,10 +495,10 @@ namespace LifeV {
             }
 
         } // loop over volumes
-        
+
         // Lump mass matrix
         _M_M_L.lumpRowSum(_M_M);
-        
+
         __chrono.stop();
 
         if(_M_verbose) {
@@ -516,20 +516,20 @@ namespace LifeV {
 
         // Apply boundary conditions
         if(_M_verbose)
-            std::cout << "** NS2F ** Applying boundary conditions" 
+            std::cout << "** NS2F ** Applying boundary conditions"
                       << std::endl;
-        
+
         if (!_BCh_u.bdUpdateDone())
             _BCh_u.bdUpdate(_mesh, _feBd_u, uDof());
 
         bcManage(_M_C, _M_Dtr, _M_rhs_u, _mesh, uDof(), _BCh_u, _feBd_u, 1.0, _M_time );
-        
+
         if(_M_verbose)
-            std::cout << "** NS2F ** Computing discrete divergence operator" 
+            std::cout << "** NS2F ** Computing discrete divergence operator"
                       << std::endl;
         _M_D = trans( _M_Dtr );
 
-        // Export matrices to Matlab format for debugging purposes        
+        // Export matrices to Matlab format for debugging purposes
         if(_M_verbose) {
             std::cout << "** NS2F ** Exporting matrices to Matlab format"
                       << std::endl;
@@ -537,7 +537,7 @@ namespace LifeV {
             _M_D.spy( "./results/spyD" );
             _M_Dtr.spy( "./results/spyDtr" );
         }
-        
+
         // Solve the system
         if(_M_verbose)
             std::cout << "** NS2F ** Solving the system" << std::endl;
