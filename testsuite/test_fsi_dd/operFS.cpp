@@ -279,6 +279,44 @@ Vector operFS::getFluidInterfaceOnSolid(Vector &_vec)
 
     return vec;
 }
+
+
+
+Vector operFS::getFluidInterfaceOnSolid(Vector    &_vec,
+                                        BCHandler &_BCh)
+{
+    Vector vec(M_residualF.size());
+    vec = 0;
+
+    BCBase const &BC_fluidInterface = _BCh[0];
+    BCBase const &BC_solidInterface = M_fluid.BC_fluid()[0];
+
+    UInt nDofInterface = BC_fluidInterface.list_size();
+
+    UInt nDimF = BC_fluidInterface.numberOfComponents();
+
+    UInt totalDofFluid = M_residualF.size()/ nDimF;
+
+    for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)
+    {
+        ID IDfluid = BC_fluidInterface(iBC)->id();
+
+        BCVectorInterface const *BCVInterface =
+            static_cast <BCVectorInterface const *>
+            (BC_fluidInterface.pointerToBCVector());
+
+        ID IDsolid = BCVInterface->
+            dofInterface().getInterfaceDof(IDfluid);
+
+        for (UInt jDim = 0; jDim < nDimF; ++jDim)
+        {
+            vec[IDsolid - 1 + jDim*totalDofFluid] =
+                _vec[IDfluid - 1 + jDim*totalDofFluid];
+        }
+    }
+
+    return vec;
+}
 //
 // Residual evaluation
 //
@@ -301,15 +339,15 @@ void operFS::eval(const Vector& disp,
     M_solid.d() = setDispOnInterface(disp);
 //    M_solid.d() = disp;
 
+
     M_solid._recur = 0;
     M_solid.iterate();
-
-//    M_solid.postProcess();
 
     M_fluid.updateMesh(M_time);
     M_fluid.iterate   (M_time);
 
-//    M_fluid.postProcess();
+    M_solid.postProcess();
+    M_fluid.postProcess();
 
     dispNew = M_solid.d();
     velo    = M_solid.w();
@@ -340,7 +378,6 @@ void operFS::evalResidual(Vector &res,
     M_residualF = M_fluid.residual();
 
     computeResidualFSI();
-
     res = getResidualFSIOnSolid();
 
     std::cout << "Max ResidualF   = " << maxnorm(M_residualF)
@@ -371,7 +408,8 @@ void  operFS::solveJac(Vector &muk,
                        const Vector  &_res,
                        double        _linearRelTol)
 {
-    UInt precChoice = 1;
+    UInt precChoice = 0;
+
     switch(precChoice)
     {
         case 0:
@@ -445,12 +483,21 @@ void  operFS::invSfPrime(const Vector& res,
     // step = S'_f^{-1} \cdot res
 
     setResidualFSI(res);
+//    this->M_fluid.updateDispVelo();
+//    M_residualFSI = 0.;
     solveLinearFluid();
+
 
     Vector deltaLambda = this->M_fluid.getDeltaLambda();
 
+    deltaLambda = getFluidInterfaceOnSolid(deltaLambda,
+                                           M_BCh_du);
+//     for (int ii = 0; ii < M_residualFSI.size(); ++ii)
+//         std::cout << M_residualFSI[ii] << " "
+//               << this->M_fluid.residual()[ii] << " "
+//               << deltaLambda[ii] << std::endl;
     std::cout << "deltaLambda norm = " << maxnorm(deltaLambda) << std::endl;
-
+    std::cout << "ResidualFSI norm = " << maxnorm(M_residualFSI) << std::endl;
     step = getFluidInterfaceOnSolid(deltaLambda);
     std::cout << "deltaLambda step = " << maxnorm(step) << std::endl;
 }
@@ -469,10 +516,11 @@ void  operFS::invSsPrime(const Vector& res,
     setResidualFSI(res);
     solveLinearSolid();
 
-     for (int i = 0; i < (int) M_dz.size(); ++i)
-         step[i] = dz()[i];
+    step = setDispOnInterface(M_dz);
+//      for (int i = 0; i < (int) M_dz.size(); ++i)
+//          step[i] = dz()[i];
 
-     return;
+//     return;
 }
 
 

@@ -200,7 +200,7 @@ int main(int argc, char** argv)
 
     BCVectorInterface du_wall(oper.residualFSI(),
                               dim_fluid,
-                              dofStructureToFluidMesh);
+                              dofMeshToFluid);
     // Passing the residual to the linearized structure: \sigma -> dz
     BCVectorInterface dg_wall(oper.residualFSI(),
                               dim_fluid,

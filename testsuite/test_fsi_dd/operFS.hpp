@@ -105,6 +105,8 @@ namespace LifeV
 
         Vector getResidualFSIOnSolid();
         Vector getFluidInterfaceOnSolid(Vector &_vec);
+        Vector getFluidInterfaceOnSolid(Vector &_vec,
+                                        BCHandler &_BCh);
 
 //         PhysVectUnknown<Vector> const & residualS() const
 //             {return M_residualS;}
