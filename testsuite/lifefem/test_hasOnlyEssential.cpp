@@ -30,13 +30,16 @@
 
 using namespace LifeV;
 
-Real zero(const Real& t, const Real& x, const Real& y, const Real& z,
-          const ID& id)
+Real zero(const Real& /* t */,
+          const Real& /* x */,
+          const Real& /* y */,
+          const Real& /* z */,
+          const ID& /* id*/)
 {
     return 0;
 }
 
-int main(int argc, char** argv)
+int main(int /* argc */, char** /* argv */)
 {
 
     BCFunctionBase bcf(zero);
