@@ -38,36 +38,37 @@
 using namespace LifeV;
 
 typedef pair< Real, Real > Vec2D;
-void computeInterface2TubesValues( const Vec2D& Un_alpha_bd,
-                                   const Vec2D& Un_alpha_int,
-                                   const Edge1D& edge_alpha,
-                                   const NonLinearFluxFun1D&   flux_alpha,
-                                   const NonLinearSourceFun1D& source_alpha,
-                                   const Vec2D& Un_beta_bd,
-                                   const Vec2D& Un_beta_int,
-                                   const Edge1D& edge_beta,
-                                   const NonLinearFluxFun1D&   flux_beta,
-                                   const NonLinearSourceFun1D& source_beta,
-                                   const Real& time_step,
-                                   Vec2D& bcDir_alpha,
-                                   Vec2D& bcDir_beta
-                                   );
+int computeInterface2TubesValues( const Vec2D& Un_alpha_bd,
+				  const Vec2D& Un_alpha_int,
+				  const Edge1D& edge_alpha, const UInt& dof_alpha,
+				  const NonLinearFluxFun1D&   flux_alpha,
+				  const NonLinearSourceFun1D& source_alpha,
+				  const Vec2D& Un_beta_bd,
+				  const Vec2D& Un_beta_int,
+				  const Edge1D& edge_beta, const UInt& dof_beta,
+				  const NonLinearFluxFun1D&   flux_beta,
+				  const NonLinearSourceFun1D& source_beta,
+				  const Real& time_step,
+				  Vec2D& bcDir_alpha,
+				  Vec2D& bcDir_beta
+				  );
+int test_newton( );
 
 void f_jac( const Vec2D& Un_alpha_bd,
-            const Vec2D& Un_alpha_int,
-            const Edge1D& edge_alpha,
-            const NonLinearFluxFun1D&   fluxFun_alpha,
-            const NonLinearSourceFun1D& sourceFun_alpha,
-            const Vec2D& Un_beta_bd,
-            const Vec2D& Un_beta_int,
-            const Edge1D& edge_beta,
-            const NonLinearFluxFun1D&   fluxFun_beta,
-            const NonLinearSourceFun1D& sourceFun_beta,
-            const Real& time_step,
-            const Vector<Real>& x,
-            Vector<Real>& f,
-            Matrix<Real>& jac
-            );
+	    const Vec2D& Un_alpha_int,
+	    const Edge1D& edge_alpha, const UInt& dof_alpha,
+	    const NonLinearFluxFun1D&   fluxFun_alpha,
+	    const NonLinearSourceFun1D& sourceFun_alpha,
+	    const Vec2D& Un_beta_bd,
+	    const Vec2D& Un_beta_int,
+	    const Edge1D& edge_beta, const UInt& dof_beta,
+	    const NonLinearFluxFun1D&   fluxFun_beta,
+	    const NonLinearSourceFun1D& sourceFun_beta,
+	    const Real& time_step,
+	    const Vector<Real>& x,
+	    Vector<Real>& f,
+	    Matrix<Real>& jac
+	    );
 
 //! 2D dot product
 Real dot(const Vec2D& vec1, const Vec2D& vec2)
@@ -82,7 +83,7 @@ Vec2D interpolLinear(const Real& point_bound, const Real& point_internal,
     Real deltaX = std::abs(point_bound - point_internal);
 
     Real cfl =  eigenvalue * deltaT / deltaX;
-
+    std::cout << "cfl " << cfl << std::endl;
     Real weight;   //!< weight in the linear approximation
 
     if ( point_bound < point_internal ) { //! the edge is on the left of the domain
@@ -110,10 +111,10 @@ int main(int argc, char** argv)
 
     //! ********** Reading from data file ******************************************
     GetPot command_line(argc,argv);
-    const char* data_file_name = command_line.follow("data", 2, "-f","--file");
-    /*
+    /*const char* data_file_name = command_line.follow("data", 2, "-f","--file");
       GetPot data_file(data_file_name);
     */
+
 
     GetPot data_file( "datanl" );
 
@@ -134,13 +135,14 @@ int main(int argc, char** argv)
     std::cout << "======\n\tNon Linear model tube 2" << std::endl;
     onedparamNL_t2.showMeData(std::cout);
     std::cout << "-----------------------------" << std::endl;
-
+    /*
     std::cout << "======\n\tLinear model tube 1" << std::endl;
     onedparamLin.showMeData(std::cout);
     std::cout << "-----------------------------" << std::endl;
     std::cout << "======\n\tLinear model tube 2" << std::endl;
     onedparamLin_t2.showMeData(std::cout);
     std::cout << "-----------------------------" << std::endl;
+    */
 
     //  OneDModelSolver onedm(data_file, onedparamLin);
     OneDModelSolver onedm   (data_file, onedparamNL);
@@ -195,14 +197,10 @@ int main(int argc, char** argv)
     std::cout << "Hit return to continue" << std::endl;
     std::cin.get(ch);
 
+    //! interface values
+    Vec2D bcDir_t1, bcDir_t2;
 
-    Real bcR1, bcR2, bcL1, bcL2;
-    bcR1 = 0.;
-    bcR2 = 0.;
-    bcL1 = 0.;
-    bcL2 = 0.;
-
-
+    std::cout << "++++++++++++++++++++++++++++++\n\tTemporal loop starting ... " << std::endl;
     // Temporal loop
     //
     Chrono chrono;
@@ -213,11 +211,39 @@ int main(int argc, char** argv)
                   << "s... \n";
         chrono.start();
 
-        //! compute the interface values
+	Edge1D foo = onedm.RightEdge();
+	
+
+ 	std::cout << "right edge " << foo.pt1().x() <<  " " << foo.pt2().x() << std::endl;
+
+       //! compute the interface values
+	Vec2D bcDir_t1, bcDir_t2;
+	//! compute interface values
+	int cvg_newton = computeInterface2TubesValues
+	  ( onedm.BCValuesRight(),
+	    onedm.BCValuesInternalRight(),
+	    onedm.RightEdge(), 
+	    onedm.RightNodeId(),
+	    onedm.FluxFun(), 
+	    onedm.SourceFun(),
+	    onedm_t2.BCValuesLeft(),
+	    onedm_t2.BCValuesInternalLeft(),
+	    onedm_t2.LeftEdge(), 
+	    onedm_t2.LeftNodeId(),
+	    onedm_t2.FluxFun(), 
+	    onedm_t2.SourceFun(),
+	    onedm.timestep(),
+	    bcDir_t1, bcDir_t2
+	    );
+
+	std::cout << "bc dir tube 1 " << bcDir_t1.first <<  " " << bcDir_t1.second 
+		  << "\nbc dir tube 2 " << bcDir_t2.first <<  " " << bcDir_t2.second << std::endl;
 
         //! set the interface values
-        onedm.setBCValuesRight( bcR1, bcR2 );
-        onedm_t2.setBCValuesLeft( bcL1, bcL2 );
+        onedm.setBCValuesRight( bcDir_t1.first, bcDir_t1.second );
+        onedm_t2.setBCValuesLeft( bcDir_t2.first, bcDir_t2.second );
+
+        ASSERT_PRE( !cvg_newton,"Newton iteration for interface values computation not achieved.");
 
         //! tube 1
         onedm.timeAdvance( time );
@@ -242,66 +268,93 @@ int main(int argc, char** argv)
 
 }
 
-void computeInterface2TubesValues( const Vec2D& Un_alpha_bd,
-                                   const Vec2D& Un_alpha_int,
-                                   const Edge1D& edge_alpha,
-                                   const NonLinearFluxFun1D&   fluxFun_alpha,
-                                   const NonLinearSourceFun1D& sourceFun_alpha,
-                                   const Vec2D& Un_beta_bd,
-                                   const Vec2D& Un_beta_int,
-                                   const Edge1D& edge_beta,
-                                   const NonLinearFluxFun1D&   fluxFun_beta,
-                                   const NonLinearSourceFun1D& sourceFun_beta,
-                                   const Real& time_step,
-                                   Vec2D& bcDir_alpha,
-                                   Vec2D& bcDir_beta
-                                   )
-{
-    //! unknown of non linear equation f(x) = 0
-    Vector<Real> x(4);
-    //! non linear function f
-    Vector<Real> f(4);
-    //! jacobian of the non linear function
-    Matrix<Real> jac(4,4);
 
-    x[0] = Un_alpha_bd.first;
-    x[1] = Un_alpha_bd.second;
-    x[2] = Un_beta_bd.first;
-    x[3] = Un_beta_bd.second;
- 
+int computeInterface2TubesValues( const Vec2D& Un_alpha_bd,
+				  const Vec2D& Un_alpha_int,
+				  const Edge1D& edge_alpha, const UInt& dof_alpha,
+				  const NonLinearFluxFun1D&   fluxFun_alpha,
+				  const NonLinearSourceFun1D& sourceFun_alpha,
+				  const Vec2D& Un_beta_bd,
+				  const Vec2D& Un_beta_int,
+				  const Edge1D& edge_beta, const UInt& dof_beta,
+				  const NonLinearFluxFun1D&   fluxFun_beta,
+				  const NonLinearSourceFun1D& sourceFun_beta,
+				  const Real& time_step,
+				  Vec2D& bcDir_alpha,
+				  Vec2D& bcDir_beta
+				  )
+
+//int test_newton()
+{
+    const UInt f_size(4);
+    
+    //! unknown of non linear equation f(x) = 0
+    Vector<Real> x(f_size);
+    //! non linear function f
+    Vector<Real> f(f_size);
+    //! jacobian of the non linear function
+    Matrix<Real> jac(f_size,f_size);
+    //! transpose of the jacobian of the non linear function
+    Matrix<Real> jac_trans(f_size,f_size);
+
+    //! tmp matrix for lapack lu inversion
+    Vector<Int> ipiv(f_size);
+
+    x[0] = Un_alpha_bd.first; //!< A_alpha
+    x[1] = Un_alpha_bd.second;//!< Q_alpha
+    x[2] = Un_beta_bd.first;  //!< A_beta
+    x[3] = Un_beta_bd.second; //!< Q_beta
+
     //! lapack variable
     int INFO[1] = {0};
     int NBRHS[1] = {1};//  nb columns of the rhs := 1.
-    int NBU[1] = {4};
+    int NBU[1] = {f_size};
 
     //! newton raphson iteration
+    //! (use the newton class???)
     for ( UInt iter = 0 ; iter < 100 ; iter ++) {
+
+        std::cout << "\titer = " << iter << std::endl;
+
         //! compute f(x) and its jacobian df(x)
-        f_jac( Un_alpha_bd, Un_alpha_int, edge_alpha, fluxFun_alpha, sourceFun_alpha,
-	       Un_beta_bd, Un_beta_int, edge_beta, fluxFun_beta, sourceFun_beta,
-	       time_step, x, f, jac);
+        f_jac( Un_alpha_bd, Un_alpha_int, edge_alpha, dof_alpha, fluxFun_alpha, sourceFun_alpha,
+	       Un_beta_bd, Un_beta_int, edge_beta, dof_beta, fluxFun_beta, sourceFun_beta,
+               time_step, x, f, jac);
+      
+
+	std::cout << "x : " << x << "\nf : " << f << "\njac : " << jac << std::endl;
+
+	//! transpose to pass to fortran storage (lapack!)
+	jac_trans = trans(jac);
 	
-	//   jac <- L and Lt where L Lt is the Cholesky factorization of df(x)
-        dpotrf_("L", NBU, jac , NBU , INFO );
-        ASSERT_PRE(!INFO[0],"Lapack factorization of jacobian matrix is not achieved.");
-
-        // Compute f <-  ( df(x)^{-1} f(x) ) (solve triangular system)
-        dtrtrs_("L", "N", "N", NBU, NBRHS, jac, NBU, f, NBU, INFO);
-        ASSERT_PRE(!INFO[0],"Lapack Computation y = df(x)^{-1} f(x)  is not achieved.");
-
+	//! Compute f <-  ( df(x)^{-1} f(x) ) (lu dcmp)
+	dgesv_(NBU, NBRHS, &jac_trans(0,0), NBU , &ipiv(0), &f(0), NBU, INFO);
+        ASSERT_PRE(!INFO[0],"Lapack LU resolution of y = df(x)^{-1} f(x) is not achieved.");
 	x += - f;
+
+        std::cout << "x : " << x << "\nf : " << f << std::endl;
+
+	//! convergence if Q_alpha == Q_beta
+	if ( std::fabs( x[1] - x[3] ) < 1e-8 ) {
+	    bcDir_alpha = Vec2D( x[0], x[1] );
+	    bcDir_beta  = Vec2D( x[2], x[3] );
+	    return 0;
+	}
+	  
     }
+    //! no convergence
+    return 1;
 
 }
 
 void f_jac( const Vec2D& Un_alpha_bd,
             const Vec2D& Un_alpha_int,
-            const Edge1D& edge_alpha,
+            const Edge1D& edge_alpha, const UInt& dof_alpha,
             const NonLinearFluxFun1D&   fluxFun_alpha,
             const NonLinearSourceFun1D& sourceFun_alpha,
             const Vec2D& Un_beta_bd,
             const Vec2D& Un_beta_int,
-            const Edge1D& edge_beta,
+            const Edge1D& edge_beta, const UInt& dof_beta,
             const NonLinearFluxFun1D&   fluxFun_beta,
             const NonLinearSourceFun1D& sourceFun_beta,
             const Real& time_step,
@@ -328,10 +381,28 @@ void f_jac( const Vec2D& Un_alpha_bd,
 
     int verbose = 2;
 
+    std::cerr << "x = " << x << std::endl;
+   
+
     Real A_alpha = x[0];
     Real Q_alpha = x[1];
     Real A_beta  = x[2];
     Real Q_beta  = x[3];
+
+    //-------------
+    //! Get the dof of the interfaces (to extract the paramaters values)
+    //-------------
+    //! identity of the point on the boundary of domain alpha
+    //! (on the right of the domain alpha)
+    UInt rightDof = dof_alpha; 
+    //! identity of the point on the boundary of domain beta
+    //! (on the left of the domain beta)
+    UInt leftDof  = dof_beta;
+    //-------------
+
+    std::cout << "rightDof = " << rightDof 
+	      << "\tleftDof = " << leftDof << std::endl;
+
 
     // *******************************************************
     //! Continuity of the flux
@@ -371,6 +442,11 @@ void f_jac( const Vec2D& Un_alpha_bd,
     U_boundary   = Vec2D ( Un_alpha_bd );
     //! values of U on the neighboring node of the boundary point
     U_internalBd = Vec2D ( Un_alpha_int );
+
+    std::cout << "boundaryPoint = " <<  boundaryPoint << " internalBdPoint = " << internalBdPoint
+	      << "U_boundary = " <<  U_boundary.first << " " << U_boundary.second
+	      << std::endl;
+
 
     //! compute the eigenvalues/eigenvectors of the flux jacobian (computed on the boundary point)
     fluxFun_alpha.jacobian_EigenValues_Vectors(U_boundary.first, U_boundary.second,
@@ -481,4 +557,25 @@ void f_jac( const Vec2D& Un_alpha_bd,
 
 
 }
+
+#if 0
+//! test function for newton iter
+int f_jac( const Vector<Real>& x,
+	   Vector<Real>& f,
+	   Matrix<Real>& jac
+	   )
+{
+    // *******************************************************
+    f(0) = 2*x(0) + 3*x[1] - 11;
+    //! Jacobian
+    jac( 0, 0 ) =  2.;
+    jac( 0, 1 ) =  3.;
+
+    // *******************************************************
+    f(1) = 2*x[0]*x[0] + x[0] + x[1]*x[1] - 12;
+    //! Jacobian
+    jac( 1, 0 ) = 4*x[0] + 1;
+    jac( 1, 1 ) = 2*x[1];
+}
+#endif
 

@@ -37,6 +37,14 @@ OneDModelSolver::OneDModelSolver(const GetPot& data_file,
     _M_oneDParam(onedparam),
     _M_fluxFun(_M_oneDParam),
     _M_sourceFun(_M_oneDParam),
+    //! id of left and right bc nodes
+    _M_leftNodeId( 0 ),
+    _M_leftInternalNodeId( _M_leftNodeId + 1 ),
+    _M_rightNodeId( _M_dimDof - 1 ),
+    _M_rightInternalNodeId( _M_rightNodeId  - 1 ),
+    //! boundary edges
+    _M_leftEdge( _M_mesh.edgeList( 1 ) ),
+    _M_rightEdge( _M_mesh.edgeList(  _M_nb_elem ) ),
     //! elementary matrices
     _M_elmatMass (_M_fe.nbNode,1,1),
     _M_elmatStiff(_M_fe.nbNode,1,1),
@@ -1405,6 +1413,76 @@ OneDModelSolver::_interpolLinear(const Real& point_bound, const Real& point_inte
                     ( 1 - weight ) * U_bound.second + weight * U_intern.second );
     return u_interp;
 
+}
+
+//! get the flux function
+const NonLinearFluxFun1D& OneDModelSolver::FluxFun() const 
+{
+    return _M_fluxFun;
+}
+//! get the source function
+const NonLinearSourceFun1D& OneDModelSolver::SourceFun() const 
+{
+    return _M_sourceFun;
+}
+
+//! get the left edge
+Edge1D const& OneDModelSolver::LeftEdge() const
+{
+    return _M_leftEdge;
+}
+//! get the right edge
+Edge1D const& OneDModelSolver::RightEdge() const
+{
+    return _M_rightEdge;
+}
+
+//! get the left node
+UInt OneDModelSolver::LeftNodeId() const
+{
+    return _M_leftNodeId;
+}
+//! get the left internal node (neighboring node)
+UInt OneDModelSolver::LeftInternalNodeId() const
+{
+    return _M_leftInternalNodeId;
+}
+//! get the right node
+UInt OneDModelSolver::RightNodeId() const
+{
+    std::cerr << "RightNodeId() " << _M_rightNodeId << std::endl;
+
+    return _M_rightNodeId;
+}
+//! get the right internal node (neighboring node)
+UInt OneDModelSolver::RightInternalNodeId() const
+{
+    return _M_rightInternalNodeId;
+}
+
+//! get the Dirichlet boundary conditions (left)
+OneDModelSolver::Vec2D OneDModelSolver::BCValuesLeft() const
+{
+    return Vec2D( _M_U1_thistime( LeftNodeId() ), 
+		  _M_U2_thistime( LeftNodeId() ) );
+}
+//! get the value at neighboring node (left)
+OneDModelSolver::Vec2D OneDModelSolver::BCValuesInternalLeft() const
+{
+    return Vec2D( _M_U1_thistime( LeftInternalNodeId() ), 
+		  _M_U2_thistime( LeftInternalNodeId() ) );
+}
+//! get the Dirichlet boundary conditions (right)
+OneDModelSolver::Vec2D OneDModelSolver::BCValuesRight() const 
+{
+    return Vec2D( _M_U1_thistime( RightNodeId() ), 
+		  _M_U2_thistime( RightNodeId() ) );
+}
+//! get the value at neighboring node (right)
+OneDModelSolver::Vec2D OneDModelSolver::BCValuesInternalRight() const 
+{
+    return Vec2D( _M_U1_thistime( RightInternalNodeId() ), 
+		  _M_U2_thistime( RightInternalNodeId() ) );
 }
 
 //! set the Dirichlet boundary conditions (right)

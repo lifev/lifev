@@ -174,10 +174,38 @@ public:
     //! Update convective term, bc treatment and solve the linearized ns system
     void iterate( const Real& time , const int& count);
 
-    //! set the Dirichlet boundary conditions (right)
-    void setBCValuesRight( const Real& bcR1, const Real& bcR2 );
+    //! get the Dirichlet boundary conditions (left)
+    Vec2D BCValuesLeft() const;
+    //! get the value at neighboring node (left)
+    Vec2D BCValuesInternalLeft() const;
+    //! get the Dirichlet boundary conditions (right)
+    Vec2D BCValuesRight() const;
+    //! get the value at neighboring node (right)
+    Vec2D BCValuesInternalRight() const;
+
     //! set the Dirichlet boundary conditions (left)
     void setBCValuesLeft( const Real& bcL1, const Real& bcL2 );
+    //! set the Dirichlet boundary conditions (right)
+    void setBCValuesRight( const Real& bcR1, const Real& bcR2 );
+
+    //! get the flux function
+    NonLinearFluxFun1D const& FluxFun() const;
+    //! get the source function
+    NonLinearSourceFun1D const& SourceFun() const;
+
+    //! get the left edge
+    Edge1D const& LeftEdge() const;
+    //! get the right edge
+    Edge1D const& RightEdge() const;
+
+    //! get the left node
+    UInt LeftNodeId() const;
+    //! get the left internal node (neighboring node)
+    UInt LeftInternalNodeId() const;
+    //! get the right node
+    UInt RightNodeId() const;
+    //! get the right internal node (neighboring node)
+    UInt RightInternalNodeId() const;
 
     //! simple cfl computation (correct for constant mesh)
     void CheckCFL() const;
@@ -209,6 +237,15 @@ private:
     //! the source function 
     LinearSimpleSourceFun1D _M_sourceFun ;
     */
+
+    const UInt _M_leftNodeId;
+    const UInt _M_leftInternalNodeId;
+    const UInt _M_rightNodeId;
+    const UInt _M_rightInternalNodeId;
+
+    //! boundary edges
+    const Edge1D& _M_leftEdge;
+    const Edge1D& _M_rightEdge;
 
     //! coefficient in front of the corresponding _M_elmat*
     Real _M_coeffMass;
