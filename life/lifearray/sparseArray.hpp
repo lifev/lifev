@@ -78,6 +78,11 @@ class MSRMatr;
 template <typename PatternType, typename DataType>
 class CSRMatr;
 
+// hide zero to the external world
+namespace{
+double zero( double val ) {return 0.0;}
+}
+
 }
 
 #include <MSRMatrix.hpp>
@@ -87,10 +92,6 @@ class CSRMatr;
 
 namespace LifeV
 {
-/**
-   helper function
- */
-double nihil( double val );
 
 
 ////////////////////////////////////////////////////////////////

@@ -687,7 +687,7 @@ MSRMatr<DataType>::diagonalize( UInt const r, DataType const coeff, std::vector<
     UInt disp = _Patt->nRows() + 1;
     UInt row, col;
 
-    transform( start, end, start, nihil );
+    transform( start, end, start, zero );
 
     for ( UInt i = istart;i < iend;++i )
     {
@@ -722,7 +722,7 @@ MSRMatr<DataType>::diagonalize( UInt const r, DataType const coeff, Vector &b, D
 
     UInt row, col;
 
-    transform( start, end, start, nihil );
+    transform( start, end, start, zero );
 
 
     // Miguel: There is a buh using ybind. Alex, did you fix it?.

@@ -560,7 +560,7 @@ zero_row( UInt const row )
 
     //nihil is the same used for diagonalize
     //method in MSRMatr class.
-    transform( start, end, start, nihil );
+    transform( start, end, start, zero );
 }
 
 

@@ -447,10 +447,6 @@ void MultInvDiag( const std::vector<Real> &Diag, const MSRMatr<Real> &Mat, MSRMa
     }
 }
 
-double nihil( double val )
-{
-    return 0.;
-}
 
 //-----------------------------------------------------------------------
 // DiagPreconditioner
