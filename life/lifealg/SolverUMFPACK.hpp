@@ -38,6 +38,8 @@ extern "C"
 #include <boost/utility.hpp>
 #include <boost/numeric/ublas/vector.hpp>
 
+#include <vecUnknown.hpp>
+
 namespace LifeV
 {
 /*!
@@ -80,7 +82,7 @@ public:
         _M_Control( new double[UMFPACK_CONTROL] ),
         _M_Info( new double[UMFPACK_INFO] )
         {
-            umfpack_dl_defaults( _M_Control );
+            ::umfpack_dl_defaults( _M_Control.get() );
         }
     SolverUMFPACK( SolverUMFPACK const & umfpackSolver )
         :
@@ -109,9 +111,6 @@ public:
             delete[] _M_Info;
         }
 
-    /** creator */
-    static SolverBase* New() { return new SolverUMFPACK; }
-
     //@}
 
     /** @name Operator overloads
@@ -136,11 +135,10 @@ public:
     void setMatrix( uint __N, const uint* __ia, const uint* __ja, const double* __v )
         {
             _M_nrows = __N;
-            _M_ia = __ia;
-            _M_ja = __ja;
+            _M_ia = ( long int* )__ia;
+            _M_ja = ( long int* )__ja;
             _M_v = __v;
         }
-
 
     //@}
 
@@ -165,84 +163,44 @@ public:
             int status = umfpack_dl_solve( UMFPACK_A,
                                            _M_ia,
                                            _M_ja,
-                                           _M_values,
+                                           _M_v,
                                            boost::addressof( __X[0] ),
                                            boost::addressof( __B[0] ),
                                            _M_numeric,
-                                           _M_Control,
-                                           _M_Info );
+                                           _M_Control.get(),
+                                           _M_Info.get() );
 
             if (status != UMFPACK_OK)
             {
-                umfpack_dl_report_info( _M_Control, _M_Info);
-                umfpack_dl_report_status( _M_Control, status);
+                reportInfo();
+                reportStatus( status );
                 Error() << "[SSolverUMFPACK::solve] solve failed\n";
             }
         }
+
+    //! report some info about umfpack
+    void reportInfo();
+
+
+    /**
+       report status of umfpack
+
+       \param status status integer returned by umfpack routines
+     */
+    void reportStatus( int );
 
     //@}
 
 private:
 
-    void prepareSolve()
-        {
-            if ( _M_matrix_reset )
-            {
-                if ( _M_symbolic )
-                {
-                    Debug(5100) << "[SolverUMFPACK::prepareSolve] Destroying symbolic factorization\n";
-
-                    umfpack_dl_free_symbolic( &_M_symbolic );
-                    _M_symbolic = 0;
-                }
-                Debug(5100) << "[SolverUMFPACK::prepareSolve] computing symbolic factorization\n";
-                int status = umfpack_dl_symbolic( _M_nrows,
-                                                  _M_nrows,
-                                                  _M_ia,
-                                                  _M_ja,
-                                                  _M_v,
-                                                  &_M_symbolic,
-                                                  _M_Control,
-                                                  _M_Info );
-                if (status != UMFPACK_OK)
-                {
-                    umfpack_dl_report_info( _M_Control, _M_Info);
-                    umfpack_dl_report_status( _M_Control, status);
-                    Error() << "[SolverUMFPACK::prepareSolve] symbolic factorization failed\n";
-                }
-            }
-            if ( _M_matrix_reset || _M_matrix_values_reset )
-            {
-                if ( _M_numeric )
-                {
-                    Debug(5100) << "[SolverUMFPACK::prepareSolve] Destroying numeric factorization\n";
-                    umfpack_dl_free_numeric( &_M_numeric );
-                    _M_numeric = 0;
-                }
-                Debug(5100) << "[SolverUMFPACK::prepareSolve] computing numeric factorization\n";
-                int status = umfpack_dl_numeric( _M_ia,
-                                                 _M_ja,
-                                                 _M_v,
-                                                 _M_symbolic, &_M_numeric,
-                                                 _M_Control,
-                                                 _M_Info );
-                if (status != UMFPACK_OK)
-                {
-                    umfpack_dl_report_info( _M_Control, _M_Info);
-                    umfpack_dl_report_status( _M_Control, status);
-                    Error() << "[SolverUMFPACK::prepareSolve] numeric factorization failed\n";
-                }
-            }
-            _M_matrix_reset = false;
-            _M_matrix_values_reset = false;
-        }
+    void prepareSolve();
 
 private:
 
     size_t _M_nrows;
-    size_t _M_ia;
-    size_t _M_ja;
-    double* _M_v;
+    long int const* _M_ia;
+    long int const* _M_ja;
+    double const* _M_v;
 
     bool _M_matrix_reset;
     bool _M_matrix_values_reset;

@@ -30,6 +30,8 @@
 */
 #include <lifeconfig.h>
 
+#include <debug.hpp>
+
 #include <vecUnknown.hpp>
 #include <GetPot.hpp>
 #include <singleton.hpp>
