@@ -61,7 +61,8 @@ void lineSearch_cubic( Fct& f, Norm& norm, Vector& residual, Vector& sol, Vector
     lambda_old = lambda;
     sol_cur = sol;
     sol += lambda * step;
-    f.evalResidual( residual, sol, iter );
+//    f.evalResidual( residual, sol, iter );
+    f.evalResidual( sol, iter, residual );
     normRes_test = norm( residual );
     ftest = 0.5 * normRes_test * normRes_test;
     fold = ftest;
@@ -73,7 +74,8 @@ void lineSearch_cubic( Fct& f, Norm& norm, Vector& residual, Vector& sol, Vector
         lambda *= 2;
         sol = sol_cur + lambda * step;
         std::cout << "--- line search (extrapolation, Goldstein rule)" << std::endl;
-        f.evalResidual( residual, sol, iter );
+//        f.evalResidual( residual, sol, iter );
+        f.evalResidual( sol, iter, residual );
         std::cout << "    line search iter : " << iter_linesearch << " residual test = "
         << normRes_test << ", lambda = " << lambda << std::endl;
         normRes_test = norm( residual );
@@ -127,7 +129,8 @@ void lineSearch_cubic( Fct& f, Norm& norm, Vector& residual, Vector& sol, Vector
         //--
         sol = sol_cur + lambda * step;
         std::cout << "--- line search (cubic interpolation, Armijo rule)" << std::endl;
-        f.evalResidual( residual, sol, iter );
+        f.evalResidual( sol, iter, residual );
+//        f.evalResidual( residual, sol, iter );
         normRes_test = norm( residual );
         std::cout << "    line search iter : " << iter_linesearch << " residual test = "
         << normRes_test << ", lambda = " << lambda << std::endl;
