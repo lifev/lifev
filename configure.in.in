@@ -68,9 +68,11 @@ AC_ARG_WITH([aztec],
   AC_MSG_RESULT([$aztec_libs])
  ])
 
-CXXFLAGS="-I/usr/include/blitz ${CXXFLAGS}"
-CXXFLAGS="-I\$(top_srcdir)/life/lifecore -I\$(top_srcdir)/life/lifemesh -I\$(top_srcdir)/life/lifefem ${CXXFLAGS}"
-CXXFLAGS="-DTHREEDIM -Wall ${CXXFLAGS}"
+CPPFLAGS="-I\$(top_srcdir)/life/lifecore -I\$(top_srcdir)/life/lifemesh -I\$(top_srcdir)/life/lifefem ${CPPFLAGS}"
+CPPFLAGS="-DTHREEDIM ${CPPFLAGS}"
+
+CXXFLAGS="-Wall ${CXXFLAGS}"
+
 
 life_libs="\$(top_builddir)/life/lifefem/liblifefem.la \$(top_builddir)/life/lifemesh/liblifemesh.la \$(top_builddir)/life/lifecore/liblifecore.la"
 AC_SUBST(life_libs)
