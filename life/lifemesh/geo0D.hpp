@@ -63,7 +63,7 @@ public:
     //! returns a pointer to a Real[3] containing the coordinates
     Real * coor()
         {
-            return _coor.c_array();
+            return const_cast<Real*>( _coor.data() );
         };
     Real const * coor() const
         {
