@@ -57,7 +57,7 @@
 #define DATA_NAME_AZTEC_MATS 40
 #endif
 
-#include "values.hpp"
+#include "sparseArray.hpp"
 #include "dataAztec.hpp"
 
 namespace LifeV
