@@ -7,7 +7,7 @@
 int main()
   {
     
-    string dirname="../../data/mesh/mesh++/";
+    string dirname="../data/mesh/mesh++/";
     string fname=dirname+"cube_47785.m++";
     string outfile="testBuilders.dat";
     ofstream ofile(outfile.c_str());

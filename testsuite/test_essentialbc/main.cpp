@@ -72,7 +72,7 @@ int main() {
   // Mesh staff
   // ===================================================
   RegionMesh3D<LinearTetra> aMesh; 
-  string mesh_dir = "../../data/mesh/mesh++/";
+  string mesh_dir = "../data/mesh/mesh++/";
 
 
   // Avaliable meshes
