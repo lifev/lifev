@@ -22,7 +22,7 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-INCLUDES		= -I$(top_srcdir)/life/lifecore -I$(top_srcdir)/life/lifearray  -I$(top_srcdir)/life/lifealg
+INCLUDES		= -I$(top_srcdir)/life/lifecore -I$(top_srcdir)/life/lifearray  -I$(top_srcdir)/life/lifealg -I$(top_srcdir)/life/lifemesh
 
 
 check_HEADERS		= MatrixTest.hpp
