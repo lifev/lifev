@@ -22,4 +22,4 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-EXTRA_DIST	= lifestyle.cls rcs.sty
+EXTRA_DIST	= lifestyle.cls rcs.sty lifev.bib

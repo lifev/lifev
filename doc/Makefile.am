@@ -1,11 +1,7 @@
 # -*- Mode : makefile -*-
 #
-#    AUTHOR: Christophe Prud'homme
-#       ORG: EPFL
-#    E-MAIL: christophe.prudhomme@epfl.ch
+# Copyright (C) 2004 EPFL, INRIA, Politechnico di Milano
 #
-# DESCRIPTION:
-# ============
 #  Distributed under the GPL(GNU Public License):
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -20,7 +16,6 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-# DESCRIP-END.
 #
 
-SUBDIRS		= tex manual notes 
+SUBDIRS		= tex manual notes common

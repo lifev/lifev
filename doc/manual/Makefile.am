@@ -46,7 +46,7 @@ BCCond.eps BasElSha.eps NSCode_mesh_types.eps theFE.eps BCHandler.eps Fem_nodes.
 BCCond.pdf BasElSha.pdf NSCode_mesh_types.pdf theFE.pdf BCHandler.pdf Fem_nodes.pdf mixed_pattern.pdf
 
 
-EXTRA_DIST = $(lifev_dev_TEX) $(IMAGES_SRC) life.bib 
+EXTRA_DIST = $(lifev_dev_TEX) $(IMAGES_SRC) 
 
 MOSTLYCLEANFILES	= lifev-dev.log lifev-dev.glo lifev-dev.idx lifev-dev.ind lifev-dev.ilg lifev-dev.aux lifev-dev.out \
                           lifev-dev.pdf lifev-dev.toc lifev-dev.lof lifev-dev.lot lifev-dev.blg lifev-dev.bbl \
