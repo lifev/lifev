@@ -10,6 +10,8 @@ New in 0.3.0:
 * Added reaction term in masstransport (MP)
 * Embedded library and testsuite code into the LifeV namespace (CP)
 * New unit testing framework : we use AutoTest(from autoconf) (CP)
+  41 running tests are available
+  3 nonautomatic (disabled) tests (test_fsi_*, test_ns_sstress)
   ported all tests to this framework
   ported all tests to GetPot
 
