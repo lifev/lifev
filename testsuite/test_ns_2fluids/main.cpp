@@ -40,7 +40,7 @@
 #include <main.hpp>
 #include <ud_functions.hpp>
 
-/* #include <ethierSteinman.hpp> */
+#include <ethierSteinman.hpp>
 
 #define ONE_QUARTER 0
 
@@ -71,9 +71,16 @@ int main() {
 
     // Boundary conditions
 
-    //EthierSteinmanUnsteady::setParamsFromGetPot( datafile );
-    //BCFunctionBase gv(EthierSteinmanUnsteady::uexact);
+    /* ETHIER-STEINMAN
+       EthierSteinmanSteady::setParamsFromGetPot( datafile );
+       BCFunctionBase gv(EthierSteinmanSteady::uexact);
+       BCHandler BCh( 1, BCHandler::HINT_BC_ONLY_ESSENTIAL );
+       BCh.addBC("Wall", 10, Essential, Full, gv, 3);
+    */
+
+    /* RISING BUBBLE PROBLEM */
     BCFunctionBase gv(g);
+
     BCHandler BCh( 6, BCHandler::HINT_BC_ONLY_ESSENTIAL );
     BCh.addBC("Wall", 1, Essential, Full, gv, 3);
     BCh.addBC("Wall", 2, Essential, Full, gv, 3);
@@ -81,10 +88,12 @@ int main() {
     BCh.addBC("Wall", 4, Essential, Full, gv, 3);
     BCh.addBC("Wall", 5, Essential, Full, gv, 3);
     BCh.addBC("Wall", 6, Essential, Full, gv, 3);
+ 
 
-    /*
-      BCHandler BCh( 1, BCHandler::HINT_BC_ONLY_ESSENTIAL );;
-      BCh.addBC("Wall", 10, Essential, Full, gv, 3);
+    /* RUNTIME ERROR CHECK PROBLEM
+       BCFunctionBase gv(g);
+       BCHandler BCh( 1, BCHandler::HINT_BC_ONLY_ESSENTIAL );;
+       BCh.addBC("Wall", 10, Essential, Full, gv, 3);
     */
 
     // Source term
@@ -100,7 +109,12 @@ int main() {
 #endif
 
     const RefFE& refFE_p = feTetraP1;
+
+#if LS_ELEMENT == P1
+    const RefFE& refFE_lss = feTetraP1;
+#elif LS_ELEMENT == P2
     const RefFE& refFE_lss = feTetraP2;
+#endif
 
     const QuadRule& qr = quadRuleTetra15pt;
     const QuadRule& qr_bd = quadRuleTria4pt;
@@ -113,7 +127,7 @@ int main() {
 
     // Solving the problem
 
-    std::cout << "** NS2F test ** Initializing 2 fluid solver" << std::endl;
+    std::cout << "[test_ns_2fluids] Initializing 2 fluid solver" << std::endl;
 
     NSSolver2FluidsMixed<mesh_type> NSS("data",
                                         refFE_u,
@@ -123,13 +137,18 @@ int main() {
                                         BCh,
                                         qr, qr_bd);
 
+    //NSS.initialize(EthierSteinmanSteady::uexact, EthierSteinmanSteady::pexact, sphere, t0, T);
     NSS.initialize(zero, zero, sphere, t0, T);
     NSS.setVerbose();
 
     // Export initial conditions to OpenDX format
 
     // Level set function
+#if LS_ELEMENT == P1
+    wr_opendx_header(ofile_root_ls + "0000.dx", NSS.mesh(), NSS.lsDof());
+#elif LS_ELEMENT == P2
     wr_opendx_header(ofile_root_ls + "0000.dx", NSS.mesh(), NSS.lsDof(), NSS.fe_ls(), "P2" );
+#endif
     wr_opendx_scalar(ofile_root_ls + "0000.dx", "levelset_ipstab", NSS.lsfunction());
 
     // Velocity
@@ -141,7 +160,7 @@ int main() {
     wr_opendx_vector(ofile_root_velocity + "0000.dx", "u", NSS.velocity(), 3);
 
     // Advancing in time
-    std::cout << "** NS2F test ** Advancing in time" << std::endl;
+    std::cout << "[test_ns_2fluids] Advancing in time" << std::endl;
 
     UInt current_step = 1;
     UInt steps_after_last_save = 1;
@@ -151,19 +170,28 @@ int main() {
     UInt reini_every = datafile("navier-stokes/miscellaneous/reini_every", 5);
 
     for(Real t = t0; t < T; t += delta_t) {
-        std::cout << "** NS2F test ** Time: " << t << std::endl;
-        NSS.timeAdvance(gravity, 0.);
+        std::cout << "[test_ns_2fluids] Time: " << t << std::endl;
+        /* ETHIER-STEINMAN
+           NSS.timeAdvance(EthierSteinmanSteady::f, 0.);
+        */
 
+        /* RISING BUBBLE */
+        NSS.timeAdvance( gravity, 0. );
+        
         // Export solution
         if(steps_after_last_save == save_every) {
-            std::cout << "** NS2F test ** Exporting solution to OpenDX format" << std::endl;
+            std::cout << "[test_ns_2fluids] Exporting solution to OpenDX format" << std::endl;
             std::ostringstream number;
             number.width(4);
             number.fill('0');
             number << current_step;
 
             // Level set function
+#if LS_ELEMENT == P1
+            wr_opendx_header(ofile_root_ls + number.str() + ".dx", NSS.mesh(), NSS.lsDof());
+#elif LS_ELEMENT == P2
             wr_opendx_header(ofile_root_ls + number.str() + ".dx", NSS.mesh(), NSS.lsDof(), NSS.fe_ls(), "P2" );
+#endif
             wr_opendx_scalar(ofile_root_ls + number.str() + ".dx", "ls", NSS.lsfunction());
 
             // Pressure
@@ -184,7 +212,7 @@ int main() {
 
         // Re-initialize solution
         if(steps_after_last_reini == reini_every) {
-            std::cout << "** NS2F test ** Reinitializing signed distance function" << std::endl;
+            std::cout << "[test_ns_2fluids] Reinitializing signed distance function" << std::endl;
             NSS.reinitialize("direct");
             steps_after_last_reini = 1;
         } else
@@ -193,7 +221,7 @@ int main() {
         current_step++;
     }
 
-    std::cout << "** NS2F test ** Done" << std::endl;;
+    std::cout << "[test_ns_2fluids] Done" << std::endl;;
 
     return 0;
 }
