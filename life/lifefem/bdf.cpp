@@ -122,27 +122,27 @@ void Bdf::initialize_unk( std::vector<Vector> uv0 )
 
 
 
-std::vector<Vector> Bdf::unk()
+const std::vector<Vector>& Bdf::unk() const
 {
     return _unk;
 }
 
 
-double Bdf::coeff_der( UInt i )
+double Bdf::coeff_der( UInt i ) const
 {
     // Pay attention: i is c-based indexed
     ASSERT( i >= 0 & i < _n + 1, "Error in specification of the time derivative coefficient for the BDF formula (out of range error)" );
     return _alpha[ i ];
 }
 
-double Bdf::coeff_ext( UInt i )
+double Bdf::coeff_ext( UInt i ) const
 {
     // Pay attention: i is c-based indexed
     ASSERT( i >= 0 & i < _n, "Error in specification of the time derivative coefficient for the BDF formula (out of range error)" );
     return _beta[ i ];
 }
 
-void Bdf::showMe()
+void Bdf::showMe() const
 {
     std::cout << "*** BDF Time discretization of order " << _n << "***" << std::endl;
     std::cout << std::endl;
@@ -189,7 +189,7 @@ void Bdf::shift_right( Vector unk_curr )
 }
 
 
-Vector Bdf::time_der( Real dt )
+Vector Bdf::time_der( Real dt ) const
 {
     Vector ut( _s );
 
@@ -205,7 +205,7 @@ Vector Bdf::time_der( Real dt )
     return ut;
 }
 
-Vector Bdf::time_der()
+Vector Bdf::time_der() const
 {
     Vector ut( _s );
 
@@ -221,7 +221,7 @@ Vector Bdf::time_der()
     return ut;
 }
 
-Vector Bdf::extrap()
+Vector Bdf::extrap() const
 {
     Vector ue( _s );
     for ( UInt j = 0;j < _s;++j )

@@ -116,27 +116,27 @@ public:
 
     //! Returns the right hand side \f$ \bar{p} \f$ of the time derivative
     //! formula
-    Vector time_der( Real dt );
+    Vector time_der( Real dt ) const;
 
     //! Returns the right hand side \f$ \bar{p} \Delta t \f$ of the time
     //! derivative formula. The timestep is taken into account elsewhere,
     //! e. g. in the mass matrix.
-    Vector time_der();
+    Vector time_der() const;
 
     //! Compute the polynomial extrapolation approximation of order n-1 of
     //! u^{n+1} defined by the n stored state vectors
-    Vector extrap();
+    Vector extrap() const;
 
     //! Return the i-th coefficient of the time derivative alpha_i
-    double coeff_der( UInt i );
+    double coeff_der( UInt i ) const;
 
     //! Return the i-th coefficient of the time extrapolation beta_i
-    double coeff_ext( UInt i );
+    double coeff_ext( UInt i ) const;
 
     //! Return a vector with the last n state vectors
-    std::vector<Vector> unk();
+    const std::vector<Vector>& unk() const;
 
-    void showMe();
+    void showMe() const;
 
     ~Bdf();
 
