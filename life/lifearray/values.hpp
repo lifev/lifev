@@ -1844,8 +1844,12 @@ set_mat_inc(UInt row, UInt col, DataType loc_val)
 {
 
   pair<UInt,bool> where = _Patt->locate_index(row,col);
-  if (where.second) _value[where.first] += loc_val;
-
+  if (where.second) 
+    _value[where.first] += loc_val;
+  else { 
+    cout << row +1<< "," << col +1<< endl;
+    ERROR_MSG("problem in MSR::set_mat_inc");
+  }
   return;
 };
 
@@ -1976,43 +1980,27 @@ diagonalize(UInt const r, DataType const coeff, Vector &b, DataType datum)
 
   UInt istart= *(_Patt->give_bindx().begin()+r-OFFSET);
   UInt iend  = *(_Patt->give_bindx().begin()+r+1-OFFSET);
-
-
-
-  //UInt Istart= *(_Patt->give_bindx().begin()+125-OFFSET);
-  //UInt Iend  = *(_Patt->give_bindx().begin()+126-OFFSET);
-    
-
+  
   typename vector<DataType>::iterator start=_value.begin() + istart;
   typename vector<DataType>::iterator end=_value.begin() + iend;
-
-  //typename vector<DataType>::iterator Start=_value.begin() + Istart;
-  //typename vector<DataType>::iterator End=_value.begin() + Iend;
-
-  //UInt disp = _Patt->nRows()+1;
+  
   UInt row,col;
- 
+
   transform(start,end,start,nihil);
   
-  
-  // Miguel: There is a buh using ybind. Alex, did you fix it?.
-  // This code works without ybind.
-  //
   for (UInt i=istart;i<iend;++i) {
-      row = _Patt->give_bindx()[i]-OFFSET;
-      UInt Rstart= *(_Patt->give_bindx().begin()+row-OFFSET);
-      UInt Rend  = *(_Patt->give_bindx().begin()+row+1-OFFSET);
-      for (UInt j=Rstart;j<Rend;++j) {
-	if ( (_Patt->give_bindx()[j]-OFFSET) == r ) {
-	  col = j; 
-	  b[row-OFFSET] -= _value[col] * datum; 
-	  _value[col]=0.;
-	  break;
-	}
+    row = _Patt->give_bindx()[i]-OFFSET;
+    UInt Rstart= *(_Patt->give_bindx().begin()+row-OFFSET);
+    UInt Rend  = *(_Patt->give_bindx().begin()+row+1-OFFSET);
+    for (UInt j=Rstart;j<Rend;++j) {
+      if ( (_Patt->give_bindx()[j]-OFFSET) == r ) {
+	col = j;
+	b[row-OFFSET] -= _value[col]*datum; 
+	_value[col]=0.;
+	break;
       }
+    }
   }
-     
-
   b[r-OFFSET] = coeff*datum;
  
   //Remark: in processing a list of Dirichlet nodes, there is no need to check a posteriori the right hand side

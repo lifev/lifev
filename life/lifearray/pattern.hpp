@@ -18,7 +18,7 @@
 */
 /*----------------------------------------------------------------------*
 |           
-| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.1 2004-05-27 14:14:16 lformaggia Exp $ 
+| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.2 2004-06-09 09:25:38 fernandez Exp $ 
 |
 |
 | #Version  0.1 Experimental   07/7/00. Luca Formaggia & Alessandro Veneziani  |
@@ -127,6 +127,11 @@ public:
   bool setpatt(DOF1 const & dof1, DynPattern & dynpatt,
 	       UInt const nbcomp = 1); 
   
+  // Miguel 12/2003: new version handling paterns comming from IP stabilization
+  template<typename DOF, typename MESH>
+  bool setpatt(const DOF& dof, const MESH& mesh, DynPattern & dynpatt,
+	       UInt const nbcomp); 
+
   //! Version for mixed patterns
   //! It builds the dynamic pattern. It is the standard routine for a
   //!  pattern associated to two  degrees of freedom object.
@@ -136,7 +141,7 @@ public:
   bool setpatt(DOF1 const & dof1, DOF2 const & dof2, DynPattern & dynpatt,
 	       UInt const bRows= 1, UInt const bCols= 1); 
   
-  static const UInt _defaultsize = 0; // MUST BE 0
+   static const UInt _defaultsize = 0; // MUST BE 0
 
   UInt _nnz;
   UInt _nrows;
@@ -186,7 +191,8 @@ public:
   //! buildpatt<DOF1,DOF2> to have details.
   template<typename DOF1,typename DOF2>
     CSRPatt(DOF1 const  & dof1,DOF2 const  & dof2,
-	    UInt const bRows= 1, UInt const bCols= 1);
+	    UInt const bRows= 1, UInt const bCols= 1); 
+
   template<typename DOF1,typename DOF2>
     bool buildPattern(DOF1 const& dof1,DOF2 const  & dof2,
 		      UInt const bRows= 1, UInt const bCols= 1);
@@ -486,9 +492,17 @@ class MSRPatt:
   MSRPatt & operator= (const MSRPatt&  RhMsr);
   template<typename DOF> MSRPatt(DOF const  & dof, UInt const nbcomp=1);
 
+  // Miguel 12/2003: new version handling patterns comming from IP stabilization
+  template<typename DOF, typename MESH> 
+    MSRPatt(const  DOF& dof, const MESH& mesh, const UInt nbcomp);
+
   template<typename DOF>
     bool buildPattern(DOF const  & dof, UInt const nbcomp);
-  //
+  
+  // Miguel 12/2003: new version handling patterns comming from IP stabilization
+  template<typename DOF, typename MESH>
+    bool buildPattern(const  DOF& dof, const MESH& mesh, const UInt nbcomp);
+
   Container  bindx() const {return _bindx;};
   Container  ybind() const {return _ybind;};
   Index_t * giveRaw_bindx() {return &(_bindx.front());}; // Give _bindx (in a raw form)
@@ -797,8 +811,7 @@ bool BasePattern::setpatt(DOF1 const & dof1, DynPattern & dynpattern,
 
       ig = dof1.localToGlobal(el,i)-1; // I store with numering from 0 (and correct later on)
       jg = dof1.localToGlobal(el,j)-1;
-
-      dynpattern.insert(setBareEdge(ig, jg));
+	dynpattern.insert(setBareEdge(ig, jg));
     }
   }
 
@@ -808,12 +821,89 @@ bool BasePattern::setpatt(DOF1 const & dof1, DynPattern & dynpattern,
 
   return true;
   }
+
+//
+// Miguel 12/2003
+//
+template<typename DOF, typename MESH> 
+  bool BasePattern::setpatt(const DOF& dof, const MESH& mesh, DynPattern & dynpattern,
+			    UInt const nbcomp){
+
+  
+  Diff_t ig,jg;
+  UInt idF, iElAd1, iElAd2, iFaEl1, iFaEl2;
+
+  for (UInt el=1; el<= dof.numElements(); el++){
+   
+    // standard neighboors
+    //
+    for (int l=dof.fe.nbDiag(); l<dof.fe.nbPattern(); ++l){      
+      ID i  = dof.fe.patternFirst(l)+1;
+      ID j  = dof.fe.patternSecond(l)+1;
+      
+      ig = dof.localToGlobal(el,i)-1; 
+      jg = dof.localToGlobal(el,j)-1;   
+      dynpattern.insert(setBareEdge(ig, jg));
+    }
+  }
+
+
+  //
+  // The following lines of code should be improved !!
+  //
+  // for each face the local numbering of the neighboors connected to this face
+  //
+  UInt p1[]={4,3,1,2};
+  UInt p2[]={4,8,9,10,
+	     3,6,7,10,
+	     1,5,7,8,
+	     2,5,6,9};
+  UInt* a;
+  UInt iop,jop,nop; // number of oposite dof
+ 
+  if ( dof.fe.nbLocalDof == 4) {
+    a = p1; // P1 FE
+    nop = 1;
+  }
+  else if ( dof.fe.nbLocalDof == 10) {
+    a = p2; // P2 FE
+    nop = 4;
+  }
+  else 
+    ERROR_MSG("Sorry, IP stabilization only works for P1 or P2 FEM");
+
+  //
+  // non-standard neighboors
+  //
+  for (idF=mesh.numBFaces()+1; idF<=mesh.numFaces(); ++idF){      
+  
+    iElAd1 = mesh.face(idF).ad_first(); 
+    iFaEl1 = mesh.face(idF).pos_first(); 	
+    iElAd2 = mesh.face(idF).ad_second(); 
+    iFaEl2 = mesh.face(idF).pos_second(); 
+    for (iop=1; iop <= nop ; ++iop) {
+      ig = dof.localToGlobal(iElAd1,a[(iFaEl1-1)*nop+iop-1])-1; 
+      for (jop=1; jop <= nop ; ++jop) {
+	jg = dof.localToGlobal(iElAd2,a[(iFaEl2-1)*nop+jop-1])-1;
+	dynpattern.insert(setBareEdge(ig, jg));
+      }
+    }
+  }   
+  _nrows = nbcomp*dof.numTotalDof();
+  _ncols = _nrows; 
+  _nnz = nbcomp*nbcomp*( dof.numTotalDof() + 2*( dynpattern.size() ) );
+
+  return true;
+}
+
+
 /* THE ROUTINE THAT BUILDS THE DYN PATTERN MAY BE GLOBAL (WHY NOT) */
 
-template<typename DOF1, typename DOF2 >
+template<typename DOF1, typename DOF2>
 bool
-BasePattern::setpatt(DOF1 const & dof1, DOF2 const & dof2,
-		     DynPattern & dynpatt, UInt const bRows, UInt const bCols){
+  BasePattern::setpatt(DOF1 const & dof1, DOF2 const & dof2, 
+		       DynPattern & dynpatt, UInt const bRows, UInt const bCols){
+ 
   UInt nelem=dof1.numElements();
   UInt ig,jg;
   BareEdge _be;
@@ -1503,6 +1593,16 @@ MSRPatt::MSRPatt(DOF1 const & dof1, UInt const nbcomp)
   ASSERT_PRE(built,"Error in MSR Pattern construction from DOF object");
 };
 
+// Miguel 12/2003
+//
+template<typename DOF, typename MESH>
+MSRPatt::MSRPatt(const DOF& dof, const MESH& mesh, const UInt nbcomp) 
+{
+  bool built;
+  built = buildPattern(dof, mesh, nbcomp);
+  ASSERT_PRE(built,"Error in MSR Pattern construction from DOF object");
+};
+
 
 template<typename DOF1>
 bool MSRPatt::buildPattern(DOF1 const & dof1, UInt const nbcomp){
@@ -1591,8 +1691,123 @@ bool MSRPatt::buildPattern(DOF1 const & dof1, UInt const nbcomp){
   _diagfirst=true;// default for MSR
   _filled=true;
   return true;
-};
+}
 
+
+
+// Miguel 12/2003
+//
+//
+template<typename DOF, typename MESH>
+bool MSRPatt::buildPattern(const DOF&  dof, const MESH& mesh, const UInt nbcomp){
+
+  
+  DynPattern  dynpatt; 
+  bool built = setpatt(dof,mesh,dynpatt, nbcomp); 
+  if(!built)return false;
+  Index_t ig,jg,cur;
+  
+  _bindx.resize(_nnz+1,0);  
+  _ybind.resize(_nnz-_nrows,0);  
+
+  // Count
+  for (DynPattern::iterator d=dynpatt.begin(); d !=dynpatt.end(); ++d){
+    ig=d->first;
+    jg=d->second;
+    _bindx[ig]+= nbcomp; 
+    _bindx[jg]+= nbcomp;
+  }
+
+  //other components
+  
+  Diff_t offset= dof.numTotalDof();
+  UInt icomp, jcomp;
+
+  //We add the missing diagonal term for jcomp != icomp
+  for (icomp=0; icomp < nbcomp; icomp++)
+    for (ig=0; ig < offset; ++ig)
+      _bindx[ig+icomp*offset]+=nbcomp-1;
+
+  Container::iterator start     = _bindx.begin();
+  Container::iterator end       = _bindx.begin()+ offset;
+  for (icomp=1; icomp < nbcomp; icomp++)
+    {
+      Container::iterator start_copy= _bindx.begin()+ icomp*offset;
+      copy(start, end, start_copy);
+    }
+
+  // Count entries BY ACCUMULATING
+  // shift right 1 position
+  rotate(_bindx.begin(),_bindx.begin()+_nrows,_bindx.begin()+_nrows+1);
+  _bindx[0]=_nrows+1;
+
+  for (ig=1; ig <static_cast<Index_t>(_nrows)+1; ++ig)
+    _bindx[ig]+=_bindx[ig-1];
+
+  
+  // for each component
+  for (icomp=0; icomp< nbcomp; icomp++){
+    for (jcomp=0; jcomp< nbcomp; jcomp++){
+
+      //We add the missing diagonal term for jcomp != icomp
+      if (jcomp != icomp)
+	for (ig=0; ig < offset; ++ig){
+	  _ybind[_bindx[ig+icomp*offset]-_nrows-1]=_bindx[ig+jcomp*offset];
+	  _bindx[_bindx[ig+icomp*offset]++]=ig+jcomp*offset;
+	}
+
+      for (DynPattern::iterator d=dynpatt.begin(); d !=dynpatt.end(); ++d){
+	ig=d->first+icomp*offset;
+	jg=d->second+jcomp*offset;
+	_ybind[_bindx[ig]-_nrows-1]=_bindx[jg];
+	_ybind[_bindx[jg]-_nrows-1]=_bindx[ig]; 
+	_bindx[_bindx[ig]++]=jg;
+	_bindx[_bindx[jg]++]=ig;
+      }
+    }
+  }
+  
+  // shift right 1 position
+  rotate(_bindx.begin(),_bindx.begin()+_nrows,_bindx.begin()+_nrows+1);
+  _bindx[0]=_nrows+1;
+
+  
+  
+  for (ig=0; ig <static_cast<Index_t>(_nrows); ++ig){
+    // We now sort the off diagonal entries
+    jg=_bindx[ig]; 
+    cur = _bindx[ig+1];
+    sort(_bindx.begin()+jg,_bindx.begin()+cur);
+  }
+  
+  // do we need it 'a la Fortran?'
+  if (PatternOffset != 0) for (Container::iterator ip=_bindx.begin();ip!=_bindx.end();++ip)*ip+=PatternOffset;
+  
+  dynpatt.clear(); // Non sono sicuro che serva....
+  _diagfirst=true;// default for MSR
+  _filled=true;
+
+
+  
+  /*  
+  Container::iterator debut = _bindx.begin();
+
+  for (UInt i = 0; i < _nrows; ++i)
+    {
+      UInt begin = *(debut+i);
+      UInt end   = *(debut+i+1);
+      cout << i+1 << " : ";
+      for (UInt pos = begin; pos < end; ++pos) 
+	cout << _bindx[pos]+1 << ", ";
+      cout << endl;
+    }
+  
+  //cout << "patern OK\n"<< endl;
+  // exit(1);
+  */
+ return true;
+
+}
 
 
 inline UInt MSRPatt::nbNeighbours(ID const d)const {

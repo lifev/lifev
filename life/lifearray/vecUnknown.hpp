@@ -227,11 +227,11 @@ class Vector
       _v+=ex_v.v();
       return *this;
     }
-  inline double & operator()(int i) const
+  inline double & operator()(const int i) const
     {
       return _v(i);
     }
-  inline double & operator[](int i) const
+  inline double & operator[](const int i) const
     {
       return _v(i);
     }
