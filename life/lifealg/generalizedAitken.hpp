@@ -213,7 +213,7 @@ computeDeltaLambda( const Vector &_lambda,
         Real det ( a22 * a11 - a21 * a21 );
         std::cout << "det = " << det << std::endl;
 
-        if ( std::fabs(det) > 1e-15 )  //! eq. (12) page 8
+        if ( std::fabs(det) != 0. )  //! eq. (12) page 8
         {
             omegaF = - ( a22 * b1 - a21 * b2 ) / det;
             omegaS = - ( a11 * b2 - a21 * b1 ) / det; // !
@@ -221,15 +221,17 @@ computeDeltaLambda( const Vector &_lambda,
             if (omegaS == 0.) omegaS = M_defOmegaS;
             if (omegaF == 0.) omegaF = M_defOmegaF;
         }
-        else if (  std::fabs(a22) < 1e-15 )
+        else if (  std::fabs(a22) == 0. )
         {
-            std::cout << "generalizedAitken:  a22=0!!" << std::endl;
+            std::cout << "generalizedAitken:  a22 = "
+                      << std::fabs(a22) << std::endl;
             omegaS = 0.;
             omegaF = -b1 / a11;
         }
-        else if (  std::fabs(a11) < 1e-15 )
+        else if (  std::fabs(a11) == 0. )
         {
-            std::cout << "generalizedAitken:  a11=0!!" << std::endl;
+            std::cout << "generalizedAitken:  a11 = "
+                      << std::fabs(a11) << std::endl;
             omegaS = -b2 / a22;
             omegaF = 0.;
         }
