@@ -364,10 +364,10 @@ private:
 };
 
 /*!
-  \class PETSC
+  \class PETSCManager
   \brief initialization and finalization for PETSC linear solvers
 
-  Should be used as LifeV::singleton<PETSC>
+  Should be used as PETSC, which is a typedef to LifeV::singleton<PETSCManager>
 
   @author Christoph Winkelmann
   @see http://www.mcs.anl.gov/petsc/
