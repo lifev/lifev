@@ -49,9 +49,20 @@ Real u0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
   return 0;
 }
 
+// Initial velocity for stationary NS
 Real u0o(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
 {
-  return 0.0;
+  Real pi = 3.14159265358979;
+  switch(i) {
+  case 1:
+  case 2:
+    return 0.0;
+    break;
+  case 3:
+     return 0.0;
+     break;
+  }
+  return 0;
 }
 
 // Initial pressure
@@ -75,4 +86,10 @@ Real uo(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
   }
   return 0.0;
 }
+
+  // constant flux
+Real my_flux( Real time ){
+   return -1.;
+  }
+
 }

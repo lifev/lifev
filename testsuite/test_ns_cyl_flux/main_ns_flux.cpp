@@ -68,17 +68,13 @@ main(int argc, char** argv)
     //
     BCFunctionBase u_wall(u1);
     BCFunctionBase out_flow(u1);
-
-    // Out of temporal loop NS. I resolve once
-    // Boundary conditions definition
-    //
-    BCFunctionBase in_flowo(uo);
-    BCHandler BCh_uo(5);
-    BCh_uo.addBC("Wall",   2, Essential, Full, u_wall,  3);
-    BCh_uo.addBC("Wall-inflow",   4, Essential, Full, u_wall,  3);
-    BCh_uo.addBC("Wall-outflow",   5, Essential, Full, u_wall,  3);
-    BCh_uo.addBC("OutFlow", 3, Natural,   Full, out_flow, 3);
-    BCh_uo.addBC("InFlow", 1, Natural,   Full, in_flowo, 3);
+    BCFunctionBase in_flow(uo);
+    BCHandler BCh_u(5);
+    BCh_u.addBC("Wall",   2, Essential, Full, u_wall,  3);
+    BCh_u.addBC("Wall-inflow",   4, Essential, Full, u_wall,  3);
+    BCh_u.addBC("Wall-outflow",   5, Essential, Full, u_wall,  3);
+    BCh_u.addBC("OutFlow", 3, Natural,   Full, out_flow, 3);
+    BCh_u.addBC("InFlow", 1, Natural,   Full, in_flow, 3);
 
     // Navier-Stokes Solver
     //
@@ -87,9 +83,13 @@ main(int argc, char** argv)
                                                   feTetraP1bubble, feTetraP1,
                                                   quadRuleTetra15pt,quadRuleTria3pt,
                                                   quadRuleTetra5pt, quadRuleTria3pt,
-                                                  BCh_uo) );
+                                                  BCh_u) );
     __ns->showMe();
     NavierStokesWithFlux<ns_type> __ns_with_flux( __ns );
+
+    // Impose the fluxes
+    // 
+    __ns_with_flux.setFlux("InFlow", my_flux);
 
     toEnsight EnsightFilter;
     __ns_with_flux.doOnIterationFinish( EnsightFilter  );
