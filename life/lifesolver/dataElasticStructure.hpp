@@ -15,16 +15,13 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*!
   \file dataElasticStructure.h
   \author M.A. Fernandez
   \date 10/2003
   \version 1.0
- 
   \brief
- 
- 
 */
 
 #ifndef _DATAELASTICSTRUCTURE_H_
@@ -40,9 +37,6 @@ namespace LifeV
 {
 /*!
   \class DataElasticStructure
- 
- 
- 
 */
 template <typename Mesh>
 class DataElasticStructure:

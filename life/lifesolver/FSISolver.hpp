@@ -30,7 +30,7 @@
 #define __FSISolver_H 1
 
 #include <tab.hpp>
-#include <operFS.hpp>
+#include <FSIOperator.hpp>
 #include <nonLinRichardson.hpp>
 #include <newton.hpp>
 
@@ -40,7 +40,7 @@ namespace LifeV
   \class FSISolver
   \brief solver for Fluid-Structure Interaction
 
-  \c FSISolver uses the FSI operators whose base class is \c operFS to
+  \c FSISolver uses the FSI operators whose base class is \c FSIOperator to
   solve the FSI problem.  It behaves from an interface point of view
   very much like a NS solver or solid solver.
 
@@ -55,7 +55,7 @@ namespace LifeV
   \todo Allow delayed initialization
 
   @author Christophe Prud'homme
-  @see operFS
+  @see FSIOperator
 */
 class FSISolver
 {
@@ -64,9 +64,9 @@ public:
     /** @name Typedefs
      */
     //@{
-    typedef operFS::fluid_type::value_type::source_type fluid_source_type;
-    typedef operFS::fluid_type::value_type::source_type solid_source_type;
-    typedef operFS::bchandler_type bchandler_type;
+    typedef FSIOperator::fluid_type::value_type::source_type fluid_source_type;
+    typedef FSIOperator::fluid_type::value_type::source_type solid_source_type;
+    typedef FSIOperator::bchandler_type bchandler_type;
     //@}
 
     /** @name Constructors, destructor
@@ -109,7 +109,7 @@ public:
     Real timeEnd() const { return M_fluid->endtime(); }
 
     //! get the FSI operator
-    oper_fsi_ptr const& FSIOperator() const { return M_oper; }
+    oper_fsi_ptr const& operFSI() const { return M_oper; }
 
     //! get the displacement
     Vector const& displacement() const { return M_disp; }
@@ -151,9 +151,9 @@ public:
      */
     //@{
 
-    void initialize( operFS::fluid_type::value_type::Function const& __u0,
-                     operFS::solid_type::value_type::Function const& __d0,
-                     operFS::solid_type::value_type::Function const& __w0 )
+    void initialize( FSIOperator::fluid_type::value_type::Function const& __u0,
+                     FSIOperator::solid_type::value_type::Function const& __d0,
+                     FSIOperator::solid_type::value_type::Function const& __w0 )
         {
             M_oper->fluid().initialize(__u0);
             M_oper->solid().initialize(__d0,__w0);
@@ -200,8 +200,8 @@ private:
 
     oper_fsi_ptr       M_oper;
 
-    operFS::fluid_type M_fluid;
-    operFS::solid_type M_solid;
+    FSIOperator::fluid_type M_fluid;
+    FSIOperator::solid_type M_solid;
 
 
 

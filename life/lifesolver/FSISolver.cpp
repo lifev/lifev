@@ -38,10 +38,10 @@ FSISolver::FSISolver( GetPot const& data_file,
     M_BCh_u( __bcu ),
     M_BCh_d( __bcd ),
     M_BCh_mesh( __bchext ),
-    M_fluid( new operFS::fluid_type::value_type (data_file, feTetraP1bubble, feTetraP1,quadRuleTetra64pt,
+    M_fluid( new FSIOperator::fluid_type::value_type (data_file, feTetraP1bubble, feTetraP1,quadRuleTetra64pt,
                                                  quadRuleTria3pt, quadRuleTetra64pt, quadRuleTria3pt,
                                                  *M_BCh_u,*M_BCh_mesh) ),
-    M_solid( new operFS::solid_type::value_type (data_file, feTetraP1, quadRuleTetra4pt,
+    M_solid( new FSIOperator::solid_type::value_type (data_file, feTetraP1, quadRuleTetra4pt,
                                                  quadRuleTria3pt, *M_BCh_d) ),
     M_disp(3*M_solid->dDof().numTotalDof()),
     M_velo(3*M_solid->dDof().numTotalDof()),
@@ -64,7 +64,7 @@ FSISolver::FSISolver( GetPot const& data_file,
     Debug( 6220 ) << "FSISolver::M_disp: " << M_disp.size() << "\n";
     Debug( 6220 ) << "FSISolver::M_velo: " << M_velo.size() << "\n";
 
-    OperFSPreconditioner precond  = ( OperFSPreconditioner )data_file("problem/precond"   , DIRICHLET_NEUMANN );
+    Preconditioner precond  = ( Preconditioner ) data_file("problem/precond"   , DIRICHLET_NEUMANN );
 
     Debug( 6220 ) << "FSISolver::preconditioner: " << precond << "\n";
 

@@ -34,15 +34,15 @@ include_HEADERS	= ElasticStructureHandler.hpp NavierStokesAleHandler.hpp \
                 dataNavierStokes.hpp dataSimplifiedStructure.hpp simplifiedStructure.hpp \
                 convDiffReactHandler.hpp convDiffReactSolverPC.hpp dataConvDiffReact.hpp \
                 dataDarcy.hpp darcyHandler.hpp darcySolverBase.hpp darcySolver.hpp \
-                operFS.hpp steklovPoincareBase.hpp fixedPointBase.hpp exactJacobianBase.hpp \
-                FSISolver.hpp timeSolver.hpp parabolicSolver.hpp quasiNewton.hpp
+                FSIOperator.hpp steklovPoincareBase.hpp fixedPointBase.hpp exactJacobianBase.hpp \
+                FSISolver.hpp timeSolver.hpp parabolicSolver.hpp reducedLinFluid.hpp
 
 
 lib_LTLIBRARIES	= liblifesolver.la
 
 liblifesolver_la_SOURCES	= darcySolver.cpp \
-                              operFS.cpp steklovPoincareBase.cpp fixedPointBase.cpp exactJacobianBase.cpp \
-                              FSISolver.cpp timeSolver.cpp quasiNewton.cpp
+                              FSIOperator.cpp steklovPoincareBase.cpp fixedPointBase.cpp exactJacobianBase.cpp \
+                              FSISolver.cpp timeSolver.cpp reducedLinFluid.cpp
 
 liblifesolver_la_LIBADD    = ../lifefilters/liblifefilters.la ../lifearray/liblifearray.la ../lifecore/liblifecore.la $(petsc_libs) $(aztec_libs) $(boost_libs)
 

@@ -21,16 +21,16 @@
 #ifndef _FP_HPP
 #define _FP_HPP
 
-#include "operFS.hpp"
+#include "FSIOperator.hpp"
 
 namespace LifeV
 {
 
-class fixedPoint : public operFS
+class fixedPoint : public FSIOperator
 {
 public:
 
-    typedef operFS super;
+    typedef FSIOperator super;
     typedef super::fluid_type fluid_type;
     typedef super::solid_type solid_type;
     typedef super::bchandler_type bchandler_type;

@@ -53,7 +53,7 @@ fixedPoint::setDataFromGetPot( GetPot const& data )
 void
 fixedPoint::setup()
 {
-    // call operFS setup()
+    // call FSIOperator setup()
     super::setup();
     M_aitkFS.setup( 3*M_solid->dDof().numTotalDof() );
 //    setUpBC();
@@ -173,7 +173,7 @@ void  fixedPoint::solveJac(Vector        &_muk,
 
 namespace
 {
-operFS* createFP(){ return new fixedPoint(); }
+FSIOperator* createFP(){ return new fixedPoint(); }
 static bool reg = FSIFactory::instance().registerProduct( "fixedPoint", &createFP );
 }
 

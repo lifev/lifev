@@ -131,6 +131,7 @@ protected:
 
     //! The displacement
     PhysVectUnknown<Vector> _d;
+    PhysVectUnknown<Vector> _dRhs;
 
     //! The velocity
     PhysVectUnknown<Vector> _w;
@@ -156,21 +157,21 @@ protected:
 template <typename Mesh>
 ElasticStructureHandler<Mesh>::
 ElasticStructureHandler( const GetPot& data_file, const RefFE& refFE,
-                         const QuadRule& Qr, const QuadRule& bdQr, BCHandler& BCh )
-        :
-        DataElasticStructure<Mesh>( data_file ),
-        _refFE( refFE ),
-        _dof( this->_mesh, _refFE ),
-        _dim( _dof.numTotalDof() ),
-        _Qr( Qr ),
-        _bdQr( bdQr ),
-        _fe( _refFE, getGeoMap( this->_mesh ), _Qr ),
-        _feBd( _refFE.boundaryFE(), getGeoMap( this->_mesh ).boundaryMap(), _bdQr ),
-        _d( _dim ),
-        _w( _dim ),
-        _BCh( BCh ),
-        _time( 0 ),
-        _count( 0 )
+                         const QuadRule& Qr, const QuadRule& bdQr, BCHandler& BCh ):
+    DataElasticStructure<Mesh>( data_file ),
+    _refFE( refFE ),
+    _dof( this->_mesh, _refFE ),
+    _dim( _dof.numTotalDof() ),
+    _Qr( Qr ),
+    _bdQr( bdQr ),
+    _fe( _refFE, getGeoMap( this->_mesh ), _Qr ),
+    _feBd( _refFE.boundaryFE(), getGeoMap( this->_mesh ).boundaryMap(), _bdQr ),
+    _d( _dim ),
+    _dRhs( _dim ),
+    _w( _dim ),
+    _BCh( BCh ),
+    _time( 0 ),
+    _count( 0 )
 {}
 
 

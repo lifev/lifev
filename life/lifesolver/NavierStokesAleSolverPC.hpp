@@ -827,15 +827,16 @@ iterateLin( const Real& time, BCHandler& BCh_du )
         assemb_vec( _f_p, _elvec_dp, _fe_p, _dof_p, 0 );
 
         // loop on velocity components
-        for ( UInt ic = 0;ic < nc_u;ic++ )
+        for ( UInt ic = 0; ic < nc_u; ic++ )
+        {
             // assembling velocity right hand side
             assemb_vec( _f_duWithOutBC, _elvec_du, _fe_u, _dof_u, ic );
+        }
     }
+
 
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
-
-    std::cout << "  norm_inf (_f_duWithOutBC) = " << norm_inf( _f_duWithOutBC ) << std::endl;
 
     // for BC treatment (done at each time-step)
     Real tgv = 1.e02;

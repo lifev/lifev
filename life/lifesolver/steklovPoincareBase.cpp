@@ -19,7 +19,7 @@
 
 
 #include "steklovPoincareBase.hpp"
-#include "quasiNewton.hpp"
+#include "reducedLinFluid.hpp"
 
 
 namespace LifeV
@@ -72,8 +72,8 @@ steklovPoincare::setDataFromGetPot( GetPot const& data )
 
     M_aitkFS.setDefault(M_defOmegaS, M_defOmegaF);
 
-    this->setPreconditioner   (  ( OperFSPreconditioner )data("problem/precond"     , NEWTON ) );
-    this->setDDNPreconditioner(  ( DDNPreconditioner    )data("problem/DDNprecond"  , DDN_DIRICHLET_NEUMANN ) );
+    this->setPreconditioner   (  ( Preconditioner )      data("problem/precond"     , NEWTON ) );
+    this->setDDNPreconditioner(  ( DDNPreconditioner )data("problem/DDNprecond"  , DDN_DIRICHLET_NEUMANN ) );
 
     Debug( 6205 ) << "steklovPoincare::setDataFromGetPot(GetPot) prec          = " << this->preconditioner() << "\n";
     Debug( 6205 ) << "steklovPoincare::setDataFromGetPot(GetPot) Newton-prec   = " << this->DDNpreconditioner() << "\n";
@@ -82,7 +82,7 @@ steklovPoincare::setDataFromGetPot( GetPot const& data )
 void
 steklovPoincare::setup()
 {
-    // call operFS setup()
+    // call FSIOperator setup()
     super::setup();
 
     M_dzSolid.resize( 3*M_solid->dDof().numTotalDof() );
@@ -94,7 +94,7 @@ steklovPoincare::setup()
 
     M_aitkFS.setup( 3*M_solid->dDof().numTotalDof() );
 
-    M_quasiNewton.reset(new quasiNewton(this, M_fluid, M_solid));
+    M_reducedLinFluid.reset(new reducedLinFluid(this, M_fluid, M_solid));
 }
 //
 // Residual computation
@@ -469,12 +469,12 @@ void my_matvecSfSsPrime(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
             double dt = my_data->M_pFS->fluid().timestep();
             double dti2 = 1.0/( dt * dt) ;
 
-            da = - my_data->M_pFS->fluid().density()*dti2*zSolid;
+            da = - dti2*my_data->M_pFS->fluid().density()*my_data->M_pFS->DDNprecond(zSolid);
 
             my_data->M_pFS->getQuasiNewton()->setDacc(da);
             my_data->M_pFS->getQuasiNewton()->solveReducedLinearFluid();
 
-            my_data->M_pFS->solid().d() = zSolid;
+            my_data->M_pFS->solid().d() = my_data->M_pFS->DDNprecond(zSolid);
             my_data->M_pFS->solveLinearSolid();
 
             my_data->M_pFS->setResidualS(my_data->M_pFS->solid().residual());
@@ -511,7 +511,6 @@ Vector steklovPoincare::DDNprecond(Vector const &_z)
             {
                 std::cout << " Neumann-Dirichlet Precond ... \n" << std::endl;
                 solveInvLinearFluid();
-//            Pz = getFluidInterfaceOnSolid(M_dzFluid);
                 Vector deltaLambda = this->M_fluid->getDeltaLambda();
                 transferOnInterface(deltaLambda,
                                     M_fluid->BC_fluid(),
@@ -621,7 +620,7 @@ void steklovPoincare::setBC()
 
     // solid acceleration
     // Boundary conditions for dp
-    BCVectorInterface da_wall(M_quasiNewton->dacc(),
+    BCVectorInterface da_wall(M_reducedLinFluid->dacc(),
                               dim_solid,
                               M_dofStructureToReducedFluid,
                               2); // type  = 2
@@ -630,7 +629,7 @@ void steklovPoincare::setBC()
     M_BCh_dp->addBC("InFlow",      2, Essential, Scalar, bcf);
     M_BCh_dp->addBC("OutFlow",     3, Essential, Scalar, bcf);
 
-    M_quasiNewton->setUpBC(M_BCh_dp);
+    M_reducedLinFluid->setUpBC(M_BCh_dp);
 }
 
 
@@ -777,7 +776,7 @@ Vector steklovPoincare::getFluidInterfaceOnSolid(Vector const& _vec)
 //
 namespace
 {
-operFS* createSP(){ return new steklovPoincare(); }
+FSIOperator* createSP(){ return new steklovPoincare(); }
 static bool reg = FSIFactory::instance().registerProduct( "steklovPoincare", &createSP );
 }
 }

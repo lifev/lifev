@@ -21,16 +21,16 @@
 #ifndef _STEKLOV_HPP
 #define _STEKLOV_HPP
 
-#include "operFS.hpp"
+#include "FSIOperator.hpp"
 
 namespace LifeV
 {
 
-class steklovPoincare : public operFS
+class steklovPoincare : public FSIOperator
 {
 public:
 
-    typedef operFS super;
+    typedef FSIOperator super;
     typedef super::fluid_type fluid_type;
     typedef super::solid_type solid_type;
     typedef super::bchandler_type bchandler_type;

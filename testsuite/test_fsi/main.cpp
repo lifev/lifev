@@ -124,11 +124,11 @@ struct FSIChecker
     FSIChecker( GetPot const& _data_file ):
         data_file( _data_file ),
         oper( _data_file( "problem/method", "steklovPoincare" ) ),
-        prec( ( LifeV::OperFSPreconditioner )_data_file( "problem/precond", LifeV::NEUMANN_NEUMANN ) )
+        prec( ( LifeV::Preconditioner )_data_file( "problem/precond", LifeV::NEUMANN_NEUMANN ) )
         {}
     FSIChecker( GetPot const& _data_file,
                 std::string _oper,
-                LifeV::OperFSPreconditioner _prec = LifeV::NO_PRECONDITIONER ):
+                LifeV::Preconditioner _prec = LifeV::NO_PRECONDITIONER ):
         data_file( _data_file ),
         oper( _oper ),
         prec( _prec )
@@ -141,8 +141,8 @@ struct FSIChecker
             try
             {
                 fsip = boost::shared_ptr<Problem>( new Problem( data_file, oper ) );
-                fsip->fsiSolver()->FSIOperator()->setDataFromGetPot( data_file );
-                fsip->fsiSolver()->FSIOperator()->setPreconditioner( prec );
+//                fsip->fsiSolver()->FSIOperator()->setDataFromGetPot( data_file );
+                fsip->fsiSolver()->operFSI()->setPreconditioner( prec );
 
                 fsip->run( fsip->fsiSolver()->timeStep(), fsip->fsiSolver()->timeEnd() );
             }
@@ -151,12 +151,12 @@ struct FSIChecker
                 std::cout << "caught exception :  " << _ex.what() << "\n";
             }
 
-            disp = fsip->fsiSolver()->FSIOperator()->displacementOnInterface();
+            disp = fsip->fsiSolver()->operFSI()->displacementOnInterface();
         }
 
     GetPot data_file;
     std::string oper;
-    LifeV::OperFSPreconditioner prec;
+    LifeV::Preconditioner prec;
     LifeV::Vector disp;
 };
 int main(int argc, char** argv)

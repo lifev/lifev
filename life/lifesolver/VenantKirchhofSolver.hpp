@@ -394,6 +394,8 @@ iterate()
     _w = ( 2.0 / this->_dt ) * this->_d - _rhs_w;
 
 //    evalResidual(_residual_d, _d, 0);
+//    _residual_d = -1*(_C*this->_d);
+//    std::cout << "rhsWithoutBC norm = " << norm_2(_rhsWithoutBC) << std::endl;
     _residual_d = _C*this->_d - _rhsWithoutBC;
 //    _residual_d = -1.*_residual_d;
 }
@@ -442,8 +444,6 @@ template <typename Mesh>
 void VenantKirchhofSolver<Mesh>::
 evalResidual( Vector &res, const Vector& sol, int iter)
 {
-
-
     std::cout << "O-    Computing residual... ";
 
     Chrono chrono;
@@ -579,9 +579,7 @@ void VenantKirchhofSolver<Mesh>::
 //solveJac( const Vector& res, double& linear_rel_tol, Vector &step)
 solveJac( Vector &step, const Vector& res, double& linear_rel_tol)
 {
-
     Chrono chrono;
-
 
     _f = res;
 
@@ -623,7 +621,6 @@ solveJac(Vector &step, const Vector& res, double& linear_rel_tol, BCHandler &BCd
 {
 
     Chrono chrono;
-
 
     _f = res;
 

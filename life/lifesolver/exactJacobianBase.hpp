@@ -21,7 +21,7 @@
 #ifndef _EJ_HPP
 #define _EJ_HPP
 
-#include "operFS.hpp"
+#include "FSIOperator.hpp"
 
 namespace LifeV
 {
@@ -31,11 +31,11 @@ class exactJacobian;
 
 
 
-class exactJacobian : public operFS
+class exactJacobian : public FSIOperator
 {
 public:
 
-    typedef operFS super;
+    typedef FSIOperator super;
     typedef super::fluid_type fluid_type;
     typedef super::solid_type solid_type;
     typedef super::bchandler_type bchandler_type;

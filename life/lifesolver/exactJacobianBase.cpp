@@ -19,7 +19,7 @@
 
 
 #include "exactJacobianBase.hpp"
-#include "quasiNewton.hpp"
+#include "reducedLinFluid.hpp"
 
 
 namespace LifeV
@@ -51,7 +51,7 @@ exactJacobian::setup()
 
     M_dz.resize(3*M_solid->dDof().numTotalDof());
     M_rhs_dz.resize(3*M_solid->dDof().numTotalDof());
-    M_quasiNewton.reset(new quasiNewton(this, M_fluid, M_solid));
+    M_reducedLinFluid.reset(new reducedLinFluid(this, M_fluid, M_solid));
 }
 //
 // Residual computation
@@ -179,7 +179,7 @@ void exactJacobian::setUpBC()
     else
     {
         // Boundary conditions for the reduced fluid
-        BCVectorInterface da_wall(M_quasiNewton->dacc(),
+        BCVectorInterface da_wall(M_reducedLinFluid->dacc(),
                                   dim_solid,
                                   M_dofStructureToReducedFluid,
                                   2); // type  = 2
@@ -188,10 +188,10 @@ void exactJacobian::setUpBC()
         M_BCh_dp->addBC("InFlow",      2, Essential, Scalar, bcf);
         M_BCh_dp->addBC("OutFlow",     3, Essential, Scalar, bcf);
 
-        M_quasiNewton->setUpBC(M_BCh_dp);
+        M_reducedLinFluid->setUpBC(M_BCh_dp);
 
         // Boundary conditions for dz
-        BCVectorInterface dg_wall(M_quasiNewton->minusdp(),
+        BCVectorInterface dg_wall(M_reducedLinFluid->minusdp(),
                                   dim_reducedfluid,
                                   M_dofReducedFluidToStructure,
                                   1); // type = 1
@@ -352,7 +352,7 @@ void my_matvecJacobianEJ(double *z, double *Jz, AZ_MATRIX* J, int proc_config[])
 //
 namespace
 {
-operFS* createEJ(){ return new exactJacobian(); }
+FSIOperator* createEJ(){ return new exactJacobian(); }
 static bool reg = FSIFactory::instance().registerProduct( "exactJacobian", &createEJ );
 }
 
