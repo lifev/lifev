@@ -1,0 +1,39 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#   Data file for One D Model (Non Linear)
+#-------------------------------------------------
+
+[physics]
+[./BCs]
+test_case	= 13	# test case for boundary conditions
+[../parameters]
+alphaCor	= 3.0		# coriolis coeff
+beta0	= 4.0		# pressure law factor
+beta1	= 5.5		# pressure law exponent
+Kr	= 6.0		# friction parameter (source term)
+
+[time]
+timebeg	= 1.00		# inittime
+timeend	= 1.10		# endtime
+timestep= 0.02		# timestep		
+
+[discretization]
+mesh_file	= cylhexa.mesh	# mesh file name
+mesh_dir	= ../data/mesh/inria 
+		# the directory where the mesh file is
+x_left	= 0.
+x_right	= 10.
+nx	= 9	# (nx+1) = number of elements (0,...,nx)
+
+[miscellaneous]
+post_dir = ./Post                 # the directory for postprocessing files
+verbose = 5
+post_proc_format = medit          # vtk or medit
+
+[aztec]  
+solver = cg  #cg , gmres, cgs, tfqmr, bicgstab, slu, symmlq, fixed_pt, lu
+precond = dom_decomp
+subdomain_solve = icc
+output = warnings    #warnings , none , all, all_res, last
+tol = 1e-6
+
