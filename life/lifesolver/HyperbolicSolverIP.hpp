@@ -144,7 +144,7 @@ namespace LifeV {
             _M_solver.setOptionsFromGetPot(_M_data_file, (_M_data_section + "/solver").data());
             _M_gamma = _M_data_file((_M_data_section + "/ipstab/gamma").data(), 0.125);
         }
-        
+
         //@}
 
         /*! @name Accessors
@@ -292,7 +292,7 @@ namespace LifeV {
         bool _M_verbose;
 
         //! The vector of stabilization parameters
-        std::vector<Real> _M_h2pK;
+        std::vector<Real> _M_hpK;
 
         //! The coefficient for stabilization parameters scaling
         Real _M_gamma;
@@ -303,16 +303,19 @@ namespace LifeV {
 
         //! Compute the stabilization parameters
         void compute_stabilization_parameters() {
-            _M_h2pK.resize( _M_mesh.numVolumes() );
-
-            Real measure;
+            _M_hpK.clear();
+            _M_hpK.resize( _M_mesh.numVolumes(), 0. );
 
             for(UInt i = _M_mesh.numBFaces() + 1; i <= _M_mesh.numFaces(); i++){
                 _M_fe_bd.updateMeasQuadPt( _M_mesh.faceList(i) );
-                measure = _M_fe_bd.measure();
+                Real diameter = pow(_M_fe_bd.measure() * 2., 0.5);
 
-                _M_h2pK[_M_mesh.faceList(i).ad_first() - 1] += measure * 0.5;
-                _M_h2pK[_M_mesh.faceList(i).ad_second() - 1] += measure * 0.5;
+                _M_hpK[_M_mesh.faceList(i).ad_first() - 1] =
+                    std::max(_M_hpK[_M_mesh.faceList(i).ad_first() - 1],
+                             diameter);
+                _M_hpK[_M_mesh.faceList(i).ad_second() - 1] =
+                    std::max(_M_hpK[_M_mesh.faceList(i).ad_second() - 1],
+                             diameter);
             }
         }
 
@@ -372,20 +375,33 @@ namespace LifeV {
         CurrentFE fe2(_M_fe);
         Real stab_coeff;
 
+//         UInt eleID = _M_fe_velocity.currentId();
+//         // M_elvec contains the velocity values in the nodes
+//         for ( UInt iNode = 0 ; iNode<( UInt )_M_fe_velocity.nbNode ; iNode++ )
+//         {
+//             UInt  iloc = _M_fe_velocity.patternFirst( iNode );
+//             for ( UInt iComp = 0; iComp<nbCompU; ++iComp )
+//             {
+//                 UInt ig = _dof_u.localToGlobal( eleID, iloc+1 )-1+iComp*_dim_u;
+//                 M_elvec.vec()[ iloc+iComp*_M_fe_velocity.nbNode ]=betaVec(ig);
+//             }
+//         }
+        
         for(UInt i = _M_mesh.numBFaces() + 1; i <= _M_mesh.numFaces(); i++){
             elmat.zero();
 
             UInt ad_first = _M_mesh.faceList(i).ad_first();
             UInt ad_second = _M_mesh.faceList(i).ad_second();
 
-            stab_coeff = _M_gamma * ( pow(_M_h2pK[ad_first - 1], 2) * pow(_M_h2pK[ad_second - 1], 2) );
+            stab_coeff = .5 * _M_gamma * ( pow(_M_hpK[ad_first - 1], 2) + pow(_M_hpK[ad_second - 1], 2) );
 
             _M_fe.updateFirstDerivQuadPt( _M_mesh.volumeList(ad_first) );
             fe2.updateFirstDerivQuadPt( _M_mesh.volumeList(ad_second) );
 
             _M_fe_bd.updateMeasQuadPt( _M_mesh.faceList(i) );
 
-            ipstab_grad(stab_coeff, elmat, _M_fe, fe2, _M_fe_bd, 0, 0, 1);
+            ipstab_grad(stab_coeff, elmat, _M_fe, fe2,  _M_fe_bd, 0, 0, 1);
+            //ipstab_bgrad(stab_coeff, elmat, _M_fe, fe2, beta, _M_fe_bd, 0,0,1);
             assemb_mat(_M_A_steady, elmat, _M_fe, fe2, _M_dof);
         }
     }
