@@ -25,8 +25,12 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 include ../../admin/Doxyfile.am
 
+
+
 clean: clean-am clean-local
 
 clean-local:
 	-if test -d life; then rm -rf life; fi
 	-if test -d testsuite; then rm -rf testsuite; fi
+
+MOSTLYCLEANFILES    = index.hhc index.hhk files.html Mainpage_8dox.html index.hhp

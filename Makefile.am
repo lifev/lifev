@@ -40,11 +40,15 @@ include $(top_srcdir)/admin/Doxyfile.am
 
 dist-hook: changelog
 # make sure that we have an up-to-date ChangeLog
-	cp $(srcdir)/ChangeLog .
+	if test $(top_srcdir) != $(top_builddir); then\
+	  cp $(srcdir)/ChangeLog .;\
+	fi
 
 changelog:
-	@if test -x /usr/bin/cvs2cl; then\
-	(cd $(srcdir) && cvs2cl -b -t  -S --utc -P);\
+	@if test -x /usr/bin/cvs2cl -a -d $(srcdir)/CVS; then\
+	 (cd $(srcdir) && cvs2cl -b -t  -S --utc -P);\
+    else \
+     touch $(srcdir)/ChangeLog;\
     fi
 
 apidox-all:
@@ -66,3 +70,5 @@ all-local:
 
 upload-api:
 	-cd doc/ && rsync -avz api/ `whoami`@cmcsforge.epfl.ch:/var/lib/gforge/chroot/home/groups/lifev/htdocs/api-$(LIFEV_MAJOR_VERSION).$(LIFEV_MINOR_VERSION).$(LIFEV_MICRO_VERSION)
+
+MOSTLYCLEANFILES	= ChangeLog

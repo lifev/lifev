@@ -37,7 +37,6 @@ check_PROGRAMS	= test_linearsolvers
 test_linearsolvers_SOURCES	= test_linearsolvers.cpp
 test_linearsolvers_LDADD	= liblifealg_testsuite.la
 
-
 EXTRA_DIST  = testsuite.at
 
 MOSTLYCLEANFILES=mass.m convdiff.m
