@@ -69,9 +69,9 @@ namespace LifeV {
       @see
     */
     template<typename MeshType>
-    class NSSolver2FluidsMixed 
-        : 
-        public NavierStokesHandler<MeshType, DataNS2Fluids<MeshType> > 
+    class NSSolver2FluidsMixed
+        :
+        public NavierStokesHandler<MeshType, DataNS2Fluids<MeshType> >
     {
     public:
         /** @name Typedefs
@@ -89,6 +89,7 @@ namespace LifeV {
         typedef BoostMatrix<boost::numeric::ublas::row_major> matrix_type_C;
         typedef BoostMatrix<boost::numeric::ublas::row_major> matrix_type_D;
         typedef BoostMatrix<boost::numeric::ublas::column_major> matrix_type_Dtr;
+        typedef DiagonalBoostMatrix matrix_type_M_L;
 
 #if NS2F_USE_PETSC
         typedef SolverPETSC linear_solver_u_type;
@@ -98,9 +99,9 @@ namespace LifeV {
         typedef SolverUMFPACK linear_solver_p_type;
 #endif
 
-        typedef Yosida<matrix_type_C, 
-                       matrix_type_C, 
-                       matrix_type_D, 
+        typedef Yosida<matrix_type_M_L,
+                       matrix_type_C,
+                       matrix_type_D,
                        matrix_type_Dtr,
                        linear_solver_u_type,
                        linear_solver_p_type> solver_type;
@@ -153,9 +154,9 @@ namespace LifeV {
         */
         void initialize(const function_type&, const function_type&, const function_type&, Real, Real);
 
-        /*! 
+        /*!
           \Time advance re-computes the whole problem matrix at every time step.
-          \This is necessary because (discontinuous) coefficient are 
+          \This is necessary because (discontinuous) coefficient are
           \time-dependent being so the location of the interface.
         */
         void timeAdvance(source_type const& source, Real const& time);
@@ -206,6 +207,9 @@ namespace LifeV {
 
         //! Velocity mass matrix
         matrix_type_C _M_M;
+        
+        //! Lumped velocity mass matrix
+        matrix_type_M_L _M_M_L;
 
         //! Matrix C
         matrix_type_C _M_C;
@@ -222,7 +226,7 @@ namespace LifeV {
         ElemMat _M_elmat_D;
         ElemMat _M_elmat_Dtr;
         ElemMat _M_elmat_P;
-        
+
         //! Elementary vector
         ElemVec _M_elvec;
 
@@ -301,6 +305,7 @@ namespace LifeV {
         _M_pattern_D(_M_pattern_D_block),
         _M_pattern_Dtr(_M_pattern_Dtr_block),
         _M_M(_M_pattern_C),
+        _M_M_L(_dim_u),
         _M_C(_M_pattern_C),
         _M_D(_M_pattern_D),
         _M_Dtr(_M_pattern_Dtr),
@@ -317,7 +322,7 @@ namespace LifeV {
         _M_beta_fct(0),
         _M_constant_pressure( _dim_p ),
         _M_lsfunction(_M_lss.lsfunction()),
-        _M_solver(_M_M, _M_C, _M_D, _M_Dtr, _M_data_file, "navier-stokes/yosida", _M_solver_u, _M_solver_p)
+        _M_solver(_M_M_L, _M_C, _M_D, _M_Dtr, _M_data_file, "navier-stokes/yosida", _M_solver_u, _M_solver_p)
     {
         if(_M_verbose)
             std::cout << "** NS2F ** Using boost matrix" << std::endl;
@@ -342,7 +347,7 @@ namespace LifeV {
     inline void NSSolver2FluidsMixed<MeshType>::advance_NS(source_type const& source, Real const& time) {
         // Set current time
         _M_time = time;
-        
+
         // Number of components for the velocity
         UInt nbCompU = _u.nbcomp();
 
@@ -478,8 +483,11 @@ namespace LifeV {
                 assemb_vec(_M_rhs_u, _M_elvec, fe_u(), uDof(), iComp);
             }
 
-        }
+        } // loop over volumes
+        _M_M_L.lumpRowSum(_M_M);
+
         __chrono.stop();
+
         if(_M_verbose) {
             std::cout << "** NS2F ** Elementary constributions computation : "
                       << __cumul1 << std::endl;
@@ -491,12 +499,13 @@ namespace LifeV {
 
         // Add RHS terms stemming from the time derivative
         if(!_M_steady)
-            _M_rhs_u += prod( _M_M, _bdf.bdf_u().time_der(_dt) );
-        
+            _M_rhs_u += prod( _M_M_L, _bdf.bdf_u().time_der(_dt) );
+
 #if NS2F_DEBUG
         // Export matrices in matlab format
         _M_C.spy( "./results/spyCafter" );
         _M_M.spy( "./results/spyMafter" );
+        //_M_M_L.spy( "./results/spyMLafter" );
         _M_D.spy( "./results/spyDafter" );
         _M_Dtr.spy( "./results/spyDtrafter" );
 #endif
@@ -524,10 +533,10 @@ namespace LifeV {
     }
 
     template<typename MeshType>
-    void NSSolver2FluidsMixed<MeshType>::initialize(const function_type& u0, 
-                                                    const function_type& p0, 
-                                                    const function_type& lsfunction0, 
-                                                    Real t0, Real delta_t) 
+    void NSSolver2FluidsMixed<MeshType>::initialize(const function_type& u0,
+                                                    const function_type& p0,
+                                                    const function_type& lsfunction0,
+                                                    Real t0, Real delta_t)
     {
         UInt nbCompU = _u.nbcomp();
         _bdf.bdf_u().initialize_unk(u0, _mesh, refFEu(), fe_u(), uDof(), t0, delta_t, nbCompU);
