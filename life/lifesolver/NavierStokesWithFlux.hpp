@@ -63,7 +63,7 @@ public:
     typedef boost::shared_ptr<NSSolver> solver_type;
 
     typedef boost::function< Real ( Real ) > flux_type;
-    typedef std::map<std::string, flux_type> flux_map_type;
+    typedef std::map<int, flux_type> flux_map_type;
     typedef typename flux_map_type::iterator flux_map_iterator;
     typedef typename flux_map_type::const_iterator flux_map_const_iterator;
 
@@ -129,10 +129,10 @@ public:
      */
     //@{
 
-    void setFlux( std::string const& __id, flux_type const& __flux )
+    void setFlux( int lab, flux_type const& __flux )
         {
-	  Debug( 6010 ) << "imposing flux on boundary" << __id << "\n";
-         _M_fluxes[__id]=__flux;
+	  Debug( 6010 ) << "imposing flux on boundary" << lab << "\n";
+         _M_fluxes[lab]=__flux; 
         }
 
     //@}
@@ -151,7 +151,7 @@ public:
     /**
        Use Lagrange multipliers to impose the flux
      */
-    void solve();
+    void solve(int);
 
     //@}
 
@@ -179,7 +179,7 @@ private:
 
 template<typename NSSolver>
 void
-NavierStokesWithFlux<NSSolver>::solve()
+NavierStokesWithFlux<NSSolver>::solve(int label)
 {
     // Definition of GMRes alghoritm variables and constants
     //
@@ -217,7 +217,7 @@ NavierStokesWithFlux<NSSolver>::solve()
 
     // compute the flux of NSo  
     //  
-    Qno=_M_solver->flux(1); 
+    Qno=_M_solver->flux(label); 
     std::cout << "\n";
     std::cout << "end NSo\n";
     
@@ -226,7 +226,7 @@ NavierStokesWithFlux<NSSolver>::solve()
     UInt dim_lambda = _M_solver->uDof().numTotalDof();
     Vector vec_lambda(dim_lambda);
     BCVector bcvec(vec_lambda,dim_lambda,1);
-    _M_solver->bcHandler().modifyBC("InFlow",bcvec);
+    _M_solver->bcHandler().modifyBC(label,bcvec);
 
     // Navier Stokes in temporal loop
     //
@@ -236,7 +236,7 @@ NavierStokesWithFlux<NSSolver>::solve()
     //
     for (Real time=startT+dt ; time <= T; time+=dt)
     {
-      Q=(_M_fluxes["InFlow"])(time);
+      Q=(_M_fluxes[label])(time);
       lambda0=-Q;
 
       // Costruction of vector vec_lambda
@@ -258,7 +258,7 @@ NavierStokesWithFlux<NSSolver>::solve()
 
       //compute the flux of NS
       //
-      Qn=_M_solver->flux(1); 
+      Qn=_M_solver->flux(label); 
       std::cout << "flux before update" << " " << Qn << "\n"; 
 
       // compute the variables to update lambda
@@ -287,7 +287,7 @@ NavierStokesWithFlux<NSSolver>::solve()
 
       //compute the flux of NS: the definitive one
       //
-      Qn=_M_solver->flux(1);
+      Qn=_M_solver->flux(label);
       std::cout << "imposed flux" << " " << Q << "\n"; 
       std::cout << "numerical flux" << " " << Qn << "\n";
     }
