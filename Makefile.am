@@ -25,10 +25,6 @@
 
 AUTOMAKE_OPTIONS = foreign 1.7 dist-bzip2
 
-$(top_srcdir)/configure.in: $(top_srcdir)/subdirs $(top_srcdir)/configure.files $(CONF_FILES)
-	cd $(top_srcdir) && $(MAKE) -f admin/Makefile.common configure.in
-
-
 EXTRA_DIST = configure.in.in configure.in.bot  configure.in.mid subdirs configure.files\
              Mainpage.dox BUGS Makefile.headers
 
@@ -37,6 +33,7 @@ MAINTAINERCLEANFILES = configure.files subdirs
 
 
 include $(top_srcdir)/admin/Doxyfile.am
+include $(top_srcdir)/admin/deps.am
 
 include $(top_srcdir)/Makefile.headers
 
