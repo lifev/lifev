@@ -28,7 +28,7 @@ SUBDIRS		= data  \
                   test_q1 test_p2 test_mixte test_fe \
                   test_postproc test_bdf \
 		  test_linearelasticity \
-		  test_darcy \
+		  test_darcy test_onedmodel\
 		  test_ns_bdf test_ns_cyl test_ns_sstress \
 		  test_fsi_newton test_fsi_picard \
 		  test_masstransport test_ns_ipstab
