@@ -71,7 +71,21 @@ public:
             _M_fsi = fsi_solver_ptr(  new FSISolver( data_file, BCh_u, BCh_d, BCh_mesh, _oper ) );
             _M_fsi->showMe();
             _M_fsi->setSourceTerms( fZero, fZero );
-            _M_fsi->initialize( u0, d0, w0 );
+
+            int restart = data_file("problem/restart",0);
+            if (restart)
+            {
+                std::string velName   = data_file("fluid/miscellanoues/velname"  ,"vel");
+                std::string pressName = data_file("fluid/miscellanoues/pressname","press");
+                std::string depName   = data_file("solid/miscellanoues/depname"  ,"dep");
+                _M_Tstart             = data_file("problem/Tstart"   ,0.);
+                std::cout << "Starting time = " << _M_Tstart << std::endl;
+                _M_fsi->initialize(velName, pressName, depName);
+            }
+            else
+            {
+                _M_fsi->initialize( u0, d0, w0 );
+            }
         }
 
     fsi_solver_ptr fsiSolver() { return _M_fsi; }
@@ -85,7 +99,7 @@ public:
             boost::timer _overall_timer;
 
             int _i = 1;
-            for (double time=dt; time <= T; time+=dt, ++_i)
+            for (double time=_M_Tstart + dt; time <= _M_Tstart + T; time += dt, ++_i)
             {
                 boost::timer _timer;
 
@@ -102,6 +116,7 @@ public:
 private:
 
     fsi_solver_ptr _M_fsi;
+    double         _M_Tstart;
 };
 
 struct FSIChecker
