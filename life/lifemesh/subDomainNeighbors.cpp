@@ -55,7 +55,7 @@ SubDomainNeighbors::SubDomainNeighbors( id_type SDomID ) :
 {}
 
 //! Constructor taking the connectivity table in a file as input (to do)
-SubDomainNeighbors::SubDomainNeighbors( id_type SDomID, std::string fname ) :
+SubDomainNeighbors::SubDomainNeighbors( id_type SDomID, std::string /*fname*/ ) :
         _SDomID( SDomID ),
         _nbInterf( 0 ),
         _nbNeigh( 0 ),
@@ -80,7 +80,7 @@ Int SubDomainNeighbors::NeighInterfaceRef( const size_type & i ) const
 
 
 //! Output
-std::ostream& SubDomainNeighbors::showMe( bool verbose, std::ostream & out ) const
+std::ostream& SubDomainNeighbors::showMe( bool /*verbose*/, std::ostream & out ) const
 {
     out << "********************************" << std::endl;
     out << "SubDomain number: " << _SDomID << std::endl;
