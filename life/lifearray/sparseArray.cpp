@@ -116,6 +116,7 @@ CSRMatr<CSRPatt, Tab2d>::spy( std::string const &filename )
         }
     }
 
+    std::cout << "write file " << name << std::endl;
     std::ofstream file_out( name.c_str() );
     ASSERT( file_out, "Error: Output Matrix (Values) file cannot be open" );
 

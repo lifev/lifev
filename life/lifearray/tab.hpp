@@ -22,11 +22,14 @@
 
 #include <cmath>
 
-#include "lifeV.hpp"
+#undef max
+#undef min
 
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
+
+#include <lifeV.hpp>
 
 #include <RNM.hpp>
 
