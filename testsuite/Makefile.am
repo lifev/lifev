@@ -46,7 +46,7 @@ $(srcdir)/test_essentialbc/testsuite.at \
 $(srcdir)/test_fe/testsuite.at \
 $(srcdir)/test_fsi_newton/testsuite.at \
 $(srcdir)/test_linearelasticity/testsuite.at \
-$(srddir)/test_fsi/testsuite.at \
+$(srcdir)/test_fsi/testsuite.at \
 $(srcdir)/test_fsi_picard/testsuite.at \
 $(srcdir)/test_fsi_dd/testsuite.at \
 $(srcdir)/test_masstransport/testsuite.at \
