@@ -61,6 +61,7 @@ $(srcdir)/test_ns_cyl/testsuite.at \
 $(srcdir)/test_ns_cyl_flux/testsuite.at \
 $(srcdir)/test_ns_ipstab/testsuite.at \
 $(srcdir)/test_levelset_ipstab/testsuite.at \
+$(srcdir)/test_ns_2fluids/testsuite.at \
 $(srcdir)/test_ns_sstress/testsuite.at \
 $(srcdir)/test_onedmodel/testsuite.at \
 $(srcdir)/test_p2/testsuite.at \
