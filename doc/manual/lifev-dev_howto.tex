@@ -1,6 +1,5 @@
-\documentclass{article}
+\chapter{HOWTO}
 
-\begin{document}
 \section{Geometrical mappings}
 
 In file \texttt{geoMap.h}:
@@ -17,9 +16,7 @@ GeoMap is the base class, two kinds of classes can be derived from it:
 \end{itemize}
  
 
-\section{HOWTO}
-
-\subsection{HOWTO add new basis functions}
+\section{HOWTO add new basis functions}
 
 The basis functions may be used  to define the geometrical mappings and
 the finite element shape functions. A lot of basis functions are already
@@ -35,13 +32,13 @@ coded as global function which take the coordinates $x,y,z$ as
 arguments and return the value of the function (see examples in the file   
 \texttt{basisFct.h} ).
 
-\subsection{HOWTO add a new quadrature rule}
+\section{HOWTO add a new quadrature rule}
 
 The way is very similar to the one described for the basis
 functions. You have just to derive a new class from the class
 {\verb QuadRule<Shape,nbQuadPt>}. See the file \texttt{quadRule.h}
 
-\subsection{HOWTO add a new element operator}
+\section{HOWTO add a new element operator}
 
 By ``element operator'', we mean element matrix corresponding to
 a differential operator. For example, the element stiffness or mass 
@@ -58,7 +55,7 @@ a given finite element, you must create a ``specialized'' finite
 element. This may be much more efficient, but the new operator will work
 only with this element.
 
-\subsection{HOWTO build a new finite element}
+\section{HOWTO build a new finite element}
 
 In \texttt{feBase.h}: create a base class for the new element (copy,
 paste and modify an existant one...), say {\verb FE_My_Tetra_Base}. The
@@ -110,9 +107,16 @@ You can have a look at {\verb fe_p1_tetra_exact.h}. But I emphasize that
 this is just a test, and it should probably be improved (in particular,
 the geometrical quantities stored in the geomap class...).
 
-\end{document}
 
-%%% Local Variables: 
-%%% mode: latex
-%%% TeX-master: t
-%%% End: 
+%
+%%%%%%%%%%%%% Some Settings for emacs and auc-TeX
+% Local Variables:
+% TeX-master: "lifev-dev"
+% TeX-command-default: "PDFLaTeX"
+% TeX-parse-self: t
+% TeX-auto-save: t
+% x-symbol-8bits: nil
+% TeX-auto-regexp-list: TeX-auto-full-regexp-list
+% eval: (ispell-change-dictionary "american")
+% End:
+%

@@ -25,7 +25,8 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .tex .pdf
 
-PDF		= docfe.pdf jfg.pdf lifev-dev.pdf
+
+PDF		= docfe.pdf lifev-dev.pdf
 
 lifev_dev_TEX	= lifev-dev.tex lifev-dev_generalities.tex lifev-dev_conventions.tex lifev-dev_overview.tex
 
@@ -45,10 +46,12 @@ BCCond.eps BasElSha.eps NSCode_mesh_types.eps theFE.eps BCHandler.eps Fem_nodes.
 BCCond.pdf BasElSha.pdf NSCode_mesh_types.pdf theFE.pdf BCHandler.pdf Fem_nodes.pdf mixed_pattern.pdf
 
 
-EXTRA_DIST = $(TEX_SRC) $(IMAGES_SRC) life.bib 
+EXTRA_DIST = $(lifev_dev_TEX) $(IMAGES_SRC) life.bib 
 
 MOSTLYCLEANFILES	= docfe.log docfe.aux docfe.pdf docfe.blg docfe.bbl \
 			  jfg.log jfg.aux jfg.pdf jfg.blg jfg.bbl \
 			  lifev-dev.log lifev-dev.glo lifev-dev.idx lifev-dev.ind lifev-dev.ilg lifev-dev.aux lifev-dev.out \
                           lifev-dev.pdf lifev-dev.toc lifev-dev.lof lifev-dev.lot lifev-dev.blg lifev-dev.bbl \
 			  lifev-dev_generalities.aux lifev-dev_conventions.aux lifev-dev_overview.aux
+
+#info_TEXINFOS = lifev-install.texi
