@@ -77,7 +77,7 @@ public RefEleDG
   const int type;
   /*!
     RefFEDG is the standard constructor for the reference discontinuous element.
-    Notice that geoMap property is used to map faces into the reference element.
+    Notice that geoMap property is used to map faces onto the reference element.
   */
   RefFEDG(std::string _name, int _type,
 	  ReferenceShapes _shape,
