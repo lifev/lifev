@@ -56,10 +56,10 @@ namespace LifeV
 
 /*!
   \class NavierStokesHandler
- 
+
   Abstract class which defines the general structure of a NavierStokes solver.
   For each new NavierStokes solver  we have to implement the corresponding timeAdvance and an iterate methods
- 
+
 */
 
 template <typename Mesh>
@@ -83,9 +83,14 @@ public:
       \param BCh_u boundary conditions for the velocity
       \param ord_bdf order of the bdf time advancing scheme and incremental pressure approach (default: Backward Euler)
     */
-    NavierStokesHandler( const GetPot& data_file, const RefFE& refFE_u,
-                         const RefFE& refFE_p, const QuadRule& Qr_u, const QuadRule& bdQr_u,
-                         const QuadRule& Qr_p, const QuadRule& bdQr_p, BC_Handler& BCh_u );
+    NavierStokesHandler( const GetPot& data_file,
+                         const RefFE& refFE_u,
+                         const RefFE& refFE_p,
+                         const QuadRule& Qr_u,
+                         const QuadRule& bdQr_u,
+                         const QuadRule& Qr_p,
+                         const QuadRule& bdQr_p,
+                         BC_Handler& BCh_u );
 
     //! Sets initial condition for the velocity (here the initial time is 0.0)
     void initialize( const Function& u0 );
@@ -217,25 +222,25 @@ NavierStokesHandler<Mesh>::
 NavierStokesHandler( const GetPot& data_file, const RefFE& refFE_u,
                      const RefFE& refFE_p, const QuadRule& Qr_u, const QuadRule& bdQr_u,
                      const QuadRule& Qr_p, const QuadRule& bdQr_p, BC_Handler& BCh_u ) :
-        DataNavierStokes<Mesh>( data_file ),
-        _refFE_u( refFE_u ),
-        _refFE_p( refFE_p ),
-        _dof_u( this->_mesh, _refFE_u ),
-        _dof_p( this->_mesh, _refFE_p ),
-        _dim_u( _dof_u.numTotalDof() ),
-        _dim_p( _dof_p.numTotalDof() ),
-        _Qr_u( Qr_u ),
-        _bdQr_u( bdQr_u ),
-        _Qr_p( Qr_p ),
-        _bdQr_p( bdQr_p ),
-        _fe_u( _refFE_u, getGeoMap( this->_mesh ), _Qr_u ),
-        _feBd_u( _refFE_u.boundaryFE(), getGeoMap( this->_mesh ).boundaryMap(), _bdQr_u ),
-        _fe_p( _refFE_p, getGeoMap( this->_mesh ), _Qr_p ),
-        _u( _dim_u ),
-        _p( _dim_p ),
-        _BCh_u( BCh_u ),
-        _bdf( this->_order_bdf ), _ns_post_proc( this->_mesh, _feBd_u, _dof_u, NDIM ),  // /******************
-        _count( 0 )
+    DataNavierStokes<Mesh>( data_file ),
+    _refFE_u( refFE_u ),
+    _refFE_p( refFE_p ),
+    _dof_u( this->_mesh, _refFE_u ),
+    _dof_p( this->_mesh, _refFE_p ),
+    _dim_u( _dof_u.numTotalDof() ),
+    _dim_p( _dof_p.numTotalDof() ),
+    _Qr_u( Qr_u ),
+    _bdQr_u( bdQr_u ),
+    _Qr_p( Qr_p ),
+    _bdQr_p( bdQr_p ),
+    _fe_u( _refFE_u, getGeoMap( this->_mesh ), _Qr_u ),
+    _feBd_u( _refFE_u.boundaryFE(), getGeoMap( this->_mesh ).boundaryMap(), _bdQr_u ),
+    _fe_p( _refFE_p, getGeoMap( this->_mesh ), _Qr_p ),
+    _u( _dim_u ),
+    _p( _dim_p ),
+    _BCh_u( BCh_u ),
+    _bdf( this->_order_bdf ), _ns_post_proc( this->_mesh, _feBd_u, _dof_u, NDIM ),  // /******************
+    _count( 0 )
 {}
 
 

@@ -227,11 +227,14 @@ public:
     */
     Real operator() ( const ID& iDof, const ID& iComp ) const;
 
-
     //! Assignment operator for BCVector_Interface
     BCVector_Interface & operator=( const BCVector_Interface & BCv );
 
+    //! getter
 
+    DofInterfaceBase const & dofInterface() const 
+        {return *_dofIn;}
+    
     //! Output
     std::ostream & showMe( bool verbose = false, std::ostream & out = std::cout ) const;
 

@@ -88,8 +88,11 @@ public:
     //! Output
     void showMe( std::ostream& c = std::cout ) const;
 
-    //! residual getter
+    //! BC_Handler getter
 
+    BC_Handler const & BC_solid() const {return _BCh;}
+
+    //! residual getter
     Vector& residual()
     {
         return _residual_d;

@@ -15,17 +15,17 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*!
   \file NavierStokesAleSolverPC.h
   \author M.A. Fernandez and A. Gauthier
   \date 05/2003
   \version 1.0
- 
+
   \brief This file contains a NavierStokes ALE solver  class which implements  a semi-implicit scheme with
          an exact factorization. Preconditioning of the  Schur Complement is done by an algebraic
          Chorin-Temam pressure-corrected preconditioner
- 
+
 */
 
 #ifndef _NAVIERSTOKESALESOLVERPC_HH
@@ -47,10 +47,10 @@ namespace LifeV
 {
 /*!
   \class NavierStokesSolverPC
- 
+
    This class implements an NavierStokes ALE solver via exact factorization. Preconditioning of the
    Schur Complement is done by an algebraic Chorin-Temam pressure-corrected preconditioner
- 
+
 */
 template <typename Mesh>
 class NavierStokesAleSolverPC:
@@ -72,8 +72,14 @@ public:
       \param BCh_u boundary conditions for the velocity
       \param BCh_mesh boundary conditions for the motion harmonic extension
     */
-    NavierStokesAleSolverPC( const GetPot& data_file, const RefFE& refFE_u, const RefFE& refFE_p, const QuadRule& Qr_u,
-                             const QuadRule& bdQr_u, const QuadRule& Qr_p, const QuadRule& bdQr_p, BC_Handler& BCh_u,
+    NavierStokesAleSolverPC( const GetPot& data_file,
+                             const RefFE& refFE_u,
+                             const RefFE& refFE_p,
+                             const QuadRule& Qr_u,
+                             const QuadRule& bdQr_u,
+                             const QuadRule& Qr_p,
+                             const QuadRule& bdQr_p,
+                             BC_Handler& BCh_u,
                              BC_Handler& BCh_mesh );
 
     //! Update the right  hand side  for time advancing
@@ -89,6 +95,8 @@ public:
     void iterateTransp( const Real& time );
 
     void iterateLin( const Real& time, BC_Handler& BCh_du );
+
+    BC_Handler const & BC_fluid() const {return _mesh_BCh;}
 
     Vector& residual();
 
@@ -211,7 +219,15 @@ NavierStokesAleSolverPC<Mesh>::
 NavierStokesAleSolverPC( const GetPot& data_file, const RefFE& refFE_u, const RefFE& refFE_p, const QuadRule& Qr_u,
                          const QuadRule& bdQr_u, const QuadRule& Qr_p, const QuadRule& bdQr_p, BC_Handler& BCh_u,
                          BC_Handler& BCh_mesh ) :
-        NavierStokesAleHandler<Mesh>( data_file, refFE_u, refFE_p, Qr_u, bdQr_u, Qr_p, bdQr_p, BCh_u, BCh_mesh ),
+        NavierStokesAleHandler<Mesh>( data_file,
+                                      refFE_u,
+                                      refFE_p,
+                                      Qr_u,
+                                      bdQr_u,
+                                      Qr_p,
+                                      bdQr_p,
+                                      BCh_u,
+                                      BCh_mesh ),
         _pattM_u_block( _dof_u ),
         _pattM_u( _pattM_u_block, "diag" ),
         _pattC( _dof_u, 3 ),

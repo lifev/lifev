@@ -232,8 +232,12 @@ public:
       \param bcf the function holding the user defined function involved in this boundary condition
       \param std::vector<ID> storing the list of components involved in this boundary condition
      */
-    BC_Base( const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
-             BCFunction_Base& bcf, const std::vector<ID>& comp );
+    BC_Base( const std::string& name,
+             const EntityFlag& flag,
+             const BCType& type,
+             const BCMode& mode,
+             BCFunction_Base& bcf,
+             const std::vector<ID>& comp );
 
     //! Constructor for BC without components for Scalar, Tangential or Normal  mode problems
     /*!
@@ -243,8 +247,11 @@ public:
       \param mode the boundary condition mode: Scalar, Full, Normal, Tangential
       \param bcf the function holding the user defined function involved in this boundary condition
     */
-    BC_Base( const std::string& name, const EntityFlag& flag, const BCType& type,
-             const BCMode& mode, BCFunction_Base& bcf );
+    BC_Base( const std::string& name,
+             const EntityFlag& flag,
+             const BCType& type,
+             const BCMode& mode,
+             BCFunction_Base& bcf );
 
     //! Constructor for BC without list of components for Full mode problems
     /*!
@@ -255,8 +262,12 @@ public:
       \param bcf the function holding the user defined function involved in this boundary condition
       \param nComp the number of componets involved in this boundary condition
     */
-    BC_Base( const std::string& name, const EntityFlag& flag, const BCType& type,
-             const BCMode& mode, BCFunction_Base& bcf, const UInt& nComp );
+    BC_Base( const std::string& name,
+             const EntityFlag& flag,
+             const BCType& type,
+             const BCMode& mode,
+             BCFunction_Base& bcf,
+             const UInt& nComp );
 
 
     //! Constructor for BC with data vector
@@ -268,8 +279,12 @@ public:
       \param bcv data vector
       \param std::vector<ID> storing the list of components involved in this boundary condition
      */
-    BC_Base( const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
-             BCVector_Base& bcv, const std::vector<ID>& comp );
+    BC_Base( const std::string& name,
+             const EntityFlag& flag,
+             const BCType& type,
+             const BCMode& mode,
+             BCVector_Base& bcv,
+             const std::vector<ID>& comp );
 
     //! Constructor for BC with data vector, without components for Scalar, Tangential or Normal  mode problems
     /*!
@@ -279,8 +294,11 @@ public:
       \param mode the boundary condition mode: Scalar, Full, Normal, Tangential
       \param bcv data vector
     */
-    BC_Base( const std::string& name, const EntityFlag& flag, const BCType& type,
-             const BCMode& mode, BCVector_Base& bcv );
+    BC_Base( const std::string& name,
+             const EntityFlag& flag,
+             const BCType& type,
+             const BCMode& mode,
+             BCVector_Base& bcv );
 
     //! Constructor for BC with data vector, without list of components for Full mode problems
     /*!
@@ -291,8 +309,12 @@ public:
       \param bcv data vector
       \param nComp the number of componets involved in this boundary condition
     */
-    BC_Base( const std::string& name, const EntityFlag& flag, const BCType& type,
-             const BCMode& mode, BCVector_Base& bcv, const UInt& nComp );
+    BC_Base( const std::string& name,
+             const EntityFlag& flag,
+             const BCType& type,
+             const BCMode& mode,
+             BCVector_Base& bcv,
+             const UInt& nComp );
 
 
     //! Copy constructor for BC (we have a vector of pointers to ID's and a pointer to user defined functions)
@@ -578,8 +600,12 @@ public:
       \param bcv data vector
       \param nComp the number of componets involved in this boundary condition
     */
-    void addBC( const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
-                BCVector_Base& bcv, const UInt& nComp );
+    void addBC( const std::string& name,
+                const EntityFlag& flag,
+                const BCType& type,
+                const BCMode& mode,
+                BCVector_Base& bcv,
+                const UInt& nComp );
 
 
     //! Build the boundary stuff

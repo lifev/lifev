@@ -15,16 +15,16 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*!
   \file NavierStokesAleHandler.h
   \author M.A. Fernandez
   \date 01/2003
   \version 1.0
- 
+
   \brief This file contains an abstract class for NavierStokes solvers in moving domains.
   An ALE formulation is used
- 
+
 */
 
 #ifndef _NAVIERSTOKESALEHANDLER_H_
@@ -36,12 +36,12 @@ namespace LifeV
 {
 /*!
   \class NavierStokesAleHandler
- 
+
   Abstract class which defines the general structure of a NavierStokes solver with moving domain.
   For each new NavierStokes solver  we have to implement the corresponding timeAdvance and an iterate methods.
- 
+
   \note This class inherits from NavierStokesHandler, new methods concern mesh motion staff
- 
+
 */
 template <typename Mesh>
 class NavierStokesAleHandler:
@@ -62,9 +62,15 @@ public:
       \param BCh_u boundary conditions for the velocity
       \param BCh_mesh boundary conditions for the motion harmonic extension
      */
-    NavierStokesAleHandler( const GetPot& data_file, const RefFE& refFE_u,
-                            const RefFE& refFE_p, const QuadRule& Qr_u, const QuadRule& bdQr_u,
-                            const QuadRule& Qr_p, const QuadRule& bdQr_p, BC_Handler& BCh_u, BC_Handler& BCh_mesh );
+    NavierStokesAleHandler( const GetPot& data_file,
+                            const RefFE& refFE_u,
+                            const RefFE& refFE_p,
+                            const QuadRule& Qr_u,
+                            const QuadRule& bdQr_u,
+                            const QuadRule& Qr_p,
+                            const QuadRule& bdQr_p,
+                            BC_Handler& BCh_u,
+                            BC_Handler& BCh_mesh );
 
     //! Do nothing destructor
     virtual ~NavierStokesAleHandler()
@@ -123,8 +129,19 @@ NavierStokesAleHandler<Mesh>::
 NavierStokesAleHandler( const GetPot& data_file, const RefFE& refFE_u,
                         const RefFE& refFE_p, const QuadRule& Qr_u, const QuadRule& bdQr_u,
                         const QuadRule& Qr_p, const QuadRule& bdQr_p, BC_Handler& BCh_u, BC_Handler& BCh_mesh ) :
-        NavierStokesHandler<Mesh>( data_file, refFE_u, refFE_p, Qr_u, bdQr_u, Qr_p, bdQr_p, BCh_u ),
-        HarmonicExtension( _mesh, 1.0, quadRuleTetra4pt, quadRuleTria3pt, BCh_mesh ),
+        NavierStokesHandler<Mesh>( data_file,
+                                   refFE_u,
+                                   refFE_p,
+                                   Qr_u,
+                                   bdQr_u,
+                                   Qr_p,
+                                   bdQr_p,
+                                   BCh_u ),
+        HarmonicExtension( _mesh,
+                           1.0,
+                           quadRuleTetra4pt,
+                           quadRuleTria3pt,
+                           BCh_mesh ),
         _dispOld( _dof_mesh.numTotalDof() ),
         _w( _dof_mesh.numTotalDof() ),
         _wInterp( _dim_u ),

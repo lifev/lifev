@@ -15,17 +15,17 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*!
   \file meshMotion.h
   \brief Classes to hold algorithms for the mesh motion, for instance, involved in a ALE formulation.
   \version 1.0
   \author M.A. Fernandez
   \date 11/2002
- 
+
   This file contains classes which may be used to compute the extension inside the reference domain of a given
   displacement at a specified interface
- 
+
 */
 
 #ifndef __MESHMOTION_HH__
@@ -49,10 +49,10 @@ namespace LifeV
 {
 /*!
   \class HarmonicExtension
- 
+
   Base class which provides the harmonic extension of a given displacement on a specified part
   of the mesh boundary
- 
+
   In order to deal with harmonic extensions, we have to provide a mesh (to  be moved), the parameters
   involved in the laplacian discretization: viscosity, quadrature rules and boundary conditions.
   This class contains a   PhysVectUnknown objet wich will hold the extension of the interface displacement.
@@ -80,7 +80,11 @@ public:
     */
 
     template <typename Mesh>
-    HarmonicExtension( Mesh& mesh, const Real& diffusion, const QuadRule& Qr, const QuadRule& bdQr, BC_Handler& mesh_BCh );
+    HarmonicExtension( Mesh& mesh,
+                       const Real& diffusion,
+                       const QuadRule& Qr,
+                       const QuadRule& bdQr,
+                       BC_Handler& mesh_BCh );
 
     //! This method updates the extension of the displacement, i.e. it solves the laplacian proglem
 
@@ -151,14 +155,18 @@ protected:
   \param Qr the quadrature rule for volumic elementary computations
   \param bdQr the quadrature rule for surface elementary computations
   \param bch the list of boundary conditions involved in the harmonic extension
- 
+
   \note The BC_Handler objet (bch) holds the displacement imposed on moving boundary
   in the mesh trhough a BCVetor_Interface objet.
- 
+
 */
 template <typename Mesh>
 HarmonicExtension::
-HarmonicExtension( Mesh& mesh, const Real& diffusion, const QuadRule& Qr, const QuadRule& bdQr, BC_Handler& mesh_BCh ) :
+HarmonicExtension( Mesh& mesh,
+                   const Real& diffusion,
+                   const QuadRule& Qr,
+                   const QuadRule& bdQr,
+                   BC_Handler& mesh_BCh ) :
         _diffusion( diffusion ),
         _Qr( Qr ),
         _bdQr( bdQr ),
