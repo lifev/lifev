@@ -79,6 +79,7 @@ int main() {
     long int  m=1;
     GetPot datafile( "data" );
     std::string mesh_type = datafile( "levelset/discretization/mesh_type", "INRIA" );
+    std::cout << mesh_type << " pippo " << std::endl;
     if ( mesh_type == "INRIA" )
     {
         std::string mesh_dir = datafile( "levelset/discretization/mesh_dir", "." );
@@ -88,7 +89,7 @@ int main() {
     else if ( mesh_type == "MESH++" )
     {
         std::string mesh_dir = datafile( "levelset/discretization/mesh_dir", "." );
-        std::string fname=mesh_dir+datafile( "levelset/discretization/mesh_file", "cube_48.m++" );
+        std::string fname=mesh_dir+datafile( "levelset/discretization/mesh_file", "cube_6000.m++" );
         readMppFile(mesh,fname,m);
     }
     else
