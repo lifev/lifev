@@ -30,7 +30,6 @@
 
 #include <cmath>
 
-#include "clapack.h"
 #include "RNM.hpp"
 
 
@@ -46,7 +45,7 @@
 template< class R >
 class TriDiagMatrix
 {
-private:
+protected:
   UInt _M_order; //!< order of the matrix
 
   KN<R> _M_diag;    //!< diagonal 
@@ -74,18 +73,40 @@ public:
   //! output
   void showMe(std::ostream& c = std::cout, UInt verbose = 0);
   
-  //! return the three diagonals
+  //! return the three diagonals (const)
   const KN<R>& Diag()    const { return _M_diag; }
   const KN<R>& UpDiag()  const { return _M_updiag; }
   const KN<R>& LowDiag() const { return _M_lowdiag; }
 
+  //! return the three diagonals 
+  KN<R>& Diag()     { return _M_diag; }
+  KN<R>& UpDiag()   { return _M_updiag; }
+  KN<R>& LowDiag()  { return _M_lowdiag; }
+
   const TriDiagMatrix& operator= (const TriDiagMatrix<const_R> & mattrid);
 
+  /*!
+    simple axpy product.
+
+   @@ It SHOULD use the blas2 routine : (but it does NOT!)
+   SUBROUTINE DGBMV ( TRANS, M, N, KL, KU, ALPHA, A, LDA, X, INCX, 
+                      BETA, Y, INCY )
+*  DGBMV  performs one of the matrix-vector operations
+*
+*     y := alpha*A*x + beta*y,   or   y := alpha*A'*x + beta*y,
+*
+*  where alpha and beta are scalars, x and y are vectors and A is an
+*  m by n band matrix, with kl sub-diagonals and ku super-diagonals.
+
+   One should first transform the three vectors into an adapted array for dgbmv...
+  */
+  void Axpy(const_R alpha, const ScalUnknown<Vector>& x , 
+	    const_R beta,  ScalUnknown<Vector>& y);
 };
 
 
 //----------------------------------------------------------------------
-//! IMPLEMENTATION 
+//! IMPLEMENTATION for TriDiagMatrix
 //----------------------------------------------------------------------
 //! constructor
 template< class R >
@@ -94,7 +115,10 @@ TriDiagMatrix<R>::TriDiagMatrix( UInt n_mat ):
   _M_diag(n_mat),
   _M_updiag(n_mat - 1),
   _M_lowdiag(n_mat - 1)
-{}
+{
+  ASSERT_PRE( n_mat > 1, 
+	      "Tridiag matrix class does not accept 1x1 matrices (nor 0x0).");
+}
 
 template< class R >
 const TriDiagMatrix<R>& 
@@ -123,13 +147,13 @@ void TriDiagMatrix<R>::set_mat(UInt row, UInt col, const_R loc_val)
 { 
   switch ( row - col ) {
   case 0:
-    _M_diag( row ) = loc_val;
+    _M_diag( row )    = loc_val;
     break;
   case 1:
     _M_lowdiag( col ) = loc_val;
     break;
   case -1:
-    _M_updiag( row ) = loc_val;
+    _M_updiag( row )  = loc_val;
     break;
   default:
     ERROR_MSG("Not a tridiagonal matrix. Check the indices.");
@@ -142,16 +166,53 @@ void TriDiagMatrix<R>::set_mat_inc( UInt row, UInt col, const_R loc_val )
 { 
   switch ( row - col ) {
   case 0:
-    _M_diag( row ) += loc_val;
+    _M_diag( row )    += loc_val;
     break;
   case 1:
     _M_lowdiag( col ) += loc_val;
     break;
   case -1:
-    _M_updiag( row ) += loc_val;
+    _M_updiag( row )  += loc_val;
     break;
   default:
     ERROR_MSG("Not a tridiagonal matrix. Check the indices.");
+  }
+}
+
+/*!
+  simple axpy product.
+
+  @@ It SHOULD use the blas2 routine : (but it does NOT!)
+  SUBROUTINE DGBMV ( TRANS, M, N, KL, KU, ALPHA, A, LDA, X, INCX, 
+                      BETA, Y, INCY )
+*  DGBMV  performs one of the matrix-vector operations
+*
+*     y := alpha*A*x + beta*y,   or   y := alpha*A'*x + beta*y,
+*
+*  where alpha and beta are scalars, x and y are vectors and A is an
+*  m by n band matrix, with kl sub-diagonals and ku super-diagonals.
+
+One should first transform the three vectors into an adapted array for dgbmv...
+*/
+template< class R > 
+void TriDiagMatrix<R>::Axpy(const_R alpha, const ScalUnknown<Vector>& x , 
+			    const_R beta,  ScalUnknown<Vector>& y)
+{
+  //! wrong if _M_order = 1 (but the constructor requires >1)
+  y( 0 ) = alpha * ( _M_diag( 0 )    * x( 0 ) + 
+		     _M_updiag( 0 )  * x( 1 ) ) 
+           + beta * y( 0 );
+
+  UInt last = _M_order-1;
+  y( last ) = alpha * ( _M_lowdiag( last-1 ) * x( last-1 ) +
+			_M_diag( last )      * x( last )    )
+              + beta * y( last );
+  
+  for ( UInt ii = 1; ii < _M_order-1; ii++ ){
+    y( ii ) = alpha * ( _M_lowdiag(ii-1) * x(ii-1) + 
+			_M_diag(ii)      * x(ii)   +
+			_M_updiag(ii)    * x(ii+1) ) 
+              + beta * y( ii );
   }
 }
 
