@@ -89,7 +89,7 @@ namespace LifeV {
 
                     // Evaluate coefficient on current quadrature node
 
-                    coef_s = coef1 * (ls_fun_on_qn > 0) - coef2 * (ls_fun_on_qn < 0);
+                    coef_s = coef1 * (ls_fun_on_qn > 0) + coef2 * (ls_fun_on_qn < 0);
 
                     // Compute local contribution
 
@@ -124,7 +124,7 @@ namespace LifeV {
 
                     // Evaluate coefficient on current quadrature node
 
-                    coef_s = 0.5 * ( coef1 * (ls_fun_on_qn > 0) - coef2 * (ls_fun_on_qn < 0) );
+                    coef_s = 0.5 * ( coef1 * (ls_fun_on_qn > 0) + coef2 * (ls_fun_on_qn < 0) );
 
                     // Compute local contribution
                     for ( int icoor = 0; icoor < fe.nbCoor; ++icoor )
@@ -154,7 +154,7 @@ namespace LifeV {
 
                             // Evaluate coefficient on current quadrature node
 
-                            coef_s = 0.5 * ( coef1 * (ls_fun_on_qn > 0) - coef2 * (ls_fun_on_qn < 0) );
+                            coef_s = 0.5 * ( coef1 * (ls_fun_on_qn > 0) + coef2 * (ls_fun_on_qn < 0) );
 
                             // Compute local contribution
                             s += coef_s * fe.phiDer( i, jcoor, iq ) * fe.phiDer( j, icoor, iq ) * fe.weightDet( iq );
@@ -188,7 +188,7 @@ namespace LifeV {
 
                     // Evaluate coefficient on current quadrature node
 
-                    coef_s = coef1 * (ls_fun_on_qn > 0) - coef2 * (ls_fun_on_qn < 0);
+                    coef_s = coef1 * (ls_fun_on_qn > 0) + coef2 * (ls_fun_on_qn < 0);
 
                     // Compute local contribution
 
