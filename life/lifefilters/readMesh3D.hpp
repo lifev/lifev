@@ -83,7 +83,8 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
     std::ifstream hstream( filename.c_str() );
     if ( hstream.fail() )
     {
-        std::cerr << " Error in readMpp: File not found or locked" << std::endl;
+        std::cerr << " Error in readMpp: File " << filename
+                  << " not found or locked" << std::endl;
         abort();
     }
     std::cout << "Reading Mesh++ file" << std::endl;
@@ -98,7 +99,8 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
     std::ifstream mystream( filename.c_str() );
     if ( mystream.fail() )
     {
-        std::cerr << " Error in readMpp: File not found or locked" << std::endl;
+        std::cerr << " Error in readMpp: File " << filename
+                  << " not found or locked" << std::endl;
         abort();
     }
 
@@ -344,7 +346,8 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
     std::ifstream hstream( filename.c_str() );
     if ( hstream.fail() )
     {
-        std::cerr << " Error in readINRIAMeshFile: File not found or locked"
+        std::cerr << " Error in readINRIAMeshFile: File " << filename
+                  << " not found or locked"
                   << std::endl;
         abort();
     }
@@ -360,7 +363,8 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
     std::ifstream mystream( filename.c_str() );
     if ( mystream.fail() )
     {
-        std::cerr << " Error in readINRIAMeshFile: File not found or locked" << std::endl;
+        std::cerr << " Error in readINRIAMeshFile: File " << filename
+                  << " not found or locked" << std::endl;
         abort();
     }
 
