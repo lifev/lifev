@@ -156,7 +156,7 @@ void SolverAztec::solve( array_type& x, array_type const& b )
         __ex << "[SolverAztec::solve]  ERROR: Matrix not set";
         throw std::logic_error( __ex.str() );
     }
-    AZ_iterate( &x[ 0 ],
+    AZ_iterate( x.data().begin(),
                 const_cast<double*>( b.data().begin() ),
                 M_options, M_params, M_status,
                 M_procConfig, M_matrix, M_precond, NULL );
