@@ -28,7 +28,6 @@ SUBDIRS         =
 
 check_PROGRAMS 	= test_fe 
 
-LDADD 		= $(life_libs)
 test_fe_SOURCES = build_pattern.cpp 
 
 EXTRA_DIST = testsuite.at
