@@ -19,6 +19,7 @@
 
 
 #include "steklovPoincareBase.hpp"
+#include "quasiNewton.hpp"
 
 
 namespace LifeV
@@ -36,6 +37,7 @@ steklovPoincare::steklovPoincare():
     M_BCh_dz( new BCHandler ),
     M_BCh_du_inv( new BCHandler ),
     M_BCh_dz_inv( new BCHandler ),
+    M_BCh_dp( new BCHandler ),
     M_dzSolid(),
     M_dzFluid(),
     M_rhs_dz(),
@@ -48,7 +50,7 @@ steklovPoincare::steklovPoincare():
     M_aitkFS(),
     M_dataJacobian( this )
 {
-    this->setPreconditioner( DIRICHLET_NEUMANN );
+    this->setPreconditioner( NEWTON );
     this->setDDNPreconditioner( DDN_DIRICHLET_NEUMANN );
     M_aitkFS.setDefault( M_defOmegaS, M_defOmegaF );
 }
@@ -65,16 +67,18 @@ steklovPoincare::setDataFromGetPot( GetPot const& data )
     M_defOmegaS = data("problem/defOmegaS",0.005);
     M_defOmegaF = data("problem/defOmegaF",0.005);
 
-    Debug( 6205 ) << "steklovPoincare::setDataFromGetPot(GetPot) OmegaS = " << M_defOmegaS << "\n";
-    Debug( 6205 ) << "steklovPoincare::setDataFromGetPot(GetPot) OmegaF = " << M_defOmegaF << "\n";
+    Debug( 6205 ) << "steklovPoincare::setDataFromGetPot(GetPot) OmegaS        = " << M_defOmegaS << "\n";
+    Debug( 6205 ) << "steklovPoincare::setDataFromGetPot(GetPot) OmegaF        = " << M_defOmegaF << "\n";
 
     M_aitkFS.setDefault(M_defOmegaS, M_defOmegaF);
 
-    this->setPreconditioner   (  ( OperFSPreconditioner )data("problem/precond"     , DIRICHLET_NEUMANN ) );
+    this->setPreconditioner   (  ( OperFSPreconditioner )data("problem/precond"     , NEWTON ) );
     this->setDDNPreconditioner(  ( DDNPreconditioner    )data("problem/DDNprecond"  , DDN_DIRICHLET_NEUMANN ) );
 
-    Debug( 6205 ) << "steklovPoincare::setDataFromGetPot(GetPot) prec   = " << this->preconditioner() << "\n";
+    Debug( 6205 ) << "steklovPoincare::setDataFromGetPot(GetPot) prec          = " << this->preconditioner() << "\n";
+    Debug( 6205 ) << "steklovPoincare::setDataFromGetPot(GetPot) Newton-prec   = " << this->DDNpreconditioner() << "\n";
 }
+
 void
 steklovPoincare::setup()
 {
@@ -90,6 +94,7 @@ steklovPoincare::setup()
 
     M_aitkFS.setup( 3*M_solid->dDof().numTotalDof() );
 
+    M_quasiNewton.reset(new quasiNewton(M_fluid, this));
 }
 //
 // Residual computation
@@ -164,143 +169,22 @@ void steklovPoincare::evalResidual(Vector       &res,
 // Boundary conditions setup
 //
 
-
 void steklovPoincare::setUpBC()
 {
     std::cout << "Boundary Conditions setup ... ";
 
-    UInt dim_solid = this->M_solid->dDof().numTotalDof();
-    UInt dim_fluid = this->M_fluid->uDof().numTotalDof();
-
-    //========================================================================================
-    //  DATA INTERFACING BETWEEN BOTH SOLVERS
-    //========================================================================================
-
-    BCFunctionBase bcf(fzeroSP);
-
-    //
-    // Passing data from the fluid to the structure: fluid load at the interface
-    //
-    BCVectorInterface g_wall( this->M_fluid->residual(),
-                              dim_fluid,
-                              M_dofFluidToStructure );
-    //
-    // Passing data from structure to the solid mesh: motion of the solid domain
-    //
-    BCVectorInterface d_wall(this->M_solid->d(),
-                             dim_solid,
-                             M_dofStructureToSolid );
-    //
-    // Passing data from structure to the fluid mesh: motion of the fluid domain
-    //
-    BCVectorInterface displ(this->M_solid->d(),
-                            dim_solid,
-                            M_dofStructureToFluidMesh);
-    //
-    // Passing data from structure to the fluid: solid velocity at the interface velocity
-    //
-    BCVectorInterface u_wall(this->M_fluid->wInterpolated(),
-                             dim_fluid,
-                             M_dofMeshToFluid);
-    //========================================================================================
-    //  BOUNDARY CONDITIONS
-    //========================================================================================
-
-    // Boundary conditions for the harmonic extension of the
-    // interface solid displacement
-
-    M_BCh_mesh->addBC("Interface", 1, Essential, Full, displ, 3);
-
-    // Boundary conditions for the solid displacement
-
-    M_BCh_d->addBC("Interface", 1, Essential, Full, d_wall, 3);
-
-    //========================================================================================
-    //  COUPLED FSI LINEARIZED OPERATORS
-    //========================================================================================
-
-    // Passing the residue to the linearized fluid: \sigma -> du
-    //
-    // rem: for now: no fluid.dwInterpolated().
-    //      In the future this could be relevant
+    setBC();
 
     if (this->preconditioner() == NEWTON)
     {
-        std::cout << "Steklov-Poincare:NEWTON boundary conditions" << std::endl;
-
-        BCVectorInterface du_wall(M_fluid->dwInterpolated(),
-                                  dim_fluid,
-                                  M_dofMeshToFluid );
-
-        M_BCh_du->addBC("Wall"     , 1, Essential , Full, du_wall, 3);
-
-        BCVectorInterface du_wall_inv(M_residualFSI,
-                                      dim_fluid,
-                                      M_dofMeshToFluid);
-
-        M_BCh_du_inv->addBC("Wall", 1, Natural  , Full, du_wall_inv, 3);
-
-
-        BCVectorInterface dg_wall(M_solid->d(),
-                                  dim_solid,
-                                  M_dofStructureToSolid );
-
-        M_BCh_dz->addBC("Interface", 1, Essential , Full, dg_wall, 3);
-
-        BCVectorInterface dg_wall_inv(M_residualFSI,
-                                      dim_fluid,
-                                      M_dofFluidToStructure);
-
-        M_BCh_dz_inv->addBC("Interface", 1, Natural  , Full, dg_wall_inv, 3);
+        setInterfaceNewtonBC();
     }
     else
     {
-        BCVectorInterface du_wall(M_residualFSI,
-                                  dim_fluid,
-                                  M_dofMeshToFluid);
-        // Passing the residual to the linearized structure: \sigma -> dz
-        BCVectorInterface dg_wall(M_residualFSI,
-                                  dim_fluid,
-                                  M_dofFluidToStructure);
-        M_BCh_du->addBC("Wall"     , 1, Natural  , Full, du_wall, 3);
-        M_BCh_dz->addBC("Interface", 1, Natural  , Full, dg_wall, 3);
-
+        setInterfaceBC();
     }
-
-    // Boundary conditions for du and inverse
-
-    M_BCh_du->addBC("Edges",  20, Essential, Full, bcf,      3);
-    M_BCh_du->addBC("InFlow", 2,  Natural,   Full, bcf,      3);
-    M_BCh_du->addBC("OutFlow",3,  Natural,   Full, bcf,      3);
-
-    M_BCh_du_inv->addBC("Edges",  20, Essential, Full, bcf,  3);
-    M_BCh_du_inv->addBC("InFlow", 2,  Natural,   Full, bcf,  3);
-    M_BCh_du_inv->addBC("OutFlow",3,  Natural,   Full, bcf,  3);
-
-    // Boundary conditions for dz and inverse
-
-    M_BCh_dz->addBC("Top",       3, Essential, Full, bcf,     3);
-    M_BCh_dz->addBC("Base",      2, Essential, Full, bcf,     3);
-
-    M_BCh_dz_inv->addBC("Top",       3, Essential, Full, bcf,     3);
-    M_BCh_dz_inv->addBC("Base",      2, Essential, Full, bcf,     3);
-
-    std::cout << "ok." << std::endl;
-
-    std::cout << "BC U\n";
-    M_BCh_u->showMe();
-    std::cout << "BC dU Inv\n";
-    M_BCh_du_inv->showMe();
-    std::cout << "BC D\n";
-    M_BCh_d->showMe();
-
-    std::cout << "BC mesh\n";
-    M_BCh_mesh->showMe();
-#if 0
-    UInt iBCd = M_solid->BC_solid().getBCbyName("Interface");
-    UInt iBCf = M_fluid->BC_fluid().getBCbyName("Interface");
-#endif
 }
+
 
 
 //
@@ -557,7 +441,7 @@ void my_matvecSfSsPrime(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
     Vector jz(dim);
     Vector zSolid(dim);
 
-    for (int ii = 0; ii < dim; ++ii)
+    for (int ii = 0; ii < (int) dim; ++ii)
         zSolid[ii] = z[ii];
 
     if ( xnorm == 0.0 )
@@ -567,15 +451,33 @@ void my_matvecSfSsPrime(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
             }
     else
     {
-        my_data->M_pFS->solid().d() = my_data->M_pFS->DDNprecond(zSolid);
+        if (!my_data->M_pFS->reducedFluid())
+        {
+            my_data->M_pFS->solid().d() = my_data->M_pFS->DDNprecond(zSolid);
 
-        my_data->M_pFS->fluid().updateDispVelo();
-        my_data->M_pFS->solveLinearFluid();
+            my_data->M_pFS->fluid().updateDispVelo();
+            my_data->M_pFS->solveLinearFluid();
 
-        my_data->M_pFS->solveLinearSolid();
+            my_data->M_pFS->solveLinearSolid();
 
-        my_data->M_pFS->setResidualS(my_data->M_pFS->solid().residual());
-        my_data->M_pFS->setResidualF(my_data->M_pFS->fluid().residual());
+            my_data->M_pFS->setResidualS(my_data->M_pFS->solid().residual());
+            my_data->M_pFS->setResidualF(my_data->M_pFS->fluid().residual());
+        }
+        else
+        {
+            Vector da(dim);
+            double dt = my_data->M_pFS->fluid().timestep();
+            double dti2 = 1.0/( dt * dt) ;
+
+            for (int i=0; i <(int) dim; ++i)
+                da[i] =  - my_data->M_pFS->fluid().density() * z[i] * dti2;
+
+            my_data->M_pFS->getQuasiNewton()->setDacc(da);
+            my_data->M_pFS->getQuasiNewton()->solveReducedLinearFluid();
+            my_data->M_pFS->solveLinearSolid();
+            my_data->M_pFS->setResidualS(my_data->M_pFS->solid().residual());
+            my_data->M_pFS->setResidualF(my_data->M_pFS->getQuasiNewton()->residual());
+        }
 
         my_data->M_pFS->getResidualFSIOnSolid(jz);
 
@@ -641,6 +543,158 @@ Vector steklovPoincare::DDNprecond(Vector const &_z)
 
     return Pz;
 }
+
+
+//
+// Boundary conditions setup
+//
+
+void steklovPoincare::setBC()
+{
+    UInt dim_solid        = this->M_solid->dDof().numTotalDof();
+    UInt dim_fluid        = this->M_fluid->uDof().numTotalDof();
+    UInt dim_reducedfluid = this->M_fluid->pDof().numTotalDof();
+
+    // Boundary conditions for du and inverse
+
+    BCFunctionBase bcf(fzeroSP);
+
+    //
+    // Passing data from the fluid to the structure: fluid load at the interface
+    //
+    BCVectorInterface g_wall( this->M_fluid->residual(),
+                              dim_fluid,
+                              M_dofFluidToStructure );
+    //
+    // Passing data from structure to the solid mesh: motion of the solid domain
+    //
+    BCVectorInterface d_wall(this->M_solid->d(),
+                             dim_solid,
+                             M_dofStructureToSolid );
+    //
+    // Passing data from structure to the fluid mesh: motion of the fluid domain
+    //
+    BCVectorInterface displ(this->M_solid->d(),
+                            dim_solid,
+                            M_dofStructureToFluidMesh);
+    //
+    // Passing data from structure to the fluid: solid velocity at the interface velocity
+    //
+    BCVectorInterface u_wall(this->M_fluid->wInterpolated(),
+                             dim_fluid,
+                             M_dofMeshToFluid);
+    //    //  BOUNDARY CONDITIONS
+    //
+    // Boundary conditions for the harmonic extension of the
+    // interface solid displacement
+
+    M_BCh_mesh->addBC("Interface", 1, Essential, Full, displ, 3);
+
+    // Boundary conditions for the solid displacement
+
+    M_BCh_d->addBC("Interface", 1, Essential, Full, d_wall, 3);
+
+    //    //  COUPLED FSI LINEARIZED OPERATORS
+    //
+    // Passing the residue to the linearized fluid: \sigma -> du
+    //
+    // rem: for now: no fluid.dwInterpolated().
+    //      In the future this could be relevant
+
+    M_BCh_du->addBC("Edges",  20, Essential, Full, bcf,      3);
+    M_BCh_du->addBC("InFlow", 2,  Natural,   Full, bcf,      3);
+    M_BCh_du->addBC("OutFlow",3,  Natural,   Full, bcf,      3);
+
+    M_BCh_du_inv->addBC("Edges",  20, Essential, Full, bcf,  3);
+    M_BCh_du_inv->addBC("InFlow", 2,  Natural,   Full, bcf,  3);
+    M_BCh_du_inv->addBC("OutFlow",3,  Natural,   Full, bcf,  3);
+
+    // Boundary conditions for dz and inverse
+
+    M_BCh_dz->addBC("Top",       3, Essential, Full, bcf,     3);
+    M_BCh_dz->addBC("Base",      2, Essential, Full, bcf,     3);
+
+    M_BCh_dz_inv->addBC("Top",       3, Essential, Full, bcf,     3);
+    M_BCh_dz_inv->addBC("Base",      2, Essential, Full, bcf,     3);
+
+    // solid acceleration
+    // Boundary conditions for dp
+    BCVectorInterface da_wall(M_quasiNewton->dacc(),
+                              dim_solid,
+                              M_dofStructureToReducedFluid,
+                              2); // type  = 2
+    M_BCh_dp->addBC("Wall",        1, Natural,   Scalar, da_wall);
+    M_BCh_dp->addBC("Wall_Edges", 20, Essential, Scalar, bcf);
+    M_BCh_dp->addBC("InFlow",      2, Essential, Scalar, bcf);
+    M_BCh_dp->addBC("OutFlow",     3, Essential, Scalar, bcf);
+
+    M_quasiNewton->setUpBC(M_BCh_dp);
+}
+
+
+void steklovPoincare::setInterfaceBC()
+{
+    UInt dim_solid        = this->M_solid->dDof().numTotalDof();
+    UInt dim_fluid        = this->M_fluid->uDof().numTotalDof();
+    UInt dim_reducedfluid = this->M_fluid->pDof().numTotalDof();
+
+    BCVectorInterface du_wall(M_residualFSI,
+                              dim_fluid,
+                              M_dofMeshToFluid);
+    M_BCh_du->addBC("Wall"     , 1, Natural  , Full, du_wall, 3);
+
+    // Passing the residual to the linearized structure: \sigma -> dz
+    BCVectorInterface dg_wall(M_residualFSI,
+                              dim_fluid,
+                              M_dofFluidToStructure);
+    M_BCh_dz->addBC("Interface", 1, Natural  , Full, dg_wall, 3);
+}
+
+
+
+void steklovPoincare::setInterfaceNewtonBC()
+{
+    UInt dim_solid        = this->M_solid->dDof().numTotalDof();
+    UInt dim_fluid        = this->M_fluid->uDof().numTotalDof();
+    UInt dim_reducedfluid = this->M_fluid->pDof().numTotalDof();
+
+    std::cout << "Steklov-Poincare: NEWTON boundary conditions" << std::endl;
+
+    BCVectorInterface du_wall(M_fluid->dwInterpolated(),
+                              dim_fluid,
+                              M_dofMeshToFluid );
+
+    M_BCh_du->addBC("Wall"     , 1, Essential , Full, du_wall, 3);
+
+
+    BCVectorInterface dg_wall(M_solid->d(),
+                              dim_solid,
+                              M_dofStructureToSolid );
+
+
+
+    M_BCh_dz->addBC("Interface", 1, Essential , Full, dg_wall, 3);
+
+    //! inverse operators
+
+    BCVectorInterface du_wall_inv(M_residualFSI,
+                                  dim_fluid,
+                                  M_dofMeshToFluid);
+
+    M_BCh_du_inv->addBC("Wall", 1, Natural  , Full, du_wall_inv, 3);
+
+
+    BCVectorInterface dg_wall_inv(M_residualFSI,
+                                  dim_fluid,
+                                  M_dofFluidToStructure);
+
+    M_BCh_dz_inv->addBC("Interface", 1, Natural  , Full, dg_wall_inv, 3);
+}
+
+//
+// Interface operators
+//
+
 
 
 void steklovPoincare::computeResidualFSI()

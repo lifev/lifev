@@ -18,6 +18,7 @@
 */
 
 #include "operFS.hpp"
+#include "quasiNewton.hpp"
 
 namespace LifeV
 {
@@ -28,13 +29,13 @@ operFS::operFS( fluid_type& fluid,
                 GetPot    &data_file,
                 bchandler_type& BCh_u,
                 bchandler_type& BCh_d,
-                bchandler_type& BCh_mesh)
-    :
+                bchandler_type& BCh_mesh):
     M_BCh_u       (BCh_u),
     M_BCh_d       (BCh_d),
     M_BCh_mesh    (BCh_mesh),
     M_fluid(fluid),
     M_solid(solid),
+    M_quasiNewton(),
     M_dofFluidToStructure( new DofInterface3Dto3D( feTetraP1,
                                                    M_solid->dDof(),
                                                    feTetraP1bubble,
@@ -51,32 +52,40 @@ operFS::operFS( fluid_type& fluid,
                                               M_fluid->uDof(),
                                               feTetraP1bubble,
                                               M_fluid->uDof()) ),
+    M_dofStructureToReducedFluid( new DofInterface3Dto3D(feTetraP1,
+                                                         M_fluid->pDof(),
+                                                         feTetraP1,
+                                                         M_solid->dDof()) ),
+    M_dofReducedFluidToStructure( new DofInterface3Dto3D(feTetraP1,
+                                                         solid->dDof(),
+                                                         feTetraP1,
+                                                         fluid->pDof()) ),
     M_dispStruct  ( 3*M_solid->dDof().numTotalDof() ),
     M_velo        ( 3*M_solid->dDof().numTotalDof() ),
     M_nbEval      (0)
 {
-    M_dofFluidToStructure->update(M_solid->mesh(),
-                                  1,
-                                  M_fluid->mesh(),
-                                  1,
+    M_dofFluidToStructure->update(M_solid->mesh(), 1,
+                                  M_fluid->mesh(), 1,
                                   0.);
-    M_dofStructureToSolid->update(M_solid->mesh(),
-                                  1,
-                                  M_solid->mesh(),
-                                  1,
-                                  0.);
-    M_dofStructureToFluidMesh->update(M_fluid->mesh(),
-                                      1,
-                                      M_solid->mesh(),
-                                      1,
+    M_dofStructureToSolid->update(M_solid->mesh(), 1,
+                                  M_solid->mesh(), 1,
+                                  0.0);
+    M_dofStructureToFluidMesh->update(M_fluid->mesh(), 1,
+                                      M_solid->mesh(), 1,
                                       0.0);
-    M_dofMeshToFluid->update(M_fluid->mesh(),
-                            1,
-                            M_fluid->mesh(),
-                            1,
+    M_dofMeshToFluid->update(M_fluid->mesh(), 1,
+                            M_fluid->mesh(), 1,
                             0.0);
+    M_dofStructureToReducedFluid->update(M_fluid->mesh(), 1,
+                                         M_solid->mesh(), 1,
+                                         0.0);
+    M_dofReducedFluidToStructure->update(fluid->mesh(), 1,
+                                         solid->mesh(), 1,
+                                         0.0);
+
     M_solverAztec.setOptionsFromGetPot(data_file,"jacobian/aztec");
-    M_method  = data_file("problem/method" ,0);
+    M_method       = data_file("problem/method" , 0);
+    M_reducedFluid = data_file("problem/reducedFluid", 0);
 }
 
 // Destructor
@@ -93,32 +102,40 @@ operFS::setup()
         M_dispStruct.resize( 3*M_solid->dDof().numTotalDof() );
         M_velo.resize( 3*M_solid->dDof().numTotalDof() );
 
-        M_dofFluidToStructure->setup(feTetraP1,M_solid->dDof(),feTetraP1bubble,M_fluid->uDof());
-        M_dofFluidToStructure->update(M_solid->mesh(),
-                                     1,
-                                     M_fluid->mesh(),
-                                     1,
-                                     0.);
-        M_dofStructureToSolid->setup(feTetraP1,M_solid->dDof(),feTetraP1,M_solid->dDof());
-        M_dofStructureToSolid->update(M_solid->mesh(),
-                                     1,
-                                     M_solid->mesh(),
-                                     1,
-                                     0.);
+        M_dofFluidToStructure->setup(feTetraP1, M_solid->dDof(),
+                                     feTetraP1bubble, M_fluid->uDof());
+        M_dofFluidToStructure->update(M_solid->mesh(), 1,
+                                      M_fluid->mesh(), 1,
+                                      0.);
 
-        M_dofStructureToFluidMesh->setup(M_fluid->mesh().getRefFE(),M_fluid->dofMesh(),feTetraP1,M_solid->dDof());
-        M_dofStructureToFluidMesh->update(M_fluid->mesh(),
-                                         1,
-                                         M_solid->mesh(),
-                                         1,
-                                         0.0);
+        M_dofStructureToSolid->setup(feTetraP1, M_solid->dDof(),
+                                     feTetraP1, M_solid->dDof());
+        M_dofStructureToSolid->update(M_solid->mesh(), 1,
+                                      M_solid->mesh(), 1,
+                                      0.);
+
+        M_dofStructureToFluidMesh->setup(M_fluid->mesh().getRefFE(), M_fluid->dofMesh(),
+                                         feTetraP1, M_solid->dDof());
+        M_dofStructureToFluidMesh->update(M_fluid->mesh(), 1,
+                                          M_solid->mesh(), 1,
+                                          0.0);
 
         M_dofMeshToFluid->setup(feTetraP1bubble,M_fluid->uDof(),feTetraP1bubble,M_fluid->uDof());
-        M_dofMeshToFluid->update(M_fluid->mesh(),
-                                1,
-                                M_fluid->mesh(),
-                                1,
-                                0.0);
+        M_dofMeshToFluid->update(M_fluid->mesh(), 1,
+                                 M_fluid->mesh(), 1,
+                                 0.0);
+
+        M_dofStructureToReducedFluid->setup(feTetraP1, M_fluid->pDof(),
+                                            feTetraP1, M_solid->dDof());
+        M_dofStructureToReducedFluid->update(M_fluid->mesh(), 1,
+                                             M_solid->mesh(), 1,
+                                             0.0);
+
+        M_dofReducedFluidToStructure->setup(feTetraP1, M_solid->dDof(),
+                                            feTetraP1, M_fluid->pDof());
+        M_dofReducedFluidToStructure->update(M_fluid->mesh(), 1,
+                                             M_solid->mesh(), 1,
+                                             0.0);
     }
 }
 //
@@ -128,6 +145,8 @@ operFS::setDataFromGetPot( GetPot const& data_file )
 {
     M_solverAztec.setOptionsFromGetPot(data_file,"jacobian/aztec");
     M_method  = data_file("problem/method" ,0);
+    M_quasiNewton->setLinearSolver(data_file);
+    M_reducedFluid = data_file("problem/reducedFluid", 0);
 }
 
 

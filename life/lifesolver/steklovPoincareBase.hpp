@@ -60,11 +60,12 @@ public:
     void solveInvLinearSolid();
 
     Vector DDNprecond(Vector const &_z);
+
     //setters and getters
 
     Vector dzSolid()       {return M_dzSolid;}
     Vector dzFluid()       {return M_dzFluid;}
-    Real   defOmega() {return M_defOmega;}
+    Real   defOmega()      {return M_defOmega;}
 
     void setResidualS  ( Vector const& _res ){M_residualS = _res;}
     void setResidualF  ( Vector const& _res ){M_residualF = _res;}
@@ -108,8 +109,11 @@ private:
     bchandler_type          M_BCh_du_inv;
     bchandler_type          M_BCh_dz_inv;
 
+    bchandler_type          M_BCh_dp;
+
     Vector                  M_dzSolid;
     Vector                  M_dzFluid;
+
     Vector                  M_rhs_dz;
 
     PhysVectUnknown<Vector> M_residualS;
@@ -144,14 +148,13 @@ private:
                          double       linear_rel_tol,
                          Vector       &step);
 
+    void setBC();
+    void setInterfaceBC();
+    void setInterfaceNewtonBC();
+
     void computeResidualFSI();
 
 
-
-//     void transferOnInterface(const Vector      &_vec1,
-//                              const BCHandler   &_BC,
-//                              const std::string &_BCName,
-//                              Vector            &_vec2);
 
     DataJacobian            M_dataJacobian;
 };

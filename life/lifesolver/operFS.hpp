@@ -17,12 +17,16 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#ifndef _OPERFS
+#define _OPERFS
+
 #include <factory.hpp>
 #include <singleton.hpp>
 
 #include "dofInterface3Dto3D.hpp"
 #include "NavierStokesAleSolverPC.hpp"
 #include "VenantKirchhofSolver.hpp"
+//#include "quasiNewton.hpp"
 #include "regionMesh3D_ALE.hpp"
 #include "SolverAztec.hpp"
 #include "generalizedAitken.hpp"
@@ -30,8 +34,6 @@
 #include "bcFunction.hpp"
 #include "dof.hpp"
 
-#ifndef _OPERFS
-#define _OPERFS
 
 namespace LifeV
 {
@@ -55,6 +57,7 @@ typedef enum DDNPreconditioner
     DDN_NEUMANN_NEUMANN
 };
 
+class quasiNewton;
 
 class operFS {
 
@@ -69,6 +72,9 @@ public:
     typedef boost::shared_ptr<DofInterface3Dto3D> dof_interface_type;
     typedef boost::shared_ptr<BCHandler> bchandler_type;
 
+//    typedef boost::shared_ptr<quasiNewton> quasi_newton_type;
+    typedef boost::shared_ptr<quasiNewton> quasi_newton_type;
+
     // constructors
     operFS():
         M_BCh_u(),
@@ -80,6 +86,8 @@ public:
         M_dofStructureToSolid( new DofInterface3Dto3D ),
         M_dofStructureToFluidMesh( new DofInterface3Dto3D ),
         M_dofMeshToFluid( new DofInterface3Dto3D ),
+        M_dofStructureToReducedFluid( new DofInterface3Dto3D ),
+        M_dofReducedFluidToStructure( new DofInterface3Dto3D ),
         M_dispStruct(),
         M_dispStructOld(),
         M_velo(),
@@ -88,12 +96,12 @@ public:
         M_precond( NO_PRECONDITIONER )
         {}
 
-    operFS(fluid_type & fluid,
-           solid_type &solid,
-           GetPot    &data_file,
-           bchandler_type& BCh_u,
-           bchandler_type& BCh_d,
-           bchandler_type& BCh_mesh);
+    operFS(fluid_type     &fluid,
+           solid_type     &solid,
+           GetPot         &data_file,
+           bchandler_type &BCh_u,
+           bchandler_type &BCh_d,
+           bchandler_type &BCh_mesh);
 
     // destructor
 
@@ -117,7 +125,6 @@ public:
                     int     iter);
 
     void solveLinearFluid();
-
     void solveLinearSolid();
 
     // mutators and setters
@@ -126,7 +133,6 @@ public:
         {return M_nbEval;}
 
     fluid_type::value_type& fluid() {return *M_fluid;}
-
     solid_type::value_type& solid() {return *M_solid;}
 
     void setPreconditioner   ( OperFSPreconditioner _p ) { M_precond = _p; }
@@ -157,6 +163,9 @@ public:
     dof_interface_type& dofMeshToFluid() { return M_dofMeshToFluid; }
     dof_interface_type const& dofMeshToFluid() const { return M_dofMeshToFluid; }
 
+    quasi_newton_type getQuasiNewton(){return M_quasiNewton;}
+
+    UInt reducedFluid(){return M_reducedFluid;}
 protected:
 
     void transferOnInterface(const Vector      &_vec1,
@@ -171,10 +180,14 @@ protected:
     fluid_type              M_fluid;
     solid_type              M_solid;
 
+    quasi_newton_type       M_quasiNewton;
+
     dof_interface_type      M_dofFluidToStructure;
     dof_interface_type      M_dofStructureToSolid;
     dof_interface_type      M_dofStructureToFluidMesh;
     dof_interface_type      M_dofMeshToFluid;
+    dof_interface_type      M_dofStructureToReducedFluid;
+    dof_interface_type      M_dofReducedFluidToStructure;
 
     Vector                  M_dispStruct;
     Vector                  M_dispStructOld;
@@ -188,6 +201,7 @@ protected:
 
 private:
 
+    UInt                    M_reducedFluid;
     UInt                    M_method;
     OperFSPreconditioner    M_precond;
     DDNPreconditioner       M_DDNprecond;
@@ -204,6 +218,7 @@ typedef singleton<factory<operFS,  std::string> > FSIFactory;
    of the Fluid and Structure.
 
  */
+
 #define FOR_EACH_INTERFACE_DOF( Expr )                              \
 {                                                                   \
     UInt iBCf = M_fluid->BC_fluid().getBCbyName("Interface");       \
