@@ -235,6 +235,8 @@ bool visit_predicate( const path & pth )
     return
         leaf != "CVS"
         && leaf != "admin"
+        && leaf != ".deps"
+        && leaf != ".libs"
         && leaf != "autom4te.cache"
         && leaf != "Templates"
         && leaf != "bin"

@@ -94,3 +94,13 @@ $(top_srcdir)/acinclude.m4:
 
 Makefile.headers: tools/update-headers
 	$(SHELL) tools/update-headers
+
+report:
+	@if test -x tools/inspect/inspect; then\
+        thedate=`date +%Y%m%d`;\
+		thepwd=`pwd`;\
+		cd $(srcdir) && $$thepwd/tools/inspect/inspect > $$thepwd/report-$$thedate.html;\
+    else\
+       echo "tools/inspect/inspect has not been built";\
+       echo "consider typing: cd tools/inspect && make";\
+	fi
