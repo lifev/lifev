@@ -1,4 +1,5 @@
 New in 0.1.0pre4:
+* added lifecore/testsuite for small tests programs related to lifecore
 * life libraries should be std:: clean. no more using namespace std::
   it is a very bad programming pratic in the long run
 * use Quality Management Test tool qmtest for the testsuite
