@@ -92,7 +92,7 @@ int nonLinRichardson( Vector& sol,
     Real omegaS = omega;
     Real omegaF = omega;
 
-    f.evalResidual( sol, iter, residual );
+    residual = f.evalResidual( sol, iter );
 
     Real normRes      = norm( residual );
     Real stop_tol     = abstol + reltol*normRes;
@@ -110,7 +110,7 @@ int nonLinRichardson( Vector& sol,
         std::cout << std::endl;
         std::cout << "------------------------------------------------------------------" << std::endl;
         std::cout << "  NonLinRichardson: residual = " << normRes
-        << ", stoping tolerance = " << stop_tol << std::endl;
+                  << ", stoping tolerance = " << stop_tol << std::endl;
         std::cout << "------------------------------------------------------------------" << std::endl;
         std::cout << std::endl;
 
@@ -119,8 +119,7 @@ int nonLinRichardson( Vector& sol,
         normResOld = normRes;
         normRes = norm( residual );
 
-        //f.solid().updateJac( sol, iter );
-        f.solvePrec(residual, linearRelTol, muk);
+        muk  = f.solvePrec(residual, linearRelTol);
         step = aitken.computeDeltaLambda( sol, muk );
 
         std::cout << "Step norm = " << norm( step ) << std::endl;
@@ -129,12 +128,11 @@ int nonLinRichardson( Vector& sol,
 
         sol += step;
 
-        f.evalResidual( sol, iter, residual );
+        residual = f.evalResidual( sol, iter );
 
         out_res << " Res norm = " << norm( residual ) << std::endl;
 
-        normRes = norm( residual );
-        normRes = 1.;
+        normRes  = norm( residual );
     }
 
     if ( normRes > stop_tol )

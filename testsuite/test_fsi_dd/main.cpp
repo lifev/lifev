@@ -110,8 +110,12 @@ int main(int argc, char** argv)
                                1,
                                fluid.mesh(),
                                1,
-                               0.0);
+                               0.);
 
+    BCVector_Interface g_wall(fluid.residual(),
+                              dim_fluid,
+                              dofFluidToStructure);
+    
     //
     // Passing data from structure to the solid mesh: motion of the solid domain
     //
@@ -123,7 +127,7 @@ int main(int argc, char** argv)
                                1,
                                solid.mesh(),
                                1,
-                               0.0);
+                               0.);
 
     BCVector_Interface d_wall(solid.d(),
                               dim_solid,
@@ -197,15 +201,9 @@ int main(int argc, char** argv)
     //      In the future this could be relevant
 
     BCVector_Interface du_wall(oper.residualFSI(),
-                               dim_solid,
-                               dofMeshToFluid);
+                               dim_fluid,
+                               dofStructureToFluidMesh);
     // Passing the residual to the linearized structure: \sigma -> dz
-//    BCVector_Interface dg_wall(oper.residualFSI(),
-//                               dim_fluid,
-//                               dofFluidToStructure);
-//     BCVector_Interface dg_wall(oper.residualS(),
-//                                dim_solid,
-//                                dofStructureToSolid);
     BCVector_Interface dg_wall(oper.residualFSI(),
                                dim_fluid,
                                dofFluidToStructure);
@@ -216,7 +214,6 @@ int main(int argc, char** argv)
 
     // Boundary conditions for dz
 
-//    BCh_dz.addBC("Interface", 1, Essential  , Full, dg_wall, 3);
     BCh_dz.addBC("Interface", 1, Natural  , Full, dg_wall, 3);
     BCh_dz.addBC("Top",       3, Essential, Full, bcf,     3);
     BCh_dz.addBC("Base",      2, Essential, Full, bcf,     3);
@@ -278,8 +275,8 @@ int main(int argc, char** argv)
         // the newton solver
 
         status = nonLinRichardson(disp, oper, maxnorm, abstol, reltol,
-                                   maxiter, etamax, linesearch, out_res,
-                                   time, 0.1);
+                        maxiter, etamax, linesearch, out_res,
+                        time, 0.1);
 //        status = newton(disp,oper, maxnorm, abstol, reltol, maxiter, etamax,linesearch,out_res,time);
 
         if(status == 1)

@@ -94,7 +94,7 @@ void operFS::computeResidualFSI()
         for (UInt jDim = 0; jDim < nDimF; ++jDim)
         {
             M_residualFSI[IDfluid - 1 + jDim*totalDofFluid] =
-               std::fabs(M_residualF[IDfluid - 1 + jDim*totalDofFluid] -
+               std::fabs(M_residualF[IDfluid - 1 + jDim*totalDofFluid] +
                          M_residualS[IDsolid - 1 + jDim*totalDofSolid]);
         }
     }
@@ -232,20 +232,22 @@ void operFS::eval(const Vector& disp,
     dispNew = M_solid.d();
     velo    = M_solid.w();
 
+    M_fluid.postProcess();
+    M_solid.postProcess();
+    
     std::cout << "                ::: norm(disp     ) = "
               << maxnorm(disp) << std::endl;
     std::cout << "                ::: norm(dispNew  ) = "
               << maxnorm(dispNew) << std::endl;
     std::cout << "                ::: norm(velo     ) = "
               << maxnorm(velo) << std::endl;
-
-
 }
 
-void operFS::evalResidual(Vector &disp,
-                          int iter,
-                          Vector &res)
+Vector operFS::evalResidual(Vector &disp,
+                            int iter)
 {
+    Vector res(disp.size());
+    
     int status = 0;
 
     if(iter == 0) status = 1;
@@ -262,12 +264,9 @@ void operFS::evalResidual(Vector &disp,
     computeResidualFSI();
 
     res = getResidualFSIOnSolid();
-//    res = M_residualFSI;
 
-    solveLinearSolid();
+    //solveLinearSolid();
 
-//     for (UInt ii = 0; ii < M_residualFSI.size(); ++ii)
-//         std::cout << M_residualFSI[ii] << std::endl;//  << " " << M_dz[ii] << std::endl;
 
     std::cout << "Max ResidualF   = " << maxnorm(M_residualF)
               << std::endl;
@@ -276,6 +275,7 @@ void operFS::evalResidual(Vector &disp,
     std::cout << "Max ResidualFSI = " << maxnorm(M_residualFSI)
               << std::endl;
 
+    return res;
 }
 
 //
@@ -319,21 +319,21 @@ void  operFS::updateJac(Vector& sol,int iter) {
 
 
 
-void  operFS::solvePrec(const Vector  &_res,
-                        double        _linearRelTol,
-                        Vector        &_muk)
+Vector  operFS::solvePrec(const Vector  &_res,
+                          double        _linearRelTol)
 {
+    Vector muk(_res.size());
+    
     UInt precChoice = 1;
-
     switch(precChoice)
     {
         case 0:
             // Dirichlet-Neumann preconditioner
-            invSfPrime(_res, _linearRelTol, _muk);
+            invSfPrime(_res, _linearRelTol, muk);
             break;
         case 1:
             // Dirichlet-Neumann preconditioner
-            invSsPrime(_res, _linearRelTol, _muk);
+            invSsPrime(_res, _linearRelTol, muk);
             break;
         case 2:
             // Dirichlet-Neumann preconditioner
@@ -344,13 +344,15 @@ void  operFS::solvePrec(const Vector  &_res,
             invSfPrime(_res, _linearRelTol, muF);
             invSsPrime(_res, _linearRelTol, muS);
 
-            _muk = muS + muF;
+            muk = muS + muF;
         }
         break;
         default:
             // Newton preconditioner
-            invSfSsPrime(_res, _linearRelTol, _muk);
+            invSfSsPrime(_res, _linearRelTol, muk);
     }
+
+    return muk;
 }
 
 //
@@ -365,7 +367,7 @@ void  operFS::solveLinearFluid()
 void  operFS::solveLinearSolid()
 {
     M_rhs_dz = 0.;
-    M_dz = M_rhs_dz;
+    M_dz     = 0.;
 
     if ( !M_BCh_dz.bdUpdateDone() )
         M_BCh_dz.bdUpdate(M_solid._mesh, M_solid._feBd,
@@ -378,11 +380,11 @@ void  operFS::solveLinearSolid()
 
     std::cout << "rhs_dz norm = " << maxnorm(M_rhs_dz) << std::endl;
     M_solid._recur = 1;
-    M_solid.solveJac(M_dz, M_rhs_dz, tol);
+    M_solid.solveJac(M_dz, M_rhs_dz, tol, M_BCh_dz);
     std::cout << "dz norm     = " << maxnorm(M_dz) << std::endl;
 
-    for (UInt ii = 0; ii < M_rhs_dz.size(); ++ii)
-        std::cout << M_rhs_dz[ii] << " " << M_dz[ii] << std::endl;
+//     for (UInt ii = 0; ii < M_rhs_dz.size(); ++ii)
+//         std::cout << M_rhs_dz[ii] << " " << M_dz[ii] << std::endl;
 }
 
 

@@ -66,24 +66,22 @@ namespace LifeV
 
         // member functions
 
-        void eval         (const  Vector &disp,
-                           int    status,
-                           Vector &dispNew,
-                           Vector &veloStruct);
+        void eval           (const  Vector &disp,
+                             int    status,
+                             Vector &dispNew,
+                             Vector &veloStruct);
+        
+        Vector evalResidual (Vector &sol,
+                             int    iter);
+            
+        void updateJac      (Vector& sol,
+                             int     iter);
 
-        void evalResidual (Vector &sol,
-                           int    iter,
-                           Vector &res);
+        void solvePrec      (Vector &);
 
-        void updateJac    (Vector& sol,
-                           int     iter);
-
-        void solvePrec    (Vector &);
-
-        void solvePrec    (const Vector &,
-                           double,
-                           Vector &);
-
+        Vector solvePrec      (const Vector &,
+                               double);
+        
         void solveLinearFluid();
 
         void solveLinearSolid();
@@ -109,12 +107,9 @@ namespace LifeV
 
 //         PhysVectUnknown<Vector> const & residualS() const
 //             {return M_residualS;}
-        PhysVectUnknown<Vector> & residualS()
-            {return M_residualS;}
-        PhysVectUnknown<Vector> const & residualF() const
-            {return M_residualF;}
-        PhysVectUnknown<Vector> & residualFSI()
-            {return M_residualFSI;}
+        PhysVectUnknown<Vector> & residualS()             {return M_residualS;}
+        PhysVectUnknown<Vector> const & residualF() const {return M_residualF;}
+        PhysVectUnknown<Vector> & residualFSI()           {return M_residualFSI;}
 
         NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >
         &fluid() {return M_fluid;}
@@ -153,18 +148,18 @@ namespace LifeV
 
         DataJacobian            M_dataJacobian;
 
-        void  invSfPrime(const Vector &res,
-                         double       linear_rel_tol,
-                         Vector       &step);
+        
+        void  invSfPrime  (const Vector &res,
+                           double       linear_rel_tol,
+                           Vector       &step);
 
-        void  invSsPrime(const Vector &res,
-                         double       linear_rel_tol,
-                         Vector       &step);
+        void  invSsPrime  (const Vector &res,
+                            double       linear_rel_tol,
+                            Vector       &step);
 
         void  invSfSsPrime(const Vector &res,
                            double       linear_rel_tol,
                            Vector       &step);
-
     };
 
 
