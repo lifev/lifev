@@ -151,6 +151,15 @@ public:
 
     //@}
 
+    void setFluidBC             (bchandler_type &bc_fluid);
+    void setLinFluidBC          (bchandler_type &bc_dfluid);
+    void setInvLinFluidBC       (bchandler_type &bc_dfluid_inv);
+    void setHarmonicExtensionBC (bchandler_type &bc_he);
+    void setSolidBC             (bchandler_type &bc_solid);
+    void setLinSolidBC          (bchandler_type &bc_dsolid);
+    void setInvLinSolidBC       (bchandler_type &bc_dsolid_inv);
+    void setReducedLinFluidBC   (bchandler_type &bc_dredfluid);
+    void setInvReducedLinFluidBC(bchandler_type &bc_dredfluid_inv);
 
     /** @name  Methods
      */

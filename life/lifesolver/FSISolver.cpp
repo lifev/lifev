@@ -177,6 +177,65 @@ FSISolver::setFSIOperator( std::string const& __op )
     Debug( 6220 ) << "FSISolver::setFSIOperator done\n";
 }
 
+
+void
+FSISolver::setFluidBC(bchandler_type &bc_fluid)
+{
+    M_oper->setFluidBC(bc_fluid);
+}
+
+void
+FSISolver::setLinFluidBC(bchandler_type &bc_dfluid)
+{
+    M_oper->setLinFluidBC(bc_dfluid);
+}
+
+void
+FSISolver::setInvLinFluidBC(bchandler_type &bc_dfluid_inv)
+{
+    M_oper->setInvLinFluidBC(bc_dfluid_inv);
+}
+
+void
+FSISolver::setHarmonicExtensionBC(bchandler_type &bc_he)
+{
+    M_oper->setHarmonicExtensionBC(bc_he);
+}
+
+void
+FSISolver::setSolidBC(bchandler_type &bc_solid)
+{
+    M_oper->setSolidBC(bc_solid);
+}
+
+void
+FSISolver::setLinSolidBC(bchandler_type &bc_dsolid)
+{
+    M_oper->setLinSolidBC(bc_dsolid);
+}
+
+void
+FSISolver::setInvLinSolidBC(bchandler_type &bc_dsolid_inv)
+{
+    M_oper->setInvLinSolidBC(bc_dsolid_inv);
+}
+
+void
+FSISolver::setReducedLinFluidBC(bchandler_type &bc_dredfluid)
+{
+    M_oper->setReducedLinFluidBC(bc_dredfluid);
+}
+
+void
+FSISolver::setInvReducedLinFluidBC(bchandler_type &bc_dredfluid_inv)
+{
+    M_oper->setInvReducedLinFluidBC(bc_dredfluid_inv);
+}
+
+
+//
+
+
 void
 FSISolver::iterate( Real time )
 {
