@@ -362,7 +362,7 @@ namespace LifeV
         {
             for( size_type i=0; i<this->size1(); ++i )
                 {
-                    this->push_back(i, i, 0);
+                    this->push_back( i, i, 0 );
                 }
         }
 
@@ -370,7 +370,7 @@ namespace LifeV
         {
             for ( size_type i=0; i<this->size1(); ++i )
                 {
-                    this->value_data()[i] = 1. / this->value_data()[i];
+                    this->value_data()[ i ] = 1. / this->value_data()[ i ];
                 }
         }
 
@@ -386,7 +386,7 @@ namespace LifeV
                         {
                             rowSum += *i2;
                         }
-                    this->operator()( i1.index1(), i1.index1() ) = rowSum;
+                    this->value_data()[ i1.index1() ] = rowSum;
                 }
         }
 
