@@ -80,31 +80,45 @@ namespace LifeV
 
         void solvePrec    (Vector &);
 
-        void  operFS::solvePrec(Vector &,
-				const Vector &,
-				double &);
+        void solvePrec    (const Vector &,
+                           double,
+                           Vector &);
 
         void solveLinearFluid();
 
         void solveLinearSolid();
 
         void computeResidualFSI();
+//        void computeResidualFSI(const PhysVectUnknown<Vector> &_res);
 
         // mutators and setters
 
-        UInt   const & nbEval()    const {return M_nbEval;};
+        UInt   const & nbEval()      const
+            {return M_nbEval;}
 
-        Vector const & dz()        const {return M_dz;};
+        Vector const & dz()          const
+            {return M_dz;}
 
-        PhysVectUnknown<Vector> const & residualS()   const {return M_residualS;};
-        PhysVectUnknown<Vector> const & residualF()   const {return M_residualF;};
-        PhysVectUnknown<Vector> & residualFSI() {return M_residualFSI;};
+        Vector const & residualFSI() const
+            {return M_residualFSI;}
+
+        void setResidualFSI(double *_res);
+//             {for (UInt ivec = 0; ivec < M_residualFSI.size(); ++ivec)
+//                 M_residualFSI[ivec] = _vec[ivec];
+//             }
+
+        PhysVectUnknown<Vector> const & residualS() const
+            {return M_residualS;}
+        PhysVectUnknown<Vector> const & residualF() const
+            {return M_residualF;}
+        PhysVectUnknown<Vector> & residualFSI()
+            {return M_residualFSI;}
 
         NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >
-        &fluid() {return M_fluid;};
+        &fluid() {return M_fluid;}
 
         VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >
-        &solid() {return M_solid;};
+        &solid() {return M_solid;}
 
         void setTime(const Real &time) {M_time = time;};
 
@@ -151,9 +165,17 @@ namespace LifeV
 
     };
 
-    void my_matvecJacobian(double *z,
-                           double *Jz,
-                           AZ_MATRIX* J,
-                           int proc_config[]);
+
+
+
+void my_matvecSfSsPrime(double *z,
+                        double *Jz,
+                        AZ_MATRIX* J,
+                        int proc_config[]);
+
+void my_matvecSsPrime  (double *z,
+                        double *Jz,
+                        AZ_MATRIX* J,
+                        int proc_config[]);
 }
 #endif
