@@ -1,6 +1,6 @@
 Bugs fixed in 0.3.0:
 * Fixed petsc support, require petsc2.2 now (CP)
-  Fixed testsuite/test_linearsolver (CP)
+* Fixed testsuite/test_linearsolvers (CP)
 
 New in 0.3.0:
 * Added 1D model solver for blood flow simulation (VM)
