@@ -22,12 +22,12 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-noinst_HEADERS = norm.hpp ud_functions.hpp 
+noinst_HEADERS = ud_functions.hpp 
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
 check_PROGRAMS = test_linearelasticity
-test_linearelasticity_SOURCES = main.cpp norm.cpp 
+test_linearelasticity_SOURCES = main.cpp 
 
 EXTRA_DIST = data 
 

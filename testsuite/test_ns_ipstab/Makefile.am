@@ -25,8 +25,8 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
 check_PROGRAMS     = test_ns_ipstab
-noinst_HEADERS     = ud_functions.hpp norm.hpp NavierStokesSolverIP.hpp
-test_ns_ipstab_SOURCES = main.cpp  norm.cpp
+noinst_HEADERS     = ud_functions.hpp  NavierStokesSolverIP.hpp
+test_ns_ipstab_SOURCES = main.cpp  
 EXTRA_DIST         = data 
 
 

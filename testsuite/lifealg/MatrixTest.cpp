@@ -28,6 +28,8 @@
 */
 #include <MatrixTest.hpp>
 
+namespace LifeV
+{
 //
 // Mass
 //
@@ -134,4 +136,5 @@ MatrixConvectionDiffusion::MatrixConvectionDiffusion( int nx, value_type __rho )
     _M_pattern = new CSRPatt( nnz, N, N, __ia, __ja );
     _M_mat = new CSRMatr<CSRPatt, double>( *_M_pattern, _M_val );
     assert( _M_mat != 0 );
+}
 }

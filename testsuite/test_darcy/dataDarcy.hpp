@@ -7,22 +7,24 @@
 #include "GetPot.hpp"
 #include "tab.hpp"
 
+namespace LifeV
+{
 using namespace std;
 
-//! add here any linear solver you like (Mumps...) 
+//! add here any linear solver you like (Mumps...)
 enum LinearSolver{LinSlv_Aztec, LinSlv_UMFPack};
 
 /*! Type of BC on the interface (if any) of the subdomain
  in Input (In) or Output (Out).
  If p is the scalar variable and u = K grad p the velocity
- and n the unit normal 
+ and n the unit normal
    -- Dirichlet  : p                    on Sigma
    -- Neumann    : (- u.n)              on Sigma
    -- Robin      : (- u.n) + alpha p    on Sigma
    -- MinusRobin : -(- u.n) + alpha p   on Sigma
 */
 enum TypeOfBCInterfaceIn{DirichletIn, NeumannIn, RobinIn};
-enum TypeOfBCInterfaceOut{DirichletOut, NeumannOut, RobinOut, MinusRobinOut}; 
+enum TypeOfBCInterfaceOut{DirichletOut, NeumannOut, RobinOut, MinusRobinOut};
 
 
 class DataDarcy
@@ -54,4 +56,5 @@ public:
   void dataDarcyShowMe(ostream& c=cout);
   void dataDarcyHelp(ostream& c=cout);
 };
+}
 #endif

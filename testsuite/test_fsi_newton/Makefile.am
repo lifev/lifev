@@ -24,9 +24,9 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-check_HEADERS = norm.hpp operFS.hpp ud_functions.hpp 
+check_HEADERS = operFS.hpp ud_functions.hpp 
 
 check_PROGRAMS = test_fsi_newton
-test_fsi_newton_SOURCES = main.cpp norm.cpp operFS.cpp 
+test_fsi_newton_SOURCES = main.cpp operFS.cpp 
 
 EXTRA_DIST = data 

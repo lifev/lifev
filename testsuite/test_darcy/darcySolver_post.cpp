@@ -1,17 +1,17 @@
 /* -*- mode: c++ -*-
-   This program is part of the LifeV library 
+   This program is part of the LifeV library
    Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politechnico di Milano
 
    This program is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public License
    as published by the Free Software Foundation; either version 2
    of the License, or (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -22,6 +22,8 @@
 
 #define ANALYTICAL_SOL 0
 
+namespace LifeV
+{
 void DarcySolver::postProcessTraceOfPressureRT0()
 {
   if(verbose) cout << "Postprocessing of TP (RT0 per element)\n";
@@ -58,18 +60,18 @@ void DarcySolver::postProcessPressureQ0()
 #if ANALYTICAL_SOL
   cout <<"Compute L2 pressure error:\n";
   AnalyticalSolPres analyticSol;
-  
+
   double normL2=0., normL2diff=0., normL2sol=0.;
   double normL2sq=0., normL2diffsq=0., normL2solsq=0.;
 
   for(UInt i=1; i<=mesh.numVolumes(); ++i){
-    
+
     pfe.updateFirstDeriv(mesh.volumeList(i));
-    
+
     normL2sq     += elem_L2_2(globalP,pfe,pdof);
     normL2solsq  += elem_L2_2(analyticSol,pfe);
     normL2diffsq += elem_L2_diff_2(globalP,analyticSol,pfe,pdof);
-    
+
   }
 
   normL2     = sqrt(normL2sq);
@@ -84,17 +86,17 @@ void DarcySolver::postProcessPressureQ0()
   ofile << "|| p       ||_{L^2}                   = " << normL2 << endl;
   ofile << "|| p_ex     ||_{L^2}                   = " << normL2sol << endl;
   ofile << "|| p - p_ex ||_{L^2}                   = " << normL2diff<< endl;
-  ofile << "|| P - p_ex ||_{L^2} / || p_ex ||_{L^2} = " 
+  ofile << "|| P - p_ex ||_{L^2} / || p_ex ||_{L^2} = "
 	<< normL2diff / normL2sol << endl << endl;
   ofile << "|| p       ||^2_{L^2}                   = " << normL2sq << endl;
   ofile << "|| p_ex     ||^2_{L^2}                   = " << normL2solsq << endl;
   ofile << "|| p - p_ex ||^2_{L^2}                   = " << normL2diffsq << endl;
-  ofile << "|| P - p_ex ||^2_{L^2} / || p_ex ||^2_{L^2} = " 
+  ofile << "|| P - p_ex ||^2_{L^2} / || p_ex ||^2_{L^2} = "
 	<< normL2diffsq / normL2solsq << endl;
 #endif
 
 }
-  
+
 void DarcySolver::postProcessPressureQ1()
 {
   if(verbose)
@@ -102,7 +104,7 @@ void DarcySolver::postProcessPressureQ1()
   // Q1 elements
   const RefFE& refFE    = feHexaQ1;
   CurrentFE fe_q1(refFE,geoMap,qr);
-  Dof dof_q1(refFE); 
+  Dof dof_q1(refFE);
   dof_q1.update(mesh);
   UInt dim_q1 = dof_q1.numTotalDof();
   ScalUnknown<Vector> p_q1(dim_q1), f_q1(dim_q1);
@@ -121,7 +123,7 @@ void DarcySolver::postProcessPressureQ1()
     assemb_mat(A_q1,elmat,fe_q1,dof_q1,0,0);
     assemb_vec(f_q1,elvec,fe_q1,dof_q1,0);
   }
-  int    options[AZ_OPTIONS_SIZE]; 
+  int    options[AZ_OPTIONS_SIZE];
   double params[AZ_PARAMS_SIZE];
   // we first initialize Aztec with its defaults and user's parameters
   aztecOptionsFromDataFile(options,params);
@@ -131,10 +133,10 @@ void DarcySolver::postProcessPressureQ1()
   options[AZ_precond] = AZ_dom_decomp;
   options[AZ_subdomain_solve] = AZ_icc;
   aztecSolveLinearSyst(A_q1,p_q1.giveVec(),f_q1.giveVec(),p_q1.size(),
-		       pattA_q1,options,params);  
+		       pattA_q1,options,params);
   //
   string vtkname,bbname;
-  /*  
+  /*
   char str_iter[10],str_time[10];
   static int iter_post=0;
   sprintf(str_time,"t=%f",time);
@@ -158,18 +160,18 @@ void DarcySolver::postProcessPressureQ1()
 #if ANALYTICAL_SOL
   cout <<"Compute pressure error:\n";
   AnalyticalSolPres analyticSol;
-  
+
   double normL2=0., normL2diff=0., normL2sol=0.;
   double normH1=0., normH1diff=0., normH1sol=0.;
 
   for(UInt i=1; i<=mesh.numVolumes(); ++i){
-    
+
     fe_q1.updateFirstDeriv(mesh.volumeList(i));
-    
+
     normL2     += elem_L2_2(p_q1,fe_q1,dof_q1);
     normL2sol  += elem_L2_2(analyticSol,fe_q1);
     normL2diff += elem_L2_diff_2(p_q1,analyticSol,fe_q1,dof_q1);
-    
+
     normH1     += elem_H1_2(p_q1,fe_q1,dof_q1);
     normH1sol  += elem_H1_2(analyticSol,fe_q1);
     normH1diff += elem_H1_diff_2(p_q1,analyticSol,fe_q1,dof_q1);
@@ -193,7 +195,7 @@ void DarcySolver::postProcessPressureQ1()
   ofile << "|| p - p_ex ||_{L^2}                   = " << normL2diff<< endl;
   ofile << "|| P - p_ex ||_{L^2} / || p_ex ||_{L^2} = " << normL2diff/normL2sol
        << endl;
-  
+
   ofile << "|| U       ||_{H^1}                   = " << normH1 << endl;
   ofile << "|| sol     ||_{H^1}                   = " << normH1sol << endl;
   ofile << "|| U - sol ||_{H^1}                   = " << normH1diff<< endl;
@@ -218,12 +220,12 @@ void DarcySolver::postProcessVelocityQ1()
   MSRPatt pattA_q1(dof_q1,nbCoor);
   MSRMatr<double> A_q1(pattA_q1);
   ElemMat elmat_hdiv(fe_q1.nbNode,nbCoor,0,
-		     vfe.nbNode,0,1);  
+		     vfe.nbNode,0,1);
   ElemMat elmat(fe_q1.nbNode,nbCoor,nbCoor);
   ElemVec elvec(fe_q1.nbNode,nbCoor);
   ElemVec elvec_hdiv(vfe.nbNode,1);
   Tab1dView elvec_hdiv_vec = elvec_hdiv.block(0);
-  
+
   for(UInt i = 1; i<=mesh.numVolumes(); i++){
     fe_q1.updateJac(mesh.volumeList(i));
     vfe.updatePiola(mesh.volumeList(i));
@@ -253,7 +255,7 @@ void DarcySolver::postProcessVelocityQ1()
   options[AZ_precond] = AZ_dom_decomp;
   options[AZ_subdomain_solve] = AZ_icc;
   aztecSolveLinearSyst(A_q1,u_q1.giveVec(),f_q1.giveVec(),u_q1.size(),
-		       pattA_q1,options,params);  
+		       pattA_q1,options,params);
   //
   string vtkname,bbname;
   /*
@@ -287,20 +289,20 @@ void DarcySolver::postProcessVelocityQ1()
 		   diffusion_tensor(2,2) / diffusion_scalar,
 		   diffusion_tensor(1,1) / diffusion_scalar);
   */
-  
+
   double normL2=0., normL2diff=0., normL2sol=0.;
   double normH1=0., normH1diff=0., normH1sol=0.;
 
   for(UInt i=1; i<=mesh.numVolumes(); ++i){
-    
+
     fe_q1.updateFirstDeriv(mesh.volumeList(i));
-    
+
     normL2     += elem_L2_2(u_q1,fe_q1,dof_q1,3);
     normL2sol  = -1.; //! elem_L2_2 is not reckognized
     //! (confusion with another templated function)
     // normL2sol  += elem_L2_2<AnalyticalSolFlux>(analyticSol,fe_q1,0.0,3);
     normL2diff += elem_L2_diff_2(u_q1,analyticSol,fe_q1,dof_q1,0.,3);
-    /*    
+    /*
     normH1     += elem_H1_2(u_q1,fe_q1,dof_q1,0,3);
     normH1sol  += elem_H1_2(analyticSol,fe_q1,0,3);
     normH1diff += elem_H1_diff_2(u_q1,analyticSol,fe_q1,dof_q1,0,3);
@@ -326,7 +328,7 @@ void DarcySolver::postProcessVelocityQ1()
   ofile << "|| U - exact ||_{L^2}                   = " << normL2diff<< endl;
   ofile << "|| U - exact ||_{L^2}/|| exact ||_{L^2} = " << normL2diff/normL2sol
        << endl;
-  
+
   //  cerr << "|| U       ||_{H^1}                   = " << normH1 << endl;
   //  cerr << "|| exact     ||_{H^1}                   = " << normH1sol << endl;
   //  cerr << "|| U - exact ||_{H^1}                   = " << normH1diff<< endl;
@@ -335,4 +337,4 @@ void DarcySolver::postProcessVelocityQ1()
 
 #endif
 }
-
+}

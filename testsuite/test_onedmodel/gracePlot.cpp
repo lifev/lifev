@@ -28,6 +28,8 @@
 
 #include "gracePlot.hpp"
 
+namespace LifeV
+{
 #if defined(HAVE_GRACE_NP_H)
 GracePlot::GracePlot() {
 
@@ -132,5 +134,5 @@ int main(int argc, char* argv[]) {
 
 
 #endif
-
+}
 #endif /* HAVE_GRACE_NP_H */

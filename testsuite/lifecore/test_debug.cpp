@@ -24,7 +24,7 @@ int
 main()
 {
 
-    Life::LDebug() << "Hello\n";
+    LifeV::LDebug() << "Hello\n";
 
 
     //
@@ -32,7 +32,7 @@ main()
     // export DEBUG=2000
     // then execute test_debug
     //
-    Life::LDebug(2000) << "AREA 2000 is now enabled\n";
+    LifeV::LDebug(2000) << "AREA 2000 is now enabled\n";
 
 }
 

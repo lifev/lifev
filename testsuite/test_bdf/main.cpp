@@ -52,6 +52,7 @@
 #undef INRIA
 
 int main() {
+    using namespace LifeV;
     try
     {
         Chrono chrono;

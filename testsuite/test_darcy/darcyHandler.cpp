@@ -1,17 +1,17 @@
 /* -*- mode: c++ -*-
-   This program is part of the LifeV library 
+   This program is part of the LifeV library
    Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politechnico di Milano
 
    This program is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public License
    as published by the Free Software Foundation; either version 2
    of the License, or (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -20,6 +20,8 @@
 #include "darcyHandler.hpp"
 #include "chrono.hpp"
 
+namespace LifeV
+{
 using namespace std;
 
 DarcyHandler::DarcyHandler(const GetPot& data_file):
@@ -27,7 +29,7 @@ DarcyHandler::DarcyHandler(const GetPot& data_file):
   DataAztec(data_file),
   nbCoor(nDimensions),
   geoMap(geoBilinearHexa),
-  qr(quadRuleHexa8pt),  
+  qr(quadRuleHexa8pt),
   geoMapBd(geoMap.boundaryMap()),
   qrBd(quadRuleQuad4pt),
   refBdFE(feQuadQ0),
@@ -53,7 +55,7 @@ DarcyHandler::DarcyHandler(const GetPot& data_file):
   vdof.update(mesh);
   pdof.update(mesh);
   tpdof.update(mesh);
-  
+
   dimTPdof = tpdof.numTotalDof();
   dimPdof = pdof.numTotalDof();
   dimVdof = vdof.numTotalDof();
@@ -74,39 +76,39 @@ DarcyHandler::DarcyHandler(const GetPot& data_file):
     bc_fct2.setFunction(g3);
     nb_bc = 2;
     bc.setNumber(nb_bc);
-    bc.addBC("Inlet",      1, Natural,   Scalar, bc_fct1); 
-    bc.addBC("Outlet",  3, Natural, Scalar, bc_fct2); 
+    bc.addBC("Inlet",      1, Natural,   Scalar, bc_fct1);
+    bc.addBC("Outlet",  3, Natural, Scalar, bc_fct2);
     break;
 
   case 2:
     /*
       Dirichlet condition (on p) at inlet (ref 1) and outlet (ref 3)
       example of mesh: cylhexa.mesh
-    */      
+    */
     bc_fct1.setFunction(g1);
     bc_fct2.setFunction(g3);
     nb_bc = 2;
     bc.setNumber(nb_bc);
-    bc.addBC("Inlet",      1, Essential,   Scalar, bc_fct1); 
-    bc.addBC("Outlet",  3, Essential, Scalar, bc_fct2); 
+    bc.addBC("Inlet",      1, Essential,   Scalar, bc_fct1);
+    bc.addBC("Outlet",  3, Essential, Scalar, bc_fct2);
     break;
 
   case 3:
     /*
-      Robin condition (dp/dq + alpha p = 1, alpha=1) at inlet (ref 1) 
+      Robin condition (dp/dq + alpha p = 1, alpha=1) at inlet (ref 1)
       and Dirichlet (p=-1) at outlet (ref 3)
       example of mesh: cylhexa.mesh
-    */      
+    */
     bc_fct_rob.setFunctions_Mixte(g1, mixte_coeff); //! Robin coeff = 1.
     bc_fct2.setFunction(g3);
     nb_bc = 2;
     bc.setNumber(nb_bc);
-    bc.addBC("Inlet",   1,     Mixte, Scalar, bc_fct_rob); 
-    bc.addBC("Outlet",  3, Essential, Scalar, bc_fct2); 
+    bc.addBC("Inlet",   1,     Mixte, Scalar, bc_fct_rob);
+    bc.addBC("Outlet",  3, Essential, Scalar, bc_fct2);
     break;
 
   case 33:
-    /* 
+    /*
       Analytical solution defined in user_fct
 
       example of mesh: hexahexa10x10x10.mesh
@@ -121,15 +123,15 @@ DarcyHandler::DarcyHandler(const GetPot& data_file):
 
     nb_bc = 6;
     bc.setNumber(nb_bc);
-    
-    bc.addBC("Analytical, real BC",    1, Essential,   Scalar, bc_fct1); 
+
+    bc.addBC("Analytical, real BC",    1, Essential,   Scalar, bc_fct1);
     bc.addBC("Analytical, real BC",    2, Essential,   Scalar, bc_fct2);
     bc.addBC("Analytical, real BC",    3, Essential,   Scalar, bc_fct3);
     bc.addBC("Analytical, real BC",    4, Essential,   Scalar, bc_fct4);
     bc.addBC("Analytical, real BC",    5, Essential,   Scalar, bc_fct5);
     bc.addBC("Analytical, real BC",    6, Essential,   Scalar, bc_fct6);
-    
-    break;  
+
+    break;
 
   default:
     ERROR_MSG("Unknown test case");
@@ -139,7 +141,7 @@ DarcyHandler::DarcyHandler(const GetPot& data_file):
   //  tpdof.bdUpdate(mesh, feBd, bc);
   // check the mesh after b.c.
   /*
-    BE CAREFUL: calling 
+    BE CAREFUL: calling
     mesh.check(true,true);
     after updateElementFaces(true) erase faceElement !!!!
   */
@@ -147,5 +149,5 @@ DarcyHandler::DarcyHandler(const GetPot& data_file):
   if(verbose>2) tpdof.showMe();
   if(verbose>2) bc.showMe(true);
 }
-
+}
 

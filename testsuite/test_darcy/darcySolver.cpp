@@ -1,17 +1,17 @@
 /* -*- mode: c++ -*-
-   This program is part of the LifeV library 
+   This program is part of the LifeV library
    Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politechnico di Milano
 
    This program is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public License
    as published by the Free Software Foundation; either version 2
    of the License, or (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -29,6 +29,8 @@
 #include "clapack.h"
 #include "user_diffusion.hpp"
 
+namespace LifeV
+{
 //====================================================
 
 DarcySolver::DarcySolver(const GetPot& data_file):
@@ -58,7 +60,7 @@ DarcySolver::DarcySolver(const GetPot& data_file):
 
   /*
     Initialization of the signs of the faces:
-    the rule is the following: if 
+    the rule is the following: if
   */
   RegionMesh3D<LinearHexa>::VolumeType* vol;
   ID iglobface,iglobvol;
@@ -128,7 +130,7 @@ void DarcySolver::_element_computation(int ielem)
       switch(diffusion_function){
       case 0: // constant diffusion tensor given in the data file
 	permlower = diffusion_tensor;
-	permlower *= diffusion_scalar; 
+	permlower *= diffusion_scalar;
 	/* // the diffusion matrix is divided by the viscosity which sould be 1/diffusion_scalar!
            Remark: not very optimal since in this case
 	   this constant matrix is inverted on each elements.
@@ -152,7 +154,7 @@ void DarcySolver::_element_computation(int ielem)
       dpotrf_("L", NBT, permlower, NBT, INFO);
       ASSERT_PRE(!INFO[0],"Lapack factorization of PERM is not achieved.");
       dpotri_("L", NBT, permlower, NBT, INFO);
-      ASSERT_PRE(!INFO[0],"Lapack solution of PERM is not achieved."); 
+      ASSERT_PRE(!INFO[0],"Lapack solution of PERM is not achieved.");
       permlower(0,1) = permlower(1,0);
       permlower(0,2) = permlower(2,0);
       permlower(1,2) = permlower(2,1);
@@ -202,16 +204,16 @@ void DarcySolver::computeHybridMatrixAndSourceRHS()
     elmatMix.showMe();
   }
   //
-  globalTP=0.0; 
+  globalTP=0.0;
   globalF=0.0;
   globalP = 0.0;
   globalFlux = 0.0;
-  mat.zeros(); 
+  mat.zeros();
   //
   //
   /*
   Initial Element Matrix : (where t is transpose)
-  
+
     [ A  B  C    [ U       [ Pext       [ F1      <- F1 : Dirichlet
       Bt 0  0      P    =    F       =    F2      <- F2 : Source term
       Ct 0  0 ]    L ]       UExt ]       F3 ]    <- F3 : Neumann & Robin
@@ -219,24 +221,24 @@ void DarcySolver::computeHybridMatrixAndSourceRHS()
    The fluxes U_i are not supposed to be continuous accross the faces: this
    yields a block diagonal matrix A (therefore A^{-1} is not full and can be
    easily computed at the element level).
-   
+
    The L_i are the Lagrange multipliers forcing the continuity of the flux
-   across the faces. 
-   
-   We eliminate U and P and we keep L 
-   
+   across the faces.
+
+   We eliminate U and P and we keep L
+
     (i) Matrix to be assembled and solved to determine L:
- 
+
     [   Ct A^{-1} C -  Ct A^{-1} B ( Bt A^{-1} B )^{-1} Bt A^{-1} C ] * L
-    = 
-    Ct A^{-1}  *  F1  -  Ct A^{-1}  B ( Bt A^{-1} B )^{-1} Bt A^{-1}  *  F1  
+    =
+    Ct A^{-1}  *  F1  -  Ct A^{-1}  B ( Bt A^{-1} B )^{-1} Bt A^{-1}  *  F1
     +  Ct A^{-1}  B ( Bt A^{-1} B )^{-1} F2
     -  F3
-    
+
     (ii) Recover the pression at the element level:
-    
-    P = - ( Bt A^{-1} B )^{-1} Bt A^{-1} C * L   
-        + ( Bt A^{-1} B )^{-1} Bt A^{-1} * F1 
+
+    P = - ( Bt A^{-1} B )^{-1} Bt A^{-1} C * L
+        + ( Bt A^{-1} B )^{-1} Bt A^{-1} * F1
         - ( Bt A^{-1} B )^{-1}  *  F2
 
     (iii) Recover the flux at the element level:
@@ -244,11 +246,11 @@ void DarcySolver::computeHybridMatrixAndSourceRHS()
     U = -  A^{-1} B  * P  -  A^{-1} C  *  L  +  A^{-1}    * F1
 
   */
-  
+
   Tab2d AA = elmatMix.block(0,0);
   Tab2d BB = elmatMix.block(0,1);
   Tab2d CC = elmatMix.block(0,2);
-  
+
   SourceAnalyticalFct sourceAnalytical;
 
   for(UInt ivol = 1; ivol<= mesh.numVolumes(); ivol++){
@@ -281,7 +283,7 @@ void DarcySolver::computeHybridMatrixAndSourceRHS()
     dsyrk_("L", "T", NBL, NBU, ONE_, CC, NBU, ZERO_, CtC, NBL);
     // Compute BtC <- Bt L^{-t} L^{-1} C = Bt A^{-1} C
     // (BtC fully stored)
-    dgemm_("T", "N", NBP, NBL, NBU, ONE_, BB, NBU, CC, NBU, 
+    dgemm_("T", "N", NBP, NBL, NBU, ONE_, BB, NBU, CC, NBU,
            ZERO_, BtC, NBP );
     //BtB <- LB and LBt where LB LBt is the cholesky factorization of Bt A^{-1} B
     dpotrf_("L", NBP, BtB , NBP, INFO );
@@ -289,7 +291,7 @@ void DarcySolver::computeHybridMatrixAndSourceRHS()
     // Compute BtC = LB^{-1} BtC <-  LB^{-1} Bt A^{-1} C
     dtrtrs_("L", "N", "N", NBP, NBL, BtB, NBP, BtC, NBP, INFO);
     ASSERT_PRE(!INFO[0],"Lapack Computation BtC = LB^{-1} BtC is not achieved.");
-    // CtC = CtC - (BtC)t BtC 
+    // CtC = CtC - (BtC)t BtC
     // (result stored only on lower part)
     // CtC <- Ct A^{-1} C - Ct A^{-t} B (Bt A^{-1} B)^{-1}  Bt A^{-1} C
     dsyrk_("L", "T", NBL, NBP, MINUSONE_, BtC, NBP, ONE_, CtC, NBL);
@@ -307,15 +309,15 @@ void DarcySolver::computeHybridMatrixAndSourceRHS()
     //....................
     // VECTOR OPERATIONS
     //....................
-    // initialize the rhs vectors.    
-    elvecSource.zero();     //  source rhs (NBP) 
+    // initialize the rhs vectors.
+    elvecSource.zero();     //  source rhs (NBP)
     elvecHyb.zero();        //  hybrid rhs : inserted in the global vector.
     Tab1dView RHSTP = elvecHyb.block(0);
 
     // The source term is computed with a test function in the Pressure space.
     switch(test_case){
-    case 33: 
-      source(sourceAnalytical, elvecSource, pfe, 0);     
+    case 33:
+      source(sourceAnalytical, elvecSource, pfe, 0);
     default:
       source(sourceFct, elvecSource, pfe, 0);
     }
@@ -326,7 +328,7 @@ void DarcySolver::computeHybridMatrixAndSourceRHS()
     ASSERT_PRE(!INFO[0],"Lapack Computation rhs = LB^{-1} rhs is not achieved.");
     // Compute RHSTP = t(BtC) rhs <- Ct A^{-1} Bt (Bt A^{-1} B)^{-1} F2
     // (fully stored)
-    dgemm_("T", "N", NBL, NBRHS, NBP, ONE_, BtC, NBP, rhs, NBP, 
+    dgemm_("T", "N", NBL, NBRHS, NBP, ONE_, BtC, NBP, rhs, NBP,
            ZERO_, RHSTP, NBL );
     //........................
     // END OF VECTOR OPERATIONS.
@@ -373,12 +375,12 @@ void DarcySolver::computePresFlux()
 
   /*==========================================
     POST PROCESSING
-    compute the pressure (Qk or Pk / element) 
+    compute the pressure (Qk or Pk / element)
     and the velocity (RTk / element) => 2 (opposite) velocities / face
     ==========================================*/
 
   Vector& global_flux  = globalFlux;
-  
+
   // No need for CtC in this part: only difference. (+ last dsyrk)
   Tab2d AA = elmatMix.block(0,0);
   Tab2d BB = elmatMix.block(0,1);
@@ -413,7 +415,7 @@ void DarcySolver::computePresFlux()
     dsyrk_("L", "T", NBP, NBU, ONE_, BB, NBU, ZERO_, BtB, NBP);
      // Compute BtC <- Bt L^{-t} L^{-1} C = Bt A^{-1} C
     // (BtC fully stored)
-    dgemm_("T", "N", NBP, NBL, NBU, ONE_, BB, NBU, CC, NBU, 
+    dgemm_("T", "N", NBP, NBL, NBU, ONE_, BB, NBU, CC, NBU,
            ZERO_, BtC, NBP );
     //BtB <- LB and LBt where LB LBt is the cholesky factorization of Bt A^{-1} B
     dpotrf_("L", NBP, BtB , NBP, INFO );
@@ -438,15 +440,15 @@ void DarcySolver::computePresFlux()
     //________________________________
     // 1/ Computation of the PRESSURE
     //________________________________
-    
-    // initialize the rhs vectors.    
-    elvecSource.zero();     //  source rhs (NBP) 
+
+    // initialize the rhs vectors.
+    elvecSource.zero();     //  source rhs (NBP)
     elvecHyb.zero();        //  hybrid rhs : extracted from the global vector.
     // The source term is computed with a test function in the Pressure space.
     // Beware: integrate the source term... ?
     switch(test_case){
     case 33:
-      source(sourceAnalytical, elvecSource, pfe, 0);      
+      source(sourceAnalytical, elvecSource, pfe, 0);
     default:
       source(sourceFct, elvecSource, pfe, 0);
     }
@@ -456,15 +458,15 @@ void DarcySolver::computePresFlux()
     dtrtrs_("L", "N", "N", NBP, NBRHS, BtB, NBP, rhs, NBP, INFO);
     ASSERT_PRE(!INFO[0],
 	       "Lapack Computation rhs = LB^{-1} rhs is not achieved.");
-    // extract the resulting TP for the current fe and put it into elvecHyb. 
+    // extract the resulting TP for the current fe and put it into elvecHyb.
     extract_vec(globalTP, elvecHyb, refTPFE, tpdof,ivol, 0);
     Tab1dView RHSTP = elvecHyb.block(0);
     // RHSTP = elvecHyb.block(0)  contains the local TP for the current fe.
-    // rhs = BtC * RHSTP + rhs <- LB^{-1} Bt A^{-1} C * L + LB^{-1} F2 
+    // rhs = BtC * RHSTP + rhs <- LB^{-1} Bt A^{-1} C * L + LB^{-1} F2
     /* FAUTE DE SIGNE !!!! version originale @@@@@@@@@@@@@@
-      dgemm_("N", "N", NBP, NBRHS, NBL, ONE_, BtC, NBP, RHSTP, NBL, 
+      dgemm_("N", "N", NBP, NBRHS, NBL, ONE_, BtC, NBP, RHSTP, NBL,
       ONE_, rhs, NBP, strlen("T"), strlen("N") );*/
-    dgemm_("N", "N", NBP, NBRHS, NBL, MINUSONE_, BtC, NBP, RHSTP, NBL, 
+    dgemm_("N", "N", NBP, NBRHS, NBL, MINUSONE_, BtC, NBP, RHSTP, NBL,
            MINUSONE_, rhs, NBP );
     //  rhs = LB^{-T} rhs
     //  rhs <- - (Bt A^{-1} B)^{-1} Bt A^{-1} C * L - (Bt A^{-1} B)^{-1} F2
@@ -475,18 +477,18 @@ void DarcySolver::computePresFlux()
     // contains the pressure for the current element.
     /* Put the pressure of the current fe ("elvecSource")
       in the global vector globalP.*/
-    assemb_vec( globalP, elvecSource, refPFE, pdof,ivol, 0);    
+    assemb_vec( globalP, elvecSource, refPFE, pdof,ivol, 0);
     //__________________________________
     // 2/ Computation of the VELOCITIES
     //__________________________________
-    // initialize the element flux vector.    
+    // initialize the element flux vector.
     elvecFlux.zero();     //  Flux (NBU)
     // initialize the flux vector (clean this some day...)
     Tab1dView flux = elvecFlux.block(0);
     flux = elvecFlux.block(0);
     // Compute  flux = BB * rhs <- L^{-1} B P
     dgemv_("N", NBU, NBP, ONE_, BB, NBU, rhs, INC1, ZERO_, flux, INC1 );
-    // Compute  flux = - CC * RHSTP - flux <-   - L^{-1} C TP - L^{-1} B P  
+    // Compute  flux = - CC * RHSTP - flux <-   - L^{-1} C TP - L^{-1} B P
     dgemv_("N", NBU, NBL, MINUSONE_, CC, NBL, RHSTP, INC1, MINUSONE_,
 	   flux, INC1 );
      // Compute flux = L^{-T} flux <-  - A^{-1} Ct TP - A^{-1} Bt P
@@ -507,7 +509,7 @@ void DarcySolver::computePresFlux()
       }
     }
     //..........................
-    // END OF VECTOR OPERATIONS. 
+    // END OF VECTOR OPERATIONS.
     //..........................
 
     //---------------------------------------
@@ -535,4 +537,5 @@ double DarcySolver::computeFluxFlag(int flag)
     }
   }
   return Fl;
+}
 }

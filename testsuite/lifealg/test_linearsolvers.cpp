@@ -40,6 +40,8 @@
 
 static char help[] = "";
 
+namespace LifeV{
+
 template<typename Mat>
 bool test_umfpack( Mat& __mat )
 {
@@ -97,7 +99,7 @@ bool test_petsc( Mat& __mat )
     return 1;
 #endif
 }
-
+}
 int main( int argc, char** argv )
 {
 #if defined(HAVE_PETSC_H)
@@ -112,20 +114,20 @@ int main( int argc, char** argv )
     //
     // Mass matrix
     //
-    MatrixMass mass( N );
+    LifeV::MatrixMass mass( N );
     mass.matrix().spy( "mass.m" );
 
-    test_petsc ( mass );
-    test_umfpack ( mass );
+    LifeV::test_petsc ( mass );
+    LifeV::test_umfpack ( mass );
 
     //
     // convdiff matrix
     //
-    MatrixConvectionDiffusion convdiff( N, 1.0 );
+    LifeV::MatrixConvectionDiffusion convdiff( N, 1.0 );
     convdiff.matrix().spy( "convdiff.m" );
 
-    assert( test_petsc ( convdiff ) );
-    assert( test_umfpack ( convdiff ) );
+    assert( LifeV::test_petsc ( convdiff ) );
+    assert( LifeV::test_umfpack ( convdiff ) );
 
 #if defined(HAVE_PETSC_H)
     PetscFinalize();

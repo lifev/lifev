@@ -28,77 +28,77 @@
 
 int main(int argc, char** argv)
 {
+    using namespace LifeV;
+    //! ********** Reading from data file ******************************************
 
- //! ********** Reading from data file ******************************************
+    GetPot command_line(argc,argv);
+    const char* data_file_name = command_line.follow("data", 2, "-f","--file");
+    GetPot data_file(data_file_name);
 
-  GetPot command_line(argc,argv);
-  const char* data_file_name = command_line.follow("data", 2, "-f","--file");
-  GetPot data_file(data_file_name);
-
-  OneDModelSolver onedm(data_file_name);
-  onedm.showMeData();
-  onedm.showMeHandler(cout, 6);
+    OneDModelSolver onedm(data_file_name);
+    onedm.showMeData();
+    onedm.showMeHandler(cout, 6);
 
 
-  // Initialization
-  //
-  Real dt     = onedm.timestep();
-  Real startT = onedm.inittime();
-  Real T      = onedm.endtime();
+    // Initialization
+    //
+    Real dt     = onedm.timestep();
+    Real startT = onedm.inittime();
+    Real T      = onedm.endtime();
 
-  Real u0 = 0.; //! constant initial condition
+    Real u0 = 0.; //! constant initial condition
 
-  /*
-  if(startT > 0.0){
-     cout << "initialize velocity and pressure with data from file" << std::endl;
-     ostringstream indexin;
-     string vinname, cinname;
-     indexin << (startT*100);
-     vinname = "fluid.res"+indexin.str();
-     onedm.initialize(vinname);}
-  else{
-     std::cout << "initialize velocity and pressure with u0 and p0" << std::endl;
+    /*
+      if(startT > 0.0){
+      cout << "initialize velocity and pressure with data from file" << std::endl;
+      ostringstream indexin;
+      string vinname, cinname;
+      indexin << (startT*100);
+      vinname = "fluid.res"+indexin.str();
+      onedm.initialize(vinname);}
+      else{
+      std::cout << "initialize velocity and pressure with u0 and p0" << std::endl;
       onedm.initialize(u0,p0,0.0,dt);
-  }
-  */
+      }
+    */
 
-  std::cout << "initialize with constant u0" << std::endl;
-  onedm.initialize(u0);
+    std::cout << "initialize with constant u0" << std::endl;
+    onedm.initialize(u0);
 
-  std::cout << "startT T dt " << startT << " " <<  T << " " << dt << std::endl;
+    std::cout << "startT T dt " << startT << " " <<  T << " " << dt << std::endl;
 
-  char ch;
-  cout << "Hit return to continue" << endl;
-  cin.get(ch);
+    char ch;
+    cout << "Hit return to continue" << endl;
+    cin.get(ch);
 
-  // Temporal loop
-  //
-  for (Real time=startT+dt ; time <= T; time+=dt) {
+    // Temporal loop
+    //
+    for (Real time=startT+dt ; time <= T; time+=dt) {
 
-    onedm.timeAdvance();
-    onedm.iterate();
+        onedm.timeAdvance();
+        onedm.iterate();
 
-    if ( data_file( "miscellaneous/show_graceplot", false ) )
-        onedm.gplot();
+        if ( data_file( "miscellaneous/show_graceplot", false ) )
+            onedm.gplot();
 
 // ************* saving result on file *****************************************
-    ostringstream indexout;
-    indexout << (time*100);
-    string voutname;
-    voutname = onedm.PostDirectory() + "/res.res" + indexout.str();
-    // fstream Resfile(voutname.c_str(),ios::out | ios::binary);
-    fstream Resfile(voutname.c_str(),ios::out );
-    // Resfile.write((char*)&onedm.u()(1),onedm.u().size()*sizeof(double));
-    Resfile.write((char*)&onedm.U_nexttime()(1),
-		  onedm.U_nexttime().size()*sizeof(double));
-    Resfile.close();
+        ostringstream indexout;
+        indexout << (time*100);
+        string voutname;
+        voutname = onedm.PostDirectory() + "/res.res" + indexout.str();
+        // fstream Resfile(voutname.c_str(),ios::out | ios::binary);
+        fstream Resfile(voutname.c_str(),ios::out );
+        // Resfile.write((char*)&onedm.u()(1),onedm.u().size()*sizeof(double));
+        Resfile.write((char*)&onedm.U_nexttime()(1),
+                      onedm.U_nexttime().size()*sizeof(double));
+        Resfile.close();
 
 
-    //onedm.postProcess();
-  }
+        //onedm.postProcess();
+    }
 
-  cout << "Hit return to close" << endl;
-  cin.get(ch);
+    cout << "Hit return to close" << endl;
+    cin.get(ch);
 
-  return 0;
+    return 0;
 }

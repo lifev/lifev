@@ -7,9 +7,11 @@
 #include <stdio.h>
 #include <string>
 
+namespace LifeV
+{
 class Coord{
 public:
-  Coord(){init(0);}; 
+  Coord(){init(0);};
   Coord &operator=(const Coord & A){init(A.coord);return *this;};
   float &operator[](int i){return coord[i];};
 
@@ -19,7 +21,7 @@ private:
     for(int i=0;i<3;++i)
       coord[i]=(a != 0) ? a[i]:-100;};
 
-  float coord[3]; 
+  float coord[3];
 };
 
 
@@ -101,7 +103,7 @@ bool outensight7Mesh3D(RegionMesh3D & mesh, PhysVectUnknown<Vector> & u, ScalUnk
   File3.write((char *)&idelem.front(),idelem.size()*sizeof(int));
 
 // ------------------   Output P1 Elements (Tetra or Hexahedra)   -------------------------
-  
+
   for( ID k = 0; k < mesh.storedVolumes(); k++){
       for (ID j = 0; j < mesh.numLocalVertices(); j++){
 	File3.write((char *)&mesh.volume(k+1).point(j+1).id(),sizeof(ID));
@@ -136,22 +138,22 @@ bool outensight7Mesh3D(RegionMesh3D & mesh, PhysVectUnknown<Vector> & u, ScalUnk
   Coord nodevel;
 
     index << (time*100);
-  
+
     switch( index.str().size() ) {
     case 1:
       name = "pressure.res00"+index.str();
       vname = "velocity.res00"+index.str();
       break;
-    case 2:   
+    case 2:
       name = "pressure.res0"+index.str();
       vname = "velocity.res0"+index.str();
       break;
-    case 3:   
+    case 3:
       name = "pressure.res"+index.str();
       vname = "velocity.res"+index.str();
       break;
     }
-    
+
     for(ID i=0; i< p.size(); i++){
        pressure.push_back((float)(p(i)));}
 
@@ -167,7 +169,7 @@ bool outensight7Mesh3D(RegionMesh3D & mesh, PhysVectUnknown<Vector> & u, ScalUnk
   strcpy(buffer,"concentration distribution timestep ");
   File4.write((char*)&buffer,sizeof(buffer));
 
-  File4.write((char*)&pressure.front(),p.size()*sizeof(float)); 
+  File4.write((char*)&pressure.front(),p.size()*sizeof(float));
 
   File4.close();
 
@@ -176,13 +178,14 @@ bool outensight7Mesh3D(RegionMesh3D & mesh, PhysVectUnknown<Vector> & u, ScalUnk
   strcpy(buffer,"velocity field  timestep 1");
   File5.write((char*)&buffer,sizeof(buffer));
 
-  File5.write((char*)&velocity.front(),3*velocity.size()*sizeof(float)); 
+  File5.write((char*)&velocity.front(),3*velocity.size()*sizeof(float));
 
   File5.close();
 
   cout << "result files are velocity.res*** and pressure.res*** " << endl;
 
   return true;
-  
+
 }
 
+}

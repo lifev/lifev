@@ -1,17 +1,17 @@
 /* -*- mode: c++ -*-
-   This program is part of the LifeV library 
+   This program is part of the LifeV library
    Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politechnico di Milano
 
    This program is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public License
    as published by the Free Software Foundation; either version 2
    of the License, or (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -20,6 +20,8 @@
 #define _DARCY_SOLVER_H
 #include "darcyHandler.hpp"
 
+namespace LifeV
+{
 /*!
   \brief A mixed hybrid Darcy solver
   \file darcySolver.hpp
@@ -52,17 +54,17 @@ public:
     signLocalFace(ivol,ilocface)
     =  1  if ivol is the first adjacent of face ilocface
     = -1                 second
-    
+
     Remark: this array could be in regionMesh.
   */
-  KNM<Real> signLocalFace; 
-  KN<Real> diffusion_scalar_ele; //! scalar diffusion coeff, element by element 
+  KNM<Real> signLocalFace;
+  KN<Real> diffusion_scalar_ele; //! scalar diffusion coeff, element by element
 
   SourceFct sourceFct;
 
   void _element_computation(int i); //!< computations of element matrices
 
-  void computeHybridMatrixAndSourceRHS(); //!< compute the matrix for TP 
+  void computeHybridMatrixAndSourceRHS(); //!< compute the matrix for TP
   //!< and the contribution from the source term to the globalF right hand side.
 
   void applyBC(); //!< apply the b.c. for the TP problem
@@ -75,5 +77,5 @@ public:
   void postProcessVelocityQ1();//!< projection of U (RT0) on Q1 and postproc.
   double computeFluxFlag(int flag);
 };
-
+}
 #endif

@@ -51,6 +51,9 @@
 #include "vecUnknown.hpp"
 #include "basicOneDMesh.hpp"
 
+
+namespace LifeV
+{
 typedef KN<double> Rn;
 using namespace std;
 
@@ -130,7 +133,7 @@ public:
 
 };
 #endif /* HAVE_GRACE_NP_H */
-
+}
 
 
 #endif

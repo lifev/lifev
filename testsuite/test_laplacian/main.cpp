@@ -45,6 +45,7 @@
 #define INRIA
 
 int main() {
+    using namespace LifeV;
 
     Chrono chrono;
 

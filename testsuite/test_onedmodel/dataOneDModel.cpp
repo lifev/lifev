@@ -1,17 +1,17 @@
 /* -*- mode: c++ -*-
-   This program is part of the LifeV library 
+   This program is part of the LifeV library
    Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politechnico di Milano
 
    This program is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public License
    as published by the Free Software Foundation; either version 2
    of the License, or (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -19,14 +19,16 @@
 /*!
   \file dataOneDModel.cpp
   \author Vincent Martin
-  \date 07/2004 
+  \date 07/2004
   \version 1.0
 
-  \brief Implementation of the class for the data in oned model 
+  \brief Implementation of the class for the data in oned model
 
 */
 #include "dataOneDModel.hpp"
 
+namespace LifeV
+{
 //! constructor using a data file.
 DataOneDModel::DataOneDModel(const GetPot& dfile)
 {
@@ -37,7 +39,7 @@ DataOneDModel::DataOneDModel(const GetPot& dfile)
   _M_beta0 = dfile("physics/parameters/beta0",1.);
   _M_beta1 = dfile("physics/parameters/beta1",0.5);
   _M_Kr = dfile("physics/parameters/Kr",1.);
-  
+
   //! Time
   _M_time_beg = dfile("time/timebeg",0.0);
   _M_time_end = dfile("time/timeend",1.0);
@@ -101,3 +103,4 @@ void DataOneDModel::showMeData(std::ostream& c) const
   c << "post_proc_format = " << _M_post_proc_format << std::endl;
 }
 
+}

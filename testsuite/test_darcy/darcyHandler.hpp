@@ -1,17 +1,17 @@
 /* -*- mode: c++ -*-
-   This program is part of the LifeV library 
+   This program is part of the LifeV library
    Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politechnico di Milano
 
    This program is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public License
    as published by the Free Software Foundation; either version 2
    of the License, or (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -34,6 +34,8 @@
 #include "user_fct.hpp"
 #include "user_diffusion.hpp"
 
+namespace LifeV
+{
 /*
   \brief Basic objects for a Darcy solver using Mixed Hybrid finite elements
   \file darcyHandler.h
@@ -46,7 +48,7 @@
               div u  = 0
 
    (K : diffusion)
-   
+
   Boundary conditions:
 
   p = p_d         (Essential B.C.)
@@ -54,7 +56,7 @@
 
 
   \par 2) Approximation:
-  
+
   u is approximated in RT_k
   p is approximated in Q_k
 
@@ -71,7 +73,7 @@
   at the *element level* the other unknows. For efficiency, all the
   manipulations done on the element matrices are performed
   using BLAS and LAPACK.
-  
+
   Once the TP problem solved, U and P are recovered by manipulation
   at the *element level*, one more time using BLAS and LAPACK.
 
@@ -102,8 +104,8 @@ public:
   Dof tpdof;//! the degree of freedom for the trace of the pressure (Q0)
   UInt dimPdof; //! number of pressure dof
   UInt dimVdof; //! number of velocity dof
-  UInt dimTPdof;//! number of trace of pressure dof 
-  UInt numFacesPerVolume; //! number of faces per volume 
+  UInt dimTPdof;//! number of trace of pressure dof
+  UInt numFacesPerVolume; //! number of faces per volume
   RegionMesh3D<LinearHexa> mesh; // the mesh
   int nb_bc;                //!< number of boundary conditions
   BC_Handler bc;            //!< boundary conditions handler
@@ -122,5 +124,6 @@ public:
 public:
   DarcyHandler(const GetPot& data_file);
 };
+}
 #endif
 

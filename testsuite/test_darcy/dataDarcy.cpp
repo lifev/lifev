@@ -1,6 +1,8 @@
 #include <iostream>
 #include "dataDarcy.hpp"
 
+namespace LifeV
+{
 using namespace std;
 
 //! constructor using a data file.
@@ -65,7 +67,7 @@ void DataDarcy::dataDarcyHelp(ostream& c)
   c << "diffusion_tensor: the 9 entries of the diffusion tensor (by rows)" << endl;
   c << "diffusion_function: number of a user defined function (usrDiffusion.cc)" << endl;
   // Linear Solver
-  c << "theLinearSolver: the linear solver you want to use:\n" 
+  c << "theLinearSolver: the linear solver you want to use:\n"
     << "Aztec: " << LinSlv_Aztec <<  "\tUMFPack: " << LinSlv_UMFPack << endl;
   // miscellaneous
   c << "\n*** Help for data [miscellaneous]\n\n";
@@ -75,4 +77,4 @@ void DataDarcy::dataDarcyHelp(ostream& c)
   c << "verbose          : to make the code verbose" << endl;
   c << "post_proc_format : postprocessing format (medit, vtk, ...)" << endl;
 }
-
+}

@@ -41,6 +41,7 @@
 #undef OPER_TEMPLATE
 
 int main() {
+    using namespace LifeV;
 
     Chrono chrono;
 

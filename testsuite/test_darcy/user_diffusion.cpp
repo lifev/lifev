@@ -1,6 +1,8 @@
 #include "tab.hpp"
 #include <cmath>
 
+namespace LifeV
+{
 double gamma(double x)
 {
   double angle_deg = 90;
@@ -42,7 +44,7 @@ double permeability_sd009(const double& x, const double& y, const double& z) {
   const double x1=790.;
   const double y1=1074.;
   const double x3=832.5;
-  const double y3=1099; 
+  const double y3=1099;
   double slope = (y3 - y1) / (x3 - x1);
   double position = y - y1 - slope * (x - x1);
   double perm;
@@ -59,7 +61,7 @@ double permeability_sd010(const double& x, const double& y, const double& z) {
   const double x1=790.;
   const double y1=1074.;
   const double x3=832.5;
-  const double y3=1099; 
+  const double y3=1099;
   double slope = (y3 - y1) / (x3 - x1);
   double position = y - y1 - slope * (x - x1);
   double perm;
@@ -72,3 +74,4 @@ double permeability_sd010(const double& x, const double& y, const double& z) {
   return perm ;
 }
 
+}

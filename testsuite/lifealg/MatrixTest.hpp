@@ -31,6 +31,8 @@
 
 #include <values.hpp>
 
+namespace LifeV
+{
 class MatrixMass
 {
 public:
@@ -101,5 +103,5 @@ private:
     std::vector<double> _M_val;
 };
 
-
+}
 #endif /* __MatrixTest_H */

@@ -1,17 +1,17 @@
 /* -*- mode: c++ -*-
-   This program is part of the LifeV library 
+   This program is part of the LifeV library
    Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politechnico di Milano
 
    This program is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public License
    as published by the Free Software Foundation; either version 2
    of the License, or (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -19,18 +19,20 @@
 /*!
   \file oneDModelHandler.cpp
   \author Vincent Martin
-  \date 07/2004 
+  \date 07/2004
   \version 1.0
 
-  \brief This file contains the implementation for the OneD model solver.  
+  \brief This file contains the implementation for the OneD model solver.
 
 */
 
 #include "oneDModelHandler.hpp"
 
+namespace LifeV
+{
 //! Constructor
 OneDModelHandler::OneDModelHandler(const GetPot& data_file):
-     DataOneDModel(data_file), 
+     DataOneDModel(data_file),
      DataAztec(data_file),
      _M_nbCoor(1),
      _M_mesh(_M_x_left,_M_x_right,_M_nx),
@@ -52,7 +54,7 @@ OneDModelHandler::OneDModelHandler(const GetPot& data_file):
   */
 
   std::cout << "dimDof = "  << _M_dimDof << std::endl;
-  
+
 }
 
 
@@ -65,30 +67,31 @@ void OneDModelHandler::showMeHandler(std::ostream& c, UInt verbose)
 }
 
 //! Returns the concentration
-ScalUnknown<Vector>& OneDModelHandler::AreaUnkn() 
+ScalUnknown<Vector>& OneDModelHandler::AreaUnkn()
 {
   return _M_AreaUnkn;
 }
 
 // ! Initialize with constant initial conditions concentration
-void OneDModelHandler::initialize(const double& u0) 
+void OneDModelHandler::initialize(const double& u0)
 {
   _M_U_initial = u0;
 }
 
 // ! Initialize when  initial conditions concentration
-void OneDModelHandler::initialize(const Function& c0, Real t0, Real dt) 
+void OneDModelHandler::initialize(const Function& c0, Real t0, Real dt)
 {
 
 }
 
 // ! Initialize when initial values for the concentration are read from file
-void OneDModelHandler::initialize(const std::string & vname) 
+void OneDModelHandler::initialize(const std::string & vname)
 {
-  
+
   std::fstream Resfile(vname.c_str(),ios::in | ios::binary);
   if (Resfile.fail()) {std::cerr<<" Error in initialize: File not found or locked"<<std::endl; abort();}
   Resfile.read((char*)&_M_AreaUnkn(1),_M_AreaUnkn.size()*sizeof(double));
   Resfile.close();
 }
 
+}

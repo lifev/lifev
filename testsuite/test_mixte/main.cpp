@@ -50,7 +50,9 @@
 #include "vtk_wrtrs.hpp"
 
 
-int main() {
+int main()
+{
+    using namespace LifeV;
     Chrono chrono;
 
 

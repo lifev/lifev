@@ -26,6 +26,8 @@
 
 int main()
 {
+    using namespace LifeV;
+
     GetPot datafile( "data" );
     string dirname=datafile( "mesh_dir","." );//"../data/mesh/mesh++/";
     string fname=dirname+datafile( "mesh_file","cube_47785.m++" );//dirname+"cube_47785.m++";
