@@ -56,14 +56,13 @@ namespace LifeV {
                  int iblock, int jblock);
 
     /**
-       \Two-fluid lumped mass operator
+       \Two-fluid lumped mass
     */
 
-    void lumped_mass_2f(Real coef1, Real coef2, 
-                        const ElemVec& ls_fun_loc, const CurrentFE& fe_ls,
-                        ElemMat& elmat, const CurrentFE& fe,
-                        int iblock, int jblock);
-
+    void lumped_mass_2f(Real coef1, Real coef2,
+                 const ElemVec& ls_fun_loc, const CurrentFE& fe_ls,
+                 ElemMat& elmat, const CurrentFE& fe,
+                 int iblock, int jblock);
     /**
        \Two-fluid stiffness-strain operator
     */
@@ -123,7 +122,7 @@ namespace LifeV {
 
                     // Evaluate coefficient on current quadrature node
 
-                    coef_s = coef1 * (ls_fun_on_qn > 0) + coef2 * (ls_fun_on_qn < 0);
+                    coef_s = coef1 * (ls_fun_on_qn >= 0) + coef2 * (ls_fun_on_qn < 0);
 
                     // Compute local contribution
 
@@ -135,7 +134,7 @@ namespace LifeV {
         }
     }
 
-    void lumped_mass_2f(Real coef1, Real coef2, 
+    void lumped_mass_2f(Real coef1, Real coef2,
                  const ElemVec& ls_fun_loc, const CurrentFE& fe_ls,
                  ElemMat& elmat, const CurrentFE& fe,
                  int iblock = 0, int jblock = 0) {
@@ -156,7 +155,7 @@ namespace LifeV {
 
                     // Evaluate coefficient on current quadrature node
 
-                    coef_s = coef1 * (ls_fun_on_qn > 0) + coef2 * (ls_fun_on_qn < 0);
+                    coef_s = coef1 * (ls_fun_on_qn >= 0) + coef2 * (ls_fun_on_qn < 0);
 
                     // Compute local contribution
 
@@ -167,7 +166,6 @@ namespace LifeV {
             }
         }
     }
-
 
     void stiff_strain_2f(Real coef1, Real coef2,
                          const ElemVec& ls_fun_loc, const CurrentFE& fe_ls,
@@ -192,7 +190,7 @@ namespace LifeV {
 
                     // Evaluate coefficient on current quadrature node
 
-                    coef_s = 0.5 * ( coef1 * (ls_fun_on_qn > 0) + coef2 * (ls_fun_on_qn < 0) );
+                    coef_s = 0.5 * ( coef1 * (ls_fun_on_qn >= 0) + coef2 * (ls_fun_on_qn < 0) );
 
                     // Compute local contribution
                     for ( int icoor = 0; icoor < fe.nbCoor; ++icoor )
@@ -256,7 +254,7 @@ namespace LifeV {
 
                     // Evaluate coefficient on current quadrature node
 
-                    coef_s = coef1 * (ls_fun_on_qn > 0) + coef2 * (ls_fun_on_qn < 0);
+                    coef_s = coef1 * (ls_fun_on_qn >= 0) + coef2 * (ls_fun_on_qn < 0);
 
                     // Compute local contribution
 
@@ -298,7 +296,7 @@ namespace LifeV {
 
                 // Evaluate coefficient on current quadrature node
 
-                coef_s = coef1 * (ls_fun_on_qn > 0) + coef2 * (ls_fun_on_qn < 0);
+                coef_s = coef1 * (ls_fun_on_qn >= 0) + coef2 * (ls_fun_on_qn < 0);
                 fe.coorQuadPt( x, y, z, iq );
                 s += coef_s * fe.phi( i, iq ) * fct(t, x, y, z, iblock + 1 ) * fe.weightDet( iq );
             }
