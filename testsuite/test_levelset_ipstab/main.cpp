@@ -185,7 +185,7 @@ int main() {
 
     SolverAztec solver;
 
-    LevelSetSolver<meshType> lss(datafile, solver, geoMap, refFE, qr, qrBd, BCh, fe, dof, betaVec);
+    LevelSetSolver<meshType> lss(datafile, solver, refFE, qr, qrBd, BCh, fe, dof, betaVec);
     lss.initialize(sphere);
 
     LevelSetSolver<meshType>::lsfunction_type U = lss.lsfunction();
