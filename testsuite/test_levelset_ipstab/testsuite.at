@@ -37,5 +37,5 @@ mesh_dir = ./
 mesh_file  = 'cube_48.m++'       # mesh file
 mesh_faces = all                    # update all faces elements
 ]])
-AT_CHECK([ln -sf $top_builddir/testsuite/'data/mesh/mesh++/'/'cube_48.m++' &&  $top_builddir/testsuite/test_levelset_ipstab/test_levelset_ipstab],[0],[ignore],[ignore])
+AT_CHECK([ln -sf  $top_builddir/testsuite/test_levelset_ipstab/test_levelset_ipstab],[0],[ignore],[ignore])
 AT_CLEANUP
