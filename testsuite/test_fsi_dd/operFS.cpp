@@ -180,21 +180,23 @@ namespace LifeV
         {
             case 0:
                 // Dirichlet-Neumann preconditioner
-                invSfPrime(res, linear_rel_tol, step);
+                invSsPrime(res, linear_rel_tol, step);
                 break;
             case 1:
                 // Dirichlet-Neumann preconditioner
                 invSfPrime(res, linear_rel_tol, step);
                 break;
             case 2:
-                // Dirichlet-Neumann preconditioner
-            //     Vector mu_f(res.size());
-//                 Vector mu_s(res.size());
+                // Neumann-Neumann preconditioner
+	      /*
+	        Vector mu_f(res.size());
+                Vector mu_s(res.size());
 
-//                 invSfPrime(res, linear_rel_tol, mu_f);
-//                 invSsPrime(res, linear_rel_tol, mu_s);
+	        invSfPrime(res, linear_rel_tol, mu_f);
+	        invSsPrime(res, linear_rel_tol, mu_s);
 
-//                 step = aitk.computeDeltaLambda(mu_f,mu_s);
+	        step = aitk.computeDeltaLambda(mu_f,mu_s);
+	      */
                 break;
             default:
                 // Newton preconditioner
