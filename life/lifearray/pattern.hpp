@@ -18,7 +18,7 @@
 */
 /*----------------------------------------------------------------------*
 |
-| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.22 2005-02-24 14:08:30 prudhomm Exp $
+| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.23 2005-03-01 09:46:54 ddipietro Exp $
 |
 |
 | #Version  0.1 Experimental   07/7/00. Luca Formaggia & Alessandro Veneziani
@@ -62,7 +62,6 @@
 #include<string>
 //#include<functional>
 #include <life/lifemesh/bareItems.hpp>
-
 
 namespace LifeV
 {
@@ -130,7 +129,11 @@ public:
       @param ex_nrow number of rows
       @param ex_ncol number of columns
     */
+
     BasePattern( UInt ex_nnz, UInt ex_nrow, UInt ex_ncol );
+
+    //! Default distructor
+    virtual ~BasePattern() {}; 
 
     //! Copy constructor
     BasePattern( BasePattern const &rightHandPattern );
@@ -157,6 +160,9 @@ public:
     //! some info for the curious
     void showMe( bool const verbose = false,
                  std::ostream & out = std::cout ) const;
+
+    //! Returns true if the indices (i,j) are in the pattern
+    virtual bool isThere( Index_t const i, Index_t const j ) const = 0;
 
 protected:
     /*!
@@ -417,13 +423,13 @@ public:
     //! Return a block diagonal pattern of nblock blocks
     friend CSRPatt diagblockMatrix( CSRPatt const &patt, UInt const nblock );
 
+    //! Returns true if the indices (i,j) are in the pattern
+    bool isThere( Index_t const i, Index_t const j ) const;
 
 protected:
     //! Row offset for row index i
     Diff_t _row_off( Index_t i ) const { return _i2o( _ia[ _i2o( i ) ] ); }
 
-    //! Returns true if the indices (i,j) are in the pattern
-    inline bool isThere( Index_t const i, Index_t const j ) const;
 
     //! Locate position in vector containing index couple (i,j)
     std::pair<Diff_t, bool> locate_pattern( Index_t const i,
@@ -703,14 +709,14 @@ public:
       PATTERN_OFFSET)
     */
 
+    bool isThere( Index_t i, Index_t j ) const;
+
 protected:
     //! Row offset for row index i
     Diff_t _row_off( Index_t i ) const { return _i2o( _ia[ _i2o( i ) ] ); }
 
     std::pair<Diff_t, bool> locate_pattern( Index_t const i,
                                             Index_t const j ) const;
-
-    bool isThere( Index_t i, Index_t j ) const;
 
 private:
     Container _ia;
@@ -833,15 +839,15 @@ public:
                                  MSRPatt const &patt,
                                  UInt const nblock );
 
+    // superata dalla locate
+    bool isThere( Index_t i, Index_t j ) const;
+
 protected:
     //! Row offset for row index i
     Diff_t _row_off( Index_t i ) const { return _i2o( _bindx[ _i2o( i ) ] ); }
 
     std::pair<Diff_t, bool> locate_pattern( Index_t const i,
                                             Index_t const j ) const;
-
-    // superata dalla locate
-    inline bool isThere( Index_t i, Index_t j ) const;
 
 private:
     Container _bindx;
@@ -1070,11 +1076,16 @@ public:
     //! Tests if offsets are consistent with those of a global matrix
     bool check( bool verbose = false, std::ostream & c = std::cout ) const;
 
+    /**! 
+       \Returns true if the indices (i,j) are in the pattern. (i, j) are in 
+       \global numbering
+    */
+    bool isThere( Index_t const i_g, Index_t const j_g ) const;
+
 protected:
 
 private:
     void resetOffset( Diff_t const m = 0, Diff_t const n = 0 );
-
 
     PATTERN * _blocks[ BROWS ][ BCOLS ];
 
@@ -3391,6 +3402,19 @@ MixedPattern<BROWS, BCOLS, PATTERN>::showMe( bool verbose,
     }
 }
 
+template<UInt BROWS, UInt BCOLS, typename PATTERN>
+bool MixedPattern<BROWS, BCOLS, PATTERN>::isThere( Index_t const i_g, Index_t const j_g) const {
+    std::pair<UInt, UInt> __block;
+    std::pair<UInt, UInt> __offset;
+
+    __block = locateElBlock( i_g, j_g );
+    if (__block.first == BROWS && __block.second == BCOLS)
+        return false;
+    __offset = blockOffset( __block.first, __block.second );
+
+    const PATTERN* __block_ptr = block_ptr( __block.first, __block.second );
+    return __block_ptr->isThere( i_g - __offset.first, j_g - __offset.second );
+}
 
 ////////////////////////////////////////////////////////////////////////////
 // This work both for Mixed and simple pattern
