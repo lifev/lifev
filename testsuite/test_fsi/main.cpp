@@ -109,8 +109,8 @@ struct FSIChecker
     FSIChecker( GetPot const& _data_file )
         :
         data_file( _data_file ),
-        oper( _data_file( "problem/method","steklovPoincare" ) ),
-        prec( _data_file( "problem/precond", LifeV::NEUMANN_NEUMANN ) )
+        oper( _data_file( "problem/method", "steklovPoincare" ) ),
+        prec( ( LifeV::OperFSPreconditioner )_data_file( "problem/precond", LifeV::NEUMANN_NEUMANN ) )
         {}
     FSIChecker( GetPot const& _data_file,
                 std::string _oper,
