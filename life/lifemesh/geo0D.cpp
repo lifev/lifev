@@ -75,13 +75,14 @@ Geo0D::showMe( bool verbose, std::ostream & out ) const
     out << " Geo0D object " << std::endl;
     if ( verbose )
     {
+        unsigned i;
         out << " Coordinates:" << std::endl;
         Real const * c = coor();
-        for ( unsigned i = 0; i < nDimensions; i++ )
+        for ( i = 0; i < nDimensions-1; i++ )	
         {
             out << c[ i ] << ",  ";
         }
-        out << std::endl << std::endl;
+        out << c[i] << std::endl << std::endl;
     }
     out << "ID= " << id() << "  ";
     out << "----- END OF Geo0D data ---" << std::endl << std::endl;

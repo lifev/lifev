@@ -1025,7 +1025,7 @@ bool fixBoundaryFaces( RegionMesh3D & mesh,
             // Correct extra info
             fit->ad_first() = vol;
             fit->pos_first() = j;
-            if ( fit->markerUnset() )
+            if ( fit->isMarkerUnset() )	
             {
                 inheritWeakerMarker( *fit );
                 if ( verbose )
@@ -1532,7 +1532,7 @@ p1top2( RegionMesh & mesh, std::ostream & out = std::cout )
         //#define JFG
         //#ifndef JFG
         // original version: DOES NOT work when the edges are not give in the mesh file
-        if ( pe->markerUnset() )
+        if ( pe->isMarkerUnset() )	
             inheritWeakerMarker( *pe );
         pp->setMarker( pe->marker() );
         //#else

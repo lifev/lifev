@@ -27,17 +27,18 @@ namespace LifeV
 //MarkerTraits_Base
 const MarkerTraits_Base::EntityFlag MarkerTraits_Base::NULLFLAG = LONG_MIN;
 
+//MM: if you modity these changes here recheck function readNetgenMesh
+//	    becouse it uses this changes
+
 MarkerTraits_Base::EntityFlag MarkerTraits_Base::strongerFlag( EntityFlag const & a, EntityFlag const & b )
 {
-    if ( a == NULLFLAG | b == NULLFLAG )
-        return NULLFLAG;
     return a > b ? a : b ;
 }
 
 MarkerTraits_Base::EntityFlag MarkerTraits_Base::weakerFlag( EntityFlag const & a, EntityFlag const & b )
 {
-    if ( a == NULLFLAG | b == NULLFLAG )
-        return NULLFLAG;
+    if(a==NULLFLAG)return b;			
+    if(b==NULLFLAG)return a;			
     return a < b ? a : b ;
 }
 }

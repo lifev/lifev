@@ -524,10 +524,10 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
                         z[ 1 ] = umesh.point( i1 ).z();
                         z[ 2 ] = umesh.point( i2 ).z();
                         z[ 3 ] = umesh.point( i3 ).z();
-                        volume[ jj ] = calcvol( x, y, z );
-                        if ( volume[ jj ] < minvolume )
+                        volume[ jj-1 ] = calcvol( x, y, z );	
+                        if ( volume[ jj-1 ] < minvolume )
                         {
-                            minvolume = volume[ jj ];
+                            minvolume = volume[ jj-1 ];	 
                             jk = jj;
                         }
                     }
@@ -611,10 +611,10 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
                     z[ 1 ] = umesh.point( i1 ).z();
                     z[ 2 ] = umesh.point( i2 ).z();
                     z[ 3 ] = umesh.point( i3 ).z();
-                    volume[ jj ] = calcvol( x, y, z );
-                    if ( volume[ jj ] < minvolume )
+                    volume[ jj-1 ] = calcvol( x, y, z );	
+                    if ( volume[ jj-1 ] < minvolume )	
                     {
-                        minvolume = volume[ jj ];
+                        minvolume = volume[ jj-1 ];
                         jk = jj;
                     }
                 }

@@ -5,6 +5,10 @@ Bugs fixed in 0.5.0:
 [configure]
 * Fixed umfpack check when umfpack is not installed (CP)
 
+[all]
+* fixed little bugs in convDiffReactSolverPC,
+  basisElSh,currentFE,defQuadRuleFE (MM)
+
 New in 0.5.0:
 =============
 [configure]
@@ -44,6 +48,7 @@ New in 0.5.0:
 * Removed test_darcytetra (VM)
 * oned solver can solve 2 coupled tubes (VM)
 * Centralized all FSI tests in test_fsi (GF)
+* Added test for netgen in lifefilters (MM) 
 
 Bugs fixed in 0.4.0:
 ====================

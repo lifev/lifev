@@ -511,6 +511,7 @@ void CurrentFE::_comp_phiDerDer2()
                 x1 = 0.;
                 for ( int jcoor = 0;jcoor < nbCoor;jcoor++ )
                 {
+		    x1 += tInvJac(icoor,jcoor,ig)*dPhiRef(j,jcoor,ig); 
                     x2 = 0.;
                     for ( int k1 = 0;k1 < nbCoor;k1++ )
                     {

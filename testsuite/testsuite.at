@@ -78,3 +78,7 @@ m4_include([test_masstransport/testsuite.at])
 m4_include([test_mass_coupling/testsuite.at])
 
 m4_include([test_coupling_3d0d/testsuite.at])
+
+AT_BANNER([test_netgen test using netgen meshes])
+m4_include([lifefilters/testsuite.at])
+

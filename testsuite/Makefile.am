@@ -33,7 +33,8 @@ SUBDIRS		= data  \
 		      test_ns_bdf test_ns_cyl test_ns_cyl_flux test_ns_bcvec test_ns_sstress \
 		      test_fsi \
 		      test_masstransport test_mass_coupling test_ns_ipstab \
-                      test_coupling_3d0d
+                      test_coupling_3d0d \
+		      lifefilters
 
 TESTSUITES=$(srcdir)/lifecore/testsuite.at \
 $(srcdir)/lifearray/testsuite.at \
@@ -61,7 +62,8 @@ $(srcdir)/test_ns_sstress/testsuite.at \
 $(srcdir)/test_onedmodel/testsuite.at \
 $(srcdir)/test_p2/testsuite.at \
 $(srcdir)/test_postproc/testsuite.at \
-$(srcdir)/test_q1/testsuite.at 
+$(srcdir)/test_q1/testsuite.at \
+$(srcdir)/lifefilters/testsuite.at 
 
 
 $(srcdir)/package.m4: $(top_srcdir)/configure.in.in

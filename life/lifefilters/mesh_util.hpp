@@ -364,7 +364,7 @@ bool checkMesh3D( RegionMesh3D & mesh, Switch & sw,
             for ( typename RegionMesh3D::Volumes::iterator iv = mesh.volumeList.begin();
                     iv != mesh.volumeList.end();++iv )
             {
-                if ( iv->markerUnset() )
+                if ( iv->isMarkerUnset() )
                     iv->setMarker( mesh.marker() );
             }
         }
