@@ -62,7 +62,7 @@ public:
     typedef typename NavierStokesHandler<Mesh>::Function Function;
     typedef typename NavierStokesHandler<Mesh>::source_type source_type;
 
-    //! Constructor
+    //! Constructors
     /*!
       \param data_file GetPot data file
       \param refFE_u reference FE for the velocity
@@ -84,6 +84,22 @@ public:
                              BCHandler& BCh_u,
                              BCHandler& BCh_mesh );
 
+    NavierStokesAleSolverPC( const GetPot& data_file,
+                             const RefFE& refFE_u,
+                             const RefFE& refFE_p,
+                             const QuadRule& Qr_u,
+                             const QuadRule& bdQr_u,
+                             const QuadRule& Qr_p,
+                             const QuadRule& bdQr_p);
+
+//     NavierStokesAleSolverPC( const GetPot& data_file,
+//                              const RefFE& refFE_u,
+//                              const RefFE& refFE_p,
+//                              const QuadRule& Qr_u,
+//                              const QuadRule& bdQr_u,
+//                              const QuadRule& Qr_p,
+//                              const QuadRule& bdQr_p)
+
     //! Update the right  hand side  for time advancing
     /*!
       \param source volumic source
@@ -103,6 +119,7 @@ public:
     Vector& residual();
     Vector  getDeltaLambda() {return _dt*_du;}
 
+    void setBC(BCHandler &fluidBC, BCHandler &HamonicExtensionBC);
 private:
 
 
@@ -275,8 +292,6 @@ NavierStokesAleSolverPC( const GetPot& data_file, const RefFE& refFE_u, const Re
         _factor_data( _C, _D, _trD, _H, _HinvC, _HinvDtr, _invCtrDP, _dataAztec_i, _dataAztec_s, _BCh_u.hasOnlyEssential(), 1 ),
         _factor_data_jacobian( _C, _D, _trD, _H, _HinvC, _HinvDtr, _invCtrDP, _dataAztec_i, _dataAztec_s, _BCh_u.hasOnlyEssential(), 2 )
 {
-
-
     std::cout << std::endl;
     std::cout << "F-  Pressure unknowns: " << _dim_p << std::endl;
     std::cout << "F-  Velocity unknowns: " << _dim_u << std::endl << std::endl;
@@ -309,6 +324,115 @@ NavierStokesAleSolverPC( const GetPot& data_file, const RefFE& refFE_u, const Re
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 }
 
+
+template <typename Mesh>
+NavierStokesAleSolverPC<Mesh>::
+NavierStokesAleSolverPC( const GetPot& data_file,
+                         const RefFE& refFE_u,
+                         const RefFE& refFE_p,
+                         const QuadRule& Qr_u,
+                         const QuadRule& bdQr_u,
+                         const QuadRule& Qr_p,
+                         const QuadRule& bdQr_p ) :
+    NavierStokesAleHandler<Mesh>( data_file,
+                                  refFE_u,
+                                  refFE_p,
+                                  Qr_u,
+                                  bdQr_u,
+                                  Qr_p,
+                                  bdQr_p),
+    _pattM_u_block       ( _dof_u ),
+    _pattM_u             ( _pattM_u_block, "diag" ),
+    _pattC               ( _dof_u, 3 ),
+    _pattD_block         ( _dof_p, _dof_u ),
+    _pattD               ( _pattD_block ),
+    _pattDtr_block       ( _dof_u, _dof_p ),
+    _pattDtr             ( _pattDtr_block ),
+    _D                   ( _pattD ),
+    _trD                 ( _pattDtr ),
+    _trDAux              ( _pattDtr ),
+    _HinvDtr             ( _pattDtr ),
+    _M_u                 ( _pattM_u ),
+    _HinvC               ( _pattC ),
+    _CStokes             ( _pattC ),
+    _C                   ( _pattC ),
+    _CAux                ( _pattC ),
+    _H                   ( _pattC.nRows() ),
+    _elmatC              ( _fe_u.nbNode, nDimensions, nDimensions ),
+    _elmatM_u            ( _fe_u.nbNode, nDimensions, nDimensions ),
+    _elmatDtr            ( _fe_u.nbNode, nDimensions, 0, _fe_p.nbNode, 0, 1 ),
+    _elvec               ( _fe_u.nbNode, nDimensions ),
+    _elvec_du            ( _fe_u.nbNode, nDimensions ),
+    _elvec_dp            ( _fe_p.nbNode, 1 ),
+    _w_loc               ( _fe_u.nbNode, nDimensions ),
+    _uk_loc              ( _fe_u.nbNode, nDimensions ),
+    _pk_loc              ( _fe_p.nbNode, 1 ),
+    _convect             ( _fe_u.nbNode, nDimensions ),
+    _d_loc               ( _fe_u.nbNode, nDimensions ),
+    _dw_loc              ( _fe_u.nbNode, nDimensions ),
+    _dp                  ( _dim_p ),
+    _un                  ( _dim_u ),
+    _du                  ( _dim_u ),
+    _f_u                 ( _dim_u ),
+    _f_duWithOutBC       ( _dim_u ),
+    _f_p                 ( _dim_p ),
+    _f_uWithOutBC        ( _dim_u ),
+    _residual_u          ( _dim_u ),
+    _invCtrDP            ( _dim_u ),
+    _dataAztec_i         ( data_file, "fluid/aztec_i" ),
+    _dataAztec_ii        ( data_file, "fluid/aztec_ii" ),
+    _dataAztec_s         ( data_file, "fluid/aztec_s" ),
+    _factor_data         ( _C, _D, _trD, _H, _HinvC, _HinvDtr, _invCtrDP, _dataAztec_i, _dataAztec_s, true, 1 ),
+    _factor_data_jacobian( _C, _D, _trD, _H, _HinvC, _HinvDtr, _invCtrDP, _dataAztec_i, _dataAztec_s, true, 2 )
+{
+    std::cout << std::endl;
+    std::cout << "F-  Pressure unknowns: " << _dim_p << std::endl;
+    std::cout << "F-  Velocity unknowns: " << _dim_u << std::endl << std::endl;
+    std::cout << "F-  Computing mass matrix... ";
+
+    Chrono chrono;
+    chrono.start();
+
+    // Number of velocity components
+    UInt nc_u = _u.nbcomp();
+
+    // Initializing mass matrix
+    _M_u.zeros();
+
+    Real dti = 1.0 / _dt;
+
+    // loop on volumes: assembling mass term
+    for ( UInt i = 1; i <= _mesh.numVolumes(); ++i )
+    {
+        _fe_u.updateFirstDerivQuadPt( _mesh.volumeList( i ) );
+        _elmatM_u.zero();
+        mass( _rho * dti, _elmatM_u, _fe_u, 0, 0, nc_u );
+        for ( UInt ic = 0; ic < nc_u; ++ic )
+        {
+            assemb_mat( _M_u, _elmatM_u, _fe_u, _dof_u, ic, ic );
+        }
+    }
+
+    chrono.stop();
+    std::cout << "done in " << chrono.diff() << " s." << std::endl;
+}
+
+
+// members
+
+
+
+
+template <typename Mesh>
+void NavierStokesAleSolverPC<Mesh>::
+setBC(BCHandler &fluidBC, BCHandler &HamonicExtensionBC)
+{
+    setFluidBC(fluidBC);
+    setHamonixExtensionBC(HarmonicExtensionBC);
+
+    _factor_data.setFullEssential(fluidBC.hasOnlyEssential());
+    _factor_data_jacobian(fluidBC.hasOnlyEssential());
+}
 
 
 template <typename Mesh>

@@ -62,7 +62,7 @@ public:
     typedef typename ElasticStructureHandler<Mesh>::Function Function;
     typedef typename ElasticStructureHandler<Mesh>::source_type source_type;
 
-    //! Constructor
+    //! Constructors
     /*!
       \param data_file GetPot data file
       \param refFE reference FE for the displacement
@@ -70,8 +70,17 @@ public:
       \param bdQr surface quadrature rule
       \param BCh boundary conditions for the displacement
     */
-    VenantKirchhofSolver( const GetPot& data_file, const RefFE& refFE, const QuadRule& Qr,
-                          const QuadRule& bdQr, BCHandler& BCh );
+
+    VenantKirchhofSolver( const GetPot&   data_file,
+                          const RefFE&    refFE,
+                          const QuadRule& Qr,
+                          const QuadRule& bdQr,
+                          BCHandler     & BCh);
+
+    VenantKirchhofSolver( const GetPot&   data_file,
+                          const RefFE&    refFE,
+                          const QuadRule& Qr,
+                          const QuadRule& bdQr);
 
     //! Update the right  hand side  for time advancing
     /*!
@@ -275,6 +284,103 @@ VenantKirchhofSolver( const GetPot& data_file, const RefFE& refFE, const QuadRul
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 }
+
+
+
+template <typename Mesh>
+VenantKirchhofSolver<Mesh>::
+VenantKirchhofSolver( const GetPot&   data_file,
+                      const RefFE&    refFE,
+                      const QuadRule& Qr,
+                      const QuadRule& bdQr) :
+    ElasticStructureHandler<Mesh>( data_file, refFE, Qr, bdQr ),
+    DataNewton( data_file, "solid/newton" ),
+    _pattM_block( this->_dof ),
+    _pattM( _pattM_block, "diag" ),
+    _pattK( this->_dof, 3 ),
+    _M( _pattM ),
+    _Kl( _pattK ),
+    _K( _pattK ),
+    _C( _pattK ),
+    _J( _pattK ),
+    _elmatK( this->_fe.nbNode, nDimensions, nDimensions ),
+    _elmatM( this->_fe.nbNode, nDimensions, nDimensions ),
+    _elmatC( this->_fe.nbNode, nDimensions, nDimensions ),
+    _elvec( this->_fe.nbNode, nDimensions ),
+    _dk_loc( this->_fe.nbNode, nDimensions ),
+    _rhs( this->_dim ),
+    _rhs_w( this->_dim ),
+    _rhsWithoutBC( this->_dim ),
+    _f( this->_dim ),
+    _residual_d( this->_dim ),
+    _out_iter( "out_iter_solid" ),
+    _out_res( "out_res_solid" ),
+    _time( 0.0 ),
+    _recur( 0 )
+{
+
+    std::cout << std::endl;
+    std::cout << "S-  Displacement unknowns: " << this->_dim << std::endl;
+    std::cout << "S-  Computing mass and linear strain matrices... ";
+
+    _linearSolver.setOptionsFromGetPot( data_file, "solid/aztec" );
+    _linearSolver.setMatrix( _J );
+
+    Chrono chrono;
+    chrono.start();
+
+    // Matrices initialization
+    _M.zeros();
+    _Kl.zeros();
+    _C.zeros();
+    // Number of displacement components
+    UInt nc = this->_d.nbcomp();
+
+    //inverse of dt:
+    Real dti2 = 2.0 / ( this->_dt * this->_dt );
+
+    // Elementary computation and matrix assembling
+    // Loop on elements
+    for ( UInt i = 1; i <= _mesh.numVolumes(); i++ )
+    {
+
+        this->_fe.updateFirstDerivQuadPt( _mesh.volumeList( i ) );
+
+        _elmatK.zero();
+        _elmatM.zero();
+
+        // stiffness
+        stiff_strain( _mu, _elmatK, this->_fe );
+        stiff_div ( 0.5 * _lambda, _elmatK, this->_fe );
+
+        _elmatC.mat() = _elmatK.mat();
+
+        // mass
+        mass( dti2 * _rho, _elmatM, this->_fe, 0, 0, nDimensions );
+
+        _elmatC.mat() += _elmatM.mat();
+
+        // assembling
+        for ( UInt ic = 0;ic < nc;ic++ )
+        {
+            for ( UInt jc = 0;jc < nc;jc++ )
+            {
+                assemb_mat( _Kl, _elmatK, this->_fe, this->_dof, ic, jc );
+                assemb_mat( _C, _elmatC, this->_fe, this->_dof, ic, jc );
+            }
+
+            //mass
+            assemb_mat( _M, _elmatM, this->_fe, this->_dof, ic, ic );
+        }
+    }
+
+    chrono.stop();
+    std::cout << "done in " << chrono.diff() << " s." << std::endl;
+}
+
+
+//
+
 
 template <typename Mesh>
 void VenantKirchhofSolver<Mesh>::

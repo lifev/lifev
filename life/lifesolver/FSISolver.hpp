@@ -88,6 +88,9 @@ public:
                bchandler_type __bchext,
                std::string __oper = "" );
 
+//     FSISolver( GetPot const& datafile,
+//                std::string __oper = "" );
+
     //@}
 
     /** @name Operator overloads

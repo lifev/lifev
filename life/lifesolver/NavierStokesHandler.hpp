@@ -82,7 +82,7 @@ public:
     //! type used for flux computations (see FacesOnSections)
     typedef __gnu_cxx::slist< std::pair< ID, SimpleVect< ID > > > face_dof_type;
 
-    //! Constructor
+    //! Constructors
     /*!
       \param data_file GetPot data file
       \param refFE_u reference FE for the velocity
@@ -94,14 +94,24 @@ public:
       \param BCh_u boundary conditions for the velocity
       \param ord_bdf order of the bdf time advancing scheme and incremental pressure approach (default: Backward Euler)
     */
-    NavierStokesHandler( const GetPot& data_file,
-                         const RefFE& refFE_u,
-                         const RefFE& refFE_p,
+    NavierStokesHandler( const GetPot&   data_file,
+                         const RefFE&    refFE_u,
+                         const RefFE&    refFE_p,
                          const QuadRule& Qr_u,
                          const QuadRule& bdQr_u,
                          const QuadRule& Qr_p,
                          const QuadRule& bdQr_p,
-                         BCHandler& BCh_u );
+                         BCHandler&      BCh_u );
+
+    /*! constructor without BCs */
+    NavierStokesHandler( const GetPot&   data_file,
+                         const RefFE&    refFE_u,
+                         const RefFE&    refFE_p,
+                         const QuadRule& Qr_u,
+                         const QuadRule& bdQr_u,
+                         const QuadRule& Qr_p,
+                         const QuadRule& bdQr_p);
+
 
     //! Sets initial condition for the velocity (here the initial time is 0.0)
     void initialize( const Function& u0 );
@@ -129,6 +139,10 @@ public:
             return _M_source;
         }
 
+    //! checking if BC are set
+    const bool setFluidBC() const {return M_setBC;}
+    //! set the fluid BCs
+    void setFluidBC(BCHandler &BCh_u){_BCh_u = BCh_u; M_setBC = true;}
     //! Update the right  hand side  for time advancing
     /*!
       \param source volumic source
@@ -143,10 +157,7 @@ public:
     mesh_type& mesh() { return _mesh;}
 
     //! returns the BCHandler
-    BCHandler& bcHandler()
-        {
-            return _BCh_u;
-        }
+    BCHandler& bcHandler() {return _BCh_u;}
     //! Returns the velocity vector
     PhysVectUnknown<Vector>& u();
 
@@ -238,18 +249,6 @@ public:
                          const Real&  __x_frontier,
                          std::pair<ID, ID> & __point_on_boundary );
 
-protected:
-    /*! Update the local (face dof) to global dof vector
-
-       \param __faces_on_section : list of faces that were found:
-       first:  global face number (input)
-       second: output vector of size nDofF (nb of dof per face).
-       On output it contains the local (in the face) to global dof.
-       \param __reffe : reference fe.
-   */
-    void _updateDofFaces( face_dof_type & __faces_on_section, const RefFE& __reffe );
-
-public:
     /*! compute the area in the case of a cylindric domain (axis centered on the origin),
       given a boundary point (i.e. the radius).
       The area is approximated using the regular polygonal area formula.
@@ -365,7 +364,6 @@ protected:
     //! Aux. var. for PostProc
     UInt _count;
 
-protected:
     //---------------
     //! stuff to compute the fluxes at each section for a cylindrical tube (mesh: tube20.mesh)
     //! This is hard coded as it strongly depends on the mesh
@@ -382,10 +380,24 @@ protected:
     std::ofstream M_out_fluxes;
     std::ofstream M_out_pressure;
 
+    /*! Update the local (face dof) to global dof vector
+
+       \param __faces_on_section : list of faces that were found:
+       first:  global face number (input)
+       second: output vector of size nDofF (nb of dof per face).
+       On output it contains the local (in the face) to global dof.
+       \param __reffe : reference fe.
+   */
+    void _updateDofFaces( face_dof_type & __faces_on_section, const RefFE& __reffe );
+
 
 private:
 
+//! private members
     bool          M_setBC;
+
+//! private methods
+    void          initializeMeanValuesPerSection();
 
 };
 
@@ -396,86 +408,106 @@ private:
 //
 
 
-// Constructor
+// Constructors
 template <typename Mesh, typename DataType>
 NavierStokesHandler<Mesh, DataType>::
 NavierStokesHandler( const GetPot& data_file, const RefFE& refFE_u,
                      const RefFE& refFE_p, const QuadRule& Qr_u,
                      const QuadRule& bdQr_u, const QuadRule& Qr_p,
                      const QuadRule& bdQr_p, BCHandler& BCh_u ) :
-    DataType( data_file ),
-    _refFE_u( refFE_u ),
-    _refFE_p( refFE_p ),
-    _dof_u( this->_mesh, _refFE_u ),
-    _dof_p( this->_mesh, _refFE_p ),
-    _dim_u( _dof_u.numTotalDof() ),
-    _dim_p( _dof_p.numTotalDof() ),
-    _Qr_u( Qr_u ),
-    _bdQr_u( bdQr_u ),
-    _Qr_p( Qr_p ),
-    _bdQr_p( bdQr_p ),
-    _fe_u( _refFE_u, getGeoMap( this->_mesh ), _Qr_u ),
-    _feBd_u( _refFE_u.boundaryFE(), getGeoMap( this->_mesh ).boundaryMap(),
-             _bdQr_u ),
-    _fe_p( _refFE_p, getGeoMap( this->_mesh ), _Qr_p ),
-    _u( _dim_u ),
-    _p( _dim_p ),
-    _BCh_u( BCh_u ),
-    _bdf( this->_order_bdf ), _ns_post_proc( this->_mesh, _feBd_u, _dof_u,
-                                             NDIM ),  // /******************
-    _count( 0 ),
+    DataType                           ( data_file ),
+    _refFE_u                           ( refFE_u ),
+    _refFE_p                           ( refFE_p ),
+    _dof_u                             ( this->_mesh, _refFE_u ),
+    _dof_p                             ( this->_mesh, _refFE_p ),
+    _dim_u                             ( _dof_u.numTotalDof() ),
+    _dim_p                             ( _dof_p.numTotalDof() ),
+    _Qr_u                              ( Qr_u ),
+    _bdQr_u                            ( bdQr_u ),
+    _Qr_p                              ( Qr_p ),
+    _bdQr_p                            ( bdQr_p ),
+    _fe_u                              ( _refFE_u,
+                                         getGeoMap( this->_mesh ),
+                                         _Qr_u ),
+    _feBd_u                            ( _refFE_u.boundaryFE(),
+                                         getGeoMap( this->_mesh ).boundaryMap(),
+                                         _bdQr_u ),
+    _fe_p                              ( _refFE_p,
+                                         getGeoMap( this->_mesh ),
+                                         _Qr_p ),
+    _u                                 ( _dim_u ),
+    _p                                 ( _dim_p ),
+    _BCh_u                             ( BCh_u ),
+    _bdf                               ( this->_order_bdf ),
+    _ns_post_proc                      ( this->_mesh, _feBd_u, _dof_u, NDIM ),
+    _count                             ( 0 ),
     //! stuff to compute the fluxes at each section (ex. of mesh: tube20.mesh)
-    M_nb_sections( NbZSections() ),
-    M_z_section( M_nb_sections ),
+    M_nb_sections                      ( NbZSections() ),
+    M_z_section                        ( M_nb_sections ),
     M_list_of_faces_on_section_velocity( M_nb_sections ),
     M_list_of_faces_on_section_pressure( M_nb_sections ),
-    M_list_of_points_on_boundary( M_nb_sections ),
-    M_out_areas("Areas.res"), M_out_areas_polygon("AreasPolygon.res"),
-    M_out_fluxes("Fluxes.res"), M_out_pressure("Pressure.res")
+    M_list_of_points_on_boundary       ( M_nb_sections ),
+    M_out_areas                        ("Areas.res"),
+    M_out_areas_polygon                ("AreasPolygon.res"),
+    M_out_fluxes                       ("Fluxes.res"),
+    M_out_pressure                     ("Pressure.res")
 {
-    if ( this->computeMeanValuesPerSection() == 1 ) {
-        //---------------
-        //! stuff to compute the fluxes at each section for a cylindrical tube
-        //! (ex. of mesh: tube20.mesh)
-        //---------------
-
-        if ( ! this->_mesh.hasInternalFaces() )
-            ERROR_MSG("The mesh must have all internal faces built up. Check that 'mesh_faces = all' in the data file.");
-        if ( M_nb_sections < 2 )
-            ERROR_MSG("We can't compute the mean values on less than 2 sections.");
-        ASSERT( ZSectionFinal() - ZSectionInit() > 0,
-                "We can't compute the mean values on less than 2 sections.");
-
-        for ( int izs = 0; izs < M_nb_sections ; izs ++  ){
-            M_z_section[ izs ] = ZSectionInit() + Real(izs) * ( ZSectionFinal() - ZSectionInit() )
-                / Real(M_nb_sections-1); // mesh dependent (length of tube=5)
-        }
-
-        for ( int izs = 0; izs < M_nb_sections ; izs ++  ){
-            //! for velocity
-            this->FacesOnSection( M_z_section[izs],
-                                  M_list_of_faces_on_section_velocity[izs],
-                                  M_list_of_faces_on_section_pressure[izs],
-                                  ToleranceSection(),
-                                  XSectionFrontier(), M_list_of_points_on_boundary[izs] );
-            if ( M_list_of_faces_on_section_velocity[izs].size() == 0 ||
-                 M_list_of_faces_on_section_pressure[izs].size() == 0  ) {
-                std::cout << "section z=" << M_z_section[izs] << " size="
-                          << M_list_of_faces_on_section_velocity[izs].size() << std::endl;
-                ERROR_MSG("For this section, no faces found.");
-            }
-        }
-        if ( M_list_of_faces_on_section_velocity.size() == 0 ||
-             M_list_of_faces_on_section_pressure.size() == 0 ) {
-            ERROR_MSG("No list of faces found.");
-        }
-        //---------------
-        //! end of stuff to compute the fluxes
-        //---------------
-    }
-
+    if ( this->computeMeanValuesPerSection() == 1 )
+        initializeMeanValuesPerSection();
 }
 
+
+
+
+template <typename Mesh, typename DataType>
+NavierStokesHandler<Mesh, DataType>::
+NavierStokesHandler( const GetPot&   data_file,
+                     const RefFE&    refFE_u,
+                     const RefFE&    refFE_p,
+                     const QuadRule& Qr_u,
+                     const QuadRule& bdQr_u,
+                     const QuadRule& Qr_p,
+                     const QuadRule& bdQr_p) :
+    DataType                           ( data_file ),
+    _refFE_u                           ( refFE_u ),
+    _refFE_p                           ( refFE_p ),
+    _dof_u                             ( this->_mesh, _refFE_u ),
+    _dof_p                             ( this->_mesh, _refFE_p ),
+    _dim_u                             ( _dof_u.numTotalDof() ),
+    _dim_p                             ( _dof_p.numTotalDof() ),
+    _Qr_u                              ( Qr_u ),
+    _bdQr_u                            ( bdQr_u ),
+    _Qr_p                              ( Qr_p ),
+    _bdQr_p                            ( bdQr_p ),
+    _fe_u                              ( _refFE_u,
+                                         getGeoMap( this->_mesh ),
+                                         _Qr_u ),
+    _feBd_u                            ( _refFE_u.boundaryFE(),
+                                         getGeoMap( this->_mesh ).boundaryMap(),
+                                         _bdQr_u ),
+    _fe_p                              ( _refFE_p,
+                                         getGeoMap( this->_mesh ),
+                                         _Qr_p ),
+    _u                                 ( _dim_u ),
+    _p                                 ( _dim_p ),
+//    _BCh_u                             ( new BCHandler(0) ),
+    _bdf                               ( this->_order_bdf ),
+    _ns_post_proc                      ( this->_mesh, _feBd_u, _dof_u, NDIM ),
+    _count                             ( 0 ),
+    //! stuff to compute the fluxes at each section (ex. of mesh: tube20.mesh)
+    M_nb_sections                      ( NbZSections() ),
+    M_z_section                        ( M_nb_sections ),
+    M_list_of_faces_on_section_velocity( M_nb_sections ),
+    M_list_of_faces_on_section_pressure( M_nb_sections ),
+    M_list_of_points_on_boundary       ( M_nb_sections ),
+    M_out_areas                        ("Areas.res"),
+    M_out_areas_polygon                ("AreasPolygon.res"),
+    M_out_fluxes                       ("Fluxes.res"),
+    M_out_pressure                     ("Pressure.res")
+{
+    if ( this->computeMeanValuesPerSection() == 1 )
+        initializeMeanValuesPerSection();
+}
 
 // Returns the velocity vector
 template <typename Mesh, typename DataType>
@@ -1477,6 +1509,7 @@ void NavierStokesHandler<Mesh, DataType>::uInterpolate( const Function& uFct,
     }
 }
 
+
 template <typename Mesh, typename DataType>
 Real NavierStokesHandler<Mesh, DataType>::pErrorL2( const Function& pexact,
                                           Real time,
@@ -1510,8 +1543,8 @@ Real NavierStokesHandler<Mesh, DataType>::pErrorL2( const Function& pexact,
 
 template <typename Mesh, typename DataType>
 Real NavierStokesHandler<Mesh, DataType>::uErrorL2( const Function& uexact,
-                                          Real time,
-                                          Real* relError )
+                                                    Real time,
+                                                    Real* relError )
 {
     Real normU = 0.;
     UInt nbCompU = _u.nbcomp();
@@ -1532,6 +1565,47 @@ Real NavierStokesHandler<Mesh, DataType>::uErrorL2( const Function& uexact,
     }
     return sqrt( normU );
 }
+
+template <typename Mesh, typename DataType>
+void NavierStokesHandler<Mesh, DataType>::initializeMeanValuesPerSection()
+{
+    //---------------
+    //! stuff to compute the fluxes at each section for a cylindrical tube
+    //! (ex. of mesh: tube20.mesh)
+    //---------------
+
+        if ( ! this->_mesh.hasInternalFaces() )
+            ERROR_MSG("The mesh must have all internal faces built up. Check that 'mesh_faces = all' in the data file.");
+        if ( M_nb_sections < 2 )
+            ERROR_MSG("We can't compute the mean values on less than 2 sections.");
+        ASSERT( ZSectionFinal() - ZSectionInit() > 0,
+                "We can't compute the mean values on less than 2 sections.");
+
+        for ( int izs = 0; izs < M_nb_sections ; izs ++  ){
+            M_z_section[ izs ] = ZSectionInit() + Real(izs) * ( ZSectionFinal() - ZSectionInit() )
+                / Real(M_nb_sections-1); // mesh dependent (length of tube=5)
+        }
+
+        for ( int izs = 0; izs < M_nb_sections ; izs ++  ){
+            //! for velocity
+            this->FacesOnSection( M_z_section[izs],
+                                  M_list_of_faces_on_section_velocity[izs],
+                                  M_list_of_faces_on_section_pressure[izs],
+                                  ToleranceSection(),
+                                  XSectionFrontier(), M_list_of_points_on_boundary[izs] );
+            if ( M_list_of_faces_on_section_velocity[izs].size() == 0 ||
+                 M_list_of_faces_on_section_pressure[izs].size() == 0  ) {
+                std::cout << "section z=" << M_z_section[izs] << " size="
+                          << M_list_of_faces_on_section_velocity[izs].size() << std::endl;
+                ERROR_MSG("For this section, no faces found.");
+            }
+        }
+        if ( M_list_of_faces_on_section_velocity.size() == 0 ||
+             M_list_of_faces_on_section_pressure.size() == 0 ) {
+            ERROR_MSG("No list of faces found.");
+        }
+}
+
 
 }
 #endif

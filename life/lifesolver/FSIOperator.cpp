@@ -119,10 +119,11 @@ FSIOperator::displacementOnInterface()
 
 
 void FSIOperator::transferOnInterface(const Vector      &_vec1,
-                                 const BCHandler   &_BC,
-                                 const std::string &_BCName,
-                                 Vector            &_vec2)
+                                      const BCHandler   &_BC,
+                                      const std::string &_BCName,
+                                      Vector            &_vec2)
 {
+    _vec2 = ZeroVector(_vec2.size());
     int iBC = _BC.getBCbyName(_BCName);
 
     BCBase const &BCInterface = _BC[(UInt) iBC];

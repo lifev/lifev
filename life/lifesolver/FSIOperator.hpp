@@ -163,7 +163,18 @@ public:
     virtual void setup();
 
     dof_interface_type& dofMeshToFluid() { return M_dofMeshToFluid; }
-    dof_interface_type const& dofMeshToFluid() const { return M_dofMeshToFluid; }
+    dof_interface_type const& dofMeshToFluid() const
+        { return M_dofMeshToFluid; }
+    dof_interface_type const& dofStructureTofluidMesh() const
+        { return M_dofStructureToFluidMesh; }
+    dof_interface_type const& dofStructureToReducedFluid() const
+        { return M_dofStructureToReducedFluid; }
+    dof_interface_type const& dofReducedFluidToStructure() const
+        { return M_dofReducedFluidToStructure; }
+    dof_interface_type const& dofFluidToStructure() const
+        { return M_dofFluidToStructure; }
+    dof_interface_type const& dofStructureToSolid() const
+        { return M_dofStructureToSolid; }
 
     quasi_newton_type getReducedLinFluid(){return M_reducedLinFluid;}
 

@@ -66,7 +66,7 @@ class HarmonicExtension
 {
 public:
 
-    //! Constructor for an harmonics extensions
+    //! Constructors for an harmonics extensions
     /*!
       \param mesh the mesh of the reference domain to be moved
       \param mu the "viscosity" in the laplacian operator
@@ -80,11 +80,17 @@ public:
     */
 
     template <typename Mesh>
-    HarmonicExtension( Mesh& mesh,
-                       const Real& diffusion,
+    HarmonicExtension( Mesh&           mesh,
+                       const Real&     diffusion,
                        const QuadRule& Qr,
                        const QuadRule& bdQr,
-                       BCHandler& mesh_BCh );
+                       BCHandler&      mesh_BCh );
+
+    template <typename Mesh>
+    HarmonicExtension( Mesh&           mesh,
+                       const Real&     diffusion,
+                       const QuadRule& Qr,
+                       const QuadRule& bdQr );
 
     //! This method updates the extension of the displacement, i.e. it solves the laplacian proglem
 
@@ -103,6 +109,12 @@ public:
 
     //! Returns a reference to the corresponding Dof object
     const Dof& dofMesh() const;
+
+    //! checking if BC are set
+    const bool setHarmonicExtensionBC() const {return M_setBC;}
+    //! set the mesh BCs
+    void setHarmonicExtensionBC(BCHandler &BCh_HarmonicExtension);
+
 
 protected:
 
@@ -145,6 +157,11 @@ protected:
     //! Auxiliary vector holding the second right hand of the system
     PhysVectUnknown<Vector> _f;
 
+
+private:
+
+    bool          M_setBC;
+
 };
 
 
@@ -168,24 +185,23 @@ HarmonicExtension( Mesh& mesh,
                    const QuadRule& bdQr,
                    BCHandler& mesh_BCh ) :
         _diffusion( diffusion ),
-        _Qr( Qr ),
-        _bdQr( bdQr ),
-        _mesh_BCh( mesh_BCh ),
-        _dof_mesh( mesh, mesh.getRefFE() ),
-        _aPattB( _dof_mesh ),
-        _aPatt( _aPattB, "diag" ),
-        _a( _aPatt ),
-        _fe( mesh.getRefFE(), mesh.getGeoMap(), _Qr ),
-        _feBd( mesh.getRefFE().boundaryFE(), mesh.getGeoMap().boundaryMap(), _bdQr ),
-        _elmat( _fe.nbNode, nDimensions, nDimensions ),
-        _disp( _dof_mesh.numTotalDof() ),
-        _f( _dof_mesh.numTotalDof() )
+        _Qr       ( Qr ),
+        _bdQr     ( bdQr ),
+        _mesh_BCh ( mesh_BCh ),
+        _dof_mesh ( mesh, mesh.getRefFE() ),
+        _aPattB   ( _dof_mesh ),
+        _aPatt    ( _aPattB, "diag" ),
+        _a        ( _aPatt ),
+        _fe       ( mesh.getRefFE(), mesh.getGeoMap(), _Qr ),
+        _feBd     ( mesh.getRefFE().boundaryFE(), mesh.getGeoMap().boundaryMap(), _bdQr ),
+        _elmat    ( _fe.nbNode, nDimensions, nDimensions ),
+        _disp     ( _dof_mesh.numTotalDof() ),
+        _f        ( _dof_mesh.numTotalDof() )
 {
 
     // Loop on elements
     for ( UInt i = 1; i <= mesh.numVolumes(); ++i )
     {
-
         // Updating derivatives
         _fe.updateFirstDerivQuadPt( mesh.volumeList( i ) );
         _elmat.zero();
@@ -201,7 +217,46 @@ HarmonicExtension( Mesh& mesh,
     _disp = ZeroVector( _disp.size() );
 }
 
-// This method updates the extension of the displacement, i.e. it solves the laplacian proglem
+template <typename Mesh>
+HarmonicExtension::
+HarmonicExtension( Mesh& mesh,
+                   const Real& diffusion,
+                   const QuadRule& Qr,
+                   const QuadRule& bdQr ) :
+        _diffusion( diffusion ),
+        _Qr       ( Qr ),
+        _bdQr     ( bdQr ),
+        _dof_mesh ( mesh, mesh.getRefFE() ),
+        _aPattB   ( _dof_mesh ),
+        _aPatt    ( _aPattB, "diag" ),
+        _a        ( _aPatt ),
+        _fe       ( mesh.getRefFE(), mesh.getGeoMap(), _Qr ),
+        _feBd     ( mesh.getRefFE().boundaryFE(), mesh.getGeoMap().boundaryMap(), _bdQr ),
+        _elmat    ( _fe.nbNode, nDimensions, nDimensions ),
+        _disp     ( _dof_mesh.numTotalDof() ),
+        _f        ( _dof_mesh.numTotalDof() )
+{
+    // Loop on elements
+    for ( UInt i = 1; i <= mesh.numVolumes(); ++i )
+    {
+        // Updating derivatives
+        _fe.updateFirstDerivQuadPt( mesh.volumeList( i ) );
+        _elmat.zero();
+        stiff( _diffusion, _elmat, _fe, 0, 0, 3 );
+        // Assembling
+        for ( UInt j = 0; j < 3; ++j )
+        {
+            assemb_mat( _a, _elmat, _fe, _dof_mesh, j, j );
+        }
+    }
+
+    // Initializations
+    _disp = ZeroVector( _disp.size() );
+}
+
+
+
+// This method updates the extension of the displacement, i.e. it solves the laplacian problem
 template <typename Mesh>
 void HarmonicExtension::updateExtension( Mesh& mesh, const Real& time, const UInt recur )
 {
@@ -225,17 +280,17 @@ void HarmonicExtension::updateExtension( Mesh& mesh, const Real& time, const UIn
     bcManageVector( _f, mesh, _dof_mesh, _mesh_BCh, _feBd, time, 1.0 );
 
     // AZTEC stuff
-    int proc_config[ AZ_PROC_SIZE ]; // Processor information:
-    int options[ AZ_OPTIONS_SIZE ]; // Array used to select solver options.
+    int proc_config[ AZ_PROC_SIZE ];   // Processor information:
+    int options[ AZ_OPTIONS_SIZE ];    // Array used to select solver options.
     double params[ AZ_PARAMS_SIZE ];   // User selected solver paramters.
-    int *data_org;                // Array to specify data layout
+    int *data_org;                     // Array to specify data layout
     double status[ AZ_STATUS_SIZE ];   // Information returned from AZ_solve()
     // indicating success or failure.
-    int *update,                   // vector elements updated on this node.
-    *external;                // vector elements needed by this node.
-    int *update_index;            // ordering of update[] and external[]
-    int *extern_index;            // locally on this processor.
-    int N_update;                 // # of unknowns updated on this node
+    int *update,                       // vector elements updated on this node.
+    *external;                         // vector elements needed by this node.
+    int *update_index;                 // ordering of update[] and external[]
+    int *extern_index;                 // locally on this processor.
+    int N_update;                      // # of unknowns updated on this node
 
     AZ_set_proc_config( proc_config, AZ_NOT_MPI );
     AZ_read_update( &N_update, &update, proc_config, dim, 1, AZ_linear );

@@ -65,8 +65,16 @@ public:
       \param bdQr surface quadrature
       \param BCh boundary conditions for the displacement
     */
-    ElasticStructureHandler( const GetPot& data_file, const RefFE& refFE,
-                             const QuadRule& Qr, const QuadRule& bdQr, BCHandler& BCh );
+    ElasticStructureHandler( const GetPot&   data_file,
+                             const RefFE&    refFE,
+                             const QuadRule& Qr,
+                             const QuadRule& bdQr,
+                             BCHandler&      BCh );
+
+    ElasticStructureHandler( const GetPot&   data_file,
+                             const RefFE&    refFE,
+                             const QuadRule& Qr,
+                             const QuadRule& bdQr);
 
     //! Sets initial condition for the displacment en velocity
     void initialize( const Function& d0, const Function& w0 );
@@ -108,6 +116,10 @@ public:
     CurrentBdFE & feBd(){return _feBd;}
     Dof         & dof() {return _dof;}
 
+    //! checking if BC are set
+    const bool setSolidBC() const {return M_setBC;}
+    //! set the fluid BCs
+    void setSolidBC(BCHandler &BCh_solid){_BCh = BCh_solid; M_setBC = true;}
 protected:
 
     //! Reference FE
@@ -149,6 +161,7 @@ protected:
 
 private:
 
+    bool M_setBC;
     void readUnknown( const std::string       &name,
                       PhysVectUnknown<Vector> &unknown);
 
@@ -164,8 +177,11 @@ private:
 // Constructor
 template <typename Mesh>
 ElasticStructureHandler<Mesh>::
-ElasticStructureHandler( const GetPot& data_file, const RefFE& refFE,
-                         const QuadRule& Qr, const QuadRule& bdQr, BCHandler& BCh ):
+ElasticStructureHandler( const GetPot&   data_file,
+                         const RefFE&    refFE,
+                         const QuadRule& Qr,
+                         const QuadRule& bdQr,
+                         BCHandler&      BCh ):
     DataElasticStructure<Mesh>( data_file ),
     _refFE( refFE ),
     _dof( this->_mesh, _refFE ),
@@ -178,6 +194,28 @@ ElasticStructureHandler( const GetPot& data_file, const RefFE& refFE,
     _dRhs( _dim ),
     _w( _dim ),
     _BCh( BCh ),
+    _time( 0 ),
+    _count( 0 )
+{}
+
+template <typename Mesh>
+ElasticStructureHandler<Mesh>::
+ElasticStructureHandler( const GetPot& data_file,
+                         const RefFE& refFE,
+                         const QuadRule& Qr,
+                         const QuadRule& bdQr):
+    DataElasticStructure<Mesh>( data_file ),
+    _refFE( refFE ),
+    _dof( this->_mesh, _refFE ),
+    _dim( _dof.numTotalDof() ),
+    _Qr( Qr ),
+    _bdQr( bdQr ),
+    _fe( _refFE, getGeoMap( this->_mesh ), _Qr ),
+    _feBd( _refFE.boundaryFE(), getGeoMap( this->_mesh ).boundaryMap(), _bdQr ),
+    _d( _dim ),
+    _dRhs( _dim ),
+    _w( _dim ),
+//    _BCh( new BCHandler(0)),
     _time( 0 ),
     _count( 0 )
 {}

@@ -56,7 +56,7 @@ public:
 
     typedef typename NavierStokesHandler<Mesh>::Function Function;
 
-    //! Constructor
+    //! Constructors
     /*!
       \param data_file GetPot data file
       \param refFE_u reference FE for the velocity
@@ -77,6 +77,14 @@ public:
                             const QuadRule& bdQr_p,
                             BCHandler& BCh_u,
                             BCHandler& BCh_mesh );
+
+    NavierStokesAleHandler( const GetPot&   data_file,
+                            const RefFE&    refFE_u,
+                            const RefFE&    refFE_p,
+                            const QuadRule& Qr_u,
+                            const QuadRule& bdQr_u,
+                            const QuadRule& Qr_p,
+                            const QuadRule& bdQr_p);
 
     //! Do nothing destructor
     virtual ~NavierStokesAleHandler()
@@ -151,12 +159,18 @@ private:
 //
 
 
-// Constructor
+// Constructors
 template <typename Mesh>
 NavierStokesAleHandler<Mesh>::
-NavierStokesAleHandler( const GetPot& data_file, const RefFE& refFE_u,
-                        const RefFE& refFE_p, const QuadRule& Qr_u, const QuadRule& bdQr_u,
-                        const QuadRule& Qr_p, const QuadRule& bdQr_p, BCHandler& BCh_u, BCHandler& BCh_mesh ) :
+NavierStokesAleHandler( const GetPot&   data_file,
+                        const RefFE&    refFE_u,
+                        const RefFE&    refFE_p,
+                        const QuadRule& Qr_u,
+                        const QuadRule& bdQr_u,
+                        const QuadRule& Qr_p,
+                        const QuadRule& bdQr_p,
+                        BCHandler&      BCh_u,
+                        BCHandler&      BCh_mesh ) :
         NavierStokesHandler<Mesh>( data_file,
                                    refFE_u,
                                    refFE_p,
@@ -165,22 +179,57 @@ NavierStokesAleHandler( const GetPot& data_file, const RefFE& refFE_u,
                                    Qr_p,
                                    bdQr_p,
                                    BCh_u ),
-        HarmonicExtension( _mesh,
-                           1.0,
-                           quadRuleTetra4pt,
-                           quadRuleTria3pt,
-                           BCh_mesh ),
-        _dispOld( _dof_mesh.numTotalDof() ),
-        _w( _dof_mesh.numTotalDof() ),
-        _wInterp( _dim_u ),
-        _dInterp( _dim_u ),
-        _dwInterp( _dim_u )
+        HarmonicExtension        ( _mesh,
+                                   1.0,
+                                   quadRuleTetra4pt,
+                                   quadRuleTria3pt,
+                                   BCh_mesh ),
+        _dispOld                 ( _dof_mesh.numTotalDof() ),
+        _w                       ( _dof_mesh.numTotalDof() ),
+        _wInterp                 ( _dim_u ),
+        _dInterp                 ( _dim_u ),
+        _dwInterp                ( _dim_u )
 {
-    _factor = data_file( "fluid/miscellaneous/factor", 1.0 );
-    _dispOld = ZeroVector( _dispOld.size() );
-    _w = ZeroVector( _w.size() );
-    _wInterp = ZeroVector( _wInterp.size() );
-    _dInterp = ZeroVector( _dInterp.size() );
+    _factor   = data_file ( "fluid/miscellaneous/factor", 1.0 );
+    _dispOld  = ZeroVector( _dispOld.size() );
+    _w        = ZeroVector( _w.size() );
+    _wInterp  = ZeroVector( _wInterp.size() );
+    _dInterp  = ZeroVector( _dInterp.size() );
+    _dwInterp = ZeroVector( _dwInterp.size() );
+}
+
+
+template <typename Mesh>
+NavierStokesAleHandler<Mesh>::
+NavierStokesAleHandler( const GetPot&   data_file,
+                        const RefFE&    refFE_u,
+                        const RefFE&    refFE_p,
+                        const QuadRule& Qr_u,
+                        const QuadRule& bdQr_u,
+                        const QuadRule& Qr_p,
+                        const QuadRule& bdQr_p ) :
+        NavierStokesHandler<Mesh>( data_file,
+                                   refFE_u,
+                                   refFE_p,
+                                   Qr_u,
+                                   bdQr_u,
+                                   Qr_p,
+                                   bdQr_p ),
+        HarmonicExtension        ( _mesh,
+                                   1.0,
+                                   quadRuleTetra4pt,
+                                   quadRuleTria3pt ),
+        _dispOld                 ( _dof_mesh.numTotalDof() ),
+        _w                       ( _dof_mesh.numTotalDof() ),
+        _wInterp                 ( _dim_u ),
+        _dInterp                 ( _dim_u ),
+        _dwInterp                ( _dim_u )
+{
+    _factor   = data_file ( "fluid/miscellaneous/factor", 1.0 );
+    _dispOld  = ZeroVector( _dispOld.size() );
+    _w        = ZeroVector( _w.size() );
+    _wInterp  = ZeroVector( _wInterp.size() );
+    _dInterp  = ZeroVector( _dInterp.size() );
     _dwInterp = ZeroVector( _dwInterp.size() );
 }
 

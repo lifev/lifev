@@ -27,6 +27,13 @@ HarmonicExtension::getDisplacement()
     return _disp;
 }
 
+
+void HarmonicExtension::setHarmonicExtensionBC( BCHandler &BCh_harmonicExtension )
+{
+    _mesh_BCh = BCh_harmonicExtension;
+    M_setBC   = true;
+}
+
 const Dof& HarmonicExtension::
 dofMesh() const
 {
