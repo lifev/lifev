@@ -35,8 +35,8 @@ namespace LifeV
         M_velo        ( 3*M_solid.dDof().numTotalDof() ),
         M_dz          ( 3*M_solid.dDof().numTotalDof() ),
         M_rhs_dz      ( 3*M_solid.dDof().numTotalDof() ),
-        M_residualS   ( 3*M_solid.dDof().numTotalDof() ),
-        M_residualF   ( 1*M_fluid.uDof().numTotalDof() ),
+        M_residualS   ( M_solid.dDof().numTotalDof() ),
+        M_residualF   ( M_fluid.uDof().numTotalDof() ),
         M_nbEval      (0),
         M_BCh_du      (BCh_du),
         M_BCh_dz      (BCh_dz),
@@ -109,7 +109,7 @@ namespace LifeV
         M_residualS = M_solid.residual();
 
         M_residualF = M_fluid.residual();
-        
+
         //disp = M_dispStruct;
     }
 

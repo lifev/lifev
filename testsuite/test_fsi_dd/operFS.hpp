@@ -87,8 +87,8 @@ namespace LifeV
 
         Vector const & dz()        const {return M_dz;};
 
-        Vector const & residualS() const {return M_residualS;};
-        Vector const & residualF() const {return M_residualS;};
+        PhysVectUnknown<Vector> const & residualS() const {return M_residualS;};
+        PhysVectUnknown<Vector> const & residualF() const {return M_residualF;};
         
         NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >
         &fluid() {return M_fluid;};
@@ -116,8 +116,8 @@ namespace LifeV
         Vector       M_dz;
         Vector       M_rhs_dz;
 
-        Vector       M_residualS;
-        Vector       M_residualF;
+        PhysVectUnknown<Vector>       M_residualS;
+        PhysVectUnknown<Vector>       M_residualF;
         
         UInt         M_nbEval;
 
