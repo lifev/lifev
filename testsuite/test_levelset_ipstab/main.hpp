@@ -75,18 +75,76 @@ namespace LifeV
         }
     };
 
+    class uniform
+    {
+    public:
+        uniform() {};
+        static void set( Real ux, Real uy, Real uz )
+            {
+                M_u[0] = ux;
+                M_u[1] = uy;
+                M_u[2] = uz;
+            }
+        inline Real operator() ( Real /* x */, Real /* y */,
+                                 Real /* z */, int i ) const
+            {
+                return M_u[i+1];
+            }
+        static Real u( Real /* t */, Real /* x */, Real /* y */, Real /* z */,
+                       int i )
+            {
+                return M_u[i+1];
+            }
+    private:
+        static Real M_u[3];
+    };
+
+Real uniform::M_u[3];
+
     /**
        \Analytical expression for signed distance function
     */
 
-    Real sphere(const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& i) {
-        switch(i){
-        case 1:
-            return sqrt( (x - .5) * (x - .5) + (y - .75) * (y - .75) + (z - .5) * (z - .5) ) - .2;
-            break;
+    class sphere {
+    public:
+        static void init( Real x0, Real y0, Real z0, Real r,
+                          Real ux, Real uy, Real uz )
+            {
+                M_x0 = x0;
+                M_y0 = y0;
+                M_z0 = z0;
+                M_r = r;
+                M_ux = ux;
+                M_uy = uy;
+                M_uz = uz;
+            }
+        static Real phi(const Real& t,
+                        const Real& x,
+                        const Real& y,
+                        const Real& z,
+                        const ID& /* i */) {
+            Real dx = M_x0 + M_ux * t - x;
+            Real dy = M_y0 + M_uy * t - y;
+            Real dz = M_z0 + M_uz * t - z;
+            return sqrt( dx*dx + dy*dy + dz*dz ) - M_r;
         }
-        return sqrt( (x - .5) * (x - .5) + (y - .75) * (y - .75) + (z - .5) * (z - .5) ) - .2;
-    }
+    private:
+        static Real M_x0;
+        static Real M_y0;
+        static Real M_z0;
+        static Real M_r;
+        static Real M_ux;
+        static Real M_uy;
+        static Real M_uz;
+    };
+
+Real sphere::M_x0 = 0.5;
+Real sphere::M_y0 = 0.5;
+Real sphere::M_z0 = 0.75;
+Real sphere::M_r = 0.2;
+Real sphere::M_ux = 1.;
+Real sphere::M_uy = 1.;
+Real sphere::M_uz = 1.;
 
     /**
        \Project the analytical velocity field onto finite element space
