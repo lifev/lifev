@@ -38,7 +38,7 @@ namespace LifeV {
     */
 
     template<class Vector>
-    Vector cross_prod(Vector& v1, Vector& v2) {
+    Vector crossProd(Vector& v1, Vector& v2) {
         Vector v;
         v[0] = v1[1] * v2[2] - v2[1] * v1[2];
         v[1] = - v1[0] * v2[2] + v2[0] * v1[2];
@@ -52,7 +52,7 @@ namespace LifeV {
     */
 
     template<class Point>
-    inline Real point_to_point_distance(Point& P1, Point& P2) {
+    inline Real pointToPointDistance(Point& P1, Point& P2) {
         return boost::numeric::ublas::norm_2(P2 - P1);
     }
 
@@ -64,7 +64,7 @@ namespace LifeV {
     */
 
     template<class Point, class Vector>
-    inline Real point_to_plane_distance(Point& P, Point& P0, Vector& n) {
+    inline Real pointToPlaneDistance(Point& P, Point& P0, Vector& n) {
         Real d = - inner_prod(n, P0);
      
         return fabs( ( inner_prod(n, P) + d ) / boost::numeric::ublas::norm_2(n) );
@@ -80,7 +80,7 @@ namespace LifeV {
     */
 
     template<class Point, class Vector>
-    void point_projection_on_plane(Point& P, Point& P0, Vector& n, Point& Q) {
+    void pointProjectionOnPlane(Point& P, Point& P0, Vector& n, Point& Q) {
         Real d = - inner_prod(n, P0);
 
         Real D = pow(boost::numeric::ublas::norm_2(n), 2);
@@ -102,7 +102,7 @@ namespace LifeV {
     */
 
     template<class Point, class FACE>
-    bool point_is_on_face(Point& P, FACE& f) {
+    bool pointIsOnFace(Point& P, FACE& f) {
 
         Real a11 = f.point(2)[0] - f.point(1)[0];
         Real a12 = f.point(3)[0] - f.point(1)[0];
@@ -128,7 +128,7 @@ namespace LifeV {
     */
 
     template<class Point>
-    inline void find_zero_on_edge(Point& P1, Real u1, Point& P2, Real u2, Point& P) {
+    inline void findZeroOnEdge(Point& P1, Real u1, Point& P2, Real u2, Point& P) {
         Real s = fabs(u1) / (fabs(u1) + fabs(u2));
 
         P = s * P2 + (1 - s) * P1;
@@ -138,12 +138,12 @@ namespace LifeV {
        \A functor to determine whether two points coincide up to a certain tolerance
     */
 
-    template<typename Point> class points_coincide : public std::binary_function<Point, Point, bool> {
+    template<typename Point> class pointsCoincide : public std::binary_function<Point, Point, bool> {
     public:
-        points_coincide() { _M_toll = 1e-6; }
-        points_coincide(Real toll) : _M_toll(toll) {}
+        pointsCoincide() { _M_toll = 1e-6; }
+        pointsCoincide(Real toll) : _M_toll(toll) {}
         inline bool operator()(const Point& P1, const Point& P2) const {
-            return point_to_point_distance(P1, P2) < _M_toll;
+            return pointToPointDistance(P1, P2) < _M_toll;
         }
     private:
         Real _M_toll;
@@ -154,7 +154,7 @@ namespace LifeV {
     */
 
     template<class PointType1, class PointType2>
-    void convert_point_type(PointType1& Ppt1, PointType2& Ppt2){
+    void convertPointType(PointType1& Ppt1, PointType2& Ppt2){
         Ppt1[0] = Ppt2.x();
         Ppt1[1] = Ppt2.y();
         Ppt1[2] = Ppt2.z();

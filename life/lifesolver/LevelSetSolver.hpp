@@ -138,7 +138,7 @@ namespace LifeV {
                 else {
                     vector_type v1 = _M_points[1] - _M_points[0];
                     vector_type v2 = _M_points[2] - _M_points[0];
-                    vector_type n = cross_prod(v1, v2);
+                    vector_type n = crossProd(v1, v2);
 
                     Real d = boost::numeric::ublas::norm_2(n);            
                     n /= d;
@@ -161,15 +161,15 @@ namespace LifeV {
 
                 Real d;
 
-                point_projection_on_plane(P, P0, n, Q);
-                projection_is_on_face = point_is_on_face(Q, *this);
+                pointProjectionOnPlane(P, P0, n, Q);
+                projection_is_on_face = pointIsOnFace(Q, *this);
 
                 if (projection_is_on_face) {
-                    d = point_to_point_distance(P, Q);
+                    d = pointToPointDistance(P, Q);
                 } else {
-                    d = point_to_point_distance(P, P0);
+                    d = pointToPointDistance(P, P0);
                     for(int iP = 2; iP <= 3; iP++)
-                        d = std::min( d, point_to_point_distance(P, point(iP)) );
+                        d = std::min( d, pointToPointDistance(P, point(iP)) );
                 }
 
                 return d;
@@ -296,7 +296,7 @@ namespace LifeV {
             for(UInt iP = 1; iP < _mesh.numPoints(); iP++) {
 
                 point_type P;
-                convert_point_type(P, _mesh.pointList(iP));
+                convertPointType(P, _mesh.pointList(iP));
 
                 Real d = _M_face_list.begin()->point_to_face_distance(P);
             
@@ -377,9 +377,9 @@ namespace LifeV {
                         P2[1] = _mesh.pointList(jg2 + 1).y(); 
                         P2[2] = _mesh.pointList(jg2 + 1).z();
 
-                        find_zero_on_edge(P1, u1, P2, u2, P);
+                        findZeroOnEdge(P1, u1, P2, u2, P);
 
-                        points_coincide<point_type> compare(_M_tol);
+                        pointsCoincide<point_type> compare(_M_tol);
                         bool isAlreadyThere = false;
 
                         for(point_list_type::iterator point_it = locPointList.begin(); point_it != locPointList.end(); point_it++)
@@ -451,11 +451,11 @@ namespace LifeV {
             vector_type v1 = P1 - P0;
             vector_type v2 = P2 - P0;
             vector_type v3 = P3 - P0;
-            vector_type n = cross_prod(v1, v2);
+            vector_type n = crossProd(v1, v2);
 
-            Real a12 = inner_prod(cross_prod(v1, v2), n);
-            Real a13 = inner_prod(cross_prod(v1, v3), n);
-            Real a23 = inner_prod(cross_prod(v2, v3), n);
+            Real a12 = inner_prod(crossProd(v1, v2), n);
+            Real a13 = inner_prod(crossProd(v1, v3), n);
+            Real a23 = inner_prod(crossProd(v2, v3), n);
 
             if (a12 * a13 > 0)
                 if (a23 > 0) {
