@@ -19,11 +19,15 @@
 #include "lifeV.hpp"
 #include "NavierStokesAleSolverPC.hpp"
 #include "VenantKirchhofSolver.hpp"
-#include "operFS.hpp"
+#include "nonLinRichardson.hpp"
+#include "steklovPoincareBase.hpp"
+#include "fixedPointBase.hpp"
+#include "exactJacobianBase.hpp"
 #include "dofInterface3Dto3D.hpp"
 #include "ud_functions.hpp"
 #include "regionMesh3D_ALE.hpp"
 #include "zeroDModelSolver.hpp"
+
 
 #include <ensight7Writer.hpp>
 #include <medit_wrtrs.hpp>
@@ -139,9 +143,9 @@ int main(int argc, char** argv)
     // Number of boundary conditions for the fluid velocity,
     // solid displacement, and fluid mesh motion
     //
-    BCHandler BCh_u(4);
-    BCHandler BCh_d(4);
-    BCHandler BCh_mesh(7, BCHandler::HINT_BC_ONLY_ESSENTIAL);
+    BCHandler BCh_u;
+    BCHandler BCh_d;
+    BCHandler BCh_mesh;
 
 
     //========================================================================================
@@ -158,6 +162,10 @@ int main(int argc, char** argv)
     //
     VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> > solid(data_file, feTetraP1, quadRuleTetra4pt,
                                                                 quadRuleTria3pt, BCh_d);
+
+    // The 0d Model
+    //
+    zeroDModelSolver network(data_file);
 
     // Outputs
     fluid.showMe();
@@ -199,7 +207,7 @@ int main(int argc, char** argv)
     compxy[1]=2;
 
     // Boundary conditions for the harmonic extension of the interface solid displacement
-    BCh_mesh.addBC("Interface",            1, Essential, Full,      displ, 3);
+    //BCh_mesh.addBC("Interface",            1, Essential, Full,      displ, 3);
     BCh_mesh.addBC("Interface_edge_top",  10, Essential, Component, displ, compxy);
     BCh_mesh.addBC("Interface_edge_top",  10, Essential, Component, bcf,   compz);
     BCh_mesh.addBC("Interface_edge_base", 20, Essential, Component, displ, compxy);
@@ -218,36 +226,65 @@ int main(int argc, char** argv)
 
 
     // Boundary conditions for the solid displacement
-    BCh_d.addBC("Interface", 1, Natural, Full, g_wall, 3);
+    //BCh_d.addBC("Interface", 1, Natural, Full, g_wall, 3);
     BCh_d.addBC("Top",       3, Essential, Component, bcf,compz);
     BCh_d.addBC("Base",      2, Essential, Component, bcf, compz);
     BCh_d.addBC("Base_edge", 4, Essential, Full, area,  3);
 
     //========================================================================================
-    //  COUPLED FSI OPERATOR
+    //  COUPLING FS
     //========================================================================================
     //
 
-    BCHandler BCh_du(3, BCHandler::HINT_BC_ONLY_ESSENTIAL);
-    BCHandler BCh_dz(4);
+    UInt method    = data_file("problem/method"    , 0);
+    UInt maxpf     = data_file("problem/maxSubIter", 300);
+    UInt precond   = data_file("problem/precond"   , 1);
+    Real defOmega  = data_file("problem/defOmega"  , 0.01);
+    Real abstol    = data_file("problem/abstol"  , 1.e-07);
+    Real reltol    = data_file("problem/reltol"  , 1.e-04);
+    Real etamax    = data_file("problem/etamax"  , 1.e-03);
+    int linesearch = data_file("problem/linesearch"  , 0);
 
-    operFS oper(fluid, solid, BCh_du, BCh_dz);
+    std::cout << "\n Fluid/Structure interactions \n";
+    std::auto_ptr<operFS> __operFSI;
+    switch(method)
+    {
+        case 0:
+            std::cout << " -- Fixed Point method \n";
+            std::cout << "-------------------------------------------------- \n \n";
+            __operFSI.reset(new fixedPoint(fluid,
+                                           solid,
+                                           data_file,
+                                           BCh_u,
+                                           BCh_d,
+                                           BCh_mesh));
+            break;
+        case 1:
+            std::cout << " -- SteklovPoincare method \n";
+            std::cout << "------------------------------------------------------ \n\n";
+            __operFSI.reset(new steklovPoincare(fluid,
+                                                solid,
+                                                data_file,
+                                                BCh_u,
+                                                BCh_d,
+                                                BCh_mesh));
+            if (precond == 2) defOmega = -1.;
+            break;
+        case 2:
+            std::cout << " -- exactJacobian method\n";
+            std::cout << "----------------------------------------------------\n\n";
+            __operFSI.reset(new exactJacobian(fluid,
+                                              solid,
+                                              data_file,
+                                              BCh_u,
+                                              BCh_d,
+                                              BCh_mesh));
+            break;
+        default:
+            ERROR_MSG("No FSI coupling strategy defined \n");
+    }
 
-    // Passing data from fluid to the structure: du -> dz
-    BCVectorInterface dg_wall(fluid.residual(), dim_fluid, dofFluidToStructure);
-
-    // Boundary conditions for du
-    BCVector du_wall(fluid.dwInterpolated(), dim_fluid); // dw -> du
-    BCh_du.addBC("Wall",        1, Essential, Full, du_wall,  3);
-    BCh_du.addBC("Edge_top",   10, Essential, Full, du_wall,  3);
-    BCh_du.addBC("Edge_base",  20, Essential, Full, du_wall,  3);
-
-    // Boundary conditions for dz
-    BCh_dz.addBC("Interface", 1, Natural,   Full,      dg_wall, 3);
-    BCh_dz.addBC("Top",       3, Essential, Component, bcf,     compz);
-    BCh_dz.addBC("Base",      2, Essential, Component, bcf,     compz);
-    BCh_dz.addBC("Edge_base", 4, Essential, Component, bcf,     compz);
-    //BCh_dz.addBC("Edge_base", 4, Natural, Full, dg_wall, 3); ?????
+    operFS &operFSI = *__operFSI;
 
 
     //========================================================================================
@@ -255,13 +292,14 @@ int main(int argc, char** argv)
     //========================================================================================
     //
 
-    UInt maxpf = 100;
+    int status;
+    int maxiter;
+
     Real dt = fluid.timestep();
     Real T  = fluid.endtime();
+
     fluid.initialize(u0);
     solid.initialize(d0,w0);
-    Real abstol=1.e-7, reltol=0.0, etamax=1.e-3;
-    int status,maxiter,linesearch=0;
 
     std::ofstream nout("num_iter");
     ASSERT(nout,"Error: Output file cannot be opened.");
@@ -274,8 +312,6 @@ int main(int argc, char** argv)
 
     std::ofstream out_iter("iter");
     std::ofstream out_res("res");
-
-    zeroDModelSolver network(data_file);
 
     Real Qin;
     Real Qout;
@@ -301,6 +337,10 @@ int main(int argc, char** argv)
 
     // Temporal loop
     //
+
+    Chrono chrono;
+    chrono.start();
+
     for (Real time=dt; time <= T; time+=dt) {
 
         Qin    = fluid.flux(2);
@@ -308,8 +348,6 @@ int main(int argc, char** argv)
         deltaP = network.getPressureFromQFSI(time, Qin, Qout);
 
         vectorPressure = ScalarVector(dim_fluid, -deltaP);
-
-        //area.setFunction(disp_adaptor(network.radius()));
 
         displacement = network.radius()-1;
 
@@ -320,14 +358,14 @@ int main(int argc, char** argv)
         _M_outfile << "     " << -Qin << ";" << std::endl;
         _M_outfile.close();
 
+        _M_outfile.open("res_Qout.m", std::ios::app);
+        _M_outfile << "     " << Qout << ";" << std::endl;
+        _M_outfile.close();
+
         _M_outfile.open("res_DP.m", std::ios::app);
         _M_outfile << "      " <<  deltaP << ";" << std::endl;
         _M_outfile.close();
-        std::cout << "\nSEIS\n";
-        fluid.timeAdvance(f,time);
-        solid.timeAdvance(f,time);
-        oper.setTime(time);
-        std::cout << "\nSETE\n";
+
         // displacement prediction
         disp = solid.d() + dt*(1.5*solid.w() - 0.5*velo_1);
 
@@ -339,8 +377,19 @@ int main(int argc, char** argv)
         maxiter = maxpf;
 
         // the newton solver
-        status = newton(disp,oper, norm_inf_adaptor(), abstol, reltol, maxiter, etamax,
-                        linesearch,out_res,time);
+        if (method == 2)
+        {
+            status = newton(disp, operFSI, norm_inf_adaptor(),
+                            abstol, reltol, maxiter, etamax,
+                            linesearch, out_res, time);
+        }
+        else
+        {
+            status = nonLinRichardson(disp, operFSI, norm_inf_adaptor(),
+                                      abstol, reltol, maxiter, etamax,
+                                      linesearch, out_res, time, defOmega);
+        }
+
 
         if(status == 1) {
             std::cout << "Inners iterations failed\n";
@@ -349,11 +398,15 @@ int main(int argc, char** argv)
         else {
             std::cout << "End of time "<< time << std::endl;
             std::cout << "Number of inner iterations       : " << maxiter << std::endl;
-            out_iter << time << " " << maxiter << " " << oper.nbEval() << std::endl;
+            out_iter << time << " " << maxiter << " " << operFSI.nbEval() << std::endl;
             fluid.postProcess();
             solid.postProcess();
         }
+
     }
+
+    chrono.stop();
+    out_res << "Total computation time = " << chrono.diff() << "\n";
 
     _M_outfile.open("res_Qin.m", std::ios::app);
     _M_outfile << "    ]; " << std::endl;
