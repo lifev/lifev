@@ -15,7 +15,7 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /* --------------------------------------------------------------------------*
 /                                                                            /
 /      ...                                                                   /
@@ -62,7 +62,7 @@
 #include <lifeV.hpp>
 
 #if 0
-#ifndef _LIFEV_HH_ 
+#ifndef _LIFEV_HH_
 //more correct version
 typedef size_t UInt;
 typedef std::vector<UInt>::iterator UIIter;
@@ -187,6 +187,10 @@ public:
     void ShowMe();
 
     //! write matrix in sparse matlab format and spy
+    /*! just run the resulting m-file and the matrix is loaded into A
+     *  and its sparsity pattern is displayed.
+     *  @param filename name of the m-file
+     */
     void spy( std::string const &filename );
 
 private:
@@ -287,12 +291,18 @@ public:
     };
 
     void ShowMe();
+
+    //! write matrix in sparse matlab format and spy
+    /*! just run the resulting m-file and the matrix is loaded into A
+     *  and its sparsity pattern is displayed.
+     *  @param filename name of the m-file
+     */
     void spy( std::string const &filename );
 
     //!column-concatenation of two blocks of CSRMatr
     /*  friend CSRMatr<CSRPatt,double>
         colUnify(const CSRMatr<CSRPatt,double> &Mat1,
-        const CSRMatr<CSRPatt,double> &Mat2);*/ 
+        const CSRMatr<CSRPatt,double> &Mat2);*/
     //version without using static : the one to keep (13/12/01)
     friend void
     colUnify( CSRMatr<CSRPatt, double> &ans, const CSRMatr<CSRPatt, double> &Mat1,
@@ -384,6 +394,12 @@ public:
         return _value[ _Patt->locate_index( i, j ).first ];
     };
     //  void ShowMe() const;
+    
+    //! write matrix in sparse matlab format and spy
+    /*! just run the resulting m-file and the matrix is loaded into A
+     *  and its sparsity pattern is displayed.
+     *  @param filename name of the m-file
+     */
     void spy( std::string const &filename );
     //  void diagonalize_row ( UInt const r, DataType const coeff);
     //  void diagonalize ( UInt const r, DataType const coeff, std::vector<DataType> &b, DataType datum);
@@ -515,6 +531,10 @@ public:
     void ShowMe();
 
     //! write matrix in sparse matlab format and spy
+    /*! just run the resulting m-file and the matrix is loaded into A
+     *  and its sparsity pattern is displayed.
+     *  @param filename name of the m-file
+     */
     void spy( std::string const &filename );
 
     //! set entry (r,r) to coeff and rest of row r to zero
@@ -670,7 +690,11 @@ public:
     {
         return _Patt->showMe( true );
     }
-    //! Matrix visualization a la matlab.
+    //! write matrix in sparse matlab format and spy
+    /*! just run the resulting m-file and the matrix is loaded into A
+     *  and its sparsity pattern is displayed.
+     *  @param filename name of the m-file
+     */
     void spy( std::string const &filename );
     //! Assigns matrix diagonal element (r,r) to coeff, other elts
     //! of row r to zero.
@@ -719,9 +743,9 @@ private:
     a vectorial operator.
     AZTEC library can be used with this type of matrix format through
     a user defined matrix-vector product.
- 
+
     This a more efficient implementation in the case of the use of MSR pattern
- 
+
  */
 template <UInt BRows, UInt BCols>
 class MixedMatr<BRows, BCols, MSRPatt, double>
@@ -800,7 +824,11 @@ public:
     {
         return _Patt->showMe( true );
     }
-    //! Matrix visualization a la matlab.
+    //! write matrix in sparse matlab format and spy
+    /*! just run the resulting m-file and the matrix is loaded into A
+     *  and its sparsity pattern is displayed.
+     *  @param filename name of the m-file
+     */
     void spy( std::string const &filename );
     //! Assigns matrix diagonal element (r,r) to coeff, other elts
     //! of row r to zero.
@@ -848,9 +876,9 @@ private:
     a vectorial operator.
     AZTEC library can be used with this type of matrix format through
     a user defined matrix-vector product.
- 
+
     This a more efficient implementation in the case of the use of CSR pattern
- 
+
  */
 template <UInt BRows, UInt BCols>
 class MixedMatr<BRows, BCols, CSRPatt, double>
@@ -928,7 +956,11 @@ public:
     {
         return _Patt->showMe( true );
     }
-    //! Matrix visualization a la matlab.
+    //! write matrix in sparse matlab format and spy
+    /*! just run the resulting m-file and the matrix is loaded into A
+     *  and its sparsity pattern is displayed.
+     *  @param filename name of the m-file
+     */
     void spy( std::string const &filename );
     //! Assigns matrix diagonal element (r,r) to coeff, other elts
     //! of row r to zero.
@@ -1923,7 +1955,7 @@ showMe() const
   std::cout << "**************************" << std::endl;
   std::cout << "     VBR Matrix Pattern   " << std::endl;
   std::cout << std::endl;
- 
+
   std::cout << pare;
   for (PatternDefs::Diff_t i_index=0; i_index <
   static_cast<PatternDefs::Diff_t>(_Patt->nRows()); i_index++)
@@ -2215,13 +2247,13 @@ MSRMatr<DataType>&
 MSRMatr<DataType>::operator* (const DataType num, MSRMatr<DataType>& M)
   {
     UInt stop=_Patt->nNz();
- 
+
     for (UInt i=0;i<stop;++i)
       _value[i]=num*M.value()[i];
- 
+
    return *this;
   }
- 
+
       */
 
 template <class DataType>
