@@ -63,7 +63,9 @@ public:
     //@{
 
     //! default constructor
-    SolverAztec(std::string filename="data");
+    //! @param filename GetPot data file containing options for solver in
+    //!        section "aztec"
+    SolverAztec( std::string filename="" );
 
     //! create a new instance
     static SolverAztec* New();
