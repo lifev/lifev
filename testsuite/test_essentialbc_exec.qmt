@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<!DOCTYPE extension
+  PUBLIC '-//QM/2.1/Extension//EN'
+  'http://www.codesourcery.com/qm/dtds/2.1/-//qm/2.1/extension//en.dtd'>
+<extension class="command.ShellScriptTest" kind="test"><argument name="stdin"><text/></argument><argument name="stderr"><text/></argument><argument name="stdout"><text/></argument><argument name="prerequisites"><set><tuple><text>test_essentialbc_comp</text><enumeral>PASS</enumeral></tuple></set></argument><argument name="target_group"><text>.*</text></argument><argument name="exit_code"><integer>0</integer></argument><argument name="environment"><set/></argument><argument name="script"><text>srcdir=`cat Makefile | grep &quot;^srcdir =&quot; | awk 'BEGIN{FS=&quot;=&quot;}{print $2}'`
+sh $srcdir/run.sh -e -t=test_essentialbc </text></argument><argument name="arguments"><set><text/></set></argument><argument name="timeout"><integer>-1</integer></argument><argument name="resources"><set/></argument></extension>
