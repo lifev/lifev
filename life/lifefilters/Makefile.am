@@ -24,11 +24,12 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 INCLUDES	= $(all_includes)
 
-include_HEADERS	= gmsh_wrtrs.hpp medit_wrtrs.hpp openDX_wrtrs.hpp vtk_wrtrs.hpp mesh_util.hpp readMesh2D.hpp readMesh3D.hpp
+include_HEADERS	= gmsh_wrtrs.hpp medit_wrtrs.hpp openDX_wrtrs.hpp vtk_wrtrs.hpp gmv_wrtrs.hpp\
+                    mesh_util.hpp readMesh2D.hpp readMesh3D.hpp
 
 lib_LTLIBRARIES	= liblifefilters.la
 
-liblifefilters_la_SOURCES	= medit_wrtrs.cpp vtk_wrtrs.cpp readMesh3D.cpp
+liblifefilters_la_SOURCES	= medit_wrtrs.cpp vtk_wrtrs.cpp readMesh3D.cpp 
 liblifefilters_la_LIBADD	= ../lifefem/liblifefem.la
 
 include $(top_srcdir)/admin/Doxyfile.am
