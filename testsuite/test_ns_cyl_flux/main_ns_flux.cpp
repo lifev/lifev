@@ -91,9 +91,7 @@ main(int argc, char** argv)
     __ns->showMe();
     NavierStokesWithFlux<ns_type> __ns_with_flux( __ns );
 
-    //toEnsight<ns_type> EnsightFilter;
     toEnsight EnsightFilter;
-
     __ns_with_flux.doOnIterationFinish( EnsightFilter  );
     __ns_with_flux.solve();
 
