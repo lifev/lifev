@@ -10,13 +10,13 @@
 [./physics]
 density         = 1.0               # density
 viscosity       = 0.035             # viscosity
-inittime        = 0.00              # starttime
+inittime        = 0.00             # starttime
 endtime         = 0.02              # endtime --> two steps for testing purposes
 
 
 [../discretization]
 mesh_dir  = ../data/mesh/inria/  # the directory where the mesh file is
-mesh_file = cyltetra.mesh     # mesh file
+mesh_file =  cyltetra.mesh     #hexa8x8.mesh     # mesh file
 timestep  = 0.01               # timestep
 
 
