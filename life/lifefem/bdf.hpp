@@ -246,8 +246,8 @@ void Bdf::initialize_unk( const Funct& u0,
                             ( *it )
                             ( icmp * size_comp + dof.localToGlobal( iElem, lDof ) - 1 ) =
                                 u0( t0 - backtime * dt, x, y, z, icmp + 1 );
-                            backtime++;
                         }
+                        backtime++;
                     }
                 }
             }
@@ -282,8 +282,8 @@ void Bdf::initialize_unk( const Funct& u0,
                             ( *it )
                             ( icmp * size_comp + dof.localToGlobal( iElem, lDof ) - 1 ) =
                                 u0( t0 - backtime * dt, x, y, z, icmp + 1 );
-                            backtime++;
                         }
+                        backtime++;
                     }
                 }
             }
@@ -314,8 +314,8 @@ void Bdf::initialize_unk( const Funct& u0,
                         {
                             ( *it )
                             ( icmp * size_comp + dof.localToGlobal( iElem, lDof ) - 1 ) = u0( t0 - backtime * dt, x, y, z, icmp + 1 );
-                            backtime++;
                         }
+                        backtime++;
                     }
                 }
             }
@@ -338,8 +338,8 @@ void Bdf::initialize_unk( const Funct& u0,
                 {
                     ( *it )
                     ( icmp * size_comp + dof.localToGlobal( iElem, lDof ) - 1 ) = u0( t0 - backtime * dt, x, y, z, icmp + 1 );
-                    backtime++;
                 }
+                backtime++;
             }
         }
     }
