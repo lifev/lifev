@@ -7,6 +7,7 @@ Luca Formaggia
 Alain Gauthier
 Jean Federich Gerbeau
 Alessandro Veneziani
+Christophe Prud'homme
 
 Many others have contributed to some parts
 
@@ -62,7 +63,10 @@ good luck
 
 
 #$Log: README,v $
-#Revision 1.8  2002-10-29 17:48:44  cvs
+#Revision 1.9  2003-10-15 16:59:28  prudhomm
+#my main contribution to Life ;) : edit the README file
+#
+#Revision 1.8  2002/10/29 17:48:44  cvs
 #*** empty log message ***
 #
 #Revision 1.7  2002/10/29 17:44:33  cvs
