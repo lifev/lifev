@@ -65,6 +65,12 @@ public:
   //! set to zero the matrix (all 3 diagonals)
   void zero();
 
+  //! set the value loc_val at (row , col) in the matrix (may be slow!)
+  void set_mat(UInt row, UInt col, const_R loc_val);
+
+  //! add the value loc_val at (row , col) in the matrix (may be slow!)
+  void set_mat_inc( UInt row , UInt col , const_R loc_val );
+
   //! output
   void showMe(std::ostream& c = std::cout, UInt verbose = 0);
   
@@ -110,7 +116,46 @@ void TriDiagMatrix<R>::zero()
   _M_lowdiag = 0.;
 
 }
-//! set to zero the matrix (all 3 diagonals)
+
+//! set the value loc_val at (row , col) in the matrix (may be slow!)
+template< class R >
+void TriDiagMatrix<R>::set_mat(UInt row, UInt col, const_R loc_val)
+{ 
+  switch ( row - col ) {
+  case 0:
+    _M_diag( row ) = loc_val;
+    break;
+  case 1:
+    _M_lowdiag( col ) = loc_val;
+    break;
+  case -1:
+    _M_updiag( row ) = loc_val;
+    break;
+  default:
+    ERROR_MSG("Not a tridiagonal matrix. Check the indices.");
+  }
+}
+
+//! add the value loc_val at (row , col) in the matrix (may be slow!)
+template< class R >
+void TriDiagMatrix<R>::set_mat_inc( UInt row, UInt col, const_R loc_val )
+{ 
+  switch ( row - col ) {
+  case 0:
+    _M_diag( row ) += loc_val;
+    break;
+  case 1:
+    _M_lowdiag( col ) += loc_val;
+    break;
+  case -1:
+    _M_updiag( row ) += loc_val;
+    break;
+  default:
+    ERROR_MSG("Not a tridiagonal matrix. Check the indices.");
+  }
+}
+
+//! output
 template< class R > 
 void TriDiagMatrix<R>::showMe(std::ostream& c, UInt verbose)
 {
