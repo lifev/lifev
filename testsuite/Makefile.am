@@ -1,4 +1,4 @@
-# -*- makefile -*-
+# -*- makefile; indent-tabs-mode: t -*-
 #
 # 
 #
@@ -89,6 +89,7 @@ AUTOTEST = $(AUTOM4TE) --language=autotest
 $(TESTSUITE): $(srcdir)/testsuite.at $(srcdir)/package.m4 $(TESTSUITES)
 	$(AUTOTEST) -I $(srcdir) $@.at -o $@.tmp
 	mv $@.tmp $@
+	ln -sf $(TESTSUITE)
 
 
 
