@@ -104,8 +104,8 @@ public:
                        void (*matvec)(double*, double*, AZ_MATRIX_STRUCT*,
                                       int*));
 
-    void setTolerance(double tol) {
-        _params[AZ_tol] = tol;
+    void setTolerance(double newTolerance) {
+        M_params[AZ_tol] = newTolerance;
     }
 
     //@}
@@ -135,37 +135,37 @@ public:
 
 private:
     //! private method containing code shared by public setMatrix methods
-    void _setMatrix(MSRMatr<value_type> const& m);
+    void F_setMatrix(MSRMatr<value_type> const& m);
 
     //! data organisation for C
-    int _data_org[AZ_COMM_SIZE];
+    int M_dataOrg[AZ_COMM_SIZE];
 
     //! processor information
-    int _proc_config[AZ_PROC_SIZE];
+    int M_procConfig[AZ_PROC_SIZE];
 
     //! array used to select solver options
-    int _options[AZ_OPTIONS_SIZE];
+    int M_options[AZ_OPTIONS_SIZE];
 
     //! user selected solver parameters
-    double _params[AZ_PARAMS_SIZE];
+    double M_params[AZ_PARAMS_SIZE];
 
     //! information returned from AZ_solve() indicating success or failure
-    double _status[AZ_STATUS_SIZE];
+    double M_status[AZ_STATUS_SIZE];
 
     //! aztec matrix
-    AZ_MATRIX* _matrix;
+    AZ_MATRIX* M_matrix;
 
     //! aztec preconditioner
-    AZ_PRECOND* _precond;
+    AZ_PRECOND* M_precond;
 
     //! number of the next solver to be created
-    static UInt _solverNumber;
+    static UInt S_solverNumber;
 
     //! MSRPatt converted from CSRPatt if matrix given as CSRMatr
-    std::auto_ptr<MSRPatt> _tempPattern;
+    std::auto_ptr<MSRPatt> M_tempPattern;
 
     //! MSRMatr converted from CSRMatr if given as such
-    std::auto_ptr<MSRMatr<value_type> > _tempMatrix;
+    std::auto_ptr<MSRMatr<value_type> > M_tempMatrix;
 };
 
 }
