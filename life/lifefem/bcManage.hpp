@@ -231,8 +231,21 @@ void bcEssentialManage( MatrixType& A, VectorType& b, const MeshType& mesh, cons
             {
                 // Global Dof
                 idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
+#if USE_BOOST_MATRIX
+                Real datum = BCb( BCb( i ) ->id(), BCb.component( j ) );
+
+                using namespace boost::numeric::ublas;
+                matrix_row<MatrixType> mr (A, idDof-1);
+                mr *= 0;
+                matrix_column<MatrixType> mc (A, idDof-1);
+                b -= mc*datum; // correct rhs
+                mc *= 0;
+                A( idDof-1, idDof-1 ) = coef;
+                b( idDof-1 ) = coef*datum;
+#else
                 // Modifying matrix and right hand side
                 A.diagonalize( idDof - 1, coef, b, BCb( BCb( i ) ->id(), BCb.component( j ) ) );
+#endif
             }
         }
     }
@@ -252,8 +265,23 @@ void bcEssentialManage( MatrixType& A, VectorType& b, const MeshType& mesh, cons
                 x = static_cast< const IdentifierEssential* >( BCb( i ) ) ->x();
                 y = static_cast< const IdentifierEssential* >( BCb( i ) ) ->y();
                 z = static_cast< const IdentifierEssential* >( BCb( i ) ) ->z();
+
+#if USE_BOOST_MATRIX
+                Real datum = BCb( t, x, y, z, BCb.component( j ) );
+
+
+                using namespace boost::numeric::ublas;
+                matrix_row<MatrixType> mr (A, idDof-1);
+                mr *= 0;
+                matrix_column<MatrixType> mc (A, idDof-1);
+                b -= mc*datum; // correct rhs
+                mc *= 0;
+                A( idDof-1, idDof-1 ) = coef;
+                b( idDof-1 ) = coef*datum;
+#else
                 // Modifying matrix and right hand side
                 A.diagonalize( idDof - 1, coef, b, BCb( t, x, y, z, BCb.component( j ) ) );
+#endif
             }
         }
     }
@@ -745,9 +773,9 @@ void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Do
                             // Upper diagonal entry of the elementary boundary mass matrix
 //                            sum += mcoef * bdfem.phi( int( idofF - 1 ), l ) * bdfem.phi( int( k - 1 ), l ) *
 //                                   bdfem.weightMeas( l );
-                            sum += BCb.MixteVec( idDof, BCb.component( j ) )*bdfem.phi( int( idofF - 1 ), l ) * 
+                            sum += BCb.MixteVec( idDof, BCb.component( j ) )*bdfem.phi( int( idofF - 1 ), l ) *
                                    bdfem.phi( int( k - 1 ), l ) * bdfem.weightMeas( l );
- 
+
                         }
 
                         // Assembling upper entry.  The boundary mass matrix is symetric
