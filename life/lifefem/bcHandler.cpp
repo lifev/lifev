@@ -239,6 +239,8 @@ bool BCHandler::hasOnlyEssential() const
             __ex << "BCHandler::hasOnlyEssential(): state is not consistent:\n"
                  << "flag from constructor says    " << _fullEssential << "\n"
                  << "added boundary conditions say " << listFullEssential;
+            std::cerr << std::endl << "Throwing exception:\n"
+                      << __ex.str() << std::endl;
             throw std::logic_error( __ex.str() );
         }
         return listFullEssential;
