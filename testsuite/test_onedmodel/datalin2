@@ -21,17 +21,17 @@ left_eigvec12 = -3.
 left_eigvec21 = -1.
 left_eigvec22 = 4.
 # source function for the linear test case
-source10	= 1.
-source20	= 2.
-source11	= 0.
-source12	= 0.
-source21	= 0.
-source22	= 0.
+source10	= 0.
+source20	= 0.
+source11	= -9.
+source12	= 47.
+source21	= -3.
+source22	= 15.
 
 [time]
 timebeg	 = 0.0		# inittime
-timeend	 = 6.0		# endtime
-timestep = 0.001		# timestep		
+timeend	 = 10.0		# endtime
+timestep = 0.01		# timestep		
 
 [discretization]
 mesh_file	= cylhexa.mesh	# mesh file name

@@ -21,16 +21,16 @@ left_eigvec12 = -3.
 left_eigvec21 = -1.
 left_eigvec22 = 4.
 # source function for the linear test case
-source10	= 1.
-source20	= 2.
-source11	= 0.5
-source12	= 0.
-source21	= 0.
-source22	= 0.4
+source10	= 0.
+source20	= 0.
+source11	= 8
+source12	= -12.
+source21	= 1.
+source22	= 1.
 
 [time]
 timebeg	 = 0.0		# inittime
-timeend	 = 6.0		# endtime
+timeend	 = 10.0		# endtime
 timestep = 0.01		# timestep		
 
 [discretization]
