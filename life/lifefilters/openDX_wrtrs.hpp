@@ -67,7 +67,7 @@ void wr_opendx_header( std::string fname, const TheMesh& mesh, const TheDof& dof
 
     std::ofstream ofile( fname.c_str() );
 
-    ASSERT( ofile, "Error: Output file cannot be open" ); //
+    ASSERT( ofile, "Error: Output file cannot be open" );
     UInt nldpe = fem.refFE.nbDofPerEdge;
     UInt nldpv = fem.refFE.nbDofPerVertex;
     UInt nldpf = fem.refFE.nbDofPerFace;
@@ -80,18 +80,17 @@ void wr_opendx_header( std::string fname, const TheMesh& mesh, const TheDof& dof
     UInt nv = mesh.numVertices();
     UInt nf = mesh.numFaces();
     UInt nldof = nle * nldpe + nlv * nldpv + nlf * nldpf + nldpV;
-    //  _totalDof=nV*nldpV+ne*nldpe+nv*nldpv+nf*nldpf;
-    UInt num_points = dof.numTotalDof(); // discuss this with Luca
-    UInt num_points_supp = dof.numTotalDof() - nv; // discuss this with Luca
+    UInt num_points = dof.numTotalDof();
+    UInt num_points_supp = dof.numTotalDof() - nv;
     std::vector<Real> supp_x( num_points_supp, 0.0 );
     std::vector<Real> supp_y( num_points_supp, 0.0 );
     std::vector<Real> supp_z( num_points_supp, 0.0 );
     Real x, y, z;
     char quotes = '"';
 
-    // Coordinates writing
+    // Writiing POSITIONS
 
-    ofile << std::endl; // added by Diego
+    ofile << "#POSITIONS" << std::endl;
     ofile << "object " << quotes << "pos" << quotes << std::endl;
     ofile << "class array ";
     ofile << "type float ";
@@ -183,43 +182,36 @@ void wr_opendx_header( std::string fname, const TheMesh& mesh, const TheDof& dof
 
     ofile << std::endl;
 
-    // connectivity
+    // Writing CONNECTIONS
+    ofile << "#CONNECTIONS" << std::endl;
     ofile << "object " << quotes << "con" << quotes << std::endl;
     ofile << "class array ";
     ofile << "type int ";
-    // Alain: this test was not working in case of using mixed fe
-    //#if defined(LINEAR_P1)
-    // it is replaced by:
     if ( nam_fe == "P1" )
         ofile << "rank " << VRANK << " shape " << nldof;
     else if ( nam_fe == "P1bubble" )
         ofile << "rank " << VRANK << " shape " << nldof - 1;
-    //#elif defined(LINEAR_P2)
     else if ( nam_fe == "P2" )
         ofile << "rank " << VRANK << " shape " << nldof - 6;
-    //#endif
     else if ( nam_fe == "P2tilde" )
         ofile << "rank " << VRANK << " shape " << nldof - 7;
     ASSERT( ( nam_fe == "P1" || nam_fe == "P2" || nam_fe == "P2tilde" ||
               nam_fe == "P1bubble" ),
             "output header defined only for finite element P1, P2 or P2tilde" );
 
-    //#if defined(LINEAR_P1)
     if ( nam_fe == "P1" || nam_fe == "P1bubble" )
         ofile << " items " << nV;
-    //#elif defined(LINEAR_P2)
     else if ( nam_fe == "P2" || nam_fe == "P2tilde" )
         ofile << " items " << nV * 8;
-    //#endif
+
     ofile << " data follows" << std::endl;
 
-    //#if defined(LINEAR_P1)
     if ( nam_fe == "P1" )
     {
         for ( i = 0;i < nV;++i )
         {
             for ( j = 0;j < nldof;++j )
-                ofile << dof.localToGlobal( i + 1, j + 1 ) - 1 << " "; //damned (C vs) Fortran
+                ofile << dof.localToGlobal( i + 1, j + 1 ) - 1 << " ";
 
             ofile << std::endl;
         }
@@ -230,34 +222,21 @@ void wr_opendx_header( std::string fname, const TheMesh& mesh, const TheDof& dof
         for ( i = 0;i < nV;++i )
         {
             for ( j = 0;j < nldof - 1;++j )
-                ofile << dof.localToGlobal( i + 1, j + 1 ) - 1 << " "; //damned (C vs) Fortran
+                ofile << dof.localToGlobal( i + 1, j + 1 ) - 1 << " ";
 
             ofile << std::endl;
         }
     }
 
-
-
-    //#elif defined(LINEAR_P2)
     else if ( nam_fe == "P2" || nam_fe == "P2tilde" )
     {
-        /*
-          for (i=0;i<nV;++i){
-          for (j=0;j<nldof-6;++j)
-          ofile << dof.localToGlobal(i+1,j+1)-1 << " ";//damned (C vs) Fortran
-         
-          ofile << std::endl;
-          }
-         
-        */
-
         int * MyCon = new int[ nldof ];
 
         for ( i = 0;i < nV;++i )
         {
             for ( j = 0;j < nldof;++j )
             {
-                MyCon[ j ] = dof.localToGlobal( i + 1, j + 1 ) - 1; //damned (C vs) Fortran
+                MyCon[ j ] = dof.localToGlobal( i + 1, j + 1 ) - 1;
             }
             ofile << MyCon[ 4 ] << " ";
             ofile << MyCon[ 0 ] << " ";
@@ -307,11 +286,11 @@ void wr_opendx_header( std::string fname, const TheMesh& mesh, const TheDof& dof
             ofile << MyCon[ 6 ] << " ";
             ofile << std::endl;
 
-        } // end for (i = ...
+        }
         delete[] MyCon;
 
     }
-    //#endif
+
     ofile << "attribute " << quotes << "element type" << quotes
     << " string " << quotes << CELL << quotes << std::endl;
     ofile << "attribute " << quotes << "ref" << quotes
@@ -427,8 +406,6 @@ void wr_opendx_scalar( std::string fname, std::string name, VectorType const & U
 
 void wr_opendx_vector( std::string fname, std::string name, std::vector<Real> U,
                        std::vector<Real> V, std::vector<Real> W );
-
-// Version accepting various vector types, Alain 21/01/02
 template <typename VectorType>
 void wr_opendx_vector( std::string fname, std::string name, VectorType U,
                        UInt nbcomp )
@@ -442,7 +419,7 @@ void wr_opendx_vector( std::string fname, std::string name, VectorType U,
     ASSERT( ofile, "Error: Output file cannot be open" );
 
     udim = U.size();
-
+    ofile << "#DATA" << std::endl;
     ofile << "object " << quotes << nameExt << quotes << std::endl;
     ofile << "class array ";
     ofile << "type float ";
