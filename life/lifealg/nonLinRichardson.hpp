@@ -136,11 +136,10 @@ namespace LifeV
 
             linres     = linear_rel_tol;
 
-            muS        = sol;
             
-            f.solvePrec(sol); 
+            //f.solvePrec(sol); 
 
-            muS        = sol - muS;
+            f.evalResidual(residual, sol, iter);
             
 /*
               linres contains the relative linear tolerance achieved by the
@@ -148,6 +147,8 @@ namespace LifeV
 */
 
             step  = aitken.computeDeltaLambda(sol, muS, muF);
+
+            muS   = sol;
 
             sol   = sol - step;
             
@@ -163,82 +164,82 @@ namespace LifeV
               gmres, see formula (3.7) and (3.9) of Brown & Saad (1990))
 */
 
-            lambda = 1.;
+//             lambda = 1.;
 
-            //
-            // -- line search
-            //
+//             //
+//             // -- line search
+//             //
 
-            switch(linesearch)
-            {
-                case 0:// no linesearch
-                    sol += step;
-                    f.evalResidual(residual, sol, iter);
-                    normRes = norm(residual);
-                    break;
-                case 1:
-                    lineSearch_parab(f, norm, residual, sol, step, normRes, lambda, iter);
-                    break;
-                case 2: // recommended
-                    lineSearch_cubic(f, norm, residual, sol, step, normRes, lambda, slope, iter);
-                    break;
-                default:
-                    cout << "Unknown linesearch \n";
-                    exit(1);
-            }
+//             switch(linesearch)
+//             {
+//                 case 0:// no linesearch
+//                     sol += step;
+//                     f.evalResidual(residual, sol, iter);
+//                     normRes = norm(residual);
+//                     break;
+//                 case 1:
+//                     lineSearch_parab(f, norm, residual, sol, step, normRes, lambda, iter);
+//                     break;
+//                 case 2: // recommended
+//                     lineSearch_cubic(f, norm, residual, sol, step, normRes, lambda, slope, iter);
+//                     break;
+//                 default:
+//                     cout << "Unknown linesearch \n";
+//                     exit(1);
+//             }
             
-            //
-            //-- end of line search
-            //
+//             //
+//             //-- end of line search
+//             //
 
-            normStep = lambda*norm(step);
-            ratio    = normRes/normResOld;
+//             normStep = lambda*norm(step);
+//             ratio    = normRes/normResOld;
 
-            if(ratio > 1)
-            {
-                increase_res ++;
-                cout << "!!! NonLinRichardson warning: increase in residual \n";
+//             if(ratio > 1)
+//             {
+//                 increase_res ++;
+//                 cout << "!!! NonLinRichardson warning: increase in residual \n";
 
-                if(increase_res == max_increase_res)
-                {
-                    cout << "!!! NonLinRichardson:" << max_increase_res
-                         << " consecutive increases in residual" << endl;
-                    maxit = iter;
-                    return 1;
-                }
-            }
-            else increase_res=0;
+//                 if(increase_res == max_increase_res)
+//                 {
+//                     cout << "!!! NonLinRichardson:" << max_increase_res
+//                          << " consecutive increases in residual" << endl;
+//                     maxit = iter;
+//                     return 1;
+//                 }
+//             }
+//             else increase_res=0;
             
-            cout << "------------------------------------------------------------------"
-                 << endl;
-            cout << "    NonLinRichardson " << iter << ": residual=" << normRes << ",  step="
-                 << normStep << endl;
-            cout << "------------------------------------------------------------------"
-                 << endl;
+//             cout << "------------------------------------------------------------------"
+//                  << endl;
+//             cout << "    NonLinRichardson " << iter << ": residual=" << normRes << ",  step="
+//                  << normStep << endl;
+//             cout << "------------------------------------------------------------------"
+//                  << endl;
 
-            out_res << time << "    " << iter << "   " << normRes << endl;
+//             out_res << time << "    " << iter << "   " << normRes << endl;
 
-            //
-            //-- forcing term computation (Eisenstat-Walker)
-            //
+//             //
+//             //-- forcing term computation (Eisenstat-Walker)
+//             //
 
-            if (eta_max > 0)
-            {
-                eta_old = linear_rel_tol;
-                eta_new = gamma*ratio*ratio;
+//             if (eta_max > 0)
+//             {
+//                 eta_old = linear_rel_tol;
+//                 eta_new = gamma*ratio*ratio;
                 
-                if(gamma*eta_old*eta_old > .1)
-                    eta_new = max(eta_new, gamma*eta_old*eta_old);
+//                 if(gamma*eta_old*eta_old > .1)
+//                     eta_new = max(eta_new, gamma*eta_old*eta_old);
 
-                linear_rel_tol = min(eta_new,eta_max);
-                linear_rel_tol = min(eta_max,max(linear_rel_tol,.5*stop_tol/normRes));
+//                 linear_rel_tol = min(eta_new,eta_max);
+//                 linear_rel_tol = min(eta_max,max(linear_rel_tol,.5*stop_tol/normRes));
 
-                cout <<"    NonLinRichardson: forcing term eta = " << linear_rel_tol << endl;
-            }
+//                 cout <<"    NonLinRichardson: forcing term eta = " << linear_rel_tol << endl;
+//             }
             
-            //
-            //-- end of forcing term computation
-            //
+//             //
+//             //-- end of forcing term computation
+//             //
         }
 
         if(normRes > stop_tol)
