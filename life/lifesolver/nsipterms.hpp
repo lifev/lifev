@@ -173,8 +173,8 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix, const VECTOR& state )
         {
             Real coeffPress = M_gammaPress * hK2; // P1, P2 (code)
             //Real coeffPress = M_gammaPress * hK; // P1 p nonsmooth (code)
-            //Real coeffPress = M_gammaPress * // Pk (paper)
-            //                  std::min<Real>(1, bmax*hK/viscosity)*hk2/bmax
+            //Real coeffPress = M_gammaPress * hK2 / // Pk (paper)
+            //    std::max<Real>( bmax, M_viscosity/hK );
 
             ipstab_grad(coeffPress, M_elMatP, M_fe1, M_fe1, M_feBd,
                         nDimensions, nDimensions);
@@ -199,7 +199,7 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix, const VECTOR& state )
         }
 
         // velocity stabilization
-        if ( M_gammaDiv != 0 || M_gammaBeta != 0 )
+        if ( ( M_gammaDiv != 0 || M_gammaBeta != 0 ) && bmax > 0 )
         {
             Real coeffBeta = M_gammaBeta * hK2 / std::max<Real>(bmax, hK2); // code
             //Real coeffBeta = M_gammaBeta * hK2 / bmax; // paper
