@@ -64,7 +64,7 @@ void operFS::eval(Vector& dispNew, Vector& velo, const Vector& disp, int status)
 
 // Residual evaluation
 //
-void operFS::evalResidual(const Vector& disp, int iter, Vector &res) {
+void operFS::evalResidual(Vector &res, const Vector& disp, int iter) {
 
   int status = 0;
   if(iter == 0) status = 1;
@@ -82,7 +82,7 @@ void  operFS::updateJac(Vector& sol,int iter) {
 
 
 //
-void  operFS::solveJac(const Vector& res, double& linear_rel_tol, Vector &step) {
+void  operFS::solveJac(Vector &step, const Vector& res, double& linear_rel_tol) {
 
  // AZTEC specifications for the second system
   int    data_org[AZ_COMM_SIZE];   // data organisation for J
@@ -156,10 +156,7 @@ void  operFS::solveLinearSolid() {
 
   _solid.setRecur(1);
 
-  _solid.solveJac(_dz, tol, _rhs_dz);
-
-//   for (UInt ii = 0; ii < _rhs_dz.size(); ++ii)
-//       std::std::cout << _rhs_dz[ii] << " " << _dz[ii] << std::std::endl;
+  _solid.solveJac(_dz, _rhs_dz, tol);
 
 }
 

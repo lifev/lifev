@@ -55,13 +55,13 @@ class operFS {
   void eval(Vector& dispNew, Vector& veloStruct, const Vector& disp,int status);
 
   //
-  void evalResidual(const Vector& sol, int iter, Vector &res);
+  void evalResidual(Vector &res, const Vector& sol, int iter);
 
   //
   void updateJac(Vector& sol,int iter);
 
   //
-  void solveJac(const Vector& res, double& linear_rel_tol, Vector &step);
+  void solveJac(Vector &step, const Vector& res, double& linear_rel_tol);
 
   //
   void solveLinearFluid();
