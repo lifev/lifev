@@ -61,7 +61,7 @@ public:
 
 SolverPETSC::SolverPETSC( std::string const& __ksp_type,
                           std::string const& __pc_type,
-                          PetscMonitorType __monitor)
+                          PetscMonitorType __monitor )
         :
         _M_p ( new Private )
 {
@@ -143,6 +143,41 @@ SolverPETSC::residualNorm() const
     return __residual;
 }
 
+double
+SolverPETSC::condEst() const
+{
+    double __value;
+    PetscTruth __computed;
+    PetscTruth __found;
+    PetscOptionsGetLogical( PETSC_NULL,
+                            "-ksp_set_compute_singular_values",
+                            &__computed, &__found );
+    if ( true ) //__computed )
+    {
+        PetscReal __emin;
+        PetscReal __emax;
+        KSPComputeExtremeSingularValues( _M_p->__ksp, &__emax, &__emin);
+        __value = __emax/__emin;
+    }
+    else
+    {
+        std::cerr << "Singular values have not been computed" << std::endl;
+        std::cerr
+            << "add 'ksp_set_compute_singular_values = true' to your data file"
+            << std::endl;
+        __value = 0./0.; // aka nan
+    }
+    return __value;
+}
+
+int
+SolverPETSC::iterations() const
+{
+    int __iter;
+    KSPGetIterationNumber( _M_p->__ksp , &__iter );
+    return __iter;
+}
+
 PC const& SolverPETSC::preconditioner() const
 {
     return _M_p->__pc;
@@ -216,7 +251,8 @@ SolverPETSC::solve( array_type& __X,
                     MatStructure __ptype )
 {
     PetscTruth __quiet;
-    PetscOptionsHasName( PETSC_NULL, "-quiet", &__quiet );
+    PetscTruth __found;
+    PetscOptionsGetLogical( PETSC_NULL, "-quiet", &__quiet, &__found );
     if ( !__quiet )
     {
         std::cout << "[SolverPETSC::solve] Solving primal\n";
@@ -230,7 +266,8 @@ SolverPETSC::solveTranspose( array_type& __X,
                              MatStructure __ptype )
 {
     PetscTruth __quiet;
-    PetscOptionsHasName( PETSC_NULL, "-quiet", &__quiet );
+    PetscTruth __found;
+    PetscOptionsGetLogical( PETSC_NULL, "-quiet", &__quiet, &__found );
     if ( !__quiet )
     {
         std::cout << "[SolverPETSC::solveTranspose] Solving transpose\n";
@@ -249,12 +286,6 @@ SolverPETSC::_F_solveCommon( Mat const& __A,
     MatGetSize( __A, &__rowA, &__colA );
     //CHKERRQ(__ierr);
 
-    PetscTruth __quiet;
-    PetscOptionsHasName( PETSC_NULL, "-quiet", &__quiet );
-    if ( !__quiet )
-    {
-        std::cout << "[SolverPETSC::solveTranspose] Solving transpose\n";
-    }
     Vec __x;
     VecCreateSeqWithArray( PETSC_COMM_SELF, __X.size(), &__X[ 0 ], &__x );
 
@@ -274,6 +305,10 @@ SolverPETSC::_F_solveCommon( Mat const& __A,
     //CHKERRQ(__ierr);
 #else
 
+    PetscTruth __quiet;
+    PetscTruth __found;
+    PetscOptionsGetLogical( PETSC_NULL, "-quiet", &__quiet, &__found );
+    
     PetscInt its = 0;
 
     KSPSolve( _M_p->__ksp, __b, __x );
@@ -301,7 +336,7 @@ SolverPETSC::_F_solveCommon( Mat const& __A,
       View info about the solver
     */
     PetscTruth __flag;
-    PetscOptionsHasName( PETSC_NULL, "-nokspview", &__flag );
+    PetscOptionsGetLogical( PETSC_NULL, "-nokspview", &__flag, &__found );
     if ( !__flag )
     {
         KSPView( _M_p->__ksp, PETSC_VIEWER_STDOUT_WORLD );
@@ -357,6 +392,15 @@ void SolverPETSC::setOptionsFromGetPot( const GetPot& dataFile,
         delete[] argv[ i ];
     }
     delete[] argv;
+    
+    // set compute singular values from options
+    // (not supported directly by PETSc)
+    PetscTruth __compute;
+    PetscTruth __found;
+    PetscOptionsGetLogical( PETSC_NULL,
+                            "-ksp_set_compute_singular_values",
+                            &__compute, &__found );
+    KSPSetComputeSingularValues( _M_p->__ksp, __compute );
 }
 
 } // namespace LifeV
