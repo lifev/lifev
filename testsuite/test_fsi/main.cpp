@@ -54,9 +54,39 @@ int main(int argc, char** argv)
     //  TEMPORAL LOOP
     //========================================================================================
 
-    //steklovPoincare oper(data_file);
-//    fixedPoint oper(data_file);
-    exactJacobian oper(data_file);
+    int method  = data_file("problem/method" ,0);
+
+    std::cout << std::endl;
+    std::cout << "Fluid/Structure interactions";
+    std::auto_ptr<operFS> p_oper;
+    switch(method)
+    {
+        case 0:
+            std::cout << " -- Fixed Point method" << std::endl;
+            std::cout << "--------------------------------------------------"
+                      << std::endl;
+            std::cout << std::endl;
+            p_oper.reset(new fixedPoint(data_file));
+            break;
+        case 1:
+            std::cout << " -- SteklovPoincare method" << std::endl;
+            std::cout << "------------------------------------------------------"
+                      << std::endl;
+            std::cout << std::endl;
+            p_oper.reset(new steklovPoincare(data_file));
+            break;
+        case 2:
+            std::cout << " -- exactJacobian method" << std::endl;
+            std::cout << "----------------------------------------------------"
+                      << std::endl;
+            std::cout << std::endl;
+            p_oper.reset(new exactJacobian(data_file));
+            break;
+        default:
+            p_oper.reset(new steklovPoincare(data_file));
+    }
+
+    operFS &oper = *p_oper;
 
     oper.fluid().showMe();
     oper.solid().showMe();
@@ -66,7 +96,7 @@ int main(int argc, char** argv)
     Real T      = oper.fluid().endtime();
 
     Real abstol = 1.e-7;
-    Real reltol = 0.e-4;
+    Real reltol = 1.e-4;
     Real etamax = 1.e-3;
 
     int status;
@@ -116,10 +146,16 @@ int main(int argc, char** argv)
 
         // the newton solver
 
-//         status = nonLinRichardson(disp, oper, norm_inf, abstol, reltol,
-//                         maxiter, etamax, linesearch, out_res,
-//                         time, 0.1);
-        status = newton(disp,oper, norm_inf_adaptor(), abstol, reltol, maxiter, etamax,linesearch,out_res,time);
+        if (method == 2)
+        {
+            status = newton(disp,oper, norm_inf_adaptor(), abstol, reltol, maxiter, etamax,linesearch,out_res,time);
+        }
+        else
+        {
+            status = nonLinRichardson(disp, oper, norm_inf_adaptor(), abstol, reltol,
+                                      maxiter, etamax, linesearch, out_res,
+                                      time, 0.01);
+        }
 
         if(status == 1)
         {
