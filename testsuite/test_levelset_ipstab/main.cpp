@@ -28,7 +28,6 @@
 #include <LevelSetSolver.hpp>
 
 #include "main.hpp"
-#include "ud_functions.hpp"
 #include "bcManage.hpp"
 #include "elemMat.hpp"
 #include "elemOper.hpp"
