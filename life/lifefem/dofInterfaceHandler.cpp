@@ -48,7 +48,7 @@ DofInterfaceHandler::DofInterfaceHandler( const UInt & NbNeigh, const LocalDofPa
 
     for ( UInt i = 0 ; i < _nbNeigh ; ++i )
     {
-        _neighList.push_back( DofInterface3Dto2D( refFE, dof1 ) );
+        _neighList.push_back( dof_interface_type( new DofInterface3Dto2D( refFE, dof1 ) ) );
     }
 }
 
@@ -60,7 +60,7 @@ DofInterfaceHandler::DofInterfaceHandler( const UInt & NbNeigh, const LocalDofPa
 void DofInterfaceHandler::addNeighbor( const LocalDofPattern& refFE, const Dof& dof1 )
 {
     ASSERT_PRE( _nbNeigh != _neighList.size(), "The list of neighbors in the Handler is full." );
-    _neighList.push_back( DofInterface3Dto2D( refFE, dof1 ) );
+    _neighList.push_back( dof_interface_type( new DofInterface3Dto2D( refFE, dof1 ) ) );
 }
 
 //! creates the list of Vectors that store data
@@ -69,17 +69,17 @@ void DofInterfaceHandler::initVectors()
     ASSERT_PRE( _nbNeigh != _InIBCList.size() || _nbNeigh == 0 , "The list of InIBC Vectors in the Handler is full." );
     for ( UInt iter = 0 ; iter < _nbNeigh ; ++iter )
     {
-        ASSERT_PRE( _neighList[ iter ].finalized(), "The DofInterface3Dto2D should be updated before calling initVectors (InIBC)." );
-        _InIBCList.push_back( Vector( _neighList[ iter ].nbInterfaceDof() ) );
+        ASSERT_PRE( _neighList[ iter ]->finalized(), "The DofInterface3Dto2D should be updated before calling initVectors (InIBC)." );
+        _InIBCList.push_back( Vector( _neighList[ iter ]->nbInterfaceDof() ) );
 
     }
     ASSERT_PRE( _nbNeigh != _OutIBCList.size() || _nbNeigh == 0 , "The list of OutIBC Vectors in the Handler is full." );
     for ( UInt iter = 0 ; iter < _nbNeigh ; ++iter )
     {
-        ASSERT_PRE( _neighList[ iter ].finalized(), "The DofInterface3Dto2D should be updated before calling initVectors (OutIBC)." );
-        _OutIBCList.push_back( Vector( _neighList[ iter ].nbInterfaceDof() ) );
+        ASSERT_PRE( _neighList[ iter ]->finalized(), "The DofInterface3Dto2D should be updated before calling initVectors (OutIBC)." );
+        _OutIBCList.push_back( Vector( _neighList[ iter ]->nbInterfaceDof() ) );
 
-        _indexInterfRefMap[ _neighList[ iter ].InterfaceRef() ] = iter;
+        _indexInterfRefMap[ _neighList[ iter ]->InterfaceRef() ] = iter;
     }
 }
 
@@ -91,8 +91,10 @@ void DofInterfaceHandler::initBCVectorInterface()
     ASSERT_PRE( _nbNeigh == _OutIBCList.size(), "The list of OutIBC Vectors in the Handler should be initialized before calling initBCVectorInterface." );
     for ( UInt iter = 0 ; iter < _nbNeigh ; ++iter )
     {
-        ASSERT_PRE( _neighList[ iter ].finalized(), "The DofInterface3Dto2D should be updated before calling initBCVectorInterface." );
-        _bcvList.push_back( BCVectorInterface( _InIBCList[ iter ], _neighList[ iter ].nbInterfaceDof(), _neighList[ iter ] ) );
+        ASSERT_PRE( _neighList[ iter ]->finalized(), "The DofInterface3Dto2D should be updated before calling initBCVectorInterface." );
+
+        BCVectorInterface::dof_interface_type __di = _neighList[ iter ];
+        _bcvList.push_back( BCVectorInterface( _InIBCList[ iter ], _neighList[ iter ]->nbInterfaceDof(), __di ) );
     }
 
 }
@@ -112,10 +114,10 @@ UInt DofInterfaceHandler::NbInterfaceUnknowns() const
     UInt counter = 0;
     for ( UInt iter = 0 ; iter < _nbNeigh ; ++iter )
     {
-        ASSERT_PRE( _neighList[ iter ].nbInterfaceDof() == _InIBCList[ iter ].size() &&
-                    _neighList[ iter ].nbInterfaceDof() == _OutIBCList[ iter ].size(),
+        ASSERT_PRE( _neighList[ iter ]->nbInterfaceDof() == _InIBCList[ iter ].size() &&
+                    _neighList[ iter ]->nbInterfaceDof() == _OutIBCList[ iter ].size(),
                     "The IBC vectors must have the same size as the number of interface dof." );
-        counter += _neighList[ iter ].nbInterfaceDof();
+        counter += _neighList[ iter ]->nbInterfaceDof();
     }
     return counter;
 }
@@ -125,13 +127,13 @@ DofInterface3Dto2D& DofInterfaceHandler::operator[] ( const UInt& i )
 {
     ASSERT_PRE( _nbNeigh == _neighList.size(), "Some neighbors have not been added to the list" );
     ASSERT_BD( i >= 0 && i < _nbNeigh );
-    return _neighList[ i ];
+    return *_neighList[ i ];
 }
 const DofInterface3Dto2D& DofInterfaceHandler::operator[] ( const UInt& i ) const
 {
     ASSERT_PRE( _nbNeigh == _neighList.size(), "Some neighbors have not been added to the list" );
     ASSERT_BD( i >= 0 && i < _nbNeigh );
-    return _neighList[ i ];
+    return *_neighList[ i ];
 }
 
 
@@ -228,8 +230,8 @@ void DofInterfaceHandler::ClearSomeDofInterface3Dto2DList()
 {
     for ( UInt iter = 0 ; iter < _nbNeigh ; ++iter )
     {
-        ASSERT_PRE( _neighList[ iter ].finalized(), "The DofInterface3Dto2D should be updated before calling ClearDofInterface3Dto2DList()." );
-        _neighList[ iter ].ClearLists();
+        ASSERT_PRE( _neighList[ iter ]->finalized(), "The DofInterface3Dto2D should be updated before calling ClearDofInterface3Dto2DList()." );
+        _neighList[ iter ]->ClearLists();
     }
 }
 

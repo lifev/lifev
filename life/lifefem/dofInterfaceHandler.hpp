@@ -40,6 +40,8 @@ class DofInterfaceHandler
 
 public:
 
+    typedef boost::shared_ptr<DofInterface3Dto2D> dof_interface_type;
+
     /*! Default Constructor (call addNeigbor() after for each interface)
       \param NbNeigh  number of neighbouring subdomains
     */
@@ -119,7 +121,7 @@ private:
     const UInt _nbNeigh; //!< number of neighbors
 
     //! list of DofInterface3Dto2D (each one lives on one interface)
-    std::vector< DofInterface3Dto2D > _neighList;
+    std::vector< dof_interface_type > _neighList;
 
     //! list of INPUT Vectors that live on the interfaces (one per interface)
     //! INPUT interface Boundary Conditions values.
