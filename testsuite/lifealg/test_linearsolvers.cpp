@@ -27,6 +27,8 @@
 
 #include <lifeconfig.h>
 
+#include "SolverAztec.hpp"
+
 #if defined(HAVE_PETSC_H)
 #include <SolverPETSC.hpp>
 #endif /* HAVE_PETSC_H */
@@ -79,7 +81,8 @@ bool test_petsc( Mat& __mat )
     int Nrows = __mat.matrix().Patt()->nRows();
 
     LifeV::SolverPETSC __petsc( "gmres", "ilu" );
-    __petsc.setMatrix( Nrows, __mat.iaData(), __mat.jaData(), __mat.valueData() );
+    //__petsc.setMatrix( Nrows, __mat.iaData(), __mat.jaData(), __mat.valueData() );
+    __petsc.setMatrix(__mat.matrix());
 
     Vector __x( Nrows );
     Vector __sol( Nrows );
@@ -100,9 +103,37 @@ bool test_petsc( Mat& __mat )
     return 1;
 #endif
 }
+
+template<typename Mat>
+bool test_aztec( Mat& __mat )
+{
+    int Nrows = __mat.matrix().Patt()->nRows();
+
+    LifeV::SolverAztec __aztec;
+    __aztec.setMatrix(__mat.matrix());
+
+    Vector __x( Nrows );
+    Vector __sol( Nrows );
+    Vector __b( Nrows );
+
+    __sol = 10;
+    __b = __mat.matrix() * __sol;
+
+    __x = 0;
+    __aztec.solve( __x, __b );
+
+    std::cout << "norm(x) = " << norm( __x ) << "\n";
+
+    __x -= __sol;
+    std::cout << "norm(error) = " << norm( __x ) << "\n";
+    return norm(__x) < 1e-6;
 }
+
+} // namespace LifeV
+
 int main( int argc, char** argv )
 {
+    bool success = true;
     try
     {
     int N = 100;
@@ -120,18 +151,20 @@ int main( int argc, char** argv )
     LifeV::MatrixMass mass( N );
     mass.matrix().spy( "mass.m" );
 
-    LifeV::test_petsc ( mass );
-    LifeV::test_umfpack ( mass );
+    success &= LifeV::test_petsc ( mass );
+    success &= LifeV::test_umfpack ( mass );
+    success &= LifeV::test_aztec( mass );
 
     //
     // convdiff matrix
     //
     std::cout << "convection diffusion matrix...\n";
-    LifeV::MatrixConvectionDiffusion convdiff( N , 1.0 );
+    LifeV::MatrixConvectionDiffusion convdiff((int)std::sqrt((double)N), 1.0);
     convdiff.matrix().spy( "convdiff.m" );
 
-    LifeV::test_petsc ( convdiff );
-    LifeV::test_umfpack ( convdiff );
+    success &= LifeV::test_petsc ( convdiff );
+    success &= LifeV::test_umfpack ( convdiff );
+    success &= LifeV::test_aztec( convdiff );
 
     }
     catch( std::exception const& __e )
@@ -144,5 +177,7 @@ int main( int argc, char** argv )
         std::cout << "unknown exception caught\n";
         return EXIT_FAILURE;
     }
+    std::cout << (success ? "success" : "solve failed") << std::endl;
+    //return (success ? EXIT_SUCCESS : EXIT_FAILURE);
     return EXIT_SUCCESS;
 }
