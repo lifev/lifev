@@ -33,9 +33,9 @@ int main(int argc, char** argv)
 
   // Definition of GMRes alghoritm variables and constants
   //
-  Real lambda0,Q,Qn2,Qn1,Qn;
+  Real lambda0,Q,Qno,Qn;
   Real lambda;
-  Real r0,y;
+  Real r0,y,z;
   Real absr0;
   Real pi=3.14159265358979;
   int v; 
@@ -51,28 +51,28 @@ int main(int argc, char** argv)
   BCFunction_Base u_wall(u1);
   BCFunction_Base out_flow(u1);
 
-  // SECOND NS. I resolve once 
+  // Out of temporal loop NS. I resolve once 
   // Boundary conditions definition
   //
-  BCFunction_Base in_flow2(u2);
-  BC_Handler BCh_u2(5);
-  BCh_u2.addBC("Wall",   2, Essential, Full, u_wall,  3);
-  BCh_u2.addBC("Wall-inflow",   4, Essential, Full, u_wall,  3);
-  BCh_u2.addBC("Wall-outflow",   5, Essential, Full, u_wall,  3);
-  BCh_u2.addBC("InFlow2", 1, Natural,   Full, in_flow2, 3);
-  BCh_u2.addBC("OutFlow", 3, Natural,   Full, out_flow, 3);
+  BCFunction_Base in_flowo(uo);
+  BC_Handler BCh_uo(5);
+  BCh_uo.addBC("Wall",   2, Essential, Full, u_wall,  3);
+  BCh_uo.addBC("Wall-inflow",   4, Essential, Full, u_wall,  3);
+  BCh_uo.addBC("Wall-outflow",   5, Essential, Full, u_wall,  3);
+  BCh_uo.addBC("InFlow2", 1, Natural,   Full, in_flowo, 3);
+  BCh_uo.addBC("OutFlow", 3, Natural,   Full, out_flow, 3);
    
   // Navier-Stokes Solver
   //
-  NavierStokesSolverPC< RegionMesh3D<LinearTetra> > ns2(data_file, feTetraP1bubble, feTetraP1,quadRuleTetra64pt, 
-						   quadRuleTria3pt, quadRuleTetra5pt, quadRuleTria3pt, BCh_u2);
-  ns2.showMe();
+  NavierStokesSolverPC< RegionMesh3D<LinearTetra> > nso(data_file, feTetraP1bubble, feTetraP1,quadRuleTetra15pt, 
+						   quadRuleTria3pt, quadRuleTetra5pt, quadRuleTria3pt, BCh_uo);
+  nso.showMe();
 
   // Initialization
   //
-  Real dt = ns2.timestep();  
-  Real startT = ns2.inittime();
-  Real T  = ns2.endtime();
+  Real dt = nso.timestep();  
+  Real startT = nso.inittime();
+  Real T  = nso.endtime();
 
   if(startT > 0.0){
      cout << "initialize velocity and pressure with data from file" << std::endl;
@@ -80,52 +80,51 @@ int main(int argc, char** argv)
      string vinname, cinname;
      indexin << (startT*100);
      vinname = "fluid.res"+indexin.str();
-     ns2.initialize(vinname);}
+     nso.initialize(vinname);}
   else{
      cout << "initialize velocity and pressure with u0 and p0" << std::endl;	
-     ns2.initialize(u02,p0,0.0,dt);
+     nso.initialize(u0o,p0,0.0,dt);
   }
 
   // I solve only one time step because is always the same
   //
   for (Real time=startT+dt ; time <= startT+dt; time+=dt) {
     cout << endl;
-    cout << "start NS2" << endl;
-    ns2.timeAdvance(f,time);
-    ns2.iterate(time); 
+    cout << "start NSo" << endl;
+    nso.timeAdvance(f,time);
+    nso.iterate(time); 
   }
  
-  Qn2=ns2.flux(1); // compute the flux of NS2    
+  Qno=nso.flux(1); // compute the flux of NSo 
   cout << endl;
-  cout << "end NS2" << endl;
+  cout << "end NSo" << endl;
 
   /////////
   // GMRes 
   /////////
 
-  // Definitions to construct the vector lambda and the quantities for the exchange of informations between NS1 and NS3
+  // Definitions to construct the vector lambda 
   //
-  PhysVectUnknown<Vector> u3(ns2.uDof().numTotalDof());
-  UInt dim_lambda = ns2.uDof().numTotalDof(); 
+  UInt dim_lambda = nso.uDof().numTotalDof(); 
   Vector vec_lambda(dim_lambda);
   BCVector bcvec(vec_lambda,dim_lambda,1);
   
-  // Boundary conditions definition FIRST NS
+  // Boundary conditions definition inner NS
   //
-  BC_Handler BCh_u1(5);
-  BCh_u1.addBC("Wall",   2, Essential, Full, u_wall,  3);
-  BCh_u1.addBC("Wall-inflow",   4, Essential, Full, u_wall,  3);
-  BCh_u1.addBC("Wall-outflow",   5, Essential, Full, u_wall,  3);
-  BCh_u1.addBC("OutFlow", 3, Natural,   Full, out_flow, 3);
-  BCh_u1.addBC("InFlow1", 1, Natural,   Full, bcvec, 3); 
+  BC_Handler BCh_u(5);
+  BCh_u.addBC("Wall",   2, Essential, Full, u_wall,  3);
+  BCh_u.addBC("Wall-inflow",   4, Essential, Full, u_wall,  3);
+  BCh_u.addBC("Wall-outflow",   5, Essential, Full, u_wall,  3);
+  BCh_u.addBC("OutFlow", 3, Natural,   Full, out_flow, 3);
+  BCh_u.addBC("InFlow1", 1, Natural,   Full, bcvec, 3); 
 
-  // Definition of the class for the FIRST NS
+  // Definition of the class
   //
-  NavierStokesSolverPC< RegionMesh3D<LinearTetra> > ns1(data_file, feTetraP1bubble, feTetraP1,quadRuleTetra64pt, 
-				       quadRuleTria3pt, quadRuleTetra5pt, quadRuleTria3pt, BCh_u1);
-  ns1.showMe(); 
+  NavierStokesSolverPC< RegionMesh3D<LinearTetra> > ns(data_file, feTetraP1bubble, feTetraP1,quadRuleTetra15pt, 
+				       quadRuleTria3pt, quadRuleTetra5pt, quadRuleTria3pt, BCh_u);
+  ns.showMe(); 
 
-  // Initialization for FIRST NS
+  // Initialization
   //
   if(startT > 0.0){
      cout << "initialize velocity and pressure with data from file" << std::endl;
@@ -133,47 +132,15 @@ int main(int argc, char** argv)
      string vinname, cinname;
      indexin << (startT*100);
      vinname = "fluid.res"+indexin.str();
-     ns1.initialize(vinname);}
+     ns.initialize(vinname);}
   else{
      cout << "initialize velocity and pressure with u0 and p0" << std::endl;	
-     ns1.initialize(u0,p0,0.0,dt);
+     ns.initialize(u0,p0,0.0,dt);
   }
   
-  Real init_flux1=ns1.flux(1);
+  Qn=ns.flux(1);
   cout << endl;
-  cout << "flusso iniziale NS1" << " " << init_flux1 << endl; 
-  
-  // Boundary conditions definition THIRD NS
-  //
-  BC_Handler BCh_u3(5);
-  BCh_u3.addBC("Wall",   2, Essential, Full, u_wall,  3);
-  BCh_u3.addBC("Wall-inflow",   4, Essential, Full, u_wall,  3);
-  BCh_u3.addBC("Wall-outflow",   5, Essential, Full, u_wall,  3);
-  BCh_u3.addBC("OutFlow", 3, Natural,   Full, out_flow, 3);
-  BCh_u3.addBC("InFlow3", 1, Natural,   Full, bcvec, 3);
-
-  // Definition of the class for the THIRD NS
-  //
-  NavierStokesSolverPC< RegionMesh3D<LinearTetra> > ns3(data_file, feTetraP1bubble, feTetraP1,quadRuleTetra64pt, 					       quadRuleTria3pt, quadRuleTetra5pt, quadRuleTria3pt, BCh_u3);
-  ns3.showMe();
-
-  // Initialization for THIRD NS
-  //
-  if(startT > 0.0){
-     cout << "initialize velocity and pressure with data from file" << std::endl;
-     ostringstream indexin;
-     string vinname, cinname;
-     indexin << (startT*100);
-     vinname = "fluid.res"+indexin.str();
-     ns3.initialize(vinname);}
-  else{
-     cout << "initialize velocity and pressure with u0 and p0" << std::endl;	
-     ns3.initialize(u0,p0,0.0,dt);
-  }
-
-  Real init_flux3=ns3.flux(1);
-  cout << endl;
-  cout << "flusso iniziale NS3" << " " << init_flux3 << endl;
+  cout << "initial flux NS" << " " << Qn << endl; 
   
   //ofstream outfile("flusso.txt"); 
 
@@ -185,13 +152,13 @@ int main(int argc, char** argv)
     //
     Q=-1; 
     //Q=-1*cos(2*pi*time); // pulsatile flow
-    //Q=-0.2*ns2.compute_flux(time); //fisiological flux
+    //Q=-0.2*ns.compute_flux(time); //physiological flux
     lambda0=-Q;
 
     //outfile << Q << endl;
 
     // FIRST NS 
-    // BC changing in time for first NS
+    // BC changing in time for NS
     //
     for (UInt i=0 ; i < dim_lambda; ++i) {
       vec_lambda[i]=-lambda0;
@@ -200,21 +167,16 @@ int main(int argc, char** argv)
     // Navier-Stokes Solver
     //
     cout << endl;
-    cout << "start NS1 time" << " " << time << endl;
-    if (time==startT+dt) {
-      ns1.timeAdvance(f,time);
-    }
-    else {
-      ns1.timeAdvance(f,time,u3); // I pass the velocity u3 as the one at the previous time step 
-    }
-    ns1.iterate(time); 
+    cout << "start NS time" << " " << time << endl;
+    ns.timeAdvance(f,time);
+    ns.iterate(time); 
     //
-    // end FIRST NS
+    // end NS
     
-    Qn1=ns1.flux(1); //compute the flux of NS1
+    Qn=ns.flux(1); //compute the flux of NS
 
     // compute the variables to update lambda
-    r0=Qn1-Q;
+    r0=Qn-Q;
     if(r0>0){
       absr0=r0;
       v=1;
@@ -223,23 +185,15 @@ int main(int argc, char** argv)
       absr0=-r0;
       v=-1;
       }
-    y=absr0/Qn2;
-    lambda=lambda0+v*y;    
+    y=absr0/Qno;
+    z=v*y;
+    lambda=lambda0+z;    
+ 
+    // update the velocity and the pressure
+    ns.u()=ns.u()-z*nso.u();    
+    ns.p()=ns.p()-z*nso.p();
 
-    // THIRD NS
-    //BC changing in time for THIRD NS
-    //
-    for (UInt i=0 ; i < dim_lambda; ++i) {
-      vec_lambda[i]=-lambda;
-    }
-    
-    // Navier-Stokes Solver
-    //
-    cout << "start NS3 time" << " " << time << endl;
-    ns3.timeAdvance(f,time);
-    u3=ns3.iterate(time,1); //return the velocity 
-
-    Qn=ns3.flux(1); //compute the flux of NS3: the definitive one
+    Qn=ns.flux(1); //compute the flux of NS: the definitive one
     cout << "imposed flux" << " " << Q << endl;
     cout << "numerical flux" << " " << Qn << endl;
 
@@ -249,11 +203,11 @@ int main(int argc, char** argv)
     string voutname;
     voutname = "fluid.res"+indexout.str();
     fstream Resfile(voutname.c_str(),ios::out | ios::binary);
-    Resfile.write((char*)&ns3.u()(1),ns3.u().size()*sizeof(double));
-    Resfile.write((char*)&ns3.p()(1),ns3.p().size()*sizeof(double));
+    Resfile.write((char*)&ns.u()(1),ns.u().size()*sizeof(double));
+    Resfile.write((char*)&ns.p()(1),ns.p().size()*sizeof(double));
     Resfile.close();
 
-    ns3.postProcess();
+    ns.postProcess();
   }
   return 0;
 }
