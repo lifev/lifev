@@ -135,10 +135,10 @@ public:
   std::vector<DataType> & value()  {return _value;};
 
   //! give the value vector in raw format (suitable for C)
-  DataType * giveRawCSR_value() {return &(_values.front());}
+  DataType * giveRawCSR_value() {return &(_value.front());}
 
   //! give the value vector in const raw format (suitable for C)
-  const DataType * giveRawCSR_value() const {return &(_values.front());}
+  const DataType * giveRawCSR_value() const {return &(_value.front());}
 
   //! assignment operator.
   //! Warning: the two matrices will point to the same pattern
@@ -980,9 +980,11 @@ CSRMatr<PatternType, DataType>::operator= (const MSRMatr<DataType>& msrMatr)
     const Container& ja = _Patt->ja();
     Container::const_iterator ia = _Patt->ia().begin();
     UInt nrows = _Patt->nRows();
-    for(UInt iRow=0; iRow<nrows; ++iRow, ++ia) {
-        for(UInt i=*ia-OFFSET; i<*(ia+1)-OFFSET; ++i, ++value) {
-            iCol = ja[i]-OFFSET;
+    for(UInt iRow=0; iRow<nrows; ++iRow, ++ia)
+    {
+        for(UInt i=*ia-OFFSET; i<*(ia+1)-OFFSET; ++i, ++value)
+        {
+            UInt iCol = ja[i]-OFFSET;
             *value = msrMatr.get_value(iRow, iCol);
         }
     }
@@ -1036,14 +1038,13 @@ CSRMatr(const CSRPatt &ex_pattern)
   _value.resize(ex_pattern.nNz());
 }
 //version for Datatype=Tab2d
-CSRMatr<CSRPatt,Tab2d>::
-CSRMatr(const CSRPatt &ex_pattern, UInt const nr, UInt const nc);
-
-
+template<>
+CSRMatr<CSRPatt,Tab2d>::CSRMatr(const CSRPatt &ex_pattern,
+                                UInt const nr, UInt const nc);
 
 template<typename DataType>
-CSRMatr<CSRPatt,DataType>::
-CSRMatr(const CSRPatt &ex_pattern, const std::vector<DataType> &ex_value)
+CSRMatr<CSRPatt,DataType>::CSRMatr(const CSRPatt &ex_pattern,
+                                   const std::vector<DataType> &ex_value)
 {
   _value.reserve(ex_pattern.nNz()); // in case of block matrix, there is
   // no default constructor for class KNM
@@ -1160,9 +1161,9 @@ trans_mult(const Vector &v) const
 }
 
 // version for block matrices
+template<>
 VectorBlock
-CSRMatr<CSRPatt,Tab2d>::
-trans_mult(const VectorBlock &v);
+CSRMatr<CSRPatt,Tab2d>::trans_mult(const VectorBlock &v);
 
 //
 template<typename DataType>
@@ -1174,7 +1175,7 @@ zero_row(UInt const row)
   typename std::vector<DataType>::iterator end= _value.begin()+
     *(_Patt->give_ia().begin()+row+1-OFFSET);
 
-  transform(start,end,start,nihil); //nihil is the same used for diagonalize
+  transform(start,end,start,this->nihil); //nihil is the same used for diagonalize
   //method in MSRMatr class.
 }
 
@@ -1199,8 +1200,9 @@ operator*(const Vector &v) const
 }
 
 // version for block matrices
-VectorBlock CSRMatr<CSRPatt,Tab2d>::
-operator*(const VectorBlock &v) const;
+template<>
+VectorBlock
+CSRMatr<CSRPatt,Tab2d>::operator*(const VectorBlock &v) const;
 
 // Version for C pointer vector. BEWARE: no check on bounds done !
 template<typename DataType>
@@ -1335,8 +1337,9 @@ spy(std::string  const &filename)
 };
 
 // the case of block matrices with Tab2d block type.
-void CSRMatr<CSRPatt,Tab2d>::
-spy(std::string  const &filename);
+template<>
+void
+CSRMatr<CSRPatt,Tab2d>::spy(std::string  const &filename);
 
 //version without using static (I think it is better)
 // Modified by A. Gilardi. 03/02.
@@ -1351,22 +1354,22 @@ void rowUnify(CSRMatr<CSRPatt,double> &ans, const CSRMatr<CSRPatt,double> &Mat1,
 // passing the known datum to the rhs b.
 template<typename VectorType, typename DataType>
 void zero_row_col(UInt const row, CSRMatr<CSRPatt,double> &trD,
-		  CSRMatr<CSRPatt,double> &D, VectorType &bp,
-		  DataType const datum)
+                  CSRMatr<CSRPatt,double> &D, VectorType &bp,
+                  DataType const datum)
 {
-  // for trD
-  trD.zero_row(row);
+    // for trD
+    trD.zero_row(row);
 
-  // for D
-  UInt j;
-  //loop on the columns of trD involved
-  for ( j= trD._Patt->give_ia()[row-OFFSET];
-	j < trD._Patt->give_ia()[row+1-OFFSET]; j++)
+    // for D
+    UInt j;
+    //loop on the columns of trD involved
+    for ( j= trD._Patt->give_ia()[row-OFFSET];
+          j < trD._Patt->give_ia()[row+1-OFFSET]; j++)
     {
-      // columns of trD become rows of D
-      row_loc= trD._Patt->give_ja()[j];
-      bp[row_loc]-= datum * D._value[trD._Patt->give_jaT()[j]];
-      D._value[trD._Patt->give_jaT()[j]]= 0.;
+        // columns of trD become rows of D
+        UInt row_loc= trD._Patt->give_ja()[j];
+        bp[row_loc]-= datum * D._value[trD._Patt->give_jaT()[j]];
+        D._value[trD._Patt->give_jaT()[j]]= 0.;
     }
 }
 
@@ -1374,9 +1377,9 @@ template<typename DataType>
 void CSRMatr<CSRPatt,DataType>::
 zeros()
 {
-  typename std::vector<DataType>::iterator start= _value.begin();
-  typename std::vector<DataType>::iterator end  = _value.end();
-  fill(start, end, 0.0);
+    typename std::vector<DataType>::iterator start= _value.begin();
+    typename std::vector<DataType>::iterator end  = _value.end();
+    fill(start, end, 0.0);
 }
 
 //---------------------------------------------------------------------
@@ -1981,48 +1984,49 @@ MSRMatr<DataType>::operator* (const DataType num, MSRMatr<DataType>& M)
 template<class DataType>
 void MSRMatr<DataType>::ShowMe()
 {
-  Container::iterator found;
-  int i_first,i_last;
-  std::vector<UInt> vec_temp = _Patt->bindx();
-  UInt _nrows= _Patt->nRows();
-  UInt _ncols= _Patt->nCols();
-  UInt _nnz  = _Patt->nNz();
+    Container::iterator found;
+    int i_first,i_last;
+    std::vector<UInt> vec_temp = _Patt->bindx();
+    UInt _nrows= _Patt->nRows();
+    UInt _ncols= _Patt->nCols();
+    UInt _nnz  = _Patt->nNz();
 
-  std::string pare="[";
-  std::cout << "**************************" << std::endl;
-  std::cout << "     MSR Matrix           " << std::endl;
-  std::cout << std::endl;
-  std::cout << pare;
-  for (UInt i_index=0; i_index < _nrows; ++i_index)
+    std::string pare="[";
+    std::cout << "**************************" << std::endl;
+    std::cout << "     MSR Matrix           " << std::endl;
+    std::cout << std::endl;
+    std::cout << pare;
+    for (UInt i_index=0; i_index < _nrows; ++i_index)
     {
-      std::cout << pare;
-      pare = " [";
-      i_first=_Patt->bindx()[i_index];
-      i_last =_Patt->bindx()[i_index+1];
-      //      std::cout << i_first << " " << i_last << std::endl;
-      for(int j=0;j<_ncols;++j)
-	{
-	  if (j==i_index)
-	    std::cout << " " << _value[i_index] << " ";
-	  else
-	    {
-	      found = find(&vec_temp[i_first],&vec_temp[i_last],j); // I am not supposing any given ordering in _ja
-	      if (found==&vec_temp[i_last])
-		std::cout << " 0 ";
-	      else
-		{
-		  UInt j_index=found-&vec_temp[0];
-		  std::cout << " " << _value[j_index] << " ";
-		}
-	    }
+        std::cout << pare;
+        pare = " [";
+        i_first=_Patt->bindx()[i_index];
+        i_last =_Patt->bindx()[i_index+1];
+        //      std::cout << i_first << " " << i_last << std::endl;
+        for(int j=0;j<_ncols;++j)
+        {
+            if (j==i_index)
+                std::cout << " " << _value[i_index] << " ";
+            else
+            {
+                // I am not supposing any given ordering in _ja
+                found = std::find(&vec_temp[i_first],&vec_temp[i_last],j);
+                if (found==( Container::iterator )&vec_temp[i_last])
+                    std::cout << " 0 ";
+                else
+                {
+                    UInt j_index=found-&vec_temp[0];
+                    std::cout << " " << _value[j_index] << " ";
+                }
+            }
         }
-      if (i_index==_nrows-1)
-        std::cout << " ]] " << std::endl;
-      else
-        std::cout << " ]  " << std::endl;
+        if (i_index==_nrows-1)
+            std::cout << " ]] " << std::endl;
+        else
+            std::cout << " ]  " << std::endl;
     }
-  std::cout << "nnz = " << _nnz << ", nrow = " << _nrows << ", ncol = " << _ncols << std::endl;
-  return;
+    std::cout << "nnz = " << _nnz << ", nrow = " << _nrows << ", ncol = " << _ncols << std::endl;
+    return;
 };
 
 template<typename DataType>
@@ -2173,7 +2177,7 @@ diagonalize(UInt const r, DataType const coeff, std::vector<DataType> &b,
   UInt disp = _Patt->nRows()+1;
   UInt row,col;
 
-  transform(start,end,start,nihil);
+  transform(start,end,start,this->nihil);
 
   for (UInt i=istart;i<iend;++i)
     {
@@ -2209,7 +2213,7 @@ diagonalize(UInt const r, DataType const coeff, Vector &b, DataType datum)
 
   UInt row,col;
 
-  transform(start,end,start,nihil);
+  transform(start,end,start,this->nihil);
 
 
   // Miguel: There is a buh using ybind. Alex, did you fix it?.
@@ -2625,46 +2629,45 @@ template< typename VectorType >
 void
 MixedMatr<BRows, BCols, PatternType, DataType>::
 diagonalize( UInt const row, DataType const coeff, VectorType &b,
-	     DataType datum)
+             DataType datum)
 {
-  UInt nnz= 0, m=0, n=0;
-  Container coldata, pos;
-  coldata.resize(_Patt->nCols());
-  pos.resize(_Patt->nCols());
+    UInt nnz= 0, m=0, n=0;
+    Container coldata, pos;
+    coldata.resize(_Patt->nCols());
+    pos.resize(_Patt->nCols());
 
-  nnz= _Patt->row(row-OFFSET,coldata.begin(),pos.begin());
+    nnz= _Patt->row(row-OFFSET,coldata.begin(),pos.begin());
 
-  UInt jcol=0;
-  if (coldata[jcol] == row){ //case diagfirst
-    //diagonal element:
-    extract_pair(_Patt->locateElBlock(row-OFFSET ,coldata[jcol]-OFFSET), m, n);
-    _bValues[m][n][pos[jcol]]= coeff;
-    //other elements:
-    for (jcol=1; jcol < nnz; jcol++){
-      extract_pair(_Patt->locateElBlock(row-OFFSET ,coldata[jcol]-OFFSET), m, n);
-      _bValues[m][n][pos[jcol]]= 0.0;
+    UInt jcol=0;
+    if (coldata[jcol] == row){ //case diagfirst
+        //diagonal element:
+        extract_pair(_Patt->locateElBlock(row-OFFSET ,coldata[jcol]-OFFSET), m, n);
+        _bValues[m][n][pos[jcol]]= coeff;
+        //other elements:
+        for (jcol=1; jcol < nnz; jcol++){
+            extract_pair(_Patt->locateElBlock(row-OFFSET ,coldata[jcol]-OFFSET), m, n);
+            _bValues[m][n][pos[jcol]]= 0.0;
+        }
     }
-  }
-  else
-    for (jcol=0; jcol < nnz; jcol++){
-      extract_pair(_Patt->locateElBlock(row-OFFSET ,coldata[jcol]-OFFSET), m, n);
-      if (coldata[jcol] == row)
-	//diagonal element:
-	_bValues[m][n][pos[jcol]]= coeff;
-      else
-	//other elements
-	_bValues[m][n][pos[jcol]]= 0.0;
-    }
+    else
+        for (jcol=0; jcol < nnz; jcol++){
+            extract_pair(_Patt->locateElBlock(row-OFFSET ,coldata[jcol]-OFFSET), m, n);
+            if (coldata[jcol] == row)
+                //diagonal element:
+                _bValues[m][n][pos[jcol]]= coeff;
+            else
+                //other elements
+                _bValues[m][n][pos[jcol]]= 0.0;
+        }
 
-  //rhs:
-  b[r-OFFSET]= coeff*datum;
+    //rhs:
+    b[row-OFFSET]= coeff*datum;
 }
 
 // Matrix-vector product.
 template<UInt BRows, UInt BCols, typename PatternType, typename DataType>
 std::vector<DataType>
-MixedMatr<BRows, BCols, PatternType, DataType>::
-operator*(const std::vector<DataType> &v) const
+MixedMatr<BRows, BCols, PatternType, DataType>::operator*(const std::vector<DataType> &v) const
 {
   ASSERT(_Patt->nCols()==v.size(),"Error in Matrix Vector product");
   std::vector<DataType> ans;
@@ -3829,7 +3832,7 @@ diagonalize( UInt const row, double const coeff, VectorType &b,
     }
 
   //rhs:
-  b[r-OFFSET]= coeff*datum;
+  b[row-OFFSET]= coeff*datum;
 }
 
 // set to zero the row trD and the corresponding column=row for D
@@ -4047,34 +4050,33 @@ zeros()
 //-----------------------------------------------------------------------
 
 //for CSR or MSR normal pattern
-DiagPreconditioner<Vector>::
-DiagPreconditioner(const CSRMatr<CSRPatt,double> &M);
+template<>
+DiagPreconditioner<Vector>::DiagPreconditioner(const CSRMatr<CSRPatt,double> &M);
 
-DiagPreconditioner<Vector>::
-DiagPreconditioner(const MSRMatr<double> &M);
+template<>
+DiagPreconditioner<Vector>::DiagPreconditioner(const MSRMatr<double> &M);
 
 
 
 //for VBR pattern
-DiagPreconditioner<Vector>::
-DiagPreconditioner(const VBRMatr<double> &M);
+template<>
+DiagPreconditioner<Vector>::DiagPreconditioner(const VBRMatr<double> &M);
 
 
 //for CSR block pattern
-DiagPreconditioner<VectorBlock>::
-DiagPreconditioner(const CSRMatr<CSRPatt,Tab2d> &M);
+template<>
+DiagPreconditioner<VectorBlock>::DiagPreconditioner(const CSRMatr<CSRPatt,Tab2d> &M);
 
 
 //solve the diagonal system
+template<>
 Vector
-DiagPreconditioner<Vector>::
-solve(const Vector &x) const;
+DiagPreconditioner<Vector>::solve(const Vector &x) const;
 
 
-
+template<>
 VectorBlock
-DiagPreconditioner<VectorBlock>::
-solve(const VectorBlock &x) const;
+DiagPreconditioner<VectorBlock>::solve(const VectorBlock &x) const;
 
 
 //-----------------------------------------------------------------------
@@ -4082,34 +4084,33 @@ solve(const VectorBlock &x) const;
 //-----------------------------------------------------------------------
 
 //for CSR or MSR normal pattern
-IDPreconditioner<Vector>::
-IDPreconditioner(const CSRMatr<CSRPatt,double> &M);
+template<>
+IDPreconditioner<Vector>::IDPreconditioner(const CSRMatr<CSRPatt,double> &M);
 
 
-IDPreconditioner<Vector>::
-IDPreconditioner(const MSRMatr<double> &M);
+template<>
+IDPreconditioner<Vector>::IDPreconditioner(const MSRMatr<double> &M);
 
 
 //for VBR pattern
-IDPreconditioner<Vector>::
-IDPreconditioner(const VBRMatr<double> &M);
+template<>
+IDPreconditioner<Vector>::IDPreconditioner(const VBRMatr<double> &M);
 
 
 
 //for CSR block pattern
-IDPreconditioner<VectorBlock>::
-IDPreconditioner(const CSRMatr<CSRPatt,Tab2d> &M);
+template<>
+IDPreconditioner<VectorBlock>::IDPreconditioner(const CSRMatr<CSRPatt,Tab2d> &M);
 
 
 //solve the diagonal system
+template<>
 Vector
-IDPreconditioner<Vector>::
-solve(const Vector &x) const;
+IDPreconditioner<Vector>::solve(const Vector &x) const;
 
-
+template<>
 VectorBlock
-IDPreconditioner<VectorBlock>::
-solve(const VectorBlock &x) const;
+IDPreconditioner<VectorBlock>::solve(const VectorBlock &x) const;
 
 } // namespace LifeV
 
