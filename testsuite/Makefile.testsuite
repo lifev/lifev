@@ -30,7 +30,7 @@ test: $(TESTINGS)
 
 
 check-local:
-	if test "$(top_srcdir)" != "$(top_builddir)"; then\
+	@if test "$(top_srcdir)" != "$(top_builddir)"; then\
      extra_dist="$(EXTRA_DIST)";\
 	 if test ! -z "$$extra_dist"; then \
        for i in $$extra_dist; do \
