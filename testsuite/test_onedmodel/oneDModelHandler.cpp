@@ -33,6 +33,7 @@ namespace LifeV
 //! Constructor
 OneDModelHandler::OneDModelHandler(const GetPot& data_file):
      DataOneDModel(data_file),
+     DataAztec(data_file),
      _M_nbCoor(1),
      _M_mesh(_M_x_left,_M_x_right,_M_nb_elem),
      _M_geoMap(geoLinearSeg),

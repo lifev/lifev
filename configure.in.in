@@ -1,11 +1,11 @@
 # -*- autoconf -*-
 # 
 #
-AC_INIT([lifev], [0.5.0], [lifev-dev@webmail.mate.polimi.it])
+AC_INIT([lifev], [0.4.1], [lifev-dev@webmail.mate.polimi.it])
 
 LIFEV_MAJOR_VERSION=0
-LIFEV_MINOR_VERSION=5
-LIFEV_MICRO_VERSION=0
+LIFEV_MINOR_VERSION=4
+LIFEV_MICRO_VERSION=1
 LIFEV_EXTRA_VERSION=
 AC_SUBST(LIFEV_MAJOR_VERSION)
 AC_SUBST(LIFEV_MINOR_VERSION)
@@ -95,9 +95,6 @@ else
 fi
 
 AC_CHECK_BOOST
-AC_CHECK_BOOST_GRAPH
-AC_CHECK_BOOST_SIGNALS
-AC_CHECK_BOOST_TEST
 
 
 dnl
@@ -113,7 +110,6 @@ AM_CONDITIONAL(HAVE_UMFPACK, test "x$umfpack_libs" != "x" )
 dnl lapack, blas, g2c
 AC_CHECK_LAPACK
 AC_CHECK_UMFPACK
-AM_CONDITIONAL(HAVE_UMFPACK, test "x$umfpack_libs" != "x" )
 
 dnl aztec
 AC_CHECK_AZTEC
@@ -138,7 +134,7 @@ CPPFLAGS="-DTHREEDIM ${CPPFLAGS}"
 CXXFLAGS="-Wall ${CXXFLAGS}"
 
 
-life_libs="\$(top_builddir)/life/lifefilters/liblifefilters.la \$(top_builddir)/life/lifesolver/liblifesolver.la  \$(top_builddir)/life/lifefem/liblifefem.la \$(top_builddir)/life/lifealg/liblifealg.la \$(top_builddir)/life/lifemesh/liblifemesh.la \$(top_builddir)/life/lifearray/liblifearray.la \$(top_builddir)/life/lifecore/liblifecore.la"
+life_libs="\$(top_builddir)/life/lifefilters/liblifefilters.la  \$(top_builddir)/life/lifefem/liblifefem.la \$(top_builddir)/life/lifealg/liblifealg.la \$(top_builddir)/life/lifemesh/liblifemesh.la \$(top_builddir)/life/lifearray/liblifearray.la \$(top_builddir)/life/lifecore/liblifecore.la"
 
 #life_libs="\$(top_builddir)/life/lifefilters/liblifefilters.la  \$(top_builddir)/life/lifesolver/liblifesolver.la \$(top_builddir)/life/lifefem/liblifefem.la \$(top_builddir)/life/lifealg/liblifealg.la \$(top_builddir)/life/lifemesh/liblifemesh.la \$(top_builddir)/life/lifearray/liblifearray.la \$(top_builddir)/life/lifecore/liblifecore.la"
 

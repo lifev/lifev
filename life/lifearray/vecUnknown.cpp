@@ -22,7 +22,7 @@ namespace LifeV
 {
 //! the case of VectorBlock type
 PhysVectUnknown<VectorBlock>::
-PhysVectUnknown( UInt const Ndof ) : super( Ndof, nDimensions )
+PhysVectUnknown( UInt const Ndof ) : super( Ndof, nDimensions ), _size( Ndof )
 {}
 
 //! the case of VectorBlock type

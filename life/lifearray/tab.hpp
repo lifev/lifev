@@ -22,17 +22,7 @@
 
 #include <cmath>
 
-#undef max
-#undef min
-
-#include <boost/numeric/ublas/vector.hpp>
-#include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/io.hpp>
-
-#include <lifeV.hpp>
-
-#include <RNM.hpp>
-
+#include "lifeV.hpp"
 
 namespace LifeV
 {
@@ -276,7 +266,7 @@ inline R Norme_infty( const R3 & A )
 // inline R Theta(R2 P){ return atan2(P.y,P.x);}
 }
 
-//# include "RNM.hpp"
+# include "RNM.hpp" 
 //# include "RNM.hpp"
 
 namespace LifeV
@@ -286,57 +276,16 @@ typedef KNM_<R> RNM_;
 typedef KN<R> RN;
 typedef KN_<R> RN_;
 
-#if 0
-typedef boost::numeric::ublas::matrix<R> RNM;
-typedef boost::numeric::ublas::matrix<R> RNM_;
-typedef boost::numeric::ublas::vector<R> RN;
-typedef boost::numeric::ublas::vector<R> RN_;
-#endif
+typedef KNM<Real> Tab2d;
+typedef KNM_<Real> Tab2dView;
+typedef KN<Real> Tab1d;
+typedef KN_<Real> Tab1dView;
 
-typedef boost::numeric::ublas::matrix<double> Tab2d;
-typedef Tab2d Matrix;
-typedef boost::numeric::ublas::matrix_range<Tab2d> Tab2dView;
-typedef boost::numeric::ublas::range TabRange;
+/*!
+  \typedef Fct1D is a pointer on a function taking a real as argument
+  and returning a real
+*/
+typedef double ( *Fct1D ) ( double );
 
-typedef boost::numeric::ublas::zero_matrix<double> ZeroMatrix;
-typedef boost::numeric::ublas::scalar_matrix<double> ScalarMatrix;
-typedef boost::numeric::ublas::identity_matrix<double> IdentityMatrix;
-
-
-typedef boost::numeric::ublas::vector<double> Tab1d;
-typedef boost::numeric::ublas::vector_range<Tab1d> Tab1dView;
-typedef boost::numeric::ublas::vector<int> Tab1dInt;
-typedef boost::numeric::ublas::vector<int> Tab1dViewInt;
-
-typedef boost::numeric::ublas::vector<double> Vector;
-typedef boost::numeric::ublas::unit_vector<double> UnitVector;
-typedef boost::numeric::ublas::scalar_vector<double> ScalarVector;
-typedef boost::numeric::ublas::zero_vector<double> ZeroVector;
-
-inline double
-dot( Vector const &ex_v1, Vector const &ex_v2 )
-{
-    return boost::numeric::ublas::inner_prod( ex_v1, ex_v2 );
-}
-
-/* reduce operations */
-using boost::numeric::ublas::sum;
-using boost::numeric::ublas::norm_1;
-using boost::numeric::ublas::norm_2;
-using boost::numeric::ublas::norm_inf;
-using boost::numeric::ublas::index_norm_inf;
-
-/* binary operations */
-using boost::numeric::ublas::outer_prod;
-using boost::numeric::ublas::inner_prod;
-
-struct norm_inf_adaptor
-{
-    template<typename E>
-    Real operator()( E const& __v ) const
-        {
-            return norm_inf( __v );
-        }
-};
 }
 #endif

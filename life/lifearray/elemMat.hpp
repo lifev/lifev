@@ -18,23 +18,24 @@
 */
 #ifndef _ELEMMAT_H_INCLUDED
 #define _ELEMMAT_H_INCLUDED
-#include <vector>
+#include <vector> 
 /*
 #include "comprow_double.hpp"   // SparseLib++ matrix for "assemble_SparseLib"
 */
-
-#include "vecUnknown.hpp"
+#include "tab.hpp"
 
 namespace LifeV
 {
 class ElemMat
 {
-
+    Tab2d _mat; // the array
+    UInt _nBlockRow; // number of block rows
+    UInt _nBlockCol; // number of block columns
+    std::vector<UInt> _nRow; // _nRow[i]=nb of rows in the i-th block row
+    std::vector<UInt> _firstRow; //_firstRow[i]=index of first row of i-th block row
+    std::vector<UInt> _nCol; // _nCol[i]=nb of col in the i-th block col
+    std::vector<UInt> _firstCol; //_firstCol[i]=index of first col of i-th block col
 public:
-    typedef KNM<Real> matrix_type;
-    typedef KNM_<Real> matrix_view;
-    //typedef Tab2d matrix_type;
-
     ~ElemMat();
     ElemMat( UInt nNode1, UInt nbr1, UInt nbc1 ); // constructor for 1 finite element
     ElemMat( UInt nNode1, UInt nbr1, UInt nbc1,
@@ -42,43 +43,29 @@ public:
     ElemMat( UInt nNode1, UInt nbr1, UInt nbc1,
              UInt nNode2, UInt nbr2, UInt nbc2,
              UInt nNode3, UInt nbr3, UInt nbc3 ); // constructor for 3 finite elements
-    matrix_type& mat()
-        {
-            return _mat;
-        }
-    UInt nBlockRow() const
-        {
-            return _nBlockRow;
-        }
-    UInt nBlockCol() const
-        {
-            return _nBlockCol;
-        }
+    inline Tab2d& mat()
+    {
+        return _mat;
+    }
+    inline UInt nBlockRow() const
+    {
+        return _nBlockRow;
+    }
+    inline UInt nBlockCol() const
+    {
+        return _nBlockCol;
+    }
 
-    //Tab2dView block( UInt i, UInt j )
-    matrix_view block( UInt i, UInt j )
-        {
-            return _mat( SubArray( _nRow[ i ], _firstRow[ i ] ),
-                         SubArray( _nCol[ j ], _firstCol[ j ] ) );
-            //Tab2dView __mr (_mat, TabRange(_firstRow[i], _nRow[i]), TabRange(_firstCol[j], _nCol[j]));
-            //return __mr;
-        }
-    void zero()
-        {
-            //_mat = ZeroMatrix( _mat.size1(), _mat.size2() );
-            _mat = 0.0;
-        };
+    inline Tab2dView block( UInt i, UInt j )
+    {
+        return _mat( SubArray( _nRow[ i ], _firstRow[ i ] ),
+                     SubArray( _nCol[ j ], _firstCol[ j ] ) );
+    }
+    inline void zero()
+    {
+        _mat = 0;
+    };
     void showMe( std::ostream& c = std::cout );
-private:
-
-    matrix_type _mat;
-
-    UInt _nBlockRow; // number of block rows
-    UInt _nBlockCol; // number of block columns
-    std::vector<UInt> _nRow; // _nRow[i]=nb of rows in the i-th block row
-    std::vector<UInt> _firstRow; //_firstRow[i]=index of first row of i-th block row
-    std::vector<UInt> _nCol; // _nCol[i]=nb of col in the i-th block col
-    std::vector<UInt> _firstCol; //_firstCol[i]=index of first col of i-th block col
 };
 }
 #endif

@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 /*! Contains the basic element shapes, to be used by Geometric and Finite
   Elements
  
-  $Header: /cvsroot/lifev/lifev/life/lifecore/Attic/basisElSh.hpp,v 1.4 2004-10-05 12:31:50 prudhomm Exp $
+  $Header: /cvsroot/lifev/lifev/life/lifecore/Attic/basisElSh.hpp,v 1.5 2004-11-08 04:42:29 mm0 Exp $
  
  \version 0.0 Experimental   19/8/99. Luca Formaggia
  
@@ -104,7 +104,8 @@ public:
     static const ReferenceGeometry Geometry = EDGE;
     static const UInt nDim = 1;
     static const UInt numFaces = 0;
-    static const UInt numEdges = 0;
+    static const UInt numEdges = 1;	//meneghin: I think 1, not 0
+//    static const UInt numEdges = 0;
     static const UInt numVertices = 2;
 };
 
@@ -116,7 +117,8 @@ public:
     static const ReferenceGeometry Geometry = FACE;
     static const UInt nDim = 2;
     static const UInt numVertices = 3;
-    static const UInt numFaces = 0;
+    static const UInt numFaces = 1;	//meneghin: I think 1, not 0
+//    static const UInt numFaces = 0;
     static const UInt numEdges = numVertices;
 };
 
@@ -127,7 +129,8 @@ public:
     static const ReferenceShapes Shape = QUAD;
     static const ReferenceGeometry Geometry = FACE;
     static const UInt nDim = 2;
-    static const UInt numFaces = 0;
+    static const UInt numFaces = 1;	//meneghin: I think 1, not 0
+//    static const UInt numFaces = 0;
     static const UInt numVertices = 4;
     static const UInt numEdges = numVertices;
 };

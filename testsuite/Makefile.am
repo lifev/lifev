@@ -1,4 +1,4 @@
-# -*- makefile; indent-tabs-mode: t -*-
+# -*- makefile -*-
 #
 # 
 #
@@ -29,23 +29,25 @@ SUBDIRS		= data  \
               test_q1 test_p2 test_mixte test_fe \
               test_postproc test_bdf \
 		      test_linearelasticity \
-		      test_darcy test_onedmodel\
-		      test_ns_bdf test_ns_cyl test_ns_cyl_flux test_ns_bcvec test_ns_sstress \
-		      test_fsi \
-		      test_masstransport test_mass_coupling test_ns_ipstab \
-                      test_coupling_3d0d
+		      test_darcy test_darcytetra test_onedmodel\
+		      test_ns_bdf test_ns_cyl test_ns_bcvec test_ns_sstress \
+		      test_fsi_newton test_fsi_picard test_fsi_dd\
+		      test_masstransport test_mass_coupling test_ns_ipstab\
+		      test_netgen
 
 TESTSUITES=$(srcdir)/lifecore/testsuite.at \
 $(srcdir)/lifearray/testsuite.at \
 $(srcdir)/lifealg/testsuite.at \
 $(srcdir)/test_bdf/testsuite.at \
 $(srcdir)/test_bdf/testsuite.at \
-$(srcdir)/test_coupling_3d0d/testsuite.at \
 $(srcdir)/test_darcy/testsuite.at \
+$(srcdir)/test_darcytetra/testsuite.at \
 $(srcdir)/test_essentialbc/testsuite.at \
 $(srcdir)/test_fe/testsuite.at \
+$(srcdir)/test_fsi_newton/testsuite.at \
 $(srcdir)/test_linearelasticity/testsuite.at \
-$(srcdir)/test_fsi/testsuite.at \
+$(srcdir)/test_fsi_picard/testsuite.at \
+$(srcdir)/test_fsi_dd/testsuite.at \
 $(srcdir)/test_masstransport/testsuite.at \
 $(srcdir)/test_mass_coupling/testsuite.at \
 $(srcdir)/test_laplacian/testsuite.at \
@@ -55,13 +57,13 @@ $(srcdir)/test_naturalbc/testsuite.at \
 $(srcdir)/test_ns_bdf/testsuite.at \
 $(srcdir)/test_ns_bcvec/testsuite.at \
 $(srcdir)/test_ns_cyl/testsuite.at \
-$(srcdir)/test_ns_cyl_flux/testsuite.at \
 $(srcdir)/test_ns_ipstab/testsuite.at \
 $(srcdir)/test_ns_sstress/testsuite.at \
 $(srcdir)/test_onedmodel/testsuite.at \
 $(srcdir)/test_p2/testsuite.at \
 $(srcdir)/test_postproc/testsuite.at \
-$(srcdir)/test_q1/testsuite.at 
+$(srcdir)/test_q1/testsuite.at \
+$(srcdir)/test_netgen/testsuite.at 
 
 
 $(srcdir)/package.m4: $(top_srcdir)/configure.in.in
@@ -78,7 +80,7 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.in.in
 EXTRA_DIST = testsuite.at testsuite package.m4
 
 TESTSUITE = $(srcdir)/testsuite
-check-local: atconfig atlocal  $(TESTSUITE) $(LN_TESTSUITE)
+check-local: atconfig atlocal  $(TESTSUITE)
 	$(SHELL) $(TESTSUITE)
 
 AUTOM4TE    = autom4te
@@ -86,16 +88,7 @@ AUTOTEST = $(AUTOM4TE) --language=autotest
 $(TESTSUITE): $(srcdir)/testsuite.at $(srcdir)/package.m4 $(TESTSUITES)
 	$(AUTOTEST) -I $(srcdir) $@.at -o $@.tmp
 	mv $@.tmp $@
-	@if test $(top_srcdir) != $(top_builddir); then\
-     ln -sf $(TESTSUITE);\
-    fi
 
-testsuite: $(srcdir)/testsuite.at $(srcdir)/package.m4 $(TESTSUITES)
-	$(AUTOTEST) -I $(srcdir) $(srcdir)/$@.at -o $(srcdir)/$@.tmp
-	mv $(srcdir)/$@.tmp $(srcdir)/$@
-	@if test $(top_srcdir) != $(top_builddir); then\
-     ln -sf $(TESTSUITE);\
-    fi
 
 
 include $(top_srcdir)/admin/Doxyfile.am

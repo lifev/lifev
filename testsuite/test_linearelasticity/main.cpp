@@ -18,6 +18,7 @@
 */
 #include <cstdlib>
 #include "lifeV.hpp"
+#include "vectorNorms.hpp"
 #include "regionMesh3D_ALE.hpp"
 #include "VenantKirchhofSolver.hpp"
 #include "ud_functions.hpp"
@@ -42,7 +43,7 @@ int main(int argc, char** argv)
 
     // Number of boundary conditions for the velocity and mesh motion
     //
-    BCHandler BCh(2);
+    BC_Handler BCh(2);
 
     // The linear Venant-Kirchhof solver
     //
@@ -52,7 +53,7 @@ int main(int argc, char** argv)
 
     // Boundary conditions for the displacement
     //
-    BCFunctionBase fixed(g1);
+    BCFunction_Base fixed(g1);
     BCh.addBC("Base2 ", 2 , Essential, Full, fixed, 3);
     BCh.addBC("Base3 ", 3 , Essential, Full, fixed, 3);
 

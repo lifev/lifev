@@ -29,14 +29,13 @@ namespace LifeV
 {
 class ElemVec
             :
-        public KN<Real>
-        //public Tab1d
+            public Tab1d
 {
+    int _nBlockRow; // number of block rows
+    std::vector<int> _nRow; // _nRow[i]=nb of rows in the i-th block row
+    std::vector<int> _firstRow; //_firstRow[i]=index of first row of i-th block row
 public:
-    //typedef Tab1d super;
-    typedef KN<Real> super;
-    typedef KN_<Real> vector_view;
-
+    typedef Tab1d super;
 
     ElemVec( int nNode1, int nbr1 );
     ElemVec( int nNode1, int nbr1,
@@ -49,15 +48,16 @@ public:
     {
         if ( this == &__v )
             return * this;
-        super::operator=( ( super const& ) __v );
+        super& __super = ( super& ) * this;
+        __super = super( *this );
         return *this;
     }
 
-    super& vec()
+    Tab1d& vec()
     {
         return * this;
     };
-    const super& vec() const
+    const Tab1d& vec() const
     {
         return * this;
     };
@@ -65,25 +65,17 @@ public:
     {
         return _nBlockRow;
     }
-    //Tab1dView block( int i )
-    vector_view block( int i )
+    Tab1dView block( int i )
     {
         return ( *this ) ( SubArray( _nRow[ i ], _firstRow[ i ] ) );
-        //return Tab1dView( *this, TabRange( _firstRow[i], _nRow[ i ] ) );
     }
     //  inline void zero(){_vec=Tab1d(_nBlockRow*_vec.N(),0.0);};
-    void zero()
+    inline void zero()
     {
-        //( *this ) = ZeroVector( this->size() );
-        super& __super = ( super& )*this;
+        super & __super = ( super& ) * this;
         __super = super( this->N(), 0.0 );
     }
     void showMe( std::ostream& c = std::cout );
-private:
-    int _nBlockRow; // number of block rows
-    std::vector<int> _nRow; // _nRow[i]=nb of rows in the i-th block row
-    std::vector<int> _firstRow; //_firstRow[i]=index of first row of i-th block row
-
 };
 }
 

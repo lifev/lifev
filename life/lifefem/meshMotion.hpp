@@ -15,17 +15,17 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+*/ 
 /*!
   \file meshMotion.h
   \brief Classes to hold algorithms for the mesh motion, for instance, involved in a ALE formulation.
   \version 1.0
   \author M.A. Fernandez
   \date 11/2002
-
+ 
   This file contains classes which may be used to compute the extension inside the reference domain of a given
   displacement at a specified interface
-
+ 
 */
 
 #ifndef __MESHMOTION_HH__
@@ -42,24 +42,24 @@
 #include <refFE.hpp>
 #include <values.hpp>
 #include <assemb.hpp>
-#include <bcManage.hpp>
+#include <bc_manage.hpp>
 
 
 namespace LifeV
 {
 /*!
   \class HarmonicExtension
-
+ 
   Base class which provides the harmonic extension of a given displacement on a specified part
   of the mesh boundary
-
+ 
   In order to deal with harmonic extensions, we have to provide a mesh (to  be moved), the parameters
   involved in the laplacian discretization: viscosity, quadrature rules and boundary conditions.
   This class contains a   PhysVectUnknown objet wich will hold the extension of the interface displacement.
   The constructor of the class built the global matrix of the discretized laplacian. The extension of the
   displacement is computed by calling the public method update. Finally, this extension can be recovered by
   calling method getDisplacement.
-
+ 
 */
 
 class HarmonicExtension
@@ -74,17 +74,13 @@ public:
       \param bdQr the quadrature rule for surface elementary computations
       \param mesh_BCh the list of boundary conditions involved in the harmonic extension
 
-      \note The BCHandler objet (bch) holds the displacement imposed on moving boundary
+      \note The BC_Handler objet (bch) holds the displacement imposed on moving boundary
       in the mesh trhough a BCVetor_Interface objet.
 
     */
 
     template <typename Mesh>
-    HarmonicExtension( Mesh& mesh,
-                       const Real& diffusion,
-                       const QuadRule& Qr,
-                       const QuadRule& bdQr,
-                       BCHandler& mesh_BCh );
+    HarmonicExtension( Mesh& mesh, const Real& diffusion, const QuadRule& Qr, const QuadRule& bdQr, BC_Handler& mesh_BCh );
 
     //! This method updates the extension of the displacement, i.e. it solves the laplacian proglem
 
@@ -116,7 +112,7 @@ protected:
     const QuadRule& _bdQr;
 
     //! BC holding the imposed boundary displacement
-    BCHandler& _mesh_BCh;
+    BC_Handler& _mesh_BCh;
 
     //! The Dof object associated with the displacement computations
     Dof _dof_mesh;
@@ -155,18 +151,14 @@ protected:
   \param Qr the quadrature rule for volumic elementary computations
   \param bdQr the quadrature rule for surface elementary computations
   \param bch the list of boundary conditions involved in the harmonic extension
-
-  \note The BCHandler objet (bch) holds the displacement imposed on moving boundary
+ 
+  \note The BC_Handler objet (bch) holds the displacement imposed on moving boundary
   in the mesh trhough a BCVetor_Interface objet.
-
+ 
 */
 template <typename Mesh>
 HarmonicExtension::
-HarmonicExtension( Mesh& mesh,
-                   const Real& diffusion,
-                   const QuadRule& Qr,
-                   const QuadRule& bdQr,
-                   BCHandler& mesh_BCh ) :
+HarmonicExtension( Mesh& mesh, const Real& diffusion, const QuadRule& Qr, const QuadRule& bdQr, BC_Handler& mesh_BCh ) :
         _diffusion( diffusion ),
         _Qr( Qr ),
         _bdQr( bdQr ),
@@ -198,7 +190,7 @@ HarmonicExtension( Mesh& mesh,
     }
 
     // Initializations
-    _disp = ZeroVector( _disp.size() );
+    _disp = 0.0;
 }
 
 // This method updates the extension of the displacement, i.e. it solves the laplacian proglem
@@ -212,17 +204,17 @@ void HarmonicExtension::updateExtension( Mesh& mesh, const Real& time, const UIn
         _mesh_BCh.bdUpdate( mesh, _feBd, _dof_mesh );
 
         // Boundary conditions treatment on the matrix
-        bcManageMatrix( _a, mesh, _dof_mesh, _mesh_BCh, _feBd, 1.0 );
+        bc_manage_matrix( _a, mesh, _dof_mesh, _mesh_BCh, _feBd, 1.0 );
     }
 
     // Number to total dof
     UInt dim = _dof_mesh.numTotalDof();
 
     // Initializations
-    _f = ZeroVector( _f.size() );
+    _f = 0.0;
 
     // Boundary conditions treatment
-    bcManageVector( _f, mesh, _dof_mesh, _mesh_BCh, _feBd, time, 1.0 );
+    bc_manage_vector( _f, mesh, _dof_mesh, _mesh_BCh, _feBd, time, 1.0 );
 
     // AZTEC stuff
     int proc_config[ AZ_PROC_SIZE ]; // Processor information:
@@ -289,7 +281,7 @@ void HarmonicExtension::updateExtensionTransp( Mesh& mesh, const Real& time )
 {
 
     // Boundary conditions treatment
-    bcManageVector( _disp, mesh, _dof_mesh, _mesh_BCh, _feBd, time );
+    bc_manage_vector( _disp, mesh, _dof_mesh, _mesh_BCh, _feBd, time );
 }
 }
 #endif

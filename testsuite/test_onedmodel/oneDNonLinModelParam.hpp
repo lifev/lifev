@@ -29,10 +29,10 @@
 #define _PARAMETER_H_
 #include <string>
 #include <iostream>
+#include "lifeV.hpp"
+#include "GetPot.hpp"
 
-#include <lifeV.hpp>
-#include <GetPot.hpp>
-#include <tab.hpp>
+#include "RNM.hpp"
 
 namespace LifeV
 {
@@ -55,8 +55,8 @@ namespace LifeV
 */
 class OneDNonLinModelParam
 {
-public :
-
+public : 
+  
   //! constructor
   OneDNonLinModelParam(const GetPot& dfile);
 
@@ -70,7 +70,7 @@ public :
 
   //! initialisation from physical values
   void initParam( const Real& Young_modulus );
-
+  
   //! output
   void showMeData(std::ostream& c) const;
 
@@ -80,10 +80,10 @@ private :
   UInt _M_paramSize;
 
   //! reference area (often called A0) 
-  Vector _M_Area0;
+  KN<Real> _M_Area0;
   
   //! coriolis coefficient (often called alpha) 
-  Vector _M_AlphaCoriolis;
+  KN<Real> _M_AlphaCoriolis;
 
   /*!-----------------------------------------------------
     BETA0 AND BETA1
@@ -92,7 +92,7 @@ private :
     (often called beta0 (or beta) and beta1)
 
    BEWARE: there are at least 2 or 3 different ways of defining it!!!
-
+   
    -------------------------------------------------------
    CONVENTIONS used here: 
    -------------------------------------------------------
@@ -101,7 +101,7 @@ private :
 
    This PressBeta0 is homogeneous to a pressure. 
    In most cases PressBeta1 is taken equal to 1/2. 
-
+   
    PressBeta0 = ( \sqrt{\pi} h_0 E ) / ( ( 1 - \ksi^2 ) * \sqrt{Area0} )
    -------------------------------------------------------
    (
@@ -110,7 +110,7 @@ private :
    P - P_ext = \tilde{\beta_0} ( \sqrt{A} - \sqrt{A_0} ) / A_0 
    with 
    \beta0 = ( \sqrt{\pi} h_0 E ) / ( 1 - \ksi^2 )
-
+   
    link with PressBeta0:
 
       \tilde{\beta_0} = PressBeta0 * \sqrt{A_0}
@@ -118,7 +118,7 @@ private :
    2/ Auxiliary Parameter often used in the model1D code (by J-FG or D Lamponi)
       (ONLY when beta1=1/2 !!) 
    P - P_ext = 2 * rho * AuxBeta ( \sqrt{A} - \sqrt{A_0} )
-
+   
    link with PressBeta0:
 
       AuxBeta = PressBeta0 * PressBeta1 / ( rho * Area0^(PressBeta1) ) 
@@ -130,12 +130,12 @@ private :
   */
 
   //! P - P_ext = PressBeta0 [ ( A / Area0 )^{PressBeta1} - 1 ]
-  Vector _M_PressBeta0; //! homogeneous to a pressure
-  Vector _M_PressBeta1; //! power coeff (>0, often=1/2)
+  KN<Real> _M_PressBeta0; //! homogeneous to a pressure
+  KN<Real> _M_PressBeta1; //! power coeff (>0, often=1/2)
 
 
   // friction parameter Kr 
-  Vector _M_FrictionKr;
+  KN<Real> _M_FrictionKr;
 
   //! density rho (always taken constant along the vessel)
   Real _M_DensityRho;
@@ -199,29 +199,29 @@ private :
   UInt _M_paramSize;
 
   //! flux matrix
-  Vector _M_Flux11;
-  Vector _M_Flux12;
-  Vector _M_Flux21;
-  Vector _M_Flux22;
+  KN<Real> _M_Flux11;
+  KN<Real> _M_Flux12;
+  KN<Real> _M_Flux21;
+  KN<Real> _M_Flux22;
 
   //! celerities of the linear problem (eigenvalues of the flux matrix)
-  Vector _M_celerity1;
-  Vector _M_celerity2;
+  KN<Real> _M_celerity1;
+  KN<Real> _M_celerity2;
 
   //! eigenvector for first eigenvalue
-  Vector _M_celer1_left_eigVector1;
-  Vector _M_celer1_left_eigVector2;
+  KN<Real> _M_celer1_left_eigVector1;
+  KN<Real> _M_celer1_left_eigVector2;
   //! eigenvector for second eigenvalue
-  Vector _M_celer2_left_eigVector1;
-  Vector _M_celer2_left_eigVector2;
+  KN<Real> _M_celer2_left_eigVector1;
+  KN<Real> _M_celer2_left_eigVector2;
 
   //! source matrix
-  Vector _M_Source10;
-  Vector _M_Source20;
-  Vector _M_Source11;
-  Vector _M_Source12;
-  Vector _M_Source21;
-  Vector _M_Source22;
+  KN<Real> _M_Source10;
+  KN<Real> _M_Source20;
+  KN<Real> _M_Source11;
+  KN<Real> _M_Source12;
+  KN<Real> _M_Source21;
+  KN<Real> _M_Source22;
 
 };
 

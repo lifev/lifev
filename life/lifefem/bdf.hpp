@@ -1,10 +1,5 @@
 /*
  This file is part of the LifeV library
-
- Authors: A. Veneziani
-          C. Prud'homme <christophe.prudhomme@epfl.ch>
-          C. Winkelmann
-
  Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
 
  This library is free software; you can redistribute it and/or
@@ -20,16 +15,16 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+*/ 
 /*!
-  \file bdf.hpp
+  \file bdf.h
   \author A. Veneziani
-  \author C. Prud'homme
-  \author C. Winkelmann
-
-  File containing a class for an easy handling of different order time
+  \date 04/2003
+  \version 1.0
+ 
+  \brief File containing a class for an easy handling of different order time
   discretizations/extrapolations BDF based
-
+ 
 */
 #ifndef _BDF_H
 #define _BDF_H
@@ -49,36 +44,36 @@ typedef Real ( *Funct ) ( const Real&, const Real&, const Real&, const Real&,
 /*!
   \class Bdf
   \brief Backward differencing formula time discretization
-
+  
   A differential equation of the form
-
+  
   \f$ M u' = A u + f \f$
-
+  
   is discretized in time as
-
+  
   \f$ M p'(t_{k+1}) = A u_{k+1} + f_{k+1} \f$
-
+  
   where p denotes the polynomial of order n in t that interpolates
   (t_i,u_i) for i = k-n+1,...,k+1.
-
+  
   The approximative time derivative \f$ p'(t_{k+1}) \f$ is a linear
   combination of state vectors u_i:
-
+  
   \f$ p'(t_{k+1}) = \frac{1}{\Delta t} (\alpha_0 u_{k+1} - \sum_{i=0}^n \alpha_i u_{k+1-i} )\f$
-
+  
   Thus we have
-
-  \f$ \frac{\alpha_0}{\Delta t} M u_{k+1} = A u_{k+1} + f + M \bar{p} \f$
-
+  
+  \f$ \frac{\alpha_0}{\Delta t} M u_{k+1} = A u_{k+1} + f + \bar{p} \f$
+  
   with
-
+  
   \f$ \bar{p} = \frac{1}{\Delta t} \sum_{i=1}^n \alpha_i u_{k+1-i} \f$
-
+  
   This class stores the n last state vectors in order to be able to
   calculate \f$ \bar{p} \f$. It also provides alpha_i
   and can extrapolate the the new state from the n last states with a
   polynomial of order n-1:
-
+  
   \f$ u_{k+1} \approx \sum_{i=0}^{n-1} \beta_i u_{k-i} \f$
 */
 class Bdf
@@ -88,8 +83,6 @@ public:
      *  @param n order of the BDF
      */
     Bdf( const UInt n );
-
-    ~Bdf();
 
     //! Initialize all the entries of the unknown vector to be derived with the
     //! vector u0 (duplicated)
@@ -119,48 +112,50 @@ public:
      *  the old values.
      *  @param u_curr current (new) value of the state vector
      */
-    void shift_right( Vector const& u_curr );
+    void shift_right( Vector u_curr );
 
     //! Returns the right hand side \f$ \bar{p} \f$ of the time derivative
     //! formula
-    Vector time_der( Real dt ) const;
+    Vector time_der( Real dt );
 
     //! Returns the right hand side \f$ \bar{p} \Delta t \f$ of the time
     //! derivative formula. The timestep is taken into account elsewhere,
     //! e. g. in the mass matrix.
-    Vector time_der() const;
+    Vector time_der();
 
     //! Compute the polynomial extrapolation approximation of order n-1 of
     //! u^{n+1} defined by the n stored state vectors
-    Vector extrap() const;
+    Vector extrap();
 
     //! Return the i-th coefficient of the time derivative alpha_i
-    double coeff_der( UInt i ) const;
+    double coeff_der( UInt i );
 
     //! Return the i-th coefficient of the time extrapolation beta_i
-    double coeff_ext( UInt i ) const;
+    double coeff_ext( UInt i );
 
     //! Return a vector with the last n state vectors
-    const std::vector<Vector>& unk() const;
+    std::vector<Vector> unk();
 
-    void showMe() const;
+    void showMe();
+
+    ~Bdf();
 
 private:
     //! Order of the BDF derivative/extrapolation: the time-derivative
     //! coefficients vector has size n+1, the extrapolation vector has size n
-    UInt _M_order;
+    UInt _n;
 
     //! Size of the unknown vector
-    UInt _M_size;
+    UInt _s;
 
     //! Coefficients \f$ \alpha_i \f$ of the time bdf discretization
-    Vector _M_alpha;
+    Vector _alpha;
 
     //! Coefficients \f$ \beta_i \f$ of the extrapolation
-    Vector _M_beta;
+    Vector _beta;
 
     //! Last n state vectors
-    std::vector<Vector> _M_unknowns;
+    std::vector<Vector> _unk;
 };
 
 
@@ -169,11 +164,8 @@ private:
 //
 
 template <typename Mesh, typename RefFE, typename CurrFE, typename Dof>
-void Bdf::initialize_unk( const Funct& u0,
-                          Mesh& mesh,
-                          RefFE& refFE, CurrFE& currFE,
-                          Dof& dof,
-                          Real t0, Real dt,
+void Bdf::initialize_unk( const Funct& u0, Mesh& mesh, RefFE& refFE,
+                          CurrFE& currFE, Dof& dof, Real t0, Real dt,
                           UInt nbComp = 1 )
 {
     typedef typename Mesh::VolumeShape GeoShape; // Element shape
@@ -191,18 +183,18 @@ void Bdf::initialize_unk( const Funct& u0,
     UInt nDofElemE = nElemE * nDofpE; // number of edge's Dof on a Element
     UInt nDofElemF = nElemF * nDofpF; // number of face's Dof on a Element
 
-    std::vector< Vector >::iterator iter = _M_unknowns.begin();
-    std::vector< Vector >::iterator iter_end = _M_unknowns.end();
+    std::vector< Vector >::iterator iter = _unk.begin();
+    std::vector< Vector >::iterator iter_end = _unk.end();
 
 
     UInt size_comp = dof.numTotalDof();
-    _M_size = size_comp * nbComp; // Inizialization of the dimension of the vector
+    _s = size_comp * nbComp; // Inizialization of the dimension of the vector
 
-    Vector aux( _M_size );
-    aux = ZeroVector( _M_size );
+    Vector aux( _s );
+    aux = 0.0;
 
 
-    for ( iter = _M_unknowns.begin() ; iter != iter_end; iter++ )
+    for ( iter = _unk.begin() ; iter != iter_end; iter++ )
     {
         *iter = aux;
     }
@@ -237,7 +229,7 @@ void Bdf::initialize_unk( const Funct& u0,
 
                     // Loop on data vector components ****************
                     backtime = 0;
-                    for ( std::vector<Vector>::iterator it = _M_unknowns.begin(); it<_M_unknowns.end();
+                    for ( std::vector<Vector>::iterator it = _unk.begin(); it<_unk.end();
                             it++ )
                     {
                         for ( UInt icmp = 0; icmp < nbComp; ++icmp )
@@ -246,8 +238,8 @@ void Bdf::initialize_unk( const Funct& u0,
                             ( *it )
                             ( icmp * size_comp + dof.localToGlobal( iElem, lDof ) - 1 ) =
                                 u0( t0 - backtime * dt, x, y, z, icmp + 1 );
+                            backtime++;
                         }
-                        backtime++;
                     }
                 }
             }
@@ -274,7 +266,7 @@ void Bdf::initialize_unk( const Funct& u0,
 
                     // Loop on data vector components
                     backtime = 0;
-                    for ( std::vector<Vector>::iterator it = _M_unknowns.begin(); it<_M_unknowns.end();
+                    for ( std::vector<Vector>::iterator it = _unk.begin(); it<_unk.end();
                             it++ )
                     {
                         for ( UInt icmp = 0; icmp < nbComp; ++icmp )
@@ -282,8 +274,8 @@ void Bdf::initialize_unk( const Funct& u0,
                             ( *it )
                             ( icmp * size_comp + dof.localToGlobal( iElem, lDof ) - 1 ) =
                                 u0( t0 - backtime * dt, x, y, z, icmp + 1 );
+                            backtime++;
                         }
-                        backtime++;
                     }
                 }
             }
@@ -308,14 +300,14 @@ void Bdf::initialize_unk( const Funct& u0,
 
                     // Loop on data vector components
                     backtime = 0;
-                    for ( std::vector<Vector>::iterator it = _M_unknowns.begin();it<_M_unknowns.end();it++ )
+                    for ( std::vector<Vector>::iterator it = _unk.begin();it<_unk.end();it++ )
                     {
                         for ( UInt icmp = 0; icmp < nbComp; ++icmp )
                         {
                             ( *it )
                             ( icmp * size_comp + dof.localToGlobal( iElem, lDof ) - 1 ) = u0( t0 - backtime * dt, x, y, z, icmp + 1 );
+                            backtime++;
                         }
-                        backtime++;
                     }
                 }
             }
@@ -332,14 +324,14 @@ void Bdf::initialize_unk( const Funct& u0,
 
             // Loop on data vector components
             backtime = 0;
-            for ( std::vector<Vector>::iterator it = _M_unknowns.begin();it<_M_unknowns.end();it++ )
+            for ( std::vector<Vector>::iterator it = _unk.begin();it<_unk.end();it++ )
             {
                 for ( UInt icmp = 0; icmp < nbComp; ++icmp )
                 {
                     ( *it )
                     ( icmp * size_comp + dof.localToGlobal( iElem, lDof ) - 1 ) = u0( t0 - backtime * dt, x, y, z, icmp + 1 );
+                    backtime++;
                 }
-                backtime++;
             }
         }
     }

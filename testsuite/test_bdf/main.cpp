@@ -39,7 +39,7 @@
 
 #include "main.hpp"
 #include "ud_functions.hpp"
-#include "bcManage.hpp"
+#include "bc_manage.hpp"
 #include "elemMat.hpp"
 #include "elemOper.hpp"
 #include "bdf.hpp"
@@ -54,9 +54,7 @@
 int main() {
     using namespace LifeV;
     using namespace std;
-#if WITH_EXCEPTION
     try
-#endif
     {
         Chrono chrono;
 
@@ -64,9 +62,9 @@ int main() {
         // Boundary conditions definition
         // ===================================================
 
-        BCFunctionBase gv1(g1); // Functor storing the user definded function g
-        BCFunctionBase gv2(g2); // Functor storing the user definded function g
-        BCHandler BCh(2); // We impose two boundary conditions
+        BCFunction_Base gv1(g1); // Functor storing the user definded function g
+        BCFunction_Base gv2(g2); // Functor storing the user definded function g
+        BC_Handler BCh(2); // We impose two boundary conditions
 
         BCh.addBC("Inlet",  10, Essential, Scalar, gv1);
         BCh.addBC("Outlet",  20, Essential, Scalar, gv2);
@@ -155,8 +153,8 @@ int main() {
 
         // initialization of vector of unknowns and rhs
         ScalUnknown<Vector> U(dim), F(dim);
-        U=ZeroVector( dim );
-        F=ZeroVector( dim );
+        U=0.0;
+        F=0.0;
 
         // ==========================================
         // Definition of the time integration stuff
@@ -267,7 +265,7 @@ int main() {
             cout << "Now we are at time " << t << endl;
 
             A.zeros();
-            F=ZeroVector( F.size() );
+            F=0;
             // ======================================================================
             // Update of the right hand sied with the solution at the previous steps
             // ======================================================================
@@ -304,7 +302,7 @@ int main() {
             Real tgv=1.;
 
             chrono.start();
-            bcManage(A,F,aMesh,dof,BCh,feBd,tgv,t);
+            bc_manage(A,F,aMesh,dof,BCh,feBd,tgv,t);
 
             chrono.stop();
             cout << chrono.diff() << "s." << endl;
@@ -340,9 +338,8 @@ int main() {
                 fe.updateFirstDeriv(aMesh.volumeList(i));
 
                 normL2     += elem_L2_2(U,fe,dof);
-                // U.nbcomp()=1 for a scalar problem
-                normL2sol  += elem_L2_2(analyticSol,fe,t,( UInt )U.nbcomp());
-                normL2diff += elem_L2_diff_2(U,analyticSol,fe, dof, t,( UInt )U.nbcomp());
+                normL2sol  += elem_L2_2(analyticSol,fe,t,U.nbcomp());// U.nbcomp()=1 for a scalar problem
+                normL2diff += elem_L2_diff_2(U,analyticSol,fe,dof,t,U.nbcomp());
 
                 normH1     += elem_H1_2(U,fe,dof);
                 normH1sol  += elem_H1_2(analyticSol,fe,t,U.nbcomp());
@@ -376,13 +373,11 @@ int main() {
 
         } // END OF TIME LOOP
     }
-#if WITH_EXCEPTION
     catch( std::exception const& __e )
     {
         std::cerr << "An exception was caught in LifeV\n"
         << "reason: \n" << __e.what() << "\n";
         return EXIT_FAILURE;
     }
-#endif
     return EXIT_SUCCESS;
 }

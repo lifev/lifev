@@ -21,6 +21,7 @@
 #include "chrono.hpp"
 #include "dataOneDModel.hpp"
 #include "oneDModelSolver.hpp"
+#include "ud_functions.hpp"
 #include "GetPot.hpp"
 #include <sstream>
 
@@ -34,10 +35,10 @@ int main(int argc, char** argv)
   const char* data_file_name = command_line.follow("data", 2, "-f","--file");
   GetPot data_file(data_file_name);
 
-  OneDNonLinModelParam onedparamNL(data_file);
+  OneDNonLinModelParam onedparamNL(data_file_name);
   onedparamNL.initParam(4e6);
 
-  LinearSimpleParam onedparamLin(data_file);
+  LinearSimpleParam onedparamLin(data_file_name);
 
   std::cout << "======\n\tNon Linear model " << std::endl;
   onedparamNL.showMeData(std::cout);
@@ -46,8 +47,8 @@ int main(int argc, char** argv)
   onedparamLin.showMeData(std::cout);
   std::cout << "-----------------------------" << std::endl;
 
-  //  OneDModelSolver onedm(data_file, onedparamLin);
-  OneDModelSolver onedm(data_file, onedparamNL);
+  //  OneDModelSolver onedm(data_file_name, onedparamLin);
+  OneDModelSolver onedm(data_file_name, onedparamNL);
 
   onedm.showMeData();
   //  onedm.showMeHandler(cout, 6);
@@ -108,6 +109,18 @@ int main(int argc, char** argv)
 
     if ( data_file( "miscellaneous/show_graceplot", 0 ) )
       onedm.gplot();
+
+    // ************* saving result on file *****************************************
+    std::ostringstream indexout;
+    indexout << (time*100);
+    std::string voutname;
+    voutname = onedm.PostDirectory() + "/res.res" + indexout.str();
+    // fstream Resfile(voutname.c_str(),ios::out | ios::binary);
+    std::fstream Resfile(voutname.c_str(),std::ios::out );
+    // Resfile.write((char*)&onedm.u()(1),onedm.u().size()*sizeof(Real));
+    Resfile.write((char*)&onedm.U1_thistime()(1),
+		  onedm.U1_thistime().size()*sizeof(Real));
+    Resfile.close();
 
     //onedm.postProcess();
   }

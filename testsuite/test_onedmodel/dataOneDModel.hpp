@@ -44,48 +44,44 @@ class DataOneDModel
 {
 public:
 
-    //! Constructor
-    DataOneDModel(const GetPot& dfile);
+  //! Constructor
+  DataOneDModel(const GetPot& dfile);
 
-    // return the different time data
-    Real timestep() const;
-    Real inittime() const;
-    Real endtime()  const;
+  // return the different time data
+  Real timestep() const;
+  Real inittime() const;
+  Real endtime()  const;
 
-    // return the two extremal points
-    Real xLeft() const;
-    Real xRight() const;
+  const std::string PostDirectory() const {return _M_post_dir;};
 
-    const std::string PostDirectory() const {return _M_post_dir;};
-
-    //! Output
-    void showMeData(std::ostream& c=std::cout) const;
+  //! Output
+  void showMeData(std::ostream& c=std::cout) const;
 
 protected:
 
-    //! boundcond (boundary conditions)
-    int _M_test_case; //! test case
+  //! boundcond (boundary conditions)
+  int _M_test_case; //! test case
 
-    //
-    //! Time
-    //
-    Real _M_time_beg;  //! starting time
-    Real _M_time_end; //! finishing time
-    Real _M_time_step; //! time step
-    //
-    //! Discretization
-    //
-    std::string _M_mesh_file;
-    std::string _M_mesh_dir;
-    Real _M_x_left;  //! left coordinate
-    Real _M_x_right; //! right coordinate
-    UInt _M_nb_elem;    //! number of elements
-    //
-    //! Miscellaneous
-    //
-    std::string _M_post_dir; //! full directory name (including path)
-    std::string _M_post_file; //! output file name
-    int _M_verbose;
+  //
+  //! Time
+  //
+  Real _M_time_beg;  //! starting time
+  Real _M_time_end; //! finishing time
+  Real _M_time_step; //! time step
+  //
+  //! Discretization
+  //
+  std::string _M_mesh_file;
+  std::string _M_mesh_dir;
+  Real _M_x_left;  //! left coordinate
+  Real _M_x_right; //! right coordinate
+  UInt _M_nb_elem;    //! number of elements
+  //
+  //! Miscellaneous
+  //
+  std::string _M_post_dir; //! full name (including path)
+  int _M_verbose;
+  std::string _M_post_proc_format;
 };
 }
 #endif

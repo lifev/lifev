@@ -3,7 +3,6 @@
  This file is part of the LifeV library
 
  Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-            Christoph Winkelmann <christoph.winkelmann@epfl.ch>
       Date: 2004-08-29
 
  Copyright (C) 2004 EPFL
@@ -21,22 +20,17 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+*/ 
 /**
    \file SolverPETSC.hpp
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-   \author Christoph Winkelmann <christoph.winkelmann@epfl.ch>
    \date 2004-08-29
 */
 #include <lifeconfig.h>
 
-#include <debug.hpp>
-
-#include <vecUnknown.hpp>
-#include <GetPot.hpp>
-#include <singleton.hpp>
-
 #include <SolverPETSC.hpp>
+#include "GetPot.hpp"
+#include "singleton.hpp"
 
 namespace LifeV
 {
@@ -71,14 +65,13 @@ SolverPETSC::SolverPETSC( std::string const& __ksp_type,
         :
         _M_p ( new Private )
 {
-    int ierr = KSPCreate( PETSC_COMM_WORLD, &_M_p->__ksp );
-    //CHKERRQ(ierr);
+    const PETSC & petsc = singleton<PETSC>::instance();
 
-    ierr = KSPGetPC( _M_p->__ksp, &_M_p->__pc );
-    //CHKERRQ(ierr);
+    int ierr = KSPCreate( PETSC_COMM_WORLD, &_M_p->__ksp ); //CHKERRQ(ierr);
 
-    ierr = KSPSetType( _M_p->__ksp, const_cast<char*> ( __ksp_type.c_str() ) );
-    //CHKERRQ(ierr);
+    ierr = KSPGetPC( _M_p->__ksp, &_M_p->__pc ); //CHKERRQ(ierr);
+
+    ierr = KSPSetType( _M_p->__ksp, const_cast<char*> ( __ksp_type.c_str() ) ); //CHKERRQ(ierr);
 
     //! set the monitor type
     switch ( __monitor )
@@ -96,26 +89,20 @@ SolverPETSC::SolverPETSC( std::string const& __ksp_type,
         // do nothing
         break;
     }
-    ierr = PCSetType( _M_p->__pc, const_cast<char*> ( __pc_type.c_str() ) );
-    //CHKERRQ(ierr);
+    ierr = PCSetType( _M_p->__pc, const_cast<char*> ( __pc_type.c_str() ) ); //CHKERRQ(ierr);
 
     if ( __pc_type == "ilu" )
     {
-        //ierr = PCILUSetLevels( _M_p->__pc, 2 );
-        //CHKERRQ(ierr);
+        //ierr = PCILUSetLevels( _M_p->__pc, 2 ); //CHKERRQ(ierr);
         ierr = PCILUSetUseDropTolerance( _M_p->__pc, 1e-6, 0.1, 200 );
     }
     if ( __pc_type == "icc" )
     {
-        ierr = PCICCSetLevels( _M_p->__pc, 2 );
-        //CHKERRQ(ierr);
+        ierr = PCICCSetLevels( _M_p->__pc, 2 ); //CHKERRQ(ierr);
     }
-    ierr = KSPSetTolerances( _M_p->__ksp, _M_p->__tolerance,
-                             PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT );
-    //CHKERRQ(ierr);
+    ierr = KSPSetTolerances( _M_p->__ksp, _M_p->__tolerance, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT ); //CHKERRQ(ierr);
 
-    ierr = KSPSetFromOptions( _M_p->__ksp );
-    //CHKERRQ(ierr);
+    ierr = KSPSetFromOptions( _M_p->__ksp ); //CHKERRQ(ierr);
 }
 
 SolverPETSC::~SolverPETSC()
@@ -123,13 +110,11 @@ SolverPETSC::~SolverPETSC()
     int __ierr;
     if ( _M_p->_M_use_A )
     {
-        __ierr = MatDestroy( _M_p->__A );
-        //CHKERRQ( __ierr );
+        __ierr = MatDestroy( _M_p->__A ); ////CHKERRQ( __ierr );
     }
     if ( _M_p->_M_use_A_t )
     {
-        __ierr = MatDestroy( _M_p->__A_t );
-        //CHKERRQ( __ierr );
+        __ierr = MatDestroy( _M_p->__A_t ); ////CHKERRQ( __ierr );
     }
 }
 
@@ -139,55 +124,17 @@ SolverPETSC::New()
     return new SolverPETSC;
 }
 
+/*!
+  \brief Gets the last (approximate preconditioned) residual norm that has been computed.
+ 
+  \return last (approximate preconditioned) residual norm
+*/
 double
 SolverPETSC::residualNorm() const
 {
     double __residual;
     KSPGetResidualNorm( _M_p->__ksp, &__residual );
     return __residual;
-}
-
-double
-SolverPETSC::condEst() const
-{
-    double __value;
-    PetscTruth __computed;
-    PetscTruth __found;
-    PetscOptionsGetLogical( PETSC_NULL,
-                            "-ksp_set_compute_singular_values",
-                            &__computed, &__found );
-    if ( true ) //__computed )
-    {
-        PetscReal __emin;
-        PetscReal __emax;
-        KSPComputeExtremeSingularValues( _M_p->__ksp, &__emax, &__emin);
-        __value = __emax/__emin;
-    }
-    else
-    {
-        std::cerr << "Singular values have not been computed" << std::endl;
-        std::cerr
-            << "add 'ksp_set_compute_singular_values = true' to your data file"
-            << std::endl;
-        __value = std::numeric_limits<double>::signaling_NaN();
-    }
-    return __value;
-}
-
-int
-SolverPETSC::iterations() const
-{
-    int __iter;
-    KSPGetIterationNumber( _M_p->__ksp , &__iter );
-    return __iter;
-}
-
-bool
-SolverPETSC::converged() const
-{
-    KSPConvergedReason reason;
-    KSPGetConvergedReason( _M_p->__ksp, &reason );
-    return reason >= 0;
 }
 
 PC const& SolverPETSC::preconditioner() const
@@ -208,16 +155,29 @@ KSP & SolverPETSC::krylovSolver()
     return _M_p->__ksp;
 }
 
+
+/*!
+  \brief Sets the relative, absolute, divergence, and maximum iteration tolerances
+  used by the default KSP convergence testers.
+ 
+  Use PETSC_DEFAULT to retain the default value of any of the tolerances.
+ 
+  See KSPDefaultConverged() for details on the use of these parameters in the default convergence test.
+  See also KSPSetConvergenceTest() for setting user-defined stopping criteria.
+ 
+  \arg rtol - the relative convergence tolerance (relative decrease in the residual norm)
+  \arg atol - the absolute convergence tolerance (absolute size of the residual norm)
+  \arg dtol - the divergence tolerance (amount residual can increase before KSPDefaultConverged() concludes that the method is diverging)
+  \arg maxits - maximum number of iterations to use
+*/
 void
-SolverPETSC::setTolerances( double __rtol, double __atol, double __dtol,
-                            int __maxits )
+SolverPETSC::setTolerances( double __rtol, double __atol, double __dtol, int __maxits )
 {
     KSPSetTolerances( _M_p->__ksp, __rtol, __atol, __dtol, __maxits );
 }
 
 void
-SolverPETSC::setMatrix( uint __nrows, const uint* __r, const uint *__i,
-                        const double* __v )
+SolverPETSC::setMatrix( uint __nrows, const uint* __r, const uint *__i, const double* __v )
 {
     MatCreateSeqAIJWithArrays( PETSC_COMM_SELF,
                                __nrows, __nrows,
@@ -231,18 +191,16 @@ SolverPETSC::setMatrix( uint __nrows, const uint* __r, const uint *__i,
 
 void SolverPETSC::setMatrix( const MSRMatr<value_type>& m )
 {
-    _M_tempPattern.reset( new CSRPatt( *( m.Patt() ) ) );
-    _M_tempMatrix.reset( new CSRMatr<CSRPatt, value_type>
-                         ( *_M_tempPattern, m ));
-    setMatrix( _M_tempPattern->nRows(),
-               _M_tempPattern->giveRawCSR_ia(),
-               _M_tempPattern->giveRawCSR_ja(),
-               _M_tempMatrix->giveRawCSR_value() );
+    _tempPattern.reset( new CSRPatt( *( m.Patt() ) ) );
+    _tempMatrix.reset( new CSRMatr<CSRPatt, value_type>( *_tempPattern, m ) );
+    setMatrix( _tempPattern->nRows(),
+               _tempPattern->giveRawCSR_ia(),
+               _tempPattern->giveRawCSR_ja(),
+               _tempMatrix->giveRawCSR_value() );
 }
 
 void
-SolverPETSC::setMatrixTranspose( uint __nrows, const uint* __r,
-                                 const uint *__i, const double* __v )
+SolverPETSC::setMatrixTranspose( uint __nrows, const uint* __r, const uint *__i, const double* __v )
 {
     MatCreateSeqAIJWithArrays( PETSC_COMM_SELF,
                                __nrows, __nrows,
@@ -257,55 +215,29 @@ SolverPETSC::setMatrixTranspose( uint __nrows, const uint* __r,
 
 }
 
+//! solve \f[ A X = B \f]
+/*!
+ 
+\param __X  the solution
+\param __B the right hand side
+\return the number of iterations
+*/
 void
-SolverPETSC::solve( array_type& __X,
-                    array_type const& __B,
-                    MatStructure __ptype )
-{
-    PetscTruth __quiet;
-    PetscTruth __found;
-    PetscOptionsGetLogical( PETSC_NULL, "-quiet", &__quiet, &__found );
-    if ( !__quiet )
-    {
-        std::cout << "[SolverPETSC::solve] Solving primal\n";
-    }
-    _F_solveCommon( _M_p->__A, __X, __B, __ptype );
-}
-
-void
-SolverPETSC::solveTranspose( array_type& __X,
-                             array_type const& __B,
-                             MatStructure __ptype )
-{
-    PetscTruth __quiet;
-    PetscTruth __found;
-    PetscOptionsGetLogical( PETSC_NULL, "-quiet", &__quiet, &__found );
-    if ( !__quiet )
-    {
-        std::cout << "[SolverPETSC::solveTranspose] Solving transpose\n";
-    }
-    _F_solveCommon( _M_p->__A_t, __X, __B, __ptype );
-}
-
-void
-SolverPETSC::_F_solveCommon( Mat const& __A,
-                             array_type& __X,
-                             array_type const& __B,
-                             MatStructure __ptype)
+SolverPETSC::solve( array_type& __X, array_type const& __B, MatStructure __ptype )
 {
     int __rowA;
     int __colA;
-    MatGetSize( __A, &__rowA, &__colA );
-    //CHKERRQ(__ierr);
+    MatGetSize( _M_p->__A, &__rowA, &__colA ); //CHKERRQ(__ierr);
 
+    std::cerr << "[SolverPETSC::solve]  Solving primal\n";
     Vec __x;
     VecCreateSeqWithArray( PETSC_COMM_SELF, __X.size(), &__X[ 0 ], &__x );
 
     Vec __b;
     VecCreateSeqWithArray( PETSC_COMM_SELF, __B.size(), &__B[ 0 ], &__b );
 
-    KSPSetOperators( _M_p->__ksp, __A, __A, __ptype );
-    //CHKERRQ(__ierr);
+
+    KSPSetOperators( _M_p->__ksp, _M_p->__A, _M_p->__A, __ptype ); //CHKERRQ(__ierr);
 
     KSPSetInitialGuessNonzero( _M_p->__ksp, PETSC_TRUE );
 
@@ -313,13 +245,8 @@ SolverPETSC::_F_solveCommon( Mat const& __A,
 
     KSPSetRhs( _M_p->__ksp, __b );
     KSPSetSolution( _M_p->__ksp, __x );
-    KSPSolve( _M_p->__ksp );
-    //CHKERRQ(__ierr);
+    KSPSolve( _M_p->__ksp ); //CHKERRQ(__ierr);
 #else
-
-    PetscTruth __quiet;
-    PetscTruth __found;
-    PetscOptionsGetLogical( PETSC_NULL, "-quiet", &__quiet, &__found );
 
     PetscInt its = 0;
 
@@ -328,35 +255,95 @@ SolverPETSC::_F_solveCommon( Mat const& __A,
     KSPGetConvergedReason( _M_p->__ksp, &reason );
     if ( reason == KSP_DIVERGED_INDEFINITE_PC )
     {
-        std::cerr << "\nDivergence because of indefinite preconditioner;\n";
+        std::cout << "\nDivergence because of indefinite preconditioner;\n";
     }
     else if ( reason < 0 )
     {
-        std::cerr << "\nOther kind of divergence: this should not happen.\n";
+        std::cout << "\nOther kind of divergence: this should not happen.\n";
     }
-    else if ( !__quiet )
+    else
     {
         KSPGetIterationNumber( _M_p->__ksp , &its );
         std::cout << "\nConvergence in " << ( int ) its << " iterations.\n";
     }
-    if ( !__quiet )
-    {
-        std::cout << "\n";
-    }
+    std::cout << "\n";
 #endif
     /*
       View info about the solver
     */
     PetscTruth __flag;
-    PetscTruth __flagFound;
-    PetscOptionsGetLogical( PETSC_NULL, "-nokspview", &__flag, &__flagFound );
+    PetscOptionsHasName( PETSC_NULL, "-nokspview", &__flag );
     if ( !__flag )
     {
         KSPView( _M_p->__ksp, PETSC_VIEWER_STDOUT_WORLD );
     }
 
-    // Petsc won't deallocate the memory so __X and __B contains the
-    // informations
+    /*
+      View solver info; we could instead use the option -ksp_view to
+      print this info to the screen at the conclusion of KSPSolve().
+    */
+    KSPView( _M_p->__ksp, PETSC_VIEWER_STDOUT_WORLD );
+
+    // Petsc won't deallocate the memory so __X and __B contains the informations
+    VecDestroy( __x );
+    VecDestroy( __b );
+}
+
+void
+SolverPETSC::solveTranspose( array_type& __X, array_type const& __B, MatStructure __ptype )
+{
+    int __rowA;
+    int __colA;
+    MatGetSize( _M_p->__A_t, &__rowA, &__colA ); ////CHKERRQ(__ierr);
+
+    std::cerr << "[SolverPETSC::solveTranspose] Solving transpose\n";
+    Vec __x;
+    VecCreateSeqWithArray( PETSC_COMM_SELF, __X.size(), &__X[ 0 ], &__x );
+
+    Vec __b;
+    VecCreateSeqWithArray( PETSC_COMM_SELF, __B.size(), &__B[ 0 ], &__b );
+
+    KSPSetOperators( _M_p->__ksp, _M_p->__A_t, _M_p->__A_t, __ptype ); ////CHKERRQ(__ierr);
+
+#if PETSC_VERSION == 220
+
+    KSPSetRhs( _M_p->__ksp, __b );
+    KSPSetSolution( _M_p->__ksp, __x );
+    KSPSolve( _M_p->__ksp ); //CHKERRQ(__ierr);
+#else
+
+    PetscInt its = 0;
+
+    KSPSolve( _M_p->__ksp, __b, __x );
+    KSPConvergedReason reason;
+    KSPGetConvergedReason( _M_p->__ksp, &reason );
+    if ( reason == KSP_DIVERGED_INDEFINITE_PC )
+    {
+        std::cout << "\nDivergence because of indefinite preconditioner;\n";
+    }
+    else if ( reason < 0 )
+    {
+        std::cout << "\nOther kind of divergence: this should not happen.\n";
+    }
+    else
+    {
+        KSPGetIterationNumber( _M_p->__ksp , &its );
+        std::cout << "\nConvergence in " << ( int ) its << " iterations.\n";
+    }
+    std::cout << "\n";
+#endif
+
+    /*
+      View info about the solver
+    */
+    PetscTruth __flag;
+    PetscOptionsHasName( PETSC_NULL, "-nokspview", &__flag );
+    if ( !__flag )
+    {
+        KSPView( _M_p->__ksp, PETSC_VIEWER_STDOUT_WORLD );
+    }
+
+    // Petsc won't deallocate the memory so __X and __B contains the informations
     VecDestroy( __x );
     VecDestroy( __b );
 }
@@ -405,17 +392,6 @@ void SolverPETSC::setOptionsFromGetPot( const GetPot& dataFile,
         delete[] argv[ i ];
     }
     delete[] argv;
-
-    // set compute singular values from options
-    // (not supported directly by PETSc)
-    PetscTruth __compute;
-    PetscTruth __found;
-    PetscOptionsGetLogical( PETSC_NULL,
-                            "-ksp_set_compute_singular_values",
-                            &__compute, &__found );
-    KSPSetComputeSingularValues( _M_p->__ksp, __compute );
 }
-
-static const bool __petsc_initialize = PETSC::instance().initialize();
 
 } // namespace LifeV

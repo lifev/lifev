@@ -40,13 +40,13 @@ namespace LifeV
 {
 /*!
   \class DofInterfaceBase
-
+ 
   Base class which holds the conections of the dof in two matching meshes
   The dof mapping (STL map) is set in the derived classes.
   Each derived class depends on the type of interface you have.
-
+ 
   Method getInterfaceDof gives the connections.
-
+ 
 */
 class DofInterfaceBase
 {

@@ -39,13 +39,13 @@ int main(int argc, char** argv)
 
     // Boundary conditions definition
     //
-    BCFunctionBase uin(u_in);
-    BCFunctionBase uin_d(u_w);
-    BCFunctionBase uw(u_w);
-    BCFunctionBase uout(u_out);
-    BCFunctionBase uoutd(u_w);
+    BCFunction_Base uin(u_in);
+    BCFunction_Base uin_d(u_w);
+    BCFunction_Base uw(u_w);
+    BCFunction_Base uout(u_out);
+    BCFunction_Base uoutd(u_w);
 
-    BCHandler BCh_u(7); // We impose 7 boundary conditions
+    BC_Handler BCh_u(7); // We impose 7 boundary conditions
 
     // mode "Full" involves all components, which are 3 for the velocity.
     BCh_u.addBC("Inlet",   10, Essential, Full, uin, 3);
@@ -56,10 +56,10 @@ int main(int argc, char** argv)
     BCh_u.addBC("Outlet2", 30, Natural,   Full, uout, 3);
     BCh_u.addBC("Outlet2d",31, Essential, Full, uoutd, 3);
 
-    //  BCFunctionBase u_wall(u1);
-    //  BCFunctionBase in_flow(u0);
-    //  BCFunctionBase out_flow(u2);
-    //  BCHandler BCh_u(3);
+    //  BCFunction_Base u_wall(u1);
+    //  BCFunction_Base in_flow(u0);
+    //  BCFunction_Base out_flow(u2);
+    //  BC_Handler BCh_u(3);
     //  BCh_u.addBC("Wall",   20, Essential, Full, u_wall,  3);
     //  BCh_u.addBC("InFlow", 10, Essential,   Full, in_flow, 3);
     //  BCh_u.addBC("OutFlow", 50, Natural,   Full, out_flow, 3);

@@ -26,7 +26,7 @@
 namespace LifeV
 {
 template <class Fct, class Vector, class Real, class Norm>
-int newton( Vector& sol, Fct& f, Norm norm, Real abstol, Real reltol,
+int newton( Vector& sol, Fct& f, Norm& norm, Real abstol, Real reltol,
             int& maxit, Real eta_max, int linesearch = 0, std::ofstream& out_res,
             const Real& time )
 {
@@ -58,14 +58,10 @@ int newton( Vector& sol, Fct& f, Norm norm, Real abstol, Real reltol,
     Real linres;
 
     int iter = 0, increase_res = 0;
-    Vector residual = sol;
-
-    Vector step(  sol.size() );
-    step = ZeroVector( sol.size() );
-
+    Vector residual = sol, step = sol;
+    step = 0.;
     Real normResOld = 1, lambda, slope;
-    f.evalResidual( residual, sol, iter);
-//    f.evalResidual( sol, iter, residual );
+    f.evalResidual( residual, sol, iter );
     Real normRes = norm( residual ), normStep = 0,
                    stop_tol = abstol + reltol * normRes,
                               ratio;
@@ -80,18 +76,15 @@ int newton( Vector& sol, Fct& f, Norm norm, Real abstol, Real reltol,
 
     out_res << time << "    " << iter << "   " << normRes << std::endl;
 
-    f.updateJac( sol , 1);
-
     while ( normRes > stop_tol && iter < maxit )
     {
         iter++;
         ratio = normRes / normResOld;
         normResOld = normRes;
         normRes = norm( residual );
-        if (iter != 1) f.updateJac( sol, iter );
+        f.updateJac( sol, iter );
         linres = linear_rel_tol;
-        f.solveJac( step, -1. * residual, linres); // residual = f(sol)
-//        f.solveJac( -1. * residual, linres, step); // residual = f(sol)
+        f.solveJac( step, -1. * residual, linres ); // residual = f(sol)
         /*
           linres contains the relative linear tolerance achieved by the
           linear solver, i.e linear_rel_tol = | -f(sol) - J step | / |-f(sol)|
@@ -113,8 +106,7 @@ int newton( Vector& sol, Fct& f, Norm norm, Real abstol, Real reltol,
         {
         case 0: // no linesearch
             sol += step;
-            f.evalResidual( residual, sol, iter);
-//            f.evalResidual( sol, iter, residual );
+            f.evalResidual( residual, sol, iter );
             normRes = norm( residual );
             break;
         case 1:
@@ -155,11 +147,7 @@ int newton( Vector& sol, Fct& f, Norm norm, Real abstol, Real reltol,
         std::cout << "------------------------------------------------------------------"
         << std::endl;
 
-        out_res << time << " " << iter << " "
-                << std::setw(15) << normRes << " "
-                << std::setw(15) << norm(sol) << " "
-                << std::setw(15) << normStep
-                << std::endl;
+        out_res << time << "    " << iter << "   " << normRes << std::endl;
 
         //
         //-- forcing term computation (Eisenstat-Walker)

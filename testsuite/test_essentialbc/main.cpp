@@ -42,13 +42,13 @@
 
 #include "main.hpp"
 #include "ud_functions.hpp"
-#include "bcManage.hpp"
+#include "bc_manage.hpp"
 
 
 int main()
 {
     using namespace LifeV;
-
+    using namespace std;
     Chrono chrono;
 
 
@@ -57,9 +57,9 @@ int main()
     // ===================================================
 
 
-    BCFunctionBase gv(g); // Functor storing the user definded function g
+    BCFunction_Base gv(g); // Functor storing the user definded function g
 
-    BCHandler BCh(2); // We impose two boundary conditions
+    BC_Handler BCh(2); // We impose two boundary conditions
 
 
     BCh.addBC("Inlet",  10, Essential, Scalar, gv);
@@ -96,14 +96,14 @@ int main()
     RegionMesh3D<LinearTetra> aMesh;
 
     GetPot datafile( "data" );
-    std::string mesh_dir = datafile( "mesh_dir", "." );//../data/mesh/mesh++/";
-    std::string fname=mesh_dir+datafile( "mesh_file", "cube_384.m++" );
+    string mesh_dir = datafile( "mesh_dir", "." );//../data/mesh/mesh++/";
+    string fname=mesh_dir+datafile( "mesh_file", "cube_384.m++" );
 
     long int  m=1;
     readMppFile(aMesh,fname,m);
     aMesh.showMe();
 
-    Debug( 10010 )<< "Now building local Edges/faces Stuff"<<endl<<endl;
+    cout<< "Now building local Edges/faces Stuff"<<endl<<endl;
     aMesh.updateElementEdges();
     aMesh.updateElementFaces();
     aMesh.showMe();
@@ -132,18 +132,22 @@ int main()
 
     // initialization of vector of unknowns and rhs
     ScalUnknown<Vector> U(dim), F(dim);
-    U=ZeroVector( dim );
-    F=ZeroVector( dim );
+    U=0.0; F=0.0;
 
     // ==========================================
     // Pattern construction and matrix assembling
     // ==========================================
+    cout << "dim                    = " << dim     << endl << endl;
+
     // pattern for stiff operator
     MSRPatt pattA(dof);
 
+    cout << "Values" << endl;
+
     // A: stiff operator
     MSRMatr<double> A(pattA);
-    Debug( 10010 ) << "*** Matrix computation: "<<endl;
+
+    cout << "*** Matrix computation           : "<<endl;
     chrono.start();
     //
     Stiff Ostiff(&fe);
@@ -153,24 +157,25 @@ int main()
 
     // assembling of A: stiff operator
     assemble(stiff,aMesh,fe,dof,source,A,F);
+    cout << "A has been constructed" << endl;
 
     chrono.stop();
-    Debug( 10010 ) << "*** Matrix computation: "<<chrono.diff() << "s." << endl;
+    //cout << chrono.diff() << "s." << endl;
 
     // ====================================
     // Treatment of the Boundary conditions
     // ====================================
 
     // BC manage for the velocity
-    Debug( 10010 ) << "*** BC Management: "<<endl;
+    cout << "*** BC Management: "<<endl;
 
     Real tgv=1.;
 
     chrono.start();
-    bcManage(A,F,aMesh,dof,BCh,feBd,tgv,0.0);
+    bc_manage(A,F,aMesh,dof,BCh,feBd,tgv,0.0);
 
     chrono.stop();
-    Debug( 10010 ) <<"*** BC Management: "<< chrono.diff() << "s." << endl;
+    //cout << chrono.diff() << "s." << endl;
 
     // ==============================
     // Reolution of the linear system
@@ -192,11 +197,11 @@ int main()
     //  double *val;                   // in these MSR arrays.
     int    N_update;                 // # of unknowns updated on this node
     //
-    Debug( 10010 ) << "*** Linear System Solving (AZTEC)" << endl;
+    cout << "*** Linear System Solving (AZTEC)" << endl;
     AZ_set_proc_config(proc_config, AZ_NOT_MPI );
-    //   Debug( 10010 ) << AZ_PROC_SIZE << " " << AZ_node << " " << AZ_N_procs << endl;
+    //   cout << AZ_PROC_SIZE << " " << AZ_node << " " << AZ_N_procs << endl;
     //   for (UInt ii=0; ii<AZ_PROC_SIZE; ++ii)
-    //     Debug( 10010 ) << proc_config[ii] << endl;
+    //     cout << proc_config[ii] << endl;
 
     AZ_read_update(&N_update, &update, proc_config, U.size(), 1, AZ_linear);
 
@@ -218,8 +223,8 @@ int main()
              A.giveRaw_value(), data_org,
              status, proc_config);
     //
-    chrono.stop();
-    Debug( 10010 ) << "*** Solution computed in " << chrono.diff() << "s." << endl;
+    //chrono.stop();
+    //cout << "*** Solution computed in " << chrono.diff() << "s." << endl;
 
     //
 
@@ -232,8 +237,8 @@ int main()
     Real normL2=0., normL2diff=0., normL2sol=0.;
     Real normH1=0., normH1diff=0., normH1sol=0.;
 
-    for(UInt i=1; i<=aMesh.numVolumes(); ++i)
-    {
+    for(UInt i=1; i<=aMesh.numVolumes(); ++i){
+        //
         fe.updateFirstDeriv(aMesh.volumeList(i));
 
         normL2     += elem_L2_2(U,fe,dof);
@@ -253,16 +258,17 @@ int main()
     normH1sol  = sqrt(normH1sol);
     normH1diff = sqrt(normH1diff);
 
-    std::cout << "|| U       ||_{L^2}                   = " << normL2 << std::endl;
-    std::cout << "|| sol     ||_{L^2}                   = " << normL2sol << std::endl;
-    std::cout << "|| U - sol ||_{L^2}                   = " << normL2diff<< std::endl;
-    std::cout << "|| U - sol ||_{L^2} / || sol ||_{L^2} = " << normL2diff/normL2sol
-         << std::endl;
+    cout << "|| U       ||_{L^2}                   = " << normL2 << endl;
+    cout << "|| sol     ||_{L^2}                   = " << normL2sol << endl;
+    cout << "|| U - sol ||_{L^2}                   = " << normL2diff<< endl;
+    cout << "|| U - sol ||_{L^2} / || sol ||_{L^2} = " << normL2diff/normL2sol
+         << endl;
 
-    std::cout << "|| U       ||_{H^1}                   = " << normH1 << std::endl;
-    std::cout << "|| sol     ||_{H^1}                   = " << normH1sol << std::endl;
-    std::cout << "|| U - sol ||_{H^1}                   = " << normH1diff<< std::endl;
-    std::cout << "|| U - sol ||_{H^1} / || sol ||_{H^1} = " << normH1diff/normH1sol << std::endl;
+    cout << "|| U       ||_{H^1}                   = " << normH1 << endl;
+    cout << "|| sol     ||_{H^1}                   = " << normH1sol << endl;
+    cout << "|| U - sol ||_{H^1}                   = " << normH1diff<< endl;
+    cout << "|| U - sol ||_{H^1} / || sol ||_{H^1} = " << normH1diff/normH1sol
+         << endl;
 
     return 0;
 }

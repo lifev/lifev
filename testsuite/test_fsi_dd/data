@@ -6,7 +6,7 @@
 [fluid]
 
 [./physics]
-endtime   = 0.03             # endtime
+endtime   = 0.002             # endtime
 density   = 1.0               # density
 viscosity = 0.03              # viscosity
 

@@ -15,13 +15,13 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+*/ 
 /*!
   \file convDiffReactSolverPC.h
   \author M. Prosi
   \date 03/2004
   \version 1.0
-
+ 
   \brief This file contains a solver class for the Convection-Diffusion-Reaction equation
 */
 
@@ -35,9 +35,9 @@
 #include "values.hpp"
 #include "pattern.hpp"
 #include "assemb.hpp"
-#include "bcManage.hpp"
+#include "bc_manage.hpp"
 #include "algebraic_facto.hpp"
-#include "bcHandler.hpp"
+#include "bcCond.hpp"
 #include "chrono.hpp"
 #include "dataAztec.hpp"
 #include "bdf.hpp"
@@ -48,9 +48,9 @@ namespace LifeV
 {
 /*!
   \class convDiffReactSolverPC
-
+ 
    This class implements a solver for the Convection-Diffusion-Reaction equation
-
+ 
 */
 template <typename Mesh>
 class ConvDiffReactSolverPC:
@@ -60,7 +60,6 @@ class ConvDiffReactSolverPC:
 public:
 
     typedef typename ConvDiffReactHandler<Mesh>::Function Function;
-    typedef typename ConvDiffReactHandler<Mesh>::source_type source_type;
 
     //! Constructor
     /*!
@@ -71,26 +70,26 @@ public:
       \param BCh_c boundary conditions for the concentration
     */
     ConvDiffReactSolverPC( const GetPot& data_file, const RefFE& refFE_c, const QuadRule& Qr_c,
-                           const QuadRule& bdQr_c, BCHandler& BCh_c );
+                           const QuadRule& bdQr_c, BC_Handler& BCh_c );
 
     //! Update the right  hand side  for time advancing
     /*!
       \param source volumic source
       \param time present time
     */
-    void timeAdvance( source_type const& source, const Real& time );
+    void timeAdvance( const Function source, const Real& time );
 
     //! Update convective term, bc treatment and solve the linearized ns system
     void iterate( const Real& time );
 
     //! Projection of the velocity on grid of concentration discretization
     template <typename RegionMesh3D>
-    void getvel( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u, const Real& time );
+    void getvel( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u, const Real& time );
 
     //! Calculate the local coordinates of concentration gridpoints in the
     //! velocity grid (is needed for the Projection)
     template <typename RegionMesh3D>
-    void getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u );
+    void getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u );
 
     //! Calculate the volume of a tetrahedra given by its corner nodes
     Real calcvol( Real x[ 4 ], Real y[ 4 ], Real z[ 4 ] );
@@ -138,7 +137,7 @@ private:
 template <typename Mesh>
 ConvDiffReactSolverPC<Mesh>::
 ConvDiffReactSolverPC( const GetPot& data_file, const RefFE& refFE_c, const QuadRule& Qr_c,
-                       const QuadRule& bdQr_c, BCHandler& BCh_c ) :
+                       const QuadRule& bdQr_c, BC_Handler& BCh_c ) :
         ConvDiffReactHandler<Mesh>( data_file, refFE_c, Qr_c, bdQr_c, BCh_c ),
         _pattM( _dof_c ),
         _DR( _pattM ),
@@ -216,7 +215,7 @@ ConvDiffReactSolverPC( const GetPot& data_file, const RefFE& refFE_c, const Quad
 
 template <typename Mesh>
 void ConvDiffReactSolverPC<Mesh>::
-timeAdvance( source_type const& source, const Real& time )
+timeAdvance( const Function source, const Real& time )
 {
 
     std::cout << "  o-  Updating mass term on right hand side (concentration)... ";
@@ -225,7 +224,7 @@ timeAdvance( source_type const& source, const Real& time )
     chrono.start();
 
     // Right hand side for the velocity at time
-    _f_c = ZeroVector( _f_c.size() );
+    _f_c = 0.;
 
     // loop on volumes: assembling source term
     for ( UInt i = 1; i <= _mesh.numVolumes(); ++i )
@@ -351,7 +350,7 @@ iterate( const Real& time )
     // BC manage for the concentration
     if ( !_BCh_c.bdUpdateDone() )
         _BCh_c.bdUpdate( _mesh, _feBd_c, _dof_c );
-    bcManage( _CDR, _f_c, _mesh, _dof_c, _BCh_c, _feBd_c, tgv, time );
+    bc_manage( _CDR, _f_c, _mesh, _dof_c, _BCh_c, _feBd_c, tgv, time );
     chrono.stop();
 
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
@@ -403,7 +402,7 @@ iterate( const Real& time )
 template <typename Mesh>
 template <typename RegionMesh3D>
 void ConvDiffReactSolverPC<Mesh>::
-getvel( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u, const Real& time )
+getvel( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u, const Real& time )
 {
 
     //   for (UInt j=0; j<3; j++){
@@ -452,7 +451,7 @@ getvel( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u, con
 template <typename Mesh>
 template <typename RegionMesh3D>
 void ConvDiffReactSolverPC<Mesh>::
-getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
+getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u )
 {
 
     Real b1, b2, b3;
@@ -461,7 +460,7 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
     Chrono chrono;
     chrono.start();
 
-    _u_c = ScalarVector( _u_c.size(), -100 );
+    _u_c = -100.0;
 
     Real x[ 4 ], y[ 4 ], z[ 4 ], xt[ 4 ], yt[ 4 ], zt[ 4 ];
     UInt vid, i1, i2, i3, v1, v2, v3, v4;

@@ -47,6 +47,9 @@ The simplest way to compile this package is:
      Running `configure' takes awhile.  While running, it prints some
      messages telling which features it is checking for.
 
+NOTE: If configure doesn't work you should need to run 
+      autoconf before (Mauro Meneghin)
+
   2. Type `make' to compile the package.
 
   3. Optionally, type `make check' to run any self-tests that come with

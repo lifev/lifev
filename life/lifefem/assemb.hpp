@@ -15,7 +15,7 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+*/ 
 /* --------------------------------------------------------------------------*
 /                                                                            /
 /      ...                                                                   /
@@ -26,7 +26,6 @@
 / #Version 0.1 Experimental:   31/01/2001 Alessandro Veneziani               /
 / #Version 0.2 Added features for vector problems: VBR or global CSR formats /
 /                              02/01/2002 Alessandro Veneziani       /=> la specializzazione per il caso simmetrico e' ancora da fare
-/ #Version 0.3 6/10/2004 Added features for discontinuous finite elements
 / #Purpose: Container for the assembly routines                              /
 /                                                                            /
 /                                                                            /
@@ -35,13 +34,9 @@
 #define _ASSEMBLY
 
 #include "currentFE.hpp"
-#include "currentFEDG.hpp"
-#include "currentIFDG.hpp"
-#include "currentBFDG.hpp"
 #include "elemMat.hpp"
 #include "elemVec.hpp"
 #include "localDofPattern.hpp"
-#include "bcHandler.hpp"
 
 namespace LifeV
 {
@@ -122,7 +117,7 @@ assemble( Oper oper, const RegionMesh& mesh, CurrentFE& fe, const DOF& dof,
             compute_vec( source_fct, elvec, fe, t, ic ); // compute local vector
 #endif
             // the previous line would become:  compute_vec(source_fct.comp(ic),elvec,fe); ****
-            assemb_vec( b, elvec, fe, dof, ic ); // assemble local vector into global one
+            assemb_vec( b, elvec, fe, dof, ic ); // assebmle local vector into global one
         }
     }
 }
@@ -280,204 +275,6 @@ assemble_symm_block_diagonal( Oper oper, const RegionMesh& mesh, CurrentFE& fe, 
         }
     }
 }
-
-////////////////////////////////////////////////////////////////////////////////
-//
-// DG matrix assembling
-//
-////////////////////////////////////////////////////////////////////////////////
-
-template<typename OperDG, typename OperDGIF, typename OperDGBF,
-	 typename DOF, typename DOFBYFACE,
-	 typename RegionMesh, typename UsrSourceFct,
-	 typename Matrix, typename Vector>
-  void assemble_DG(OperDG operDG, OperDGIF operDGIF, OperDGBF operDGBF,
-		   const RegionMesh& mesh,
-		   const BCHandler& BCh,
-		   CurrentFEDG& feDG, CurrentIFDG& feIFDG, CurrentBFDG& feBFDG,
-		   const DOF& dof, const DOFBYFACE& dofbyface,
-		   const UsrSourceFct& source_fct,
-		   Matrix& A, Vector& b)
-{
-  UInt i, ic, jc;
-  UInt nc = b.size() / dof.numTotalDof();
-  UInt iAd, iOp;
-
-  ElemMat elmat(feDG.nbNode, nc, nc);
-  ElemMat bfmat(feDG.nbNode, nc, nc);
-  ElemMat ifmat(2 * feDG.nbNode, nc, nc);
-
-  ElemVec elvec(feDG.nbNode, nc);
-  ElemVec bfvec(feDG.nbNode, nc);
-  ElemVec ifvec(feDG.nbNode, nc, feDG.nbNode, nc);
-
-/*   ElemMat::matrix_view matIF = ifmat.block(0, 0); */
-/*   ElemMat::matrix_view matBF = bfmat.block(0, 0); */
-
-  // Assembling volume integrals contributions
-  for(i = 1; i <= mesh.numVolumes(); ++i){
-    feDG.updateFirstDeriv(mesh.volumeList(i));
-
-    elmat.zero();
-    elvec.zero();
-
-    for(ic = 0; ic < nc; ic++){
-      for(jc = 0; jc < nc; jc++){
-	compute_mat_DG(elmat, operDG, feDG, ic, jc);
-	assemb_mat_DG(A, elmat, feDG, dof, i, ic, jc);
-      }
-      compute_vec_DG(source_fct, elvec, feDG, ic);
-      assemb_vec_DG(b, elvec, feDG, dof, ic);
-    }
-  }
-
-  // Assembling boundary faces contributions (boundary faces are stored first)
-  for(i = 1; i <= mesh.numBFaces(); ++i){
-    iAd = (UInt)mesh.faceList(i).ad_first();
-
-    feBFDG.updateBCType(mesh.faceList(i), BCh);
-    // The update member to call should be chosen according to the penalization method...
-    feBFDG.updateMeasNormalQuadPtFirstDerivAd(mesh.faceList(i), mesh.volumeList(iAd));
-
-    bfmat.zero();
-    bfvec.zero();
-
-    for(ic = 0; ic < nc; ic++){
-      for(jc = 0; jc < nc; jc++){
-
-	// Compute local matrix
-	compute_mat_DG_BF(bfmat, operDGBF, feBFDG, ic, jc);
-
-	// Assemble local matrix into global one
-	assemb_mat_DG_BF(A, bfmat, feDG, dof, iAd, ic, jc);
-
-      }
-      compute_vec_DG_BF(BCh, bfvec, feBFDG, ic);
-      assemb_vec_DG_BF(b, bfvec, feBFDG, iAd, dof, ic);
-
-    }
-  }
-
-  // Assembling internal faces contributions
-  for(i = mesh.numBFaces() + 1; i <= mesh.numFaces(); ++i){
-    iAd = (UInt)mesh.faceList(i).ad_first();
-    iOp = (UInt)mesh.faceList(i).ad_second();
-
-    feIFDG.updateMeasNormalQuadPtFirstDerivAd(mesh.faceList(i), mesh.volumeList(iAd));
-    feIFDG.updateMeasNormalQuadPtFirstDerivOp(mesh.faceList(i), mesh.volumeList(iOp));
-
-    ifmat.zero();
-    ifvec.zero();
-
-    for(ic = 0; ic < nc; ic++){
-      for(jc = 0; jc < nc; jc++){
-	// Compute local matrix
-	compute_mat_DG_IF(ifmat, operDGIF, feDG.nbNode, feIFDG, ic, jc);
-
-	// Assemble local matrix into global one
-	assemb_mat_DG_IF(A, ifmat, feDG, dofbyface, i - mesh.numBFaces(), ic, jc);
-
-      }
-    }
-  }
-
-}
-
-template<typename OperDG,  typename OperDGIF, typename OperDGBF,
-	 typename DOF, typename DOFBYFACE,
-	 typename RegionMesh, typename UsrSourceFct,
-	 typename Matrix, typename Vector, typename Velocity>
-  void assemble_AdvecDG(OperDG operDG, OperDGIF operDGIF, OperDGBF operDGBF,
-			const RegionMesh& mesh,
-			const BCHandler& BCh,
-			Velocity& u,
-			CurrentFEDG& feDG, CurrentIFDG& feIFDG, CurrentBFDG& feBFDG,
-			const DOF& dof, const DOFBYFACE& dofbyface,
-			const UsrSourceFct& source_fct,
-			Matrix& A, Matrix& M, Vector& b)
-{
-  UInt i, ic, jc;
-  UInt nc = b.size() / dof.numTotalDof();
-  UInt iAd, iOp;
-
-  ElemMat elmat(feDG.nbNode, nc, nc);
-  ElemMat bfmat(feDG.nbNode, nc, nc);
-  ElemMat ifmat(2 * feDG.nbNode, nc, nc);
-
-  ElemVec elvec(feDG.nbNode, nc);
-  ElemVec bfvec(feDG.nbNode, nc);
-  ElemVec ifvec(feDG.nbNode, nc, feDG.nbNode, nc);
-
-  // Assembling volume integrals contributions
-  for(i = 1; i <= mesh.numVolumes(); ++i){
-    feDG.updateFirstDerivQuadPtMass(mesh.volumeList(i));
-
-    elmat.zero();
-    elvec.zero();
-
-    for(ic = 0; ic < nc; ic++){
-      for(jc = 0; jc < nc; jc++){
-	compute_mat_DG(elmat, operDG, feDG, ic, jc);
-	assemb_mat_DG(A, elmat, feDG, dof, i, ic, jc);
-
-	assemb_mass_DG(M, feDG.mass, feDG, dof, i, ic, jc);
-      }
-      compute_vec_DG(source_fct, elvec, feDG, ic);
-      assemb_vec_DG(b, elvec, feDG, dof, ic);
-    }
-  }
-
-  // Assembling boundary faces contributions (boundary faces are stored first)
-  for(i = 1; i <= mesh.numBFaces(); ++i){
-    iAd = (UInt)mesh.faceList(i).ad_first();
-
-    feBFDG.updateBCType(mesh.faceList(i), BCh);
-    feBFDG.updateMeasNormalQuadPtFirstDerivAd(mesh.faceList(i), mesh.volumeList(iAd));
-
-    bfmat.zero();
-    bfvec.zero();
-
-    for(ic = 0; ic < nc; ic++){
-      for(jc = 0; jc < nc; jc++){
-
-	// Compute local matrix
-	compute_mat_DG_BF(bfmat, operDGBF, feBFDG, ic, jc);
-
-	// Assemble local matrix into global one
-	assemb_mat_DG_BF(A, bfmat, feDG, dof, iAd, ic, jc);
-      }
-      compute_vec_AdvecDG_BF(BCh, u, bfvec, feBFDG, ic);
-      assemb_vec_DG_BF(b, bfvec, feBFDG, iAd, dof, ic);
-
-    }
-  }
-
-  // Assembling internal faces contributions
-  for(i = mesh.numBFaces() + 1; i <= mesh.numFaces(); ++i){
-    iAd = (UInt)mesh.faceList(i).ad_first();
-    iOp = (UInt)mesh.faceList(i).ad_second();
-
-    feIFDG.updateMeasNormalQuadPtFirstDerivAd(mesh.faceList(i), mesh.volumeList(iAd));
-    feIFDG.updateMeasNormalQuadPtFirstDerivOp(mesh.faceList(i), mesh.volumeList(iOp));
-
-    ifmat.zero();
-    ifvec.zero();
-
-    for(ic = 0; ic < nc; ic++){
-      for(jc = 0; jc < nc; jc++){
-	// Compute local matrix
-	compute_mat_DG_IF(ifmat, operDGIF, feDG.nbNode, feIFDG, ic, jc);
-
-	// Assemble local matrix into global one
-	assemb_mat_DG_IF(A, ifmat, feDG, dofbyface, i - mesh.numBFaces(), ic, jc);
-
-      }
-    }
-  }
-
-}
-
-////////////////////////////////////////////////////////////////////////////////
 //
 //////////////////////////////////
 //
@@ -485,7 +282,7 @@ template <typename Oper>
 void compute_mat( ElemMat& elmat, Oper& oper,
                   const CurrentFE& fe, int iblock = 0, int jblock = 0 )
 {
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    Tab2dView mat = elmat.block( iblock, jblock );
     UInt ig;
     unsigned int i, j;
     double s;
@@ -508,101 +305,6 @@ void compute_mat( ElemMat& elmat, Oper& oper,
         }
     }
 }
-
-
-////////////////////////////////////////////////////////////////////////////////
-//
-// Compute local matrices for DG
-//
-////////////////////////////////////////////////////////////////////////////////
-
-
-// Volume integrals
-
-template<typename Oper>
-void compute_mat_DG(ElemMat& elmat, Oper& oper,
-		 const CurrentFEDG& fe, int iblock=0,int jblock=0)
-{
-    ElemMat::matrix_view mat = elmat.block(iblock,jblock);
-    UInt ig;
-    unsigned int i,j;
-    double s;
-
-    Real x=0,y=0,z=0;
-    for(i=0;i<(UInt)fe.nbNode;i++){
-        for(j=0;j<(UInt)fe.nbNode;j++){
-            s = 0.;
-
-            for(ig=0;ig<(UInt)fe.nbQuadPt;ig++){
-                fe.coorQuadPt(x,y,z,ig);
-
-                s += oper(i, j, ig, x, y, z, 0, 0, iblock, jblock) * fe.weightDet(ig);
-            }
-
-            mat((int)i,(int)j) += s;
-        }
-    }
-}
-
-// Boundary integrals (boundary faces)
-
-template<typename Oper>
-void compute_mat_DG_BF(ElemMat& bfmat, Oper& oper,
-		 const CurrentBFDG& fe, int iblock=0,int jblock=0)
-{
-  ElemMat::matrix_view mat = bfmat.block(iblock,jblock);
-  UInt ig;
-  unsigned int i, j;
-  double s;
-  Real x=0,y=0,z=0;
-
-  for(i=0;i<(UInt)fe.nbNodeAd;i++){
-    for(j=0;j<(UInt)fe.nbNodeAd;j++){
-      s = 0;
-      for(ig=0;ig<(UInt)fe.nbQuadPt;ig++){
-	fe.coorQuadPt(x,y,z,ig);
-
-	s += oper(i, j, ig, x, y, z, 0, 0, iblock, jblock) * fe.weightMeas(ig);
-
-       }
-      mat((int)i, (int)j) += s;
-    }
-  }
-}
-
-// Boundary integrals (internal faces)
-
-template<typename Oper>
-void compute_mat_DG_IF(ElemMat& ifmat, Oper& oper, int nbNodeAd,
-		 const CurrentIFDG& fe, int iblock=0,int jblock=0)
-{
-  ElemMat::matrix_view mat = ifmat.block(iblock,jblock);
-  UInt ig;
-  unsigned int i, j, H, K;
-  Real s;
-
-  Real x = 0, y = 0, z = 0;
-
-  for(K = 0; K < 2; K++){
-    for(H = 0; H < 2; H++){
-
-      for(i = 0; i < (UInt)fe.nbNodeAd; i++){
-	for(j = 0; j < (UInt)fe.nbNodeAd; j++){
-	  s = 0.;
-
-	  for(ig = 0; ig < (UInt)fe.nbQuadPt; ig++){
-	    fe.coorQuadPt(x,y,z,ig);
-	    s += oper(i, j, ig, x, y, z, K, H, iblock, jblock) * fe.weightMeas(ig);
-	  }// for ig
-
-	  mat((int)(H * nbNodeAd + i), (int)(K * nbNodeAd + j)) += s;
-	}//for j
-      }// for i
-    }// for H
-  }// for K
-}
-
-////////////////////////////////////////////////////////////////////////////////
 //
 //! compute local matrix element for mixed FE
 //Alain 1/02/02.
@@ -610,7 +312,7 @@ template <typename Oper>
 void compute_mat_mixed( ElemMat& elmat, Oper& oper,
                         const CurrentFE& fe1, const CurrentFE& fe2, int iblock = 0, int jblock = 0 )
 {
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    Tab2dView mat = elmat.block( iblock, jblock );
     int ig;
     int i, j;
     double s;
@@ -640,7 +342,7 @@ template <typename Oper>
 void compute_mat_symm( ElemMat& elmat, Oper& oper,
                        const CurrentFE& fe, int iblock = 0, int jblock = 0 )
 {
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    Tab2dView mat = elmat.block( iblock, jblock );
     UInt ig;
     unsigned int i, iloc, jloc;
     double s;
@@ -690,7 +392,7 @@ template <typename Matrix, typename DOF>
 void
 assemb_mat( Matrix& M, ElemMat& elmat, const CurrentFE& fe, const DOF& dof, int iblock = 0, int jblock = 0 )
 {
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    Tab2dView mat = elmat.block( iblock, jblock );
     UInt totdof = dof.numTotalDof();
     int i, j, k;
     UInt ig, jg;
@@ -715,7 +417,7 @@ template <typename Matrix, typename DOF>
 void
 assemb_mat( Matrix& M, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2, const DOF& dof, int iblock = 0, int jblock = 0 )
 {
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    Tab2dView mat = elmat.block( iblock, jblock );
     UInt totdof = dof.numTotalDof();
     int i, j, k;
     UInt ig, jg;
@@ -744,7 +446,7 @@ void assemb_mat( Matrix& M, ElemMat& elmat, const LocalDofPattern& fe, const DOF
     //    std::cout << "assemble for vector elem mat not yet implemented\n";
     //    exit(1);
     //  }
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    Tab2dView mat = elmat.block( iblock, jblock );
     UInt totdof = dof.numTotalDof();
     int i, j, k;
     UInt ig, jg;
@@ -760,106 +462,7 @@ void assemb_mat( Matrix& M, ElemMat& elmat, const LocalDofPattern& fe, const DOF
     }
 }
 
-////////////////////////////////////////////////////////////////////////////////
-//
-// Assembling of the elementary matrices for DG
-//
-////////////////////////////////////////////////////////////////////////////////
 
-template<typename DOF, typename Matrix>
-void assemb_mat_DG(Matrix& M, ElemMat& elmat, const CurrentFEDG& fe, const DOF& dof,
-		const UInt feId, int iblock = 0,int jblock = 0)
-{
-  ElemMat::matrix_view mat = elmat.block(iblock, jblock);
-  UInt totdof = dof.numTotalDof();
-  int i, j, k;
-  UInt ig, jg;
-
-  UInt eleId = feId; //! direct use of the fe identity number. (different from the other assemb_mat)
-
-  for(k = 0 ; k < fe.refFE.elPattern.nbPattern() ; k++){
-
-    i = fe.patternFirst(k);
-    j = fe.patternSecond(k);
-
-    ig = dof.localToGlobal(eleId, i + 1) - 1 + iblock * totdof;
-    jg = dof.localToGlobal(eleId, j + 1) - 1 + jblock * totdof;
-
-    M.set_mat_inc(ig, jg, mat(i, j));
-  }
-}
-
-template<typename DOF, typename Matrix>
-void assemb_mass_DG(Matrix& M, KNM<Real>& mat, const CurrentFEDG& fe, const DOF& dof,
-		const UInt feId, int iblock = 0,int jblock = 0)
-{
-  UInt totdof = dof.numTotalDof();
-  int i, j, k;
-  UInt ig, jg;
-
-  UInt eleId = feId; //! direct use of the fe identity number. (different from the other assemb_mat)
-
-  for(k = 0 ; k < fe.refFE.elPattern.nbPattern() ; k++){
-
-    i = fe.patternFirst(k);
-    j = fe.patternSecond(k);
-
-    ig = dof.localToGlobal(eleId, i + 1) - 1 + iblock * totdof;
-    jg = dof.localToGlobal(eleId, j + 1) - 1 + jblock * totdof;
-
-    M.set_mat_inc(ig, jg, mat(i, j));
-  }
-}
-
-template<typename DOFBYFACE, typename Matrix>
-void assemb_mat_DG_IF(Matrix& M, ElemMat& ifmat, const CurrentFEDG& fe, const DOFBYFACE& dofbyface,
-		const UInt ifId, int iblock=0,int jblock=0)
-{
-  ElemMat::matrix_view mat = ifmat.block(iblock, jblock);
-  UInt totdof = dofbyface.numTotalDof();
-
-  int i, j, k;
-  UInt ig, jg;
-
-  UInt faceId = ifId;
-
-  for(k = 0 ; k < fe.refFE.facePattern.nbPattern(); k++){
-
-    i = fe.patternFirstFaces(k);
-    j = fe.patternSecondFaces(k);
-
-    ig = dofbyface.localToGlobal(faceId, i + 1) - 1 + iblock * totdof;
-    jg = dofbyface.localToGlobal(faceId, j + 1) - 1 + jblock * totdof;
-
-    M.set_mat_inc(ig, jg, mat(i,j));
-  }
-}
-
-template<typename DOF, typename Matrix>
-void assemb_mat_DG_BF(Matrix& M, ElemMat& bfmat, const CurrentFEDG& fe, const DOF& dof,
-		const UInt AdId, int iblock=0,int jblock=0)
-{
-  ElemMat::matrix_view mat = bfmat.block(iblock, jblock);
-  UInt totdof = dof.numTotalDof();
-
-  int i, j, k;
-  UInt ig, jg;
-
-  UInt eleId = AdId;
-
-  for(k = 0; k < fe.refFE.elPattern.nbPattern(); k++){
-
-    i = fe.patternFirst(k);
-    j = fe.patternSecond(k);
-
-    ig = dof.localToGlobal(eleId, i + 1) - 1 + iblock * totdof;
-    jg = dof.localToGlobal(eleId, j + 1) - 1 + jblock * totdof;
-
-    M.set_mat_inc(ig, jg, mat(i, j));
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////
 //
 /////////////////////////////////
 //
@@ -876,7 +479,7 @@ void assemb_mat_symm_lower( Matrix& M, ElemMat& elmat, const LocalDofPattern& fe
     //    std::cout << "assemble for vector elem mat not yet implemented\n";
     //    exit(1);
     //  }
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    Tab2dView mat = elmat.block( iblock, jblock );
     UInt totdof = dof.numTotalDof();
     int i, j, k;
     UInt ig, jg;
@@ -929,7 +532,7 @@ void assemb_mat_symm_upper( Matrix& M, ElemMat& elmat, const LocalDofPattern& fe
     //    std::cout << "assemble for vector elem mat not yet implemented\n";
     //    exit(1);
     //  }
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    Tab2dView mat = elmat.block( iblock, jblock );
     UInt totdof = dof.numTotalDof();
     int i, j, k;
     UInt ig, jg;
@@ -973,7 +576,7 @@ void
 assemb_mat_mixed( Matrix& M, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2,
                   const DOF1& dof1, const DOF2& dof2, int iblock = 0, int jblock = 0 )
 {
-    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+    Tab2dView mat = elmat.block( iblock, jblock );
     UInt totdof1 = dof1.numTotalDof();
     UInt totdof2 = dof2.numTotalDof();
     int i, j, k1, k2;
@@ -1005,7 +608,7 @@ assemb_tr_mat_mixed( Real mulfac, Matrix& M, ElemMat& elmat,
                      const DOF1& dof1, const DOF2& dof2,
                      int iblock = 0, int jblock = 0 )
 {
-    ElemMat::matrix_view mat = elmat.block( jblock, iblock );
+    Tab2dView mat = elmat.block( jblock, iblock );
     UInt totdof1 = dof1.numTotalDof();
     UInt totdof2 = dof2.numTotalDof();
     int i, j, k1, k2;
@@ -1037,7 +640,7 @@ void compute_vec( Real constant, ElemVec& elvec, const CurrentFE& fe, int iblock
   Why dont we let CurrentFE to store the time as well?
   we may choose then a common layout for the user functions that always has
   the time as entry point.
- */
+ */ 
 //
 //
 //////////////////
@@ -1046,7 +649,7 @@ template <typename UsrFct>
 void compute_vec( const UsrFct& fct, ElemVec& elvec, const CurrentFE& fe, int iblock = 0 )
 {
     int i, ig;
-    ElemVec::vector_view vec = elvec.block( iblock );
+    Tab1dView vec = elvec.block( iblock );
     Real s, x, y, z;
     for ( i = 0;i < fe.nbNode;i++ )
     {
@@ -1066,61 +669,7 @@ void compute_vec( const UsrFct& fct, ElemVec& elvec, const CurrentFE& fe )
 {
     compute_vec( fct, elvec, fe, 0 );
 }
-////////////////////////////////////////////////////////////////////////////////
-//
-// rhs computation for DG elements
-//
-///////////////////////////////////////////////////////////////////////////////
 
-template<typename UsrFct>
-void compute_vec_DG(const UsrFct& fct, ElemVec& elvec, const CurrentFEDG& feDG, int iblock){
-  int i,ig;
-  ElemVec::vector_view vec = elvec.block(iblock);
-  Real s, x, y, z;
-  for(i = 0; i < feDG.nbNode; i++){
-    s = 0.;
-    for(ig = 0; ig < feDG.nbQuadPt; ig++){
-      feDG.coorQuadPt(x, y, z, ig);
-      s += feDG.phi(i,ig) * fct(x,y,z,iblock) * feDG.weightDet(ig);
-    }
-    vec(i) += s;
-  }
-}
-
-// Compute right hand side vector for pure hyperbolic problems
-template<typename Velocity>
-void compute_vec_AdvecDG_BF(const BCHandler& BCh, Velocity& u, ElemVec& bfvec, const CurrentBFDG& bfDG, int iblock){
-
-  int i, ig, icoor;
-
-  ElemVec::vector_view vec = bfvec.block(iblock);
-
-  Real s, x, y, z, u_normal;
-
-  const BCBase& CurrBC = BCh.GetBCWithFlag(bfDG.marker);
-  ASSERT_PRE(bfDG.bcType == Essential, "Only essential conditions admitted in pure hyperbolic problems")
-
-  for(i = 0; i < bfDG.nbNodeAd; i++){
-    s = 0.;
-    u_normal = 0.;
-
-    for(ig = 0; ig < bfDG.nbQuadPt; ig++){
-      bfDG.coorQuadPt(x, y, z, ig);
-
-      for(icoor = 0; icoor < bfDG.nbCoorAd; icoor++){
-        u_normal += bfDG.normal(icoor, ig) * u(x, y, z, icoor);
-      }
-
-      if(u_normal < 0){
-	for(icoor = 0; icoor < bfDG.nbCoorAd; icoor++){
-	  s += - u_normal * bfDG.phiAd(i, ig) * CurrBC(0., x, y, z, iblock) * bfDG.weightMeas(ig);
-	}
-      }
-    }
-
-    vec(i) += s;
-  }
-}
 
 // ! versione per il caso stabilizzato (o comunque son termine forzante wrappato)
 template <typename OperFct>
@@ -1128,7 +677,7 @@ void compute_vec_stab( OperFct& fct, ElemVec& elvec, const CurrentFE& fe,
                        int iblock )
 {
     int i, ig;
-    ElemVec::vector_view vec = elvec.block( iblock );
+    Tab1dView vec = elvec.block( iblock );
     Real s, x, y, z;
     for ( i = 0;i < fe.nbNode;i++ )
     {
@@ -1147,7 +696,7 @@ template <typename UsrFct>
 void compute_vec( const UsrFct& fct, ElemVec& elvec, const CurrentFE& fe, const Real& t, int iblock = 0 )
 {
     int i, ig;
-    ElemVec::vector_view vec = elvec.block( iblock );
+    Tab1dView vec = elvec.block( iblock );
     Real s, x, y, z;
     for ( i = 0;i < fe.nbNode;i++ )
     {
@@ -1169,7 +718,7 @@ void compute_vec_stab( OperFct& fct, ElemVec& elvec, const CurrentFE& fe, Real t
                        int iblock )
 {
     int i, ig;
-    ElemVec::vector_view vec = elvec.block( iblock );
+    Tab1dView vec = elvec.block( iblock );
     Real s, x, y, z;
     for ( i = 0;i < fe.nbNode;i++ )
     {
@@ -1191,7 +740,7 @@ void
 assemb_vec( Vector& V, ElemVec& elvec, const CurrentFE& fe, const DOF& dof, int iblock )
 {
     UInt totdof = dof.numTotalDof();
-    typename ElemVec::vector_view vec = elvec.block( iblock );
+    Tab1dView vec = elvec.block( iblock );
     int i;
     UInt ig;
     UInt eleId = fe.currentId();
@@ -1203,43 +752,6 @@ assemb_vec( Vector& V, ElemVec& elvec, const CurrentFE& fe, const DOF& dof, int 
 }
 ///
 
-////////////////////////////////////////////////////////////////////////////////
-//
-// Added by D. A. Di Pietro: vector assembly for DG
-//
-////////////////////////////////////////////////////////////////////////////////
-
-template<typename DOF, typename Vector, typename ElemVec>
-void assemb_vec_DG(Vector& V, ElemVec& elvec,const CurrentFEDG& feDG, const DOF& dof, int iblock)
-{
-  UInt totdof = dof.numTotalDof();
-  typename ElemVec::vector_view vec = elvec.block(iblock);
-  int i;
-  UInt ig;
-  UInt eleId = feDG.currentId();
-  for(i = 0; i < feDG.nbNode; i++){
-    ig = dof.localToGlobal(eleId, i + 1) - 1 + iblock * totdof;
-
-    V[ig] += vec(i);
-  }
-}
-template<typename DOF, typename Vector, typename ElemVec>
-void assemb_vec_DG_BF(Vector& V,ElemVec& bfvec, const CurrentBFDG& bfDG, UInt iAd, const DOF& dof, int iblock){
-  UInt totdof = dof.numTotalDof();
-  typename ElemVec::vector_view vec = bfvec.block(iblock);
-  int i;
-  UInt ig;
-
-  UInt eleId = iAd;
-
-  for(i = 0; i < bfDG.nbNodeAd; i++){
-    ig = dof.localToGlobal(eleId, i + 1) - 1 + iblock * totdof;
-
-    V[ig] += vec(i);
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////
 
 ///
 //////////////////
@@ -1255,7 +767,7 @@ assemb_vec( Vector& V, ElemVec& elvec, const LocalDofPattern& fe, const DOF& dof
     //    exit(1);
     //  }
     UInt totdof = dof.numTotalDof();
-    typename ElemVec::vector_view vec = elvec.block( iblock );
+    Tab1dView vec = elvec.block( iblock );
     int i;
     //  std::cout << "in assemb_vec" << std::endl;
     UInt ig;
@@ -1287,7 +799,7 @@ extract_vec( Vector& V, ElemVec& elvec, const LocalDofPattern& fe, const DOF& do
     //  }
 
     UInt totdof = dof.numTotalDof();
-    typename ElemVec::vector_view vec = elvec.block( iblock );
+    Tab1dView vec = elvec.block( iblock );
     int i;
     //  std::cout << "in assemb_vec" << std::endl;
     UInt ig;

@@ -15,23 +15,21 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+*/ 
 /*!
   \file NavierStokesHandler.h
   \author M.A. Fernandez
   \date 01/2003
   \version 1.0
-
+ 
   \brief This file contains an abstract class for NavierStokes solvers.
-
+ 
 */
 
 #ifndef _NAVIERSTOKESHANDLER_H_
 #define _NAVIERSTOKESHANDLER_H_
 
 #include <sstream>
-
-#include <boost/function.hpp>
 
 
 #include "lifeV.hpp"
@@ -42,7 +40,7 @@
 #include "dataAztec.hpp"
 #include "medit_wrtrs.hpp"
 #include "gmv_wrtrs.hpp"
-#include "bcHandler.hpp"
+#include "bcCond.hpp"
 #include "bdfNS.hpp"
 #include "post_proc.hpp"
 #include "openDX_wrtrs.hpp"
@@ -58,11 +56,10 @@ namespace LifeV
 
 /*!
   \class NavierStokesHandler
-
+ 
   Abstract class which defines the general structure of a NavierStokes solver.
-  For each new NavierStokes solver  we have to implement the corresponding
-  timeAdvance and an iterate methods
-
+  For each new NavierStokes solver  we have to implement the corresponding timeAdvance and an iterate methods
+ 
 */
 
 template <typename Mesh>
@@ -72,10 +69,7 @@ class NavierStokesHandler:
 
 public:
 
-    typedef Real ( *Function ) ( const Real&, const Real&, const Real&,
-                                 const Real&, const ID& );
-    typedef boost::function<Real ( Real const&, Real const&, Real const&,
-                                   Real const&, ID const& )> source_type;
+    typedef Real ( *Function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
 
     //! Constructor
     /*!
@@ -89,52 +83,29 @@ public:
       \param BCh_u boundary conditions for the velocity
       \param ord_bdf order of the bdf time advancing scheme and incremental pressure approach (default: Backward Euler)
     */
-    NavierStokesHandler( const GetPot& data_file,
-                         const RefFE& refFE_u,
-                         const RefFE& refFE_p,
-                         const QuadRule& Qr_u,
-                         const QuadRule& bdQr_u,
-                         const QuadRule& Qr_p,
-                         const QuadRule& bdQr_p,
-                         BCHandler& BCh_u );
+    NavierStokesHandler( const GetPot& data_file, const RefFE& refFE_u,
+                         const RefFE& refFE_p, const QuadRule& Qr_u, const QuadRule& bdQr_u,
+                         const QuadRule& Qr_p, const QuadRule& bdQr_p, BC_Handler& BCh_u );
 
     //! Sets initial condition for the velocity (here the initial time is 0.0)
     void initialize( const Function& u0 );
 
-    //! Sets initial condition for the velocity and the pressure
-    //! (incremental approach): the initial time is t0, the time step dt
-    void initialize( const Function& u0, const Function& p0, Real t0, Real dt);
+    //! Sets initial condition for the velocity and the pressure (incremental approach): the initial time is t0, the time step dt
+    void initialize( const Function& u0, const Function& p0, Real t0, Real dt );
 
     //! Sets initial condition for the velocity and the pressure from file
     void initialize( const std::string & vname );
-
-    //! set the source term functor
-    void setSourceTerm( source_type __s )
-        {
-            _M_source = __s;
-        }
-
-    //! get the source term functor
-    source_type sourceTerm() const
-        {
-            return _M_source;
-        }
 
     //! Update the right  hand side  for time advancing
     /*!
       \param source volumic source
       \param time present time
     */
-    virtual void timeAdvance( source_type const& source, Real const& time ) =0;
+    virtual void timeAdvance( const Function source, const Real& time ) = 0;
 
     //! Update convective term, bc treatment and solve the linearized ns system
     virtual void iterate( const Real& time ) = 0;
 
-    //! returns the BCHandler
-    BCHandler& bcHandler()
-        {
-            return _BCh_u;
-        }
     //! Returns the velocity vector
     PhysVectUnknown<Vector>& u();
 
@@ -152,9 +123,7 @@ public:
 
 
     //! OpenDX writers
-    void dx_write_sol( std::string const& file_sol,
-                       std::string const& fe_type_vel,
-                       std::string const& fe_type_pre );
+    void dx_write_sol( std::string const& file_sol, std::string const& fe_type_vel, std::string const& fe_type_pre );
 
     //! Returns the BDF Time Advancing stuff
     const BdfNS& bdf() const;
@@ -171,30 +140,12 @@ public:
     //! \param flag the mesh flag identifying the part of the mesh where the flux is computed
     Real flux( const EntityFlag& flag );
 
-    //! Interpolate a given velocity function nodally onto a velocity vector
-    void uInterpolate( const Function& uFct, Vector& uVect, Real time );
-
-    //! calculate L2 pressure error for given exact pressure function
-    //! takes into account a possible offset by a constant
-    //! \param pexact the exact pressure as a function
-    //! \param time the time
-    //! \param relError Real* to store the relative error in
-    Real pErrorL2( const Function& pexact, Real time, Real* relError=0 );
-
-    //! calculate L2 velocity error for given exact velocity function
-    //! \param pexact the exact velocity as a function
-    //! \param time the time
-    //! \param relError Real* to store the relative error in
-    Real uErrorL2( const Function& uexact, Real time, Real* relError=0 );
-
     //! Do nothing destructor
     virtual ~NavierStokesHandler()
     {}
 
-protected:
 
-    //! source term for NS
-    source_type _M_source;
+protected:
 
     //! Reference FE for the velocity
     const RefFE& _refFE_u;
@@ -240,9 +191,9 @@ protected:
     ScalUnknown<Vector> _p;
 
     //! The BC handler
-    BCHandler& _BCh_u;
+    BC_Handler& _BCh_u;
 
-    //! The BDF Time Advance Method + Incremental Pressure
+    // ! The BDF Time Advance Method + Incremental Pressure
     BdfNS _bdf;
 
 
@@ -264,30 +215,27 @@ protected:
 template <typename Mesh>
 NavierStokesHandler<Mesh>::
 NavierStokesHandler( const GetPot& data_file, const RefFE& refFE_u,
-                     const RefFE& refFE_p, const QuadRule& Qr_u,
-                     const QuadRule& bdQr_u, const QuadRule& Qr_p,
-                     const QuadRule& bdQr_p, BCHandler& BCh_u ) :
-    DataNavierStokes<Mesh>( data_file ),
-    _refFE_u( refFE_u ),
-    _refFE_p( refFE_p ),
-    _dof_u( this->_mesh, _refFE_u ),
-    _dof_p( this->_mesh, _refFE_p ),
-    _dim_u( _dof_u.numTotalDof() ),
-    _dim_p( _dof_p.numTotalDof() ),
-    _Qr_u( Qr_u ),
-    _bdQr_u( bdQr_u ),
-    _Qr_p( Qr_p ),
-    _bdQr_p( bdQr_p ),
-    _fe_u( _refFE_u, getGeoMap( this->_mesh ), _Qr_u ),
-    _feBd_u( _refFE_u.boundaryFE(), getGeoMap( this->_mesh ).boundaryMap(),
-             _bdQr_u ),
-    _fe_p( _refFE_p, getGeoMap( this->_mesh ), _Qr_p ),
-    _u( _dim_u ),
-    _p( _dim_p ),
-    _BCh_u( BCh_u ),
-    _bdf( this->_order_bdf ), _ns_post_proc( this->_mesh, _feBd_u, _dof_u,
-                                             NDIM ),  // /******************
-    _count( 0 )
+                     const RefFE& refFE_p, const QuadRule& Qr_u, const QuadRule& bdQr_u,
+                     const QuadRule& Qr_p, const QuadRule& bdQr_p, BC_Handler& BCh_u ) :
+        DataNavierStokes<Mesh>( data_file ),
+        _refFE_u( refFE_u ),
+        _refFE_p( refFE_p ),
+        _dof_u( this->_mesh, _refFE_u ),
+        _dof_p( this->_mesh, _refFE_p ),
+        _dim_u( _dof_u.numTotalDof() ),
+        _dim_p( _dof_p.numTotalDof() ),
+        _Qr_u( Qr_u ),
+        _bdQr_u( bdQr_u ),
+        _Qr_p( Qr_p ),
+        _bdQr_p( bdQr_p ),
+        _fe_u( _refFE_u, getGeoMap( this->_mesh ), _Qr_u ),
+        _feBd_u( _refFE_u.boundaryFE(), getGeoMap( this->_mesh ).boundaryMap(), _bdQr_u ),
+        _fe_p( _refFE_p, getGeoMap( this->_mesh ), _Qr_p ),
+        _u( _dim_u ),
+        _p( _dim_p ),
+        _BCh_u( BCh_u ),
+        _bdf( this->_order_bdf ), _ns_post_proc( this->_mesh, _feBd_u, _dof_u, NDIM ),  // /******************
+        _count( 0 )
 {}
 
 
@@ -390,37 +338,26 @@ NavierStokesHandler<Mesh>::postProcess()
         }
 
         // postprocess data file for GMV
-        wr_gmv_ascii( "test." + name + ".inp", this->_mesh, _dim_u,
-                      _u.giveVec(), _p.giveVec() );
+        wr_gmv_ascii( "test." + name + ".inp", this->_mesh, _dim_u, _u.giveVec(), _p.giveVec() );
 
         // postprocess data file for medit
-        wr_medit_ascii_scalar( "press." + name + ".bb", _p.giveVec(),
-                               _p.size() );
-        wr_medit_ascii_scalar( "vel_x." + name + ".bb", _u.giveVec(),
-                               this->_mesh.numVertices() );
-        wr_medit_ascii_scalar( "vel_y." + name + ".bb", _u.giveVec() + _dim_u,
-                               this->_mesh.numVertices() );
-        wr_medit_ascii_scalar( "vel_z." + name + ".bb", _u.giveVec()+2*_dim_u,
-                               this->_mesh.numVertices() );
-        system( ( "ln -s " + this->_mesh_dir + this->_mesh_file +
-                  " press." + name + ".mesh" ).data() );
-        system( ( "ln -s " + this->_mesh_dir + this->_mesh_file +
-                  " vel_x." + name + ".mesh" ).data() );
-        system( ( "ln -s " + this->_mesh_dir + this->_mesh_file +
-                  " vel_y." + name + ".mesh" ).data() );
-        system( ( "ln -s " + this->_mesh_dir + this->_mesh_file +
-                  " vel_z." + name + ".mesh" ).data() );
+        wr_medit_ascii_scalar( "press." + name + ".bb", _p.giveVec(), _p.size() );
+        wr_medit_ascii_scalar( "vel_x." + name + ".bb", _u.giveVec(), this->_mesh.numVertices() );
+        wr_medit_ascii_scalar( "vel_y." + name + ".bb", _u.giveVec() + _dim_u, this->_mesh.numVertices() );
+        wr_medit_ascii_scalar( "vel_z." + name + ".bb", _u.giveVec() + 2 * _dim_u, this->_mesh.numVertices() );
+        system( ( "ln -s " + this->_mesh_dir + this->_mesh_file + " press." + name + ".mesh" ).data() );
+        system( ( "ln -s " + this->_mesh_dir + this->_mesh_file + " vel_x." + name + ".mesh" ).data() );
+        system( ( "ln -s " + this->_mesh_dir + this->_mesh_file + " vel_y." + name + ".mesh" ).data() );
+        system( ( "ln -s " + this->_mesh_dir + this->_mesh_file + " vel_z." + name + ".mesh" ).data() );
     }
 }
 
 
 // Writing (DX)
-//! Write the solution in DX format
+// ! Write the solution in DX format
 template <typename Mesh>
 void
-NavierStokesHandler<Mesh>::dx_write_sol( std::string const& file_sol,
-                                         std::string const& fe_type_vel,
-                                         std::string const& fe_type_pre )
+NavierStokesHandler<Mesh>::dx_write_sol( std::string const& file_sol, std::string const& fe_type_vel, std::string const& fe_type_pre )
 {
 
     std::string file_vel = file_sol + "_vel.dx";
@@ -435,21 +372,131 @@ NavierStokesHandler<Mesh>::dx_write_sol( std::string const& file_sol,
 }
 
 // Set the initial condition
-//! Initialize when only initial conditions on the velocity are given
+// ! Initialize when only initial conditions on the velocity are given
 template <typename Mesh>
 void
 NavierStokesHandler<Mesh>::initialize( const Function& u0 )
 {
 
     // Initialize pressure
-    _p = ZeroVector( _p.size() );
+    _p = 0.0;
 
     // ********** initialize in the pressure BDF structure
     _bdf.bdf_p().initialize_unk( _p );
 
     // Initialize velocity
-    uInterpolate( u0, _u, 0.0 );
 
+    typedef typename Mesh::VolumeShape GeoShape; // Element shape
+
+    UInt nDofpV = _refFE_u.nbDofPerVertex; // number of Dof per vertex
+    UInt nDofpE = _refFE_u.nbDofPerEdge;   // number of Dof per edge
+    UInt nDofpF = _refFE_u.nbDofPerFace;   // number of Dof per face
+    UInt nDofpEl = _refFE_u.nbDofPerVolume; // number of Dof per Volume
+
+    UInt nElemV = GeoShape::numVertices; // Number of element's vertices
+    UInt nElemE = GeoShape::numEdges;    // Number of element's edges
+    UInt nElemF = GeoShape::numFaces;    // Number of element's faces
+
+    UInt nDofElemV = nElemV * nDofpV; // number of vertex's Dof on a Element
+    UInt nDofElemE = nElemE * nDofpE; // number of edge's Dof on a Element
+    UInt nDofElemF = nElemF * nDofpF; // number of face's Dof on a Element
+
+    ID nbComp = _u.nbcomp(); // Number of components of the mesh velocity
+
+    Real x, y, z;
+
+    ID lDof;
+
+    // Loop on elements of the mesh
+    for ( ID iElem = 1; iElem <= this->_mesh.numVolumes(); ++iElem )
+    {
+
+        _fe_u.updateJac( this->_mesh.volume( iElem ) );
+
+        // Vertex based Dof
+        if ( nDofpV )
+        {
+
+            // loop on element vertices
+            for ( ID iVe = 1; iVe <= nElemV; ++iVe )
+            {
+
+                // Loop number of Dof per vertex
+                for ( ID l = 1; l <= nDofpV; ++l )
+                {
+                    lDof = ( iVe - 1 ) * nDofpV + l; // Local dof in this element
+
+                    // Nodal coordinates
+                    _fe_u.coorMap( x, y, z, _fe_u.refFE.xi( lDof - 1 ), _fe_u.refFE.eta( lDof - 1 ), _fe_u.refFE.zeta( lDof - 1 ) );
+
+                    // Loop on data vector components
+                    for ( UInt icmp = 0; icmp < nbComp; ++icmp )
+                        _u( icmp * _dim_u + _dof_u.localToGlobal( iElem, lDof ) - 1 ) = u0( 0.0, x, y, z, icmp + 1 );
+                }
+            }
+        }
+
+        // Edge based Dof
+        if ( nDofpE )
+        {
+
+            // loop on element edges
+            for ( ID iEd = 1; iEd <= nElemE; ++iEd )
+            {
+
+                // Loop number of Dof per edge
+                for ( ID l = 1; l <= nDofpE; ++l )
+                {
+                    lDof = nDofElemV + ( iEd - 1 ) * nDofpE + l; // Local dof in the adjacent Element
+
+                    // Nodal coordinates
+                    _fe_u.coorMap( x, y, z, _fe_u.refFE.xi( lDof - 1 ), _fe_u.refFE.eta( lDof - 1 ), _fe_u.refFE.zeta( lDof - 1 ) );
+
+                    // Loop on data vector components
+                    for ( UInt icmp = 0; icmp < nbComp; ++icmp )
+                        _u( icmp * _dim_u + _dof_u.localToGlobal( iElem, lDof ) - 1 ) = u0( 0.0, x, y, z, icmp + 1 );
+                }
+            }
+        }
+
+        // Face based Dof
+        if ( nDofpF )
+        {
+
+            // loop on element faces
+            for ( ID iFa = 1; iFa <= nElemF; ++iFa )
+            {
+
+                // Loop on number of Dof per face
+                for ( ID l = 1; l <= nDofpF; ++l )
+                {
+
+                    lDof = nDofElemE + nDofElemV + ( iFa - 1 ) * nDofpF + l; // Local dof in the adjacent Element
+
+                    // Nodal coordinates
+                    _fe_u.coorMap( x, y, z, _fe_u.refFE.xi( lDof - 1 ), _fe_u.refFE.eta( lDof - 1 ), _fe_u.refFE.zeta( lDof - 1 ) );
+
+                    // Loop on data vector components
+                    for ( UInt icmp = 0; icmp < nbComp; ++icmp )
+                        _u( icmp * _dim_u + _dof_u.localToGlobal( iElem, lDof ) - 1 ) = u0( 0.0, x, y, z, icmp + 1 );
+                }
+            }
+        }
+
+        // Element based Dof
+        // Loop on number of Dof per Element
+        for ( ID l = 1; l <= nDofpEl; ++l )
+        {
+            lDof = nDofElemF + nDofElemE + nDofElemV + l; // Local dof in the Element
+
+            // Nodal coordinates
+            _fe_u.coorMap( x, y, z, _fe_u.refFE.xi( lDof - 1 ), _fe_u.refFE.eta( lDof - 1 ), _fe_u.refFE.zeta( lDof - 1 ) );
+
+            // Loop on data vector components
+            for ( UInt icmp = 0; icmp < nbComp; ++icmp )
+                _u( icmp * _dim_u + _dof_u.localToGlobal( iElem, lDof ) - 1 ) = u0( 0.0, x, y, z, icmp + 1 );
+        }
+    }
     //****** Initialize in the BDF structure
     _bdf.bdf_u().initialize_unk( _u );
 
@@ -458,29 +505,21 @@ NavierStokesHandler<Mesh>::initialize( const Function& u0 )
 
 }
 
-//! Initialize when  initial conditions both on the velocity and the pressure
-//! (for incremental schemes) are given
-//! Useful for test cases when the analytical solution is known
+// ! Initialize when  initial conditions both on the velocity and the pressure (for incremental schemes) are given
+// ! Useful for test cases when the analytical solution is known
 template <typename Mesh>
 void
-NavierStokesHandler<Mesh>::initialize( const Function& u0, const Function& p0,
-                                       Real t0, Real dt )
+NavierStokesHandler<Mesh>::initialize( const Function& u0, const Function& p0, Real t0, Real dt )
 {
 
     ID nbComp = _u.nbcomp(); // Number of components of the velocity
 
 
-    _bdf.bdf_u().initialize_unk( u0, this->_mesh, _refFE_u, _fe_u, _dof_u, t0,
-                                 dt, nbComp );
+    _bdf.bdf_u().initialize_unk( u0, this->_mesh, _refFE_u, _fe_u, _dof_u, t0, dt, nbComp );
+    _u = *( _bdf.bdf_u().unk().begin() ); // initialize _u with the first element in bdf_u.unk (=last value)
 
-    // initialize _u with the first element in bdf_u.unk (=last value)
-    _u = *( _bdf.bdf_u().unk().begin() );
-
-    _bdf.bdf_p().initialize_unk( p0, this->_mesh, _refFE_p, _fe_p, _dof_p, t0,
-                                 dt, 1 );
-
-    // initialize _p with the first element in bdf_p.unk (=last value)
-    _p = *( _bdf.bdf_p().unk().begin() );
+    _bdf.bdf_p().initialize_unk( p0, this->_mesh, _refFE_p, _fe_p, _dof_p, t0, dt, 1 );
+    _p = *( _bdf.bdf_p().unk().begin() ); // initialize _u with the first element in bdf_u.unk (=last value)
 
 
     _bdf.bdf_u().showMe();
@@ -488,8 +527,7 @@ NavierStokesHandler<Mesh>::initialize( const Function& u0, const Function& p0,
 
 }
 
-//! Initialize when initial values for the velocity and the pressure are read
-//! from file (M. Prosi)
+// ! Initialize when initial values for the velocity and the pressure are read from file (M. Prosi)
 template <typename Mesh>
 void
 NavierStokesHandler<Mesh>::initialize( const std::string & vname )
@@ -498,8 +536,7 @@ NavierStokesHandler<Mesh>::initialize( const std::string & vname )
     std::fstream resfile( vname.c_str(), std::ios::in | std::ios::binary );
     if ( resfile.fail() )
     {
-        std::cerr << " Error in initialization: File not found or locked"
-                  << std::endl;
+        std::cerr << " Error in initialization: File not found or locked" << std::endl;
         abort();
     }
     resfile.read( ( char* ) & _u( 1 ), _u.size() * sizeof( double ) );
@@ -576,11 +613,8 @@ NavierStokesHandler<Mesh>::flux( const EntityFlag& flag )
 
         ibF = j->first;
 
-        // id of the element adjacent to the face
-        iElAd = this->_mesh.boundaryFace( ibF ).ad_first();
-
-        // local id of the face in its adjacent element
-        iFaEl = this->_mesh.boundaryFace( ibF ).pos_first();
+        iElAd = this->_mesh.boundaryFace( ibF ).ad_first();  // id of the element adjacent to the face
+        iFaEl = this->_mesh.boundaryFace( ibF ).pos_first(); // local id of the face in its adjacent element
 
         // Vertex based Dof
         if ( nDofpV )
@@ -589,19 +623,14 @@ NavierStokesHandler<Mesh>::flux( const EntityFlag& flag )
             // loop on face vertices
             for ( ID iVeFa = 1; iVeFa <= nFaceV; ++iVeFa )
             {
-                // local vertex number (in element)
-                iVeEl = GeoShape::fToP( iFaEl, iVeFa );
+
+                iVeEl = GeoShape::fToP( iFaEl, iVeFa ); // local vertex number (in element)
 
                 // Loop number of Dof per vertex
                 for ( ID l = 1; l <= nDofpV; ++l )
                 {
-                    // local Dof j-th degree of freedom on a face
-                    lDof = ( iVeFa - 1 ) * nDofpV + l ;
-
-                    // global Dof
-                    gDof = _dof_u.localToGlobal( iElAd,
-                                                 ( iVeEl - 1 ) * nDofpV + l );
-
+                    lDof = ( iVeFa - 1 ) * nDofpV + l ; // local Dof j-esimo grado di liberta' su una faccia
+                    gDof = _dof_u.localToGlobal( iElAd, ( iVeEl - 1 ) * nDofpV + l ); // global Dof
                     j->second( lDof ) = gDof; // local to global on this face
                 }
             }
@@ -614,20 +643,14 @@ NavierStokesHandler<Mesh>::flux( const EntityFlag& flag )
             // loop on face edges
             for ( ID iEdFa = 1; iEdFa <= nFaceE; ++iEdFa )
             {
-                // local edge number (in element)
-                iEdEl = GeoShape::fToE( iFaEl, iEdFa ).first;
 
+                iEdEl = GeoShape::fToE( iFaEl, iEdFa ).first; // local edge number (in element)
                 // Loop number of Dof per edge
                 for ( ID l = 1; l <= nDofpE; ++l )
                 {
-                    // local Dof are put after the lDof of the vertices
-                    lDof = nDofFV + ( iEdFa - 1 ) * nDofpE + l ;
 
-                    // global Dof
-                    gDof = _dof_u.localToGlobal( iElAd,
-                                                 nDofElemV +
-                                                 ( iEdEl - 1 ) * nDofpE + l );
-
+                    lDof = nDofFV + ( iEdFa - 1 ) * nDofpE + l ; // local Dof sono messi dopo gli lDof dei vertici
+                    gDof = _dof_u.localToGlobal( iElAd, nDofElemV + ( iEdEl - 1 ) * nDofpE + l ); // global Dof
                     j->second( lDof ) = gDof; // local to global on this face
                 }
             }
@@ -639,14 +662,8 @@ NavierStokesHandler<Mesh>::flux( const EntityFlag& flag )
             // Loop on number of Dof per face
             for ( ID l = 1; l <= nDofpF; ++l )
             {
-                // local Dof are put after the lDof of the vertices and edges
-                lDof = nDofFE + nDofFV + l;
-
-                // global Dof
-                gDof = _dof_u.localToGlobal( iElAd,
-                                             nDofElemE + nDofElemV +
-                                             ( iFaEl - 1 ) * nDofpF + l );
-
+                lDof = nDofFE + nDofFV + l; // local Dof sono messi dopo gli lDof dei vertici e dopo quelli degli spigoli
+                gDof = _dof_u.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iFaEl - 1 ) * nDofpF + l ); // global Dof
                 j->second( lDof ) = gDof; // local to global on this face
             }
         }
@@ -668,15 +685,14 @@ NavierStokesHandler<Mesh>::flux( const EntityFlag& flag )
             for ( ID l = 1; l <= nDofF; ++l )
             {
                 gDof = j->second( l );
-                u_local[ ic * nDofF + l - 1 ] =
-                    _u( ic * numTotalDof + gDof - 1 );
+                u_local[ ic * nDofF + l - 1 ] = _u( ic * numTotalDof + gDof - 1 );
             }
         }
 
         // Updating quadrature data on the current face
         _feBd_u.updateMeasNormalQuadPt( this->_mesh.boundaryFace( j->first ) );
 
-        // Quadrature formula
+        // Quadrautre formula
         // Loop on quadrature points
         for ( int iq = 0; iq < _feBd_u.nbQuadPt; ++iq )
         {
@@ -689,212 +705,12 @@ NavierStokesHandler<Mesh>::flux( const EntityFlag& flag )
                 // Interpolation
                 // Loop on local dof
                 for ( ID l = 1; l <= nDofF; ++l )
-                    flux += _feBd_u.weightMeas( iq ) *
-                        u_local[ ic * nDofF + l - 1 ] *
-                        _feBd_u.phi( int( l - 1 ), iq ) *
-                        _feBd_u.normal( int( ic ), iq );
+                    flux += _feBd_u.weightMeas( iq ) * u_local[ ic * nDofF + l - 1 ] * _feBd_u.phi( int( l - 1 ), iq ) * _feBd_u.normal( int( ic ), iq );
             }
         }
     }
 
     return flux;
-}
-
-template<typename Mesh>
-void NavierStokesHandler<Mesh>::uInterpolate( const Function& uFct,
-                                              Vector& uVect, Real time )
-{
-    typedef typename Mesh::VolumeShape GeoShape; // Element shape
-
-    UInt nDofpV  = _refFE_u.nbDofPerVertex; // number of Dof per vertex
-    UInt nDofpE  = _refFE_u.nbDofPerEdge;   // number of Dof per edge
-    UInt nDofpF  = _refFE_u.nbDofPerFace;   // number of Dof per face
-    UInt nDofpEl = _refFE_u.nbDofPerVolume; // number of Dof per Volume
-
-    UInt nElemV = GeoShape::numVertices; // Number of element's vertices
-    UInt nElemE = GeoShape::numEdges;    // Number of element's edges
-    UInt nElemF = GeoShape::numFaces;    // Number of element's faces
-
-    UInt nDofElemV = nElemV * nDofpV; // number of vertex's Dof on a Element
-    UInt nDofElemE = nElemE * nDofpE; // number of edge's Dof on a Element
-    UInt nDofElemF = nElemF * nDofpF; // number of face's Dof on a Element
-
-    ID nbComp = _u.nbcomp(); // Number of components of the mesh velocity
-
-    Real x, y, z;
-
-    ID lDof;
-
-    // Loop on elements of the mesh
-    for ( ID iElem = 1; iElem <= this->_mesh.numVolumes(); ++iElem )
-    {
-
-        _fe_u.updateJac( this->_mesh.volume( iElem ) );
-
-        // Vertex based Dof
-        if ( nDofpV )
-        {
-
-            // loop on element vertices
-            for ( ID iVe = 1; iVe <= nElemV; ++iVe )
-            {
-
-                // Loop number of Dof per vertex
-                for ( ID l = 1; l <= nDofpV; ++l )
-                {
-                    // Local dof in this element
-                    lDof = ( iVe - 1 ) * nDofpV + l;
-
-                    // Nodal coordinates
-                    _fe_u.coorMap( x, y, z,
-                                   _fe_u.refFE.xi( lDof - 1 ),
-                                   _fe_u.refFE.eta( lDof - 1 ),
-                                   _fe_u.refFE.zeta( lDof - 1 ) );
-
-                    // Loop on data vector components
-                    for ( UInt icmp = 0; icmp < nbComp; ++icmp )
-                        uVect( icmp * _dim_u +
-                               _dof_u.localToGlobal( iElem, lDof ) - 1 ) =
-                            uFct( time, x, y, z, icmp + 1 );
-                }
-            }
-        }
-
-        // Edge based Dof
-        if ( nDofpE )
-        {
-
-            // loop on element edges
-            for ( ID iEd = 1; iEd <= nElemE; ++iEd )
-            {
-
-                // Loop number of Dof per edge
-                for ( ID l = 1; l <= nDofpE; ++l )
-                {
-                    // Local dof in the adjacent Element
-                    lDof = nDofElemV + ( iEd - 1 ) * nDofpE + l;
-
-                    // Nodal coordinates
-                    _fe_u.coorMap( x, y, z,
-                                   _fe_u.refFE.xi( lDof - 1 ),
-                                   _fe_u.refFE.eta( lDof - 1 ),
-                                   _fe_u.refFE.zeta( lDof - 1 ) );
-
-                    // Loop on data vector components
-                    for ( UInt icmp = 0; icmp < nbComp; ++icmp )
-                        uVect( icmp * _dim_u +
-                               _dof_u.localToGlobal( iElem, lDof ) - 1 ) =
-                            uFct( time, x, y, z, icmp + 1 );
-                }
-            }
-        }
-
-        // Face based Dof
-        if ( nDofpF )
-        {
-
-            // loop on element faces
-            for ( ID iFa = 1; iFa <= nElemF; ++iFa )
-            {
-
-                // Loop on number of Dof per face
-                for ( ID l = 1; l <= nDofpF; ++l )
-                {
-
-                    // Local dof in the adjacent Element
-                    lDof = nDofElemE + nDofElemV + ( iFa - 1 ) * nDofpF + l;
-
-                    // Nodal coordinates
-                    _fe_u.coorMap( x, y, z,
-                                   _fe_u.refFE.xi( lDof - 1 ),
-                                   _fe_u.refFE.eta( lDof - 1 ),
-                                   _fe_u.refFE.zeta( lDof - 1 ) );
-
-                    // Loop on data vector components
-                    for ( UInt icmp = 0; icmp < nbComp; ++icmp )
-                        uVect( icmp * _dim_u +
-                               _dof_u.localToGlobal( iElem, lDof ) - 1 ) =
-                            uFct( time, x, y, z, icmp + 1 );
-                }
-            }
-        }
-
-        // Element based Dof
-        // Loop on number of Dof per Element
-        for ( ID l = 1; l <= nDofpEl; ++l )
-        {
-            // Local dof in the Element
-            lDof = nDofElemF + nDofElemE + nDofElemV + l;
-
-            // Nodal coordinates
-            _fe_u.coorMap( x, y, z,
-                           _fe_u.refFE.xi( lDof - 1 ),
-                           _fe_u.refFE.eta( lDof - 1 ),
-                           _fe_u.refFE.zeta( lDof - 1 ) );
-
-            // Loop on data vector components
-            for ( UInt icmp = 0; icmp < nbComp; ++icmp )
-                uVect( icmp * _dim_u +
-                       _dof_u.localToGlobal( iElem, lDof ) - 1 ) =
-                    uFct( time, x, y, z, icmp + 1 );
-        }
-    }
-}
-
-template<typename Mesh>
-Real NavierStokesHandler<Mesh>::pErrorL2( const Function& pexact,
-                                          Real time,
-                                          Real* relError )
-{
-    Real sum2 = 0.;
-    Real sum1 = 0.;
-    Real sum0 = 0.;
-    Real sumExact2 = 0.;
-    Real sumExact1 = 0.;
-    for ( UInt iVol = 1; iVol <= _mesh.numVolumes(); iVol++ )
-    {
-        _fe_p.updateFirstDeriv( _mesh.volumeList( iVol ) );
-        sum2 += elem_L2_diff_2( _p, pexact, _fe_p, _dof_p, time, 1 );
-        sum1 += elem_integral_diff( _p, pexact, _fe_p, _dof_p, time, 1 );
-        sum0 += _fe_p.measure();
-        if (relError)
-        {
-            sumExact2 += elem_L2_2( pexact, _fe_p, time, 1 );
-            sumExact1 += elem_integral( pexact, _fe_p, time, 1 );
-        }
-    }
-    Real absError = sqrt( sum2 - sum1*sum1/sum0 );
-    if (relError)
-    {
-        Real normExact = sqrt( sumExact2 - sumExact1*sumExact1/sum0 );
-        *relError = absError / normExact;
-    }
-    return absError;
-}
-
-template<typename Mesh>
-Real NavierStokesHandler<Mesh>::uErrorL2( const Function& uexact,
-                                          Real time,
-                                          Real* relError )
-{
-    Real normU = 0.;
-    UInt nbCompU = _u.nbcomp();
-    Real sumExact = 0.;
-    for ( UInt iVol = 1; iVol <= _mesh.numVolumes(); iVol++ )
-    {
-        _fe_u.updateFirstDeriv( _mesh.volumeList( iVol ) );
-        normU += elem_L2_diff_2( _u, uexact, _fe_u, _dof_u, time,
-                                 int( nbCompU ) );
-        if (relError)
-        {
-            sumExact += elem_L2_2( uexact, _fe_u, time, int( nbCompU ) );
-        }
-    }
-    if (relError)
-    {
-        *relError = sqrt( normU / sumExact );
-    }
-    return sqrt( normU );
 }
 
 }

@@ -20,17 +20,15 @@
 
 namespace LifeV
 {
-// realize the inverse of a diagonal matrix and multiply it by another matrix
+//Realizza l'inversa di una matrice diagonale e la moltiplica per un'altra matrice
 void MultInvDiag( const std::vector<Real> &Diag,
                   const CSRMatr<CSRPatt, Real> &Mat, CSRMatr<CSRPatt, Real> &ans )
 {
-    ASSERT( find( Diag.begin(), Diag.end(), 0 ) == Diag.end(),
-            "The diagonal matrix must be invertible" );
+    ASSERT( find( Diag.begin(), Diag.end(), 0 ) == Diag.end(), "La matrice diagonale deve essere invertibile" );
 
-    ASSERT( Diag.size() == Mat._Patt->nRows(),
-            "The matrices are not compatible for calculating their product" );
+    ASSERT( Diag.size() == Mat._Patt->nRows(), "Le matrice non sono compatibili per poter calcolare il loro prodotto" );
 
-    // execute the product
+    // Esecuzione del prodotto
     for ( UInt row = 0; row < Mat._Patt->nRows(); ++row )
         for ( UInt pos = Mat._Patt->ia() [ row ]; pos < Mat._Patt->ia() [ row + 1 ]; ++pos )
             ans._value[ pos ] = ( Mat._value[ pos ] / Diag[ row ] );
@@ -44,7 +42,7 @@ CSRMatr<CSRPatt, Tab2d>::CSRMatr( const CSRPatt &ex_pattern, UInt const nr, UInt
 {
     _Patt = &ex_pattern;
     Tab2d mzero( nr, nc );
-    mzero = ZeroMatrix( nr, nc );
+    mzero = 0.;
     _value.resize( ex_pattern.nNz(), mzero );
 }
 
@@ -54,7 +52,7 @@ VectorBlock
 CSRMatr<CSRPatt, Tab2d>::trans_mult( const VectorBlock &v )
 {
     UInt nblockr = _Patt->nRows(); // for square matrices...
-    int blsize = _value[ 0 ].size1(); // for square block
+    int blsize = _value[ 0 ].N(); // for square block
 
     ASSERT( nblockr == v.size(), "Error in Matrix Vector product" );
     VectorBlock ans( nblockr, blsize );
@@ -64,8 +62,8 @@ CSRMatr<CSRPatt, Tab2d>::trans_mult( const VectorBlock &v )
     {
         for ( UInt ii = _Patt->ia() [ ir ] - OFFSET;ii < _Patt->ia() [ ir + 1 ] - OFFSET;++ii )
         {
-            ans.numBlock( _Patt->ja() [ ii ] - OFFSET ) += prod( trans( _value[ii] ),
-                                                                 v.numBlock( ir ) );
+            Tab2dView tr_block( _value[ ii ].t() ); // transpose-block
+            ans.numBlock( _Patt->ja() [ ii ] - OFFSET ) += ( tr_block * v.numBlock( ir ) );
         };
     };
     return ans;
@@ -78,7 +76,7 @@ CSRMatr<CSRPatt, Tab2d>::operator*( const VectorBlock &v ) const
 {
     UInt nblockr = _Patt->nRows();
     UInt nblockc = _Patt->nCols();
-    int blsize = _value[ 0 ].size1(); // for square block
+    int blsize = _value[ 0 ].N(); // for square block
 
     ASSERT( nblockc == v.size(), "Error in Matrix Vector product" );
     VectorBlock ans( nblockr, blsize );
@@ -86,8 +84,8 @@ CSRMatr<CSRPatt, Tab2d>::operator*( const VectorBlock &v ) const
 
     for ( UInt ir = 0 + OFFSET;ir < nblockr + OFFSET;++ir )
     {
-        for ( UInt ii = _Patt->give_ia() [ ir ] - OFFSET; ii < _Patt->give_ia() [ ir + 1 ] - OFFSET; ++ii )
-            ans.numBlock( ir ) += prod( _value[ ii ], v.numBlock( _Patt->give_ja() [ ii ] - OFFSET ) );
+        for ( UInt ii = _Patt->give_ia() [ ir ] - OFFSET;ii < _Patt->give_ia() [ ir + 1 ] - OFFSET;++ii )
+            ans.numBlock( ir ) += ( _value[ ii ] * v.numBlock( _Patt->give_ja() [ ii ] - OFFSET ) );
     }
     return ans;
 }
@@ -101,7 +99,7 @@ CSRMatr<CSRPatt, Tab2d>::spy( std::string const &filename )
     std::string name = filename, uti = " , ";
     UInt nrows = _Patt->nRows();
     Container ia = _Patt->ia(), ja = _Patt->ja();
-    int blsize = _value[ 0 ].size1(); // for square block
+    int blsize = _value[ 0 ].N(); // for square block
     //
     // check on the file name
     //
@@ -118,7 +116,6 @@ CSRMatr<CSRPatt, Tab2d>::spy( std::string const &filename )
         }
     }
 
-    std::cout << "write file " << name << std::endl;
     std::ofstream file_out( name.c_str() );
     ASSERT( file_out, "Error: Output Matrix (Values) file cannot be open" );
 
@@ -425,12 +422,9 @@ void rowUnify( CSRMatr<CSRPatt, double> &ans, const CSRMatr<CSRPatt, double> &Ma
 //Miguel: 4/2003, the last version was too expensive.
 void MultInvDiag( const std::vector<Real> &Diag, const MSRMatr<Real> &Mat, MSRMatr<Real> &ans )
 {
-    ASSERT( find( Diag.begin(), Diag.end(), 0 ) == Diag.end(),
-            "The diagonal matrix must be invertible" );
+    ASSERT( find( Diag.begin(), Diag.end(), 0 ) == Diag.end(), "La matrice diagonale deve essere invertibile" );
 
-    ASSERT( Diag.size() == Mat._Patt->nRows(),
-            "The matrices are not compatible for calculating their product" );
-
+    ASSERT( Diag.size() == Mat._Patt->nRows(), "Le matrice non sono compatibili per poter calcolare il loro prodotto" );
     UInt begin, end;
     Real diag;
     UInt nRows = Mat._Patt->nRows();
@@ -462,14 +456,10 @@ DiagPreconditioner<Vector>::DiagPreconditioner( const CSRMatr<CSRPatt, double> &
 {
     double loc_val = 0.0;
     UInt M_size = M.Patt() ->nRows();
-#if 0
     Vector v_zero( M_size );
-    v_zero = ZeroVector( M_size );
+    v_zero = 0.;
 
     _diag = v_zero;
-#else
-    _diag = ZeroVector( M_size );
-#endif
     for ( UInt i = 0; i < M_size; i++ )
     {
         loc_val = M.get_value( i, i );
@@ -482,14 +472,10 @@ DiagPreconditioner<Vector>::DiagPreconditioner( const MSRMatr<double> &M )
 {
     double loc_val = 0.0;
     UInt M_size = M.Patt() ->nRows();
-#if 0
     Vector v_zero( M_size );
     v_zero = 0.;
 
     _diag = v_zero;
-#else
-    _diag = ZeroVector( M_size );
-#endif
     for ( UInt i = 0; i < M_size; i++ )
     {
         loc_val = M.get_value( i, i );
@@ -505,8 +491,10 @@ DiagPreconditioner<Vector>::DiagPreconditioner( const VBRMatr<double> &M )
     UInt Nblocks = M.Patt() ->nRows();
     UInt blockSize = M.Patt() ->rpntr() [ 1 ] - M.Patt() ->rpntr() [ 0 ];
     UInt M_size = Nblocks * blockSize;
+    Vector v_zero( M_size );
+    v_zero = 0.;
 
-    _diag = ZeroVector( M_size );
+    _diag = v_zero;
     for ( UInt i = 0; i < M_size; i++ )
     {
         loc_val = M.get_value( i, i );
@@ -520,9 +508,9 @@ template <>
 DiagPreconditioner<VectorBlock>::DiagPreconditioner( const CSRMatr<CSRPatt, Tab2d> &M )
 {
     UInt Nblocks = M.Patt() ->nRows();
-    int blockSize = M.value() [ 0 ].size1();
+    int blockSize = M.value() [ 0 ].N();
     Tab2d loc_val( blockSize, blockSize );
-    loc_val = ZeroMatrix( blockSize, blockSize );
+    loc_val = 0.;
     VectorBlock v_zero( Nblocks, blockSize );
     v_zero = 0.;
 
@@ -554,10 +542,10 @@ template <>
 VectorBlock
 DiagPreconditioner<VectorBlock>::solve( const VectorBlock &x ) const
 {
-    VectorBlock y( x.size(), x.numBlock( 0 ).size() );
+    VectorBlock y( x.size(), x.numBlock( 0 ).N() );
 
     for ( UInt i = 0; i < x.size(); i++ )
-        for ( int j = 0; j < x.numBlock( 0 ).size(); j++ )
+        for ( int j = 0; j < x.numBlock( 0 ).N(); j++ )
             y.numBlock( i ) ( j ) = x.numBlock( i ) ( j ) * diagBlock( i ) ( j );
 
     return y;
@@ -571,14 +559,18 @@ template <>
 IDPreconditioner<Vector>::IDPreconditioner( const CSRMatr<CSRPatt, double> &M )
 {
     UInt M_size = M.Patt() ->nRows();
-    _diag = ScalarVector( M_size, 1.0 );
+    Vector v_id( M_size );
+    v_id = 1.;
+    _diag = v_id;
 }
 
 template <>
 IDPreconditioner<Vector>::IDPreconditioner( const MSRMatr<double> &M )
 {
     UInt M_size = M.Patt() ->nRows();
-    _diag = ScalarVector( M_size, 1.0 );
+    Vector v_id( M_size );
+    v_id = 1.;
+    _diag = v_id;
 }
 
 //for VBR pattern
@@ -588,14 +580,16 @@ IDPreconditioner<Vector>::IDPreconditioner( const VBRMatr<double> &M )
     UInt Nblocks = M.Patt() ->nRows();
     UInt blockSize = M.Patt() ->rpntr() [ 1 ] - M.Patt() ->rpntr() [ 0 ];
     UInt M_size = Nblocks * blockSize;
-    _diag = ScalarVector( M_size, 1.0 );
+    Vector v_id( M_size );
+    v_id = 1.;
+    _diag = v_id;
 }
 //for CSR block pattern
 template <>
 IDPreconditioner<VectorBlock>::IDPreconditioner( const CSRMatr<CSRPatt, Tab2d> &M )
 {
     int Nblocks = M.Patt() ->nRows();
-    int blockSize = M.value() [ 0 ].size1();
+    int blockSize = M.value() [ 0 ].N();
     VectorBlock v_id( Nblocks, blockSize );
     v_id = 1.;
     _diag = v_id;

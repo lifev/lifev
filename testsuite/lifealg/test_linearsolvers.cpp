@@ -27,15 +27,14 @@
 
 #include <lifeconfig.h>
 
-#include <debug.hpp>
-#include <SolverAztec.hpp>
+#include "SolverAztec.hpp"
 
 #if defined(HAVE_PETSC_H)
 #include <SolverPETSC.hpp>
 #endif /* HAVE_PETSC_H */
 
 #if defined(HAVE_UMFPACK_H)
-#include <SolverUMFPACK.hpp>
+//#include <SolverUMFPACK.hpp>
 #endif /* HAVE_UMFPACK_H */
 
 #include <MatrixTest.hpp>
@@ -49,34 +48,28 @@ namespace LifeV{
 template<typename Mat>
 bool test_umfpack( Mat& __mat )
 {
-#if defined( HAVE_UMFPACK_H )
-    LifeV::Debug( 10000 ) << "UmFPACK solver test\n";
+#if 0
     int Nrows = __mat.matrix().Patt()->nRows();
 
-    SolverUMFPACK __solver;
-    __solver.setMatrix( Nrows, __mat.iaData(), __mat.jaData(), __mat.valueData() );
+    //Life::Solver __petsc( "gmres", "ilu" );
+    //__petsc.setMatrix( Nrows, __mat.iaData(), __mat.jaData(), __mat.valueData() );
 
     Vector __x( Nrows );
     Vector __sol( Nrows );
     Vector __b( Nrows );
 
-    __sol = ScalarVector( Nrows, 10 );
+    __sol = 10;
     __b = __mat.matrix() * __sol;
 
-    __x = ZeroVector( Nrows );
-    __solver.solve( __x, __b );
-    __solver.reportInfo();
+    __x = 0;
+    //__petsc.solve( __x, __b );
 
-    LifeV::Debug( 10000 )  << "norm_2(x) = " << norm_2( __x ) << "\n";
+    std::cout << "norm(x) = " << norm( __x ) << "\n";
 
     __x -= __sol;
-    LifeV::Debug( 10000 )  << "norm_2(error) = " << norm_2( __x ) << "\n";
-
-    LifeV::Debug( 10000 ) << "UMFPACK solver test done\n";
-
-    return norm_2(__x) < 1e-10;
+    std::cout << "norm(error) = " << norm( __x ) << "\n";
 #else
-    return 1;
+    return true;
 #endif
 }
 
@@ -84,33 +77,28 @@ template<typename Mat>
 bool test_petsc( Mat& __mat )
 {
 #if defined(HAVE_PETSC_H)
-    LifeV::Debug( 10000 ) << "PETSC solver test\n";
-    int Nrows = __mat.matrix().Patt()->nRows();
 
-    double __relTol = 1.e-14;
+    int Nrows = __mat.matrix().Patt()->nRows();
 
     LifeV::SolverPETSC __petsc( "gmres", "ilu" );
     //__petsc.setMatrix( Nrows, __mat.iaData(), __mat.jaData(), __mat.valueData() );
     __petsc.setMatrix(__mat.matrix());
-    __petsc.setTolerances( 0, __relTol );
 
     Vector __x( Nrows );
     Vector __sol( Nrows );
     Vector __b( Nrows );
 
-    __sol = ScalarVector( Nrows, 10 );
+    __sol = 10;
     __b = __mat.matrix() * __sol;
 
-    __x = ZeroVector( Nrows );
+    __x = 0;
     __petsc.solve( __x, __b );
 
-    LifeV::Debug( 10000 ) << "norm_2(x) = " << norm_2( __x ) << "\n";
+    std::cout << "norm(x) = " << norm( __x ) << "\n";
 
     __x -= __sol;
-    LifeV::Debug( 10000 ) << "norm_2(error) = " << norm_2( __x ) << "\n";
-    LifeV::Debug( 10000 ) << "PETSC solver test done\n";
-
-    return __petsc.converged();
+    std::cout << "norm(error) = " << norm( __x ) << "\n";
+    return norm(__x) < 1e-10;
 #else
     return 1;
 #endif
@@ -121,27 +109,25 @@ bool test_aztec( Mat& __mat )
 {
     int Nrows = __mat.matrix().Patt()->nRows();
 
-    double __relTol = 1.e-14;
-
     LifeV::SolverAztec __aztec;
     __aztec.setMatrix(__mat.matrix());
-    __aztec.setTolerance( __relTol );
+    __aztec.setTolerance( 1e-16 );
 
     Vector __x( Nrows );
     Vector __sol( Nrows );
     Vector __b( Nrows );
 
-    __sol = ScalarVector( Nrows, 10 );
+    __sol = 10;
     __b = __mat.matrix() * __sol;
 
-    __x = ZeroVector( Nrows );
+    __x = 0;
     __aztec.solve( __x, __b );
 
-    LifeV::Debug( 10000 )  << "norm_2(x) = " << norm_2( __x ) << "\n";
+    std::cout << "norm(x) = " << norm( __x ) << "\n";
 
     __x -= __sol;
-    LifeV::Debug( 10000 )  << "norm_2(error) = " << norm_2( __x ) << "\n";
-    return __aztec.converged();
+    std::cout << "norm(error) = " << norm( __x ) << "\n";
+    return norm(__x) < 1e-10;
 }
 
 } // namespace LifeV
@@ -151,48 +137,48 @@ int main( int argc, char** argv )
     bool success = true;
     try
     {
-        GetPot commandLine( argc, argv );
-        int N = commandLine.follow( 100, "-N" );
+    int N = 100;
 
 #if defined(HAVE_PETSC_H)
-        PetscInitialize(&argc,&argv,(char *)0,help);
+    PetscInitialize(&argc,&argv,(char *)0,help);
+    PetscOptionsGetInt(PETSC_NULL,"-N",&N,PETSC_NULL);
 #endif /* HAVE_PETSC_H */
 
 
-        //
-        // Mass matrix
-        //
-        LifeV::Debug( 10000 ) << "mass matrix...\n";
-        LifeV::MatrixMass mass( N );
-        mass.matrix().spy( "mass.m" );
+    //
+    // Mass matrix
+    //
+    std::cout << "mass matrix...\n";
+    LifeV::MatrixMass mass( N );
+    mass.matrix().spy( "mass.m" );
 
-        success &= LifeV::test_petsc ( mass );
-        //success &= LifeV::test_umfpack ( mass );
-        success &= LifeV::test_aztec( mass );
+    success &= LifeV::test_petsc ( mass );
+    success &= LifeV::test_umfpack ( mass );
+    success &= LifeV::test_aztec( mass );
 
-        //
-        // convdiff matrix
-        //
-        LifeV::Debug( 10000 ) << "convection diffusion matrix...\n";
-        LifeV::MatrixConvectionDiffusion convdiff((int)std::sqrt((double)N), 1.0);
-        convdiff.matrix().spy( "convdiff.m" );
+    //
+    // convdiff matrix
+    //
+    std::cout << "convection diffusion matrix...\n";
+    LifeV::MatrixConvectionDiffusion convdiff((int)std::sqrt((double)N), 1.0);
+    convdiff.matrix().spy( "convdiff.m" );
 
-        success &= LifeV::test_petsc ( convdiff );
-        //success &= LifeV::test_umfpack ( convdiff );
-        success &= LifeV::test_aztec( convdiff );
+    success &= LifeV::test_petsc ( convdiff );
+    success &= LifeV::test_umfpack ( convdiff );
+    success &= LifeV::test_aztec( convdiff );
 
     }
     catch( std::exception const& __e )
     {
-        std::cerr << "std::exception: " << __e.what() << "\n";
+        std::cout << "std::exception: " << __e.what() << "\n";
         return EXIT_FAILURE;
     }
     catch( ... )
     {
-        std::cerr << "unknown exception caught\n";
+        std::cout << "unknown exception caught\n";
         return EXIT_FAILURE;
     }
-    std::cerr << (success ? "success" : "solve failed") << std::endl;
+    std::cout << (success ? "success" : "solve failed") << std::endl;
     return (success ? EXIT_SUCCESS : EXIT_FAILURE);
     //return EXIT_SUCCESS;
 }

@@ -33,7 +33,7 @@
 
 #include "main.hpp"
 #include "ud_functions.hpp"
-#include "bcManage.hpp"
+#include "bc_manage.hpp"
 #include "vtk_wrtrs.hpp"
 #include "elemMat.hpp"
 #include "elemOper.hpp"
@@ -50,11 +50,11 @@ int main() {
     // Boundary conditions definition
     // ===================================================
 
-    BCFunctionBase gv1(g1); // Functor storing the user definded function g1
-    BCFunctionBase gv2(g2); // Functor storing the user definded function g2
-    BCFunctionBase gv3(g3); // Functor storing the user definded function g3
+    BCFunction_Base gv1(g1); // Functor storing the user definded function g1
+    BCFunction_Base gv2(g2); // Functor storing the user definded function g2
+    BCFunction_Base gv3(g3); // Functor storing the user definded function g3
 
-    BCHandler BCh(5); // We impose five boundary conditions
+    BC_Handler BCh(5); // We impose five boundary conditions
 
     BCh.addBC("Wall",  2, Essential, Scalar, gv2);
     BCh.addBC("BInlet",  4, Essential, Scalar, gv1);
@@ -121,8 +121,8 @@ int main() {
 
     // initialization of vector of unknowns and rhs
     ScalUnknown<Vector> U(dim), F(dim);
-    U=ZeroVector( dim );
-    F=ZeroVector( dim );
+    U=0.0;
+    F=0.0;
 
     // ==========================================
     // Pattern construction and matrix assembling
@@ -173,7 +173,7 @@ int main() {
     Real tgv=1.;
 
     chrono.start();
-    bcManage(A,F,aMesh,dof,BCh,feBd,tgv,0.0);
+    bc_manage(A,F,aMesh,dof,BCh,feBd,tgv,0.0);
 
     chrono.stop();
     cout << chrono.diff() << "s." << endl;

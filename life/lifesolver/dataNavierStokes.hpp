@@ -15,15 +15,15 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+*/ 
 /*!
   \file dataNavierStokes.h
   \author M.A. Fernandez
   \date 01/2003
   \version 1.0
-
+ 
   \brief File containing a class for handling NavierStokes data with GetPot
-
+ 
 */
 #ifndef _DATANAVIERSTOKES_H_
 #define _DATANAVIERSTOKES_H_
@@ -38,9 +38,9 @@ namespace LifeV
 {
 /*!
   \class DataNavierStokes
-
+ 
   Base class which holds usual data for the NavierStokes equations solvers
-
+ 
 */
 template <typename Mesh>
 class DataNavierStokes:
@@ -132,7 +132,7 @@ template <typename Mesh>
 Real DataNavierStokes<Mesh>::
 density() const
 {
-    return _rho;
+    return this->_density;
 }
 
 // The viscosity
@@ -140,7 +140,7 @@ template <typename Mesh>
 Real DataNavierStokes<Mesh>::
 viscosity() const
 {
-    return _mu;
+    return this->_viscosity;
 }
 
 

@@ -15,12 +15,11 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+*/ 
 /*! file geo0D.h */
 #ifndef _GEO0D_HH_
 #define _GEO0D_HH_
 
-#include <boost/array.hpp>
 
 #include "meshEntity.hpp"
 #include "basisElSh.hpp"
@@ -29,20 +28,19 @@ namespace LifeV
 {
 //! \defgroup GeoXD Basis Geometrical Entities Geo0D and GeoND.
 /*!
-
-They are intermediate classes used to build the actual Geometry classes
-
-\warning Geo1D/2D/3D are template classes because some of the info is not
-known a priori and I want all vector dimensions determined at compile time
-to enhance memory access time. IT IS UP TO THE USER to provide a coherent
-GeoShape!.  */
+ 
+  They are intermediate classes used to build the actual Geometry classes
+ 
+  \warning Geo1D/2D/3D are template classes because some of the info is not
+  known a priori and I want all vector dimensions determined at compile time
+  to enhance memory access time. IT IS UP TO THE USER to provide a coherent
+  GeoShape!.  */
 
 /*@{*/
 
 //! Zero dimensional entity. It stores boundary information
-class Geo0D
-    :
-        public MeshEntityWithBoundary
+class Geo0D:
+            public MeshEntityWithBoundary
 {
 public:
 
@@ -62,72 +60,72 @@ public:
 
     //! returns a pointer to a Real[3] containing the coordinates
     Real * coor()
-        {
-            return const_cast<Real*>( _coor.data() );
-        };
+    {
+        return _coor;
+    };
     Real const * coor() const
-        {
-            return _coor.data();
-        };
+    {
+        return _coor;
+    };
 
 
     //! Used to provide coords to object created using
     //! a constructor with no coordinates given, or to
     //! modify existing coordinates.
-    Real & x()
-        {
-            return _coor[ 0 ];
-        }
-    Real & y()
-        {
-            return _coor[ 1 ];
-        }
-    Real & z()
-        {
+    INLINE Real & x()
+    {
+        return _coor[ 0 ];
+    }
+    INLINE Real & y()
+    {
+        return _coor[ 1 ];
+    }
+    INLINE Real & z()
+    {
 #if defined(THREEDIM)
-            return _coor[ 2 ];
+        return _coor[ 2 ];
 #else
 
-            ERROR_MSG( "z coordinate may be modified only in a 3D problem" );
+        ERROR_MSG( "z coordinate may be modified only in a 3D problem" );
 #endif
 
-        }
-    Real x() const
-        {
-            return _coor[ 0 ];
-        }
-    Real y() const
-        {
-            return _coor[ 1 ];
-        };
-    Real z() const
-        {
+    }
+    INLINE Real x() const
+    {
+        return _coor[ 0 ];
+    }
+    INLINE Real y() const
+    {
+        return _coor[ 1 ];
+    };
+    INLINE Real z() const
+    {
 #if defined(THREEDIM)
-            return _coor[ 2 ];
+        return _coor[ 2 ];
 #else
 
-            return 0;
+        return 0;
 #endif
 
-        }
+    }
 
     //!Another way to access coordinate data
-    Real coordinate ( ID const i ) const
-        {
-            ASSERT_BD( i > 0 && i <= NDIM ) ;
-            return _coor[ i -1 ]; // indexing from 1
-        }
+    INLINE Real coordinate ( ID const i ) const
+    {
+        ASSERT_BD( i > 0 && i <= NDIM ) ;
+        return _coor[ i -1 ]; // indexing from 1
+    }
     //!Another way to modify coordinate data
-    Real & coordinate ( ID const i )
-        {
-            ASSERT_BD( i > 0 && i <= NDIM ) ;
-            return _coor[ i -1 ];
-        }
+    INLINE Real & coordinate ( ID const i )
+    {
+        ASSERT_BD( i > 0 && i <= NDIM ) ;
+        return _coor[ i -1 ];
+    }
     //! Useful for debugging
     std::ostream & showMe( bool verbose = false, std::ostream & c = std::cout ) const;
 
 private:
-    boost::array<Real,nDimensions> _coor;
+    Real _coor[ nDimensions ];
 };
 }
 #endif

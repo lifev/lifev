@@ -2,17 +2,17 @@
 /*
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
-
+ 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-
+ 
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-
+ 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -24,7 +24,7 @@
 /******************************************************************
  Definition of ElementarOperators and all the utilities
  for the assembly via Expression Templates (See Veldhuizen, Haney, Furnish)
-
+ 
  Release 0.1 - A. Veneziani, January 2001
  Adaptation to the new f.e. JFG 04/2002 (remark : several class
  implementation should now be put in a .cc)
@@ -33,10 +33,6 @@
 #include "elemMat.hpp"
 #include "elemVec.hpp"
 #include "currentFE.hpp"
-#include "currentFEDG.hpp"
-#include "currentIFDG.hpp"
-#include "currentBFDG.hpp"
-#include "bcHandler.hpp"
 
 namespace LifeV
 {
@@ -196,77 +192,6 @@ private:
     CurrentFE* _fe; // MUST be a pointer
 };
 
-////////////////////////////////////////////////////////////////////////////////
-//
-// January 2004: DG operators (D. A. Di Pietro)
-//
-////////////////////////////////////////////////////////////////////////////////
-// Jump and average trace operators
-
-class JumpIF {
- public:
-  JumpIF(CurrentIFDG* fe):_fe(fe){};
-  CurrentIFDG* fe_ptr() {return _fe;};
-
-  Real operator()(int i, int icoor, int iq, int H)
-    {
-      // returns the coor-th component of jump(phi^H_i)
-      if(H == 0)
-	return _fe -> phiAd(i, iq) * _fe -> normal(icoor, iq);
-      else
-	return - _fe -> phiOp(i, iq) * _fe -> normal(icoor, iq);
-    }
-
- private:
-  CurrentIFDG* _fe;
-};
-
-class JumpBF {
- public:
-  JumpBF(CurrentBFDG* fe):_fe(fe){};
-  CurrentBFDG* fe_ptr() {return _fe;};
-
-  Real operator()(int i, int icoor, int iq, int H)
-    {
-      // returns the coor-th component of jump(phi^H_i)
-      return _fe -> phiAd(i, iq) * _fe -> normal(icoor, iq);
-    }
-
- private:
-  CurrentBFDG* _fe;
-};
-class AvgIF {
- public:
-  AvgIF(CurrentIFDG* fe):_fe(fe){};
-  CurrentIFDG* fe_ptr() {return _fe;};
-
-  Real operator()(int i, int iq, int H)
-    {
-      // returns the average of phi^H_i
-      if(H == 0)
-	return 0.5 * _fe -> phiAd(i, iq);
-      else
-	return 0.5 * _fe -> phiOp(i, iq);
-    }
-
- private:
-  CurrentIFDG* _fe;
-};
-
-class AvgBF {
- public:
-  AvgBF(CurrentBFDG* fe):_fe(fe){};
-  CurrentBFDG* fe_ptr() {return _fe;};
-
-  Real operator()(int i, int icoor, int iq, int H)
-    {
-      // returns the average of phi^H_i
-      return _fe -> phiAd(i, iq);
-    }
-
- private:
-  CurrentBFDG* _fe;
-};
 
 // December 2001: Vector formulation
 class VStiff
@@ -472,13 +397,7 @@ public:
     //   P operator()(int i, int iq, Real x, Real y, Real z,int ic=0,int jc=0)
     //     { return _a(i,iq,x,y,z);}
 
-   // D. A. Di Pietro: This overloading of operator() is necessary to handle DG operators
-   P operator()(int i, int j, int iq, Real x, Real y, Real z, int K, int H, int ic, int jc)
-     { return _a(i, j, iq, x, y, z, K, H, ic, jc);}
 
-   // D. A. Di Pietro: This overloading includes time dependence
-   P operator()(int i, int j, int iq, Real t, Real x, Real y, Real z, int K, int H, int ic, int jc)
-     { return _a(i, j, iq, t, x, y, z, K, H, ic, jc);}
 
     //  int nc() {return _a.nc();}
 
@@ -490,7 +409,7 @@ class SymEOExpr: public EOExpr<P,A>{
  public:
    SymEOExpr(const A& eo): EOExpr<P,A>(eo)
      {}
-     };*/
+     };*/ 
 //////////////////////////////////////////////
 //
 // Example of use: -mu*Laplace(u) + sigma*(u)
@@ -537,17 +456,7 @@ public:
     {
         return Op::apply( _a( i, iq, x, y, z, ic ), _b( i, iq, x, y, z, ic ) );
     };
-   // D. A. Di Pietro: This overloading of operator() is necessary to handle DG operators
-   P operator()(int i, int j, int iq, Real x, Real y, Real z, int K, int H, int ic, int jc)
-     {
-       return Op::apply(_a(i, j, iq, x, y, z, K, H, ic, jc), _b(i, j, iq, x, y, z, K, H, ic, jc));
-     };
 
-   // D. A. Di Pietro: This overloading of operator() includes time dependence
-   P operator()(int i, int j, int iq, Real t, Real x, Real y, Real z, int K, int H, int ic, int jc)
-     {
-       return Op::apply(_a(i, j, iq, t, x, y, z, K, H, ic, jc), _b(i, j, iq, t, x, y, z, K, H, ic, jc));
-     };
 };
 //
 template <typename P, typename A, typename Op>
@@ -565,25 +474,9 @@ public:
     {}
     ;
 
-  P operator()(int i, int j, int iq, Real x, Real y, Real z,int ic=0, int jc=0)
-    {return Op::apply(_a(i,j,iq,x,y,z,ic,jc),_b);};
-
-  P operator() ( int i, int j, int iq, Real x, Real y, Real z, int ic = 0, int jc = 0 )
+    P operator() ( int i, int j, int iq, Real x, Real y, Real z, int ic = 0, int jc = 0 )
     {
         return Op::apply( _a( i, j, iq, x, y, z, ic, jc ), _b );
-    };
-
-  // Added by D. A. Di Pietro 2/2004
-  P operator()(int i, int j, int iq, Real x, Real y, Real z, int K, int H, int ic, int jc)
-    {
-      return Op::apply(_a(i, j, iq, x, y, z, K, H, ic, jc), _b);
-    };
-
-
-  // Added by D. A. Di Pietro 2/2004
-  P operator()(int i, int j, int iq, Real t, Real x, Real y, Real z, int K, int H, int ic, int jc)
-    {
-      return Op::apply(_a(i, j, iq, t, x, y, z, K, H, ic, jc), _b);
     };
 };
 
@@ -615,27 +508,6 @@ public:
         return s;
     }
 
-  // D. A. Di Pietro: This overloading of operator() is necessary to handle DG operators
-  P operator()(int i, int j, int iq, Real x, Real y, Real z, int K, int H, int ic, int jc) const {
-    P s=0;
-    for(int icoor=0; icoor<NDIM; icoor++) {
-      for(int jcoor=0; jcoor<NDIM; jcoor++) {
-	s += Op::apply(_a(i, j, iq, icoor, jcoor, K, H, ic, jc), _t(icoor, jcoor, x, y, z));
-      }
-    }
-    return s;
-  }
-
-   // D. A. Di Pietro: This overloading of operator() includes time dependence
-  P operator()(int i, int j, int iq, Real t, Real x, Real y, Real z, int K, int H, int ic, int jc) const {
-    P s=0;
-    for(int icoor=0; icoor<NDIM; icoor++) {
-      for(int jcoor=0; jcoor<NDIM; jcoor++) {
-	s += Op::apply(_a(i, j, iq, icoor, jcoor, K, H, ic, jc), _t(icoor, jcoor, x, y, z));
-      }
-    }
-    return s;
-  }
 };
 
 template <typename P, typename A, typename Op>
@@ -666,27 +538,6 @@ public:
         return s;
     }
 
-  // D. A. Di Pietro: This overloading of operator() is necessary to handle DG operators
-  P operator()(int i, int j, int iq, Real x, Real y, Real z, int K, int H, int ic, int jc) const {
-    P s=0;
-    for(int icoor=0; icoor<NDIM; icoor++) {
-      for(int jcoor=0; jcoor<NDIM; jcoor++) {
-	s+=Op::apply(_a(i, j, iq, icoor, jcoor, K, H, ic, jc), _t(icoor, jcoor));
-      }
-    }
-    return s;
-  }
-
-  // D. A. Di Pietro: This overloading of operator() includes time dependence
-  P operator()(int i, int j, int iq, Real t, Real x, Real y, Real z, int K, int H, int ic, int jc) const {
-    P s=0;
-    for(int icoor=0; icoor<NDIM; icoor++) {
-      for(int jcoor=0; jcoor<NDIM; jcoor++) {
-	s+=Op::apply(_a(i, j, iq, icoor, jcoor, K, H, ic, jc), _t(icoor, jcoor));
-      }
-    }
-    return s;
-  }
 };
 
 template <typename P, typename A, typename Op>
@@ -704,18 +555,12 @@ public:
     {}
     ;
 
+
     P operator() ( int i, int j, int iq, Real x, Real y, Real z ) const
     {
         return Op::apply( _a( i, j, iq, x, y, z ), ( *_f ) ( x, y, z ) );
     };
 
-   // D. A. Di Pietro: This overloading of operator() is necessary to handle DG operators
-  P operator()(int i, int j, int iq, Real x, Real y, Real z, int K, int H, int ic, int jc) const
-      {return Op::apply(_a(i, j, iq, x, y, z, K, H, ic, jc), (*_f)(x, y, z));};
-
-   // Added by D. A. Di Pietro
-  P operator()(int i, int j, int iq, Real t, Real x, Real y, Real z, int K, int H, int ic, int jc) const
-      {return Op::apply(_a(i, j, iq, t, x, y, z, K, H, ic, jc), (*_f)(x, y, z));};
 };
 
 

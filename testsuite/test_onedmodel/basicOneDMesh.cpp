@@ -35,28 +35,28 @@ namespace LifeV
 //------------------------------------
 //! Default constructor
 Point1D::Point1D():
-    _M_x(0.),
-    _M_id(0)
+  _M_x(0.),
+  _M_id(0)
 {
 }
 //! Constructor
 Point1D::Point1D(const Real& x, const UInt& id):
-    _M_x(x),
-    _M_id(id)
+  _M_x(x),
+  _M_id(id)
 {
 }
 //! Copy constructor
 Point1D::Point1D(const Point1D& pt):
-    _M_x(pt._M_x),
-    _M_id(pt._M_id)
+  _M_x(pt._M_x),
+  _M_id(pt._M_id)
 {
 }
 //! operator =
 Point1D & Point1D::operator= (const Point1D & pt)
 {
-    _M_x  = pt.x();
-    _M_id = pt.id();
-    return *this;
+  _M_x  = pt.x();
+  _M_id = pt.id();
+  return *this;
 }
 
 //------------------------------------
@@ -64,66 +64,58 @@ Point1D & Point1D::operator= (const Point1D & pt)
 //------------------------------------
 //! Default constructor
 Edge1D::Edge1D():
-    _M_pt1(),
-    _M_pt2(),
-    _M_length(0),
-    _M_id(0)
-{}
-
-//! Copy constructor
-Edge1D::Edge1D(const Edge1D & edg) :
-    _M_pt1( edg._M_pt1 ),
-    _M_pt2( edg._M_pt2 ),
-    _M_length( edg._M_length ),
-    _M_id( edg._M_id )
+  _M_pt1(),
+  _M_pt2(),
+  _M_length(0),
+  _M_id(0)
 {}
 
 //! Constructor with two end abscissae
 Edge1D::Edge1D( const Real& x1, const Real& x2, const UInt& id ):
-    _M_pt1(std::min(x1,x2)),
-    _M_pt2(std::max(x2,x1)),
-    _M_length(std::abs(x2-x1)),
-    _M_id(id)
+  _M_pt1(std::min(x1,x2)),
+  _M_pt2(std::max(x2,x1)),
+  _M_length(std::abs(x2-x1)),
+  _M_id(id)
 {
-    ASSERT_PRE(_M_length > 0 ,
-               "The points must be provided with (stricly) increasing absissa.");
+  ASSERT_PRE(_M_length > 0 ,
+	     "The points must be provided with (stricly) increasing absissa.");
 }
 
 //! Constructor with two end abscissae
 Edge1D::Edge1D( const Point1D& pt1, const Point1D& pt2, const UInt& id ):
-    _M_id(id)
+  _M_id(id)
 {
-    if ( Real diff = pt2.x() - pt1.x() > 0 ) {
-        _M_pt1 = pt1;  _M_pt2 = pt2;
-        _M_length = diff;
-    }
-    else {
-        _M_pt1 = pt2;  _M_pt2 = pt1;
-        _M_length = -diff;
-    }
+  if ( Real diff = pt2.x() - pt1.x() > 0 ) {
+    _M_pt1 = pt1;  _M_pt2 = pt2;
+    _M_length = diff;
+  }
+  else {
+    _M_pt1 = pt2;  _M_pt2 = pt1;
+    _M_length = -diff;
+  }
 }
 
 //! operator =
 Edge1D & Edge1D::operator= (const Edge1D & edg)
 {
-    _M_pt1  = edg.pt1();
-    _M_pt2  = edg.pt2();
-    _M_length = edg.length();
-    _M_id   = edg.id();
-    return *this;
+  _M_pt1  = edg.pt1();
+  _M_pt2  = edg.pt2();
+  _M_length = edg.length();
+  _M_id   = edg.id();
+  return *this;
 }
 
 // return one of the end points (i=1 or 2)
 Point1D Edge1D::point( const UInt& i ) const
 {
-    switch(i){
-    case 1:
-        return _M_pt1; break;
-    case 2:
-        return _M_pt2; break;
-    default:
-        ERROR_MSG("Only two end points for an edge (basic Edge1D)");
-    }
+  switch(i){
+  case 1:
+    return _M_pt1; break;
+  case 2:
+    return _M_pt2; break;
+  default:
+    ERROR_MSG("Only two end points for an edge (basic Edge1D)");
+  }
 }
 
 //------------------------------------
@@ -131,72 +123,72 @@ Point1D Edge1D::point( const UInt& i ) const
 //------------------------------------
 //! constructor reading a mesh file: do it!
 BasicOneDMesh::BasicOneDMesh(const std::string& mesh_file,
-                             const std::string& mesh_dir)
+			     const std::string& mesh_dir)
 {}
 
 //! constructor for regular meshes
 BasicOneDMesh::BasicOneDMesh(const Real& xl, const Real& xr,
-                             const UInt& nb_elem):
-    _M_pointList( nb_elem + 1 ),
-    _M_edgeList( nb_elem )
+			     const UInt& nb_elem):
+  _M_pointList( nb_elem + 1 ),
+  _M_edgeList( nb_elem )
 {
-    ASSERT_PRE( nb_elem > 0, "The number of elements must be positive!");
+  ASSERT_PRE( nb_elem > 0, "The number of elements must be positive!");
 
-    Real x_current = xl;
-    Real deltax = ( xr - xl ) / _M_edgeList.size();
-    ASSERT_PRE( deltax > 0 ,
-                "The left point is on the right..." );
+  Real x_current = xl;
+  Real deltax = ( xr - xl ) / _M_edgeList.size();
+  ASSERT_PRE( deltax > 0 ,
+	      "The left point is on the right..." );
 
-    for (UInt it=0; it < _M_pointList.size(); it++)
-        {
-            _M_pointList[it] = Point1D(x_current, it);
-            x_current += deltax;
-        }
-    ASSERT_PRE( std::abs(xr - x_current + deltax ) < 1e-10 * deltax ,
-                "Some problems with the basic 1D mesh build. Check xleft<xright?" );
+  for (UInt it=0; it < _M_pointList.size(); it++)
+    {
+      _M_pointList[it] = Point1D(x_current, it);
+      x_current += deltax;
+    }
+  ASSERT_PRE( std::abs(xr - x_current + deltax ) < 1e-10 * deltax ,
+       "Some problems with the basic 1D mesh build. Check xleft<xright?" );
 
-    for (UInt it=0; it < _M_edgeList.size(); it++)
-        {
-            _M_edgeList[it] = Edge1D(_M_pointList[it],_M_pointList[it+1], it);
-        }
+  for (UInt it=0; it < _M_edgeList.size(); it++)
+    {
+      _M_edgeList[it] = Edge1D(_M_pointList[it],_M_pointList[it+1], it);
+    }
 }
 
 //! return one edge of the list (iedg starts at 1)
 Edge1D BasicOneDMesh::edgeList( const UInt& iedg ) const
 {
-    ASSERT_BD(0 < iedg && iedg < _M_edgeList.size() + 1 );
-    return _M_edgeList[ iedg - 1 ];
+  ASSERT_BD(0 < iedg && iedg < _M_edgeList.size() + 1 );
+  return _M_edgeList[ iedg - 1 ];
 }
 
 //! return the one point of the list (BEWARE: start at 1)
 Point1D BasicOneDMesh::pointList( const UInt& ipt ) const 
 {
-    ASSERT_BD(0 < ipt && ipt < _M_pointList.size() + 1 );
-    return _M_pointList[ ipt - 1 ];
+  ASSERT_BD(0 < ipt && ipt < _M_pointList.size() + 1 );
+  return _M_pointList[ ipt - 1 ];
 }
 
 void BasicOneDMesh::showMe(std::ostream& c, const UInt& verbose)
 {
-    c << "\n*** Basic 1D Mesh \n";
-    c << "number of points = " << numVertices() << "\n";
-    if (verbose > 3) {
-        UInt count(0),lines(10);
-        for (UInt it=0; it < _M_pointList.size(); it++) {
-            if (count++ % lines ==0){
-                c << std::endl;
-            }
-            c << _M_pointList[it].x() << " " << _M_pointList[it].id() << "\t" ;
-        }
+  c << "\n*** Basic 1D Mesh \n";
+  c << "number of points = " << numVertices() << "\n";
+  if (verbose > 3) {
+    UInt count(0),lines(10);
+    for (UInt it=0; it < _M_pointList.size(); it++) {
+      if (count++ % lines ==0){
+	c << std::endl;
+      }
+      c << _M_pointList[it].x() << " " << _M_pointList[it].id() << "\t" ;
     }
-    c << "\nnumber of edges = " << numEdges() << "\n";
-    if (verbose > 3) {
-        for (UInt it=0; it < _M_edgeList.size(); it++) {
-            c << "x1 = " << _M_edgeList[it].pt1().x()
-              << "\tx2 = " << _M_edgeList[it].pt2().x()
-              << "\t" << _M_edgeList[it].id()  << "\n";
-        }
+  }
+  c << "\nnumber of edges = " << numEdges() << "\n";
+  if (verbose > 3) {
+    for (UInt it=0; it < _M_edgeList.size(); it++) {
+      c << "x1 = " << _M_edgeList[it].pt1().x()
+	<< "\tx2 = " << _M_edgeList[it].pt2().x()
+	<< "\t" << _M_edgeList[it].id()  << "\n";
+    }
 
-    }
-    c << "*** End of Basic 1D Mesh \n" << std::endl;
+  }
+  c << "*** End of Basic 1D Mesh \n" << std::endl;
 }
 }

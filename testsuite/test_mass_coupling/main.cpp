@@ -9,6 +9,7 @@
 #include "ud_functions.hpp"
 #include "GetPot.hpp"
 #include "ensight7Writer.hpp"
+#include <vectorNorms.hpp> // - for new version or Christophe will kill me
 
 int main(int argc, char** argv)
 {
@@ -35,12 +36,12 @@ int main(int argc, char** argv)
   Real s = 2.134e-3;
 
 // ********** Boundary conditions definitions for mass transport **************
-  BCFunctionBase c_inflow(c1);
-  BCFunctionMixte c_wall(alpha,beta);   // Permeability boundary condition
-  BCHandler BCh_cl(3);
+  BCFunction_Base c_inflow(c1);
+  BCFunction_Mixte c_wall(alpha,beta);   // Permeability boundary condition
+  BC_Handler BCh_cl(3);
 
-  BCFunctionBase c_adv(cadv);
-  BCHandler BCh_cw(2);
+  BCFunction_Base c_adv(cadv);
+  BC_Handler BCh_cw(2);
 
 // ****** Concentration class lumen: cdrlumen **********************************
   ConvDiffReactSolverPC< RegionMesh3D<LinearHexa> >
@@ -59,30 +60,6 @@ int main(int argc, char** argv)
   Vector cw_interface(dim_cw);
   Vector cl_interface(dim_cl);
 
-  Vector cw_mixte(dim_cw);
-  Vector cl_mixte(dim_cl);
-
-  Vector Pw_var(dim_cw);
-  Vector Pl_var(dim_cl);
-
-// Produce a "hole" in the permeability of the testgeometry (10 times higher permeability)
-
-  for(UInt ii=0; ii < dim_cw; ii++){
-     Pw_var(ii)=P;}
-  for(UInt ii=3; ii < 4; ii++){
-     for(UInt jj=749; jj < 768; jj++){
-	Pw_var(jj+ii*777)=10*P;}}
-
-  for(UInt ii=0; ii < dim_cl; ii++){
-     Pl_var(ii)=P;}
-  for(UInt ii=5; ii < 6; ii++){
-     Pl_var(44+ii*992)=10*P;
-     for(UInt jj=717; jj < 725; jj++){
-	Pl_var(jj+ii*992)=10*P;}
-     Pl_var(45+ii*992)=10*P;
-     for(UInt jj=806; jj < 814; jj++){
-	Pl_var(jj+ii*992)=10*P;}
-     Pl_var(46+ii*992)=10*P;}
 
 //========================================================================================
 //  DATA INTERFACING BETWEEN BOTH SOLVERS
@@ -91,20 +68,13 @@ int main(int argc, char** argv)
 // Passing data from the lumen to the wall
   DofInterface3Dto3D dofLumentoWall(feHexaQ1,cdrwall.cDof(),feHexaQ1,cdrlumen.cDof());
   dofLumentoWall.update(cdrwall.mesh(), 3, cdrlumen.mesh(), 6, tol);
-  BCVectorInterface cl_coupling(cl_interface, dim_cl, dofLumentoWall);
-//  cl_coupling.setMixteCoef((-1.0/epsilon)*(u_filt*(((s*kappa)/2)-Klag)-P));
-  for(UInt ii=0; ii < dim_cl; ii++){
-     cl_mixte(ii)=(-1.0/epsilon)*(u_filt*(((s*kappa)/2)-Klag)-Pl_var(ii));}
-  cl_coupling.setMixteVec( cl_mixte );
-
+  BCVector_Interface cl_coupling(cl_interface, dim_cl, dofLumentoWall);
+  cl_coupling.setMixteCoef((-1.0/epsilon)*(u_filt*(((s*kappa)/2)-Klag)-P));
 // Passing data from the wall to the lumen
   DofInterface3Dto3D dofWalltoLumen(feHexaQ1,cdrlumen.cDof(),feHexaQ1,cdrwall.cDof());
   dofWalltoLumen.update(cdrlumen.mesh(), 6, cdrwall.mesh(), 3, tol);
-  BCVectorInterface cw_coupling(cw_interface, dim_cw, dofWalltoLumen);
-//  cw_coupling.setMixteCoef(P-u_filt*(1.0-((s*kappa)/2)));
-  for(UInt ii=0; ii < dim_cw; ii++){
-     cw_mixte(ii)=Pw_var(ii)-u_filt*(1.0-((s*kappa)/2));}
-  cw_coupling.setMixteVec( cw_mixte );
+  BCVector_Interface cw_coupling(cw_interface, dim_cw, dofWalltoLumen);
+  cw_coupling.setMixteCoef(P-u_filt*(1.0-((s*kappa)/2)));
 
   BCh_cl.addBC("coupling part",   6, Mixte, Scalar, cw_coupling);// Interface to wall part
   BCh_cl.addBC("C-Endothel",   2, Mixte, Scalar, c_wall);        // Permeability boundary condition
@@ -174,20 +144,20 @@ int main(int argc, char** argv)
 	std::cout << iter << std::endl;
 
 	for(UInt ii=0; ii < dim_cw; ii++){
-	   cw_interface(ii)=cdrwall.c()(ii)*(1/epsilon)*(Pw_var(ii)-u_filt*((s*kappa)/2));}
+	   cw_interface(ii)=cdrwall.c()(ii)*(1/epsilon)*(P-u_filt*((s*kappa)/2));}
 
 	cdrlumen.iterate(time);
 
 	for(UInt ii=0; ii < dim_cl; ii++){
-	   cl_interface(ii)=cdrlumen.c()(ii)*(Pl_var(ii)+u_filt*((s*kappa)/2));}
+	   cl_interface(ii)=cdrlumen.c()(ii)*(P+u_filt*((s*kappa)/2));}
 
 	cdrwall.iterate(time);
 
 	cw_delta=cdrwall.c()-cw_old;
 	cl_delta=cdrlumen.c()-cl_old;
 
-	std::cout << "difference in the wall: " << norm_inf(cw_delta) << std::endl;
-	std::cout << "difference in the lumen: " << norm_inf(cl_delta) << std::endl;
+	std::cout << "difference in the wall: " << maxnorm(cw_delta) << std::endl;
+	std::cout << "difference in the lumen: " << maxnorm(cl_delta) << std::endl;
 
 	cw_old=cdrwall.c();
 	cl_old=cdrlumen.c();

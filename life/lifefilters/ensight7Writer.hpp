@@ -20,7 +20,7 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+*/ 
 /**
    \file ensight7Writer.hpp
    \author Martin Prosi <martin.prosi@epfl.ch>
@@ -68,12 +68,8 @@ private:
 };
 
 
-
 template <typename RegionMesh3D>
-bool outensight7Mesh3D( RegionMesh3D const & mesh,
-                        PhysVectUnknown<Vector> const& u,
-                        ScalUnknown<Vector> const & p,
-                        Real const & time )
+bool outensight7Mesh3D( RegionMesh3D & mesh, PhysVectUnknown<Vector> & u, ScalUnknown<Vector> & p, Real & time )
 {
 
     std::vector<Coord> grid; // coordinates of Grid nodes
@@ -160,8 +156,7 @@ bool outensight7Mesh3D( RegionMesh3D const & mesh,
     {
         for ( ID j = 0; j < mesh.numLocalVertices(); j++ )
         {
-            int __id = mesh.volume( k + 1 ).point( j + 1 ).id();
-            File3.write( ( char * ) & __id , sizeof( ID ) );
+            File3.write( ( char * ) & mesh.volume( k + 1 ).point( j + 1 ).id(), sizeof( ID ) );
         }
     }
 

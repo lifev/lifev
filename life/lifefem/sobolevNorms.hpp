@@ -18,9 +18,6 @@
 */
 #ifndef _SOBOLEVNORMS_H_INCLUDED
 #define _SOBOLEVNORMS_H_INCLUDED
-
-#include <boost/function.hpp>
-
 #include "lifeV.hpp"
 #include "dof.hpp"
 #include "currentFE.hpp"
@@ -28,9 +25,8 @@
 namespace LifeV
 {
 //! returns the square of the L2 norm of u on the current element
-template <typename VectorType>
-Real
-elem_L2_2( const VectorType & u, const CurrentFE& fe, const Dof& dof )
+template <typename VectorType, typename DOF>
+Real elem_L2_2( const VectorType & u, const CurrentFE& fe, const DOF& dof )
 {
     int i, inod, ig;
     UInt eleID = fe.currentId();
@@ -49,16 +45,15 @@ elem_L2_2( const VectorType & u, const CurrentFE& fe, const Dof& dof )
 }
 
 //! version for vectorial problem
-template <typename VectorType>
-Real
-elem_L2_2( const VectorType & u, const CurrentFE& fe, const Dof& dof,
-           const int nbcomp )
+template <typename VectorType, typename DOF>
+Real elem_L2_2( const VectorType & u, const CurrentFE& fe, const DOF& dof,
+                const int nbcomp )
 {
     int i, inod, ig;
     UInt eleID = fe.currentId();
     UInt ic;
     Real s = 0, u_ig;
-    for ( ic = 0; ic < (UInt)nbcomp; ic++ )
+    for ( ic = 0; ic < nbcomp; ic++ )
     {
         for ( ig = 0;ig < fe.nbQuadPt;ig++ )
         {
@@ -75,9 +70,8 @@ elem_L2_2( const VectorType & u, const CurrentFE& fe, const Dof& dof,
 }
 
 //! returns the square of the L2 norm of fct on the current element
-Real
-elem_L2_2( boost::function<double( double,double,double )> fct,
-           const CurrentFE& fe )
+template <typename UsrFct>
+Real elem_L2_2( const UsrFct& fct, const CurrentFE& fe )
 {
     Real s = 0., f, x, y, z;
     for ( int ig = 0;ig < fe.nbQuadPt;ig++ )
@@ -90,9 +84,9 @@ elem_L2_2( boost::function<double( double,double,double )> fct,
 }
 
 //! for time dependent+vectorial.
-Real
-elem_L2_2( boost::function<double( double, double, double, double, UInt )> fct,
-           const CurrentFE& fe, const Real t, const UInt nbcomp )
+template <typename UsrFct>
+Real elem_L2_2( const UsrFct& fct, const CurrentFE& fe, const Real t,
+                const UInt nbcomp )
 {
     int ig;
     UInt ic;
@@ -110,9 +104,8 @@ elem_L2_2( boost::function<double( double, double, double, double, UInt )> fct,
 }
 
 //! returns the square of the H1 semi-norm of u on the current element
-template <typename VectorType>
-Real
-elem_H1_2( const VectorType & u, const CurrentFE& fe, const Dof& dof )
+template <typename VectorType, typename DOF>
+Real elem_H1_2( const VectorType & u, const CurrentFE& fe, const DOF& dof )
 {
     int i, inod, ig;
     UInt eleID = fe.currentId();
@@ -138,9 +131,8 @@ elem_H1_2( const VectorType & u, const CurrentFE& fe, const Dof& dof )
 }
 
 //! returns the square of the H1 semi-norm of fct on the current element
-template<typename UsrFct>
-Real
-elem_H1_2( const UsrFct& fct, const CurrentFE& fe )
+template <typename UsrFct>
+Real elem_H1_2( const UsrFct& fct, const CurrentFE& fe )
 {
     Real s = 0., s1 = 0., f, fx, fy, fz, x, y, z;
     for ( int ig = 0;ig < fe.nbQuadPt;ig++ )
@@ -179,11 +171,9 @@ Real elem_H1_2( const UsrFct& fct, const CurrentFE& fe, const Real t, const UInt
 
 
 //! returns the square of the L2 norm of (u-fct) on the current element
-template <typename VectorType>
-Real elem_L2_diff_2( VectorType & u,
-                     boost::function<double( double, double, double )> fct,
-                     const CurrentFE& fe,
-                     const Dof& dof )
+template <typename VectorType, typename UsrFct, typename DOF>
+Real elem_L2_diff_2( VectorType & u, UsrFct& fct, const CurrentFE& fe,
+                     const DOF& dof )
 {
     int i, inod, ig;
     UInt eleID = fe.currentId();
@@ -203,13 +193,10 @@ Real elem_L2_diff_2( VectorType & u,
     return s;
 }
 
-//! returns the square of the L2 norm of (u-fct) on the current element
 //! for time dependent+vectorial
-template <typename VectorType>
-Real elem_L2_diff_2( VectorType & u,
-                     boost::function<double( double, double, double, double, UInt )> fct,
-                     const CurrentFE& fe,
-                     const Dof& dof, const Real t, const int nbcomp )
+template <typename VectorType, typename UsrFct, typename DOF>
+Real elem_L2_diff_2( VectorType & u, UsrFct& fct, const CurrentFE& fe,
+                     const DOF& dof, const Real t, const int nbcomp )
 {
     // returns the square of the L2 norm of (u-fct) on the current element
     int i, inod, ig;
@@ -235,9 +222,9 @@ Real elem_L2_diff_2( VectorType & u,
 }
 
 //! returns the square of the H1 semi-norm of (u-fct) on the current element
-template <typename VectorType, typename UsrFct>
+template <typename VectorType, typename UsrFct, typename DOF>
 Real elem_H1_diff_2( const VectorType & u, const UsrFct& fct, const CurrentFE& fe,
-                     const Dof& dof )
+                     const DOF& dof )
 {
     int i, inod, ig;
     UInt eleID = fe.currentId();
@@ -273,9 +260,9 @@ Real elem_H1_diff_2( const VectorType & u, const UsrFct& fct, const CurrentFE& f
 }
 
 //! returns the square of the H1 semi-norm of (u-fct) on the current element  (time-dependent case)
-template <typename VectorType, typename UsrFct>
+template <typename VectorType, typename UsrFct, typename DOF>
 Real elem_H1_diff_2( const VectorType & u, const UsrFct& fct, const CurrentFE& fe,
-                     const Dof& dof, const Real t, const UInt nbcomp )
+                     const DOF& dof, const Real t, const UInt nbcomp )
 {
     int i, inod, ig;
     UInt ic;
@@ -313,57 +300,5 @@ Real elem_H1_diff_2( const VectorType & u, const UsrFct& fct, const CurrentFE& f
     }
     return s;
 }
-
-//! returns the integral of (u-fct) on the current element
-//! for time dependent+vectorial
-template <typename VectorType>
-Real elem_integral_diff( VectorType & u,
-                         boost::function<double( double, double, double, double, UInt )> fct,
-                         const CurrentFE& fe,
-                         const Dof& dof, const Real t, const int nbcomp )
-{
-    int i, inod, ig;
-    UInt eleID = fe.currentId();
-    int ic;
-    Real s = 0., u_ig, u_minus_f, x, y, z;
-    for ( ig = 0;ig < fe.nbQuadPt;ig++ )
-    {
-        fe.coorQuadPt( x, y, z, ig );
-        for ( ic = 0; ic < nbcomp; ic++ )
-        {
-            u_ig = 0.;
-            for ( i = 0;i < fe.nbNode;i++ )
-            {
-                inod = dof.localToGlobal( eleID, i + 1 )
-                    - 1 + ic * dof.numTotalDof();
-                u_ig += u( inod ) * fe.phi( i, ig );
-            }
-            u_minus_f = u_ig - fct( t, x, y, z, ic + 1 );
-            s += u_minus_f * fe.weightDet( ig );
-        }
-    }
-    return s;
 }
-
-//! returns the integral of fct on the current element
-//! for time dependent+vectorial
-Real elem_integral( boost::function<double( double, double, double,
-                                            double, UInt )> fct,
-                    const CurrentFE& fe, const Real t, const int nbcomp )
-{
-    int ig;
-    int ic;
-    Real s = 0., x, y, z;
-    for ( ig = 0;ig < fe.nbQuadPt;ig++ )
-    {
-        fe.coorQuadPt( x, y, z, ig );
-        for ( ic = 0; ic < nbcomp; ic++ )
-        {
-            s += fct( t, x, y, z, ic + 1 ) * fe.weightDet( ig );
-        }
-    }
-    return s;
-}
-
-} // namespace LifeV
 #endif

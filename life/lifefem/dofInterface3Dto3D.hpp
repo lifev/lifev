@@ -39,22 +39,22 @@
 #include "tab.hpp"
 #include "markers.hpp"
 #include "currentBdFE.hpp"
-#include <ext/slist>
+#include <ext/slist> 
 //using namespace __gnu_cxx;
 
 namespace LifeV
 {
 /*!
   \class DofInterface3Dto3D
-
+ 
   Base class which holds the conections of the dof in two matching meshes
-
+ 
   In order to hold the interface conections the user must give the
   RefFE elements and Dof used in both meshes.  The connections may be
   built by calling the update method. An interpolate method has been
   provided in order to interpolate data at the interface.Finally
   method getInterfaceDof gives the connections.
-
+ 
 */
 class DofInterface3Dto3D:
             public DofInterfaceBase
@@ -107,7 +107,7 @@ public:
     //! for a specific dof number at the interface in mesh1
     /*!
       \param i a dof number in mesh1
-    */
+    */ 
     // ID getInterfaceDof(const ID& i) const;
 
 private:
@@ -494,7 +494,7 @@ void DofInterface3Dto3D::update( Mesh& mesh1, const EntityFlag& flag1,
   \param mesh2 the mesh which provides de data at the interface
   \param v the data vector on mesh2 holding dofs of type refFE1
   \param vI the interpolated data vector on mesh2 holding dofs of type refFE2
-
+ 
   \note We should use this method ONLY when the acuracy of the data is less that
   the accuracy of the unknowns on mesh1, i.e., when refFE1 is more accurate
   than refFE2

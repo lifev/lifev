@@ -30,106 +30,106 @@ namespace LifeV
   \file medit_wrtrs.h
   \author J.-F. Gerbeau & V. Martin
   \date 04/11/2002 - 27/02/2003
-
+ 
   \note Miguel 11/2002: writer for mesh
-
+ 
   \brief Write a mesh (Inria medit format ("toto.mesh")),
   and the solution (Inria medit format ("OUTtoto.bb").
-
+ 
   Also read a solution given in the Inria medit format.
   ("INtoto.bb")
 */
 
 /*!
   A simple medit scalar writer.
-
+ 
   \param fname : name of the solution file.
   \warning medit assumes that, if the mesh file is name.mesh,
   the solution file is name.bb
-
+ 
   \param U : the array containing the solution
-
+ 
   \param Usize : the size of U
-
+ 
   \param type : 1 -> solution given per element
   2 -> solution given per vertex (default)
-
+ 
   \par Example of call:
   ScalUnknown<Vector> pressure(nbDof);
   wr_medit_ascii_scalar("meshname.bb",pressure.giveVec(),pressure.size());
 */
 
-void wr_medit_ascii_scalar( std::string fname, Real const* U, int Usize, int type = 2 );
+void wr_medit_ascii_scalar( std::string fname, Real* U, int Usize, int type = 2 );
 
 /*!
   A simple medit vector writer.
-
+ 
   \param fname : name of the solution file.
   \warning medit assumes that, if the mesh file is name.mesh,
   the solution file is name.bb
-
+ 
   \param U : the array containing the solution
-
+ 
   \param Usize : the size of U
-
+ 
   \param type : 1 -> solution given per element
   2 -> solution given per vertex (default)
-
+ 
   \par Example of call:
   PhysVectUnknown<Vector> velocity(nbDof);
   wr_medit_ascii_vector("meshname.bb",velocity.giveVec(),velocity.size());
 */
-void wr_medit_ascii_vector( std::string fname, Real const* U, int Usize, int type = 2 );
+void wr_medit_ascii_vector( std::string fname, Real* U, int Usize, int type = 2 );
 
 /*!
   A simple medit scalar reader.
   It does NOT change the size of the given vector!
-
+ 
   \param fname : name of the solution file.
   \warning medit assumes that, if the mesh file is name.mesh,
   the solution file is name.bb
-
+ 
   \param U : the array containing the solution.
   The array must be correctly initialized previously.
-
+ 
   \param Usize : the size of U (correctly set.)
-
+ 
   \param type : 1 -> solution given per element
   2 -> solution given per vertex (default)
-
+ 
   \par Example of call:
   ScalUnknown<Vector> pressure(nbDof);
   wr_medit_ascii_scalar("meshname.bb",pressure.giveVec(),pressure.size());
 */
 
-void rd_medit_ascii_scalar( std::string fname, Real * U, const UInt& Usize, UInt& type );
+void rd_medit_ascii_scalar( std::string fname, Real* U, const UInt& Usize, UInt& type );
 
 /*!
   A simple medit vector reader.
   It does NOT change the size of the given vector!
-
+ 
   \param fname : name of the solution file.
   \warning medit assumes that, if the mesh file is name.mesh,
   the solution file is name.bb
-
+ 
   \param U : the array containing the solution
   The array must be correctly initialized previously.
-
+ 
   \param Usize : the size of U (correctly set.)
-
+ 
   \param type : 1 -> solution given per element
   2 -> solution given per vertex (default)
-
+ 
   \par Example of call:
   PhysVectUnknown<Vector> velocity(nbDof);
   wr_medit_ascii_vector("meshname.bb",velocity.giveVec(),velocity.size());
 */
-void rd_medit_ascii_vector( std::string fname, Real * U, const UInt& Usize, UInt& type );
+void rd_medit_ascii_vector( std::string fname, Real* U, const UInt& Usize, UInt& type );
 
 
 /*!
   A simple medit mesh writer.
-
+ 
   \param fname : name of the mesh file.
   \param mesh : the Mesh object
 */
@@ -215,7 +215,7 @@ void wr_medit_ascii( std::string fname, const Mesh& mesh )
 
 /*!
   A medit mesh writer.
-
+ 
   \param fname : name of the mesh file.
   \param mesh : the Mesh object
 */
@@ -301,7 +301,7 @@ void wr_medit_ascii( std::string fname, const Mesh& mesh, const Vector& disp, co
 
 /*!
   A medit mesh writer.
-
+ 
   \param fname : name of the mesh file.
   \param mesh : the Mesh object
 */

@@ -84,15 +84,15 @@ void DofInterfaceHandler::initVectors()
 }
 
 //! creates the list of BC Vectors
-void DofInterfaceHandler::initBCVectorInterface()
+void DofInterfaceHandler::initBCVector_Interface()
 {
     ASSERT_PRE( _nbNeigh != _bcvList.size() || _nbNeigh == 0 , "The list of BC Vectors in the Handler is full." );
-    ASSERT_PRE( _nbNeigh == _InIBCList.size(), "The list of InIBC Vectors in the Handler should be initialized before calling initBCVectorInterface." );
-    ASSERT_PRE( _nbNeigh == _OutIBCList.size(), "The list of OutIBC Vectors in the Handler should be initialized before calling initBCVectorInterface." );
+    ASSERT_PRE( _nbNeigh == _InIBCList.size(), "The list of InIBC Vectors in the Handler should be initialized before calling initBCVector_Interface." );
+    ASSERT_PRE( _nbNeigh == _OutIBCList.size(), "The list of OutIBC Vectors in the Handler should be initialized before calling initBCVector_Interface." );
     for ( UInt iter = 0 ; iter < _nbNeigh ; ++iter )
     {
-        ASSERT_PRE( _neighList[ iter ].finalized(), "The DofInterface3Dto2D should be updated before calling initBCVectorInterface." );
-        _bcvList.push_back( BCVectorInterface( _InIBCList[ iter ], _neighList[ iter ].nbInterfaceDof(), _neighList[ iter ] ) );
+        ASSERT_PRE( _neighList[ iter ].finalized(), "The DofInterface3Dto2D should be updated before calling initBCVector_Interface." );
+        _bcvList.push_back( BCVector_Interface( _InIBCList[ iter ], _neighList[ iter ].nbInterfaceDof(), _neighList[ iter ] ) );
     }
 
 }
@@ -195,12 +195,12 @@ Vector & DofInterfaceHandler::OutIBC_byRefInterf( const Int & refinterf )
 
 
 //! extracting a BCVector in the _bcvList list (starts from 0)
-const BCVectorInterface &DofInterfaceHandler:: BCvec( const UInt & i ) const
+const BCVector_Interface &DofInterfaceHandler:: BCvec( const UInt & i ) const
 {
     ASSERT_PRE( _nbNeigh == _bcvList.size(), "Some BC Vectors have not been added to the list" );
     return _bcvList[ i ];
 }
-BCVectorInterface & DofInterfaceHandler::BCvec( const UInt & i )
+BCVector_Interface & DofInterfaceHandler::BCvec( const UInt & i )
 {
     ASSERT_PRE( _nbNeigh == _bcvList.size(), "Some BC Vectors have not been added to the list" );
     return _bcvList[ i ];

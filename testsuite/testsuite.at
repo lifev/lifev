@@ -27,6 +27,9 @@
 # 
 AT_INIT([lifev testsuite])
 
+AT_BANNER([test_netgen test using netgen meshes])
+m4_include([test_netgen/testsuite.at])
+
 #lifecore tests
 m4_include([lifecore/testsuite.at])
 
@@ -46,7 +49,6 @@ m4_include([test_p2/testsuite.at])
 m4_include([test_q1/testsuite.at])
 m4_include([test_fe/testsuite.at])
 m4_include([test_mixte/testsuite.at])
-m4_include([test_dg/testsuite.at])
 
 # solver tests
 AT_BANNER([life/lifesolver testsuite ...])
@@ -56,12 +58,12 @@ m4_include([test_essentialbc/testsuite.at])
 m4_include([test_naturalbc/testsuite.at])
 m4_include([test_onedmodel/testsuite.at])
 m4_include([test_darcy/testsuite.at])
+m4_include([test_darcytetra/testsuite.at])
 m4_include([test_linearelasticity/testsuite.at])
 m4_include([test_bdf/testsuite.at])
 m4_include([test_ns_bdf/testsuite.at])
 m4_include([test_ns_bcvec/testsuite.at])
 m4_include([test_ns_cyl/testsuite.at])
-m4_include([test_ns_cyl_flux/testsuite.at])
 m4_include([test_ns_ipstab/testsuite.at])
 
 AT_BANNER([test_ns_sstress test is broken, skipping/disabling it for now])
@@ -74,7 +76,7 @@ AT_BANNER([test_fsi_dd not ready yet, skipping/disabling it for now])
 #m4_include([test_fsi_picard/testsuite.at])
 #m4_include([test_fsi_dd/testsuite.at])
 
+
 m4_include([test_masstransport/testsuite.at])
 m4_include([test_mass_coupling/testsuite.at])
 
-m4_include([test_coupling_3d0d/testsuite.at])

@@ -166,10 +166,13 @@ public:
     inline bool isMarkerUnset() const;
 
     //! Put marker to nullflag
-    inline bool unsetMarker() const;
+    inline void unsetMarker() const;	//meneghin: put marker to nullflag
+    					// is not what it did
+//    inline bool unsetMarker() const;
 
     //! Put marker to nullflag
-    inline bool markerUnset() const;
+    inline void markerUnset() const;	//meneghin: and this too
+//    inline bool markerUnset() const;
 
     //! Helper function that prints a marker Flag
     std::ostream & printFlag( EntityFlag const f, std::ostream & out ) const;
@@ -284,7 +287,8 @@ typename MarkerTraits::EntityFlag Marker_Base<MarkerTraits>::setWeakerMarker( En
 template <typename MarkerTraits>
 typename MarkerTraits::EntityFlag Marker_Base<MarkerTraits>::setStrongerMarker( EntityFlag const & p )
 {
-    if ( markerUnset() )
+    if ( isMarkerUnset() )		//meneghin
+//    if ( markerUnset() )
         return flag = p;
     return setMarker( MarkerTraits::strongerFlag( this->marker(), p ) );
 }
@@ -292,7 +296,8 @@ typename MarkerTraits::EntityFlag Marker_Base<MarkerTraits>::setStrongerMarker( 
 template <typename MarkerTraits>
 typename MarkerTraits::EntityFlag Marker_Base<MarkerTraits>::setWeakerMarker( EntityFlag const & p )
 {
-    if ( markerUnset() )
+    if ( isMarkerUnset() )		//meneghin
+//    if ( markerUnset() )
         return flag = p;
     return setMarker( MarkerTraits::weakerFlag( this->marker(), p ) );
 }
@@ -310,16 +315,20 @@ bool Marker_Base<MarkerTraits>::isMarkerUnset() const
 }
 
 template <typename MarkerTraits>
-bool Marker_Base<MarkerTraits>::unsetMarker() const
+void Marker_Base<MarkerTraits>::unsetMarker() const	//meneghin: what
+//bool Marker_Base<MarkerTraits>::unsetMarker() const	// doc says
 {
-    return isMarkerUnset();
+    flag=nullFlag();
+//    return isMarkerUnset();
 }
 
 
 template <typename MarkerTraits>
-bool Marker_Base<MarkerTraits>::markerUnset() const
+void Marker_Base<MarkerTraits>::markerUnset() const	//meneghin
+//bool Marker_Base<MarkerTraits>::markerUnset() const
 {
-    return isMarkerUnset();
+    flag=nullFlag();
+//    return isMarkerUnset();
 }
 
 template <typename MarkerTraits>

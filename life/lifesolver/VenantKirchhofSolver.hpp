@@ -15,16 +15,16 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+*/ 
 /*!
   \file VenantKirchhofSolver.h
   \author M.A. Fernandez
   \date 6/2003
   \version 1.0
-
+ 
   \brief
   This file contains solvers for St. Venant-Kirchhof materials (linear for the moment)
-
+ 
 */
 #ifndef _VENANTKIRCHHOFSOLVER_H_
 #define _VENANTKIRCHHOFSOLVER_H_
@@ -36,8 +36,8 @@
 #include "values.hpp"
 #include "pattern.hpp"
 #include "assemb.hpp"
-#include "bcManage.hpp"
-#include "bcHandler.hpp"
+#include "bc_manage.hpp"
+#include "bcCond.hpp"
 #include "chrono.hpp"
 #include "dataAztec.hpp"
 #include "dataNewton.hpp"
@@ -48,12 +48,12 @@ namespace LifeV
 
 /*!
   \class VenantKirchhofSolver
-
+ 
   \brief
   This class solves the linear elastodynamics equations for a (only linear right now)
   St. Venant-Kirchoff material
-
-
+ 
+ 
 */
 template <typename Mesh>
 class VenantKirchhofSolver:
@@ -63,7 +63,6 @@ class VenantKirchhofSolver:
 public:
 
     typedef typename ElasticStructureHandler<Mesh>::Function Function;
-    typedef typename ElasticStructureHandler<Mesh>::source_type source_type;
 
     //! Constructor
     /*!
@@ -74,46 +73,38 @@ public:
       \param BCh boundary conditions for the displacement
     */
     VenantKirchhofSolver( const GetPot& data_file, const RefFE& refFE, const QuadRule& Qr,
-                          const QuadRule& bdQr, BCHandler& BCh );
+                          const QuadRule& bdQr, BC_Handler& BCh );
 
     //! Update the right  hand side  for time advancing
     /*!
       \param source volumic source
       \param time present time
     */
-    void timeAdvance( source_type const& source, const Real& time );
+    void timeAdvance( const Function source, const Real& time );
 
     //! Solve the non-linear system
     void iterate();
-    void iterate(Vector &_sol);
 
     //! Output
     void showMe( std::ostream& c = std::cout ) const;
 
-    //! getters
-
-    //! BCHandler getter and setter
-
-    BCHandler const & BC_solid() const {return _BCh;}
-    void setBCSolid(const BCHandler &_BCd) {_BCh = _BCd;}
     //! residual getter
-    Vector& residual() {return _residual_d;}
 
-    //! recur setter
+    Vector& residual()
+    {
+        return _residual_d;
+    };
 
-    void setRecur(UInt recur) {_recur = recur;}
-
-    void updateJac( Vector& sol, int iter );
-
-    //! solves the tangent problem for newton iterations
-    void solveJac( Vector &step, const Vector& res, double& linear_rel_tol);
-//    void solveJac( const Vector& res, double& linear_rel_tol, Vector &step);
-    //! solves the tangent problem with custom BC
-//    void solveJac( const Vector& res, double& linear_rel_tol, Vector &step, BCHandler &_BCd );
-    void solveJac( Vector &step, const Vector& res, double& linear_rel_tol, BCHandler &_BCd );
-
-    //! evaluates residual for newton interations
-    void evalResidual( Vector &res, const Vector& sol, int iter);
+    //! friends classes related to the newton solver
+    template <class Fct, class Vector, class Real, class Norm>
+    friend int newton( Vector& sol, Fct& f, Norm& norm, Real abstol, Real reltol, int& maxit,
+                       Real eta_max, int linesearch, std::ofstream& out_res, const Real& time );
+    template <class Fct, class Vector, class Real, class Norm>
+    friend void lineSearch_cubic( Fct& f, Norm& norm, Vector& residual, Vector& sol, Vector& step,
+                                  Real& normRes, Real& lambda, Real slope, int iter );
+    template <class Fct, class Vector, class Real, class Norm>
+    friend void lineSearch_parab( Fct& f, Norm& norm, Vector& residual, Vector& sol, Vector& step, Real& normRes,
+                                  Real& lambda, int iter );
 
 private:
 
@@ -166,8 +157,14 @@ private:
     //! data for solving tangent problem with aztec
     DataAztec _dataAztec;
 
+    //! evaluates residual for newton interations
+    void evalResidual( Vector&res, const Vector& sol, int iter );
 
     //! updates the tangent matrix for newton iterations
+    void updateJac( Vector& sol, int iter );
+
+    //! solves the tangent problem for newton iterations
+    void solveJac( Vector& step, const Vector& res, double& linear_rel_tol );
 
     //! files for lists of iterations and residuals per timestep
     std::ofstream _out_iter;
@@ -178,6 +175,9 @@ private:
 
     //! level of recursion for Aztec (has a sens with FSI coupling)
     UInt _recur;
+
+    friend class operFS;
+
 };
 
 
@@ -187,7 +187,7 @@ private:
 template <typename Mesh>
 VenantKirchhofSolver<Mesh>::
 VenantKirchhofSolver( const GetPot& data_file, const RefFE& refFE, const QuadRule& Qr,
-                      const QuadRule& bdQr, BCHandler& BCh ) :
+                      const QuadRule& bdQr, BC_Handler& BCh ) :
         ElasticStructureHandler<Mesh>( data_file, refFE, Qr, bdQr, BCh ),
         DataNewton( data_file, "solid/newton" ),
         _pattM_block( this->_dof ),
@@ -269,11 +269,12 @@ VenantKirchhofSolver( const GetPot& data_file, const RefFE& refFE, const QuadRul
 
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
+
 }
 
 template <typename Mesh>
 void VenantKirchhofSolver<Mesh>::
-timeAdvance( source_type const& source, const Real& time )
+timeAdvance( const Function source, const Real& time )
 {
 
     UInt ig;
@@ -330,7 +331,7 @@ timeAdvance( source_type const& source, const Real& time )
     }
 
     // Right hand side for the velocity at time
-    _rhsWithoutBC = ZeroVector( _rhsWithoutBC.size() );
+    _rhsWithoutBC = 0.;
 
     // loop on volumes: assembling source term
     for ( UInt i = 1; i <= _mesh.numVolumes(); ++i )
@@ -348,9 +349,7 @@ timeAdvance( source_type const& source, const Real& time )
     }
 
     // right hand side without boundary load terms
-    Vector __z = this->_d + this->_dt * _w;
-    //_rhsWithoutBC += _M * ( this->_d + this->_dt * _w );
-    _rhsWithoutBC += _M * __z;
+    _rhsWithoutBC += _M * ( this->_d + this->_dt * _w );
     _rhsWithoutBC -= _K * this->_d;
 
     _rhs_w = ( 2.0 / this->_dt ) * this->_d + _w;
@@ -371,7 +370,7 @@ iterate()
 
     int maxiter = _maxiter;
 
-    status = newton( this->_d, *this, norm_inf_adaptor(), _abstol, _reltol, maxiter, _etamax, ( int ) _linesearch, _out_res, _time );
+    status = newton( this->_d, *this, maxnorm, _abstol, _reltol, maxiter, _etamax, ( int ) _linesearch, _out_res, _time );
 
     if ( status == 1 )
     {
@@ -386,39 +385,10 @@ iterate()
 
     _w = ( 2.0 / this->_dt ) * this->_d - _rhs_w;
 
-    _residual_d = -1*(_C*this->_d);
-//    _residual_d = -1.*_residual_d;
+    _residual_d = _K * this->_d - _rhs;
+
 }
 
-template <typename Mesh>
-void VenantKirchhofSolver<Mesh>::
-iterate(Vector &_sol)
-{
-
-    int status;
-
-    int maxiter = _maxiter;
-
-    status = newton( _sol, *this, norm_inf_adaptor(), _abstol, _reltol, maxiter, _etamax, ( int ) _linesearch, _out_res, _time );
-
-    if ( status == 1 )
-    {
-        std::cout << "Inners iterations failed\n";
-        exit( 1 );
-    }
-    else
-    {
-        std::cout << "Number of inner iterations       : " << maxiter << std::endl;
-        _out_iter << _time << " " << maxiter << std::endl;
-    }
-
-    _w = ( 2.0 / this->_dt ) * this->_d - _rhs_w;
-
-    std::cout << "sol norm = " << norm(_sol) << std::endl;
-
-    _residual_d = -1*(_C*_sol);// - _rhsWithoutBC;
-//    _residual_d = -1.*_residual_d;
-}
 
 
 template <typename Mesh>
@@ -432,12 +402,12 @@ showMe( std::ostream& c ) const
 
 template <typename Mesh>
 void VenantKirchhofSolver<Mesh>::
-evalResidual( Vector &res, const Vector& sol, int iter)
-//evalResidual( const Vector& sol, int iter, Vector &res )
+evalResidual( Vector&res, const Vector& sol, int iter )
 {
 
 
     std::cout << "O-    Computing residual... ";
+
 
     Chrono chrono;
     chrono.start();
@@ -491,17 +461,16 @@ evalResidual( Vector &res, const Vector& sol, int iter)
 
     if ( !_BCh.bdUpdateDone() )
         _BCh.bdUpdate( _mesh, _feBd, this->_dof );
-
-    bcManageMatrix( _K, _mesh, this->_dof, _BCh, _feBd, 1.0 );
+    bc_manage_matrix( _K, _mesh, this->_dof, _BCh, _feBd, 1.0 );
 
     _rhs = _rhsWithoutBC;
-
-    bcManageVector( _rhs, _mesh, this->_dof, _BCh, _feBd, _time, 1.0 );
+    bc_manage_vector( _rhs, _mesh, this->_dof, _BCh, _feBd, _time, 1.0 );
 
     res = _K * sol - _rhs;
 
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
+
 }
 
 
@@ -510,7 +479,9 @@ template <typename Mesh>
 void VenantKirchhofSolver<Mesh>::
 updateJac( Vector& sol, int iter )
 {
-    std::cout << "    o-  Solid: Updating JACOBIAN in iter " << iter << std::endl << "  ... ";
+
+
+    std::cout << "    o-  Updating JACOBIAN in iter " << iter << std::endl << "  ... ";
 
     Chrono chrono;
     chrono.start();
@@ -521,7 +492,6 @@ updateJac( Vector& sol, int iter )
 
     if ( _maxiter > 1 )
     {
-        std::cout << " ******** non linear part" << std::endl;
 
         UInt ig;
 
@@ -531,6 +501,7 @@ updateJac( Vector& sol, int iter )
         // loop on volumes: assembling source term
         for ( UInt i = 1; i <= _mesh.numVolumes(); ++i )
         {
+
             _fe.updateFirstDerivQuadPt( _mesh.volumeList( i ) );
 
             _elmatK.zero();
@@ -556,15 +527,14 @@ updateJac( Vector& sol, int iter )
             for ( UInt ic = 0; ic < nc; ++ic )
                 for ( UInt jc = 0; jc < nc; jc++ )
                     assemb_mat( _J, _elmatK, _fe, this->_dof, ic, jc );
+
         }
+
     }
-//     if (iter == 1)
-//     {
-//         _J.spy("Jacobian");
-//     }
 
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
+
 }
 
 
@@ -572,8 +542,7 @@ updateJac( Vector& sol, int iter )
 
 template <typename Mesh>
 void VenantKirchhofSolver<Mesh>::
-//solveJac( const Vector& res, double& linear_rel_tol, Vector &step)
-solveJac( Vector &step, const Vector& res, double& linear_rel_tol)
+solveJac( Vector& step, const Vector& res, double& linear_rel_tol )
 {
 
     Chrono chrono;
@@ -590,91 +559,9 @@ solveJac( Vector &step, const Vector& res, double& linear_rel_tol)
     if ( !_BCh.bdUpdateDone() )
         _BCh.bdUpdate( _mesh, _feBd, this->_dof );
 
-    bcManageMatrix( _J, _mesh, this->_dof, _BCh, _feBd, tgv );
+    bc_manage_matrix( _J, _mesh, this->_dof, _BCh, _feBd, tgv );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
-
-    // AZTEC specifications for the first system
-    int data_org[ AZ_COMM_SIZE ];   // data organisation for C
-    int proc_config[ AZ_PROC_SIZE ]; // Processor information:
-    int options[ AZ_OPTIONS_SIZE ]; // Array used to select solver options.
-    double params[ AZ_PARAMS_SIZE ];   // User selected solver paramters.
-    double status[ AZ_STATUS_SIZE ];   // Information returned from AZ_solve()
-    // indicating success or failure.
-    AZ_set_proc_config( proc_config, AZ_NOT_MPI );
-
-    //AZTEC matrix and preconditioner
-    AZ_MATRIX *J;
-    AZ_PRECOND *prec_J;
-
-    int N_eq = 3 * this->_dim; // number of DOF for each component
-    // data_org assigned "by hands" while no parallel computation is performed
-    data_org[ AZ_N_internal ] = N_eq;
-    data_org[ AZ_N_border ] = 0;
-    data_org[ AZ_N_external ] = 0;
-    data_org[ AZ_N_neigh ] = 0;
-    data_org[ AZ_name ] = 0;
-
-    // create matrix and preconditionner
-    J = AZ_matrix_create( N_eq );
-    prec_J = AZ_precond_create( J, AZ_precondition, NULL );
-
-    AZ_set_MSR( J, ( int* ) _pattK.giveRaw_bindx(),
-                ( double* ) _J.giveRaw_value(),
-                data_org, 0, NULL, AZ_LOCAL );
-
-    _dataAztec.aztecOptionsFromDataFile( options, params );
-
-    options[ AZ_recursion_level ] = _recur;
-
-
-    //keep  factorisation and preconditioner reused in my_matvec
-    // options_i[AZ_keep_info]= 1;
-
-    //params[AZ_tol]       = linear_rel_tol;
-
-    std::cout << "  o-  Solving system...  ";
-    chrono.start();
-    AZ_iterate( &step[ 0 ], _f.giveVec(), options, params, status,
-                proc_config, J, prec_J, NULL );
-    chrono.stop();
-    std::cout << "done in " << chrono.diff() << " s." << std::endl;
-
-    //--options[AZ_recursion_level];
-
-    AZ_matrix_destroy( &J );
-    AZ_precond_destroy( &prec_J );
-
-}
-
-
-template <typename Mesh>
-void VenantKirchhofSolver<Mesh>::
-//solveJac(const Vector& res, double& linear_rel_tol, Vector &step, BCHandler &_BCd )
-solveJac(Vector &step, const Vector& res, double& linear_rel_tol, BCHandler &_BCd )
-{
-
-    Chrono chrono;
-
-
-    _f = res;
-
-    // for BC treatment (done at each time-step)
-    Real tgv = 1.0;
-    std::cout << "  o-  Applying boundary conditions... ";
-    chrono.start();
-
-    // BC manage for the velocity
-    if ( !_BCd.bdUpdateDone() )
-        _BCd.bdUpdate( _mesh, _feBd, this->_dof );
-
-//    _BCd.showMe();
-
-    bcManageMatrix( _J, _mesh, this->_dof, _BCd, _feBd, tgv );
-    chrono.stop();
-    std::cout << "done in " << chrono.diff() << "s." << std::endl;
-
-//    _J.spy("Jacobian");
 
     // AZTEC specifications for the first system
     int data_org[ AZ_COMM_SIZE ];   // data organisation for C
@@ -724,8 +611,6 @@ solveJac(Vector &step, const Vector& res, double& linear_rel_tol, BCHandler &_BC
 
     AZ_matrix_destroy( &J );
     AZ_precond_destroy( &prec_J );
-
-    bcManageMatrix( _J, _mesh, this->_dof, _BCh, _feBd, tgv );
 
 }
 }

@@ -529,11 +529,12 @@ Real fct1_P2_1D( cRRef x, cRRef, cRRef )
 {
     return 2. * ( x - 1. ) * ( x - 0.5 );
 }
-Real fct2_P2_1D( cRRef x, cRRef, cRRef )
+//meneghin: swapped fct2_P2_1D with fct3_P2_1D
+Real fct3_P2_1D( cRRef x, cRRef, cRRef )
 {
     return 4. * x * ( 1. - x );
 }
-Real fct3_P2_1D( cRRef x, cRRef, cRRef )
+Real fct2_P2_1D( cRRef x, cRRef, cRRef )
 {
     return 2. * x * ( x - 0.5 );
 }
@@ -542,11 +543,12 @@ Real derfct1_1_P2_1D( cRRef x, cRRef , cRRef )
 {
     return 4. * x - 3.;
 }
-Real derfct2_1_P2_1D( cRRef x, cRRef , cRRef )
+//meneghin: swapped derfct2_1_P2_1D with derfct3_1_P2_1D
+Real derfct3_1_P2_1D( cRRef x, cRRef , cRRef )
 {
     return -8. * x + 4.;
 }
-Real derfct3_1_P2_1D( cRRef x, cRRef , cRRef )
+Real derfct2_1_P2_1D( cRRef x, cRRef , cRRef )
 {
     return 4. * x - 1.;
 }
@@ -555,11 +557,12 @@ Real der2fct1_11_P2_1D( cRRef x, cRRef , cRRef )
 {
     return 4;
 }
-Real der2fct2_11_P2_1D( cRRef x, cRRef , cRRef )
+//meneghin: swapped der2fct2_11_P2_1D with der2fct3_11_P2_1D
+Real der2fct3_11_P2_1D( cRRef x, cRRef , cRRef )
 {
     return -8;
 }
-Real der2fct3_11_P2_1D( cRRef x, cRRef , cRRef )
+Real der2fct2_11_P2_1D( cRRef x, cRRef , cRRef )
 {
     return 4;
 }

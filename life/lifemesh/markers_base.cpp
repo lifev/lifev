@@ -29,15 +29,17 @@ const MarkerTraits_Base::EntityFlag MarkerTraits_Base::NULLFLAG = LONG_MIN;
 
 MarkerTraits_Base::EntityFlag MarkerTraits_Base::strongerFlag( EntityFlag const & a, EntityFlag const & b )
 {
-    if ( a == NULLFLAG | b == NULLFLAG )
-        return NULLFLAG;
+//    if ( a == NULLFLAG | b == NULLFLAG )	meneghin: for me is better instead as below, do you agree?
+//        return NULLFLAG;
     return a > b ? a : b ;
 }
 
 MarkerTraits_Base::EntityFlag MarkerTraits_Base::weakerFlag( EntityFlag const & a, EntityFlag const & b )
 {
-    if ( a == NULLFLAG | b == NULLFLAG )
-        return NULLFLAG;
+//    if ( a == NULLFLAG | b == NULLFLAG )	meneghin: for me is better instead as below, do you agree?
+//        return NULLFLAG;
+    if(a==NULLFLAG)return b;			//
+    if(b==NULLFLAG)return a;			//
     return a < b ? a : b ;
 }
 }

@@ -15,16 +15,16 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+*/ 
 /*!
   \file NavierStokesAleHandler.h
   \author M.A. Fernandez
   \date 01/2003
   \version 1.0
-
+ 
   \brief This file contains an abstract class for NavierStokes solvers in moving domains.
   An ALE formulation is used
-
+ 
 */
 
 #ifndef _NAVIERSTOKESALEHANDLER_H_
@@ -36,12 +36,12 @@ namespace LifeV
 {
 /*!
   \class NavierStokesAleHandler
-
+ 
   Abstract class which defines the general structure of a NavierStokes solver with moving domain.
   For each new NavierStokes solver  we have to implement the corresponding timeAdvance and an iterate methods.
-
+ 
   \note This class inherits from NavierStokesHandler, new methods concern mesh motion staff
-
+ 
 */
 template <typename Mesh>
 class NavierStokesAleHandler:
@@ -49,8 +49,6 @@ class NavierStokesAleHandler:
             public HarmonicExtension
 {
 public:
-
-    typedef typename NavierStokesHandler<Mesh>::source_type source_type;
 
     //! Constructor
     /*!
@@ -64,15 +62,9 @@ public:
       \param BCh_u boundary conditions for the velocity
       \param BCh_mesh boundary conditions for the motion harmonic extension
      */
-    NavierStokesAleHandler( const GetPot& data_file,
-                            const RefFE& refFE_u,
-                            const RefFE& refFE_p,
-                            const QuadRule& Qr_u,
-                            const QuadRule& bdQr_u,
-                            const QuadRule& Qr_p,
-                            const QuadRule& bdQr_p,
-                            BCHandler& BCh_u,
-                            BCHandler& BCh_mesh );
+    NavierStokesAleHandler( const GetPot& data_file, const RefFE& refFE_u,
+                            const RefFE& refFE_p, const QuadRule& Qr_u, const QuadRule& bdQr_u,
+                            const QuadRule& Qr_p, const QuadRule& bdQr_p, BC_Handler& BCh_u, BC_Handler& BCh_mesh );
 
     //! Do nothing destructor
     virtual ~NavierStokesAleHandler()
@@ -130,31 +122,20 @@ template <typename Mesh>
 NavierStokesAleHandler<Mesh>::
 NavierStokesAleHandler( const GetPot& data_file, const RefFE& refFE_u,
                         const RefFE& refFE_p, const QuadRule& Qr_u, const QuadRule& bdQr_u,
-                        const QuadRule& Qr_p, const QuadRule& bdQr_p, BCHandler& BCh_u, BCHandler& BCh_mesh ) :
-        NavierStokesHandler<Mesh>( data_file,
-                                   refFE_u,
-                                   refFE_p,
-                                   Qr_u,
-                                   bdQr_u,
-                                   Qr_p,
-                                   bdQr_p,
-                                   BCh_u ),
-        HarmonicExtension( _mesh,
-                           1.0,
-                           quadRuleTetra4pt,
-                           quadRuleTria3pt,
-                           BCh_mesh ),
+                        const QuadRule& Qr_p, const QuadRule& bdQr_p, BC_Handler& BCh_u, BC_Handler& BCh_mesh ) :
+        NavierStokesHandler<Mesh>( data_file, refFE_u, refFE_p, Qr_u, bdQr_u, Qr_p, bdQr_p, BCh_u ),
+        HarmonicExtension( _mesh, 1.0, quadRuleTetra4pt, quadRuleTria3pt, BCh_mesh ),
         _dispOld( _dof_mesh.numTotalDof() ),
         _w( _dof_mesh.numTotalDof() ),
         _wInterp( _dim_u ),
         _dInterp( _dim_u ),
         _dwInterp( _dim_u )
 {
-    _dispOld = ZeroVector( _dispOld.size() );
-    _w = ZeroVector( _w.size() );
-    _wInterp = ZeroVector( _wInterp.size() );
-    _dInterp = ZeroVector( _dInterp.size() );
-    _dwInterp = ZeroVector( _dwInterp.size() );
+    _dispOld = 0.0;
+    _w = 0.0;
+    _wInterp = 0.0;
+    _dInterp = 0.0;
+    _dwInterp = 0.0;
 }
 
 
@@ -192,22 +173,23 @@ template <typename Mesh>
 void NavierStokesAleHandler<Mesh>::
 updateDispVelo()
 {
+
     // Updating mesh displacement and velocity
     updateExtension( _mesh, 0.0, 1 );
 
     Real dti = 1.0 / _dt;
 
-    std::cout << " max norm dx = " << norm_inf( _disp ) << std::endl;
+    std::cout << " max norm dx = " << maxnorm( _disp ) << std::endl;
 
     _interpolate( _w.nbcomp(), _disp, _dInterp );
 
-    std::cout << " max norm dxInterp = " << norm_inf( _dInterp ) << std::endl;
+    std::cout << " max norm dxInterp = " << maxnorm( _dInterp ) << std::endl;
 
     _dwInterp = _dInterp * dti;
 
-    std::cout << " max norm dwInterp = " << norm_inf( _dwInterp ) << std::endl;
-}
+    std::cout << " max norm dwInterp = " << maxnorm( _dwInterp ) << std::endl;
 
+}
 
 // Postprocessing pressure
 template <typename Mesh>
@@ -313,7 +295,7 @@ _interpolate( const UInt nbComp, const Vector& w, Vector& wInterp )
     UInt nDofElemF = nElemF * nDofpF; // number of face's Dof on a Element
 
 
-    Real x, y, z;
+    Real x, y, z, sum;
 
     KN<Real> wLoc( nDofElem * nbComp );
 
@@ -351,12 +333,12 @@ _interpolate( const UInt nbComp, const Vector& w, Vector& wInterp )
                     {
 
                         // Interpolating data at the nodal point
-                        double __sum = 0;
+                        sum = 0;
                         for ( ID idof = 0; idof < nDofElem; ++idof )  // Loop on local Dof on the element
-                            __sum += wLoc( icmp * nDofElem + idof ) * _mesh.getRefFE().phi( idof, x, y, z );
+                            sum += wLoc( icmp * nDofElem + idof ) * _mesh.getRefFE().phi( idof, x, y, z );
 
                         // Updating interpolated mesh velocity
-                        wInterp( icmp * _dof_u.numTotalDof() + _dof_u.localToGlobal( iElem, lDof ) - 1 ) = __sum;
+                        wInterp( icmp * _dof_u.numTotalDof() + _dof_u.localToGlobal( iElem, lDof ) - 1 ) = sum;
                     }
                 }
             }
@@ -385,12 +367,12 @@ _interpolate( const UInt nbComp, const Vector& w, Vector& wInterp )
                     {
 
                         // Interpolating data at the nodal point
-                        double __sum = 0;
+                        sum = 0;
                         for ( ID idof = 0; idof < nDofElem; ++idof )   // Loop on local Dof on the adjacent element
-                            __sum += wLoc( icmp * nDofElem + idof ) * _mesh.getRefFE().phi( idof, x, y, z );
+                            sum += wLoc( icmp * nDofElem + idof ) * _mesh.getRefFE().phi( idof, x, y, z );
 
                         // Updating interpolating vector
-                        wInterp( icmp * _dof_u.numTotalDof() + _dof_u.localToGlobal( iElem, lDof ) - 1 ) = __sum;
+                        wInterp( icmp * _dof_u.numTotalDof() + _dof_u.localToGlobal( iElem, lDof ) - 1 ) = sum;
                     }
                 }
             }
@@ -420,12 +402,12 @@ _interpolate( const UInt nbComp, const Vector& w, Vector& wInterp )
                     {
 
                         // Interpolating data at the nodal point
-                        double __sum = 0;
+                        sum = 0;
                         for ( ID idof = 0; idof < nDofElem; ++idof )  // Loop on local Dof on the adjacent element
-                            __sum += wLoc( icmp * nDofElem + idof ) * _mesh.getRefFE().phi( idof, x, y, z );
+                            sum += wLoc( icmp * nDofElem + idof ) * _mesh.getRefFE().phi( idof, x, y, z );
 
                         // Updating interpolating vector
-                        wInterp( icmp * _dof_u.numTotalDof() + _dof_u.localToGlobal( iElem, lDof ) - 1 ) = __sum;
+                        wInterp( icmp * _dof_u.numTotalDof() + _dof_u.localToGlobal( iElem, lDof ) - 1 ) = sum;
                     }
                 }
             }
@@ -447,12 +429,12 @@ _interpolate( const UInt nbComp, const Vector& w, Vector& wInterp )
             {
 
                 // Interpolating data at the nodal point
-                double __sum = 0;
+                sum = 0;
                 for ( ID idof = 0; idof < nDofElem; ++idof )  // Loop on local Dof on the adjacent element
-                    __sum += wLoc( icmp * nDofElem + idof ) * _mesh.getRefFE().phi( idof, x, y, z );
+                    sum += wLoc( icmp * nDofElem + idof ) * _mesh.getRefFE().phi( idof, x, y, z );
 
                 // Updating interpolating vector
-                wInterp( icmp * _dof_u.numTotalDof() + _dof_u.localToGlobal( iElem, lDof ) - 1 ) = __sum;
+                wInterp( icmp * _dof_u.numTotalDof() + _dof_u.localToGlobal( iElem, lDof ) - 1 ) = sum;
             }
         }
     }

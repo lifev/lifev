@@ -22,9 +22,9 @@ int main(int argc, char** argv)
 
 
     // ********* Boundary conditions definition for fluid *************************
-    BCFunctionBase u_wall(u1);
-    BCFunctionBase u_inflow(u2);
-    BCHandler BCh_u(4);
+    BCFunction_Base u_wall(u1);
+    BCFunction_Base u_inflow(u2);
+    BC_Handler BCh_u(4);
 
     BCh_u.addBC("Wall",   3, Essential, Full, u_wall,  3);  // non-permeable Wall - no-slip condition
     BCh_u.addBC("Wall-inflow",   4, Essential, Full, u_wall,  3);
@@ -33,10 +33,10 @@ int main(int argc, char** argv)
     BCh_u.addBC("InFlow", 1, Essential,   Full, u_inflow, 3); // Velocity profile
 
 // ********** Boundary conditions definitions for mass transport ***************
-    BCFunctionBase c_inflow(c1);
-//  BCFunctionMixte c_wall(alpha,beta);   // Permeability boundary condition
-    BCFunctionBase c_wall(cw);              // Concentration boundary condition
-    BCHandler BCh_c(4);
+    BCFunction_Base c_inflow(c1);
+//  BCFunction_Mixte c_wall(alpha,beta);   // Permeability boundary condition
+    BCFunction_Base c_wall(cw);              // Concentration boundary condition
+    BC_Handler BCh_c(4);
 
 //  BCh_c.addBC("C-Wall",   3, Mixte, Scalar, c_wall);  // Permeability boundary condition
 //  BCh_c.addBC("C-Wall-inflow",   4, Mixte, Scalar, c_wall);

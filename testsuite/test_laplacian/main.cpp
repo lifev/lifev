@@ -33,7 +33,7 @@
 
 #include "main.hpp"
 #include "ud_functions.hpp"
-#include "bcManage.hpp"
+#include "bc_manage.hpp"
 #include "elemMat.hpp"
 #include "elemOper.hpp"
 #include "openDX_wrtrs.hpp"
@@ -54,9 +54,9 @@ int main() {
     // Boundary conditions definition
     // ===================================================
 
-    BCFunctionBase gv1(g1); // Functor storing the user definded function g
-    BCFunctionBase gv2(g2); // Functor storing the user definded function g
-    BCHandler BCh(2); // We impose two boundary conditions
+    BCFunction_Base gv1(g1); // Functor storing the user definded function g
+    BCFunction_Base gv2(g2); // Functor storing the user definded function g
+    BC_Handler BCh(2); // We impose two boundary conditions
 
     BCh.addBC("Inlet",  10, Essential, Scalar, gv1);
     BCh.addBC("Outlet",  20, Essential, Scalar, gv2);
@@ -146,8 +146,8 @@ int main() {
 
     // initialization of vector of unknowns and rhs
     ScalUnknown<Vector> U(dim), F(dim);
-    U = ZeroVector( dim );
-    F = ZeroVector( dim );
+    U = 0.0;
+    F = 0.0;
 
     // ==========================================
     // Pattern construction and matrix assembling
