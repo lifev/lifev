@@ -23,8 +23,8 @@
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
 SUBDIRS         =  
-check_PROGRAMS = test_P2
+check_PROGRAMS = test_p2
 noinst_HEADERS = main.hpp ud_functions.hpp 
 LDADD = $(life_libs)
-test_P2_SOURCES = main.cpp 
+test_p2_SOURCES = main.cpp 
 EXTRA_DIST = 

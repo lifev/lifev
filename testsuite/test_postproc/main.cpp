@@ -80,11 +80,11 @@ int main() {
  
   long int  m=1;
 #ifdef INRIA
-  string mesh_dir = "../../Meshes/MeshINRIA/";
+  string mesh_dir = "../data/mesh/inria/";
   string fname=mesh_dir+"cube_6007.me.hpp";
   readINRIAMeshFile(aMesh,fname,m);
 #else
-  string mesh_dir = "../../Meshes/Mesh++/";
+  string mesh_dir = "../data/mesh/mesh++/";
   //  string fname=mesh_dir+"cube_6000.m++";
   string fname=mesh_dir+"cube_48.m++";
   readMppFile(aMesh,fname,m);
@@ -129,12 +129,12 @@ int main() {
   // ==========================================
   // Definition of the time integration stuff 
   // ==========================================
-  Real Tfin = 10.;  
-  Real delta_t = 0.5;
-  Real t0 = 0.;
+  //Real Tfin = 10.;  
+  //Real delta_t = 0.5;
+  //Real t0 = 0.;
   UInt ord_bdf = 3;
   Bdf bdf(ord_bdf);    
-  Real coeff=bdf.coeff_der(0)/delta_t;  
+  //Real coeff=bdf.coeff_der(0)/delta_t;  
    
   bdf.showMe();
 
