@@ -131,6 +131,7 @@ private:
 
 int main(int argc, char** argv)
 {
+#if 0
     using namespace LifeV;
 
 
@@ -425,7 +426,7 @@ int main(int argc, char** argv)
     _M_outfile << "figure;" << std::endl;
     _M_outfile << "plot(xx,DP);" << std::endl;
     _M_outfile.close();
-
+#endif
     return 0;
 }
 
