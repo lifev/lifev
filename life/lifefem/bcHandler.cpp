@@ -38,14 +38,22 @@
 namespace LifeV
 {
 
-BCHandler::BCHandler( const ID& nbc, BCHints hint )
-    : M_bdUpdateDone( 0 ),
-      M_hint( hint )
+BCHandler::BCHandler( const ID& nbc, BCHints hint ):
+    M_bdUpdateDone( 0 ),
+    M_hint( hint )
 {
     if ( nbc > 0 )
     {
         M_bcList.reserve( nbc );
     }
+}
+
+
+BCHandler::BCHandler( const BCHandler &BCh):
+    M_bdUpdateDone(BCh.M_bdUpdateDone),
+    M_hint(BCh.M_hint),
+    M_bcList(BCh.M_bcList)
+{
 }
 
 
@@ -263,6 +271,22 @@ bool BCHandler::hasOnlyEssential() const
         return storedOnlyEssential;
     }
 }
+
+
+// operator overloading
+
+BCHandler& BCHandler::operator = (const BCHandler &BCh)
+{
+    if (this != &BCh)
+    {
+        M_bdUpdateDone = BCh.M_bdUpdateDone;
+        M_hint         = BCh.M_hint;
+        M_bcList       = BCh.M_bcList;
+    }
+
+    return *this;
+}
+
 
 
 BCBase& BCHandler::operator[] ( const Index_t& i )
