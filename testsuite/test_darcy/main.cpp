@@ -103,9 +103,9 @@ checkArterialWallTetra()
     bcFct_rob.setFunctions_Mixte(alpha, beta);
     BCFunctionBase bcFct2;
     bcFct2.setFunction(p_adv);
-    int nb_bc = 2;
+//    int nb_bc = 2;
     BCHandler bc;
-    bc.setNumber(nb_bc);
+//    bc.setNumber(nb_bc);
     bc.addBC("Endothel",   3,     Mixte, Scalar, bcFct_rob);
     bc.addBC("Adventitia",  1, Essential, Scalar, bcFct2);
 
@@ -128,9 +128,9 @@ checkStraightTubeTetra()
     BCFunctionBase bcFct2;
     bcFct1.setFunction(g1);
     bcFct2.setFunction(g3);
-    int nb_bc = 2;
+//    int nb_bc = 2;
     BCHandler bc;
-    bc.setNumber(nb_bc);
+//    bc.setNumber(nb_bc);
     bc.addBC("Inlet",      1, Natural,   Scalar, bcFct1);
     bc.addBC("Outlet",  3, Natural, Scalar, bcFct2);
 
@@ -152,9 +152,9 @@ checkStraightTubeHexa()
     BCFunctionBase bcFct2;
     bcFct1.setFunction(g1);
     bcFct2.setFunction(g3);
-    int nb_bc = 2;
+//    int nb_bc = 2;
     BCHandler bc;
-    bc.setNumber(nb_bc);
+//    bc.setNumber(nb_bc);
     bc.addBC("Inlet",      1, Essential,   Scalar, bcFct1);
     bc.addBC("Outlet",  3, Essential, Scalar, bcFct2);
 
@@ -179,7 +179,7 @@ checkAnalyticalHexa()
     BCFunctionBase bcFct6;  //!< high Z
 
     // number of boundary conditions
-    int nb_bc;
+//    int nb_bc;
     // boundary conditions handler
     BCHandler bc;
 
@@ -196,8 +196,8 @@ checkAnalyticalHexa()
     bcFct5.setFunction(zero); //!< low   Z
     bcFct6.setFunction(zero); //!< high  Z
 
-    nb_bc = 6;
-    bc.setNumber(nb_bc);
+//    nb_bc = 6;
+//    bc.setNumber(nb_bc);
 
     bc.addBC("Analytical, real BC",    1, Essential,   Scalar, bcFct1);
     bc.addBC("Analytical, real BC",    2, Essential,   Scalar, bcFct2);
@@ -410,7 +410,7 @@ int main(int argc, char** argv)
 
     BCFunctionMixte bcFct_rob;  //!< a mixte (or Robin) bc function
 
-    int nb_bc;                //!< number of boundary conditions
+//    int nb_bc;                //!< number of boundary conditions
     BCHandler bc;            //!< boundary conditions handler
 
     // define the boundary conditions
@@ -423,8 +423,8 @@ int main(int argc, char** argv)
             */
             bcFct1.setFunction(g1);
             bcFct2.setFunction(g3);
-            nb_bc = 2;
-            bc.setNumber(nb_bc);
+//            nb_bc = 2;
+//            bc.setNumber(nb_bc);
             bc.addBC("Inlet",      1, Natural,   Scalar, bcFct1);
             bc.addBC("Outlet",  3, Natural, Scalar, bcFct2);
             break;
@@ -436,8 +436,8 @@ int main(int argc, char** argv)
             */
             bcFct1.setFunction(g1);
             bcFct2.setFunction(g3);
-            nb_bc = 2;
-            bc.setNumber(nb_bc);
+//            nb_bc = 2;
+//            bc.setNumber(nb_bc);
             bc.addBC("Inlet",      1, Essential,   Scalar, bcFct1);
             bc.addBC("Outlet",  3, Essential, Scalar, bcFct2);
             break;
@@ -450,8 +450,8 @@ int main(int argc, char** argv)
             */
             bcFct_rob.setFunctions_Mixte(g1, mixte_coeff); //! Robin coeff = 1.
             bcFct2.setFunction(g3);
-            nb_bc = 2;
-            bc.setNumber(nb_bc);
+//            nb_bc = 2;
+//            bc.setNumber(nb_bc);
             bc.addBC("Inlet",   1,     Mixte, Scalar, bcFct_rob);
             bc.addBC("Outlet",  3, Essential, Scalar, bcFct2);
             break;
@@ -470,8 +470,8 @@ int main(int argc, char** argv)
             bcFct5.setFunction(zero); //!< low   Z
             bcFct6.setFunction(zero); //!< high  Z
 
-            nb_bc = 6;
-            bc.setNumber(nb_bc);
+//            nb_bc = 6;
+//            bc.setNumber(nb_bc);
 
             bc.addBC("Analytical, real BC",    1, Essential,   Scalar, bcFct1);
             bc.addBC("Analytical, real BC",    2, Essential,   Scalar, bcFct2);
@@ -496,8 +496,8 @@ int main(int argc, char** argv)
             */
             bcFct_rob.setFunctions_Mixte(alpha, beta);
             bcFct2.setFunction(p_adv);
-            nb_bc = 2;
-            bc.setNumber(nb_bc);
+//            nb_bc = 2;
+//            bc.setNumber(nb_bc);
             bc.addBC("Endothel",   3,     Mixte, Scalar, bcFct_rob);
             bc.addBC("Adventitia",  1, Essential, Scalar, bcFct2);
             break;
