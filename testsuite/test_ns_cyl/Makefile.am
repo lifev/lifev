@@ -22,11 +22,14 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-include $(top_srcdir)/testsuite/Makefile.testsuite
 
-check_PROGRAMS  = testcyl
-noinst_HEADERS  = ud_functions.hpp
-testcyl_SOURCES = main.cpp
+check_HEADERS  = ud_functions.hpp
+
+check_PROGRAMS  = test_ns_cyl
+test_ns_cyl_SOURCES = main.cpp
+
 EXTRA_DIST      = data
 
 
+
+include $(top_srcdir)/testsuite/Makefile.testsuite

@@ -22,11 +22,14 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-include $(top_srcdir)/testsuite/Makefile.testsuite
 
-check_PROGRAMS      = testSStress
-noinst_HEADERS      = ud_functions.hpp ud_functions_ns.hpp
-testSStress_SOURCES = main.cpp
+check_HEADERS      = ud_functions.hpp ud_functions_ns.hpp
+
+check_PROGRAMS      = test_ns_sstress
+test_ns_sstress_SOURCES = main.cpp
+
 EXTRA_DIST          = data
+
+include $(top_srcdir)/testsuite/Makefile.testsuite
 
 ## 
