@@ -72,7 +72,10 @@ AT_BANNER([test_ns_sstress test is broken, skipping/disabling it for now])
 #m4_include([test_ns_sstress/testsuite.at])
 
 # disabled for now as it seems to run endlessly
-#m4_include([test_fsi/testsuite.at])
+m4_include([test_fsi/testsuite.at])
+
+#AT_BANNER([test_fsi_newton test takes too much time, skipping/disabling it for now])
+#m4_include([test_fsi_newton/testsuite.at])
 
 m4_include([test_masstransport/testsuite.at])
 m4_include([test_mass_coupling/testsuite.at])
