@@ -220,7 +220,7 @@ public:
       -# \c DIFFERENT_NONZERO_PATTERN -
       Pmat does not have the same nonzero structure.
     */
-    int solve( array_type& __X, array_type const& __B, MatStructure __ptype = SAME_NONZERO_PATTERN );
+    void solve( array_type& __X, array_type const& __B, MatStructure __ptype = SAME_NONZERO_PATTERN );
 
     /*
       solve the transpose problem \f$ A^T x = b  \f$
@@ -245,7 +245,7 @@ public:
       -# \c DIFFERENT_NONZERO_PATTERN -
       Pmat does not have the same nonzero structure.
     */
-    int solveTranspose( array_type& __X, array_type const& __B, MatStructure __ptype = SAME_NONZERO_PATTERN );
+    void solveTranspose( array_type& __X, array_type const& __B, MatStructure __ptype = SAME_NONZERO_PATTERN );
 
 
     //@}

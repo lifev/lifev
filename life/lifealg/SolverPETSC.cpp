@@ -31,8 +31,6 @@
 #include <SolverPETSC.hpp>
 #include "GetPot.hpp"
 
-#define PETSC_KSPSOLVE_OLD_INTERFACE 0
-
 namespace LifeV
 {
 
@@ -199,7 +197,7 @@ SolverPETSC::setMatrixTranspose( uint __nrows, const uint* __r, const uint *__i,
 \param __B	the right hand side
 \return the number of iterations
 */
-int
+void
 SolverPETSC::solve( array_type& __X, array_type const& __B, MatStructure  __ptype )
 {
     int __rowA;
@@ -217,13 +215,14 @@ SolverPETSC::solve( array_type& __X, array_type const& __B, MatStructure  __ptyp
     KSPSetOperators( _M_p->__ksp, _M_p->__A, _M_p->__A, __ptype  ); //CHKERRQ(__ierr);
 
     KSPSetInitialGuessNonzero(_M_p->__ksp, PETSC_TRUE);
-        
-    PetscInt           its = 0;
-#if PETSC_KSPSOLVE_OLD_INTERFACE
+
+#if PETSC_VERSION == 220
     KSPSetRhs(_M_p->__ksp,__b);
     KSPSetSolution(_M_p->__ksp,__x);
     KSPSolve( _M_p->__ksp ); //CHKERRQ(__ierr);
 #else
+    PetscInt           its = 0;
+
     KSPSolve( _M_p->__ksp, __b, __x);
     KSPConvergedReason reason;
     KSPGetConvergedReason(_M_p->__ksp, &reason);
@@ -256,12 +255,9 @@ SolverPETSC::solve( array_type& __X, array_type const& __B, MatStructure  __ptyp
     // Petsc won't deallocate the memory so __X and __B contains the informations
     VecDestroy( __x );
     VecDestroy( __b );
-
-    std::cerr << "[SolverPETSC::solve] Solving primal done in " << its << " iterations\n";
-    return its;
 }
 
-int
+void
 SolverPETSC::solveTranspose( array_type& __X, array_type const& __B, MatStructure __ptype )
 {
     int __rowA;
@@ -277,12 +273,13 @@ SolverPETSC::solveTranspose( array_type& __X, array_type const& __B, MatStructur
 
     KSPSetOperators( _M_p->__ksp, _M_p->__A_t, _M_p->__A_t, __ptype ); ////CHKERRQ(__ierr);
 
-    PetscInt           its = 0;
-#if PETSC_KSPSOLVE_OLD_INTERFACE
+#if PETSC_VERSION == 220
     KSPSetRhs(_M_p->__ksp,__b);
     KSPSetSolution(_M_p->__ksp,__x);
     KSPSolve( _M_p->__ksp ); //CHKERRQ(__ierr);
 #else
+    PetscInt           its = 0;
+
     KSPSolve( _M_p->__ksp, __b, __x);
     KSPConvergedReason reason;
     KSPGetConvergedReason(_M_p->__ksp, &reason);
@@ -310,9 +307,6 @@ SolverPETSC::solveTranspose( array_type& __X, array_type const& __B, MatStructur
     // Petsc won't deallocate the memory so __X and __B contains the informations
     VecDestroy( __x );
     VecDestroy( __b );
-
-    std::cerr << "[SolverPETSC::solveTranspose] Solving transpose done in " << its << " iterations\n";
-    return its;
 }
 
 PETSCforSingleton::PETSCforSingleton(const GetPot& dataFile,
