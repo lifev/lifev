@@ -1,9 +1,9 @@
 # -*- autoconf -*-
 # 
 #
-AC_INIT(life, 0.1.0pre4, christophe.prudhomme@epfl.ch)
+AC_INIT(life, 0.1.0pre5, christophe.prudhomme@epfl.ch)
 LIFE_PACKAGE=life
-LIFE_VERSION=0.1.0pre4
+LIFE_VERSION=0.1.0pre5
 
 PACKAGE=$LIFE_PACKAGE
 VERSION=$LIFE_VERSION
@@ -30,11 +30,45 @@ AC_PROG_CXX( g++ )
 AC_PROG_F77( g77 )
 AC_PROG_F77_C_O
 
+dnl Check debugging mode for compilation.
+AC_ARG_ENABLE(debug,
+  AC_HELP_STRING([--enable-debug],[enables debugging mode (default=no)]),
+  [
+   if test $enableval = "no";
+     then ac_use_debug_code="no"
+     else ac_use_debug_code="yes"
+   fi
+  ], [ac_use_debug_code="no"])
+
+AC_ARG_ENABLE(opt,
+  AC_HELP_STRING([--enable-opt],[enables optimization mode (default=no)]),
+  [
+   if test $enableval = "no";
+     then ac_use_opt_code="no"
+     else ac_use_opt_code="yes"
+   fi
+  ], [ac_use_opt_code="no"])
+
+if test $ac_use_debug_code = "yes" -a $ac_use_opt_code = "yes"
+then
+  AC_MSG_ERROR(Cannot use --enable-debug and --enable-opt at the same time!)
+fi
+
+if test $ac_use_debug_code = "yes"; then
+ CXXFLAGS="-g3 -O0 -Wall"
+ CFLAGS="-g3 -O0 -Wall"
+else 
+ if test $ac_use_opt_code = "yes"; then
+  CXXFLAGS="-O2 -funroll-all-loops -fargument-noalias-global -fno-gcse -Wall"
+  CFLAGS="-O2 -funroll-all-loops -fargument-noalias-global -fno-gcse -Wall"
+  CPPFLAGS="-DNDEBUG"
+ fi
+fi
+
 # check for libtool
 AC_PROG_LIBTOOL
 AC_ARG_WITH([aztec], 
- #AS_HELP_STRING([--with-aztec],[tell where aztec resides]),
- [--with-aztec=PATH              tell the path where aztec resides],
+ AC_HELP_STRING([--with-aztec],[tell where aztec resides]),
  [
   # AZTEC check
   AC_MSG_CHECKING([Aztec headers files presence])
