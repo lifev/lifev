@@ -157,14 +157,23 @@ public:
     typedef VectorType super;
 
     //  PhysVectUnknown(){}
+    explicit PhysVectUnknown( std::string const& __s )
+        :
+        super(),
+        _M_name( __s )
+        {}
+
+    //  PhysVectUnknown(){}
     explicit PhysVectUnknown( UInt const Ndof )
         :
-        super( nDimensions*Ndof )
+        super( nDimensions*Ndof ),
+        _M_name( "vector_unknown" )
         {}
 
     PhysVectUnknown( PhysVectUnknown<VectorType> const &RhPhysVectUnknown )
         :
-        super( RhPhysVectUnknown )
+        super( RhPhysVectUnknown ),
+        _M_name( RhPhysVectUnknown._M_name )
         {}
 
     PhysVectUnknown& operator=( PhysVectUnknown const& __v )
@@ -172,6 +181,7 @@ public:
             if ( this == &__v )
                 return * this;
             super::operator=( ( super const& )__v );
+            _M_name = __v._M_name;
             return *this;
         }
     template<typename VectorExpr>
@@ -198,6 +208,17 @@ public:
         {
             return _S_nbcomp;
         }
+
+    void setName( std::string const& __name )
+        {
+            _M_name = __name;
+        }
+    std::string const& name() const
+        {
+            return _M_name;
+        }
+private:
+    std::string _M_name;
 };
 
 //! the case of VectorBlock type
@@ -223,16 +244,26 @@ public:
 
     ScalUnknown()
         :
-        super()
+        super(),
+        _M_name( "scalar_unknown" )
+
+        {}
+    ScalUnknown( std::string const& __s )
+        :
+        super(),
+        _M_name( __s )
+
         {}
     explicit ScalUnknown( UInt const Ndof )
         :
-        super( Ndof )
+        super( Ndof ),
+        _M_name( "scalar_unknown" )
         {}
 
     ScalUnknown( const ScalUnknown<VectorType> &RhScalUnknown )
         :
-        super( RhScalUnknown )
+        super( RhScalUnknown ),
+        _M_name( RhScalUnknown._M_name )
         {}
 
     ScalUnknown& operator=( ScalUnknown const& __v )
@@ -240,6 +271,7 @@ public:
             if ( this == &__v )
                 return * this;
             super::operator=( ( super const& )__v );
+            _M_name = __v._M_name;
             return *this;
         }
     template<typename VectorExpr>
@@ -267,6 +299,16 @@ public:
         {
             return _S_nbcomp;
         }
+    void setName( std::string const& __name )
+        {
+            _M_name = __name;
+        }
+    std::string const& name() const
+        {
+            return _M_name;
+        }
+private:
+    std::string _M_name;
 };
 
 //---------------------------------------------------------------//
