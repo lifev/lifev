@@ -807,7 +807,7 @@ CSRMatr(const PatternType &ex_pattern, const vector<DataType> &ex_value)
 template<typename PatternType, typename DataType>
 CSRMatr<PatternType,DataType>::
 CSRMatr(const CSRMatr<PatternType,DataType> &RightHandCSR):
-  _Patt(RightHandCSR.Patt()),_value(RightHandCSR.value()) {};
+  _value(RightHandCSR.value()),_Patt(RightHandCSR.Patt()) {};
 
 template<typename PatternType, typename DataType>
 CSRMatr<PatternType,DataType>&
@@ -890,7 +890,7 @@ CSRMatr(const CSRPatt &ex_pattern, const vector<DataType> &ex_value)
 template<typename DataType>
 CSRMatr<CSRPatt,DataType>::
 CSRMatr(const CSRMatr<CSRPatt,DataType> &RightHandCSR):
-  _Patt(RightHandCSR.Patt()),_value(RightHandCSR.value()) {};
+  _value(RightHandCSR.value()),_Patt(RightHandCSR.Patt()) {};
 
 template<typename DataType>
 CSRMatr<CSRPatt,DataType>&
@@ -1046,7 +1046,7 @@ void CSRMatr<CSRPatt,DataType>::diagonalize(UInt const r, DataType const coeff,
     }
 
     set_mat(r, r, coeff); // A(r,r) = coeff
-  
+
     b[r-OFFSET] = coeff*datum; // correct right hand side for row r
 }
 
