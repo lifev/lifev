@@ -39,7 +39,7 @@ namespace LifeV
 /*!
   \class Subelements
   \brief P1 subdivision of tetrahedra for level set interface reconstruction.
-  
+
   P1 is subdivided into 1 P1 tetrahedron, P1-bubble is subdivided into 4
   tetrahedra (cross-grid), P2 is subdivided into 8 tetrahedra.
   \author Christoph Winkelmann <christoph.winkelmann@epfl.ch>
@@ -124,13 +124,13 @@ public:
                     }
             }
         }
-    
+
     /*! \return number of subelements */
     UInt numSubelements() const { return M_numSubelements; }
-    
+
     /*! \return number of local edges in each subelement */
     UInt numLocalEdges() const { return M_numLocalEdges; }
-    
+
     /*!
       \param iSubelement number of subelement, 0 ... numSubelements()-1
       \param iEdge number of edge in subelement, 1 or 2
@@ -140,6 +140,8 @@ public:
     UInt edge2Point( UInt iSubelement, UInt iEdge, UInt iPoint )
         {
             UInt subPoint = LinearTetra::eToP( iEdge, iPoint ) - 1;
+            ASSERT( iSubelement < M_numSubelements,
+                    "iSubelement too big" );
             return M_nodes[ 4 * iSubelement + subPoint ];
         }
 
@@ -151,31 +153,31 @@ public:
     */
     void coord( Real& x, Real& y, Real& z, UInt iLocPoint )
         {
-            M_fe.coorMap( x, y, z, M_xi[iLocPoint],
-                          M_eta[iLocPoint], M_zeta[iLocPoint] );
+            M_fe.coorMap( x, y, z, M_xi[iLocPoint-1],
+                          M_eta[iLocPoint-1], M_zeta[iLocPoint-1] );
         }
 private:
     //! current finite element
     const CurrentFE& M_fe;
-    
+
     //! number of subelements
     UInt M_numSubelements;
-    
+
     //! number of edges per subelement
     UInt M_numLocalEdges;
-    
+
     //! reference coordinates xi of nodes in macroelement
     std::vector<Real> M_xi;
-    
+
     //! reference coordinates eta of nodes in macroelement
     std::vector<Real> M_eta;
-    
+
     //! reference coordinates zeta of nodes in macroelement
     std::vector<Real> M_zeta;
-    
+
     //! 4 consecutive node numbers in this vector define one subelement
     std::vector<UInt> M_nodes;
-    
+
 }; // class Subelements
 
 } // namespace LifeV
