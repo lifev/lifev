@@ -1,11 +1,11 @@
 #include "lifeV.hpp"
-#include "NavierStokesAleSolverPC.hpp"
+#include "NavierStokesAleSolverPC.new.hpp"
 #include "regionMesh3D_ALE.hpp"
 #include "ud_functions.hpp"
 #include "bcVector.hpp"
 
-//#define PVM
-#undef PVM
+#define PVM
+//#undef PVM
 
 #ifdef PVM
 #include <pvm3.h>
