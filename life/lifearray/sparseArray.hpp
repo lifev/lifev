@@ -302,14 +302,19 @@ public:
   MSRMatr(const CSRPatt &ex_pattern);
   MSRMatr(const MSRPatt* ex_pattern, const vector<DataType> &ex_value);
   MSRMatr(const MSRMatr<DataType> &RightHandMSR);
-  MSRMatr(const MSRPatt &ex_pattern,const CSRMatr<CSRPatt,DataType> &RightHandCSR);
-  // CSR_values -> MSR_values
-  /* to convert from CSR to MSR:
-     MSRPatt nameMSRP(CSRPatt nameCSRP);
-     MSRMatr nameMSR_matrix(nameMSRP,nameCSR_matrix);*/
-
-  // Alain : for conversion, the pattern must have been already converted
-  // REMARK: I haven't managed to do it with the template DataType
+  // MSRMatr(const MSRPatt &ex_pattern,const CSRMatr<CSRPatt,DataType> &RightHandCSR);
+  /*! conversion of a CSRMatr into a MSRMatr.
+   *
+   *  To convert, do the following steps:
+   *  -# MSRPatt myMSRpattern(myCSRpattern);
+   *  -# MSRMatr myMSRMatrix(myMSRpattern);
+   *  -# CSRmat2MSRmat(myMSRmatrix, myCSRmatrix);
+   * 
+   *  Remarks:
+   * 
+   *  -# The pattern must be converted before calling CSRmat2MSRmat.
+   *  -# only implemented for DataType=double
+   */
   friend void CSRmat2MSRmat(MSRMatr<double> &MSRmat,
 			    CSRMatr<CSRPatt,double> const &CSRmat);
 
