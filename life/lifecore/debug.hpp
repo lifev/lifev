@@ -168,7 +168,7 @@ public:
     NdebugStream& operator<<( char const* ) { return *this; }
     NdebugStream& operator<<( std::string const& ) { return *this; }
     NdebugStream& operator<<( double ) { return *this; }
-    NdebugStream& operator<<( LNManipFunction f ) { return *this; }
+    NdebugStream& operator<<( LNManipFunction /*f*/ ) { return *this; }
     //@}
 };
 
