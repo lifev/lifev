@@ -58,8 +58,8 @@ drop            = 1.00e-3
 
 [./physics]
 diffusivity     = 2.87e-7           # diffusivity
+react           = 0.0               # reaction coefficient
 
-# Till now we compute fluid and mastransport on the same mesh
 [../discretization]
 mesh_dir = ./
 mesh_file = cyltetra.mesh     # mesh file
