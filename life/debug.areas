@@ -9,6 +9,11 @@
 6010 -- LifeV::NavierStokesWithFlux
 6020 -- LifeV::NavierStokesSolverPC
 6100 -- LifeV::DarcySolver
+6200 -- LifeV::operFS
+6205 -- LifeV::exactJacobian
+6210 -- LifeV::fixedPoint
+6215 -- LifeV::steklovPoincare
+6220 -- LifeV::FSISolver
 7000 -- LifeV::alg
 7010 -- LifeV::SolverPETSC
 10000 -- testsuite
