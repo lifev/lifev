@@ -34,7 +34,8 @@ interpolate.hpp \
 postProc.hpp \
 bcManage.hpp currentBdFE.hpp currentFE.hpp currentHdivFE.hpp \
 dof.hpp dofInterface3Dto2D.hpp dofInterface3Dto3D.hpp dofInterfaceBase.hpp \
-dofInterfaceHandler.hpp  elemOper.hpp elemOper_ext.hpp \
+dofInterfaceHandler.hpp \
+elemOper.hpp elemOper_ext.hpp elemOper2Fluids.hpp \
 geoMap.hpp localDofPattern.hpp meshMotion.hpp quadRule.hpp \
 refEle.hpp refFE.hpp refHdivFE.hpp refHybridFE.hpp \
 sobolevNorms.hpp staticBdFE.hpp regionMesh3D_ALE.hpp v2elemVec.hpp values.hpp \
