@@ -82,8 +82,8 @@ namespace LifeV
         Vector residual     = sol;
         Vector step         = sol;
 
-        Vector muS(f.solid().dDof().numTotalDof());
-        Vector muF(f.fluid().uDof().numTotalDof());
+        PhysVectUnknown<Vector> muS(f.solid().dDof().numTotalDof());
+        PhysVectUnknown<Vector> muF(f.fluid().uDof().numTotalDof());
 
         muS                 = -2.;
         muF                 = -1.;
@@ -128,20 +128,11 @@ namespace LifeV
 
             std::cout << "Step norm = " << norm(step) << std::endl;
 
-            out_res << "Step norm = " << norm(step);
-            out_res << "size d = " << f.solid().dDof().numTotalDof() << std::endl;
-            out_res << "size f = " << f.fluid().uDof().numTotalDof() << std::endl;
+            out_res << "Step norm = " << norm(step) << std::endl;
             
             muS        = f.residualS();
             muF        = f.residualF();
 
-            for (UInt ii = 0; ii < muF.size(); ++ii)
-            {
-                out_res << std::fabs(muF[ii]) << " ";
-                    if (ii < muS.size()) out_res << std::fabs(muS[ii]);
-                out_res << std::endl;
-            }
-            
             sol       += step;
             
             f.evalResidual(sol, iter, residual);
