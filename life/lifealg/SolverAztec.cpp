@@ -171,7 +171,18 @@ void SolverAztec::solve( array_type& x,
         switch ( preCalc )
         {
             case SAME_PRECONDITIONER:
-                M_options[AZ_pre_calc] = AZ_reuse;
+                if ( M_options[AZ_keep_info] == 0 ) {
+                    std::cerr << "\n[SolverAztec::solve]  WARNING: "
+                              << "preconditioner has to be recalculated\n"
+                              << "unexpectedly. Set keep_info = 1 in "
+                              << "the data file to avoid this.\n";
+                    // there 's no preconditioner to be reused
+                    M_options[AZ_pre_calc] = AZ_recalc;
+                    // make sure it works next time
+                    M_options[AZ_keep_info] = 1;
+                } else {
+                    M_options[AZ_pre_calc] = AZ_reuse;
+                }
                 break;
             case SAME_NONZERO_PATTERN:
                 M_options[AZ_pre_calc] = AZ_recalc;
