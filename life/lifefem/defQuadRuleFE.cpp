@@ -46,9 +46,9 @@ static const QuadPoint pt_seg_1pt[ 1 ] =
     };
 const QuadRule quadRuleSeg1pt( pt_seg_1pt,
                                QUAD_RULE_SEG_1PT,
-                               "Gauss Legendre 1 point on a segment", LINE, 1, UNKNOWN );
+                               "Gauss Legendre 1 point on a segment", LINE, 1, 1 );
 //
-const QuadRule quadRuleDummy( pt_seg_1pt, 1, "Dummy quadrature rule", LINE, 1, UNKNOWN );
+const QuadRule quadRuleDummy( pt_seg_1pt, 1, "Dummy quadrature rule", LINE, 1, 1 );
 //----------------------------------------------------------------------
 const Real q2ptx1 = ( 1 - sqrt( 1. / 3. ) ) / 2., q2ptx2 = ( 1 + sqrt( 1. / 3. ) ) / 2.;
 const Real q2ptw1 = 0.5, q2ptw2 = 0.5;
@@ -60,7 +60,7 @@ static const QuadPoint pt_seg_2pt[ 2 ] =
     };
 const QuadRule quadRuleSeg2pt( pt_seg_2pt,
                                QUAD_RULE_SEG_2PT,
-                               "Gauss Legendre 2 points on a segment", LINE, 2, UNKNOWN );
+                               "Gauss Legendre 2 points on a segment", LINE, 2, 3 );
 //----------------------------------------------------------------------
 const Real q3ptx1 = 0.5, q3ptx2 = ( 1 - sqrt( 3. / 5. ) ) / 2., q3ptx3 = ( 1 + sqrt( 3. / 5. ) ) / 2.;
 const Real q3ptw1 = 8. / 18., q3ptw2 = 5. / 18., q3ptw3 = 5. / 18.;
@@ -74,7 +74,7 @@ static const QuadPoint pt_seg_3pt[ 3 ] =
 
 const QuadRule quadRuleSeg3pt( pt_seg_3pt,
                                QUAD_RULE_SEG_3PT,
-                               "Gauss Legendre 3 points on a segment", LINE, 3, UNKNOWN );
+                               "Gauss Legendre 3 points on a segment", LINE, 3, 5 );
 /*----------------------------------------------------------------------
   Set of all quadrature rules on segments
   ----------------------------------------------------------------------*/
@@ -104,7 +104,7 @@ static const QuadPoint pt_tria_1pt[ 1 ] =
     };
 const QuadRule quadRuleTria1pt( pt_tria_1pt,
                                 QUAD_RULE_TRIA_1PT,
-                                "Quadrature rule 1 point on a triangle", TRIANGLE, 1, UNKNOWN );
+                                "Quadrature rule 1 point on a triangle", TRIANGLE, 1, 1 );
 //----------------------------------------------------------------------
 static const QuadPoint pt_tria_3pt[ 3 ] =
     {
@@ -114,7 +114,7 @@ static const QuadPoint pt_tria_3pt[ 3 ] =
     };
 const QuadRule quadRuleTria3pt( pt_tria_3pt,
                                 QUAD_RULE_TRIA_3PT,
-                                "Quadrature rule 3 points on a triangle", TRIANGLE, 3, UNKNOWN );
+                                "Quadrature rule 3 points on a triangle", TRIANGLE, 3, 2 );
 //----------------------------------------------------------------------
 // 4 points Integration rule for triangle (Ref. e.g. Comincioli pag. 234) D of Ex = 3
 const Real t4pt_xb1 = 3. / 5.,
@@ -164,7 +164,7 @@ static const QuadPoint pt_quad_1pt[ 1 ] =
     };
 const QuadRule quadRuleQuad1pt( pt_quad_1pt,
                                 QUAD_RULE_QUAD_1PT,
-                                "Quadrature rule 1 point on a quadrangle", QUAD, 1, UNKNOWN );
+                                "Quadrature rule 1 point on a quadrangle", QUAD, 1, 1 );
 //----------------------------------------------------------------------
 static const QuadPoint pt_quad_4pt[ 4 ] =
     {
@@ -175,7 +175,7 @@ static const QuadPoint pt_quad_4pt[ 4 ] =
     };
 const QuadRule quadRuleQuad4pt( pt_quad_4pt,
                                 QUAD_RULE_QUAD_4PT,
-                                "Quadrature rule 4 points on a quadrangle", QUAD, 4, UNKNOWN );
+                                "Quadrature rule 4 points on a quadrangle", QUAD, 4, 3 );
 //----------------------------------------------------------------------
 // 4 points Integration rule for quadrangle
 
@@ -194,7 +194,7 @@ static const QuadPoint pt_quad_9pt[ 9 ] =
 
 const QuadRule quadRuleQuad9pt( pt_quad_9pt,
                                 QUAD_RULE_QUAD_9PT,
-                                "Quadrature rule 9 points on a quadrangle", QUAD, 9, UNKNOWN );
+                                "Quadrature rule 9 points on a quadrangle", QUAD, 9, 5 );
 /*----------------------------------------------------------------------
   Set of all quadrature rules on quadrangle
   ----------------------------------------------------------------------*/
@@ -227,7 +227,7 @@ static const QuadPoint pt_tetra_1pt[ 1 ] =
     };
 const QuadRule quadRuleTetra1pt( pt_tetra_1pt,
                                  QUAD_RULE_TETRA_1PT,
-                                 "Quadrature rule 1 point on a tetraedra", TETRA, 1, UNKNOWN );
+                                 "Quadrature rule 1 point on a tetraedra", TETRA, 1, 1 );
 //----------------------------------------------------------------------
 const Real tet4ptx1 = ( 5. - sqrt( 5. ) ) / 20., tet4ptx2 = ( 5. + 3*sqrt( 5. ) ) / 20.;
 
@@ -240,7 +240,7 @@ static const QuadPoint pt_tetra_4pt[ 4 ] =
     };
 const QuadRule quadRuleTetra4pt( pt_tetra_4pt,
                                  QUAD_RULE_TETRA_4PT,
-                                 "Quadrature rule 4 points on a tetraedra", TETRA, 4, UNKNOWN );
+                                 "Quadrature rule 4 points on a tetraedra", TETRA, 4, 2 );
 //----------------------------------------------------------------------
 // 5 points Integration rule for tetraedra (Ref. e.g. Comincioli pag. 236)
 const Real tet5ptx1 = 1. / 6. , tet5ptx2 = 1. / 2., tet5ptx3 = 1. / 4.;
@@ -429,7 +429,7 @@ static const QuadPoint pt_tetra_64pt[ 64 ] =
 const QuadRule quadRuleTetra64pt( pt_tetra_64pt,
                                   QUAD_RULE_TETRA_64PT,
                                   "Quadrature rule 64 points on a tetraedra",
-                                  TETRA, 64, 3 );
+                                  TETRA, 64, 7 );
 /*----------------------------------------------------------------------
   Set of all quadrature rules on tetraedra
   ----------------------------------------------------------------------*/
@@ -461,7 +461,7 @@ static const QuadPoint pt_hexa_1pt[ 1 ] =
     };
 const QuadRule quadRuleHexa1pt( pt_hexa_1pt,
                                 QUAD_RULE_HEXA_1PT,
-                                "Quadrature rule 1 point on a hexa", HEXA, 1, UNKNOWN );
+                                "Quadrature rule 1 point on a hexa", HEXA, 1, 1 );
 //----------------------------------------------------------------------
 static const QuadPoint pt_hexa_8pt[ 8 ] =
     {
@@ -476,7 +476,7 @@ static const QuadPoint pt_hexa_8pt[ 8 ] =
     };
 const QuadRule quadRuleHexa8pt( pt_hexa_8pt,
                                 QUAD_RULE_HEXA_8PT,
-                                "Quadrature rule 8 points on a hexa", HEXA, 8, UNKNOWN );
+                                "Quadrature rule 8 points on a hexa", HEXA, 8, 3 );
 /*----------------------------------------------------------------------
   Set of all quadrature rules on hexa
   ----------------------------------------------------------------------*/
