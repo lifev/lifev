@@ -38,7 +38,7 @@ test_petsc_SOURCES	= test_petsc.cpp
 test_petsc_LDADD    = $(life_libs) $(boost_test_lib)
 
 test_linearsolvers_SOURCES	= test_linearsolvers.cpp
-test_linearsolvers_LDADD	= liblifealg_testsuite.la
+test_linearsolvers_LDADD	= liblifealg_testsuite.la $(umfpack_libs)
 
 
 EXTRA_DIST  = testsuite.at

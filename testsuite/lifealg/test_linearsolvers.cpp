@@ -35,7 +35,7 @@
 #endif /* HAVE_PETSC_H */
 
 #if defined(HAVE_UMFPACK_H)
-//#include <SolverUMFPACK.hpp>
+#include <SolverUMFPACK.hpp>
 #endif /* HAVE_UMFPACK_H */
 
 #include <MatrixTest.hpp>
@@ -49,28 +49,34 @@ namespace LifeV{
 template<typename Mat>
 bool test_umfpack( Mat& __mat )
 {
-#if 0
+#if defined( HAVE_UMFPACK_H )
+    LifeV::Debug( 10000 ) << "UmFPACK solver test\n";
     int Nrows = __mat.matrix().Patt()->nRows();
 
-    //Life::Solver __petsc( "gmres", "ilu" );
-    //__petsc.setMatrix( Nrows, __mat.iaData(), __mat.jaData(), __mat.valueData() );
+    SolverUMFPACK __solver;
+    __solver.setMatrix( Nrows, __mat.iaData(), __mat.jaData(), __mat.valueData() );
 
     Vector __x( Nrows );
     Vector __sol( Nrows );
     Vector __b( Nrows );
 
-    __sol = 10;
+    __sol = ScalarVector( Nrows, 10 );
     __b = __mat.matrix() * __sol;
 
-    __x = 0;
-    //__petsc.solve( __x, __b );
+    __x = ZeroVector( Nrows );
+    __solver.solve( __x, __b );
+    __solver.reportInfo();
 
     LifeV::Debug( 10000 )  << "norm_2(x) = " << norm_2( __x ) << "\n";
 
     __x -= __sol;
     LifeV::Debug( 10000 )  << "norm_2(error) = " << norm_2( __x ) << "\n";
+
+    LifeV::Debug( 10000 ) << "UMFPACK solver test done\n";
+
+    return norm_2(__x) < 1e-10;
 #else
-    return true;
+    return 1;
 #endif
 }
 
