@@ -27,21 +27,21 @@
 #include <SolverAztec.hpp>
 #include <LevelSetSolver.hpp>
 
-#include "main.hpp"
-#include "bcManage.hpp"
-#include "elemMat.hpp"
-#include "elemOper.hpp"
-#include "openDX_wrtrs.hpp"
-#include "vtk_wrtrs.hpp"
-#include "bdf.hpp"
+#include <main.hpp>
 
-#undef INRIA
-#define USE_AZTEC_SOLVER
+#include <importer.hpp>
+
+#include <bcManage.hpp>
+
+#include <elemMat.hpp>
+#include <elemOper.hpp>
+
+#include <openDX_wrtrs.hpp>
+#include <vtk_wrtrs.hpp>
+#include <bdf.hpp>
 
 int main() {
     using namespace LifeV;
-
-    Chrono chrono;
 
     // Boundary conditions definition
 
@@ -63,152 +63,120 @@ int main() {
     // Finite element stuff
 
     const GeoMap& geoMap = geoLinearTetra;
-    const GeoMap& geoMapBd = geoMap.boundaryMap();
+    const GeoMap& geoMapBd = geoLinearTria;
 
-    const QuadRule& qr = quadRuleTetra15pt;
-    const QuadRule& qrBd = quadRuleTria7pt;
+    GetPot datafile( "data" );
 
-    const RefFE& refFE = feTetraP2;
-    const RefFE& refBdFE = refFE.boundaryFE();
-    std::string feName("P2");
+    std::string __fe_name = datafile("levelset/discretization/FEM", "P1");
+    const RefFE& refFE = __fe_name == "P1" ? feTetraP1 : feTetraP2;
+    const RefFE& refBdFE = __fe_name == "P1" ? feTriaP1 : feTriaP2;
+
+    const QuadRule& qr = __fe_name == "P1" ? quadRuleTetra5pt : quadRuleTetra15pt;
+    const QuadRule& qrBd = __fe_name == "P1" ? quadRuleTria3pt : quadRuleTria7pt;
+
 
     // Mesh stuff
 
+    std::cout << "** LS test ** Importing mesh" << std::endl;
+
     typedef RegionMesh3D<LinearTetra> meshType;
-    meshType mesh;
+    meshType __mesh;
 
-    long int  m=1;
-    GetPot datafile( "data" );
-    std::string mesh_type = datafile( "levelset/discretization/mesh_type",
-                                      ".m++" );
-    std::cout << mesh_type << std::endl;
-    if ( mesh_type == "INRIA" )
-    {
-        std::string mesh_dir = datafile( "levelset/discretization/mesh_dir",
-                                         "." );
-        std::string fname = mesh_dir +
-            datafile( "levelset/discretization/mesh_file", "cube_6000.mesh" );
-        readINRIAMeshFile(mesh,fname,m);
-    }
-    else if ( mesh_type == ".m++" )
-    {
-        std::string mesh_dir = datafile( "levelset/discretization/mesh_dir",
-                                         "." );
-        std::string fname = mesh_dir +
-            datafile( "levelset/discretization/mesh_file", "cube_6000.m++" );
-        readMppFile(mesh,fname,m);
-    }
-    else
-    {
-        std::cerr << "wrong mesh type. It can be either MESH++ or INRIA"
-                  << std::endl;
-        return EXIT_FAILURE;
-    }
+    std::string __mesh_file = datafile("levelset/discretization/mesh_dir", "../data/mesh++/");
+    __mesh_file += datafile("levelset/discretization/mesh_file", "cube_48.m++");
 
-    mesh.updateElementFaces();
-    mesh.updateElementEdges();
+    importer __importer(__mesh_file, MESHPP);
+    __importer.import(__mesh, 1);
+
+    std::cout << "** LS test ** Regenerating edge and face information" << std::endl;
+
+    __mesh.updateElementFaces();
+    __mesh.updateElementEdges();
 
     // Build ALL faces (interior faces are necessary for IP stabilization)
 
-    std::cout << " o-> Building face list" << std::endl;
+    std::cout << "** LS test ** Building face list" << std::endl;
 
-    UInt numIFaces = mesh.numFaces() - mesh.numBFaces();
-    UInt numBFaces = mesh.numBFaces();
-    buildFaces(mesh, std::cout, std::cerr, numBFaces, numIFaces,
+    UInt numIFaces = __mesh.numFaces() - __mesh.numBFaces();
+    UInt numBFaces = __mesh.numBFaces();
+    buildFaces(__mesh, std::cout, std::cerr, numBFaces, numIFaces,
                true, true, false);
 
     // Current FE classes for the problem under study with mapping and
     // quadrature rules
 
-    CurrentFE fe(refFE, geoMap, qr);
-    CurrentBdFE feBd(refBdFE, geoMapBd, qrBd);
+    std::cout << "** LS test ** Defining current finite element" << std::endl;
 
+    CurrentFE __fe(refFE, geoMap, qr);
+    CurrentBdFE feBd(refBdFE, geoMapBd, qrBd);
+    
     // Update of the Dof for the particular FE problem and for the boundary
     // conditions
 
-    Dof dof(refFE);
-    dof.update(mesh);
+    std::cout << "** LS test ** Updating DOF table" << std::endl;
 
-    /*
-      No boundary condition is needed in this testcase since the normal
-      component of velocity is zero all over the boundary and hence no inlet
-      boundary exists. This part of the code is however only commented out
-      since it may serve as a template.
+    Dof __dof(refFE);
+    __dof.update(__mesh);
 
-      BCh.bdUpdate( mesh,  feBd, dof );
-    */
+    // No boundary condition is needed in this test case since the normal
+    // component of velocity is zero all over the boundary and hence no inlet
+    // boundary exists. This part of the code is however only commented out
+    // since it may serve as a template.
 
-    UInt dim = dof.numTotalDof();
+    //BCh.bdUpdate( __mesh,  feBd, __dof );
+
+    UInt dim = __dof.numTotalDof();
 
     // Velocity field projection
 
     bool analyticalBeta = datafile("levelset/parameters/analytical_beta",
                                    false);
 
-    SolverAztec solverMass;
-    solverMass.setOptionsFromGetPot(datafile, "levelset/solver-mass");
-
-    ElemMat elmatM(fe.nbNode, 1, 1);
     PhysVectUnknown<Vector> betaVec(dim);
     betaVec = ZeroVector(NDIM * dim);
 
     if (!analyticalBeta) {
-        std::cout << "O-> Projecting velocity field onto fe space"
+        std::cout << "** LS test ** Projecting velocity field onto fe space"
                   << std::endl;
 
-        MSRPatt pattM_NDIM(dof, mesh, NDIM);
+        SolverAztec solverMass;
+        solverMass.setOptionsFromGetPot(datafile, "levelset/solver-mass");
+
+        ElemMat elmatM(__fe.nbNode, NDIM, NDIM);
+
+        MSRPatt pattM_NDIM(__dof, __mesh, NDIM);
         MSRMatr<Real> M_NDIM(pattM_NDIM);
 
+        std::cout << "** LS test ** Computing projection RHS" << std::endl;
         for(int ic = 0; ic < NDIM; ic++)
-            for(UInt i = 1; i <= mesh.numVolumes(); i++){
-                fe.updateJac(mesh.volumeList(i));
+            for(UInt i = 1; i <= __mesh.numVolumes(); i++){
+                __fe.updateJac( __mesh.volumeList(i) );
 
                 elmatM.zero();
 
-                mass(1., elmatM, fe, ic, ic);
-                assemb_mat(M_NDIM, elmatM, fe, dof, ic, ic);
+                mass(1., elmatM, __fe, ic, ic);
+
+                assemb_mat(M_NDIM, elmatM, __fe, __dof, ic, ic);
             }
 
-
-
+        std::cout << "** LS test ** Solving mass matrix system" << std::endl;
         vortex analyticalVelocityField;
-        projectVelocityField(mesh, fe, dof, betaVec, analyticalVelocityField,
+        projectVelocityField(__mesh, __fe, __dof, betaVec, analyticalVelocityField,
                              NDIM, M_NDIM, solverMass);
 
     }
 
+    // Export velocity field projection to OpenDX format
+
+    wr_opendx_header("results/beta.dx", __mesh, __dof, __fe, __fe_name);
+    wr_opendx_vector("results/beta.dx", "u", betaVec, 3);
+
     // Boundary conditions handling
 
-    /*
-      No boundary condition is needed in this testcase since the normal
-      component of velocity is zero all over the boundary and hence no inlet
-      boundary exists. This part of the code is however only commented out
-      since it may serve as a template.
+    // Real tgv=1.;
+    // bcManage(A,F,__mesh,__dof,BCh,feBd,tgv,0.0);
 
-      std::cout << "O-> BC Management " << std::endl;
-
-      Real tgv=1.;
-
-      bcManage(A,F,mesh,dof,BCh,feBd,tgv,0.0);
-    */
-
-    std::cout << "O-> Solving the problem" << std::endl;
-
-    SolverAztec solver;
-
-    /*
-      LevelSetSolver(mesh_type& mesh,
-      const GetPot& data_file,
-      const std::string& data_section,
-      const RefFE& reffe,
-      const QuadRule& qr,
-      const QuadRule& qr_bd,
-      const BCHandler& bc_h,
-      CurrentFE& fe_velocity,
-      const Dof& dof_velocity,
-      velocity_type& velocity0)
-    */
-
+    std::cout << "** LS test ** Solving the problem" << std::endl;
 
     // Retrieve time advancement parameters
 
@@ -218,22 +186,23 @@ int main() {
 
     // Solver initialization
 
-    LevelSetSolver<meshType> lss(mesh, datafile, "levelset", refFE,
-                                 qr, qrBd, BCh, fe, dof, betaVec);
+    LevelSetSolver<meshType> lss(__mesh, datafile, "levelset", refFE,
+                                 qr, qrBd, BCh, __fe, __dof, betaVec);
     lss.initialize(sphere, t0, delta_t);
+    lss.setVerboseMode();
 
     const LevelSetSolver<meshType>::lsfunction_type& U = lss.lsfunction();
     std::string outputFileRoot = "./results/ls_ip";
 
     // Save initial conditions
 
-    wr_opendx_header(outputFileRoot + "0000.dx", mesh, dof, lss.fe(), feName );
+    wr_opendx_header(outputFileRoot + "0000.dx", __mesh, __dof, lss.fe(), __fe_name );
     wr_opendx_scalar(outputFileRoot + "0000.dx", "levelset_ipstab", U);
 
     // Reinitialize and save re-initialized IC
 
     lss.directReinitialization();
-    wr_opendx_header(outputFileRoot + "0000r.dx", mesh, dof, lss.fe(), feName );
+    wr_opendx_header(outputFileRoot + "0000r.dx", __mesh, __dof, lss.fe(), __fe_name );
     wr_opendx_scalar(outputFileRoot + "0000r.dx", "levelset_ipstab", U);
 
     // Retrieve parameters from data file
@@ -241,14 +210,23 @@ int main() {
     UInt save_every = datafile("levelset/parameters/save_every", 1);
     UInt reini_every = datafile("levelset/parameters/reinit_every", 10);
 
+    // Initialize ostream to save mass information
+
+    std::ofstream __ofile("results/mass.txt");
+
+    // Initialize counters
+
     UInt current_step = 1;
     UInt steps_after_last_reini = 1;
     UInt steps_after_last_save = 1;
-
+    
     for(Real t = t0; t < T; t += delta_t) {
-        std::cout << " o-> Step: " << current_step << ", t = " << t
+        std::cout << "** LS test ** Step: " << current_step << ", t = " << t
                   << std::endl;
         lss.timeAdvance();
+        __ofile << t << "\t" << lss.computeMass( LevelSetSolver<meshType>::fluid1 ) << std::endl;
+        std::cout << lss;
+        lss.spy("./results/");
 
         std::ostringstream number;
         number.width(4);
@@ -256,7 +234,7 @@ int main() {
         number << current_step;
 
         if(steps_after_last_save == save_every) {
-            wr_opendx_header(outputFileRoot + number.str() + ".dx", mesh, dof, lss.fe(), feName );
+            wr_opendx_header(outputFileRoot + number.str() + ".dx", __mesh, __dof, lss.fe(), __fe_name );
             wr_opendx_scalar(outputFileRoot + number.str() + ".dx",
                              "levelset_ipstab", U);
 
@@ -265,14 +243,14 @@ int main() {
             steps_after_last_save++;
 
         if(steps_after_last_reini == reini_every) {
-            std::cout << "  - reinitializing signed distance function"
+            std::cout << "** LS test ** Reinitializing signed distance function"
                       << std::endl;
             lss.directReinitialization();
 
             steps_after_last_reini = 1;
 
             wr_opendx_header(outputFileRoot + number.str() + "r.dx",
-                             mesh, dof, lss.fe(), feName );
+                             __mesh, __dof, lss.fe(), __fe_name );
             wr_opendx_scalar(outputFileRoot + number.str() + "r.dx",
                              "levelset_ipstab", U);
         }
@@ -281,8 +259,10 @@ int main() {
 
         current_step++;
     }
+    
+    __ofile.close();
 
-    std::cout << "O-> Done" << std::endl;
-
+    std::cout << "** LS test ** Done" << std::endl;
+    
     return 0;
 }
