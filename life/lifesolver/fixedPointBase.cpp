@@ -37,8 +37,10 @@ void fixedPoint::eval(Vector& dispNew, Vector& velo, const Vector& disp, int sta
     if(status) M_nbEval = 0; // new time step
     M_nbEval++ ;
 
-    M_solid.d() = setDispOnInterface(_disp);
+//    M_solid.d() = setDispOnInterface(_disp);
 
+    M_solid.d() = disp;
+    
     M_fluid.updateMesh(M_time);
     M_fluid.iterate(M_time);
 
