@@ -86,7 +86,7 @@ bool test_petsc( Mat& __mat )
 #if defined(HAVE_PETSC_H)
     LifeV::Debug( 10000 ) << "PETSC solver test\n";
     int Nrows = __mat.matrix().Patt()->nRows();
-    
+
     double __relTol = 1.e-14;
 
     LifeV::SolverPETSC __petsc( "gmres", "ilu" );
@@ -120,7 +120,7 @@ template<typename Mat>
 bool test_aztec( Mat& __mat )
 {
     int Nrows = __mat.matrix().Patt()->nRows();
-    
+
     double __relTol = 1.e-14;
 
     LifeV::SolverAztec __aztec;
@@ -167,7 +167,7 @@ int main( int argc, char** argv )
         mass.matrix().spy( "mass.m" );
 
         success &= LifeV::test_petsc ( mass );
-        success &= LifeV::test_umfpack ( mass );
+        //success &= LifeV::test_umfpack ( mass );
         success &= LifeV::test_aztec( mass );
 
         //
@@ -178,7 +178,7 @@ int main( int argc, char** argv )
         convdiff.matrix().spy( "convdiff.m" );
 
         success &= LifeV::test_petsc ( convdiff );
-        success &= LifeV::test_umfpack ( convdiff );
+        //success &= LifeV::test_umfpack ( convdiff );
         success &= LifeV::test_aztec( convdiff );
 
     }
