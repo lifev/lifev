@@ -75,7 +75,7 @@ namespace LifeV
                            int    iter,
                            Vector &res);
 
-        void updatePrec   (Vector& sol,
+        void updateJac    (Vector& sol,
                            int     iter);
 
         void solvePrec    (Vector &);
@@ -103,11 +103,13 @@ namespace LifeV
             {return M_residualFSI;}
 
         void setResidualFSI(double *_res);
-//             {for (UInt ivec = 0; ivec < M_residualFSI.size(); ++ivec)
-//                 M_residualFSI[ivec] = _vec[ivec];
-//             }
+        void setResidualFSI(const Vector _res);
 
-        PhysVectUnknown<Vector> const & residualS() const
+        Vector getResidualFSIOnSolid();
+
+//         PhysVectUnknown<Vector> const & residualS() const
+//             {return M_residualS;}
+        PhysVectUnknown<Vector> & residualS()
             {return M_residualS;}
         PhysVectUnknown<Vector> const & residualF() const
             {return M_residualF;}

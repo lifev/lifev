@@ -47,6 +47,8 @@ operFS::operFS(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid,
 }
 
 // Destructor
+  
+
 
 operFS::~operFS()
 {
@@ -65,6 +67,8 @@ operFS::~operFS()
 
 void operFS::computeResidualFSI()
 {
+    M_residualFSI = 0.;
+
     BC_Base const &BC_fluidInterface = M_fluid.BC_fluid()[0];
     BC_Base const &BC_solidInterface = M_solid.BC_solid()[0];
 
@@ -129,6 +133,77 @@ void operFS::setResidualFSI(double *_res)
     }
 }
 
+void operFS::setResidualFSI(const Vector _res)
+{
+    BC_Base const &BC_fluidInterface = M_fluid.BC_fluid()[0];
+    BC_Base const &BC_solidInterface = M_solid.BC_solid()[0];
+
+    UInt nDofInterface = BC_fluidInterface.list_size();
+
+    UInt nDimF = BC_fluidInterface.numberOfComponents();
+    UInt nDimS = BC_solidInterface.numberOfComponents();
+
+    UInt totalDofFluid = M_residualF.size()/ nDimF;
+    UInt totalDofSolid = M_residualS.size()/ nDimS;
+
+    for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)
+    {
+        ID IDfluid = BC_fluidInterface(iBC)->id();
+
+        BCVector_Interface const *BCVInterface =
+            static_cast <BCVector_Interface const *>
+            (BC_fluidInterface.pointerToBCVector());
+
+        ID IDsolid = BCVInterface->
+            dofInterface().getInterfaceDof(IDfluid);
+
+        for (UInt jDim = 0; jDim < nDimF; ++jDim)
+        {
+            M_residualFSI[IDfluid - 1 + jDim*totalDofFluid] =
+                std::fabs(_res[IDsolid - 1 + jDim*totalDofSolid]);
+        }
+    }
+}
+
+
+Vector operFS::getResidualFSIOnSolid()
+{
+    Vector vec = M_residualS;
+    vec = 0.;
+
+    BC_Base const &BC_fluidInterface = M_fluid.BC_fluid()[0];
+    BC_Base const &BC_solidInterface = M_solid.BC_solid()[0];
+
+    UInt nDofInterface = BC_fluidInterface.list_size();
+
+    UInt nDimF = BC_fluidInterface.numberOfComponents();
+    UInt nDimS = BC_solidInterface.numberOfComponents();
+
+    UInt totalDofFluid = M_residualF.size()/ nDimF;
+    UInt totalDofSolid = M_residualS.size()/ nDimS;
+
+    for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)
+    {
+        ID IDfluid = BC_fluidInterface(iBC)->id();
+
+        BCVector_Interface const *BCVInterface =
+            static_cast <BCVector_Interface const *>
+            (BC_fluidInterface.pointerToBCVector());
+
+        ID IDsolid = BCVInterface->
+            dofInterface().getInterfaceDof(IDfluid);
+
+        for (UInt jDim = 0; jDim < nDimF; ++jDim)
+        {
+            vec[IDsolid - 1 + jDim*totalDofSolid] =
+                std::fabs(M_residualF[IDfluid - 1 + jDim*totalDofFluid] -
+                          M_residualS[IDsolid - 1 + jDim*totalDofSolid]);
+        }
+    }
+
+    return vec;
+}
+
 //
 // Residual evaluation
 //
@@ -144,22 +219,15 @@ void operFS::eval(const Vector& disp,
 
     UInt nDofInterface;
     nDofInterface = M_fluid.BC_fluid()[1].list_size();
-    std::cout << nDofInterface << std::endl;
-
-    std::cout << "dim solid.d = " << M_solid.d().size()
-              << std::endl;
-    std::cout << "dim disp    = " << disp.size()
-              << std::endl;
 
     M_solid.d() = disp;
+
+    M_solid._recur = 0;
+    M_solid.iterate();
 
     M_fluid.updateMesh(M_time);
     M_fluid.iterate   (M_time);
 
-    M_solid._recur = 0;
-    M_solid.d() = 1.;
-
-    M_solid.iterate();
 
     dispNew = M_solid.d();
     velo    = M_solid.w();
@@ -188,24 +256,24 @@ void operFS::evalResidual(Vector &disp,
 
     eval(disp, status, M_dispStruct, M_velo);
 
-//    res = disp - M_dispStruct;
-
     M_residualS = M_solid.residual();
-
     M_residualF = M_fluid.residual();
-
-//    res = M_residualS + M_residualF;
 
     computeResidualFSI();
 
-    res = M_residualFSI;
+    res = getResidualFSIOnSolid();
+//    res = M_residualFSI;
 
+    solveLinearSolid();
 
-    std::cout << "Max ResidualFSI = " << maxnorm(M_residualFSI)
-              << std::endl;
+//     for (UInt ii = 0; ii < M_residualFSI.size(); ++ii)
+//         std::cout << M_residualFSI[ii] << std::endl;//  << " " << M_dz[ii] << std::endl;
+
     std::cout << "Max ResidualF   = " << maxnorm(M_residualF)
               << std::endl;
     std::cout << "Max ResidualS   = " << maxnorm(M_residualS)
+              << std::endl;
+    std::cout << "Max ResidualFSI = " << maxnorm(M_residualFSI)
               << std::endl;
 
 }
@@ -214,9 +282,9 @@ void operFS::evalResidual(Vector &disp,
 // Preconditionner computation using AZTEC
 //
 
-void  operFS::updatePrec(Vector& sol,int iter)
-{
-}
+// void  operFS::updateJac(Vector& sol,int iter)
+// {
+// }
 
 
 //
@@ -244,6 +312,12 @@ void  operFS::solvePrec(Vector &_uBarS)
 
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 }
+
+//
+void  operFS::updateJac(Vector& sol,int iter) {
+}
+
+
 
 void  operFS::solvePrec(const Vector  &_res,
                         double        _linearRelTol,
@@ -290,19 +364,25 @@ void  operFS::solveLinearFluid()
 
 void  operFS::solveLinearSolid()
 {
-    M_rhs_dz = 0.0;
+    M_rhs_dz = 0.;
+    M_dz = M_rhs_dz;
 
     if ( !M_BCh_dz.bdUpdateDone() )
         M_BCh_dz.bdUpdate(M_solid._mesh, M_solid._feBd,
                           M_solid._dof);
 
     bc_manage_vector(M_rhs_dz, M_solid._mesh, M_solid._dof,
-                     M_BCh_dz, M_solid._feBd, 1.0, 1.0);
+                     M_BCh_dz, M_solid._feBd, 1., 1.);
 
     Real tol       = 1.e-10;
 
+    std::cout << "rhs_dz norm = " << maxnorm(M_rhs_dz) << std::endl;
     M_solid._recur = 1;
     M_solid.solveJac(M_dz, M_rhs_dz, tol);
+    std::cout << "dz norm     = " << maxnorm(M_dz) << std::endl;
+
+    for (UInt ii = 0; ii < M_rhs_dz.size(); ++ii)
+        std::cout << M_rhs_dz[ii] << " " << M_dz[ii] << std::endl;
 }
 
 
@@ -332,6 +412,14 @@ void  operFS::invSsPrime(const Vector& res,
                          double linear_rel_tol,
                          Vector& step)
 {
+    setResidualFSI(res);
+    solveLinearSolid();
+
+     for (int i = 0; i < (int) M_dz.size(); ++i)
+         step[i] = dz()[i];
+
+     return;
+
     //! step  = S'_s^{-1} \cdot res
 
     // AZTEC specifications for the second system
@@ -401,19 +489,13 @@ void my_matvecSsPrime(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
             Jz[i] =  0.0;
     else
     {
-         for (int i=0; i <(int)dim; ++i)
-             my_data->M_pFS->solid().residual()[i] = 1.;
-
-//         my_data->M_pFS->solveLinearSolid();
-
-        for (int i=0; i <(int)dim; ++i)
-        {
-            my_data->M_pFS->solid().d()[i] =  1.;
-        }
+//        my_data->M_pFS->setResidualFSI(z);
+//          for (int i=0; i <(int)dim; ++i)
+//              my_data->M_pFS->solid().d()[i] = z[i];
+//          my_data->M_pFS->solid().iterate();
+//          my_data->M_pFS->solid().postProcess();
+        my_data->M_pFS->setResidualFSI(z);
         my_data->M_pFS->solveLinearSolid();
-
-        // Here we have to get rid of z[i]
-        // Jz = to the computations just above.
 
         for (int i = 0; i < (int) dim; ++i)
             Jz[i] = my_data->M_pFS->dz()[i];
