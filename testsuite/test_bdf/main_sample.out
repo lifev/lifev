@@ -1,0 +1,930 @@
+ Boundary Conditions Handler ====>
+ Number of BC stored 2
+ List => 
+********************************
+BC Name: Inlet
+Flag: 10
+Type: 0
+Mode: 0
+Number of components: 1
+List of components: 1 
+Number of stored ID's: 0
+********************************
+********************************
+BC Name: Outlet
+Flag: 20
+Type: 0
+Mode: 0
+Number of components: 1
+List of components: 1 
+Number of stored ID's: 0
+********************************
+ <===========================>
+../data/mesh/mesh++/cube_384.m++
+Reading Mesh++ file
+Linear Tetra Mesh
+#Vertices= 125 #BVertices= 98
+#Faces= 864 #Boundary Faces= 192
+#Edges= 604 #Boundary Edges= 288
+#Points= 125 #Boundary Points= 98
+#Volumes= 384
+Vertices Read 
+Reading Bfaces 
+Boundary Faces Read 
+Reading Bedges 
+Boundary Edges Read 
+Reading Volumes 
+384 Volume elements Read
+WARNING: Not all volumes have marker flag set
+Volume enclosed by the mesh= 1
+(Computed by integrating mesh elements measures)
+(Using 1 point Quadrature rule)
+**** Marker Flags for Fixed Boundary Faces ***
+ (it only contains those that were fixed because unset !
+id->marker   id->marker  id->marker
+
+  *****  END OF LIST ****
+ Boundary faces found:192
+ Num Faces Stored stored:192
+ Boundary faces counter gives:192
+Computing internal edges**DOMAIN SURFACE IS (TOPOLOGICALLY) CLOSED
+ ********     COUNTERS CONTENT **********************************
+ Num Volumes:  384
+ Num Vertices: 125 Num B. Vertices: 98
+ Num Points:   125 Num B. Points  : 98
+ Num Edges:    604 Num B. Edges   : 288
+ Num Faces:    864 Num B. Faces   : 192
+ ********     END COUNTERS **********************************
+
+*** CHECKING WITH EULER FORMULAE *****  
+
+*** CHECKING IS OK *****  
+   VOLUME ENCLOSED BY THE MESH COMPUTED BY INTEGRATION ON BOUNDARY FACES
+INT(X)     INT(Y)      INT(Z) <- they should be equal and equal to
+                                 the voulume enclosed by the mesh 
+1 1 1
+   BOUNDARY FACES ARE DEFINING A CLOSED SURFACE IF 0
+ IS (ALMOST) ZERO
+**************************************************
+**************************************************
+                      RegionMesh3D                
+**************************************************
+**************************************************
+ ID: 0 Marker Flag:1
+**************** COUNTERS ********************
+NumPoints=125  numBPoints=98
+NumVertices=125  numBVerices=98
+NumVolumes=384  numFaces=864
+NumBFaces=192  numEdges=604
+NumBEdges=288
+**************************************************
+************ACTUALLY STORED  ********************
+Points=125  Edges=  288
+Faces= 192  Volumes=384
+**************************************************
+*******         STATUS OF SWITCHES    ************
+
+ Status of switches
+Switch named: FACES_HAVE_ADIACENCY Value= 0
+Switch named: HAS_ALL_EDGES Value= 0
+Switch named: HAS_ALL_FACES Value= 0
+Switch named: HAS_BEEN_CHECKED Value= 1
+Switch named: HAS_BOUNDARY_EDGES Value= 0
+Switch named: HAS_BOUNDARY_FACES Value= 1
+Switch named: HAS_VOLUME_TO_EDGES Value= 0
+Switch named: HAS_VOLUME_TO_FACES Value= 0
+**************************************************
+**************************************************
+Now building local Edges/faces Stuff
+
+**************************************************
+**************************************************
+                      RegionMesh3D                
+**************************************************
+**************************************************
+ ID: 0 Marker Flag:1
+**************** COUNTERS ********************
+NumPoints=125  numBPoints=98
+NumVertices=125  numBVerices=98
+NumVolumes=384  numFaces=864
+NumBFaces=192  numEdges=604
+NumBEdges=288
+**************************************************
+************ACTUALLY STORED  ********************
+Points=125  Edges=  288
+Faces= 192  Volumes=384
+**************************************************
+*******         STATUS OF SWITCHES    ************
+
+ Status of switches
+Switch named: FACES_HAVE_ADIACENCY Value= 0
+Switch named: HAS_ALL_EDGES Value= 0
+Switch named: HAS_ALL_FACES Value= 0
+Switch named: HAS_BEEN_CHECKED Value= 1
+Switch named: HAS_BOUNDARY_EDGES Value= 0
+Switch named: HAS_BOUNDARY_FACES Value= 1
+Switch named: HAS_VOLUME_TO_EDGES Value= 1
+Switch named: HAS_VOLUME_TO_FACES Value= 1
+**************************************************
+**************************************************
+ Degree of Freedom (Dof) Object
+ Total Dof Stored             729
+ With offset (min. Dof Id) =  1
+ Dof's on Vertices  from 1 , to:125
+ Dof's on Edges     from 126 , to:729
+ Dof's on Faces     from 730 , to:729
+ Dof's on Volumes   from 730 , to:729
+*** BDF Time discretization of order 3***
+
+*** Coefficients: 
+
+alpha(0) = 1.83333
+alpha(1) = 3
+alpha(2) = -1.5
+alpha(3) = 0.333333
+beta(0) = 3
+beta(1) = -3
+beta(2) = 1
+Length unknown vectors:3,0
+dim                    = 729
+
+Values
+*** Matrix computation           : 
+*** Linear System Solving (AZTEC)
+*** BDF Time discretization of order 3***
+
+*** Coefficients: 
+
+alpha(0) = 1.83333
+alpha(1) = 3
+alpha(2) = -1.5
+alpha(3) = 0.333333
+beta(0) = 3
+beta(1) = -3
+beta(2) = 1
+Length unknown vectors:3,729
+Now we are at time 0.5
+A has been constructed
+0.51s.
+*** BC Management: 
+0s.
+
+		*******************************************************
+		***** Preconditioned GMRES solution
+		***** ILUT( fill-in = 5.000e+00, drop = 1.000e-04)
+ 		***** without overlap
+		***** No scaling
+		***** NOTE: convergence VARIES when the total number of
+		*****       processors is changed.
+		*******************************************************
+
+                iter:    0           residual = 1.000000e+00
+
+		*******************************************************
+		***** ilut: The ilut factors require 1.885e+00 times 
+		*****       the memory of the overlapped subdomain matrix.
+		*******************************************************
+
+                iter:    1           residual = 2.017355e-04
+                iter:    2           residual = 1.346480e-08
+                iter:    3           residual = 1.839637e-12
+
+
+		Solution time: 0.040000 (sec.)
+		total iterations: 3
+		Flops not available for options[AZ_precond] = 14
+*** Solution computed in 0.05s.
+|| U       ||_{L^2}                   = 0.281366
+|| sol     ||_{L^2}                   = 0.281366
+|| U - sol ||_{L^2}                   = 4.31541e-12
+|| U - sol ||_{L^2} / || sol ||_{L^2} = 1.53374e-11
+|| U       ||_{H^1}                   = 0.57373
+|| sol     ||_{H^1}                   = 0.57373
+|| U - sol ||_{H^1}                   = 1.61292e-10
+|| U - sol ||_{H^1} / || sol ||_{H^1} = 2.81129e-10
+Now we are at time 1
+A has been constructed
+0.79s.
+*** BC Management: 
+0s.
+
+		*******************************************************
+		***** Preconditioned GMRES solution
+		***** ILUT( fill-in = 5.000e+00, drop = 1.000e-04)
+ 		***** without overlap
+		***** No scaling
+		***** NOTE: convergence VARIES when the total number of
+		*****       processors is changed.
+		*******************************************************
+
+                iter:    0           residual = 1.000000e+00
+
+		*******************************************************
+		***** ilut: The ilut factors require 1.884e+00 times 
+		*****       the memory of the overlapped subdomain matrix.
+		*******************************************************
+
+                iter:    1           residual = 6.109384e-05
+                iter:    2           residual = 3.702171e-09
+                iter:    3           residual = 6.152750e-13
+
+
+		Solution time: 0.040000 (sec.)
+		total iterations: 3
+		Flops not available for options[AZ_precond] = 14
+*** Solution computed in 0.04s.
+|| U       ||_{L^2}                   = 1.12546
+|| sol     ||_{L^2}                   = 1.12546
+|| U - sol ||_{L^2}                   = 1.75689e-11
+|| U - sol ||_{L^2} / || sol ||_{L^2} = 1.56104e-11
+|| U       ||_{H^1}                   = 2.29492
+|| sol     ||_{H^1}                   = 2.29492
+|| U - sol ||_{H^1}                   = 6.45153e-10
+|| U - sol ||_{H^1} / || sol ||_{H^1} = 2.81122e-10
+Now we are at time 1.5
+A has been constructed
+0.79s.
+*** BC Management: 
+0.01s.
+
+		*******************************************************
+		***** Preconditioned GMRES solution
+		***** ILUT( fill-in = 5.000e+00, drop = 1.000e-04)
+ 		***** without overlap
+		***** No scaling
+		***** NOTE: convergence VARIES when the total number of
+		*****       processors is changed.
+		*******************************************************
+
+                iter:    0           residual = 1.000000e+00
+
+		*******************************************************
+		***** ilut: The ilut factors require 1.877e+00 times 
+		*****       the memory of the overlapped subdomain matrix.
+		*******************************************************
+
+                iter:    1           residual = 2.481681e-05
+                iter:    2           residual = 1.533139e-09
+                iter:    3           residual = 1.874165e-13
+
+
+		Solution time: 0.030000 (sec.)
+		total iterations: 3
+		Flops not available for options[AZ_precond] = 14
+*** Solution computed in 0.03s.
+|| U       ||_{L^2}                   = 2.53229
+|| sol     ||_{L^2}                   = 2.53229
+|| U - sol ||_{L^2}                   = 3.93502e-11
+|| U - sol ||_{L^2} / || sol ||_{L^2} = 1.55394e-11
+|| U       ||_{H^1}                   = 5.16357
+|| sol     ||_{H^1}                   = 5.16357
+|| U - sol ||_{H^1}                   = 1.4512e-09
+|| U - sol ||_{H^1} / || sol ||_{H^1} = 2.81046e-10
+Now we are at time 2
+A has been constructed
+0.77s.
+*** BC Management: 
+0s.
+
+		*******************************************************
+		***** Preconditioned GMRES solution
+		***** ILUT( fill-in = 5.000e+00, drop = 1.000e-04)
+ 		***** without overlap
+		***** No scaling
+		***** NOTE: convergence VARIES when the total number of
+		*****       processors is changed.
+		*******************************************************
+
+                iter:    0           residual = 1.000000e+00
+
+		*******************************************************
+		***** ilut: The ilut factors require 1.869e+00 times 
+		*****       the memory of the overlapped subdomain matrix.
+		*******************************************************
+
+                iter:    1           residual = 1.033115e-05
+                iter:    2           residual = 6.742832e-10
+                iter:    3           residual = 1.078068e-13
+
+
+		Solution time: 0.040000 (sec.)
+		total iterations: 3
+		Flops not available for options[AZ_precond] = 14
+*** Solution computed in 0.04s.
+|| U       ||_{L^2}                   = 4.50185
+|| sol     ||_{L^2}                   = 4.50185
+|| U - sol ||_{L^2}                   = 7.00478e-11
+|| U - sol ||_{L^2} / || sol ||_{L^2} = 1.55598e-11
+|| U       ||_{H^1}                   = 9.17969
+|| sol     ||_{H^1}                   = 9.17969
+|| U - sol ||_{H^1}                   = 2.58042e-09
+|| U - sol ||_{H^1} / || sol ||_{H^1} = 2.81101e-10
+Now we are at time 2.5
+A has been constructed
+0.78s.
+*** BC Management: 
+0s.
+
+		*******************************************************
+		***** Preconditioned GMRES solution
+		***** ILUT( fill-in = 5.000e+00, drop = 1.000e-04)
+ 		***** without overlap
+		***** No scaling
+		***** NOTE: convergence VARIES when the total number of
+		*****       processors is changed.
+		*******************************************************
+
+                iter:    0           residual = 1.000000e+00
+
+		*******************************************************
+		***** ilut: The ilut factors require 1.860e+00 times 
+		*****       the memory of the overlapped subdomain matrix.
+		*******************************************************
+
+                iter:    1           residual = 4.903640e-06
+                iter:    2           residual = 2.474874e-10
+                iter:    3           residual = 3.338337e-14
+
+
+		Solution time: 0.040000 (sec.)
+		total iterations: 3
+		Flops not available for options[AZ_precond] = 14
+*** Solution computed in 0.04s.
+|| U       ||_{L^2}                   = 7.03414
+|| sol     ||_{L^2}                   = 7.03414
+|| U - sol ||_{L^2}                   = 1.09349e-10
+|| U - sol ||_{L^2} / || sol ||_{L^2} = 1.55455e-11
+|| U       ||_{H^1}                   = 14.3433
+|| sol     ||_{H^1}                   = 14.3433
+|| U - sol ||_{H^1}                   = 4.03208e-09
+|| U - sol ||_{H^1} / || sol ||_{H^1} = 2.81113e-10
+Now we are at time 3
+A has been constructed
+0.77s.
+*** BC Management: 
+0s.
+
+		*******************************************************
+		***** Preconditioned GMRES solution
+		***** ILUT( fill-in = 5.000e+00, drop = 1.000e-04)
+ 		***** without overlap
+		***** No scaling
+		***** NOTE: convergence VARIES when the total number of
+		*****       processors is changed.
+		*******************************************************
+
+                iter:    0           residual = 1.000000e+00
+
+		*******************************************************
+		***** ilut: The ilut factors require 1.847e+00 times 
+		*****       the memory of the overlapped subdomain matrix.
+		*******************************************************
+
+                iter:    1           residual = 2.345905e-06
+                iter:    2           residual = 8.829283e-11
+
+
+		Solution time: 0.040000 (sec.)
+		total iterations: 2
+		Flops not available for options[AZ_precond] = 14
+*** Solution computed in 0.04s.
+|| U       ||_{L^2}                   = 10.1292
+|| sol     ||_{L^2}                   = 10.1292
+|| U - sol ||_{L^2}                   = 4.25567e-09
+|| U - sol ||_{L^2} / || sol ||_{L^2} = 4.2014e-10
+|| U       ||_{H^1}                   = 20.6543
+|| sol     ||_{H^1}                   = 20.6543
+|| U - sol ||_{H^1}                   = 6.78186e-08
+|| U - sol ||_{H^1} / || sol ||_{H^1} = 3.28351e-09
+Now we are at time 3.5
+A has been constructed
+0.78s.
+*** BC Management: 
+0s.
+
+		*******************************************************
+		***** Preconditioned GMRES solution
+		***** ILUT( fill-in = 5.000e+00, drop = 1.000e-04)
+ 		***** without overlap
+		***** No scaling
+		***** NOTE: convergence VARIES when the total number of
+		*****       processors is changed.
+		*******************************************************
+
+                iter:    0           residual = 1.000000e+00
+
+		*******************************************************
+		***** ilut: The ilut factors require 1.832e+00 times 
+		*****       the memory of the overlapped subdomain matrix.
+		*******************************************************
+
+                iter:    1           residual = 1.402746e-06
+                iter:    2           residual = 4.543174e-11
+
+
+		Solution time: 0.030000 (sec.)
+		total iterations: 2
+		Flops not available for options[AZ_precond] = 14
+*** Solution computed in 0.03s.
+|| U       ||_{L^2}                   = 13.7869
+|| sol     ||_{L^2}                   = 13.7869
+|| U - sol ||_{L^2}                   = 5.67869e-09
+|| U - sol ||_{L^2} / || sol ||_{L^2} = 4.1189e-10
+|| U       ||_{H^1}                   = 28.1128
+|| sol     ||_{H^1}                   = 28.1128
+|| U - sol ||_{H^1}                   = 6.90388e-08
+|| U - sol ||_{H^1} / || sol ||_{H^1} = 2.45578e-09
+Now we are at time 4
+A has been constructed
+0.78s.
+*** BC Management: 
+0s.
+
+		*******************************************************
+		***** Preconditioned GMRES solution
+		***** ILUT( fill-in = 5.000e+00, drop = 1.000e-04)
+ 		***** without overlap
+		***** No scaling
+		***** NOTE: convergence VARIES when the total number of
+		*****       processors is changed.
+		*******************************************************
+
+                iter:    0           residual = 1.000000e+00
+
+		*******************************************************
+		***** ilut: The ilut factors require 1.814e+00 times 
+		*****       the memory of the overlapped subdomain matrix.
+		*******************************************************
+
+                iter:    1           residual = 9.536308e-07
+                iter:    2           residual = 3.046946e-11
+
+
+		Solution time: 0.040000 (sec.)
+		total iterations: 2
+		Flops not available for options[AZ_precond] = 14
+*** Solution computed in 0.04s.
+|| U       ||_{L^2}                   = 18.0074
+|| sol     ||_{L^2}                   = 18.0074
+|| U - sol ||_{L^2}                   = 6.39401e-09
+|| U - sol ||_{L^2} / || sol ||_{L^2} = 3.55077e-10
+|| U       ||_{H^1}                   = 36.7188
+|| sol     ||_{H^1}                   = 36.7188
+|| U - sol ||_{H^1}                   = 7.11239e-08
+|| U - sol ||_{H^1} / || sol ||_{H^1} = 1.93699e-09
+Now we are at time 4.5
+A has been constructed
+0.78s.
+*** BC Management: 
+0s.
+
+		*******************************************************
+		***** Preconditioned GMRES solution
+		***** ILUT( fill-in = 5.000e+00, drop = 1.000e-04)
+ 		***** without overlap
+		***** No scaling
+		***** NOTE: convergence VARIES when the total number of
+		*****       processors is changed.
+		*******************************************************
+
+                iter:    0           residual = 1.000000e+00
+
+		*******************************************************
+		***** ilut: The ilut factors require 1.801e+00 times 
+		*****       the memory of the overlapped subdomain matrix.
+		*******************************************************
+
+                iter:    1           residual = 4.894364e-07
+                iter:    2           residual = 9.214980e-12
+
+
+		Solution time: 0.040000 (sec.)
+		total iterations: 2
+		Flops not available for options[AZ_precond] = 14
+*** Solution computed in 0.04s.
+|| U       ||_{L^2}                   = 22.7906
+|| sol     ||_{L^2}                   = 22.7906
+|| U - sol ||_{L^2}                   = 4.89193e-09
+|| U - sol ||_{L^2} / || sol ||_{L^2} = 2.14646e-10
+|| U       ||_{H^1}                   = 46.4722
+|| sol     ||_{H^1}                   = 46.4722
+|| U - sol ||_{H^1}                   = 4.73091e-08
+|| U - sol ||_{H^1} / || sol ||_{H^1} = 1.01801e-09
+Now we are at time 5
+A has been constructed
+0.77s.
+*** BC Management: 
+0s.
+
+		*******************************************************
+		***** Preconditioned GMRES solution
+		***** ILUT( fill-in = 5.000e+00, drop = 1.000e-04)
+ 		***** without overlap
+		***** No scaling
+		***** NOTE: convergence VARIES when the total number of
+		*****       processors is changed.
+		*******************************************************
+
+                iter:    0           residual = 1.000000e+00
+
+		*******************************************************
+		***** ilut: The ilut factors require 1.794e+00 times 
+		*****       the memory of the overlapped subdomain matrix.
+		*******************************************************
+
+                iter:    1           residual = 3.384065e-07
+                iter:    2           residual = 7.250593e-12
+
+
+		Solution time: 0.040000 (sec.)
+		total iterations: 2
+		Flops not available for options[AZ_precond] = 14
+*** Solution computed in 0.04s.
+|| U       ||_{L^2}                   = 28.1366
+|| sol     ||_{L^2}                   = 28.1366
+|| U - sol ||_{L^2}                   = 3.41762e-09
+|| U - sol ||_{L^2} / || sol ||_{L^2} = 1.21465e-10
+|| U       ||_{H^1}                   = 57.373
+|| sol     ||_{H^1}                   = 57.373
+|| U - sol ||_{H^1}                   = 3.78449e-08
+|| U - sol ||_{H^1} / || sol ||_{H^1} = 6.59629e-10
+Now we are at time 5.5
+A has been constructed
+0.78s.
+*** BC Management: 
+0s.
+
+		*******************************************************
+		***** Preconditioned GMRES solution
+		***** ILUT( fill-in = 5.000e+00, drop = 1.000e-04)
+ 		***** without overlap
+		***** No scaling
+		***** NOTE: convergence VARIES when the total number of
+		*****       processors is changed.
+		*******************************************************
+
+                iter:    0           residual = 1.000000e+00
+
+		*******************************************************
+		***** ilut: The ilut factors require 1.782e+00 times 
+		*****       the memory of the overlapped subdomain matrix.
+		*******************************************************
+
+                iter:    1           residual = 2.716764e-07
+                iter:    2           residual = 4.293970e-12
+
+
+		Solution time: 0.030000 (sec.)
+		total iterations: 2
+		Flops not available for options[AZ_precond] = 14
+*** Solution computed in 0.03s.
+|| U       ||_{L^2}                   = 34.0453
+|| sol     ||_{L^2}                   = 34.0453
+|| U - sol ||_{L^2}                   = 2.50553e-09
+|| U - sol ||_{L^2} / || sol ||_{L^2} = 7.3594e-11
+|| U       ||_{H^1}                   = 69.4214
+|| sol     ||_{H^1}                   = 69.4214
+|| U - sol ||_{H^1}                   = 3.14927e-08
+|| U - sol ||_{H^1} / || sol ||_{H^1} = 4.53645e-10
+Now we are at time 6
+A has been constructed
+0.77s.
+*** BC Management: 
+0s.
+
+		*******************************************************
+		***** Preconditioned GMRES solution
+		***** ILUT( fill-in = 5.000e+00, drop = 1.000e-04)
+ 		***** without overlap
+		***** No scaling
+		***** NOTE: convergence VARIES when the total number of
+		*****       processors is changed.
+		*******************************************************
+
+                iter:    0           residual = 1.000000e+00
+
+		*******************************************************
+		***** ilut: The ilut factors require 1.773e+00 times 
+		*****       the memory of the overlapped subdomain matrix.
+		*******************************************************
+
+                iter:    1           residual = 1.884179e-07
+                iter:    2           residual = 2.831721e-12
+
+
+		Solution time: 0.040000 (sec.)
+		total iterations: 2
+		Flops not available for options[AZ_precond] = 14
+*** Solution computed in 0.04s.
+|| U       ||_{L^2}                   = 40.5167
+|| sol     ||_{L^2}                   = 40.5167
+|| U - sol ||_{L^2}                   = 2.34313e-09
+|| U - sol ||_{L^2} / || sol ||_{L^2} = 5.78312e-11
+|| U       ||_{H^1}                   = 82.6172
+|| sol     ||_{H^1}                   = 82.6172
+|| U - sol ||_{H^1}                   = 3.18146e-08
+|| U - sol ||_{H^1} / || sol ||_{H^1} = 3.85085e-10
+Now we are at time 6.5
+A has been constructed
+0.79s.
+*** BC Management: 
+0s.
+
+		*******************************************************
+		***** Preconditioned GMRES solution
+		***** ILUT( fill-in = 5.000e+00, drop = 1.000e-04)
+ 		***** without overlap
+		***** No scaling
+		***** NOTE: convergence VARIES when the total number of
+		*****       processors is changed.
+		*******************************************************
+
+                iter:    0           residual = 1.000000e+00
+
+		*******************************************************
+		***** ilut: The ilut factors require 1.766e+00 times 
+		*****       the memory of the overlapped subdomain matrix.
+		*******************************************************
+
+                iter:    1           residual = 1.876229e-07
+                iter:    2           residual = 2.503633e-12
+
+
+		Solution time: 0.030000 (sec.)
+		total iterations: 2
+		Flops not available for options[AZ_precond] = 14
+*** Solution computed in 0.03s.
+|| U       ||_{L^2}                   = 47.5508
+|| sol     ||_{L^2}                   = 47.5508
+|| U - sol ||_{L^2}                   = 2.39966e-09
+|| U - sol ||_{L^2} / || sol ||_{L^2} = 5.04652e-11
+|| U       ||_{H^1}                   = 96.9605
+|| sol     ||_{H^1}                   = 96.9605
+|| U - sol ||_{H^1}                   = 3.53046e-08
+|| U - sol ||_{H^1} / || sol ||_{H^1} = 3.64113e-10
+Now we are at time 7
+A has been constructed
+0.77s.
+*** BC Management: 
+0s.
+
+		*******************************************************
+		***** Preconditioned GMRES solution
+		***** ILUT( fill-in = 5.000e+00, drop = 1.000e-04)
+ 		***** without overlap
+		***** No scaling
+		***** NOTE: convergence VARIES when the total number of
+		*****       processors is changed.
+		*******************************************************
+
+                iter:    0           residual = 1.000000e+00
+
+		*******************************************************
+		***** ilut: The ilut factors require 1.759e+00 times 
+		*****       the memory of the overlapped subdomain matrix.
+		*******************************************************
+
+                iter:    1           residual = 1.573318e-07
+                iter:    2           residual = 2.252476e-12
+
+
+		Solution time: 0.040000 (sec.)
+		total iterations: 2
+		Flops not available for options[AZ_precond] = 14
+*** Solution computed in 0.04s.
+|| U       ||_{L^2}                   = 55.1477
+|| sol     ||_{L^2}                   = 55.1477
+|| U - sol ||_{L^2}                   = 2.15337e-09
+|| U - sol ||_{L^2} / || sol ||_{L^2} = 3.90473e-11
+|| U       ||_{H^1}                   = 112.451
+|| sol     ||_{H^1}                   = 112.451
+|| U - sol ||_{H^1}                   = 3.82566e-08
+|| U - sol ||_{H^1} / || sol ||_{H^1} = 3.40206e-10
+Now we are at time 7.5
+A has been constructed
+0.78s.
+*** BC Management: 
+0.01s.
+
+		*******************************************************
+		***** Preconditioned GMRES solution
+		***** ILUT( fill-in = 5.000e+00, drop = 1.000e-04)
+ 		***** without overlap
+		***** No scaling
+		***** NOTE: convergence VARIES when the total number of
+		*****       processors is changed.
+		*******************************************************
+
+                iter:    0           residual = 1.000000e+00
+
+		*******************************************************
+		***** ilut: The ilut factors require 1.755e+00 times 
+		*****       the memory of the overlapped subdomain matrix.
+		*******************************************************
+
+                iter:    1           residual = 1.495988e-07
+                iter:    2           residual = 1.675235e-12
+
+
+		Solution time: 0.030000 (sec.)
+		total iterations: 2
+		Flops not available for options[AZ_precond] = 14
+*** Solution computed in 0.03s.
+|| U       ||_{L^2}                   = 63.3073
+|| sol     ||_{L^2}                   = 63.3073
+|| U - sol ||_{L^2}                   = 2.14089e-09
+|| U - sol ||_{L^2} / || sol ||_{L^2} = 3.38175e-11
+|| U       ||_{H^1}                   = 129.089
+|| sol     ||_{H^1}                   = 129.089
+|| U - sol ||_{H^1}                   = 4.23537e-08
+|| U - sol ||_{H^1} / || sol ||_{H^1} = 3.28096e-10
+Now we are at time 8
+A has been constructed
+0.77s.
+*** BC Management: 
+0s.
+
+		*******************************************************
+		***** Preconditioned GMRES solution
+		***** ILUT( fill-in = 5.000e+00, drop = 1.000e-04)
+ 		***** without overlap
+		***** No scaling
+		***** NOTE: convergence VARIES when the total number of
+		*****       processors is changed.
+		*******************************************************
+
+                iter:    0           residual = 1.000000e+00
+
+		*******************************************************
+		***** ilut: The ilut factors require 1.749e+00 times 
+		*****       the memory of the overlapped subdomain matrix.
+		*******************************************************
+
+                iter:    1           residual = 1.027857e-07
+                iter:    2           residual = 1.320546e-12
+
+
+		Solution time: 0.030000 (sec.)
+		total iterations: 2
+		Flops not available for options[AZ_precond] = 14
+*** Solution computed in 0.04s.
+|| U       ||_{L^2}                   = 72.0296
+|| sol     ||_{L^2}                   = 72.0296
+|| U - sol ||_{L^2}                   = 2.00343e-09
+|| U - sol ||_{L^2} / || sol ||_{L^2} = 2.7814e-11
+|| U       ||_{H^1}                   = 146.875
+|| sol     ||_{H^1}                   = 146.875
+|| U - sol ||_{H^1}                   = 4.57269e-08
+|| U - sol ||_{H^1} / || sol ||_{H^1} = 3.11332e-10
+Now we are at time 8.5
+A has been constructed
+0.78s.
+*** BC Management: 
+0s.
+
+		*******************************************************
+		***** Preconditioned GMRES solution
+		***** ILUT( fill-in = 5.000e+00, drop = 1.000e-04)
+ 		***** without overlap
+		***** No scaling
+		***** NOTE: convergence VARIES when the total number of
+		*****       processors is changed.
+		*******************************************************
+
+                iter:    0           residual = 1.000000e+00
+
+		*******************************************************
+		***** ilut: The ilut factors require 1.747e+00 times 
+		*****       the memory of the overlapped subdomain matrix.
+		*******************************************************
+
+                iter:    1           residual = 9.731809e-08
+                iter:    2           residual = 1.306130e-12
+
+
+		Solution time: 0.030000 (sec.)
+		total iterations: 2
+		Flops not available for options[AZ_precond] = 14
+*** Solution computed in 0.03s.
+|| U       ||_{L^2}                   = 81.3147
+|| sol     ||_{L^2}                   = 81.3147
+|| U - sol ||_{L^2}                   = 2.01767e-09
+|| U - sol ||_{L^2} / || sol ||_{L^2} = 2.48131e-11
+|| U       ||_{H^1}                   = 165.808
+|| sol     ||_{H^1}                   = 165.808
+|| U - sol ||_{H^1}                   = 5.16598e-08
+|| U - sol ||_{H^1} / || sol ||_{H^1} = 3.11564e-10
+Now we are at time 9
+A has been constructed
+0.77s.
+*** BC Management: 
+0s.
+
+		*******************************************************
+		***** Preconditioned GMRES solution
+		***** ILUT( fill-in = 5.000e+00, drop = 1.000e-04)
+ 		***** without overlap
+		***** No scaling
+		***** NOTE: convergence VARIES when the total number of
+		*****       processors is changed.
+		*******************************************************
+
+                iter:    0           residual = 1.000000e+00
+
+		*******************************************************
+		***** ilut: The ilut factors require 1.743e+00 times 
+		*****       the memory of the overlapped subdomain matrix.
+		*******************************************************
+
+                iter:    1           residual = 9.055588e-08
+                iter:    2           residual = 1.002966e-12
+
+
+		Solution time: 0.040000 (sec.)
+		total iterations: 2
+		Flops not available for options[AZ_precond] = 14
+*** Solution computed in 0.04s.
+|| U       ||_{L^2}                   = 91.1625
+|| sol     ||_{L^2}                   = 91.1625
+|| U - sol ||_{L^2}                   = 2.02371e-09
+|| U - sol ||_{L^2} / || sol ||_{L^2} = 2.21989e-11
+|| U       ||_{H^1}                   = 185.889
+|| sol     ||_{H^1}                   = 185.889
+|| U - sol ||_{H^1}                   = 5.6764e-08
+|| U - sol ||_{H^1} / || sol ||_{H^1} = 3.05366e-10
+Now we are at time 9.5
+A has been constructed
+0.77s.
+*** BC Management: 
+0s.
+
+		*******************************************************
+		***** Preconditioned GMRES solution
+		***** ILUT( fill-in = 5.000e+00, drop = 1.000e-04)
+ 		***** without overlap
+		***** No scaling
+		***** NOTE: convergence VARIES when the total number of
+		*****       processors is changed.
+		*******************************************************
+
+                iter:    0           residual = 1.000000e+00
+
+		*******************************************************
+		***** ilut: The ilut factors require 1.738e+00 times 
+		*****       the memory of the overlapped subdomain matrix.
+		*******************************************************
+
+                iter:    1           residual = 9.584545e-08
+                iter:    2           residual = 1.084471e-12
+
+
+		Solution time: 0.040000 (sec.)
+		total iterations: 2
+		Flops not available for options[AZ_precond] = 14
+*** Solution computed in 0.04s.
+|| U       ||_{L^2}                   = 101.573
+|| sol     ||_{L^2}                   = 101.573
+|| U - sol ||_{L^2}                   = 2.01607e-09
+|| U - sol ||_{L^2} / || sol ||_{L^2} = 1.98484e-11
+|| U       ||_{H^1}                   = 207.117
+|| sol     ||_{H^1}                   = 207.117
+|| U - sol ||_{H^1}                   = 6.23684e-08
+|| U - sol ||_{H^1} / || sol ||_{H^1} = 3.01127e-10
+Now we are at time 10
+A has been constructed
+0.78s.
+*** BC Management: 
+0s.
+
+		*******************************************************
+		***** Preconditioned GMRES solution
+		***** ILUT( fill-in = 5.000e+00, drop = 1.000e-04)
+ 		***** without overlap
+		***** No scaling
+		***** NOTE: convergence VARIES when the total number of
+		*****       processors is changed.
+		*******************************************************
+
+                iter:    0           residual = 1.000000e+00
+
+		*******************************************************
+		***** ilut: The ilut factors require 1.735e+00 times 
+		*****       the memory of the overlapped subdomain matrix.
+		*******************************************************
+
+                iter:    1           residual = 7.874150e-08
+                iter:    2           residual = 8.511232e-13
+
+
+		Solution time: 0.030000 (sec.)
+		total iterations: 2
+		Flops not available for options[AZ_precond] = 14
+*** Solution computed in 0.03s.
+|| U       ||_{L^2}                   = 112.546
+|| sol     ||_{L^2}                   = 112.546
+|| U - sol ||_{L^2}                   = 2.01845e-09
+|| U - sol ||_{L^2} / || sol ||_{L^2} = 1.79344e-11
+|| U       ||_{H^1}                   = 229.492
+|| sol     ||_{H^1}                   = 229.492
+|| U - sol ||_{H^1}                   = 6.73164e-08
+|| U - sol ||_{H^1} / || sol ||_{H^1} = 2.93328e-10
