@@ -1407,7 +1407,7 @@ operator*( const Vector &v ) const
 
     ASSERT( ncols == v.size(), "Error in Matrix Vector product" );
     Vector ans( nrows );
-    ans = 0.0;
+    ans = ZeroVector( nrows );
 
     for ( UInt ir = 0 + OFFSET;ir < nrows + OFFSET;++ir )
     {
@@ -2143,7 +2143,7 @@ operator*( const Vector &v ) const
     UInt nrows = _Patt->nRows();
     ASSERT( nrows == v.size(), "Error in Matrix Vector product" );
     Vector ans( nrows );
-    ans = 0.;
+    ans = ZeroVector( nrows );
 
     for ( UInt i = 0 + OFFSET;i < nrows + OFFSET;++i )
     {
@@ -3651,8 +3651,7 @@ MixedMatr<BRows, BCols, MSRPatt, double>::
 operator*( const Vector &v ) const
 {
     ASSERT( _Patt->nCols() == v.size(), "Error in Matrix Vector product" );
-    Vector ans( _Patt->nRows() );
-    ans = 0.0;
+    Vector ans( ZeroVector(_Patt->nRows() ) );
 
     UInt nrows, istart, iend;
     UInt r_offset, c_offset;
@@ -4321,8 +4320,7 @@ MixedMatr<BRows, BCols, CSRPatt, double>::
 operator*( const Vector &v ) const
 {
     ASSERT( _Patt->nCols() == v.size(), "Error in Matrix Vector product" );
-    Vector ans( _Patt->nRows() );
-    ans = 0.0;
+    Vector ans( ZeroVector( _Patt->nRows() ) );
 
     UInt nrows, iastart, iaend;
     UInt r_offset, c_offset;

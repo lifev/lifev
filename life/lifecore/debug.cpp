@@ -34,6 +34,7 @@
 #include <sstream>
 #include <string>
 
+#include <boost/lexical_cast.hpp>
 
 #if defined(HAVE_CONFIG_H)
 # include <lifeconfig.h>
@@ -135,7 +136,7 @@ initDebugAreas ()
 		    fin.open ( "../debug.areas" );
 		    if ( fin.fail() )
 		    {
-                Warning() << "Debug areas not found.\n";
+                Warning() << "The file debug.areas was not found.\n";
 		    }
 		}
 		while ( fin )
@@ -171,18 +172,18 @@ initDebugAreas ()
 
     }
 }
-std::string const&
+std::string
 getDescription ( uint __area )
 {
     if ( DebugAreas->empty() )
-		return *StringNull;
+		return std::string( "Area " ) + boost::lexical_cast<std::string>(__area);
 
     std::map<uint, std::string>::iterator entry_it = DebugAreas->find ( __area );
 
     if ( entry_it != DebugAreas->end() )
 		return entry_it->second;
     else
-		return DebugAreas->find ( 0 )->second;
+		return std::string( "Area " ) + boost::lexical_cast<std::string>(__area);
 
 
 }
@@ -207,7 +208,7 @@ DebugStream::DebugStream( int area, int level, bool print )
 	{
 	    __p->debug =  ( print && !area );
 	}
-	if ( __p->debug && getDescription( area ).empty() == false )
+	if ( __p->debug )
 	    __p->_M_output << getDescription ( area ) << ": ";
 
 }
@@ -226,7 +227,7 @@ DebugStream::DebugStream( const char* initialString, int area, int level, bool p
 	{
 	    __p->debug =  ( print && !area );
 	}
-	if ( __p->debug && getDescription( area ).empty() == false )
+	if ( __p->debug )
 	    __p->_M_output << getDescription ( area ) << ": "
                        << initialString;
 }

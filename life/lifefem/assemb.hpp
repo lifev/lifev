@@ -122,7 +122,7 @@ assemble( Oper oper, const RegionMesh& mesh, CurrentFE& fe, const DOF& dof,
             compute_vec( source_fct, elvec, fe, t, ic ); // compute local vector
 #endif
             // the previous line would become:  compute_vec(source_fct.comp(ic),elvec,fe); ****
-            assemb_vec( b, elvec, fe, dof, ic ); // assebmle local vector into global one
+            assemb_vec( b, elvec, fe, dof, ic ); // assemble local vector into global one
         }
     }
 }
@@ -311,8 +311,8 @@ template<typename OperDG, typename OperDGIF, typename OperDGBF,
   ElemVec bfvec(feDG.nbNode, nc);
   ElemVec ifvec(feDG.nbNode, nc, feDG.nbNode, nc);
 
-/*   Tab2dView matIF = ifmat.block(0, 0); */
-/*   Tab2dView matBF = bfmat.block(0, 0); */
+/*   ElemMat::matrix_view matIF = ifmat.block(0, 0); */
+/*   ElemMat::matrix_view matBF = bfmat.block(0, 0); */
 
   // Assembling volume integrals contributions
   for(i = 1; i <= mesh.numVolumes(); ++i){
@@ -485,7 +485,7 @@ template <typename Oper>
 void compute_mat( ElemMat& elmat, Oper& oper,
                   const CurrentFE& fe, int iblock = 0, int jblock = 0 )
 {
-    Tab2dView mat = elmat.block( iblock, jblock );
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     UInt ig;
     unsigned int i, j;
     double s;
@@ -523,25 +523,25 @@ template<typename Oper>
 void compute_mat_DG(ElemMat& elmat, Oper& oper,
 		 const CurrentFEDG& fe, int iblock=0,int jblock=0)
 {
-  Tab2dView mat = elmat.block(iblock,jblock);
-  UInt ig;
-  unsigned int i,j;
-  double s;
+    ElemMat::matrix_view mat = elmat.block(iblock,jblock);
+    UInt ig;
+    unsigned int i,j;
+    double s;
 
-  Real x=0,y=0,z=0;
-  for(i=0;i<(UInt)fe.nbNode;i++){
-    for(j=0;j<(UInt)fe.nbNode;j++){
-      s = 0.;
+    Real x=0,y=0,z=0;
+    for(i=0;i<(UInt)fe.nbNode;i++){
+        for(j=0;j<(UInt)fe.nbNode;j++){
+            s = 0.;
 
-      for(ig=0;ig<(UInt)fe.nbQuadPt;ig++){
-	fe.coorQuadPt(x,y,z,ig);
+            for(ig=0;ig<(UInt)fe.nbQuadPt;ig++){
+                fe.coorQuadPt(x,y,z,ig);
 
-	s += oper(i, j, ig, x, y, z, 0, 0, iblock, jblock) * fe.weightDet(ig);
-       }
+                s += oper(i, j, ig, x, y, z, 0, 0, iblock, jblock) * fe.weightDet(ig);
+            }
 
-      mat((int)i,(int)j) += s;
+            mat((int)i,(int)j) += s;
+        }
     }
-  }
 }
 
 // Boundary integrals (boundary faces)
@@ -550,7 +550,7 @@ template<typename Oper>
 void compute_mat_DG_BF(ElemMat& bfmat, Oper& oper,
 		 const CurrentBFDG& fe, int iblock=0,int jblock=0)
 {
-  Tab2dView mat = bfmat.block(iblock,jblock);
+  ElemMat::matrix_view mat = bfmat.block(iblock,jblock);
   UInt ig;
   unsigned int i, j;
   double s;
@@ -576,7 +576,7 @@ template<typename Oper>
 void compute_mat_DG_IF(ElemMat& ifmat, Oper& oper, int nbNodeAd,
 		 const CurrentIFDG& fe, int iblock=0,int jblock=0)
 {
-  Tab2dView mat = ifmat.block(iblock,jblock);
+  ElemMat::matrix_view mat = ifmat.block(iblock,jblock);
   UInt ig;
   unsigned int i, j, H, K;
   Real s;
@@ -610,7 +610,7 @@ template <typename Oper>
 void compute_mat_mixed( ElemMat& elmat, Oper& oper,
                         const CurrentFE& fe1, const CurrentFE& fe2, int iblock = 0, int jblock = 0 )
 {
-    Tab2dView mat = elmat.block( iblock, jblock );
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     int ig;
     int i, j;
     double s;
@@ -640,7 +640,7 @@ template <typename Oper>
 void compute_mat_symm( ElemMat& elmat, Oper& oper,
                        const CurrentFE& fe, int iblock = 0, int jblock = 0 )
 {
-    Tab2dView mat = elmat.block( iblock, jblock );
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     UInt ig;
     unsigned int i, iloc, jloc;
     double s;
@@ -690,7 +690,7 @@ template <typename Matrix, typename DOF>
 void
 assemb_mat( Matrix& M, ElemMat& elmat, const CurrentFE& fe, const DOF& dof, int iblock = 0, int jblock = 0 )
 {
-    Tab2dView mat = elmat.block( iblock, jblock );
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     UInt totdof = dof.numTotalDof();
     int i, j, k;
     UInt ig, jg;
@@ -715,7 +715,7 @@ template <typename Matrix, typename DOF>
 void
 assemb_mat( Matrix& M, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2, const DOF& dof, int iblock = 0, int jblock = 0 )
 {
-    Tab2dView mat = elmat.block( iblock, jblock );
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     UInt totdof = dof.numTotalDof();
     int i, j, k;
     UInt ig, jg;
@@ -744,7 +744,7 @@ void assemb_mat( Matrix& M, ElemMat& elmat, const LocalDofPattern& fe, const DOF
     //    std::cout << "assemble for vector elem mat not yet implemented\n";
     //    exit(1);
     //  }
-    Tab2dView mat = elmat.block( iblock, jblock );
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     UInt totdof = dof.numTotalDof();
     int i, j, k;
     UInt ig, jg;
@@ -770,7 +770,7 @@ template<typename DOF, typename Matrix>
 void assemb_mat_DG(Matrix& M, ElemMat& elmat, const CurrentFEDG& fe, const DOF& dof,
 		const UInt feId, int iblock = 0,int jblock = 0)
 {
-  Tab2dView mat = elmat.block(iblock, jblock);
+  ElemMat::matrix_view mat = elmat.block(iblock, jblock);
   UInt totdof = dof.numTotalDof();
   int i, j, k;
   UInt ig, jg;
@@ -815,7 +815,7 @@ template<typename DOFBYFACE, typename Matrix>
 void assemb_mat_DG_IF(Matrix& M, ElemMat& ifmat, const CurrentFEDG& fe, const DOFBYFACE& dofbyface,
 		const UInt ifId, int iblock=0,int jblock=0)
 {
-  Tab2dView mat = ifmat.block(iblock, jblock);
+  ElemMat::matrix_view mat = ifmat.block(iblock, jblock);
   UInt totdof = dofbyface.numTotalDof();
 
   int i, j, k;
@@ -839,7 +839,7 @@ template<typename DOF, typename Matrix>
 void assemb_mat_DG_BF(Matrix& M, ElemMat& bfmat, const CurrentFEDG& fe, const DOF& dof,
 		const UInt AdId, int iblock=0,int jblock=0)
 {
-  Tab2dView mat = bfmat.block(iblock, jblock);
+  ElemMat::matrix_view mat = bfmat.block(iblock, jblock);
   UInt totdof = dof.numTotalDof();
 
   int i, j, k;
@@ -876,7 +876,7 @@ void assemb_mat_symm_lower( Matrix& M, ElemMat& elmat, const LocalDofPattern& fe
     //    std::cout << "assemble for vector elem mat not yet implemented\n";
     //    exit(1);
     //  }
-    Tab2dView mat = elmat.block( iblock, jblock );
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     UInt totdof = dof.numTotalDof();
     int i, j, k;
     UInt ig, jg;
@@ -929,7 +929,7 @@ void assemb_mat_symm_upper( Matrix& M, ElemMat& elmat, const LocalDofPattern& fe
     //    std::cout << "assemble for vector elem mat not yet implemented\n";
     //    exit(1);
     //  }
-    Tab2dView mat = elmat.block( iblock, jblock );
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     UInt totdof = dof.numTotalDof();
     int i, j, k;
     UInt ig, jg;
@@ -973,7 +973,7 @@ void
 assemb_mat_mixed( Matrix& M, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2,
                   const DOF1& dof1, const DOF2& dof2, int iblock = 0, int jblock = 0 )
 {
-    Tab2dView mat = elmat.block( iblock, jblock );
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     UInt totdof1 = dof1.numTotalDof();
     UInt totdof2 = dof2.numTotalDof();
     int i, j, k1, k2;
@@ -1005,7 +1005,7 @@ assemb_tr_mat_mixed( Real mulfac, Matrix& M, ElemMat& elmat,
                      const DOF1& dof1, const DOF2& dof2,
                      int iblock = 0, int jblock = 0 )
 {
-    Tab2dView mat = elmat.block( jblock, iblock );
+    ElemMat::matrix_view mat = elmat.block( jblock, iblock );
     UInt totdof1 = dof1.numTotalDof();
     UInt totdof2 = dof2.numTotalDof();
     int i, j, k1, k2;
@@ -1046,7 +1046,7 @@ template <typename UsrFct>
 void compute_vec( const UsrFct& fct, ElemVec& elvec, const CurrentFE& fe, int iblock = 0 )
 {
     int i, ig;
-    Tab1dView vec = elvec.block( iblock );
+    ElemVec::vector_view vec = elvec.block( iblock );
     Real s, x, y, z;
     for ( i = 0;i < fe.nbNode;i++ )
     {
@@ -1075,7 +1075,7 @@ void compute_vec( const UsrFct& fct, ElemVec& elvec, const CurrentFE& fe )
 template<typename UsrFct>
 void compute_vec_DG(const UsrFct& fct, ElemVec& elvec, const CurrentFEDG& feDG, int iblock){
   int i,ig;
-  Tab1dView vec = elvec.block(iblock);
+  ElemVec::vector_view vec = elvec.block(iblock);
   Real s, x, y, z;
   for(i = 0; i < feDG.nbNode; i++){
     s = 0.;
@@ -1093,7 +1093,7 @@ void compute_vec_AdvecDG_BF(const BCHandler& BCh, Velocity& u, ElemVec& bfvec, c
 
   int i, ig, icoor;
 
-  Tab1dView vec = bfvec.block(iblock);
+  ElemVec::vector_view vec = bfvec.block(iblock);
 
   Real s, x, y, z, u_normal;
 
@@ -1128,7 +1128,7 @@ void compute_vec_stab( OperFct& fct, ElemVec& elvec, const CurrentFE& fe,
                        int iblock )
 {
     int i, ig;
-    Tab1dView vec = elvec.block( iblock );
+    ElemVec::vector_view vec = elvec.block( iblock );
     Real s, x, y, z;
     for ( i = 0;i < fe.nbNode;i++ )
     {
@@ -1147,7 +1147,7 @@ template <typename UsrFct>
 void compute_vec( const UsrFct& fct, ElemVec& elvec, const CurrentFE& fe, const Real& t, int iblock = 0 )
 {
     int i, ig;
-    Tab1dView vec = elvec.block( iblock );
+    ElemVec::vector_view vec = elvec.block( iblock );
     Real s, x, y, z;
     for ( i = 0;i < fe.nbNode;i++ )
     {
@@ -1169,7 +1169,7 @@ void compute_vec_stab( OperFct& fct, ElemVec& elvec, const CurrentFE& fe, Real t
                        int iblock )
 {
     int i, ig;
-    Tab1dView vec = elvec.block( iblock );
+    ElemVec::vector_view vec = elvec.block( iblock );
     Real s, x, y, z;
     for ( i = 0;i < fe.nbNode;i++ )
     {
@@ -1191,7 +1191,7 @@ void
 assemb_vec( Vector& V, ElemVec& elvec, const CurrentFE& fe, const DOF& dof, int iblock )
 {
     UInt totdof = dof.numTotalDof();
-    Tab1dView vec = elvec.block( iblock );
+    typename ElemVec::vector_view vec = elvec.block( iblock );
     int i;
     UInt ig;
     UInt eleId = fe.currentId();
@@ -1213,7 +1213,7 @@ template<typename DOF, typename Vector, typename ElemVec>
 void assemb_vec_DG(Vector& V, ElemVec& elvec,const CurrentFEDG& feDG, const DOF& dof, int iblock)
 {
   UInt totdof = dof.numTotalDof();
-  Tab1dView vec = elvec.block(iblock);
+  typename ElemVec::vector_view vec = elvec.block(iblock);
   int i;
   UInt ig;
   UInt eleId = feDG.currentId();
@@ -1226,7 +1226,7 @@ void assemb_vec_DG(Vector& V, ElemVec& elvec,const CurrentFEDG& feDG, const DOF&
 template<typename DOF, typename Vector, typename ElemVec>
 void assemb_vec_DG_BF(Vector& V,ElemVec& bfvec, const CurrentBFDG& bfDG, UInt iAd, const DOF& dof, int iblock){
   UInt totdof = dof.numTotalDof();
-  Tab1dView vec = bfvec.block(iblock);
+  typename ElemVec::vector_view vec = bfvec.block(iblock);
   int i;
   UInt ig;
 
@@ -1255,7 +1255,7 @@ assemb_vec( Vector& V, ElemVec& elvec, const LocalDofPattern& fe, const DOF& dof
     //    exit(1);
     //  }
     UInt totdof = dof.numTotalDof();
-    Tab1dView vec = elvec.block( iblock );
+    typename ElemVec::vector_view vec = elvec.block( iblock );
     int i;
     //  std::cout << "in assemb_vec" << std::endl;
     UInt ig;
@@ -1287,7 +1287,7 @@ extract_vec( Vector& V, ElemVec& elvec, const LocalDofPattern& fe, const DOF& do
     //  }
 
     UInt totdof = dof.numTotalDof();
-    Tab1dView vec = elvec.block( iblock );
+    typename ElemVec::vector_view vec = elvec.block( iblock );
     int i;
     //  std::cout << "in assemb_vec" << std::endl;
     UInt ig;

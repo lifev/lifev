@@ -214,7 +214,7 @@ void  exactJacobian::solveJac(Vector         &_muk,
         _muk[i]=0.0;
 
     chrono.start();
-    AZ_iterate(&_muk[0], &_res[0], options, params, status, proc_config, J, NULL, NULL);
+    AZ_iterate(&_muk[0], const_cast<double*>( &_res[0] ), options, params, status, proc_config, J, NULL, NULL);
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
@@ -233,8 +233,8 @@ void  exactJacobian::solveLinearFluid()
 
 void  exactJacobian::solveLinearSolid()
 {
-    M_rhs_dz = 0.;
-    M_dz     = 0.;
+    M_rhs_dz = ZeroVector( M_rhs_dz.size() );
+    M_dz     = ZeroVector( M_dz.size() );
 
     if ( !M_BCh_dz.bdUpdateDone() )
         M_BCh_dz.bdUpdate(this->M_solid.mesh(),

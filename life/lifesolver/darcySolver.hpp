@@ -23,11 +23,14 @@
 #ifndef _DARCY_SOLVER_H
 #define _DARCY_SOLVER_H
 
+#include <debug.hpp>
+
+#include <darcySolverBase.hpp>
+
 #include "darcyHandler.hpp"
 #include "bcManage.hpp"
 
 #include "clapack.h"
-#include "user_diffusion.hpp"
 #include "medit_wrtrs.hpp"
 #include "ensight7Writer.hpp"
 #include "sobolevNorms.hpp"
@@ -35,6 +38,8 @@
 
 namespace LifeV
 {
+
+
 /*!
   \brief A mixed hybrid Darcy solver
   \file darcySolver.hpp
@@ -44,6 +49,7 @@ namespace LifeV
   Templated class to be used both for tetra or hexa meshes.
   can be used as follows:
 
+  \verbatim
   //! HEXA
   DarcySolver< RegionMesh3D<LinearHexa> >
   DarcySolverHexaRT0( data_file, feHexaRT0, feHexaQ0, feHexaRT0Hyb,
@@ -54,14 +60,21 @@ namespace LifeV
   DarcySolverTetraRT0( data_file, feTetraRT0, feTetraP0, feTetraRT0Hyb,
                        feTetraRT0VdotNHyb, feTetraP1,
                        quadRuleTetra15pt, quadRuleTria4pt );
-
+  \endverbatim
 */
-
 template <typename Mesh>
-class DarcySolver:
-        public DarcyHandler<Mesh>
+class DarcySolver
+    :
+    public DarcyHandler<Mesh>,
+    virtual public DarcySolverBase
 {
 public:
+
+    typedef DarcySolverBase::source_type source_type;
+    typedef DarcySolverBase::pressure_solution_type pressure_solution_type;
+    typedef DarcySolverBase::velocity_solution_type velocity_solution_type;
+    typedef DarcySolverBase::error_signal_type error_signal_type;
+
     //! Constructor
     /*!
       \param data_file GetPot data file
@@ -77,6 +90,55 @@ public:
                  const RefFE& refFE_p, const RefHybridFE& refFE_tp,
                  const RefHybridFE& refFE_vdotn, const RefFE& refFE_pnodal,
                  const QuadRule& qr_u, const QuadRule& bdqr_u );
+
+
+    /**
+       compute the matrix for TP and the contribution from the source
+       term to the globalF right hand side.
+    */
+    void computeHybridMatrixAndSourceRHS();
+
+    void applyBC(); //!< apply the b.c. for the TP problem
+
+    void setup()
+        {
+            computeHybridMatrixAndSourceRHS();
+            applyBC();
+        }
+
+     void setBC( BCHandler const& __bch )
+        {
+            _M_bc = __bch;
+
+            // update the dof with the b.c.
+            _M_bc.bdUpdate(this->_mesh, feBd, tpdof);
+
+            if(verbose>2)
+                _M_bc.showMe(true);
+
+        }
+
+    void solve();//!< solve the linear system for TP with Aztec
+    void computePresFlux();//!< Compute P and U (once TP known)
+
+    void postProcessTraceOfPressureRT0();//!< postprocess TP constant per face
+    void postProcessVelocityRT0();//!< postprocess Velocity (RT0 per element)
+    void postProcessPressureQ0();//!< postprocess P constant per element
+    void projectPressureQ1( ScalUnknown<Vector>& nodalPres ); //!< projection of P (Q0/P0) on Q1/P1.
+    void postProcessPressureQ1(); //!< postproc of Q1/P1 pressure.
+    void projectVelocityQ1( PhysVectUnknown<Vector>& nodalVel ); //!< projection of U (RT0) on Q1/P1.
+    void postProcessVelocityQ1();//!<  postproc of Q1/P1 velocity.
+    void postProcessEnsight(); //!< postprocessing in ensight format of P and U
+    Real computeFluxFlag(int flag);
+
+    //! L2 error for pressure wrt analytical solution
+    void errorL2( darcy_unknown_type, pressure_solution_type );
+
+    //! L2 error for velocity wrt analytical solution
+    void errorL2( velocity_solution_type  );
+
+private:
+    void _element_computation(int i); //!< computations of element matrices
 
 private:
     MSRPatt msrPattern;
@@ -105,27 +167,9 @@ private:
     KNM<Real> signLocalFace;
     KN<Real> diffusion_scalar_ele; //! scalar diffusion coeff, element by element
 
-    SourceFct sourceFct;
+    //!< boundary conditions handler
+    BCHandler _M_bc;
 
-private:
-    void _element_computation(int i); //!< computations of element matrices
-
-public:
-    void computeHybridMatrixAndSourceRHS(); //!< compute the matrix for TP
-    //!< and the contribution from the source term to the globalF right hand side.
-
-    void applyBC(); //!< apply the b.c. for the TP problem
-    void solveDarcy();//!< solve the linear system for TP with Aztec
-    void computePresFlux();//!< Compute P and U (once TP known)
-    void postProcessTraceOfPressureRT0();//!< postprocess TP constant per face
-    void postProcessVelocityRT0();//!< postprocess Velocity (RT0 per element)
-    void postProcessPressureQ0();//!< postprocess P constant per element
-    void projectPressureQ1( ScalUnknown<Vector>& nodalPres ); //!< projection of P (Q0/P0) on Q1/P1.
-    void postProcessPressureQ1(); //!< postproc of Q1/P1 pressure.
-    void projectVelocityQ1( PhysVectUnknown<Vector>& nodalVel ); //!< projection of U (RT0) on Q1/P1.
-    void postProcessVelocityQ1();//!<  postproc of Q1/P1 velocity.
-    void postProcessEnsight(); //!< postprocessing in ensight format of P and U
-    Real computeFluxFlag(int flag);
 };
 
 
@@ -155,13 +199,10 @@ DarcySolver<Mesh>::DarcySolver( const GetPot& data_file, const RefHdivFE& refFE_
     BtB(pfe.nbNode,pfe.nbNode),
     CtC(refTPFE.nbDof, refTPFE.nbDof),
     BtC(pfe.nbNode, refTPFE.nbDof),
-    signLocalFace(this->_mesh.numVolumes(),numFacesPerVolume),
-    diffusion_scalar_ele(1 /*this->_mesh.numVolumes()*/)  //to save memory when possible...
+    signLocalFace( this->_mesh.numVolumes(),numFacesPerVolume),
+    diffusion_scalar_ele( 1 /*this->_mesh.numVolumes()*/) //to save memory when possible...
 {
-
-    signLocalFace = -1.;
-
-    // initialisation of the space dependent diffusion with diffusion_scalar
+    signLocalFace = -1.0;
     diffusion_scalar_ele = diffusion_scalar;
 
     /*
@@ -171,8 +212,8 @@ DarcySolver<Mesh>::DarcySolver( const GetPot& data_file, const RefHdivFE& refFE_
     ID iglobface,iglobvol;
     for( ID ivol = 1 ; ivol <= this->_mesh.numVolumes() ; ivol++ ) {
         iglobvol = this->_mesh.volumeList(ivol).id();
-        for( ID ilocface=1 ; 
-             ilocface <= this->_mesh.volumeList(ivol).numLocalFaces ; 
+        for( ID ilocface=1 ;
+             ilocface <= this->_mesh.volumeList(ivol).numLocalFaces ;
              ilocface++ ) {
 
             iglobface = this->_mesh.localFaceId(iglobvol,ilocface);
@@ -203,81 +244,13 @@ void DarcySolver<Mesh>::_element_computation(int ielem)
     // only one block is set to zero since the other ones are not recomputed
     elmatMix.block(0,0) = 0.;
 
+#warning NEED TO PROVIDE A GENERAL DIFFUSION TENSOR
     double xg,yg,zg;
+    // coordinate of the barycenter of the current element
+    pfe.barycenter(xg,yg,zg);
+    diffusion_scalar = _M_diffusion( xg, yg, zg )( 0, 0 );
+    mass_Hdiv( 1./diffusion_scalar, elmatMix,vfe,0,0 );
 
-    switch(diffusion_type){
-    case 0:
-        //-------------------------
-        // *** scalar diffusion ***
-        //-------------------------
-        switch(diffusion_function){
-        case 0: // constant diffusion given in the data file
-            mass_Hdiv(1./diffusion_scalar,elmatMix,vfe,0,0);
-            break;
-        case 9: // porous medium with a function
-            pfe.barycenter(xg,yg,zg); // coordinate of the barycenter of the current element
-            diffusion_scalar = permeability_sd009(xg, yg, zg);
-            mass_Hdiv(1./diffusion_scalar,elmatMix,vfe,0,0);
-            break;
-        case 10: // porous medium with a function
-            pfe.barycenter(xg,yg,zg); // coordinate of the barycenter of the current element
-            diffusion_scalar = permeability_sd010(xg, yg, zg);
-            mass_Hdiv(1./diffusion_scalar,elmatMix,vfe,0,0);
-            break;
-        default:
-            std::cerr << "Unknown function for scalar diffusion. Change physics/diffusion_function in the data file\n"
-                      << std::endl;
-            exit(1);
-        }
-        break;
-    case 1:
-        //-------------------------
-        // *** tensor diffusion ***
-        //-------------------------
-        {
-            KNM<double> permlower(3,3),invpermea(3,3);
-            switch(diffusion_function){
-            case 0: // constant diffusion tensor given in the data file
-                permlower = diffusion_tensor;
-                permlower *= diffusion_scalar;
-                /* // the diffusion matrix is divided by the viscosity which sould be 1/diffusion_scalar!
-                   Remark: not very optimal since in this case
-                   this constant matrix is inverted on each elements.
-                   (can be easily improved if needed)
-                */
-                break;
-            case 1: // fibrous medium
-                pfe.barycenter(xg,yg,zg); // coordinate of the barycenter of the current element
-                permlower = fibrous_permea(1./diffusion_scalar,diffusion_tensor, xg); //! added "1./"
-                break;
-            default:
-                std::cerr << "Unknown function for tensor diffusion. Change physics/diffusion_function in the data file\n"
-                          << std::endl;
-                exit(1);
-            }
-            //
-            // we compute the inverse of permlower
-            //
-            // PERM <- L and Lt where L Lt is the Cholesky factorization of PERM
-            int NBT[1] = {3}; //  dim of tensor permeabilite
-            int INFO[1] = {0};
-            dpotrf_("L", NBT, permlower, NBT, INFO);
-            ASSERT_PRE(!INFO[0],"Lapack factorization of PERM is not achieved.");
-            dpotri_("L", NBT, permlower, NBT, INFO);
-            ASSERT_PRE(!INFO[0],"Lapack solution of PERM is not achieved.");
-            permlower(0,1) = permlower(1,0);
-            permlower(0,2) = permlower(2,0);
-            permlower(1,2) = permlower(2,1);
-            invpermea = permlower;
-            //
-            mass_Hdiv(invpermea, elmatMix, vfe,0,0); //  modify the (0,0) block of the matrix
-            break;
-        }
-    default:
-        std::cerr << "diffusion_type=" << diffusion_type << " ??? \n" 
-                  << std::endl;
-        exit(1);
-    }
 }
 
 template <typename Mesh>
@@ -309,16 +282,16 @@ void DarcySolver<Mesh>::computeHybridMatrixAndSourceRHS()
     TP_VdotN_Hdiv(1., elmatMix, refTPFE,refVdotNFE, 0, 2 );
     //
     if(verbose>3){
-        std::cout << "elmatHyb : \n" << std::endl;
+        Debug( 6100 ) << "elmatHyb : \n" << "\n";
         elmatHyb.showMe();
-        std::cout << "elmatMix : \n" << std::endl;
+        Debug( 6100 ) << "elmatMix : \n" << "\n";
         elmatMix.showMe();
     }
     //
-    globalTP=0.0;
-    globalF=0.0;
-    globalP = 0.0;
-    globalFlux = 0.0;
+    globalTP=ZeroVector( globalTP.size() );
+    globalF=ZeroVector( globalF.size() );
+    globalP = ZeroVector( globalP.size() );
+    globalFlux = ZeroVector( globalFlux.size() );
     mat.zeros();
     //
     //
@@ -358,12 +331,11 @@ void DarcySolver<Mesh>::computeHybridMatrixAndSourceRHS()
 
     */
 
-    Tab2d AA = elmatMix.block(0,0);
-    Tab2d BB = elmatMix.block(0,1);
-    Tab2d CC = elmatMix.block(0,2);
+    ElemMat::matrix_type AA = elmatMix.block(0,0);
+    ElemMat::matrix_type BB = elmatMix.block(0,1);
+    ElemMat::matrix_type CC = elmatMix.block(0,2);
 
-    SourceAnalyticalFct sourceAnalytical;
-
+    Debug( 6100 ) << "number of volumes: " << this->_mesh.numVolumes() << "\n";
     for(UInt ivol = 1; ivol<= this->_mesh.numVolumes(); ivol++){
         //----------------------------
         // LOOP ON THE VOLUME ELEMENTS
@@ -380,12 +352,15 @@ void DarcySolver<Mesh>::computeHybridMatrixAndSourceRHS()
         //   AA <- L and Lt where L Lt is the Cholesky factorization of A
         dpotrf_("L", NBU, AA , NBU , INFO );
         ASSERT_PRE(!INFO[0],"Lapack factorization of A is not achieved.");
+
         // Compute BB <-  L^{-1} B (solve triangular system)
         dtrtrs_("L", "N", "N", NBU, NBP, AA, NBU, BB, NBU, INFO);
         ASSERT_PRE(!INFO[0],"Lapack Computation B = L^{-1} B  is not achieved.");
+
         // Compute CC <-  L^{-1} C (solve triangular system)
         dtrtrs_("L", "N", "N", NBU, NBL, AA, NBU, CC, NBU, INFO);
         ASSERT_PRE(!INFO[0],"Lapack Computation C = L^{-1} C  is not achieved.");
+
         // Compute BtB <-  Bt L^{-t} L^{-1} B = Bt A^{-1} B
         // (BtB stored only on lower part)
         dsyrk_("L", "T", NBP, NBU, ONE_, BB, NBU, ZERO_, BtB, NBP);
@@ -399,6 +374,7 @@ void DarcySolver<Mesh>::computeHybridMatrixAndSourceRHS()
         //BtB <- LB and LBt where LB LBt is the cholesky factorization of Bt A^{-1} B
         dpotrf_("L", NBP, BtB , NBP, INFO );
         ASSERT_PRE(!INFO[0],"Lapack factorization of BtB is not achieved.");
+
         // Compute BtC = LB^{-1} BtC <-  LB^{-1} Bt A^{-1} C
         dtrtrs_("L", "N", "N", NBP, NBL, BtB, NBP, BtC, NBP, INFO);
         ASSERT_PRE(!INFO[0],"Lapack Computation BtC = LB^{-1} BtC is not achieved.");
@@ -423,17 +399,12 @@ void DarcySolver<Mesh>::computeHybridMatrixAndSourceRHS()
         // initialize the rhs vectors.
         elvecSource.zero();     //  source rhs (NBP)
         elvecHyb.zero();        //  hybrid rhs : inserted in the global vector.
-        Tab1dView RHSTP = elvecHyb.block(0);
+        ElemVec::vector_view RHSTP = elvecHyb.block(0);
 
-        // The source term is computed with a test function in the Pressure space.
-        switch(test_case){
-        case 33:
-            source(sourceAnalytical, elvecSource, pfe, 0);
-        default:
-            source(sourceFct, elvecSource, pfe, 0);
-        }
+        source( this->sourceTerm(), elvecSource, pfe, 0 );
+
         // initialize the rhs vector (clean this some day...)
-        Tab1dView rhs = elvecSource.block(0); // corresponds to F2
+        ElemVec::vector_view  rhs = elvecSource.block(0); // corresponds to F2
         // Compute rhs = LB^{-1} rhs <- LB^{-1} F2
         dtrtrs_("L", "N", "N", NBP, NBRHS, BtB, NBP, rhs, NBP, INFO);
         ASSERT_PRE(!INFO[0],"Lapack Computation rhs = LB^{-1} rhs is not achieved.");
@@ -460,22 +431,23 @@ void DarcySolver<Mesh>::computeHybridMatrixAndSourceRHS()
 template <typename Mesh>
 void DarcySolver<Mesh>::applyBC()
 {
-    bcManage(mat,globalF,this->_mesh,tpdof,bc,feBd,1.,0.0);
+    bcManage(mat,globalF,this->_mesh,tpdof,_M_bc,feBd,1.,0.0);
 }
 
 template <typename Mesh>
-void DarcySolver<Mesh>::solveDarcy()
+void DarcySolver<Mesh>::solve()
 {
     aztecSolveLinearSyst(mat,globalTP.giveVec(),globalF.giveVec(),
                          globalTP.size(),msrPattern);
+    computePresFlux();
 }
 
 template <typename Mesh>
 void DarcySolver<Mesh>::computePresFlux()
 {
     //! reset to 0
-    globalP = 0.0;
-    globalFlux = 0.0;
+    globalP = ZeroVector( globalP.size() );
+    globalFlux = ZeroVector( globalFlux.size() );
 
     int INFO[1] = {0};
     int NBRHS[1] = {1};// nb columns of the rhs := 1.
@@ -496,11 +468,9 @@ void DarcySolver<Mesh>::computePresFlux()
     Vector& global_flux  = globalFlux;
 
     // No need for CtC in this part: only difference. (+ last dsyrk)
-    Tab2d AA = elmatMix.block(0,0);
-    Tab2d BB = elmatMix.block(0,1);
-    Tab2d CC = elmatMix.block(0,2);
-
-    SourceAnalyticalFct sourceAnalytical;
+    ElemMat::matrix_type AA = elmatMix.block(0,0);
+    ElemMat::matrix_type BB = elmatMix.block(0,1);
+    ElemMat::matrix_type CC = elmatMix.block(0,2);
 
     ID iglobface;
     for( ID ivol = 1 ; ivol <= this->_mesh.numVolumes(); ivol++ ) {
@@ -558,21 +528,25 @@ void DarcySolver<Mesh>::computePresFlux()
         elvecHyb.zero();        //  hybrid rhs : extracted from the global vector.
         // The source term is computed with a test function in the Pressure space.
         // Beware: integrate the source term... ?
+#if 0
         switch(test_case){
         case 33:
             source(sourceAnalytical, elvecSource, pfe, 0);
         default:
             source(sourceFct, elvecSource, pfe, 0);
         }
+#else
+        source( this->sourceTerm(), elvecSource, pfe, 0);
+#endif
         // initialize the rhs vector (clean this some day...)
-        Tab1dView rhs = elvecSource.block(0); // corresponds to F2
+        ElemVec::vector_view rhs = elvecSource.block(0); // corresponds to F2
         // Compute rhs = LB^{-1} rhs <- LB^{-1} F2
         dtrtrs_("L", "N", "N", NBP, NBRHS, BtB, NBP, rhs, NBP, INFO);
         ASSERT_PRE(!INFO[0],
                    "Lapack Computation rhs = LB^{-1} rhs is not achieved.");
         // extract the resulting TP for the current fe and put it into elvecHyb.
         extract_vec(globalTP, elvecHyb, refTPFE, tpdof,ivol, 0);
-        Tab1dView RHSTP = elvecHyb.block(0);
+        ElemVec::vector_view  RHSTP = elvecHyb.block(0);
         // RHSTP = elvecHyb.block(0)  contains the local TP for the current fe.
         // rhs = BtC * RHSTP + rhs <- LB^{-1} Bt A^{-1} C * L + LB^{-1} F2
         /* FAUTE DE SIGNE !!!! version originale @@@@@@@@@@@@@@
@@ -596,7 +570,7 @@ void DarcySolver<Mesh>::computePresFlux()
         // initialize the element flux vector.
         elvecFlux.zero();     //  Flux (NBU)
         // initialize the flux vector (clean this some day...)
-        Tab1dView flux = elvecFlux.block(0);
+        ElemVec::vector_view flux = elvecFlux.block(0);
         flux = elvecFlux.block(0);
         // Compute  flux = BB * rhs <- L^{-1} B P
         dgemv_("N", NBU, NBP, ONE_, BB, NBU, rhs, INC1, ZERO_, flux, INC1 );
@@ -615,7 +589,7 @@ void DarcySolver<Mesh>::computePresFlux()
         //---------------------------------------
 
         for( ID ilocface=1 ;
-             ilocface <= this->_mesh.volumeList(ivol).numLocalFaces ; 
+             ilocface <= this->_mesh.volumeList(ivol).numLocalFaces ;
              ilocface++ ) {
             iglobface = this->_mesh.localFaceId( ivol , ilocface );
             if( this->_mesh.faceElement( iglobface , 1 ) == ivol ){
@@ -632,6 +606,100 @@ void DarcySolver<Mesh>::computePresFlux()
     }
 }
 
+
+template <typename Mesh>
+void
+DarcySolver<Mesh>::errorL2( darcy_unknown_type __type,  pressure_solution_type __analytical_sol )
+{
+    Debug( 6100 ) <<"Compute L2 pressure error:\n";
+
+    double normL2sq=0.;
+    double normL2diffsq=0.;
+    double normL2solsq=0.;
+
+    switch( __type )
+    {
+        case DARCY_PRESSURE_GLOBAL:
+        {
+            for(UInt i=1; i<=this->_mesh.numVolumes(); ++i)
+            {
+                pfe.updateFirstDeriv(this->_mesh.volumeList(i));
+
+
+                normL2sq     += elem_L2_2(globalP,pfe,pdof);
+                normL2solsq  += elem_L2_2( __analytical_sol, pfe );
+                normL2diffsq += elem_L2_diff_2(globalP,__analytical_sol,pfe,pdof);
+            }
+        }
+        break;
+        case DARCY_PRESSURE:
+        {
+
+            // Q1 or P1 elements
+            CurrentFE fe( refPFEnodal , geoMap , qr );
+            Dof dof( refPFEnodal );
+            dof.update( this->_mesh );
+            UInt dim = dof.numTotalDof();
+            ScalUnknown<Vector> nodalPres( dim );
+            projectPressureQ1( nodalPres );
+
+            Debug( 6100 ) << "Postprocessing of pressure (L2 projection on the nodes)\n";
+            for(UInt i=1; i<=this->_mesh.numVolumes(); ++i)
+            {
+
+                fe.updateFirstDeriv(this->_mesh.volumeList(i));
+
+                normL2sq     += elem_L2_2( nodalPres, fe, dof );
+                normL2solsq  += elem_L2_2( __analytical_sol, fe );
+                normL2diffsq += elem_L2_diff_2( nodalPres, __analytical_sol, fe, dof );
+
+            }
+        }
+        break;
+        default:
+            std::ostringstream __ex;
+            __ex << "invalid darcy unknown type: " << __type;
+            throw std::invalid_argument( __ex.str() );
+            break;
+    }
+
+    // send the signals to all observers that the l2 errors has been computed
+    _M_error_signal( "L2", __type, normL2sq, normL2solsq, normL2diffsq );
+}
+
+template <typename Mesh>
+void
+DarcySolver<Mesh>::errorL2( velocity_solution_type __analytical_sol )
+{
+    Debug( 6100 ) <<"Compute L2 velocity error:\n";
+    Debug( 6100 ) << "Postprocessing of velocity (L2 projection on the nodes)\n";
+
+    // Q1 or P1 elements
+    CurrentFE fe( refPFEnodal , geoMap , qr );
+    Dof dof( refPFEnodal );
+    dof.update( this->_mesh );
+    UInt dim = dof.numTotalDof();
+    PhysVectUnknown<Vector> nodalVel( dim );
+    projectVelocityQ1( nodalVel );
+
+    double normL2sq=0.;
+    double normL2diffsq=0.;
+    double normL2solsq=0.;
+
+
+    for(UInt i=1; i<=this->_mesh.numVolumes(); ++i)
+    {
+        fe.updateFirstDeriv(this->_mesh.volumeList(i));
+
+        normL2sq     += elem_L2_2( nodalVel, fe, dof, 3 );
+        normL2solsq  += elem_L2_2( __analytical_sol, fe, 0.0, 3 );
+        normL2diffsq += elem_L2_diff_2( nodalVel, __analytical_sol, fe, dof, 0., 3 );
+
+    }
+
+    // send the signals to all observers that the l2 errors has been computed
+    _M_error_signal( "L2", DARCY_VELOCITY, normL2sq, normL2solsq, normL2diffsq );
+}
 
 //-------------------------------------------------
 //! post processing part.
@@ -661,7 +729,7 @@ Real DarcySolver<Mesh>::computeFluxFlag(int flag)
 template <typename Mesh>
 void DarcySolver<Mesh>::postProcessTraceOfPressureRT0()
 {
-    if(verbose) std::cout << "Postprocessing of TP (RT0 per element)\n";
+    Debug( 6100 ) << "Postprocessing of TP (RT0 per element)\n";
     if(post_proc_format == "medit"){
         wr_medit_ascii_scalar(post_dir + "/presTP0.bb",globalTP.giveVec(),globalTP.size(),1);
     } else {
@@ -673,7 +741,7 @@ void DarcySolver<Mesh>::postProcessTraceOfPressureRT0()
 template <typename Mesh>
 void DarcySolver<Mesh>::postProcessVelocityRT0()
 {
-    if(verbose) std::cout << "Postprocessing of velocity (RT0 per element)\n";
+    Debug( 6100 ) << "Postprocessing of velocity (RT0 per element)\n";
     if(post_proc_format == "medit"){
         wr_medit_ascii_scalar(post_dir + "/velocRT0.bb",globalFlux.giveVec(),globalFlux.size(),1);
     } else {
@@ -685,55 +753,13 @@ void DarcySolver<Mesh>::postProcessVelocityRT0()
 template <typename Mesh>
 void DarcySolver<Mesh>::postProcessPressureQ0()
 {
-    if ( verbose > 1 )
-        std::cout << "Postprocessing of pressure (constant by element)\n";
+    Debug( 6100 ) << "Postprocessing of pressure (constant by element)\n";
     if ( post_proc_format == "medit" ) {
         wr_medit_ascii_scalar(post_dir + "/presQ0.bb",globalP.giveVec(),globalP.size(),1);
     } else {
         std::cerr
             <<"Warning: Solution constant by element is possible only with medit for the moment\n";
     }
-
-#if ANALYTICAL_SOL
-    if ( verbose > 1 )
-        std::cout <<"Compute L2 pressure error:\n";
-    AnalyticalSolPres analyticSol;
-
-    double normL2=0., normL2diff=0., normL2sol=0.;
-    double normL2sq=0., normL2diffsq=0., normL2solsq=0.;
-
-    for(UInt i=1; i<=this->_mesh.numVolumes(); ++i){
-
-        pfe.updateFirstDeriv(this->_mesh.volumeList(i));
-
-        normL2sq     += elem_L2_2(globalP,pfe,pdof);
-        normL2solsq  += elem_L2_2(analyticSol,pfe);
-        normL2diffsq += elem_L2_diff_2(globalP,analyticSol,pfe,pdof);
-
-    }
-
-    normL2     = sqrt(normL2sq);
-    normL2sol  = sqrt(normL2solsq);
-    normL2diff = sqrt(normL2diffsq);
-
-    std::string errname = post_dir + "/errQ0Pres.txt";
-    std::ofstream ofile(errname.c_str());
-
-    ASSERT(ofile,"Error: Output file cannot be opened.");
-    ofile << "PRESSION ERROR (Q0)" << std::endl;
-    ofile << "|| p       ||_{L^2}                   = " << normL2 << std::endl;
-    ofile << "|| p_ex     ||_{L^2}                   = " << normL2sol << std::endl;
-    ofile << "|| p - p_ex ||_{L^2}                   = " << normL2diff<< std::endl;
-    ofile << "|| P - p_ex ||_{L^2} / || p_ex ||_{L^2} = "
-          << normL2diff / normL2sol << "\n" << std::endl;
-    ofile << "SQUARE of PRESSION ERROR (Q0)" << std::endl;
-    ofile << "|| p       ||^2_{L^2}                   = " << normL2sq << std::endl;
-    ofile << "|| p_ex     ||^2_{L^2}                   = " << normL2solsq << std::endl;
-    ofile << "|| p - p_ex ||^2_{L^2}                   = " << normL2diffsq << std::endl;
-    ofile << "|| P - p_ex ||^2_{L^2} / || p_ex ||^2_{L^2} = "
-          << normL2diffsq / normL2solsq << std::endl;
-#endif
-
 }
 
 template <typename Mesh>
@@ -743,10 +769,13 @@ void DarcySolver<Mesh>::projectPressureQ1( ScalUnknown<Vector> & p_q1 )
     CurrentFE fe_q1(refPFEnodal,geoMap,qr);
     Dof dof_q1(refPFEnodal);
     dof_q1.update(this->_mesh);
+
     UInt dim_q1 = dof_q1.numTotalDof();
+
     ScalUnknown<Vector> f_q1(dim_q1);
-    p_q1=0.0;
-    f_q1=0.0;
+    p_q1=ZeroVector( dim_q1 );
+    f_q1=ZeroVector( dim_q1 );
+
     MSRPatt pattA_q1(dof_q1);
     MSRMatr<double> A_q1(pattA_q1);
     ElemMat elmat(fe_q1.nbNode,1,1);
@@ -776,8 +805,7 @@ void DarcySolver<Mesh>::projectPressureQ1( ScalUnknown<Vector> & p_q1 )
 template <typename Mesh>
 void DarcySolver<Mesh>::postProcessPressureQ1()
 {
-    if( verbose > 1 )
-        std::cout << "Postprocessing of pressure (L2 projection on the nodes)\n";
+    Debug( 6100 ) << "Postprocessing of pressure (L2 projection on the nodes)\n";
     // Q1 or P1 elements
     CurrentFE fe_q1( refPFEnodal , geoMap , qr );
     Dof dof_q1( refPFEnodal );
@@ -807,54 +835,6 @@ void DarcySolver<Mesh>::postProcessPressureQ1()
     //iter_post ++;
     //---------------------------------------------
 
-    //! in case of existing analytical solution
-#if ANALYTICAL_SOL
-    if ( verbose > 1 )
-        std::cout <<"Compute the pressure error.\n";
-
-    AnalyticalSolPres analyticSol;
-
-    double normL2=0., normL2diff=0., normL2sol=0.;
-    double normH1=0., normH1diff=0., normH1sol=0.;
-
-    for(UInt ivol=1; ivol<=this->_mesh.numVolumes(); ++ivol){
-
-        fe_q1.updateFirstDeriv(this->_mesh.volumeList(ivol));
-
-        normL2     += elem_L2_2(nodalPres,fe_q1,dof_q1);
-        normL2sol  += elem_L2_2(analyticSol,fe_q1);
-        normL2diff += elem_L2_diff_2(nodalPres,analyticSol,fe_q1,dof_q1);
-
-        normH1     += elem_H1_2(nodalPres,fe_q1,dof_q1);
-        normH1sol  += elem_H1_2(analyticSol,fe_q1);
-        normH1diff += elem_H1_diff_2(nodalPres,analyticSol,fe_q1,dof_q1);
-    }
-
-    normL2     = sqrt(normL2);
-    normL2sol  = sqrt(normL2sol);
-    normL2diff = sqrt(normL2diff);
-
-    normH1     = sqrt(normH1);
-    normH1sol  = sqrt(normH1sol);
-    normH1diff = sqrt(normH1diff);
-
-    std::string errname = post_dir + "/errQ1Pres.txt";
-    std::ofstream ofile(errname.c_str());
-
-    ASSERT(ofile,"Error: Output file cannot be opened.");
-    ofile << "PRESSION ERROR (Q1)" << std::endl;
-    ofile << "|| p       ||_{L^2}                   = " << normL2 << std::endl;
-    ofile << "|| p_ex     ||_{L^2}                   = " << normL2sol << std::endl;
-    ofile << "|| p - p_ex ||_{L^2}                   = " << normL2diff<< std::endl;
-    ofile << "|| P - p_ex ||_{L^2} / || p_ex ||_{L^2} = " << normL2diff/normL2sol
-          << std::endl;
-
-    ofile << "|| U       ||_{H^1}                   = " << normH1 << std::endl;
-    ofile << "|| sol     ||_{H^1}                   = " << normH1sol << std::endl;
-    ofile << "|| U - sol ||_{H^1}                   = " << normH1diff<< std::endl;
-    ofile << "|| U - sol ||_{H^1} / || sol ||_{H^1} = " << normH1diff/normH1sol
-          << std::endl;
-#endif
 }
 
 template <typename Mesh>
@@ -865,9 +845,11 @@ void DarcySolver<Mesh>::projectVelocityQ1( PhysVectUnknown<Vector>& u_q1 )
     Dof dof_q1( refPFEnodal );
     dof_q1.update( this->_mesh );
     UInt dim_q1 = dof_q1.numTotalDof();
+
     PhysVectUnknown<Vector> f_q1( dim_q1 );
-    u_q1=0.0;
-    f_q1=0.0;
+    u_q1=ZeroVector( u_q1.size() ); // warning here number of components is 3 -> size = 3*dim_q1
+    f_q1=ZeroVector( f_q1.size() ); // warning here number of components is 3 -> size = 3*dim_q1
+
     MSRPatt pattA_q1(dof_q1,nbCoor);
     MSRMatr<double> A_q1(pattA_q1);
     ElemMat elmat_hdiv(fe_q1.nbNode,nbCoor,0,
@@ -875,7 +857,7 @@ void DarcySolver<Mesh>::projectVelocityQ1( PhysVectUnknown<Vector>& u_q1 )
     ElemMat elmat(fe_q1.nbNode,nbCoor,nbCoor);
     ElemVec elvec(fe_q1.nbNode,nbCoor);
     ElemVec elvec_hdiv(vfe.nbNode,1);
-    Tab1dView elvec_hdiv_vec = elvec_hdiv.block(0);
+    ElemVec::vector_view elvec_hdiv_vec = elvec_hdiv.block(0);
 
     for(UInt i = 1; i<=this->_mesh.numVolumes(); i++){
         fe_q1.updateJac(this->_mesh.volumeList(i));
@@ -913,8 +895,7 @@ void DarcySolver<Mesh>::projectVelocityQ1( PhysVectUnknown<Vector>& u_q1 )
 template <typename Mesh>
 void DarcySolver<Mesh>::postProcessVelocityQ1()
 {
-    if( verbose > 1 )
-        std::cout << "Postprocessing of velocity (L2 projection on the nodes)\n";
+    Debug( 6100 ) << "Postprocessing of velocity (L2 projection on the nodes)\n";
     // Q1 or P1 elements
     CurrentFE fe_q1( refPFEnodal , geoMap , qr );
     Dof dof_q1( refPFEnodal );
@@ -941,76 +922,13 @@ void DarcySolver<Mesh>::postProcessVelocityQ1()
         wr_vtk_ascii_header(vtkname,"Velocity",this->_mesh, dof_q1, fe_q1);
         wr_vtk_ascii_vector(vtkname,"U",nodalVel.giveVec(), nodalVel.size());
     }
-    //iter_post ++;
-
-    //---------------------------------------------
-
-#if ANALYTICAL_SOL
-    if ( verbose > 1 )
-        std::cout <<"Compute the velocity error.\n";
-    AnalyticalSolFlux analyticSol;
-
-    /*
-      analyticSol.init(diffusion_tensor(0,0)  / diffusion_scalar,
-      diffusion_tensor(2,0) / diffusion_scalar,
-      diffusion_tensor(2,2) / diffusion_scalar,
-      diffusion_tensor(1,1) / diffusion_scalar);
-    */
-
-    double normL2=0., normL2diff=0., normL2sol=0.;
-    double normH1=0., normH1diff=0., normH1sol=0.;
-
-    for(UInt i=1; i<=this->_mesh.numVolumes(); ++i){
-
-        fe_q1.updateFirstDeriv(this->_mesh.volumeList(i));
-
-        normL2     += elem_L2_2(nodalVel,fe_q1,dof_q1,3);
-        normL2sol  = -1.; //! elem_L2_2 is not reckognized
-        //! (confusion with another templated function)
-        // normL2sol  += elem_L2_2<AnalyticalSolFlux>(analyticSol,fe_q1,0.0,3);
-        normL2diff += elem_L2_diff_2(nodalVel,analyticSol,fe_q1,dof_q1,0.,3);
-        /*
-          normH1     += elem_H1_2(nodalVel,fe_q1,dof_q1,0,3);
-          normH1sol  += elem_H1_2(analyticSol,fe_q1,0,3);
-          normH1diff += elem_H1_diff_2(nodalVel,analyticSol,fe_q1,dof_q1,0,3);
-        */
-    }
-
-    normL2     = sqrt(normL2);
-    normL2sol  = sqrt(normL2sol);
-    normL2diff = sqrt(normL2diff);
-
-    normH1     = sqrt(normH1);
-    normH1sol  = sqrt(normH1sol);
-    normH1diff = sqrt(normH1diff);
-
-    std::string errname = post_dir + "/errQ1Vel.txt";
-    std::ofstream ofile(errname.c_str());
-
-    ASSERT(ofile,"Error: Output file cannot be opened.");
-    ofile << "VELOCITY ERROR (Q1)" << std::endl;
-
-    ofile << "|| U         ||_{L^2}                   = " << normL2 << std::endl;
-    ofile << "|| exact     ||_{L^2}                   = " << normL2sol << std::endl;
-    ofile << "|| U - exact ||_{L^2}                   = " << normL2diff<< std::endl;
-    ofile << "|| U - exact ||_{L^2}/|| exact ||_{L^2} = " << normL2diff/normL2sol
-          << std::endl;
-
-    //  std::cerr << "|| U       ||_{H^1}                   = " << normH1 << std::endl;
-    //  std::cerr << "|| exact     ||_{H^1}                   = " << normH1sol << std::endl;
-    //  std::cerr << "|| U - exact ||_{H^1}                   = " << normH1diff<< std::endl;
-    // std::cerr << "|| U - exact ||_{H^1} / || exact ||_{H^1} = " << normH1diff/normH1sol
-    //   << std::endl;
-
-#endif
 }
 
 
 template <typename Mesh>
 void DarcySolver<Mesh>::postProcessEnsight()
 {
-    if(verbose)
-        std::cout << "Postprocessing of pressure and velocity (P1-Output)\n";
+    Debug( 6100 ) << "Postprocessing of pressure and velocity (P1-Output)\n";
 
     // ********** P1 computation of the velocity **********************
     CurrentFE fe_q1( refPFEnodal , geoMap , qr );

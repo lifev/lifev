@@ -3,6 +3,7 @@
  This file is part of the LifeV library
 
  Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+            Christoph Winkelmann <christoph.winkelmann@epfl.ch>
       Date: 2004-08-29
 
  Copyright (C) 2004 EPFL
@@ -24,13 +25,16 @@
 /**
    \file SolverPETSC.hpp
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+   \author Christoph Winkelmann <christoph.winkelmann@epfl.ch>
    \date 2004-08-29
 */
 #include <lifeconfig.h>
 
+#include <vecUnknown.hpp>
+#include <GetPot.hpp>
+#include <singleton.hpp>
+
 #include <SolverPETSC.hpp>
-#include "GetPot.hpp"
-#include "singleton.hpp"
 
 namespace LifeV
 {
@@ -165,7 +169,7 @@ SolverPETSC::condEst() const
         std::cerr
             << "add 'ksp_set_compute_singular_values = true' to your data file"
             << std::endl;
-        __value = 0./0.; // aka nan
+        __value = std::numeric_limits<double>::signaling_NaN();
     }
     return __value;
 }
@@ -308,7 +312,7 @@ SolverPETSC::_F_solveCommon( Mat const& __A,
     PetscTruth __quiet;
     PetscTruth __found;
     PetscOptionsGetLogical( PETSC_NULL, "-quiet", &__quiet, &__found );
-    
+
     PetscInt its = 0;
 
     KSPSolve( _M_p->__ksp, __b, __x );
@@ -393,7 +397,7 @@ void SolverPETSC::setOptionsFromGetPot( const GetPot& dataFile,
         delete[] argv[ i ];
     }
     delete[] argv;
-    
+
     // set compute singular values from options
     // (not supported directly by PETSc)
     PetscTruth __compute;

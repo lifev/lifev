@@ -198,7 +198,7 @@ HarmonicExtension( Mesh& mesh,
     }
 
     // Initializations
-    _disp = 0.0;
+    _disp = ZeroVector( _disp.size() );
 }
 
 // This method updates the extension of the displacement, i.e. it solves the laplacian proglem
@@ -219,7 +219,7 @@ void HarmonicExtension::updateExtension( Mesh& mesh, const Real& time, const UIn
     UInt dim = _dof_mesh.numTotalDof();
 
     // Initializations
-    _f = 0.0;
+    _f = ZeroVector( _f.size() );
 
     // Boundary conditions treatment
     bcManageVector( _f, mesh, _dof_mesh, _mesh_BCh, _feBd, time, 1.0 );

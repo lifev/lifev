@@ -24,12 +24,8 @@ namespace LifeV
 
 // Constructors
 
-operFS::operFS(GetPot     &data_file):
-    M_BCh_u       (3),
-    M_BCh_d       (3),
-    M_BCh_mesh    (4),
-    M_BCh_du      (2),
-    M_BCh_dz      (3),
+operFS::operFS(GetPot     &data_file)
+    :
     M_fluid       (data_file,
                    feTetraP1bubble,
                    feTetraP1,
@@ -43,6 +39,11 @@ operFS::operFS(GetPot     &data_file):
                    quadRuleTetra4pt,
                    quadRuleTria3pt,
                    M_BCh_d),
+    M_BCh_u       (3),
+    M_BCh_d       (3),
+    M_BCh_mesh    (4),
+    M_BCh_du      (2),
+    M_BCh_dz      (3),
     M_dofFluidToStructure(feTetraP1,
                           M_solid.dDof(),
                           feTetraP1bubble,
@@ -52,9 +53,9 @@ operFS::operFS(GetPot     &data_file):
                           feTetraP1,
                           M_solid.dDof()),
     M_dofStructureToFluidMesh(M_fluid.mesh().getRefFE(),
-                            M_fluid.dofMesh(),
-                            feTetraP1,
-                            M_solid.dDof()),
+                              M_fluid.dofMesh(),
+                              feTetraP1,
+                              M_solid.dDof()),
     M_dofMeshToFluid(feTetraP1bubble,
                      M_fluid.uDof(),
                      feTetraP1bubble,
@@ -64,25 +65,25 @@ operFS::operFS(GetPot     &data_file):
     M_nbEval      (0)
 {
     M_dofFluidToStructure.update(M_solid.mesh(),
-                               1,
-                               M_fluid.mesh(),
-                               1,
-                               0.);
+                                 1,
+                                 M_fluid.mesh(),
+                                 1,
+                                 0.);
     M_dofStructureToSolid.update(M_solid.mesh(),
                                1,
                                M_solid.mesh(),
                                1,
                                0.);
     M_dofStructureToFluidMesh.update(M_fluid.mesh(),
-                                   1,
-                                   M_solid.mesh(),
-                                   1,
-                                   0.0);
+                                     1,
+                                     M_solid.mesh(),
+                                     1,
+                                     0.0);
     M_dofMeshToFluid.update(M_fluid.mesh(),
-                          1,
-                          M_fluid.mesh(),
-                          1,
-                          0.0);
+                            1,
+                            M_fluid.mesh(),
+                            1,
+                            0.0);
     M_solverAztec.setOptionsFromGetPot(data_file,"jacobian/aztec");
     M_method  = data_file("problem/method" ,0);
 }

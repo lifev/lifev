@@ -87,12 +87,12 @@ private:
 
     //! first time call boolean
     bool M_firstCall;
-    
-    //! If default omega is negative, then always use the 
-    // absolute value of the default omega. In this case 
-    //  M_usedefault=true 
+
+    //! If default omega is negative, then always use the
+    // absolute value of the default omega. In this case
+    //  M_usedefault=true
     bool M_useDefault;
-    
+
 };
 
 //
@@ -104,21 +104,18 @@ generalizedAitken<Vector, Real>::generalizedAitken( const int _nDof,
         const Real _defOmegaF,
         const Real _defOmegaS ) :
         M_nDof ( _nDof ),
-        M_lambda ( _nDof ),
-        M_muS ( _nDof ),
-        M_muF ( _nDof ),
+        M_lambda ( ZeroVector( _nDof ) ),
+        M_muS ( ZeroVector( _nDof ) ),
+        M_muF ( ZeroVector( _nDof ) ),
         M_defOmegaS ( _defOmegaS ),
         M_defOmegaF ( _defOmegaF )
 {
-    M_muS = 0.;
-    M_muF = 0.;
-    M_lambda = 0.;
     M_firstCall = true;
     if (( M_defOmegaS < 0 ) || ( M_defOmegaF< 0 ))
     {
         M_useDefault = true;
-	M_defOmegaS = std::fabs(M_defOmegaS);
-	M_defOmegaF = std::fabs(M_defOmegaF);
+        M_defOmegaS = std::fabs(M_defOmegaS);
+        M_defOmegaF = std::fabs(M_defOmegaF);
     } else {
         M_useDefault = false;
     }

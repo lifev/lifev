@@ -24,7 +24,7 @@
 
 namespace LifeV
 {
-Real maxnorm( const Vector& v );
+//Real maxnorm( const Vector& v );
 }
 
 #endif

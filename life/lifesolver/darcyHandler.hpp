@@ -1,6 +1,6 @@
 /* -*- mode: c++ -*-
    This program is part of the LifeV library
- 
+
   Author(s): Vincent Martin <vincent.martin@mate.polimi.it>
        Date: 2004-10-11
 
@@ -35,8 +35,6 @@
 #include "values.hpp"
 #include "assemb.hpp"
 #include "vtk_wrtrs.hpp"
-#include "user_fct.hpp"
-#include "user_diffusion.hpp"
 
 namespace LifeV
 {
@@ -108,6 +106,8 @@ public:
                   const RefFE& refFE_p, const RefHybridFE& refFE_tp,
                   const RefHybridFE& refFE_vdotn, const RefFE& refFE_pnodal,
                   const QuadRule& qr_u, const QuadRule& bdqr_u );
+
+
 protected:
     const UInt nbCoor; //!< = 3 in 3D, 2 in 2D
     const GeoMap& geoMap;
@@ -131,19 +131,7 @@ protected:
     UInt dimVdof; //! number of velocity dof
     UInt dimTPdof;//! number of trace of pressure dof
     UInt numFacesPerVolume; //! number of faces per volume
-    int nb_bc;                //!< number of boundary conditions
-    BCHandler bc;            //!< boundary conditions handler
 
-    //! boundary conditions functions
-    //! on a cube one might use them as follows:
-    BCFunctionBase bcFct1;  //!< low  X
-    BCFunctionBase bcFct2;  //!< high X
-    BCFunctionBase bcFct3;  //!< low  Y
-    BCFunctionBase bcFct4;  //!< high Y
-    BCFunctionBase bcFct5;  //!< low  Z
-    BCFunctionBase bcFct6;  //!< high Z
-
-    BCFunctionMixte bcFct_rob;  //!< a mixte (or Robin) bc function
 
 };
 
@@ -200,99 +188,7 @@ DarcyHandler<Mesh>::DarcyHandler( const GetPot& data_file, const RefHdivFE& refF
         std::cout << "Number of  P dof : " << dimPdof << std::endl;
         std::cout << "Number of  V dof : " << dimVdof << std::endl;
     }
-    // define the boundary conditions
-    switch(test_case){
-    case 1:
-        /*
-          Neumann condition (on p) at inlet (ref 1) and outlet (ref 3)
-          example of mesh: cylhexa.mesh
-        */
-        bcFct1.setFunction(g1);
-        bcFct2.setFunction(g3);
-        nb_bc = 2;
-        bc.setNumber(nb_bc);
-        bc.addBC("Inlet",      1, Natural,   Scalar, bcFct1);
-        bc.addBC("Outlet",  3, Natural, Scalar, bcFct2);
-        break;
 
-    case 2:
-        /*
-          Dirichlet condition (on p) at inlet (ref 1) and outlet (ref 3)
-          example of mesh: cylhexa.mesh
-        */
-        bcFct1.setFunction(g1);
-        bcFct2.setFunction(g3);
-        nb_bc = 2;
-        bc.setNumber(nb_bc);
-        bc.addBC("Inlet",      1, Essential,   Scalar, bcFct1);
-        bc.addBC("Outlet",  3, Essential, Scalar, bcFct2);
-        break;
-
-    case 3:
-        /*
-          Robin condition (dp/dq + alpha p = 1, alpha=1) at inlet (ref 1)
-          and Dirichlet (p=-1) at outlet (ref 3)
-          example of mesh: cylhexa.mesh
-        */
-        bcFct_rob.setFunctions_Mixte(g1, mixte_coeff); //! Robin coeff = 1.
-        bcFct2.setFunction(g3);
-        nb_bc = 2;
-        bc.setNumber(nb_bc);
-        bc.addBC("Inlet",   1,     Mixte, Scalar, bcFct_rob);
-        bc.addBC("Outlet",  3, Essential, Scalar, bcFct2);
-        break;
-
-    case 33:
-        /*
-          Analytical solution defined in user_fct
-
-          example of mesh: hexahexa10x10x10.mesh
-
-        */
-        bcFct1.setFunction(zero); //!< low   X
-        bcFct2.setFunction(zero); //!< high  X
-        bcFct3.setFunction(zero); //!< low   Y
-        bcFct4.setFunction(zero); //!< high  Y
-        bcFct5.setFunction(zero); //!< low   Z
-        bcFct6.setFunction(zero); //!< high  Z
-
-        nb_bc = 6;
-        bc.setNumber(nb_bc);
-
-        bc.addBC("Analytical, real BC",    1, Essential,   Scalar, bcFct1);
-        bc.addBC("Analytical, real BC",    2, Essential,   Scalar, bcFct2);
-        bc.addBC("Analytical, real BC",    3, Essential,   Scalar, bcFct3);
-        bc.addBC("Analytical, real BC",    4, Essential,   Scalar, bcFct4);
-        bc.addBC("Analytical, real BC",    5, Essential,   Scalar, bcFct5);
-        bc.addBC("Analytical, real BC",    6, Essential,   Scalar, bcFct6);
-
-        break;
-
-    case 4:
-        /*
-          Robin condition (dp/dq = alpha + beta*p, alpha=2.535e-6, beta=-7.596) at endothel (ref 3)
-          and Dirichlet (p=7.4226e-8) at adventitia (ref 1)
-          example of mesh: piece-of-tube-wall-tetra.mesh
-          diffusion coefficient: 1.0
-          This is the scaled problem of plasma filtration through the artery wall with phys. 
-          realistic data: diff.coeff (=darcy_perm/mu_plasma = 2e-14/0.0072 = 2.78e-12
-                          RobinBC resulting from the flux balance at the endothel (L_p_end=2.11e-11)
-                          pressure at the adventitia = 20 mmHg
-          (scaling: p* = diff.coeff * p otherwise wrong result - bad condition of Matrices)
-        */
-        bcFct_rob.setFunctions_Mixte(alpha, beta);
-        bcFct2.setFunction(p_adv);
-        nb_bc = 2;
-        bc.setNumber(nb_bc);
-        bc.addBC("Endothel",   3,     Mixte, Scalar, bcFct_rob);
-        bc.addBC("Adventitia",  1, Essential, Scalar, bcFct2);
-        break;
-
-    default:
-        ERROR_MSG("Unknown test case");
-    }
-    // update the dof with the b.c.
-    bc.bdUpdate(this->_mesh, feBd, tpdof);
     /*
     // check the mesh after b.c.
       BE CAREFUL: calling
@@ -301,7 +197,6 @@ DarcyHandler<Mesh>::DarcyHandler( const GetPot& data_file, const RefHdivFE& refF
     */
     //
     if(verbose>2) tpdof.showMe();
-    if(verbose>2) bc.showMe(true);
 }
 
 }

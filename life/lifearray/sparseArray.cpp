@@ -42,7 +42,7 @@ CSRMatr<CSRPatt, Tab2d>::CSRMatr( const CSRPatt &ex_pattern, UInt const nr, UInt
 {
     _Patt = &ex_pattern;
     Tab2d mzero( nr, nc );
-    mzero = 0.;
+    mzero = ZeroMatrix( nr, nc );
     _value.resize( ex_pattern.nNz(), mzero );
 }
 
@@ -52,7 +52,7 @@ VectorBlock
 CSRMatr<CSRPatt, Tab2d>::trans_mult( const VectorBlock &v )
 {
     UInt nblockr = _Patt->nRows(); // for square matrices...
-    int blsize = _value[ 0 ].N(); // for square block
+    int blsize = _value[ 0 ].size1(); // for square block
 
     ASSERT( nblockr == v.size(), "Error in Matrix Vector product" );
     VectorBlock ans( nblockr, blsize );
@@ -62,8 +62,8 @@ CSRMatr<CSRPatt, Tab2d>::trans_mult( const VectorBlock &v )
     {
         for ( UInt ii = _Patt->ia() [ ir ] - OFFSET;ii < _Patt->ia() [ ir + 1 ] - OFFSET;++ii )
         {
-            Tab2dView tr_block( _value[ ii ].t() ); // transpose-block
-            ans.numBlock( _Patt->ja() [ ii ] - OFFSET ) += ( tr_block * v.numBlock( ir ) );
+            ans.numBlock( _Patt->ja() [ ii ] - OFFSET ) += prod( trans( _value[ii] ),
+                                                                 v.numBlock( ir ) );
         };
     };
     return ans;
@@ -76,7 +76,7 @@ CSRMatr<CSRPatt, Tab2d>::operator*( const VectorBlock &v ) const
 {
     UInt nblockr = _Patt->nRows();
     UInt nblockc = _Patt->nCols();
-    int blsize = _value[ 0 ].N(); // for square block
+    int blsize = _value[ 0 ].size1(); // for square block
 
     ASSERT( nblockc == v.size(), "Error in Matrix Vector product" );
     VectorBlock ans( nblockr, blsize );
@@ -84,8 +84,8 @@ CSRMatr<CSRPatt, Tab2d>::operator*( const VectorBlock &v ) const
 
     for ( UInt ir = 0 + OFFSET;ir < nblockr + OFFSET;++ir )
     {
-        for ( UInt ii = _Patt->give_ia() [ ir ] - OFFSET;ii < _Patt->give_ia() [ ir + 1 ] - OFFSET;++ii )
-            ans.numBlock( ir ) += ( _value[ ii ] * v.numBlock( _Patt->give_ja() [ ii ] - OFFSET ) );
+        for ( UInt ii = _Patt->give_ia() [ ir ] - OFFSET; ii < _Patt->give_ia() [ ir + 1 ] - OFFSET; ++ii )
+            ans.numBlock( ir ) += prod( _value[ ii ], v.numBlock( _Patt->give_ja() [ ii ] - OFFSET ) );
     }
     return ans;
 }
@@ -99,7 +99,7 @@ CSRMatr<CSRPatt, Tab2d>::spy( std::string const &filename )
     std::string name = filename, uti = " , ";
     UInt nrows = _Patt->nRows();
     Container ia = _Patt->ia(), ja = _Patt->ja();
-    int blsize = _value[ 0 ].N(); // for square block
+    int blsize = _value[ 0 ].size1(); // for square block
     //
     // check on the file name
     //
@@ -456,10 +456,14 @@ DiagPreconditioner<Vector>::DiagPreconditioner( const CSRMatr<CSRPatt, double> &
 {
     double loc_val = 0.0;
     UInt M_size = M.Patt() ->nRows();
+#if 0
     Vector v_zero( M_size );
-    v_zero = 0.;
+    v_zero = ZeroVector( M_size );
 
     _diag = v_zero;
+#else
+    _diag = ZeroVector( M_size );
+#endif
     for ( UInt i = 0; i < M_size; i++ )
     {
         loc_val = M.get_value( i, i );
@@ -472,10 +476,14 @@ DiagPreconditioner<Vector>::DiagPreconditioner( const MSRMatr<double> &M )
 {
     double loc_val = 0.0;
     UInt M_size = M.Patt() ->nRows();
+#if 0
     Vector v_zero( M_size );
     v_zero = 0.;
 
     _diag = v_zero;
+#else
+    _diag = ZeroVector( M_size );
+#endif
     for ( UInt i = 0; i < M_size; i++ )
     {
         loc_val = M.get_value( i, i );
@@ -491,10 +499,8 @@ DiagPreconditioner<Vector>::DiagPreconditioner( const VBRMatr<double> &M )
     UInt Nblocks = M.Patt() ->nRows();
     UInt blockSize = M.Patt() ->rpntr() [ 1 ] - M.Patt() ->rpntr() [ 0 ];
     UInt M_size = Nblocks * blockSize;
-    Vector v_zero( M_size );
-    v_zero = 0.;
 
-    _diag = v_zero;
+    _diag = ZeroVector( M_size );
     for ( UInt i = 0; i < M_size; i++ )
     {
         loc_val = M.get_value( i, i );
@@ -508,9 +514,9 @@ template <>
 DiagPreconditioner<VectorBlock>::DiagPreconditioner( const CSRMatr<CSRPatt, Tab2d> &M )
 {
     UInt Nblocks = M.Patt() ->nRows();
-    int blockSize = M.value() [ 0 ].N();
+    int blockSize = M.value() [ 0 ].size1();
     Tab2d loc_val( blockSize, blockSize );
-    loc_val = 0.;
+    loc_val = ZeroMatrix( blockSize, blockSize );
     VectorBlock v_zero( Nblocks, blockSize );
     v_zero = 0.;
 
@@ -542,10 +548,10 @@ template <>
 VectorBlock
 DiagPreconditioner<VectorBlock>::solve( const VectorBlock &x ) const
 {
-    VectorBlock y( x.size(), x.numBlock( 0 ).N() );
+    VectorBlock y( x.size(), x.numBlock( 0 ).size() );
 
     for ( UInt i = 0; i < x.size(); i++ )
-        for ( int j = 0; j < x.numBlock( 0 ).N(); j++ )
+        for ( int j = 0; j < x.numBlock( 0 ).size(); j++ )
             y.numBlock( i ) ( j ) = x.numBlock( i ) ( j ) * diagBlock( i ) ( j );
 
     return y;
@@ -559,18 +565,14 @@ template <>
 IDPreconditioner<Vector>::IDPreconditioner( const CSRMatr<CSRPatt, double> &M )
 {
     UInt M_size = M.Patt() ->nRows();
-    Vector v_id( M_size );
-    v_id = 1.;
-    _diag = v_id;
+    _diag = ScalarVector( M_size, 1.0 );
 }
 
 template <>
 IDPreconditioner<Vector>::IDPreconditioner( const MSRMatr<double> &M )
 {
     UInt M_size = M.Patt() ->nRows();
-    Vector v_id( M_size );
-    v_id = 1.;
-    _diag = v_id;
+    _diag = ScalarVector( M_size, 1.0 );
 }
 
 //for VBR pattern
@@ -580,16 +582,14 @@ IDPreconditioner<Vector>::IDPreconditioner( const VBRMatr<double> &M )
     UInt Nblocks = M.Patt() ->nRows();
     UInt blockSize = M.Patt() ->rpntr() [ 1 ] - M.Patt() ->rpntr() [ 0 ];
     UInt M_size = Nblocks * blockSize;
-    Vector v_id( M_size );
-    v_id = 1.;
-    _diag = v_id;
+    _diag = ScalarVector( M_size, 1.0 );
 }
 //for CSR block pattern
 template <>
 IDPreconditioner<VectorBlock>::IDPreconditioner( const CSRMatr<CSRPatt, Tab2d> &M )
 {
     int Nblocks = M.Patt() ->nRows();
-    int blockSize = M.value() [ 0 ].N();
+    int blockSize = M.value() [ 0 ].size1();
     VectorBlock v_id( Nblocks, blockSize );
     v_id = 1.;
     _diag = v_id;

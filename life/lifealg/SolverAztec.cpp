@@ -29,6 +29,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <boost/utility.hpp>
+
 #include <SolverAztec.hpp>
 
 class GetPot;
@@ -136,7 +138,9 @@ void SolverAztec::solve( array_type& x, array_type const& b )
 {
     if ( M_matrix != 0 )
     {
-        AZ_iterate( &x[ 0 ], &b[ 0 ], M_options, M_params, M_status,
+        AZ_iterate( &x[ 0 ],
+                    const_cast<double*>( boost::addressof( b[ 0 ] ) ),
+                    M_options, M_params, M_status,
                     M_procConfig, M_matrix, M_precond, NULL );
     }
     else

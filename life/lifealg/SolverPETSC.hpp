@@ -3,6 +3,7 @@
  This file is part of the LifeV library
 
  Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+            Christoph Winkelmann <christoph.winkelmann@epfl.ch>
       Date: 2004-08-29
 
  Copyright (C) 2004 EPFL
@@ -24,6 +25,7 @@
 /**
    \file SolverPETSC.hpp
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+   \author Christoph Winkelmann <christoph.winkelmann@epfl.ch>
    \date 2004-08-29
 */
 #ifndef __SolverPETSC_H
@@ -39,7 +41,7 @@
 #endif /* HAVE_PETSC_H */
 
 #include <vecUnknown.hpp>
-#include "sparseArray.hpp"
+#include <sparseArray.hpp>
 
 class GetPot;
 
@@ -114,7 +116,8 @@ typedef enum PetscMonitorType
   -# "mat"
   -# "hypre"
 
-  @author Christophe Prud'homme
+  \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+  \author Christoph Winkelmann <christoph.winkelmann@epfl.ch>
   @see
 */
 class SolverPETSC
@@ -169,23 +172,23 @@ public:
       \return last (approximate preconditioned) residual norm
     */
     double residualNorm() const;
-    
+
     /*!
       \brief Gets a condition number estimate of the preconditioned system.
-      
+
       The estimate is the quotient of the minimal and the maximal singular
       value found in the Krylov space used in the last solve.
-      
+
       Note: The necessary data is only computed during the solve if the option
       ksp_set_compute_singular_values is set to true in the data file.
-      
+
       \return estimated condition number
     */
     double condEst() const;
 
     //! Gets the number of iterations performed in the last solve.
     int iterations() const;
-    
+
     //! get the petsc preconditioner
     PC const& preconditioner() const;
 
@@ -315,15 +318,15 @@ void setTolerances( double = PETSC_DEFAULT,
     /*!
       @brief Adds options from data file to PETSC database and sets these new
       options for this solver.
-      
+
       Any option of the form NAME = VALUE is passed to PETSC as command line
       option -NAME VALUE.
-      
+
       Example: ksp_type = gmres. See the PETSC documentation for more
       available options.
-      
+
       In addition, there are the following options:
-      
+
       @arg nokspview = false | true - Do not show parameters of Krylov space
       solver. Default: false
       @arg quiet = false | true - Do not show log messages. Only error
@@ -331,10 +334,10 @@ void setTolerances( double = PETSC_DEFAULT,
       @arg ksp_set_compute_singular_values = false | true - Calculate singular
       values when solving. Needed if condEst shall not return NaN. Default:
       false
-      
+
       @param dataFile GetPot object containing the options from the data file
       @param section section in the GetPot object containing the PETSC stuff
-      
+
       You should have a look at PETSC documentation for further details.
       @author Christoph Winkelmann
       @see http://www.mcs.anl.gov/petsc/

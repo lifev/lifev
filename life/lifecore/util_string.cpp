@@ -29,7 +29,7 @@ std::istream & eatline( std::istream & s )    // eat a whole line from std::istr
 
 std::istream & eat_comments( std::istream & s )    //eat lines starting with '!%#;$'
 {
-    char c;
+    char c = 'a';
     s.get( c ) ;
     while ( c == '!' ||
             c == '%' ||

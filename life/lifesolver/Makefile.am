@@ -22,6 +22,7 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
+AM_CPPFLAGS = -DNO_BLASLAPACK
 INCLUDES 	= -I$(top_srcdir)/life/lifecore  -I$(top_srcdir)/life/lifearray -I$(top_srcdir)/life/lifealg \
              -I$(top_srcdir)/life/lifemesh -I$(top_srcdir)/life/lifefem -I$(top_srcdir)/life/lifefilters 
 
@@ -30,19 +31,18 @@ include_HEADERS	= ElasticStructureHandler.hpp NavierStokesAleHandler.hpp \
                 NavierStokesSolverPC.hpp VenantKirchhofSolver.hpp dataElasticStructure.hpp \
                 dataNavierStokes.hpp dataSimplifiedStructure.hpp simplifiedStructure.hpp \
                 convDiffReactHandler.hpp convDiffReactSolverPC.hpp dataConvDiffReact.hpp \
-                dataDarcy.hpp darcyHandler.hpp darcySolver.hpp operFS.hpp steklovPoincareBase.hpp \
-		fixedPointBase.hpp exactJacobianBase.hpp
+                dataDarcy.hpp darcyHandler.hpp darcySolverBase.hpp darcySolver.hpp \
+                operFS.hpp steklovPoincareBase.hpp fixedPointBase.hpp exactJacobianBase.hpp
 
 
 lib_LTLIBRARIES	= liblifesolver.la
 
-liblifesolver_la_SOURCES	= operFS.cpp steklovPoincareBase.cpp fixedPointBase.cpp exactJacobianBase.cpp 
+liblifesolver_la_SOURCES	= darcySolver.cpp operFS.cpp steklovPoincareBase.cpp fixedPointBase.cpp exactJacobianBase.cpp 
 
-liblifesolver_la_LIBADD    = ../lifefilters/liblifefilters.la ../lifecore/liblifecore.la ../lifearray/liblifearray.la $(petsc_libs) $(aztec_libs)
-include $(top_srcdir)/admin/Doxyfile.am
+liblifesolver_la_LIBADD    = ../lifefilters/liblifefilters.la ../lifecore/liblifecore.la ../lifearray/liblifearray.la $(petsc_libs) $(aztec_libs) $(boost_libs)
 
 #bin_PROGRAMS=multiscale
 #multiscale_SOURCES  = #multiscale.cpp
 #multiscale_LDADD    = ../lifecore/liblifecore.la 
 
-#include $(top_srcdir)/admin/Doxyfile.am
+include $(top_srcdir)/admin/Doxyfile.am

@@ -15,24 +15,24 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*!
   \file algebraic_facto.h
   \author Alain Gauthier.
   \date 04/02
- 
+
   \brief Matrices-vector product for AZTEC. Preconditioner for AZTEC
- 
+
   \version 18/09/02, addition of: other pointers in DataFactorisation, two other Schur
   complement preconditionner my_precSchur_PC anc my_precSchur_CC, Alain.
- 
+
   \version 18/01/03, fully Dirichlet bc conditions treatment (without define). New treatment of the
   Aztec options for the Schur complement system using DataAztec (without including main.h). Miguel
- 
+
   #purposes: definition of various functions which are used as
             matrix-vector products with AZTEC. The aim is the implementation
             of exact/inexact algebraic factorisation methods for NS equation
- 
+
              construction of preconditioners used within AZTEC according
             to the algebraic factorisation method.
 */
@@ -303,15 +303,15 @@ DataFactorisation<MatrixTypeC, MatrixTypeD, MatrixTypeDtr, MatrixTypeH, MatrixTy
 ////////////////////////
 /*!
    \brief Matrix-vector product function passed through AZTEC.
- 
+
    Computes the product C * p where
    the matrix C is stored in the class DataFactorisation.
- 
+
    \param p
    \param ap
    \param Amat
    \param proc_config contains information on processor for AZTEC, initialized by the function AZ_set_proc_config.
- 
+
    In output the result is set in the vector ap.
 */
 template <typename MatrixTypeC,
@@ -338,10 +338,10 @@ void my_Cmatvec( double *p, double *ap, AZ_MATRIX * Amat,
    requested_rows[0 ... N_requested_rows-1].  Return this information in
    'row_lengths, columns, values'.  If there is not enough space to complete
    this operation, return 0. Otherwise, return 1.
- 
+
    Purpose : necessary for using AZTEC preconditioner with USER-DEFINED
              matrix.
- 
+
    \param Amat             On input, points to user's data containing
                            matrix values.
    \param N_requested_rows On input, number of rows for which nonzero are
@@ -361,7 +361,7 @@ void my_Cmatvec( double *p, double *ap, AZ_MATRIX * Amat,
                            'columns' and 'values' for storing nonzeros.
       If more space is needed, return 0.
    \return An integer value, 0 if more memory space is needed, 1 otherwise.
- 
+
    REMARK: VERSION VALID FOR MixedMatr MATRIX, it's not necessary for
            other matrix types (C would be an MSR matrix in this case).
  */
@@ -420,11 +420,11 @@ int matC_getrow( int columns[], double values[], int row_lengths[],
 ////////////////////////
 /*!
    \brief Matrix-vector product function passed through AZTEC.
- 
+
    The aim is to compute the product (D*C^(-1)*trD) * p where
    the matrices C, D and trD are stored in the class DataFactorisation.
    In output the result is set in the vector ap.
- 
+
    REMARK: this function correspond to the EXACT algebraic factorisation
            method.
  */
@@ -532,13 +532,13 @@ void my_matvec( double *p, double *ap, AZ_MATRIX * Amat, int proc_config[] )
 ////////////////////////
 /*!
    \brief Matrix-vector product function passed through AZTEC.
- 
+
    SPECIALISATION IF C IS OF TYPE MSR
- 
+
    The aim is to compute the product (D*C^(-1)*trD) * p where
    the matrices C, D and trD are stored in the class DataFactorisation.
    In output the result is set in the vector ap.
- 
+
    REMARK: this function correspond to the EXACT algebraic factorisation
            method.
  */
@@ -642,13 +642,13 @@ void my_matvec( double *p, double *ap, AZ_MATRIX * Amat, int proc_config[] )
 ////////////////////////
 /*!
    \brief Matrix-vector product function passed through AZTEC.
- 
+
    SOLVE THE SYSTEM FOR C FOR EACH BLOCK SEPARATLY (WORK WITH MIXEDMATR TYPE)
- 
+
    The aim is to compute the product (D*C^(-1)*trD) * p where
    the matrices C, D and trD are stored in the class DataFactorisation.
    In output the result is set in the vector ap.
- 
+
    REMARK: this function correspond to the EXACT algebraic factorisation
            method.
  */
@@ -788,12 +788,12 @@ void my_matvec_block( double *p, double *ap, AZ_MATRIX * Amat,
 ////////////////////////
 /*!
    \brief Matrix-vector product function passed through AZTEC.
- 
+
    The aim is to compute the product (D*H^{-1}*trD) * p where
    the matrices H, D and trD are stored in the class DataFactorisation.
    In output the result is set in the vector ap.
    H corresponds to an approximation of the matrix C.
- 
+
    REMARK: H is diagonal and then stored in vector type.
  */
 template <typename MatrixTypeC,
@@ -832,14 +832,14 @@ void my_approxmatvec( double *p, double *ap, AZ_MATRIX * Amat, int proc_config[]
 ////////////////////////
 /*!
    \brief Preconditioner of the Schur complement passed to AZTEC.
- 
+
    The aim is to solve the system (D*H^{-1}*trD) * z = r where
    in input z=r.
    the matrices H, D and trD are stored in the class DataFactorisation.
    In output the result is set in the vector z.
    H corresponds to an approximation of the matrix C in the case of
    Chorin-Temam's method, Yosida one or inexact LU precondioning.
- 
+
    REMARK: H is diagonal and then stored in vector type.
  */
 template <typename MatrixTypeC,
@@ -904,7 +904,7 @@ void my_precSchur( double *z, int *options, int *proc_config, double *params,
 ////////////////////////
 /*!
    \brief Pressure corrected Preconditioner of the Schur complement passed to AZTEC.
- 
+
    The aim is to solve the system (S*B^{-1}*S) * z = r where
    S=(D*H^{-1}*trD), B= D*H^{-1}*C*H^{-1}*D^T and
    in input z=r.
@@ -913,7 +913,7 @@ void my_precSchur( double *z, int *options, int *proc_config, double *params,
    In output the result is set in the vector z.
    H corresponds to an approximation of the matrix C in the case of
    Chorin-Temam's method, Yosida one or inexact LU precondioning.
- 
+
    REMARK: H is diagonal and then stored in vector type.
  */
 template <typename MatrixTypeC,
@@ -964,8 +964,7 @@ void my_precSchur_PC( double *z, int *options, int *proc_config, double *params,
 
     // temporary vector z1
     Vector z1( dim );
-    z1 = 0.;
-
+    z1 = ZeroVector( dim );
 
     // keep factorisation for reusing it
     matS->data_org[ AZ_name ] = DATA_NAME_AZTEC_MATS;     // identification
@@ -975,7 +974,7 @@ void my_precSchur_PC( double *z, int *options, int *proc_config, double *params,
     options_s[ AZ_recursion_level ] = my_data->_recur;
 
 
-    AZ_iterate( &z1[ 0 ], z, options_s, params_s, status_s,
+    AZ_iterate( boost::addressof( z1[ 0 ] ), z, options_s, params_s, status_s,
                 proc_config, matS, NULL, NULL );
 
 
@@ -1011,7 +1010,7 @@ void my_precSchur_PC( double *z, int *options, int *proc_config, double *params,
 ////////////////////////
 /*!
    \brief Cahouet-Chabart Preconditioner of the Schur complement passed to AZTEC.
- 
+
    The aim is to solve the system (nu*Mp^{-1}+S^{-1})^{-1} * z = r where
    S=(D*H^{-1}*trD), Mp = pressure mass matrix and
    in input z=r.
@@ -1019,7 +1018,7 @@ void my_precSchur_PC( double *z, int *options, int *proc_config, double *params,
    class DataFactorisation.
    In output the result is set in the vector z.
    H corresponds to an approximation of the matrix C.
- 
+
    REMARK: H is diagonal and then stored in vector type.
  */
 template <typename MatrixTypeC,

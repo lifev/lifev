@@ -343,7 +343,7 @@ timeAdvance( const Function source, const Real& time )
     }
 
     // Right hand side for the velocity at time
-    _rhsWithoutBC = 0.;
+    _rhsWithoutBC = ZeroVector( _rhsWithoutBC.size() );
 
     // loop on volumes: assembling source term
     for ( UInt i = 1; i <= _mesh.numVolumes(); ++i )
@@ -361,7 +361,9 @@ timeAdvance( const Function source, const Real& time )
     }
 
     // right hand side without boundary load terms
-    _rhsWithoutBC += _M * ( this->_d + this->_dt * _w );
+    Vector __z = this->_d + this->_dt * _w;
+    //_rhsWithoutBC += _M * ( this->_d + this->_dt * _w );
+    _rhsWithoutBC += _M * __z;
     _rhsWithoutBC -= _K * this->_d;
 
     _rhs_w = ( 2.0 / this->_dt ) * this->_d + _w;

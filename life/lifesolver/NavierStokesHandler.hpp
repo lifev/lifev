@@ -396,7 +396,7 @@ NavierStokesHandler<Mesh>::initialize( const Function& u0 )
 {
 
     // Initialize pressure
-    _p = 0.0;
+    _p = ZeroVector( _p.size() );
 
     // ********** initialize in the pressure BDF structure
     _bdf.bdf_p().initialize_unk( _p );

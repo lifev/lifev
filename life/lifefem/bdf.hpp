@@ -199,7 +199,7 @@ void Bdf::initialize_unk( const Funct& u0,
     _M_size = size_comp * nbComp; // Inizialization of the dimension of the vector
 
     Vector aux( _M_size );
-    aux = 0.0;
+    aux = ZeroVector( _M_size );
 
 
     for ( iter = _M_unknowns.begin() ; iter != iter_end; iter++ )

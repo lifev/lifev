@@ -142,7 +142,7 @@ void source( const UsrFct& fct, ElemVec& elvec, const CurrentFE& fe, int iblock 
 {
     ASSERT_PRE( fe.hasQuadPtCoor(), "Source with space dependent fonction need updated quadrature point coordinates. Call for example updateFirstDerivQuadPt() instead of updateFirstDeriv()." );
     int i, ig;
-    Tab1dView vec = elvec.block( iblock );
+    ElemVec::vector_view vec = elvec.block( iblock );
     Real s;
     for ( i = 0;i < fe.nbNode;i++ )
     {
@@ -165,7 +165,7 @@ void source( const UsrFct& fct, ElemVec& elvec, const CurrentFE& fe, Real t, int
 {
     ASSERT_PRE( fe.hasQuadPtCoor(), "Source with space dependent fonction need updated quadrature point coordinates. Call for example updateFirstDerivQuadPt() instead of updateFirstDeriv()." );
     int i, ig;
-    Tab1dView vec = elvec.block( iblock );
+    ElemVec::vector_view vec = elvec.block( iblock );
     Real s;
     for ( i = 0;i < fe.nbNode;i++ )
     {

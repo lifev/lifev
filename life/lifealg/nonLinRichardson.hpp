@@ -80,21 +80,21 @@ int nonLinRichardson( Vector& sol,
 
     int nDofFS = sol.size();
 
-    Vector residual = sol;
-    Vector step     = sol;
-    Vector muk      = sol;
+    Vector residual ( sol.size() );
+    Vector step     ( sol.size() );
+    Vector muk      ( sol.size() );
 
-    step = 0.;
-    muk  = 0.;
+    step = ZeroVector( step.size() );
+    muk  = ZeroVector( muk.size() );
 
     Real normResOld = 1;
 
     Real omegaS = omega;
     Real omegaF = omega;
 
-        std::cout << "------------------------------------------------------------------" << std::endl;
-        std::cout << "  NonLinRichardson: starting " << std::endl;
-        std::cout << "------------------------------------------------------------------" << std::endl;
+    std::cout << "------------------------------------------------------------------" << std::endl;
+    std::cout << "  NonLinRichardson: starting " << std::endl;
+    std::cout << "------------------------------------------------------------------" << std::endl;
     f.evalResidual( residual, sol, iter );
 
     Real normRes      = norm( residual );
@@ -115,7 +115,7 @@ int nonLinRichardson( Vector& sol,
         std::cout << std::endl;
         std::cout << "------------------------------------------------------------------" << std::endl;
         std::cout << "  NonLinRichardson: iter = " << iter
-		  << ", residual = " << normRes
+                  << ", residual = " << normRes
                   << ", stoping tolerance = " << stop_tol << std::endl;
         std::cout << "------------------------------------------------------------------" << std::endl;
         std::cout << std::endl;
@@ -136,7 +136,7 @@ int nonLinRichardson( Vector& sol,
         sol += step;
 
         f.evalResidual( residual, sol, iter );
-	normRes = norm( residual );
+        normRes = norm( residual );
         out_res << " residual  norm = " << normRes << std::endl;
 
     }
@@ -150,7 +150,7 @@ int nonLinRichardson( Vector& sol,
 
     std::cout << "------------------------------------------------------------------" << std::endl;
     std::cout << "--- NonLinRichardson: convergence (" << normRes
-	      <<") in " << iter << " iterations\n\n";
+              <<") in " << iter << " iterations\n\n";
     std::cout << "------------------------------------------------------------------" << std::endl;
 
     maxit = iter;

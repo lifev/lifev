@@ -21,7 +21,7 @@
 
 namespace LifeV
 {
-
+/*
 Real maxnorm( const Vector& v )
 {
     Real max = fabs( v[ 0 ] );
@@ -32,6 +32,6 @@ Real maxnorm( const Vector& v )
     }
     return max;
 }
-
+*/
 
 }

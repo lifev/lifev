@@ -258,8 +258,8 @@ void  steklovPoincare::solveLinearFluid()
 
 void  steklovPoincare::solveLinearSolid()
 {
-    M_rhs_dz = 0.;
-    M_dz     = 0.;
+    M_rhs_dz = ZeroVector( M_rhs_dz.size() );
+    M_dz     = ZeroVector( M_dz.size() );
 
     if ( !M_BCh_dz.bdUpdateDone() )
         M_BCh_dz.bdUpdate(this->M_solid.mesh(),
@@ -389,7 +389,7 @@ void my_matvecSfSsPrime(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
 
 void steklovPoincare::computeResidualFSI()
 {
-    M_residualFSI = 0.;
+    M_residualFSI = ZeroVector( M_residualFSI.size() );
 
     BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[0];
     BCBase const &BC_solidInterface = M_solid.BC_solid()[0];
@@ -491,7 +491,7 @@ void steklovPoincare::setResidualFSI(const Vector _res)
 Vector steklovPoincare::getResidualFSIOnSolid()
 {
     Vector vec = M_residualS;
-    vec = 0.;
+    vec = ZeroVector( vec.size() );
 
     BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[0];
     BCBase const &BC_solidInterface = M_solid.BC_solid()[0];
@@ -602,8 +602,7 @@ Vector steklovPoincare::getFluidInterfaceOnSolid(Vector &_vec)
 
 Vector steklovPoincare::setDispOnInterface(const Vector &_disp)
 {
-    Vector vec = _disp.size();
-    vec = 0.;
+    Vector vec( ZeroVector( _disp.size() ) );
 
     BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[0];
     BCBase const &BC_solidInterface = M_solid.BC_solid()[0];

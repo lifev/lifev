@@ -48,14 +48,23 @@ class DataDarcy:
         public DataMesh<Mesh>
 {
 public:
+
+    //! constructor using a data file.
+    DataDarcy(const GetPot& dfile);
+    void dataDarcyShowMe(std::ostream& c=std::cout);
+    void dataDarcyHelp(std::ostream& c=std::cout);
+
+protected:
     //
     // Physics
     //
     int test_case;
-    int diffusion_type;
+    int _M_diffusion_type;
     int diffusion_function;
     double diffusion_scalar;
     KNM<double> diffusion_tensor;
+
+
     //
     // Linear Solver
     //
@@ -67,10 +76,6 @@ public:
     int verbose;
     std::string post_proc_format;
 
-    //! constructor using a data file.
-    DataDarcy(const GetPot& dfile);
-    void dataDarcyShowMe(std::ostream& c=std::cout);
-    void dataDarcyHelp(std::ostream& c=std::cout);
 };
 
 
@@ -86,7 +91,7 @@ DataDarcy<Mesh>::DataDarcy(const GetPot& dfile):
 {
     // physics
     test_case = dfile("darcy/physics/test_case",1);
-    diffusion_type = dfile("darcy/physics/diffusion_type",0);
+    _M_diffusion_type = dfile("darcy/physics/diffusion_type",0);
     diffusion_function = dfile("darcy/physics/diffusion_function",0);
     diffusion_scalar = dfile("darcy/physics/diffusion_scalar",1.);
     diffusion_tensor(0,0) = dfile("darcy/physics/diffusion_tensor",1.,0);
@@ -113,7 +118,7 @@ void DataDarcy<Mesh>::dataDarcyShowMe(std::ostream& c)
     // physics
     c << "\n*** Values for data [physics]\n\n";
     c << "test_case = " << test_case << "\n";
-    c << "diffusion_type = " << diffusion_type << "\n";
+    c << "diffusion_type = " << _M_diffusion_type << "\n";
     c << "diffusion_scalar = " << diffusion_scalar << "\n";
     c << "diffusion_tensor = " << diffusion_tensor << "\n";
     // Linear Solver

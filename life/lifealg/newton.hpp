@@ -58,8 +58,11 @@ int newton( Vector& sol, Fct& f, Norm& norm, Real abstol, Real reltol,
     Real linres;
 
     int iter = 0, increase_res = 0;
-    Vector residual = sol, step = sol;
-    step = 0.;
+    Vector residual = sol;
+
+    Vector step(  sol.size() );
+    step = ZeroVector( sol.size() );
+
     Real normResOld = 1, lambda, slope;
     f.evalResidual( residual, sol, iter);
 //    f.evalResidual( sol, iter, residual );

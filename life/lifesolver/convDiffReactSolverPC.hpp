@@ -224,7 +224,7 @@ timeAdvance( const Function source, const Real& time )
     chrono.start();
 
     // Right hand side for the velocity at time
-    _f_c = 0.;
+    _f_c = ZeroVector( _f_c.size() );
 
     // loop on volumes: assembling source term
     for ( UInt i = 1; i <= _mesh.numVolumes(); ++i )
@@ -460,7 +460,7 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
     Chrono chrono;
     chrono.start();
 
-    _u_c = -100.0;
+    _u_c = ScalarVector( _u_c.size(), -100 );
 
     Real x[ 4 ], y[ 4 ], z[ 4 ], xt[ 4 ], yt[ 4 ], zt[ 4 ];
     UInt vid, i1, i2, i3, v1, v2, v3, v4;

@@ -148,11 +148,11 @@ NavierStokesAleHandler( const GetPot& data_file, const RefFE& refFE_u,
         _dInterp( _dim_u ),
         _dwInterp( _dim_u )
 {
-    _dispOld = 0.0;
-    _w = 0.0;
-    _wInterp = 0.0;
-    _dInterp = 0.0;
-    _dwInterp = 0.0;
+    _dispOld = ZeroVector( _dispOld.size() );
+    _w = ZeroVector( _w.size() );
+    _wInterp = ZeroVector( _dim_u );
+    _dInterp = ZeroVector( _dim_u );
+    _dwInterp = ZeroVector( _dim_u );
 }
 
 

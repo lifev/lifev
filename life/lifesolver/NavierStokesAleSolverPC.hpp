@@ -326,7 +326,7 @@ timeAdvance( const Function source, const Real& time )
     chrono.start();
 
     // Right hand side for the velocity at time
-    _f_uWithOutBC = 0.;
+    _f_uWithOutBC = ZeroVector( _f_uWithOutBC.size() );
 
     // loop on volumes: assembling source term
     for ( UInt i = 1; i <= _mesh.numVolumes(); ++i )
@@ -765,8 +765,8 @@ iterateLin( const Real& time, BCHandler& BCh_du )
     chrono.start();
 
     //initialize right hand side
-    _f_duWithOutBC = 0.0;
-    _f_p = 0.0;
+    _f_duWithOutBC = ZeroVector( _f_duWithOutBC.size() );
+    _f_p = ZeroVector( _f_p.size() );
 
     // Loop on elements
     for ( UInt i = 1; i <= _mesh.numVolumes(); i++ )
@@ -905,7 +905,7 @@ iterateLin( const Real& time, BCHandler& BCh_du )
     // ---------------
     options_i[ AZ_recursion_level ] = 1;
 
-    _du = 0.0;
+    _du = ZeroVector( _du.size() );
 
     // intermediate velocity computation
     std::cout << "  o-  Solving system (i)... ";
@@ -973,7 +973,7 @@ iterateLin( const Real& time, BCHandler& BCh_du )
         vec_DV[ _dim_p - 1 ] = 1.0; // correction of the right hand side.
     }
 
-    _dp = 0.0;
+    _dp = ZeroVector( _dp.size() );
 
 
     std::cout << "  o-  Solving pressure system... \n";
