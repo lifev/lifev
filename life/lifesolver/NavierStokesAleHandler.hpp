@@ -195,15 +195,15 @@ updateDispVelo()
 
     Real dti = 1.0 / _dt;
 
-    std::cout << " max norm dx = " << maxnorm( _disp ) << std::endl;
+    std::cout << " max norm dx = " << norm_inf( _disp ) << std::endl;
 
     _interpolate( _w.nbcomp(), _disp, _dInterp );
 
-    std::cout << " max norm dxInterp = " << maxnorm( _dInterp ) << std::endl;
+    std::cout << " max norm dxInterp = " << norm_inf( _dInterp ) << std::endl;
 
     _dwInterp = _dInterp * dti;
 
-    std::cout << " max norm dwInterp = " << maxnorm( _dwInterp ) << std::endl;
+    std::cout << " max norm dwInterp = " << norm_inf( _dwInterp ) << std::endl;
 }
 
 
@@ -311,7 +311,7 @@ _interpolate( const UInt nbComp, const Vector& w, Vector& wInterp )
     UInt nDofElemF = nElemF * nDofpF; // number of face's Dof on a Element
 
 
-    Real x, y, z, sum;
+    Real x, y, z;
 
     KN<Real> wLoc( nDofElem * nbComp );
 
@@ -349,12 +349,12 @@ _interpolate( const UInt nbComp, const Vector& w, Vector& wInterp )
                     {
 
                         // Interpolating data at the nodal point
-                        sum = 0;
+                        double __sum = 0;
                         for ( ID idof = 0; idof < nDofElem; ++idof )  // Loop on local Dof on the element
-                            sum += wLoc( icmp * nDofElem + idof ) * _mesh.getRefFE().phi( idof, x, y, z );
+                            __sum += wLoc( icmp * nDofElem + idof ) * _mesh.getRefFE().phi( idof, x, y, z );
 
                         // Updating interpolated mesh velocity
-                        wInterp( icmp * _dof_u.numTotalDof() + _dof_u.localToGlobal( iElem, lDof ) - 1 ) = sum;
+                        wInterp( icmp * _dof_u.numTotalDof() + _dof_u.localToGlobal( iElem, lDof ) - 1 ) = __sum;
                     }
                 }
             }
@@ -418,12 +418,12 @@ _interpolate( const UInt nbComp, const Vector& w, Vector& wInterp )
                     {
 
                         // Interpolating data at the nodal point
-                        sum = 0;
+                        double __sum = 0;
                         for ( ID idof = 0; idof < nDofElem; ++idof )  // Loop on local Dof on the adjacent element
-                            sum += wLoc( icmp * nDofElem + idof ) * _mesh.getRefFE().phi( idof, x, y, z );
+                            __sum += wLoc( icmp * nDofElem + idof ) * _mesh.getRefFE().phi( idof, x, y, z );
 
                         // Updating interpolating vector
-                        wInterp( icmp * _dof_u.numTotalDof() + _dof_u.localToGlobal( iElem, lDof ) - 1 ) = sum;
+                        wInterp( icmp * _dof_u.numTotalDof() + _dof_u.localToGlobal( iElem, lDof ) - 1 ) = __sum;
                     }
                 }
             }
@@ -445,12 +445,12 @@ _interpolate( const UInt nbComp, const Vector& w, Vector& wInterp )
             {
 
                 // Interpolating data at the nodal point
-                sum = 0;
+                double __sum = 0;
                 for ( ID idof = 0; idof < nDofElem; ++idof )  // Loop on local Dof on the adjacent element
-                    sum += wLoc( icmp * nDofElem + idof ) * _mesh.getRefFE().phi( idof, x, y, z );
+                    __sum += wLoc( icmp * nDofElem + idof ) * _mesh.getRefFE().phi( idof, x, y, z );
 
                 // Updating interpolating vector
-                wInterp( icmp * _dof_u.numTotalDof() + _dof_u.localToGlobal( iElem, lDof ) - 1 ) = sum;
+                wInterp( icmp * _dof_u.numTotalDof() + _dof_u.localToGlobal( iElem, lDof ) - 1 ) = __sum;
             }
         }
     }

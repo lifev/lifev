@@ -102,17 +102,6 @@ public:
 
     void setRecur(UInt recur) {_recur = recur;}
 
-    //! friends classes related to the newton solver
-    template <class Fct, class Vector, class Real, class Norm>
-    friend int newton( Vector& sol, Fct& f, Norm& norm, Real abstol, Real reltol, int& maxit,
-                       Real eta_max, int linesearch, std::ofstream& out_res, const Real& time );
-    template <class Fct, class Vector, class Real, class Norm>
-    friend void lineSearch_cubic( Fct& f, Norm& norm, Vector& residual, Vector& sol, Vector& step,
-                                  Real& normRes, Real& lambda, Real slope, int iter );
-    template <class Fct, class Vector, class Real, class Norm>
-    friend void lineSearch_parab( Fct& f, Norm& norm, Vector& residual, Vector& sol, Vector& step, Real& normRes,
-                                  Real& lambda, int iter );
-
     void updateJac( Vector& sol, int iter );
 
     //! solves the tangent problem for newton iterations
@@ -122,6 +111,8 @@ public:
 //    void solveJac( const Vector& res, double& linear_rel_tol, Vector &step, BCHandler &_BCd );
     void solveJac( Vector &step, const Vector& res, double& linear_rel_tol, BCHandler &_BCd );
 
+    //! evaluates residual for newton interations
+    void evalResidual( Vector &res, const Vector& sol, int iter);
 
 private:
 
@@ -174,9 +165,7 @@ private:
     //! data for solving tangent problem with aztec
     DataAztec _dataAztec;
 
-    //! evaluates residual for newton interations
-//    void evalResidual( const Vector& sol, int iter, Vector &res );
-    void evalResidual( Vector &res, const Vector& sol, int iter);
+
     //! updates the tangent matrix for newton iterations
 
     //! files for lists of iterations and residuals per timestep
@@ -188,9 +177,6 @@ private:
 
     //! level of recursion for Aztec (has a sens with FSI coupling)
     UInt _recur;
-
-    friend class operFS;
-
 };
 
 
@@ -384,7 +370,7 @@ iterate()
 
     int maxiter = _maxiter;
 
-    status = newton( this->_d, *this, maxnorm, _abstol, _reltol, maxiter, _etamax, ( int ) _linesearch, _out_res, _time );
+    status = newton( this->_d, *this, norm_inf_adaptor(), _abstol, _reltol, maxiter, _etamax, ( int ) _linesearch, _out_res, _time );
 
     if ( status == 1 )
     {
@@ -412,7 +398,7 @@ iterate(Vector &_sol)
 
     int maxiter = _maxiter;
 
-    status = newton( _sol, *this, maxnorm, _abstol, _reltol, maxiter, _etamax, ( int ) _linesearch, _out_res, _time );
+    status = newton( _sol, *this, norm_inf_adaptor(), _abstol, _reltol, maxiter, _etamax, ( int ) _linesearch, _out_res, _time );
 
     if ( status == 1 )
     {

@@ -84,11 +84,11 @@ void steklovPoincare::evalResidual(Vector       &_res,
     Vector velo    = this->M_solid.w();
 
     std::cout << "norm(disp     ) = "
-              << maxnorm(_disp) << std::endl;
+              << norm_inf(_disp) << std::endl;
     std::cout << "norm(dispNew  ) = "
-              << maxnorm(dispNew) << std::endl;
+              << norm_inf(dispNew) << std::endl;
     std::cout << "norm(velo     ) = "
-              << maxnorm(velo) << std::endl;
+              << norm_inf(velo) << std::endl;
 
     M_residualS = this->M_solid.residual();
     M_residualF = this->M_fluid.residual();
@@ -97,11 +97,11 @@ void steklovPoincare::evalResidual(Vector       &_res,
 
     _res = getResidualFSIOnSolid();
 
-    std::cout << "Max ResidualF   = " << maxnorm(M_residualF)
+    std::cout << "Max ResidualF   = " << norm_inf(M_residualF)
               << std::endl;
-    std::cout << "Max ResidualS   = " << maxnorm(M_residualS)
+    std::cout << "Max ResidualS   = " << norm_inf(M_residualS)
               << std::endl;
-    std::cout << "Max ResidualFSI = " << maxnorm(M_residualFSI)
+    std::cout << "Max ResidualFSI = " << norm_inf(M_residualFSI)
               << std::endl;
 }
 
@@ -275,11 +275,11 @@ void  steklovPoincare::solveLinearSolid()
 
     Real tol       = 1.e-10;
 
-    std::cout << "rhs_dz norm = " << maxnorm(M_rhs_dz) << std::endl;
+    std::cout << "rhs_dz norm = " << norm_inf(M_rhs_dz) << std::endl;
     this->M_solid.setRecur(1);
     this->M_solid.updateJac(M_dz, 0);
     this->M_solid.solveJac(M_dz, M_rhs_dz, tol, M_BCh_dz);
-    std::cout << "dz norm     = " << maxnorm(M_dz) << std::endl;
+    std::cout << "dz norm     = " << norm_inf(M_dz) << std::endl;
 }
 
 

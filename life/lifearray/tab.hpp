@@ -317,23 +317,20 @@ dot( Vector const &ex_v1, Vector const &ex_v2 )
 {
     return boost::numeric::ublas::inner_prod( ex_v1, ex_v2 );
 }
-//! norm derived from dot:
-inline double
-norm( Vector const &ex_v )
-{
-    return boost::numeric::ublas::norm_2( ex_v );
-}
-inline double
-maxnorm( Vector const &ex_v )
-{
-    return boost::numeric::ublas::norm_inf( ex_v );
-}
 
-/*!
-  \typedef Fct1D is a pointer on a function taking a real as argument
-  and returning a real
-*/
-typedef double ( *Fct1D ) ( double );
+using boost::numeric::ublas::sum;
+using boost::numeric::ublas::norm_1;
+using boost::numeric::ublas::norm_2;
+using boost::numeric::ublas::norm_inf;
+using boost::numeric::ublas::index_norm_inf;
 
+struct norm_inf_adaptor
+{
+    template<typename E>
+    Real operator()( E const& __v )
+        {
+            return norm_inf( __v );
+        }
+};
 }
 #endif

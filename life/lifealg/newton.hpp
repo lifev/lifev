@@ -26,7 +26,7 @@
 namespace LifeV
 {
 template <class Fct, class Vector, class Real, class Norm>
-int newton( Vector& sol, Fct& f, Norm& norm, Real abstol, Real reltol,
+int newton( Vector& sol, Fct& f, Norm norm, Real abstol, Real reltol,
             int& maxit, Real eta_max, int linesearch = 0, std::ofstream& out_res,
             const Real& time )
 {

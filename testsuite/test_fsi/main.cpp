@@ -109,17 +109,17 @@ int main(int argc, char** argv)
 
         velo_1 = oper.solid().w();
 
-        std::cout << "norm( disp   ) init = " << maxnorm(disp)   << std::endl;
-        std::cout << "norm( velo_1 ) init = " << maxnorm(velo_1) << std::endl;
+        std::cout << "norm( disp   ) init = " << norm_inf(disp)   << std::endl;
+        std::cout << "norm( velo_1 ) init = " << norm_inf(velo_1) << std::endl;
 
         maxiter = maxpf;
 
         // the newton solver
 
-//         status = nonLinRichardson(disp, oper, maxnorm, abstol, reltol,
+//         status = nonLinRichardson(disp, oper, norm_inf, abstol, reltol,
 //                         maxiter, etamax, linesearch, out_res,
 //                         time, 0.1);
-        status = newton(disp,oper, maxnorm, abstol, reltol, maxiter, etamax,linesearch,out_res,time);
+        status = newton(disp,oper, norm_inf_adaptor(), abstol, reltol, maxiter, etamax,linesearch,out_res,time);
 
         if(status == 1)
         {

@@ -38,7 +38,7 @@ void fixedPoint::eval(Vector& dispNew, Vector& velo, const Vector& disp, int sta
     M_nbEval++ ;
 
     M_solid.d() = disp;
-    
+
     M_fluid.updateMesh(M_time);
     M_fluid.iterate(M_time);
 
@@ -48,9 +48,9 @@ void fixedPoint::eval(Vector& dispNew, Vector& velo, const Vector& disp, int sta
     dispNew = M_solid.d();
     velo    = M_solid.w();
 
-    std::cout << "                ::: norm(disp     ) = " << maxnorm(disp) << std::endl;
-    std::cout << "                ::: norm(dispNew  ) = " << maxnorm(dispNew) << std::endl;
-    std::cout << "                ::: norm(velo     ) = " << maxnorm(velo) << std::endl;
+    std::cout << "                ::: norm(disp     ) = " << norm_inf(disp) << std::endl;
+    std::cout << "                ::: norm(dispNew  ) = " << norm_inf(dispNew) << std::endl;
+    std::cout << "                ::: norm(velo     ) = " << norm_inf(velo) << std::endl;
 }
 
 

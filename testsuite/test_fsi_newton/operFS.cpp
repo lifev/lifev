@@ -55,9 +55,9 @@ void operFS::eval(Vector& dispNew, Vector& velo, const Vector& disp, int status)
   dispNew = _solid.d();
   velo    = _solid.w();
 
-  std::cout << "                ::: norm(disp     ) = " << maxnorm(disp) << std::endl;
-  std::cout << "                ::: norm(dispNew  ) = " << maxnorm(dispNew) << std::endl;
-  std::cout << "                ::: norm(velo     ) = " << maxnorm(velo) << std::endl;
+  std::cout << "                ::: norm(disp     ) = " << norm_inf(disp) << std::endl;
+  std::cout << "                ::: norm(dispNew  ) = " << norm_inf(dispNew) << std::endl;
+  std::cout << "                ::: norm(velo     ) = " << norm_inf(velo) << std::endl;
 
 }
 

@@ -372,7 +372,7 @@ dot( VectorBlock const &ex_v1, VectorBlock const &ex_v2 )
 }
 
 //! norm derived from dot:
-inline double l2norm( VectorBlock const &ex_v )
+inline double norm_2( VectorBlock const &ex_v )
     {
         return sqrt( dot( ex_v, ex_v ) );
     }

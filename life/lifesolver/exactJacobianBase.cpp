@@ -77,13 +77,13 @@ void exactJacobian::evalResidual(Vector &_res,
     M_dispStruct = this->M_solid.d();
     M_velo       = this->M_solid.w();
 
-    std::cout << "                ::: norm(disp     ) = " << maxnorm(_disp)  << std::endl;
-    std::cout << "                ::: norm(dispNew  ) = " << maxnorm(M_dispStruct) << std::endl;
-    std::cout << "                ::: norm(velo     ) = " << maxnorm(M_velo) << std::endl;
+    std::cout << "                ::: norm(disp     ) = " << norm_inf(_disp)  << std::endl;
+    std::cout << "                ::: norm(dispNew  ) = " << norm_inf(M_dispStruct) << std::endl;
+    std::cout << "                ::: norm(velo     ) = " << norm_inf(M_velo) << std::endl;
 
-    std::cout << "Max ResidualF   = " << maxnorm(M_fluid.residual())
+    std::cout << "Max ResidualF   = " << norm_inf(M_fluid.residual())
               << std::endl;
-    std::cout << "Max ResidualS   = " << maxnorm(M_solid.residual())
+    std::cout << "Max ResidualS   = " << norm_inf(M_solid.residual())
               << std::endl;
 
     _res = _disp - M_dispStruct;
@@ -253,10 +253,10 @@ void  exactJacobian::solveLinearSolid()
 
     Real tol       = 1.e-10;
 
-    std::cout << "rhs_dz norm = " << maxnorm(M_rhs_dz) << std::endl;
+    std::cout << "rhs_dz norm = " << norm_inf(M_rhs_dz) << std::endl;
     this->M_solid.setRecur(1);
     this->M_solid.solveJac(M_dz, M_rhs_dz, tol);
-    std::cout << "dz norm     = " << maxnorm(M_dz) << std::endl;
+    std::cout << "dz norm     = " << norm_inf(M_dz) << std::endl;
 }
 
 

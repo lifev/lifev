@@ -407,11 +407,11 @@ void operFS::eval(const Vector& disp,
     velo    = M_solid.w();
 
     std::cout << "                ::: norm(disp     ) = "
-              << maxnorm(disp) << std::endl;
+              << norm_inf(disp) << std::endl;
     std::cout << "                ::: norm(dispNew  ) = "
-              << maxnorm(dispNew) << std::endl;
+              << norm_inf(dispNew) << std::endl;
     std::cout << "                ::: norm(velo     ) = "
-              << maxnorm(velo) << std::endl;
+              << norm_inf(velo) << std::endl;
 }
 
 void operFS::evalResidual(Vector &res,
@@ -434,11 +434,11 @@ void operFS::evalResidual(Vector &res,
     computeResidualFSI();
     res = getResidualFSIOnSolid();
 
-    std::cout << "Max ResidualF   = " << maxnorm(M_residualF)
+    std::cout << "Max ResidualF   = " << norm_inf(M_residualF)
               << std::endl;
-    std::cout << "Max ResidualS   = " << maxnorm(M_residualS)
+    std::cout << "Max ResidualS   = " << norm_inf(M_residualS)
               << std::endl;
-    std::cout << "Max ResidualFSI = " << maxnorm(M_residualFSI)
+    std::cout << "Max ResidualFSI = " << norm_inf(M_residualFSI)
               << std::endl;
 }
 
@@ -483,12 +483,12 @@ void  operFS::solveJac(Vector &muk,
             invSsPrime(_res, _linearRelTol, muS);
             invSfPrime(_res, _linearRelTol, muF);
 
-            std::cout << "maxnorm muS = " << maxnorm(muS) << std::endl;
-            std::cout << "maxnorm muF = " << maxnorm(muF) << std::endl;
+            std::cout << "norm_inf muS = " << norm_inf(muS) << std::endl;
+            std::cout << "norm_inf muF = " << norm_inf(muF) << std::endl;
 
             muk = .9*muS + .1*muF;
 
-            std::cout << "maxnorm muk = " << maxnorm(muk) << std::endl;
+            std::cout << "norm_inf muk = " << norm_inf(muk) << std::endl;
             // indeed, Here we should call Aitken (a different instance than
             // the one defined in nonLinRichardson) and
             // we should replace the defaultOmega for he nonLinRichardson
@@ -535,11 +535,11 @@ void  operFS::solveLinearSolid()
 
     Real tol       = 1.e-10;
 
-    std::cout << "rhs_dz norm = " << maxnorm(M_rhs_dz) << std::endl;
+    std::cout << "rhs_dz norm = " << norm_inf(M_rhs_dz) << std::endl;
     M_solid._recur = 1;
     M_solid.updateJac(M_dz, 0);
     M_solid.solveJac(M_dz, M_rhs_dz, tol, M_BCh_dz);
-    std::cout << "dz norm     = " << maxnorm(M_dz) << std::endl;
+    std::cout << "dz norm     = " << norm_inf(M_dz) << std::endl;
 }
 
 
@@ -570,7 +570,7 @@ void  operFS::invSfPrime(const Vector& res,
                         "Interface",
                         step);
 
-    std::cout << "deltaLambda step = " << maxnorm(step) << std::endl;
+    std::cout << "deltaLambda step = " << norm_inf(step) << std::endl;
 }
 
 

@@ -64,10 +64,10 @@ bool test_umfpack( Mat& __mat )
     __x = 0;
     //__petsc.solve( __x, __b );
 
-    std::cout << "l2 norm(x) = " << l2norm( __x ) << "\n";
+    std::cout << "norm_2(x) = " << norm_2( __x ) << "\n";
 
     __x -= __sol;
-    std::cout << "l2 norm(error) = " << l2norm( __x ) << "\n";
+    std::cout << "norm_2(error) = " << norm_2( __x ) << "\n";
 #else
     return true;
 #endif
@@ -94,10 +94,10 @@ bool test_petsc( Mat& __mat )
     __x = ZeroVector( Nrows );
     __petsc.solve( __x, __b );
 
-    std::cout << "l2 norm(x) = " << norm_2( __x ) << "\n";
+    std::cout << "norm_2(x) = " << norm_2( __x ) << "\n";
 
     __x -= __sol;
-    std::cout << "l2 norm(error) = " << norm_2( __x ) << "\n";
+    std::cout << "norm_2(error) = " << norm_2( __x ) << "\n";
     return norm_2(__x) < 1e-10;
 #else
     return 1;

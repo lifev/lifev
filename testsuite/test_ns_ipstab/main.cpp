@@ -101,8 +101,8 @@ int main( int argc, char** argv )
         fluid.initialize( xexact );
         fluid.timeAdvance( f, 0.0 );
 
-        int  status = picard( &fluid, maxnorm, fx1, fx0, gx1, gx0,
-                             x1, x0, abstol, reltol, maxiter, method, omega );
+        int  status = picard( &fluid, norm_inf_adaptor(), fx1, fx0, gx1, gx0,
+                              x1, x0, abstol, reltol, maxiter, method, omega );
 
         if( status == 1 )
         {

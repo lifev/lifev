@@ -186,8 +186,8 @@ int main(int argc, char** argv)
 	cw_delta=cdrwall.c()-cw_old;
 	cl_delta=cdrlumen.c()-cl_old;
 
-	std::cout << "difference in the wall: " << maxnorm(cw_delta) << std::endl;
-	std::cout << "difference in the lumen: " << maxnorm(cl_delta) << std::endl;
+	std::cout << "difference in the wall: " << norm_inf(cw_delta) << std::endl;
+	std::cout << "difference in the lumen: " << norm_inf(cl_delta) << std::endl;
 
 	cw_old=cdrwall.c();
 	cl_old=cdrlumen.c();

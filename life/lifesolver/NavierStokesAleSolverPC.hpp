@@ -838,7 +838,7 @@ iterateLin( const Real& time, BCHandler& BCh_du )
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
-    std::cout << "  maxnorm (_f_duWithOutBC) = " << maxnorm( _f_duWithOutBC ) << std::endl;
+    std::cout << "  norm_inf (_f_duWithOutBC) = " << norm_inf( _f_duWithOutBC ) << std::endl;
 
     // for BC treatment (done at each time-step)
     Real tgv = 1.e02;
@@ -858,8 +858,8 @@ iterateLin( const Real& time, BCHandler& BCh_du )
 
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
-    std::cout << "  maxnorm (_f_du) after BC= " << maxnorm( _f_u ) << std::endl;
-    std::cout << "  maxnorm ( difference ) after BC= " << maxnorm( _f_duWithOutBC - _f_u ) << std::endl;
+    std::cout << "  norm_inf (_f_du) after BC= " << norm_inf( _f_u ) << std::endl;
+    std::cout << "  norm_inf ( difference ) after BC= " << norm_inf( _f_duWithOutBC - _f_u ) << std::endl;
 
     //matrices HinvDtr:
     MultInvDiag( _H, _trD, _HinvDtr );
@@ -977,9 +977,9 @@ iterateLin( const Real& time, BCHandler& BCh_du )
 
 
     std::cout << "  o-  Solving pressure system... \n";
-    std::cout << "  maxnorm (vec_DV) = " << maxnorm( vec_DV ) << std::endl;
-    std::cout << "  maxnorm (_f_p) = " << maxnorm( _f_p ) << std::endl;
-    std::cout << "  maxnorm (_D*_du ) = " << maxnorm( _D * _du ) << std::endl;
+    std::cout << "  norm_inf (vec_DV) = " << norm_inf( vec_DV ) << std::endl;
+    std::cout << "  norm_inf (_f_p) = " << norm_inf( _f_p ) << std::endl;
+    std::cout << "  norm_inf (_D*_du ) = " << norm_inf( _D * _du ) << std::endl;
 
     chrono.start();
     options_ii[ AZ_recursion_level ] = 1;
@@ -1005,7 +1005,7 @@ iterateLin( const Real& time, BCHandler& BCh_du )
 
     _residual_u = _f_duWithOutBC - _CAux * _du - _trDAux * _dp;
 
-    std::cout << "  maxnorm (_residual_du ) = " << maxnorm( _dt*_du ) << std::endl;
+    std::cout << "  norm_inf (_residual_du ) = " << norm_inf( _dt*_du ) << std::endl;
 }
 
 

@@ -53,7 +53,6 @@
 int main()
 {
     using namespace LifeV;
-    using namespace std;
     Chrono chrono;
 
 
@@ -103,14 +102,14 @@ int main()
     RegionMesh3D<LinearTetra> aMesh;
 
     GetPot datafile( "data" );
-    string mesh_dir = datafile( "mesh_dir", "." );//../data/mesh/mesh++/";
-    string fname=mesh_dir+datafile( "mesh_file", "cube_384.m++" );
+    std::string mesh_dir = datafile( "mesh_dir", "." );//../data/mesh/mesh++/";
+    std::string fname=mesh_dir+datafile( "mesh_file", "cube_384.m++" );
 
     long int  m=1;
     readMppFile(aMesh,fname,m);
     aMesh.showMe();
 
-    cout<< "Now building local Edges/faces Stuff"<<endl<<endl;
+    Debug( 10010 )<< "Now building local Edges/faces Stuff"<<"\n";
     aMesh.updateElementEdges();
     aMesh.updateElementFaces();
     aMesh.showMe();
@@ -145,17 +144,17 @@ int main()
     // ==========================================
     // Pattern construction and matrix assembling
     // ==========================================
-    cout << "dim                    = " << dim     << endl << endl;
+    Debug( 10010 ) << "dim                    = " << dim     << "\n" << "\n";
 
     // pattern for stiff operator
     MSRPatt pattA(dof);
 
-    cout << "Values" << endl;
+    Debug( 10010 ) << "Values" << "\n";
 
     // A: stiff operator
     MSRMatr<double> A(pattA);
 
-    cout << "*** Matrix computation           : "<<endl;
+    Debug( 10010 ) << "*** Matrix computation           : "<<"\n";
     chrono.start();
     //
     Stiff Ostiff(&fe);
@@ -165,17 +164,17 @@ int main()
 
     // assembling of A: stiff operator
     assemble(stiff,aMesh,fe,dof,source,A,F);
-    cout << "A has been constructed" << endl;
+    Debug( 10010 ) << "A has been constructed" << "\n";
 
     chrono.stop();
-    //cout << chrono.diff() << "s." << endl;
+    Debug( 10010 ) << chrono.diff() << "s." << "\n";
 
     // ====================================
     // Treatment of the Boundary conditions
     // ====================================
 
     // BC manage for the velocity
-    cout << "*** BC Management: "<<endl;
+    Debug( 10010 ) << "*** BC Management: "<<"\n";
 
     Real tgv=1.;
 
@@ -183,7 +182,7 @@ int main()
     bcManage(A,F,aMesh,dof,BCh,feBd,tgv,0.0);
 
     chrono.stop();
-    //cout << chrono.diff() << "s." << endl;
+    //Debug( 10010 ) << chrono.diff() << "s." << "\n";
 
     // ==============================
     // Reolution of the linear system
@@ -205,11 +204,11 @@ int main()
     //  double *val;                   // in these MSR arrays.
     int    N_update;                 // # of unknowns updated on this node
     //
-    cout << "*** Linear System Solving (AZTEC)" << endl;
+    Debug( 10010 ) << "*** Linear System Solving (AZTEC)" << "\n";
     AZ_set_proc_config(proc_config, AZ_NOT_MPI );
-    //   cout << AZ_PROC_SIZE << " " << AZ_node << " " << AZ_N_procs << endl;
+    //   Debug( 10010 ) << AZ_PROC_SIZE << " " << AZ_node << " " << AZ_N_procs << "\n";
     //   for (UInt ii=0; ii<AZ_PROC_SIZE; ++ii)
-    //     cout << proc_config[ii] << endl;
+    //     Debug( 10010 ) << proc_config[ii] << "\n";
 
     AZ_read_update(&N_update, &update, proc_config, U.size(), 1, AZ_linear);
 
@@ -231,7 +230,7 @@ int main()
              status, proc_config);
     //
     chrono.stop();
-    //cout << "*** Solution computed in " << chrono.diff() << "s." << endl;
+    Debug( 10010 ) << "*** Solution computed in " << chrono.diff() << "s." << "\n";
 
     //
 
@@ -265,17 +264,17 @@ int main()
     normH1sol  = sqrt(normH1sol);
     normH1diff = sqrt(normH1diff);
 
-    cout << "|| U       ||_{L^2}                   = " << normL2 << endl;
-    cout << "|| sol     ||_{L^2}                   = " << normL2sol << endl;
-    cout << "|| U - sol ||_{L^2}                   = " << normL2diff<< endl;
-    cout << "|| U - sol ||_{L^2} / || sol ||_{L^2} = " << normL2diff/normL2sol
-         << endl;
+    std::cout << "|| U       ||_{L^2}                   = " << normL2 << std::endl;
+    std::cout << "|| sol     ||_{L^2}                   = " << normL2sol << std::endl;
+    std::cout << "|| U - sol ||_{L^2}                   = " << normL2diff<< std::endl;
+    std::cout << "|| U - sol ||_{L^2} / || sol ||_{L^2} = " << normL2diff/normL2sol
+         << std::endl;
 
-    cout << "|| U       ||_{H^1}                   = " << normH1 << endl;
-    cout << "|| sol     ||_{H^1}                   = " << normH1sol << endl;
-    cout << "|| U - sol ||_{H^1}                   = " << normH1diff<< endl;
-    cout << "|| U - sol ||_{H^1} / || sol ||_{H^1} = " << normH1diff/normH1sol
-         << endl;
+    std::cout << "|| U       ||_{H^1}                   = " << normH1 << std::endl;
+    std::cout << "|| sol     ||_{H^1}                   = " << normH1sol << std::endl;
+    std::cout << "|| U - sol ||_{H^1}                   = " << normH1diff<< std::endl;
+    std::cout << "|| U - sol ||_{H^1} / || sol ||_{H^1} = " << normH1diff/normH1sol
+         << std::endl;
 
     return 0;
 }

@@ -199,13 +199,13 @@ int main(int argc, char** argv)
 
         velo_1 = solid.w();
 
-        cout << "norm( disp ) init = " << maxnorm(disp) << endl;
-        cout << "norm( velo_! ) init = " << maxnorm(velo_1) << endl;
+        cout << "norm( disp ) init = " << norm_inf(disp) << endl;
+        cout << "norm( velo_! ) init = " << norm_inf(velo_1) << endl;
 
         maxiter = maxpf;
 
         // the newton solver
-        status = newton(disp,oper, maxnorm, abstol, reltol, maxiter, etamax,linesearch,out_res,time);
+        status = newton(disp,oper, norm_inf_adaptor(), abstol, reltol, maxiter, etamax,linesearch,out_res,time);
 
         if(status == 1) {
             cout << "Inners iterations failed\n";

@@ -183,15 +183,15 @@ int main(int argc, char** argv)
         velo_1 = velo;
 
         disp_old = disp;
-        cout << "        norm(dispStruct  ) init = " << maxnorm(disp) << endl;
-        cout << "        norm(velo  ) init = "       << maxnorm(velo) << endl;
-        cout << "        norm(velo_1) init = "       << maxnorm(velo_1) << endl;
+        cout << "        norm(dispStruct  ) init = " << norm_inf(disp) << endl;
+        cout << "        norm(velo  ) init = "       << norm_inf(velo) << endl;
+        cout << "        norm(velo_1) init = "       << norm_inf(velo_1) << endl;
 
         maxiter = maxpf;
 
         // Picard-Aitken iterations
         //
-        status = picard(&oper,maxnorm,dispStruct,dispStruct_old,velo,velo_old,
+        status = picard(&oper,norm_inf_adaptor(),dispStruct,dispStruct_old,velo,velo_old,
                         disp,disp_old,abstol,reltol,maxiter,1,omega);
 
         if(status == 1) {
