@@ -89,7 +89,7 @@ double SolverAztec::residualNorm() const
 
 int SolverAztec::iterations() const
 {
-    return M_status[ AZ_its ];
+    return (int)M_status[ AZ_its ];
 }
 
 bool SolverAztec::converged() const
