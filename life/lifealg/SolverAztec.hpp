@@ -84,8 +84,14 @@ public:
      */
     //@{
 
+    //! set matrix from MSRMatr
     void setMatrix(MSRMatr<value_type> const& m);
-    
+
+    /** set matrix from CSRMatr
+     *
+     *  Warning: The matrix is converted to MSR. This method provides ease of
+     *  use, possibly for the sake of efficiency.
+     */
     void setMatrix(CSRMatr<CSRPatt, value_type> const& m);
 
     //@}
@@ -116,7 +122,7 @@ public:
 private:
     //! private method containing code shared by public setMatrix methods
     void _setMatrix(MSRMatr<value_type> const& m);
-        
+
     //! data organisation for C
     int _data_org[AZ_COMM_SIZE];
 
@@ -140,10 +146,10 @@ private:
 
     //! number of the next solver to be created
     static UInt _solverNumber;
-    
+
     //! MSRPatt converted from CSRPatt if matrix given as CSRMatr
     std::auto_ptr<MSRPatt> _tempPattern;
-    
+
     //! MSRMatr converted from CSRMatr if given as such
     std::auto_ptr<MSRMatr<value_type> > _tempMatrix;
 };
