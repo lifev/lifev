@@ -1,8 +1,10 @@
 #ifndef FORTRAN_FROM_CPLUSPLUS 
 #define FORTRAN_FROM_CPLUSPLUS
-#include <assert.h>
-#include <stddef.h>
+
+#include <cassert>
+#include <cstddef>
 #include <cstring>
+
 //! \file fortran_wrap.h
 /*
   Useful utilities for interfacing FORTRAN77 subroutines with C++
@@ -254,27 +256,4 @@ inline CHARACTER::operator char*()
 { 
   return rep; 
 } 
-/*
-  $Log: fortran_wrap.hpp,v $
-  Revision 1.1  2004-02-08 09:09:24  prudhomm
-  finally added the new life libraries layout
-
-  life/lifecore core library
-  life/lifemesh mesh library
-  life/lifefem fem library
-
-  more to come in the future
-
-  Revision 1.3  2003/03/26 15:05:14  gerbeau
-  jfg 26/03/2003
-
-  Revision 1.2  2002/10/31 16:30:06  gerbeau
-  JFG 31/10/2002
-  
-  Revision 1.1.1.1  2002/10/03 16:31:13  cvs
-  LifeV Version 1.0
-  
-  Revision 1.1  2002/04/03 09:38:50  forma
-  Modified version of forstran_wrap utility. Modified by LF.
- */
 #endif
