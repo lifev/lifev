@@ -106,6 +106,8 @@ public:
     friend void lineSearch_parab( Fct& f, Norm& norm, Vector& residual, Vector& sol, Vector& step, Real& normRes,
                                   Real& lambda, int iter );
 
+    void updateJac( Vector& sol, int iter );
+
 private:
 
     //! Block pattern of M
@@ -161,7 +163,6 @@ private:
     void evalResidual( Vector&res, const Vector& sol, int iter );
 
     //! updates the tangent matrix for newton iterations
-    void updateJac( Vector& sol, int iter );
 
     //! solves the tangent problem for newton iterations
     void solveJac( Vector& step, const Vector& res, double& linear_rel_tol );
@@ -387,13 +388,8 @@ iterate()
 
     _w = ( 2.0 / this->_dt ) * this->_d - _rhs_w;
 
-    _residual_d = _C*this->_d - _rhsWithoutBC;
-//    _residual_d = _K * this->_d;// - _rhsWithoutBC;
-
-
-//     for (UInt ii = 0; ii < _residual_d.size(); ++ii)
-//         std::cout << _residual_d[ii] << std::endl;
-
+    _residual_d = -1*(_C*this->_d);
+//    _residual_d = -1.*_residual_d;
 }
 
 
@@ -490,7 +486,7 @@ updateJac( Vector& sol, int iter )
 {
 
 
-    std::cout << "    o-  Updating JACOBIAN in iter " << iter << std::endl << "  ... ";
+    std::cout << "    o-  Solid: Updating JACOBIAN in iter " << iter << std::endl << "  ... ";
 
     Chrono chrono;
     chrono.start();
