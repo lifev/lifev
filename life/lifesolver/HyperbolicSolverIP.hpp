@@ -29,10 +29,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
   \date 1-26-2005
 */
 
-#define USE_AZTEC_SOLVER 1
-
 #ifndef _HYPERBOLICSOLVERIP_HPP_
 #define _HYPERBOLICSOLVERIP_HPP_
+
+#define HSIP_USE_AZTEC_SOLVER 0
+#define HSIP_USE_BOOST_MATRIX 1
 
 #include <utility>
 #include <algorithm>
@@ -41,6 +42,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <list>
 #include <set>
 
+#include <boost/numeric/ublas/operation.hpp>
+
+#include <life/lifecore/chrono.hpp>
+#include <life/lifecore/GetPot.hpp>
+
+#include <life/lifearray/boostmatrix.hpp>
 #include <life/lifearray/tab.hpp>
 
 #include <life/lifemesh/dataMesh.hpp>
@@ -48,20 +55,20 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifefem/bdf.hpp>
 
-#if USE_AZTEC_SOLVER
+
+#if HSIP_USE_AZTEC_SOLVER
 #include <life/lifealg/SolverAztec.hpp>
 #else
 #include <life/lifealg/SolverUMFPACK.hpp>
 #endif
 
 #include <life/lifefem/bcHandler.hpp>
-
 #include <life/lifefem/dof.hpp>
-
+#include <life/lifefem/elemOper.hpp>
+#include <life/lifefem/bcHandler.hpp>
+#include <life/lifefem/dof.hpp>
 #include <life/lifefem/elemOper.hpp>
 #include <life/lifefem/elemOper2Fluids.hpp>
-
-#include <life/lifecore/chrono.hpp>
 
 namespace LifeV {
     /*!
@@ -81,18 +88,23 @@ namespace LifeV {
 
         typedef MeshType mesh_type;
 
-#if USE_AZTEC_SOLVER
-        typedef SolverAztec solver_type;
-#else
-        typedef SolverUMFPACK solver_type;
-#endif
+        
 
-#if USE_AZTEC_SOLVER
+#if HSIP_USE_AZTEC_SOLVER
+        typedef SolverAztec solver_type;
         typedef MSRPatt pattern_type;
         typedef MSRMatr<Real> matrix_type;
 #else
-        typedef CSRPatt pattern_type;
-        typedef CSRMatr<CSRPatt, Real> matrix_type;
+        typedef SolverUMFPACK solver_type;
+#if HSIP_USE_BOOST_MATRIX
+        typedef MSRPatt pattern_type;
+        typedef BoostMatrix<boost::numeric::ublas::row_major> matrix_type;
+#else
+        /* CSRMatr use with SolverUMFPACK is not available at the moment
+          typedef CSRPatt pattern_type;
+          typedef CSRMatr<CSRPatt, Real> matrix_type;
+        */
+#endif
 #endif
 
         typedef Vector u_type;
@@ -130,11 +142,7 @@ namespace LifeV {
             _M_dof(_M_mesh, _M_reffe),
             _M_M_pattern(_M_dof, nbComp),
             _M_M(_M_M_pattern),
-#if USE_AZTEC_SOLVER
-            _M_A_pattern(_M_dof, _M_mesh, 1),
-#else
-            _M_A_pattern(_M_dof, nbComp, _M_mesh),
-#endif
+            _M_A_pattern(_M_dof, _M_mesh, nbComp),
             _M_A_steady(_M_A_pattern),
             _M_A(_M_A_pattern),
             _M_dim( _M_dof.numTotalDof() ),
@@ -148,13 +156,20 @@ namespace LifeV {
             _M_bdf(_M_bdf_order),
             _M_monitored_times(5)
         {
-#if USE_AZTEC_SOLVER
-            _M_solver.setOptionsFromGetPot(_M_data_file, (_M_data_section + "/solver").data());
+#if HSIP_USE_AZTEC_SOLVER
+            _M_solver.setOptionsFromGetPot(_M_data_file, (_M_data_section + "/solver").data());        
             std::cout << "** HSIP ** Using AZTEC solver" << std::endl;
 #else
             std::cout << "** HSIP ** Using UMFPACK solver" << std::endl;
 #endif
-            _M_gamma = _M_data_file((_M_data_section + "/ipstab/gamma").data(), 0.125);
+
+#if HSIP_USE_BOOST_MATRIX
+            std::cout << "** HSIP ** Using boost matrix" << std::endl;             
+#else
+            std::cout << "** HSIP ** Using MSR/CSRMatr" << std::endl;
+#endif
+
+            _M_gamma = _M_data_file( (_M_data_section + "/ipstab/gamma").data(), 0.125 );
 
             switch( _M_fe.nbNode )
             {
@@ -239,8 +254,8 @@ namespace LifeV {
           Matlab's spy function
         */
         void spy(std::string __path) {
-            _M_A.spy(__path + "spyA");
-            _M_M.spy(__path + "spyM");
+            _M_A.spy( __path + "spyA" );
+            _M_M.spy( __path + "spyM" );
         }
         //@}
 
@@ -373,10 +388,10 @@ namespace LifeV {
                 Real diameter = pow(_M_fe_bd.measure() * 2., 0.5);
 
                 _M_hpK[_M_mesh.faceList(i).ad_first() - 1] =
-                    std::max(_M_hpK[_M_mesh.faceList(i).ad_first() - 1],
+                    std::max<Real>(_M_hpK[_M_mesh.faceList(i).ad_first() - 1],
                              diameter);
                 _M_hpK[_M_mesh.faceList(i).ad_second() - 1] =
-                    std::max(_M_hpK[_M_mesh.faceList(i).ad_second() - 1],
+                    std::max<Real>(_M_hpK[_M_mesh.faceList(i).ad_second() - 1],
                              diameter);
             }
         }
@@ -535,6 +550,7 @@ namespace LifeV {
     void HyperbolicSolverIP<MeshType>::initialize(const function_type& u0, Real t0, Real delta_t) {
         Chrono __chrono;
         __chrono.start();
+
         // Set initial time and time step
         _M_t0 = t0;
         _M_delta_t = delta_t;
@@ -597,8 +613,17 @@ namespace LifeV {
         __chrono.stop();
         _M_monitored_times[2] = __chrono.diff();
 
+        if(_M_verbose) std::cout << "** HSIP ** Adding RHS unsteady terms" << std::endl;
+
+#if HSIP_USE_BOOST_MATRIX
+        for_each(_M_b.begin(), _M_b.end(), boost::lambda::_1 = 0.0 );
+        axpy_prod( _M_M, _M_bdf.time_der(_M_delta_t), _M_b, false );
+
+        _M_b += prod( _M_M, _M_bdf.time_der( _M_delta_t ) );
+#else
         _M_b = ZeroVector( _M_b.size() );
         _M_b += _M_M * _M_bdf.time_der(_M_delta_t);
+#endif
 
         if(_M_verbose) std::cout << "** HSIP ** Applying boundary conditions" << std::endl;
 
@@ -606,7 +631,6 @@ namespace LifeV {
         apply_bc();
         __chrono.stop();
         _M_monitored_times[3] = __chrono.diff();
-
 
         __chrono.start();
         if(_M_verbose) std::cout << "** HSIP ** Passing matrix to linear solver" << std::endl;
@@ -630,7 +654,7 @@ std::ostream& operator<<(std::ostream& __ostr, HyperbolicSolverIP<_MeshType>& __
     __ostr << "==================================================" << std::endl;
     __ostr << "** HSIP ** Report" << std::endl;
     __ostr << "==================================================" << std::endl;
-#if USE_AZTEC_SOLVER
+#if HSIP_USE_AZTEC_SOLVER
     __ostr << "Convergence                         ";
     __HS._M_solver.converged() ? __ostr << "YES" : __ostr << "NO";
     __ostr << std::endl;
