@@ -31,7 +31,7 @@ check_PROGRAMS = test_onedmodel test_twotubes
 noinst_HEADERS = dataOneDModel.hpp basicOneDMesh.hpp dofOneD.hpp \
 		 oneDNonLinModelParam.hpp vectorFunction1D.hpp \
 		 oneDModelHandler.hpp oneDModelSolver.hpp \
-         interface2Vessels.hpp \
+         interface2Vessels.hpp triDiagCholesky.hpp triDiagLU.hpp \
 		 ud_functions.hpp gracePlot.hpp
 
 test_onedmodel_SOURCES = dataOneDModel.cpp  basicOneDMesh.cpp \

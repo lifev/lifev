@@ -70,6 +70,8 @@ OneDModelSolver::OneDModelSolver(const GetPot& data_file,
     _M_diffSrc22(_M_nb_elem),
     //! mass matrix (to be inverted)
     _M_massMatrix(_M_dimDof),
+    _M_cholFactorMassMatrix(_M_dimDof),
+    _M_choleskySlv(),
     _M_factorMassMatrix(_M_dimDof),
     _M_massupdiag2( _M_dimDof - 2 ),
     _M_massipiv( _M_dimDof ),
@@ -108,6 +110,7 @@ OneDModelSolver::OneDModelSolver(const GetPot& data_file,
     //! Matrices initialization
     _M_massMatrix.zero();
     _M_factorMassMatrix.zero();
+    _M_cholFactorMassMatrix.zero();
 
     _M_gradMatrix.zero();
 
@@ -140,16 +143,51 @@ OneDModelSolver::OneDModelSolver(const GetPot& data_file,
 
     } //! end loop on elements
 
+    /*
+    //---------------------------
+    //! test of cholesky solver
+    TriDiagCholesky< Real, TriDiagMatrix<Real>, Vector > slv_chol;
+
+    TriDiagMatrix<Real> fact_mat(_M_dimDof);
+    fact_mat= _M_massMatrix;
+    Vector x( _M_dimDof );
+    Vector b( _M_dimDof );
+    for( Int ii = 0 ; ii < _M_dimDof ; ii ++ ) {
+        b( ii ) = ii;
+    }
+
+    std::cout << "b \n" << b << std::endl;
+    std::cout << "\n befor facto " << std::endl;
+    fact_mat.showMe( std::cout , 4 );
+    slv_chol.CholeskyFactor( fact_mat );
+    std::cout << "\n after facto " << std::endl;
+    fact_mat.showMe( std::cout , 4 );
+    slv_chol.CholeskySolve( fact_mat, b);
+    std::cout << "sol \n" << b << std::endl;
+    //---------------------------
+    */
+
+    /* 
+    //! unsymmetric treatment
     //! Dirichlet boundary conditions set in matrices
     _updateBCDirichletMatrix( _M_massMatrix );
 
     //! usefull ??????
-    _updateBCDirichletMatrix( _M_gradMatrix );
+    //    _updateBCDirichletMatrix( _M_gradMatrix );
 
 
     _M_factorMassMatrix = _M_massMatrix;
     //! factorization of the mass matrix
     _factorizeMassMatrix();
+    */
+
+    _M_cholFactorMassMatrix = _M_massMatrix;
+    //! Dirichlet boundary conditions set in the mass matrix
+    _updateBCDirichletMatrix( _M_cholFactorMassMatrix );
+
+    //! factorization of the mass matrix
+    _M_choleskySlv.CholeskyFactor( _M_cholFactorMassMatrix );
+
 
     /*
       std::cout << "\n\n\tMass matrix " << std::endl;
@@ -472,6 +510,7 @@ void OneDModelSolver::_updateMatrices()
       std::cout << "o-loop over the matrices BC DIR... ";
     */
 
+    /*
     //! usefull ??????
     //! taking into account the dirichlet bc
     _updateBCDirichletMatrix( _M_massMatrixDiffSrc11 );
@@ -495,7 +534,7 @@ void OneDModelSolver::_updateMatrices()
     _updateBCDirichletMatrix( _M_divMatrixDiffSrc22 );
     // chrono.stop();
     // std::cout << "done in " << chrono.diff() << " s." << std::endl;
-
+    */
 }
 
 
@@ -509,12 +548,26 @@ _updateBCDirichletMatrix( TriDiagMatrix<Real>& mat )
     UInt firstDof = 0;
     UInt lastDof  = mat.OrderMatrix()-1;
 
+    /* 
+    //! unsymmetric treatment (LU must be used!)
     //! modify the first row
     mat.Diag()( firstDof )   = 1.;
     mat.UpDiag()( firstDof ) = 0.;
 
     //! modify the last row
     mat.Diag()( lastDof )      = 1.;
+    mat.LowDiag()( lastDof-1 ) = 0.;
+    */
+
+    //! symmetric treatment (cholesky can be used)
+    //! modify the first row
+    mat.Diag()( firstDof )    = 1.;
+    mat.UpDiag()( firstDof )  = 0.;
+    mat.LowDiag()( firstDof ) = 0.; //!and second row
+
+    //! modify the last row
+    mat.Diag()( lastDof )      = 1.;
+    mat.UpDiag()( lastDof-1 )  = 0.; //!and penultimate row
     mat.LowDiag()( lastDof-1 ) = 0.;
 }
 
@@ -530,6 +583,9 @@ _updateBCDirichletVector()
 {
     UInt firstDof = 0;
     UInt lastDof  = _M_rhs1.size()-1;
+
+    /* 
+    //! unsymmetric treatment (LU must be used!)
     //! first row modified
     _M_rhs1( firstDof ) = _M_bcDirLeft.first;
     _M_rhs2( firstDof ) = _M_bcDirLeft.second;
@@ -537,6 +593,24 @@ _updateBCDirichletVector()
     //! last row modified
     _M_rhs1( lastDof ) = _M_bcDirRight.first;
     _M_rhs2( lastDof ) = _M_bcDirRight.second;
+    */
+
+    //! symmetric treatment (cholesky can be used)
+    //! first row modified (Dirichlet)
+    _M_rhs1( firstDof ) = _M_bcDirLeft.first;
+    _M_rhs2( firstDof ) = _M_bcDirLeft.second;
+    //! second row modified (for symmetry)
+    _M_rhs1( firstDof + 1 ) += - _M_massMatrix.LowDiag()( firstDof ) * _M_bcDirLeft.first;
+    _M_rhs2( firstDof + 1 ) += - _M_massMatrix.LowDiag()( firstDof ) * _M_bcDirLeft.second;
+   
+    
+    //! last row modified (Dirichlet)
+    _M_rhs1( lastDof ) = _M_bcDirRight.first;
+    _M_rhs2( lastDof ) = _M_bcDirRight.second;
+    //! penultimate row modified (for symmetry)
+    _M_rhs1( lastDof - 1 ) += - _M_massMatrix.UpDiag()( lastDof - 1 ) * _M_bcDirRight.first;
+    _M_rhs2( lastDof - 1 ) += - _M_massMatrix.UpDiag()( lastDof - 1 ) * _M_bcDirRight.second;
+
 }
 
 
@@ -1724,7 +1798,6 @@ void OneDModelSolver::_factorizeMassMatrix()
     dgttrf_( &OrderMat, _M_factorMassMatrix.LowDiag(), _M_factorMassMatrix.Diag(),
              _M_factorMassMatrix.UpDiag(), _M_massupdiag2, _M_massipiv, &INFO);
     ASSERT_PRE(!INFO,"Lapack factorization of tridiagonal matrix not achieved.");
-
 }
 /*! lapack LU solve AFTER FACTORIZATION of _M_factorMassMatrix
   SUBROUTINE DGTTRS( TRANS, N, NRHS, DL, D, DU, DU2, IPIV, B, LDB, INFO )
@@ -1941,36 +2014,26 @@ void OneDModelSolver::iterate( const Real& time_val , const int& count)
     Chrono chrono;
     chrono.start();
 
+    /*
+    //! lu
     //! solve the system: rhs1 = massFactor^{-1} * rhs1
     _solveMassMatrix( _M_rhs1 );
 
     //! solve the system: rhs2 = massFactor^{-1} * rhs2
     _solveMassMatrix( _M_rhs2 );
-
-    /*
-      std::cout << "\n\tsolution at time n+1 " << std::endl;
-      for ( UInt ii=0; ii < _M_dimDof ; ii++ ) {
-      std::cout <<  ii << " " << _M_rhs1(ii) << std::endl;;
-      }
     */
+
+    //! cholesky solve
+    //! solve the system: rhs1 = massFactor^{-1} * rhs1
+    _M_choleskySlv.CholeskySolve( _M_cholFactorMassMatrix, _M_rhs1 );
+
+    //! solve the system: rhs2 = massFactor^{-1} * rhs2
+    _M_choleskySlv.CholeskySolve( _M_cholFactorMassMatrix, _M_rhs2 );
 
     //! update the solution for the next time step
     _M_U1_thistime = _M_rhs1;
     _M_U2_thistime = _M_rhs2;
 
-    /*
-    //! exact solution
-    Real celerity =2., xii;
-    for ( UInt ii=0; ii < _M_dimDof ; ii++ ) {
-    xii = ii * (_M_x_right - _M_x_left) / _M_nb_elem;
-    if ( xii <= celerity * time_val ) {
-    _M_U2_thistime[ii] = _M_U1_thistime[ii] - sin( 2*M_PI * ( time_val - xii / celerity ) );
-    }
-    else {
-    _M_U2_thistime[ii] = _M_U1_thistime[ii] - 0.;
-    }
-    }
-    */
     if( !(count % 5) ){
         std::string fname1 = _M_post_dir + "/" + _M_post_file + "A.mtv";
         std::string fname2 = _M_post_dir + "/" + _M_post_file + "Q.mtv";

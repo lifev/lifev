@@ -73,8 +73,8 @@
     a) (phi_i)_{i in nodes} is the basis of P1 (the "hat" functions)
     b) (1_{i+1/2})_{i+1/2 in elements} is the basis of P0 (constant per
         element). The vertices of the element "i+1/2" are the nodes "i" and "i+1".
-	
-    Then:
+
+   Then:
 
     c) Uh    is in P1 : U = sum_{i in nodes} U_i phi_i
 
@@ -82,7 +82,7 @@
     e) diffFh(U) is in P0 : 
 diffFlux(U) = sum_{i+1/2 in elements} 1/2 { dF/dU(U_i) + dF/dU(U_i+1) } 1_{i+1/2}
     (means of the two extremal values of the cell)
-   
+
     We note that d) allows us to define easily
     f) dF/dz(U) = sum_{i in nodes} F(U_i) d(phi_i)/dz 
 
@@ -99,7 +99,7 @@ diffSrc(U) = sum_{i+1/2 in elements} 1/2 { dS/dU(U_i) + dS/dU(U_i+1) } 1_{i+1/2}
     at the element level and reassembled.
     Afterwards, there remains to do only some tridiagonal matrix vector
     products to obtain the right hand side.
-    
+
     This procedure might appear a bit memory consuming (there are 18
     tridiagonal matrices stored), but it has the advantage of being
     very clear. If it is too costly, it should be quite easy to improve 
@@ -124,6 +124,7 @@ diffSrc(U) = sum_{i+1/2 in elements} 1/2 { dS/dU(U_i) + dS/dU(U_i+1) } 1_{i+1/2}
 #include <chrono.hpp>
 
 #include <tridiagMatrix.hpp>
+#include <triDiagCholesky.hpp>
 #include <oneDNonLinModelParam.hpp>
 #include <vectorFunction1D.hpp>
 
@@ -146,7 +147,7 @@ public:
     /*!
       \param data_file GetPot data file
     */
-    OneDModelSolver(const GetPot& data_file, 
+    OneDModelSolver(const GetPot& data_file,
                     const OneDNonLinModelParam& onedparam);
     // const LinearSimpleParam& onedparam);
 
@@ -293,12 +294,16 @@ private:
     //! tridiagonal mass matrix
     TriDiagMatrix<Real> _M_massMatrix;
 
+    //! cholesky factorized tridiagonal mass matrix
+    TriDiagMatrix<Real> _M_cholFactorMassMatrix;
+    //! cholesky factorization
+    TriDiagCholesky< Real, TriDiagMatrix<Real>, Vector > _M_choleskySlv;
+
     //! lapack LU factorized tridiagonal mass matrix
     TriDiagMatrix<Real> _M_factorMassMatrix;
     //! vectors used by lapack for factorization:
     KN<Real> _M_massupdiag2; //!< second upper diagonal (used by lapack) (size _M_order-2)
     KN<int>  _M_massipiv;   //!< indices of pivot in the lapack LU (size _M_order)
-
 
     //! tridiagonal mass matrices multiplied by diffSrcij
     TriDiagMatrix<Real> _M_massMatrixDiffSrc11;
@@ -314,7 +319,7 @@ private:
 
     //! tridiagonal gradient matrix
     TriDiagMatrix<Real> _M_gradMatrix;
-    //! tridiagonal gradient matrices multiplied by diffFluxij 
+    //! tridiagonal gradient matrices multiplied by diffFluxij
     TriDiagMatrix<Real> _M_gradMatrixDiffFlux11;
     TriDiagMatrix<Real> _M_gradMatrixDiffFlux12;
     TriDiagMatrix<Real> _M_gradMatrixDiffFlux21;
@@ -327,7 +332,7 @@ private:
     TriDiagMatrix<Real> _M_divMatrixDiffSrc22;
 
 
-    //! Update the coefficients 
+    //! Update the coefficients
     //! (from the flux, source functions and their derivatives)
     void _updateMatrixCoefficients(const UInt& ii, const UInt& jj,
                                    const UInt& iedge);
@@ -338,11 +343,11 @@ private:
     //! assemble the matrices
     int _assemble_matrices(const UInt& ii, const UInt& jj );
 
-    /*! update the matrices  
+    /*! update the matrices
       _M_massMatrixDiffSrcij, _M_stiffMatrixDiffFluxij
       _M_gradMatrixDiffFluxij, and _M_divMatrixDiffSrcij (i,j=1,2)
 
-      from the values of diffFlux(Un) and diffSrc(Un) 
+      from the values of diffFlux(Un) and diffSrc(Un)
       that are computed with _updateMatrixCoefficients.
 
       call of  _updateMatrixCoefficients,
