@@ -120,7 +120,7 @@ int nonLinRichardson( Vector& sol,
 
         normMukOld = normMuk;
 
-        f.solvePrec(residual, linearRelTol, muk);
+        f.solveJac(residual, linearRelTol, muk);
         step = aitken.computeDeltaLambda( sol, muk );
 
         std::cout << "Step norm = " << norm( step ) << std::endl;

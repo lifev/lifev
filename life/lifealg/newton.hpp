@@ -112,10 +112,10 @@ int newton( Vector& sol, Fct& f, Norm& norm, Real abstol, Real reltol,
             normRes = norm( residual );
             break;
         case 1:
-//            lineSearch_parab( f, norm, residual, sol, step, normRes, lambda, iter );
+            lineSearch_parab( f, norm, residual, sol, step, normRes, lambda, iter );
             break;
         case 2:  // recommended
-//            lineSearch_cubic( f, norm, residual, sol, step, normRes, lambda, slope, iter );
+            lineSearch_cubic( f, norm, residual, sol, step, normRes, lambda, slope, iter );
             break;
         default:
             std::cout << "Unknown linesearch \n";

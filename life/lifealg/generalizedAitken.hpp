@@ -1,26 +1,26 @@
 
 /* -*- mode: c++ -*-
- 
+
 This file is part of the LifeV library
- 
+
 Author(s):
 Simone Deparis <simone.deparis@epfl.ch>
 Gilles Fourestey <gilles.fourestey@epfl.ch>
- 
+
 Date: 2004-09-23
- 
+
 Copyright (C) 2004 EPFL
- 
+
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
 License as published by the Free Software Foundation; either
 version 2.1 of the License, or (at your option) any later version.
- 
+
 This library is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
- 
+
 You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #ifndef _GENERALIZEDAITKEN_HPP
 #define _GENERALIZEDAITKEN_HPP
 
-#include <lifeconfig.h> 
+#include <lifeconfig.h>
 //#include "lifeV.hpp"
 #include <cstdlib>
 
@@ -132,9 +132,10 @@ generalizedAitken<Vector, Real>::~generalizedAitken()
 */
 
 template <class Vector, class Real>
-Vector generalizedAitken<Vector, Real>::computeDeltaLambda( const Vector &_lambda,
-        const Vector &_muF,
-        const Vector &_muS )
+Vector generalizedAitken<Vector, Real>::
+computeDeltaLambda( const Vector &_lambda,
+                    const Vector &_muF,
+                    const Vector &_muS )
 {
     Vector deltaLambda;
 
@@ -223,8 +224,9 @@ Vector generalizedAitken<Vector, Real>::computeDeltaLambda( const Vector &_lambd
 
 /*! one parameter version of the generalized aitken method.*/
 template <class Vector, class Real>
-Vector generalizedAitken<Vector, Real>::computeDeltaLambda( const Vector &_lambda,
-        const Vector &_mu )
+Vector generalizedAitken<Vector, Real>::
+computeDeltaLambda( const Vector &_lambda,
+                    const Vector &_mu )
 {
 
     Vector deltaLambda;

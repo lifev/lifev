@@ -49,6 +49,7 @@ void lineSearch_parab( Fct& f, Norm& norm, Vector& residual, Vector& sol, Vector
                        Real& lambda, int iter )
 {
     //----------------------------------------------------------------------
+    std::cout << "Parabolic line search ..." << std::endl;
     const Real sigma0 = 0.1;
     const Real sigma1 = 0.5;
     const Real alpha = 1.e-4;
@@ -105,6 +106,7 @@ void lineSearch_parab( Fct& f, Norm& norm, Vector& residual, Vector& sol, Vector
         }
     }
     normRes = normRes_test;
+    std::cout << "ok." << std::endl;
 }
 }
 #endif
