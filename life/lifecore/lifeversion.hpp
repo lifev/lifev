@@ -1,0 +1,86 @@
+/* -*- mode: c++ -*-
+
+  This file is part of the LifeV library
+
+  Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+       Date: 2005-02-19
+
+  Copyright (C) 2005 EPFL
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+/**
+   \file lifeversion.hpp
+   \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+   \date 2005-02-19
+ */
+#ifndef _LIFEV_VERSION_H_
+#define _LIFEV_VERSION_H_
+
+#define LIFEV_MAKE_VERSION( a,b,c ) (((a) << 16) | ((b) << 8) | (c))
+
+#define LIFEV_VERSION \
+  LIFEV_MAKE_VERSION(LIFEV_VERSION_MAJOR,LIFEV_VERSION_MINOR,LIFEV_VERSION_MICRO)
+
+#define LIFEV_IS_VERSION(a,b,c) ( LIFEV_VERSION >= LIFEV_MAKE_VERSION(a,b,c) )
+
+/**
+ * Namespace for general LIFEV functions.
+ */
+namespace LifeV
+{
+    /**
+     * Returns the encoded number of LIFEV's version, see the LIFEV_VERSION macro.
+     * In contrary to that macro this function returns the number of the actually
+     * installed LIFEV version, not the number of the LIFEV version that was
+     * installed when the program was compiled.
+     * @return the version number, encoded in a single uint
+     * @since 0.7
+     */
+    LIFEV_EXPORT uint version();
+
+    /**
+     * Returns the major number of LIFEV's version, e.g.
+     * 0 for LIFEV 0.7
+     * @return the major version number
+     * @since 0.7
+     */
+    LIFEV_EXPORT uint versionMajor();
+
+    /**
+     * Returns the minor number of LIFEV's version, e.g.
+     * 7 for LIFEV 0.7.0
+     * @return the minor version number
+     * @since 0.7
+     */
+    LIFEV_EXPORT uint versionMinor();
+
+    /**
+     * Returns the micro number of LIFEV's version, e.g.
+     * 0 for LIFEV 0.7.0
+     * @return the extra information
+     * @since 0.7
+     */
+    LIFEV_EXPORT uint versionMicro();
+
+    /**
+     * Returns the LIFEV version as string, e.g. "0.7.0".
+     * @return the LIFEV version. You can keep the string forever
+     * @since 0.7
+     */
+    LIFEV_EXPORT char const* versionString();
+}
+
+#endif // _LIFEV_VERSION_H_
