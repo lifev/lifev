@@ -115,7 +115,13 @@ public:
     {
         M_params[ AZ_tol ] = newTolerance;
     }
-
+ 
+   // setes the level of recursion in the solution 
+   // of a linear system  
+   void setRecursionLevel( int newLevel )
+    {
+        M_options[ AZ_recursion_level ] = newLevel;
+    }
     //@}
 
     /** @name  Methods
