@@ -141,7 +141,7 @@ int main(int argc, char** argv)
     //
     BCHandler BCh_u(4);
     BCHandler BCh_d(4);
-    BCHandler BCh_mesh(7, true); // flag for fully essential BC is set to true
+    BCHandler BCh_mesh(7, BCHandler::HINT_BC_ONLY_ESSENTIAL);
 
 
     //========================================================================================
@@ -228,7 +228,7 @@ int main(int argc, char** argv)
     //========================================================================================
     //
 
-    BCHandler BCh_du(3, true); // flag for fully essential BC is set to true
+    BCHandler BCh_du(3, BCHandler::HINT_BC_ONLY_ESSENTIAL);
     BCHandler BCh_dz(4);
 
     operFS oper(fluid, solid, BCh_du, BCh_dz);

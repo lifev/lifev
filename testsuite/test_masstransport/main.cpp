@@ -24,7 +24,7 @@ int main(int argc, char** argv)
     // ********* Boundary conditions definition for fluid *************************
     BCFunctionBase u_wall(u1);
     BCFunctionBase u_inflow(u2);
-    BCHandler BCh_u(4, true); // flag for fully essential BC is set to true
+    BCHandler BCh_u(4, BCHandler::HINT_BC_ONLY_ESSENTIAL);
 
     BCh_u.addBC("Wall",   3, Essential, Full, u_wall,  3);  // non-permeable Wall - no-slip condition
     BCh_u.addBC("Wall-inflow",   4, Essential, Full, u_wall,  3);

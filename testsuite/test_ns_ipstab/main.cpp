@@ -51,8 +51,9 @@ int main( int argc, char** argv )
 
     bool neumann = dataFile( "fluid/miscellaneous/neumann", 0 );
 
-    // second argument is flag for fully essential BC
-    BCHandler bcH( 0, !neumann );
+    BCHandler::BCHints hint =
+        neumann ? BCHandler::HINT_BC_NONE : BCHandler::HINT_BC_ONLY_ESSENTIAL;
+    BCHandler bcH( 0, hint );
 
     NavierStokesSolverIP< RegionMesh3D<LinearTetra> >
         fluid( dataFile, feTetraP1, quadRuleTetra4pt, quadRuleTria3pt, bcH );
