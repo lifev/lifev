@@ -21,7 +21,6 @@
 
 #include "lifeV.hpp"
 #include "refEle.hpp"
-
 /*!
   \file geoMap.h
   \brief Structure for the geometrical mapping
@@ -87,4 +86,31 @@ extern const GeoMap geoLinearTria;
 extern const GeoMap geoBilinearQuad;
 extern const GeoMap geoLinearTetra;
 extern const GeoMap geoBilinearHexa;
+//
+/*! Helper function that returns the geomap associated to a mesh
+
+\note To be completed!
+*/
+template <typename RegionMesh>
+const GeoMap& getGeoMap(RegionMesh & mesh)
+{
+  typedef typename RegionMesh::ElementShape ElementShape;
+  switch(ElementShape::Shape) {
+  case HEXA: 
+    if (ElementShape::numPoints == 8)
+      return geoBilinearHexa;
+    else 
+      ERROR_MSG("Geomap type not yet implemented");
+    break;
+  case TETRA: 
+    if (ElementShape::numPoints == 4)
+      return geoLinearTetra;
+    else
+      ERROR_MSG("Geomap type not yet implemented");
+    break;
+  default:
+    ERROR_MSG("Geomap type not yet implemented");
+  }  
+}
+
 #endif
