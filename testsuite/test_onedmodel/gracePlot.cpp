@@ -31,52 +31,74 @@
 namespace LifeV
 {
 #if defined(HAVE_GRACE_NP_H)
-GracePlot::GracePlot() {
+void
+GracePlot::GraceInit()
+{
+    if ( GraceOpenVA("xmgrace", 2048, "-nosafe", "-noask", NULL)== -1) {
+        cerr << "Can't run grace" << endl;
+        exit (EXIT_FAILURE);
+    }
+    GracePrintf("g0 on");                     /* Activate graph 0 */
+    GracePrintf("with g0");                   /* reset the current graph to graph 0 */
+    GracePrintf("view 0.1, 0.1, 1.2, 0.9");
+}
+GracePlot::GracePlot()
+    :
+    _M_do_plot( false )
+{
+    std::cout << "do_plot: " << std::boolalpha << _M_do_plot << "\n";
+}
 
-  if ( GraceOpenVA("xmgrace", 2048, "-nosafe", "-noask", NULL)== -1) {
-    cerr << "Can't run grace" << endl;
-    exit (EXIT_FAILURE);
-  }
-
-  GracePrintf("g0 on");                     /* Activate graph 0 */
-  GracePrintf("with g0");                   /* reset the current graph to graph 0 */
-  GracePrintf("view 0.1, 0.1, 1.2, 0.9");
-
+GracePlot::GracePlot( GetPot const& __data )
+    :
+    _M_do_plot( __data( "miscellaneous/show_graceplot",  true ) )
+{
+    std::cout << "do_plot: " << std::boolalpha << _M_do_plot << "\n";
+    if ( doPlot() )
+    {
+        GraceInit();
+    }
 }
 
 void GracePlot::Plot(const Rn& x, const Rn& y)
 {
-  int n = x.N();
-  ASSERT( y.N() == n,
-	  "Plot: x and y should have same size." );
+    if (  doPlot() )
+    {
+        int n = x.N();
+        ASSERT( y.N() == n,
+                "Plot: x and y should have same size." );
 
-  GracePrintf("with g0");
-  GracePrintf("kill s0");
-  for (int i=0; i<n; i++)
-     GracePrintf ("g0.s0 point %g, %g", x(i), y(i));
-  GracePrintf(" ");
+        GracePrintf("with g0");
+        GracePrintf("kill s0");
+        for (int i=0; i<n; i++)
+            GracePrintf ("g0.s0 point %g, %g", x(i), y(i));
+        GracePrintf(" ");
 
 
-  GracePrintf("autoscale");
-  GracePrintf("redraw");
+        GracePrintf("autoscale");
+        GracePrintf("redraw");
+    }
 }
 
 void GracePlot::Plot(const std::vector< Point1D >& x,
-		     const ScalUnknown<Vector>& y)
+                     const ScalUnknown<Vector>& y)
 {
-  UInt n = x.size();
-  ASSERT( y.size() == n,
-	  "Plot: x and y should have same size." );
+    if (  _M_do_plot )
+    {
+        UInt n = x.size();
+        ASSERT( y.size() == n,
+                "Plot: x and y should have same size." );
 
-  GracePrintf("with g0");
-  GracePrintf("kill s0");
-  for (UInt ii=0; ii<n; ii++)
-     GracePrintf ("g0.s0 point %g, %g", x[ii].x(), y(ii));
-  GracePrintf(" ");
+        GracePrintf("with g0");
+        GracePrintf("kill s0");
+        for (UInt ii=0; ii<n; ii++)
+            GracePrintf ("g0.s0 point %g, %g", x[ii].x(), y(ii));
+        GracePrintf(" ");
 
 
-  GracePrintf("autoscale");
-  GracePrintf("redraw");
+        GracePrintf("autoscale");
+        GracePrintf("redraw");
+    }
 }
 
 
@@ -88,48 +110,48 @@ double b=0.1;
 double f(double x) {return sin(2*M_PI*x)*sin(2*M_PI*x);}
 
 double solex2(double x, double t) {
-  return exp((b-D)*t)*sin(x-a*t);
+    return exp((b-D)*t)*sin(x-a*t);
 }
 
 double solex1(double x, double t) {
-  double tmp=sqrt(a*a+4*b*D);
-  return t==0
-    ? 0
-    : 0.5*exp(a*x/(2.*D))*(exp(-x/(2.*D)*tmp)*erfc((x-tmp*t)/(2*sqrt(D*t)))
-			      + exp(x/(2*D)*tmp)*erfc((x+tmp*t)/(2*sqrt(D*t))));
+    double tmp=sqrt(a*a+4*b*D);
+    return t==0
+        ? 0
+        : 0.5*exp(a*x/(2.*D))*(exp(-x/(2.*D)*tmp)*erfc((x-tmp*t)/(2*sqrt(D*t)))
+                               + exp(x/(2*D)*tmp)*erfc((x+tmp*t)/(2*sqrt(D*t))));
 }
 
 int main(int argc, char* argv[]) {
 
-  int n=64;
-  double L=6;
-  double dx=L/(n-1);
-  double tf=1;
-  double dt=dx/a;
+    int n=64;
+    double L=6;
+    double dx=L/(n-1);
+    double tf=1;
+    double dt=dx/a;
 
-  Rn x(n), y(n);
-  GracePlot p;
+    Rn x(n), y(n);
+    GracePlot p;
 
-  for (int i=0; i<n; i++) {
-    x(i) = i*dx;
-  }
-
-  for (double t=0; t<tf+dt; t+=dt) {
     for (int i=0; i<n; i++) {
-      y(i) = solex1(x(i), t);
+        x(i) = i*dx;
     }
-    ostringstream str;
-    str << "Time= " << t;
-    p.Title(str.str());
-    p.Xlabel("x"); p.Ylabel("f(x)");
-    p.Legend("courbe de y=solex(x)");
-    p.Plot(x, y);
-    p.Sleep(0.5);
-  }
 
-  cout << "Hit return to close plot" << endl;
-  char ch;
-  cin.get(ch);
+    for (double t=0; t<tf+dt; t+=dt) {
+        for (int i=0; i<n; i++) {
+            y(i) = solex1(x(i), t);
+        }
+        ostringstream str;
+        str << "Time= " << t;
+        p.Title(str.str());
+        p.Xlabel("x"); p.Ylabel("f(x)");
+        p.Legend("courbe de y=solex(x)");
+        p.Plot(x, y);
+        p.Sleep(0.5);
+    }
+
+    cout << "Hit return to close plot" << endl;
+    char ch;
+    cin.get(ch);
 }
 
 

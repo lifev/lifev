@@ -47,6 +47,9 @@
 #include <grace_np.h>
 #endif /* HAVE_GRACE_NP_H */
 
+#include <GetPot.hpp>
+
+
 #include "RNM.hpp"
 #include "vecUnknown.hpp"
 #include "basicOneDMesh.hpp"
@@ -61,38 +64,81 @@ using namespace std;
 class GracePlot {
 
 public:
-  GracePlot();
-  ~GracePlot(){  GraceClose(); };
+    GracePlot();
+    GracePlot( GetPot const& );
 
-  void Title(string title) {
-    GracePrintf("with g0");
-    GracePrintf("title \"%s\"", title.data());
-  }
+    ~GracePlot()
+        {
+            if (  doPlot() )
+            {
+                GraceClose();
+            }
+        };
 
-  void Legend(string label) {
-    GracePrintf("with g0");
-    GracePrintf("s0 legend \"%s\"", label.data());
-  }
+    bool doPlot() const { return _M_do_plot; }
 
-  void Xlabel(string xlabel) {
-    GracePrintf("with g0");
-    GracePrintf("xaxis label \"%s\"", xlabel.data());
-  }
+    void Title(string title)
+        {
+            if (  doPlot() )
+            {
+                GracePrintf("with g0");
+                GracePrintf("title \"%s\"", title.data());
+            }
+        }
 
-  void Ylabel(string ylabel) {
-    GracePrintf("with g0");
-    GracePrintf("yaxis label \"%s\"", ylabel.data());
-  }
+    void Legend(string label)
+        {
+            if (  doPlot() )
+            {
+                GracePrintf("with g0");
+                GracePrintf("s0 legend \"%s\"", label.data());
+            }
+        }
 
-  void Plot(const Rn& x, const Rn& y);
+    void Xlabel(string xlabel)
+        {
+            if (  doPlot() )
+            {
+                GracePrintf("with g0");
+                GracePrintf("xaxis label \"%s\"", xlabel.data());
+            }
+        }
 
-  void Plot(const std::vector< Point1D >& x,
-	    const ScalUnknown<Vector>& y);
+    void Ylabel(string ylabel)
+        {
+            if (  doPlot() )
+            {
+                GracePrintf("with g0");
+                GracePrintf("yaxis label \"%s\"", ylabel.data());
+            }
+        }
 
-  void Sleep(double delay) {GracePrintf("sleep %g", delay);};
-  //  void Hold(bool onoff);
-  //  void Clear();
+    void Plot(const Rn& x, const Rn& y);
 
+    void Plot(const std::vector< Point1D >& x,
+              const ScalUnknown<Vector>& y);
+
+    void Sleep(double delay)
+        {
+            if (  doPlot() )
+            {
+                GracePrintf("sleep %g", delay);
+            }
+        }
+
+    void setPlot( bool __do_plot )
+        {
+            _M_do_plot = __do_plot;
+            if (  doPlot() )
+                GraceInit();
+            else
+                GraceClose();
+        }
+
+private:
+    void GraceInit();
+private:
+    bool _M_do_plot;
 };
 #else
 /*!\class GracePlot
@@ -105,7 +151,7 @@ public:
 class GracePlot {
 
 public:
-  GracePlot()
+    GracePlot()
         {
             std::cerr << "================================================================================\n"
                       << "WARNING: you are using the dummy graceplot class\n"
@@ -113,23 +159,23 @@ public:
                       << "see http://graceplot.sourceforge.net/ to install grace\n"
                       << "================================================================================\n";
         }
-  ~GracePlot(){ };
+    ~GracePlot(){ };
 
-  void Title(string title) {}
+    void Title(string title) {}
 
-  void Legend(string label) {}
+    void Legend(string label) {}
 
-  void Xlabel(string xlabel) {}
+    void Xlabel(string xlabel) {}
 
-  void Ylabel(string ylabel) {}
+    void Ylabel(string ylabel) {}
 
-  void Plot(const Rn& x, const Rn& y);
+    void Plot(const Rn& x, const Rn& y);
 
-  void Plot(const std::vector< Point1D >& x,const ScalUnknown<Vector>& y) {}
+    void Plot(const std::vector< Point1D >& x,const ScalUnknown<Vector>& y) {}
 
-  void Sleep(double delay) {}
-  //  void Hold(bool onoff);
-  //  void Clear();
+    void Sleep(double delay) {}
+    //  void Hold(bool onoff);
+    //  void Clear();
 
 };
 #endif /* HAVE_GRACE_NP_H */
