@@ -210,6 +210,10 @@ public:
         {
             return super::size();
         }
+    void resize( size_t __s, bool preserve = false )
+        {
+            super::resize( __s*_S_nbcomp, preserve );
+        }
     static UInt nbcomp()
         {
             return _S_nbcomp;
@@ -296,7 +300,6 @@ public:
         {
             return & ( ( *this ) [ 0 ] );
         }
-
     UInt size() const
         {
             return super::size();
