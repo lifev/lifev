@@ -91,9 +91,9 @@ $(TESTSUITE): $(srcdir)/testsuite.at $(srcdir)/package.m4 $(TESTSUITES)
 
 include $(top_srcdir)/admin/Doxyfile.am
 
-MOSTLYCLEANFILES	= atconfig testsuite.log `find -type f -print | grep testsuite.dir`
+MOSTLYCLEANFILES	= testsuite.log `find -type f -print | grep testsuite.dir`
 
-
+DISTCLEANFILES		= atconfig
 
 
 
