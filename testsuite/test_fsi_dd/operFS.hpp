@@ -154,8 +154,8 @@ namespace LifeV
                            Vector       &step);
 
         void  invSsPrime  (const Vector &res,
-                            double       linear_rel_tol,
-                            Vector       &step);
+                           double       linear_rel_tol,
+                           Vector       &step);
 
         void  invSfSsPrime(const Vector &res,
                            double       linear_rel_tol,
@@ -166,11 +166,6 @@ namespace LifeV
 
 
 void my_matvecSfSsPrime(double *z,
-                        double *Jz,
-                        AZ_MATRIX* J,
-                        int proc_config[]);
-
-void my_matvecSsPrime  (double *z,
                         double *Jz,
                         AZ_MATRIX* J,
                         int proc_config[]);
