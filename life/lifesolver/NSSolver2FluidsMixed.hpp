@@ -342,7 +342,7 @@ namespace LifeV {
     {
         if(_M_verbose)
             std::cout << "** NS2F ** Using boost matrix" << std::endl;
-#if L_NS2F_LINEAR_SOLVER==L_NS2F_PETSC
+#if L_NS2F_LINEAR_SOLVER == L_NS2F_PETSC
         std::cout << "** NS2F ** Using PETSC linear solver" << std::endl;
         _M_solver_u.setOptionsFromGetPot(_M_data_file, "navier-stokes/yosida/solver-u");
         _M_solver_p.setOptionsFromGetPot(_M_data_file, "navier-stokes/yosida/solver-p");
@@ -355,7 +355,7 @@ namespace LifeV {
             nullSpace[ 0 ] = &_M_constant_pressure;
             _M_solver_p.setNullSpace(nullSpace);
         }
-#elif L_NS2F_LINEAR_SOLVER == L_NS2F_PETSC
+#elif L_NS2F_LINEAR_SOLVER == L_NS2F_UMFPACK
         std::cout << "** NS2F ** Using UMFPACK linear solver" << std::endl;
 #endif
         _M_verbose = _M_data_file("navier-stokes/miscellaneous/verbose", false);
@@ -369,9 +369,6 @@ namespace LifeV {
 
         // Number of components for the velocity
         UInt nbCompU = _u.nbcomp();
-
-        // First coefficient of BDF formula
-        Real bdf_coeff = _bdf.bdf_u().coeff_der(0) / _dt;
 
         // Velocity vector for the linearization of the convection term
         Vector betaVec(_u.size());
@@ -436,16 +433,15 @@ namespace LifeV {
             }
 
             element_id = _fe_u.currentId();
+            
             // Stiffness strain
             stiff_strain_2f(2. * viscosity(fluid1), 2. * viscosity(fluid2), _M_elvec_lss, _M_lss.fe(), _M_elmat_C, fe_u());
 
 
             // Mass
             if(!_M_steady) {
-                for(UInt iComp = 0; iComp < nbCompU; iComp++) {
-                        mass_2f(bdf_coeff * density(fluid1), bdf_coeff * density(fluid2), _M_elvec_lss, _M_lss.fe(), _M_elmat_C, fe_u(), iComp, iComp);
-                        mass_2f(density(fluid1), density(fluid2), _M_elvec_lss, _M_lss.fe(), _M_elmat_M, fe_u(), iComp, iComp);
-                    }
+                for(UInt iComp = 0; iComp < nbCompU; iComp++)
+                        mass_2f(density(fluid1), density(fluid2), _M_elvec_lss, _M_lss.fe(), _M_elmat_C, fe_u(), iComp, iComp);
             }
 
             //  Extract the vector of local velocity dofs
@@ -507,6 +503,9 @@ namespace LifeV {
         // Lump mass matrix
         _M_M_L.lumpRowSum(_M_M);
         _M_M_L_w = ( _bdf.bdf_u().coeff_der(0) / _dt ) *_M_M_L;
+        
+        // Add unsteady contribution
+        _M_C += _M_M_L_w;
 
         __chrono.stop();
 
