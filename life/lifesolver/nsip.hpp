@@ -10,6 +10,8 @@
 #ifndef _NAVIERSTOKESSOLVERIP_H_
 #define _NAVIERSTOKESSOLVERIP_H_
 
+#define USE_AZTEC_SOLVER 1
+
 #include <NavierStokesHandler.hpp>
 #include <elemMat.hpp>
 #include <elemVec.hpp>
@@ -18,11 +20,16 @@
 #include <pattern.hpp>
 #include <assemb.hpp>
 #include <bcManage.hpp>
+
+#if USE_AZTEC_SOLVER
 #include <SolverAztec.hpp>
-//#include <lifeconfig.h>
-//#if defined( HAVE_PETSC_H )
-//#include <SolverPETSC.hpp>
-//#endif /* HAVE_PETSC_H */
+#else
+#include <lifeconfig.h>
+#if defined( HAVE_PETSC_H )
+#include <SolverPETSC.hpp>
+#endif /* HAVE_PETSC_H */
+#endif /* USE_AZTEC_SOLVER */
+
 #include <bcHandler.hpp>
 #include <chrono.hpp>
 #include <sobolevNorms.hpp>
@@ -113,8 +120,11 @@ private:
     //! Global solution _u and _p
     Vector M_sol;
 
+#if USE_AZTEC_SOLVER
     SolverAztec M_linearSolver;
-    //SolverPETSC M_linearSolver;
+#else
+    SolverPETSC M_linearSolver;
+#endif
 
     Real M_time;
 
@@ -170,8 +180,11 @@ NavierStokesSolverIP( const GetPot& dataFile,
     M_gammaDiv = dataFile( "fluid/ipstab/gammaDiv", 0. );
     M_gammaPress = dataFile( "fluid/ipstab/gammaPress", 0. );
 
+#if USE_AZTEC_SOLVER
     M_linearSolver.setOptionsFromGetPot( dataFile, "fluid/aztec" );
-    //M_linearSolver.setOptionsFromGetPot( dataFile, "fluid/petsc" );
+#else
+    M_linearSolver.setOptionsFromGetPot( dataFile, "fluid/petsc" );
+#endif
 
     std::cout << std::endl;
     std::cout << "O-  Pressure unknowns: " << _dim_p     << std::endl;
@@ -244,10 +257,10 @@ NavierStokesSolverIP( const GetPot& dataFile,
         }
     }
 
-    IPStabilization<Mesh, Dof>
-        pressureStab(_mesh, _dof_u, _refFE_u, _feBd_u, _Qr_u,
-                     0, 0, M_gammaPress, this->viscosity() );
-    pressureStab.apply(M_matrStokes, this->_u);
+    //IPStabilization<Mesh, Dof>
+    //    pressureStab(_mesh, _dof_u, _refFE_u, _feBd_u, _Qr_u,
+    //                 0, 0, M_gammaPress, this->viscosity() );
+    //pressureStab.apply(M_matrStokes, this->_u);
 
     M_sol = 0.0;
 
@@ -376,9 +389,9 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
     chrono.start();
 
     IPStabilization<Mesh, Dof>
-        velocityStab(_mesh, _dof_u, _refFE_u, _feBd_u, _Qr_u,
-                     M_gammaBeta, M_gammaDiv, 0, this->viscosity());
-    velocityStab.apply(M_matrFull, this->_u);
+        allStab( _mesh, _dof_u, _refFE_u, _feBd_u, _Qr_u,
+                 M_gammaBeta, M_gammaDiv, M_gammaPress, this->viscosity() );
+    allStab.apply( M_matrFull, this->_u );
 
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
@@ -407,7 +420,7 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
 
 
     //if ( _BCh_u.fullEssential() )
-//     M_matrFull.diagonalize( nDimensions*_dim_u, 1.0, M_rhsFull, 0);
+    M_matrFull.diagonalize( nDimensions*_dim_u, 1.0, M_rhsFull, 0);
 //                             pexact( M_time,
 //                                     _mesh.point( 1 ).x(),
 //                                     _mesh.point( 1 ).y(),
