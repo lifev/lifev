@@ -155,6 +155,8 @@ int main(int argc, char* argv[]) {
 }
 
 
-#endif
-}
+#endif /* TEST */
+
 #endif /* HAVE_GRACE_NP_H */
+
+} /* end of namespace LifeV */
