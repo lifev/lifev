@@ -38,10 +38,17 @@ int main(int argc, char** argv)
 
   // Navier-Stokes Solver
   //
+  //Classical grad-grad version: put nothing or 0 in last argument
+  //
+  //NavierStokesSolverPC< RegionMesh3D<LinearTetra> > ns(data_file, feTetraP1bubble, feTetraP1,quadRuleTetra64pt,
+  //				       quadRuleTria3pt, quadRuleTetra5pt, quadRuleTria3pt, BCh_u );
+  //
+  //
+  // Curl-curl version: put 1 in last argument
+  //
   NavierStokesSolverPC< RegionMesh3D<LinearTetra> > ns(data_file, feTetraP1bubble, feTetraP1,quadRuleTetra64pt,
-						       quadRuleTria3pt, quadRuleTetra5pt, quadRuleTria3pt, BCh_u);
+						       quadRuleTria3pt, quadRuleTetra5pt, quadRuleTria3pt, BCh_u, 1 );
   ns.showMe();
-
 
   // boundary conditions definition
   //
@@ -63,9 +70,6 @@ int main(int argc, char** argv)
   BCh_u.addBC("Wall-outflow",   5, Essential, Full, u_wall,  3);
   BCh_u.addBC("InFlow", 1, Natural,  Full, bcvec , 3);
   BCh_u.addBC("OutFlow", 3, Natural,  Full, out_flow, 3);
-
-
-
 
 
   // Initialization
