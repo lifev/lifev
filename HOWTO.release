@@ -1,0 +1,25 @@
+# -*- mode: text -*-
+
+HOWTO to make a release X_Y_Z
+=============================
+
+1- update configure.in.in VERSION
+
+2- update NEWS
+
+3- run make distcheck 
+   o ensures that the generated tarball is complete
+   o runs all tests from the tarball
+
+If step 3 went fine then 
+
+4- tag HEAD with the tag LIFEV_X_Y_Z_BRANCH
+   cd top_srcdir
+   cvs tag LIFEV_X_Y_Z_BRANCH
+
+5- upload the tarball on cmcsforge.epfl.ch
+
+6- add news on cmcsforge.epfl.ch and www.lifev.org
+
+7- send email on lifev-dev@ and eventually other lists like
+   cmcs.personnel@

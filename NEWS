@@ -7,7 +7,13 @@ Bugs fixed in 0.6.0:
 New in 0.6.0:
 =============
 [configure]
-* Added support for AMD ACML and Intel MKL for both 32bits and 64bits arch(CP)
+* Cleanup, homogenized and centralized lookup directories 
+  for 3rd party libraries (CP,CW)
+* Added support for AMD ACML and Intel MKL for both 32bits 
+  and 64bits arch(CP)
+
+* [lifefem]
+* Added curl-curl operator (CV)
 
 [lifesolver]
 * Added ParabolicSolver, TimeSolver, *UDep (MM)
@@ -15,6 +21,7 @@ New in 0.6.0:
 * Class operFS renamed to FSIOperator (GF)
 * Added class reducedLinFluid that computes the reduced fluid for the jacobian
   in steklovPoincare and exactJacobian framework (GF)
+* Added possibility to use curl-curl formulation (CV)
 
 [testsuite]
 * Added test for ParabolicSolver in lifesolver (MM)
@@ -236,4 +243,4 @@ New in 0.1.0pre3:
 * fixed some bugs and miscompilation in a few places
 
 
- -- Christophe Prud'homme <prudhomm@debian.org>, Thu Dec 16 08:17:43 2004
+ -- Christophe Prud'homme <prudhomm@debian.org>, Thu Jan 27 11:43:29 2005
