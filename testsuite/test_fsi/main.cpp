@@ -26,6 +26,8 @@
 
 #include "ud_functions.hpp"
 
+
+
 class Problem
 {
 public:
@@ -102,33 +104,71 @@ private:
     fsi_solver_ptr _M_fsi;
 };
 
-LifeV::Vector
-check( GetPot const& data_file,  std::string __oper, LifeV::OperFSPreconditioner __prec = LifeV::NO_PRECONDITIONER )
+struct FSIChecker
 {
-    try
-    {
-        Problem fsip( data_file, __oper );
-        fsip.fsiSolver()->FSIOperator()->setPreconditioner( __prec );
+    FSIChecker( GetPot const& _data_file,
+                std::string _oper,
+                LifeV::OperFSPreconditioner _prec = LifeV::NO_PRECONDITIONER )
+        :
+        data_file( _data_file ),
+        oper( _oper ),
+        prec( _prec )
+        {
 
-        fsip.run( fsip.fsiSolver()->timeStep(), fsip.fsiSolver()->timeStep() ); // only one iteration
+        }
+    void
+    operator()()
+        {
+            boost::shared_ptr<Problem> fsip;
 
-        return fsip.fsiSolver()->displacement();
-    }
-    catch ( std::exception const& __ex )
-    {
-        std::cout << "caught exception :  " << __ex.what() << "\n";
-    }
-}
+            try
+            {
+                fsip = boost::shared_ptr<Problem>( new Problem( data_file, oper ) );
+                fsip->fsiSolver()->FSIOperator()->setDataFromGetPot( data_file );
+                fsip->fsiSolver()->FSIOperator()->setPreconditioner( prec );
+
+                fsip->run( fsip->fsiSolver()->timeStep(), fsip->fsiSolver()->timeStep() ); // only one iteration
+            }
+            catch ( std::exception const& __ex )
+            {
+                std::cout << "caught exception :  " << __ex.what() << "\n";
+            }
+            disp = fsip->fsiSolver()->displacement();
+
+        }
+    GetPot data_file;
+    std::string oper;
+    LifeV::OperFSPreconditioner prec;
+    LifeV::Vector disp;
+};
 int main(int argc, char** argv)
 {
     GetPot command_line(argc,argv);
     const char* data_file_name = command_line.follow("data", 2, "-f","--file");
     GetPot data_file(data_file_name);
 
-    LifeV::Vector __ej_disp = check( data_file,  "fixedPoint" );
-    LifeV::Vector __sp_disp = check( data_file,  "steklovPoincare",  LifeV::DIRICHLET_NEUMANN );
 
-    std::cout << "norm_2(displacement error) = " << LifeV::norm_2( __sp_disp - __ej_disp ) << "\n";
+
+    LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+
+    FSIChecker __sp_check( data_file,  "steklovPoincare", LifeV::DIRICHLET_NEUMANN );
+    __sp_check();
+
+    LifeV::Debug( 10000 ) << "__sp_disp size : "  << __sp_check.disp.size() << "\n";
+    LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+
+    LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+
+    FSIChecker __fp_check( data_file,  "fixedPoint" );
+    __fp_check();
+
+
+    LifeV::Debug( 10000 ) << "__fp_disp size : "  << __fp_check.disp.size() << "\n";
+    LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+
+    std::cout << "norm_2(SP displacement)    = " << LifeV::norm_2( __sp_check.disp ) << " \n"
+              << "norm_2(FP displacement)    = " << LifeV::norm_2( __fp_check.disp ) << " \n"
+              << "norm_2(displacement error) = " << LifeV::norm_2( __sp_check.disp - __fp_check.disp ) << "\n";
     return 0;
 }
 

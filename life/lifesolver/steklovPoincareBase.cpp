@@ -40,9 +40,14 @@ steklovPoincare::steklovPoincare()
     M_residualS(),
     M_residualF(),
     M_residualFSI(),
+    M_defOmega( 0.005 ),
+    M_defOmegaS( 0.005 ),
+    M_defOmegaF( 0.005 ),
     M_aitkFS(),
     M_dataJacobian( this )
-{}
+{
+    M_aitkFS.setDefault( M_defOmegaS, M_defOmegaF );
+}
 
 steklovPoincare::steklovPoincare( fluid_type& fluid,
                                   solid_type& solid,
@@ -89,6 +94,24 @@ steklovPoincare::steklovPoincare( fluid_type& fluid,
 steklovPoincare::~steklovPoincare()
 {}
 
+void
+steklovPoincare::setDataFromGetPot( GetPot const& data )
+{
+    // call the super class to setup the data from getpot file if needed
+    super::setDataFromGetPot( data );
+
+    M_defOmegaS = data("problem/defOmegaS",0.005);
+    M_defOmegaF = data("problem/defOmegaF",0.005);
+
+    Debug( 6205 ) << "steklovPoincare::setDataFromGetPot(GetPot) OmegaS = " << M_defOmegaS << "\n";
+    Debug( 6205 ) << "steklovPoincare::setDataFromGetPot(GetPot) OmegaF = " << M_defOmegaF << "\n";
+
+    M_aitkFS.setDefault(M_defOmegaS, M_defOmegaF);
+
+    this->setPreconditioner(  ( OperFSPreconditioner )data("problem/precond"  , DIRICHLET_NEUMANN ) );
+
+    Debug( 6205 ) << "steklovPoincare::setDataFromGetPot(GetPot) prec   = " << this->preconditioner() << "\n";
+}
 void
 steklovPoincare::setup()
 {
@@ -300,7 +323,8 @@ void  steklovPoincare::solveJac(Vector &muk,
 {
     Vector muF(_res.size());
     Vector muS(_res.size());
-
+    Debug(  6205 ) << "steklovPoincare::solveJac _linearRelTol  : " << _linearRelTol << "\n";
+    Debug(  6205 ) << "steklovPoincare::solveJac preconditioner : "  << this->preconditioner() << "\n";
     switch(this->preconditioner())
     {
         case NEUMANN_DIRICHLET:
@@ -338,9 +362,14 @@ void  steklovPoincare::solveJac(Vector &muk,
 //            std::cout << "maxnorm muk = " << norm_inf(muk) << std::endl;
         }
         break;
+        case NO_PRECONDITIONER:
         default:
-            // Newton preconditioner
-            invSfSsPrime(_res, _linearRelTol, muk);
+        {
+            std::ostringstream __ex;
+            __ex << "The steklovPoincare operator needs a preconditioner : \n"
+                 << "NEUMANN_DIRICHLET, NEUMANN_NEUMANN, DIRICHLET_NEUMANN\n";
+            throw std::logic_error( __ex.str() );
+        }
     }
 
     if (M_nbEval == 1) M_aitkFS.restart();

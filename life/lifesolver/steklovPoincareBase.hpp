@@ -72,6 +72,8 @@ public:
     void setResidualFSI( double const* _res );
     void setResidualFSI( Vector const& _res );
 
+    void setDataFromGetPot( GetPot const& data );
+
     void setup();
 
     struct DataJacobian
