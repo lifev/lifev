@@ -63,10 +63,11 @@ public:
     void solveReducedLinearFluid();
 
 
-    const Vector &dacc()    {return M_dacc;}
+    const Vector& dacc()    {return M_dacc;}
     void setDacc(Vector const &_vec){M_dacc = _vec;}
+    Vector& minusdp() {return M_minusdp;}
 
-    const Vector &residual() {return M_residual_dp;}
+    const Vector& residual() {return M_residual_dp;}
     void evalResidual();
 
     void setLinearSolver (GetPot const &_data_file);
@@ -120,6 +121,7 @@ private:
 
     //! unknown: presure variation and residual
     Vector           M_dp;
+    Vector           M_minusdp;
     Vector           M_residual_dp;
 
     //! right handside

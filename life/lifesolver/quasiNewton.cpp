@@ -28,6 +28,7 @@ quasiNewton::quasiNewton(fluid_type       _fluid,
     M_fluid( _fluid ),
     M_BCh_dp( new BCHandler ),
     M_refFE( _fluid->refFEp() ),
+    M_dacc( _op->solid().dDof().numTotalDof() ),
     M_Qr( quadRuleTetra4pt ),
     M_bdQr( quadRuleTria3pt ),
     M_dof(_fluid->mesh(), M_refFE),
@@ -39,7 +40,7 @@ quasiNewton::quasiNewton(fluid_type       _fluid,
     M_feBd(M_refFE.boundaryFE(), getGeoMap(_fluid->mesh()  ).boundaryMap(),M_bdQr),
     M_elmatC(M_fe.nbNode, 1, 1),
     M_dp(M_dim),
-    M_residual_dp(3*M_dim),
+    M_residual_dp(_fluid->uDof().numTotalDof()),
     M_f(M_dim),
     M_computedC(false)
 {
@@ -90,6 +91,7 @@ void quasiNewton::solveReducedLinearFluid()
     M_linearSolver.solve( M_dp, M_f, SolverAztec::SAME_PRECONDITIONER );
 
     evalResidual();
+    M_minusdp = -1.0*M_dp;
 }
 
 
