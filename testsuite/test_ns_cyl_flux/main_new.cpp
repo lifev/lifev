@@ -27,7 +27,7 @@
    \date 2004-10-12
  */
 #include <lifeV.hpp>
-#include <NavierStokesSolverPCnotincr.hpp>
+#include <NavierStokesSolverPC.hpp>
 #include <NavierStokesWithFlux_new.hpp>
 #include <chrono.hpp>
 #include <ud_functions.hpp>
@@ -86,13 +86,14 @@ main(int argc, char** argv)
                                                   BCh_u) );
     __ns->showMe();
     __ns->setSourceTerm( f );
+    __ns->yesFlux(1);
 
     NavierStokesWithFlux<ns_type> __ns_with_flux( __ns );
 
     // Impose the fluxes for initialize
     //
-    __ns_with_flux.setFlux(2, my_flux_cost);
-    __ns_with_flux.setFlux(3, my_flux_cost2);
+    __ns_with_flux.setFlux(2, my_flux_cos);
+    __ns_with_flux.setFlux(3, my_flux_cos2);
 
     toEnsight EnsightFilter;
     __ns_with_flux.doOnIterationFinish( EnsightFilter  );
@@ -108,14 +109,13 @@ main(int argc, char** argv)
 
        // Impose the fluxes
        //
-       __ns_with_flux.setFlux(2, my_flux_cost); //costant
-       __ns_with_flux.setFlux(3, my_flux_cost2); //costant
+       __ns_with_flux.setFlux(2, my_flux_cos); //costant
+       __ns_with_flux.setFlux(3, my_flux_cos2); //costant
        //__ns_with_flux.setFlux(1, my_flux_cos); //cosinusoidal
        //__ns_with_flux.setFlux(1, my_flux_physio); // physiological
 
-       //__ns_with_flux.iterate( time ); // one flux
-       __ns_with_flux.iterate( time ); // two fluxes
-       __ns->postProcess();
+       __ns_with_flux.iterate( time ); 
+       //__ns->postProcess();
     }
 
     return EXIT_SUCCESS;
