@@ -628,7 +628,7 @@ void stiff_sd(Real coef,const ElemVec& vec_loc, ElemMat& elmat,const CurrentFE& 
 
     for(icoor=0;icoor<fe.nbCoor;icoor++){
      for(jcoor=0;jcoor<fe.nbCoor;jcoor++){ 
-	s += coef_v[icoor]*fe.phiDer(iloc,icoor,ig)*coef_v[jcoor]*fe.phiDer(iloc,icoor,ig)
+	s += coef_v[icoor]*fe.phiDer(iloc,icoor,ig)*coef_v[jcoor]*fe.phiDer(jloc,jcoor,ig)
 	  *fe.weightDet(ig);
      }
     }

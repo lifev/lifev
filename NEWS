@@ -1,8 +1,5 @@
-Bugs fixed in 0.1.0:
-*
-
-New in 0.1.0:
-*
+Bugs fixed in 0.1.0
+* bug #23: fixed wrong assembly in elemOper.cpp in stiff_sd (Martin Prosi):
 
 
 Bugs fixed in 0.1.0pre5:
