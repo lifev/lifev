@@ -138,7 +138,7 @@ template<class R>
     for (int i=0;i<n;i++)
       {  R & x(v[index(i)]);
           x =  f(x);}
-    return x;
+    return *this;
   }
 
 
