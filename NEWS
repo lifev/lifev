@@ -1,6 +1,21 @@
 # -*- readme-debian -*-
 
 
+Bugs fixed in 0.6.0:
+====================
+
+New in 0.6.0:
+=============
+[configure]
+* Added support for AMD ACML and Intel MKL for both 32bits and 64bits arch(CP)
+
+[lifesolver]
+* Added ParabolicSolver, TimeSolver, *UDep (MM)
+
+[testsuite]
+* Added test for ParabolicSolver in lifesolver (MM)
+
+
 Bugs fixed in 0.5.0:
 ====================
 [configure]
@@ -47,7 +62,6 @@ New in 0.5.0:
   ** use boost::shared_ptr<> for safe memory management
 
 [lifesolver]
-* Added ParabolicSolver, TimeSolver, *UDep (MM)
 * Templated the darcy classes.(VM)
   ** use of DataMesh class requires a change in data files
 * Abstraction and interface for darcy Solver (CP, VM)
@@ -61,7 +75,6 @@ New in 0.5.0:
 * Added frontend for mesh readers (CP) 
 
 [testsuite]
-* Added test for ParabolicSolver in lifesolver
 * Added test for 3D/0D coupling (AM)
 * Moved files of test_darcy in lifesolver (VM, CP)
   ** hex and tet tests
@@ -218,4 +231,4 @@ New in 0.1.0pre3:
 * fixed some bugs and miscompilation in a few places
 
 
- -- Christophe Prud'homme <prudhomm@mit.edu>, Tue Nov 30 08:40:19 2004
+ -- Christophe Prud'homme <prudhomm@debian.org>, Thu Dec 16 08:17:43 2004
