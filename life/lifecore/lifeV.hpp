@@ -205,9 +205,10 @@ namespace LifeV
 
 typedef double Real;
 
-namespace mpl = boost::mpl;
-
 #if 0
+   namespace mpl = boost::mpl;
+
+
 /*! \namespace detail
   \internal
 */
@@ -302,6 +303,7 @@ typedef unsigned short USInt;
 //! IDs (which starts ALWAYS from 1)
 typedef unsigned int id_type;
 typedef id_type ID;
+typedef id_type Index_t;
 
 //! dimension type
 typedef unsigned short dim_type;
