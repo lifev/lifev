@@ -1,0 +1,405 @@
+#include "darcySolver.hpp"
+#include "bc_manage.hpp"
+#include "medit_wrtrs.hpp"
+#include "clapack.h"
+
+//====================================================
+
+DarcySolver::DarcySolver(const GetPot& data_file):
+  DarcyHandler(data_file),
+  msrPattern(tpdof),
+  mat(msrPattern),
+  globalTP(dimTPdof),
+  globalF(dimTPdof),
+  globalP(dimPdof),
+  globalFlux(dimTPdof),
+  elvecHyb(refTPFE.nbDof,1),
+  elvecSource(pfe.nbNode,1),
+  elvecFlux(vfe.nbNode,1),
+  elmatMix(vfe.nbNode,1,1, pfe.nbNode,0,1, refTPFE.nbDof,0,1),
+  elmatHyb(refTPFE.nbDof,1,1),
+  BtB(pfe.nbNode,pfe.nbNode),
+  CtC(refTPFE.nbDof, refTPFE.nbDof),
+  BtC(pfe.nbNode, refTPFE.nbDof),
+  signLocalFace(mesh.numVolumes(),numFacesPerVolume)
+{
+  globalTP.vec()=0.0; 
+  globalF.vec()=0.0;
+  globalP.vec() = 0.0;
+  globalFlux.vec() = 0.0;
+  elvecHyb.zero();
+  signLocalFace = -1.;
+  elvecSource.zero();
+  elvecFlux.zero();
+  elmatMix.zero();
+  elmatHyb.zero();
+  /*
+    Update the divergence Matrix
+    (independant of the current element thanks to the Piola transform)
+  */
+  grad_Hdiv(1.,elmatMix,vfe,pfe,0,1);
+  /*
+    Update the Boundary Matrix
+    (independant of the current element thanks to the Piola transform.)
+  */
+  TP_VdotN_Hdiv(1., elmatMix, refTPFE, 0, 2 );
+  //
+  if(verbose>2){
+    cout << "elmatHyb : \n";
+    elmatHyb.showMe();
+    cout << "elmatMix : \n";
+    elmatMix.showMe();
+  }
+    /*
+    Initialization of the signs of the faces:
+    the rule is the following: if 
+  */
+  RegionMesh3D<LinearHexa>::VolumeType* vol;
+  ID iglobface,iglobvol;
+  for(ID ivol = 1; ivol<= mesh.numVolumes(); ivol++){
+    vol = &(mesh.volumeList(ivol));
+    iglobvol = vol->id();
+    for(ID ilocface=1;ilocface<=vol->numLocalFaces;ilocface++){
+      iglobface = mesh.localFaceId(iglobvol,ilocface);
+      if(mesh.faceElement(iglobface,1) == iglobvol){
+	signLocalFace(iglobvol-1,ilocface-1) = 1.;
+      }
+    }
+  }
+}
+
+void DarcySolver::computeHybridMatrix()
+{
+  char* UPLO = "L";
+  UInt lenUPLO =  strlen(UPLO);
+  int INFO[1] = {0};
+  int NBRHS[1] = {1};//  nb columns of the rhs := 1.
+  int NBP[1] = {pfe.nbNode};//  pressure dof
+  int NBU[1] = {vfe.nbNode};//  velocity dof
+  int NBL[1] = {refTPFE.nbDof};//  trace of pressure dof (lagrange multiplier)
+  double ONE_[1]      = {1.0};
+  double MINUSONE_[1] = {-1.0};
+  double ZERO_[1]     = {0.0};
+  /*
+  Initial Element Matrix : (where t is transpose)
+  
+    [ A  B  C    [ U       [ Pext       [ F1      <- F1 : Dirichlet
+      Bt 0  0      P    =    F       =    F2      <- F2 : Source term
+      Ct 0  0 ]    L ]       UExt ]       F3 ]    <- F3 : Neumann & Robin
+
+   The fluxes U_i are not supposed to be continuous accross the faces: this
+   yields a block diagonal matrix A (therefore A^{-1} is not full and can be
+   easily computed at the element level).
+   
+   The L_i are the Lagrange multipliers forcing the continuity of the flux
+   across the faces. 
+   
+   We eliminate U and P and we keep L 
+   
+    (i) Matrix to be assembled and solved to determine L:
+ 
+    [   Ct A^{-1} C -  Ct A^{-1} B ( Bt A^{-1} B )^{-1} Bt A^{-1} C ] * L
+    = 
+    Ct A^{-1}  *  F1  -  Ct A^{-1}  B ( Bt A^{-1} B )^{-1} Bt A^{-1}  *  F1  
+    +  Ct A^{-1}  B ( Bt A^{-1} B )^{-1} F2
+    -  F3
+    
+    (ii) Recover the pression at the element level:
+    
+    P = - ( Bt A^{-1} B )^{-1} Bt A^{-1} C * L   
+        + ( Bt A^{-1} B )^{-1} Bt A^{-1} * F1 
+        - ( Bt A^{-1} B )^{-1}  *  F2
+
+    (iii) Recover the flux at the element level:
+
+    U = -  A^{-1} B  * P  -  A^{-1} C  *  L  +  A^{-1}    * F1
+
+  */
+  
+  Tab2d AA = elmatMix.block(0,0);
+  Tab2d BB = elmatMix.block(0,1);
+  Tab2d CC = elmatMix.block(0,2);
+  
+  for(UInt i = 1; i<= mesh.numVolumes(); i++){
+    //----------------------------
+    // LOOP ON THE VOLUME ELEMENTS
+    //----------------------------
+    // update the current element for the Velocity (only).
+    vfe.updatePiola(mesh.volumeList(i));
+    /*
+      update the current element for the Pressure
+      (used for the source term).
+      The only necessary part is the quadpt.
+      The jacobian is not used. (check...)
+    */
+    pfe.updateJacQuadPt(mesh.volumeList(i));
+    /*
+      modify the (0,0) block (A) of the matrix
+      the blocks (0,1) (B) and (0,2) (C) are independent of the element
+      and have already been computed
+    */
+    // only one block is set to zero since the other ones are not recomputed
+    elmatMix.block(0,0) = 0.;
+    switch(diffusion_type){
+    case 0:
+      mass_Hdiv(diffusion_coef,elmatMix,vfe,0,0);
+      break;
+    case 1:
+      // mass_Hdiv(diffusion_tensor,elmatMix,vfe,0,0);
+      break;
+    default:
+      cout << "diffusion_type=" << diffusion_type << " ??? \n";
+      exit(1);
+    }
+    AA = elmatMix.block(0,0); // AA <- A
+    BB = elmatMix.block(0,1); // BB <- B
+    CC = elmatMix.block(0,2); // CC <- C
+
+    //....................
+    // MATRIX OPERATIONS
+    //....................
+    //   AA <- L and Lt where L Lt is the Cholesky factorization of A
+    dpotrf_("L", NBU, AA , NBU , INFO );
+    ASSERT_PRE(!INFO[0],"Lapack factorization of A is not achieved.");
+    // Compute BB <-  L^{-1} B (solve triangular system)
+    dtrtrs_("L", "N", "N", NBU, NBP, AA, NBU, BB, NBU, INFO);
+    ASSERT_PRE(!INFO[0],"Lapack Computation B = L^{-1} B  is not achieved.");
+    // Compute CC <-  L^{-1} C (solve triangular system)
+    dtrtrs_("L", "N", "N", NBU, NBL, AA, NBU, CC, NBU, INFO);
+    ASSERT_PRE(!INFO[0],"Lapack Computation C = L^{-1} C  is not achieved.");
+    // Compute BtB <-  Bt L^{-t} L^{-1} B = Bt A^{-1} B
+    // (BtB stored only on lower part)
+    dsyrk_("L", "T", NBP, NBU, ONE_, BB, NBU, ZERO_, BtB, NBP);
+    // Compute CtC <-  Ct L^{-t} L^{-1} C = Ct A^{-1} C
+    // (CtC stored only on lower part)
+    dsyrk_("L", "T", NBL, NBU, ONE_, CC, NBU, ZERO_, CtC, NBL);
+    // Compute BtC <- Bt L^{-t} L^{-1} C = Bt A^{-1} C
+    // (BtC fully stored)
+    dgemm_("T", "N", NBP, NBL, NBU, ONE_, BB, NBU, CC, NBU, 
+           ZERO_, BtC, NBP );
+    //BtB <- LB and LBt where LB LBt is the cholesky factorization of Bt A^{-1} B
+    dpotrf_("L", NBP, BtB , NBP, INFO );
+    ASSERT_PRE(!INFO[0],"Lapack factorization of BtB is not achieved.");
+    // Compute BtC = LB^{-1} BtC <-  LB^{-1} Bt A^{-1} C
+    dtrtrs_("L", "N", "N", NBP, NBL, BtB, NBP, BtC, NBP, INFO);
+    ASSERT_PRE(!INFO[0],"Lapack Computation BtC = LB^{-1} BtC is not achieved.");
+    // CtC = CtC - (BtC)t BtC 
+    // (result stored only on lower part)
+    // CtC <- Ct A^{-1} C - Ct A^{-t} B (Bt A^{-1} B)^{-1}  Bt A^{-1} C
+    dsyrk_("L", "T", NBL, NBP, MINUSONE_, BtC, NBP, ONE_, CtC, NBL);
+    //...........................
+    // END OF MATRIX OPERATIONS
+    //...........................
+    /* Sum up:
+       AA  <-  L and Lt where L Lt is the Cholesky factorization of A
+       BB  <-  L^{-1} B
+       CC  <-  L^{-1} C
+       BtB <-  LB and LBt where LB LBt is the factorization of Bt A^{-1} B
+       BtC <- LB^{-1} Bt A^{-1} C
+       CtC <- Ct A^{-1} C - Ct A^{-t} B (Bt A^{-1} B)^{-1}  Bt A^{-1} C
+    */
+    //....................
+    // VECTOR OPERATIONS
+    //....................
+    // initialize the rhs vectors.    
+    elvecSource.zero();     //  source rhs (NBP) 
+    elvecHyb.zero();        //  hybrid rhs : inserted in the global vector.
+    Tab1dView RHSTP = elvecHyb.block(0);
+
+    // The source term is computed with a test function in the Pressure space.
+    source(sourceFct, elvecSource, pfe, 0); 
+    // initialize the rhs vector (clean this some day...)
+    Tab1dView rhs = elvecSource.block(0); // corresponds to F2
+    // Compute rhs = LB^{-1} rhs <- LB^{-1} F2
+    dtrtrs_("L", "N", "N", NBP, NBRHS, BtB, NBP, rhs, NBP, INFO);
+    ASSERT_PRE(!INFO[0],"Lapack Computation rhs = LB^{-1} rhs is not achieved.");
+    // Compute RHSTP = t(BtC) rhs <- Ct A^{-1} Bt (Bt A^{-1} B)^{-1} F2
+    // (fully stored)
+    dgemm_("T", "N", NBL, NBRHS, NBP, ONE_, BtC, NBP, rhs, NBP, 
+           ZERO_, RHSTP, NBL );
+    //........................
+    // END OF VECTOR OPERATIONS.
+    // (Not finished: for the moment F1 = 0. TO DO : b.c. )
+    //........................
+    elmatHyb.block(0,0) = CtC;  /* update the hybrid element matrix
+				   Everything is stored in the Lower part */
+    assemb_mat_symm_lower(mat,elmatHyb,refTPFE,tpdof,
+                          mesh.volumeList(i).id(),0,0);
+    assemb_vec(globalF.vec(),elvecHyb,refTPFE,tpdof,
+               mesh.volumeList(i).id(), 0);
+    //-----------------------------------
+    // END OF LOOP ON THE VOLUME ELEMENTS
+    //-----------------------------------
+  }
+}
+
+void DarcySolver::applyBC()
+{
+  bc_manage(mat,globalF.vec(),mesh,tpdof,bc,feBd,1.,0.0);
+}
+
+void DarcySolver::solveDarcy()
+{
+  aztecSolveLinearSyst(mat,globalTP.giveVec(),globalF.giveVec(),
+		       globalTP.size(),msrPattern);
+}
+
+void DarcySolver::computePresFlux()
+{
+  char* UPLO = "L";
+  UInt lenUPLO =  strlen(UPLO);
+  int INFO[1] = {0};
+  int NBRHS[1] = {1};// nb columns of the rhs := 1.
+  int INC1[1] = {1};// increment := 1.
+  int NBP[1] = {pfe.nbNode};//  pressure dof
+  int NBU[1] = {vfe.nbNode};//  velocity dof
+  int NBL[1] = {refTPFE.nbDof};//  trace of pressure dof (lagrange multiplier)
+  double ONE_[1]      = {1.0};
+  double MINUSONE_[1] = {-1.0};
+  double ZERO_[1]     = {0.0};
+
+  /*==========================================
+    POST PROCESSING
+    compute the pressure (Qk or Pk / element) 
+    and the velocity (RTk / element) => 2 (opposite) velocities / face
+    ==========================================*/
+
+  Vector& global_flux  = globalFlux.vec();
+  
+  // No need for CtC in this part: only difference. (+ last dsyrk)
+  Tab2d AA = elmatMix.block(0,0);
+  Tab2d BB = elmatMix.block(0,1);
+  Tab2d CC = elmatMix.block(0,2);
+
+
+  RegionMesh3D<LinearHexa>::VolumeType* vol;
+  ID iglobface,iglobvol;
+  for(ID ivol = 1; ivol<= mesh.numVolumes(); ivol++){
+    vol = &(mesh.volumeList(ivol));
+    iglobvol = vol->id();    
+    //----------------------------------
+    //  LOOP ON THE VOLUME ELEMENTS
+    //----------------------------------
+    // update the current element for the Velocity (only).
+    vfe.updatePiola( *vol );
+    // update the current element for the Pressure (used for the source term).
+    // The only necessary part is the quadpt. The jacobian is not used. (check...)
+    pfe.updateJacQuadPt( *vol );
+    // elmatMix.zero();
+    // only one block is set to zero since the other ones are not recomputed
+    elmatMix.block(0,0) = 0.;
+    mass_Hdiv(1.,elmatMix,vfe,0,0);  //  modify the (0,0) block of the matrix.
+    // initialize the temporary matrices
+
+    AA = elmatMix.block(0,0);
+    BB = elmatMix.block(0,1);
+    CC = elmatMix.block(0,2);
+    //....................
+    // MATRIX OPERATIONS.
+    //...................
+    //   AA <- L and Lt where L Lt is the Cholesky factorization of A
+    dpotrf_("L", NBU, AA , NBU , INFO );
+    ASSERT_PRE(!INFO[0],"Lapack factorization of A is not achieved.");
+    // Compute BB <-  L^{-1} B (solve triangular system)
+    dtrtrs_("L", "N", "N", NBU, NBP, AA, NBU, BB, NBU, INFO);
+    ASSERT_PRE(!INFO[0],"Lapack Computation B = L^{-1} B  is not achieved.");
+    // Compute CC <-  L^{-1} C (solve triangular system)
+    dtrtrs_("L", "N", "N", NBU, NBL, AA, NBU, CC, NBU, INFO);
+    ASSERT_PRE(!INFO[0],"Lapack Computation C = L^{-1} C  is not achieved.");
+    // Compute BtB <-  Bt L^{-t} L^{-1} B = Bt A^{-1} B
+    // (BtB stored only on lower part)
+    dsyrk_("L", "T", NBP, NBU, ONE_, BB, NBU, ZERO_, BtB, NBP);
+     // Compute BtC <- Bt L^{-t} L^{-1} C = Bt A^{-1} C
+    // (BtC fully stored)
+    dgemm_("T", "N", NBP, NBL, NBU, ONE_, BB, NBU, CC, NBU, 
+           ZERO_, BtC, NBP );
+    //BtB <- LB and LBt where LB LBt is the cholesky factorization of Bt A^{-1} B
+    dpotrf_("L", NBP, BtB , NBP, INFO );
+    ASSERT_PRE(!INFO[0],"Lapack factorization of BtB is not achieved.");
+    // Compute BtC = LB^{-1} BtC <-  LB^{-1} Bt A^{-1} C
+    dtrtrs_("L", "N", "N", NBP, NBL, BtB, NBP, BtC, NBP, INFO);
+    ASSERT_PRE(!INFO[0],"Lapack Computation BtC = LB^{-1} BtC is not achieved.");
+    //...........................
+    // END OF MATRIX OPERATIONS.
+    //..........................
+    /* Sum up:
+       AA  <-  L and Lt where L Lt is the Cholesky factorization of A
+       BB  <-  L^{-1} B
+       CC  <-  L^{-1} C
+       BtB <-  LB and LBt where LB LBt is the factorization of Bt A^{-1} B
+       BtC <- LB^{-1} Bt A^{-1} C
+    */
+    //...................
+    // VECTOR OPERATIONS (Computation of Pressure and Velocities)
+    //...................
+
+    //________________________________
+    // 1/ Computation of the PRESSURE
+    //________________________________
+    
+    // initialize the rhs vectors.    
+    elvecSource.zero();     //  source rhs (NBP) 
+    elvecHyb.zero();        //  hybrid rhs : extracted from the global vector.
+    // The source term is computed with a test function in the Pressure space.
+    // Beware: integrate the source term... ?
+    source(sourceFct, elvecSource, pfe, 0); 
+    // initialize the rhs vector (clean this some day...)
+    Tab1dView rhs = elvecSource.block(0); // corresponds to F2
+    // Compute rhs = LB^{-1} rhs <- LB^{-1} F2
+    dtrtrs_("L", "N", "N", NBP, NBRHS, BtB, NBP, rhs, NBP, INFO);
+    ASSERT_PRE(!INFO[0],
+	       "Lapack Computation rhs = LB^{-1} rhs is not achieved.");
+    // extract the resulting TP for the current fe and put it into elvecHyb. 
+    extract_vec(globalTP.vec(), elvecHyb, refTPFE, tpdof,iglobvol, 0);
+    Tab1dView RHSTP = elvecHyb.block(0);
+    // RHSTP = elvecHyb.block(0)  contains the local TP for the current fe.
+    // rhs = BtC * RHSTP + rhs <- LB^{-1} Bt A^{-1} C * L + LB^{-1} F2 
+    /* FAUTE DE SIGNE !!!! version originale @@@@@@@@@@@@@@
+      dgemm_("N", "N", NBP, NBRHS, NBL, ONE_, BtC, NBP, RHSTP, NBL, 
+      ONE_, rhs, NBP, strlen("T"), strlen("N") );*/
+    dgemm_("N", "N", NBP, NBRHS, NBL, MINUSONE_, BtC, NBP, RHSTP, NBL, 
+           MINUSONE_, rhs, NBP );
+    //  rhs = LB^{-T} rhs
+    //  rhs <- - (Bt A^{-1} B)^{-1} Bt A^{-1} C * L - (Bt A^{-1} B)^{-1} F2
+     // TO DO : the case when F1 and F3 are not zero
+    dtrtrs_("L", "T", "N", NBP, NBRHS, BtB, NBP, rhs, NBP, INFO);
+    ASSERT_PRE(!INFO[0],
+	       "Lapack Computation rhs = LB^{-T} rhs is not achieved.");
+    // contains the pressure for the current element.
+    /* Put the pressure of the current fe ("elvecSource")
+      in the global vector globalP.*/
+    assemb_vec( globalP.vec(), elvecSource, refPFE, pdof,iglobvol, 0);    
+    //__________________________________
+    // 2/ Computation of the VELOCITIES
+    //__________________________________
+    // initialize the element flux vector.    
+    elvecFlux.zero();     //  Flux (NBU)
+    // initialize the flux vector (clean this some day...)
+    Tab1dView flux = elvecFlux.block(0);
+    flux = elvecFlux.block(0);
+    // Compute  flux = BB * rhs <- L^{-1} B P
+    dgemv_("N", NBU, NBP, ONE_, BB, NBU, rhs, INC1, ZERO_, flux, INC1 );
+    // Compute  flux = - CC * RHSTP - flux <-   - L^{-1} C TP - L^{-1} B P  
+    dgemv_("N", NBU, NBL, MINUSONE_, CC, NBL, RHSTP, INC1, MINUSONE_,
+	   flux, INC1 );
+     // Compute flux = L^{-T} flux <-  - A^{-1} Ct TP - A^{-1} Bt P
+    dtrtrs_("L", "T", "N", NBU, NBRHS, AA, NBU, flux, NBU, INFO);
+    ASSERT_PRE(!INFO[0],
+	       "Lapack Computation flux = L^{-T} flux is not achieved.");
+    // TO DO: the case when F1 is not zero
+    for(ID ilocface=1;ilocface<=vol->numLocalFaces;ilocface++){
+      iglobface = mesh.localFaceId(iglobvol,ilocface);
+      if(mesh.faceElement(iglobface,1) == iglobvol){
+	global_flux[iglobface-1] = flux( ilocface-1 );
+      }
+    }
+    //..........................
+    // END OF VECTOR OPERATIONS. 
+    //..........................
+
+    //---------------------------------------
+    // END OF THE LOOP ON THE VOLUME ELEMENTS
+    //---------------------------------------
+  }
+}
+
