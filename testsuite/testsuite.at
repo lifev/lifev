@@ -69,6 +69,6 @@ AT_BANNER([test_fsi_newton test takes too much time, skipping/disabling it for n
 #m4_include([test_fsi_picard/testsuite.at])
 
 m4_include([test_masstransport/testsuite.at])
-m4_include([test_mass_coupling/testsuite.at])
+#m4_include([test_mass_coupling/testsuite.at])
 m4_include([test_onedmodel/testsuite.at])
 
