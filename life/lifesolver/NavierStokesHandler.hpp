@@ -173,13 +173,19 @@ public:
 
     //! Interpolate a given velocity function nodally onto a velocity vector
     void uInterpolate( const Function& uFct, Vector& uVect, Real time );
-    
+
     //! calculate L2 pressure error for given exact pressure function
     //! takes into account a possible offset by a constant
-    Real pErrorL2( const Function& pexact, Real time );
+    //! \param pexact the exact pressure as a function
+    //! \param time the time
+    //! \param relError Real* to store the relative error in
+    Real pErrorL2( const Function& pexact, Real time, Real* relError=0 );
 
     //! calculate L2 velocity error for given exact velocity function
-    Real uErrorL2( const Function& uexact, Real time );
+    //! \param pexact the exact velocity as a function
+    //! \param time the time
+    //! \param relError Real* to store the relative error in
+    Real uErrorL2( const Function& uexact, Real time, Real* relError=0 );
 
     //! Do nothing destructor
     virtual ~NavierStokesHandler()
@@ -472,7 +478,7 @@ NavierStokesHandler<Mesh>::initialize( const Function& u0, const Function& p0,
 
     _bdf.bdf_p().initialize_unk( p0, this->_mesh, _refFE_p, _fe_p, _dof_p, t0,
                                  dt, 1 );
-    
+
     // initialize _p with the first element in bdf_p.unk (=last value)
     _p = *( _bdf.bdf_p().unk().begin() );
 
@@ -492,7 +498,7 @@ NavierStokesHandler<Mesh>::initialize( const std::string & vname )
     std::fstream resfile( vname.c_str(), std::ios::in | std::ios::binary );
     if ( resfile.fail() )
     {
-        std::cerr << " Error in initialization: File not found or locked" 
+        std::cerr << " Error in initialization: File not found or locked"
                   << std::endl;
         abort();
     }
@@ -572,7 +578,7 @@ NavierStokesHandler<Mesh>::flux( const EntityFlag& flag )
 
         // id of the element adjacent to the face
         iElAd = this->_mesh.boundaryFace( ibF ).ad_first();
-        
+
         // local id of the face in its adjacent element
         iFaEl = this->_mesh.boundaryFace( ibF ).pos_first();
 
@@ -591,11 +597,11 @@ NavierStokesHandler<Mesh>::flux( const EntityFlag& flag )
                 {
                     // local Dof j-th degree of freedom on a face
                     lDof = ( iVeFa - 1 ) * nDofpV + l ;
-                    
+
                     // global Dof
                     gDof = _dof_u.localToGlobal( iElAd,
                                                  ( iVeEl - 1 ) * nDofpV + l );
-                    
+
                     j->second( lDof ) = gDof; // local to global on this face
                 }
             }
@@ -616,12 +622,12 @@ NavierStokesHandler<Mesh>::flux( const EntityFlag& flag )
                 {
                     // local Dof are put after the lDof of the vertices
                     lDof = nDofFV + ( iEdFa - 1 ) * nDofpE + l ;
-                    
+
                     // global Dof
                     gDof = _dof_u.localToGlobal( iElAd,
                                                  nDofElemV +
                                                  ( iEdEl - 1 ) * nDofpE + l );
-                    
+
                     j->second( lDof ) = gDof; // local to global on this face
                 }
             }
@@ -635,12 +641,12 @@ NavierStokesHandler<Mesh>::flux( const EntityFlag& flag )
             {
                 // local Dof are put after the lDof of the vertices and edges
                 lDof = nDofFE + nDofFV + l;
-                
+
                 // global Dof
                 gDof = _dof_u.localToGlobal( iElAd,
                                              nDofElemE + nDofElemV +
                                              ( iFaEl - 1 ) * nDofpF + l );
-                
+
                 j->second( lDof ) = gDof; // local to global on this face
             }
         }
@@ -747,8 +753,8 @@ void NavierStokesHandler<Mesh>::uInterpolate( const Function& uFct,
 
                     // Loop on data vector components
                     for ( UInt icmp = 0; icmp < nbComp; ++icmp )
-                        uVect( icmp * _dim_u + 
-                               _dof_u.localToGlobal( iElem, lDof ) - 1 ) = 
+                        uVect( icmp * _dim_u +
+                               _dof_u.localToGlobal( iElem, lDof ) - 1 ) =
                             uFct( time, x, y, z, icmp + 1 );
                 }
             }
@@ -777,7 +783,7 @@ void NavierStokesHandler<Mesh>::uInterpolate( const Function& uFct,
                     // Loop on data vector components
                     for ( UInt icmp = 0; icmp < nbComp; ++icmp )
                         uVect( icmp * _dim_u +
-                               _dof_u.localToGlobal( iElem, lDof ) - 1 ) = 
+                               _dof_u.localToGlobal( iElem, lDof ) - 1 ) =
                             uFct( time, x, y, z, icmp + 1 );
                 }
             }
@@ -807,7 +813,7 @@ void NavierStokesHandler<Mesh>::uInterpolate( const Function& uFct,
                     // Loop on data vector components
                     for ( UInt icmp = 0; icmp < nbComp; ++icmp )
                         uVect( icmp * _dim_u +
-                               _dof_u.localToGlobal( iElem, lDof ) - 1 ) = 
+                               _dof_u.localToGlobal( iElem, lDof ) - 1 ) =
                             uFct( time, x, y, z, icmp + 1 );
                 }
             }
@@ -836,31 +842,54 @@ void NavierStokesHandler<Mesh>::uInterpolate( const Function& uFct,
 }
 
 template<typename Mesh>
-Real NavierStokesHandler<Mesh>::pErrorL2( const Function& pexact, Real time )
+Real NavierStokesHandler<Mesh>::pErrorL2( const Function& pexact,
+                                          Real time,
+                                          Real* relError )
 {
     Real sum2 = 0.;
     Real sum1 = 0.;
     Real sum0 = 0.;
+    Real sumExact = 0.;
     for ( UInt iVol = 1; iVol <= _mesh.numVolumes(); iVol++ )
     {
         _fe_p.updateFirstDeriv( _mesh.volumeList( iVol ) );
         sum2 += elem_L2_diff_2( _p, pexact, _fe_p, _dof_p, time, 1 );
         sum1 += elem_integral_diff( _p, pexact, _fe_p, _dof_p, time, 1 );
         sum0 += _fe_p.measure();
+        if (relError)
+        {
+            sumExact += elem_L2_2( pexact, _fe_p, time, 1 );
+        }
     }
-    return sqrt( sum2 - sum1*sum1/sum0 );
+    Real absError = sqrt( sum2 - sum1*sum1/sum0 );
+    if (relError)
+    {
+        *relError = absError / sqrt( sumExact );
+    }
+    return absError;
 }
 
 template<typename Mesh>
-Real NavierStokesHandler<Mesh>::uErrorL2( const Function& uexact, Real time )
+Real NavierStokesHandler<Mesh>::uErrorL2( const Function& uexact,
+                                          Real time,
+                                          Real* relError )
 {
     Real normU = 0.;
     UInt nbCompU = _u.nbcomp();
+    Real sumExact = 0.;
     for ( UInt iVol = 1; iVol <= _mesh.numVolumes(); iVol++ )
     {
         _fe_u.updateFirstDeriv( _mesh.volumeList( iVol ) );
         normU += elem_L2_diff_2( _u, uexact, _fe_u, _dof_u, time,
                                  int( nbCompU ) );
+        if (relError)
+        {
+            sumExact += elem_L2_2( uexact, _fe_u, time, int( nbCompU ) );
+        }
+    }
+    if (relError)
+    {
+        *relError = sqrt( normU / sumExact );
     }
     return sqrt( normU );
 }
