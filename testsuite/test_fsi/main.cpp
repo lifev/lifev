@@ -87,6 +87,9 @@ int main(int argc, char** argv)
     std::ofstream out_iter("iter");
     std::ofstream out_res ("res");
 
+    M_fluid.initialize(u0);
+    M_solid.initialize(d0,w0);
+
     //
     // Temporal loop
     //
