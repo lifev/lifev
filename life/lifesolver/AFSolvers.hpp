@@ -24,6 +24,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 /**
    \file AFSolvers.hpp
    \author Daniele Antonio Di Pietro <dipietro@unibg.it>
+   \author Christoph Winkelmann <christoph.winkelmann@epfl.ch>
 
    \date 2-22-2005
 */
@@ -37,7 +38,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/operation.hpp>
 
-#include <life/lifesolver/boostmatrixUtils.hpp>
+#include <life/lifearray/boostmatrix.hpp>
 
 namespace LifeV {
     /*!
@@ -46,8 +47,9 @@ namespace LifeV {
       factorization of N-S system.
 
       \author Daniele Antonio Di Pietro <dipietro@unibg.it>
+      \author Christoph Winkelmann <christoph.winkelmann@epfl.ch>
     */
-    template<typename __M_L_matrix_type, 
+    template<typename __M_L_matrix_type,
              typename __C_matrix_type,
              typename __D_matrix_type,
              typename __D_T_matrix_type>
@@ -67,10 +69,10 @@ namespace LifeV {
            @name Constructors
         */
         //@{
-        AFSolver(M_L_matrix_type& __M_L,
-                 C_matrix_type& __C,
-                 D_matrix_type& __D,
-                 D_T_matrix_type& __D_T)
+        AFSolver(const M_L_matrix_type& __M_L,
+                 const C_matrix_type& __C,
+                 const D_matrix_type& __D,
+                 const D_T_matrix_type& __D_T)
             :
             _M_M_L(__M_L),
             _M_C(__C),
@@ -80,38 +82,38 @@ namespace LifeV {
         }
         //@}
 
-        /**
-           @name Modifiers
-        */
-        //@{
-        /**!
-           \Set lumped mass matrix used for time advancement
-        */
-        void setML(M_L_matrix_type& __M_L) {
-            _M_M_L = __M_L;
-        }
+//         /**
+//            @name Modifiers
+//         */
+//         //@{
+//         /**!
+//            \Set lumped mass matrix used for time advancement
+//         */
+//         void setML(const M_L_matrix_type& __M_L) {
+//             _M_M_L = __M_L;
+//         }
 
-        /**!
-           \Set stiffness matrix
-        */
-        void setC(C_matrix_type& __C) {
-            _M_C = __C;
-        }
+//         /**!
+//            \Set stiffness matrix
+//         */
+//         void setC(const C_matrix_type& __C) {
+//             _M_C = __C;
+//         }
 
-        /**!
-           \Set discrete divergence operator
-        */
-        void setD(D_matrix_type& __D) {
-            _M_D = __D;
-        }
+//         /**!
+//            \Set discrete divergence operator
+//         */
+//         void setD(const D_matrix_type& __D) {
+//             _M_D = __D;
+//         }
 
-        /**!
-           \Set discrete gradient operator
-        */
-        void setDT(D_T_matrix_type& __D_T) {
-            _M_D_T = __D_T;
-        }
-        //@}
+//         /**!
+//            \Set discrete gradient operator
+//         */
+//         void setDT(const D_T_matrix_type& __D_T) {
+//             _M_D_T = __D_T;
+//         }
+//         //@}
 
         /**
            @name Members
@@ -124,14 +126,16 @@ namespace LifeV {
                  typename __vector_type_p,
                  typename __vector_type_b_u,
                  typename __vector_type_b_p>
-        void solve(__vector_type_u& __u, __vector_type_p& __p,
-                   __vector_type_b_u& __b_u, __vector_type_b_p& __b_p);
+        void solve(__vector_type_u& __u,
+                   __vector_type_p& __p,
+                   const __vector_type_b_u& __b_u,
+                   const __vector_type_b_p& __b_p) const;
         //@}
 
     protected:
-        /**! 
+        /**!
            \The lumped mass matrix used for time advancement. If alfa is the
-           \first coefficient of the BDF formula, delta_t the time step and 
+           \first coefficient of the BDF formula, delta_t the time step and
            \M the mass matrix:
            \M_L = alfa / delta_t * lump(M)
         */
@@ -146,11 +150,12 @@ namespace LifeV {
         //! The discrete divergence operator
         const D_T_matrix_type& _M_D_T;
 
-        /**! 
-           \The inverse of the mass matrix used for time advancement. The matrix
-           \M_L must be of a type for which the function invert(M_L) is available
+        /**!
+           The inverse of the mass matrix used for time advancement. The matrix
+           M_L must be of a type for which the member function invert() is
+           available
         */
-        //M_L_matrix_type _M_inv_M_L;        
+        //M_L_matrix_type _M_inv_M_L;
     };
 
     /*!
@@ -165,8 +170,8 @@ namespace LifeV {
              typename __D_T_matrix_type,
              typename __solver_u_type,
              typename __solver_p_type>
-    class YosidaSolver 
-        : 
+    class YosidaSolver
+        :
         public AFSolver<__M_L_matrix_type,
                         __C_matrix_type,
                         __D_matrix_type,
@@ -197,10 +202,10 @@ namespace LifeV {
            @name Constructors
         */
         //@{
-        YosidaSolver(M_L_matrix_type& __M_L,
-                     C_matrix_type& __C,
-                     D_matrix_type& __D,
-                     D_T_matrix_type& __D_T,
+        YosidaSolver(const M_L_matrix_type& __M_L,
+                     const C_matrix_type& __C,
+                     const D_matrix_type& __D,
+                     const D_T_matrix_type& __D_T,
                      const GetPot& __data_file,
                      const std::string& __data_section,
                      solver_u_type& __solver_u,
@@ -251,7 +256,7 @@ namespace LifeV {
 
     /*!
       \class Yosida
-      \brief Yosida solver implementation as described in 
+      \brief Yosida solver implementation as described in
 
       A. Quarteroni, F. Saleri, A. Veneziani
       Factorization methods for the numerical approximation of Navier-Stokes
@@ -266,13 +271,13 @@ namespace LifeV {
              typename __D_T_matrix_type,
              typename __solver_u_type,
              typename __solver_p_type>
-    class Yosida : public 
+    class Yosida : public
     YosidaSolver<__M_L_matrix_type,
                  __C_matrix_type,
                  __D_matrix_type,
                  __D_T_matrix_type,
                  __solver_u_type,
-                 __solver_p_type> 
+                 __solver_p_type>
     {
     public:
         /**!
@@ -297,10 +302,10 @@ namespace LifeV {
            @name Constructors
         */
         //@{
-        Yosida(M_L_matrix_type& __M_L,
-               C_matrix_type& __C,
-               D_matrix_type& __D,
-               D_T_matrix_type& __D_T,
+        Yosida(const M_L_matrix_type& __M_L,
+               const C_matrix_type& __C,
+               const D_matrix_type& __D,
+               const D_T_matrix_type& __D_T,
                const GetPot& __data_file,
                const std::string& __data_section,
                solver_u_type& __solver_u,
@@ -311,23 +316,30 @@ namespace LifeV {
                          __D_matrix_type,
                          __D_T_matrix_type,
                          __solver_u_type,
-                         __solver_p_type>(__M_L, __C, __D, __D_T, __data_file, __data_section, __solver_u, __solver_p) {
+                         __solver_p_type>(__M_L, __C, __D, __D_T
+                                          , __data_file, __data_section,
+                                          __solver_u, __solver_p) {
         }
         //@}
         /**!
            @name Methods
         */
         //@{
-        template<typename __vector_type_u, typename __vector_type_p, typename __vector_type_b_u, typename __vector_type_b_p>
-        void solve(__vector_type_u& __u, __vector_type_p& __p,
-                   __vector_type_b_u& __b_u, __vector_type_b_p& __b_p) {
-            // Inverse of (lumped) mass matrix
-            matrix_type __H(_M_M_L);
-            invert(_M_M_L, __H);
+        template<typename __vector_type_u,
+                 typename __vector_type_p,
+                 typename __vector_type_b_u,
+                 typename __vector_type_b_p>
+        void solve(__vector_type_u& __u,
+                   __vector_type_p& __p,
+                   const __vector_type_b_u& __b_u,
+                   const __vector_type_b_p& __b_p) {
+            // Inverse of (e.g. lumped) mass matrix
+            M_L_matrix_type __H(_M_M_L);
+            __H.invert();
 
             // Approximate Schur complement
-            boost::numeric::ublas::matrix<Real> __S( _M_D.size1(), _M_D.size1() );
-            schur(_M_D, __H, _M_D_T, __S);
+            matrix_type __S( _M_D.size1(), _M_D_T.size2());
+            schurProduct(_M_D, __H, _M_D_T, __S);
 
             // Set matrices for the linear solvers
             _M_solver_u.setMatrix(_M_C);
@@ -341,21 +353,24 @@ namespace LifeV {
             _M_solver_p.solve( __p, prod(_M_D, __u_tilde) - __b_p );
 
             // End-of-step velocity computation
-            _M_solver_u.solve( __u, prod(_M_C, __u_tilde) - prod(_M_D_T, __p) );
+            _M_solver_u.solve( __u, prod(_M_C, __u_tilde) - prod(_M_D_T, __p));
         }
     };
 
-    template<typename D_type, typename H_type, typename D_T_type, typename S_type>
-    void schur(const D_type& D,
-               const H_type& H,
-               const D_T_type& D_T,
-               S_type& S) {
-        UInt N = D.size1();
-        for(UInt i = 0; i < N; i++)
-            for(UInt j = 0; j < N; j++)
-                for(UInt k = 0; k < N; k++)
-                    S(i, j) += D(i, k) * H(k, k) * D_T(k, j);
-    }
+//     template<typename D_type,
+//              typename H_type,
+//              typename D_T_type,
+//              typename S_type>
+//     void schur(const D_type& D,
+//                const H_type& H,
+//                const D_T_type& D_T,
+//                S_type& S) {
+//         UInt N = D.size1();
+//         for(UInt i = 0; i < N; i++)
+//             for(UInt j = 0; j < N; j++)
+//                 for(UInt k = 0; k < N; k++)
+//                     S(i, j) += D(i, k) * H(k, k) * D_T(k, j);
+//     }
 }
 
 #endif
