@@ -103,7 +103,11 @@ public:
     void setMatrixFree(int nEq, void* data,
                        void (*matvec)(double*, double*, AZ_MATRIX_STRUCT*,
                                       int*));
-        
+
+    void setTolerance(double tol) {
+        _params[AZ_tol] = tol;
+    }
+
     //@}
 
     /** @name  Methods
