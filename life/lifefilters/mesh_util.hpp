@@ -189,7 +189,7 @@ void fixVolumes( RegionMesh3D & mesh,
     }
 }
 //!\brief Computes volume enclosed by boundary faces
-/*! 
+/*!
   It computes, for $i=1,2,3$, the integral \f$\int_{\partial \Omega} x_i n_i
   d\gamma \f$, \f$n_i\f$ being the i-th component of the boundary normal. If
   the domain boundary is properly disretised they should all return (within
@@ -201,7 +201,7 @@ void fixVolumes( RegionMesh3D & mesh,
 */
 template <typename RegionMesh3D>
 void getVolumeFromFaces( RegionMesh3D const & mesh,
-                         Real vols[ 3 ], 
+                         Real vols[ 3 ],
                          std::ostream & err = std::cerr )
 {
     GetCoordComponent getx( 0 );
@@ -358,7 +358,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
 
     if ( mesh.storedVolumes() == 0 )
     {
-        err << "FATAL: mesh does not store volumes: I cannot do anything" 
+        err << "FATAL: mesh does not store volumes: I cannot do anything"
             << std::endl;
         sw.create( "ABORT_CONDITION", true );
         sw.create( "NOT_HAS_VOLUMES", true );
@@ -752,33 +752,49 @@ bool checkMesh3D( RegionMesh3D & mesh,
     out << " ********     END COUNTERS **********************************"
         << std::endl;
 
-    bool eulok( true );
+    bool eulok1 = ( 2 * mesh.numFaces() -
+                    mesh.numLocalFaces() * mesh.numVolumes() -
+                    mesh.numBFaces() ) == 0;
 
-    eulok = ( 2 * mesh.numFaces() -
-              mesh.numLocalFaces() * mesh.numVolumes() -
-              mesh.numBFaces() ) == 0;
+    bool eulok2( true );
+
     if ( RegionMesh3D::ElementShape::Shape == TETRA )
     {
         out << std::endl << "*** CHECKING WITH EULER FORMULAE *****  "
             << std::endl;
-        eulok = eulok & ( mesh.numEdges() -
-                          mesh.numVolumes() -
-                          mesh.numVertices() - 
-                          ( 3 * mesh.numBFaces() -
-                            2 * mesh.numBVertices() ) / 4 ) == 0;
+        eulok2 = ( mesh.numEdges() -
+                   mesh.numVolumes() -
+                   mesh.numVertices() -
+                   ( 3 * mesh.numBFaces() -
+                     2 * mesh.numBVertices() ) / 4 ) == 0;
     }
-    if ( ! eulok )
+
+    if ( !( eulok1 && eulok2 ) )
     {
-        err << " WE DO NOT SATISFY EUREF FORMULAS " << std::endl;
-        err << "2*nFa=nFxV*nVo+nBFa";
-        if ( RegionMesh3D::ElementShape::Shape == TETRA )
-            err << "or nEd=nVo+nVe+(3*nBFa-2*nBVe)/4 ";
-        err << std::endl;
+        err << "WARNING: The following Euler formula(s) are not satisfied"
+            << std::endl;
         sw.create( "NOT_EULER_OK" );
     }
     else
     {
         out << std::endl << "*** CHECKING IS OK *****  " << std::endl;
+    }
+
+    if ( !eulok1 )
+    {
+        err << "  2*nFaces = nFacesPerVolume*nVolumes + nBoundaryFaces"
+            << std::endl;
+        err << "  2*" << mesh.numFaces() << " != " << mesh.numLocalFaces()
+            << " * "<< mesh.numVolumes() << " + " << mesh.numBFaces()
+            << std::endl;
+    }
+
+    if ( !eulok2 )
+    {
+        err << "  nEdges = nVolumes + nVertices + (3*nBoundaryFaces - 2*nBoundaryVertices)/4" << std::endl;
+        err << "  " << mesh.numEdges() << " != " << mesh.numVolumes() << " + "
+            << mesh.numVertices() << " + (3*" << mesh.numBFaces() << " - 2*"
+            << mesh.numBVertices() << ")/4" << std::endl;
     }
 
     mesh.setLinkSwitch( "HAS_BEEN_CHECKED" );
