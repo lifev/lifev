@@ -33,20 +33,6 @@
 
 namespace LifeV
 {
-    class operFS;
-//    class GetPot;
-
-    class DataJacobian
-    {
-    public:
-
-        DataJacobian(operFS* oper):
-            M_pFS(oper){}
-
-        operFS* M_pFS;
-    };
-
-
 //
 // Fluid-Structure operator Class
 //
@@ -60,57 +46,31 @@ namespace LifeV
 
         // destructor
 
-        ~operFS();
+        virtual ~operFS();
+
+        // virtual memeber functions
+
+        virtual void evalResidual(const Vector &_res,
+                                  const int     _iter,
+                                  Vector       &res) = 0;
+
+        virtual void solveJac (const Vector &_res,
+                                const double  _linearRelTol,
+                                Vector       &_muk) = 0;
 
         // member functions
-
-        void eval           (const  Vector &disp,
-                             int    status,
-                             Vector &dispNew,
-                             Vector &veloStruct);
-
-        Vector evalResidual (Vector &_disp,
-                             int     _iter,
-                             Vector &_res);
-
-        void updateJac      (Vector& sol,
-                             int     iter);
-
-        void solvePrec      (Vector &);
 
         Vector solvePrec    (const Vector &,
                              double,
                              Vector &);
-
         void solveLinearFluid();
 
         void solveLinearSolid();
-
-        void computeResidualFSI();
-//        void computeResidualFSI(const PhysVectUnknown<Vector> &_res);
 
         // mutators and setters
 
         UInt   const & nbEval()      const
             {return M_nbEval;}
-
-        Vector const & dz()          const
-            {return M_dz;}
-
-        Vector const & residualFSI() const
-            {return M_residualFSI;}
-
-        void setResidualFSI(double *_res);
-        void setResidualFSI(const Vector _res);
-
-        Vector getResidualFSIOnSolid();
-
-        Vector getSolidInterfaceOnFluid(Vector &_vec);
-        Vector getFluidInterfaceOnSolid(Vector &_vec);
-
-        PhysVectUnknown<Vector> & residualS()             {return M_residualS;}
-        PhysVectUnknown<Vector> const & residualF() const {return M_residualF;}
-        PhysVectUnknown<Vector> & residualFSI()           {return M_residualFSI;}
 
         NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >
         &fluid() {return M_fluid;}
@@ -119,8 +79,15 @@ namespace LifeV
         &solid() {return M_solid;}
 
         void setTime(const Real &time) {M_time = time;};
+        Real time() {return M_time;};
 
-    private:
+    protected:
+
+        NavierStokesAleSolverPC
+        < RegionMesh3D_ALE<LinearTetra> > M_fluid;
+
+        VenantKirchhofSolver
+        < RegionMesh3D_ALE<LinearTetra> > M_solid;
 
         BCHandler               M_BCh_u;
         BCHandler               M_BCh_d;
@@ -129,54 +96,25 @@ namespace LifeV
         BCHandler               M_BCh_du;
         BCHandler               M_BCh_dz;
 
-        NavierStokesAleSolverPC
-        < RegionMesh3D_ALE<LinearTetra> > M_fluid;
-
-        VenantKirchhofSolver
-        < RegionMesh3D_ALE<LinearTetra> > M_solid;
-
-        Vector                  M_dispStruct;
-
-        Real                    M_time;
-        Real                    M_linearRelTol;
-
-        SolverAztec             M_solverAztec;
-
-        Vector                  M_velo;
-        Vector                  M_dz;
-        Vector                  M_rhs_dz;
-
         DofInterface3Dto3D      M_dofFluidToStructure;
         DofInterface3Dto3D      M_dofStructureToSolid;
         DofInterface3Dto3D      M_dofStructureToFluidMesh;
         DofInterface3Dto3D      M_dofMeshToFluid;
 
+        Vector                  M_dispStruct;
+        Vector                  M_velo;
 
-        PhysVectUnknown<Vector> M_residualS;
-        PhysVectUnknown<Vector> M_residualF;
-        PhysVectUnknown<Vector> M_residualFSI;
+        SolverAztec             M_solverAztec;
+
+    private:
+
+        Real                    M_time;
 
         UInt                    M_nbEval;
 
-        DataJacobian            M_dataJacobian;
-
         UInt                    M_method;
         UInt                    M_precond;
-
-        Vector  invSfPrime  (const Vector &res);
-        Vector  invSsPrime  (const Vector &res);
-
-        Vector  invSfSsPrime(const Vector &res);
-
-        void    setUpBC();
     };
 
-
-
-
-void my_matvecSfSsPrime(double *z,
-                        double *Jz,
-                        AZ_MATRIX* J,
-                        int proc_config[]);
 }
 #endif

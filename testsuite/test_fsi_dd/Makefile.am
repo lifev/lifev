@@ -24,9 +24,9 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-check_HEADERS = operFS.hpp ud_functions.hpp 
+check_HEADERS = exactJacobianBase.hpp fixedPointBase.hpp steklovPoincareBase.hpp operFS.hpp ud_functions.hpp 
 
 check_PROGRAMS = test_fsi_dd
-test_fsi_dd_SOURCES = main.cpp operFS.cpp ud_functions.cpp 
+test_fsi_dd_SOURCES = main.cpp exactJacobianBase.cpp operFS.cpp fixedPointBase.cpp steklovPoincareBase.cpp ud_functions.cpp  
 
 EXTRA_DIST = data testsuite.at 

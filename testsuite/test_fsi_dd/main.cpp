@@ -21,6 +21,9 @@
 #include "VenantKirchhofSolver.hpp"
 #include "nonLinRichardson.hpp"
 #include "operFS.hpp"
+#include "steklovPoincareBase.hpp"
+#include "fixedPointBase.hpp"
+#include "exactJacobianBase.hpp"
 #include "vectorNorms.hpp"
 #include "dofInterface3Dto3D.hpp"
 #include "ud_functions.hpp"
@@ -55,11 +58,16 @@ int main(int argc, char** argv)
     //  TEMPORAL LOOP
     //========================================================================================
 
-    operFS oper(data_file);
+//     fixedPoint oper(data_file);
+     steklovPoincare oper(data_file);
+//    exactJacobian oper(data_file);
 
     UInt maxpf  = 100;
     Real dt     = oper.fluid().timestep();
     Real T      = oper.fluid().endtime();
+
+    oper.fluid().initialize(u0);
+    oper.solid().initialize(d0,w0);
 
 
     Real abstol = 1.e-7;
@@ -97,7 +105,7 @@ int main(int argc, char** argv)
 
         // displacement prediction
 
-        disp   = 0.;//solid.d();// + dt*(1.5*solid.w() - 0.5*velo_1);
+        disp   = oper.solid().d() + dt*(1.5*oper.solid().w() - 0.5*velo_1);
 
         velo_1 = oper.solid().w();
 
@@ -108,10 +116,19 @@ int main(int argc, char** argv)
 
         // the newton solver
 
-        status = nonLinRichardson(disp, oper, maxnorm, abstol, reltol,
-                        maxiter, etamax, linesearch, out_res,
-                        time, 0.1);
-//        status = newton(disp,oper, maxnorm, abstol, reltol, maxiter, etamax,linesearch,out_res,time);
+          status = nonLinRichardson(disp, oper, maxnorm, abstol, reltol,
+                          maxiter, etamax, linesearch, out_res,
+                          time, 0.01);
+//         status = newton(disp,
+//                         oper,
+//                         maxnorm,
+//                         abstol,
+//                         reltol,
+//                         maxiter,
+//                         etamax,
+//                         linesearch,
+//                         out_res,
+//                         time);
 
         if(status == 1)
         {
