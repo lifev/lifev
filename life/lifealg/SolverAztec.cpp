@@ -54,6 +54,10 @@ SolverAztec::SolverAztec()
     GetPot dataFile;
     DataAztec dataAztec( dataFile, "aztec" );
     dataAztec.aztecOptionsFromDataFile( M_options, M_params );
+    
+    // use ilu by default
+    M_options[ AZ_precond ] = AZ_dom_decomp;
+    M_options[ AZ_subdomain_solve ] = AZ_ilu;
 }
 
 SolverAztec::~SolverAztec()
@@ -81,6 +85,16 @@ SolverAztec* SolverAztec::New()
 double SolverAztec::residualNorm() const
 {
     return M_status[ AZ_r ];
+}
+
+int SolverAztec::iterations() const
+{
+    return M_status[ AZ_its ];
+}
+
+bool SolverAztec::converged() const
+{
+    return M_status[ AZ_why ] == AZ_normal;
 }
 
 void SolverAztec::setMatrix( MSRMatr<value_type> const& newMatrix )

@@ -20,7 +20,7 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /**
    \file SolverAztec.hpp
    \author Christoph Winkelmann <christoph.winkelmann@epfl.ch>
@@ -40,7 +40,7 @@ namespace LifeV
 /*!
   \class SolverAztec
   \brief wrap aztec linear solvers
- 
+
   @author Christoph Winkelmann
 */
 class SolverAztec
@@ -48,7 +48,7 @@ class SolverAztec
 public:
 
     /** @name Typedefs
-     */ 
+     */
     //@{
 
     typedef double value_type;
@@ -59,7 +59,7 @@ public:
     //@}
 
     /** @name Constructors, destructor
-     */ 
+     */
     //@{
 
     //! default constructor
@@ -74,15 +74,19 @@ public:
     //@}
 
     /** @name Accessors
-     */ 
+     */
     //@{
 
     double residualNorm() const;
 
+    int iterations() const;
+
+    bool converged() const;
+
     //@}
 
     /** @name  Mutators
-     */ 
+     */
     //@{
 
     //! set matrix from MSRMatr
@@ -113,7 +117,7 @@ public:
     //@}
 
     /** @name  Methods
-     */ 
+     */
     //@{
 
     /*
