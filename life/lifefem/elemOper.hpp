@@ -1,4 +1,4 @@
-/*
+/*-*- mode: c++ -*-
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
 
@@ -229,7 +229,7 @@ void div_Hdiv( Real coef,ElemMat& elmat,const CurrentHdivFE& fe_u,
                const CurrentFE& fe_p,int iblock,int jblock);
 
 //----------------Elementary tp v dot n matrix-----------------------
-void TP_VdotN_Hdiv(Real coef, ElemMat& elmat, const RefHybridFE& tpfe, int iblock,int jblock);
+void TP_VdotN_Hdiv(Real coef, ElemMat& elmat,const RefHybridFE& tpfe, const RefHybridFE& vdotnfe, int iblock,int jblock);
 
 //----------------Elementary tp^2  matrix-----------------------
 void TP_TP_Hdiv(Real coef, ElemMat& elmat, const RefHybridFE& tpfe, int iblock,int jblock);
@@ -237,7 +237,7 @@ void TP_TP_Hdiv(Real coef, ElemMat& elmat, const RefHybridFE& tpfe, int iblock,i
 //-------------Mass matrix---------------------------------------
 /*!
  Weighted Mass matrix with a permeability tensor which is a constant scalar matrix
-(i.e. = coef * id).
+(i.e. K^{-1} = coef * Id, coef being the inverse of the permeability).
 */
 void mass_Hdiv( Real coef,ElemMat& elmat,const CurrentHdivFE& fe,
 		int iblock=0,int jblock=0);
@@ -255,12 +255,24 @@ void mass_gradu(Real coef, const ElemVec& u0_loc, ElemMat& elmat,const CurrentFE
 //-------------Mass matrix---------------------------------------
 /*!
  Weighted Mass matrix with permeability matrix which is a constant per element symmetric
- positive definite matrix (non diagonal a priori).
+ positive definite matrix (non diagonal a priori) and ALREADY INVERTED
+ (with Lapack LU or Choleski for instance).
 */
-void mass_Hdiv(KNM<Real> &Kperm, ElemMat& elmat, const CurrentHdivFE& fe,
+void mass_Hdiv(KNM<Real> &Invperm, ElemMat& elmat, const CurrentHdivFE& fe,
 	       int iblock=0,int jblock=0);
 
 
+/*!
+ Weighted Mass matrix with a permeability that is a scalar function.
+ The inverse function of the permeability should be provided.
+*/
+void mass_Hdiv( Real (*Invperm)(const Real&, const Real&,const Real&),
+		ElemMat& elmat,const CurrentHdivFE& fe,int iblock,int jblock);
+
+/*!
+ Weighted Mass matrix with a permeability which is a constant scalar
+(i.e. K^{-1} = coef, coef is the inverse of the permeability).
+*/
 void mass_Mixed_Hdiv(Real coef, ElemMat& elmat,const CurrentFE& fe,
 		     const CurrentHdivFE& hdivfe,int iblock,int jblock);
 

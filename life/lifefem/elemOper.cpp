@@ -1,4 +1,4 @@
-/*
+/*-*- mode: c++ -*-
   This file is part of the LifeV library
   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
 
@@ -1904,9 +1904,36 @@ void div_Hdiv(Real coef, ElemMat& elmat,const CurrentHdivFE& fe_u,
 \param tpfe  : reference lagrange multiplier element (for hybrid MFE)
 \param iblock, \param jblock : subarray indexes where to store the integral just computed.
 */
-void TP_VdotN_Hdiv(Real coef, ElemMat& elmat, const RefHybridFE& tpfe, int iblock,int jblock)
+void TP_VdotN_Hdiv(Real coef, ElemMat& elmat, const RefHybridFE& tpfe, 
+		   const RefHybridFE& vdotnfe, int iblock,int jblock)
 {
-  TP_TP_Hdiv(coef, elmat, tpfe, iblock, jblock);
+  //! previous way of construction (worked only for RTO hexa)
+  // TP_TP_Hdiv(coef, elmat, tpfe, iblock, jblock);
+
+  Tab2dView mat = elmat.block(iblock,jblock);
+  Int ig,i,j, nbnode;
+  UInt nf;
+  Real tpvn;
+  // Real a[4] = {2./sqrt(3.),2,2,2};
+
+  for( nf = 0 ; nf < tpfe.nBdFE() ; nf ++ ){
+    //! use the static boundary element of the reference element.
+    const StaticBdFE &   bdtpfe = tpfe[ nf ];
+ const StaticBdFE &   bdvdotnfe = vdotnfe[ nf ];
+    nbnode =  bdtpfe.nbNode;
+
+    for( i = 0 ; i < nbnode ; i ++ ){
+      for( j = 0 ; j < nbnode ; j ++ ){
+	tpvn = 0.;
+	for( ig = 0 ; ig < bdtpfe.nbQuadPt ; ig ++ )
+	  tpvn +=/*a[nf]*/ bdtpfe.phi(j , ig) * bdvdotnfe.phi(i , ig) * bdtpfe.weightMeas( ig );
+	//! using the Piola transform properties.
+
+	//! Matrix : block diagonal. size of the blocks = bdfe.nbNode.
+	mat(nf * nbnode + i, nf * nbnode + j) += tpvn * coef; 
+      }
+    }
+  }
 }
 
 //----------------------------------------------------------------------
@@ -1956,7 +1983,6 @@ void TP_TP_Hdiv(Real coef, ElemMat& elmat, const RefHybridFE& tpfe, int iblock,i
 
 	//! Matrix : block diagonal. size of the blocks = bdfe.nbNode.
 	mat(nf * nbnode + i, nf * nbnode + j) += tpvn * coef;
-	// cout << "mat i , j : " << nf * nbnode + i << " " <<  nf  * nbnode + j << " =  " <<  mat(nf * nbnode + i, nf  * nbnode + j) << endl;
       }
     }
   }
@@ -1965,14 +1991,14 @@ void TP_TP_Hdiv(Real coef, ElemMat& elmat, const RefHybridFE& tpfe, int iblock,i
 //----------------------------------------------------------------------
 /*! \function mass_Hdiv : compute
 
-       1/coef *  \int_{current element} w_j * w_i
+       coef *  \int_{current element} w_j * w_i
                   where w_j is a vectorial H(div) basis function
 
 Here the permeability matrix is a CONSTANT SCALAR tensor (i.e. = coef * Id).
 
-BEWARE  :   it is the INVERSE of "coef" that is used.
+BEWARE  :   it is "coef" that is used (and NOT ITS INVERSE!!).
 
-\param coef  : constant coefficient. (used with its INVERSE)
+\param coef  : constant coefficient. 
 \param elmat : (mixed) element matrix.
 \param fe_u  : current vectorial element (in H(div))
 \param iblock, \param jblock : subarray indexes where to store the integral just computed.
@@ -1990,51 +2016,83 @@ void mass_Hdiv(Real coef, ElemMat& elmat,const CurrentHdivFE& fe,int iblock,int 
           x += fe.phi( j , icoor , ig ) * fe.phi( i , icoor , ig ) * fe.weightDet( ig );
         }
       }
-      mat(i,j) += x / coef;
+      //! coef is the inverse of the permeability
+      mat(i,j) += x * coef;
     }
   }
 }
+
 //----------------------------------------------------------------------
-/*! \function mass_Hdiv : compute
-       \int_{current element} ((Kperm)^{-1} w_j) * w_j * w_i
-                  where w_j is a vectorial H(div) basis function
-
-     Here the permeability matrix "Kperm" is a CONSTANT symmetric positive definite
-     matrix (NON DIAGONAL a priori). I repeat, the matrix is constant over the
-     whole current element.
-     (To be done later : call "Kperm" already decomposed by cholesky in order to
-     make the decomposition only once for a whole zone (such as a "geological layer"),
-     where the permeability is constant.)
-
-\param Kperm : constant coefficient TENSOR. (CONSTANT over the current element).
-\param elmat : (mixed) element matrix.
-\param fe_u  : current vectorial element (in H(div))
-\param iblock, \param jblock : subarray indexes where to store the integral just computed.
+/*! \function mass_Hdiv : compute  
+  \int_{current element} ((Invperm* w_j) * w_i
+  where w_j is a vectorial H(div) basis function
+  
+  Here the permeability matrix "Invperm" is a CONSTANT symmetric positive definite 
+  matrix (NON DIAGONAL a priori). The matrix is constant over the 
+  whole current element and is already inverted by LU or Choleski Lapack. 
+  
+  \param Invperm : constant coefficient TENSOR. (CONSTANT over the current element).
+  \param elmat   : (mixed) element matrix.
+  \param fe      : current vectorial element (in H(div))
+  \param iblock, \param jblock : subarray indexes where to store the integral just computed.
 */
-void mass_Hdiv(KNM<Real> &Kperm, ElemMat& elmat, const CurrentHdivFE& fe,\
+void mass_Hdiv(KNM<Real>& Invperm, ElemMat& elmat, const CurrentHdivFE& fe,
 	       int iblock, int jblock)
 {
   Tab2dView mat = elmat.block(iblock,jblock);
-  // int ig,i,j,icoor;
-  Real s;
-  KN<Real> p(fe.nbCoor);
-  KN<Real> b(fe.nbCoor);
-  KN<Real> x(fe.nbCoor);
-  KN<Real> y(fe.nbCoor);
-  choldc(Kperm,p);
-  for(int j=0;j<fe.nbNode;j++){
-    for(int i=0;i<fe.nbNode;i++){
-      s =0.;
-      for(int ig=0;ig<fe.nbQuadPt;ig++){
-        for(int lcoor=0;lcoor<fe.nbCoor;lcoor++){
-          b(lcoor) = fe.phi(j,lcoor,ig);
-        }
-	cholsl(Kperm,p, b, y);
-	for(int icoor=0;icoor<fe.nbCoor;icoor++){
-	  s += y(icoor)*fe.phi(i,icoor,ig)*fe.weightDet(ig);
+  int ig,i,j,icoor,jcoor;
+  Real x;
+  for( j = 0 ; j < fe.nbNode ; j ++ ){
+    for( i = 0 ; i <  fe.nbNode/* by symmetry j+1 */ ; i ++ ){
+      x =0.;
+      for( ig = 0 ; ig < fe.nbQuadPt ; ig ++ ){
+        for( icoor = 0 ; icoor < fe.nbCoor ; icoor ++ ){
+	  for( jcoor = 0 ; jcoor < fe.nbCoor ; jcoor ++ ){  
+	    //! Invperm is the inverse of the permeability
+	    x += Invperm(icoor,jcoor) * fe.phi( j, jcoor, ig ) * fe.phi( i, icoor, ig ) * fe.weightDet(ig);
+	  }      
 	}
       }
-      mat(i,j)+= s;
+      mat(i,j) += x ;  	  
+    }
+  }
+}
+
+
+//----------------------------------------------------------------------
+/*! \function mass_Hdiv : compute  
+  \int_{current element} ((Invperm* w_j) * w_i
+  where w_j is a vectorial H(div) basis function
+  
+  Here the permeability is a NON-CONSTANT scalar function 
+  whose inverse is "Invperm".
+ 
+  We note again that it is the inverse of the permeability that 
+  is provided directly (Invperm = K^{-1}).
+  
+  \param Invperm : scalar function inverse of the permeability.
+  \param elmat   : (mixed) element matrix.
+  \param fe      : current vectorial element (in H(div))
+  \param iblock, \param jblock : subarray indexes where to store the integral just computed.
+*/
+void mass_Hdiv(Real (*Invperm)(const Real&, const Real&,const Real&),
+	       ElemMat& elmat,const CurrentHdivFE& fe,int iblock,int jblock)
+{
+  Tab2dView mat = elmat.block(iblock,jblock);
+  int ig,i,j,icoor;
+  Real intg,x,y,z;
+  for( j = 0 ; j < fe.nbNode ; j ++ ){
+    for( i = 0 ; i <  fe.nbNode/* by symmetry j+1 */ ; i ++ ){
+      intg =0.;
+      for( ig = 0 ; ig < fe.nbQuadPt ; ig ++ ){
+        fe.coorQuadPt(x,y,z,ig);
+        for( icoor = 0 ; icoor < fe.nbCoor ; icoor ++ ){
+          //! caution inverse of the permeability
+          intg += 1. * Invperm(x,y,z) * fe.phi( j , icoor , ig ) 
+	    * fe.phi( i , icoor , ig ) * fe.weightDet( ig );
+        }      
+      } 
+      mat(i,j) += intg;  	  
     }
   }
 }
@@ -2136,4 +2194,6 @@ void cholsl(KNM<Real> &a,  KN<Real> &p,  KN<Real> &b, KN<Real> &x)
      x(i)= sum/p(i);
    }
 }
+
+
 }
