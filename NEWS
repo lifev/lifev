@@ -26,6 +26,8 @@ New in 0.4.0:
 [lifealg]
 * Added support for petsc 2.2.0/2.2.1 (CW & CP)
 * Added SolverAztec similar to SolverPETSC (CW)
+* Added Aitken method to get optimal relaxation parameter (GF & SD)
+* Added nonlinear Richardson solver (GF & SD)
 
 [lifefem]
 * Added helpers for the Fitzhugh-Nagumo solver (JFG)
