@@ -151,7 +151,19 @@ public:
     //! Returns the pressure Dof
     const Dof& pDof() const;
 
-    //! Postprocessing
+    //! returns the FE ref for the velocity
+
+    const RefFE& refFEu() const {return _refFE_u;}
+
+    //! returns the FE ref for the pressure
+
+    const RefFE& refFEp() const {return _refFE_p;}
+
+    //! returns the current FE for the velocity u
+    CurrentFE&   fe_u()   {return _fe_u;}
+    CurrentBdFE& feBd_u() {return _feBd_u;}
+
+//! Postprocessing
     void postProcess();
 
 
