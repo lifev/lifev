@@ -50,6 +50,7 @@ m4_include([test_mixte/testsuite.at])
 # solver tests
 AT_BANNER([life/lifesolver testsuite ...])
 m4_include([test_laplacian/testsuite.at])
+m4_include([test_postproc/testsuite.at])
 m4_include([test_essentialbc/testsuite.at])
 m4_include([test_naturalbc/testsuite.at])
 m4_include([test_darcy/testsuite.at])

@@ -28,7 +28,7 @@ check_HEADERS      = ud_functions.hpp ud_functions_ns.hpp
 check_PROGRAMS      = test_ns_sstress
 test_ns_sstress_SOURCES = main.cpp
 
-EXTRA_DIST          = data
+EXTRA_DIST = data testsuite.at
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 

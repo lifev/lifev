@@ -29,6 +29,6 @@ noinst_HEADERS = main.hpp ud_functions.hpp
 check_PROGRAMS = test_q1 
 test_q1_SOURCES = main.cpp 
 
-EXTRA_DIST      = data
+EXTRA_DIST = data testsuite.at
 
 include $(top_srcdir)/testsuite/Makefile.testsuite

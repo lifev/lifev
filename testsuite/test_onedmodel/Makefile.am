@@ -35,6 +35,6 @@ test_onedmodel_SOURCES = dataOneDModel.cpp  basicOneDMesh.cpp \
 			gracePlot.cpp 
 test_onedmodel_LDADD    = $(grace_libs) $(life_libs)
 
-EXTRA_DIST = data 
+EXTRA_DIST = data testsuite.at 
 
 #

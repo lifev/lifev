@@ -30,6 +30,6 @@ check_PROGRAMS		= test_essentialbc
 
 test_essentialbc_SOURCES	= main.cpp
 
-EXTRA_DIST          = data
+EXTRA_DIST = data testsuite.at
 
 include $(top_srcdir)/testsuite/Makefile.testsuite

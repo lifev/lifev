@@ -28,3 +28,7 @@ noinst_HEADERS = main.hpp ud_functions.hpp
 
 check_PROGRAMS = test_postproc
 test_postproc_SOURCES = main.cpp 
+
+EXTRA_DIST  = testsuite.at data
+
+

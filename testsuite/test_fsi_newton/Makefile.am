@@ -29,4 +29,4 @@ check_HEADERS = operFS.hpp ud_functions.hpp
 check_PROGRAMS = test_fsi_newton
 test_fsi_newton_SOURCES = main.cpp operFS.cpp 
 
-EXTRA_DIST = data 
+EXTRA_DIST = data testsuite.at 

@@ -98,16 +98,26 @@ int main()
 #endif
 
     long int  m=1;
-#ifdef INRIA
-    string mesh_dir = "../data/mesh/inria/";
-    string fname=mesh_dir+"cube_6007.me.hpp";
-    readINRIAMeshFile(aMesh,fname,m);
-#else
-    string mesh_dir = "../data/mesh/mesh++/";
-    //  string fname=mesh_dir+"cube_6000.m++";
-    string fname=mesh_dir+"cube_48.m++";
-    readMppFile(aMesh,fname,m);
-#endif
+    GetPot datafile( "data" );
+    std::string mesh_type = datafile( "mesh_type", "INRIA" );
+    if ( mesh_type == "INRIA" )
+    {
+        string mesh_dir = datafile( "mesh_dir", "." );
+        string fname=mesh_dir+datafile( "mesh_file", "cube_6007.mesh" );
+        readINRIAMeshFile(aMesh,fname,m);
+    }
+    else if ( mesh_type == "MESH++" )
+    {
+        string mesh_dir = datafile( "mesh_dir", "." );
+        string fname=mesh_dir+datafile( "mesh_file", "cube_48.m++" );
+        //  string fname=mesh_dir+"cube_48.m++";
+        readMppFile(aMesh,fname,m);
+    }
+    else
+    {
+        std::cerr << "wrong mesh type. It can be either MESH++ or INRIA" << std::endl;
+        return EXIT_FAILURE;
+    }
 
     // Avaliable meshes
     //string fname=mesh_dir+"cube_48.m++";

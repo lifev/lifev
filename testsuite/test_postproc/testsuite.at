@@ -27,5 +27,11 @@
 # 
 AT_SETUP([test_postproc])
 AT_KEYWORDS([postproc])
-AT_CHECK([ln -sf $top_builddir/testsuite/'data/mesh/mesh++/'/'cube_48.m++' &&  $top_builddir/testsuite/test_postproc/test_postproc],[0],[ignore],[ignore])
+AT_DATA([data],[[
+mesh_type  = 'MESH++'
+mesh_dir   = './'  # the directory where the mesh file is
+mesh_file  = 'cube_48.m++'       # mesh file
+mesh_faces = all                    # update all faces elements
+]])
+AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/mesh++/cube_48.m++ &&  $top_builddir/testsuite/test_postproc/test_postproc],[0],[ignore],[ignore])
 AT_CLEANUP

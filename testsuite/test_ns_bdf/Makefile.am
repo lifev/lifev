@@ -30,5 +30,5 @@ check_HEADERS  = ud_functions.hpp
 check_PROGRAMS  = test_ns_bdf
 test_ns_bdf_SOURCES = main.cpp 
 
-EXTRA_DIST      = data 
+EXTRA_DIST = data testsuite.at 
 

@@ -32,6 +32,6 @@ test_laplacian_SOURCES	= main.cpp
 
 MOSTLYCLEANFILES	= dopo.m
 
-EXTRA_DIST          = data
+EXTRA_DIST = data testsuite.at
 
 include $(top_srcdir)/testsuite/Makefile.testsuite

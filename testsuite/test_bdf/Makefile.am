@@ -29,4 +29,4 @@ check_HEADERS = main.hpp ud_functions.hpp
 check_PROGRAMS = test_bdf 
 test_bdf_SOURCES = main.cpp 
 
-EXTRA_DIST      = data
+EXTRA_DIST = data testsuite.at

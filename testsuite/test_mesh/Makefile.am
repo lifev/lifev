@@ -30,6 +30,6 @@ test_mesh_LDFLAGS       =-lg2c
 
 MOSTLYCLEANFILES	= testBuilders.dat
 
-EXTRA_DIST          = data test_mesh.dox
+EXTRA_DIST = data testsuite.at test_mesh.dox
 
 include $(top_srcdir)/testsuite/Makefile.testsuite

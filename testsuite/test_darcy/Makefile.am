@@ -30,7 +30,7 @@ check_HEADERS = darcyHandler.hpp darcySolver.hpp dataDarcy.hpp user_fct.hpp user
 check_PROGRAMS = test_darcy
 test_darcy_SOURCES = darcyHandler.cpp darcySolver.cpp darcySolver_post.cpp dataDarcy.cpp main.cpp user_fct.cpp user_diffusion.cpp 
 
-EXTRA_DIST = data
+EXTRA_DIST = data testsuite.at
 
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
