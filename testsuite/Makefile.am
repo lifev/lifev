@@ -32,13 +32,15 @@ SUBDIRS		= data  \
 		      test_darcy test_darcytetra test_onedmodel\
 		      test_ns_bdf test_ns_cyl test_ns_bcvec test_ns_sstress \
 		      test_fsi_newton test_fsi_picard test_fsi_dd\
-		      test_masstransport test_mass_coupling test_ns_ipstab
+		      test_masstransport test_mass_coupling test_ns_ipstab \
+                      test_coupling_3d0d
 
 TESTSUITES=$(srcdir)/lifecore/testsuite.at \
 $(srcdir)/lifearray/testsuite.at \
 $(srcdir)/lifealg/testsuite.at \
 $(srcdir)/test_bdf/testsuite.at \
 $(srcdir)/test_bdf/testsuite.at \
+$(srcdir)/test_coupling_3d0d/testsuite.at \
 $(srcdir)/test_darcy/testsuite.at \
 $(srcdir)/test_darcytetra/testsuite.at \
 $(srcdir)/test_essentialbc/testsuite.at \

@@ -76,3 +76,5 @@ AT_BANNER([test_fsi_dd not ready yet, skipping/disabling it for now])
 
 m4_include([test_masstransport/testsuite.at])
 m4_include([test_mass_coupling/testsuite.at])
+
+m4_include([test_coupling_3d0d/testsuite.at])
