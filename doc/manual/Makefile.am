@@ -33,11 +33,8 @@ lifev_dev_TEX	= lifev-dev.tex lifev-dev_generalities.tex lifev-dev_conventions.t
 all:$(PDF)
 
 .tex.pdf: 
-	-(TEXINPUTS=$(srcdir):$(top_srcdir)/doc/tex//:$$TEXINPUTS  pdflatex `basename $< .tex`)
-	-(BIBINPUTS=$$BIBINPUTS:$(srcdir):$(top_srcdir)/doc/tex//:$$BIBINPUTS  bibtex `basename $< .tex`)
-	-(BIBINPUTS=$$BIBINPUTS:$(srcdir):$(top_srcdir)/doc/tex//:$$BIBINPUTS  makeindex `basename $< .tex`)
-	-(TEXINPUTS=$(srcdir):$(top_srcdir)/doc/tex//:$$TEXINPUTS  pdflatex `basename $< .tex`)
-	-(TEXINPUTS=$(srcdir):$(top_srcdir)/doc/tex//:$$TEXINPUTS  pdflatex `basename $< .tex`)
+    -(chmod +x ltxcompile)
+	-(srcdir=$(srcdir) top_srcdir=$(top_srcdir) ltxcompile `basename $< .tex` )
 
 lifev-dev.pdf: $(lifev_dev_TEX)
 
