@@ -335,7 +335,7 @@ namespace LifeV {
                    const __vector_type_b_u& __b_u,
                    const __vector_type_b_p& __b_p) {
             Chrono chrono;
-            
+
             // Inverse of (e.g. lumped) mass matrix
             chrono.start();
             std::cout << "[Yosida::solve] invert mass matrix            "
@@ -369,7 +369,7 @@ namespace LifeV {
             Vector  __u_tilde( __u.size() );
             _M_solver_u.solve( __u_tilde, __b_u );
             chrono.stop();
-            std::cout << " in " << chrono.diff() << " s" << std::endl;
+            std::cout << "in " << chrono.diff() << " s" << std::endl;
 
             // Pressure computation
             chrono.start();
@@ -377,7 +377,7 @@ namespace LifeV {
                       << std::flush;
             _M_solver_p.solve( __p, prod(_M_D, __u_tilde) - __b_p );
             chrono.stop();
-            std::cout << " in " << chrono.diff() << " s" << std::endl;
+            std::cout << "in " << chrono.diff() << " s" << std::endl;
 
             // End-of-step velocity computation
             chrono.start();
@@ -385,7 +385,7 @@ namespace LifeV {
                       << std::flush;
             _M_solver_u.solve( __u, __b_u - prod(_M_D_T, __p));
             chrono.stop();
-            std::cout << " in " << chrono.diff() << " s" << std::endl;
+            std::cout << "in " << chrono.diff() << " s" << std::endl;
         }
     };
 }
