@@ -159,7 +159,8 @@ OneDModelSolver::OneDModelSolver(const GetPot& data_file,
 void OneDModelSolver::
 _updateMatrixCoefficients(const UInt& ii, const UInt& jj , const UInt& iedge)
 {
-    Real dFluxdUelem, dSrcdUelem;
+    Real dFluxdUelem = 0;
+    Real dSrcdUelem = 0;
 
     ASSERT_BD( 0 < ii && ii < 3 && 0 < jj && jj < 3 );
 
@@ -418,7 +419,7 @@ _updateBCDirichletMatrix( TriDiagMatrix<Real>& mat )
     UInt firstDof = 0;
     UInt lastDof  = mat.OrderMatrix()-1;
 
-    /* 
+    /*
     //! unsymmetric treatment (LU must be used!)
     //! modify the first row
     mat.Diag()( firstDof )   = 1.;
@@ -454,7 +455,7 @@ _updateBCDirichletVector()
     UInt firstDof = 0;
     UInt lastDof  = _M_rhs1.size()-1;
 
-    /* 
+    /*
     //! unsymmetric treatment (LU must be used!)
     //! first row modified
     _M_rhs1( firstDof ) = _M_bcDirLeft.first;
@@ -1404,25 +1405,25 @@ UInt OneDModelSolver::RightInternalNodeId() const
 //! get the Dirichlet boundary conditions (left)
 OneDModelSolver::Vec2D OneDModelSolver::BCValuesLeft() const
 {
-    return Vec2D( _M_U1_thistime( LeftNodeId() ), 
+    return Vec2D( _M_U1_thistime( LeftNodeId() ),
                   _M_U2_thistime( LeftNodeId() ) );
 }
 //! get the value at neighboring node (left)
 OneDModelSolver::Vec2D OneDModelSolver::BCValuesInternalLeft() const
 {
-    return Vec2D( _M_U1_thistime( LeftInternalNodeId() ), 
+    return Vec2D( _M_U1_thistime( LeftInternalNodeId() ),
                   _M_U2_thistime( LeftInternalNodeId() ) );
 }
 //! get the Dirichlet boundary conditions (right)
-OneDModelSolver::Vec2D OneDModelSolver::BCValuesRight() const 
+OneDModelSolver::Vec2D OneDModelSolver::BCValuesRight() const
 {
-    return Vec2D( _M_U1_thistime( RightNodeId() ), 
+    return Vec2D( _M_U1_thistime( RightNodeId() ),
                   _M_U2_thistime( RightNodeId() ) );
 }
 //! get the value at neighboring node (right)
-OneDModelSolver::Vec2D OneDModelSolver::BCValuesInternalRight() const 
+OneDModelSolver::Vec2D OneDModelSolver::BCValuesInternalRight() const
 {
-    return Vec2D( _M_U1_thistime( RightInternalNodeId() ), 
+    return Vec2D( _M_U1_thistime( RightInternalNodeId() ),
                   _M_U2_thistime( RightInternalNodeId() ) );
 }
 
@@ -1662,7 +1663,9 @@ void OneDModelSolver::initialize(const Real& u10, const Real& u20)
 }
 
 // ! Initialize when  initial conditions concentration
-void OneDModelSolver::initialize(const Function& c0, Real t0, Real dt)
+void OneDModelSolver::initialize(const Function& /* c0 */,
+                                 Real /* t0 */,
+                                 Real /* dt */)
 {
     ERROR_MSG("Not yet implemented");
 }
