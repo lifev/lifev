@@ -104,6 +104,7 @@ namespace LifeV
         void setResidualFSI(const Vector _res);
 
         Vector getResidualFSIOnSolid();
+        Vector getFluidInterfaceOnSolid(Vector &_vec);
 
 //         PhysVectUnknown<Vector> const & residualS() const
 //             {return M_residualS;}

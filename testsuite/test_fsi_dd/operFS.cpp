@@ -143,6 +143,8 @@ void operFS::setResidualFSI(const Vector _res)
     UInt totalDofFluid = M_residualF.size()/ nDimF;
     UInt totalDofSolid = M_residualS.size()/ nDimS;
 
+    M_residualFSI = 0.;
+
     for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)
     {
         ID IDfluid = BC_fluidInterface(iBC)->id();
@@ -207,7 +209,7 @@ Vector operFS::setDispOnInterface(const Vector &_disp)
     Vector vec = _disp.size();
     vec = 0.;
 
-        BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[0];
+    BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[0];
     BCBase const &BC_solidInterface = M_solid.BC_solid()[0];
 
     UInt nDofInterface = BC_fluidInterface.list_size();
@@ -239,6 +241,44 @@ Vector operFS::setDispOnInterface(const Vector &_disp)
     return vec;
 }
 
+
+
+Vector operFS::getFluidInterfaceOnSolid(Vector &_vec)
+{
+    Vector vec(M_residualS.size());
+    vec = 0;
+
+    BCBase const &BC_fluidInterface = M_fluid.BC_fluid()[0];
+    BCBase const &BC_solidInterface = M_solid.BC_solid()[0];
+
+    UInt nDofInterface = BC_fluidInterface.list_size();
+
+    UInt nDimF = BC_fluidInterface.numberOfComponents();
+    UInt nDimS = BC_solidInterface.numberOfComponents();
+
+    UInt totalDofFluid = M_residualF.size()/ nDimF;
+    UInt totalDofSolid = M_residualS.size()/ nDimS;
+
+    for (UInt iBC = 1; iBC <= nDofInterface; ++iBC)
+    {
+        ID IDfluid = BC_fluidInterface(iBC)->id();
+
+        BCVectorInterface const *BCVInterface =
+            static_cast <BCVectorInterface const *>
+            (BC_fluidInterface.pointerToBCVector());
+
+        ID IDsolid = BCVInterface->
+            dofInterface().getInterfaceDof(IDfluid);
+
+        for (UInt jDim = 0; jDim < nDimF; ++jDim)
+        {
+            vec[IDsolid - 1 + jDim*totalDofSolid] =
+                _vec[IDfluid - 1 + jDim*totalDofSolid];
+        }
+    }
+
+    return vec;
+}
 //
 // Residual evaluation
 //
@@ -256,13 +296,13 @@ void operFS::eval(const Vector& disp,
     nDofInterface = M_fluid.BC_fluid()[1].list_size();
 
 
-    Vector sol(disp.size());
+//    Vector sol(disp.size());
 
-//    M_solid.d() = setDispOnInterface(disp);
-    M_solid.d() = disp;
+    M_solid.d() = setDispOnInterface(disp);
+//    M_solid.d() = disp;
 
     M_solid._recur = 0;
-    M_solid.iterate(sol);
+    M_solid.iterate();
 
 //    M_solid.postProcess();
 
@@ -386,9 +426,7 @@ void  operFS::solveLinearSolid()
 
     std::cout << "rhs_dz norm = " << maxnorm(M_rhs_dz) << std::endl;
     M_solid._recur = 1;
-    Vector null(M_dz.size()); // null displacement for Jacobian matrix update
-    null = 0.;
-    M_solid.updateJac(null, 0);
+    M_solid.updateJac(M_dz, 0);
     M_solid.solveJac(M_dz, M_rhs_dz, tol, M_BCh_dz);
     std::cout << "dz norm     = " << maxnorm(M_dz) << std::endl;
 }
@@ -406,7 +444,15 @@ void  operFS::invSfPrime(const Vector& res,
 {
     // step = S'_f^{-1} \cdot res
 
+    setResidualFSI(res);
+    solveLinearFluid();
 
+    Vector deltaLambda = this->M_fluid.getDeltaLambda();
+
+    std::cout << "deltaLambda norm = " << norm(deltaLambda) << std::endl;
+
+    step = getFluidInterfaceOnSolid(deltaLambda);
+    std::cout << "deltaLambda step = " << norm(step) << std::endl;
 }
 
 

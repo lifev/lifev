@@ -261,10 +261,10 @@ int main(int argc, char** argv)
 
         // displacement prediction
 
-        if (time == 2*dt)
-            disp = solid.d() + dt*solid.w();
-        else
-            disp   = solid.d() + dt*(1.5*solid.w() - 0.5*velo_1);
+//          if (time == 2*dt)
+//              disp = solid.d() + dt*solid.w();
+//          else
+        disp   = solid.d() + dt*(1.5*solid.w() - 0.5*velo_1);
 
         velo_1 = solid.w();
 
@@ -277,7 +277,7 @@ int main(int argc, char** argv)
 
         status = nonLinRichardson(disp, oper, maxnorm, abstol, reltol,
                         maxiter, etamax, linesearch, out_res,
-                        time, 0.1);
+                        time, 0.01);
 //        status = newton(disp,oper, maxnorm, abstol, reltol, maxiter, etamax,linesearch,out_res,time);
 
         if(status == 1)
