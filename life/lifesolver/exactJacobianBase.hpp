@@ -43,9 +43,6 @@ public:
     // default constructor
     exactJacobian():
         super(),
-        M_BCh_du ( new BCHandler ),
-        M_BCh_dz ( new BCHandler ),
-        M_BCh_dp ( new BCHandler ),
         M_dz     (),
         M_rhs_dz (),
         M_dataJacobian(this)
@@ -89,10 +86,6 @@ public:
     };
 
 private:
-
-    bchandler_type         M_BCh_du;
-    bchandler_type         M_BCh_dz;
-    bchandler_type         M_BCh_dp;
 
     Vector            M_dz;
     Vector            M_rhs_dz;

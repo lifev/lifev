@@ -95,21 +95,8 @@ public:
         steklovPoincare* M_pFS;
     };
 
-    bchandler_type   BCh_du_inv(){return M_BCh_du_inv;}
-    bchandler_type   BCh_dz_inv(){return M_BCh_dz_inv;}
-
-    bchandler_type   BCh_du(){return M_BCh_du;}
-    bchandler_type   BCh_dz(){return M_BCh_dz;}
 
 private:
-
-    bchandler_type          M_BCh_du;
-    bchandler_type          M_BCh_dz;
-    bchandler_type          M_BCh_dp;
-
-    bchandler_type          M_BCh_du_inv;
-    bchandler_type          M_BCh_dz_inv;
-    bchandler_type          M_BCh_dp_inv;
 
     Vector                  M_dzSolid;
     Vector                  M_dzFluid;

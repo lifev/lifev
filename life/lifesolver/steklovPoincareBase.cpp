@@ -33,12 +33,6 @@ Real fzeroSP(const Real& /*t*/,
 
 steklovPoincare::steklovPoincare():
     super(),
-    M_BCh_du( new BCHandler ),
-    M_BCh_dz( new BCHandler ),
-    M_BCh_dp( new BCHandler ),
-    M_BCh_du_inv( new BCHandler ),
-    M_BCh_dz_inv( new BCHandler ),
-    M_BCh_dp_inv( new BCHandler ),
     M_dzSolid(),
     M_dzFluid(),
     M_rhs_dz(),
@@ -692,7 +686,7 @@ void steklovPoincare::setInterfaceNewtonBC()
     UInt dim_fluid        = this->M_fluid->uDof().numTotalDof();
     //UInt dim_reducedfluid = this->M_fluid->pDof().numTotalDof();
 
-    std::cout << "Steklov-Poincare: NEWTON boundary conditions" << std::endl;
+    std::cout << "Steklov-Poincare: NEWTON boundary conditions" << std::flush << std::endl;
 
     BCVectorInterface du_wall(M_fluid->dwInterpolated(),
                               dim_fluid,

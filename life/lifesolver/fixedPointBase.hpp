@@ -34,16 +34,13 @@ public:
     typedef super::fluid_type fluid_type;
     typedef super::solid_type solid_type;
     typedef super::bchandler_type bchandler_type;
-    // default constructor
-//     fixedPoint()
-//         :
-//         super()
-//         {}
 
     // constructors
+
     fixedPoint();
 
     // destructor
+
     ~fixedPoint();
 
     // member functions
@@ -65,17 +62,11 @@ public:
 
 private:
 
-//     void eval        (const Vector &_disp,
-//                       const int     _status);
     Real                    M_defOmega;
     generalizedAitken<Vector, Real> M_aitkFS;
 
     void eval(Vector& dispNew, Vector& velo, const Vector& disp, int status);
 
-//     void transferOnInterface(const Vector      &_vec1,
-//                              const BCHandler   &_BC,
-//                              const std::string &_BCName,
-//                              Vector            &_vec2);
 };
 
 }

@@ -79,9 +79,15 @@ public:
 
     // constructors
     FSIOperator():
-        M_BCh_u(),
-        M_BCh_d(),
-        M_BCh_mesh(),
+        M_BCh_u(new BCHandler),
+        M_BCh_d(new BCHandler),
+        M_BCh_mesh(new BCHandler),
+        M_BCh_du(new BCHandler),
+        M_BCh_du_inv(new BCHandler),
+        M_BCh_dz(new BCHandler),
+        M_BCh_dz_inv(new BCHandler),
+        M_BCh_dp(new BCHandler),
+        M_BCh_dp_inv(new BCHandler),
         M_fluid(),
         M_solid(),
         M_dofFluidToStructure( new DofInterface3Dto3D ),
@@ -180,9 +186,18 @@ public:
 
     UInt reducedFluid(){return M_reducedFluid;}
 
-    bchandler_type const& BCh_u(){return M_BCh_u;}
-    bchandler_type const& BCh_d(){return M_BCh_d;}
-    bchandler_type const& BCh_mesh(){return M_BCh_mesh;}
+    bchandler_type const& BCh_fluid(){return M_BCh_u;}
+
+    bchandler_type const& BCh_solid(){return M_BCh_d;}
+
+    bchandler_type const& BCh_harmonicExtension(){return M_BCh_mesh;}
+
+    bchandler_type const& BCh_du(){return M_BCh_du;}
+    bchandler_type const& BCh_du_inv(){return M_BCh_du_inv;}
+
+    bchandler_type const& BCh_dz(){return M_BCh_dz;}
+    bchandler_type const& BCh_dz_inv(){return M_BCh_dz_inv;}
+
 
 protected:
 
@@ -195,6 +210,15 @@ protected:
     bchandler_type          M_BCh_d;
     bchandler_type          M_BCh_mesh;
 
+    // interface operators BCs
+    bchandler_type          M_BCh_du;
+    bchandler_type          M_BCh_du_inv;
+
+    bchandler_type          M_BCh_dz;
+    bchandler_type          M_BCh_dz_inv;
+
+    bchandler_type          M_BCh_dp;
+    bchandler_type          M_BCh_dp_inv;
 
     fluid_type              M_fluid;
     solid_type              M_solid;
