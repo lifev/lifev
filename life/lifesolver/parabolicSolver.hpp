@@ -1,6 +1,5 @@
-/*
+/* parabolicSolver.hpp
 
-$Id: parabolicSolver.hpp,v 1.2 2004-12-17 10:08:17 vmartin Exp $
 ParabolicSolver class
 This class solves parabolic equations, that
 are as Quarteroni says in his book, equations
