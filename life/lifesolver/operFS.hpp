@@ -40,12 +40,22 @@ namespace LifeV
 //
 typedef enum OperFSPreconditioner
 {
-    NO_PRECONDITIONER=-1,
+    NO_PRECONDITIONER = -1,
     NEUMANN_DIRICHLET,
     DIRICHLET_NEUMANN,
     NEUMANN_NEUMANN,
     NEWTON
 };
+
+typedef enum DDNPreconditioner
+{
+    DDN_NO_PRECONDITIONER = -1,
+    DDN_NEUMANN_DIRICHLET,
+    DDN_DIRICHLET_NEUMANN,
+    DDN_NEUMANN_NEUMANN
+};
+
+
 class operFS {
 
 public:
@@ -119,8 +129,11 @@ public:
 
     solid_type::value_type& solid() {return *M_solid;}
 
-    void setPreconditioner( OperFSPreconditioner _p ) { M_precond = _p; }
+    void setPreconditioner   ( OperFSPreconditioner _p ) { M_precond = _p; }
+    void setDDNPreconditioner( DDNPreconditioner _p ) { M_DDNprecond = _p; }
+
     OperFSPreconditioner preconditioner() const { return M_precond; }
+    DDNPreconditioner    DDNpreconditioner() const { return M_DDNprecond; }
 
     void setTime(const Real &time) {M_time = time;};
     Real time() {return M_time;};
@@ -177,7 +190,7 @@ private:
 
     UInt                    M_method;
     OperFSPreconditioner    M_precond;
-
+    DDNPreconditioner       M_DDNprecond;
 };
 
 typedef boost::shared_ptr<operFS> oper_fsi_ptr;

@@ -38,18 +38,12 @@ public:
     // default constructor
     steklovPoincare();
 
-    // constructors
-    steklovPoincare(fluid_type& fluid,
-                    solid_type& solid,
-                    GetPot    &_dataFile,
-                    bchandler_type &BCh_u,
-                    bchandler_type &BCh_d,
-                    bchandler_type &BCh_mesh);
-
     // destructor
     ~steklovPoincare();
 
     // member functions
+
+    void setUpBC();
 
     void evalResidual(Vector       &_res,
                       const Vector &_disp,
@@ -65,35 +59,35 @@ public:
     void solveInvLinearFluid();
     void solveInvLinearSolid();
 
-    void setUpBC();
-
+    Vector DDNprecond(Vector const &_z);
     //setters and getters
 
-    Vector dz()       {return M_dz;}
+    Vector dzSolid()       {return M_dzSolid;}
+    Vector dzFluid()       {return M_dzFluid;}
     Real   defOmega() {return M_defOmega;}
 
     void setResidualS  ( Vector const& _res ){M_residualS = _res;}
     void setResidualF  ( Vector const& _res ){M_residualF = _res;}
 
-//    void setResidualF  ( Vector const& _res );
     void setResidualFSI( double const* _res );
     void setResidualFSI( Vector const& _res );
 
     void setDataFromGetPot( GetPot const& data );
+
     Vector getResidualFSIOnSolid();
-    void getResidualFSIOnSolid(Vector& _vec);
+    void   getResidualFSIOnSolid(Vector& _vec);
     Vector getSolidInterfaceOnSolid(double const* _vec);
+    Vector getSolidInterfaceOnFluid(Vector const& _vec);
+    Vector getFluidInterfaceOnSolid(Vector const& _vec);
 
     void setup();
 
     struct DataJacobian
     {
-        DataJacobian()
-            :
+        DataJacobian():
             M_pFS(0)
             {}
-        DataJacobian(steklovPoincare* oper)
-            :
+        DataJacobian(steklovPoincare* oper):
             M_pFS(oper)
             {}
 
@@ -114,7 +108,8 @@ private:
     bchandler_type          M_BCh_du_inv;
     bchandler_type          M_BCh_dz_inv;
 
-    Vector                  M_dz;
+    Vector                  M_dzSolid;
+    Vector                  M_dzFluid;
     Vector                  M_rhs_dz;
 
     PhysVectUnknown<Vector> M_residualS;
@@ -152,8 +147,6 @@ private:
     void computeResidualFSI();
 
 
-    Vector getSolidInterfaceOnFluid(Vector const& _vec);
-    Vector getFluidInterfaceOnSolid(Vector const& _vec);
 
 //     void transferOnInterface(const Vector      &_vec1,
 //                              const BCHandler   &_BC,

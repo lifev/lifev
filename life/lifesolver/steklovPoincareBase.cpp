@@ -36,7 +36,8 @@ steklovPoincare::steklovPoincare():
     M_BCh_dz( new BCHandler ),
     M_BCh_du_inv( new BCHandler ),
     M_BCh_dz_inv( new BCHandler ),
-    M_dz(),
+    M_dzSolid(),
+    M_dzFluid(),
     M_rhs_dz(),
     M_residualS(),
     M_residualF(),
@@ -48,34 +49,8 @@ steklovPoincare::steklovPoincare():
     M_dataJacobian( this )
 {
     this->setPreconditioner( DIRICHLET_NEUMANN );
+    this->setDDNPreconditioner( DDN_DIRICHLET_NEUMANN );
     M_aitkFS.setDefault( M_defOmegaS, M_defOmegaF );
-}
-
-steklovPoincare::steklovPoincare( fluid_type& fluid,
-                                  solid_type& solid,
-                                  GetPot &_dataFile,
-                                  bchandler_type& BCh_u,
-                                  bchandler_type& BCh_d,
-                                  bchandler_type& BCh_mesh)
-    :
-    operFS(fluid, solid, _dataFile, BCh_u, BCh_d, BCh_mesh),
-    M_BCh_du      ( new BCHandler ),
-    M_BCh_dz      ( new BCHandler ),
-    M_dz          ( 3*M_solid->dDof().numTotalDof() ),
-    M_rhs_dz      ( 3*M_solid->dDof().numTotalDof() ),
-    M_residualS   ( M_solid->dDof().numTotalDof() ),
-    M_residualF   ( M_fluid->uDof().numTotalDof() ),
-    M_residualFSI ( M_fluid->uDof().numTotalDof() ),
-    M_aitkFS      ( 3*M_solid->dDof().numTotalDof() ),
-    M_dataJacobian(this)
-{
-    this->setPreconditioner(  ( OperFSPreconditioner )_dataFile("problem/precond"  , DIRICHLET_NEUMANN ) );
-
-    M_defOmegaS = _dataFile("problem/defOmegaS",0.005);
-    M_defOmegaF = _dataFile("problem/defOmegaF",0.005);
-    M_aitkFS.setDefault(M_defOmegaS, M_defOmegaF);
-
-    setUpBC();
 }
 
 steklovPoincare::~steklovPoincare()
@@ -95,7 +70,8 @@ steklovPoincare::setDataFromGetPot( GetPot const& data )
 
     M_aitkFS.setDefault(M_defOmegaS, M_defOmegaF);
 
-    this->setPreconditioner(  ( OperFSPreconditioner )data("problem/precond"  , DIRICHLET_NEUMANN ) );
+    this->setPreconditioner   (  ( OperFSPreconditioner )data("problem/precond"     , DIRICHLET_NEUMANN ) );
+    this->setDDNPreconditioner(  ( DDNPreconditioner    )data("problem/DDNprecond"  , DDN_DIRICHLET_NEUMANN ) );
 
     Debug( 6205 ) << "steklovPoincare::setDataFromGetPot(GetPot) prec   = " << this->preconditioner() << "\n";
 }
@@ -105,7 +81,8 @@ steklovPoincare::setup()
     // call operFS setup()
     super::setup();
 
-    M_dz.resize( 3*M_solid->dDof().numTotalDof() );
+    M_dzSolid.resize( 3*M_solid->dDof().numTotalDof() );
+    M_dzFluid.resize( 3*M_fluid->uDof().numTotalDof() );
     M_rhs_dz.resize( 3*M_solid->dDof().numTotalDof() );
     M_residualS.resize( M_solid->dDof().numTotalDof() );
     M_residualF.resize( M_fluid->uDof().numTotalDof() );
@@ -113,7 +90,6 @@ steklovPoincare::setup()
 
     M_aitkFS.setup( 3*M_solid->dDof().numTotalDof() );
 
-//    setUpBC();
 }
 //
 // Residual computation
@@ -250,21 +226,32 @@ void steklovPoincare::setUpBC()
     //      In the future this could be relevant
 
     if (this->preconditioner() == NEWTON)
-     {
+    {
         std::cout << "Steklov-Poincare:NEWTON boundary conditions" << std::endl;
+
         BCVectorInterface du_wall(M_fluid->dwInterpolated(),
                                   dim_fluid,
                                   M_dofMeshToFluid );
+
+        M_BCh_du->addBC("Wall"     , 1, Essential , Full, du_wall, 3);
+
+        BCVectorInterface du_wall_inv(M_residualFSI,
+                                      dim_fluid,
+                                      M_dofMeshToFluid);
+
+        M_BCh_du_inv->addBC("Wall", 1, Natural  , Full, du_wall_inv, 3);
+
+
         BCVectorInterface dg_wall(M_solid->d(),
                                   dim_solid,
                                   M_dofStructureToSolid );
 
-        M_BCh_du->addBC("Wall"     , 1, Essential , Full, du_wall, 3);
         M_BCh_dz->addBC("Interface", 1, Essential , Full, dg_wall, 3);
 
         BCVectorInterface dg_wall_inv(M_residualFSI,
                                       dim_fluid,
                                       M_dofFluidToStructure);
+
         M_BCh_dz_inv->addBC("Interface", 1, Natural  , Full, dg_wall_inv, 3);
     }
     else
@@ -272,7 +259,7 @@ void steklovPoincare::setUpBC()
         BCVectorInterface du_wall(M_residualFSI,
                                   dim_fluid,
                                   M_dofMeshToFluid);
-    // Passing the residual to the linearized structure: \sigma -> dz
+        // Passing the residual to the linearized structure: \sigma -> dz
         BCVectorInterface dg_wall(M_residualFSI,
                                   dim_fluid,
                                   M_dofFluidToStructure);
@@ -281,12 +268,17 @@ void steklovPoincare::setUpBC()
 
     }
 
-    // Boundary conditions for du
+    // Boundary conditions for du and inverse
 
     M_BCh_du->addBC("Edges",  20, Essential, Full, bcf,      3);
     M_BCh_du->addBC("InFlow", 2,  Natural,   Full, bcf,      3);
     M_BCh_du->addBC("OutFlow",3,  Natural,   Full, bcf,      3);
-    // Boundary conditions for dz
+
+    M_BCh_du_inv->addBC("Edges",  20, Essential, Full, bcf,  3);
+    M_BCh_du_inv->addBC("InFlow", 2,  Natural,   Full, bcf,  3);
+    M_BCh_du_inv->addBC("OutFlow",3,  Natural,   Full, bcf,  3);
+
+    // Boundary conditions for dz and inverse
 
     M_BCh_dz->addBC("Top",       3, Essential, Full, bcf,     3);
     M_BCh_dz->addBC("Base",      2, Essential, Full, bcf,     3);
@@ -298,6 +290,8 @@ void steklovPoincare::setUpBC()
 
     std::cout << "BC U\n";
     M_BCh_u->showMe();
+    std::cout << "BC dU Inv\n";
+    M_BCh_du_inv->showMe();
     std::cout << "BC D\n";
     M_BCh_d->showMe();
 
@@ -374,12 +368,20 @@ void steklovPoincare::solveLinearFluid()
     this->M_fluid->iterateLin(time(), *M_BCh_du);
 }
 
+
+void steklovPoincare::solveInvLinearFluid()
+{
+    this->M_fluid->iterateLin(time(), *M_BCh_du_inv);
+    this->M_dzFluid = M_fluid->getDeltaLambda();
+}
+
+
 //
 
 void steklovPoincare::solveLinearSolid()
 {
-    M_rhs_dz = ZeroVector( M_rhs_dz.size() );
-    M_dz     = ZeroVector( M_dz.size() );
+    M_rhs_dz  = ZeroVector( M_rhs_dz.size() );
+    M_dzSolid = ZeroVector( M_dzSolid.size() );
 
     if ( !M_BCh_dz->bdUpdateDone() )
         M_BCh_dz->bdUpdate(this->M_solid->mesh(),
@@ -397,17 +399,17 @@ void steklovPoincare::solveLinearSolid()
 
     std::cout << "rhs_dz norm   = " << norm_inf(M_rhs_dz) << std::endl;
     this->M_solid->setRecur(1);
-    this->M_solid->updateJac(M_dz, 0);
-    this->M_solid->solveJac(M_dz, M_rhs_dz, tol, *M_BCh_dz);
-    std::cout << "dz norm       = " << norm_inf(M_dz) << std::endl;
+    this->M_solid->updateJac(M_dzSolid, 0);
+    this->M_solid->solveLin(M_dzSolid, M_rhs_dz, tol, *M_BCh_dz);
+    std::cout << "dz norm       = " << norm_inf(M_dzSolid) << std::endl;
     std::cout << "residual norm = " << norm_inf(M_solid->residual()) << std::endl;
 }
 
 
 void steklovPoincare::solveInvLinearSolid()
 {
-    M_rhs_dz = ZeroVector( M_rhs_dz.size() );
-    M_dz     = ZeroVector( M_dz.size() );
+    M_rhs_dz  = ZeroVector( M_rhs_dz.size() );
+    M_dzSolid = ZeroVector( M_dzSolid.size() );
 
     if ( !M_BCh_dz_inv->bdUpdateDone() )
         M_BCh_dz_inv->bdUpdate(this->M_solid->mesh(),
@@ -425,11 +427,9 @@ void steklovPoincare::solveInvLinearSolid()
 
     std::cout << "rhs_dz norm   = " << norm_inf(M_rhs_dz) << std::endl;
     this->M_solid->setRecur(1);
-    this->M_solid->updateJac(M_dz, 0);
-    this->M_solid->solveJac(M_dz, M_rhs_dz, tol, *M_BCh_dz_inv);
-    std::cout << "dz norm       = " << norm_inf(M_dz) << std::endl;
-    std::cout << "residual norm = " << norm_inf(M_solid->residual()) << std::endl;
-    M_solid->residual() = ZeroVector(M_solid->residual().size());
+    this->M_solid->updateJac(M_dzSolid, 0);
+    this->M_solid->solveLin(M_dzSolid, M_rhs_dz, tol, *M_BCh_dz_inv);
+    std::cout << "dz norm       = " << norm_inf(M_dzSolid) << std::endl;
     std::cout << "residual norm = " << norm_inf(M_solid->residual()) << std::endl;
 }
 
@@ -475,7 +475,7 @@ void  steklovPoincare::invSsPrime(const Vector& res,
     setResidualFSI(res);
     solveLinearSolid();
 
-    transferOnInterface(M_dz,
+    transferOnInterface(M_dzSolid,
                         M_solid->BC_solid(),
                         "Interface",
                         step);
@@ -532,16 +532,10 @@ void steklovPoincare::invSfSsPrime(const Vector& _res,
     AZ_iterate(&_muk[0], const_cast<double*>( &_res[0] ), options, params,
                status, proc_config, J, NULL, NULL);
 
-    setResidualFSI(_muk); //@
-    solveInvLinearSolid(); //@
-
-    transferOnInterface(M_dz,
+    transferOnInterface(DDNprecond(_muk),
                         M_solid->BC_solid(),
                         "Interface",
                         _muk);
-
-//     _muk = this->M_dz; //@
-
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
@@ -553,7 +547,7 @@ void my_matvecSfSsPrime(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
     // Extraction of data from J
     steklovPoincare::DataJacobian* my_data = static_cast< steklovPoincare::DataJacobian* >(AZ_get_matvec_data(J));
 
-    UInt dim = my_data->M_pFS->dz().size();
+    UInt dim = my_data->M_pFS->dzSolid().size();
 
     double xnorm =  AZ_gvector_norm(dim, -1, z, proc_config);
     std::cout << " ***** norm (z)  = " << xnorm << std::endl<< std::endl;
@@ -564,7 +558,7 @@ void my_matvecSfSsPrime(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
     if ( xnorm == 0.0 )
         for (int i=0; i <(int) dim; ++i)
             {
-                Jz[i] =  0.0;
+                Jz[i]  = 0.0;
             }
     else
     {
@@ -600,7 +594,7 @@ void my_matvecSfSsPrimePrec(double *z, double *Jz, AZ_MATRIX *J, int proc_config
     // Extraction of data from J
     steklovPoincare::DataJacobian* my_data = static_cast< steklovPoincare::DataJacobian* >(AZ_get_matvec_data(J));
 
-    UInt dim = my_data->M_pFS->dz().size();
+    UInt dim = my_data->M_pFS->dzSolid().size();
 
     double xnorm =  AZ_gvector_norm(dim, -1, z, proc_config);
     std::cout << " ***** norm (z)  = " << xnorm << std::endl<< std::endl;
@@ -608,20 +602,17 @@ void my_matvecSfSsPrimePrec(double *z, double *Jz, AZ_MATRIX *J, int proc_config
     Vector jz(dim);
     Vector zSolid(dim);
 
+    for (int ii = 0; ii < dim; ++ii)
+        zSolid[ii] = z[ii];
+
     if ( xnorm == 0.0 )
         for (int i=0; i <(int) dim; ++i)
             {
-                Jz[i] =  0.0;
+                Jz[i]     = 0.0;
             }
     else
     {
-        my_data->M_pFS->setResidualFSI(z);
-        my_data->M_pFS->solveInvLinearSolid();
-
-        for (int i = 0; i <(int) dim; ++i)
-        {
-            my_data->M_pFS->solid().d()[i] =  my_data->M_pFS->dz()[i];
-        }
+        my_data->M_pFS->solid().d() = my_data->M_pFS->DDNprecond(zSolid);
 
         my_data->M_pFS->fluid().updateDispVelo();
         my_data->M_pFS->solveLinearFluid();
@@ -643,6 +634,50 @@ void my_matvecSfSsPrimePrec(double *z, double *Jz, AZ_MATRIX *J, int proc_config
 }
 
 
+Vector steklovPoincare::DDNprecond(Vector const &_z)
+{
+    std::cout << "Domain Decompostion Newton Precond. using ";
+    Vector Pz(_z.size());
+
+    setResidualFSI(_z);
+
+    this->M_dzSolid = ZeroVector(M_dzSolid.size());
+    this->M_dzFluid = ZeroVector(M_dzFluid.size());
+
+    switch(this->DDNpreconditioner())
+    {
+        case NEUMANN_DIRICHLET:
+            // Neumann-Dirichlet preconditioner
+            std::cout << " Neumann-Dirichlet Precond ... \n" << std::endl;
+            solveInvLinearFluid();
+            Pz = getFluidInterfaceOnSolid(M_dzFluid);
+            break;
+        case DIRICHLET_NEUMANN:
+            // Dirichlet-Neumann preconditioner
+            std::cout << " Dirichlet-Neumann Precond ... \n" << std::endl;
+            solveInvLinearSolid();
+            Pz = M_dzSolid;
+            break;
+        case NEUMANN_NEUMANN:
+            // Neumann-Neumann preconditioner
+        {
+            std::cout << " Neumann-Neumann Precond ... \n" << std::endl;
+            solveInvLinearFluid();
+            solveInvLinearSolid();
+            Pz = 0.9*M_dzSolid  +
+                0.1*getFluidInterfaceOnSolid(M_dzFluid);
+        }
+        break;
+        case NO_PRECONDITIONER:
+        default:
+        {
+            std::cout << " no preconditioner ... " << std::endl;
+            Pz = _z;
+        }
+    }
+
+    return Pz;
+}
 
 
 void steklovPoincare::computeResidualFSI()
