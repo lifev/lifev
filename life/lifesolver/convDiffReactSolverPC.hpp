@@ -59,7 +59,11 @@ public ConvDiffReactHandler<Mesh> {
   void timeAdvance(const Function source, const Real& time);
 
   //! Update convective term, bc treatment and solve the linearized ns system
-  void iterate(const Real& time, PhysVectUnknown<Vector> & u);
+  void iterate(const Real& time);
+
+  //! Projection of the velocity on grid of concentration discretization
+  template <typename RegionMesh3D>
+  void getvel(RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u, const Real& time);
 
  private:
 
@@ -83,7 +87,10 @@ public ConvDiffReactHandler<Mesh> {
 
   //! Right  hand  side for the concentration
   ScalUnknown<Vector> _f_c;
-  
+
+  //! velocity vector on the concentration nodes
+  PhysVectUnknown<Vector> _u_c;
+
   DataAztec _dataAztec_o;
 };
 
@@ -103,6 +110,7 @@ ConvDiffReactSolverPC(const GetPot& data_file, const RefFE& refFE_c, const QuadR
      _elvec(_fe_c.nbNode,1), 
      _elvec_u(_fe_c.nbNode,nDimensions),
      _f_c(_dim_c),
+     _u_c(_dim_c),
      _dataAztec_o(data_file,"masstransport/aztec_o"){
   
   cout << endl;
@@ -189,9 +197,9 @@ timeAdvance(const Function source, const Real& time) {
 
 template<typename Mesh>  
 void ConvDiffReactSolverPC<Mesh>::
-iterate(const Real& time, PhysVectUnknown<Vector> & u) {
+iterate(const Real& time) {
 
-  UInt nc_u=u.nbcomp();
+  UInt nc_u=_u_c.nbcomp();
 
   Chrono  chrono;
 
@@ -222,7 +230,7 @@ iterate(const Real& time, PhysVectUnknown<Vector> & u) {
        UInt  iloc = _fe_c.patternFirst(k);
        for (UInt ic=0; ic<nc_u; ++ic){
 	  UInt ig=_dof_c.localToGlobal(eleID,iloc+1)-1+ic*_dim_c;     
-	  _elvec_u[iloc+ic*_fe_c.nbNode] = u(ig);
+	  _elvec_u[iloc+ic*_fe_c.nbNode] = _u_c(ig);
        }
      }
 
@@ -240,8 +248,8 @@ iterate(const Real& time, PhysVectUnknown<Vector> & u) {
          UInt  iloc = _fe_c.patternFirst(ih_c);
 	 for (UInt ic=0; ic<nc_u;++ic){
 	   UInt ig=_dof_c.localToGlobal(eleID,iloc+1)-1+ic*_dim_c;
-           _elvec_u[iloc+ic*_fe_c.nbNode] = u(ig);
-	   VLoc_c+=u(ig)*u(ig);}
+           _elvec_u[iloc+ic*_fe_c.nbNode] = _u_c(ig);
+	   VLoc_c+=_u_c(ig)*_u_c(ig);}
 	 VLoc_c=sqrt(VLoc_c);
 	 VLoc_mean += VLoc_c;
 	if (VLoc_c>VLoc_infty) VLoc_infty=VLoc_c;
@@ -328,5 +336,18 @@ iterate(const Real& time, PhysVectUnknown<Vector> & u) {
   _bdf.shift_right(_c);
   
 }
+
+template<typename Mesh> template<typename RegionMesh3D>  
+void ConvDiffReactSolverPC<Mesh>::
+getvel(RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BC_Handler& BCh_u, const Real& time){
+
+   for (UInt j=0; j<3; j++){
+       for(UInt i=0; i< _dim_c; i++){
+	  _u_c(i+j*_dim_c)=u(i+j*u.size()/3);
+       }}
+
+
+}
+
 
 #endif
