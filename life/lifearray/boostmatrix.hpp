@@ -115,10 +115,18 @@ public:
             return prod(*this, b);
         }
 
-    //! set to zero. WARNING: erases the pattern also
+    //! set to zero without erasing pattern
     void zeros()
         {
-            clear();
+            for ( typename BoostMatrix::iterator1 i1=begin1();
+                  i1!=end1(); ++i1 )
+            {
+                for ( typename BoostMatrix::iterator2 i2=i1.begin();
+                      i2!=i1.end(); ++i2 )
+                {
+                    *i2 = 0;
+                }
+            }
         }
 
     /** Diagonalization of row r of the system. Done by setting A(r,r) = coeff,
