@@ -1,0 +1,25 @@
+# Mode: -*- readme-debian -*-
+
+LifeV : A Finite Element Library
+--------------------------------
+
+* Website
+---------
+
+http://www.lifev.org contains lots of useful information about LifeV.
+You are strongly encouraged to use the site and eventually participate
+to its development.
+
+* Installations tips
+--------------------
+
+See INSTALL for intructions on how to use configure.
+
+LifeV uses Aztec as the linear algebra library. You will need to
+install it and configure LifeV with aztec:
+
+configure --with-aztec=<path to prefix directory of aztec installation>
+
+
+
+ -- Christophe Prud'homme <prudhomm@mit.edu>, Sun Aug 29 18:29:34 2004
