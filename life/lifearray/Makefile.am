@@ -26,7 +26,7 @@ SUBDIRS		= . testsuite
 INCLUDES 	= -I$(top_srcdir)/life/lifecore 
 
 include_HEADERS	= RNM.hpp RNM_op.hpp RNM_opc.hpp RNM_tpl.hpp tab.hpp \
-		  vecUnknown.cpp vecUnknown.hpp variables.hpp
+		  vecUnknown.cpp vecUnknown.hpp variables.hpp \
 		  SimpleVect.hpp
 
 #lib_LTLIBRARIES	= lifearray.la

@@ -20,6 +20,8 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
+SUBDIRS		= . testsuite
+
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
 INCLUDES 	= -I$(top_srcdir)/life/lifecore -I$(top_srcdir)/life/lifearray -I$(top_srcdir)/life/lifefem -I$(top_srcdir)/life/lifemesh
