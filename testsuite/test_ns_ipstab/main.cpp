@@ -28,12 +28,13 @@ P1/P1 or P2/P2 FEM with Interior Penalty ( IP ) stabilization
 
 */
 
-#include "lifeV.hpp"
-#include "NavierStokesSolverIP.hpp"
-#include "ud_functions.hpp"
-//#include "ethierSteinman.hpp"
-#include "picard.hpp"
-#include "vectorNorms.hpp"
+#include <lifeV.hpp>
+#include <NavierStokesSolverIP.hpp>
+#include <ud_functions.hpp>
+//#include <ethierSteinman.hpp>
+//#include <simple.hpp>
+#include <picard.hpp>
+#include <vectorNorms.hpp>
 
 int main( int argc, char** argv )
 {
@@ -54,7 +55,7 @@ int main( int argc, char** argv )
 
     NavierStokesSolverIP< RegionMesh3D<LinearTetra> >
         fluid( data_file, feTetraP1, quadRuleTetra4pt, quadRuleTria3pt, BCh );
-    fluid.showMe();
+    //fluid.showMe();
 
     // Boundary conditions for the fluid velocity
     //vector<ID> icomp( 1 );
@@ -69,17 +70,18 @@ int main( int argc, char** argv )
     //BCh.addBC( "InFlow", 2, Natural, Full, in_flow, 3 );
     //BCh.addBC( "Edges", 20, Essential, Full, bcf, 3 );
 
-    BCh.showMe();
+    //BCh.showMe();
 
-    if ( data_file( "fluid/miscellaneous/steady", 1 ) != 0 ) {
-
+    if ( data_file( "fluid/miscellaneous/steady", 1 ) != 0 )
+    {
         // Picard-Aitken iterations: steady version
         //
 
-        Real abstol = 1.e6;
-        Real reltol = 0.0;
-        int maxiter = 300;
-        Real omega  = 0;
+        Real abstol = data_file( "fluid/picard/abstol", 1.e6 );
+        Real reltol = data_file( "fluid/picard/reltol", 0.0 );
+        int maxiter = data_file( "fluid/picard/maxiter", 300 );
+        int method = data_file( "fluid/picard/method", 1 ); // 1=Aitken
+        Real omega  = data_file( "fluid/picard/omega", 0 );
 
         UInt dim_u = fluid.uDof().numTotalDof();
 
@@ -98,12 +100,15 @@ int main( int argc, char** argv )
         fluid.timeAdvance( f, 0.0 );
 
         int  status = picard( &fluid, maxnorm, fx1, fx0, gx1, gx0,
-                             x1, x0, abstol, reltol, maxiter, 1, omega );
+                             x1, x0, abstol, reltol, maxiter, method, omega );
 
-        if( status == 1 ) {
+        if( status == 1 )
+        {
             std::cout << "Inner iterations failed" << std::endl;
             exit( 1 );
-        }  else {
+        }
+        else
+        {
             // std::cout << "End of time "<< time << std::endl;
             std::cout << "Number of inner iterations       : " << maxiter
                       << std::endl;
@@ -121,11 +126,10 @@ int main( int argc, char** argv )
         Real T = fluid.endtime();
         // fluid is initialized in constructor
 
-        fluid.postProcess();
-
         // Temporal loop
 
-        for ( Real time = startT+dt ; time <= T; time+=dt ) {
+        for ( Real time = startT+dt ; time <= T; time+=dt )
+        {
             fluid.timeAdvance( f, time );
             fluid.iterate( time );
 
