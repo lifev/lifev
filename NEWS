@@ -1,11 +1,11 @@
-Bugs fixed in 0.3.90:
+Bugs fixed in 0.4.0:
 [lifefilters]
 * OpenDX filter got revamped (CW)
 
 [testsuite]
 * remove/centralize multiple copies of classes/files (CP)
 
-New in 0.3.90:
+New in 0.4.0:
 [configure]
 * Added --with-petsc=<top level petsc directory> configure option (CP)
 * Added support for automake 1.9 (CP)
@@ -19,6 +19,7 @@ New in 0.3.90:
 
 [lifealg]
 * Added support for petsc 2.2.0/2.2.1 (CW & CP)
+* Added SolverAztec similar to SolverPETSC (CW)
 
 [lifefem]
 * Added helpers for the Fitzhugh-Nagumo solver (JFG)
