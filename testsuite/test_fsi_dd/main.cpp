@@ -64,18 +64,28 @@ int main(int argc, char** argv)
     //========================================================================================
     // FLUID AND SOLID SOLVERS
     //========================================================================================
+
     //
     // The NavierStokes ALE solver
     //
-    NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> > fluid(data_file, feTetraP1bubble, feTetraP1,quadRuleTetra64pt,
-                                                                   quadRuleTria3pt, quadRuleTetra64pt, quadRuleTria3pt,
-                                                                   BCh_u,BCh_mesh);
-
+    NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >
+        fluid(data_file,
+              feTetraP1bubble,
+              feTetraP1,
+              quadRuleTetra64pt,
+              quadRuleTria3pt,
+              quadRuleTetra64pt,
+              quadRuleTria3pt,
+              BCh_u, BCh_mesh);
+    //
     // The structural solver
     //
-    VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> > solid(data_file, feTetraP1, quadRuleTetra4pt,
-                                                                quadRuleTria3pt, BCh_d);
-
+    VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >
+        solid(data_file,
+              feTetraP1,
+              quadRuleTetra4pt,
+              quadRuleTria3pt,
+              BCh_d);
     // Outputs
     fluid.showMe();
     solid.showMe();
@@ -92,32 +102,56 @@ int main(int argc, char** argv)
     // Passing data from the fluid to the structure: fluid load at the interface
     //
 
-    DofInterface3Dto3D dofFluidToStructure(feTetraP1, solid.dDof(), feTetraP1bubble, fluid.uDof());
-    dofFluidToStructure.update(solid.mesh(), 1, fluid.mesh(), 1, 0.0);
-    BCVector_Interface g_wall(fluid.residual(), dim_fluid, dofFluidToStructure);
+    DofInterface3Dto3D dofFluidToStructure(feTetraP1,
+                                           solid.dDof(),
+                                           feTetraP1bubble,
+                                           fluid.uDof());
+    dofFluidToStructure.update(solid.mesh(),
+                               1,
+                               fluid.mesh(),
+                               1,
+                               0.0);
+    BCVector_Interface g_wall(fluid.residual(),
+                              dim_fluid,
+                              dofFluidToStructure);
 
     //
     // Passing data from structure to the fluid mesh: motion of the fluid domain
     //
 
-    DofInterface3Dto3D dofStructureToFluidMesh(fluid.mesh().getRefFE(), fluid.dofMesh(),
-                                               feTetraP1, solid.dDof());
-    dofStructureToFluidMesh.update(fluid.mesh(), 1, solid.mesh(), 1, 0.0);
-    BCVector_Interface displ(solid.d(), dim_solid, dofStructureToFluidMesh);
-
-
-
+    DofInterface3Dto3D dofStructureToFluidMesh(fluid.mesh().getRefFE(),
+                                               fluid.dofMesh(),
+                                               feTetraP1,
+                                               solid.dDof());
+    dofStructureToFluidMesh.update(fluid.mesh(),
+                                   1,
+                                   solid.mesh(),
+                                   1,
+                                   0.0);
+    BCVector_Interface displ(solid.d(),
+                             dim_solid,
+                             dofStructureToFluidMesh);
+    //
     // Passing data from structure to the fluid: solid velocity at the interface velocity
     //
-    DofInterface3Dto3D dofMeshToFluid(feTetraP1bubble, fluid.uDof(), feTetraP1bubble, fluid.uDof() );
-    dofMeshToFluid.update(fluid.mesh(), 1, fluid.mesh(), 1, 0.0);
-    BCVector_Interface u_wall(fluid.wInterpolated(), dim_fluid,dofMeshToFluid);
+    DofInterface3Dto3D dofMeshToFluid(feTetraP1bubble,
+                                      fluid.uDof(),
+                                      feTetraP1bubble,
+                                      fluid.uDof() );
+    dofMeshToFluid.update(fluid.mesh(),
+                          1,
+                          fluid.mesh(),
+                          1,
+                          0.0);
+    BCVector_Interface u_wall(fluid.wInterpolated(),
+                              dim_fluid,
+                              dofMeshToFluid);
 
 
     //========================================================================================
     //  BOUNDARY CONDITIONS
     //========================================================================================
-    //
+
     // Boundary conditions for the harmonic extension of the
     // interface solid displacement
     BCFunction_Base bcf(fZero);
@@ -141,8 +175,7 @@ int main(int argc, char** argv)
     //========================================================================================
     //  COUPLED FSI LINEARIZED OPERATORS
     //========================================================================================
-    //
-    //
+
     BC_Handler BCh_du(2);
     BC_Handler BCh_dz(3);
 
@@ -150,7 +183,7 @@ int main(int argc, char** argv)
 
     // Passing the residue to the linearized fluid: \sigma -> du
     //
-    // rem: for now: no fluid.dwInterpolated(). 
+    // rem: for now: no fluid.dwInterpolated().
     //      In the future this could be relevant
 
     BCVector_Interface du_wall(oper.residualFSI(), dim_fluid, dofMeshToFluid);
@@ -162,21 +195,20 @@ int main(int argc, char** argv)
 
     // Boundary conditions for du
 
-    BCh_du.addBC("Wall",   1,  Natural, Full, du_wall,  3);
+    BCh_du.addBC("Wall",   1,  Essential, Full, du_wall,  3);
     BCh_du.addBC("Edges",  20, Essential, Full, bcf,      3);
-
 
     // Boundary conditions for dz
 
-    BCh_dz.addBC("Interface", 1, Natural,   Full, dg_wall, 3);
-    BCh_dz.addBC("Top",       3, Essential, Full, bcf,  3);
-    BCh_dz.addBC("Base",      2, Essential, Full, bcf,  3);
-
+    BCh_dz.addBC("Interface", 1, Essential, Full, dg_wall, 3);
+    BCh_dz.addBC("Top",       3, Essential, Full, bcf,     3);
+    BCh_dz.addBC("Base",      2, Essential, Full, bcf,     3);
 
 
     //========================================================================================
     //  TEMPORAL LOOP
     //========================================================================================
+
 
     UInt maxpf  = 100;
     Real dt     = fluid.timestep();
