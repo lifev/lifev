@@ -42,6 +42,7 @@ SUBDIRS = admin doc life testsuite
 include $(top_srcdir)/admin/Doxyfile.am
 
 apidox-all:
+    make apidox 
 	cd life && make apidox
 
 
