@@ -1,6 +1,7 @@
 #include "currentFE.hpp"
 
-CurrentFE::CurrentFE(const RefFE& _refFE,const GeoMap& _geoMap,const QuadRule& _qr):
+CurrentFE::CurrentFE(const RefFE& _refFE,const GeoMap& _geoMap,const QuadRule& _qr)
+  :
   nbGeoNode(_geoMap.nbDof),nbNode(_refFE.nbDof),nbCoor(_refFE.nbCoor),
   nbQuadPt(_qr.nbQuadPt), nbDiag( _refFE.nbDiag() ),
   nbUpper( _refFE.nbUpper() ) , nbPattern( _refFE.nbPattern() ),
@@ -31,6 +32,9 @@ CurrentFE::CurrentFE(const RefFE& _refFE,const GeoMap& _geoMap,const QuadRule& _
       }
     }
   }
+  std::cerr << "N= " << point.N() << "\n"
+	    << "M= " << point.M() << "\n";
+
 #ifdef TEST_PRE
   _hasJac = false;
   _hasFirstDeriv = false;

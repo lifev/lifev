@@ -1,8 +1,14 @@
-#
-# Configure script
+# -*- autoconf -*-
+# 
 #
 
-AC_INIT(life, 0.1.0pre1, christophe.prudhomme@epfl.ch)
+LIFE_PACKAGE=life
+LIFE_VERSION=0.1.0pre2
+AC_SUBST(LIFE_PACKAGE)
+AC_SUBST(LIFE_VERSION)
+
+# AC_INIT(${LIFE_PACKAGE}, ${LIFE_VERSION}, christophe.prudhomme@epfl.ch)
+AC_INIT(Makefile.am)
 
 AC_CONFIG_AUX_DIR(admin)
 
@@ -11,7 +17,7 @@ AC_CANONICAL_HOST
 AC_CANONICAL_SYSTEM
 
 
-AM_INIT_AUTOMAKE(life, 0.1.0pre1 )
+AM_INIT_AUTOMAKE(${LIFE_PACKAGE}, ${LIFE_VERSION} )
 AM_CONFIG_HEADER(lifeconfig.h)
 
 
@@ -27,20 +33,23 @@ AC_PROG_F77_C_O
 AC_PROG_LIBTOOL
 
 # AZTEC check
+AC_MSG_CHECKING([Aztec headers files presence])
 ac_aztec_includedirs="$REPOSITORY/$ARCH/include/Aztec_LifeV/ /usr/include /usr/local/include"
 AC_FIND_FILE("az_aztec.h",$ac_aztec_includedirs , ac_aztec_includedir)
- echo $ac_aztec_includedir
+AC_MSG_RESULT([$ac_aztec_includedir])
 CXXFLAGS="-I$ac_aztec_includedir ${CXXFLAGS}"
 
+AC_MSG_CHECKING([Aztec libraries presence])
 ac_aztec_libdirs="$REPOSITORY/$ARCH/lib$AFFIX/Aztec_LifeV/ /usr/lib /usr/local/lib"
 AC_FIND_FILE("libaztec.a", $ac_aztec_libdirs, ac_aztec_libdir)
- echo $ac_aztec_libdir
+# echo $ac_aztec_libdir
 LDFLAGS="${LDFLAGS} -L${ac_aztec_libdir}"
 aztec_libs="-laztec"
-AC_SUBST( aztec_libs )
+AC_SUBST(aztec_libs)
+AC_MSG_RESULT([$aztec_libs])
 
-
-CXXFLAGS="-I\$(top_srcdir)/life/lifecore -I\$(top_srcdir)/life/lifemesh -I\$(top_srcdir)/life/lifefem"
+CXXFLAGS="-I/usr/include/blitz ${CXXFLAGS}"
+CXXFLAGS="-I\$(top_srcdir)/life/lifecore -I\$(top_srcdir)/life/lifemesh -I\$(top_srcdir)/life/lifefem ${CXXFLAGS}"
 CXXFLAGS="-DTHREEDIM -Wall ${CXXFLAGS}"
 
 life_libs="\$(top_builddir)/life/lifefem/liblifefem.la \$(top_builddir)/life/lifemesh/liblifemesh.la \$(top_builddir)/life/lifecore/liblifecore.la"

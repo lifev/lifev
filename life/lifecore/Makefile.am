@@ -25,8 +25,9 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .cc
 
-INCLUDES 	= -I$(top_srcdir)/life/lifefem -I$(top_srcdir)/life/lifemesh
+
 AM_CPPFLAGS	= -DTHREEDIM
+
 
 include_HEADERS		= ElasticStructureHandler.hpp GetPot.hpp NavierStokesAleHandler.hpp NavierStokesAleSolverPC.hpp \
 NavierStokesHandler.hpp NavierStokesHandler_miguel.hpp NavierStokesSolverPC.hpp Operator01.hpp \

@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------*
 | LifeV main header file                                               |
 |                                                                      |
-| $Header: /cvsroot/lifev/lifev/life/lifecore/Attic/lifeV.hpp,v 1.1 2004-02-08 09:09:24 prudhomm Exp $                                                             |
+| $Header: /cvsroot/lifev/lifev/life/lifecore/Attic/lifeV.hpp,v 1.2 2004-02-13 09:59:34 prudhomm Exp $                                                             |
 |                                                                      |
 | #Version  0.0 Experimental   9/7/99. Luca Formaggia                  |
 |           0.1 Experimental  10/8/99. Jean-Fred Gerbeau.              |
@@ -20,8 +20,8 @@
 // Alain: added for version g++3.0x, 20/06/02 (is it necessary to
 //  always include those ? )
 # include <iostream>
+# include <cmath>
 # include <numeric>
-# include <math.h>
 
 // standard IO (always included)
 
@@ -211,4 +211,4 @@ using namespace std;
 
 #endif
 
-// $Id: lifeV.hpp,v 1.1 2004-02-08 09:09:24 prudhomm Exp $
+// $Id: lifeV.hpp,v 1.2 2004-02-13 09:59:34 prudhomm Exp $

@@ -51,7 +51,8 @@ using namespace std; // To be taken away some time
 */
 //!  \brief Report 3D element orientation
 /*!  It uses a linear representation of the Tetra/Hexa: it is only a
-  orientation check.  The orientation is considered positive if it obeys the right-hand rule (right-hand orientation).
+  orientation check.  The orientation is considered positive if it
+  obeys the right-hand rule (right-hand orientation).
 
   \param mesh A region mesh of 3D elements
   
@@ -70,39 +71,45 @@ using namespace std; // To be taken away some time
 template <typename RegionMesh3D>
 Real checkVolumes(RegionMesh3D const & mesh, SimpleVect<bool> & elSign, Switch & sw)
 {
-  Real meas(0.0);
-  Real lmeas;
+  Real meas = 0.0;
+  Real lmeas = 0.0;
   elSign.clear();
   elSign.reserve(mesh.numVolumes());
   typedef typename RegionMesh3D::VolumeShape GeoShape;
-  CurrentFE* fe;
+  
   switch(GeoShape::Shape){
   case TETRA:
-    fe = new CurrentFE(feTetraP1,geoLinearTetra,quadRuleTetra1pt);
+  {
+    CurrentFE fe(feTetraP1,geoLinearTetra,quadRuleTetra1pt);
+    std::cerr << "N= " << fe.point.N() << "\n"
+	      << "M= " << fe.point.M() << "\n";
     for(ID i = 1; i<=mesh.numVolumes(); i++){
-      fe->updateJac(mesh.volume(i));
-      lmeas = fe->measure();
+      fe.updateJac(mesh.volume(i));
+      lmeas = fe.measure();
       meas+=lmeas;
       elSign.push_back(lmeas>0.0);
     }
+  }
     break;
   case HEXA:
-    fe = new CurrentFE(feHexaQ1,geoBilinearHexa,quadRuleHexa1pt);
+  {
+    CurrentFE fe(feHexaQ1,geoBilinearHexa,quadRuleHexa1pt);
     for(ID i = 1; i<=mesh.numVolumes(); i++){
-      fe->updateJac(mesh.volume(i));
-      lmeas = fe->measure();
+      fe.updateJac(mesh.volume(i));
+      lmeas = fe.measure();
       meas+=lmeas;
       elSign.push_back(lmeas>0.0);
     }
+  }
     break;
   default:
     sw.create("SKIP_ORIENTATION_TEST",true);
 
-    delete fe;
     return 0;
   }
 
-  if(std::find(elSign.begin(),elSign.end(),false)!=elSign.end())sw.create("HAS_NEGATIVE_VOLUMES",true);
+  if(std::find(elSign.begin(),elSign.end(),false)!=elSign.end())
+    sw.create("HAS_NEGATIVE_VOLUMES",true);
 
   return meas;
 }

@@ -25,9 +25,6 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .cc
 
-INCLUDES 	= -I$(top_srcdir)/life/lifecore -I$(top_srcdir)/life/lifemesh
-AM_CPPFLAGS	= -DTHREEDIM
-
 include_HEADERS		= currentBdFE.hpp currentFE.hpp currentHdivFE.hpp elemOper.hpp \
 elemOper_ext.hpp geoMap.hpp localDofPattern.hpp quadRule.hpp \
 refEle.hpp refFE.hpp refHdivFE.hpp refHybridFE.hpp \

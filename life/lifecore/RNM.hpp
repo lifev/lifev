@@ -3,14 +3,11 @@
 
 // une tentative qui ne marche pas 
 // de tableau constant 
+#include <cassert>
 #include <iostream>
 #include <iomanip>
 
-#if defined(__Linux)
 #include <cmath>
-#elif defined(__OSF1)
-#include <math.h>
-#endif
 
 using namespace std;
 #define const_R   R
@@ -196,7 +193,7 @@ public:
   R KNMmin() const ; // min -> KNMmin to avoid clash name with aztec, JFG
   R KNMmax() const ;// max -> KNMmax to avoid clash name with aztec, JFG
   R sum() const ;
-  KN_ & map(R (*f)(R ));
+  KN_ & map(R (*)(R));
   
   const KN_& operator =(const Add_KN_<R> & u) ;
   const KN_& operator+=(const Add_KN_<R> & u) ;
@@ -667,7 +664,10 @@ template<class R>
 class KNM: public KNM_<R>{ public:
 
   KNM(const int n,const int m) 
-        :KNM_<R>(new R[n*m],n,m){}
+        :KNM_<R>(new R[n*m],n,m)
+	{
+	    assert( v != 0 );
+	}
 
   /* Alain (28/06/02): I remove the explicit statment for allowing implicit
      conversion.

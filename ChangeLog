@@ -1,3 +1,18 @@
+2004-02-13  Christophe Prud'homme  <prudhomm@zion>
+
+	* life/lifecore/tab.hpp: use <cmath> instead of <math.h>
+
+	* life/lifecore/lifeV.hpp: use <cmath> instead of <math.h>
+
+	* life/lifecore/dataNewton.hpp: use <cmath> instead of <math.h>
+
+	* life/lifecore/RNM.hpp: added <cassert> and use <cmath>
+
+	* life/lifemesh/mesh_util.hpp (checkVolumes): cleanup, no need for dynamic allocation, still a bug in there
+
+	* configure.in.in: sanitize aztec configuration
+	create LIFE_PACKAGE and LIFE_VERSION variables
+
 2004-02-06  Christophe Prud'homme  <prudhomm@zion>
 
 	* life/lifecore/assemb.hpp (assemble): fix compilation error in assemb. ic should be ints to avoid overload clashes

@@ -2,7 +2,7 @@
 #define _TAB_H_INCLUDED
 
 
-#include <math.h>
+#include <cmath>
 
 #include "lifeV.hpp"
 
