@@ -336,7 +336,8 @@ SolverPETSC::_F_solveCommon( Mat const& __A,
       View info about the solver
     */
     PetscTruth __flag;
-    PetscOptionsGetLogical( PETSC_NULL, "-nokspview", &__flag, &__found );
+    PetscTruth __flagFound;
+    PetscOptionsGetLogical( PETSC_NULL, "-nokspview", &__flag, &__flagFound );
     if ( !__flag )
     {
         KSPView( _M_p->__ksp, PETSC_VIEWER_STDOUT_WORLD );
