@@ -430,9 +430,10 @@ NavierStokesWithFlux<NSSolver>::iterate_two_fluxes( const Real& time )
     int label1 = boost::next( _M_fluxes.begin() )->first;
     Debug( 6020 ) << "imposing fluxes on BC : " << label0 << " and BC : "<< label1 << "\n";
 
-    Real Q[2],Qn[2];
-    Real lambda[2],v1[2],v2[2],r0[2],z[2];
-    Real w1[2],w2[2],h[2][2];
+    Vector Q( 2 ),Qn( 2 );
+    Vector lambda( 2 ),v1( 2 ),v2( 2 ),r0( 2 ),z( 2 );
+    Vector w1( 2 ),w2( 2 );
+    Matrix h( 2, 2 );
     Real absr0;
 
 
@@ -444,25 +445,20 @@ NavierStokesWithFlux<NSSolver>::iterate_two_fluxes( const Real& time )
     _M_solver->bcHandler().modifyBC(label0,bcvec0);
     _M_solver->bcHandler().modifyBC(label1,bcvec1);
 
-    for (UInt i=0 ; i<_M_solver->uDof().numTotalDof(); ++i) {
-        _M_uzero[i]=0.;
-    }
+    _M_uzero = ZeroVector( _M_uzero.size() );
 
     Q[0] = _M_fluxes[label0](time);
     Q[1] = _M_fluxes[label1](time);
-    lambda[0]=Q[0];
-    lambda[1]=Q[1];
+    lambda = Q;
     std::cout << "imposed flux 0" << " " << Q[0] << "\n";
     std::cout << "imposed flux 1" << " " << Q[1] << "\n";
 
     // NS1
     //
-    // Costruction of vectors vec_lambda
+    // Construction of vectors vec_lambda
     //
-    for (UInt i=0 ; i < dim_lambda; ++i) {
-        vec_lambda0[i]=lambda[0];
-        vec_lambda1[i]=lambda[1];
-      }
+    vec_lambda0 = ScalarVector( vec_lambda0.size(), lambda[0] );
+    vec_lambda1 = ScalarVector( vec_lambda1.size(), lambda[1] );
 
     Debug( 6020 ) << "start NS1 time" << " " << time << "\n";
     _M_solver->timeAdvance(_M_solver->sourceTerm(),time);
@@ -488,20 +484,16 @@ NavierStokesWithFlux<NSSolver>::iterate_two_fluxes( const Real& time )
 
     // GMRes algorithm
     //
-    r0[0]=Qn[0]-Q[0];
-    r0[1]=Qn[1]-Q[1];
-    absr0=std::sqrt(r0[0]*r0[0]+r0[1]*r0[1]);
-    v1[0]=r0[0]/absr0;
-    v1[1]=r0[1]/absr0;
+    r0 = Qn - Q;
+    absr0 = norm_2( r0 );
+    v1 = r0/absr0;
 
     // NSo1
     //
     // Changing BC
     //
-    for (UInt i=0 ; i < dim_lambda; ++i) {
-        vec_lambda0[i]=-v1[0];
-        vec_lambda1[i]=-v1[1];
-      }
+    vec_lambda0 = ScalarVector( vec_lambda0.size(), -v1[0] );
+    vec_lambda1 = ScalarVector( vec_lambda1.size(), -v1[1] );
 
     Debug( 6020 ) << "start NSo1 time" << " " << time << "\n";
 
@@ -527,21 +519,17 @@ NavierStokesWithFlux<NSSolver>::iterate_two_fluxes( const Real& time )
     w1[0]=_M_solver->flux(label0);
     w1[1]=_M_solver->flux(label1);
 
-    h[0][0]=w1[0]*v1[0]+w1[1]*v1[1];
-    w1[0]=w1[0]-h[0][0]*v1[0];
-    w1[1]=w1[1]-h[0][0]*v1[1];
-    h[1][0]=std::sqrt(w1[0]*w1[0]+w1[1]*w1[1]);
-    v2[0]=w1[0]/h[1][0];
-    v2[1]=w1[1]/h[1][0];
+    h( 0, 0 ) = inner_prod( w1, v1 );
+    w1 -= h( 0, 0 )*v1;
+    h( 1, 0 ) = norm_2( w1 );
+    v2 = w1/h( 1, 0 );
 
     // NSo2
     //
     // Changing BC
     //
-    for (UInt i=0 ; i < dim_lambda; ++i) {
-        vec_lambda0[i]=-v2[0];
-        vec_lambda1[i]=-v2[1];
-      }
+    vec_lambda0 = ScalarVector( vec_lambda0.size(), -v2[0] );
+    vec_lambda1 = ScalarVector( vec_lambda1.size(), -v2[1] );
 
     Debug( 6020 ) << "start NSo2 time" << " " << time << "\n";
 
@@ -566,27 +554,23 @@ NavierStokesWithFlux<NSSolver>::iterate_two_fluxes( const Real& time )
     w2[0]=_M_solver->flux(label0);
     w2[1]=_M_solver->flux(label1);
 
-    h[0][1]=w2[0]*v1[0]+w2[1]*v1[1];
-    w2[0]=w2[0]-h[0][1]*v1[0];
-    w2[1]=w2[1]-h[0][1]*v1[1];
-    h[1][1]=w2[0]*v2[0]+w2[1]*v2[1];
-    w2[0]=w2[0]-h[1][1]*v2[0];
-    w2[1]=w2[1]-h[1][1]*v2[1];
+    h( 0, 1 ) = inner_prod( w2, v1 );
+    w2 -= h( 0, 1 )*v1;
+    h( 1, 1 ) = inner_prod( w2, v2 );
+    w2 -= h( 1, 1 )*v2;
 
     // check
     //
-    std::cout << "w2 = " << w2[0] << "\n"
-              << "w2 = " << w2[1] << "\n";
+    std::cout << "w2 = " << w2 << "\n";
 
     //
     // Update lambda
     //
-    z[0]=-h[1][1]*absr0/(h[1][0]*h[0][1]-h[0][0]*h[1][1]);
-    z[1]=-h[1][0]*absr0/(h[1][0]*h[0][1]-h[0][0]*h[1][1]);
-    lambda[0]=lambda[0]+v1[0]*z[0]+v2[0]*z[1];
-    lambda[1]=lambda[1]+v1[1]*z[0]+v2[1]*z[1];
-    std::cout <<"lambda0 = " << lambda[0] << "\n";
-    std::cout <<"lambda1 = " << lambda[1] << "\n";
+    Real tt = absr0/( h( 1, 0 )*h( 0, 1 )-h( 0, 0 )*h( 1, 1 ) );
+    z[0] = -h( 1, 1 )*tt;
+    z[1] = -h( 1, 0 )*tt;
+    lambda += v1*z[0]+v2*z[1];
+    std::cout << "lambda = " << lambda << "\n";
 
     //
     // Update the velocity and the pressure
@@ -598,10 +582,8 @@ NavierStokesWithFlux<NSSolver>::iterate_two_fluxes( const Real& time )
     //
     // Costruction of vectors vec_lambda
     //
-    for (UInt i=0 ; i < dim_lambda; ++i) {
-        vec_lambda0[i]=lambda[0];
-        vec_lambda1[i]=lambda[1];
-      }
+    vec_lambda0 = ScalarVector( vec_lambda0.size(), lambda[0] );
+    vec_lambda1 = ScalarVector( vec_lambda1.size(), lambda[1] );
 
     std::cout << "start NS2 time" << " " << time << "\n";
 
@@ -631,8 +613,6 @@ NavierStokesWithFlux<NSSolver>::iterate_two_fluxes( const Real& time )
     std::cout << "numerical flux 0" << " " << Qn[0] << "\n";
     std::cout << "imposed flux 1" << " " << Q[1] << "\n";
     std::cout << "numerical flux 1" << " " << Qn[1] << "\n";
-    //#endif
-
 }
 }
 #endif /* __NavierStokesWithFlux_H */
