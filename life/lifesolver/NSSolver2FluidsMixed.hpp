@@ -30,8 +30,10 @@
 #ifndef _NSSOLVER2FLUIDSMIXED_HPP_
 #define _NSSOLVER2FLUIDSMIXED_HPP_
 
-#define NS2F_USE_PETSC 0
-#define NS2F_DEBUG 1
+#define L_NS2F_UMFPACK 0
+#define L_NS2F_PETSC 1
+
+#define L_NS2F_LINEAR_SOLVER L_HSIP_PETSC
 
 #include <life/lifecore/chrono.hpp>
 
@@ -50,7 +52,12 @@
 #include <life/lifefem/bcHandler.hpp>
 #include <life/lifefem/assemb.hpp>
 
+#if L_NS2F_LINEAR_SOLVER == L_NS2F_PETSC
+#include <life/lifealg/SolverPETSC.hpp>
+#elif L_NS2F_LINEAR_SOLVER == L_NS2F_UMFPACK
 #include <life/lifealg/SolverUMFPACK.hpp>
+#endif
+
 #include <life/lifesolver/AFSolvers.hpp>
 
 
@@ -87,14 +94,15 @@ namespace LifeV {
         typedef typename NavierStokesHandler<mesh_type, data_type>::source_type source_type;
 
         typedef BoostMatrix<boost::numeric::ublas::row_major> matrix_type_C;
+        typedef BoostMatrix<boost::numeric::ublas::row_major> matrix_type_M;
         typedef BoostMatrix<boost::numeric::ublas::row_major> matrix_type_D;
         typedef BoostMatrix<boost::numeric::ublas::column_major> matrix_type_Dtr;
         typedef DiagonalBoostMatrix matrix_type_M_L;
 
-#if NS2F_USE_PETSC
+#if L_NS2F_LINEAR_SOLVER == L_NS2F_PETSC
         typedef SolverPETSC linear_solver_u_type;
         typedef SolverPETSC linear_solver_p_type;
-#else
+#elif L_NS2F_LINEAR_SOLVER == L_NS2F_UMFPACK
         typedef SolverUMFPACK linear_solver_u_type;
         typedef SolverUMFPACK linear_solver_p_type;
 #endif
@@ -206,7 +214,7 @@ namespace LifeV {
         MixedPattern<NDIM, 1, CSRPatt> _M_pattern_Dtr;
 
         //! Velocity mass matrix
-        matrix_type_C _M_M;
+        matrix_type_M _M_M;
         
         //! Lumped velocity mass matrix
         matrix_type_M_L _M_M_L;
@@ -305,7 +313,7 @@ namespace LifeV {
         _M_pattern_D(_M_pattern_D_block),
         _M_pattern_Dtr(_M_pattern_Dtr_block),
         _M_M(_M_pattern_C),
-        _M_M_L(_dim_u),
+        _M_M_L(_dim_u * NDIM),
         _M_C(_M_pattern_C),
         _M_D(_M_pattern_D),
         _M_Dtr(_M_pattern_Dtr),
@@ -326,18 +334,21 @@ namespace LifeV {
     {
         if(_M_verbose)
             std::cout << "** NS2F ** Using boost matrix" << std::endl;
-#if NS2F_USE_PETSC
+#if L_NS2F_LINEAR_SOLVER==L_NS2F_PETSC
+        std::cout << "** NS2F ** Using PETSC linear solver" << std::endl;
         _M_solver_u.setOptionsFromGetPot(_M_data_file, "navier-stokes/solver-u");
         _M_solver_p.setOptionsFromGetPot(_M_data_file, "navier-stokes/solver-p");
-	if ( _BCh_u.hasOnlyEssential() ) {
-	    Real constPress = 1. / sqrt( _dim_p );
-	    for(UInt i = 0; i < _dim_p; ++i) {
-		_M_constant_pressure[ i ] = constPress;
-	      }
-	    std::vector<const Vector*> nullSpace(1);
-	    nullSpace[ 0 ] = &_M_constant_pressure;
-	    _M_solver_p.setNullSpace(nullSpace);
-	  }
+        if ( _BCh_u.hasOnlyEssential() ) {
+            Real constPress = 1. / sqrt( _dim_p );
+            for(UInt i = 0; i < _dim_p; ++i) {
+                _M_constant_pressure[ i ] = constPress;
+            }
+            std::vector<const Vector*> nullSpace(1);
+            nullSpace[ 0 ] = &_M_constant_pressure;
+            _M_solver_p.setNullSpace(nullSpace);
+        }
+#elif L_NS2F_LINEAR_SOLVER == L_NS2F_PETSC
+        std::cout << "** NS2F ** Using UMFPACK linear solver" << std::endl;
 #endif
         _M_verbose = _M_data_file("navier-stokes/miscellaneous/verbose", false);
         _M_steady = _M_data_file("navier-stokes/miscellaneous/steady", false);
@@ -484,39 +495,49 @@ namespace LifeV {
             }
 
         } // loop over volumes
+        
+        // Lump mass matrix
         _M_M_L.lumpRowSum(_M_M);
-
+        
         __chrono.stop();
 
         if(_M_verbose) {
             std::cout << "** NS2F ** Elementary constributions computation : "
-                      << __cumul1 << std::endl;
+                      << __cumul1 << " s" << std::endl;
             std::cout << "** NS2F ** Diagonal block assembling: "
-                      << __cumul2 << std::endl;
+                      << __cumul2 << " s" << std::endl;
             std::cout << "** NS2F ** Off-diagonal block assembling: "
-                      << __cumul3 << std::endl;
+                      << __cumul3 << " s" << std::endl;
         }
 
         // Add RHS terms stemming from the time derivative
         if(!_M_steady)
             _M_rhs_u += prod( _M_M_L, _bdf.bdf_u().time_der(_dt) );
 
-#if NS2F_DEBUG
-        // Export matrices in matlab format
-        _M_C.spy( "./results/spyCafter" );
-        _M_M.spy( "./results/spyMafter" );
-        //_M_M_L.spy( "./results/spyMLafter" );
-        _M_D.spy( "./results/spyDafter" );
-        _M_Dtr.spy( "./results/spyDtrafter" );
-#endif
-
         // Apply boundary conditions
+        if(_M_verbose)
+            std::cout << "** NS2F ** Applying boundary conditions" 
+                      << std::endl;
+        
         if (!_BCh_u.bdUpdateDone())
             _BCh_u.bdUpdate(_mesh, _feBd_u, uDof());
 
         bcManage(_M_C, _M_Dtr, _M_rhs_u, _mesh, uDof(), _BCh_u, _feBd_u, 1.0, _M_time );
+        
+        if(_M_verbose)
+            std::cout << "** NS2F ** Computing discrete divergence operator" 
+                      << std::endl;
         _M_D = trans( _M_Dtr );
 
+        // Export matrices to Matlab format for debugging purposes        
+        if(_M_verbose) {
+            std::cout << "** NS2F ** Exporting matrices to Matlab format"
+                      << std::endl;
+            _M_C.spy( "./results/spyC" );
+            _M_D.spy( "./results/spyD" );
+            _M_Dtr.spy( "./results/spyDtr" );
+        }
+        
         // Solve the system
         if(_M_verbose)
             std::cout << "** NS2F ** Solving the system" << std::endl;
