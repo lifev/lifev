@@ -171,28 +171,35 @@ namespace LifeV
                             double& linear_rel_tol)
     {
         Real omega(0.1);
+
         generalizedAitken<Vector,Real> aitk(res.size(),omega);
 
-        UInt precChoice(1);
+        UInt precChoice = 1;
 
+        switch(precChoice)
+        {
+            case 0:
+                // Dirichlet-Neumann preconditioner
+                invSfPrime(res, linear_rel_tol, step);
+                break;
+            case 1:
+                // Dirichlet-Neumann preconditioner
+                invSfPrime(res, linear_rel_tol, step);
+                break;
+            case 2:
+                // Dirichlet-Neumann preconditioner
+            //     Vector mu_f(res.size());
+//                 Vector mu_s(res.size());
 
-        if (precChoice==0) {
-            // Dirichlet-Neumann preconditioner
-            invSfPrime(step, res, linear_rel_tol);
-        } else if (precChoice==1) {
-            // Dirichlet-Neumann preconditioner
-            invSfPrime(step, res, linear_rel_tol);
-        } else  if (precChoice==2) {
-            // Dirichlet-Neumann preconditioner
-            Vector mu_f(res.size()), mu_s(res.size());
-            invSfPrime(mu_f, res, linear_rel_tol);
-            invSsPrime(mu_s, res, linear_rel_tol);
-            step=aitk.computeDeltaLambda(mu_f,mu_s);
-        } else {
-            // Newton preconditioner
-            invSfSsPrime(step, res, linear_rel_tol);
+//                 invSfPrime(res, linear_rel_tol, mu_f);
+//                 invSsPrime(res, linear_rel_tol, mu_s);
+
+//                 step = aitk.computeDeltaLambda(mu_f,mu_s);
+                break;
+            default:
+                // Newton preconditioner
+                invSfSsPrime(res, linear_rel_tol, step);
         }
-
     }
 
 //
@@ -222,9 +229,9 @@ namespace LifeV
     }
 
 
-    void  operFS::invSfPrime(Vector& step,
-                             const Vector& res,
-                             double& linear_rel_tol)
+    void  operFS::invSfPrime(const Vector& res,
+                             double linear_rel_tol,
+                             Vector& step)
     {
         // step = S'_f^{-1} \cdot res
 
@@ -232,18 +239,18 @@ namespace LifeV
 
     }
 
-    void  operFS::invSsPrime(Vector& step,
-                             const Vector& res,
-                             double& linear_rel_tol)
+    void  operFS::invSsPrime(const Vector& res,
+                             double linear_rel_tol,
+                             Vector& step)
     {
         // step  = S'_s^{-1} \cdot res
 
 
     }
 
-    void  operFS::invSfSsPrime(Vector& step,
-                               const Vector& res,
-                               double& linear_rel_tol)
+    void  operFS::invSfSsPrime(const Vector& res,
+                               double linear_rel_tol,
+                               Vector& step)
     {
       
         // AZTEC specifications for the second system

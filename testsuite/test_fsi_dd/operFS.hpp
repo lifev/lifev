@@ -137,21 +137,23 @@ namespace LifeV
         DataJacobian M_dataJacobian;
       
       
-        void  operFS::invSfPrime(Vector &,
-				 const Vector &,
-				 double &);
-        void  operFS::invSsPrime(Vector &,
-				 const Vector &,
-				 double &);
-        void  operFS::invSfSsPrime(Vector &,
-				   const Vector &,
-				   double &);
-
+        void  invSfPrime(const Vector &res,
+                         double       linear_rel_tol,
+                         Vector       &step);
+        
+        void  invSsPrime(const Vector &res,
+                         double       linear_rel_tol,
+                         Vector       &step);
+        
+        void  invSfSsPrime(const Vector &res,
+                           double       linear_rel_tol,
+                           Vector       &step);
+        
     };
 
-        void my_matvecJacobian(double *z,
-			       double *Jz,
-			       AZ_MATRIX* J,
-			       int proc_config[]);
+    void my_matvecJacobian(double *z,
+                           double *Jz,
+                           AZ_MATRIX* J,
+                           int proc_config[]);
 }
 #endif
