@@ -1,4 +1,4 @@
-# -*- Mode : makefile -*-
+# -*- Mode : makefile; indent-tabs-mode: t -*-
 #
 #    AUTHOR: Christophe Prud'homme
 #       ORG: EPFL
@@ -42,7 +42,7 @@ SUBDIRS = admin doc life testsuite
 include $(top_srcdir)/admin/Doxyfile.am
 
 apidox-all:
-    make apidox 
+	make apidox
 	cd life && make apidox
 
 
