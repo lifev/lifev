@@ -36,6 +36,8 @@ class SimpleVect : public std::vector<T>
   const T& fat(size_type i) const;
   inline reference operator()(size_type const i){return *(begin() + (i-OFFSETVEC));}
   inline const_reference operator() (size_type const i) const {return *(begin() +(i-OFFSETVEC));}
+  //! Completely clear out the container, returning memory to the system
+  void clean(){raw_container tmp; clear(); swap(tmp);}
   inline bool bCheck(size_type const i) const { return i>=OFFSETVEC && i< size() +OFFSETVEC ;} 
 };
 
@@ -74,6 +76,8 @@ class SimpleArray : public std::vector<T>
   } 
   
   inline void reshape(SimpleArray<T,OFFSETVEC>::size_type  const n, size_type const m);
+  //! Completely clear out the container, returning memory to the system
+  void clean(){raw_container tmp;clear(); swap(tmp);_nrows=0;_ncols=0;}
   
   inline bool bCheck(size_type const i,size_type const j) const
     { return i>=OFFSETVEC && i-OFFSETVEC+(j-OFFSETVEC)*_nrows< size() ;} 
