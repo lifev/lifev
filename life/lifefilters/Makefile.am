@@ -26,7 +26,7 @@ INCLUDES	= $(all_includes)
 
 include_HEADERS	= gmsh_wrtrs.hpp medit_wrtrs.hpp openDX_wrtrs.hpp vtk_wrtrs.hpp\
 		  gmv_wrtrs.hpp mesh_util.hpp readMesh2D.hpp readMesh3D.hpp ensight7Writer.hpp\
-          importer.hpp
+          importer.hpp postProc.hpp
 
 lib_LTLIBRARIES	= liblifefilters.la
 
