@@ -38,6 +38,6 @@ lib_LTLIBRARIES	= liblifealg.la
 
 liblifealg_la_SOURCES = dataAztec.cpp dataNewton.cpp pattern.cpp values.cpp $(PETSC_SRCS)
 
-liblifealg_la_LIBADD	= ../lifefem/liblifefem.la ../lifecore/liblifecore.la $(petsc_libs) $(aztec_libs)
+liblifealg_la_LIBADD	=  ../lifecore/liblifecore.la $(petsc_libs) $(aztec_libs)
 
 include $(top_srcdir)/admin/Doxyfile.am
