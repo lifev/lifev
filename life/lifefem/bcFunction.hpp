@@ -168,7 +168,7 @@ private:
     function_type _M_coef;
 };
 
-typedef LifeV::singleton< LifeV::factoryClone< BCFunctionBase > > FactoryCloneBC;
+typedef LifeV::singleton< LifeV::factoryClone< BCFunctionBase > > FactoryCloneBCFunction;
 
 }
 

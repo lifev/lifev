@@ -385,7 +385,7 @@ private:
 
 
     //! Pointer to a user given data vector
-    BCVectorBase* _M_bcv;
+    boost::shared_ptr<BCVectorBase> _M_bcv;
 
     //! True is a data vector has been provided
     bool _M_dataVector;

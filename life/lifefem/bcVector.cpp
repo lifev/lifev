@@ -88,7 +88,7 @@ BCVectorBase::operator() ( const ID& iDof, const ID& iComp ) const
 }
 
 //! This method returns the value of the mixte coefficient to be imposed in the component iComp of the dof iDof
-Real 
+Real
 BCVectorBase::MixteVec ( const ID& iDof, const ID& iComp ) const
 {
     ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
@@ -154,6 +154,13 @@ BCVector::showMe( bool verbose, std::ostream & out ) const
     out << "+++++++++++++++++++++++++++++++" << std::endl;
     return out;
 }
+BCVectorBase*
+createBCVector( BCVectorBase const* __bc )
+{
+    return new BCVector( ( BCVector const& )*__bc );
+}
+// register BCFunctionBase in factory for cloning
+const bool __bcvec = FactoryCloneBCVector::instance().registerProduct( typeid(BCVector), &createBCVector );
 
 
 //
@@ -198,7 +205,7 @@ BCVectorInterface::operator() ( const ID& iDof, const ID& iComp ) const
 
 
 //! This method returns the value of the mixte coefficient to be imposed in the component iComp of the dof iDof
-Real 
+Real
 BCVectorInterface::MixteVec( const ID& iDof, const ID& iComp ) const
 {
     ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
@@ -233,4 +240,13 @@ BCVectorInterface::showMe( bool verbose, std::ostream & out ) const
     out << "+++++++++++++++++++++++++++++++" << std::endl;
     return out;
 }
+
+BCVectorBase*
+createBCVectorInterface( BCVectorBase const* __bc )
+{
+    return new BCVectorInterface( ( BCVectorInterface const& )*__bc );
+}
+// register BCFunctionBase in factory for cloning
+const bool __bcint = FactoryCloneBCVector::instance().registerProduct( typeid(BCVectorInterface), &createBCVectorInterface );
+
 }

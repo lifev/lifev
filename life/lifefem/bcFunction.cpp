@@ -69,7 +69,7 @@ createBCFunctionBase( BCFunctionBase const* __bc )
     return new BCFunctionBase( ( BCFunctionBase const& )*__bc );
 }
 // register BCFunctionBase in factory for cloning
-const bool __bcbase = FactoryCloneBC::instance().registerProduct( typeid(BCFunctionBase), &createBCFunctionBase );
+const bool __bcbase = FactoryCloneBCFunction::instance().registerProduct( typeid(BCFunctionBase), &createBCFunctionBase );
 
 //
 // BCFunctionMixte
@@ -110,7 +110,7 @@ createBCFunctionMixte( BCFunctionBase const* __bc )
     return new BCFunctionMixte( ( BCFunctionMixte const& )*__bc );
 }
 // register BCFunctionMixte in factory for cloning
-const bool __bcmixte = FactoryCloneBC::instance().registerProduct( typeid(BCFunctionMixte), &createBCFunctionMixte );
+const bool __bcmixte = FactoryCloneBCFunction::instance().registerProduct( typeid(BCFunctionMixte), &createBCFunctionMixte );
 
 }
 

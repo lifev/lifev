@@ -41,7 +41,7 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag,
     _M_flag( flag ),
     _M_type( type ),
     _M_mode( mode ),
-    _M_bcf( FactoryCloneBC::instance().createObject( &bcf ) ),
+    _M_bcf( FactoryCloneBCFunction::instance().createObject( &bcf ) ),
     _M_dataVector( false ),
     _M_comp( comp ),
     _M_finalised( false )
@@ -58,7 +58,7 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& t
     _M_flag( flag ),
     _M_type( type ),
     _M_mode( mode ),
-    _M_bcf( FactoryCloneBC::instance().createObject( &bcf ) ),
+    _M_bcf( FactoryCloneBCFunction::instance().createObject( &bcf ) ),
     _M_dataVector( false ),
     _M_comp(),
     _M_finalised( false )
@@ -97,7 +97,7 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& t
     _M_flag( flag ),
     _M_type( type ),
     _M_mode( mode ),
-    _M_bcf( FactoryCloneBC::instance().createObject( &bcf ) ),
+    _M_bcf( FactoryCloneBCFunction::instance().createObject( &bcf ) ),
     _M_dataVector( false ),
     _M_comp(),
     _M_finalised( false )
@@ -122,7 +122,7 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& t
     _M_type( type ),
     _M_mode( mode ),
     _M_bcf(),
-    _M_bcv( &bcv ),
+    _M_bcv( FactoryCloneBCVector::instance().createObject( &bcv )  ),
     _M_dataVector( true ),
     _M_comp(comp),
     _M_finalised( false )
@@ -140,7 +140,7 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& t
     _M_type( type ),
     _M_mode( mode ),
     _M_bcf(),
-    _M_bcv( &bcv ),
+    _M_bcv( FactoryCloneBCVector::instance().createObject( &bcv ) ),
     _M_dataVector( true ),
     _M_comp(),
     _M_finalised( false )
@@ -182,7 +182,7 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& t
     _M_type( type ),
     _M_mode( mode ),
     _M_bcf(),
-    _M_bcv( &bcv ),
+    _M_bcv( FactoryCloneBCVector::instance().createObject( &bcv ) ),
     _M_dataVector( true ),
     _M_comp(),
     _M_finalised( false )
@@ -312,7 +312,7 @@ const BCFunctionBase* BCBase::pointerToFunctor() const
 //! Returns a pointer  to the BCVector
 const BCVectorBase* BCBase::pointerToBCVector() const
 {
-    return _M_bcv;
+    return _M_bcv.get();
 }
 
 //! True is a data vector has been provided
@@ -324,14 +324,14 @@ bool BCBase::dataVector() const
 void
 BCBase::setBCVector( BCVectorBase& __v )
 {
-    _M_bcv = &__v;
+    _M_bcv = boost::shared_ptr<BCVectorBase>( FactoryCloneBCVector::instance().createObject( &__v ) );
     _M_dataVector = true;
 }
 
 void
 BCBase::setBCFunction( BCFunctionBase& __f )
 {
-    _M_bcf = boost::shared_ptr<BCFunctionBase>( FactoryCloneBC::instance().createObject( &__f ) );
+    _M_bcf = boost::shared_ptr<BCFunctionBase>( FactoryCloneBCFunction::instance().createObject( &__f ) );
     _M_dataVector = false;
 }
 

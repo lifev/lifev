@@ -38,6 +38,10 @@
 #include "lifeV.hpp"
 #include "dofInterfaceBase.hpp"
 #include "vecUnknown.hpp"
+#include <boost/function.hpp>
+
+#include <singleton.hpp>
+#include <factory.hpp>
 
 
 
@@ -333,5 +337,6 @@ protected:
     DofInterfaceBase* _M_dofIn;
 
 };
+typedef LifeV::singleton< LifeV::factoryClone< BCVectorBase > > FactoryCloneBCVector;
 }
 #endif
