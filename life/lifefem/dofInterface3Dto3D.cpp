@@ -17,7 +17,8 @@
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #include <cmath>
-#include "dofInterface3Dto3D.hpp"
+
+#include <dofInterface3Dto3D.hpp>
 
 namespace LifeV
 {
@@ -101,4 +102,5 @@ bool coincide( const Real& x1, const Real& y1, const Real& z1, const Real& x2, c
     else
         return false;
 }
+
 }

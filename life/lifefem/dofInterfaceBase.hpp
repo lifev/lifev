@@ -15,26 +15,26 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*!
   \file dofInterfaceBase.h
   \brief Base Class for interfacing dofs between two meshes
   \version 1.0
   \author M.A. Fernandez and V. Martin
   \date 11/2002
- 
+
   This file contains the class which may be used to update and hold the connections between the dof
   on two matching meshes.
 */
 #ifndef _DOFINTERFACEBASE_HH
 #define _DOFINTERFACEBASE_HH
 
-#include "lifeV.hpp"
 #include <map>
 #include <fstream>
-#include "vecUnknown.hpp"
 
-//using namespace __gnu_cxx;
+
+#include <lifeV.hpp>
+#include <vecUnknown.hpp>
 
 namespace LifeV
 {
