@@ -19,8 +19,8 @@
 #include "operFS.hpp"
 
 
-operFS::operFS(NavierStokesAleSolverPC< RegionMesh3D<LinearTetra> >& fluid, 
-	       VenantKirchhofSolver< RegionMesh3D<LinearTetra> >& solid, 
+operFS::operFS(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid, 
+	       VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid, 
 	       BC_Handler& BCh_du, BC_Handler& BCh_dz):
   _fluid(fluid),
      _solid(solid),

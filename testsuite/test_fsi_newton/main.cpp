@@ -25,7 +25,7 @@
 #include "norm.hpp"
 #include "dofInterface3Dto3D.hpp"
 #include "ud_functions.hpp"
-
+#include "regionMesh3D_ALE.hpp"
 
 
 /*
@@ -63,13 +63,13 @@ int main(int argc, char** argv)
   //
   // The NavierStokes ALE solver
   //
-  NavierStokesAleSolverPC< RegionMesh3D<LinearTetra> > fluid(data_file, feTetraP1bubble, feTetraP1,quadRuleTetra64pt, 
+  NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> > fluid(data_file, feTetraP1bubble, feTetraP1,quadRuleTetra64pt, 
 							     quadRuleTria3pt, quadRuleTetra64pt, quadRuleTria3pt, 
 							     BCh_u,BCh_mesh);
 
   // The structural solver
   //
-  VenantKirchhofSolver< RegionMesh3D<LinearTetra> > solid(data_file, feTetraP1, quadRuleTetra4pt, 
+  VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> > solid(data_file, feTetraP1, quadRuleTetra4pt, 
 							  quadRuleTria3pt, BCh_d);
 
   // Outputs

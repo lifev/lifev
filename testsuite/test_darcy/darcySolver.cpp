@@ -89,7 +89,6 @@ DarcySolver::DarcySolver(const GetPot& data_file):
 void DarcySolver::computeHybridMatrix()
 {
   char* UPLO = "L";
-  UInt lenUPLO =  strlen(UPLO);
   int INFO[1] = {0};
   int NBRHS[1] = {1};//  nb columns of the rhs := 1.
   int NBP[1] = {pfe.nbNode};//  pressure dof
@@ -265,7 +264,6 @@ void DarcySolver::solveDarcy()
 void DarcySolver::computePresFlux()
 {
   char* UPLO = "L";
-  UInt lenUPLO =  strlen(UPLO);
   int INFO[1] = {0};
   int NBRHS[1] = {1};// nb columns of the rhs := 1.
   int INC1[1] = {1};// increment := 1.

@@ -19,7 +19,7 @@
 #include "NavierStokesAleSolverPC.hpp"
 #include "VenantKirchhofSolver.hpp"
 #include "norm.hpp"
-
+#include "regionMesh3D_ALE.hpp"
 #ifndef _OPERFS
 #define _OPERFS
 
@@ -46,8 +46,8 @@ class operFS {
 
  public:
 
-  operFS(NavierStokesAleSolverPC< RegionMesh3D<LinearTetra> >& fluid, 
-	 VenantKirchhofSolver< RegionMesh3D<LinearTetra> >& solid,
+  operFS(NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& fluid, 
+	 VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& solid,
 	 BC_Handler& BCh_du, BC_Handler& BCh_dz);
   
   //
@@ -72,9 +72,9 @@ class operFS {
   UInt nbEval(); 
 
 
-  NavierStokesAleSolverPC< RegionMesh3D<LinearTetra> >& _fluid;
+  NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> >& _fluid;
   
-  VenantKirchhofSolver< RegionMesh3D<LinearTetra> >& _solid;
+  VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >& _solid;
   
   Vector _dispStruct;
   Vector _velo; 

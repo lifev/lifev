@@ -22,6 +22,7 @@
 
 #include "lifeV.hpp"
 #include "norm.hpp"
+#include "regionMesh3D_ALE.hpp"
 #include "VenantKirchhofSolver.hpp"
 #include "ud_functions.hpp"
 
@@ -48,7 +49,7 @@ int main(int argc, char** argv)
 
   // The linear Venant-Kirchhof solver
   //
-  VenantKirchhofSolver< RegionMesh3D<LinearTetra> > solid(data_file, feTetraP1, quadRuleTetra4pt, 
+  VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> > solid(data_file, feTetraP1, quadRuleTetra4pt, 
 							  quadRuleTria3pt, BCh);
   solid.showMe();
 
