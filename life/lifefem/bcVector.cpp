@@ -45,7 +45,7 @@ BCVectorBase::BCVectorBase()
 {}
 
 //! Constructor
-BCVectorBase::BCVectorBase( Vector& vec, const UInt nbTotalDof, UInt type )
+BCVectorBase::BCVectorBase( const Vector& vec, const UInt nbTotalDof, UInt type )
     :
     _M_vec( &vec ),
     _M_nbTotalDof( nbTotalDof ),
@@ -155,7 +155,7 @@ BCVectorInterface::BCVectorInterface()
 {}
 
 //! Constructor
-BCVectorInterface::BCVectorInterface( Vector& vec, UInt nbTotalDof,
+BCVectorInterface::BCVectorInterface( const Vector& vec, UInt nbTotalDof,
                                       dof_interface_type dofIn, UInt type )
     :
     BCVectorBase( vec, nbTotalDof, type ),

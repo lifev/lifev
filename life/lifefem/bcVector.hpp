@@ -70,7 +70,7 @@ public:
       \warning (implemented only for the Natural BC AM 10/2004)
       -# 2:  needs boundary integration of \f$\mathbf{\lambda} \cdot n \phi_i\f$
     */
-    BCVectorBase( Vector& vec, const UInt nbTotalDof, UInt type=0 );
+    BCVectorBase( const Vector& vec, const UInt nbTotalDof, UInt type=0 );
 
 
     //! Default Constructor (the user must call setBCVector(..))
@@ -178,7 +178,7 @@ public:
 protected:
 
     //! The data vector
-    Vector* _M_vec;
+    const Vector* _M_vec;
 
     //! The data vector of the mixte coefficient
     Vector* _M_vec_mixte;
@@ -291,7 +291,7 @@ public:
       \warning: implemented only for the Natural BC
       -# 2:  needs boundary integration of \f$\mathbf{\lambda} \cdot n \phi_i\f$
     */
-    BCVectorInterface( Vector& vec, UInt nbTotalDof, dof_interface_type dofIn, UInt type=0 );
+    BCVectorInterface( const Vector& vec, UInt nbTotalDof, dof_interface_type dofIn, UInt type=0 );
 
     //! Default Constructor (the user must call setBCVector(..))
     BCVectorInterface ();
