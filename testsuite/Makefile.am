@@ -30,7 +30,7 @@ SUBDIRS		= data  \
               test_postproc test_bdf \
 		      test_linearelasticity \
 		      test_darcy test_darcytetra test_onedmodel\
-		      test_ns_bdf test_ns_cyl test_ns_bcvec test_ns_sstress \
+		      test_ns_bdf test_ns_cyl test_ns_cyl_flux test_ns_bcvec test_ns_sstress \
 		      test_fsi_newton test_fsi_picard test_fsi_dd\
 		      test_masstransport test_mass_coupling test_ns_ipstab \
                       test_coupling_3d0d
@@ -58,6 +58,7 @@ $(srcdir)/test_naturalbc/testsuite.at \
 $(srcdir)/test_ns_bdf/testsuite.at \
 $(srcdir)/test_ns_bcvec/testsuite.at \
 $(srcdir)/test_ns_cyl/testsuite.at \
+$(srcdir)/test_ns_cyl_flux/testsuite.at \
 $(srcdir)/test_ns_ipstab/testsuite.at \
 $(srcdir)/test_ns_sstress/testsuite.at \
 $(srcdir)/test_onedmodel/testsuite.at \
