@@ -43,7 +43,8 @@ typedef enum OperFSPreconditioner
     NO_PRECONDITIONER=-1,
     NEUMANN_DIRICHLET,
     DIRICHLET_NEUMANN,
-    NEUMANN_NEUMANN
+    NEUMANN_NEUMANN,
+    NEWTON
 };
 class operFS {
 

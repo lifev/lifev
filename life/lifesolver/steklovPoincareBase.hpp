@@ -55,9 +55,9 @@ public:
                       const Vector &_disp,
                       const int     _iter);
 
-    void solveJac   (Vector        &_muk,
-                     const Vector &_res,
-                     const double  _linearRelTol);
+    void solveJac    (Vector        &_muk,
+                      const Vector &_res,
+                      const double  _linearRelTol);
 
     void solveLinearFluid();
     void solveLinearSolid();
@@ -69,10 +69,17 @@ public:
     Vector dz()       {return M_dz;}
     Real   defOmega() {return M_defOmega;}
 
+    void setResidualS  ( Vector const& _res ){M_residualS = _res;}
+    void setResidualF  ( Vector const& _res ){M_residualF = _res;}
+
+//    void setResidualF  ( Vector const& _res );
     void setResidualFSI( double const* _res );
     void setResidualFSI( Vector const& _res );
 
     void setDataFromGetPot( GetPot const& data );
+    Vector getResidualFSIOnSolid();
+    void getResidualFSIOnSolid(Vector& _vec);
+    Vector getSolidInterfaceOnSolid(double const* _vec);
 
     void setup();
 
@@ -89,6 +96,7 @@ public:
 
         steklovPoincare* M_pFS;
     };
+
 
 private:
 
@@ -117,22 +125,21 @@ private:
                          Vector &dispNew,
                          Vector &veloStruct);
 
-    void  invSfPrime  (const Vector &res,
-                       double       linear_rel_tol,
-                       Vector       &step);
+    void  invSfPrime    (const Vector &res,
+                         double       linear_rel_tol,
+                         Vector       &step);
 
-    void  invSsPrime  (const Vector &res,
-                       double       linear_rel_tol,
-                       Vector       &step);
+    void  invSsPrime    (const Vector &res,
+                         double       linear_rel_tol,
+                         Vector       &step);
 
 
-    void  invSfSsPrime(const Vector &res,
-                       double       linear_rel_tol,
-                       Vector       &step);
+    void  invSfSsPrime  (const Vector &res,
+                         double       linear_rel_tol,
+                         Vector       &step);
 
     void computeResidualFSI();
 
-    Vector getResidualFSIOnSolid();
 
     Vector getSolidInterfaceOnFluid(Vector const& _vec);
     Vector getFluidInterfaceOnSolid(Vector const& _vec);
