@@ -91,7 +91,7 @@ public:
       \param bdQr_u surface quadrature rule for the velocity
       \param Qr_p volumic quadrature rule for the pressure
       \param bdQr_p surface quadrature rule for the pressure
-      \param BCh_u boundary conditions for the velocity
+      \param BCh_fluid boundary conditions for the fluid
       \param ord_bdf order of the bdf time advancing scheme and incremental pressure approach (default: Backward Euler)
     */
     NavierStokesHandler( const GetPot&   data_file,
@@ -142,7 +142,11 @@ public:
     //! checking if BC are set
     const bool setFluidBC() const {return M_setBC;}
     //! set the fluid BCs
-    void setFluidBC(BCHandler &BCh_u){_BCh_u = BCh_u; M_setBC = true;}
+    void setFluidBC(BCHandler &BCh_u){M_BCh_fluid = &BCh_u; M_setBC = true;}
+    //! returns the BCHandler
+    BCHandler& BCh_fluid() {return *M_BCh_fluid;}
+    //! deprecated
+     LIFEV_DEPRECATED BCHandler& bcHandler() {return *M_BCh_fluid;}
     //! Update the right  hand side  for time advancing
     /*!
       \param source volumic source
@@ -156,8 +160,6 @@ public:
     //! returns the mesh
     mesh_type& mesh() { return _mesh;}
 
-    //! returns the BCHandler
-    BCHandler& bcHandler() {return _BCh_u;}
     //! Returns the velocity vector
     PhysVectUnknown<Vector>& u();
 
@@ -351,8 +353,7 @@ protected:
     //! The pressure
     ScalUnknown<Vector> _p;
 
-    //! The BC handler
-    BCHandler& _BCh_u;
+
 
     //! The BDF Time Advance Method + Incremental Pressure
     BdfNS _bdf;
@@ -399,6 +400,9 @@ private:
 //! private methods
     void          initializeMeanValuesPerSection();
 
+    //! The BC handler
+    BCHandler    *M_BCh_fluid;
+
 };
 
 
@@ -437,7 +441,6 @@ NavierStokesHandler( const GetPot& data_file, const RefFE& refFE_u,
                                          _Qr_p ),
     _u                                 ( _dim_u ),
     _p                                 ( _dim_p ),
-    _BCh_u                             ( BCh_u ),
     _bdf                               ( this->_order_bdf ),
     _ns_post_proc                      ( this->_mesh, _feBd_u, _dof_u, NDIM ),
     _count                             ( 0 ),
@@ -450,7 +453,8 @@ NavierStokesHandler( const GetPot& data_file, const RefFE& refFE_u,
     M_out_areas                        ("Areas.res"),
     M_out_areas_polygon                ("AreasPolygon.res"),
     M_out_fluxes                       ("Fluxes.res"),
-    M_out_pressure                     ("Pressure.res")
+    M_out_pressure                     ("Pressure.res"),
+    M_BCh_fluid                        ( &BCh_u )
 {
     if ( this->computeMeanValuesPerSection() == 1 )
         initializeMeanValuesPerSection();
@@ -490,7 +494,7 @@ NavierStokesHandler( const GetPot&   data_file,
                                          _Qr_p ),
     _u                                 ( _dim_u ),
     _p                                 ( _dim_p ),
-//    _BCh_u                             ( new BCHandler(0) ),
+    M_BCh_fluid                        ( 0 ),
     _bdf                               ( this->_order_bdf ),
     _ns_post_proc                      ( this->_mesh, _feBd_u, _dof_u, NDIM ),
     _count                             ( 0 ),
