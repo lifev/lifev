@@ -97,6 +97,8 @@ DataMesh( const GetPot& dfile, const std::string& section )
         readINRIAMeshFile( _mesh, _mesh_dir + _mesh_file, 1, verbose );
     else if ( _mesh_type == ".m++" )
         readMppFile( _mesh, _mesh_dir + _mesh_file, 1, verbose );
+    else if ( _mesh_type == ".msh" )
+        readGmshFile( _mesh, _mesh_dir + _mesh_file, 1 );
     else
         ERROR_MSG( "Sorry, this mesh file can not be loaded" );
 
