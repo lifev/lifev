@@ -1,3 +1,31 @@
+/* -*- mode: c++ -*-
+
+  This file is part of the LifeV library
+
+  Author(s): Christoph Winkelmann <christoph.winkelmann@epfl.ch>
+       Date: 2004-12-16
+
+  Copyright (C) 2004 EPFL
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+/**
+   \file test_hasOnlyEssential.cpp
+   \author Christoph Winkelmann <christoph.winkelmann@epfl.ch>
+   \date 2004-12-16
+*/
 #include <bcHandler.hpp>
 
 using namespace LifeV;
@@ -12,10 +40,10 @@ int main(int argc, char** argv)
 {
 
     BCFunctionBase bcf(zero);
-    
+
     std::vector<ID> compX;
     compX.push_back(1);
-    
+
     std::vector<ID> compY;
     compY.push_back(2);
 
@@ -40,7 +68,7 @@ int main(int argc, char** argv)
     compXYZ.push_back(3);
 
     std::auto_ptr<BCHandler> bcH(0);
-    
+
     // 1     tests with one marker
     // 1.1   mode Full
     std::cout << "full" << std::endl;
@@ -201,7 +229,7 @@ int main(int argc, char** argv)
     bcH->addBC( "test", 1, Natural, Full, bcf, nDimensions );
     bcH->addBC( "test", 2, Essential, Full, bcf, nDimensions );
     bcH->hasOnlyEssential();
-    
+
     // 2.2   mode Full/Component
     // 2.2.1 full + one component
     std::cout << "full / X" << std::endl;
@@ -222,7 +250,7 @@ int main(int argc, char** argv)
     bcH->addBC( "test", 2, Essential, Component, bcf, compZ );
     bcH->hasOnlyEssential();
 
-    // 2.2.2 full + two components 
+    // 2.2.2 full + two components
     std::cout << "full / X,Y" << std::endl;
     bcH.reset( new BCHandler );
     bcH->addBC( "test", 1, Essential, Full, bcf, nDimensions );
