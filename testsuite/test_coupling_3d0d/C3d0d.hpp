@@ -36,16 +36,19 @@
 
 /**
 
-    Coupler for the 3D (NS - non compliant) and 0D (lumped parameter model) models
+    \brief Coupler for the 3D (NS - non compliant) and 0D (lumped parameter model) models
+
+    Mean pressure problem -  network gives pressure to fluid
+    Flow rate problem     -  network gives flux to fluid
 
 */
 
 namespace LifeV
 {
 
-  class C3d0d {
+class C3d0d {
 
-  public:
+public:
 
     typedef RegionMesh3D<LinearTetra> Mesh;
     typedef NavierStokesSolverPC< Mesh > NS;
@@ -53,79 +56,96 @@ namespace LifeV
     typedef Real ( *Function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> source_type;
 
-    //Constructors
+    //! Constructor
+    /*!
+      \param fluid solver
+      \param lumped parameters solver
+      \param data file
+      \param BC for the fluid (BCHandler)
+    */
+    C3d0d(boost::shared_ptr<NS> &ns, zeroDModelSolver &network, GetPot& data_file,
+          BCHandler& BCh_u);
 
-    C3d0d(GetPot& data_file, BCHandler& BCh_u);
-
-    //Destructor
+    //! Destructor
     virtual ~C3d0d();
 
     //Virtual Member Functions
 
+    //! Initializes the fluid solver
     virtual void initialize(const Function& u0, const Function& p0, Real t0, Real dt) = 0;
 
+    //! Updates de BC at interface and the known term
     virtual void timeAdvance(source_type const& source, Real const& time) = 0;
 
+    //! Iterates
     virtual void iterate(Real const& time) = 0;
 
-    //Member Functions   
- 
+    //Member Functions
+
     void startWrtMatlab();
-    
+
     void finishWrtMatlab();
 
-    //Mutators 
+    //Mutators
 
     //Setters
-    
+
+    //! Gets the coupling strategy
     UInt strategy();
 
+    //! Sets the coupling strategy
     void setStrategy(int const&);
 
+    //! Gets the fluid solver
     boost::shared_ptr<NS> & ns() {return _M_ns;}
 
+    //! Gets the lumped parameters solver
     zeroDModelSolver & network() {return _M_network;}
 
+    //! Gets the fluid solver when using the flow rate coupling strategy
     NavierStokesWithFlux< NS > & nsFlux(){return _M_nsFlux;}
 
-  protected: 
+  protected:
 
     Real _M_dt;
     Real _M_T;
 
-    BCHandler                  _M_BCh_u;  
+    BCHandler                  _M_BCh_u;
     boost::shared_ptr<NS>      _M_ns;
     zeroDModelSolver           _M_network;
     NavierStokesWithFlux< NS > _M_nsFlux;
 
     std::ofstream _M_outfile;
 
-  private: 
-    
+  private:
+
     //Coupling Strategy
     UInt _M_strategy;
   };
-    
+
 //************************************************************************************
-//                                   IMPLEMENTATION                                   
+//                                   IMPLEMENTATION
 //************************************************************************************
 
-
-//Constructors
-C3d0d::C3d0d(GetPot &data_file, BCHandler &BCh_u)
+//! Constructor
+/*!
+  \param fluid solver
+  \param lumped parameters solver
+  \param data file
+  \param BC for the fluid (BCHandler)
+*/
+C3d0d::C3d0d(boost::shared_ptr<NS> &ns, zeroDModelSolver &network, GetPot &data_file, BCHandler &BCh_u)
   :
     _M_dt( data_file("fluid/discretization/timestep",0.001) ),
     _M_T( data_file("fluid/physics/endtime",0.002) ),
-    _M_ns( new NS (data_file, feTetraP1bubble, feTetraP1,
-                   quadRuleTetra15pt,quadRuleTria3pt,
-		   quadRuleTetra5pt, quadRuleTria3pt, BCh_u) ),
-    _M_network(data_file),
+    _M_ns( ns ),
+    _M_network(network),
     _M_nsFlux(_M_ns),
-    _M_strategy(data_file("problem/strategy",0))   
+    _M_strategy(data_file("problem/strategy",0))
 {}
 
 //
-void 
+void
 C3d0d::startWrtMatlab()
 {
 
@@ -142,7 +162,7 @@ C3d0d::startWrtMatlab()
 }
 
 //
-void 
+void
 C3d0d::finishWrtMatlab()
 {
     _M_outfile.open("res_Q.m", std::ios::app);
@@ -159,21 +179,21 @@ C3d0d::finishWrtMatlab()
 
 }
 
-//Gets coupling strategy
+//! Gets coupling strategy
 UInt
 C3d0d::strategy()
 {
   return _M_strategy;
 }
 
-//Sets coupling strategy
-void 
+//! Sets coupling strategy
+void
 C3d0d::setStrategy(int const& strategy)
 {
     _M_strategy = strategy;
 }
 
-// Destructor
+//! Destructor
 C3d0d::~C3d0d()
 {
 }

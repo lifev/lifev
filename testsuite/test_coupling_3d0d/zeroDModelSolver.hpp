@@ -61,6 +61,11 @@ public:
     */
     zeroDModelSolver(GetPot const& data_file);
 
+    /*! Constructor
+      \param zeroDModelSolver object
+     */
+    zeroDModelSolver(zeroDModelSolver const& network);
+
     //! Computes the pressure of the network, given the flux from 3D
     //! \param current time step
     //! \param flux from 3d
@@ -157,6 +162,47 @@ zeroDModelSolver::zeroDModelSolver(GetPot const& data_file):
     x[8]=0.0211;
 
 }
+
+zeroDModelSolver::zeroDModelSolver(zeroDModelSolver const& __network):
+
+    _M_Length(__network._M_Length),
+    _M_Radius0(__network._M_Radius),
+    _M_Thickness(__network._M_Thickness),
+
+    _M_dt(__network._M_dt),
+    _M_rho(__network._M_rho),
+    _M_nu(__network._M_nu),
+    _M_E(__network._M_E),
+    _M_Poisson(__network._M_Poisson),
+
+    _M_C1(0.05),
+    _M_C2(0.5),
+    _M_C3(0.02),
+    _M_C4(0.001),
+    _M_L5(0.5),
+    _M_L6(0.1),
+    _M_L8(0.1),
+    _M_R5(5.),
+    _M_R6(6.),
+    _M_R8(5.001),
+
+    _M_L(__network._M_L),
+    _M_R(__network._M_R),
+    _M_C(__network._M_C)
+
+{
+    x[0]=0.0178;
+    x[1]=0.3740;
+    x[2]=0.3346;
+    x[3]=-0.0309;
+    x[4]=-0.0908;
+    x[5]=-0.0011;
+    x[6]=0.0211;
+    x[7]=0.0257;
+    x[8]=0.0211;
+
+}
+
 
 Real zeroDModelSolver::getPressureFromQ(Real const& time, Real const& Q)
 {

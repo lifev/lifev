@@ -114,13 +114,22 @@ int main(int argc, char** argv)
     BCFunctionBase u_wall(u1);
     BCFunctionBase out_flow(u1);
     BCFunctionBase in_flow(uo);
-    BCHandler BCh_u(5);
+    BCHandler BCh_u;
 
     BCh_u.addBC("Wall",   2, Essential, Full, u_wall,  3);
     BCh_u.addBC("Wall-inflow",   4, Essential, Full, u_wall,  3);
     BCh_u.addBC("Wall-outflow",   5, Essential, Full, u_wall,  3);
     BCh_u.addBC("OutFlow", 3, Natural,  Full, out_flow, 3);
     BCh_u.addBC("InFlow", 1, Natural,   Full, in_flow, 3);
+
+    // Navier-Stokes Solver
+    //
+    typedef NavierStokesSolverPC< RegionMesh3D<LinearTetra> > NS;
+    boost::shared_ptr<NS> __ns( new NS (data_file, feTetraP1bubble, feTetraP1,
+                                        quadRuleTetra15pt,quadRuleTria3pt,
+                                        quadRuleTetra5pt, quadRuleTria3pt, BCh_u) );
+
+    zeroDModelSolver __network(data_file);
 
     std::cout << "\n Coupling 3D and 0D models \n ";
     std::auto_ptr<C3d0d> __coupling;
@@ -131,7 +140,7 @@ int main(int argc, char** argv)
             {
                 std::cout << "Mean Pressure problem \n";
                 std::cout <<" -----------------------------------------------\n";
-                __coupling.reset(new meanPressure(data_file, BCh_u, 1));
+                __coupling.reset(new meanPressure(__ns, __network, data_file, BCh_u, 1));
             }
             break;
 
@@ -139,7 +148,7 @@ int main(int argc, char** argv)
             {
                 std::cout << "Flow Rate problem \n";
                 std::cout <<" -----------------------------------------------\n";
-                __coupling.reset(new flowRate(data_file, BCh_u, 1));
+                __coupling.reset(new flowRate(__ns, __network, data_file, BCh_u, 1));
 
                 toEnsight EnsightFilter;
                 __coupling->nsFlux().doOnIterationFinish( EnsightFilter  );

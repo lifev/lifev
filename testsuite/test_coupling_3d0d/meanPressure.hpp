@@ -34,7 +34,7 @@
 
 /**
 
-    Mean Pressure strategy for coupling 3D (NS - non compliant) and 0D (lumped parameter model) models
+    \brief Mean Pressure strategy for coupling 3D (NS - non compliant) and 0D (lumped parameter model) models
 
         - 3D passes the flux to 0D, whereas 0D passes the mean pressure to 3D
 
@@ -43,32 +43,39 @@
 namespace LifeV
 {
 
-  class meanPressure : public C3d0d {
+class meanPressure : public C3d0d {
 
-  public:
+public:
 
-    //Constructors
-    meanPressure(GetPot& data_file, BCHandler& BChx_u, int interfaceFlag);
+    /*! Constructor
+      \param fluid solver
+      \param lumped parameters solver
+      \param data file
+      \param BC for the fluid (BCHandler)
+      \param flag indicating the interface boundary
+    */
+    meanPressure(boost::shared_ptr<NS> &ns, zeroDModelSolver &network, GetPot& data_file,
+                 BCHandler& BChx_u, int interfaceFlag);
 
-    //Destructor
+    //! Destructor
     ~meanPressure();
 
-    //Member Functions   
+    //Member Functions
 
+    //! Initializes the fluid solver
     void initialize(const Function& u0, const Function& p0, Real t0, Real dt);
 
+    //! Updates de BC at interface and the known term
     void timeAdvance(source_type const& source, Real const& time);
 
+    //! Iterates
     void iterate(Real const& time);
 
-    //Mutators 
+    //Mutators
 
     //Setters
-    
-    //virtual NavierStokesWithFlux< NS > & nsFlux() = 0;
 
-
-  protected: 
+  protected:
 
     int       _M_interfaceFlag;
 
@@ -78,42 +85,47 @@ namespace LifeV
     Real      _M_Q;
     Real      _M_deltaP;
 
-  private: 
-  
-  };  
-    
+  private:
+
+  };
+
 //************************************************************************************
-//                                   IMPLEMENTATION                                   
+//                                   IMPLEMENTATION
 //************************************************************************************
 
-
-//Constructors
-meanPressure::meanPressure(GetPot& data_file, BCHandler& BCh_u, int interfaceFlag)
+/*! Constructor
+  \param fluid solver
+  \param lumped parameters solver
+  \param data file
+  \param BC for the fluid (BCHandler)
+  \param flag indicating the interface boundary
+*/
+meanPressure::meanPressure(boost::shared_ptr<NS> &ns, zeroDModelSolver &network, GetPot& data_file, BCHandler& BCh_u, int interfaceFlag)
   :
-  C3d0d(data_file, BCh_u),
+  C3d0d(ns, network, data_file, BCh_u),
   _M_interfaceFlag(interfaceFlag),
   _M_dimFluid(_M_ns->uDof().numTotalDof()),
   _M_vectorPressure(_M_dimFluid)
-{  
+{
   BCVector _M_bcvecPressure(_M_vectorPressure, _M_dimFluid, 1);
   _M_ns->bcHandler().modifyBC(_M_interfaceFlag, _M_bcvecPressure);
 }
 
-//
-void 
+//! Initializes the fluid solver
+void
 meanPressure::initialize(const Function& u0, const Function& p0, Real t0, Real dt)
 {
   _M_ns->initialize(u0, p0, t0, dt);
 }
 
-//
-void 
+//! Updates de BC at interface and the known term
+void
 meanPressure::timeAdvance(source_type const& source, Real const& time)
 {
 
   _M_Q      = _M_ns->flux(_M_interfaceFlag);
   _M_deltaP = _M_network.getPressureFromQ(time,_M_Q);
-  
+
   _M_vectorPressure = ScalarVector( _M_dimFluid, -_M_deltaP );
 
   _M_outfile.open("res_Q.m", std::ios::app);
@@ -128,15 +140,15 @@ meanPressure::timeAdvance(source_type const& source, Real const& time)
 }
 
 
-//
-void 
+//! Iterates
+void
 meanPressure::iterate(Real const& time)
 {
   _M_ns->iterate(time);
 
 }
 
-// Destructor
+//! Destructor
 meanPressure::~meanPressure()
 {
 }

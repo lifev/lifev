@@ -33,7 +33,7 @@
 
 /**
 
-    Mean Pressure strategy for coupling 3D (NS - non compliant) and 0D (lumped parameter model) models
+    \brief Flow rate strategy for coupling 3D (NS - non compliant) and 0D (lumped parameter model) models
 
         - 3D passes the pression to 0D, whereas 0D passes the flow rate to 3D
 
@@ -47,7 +47,7 @@ public:
     flux_adaptor( double __Q )
         :
         _M_Q( __Q )
-        {}
+    {}
 
     Real operator()( Real /*time*/ )
         {
@@ -61,63 +61,79 @@ private:
 namespace LifeV
 {
 
-  class flowRate : public C3d0d {
+class flowRate : public C3d0d {
 
-  public:
+public:
 
-    //Constructors
-    flowRate(GetPot& data_file, BCHandler& BChx_u, int interfaceFlag);
+    /*! Constructor
+      \param fluid solver
+      \param lumped parameters solver
+      \param data file
+      \param BC for the fluid (BCHandler)
+      \param flag indicating the interface boundary
+    */
+    flowRate(boost::shared_ptr<NS> &ns, zeroDModelSolver &network, GetPot& data_file,
+             BCHandler& BChx_u, int interfaceFlag);
 
-    //Destructor
+    //! Destructor
     ~flowRate();
 
-    //Member Functions   
+    //Member Functions
 
+    //! Initializes the fluid solver
     void initialize(const Function& u0, const Function& p0, Real t0, Real dt);
 
+    //! Updates de BC at interface and the known term
     void timeAdvance(source_type const& source, Real const& time);
 
-    void iterate(Real const& time);    
+    //! Iterates
+    void iterate(Real const& time);
 
-    //Mutators 
+    //Mutators
 
     //Setters
 
-  protected: 
+  protected:
 
     int       _M_interfaceFlag;
 
     Real      _M_Q;
     Real      _M_deltaP;
 
-  private: 
-  
-  };  
+  private:
+
+  };
 
 //************************************************************************************
-//                                   IMPLEMENTATION                                   
+//                                   IMPLEMENTATION
 //************************************************************************************
 
 
-//Constructors
-flowRate::flowRate(GetPot& data_file, BCHandler& BCh_u, int interfaceFlag)
+/*! Constructor
+  \param fluid solver
+  \param lumped parameters solver
+  \param data file
+  \param BC for the fluid (BCHandler)
+  \param flag indicating the interface boundary
+*/
+flowRate::flowRate(boost::shared_ptr<NS> &ns, zeroDModelSolver &network, GetPot& data_file, BCHandler& BCh_u, int interfaceFlag)
   :
-  C3d0d(data_file, BCh_u),
+  C3d0d(ns, network, data_file, BCh_u),
   _M_interfaceFlag(interfaceFlag)
-{ 
+{
   _M_nsFlux.setFlux(_M_interfaceFlag, flux_adaptor( 0 ));
 }
 
-//
-void 
+//! Initializes the fluid solver
+void
 flowRate::initialize(const Function& u0, const Function& p0, Real t0, Real dt)
 {
   _M_ns->setSourceTerm(f);
   _M_nsFlux.initialize(u0, p0, t0, dt);
 }
 
-//
-void 
+//! Updates de BC at interface and the known term
+void
 flowRate::timeAdvance(source_type const& source, Real const& time)
 {
 
@@ -136,14 +152,14 @@ flowRate::timeAdvance(source_type const& source, Real const& time)
 
 }
 
-//
-void 
+//! Iterates
+void
 flowRate::iterate(Real const& time)
 {
   _M_nsFlux.iterate(time);
 }
 
-// Destructor
+//! Destructor
 flowRate::~flowRate()
 {
 }
