@@ -107,7 +107,7 @@ nb_elem	= 30	#   number of elements
 post_dir = ./                 # the directory for postprocessing files
 post_file = soltube1               # the file name
 verbose = 5
-show_graceplot = 1                # 0: no grace plot, 1: show grace plots
+show_graceplot = 0                # 0: no grace plot, 1: show grace plots
 ]])
 
 AT_DATA([datanl2],[[# -*- getpot -*- (GetPot mode activation for emacs)
@@ -141,7 +141,7 @@ nb_elem	= 30	#   number of elements
 post_dir = ./                 # the directory for postprocessing files
 post_file = soltube2               # the file name
 verbose = 5
-show_graceplot = 1                # 0: no grace plot, 1: show grace plots
+show_graceplot = 0                # 0: no grace plot, 1: show grace plots
 ]])
 AT_CHECK([$top_builddir/testsuite/test_onedmodel/test_twotubes < keystrokes],[0],[ignore],[ignore])
 AT_CLEANUP
