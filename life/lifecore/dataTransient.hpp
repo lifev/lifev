@@ -36,42 +36,49 @@ namespace LifeV
 {
 
 /*
-  \author JFG
-  \brief very poor data for time dependent problem
+  \author J.F. Gerbeau
+  \brief Data for time dependent problems
  
   \todo merge with dataTime
  
   \todo allow variable time steps
   \todo select a stopping test (based on either max_time_iter or max_time)
-  \todo a standard banner for new time step
   \todo tolerance for steady state
  
 */ 
-//using namespace std;
+
 class DataTransient
 {
 public:
-    double max_time;
-    int max_time_iter;
-    double time_step;
-    int post_proc_period;
-    /**
-       Constructor from GetPot
-     */
-    DataTransient( const GetPot& dfile );
-    /**
-       Print information
-     */
-    void dataTransientShowMe( std::ostream& c );
-    /**
-       Print some help
-     */
-    void dataTransientHelp( std::ostream& c );
-
-    /**
-       Print current iteration and time
-     */
-    void timeBanner( int iter, double t );
+  double init_time;
+  double max_time;
+  int    max_time_iter;
+  double time_step;
+  int    post_proc_period;
+  int    init_data;
+  /*!
+    init_data = 0 : the initial data is computed in the code
+    init_data = 1 : the intial data is read on the file init_file_name
+  */
+  int adapt_period;
+  std::string init_file_name;
+  /**
+     Constructor from GetPot
+  */
+  DataTransient(const GetPot& dfile);
+  /**
+     Print information
+  */
+  void dataTransientShowMe(std::ostream& c);
+  /**
+     Print some help
+  */
+  void dataTransientHelp(std::ostream& c);
+  
+  /**
+     Print current iteration and time
+  */
+  void timeBanner(int iter,double t);
 };
 }
 #endif
