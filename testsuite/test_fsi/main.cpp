@@ -16,6 +16,7 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
+#include <cassert>
 
 #include <lifeV.hpp>
 
@@ -70,7 +71,7 @@ fsi_setup( GetPot const& data_file )
 /*!
   This routine runs the temporal loop
 */
-void
+LifeV::Vector
 fsi_run( fsi_solver_ptr __fsi )
 {
     double dt     = __fsi->timeStep();
@@ -90,13 +91,15 @@ fsi_run( fsi_solver_ptr __fsi )
     }
     std::cout << "Total computation time = "
               << __overall_timer.elapsed() << "s" << "\n";
+
+    return __fsi->displacement();
 }
 
 /*
   This routine checks that the results given by the different
   FSIOperator are actually the same.
 */
-void
+double
 fsi_check( GetPot const& data_file)
 {
     fsi_solver_ptr __fsi = fsi_setup( data_file );
@@ -104,11 +107,13 @@ fsi_check( GetPot const& data_file)
     __fsi->setFSIOperator( "steklovPoincare" );
     __fsi->FSIOperator()->setPreconditioner( LifeV::DIRICHLET_NEUMANN );
 
-    fsi_run( __fsi );
+    LifeV::Vector __sp_disp = fsi_run( __fsi );
 
     __fsi->setFSIOperator( "exactJacobian" );
 
-    fsi_run( __fsi );
+    LifeV::Vector __ej_disp = fsi_run( __fsi );
+
+    return LifeV::norm_2( __sp_disp - __ej_disp );
 
 }
 int main(int argc, char** argv)
