@@ -21,6 +21,7 @@
 #include "regionMesh3D.hpp"
 #include "util_string.hpp"
 #include "mesh_util.hpp"
+#include <sstream>
 
 namespace LifeV
 {
@@ -39,7 +40,7 @@ namespace LifeV
 |
 | #Mesh readers
 |
-*----------------------------------------------------------------------*/ 
+*----------------------------------------------------------------------*/
 /********************************************************************************
 MESH BUILDERS
 ********************************************************************************/
@@ -54,8 +55,10 @@ readMppFileHead( std::ifstream & mystream, UInt & numVertices, UInt & numBVertic
 //
 template <typename GeoShape, typename MC>
 bool
-readMppFile( RegionMesh3D<GeoShape, MC> & mesh, const std::string & filename,
-             EntityFlag regionFlag )
+readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
+             const std::string & filename,
+             EntityFlag regionFlag,
+             bool verbose=false )
 {
     unsigned done = 0;
     std::string line;
@@ -65,6 +68,9 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh, const std::string & filename,
     UInt nVe( 0 ), nBVe( 0 ), nFa( 0 ), nBFa( 0 ), nPo( 0 ), nBPo( 0 );
     UInt nVo( 0 ), nEd( 0 ), nBEd( 0 );
     UInt i;
+    
+    std::stringstream discardedLog;
+    std::ostream& oStr = verbose ? std::cout : discardedLog;
 
     ASSERT_PRE0( GeoShape::Shape == TETRA , "ReadMppFiles reads only tetra meshes" ) ;
 
@@ -80,7 +86,7 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh, const std::string & filename,
         std::cerr << " Error in readMpp: File not found or locked" << std::endl;
         abort();
     }
-    std::cout << "Reading Mesh++ file" << std::endl;
+    oStr << "Reading Mesh++ file" << std::endl;
     if ( ! readMppFileHead( hstream, nVe, nBVe, nBFa, nBEd, nVo ) )
     {
         std::cerr << " Error While reading mesh++ file headers" << std::endl;
@@ -104,7 +110,8 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh, const std::string & filename,
     if ( GeoShape::numPoints > 4 )
     {
 
-        std::cout << "Quadratic Tetra  Mesh (from Linear geometry)" << std::endl;
+        std::cout << "Quadratic Tetra  Mesh (from Linear geometry)"
+                  << std::endl;
         nPo = nVe + nEd;
         nBPo = nBVe + nBEd;
     }
@@ -184,14 +191,14 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh, const std::string & filename,
                 pp->z() = z;
                 pp->setMarker( EntityFlag( ibc ) );
             }
-            std::cout << "Vertices Read " << std::endl;
+            oStr << "Vertices Read " << std::endl;
             done++;
             if ( count != nBVe )
                 std::cerr << "NumB points inconsistent !" << std::endl;
         }
         if ( line.find( "iangular" ) != std::string::npos )
         {
-            std::cout << "Reading Bfaces " << std::endl;
+            oStr << "Reading Bfaces " << std::endl;
             std::string node_s = line.substr( line.find_last_of( ":" ) + 1 );
             // _numBFaces=atoi(node_s);
             for ( i = 0;i < nBFa;i++ )
@@ -210,12 +217,12 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh, const std::string & filename,
                 pf->setPoint( 2, mesh.point( p2 ) ); // set face conn.
                 pf->setPoint( 3, mesh.point( p3 ) ); // set face conn.
             }
-            std::cout << "Boundary Faces Read " << std::endl;
+            oStr << "Boundary Faces Read " << std::endl;
             done++;
         }
         if ( line.find( "Sides" ) != std::string::npos )
         {
-            std::cout << "Reading Bedges " << std::endl;
+            oStr << "Reading Bedges " << std::endl;
             std::string node_s = line.substr( line.find_last_of( ":" ) + 1 );
             //_numBEdges=atoi(node_s);
             for ( i = 0;i < nBEd;i++ )
@@ -232,13 +239,13 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh, const std::string & filename,
                 pe->setPoint( 1, mesh.point( p1 ) ); // set edge conn.
                 pe->setPoint( 2, mesh.point( p2 ) ); // set edge conn.
             }
-            std::cout << "Boundary Edges Read " << std::endl;
+            oStr << "Boundary Edges Read " << std::endl;
             done++;
         }
         count = 0;
         if ( line.find( "etrahedral" ) != std::string::npos )
         {
-            std::cout << "Reading Volumes " << std::endl;
+            oStr << "Reading Volumes " << std::endl;
             std::string node_s = line.substr( line.find_last_of( ":" ) + 1 );
             for ( i = 0; i < nVo; i++ )
             {
@@ -251,7 +258,7 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh, const std::string & filename,
                 pv->setPoint( 4, mesh.point( p4 ) );
                 count++;
             }
-            std::cout << count << " Volume elements Read" << std::endl;
+            oStr << count << " Volume elements Read" << std::endl;
             done++;
         }
 
@@ -268,18 +275,18 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh, const std::string & filename,
     ///// CORRECTION JFG
     //if (mesh.check(1, true,true))done=0;
 
-    if ( !checkMesh3D( mesh, sw, true, true, std::cout, std::cout, std::cout ) )
+        if ( !checkMesh3D( mesh, sw, true, verbose, oStr, std::cerr, oStr ) )
         abort(); // CORRECTION JFG
 
     Real vols[ 3 ];
-    getVolumeFromFaces( mesh, vols, std::cout );
-    std::cout << "   VOLUME ENCLOSED BY THE MESH COMPUTED BY INTEGRATION ON" <<
+    getVolumeFromFaces( mesh, vols, oStr );
+    oStr << "   VOLUME ENCLOSED BY THE MESH COMPUTED BY INTEGRATION ON" <<
     " BOUNDARY FACES" << std::endl;
-    std::cout << "INT(X)     INT(Y)      INT(Z) <- they should be equal and equal to" << std::endl <<
+    oStr << "INT(X)     INT(Y)      INT(Z) <- they should be equal and equal to" << std::endl <<
     "                                 the voulume enclosed by the mesh " << std::endl;
-    std::cout << vols[ 0 ] << " " << vols[ 1 ] << " " << vols[ 2 ] << std::endl;
+    oStr << vols[ 0 ] << " " << vols[ 1 ] << " " << vols[ 2 ] << std::endl;
 
-    std::cout << "   BOUNDARY FACES ARE DEFINING A CLOSED SURFACE IF " << testClosedDomain( mesh, std::cout ) << std::endl <<
+    oStr << "   BOUNDARY FACES ARE DEFINING A CLOSED SURFACE IF " << testClosedDomain( mesh, oStr ) << std::endl <<
     " IS (ALMOST) ZERO" << std::endl;
 
     return done == 4 ;
@@ -289,19 +296,24 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh, const std::string & filename,
 /*
                                           INRIA MESH FILE READERS
        29/06/2002 L.F.
- */ 
+ */
 //! INRIAMesh used either spaces or CR as separators
 /*! It sucks, but this is the way it is! This little function should help handling it. It gets an
   integer field from the std::string line if it is not empty, otherwise from the input stream.
- 
+
   It assumes that the std::string is either empty or it contains and integer!!! No check is made to verify this.
 */
 
 int nextIntINRIAMeshField( std::string const & line, std::istream & mystream );
 
 bool
-readINRIAMeshFileHead( std::ifstream & mystream, UInt & numVertices, UInt & numBVertices, UInt & numBFaces,
-                       UInt & numBEdges, UInt & numVolumes, ReferenceShapes & shape );
+readINRIAMeshFileHead( std::ifstream & mystream,
+                       UInt & numVertices,
+                       UInt & numBVertices,
+                       UInt & numBFaces,
+                       UInt & numBEdges,
+                       UInt & numVolumes,
+                       ReferenceShapes & shape );
 
 //=================================================================
 // ReadmppFile It reads mesh++ Tetra meshes. It convert them into
@@ -309,7 +321,10 @@ readINRIAMeshFileHead( std::ifstream & mystream, UInt & numVertices, UInt & numB
 //
 template <typename GeoShape, typename MC>
 bool
-readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh, std::string const & filename, EntityFlag regionFlag )
+readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
+                   std::string const & filename,
+                   EntityFlag regionFlag,
+                   bool verbose=false )
 {
     unsigned done = 0;
     std::string line;
@@ -321,15 +336,19 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh, std::string const & filena
     UInt i;
     ReferenceShapes shape;
 
+    std::stringstream discardedLog;
+    std::ostream& oStr = verbose ? std::cout : discardedLog;
+
     // open stream to read header
 
     std::ifstream hstream( filename.c_str() );
     if ( hstream.fail() )
     {
-        std::cerr << " Error in readINRIAMeshFile: File not found or locked" << std::endl;
+        std::cerr << " Error in readINRIAMeshFile: File not found or locked"
+                  << std::endl;
         abort();
     }
-    std::cout << "Reading INRIA mesh file" << std::endl;
+    oStr << "Reading INRIA mesh file" << std::endl;
     if ( ! readINRIAMeshFileHead( hstream, nVe, nBVe, nBFa, nBEd, nVo, shape ) )
     {
         std::cerr << " Error While reading INRIA mesh file headers" << std::endl;
@@ -357,7 +376,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh, std::string const & filena
 
     case HEXA:
         ASSERT_PRE0( GeoShape::numPoints == 8, "Sorry I can read only bilinear Hexa meshes" );
-        std::cout << "Linear Hexa Mesh" << std::endl;
+        oStr << "Linear Hexa Mesh" << std::endl;
         nPo = nVe;
         nBPo = nBVe;
         break;
@@ -443,7 +462,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh, std::string const & filena
                 pp->z() = z;
                 pp->setMarker( EntityFlag( ibc ) );
             }
-            std::cout << "Vertices Read " << std::endl;
+            oStr << "Vertices Read " << std::endl;
             done++;
             if ( count != nBVe )
                 std::cerr << "NumB points inconsistent !" << std::endl;
@@ -452,7 +471,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh, std::string const & filena
         if ( line.find( "Triangles" ) != std::string::npos )
         {
             nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), mystream );
-            std::cout << "Reading Bfaces " << std::endl;
+            oStr << "Reading Bfaces " << std::endl;
             for ( i = 0;i < nBFa;i++ )
             {
                 mystream >> p1 >> p2 >> p3 >> ibc;
@@ -464,14 +483,14 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh, std::string const & filena
                 pf->setPoint( 2, mesh.point( p2 ) ); // set face conn.
                 pf->setPoint( 3, mesh.point( p3 ) ); // set face conn.
             }
-            std::cout << "Boundary Faces Read " << std::endl;
+            oStr << "Boundary Faces Read " << std::endl;
             done++;
         }
 
         if ( line.find( "Quadrilaterals" ) != std::string::npos )
         {
             nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), mystream );
-            std::cout << "Reading Bfaces " << std::endl;
+            oStr << "Reading Bfaces " << std::endl;
             for ( i = 0;i < nBFa;i++ )
             {
                 mystream >> p1 >> p2 >> p3 >> p4 >> ibc;
@@ -484,14 +503,14 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh, std::string const & filena
                 pf->setPoint( 3, mesh.point( p3 ) ); // set face conn.
                 pf->setPoint( 4, mesh.point( p4 ) ); // set face conn.
             }
-            std::cout << "Boundary Faces Read " << std::endl;
+            oStr << "Boundary Faces Read " << std::endl;
             done++;
         }
 
         if ( line.find( "Edges" ) != std::string::npos )
         {
             nextIntINRIAMeshField( line.substr( line.find_last_of( "a" ) + 1 ), mystream );
-            std::cout << "Reading Bedges " << std::endl;
+            oStr << "Reading Bedges " << std::endl;
             for ( i = 0;i < nBEd;i++ )
             {
                 mystream >> p1 >> p2 >> ibc;
@@ -500,14 +519,14 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh, std::string const & filena
                 pe->setPoint( 1, mesh.point( p1 ) ); // set edge conn.
                 pe->setPoint( 2, mesh.point( p2 ) ); // set edge conn.
             }
-            std::cout << "Boundary Edges Read " << std::endl;
+            oStr << "Boundary Edges Read " << std::endl;
             done++;
         }
         if ( line.find( "Tetrahedra" ) != std::string::npos )
         {
             count = 0;
             nextIntINRIAMeshField( line.substr( line.find_last_of( "a" ) + 1 ), mystream );
-            std::cout << "Reading Volumes " << std::endl;
+            oStr << "Reading Volumes " << std::endl;
             for ( i = 0; i < nVo; i++ )
             {
                 mystream >> p1 >> p2 >> p3 >> p4 >> ibc;
@@ -520,14 +539,14 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh, std::string const & filena
                 pv->setMarker( EntityFlag( ibc ) );
                 count++;
             }
-            std::cout << count << " Volume elements Read" << std::endl;
+            oStr << count << " Volume elements Read" << std::endl;
             done++;
         }
         if ( line.find( "Hexahedra" ) != std::string::npos )
         {
             count = 0;
             nextIntINRIAMeshField( line.substr( line.find_last_of( "a" ) + 1 ), mystream );
-            std::cout << "Reading Volumes " << std::endl;
+            oStr << "Reading Volumes " << std::endl;
             for ( i = 0; i < nVo; i++ )
             {
                 mystream >> p1 >> p2 >> p3 >> p4 >> p5 >> p6 >> p7 >> p8 >> ibc;
@@ -544,7 +563,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh, std::string const & filena
                 pv->setMarker( EntityFlag( ibc ) );
                 count++;
             }
-            std::cout << count << " Volume elements Read" << std::endl;
+            oStr << count << " Volume elements Read" << std::endl;
             done++;
         }
 
@@ -553,9 +572,9 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh, std::string const & filena
     // Test mesh
     Switch sw;
 
-    if ( !checkMesh3D( mesh, sw, true, false, std::cout, std::cout, std::cout ) )
+    if ( !checkMesh3D( mesh, sw, true, verbose, oStr, std::cerr, oStr ) )
         abort();
-    // if(!checkMesh3D(mesh, sw, true,true, std::cout,std::cout,std::cout)) abort();//verbose version
+    // if(!checkMesh3D(mesh, sw, true,true, oStr,oStr,oStr)) abort();//verbose version
 
     // This part is to build a P2 mesh from a P1 geometry
 
@@ -564,14 +583,14 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh, std::string const & filena
     mystream.close();
 
     Real vols[ 3 ];
-    getVolumeFromFaces( mesh, vols, std::cout );
-    std::cout << "   VOLUME ENCLOSED BY THE MESH COMPUTED BY INTEGRATION ON" <<
+    getVolumeFromFaces( mesh, vols, oStr );
+    oStr << "   VOLUME ENCLOSED BY THE MESH COMPUTED BY INTEGRATION ON" <<
     " BOUNDARY FACES" << std::endl;
-    std::cout << "INT(X)     INT(Y)      INT(Z) <- they should be equal and equal to" << std::endl <<
+    oStr << "INT(X)     INT(Y)      INT(Z) <- they should be equal and equal to" << std::endl <<
     "                                 the voulume enclosed by the mesh " << std::endl;
-    std::cout << vols[ 0 ] << " " << vols[ 1 ] << " " << vols[ 2 ] << std::endl;
+    oStr << vols[ 0 ] << " " << vols[ 1 ] << " " << vols[ 2 ] << std::endl;
 
-    std::cout << "   BOUNDARY FACES ARE DEFINING A CLOSED SURFACE IF " << testClosedDomain( mesh, std::cout ) << std::endl <<
+    oStr << "   BOUNDARY FACES ARE DEFINING A CLOSED SURFACE IF " << testClosedDomain( mesh, oStr ) << std::endl <<
     " IS (ALMOST) ZERO" << std::endl;
 
     return done == 4 ;
@@ -588,7 +607,12 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh, std::string const & filena
 
 // ****************      Mesh ++  Readers   **********************************
 bool
-readMppFileHead( std::ifstream & mystream, UInt & numVertices, UInt & numBVertices, UInt & numBFaces, UInt & numBEdges, UInt & numVolumes );
+readMppFileHead( std::ifstream & mystream,
+                 UInt & numVertices,
+                 UInt & numBVertices,
+                 UInt & numBFaces,
+                 UInt & numBEdges,
+                 UInt & numVolumes );
 
 // ****************      INRIA mesh  readers   **********************************
 
@@ -597,7 +621,13 @@ int nextIntINRIAMeshField( std::string const & line, std::istream & mystream );
 //! Reads all basic info from INRIA MESH file
 //! so as to be able to properly dimension all arrays
 bool
-readINRIAMeshFileHead( std::ifstream & mystream, UInt & numVertices, UInt & numBVertices, UInt & numBFaces, UInt & numBEdges, UInt & numVolumes, ReferenceShapes & shape );
+readINRIAMeshFileHead( std::ifstream & mystream,
+                       UInt & numVertices,
+                       UInt & numBVertices,
+                       UInt & numBFaces,
+                       UInt & numBEdges,
+                       UInt & numVolumes,
+                       ReferenceShapes & shape );
 
 }
 #endif
