@@ -146,7 +146,7 @@ int main(int argc, char** argv)
     BC_Handler BCh_du(2);
     BC_Handler BCh_dz(3);
 
-    operFS oper(fluid, solid, BCh_du, BCh_dz, data_file);
+    operFS oper(fluid, solid, BCh_du, BCh_dz);
 
     // Passing data from structure to the fluid: z -> du
     //
@@ -227,8 +227,9 @@ int main(int argc, char** argv)
         // the newton solver
 
         status = nonLinRichardson(disp, oper, maxnorm, abstol, reltol,
-                                  maxiter, etamax, linesearch, out_res,
-                                  time, 0.1);
+                                   maxiter, etamax, linesearch, out_res,
+                                   time, 0.1);
+//        status = newton(disp,oper, maxnorm, abstol, reltol, maxiter, etamax,linesearch,out_res,time);
 
         if(status == 1)
         {
