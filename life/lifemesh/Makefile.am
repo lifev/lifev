@@ -2,8 +2,6 @@
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .cc
 
 INCLUDES 	= -I$(top_srcdir)/life/lifecore -I$(top_srcdir)/life/lifefem
-AM_CPPFLAGS	= -DTHREEDIM
-
 
 include_HEADERS		= bareItems.hpp basisElSh.hpp bcCond.hpp bcVector.hpp \
 			  dof.hpp dofInterface3Dto2D.hpp dofInterface3Dto3D.hpp dofInterfaceBase.hpp \
