@@ -1,0 +1,71 @@
+
+Contents:
+
+****How to run the tests
+****Instructions on how to set a new "OFFICIAL TEST"
+****How the make_test script works
+
+
+
+****How to run the tests
+
+a) Make sure LifeV_Dir environmental variable and all other variables which
+are possibly necessary for compilation are all properly set.
+ 
+b) run "make" and in TestResults you will have a brief report on
+   the test results. In TestLog you have a Log file with the collected output.
+
+
+****Instructions on how to set a new "OFFICIAL TEST"
+
+1) Prepare a directory under this branch with the name test_<my_test_dir>,
+where the "test_" part is COMPULSORY.
+
+2) Put in that directory all files needed to compile the testing program
+<my_test_program> (you may call it any name you want) and a file
+<testing_file> which contains the data against which the test will be made
+(usually the output of the testing program). The testing file is usually
+called <my_test_program>_sample.out: though this convention is not strict
+it helps if you want to use one of the makefile templates already prepared
+for you and available in the directory Templates.
+
+IMPORTANT NOTICE: make sure that the testing file against which the test
+will me made *DOES NOT* contain any machine dependend data. For instance,
+data related to execution times. In particular if you are comparing the
+output listing of a program that calls AZTEC you should set
+options[AZ_output]=AZ_warnings or options[AZ_output]=AZ_none.
+
+3) Prepare a makefile (maybe modifying one of the templates in the
+Templates/ directory) the essential part of the makefile are the following:
+
+ a) called without argument it has to produce the testing program
+ b) called with the argument "test" it has to run the program
+ ../bin/make_test in one of the two following forms"
+
+  ../bin/make_test <my_test_program> <testing_file> 
+
+  or
+
+  ../bin/make_test <my_test_program> <testing_file> <output_file>
+ 
+The former form is used whenever <testing_file> has to be checked against
+the standard output of <my_test_program>, the latter is adopted when the
+test is made against an <output_file> produced by <my_test_program>
+
+ c) called with argument "clean" does the usual cleaning
+
+****How the make_test script works
+
+Usage: make_test program [-h] [-d] test_file [outfile]
+       runs the testing program "program" and compares the contents of
+       test_file  with either the standard output or "outfile" 
+       (when the latter is provided).
+      
+       Exit status != 0 is someting is wrong
+
+-h : shows usage
+-d : debugging. It shows all lines
+
+The make_test program produces a file called TestResults, that contains the
+test results and possibly the differences between the testing and output
+files.

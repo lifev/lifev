@@ -1,0 +1,217 @@
+Reading Mesh++ file
+Quadratic Tetra  Mesh (from Linear geometry)
+#Vertices= 9276 #BVertices= 2353
+#Faces= 97921 #Boundary Faces= 4702
+#Edges= 59411 #Boundary Edges= 7053
+#Points= 68687 #Boundary Points= 9406
+#Volumes= 47785
+Vertices Read 
+Reading Bfaces 
+Boundary Faces Read 
+Reading Bedges 
+Boundary Edges Read 
+Reading Volumes 
+47785 Volume elements Read
+Building P2 mesh points and connectivities from P1 data
+Processing 7053 P1 Edges
+Processing 4702 Face Edges
+Processing 47785 Mesh Elements
+ ******* Done Construction of P2 Mmesh *******
+
+WARNING: Not all volumes have marker flag set
+Volume enclosed by the mesh= 1
+(Computed by integrating mesh elements measures)
+(Using 1 point Quadrature rule)
+**** Marker Flags for Fixed Boundary Faces ***
+ (it only contains those that were fixed because unset !
+id->marker   id->marker  id->marker
+
+  *****  END OF LIST ****
+ Boundary faces found:4702
+ Num Faces Stored stored:4702
+ Boundary faces counter gives:4702
+Computing internal edges**DOMAIN SURFACE IS (TOPOLOGICALLY) CLOSED
+ ********     COUNTERS CONTENT **********************************
+ Num Volumes:  47785
+ Num Vertices: 9276 Num B. Vertices: 2353
+ Num Points:   68687 Num B. Points  : 9406
+ Num Edges:    59411 Num B. Edges   : 7053
+ Num Faces:    97921 Num B. Faces   : 4702
+ ********     END COUNTERS **********************************
+
+*** CHECKING WITH EULER FORMULAE *****  
+
+*** CHECKING IS OK *****  
+   VOLUME ENCLOSED BY THE MESH COMPUTED BY INTEGRATION ON BOUNDARY FACES
+INT(X)     INT(Y)      INT(Z) <- they should be equal and equal to
+                                 the voulume enclosed by the mesh 
+1 1 1
+   BOUNDARY FACES ARE DEFINING A CLOSED SURFACE IF -6.99874e-15
+ IS (ALMOST) ZERO
+ **********************************************************
+  ****************** CHECKING MESH WITH INTERNAL CHECKER
+ **********************************************************
+  ****************** CLEANING edges and faces 
+ERROR: Not all boundary faces stored
+WARNING: mesh does not store all boundary edges
+Building edges from scratch
+**************************************************
+**************************************************
+                      RegionMesh3D                
+**************************************************
+**************************************************
+ ID: 0 Marker Flag:1
+**************** COUNTERS ********************
+NumPoints=68687  numBPoints=9406
+NumVertices=9276  numBVerices=2353
+NumVolumes=47785  numFaces=97921
+NumBFaces=4702  numEdges=59411
+NumBEdges=7053
+**************************************************
+************ACTUALLY STORED  ********************
+Points=68687  Edges=  7053
+Faces= 4702  Volumes=47785
+**************************************************
+*******         STATUS OF SWITCHES    ************
+
+ Status of switches
+Switch named: FACES_HAVE_ADIACENCY Value= 1
+Switch named: HAS_ALL_EDGES Value= 0
+Switch named: HAS_ALL_FACES Value= 0
+Switch named: HAS_BEEN_CHECKED Value= 1
+Switch named: HAS_BOUNDARY_EDGES Value= 1
+Switch named: HAS_BOUNDARY_FACES Value= 1
+Switch named: HAS_VOLUME_TO_EDGES Value= 0
+Switch named: HAS_VOLUME_TO_FACES Value= 0
+**************************************************
+**************************************************
+ Now building local Edges/faces Stuff
+
+**************************************************
+**************************************************
+                      RegionMesh3D                
+**************************************************
+**************************************************
+ ID: 0 Marker Flag:1
+**************** COUNTERS ********************
+NumPoints=68687  numBPoints=9406
+NumVertices=9276  numBVerices=2353
+NumVolumes=47785  numFaces=97921
+NumBFaces=4702  numEdges=59411
+NumBEdges=7053
+**************************************************
+************ACTUALLY STORED  ********************
+Points=68687  Edges=  7053
+Faces= 4702  Volumes=47785
+**************************************************
+*******         STATUS OF SWITCHES    ************
+
+ Status of switches
+Switch named: FACES_HAVE_ADIACENCY Value= 1
+Switch named: HAS_ALL_EDGES Value= 0
+Switch named: HAS_ALL_FACES Value= 0
+Switch named: HAS_BEEN_CHECKED Value= 1
+Switch named: HAS_BOUNDARY_EDGES Value= 1
+Switch named: HAS_BOUNDARY_FACES Value= 1
+Switch named: HAS_VOLUME_TO_EDGES Value= 1
+Switch named: HAS_VOLUME_TO_FACES Value= 1
+**************************************************
+**************************************************
+ Now cleaning local Edges/faces Stuff
+
+**************************************************
+**************************************************
+                      RegionMesh3D                
+**************************************************
+**************************************************
+ ID: 0 Marker Flag:1
+**************** COUNTERS ********************
+NumPoints=68687  numBPoints=9406
+NumVertices=9276  numBVerices=2353
+NumVolumes=47785  numFaces=97921
+NumBFaces=4702  numEdges=59411
+NumBEdges=7053
+**************************************************
+************ACTUALLY STORED  ********************
+Points=68687  Edges=  7053
+Faces= 4702  Volumes=47785
+**************************************************
+*******         STATUS OF SWITCHES    ************
+
+ Status of switches
+Switch named: FACES_HAVE_ADIACENCY Value= 1
+Switch named: HAS_ALL_EDGES Value= 0
+Switch named: HAS_ALL_FACES Value= 0
+Switch named: HAS_BEEN_CHECKED Value= 1
+Switch named: HAS_BOUNDARY_EDGES Value= 1
+Switch named: HAS_BOUNDARY_FACES Value= 1
+Switch named: HAS_VOLUME_TO_EDGES Value= 0
+Switch named: HAS_VOLUME_TO_FACES Value= 0
+**************************************************
+**************************************************
+ **********************************************************
+  ****************** BUILDING ALL EDGES
+ **********************************************************
+  ****************** BUILDING ALL FACES
+**************************************************
+**************************************************
+                      RegionMesh3D                
+**************************************************
+**************************************************
+ ID: 0 Marker Flag:1
+**************** COUNTERS ********************
+NumPoints=68687  numBPoints=9406
+NumVertices=9276  numBVerices=2353
+NumVolumes=47785  numFaces=97921
+NumBFaces=4702  numEdges=59411
+NumBEdges=7053
+**************************************************
+************ACTUALLY STORED  ********************
+Points=68687  Edges=  59411
+Faces= 97921  Volumes=47785
+**************************************************
+*******         STATUS OF SWITCHES    ************
+
+ Status of switches
+Switch named: FACES_HAVE_ADIACENCY Value= 1
+Switch named: HAS_ALL_EDGES Value= 1
+Switch named: HAS_ALL_FACES Value= 1
+Switch named: HAS_BEEN_CHECKED Value= 1
+Switch named: HAS_BOUNDARY_EDGES Value= 1
+Switch named: HAS_BOUNDARY_FACES Value= 1
+Switch named: HAS_VOLUME_TO_EDGES Value= 0
+Switch named: HAS_VOLUME_TO_FACES Value= 0
+**************************************************
+**************************************************
+ Now building again local Edges/faces Stuff
+
+**************************************************
+**************************************************
+                      RegionMesh3D                
+**************************************************
+**************************************************
+ ID: 0 Marker Flag:1
+**************** COUNTERS ********************
+NumPoints=68687  numBPoints=9406
+NumVertices=9276  numBVerices=2353
+NumVolumes=47785  numFaces=97921
+NumBFaces=4702  numEdges=59411
+NumBEdges=7053
+**************************************************
+************ACTUALLY STORED  ********************
+Points=68687  Edges=  59411
+Faces= 97921  Volumes=47785
+**************************************************
+*******         STATUS OF SWITCHES    ************
+
+ Status of switches
+Switch named: FACES_HAVE_ADIACENCY Value= 1
+Switch named: HAS_ALL_EDGES Value= 1
+Switch named: HAS_ALL_FACES Value= 1
+Switch named: HAS_BEEN_CHECKED Value= 1
+Switch named: HAS_BOUNDARY_EDGES Value= 1
+Switch named: HAS_BOUNDARY_FACES Value= 1
+Switch named: HAS_VOLUME_TO_EDGES Value= 1
+Switch named: HAS_VOLUME_TO_FACES Value= 1
+**************************************************
+**************************************************
