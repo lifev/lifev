@@ -1,28 +1,32 @@
 /*
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
+  This file is part of the LifeV library
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+  Authors: Luca Formaggia
+           Christophe Prud'homme <christophe.prudhomme@epfl.ch>
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-/*! file regionMesh2D.h
-  \brief The 2D mesh classes interfaces
-  \version $Revision: 1.9 $ Luca Formaggia
-
-  Introduces the RegionMesh2D class
-*/
-
+/**
+ * \file regionMesh2D.hpp
+ * \brief The 2D mesh classes interfaces
+ *
+ * Introduces the RegionMesh2D class
+ */
 #ifndef _REGIONMESH2D_HH_
 #define _REGIONMESH2D_HH_
 
@@ -36,7 +40,7 @@
 #include <life/lifemesh/geoElement.hpp>
 #include <life/lifemesh/bareItems.hpp>
 #include <life/lifemesh/basisElSh.hpp>
-#include <life/lifearray/SimpleVect.hpp>  
+#include <life/lifearray/SimpleVect.hpp>
 
 namespace LifeV
 {
@@ -47,21 +51,37 @@ namespace LifeV
  *
  * This is the class that stores the mesh entities for a single 2D region In
  * a region elements are all of the same type
+ * \author Luca Formaggia
+ * \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
  */
 template <typename GEOSHAPE, typename MC = DefMarkerCommon >
-class RegionMesh2D 
-  : 
-  public MeshEntity, 
+class RegionMesh2D
+  :
+  public MeshEntity,
   public MC::RegionMarker
 {
 
 public:
 
 
+    /**
+     * default constructor
+     * @param id marker of the RegionMesh2D
+     */
     explicit RegionMesh2D( ID id = 0 );
+
+    /**
+     * copy constructor
+     * @param m a RegionMesh2D
+     */
     explicit RegionMesh2D( RegionMesh2D<GEOSHAPE, MC> const & m );
 
 
+    /**
+     * assignement operator
+     * @param m a RegionMesh2D
+     * @return the newly copied RegionMesh2D
+     */
     RegionMesh2D<GEOSHAPE, MC> operator=( RegionMesh2D<GEOSHAPE, MC> const & m );
 
     //! \name Markers_Types
@@ -131,62 +151,106 @@ public:
     */
 
     //@{
-    
+
     /**
-     * 
+     *
      * @return the number of switches which have been set
      */
     const UInt numSwitches() const
     {
         return switches.size();
     };
-    
+
     /**
      * Interrogate Switch
      * @param _s name of the switch
      * @return true if the name is in the switch, false otherwise
      */
     bool getLinkSwitch( std::string const & _s ) const;
-    
+
     /**
      *  Set a switch
-     * @param _s 
+     * @param _s
      */
     void setLinkSwitch( std::string const & _s );
-    
+
     /**
      * unset a switch
-     * @param _s 
+     * @param _s
      */
     void unsetLinkSwitch( std::string const & _s );
-    
+
     //@}
-    
+
     /**
      * Number of local vertices for each (2D) element
      * @return Number of local vertices for each (2D) element
      */
-    UInt numLocalVertices() const; 
-    
+    UInt numLocalVertices() const;
+
     /**
      * Number of local edges for each (2D) element
      * @return Number of local edges for each (2D) element
      */
-    UInt numLocalEdges() const; 
+    UInt numLocalEdges() const;
 
-    /*! \name Generic_Methods Generic methods for all regionmeshXX
+    /** \name Generic_Methods Generic methods for all regionMesh
      * These are the generic methods to get information about the number of
      * elements.  It is a generic interface common for all RegionMeshes (3D --
      * 1D)
      */
     //@{
-    UInt numElements() const; //!< Number of elements in mesh (alias to numFaces())
-    UInt & numElements(); //!< Number of 3D elements
-    UInt numBElements() const; //!< Number of Boundary faces
-    UInt & numBElements(); //!< Number of boundary faces
+
+    /**
+     * Number of elements in mesh (alias to numFaces())
+     * @return Number of elements in mesh (alias to numFaces())
+     */
+    UInt numElements() const;
+
+    /**
+     * Number of 3D elements
+     * @return Number of 3D elements
+     */
+    UInt & numElements();
+
+    /**
+     * Number of Boundary faces
+     * @return Number of Boundary faces
+     */
+    UInt numBElements() const;
+
+    /**
+     * Number of boundary faces
+     * @return Number of boundary faces
+     */
+    UInt & numBElements();
+
+    /**
+     * get element at the i-th index
+     * @param i index of the element
+     * @return element at index i
+     */
     ElementType & element( ID const & i );
+
+    /**
+     * get element at the i-th index
+     * @param i index of the element
+     * @return element at index i
+     */
     ElementType const & element( ID const & i ) const;
+
+    /**
+     * get boundary element at the i-th index
+     * @param i index of the boundary element
+     * @return boundary element at the i-th index
+     */
     BElementType & bElement( ID const & i );
+
+    /**
+     * get boundary element at the i-th index
+     * @param i index of the boundary element
+     * @return boundary element at the i-th index
+     */
     BElementType const & bElement( ID const & i ) const;
     //@}
 
@@ -195,21 +259,86 @@ public:
        ============================================*/
     //! \name Face_Methods All methods which operates on 2D elements
     //@{
-    UInt numFaces() const;    /*!< Returns number of Face elements in the mesh
-             as given by the internal counter.*/
-    UInt & numFaces();    /*!< Access number of Face (internal counter)*/
-    UInt storedFaces() const; //!< faces actully stored in list
+    /**
+     * Returns number of Face elements in the mesh
+     * as given by the internal counter
+     * @return
+     */
+    UInt numFaces() const;
+
+    /**
+     * Access number of Face (internal counter)
+     * @return Access number of Face (internal counter)
+     */
+    UInt & numFaces();
+
+    /**
+     * faces actually stored in list
+     * @return number of faces actually stored in list
+     */
+    UInt storedFaces() const;
+
+    /**
+     *
+     * @return
+     */
     UInt maxNumFaces() const; /*!< Current capacity of Faces Container,
              i.e. how many elements may be stored */
-    void setMaxNumFaces( UInt const n, bool const setcounter = false ); /*!< Changes Current capacity of Faces
-             (Optionally sets internal counter.) */
-    FaceType & addFace(); //!< Adds faces. Id computed automatically. Return ref to added V.
+
+    /**
+     * Changes Current capacity of Faces
+     * (Optionally sets internal counter.)
+     * @param n maximum number of faces
+     * @param setcounter true to set the counter, false otherwise
+     */
+    void setMaxNumFaces( UInt const n, bool const setcounter = false );
+
+    /**
+     * Adds faces. Id computed automatically.
+     * @return ref to added face
+     */
+    FaceType & addFace();
+
+    /**
+     * Adds faces. Id computed automatically.
+     * @param v face to add
+     * @return reference to the newly added face
+     */
     FaceType & addFace( FaceType const & v );
-    FaceType & setFace( FaceType const & v, ID const pos ); //!< Add face to a specified position
-    void setFaceCounter(); //! set numFaces counter
-    FaceType & lastFace(); //!< Reference to last face stored in list. Useful for mesh readers
-    FaceType const & face( ID const i ) const; //!< ith mesh 2Delement
-    FaceType & face( ID const i ); //!<ith mesh 2Delement
+
+    /**
+     * Add face to a specified position
+     * @param v face to add
+     * @param pos position of the face
+     * @return reference to the newly added face
+     */
+    FaceType & setFace( FaceType const & v, ID const pos );
+
+    /**
+     * set numFaces counter
+     */
+    void setFaceCounter();
+
+    /**
+     * Reference to last face stored in list.
+     * Useful for mesh readers
+     * @return reference of the last face in the list
+     */
+    FaceType & lastFace();
+
+    /**
+     * ith mesh 2Delement
+     * @param i index of the mesh 2Delement
+     * @return the i-th face
+     */
+    FaceType const & face( ID const i ) const;
+
+    /**
+     * ith mesh 2Delement
+     * @param i index of the mesh face
+     * @return reference to the ith mesh face
+     */
+    FaceType & face( ID const i ); //!<
     //@}
 
     /* ============================================
@@ -409,7 +538,7 @@ protected:
     template < typename T >
     UInt maxNumItems( SimpleVect< T> const & list ) const;
     template < typename T >
-    void setMaxNumItems( SimpleVect< T> & list, UInt n, char * title );
+    void setMaxNumItems( SimpleVect< T> & list, UInt n, std::string title );
 
 
     // Internal counters
@@ -581,8 +710,7 @@ RegionMesh2D<GEOSHAPE, MC>::maxNumItems( SimpleVect< T> const & list ) const
 template <typename GEOSHAPE, typename MC>
 template <typename T>
 void
-RegionMesh2D<GEOSHAPE, MC>::
-setMaxNumItems( SimpleVect< T> & list, UInt n, char * title )
+RegionMesh2D<GEOSHAPE, MC>::setMaxNumItems( SimpleVect< T> & list, UInt n, std::string title )
 {
     if ( list.capacity() == 0 )
     {
@@ -590,17 +718,12 @@ setMaxNumItems( SimpleVect< T> & list, UInt n, char * title )
     }
     else if ( list.capacity() == n )
     {
-#ifdef VERBOSE
-        std::cerr << "WARNING: Capacity of " << title << "list already set to " << n << std::endl;
-#endif
-
+        Warning() << "Capacity of " << title << "list already set to " << n << "\n";
     }
     else
     {
-#ifdef VERBOSE
-        std::cerr << "WARNING: Resetting " << title << " list size to " << n << std::endl;
-        std::cerr << "         ALL PREVIOUS POINTERS TO THE LIST (IF ANY) ARE NOW INVALID" << std::endl;
-#endif
+        Warning() << "Resetting " << title << " list size to " << n << "\n";
+        Warning() << "ALL PREVIOUS POINTERS TO THE LIST (IF ANY) ARE NOW INVALID\n";
 
         list.reserve( n );
     }
@@ -1022,8 +1145,7 @@ RegionMesh2D<GEOSHAPE, MC>::addPoint( bool const boundary, bool const vertex )
 template <typename GEOSHAPE, typename MC>
 INLINE
 typename RegionMesh2D<GEOSHAPE, MC>::PointType &
-RegionMesh2D<GEOSHAPE, MC>::addPoint
-( PointType const & p, bool const boundary, bool const vertex )
+RegionMesh2D<GEOSHAPE, MC>::addPoint( PointType const & p, bool const boundary, bool const /*vertex*/ )
 {
     ASSERT_PRE( pointList.size() < pointList.capacity(), "Point list size exceeded" <<
                 pointList.size() + 1 << " " << pointList.capacity() ) ;
