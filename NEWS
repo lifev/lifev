@@ -7,6 +7,9 @@ Bugs fixed in 0.5.0:
 
 New in 0.5.0:
 =============
+[configure]
+* Added support for boost which is mandatory now (CP)
+
 [lifecore]
 * Added the Cloning Factory pattern (aka Abstract Factory)
   implementation (CP)  
@@ -18,18 +21,21 @@ New in 0.5.0:
   ** improved documentation 
   ** reduced code redundancy and code size
   ** use clone factory for BCFunction
-  ** use boost::shared_ptr<> for better memory management
+  ** use clone factory for BCVector
+  ** use boost::shared_ptr<> for safe memory management
 
 [lifesolver]
 * Templated the darcy classes.(VM)
   ** use of DataMesh class requires a change in data files
+* Factorized and merged FSI::operFS (GF)
+* Added NavierStokesWithFlux solver to impose fluxes (CV, CP)
 
 [testsuite]
 * Added test for 3D/0D coupling (AM)
 * Moved files of test_darcy in lifesolver (VM)
   ** data files are changed
 * Removed test_darcytetra (VM)
-
+* Centralized all FSI tests in test_fsi (GF)
 
 Bugs fixed in 0.4.0:
 ====================
@@ -177,4 +183,4 @@ New in 0.1.0pre3:
 * fixed some bugs and miscompilation in a few places
 
 
- -- Christophe Prud'homme <prudhomm@debian.org>, Wed Oct 13 12:18:05 2004
+ -- Christophe Prud'homme <prudhomm@debian.org>, Fri Oct 22 12:39:45 2004
