@@ -20,15 +20,15 @@
 #  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
+SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 AM_CPPFLAGS	= -DNO_BLASLAPACK
 
-check_HEADERS = user_fct.hpp user_diffusion.hpp 
+check_HEADERS = user_fct.hpp user_diffusion.hpp
 
 
 check_PROGRAMS = test_darcy
-test_darcy_SOURCES =  main.cpp user_fct.cpp user_diffusion.cpp 
+test_darcy_SOURCES =  main.cpp user_fct.cpp user_diffusion.cpp
 test_darcy_LDADD   = $(life_libs) $(boost_libs)
 EXTRA_DIST = data data-analyticalhexa datatetra data-arterialwall testsuite.at
 
