@@ -53,6 +53,9 @@ public:
 
     typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID
                                    & )> function_type;
+
+    typedef boost::shared_ptr<DofInterface3Dto3D> dof_interface_type;
+
     // constructors
     operFS()
         :
@@ -60,7 +63,11 @@ public:
         M_BCh_d(),
         M_BCh_mesh(),
         M_fluid(),
-        M_solid()
+        M_solid(),
+        M_dofFluidToStructure( new DofInterface3Dto3D ),
+        M_dofStructureToSolid( new DofInterface3Dto3D ),
+        M_dofStructureToFluidMesh( new DofInterface3Dto3D ),
+        M_dofMeshToFluid( new DofInterface3Dto3D )
         {}
 
     operFS(fluid_type & fluid,
@@ -126,6 +133,9 @@ public:
 
     virtual void setup();
 
+    dof_interface_type& dofMeshToFluid() { return M_dofMeshToFluid; }
+    dof_interface_type const& dofMeshToFluid() const { return M_dofMeshToFluid; }
+
 protected:
 
     BCHandler               M_BCh_u;
@@ -135,10 +145,10 @@ protected:
     fluid_type              M_fluid;
     solid_type              M_solid;
 
-    DofInterface3Dto3D      M_dofFluidToStructure;
-    DofInterface3Dto3D      M_dofStructureToSolid;
-    DofInterface3Dto3D      M_dofStructureToFluidMesh;
-    DofInterface3Dto3D      M_dofMeshToFluid;
+    dof_interface_type      M_dofFluidToStructure;
+    dof_interface_type      M_dofStructureToSolid;
+    dof_interface_type      M_dofStructureToFluidMesh;
+    dof_interface_type      M_dofMeshToFluid;
 
     Vector                  M_dispStruct;
     Vector                  M_velo;

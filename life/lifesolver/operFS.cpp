@@ -48,42 +48,42 @@ operFS::operFS( fluid_type& fluid,
 //                    M_BCh_d),
     M_fluid(fluid),
     M_solid(solid),
-    M_dofFluidToStructure(feTetraP1,
-                          M_solid->dDof(),
-                          feTetraP1bubble,
-                          M_fluid->uDof()),
-    M_dofStructureToSolid(feTetraP1,
-                          M_solid->dDof(),
-                          feTetraP1,
-                          M_solid->dDof()),
-    M_dofStructureToFluidMesh(M_fluid->mesh().getRefFE(),
-                              M_fluid->dofMesh(),
-                              feTetraP1,
-                              M_solid->dDof()),
-    M_dofMeshToFluid(feTetraP1bubble,
-                     M_fluid->uDof(),
-                     feTetraP1bubble,
-                     M_fluid->uDof()),
+    M_dofFluidToStructure( new DofInterface3Dto3D( feTetraP1,
+                                                   M_solid->dDof(),
+                                                   feTetraP1bubble,
+                                                   M_fluid->uDof()) ),
+    M_dofStructureToSolid( new DofInterface3Dto3D( feTetraP1,
+                                                   M_solid->dDof(),
+                                                   feTetraP1,
+                                                   M_solid->dDof()) ),
+    M_dofStructureToFluidMesh( new DofInterface3Dto3D( M_fluid->mesh().getRefFE(),
+                                                       M_fluid->dofMesh(),
+                                                       feTetraP1,
+                                                       M_solid->dDof()) ),
+    M_dofMeshToFluid( new DofInterface3Dto3D( feTetraP1bubble,
+                                              M_fluid->uDof(),
+                                              feTetraP1bubble,
+                                              M_fluid->uDof()) ),
     M_dispStruct  ( 3*M_solid->dDof().numTotalDof() ),
     M_velo        ( 3*M_solid->dDof().numTotalDof() ),
     M_nbEval      (0)
 {
-    M_dofFluidToStructure.update(M_solid->mesh(),
-                                 1,
-                                 M_fluid->mesh(),
-                                 1,
-                                 0.);
-    M_dofStructureToSolid.update(M_solid->mesh(),
-                               1,
-                               M_solid->mesh(),
-                               1,
-                               0.);
-    M_dofStructureToFluidMesh.update(M_fluid->mesh(),
-                                     1,
-                                     M_solid->mesh(),
-                                     1,
-                                     0.0);
-    M_dofMeshToFluid.update(M_fluid->mesh(),
+    M_dofFluidToStructure->update(M_solid->mesh(),
+                                  1,
+                                  M_fluid->mesh(),
+                                  1,
+                                  0.);
+    M_dofStructureToSolid->update(M_solid->mesh(),
+                                  1,
+                                  M_solid->mesh(),
+                                  1,
+                                  0.);
+    M_dofStructureToFluidMesh->update(M_fluid->mesh(),
+                                      1,
+                                      M_solid->mesh(),
+                                      1,
+                                      0.0);
+    M_dofMeshToFluid->update(M_fluid->mesh(),
                             1,
                             M_fluid->mesh(),
                             1,
@@ -103,28 +103,28 @@ operFS::setup()
 {
     if ( M_solid && M_fluid )
     {
-        M_dofFluidToStructure.setup(feTetraP1,M_solid->dDof(),feTetraP1bubble,M_fluid->uDof());
-        M_dofFluidToStructure.update(M_solid->mesh(),
+        M_dofFluidToStructure->setup(feTetraP1,M_solid->dDof(),feTetraP1bubble,M_fluid->uDof());
+        M_dofFluidToStructure->update(M_solid->mesh(),
                                      1,
                                      M_fluid->mesh(),
                                      1,
                                      0.);
-        M_dofStructureToSolid.setup(feTetraP1,M_solid->dDof(),feTetraP1,M_solid->dDof());
-        M_dofStructureToSolid.update(M_solid->mesh(),
+        M_dofStructureToSolid->setup(feTetraP1,M_solid->dDof(),feTetraP1,M_solid->dDof());
+        M_dofStructureToSolid->update(M_solid->mesh(),
                                      1,
                                      M_solid->mesh(),
                                      1,
                                      0.);
 
-        M_dofStructureToFluidMesh.setup(M_fluid->mesh().getRefFE(),M_fluid->dofMesh(),feTetraP1,M_solid->dDof());
-        M_dofStructureToFluidMesh.update(M_fluid->mesh(),
+        M_dofStructureToFluidMesh->setup(M_fluid->mesh().getRefFE(),M_fluid->dofMesh(),feTetraP1,M_solid->dDof());
+        M_dofStructureToFluidMesh->update(M_fluid->mesh(),
                                          1,
                                          M_solid->mesh(),
                                          1,
                                          0.0);
 
-        M_dofMeshToFluid.setup(feTetraP1bubble,M_fluid->uDof(),feTetraP1bubble,M_fluid->uDof());
-        M_dofMeshToFluid.update(M_fluid->mesh(),
+        M_dofMeshToFluid->setup(feTetraP1bubble,M_fluid->uDof(),feTetraP1bubble,M_fluid->uDof());
+        M_dofMeshToFluid->update(M_fluid->mesh(),
                                 1,
                                 M_fluid->mesh(),
                                 1,

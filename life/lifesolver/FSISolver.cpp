@@ -77,49 +77,7 @@ FSISolver::FSISolver( GetPot const& data_file, BCHandler const& __bcu, BCHandler
     this->setFSIOperator( M_method );
     M_oper->setPreconditioner( precond );
 
-    UInt dim_solid = M_oper->solid().dDof().numTotalDof();
-    UInt dim_fluid = M_oper->fluid().uDof().numTotalDof();
 
-
-    //========================================================================================
-    //  DATA INTERFACING BETWEEN BOTH SOLVERS
-    //========================================================================================
-    //
-    // Passing data from the fluid to the structure: fluid load at the interface
-    //
-    DofInterface3Dto3D dofFluidToStructure(feTetraP1, M_oper->solid().dDof(), feTetraP1bubble, M_oper->fluid().uDof());
-    dofFluidToStructure.update(M_oper->solid().mesh(), 1, M_oper->fluid().mesh(), 1, 0.0);
-    BCVectorInterface g_wall(M_oper->fluid().residual(), dim_fluid, dofFluidToStructure);
-
-
-    // Passing data from structure to the fluid mesh: motion of the fluid domain
-    //
-    DofInterface3Dto3D dofStructureToFluidMesh(M_oper->fluid().mesh().getRefFE(), M_oper->fluid().dofMesh(),
-                                               feTetraP1, M_oper->solid().dDof());
-    dofStructureToFluidMesh.update(M_oper->fluid().mesh(), 1, M_oper->solid().mesh(), 1, 0.0);
-    BCVectorInterface displ(M_oper->solid().d(), dim_solid, dofStructureToFluidMesh);
-
-
-
-    // Passing data from structure to the fluid: solid velocity at the interface velocity
-    //
-    DofInterface3Dto3D dofMeshToFluid(feTetraP1bubble, M_oper->fluid().uDof(), feTetraP1bubble, M_oper->fluid().uDof() );
-    dofMeshToFluid.update(M_oper->fluid().mesh(), 1, M_oper->fluid().mesh(), 1, 0.0);
-    BCVectorInterface u_wall(M_oper->fluid().wInterpolated(), dim_fluid,dofMeshToFluid);
-
-    //========================================================================================
-    //  BOUNDARY CONDITIONS
-    //========================================================================================
-    //
-    // Boundary conditions for the harmonic extension of the
-    // interface solid displacement
-    //    M_BCh_mesh.addBC("Interface", 1, Essential, Full, displ, 3);
-
-    // Boundary conditions for the fluid velocity
-    M_BCh_u.addBC("Wall",   1,  Essential, Full, u_wall,  3);
-
-    // Boundary conditions for the solid displacement
-    //    M_BCh_d.addBC("Interface", 1, Natural, Full, g_wall, 3);
 }
 void
 FSISolver::setFSIOperator( std::string const& __op )
@@ -127,6 +85,25 @@ FSISolver::setFSIOperator( std::string const& __op )
     M_oper = oper_fsi_ptr( FSIFactory::instance().createObject( M_method ) );
     M_oper->setFluid( M_fluid );
     M_oper->setSolid( M_solid );
+
+    UInt dim_solid = M_oper->solid().dDof().numTotalDof();
+    UInt dim_fluid = M_oper->fluid().uDof().numTotalDof();
+
+
+    // Passing data from structure to the fluid: solid velocity at the interface velocity
+    //
+    BCVectorInterface::dof_interface_type __di( M_oper->dofMeshToFluid() );
+    BCVectorInterface u_wall( M_oper->fluid().wInterpolated(),
+                              dim_fluid,
+                              __di );
+
+    // Boundary conditions for the fluid velocity
+    M_BCh_u.addBC("Wall",   1,  Essential, Full, u_wall,  3);
+
+    M_BCh_u.showMe();
+    M_BCh_d.showMe();
+    M_BCh_mesh.showMe();
+
     M_oper->setBC( M_BCh_u, M_BCh_d, M_BCh_mesh );
     M_oper->setup();
 }

@@ -191,27 +191,32 @@ void steklovPoincare::setUpBC()
     //
     // Passing data from the fluid to the structure: fluid load at the interface
     //
-    BCVectorInterface g_wall(this->M_fluid->residual(),
+    boost::shared_ptr<DofInterfaceBase> __dibase( M_dofFluidToStructure );
+    BCVectorInterface g_wall(( Vector& )this->M_fluid->residual(),
                              dim_fluid,
-                             M_dofFluidToStructure);
+                             __dibase );
+
     //
     // Passing data from structure to the solid mesh: motion of the solid domain
     //
+    __dibase =  M_dofStructureToSolid;
     BCVectorInterface d_wall(this->M_solid->d(),
                              dim_solid,
-                             M_dofStructureToSolid);
+                             __dibase );
     //
     // Passing data from structure to the fluid mesh: motion of the fluid domain
     //
+    __dibase = M_dofStructureToFluidMesh;
     BCVectorInterface displ(this->M_solid->d(),
                             dim_solid,
-                            M_dofStructureToFluidMesh);
+                            __dibase);
     //
     // Passing data from structure to the fluid: solid velocity at the interface velocity
     //
+    __dibase = M_dofMeshToFluid;
     BCVectorInterface u_wall(this->M_fluid->wInterpolated(),
                              dim_fluid,
-                             M_dofMeshToFluid);
+                             __dibase);
     //========================================================================================
     //  BOUNDARY CONDITIONS
     //========================================================================================
@@ -233,14 +238,15 @@ void steklovPoincare::setUpBC()
     //
     // rem: for now: no fluid.dwInterpolated().
     //      In the future this could be relevant
-
+    __dibase = M_dofMeshToFluid;
     BCVectorInterface du_wall(M_residualFSI,
                               dim_fluid,
-                              M_dofMeshToFluid);
+                              __dibase);
     // Passing the residual to the linearized structure: \sigma -> dz
+    __dibase = M_dofFluidToStructure;
     BCVectorInterface dg_wall(M_residualFSI,
                               dim_fluid,
-                              M_dofFluidToStructure);
+                              __dibase);
 
     // Boundary conditions for du
 
