@@ -336,7 +336,7 @@ namespace LifeV {
         */
         void exportToMatlab(std::string __file_name) {
             std::ofstream ofile(__file_name.c_str());
-            ASSERT( __file_name, "Error exporting interface to Matlab format: Output file cannot be open" );
+            ASSERT( ofile, "Error exporting interface to Matlab format: Output file cannot be open" );
 
             // POINTS
 
