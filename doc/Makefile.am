@@ -18,4 +18,4 @@
 #  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-SUBDIRS		= tex manual notes common
+SUBDIRS		= tex common api manual notes
