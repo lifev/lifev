@@ -27,6 +27,7 @@
 #include <chrono.hpp>
 #include <sobolevNorms.hpp>
 #include <geoMap.hpp>
+#include <ipStabilization.hpp>
 
 namespace LifeV
 {
@@ -235,44 +236,10 @@ NavierStokesSolverIP( const GetPot& dataFile,
         }
     }
 
-    UInt iElAd1, iElAd2;
-    CurrentFE fe1( _refFE_u, getGeoMap( _mesh ), _Qr_u );
-    CurrentFE fe2( _refFE_u, getGeoMap( _mesh ), _Qr_u );
-
-    M_elmatP.zero();
-
-    // Elementary computation and matrix assembling
-    // Loop on interior faces
-    for ( UInt iFace = _mesh.numBFaces()+1; iFace<= _mesh.numFaces(); ++iFace )
-    {
-        // Updating face staff
-        _feBd_u.updateMeas( _mesh.face( iFace ) );
-
-        gamma = _feBd_u.measure()/32.0;   // P1
-        //  gamma = _feBd_u.measure()/128.0; // P2
-        // gamma = _feBd_u.measure()*sqrt( _feBd_u.measure() )/8.0; // P1 p non smooth
-
-        iElAd1 = _mesh.face( iFace ).ad_first();
-        iElAd2 = _mesh.face( iFace ).ad_second();
-
-        fe1.updateFirstDeriv( _mesh.volumeList( iElAd1 ) );
-        fe2.updateFirstDeriv( _mesh.volumeList( iElAd2 ) );
-
-        ipstab_grad(gamma,M_elmatP,fe1,fe1,_feBd_u,nDimensions,nDimensions);
-        assemb_mat(M_matrStokes,M_elmatP,fe1,_dof_u,nDimensions,nDimensions);
-
-        ipstab_grad(gamma,M_elmatP,fe2,fe2,_feBd_u,nDimensions,nDimensions);
-        assemb_mat(M_matrStokes,M_elmatP,fe2,_dof_u,nDimensions,nDimensions);
-
-        ipstab_grad(-gamma,M_elmatP,fe1,fe2,_feBd_u,nDimensions,nDimensions);
-        assemb_mat(M_matrStokes,M_elmatP,fe1,fe2,_dof_u,nDimensions,
-                   nDimensions);
-
-        ipstab_grad(-gamma,M_elmatP,fe2,fe1,_feBd_u,nDimensions,nDimensions);
-        assemb_mat(M_matrStokes,M_elmatP,fe2,fe1,_dof_u,nDimensions,
-                   nDimensions);
-
-    }
+    IPStabilization<Mesh, Dof>
+        pressureStab(_mesh, _dof_u, _refFE_u, _feBd_u, _Qr_u,
+                     0, 0, 1./32, this->viscosity() );
+    pressureStab.apply(M_matrStokes, this->_u);
 
     if ( M_steady )
     {
@@ -446,124 +413,11 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
 
     chrono.start();
 
-    UInt iElAd1, iElAd2, ig, iFaEl, iloc;
-    CurrentFE fe1( _refFE_u, getGeoMap( _mesh ), _Qr_u );
-    CurrentFE fe2( _refFE_u, getGeoMap( _mesh ), _Qr_u );
-    Real gamma_b, gamma_u , bmax, bmax_u;
-
-    ElemVec beta( _feBd_u.nbNode, nDimensions ); // local trace of the velocity
-
-    typedef ID ( *FTOP )( ID const _localFace, ID const _point );
-
-    FTOP ftop = 0;
-
-    switch( _fe_u.nbNode )
-    {
-        case 4:
-            ftop = LinearTetra::fToP;
-            break;
-        case 10:
-            ftop = QuadraticTetra::fToP;
-            break;
-        case 8:
-            ftop = LinearHexa::fToP;
-            break;
-        case 20:
-            ftop = QuadraticHexa::fToP;
-            break;
-        default:
-            ERROR_MSG( "This refFE is not allowed with IP stabilisation" );
-            break;
-    }
-
-    M_elmatC.zero();
-
-    // Elementary computation and matrix assembling
-    // Loop on interior faces
-    for ( UInt iFace = _mesh.numBFaces()+1; iFace<= _mesh.numFaces(); ++iFace )
-    {
-        // Updating face staff
-        _feBd_u.updateMeas( _mesh.face( iFace ) );
-
-        iElAd1 = _mesh.face( iFace ).ad_first();
-        iElAd2 = _mesh.face( iFace ).ad_second();
-
-        fe1.updateFirstDeriv( _mesh.volumeList( iElAd1 ) );
-        fe2.updateFirstDeriv( _mesh.volumeList( iElAd2 ) );
-
-        // local id of the face in its adjacent element
-        iFaEl = _mesh.face( iFace ).pos_first();
-
-        for ( int iNode = 0; iNode < _feBd_u.nbNode; ++iNode )
-        {
-            iloc = ftop( iFaEl, iNode+1 );
-            for ( int iCoor = 0; iCoor < fe1.nbCoor; ++iCoor )
-            {
-                ig = _dof_u.localToGlobal( iElAd1, iloc+1 )-1+iCoor*_dim_u;
-                beta.vec()[ iCoor*_feBd_u.nbNode + iNode ] = _u( ig );
-            }
-        }
-
-        bmax = fabs( beta.vec()[ 0 ] );
-        for ( int l = 1; l < int( fe1.nbCoor*_feBd_u.nbNode ); ++l )
-        {
-            if ( bmax < fabs( beta.vec()[ l ] ) )
-                bmax = fabs( beta.vec()[ l ] );
-        }
-
-        bmax_u = bmax;
-        if ( bmax_u < _feBd_u.measure() )
-            bmax_u = _feBd_u.measure();
-
-        gamma_b = 0.125*_feBd_u.measure()/bmax_u;
-        gamma_u = 0.125*_feBd_u.measure()*bmax;
-        //gamma_u = 0.125*sqrt( _feBd_u.measure() )*bmax;
-
-
-        M_elmatC.zero();
-        //ipstab_grad( gamma_u, M_elmatC, fe1, fe1, _feBd_u, 0, 0,
-        //nDimensions );
-        ipstab_bgrad( gamma_b, M_elmatC, fe1, fe1, beta, _feBd_u, 0, 0,
-                      nDimensions );
-        ipstab_div( gamma_u, M_elmatC, fe1, fe1, _feBd_u );
-        for ( UInt iComp = 0; iComp<nDimensions; ++iComp )
-            for ( UInt jComp = 0; jComp<nDimensions; ++jComp )
-                assemb_mat( M_matrFull, M_elmatC, fe1, _dof_u, iComp, jComp );
-
-        M_elmatC.zero();
-        //ipstab_grad( gamma_u, M_elmatC, fe2, fe2, _feBd_u, 0, 0,
-        //nDimensions );
-        ipstab_bgrad( gamma_b, M_elmatC, fe2, fe2, beta, _feBd_u, 0, 0,
-                      nDimensions );
-        ipstab_div( gamma_u, M_elmatC, fe2, fe2, _feBd_u );
-        for ( UInt iComp = 0; iComp<nDimensions; ++iComp )
-            for ( UInt jComp = 0; jComp<nDimensions; ++jComp )
-                assemb_mat( M_matrFull, M_elmatC, fe2, _dof_u, iComp, jComp );
-
-        M_elmatC.zero();
-        //ipstab_grad( -gamma_u, M_elmatC, fe1, fe2, _feBd_u, 0, 0,
-        //             nDimensions );
-        ipstab_bgrad( -gamma_b, M_elmatC, fe1, fe2, beta, _feBd_u, 0, 0,
-                      nDimensions );
-        ipstab_div( -gamma_u, M_elmatC, fe1, fe2, _feBd_u );
-        for ( UInt iComp = 0; iComp<nDimensions; ++iComp )
-            for ( UInt jComp = 0; jComp<nDimensions; ++jComp )
-                assemb_mat( M_matrFull, M_elmatC, fe1, fe2, _dof_u, iComp,
-                            jComp );
-
-        M_elmatC.zero();
-        //ipstab_grad( -gamma_u, M_elmatC, fe2, fe1, _feBd_u, 0, 0,
-        //             nDimensions );
-        ipstab_bgrad( -gamma_b, M_elmatC, fe2, fe1, beta, _feBd_u, 0, 0,
-                      nDimensions );
-        ipstab_div( -gamma_u, M_elmatC, fe2, fe1, _feBd_u );
-        for ( UInt iComp = 0; iComp<nDimensions; ++iComp )
-            for ( UInt jComp = 0; jComp<nDimensions; ++jComp )
-                assemb_mat( M_matrFull, M_elmatC, fe2, fe1, _dof_u, iComp,
-                            jComp );
-
-    }
-
+    IPStabilization<Mesh, Dof>
+        velocityStab(_mesh, _dof_u, _refFE_u, _feBd_u, _Qr_u,
+                     1./8, 1./8, 0, this->viscosity() );
+    velocityStab.apply(M_matrFull, this->_u);
+    
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
