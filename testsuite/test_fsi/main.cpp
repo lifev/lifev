@@ -41,7 +41,7 @@ public:
 
       -# initialize and setup the FSIsolver
     */
-    Problem( GetPot const& data_file, std::string __oper = "" )
+    Problem( GetPot const& data_file, std::string _oper = "" )
         {
             using namespace LifeV;
 
@@ -67,8 +67,8 @@ public:
             BCh_d->addBC("Top",       3, Essential, Full, bcf,  3);
             BCh_d->addBC("Base",      2, Essential, Full, bcf,  3);
 
-            Debug( 10000 ) << "creating FSISolver with operator :  " << __oper << "\n";
-            _M_fsi = fsi_solver_ptr(  new FSISolver( data_file, BCh_u, BCh_d, BCh_mesh, __oper ) );
+            Debug( 10000 ) << "creating FSISolver with operator :  " << _oper << "\n";
+            _M_fsi = fsi_solver_ptr(  new FSISolver( data_file, BCh_u, BCh_d, BCh_mesh, _oper ) );
             _M_fsi->showMe();
             _M_fsi->setSourceTerms( fZero, fZero );
             _M_fsi->initialize( u0, d0, w0 );
@@ -82,20 +82,20 @@ public:
     void
     run( double dt, double T)
         {
-            boost::timer __overall_timer;
+            boost::timer _overall_timer;
 
-            int __i = 1;
-            for (double time=dt; time <= T; time+=dt, ++__i)
+            int _i = 1;
+            for (double time=dt; time <= T; time+=dt, ++_i)
             {
-                boost::timer __timer;
+                boost::timer _timer;
 
                 _M_fsi->iterate( time );
 
-                std::cout << "[fsi_run] Iteration " << __i << " was done in : "
-                          << __timer.elapsed() << "\n";
+                std::cout << "[fsi_run] Iteration " << _i << " was done in : "
+                          << _timer.elapsed() << "\n";
             }
             std::cout << "Total computation time = "
-                      << __overall_timer.elapsed() << "s" << "\n";
+                      << _overall_timer.elapsed() << "s" << "\n";
 
         }
 
@@ -106,16 +106,14 @@ private:
 
 struct FSIChecker
 {
-    FSIChecker( GetPot const& _data_file )
-        :
+    FSIChecker( GetPot const& _data_file ):
         data_file( _data_file ),
         oper( _data_file( "problem/method", "steklovPoincare" ) ),
         prec( ( LifeV::OperFSPreconditioner )_data_file( "problem/precond", LifeV::NEUMANN_NEUMANN ) )
         {}
     FSIChecker( GetPot const& _data_file,
                 std::string _oper,
-                LifeV::OperFSPreconditioner _prec = LifeV::NO_PRECONDITIONER )
-        :
+                LifeV::OperFSPreconditioner _prec = LifeV::NO_PRECONDITIONER ):
         data_file( _data_file ),
         oper( _oper ),
         prec( _prec )
@@ -131,15 +129,16 @@ struct FSIChecker
                 fsip->fsiSolver()->FSIOperator()->setDataFromGetPot( data_file );
                 fsip->fsiSolver()->FSIOperator()->setPreconditioner( prec );
 
-                fsip->run( fsip->fsiSolver()->timeStep(), fsip->fsiSolver()->timeStep() ); // only one iteration
+                fsip->run( fsip->fsiSolver()->timeStep(), fsip->fsiSolver()->timeEnd() );
             }
-            catch ( std::exception const& __ex )
+            catch ( std::exception const& _ex )
             {
-                std::cout << "caught exception :  " << __ex.what() << "\n";
+                std::cout << "caught exception :  " << _ex.what() << "\n";
             }
-            disp = fsip->fsiSolver()->displacement();
 
+            disp = fsip->fsiSolver()->FSIOperator()->displacementOnInterface();
         }
+
     GetPot data_file;
     std::string oper;
     LifeV::OperFSPreconditioner prec;
@@ -157,29 +156,46 @@ int main(int argc, char** argv)
     {
         LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 
-        FSIChecker __sp_check( data_file );
-        __sp_check();
+        FSIChecker _ej_check( data_file, "exactJacobian" );
+        _ej_check();
 
-        LifeV::Debug( 10000 ) << "__sp_disp size : "  << __sp_check.disp.size() << "\n";
+        LifeV::Debug( 10000 ) << "_ej_disp size : "  << _ej_check.disp.size() << "\n";
         LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 
         LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 
-        FSIChecker __fp_check( data_file,  "fixedPoint" );
-        __fp_check();
+        FSIChecker _fp_check( data_file,  "fixedPoint" );
+        _fp_check();
 
 
-        LifeV::Debug( 10000 ) << "__fp_disp size : "  << __fp_check.disp.size() << "\n";
+        LifeV::Debug( 10000 ) << "_fp_disp size : "  << _fp_check.disp.size() << "\n";
         LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 
-        std::cout << "norm_2(SP displacement)    = " << LifeV::norm_2( __sp_check.disp ) << " \n"
-                  << "norm_2(FP displacement)    = " << LifeV::norm_2( __fp_check.disp ) << " \n"
-                  << "norm_2(displacement error) = " << LifeV::norm_2( __sp_check.disp - __fp_check.disp ) << "\n";
+        LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+
+        FSIChecker _sp_check( data_file );
+        _sp_check();
+
+
+        LifeV::Debug( 10000 ) << "_fp_disp size : "  << _sp_check.disp.size() << "\n";
+        LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+
+        double norm1 = LifeV::norm_2( _ej_check.disp - _sp_check.disp );
+        double norm2 = LifeV::norm_2( _ej_check.disp - _fp_check.disp );
+
+        std::cout << "norm_2(EJ displacement)          = " << LifeV::norm_2( _ej_check.disp ) << " \n"
+                  << "norm_2(FP displacement)          = " << LifeV::norm_2( _fp_check.disp ) << " \n"
+                  << "norm_2(SP displacement)          = " << LifeV::norm_2( _sp_check.disp ) << " \n"
+                  << "norm_2(displacement error EJ/SP) = " << norm1 << "\n"
+                  << "norm_2(displacement error EJ/FP) = " << norm2 << "\n";
+
+        if ((norm1 < 1e-05) && (norm2 < 1e-05)) return 0;
+        else return -1;
     }
     else
     {
-        FSIChecker __sp_check( data_file );
-        __sp_check();
+        FSIChecker _sp_check( data_file );
+        _sp_check();
     }
 
     return 0;
