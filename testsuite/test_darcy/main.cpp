@@ -108,6 +108,7 @@ int main(int argc, char** argv)
         darcyslv.postProcessPressureQ0();
         darcyslv.postProcessPressureQ1();
         darcyslv.postProcessVelocityQ1();
+        darcyslv.postProcessEnsight();
         chrono.stop();
         if(darcyslv.verbose)
             std::cout << "<---  done in " << chrono.diff() << "s.\n" << std::endl;
@@ -150,6 +151,7 @@ int main(int argc, char** argv)
         darcyslv.postProcessPressureQ0();
         darcyslv.postProcessPressureQ1();
         darcyslv.postProcessVelocityQ1();
+        darcyslv.postProcessEnsight();
         chrono.stop();
         if(darcyslv.verbose)
             std::cout << "<---  done in " << chrono.diff() << "s.\n" << std::endl;
