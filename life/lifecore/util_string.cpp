@@ -22,17 +22,15 @@ namespace LifeV
 {
 std::istream & eatline( std::istream & s )    // eat a whole line from std::istream
 {
-    while ( s . get
-                () != '\n' && s . good() )
+    while ( s.get() != '\n' && s . good() )
         {}
     return s ;
 }
 
 std::istream & eat_comments( std::istream & s )    //eat lines starting with '!%#;$'
 {
-    char c ;
-    s . get
-        ( c ) ;
+    char c;
+    s.get( c ) ;
     while ( c == '!' ||
             c == '%' ||
             c == '#' ||
@@ -40,10 +38,9 @@ std::istream & eat_comments( std::istream & s )    //eat lines starting with '!%
             c == '$' )
     {
         s >> eatline ;
-        s . get
-            ( c ) ;
+        s.get( c ) ;
     }
-    return s . putback( c ) ;
+    return s.putback( c ) ;
 }
 
 std::string& setStringLength( std::string& s, unsigned int len, char c )
