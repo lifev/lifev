@@ -125,15 +125,15 @@ int nonLinRichardson( Vector& sol,
 
         std::cout << "Step norm = " << norm( step ) << std::endl;
         out_res   << "iter = " << iter
-                  << " Step norm = " << norm( muk );
+                  << " Step norm = " << norm( step );
 
         sol += step;
 
         residual = f.evalResidual( sol, iter );
 
-        out_res << " Res norm = " << norm( muk ) << std::endl;
+        out_res << " muk norm = " << norm( muk ) << std::endl;
 
-        normMuk  = norm( step );
+        normMuk  = norm( muk );
     }
 
     if ( normMuk > stop_tol )
