@@ -89,13 +89,13 @@ main(int argc, char** argv)
 
     // Impose the fluxes
     // 
-    //__ns_with_flux.setFlux("InFlow", my_flux_cost); //costant
-    __ns_with_flux.setFlux("InFlow", my_flux_cos); //cosinusoidal
-    //__ns_with_flux.setFlux("InFlow", my_flux_physio); // physiological
+    __ns_with_flux.setFlux(1, my_flux_cost); //costant
+    //__ns_with_flux.setFlux(1, my_flux_cos); //cosinusoidal
+    //__ns_with_flux.setFlux(1, my_flux_physio); // physiological
 
     toEnsight EnsightFilter;
     __ns_with_flux.doOnIterationFinish( EnsightFilter  );
-    __ns_with_flux.solve();
+    __ns_with_flux.solve(1);
 
     return EXIT_SUCCESS;
 }
