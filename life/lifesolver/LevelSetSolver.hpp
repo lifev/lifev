@@ -172,16 +172,19 @@ namespace LifeV {
               a subset of.
             */
             bool pointIsOnFace(const point_type& P) {
-                Real D = _M_points[0][0] * (_M_points[2][1] - _M_points[1][1]) +
+                Real D =
+                    _M_points[0][0] * (_M_points[2][1] - _M_points[1][1]) +
                     _M_points[1][0] * (_M_points[0][1] - _M_points[2][1]) +
                     _M_points[2][0] * (_M_points[1][1] - _M_points[0][1]);
 
-                Real xi = (P[0] - _M_points[0][0]) * (_M_points[0][1] - _M_points[2][1]) +
-                    (P[1] - _M_points[0][1]) * (_M_points[2][0] - _M_points[2][0]);
+                Real xi =
+                    (P[0]-_M_points[0][0])*(_M_points[0][1]-_M_points[2][1]) +
+                    (P[1]-_M_points[0][1])*(_M_points[2][0]-_M_points[2][0]);
                 xi /= D;
 
-                Real eta = (P[0] - _M_points[0][0]) * (_M_points[1][1] - _M_points[0][1]) +
-                    (P[1] - _M_points[0][1]) * (_M_points[0][0] - _M_points[1][0]);
+                Real eta =
+                    (P[0]-_M_points[0][0])*(_M_points[1][1]-_M_points[0][1]) +
+                    (P[1]-_M_points[0][1])*(_M_points[0][0]-_M_points[1][0]);
                 eta /= D;
 
                 return (xi >= 0 && xi <= 1 && eta >= 0 && eta <= 1 - xi);
@@ -266,20 +269,10 @@ namespace LifeV {
             return u();
         }
 
-        /*! \return the current finite element */
-        const CurrentFE& fe() const {
-            return _M_fe;
-        }
-
         //@}
 
         /*! \name Mutators */
         //@{
-
-        /*! \return a reference to the current finite element */
-        CurrentFE& fe() {
-            return _M_fe;
-        }
 
         //! set the tolerance on interface position
         void setTol(Real tol) {
@@ -293,24 +286,27 @@ namespace LifeV {
         //! reinitialize the interface using direct method
         void directReinitialization() {
             build_interface();
-            if(_M_verbose) {
-                std::cout << "** LSS ** " << _M_face_list.size() << " faces" << std::endl;
-                std::cout << "** LSS ** Reinitializing the interface" << std::endl;
+            if ( this->verboseMode() ) {
+                std::cout << "** LSS ** " << _M_face_list.size() << " faces"
+                          << std::endl;
+                std::cout << "** LSS ** Reinitializing the interface"
+                          << std::endl;
             }
 #if LSS_DEBUG_REINI
             exportToMatlab("./results/before.m");
 #endif
-            for(UInt iP = 1; iP <= _M_mesh.numPoints(); iP++) {
+            for(UInt iP = 1; iP <= this->mesh().numPoints(); iP++) {
                 point_type P;
-                convertPointType(P, _M_mesh.pointList(iP));
+                convertPointType(P, this->mesh().pointList(iP));
 
                 Real d = _M_face_list.begin()->pointToFaceDistance(P);
 
-                for(face_list_iterator faces_it = _M_face_list.begin(); faces_it != _M_face_list.end(); faces_it++)
+                for(face_list_iterator faces_it = _M_face_list.begin();
+                    faces_it != _M_face_list.end(); faces_it++)
                     d = std::min<Real>(d, faces_it->pointToFaceDistance(P));
 
 
-                _M_u[iP - 1] = signum(_M_u[iP - 1]) * d;
+                this->u()[iP - 1] = signum(this->u()[iP - 1]) * d;
             }
 #if LSS_DEBUG_REINI
             build_interface();
@@ -324,18 +320,18 @@ namespace LifeV {
             Real __ls_fun;
             UInt __jglo;
 
-            for(UInt i = 1; i <= _M_mesh.numVolumes(); i++) {
-                _M_fe.updateJac( _M_mesh.volumeList(i) );
+            for(UInt i = 1; i <= this->mesh().numVolumes(); i++) {
+                this->fe().updateJac( this->mesh().volumeList(i) );
 
-                for(int iq = 0; iq < _M_fe.nbQuadPt; iq++) {
+                for(int iq = 0; iq < this->fe().nbQuadPt; iq++) {
                     __ls_fun = 0.;
-                    for(int j = 0; j < _M_fe.nbNode; j++) {
-                        __jglo = _M_dof.localToGlobal(i, j + 1) - 1;
-                        __ls_fun += _M_fe.phi(j, iq) * _M_u(__jglo);
+                    for(int j = 0; j < this->fe().nbNode; j++) {
+                        __jglo = this->dof().localToGlobal(i, j + 1) - 1;
+                        __ls_fun += this->fe().phi(j, iq) * this->u()(__jglo);
                     }
-                    __mass += (__fluid_id == fluid1) ? 
-                        (__ls_fun < 0 ? 1. : 0.) * _M_fe.weightDet(iq) :
-                        (__ls_fun >= 0 ? 1. : 0.) * _M_fe.weightDet(iq);
+                    __mass += (__fluid_id == fluid1) ?
+                        (__ls_fun <  0 ? 1. : 0.) * this->fe().weightDet(iq) :
+                        (__ls_fun >= 0 ? 1. : 0.) * this->fe().weightDet(iq);
                 }
             }
             return __mass;
@@ -357,11 +353,14 @@ namespace LifeV {
             ofile << "% P(i, j) = j-th coordinate of point i" << std::endl;
             ofile << "% ========================================" << std::endl;
             ofile << "P = [..." << std::endl;
-            for(face_list_iterator faces_it = _M_face_list.begin(); faces_it != _M_face_list.end(); faces_it++) {
-                for(int node_id = 1; node_id <= faces_it->numLocalNodes(); node_id++)
+            for(face_list_iterator faces_it = _M_face_list.begin();
+                faces_it != _M_face_list.end(); faces_it++) {
+                for(int node_id = 1;
+                    node_id <= faces_it->numLocalNodes(); node_id++)
                     ofile << faces_it->point(node_id)[0] << ", "
                           << faces_it->point(node_id)[1] << ", "
-                          << faces_it->point(node_id)[2] << ";... " << std::endl;
+                          << faces_it->point(node_id)[2] << ";... "
+                          << std::endl;
             }
             ofile << "];" << std::endl;
 
@@ -375,8 +374,10 @@ namespace LifeV {
             ofile << "% ========================================" << std::endl;
             ofile << " C = [..." << std::endl;
             int nP = 1;
-            for(face_list_iterator faces_it = _M_face_list.begin(); faces_it != _M_face_list.end(); faces_it++) {
-                for(int node_id = 1; node_id <= faces_it->numLocalNodes(); node_id++, nP++)
+            for(face_list_iterator faces_it = _M_face_list.begin();
+                faces_it != _M_face_list.end(); faces_it++) {
+                for(int node_id = 1;
+                    node_id <= faces_it->numLocalNodes(); node_id++, nP++)
                     ofile << nP << " ";
                 ofile << ";..." << std::endl;
             }
@@ -388,8 +389,8 @@ namespace LifeV {
             ofile << "% SOLUTION" << std::endl;
             ofile << "% ========================================" << std::endl;
             ofile << "U = [..." << std::endl;
-            for(UInt i = 0; i < _M_u.size(); i++)
-                ofile << _M_u[i] << ";..." << std::endl;
+            for(UInt i = 0; i < this->u().size(); i++)
+                ofile << this->u()[i] << ";..." << std::endl;
             ofile << "];" << std::endl;
 
             ofile.close();
@@ -409,13 +410,13 @@ namespace LifeV {
 
             _M_face_list.clear();
 
-            Subelements se( _M_fe );
+            Subelements se( this->fe() );
 
             // A loop on the volumes to find the local intersection with the
             // interface
-            for(UInt iV = 1; iV <= _M_mesh.numVolumes(); iV++) {
+            for(UInt iV = 1; iV <= this->mesh().numVolumes(); iV++) {
 
-                _M_fe.updateJac( _M_mesh.volumeList( iV ) );
+                this->fe().updateJac( this->mesh().volumeList( iV ) );
 
                 for(UInt iSe = 0; iSe < se.numSubelements(); ++iSe ) {
 
@@ -426,11 +427,11 @@ namespace LifeV {
                         UInt j1 = se.edge2Point( iSe, ie, 1 );
                         UInt j2 = se.edge2Point( iSe, ie, 2 );
 
-                        UInt jg1 = _M_dof.localToGlobal(iV, j1) - 1;
-                        UInt jg2 = _M_dof.localToGlobal(iV, j2) - 1;
+                        UInt jg1 = this->dof().localToGlobal(iV, j1) - 1;
+                        UInt jg2 = this->dof().localToGlobal(iV, j2) - 1;
 
-                        Real u1 = _M_u[jg1];
-                        Real u2 = _M_u[jg2];
+                        Real u1 = this->u()[jg1];
+                        Real u2 = this->u()[jg2];
 
                         // If the solution is zero somewhere on the segment
                         if(u1 * u2 < 0) {
@@ -441,18 +442,18 @@ namespace LifeV {
                             se.coord( P1[0], P1[1], P1[2], j1 );
                             se.coord( P2[0], P2[1], P2[2], j2 );
 
-                            //_M_fe.coorMap( P1[0], P1[1], P1[2], se.xi(j1),
+                            //this->fe().coorMap( P1[0], P1[1], P1[2], se.xi(j1),
                             //               se.eta(j1), se.zeta(j1) );
-                            //_M_fe.coorMap( P2[0], P2[1], P2[2], se.xi(j2),
+                            //this->fe().coorMap( P2[0], P2[1], P2[2], se.xi(j2),
                             //               se.eta(j2), se.zeta(j2) );
 
-                            //P1[0] = _M_mesh.pointList(jg1 + 1).x();
-                            //P1[1] = _M_mesh.pointList(jg1 + 1).y();
-                            //P1[2] = _M_mesh.pointList(jg1 + 1).z();
+                            //P1[0] = this->mesh().pointList(jg1 + 1).x();
+                            //P1[1] = this->mesh().pointList(jg1 + 1).y();
+                            //P1[2] = this->mesh().pointList(jg1 + 1).z();
 
-                            //P2[0] = _M_mesh.pointList(jg2 + 1).x();
-                            //P2[1] = _M_mesh.pointList(jg2 + 1).y();
-                            //P2[2] = _M_mesh.pointList(jg2 + 1).z();
+                            //P2[0] = this->mesh().pointList(jg2 + 1).x();
+                            //P2[1] = this->mesh().pointList(jg2 + 1).y();
+                            //P2[2] = this->mesh().pointList(jg2 + 1).z();
 
                             findZeroOnEdge(P1, u1, P2, u2, P);
 
