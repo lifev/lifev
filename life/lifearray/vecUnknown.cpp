@@ -21,11 +21,13 @@
 namespace LifeV
 {
 //! the case of VectorBlock type
+template<>
 PhysVectUnknown<VectorBlock>::
 PhysVectUnknown( UInt const Ndof ) : super( Ndof, nDimensions )
 {}
 
 //! the case of VectorBlock type
+template<>
 GenericVecHdl<VectorBlock>::
 GenericVecHdl( const ScalUnknown<VectorBlock> &RhScU1,
                const ScalUnknown<VectorBlock> &RhScU2 ) :
@@ -39,6 +41,7 @@ GenericVecHdl( const ScalUnknown<VectorBlock> &RhScU1,
 }
 
 //! the case of VectorBlock type
+template<>
 GenericVecHdl<VectorBlock>::
 GenericVecHdl( const PhysVectUnknown<VectorBlock> &RhPhVU,
                const ScalUnknown<VectorBlock> &RhScU ) :
@@ -52,6 +55,7 @@ GenericVecHdl( const PhysVectUnknown<VectorBlock> &RhPhVU,
 }
 
 //! the case of VectorBlock type
+template<>
 GenericVecHdl<VectorBlock>::
 GenericVecHdl( const ScalUnknown<VectorBlock> &RhScU,
                const PhysVectUnknown<VectorBlock> &RhPhVU ) :
@@ -65,6 +69,7 @@ GenericVecHdl( const ScalUnknown<VectorBlock> &RhScU,
 }
 
 //! the case of VectorBlock type
+template<>
 GenericVecHdl<VectorBlock>::
 GenericVecHdl( const PhysVectUnknown<VectorBlock> &RhPhVU,
                const GenericVecHdl<VectorBlock> &RhGenVec ) :
@@ -78,6 +83,7 @@ GenericVecHdl( const PhysVectUnknown<VectorBlock> &RhPhVU,
         numBlock( RhPhVU.size() + i ) = RhGenVec.numBlock( i );
 }
 //! the case of VectorBlock type
+template<>
 GenericVecHdl<VectorBlock>::
 GenericVecHdl( const GenericVecHdl<VectorBlock> &RhGenVec,
                const PhysVectUnknown<VectorBlock> &RhPhVU ) :
