@@ -20,7 +20,6 @@
 #include <life/lifesolver/NavierStokesAleSolverPC.hpp>
 #include <life/lifesolver/VenantKirchhofSolver.hpp>
 #include <life/lifealg/nonLinRichardson.hpp>
-#include <life/lifesolver/steklovPoincareBase.hpp>
 #include <life/lifesolver/fixedPointBase.hpp>
 #include <life/lifesolver/exactJacobianBase.hpp>
 #include <life/lifefem/dofInterface3Dto3D.hpp>
@@ -260,17 +259,17 @@ int main(int argc, char** argv)
                                            BCh_d,
                                            BCh_mesh));
             break;
-        case 1:
-            std::cout << " -- SteklovPoincare method \n";
-            std::cout << "------------------------------------------------------ \n\n";
-            __operFSI.reset(new steklovPoincare(fluid,
-                                                solid,
-                                                data_file,
-                                                BCh_u,
-                                                BCh_d,
-                                                BCh_mesh));
-            if (precond == 2) defOmega = -1.;
-            break;
+//         case 1:
+//             std::cout << " -- SteklovPoincare method \n";
+//             std::cout << "------------------------------------------------------ \n\n";
+//             __operFSI.reset(new steklovPoincare(fluid,
+//                                                 solid,
+//                                                 data_file,
+//                                                 BCh_u,
+//                                                 BCh_d,
+//                                                 BCh_mesh));
+//             if (precond == 2) defOmega = -1.;
+//             break;
         case 2:
             std::cout << " -- exactJacobian method\n";
             std::cout << "----------------------------------------------------\n\n";
