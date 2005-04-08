@@ -129,7 +129,7 @@ struct FSIChecker
 {
     FSIChecker( GetPot const& _data_file ):
         data_file( _data_file ),
-        oper     ( _data_file( "problem/method", "steklovPoincare" ) ),
+        oper     ( _data_file( "problem/method", "exactJacobian" ) ),
         prec     ( ( LifeV::Preconditioner )_data_file( "problem/precond", LifeV::NEUMANN_NEUMANN ) )
         {}
 
@@ -188,7 +188,7 @@ int main(int argc, char** argv)
 
         LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 
-        FSIChecker _sp_check( data_file, "steklovPoincare" );
+        FSIChecker _sp_check( data_file, "fixedPoint" );
         _sp_check();
 
 

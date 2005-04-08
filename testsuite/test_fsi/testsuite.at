@@ -34,7 +34,7 @@ AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 
 [problem]
 
-method       = steklovPoincare # 0 = fixedpoint, 1 = steklovpoincare, 2 = exactjacobian	
+method       = exactJacobian # 0 = fixedpoint, 1 = steklovpoincare, 2 = exactjacobian	
 precond      = 2 # precond for steklovpoincare, 0 = lin fluid, 1 lin structure, 2 = both
 defOmega     = 0.001 # usually 0.01 for precond = 0 or 1; -1 for precond = 2
 defOmegaS    = 0.001 # matters only with  precond = 2
@@ -174,7 +174,7 @@ AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 
 [problem]
 
-method       = steklovPoincare # 0 = fixedpoint, 1 = steklovpoincare, 2 = exactjacobian	
+method       = exactJacobian # 0 = fixedpoint, 1 = steklovpoincare, 2 = exactjacobian	
 precond      = 2 # precond for steklovpoincare, 0 = lin fluid, 1 lin structure, 2 = both
 defOmega     = 0.001 # usually 0.01 for precond = 0 or 1; -1 for precond = 2
 defOmegaS    = 0.001 # matters only with  precond = 2
