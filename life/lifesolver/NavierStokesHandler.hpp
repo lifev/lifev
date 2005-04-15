@@ -81,6 +81,7 @@ public:
 
     //! type used for flux computations (see FacesOnSections)
     typedef __gnu_cxx::slist< std::pair< ID, SimpleVect< ID > > > face_dof_type;
+    typedef face_dof_type::const_iterator const_face_dof_iterator_type;
 
     //! Constructors
     /*!
@@ -226,16 +227,20 @@ public:
     /*! Get the faces that live on a horizontal section (z=__z_section)
       up to a given tolerance (z = __z_section +/- __tolerance ).
 
-      \param __z_section : position of the planar section
+      \param __planar_section : position of the planar section (plane
+      given by its 4 (THREED) components (a,b,c,d) such that
+      a x + b y + c z + d = 0
       \param __faces_on_section : list of faces that were found:
       first:  global face number
       second: vector of size nDofF (nb of dof per face). contains the local (in the face) to global dof.
 
       The first is for velocity ("_u") and the second
       for pressure ("_p").
-     \param __tolerance_section :
-                  all faces between the two planes  z = __z_section - __tolerance_section
-                  and z = __z_section + __tolerance_section are kept.
+
+      \param __tolerance_section :
+      all faces between the two planes
+      a x + b y + c z + d = +/- __tolerance_section
+      are kept.
       (we only check the first 3 points of the faces)
 
       \param __x_frontier : given point on the boundary.
@@ -244,7 +249,7 @@ public:
 
       This function is VERY mesh dependent!! Use it with caution.
     */
-    void FacesOnSection( const Real&  __z_section,
+    void FacesOnSection( const SimpleVect<Real> &  __planar_section,
                          face_dof_type & __faces_on_section_u,
                          face_dof_type & __faces_on_section_p,
                          const Real& __tolerance_section,
@@ -268,10 +273,13 @@ public:
                                 first:  global face number
                                 second: vector of size nDofF (nb of dof per face)
                                         contains the local (in the face) to global dof.
-      \param modify_sign_normal : if == true, the computed flux is positive if (u \dot z) is positive
+     \param __modify_sign_normal : if == true, the computed flux is positive if (u \dot __reference_normal) is positive
+     \param __reference_normal : vector provided to give a fixed orientation to the normal
+
     */
     std::pair< Real, Real > AreaAndFlux( const face_dof_type & __faces_on_section_u,
-                                         const bool& modify_sign_normal = false );
+                                         const bool& __modify_sign_normal,
+                                         const SimpleVect<Real>& __reference_normal);
     /*! compute the Area and Flux
       \param __faces_on_section_p : list of (faces <-> pressure dof) that were found:
       first:  global face number
@@ -377,7 +385,9 @@ protected:
     std::vector< std::pair<ID, ID> >  M_list_of_points_on_boundary;
 
     std::ofstream M_out_areas;
+#if COMPUTE_POLYGONAL_AREA
     std::ofstream M_out_areas_polygon;
+#endif
     std::ofstream M_out_fluxes;
     std::ofstream M_out_pressure;
 
@@ -389,7 +399,8 @@ protected:
        On output it contains the local (in the face) to global dof.
        \param __reffe : reference fe.
    */
-    void _updateDofFaces( face_dof_type & __faces_on_section, const RefFE& __reffe );
+    void _updateDofFaces( face_dof_type & __faces_on_section,
+                          const RefFE& __reffe, const Dof& __dof );
 
 
 private:
@@ -398,7 +409,8 @@ private:
     bool          M_setBC;
 
 //! private methods
-    void          initializeMeanValuesPerSection();
+    void initializeMeanValuesPerSection();
+    void initializeSectionsBifurc();
 
     //! The BC handler
     BCHandler    *M_BCh_fluid;
@@ -451,13 +463,19 @@ NavierStokesHandler( const GetPot& data_file, const RefFE& refFE_u,
     M_list_of_faces_on_section_pressure( M_nb_sections ),
     M_list_of_points_on_boundary       ( M_nb_sections ),
     M_out_areas                        ("Areas.res"),
+#if COMPUTE_POLYGONAL_AREA
     M_out_areas_polygon                ("AreasPolygon.res"),
+#endif
     M_out_fluxes                       ("Fluxes.res"),
     M_out_pressure                     ("Pressure.res"),
     M_BCh_fluid                        ( &BCh_u )
 {
     if ( this->computeMeanValuesPerSection() == 1 )
         initializeMeanValuesPerSection();
+    /*
+    //! for simple bifurcation mesh
+        initializeSectionsBifurc();
+    */
 }
 
 
@@ -504,7 +522,9 @@ NavierStokesHandler( const GetPot&   data_file,
     M_list_of_faces_on_section_pressure( M_nb_sections ),
     M_list_of_points_on_boundary       ( M_nb_sections ),
     M_out_areas                        ("Areas.res"),
+#if COMPUTE_POLYGONAL_AREA
     M_out_areas_polygon                ("AreasPolygon.res"),
+#endif
     M_out_fluxes                       ("Fluxes.res"),
     M_out_pressure                     ("Pressure.res"),
     // fluid Bc conditions
@@ -880,8 +900,14 @@ NavierStokesHandler<Mesh, DataType>::flux( const EntityFlag& flag )
     face_dof_type faces_on_flag;
     FacesOnFlag( flag, _refFE_u, faces_on_flag ); //! reconstruct all the connectivity
 
+    //! reference normal vector (unused, as we keep the positive outward normal on the boundary)
+    SimpleVect<Real> unused(3);
+    unused(0) = 0.;
+    unused(1) = 0.;
+    unused(2) = 0.;
+
     std::pair< Real, Real > area_flux = AreaAndFlux( faces_on_flag,
-                                                     false ); //! keep the orientation of the normal
+                                                     false, unused ); //! keep the orientation of the normal
     return area_flux.second;
 }
 
@@ -940,7 +966,10 @@ NavierStokesHandler<Mesh, DataType>::FacesOnFlag( const EntityFlag& __flag ,
 /*! Get the faces that live on a horizontal section (z=__z_section)
     up to a given tolerance (z = __z_section +/- __tolerance ).
 
-    \param __z_section : position of the planar section
+    \param __planar_section : position of the planar section (plane 
+    given by its 4 (THREED) components (a,b,c,d) such that
+    a x + b y + c z + d = 0
+
     \param __faces_on_section : list of faces that were found:
       first:  global face number
       second: vector of size nDofF (nb of dof per face).
@@ -949,9 +978,10 @@ NavierStokesHandler<Mesh, DataType>::FacesOnFlag( const EntityFlag& __flag ,
       The first is for velocity ("_u") and the second
       for pressure ("_p").
    \param __tolerance_section :
-                  all faces between the two planes  z = __z_section - __tolerance_section
-                  and z = __z_section + __tolerance_section are kept.
-   (we only check the first 3 points of the faces)
+                  all faces between the two planes
+		  a x + b y + c z + d = +/- __tolerance_section
+		  are kept.
+   (we only check the first 3 points of the mesh faces)
 
    \param __x_frontier : given point on the boundary.
    \param __point_on_boundary is a pair<global face ID, Vertex ID> determining a point
@@ -961,7 +991,7 @@ NavierStokesHandler<Mesh, DataType>::FacesOnFlag( const EntityFlag& __flag ,
 */
 template <typename Mesh, typename DataType>
 void
-NavierStokesHandler<Mesh, DataType>::FacesOnSection( const Real&  __z_section,
+NavierStokesHandler<Mesh, DataType>::FacesOnSection( const SimpleVect<Real> &  __planar_section,
                                            face_dof_type & __faces_on_section_u,
                                            face_dof_type & __faces_on_section_p,
                                            const Real& __tolerance_section ,
@@ -990,6 +1020,17 @@ NavierStokesHandler<Mesh, DataType>::FacesOnSection( const Real&  __z_section,
     ID  iglobface;
 
     bool _found_point = false;
+    //! default value
+    __point_on_boundary = std::pair<ID, ID>( 0 , 0 );
+
+    //! coefficients defining the plane ax + by + cz + d = 0
+    Real a_plane = __planar_section(0);
+    Real b_plane = __planar_section(1);
+    Real c_plane = __planar_section(2);
+    Real d_plane = __planar_section(3);
+
+    //    std::cout << "a " << a_plane << " b " << b_plane << " c "
+    //         << c_plane << " d " << d_plane << std::endl;
 
     //! search the faces on a given horizontal section
     //! loop on all faces
@@ -997,33 +1038,60 @@ NavierStokesHandler<Mesh, DataType>::FacesOnSection( const Real&  __z_section,
         iglobface = this->_mesh.faceList(iface).id();
 
         //! 3 points on the faces
+        Real x_VeFa1 = this->_mesh.faceList(iface).point( 1 ).x();
+        Real y_VeFa1 = this->_mesh.faceList(iface).point( 1 ).y();
         Real z_VeFa1 = this->_mesh.faceList(iface).point( 1 ).z();
+
+        Real x_VeFa2 = this->_mesh.faceList(iface).point( 2 ).x();
+        Real y_VeFa2 = this->_mesh.faceList(iface).point( 2 ).y();
         Real z_VeFa2 = this->_mesh.faceList(iface).point( 2 ).z();
+
+        Real x_VeFa3 = this->_mesh.faceList(iface).point( 3 ).x();
+        Real y_VeFa3 = this->_mesh.faceList(iface).point( 3 ).y();
         Real z_VeFa3 = this->_mesh.faceList(iface).point( 3 ).z();
 
         //! check the tolerance here (depends on the mesh)
-        if ( std::fabs( __z_section - z_VeFa1 ) < __tolerance_section &&
-             std::fabs( __z_section - z_VeFa2 ) < __tolerance_section &&
-             std::fabs( __z_section - z_VeFa3 ) < __tolerance_section
+        if ( std::fabs( a_plane * x_VeFa1 + b_plane * y_VeFa1 + c_plane * z_VeFa1 + d_plane ) < __tolerance_section &&
+             std::fabs( a_plane * x_VeFa2 + b_plane * y_VeFa2 + c_plane * z_VeFa2 + d_plane ) < __tolerance_section &&
+             std::fabs( a_plane * x_VeFa3 + b_plane * y_VeFa3 + c_plane * z_VeFa3 + d_plane ) < __tolerance_section
              ) {
-            __faces_on_section_u.push_front( make_pair( iglobface, SimpleVect<ID>( nDofF_u ) ) );
-            __faces_on_section_p.push_front( make_pair( iglobface, SimpleVect<ID>( nDofF_p ) ) );
+            //! additional inequality constraint:
+            //! 3<y<3.5 for sections x=+/- 0.5 and
+            //! -0.5<x<0.5 for section y=4
+            if ( ! ( a_plane == 1. && std::fabs( d_plane ) == 0.5 ) ||
+                 ! ( b_plane == 1. && std::fabs( d_plane ) == 0.5 ) ||
+                 ( a_plane == 1. && std::fabs( d_plane ) == 0.5 &&
+                   y_VeFa1 > 3. - __tolerance_section && y_VeFa1 < 3.5 + __tolerance_section &&
+                   y_VeFa2 > 3. - __tolerance_section && y_VeFa2 < 3.5 + __tolerance_section &&
+                   y_VeFa3 > 3. - __tolerance_section && y_VeFa3 < 3.5 + __tolerance_section    ) ||
+                 ( b_plane == 1. && d_plane == -4. &&
+                   std::fabs( x_VeFa1 ) < 0.5 + __tolerance_section &&
+                   std::fabs( x_VeFa2 ) < 0.5 + __tolerance_section &&
+                   std::fabs( x_VeFa3 ) < 0.5 + __tolerance_section )
+                 ) {
+                // std::cout << "Found:" << iglobface << " x " << x_VeFa1 << " y " << y_VeFa1
+                //          << " z " << z_VeFa1
+                //          << std::endl;
 
-            ID iVeFa = 1;
-            while ( ! _found_point && iVeFa <= nFaceV ) {
-                Real x_VeFa = this->_mesh.faceList(iface).point( iVeFa ).x();
-                if ( std::fabs( x_VeFa - __x_frontier ) < __tolerance_section ) {
-                    __point_on_boundary = std::pair<ID, ID>( iglobface , iVeFa );
-                    _found_point = true;
+                __faces_on_section_u.push_front( make_pair( iglobface, SimpleVect<ID>( nDofF_u ) ) );
+                __faces_on_section_p.push_front( make_pair( iglobface, SimpleVect<ID>( nDofF_p ) ) );
+
+                ID iVeFa = 1;
+                while ( ! _found_point && iVeFa <= nFaceV ) {
+                    Real x_VeFa = this->_mesh.faceList(iface).point( iVeFa ).x();
+                    if ( std::fabs( x_VeFa - __x_frontier ) < __tolerance_section ) {
+                        __point_on_boundary = std::pair<ID, ID>( iglobface , iVeFa );
+                        _found_point = true;
+                    }
+                    iVeFa ++;
                 }
-                iVeFa ++;
             }
         }
     }
 
     //! building the local to global vector for these boundary faces (veloc and pressure)
-    _updateDofFaces( __faces_on_section_u, _refFE_u );
-    _updateDofFaces( __faces_on_section_p, _refFE_p );
+    _updateDofFaces( __faces_on_section_u, _refFE_u, _dof_u );
+    _updateDofFaces( __faces_on_section_p, _refFE_p, _dof_p );
 }
 
 /*! Update the local (face dof) to global dof vector
@@ -1037,7 +1105,7 @@ NavierStokesHandler<Mesh, DataType>::FacesOnSection( const Real&  __z_section,
 template <typename Mesh, typename DataType>
 void
 NavierStokesHandler<Mesh, DataType>::_updateDofFaces( face_dof_type & __faces_on_section,
-                                            const RefFE& __reffe )
+                                                      const RefFE& __reffe, const Dof& __dof)
 {
     typedef typename Mesh::VolumeShape GeoShape;
     typedef typename Mesh::FaceShape GeoBShape;
@@ -1099,7 +1167,8 @@ NavierStokesHandler<Mesh, DataType>::_updateDofFaces( face_dof_type & __faces_on
                     lDof = ( iVeFa - 1 ) * nDofpV + l ;
 
                     // global Dof
-                    gDof = _dof_u.localToGlobal( iElAd,
+                    //!!!!!!!!!! BUG : GENERAL DOF here CORRECT this!!!!!!
+                    gDof = __dof.localToGlobal( iElAd,
                                                  ( iVeEl - 1 ) * nDofpV + l );
 
                     j->second( lDof ) = gDof; // local to global on this face
@@ -1124,7 +1193,7 @@ NavierStokesHandler<Mesh, DataType>::_updateDofFaces( face_dof_type & __faces_on
                     lDof = nDofFV + ( iEdFa - 1 ) * nDofpE + l ;
 
                     // global Dof
-                    gDof = _dof_u.localToGlobal( iElAd,
+                    gDof = __dof.localToGlobal( iElAd,
                                                  nDofElemV +
                                                  ( iEdEl - 1 ) * nDofpE + l );
 
@@ -1143,7 +1212,7 @@ NavierStokesHandler<Mesh, DataType>::_updateDofFaces( face_dof_type & __faces_on
                 lDof = nDofFE + nDofFV + l;
 
                 // global Dof
-                gDof = _dof_u.localToGlobal( iElAd,
+                gDof = __dof.localToGlobal( iElAd,
                                              nDofElemE + nDofElemV +
                                              ( iFaEl - 1 ) * nDofpF + l );
 
@@ -1183,12 +1252,14 @@ NavierStokesHandler<Mesh, DataType>::AreaCylindric( const std::pair<ID, ID> & __
   first:  global face number
   second: vector of size nDofF (nb of dof per face)
   contains the local (in the face) to global dof.
-  \param modify_sign_normal : if == true, the computed flux is positive if (u \dot z) is positive
+  \param __modify_sign_normal : if == true, the computed flux is positive if (u \dot __reference_normal) is positive
+  \param __reference_normal : vector provided to give a fixed orientation to the normal
 */
 template <typename Mesh, typename DataType>
 std::pair< Real, Real >
 NavierStokesHandler<Mesh, DataType>::AreaAndFlux( const face_dof_type & __faces_on_section_u,
-                                        const bool & modify_sign_normal )
+                                                  const bool & __modify_sign_normal,
+                                                  const SimpleVect<Real>& __reference_normal )
 {
     typedef typename Mesh::FaceShape GeoBShape;
 
@@ -1209,8 +1280,6 @@ NavierStokesHandler<Mesh, DataType>::AreaAndFlux( const face_dof_type & __faces_
 
     ID gDof, numTotalDof = _dof_u.numTotalDof();
 
-    typedef face_dof_type::const_iterator constFaceDofIterator;
-
     // Number of velocity components
     UInt nc_u = _u.nbcomp();
 
@@ -1218,10 +1287,9 @@ NavierStokesHandler<Mesh, DataType>::AreaAndFlux( const face_dof_type & __faces_
     std::vector<Real> u_local( nc_u * nDofF );
 
     // Loop on faces
-    for ( constFaceDofIterator j = __faces_on_section_u.begin();
+    for ( const_face_dof_iterator_type j = __faces_on_section_u.begin();
           j != __faces_on_section_u.end(); ++j )
     {
-
         // Extracting local values of the velocity in the current face
         for ( UInt ic = 0; ic < nc_u; ++ic )
         {
@@ -1238,23 +1306,29 @@ NavierStokesHandler<Mesh, DataType>::AreaAndFlux( const face_dof_type & __faces_
 
         __area += _feBd_u.measure();
 
+        //   std::cout << "area/flux comp : " << j->first << " area= " << __area << std::endl;
+
+        //! check the orientation of the normal
+        //! the flux will be positive if (u \dot positive_normal) is positive
+        Real sign_normal = 1.0;
+        Int i_quadr = 0; //! check only at the 1rst quad point
+        //(assuming that the element is not too distorted)
+        Real n_dot_ref = 0.;
+        for ( int ic = 0; ic < (int)nc_u; ++ic ) { //! dot product
+            n_dot_ref =_feBd_u.normal( ic, i_quadr ) * __reference_normal( ic );
+        }
+        if ( __modify_sign_normal && n_dot_ref < 0 ) {
+            sign_normal = -1.0;
+        }
 
         // Quadrature formula
         // Loop on quadrature points for velocities
         for ( int iq = 0; iq < _feBd_u.nbQuadPt; ++iq )
         {
-            //! check the orientation of the normal
-            //! the flux will be positive if (u \dot z) is positive
-            Real sign_normal_dot_z = 1.0;
-            if ( modify_sign_normal && _feBd_u.normal( 2, iq ) < 0 ) { //! component=2 -> z axis
-                sign_normal_dot_z = -1.0;
-            }
-
             // Dot product
             // Loop on components
             for ( UInt ic = 0; ic < nc_u; ++ic )
             {
-
                 // Interpolation
                 // Loop on local dof
                 for ( ID l = 1; l <= nDofF; ++l )
@@ -1262,7 +1336,7 @@ NavierStokesHandler<Mesh, DataType>::AreaAndFlux( const face_dof_type & __faces_
                         u_local[ ic * nDofF + l - 1 ] *
                         _feBd_u.phi( int( l - 1 ), iq ) *
                         _feBd_u.normal( int( ic ), iq ) *
-                        sign_normal_dot_z;
+                        sign_normal;
             }
         }
     }
@@ -1300,8 +1374,6 @@ NavierStokesHandler<Mesh, DataType>::MeanPressure( const face_dof_type & __faces
     ID gDof;
     //ID numTotalDof = _dof_p.numTotalDof();
 
-    typedef face_dof_type::const_iterator constFaceDofIterator;
-
     // Nodal values of the pressure in the current face
     std::vector<Real> p_local( nDofF );
 
@@ -1309,8 +1381,10 @@ NavierStokesHandler<Mesh, DataType>::MeanPressure( const face_dof_type & __faces
     CurrentBdFE __ThefeBd_p( _refFE_p.boundaryFE(), getGeoMap( this->_mesh ).boundaryMap(),
                              _bdQr_p );
 
+    Real area = 0.;
+
     // Loop on faces
-    for ( constFaceDofIterator j = __faces_on_section_p.begin();
+    for ( const_face_dof_iterator_type j = __faces_on_section_p.begin();
           j != __faces_on_section_p.end(); ++j )
     {
 
@@ -1321,6 +1395,7 @@ NavierStokesHandler<Mesh, DataType>::MeanPressure( const face_dof_type & __faces
 
         // Updating quadrature data on the current face
         __ThefeBd_p.updateMeasQuadPt( this->_mesh.boundaryFace( j->first ) );
+        area += __ThefeBd_p.measure();
 
         // Quadrature formula
         // Loop on quadrature points for velocities
@@ -1329,11 +1404,14 @@ NavierStokesHandler<Mesh, DataType>::MeanPressure( const face_dof_type & __faces
             // Interpolation
             // Loop on local dof
             for ( ID l = 1; l <= nDofF; ++l )
-                __pressure += //__ThefeBd_p.weightMeas( iq ) *
+                __pressure += __ThefeBd_p.weightMeas( iq ) *
                     p_local[ l - 1 ] *
                     __ThefeBd_p.phi( int( l - 1 ), iq );
+
         }
     }
+    // divide by the (approximated in the case of FSI) area to obtain the mean.
+    __pressure = __pressure / area;
 
     return  __pressure;
 }
@@ -1353,23 +1431,35 @@ void NavierStokesHandler<Mesh, DataType>::PostProcessPressureAreaAndFlux( const 
                  << "%% toplabel='Section,time=" << __time << "'\n %% ylabel='Flux'\n";
     M_out_pressure  << "$ DATA = CURVE2D\n %% xlabel='z'\n"
                     << "%% toplabel='Section,time=" << __time << "'\n %% ylabel='Pressure'\n";
+#if COMPUTE_POLYGONAL_AREA
     M_out_areas_polygon  << "$ DATA = CURVE2D\n %% xlabel='z'\n"
                          << "%% toplabel='Section,time=" << __time << "'\n %% ylabel='AreaPolygonal'\n";
+#endif
+
+    SimpleVect<Real> reference_normal(3);
+    reference_normal(0) = 1.;
+    reference_normal(1) = 0.;
+    reference_normal(2) = 0.; // flux positive if (u dot reference_normal) > 0
 
     for ( int izs = 0; izs < M_nb_sections ; izs ++  ){
-        //! all normals are oriented along z axis -> "true"
-        std::pair<Real, Real> AQmid  = this->AreaAndFlux( M_list_of_faces_on_section_velocity[izs], true );
+        //! all normals oriented according to the reference_normal -> "true"
+        std::pair<Real, Real> AQmid  = this->AreaAndFlux( M_list_of_faces_on_section_velocity[izs], true, reference_normal );
         M_out_areas  << M_z_section[izs] << "\t" << AQmid.first << "\n";
         M_out_fluxes << M_z_section[izs] << "\t" << AQmid.second << "\n";
         M_out_pressure << M_z_section[izs] << "\t" << this->MeanPressure( M_list_of_faces_on_section_pressure[izs] ) << "\n";
 
+#if COMPUTE_POLYGONAL_AREA
+        //! remove the polygonal area??
         Real area_polygon = this->AreaCylindric( M_list_of_points_on_boundary[izs], NbPolygonEdges() );
         M_out_areas_polygon  << M_z_section[izs] << "\t" << area_polygon << "\n";
+#endif
     }
     M_out_areas << std::endl;
     M_out_fluxes << std::endl;
     M_out_pressure << std::endl;
+#if COMPUTE_POLYGONAL_AREA
     M_out_areas_polygon << std::endl;
+#endif
 }
 
 
@@ -1579,36 +1669,123 @@ void NavierStokesHandler<Mesh, DataType>::initializeMeanValuesPerSection()
     //! (ex. of mesh: tube20.mesh)
     //---------------
 
-        if ( ! this->_mesh.hasInternalFaces() )
-            ERROR_MSG("The mesh must have all internal faces built up. Check that 'mesh_faces = all' in the data file.");
-        if ( M_nb_sections < 2 )
-            ERROR_MSG("We can't compute the mean values on less than 2 sections.");
-        ASSERT( ZSectionFinal() - ZSectionInit() > 0,
-                "We can't compute the mean values on less than 2 sections.");
+    if ( ! this->_mesh.hasInternalFaces() )
+        ERROR_MSG("The mesh must have all internal faces built up. Check that 'mesh_faces = all' in the data file.");
+    if ( M_nb_sections < 2 )
+        ERROR_MSG("We can't compute the mean values on less than 2 sections.");
+    ASSERT( ZSectionFinal() - ZSectionInit() > 0,
+            "Error on the z given to compute the sections.");
 
-        for ( int izs = 0; izs < M_nb_sections ; izs ++  ){
-            M_z_section[ izs ] = ZSectionInit() + Real(izs) * ( ZSectionFinal() - ZSectionInit() )
-                / Real(M_nb_sections-1); // mesh dependent (length of tube=5)
+    for ( int izs = 0; izs < M_nb_sections ; izs ++  ){
+        M_z_section[ izs ] = ZSectionInit() + Real(izs) * ( ZSectionFinal() - ZSectionInit() )
+            / Real(M_nb_sections-1); // mesh dependent (length of tube=5)
+    }
+
+    //! coefficients defining the planar section: ax + by + cz + d = 0
+    SimpleVect<Real> PlaneCoeff(4);
+    //! Assuming a plane parallel to the Oz axis
+    PlaneCoeff(0) = 0.; // a
+    PlaneCoeff(1) = 0.; // b
+    PlaneCoeff(2) = 1.; // c
+    PlaneCoeff(3) = 0.; // d
+
+    for ( int izs = 0; izs < M_nb_sections ; izs ++  ){
+        PlaneCoeff(3) = - M_z_section[izs];
+        //! for velocity
+        this->FacesOnSection( PlaneCoeff,
+                              M_list_of_faces_on_section_velocity[izs],
+                              M_list_of_faces_on_section_pressure[izs],
+                              ToleranceSection(),
+                              XSectionFrontier(), M_list_of_points_on_boundary[izs] );
+        if ( M_list_of_faces_on_section_velocity[izs].size() == 0 ||
+             M_list_of_faces_on_section_pressure[izs].size() == 0  ) {
+            std::cout << "section z=" << M_z_section[izs] << " size="
+                      << M_list_of_faces_on_section_velocity[izs].size() << std::endl;
+            ERROR_MSG("For this section, no faces found.");
+        }
+#if COMPUTE_POLYGONAL_AREA
+        if ( M_list_of_points_on_boundary[izs].first  == 0 &&
+             M_list_of_points_on_boundary[izs].second == 0 ) {
+            std::cout << "section z=" << M_z_section[izs]
+                      << " (point=" <<  XSectionFrontier() << ")" << std::endl;
+            ERROR_MSG("For this section, no boundary points found.");
+        }
+#endif
+    }
+    if ( M_list_of_faces_on_section_velocity.size() == 0 ||
+         M_list_of_faces_on_section_pressure.size() == 0 ) {
+        ERROR_MSG("No list of faces found.");
+    }
+}
+
+template <typename Mesh, typename DataType>
+void NavierStokesHandler<Mesh, DataType>::initializeSectionsBifurc()
+{
+    //---------------
+    //! To obtain geometrically the internal faces representing the stent
+    //! (ex. of mesh: bif3d_*.mesh)
+    //---------------
+
+    if ( ! this->_mesh.hasInternalFaces() )
+        ERROR_MSG("The mesh must have all internal faces built up. Check that 'mesh_faces = all' in the data file.");
+    if ( M_nb_sections != 3 )
+        ERROR_MSG("We a priori know that the stent lives on 3 planar sections.");
+
+    //! coefficients defining the planar section: ax + by + cz + d = 0
+    SimpleVect<Real> PlaneCoeff(4);
+
+    //! values of "d"
+    M_z_section[ 0 ] = 0.5;  // plane x=0.5
+    M_z_section[ 1 ] = -0.5; // plane x=-0.5
+    M_z_section[ 2 ] = 4;    // plane y=4
+
+    for ( int izs = 0; izs < M_nb_sections ; izs ++  ){
+        switch ( izs ) {
+        case 0:
+            //! Right part of the stent :  x=0.5
+        case 1:
+            //! Left part of the stent :  x=-0.5
+            PlaneCoeff(0) = 1.; // a
+            PlaneCoeff(1) = 0.; // b
+            PlaneCoeff(2) = 0.; // c
+            PlaneCoeff(3) = - M_z_section[ izs ]; // d
+            break;
+        case 2:
+            //! Aneurismal part of the stent :  y=4
+            PlaneCoeff(0) = 0.; // a
+            PlaneCoeff(1) = 1.; // b
+            PlaneCoeff(2) = 0.; // c
+            PlaneCoeff(3) = - M_z_section[ izs ]; // d
+            break;
+        default:
+            ERROR_MSG("No such planar section");
         }
 
-        for ( int izs = 0; izs < M_nb_sections ; izs ++  ){
-            //! for velocity
-            this->FacesOnSection( M_z_section[izs],
-                                  M_list_of_faces_on_section_velocity[izs],
-                                  M_list_of_faces_on_section_pressure[izs],
-                                  ToleranceSection(),
-                                  XSectionFrontier(), M_list_of_points_on_boundary[izs] );
-            if ( M_list_of_faces_on_section_velocity[izs].size() == 0 ||
-                 M_list_of_faces_on_section_pressure[izs].size() == 0  ) {
-                std::cout << "section z=" << M_z_section[izs] << " size="
-                          << M_list_of_faces_on_section_velocity[izs].size() << std::endl;
-                ERROR_MSG("For this section, no faces found.");
-            }
+        this->FacesOnSection( PlaneCoeff,
+                              M_list_of_faces_on_section_velocity[izs],
+                              M_list_of_faces_on_section_pressure[izs],
+                              ToleranceSection(),
+                              XSectionFrontier(), M_list_of_points_on_boundary[izs] );
+        if ( M_list_of_faces_on_section_velocity[izs].size() == 0 ||
+             M_list_of_faces_on_section_pressure[izs].size() == 0  ) {
+            std::cout << "section z=" << M_z_section[izs] << " size="
+                      << M_list_of_faces_on_section_velocity[izs].size() << std::endl;
+            ERROR_MSG("For this section, no faces found.");
         }
-        if ( M_list_of_faces_on_section_velocity.size() == 0 ||
-             M_list_of_faces_on_section_pressure.size() == 0 ) {
-            ERROR_MSG("No list of faces found.");
+#if COMPUTE_POLYGONAL_AREA
+        if ( M_list_of_points_on_boundary[izs].first  == 0 &&
+             M_list_of_points_on_boundary[izs].second == 0 ) {
+            std::cout << "section z=" << M_z_section[izs]
+                      << " (point=" <<  XSectionFrontier() << ")" << std::endl;
+            ERROR_MSG("For this section, no boundary points found.");
         }
+#endif
+    }
+
+    if ( M_list_of_faces_on_section_velocity.size() == 0 ||
+         M_list_of_faces_on_section_pressure.size() == 0 ) {
+        ERROR_MSG("No list of faces found.");
+    }
 }
 
 
