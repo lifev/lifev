@@ -1031,10 +1031,12 @@ NavierStokesHandler<Mesh, DataType>::FacesOnSection( const SimpleVect<Real> &  _
     Real c_plane = __planar_section(2);
     Real d_plane = __planar_section(3);
 
-    int verbose = 2;
+    /*
+    int verbose = 0;
     if ( verbose > 1 )
         std::cout << "a " << a_plane << " b " << b_plane << " c "
                   << c_plane << " d " << d_plane << std::endl;
+    */
 
     //! search the faces on a given horizontal section
     //! loop on all faces
@@ -1084,10 +1086,12 @@ NavierStokesHandler<Mesh, DataType>::FacesOnSection( const SimpleVect<Real> &  _
                    y_VeFa2 < 0. + __tolerance_section &&
                    y_VeFa3 < 0. + __tolerance_section )
                  ) {
+                /*
                 if ( verbose > 1 )
                     std::cout << "Found:" << iglobface << " x " << x_VeFa1 << " y " << y_VeFa1
                               << " z " << z_VeFa1
                               << std::endl;
+                */
 
                 __faces_on_section_u.push_front( make_pair( iglobface, SimpleVect<ID>( nDofF_u ) ) );
                 __faces_on_section_p.push_front( make_pair( iglobface, SimpleVect<ID>( nDofF_p ) ) );
@@ -1302,7 +1306,7 @@ NavierStokesHandler<Mesh, DataType>::AreaAndFlux( const face_dof_type & __faces_
     // Nodal values of the velocity in the current face
     std::vector<Real> u_local( nc_u * nDofF );
 
-    int verbose = 2;
+    //    int verbose = 2;
 
     // Loop on faces
     for ( const_face_dof_iterator_type j = __faces_on_section_u.begin();
@@ -1324,8 +1328,10 @@ NavierStokesHandler<Mesh, DataType>::AreaAndFlux( const face_dof_type & __faces_
 
         __area += _feBd_u.measure();
 
+        /*
         if ( verbose > 1)
             std::cout << "area/flux comp : " << j->first << " area= " << __area << std::endl;
+        */
 
         //! check the orientation of the normal
         //! the flux will be positive if (u \dot positive_normal) is positive
