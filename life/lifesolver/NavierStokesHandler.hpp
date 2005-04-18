@@ -216,12 +216,13 @@ public:
     /*! Computes the area and flux on a given part of the boundary
       \param flag the mesh flag identifying the part of the mesh where the flux is computed
       \param __reffe : reference fe.
+      \param __dof : dof.
       \param __faces_on_section : list of faces that were found:
       first:  global face number
       second: vector of size nDofF (nb of dof per face). contains the local (in the face) to global dof.
     */
     void FacesOnFlag( const EntityFlag& flag, const RefFE& __reffe,
-                      face_dof_type & __faces_on_flag );
+                      const Dof& __dof, face_dof_type & __faces_on_flag );
 
 
     /*! Get the faces that live on a horizontal section (z=__z_section)
@@ -898,7 +899,7 @@ Real
 NavierStokesHandler<Mesh, DataType>::flux( const EntityFlag& flag )
 {
     face_dof_type faces_on_flag;
-    FacesOnFlag( flag, _refFE_u, faces_on_flag ); //! reconstruct all the connectivity
+    FacesOnFlag( flag, _refFE_u, _dof_u, faces_on_flag ); //! reconstruct all the connectivity
 
     //! reference normal vector (unused, as we keep the positive outward normal on the boundary)
     SimpleVect<Real> unused(3);
@@ -915,6 +916,7 @@ NavierStokesHandler<Mesh, DataType>::flux( const EntityFlag& flag )
 
    \param flag : __flag of the faces that are sought
    \param __reffe : reference fe.
+   \param __dof : dof.
    \param __faces_on_section : list of faces that were found:
    first:  global face number
    second: vector of size nDofF (nb of dof per face).
@@ -923,8 +925,8 @@ NavierStokesHandler<Mesh, DataType>::flux( const EntityFlag& flag )
 template <typename Mesh, typename DataType>
 void
 NavierStokesHandler<Mesh, DataType>::FacesOnFlag( const EntityFlag& __flag ,
-                                        const RefFE& __reffe,
-                                        face_dof_type & __faces_on_flag )
+                                                  const RefFE& __reffe,  const Dof& __dof,
+                                                  face_dof_type & __faces_on_flag )
 {
 
     typedef typename Mesh::FaceShape GeoBShape;
@@ -959,14 +961,14 @@ NavierStokesHandler<Mesh, DataType>::FacesOnFlag( const EntityFlag& __flag ,
     }
 
     //! building the local to global vector for these boundary faces
-    _updateDofFaces( __faces_on_flag, __reffe );
+    _updateDofFaces( __faces_on_flag, __reffe, __dof );
 
 }
 
 /*! Get the faces that live on a horizontal section (z=__z_section)
     up to a given tolerance (z = __z_section +/- __tolerance ).
 
-    \param __planar_section : position of the planar section (plane 
+    \param __planar_section : position of the planar section (plane
     given by its 4 (THREED) components (a,b,c,d) such that
     a x + b y + c z + d = 0
 
@@ -1029,8 +1031,10 @@ NavierStokesHandler<Mesh, DataType>::FacesOnSection( const SimpleVect<Real> &  _
     Real c_plane = __planar_section(2);
     Real d_plane = __planar_section(3);
 
-    //    std::cout << "a " << a_plane << " b " << b_plane << " c "
-    //         << c_plane << " d " << d_plane << std::endl;
+    int verbose = 2;
+    if ( verbose > 1 )
+        std::cout << "a " << a_plane << " b " << b_plane << " c "
+                  << c_plane << " d " << d_plane << std::endl;
 
     //! search the faces on a given horizontal section
     //! loop on all faces
@@ -1055,11 +1059,12 @@ NavierStokesHandler<Mesh, DataType>::FacesOnSection( const SimpleVect<Real> &  _
              std::fabs( a_plane * x_VeFa2 + b_plane * y_VeFa2 + c_plane * z_VeFa2 + d_plane ) < __tolerance_section &&
              std::fabs( a_plane * x_VeFa3 + b_plane * y_VeFa3 + c_plane * z_VeFa3 + d_plane ) < __tolerance_section
              ) {
-            //! additional inequality constraint:
+            //! GEOMETRY : additional inequality constraint:
+            /*
             //! 3<y<3.5 for sections x=+/- 0.5 and
             //! -0.5<x<0.5 for section y=4
             if ( ! ( a_plane == 1. && std::fabs( d_plane ) == 0.5 ) ||
-                 ! ( b_plane == 1. && std::fabs( d_plane ) == 0.5 ) ||
+                 ! ( b_plane == 1. && d_plane == - 4. ) ||
                  ( a_plane == 1. && std::fabs( d_plane ) == 0.5 &&
                    y_VeFa1 > 3. - __tolerance_section && y_VeFa1 < 3.5 + __tolerance_section &&
                    y_VeFa2 > 3. - __tolerance_section && y_VeFa2 < 3.5 + __tolerance_section &&
@@ -1069,9 +1074,20 @@ NavierStokesHandler<Mesh, DataType>::FacesOnSection( const SimpleVect<Real> &  _
                    std::fabs( x_VeFa2 ) < 0.5 + __tolerance_section &&
                    std::fabs( x_VeFa3 ) < 0.5 + __tolerance_section )
                  ) {
-                // std::cout << "Found:" << iglobface << " x " << x_VeFa1 << " y " << y_VeFa1
-                //          << " z " << z_VeFa1
-                //          << std::endl;
+            */
+            //! plane z=2.5 : only y<0
+            if ( ! ( std::fabs( c_plane - 1. ) < __tolerance_section
+                     && std::fabs( d_plane + 2.5 ) < __tolerance_section ) ||
+                 ( std::fabs( c_plane - 1. ) < __tolerance_section &&
+                   std::fabs( d_plane + 2.5 ) < __tolerance_section &&
+                   y_VeFa1 < 0. + __tolerance_section &&
+                   y_VeFa2 < 0. + __tolerance_section &&
+                   y_VeFa3 < 0. + __tolerance_section )
+                 ) {
+                if ( verbose > 1 )
+                    std::cout << "Found:" << iglobface << " x " << x_VeFa1 << " y " << y_VeFa1
+                              << " z " << z_VeFa1
+                              << std::endl;
 
                 __faces_on_section_u.push_front( make_pair( iglobface, SimpleVect<ID>( nDofF_u ) ) );
                 __faces_on_section_p.push_front( make_pair( iglobface, SimpleVect<ID>( nDofF_p ) ) );
@@ -1286,6 +1302,8 @@ NavierStokesHandler<Mesh, DataType>::AreaAndFlux( const face_dof_type & __faces_
     // Nodal values of the velocity in the current face
     std::vector<Real> u_local( nc_u * nDofF );
 
+    int verbose = 2;
+
     // Loop on faces
     for ( const_face_dof_iterator_type j = __faces_on_section_u.begin();
           j != __faces_on_section_u.end(); ++j )
@@ -1306,7 +1324,8 @@ NavierStokesHandler<Mesh, DataType>::AreaAndFlux( const face_dof_type & __faces_
 
         __area += _feBd_u.measure();
 
-        //   std::cout << "area/flux comp : " << j->first << " area= " << __area << std::endl;
+        if ( verbose > 1)
+            std::cout << "area/flux comp : " << j->first << " area= " << __area << std::endl;
 
         //! check the orientation of the normal
         //! the flux will be positive if (u \dot positive_normal) is positive
