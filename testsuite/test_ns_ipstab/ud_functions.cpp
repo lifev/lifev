@@ -69,7 +69,8 @@ Real EthierSteinmanSteady::f(const Real& t, const Real& x, const Real& y,
     exit(1);
 }
 
-Real EthierSteinmanSteady::uexact(const Real& t, const Real& x, const Real& y,
+Real EthierSteinmanSteady::uexact(const Real& /* t */,
+                                  const Real& x, const Real& y,
                                   const Real& z, const ID& i) {
     switch(i) {
         case 1:
@@ -92,7 +93,8 @@ Real EthierSteinmanSteady::uexact(const Real& t, const Real& x, const Real& y,
     exit(1);
 }
 
-Real EthierSteinmanSteady::ux( const Real& t, const Real& x, const Real& y,
+Real EthierSteinmanSteady::ux( const Real& /* t */,
+                               const Real& x, const Real& y,
                                const Real& z, const ID& i) {
     switch(i) {
         case 1:
@@ -115,7 +117,8 @@ Real EthierSteinmanSteady::ux( const Real& t, const Real& x, const Real& y,
     exit(1);
 }
 
-Real EthierSteinmanSteady::uy( const Real& t, const Real& x, const Real& y,
+Real EthierSteinmanSteady::uy( const Real& /* t */,
+                               const Real& x, const Real& y,
                                const Real& z, const ID& i) {
     switch(i) {
         case 1:
@@ -138,7 +141,8 @@ Real EthierSteinmanSteady::uy( const Real& t, const Real& x, const Real& y,
     exit(1);
 }
 
-Real EthierSteinmanSteady::uz( const Real& t, const Real& x, const Real& y,
+Real EthierSteinmanSteady::uz( const Real& /* t */,
+                               const Real& x, const Real& y,
                                const Real& z, const ID& i) {
     switch(i) {
         case 1:
@@ -162,8 +166,9 @@ Real EthierSteinmanSteady::uz( const Real& t, const Real& x, const Real& y,
 }
 
 
-Real EthierSteinmanSteady::pexact(const Real& t, const Real& x, const Real& y,
-                                  const Real& z, const ID& i) {
+Real EthierSteinmanSteady::pexact(const Real& /* t */,
+                                  const Real& x, const Real& y,
+                                  const Real& z, const ID& /* i */) {
     return (a*a+b*b+a*b)*(exp(a*(x-y)+b*(x-z))+
                           exp(a*(y-z)+b*(y-x))+
                           exp(a*(z-x)+b*(z-y)));
