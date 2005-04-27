@@ -99,3 +99,15 @@ kspace          = 40
 tol             = 1.00e-6
 drop            = 1.00e-4
 
+[mesh_motion]
+
+[./aztec]
+output          = none
+max_iter        = 300
+poly_ord        = 5
+kspace          = 40
+precond         = dom_decomp
+drop            = 1.00e-4
+ilut_fill       = 4
+tol             = 1.e-15
+keep_info       = 1
