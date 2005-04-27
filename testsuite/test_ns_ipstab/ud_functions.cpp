@@ -189,11 +189,11 @@ Real EthierSteinmanSteady::xexact(const Real& t, const Real& x, const Real& y,
 
 
 // Initial velocity
-Real EthierSteinmanSteady::u0(const Real& t, const Real& x, const Real& y,
+Real EthierSteinmanSteady::x0(const Real& t, const Real& x, const Real& y,
                               const Real& z, const ID& i)
 {
     // return 0.0;
-    return uexact(t,x,y,z,i);
+    return xexact(t,x,y,z,i);
 }
 
 Real EthierSteinmanSteady::fNeumann(const Real& t, const Real& x,

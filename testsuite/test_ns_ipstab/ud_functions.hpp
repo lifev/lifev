@@ -47,7 +47,7 @@ public:
     static Real xexact( const Real& t, const Real& x, const Real& y,
                         const Real& z, const ID& i );
     // Initial velocity
-    static Real u0( const Real& t, const Real& x, const Real& y,
+    static Real x0( const Real& t, const Real& x, const Real& y,
                     const Real& z, const ID& i );
     static Real fNeumann( const Real& t, const Real& x, const Real& y,
                           const Real& z, const ID& i );

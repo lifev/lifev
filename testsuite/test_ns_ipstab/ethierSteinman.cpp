@@ -91,10 +91,10 @@ Real EthierSteinmanUnsteady::pexact( const Real& t,
 }
 
 // Initial velocity
-Real EthierSteinmanUnsteady::u0( const Real& t, const Real& x, const Real& y,
+Real EthierSteinmanUnsteady::x0( const Real& t, const Real& x, const Real& y,
                                  const Real& z, const ID& i )
 {
-    return uexact(t,x,y,z,i);
+    return xexact(t,x,y,z,i);
 }
 
 // derivatives for neumann
@@ -187,7 +187,7 @@ Real EthierSteinmanUnsteady::fNeumann( const Real& t,
     Real nz=-1.;
     switch(i) {
         case 1:
-            return pexact(t, x, y, z, 1) * nx 
+            return pexact(t, x, y, z, 1) * nx
                 - mu * ( ux(t, x, y, z, 1) * nx * 2 +
                          ux(t, x, y, z, 2) * ny +
                          ux(t, x, y, z, 3) * nz +
