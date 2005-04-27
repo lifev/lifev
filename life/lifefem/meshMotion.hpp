@@ -32,9 +32,6 @@
 #define __MESHMOTION_HH__
 
 #include <life/lifecore/life.hpp>
-
-#include <life/lifealg/dataAztec.hpp>
-
 #include <life/lifefem/dof.hpp>
 #include <life/lifearray/pattern.hpp>
 #include <life/lifearray/elemMat.hpp>
@@ -43,6 +40,8 @@
 #include <life/lifefem/values.hpp>
 #include <life/lifefem/assemb.hpp>
 #include <life/lifefem/bcManage.hpp>
+#include <life/lifealg/SolverAztec.hpp>
+
 
 
 namespace LifeV
@@ -80,8 +79,9 @@ public:
     */
 
     template <typename Mesh>
-    HarmonicExtension( Mesh&           mesh,
-                       const Real&     diffusion,
+
+    HarmonicExtension(  const GetPot& data_file, Mesh& mesh,
+                       const Real& diffusion,
                        const QuadRule& Qr,
                        const QuadRule& bdQr,
                        BCHandler&      mesh_BCh );
@@ -132,14 +132,11 @@ protected:
     //! The Dof object associated with the displacement computations
     Dof _dof_mesh;
 
-    //! The pattern of the FE discretized scalar laplacian matrix
-    MSRPatt _aPattB;
-
-    //! The pattern of the FE discretized vector laplacian matrix
-    MixedPattern<nDimensions, nDimensions, MSRPatt> _aPatt;
+  //! The pattern of the FE discretized vector laplacian matrix
+    MSRPatt _aPatt;
 
     //! The matrix holding the values
-    MixedMatr<nDimensions, nDimensions, MSRPatt, Real> _a;
+    MSRMatr<double> _a;
 
     //! Current element
     CurrentFE _fe;
@@ -151,10 +148,13 @@ protected:
     ElemMat _elmat;
 
     //! The actual extension of the displacement
-    PhysVectUnknown<Vector> _disp;
+    Vector _disp;
 
     //! Auxiliary vector holding the second right hand of the system
     PhysVectUnknown<Vector> _f;
+
+
+    SolverAztec _linearSolver;
 
 
 private:
@@ -163,6 +163,7 @@ private:
     BCHandler    *M_BCh_HarmonicExtension;
 
     bool          M_setBC;
+
 
 };
 
@@ -181,42 +182,47 @@ private:
 */
 template <typename Mesh>
 HarmonicExtension::
-HarmonicExtension( Mesh& mesh,
+HarmonicExtension(  const GetPot& data_file,Mesh& mesh,
                    const Real& diffusion,
                    const QuadRule& Qr,
                    const QuadRule& bdQr,
                    BCHandler& mesh_BCh ) :
         _diffusion( diffusion ),
-        _Qr       ( Qr ),
-        _bdQr     ( bdQr ),
-        _dof_mesh ( mesh, mesh.getRefFE() ),
-        _aPattB   ( _dof_mesh ),
-        _aPatt    ( _aPattB, "diag" ),
-        _a        ( _aPatt ),
-        _fe       ( mesh.getRefFE(), mesh.getGeoMap(), _Qr ),
-        _feBd     ( mesh.getRefFE().boundaryFE(), mesh.getGeoMap().boundaryMap(), _bdQr ),
-        _elmat    ( _fe.nbNode, nDimensions, nDimensions ),
-        _disp     ( _dof_mesh.numTotalDof() ),
-        _f        ( _dof_mesh.numTotalDof() ),
+        _Qr( Qr ),
+        _bdQr( bdQr ),
+        _dof_mesh( mesh, mesh.getRefFE() ),
+        _aPatt( _dof_mesh, nDimensions ),
+        _a( _aPatt ),
+        _fe( mesh.getRefFE(), mesh.getGeoMap(), _Qr ),
+        _feBd( mesh.getRefFE().boundaryFE(), mesh.getGeoMap().boundaryMap(), _bdQr ),
+        _elmat( _fe.nbNode, nDimensions, nDimensions ),
+        _disp( nDimensions * _dof_mesh.numTotalDof() ),
+        _f( _dof_mesh.numTotalDof() ),
         M_BCh_HarmonicExtension ( &mesh_BCh )
-{
-    // Loop on elements
-    for ( UInt i = 1; i <= mesh.numVolumes(); ++i )
-    {
-        // Updating derivatives
-        _fe.updateFirstDerivQuadPt( mesh.volumeList( i ) );
-        _elmat.zero();
-        stiff( _diffusion, _elmat, _fe, 0, 0, 3 );
-        // Assembling
-        for ( UInt j = 0; j < 3; ++j )
-        {
-            assemb_mat( _a, _elmat, _fe, _dof_mesh, j, j );
-        }
-    }
+ {
+   // Loop on elements
+   for ( UInt i = 1; i <= mesh.numVolumes(); ++i )
+     {
+       // Updating derivatives
+       _fe.updateFirstDerivQuadPt( mesh.volumeList( i ) );
+       _elmat.zero();
+       stiff( _diffusion, _elmat, _fe, 0, 0, 3 );
+       // Assembling
+       for ( UInt j = 0; j < 3; ++j )
+	 {
+	   assemb_mat( _a, _elmat, _fe, _dof_mesh, j, j );
+	 }
+     }
+   
+   // Initializations
+   _disp = ZeroVector( _disp.size() );
 
-    // Initializations
-    _disp = ZeroVector( _disp.size() );
-}
+  _linearSolver.setOptionsFromGetPot( data_file, "mesh_motion/aztec" );
+  _linearSolver.setMatrix( _a );
+
+
+ }
+
 
 template <typename Mesh>
 HarmonicExtension::
@@ -228,16 +234,16 @@ HarmonicExtension( Mesh& mesh,
         _Qr       ( Qr ),
         _bdQr     ( bdQr ),
         _dof_mesh ( mesh, mesh.getRefFE() ),
-        _aPattB   ( _dof_mesh ),
-        _aPatt    ( _aPattB, "diag" ),
+	_aPatt( _dof_mesh, nDimensions ),
         _a        ( _aPatt ),
         _fe       ( mesh.getRefFE(), mesh.getGeoMap(), _Qr ),
         _feBd     ( mesh.getRefFE().boundaryFE(), mesh.getGeoMap().boundaryMap(), _bdQr ),
         _elmat    ( _fe.nbNode, nDimensions, nDimensions ),
-        _disp     ( _dof_mesh.numTotalDof() ),
+        _disp     ( nDimensions * _dof_mesh.numTotalDof() ),
         _f        ( _dof_mesh.numTotalDof() ),
         M_BCh_HarmonicExtension ( 0 )
 {
+
     // Loop on elements
     for ( UInt i = 1; i <= mesh.numVolumes(); ++i )
     {
@@ -270,70 +276,16 @@ void HarmonicExtension::updateExtension( Mesh& mesh, const Real& time, const UIn
         bcManageMatrix( _a, mesh, _dof_mesh, BCh_HarmonicExtension(), _feBd, 1.0 );
     }
 
-    // Number to total dof
-    UInt dim = _dof_mesh.numTotalDof();
-
     // Initializations
     _f = ZeroVector( _f.size() );
+    _disp = ZeroVector( _disp.size() );
 
     // Boundary conditions treatment
     bcManageVector( _f, mesh, _dof_mesh, BCh_HarmonicExtension(), _feBd, time, 1.0 );
 
-    // AZTEC stuff
-    int proc_config[ AZ_PROC_SIZE ];   // Processor information:
-    int options[ AZ_OPTIONS_SIZE ];    // Array used to select solver options.
-    double params[ AZ_PARAMS_SIZE ];   // User selected solver paramters.
-    int *data_org;                     // Array to specify data layout
-    double status[ AZ_STATUS_SIZE ];   // Information returned from AZ_solve()
-    // indicating success or failure.
-    int *update,                       // vector elements updated on this node.
-    *external;                         // vector elements needed by this node.
-    int *update_index;                 // ordering of update[] and external[]
-    int *extern_index;                 // locally on this processor.
-    int N_update;                      // # of unknowns updated on this node
-
-    AZ_set_proc_config( proc_config, AZ_NOT_MPI );
-    AZ_read_update( &N_update, &update, proc_config, dim, 1, AZ_linear );
-    AZ_transform( proc_config, &external, ( int * ) _aPattB.giveRaw_bindx(), _a.giveRaw_value( 0, 0 ),
-                  update, &update_index, &extern_index, &data_org, N_update, NULL, NULL, NULL, NULL,
-                  AZ_MSR_MATRIX );
-    AZ_transform( proc_config, &external, ( int * ) _aPattB.giveRaw_bindx(), _a.giveRaw_value( 1, 1 ),
-                  update, &update_index, &extern_index, &data_org, N_update, NULL, NULL, NULL, NULL,
-                  AZ_MSR_MATRIX );
-    AZ_transform( proc_config, &external, ( int * ) _aPattB.giveRaw_bindx(), _a.giveRaw_value( 2, 2 ),
-                  update, &update_index, &extern_index, &data_org, N_update, NULL, NULL, NULL, NULL,
-                  AZ_MSR_MATRIX );
-
-    // Recovering AZTEC defaults options and params
-    AZ_defaults( options, params );
-
-    // Fixed Aztec options for this linera system
-    options[ AZ_solver ] = AZ_gmres;
-    options[ AZ_output ] = AZ_none;
-//    options[ AZ_output ] = 1;
-    options[ AZ_poly_ord ] = 5;
-    options[ AZ_kspace ] = 40;
-    options[ AZ_precond ] = AZ_dom_decomp;
-    params[ AZ_tol ] = 1.00e-10;
-    params[ AZ_drop ] = 1.00e-4;
-    params[ AZ_ilut_fill ] = 5;
-
-    options[ AZ_recursion_level ] = recur;
-
-    // Solving first component
-    AZ_solve( _disp.giveVec(), _f.giveVec(), options, params, NULL,
-              ( int * ) _aPattB.giveRaw_bindx(), NULL, NULL, NULL,
-              _a.giveRaw_value( 0, 0 ), data_org, status, proc_config );
-
-    // Solving second component
-    AZ_solve( _disp.giveVec() + dim, _f.giveVec() + dim, options, params, NULL,
-              ( int * ) _aPattB.giveRaw_bindx(), NULL, NULL, NULL,
-              _a.giveRaw_value( 1, 1 ), data_org, status, proc_config );
-
-    // Solving third component
-    AZ_solve( _disp.giveVec() + 2 * dim, _f.giveVec() + 2 * dim, options, params, NULL,
-              ( int * ) _aPattB.giveRaw_bindx(), NULL, NULL, NULL,
-              _a.giveRaw_value( 2, 2 ), data_org, status, proc_config );
+    _linearSolver.setRecursionLevel( recur );
+  
+    _linearSolver.solve( _disp, _f, SolverAztec::SAME_PRECONDITIONER);
 
 }
 
