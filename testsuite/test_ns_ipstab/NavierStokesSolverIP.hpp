@@ -1,8 +1,31 @@
-/*!
-  \file NavierStokesSolverIP.h
-  \author M.A. Fernandez
+/* -*- mode: c++ -*-
+
+ This file is part of the LifeV library
+
+ Author(s): Miguel A. Fernandez <miguel.fernandez@inria.fr>
+            Christoph Winkelmann <christoph.winkelmann@epfl.ch>
+      Date: 2003-06-09
+
+ Copyright (C) 2004 EPFL
+
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
+
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+/**
+  \file NavierStokesSolverIP.hpp
+  \author M.A. Fernandez, Ch. Winkelmann
   \date 6/2003
-  \version 1.0
 
   \brief This file contains a Navier-Stokes solver class which implements a
   stabilized implicit scheme with coupled solving.
@@ -10,7 +33,9 @@
 #ifndef _NAVIERSTOKESSOLVERIP_H_
 #define _NAVIERSTOKESSOLVERIP_H_
 
-#define USE_AZTEC_SOLVER 1
+#define AZTEC_SOLVER 0
+#define PETSC_SOLVER 1
+#define UMFPACK_SOLVER 0
 
 #include <life/lifesolver/NavierStokesHandler.hpp>
 #include <life/lifearray/elemMat.hpp>
@@ -20,21 +45,30 @@
 #include <life/lifearray/pattern.hpp>
 #include <life/lifefem/assemb.hpp>
 #include <life/lifefem/bcManage.hpp>
+#include <life/lifearray/boostmatrix.hpp>
 
-#if USE_AZTEC_SOLVER
+#if AZTEC_SOLVER
 #include <life/lifealg/SolverAztec.hpp>
 #else
+
 #include <lifeconfig.h>
+
 #if defined( HAVE_PETSC_H )
 #include <life/lifealg/SolverPETSC.hpp>
 #endif /* HAVE_PETSC_H */
-#endif /* USE_AZTEC_SOLVER */
+
+#if defined ( HAVE_UMFPACK_H )
+#include <life/lifealg/SolverUMFPACK.hpp>
+#endif /* HAVE_UMFPACK_H */
+
+#endif /* AZTEC_SOLVER */
 
 #include <life/lifefem/bcHandler.hpp>
 #include <life/lifecore/chrono.hpp>
 #include <life/lifefem/sobolevNorms.hpp>
 #include <life/lifefem/geoMap.hpp>
-#include <ipStabilization.hpp>
+#include <testsuite/test_ns_ipstab/ipStabilization.hpp>
+#include <life/lifesolver/AFSolvers.hpp>
 
 namespace LifeV
 {
@@ -83,6 +117,12 @@ public:
 
     void initialize( const Function& x0, Real t0=0., Real dt=0. );
 
+    /*! Initialize when initial values for the velocity and the pressure are
+      read from file
+      @author Martin Prosi
+    */
+    void initialize( const std::string & vname );
+
     //! linearize convective term around given (exact) velocity function
     void linearize( const Function& betaFct ) { M_betaFct = &betaFct; }
 
@@ -100,15 +140,23 @@ private:
     //! Block pattern of full matrix
     MSRPatt M_fullPattern;
 
+#if AZTEC_SOLVER
+    typedef MSRMatr<double> matrix_type;
+#elif PETSC_SOLVER
+    typedef BoostMatrix<boost::numeric::ublas::row_major> matrix_type;
+#elif UMFPACK_SOLVER
+    typedef BoostMatrix<boost::numeric::ublas::column_major> matrix_type;
+#endif
+
     //! Matrix M_u: Vmass
     //MixedMatr<nDimensions, nDimensions, MSRPatt, double> M_matrMass;
-    MSRMatr<double> M_matrMass;
+    matrix_type M_matrMass;
 
     //! Matrix CStokes: rho*bdfCoeff*Vmass + mu*Vstiff + linear stabilizations
-    MSRMatr<double> M_matrStokes;
+    matrix_type M_matrStokes;
 
     //! Matrix C: CStokes + Convective_term + nonlinear stabilizations
-    MSRMatr<double> M_matrFull;
+    matrix_type M_matrFull;
 
     //! Elementary matrices and vectors
     ElemMat M_elmatC; //velocity stiffness
@@ -127,10 +175,12 @@ private:
     //! Global solution _u and _p
     Vector M_sol;
 
-#if USE_AZTEC_SOLVER
+#if AZTEC_SOLVER
     SolverAztec M_linearSolver;
-#else
+#elif PETSC_SOLVER
     SolverPETSC M_linearSolver;
+#elif UMFPACK_SOLVER
+    SolverUMFPACK M_linearSolver;
 #endif
 
     Real M_time;
@@ -224,9 +274,9 @@ NavierStokesSolverIP( const GetPot& dataFile,
                   << std::endl;
     }
 
-#if USE_AZTEC_SOLVER
+#if AZTEC_SOLVER
     M_linearSolver.setOptionsFromGetPot( dataFile, "fluid/aztec" );
-#else
+#elif PETSC_SOLVER
     M_linearSolver.setOptionsFromGetPot( dataFile, "fluid/petsc" );
 
     if ( this->BCh_fluid().hasOnlyEssential() && !M_diagonalize )
@@ -259,6 +309,9 @@ NavierStokesSolverIP( const GetPot& dataFile,
     //M_u.zeros();
     M_matrMass.zeros();
     M_matrStokes.zeros();
+    //chrono.stop();
+    //std::cout << "(zeros:" << chrono.diff() << ") " << std::flush;
+    //chrono.start();
 
     // Number of velocity components
     UInt nbCompU = _u.nbcomp();
@@ -288,9 +341,9 @@ NavierStokesSolverIP( const GetPot& dataFile,
             M_elmatMass.mat() *= ( 1./bdfCoeff );
         }
 
-        for ( UInt iComp = 0;iComp<nbCompU;iComp++ )
+        for ( UInt iComp = 0; iComp<nbCompU; iComp++ )
         {
-            for ( UInt jComp = 0;jComp<nbCompU;jComp++ )
+            for ( UInt jComp = 0; jComp<nbCompU; jComp++ )
             {
                 // stiffness
                 assemb_mat( M_matrStokes, M_elmatC, _fe_u, _dof_u, iComp,
@@ -517,6 +570,8 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
+    //M_matrFull.spy("C.m");
+
     M_linearSolver.setMatrix( M_matrFull );
 
 
@@ -539,34 +594,48 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
         // use bdf based extrapolation as initial guess
         M_sol = _bdf.bdf_u().extrap();
     }
-    removeMean( M_sol, 4 );
+    if ( this->BCh_fluid().hasOnlyEssential() && !M_diagonalize )
+    {
+        removeMean( M_sol, 4 );
+    }
 
     std::cout << "  o-  Solving system...                        "
               << std::flush;
     chrono.start();
-#if USE_AZTEC_SOLVER
+#if AZTEC_SOLVER
     M_linearSolver.solve( M_sol, M_rhsFull,
                           SolverAztec::SAME_PRECONDITIONER );
-#else
+#elif PETSC_SOLVER
     M_linearSolver.solve( M_sol, M_rhsFull, SAME_PRECONDITIONER );
+#else
+    M_linearSolver.solve( M_sol, M_rhsFull );
 #endif
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
+#if 1-UMFPACK_SOLVER
     if ( !M_linearSolver.converged() )
     {
         std::cerr << "        WARNING: Solver failed to converge."
                   << std::endl;
     }
-#if USE_AZTEC_SOLVER
-#else
+#endif
+
+#if PETSC_SOLVER
     std::cout << "        estimated condition number (preconditioned) = "
               << M_linearSolver.condEst() << std::endl;
 #endif
+
+
+#if 1-UMFPACK_SOLVER
     std::cout << "        number of iterations                        = "
               << M_linearSolver.iterations() << std::endl;
+#endif
 
-    removeMean( M_sol, 4 );
+    if ( this->BCh_fluid().hasOnlyEssential() && !M_diagonalize )
+    {
+        removeMean( M_sol, 4 );
+    }
     for ( UInt iDof = 0; iDof<nDimensions*_dim_u; ++iDof )
     {
         _u[ iDof ] = M_sol[ iDof ];
@@ -593,7 +662,10 @@ void NavierStokesSolverIP<Mesh>::initialize( const Function& x0,
 
     // initialize M_sol with the first element in bdf_u.unk (=last value)
     M_sol = *( _bdf.bdf_u().unk().begin() );
-    removeMean( M_sol, 4 );
+    if ( this->BCh_fluid().hasOnlyEssential() && !M_diagonalize )
+    {
+        removeMean( M_sol, 4 );
+    }
     for ( UInt iDof = 0; iDof<nDimensions*_dim_u; ++iDof )
     {
         _u[ iDof ] = M_sol[ iDof ];
@@ -618,6 +690,45 @@ void NavierStokesSolverIP<Mesh>::initialize( const Function& x0,
         this->postProcess();
     }
 } // initialize()
+
+/*! Initialize when initial values for the velocity and the pressure are read
+  from file
+  @author Martin Prosi
+*/
+template <typename Mesh>
+void
+NavierStokesSolverIP<Mesh>::initialize( const std::string & vname )
+{
+
+    std::fstream resfile( vname.c_str(), std::ios::in | std::ios::binary );
+    if ( resfile.fail() )
+    {
+        std::cerr << " Error in initialization: File not found or locked"
+                  << std::endl;
+        abort();
+    }
+
+    resfile.read( ( char* ) & M_sol( 0 ), M_sol.size() * sizeof( double ) );
+    resfile.close();
+
+    for ( UInt iDof = 0; iDof<nDimensions*_dim_u; ++iDof )
+    {
+        _u[ iDof ] = M_sol[ iDof ];
+    }
+    for ( UInt iDof = 0; iDof<_dim_u; ++iDof )
+    {
+        _p[ iDof ] = M_sol[ iDof+nDimensions*_dim_u ];
+    }
+
+    _bdf.bdf_u().initialize_unk( M_sol );
+    //_bdf.bdf_p().initialize_unk( _p );
+
+    _bdf.bdf_u().showMe();
+    //_bdf.bdf_p().showMe();
+
+}
+
+
 
 template <typename Mesh>
 void NavierStokesSolverIP<Mesh>::removeMean( Vector& x, UInt comp )
