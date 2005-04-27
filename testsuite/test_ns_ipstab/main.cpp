@@ -162,7 +162,7 @@ int main( int argc, char** argv )
         x0  = ZeroVector( lVec );
 
         // Compute right hand side
-        fluid.initialize( Problem::xexact );
+        fluid.initialize( Problem::x0 );
         fluid.timeAdvance( Problem::f, 0.0 );
 
         int  status = picard( &fluid, norm_inf_adaptor(), fx1, fx0, gx1, gx0,
@@ -196,7 +196,7 @@ int main( int argc, char** argv )
         Real dt = fluid.timestep();
         Real t0 = fluid.inittime();
         Real tFinal = fluid.endtime();
-        fluid.initialize( Problem::xexact, t0, dt );
+        fluid.initialize( Problem::x0, t0, dt );
 
         // Temporal loop
 
