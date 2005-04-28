@@ -22,18 +22,21 @@
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 /**
-   \file ipStabilization.hpp
+   \file nsipterms.hpp
    \author Christoph Winkelmann <christoph.winkelmann@epfl.ch>
    \date 2004-10-08
 */
 
-#ifndef _IPSTABILIZATION_HPP_
-#define _IPSTABILIZATION_HPP_
+#ifndef _NSIPTERMS_HPP
+#define _NSIPTERMS_HPP
 
 #define USE_OLD_PARAMETERS 0
 #define WITH_DIVERGENCE 1
 
 namespace LifeV
+{
+
+namespace details
 {
 
 template<typename MESH, typename DOF>
@@ -50,7 +53,7 @@ public:
                      Real            gammaBeta = 0,
                      Real            gammaDiv = 0,
                      Real            gammaPress = 0,
-                     Real            viscosity = 1);
+                     Real            viscosity = 1 );
 
     /*! compute IP stabilization terms and add them into matrix
      *  @param matrix matrix where the stabilization terms are added into
@@ -86,7 +89,7 @@ IPStabilization<MESH, DOF>::IPStabilization( const MESH&     mesh,
                                              Real            gammaBeta,
                                              Real            gammaDiv,
                                              Real            gammaPress,
-                                             Real            viscosity) :
+                                             Real            viscosity ) :
     M_mesh( mesh ),
     M_dof( dof ),
     M_fe1( refFE, getGeoMap(mesh), quadRule ),
@@ -354,6 +357,8 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix, const VECTOR& state )
 
 } // apply(...)
 
+} // namespace details
+
 } // namespace LifeV
 
-#endif /* _IPSTABILIZATION_HPP_ */
+#endif /* _NSIPTERMS_HPP */

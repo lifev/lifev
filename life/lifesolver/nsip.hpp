@@ -67,7 +67,7 @@
 #include <life/lifecore/chrono.hpp>
 #include <life/lifefem/sobolevNorms.hpp>
 #include <life/lifefem/geoMap.hpp>
-#include <testsuite/test_ns_ipstab/ipStabilization.hpp>
+#include <life/lifesolver/nsipterms.hpp>
 #include <life/lifesolver/AFSolvers.hpp>
 
 namespace LifeV
@@ -370,7 +370,7 @@ NavierStokesSolverIP( const GetPot& dataFile,
         }
     }
 
-    //IPStabilization<Mesh, Dof>
+    //details::IPStabilization<Mesh, Dof>
     //    pressureStab(_mesh, _dof_u, _refFE_u, _feBd_u, _Qr_u,
     //                 0, 0, M_gammaPress, this->viscosity() );
     //pressureStab.apply(M_matrStokes, this->_u);
@@ -523,7 +523,7 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
 
     chrono.start();
 
-    IPStabilization<Mesh, Dof>
+    details::IPStabilization<Mesh, Dof>
         allStab( _mesh, _dof_u, _refFE_u, _feBd_u, _Qr_u,
                  M_gammaBeta, M_gammaDiv, M_gammaPress, this->viscosity() );
     allStab.apply( M_matrFull, betaVec );
