@@ -29,7 +29,7 @@ P1/P1 or P2/P2 FEM with Interior Penalty (IP) stabilization
 */
 
 #include <life/lifecore/life.hpp>
-#include <NavierStokesSolverIP.hpp>
+#include <life/lifesolver/nsip.hpp>
 #include <ud_functions.hpp>
 #include <ethierSteinman.hpp>
 // #include <simple.hpp>
