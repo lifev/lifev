@@ -20,11 +20,11 @@
 /*!
 
 \author M.A. Fernandez
-\date 01/01/2004
+\date 28/04/2005
 
-\brief Main program for solving he Oseen's equation with reaction using
-P1/P1 or P2/P2 FEM with Interior Penalty (IP) stabilization
-(See Burman-Fernandez-Hansbo 2004).
+\brief Flow around a cylinder using Navier-Stokes with IP stabilization.
+       ( see Hansbo & Szepessy 90 ). The result file "cl" contains the 
+       lift coefficient at each time, so that the Strouhal number can be computed
 
 */
 
