@@ -33,8 +33,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 namespace LifeV
 {
 
-Real EthierSteinmanUnsteady::f( const Real& t, const Real& x, const Real& y,
-                                const Real& z, const ID& i ) { return 0; }
+Real EthierSteinmanUnsteady::f( const Real& /* t */,
+                                const Real& /* x */,
+                                const Real& /* y */,
+                                const Real& /* z */,
+                                const ID& /* i */ ) { return 0; }
 
 Real EthierSteinmanUnsteady::xexact( const Real& t,
                                      const Real& x,
@@ -85,7 +88,7 @@ Real EthierSteinmanUnsteady::pexact( const Real& t,
                                      const Real& x,
                                      const Real& y,
                                      const Real& z,
-                                     const ID& i )
+                                     const ID& /* i */ )
 {
     return xexact(t, x, y, z, 4);
 }
