@@ -33,8 +33,8 @@
 #ifndef _NAVIERSTOKESSOLVERIP_H_
 #define _NAVIERSTOKESSOLVERIP_H_
 
-#define AZTEC_SOLVER 0
-#define PETSC_SOLVER 1
+#define AZTEC_SOLVER 1
+#define PETSC_SOLVER 0
 #define UMFPACK_SOLVER 0
 
 #include <life/lifesolver/NavierStokesHandler.hpp>
