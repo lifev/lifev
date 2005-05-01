@@ -33,37 +33,60 @@
 #include <life/lifecore/life.hpp>
 #include <life/lifemesh/dataMesh.hpp>
 #include <life/lifefem/dataTime.hpp>
+#include <life/lifecore/dataString.hpp>
 
 namespace LifeV
 {
-/*!
-  \class DataNavierStokes
 
-  Base class which holds usual data for the NavierStokes equations solvers
 
-*/
-template <typename Mesh>
-class DataNavierStokes:
-            public DataMesh<Mesh>,
-            public DataTime
-{
-public:
 
+
+
+
+  /*!
+    \typedef enum
+    
+  */
+  typedef enum NSStabilization
+    {
+      NO_STABILIZATION,     //!< No stabilization
+      IP_STABILIZATION,       //!< Interior penalty
+      SD_STABILIZATION        //!< Stream-line diffusion
+    };
+  
+  
+  /*!
+    \class DataNavierStokes
+    
+    Base class which holds usual data for the NavierStokes equations solvers
+    
+  */
+  template <typename Mesh>
+  class DataNavierStokes:
+    public DataMesh<Mesh>,
+    public DataTime
+  {
+  public:
+    
     //! Constructor
     DataNavierStokes( const GetPot& dfile );
-
+    
     //! Ouptut
     void showMe( std::ostream& c = std::cout );
+    
     //! End time
     Real density() const;
     Real viscosity() const;
     Real inittime() const;
     Real endtime() const;
-
+    
     UInt verbose() const;
     Real dump_init() const;
     UInt dump_period() const;
-
+    Real factor() const;
+    
+    NSStabilization stabilization() const;
+    
     //! a way to obtain the Mean Flux, Mean Pressure and
     //! Mean Area at a section defined by z=z_data.
     UInt computeMeanValuesPerSection() const;
@@ -73,22 +96,27 @@ public:
     Real ZSectionInit() const;
     Real ZSectionFinal() const;
     UInt NbPolygonEdges() const;
-
-
-protected:
+    
+    
+  protected:
     //! Physics
     Real _rho; // density
     Real _mu; // viscosity
     Real _inittime; // initial time (Alex December 2003)
     Real _endtime; // end time
-
-
+    
+    
     //! Miscellaneous
     UInt _verbose; // temporal output verbose
     Real _dump_init; // time for starting the dumping of the results (Alex December 2003)
     UInt _dump_period; // frequency of the dumping (one dump after _dump_period time steps) (Alex December 2003)
-
-private:
+    Real M_factor; // amplification factor for moving domains
+    
+    //! Discretization
+    NSStabilization M_stab_method;
+    
+    
+  private:
     //! To extract Mean Values at a given section z
     UInt M_computeMeanValuesPerSection; //! switch: 0 don't compute it, 1 compute
     UInt M_NbZSections;
@@ -97,7 +125,9 @@ private:
     Real M_ZSectionInit;
     Real M_ZSectionFinal;
     UInt M_NbPolygonEdges; //! number of edges of the polygon (in mesh) describing the circle
-};
+    
+    DataStringList M_stabilization_list;
+  };
 
 
 //
@@ -110,8 +140,16 @@ template <typename Mesh>
 DataNavierStokes<Mesh>::
 DataNavierStokes( const GetPot& dfile ) :
         DataMesh<Mesh>( dfile, "fluid/discretization" ),
-        DataTime( dfile, "fluid/discretization" )
+        DataTime( dfile, "fluid/discretization" ),
+	M_stabilization_list( "fluid/discretization/stabilization" )
 {
+
+  
+  
+    M_stabilization_list.add( "ip", IP_STABILIZATION, "interior penalty " );
+    M_stabilization_list.add( "sd", SD_STABILIZATION, "stream-line difussion" );
+    M_stabilization_list.add( "none", NO_STABILIZATION,  "none (default)" );
+
 
     // physics
     _rho = dfile( "fluid/physics/density", 1. );
@@ -123,6 +161,14 @@ DataNavierStokes( const GetPot& dfile ) :
     _verbose = dfile( "fluid/miscellaneous/verbose", 1 );
     _dump_init = dfile( "fluid/miscellaneous/dump_init", _inittime );
     _dump_period = dfile( "fluid/miscellaneous/dump_period", 1 );
+    M_factor = dfile( "fluid/miscellaneous/factor", 0. );
+
+    M_stab_method = NSStabilization ( M_stabilization_list.value( dfile( "fluid/discretization/stabilization", "none") ) );
+
+    // IP needs boundary faces
+    bool ipfaces =  ( M_stab_method == IP_STABILIZATION ) && (this->_mesh_faces != "all" ) ;
+    if ( ipfaces )
+      ERROR_MSG("ERROR: IP requires boundary faces. Put mesh_faces = all in data file." );          
 
     //mean values per section
     M_computeMeanValuesPerSection =
@@ -157,10 +203,27 @@ showMe( std::ostream& c )
     c << "verbose   = " << _verbose << std::endl;
     c << "initial time for writing solution  = " << _dump_init << std::endl;
     c << "number of time steps between two consecutive dumps of the solution = " << _dump_period << std::endl;
+    c << "amplification factor = " << M_factor << std::endl;
+
 
     c << "\n*** Values for data [fluid/discretization]\n\n";
     DataMesh<Mesh>::showMe( c );
     DataTime::showMe( c );
+    c << "stabilization = ";
+    switch( M_stab_method ) 
+      {
+      case NO_STABILIZATION:
+	c << "none" ;
+	break;
+      case IP_STABILIZATION:
+	c << "ip" ;
+	break;
+      case SD_STABILIZATION:
+	c << "sd" ;
+	break;
+      }
+    c << std::endl;
+
 
     c << "\n*** Values for data [fluid/valuespersection]\n\n";
     c << "computeMeanValuesPerSection (switch 0: don't compute, 1: compute)  = "
@@ -229,6 +292,22 @@ dump_period() const
 {
     return _dump_period;
 }
+
+// Amplification factor
+template <typename Mesh>
+Real DataNavierStokes<Mesh>::
+factor() const
+{
+    return M_factor;
+}
+
+// Stabilization method
+template <typename Mesh>
+ NSStabilization DataNavierStokes<Mesh>::stabilization() const
+{
+    return M_stab_method;
+}
+
 
 //! Mean Values per Sections
 //! compute (0) or not (1) the mean values per sections

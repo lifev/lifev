@@ -46,6 +46,7 @@
 #include <life/lifefem/bdfNS.hpp>
 #include <life/lifefem/postProc.hpp>
 #include <life/lifefilters/openDX_wrtrs.hpp>
+#include <life/lifearray/pattern.hpp>
 #include <cmath>
 #include <sstream>
 #include <ext/slist>
@@ -310,6 +311,11 @@ public:
     //! \param relError Real* to store the relative error in
     Real uErrorL2( const Function& uexact, Real time, Real* relError=0 );
 
+
+
+    BasePattern::PatternType patternType();
+
+
     //! Do nothing destructor
     virtual ~NavierStokesHandler()
     {}
@@ -415,6 +421,9 @@ private:
 
     //! The BC handler
     BCHandler    *M_BCh_fluid;
+
+    BasePattern::PatternType M_patternType;
+  
 
 };
 
@@ -1685,6 +1694,21 @@ Real NavierStokesHandler<Mesh, DataType>::uErrorL2( const Function& uexact,
     }
     return sqrt( normU );
 }
+
+
+
+  template <typename Mesh, typename DataType>
+  BasePattern::PatternType NavierStokesHandler<Mesh, DataType>::patternType() {
+ 
+    BasePattern::PatternType  pt = BasePattern::STANDARD_PATTERN;
+    if ( this->stabilization() == IP_STABILIZATION )
+      pt = BasePattern::EDGE_COUPLING_PATTERN;
+    return pt;
+  }
+
+
+
+
 
 template <typename Mesh, typename DataType>
 void NavierStokesHandler<Mesh, DataType>::initializeMeanValuesPerSection()
