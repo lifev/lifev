@@ -106,6 +106,99 @@ void wr_gmv_ascii( std::string fname, const Mesh& mesh, const UInt& dim, const R
     ofile << "endgmv\n";
 
 }
+
+
+// for moving meshes
+template <typename Mesh>
+ void wr_gmv_ascii( std::string fname, const Mesh& mesh, const UInt& dim, const Real* U, const Real* P, const Vector& disp, const Real& factor)
+{
+
+    std::ofstream ofile( fname.c_str() );
+
+    ASSERT( ofile, "Error: Output file cannot be open" );
+
+
+    ofile << "gmvinput ascii\n";
+
+    //
+    // Nodes
+    //
+    ofile << "nodev ";
+    UInt nV = mesh.numVertices();
+    ofile << nV << std::endl;
+
+    if ( factor <= 0.0 ) {
+      for ( UInt i = 1; i <= nV; ++i )
+	{
+	  ofile << mesh.point( i ).x() << " "
+		<< mesh.point( i ).y() << " "
+		<< mesh.point( i ).z() << " "
+		<< std::endl;
+	}
+      ofile << std::endl;
+    }
+    else
+      {
+	for ( UInt i = 1; i <= nV; ++i )
+	  {
+	    ofile << mesh.point( i ).x()- disp[ i - 1 ]  + factor * disp[ i - 1 ]  << " "
+		  << mesh.point( i ).y()- disp[ i - 1 + nV ]  + factor * disp[ i - 1 + nV ]<< " "
+		  << mesh.point( i ).z()- disp[ i - 1 + 2 * nV ]  + factor * disp[ i - 1 + 2 * nV ]<< " "
+		  << std::endl;
+	  }
+	ofile << std::endl;
+      }
+    //
+    // Elements
+    //
+    ofile << "cells ";
+    UInt nE = mesh.numVolumes();
+    ofile << nE << std::endl;
+
+    typedef typename Mesh::VolumeShape ElementShape;
+    UInt nVpE = ElementShape::numVertices;
+
+    for ( ID k = 1; k <= nE; ++k )
+    {
+        ofile << "tet 4\n";
+        for ( ID i = 1; i <= nVpE; ++i )
+            ofile << mesh.volume( k ).point( i ).id() << " ";
+        ofile << std::endl;
+    }
+    ofile << std::endl;
+    //
+    // Velocity
+    //
+    ofile << "velocity 1\n";
+    for ( int icomp = 0; icomp < 3 ; ++icomp )
+        for ( int i = 0; i < int( nV ); i++ )
+        {
+            ofile << U[ icomp * dim + i ] << std::endl;
+        }
+
+    ofile << std::endl;
+    //
+    // Pressure
+    //
+    ofile << "variable 'pressure' 1\n";
+    for ( int i = 0; i < int( nV ); i++ )
+    {
+        ofile << P[ i ] << std::endl;
+    }
+    ofile << "endvars\n";
+    ofile << std::endl;
+
+    ofile << "endgmv\n";
+
+}
+
+
+
+
+
+
+
+
 }
 
 #endif
