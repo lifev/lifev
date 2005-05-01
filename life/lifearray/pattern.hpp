@@ -18,7 +18,7 @@
 */
 /*----------------------------------------------------------------------*
 |
-| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.24 2005-03-01 10:15:11 winkelma Exp $
+| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.25 2005-05-01 21:35:43 fernandez Exp $
 |
 |
 | #Version  0.1 Experimental   07/7/00. Luca Formaggia & Alessandro Veneziani
@@ -119,6 +119,21 @@ protected:
 class BasePattern : public PatternDefs
 {
 public:
+
+
+  /*!
+      \typedef enum
+      
+    */
+    typedef enum PatternType
+    {
+        STANDARD_PATTERN,          //!< Standard pattern
+        EDGE_COUPLING_PATTERN      //!< Additional coupling trhough edges
+    };
+
+
+
+
 
     //! Default constructor (size zero)
     BasePattern();
@@ -757,7 +772,7 @@ public:
     //! Constructor for continuous FEM with IP stabilization
     //! @author Miguel Fernandez, 12/2003
     template <typename DOF, typename MESH>
-    MSRPatt( const DOF& dof, const MESH& mesh, const UInt nbcomp );
+    MSRPatt( const DOF& dof, const MESH& mesh, const UInt nbcomp, PatternType patternType = EDGE_COUPLING_PATTERN );
 
     //! Constructor for DG FEM
     //! @author Daniele A. Di Pietro, 10/2004
@@ -1292,12 +1307,15 @@ bool BasePattern::setpatt( const DOF& dof, const MESH& mesh,
     //
     // for each face the local numbering of the neighboors connected
     // to this face
+    
     UInt p1[] = {4, 3, 1, 2};
     UInt p2[] = {4, 8, 9, 10,
                  3, 6, 7, 10,
                  1, 5, 7, 8,
                  2, 5, 6, 9};
+    
     UInt* a;
+    
     UInt iop, jop, nop; // number of opposite dof
 
     if ( dof.fe.nbLocalDof == 4 )
@@ -2222,11 +2240,23 @@ MSRPatt::MSRPatt( DOF1 const & dof1, UInt const nbcomp )
 // Miguel 12/2003
 //
 template <typename DOF, typename MESH>
-MSRPatt::MSRPatt( const DOF& dof, const MESH& mesh, const UInt nbcomp )
+MSRPatt::MSRPatt( const DOF& dof, const MESH& mesh, const UInt nbcomp, PatternType patternType)
 {
-    bool built;
-    built = buildPattern( dof, mesh, nbcomp );
-    ASSERT_PRE( built, "Error in MSR Pattern construction from DOF object" );
+  bool built;
+
+  switch ( patternType  ) 
+    {
+    case STANDARD_PATTERN:
+      built = buildPattern( dof, nbcomp );
+      break;
+    case EDGE_COUPLING_PATTERN:
+      built = buildPattern( dof, mesh, nbcomp );
+      break;
+    default:
+      ERROR_MSG( "This pattern type is not yet allowed" );
+    }
+ 
+  ASSERT_PRE( built, "Error in MSR Pattern construction from DOF object" );
 }
 
 // D. A. Di Pietro
@@ -2364,6 +2394,7 @@ bool MSRPatt::buildPattern( const DOF& dof, const MESH& mesh,
 {
     DynPattern dynpatt;
     bool built = setpatt( dof, mesh, dynpatt, nbcomp );
+
     if ( built )
     {
         _buildPattern( dof, dynpatt, nbcomp );
