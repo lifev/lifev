@@ -1,0 +1,63 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file for Navier-Stokes IP Solver
+#-------------------------------------------------
+
+[fluid]
+
+[./physics]
+endtime         = 400          # endtime
+density         = 1.0          # density
+viscosity       = 0.01       # viscosity
+
+
+[../discretization]
+mesh_dir        = ../../../lifev/testsuite/data/mesh/inria/  # the directory where the mesh file is
+mesh_file       = cyl2D.mesh          # mesh file
+mesh_faces      = all
+timestep        = 0.3                   # timestep
+order_bdf       = 1
+diagonalize     = 1 # weight, 0=off
+div_beta_u_v    = 1 # 1=on, 0=off
+stabilization   = sd # none, ip, sd
+
+[../miscellaneous]
+verbose         = 1
+steady          = 0
+
+[../aztec]
+solver          = gmres
+scaling         = none
+output          = all_res
+conv            = r0
+max_iter        = 100
+kspace          = 40
+precond         = dom_decomp #none,jacobi,sym_gs,neumann,ls,smoother,dom_decomp
+subdomain_solve = ilut
+ilut_fill       = 6
+drop            = 1.e-5
+tol             = 1.00e-10
+#keep_info       = 1
+
+[../petsc]
+ksp_type                  = gmres
+ksp_gmres_restart         = 20
+ksp_rtol                  = 1.e-10
+ksp_max_it                = 100
+pc_type                   = ilu
+#pc_ilu_use_drop_tolerance = 1.e-1,0.01,100 # activates SPARSKIT routine
+pc_ilu_levels             = 0
+ksp_cancelmonitors        = 1
+nokspview                 = true
+quiet                     = true
+ksp_set_compute_singular_values = true
+
+
+[../sdstab]
+gammaBeta  = 0.1
+gammaDiv   = 0.1 # not used at the moment
+
+[../ipstab]
+gammaBeta  = 0.125
+gammaDiv   = 0.125 # not used at the moment
+gammaPress = 0.03125 # not used at the moment
