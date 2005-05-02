@@ -57,8 +57,18 @@ public:
     //! Output
     virtual void showMe( std::ostream& c = std::cout ) const;
 
+
+  std::string meshDir() {return _mesh_dir;}
+  std::string meshFile() {return _mesh_file;}
+  
+
     //! The mesh
     Mesh& mesh();
+
+
+
+
+
     //! Virtual destructor
     virtual ~DataMesh();
 
