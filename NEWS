@@ -40,6 +40,10 @@ New in 0.7.0:
   ** base class for applications
   ** provides generic options
 
+[lifealg]
+* Added the preconditioner concept(base class) (CP)
+* Added an implementation of the Givens rotation (CP)
+
 [lifefem]
 * Added levelset solver (DADP)
 * Added hyperbolic solver (DADP)
@@ -49,7 +53,8 @@ New in 0.7.0:
 * Added levelset tests (DADP)
 
 [tools]
-* Added inspect: a tool to check for issues like missing copyright, 
+* Added inspect (CP)
+  a tool to check for issues like missing copyright,
   missing license, tabs in file, minmax issues, ...
 
 
@@ -292,4 +297,4 @@ New in 0.1.0pre3:
 * fixed some bugs and miscompilation in a few places
 
 
- -- Christophe Prud'homme <prudhomm@debian.org>, Sat Mar 19 13:42:54 2005
+ -- Christophe Prud'homme <prudhomm@debian.org>, Wed May  4 12:00:52 2005
