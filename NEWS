@@ -43,6 +43,7 @@ New in 0.7.0:
 [lifealg]
 * Added the preconditioner concept(base class) (CP)
 * Added an implementation of the Givens rotation (CP)
+* Added the iterative solver iteration class handler concept (CP)
 
 [lifefem]
 * Added levelset solver (DADP)
@@ -297,4 +298,4 @@ New in 0.1.0pre3:
 * fixed some bugs and miscompilation in a few places
 
 
- -- Christophe Prud'homme <prudhomm@debian.org>, Wed May  4 12:00:52 2005
+ -- Christophe Prud'homme <prudhomm@debian.org>, Wed May  4 12:08:31 2005
