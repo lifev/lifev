@@ -439,9 +439,9 @@ namespace LifeV
     if ( M_betaFct )
       this->uInterpolate( *M_betaFct, M_beta, M_time );
     else if ( M_steady )
-      M_beta = _u; // last iteration
+      M_beta = _rho * _u; // last iteration
     else
-      M_beta = _bdf.bdf_u().extrap(); // bdf extrapolation
+      M_beta = _rho * _bdf.bdf_u().extrap(); // bdf extrapolation
     
 
     switch ( this->stabilization() )
@@ -504,7 +504,7 @@ namespace LifeV
             for ( UInt iComp = 0; iComp<nbCompU; ++iComp )
 	      {
                 UInt ig = _dof_u.localToGlobal( eleID, iloc+1 )-1+iComp*_dim_u;
-                M_elvec.vec()[ iloc+iComp*_fe_u.nbNode ] = _rho * M_beta[ig];
+                M_elvec.vec()[ iloc+iComp*_fe_u.nbNode ] =  M_beta[ig];
 	      }
 	  }
 	
