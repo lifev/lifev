@@ -123,13 +123,22 @@ public:
     */
     void initialize( const std::string & vname );
 
+    //! Initialize with steady Stokes solution (without convection)
+    void initializeStokes( source_type const& source, Real t0 );
+
     //! linearize convective term around given (exact) velocity function
     void linearize( const Function& betaFct ) { M_betaFct = &betaFct; }
 
     //! removes mean of component comp of vector x
     void removeMean( Vector& x, UInt comp=1 );
-
+    
 private:
+
+    //! solve linear system
+    void solveLinearSystem();
+    
+    //! apply boundary conditions
+    void applyBoundaryConditions();
 
     //! Block pattern of M_u
     //MSRPatt M_pattMassUblock;
@@ -462,11 +471,10 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
               << std::flush;
     chrono.start();
     M_matrFull = M_matrStokes;
-
     chrono.stop();
-
     std::cout << "done in " << chrono.diff() << " s."
               << std::endl;
+
 
     std::cout << "  o-  Updating convective volume terms...      "
               << std::flush;
@@ -518,67 +526,25 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
     std::cout << "done in " << chrono.diff() << " s."
               << std::endl;
 
+
     std::cout << "  o-  Updating convective ip terms...          "
               << std::flush;
-
     chrono.start();
-
     details::IPStabilization<Mesh, Dof>
         allStab( _mesh, _dof_u, _refFE_u, _feBd_u, _Qr_u,
                  M_gammaBeta, M_gammaDiv, M_gammaPress, this->viscosity() );
     allStab.apply( M_matrFull, betaVec );
-
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
-
 
 
     // for BC treatment ( done at each time-step )
     std::cout << "  o-  Applying boundary conditions...          "
               << std::flush;
     chrono.start();
-
-
-
-    //     M_rhsFull = 0.0;
-    //     for ( UInt i = 0; i<nDimensions*_dim_u; ++i )
-    //     {
-    //         M_rhsFull[ i ] = M_rhsU[ i ];
-    //     }
-    M_rhsFull = M_rhsU;
-
-    // BC manage for the velocity
-    if ( !this->BCh_fluid().bdUpdateDone() )
-        this->BCh_fluid().bdUpdate( _mesh, _feBd_u, _dof_u );
-    bcManage( M_matrFull, M_rhsFull, _mesh, _dof_u, this->BCh_fluid(), _feBd_u, 1.0,
-               M_time );
-
-    if ( this->BCh_fluid().hasOnlyEssential() && M_diagonalize )
-    {
-         M_matrFull.diagonalize( nDimensions*_dim_u, M_diagonalize,
-                                 M_rhsFull, 0);
-        //                         pexact( M_time,
-        //                                 _mesh.point( 1 ).x(),
-        //                                 _mesh.point( 1 ).y(),
-        //                                 _mesh.point( 1 ).z(), 1 ) );
-        // M_matrFull.diagonalize_row( nDimensions*_dim_u, 1.0 );
-        // M_rhsFull[ nDimensions*_dim_u ] = pexact( _mesh.point( 1 ).x(),
-        //                                         _mesh.point( 1 ).y(),
-        //                                         _mesh.point( 1 ).z() );
-    }
-
+    applyBoundaryConditions();
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
-
-    //M_matrFull.spy("C.m");
-
-    M_linearSolver.setMatrix( M_matrFull );
-
-
-
-// ---------------
-// C * V = F
-// ---------------
 
     // set initial guess
     if ( M_steady )
@@ -602,35 +568,10 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
     std::cout << "  o-  Solving system...                        "
               << std::flush;
     chrono.start();
-#if AZTEC_SOLVER
-    M_linearSolver.solve( M_sol, M_rhsFull,
-                          SolverAztec::SAME_PRECONDITIONER );
-#elif PETSC_SOLVER
-    M_linearSolver.solve( M_sol, M_rhsFull, SAME_PRECONDITIONER );
-#else
-    M_linearSolver.solve( M_sol, M_rhsFull );
-#endif
+    solveLinearSystem();
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
-#if 1-UMFPACK_SOLVER
-    if ( !M_linearSolver.converged() )
-    {
-        std::cerr << "        WARNING: Solver failed to converge."
-                  << std::endl;
-    }
-#endif
-
-#if PETSC_SOLVER
-    std::cout << "        estimated condition number (preconditioned) = "
-              << M_linearSolver.condEst() << std::endl;
-#endif
-
-
-#if 1-UMFPACK_SOLVER
-    std::cout << "        number of iterations                        = "
-              << M_linearSolver.iterations() << std::endl;
-#endif
 
     if ( this->BCh_fluid().hasOnlyEssential() && !M_diagonalize )
     {
@@ -728,6 +669,73 @@ NavierStokesSolverIP<Mesh>::initialize( const std::string & vname )
 
 }
 
+template <typename Mesh>
+void
+NavierStokesSolverIP<Mesh>::initializeStokes( source_type const& source,
+                                              Real t0 )
+{
+    bool isSteady = M_steady;
+    M_steady = true;
+    timeAdvance( source, t0 );
+    M_steady = isSteady;
+    
+    Chrono chrono;
+    
+    // velocity vector for linearization of convective term
+    Vector betaVec(_u.size());
+    betaVec = ZeroVector( betaVec.size() );
+    M_time = t0;
+
+    std::cout << "  o-  Copying Stokes matrix...                 "
+              << std::flush;
+    chrono.start();
+    M_matrFull = M_matrStokes;
+    chrono.stop();
+    std::cout << "done in " << chrono.diff() << " s."
+              << std::endl;
+
+    std::cout << "  o-  Adding ip terms...                       "
+              << std::flush;
+    chrono.start();
+    details::IPStabilization<Mesh, Dof>
+        initStab( _mesh, _dof_u, _refFE_u, _feBd_u, _Qr_u,
+                  0, 0, M_gammaPress, this->viscosity() );
+    initStab.apply( M_matrFull, betaVec );
+    chrono.stop();
+    std::cout << "done in " << chrono.diff() << " s." << std::endl;
+
+    std::cout << "  o-  Applying boundary conditions...          "
+              << std::flush;
+    chrono.start();
+    applyBoundaryConditions();
+    chrono.stop();
+    std::cout << "done in " << chrono.diff() << " s." << std::endl;
+
+    M_sol = ZeroVector( M_sol.size() );
+
+    std::cout << "  o-  Solving system...                        "
+              << std::flush;
+    chrono.start();
+    solveLinearSystem();
+    chrono.stop();
+    std::cout << "done in " << chrono.diff() << " s." << std::endl;
+    
+    if ( this->BCh_fluid().hasOnlyEssential() && !M_diagonalize )
+    {
+        removeMean( M_sol, 4 );
+    }
+    for ( UInt iDof = 0; iDof<nDimensions*_dim_u; ++iDof )
+    {
+        _u[ iDof ] = M_sol[ iDof ];
+    }
+    for ( UInt iDof = 0; iDof<_dim_u; ++iDof )
+    {
+        _p[ iDof ] = M_sol[ iDof+nDimensions*_dim_u ];
+    }
+
+    _bdf.bdf_u().initialize_unk( M_sol );
+    
+} // initializeStokes
 
 
 template <typename Mesh>
@@ -748,6 +756,72 @@ void NavierStokesSolverIP<Mesh>::removeMean( Vector& x, UInt comp )
     }
 
 } // removeMean()
+
+template <typename Mesh>
+void NavierStokesSolverIP<Mesh>::applyBoundaryConditions()
+{
+    //     M_rhsFull = 0.0;
+    //     for ( UInt i = 0; i<nDimensions*_dim_u; ++i )
+    //     {
+    //         M_rhsFull[ i ] = M_rhsU[ i ];
+    //     }
+    M_rhsFull = M_rhsU;
+
+    // BC manage for the velocity
+    if ( !this->BCh_fluid().bdUpdateDone() )
+        this->BCh_fluid().bdUpdate( _mesh, _feBd_u, _dof_u );
+    bcManage( M_matrFull, M_rhsFull, _mesh, _dof_u, this->BCh_fluid(), _feBd_u, 1.0,
+               M_time );
+
+    if ( this->BCh_fluid().hasOnlyEssential() && M_diagonalize )
+    {
+         M_matrFull.diagonalize( nDimensions*_dim_u, M_diagonalize,
+                                 M_rhsFull, 0);
+        //                         pexact( M_time,
+        //                                 _mesh.point( 1 ).x(),
+        //                                 _mesh.point( 1 ).y(),
+        //                                 _mesh.point( 1 ).z(), 1 ) );
+        // M_matrFull.diagonalize_row( nDimensions*_dim_u, 1.0 );
+        // M_rhsFull[ nDimensions*_dim_u ] = pexact( _mesh.point( 1 ).x(),
+        //                                         _mesh.point( 1 ).y(),
+        //                                         _mesh.point( 1 ).z() );
+    }
+} // applyBoundaryCondition
+
+template <typename Mesh>
+void NavierStokesSolverIP<Mesh>::solveLinearSystem()
+{
+    M_linearSolver.setMatrix( M_matrFull );
+
+#if AZTEC_SOLVER
+    M_linearSolver.solve( M_sol, M_rhsFull,
+                          SolverAztec::SAME_PRECONDITIONER );
+#elif PETSC_SOLVER
+    M_linearSolver.solve( M_sol, M_rhsFull, SAME_PRECONDITIONER );
+#else
+    M_linearSolver.solve( M_sol, M_rhsFull );
+#endif
+
+#if 1-UMFPACK_SOLVER
+    if ( !M_linearSolver.converged() )
+    {
+        std::cerr << "        WARNING: Solver failed to converge."
+                  << std::endl;
+    }
+#endif
+
+#if PETSC_SOLVER
+    std::cout << "        estimated condition number (preconditioned) = "
+              << M_linearSolver.condEst() << std::endl;
+#endif
+
+
+#if 1-UMFPACK_SOLVER
+    std::cout << "        number of iterations                        = "
+              << M_linearSolver.iterations() << std::endl;
+#endif
+
+} // solveLinearSystem
 
 } // namespace LifeV
 
