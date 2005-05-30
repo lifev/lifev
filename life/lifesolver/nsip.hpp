@@ -33,8 +33,8 @@
 #ifndef _NAVIERSTOKESSOLVERIP_H_
 #define _NAVIERSTOKESSOLVERIP_H_
 
-#define AZTEC_SOLVER 1
-#define PETSC_SOLVER 0
+#define AZTEC_SOLVER 0
+#define PETSC_SOLVER 1
 #define UMFPACK_SOLVER 0
 
 #include <life/lifesolver/NavierStokesHandler.hpp>
@@ -806,7 +806,6 @@ void NavierStokesSolverIP<Mesh>::solveLinearSystem()
     M_linearSolver.setMatrix( M_matrFull );
 
 #if 1-UMFPACK_SOLVER
-    Chrono chrono;
     if ( M_tTotalSolve < M_nUsePC * M_tThisSolve*M_tThisSolve/M_tLastSolve ) {
         solveLinearSystemOnce( false );
     } else {
