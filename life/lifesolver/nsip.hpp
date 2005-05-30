@@ -131,12 +131,15 @@ public:
 
     //! removes mean of component comp of vector x
     void removeMean( Vector& x, UInt comp=1 );
-    
+
 private:
 
     //! solve linear system
     void solveLinearSystem();
-    
+
+    //! solve linear system once (iterative solvers)
+    void solveLinearSystemOnce( bool reusePC );
+
     //! apply boundary conditions
     void applyBoundaryConditions();
 
@@ -206,6 +209,11 @@ private:
     double M_diagonalize;
 
     Vector M_constantPressure;
+    
+    UInt M_nUsePC;
+    Real M_tTotalSolve;
+    Real M_tLastSolve;
+    Real M_tThisSolve;
 
 }; // class NavierStokesSolverIP
 
@@ -249,7 +257,11 @@ NavierStokesSolverIP( const GetPot& dataFile,
     M_rhsFull( ( nDimensions+1 )*_dim_u ),
     M_sol( ( nDimensions+1 )*_dim_u ),
     M_betaFct( 0 ),
-    M_constantPressure( ( nDimensions+1 )*_dim_u )
+    M_constantPressure( ( nDimensions+1 )*_dim_u ),
+    M_nUsePC( 1 ),
+    M_tTotalSolve( 0 ),
+    M_tLastSolve( 1 ),
+    M_tThisSolve( 1 )
 {
     M_steady = dataFile( "fluid/miscellaneous/steady", 1 );
     M_gammaBeta = dataFile( "fluid/ipstab/gammaBeta", 0. );
@@ -678,9 +690,9 @@ NavierStokesSolverIP<Mesh>::initializeStokes( source_type const& source,
     M_steady = true;
     timeAdvance( source, t0 );
     M_steady = isSteady;
-    
+
     Chrono chrono;
-    
+
     // velocity vector for linearization of convective term
     Vector betaVec(_u.size());
     betaVec = ZeroVector( betaVec.size() );
@@ -719,7 +731,7 @@ NavierStokesSolverIP<Mesh>::initializeStokes( source_type const& source,
     solveLinearSystem();
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
-    
+
     if ( this->BCh_fluid().hasOnlyEssential() && !M_diagonalize )
     {
         removeMean( M_sol, 4 );
@@ -734,7 +746,7 @@ NavierStokesSolverIP<Mesh>::initializeStokes( source_type const& source,
     }
 
     _bdf.bdf_u().initialize_unk( M_sol );
-    
+
 } // initializeStokes
 
 
@@ -793,11 +805,16 @@ void NavierStokesSolverIP<Mesh>::solveLinearSystem()
 {
     M_linearSolver.setMatrix( M_matrFull );
 
-#if AZTEC_SOLVER
-    M_linearSolver.solve( M_sol, M_rhsFull,
-                          SolverAztec::SAME_PRECONDITIONER );
-#elif PETSC_SOLVER
-    M_linearSolver.solve( M_sol, M_rhsFull, SAME_PRECONDITIONER );
+#if 1-UMFPACK_SOLVER
+    Chrono chrono;
+    if ( M_tTotalSolve < M_nUsePC * M_tThisSolve*M_tThisSolve/M_tLastSolve ) {
+        solveLinearSystemOnce( false );
+    } else {
+        solveLinearSystemOnce( true );
+        if ( !M_linearSolver.converged() ) {
+            solveLinearSystemOnce( false );
+        }
+    }
 #else
     M_linearSolver.solve( M_sol, M_rhsFull );
 #endif
@@ -822,6 +839,44 @@ void NavierStokesSolverIP<Mesh>::solveLinearSystem()
 #endif
 
 } // solveLinearSystem
+
+template <typename Mesh>
+void NavierStokesSolverIP<Mesh>::solveLinearSystemOnce( bool reusePC )
+{
+    Chrono chrono;
+    if ( reusePC ) {
+        chrono.start();
+#if AZTEC_SOLVER
+        M_linearSolver.solve( M_sol, M_rhsFull,
+                              SolverAztec::SAME_PRECONDITIONER );
+#elif PETSC_SOLVER
+        M_linearSolver.solve( M_sol, M_rhsFull, SAME_PRECONDITIONER );
+#endif
+        chrono.stop();
+        if ( M_nUsePC == 1 ) {
+            M_tThisSolve = chrono.diff();
+            M_tLastSolve = M_tThisSolve;
+        } else {
+            M_tLastSolve = M_tThisSolve;
+            M_tThisSolve = chrono.diff();
+        }
+        M_tTotalSolve += M_tThisSolve;
+        ++M_nUsePC;
+    } else {
+        chrono.start();
+#if AZTEC_SOLVER
+        M_linearSolver.solve( M_sol, M_rhsFull,
+                              SolverAztec::SAME_NONZERO_PATTERN );
+#elif PETSC_SOLVER
+        M_linearSolver.solve( M_sol, M_rhsFull, SAME_NONZERO_PATTERN );
+#endif
+        chrono.stop();
+        M_tThisSolve = chrono.diff();
+        M_tLastSolve = 2 * M_tThisSolve;
+        M_tTotalSolve = M_tThisSolve;
+        M_nUsePC = 1;
+    }
+} // solveLinearSystemOnce
 
 } // namespace LifeV
 
