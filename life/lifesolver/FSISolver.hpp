@@ -66,7 +66,8 @@ public:
     //@{
     typedef FSIOperator::fluid_type::value_type::source_type fluid_source_type;
     typedef FSIOperator::fluid_type::value_type::source_type solid_source_type;
-    typedef FSIOperator::bchandler_type bchandler_type;
+    typedef FSIOperator::fluid_bchandler_type fluid_bchandler_type;
+    typedef FSIOperator::solid_bchandler_type solid_bchandler_type;
     //@}
 
     /** @name Constructors, destructor
@@ -83,9 +84,9 @@ public:
       \todo allow to change the FSI operator on the fly
      */
     FSISolver( GetPot const& datafile,
-               bchandler_type __bcu,
-               bchandler_type __bcd,
-               bchandler_type __bchext,
+               fluid_bchandler_type __bcu,
+               solid_bchandler_type __bcd,
+               fluid_bchandler_type __bchext,
                std::string __oper = "" );
 
      FSISolver( GetPot const& datafile,
@@ -120,13 +121,13 @@ public:
     Vector const& displacement() const { return M_disp; }
 
     //! get access to the \c bchandler_type for the velocity
-    bchandler_type& bcHandlerU() { return M_BCh_u; }
+    fluid_bchandler_type& bcHandlerU() { return M_BCh_u; }
 
     //! get access to the \c bchandler_type for the velocity
-    bchandler_type const& bcHandlerU() const { return M_BCh_u; }
+    fluid_bchandler_type const& bcHandlerU() const { return M_BCh_u; }
 
     //! get access to the \c bchandler_type for the displacement
-    bchandler_type const& bcHandlerD() const { return M_BCh_d; }
+    solid_bchandler_type const& bcHandlerD() const { return M_BCh_d; }
 
     //@}
 
@@ -148,18 +149,18 @@ public:
       \param __op FSI operator name
     */
     void setFSIOperator( std::string const& __op );
-
+    oper_fsi_ptr FSIOper(){ return M_oper; }
     //@}
 
-    void setFluidBC             (bchandler_type &bc_fluid);
-    void setLinFluidBC          (bchandler_type &bc_dfluid);
-    void setInvLinFluidBC       (bchandler_type &bc_dfluid_inv);
-    void setHarmonicExtensionBC (bchandler_type &bc_he);
-    void setSolidBC             (bchandler_type &bc_solid);
-    void setLinSolidBC          (bchandler_type &bc_dsolid);
-    void setInvLinSolidBC       (bchandler_type &bc_dsolid_inv);
-    void setReducedLinFluidBC   (bchandler_type &bc_dredfluid);
-    void setInvReducedLinFluidBC(bchandler_type &bc_dredfluid_inv);
+    void setFluidBC             (fluid_bchandler_type &bc_fluid);
+    void setLinFluidBC          (fluid_bchandler_type &bc_dfluid);
+    void setInvLinFluidBC       (fluid_bchandler_type &bc_dfluid_inv);
+    void setHarmonicExtensionBC (fluid_bchandler_type &bc_he);
+    void setSolidBC             (solid_bchandler_type &bc_solid);
+    void setLinSolidBC          (solid_bchandler_type &bc_dsolid);
+    void setInvLinSolidBC       (solid_bchandler_type &bc_dsolid_inv);
+    void setReducedLinFluidBC   (fluid_bchandler_type &bc_dredfluid);
+    void setInvReducedLinFluidBC(fluid_bchandler_type &bc_dredfluid_inv);
 
     /** @name  Methods
      */
@@ -208,12 +209,12 @@ private:
 private:
 
     // be careful here: the BCs must be constructed before the solvers
-    bchandler_type     M_BCh_u;
-    bchandler_type     M_BCh_d;
-    bchandler_type     M_BCh_mesh;
+    fluid_bchandler_type     M_BCh_u;
+    fluid_bchandler_type     M_BCh_d;
+    fluid_bchandler_type     M_BCh_mesh;
 
-    bchandler_type     M_BCh_du;
-    bchandler_type     M_BCh_dz;
+    fluid_bchandler_type     M_BCh_du;
+    fluid_bchandler_type     M_BCh_dz;
 
     oper_fsi_ptr       M_oper;
 

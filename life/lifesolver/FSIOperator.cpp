@@ -39,39 +39,39 @@ FSIOperator::setup()
         M_dispStruct.resize( 3*M_solid->dDof().numTotalDof() );
         M_velo.resize( 3*M_solid->dDof().numTotalDof() );
 
-        M_dofFluidToStructure->setup(feTetraP1, M_solid->dDof(),
-                                     feTetraP1bubble, M_fluid->uDof());
+        M_dofFluidToStructure->setup(M_solid->mesh().getRefFE(), M_solid->dDof(),
+                                     M_fluid->mesh().getRefFE(), M_fluid->uDof());
         M_dofFluidToStructure->update(M_solid->mesh(), 1,
                                       M_fluid->mesh(), 1,
                                       0.);
 
-        M_dofStructureToSolid->setup(feTetraP1, M_solid->dDof(),
-                                     feTetraP1, M_solid->dDof());
+        M_dofStructureToSolid->setup(M_solid->mesh().getRefFE(), M_solid->dDof(),
+                                     M_solid->mesh().getRefFE(), M_solid->dDof());
         M_dofStructureToSolid->update(M_solid->mesh(), 1,
                                       M_solid->mesh(), 1,
                                       0.);
 
-        M_dofStructureToHarmonicExtension->setup(M_fluid->mesh().getRefFE(), M_fluid->dofMesh(),
-                                                 feTetraP1, M_solid->dDof());
+        M_dofStructureToHarmonicExtension->setup(M_fluid->mesh().getRefFE(), M_fluid->harmonicExtension().dofMesh(),
+//        M_dofStructureToHarmonicExtension->setup(M_fluid->mesh().getRefFE(), M_fluid->uDof(),
+                                                 M_solid->mesh().getRefFE(), M_solid->dDof());
         M_dofStructureToHarmonicExtension->update(M_fluid->mesh(), 1,
                                                   M_solid->mesh(), 1,
                                                   0.0);
 
-        M_dofHarmonicExtensionToFluid->setup(feTetraP1bubble,M_fluid->uDof(),
-                                feTetraP1bubble,M_fluid->uDof());
+        M_dofHarmonicExtensionToFluid->setup(M_fluid->mesh().getRefFE(),M_fluid->uDof(),
+                                             M_fluid->mesh().getRefFE(),M_fluid->uDof());
         M_dofHarmonicExtensionToFluid->update(M_fluid->mesh(), 1,
                                  M_fluid->mesh(), 1,
                                  0.0);
 
-        M_dofStructureToReducedFluid->setup(feTetraP1, M_fluid->pDof(),
-//        M_dofStructureToReducedFluid->setup(M_fluid->mesh().getRefFE(), M_fluid->dofMesh(),
-                                            feTetraP1, M_solid->dDof());
+        M_dofStructureToReducedFluid->setup(M_fluid->mesh().getRefFE(), M_fluid->pDof(),
+                                            M_solid->mesh().getRefFE(), M_solid->dDof());
         M_dofStructureToReducedFluid->update(M_fluid->mesh(), 1,
                                              M_solid->mesh(), 1,
                                              0.0);
 
-        M_dofReducedFluidToStructure->setup(feTetraP1, M_solid->dDof(),
-                                            feTetraP1, M_fluid->pDof());
+        M_dofReducedFluidToStructure->setup(M_solid->mesh().getRefFE(), M_solid->dDof(),
+                                            M_fluid->mesh().getRefFE(), M_fluid->pDof());
         M_dofReducedFluidToStructure->update(M_solid->mesh(), 1,
                                              M_fluid->mesh(), 1,
                                              0.0);
@@ -92,7 +92,7 @@ FSIOperator::setDataFromGetPot( GetPot const& data_file )
 //
 
 void
-FSIOperator::updateJac(Vector& /*sol*/,int /*iter*/)
+FSIOperator::updateJacobian(Vector& /*sol*/,int /*iter*/)
 {
 }
 
@@ -103,11 +103,11 @@ Vector
 FSIOperator::displacementOnInterface()
 {
 
-    Vector dispOnInterface(M_solid->d().size());
+    Vector dispOnInterface(M_solid->disp().size());
     dispOnInterface = ZeroVector(dispOnInterface.size());
 
     FOR_EACH_INTERFACE_DOF( dispOnInterface[IDsolid - 1 + jDim*totalDofSolid] =
-                            M_solid->d()              [IDsolid - 1 + jDim*totalDofSolid]);
+                            M_solid->disp()              [IDsolid - 1 + jDim*totalDofSolid]);
 
     std::cout << "max norm disp = " << norm_inf(dispOnInterface);
     std::cout << std::endl;
@@ -118,10 +118,11 @@ FSIOperator::displacementOnInterface()
 }
 
 
-void FSIOperator::transferOnInterface(const Vector      &_vec1,
-                                      const BCHandler   &_BC,
-                                      const std::string &_BCName,
-                                      Vector            &_vec2)
+void
+FSIOperator::transferOnInterface(const Vector      &_vec1,
+                                 const BCHandler   &_BC,
+                                 const std::string &_BCName,
+                                 Vector            &_vec2)
 {
     _vec2 = ZeroVector(_vec2.size());
 

@@ -65,29 +65,35 @@ class FSIOperator {
 
 public:
 
-    typedef boost::shared_ptr<NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> > > fluid_type;
-    typedef boost::shared_ptr<VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> > > solid_type;
+    typedef VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >    solid_raw_type;
+    typedef NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> > fluid_raw_type;
+    typedef boost::shared_ptr<fluid_raw_type> fluid_type;
+    typedef boost::shared_ptr<solid_raw_type> solid_type;
 
     typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID
                                    & )> function_type;
 
     typedef boost::shared_ptr<DofInterface3Dto3D> dof_interface_type;
     typedef boost::shared_ptr<BCVectorInterface>  bc_vector_interface;
-    typedef boost::shared_ptr<BCHandler>          bchandler_type;
 
-//    typedef boost::shared_ptr<reducedLinFluid> quasi_newton_type;
+    typedef solid_raw_type::bchandler_type        solid_bchandler_type;
+    typedef solid_raw_type::bchandler_raw_type    solid_bchandler_raw_type;
+
+    typedef fluid_raw_type::bchandler_type        fluid_bchandler_type;
+    typedef fluid_raw_type::bchandler_raw_type    fluid_bchandler_raw_type;
+
     typedef boost::shared_ptr<reducedLinFluid>    quasi_newton_type;
 
     // constructors
     FSIOperator():
-        M_BCh_u(new BCHandler),
-        M_BCh_d(new BCHandler),
-        M_BCh_mesh(new BCHandler),
-        M_BCh_du(new BCHandler),
-        M_BCh_du_inv(new BCHandler),
-        M_BCh_dz(new BCHandler),
-        M_BCh_dz_inv(new BCHandler),
-        M_BCh_dp(new BCHandler),
+        M_BCh_u     (new fluid_bchandler_raw_type),
+        M_BCh_d     (new solid_bchandler_raw_type),
+        M_BCh_mesh  (new fluid_bchandler_raw_type),
+        M_BCh_du    (new fluid_bchandler_raw_type),
+        M_BCh_du_inv(new fluid_bchandler_raw_type),
+        M_BCh_dz    (new solid_bchandler_raw_type),
+        M_BCh_dz_inv(new solid_bchandler_raw_type),
+        M_BCh_dp    (new BCHandler),
         M_BCh_dp_inv(new BCHandler),
         M_fluid(),
         M_solid(),
@@ -138,16 +144,16 @@ public:
                               const Vector &_disp,
                               const int     _iter) = 0;
 
-    virtual void solveJac (Vector &_muk,
-                           const Vector &_res,
-                           const double  _linearRelTol) = 0;
+    virtual void solveJac(Vector &_muk,
+                          const Vector &_res,
+                          const double  _linearRelTol) = 0;
 
     // member functions
 
     virtual void setUpBC() = 0;
 
-    void updateJac (Vector& sol,
-                    int     iter);
+    void updateJacobian (Vector& sol,
+                         int     iter);
 
     void solveLinearFluid();
     void solveLinearSolid();
@@ -176,22 +182,22 @@ public:
 
     virtual void setDataFromGetPot( GetPot const& data );
 
-    void setBC( bchandler_type& bc_u,  bchandler_type& bc_d, bchandler_type& bc_m )
+    void setBC( fluid_bchandler_type& bc_u,  solid_bchandler_type& bc_d, fluid_bchandler_type& bc_m )
         {
             M_BCh_u = bc_u;
             M_BCh_d = bc_d;
             M_BCh_mesh = bc_m;
         }
 
-    void setFluidBC             (bchandler_type &bc_fluid)       {M_BCh_u      = bc_fluid;}
-    void setLinFluidBC          (bchandler_type &bc_dfluid)      {M_BCh_du     = bc_dfluid;}
-    void setInvLinFluidBC       (bchandler_type &bc_dfluid_inv)  {M_BCh_du_inv = bc_dfluid_inv;}
-    void setHarmonicExtensionBC (bchandler_type &bc_he)          {M_BCh_mesh   = bc_he;}
-    void setSolidBC             (bchandler_type &bc_solid)       {M_BCh_d      = bc_solid;}
-    void setLinSolidBC          (bchandler_type &bc_dsolid)      {M_BCh_dz     = bc_dsolid;}
-    void setInvLinSolidBC       (bchandler_type &bc_dsolid_inv)  {M_BCh_dz     = bc_dsolid_inv;}
-    void setReducedLinFluidBC   (bchandler_type &bc_dredfluid)   {M_BCh_dp     = bc_dredfluid;}
-    void setInvReducedLinFluidBC(bchandler_type &bc_invdredfluid){M_BCh_dp_inv = bc_invdredfluid;}
+    void setFluidBC             (fluid_bchandler_type &bc_fluid)       {M_BCh_u      = bc_fluid;}
+    void setLinFluidBC          (fluid_bchandler_type &bc_dfluid)      {M_BCh_du     = bc_dfluid;}
+    void setInvLinFluidBC       (fluid_bchandler_type &bc_dfluid_inv)  {M_BCh_du_inv = bc_dfluid_inv;}
+    void setHarmonicExtensionBC (fluid_bchandler_type &bc_he)          {M_BCh_mesh   = bc_he;}
+    void setSolidBC             (solid_bchandler_type &bc_solid)       {M_BCh_d      = bc_solid;}
+    void setLinSolidBC          (solid_bchandler_type &bc_dsolid)      {M_BCh_dz     = bc_dsolid;}
+    void setInvLinSolidBC       (solid_bchandler_type &bc_dsolid_inv)  {M_BCh_dz     = bc_dsolid_inv;}
+    void setReducedLinFluidBC   (fluid_bchandler_type &bc_dredfluid)   {M_BCh_dp     = bc_dredfluid;}
+    void setInvReducedLinFluidBC(fluid_bchandler_type &bc_invdredfluid){M_BCh_dp_inv = bc_invdredfluid;}
 
     virtual void setup();
 
@@ -244,26 +250,26 @@ public:
 
     UInt reducedFluid(){return M_reducedFluid;}
 
-    bchandler_type const& BCh_fluid(){return M_BCh_u;}
-    void setBCh_fluid(bchandler_type BCh_fluid){M_BCh_u = BCh_fluid;}
+    fluid_bchandler_type const& BCh_fluid(){return M_BCh_u;}
+    void setBCh_fluid(fluid_bchandler_type BCh_fluid){M_BCh_u = BCh_fluid;}
 
-    bchandler_type const& BCh_solid(){return M_BCh_d;}
-    void setBCh_solid(bchandler_type BCh_solid){M_BCh_d = BCh_solid;}
+    solid_bchandler_type const& BCh_solid(){return M_BCh_d;}
+    void setBCh_solid(solid_bchandler_type BCh_solid){M_BCh_d = BCh_solid;}
 
-    bchandler_type const& BCh_harmonicExtension(){return M_BCh_mesh;}
-    void setBCh_HarmonicExtension(bchandler_type BCh_mesh){M_BCh_mesh = BCh_mesh;}
+    fluid_bchandler_type const& BCh_harmonicExtension(){return M_BCh_mesh;}
+    void setBCh_HarmonicExtension(fluid_bchandler_type BCh_mesh){M_BCh_mesh = BCh_mesh;}
 
-    bchandler_type const& BCh_du(){return M_BCh_du;}
-    void setBCh_fluidDer(bchandler_type BCh_fluidDer){M_BCh_du = BCh_fluidDer;}
+    fluid_bchandler_type const& BCh_du(){return M_BCh_du;}
+    void setBCh_fluidDer(fluid_bchandler_type BCh_fluidDer){M_BCh_du = BCh_fluidDer;}
 
-    bchandler_type const& BCh_du_inv(){return M_BCh_du_inv;}
-    void setBCh_fluidDerInv(bchandler_type BCh_fluidDerInv){M_BCh_du_inv = BCh_fluidDerInv;}
+    fluid_bchandler_type const& BCh_du_inv(){return M_BCh_du_inv;}
+    void setBCh_fluidDerInv(fluid_bchandler_type BCh_fluidDerInv){M_BCh_du_inv = BCh_fluidDerInv;}
 
-    bchandler_type const& BCh_dz(){return M_BCh_dz;}
-    void setBCh_solidDer(bchandler_type BCh_solidDer){M_BCh_dz = BCh_solidDer;}
+    solid_bchandler_type const& BCh_dz(){return M_BCh_dz;}
+    void setBCh_solidDer(solid_bchandler_type BCh_solidDer){M_BCh_dz = BCh_solidDer;}
 
-    bchandler_type const& BCh_dz_inv(){return M_BCh_dz_inv;}
-    void setBCh_solidDerInv(bchandler_type BCh_solidDerInv){M_BCh_dz_inv = BCh_solidDerInv;}
+    solid_bchandler_type const& BCh_dz_inv(){return M_BCh_dz_inv;}
+    void setBCh_solidDerInv(solid_bchandler_type BCh_solidDerInv){M_BCh_dz_inv = BCh_solidDerInv;}
 
 
 protected:
@@ -273,19 +279,19 @@ protected:
                              const std::string &_BCName,
                              Vector            &_vec2);
 
-    bchandler_type          M_BCh_u;
-    bchandler_type          M_BCh_d;
-    bchandler_type          M_BCh_mesh;
+    fluid_bchandler_type          M_BCh_u;
+    solid_bchandler_type          M_BCh_d;
+    fluid_bchandler_type          M_BCh_mesh;
 
     // interface operators BCs
-    bchandler_type          M_BCh_du;
-    bchandler_type          M_BCh_du_inv;
+    fluid_bchandler_type          M_BCh_du;
+    fluid_bchandler_type          M_BCh_du_inv;
 
-    bchandler_type          M_BCh_dz;
-    bchandler_type          M_BCh_dz_inv;
+    solid_bchandler_type          M_BCh_dz;
+    solid_bchandler_type          M_BCh_dz_inv;
 
-    bchandler_type          M_BCh_dp;
-    bchandler_type          M_BCh_dp_inv;
+    fluid_bchandler_type          M_BCh_dp;
+    fluid_bchandler_type          M_BCh_dp_inv;
 
     fluid_type              M_fluid;
     solid_type              M_solid;
@@ -346,14 +352,13 @@ typedef singleton<factory<FSIOperator,  std::string> > FSIFactory;
 //    UInt iBCf = M_fluid->BCh_fluid().getBCbyName("Wall");
 
 #define FOR_EACH_INTERFACE_DOF( Expr )                              \
-{\
-                                                                    \
-    UInt iBCf = M_fluid->BCh_HarmonicExtension().getBCbyName("Interface"); \
-                                                                    \
-    BCBase const &BC_fluidInterface = M_fluid->BCh_HarmonicExtension()[iBCf];   \
+{   \
+    \
+    \
+    UInt iBCf = M_fluid->harmonicExtension().BCh_harmonicExtension().getBCbyName("Interface"); \
+    BCBase const &BC_fluidInterface = M_fluid->harmonicExtension().BCh_harmonicExtension()[iBCf];   \
                                                                     \
     UInt nDofInterface = BC_fluidInterface.list_size();             \
-                                                                    \
     UInt nDimF = BC_fluidInterface.numberOfComponents();            \
                                                                     \
     UInt totalDofFluid = M_fluid->uDof().numTotalDof();             \

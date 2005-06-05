@@ -37,9 +37,9 @@ namespace LifeV
 //! constructors
 
 FSISolver::FSISolver( GetPot const& data_file,
-                      bchandler_type __bcu,
-                      bchandler_type __bcd,
-                      bchandler_type __bchext,
+                      fluid_bchandler_type __bcu,
+                      solid_bchandler_type __bcd,
+                      fluid_bchandler_type __bchext,
                       std::string __oper ):
     M_BCh_u( __bcu ),
     M_BCh_d( __bcd ),
@@ -179,55 +179,55 @@ FSISolver::setFSIOperator( std::string const& __op )
 
 
 void
-FSISolver::setFluidBC(bchandler_type &bc_fluid)
+FSISolver::setFluidBC(fluid_bchandler_type &bc_fluid)
 {
     M_oper->setFluidBC(bc_fluid);
 }
 
 void
-FSISolver::setLinFluidBC(bchandler_type &bc_dfluid)
+FSISolver::setLinFluidBC(fluid_bchandler_type &bc_dfluid)
 {
     M_oper->setLinFluidBC(bc_dfluid);
 }
 
 void
-FSISolver::setInvLinFluidBC(bchandler_type &bc_dfluid_inv)
+FSISolver::setInvLinFluidBC(fluid_bchandler_type &bc_dfluid_inv)
 {
     M_oper->setInvLinFluidBC(bc_dfluid_inv);
 }
 
 void
-FSISolver::setHarmonicExtensionBC(bchandler_type &bc_he)
+FSISolver::setHarmonicExtensionBC(fluid_bchandler_type &bc_he)
 {
     M_oper->setHarmonicExtensionBC(bc_he);
 }
 
 void
-FSISolver::setSolidBC(bchandler_type &bc_solid)
+FSISolver::setSolidBC(solid_bchandler_type &bc_solid)
 {
     M_oper->setSolidBC(bc_solid);
 }
 
 void
-FSISolver::setLinSolidBC(bchandler_type &bc_dsolid)
+FSISolver::setLinSolidBC(solid_bchandler_type &bc_dsolid)
 {
     M_oper->setLinSolidBC(bc_dsolid);
 }
 
 void
-FSISolver::setInvLinSolidBC(bchandler_type &bc_dsolid_inv)
+FSISolver::setInvLinSolidBC(solid_bchandler_type &bc_dsolid_inv)
 {
     M_oper->setInvLinSolidBC(bc_dsolid_inv);
 }
 
 void
-FSISolver::setReducedLinFluidBC(bchandler_type &bc_dredfluid)
+FSISolver::setReducedLinFluidBC(fluid_bchandler_type &bc_dredfluid)
 {
     M_oper->setReducedLinFluidBC(bc_dredfluid);
 }
 
 void
-FSISolver::setInvReducedLinFluidBC(bchandler_type &bc_dredfluid_inv)
+FSISolver::setInvReducedLinFluidBC(fluid_bchandler_type &bc_dredfluid_inv)
 {
     M_oper->setInvReducedLinFluidBC(bc_dredfluid_inv);
 }
@@ -251,12 +251,12 @@ FSISolver::iterate( Real time )
     if (M_firstIter)
     {
         M_firstIter = false;
-        M_disp   = M_oper->solid().d() + timeStep()*M_oper->solid().w();
+        M_disp   = M_oper->solid().disp() + timeStep()*M_oper->solid().w();
         M_velo   = M_oper->solid().w();
     }
     else
     {
-        M_disp   = M_oper->solid().d() + timeStep()*(1.5*M_oper->solid().w() - 0.5*M_velo);
+        M_disp   = M_oper->solid().disp() + timeStep()*(1.5*M_oper->solid().w() - 0.5*M_velo);
         M_velo   = M_oper->solid().w();
     }
 
@@ -267,18 +267,19 @@ FSISolver::iterate( Real time )
 
     // the newton solver
     uint status = 1;
-    if ( M_method == "exactJacobian" )
-    {
-        status = newton(M_disp, *M_oper, norm_inf_adaptor(),
-                        M_abstol, M_reltol, maxiter, M_etamax,
-                        M_linesearch, out_res, time);
-    }
-    else
-    {
+//     if ( M_method == "exactJacobian" )
+//     {
+//         status = newton(M_disp, *M_oper, norm_inf_adaptor(),
+//                         M_abstol, M_reltol, maxiter, M_etamax,
+//                         M_linesearch, out_res, time);
+//     }
+//     else
+//     {
         status = nonLinRichardson(M_disp, *M_oper, norm_inf_adaptor(),
                                   M_abstol, M_reltol, maxiter, M_etamax,
-                                  M_linesearch, out_res, time, M_defomega);
-    }
+                                  M_linesearch, out_res, time);
+//        , M_defomega);
+//     }
 
     if(status == 1)
     {
