@@ -56,6 +56,8 @@ public:
 
     typedef Real ( *Function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> source_type;
+    typedef BCHandler bchandler_raw_type;
+    typedef boost::shared_ptr<bchandler_raw_type> bchandler_type;
 
     //! Constructor
     /*!
@@ -93,7 +95,7 @@ public:
     virtual void iterate() = 0;
 
     //! Returns the displacement vector
-    PhysVectUnknown<Vector>& d();
+    PhysVectUnknown<Vector>& disp();
 
     //! Returns the velocity vector
     PhysVectUnknown<Vector>& w();
@@ -121,7 +123,7 @@ public:
     //! set the fluid BCs
     void setSolidBC(BCHandler &BCh_solid)
         {M_BCh_solid = &BCh_solid; M_setBC = true;}
-    BCHandler& BCh_solid() {return *M_BCh_solid;}
+    BCHandler &BCh_solid() {return *M_BCh_solid;}
 
 protected:
 
@@ -229,7 +231,7 @@ ElasticStructureHandler( const GetPot& data_file,
 // Returns the displacement vector
 template <typename Mesh>
 PhysVectUnknown<Vector> &
-ElasticStructureHandler<Mesh>::d()
+ElasticStructureHandler<Mesh>::disp()
 {
     return _d;
 }
