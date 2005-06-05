@@ -38,7 +38,7 @@ public:
     typedef FSIOperator super;
     typedef super::fluid_type fluid_type;
     typedef super::solid_type solid_type;
-    typedef super::bchandler_type bchandler_type;
+    typedef super::fluid_bchandler_type bchandler_type;
 
     // default constructor
     exactJacobian():
@@ -56,9 +56,9 @@ public:
     void evalResidual(Vector       &_res,
                       const Vector &_disp,
                       const int     _iter);
-    void solveJac    (Vector       &_muk,
-                      const Vector &_res,
-                      const double  _linearRelTol);
+    void solveJac(Vector       &_muk,
+                  const Vector &_res,
+                  const double  _linearRelTol);
 
     void solveLinearFluid();
     void solveLinearSolid();

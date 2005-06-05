@@ -67,7 +67,7 @@ void fixedPoint::eval(Vector& dispNew,
     if(status) M_nbEval = 0; // new time step
     M_nbEval++ ;
 
-    this->M_solid->d() = disp;
+    this->M_solid->disp() = disp;
 
     this->M_fluid->updateMesh(M_time);
     this->M_fluid->iterate(M_time);
@@ -75,7 +75,7 @@ void fixedPoint::eval(Vector& dispNew,
     this->M_solid->setRecur(0);
     this->M_solid->iterate();
 
-    dispNew = M_solid->d();
+    dispNew = M_solid->disp();
     velo    = M_solid->w();
 
     std::cout << " ::: norm(disp     ) = " << norm_2(disp) << std::endl;
@@ -134,7 +134,7 @@ void fixedPoint::setUpBC()
     //
     // Passing data from structure to the harmonic extension: motion of the fluid domain
     //
-    setStructureDispToHarmonicExtension(this->M_solid->d());
+    setStructureDispToHarmonicExtension(this->M_solid->disp());
     //========================================================================================
     //  BOUNDARY CONDITIONS
     //========================================================================================

@@ -63,7 +63,7 @@ void exactJacobian::eval(const Vector &_disp,
     if(_status) M_nbEval = 0; // new time step
     M_nbEval++ ;
 
-    this->M_solid->d() = _disp;
+    this->M_solid->disp() = _disp;
 
     this->M_fluid->updateMesh(time());
     this->M_fluid->iterate   (time());
@@ -89,7 +89,7 @@ void exactJacobian::evalResidual(Vector &_res,
 
     eval(_disp, status);
 
-    M_dispStruct = this->M_solid->d();
+    M_dispStruct = this->M_solid->disp();
     M_velo       = this->M_solid->w();
 
     std::cout << " ::: norm(disp     ) = " << norm_2(_disp)  << std::endl;
@@ -128,7 +128,7 @@ void exactJacobian::setUpBC()
     //
     // Passing data from structure to the harmonic Extension: motion of the fluid domain
     //
-    setStructureDispToHarmonicExtension(this->M_solid->d());
+    setStructureDispToHarmonicExtension(this->M_solid->disp());
     //========================================================================================
     //  Interface BOUNDARY CONDITIONS
     //========================================================================================
@@ -140,6 +140,9 @@ void exactJacobian::setUpBC()
     M_BCh_mesh->addBC("Interface", 1, Essential, Full,
                       *bcvStructureDispToHarmonicExtension(), 3);
 
+    M_BCh_mesh->bdUpdate(this->M_fluid->mesh(),
+                         this->M_fluid->feBd_u(),
+                         this->M_fluid->uDof());
     // Boundary conditions for the solid displacement
     M_BCh_d->addBC("Interface", 1, Natural,   Full,
                    *bcvFluidLoadToStructure(), 3);
@@ -276,7 +279,7 @@ void  exactJacobian::solveLinearSolid()
     Real tol       = 1.e-10;
 //    std::cout << "rhs_dz norm = " << norm_2(M_rhs_dz) << std::endl;
     this->M_solid->setRecur(1);
-    this->M_solid->solveJac(M_dz, M_rhs_dz, tol);
+    this->M_solid->solveJac(M_dz, M_rhs_dz, tol, M_BCh_dz);
 //    std::cout << "dz norm     = " << norm_inf(M_dz) << std::endl;
 }
 
@@ -307,7 +310,7 @@ void my_matvecJacobianEJ(double *z, double *Jz, AZ_MATRIX* J, int proc_config[])
         {
             for (int i=0; i <(int)dim; ++i)
             {
-                my_data->M_pFS->solid().d()[i] =  z[i];
+                my_data->M_pFS->solid().disp()[i] =  z[i];
             }
             my_data->M_pFS->fluid().updateDispVelo();
             my_data->M_pFS->solveLinearFluid();
