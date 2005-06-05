@@ -86,7 +86,7 @@ drop            = 1.00e-4
 ilut_fill       = 1.5
 
 [../aztec_ii]
-output          = none
+output          = all_res
 conv            = rhs #r0
 max_iter        = 1550
 poly_ord        = 5

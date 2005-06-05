@@ -44,30 +44,15 @@ public:
     Problem( GetPot const& data_file, std::string _oper = "" )
         {
             using namespace LifeV;
-            // Boundary conditions for the harmonic extension of the
-            // interface solid displacement
-//             Debug( 10000 ) << "Boundary condition for the harmonic extension\n";
-//             BCFunctionBase bcf(fZero);
-//             FSISolver::bchandler_type BCh_mesh( new BCHandler );
-//             BCh_mesh->addBC("Top",       3, Essential, Full, bcf,   3);
-//             BCh_mesh->addBC("Base",      2, Essential, Full, bcf,   3);
-//             BCh_mesh->addBC("Edges",    20, Essential, Full, bcf,   3);
-
-//             // Boundary conditions for the fluid velocity
-//             Debug( 10000 ) << "Boundary condition for the fluid\n";
-//             BCFunctionBase in_flow(u2);
-//             FSISolver::bchandler_type BCh_u( new BCHandler );
-//             BCh_u->addBC("InFlow",  2,  Natural,   Full, in_flow, 3);
-//             BCh_u->addBC("Edges",  20, Essential, Full, bcf,      3);
-
-//             // Boundary conditions for the solid displacement
-//             Debug( 10000 ) << "Boundary condition for the solid\n";
-//             FSISolver::bchandler_type BCh_d( new BCHandler );
-//             BCh_d->addBC("Top",       3, Essential, Full, bcf,  3);
-//             BCh_d->addBC("Base",      2, Essential, Full, bcf,  3);
 
             Debug( 10000 ) << "creating FSISolver with operator :  " << _oper << "\n";
-            _M_fsi = fsi_solver_ptr(  new FSISolver( data_file, BCh_u(), BCh_d(), BCh_mesh(), _oper ) );
+            _M_fsi = fsi_solver_ptr(  new FSISolver( data_file,
+                                                     BCh_fluid(),
+                                                     BCh_solid(),
+                                                     BCh_harmonicExtension(),
+                                                     _oper ));
+//            _M_fsi = fsi_solver_ptr(  new FSISolver( data_file, _oper ) );
+
             _M_fsi->setSourceTerms( fZero, fZero );
 
             int restart = data_file("problem/restart",0);
@@ -80,7 +65,7 @@ public:
                 std::string velwName  = data_file("fluid/miscellaneous/velwname", "velw");
                 std::string depName   = data_file("solid/miscellaneous/depname"  ,"dep");
                 std::string velSName  = data_file("solid/miscellaneous/velname"  ,"velw");
-                _M_Tstart             = data_file("problem/Tstart"   ,0.);
+                _M_Tstart= data_file("problem/Tstart"   ,0.);
                 std::cout << "Starting time = " << _M_Tstart << std::endl;
                 _M_fsi->initialize(velFName, pressName, velwName, depName, velSName, _M_Tstart);
             }
@@ -99,6 +84,8 @@ public:
     void
     run( double dt, double T)
         {
+//            std::ofstream ofile( "fluxes.res" );
+
             boost::timer _overall_timer;
 
             if (_M_Tstart != 0.) _M_Tstart -= dt;
@@ -111,12 +98,18 @@ public:
 
                 _M_fsi->iterate( time );
 
+//                 ofile << time << " ";
+//                 ofile << _M_fsi->operFSI()->fluid().flux(2) << " ";
+//                 ofile << _M_fsi->operFSI()->fluid().flux(3) << " ";
+//                 ofile << std::endl;
+
                 std::cout << "[fsi_run] Iteration " << _i << " was done in : "
                           << _timer.elapsed() << "\n";
             }
             std::cout << "Total computation time = "
                       << _overall_timer.elapsed() << "s" << "\n";
 
+//            ofile.close();
         }
 
 private:
