@@ -101,7 +101,8 @@ public:
     //! BCHandler getter and setter
 
     LIFEV_DEPRECATED BCHandler const & BC_solid() const {return BCh_solid();}
-//     void setBCSolid(const BCHandler & BCd) {_BCh = BCd;}
+
+    void setBC(const BCHandler & BCd) {_BCh = BCd;}
     //! residual getter
     Vector& residual() {return _residual_d;}
 
@@ -109,20 +110,27 @@ public:
 
     void setRecur(UInt recur) {_recur = recur;}
 
-    void updateJac( Vector& sol, int iter );
+    void updateJacobian( Vector& sol, int iter );
 
     //! solves the tangent problem for newton iterations
     void solveJac( Vector &step, const Vector& res, double& linear_rel_tol);
     //    void solveJac( const Vector& res, double& linear_rel_tol, Vector &step);
     //! solves the tangent problem with custom BC
-    void solveJac( Vector &step, const Vector& res, double& linear_rel_tol, BCHandler &BCd );
-    void solveLin( Vector &step, const Vector& res, double linear_rel_tol, BCHandler &BCd );
+    void solveJac( Vector &step,
+                   const Vector& res,
+                   double& linear_rel_tol,
+                   bchandler_type &BCd );
+    void solveJacobian( const Real );
+//    void solveJacobian( );
+    void solveJacobian( const Real,
+                        bchandler_type &BCd);
     //! evaluates residual for newton interations
     void evalResidual( Vector &res, const Vector& sol, int iter);
 
     void setSourceTerm( source_type const& __s ) { _M_source = __s; }
     source_type const& sourceTerm() const { return _M_source; }
 
+    Vector& ddisp() { return M_ddisp; }
     Vector& rhsWithoutBC() { return _rhsWithoutBC; }
 
 
@@ -141,6 +149,7 @@ private:
     //! Matrix M: mass
     MixedMatr<3, 3, MSRPatt, double> _M;
 
+    //! Matrix Kl: stiffness linear
     MSRMatr<double> _Kl;
 
     //! Matrix Knl: stiffness non-linear
@@ -158,6 +167,9 @@ private:
     ElemMat _elmatC; // mass + stiffness
     ElemVec _elvec;  // Elementary right hand side
     ElemVec _dk_loc; // Local displacement
+
+    //! linearized velocity
+    PhysVectUnknown<Vector> M_ddisp;
 
     //! right  hand  side displacement
     PhysVectUnknown<Vector> _rhs;
@@ -190,6 +202,8 @@ private:
 
     //! data for solving tangent problem with aztec
     SolverAztec _linearSolver;
+
+
 };
 
 
@@ -215,6 +229,7 @@ VenantKirchhofSolver( const GetPot& data_file, const RefFE& refFE, const QuadRul
     _elmatC( this->_fe.nbNode, nDimensions, nDimensions ),
     _elvec( this->_fe.nbNode, nDimensions ),
     _dk_loc( this->_fe.nbNode, nDimensions ),
+    M_ddisp ( this->_dim ),
     _rhs( this->_dim ),
     _rhs_w( this->_dim ),
     _rhsWithoutBC( this->_dim ),
@@ -228,7 +243,7 @@ VenantKirchhofSolver( const GetPot& data_file, const RefFE& refFE, const QuadRul
 
     std::cout << std::endl;
     std::cout << "S-  Displacement unknowns: " << this->_dim << std::endl;
-    std::cout << "S-  Computing mass and linear strain matrices... ";
+    std::cout << "S-  Computing mass and linear strain matrices... " << std::flush;
 
     _linearSolver.setOptionsFromGetPot( data_file, "solid/aztec" );
     _linearSolver.setMatrix( _J );
@@ -250,7 +265,6 @@ VenantKirchhofSolver( const GetPot& data_file, const RefFE& refFE, const QuadRul
     // Loop on elements
     for ( UInt i = 1; i <= _mesh.numVolumes(); i++ )
     {
-
         this->_fe.updateFirstDerivQuadPt( _mesh.volumeList( i ) );
 
         _elmatK.zero();
@@ -551,7 +565,6 @@ void VenantKirchhofSolver<Mesh>::
 evalResidual( Vector &res, const Vector& sol, int /*iter*/)
 {
     std::cout << "S-    Computing residual... ";
-
     Chrono chrono;
     chrono.start();
 
@@ -599,8 +612,10 @@ evalResidual( Vector &res, const Vector& sol, int /*iter*/)
         }
     }
 
+    std::cout << "updating the boundary conditions" << std::flush;
     if ( !this->BCh_solid().bdUpdateDone() )
         this->BCh_solid().bdUpdate( _mesh, _feBd, this->_dof );
+    std::cout << std::endl;
 
     bcManageMatrix( _K, _mesh, this->_dof, this->BCh_solid(), _feBd, 1.0 );
 
@@ -618,7 +633,7 @@ evalResidual( Vector &res, const Vector& sol, int /*iter*/)
 
 template <typename Mesh>
 void VenantKirchhofSolver<Mesh>::
-updateJac( Vector& sol, int iter )
+updateJacobian( Vector& sol, int iter )
 {
     std::cout << "  S-  Solid: Updating JACOBIAN in iter " << iter << "  ... ";
 
@@ -719,35 +734,35 @@ solveJac( Vector &step, const Vector& res, double& /*linear_rel_tol*/)
 }
 
 
-
-
 template <typename Mesh>
 void VenantKirchhofSolver<Mesh>::
-solveJac(Vector &step, const Vector& res, double& linear_rel_tol, BCHandler &BCd )
+//solveJac( const Vector& res, double& linear_rel_tol, Vector &step)
+solveJac( Vector &step, const Vector& res, double& /*linear_rel_tol*/,
+          bchandler_type &BCh)
 {
-
     Chrono chrono;
 
     _f = res;
 
     // for BC treatment (done at each time-step)
     Real tgv = 1.0;
-    std::cout << "  S-  Applying boundary conditions      ... ";
+
+    std::cout << "   S-  Applying boundary conditions      ... ";
     chrono.start();
 
     // BC manage for the velocity
-    if ( !BCd.bdUpdateDone() )
-        BCd.bdUpdate( _mesh, _feBd, this->_dof );
+    if ( BCh->bdUpdateDone() )
+        BCh->bdUpdate( _mesh, _feBd, this->_dof );
 
-    bcManageMatrix( _J, _mesh, this->_dof, BCd, _feBd, tgv );
+    bcManageMatrix( _J, _mesh, this->_dof, *BCh, _feBd, tgv );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
     _linearSolver.setRecursionLevel( _recur );
 
-    std::cout << "  S-  Solving system                    ... "<< std::flush;
+    std::cout << "   S-  Solving system                    ... "<< std::flush;
     chrono.start();
-    _linearSolver.solve( step , _f );
+    _linearSolver.solve( step , _f);
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
@@ -756,30 +771,80 @@ solveJac(Vector &step, const Vector& res, double& linear_rel_tol, BCHandler &BCd
 //    AZ_matrix_destroy( &J );
 //    AZ_precond_destroy( &prec_J );
 
-    _residual_d = _C*step;
+    _residual_d = _C*step;// - _rhsWithoutBC;
 }
 
 
+// template <typename Mesh>
+// void VenantKirchhofSolver<Mesh>::
+// solveJac(const Real time, bchandler_type &BCd )
+// {
+
+//     Chrono chrono;
+
+//     _f = res;
+
+//     // for BC treatment (done at each time-step)
+//     Real tgv = 1.0;
+//     std::cout << "  S-  Applying boundary conditions      ... ";
+//     chrono.start();
+
+//     // BC manage for the velocity
+//     if ( !BCd.bdUpdateDone() )
+//         BCd.bdUpdate( _mesh, _feBd, this->_dof );
+
+//     bcManageMatrix( _J, _mesh, this->_dof, BCd, _feBd, tgv );
+//     chrono.stop();
+//     std::cout << "done in " << chrono.diff() << "s." << std::endl;
+
+//     _linearSolver.setRecursionLevel( _recur );
+
+//     std::cout << "  S-  Solving system                    ... "<< std::flush;
+//     chrono.start();
+//     _linearSolver.solve( step , _f );
+//     chrono.stop();
+//     std::cout << "done in " << chrono.diff() << " s." << std::endl;
+
+//     //--options[AZ_recursion_level];
+
+// //    AZ_matrix_destroy( &J );
+// //    AZ_precond_destroy( &prec_J );
+
+//     _residual_d = _C*step;
+// }
+
 template <typename Mesh>
 void VenantKirchhofSolver<Mesh>::
-solveLin( Vector &step, const Vector& res, double /*linear_rel_tol*/, BCHandler &BCd )
+solveJacobian( Real /*time*/ )
 {
-    std::cout << "  S-  LINEARIZED FLUID SYSTEM" << std::endl;
+
+    std::cout << "  S-  LINEARIZED SOLID SYSTEM" << std::flush << std::endl;
     Chrono chrono;
 
-    _f = res;
+    //if (BCd == 0) BCd.reset(&BCh_solid());
+
+    _f = ZeroVector( _f.size() );
     _J = _C;
 
     // for BC treatment (done at each time-step)
-    Real tgv = 1.0;
+    double tgv = 1.0;
+
+    std::cout << "TGV = " << tgv << std::flush << std::endl;
     std::cout << "  S-  Applying boundary conditions        ... ";
     chrono.start();
 
     // BC manage for the velocity
-    if ( !BCd.bdUpdateDone() )
-        BCd.bdUpdate( _mesh, _feBd, this->_dof );
+    if ( !this->BCh_solid().bdUpdateDone() )
+        this->BCh_solid().bdUpdate( _mesh, _feBd, this->_dof );
 
-    bcManageMatrix( _J, _mesh, this->_dof, BCd, _feBd, tgv );
+    bcManageVector(_f,
+                   _mesh,
+                   this->_dof,
+                   BCh_solid(),
+                   _feBd,
+                   1., 1.);
+
+    bcManageMatrix( _J, _mesh, this->_dof, this->BCh_solid(), _feBd, tgv );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
@@ -787,15 +852,63 @@ solveLin( Vector &step, const Vector& res, double /*linear_rel_tol*/, BCHandler 
 
     std::cout << "  S-  Solving system                      ... "<< std::flush;
     chrono.start();
-    _linearSolver.solve( step , _f );
+    _linearSolver.solve( M_ddisp , _f );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
-    _w = ( 2.0 / this->_dt ) * step - _rhs_w;
+    _w = ( 2.0 / this->_dt ) * M_ddisp - _rhs_w;
 
-    std::cout << "  S-  Computing residual                  ... " << std::flush;
-    _residual_d = _C*step;
-    std::cout << " ok." << std::endl;
+//    std::cout << "  S-  Computing residual                  ... " << std::flush;
+    _residual_d = _C*M_ddisp;
+//    std::cout << " ok." << std::endl;
+}
+
+template <typename Mesh>
+void VenantKirchhofSolver<Mesh>::
+solveJacobian( const Real /*time*/ , bchandler_type& BCd)
+{
+    std::cout << "  S-  LINEARIZED SOLID SYSTEM" << std::flush << std::endl;
+    Chrono chrono;
+
+    //if (BCd == 0) BCd.reset(&BCh_solid());
+
+    _f = ZeroVector( _f.size() );
+    _J = _C;
+
+    // for BC treatment (done at each time-step)
+    Real tgv = 1.0;
+
+    std::cout << "  S-  Applying boundary conditions        ... ";
+    chrono.start();
+
+    // BC manage for the velocity
+    if ( !(*BCd).bdUpdateDone() )
+        (*BCd).bdUpdate( _mesh, _feBd, this->_dof );
+
+    bcManageVector(_f,
+                   _mesh,
+                   this->_dof,
+                   *BCd,
+                   _feBd,
+                   1., 1.);
+
+    bcManageMatrix( _J, _mesh, this->_dof, *BCd, _feBd, tgv );
+    chrono.stop();
+    std::cout << "done in " << chrono.diff() << "s." << std::endl;
+
+    _linearSolver.setRecursionLevel( _recur );
+
+    std::cout << "  S-  Solving system                      ... "<< std::flush;
+    chrono.start();
+    _linearSolver.solve( M_ddisp , _f );
+    chrono.stop();
+    std::cout << "done in " << chrono.diff() << " s." << std::endl;
+
+    _w = ( 2.0 / this->_dt ) * M_ddisp - _rhs_w;
+
+//    std::cout << "  S-  Computing residual                  ... " << std::flush;
+    _residual_d = _C*M_ddisp;
+//    std::cout << " ok." << std::endl;
 }
 
 
