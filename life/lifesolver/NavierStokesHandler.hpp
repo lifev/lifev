@@ -79,6 +79,8 @@ public:
                                    Real const&, ID const& )> source_type;
 
     typedef Mesh mesh_type;
+    typedef BCHandler                             bchandler_raw_type;
+    typedef boost::shared_ptr<bchandler_raw_type> bchandler_type;
 
     //! type used for flux computations (see FacesOnSections)
     typedef __gnu_cxx::slist< std::pair< ID, SimpleVect< ID > > > face_dof_type;
