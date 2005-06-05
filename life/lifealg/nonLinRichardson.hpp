@@ -34,10 +34,10 @@ int nonLinRichardson( VectorType& sol,
                       Real reltol,
                       int& maxit,
                       Real eta_max,
-                      int /*linesearch*/,
+                      int linesearch,
                       std::ofstream& out_res,
-                      const Real& time,
-                      const Real omega )
+                      const Real& time )
+//                      const Real omega )
 {
     /*
       sol            :  the solution
@@ -65,16 +65,16 @@ int nonLinRichardson( VectorType& sol,
       before failure is reported
     */
 
-    //        const int max_increase_res = 5;
+    const int max_increase_res = 5;
 
     /*
       Parameters for the linear solver, gamma: Default value = 0.9
     */
-    //        const Real gamma   = 0.9;
+
+    const Real gamma   = 0.9;
 
     //----------------------------------------------------------------------
 
-    //        Real linres = 1.e-3;
 
     int iter = 0;
 
@@ -82,15 +82,10 @@ int nonLinRichardson( VectorType& sol,
 
     VectorType residual ( sol.size() );
     VectorType step     ( sol.size() );
-    VectorType muk      ( sol.size() );
 
     step = ZeroVector( step.size() );
-    muk  = ZeroVector( muk.size() );
 
     Real normResOld = 1;
-//    Real omega  = f.defOmega();
-    Real omegaS = omega;
-    Real omegaF = omega;
 
     std::cout << "------------------------------------------------------------------" << std::endl;
     std::cout << "  NonLinRichardson: starting " << std::endl;
@@ -98,11 +93,14 @@ int nonLinRichardson( VectorType& sol,
     f.evalResidual( residual, sol, iter );
 
     Real normRes      = norm( residual );
-    Real normMuk      = normRes;
     Real stop_tol     = abstol + reltol*normRes;
     Real linearRelTol = fabs(eta_max);
-
-    generalizedAitken<VectorType, Real> aitken( nDofFS, omegaS, omegaF );
+    Real eta_old;
+    Real eta_new;
+    Real ratio;
+    Real slope;
+    Real linres;
+    Real lambda;
 
     //
 
@@ -112,7 +110,7 @@ int nonLinRichardson( VectorType& sol,
             << " stop tol = " << stop_tol
             << "initial norm_sol "
             << norm_2(sol) << std::endl;
-    out_res << "#iter      disp_norm       step_norm       muk_norm   residual_norm" << std::endl;
+    out_res << "#iter      disp_norm       step_norm       residual_norm" << std::endl;
 
     while ( normRes > stop_tol && iter < maxit )
     {
@@ -126,25 +124,59 @@ int nonLinRichardson( VectorType& sol,
 
         iter++;
 
+        ratio = normRes/normResOld;
         normResOld = normRes;
+        normRes = norm(residual);
 
-        f.solveJac(muk, -1.*residual, linearRelTol);
-//        step = aitken.computeDeltaLambda( sol, muk );
-        step = muk;
-        normMuk  = norm( muk );
+        f.solveJac(step, -1.*residual, linearRelTol);
 
-        std::cout << "Muk norm = " << normMuk << std::endl;
+        linres = linearRelTol;
+
+        lambda = 1.;
+        slope  = normRes * normRes * ( linres * linres - 1 );
+
+        switch ( linesearch )
+        {
+            case 0: // no linesearch
+                sol += step;
+                f.evalResidual( residual, sol, iter);
+                normRes = norm( residual );
+                break;
+            case 1:
+                lineSearch_parab( f, norm, residual, sol, step, normRes, lambda, iter );
+                break;
+            case 2:  // recommended
+                lineSearch_cubic( f, norm, residual, sol, step, normRes, lambda, slope, iter );
+                break;
+            default:
+                std::cout << "Unknown linesearch \n";
+                exit( 1 );
+        }
+
 
         out_res   << std::setw(5) << iter
                   << std::setw(15) << norm_2  (sol)
-                  << std::setw(15) << norm_2  (step)
-                  << std::setw(15) << normMuk;
+                  << std::setw(15) << norm_2  (step);
 
-        sol += step;
-        f.evalResidual( residual, sol, iter);
-
+        f.displacementOnInterface();
         normRes = norm( residual );
+
         out_res << std::setw(15) << normRes << std::endl;
+
+        if ( eta_max > 0 )
+        {
+            eta_old = linearRelTol;
+            eta_new = gamma * ratio * ratio;
+            if ( gamma * eta_old * eta_old > .1 )
+            {
+                eta_new = std::max<Real>( eta_new, gamma * eta_old * eta_old );
+            }
+            linearRelTol = std::min<Real>( eta_new, eta_max );
+            linearRelTol = std::min<Real>( eta_max,
+                                             std::max<Real>( linearRelTol,
+                                                             .5 * stop_tol / normRes ) );
+            std::cout << "    Newton: forcing term eta = " << linearRelTol << std::endl;
+        }
     }
 
     if ( normRes > stop_tol )
@@ -154,6 +186,7 @@ int nonLinRichardson( VectorType& sol,
         return 1;
     }
 
+    f.displacementOnInterface();
     std::cout << "------------------------------------------------------------------" << std::endl;
     std::cout << "--- NonLinRichardson: convergence (" << normRes
               <<") in " << iter << " iterations\n\n";
