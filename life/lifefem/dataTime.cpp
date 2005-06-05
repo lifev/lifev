@@ -38,6 +38,14 @@ Real DataTime::timestep() const
     return _dt;
 }
 
+
+// setter
+void DataTime::setTimeStep(const Real& dt)
+{
+  _dt = dt;
+}
+
+
 // Order of the bdf formula
 unsigned int DataTime::order_bdf() const
 {

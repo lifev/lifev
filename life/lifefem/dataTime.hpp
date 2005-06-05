@@ -54,7 +54,10 @@ public:
 
     //! Time step
     Real timestep() const;
-
+ 
+    //! setter
+    void setTimeStep(const Real& dt);
+  
     //! Order BDF formula
     unsigned int order_bdf() const;
 
