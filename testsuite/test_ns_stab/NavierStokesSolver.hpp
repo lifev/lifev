@@ -260,7 +260,7 @@ namespace LifeV
     M_constantPressure( ( nDimensions+1 )*_dim_u ),
     M_beta( nDimensions * _dim_u),
     M_sdStab( dataFile, _mesh, _dof_u, _refFE_u, _Qr_u, 
-	      this->viscosity(), this->timestep() ),
+	      this->viscosity() ),
     M_ipStab( dataFile, _mesh, _dof_u, _refFE_u, _feBd_u, _Qr_u, 
 	      this->viscosity() )
   {
@@ -451,7 +451,7 @@ namespace LifeV
       case SD_STABILIZATION: 
 	std::cout << "  o-  Updating SD stabilization terms (rhs)...          "
 		  << std::flush;
-	M_sdStab.apply(M_rhsFull, M_beta, source, M_time);
+	M_sdStab.apply(this->_dt,M_rhsFull, M_beta, source, M_time);
 	break;
       default:
 	ERROR_MSG("This stabilization is not yet implemented");
@@ -510,7 +510,7 @@ namespace LifeV
 	
         // Stabilising term: div u^n u v
         if ( M_divBetaUv )
-	  mass_divw( 0.5*_rho, M_elvec, M_elmatC, _fe_u, 0, 0, nbCompU );
+	  mass_divw( 0.5, M_elvec, M_elmatC, _fe_u, 0, 0, nbCompU );
         
 	
         // loop on components
@@ -541,7 +541,7 @@ namespace LifeV
       case SD_STABILIZATION: 
 	std::cout << "  o-  Updating SD stabilization terms (matrix)...          "
 		  << std::flush;
-	M_sdStab.apply( M_matrFull, M_beta );
+	M_sdStab.apply(this->_dt, M_matrFull, M_beta );
 	break;
       default:
 	ERROR_MSG("This stabilization is not yet implemented");

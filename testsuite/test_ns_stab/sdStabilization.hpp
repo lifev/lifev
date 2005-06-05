@@ -50,8 +50,7 @@ namespace LifeV
                      const DOF&      dof,
                      const RefFE&    refFE,
 		     const QuadRule& quadRule,
-		     Real            viscosity, 
-		     Real            dt_);
+		     Real            viscosity);
 
     
     /*! compute SD stabilization terms and add them into matrix
@@ -59,11 +58,11 @@ namespace LifeV
      *  @param state state vector for linearization of nonlinear stabilization
      */
     template<typename MATRIX, typename VECTOR>
-    void apply( MATRIX& matrix, const VECTOR& state );
+    void apply(const Real dt, MATRIX& matrix, const VECTOR& state );
 
     
     template <typename VECTOR, typename SOURCE >
-    void apply(VECTOR& vector, const VECTOR& state, const SOURCE& source, const Real& time);
+    void apply(const Real dt, VECTOR& vector, const VECTOR& state, const SOURCE& source, const Real& time);
 
   private:
     
@@ -71,7 +70,6 @@ namespace LifeV
     const DOF&   M_dof;
     CurrentFE    M_fe;
     Real         M_viscosity;
-    Real         M_dt;
     Real         M_gammaBeta;
     Real         M_gammaDiv;
     ElemMat      M_elMat;
@@ -81,7 +79,7 @@ namespace LifeV
 
     // methods for elementary computations
     template <typename VECTOR>
-    void M_computeParameters(const ID iVol, const VECTOR& state, ElemVec& beta,  Real& coeffBeta, Real& coeffDiv);
+    void M_computeParameters(const Real dt, const ID iVol, const VECTOR& state, ElemVec& beta,  Real& coeffBeta, Real& coeffDiv);
     
     void bgradu_bgradv(const Real& coef, ElemVec& vel, ElemMat& elmat,const CurrentFE& fe,
 		   int iblock, int jblock, int nb);
@@ -103,13 +101,11 @@ namespace LifeV
 					       const DOF&      dof,
 					       const RefFE&    refFE,
 					       const QuadRule& quadRule, 
-					       Real            viscosity,
-					       Real            dt):
+					       Real            viscosity):
     M_mesh( mesh ),
     M_dof( dof ),
     M_fe( refFE, getGeoMap(mesh), quadRule ),
     M_viscosity( viscosity ),
-    M_dt ( dt) ,
     M_gammaBeta ( dataFile( "fluid/sdstab/gammaBeta", 0. ) ),
     M_gammaDiv  ( dataFile( "fluid/sdstab/gammaDiv", 0. ) ),
     M_elMat( M_fe.nbNode, nDimensions+1, nDimensions+1 ) ,   
@@ -118,7 +114,7 @@ namespace LifeV
 
   template<typename MESH, typename DOF> 
   template <typename MATRIX, typename VECTOR>
-  void SDStabilization<MESH, DOF>::apply( MATRIX& matrix, const VECTOR& state )
+  void SDStabilization<MESH, DOF>::apply(const Real dt, MATRIX& matrix, const VECTOR& state )
   {
     if ( M_gammaBeta == 0 && M_gammaDiv == 0)
       return;
@@ -143,7 +139,7 @@ namespace LifeV
 
 	// stabilization paramteres computation
 	chronoBeta.start();
-	this->M_computeParameters(iVol, state, beta, coeffBeta, coeffDiv);
+	this->M_computeParameters(dt, iVol, state, beta, coeffBeta, coeffDiv);
 	chronoBeta.stop();
 
 	chronoElemComp.start();
@@ -188,7 +184,7 @@ namespace LifeV
 
   template<typename MESH, typename DOF> 
   template <typename VECTOR, typename SOURCE >
-  void SDStabilization<MESH, DOF>::apply( VECTOR& vector, const VECTOR& state, const SOURCE& source, const Real& time)
+  void SDStabilization<MESH, DOF>::apply(const Real dt, VECTOR& vector, const VECTOR& state, const SOURCE& source, const Real& time)
   {
     if ( M_gammaBeta == 0 )
       return;
@@ -215,7 +211,7 @@ namespace LifeV
 	chronoUpdate.stop();
 
 	chronoBeta.start();
-	this->M_computeParameters(iVol, state, beta, coeffBeta, coeffDiv);
+	this->M_computeParameters(dt, iVol, state, beta, coeffBeta, coeffDiv);
 	chronoBeta.stop();
 
 	chronoElemComp.start();
@@ -254,7 +250,7 @@ namespace LifeV
 
   template<typename MESH, typename DOF> 
   template<typename VECTOR>
-  void SDStabilization<MESH, DOF>::M_computeParameters(const ID iVol, const VECTOR& state, 
+  void SDStabilization<MESH, DOF>::M_computeParameters(const Real dt, const ID iVol, const VECTOR& state, 
 						       ElemVec& beta, Real& coeffBeta, Real& coeffDiv) {
 
     const UInt nDof = M_dof.numTotalDof();
@@ -285,10 +281,11 @@ namespace LifeV
 	  bmax = fabs( beta.vec()[ l ] );
       }
     
-    coeffBeta = M_gammaBeta  / sqrt( 4/(M_dt * M_dt) 
+    coeffBeta = M_gammaBeta  / sqrt( 4/( dt * dt) 
 				     + 4*bmax*bmax/hK2 
 				     + 16*M_viscosity*M_viscosity/hK4 );
     coeffDiv = M_gammaDiv;
+
   }
 
 
