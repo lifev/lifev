@@ -302,7 +302,7 @@ public:
 
     // get the BC number from the list using its name
 
-    UInt BCHandler::getBCbyName(const std::string _BCName) const;
+    const UInt BCHandler::getBCbyName(const std::string _BCName) const;
 
     //! output
     std::ostream& showMe( bool verbose = false, std::ostream & out = std::cout ) const;
