@@ -110,9 +110,10 @@ public:
     //! Update convective term, bc treatment and solve the linearized ns system
     void iterate( const Real& time );
 
-    void iterateTransp( const Real& time );
+//    void iterateTransp( const Real& time );
 
     void iterateLin( const Real& time, BCHandler& BCh_du );
+    void solveJacobian(  const Real& time, BCHandler& BCh_du );
 
     LIFEV_DEPRECATED BCHandler & BC_fluid() {return BCh_HarmonicExtension();}
 
@@ -122,6 +123,8 @@ public:
     void setBC(BCHandler &fluidBC, BCHandler &HamonicExtensionBC);
 private:
 
+    //! simulation time
+    double   M_time;
 
     //! Block pattern of M_u
     MSRPatt _pattM_u_block;
@@ -187,13 +190,13 @@ private:
     ElemVec _d_loc; // Elementary displacement for right hand side
     ElemVec _dw_loc; // Elementary mesh velocity for right hand side
 
-    //! The pressure
-    ScalUnknown<Vector> _dp;
-
     //! The velocity
     PhysVectUnknown<Vector> _un;
 
-    //! The velocity
+    //! The linearized pressure
+    ScalUnknown<Vector> _dp;
+
+    //! The linearized velocity
     PhysVectUnknown<Vector> _du;
 
     //! Right  hand  side for the velocity
@@ -277,8 +280,8 @@ NavierStokesAleSolverPC( const GetPot& data_file, const RefFE& refFE_u, const Re
         _convect( _fe_u.nbNode, nDimensions ),
         _d_loc( _fe_u.nbNode, nDimensions ),
         _dw_loc( _fe_u.nbNode, nDimensions ),
-        _dp( _dim_p ),
         _un( _dim_u ),
+        _dp( _dim_p ),
         _du( _dim_u ),
         _f_u( _dim_u ),
         _f_duWithOutBC( _dim_u ),
@@ -421,8 +424,6 @@ NavierStokesAleSolverPC( const GetPot& data_file,
 // members
 
 
-
-
 template <typename Mesh>
 void NavierStokesAleSolverPC<Mesh>::
 setBC(BCHandler &fluidBC, BCHandler &HamonicExtensionBC)
@@ -443,6 +444,7 @@ timeAdvance( source_type const& source, const Real& time )
     std::cout << std::endl;
     std::cout << "F== FLUID: Now we are at time " << time << " s." << std::endl;
 
+    M_time = time;
     // Number of velocity components
     UInt nc_u = _u.nbcomp();
 
@@ -468,7 +470,7 @@ timeAdvance( source_type const& source, const Real& time )
     _f_uWithOutBC += _M_u * _u;
 
     // Save last mesh displacement and fluid velocity
-    _dispOld = _disp;
+    _dispOld = harmonicExtension().getDisplacement();
     _un = _u;
 
     chrono.stop();
@@ -486,7 +488,7 @@ iterate( const Real& time )
     // Number of velocity components
     UInt nc_u = _u.nbcomp();
 
-    std::cout << "  F-  Updating matrices... ";
+    std::cout << "  F-  Updating matrices... " << std::flush;
 
     chrono.start();
 
@@ -715,7 +717,7 @@ iterate( const Real& time )
 
 
 
-template <typename Mesh>
+/*template <typename Mesh>
 void NavierStokesAleSolverPC<Mesh>::
 iterateTransp( const Real& time )
 {
@@ -862,7 +864,7 @@ iterateTransp( const Real& time )
 
 
 
-}
+}*/
 
 
 //
@@ -871,6 +873,268 @@ iterateTransp( const Real& time )
 template <typename Mesh>
 void NavierStokesAleSolverPC<Mesh>::
 iterateLin( const Real& time, BCHandler& BCh_du )
+{
+
+    Chrono chrono;
+
+    // Number of velocity components
+    UInt nc_u = _u.nbcomp(), iloc, ig;
+
+    std::cout << "  F-  LINEARIZED FLUID SYSTEM\n";
+
+    std::cout << "    F-  Updating right hand side... ";
+
+    //
+    // RIGHT HAND SIDE FOR THE LINEARIZED ALE SYSTEM
+    //
+    chrono.start();
+
+    //initialize right hand side
+    _f_duWithOutBC = ZeroVector( _f_duWithOutBC.size() );
+    _f_p = ZeroVector( _f_p.size() );
+
+    // Loop on elements
+    for ( UInt i = 1; i <= _mesh.numVolumes(); i++ )
+    {
+
+        _fe_p.update( _mesh.volumeList( i ) );
+        _fe_u.updateFirstDerivQuadPt( _mesh.volumeList( i ) );
+
+        // initialization of elementary vectors
+        _elvec_du.zero();
+        _elvec_dp.zero();
+
+        for ( UInt k = 0 ; k < ( UInt ) _fe_u.nbNode ; k++ )
+        {
+            iloc = _fe_u.patternFirst( k );
+            for ( UInt ic = 0; ic < nc_u; ++ic )
+            {
+                ig = _dof_u.localToGlobal( i, iloc + 1 ) - 1 + ic * _dim_u;
+                _convect[ iloc + ic * _fe_u.nbNode ] = _un( ig ) - _wInterp( ig );  // u^n - w^k local
+                _w_loc.vec( ) [ iloc + ic * _fe_u.nbNode ] = _wInterp( ig );                // w^k local
+                _uk_loc.vec( ) [ iloc + ic * _fe_u.nbNode ] = _u( ig );                      // u^k local
+                _d_loc.vec( ) [ iloc + ic * _fe_u.nbNode ] = _dInterp( ig );                // d local
+                _dw_loc.vec( ) [ iloc + ic * _fe_u.nbNode ] = _dwInterp( ig );               // dw local
+            }
+        }
+
+        for ( UInt k = 0 ; k < ( UInt ) _fe_p.nbNode ; k++ )
+        {
+            iloc = _fe_p.patternFirst( k );
+            ig = _dof_p.localToGlobal( i, iloc + 1 ) - 1;
+            _pk_loc[ iloc ] = _p( ig );  // p^k local
+        }
+
+        //
+        // Elementary vectors
+        //
+
+        //  - \rho ( \grad( u^n-w^k ):[I\div d - (\grad d)^T] u^k + ( u^n-w^k )^T[I\div d - (\grad d)^T] (\grad u^k)^T , v  )
+        source_mass1( -_rho, _uk_loc, _convect, _d_loc, _elvec_du, _fe_u );
+
+        //  + \rho * ( \grad u^k dw, v  )
+        source_mass2( _rho, _uk_loc, _dw_loc, _elvec_du, _fe_u );
+
+        //  - ( [-p^k I + 2*mu e(u^k)] [I\div d - (\grad d)^T] , \grad v  )
+        source_stress( -1.0, _mu, _uk_loc, _pk_loc, _d_loc, _elvec_du, _fe_u, _fe_p );
+
+        // + \mu ( \grad u^k \grad d + [\grad d]^T[\grad u^k]^T : \grad v )
+        source_stress2( _mu, _uk_loc, _d_loc, _elvec_du, _fe_u );
+
+        //  + ( (\grad u^k):[I\div d - (\grad d)^T] , q  )
+        source_press( 1.0, _uk_loc, _d_loc, _elvec_dp, _fe_u, _fe_p );
+
+        //
+        // Assembling
+        //
+
+        // assembling presssure right hand side
+        assemb_vec( _f_p, _elvec_dp, _fe_p, _dof_p, 0 );
+
+        // loop on velocity components
+        for ( UInt ic = 0; ic < nc_u; ic++ )
+        {
+            // assembling velocity right hand side
+            assemb_vec( _f_duWithOutBC, _elvec_du, _fe_u, _dof_u, ic );
+        }
+    }
+
+
+    chrono.stop();
+    std::cout << "done in " << chrono.diff() << "s." << std::endl;
+
+    // for BC treatment (done at each time-step)
+    Real tgv = 1.e02;
+
+    std::cout << "    F-  Applying boundary conditions... ";
+    chrono.start();
+    _C = _CAux;
+    _trD = _trDAux;
+
+    _f_u = _f_duWithOutBC;
+
+    BCh_du.bdUpdate( _mesh, _feBd_u, _dof_u );
+
+    bcManage( _C, _trD, _f_u, _mesh, _dof_u, BCh_du, _feBd_u, tgv, time );
+
+    chrono.stop();
+    std::cout << " done in " << chrono.diff() << "s." << std::endl;
+    std::cout << "  norm_inf (_f_du) after BC        = " << norm_inf( _f_u ) << std::endl;
+    std::cout << "  norm_inf ( difference ) after BC = " << norm_inf( _f_duWithOutBC - _f_u ) << std::endl;
+
+    //matrices HinvDtr:
+    MultInvDiag( _H, _trD, _HinvDtr );
+    // ---------------
+    // (i) C * V = F_V
+    // ---------------
+    // AZTEC specifications for each system
+    int data_org_i[ AZ_COMM_SIZE ];   // data organisation for C
+    int proc_config_i[ AZ_PROC_SIZE ]; // Processor information:
+    int options_i[ AZ_OPTIONS_SIZE ]; // Array used to select solver options.
+    double params_i[ AZ_PARAMS_SIZE ];   // User selected solver paramters.
+    double status_i[ AZ_STATUS_SIZE ];   // Information returned from AZ_solve()
+    // indicating success or failure.
+
+    AZ_set_proc_config( proc_config_i, AZ_NOT_MPI );
+
+    //AZTEC matrix and preconditioner
+    AZ_MATRIX *C;
+    AZ_PRECOND *prec_C;
+
+    int N_eq_i = 3 * _dim_u; // number of DOF for each component
+    // data_org assigned "by hands" while no parallel computation is performed
+    data_org_i[ AZ_N_internal ] = N_eq_i;
+    data_org_i[ AZ_N_border ] = 0;
+    data_org_i[ AZ_N_external ] = 0;
+    data_org_i[ AZ_N_neigh ] = 0;
+    data_org_i[ AZ_name ] = DATA_NAME_AZTEC;
+
+    // create matrix and preconditionner
+    C = AZ_matrix_create( N_eq_i );
+    prec_C = AZ_precond_create( C, AZ_precondition, NULL );
+
+    AZ_set_MSR( C, ( int* ) _pattC.giveRaw_bindx(), ( double* ) _C.giveRaw_value(), data_org_i, 0, NULL, AZ_LOCAL );
+
+    _dataAztec_i.aztecOptionsFromDataFile( options_i, params_i );
+
+    //keep C factorisation and preconditioner reused in my_matvec
+    options_i[ AZ_keep_info ] = 1;
+
+
+    // ---------------
+    // (i) C * V = F_V
+    // ---------------
+    options_i[ AZ_recursion_level ] = 1;
+
+    _du = ZeroVector( _du.size() );
+
+    // intermediate velocity computation
+    std::cout << "  F-  Solving system (i)... ";
+    chrono.start();
+    AZ_iterate( _du.giveVec(), _f_u.giveVec(), options_i, params_i, status_i,
+                proc_config_i, C, prec_C, NULL );
+    chrono.stop();
+    std::cout << "done in " << chrono.diff() << " s." << std::endl;
+
+    //options_i[AZ_recursion_level]=0;
+
+    // --------------------------------------------
+    // (ii) (D*C^(-1)*trD) * P = D*C^{-1}*F_V = D*V
+    // --------------------------------------------
+    // AZTEC specifications for the second system
+    int proc_config_ii[ AZ_PROC_SIZE ]; // Processor information:
+    int options_ii[ AZ_OPTIONS_SIZE ]; // Array used to select solver options.
+    double params_ii[ AZ_PARAMS_SIZE ];   // User selected solver paramters.
+    double status_ii[ AZ_STATUS_SIZE ];   // Information returned from AZ_solve()
+    // indicating success or failure.
+
+    AZ_set_proc_config( proc_config_ii, AZ_NOT_MPI );
+
+    //AZTEC matrix for A_ii=(D*C^{-1}*trD)
+    AZ_MATRIX *A_ii;
+    AZ_PRECOND *pILU_ii;
+
+    int N_eq_ii = _dp.size();
+
+    A_ii = AZ_matrix_create( N_eq_ii );
+    // data containing the matrices C, D, trD and H as pointers
+    // are passed through A_ii and pILU_ii:
+    AZ_set_MATFREE( A_ii, &_factor_data_jacobian,
+                    my_matvec < MixedMatr<1, 3, CSRPatt, double>, MixedMatr<3, 1, CSRPatt, double>,
+                    std::vector<double>, MSRMatr<double>, Vector > );
+
+    pILU_ii = AZ_precond_create( A_ii, my_precSchur_PC <
+                                 MSRMatr<double>,
+                                 MixedMatr<1, 3, CSRPatt, double>,
+                                 MixedMatr<3, 1, CSRPatt, double>,
+                                 std::vector<double>,
+                                 MSRMatr<double>,
+                                 Vector > , &_factor_data_jacobian );
+
+    _dataAztec_ii.aztecOptionsFromDataFile( options_ii, params_ii );
+
+    // user preconditioning:
+    options_ii[ AZ_precond ] = AZ_user_precond;
+
+    // RHS of the linear system (ii)
+    Vector vec_DV( _dp.size() );
+
+
+    //matrices HinvC (depends on time):
+    MultInvDiag( _H, _C, _HinvC );
+
+
+    // RHS of the linear system (ii)
+    vec_DV = _D * _du - _f_p;
+
+    // case of pure Dirichlet BCs:
+    if ( BCh_du.hasOnlyEssential()
+       )
+    {
+        vec_DV[ _dim_p - 1 ] = 1.0; // correction of the right hand side.
+    }
+
+    _dp = ZeroVector( _dp.size() );
+
+
+    std::cout << "  F-  Solving pressure system... \n";
+
+//    std::cout << "  norm_inf (vec_DV) = " << norm_inf( vec_DV ) << std::endl;
+//    std::cout << "  norm_inf (_f_p) = " << norm_inf( _f_p ) << std::endl;
+//    std::cout << "  norm_inf (_D*_du ) = " << norm_inf( _D * _du ) << std::endl;
+
+    chrono.start();
+    options_ii[ AZ_recursion_level ] = 1;
+
+    AZ_iterate( _dp.giveVec(), &vec_DV[ 0 ], options_ii, params_ii, status_ii,
+                proc_config_ii, A_ii, pILU_ii, NULL );
+
+    chrono.stop();
+
+    std::cout << "done in " << chrono.diff() << " s." << std::endl;
+    //options_ii[AZ_recursion_level]=0;
+
+    // ----------------------------
+    // (iii) V = V-(C^(-1)*trD) * P
+    // ----------------------------
+    _du = _du - _invCtrDP;
+    std::cout << "  F-  Velocity updated" << std::endl;
+
+    AZ_matrix_destroy( &A_ii );
+    AZ_precond_destroy( &pILU_ii );
+    AZ_matrix_destroy( &C );
+    AZ_precond_destroy( &prec_C );
+
+    _residual_u = _f_duWithOutBC - _CAux * _du - _trDAux * _dp;
+
+    std::cout << "  norm_inf (_residual_du ) = " << norm_inf( _residual_u ) << std::endl;
+    std::cout << "  norm_inf (_du )          = " << norm_inf( _du ) << std::endl;
+}
+
+
+template <typename Mesh>
+void NavierStokesAleSolverPC<Mesh>::
+solveJacobian(  const Real& time, BCHandler& BCh_du )
 {
 
     Chrono chrono;
@@ -1129,6 +1393,7 @@ iterateLin( const Real& time, BCHandler& BCh_du )
     std::cout << "  norm_inf (_residual_du ) = " << norm_inf( _residual_u ) << std::endl;
     std::cout << "  norm_inf (_du )          = " << norm_inf( _du ) << std::endl;
 }
+
 
 
 
