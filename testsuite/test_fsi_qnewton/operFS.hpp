@@ -57,7 +57,7 @@ namespace LifeV
     void evalResidual(Vector &res, const Vector& sol, int iter);
     
     //
-    void updateJac(Vector& sol,int iter);
+    void updateJacobian(Vector& sol,int iter);
     
     //
     void solveJac(Vector &step, const Vector& res, double& linear_rel_tol);

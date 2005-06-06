@@ -100,7 +100,7 @@ int main(int argc, char** argv)
     // passing data from structure to the fluid mesh: motion of the fluid domain
     //
     dof_interface_type dofStructureToFluidMesh( new  DofInterface3Dto3D(fluid.mesh().getRefFE(),
-                                    fluid.dofMesh(),
+                                    fluid.harmonicExtension().dofMesh(),
                                     feTetraP1,
                                     solid.dDof()) );
     dofStructureToFluidMesh->update(fluid.mesh(), 1, solid.mesh(), 1, 0.0);
@@ -109,7 +109,7 @@ int main(int argc, char** argv)
     // BC's for the harmonic extension of the
     // interface solid displacement
     BCFunctionBase bcf(fZero);
-    BCVectorInterface displ(solid.d(), dim_solid, dofStructureToFluidMesh );
+    BCVectorInterface displ(solid.disp(), dim_solid, dofStructureToFluidMesh );
     BCh_mesh.addBC("Interface", 1, Essential, Full, displ, 3);
     BCh_mesh.addBC("Top",       3, Essential, Full, bcf,   3);
     BCh_mesh.addBC("Base",      2, Essential, Full, bcf,   3);
@@ -200,7 +200,7 @@ int main(int argc, char** argv)
         oper.setTime(time);
 
         // displacement prediction
-        disp = solid.d() + dt*(1.5*solid.w() - 0.5*velo_1);
+        disp = solid.disp() + dt*(1.5*solid.w() - 0.5*velo_1);
 
         velo_1 = solid.w();
 

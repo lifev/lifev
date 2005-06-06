@@ -65,7 +65,7 @@ namespace LifeV
     if(status) _nbEval = 0; // new time step
     _nbEval++ ;
     
-    _solid.d() = disp;
+    _solid.disp() = disp;
     
     _fluid.updateMesh(_time);
     _fluid.iterate(_time);
@@ -73,7 +73,7 @@ namespace LifeV
     _solid.setRecur(0);
     _solid.iterate();
     
-    dispNew = _solid.d();
+    dispNew = _solid.disp();
     velo    = _solid.w();
     
     std::cout << "                ::: norm(disp     ) = " << norm_inf(disp) << std::endl;
@@ -98,7 +98,7 @@ namespace LifeV
 
   
   //
-  void  operFS::updateJac(Vector& sol,int iter) {
+  void  operFS::updateJacobian(Vector& sol,int iter) {
   }
   
   
