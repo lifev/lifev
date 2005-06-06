@@ -907,7 +907,7 @@ void NavierStokesSolverIP<Mesh>::calculateBoundaryForce( EntityFlag flag,
     fy = 0;
     fz = 0;
     const UInt nDof = _dof_u.numTotalDof();
-    for ( UInt iDof = ; iDof<nDof; ++iDof )
+    for ( UInt iDof = 0; iDof<nDof; ++iDof )
     {
         fx += testX[iDof] * residual[iDof];
         fy += testX[iDof] * residual[iDof+nDof];
