@@ -48,15 +48,15 @@ class reducedLinFluid{
 
     typedef FSIOperator::fluid_type     fluid_type;
     typedef FSIOperator::solid_type     solid_type;
-    typedef FSIOperator::bchandler_type bchandler_type;
+    typedef FSIOperator::fluid_bchandler_type bchandler_type;
 
 public:
 
 
     //! constructor
     reducedLinFluid(FSIOperator* const _op,
-                fluid_type _fluid,
-                solid_type _solid);
+                    fluid_type _fluid,
+                    solid_type _solid);
 
     //! bondary conditions setup
 

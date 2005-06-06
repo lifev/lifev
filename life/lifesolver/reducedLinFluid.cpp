@@ -22,8 +22,8 @@
 namespace LifeV
 {
 reducedLinFluid::reducedLinFluid(FSIOperator* const _op,
-                         fluid_type _fluid,
-                         solid_type _solid):
+                                 fluid_type _fluid,
+                                 solid_type _solid):
     M_FSIOperator(_op),
     M_fluid( _fluid ),
     M_solid( _solid ),
@@ -74,6 +74,7 @@ const Vector& reducedLinFluid::residual()
         evalResidual();
 
     std::cout << "residual_dp size = " << M_residual_dp.size() << std::endl;
+    std::cout << "M_f size         = " << M_f.size() << std::endl;
     return M_residual_dp;
 }
 
@@ -112,6 +113,9 @@ void reducedLinFluid::solveReducedLinearFluid()
              M_feBd, 1.0,
              M_FSIOperator->time());
 
+    std::cout << "M_f  size         = " << M_f.size() << std::endl;
+    std::cout << "M_dp size         = " << M_dp.size() << std::endl;
+
     M_linearSolver.setRecursionLevel( 1 );
     M_dp = ZeroVector( M_dp.size() );
 
@@ -124,7 +128,8 @@ void reducedLinFluid::solveReducedLinearFluid()
 
 void reducedLinFluid::solveInvReducedLinearFluid()
 {
-    if (!M_computedC) { // computing laplacien fe matrix (begining of the time step)
+    if (!M_computedC)
+    { // computing laplacien fe matrix (begining of the time step)
 
         // Initializing matrix
         M_CAux.zeros();
