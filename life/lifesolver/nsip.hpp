@@ -45,12 +45,12 @@
 #include <life/lifearray/pattern.hpp>
 #include <life/lifefem/assemb.hpp>
 #include <life/lifefem/bcManage.hpp>
-#include <life/lifearray/boostmatrix.hpp>
 
 #if AZTEC_SOLVER
 #include <life/lifealg/SolverAztec.hpp>
 #else
 
+#include <life/lifearray/boostmatrix.hpp>
 #include <lifeconfig.h>
 
 #if defined( HAVE_PETSC_H )
@@ -68,7 +68,7 @@
 #include <life/lifefem/sobolevNorms.hpp>
 #include <life/lifefem/geoMap.hpp>
 #include <life/lifesolver/nsipterms.hpp>
-#include <life/lifesolver/AFSolvers.hpp>
+//#include <life/lifesolver/AFSolvers.hpp>
 
 namespace LifeV
 {
@@ -132,6 +132,10 @@ public:
     //! removes mean of component comp of vector x
     void removeMean( Vector& x, UInt comp=1 );
 
+    //! calculates boundary force on a boundary specified by BCBase object
+    void calculateBoundaryForce( EntityFlag flag,
+                                 Real& fx , Real& fy, Real& fz );
+
 private:
 
     //! solve linear system
@@ -160,15 +164,18 @@ private:
     typedef BoostMatrix<boost::numeric::ublas::column_major> matrix_type;
 #endif
 
-    //! Matrix M_u: Vmass
+    //! Mass matrix
     //MixedMatr<nDimensions, nDimensions, MSRPatt, double> M_matrMass;
     matrix_type M_matrMass;
 
-    //! Matrix CStokes: rho*bdfCoeff*Vmass + mu*Vstiff + linear stabilizations
+    //! Stokes matrix: rho*bdfCoeff*Vmass + mu*Vstiff + linear stabilizations
     matrix_type M_matrStokes;
 
-    //! Matrix C: CStokes + Convective_term + nonlinear stabilizations
+    //! Full matrix : CStokes + Convective_term + nonlinear stabilizations
     matrix_type M_matrFull;
+
+    //! Full matrix without boundary conditions
+    matrix_type M_matrNoBC;
 
     //! Elementary matrices and vectors
     ElemMat M_elmatC; //velocity stiffness
@@ -188,12 +195,13 @@ private:
     Vector M_sol;
 
 #if AZTEC_SOLVER
-    SolverAztec M_linearSolver;
+    typedef SolverAztec solver_type;
 #elif PETSC_SOLVER
-    SolverPETSC M_linearSolver;
+    typedef SolverPETSC solver_type;
 #elif UMFPACK_SOLVER
-    SolverUMFPACK M_linearSolver;
+    typedef SolverUMFPACK solver_type;
 #endif
+    solver_type M_linearSolver;
 
     Real M_time;
 
@@ -209,7 +217,7 @@ private:
     double M_diagonalize;
 
     Vector M_constantPressure;
-    
+
     UInt M_nUsePC;
     Real M_tTotalSolve;
     Real M_tLastSolve;
@@ -247,6 +255,7 @@ NavierStokesSolverIP( const GetPot& dataFile,
     M_matrMass( M_fullPattern ),
     M_matrStokes( M_fullPattern ),
     M_matrFull( M_fullPattern ),
+    M_matrNoBC( M_fullPattern ),
     M_elmatC( _fe_u.nbNode, nDimensions, nDimensions ),
     M_elmatMass( _fe_u.nbNode, nDimensions, nDimensions ),
     M_elmatD( _fe_u.nbNode, nDimensions+1, nDimensions ),
@@ -549,6 +558,7 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
+    M_matrNoBC = M_matrFull;
 
     // for BC treatment ( done at each time-step )
     std::cout << "  o-  Applying boundary conditions...          "
@@ -876,6 +886,74 @@ void NavierStokesSolverIP<Mesh>::solveLinearSystemOnce( bool reusePC )
         M_nUsePC = 1;
     }
 } // solveLinearSystemOnce
+
+template <typename Mesh>
+void NavierStokesSolverIP<Mesh>::calculateBoundaryForce( EntityFlag flag,
+                                                         Real& fx,
+                                                         Real& fy,
+                                                         Real& fz )
+{
+    Vector residual( ( nDimensions+1 )*_dim_u );
+    Vector testX( ( nDimensions+1 )*_dim_u );
+    residual = M_matrNoBC * M_sol - M_rhsU;
+
+    BCFunctionBase fex( details::ex );
+    BCHandler bch;
+    bch.addBC( "force boundary x", flag, Essential, Full, fex, nDimensions );
+    bch.bdUpdate( _mesh, _feBd_u, _dof_u );
+    bcEssentialManageVector( testX, _dof_u, bch[0], M_time, 1. );
+
+    fx = 0;
+    fy = 0;
+    fz = 0;
+    const UInt nDof = _dof_u.numTotalDof();
+    for ( UInt iDof = ; iDof<nDof; ++iDof )
+    {
+        fx += testX[iDof] * residual[iDof];
+        fy += testX[iDof] * residual[iDof+nDof];
+        fz += testX[iDof] * residual[iDof+2*nDof];
+    }
+
+//     const UInt nDof = M_dof.numTotalDof();
+
+//     // local trace of the residual
+//     ElemVec f( M_feBd.nbNode, nDimensions );
+
+//     // loop on boundary faces
+//     for ( UInt iFace = 1; iFace<=M_mesh.numBFaces(); ++iFace )
+//     {
+//         // update current finite elements
+//         M_feBd.updateMeas( M_mesh.face( iFace ) );
+//         const Real area = M_feBd.measure();
+//         const UInt iElAd1 = M_mesh.face( iFace ).ad_first();
+//         M_fe1.updateFirstDeriv( M_mesh.volumeList( iElAd1 ) );
+
+//         // local id of the face in its adjacent element
+//         UInt iFaEl = M_mesh.face( iFace ).pos_first();
+//         for ( int iNode = 0; iNode < M_feBd.nbNode; ++iNode )
+//         {
+//             UInt iloc = M_fToP( iFaEl, iNode+1 );
+//             for ( int iCoor = 0; iCoor < M_fe1.nbCoor; ++iCoor )
+//             {
+//                 UInt ig = M_dof.localToGlobal( iElAd1, iloc+1 )-1+iCoor*nDof;
+//                 f.vec()[ iCoor*M_feBd.nbNode + iNode ] = state( ig );
+//             }
+//         }
+
+//     } // loop on boundary faces
+
+} // calculateBoundaryForce
+
+namespace details
+{
+
+Real ex( const Real& /* t */, const Real& /* x */, const Real& /* y */,
+         const Real& /* z */, const ID& i )
+{
+    return i==1 ? 1 : 0;
+}
+
+}
 
 } // namespace LifeV
 
