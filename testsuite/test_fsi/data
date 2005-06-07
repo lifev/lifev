@@ -5,9 +5,10 @@
 
 [problem]
 
-method     = steklovPoincare # fixedPoint, steklovPoincare, exactJacobian	
-precond    = 3 # precond for SP, 0 = lin fluid, 1 lin structure, 2 = both, 3 = DD-Newton
-DDNprecond = 1 # precond for DDN-newton, 0 = lin fluid, 1 lin structure, 2 = both 
+method     = exactJacobian # fixedPoint, steklovPoincare, exactJacobian	
+precond    = 3 # 0 = lin fluid, 1 lin structure, 2 = both, 3 = DD-Newton
+DDNprecond = 1 # precond for DDN-newton, 0 = lin fluid, 1 lin structure, 2 = both
+reducedFluid = 1 # 0 = exact, 1 = inexact
 defOmega   = 0.001 # usually 0.01 for precond = 0 or 1; -1 for precond = 2
 defOmegaS  = 0.001 # matters only with  precond = 2
 defOmegaF  = 0.001 # matters only with  precond = 2
@@ -16,18 +17,17 @@ abstol     = 0.e-7
 reltol     = 1.e-4
 etamax     = 1.e-3
 restart    = 0
-Tstart     = 0.02
+
 
 [fluid]
 
 [./physics]
-endtime   = 0.002             # endtime
+endtime   = 0.001             # endtime
 density   = 1.0               # density
 viscosity = 0.03              # viscosity
 
-
 [../discretization]
-mesh_dir  = ../data/mesh/inria/ # the directory where the mesh file is
+mesh_dir  = ./Mesh/ # the directory where the mesh file is
 mesh_file = tube20.mesh  # mesh file
 timestep  = 0.001             # timestep
 
@@ -37,16 +37,30 @@ velname   = vel
 pressname = press
 
 
+[reducedfluid]
+
+[./aztec]
+output          = none #all_res
+max_iter        = 1550
+poly_ord        = 5
+kspace          = 40
+precond         = dom_decomp
+tol             = 1.00e-6
+drop            = 1.00e-4
+ilut_fill       = 1.5
+keep_info       = 1
+
+
 [solid]
 
 [./physics]
 density   = 1.2               # density
 young     = 3.0E6
 poisson   = 0.3
-endtime   = 0.002
+endtime   = 0.02
 
 [../discretization]
-mesh_dir  = ../data/mesh/inria/   # the directory where the mesh file is
+mesh_dir  = ./Mesh/   # the directory where the mesh file is
 mesh_file = vessel20.mesh  # mesh file
 timestep  = 0.001             # timestep
 
@@ -76,7 +90,7 @@ tol             = 1.e-16
 [fluid]
 
 [./aztec_i]
-output          = none
+output          = all_res
 max_iter        = 1550
 poly_ord        = 5
 kspace          = 40
@@ -116,6 +130,7 @@ precond         = dom_decomp
 drop            = 1.00e-4
 ilut_fill       = 2
 tol             = 1.e-16
+
 
 [mesh_motion]
 

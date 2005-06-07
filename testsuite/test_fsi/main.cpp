@@ -181,7 +181,7 @@ int main(int argc, char** argv)
 
         LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 
-        FSIChecker _sp_check( data_file, "fixedPoint" );
+        FSIChecker _sp_check( data_file, "steklovPoincare" );
         _sp_check();
 
 
