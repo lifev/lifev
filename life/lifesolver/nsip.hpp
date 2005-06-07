@@ -894,26 +894,30 @@ void NavierStokesSolverIP<Mesh>::calculateBoundaryForce( EntityFlag flag,
                                                          Real& fz )
 {
     Vector residual( ( nDimensions+1 )*_dim_u );
-    Vector testX( ( nDimensions+1 )*_dim_u );
     residual = M_matrNoBC * M_sol - M_rhsU;
 
     BCFunctionBase fex( details::ex );
     BCHandler bch;
     bch.addBC( "force boundary x", flag, Essential, Full, fex, nDimensions );
     bch.bdUpdate( _mesh, _feBd_u, _dof_u );
-    bcEssentialManageVector( testX, _dof_u, bch[0], M_time, 1. );
+    const BCBase& BCb = bch[0];
 
     fx = 0;
     fy = 0;
     fz = 0;
-    const UInt nDof = _dof_u.numTotalDof();
-    for ( UInt iDof = 0; iDof<nDof; ++iDof )
-    {
-        fx += testX[iDof] * residual[iDof];
-        fy += testX[iDof] * residual[iDof+nDof];
-        fz += testX[iDof] * residual[iDof+2*nDof];
-    }
 
+    // Number of total scalar Dof
+    const UInt nDof = _dof_u.numTotalDof();
+
+    // Loop on BC identifiers
+    for ( ID i = 1; i <= BCb.list_size(); ++i )
+    {
+        ID idDof = BCb( i ) ->id();
+        fx += residual( idDof );
+        fy += residual( idDof + nDof );
+        fz += residual( idDof + 2*nDof );
+    }
+    
 //     const UInt nDof = M_dof.numTotalDof();
 
 //     // local trace of the residual
