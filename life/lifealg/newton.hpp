@@ -62,6 +62,8 @@ int newton( Vector& sol, Fct& f, Norm norm, Real abstol, Real reltol,
 
     Vector step(  sol.size() );
     step = ZeroVector( sol.size() );
+    Vector stepFSI(  sol.size() );
+    stepFSI = ZeroVector( sol.size() );
 
     Real normResOld = 1, lambda, slope;
     f.evalResidual( residual, sol, iter);
@@ -83,7 +85,7 @@ int newton( Vector& sol, Fct& f, Norm norm, Real abstol, Real reltol,
             << " stop tol = " << stop_tol << std::endl;
     out_res << "#iter      disp_norm       step_norm       residual_norm" << std::endl;
 
-    f.updateJac( sol , 1);
+    f.updateJacobian( sol , 1);
 
     while ( normRes > stop_tol && iter < maxit )
     {
@@ -91,21 +93,17 @@ int newton( Vector& sol, Fct& f, Norm norm, Real abstol, Real reltol,
         ratio = normRes / normResOld;
         normResOld = normRes;
         normRes = norm( residual );
-        if (iter != 1) f.updateJac( sol, iter );
+        if (iter != 1) f.updateJacobian( sol, iter );
         linres = linear_rel_tol;
 
         f.solveJac( step, -1. * residual, linres); // residual = f(sol)
 
         normStep = norm_2(step);
 
-        out_res   << std::setw(5) << iter
-                  << std::setw(15) << norm_2  (sol)
-                  << std::setw(15) << norm_2  (step);
-
         slope = normRes * normRes * ( linres * linres - 1 );
-        std::cout << "Newton " << iter << " ### slope = " << slope << std::endl;
-        std::cout << "linesearch = " << linesearch << std::endl;
-        std::cout << "step norm  = " << normStep << std::endl;
+        //std::cout << "Newton " << iter << " ### slope = " << slope << std::endl;
+        //std::cout << "linesearch = " << linesearch << std::endl;
+        //std::cout << "step norm  = " << normStep << std::endl;
         /*
           slope denotes the quantity f^T J step, which is generally used by
           line search algorithms. This formula comes form Brown & Saad (1990),
@@ -117,33 +115,27 @@ int newton( Vector& sol, Fct& f, Norm norm, Real abstol, Real reltol,
         //
         // -- line search
         //
-        if (normStep > 1.e-07)
+        switch ( linesearch )
         {
-            sol += step;
-            f.evalResidual( residual, sol, iter);
-            normRes = norm( residual );
-        }
-        else
-        {
-            switch ( linesearch )
-            {
-                case 0: // no linesearch
-                    sol += step;
-                    f.evalResidual( residual, sol, iter);
-                    normRes = norm( residual );
-                    break;
-                case 1:
-                    lineSearch_parab( f, norm, residual, sol, step, normRes, lambda, iter );
-                    break;
-                case 2:  // recommended
-                    lineSearch_cubic( f, norm, residual, sol, step, normRes, lambda, slope, iter );
-                    break;
-                default:
-                    std::cout << "Unknown linesearch \n";
-                    exit( 1 );
-            }
+            case 0: // no linesearch
+                sol += step;
+                f.evalResidual( residual, sol, iter);
+                normRes = norm( residual );
+                break;
+            case 1:
+                lineSearch_parab( f, norm, residual, sol, step, normRes, lambda, iter );
+                break;
+            case 2:  // recommended
+                lineSearch_cubic( f, norm, residual, sol, step, normRes, lambda, slope, iter );
+                break;
+            default:
+                std::cout << "Unknown linesearch \n";
+                exit( 1 );
         }
 
+        out_res   << std::setw(5) << iter
+                  << std::setw(15) << norm_2  (sol)
+                  << std::setw(15) << norm_2  (step);
         //
         //-- end of line search
         //
