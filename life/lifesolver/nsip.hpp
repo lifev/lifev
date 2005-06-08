@@ -896,11 +896,13 @@ void NavierStokesSolverIP<Mesh>::calculateBoundaryForce( EntityFlag flag,
     Vector residual( ( nDimensions+1 )*_dim_u );
     residual = M_matrNoBC * M_sol - M_rhsU;
 
-    BCFunctionBase fex( details::ex );
-    BCHandler bch;
-    bch.addBC( "force boundary x", flag, Essential, Full, fex, nDimensions );
-    bch.bdUpdate( _mesh, _feBd_u, _dof_u );
-    const BCBase& BCb = bch[0];
+    //BCFunctionBase f( fct );
+    //BCHandler bch;
+    //bch.addBC( "force boundary x", flag, Essential, Full, f, nDimensions );
+    //bch.bdUpdate( _mesh, _feBd_u, _dof_u );
+    //const BCBase& BCb = bch[0]
+
+    const BCBase& BCb = this->BCh_fluid().GetBCWithFlag( flag );
 
     fx = 0;
     fy = 0;
@@ -947,17 +949,6 @@ void NavierStokesSolverIP<Mesh>::calculateBoundaryForce( EntityFlag flag,
 //     } // loop on boundary faces
 
 } // calculateBoundaryForce
-
-namespace details
-{
-
-Real ex( const Real& /* t */, const Real& /* x */, const Real& /* y */,
-         const Real& /* z */, const ID& i )
-{
-    return i==1 ? 1 : 0;
-}
-
-}
 
 } // namespace LifeV
 
