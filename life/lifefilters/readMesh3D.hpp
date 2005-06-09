@@ -32,6 +32,7 @@
 #include <life/lifemesh/regionMesh3D.hpp>
 #include <life/lifecore/util_string.hpp>
 #include <life/lifefilters/mesh_util.hpp>
+#include <life/lifefilters/selectMarker.hpp>
 
 namespace LifeV
 {
@@ -46,6 +47,18 @@ namespace LifeV
 /********************************************************************************
 MESH BUILDERS
 ********************************************************************************/
+
+  template<typename T>
+  T Max(T & i1, T & i2,T & i3)
+{
+  return std::max(std::max(i1,i2),i3);
+}
+
+  template<typename T>
+  T Max(T & i1, T & i2, T & i3, T & i4)
+{
+  return std::max(Max(i1,i2,i3),i4);
+}
 
 bool
 readMppFileHead( std::ifstream & mystream,
@@ -322,34 +335,51 @@ readINRIAMeshFileHead( std::ifstream & mystream,
                        UInt & numBFaces,
                        UInt & numBEdges,
                        UInt & numVolumes,
-                       ReferenceShapes & shape );
+		       UInt & numStoredFaces,
+                       ReferenceShapes & shape,
+		       InternalEntitySelector
+		       iSelect=InternalEntitySelector());
 
 /*!
   read an INRIA mesh
  */
+struct FiveNumbers
+{
+public:
+  UInt i1,i2,i3,i4;
+  long int ibc;
+};
 template <typename GeoShape, typename MC>
 bool
 readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
                    std::string const & filename,
                    EntityFlag regionFlag,
-                   bool verbose=false )
+		   bool verbose=false,
+		   InternalEntitySelector 
+		   iSelect=InternalEntitySelector()
+		   )
 {
     unsigned done = 0;
     std::string line;
     Real x, y, z;
     UInt p1, p2, p3, p4, p5, p6, p7, p8;
     UInt nVe( 0 ), nBVe( 0 ), nFa( 0 ), nBFa( 0 ), nPo( 0 ), nBPo( 0 );
-
+    UInt numStoredFaces;
     UInt nVo( 0 ), nEd( 0 ), nBEd( 0 );
     UInt i;
     ReferenceShapes shape;
-
+    std::vector<FiveNumbers> faceHelp;
+    typename std::vector<FiveNumbers>::iterator faceHelpIterator;
     std::stringstream discardedLog;
     std::ostream& oStr = verbose ? std::cout : discardedLog;
 
     // open stream to read header
 
     std::ifstream hstream( filename.c_str() );
+    if (verbose){
+      std::cout<<"Reading form file "<<filename<< std::endl;
+    }
+    
     if ( hstream.fail() )
     {
         std::cerr << " Error in readINRIAMeshFile: File " << filename
@@ -358,7 +388,8 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
         abort();
     }
     std::cout << "Reading INRIA mesh file" << std::endl;
-    if ( ! readINRIAMeshFileHead( hstream, nVe, nBVe, nBFa, nBEd, nVo, shape ) )
+    if ( ! readINRIAMeshFileHead( hstream, nVe, nBVe, nBFa, nBEd, nVo, numStoredFaces,shape,
+				  iSelect) )
     {
         std::cerr << " Error While reading INRIA mesh file headers" << std::endl;
         ABORT() ;
@@ -398,13 +429,15 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
             nPo = nVe + nEd;
             // nBPo=nBVe+nBEd; // FALSE : nBEd is not known at this stage in a INRIA file (JFG 07/2002)
             // I use the relation  nBVe + nBFa - 2 = nBEd, But, is it general (hole...) ???? (JFG 07/2002)
-            nBPo = nBVe + ( nBVe + nBFa - 2 );
+            nBEd=( nBVe + nBFa - 2 );
+	    nBPo = nBVe + ( nBVe + nBFa - 2 );
         }
         else
         {
             std::cout << "Linear Tetra Mesh" << std::endl;
             nPo = nVe;
             nBPo = nBVe;
+            nBEd=( nBVe + nBFa - 2 );
         }
         break;
     default:
@@ -414,7 +447,8 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
     std::cout << "#Vertices = "          << std::setw(10) << nVe
               << "  #BVertices       = " << std::setw(10) << nBVe << std::endl;
     oStr      << "#Faces    = "          << std::setw(10) << nFa
-              << "  #Boundary Faces  = " << std::setw(10) << nBFa << std::endl;
+              << "  #Boundary Faces  = " << std::setw(10) << nBFa << std::endl
+              << "#Stored Faces = " << std::setw(10) << numStoredFaces<< std::endl;
     oStr      << "#Edges    = "          << std::setw(10) << nEd
               << "  #Boundary Edges  = " << std::setw(10) << nBEd << std::endl;
     std::cout << "#Points   = "          << std::setw(10) << nPo
@@ -433,8 +467,8 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
     mesh.numEdges() = nEd; // Here the REAL number of edges (all of them)
     mesh.setNumBEdges( nBEd );
     // Only Boundary Faces
-    mesh.setMaxNumFaces( nBFa );
-    mesh.numFaces() = nFa; // Here the REAL number of edges (all of them)
+    mesh.setMaxNumFaces( numStoredFaces );
+    mesh.numFaces() = nFa; // Here the REAL number of faces (all of them)
     mesh.setNumBFaces( nBFa );
 
     mesh.setMaxNumVolumes( nVo, true );
@@ -449,6 +483,17 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
     // I use that information to set all point info, by using a pointer.
     UInt count = 0;
     long int ibc;
+    
+    // To account for internal faces
+    if (numStoredFaces > nBFa){
+      faceHelp.resize(numStoredFaces - nBFa);
+      faceHelpIterator=faceHelp.begin();
+      oStr<<"WARNING: The mesh file (apparently) contains "<<numStoredFaces - nBFa<<" internal faces"<<std::endl;
+      
+    }
+    
+    
+    
     while ( next_good_line( mystream, line ).good() )
     {
         if ( line.find( "Vertices" ) != std::string::npos )
@@ -456,64 +501,126 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
             nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), mystream );
             for ( i = 0;i < nVe;i++ )
             {
-                mystream >> x >> y >> z >> ibc;
-                if ( ibc != 0 )
+	      mystream >> x >> y >> z >> ibc;
+	      if ( !iSelect(EntityFlag(ibc)))
                 {
-                    ++count;
-                    pp = &mesh.addPoint( true ); // Boundary point. Boundary switch set by the mesh method.
-                    pp->setMarker( EntityFlag( ibc ) );
+		  ++count;
+		  pp = &mesh.addPoint( true ); // Boundary point. Boundary switch set by the mesh method.
+		  pp->setMarker( EntityFlag( ibc ) );
                 }
-                else
+	      else
                 {
-                    pp = &mesh.addPoint( false );
+		  pp = &mesh.addPoint( false );
                 }
-                pp->x() = x;
-                pp->y() = y;
-                pp->z() = z;
-                pp->setMarker( EntityFlag( ibc ) );
+	      pp->x() = x;
+	      pp->y() = y;
+	      pp->z() = z;
+	      pp->setMarker( EntityFlag( ibc ) );
             }
             oStr << "Vertices Read " << std::endl;
             done++;
             if ( count != nBVe )
-                std::cerr << "NumB points inconsistent !" << std::endl;
+	      std::cerr << "NumB points inconsistent !" << std::endl;
         }
 
-        if ( line.find( "Triangles" ) != std::string::npos )
-        {
-            nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), mystream );
-            oStr << "Reading Bfaces " << std::endl;
-            for ( i = 0;i < nBFa;i++ )
-            {
-                mystream >> p1 >> p2 >> p3 >> ibc;
-
+        if ( line.find( "Triangles" ) != std::string::npos ){
+	  nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), mystream );
+	  oStr << "Reading Bfaces " << std::endl;
+	  for ( i = 0;i < numStoredFaces;i++ )
+	    {
+	      mystream >> p1 >> p2 >> p3 >> ibc;
+	      
+	      if (numStoredFaces > nBFa){
+		if (mesh.point( p1 ).boundary()&&mesh.point( p2 ).boundary()&&
+		    mesh.point( p3 ).boundary()){
+		  pf = &( mesh.addFace( true ) ); // Boundary faces
+		  pf->setMarker( EntityFlag( ibc ) );
+		  pf->setPoint( 1, mesh.point( p1 ) ); // set face conn.
+		  pf->setPoint( 2, mesh.point( p2 ) ); // set face conn.
+		  pf->setPoint( 3, mesh.point( p3 ) ); // set face conn.
+		  
+		} else {
+		  faceHelpIterator->i1=p1;
+		  faceHelpIterator->i2=p2;
+		  faceHelpIterator->i3=p3;
+		  faceHelpIterator->ibc=ibc;
+		  ++faceHelpIterator;
+		}
+	      } else {
+		
                 pf = &( mesh.addFace( true ) ); // Only boundary faces
-
                 pf->setMarker( EntityFlag( ibc ) );
                 pf->setPoint( 1, mesh.point( p1 ) ); // set face conn.
                 pf->setPoint( 2, mesh.point( p2 ) ); // set face conn.
                 pf->setPoint( 3, mesh.point( p3 ) ); // set face conn.
-            }
-            oStr << "Boundary Faces Read " << std::endl;
-            done++;
-        }
-
-        if ( line.find( "Quadrilaterals" ) != std::string::npos )
-        {
-            nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), mystream );
-            oStr << "Reading Bfaces " << std::endl;
-            for ( i = 0;i < nBFa;i++ )
+	      }
+	    }
+	  for (faceHelpIterator=faceHelp.begin();faceHelpIterator!=faceHelp.end();
+	       ++faceHelpIterator){
+	    p1=faceHelpIterator->i1;
+	    p2=faceHelpIterator->i2;
+	    p3=faceHelpIterator->i3;
+	    ibc=faceHelpIterator->ibc;
+	    pf = &( mesh.addFace( false ) ); // INTERNAL FACE
+	    pf->setMarker( EntityFlag( ibc ) );
+	    pf->setPoint( 1, mesh.point( p1 ) ); // set face conn.
+	    pf->setPoint( 2, mesh.point( p2 ) ); // set face conn.
+	    pf->setPoint( 3, mesh.point( p3 ) ); // set face conn.
+	  }
+	  
+	  oStr << "Boundary Faces Read " << std::endl;
+	  done++;
+	}
+	
+        if ( line.find( "Quadrilaterals" ) != std::string::npos ){
+	  nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), mystream );
+	  oStr << "Reading Bfaces " << std::endl;
+	  for ( i = 0;i < nBFa;i++ )
             {
-                mystream >> p1 >> p2 >> p3 >> p4 >> ibc;
-
+	      mystream >> p1 >> p2 >> p3 >> p4 >> ibc;
+	      
+	      if (numStoredFaces > nBFa){
+		if (mesh.point( p1 ).boundary()&&mesh.point( p2 ).boundary()&&
+		    mesh.point( p3 ).boundary()){
+		  pf = &( mesh.addFace( true ) ); // Boundary faces
+		  pf->setMarker( EntityFlag( ibc ) );
+		  pf->setPoint( 1, mesh.point( p1 ) ); // set face conn.
+		  pf->setPoint( 2, mesh.point( p2 ) ); // set face conn.
+		  pf->setPoint( 3, mesh.point( p3 ) ); // set face conn.
+		  pf->setPoint( 4, mesh.point( p4 ) ); // set face conn.
+		  
+		} else {
+		  faceHelpIterator->i1=p1;
+		  faceHelpIterator->i2=p2;
+		  faceHelpIterator->i3=p3;
+		  faceHelpIterator->i4=p4;
+		  faceHelpIterator->ibc=ibc;
+		  ++faceHelpIterator;
+		}
+	      } else {
                 pf = &( mesh.addFace( true ) ); // Only boundary faces
-
                 pf->setMarker( EntityFlag( ibc ) );
                 pf->setPoint( 1, mesh.point( p1 ) ); // set face conn.
                 pf->setPoint( 2, mesh.point( p2 ) ); // set face conn.
                 pf->setPoint( 3, mesh.point( p3 ) ); // set face conn.
                 pf->setPoint( 4, mesh.point( p4 ) ); // set face conn.
-            }
+	      }
+	    }
             oStr << "Boundary Faces Read " << std::endl;
+	    for (faceHelpIterator=faceHelp.begin();faceHelpIterator!=faceHelp.end();
+		 ++faceHelpIterator){
+	      p1=faceHelpIterator->i1;
+	      p2=faceHelpIterator->i2;
+	      p3=faceHelpIterator->i3;
+	      p4=faceHelpIterator->i4;
+	      ibc=faceHelpIterator->ibc;
+	      pf = &( mesh.addFace( false ) ); // INTERNAL FACE
+	      pf->setMarker( EntityFlag( ibc ) );
+	      pf->setPoint( 1, mesh.point( p1 ) ); // set face conn.
+	      pf->setPoint( 2, mesh.point( p2 ) ); // set face conn.
+	      pf->setPoint( 3, mesh.point( p3 ) ); // set face conn.
+	      pf->setPoint( 4, mesh.point( p4 ) ); // set face conn.
+	    }
             done++;
         }
 
