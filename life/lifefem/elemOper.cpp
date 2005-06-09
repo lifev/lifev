@@ -408,7 +408,7 @@ void ipstab_grad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const C
             for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
                 for ( ig = 0; ig < bdfe.nbQuadPt ; ++ig )
                     sum += phid1[ i ][ icoor ][ ig ] * phid2[ j ][ icoor ][ ig ] * bdfe.weightMeas( ig );
-            mat( i, j ) = coef * sum;
+            mat( i, j ) += coef * sum;
         }
     }
 
@@ -510,7 +510,7 @@ void ipstab_grad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const C
     for ( int icomp = 0;icomp < nb;icomp++ )
     {
         ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
-        mat_icomp = mat_tmp;
+        mat_icomp += mat_tmp;
     }
 }
 
@@ -634,7 +634,7 @@ void ipstab_bgrad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const 
     for ( int icomp = 0;icomp < nb;icomp++ )
     {
         ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
-        mat_icomp = mat_tmp;
+        mat_icomp += mat_tmp;
     }
 
 }
@@ -738,7 +738,7 @@ void ipstab_bagrad( const Real coef, ElemMat& elmat,
                     const ElemVec& beta, const CurrentBdFE& bdfe,
                     int iblock, int jblock )
 {
-  
+
     // Interior penalty stabilization: coef*\int_{face} grad u1_i . grad v1_j
 
     ASSERT_PRE( fe1.hasFirstDeriv(),
@@ -841,7 +841,7 @@ void ipstab_bagrad( const Real coef, ElemMat& elmat,
                         phid1[ i ][ icoor ][ ig ] *
                         phid2[ j ][ icoor ][ ig ] *
                         bdfe.weightMeas( ig );
-            mat( i, j ) = coef * sum;
+            mat( i, j ) += coef * sum;
         }
     }
 
