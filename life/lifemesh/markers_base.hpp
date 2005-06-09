@@ -67,7 +67,7 @@ class MarkerTraits_Base
 {
 public:
     //! EntityFlag is the type used to store the geometric entity flags
-    /*!  It is a signed long int so thet we have a lot of room */
+    /*!  It is a signed long int so that we have a lot of room */
 
     typedef signed long int EntityFlag;
 
@@ -96,6 +96,13 @@ public:
       It returns NULLFLAG if any of the entity a or b is a NULLFLAG.
     */
     static EntityFlag weakerFlag( EntityFlag const & a, EntityFlag const & b );
+
+    //! Equality operator. 
+    /* It is needed in order to select markers with the same entity flag
+
+    */
+  static bool EqualFlags(const EntityFlag& a, const EntityFlag& b);
+  
 };
 
 // const MarkerTraits_Base::EntityFlag MarkerTraits_Base::NULLFLAG=LONG_MIN;
@@ -171,6 +178,12 @@ public:
     //! Put marker to nullflag
     inline void markerUnset() const;    
 
+    //! Necessary to compare markers
+    /*!
+    It returns true if the marker flag is equal to the argument
+    */
+    inline bool hasEqualEntityFlag(EntityFlag const & p ) const;
+      
     //! Helper function that prints a marker Flag
     std::ostream & printFlag( EntityFlag const f, std::ostream & out ) const;
 
@@ -320,6 +333,13 @@ template <typename MarkerTraits>
 void Marker_Base<MarkerTraits>::markerUnset() const
 {
     flag=nullFlag();
+}
+
+
+template <typename MarkerTraits>
+bool Marker_Base<MarkerTraits>::hasEqualEntityFlag(EntityFlag const & a) const
+{
+    return MarkerTraits::EqualFlags(a,flag);
 }
 
 template <typename MarkerTraits>

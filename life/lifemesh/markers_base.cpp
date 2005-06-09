@@ -41,4 +41,8 @@ MarkerTraits_Base::EntityFlag MarkerTraits_Base::weakerFlag( EntityFlag const & 
     if(b==NULLFLAG)return a;            
     return a < b ? a : b ;
 }
+
+bool MarkerTraits_Base::EqualFlags(const EntityFlag& a, const EntityFlag& b)
+{return a==b;}
+
 }
