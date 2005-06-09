@@ -317,6 +317,18 @@ UInt findFaces( const RegionMesh3D & mesh, TempFaceContainer & bfaces,
     return bfaces.size();
 }
 
+//! Finds boundary edges.
+/*!  A low level routine, not meant to be called directly. It creates a
+container with all the information needed to set up properly the boundary
+face connectivities.
+
+\param mesh A 3D mesh.
+
+\param bfaces This container will be fillled with the bounddary faces.
+
+\return Number of boundary faces found.
+
+*/
 template <typename RegionMesh3D>
 UInt findBoundaryFaces( const RegionMesh3D & mesh,
                         TempFaceContainer & bfaces,
@@ -988,14 +1000,14 @@ bool fixBoundaryFaces( RegionMesh3D & mesh,
 
 
     if ( notEnough )
-    {
+      {
         err << "WARNING: number of B. Faces stored smaller" << std::endl;
         err << "         than the number of bfaces found  and build is not set"
             << std::endl;
         err << "POSSIBLE ERROR" << std::endl;
         sw.create( "BFACE_STORED_MISMATCH", true );
     }
-
+    
     if ( mesh.numBElements() == 0 )
     {
         err << "ERROR: Boundary Element counter was not set" << std::endl;
@@ -1019,7 +1031,7 @@ bool fixBoundaryFaces( RegionMesh3D & mesh,
 
     if ( verbose )
     {
-        clog << "**** Marker Flags for Fixed Boundary Faces ***" << std::endl;
+        clog << "**** Fixed Marker Flags for Boundary Faces ***" << std::endl;
         clog << " (it only contains those that were fixed because unset !"
              << std::endl;
         clog << "id->marker   id->marker  id->marker" << std::endl;
@@ -1039,16 +1051,24 @@ bool fixBoundaryFaces( RegionMesh3D & mesh,
             bface = ( makeBareFace( i1, i2, i3, i4 ) ).first;
         }
         else
-        {
+	  {
             bface = ( makeBareFace( i1, i2, i3 ) ).first;
-        }
+	  }
         fi = bfaces->find( bface );
         if ( fi == bfaces->end() )
-        {
-            notfound = true;
-        }
+	  {
+	    if(verbose){
+	      if ( RegionMesh3D::FaceShape::numVertices == 3 ){
+		err<<"Face "<<i1<<" "<<i2<<" "<<i3;
+	      } else {
+		err<<"Face "<<i1<<" "<<i2<<" "<<i3<<" " <<i4;
+	      }
+	      err<<" stored as boundary face, it's not!"<< std::endl;
+	    }
+	    notfound = true;
+	  }
         else
-        {
+	  {
             info = fi->second;
             vol = info.first; // Element ID
             pv = &mesh.volume( vol ); // Element
