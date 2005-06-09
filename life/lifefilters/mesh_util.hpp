@@ -474,7 +474,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
     else
     {
         //
-        // Make sure BFaces are first
+        // Make sure BFaces are stored first
         // Here I need to use a method that does not require the proper
         // setting of boundary Points!
         if ( mesh.numBFaces() < mesh.storedFaces() )
