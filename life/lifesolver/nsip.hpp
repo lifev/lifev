@@ -138,8 +138,11 @@ public:
 
 private:
 
-    //! solve linear system
-    void solveLinearSystem();
+    /*! solve linear system
+      @return number of iterations, zero if not applicable
+      @param condEst condition estimate is returned here, -1 if not applicable
+    */
+    UInt solveLinearSystem( Real& condEst );
 
     //! solve linear system once (iterative solvers)
     void solveLinearSystemOnce( bool reusePC );
@@ -168,27 +171,30 @@ private:
     //MixedMatr<nDimensions, nDimensions, MSRPatt, double> M_matrMass;
     matrix_type M_matrMass;
 
-    //! Stokes matrix: rho*bdfCoeff*Vmass + mu*Vstiff + linear stabilizations
+    //! Stokes matrix: mu*stiff
     matrix_type M_matrStokes;
 
-    //! Full matrix : CStokes + Convective_term + nonlinear stabilizations
+    //! Constant matrix: rho*bdfCoeff*mass + Stokes matrix
+    matrix_type M_matrConst;
+
+    //! Full matrix : constant matrix + convective term + stabilizations
     matrix_type M_matrFull;
 
     //! Full matrix without boundary conditions
     matrix_type M_matrNoBC;
 
     //! Elementary matrices and vectors
-    ElemMat M_elmatC; //velocity stiffness
-    ElemMat M_elmatMass; //velocity mass
+    ElemMat M_elmatS;    // velocity Stokes
+    ElemMat M_elmatC;    // velocity Stokes + coeff*mass
+    ElemMat M_elmatMass; // velocity mass
     ElemMat M_elmatD;
     ElemMat M_elmatDtr;
-    ElemMat M_elmatP;
     ElemVec M_elvec; // Elementary right hand side
 
-    //! Right  hand side for the velocity
-    Vector M_rhsU;
+    //! Right hand side for the velocity
+    Vector M_rhsNoBC;
 
-    //! Right  hand side global
+    //! Right hand side global
     Vector M_rhsFull;
 
     //! Global solution _u and _p
@@ -223,6 +229,11 @@ private:
     Real M_tLastSolve;
     Real M_tThisSolve;
 
+    UInt dim_u() const { return _dim_u; }
+    UInt dim_p() const { return _dim_p; }
+    BdfNS& bdf() { return _bdf; }
+    const QuadRule& qr_u() const { return _Qr_u; }
+
 }; // class NavierStokesSolverIP
 
 
@@ -230,14 +241,14 @@ template<typename Mesh> void NavierStokesSolverIP<Mesh>::
 eval( Vector& fx0, Vector& /* gx0 */, Vector /* x0 */, int /* status */ )
 {
     iterate( 0.0 );
-    for ( UInt iDof = 0; iDof < nDimensions*_dim_u ; ++iDof )
+    for ( UInt iDof = 0; iDof < nDimensions*dim_u() ; ++iDof )
     {
-        fx0[ iDof ] = _u[ iDof ];
+        fx0[ iDof ] = u()[ iDof ];
     }
 }
 
 //
-//                                         IMPLEMENTATION
+// IMPLEMENTATION
 //
 template<typename Mesh> NavierStokesSolverIP<Mesh>::
 NavierStokesSolverIP( const GetPot& dataFile,
@@ -248,25 +259,26 @@ NavierStokesSolverIP( const GetPot& dataFile,
     NavierStokesHandler<Mesh>( dataFile, refFE, refFE, quadRule,
                                boundaryQuadRule, quadRule, boundaryQuadRule,
                                bcHandler ),
-    //M_pattMassUblock( _dof_u ),
+    //M_pattMassUblock( uDof() ),
     //M_pattMassU( M_pattMassUblock, "diag" ),
-    M_fullPattern( _dof_u, _mesh, nDimensions+1 ),
+    M_fullPattern( uDof(), _mesh, nDimensions+1 ),
     //M_matrMassU( M_pattMassU ),
     M_matrMass( M_fullPattern ),
     M_matrStokes( M_fullPattern ),
+    M_matrConst( M_fullPattern ),
     M_matrFull( M_fullPattern ),
     M_matrNoBC( M_fullPattern ),
-    M_elmatC( _fe_u.nbNode, nDimensions, nDimensions ),
-    M_elmatMass( _fe_u.nbNode, nDimensions, nDimensions ),
-    M_elmatD( _fe_u.nbNode, nDimensions+1, nDimensions ),
-    M_elmatDtr( _fe_u.nbNode, nDimensions, nDimensions+1 ),
-    M_elmatP( _fe_u.nbNode, nDimensions+1, nDimensions+1 ),
-    M_elvec( _fe_u.nbNode, nDimensions ),
-    M_rhsU( ( nDimensions+1 )*_dim_u ),
-    M_rhsFull( ( nDimensions+1 )*_dim_u ),
-    M_sol( ( nDimensions+1 )*_dim_u ),
+    M_elmatS( fe_u().nbNode, nDimensions, nDimensions ),
+    M_elmatC( fe_u().nbNode, nDimensions, nDimensions ),
+    M_elmatMass( fe_u().nbNode, nDimensions, nDimensions ),
+    M_elmatD( fe_u().nbNode, nDimensions+1, nDimensions ),
+    M_elmatDtr( fe_u().nbNode, nDimensions, nDimensions+1 ),
+    M_elvec( fe_u().nbNode, nDimensions ),
+    M_rhsNoBC( ( nDimensions+1 )*dim_u() ),
+    M_rhsFull( ( nDimensions+1 )*dim_u() ),
+    M_sol( ( nDimensions+1 )*dim_u() ),
     M_betaFct( 0 ),
-    M_constantPressure( ( nDimensions+1 )*_dim_u ),
+    M_constantPressure( ( nDimensions+1 )*dim_u() ),
     M_nUsePC( 1 ),
     M_tTotalSolve( 0 ),
     M_tLastSolve( 1 ),
@@ -311,12 +323,12 @@ NavierStokesSolverIP( const GetPot& dataFile,
 
     if ( this->BCh_fluid().hasOnlyEssential() && !M_diagonalize )
     {
-        Real constPress = 1. / sqrt( _dim_u );
-        for( UInt i=0; i<_dim_u*nDimensions; ++i )
+        Real constPress = 1. / sqrt( dim_u() );
+        for( UInt i=0; i<dim_u()*nDimensions; ++i )
         {
             M_constantPressure[ i ] = 0;
         }
-        for( UInt i=_dim_u*nDimensions; i<_dim_u*(1+nDimensions); ++i )
+        for( UInt i=dim_u()*nDimensions; i<dim_u()*(1+nDimensions); ++i )
         {
             M_constantPressure[ i ] = constPress;
         }
@@ -327,10 +339,10 @@ NavierStokesSolverIP( const GetPot& dataFile,
 #endif
 
     std::cout << std::endl;
-    std::cout << "O-  Pressure unknowns: " << _dim_p     << std::endl;
-    std::cout << "O-  Velocity unknowns: " << _dim_u     << std::endl
+    std::cout << "O-  Pressure unknowns: " << dim_p()     << std::endl;
+    std::cout << "O-  Velocity unknowns: " << dim_u()     << std::endl
               << std::endl;
-    std::cout << "O-  Computing mass and Stokes matrices... " << std::flush;
+    std::cout << "O-  Computing constant matrices...        " << std::flush;
 
     Chrono chrono;
     chrono.start();
@@ -339,34 +351,37 @@ NavierStokesSolverIP( const GetPot& dataFile,
     //M_u.zeros();
     M_matrMass.zeros();
     M_matrStokes.zeros();
+    M_matrConst.zeros();
     //chrono.stop();
     //std::cout << "(zeros:" << chrono.diff() << ") " << std::flush;
     //chrono.start();
 
     // Number of velocity components
-    UInt nbCompU = _u.nbcomp();
+    UInt nbCompU = u().nbcomp();
 
-    Real bdfCoeff = _bdf.bdf_u().coeff_der( 0 ) / _dt;
+    Real bdfCoeff = bdf().bdf_u().coeff_der( 0 ) / _dt;
 
     // Elementary computation and matrix assembling
     // Loop on elements
     for ( UInt iVol = 1; iVol <= _mesh.numVolumes(); iVol++ )
     {
-        _fe_u.updateFirstDeriv( _mesh.volumeList( iVol ) );
+        fe_u().updateFirstDeriv( _mesh.volumeList( iVol ) );
 
+        M_elmatS.zero();
         M_elmatC.zero();
         M_elmatMass.zero();
         M_elmatD.zero();
         M_elmatDtr.zero();
 
         // stiffness strain
-        stiff_strain( 2.0*_mu, M_elmatC, _fe_u );
-        //stiff_div( 0.5*_fe_u.diameter(), M_elmatC, _fe_u );
+        stiff_strain( 2.0*_mu, M_elmatS, fe_u() );
+        //stiff_div( 0.5*fe_u().diameter(), M_elmatS, fe_u() );
+        M_elmatC.mat()= M_elmatS.mat();
 
         // mass
         if ( !M_steady )
         {
-            mass( _rho*bdfCoeff, M_elmatMass, _fe_u, 0, 0, nDimensions );
+            mass( _rho*bdfCoeff, M_elmatMass, fe_u(), 0, 0, nDimensions );
             M_elmatC.mat() += M_elmatMass.mat();
             M_elmatMass.mat() *= ( 1./bdfCoeff );
         }
@@ -376,40 +391,46 @@ NavierStokesSolverIP( const GetPot& dataFile,
             for ( UInt jComp = 0; jComp<nbCompU; jComp++ )
             {
                 // stiffness
-                assemb_mat( M_matrStokes, M_elmatC, _fe_u, _dof_u, iComp,
+                assemb_mat( M_matrConst, M_elmatC, fe_u(), uDof(), iComp,
+                            jComp );
+                assemb_mat( M_matrStokes, M_elmatS, fe_u(), uDof(), iComp,
                             jComp );
                 if ( !M_steady )
                 {
-                    assemb_mat( M_matrMass, M_elmatMass, _fe_u, _dof_u, iComp,
+                    assemb_mat( M_matrMass, M_elmatMass, fe_u(), uDof(), iComp,
                                 jComp);
                 }
             }
             // mass
-            //assemb_mat( M_matrMassU, M_elmatMass, _fe_u,_dof_u,iComp,iComp );
+            //assemb_mat( M_matrMassU, M_elmatMass, fe_u(),uDof(),iComp,iComp );
 
             // div
-            grad( iComp, 1.0, M_elmatDtr, _fe_u, _fe_u, iComp, nDimensions );
-            div( iComp, -1.0, M_elmatD  , _fe_u, _fe_u, nbCompU, iComp );
+            grad( iComp, 1.0, M_elmatDtr, fe_u(), fe_u(), iComp, nDimensions );
+            div( iComp, -1.0, M_elmatD  , fe_u(), fe_u(), nbCompU, iComp );
 
             // assembling
-            assemb_mat( M_matrStokes, M_elmatDtr, _fe_u, _dof_u, iComp,
+            assemb_mat( M_matrConst, M_elmatDtr, fe_u(), uDof(), iComp,
                         nbCompU );
-            assemb_mat( M_matrStokes, M_elmatD, _fe_u, _dof_u, nbCompU,
+            assemb_mat( M_matrConst, M_elmatD, fe_u(), uDof(), nbCompU,
+                        iComp );
+            assemb_mat( M_matrStokes, M_elmatDtr, fe_u(), uDof(), iComp,
+                        nbCompU );
+            assemb_mat( M_matrStokes, M_elmatD, fe_u(), uDof(), nbCompU,
                         iComp );
 
         }
     }
 
     //details::IPStabilization<Mesh, Dof>
-    //    pressureStab(_mesh, _dof_u, _refFE_u, _feBd_u, _Qr_u,
+    //    pressureStab(_mesh, uDof(), refFEu(), feBd_u(), qr_u(),
     //                 0, 0, M_gammaPress, this->viscosity() );
-    //pressureStab.apply(M_matrStokes, this->_u);
+    //pressureStab.apply(M_matrConst, u());
 
     M_sol = ZeroVector( M_sol.size() );
 
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
-    // M_matrStokes.spy( "CS.m" );
+    // M_matrConst.spy( "CS.m" );
 
 
 } // NavierStokesSolverIP() [Constructor]
@@ -424,7 +445,7 @@ timeAdvance( source_type const& source, Real const& time )
     std::cout << "O== Now we are at time "<< M_time << " s." << std::endl;
 
     // Number of velocity components
-    UInt nbCompU = _u.nbcomp();
+    UInt nbCompU = u().nbcomp();
 
     std::cout << "  o-  Updating mass term on right hand side... "
               << std::flush;
@@ -433,28 +454,28 @@ timeAdvance( source_type const& source, Real const& time )
     chrono.start();
 
     // Right hand side for the velocity at time
-    M_rhsU = ZeroVector( M_rhsU.size() );
+    M_rhsNoBC = ZeroVector( M_rhsNoBC.size() );
 
     // loop on volumes: assembling source term
     for ( UInt iVol = 1; iVol<= _mesh.numVolumes(); ++iVol )
     {
         M_elvec.zero();
-        _fe_u.updateJacQuadPt( _mesh.volumeList( iVol ) );
+        fe_u().updateJacQuadPt( _mesh.volumeList( iVol ) );
 
         for ( UInt iComp = 0; iComp<nbCompU; ++iComp )
         {
             // compute local vector
-            compute_vec( source, M_elvec, _fe_u, M_time, iComp );
+            compute_vec( source, M_elvec, fe_u(), M_time, iComp );
 
             // assemble local vector into global one
-            assemb_vec( M_rhsU, M_elvec, _fe_u, _dof_u, iComp );
+            assemb_vec( M_rhsNoBC, M_elvec, fe_u(), uDof(), iComp );
         }
     }
 
     if ( !M_steady )
     {
-        M_rhsU += M_matrMass * _bdf.bdf_u().time_der( _dt );
-        //_bdf.bdf_u().shift_right( M_sol );
+        M_rhsNoBC += M_matrMass * bdf().bdf_u().time_der( _dt );
+        //bdf().bdf_u().shift_right( M_sol );
     }
 
     chrono.stop();
@@ -468,7 +489,7 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
     Chrono chrono;
 
     // velocity vector for linearization of convective term
-    Vector betaVec(_u.size());
+    Vector betaVec( u().size() );
 
     if ( M_betaFct )
     {
@@ -478,20 +499,20 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
     {
         if ( M_steady )
         {
-            betaVec = _u; // last iteration
+            betaVec = u(); // last iteration
         }
         else
         {
-            betaVec = _bdf.bdf_u().extrap(); // bdf extrapolation
+            betaVec = bdf().bdf_u().extrap(); // bdf extrapolation
         }
     }
 
     M_time = time;
 
-    std::cout << "  o-  Copying Stokes matrix...                 "
+    std::cout << "  o-  Copying constant matrix...               "
               << std::flush;
     chrono.start();
-    M_matrFull = M_matrStokes;
+    M_matrFull = M_matrConst;
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s."
               << std::endl;
@@ -501,44 +522,44 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
               << std::flush;
 
     // Number of velocity components
-    UInt nbCompU = _u.nbcomp();
+    UInt nbCompU = u().nbcomp();
 
     chrono.start();
 
     // loop on volumes
     for ( UInt iVol = 1; iVol<= _mesh.numVolumes(); ++iVol )
     {
-        _fe_u.updateFirstDeriv( _mesh.volumeList( iVol ) ); //as updateFirstDer
+        fe_u().updateFirstDeriv( _mesh.volumeList( iVol ) ); //as updateFirstDer
 
         M_elmatC.zero();
 
-        UInt eleID = _fe_u.currentId();
+        UInt eleID = fe_u().currentId();
         // Non linear term, Semi-implicit approach
         // M_elvec contains the velocity values in the nodes
-        for ( UInt iNode = 0 ; iNode<( UInt )_fe_u.nbNode ; iNode++ )
+        for ( UInt iNode = 0 ; iNode<( UInt )fe_u().nbNode ; iNode++ )
         {
-            UInt  iloc = _fe_u.patternFirst( iNode );
+            UInt  iloc = fe_u().patternFirst( iNode );
             for ( UInt iComp = 0; iComp<nbCompU; ++iComp )
             {
-                UInt ig = _dof_u.localToGlobal( eleID, iloc+1 )-1+iComp*_dim_u;
-                M_elvec.vec()[ iloc+iComp*_fe_u.nbNode ] = _rho * betaVec(ig);
+                UInt ig = uDof().localToGlobal( eleID, iloc+1 )-1+iComp*dim_u();
+                M_elvec.vec()[ iloc+iComp*fe_u().nbNode ] = _rho * betaVec(ig);
             }
         }
 
         // Stabilising term: div u^n u v
         if ( M_divBetaUv )
         {
-            mass_divw( 0.5*_rho, M_elvec, M_elmatC, _fe_u, 0, 0, nbCompU );
+            mass_divw( 0.5*_rho, M_elvec, M_elmatC, fe_u(), 0, 0, nbCompU );
         }
 
         // loop on components
         for ( UInt iComp = 0; iComp<nbCompU; ++iComp )
         {
             // compute local convective term and assembling
-            grad( 0, M_elvec, M_elmatC, _fe_u, _fe_u, iComp, iComp );
-            grad( 1, M_elvec, M_elmatC, _fe_u, _fe_u, iComp, iComp );
-            grad( 2, M_elvec, M_elmatC, _fe_u, _fe_u, iComp, iComp );
-            assemb_mat( M_matrFull, M_elmatC, _fe_u, _dof_u, iComp, iComp );
+            grad( 0, M_elvec, M_elmatC, fe_u(), fe_u(), iComp, iComp );
+            grad( 1, M_elvec, M_elmatC, fe_u(), fe_u(), iComp, iComp );
+            grad( 2, M_elvec, M_elmatC, fe_u(), fe_u(), iComp, iComp );
+            assemb_mat( M_matrFull, M_elmatC, fe_u(), uDof(), iComp, iComp );
         }
     }
 
@@ -552,7 +573,7 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
               << std::flush;
     chrono.start();
     details::IPStabilization<Mesh, Dof>
-        allStab( _mesh, _dof_u, _refFE_u, _feBd_u, _Qr_u,
+        allStab( _mesh, uDof(), refFEu(), feBd_u(), qr_u(),
                  M_gammaBeta, M_gammaDiv, M_gammaPress, this->viscosity() );
     allStab.apply( M_matrFull, betaVec );
     chrono.stop();
@@ -572,15 +593,15 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
     if ( M_steady )
     {
         // use last iteration value as initial guess
-        for ( UInt i = 0; i<nDimensions*_dim_u; ++i )
+        for ( UInt i = 0; i<nDimensions*dim_u(); ++i )
         {
-            M_sol[ i ] = _u[ i ];
+            M_sol[ i ] = u()[ i ];
         }
     }
     else
     {
         // use bdf based extrapolation as initial guess
-        M_sol = _bdf.bdf_u().extrap();
+        M_sol = bdf().bdf_u().extrap();
     }
     if ( this->BCh_fluid().hasOnlyEssential() && !M_diagonalize )
     {
@@ -590,27 +611,38 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
     std::cout << "  o-  Solving system...                        "
               << std::flush;
     chrono.start();
-    solveLinearSystem();
+    Real condEst;
+    UInt iter = solveLinearSystem( condEst );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
+    if ( iter > 0 )
+    {
+        std::cout << "        number of iterations                        = "
+                  << iter << std::endl;
 
+    }
+    if ( condEst >= 0 )
+    {
+        std::cout << "        estimated condition number (preconditioned) = "
+                  << M_linearSolver.condEst() << std::endl;
+    }
 
     if ( this->BCh_fluid().hasOnlyEssential() && !M_diagonalize )
     {
         removeMean( M_sol, 4 );
     }
-    for ( UInt iDof = 0; iDof<nDimensions*_dim_u; ++iDof )
+    for ( UInt iDof = 0; iDof<nDimensions*dim_u(); ++iDof )
     {
-        _u[ iDof ] = M_sol[ iDof ];
+        u()[ iDof ] = M_sol[ iDof ];
     }
-    for ( UInt iDof = 0; iDof<_dim_u; ++iDof )
+    for ( UInt iDof = 0; iDof<dim_u(); ++iDof )
     {
-        _p[ iDof ] = M_sol[ iDof+nDimensions*_dim_u ];
+        p()[ iDof ] = M_sol[ iDof+nDimensions*dim_u() ];
     }
 
     if ( !M_steady )
     {
-        _bdf.bdf_u().shift_right( M_sol );
+        bdf().bdf_u().shift_right( M_sol );
     }
 
 } // iterate()
@@ -619,36 +651,36 @@ template <typename Mesh>
 void NavierStokesSolverIP<Mesh>::initialize( const Function& x0,
                                              Real t0, Real dt )
 {
-    ID nbComp = _u.nbcomp(); // Number of components of the velocity
-    _bdf.bdf_u().initialize_unk( x0, this->_mesh, _refFE_u, _fe_u, _dof_u, t0,
+    ID nbComp = u().nbcomp(); // Number of components of the velocity
+    bdf().bdf_u().initialize_unk( x0, this->_mesh, refFEu(), fe_u(), uDof(), t0,
                                  dt, nbComp+1 );
 
     // initialize M_sol with the first element in bdf_u.unk (=last value)
-    M_sol = *( _bdf.bdf_u().unk().begin() );
+    M_sol = *( bdf().bdf_u().unk().begin() );
     if ( this->BCh_fluid().hasOnlyEssential() && !M_diagonalize )
     {
         removeMean( M_sol, 4 );
     }
-    for ( UInt iDof = 0; iDof<nDimensions*_dim_u; ++iDof )
+    for ( UInt iDof = 0; iDof<nDimensions*dim_u(); ++iDof )
     {
-        _u[ iDof ] = M_sol[ iDof ];
+        u()[ iDof ] = M_sol[ iDof ];
     }
-    for ( UInt iDof = 0; iDof<_dim_u; ++iDof )
+    for ( UInt iDof = 0; iDof<dim_u(); ++iDof )
     {
-        _p[ iDof ] = M_sol[ iDof+nDimensions*_dim_u ];
+        p()[ iDof ] = M_sol[ iDof+nDimensions*dim_u() ];
     }
 
     // write initial values (for debugging only)
-    const std::vector<Vector>& unk = _bdf.bdf_u().unk();
+    const std::vector<Vector>& unk = bdf().bdf_u().unk();
     for ( int iUnk=unk.size()-1; iUnk>=0; --iUnk )
     {
-        for ( UInt iDof=0; iDof<nDimensions*_dim_u; ++iDof )
+        for ( UInt iDof=0; iDof<nDimensions*dim_u(); ++iDof )
         {
-            _u[ iDof ] = unk[ iUnk ][ iDof ];
+            u()[ iDof ] = unk[ iUnk ][ iDof ];
         }
-        for ( UInt iDof = 0; iDof<_dim_u; ++iDof )
+        for ( UInt iDof = 0; iDof<dim_u(); ++iDof )
         {
-            _p[ iDof ] = unk[ iUnk ][ iDof+nDimensions*_dim_u ];
+            p()[ iDof ] = unk[ iUnk ][ iDof+nDimensions*dim_u() ];
         }
         this->postProcess();
     }
@@ -674,20 +706,20 @@ NavierStokesSolverIP<Mesh>::initialize( const std::string & vname )
     resfile.read( ( char* ) & M_sol( 0 ), M_sol.size() * sizeof( double ) );
     resfile.close();
 
-    for ( UInt iDof = 0; iDof<nDimensions*_dim_u; ++iDof )
+    for ( UInt iDof = 0; iDof<nDimensions*dim_u(); ++iDof )
     {
-        _u[ iDof ] = M_sol[ iDof ];
+        u()[ iDof ] = M_sol[ iDof ];
     }
-    for ( UInt iDof = 0; iDof<_dim_u; ++iDof )
+    for ( UInt iDof = 0; iDof<dim_u(); ++iDof )
     {
-        _p[ iDof ] = M_sol[ iDof+nDimensions*_dim_u ];
+        p()[ iDof ] = M_sol[ iDof+nDimensions*dim_u() ];
     }
 
-    _bdf.bdf_u().initialize_unk( M_sol );
-    //_bdf.bdf_p().initialize_unk( _p );
+    bdf().bdf_u().initialize_unk( M_sol );
+    //bdf().bdf_p().initialize_unk( _p() );
 
-    _bdf.bdf_u().showMe();
-    //_bdf.bdf_p().showMe();
+    bdf().bdf_u().showMe();
+    //bdf().bdf_p().showMe();
 
 }
 
@@ -696,6 +728,7 @@ void
 NavierStokesSolverIP<Mesh>::initializeStokes( source_type const& source,
                                               Real t0 )
 {
+
     bool isSteady = M_steady;
     M_steady = true;
     timeAdvance( source, t0 );
@@ -704,14 +737,16 @@ NavierStokesSolverIP<Mesh>::initializeStokes( source_type const& source,
     Chrono chrono;
 
     // velocity vector for linearization of convective term
-    Vector betaVec(_u.size());
+    Vector betaVec(u().size());
     betaVec = ZeroVector( betaVec.size() );
     M_time = t0;
 
     std::cout << "  o-  Copying Stokes matrix...                 "
               << std::flush;
     chrono.start();
+
     M_matrFull = M_matrStokes;
+
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s."
               << std::endl;
@@ -720,7 +755,7 @@ NavierStokesSolverIP<Mesh>::initializeStokes( source_type const& source,
               << std::flush;
     chrono.start();
     details::IPStabilization<Mesh, Dof>
-        initStab( _mesh, _dof_u, _refFE_u, _feBd_u, _Qr_u,
+        initStab( _mesh, uDof(), refFEu(), feBd_u(), qr_u(),
                   0, 0, M_gammaPress, this->viscosity() );
     initStab.apply( M_matrFull, betaVec );
     chrono.stop();
@@ -738,24 +773,36 @@ NavierStokesSolverIP<Mesh>::initializeStokes( source_type const& source,
     std::cout << "  o-  Solving system...                        "
               << std::flush;
     chrono.start();
-    solveLinearSystem();
+    Real condEst;
+    UInt iter = solveLinearSystem( condEst );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
+    if ( iter > 0 )
+    {
+        std::cout << "        number of iterations                        = "
+                  << iter << std::endl;
+
+    }
+    if ( condEst >= 0 )
+    {
+        std::cout << "        estimated condition number (preconditioned) = "
+                  << M_linearSolver.condEst() << std::endl;
+    }
 
     if ( this->BCh_fluid().hasOnlyEssential() && !M_diagonalize )
     {
         removeMean( M_sol, 4 );
     }
-    for ( UInt iDof = 0; iDof<nDimensions*_dim_u; ++iDof )
+    for ( UInt iDof = 0; iDof<nDimensions*dim_u(); ++iDof )
     {
-        _u[ iDof ] = M_sol[ iDof ];
+        u()[ iDof ] = M_sol[ iDof ];
     }
-    for ( UInt iDof = 0; iDof<_dim_u; ++iDof )
+    for ( UInt iDof = 0; iDof<dim_u(); ++iDof )
     {
-        _p[ iDof ] = M_sol[ iDof+nDimensions*_dim_u ];
+        p()[ iDof ] = M_sol[ iDof+nDimensions*dim_u() ];
     }
 
-    _bdf.bdf_u().initialize_unk( M_sol );
+    bdf().bdf_u().initialize_unk( M_sol );
 
 } // initializeStokes
 
@@ -767,12 +814,12 @@ void NavierStokesSolverIP<Mesh>::removeMean( Vector& x, UInt comp )
     Real sum0 = 0.;
     for ( UInt iVol = 1; iVol <= _mesh.numVolumes(); iVol++ )
     {
-        _fe_p.updateFirstDeriv( _mesh.volumeList( iVol ) );
-        sum1 += elem_integral( x, _fe_p, _dof_p, comp );
-        sum0 += _fe_p.measure();
+        fe_p().updateFirstDeriv( _mesh.volumeList( iVol ) );
+        sum1 += elem_integral( x, fe_p(), pDof(), comp );
+        sum0 += fe_p().measure();
     }
     Real mean = sum1/sum0;
-    for ( UInt iNode = (comp-1)*_dim_u; iNode<comp*_dim_u; ++iNode )
+    for ( UInt iNode = (comp-1)*dim_u(); iNode<comp*dim_u(); ++iNode )
     {
         x[ iNode ] -= mean;
     }
@@ -783,35 +830,35 @@ template <typename Mesh>
 void NavierStokesSolverIP<Mesh>::applyBoundaryConditions()
 {
     //     M_rhsFull = 0.0;
-    //     for ( UInt i = 0; i<nDimensions*_dim_u; ++i )
+    //     for ( UInt i = 0; i<nDimensions*dim_u(); ++i )
     //     {
-    //         M_rhsFull[ i ] = M_rhsU[ i ];
+    //         M_rhsFull[ i ] = M_rhsNoBC[ i ];
     //     }
-    M_rhsFull = M_rhsU;
+    M_rhsFull = M_rhsNoBC;
 
     // BC manage for the velocity
     if ( !this->BCh_fluid().bdUpdateDone() )
-        this->BCh_fluid().bdUpdate( _mesh, _feBd_u, _dof_u );
-    bcManage( M_matrFull, M_rhsFull, _mesh, _dof_u, this->BCh_fluid(), _feBd_u, 1.0,
+        this->BCh_fluid().bdUpdate( _mesh, feBd_u(), uDof() );
+    bcManage( M_matrFull, M_rhsFull, _mesh, uDof(), this->BCh_fluid(), feBd_u(), 1.0,
                M_time );
 
     if ( this->BCh_fluid().hasOnlyEssential() && M_diagonalize )
     {
-         M_matrFull.diagonalize( nDimensions*_dim_u, M_diagonalize,
+         M_matrFull.diagonalize( nDimensions*dim_u(), M_diagonalize,
                                  M_rhsFull, 0);
         //                         pexact( M_time,
         //                                 _mesh.point( 1 ).x(),
         //                                 _mesh.point( 1 ).y(),
         //                                 _mesh.point( 1 ).z(), 1 ) );
-        // M_matrFull.diagonalize_row( nDimensions*_dim_u, 1.0 );
-        // M_rhsFull[ nDimensions*_dim_u ] = pexact( _mesh.point( 1 ).x(),
+        // M_matrFull.diagonalize_row( nDimensions*dim_u(), 1.0 );
+        // M_rhsFull[ nDimensions*dim_u() ] = pexact( _mesh.point( 1 ).x(),
         //                                         _mesh.point( 1 ).y(),
         //                                         _mesh.point( 1 ).z() );
     }
 } // applyBoundaryCondition
 
 template <typename Mesh>
-void NavierStokesSolverIP<Mesh>::solveLinearSystem()
+UInt NavierStokesSolverIP<Mesh>::solveLinearSystem(Real& condEst)
 {
     M_linearSolver.setMatrix( M_matrFull );
 
@@ -837,14 +884,16 @@ void NavierStokesSolverIP<Mesh>::solveLinearSystem()
 #endif
 
 #if PETSC_SOLVER
-    std::cout << "        estimated condition number (preconditioned) = "
-              << M_linearSolver.condEst() << std::endl;
+    condEst = M_linearSolver.condEst();
+#else
+    condEst = -1.;
 #endif
 
 
 #if 1-UMFPACK_SOLVER
-    std::cout << "        number of iterations                        = "
-              << M_linearSolver.iterations() << std::endl;
+    return M_linearSolver.iterations();
+#else
+    return 0;
 #endif
 
 } // solveLinearSystem
@@ -893,13 +942,13 @@ void NavierStokesSolverIP<Mesh>::calculateBoundaryForce( EntityFlag flag,
                                                          Real& fy,
                                                          Real& fz )
 {
-    Vector residual( ( nDimensions+1 )*_dim_u );
-    residual = M_matrNoBC * M_sol - M_rhsU;
+    Vector residual( ( nDimensions+1 )*dim_u() );
+    residual = M_matrNoBC * M_sol - M_rhsNoBC;
 
     //BCFunctionBase f( fct );
     //BCHandler bch;
     //bch.addBC( "force boundary x", flag, Essential, Full, f, nDimensions );
-    //bch.bdUpdate( _mesh, _feBd_u, _dof_u );
+    //bch.bdUpdate( _mesh, feBd_u(), uDof() );
     //const BCBase& BCb = bch[0]
 
     const BCBase& BCb = this->BCh_fluid().GetBCWithFlag( flag );
@@ -909,7 +958,7 @@ void NavierStokesSolverIP<Mesh>::calculateBoundaryForce( EntityFlag flag,
     fz = 0;
 
     // Number of total scalar Dof
-    const UInt nDof = _dof_u.numTotalDof();
+    const UInt nDof = uDof().numTotalDof();
 
     // Loop on BC identifiers
     for ( ID i = 1; i <= BCb.list_size(); ++i )
@@ -919,8 +968,8 @@ void NavierStokesSolverIP<Mesh>::calculateBoundaryForce( EntityFlag flag,
         fy += residual( idDof + nDof );
         fz += residual( idDof + 2*nDof );
     }
-    
-//     const UInt nDof = M_dof.numTotalDof();
+
+//     const UInt nDof = uDof().numTotalDof();
 
 //     // local trace of the residual
 //     ElemVec f( M_feBd.nbNode, nDimensions );
@@ -941,7 +990,7 @@ void NavierStokesSolverIP<Mesh>::calculateBoundaryForce( EntityFlag flag,
 //             UInt iloc = M_fToP( iFaEl, iNode+1 );
 //             for ( int iCoor = 0; iCoor < M_fe1.nbCoor; ++iCoor )
 //             {
-//                 UInt ig = M_dof.localToGlobal( iElAd1, iloc+1 )-1+iCoor*nDof;
+//                 UInt ig = uDof().localToGlobal( iElAd1, iloc+1 )-1+iCoor*nDof;
 //                 f.vec()[ iCoor*M_feBd.nbNode + iNode ] = state( ig );
 //             }
 //         }
