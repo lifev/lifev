@@ -59,8 +59,10 @@ class VenantKirchhofSolver:
 {
 public:
 
-    typedef typename ElasticStructureHandler<Mesh>::Function Function;
-    typedef typename ElasticStructureHandler<Mesh>::source_type source_type;
+    typedef ElasticStructureHandler<Mesh> super;
+    typedef typename super::Function Function;
+    typedef typename super::source_type source_type;
+    typedef typename super::bchandler_type bchandler_type;
 
     //! Constructors
     /*!
