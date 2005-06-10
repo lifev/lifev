@@ -349,14 +349,15 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix, const VECTOR& state )
 
     } // loop on interior faces
     std::cout << std::endl;
-    std::cout << "   .   Updating of element                     done in "
+    std::cout << "   .   Updating of element   done in "
               << chronoUpdate.diff_cumul()   << " s." << std::endl;
-    std::cout << "   .   Determination of beta                   done in "
+    std::cout << "   .   Determination of beta done in "
               << chronoBeta.diff_cumul()     << " s." << std::endl;
-    std::cout << "   .   Element computations                    done in "
+    std::cout << "   .   Element computations  done in "
               << chronoElemComp.diff_cumul() << " s." << std::endl;
-    std::cout << "   .   Assembly                                done in "
+    std::cout << "   .   Assembly              done in "
               << chronoAssembly.diff_cumul() << " s." << std::endl;
+    std::cout << "   .   total                                   ";
 
 } // apply(...)
 
