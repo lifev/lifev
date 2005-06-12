@@ -1,20 +1,20 @@
 /*
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
+  This file is part of the LifeV library
+  Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #ifndef _READMESH3D_HH_
 #define _READMESH3D_HH_
@@ -37,28 +37,28 @@
 namespace LifeV
 {
 /*----------------------------------------------------------------------*
-|
-| Added support for numbering from 1
-! Added markers
-|
-| #Mesh readers
-|
-*----------------------------------------------------------------------*/
+  |
+  | Added support for numbering from 1
+  ! Added markers
+  |
+  | #Mesh readers
+  |
+  *----------------------------------------------------------------------*/
 /********************************************************************************
 MESH BUILDERS
 ********************************************************************************/
 
-  template<typename T>
-  T Max(T & i1, T & i2,T & i3)
-{
-  return std::max(std::max(i1,i2),i3);
-}
+// template<typename T>
+// T Max(T & i1, T & i2,T & i3)
+// {
+//     return std::max(std::max(i1,i2),i3);
+// }
 
-  template<typename T>
-  T Max(T & i1, T & i2, T & i3, T & i4)
-{
-  return std::max(Max(i1,i2,i3),i4);
-}
+// template<typename T>
+// T Max(T & i1, T & i2, T & i3, T & i4)
+// {
+//     return std::max(Max(i1,i2,i3),i4);
+// }
 
 bool
 readMppFileHead( std::ifstream & mystream,
@@ -185,6 +185,7 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
     {
         if ( line.find( "odes" ) != std::string::npos )
         {
+
             std::string node_s = line.substr( line.find_last_of( ":" ) + 1 );
             //      _numVertices=atoi(node_s);
             for ( i = 0;i < nVe;i++ )
@@ -297,28 +298,28 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
     ///// CORRECTION JFG
     //if (mesh.check(1, true,true))done=0;
 
-        if ( !checkMesh3D( mesh, sw, true, verbose, oStr, std::cerr, oStr ) )
+    if ( !checkMesh3D( mesh, sw, true, verbose, oStr, std::cerr, oStr ) )
         abort(); // CORRECTION JFG
 
     Real vols[ 3 ];
     getVolumeFromFaces( mesh, vols, oStr );
     oStr << "   VOLUME ENCLOSED BY THE MESH COMPUTED BY INTEGRATION ON" <<
-    " BOUNDARY FACES" << std::endl;
+        " BOUNDARY FACES" << std::endl;
     oStr << "INT(X)     INT(Y)      INT(Z) <- they should be equal and equal to" << std::endl <<
-    "                                 the voulume enclosed by the mesh " << std::endl;
+        "                                 the voulume enclosed by the mesh " << std::endl;
     oStr << vols[ 0 ] << " " << vols[ 1 ] << " " << vols[ 2 ] << std::endl;
 
     oStr << "   BOUNDARY FACES ARE DEFINING A CLOSED SURFACE IF " << testClosedDomain( mesh, oStr ) << std::endl <<
-    " IS (ALMOST) ZERO" << std::endl;
+        " IS (ALMOST) ZERO" << std::endl;
 
     return done == 4 ;
 
 }
 
 /*
-                                          INRIA MESH FILE READERS
-       29/06/2002 L.F.
- */
+  INRIA MESH FILE READERS
+  29/06/2002 L.F.
+*/
 //! INRIAMesh used either spaces or CR as separators
 /*! It sucks, but this is the way it is! This little function should help handling it. It gets an
   integer field from the std::string line if it is not empty, otherwise from the input stream.
@@ -335,29 +336,29 @@ readINRIAMeshFileHead( std::ifstream & mystream,
                        UInt & numBFaces,
                        UInt & numBEdges,
                        UInt & numVolumes,
-		       UInt & numStoredFaces,
+                       UInt & numStoredFaces,
                        ReferenceShapes & shape,
-		       InternalEntitySelector
-		       iSelect=InternalEntitySelector());
+                       InternalEntitySelector
+                       iSelect=InternalEntitySelector());
 
 /*!
   read an INRIA mesh
- */
+*/
 struct FiveNumbers
 {
 public:
-  UInt i1,i2,i3,i4;
-  long int ibc;
+    UInt i1,i2,i3,i4;
+    long int ibc;
 };
 template <typename GeoShape, typename MC>
 bool
 readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
                    std::string const & filename,
                    EntityFlag regionFlag,
-		   bool verbose=false,
-		   InternalEntitySelector 
-		   iSelect=InternalEntitySelector()
-		   )
+                   bool verbose=false,
+                   InternalEntitySelector 
+                   iSelect=InternalEntitySelector()
+                   )
 {
     unsigned done = 0;
     std::string line;
@@ -377,9 +378,9 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
 
     std::ifstream hstream( filename.c_str() );
     if (verbose){
-      std::cout<<"Reading form file "<<filename<< std::endl;
+        std::cout<<"Reading form file "<<filename<< std::endl;
     }
-    
+
     if ( hstream.fail() )
     {
         std::cerr << " Error in readINRIAMeshFile: File " << filename
@@ -389,7 +390,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
     }
     std::cout << "Reading INRIA mesh file" << std::endl;
     if ( ! readINRIAMeshFileHead( hstream, nVe, nBVe, nBFa, nBEd, nVo, numStoredFaces,shape,
-				  iSelect) )
+                                  iSelect) )
     {
         std::cerr << " Error While reading INRIA mesh file headers" << std::endl;
         ABORT() ;
@@ -415,33 +416,33 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
     switch ( shape )
     {
 
-    case HEXA:
-        ASSERT_PRE0( GeoShape::numPoints == 8, "Sorry I can read only bilinear Hexa meshes" );
-        std::cout << "Linear Hexa Mesh" << std::endl;
-        nPo = nVe;
-        nBPo = nBVe;
-        break;
-    case TETRA:
-        if ( GeoShape::numPoints > 4 )
-        {
-            //    if (GeoShape::numPoints ==6 ){
-            std::cout << "Quadratic Tetra  Mesh (from Linear geometry)" << std::endl;
-            nPo = nVe + nEd;
-            // nBPo=nBVe+nBEd; // FALSE : nBEd is not known at this stage in a INRIA file (JFG 07/2002)
-            // I use the relation  nBVe + nBFa - 2 = nBEd, But, is it general (hole...) ???? (JFG 07/2002)
-            nBEd=( nBVe + nBFa - 2 );
-	    nBPo = nBVe + ( nBVe + nBFa - 2 );
-        }
-        else
-        {
-            std::cout << "Linear Tetra Mesh" << std::endl;
+        case HEXA:
+            ASSERT_PRE0( GeoShape::numPoints == 8, "Sorry I can read only bilinear Hexa meshes" );
+            std::cout << "Linear Hexa Mesh" << std::endl;
             nPo = nVe;
             nBPo = nBVe;
-            nBEd=( nBVe + nBFa - 2 );
-        }
-        break;
-    default:
-        ERROR_MSG( "Current version of INRIA Mesh file reader only accepts TETRA and HEXA" );
+            break;
+        case TETRA:
+            if ( GeoShape::numPoints > 4 )
+            {
+                //    if (GeoShape::numPoints ==6 ){
+                std::cout << "Quadratic Tetra  Mesh (from Linear geometry)" << std::endl;
+                nPo = nVe + nEd;
+                // nBPo=nBVe+nBEd; // FALSE : nBEd is not known at this stage in a INRIA file (JFG 07/2002)
+                // I use the relation  nBVe + nBFa - 2 = nBEd, But, is it general (hole...) ???? (JFG 07/2002)
+                nBEd=( nBVe + nBFa - 2 );
+                nBPo = nBVe + ( nBVe + nBFa - 2 );
+            }
+            else
+            {
+                std::cout << "Linear Tetra Mesh" << std::endl;
+                nPo = nVe;
+                nBPo = nBVe;
+                nBEd=( nBVe + nBFa - 2 );
+            }
+            break;
+        default:
+            ERROR_MSG( "Current version of INRIA Mesh file reader only accepts TETRA and HEXA" );
     }
 
     std::cout << "#Vertices = "          << std::setw(10) << nVe
@@ -458,22 +459,35 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
     // Set all basic data structure
 
     // I store all Points
+    std::cout << "1" << std::endl << std::flush;
     mesh.setMaxNumPoints( nPo, true );
+    std::cout << "1" << std::endl << std::flush;
     mesh.setNumBPoints( nBPo );
+    std::cout << "1" << std::endl << std::flush;
     mesh.numVertices() = nVe;
+    std::cout << "1" << std::endl << std::flush;
     mesh.numBVertices() = nBVe;
     // Only Boundary Edges (in a next version I will allow for different choices)
+    std::cout << "1" << std::endl << std::flush;
     mesh.setMaxNumEdges( nBEd );
+    std::cout << "1" << std::endl << std::flush;
     mesh.numEdges() = nEd; // Here the REAL number of edges (all of them)
+    std::cout << "1" << std::endl << std::flush;
     mesh.setNumBEdges( nBEd );
     // Only Boundary Faces
+    std::cout << "1" << std::endl << std::flush;
     mesh.setMaxNumFaces( numStoredFaces );
+    std::cout << "1" << std::endl << std::flush;
     mesh.numFaces() = nFa; // Here the REAL number of faces (all of them)
+    std::cout << "1" << std::endl << std::flush;
     mesh.setNumBFaces( nBFa );
+    std::cout << "1" << std::endl << std::flush;
 
     mesh.setMaxNumVolumes( nVo, true );
+    std::cout << "1" << std::endl << std::flush;
 
     mesh.setMarker( regionFlag ); // Add Marker to list of Markers
+    std::cout << "1" << std::endl << std::flush;
 
     typename RegionMesh3D<GeoShape, MC>::PointType * pp = 0;
     typename RegionMesh3D<GeoShape, MC>::EdgeType * pe = 0;
@@ -483,17 +497,15 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
     // I use that information to set all point info, by using a pointer.
     UInt count = 0;
     long int ibc;
-    
+
     // To account for internal faces
     if (numStoredFaces > nBFa){
-      faceHelp.resize(numStoredFaces - nBFa);
-      faceHelpIterator=faceHelp.begin();
-      oStr<<"WARNING: The mesh file (apparently) contains "<<numStoredFaces - nBFa<<" internal faces"<<std::endl;
-      
+        faceHelp.resize(numStoredFaces - nBFa);
+        faceHelpIterator=faceHelp.begin();
+        oStr<<"WARNING: The mesh file (apparently) contains "<<numStoredFaces - nBFa<<" internal faces"<<std::endl;
+
     }
-    
-    
-    
+
     while ( next_good_line( mystream, line ).good() )
     {
         if ( line.find( "Vertices" ) != std::string::npos )
@@ -501,126 +513,126 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
             nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), mystream );
             for ( i = 0;i < nVe;i++ )
             {
-	      mystream >> x >> y >> z >> ibc;
-	      if ( !iSelect(EntityFlag(ibc)))
+                mystream >> x >> y >> z >> ibc;
+                if ( !iSelect(EntityFlag(ibc)))
                 {
-		  ++count;
-		  pp = &mesh.addPoint( true ); // Boundary point. Boundary switch set by the mesh method.
-		  pp->setMarker( EntityFlag( ibc ) );
+                    ++count;
+                    pp = &mesh.addPoint( true ); // Boundary point. Boundary switch set by the mesh method.
+                    pp->setMarker( EntityFlag( ibc ) );
                 }
-	      else
+                else
                 {
-		  pp = &mesh.addPoint( false );
+                    pp = &mesh.addPoint( false );
                 }
-	      pp->x() = x;
-	      pp->y() = y;
-	      pp->z() = z;
-	      pp->setMarker( EntityFlag( ibc ) );
+                pp->x() = x;
+                pp->y() = y;
+                pp->z() = z;
+                pp->setMarker( EntityFlag( ibc ) );
             }
             oStr << "Vertices Read " << std::endl;
             done++;
             if ( count != nBVe )
-	      std::cerr << "NumB points inconsistent !" << std::endl;
+                std::cerr << "NumB points inconsistent !" << std::endl;
         }
 
         if ( line.find( "Triangles" ) != std::string::npos ){
-	  nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), mystream );
-	  oStr << "Reading Bfaces " << std::endl;
-	  for ( i = 0;i < numStoredFaces;i++ )
-	    {
-	      mystream >> p1 >> p2 >> p3 >> ibc;
-	      
-	      if (numStoredFaces > nBFa){
-		if (mesh.point( p1 ).boundary()&&mesh.point( p2 ).boundary()&&
-		    mesh.point( p3 ).boundary()){
-		  pf = &( mesh.addFace( true ) ); // Boundary faces
-		  pf->setMarker( EntityFlag( ibc ) );
-		  pf->setPoint( 1, mesh.point( p1 ) ); // set face conn.
-		  pf->setPoint( 2, mesh.point( p2 ) ); // set face conn.
-		  pf->setPoint( 3, mesh.point( p3 ) ); // set face conn.
-		  
-		} else {
-		  faceHelpIterator->i1=p1;
-		  faceHelpIterator->i2=p2;
-		  faceHelpIterator->i3=p3;
-		  faceHelpIterator->ibc=ibc;
-		  ++faceHelpIterator;
-		}
-	      } else {
-		
-                pf = &( mesh.addFace( true ) ); // Only boundary faces
+            nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), mystream );
+            oStr << "Reading Bfaces " << std::endl;
+            for ( i = 0;i < numStoredFaces;i++ )
+            {
+                mystream >> p1 >> p2 >> p3 >> ibc;
+
+                if (numStoredFaces > nBFa){
+                    if (mesh.point( p1 ).boundary()&&mesh.point( p2 ).boundary()&&
+                        mesh.point( p3 ).boundary()){
+                        pf = &( mesh.addFace( true ) ); // Boundary faces
+                        pf->setMarker( EntityFlag( ibc ) );
+                        pf->setPoint( 1, mesh.point( p1 ) ); // set face conn.
+                        pf->setPoint( 2, mesh.point( p2 ) ); // set face conn.
+                        pf->setPoint( 3, mesh.point( p3 ) ); // set face conn.
+
+                    } else {
+                        faceHelpIterator->i1=p1;
+                        faceHelpIterator->i2=p2;
+                        faceHelpIterator->i3=p3;
+                        faceHelpIterator->ibc=ibc;
+                        ++faceHelpIterator;
+                    }
+                } else {
+
+                    pf = &( mesh.addFace( true ) ); // Only boundary faces
+                    pf->setMarker( EntityFlag( ibc ) );
+                    pf->setPoint( 1, mesh.point( p1 ) ); // set face conn.
+                    pf->setPoint( 2, mesh.point( p2 ) ); // set face conn.
+                    pf->setPoint( 3, mesh.point( p3 ) ); // set face conn.
+                }
+            }
+            for (faceHelpIterator=faceHelp.begin();faceHelpIterator!=faceHelp.end();
+                 ++faceHelpIterator){
+                p1=faceHelpIterator->i1;
+                p2=faceHelpIterator->i2;
+                p3=faceHelpIterator->i3;
+                ibc=faceHelpIterator->ibc;
+                pf = &( mesh.addFace( false ) ); // INTERNAL FACE
                 pf->setMarker( EntityFlag( ibc ) );
                 pf->setPoint( 1, mesh.point( p1 ) ); // set face conn.
                 pf->setPoint( 2, mesh.point( p2 ) ); // set face conn.
                 pf->setPoint( 3, mesh.point( p3 ) ); // set face conn.
-	      }
-	    }
-	  for (faceHelpIterator=faceHelp.begin();faceHelpIterator!=faceHelp.end();
-	       ++faceHelpIterator){
-	    p1=faceHelpIterator->i1;
-	    p2=faceHelpIterator->i2;
-	    p3=faceHelpIterator->i3;
-	    ibc=faceHelpIterator->ibc;
-	    pf = &( mesh.addFace( false ) ); // INTERNAL FACE
-	    pf->setMarker( EntityFlag( ibc ) );
-	    pf->setPoint( 1, mesh.point( p1 ) ); // set face conn.
-	    pf->setPoint( 2, mesh.point( p2 ) ); // set face conn.
-	    pf->setPoint( 3, mesh.point( p3 ) ); // set face conn.
-	  }
-	  
-	  oStr << "Boundary Faces Read " << std::endl;
-	  done++;
-	}
-	
+            }
+
+            oStr << "Boundary Faces Read " << std::endl;
+            done++;
+        }
+
         if ( line.find( "Quadrilaterals" ) != std::string::npos ){
-	  nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), mystream );
-	  oStr << "Reading Bfaces " << std::endl;
-	  for ( i = 0;i < nBFa;i++ )
+            nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), mystream );
+            oStr << "Reading Bfaces " << std::endl;
+            for ( i = 0;i < nBFa;i++ )
             {
-	      mystream >> p1 >> p2 >> p3 >> p4 >> ibc;
-	      
-	      if (numStoredFaces > nBFa){
-		if (mesh.point( p1 ).boundary()&&mesh.point( p2 ).boundary()&&
-		    mesh.point( p3 ).boundary()){
-		  pf = &( mesh.addFace( true ) ); // Boundary faces
-		  pf->setMarker( EntityFlag( ibc ) );
-		  pf->setPoint( 1, mesh.point( p1 ) ); // set face conn.
-		  pf->setPoint( 2, mesh.point( p2 ) ); // set face conn.
-		  pf->setPoint( 3, mesh.point( p3 ) ); // set face conn.
-		  pf->setPoint( 4, mesh.point( p4 ) ); // set face conn.
-		  
-		} else {
-		  faceHelpIterator->i1=p1;
-		  faceHelpIterator->i2=p2;
-		  faceHelpIterator->i3=p3;
-		  faceHelpIterator->i4=p4;
-		  faceHelpIterator->ibc=ibc;
-		  ++faceHelpIterator;
-		}
-	      } else {
-                pf = &( mesh.addFace( true ) ); // Only boundary faces
+                mystream >> p1 >> p2 >> p3 >> p4 >> ibc;
+
+                if (numStoredFaces > nBFa){
+                    if (mesh.point( p1 ).boundary()&&mesh.point( p2 ).boundary()&&
+                        mesh.point( p3 ).boundary()){
+                        pf = &( mesh.addFace( true ) ); // Boundary faces
+                        pf->setMarker( EntityFlag( ibc ) );
+                        pf->setPoint( 1, mesh.point( p1 ) ); // set face conn.
+                        pf->setPoint( 2, mesh.point( p2 ) ); // set face conn.
+                        pf->setPoint( 3, mesh.point( p3 ) ); // set face conn.
+                        pf->setPoint( 4, mesh.point( p4 ) ); // set face conn.
+
+                    } else {
+                        faceHelpIterator->i1=p1;
+                        faceHelpIterator->i2=p2;
+                        faceHelpIterator->i3=p3;
+                        faceHelpIterator->i4=p4;
+                        faceHelpIterator->ibc=ibc;
+                        ++faceHelpIterator;
+                    }
+                } else {
+                    pf = &( mesh.addFace( true ) ); // Only boundary faces
+                    pf->setMarker( EntityFlag( ibc ) );
+                    pf->setPoint( 1, mesh.point( p1 ) ); // set face conn.
+                    pf->setPoint( 2, mesh.point( p2 ) ); // set face conn.
+                    pf->setPoint( 3, mesh.point( p3 ) ); // set face conn.
+                    pf->setPoint( 4, mesh.point( p4 ) ); // set face conn.
+                }
+            }
+            oStr << "Boundary Faces Read " << std::endl;
+            for (faceHelpIterator=faceHelp.begin();faceHelpIterator!=faceHelp.end();
+                 ++faceHelpIterator){
+                p1=faceHelpIterator->i1;
+                p2=faceHelpIterator->i2;
+                p3=faceHelpIterator->i3;
+                p4=faceHelpIterator->i4;
+                ibc=faceHelpIterator->ibc;
+                pf = &( mesh.addFace( false ) ); // INTERNAL FACE
                 pf->setMarker( EntityFlag( ibc ) );
                 pf->setPoint( 1, mesh.point( p1 ) ); // set face conn.
                 pf->setPoint( 2, mesh.point( p2 ) ); // set face conn.
                 pf->setPoint( 3, mesh.point( p3 ) ); // set face conn.
                 pf->setPoint( 4, mesh.point( p4 ) ); // set face conn.
-	      }
-	    }
-            oStr << "Boundary Faces Read " << std::endl;
-	    for (faceHelpIterator=faceHelp.begin();faceHelpIterator!=faceHelp.end();
-		 ++faceHelpIterator){
-	      p1=faceHelpIterator->i1;
-	      p2=faceHelpIterator->i2;
-	      p3=faceHelpIterator->i3;
-	      p4=faceHelpIterator->i4;
-	      ibc=faceHelpIterator->ibc;
-	      pf = &( mesh.addFace( false ) ); // INTERNAL FACE
-	      pf->setMarker( EntityFlag( ibc ) );
-	      pf->setPoint( 1, mesh.point( p1 ) ); // set face conn.
-	      pf->setPoint( 2, mesh.point( p2 ) ); // set face conn.
-	      pf->setPoint( 3, mesh.point( p3 ) ); // set face conn.
-	      pf->setPoint( 4, mesh.point( p4 ) ); // set face conn.
-	    }
+            }
             done++;
         }
 
@@ -702,13 +714,13 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
     Real vols[ 3 ];
     getVolumeFromFaces( mesh, vols, oStr );
     oStr << "   VOLUME ENCLOSED BY THE MESH COMPUTED BY INTEGRATION ON" <<
-    " BOUNDARY FACES" << std::endl;
+        " BOUNDARY FACES" << std::endl;
     oStr << "INT(X)     INT(Y)      INT(Z) <- they should be equal and equal to" << std::endl <<
-    "                                 the voulume enclosed by the mesh " << std::endl;
+        "                                 the voulume enclosed by the mesh " << std::endl;
     oStr << vols[ 0 ] << " " << vols[ 1 ] << " " << vols[ 2 ] << std::endl;
 
     oStr << "   BOUNDARY FACES ARE DEFINING A CLOSED SURFACE IF " << testClosedDomain( mesh, oStr ) << std::endl <<
-    " IS (ALMOST) ZERO" << std::endl;
+        " IS (ALMOST) ZERO" << std::endl;
 
     return done == 4 ;
 
@@ -718,18 +730,17 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
 //
 
 /**
-  read a gmsh mesh (3D) file and store it in a RegionMesh3D
- 
-  @param mesh mesh data structure to fill in
-  @param filename name of the gmsh mesh file  to read
-  @param regionFlag identifier for the region
-  @return true if everything went fine, false otherwise
+   read a gmsh mesh (3D) file and store it in a RegionMesh3D
+   @param mesh mesh data structure to fill in
+   @param filename name of the gmsh mesh file  to read
+   @param regionFlag identifier for the region
+   @return true if everything went fine, false otherwise
 */
 template <typename GeoShape, typename MC>
 bool
 readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
-             const std::string & filename,
-             EntityFlag regionFlag )
+              const std::string & filename,
+              EntityFlag regionFlag )
 {
     std::ifstream __is ( filename.c_str() );
 
@@ -973,11 +984,11 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
   LifeV/.../mesh/readMesh3D.h/.cc
   netgen/libsrc/meshing/meshclass.cpp
 
-#include "markers.h"
+  #include "markers.h"
 
-#include "regionMesh3D.h"
-#include "util_string.h"
-#include "mesh_util.h"
+  #include "regionMesh3D.h"
+  #include "util_string.h"
+  #include "mesh_util.h"
 */
 
 #include <life/lifemesh/bareItems.hpp>
@@ -988,60 +999,60 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
                const std::string  & filename,
                EntityFlag regionFlag)
 {
-  std::string line;
-  UInt nVe(0), nBVe(0),nFa(0),nBFa(0),nPo(0),nBPo(0);
-  UInt nVo(0),nEd(0),nBEd(0);
-  UInt i;
-  UInt fake;
-  UInt surfnr,bcnr,domin,domout;
-  UInt surf1,surf2,matnr,np,p1,p2,p3,p4,t;
-  Real x,y,z;
-  std::vector<bool> bpoints;
+    std::string line;
+    UInt nVe(0), nBVe(0),nFa(0),nBFa(0),nPo(0),nBPo(0);
+    UInt nVo(0),nEd(0),nBEd(0);
+    UInt i;
+    UInt fake;
+    UInt surfnr,bcnr,domin,domout;
+    UInt surf1,surf2,matnr,np,p1,p2,p3,p4,t;
+    Real x,y,z;
+    std::vector<bool> bpoints;
 //  std::vector<bool> bedges;
-  BareItemsHandler<BareEdge> bihBedges;
-  std::vector<EntityFlag> bcnsurf,bcnpoints;
-  UInt flag;
-  typename MC::PointMarker PMarker;
-  typename MC::EdgeMarker EMarker;
+    BareItemsHandler<BareEdge> bihBedges;
+    std::vector<EntityFlag> bcnsurf,bcnpoints;
+    UInt flag;
+    typename MC::PointMarker PMarker;
+    typename MC::EdgeMarker EMarker;
 
 
-  std::ifstream fstream1(filename.c_str()); 
-  if (fstream1.fail()) {
-    std::cerr<<"Error in readNetgenMesh: File not found or locked"<<std::endl;
-    abort();
-  }
-  std::cout<< "Reading netgen mesh file: "<<filename<<std::endl;
-  fstream1>>line;
-  if(line!="mesh3d"){
-    std::cerr<<"Error in readNetgenMesh: mesh file is not in mesh3d format (netgen)"\
-        <<std::endl;
-    abort();
-  }
-
-  /* I assume as I tested that faces stored are only boundary faces 
-     and edges stored are only a part of boundary ones with
-     inside a face with a common marker, instead points can be
-     inside the domain too, but this format doesn't say me
-     which, so I'll find them from myself
-   */
-  flag=1|2|4|8;
-  while(!fstream1.eof())
-  {
-    fstream1>>line;
-
-    if(line=="points" && flag&1){
-      fstream1>>nVe;
-      bcnpoints.reserve(nVe+1);
-      bpoints.reserve(nVe+1);
-      for(i=0;i<nVe+1;i++){
-        bpoints[i]=false;
-        bcnpoints[i]=NULLFLAG;
-      }
-      flag&=~1;
-      break;
+    std::ifstream fstream1(filename.c_str()); 
+    if (fstream1.fail()) {
+        std::cerr<<"Error in readNetgenMesh: File not found or locked"<<std::endl;
+        abort();
     }
-  }
-  fstream1.close();
+    std::cout<< "Reading netgen mesh file: "<<filename<<std::endl;
+    fstream1>>line;
+    if(line!="mesh3d"){
+        std::cerr<<"Error in readNetgenMesh: mesh file is not in mesh3d format (netgen)"\
+                 <<std::endl;
+        abort();
+    }
+
+    /* I assume as I tested that faces stored are only boundary faces 
+       and edges stored are only a part of boundary ones with
+       inside a face with a common marker, instead points can be
+       inside the domain too, but this format doesn't say me
+       which, so I'll find them from myself
+    */
+    flag=1|2|4|8;
+    while(!fstream1.eof())
+    {
+        fstream1>>line;
+
+        if(line=="points" && flag&1){
+            fstream1>>nVe;
+            bcnpoints.reserve(nVe+1);
+            bpoints.reserve(nVe+1);
+            for(i=0;i<nVe+1;i++){
+                bpoints[i]=false;
+                bcnpoints[i]=NULLFLAG;
+            }
+            flag&=~1;
+            break;
+        }
+    }
+    fstream1.close();
   
 /* as Forma told, I have found sometimes problems with seekg, becouse
    it seems that sometimes it put the stream in a non consistent state,
@@ -1049,262 +1060,262 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
    only sometimes problems on big mesh files with seekg
 */
 //  fstream.seekg(0,std::ios_base::beg);
-  std::ifstream fstream2(filename.c_str()); 
-  while(!fstream2.eof())
-  {
-    fstream2>>line;
+    std::ifstream fstream2(filename.c_str()); 
+    while(!fstream2.eof())
+    {
+        fstream2>>line;
 
-    if(line=="surfaceelementsgi" && flag&8){
-      fstream2>>nBFa;
-      bcnsurf.reserve(nBFa+1);
-      bcnsurf[0]=NULLFLAG;
-      for(i=0;i<nBFa;i++){
-        fstream2>>surfnr>>bcnr>>domin>>domout>>np>>p1>>p2>>p3\
-               >>t>>t>>t;
-        bcnsurf[i+1]=bcnr;
-        if(np!=3){
-          std::cerr<<"Error in readNetgenMesh: " \
-                "only triangular surfaces supported"<<std::endl;
-          abort();
-        }
-        //assume p1!=p2!=p3!=p1
-        nBVe+=bpoints[p1]?0:1;
-        nBVe+=bpoints[p2]?0:1;
-        nBVe+=bpoints[p3]?0:1;
-        bpoints[p1]=bpoints[p2]=bpoints[p3]=true;
+        if(line=="surfaceelementsgi" && flag&8){
+            fstream2>>nBFa;
+            bcnsurf.reserve(nBFa+1);
+            bcnsurf[0]=NULLFLAG;
+            for(i=0;i<nBFa;i++){
+                fstream2>>surfnr>>bcnr>>domin>>domout>>np>>p1>>p2>>p3\
+                        >>t>>t>>t;
+                bcnsurf[i+1]=bcnr;
+                if(np!=3){
+                    std::cerr<<"Error in readNetgenMesh: " \
+                        "only triangular surfaces supported"<<std::endl;
+                    abort();
+                }
+                //assume p1!=p2!=p3!=p1
+                nBVe+=bpoints[p1]?0:1;
+                nBVe+=bpoints[p2]?0:1;
+                nBVe+=bpoints[p3]?0:1;
+                bpoints[p1]=bpoints[p2]=bpoints[p3]=true;
 
-        /* here I set the boundary points marker
-           note: this works only with my patch
-           of strongerFlag */
-        bcnpoints[p1]=PMarker.setStrongerMarker(bcnpoints[p1],bcnr);
-        bcnpoints[p2]=PMarker.setStrongerMarker(bcnpoints[p2],bcnr);
-        bcnpoints[p3]=PMarker.setStrongerMarker(bcnpoints[p3],bcnr);
+                /* here I set the boundary points marker
+                   note: this works only with my patch
+                   of strongerFlag */
+                bcnpoints[p1]=PMarker.setStrongerMarker(bcnpoints[p1],bcnr);
+                bcnpoints[p2]=PMarker.setStrongerMarker(bcnpoints[p2],bcnr);
+                bcnpoints[p3]=PMarker.setStrongerMarker(bcnpoints[p3],bcnr);
 
 /* now I have the surface and points, so I can calculate
    the num of edges on the boundary, useful in case this is
    a quadratic tetra, I calculate the bcnr too using
    BareItemHandler<BareEdge> to store results
 */
-   //I've found this silly but easy way
-        BareEdge bed=setBareEdge(p1,p2);
-        bihBedges.addIfNotThere(bed,(ID)NULLFLAG);
-        bihBedges[bed]=(ID)EMarker.setStrongerMarker(
-                              bihBedges[bed],
-                              bcnr);
-        bed=setBareEdge(p2,p3);
-        bihBedges.addIfNotThere(bed,(ID)NULLFLAG);
-        bihBedges[bed]=(ID)EMarker.setStrongerMarker(
-                              bihBedges[bed],
-                              bcnr);
-        bed=setBareEdge(p3,p1);
-        bihBedges.addIfNotThere(bed,(ID)NULLFLAG);
-        bihBedges[bed]=(ID)EMarker.setStrongerMarker(
-                              bihBedges[bed],
-                              bcnr);
-      }
-      flag&=~8;
-      break;
+                //I've found this silly but easy way
+                BareEdge bed=setBareEdge(p1,p2);
+                bihBedges.addIfNotThere(bed,(ID)NULLFLAG);
+                bihBedges[bed]=(ID)EMarker.setStrongerMarker(
+                    bihBedges[bed],
+                    bcnr);
+                bed=setBareEdge(p2,p3);
+                bihBedges.addIfNotThere(bed,(ID)NULLFLAG);
+                bihBedges[bed]=(ID)EMarker.setStrongerMarker(
+                    bihBedges[bed],
+                    bcnr);
+                bed=setBareEdge(p3,p1);
+                bihBedges.addIfNotThere(bed,(ID)NULLFLAG);
+                bihBedges[bed]=(ID)EMarker.setStrongerMarker(
+                    bihBedges[bed],
+                    bcnr);
+            }
+            flag&=~8;
+            break;
+        }
     }
-  }
-  fstream2.close();
-  nBEd=bihBedges.howMany();
+    fstream2.close();
+    nBEd=bihBedges.howMany();
   
 
 
 /* I assume as I tested that edges stored are only a part of
    boundary ones, so really they are meaningless to me */
-  std::ifstream fstream3(filename.c_str()); 
-  while(!fstream3.eof())
-  {
-    fstream3>>line;
-    if(line=="edgesegmentsgi2" && flag&2){
-      fstream3>>fake;        //this is not really the nBEd
-      fake*=2;        //there are twice the num of lines told, test if prob
-      for(i=0;i<fake;i++){
-        fstream3>>surf1>>surf2>>p1>>p2>>t>>t>>t>>t>>t>>t>>t>>t;
-      }
-      flag&=~2;
-    }
-    else if(line=="volumeelements" && flag&4){
-      fstream3>>nVo;
-      for(i=0;i<nVo;i++){
-        fstream3>>matnr>>np>>p1>>p2>>p3>>p4;
-        if(np!=4){
-          std::cerr<<"Error in readNetgenMesh: " \
-                "only tetrahedra elements supported"<<std::endl;
-          abort();
+    std::ifstream fstream3(filename.c_str()); 
+    while(!fstream3.eof())
+    {
+        fstream3>>line;
+        if(line=="edgesegmentsgi2" && flag&2){
+            fstream3>>fake;        //this is not really the nBEd
+            fake*=2;        //there are twice the num of lines told, test if prob
+            for(i=0;i<fake;i++){
+                fstream3>>surf1>>surf2>>p1>>p2>>t>>t>>t>>t>>t>>t>>t>>t;
+            }
+            flag&=~2;
         }
-      }
-      flag&=~4;
+        else if(line=="volumeelements" && flag&4){
+            fstream3>>nVo;
+            for(i=0;i<nVo;i++){
+                fstream3>>matnr>>np>>p1>>p2>>p3>>p4;
+                if(np!=4){
+                    std::cerr<<"Error in readNetgenMesh: " \
+                        "only tetrahedra elements supported"<<std::endl;
+                    abort();
+                }
+            }
+            flag&=~4;
+        }
+        if(!flag)break;
     }
-    if(!flag)break;
-  }
-  fstream3.close();
-  if(flag!=0){
-    std::cerr<<"Error in readNetgenMesh: " \
-          "the mesh file does not have all the required sections" \
-        <<std::endl;
-    abort();
-  }
-
-  // Euler formulas
-  nFa=2*nVo+(nBFa/2);
-  nEd=nVo+nVe+(3*nBFa-2*nBVe)/4;
-
-  // Be a little verbose
-  if (GeoShape::numPoints > 4 ){
-    std::cout << "Quadratic Tetra  Mesh (from Linear geometry)" <<std::endl;
-    nPo=nVe+nEd;
-    nBPo=nBVe+nBEd;    // I calculated the real nBEd before
-  } else {
-    std::cout << "Linear Tetra Mesh" <<std::endl;
-    nPo=nVe;
-    nBPo=nBVe;        
-  }
-
-  //points can be only vertices or on edges too
-
-  std::cout<< "#Vertices= "<<nVe;
-  std::cout<< " #BVertices= "<<nBVe<<std::endl;
-  std::cout<< "#Faces= "<<nFa;
-  std::cout<< " #Boundary Faces= "<<nBFa<<std::endl;
-  std::cout<< "#Edges= "<<nEd;
-  std::cout<< " #Boundary Edges= "<<nBEd<<std::endl;
-  std::cout<< "#Points= "<<nPo;
-  std::cout<< " #Boundary Points= "<<nBPo<<std::endl;
-  std::cout<< "#Volumes= "<<nVo<<std::endl;
-
-  // Set all basic data structure
-
-  // I store all Points
-  mesh.setMaxNumPoints(nPo,true);
-  mesh.setNumBPoints(nBPo);
-  mesh.numVertices()=nVe;
-  mesh.numBVertices()=nBVe;
-  // Only Boundary Edges (in a next version I will allow for different choices)
-  mesh.setMaxNumEdges(nBEd);
-  mesh.numEdges()=nEd; // Here the REAL number of edges (all of them)
-  mesh.setNumBEdges(nBEd);    /////////????????????
-  // Only Boundary Faces
-  mesh.setMaxNumFaces(nBFa);
-  mesh.numFaces()=nFa; // Here the REAL number of edges (all of them)
-  mesh.setNumBFaces(nBFa);
-
-  mesh.setMaxNumVolumes(nVo,true);
-
-  mesh.setMarker(regionFlag); // Mark the region ????????what if more then one<<<<<<<
-
-  typename RegionMesh3D<GeoShape,MC>::PointType * pp=0;
-  typename RegionMesh3D<GeoShape,MC>::EdgeType * pe=0;
-  typename RegionMesh3D<GeoShape,MC>::FaceType * pf=0;
-  typename RegionMesh3D<GeoShape,MC>::VolumeType * pv=0;
-  // addPoint()/Face()/Edge() returns a reference to the last stored point
-  // I use that information to set all point info, by using a pointer.
-
-
-  std::ifstream  fstream4(filename.c_str()); 
-  flag=1|2|4|8;
-  while(!fstream4.eof())
-  {
-    fstream4>>line;
-
-    if(line=="points" && flag&1){
-      fstream4>>nVe;
-      for(i=0;i<nVe;i++){
-        fstream4>>x>>y>>z;
-        pp=&mesh.addPoint(bpoints[i+1]); //true if boundary point
-        pp->setMarker(bcnpoints[i+1]); 
-        pp->x()=x;
-        pp->y()=y;
-        pp->z()=z;       
-      }
-      flag&=~1;
-      break;
+    fstream3.close();
+    if(flag!=0){
+        std::cerr<<"Error in readNetgenMesh: " \
+            "the mesh file does not have all the required sections" \
+                 <<std::endl;
+        abort();
     }
-  }
-  fstream4.close();
-  std::ifstream  fstream5(filename.c_str()); 
 
-  while(flag && !fstream5.eof())  //fstream after using .seekg sometimes never reaches eof, 
-                  //entering infinite loop, why????? damn STL I reopen the file and put the flag to fix
-  {
-    fstream5>>line;
+    // Euler formulas
+    nFa=2*nVo+(nBFa/2);
+    nEd=nVo+nVe+(3*nBFa-2*nBVe)/4;
 
-    if(line=="edgesegmentsgi2" && flag&2){
-      fstream5>>fake;    //this is not really the nBEd
-      fake*=2;        //there are twice the num of lines told, test if prob
-      for(i=0;i<fake;i++){
-        fstream5>>surf1>>surf2>>p1>>p2>>t>>t>>t>>t>>t>>t>>t>>t;
-      }
-      /* here I set the real boundary edges that I stored 
-         in bihBedges
-       */
-      BareItemsHandler<BareEdge>::const_iterator bedge=bihBedges.begin();
-      for(i=0;i<nBEd;i++){
-        pe = &mesh.addEdge( true ); // Only boundary edges.
-        pe->setMarker( EntityFlag(bedge->second)); 
-        p1=bedge->first.first;
-        p2=bedge->first.second;
-        pe->setPoint( 1, mesh.point( p1 ) ); // set edge conn.
-        pe->setPoint( 2, mesh.point( p2 ) ); // set edge conn.
-        bedge++;
-      }
-      flag&=~2;
+    // Be a little verbose
+    if (GeoShape::numPoints > 4 ){
+        std::cout << "Quadratic Tetra  Mesh (from Linear geometry)" <<std::endl;
+        nPo=nVe+nEd;
+        nBPo=nBVe+nBEd;    // I calculated the real nBEd before
+    } else {
+        std::cout << "Linear Tetra Mesh" <<std::endl;
+        nPo=nVe;
+        nBPo=nBVe;        
     }
-    else if(line=="volumeelements" && flag&4){
-      fstream5>>nVo;
-      for(i=0;i<nVo;i++){
-        fstream5>>matnr>>np>>p1>>p2>>p3>>p4;
-        pv=&mesh.addVolume();
-        pv->id()=i+1;
-        pv->setPoint(1, mesh.point(p1) );
-        pv->setPoint(2, mesh.point(p2) );
-        pv->setPoint(3, mesh.point(p3) );
-        pv->setPoint(4, mesh.point(p4) );
-      }
-      flag&=~4;
+
+    //points can be only vertices or on edges too
+
+    std::cout<< "#Vertices= "<<nVe;
+    std::cout<< " #BVertices= "<<nBVe<<std::endl;
+    std::cout<< "#Faces= "<<nFa;
+    std::cout<< " #Boundary Faces= "<<nBFa<<std::endl;
+    std::cout<< "#Edges= "<<nEd;
+    std::cout<< " #Boundary Edges= "<<nBEd<<std::endl;
+    std::cout<< "#Points= "<<nPo;
+    std::cout<< " #Boundary Points= "<<nBPo<<std::endl;
+    std::cout<< "#Volumes= "<<nVo<<std::endl;
+
+    // Set all basic data structure
+
+    // I store all Points
+    mesh.setMaxNumPoints(nPo,true);
+    mesh.setNumBPoints(nBPo);
+    mesh.numVertices()=nVe;
+    mesh.numBVertices()=nBVe;
+    // Only Boundary Edges (in a next version I will allow for different choices)
+    mesh.setMaxNumEdges(nBEd);
+    mesh.numEdges()=nEd; // Here the REAL number of edges (all of them)
+    mesh.setNumBEdges(nBEd);    /////////????????????
+    // Only Boundary Faces
+    mesh.setMaxNumFaces(nBFa);
+    mesh.numFaces()=nFa; // Here the REAL number of edges (all of them)
+    mesh.setNumBFaces(nBFa);
+
+    mesh.setMaxNumVolumes(nVo,true);
+
+    mesh.setMarker(regionFlag); // Mark the region ????????what if more then one<<<<<<<
+
+    typename RegionMesh3D<GeoShape,MC>::PointType * pp=0;
+    typename RegionMesh3D<GeoShape,MC>::EdgeType * pe=0;
+    typename RegionMesh3D<GeoShape,MC>::FaceType * pf=0;
+    typename RegionMesh3D<GeoShape,MC>::VolumeType * pv=0;
+    // addPoint()/Face()/Edge() returns a reference to the last stored point
+    // I use that information to set all point info, by using a pointer.
+
+
+    std::ifstream  fstream4(filename.c_str()); 
+    flag=1|2|4|8;
+    while(!fstream4.eof())
+    {
+        fstream4>>line;
+
+        if(line=="points" && flag&1){
+            fstream4>>nVe;
+            for(i=0;i<nVe;i++){
+                fstream4>>x>>y>>z;
+                pp=&mesh.addPoint(bpoints[i+1]); //true if boundary point
+                pp->setMarker(bcnpoints[i+1]); 
+                pp->x()=x;
+                pp->y()=y;
+                pp->z()=z;       
+            }
+            flag&=~1;
+            break;
+        }
     }
-    else if(line=="surfaceelementsgi" && flag&8){
-      fstream5>>nFa;
-      for(i=0;i<nFa;i++){
-        fstream5>>surfnr>>bcnr>>domin>>domout>>np>>p1>>p2>>p3\
-               >>t>>t>>t;
-        pf=&mesh.addFace(true); // Only boundary faces
+    fstream4.close();
+    std::ifstream  fstream5(filename.c_str()); 
 
-        pf->setMarker(EntityFlag(bcnr));
-        pf->setPoint(1,mesh.point(p1)); // set face conn.
-        pf->setPoint(2,mesh.point(p2)); // set face conn.
-        pf->setPoint(3,mesh.point(p3)); // set face conn.
-      }
-      flag&=~8;
+    while(flag && !fstream5.eof())  //fstream after using .seekg sometimes never reaches eof, 
+        //entering infinite loop, why????? damn STL I reopen the file and put the flag to fix
+    {
+        fstream5>>line;
+
+        if(line=="edgesegmentsgi2" && flag&2){
+            fstream5>>fake;    //this is not really the nBEd
+            fake*=2;        //there are twice the num of lines told, test if prob
+            for(i=0;i<fake;i++){
+                fstream5>>surf1>>surf2>>p1>>p2>>t>>t>>t>>t>>t>>t>>t>>t;
+            }
+            /* here I set the real boundary edges that I stored 
+               in bihBedges
+            */
+            BareItemsHandler<BareEdge>::const_iterator bedge=bihBedges.begin();
+            for(i=0;i<nBEd;i++){
+                pe = &mesh.addEdge( true ); // Only boundary edges.
+                pe->setMarker( EntityFlag(bedge->second)); 
+                p1=bedge->first.first;
+                p2=bedge->first.second;
+                pe->setPoint( 1, mesh.point( p1 ) ); // set edge conn.
+                pe->setPoint( 2, mesh.point( p2 ) ); // set edge conn.
+                bedge++;
+            }
+            flag&=~2;
+        }
+        else if(line=="volumeelements" && flag&4){
+            fstream5>>nVo;
+            for(i=0;i<nVo;i++){
+                fstream5>>matnr>>np>>p1>>p2>>p3>>p4;
+                pv=&mesh.addVolume();
+                pv->id()=i+1;
+                pv->setPoint(1, mesh.point(p1) );
+                pv->setPoint(2, mesh.point(p2) );
+                pv->setPoint(3, mesh.point(p3) );
+                pv->setPoint(4, mesh.point(p4) );
+            }
+            flag&=~4;
+        }
+        else if(line=="surfaceelementsgi" && flag&8){
+            fstream5>>nFa;
+            for(i=0;i<nFa;i++){
+                fstream5>>surfnr>>bcnr>>domin>>domout>>np>>p1>>p2>>p3\
+                        >>t>>t>>t;
+                pf=&mesh.addFace(true); // Only boundary faces
+
+                pf->setMarker(EntityFlag(bcnr));
+                pf->setPoint(1,mesh.point(p1)); // set face conn.
+                pf->setPoint(2,mesh.point(p2)); // set face conn.
+                pf->setPoint(3,mesh.point(p3)); // set face conn.
+            }
+            flag&=~8;
+        }
     }
-  }
 
-  // This part is to build a P2 mesh from a P1 geometry
+    // This part is to build a P2 mesh from a P1 geometry
   
-  if (GeoShape::numPoints > 4 )p1top2(mesh);
-  fstream5.close();
+    if (GeoShape::numPoints > 4 )p1top2(mesh);
+    fstream5.close();
   
-  // Test mesh
-  Switch sw;
+    // Test mesh
+    Switch sw;
   
-  ///// CORRECTION JFG
-  //if (mesh.check(1, true,true))done=0;
+    ///// CORRECTION JFG
+    //if (mesh.check(1, true,true))done=0;
   
-  if(!checkMesh3D(mesh, sw, true,true,std::cout,std::cout,std::cout)) abort(); // CORRECTION JFG
+    if(!checkMesh3D(mesh, sw, true,true,std::cout,std::cout,std::cout)) abort(); // CORRECTION JFG
 
-  Real vols[3];
-  getVolumeFromFaces(mesh, vols,std::cout);
-  std::cout<< "   VOLUME ENCLOSED BY THE MESH COMPUTED BY INTEGRATION ON"<<
-    " BOUNDARY FACES"<<std::endl;
-  std::cout << "INT(X)     INT(Y)      INT(Z) <- they should be equal and equal to"<<std::endl<<
-    "                                 the voulume enclosed by the mesh "<<std::endl;
-  std::cout<<vols[0]<<" "<<vols[1]<<" "<<vols[2]<<std::endl;
+    Real vols[3];
+    getVolumeFromFaces(mesh, vols,std::cout);
+    std::cout<< "   VOLUME ENCLOSED BY THE MESH COMPUTED BY INTEGRATION ON"<<
+        " BOUNDARY FACES"<<std::endl;
+    std::cout << "INT(X)     INT(Y)      INT(Z) <- they should be equal and equal to"<<std::endl<<
+        "                                 the voulume enclosed by the mesh "<<std::endl;
+    std::cout<<vols[0]<<" "<<vols[1]<<" "<<vols[2]<<std::endl;
   
-  std::cout<< "   BOUNDARY FACES ARE DEFINING A CLOSED SURFACE IF "<<testClosedDomain(mesh,std::cout)<< std::endl<<
-    " IS (ALMOST) ZERO"<<std::endl;
+    std::cout<< "   BOUNDARY FACES ARE DEFINING A CLOSED SURFACE IF "<<testClosedDomain(mesh,std::cout)<< std::endl<<
+        " IS (ALMOST) ZERO"<<std::endl;
   
-  return true;
+    return true;
 }
 
 
@@ -1312,18 +1323,18 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
 #include <fstream>
 
 /* 
-MM I've looked to this source, easy func
-/usr/local/src/ng431/libsrc/interface/importsolution.cpp
+   MM I've looked to this source, easy func
+   /usr/local/src/ng431/libsrc/interface/importsolution.cpp
 */
 template <typename VectorType>
 void saveNetgenSolution(std::string filename,const VectorType& U,std::string fctname="u")
 {
-  std::ofstream of(filename.c_str());
-  of<<"solution "<<fctname<<" -size="<<U.size()
-    <<" -components=1 -type=nodal"<<std::endl;
-  for(UInt i=0;i<U.size();i++)
-    of<<U(i)<<std::endl;
-  of.close();
+    std::ofstream of(filename.c_str());
+    of<<"solution "<<fctname<<" -size="<<U.size()
+      <<" -components=1 -type=nodal"<<std::endl;
+    for(UInt i=0;i<U.size();i++)
+        of<<U(i)<<std::endl;
+    of.close();
 }
 
 }
