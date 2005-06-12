@@ -621,11 +621,14 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
                   << iter << std::endl;
 
     }
+
+#if PETSC_SOLVER
     if ( condEst >= 0 )
     {
         std::cout << "        estimated condition number (preconditioned) = "
                   << M_linearSolver.condEst() << std::endl;
     }
+#endif
 
     if ( this->BCh_fluid().hasOnlyEssential() && !M_diagonalize )
     {
