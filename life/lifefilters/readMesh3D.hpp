@@ -459,35 +459,22 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
     // Set all basic data structure
 
     // I store all Points
-    std::cout << "1" << std::endl << std::flush;
     mesh.setMaxNumPoints( nPo, true );
-    std::cout << "1" << std::endl << std::flush;
     mesh.setNumBPoints( nBPo );
-    std::cout << "1" << std::endl << std::flush;
     mesh.numVertices() = nVe;
-    std::cout << "1" << std::endl << std::flush;
     mesh.numBVertices() = nBVe;
     // Only Boundary Edges (in a next version I will allow for different choices)
-    std::cout << "1" << std::endl << std::flush;
     mesh.setMaxNumEdges( nBEd );
-    std::cout << "1" << std::endl << std::flush;
     mesh.numEdges() = nEd; // Here the REAL number of edges (all of them)
-    std::cout << "1" << std::endl << std::flush;
     mesh.setNumBEdges( nBEd );
     // Only Boundary Faces
-    std::cout << "1" << std::endl << std::flush;
     mesh.setMaxNumFaces( numStoredFaces );
-    std::cout << "1" << std::endl << std::flush;
     mesh.numFaces() = nFa; // Here the REAL number of faces (all of them)
-    std::cout << "1" << std::endl << std::flush;
     mesh.setNumBFaces( nBFa );
-    std::cout << "1" << std::endl << std::flush;
 
     mesh.setMaxNumVolumes( nVo, true );
-    std::cout << "1" << std::endl << std::flush;
 
     mesh.setMarker( regionFlag ); // Add Marker to list of Markers
-    std::cout << "1" << std::endl << std::flush;
 
     typename RegionMesh3D<GeoShape, MC>::PointType * pp = 0;
     typename RegionMesh3D<GeoShape, MC>::EdgeType * pe = 0;
