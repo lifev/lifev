@@ -3,8 +3,6 @@
 
 namespace LifeV
 {
-using namespace std;
-
   /*
     The following variables are static in order to make easier their
     passing to user functions (with a prototyp that cannot be changed)
@@ -75,101 +73,101 @@ using namespace std;
     store_file   = dfile("miscellaneous/store_file","sol.mat");
   }
 
-void DataFhN::dataFhNShowMe(ostream& c)
+void DataFhN::dataFhNShowMe(std::ostream& c)
 {
   // physics
   c << "\n*** Values for data [physics]\n\n";
-  c << "test_case = " << test_case << endl;
-  c << "mesh_file = " << mesh_file << endl;
-  c << "fhn_diff = " << fhn_diff << endl;
-  c << "fhn_diff_fct = " << fhn_diff_fct << endl;
-  c << "fhn_f0 = " << fhn_f0 << endl;
-  c << "fhn_eps = " << fhn_eps << endl;
-  c << "fhn_alpha = " << fhn_alpha << endl;
-  c << "fhn_beta = " << fhn_beta << endl;
-  c << "fhn_gamma = " << fhn_beta << endl;
+  c << "test_case = " << test_case << std::endl;
+  c << "mesh_file = " << mesh_file << std::endl;
+  c << "fhn_diff = " << fhn_diff << std::endl;
+  c << "fhn_diff_fct = " << fhn_diff_fct << std::endl;
+  c << "fhn_f0 = " << fhn_f0 << std::endl;
+  c << "fhn_eps = " << fhn_eps << std::endl;
+  c << "fhn_alpha = " << fhn_alpha << std::endl;
+  c << "fhn_beta = " << fhn_beta << std::endl;
+  c << "fhn_gamma = " << fhn_beta << std::endl;
 
-  c << "t_start_LV = " << t_start_LV << endl;
-  c << "t_stop_LV = " << t_stop_LV << endl;
-  c << "source_value_LV = " << source_value_LV << endl;
-  c << "stim_start_1 = " << stim_start_1 << endl;
-  c << "stim_stop_1 = " << stim_stop_1 << endl;
-  c << "stim_value_1 = " << stim_value_1 << endl;
-  c << "stim_radius_1 = " << DataFhN::stim_radius_1 << endl;
+  c << "t_start_LV = " << t_start_LV << std::endl;
+  c << "t_stop_LV = " << t_stop_LV << std::endl;
+  c << "source_value_LV = " << source_value_LV << std::endl;
+  c << "stim_start_1 = " << stim_start_1 << std::endl;
+  c << "stim_stop_1 = " << stim_stop_1 << std::endl;
+  c << "stim_value_1 = " << stim_value_1 << std::endl;
+  c << "stim_radius_1 = " << DataFhN::stim_radius_1 << std::endl;
   c << "stim_center_1 = "
     << stim_center_1(0) << ","
     << stim_center_1(1) << "," 
-    << stim_center_1(2) << endl;
+    << stim_center_1(2) << std::endl;
   
-  c << "t_start_RV = " << t_start_RV << endl;
-  c << "t_stop_RV = " << t_stop_RV << endl;
-  c << "source_value_RV = " << source_value_RV << endl;
-  c << "stim_start_2 = " << stim_start_2 << endl;
-  c << "stim_stop_2 = " << stim_stop_2 << endl;
-  c << "stim_value_2 = " << stim_value_2 << endl;
-  c << "stim_radius_2 = " << stim_radius_2 << endl;
+  c << "t_start_RV = " << t_start_RV << std::endl;
+  c << "t_stop_RV = " << t_stop_RV << std::endl;
+  c << "source_value_RV = " << source_value_RV << std::endl;
+  c << "stim_start_2 = " << stim_start_2 << std::endl;
+  c << "stim_stop_2 = " << stim_stop_2 << std::endl;
+  c << "stim_value_2 = " << stim_value_2 << std::endl;
+  c << "stim_radius_2 = " << stim_radius_2 << std::endl;
   c << "stim_center_2 = "
     << stim_center_2(0) << ","
     << stim_center_2(1) << "," 
-    << stim_center_2(2) << endl;
+    << stim_center_2(2) << std::endl;
 
   // miscellaneous
   c << "\n*** Values for data [miscellaneous]\n\n";
-  c << "mesh_dir         = " << mesh_dir << endl;
-  c << "post_dir         = " << post_dir << endl;
-  c << "verbose          = " << verbose << endl;
-  c << "post_proc_format = " << post_proc_format << endl;
-  c << "nb_ref_time      = " << nb_ref_time << endl;
-  c << "ref_file      = " << ref_file << endl;
-  c << "store_file      = " << store_file << endl;
+  c << "mesh_dir         = " << mesh_dir << std::endl;
+  c << "post_dir         = " << post_dir << std::endl;
+  c << "verbose          = " << verbose << std::endl;
+  c << "post_proc_format = " << post_proc_format << std::endl;
+  c << "nb_ref_time      = " << nb_ref_time << std::endl;
+  c << "ref_file      = " << ref_file << std::endl;
+  c << "store_file      = " << store_file << std::endl;
 }
 
-void DataFhN::dataFhNHelp(ostream& c)
+void DataFhN::dataFhNHelp(std::ostream& c)
 {
   // physics
   c << "\n*** Help for data [physics]\n\n";
-  c << "test_case: a number indicating the test case" << endl;
-  c << "mesh_file: the mesh file"<< endl;
-  c << "fhn_diff = the diffusion constant in the Fitzhugh-Nagumo equations"  << endl;
-  c << "fhn_diff_fct = 0 : constant diffusion, 1 : space dependent diffusion"  << endl;
+  c << "test_case: a number indicating the test case" << std::endl;
+  c << "mesh_file: the mesh file"<< std::endl;
+  c << "fhn_diff = the diffusion constant in the Fitzhugh-Nagumo equations"  << std::endl;
+  c << "fhn_diff_fct = 0 : constant diffusion, 1 : space dependent diffusion"  << std::endl;
   c << "fhn_f0 = the constant before the cubic term in the Fitzhugh-Nagumo equations"
-    << endl;
-  c << "fhn_eps = the epsilon in the Fitzhugh-Nagumo equations" << endl;
-  c << "fhn_alpha = the constant 'alpha' in the definition of the cubic"  << endl;
-  c << "fhn_beta = the beta constant in the Fitzhugh-Nagumo equations"  << endl;
-  c << "fhn_gamma = the gamma constant in the Fitzhugh-Nagumo equations"  << endl;
-  c << "t_start_RV = starting time for the source term, in the RV" << endl;
-  c << "t_stop_RV = stopping time for the source term, in the RV" << endl;
-  c << "source_value_RV = value of the source term (inside a sphere)" << endl;
+    << std::endl;
+  c << "fhn_eps = the epsilon in the Fitzhugh-Nagumo equations" << std::endl;
+  c << "fhn_alpha = the constant 'alpha' in the definition of the cubic"  << std::endl;
+  c << "fhn_beta = the beta constant in the Fitzhugh-Nagumo equations"  << std::endl;
+  c << "fhn_gamma = the gamma constant in the Fitzhugh-Nagumo equations"  << std::endl;
+  c << "t_start_RV = starting time for the source term, in the RV" << std::endl;
+  c << "t_stop_RV = stopping time for the source term, in the RV" << std::endl;
+  c << "source_value_RV = value of the source term (inside a sphere)" << std::endl;
 
 
-  c << "t_start_LV = starting time for the source term, in the LV" << endl;
-  c << "t_stop_LV = stopping time for the source term, in the LV" << endl;
-  c << "source_value_LV = value of the source term (inside a sphere)" << endl;
+  c << "t_start_LV = starting time for the source term, in the LV" << std::endl;
+  c << "t_stop_LV = stopping time for the source term, in the LV" << std::endl;
+  c << "source_value_LV = value of the source term (inside a sphere)" << std::endl;
 
-  c << "stim_start_1 = starting time for the stimulation 1" << endl;
-  c << "stim_stop_1 = stopping time for the stimulation  2" << endl;
-  c << "stim_value_1 = value of the stimulation 1 (inside a sphere)" << endl;
+  c << "stim_start_1 = starting time for the stimulation 1" << std::endl;
+  c << "stim_stop_1 = stopping time for the stimulation  2" << std::endl;
+  c << "stim_value_1 = value of the stimulation 1 (inside a sphere)" << std::endl;
   c << "stim_radius_1 = radius of the sphere for the stimulation  1"
-    << endl;
-  c << "stim_center_1 = x,y,z of the center of the sphere for the stimulation 1" << endl;
+    << std::endl;
+  c << "stim_center_1 = x,y,z of the center of the sphere for the stimulation 1" << std::endl;
 
-  c << "stim_start_2 = starting time for the stimulation 2" << endl;
-  c << "stim_stop_2 = stopping time for the stimulation  2" << endl;
-  c << "stim_value_2 = value of the stimulation 2 (inside a sphere)" << endl;
+  c << "stim_start_2 = starting time for the stimulation 2" << std::endl;
+  c << "stim_stop_2 = stopping time for the stimulation  2" << std::endl;
+  c << "stim_value_2 = value of the stimulation 2 (inside a sphere)" << std::endl;
   c << "stim_radius_2 = radius of the sphere for the stimulation  2"
-    << endl;
-  c << "stim_center_2 = x,y,z of the center of the sphere for the stimulation 2" << endl;
+    << std::endl;
+  c << "stim_center_2 = x,y,z of the center of the sphere for the stimulation 2" << std::endl;
 
   c << "nb_ref_time = number of time step stored in/for the reference solution";
   c << "ref_file = file where a reference solution is load";
   c << "store_file = file where the current solution is stored";
   // miscellaneous
   c << "\n*** Help for data [miscellaneous]\n\n";
-  c << "mesh_dir         : the directory where the mesh file is" << endl;;
+  c << "mesh_dir         : the directory where the mesh file is" << std::endl;;
   c << "post_dir         : the full postprocessing directory (including path)"
-    << endl;
-  c << "verbose          : to make the code verbose" << endl;
-  c << "post_proc_format : postprocessing format (medit, vtk, ...)" << endl;
+    << std::endl;
+  c << "verbose          : to make the code verbose" << std::endl;
+  c << "post_proc_format : postprocessing format (medit, vtk, ...)" << std::endl;
 }
 }
