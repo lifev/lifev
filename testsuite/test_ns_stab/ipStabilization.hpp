@@ -193,6 +193,7 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix, const VECTOR& state )
                 std::max<Real>( bmax, M_viscosity/sqrt( hK2 ) );
 #endif
 
+            M_elMatP.zero();
             chronoElemComp.start();
             ipstab_grad(coeffPress, M_elMatP, M_fe1, M_fe1, M_feBd,
                         nDimensions, nDimensions);
@@ -212,6 +213,7 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix, const VECTOR& state )
                        nDimensions, nDimensions);
             chronoAssembly.stop();
 
+            M_elMatP.zero();
             chronoElemComp.start();
             ipstab_grad(-coeffPress, M_elMatP, M_fe1, M_fe2, M_feBd,
                         nDimensions, nDimensions);
@@ -221,6 +223,7 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix, const VECTOR& state )
                        nDimensions, nDimensions);
             chronoAssembly.stop();
 
+            M_elMatP.zero();
             chronoElemComp.start();
             ipstab_grad(-coeffPress, M_elMatP, M_fe2, M_fe1, M_feBd,
                         nDimensions, nDimensions);

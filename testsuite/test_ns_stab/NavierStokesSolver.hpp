@@ -298,7 +298,7 @@ namespace LifeV
 #elif PETSC_SOLVER
     M_linearSolver.setOptionsFromGetPot( dataFile, "fluid/petsc" );
     
-    if ( this->BCh_fluid().hasOnlyEssential() && !M_diagonalize )
+    if ( this->bcHandler().hasOnlyEssential() && !M_diagonalize )
       {
         Real constPress = 1. / sqrt( _dim_u );
         for( UInt i=0; i<_dim_u*nDimensions; ++i )
@@ -561,12 +561,12 @@ namespace LifeV
     M_matrFullAux =  M_matrFull;
     
     // BC manage for the velocity
-    if ( !this->BCh_fluid().bdUpdateDone() )
-      this->BCh_fluid().bdUpdate( _mesh, _feBd_u, _dof_u );
-    bcManage( M_matrFull, M_rhsFull, _mesh, _dof_u, this->BCh_fluid(), 
+    if ( !this->bcHandler().bdUpdateDone() )
+      this->bcHandler().bdUpdate( _mesh, _feBd_u, _dof_u );
+    bcManage( M_matrFull, M_rhsFull, _mesh, _dof_u, this->bcHandler(), 
 	      _feBd_u, 1.0, M_time );
     
-    if ( this->BCh_fluid().hasOnlyEssential() && M_diagonalize )
+    if ( this->bcHandler().hasOnlyEssential() && M_diagonalize )
       M_matrFull.diagonalize( nDimensions*_dim_u, M_diagonalize, M_rhsFull, 0);
     
     chrono.stop();
@@ -591,7 +591,7 @@ namespace LifeV
       // use bdf based extrapolation as initial guess
       M_sol = _bdf.bdf_u().extrap();
     
-    if ( this->BCh_fluid().hasOnlyEssential() && !M_diagonalize )
+    if ( this->bcHandler().hasOnlyEssential() && !M_diagonalize )
       removeMean( M_sol, 4 );
     
     
@@ -625,7 +625,7 @@ namespace LifeV
               << M_linearSolver.iterations() << std::endl;
 #endif
     
-    if ( this->BCh_fluid().hasOnlyEssential() && !M_diagonalize )
+    if ( this->bcHandler().hasOnlyEssential() && !M_diagonalize )
       removeMean( M_sol, 4 );
     
     for ( UInt iDof = 0; iDof<nDimensions*_dim_u; ++iDof )
@@ -652,7 +652,7 @@ namespace LifeV
     
     // initialize M_sol with the first element in bdf_u.unk (=last value)
     M_sol = *( _bdf.bdf_u().unk().begin() );
-    if ( this->BCh_fluid().hasOnlyEssential() && !M_diagonalize )
+    if ( this->bcHandler().hasOnlyEssential() && !M_diagonalize )
       {
         removeMean( M_sol, 4 );
       }
