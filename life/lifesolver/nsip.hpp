@@ -321,7 +321,7 @@ NavierStokesSolverIP( const GetPot& dataFile,
 #elif PETSC_SOLVER
     M_linearSolver.setOptionsFromGetPot( dataFile, "fluid/petsc" );
 
-    if ( this->BCh_fluid().hasOnlyEssential() && !M_diagonalize )
+    if ( this->bcHandler().hasOnlyEssential() && !M_diagonalize )
     {
         Real constPress = 1. / sqrt( dim_u() );
         for( UInt i=0; i<dim_u()*nDimensions; ++i )
@@ -603,7 +603,7 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
         // use bdf based extrapolation as initial guess
         M_sol = bdf().bdf_u().extrap();
     }
-    if ( this->BCh_fluid().hasOnlyEssential() && !M_diagonalize )
+    if ( this->bcHandler().hasOnlyEssential() && !M_diagonalize )
     {
         removeMean( M_sol, 4 );
     }
@@ -628,7 +628,7 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
                   << condEst << std::endl;
     }
 
-    if ( this->BCh_fluid().hasOnlyEssential() && !M_diagonalize )
+    if ( this->bcHandler().hasOnlyEssential() && !M_diagonalize )
     {
         removeMean( M_sol, 4 );
     }
@@ -658,7 +658,7 @@ void NavierStokesSolverIP<Mesh>::initialize( const Function& x0,
 
     // initialize M_sol with the first element in bdf_u.unk (=last value)
     M_sol = *( bdf().bdf_u().unk().begin() );
-    if ( this->BCh_fluid().hasOnlyEssential() && !M_diagonalize )
+    if ( this->bcHandler().hasOnlyEssential() && !M_diagonalize )
     {
         removeMean( M_sol, 4 );
     }
@@ -790,7 +790,7 @@ NavierStokesSolverIP<Mesh>::initializeStokes( source_type const& source,
                   << condEst << std::endl;
     }
 
-    if ( this->BCh_fluid().hasOnlyEssential() && !M_diagonalize )
+    if ( this->bcHandler().hasOnlyEssential() && !M_diagonalize )
     {
         removeMean( M_sol, 4 );
     }
@@ -838,12 +838,12 @@ void NavierStokesSolverIP<Mesh>::applyBoundaryConditions()
     M_rhsFull = M_rhsNoBC;
 
     // BC manage for the velocity
-    if ( !this->BCh_fluid().bdUpdateDone() )
-        this->BCh_fluid().bdUpdate( _mesh, feBd_u(), uDof() );
-    bcManage( M_matrFull, M_rhsFull, _mesh, uDof(), this->BCh_fluid(), feBd_u(), 1.0,
+    if ( !this->bcHandler().bdUpdateDone() )
+        this->bcHandler().bdUpdate( _mesh, feBd_u(), uDof() );
+    bcManage( M_matrFull, M_rhsFull, _mesh, uDof(), this->bcHandler(), feBd_u(), 1.0,
                M_time );
 
-    if ( this->BCh_fluid().hasOnlyEssential() && M_diagonalize )
+    if ( this->bcHandler().hasOnlyEssential() && M_diagonalize )
     {
          M_matrFull.diagonalize( nDimensions*dim_u(), M_diagonalize,
                                  M_rhsFull, 0);
@@ -952,7 +952,7 @@ void NavierStokesSolverIP<Mesh>::calculateBoundaryForce( EntityFlag flag,
     //bch.bdUpdate( _mesh, feBd_u(), uDof() );
     //const BCBase& BCb = bch[0]
 
-    const BCBase& BCb = this->BCh_fluid().GetBCWithFlag( flag );
+    const BCBase& BCb = this->bcHandler().GetBCWithFlag( flag );
 
     fx = 0;
     fy = 0;
@@ -964,13 +964,14 @@ void NavierStokesSolverIP<Mesh>::calculateBoundaryForce( EntityFlag flag,
     // Loop on BC identifiers
     for ( ID i = 1; i <= BCb.list_size(); ++i )
     {
-        ID idDof = BCb( i ) ->id();
+        ID idDof = BCb( i )->id();
+
         fx += residual( idDof );
         fy += residual( idDof + nDof );
         fz += residual( idDof + 2*nDof );
     }
 
-//     const UInt nDof = uDof().numTotalDof();
+//     const UInt nDof = M_dof.numTotalDof();
 
 //     // local trace of the residual
 //     ElemVec f( M_feBd.nbNode, nDimensions );

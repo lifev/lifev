@@ -102,9 +102,11 @@ public:
 
     //! BCHandler getter and setter
 
-    LIFEV_DEPRECATED BCHandler const & BC_solid() const {return BCh_solid();}
+//    LIFEV_DEPRECATED BCHandler const & BC_solid() const {return BCh_solid();}
+    BCHandler const & BChandler() const {return BCh_solid();}
 
     void setBC(const BCHandler & BCd) {_BCh = BCd;}
+
     //! residual getter
     Vector& residual() {return _residual_d;}
 
@@ -118,15 +120,18 @@ public:
     void solveJac( Vector &step, const Vector& res, double& linear_rel_tol);
     //    void solveJac( const Vector& res, double& linear_rel_tol, Vector &step);
     //! solves the tangent problem with custom BC
+
     void solveJac( Vector &step,
                    const Vector& res,
                    double& linear_rel_tol,
                    bchandler_type &BCd );
+
     void solveJacobian( const Real );
 //    void solveJacobian( );
     void solveJacobian( const Real,
                         bchandler_type &BCd);
-    //! evaluates residual for newton interations
+
+//! evaluates residual for newton interations
     void evalResidual( Vector &res, const Vector& sol, int iter);
 
     void setSourceTerm( source_type const& __s ) { _M_source = __s; }

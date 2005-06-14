@@ -148,9 +148,9 @@ public:
     //! set the fluid BCs
     void setFluidBC(BCHandler &BCh_u){M_BCh_fluid = &BCh_u; M_setBC = true;}
     //! returns the BCHandler
-    BCHandler& BCh_fluid() {return *M_BCh_fluid;}
+    //BCHandler& BCh_fluid() {return *M_BCh_fluid;}
     //! deprecated
-     LIFEV_DEPRECATED BCHandler& bcHandler() {return *M_BCh_fluid;}
+    BCHandler& bcHandler() {return *M_BCh_fluid;}
     //! Update the right  hand side  for time advancing
     /*!
       \param source volumic source

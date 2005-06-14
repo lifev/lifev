@@ -115,7 +115,7 @@ public:
     void iterateLin( const Real& time, BCHandler& BCh_du );
     void solveJacobian(  const Real& time, BCHandler& BCh_du );
 
-    LIFEV_DEPRECATED BCHandler & BC_fluid() {return BCh_HarmonicExtension();}
+    //LIFEV_DEPREPCATED BCHandler & BC_fluid() {return BCh_HarmonicExtension();}
 
     Vector& residual();
     Vector  getDeltaLambda() {return _dt*_du;}
@@ -292,8 +292,8 @@ NavierStokesAleSolverPC( const GetPot& data_file, const RefFE& refFE_u, const Re
         _dataAztec_i( data_file, "fluid/aztec_i" ),
         _dataAztec_ii( data_file, "fluid/aztec_ii" ),
         _dataAztec_s( data_file, "fluid/aztec_s" ),
-        _factor_data( _C, _D, _trD, _H, _HinvC, _HinvDtr, _invCtrDP, _dataAztec_i, _dataAztec_s, this->BCh_fluid().hasOnlyEssential(), 1 ),
-        _factor_data_jacobian( _C, _D, _trD, _H, _HinvC, _HinvDtr, _invCtrDP, _dataAztec_i, _dataAztec_s, this->BCh_fluid().hasOnlyEssential(), 2 )
+        _factor_data( _C, _D, _trD, _H, _HinvC, _HinvDtr, _invCtrDP, _dataAztec_i, _dataAztec_s, this->bcHandler().hasOnlyEssential(), 1 ),
+        _factor_data_jacobian( _C, _D, _trD, _H, _HinvC, _HinvDtr, _invCtrDP, _dataAztec_i, _dataAztec_s, this->bcHandler().hasOnlyEssential(), 2 )
 {
     std::cout << std::endl;
     std::cout << "F-  Pressure unknowns: " << _dim_p << std::endl;
@@ -579,8 +579,8 @@ iterate( const Real& time )
     std::cout << "  F-  Applying boundary conditions... ";
     chrono.start();
     _f_u = _f_uWithOutBC;
-    this->BCh_fluid().bdUpdate( _mesh, _feBd_u, _dof_u );
-    bcManage( _C, _trD, _f_u, _mesh, _dof_u, this->BCh_fluid(), _feBd_u, tgv, time );
+    this->bcHandler().bdUpdate( _mesh, _feBd_u, _dof_u );
+    bcManage( _C, _trD, _f_u, _mesh, _dof_u, this->bcHandler(), _feBd_u, tgv, time );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
@@ -684,7 +684,7 @@ iterate( const Real& time )
     vec_DV = _D * _u;
 
     // case of pure Dirichlet BCs:
-    if ( this->BCh_fluid().hasOnlyEssential())
+    if ( this->bcHandler().hasOnlyEssential())
     {
         vec_DV[ _dim_p - 1 ] = 1.0; // correction of the right hand side.
         _p[ _dim_p - 1 ] = 1.0; // pressure value at the last node.

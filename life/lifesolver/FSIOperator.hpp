@@ -67,6 +67,7 @@ public:
 
     typedef VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >    solid_raw_type;
     typedef NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> > fluid_raw_type;
+
     typedef boost::shared_ptr<fluid_raw_type> fluid_type;
     typedef boost::shared_ptr<solid_raw_type> solid_type;
 
@@ -355,8 +356,8 @@ typedef singleton<factory<FSIOperator,  std::string> > FSIFactory;
 {   \
     \
     \
-    UInt iBCf = M_fluid->harmonicExtension().BCh_harmonicExtension().getBCbyName("Interface"); \
-    BCBase const &BC_fluidInterface = M_fluid->harmonicExtension().BCh_harmonicExtension()[iBCf];   \
+    UInt iBCf = M_fluid->harmonicExtension().BChandler().getBCbyName("Interface"); \
+    BCBase const &BC_fluidInterface = M_fluid->harmonicExtension().BChandler()[iBCf];   \
                                                                     \
     UInt nDofInterface = BC_fluidInterface.list_size();             \
     UInt nDimF = BC_fluidInterface.numberOfComponents();            \
