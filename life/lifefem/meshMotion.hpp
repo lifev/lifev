@@ -123,7 +123,7 @@ public:
     void setHarmonicExtensionBC(BCHandler &BCh_harmonicExtension);
     //! returns the BCHandler
     //const BCHandler& BCh_harmonicExtension() const {return *M_BCh_harmonicExtension;}
-    const BCHandler& BChandler() const {return *M_BCh_harmonicExtension;}
+    const BCHandler& bcHandler() const {return *M_BCh_harmonicExtension;}
 
 private:
 

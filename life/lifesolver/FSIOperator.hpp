@@ -356,8 +356,8 @@ typedef singleton<factory<FSIOperator,  std::string> > FSIFactory;
 {   \
     \
     \
-    UInt iBCf = M_fluid->harmonicExtension().BChandler().getBCbyName("Interface"); \
-    BCBase const &BC_fluidInterface = M_fluid->harmonicExtension().BChandler()[iBCf];   \
+    UInt iBCf = M_fluid->harmonicExtension().bcHandler().getBCbyName("Interface"); \
+    BCBase const &BC_fluidInterface = M_fluid->harmonicExtension().bcHandler()[iBCf];   \
                                                                     \
     UInt nDofInterface = BC_fluidInterface.list_size();             \
     UInt nDimF = BC_fluidInterface.numberOfComponents();            \
