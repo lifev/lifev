@@ -122,7 +122,8 @@ public:
     //! set the mesh BCs
     void setHarmonicExtensionBC(BCHandler &BCh_harmonicExtension);
     //! returns the BCHandler
-    const BCHandler& BCh_harmonicExtension() const {return *M_BCh_harmonicExtension;}
+    //const BCHandler& BCh_harmonicExtension() const {return *M_BCh_harmonicExtension;}
+    const BCHandler& BChandler() const {return *M_BCh_harmonicExtension;}
 
 private:
 
@@ -220,7 +221,7 @@ HarmonicExtension(  const GetPot& data_file,
     // Initializations
     _disp = ZeroVector( _disp.size() );
 
-//    _linearSolver.setOptionsFromGetPot( data_file, "mesh_motion/aztec" );
+    _linearSolver.setOptionsFromGetPot( data_file, "mesh_motion/aztec" );
     _linearSolver.setMatrix( _a );
 }
 template <typename Mesh>
