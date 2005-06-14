@@ -463,9 +463,9 @@ iterate( const Real& time )
     Debug( 6020 ) << "  o-  Applying boundary conditions... \n";
     chrono.start();
     // BC manage for the velocity
-    if ( !this->BCh_fluid().bdUpdateDone() )
-        this->BCh_fluid().bdUpdate( this->_mesh, this->_feBd_u, this->_dof_u );
-    bcManage( _C, _trD, _f_u, this->_mesh, this->_dof_u, this->BCh_fluid(), this->_feBd_u, tgv, time );
+    if ( !this->bcHandler().bdUpdateDone() )
+        this->bcHandler().bdUpdate( this->_mesh, this->_feBd_u, this->_dof_u );
+    bcManage( _C, _trD, _f_u, this->_mesh, this->_dof_u, this->bcHandler(), this->_feBd_u, tgv, time );
     chrono.stop();
     Debug( 6020 ) << "  o-  Applying boundary conditions done in " << chrono.diff() << "s." << "\n";
 
@@ -622,7 +622,7 @@ iterate( const Real& time )
     this->_p = ZeroVector( this->_p.size() ); // AT this point, this vector stands for the "pressure increment"
 
     // case of pure Dirichlet BCs:
-    if ( this->BCh_fluid().hasOnlyEssential() )
+    if ( this->bcHandler().hasOnlyEssential() )
     {
         vec_DV[ this->_dim_p - 1 ] = 0.0; // correction of the right hand side.
         this->_p[ this->_dim_p - 1 ] = 0.0; // pressure value at the last node.
