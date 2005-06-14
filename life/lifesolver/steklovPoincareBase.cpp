@@ -95,6 +95,7 @@ steklovPoincare::setup()
 
     M_reducedLinFluid.reset(new reducedLinFluid(this, M_fluid, M_solid));
 }
+
 //
 // Residual computation
 //
@@ -111,8 +112,8 @@ void steklovPoincare::eval(const Vector& disp,
 
     M_fluid->updateMesh(M_time);
 
-//     M_solid->postProcess();
-//     M_fluid->postProcess();
+//      M_solid->postProcess();
+//      M_fluid->postProcess();
 
     M_fluid->iterate   (M_time);
 
@@ -164,7 +165,7 @@ void steklovPoincare::evalResidual(Vector       &res,
     std::cout << "max ResidualFSI = " << norm_inf(M_residualFSI)
               << std::endl;
     std::cout << "max ResidualFSI = " << norm_inf(M_strongResidualFSI)
-              << std::endl;
+               << std::endl;
 
 
 //      Vector muk = disp;
@@ -289,24 +290,6 @@ void steklovPoincare::solveLinearSolid()
 
 void steklovPoincare::solveInvLinearSolid()
 {
-//     M_rhs_dz  = ZeroVector( M_rhs_dz.size() );
-//     M_dzSolid = ZeroVector( M_dzSolid.size() );
-
-//     if ( !M_BCh_dz_inv->bdUpdateDone() )
-//         M_BCh_dz_inv->bdUpdate(this->M_solid->mesh(),
-//                                this->M_solid->feBd(),
-//                                this->M_solid->dof());
-
-//     bcManageVector(M_rhs_dz,
-//                    this->M_solid->mesh(),
-//                    this->M_solid->dof(),
-//                    *M_BCh_dz_inv,
-//                    this->M_solid->feBd(),
-//                    1., 1.);
-
-//     Real tol       = 1.e-10;
-
-//     Debug(  6215 ) << "rhs_dz norm   = " << norm_inf(M_rhs_dz) << "\n";
     this->M_solid->setRecur(1);
     this->M_solid->updateJacobian(M_dzSolid, 0);
     this->M_solid->solveJacobian(0., M_BCh_dz_inv);
@@ -328,14 +311,20 @@ void  steklovPoincare::invSfPrime(const Vector& res,
     setResidualFSI(res);
 
     M_solid->disp() = ZeroVector(M_solid->disp().size());
-    //std::cout << "norm_inf residual FSI = " << norm_inf(M_residualFSI);
 
-    solveLinearFluid();
+//    solveLinearFluid();
 
-    Vector deltaLambda = this->M_fluid->getDeltaLambda();
+    M_reducedLinFluid->solveInvReducedLinearFluid();
+
+    //Vector deltaLambda = this->M_fluid->getDeltaLambda();
+
+    double dt  = this->M_fluid->timestep();
+    double rho = this->M_fluid->density();
+
+    Vector deltaLambda = dt*dt/rho*M_reducedLinFluid->residual();
 
     transferOnInterface(deltaLambda,
-                        M_fluid->BCh_fluid(),
+                        M_fluid->bcHandler(),
                         "Interface",
                         step);
 
@@ -513,12 +502,27 @@ Vector steklovPoincare::DDNprecond(Vector const &_z)
             // Neumann-Dirichlet preconditioner
             {
                 std::cout << " Neumann-Dirichlet Precond ... \n" << std::endl;
-                solveInvLinearFluid();
-                Vector deltaLambda = this->M_fluid->getDeltaLambda();
+//                 solveInvLinearFluid();
+//                 Vector deltaLambda = this->M_fluid->getDeltaLambda();
+//                 transferOnInterface(deltaLambda,
+//                                     M_fluid->BCh_fluid(),
+//                                     "Interface",
+//                                     Pz);
+
+                M_reducedLinFluid->solveInvReducedLinearFluid();
+
+                //Vector deltaLambda = this->M_fluid->getDeltaLambda();
+
+                double dt  = this->M_fluid->timestep();
+                double rho = this->M_fluid->density();
+
+                Vector deltaLambda = dt*dt/rho*M_reducedLinFluid->residual();
+
                 transferOnInterface(deltaLambda,
-                                    M_fluid->BCh_fluid(),
+                                    M_fluid->bcHandler(),
                                     "Interface",
                                     Pz);
+
             }
             break;
         case DIRICHLET_NEUMANN:
@@ -668,10 +672,14 @@ void steklovPoincare::setInterfaceNewtonBC()
 void steklovPoincare::computeStrongResidualFSI()
 {
 
-    Chrono chrono;
+    Chrono chrono, chronoloc;
     chrono.start();
 
-    std::cout << "  SP- Computing strong residual ... ";
+    std::cout << "  SP- Computing strong residual ... " << std::endl;
+
+    std::cout << "        builing the mass matrix ... " << std::flush;
+
+    chronoloc.start();
     MSRPatt         fullPattern( M_fluid->uDof(), nDimensions );
     ElemMat         elMassMatrix( M_fluid->fe_u().nbNode, nDimensions, nDimensions ); //velocity mass
     MSRMatr<double> massMatrix(fullPattern);
@@ -691,6 +699,10 @@ void steklovPoincare::computeStrongResidualFSI()
         }
     }
 
+    chronoloc.stop();
+    std::cout << "done in "<< chronoloc.diff() << "s." << std::endl << std::flush;
+    std::cout << "        computing the residual  ... " << std::flush;
+    chronoloc.start();
     // AZTEC specifications for the second system
     int    *data_org;     // data organisation for J
     int    proc_config[AZ_PROC_SIZE];  // Processor information:
@@ -732,8 +744,8 @@ void steklovPoincare::computeStrongResidualFSI()
                   AZ_MSR_MATRIX );
 
     PhysVectUnknown<Vector> strongResidual;
-    strongResidual.resize( M_fluid->uDof().numTotalDof() );
-    strongResidual  = ZeroVector(M_strongResidualFSI.size());
+//    strongResidual.resize( M_fluid->uDof().numTotalDof() );
+    strongResidual  = ZeroVector(M_residualFSI.size());
 
     AZ_solve( strongResidual.giveVec(), M_residualFSI.giveVec(),
               options, params, NULL,
@@ -741,12 +753,110 @@ void steklovPoincare::computeStrongResidualFSI()
               massMatrix.giveRaw_value(),
               data_org, status, proc_config );
 
-    transferOnInterface(strongResidual,
-                        M_fluid->BCh_fluid(),
-                        "Interface",
-                        M_strongResidualFSI);
+    std::cout << "done in "<< chronoloc.diff() << "s." << std::endl << std::flush;
+
+    std::cout << "        computing the normals   ... " << std::flush;
+    BCHandler BCh;
+
+    FSIOperator::dof_interface_type dofReducedFluidToMesh
+        (new FSIOperator::dof_interface_type::element_type);
+
+    Real f(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+
+    BCFunctionBase f0( fzeroSP);
+
+    BCh.addBC("Interface", 1, Natural, Full, f0, 3);
+    BCh.bdUpdate(this->fluid().mesh(),
+                 this->fluid().feBd_u(),
+                 this->fluid().uDof());
+
+
+    BCBase const &BCb = BCh[0];
+
+    // Number of local Dof (i.e. nodes) in this face
+    UInt nDofF = this->fluid().feBd_u().nbNode;
+
+    // Number of total scalar Dof
+    UInt totalDof = this->fluid().uDof().numTotalDof();
+
+    // Number of components involved in this boundary condition
+    UInt nComp = BCb.numberOfComponents();
+
+    const IdentifierNatural* pId;
+
+    ID ibF, idDof, icDof, gDof;
+
+    // ===================================================
+    // Loop on boundary faces
+    // ===================================================
+
+    PhysVectUnknown<Vector> nRhs;
+    nRhs = ZeroVector(M_residualFSI.size());
+
+    PhysVectUnknown<Vector> normals;
+    normals = ZeroVector(M_residualFSI.size());
+
+    for ( ID i = 1; i <= BCb.list_size(); ++i )
+    {
+        // Pointer to the i-th itdentifier in the list
+        pId = static_cast< const IdentifierNatural* >( BCb( i ) );
+
+        // Number of the current boundary face
+        ibF = pId->id();
+
+        ibF = BCb(i) -> id();
+//        std::cout << "iBF = " << ibF << " " << std::flush << std::endl;
+        // Updating face stuff
+        this->fluid().feBd_u().updateMeasNormalQuadPt(
+            this->fluid().mesh().boundaryFace( ibF ) );
+
+        // Loop on total Dof per Face
+        for ( ID l = 1; l <= nDofF; ++l )
+        {
+//            std::cout << l << " " << std::flush;
+            gDof = pId->bdLocalToGlobal( l );
+
+//            std::cout << gDof << std::endl << std::flush;
+            // Loop on components involved in this boundary condition
+            for ( UInt ic = 0; ic < nComp; ++ic )
+            {
+                icDof = gDof + ic * totalDof;
+
+                //Loop on quadrature points
+                    for ( int iq = 0; iq < this->fluid().feBd_u().nbQuadPt; ++iq )
+                 {
+                     // Adding right hand side contribution
+                     nRhs[ icDof - 1 ] += //BCb( gDof , 1 ) *
+                         this->fluid().feBd_u().phi( int( l - 1 ), iq ) *
+                         this->fluid().feBd_u().normal( int( ic ), iq ) *
+                         this->fluid().feBd_u().weightMeas( iq );
+                 }
+            }
+        }
+    }
+
+
+
+    AZ_solve( normals.giveVec(), nRhs.giveVec(),
+              options, params, NULL,
+              ( int * ) fullPattern.giveRaw_bindx(), NULL, NULL, NULL,
+              massMatrix.giveRaw_value(),
+              data_org, status, proc_config );
+
+    for ( int ii = 0; ii < M_strongResidualFSI.size(); ++ii)
+    {
+        M_strongResidualFSI(ii) =
+            sqrt(normals(ii + 0*totalDof)*strongResidual(ii + 0*totalDof) +
+                 normals(ii + 1*totalDof)*strongResidual(ii + 1*totalDof) +
+                 normals(ii + 2*totalDof)*strongResidual(ii + 2*totalDof));
+    }
+
+    chronoloc.stop();
+    std::cout << "done in "<< chronoloc.diff() << "s." << std::endl<< std::flush;
+
     chrono.stop();
-    std::cout << "done in " << chrono.diff() << " s." << std::endl;
+
+    std::cout << "        total time                          " << chrono.diff() << " s." << std::endl;
 
 
 
@@ -836,4 +946,6 @@ namespace
 FSIOperator* createSP(){ return new steklovPoincare(); }
 static bool reg = FSIFactory::instance().registerProduct( "steklovPoincare", &createSP );
 }
+
+
 }

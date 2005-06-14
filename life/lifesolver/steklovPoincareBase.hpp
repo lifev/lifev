@@ -108,7 +108,7 @@ private:
     PhysVectUnknown<Vector> M_residualF;
     PhysVectUnknown<Vector> M_residualFSI;
     //! FS strong residual
-    PhysVectUnknown<Vector> M_strongResidualFSI;
+    Vector                  M_strongResidualFSI;
 
     Real                    M_defOmega;
     Real                    M_defOmegaS;
