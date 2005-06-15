@@ -29,12 +29,12 @@ namespace LifeV
 {
 /*!
   \brief Base utilities operating on meshes
-
-
+  
+  
   This file contains a set of base utilities used to test mesh entities or
   operate on them
-
- */
+  
+*/
 
 //! A locally used structure, not meant for general use
 typedef std::map<BareFace, std::pair<ID, ID >,
@@ -240,7 +240,7 @@ public:
 //! Finds boundary faces.
 /*!  A low level routine, not meant to be called directly. It creates a
 container with all the information needed to set up properly the boundary
-faces connectivities.
+faces connectivities. 
 
 \param mesh A 3D mesh.
 
@@ -249,7 +249,7 @@ faces connectivities.
 \param bfaces This container will eventually contain a map whose key are
 the BareFace corresponding to the boundary faces and the data a pair of
 IDs: the ID of the adjacent element and the relative position of the face
-in the element.
+in the element. The search oof boundary faces does not rely on the proper setting of boundary nodes.
 
 \param allFaces When this bool is set true the function will also construct the set of internale faces, stored in intfaces.
 
@@ -786,14 +786,14 @@ setBPointsCounters( RegionMesh & mesh )
 
     for ( UInt k = 1;k <= mesh.numPoints();++k )
     {
-        if ( mesh.isBoundaryPoint( k ) )
-            mesh._bPoints.push_back( &mesh.point( k ) );
+      if ( mesh.isBoundaryPoint( k ) )
+	mesh._bPoints.push_back( &mesh.point( k ) );
     }
 }
 
 /*
 *******************************************************************************
-                                BOUNDARY INDICATOR FIXING
+BOUNDARY INDICATOR FIXING
 *******************************************************************************
 */
 //! It fixes boundary flag on points laying on boundary faces.
@@ -808,32 +808,30 @@ setBPointsCounters( RegionMesh & mesh )
 template <typename RegionMesh>
 void
 fixBPoints( RegionMesh & mesh, std::ostream & clog = std::cout,
-            std::ostream & /*err*/ = std::cerr, bool verbose = true )
+            std::ostream & err = std::cerr, bool verbose = true )
 {
-    ASSERT_PRE( mesh.numPoints() > 0, "The point list should not be empty" );
-    ASSERT_PRE( mesh.numBElements() > 0,
-                "The BElements list should not be empty" );
-
-    typedef typename RegionMesh::BElements BElements;
-    typedef typename RegionMesh::BElementShape BElementShape;
-    typename RegionMesh::BElementType * fp;
-
-    if ( verbose )
-        clog << "New BPoints Found " << std::endl;
-    for ( UInt k = 1;k <= mesh.numBElements();++k )
-    {
-        fp = &( mesh.bElement( k ) );
-        for ( UInt j = 1;j <= BElementShape::numPoints;++j )
-        {
-            if ( verbose && !fp->point( j ).boundary() )
-                clog << "ID: " << fp->point( j ).id() << std::endl;
-            fp->point( j ).boundary() = true;
-        }
-    }
-    // Fix now the number of vertices/points
-    setBPointsCounters( mesh );
+  ASSERT_PRE( mesh.numPoints() > 0, "The point list should not be empty" );
+  ASSERT_PRE( mesh.numBElements() > 0,
+	      "The BElements list should not be empty" );
+  
+  typedef typename RegionMesh::BElements BElements;
+  typedef typename RegionMesh::BElementShape BElementShape;
+  typename RegionMesh::BElementType * fp;
+  
+  if ( verbose ) clog << "Fixing BPoints" << std::endl;
+  std::vector<bool>bpts(mesh.numPoints());
+  
+  for ( UInt k = 1;k <= mesh.numBElements();++k )
+    for ( UInt j = 1;j <= BElementShape::numPoints;++j )
+      bpts[mesh.bElement(k).point(j).id()-1]=true;
+  
+  for (ID  k = 1; k <= mesh.numPoints() ;++k )
+    mesh.point(k).boundary()=bpts[k-1];
+  bpts.clear();
+  // Fix now the number of vertices/points
+  setBPointsCounters( mesh );
 }
-
+  
 //!It makes sure that boundary edges are stored first
 /*!
 \pre It assumes that boundary points are properly stored in the mesh
@@ -958,7 +956,7 @@ bool fixBoundaryFaces( RegionMesh3D & mesh,
                        Switch & sw,
                        UInt & numFaces,
                        UInt & bfaces_found,
-                       bool /*fixMarker */ = false,
+                       bool fixMarker= false,
                        bool verbose = false,
                        TempFaceContainer * ext_container )
 {
@@ -1470,7 +1468,7 @@ bool buildEdges( RegionMesh3D & mesh,
         {
             clog << "**** Marker Flags for Newly Created Boundary Edges ***"
                  << std::endl;
-            clog << "id->marker   id->marker   id->marker" << std::endl;
+            clog << "Edgeid->marker" << std::endl;
         }
 
         // First boundary.
@@ -1492,7 +1490,7 @@ bool buildEdges( RegionMesh3D & mesh,
             id = mesh.addEdge( edge, true ).id();
             if ( verbose )
             {
-                if ( id % 3 == 0 )
+                if ( id % 6 == 0 )
                     clog << std::endl;
                 clog << id << " -> ";
                 edge.printFlag( clog );

@@ -514,9 +514,13 @@ namespace LifeV
     */
     PointType & addPoint( PointType const & p, bool const boundary = false, bool const vertices = false );
     /*! Add a point
-      This version is for advanced use only
+      This methos is for advanced use only
     */
     PointType & setPoint( PointType const & p, ID const position, bool const boundary = false, bool const vertices = false );
+    /*! Add a point
+      This method is for advanced use only
+    */
+    PointType & setPoint( ID const & position, bool const boundary = false, bool const vertices = false );
 
     //!< adds point
     UInt addPoint( ID const iden, bool const boundary = false, UInt const start = 1 );
@@ -551,7 +555,7 @@ namespace LifeV
       {VERTEX=0, EDGE = 1, FACE = 2, VOLUME = 3};
     
     */
-    void extractEntityList(std::vector<ID> &, ReferenceGeometry r, EntityFlag const &) const;
+    void extractEntityList(std::vector<ID> &, ReferenceGeometry const & r, EntityFlag const &) const;
 
     //! Prints some mesh info
       std::ostream & showMe( bool verbose = false, std::ostream & out = std::cout ) const;
@@ -1366,7 +1370,7 @@ namespace LifeV
   template <typename GEOSHAPE, typename MC>
   INLINE
   typename RegionMesh3D<GEOSHAPE, MC>::PointType &
-  RegionMesh3D<GEOSHAPE, MC>::setPoint( PointType const & p, ID position, bool const boundary, bool const /*vertex*/ )
+  RegionMesh3D<GEOSHAPE, MC>::setPoint( PointType const & p, ID position, bool const boundary, bool const vertex)
   {
     ASSERT_PRE( position <= pointList.capacity(), "Position  exceed lpoint list capacity" <<
                 position << " " << pointList.capacity() ) ;
@@ -1395,6 +1399,37 @@ namespace LifeV
     return *pp;
   }
 
+  template <typename GEOSHAPE, typename MC>
+  INLINE
+  typename RegionMesh3D<GEOSHAPE, MC>::PointType &
+  RegionMesh3D<GEOSHAPE, MC>::
+  setPoint(ID const & position, bool const boundary, bool const vertex)
+  {
+    ASSERT_PRE( position <= pointList.capacity(), "Position  exceed lpoint list capacity" <<
+                position << " " << pointList.capacity() ) ;
+    bool found( false );
+    PointType * pp = & pointList( position );
+    if ( boundary )
+      {
+        pp->boundary() = true;
+        // This is rather complex, since I do not know a priori
+        // if point was already stored in the list!
+        // No way to avoid it, sorry
+	
+        for ( typename SimpleVect<PointType *>::iterator bp = _bPoints.begin(); bp != _bPoints.end(); ++bp )
+	  {
+            if ( ( *bp ) ->id() == position )
+	      {
+                found = true;
+                break;
+	      }
+	  }
+        if ( ! found )
+	  _bPoints.push_back( pp );
+      }
+    return *pp;
+  }
+  
   template <typename GEOSHAPE, typename MC>
   INLINE
   //RegionMesh3D<GEOSHAPE,MC>::PointType &
@@ -1840,7 +1875,7 @@ namespace LifeV
   template <typename GEOSHAPE, typename MC>
   void
   RegionMesh3D<GEOSHAPE, MC>::extractEntityList
-  (std::vector<ID> & list, ReferenceGeometry geometry, EntityFlag const & flag) const
+  (std::vector<ID> & list, ReferenceGeometry const & geometry, EntityFlag const & flag) const
   {
     switch(geometry){
     case VERTEX:

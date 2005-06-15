@@ -477,33 +477,42 @@ bool checkMesh3D( RegionMesh3D & mesh,
         // Make sure BFaces are stored first
         // Here I need to use a method that does not require the proper
         // setting of boundary Points!
-        if ( mesh.numBFaces() < mesh.storedFaces() )
+      if ( mesh.numBFaces() !=  bFacesFound) {
+	err<<" ERROR: Number of B faces does not correspond to real one"<<std::endl;
+	if (fix)
+	  {
+	    err<<"FIXED Number of B faces has been fixed to:" << bFacesFound<<std::endl;
+	    mesh.setNumBFaces( bFacesFound);
+	  }
+      }
+      
+      if ( mesh.numBFaces() < mesh.storedFaces() )
         {
-            if ( fix )
-                std::stable_partition( mesh.faceList.begin(),
-                                       mesh.faceList.end(), enquireBFace );
-            if ( fix )
-                fixIdnumber( mesh.faceList );
-            if ( fix )
-                sw.create( "FIXED_BFACES_FIRST" );
+	  if ( fix )
+	    std::stable_partition( mesh.faceList.begin(),
+				   mesh.faceList.end(), enquireBFace );
+	  if ( fix )
+	    fixIdnumber( mesh.faceList );
+	  if ( fix )
+	    sw.create( "FIXED_BFACES_FIRST" );
         }
-
-
+      
+      
         if ( !checkIdnumber( mesh.faceList ) )
         {
-            err << "ERROR: face ids where wrongly set" << std::endl;
-            err << "FIXED" << std::endl;
-            if ( fix )
-                sw.create( "FIXED_FACES_ID", true );
-            if ( fix )
-                fixIdnumber( mesh.faceList );
+	  err << "ERROR: face ids where wrongly set" << std::endl;
+	  err << "FIXED" << std::endl;
+	  if ( fix )
+	    sw.create( "FIXED_FACES_ID", true );
+	  if ( fix )
+	    fixIdnumber( mesh.faceList );
         }
 
         // Check Consistency with the mesh. Beware that this method changes *bfaces!
 
         if ( fix )
             fixBoundaryFaces( mesh, clog, err, sw, numFaces, bFacesFound,
-                              true, verbose, bfaces.get() );
+                              false, verbose, bfaces.get() );
 
         if ( mesh.storedFaces() == 0 )
         {
@@ -554,11 +563,12 @@ bool checkMesh3D( RegionMesh3D & mesh,
             sw.create( "FIXED_FACE_COUNTER", true );
     }
 
-    if ( fix && mesh.storedFaces() > mesh.numBFaces() )
+    if ( fix && mesh.storedFaces() == bFacesFound + numInternalFaces)
         mesh.setLinkSwitch( "HAS_ALL_FACES" );
 
     out << " Boundary faces found:" << bFacesFound << std::endl;
     out << " Num Faces Stored stored:" << mesh.storedFaces() << std::endl;
+    out << " Num faces in mesh      :" << mesh.numFaces() << std::endl;
     out << " Boundary faces counter gives:" << mesh.numBFaces() << std::endl;
 
     //-----------------------------------------------------
@@ -578,22 +588,30 @@ bool checkMesh3D( RegionMesh3D & mesh,
          mesh.numBEdges() > mesh.storedEdges() ||
          bEdgesFound > mesh.storedEdges() )
     {
-        err << "WARNING: mesh does not store all boundary edges" << std::endl;
+        err << "WARNING: mesh does not store (all) boundary edges" << std::endl;
         sw.create( "NOT_HAS_EDGES", true );
         if ( fix )
-            buildEdges( mesh, clog, err, bEdgesFound, intedge, true, false,
-                        verbose, bedges.get() );
+	  buildEdges( mesh, clog, err, bEdgesFound, intedge, true, false,
+		      false, bedges.get() );
         Ned = bEdgesFound + intedge;
         if ( fix )
-            sw.create( "BUILD_BEDGES", true );
+	  sw.create( "BUILD_BEDGES", true );
     }
     else
     {
 
-        // Make sure BEdges are first
-        // Here I need to use a method that does not require the proper
-        // setting of boundary Points!
-
+      // Make sure BEdges are first
+      // Here I need to use a method that does not require the proper
+      // setting of boundary Points!
+      if ( mesh.numBEdges() !=  bEdgesFound) {
+	err<<" ERROR: Number of BEdges does not correspond to real one"<<std::endl;
+	if (fix)
+	  {
+	    err<<"FIXED Number of BEdges has been fixed to:" <<bEdgesFound<<std::endl;
+	    mesh.setNumBEdges( bEdgesFound);
+	  }
+      }
+      
         if ( fix )
             std::stable_partition( mesh.edgeList.begin(), mesh.edgeList.end(),
                                    enquireBEdge );
@@ -628,6 +646,8 @@ bool checkMesh3D( RegionMesh3D & mesh,
             Ned = bEdgesFound + findInternalEdges( mesh, *bedges, iedges );
     }
     iedges.clear();
+    TempEdgeContainer tmp;
+    iedges.swap(tmp);
 
     if ( mesh.numBEdges() != bEdgesFound )
     {
@@ -676,8 +696,10 @@ bool checkMesh3D( RegionMesh3D & mesh,
     //-----------------------------------------------------
     //                                    POINTS
     //-----------------------------------------------------
+    // Now that boundary faces have been correctly set we may work out
+    // boundaty points
+    if (fix) fixBPoints(mesh,clog,err,verbose);
     EnquireBPoint<RegionMesh3D> enquirebpoint( mesh );
-
     UInt foundBPoints = std::count_if( mesh.pointList.begin(),
                                        mesh.pointList.end(), enquirebpoint );
 
