@@ -1289,17 +1289,17 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
     if(!checkMesh3D(mesh, sw, true,verbose,oStr,std::cerr,oStr)) abort(); // CORRECTION JFG
 
     Real vols[3];
-    getVolumeFromFaces(mesh, vols,ostr);
-    ostr << "   VOLUME ENCLOSED BY THE MESH COMPUTED BY INTEGRATION ON"<<
+    getVolumeFromFaces(mesh, vols,oStr);
+    oStr << "   VOLUME ENCLOSED BY THE MESH COMPUTED BY INTEGRATION ON"<<
         " BOUNDARY FACES"<<std::endl;
-    ostr << "INT(X)     INT(Y)      INT(Z) <- they should be equal and equal to"
+    oStr << "INT(X)     INT(Y)      INT(Z) <- they should be equal and equal to"
          << std::endl
          << "                                 the voulume enclosed by the mesh "
          << std::endl;
-    ostr << vols[0] << " " << vols[1] << " " << vols[2] << std::endl;
+    oStr << vols[0] << " " << vols[1] << " " << vols[2] << std::endl;
 
-    ostr << "   BOUNDARY FACES ARE DEFINING A CLOSED SURFACE IF "
-         << testClosedDomain(mesh,ostr) << std::endl
+    oStr << "   BOUNDARY FACES ARE DEFINING A CLOSED SURFACE IF "
+         << testClosedDomain(mesh,oStr) << std::endl
          << " IS (ALMOST) ZERO" << std::endl;
 
     return true;
