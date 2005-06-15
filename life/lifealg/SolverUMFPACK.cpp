@@ -102,12 +102,17 @@ SolverUMFPACK::reportStatus( int status )
     umfpack_di_report_status( _M_Control, status);
 }
 void
-SolverUMFPACK::setMatrix( const matrix_type& m )
+SolverUMFPACK::setMatrix( const matrix_type& m,
+                          bool samePattern )
 {
     _M_p->_M_mat = m;
+    _M_matrix_values_reset = true;
+    if ( !samePattern )
+        _M_matrix_reset = true;
 }
 void
-SolverUMFPACK::setMatrix( const CSRMatr<CSRPatt, value_type>& m )
+SolverUMFPACK::setMatrix( const CSRMatr<CSRPatt, value_type>& m,
+                          bool samePattern )
 {
     Debug( 5100 ) << "copying csr matrix into a csc matrix\n";
     Debug( 5100 ) << "nrows = " << m.Patt()->nRows() << "\n";
@@ -126,6 +131,9 @@ SolverUMFPACK::setMatrix( const CSRMatr<CSRPatt, value_type>& m )
             _M_p->_M_mat( iRow,  iCol ) = m.get_value( iRow, iCol );
         }
     }
+    _M_matrix_values_reset = true;
+    if ( !samePattern )
+        _M_matrix_reset = true;
 }
 void
 SolverUMFPACK::solve( array_type& __X, array_type const& __B )

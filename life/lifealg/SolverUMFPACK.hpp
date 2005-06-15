@@ -107,10 +107,19 @@ public:
      */
     //@{
 
-    //! set matrix from CSRMatr
-    void setMatrix( const CSRMatr<CSRPatt, value_type>& m );
+    /*! set matrix from CSRMatr
+      @param m CSR matrix
+      @param samePattern true, if new matrix has same pattern as matrix before
+    */
+    void setMatrix( const CSRMatr<CSRPatt, value_type>& m,
+                    bool samePattern=false );
 
-    void setMatrix( matrix_type const& m );
+    /*! set matrix from boost matrix
+      @param m boost matrix
+      @param samePattern true, if new matrix has same pattern as matrix before
+     */
+    void setMatrix( matrix_type const& m,
+                    bool samePattern=false );
 
     //@}
 
