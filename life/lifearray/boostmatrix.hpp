@@ -50,29 +50,25 @@ namespace LifeV
     */
     template<typename storage_scheme>
     class BoostMatrix
-        : public boost::numeric::ublas::compressed_matrix<double, storage_scheme>
+        : public boost::numeric::ublas::compressed_matrix<double, storage_scheme, 0, boost::numeric::ublas::unbounded_array<int> >
     {
     public:
+        typedef boost::numeric::ublas::compressed_matrix<double, storage_scheme, 0, boost::numeric::ublas::unbounded_array<int> > super;
         //! empty constructor
         BoostMatrix( typename BoostMatrix::size_type size1,
                      typename BoostMatrix::size_type size2 )
-            : boost::numeric::ublas::compressed_matrix<double, storage_scheme>
-            ( size1, size2 ) { }
+            : super( size1, size2 ) { }
 
         //! Copy constructor
 
         template<typename __E>
         BoostMatrix( const boost::numeric::ublas::matrix_expression<__E>& M)
-            :
-            boost::numeric::ublas::compressed_matrix<double, storage_scheme>(M)
-        {
-        }
+            : super(M) { }
 
         //! Constructor from a pattern object
 
         BoostMatrix( const BasePattern& pattern )
-            : boost::numeric::ublas::compressed_matrix<double, storage_scheme>
-        ( pattern.nRows(), pattern.nCols() ) {
+            : super( pattern.nRows(), pattern.nCols() ) {
             UInt __nnz = pattern.nNz();
 
             // Save current non-zero entries of the matrix in vector __val
@@ -184,7 +180,7 @@ namespace LifeV
         //! Operator =
         template<typename __storage_scheme, typename __E>
         BoostMatrix<__storage_scheme> operator=(const boost::numeric::ublas::matrix_expression<__E>& M) {
-            return boost::numeric::ublas::compressed_matrix<storage_scheme>::operator=(M);
+            return super::operator=(M);
         }
 
         //! Dump matrix to file in Matlab format and spy
@@ -232,8 +228,7 @@ namespace LifeV
     template<>
     template<UInt BROWS, UInt BCOLS, typename PATTERN>
     BoostMatrix<boost::numeric::ublas::row_major>::BoostMatrix( const MixedPattern<BROWS, BCOLS, PATTERN>& pattern )
-        :
-        boost::numeric::ublas::compressed_matrix<double, boost::numeric::ublas::row_major>( pattern.nRows(), pattern.nCols() )
+        : super( pattern.nRows(), pattern.nCols() )
     {
         UInt __nnz = pattern.nNz();
 
@@ -281,8 +276,7 @@ namespace LifeV
     template<>
     template<UInt BROWS, UInt BCOLS, typename PATTERN>
     BoostMatrix<boost::numeric::ublas::column_major>::BoostMatrix( const MixedPattern<BROWS, BCOLS, PATTERN>& pattern )
-        :
-        boost::numeric::ublas::compressed_matrix<double, boost::numeric::ublas::column_major>( pattern.nRows(), pattern.nCols() )
+        : super( pattern.nRows(), pattern.nCols() )
     {
         UInt __nnz = pattern.nNz();
 
@@ -354,11 +348,12 @@ namespace LifeV
             }
     }
 
-    class DiagonalBoostMatrix : public boost::numeric::ublas::compressed_matrix<double, boost::numeric::ublas::row_major>
+    class DiagonalBoostMatrix : public boost::numeric::ublas::compressed_matrix<double, boost::numeric::ublas::row_major, 0, boost::numeric::ublas::unbounded_array<int> >
     {
     public:
+        typedef boost::numeric::ublas::compressed_matrix<double, boost::numeric::ublas::row_major, 0, boost::numeric::ublas::unbounded_array<int> > super;
         DiagonalBoostMatrix( size_type n )
-            : boost::numeric::ublas::compressed_matrix<double, boost::numeric::ublas::row_major>( n, n, n )
+            : super( n, n, n )
         {
             for( size_type i=0; i<this->size1(); ++i )
                 {
@@ -370,10 +365,7 @@ namespace LifeV
 
         template<typename __E>
         DiagonalBoostMatrix( const boost::numeric::ublas::matrix_expression<__E>& M)
-            :
-            boost::numeric::ublas::compressed_matrix<double, boost::numeric::ublas::row_major>(M)
-        {
-        }
+            : super(M) { }
 
         void invert()
         {
@@ -386,7 +378,7 @@ namespace LifeV
         //! Operator =
         template<typename __E>
         DiagonalBoostMatrix operator=(const boost::numeric::ublas::matrix_expression<__E>& M) {
-            return boost::numeric::ublas::compressed_matrix<double, boost::numeric::ublas::row_major>::operator=(M);
+            return super::operator=(M);
         }
 
         template<typename matrix_type>
