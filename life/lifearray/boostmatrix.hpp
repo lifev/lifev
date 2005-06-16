@@ -50,10 +50,12 @@ namespace LifeV
     */
     template<typename storage_scheme>
     class BoostMatrix
-        : public boost::numeric::ublas::compressed_matrix<double, storage_scheme, 0, boost::numeric::ublas::unbounded_array<int> >
+//        : public boost::numeric::ublas::compressed_matrix<double, storage_scheme, 0, boost::numeric::ublas::unbounded_array<int> >
+        : public boost::numeric::ublas::compressed_matrix<double, storage_scheme>
     {
     public:
-        typedef boost::numeric::ublas::compressed_matrix<double, storage_scheme, 0, boost::numeric::ublas::unbounded_array<int> > super;
+//        typedef boost::numeric::ublas::compressed_matrix<double, storage_scheme, 0, boost::numeric::ublas::unbounded_array<int> > super;
+        typedef boost::numeric::ublas::compressed_matrix<double, storage_scheme> super;
         //! empty constructor
         BoostMatrix( typename BoostMatrix::size_type size1,
                      typename BoostMatrix::size_type size2 )
@@ -348,10 +350,13 @@ namespace LifeV
             }
     }
 
-    class DiagonalBoostMatrix : public boost::numeric::ublas::compressed_matrix<double, boost::numeric::ublas::row_major, 0, boost::numeric::ublas::unbounded_array<int> >
+    class DiagonalBoostMatrix
+//        : public boost::numeric::ublas::compressed_matrix<double, boost::numeric::ublas::row_major, 0, boost::numeric::ublas::unbounded_array<int> >
+        : public boost::numeric::ublas::compressed_matrix<double, boost::numeric::ublas::row_major>
     {
     public:
-        typedef boost::numeric::ublas::compressed_matrix<double, boost::numeric::ublas::row_major, 0, boost::numeric::ublas::unbounded_array<int> > super;
+//        typedef boost::numeric::ublas::compressed_matrix<double, boost::numeric::ublas::row_major, 0, boost::numeric::ublas::unbounded_array<int> > super;
+        typedef boost::numeric::ublas::compressed_matrix<double, boost::numeric::ublas::row_major> super;
         DiagonalBoostMatrix( size_type n )
             : super( n, n, n )
         {
