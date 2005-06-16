@@ -65,6 +65,8 @@ class AboutDataPrivate
 public:
     AboutDataPrivate()
         {}
+    AboutDataPrivate( AboutDataPrivate const& adp )
+        {}
     ~AboutDataPrivate()
         {
         }
@@ -114,7 +116,8 @@ AboutData::AboutData( AboutData const& ad )
     _M_BugEmailAddress( ad._M_BugEmailAddress ),
     _M_AuthorList( ad._M_AuthorList ),
     _M_CreditList( ad._M_CreditList ),
-    _M_LicenseText ( ad._M_LicenseText )
+    _M_LicenseText ( ad._M_LicenseText ),
+    d( new AboutDataPrivate( *(ad.d) ) )
 {
 }
 AboutData::~AboutData()
