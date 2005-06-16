@@ -272,7 +272,7 @@ HarmonicExtension( const GetPot& data_file,
 template <typename Mesh>
 void HarmonicExtension::updateExtension( Mesh& mesh, const Real& time, const UInt recur )
 {
-    if ( M_BCh_harmonicExtension->bdUpdateDone() )
+    if (  ! M_BCh_harmonicExtension->bdUpdateDone() )
     {
         // BC boundary information update
         M_BCh_harmonicExtension->bdUpdate( mesh, _feBd, _dof_mesh );
