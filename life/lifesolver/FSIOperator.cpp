@@ -71,7 +71,7 @@ FSIOperator::setup()
                                              0.0);
 
         M_dofReducedFluidToStructure->setup(M_solid->mesh().getRefFE(), M_solid->dDof(),
-                                            M_fluid->mesh().getRefFE(), M_fluid->pDof());
+                                            M_fluid->mesh().getRefFE(), M_fluid->uDof());
         M_dofReducedFluidToStructure->update(M_solid->mesh(), 1,
                                              M_fluid->mesh(), 1,
                                              0.0);
