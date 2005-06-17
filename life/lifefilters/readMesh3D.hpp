@@ -365,7 +365,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
     Real x, y, z;
     UInt p1, p2, p3, p4, p5, p6, p7, p8;
     UInt nVe( 0 ), nBVe( 0 ), nFa( 0 ), nBFa( 0 ), nPo( 0 ), nBPo( 0 );
-    UInt numStoredFaces;
+    UInt numStoredFaces(0);
     UInt nVo( 0 ), nEd( 0 ), nBEd( 0 );
     UInt i;
     ReferenceShapes shape;
@@ -430,15 +430,15 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
                 nPo = nVe + nEd;
                 // nBPo=nBVe+nBEd; // FALSE : nBEd is not known at this stage in a INRIA file (JFG 07/2002)
                 // I use the relation  nBVe + nBFa - 2 = nBEd, But, is it general (hole...) ???? (JFG 07/2002)
-                nBEd=( nBVe + nBFa - 2 );
-                nBPo = nBVe + ( nBVe + nBFa - 2 );
+                nBEd=(int( nBVe + nBFa - int(2) )>0?( nBVe + nBFa - 2 ):0);
+                nBPo = (int(nBVe + ( nBVe + nBFa - int(2) ))>0?nBVe + ( nBVe + nBFa - 2 ):0);
             }
             else
             {
                 std::cout << "Linear Tetra Mesh" << std::endl;
                 nPo = nVe;
                 nBPo = nBVe;
-                nBEd=( nBVe + nBFa - 2 );
+                nBEd=(int( nBVe + nBFa - int(2) )>0?( nBVe + nBFa - 2 ):0);
             }
             break;
         default:

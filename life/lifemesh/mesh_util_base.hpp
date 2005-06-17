@@ -268,6 +268,7 @@ UInt findFaces( const RegionMesh3D & mesh, TempFaceContainer & bfaces,
     BareFace bface;
     typename RegionMesh3D::VolumeShape ele;
     typedef typename RegionMesh3D::Volumes Volumes;
+    TempFaceContainer fctmp;
     TempFaceContainer::iterator fi;
 
     // clean first in case it has been alredy used
@@ -408,11 +409,12 @@ UInt findInternalEdges( const RegionMesh3D & mesh,
     BareEdge bedge;
     typedef typename RegionMesh3D::ElementShape VolumeShape;
     typedef typename RegionMesh3D::Volumes Volumes;
-
+    TempEdgeContainer tec;
 
     ASSERT0( mesh.numVolumes() > 0, "We must have some 3D elements stored n the mesh to use this function!" );
 
     internal_edges.clear();
+    internal_edges.swap(tec);
 
 
     for ( typename Volumes::const_iterator ifa = mesh.volumeList.begin();
@@ -772,7 +774,7 @@ setBPointsCounters( RegionMesh & mesh )
         }
     }
 
-    for ( UInt k = mesh.numVertices() + 1;k <= mesh.numPoints();++k )
+    for ( UInt k = mesh.numVertices() + 1;k <= mesh.storedPoints();++k )
     {
         if ( mesh.isBoundaryPoint( k ) )
         {
@@ -782,9 +784,10 @@ setBPointsCounters( RegionMesh & mesh )
 
     mesh.numBVertices() = countBV;
     mesh.setNumBPoints( countBP );
+    mesh._bPoints.clear();
     mesh._bPoints.reserve( countBP );
 
-    for ( UInt k = 1;k <= mesh.numPoints();++k )
+    for ( UInt k = 1;k <= mesh.storedPoints();++k )
     {
       if ( mesh.isBoundaryPoint( k ) )
 	mesh._bPoints.push_back( &mesh.point( k ) );
@@ -819,14 +822,23 @@ fixBPoints( RegionMesh & mesh, std::ostream & clog = std::cout,
 
   if ( verbose ) clog << "Fixing BPoints" << std::endl;
   std::vector<bool>bpts(mesh.numPoints());
-
+  // I may have launched the program for a P2 mesh
+  // yet not all the points are there
+  unsigned int numitems;
+  if(mesh.storedPoints()==mesh.numVertices()){
+    numitems=BElementShape::numVertices;
+  } else {
+    numitems=BElementShape::numPoints;
+  }
+    
   for ( UInt k = 1;k <= mesh.numBElements();++k )
-    for ( UInt j = 1;j <= BElementShape::numPoints;++j )
+    for ( UInt j = 1;j <= numitems;++j )
       bpts[mesh.bElement(k).point(j).id()-1]=true;
-
-  for (ID  k = 1; k <= mesh.numPoints() ;++k )
+  for (ID  k = 1; k <= mesh.storedPoints() ;++k )
     mesh.point(k).boundary()=bpts[k-1];
-  bpts.clear();
+    bpts.clear();
+    std::vector<bool> temp;
+    bpts.swap(temp);
   // Fix now the number of vertices/points
   setBPointsCounters( mesh );
 }
