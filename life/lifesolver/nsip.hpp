@@ -227,7 +227,7 @@ private:
     UInt M_nUsePC;
     Real M_tTotalSolve;
     Real M_tLastSolve;
-    Real M_tThisSolve;
+    bool M_reusePC;
 
     UInt dim_u() const { return _dim_u; }
     UInt dim_p() const { return _dim_p; }
@@ -282,7 +282,7 @@ NavierStokesSolverIP( const GetPot& dataFile,
     M_nUsePC( 1 ),
     M_tTotalSolve( 0 ),
     M_tLastSolve( 1 ),
-    M_tThisSolve( 1 )
+    M_reusePC( false )
 {
     M_steady = dataFile( "fluid/miscellaneous/steady", 1 );
     M_gammaBeta = dataFile( "fluid/ipstab/gammaBeta", 0. );
@@ -777,6 +777,10 @@ NavierStokesSolverIP<Mesh>::initializeStokes( source_type const& source,
     Real condEst;
     UInt iter = solveLinearSystem( condEst );
     chrono.stop();
+
+    // force rebuild next time
+    M_reusePC = false;
+
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
     if ( iter > 0 )
     {
@@ -861,18 +865,15 @@ void NavierStokesSolverIP<Mesh>::applyBoundaryConditions()
 template <typename Mesh>
 UInt NavierStokesSolverIP<Mesh>::solveLinearSystem(Real& condEst)
 {
+#if 1-UMFPACK_SOLVER
     M_linearSolver.setMatrix( M_matrFull );
 
-#if 1-UMFPACK_SOLVER
-    if ( M_tTotalSolve < M_nUsePC * M_tThisSolve*M_tThisSolve/M_tLastSolve ) {
+    solveLinearSystemOnce( M_reusePC );
+    if ( M_reusePC && !M_linearSolver.converged() ) // retry if not converged
         solveLinearSystemOnce( false );
-    } else {
-        solveLinearSystemOnce( true );
-        if ( !M_linearSolver.converged() ) {
-            solveLinearSystemOnce( false );
-        }
-    }
 #else
+    M_linearSolver.setMatrix( M_matrFull, true );
+
     M_linearSolver.solve( M_sol, M_rhsFull );
 #endif
 
@@ -912,15 +913,19 @@ void NavierStokesSolverIP<Mesh>::solveLinearSystemOnce( bool reusePC )
         M_linearSolver.solve( M_sol, M_rhsFull, SAME_PRECONDITIONER );
 #endif
         chrono.stop();
-        if ( M_nUsePC == 1 ) {
-            M_tThisSolve = chrono.diff();
-            M_tLastSolve = M_tThisSolve;
-        } else {
-            M_tLastSolve = M_tThisSolve;
-            M_tThisSolve = chrono.diff();
-        }
-        M_tTotalSolve += M_tThisSolve;
+        Real tThisSolve = chrono.diff();
+        M_tTotalSolve += tThisSolve;
         ++M_nUsePC;
+
+        Real tNextSolve;
+        if ( M_nUsePC == 2 ) {
+            tNextSolve = tThisSolve;
+        } else {
+            tNextSolve = tThisSolve * tThisSolve / M_tLastSolve;
+        }
+        M_reusePC = ( M_tTotalSolve > M_nUsePC * tNextSolve );
+        M_tLastSolve = tThisSolve;
+
     } else {
         chrono.start();
 #if AZTEC_SOLVER
@@ -930,9 +935,9 @@ void NavierStokesSolverIP<Mesh>::solveLinearSystemOnce( bool reusePC )
         M_linearSolver.solve( M_sol, M_rhsFull, SAME_NONZERO_PATTERN );
 #endif
         chrono.stop();
-        M_tThisSolve = chrono.diff();
-        M_tLastSolve = 2 * M_tThisSolve;
-        M_tTotalSolve = M_tThisSolve;
+        M_tLastSolve = chrono.diff();
+        M_reusePC = true;
+        M_tTotalSolve = M_tLastSolve;
         M_nUsePC = 1;
     }
 } // solveLinearSystemOnce
