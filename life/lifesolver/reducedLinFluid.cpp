@@ -158,6 +158,8 @@ void reducedLinFluid::solveInvReducedLinearFluid()
     M_dp = ZeroVector( M_dp.size() );
 
     M_linearSolver.solve( M_dp, M_f, SolverAztec::SAME_PRECONDITIONER );
+
+    evalResidual();
 }
 
 

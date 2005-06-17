@@ -576,9 +576,9 @@ void steklovPoincare::setBC()
                    *bcvStructureDispToSolid(), 3);
 
 
-    M_BCh_mesh->bdUpdate(this->M_fluid->mesh(),
-                         this->M_fluid->feBd_u(),
-                         this->M_fluid->uDof());
+//     M_BCh_mesh->bdUpdate(this->M_fluid->mesh(),
+//                          this->M_fluid->feBd_u(),
+//                          this->M_fluid->uDof());
     //    COUPLED FSI LINEARIZED OPERATORS
     //
     // Passing the residue to the linearized fluid: \sigma -> du
@@ -679,99 +679,23 @@ void steklovPoincare::computeStrongResidualFSI()
 
     std::cout << "        builing the mass matrix ... " << std::flush;
 
-    chronoloc.start();
-    MSRPatt         fullPattern( M_fluid->uDof(), nDimensions );
-    ElemMat         elMassMatrix( M_fluid->fe_u().nbNode, nDimensions, nDimensions ); //velocity mass
-    MSRMatr<double> massMatrix(fullPattern);
-
-    massMatrix.zeros();
-
-    for ( UInt i = 1; i <= M_fluid->mesh().numVolumes(); ++i )
-    {
-        M_fluid->fe_u().updateFirstDerivQuadPt( M_fluid->mesh().volumeList( i ) );
-        elMassMatrix.zero();
-        mass( 1., elMassMatrix, M_fluid->fe_u(), 0, 0, nDimensions );
-        for ( UInt ic = 0; ic < nDimensions; ++ic )
-        {
-            assemb_mat( massMatrix, elMassMatrix,
-                        M_fluid->fe_u(), M_fluid->uDof(),
-                        ic, ic );
-        }
-    }
-
-    chronoloc.stop();
-    std::cout << "done in "<< chronoloc.diff() << "s." << std::endl << std::flush;
-    std::cout << "        computing the residual  ... " << std::flush;
-    chronoloc.start();
-    // AZTEC specifications for the second system
-    int    *data_org;     // data organisation for J
-    int    proc_config[AZ_PROC_SIZE];  // Processor information:
-    int    options[AZ_OPTIONS_SIZE];   // Array used to select solver options.
-    double params[AZ_PARAMS_SIZE];     // User selected solver paramters.
-    double status[AZ_STATUS_SIZE];     // Information returned from AZ_solve()
-
-    int *update,                   // vector elements updated on this node.
-        *external;                // vector elements needed by this node.
-    int *update_index;            // ordering of update[] and external[]
-    int *extern_index;            // locally on this processor.
-    int N_update;                 // # of unknowns updated on this node
-
-    AZ_set_proc_config(proc_config, AZ_NOT_MPI);
-
-    // data_org assigned "by hands": no parallel computation is performed
-    UInt dim_res = M_residualFSI.size();
-
-    // Recovering AZTEC defaults options and params
-    AZ_defaults(options,params);
-
-    // Fixed Aztec options for this linear system
-    options[AZ_solver]     = AZ_gmres;
-    options[AZ_output]     = AZ_none;
-    options[AZ_poly_ord]   = 5;
-    options[AZ_kspace]     = 40;
-    options[AZ_precond]    = AZ_dom_decomp;
-    options[AZ_conv]       = AZ_rhs;
-
-    params[AZ_tol]         = 1.e-8;
-    params[ AZ_drop ]      = 1.00e-4;
-    params[ AZ_ilut_fill ] = 5;
-
-    AZ_read_update( &N_update, &update, proc_config, dim_res, 1, AZ_linear );
-    AZ_transform( proc_config, &external, ( int * ) fullPattern.giveRaw_bindx(),
-                  massMatrix.giveRaw_value(),
-                  update, &update_index, &extern_index, &data_org, N_update,
-                  NULL, NULL, NULL, NULL,
-                  AZ_MSR_MATRIX );
-
-    PhysVectUnknown<Vector> strongResidual;
-//    strongResidual.resize( M_fluid->uDof().numTotalDof() );
-    strongResidual  = ZeroVector(M_residualFSI.size());
-
-    AZ_solve( strongResidual.giveVec(), M_residualFSI.giveVec(),
-              options, params, NULL,
-              ( int * ) fullPattern.giveRaw_bindx(), NULL, NULL, NULL,
-              massMatrix.giveRaw_value(),
-              data_org, status, proc_config );
-
-    std::cout << "done in "<< chronoloc.diff() << "s." << std::endl << std::flush;
-
-    std::cout << "        computing the normals   ... " << std::flush;
-    BCHandler BCh;
-
     FSIOperator::dof_interface_type dofReducedFluidToMesh
         (new FSIOperator::dof_interface_type::element_type);
 
-    Real f(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+    //Real f(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
     BCFunctionBase f0( fzeroSP);
 
-    BCh.addBC("Interface", 1, Natural, Full, f0, 3);
+    BCHandler BCh;
+
+    BCh.addBC("Interface", 1, Natural,   Full, f0, 3);
+    BCh.addBC("interface", 1, Essential, Full, f0, 3);
+
     BCh.bdUpdate(this->fluid().mesh(),
                  this->fluid().feBd_u(),
                  this->fluid().uDof());
 
-
-    BCBase const &BCb = BCh[0];
+    BCBase const &BCbEss = BCh[1];
 
     // Number of local Dof (i.e. nodes) in this face
     UInt nDofF = this->fluid().feBd_u().nbNode;
@@ -780,86 +704,65 @@ void steklovPoincare::computeStrongResidualFSI()
     UInt totalDof = this->fluid().uDof().numTotalDof();
 
     // Number of components involved in this boundary condition
-    UInt nComp = BCb.numberOfComponents();
+    UInt nComp = BCbEss.numberOfComponents();
 
-    const IdentifierNatural* pId;
+    M_volToSurf.resize(totalDof);
 
-    ID ibF, idDof, icDof, gDof;
 
-    // ===================================================
-    // Loop on boundary faces
-    // ===================================================
-
-    PhysVectUnknown<Vector> nRhs;
-    nRhs = ZeroVector(M_residualFSI.size());
-
-    PhysVectUnknown<Vector> normals;
-    normals = ZeroVector(M_residualFSI.size());
-
-    for ( ID i = 1; i <= BCb.list_size(); ++i )
+    for ( ID i = 1; i <= BCbEss.list_size(); ++i )
     {
-        // Pointer to the i-th itdentifier in the list
-        pId = static_cast< const IdentifierNatural* >( BCb( i ) );
-
-        // Number of the current boundary face
-        ibF = pId->id();
-
-        ibF = BCb(i) -> id();
-//        std::cout << "iBF = " << ibF << " " << std::flush << std::endl;
-        // Updating face stuff
-        this->fluid().feBd_u().updateMeasNormalQuadPt(
-            this->fluid().mesh().boundaryFace( ibF ) );
-
-        // Loop on total Dof per Face
-        for ( ID l = 1; l <= nDofF; ++l )
+        // Loop on components involved in this boundary condition
+//        for ( ID j = 1; j <= nComp; ++j )
+//
         {
-//            std::cout << l << " " << std::flush;
-            gDof = pId->bdLocalToGlobal( l );
-
-//            std::cout << gDof << std::endl << std::flush;
-            // Loop on components involved in this boundary condition
-            for ( UInt ic = 0; ic < nComp; ++ic )
-            {
-                icDof = gDof + ic * totalDof;
-
-                //Loop on quadrature points
-                    for ( int iq = 0; iq < this->fluid().feBd_u().nbQuadPt; ++iq )
-                 {
-                     // Adding right hand side contribution
-                     nRhs[ icDof - 1 ] += //BCb( gDof , 1 ) *
-                         this->fluid().feBd_u().phi( int( l - 1 ), iq ) *
-                         this->fluid().feBd_u().normal( int( ic ), iq ) *
-                         this->fluid().feBd_u().weightMeas( iq );
-                 }
-            }
+            // Global Dof
+            UInt index = BCbEss( i ) ->id();// + ( BCbEss.component( j ) - 1 ) * totalDof; 
+            M_volToSurf[index] = i;
+            std::cout << index << " -> " << i << std::endl;
         }
     }
 
+//     typedef BoostMatrix<boost::numeric::ublas::column_major> matrix_type;
+
+//     matrix_type mass    (3*nDofF, 3*nDofF);
+//     Vector      rhs     (3*nDofF);
+//     Vector      residual(3*nDofF);
 
 
-    AZ_solve( normals.giveVec(), nRhs.giveVec(),
-              options, params, NULL,
-              ( int * ) fullPattern.giveRaw_bindx(), NULL, NULL, NULL,
-              massMatrix.giveRaw_value(),
-              data_org, status, proc_config );
+    
 
-    for ( int ii = 0; ii < M_strongResidualFSI.size(); ++ii)
-    {
-        M_strongResidualFSI(ii) =
-            sqrt(normals(ii + 0*totalDof)*strongResidual(ii + 0*totalDof) +
-                 normals(ii + 1*totalDof)*strongResidual(ii + 1*totalDof) +
-                 normals(ii + 2*totalDof)*strongResidual(ii + 2*totalDof));
-    }
+//     BCBase const &BCb = BCh[0];
 
-    chronoloc.stop();
-    std::cout << "done in "<< chronoloc.diff() << "s." << std::endl<< std::flush;
+//     // Number of local Dof (i.e. nodes) in this face
+//     UInt nDofF = this->fluid().feBd_u().nbNode;
+
+//     // Number of total scalar Dof
+//     UInt totalDof = this->fluid().uDof().numTotalDof();
+
+//     // Number of components involved in this boundary condition
+//     UInt nComp = BCb.numberOfComponents();
+
+//     const IdentifierNatural* pId;
+
+//     SimpleArray<UInt>  localToBoundary;
+//     SimpleArray<UInt>  boundaryToLocal;
+
+//     ID ibF, idDof, icDof, gDof;
+
+//     typedef BoostMatrix<boost::numeric::ublas::column_major> matrix_type;
+
+//     matrix_type mass(3*nDofF, 3*nDofF);
+//     Vector      rhs;
+//     Vector      residual;
+
+//     SolverUMFPACK  solver;
+
+//     solver.setMatrix(mass);
+//     solver.solve(residual, rhs);
 
     chrono.stop();
 
     std::cout << "        total time                          " << chrono.diff() << " s." << std::endl;
-
-
-
 }
 
 

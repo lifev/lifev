@@ -71,8 +71,8 @@ void exactJacobian::eval(const Vector &_disp,
     this->M_solid->setRecur(0);
     this->M_solid->iterate();
 
-//     this->M_fluid->postProcess();
-//     this->M_solid->postProcess();
+//      this->M_fluid->postProcess();
+//      this->M_solid->postProcess();
 }
 
 void exactJacobian::evalResidual(Vector &_res,
@@ -140,9 +140,10 @@ void exactJacobian::setUpBC()
     M_BCh_mesh->addBC("Interface", 1, Essential, Full,
                       *bcvStructureDispToHarmonicExtension(), 3);
 
-    M_BCh_mesh->bdUpdate(this->M_fluid->mesh(),
-                         this->M_fluid->feBd_u(),
-                         this->M_fluid->uDof());
+//     M_BCh_mesh->bdUpdate(this->M_fluid->mesh(),
+//                          this->M_fluid->feBd_u(),
+//                          this->M_fluid->uDof());
+
     // Boundary conditions for the solid displacement
     M_BCh_d->addBC("Interface", 1, Natural,   Full,
                    *bcvFluidLoadToStructure(), 3);

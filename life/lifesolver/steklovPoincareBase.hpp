@@ -116,6 +116,7 @@ private:
 
     generalizedAitken<Vector, Real> M_aitkFS;
 
+    std::vector<UInt>       M_volToSurf;
 
     Real                    M_linearRelTol;
 
