@@ -35,7 +35,7 @@ SUBDIRS		= data  \
 	      test_masstransport test_mass_coupling test_ns_ipstab \
               test_coupling_3d0d \
               test_fhn \
-              test_levelset_ipstab
+              test_levelset_ipstab test_ns_2fluids
 
 TESTSUITES=$(srcdir)/lifecore/testsuite.at \
 $(srcdir)/lifearray/testsuite.at \
