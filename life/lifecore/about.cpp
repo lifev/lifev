@@ -34,6 +34,10 @@
 
 namespace LifeV
 {
+AboutPerson::~AboutPerson()
+{
+
+}
 std::string
 AboutPerson::name() const
 {

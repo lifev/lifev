@@ -117,6 +117,9 @@ public:
             }
             return *this;
         }
+
+    ~AboutPerson();
+
     /**
      * The person's name
      * @return the person's name (can be std::string, if it has been
