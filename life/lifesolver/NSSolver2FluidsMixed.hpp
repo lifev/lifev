@@ -384,7 +384,7 @@ namespace LifeV {
 #if L_NS2F_LINEAR_SOLVER_P == L_NS2F_PETSC
         std::cout << "[NSSolver2FluidsMixed::constructor] Using PETSC linear solver for p" << std::endl;
         _M_solver_p.setOptionsFromGetPot(_M_data_file, "navier-stokes/yosida/solver-p");
-        if ( this->BCh_fluid().hasOnlyEssential() ) {
+        if ( this->bcHandler().hasOnlyEssential() ) {
             Real constPress = 1. / sqrt( _dim_p );
             for(UInt i = 0; i < _dim_p; ++i) {
                 _M_constant_pressure[ i ] = constPress;
@@ -550,10 +550,10 @@ namespace LifeV {
             std::cout << "[NSSolver2FluidsMixed::advance_NS] Applying boundary conditions"
                       << std::endl;
 
-        if (!this->BCh_fluid().bdUpdateDone())
-            this->BCh_fluid().bdUpdate(_mesh, _feBd_u, uDof());
+        if (!this->bcHandler().bdUpdateDone())
+            this->bcHandler().bdUpdate(_mesh, _feBd_u, uDof());
 
-        bcManage(_M_C, _M_G, _M_rhs_u, _mesh, uDof(), this->BCh_fluid(), _feBd_u, 1.0, _M_time );
+        bcManage(_M_C, _M_G, _M_rhs_u, _mesh, uDof(), this->bcHandler(), _feBd_u, 1.0, _M_time );
 
         if(_M_verbose)
             std::cout << "[NSSolver2FluidsMixed::advance_NS] Computing discrete divergence operator"
