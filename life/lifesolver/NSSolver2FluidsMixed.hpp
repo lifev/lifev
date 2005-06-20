@@ -30,11 +30,25 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #ifndef _NSSOLVER2FLUIDSMIXED_HPP_
 #define _NSSOLVER2FLUIDSMIXED_HPP_
 
+#include <lifeconfig.h>
+
 #define L_NS2F_UMFPACK 0
 #define L_NS2F_PETSC 1
 
 #define L_NS2F_LINEAR_SOLVER_U L_NS2F_PETSC
 #define L_NS2F_LINEAR_SOLVER_P L_NS2F_PETSC
+
+#if defined(HAVE_PETSC_H)
+#include <life/lifealg/SolverPETSC.hpp>
+#endif /* HAVE_PETSC_H */
+
+#if defined(HAVE_UMPFACK_H)
+#include <life/lifealg/SolverUMFPACK.hpp>
+#endif /* HAVE_PETSC_H */
+
+#if ( ! defined(HAVE_PETSC_H) && ( ( L_NS2F_LINEAR_SOLVER_U == L_NS2F_PETSC ) || ( L_NS2F_LINEAR_SOLVER_P == L_NS2F_PETSC ) ) ) || ( ! defined(HAVE_UMFPACK_H) && ( ( L_NS2F_LINEAR_SOLVER_U == L_NS2F_UMFPACK ) || ( L_NS2F_LINEAR_SOLVER_P == L_NS2F_UMFPACK ) ) )
+#define L_NS2F_MISSING_SOLVER
+#endif
 
 #define L_STOKES 0
 #define L_NAVIER_STOKES 1
@@ -66,9 +80,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <life/lifefem/bcManage.hpp>
 #include <life/lifefem/bcHandler.hpp>
 #include <life/lifefem/assemb.hpp>
-
-#include <life/lifealg/SolverPETSC.hpp>
-#include <life/lifealg/SolverUMFPACK.hpp>
 
 #include <life/lifesolver/AFSolvers.hpp>
 #include <life/lifealg/PressureMatrixSolver.hpp>
@@ -113,6 +124,8 @@ namespace LifeV {
         typedef BoostMatrix<ublas::column_major> matrix_type_G;
         typedef DiagonalBoostMatrix matrix_type_M_L;
 
+#if ! defined(L_NS2F_MISSING_SOLVER)
+
 #if L_NS2F_LINEAR_SOLVER_U == L_NS2F_PETSC
         typedef SolverPETSC linear_solver_u_type;
 #elif L_NS2F_LINEAR_SOLVER_U == L_NS2F_UMFPACK
@@ -138,6 +151,8 @@ namespace LifeV {
                                      matrix_type_G,
                                      linear_solver_u_type> solver_type;
 #endif
+
+#endif /* MISSING_SOLVER */
         //@}
 
         /** @name Constructors
@@ -285,23 +300,25 @@ namespace LifeV {
         //! Analytical expression for the velocity field to use in
         //! linearized advection term
         const function_type* _M_beta_fct;
-        //!
+
+        //! Vector of constant pressure
         Vector _M_constant_pressure;
 
         //! Reference to the level set function
         const lsfunction_type& _M_lsfunction;
 
+#if ! defined(L_NS2F_MISSING_SOLVER)
+
         //! Saddle point system solver
         solver_type _M_solver;
-
-        //! Vector of pressure constants
-        Vector _M_pressure_constant;
 
         //! Linear solver for velocity systems
         linear_solver_u_type _M_solver_u;
 
         //! Linear solver for pressure systems
         linear_solver_p_type _M_solver_p;
+
+#endif /* MISSING_SOLVER */
 
         //! Verbose flag
         bool _M_verbose;
@@ -359,15 +376,18 @@ namespace LifeV {
         _M_rhs_p( _dim_p ),
         _M_beta_fct(0),
         _M_constant_pressure( _dim_p ),
-        _M_lsfunction(_M_lss.lsfunction()),
+        _M_lsfunction(_M_lss.lsfunction())
+#if ! defined(L_NS2F_MISSING_SOLVER)
 #if L_NS2F_SOLVER == L_YOSIDA
-        _M_solver(_M_M_L_w, _M_C, _M_D, _M_G, _M_data_file, "navier-stokes/yosida", _M_solver_u, _M_solver_p)
+        ,_M_solver(_M_M_L_w, _M_C, _M_D, _M_G, _M_data_file, "navier-stokes/yosida", _M_solver_u, _M_solver_p)
 #elif L_NS2F_SOLVER == L_PRESSURE_MATRIX
-        _M_solver(_M_C, _M_D, _M_G, _M_data_file, "navier-stokes/pmm")
+        ,_M_solver(_M_C, _M_D, _M_G, _M_data_file, "navier-stokes/pmm")
 #endif
+#endif /* MISSING_SOLVER */
     {
         if(_M_verbose)
             std::cout << "[NSSolver2FluidsMixed::constructor] Using boost matrix" << std::endl;
+#if ! defined(L_NS2F_MISSING_SOLVER)
 #if L_NS2F_LINEAR_SOLVER_U == L_NS2F_PETSC
         std::cout << "[NSSolver2FluidsMixed::constructor] Using PETSC linear solver for u" << std::endl;
         _M_solver_u.setOptionsFromGetPot(_M_data_file, "navier-stokes/yosida/solver-u");
@@ -396,6 +416,10 @@ namespace LifeV {
 #elif L_NS2F_LINEAR_SOLVER_P == L_NS2F_UMFPACK
         std::cout << "[NSSolver2FluidsMixed::constructor] Using UMFPACK linear solver for p" << std::endl;
 #endif
+#else
+        std::cerr << "WARNING: Missing linear solver - no systems are solved!"
+                  << std::endl;
+#endif /* MISSING_SOLVER */
         _M_verbose = _M_data_file("navier-stokes/miscellaneous/verbose", false);
     }
 
@@ -583,7 +607,9 @@ namespace LifeV {
         // Solve the system
         if(_M_verbose)
             std::cout << "[NSSolver2FluidsMixed::advance_NS] Solving the system" << std::endl;
+#if ! defined(L_NS2F_MISSING_SOLVER)
         _M_solver.solve(_u, _p, _M_rhs_u, _M_rhs_p);
+#endif
 
 #if L_NS2F_SOLVER == L_PRESSURE_MATRIX
         std::cout << _M_solver << std::endl;
