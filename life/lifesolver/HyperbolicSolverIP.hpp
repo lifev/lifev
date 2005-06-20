@@ -597,7 +597,13 @@ namespace LifeV {
 
     template<typename MeshType>
     void HyperbolicSolverIP<MeshType>::apply_bc() {
+#if L_HSIP_LINEAR_SOLVER == L_HSIP_AZTEC
+        std::cerr << "WARNING: applying BCs is currently broken for aztec"
+                  << "         no boundary conditions are applied"
+                  << std::endl;
+#else
         bcManage( _M_A, _M_b, _M_mesh, _M_dof, _M_bc_h, _M_fe_bd, 1.0, _M_t );
+#endif
     }
 
     template<typename MeshType>
