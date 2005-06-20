@@ -36,7 +36,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #define L_HSIP_UMFPACK 1
 #define L_HSIP_PETSC 2
 
-#define L_HSIP_LINEAR_SOLVER L_HSIP_UMFPACK
+#define L_HSIP_LINEAR_SOLVER L_HSIP_AZTEC
 #define L_HSIP_USE_BOOST_MATRIX 0
 
 #include <utility>
