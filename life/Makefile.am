@@ -33,3 +33,5 @@ apidox:
 	@for i in $(SUBDIRS); do \
 	 (cd $$i && make apidox); \
 	done
+
+dist_pkgdata_DATA  = debug.areas
