@@ -211,9 +211,6 @@ public:
     //@{
 
     //! set matrix from raw CSR arrays
-    void setMatrix( uint, const uint*, const uint*, const double* );
-
-    //! set matrix from raw CSR arrays
     void setMatrix( size_t, const size_t*, const size_t*, const double* );
 
     //! set matrix from CSRMatr
