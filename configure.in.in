@@ -54,9 +54,11 @@ AC_LANG_SAVE
 AC_LANG_CPLUSPLUS
 
 AC_MSG_CHECKING(for size_t == uint)
-AC_TRY_RUN([
-return sizeof(size_t)==sizeof(uint);
-],
+AC_TRY_RUN(AC_LANG_PROGRAM([
+#include <cstdlib>
+],[
+return !(sizeof(size_t)==sizeof(uint));
+]),
 [
    AC_MSG_RESULT(yes)
    size_t_same_as_uint=yes
