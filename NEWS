@@ -47,9 +47,13 @@ New in 0.7.0:
 * Added a preconditioned gmres implementation (CP)
 
 [lifefem]
+* Added operators for two-fluid flows (DADP)
+
+[lifesolver]
 * Added levelset solver (DADP)
 * Added hyperbolic solver (DADP)
-* Added operators for two-fluid flows (DADP)
+* Moved Navier Stokes solver with IP stabilization to libraries (CW)
+* Added inexact flux computation strategy (CV TP)
 
 [testsuite]
 * Added levelset tests (DADP)
@@ -299,4 +303,4 @@ New in 0.1.0pre3:
 * fixed some bugs and miscompilation in a few places
 
 
- -- Christophe Prud'homme <prudhomm@debian.org>, Thu May  5 10:15:45 2005
+ -- Christophe Prud'homme <christophe.prudhomme@epfl.ch>, Wed Jun 29 10:59:35 2005
