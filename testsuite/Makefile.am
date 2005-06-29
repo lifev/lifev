@@ -31,7 +31,7 @@ SUBDIRS		= data  \
 	      test_linearelasticity \
 	      test_darcy test_onedmodel\
 	      test_ns_bdf test_ns_cyl test_ns_cyl_flux test_ns_bcvec test_ns_sstress test_nsale\
-	      test_ns_cyl_ipstab \
+	      test_ns_stab test_ns_cyl_ipstab \
 	      test_fsi test_fsi_qnewton\
 	      test_masstransport test_mass_coupling test_ns_ipstab \
               test_coupling_3d0d \
