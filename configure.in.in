@@ -48,6 +48,26 @@ LIFEV_CHECK_COMPILERS
 AC_DISABLE_STATIC
 AC_PROG_LIBTOOL
 
+AC_CHECK_TYPE(size_t, unsigned)
+
+AC_LANG_SAVE
+AC_LANG_CPLUSPLUS
+
+AC_MSG_CHECKING(for size_t == uint)
+AC_TRY_RUN([
+return sizeof(size_t)==sizeof(uint);
+],
+[
+   AC_MSG_RESULT(yes)
+   size_t_same_as_uint=yes
+   AC_DEFINE(LIFEV_SIZET_SAME_AS_UINT, 1, [sizeof(size_t)==sizeof(uint)])
+],
+[
+  AC_MSG_RESULT(no)
+  size_t_same_as_uint=no
+])
+AC_LANG_RESTORE
+
 # pdflatex
 AC_CHECK_PROG(PDFLATEX, pdflatex,[pdflatex],[no])
 
@@ -64,7 +84,6 @@ AC_CHECK_BOOST_UNIT_TEST_FRAMEWORK
 
 AC_CHECK_BOOST_PROGRAM_OPTIONS
 AM_CONDITIONAL(HAVE_BOOST_PROGRAM_OPTIONS, test "x$boost_program_options_error" = "xno")
-
 
 
 dnl

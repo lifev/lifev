@@ -211,7 +211,12 @@ public:
     //@{
 
     //! set matrix from raw CSR arrays
+    void setMatrix( uint, const uint*, const uint*, const double* );
+
+#if !defined( LIFEV_SIZET_SAME_AS_UINT )
+    //! set matrix from raw CSR arrays
     void setMatrix( size_t, const size_t*, const size_t*, const double* );
+#endif
 
     //! set matrix from CSRMatr
     template <typename PatternType>
