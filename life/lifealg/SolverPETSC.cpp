@@ -228,6 +228,19 @@ SolverPETSC::setMatrix( uint __nrows, const uint* __r, const uint *__i,
 
     _M_p->_M_use_A = true;
 }
+void
+SolverPETSC::setMatrix( size_t __nrows, const size_t* __r, const size_t *__i,
+                        const double* __v )
+{
+    MatCreateSeqAIJWithArrays( PETSC_COMM_SELF,
+                               __nrows, __nrows,
+                               ( int* ) __r,
+                               ( int* ) __i,
+                               const_cast<PetscScalar*>( __v ),
+                               &_M_p->__A );
+
+    _M_p->_M_use_A = true;
+}
 
 void SolverPETSC::setMatrix( const MSRMatr<value_type>& m )
 {

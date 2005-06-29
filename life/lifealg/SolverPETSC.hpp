@@ -213,17 +213,20 @@ public:
     //! set matrix from raw CSR arrays
     void setMatrix( uint, const uint*, const uint*, const double* );
 
+    //! set matrix from raw CSR arrays
+    void setMatrix( size_t, const size_t*, const size_t*, const double* );
+
     //! set matrix from CSRMatr
     template <typename PatternType>
     void setMatrix( const CSRMatr<PatternType, value_type>& m )
-    {
-        _M_tempPattern.reset( 0 );
-        _M_tempMatrix.reset( 0 );
-        setMatrix( m.Patt() ->nRows(),
-                   m.Patt() ->giveRawCSR_ia(),
-                   m.Patt() ->giveRawCSR_ja(),
-                   m.giveRawCSR_value() );
-    }
+        {
+            _M_tempPattern.reset( 0 );
+            _M_tempMatrix.reset( 0 );
+            setMatrix( m.Patt() ->nRows(),
+                       m.Patt() ->giveRawCSR_ia(),
+                       m.Patt() ->giveRawCSR_ja(),
+                       m.giveRawCSR_value() );
+        }
 
     /** set matrix from MSRMatr
      *
@@ -235,12 +238,12 @@ public:
     //! set matrix from boost matrix
     void setMatrix( const boost::numeric::ublas::compressed_matrix<double, boost::numeric::ublas::row_major>& m )
         {
-        _M_tempPattern.reset( 0 );
-        _M_tempMatrix.reset( 0 );
-        setMatrix( m.size1(),
-                   &(m.index1_data()[0]),
-                   &(m.index2_data()[0]),
-                   &(m.value_data()[0]) );
+            _M_tempPattern.reset( 0 );
+            _M_tempMatrix.reset( 0 );
+            setMatrix( m.size1(),
+                       &(m.index1_data()[0]),
+                       &(m.index2_data()[0]),
+                       &(m.value_data()[0]) );
         }
 
     void setMatrixTranspose( uint, const uint*, const uint*, const double* );
@@ -368,7 +371,7 @@ public:
       You should have a look at PETSC documentation for further details.
       @author Christoph Winkelmann
       @see http://www.mcs.anl.gov/petsc/
-     */
+    */
     void setOptionsFromGetPot( const GetPot& dataFile,
                                std::string section = "petsc" );
 
