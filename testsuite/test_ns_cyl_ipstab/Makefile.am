@@ -27,8 +27,10 @@ include $(top_srcdir)/testsuite/Makefile.testsuite
 check_HEADERS     = ud_functions.hpp
 
 check_PROGRAMS     = test_ns_cyl_ipstab
+
 test_ns_cyl_ipstab_SOURCES = main.cpp 
+
 EXTRA_DIST = data testsuite.at
 
-
-MOSTLYCLEANFILES=test.001.inp press.001.bb vel_x.001.bb vel_y.001.bb vel_z.001.bb
+MOSTLYCLEANFILES=test.001.inp press.001.bb vel_x.001.bb vel_y.001.bb vel_z.001.bb\
+test.002.inp press.002.bb vel_x.002.bb vel_y.002.bb vel_z.002.bb
