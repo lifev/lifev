@@ -41,7 +41,7 @@ test_umfpack_SOURCES	= test_umfpack.cpp
 test_umfpack_LDADD    = $(top_builddir)/life/lifealg/liblifealg.la $(boost_unit_test_framework_lib)
 
 test_linearsolvers_SOURCES	= test_linearsolvers.cpp
-test_linearsolvers_LDADD	= liblifealg_testsuite.la $(top_builddir)/life/lifealg/liblifealg.la  $(umfpack_libs)
+test_linearsolvers_LDADD	= liblifealg_testsuite.la $(top_builddir)/life/lifecore/liblifecore.la  $(top_builddir)/life/lifealg/liblifealg.la  $(umfpack_libs)
 
 
 EXTRA_DIST  = testsuite.at
