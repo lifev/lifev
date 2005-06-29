@@ -35,7 +35,7 @@ liblifealg_testsuite_la_LIBADD	= $(top_builddir)/life/lifealg/liblifealg.la
 check_PROGRAMS	= test_petsc test_linearsolvers test_umfpack
 
 test_petsc_SOURCES	= test_petsc.cpp
-test_petsc_LDADD    = $(top_builddir)/life/lifealg/liblifealg.la  $(boost_unit_test_framework_lib)
+test_petsc_LDADD    = $(top_builddir)/life/lifecore/liblifecore.la  $(top_builddir)/life/lifealg/liblifealg.la  $(boost_unit_test_framework_lib)
 
 test_umfpack_SOURCES	= test_umfpack.cpp
 test_umfpack_LDADD    = $(top_builddir)/life/lifealg/liblifealg.la $(boost_unit_test_framework_lib)
