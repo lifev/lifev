@@ -184,8 +184,8 @@ int main(int argc, char** argv)
             coupling.timeAdvance(f,time);
             coupling.iterate(time);
 
-            if (strategy==1)
-                coupling.ns()->postProcess();// The observers are not yet implemented in NSSolverPC
+	    //            if (strategy==1) (TP 06/05)
+	    coupling.ns()->postProcess();// The observers are not yet implemented in NSSolverPC
                                              // so it is used the "traditional" post proc in this case
         }
 

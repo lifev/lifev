@@ -96,9 +96,14 @@ main(int argc, char** argv)
     __ns_with_flux.setFlux(1, my_flux_cost);
     //__ns_with_flux.setFlux(3, my_flux_cos2);
 
-    //Set the strategy: 0 for the exact version; 1 for the inexact one. If flux imposed is one, the two versions are the same
-    //
-    __ns_with_flux.setStrategy(0);
+    /*
+      Set the strategy:
+      STRATEGY_FLUX_EXACT for the exact version;
+      STRATEGY_FLUX_INEXACT for the inexact one.
+
+      If flux imposed is one, the two versions are the same
+    */
+    __ns_with_flux.setStrategy(STRATEGY_FLUX_EXACT);
 
     toEnsight EnsightFilter;
     __ns_with_flux.doOnIterationFinish( EnsightFilter  );
@@ -114,15 +119,19 @@ main(int argc, char** argv)
     for (Real time=startT+dt ; time <= T; time+=dt)
     {
 
-       // Impose the fluxes
-       //
-       __ns_with_flux.setFlux(1, my_flux_cost); //costant
-       //__ns_with_flux.setFlux(3, my_flux_cos2); //costant
-       //__ns_with_flux.setFlux(1, my_flux_cos); //cosinusoidal
-       //__ns_with_flux.setFlux(1, my_flux_physio); // physiological
+        // Impose the fluxes
+        //
+        __ns_with_flux.setFlux(1, my_flux_cost); //costant
+        //__ns_with_flux.setFlux(3, my_flux_cos2); //costant
+        //__ns_with_flux.setFlux(1, my_flux_cos); //cosinusoidal
+        //__ns_with_flux.setFlux(1, my_flux_physio); // physiological
 
-       __ns_with_flux.iterate( time );
-       }
+        __ns_with_flux.iterate( time );
+
+        // modified postprocess in Christian NSWithFlux solver (TP 04/05)
+        __ns->postProcess();
+
+    }
 
     return EXIT_SUCCESS;
 }
