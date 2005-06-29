@@ -1,0 +1,92 @@
+# -*- mode: m4 -*-
+#
+#  This file is part of the LifeV library
+#
+#  Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+#       Date: 2005-06-29
+#
+#  Copyright (C) 2005 EPFL
+#
+#  This library is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU Lesser General Public
+#  License as published by the Free Software Foundation; either
+#  version 2.1 of the License, or (at your option) any later version.
+#
+#  This library is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#  Lesser General Public License for more details.
+#
+#  You should have received a copy of the GNU Lesser General Public
+#  License along with this library; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+# \file testsuite.at
+# \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+# \date 2005-06-29
+# 
+AT_SETUP([test_ns_cyl_ipstab])
+AT_KEYWORDS([ns cyl ipstab ip stabilization])
+AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file for Navier-Stokes IP Solver
+#-------------------------------------------------
+
+[fluid]
+
+[./physics]
+endtime         = 0.6          # endtime -- only 2 iterations
+density         = 1.0          # density
+viscosity       = 0.01       # viscosity
+
+
+[../discretization]
+mesh_dir        = ./  # the directory where the mesh file is
+mesh_file       = cyl2D.mesh          # mesh file
+mesh_faces      = all                   # update all faces elements
+timestep        = 0.3                   # timestep
+order_bdf       = 2
+diagonalize     = 1 # weight, 0=off
+div_beta_u_v    = 1 # 1=on, 0=off
+
+[../miscellaneous]
+verbose         = 1
+steady          = 0
+
+[../aztec]
+solver          = gmres
+scaling         = none
+output          = all_res
+conv            = r0
+max_iter        = 100
+kspace          = 40
+precond         = dom_decomp #none,jacobi,sym_gs,neumann,ls,smoother,dom_decomp
+subdomain_solve = ilut
+ilut_fill       = 6
+drop            = 1.e-5
+tol             = 1.00e-10
+#keep_info       = 1
+
+[../petsc]
+ksp_type                  = gmres
+ksp_gmres_restart         = 20
+ksp_rtol                  = 1.e-10
+ksp_max_it                = 100
+pc_type                   = ilu
+#pc_ilu_use_drop_tolerance = 1.e-1,0.01,100 # activates SPARSKIT routine
+pc_ilu_levels             = 0
+ksp_cancelmonitors        = 1
+nokspview                 = true
+quiet                     = true
+ksp_set_compute_singular_values = true
+
+
+[../ipstab]
+gammaBeta  = 0.125
+gammaDiv   = 0.125
+gammaPress = 0.03125
+
+]])
+AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria/cyl2D.mesh &&  $top_builddir/testsuite/test_ns_cyl_ipstab/test_ns_cyl_ipstab],[0],[ignore],[ignore])
+AT_CLEANUP
+
