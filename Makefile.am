@@ -101,4 +101,4 @@ report:
        echo "consider typing: cd tools/inspect && make";\
 	fi
 #SUBDIRS = admin doc life testsuite tools
-SUBDIRS = admin $(TOPSUBDIRS)
+SUBDIRS = admin tools $(TOPSUBDIRS)
