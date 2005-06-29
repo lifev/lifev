@@ -24,7 +24,7 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-check_HEADERS = ud_functions.hpp 
+check_HEADERS = ud_functions.hpp boundaryConditions.hpp
 
 check_PROGRAMS = test_fsi
 test_fsi_SOURCES = main.cpp ud_functions.cpp  

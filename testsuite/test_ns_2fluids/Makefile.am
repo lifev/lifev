@@ -23,7 +23,7 @@
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
 
-noinst_HEADERS = main.hpp ud_functions.hpp
+noinst_HEADERS = main.hpp ud_functions.hpp ethierSteinman.hpp
 
 
 check_PROGRAMS 	= test_ns_2fluids
