@@ -98,12 +98,12 @@ main(int argc, char** argv)
 
     /*
       Set the strategy:
-      STRATEGY_FLUX_EXACT for the exact version;
-      STRATEGY_FLUX_INEXACT for the inexact one.
+      STRATEGY_FLUX_GMRES_EXACT for the exact version;
+      STRATEGY_FLUX_GMRES_INEXACT for the inexact one.
 
       If flux imposed is one, the two versions are the same
     */
-    __ns_with_flux.setStrategy(STRATEGY_FLUX_EXACT);
+    __ns_with_flux.setStrategy(STRATEGY_FLUX_GMRES_EXACT);
 
     toEnsight EnsightFilter;
     __ns_with_flux.doOnIterationFinish( EnsightFilter  );

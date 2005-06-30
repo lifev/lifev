@@ -62,8 +62,8 @@ struct default_velocity
 };
 enum FluxStrategies
   {
-    STRATEGY_FLUX_EXACT,        /**< exact flux computation albeit require several NS solves */
-    STRATEGY_FLUX_INEXACT,      /**< inexact flux computation but cheaper */
+    STRATEGY_FLUX_GMRES_EXACT,        /**< exact flux computation albeit require several NS solves */
+    STRATEGY_FLUX_GMRES_INEXACT,      /**< inexact flux computation but cheaper */
   };
 
 }
@@ -349,10 +349,10 @@ NavierStokesWithFlux<NSSolver>::initialize( const Function& u0, const Function& 
             initialize_one_flux(u0,p0,t0,dt);
  	    break;
         case 2:
-      if (thestrategy==STRATEGY_FLUX_EXACT){
+      if (thestrategy==STRATEGY_FLUX_GMRES_EXACT){
             initialize_two_fluxes(u0,p0,t0,dt);
       }
-          if (thestrategy==STRATEGY_FLUX_INEXACT){
+          if (thestrategy==STRATEGY_FLUX_GMRES_INEXACT){
             initialize_two_fluxes_inexact(u0,p0,t0,dt);
       }
             break;
@@ -490,10 +490,10 @@ NavierStokesWithFlux<NSSolver>::iterate( const Real& time )
             iterate_one_flux( time );
         break;
         case 2:
-          if (thestrategy==STRATEGY_FLUX_EXACT){
+          if (thestrategy==STRATEGY_FLUX_GMRES_EXACT){
             iterate_two_fluxes( time );
       }
-          if (thestrategy==STRATEGY_FLUX_INEXACT){
+          if (thestrategy==STRATEGY_FLUX_GMRES_INEXACT){
             iterate_two_fluxes_inexact( time );
       }
             break;
@@ -517,10 +517,10 @@ NavierStokesWithFlux<NSSolver>::iterate( const Real& time, const int& jj )
             iterate_one_flux( time, jj );
         break;
         case 2:
-          if (thestrategy==STRATEGY_FLUX_EXACT){
+          if (thestrategy==STRATEGY_FLUX_GMRES_EXACT){
             iterate_two_fluxes( time );
       }
-          if (thestrategy==STRATEGY_FLUX_INEXACT){
+          if (thestrategy==STRATEGY_FLUX_GMRES_INEXACT){
             iterate_two_fluxes_inexact( time );
       }
             break;
