@@ -88,8 +88,8 @@ $(top_srcdir)/acinclude.m4:
 	@echo 'm4_include([admin/lifev_default_paths.m4])'>>acinclude.m4
 
 
-Makefile.headers: tools/update-headers
-	$(SHELL) tools/update-headers
+#Makefile.headers: tools/update-headers
+#	$(SHELL) tools/update-headers
 
 report:
 	@if test -x tools/inspect/inspect; then\
