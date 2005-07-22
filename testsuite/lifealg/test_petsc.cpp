@@ -51,10 +51,10 @@ void petsc_manager()
 {
     using namespace LifeV;
 
-    // petsc should be already initialized (singleton)
-    BOOST_REQUIRE( PETSC::instance().isInitialized() );
+    // petsc should not be initialized if not asked for
+    BOOST_REQUIRE( PETSC::instance().isInitialized() == false );
 
-    // should not do anything : already initialized
+    // petsc should get now initialized
     PETSC::instance().initialize();
     BOOST_REQUIRE( PETSC::instance().isInitialized() );
 
