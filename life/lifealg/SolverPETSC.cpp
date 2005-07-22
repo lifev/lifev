@@ -50,7 +50,9 @@ public:
             __tolerance( 1e-11 ),
             _M_use_A( false ),
             _M_use_A_t( false )
-    {}
+    {
+        PETSC::instance().initialize();
+    }
     double __tolerance;
     Mat __A;
     Mat __A_t;
@@ -457,7 +459,5 @@ void SolverPETSC::setOptionsFromGetPot( const GetPot& dataFile,
                             &__compute, &__found );
     KSPSetComputeSingularValues( _M_p->__ksp, __compute );
 }
-
-static const bool __petsc_initialize = PETSC::instance().initialize();
 
 } // namespace LifeV
