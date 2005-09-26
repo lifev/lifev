@@ -120,7 +120,12 @@ public:
     Vector& residual();
     Vector  getDeltaLambda() {return _dt*_du;}
 
-    void setBC(BCHandler &fluidBC, BCHandler &HamonicExtensionBC);
+    void setFullEssential(bool _full)
+        {
+            _factor_data.setFullEssential(_full);
+            _factor_data_jacobian.setFullEssential(_full);
+        }
+//    void setBC(BCHandler &fluidBC, BCHandler &HamonicExtensionBC);
 private:
 
     //! simulation time
@@ -424,16 +429,16 @@ NavierStokesAleSolverPC( const GetPot& data_file,
 // members
 
 
-template <typename Mesh>
-void NavierStokesAleSolverPC<Mesh>::
-setBC(BCHandler &fluidBC, BCHandler &HamonicExtensionBC)
-{
-    setFluidBC(fluidBC);
-    setHamonixExtensionBC(HarmonicExtensionBC);
+// template <typename Mesh>
+// void NavierStokesAleSolverPC<Mesh>::
+// setBC(BCHandler &fluidBC, BCHandler &HamonicExtensionBC)
+// {
+//     setFluidBC(fluidBC);
+//     setHamonixExtensionBC(HarmonicExtensionBC);
 
-    _factor_data.setFullEssential(fluidBC.hasOnlyEssential());
-    _factor_data_jacobian(fluidBC.hasOnlyEssential());
-}
+//     _factor_data.setFullEssential(fluidBC.hasOnlyEssential());
+//     _factor_data_jacobian(fluidBC.hasOnlyEssential());
+// }
 
 
 template <typename Mesh>
