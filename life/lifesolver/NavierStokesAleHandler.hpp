@@ -125,8 +125,11 @@ public:
     //! Postprocessing
     void postProcess();
 
+    //! HarmonicExtension getter
     const HarmonicExtension& harmonicExtension() {return M_harmonicExtension;}
-
+    //! HarmonicExtension BC setter
+    void setHarmonicExtensionBC( BCHandler &bc_he)
+        {M_harmonicExtension.setHarmonicExtensionBC(bc_he);}
 private:
     HarmonicExtension    M_harmonicExtension;
 
