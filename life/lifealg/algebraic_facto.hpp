@@ -205,7 +205,7 @@ public:
     //! full essential ?
     bool const fullEssential() const {return _fullEssential;}
     //! set full essential
-    void setFullEssential(bool fullEssential){_fullEssential = fullessential;}
+    void setFullEssential(bool fullEssential){_fullEssential = fullEssential;}
 private:
     //! true if full Dirichlet conditions are involved
     bool _fullEssential;
