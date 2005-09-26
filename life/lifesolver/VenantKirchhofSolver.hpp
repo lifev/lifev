@@ -329,6 +329,7 @@ VenantKirchhofSolver( const GetPot&   data_file,
     _elmatC( this->_fe.nbNode, nDimensions, nDimensions ),
     _elvec( this->_fe.nbNode, nDimensions ),
     _dk_loc( this->_fe.nbNode, nDimensions ),
+    M_ddisp ( this->_dim ),
     _rhs( this->_dim ),
     _rhs_w( this->_dim ),
     _rhsWithoutBC( this->_dim ),
@@ -500,6 +501,8 @@ void VenantKirchhofSolver<Mesh>::
 iterate()
 {
 
+    std::cout << "  S-  Solving the system ... " << std::endl << std::flush;
+
     int status;
 
     int maxiter = _maxiter;
@@ -525,6 +528,8 @@ iterate()
 //    std::cout << "rhsWithoutBC norm = " << norm_2(_rhsWithoutBC) << std::endl;
     _residual_d = _C*this->_d - _rhsWithoutBC;
 //    _residual_d = -1.*_residual_d;
+
+    std::cout << " ok. " << std::flush;
 }
 
 template <typename Mesh>
@@ -571,7 +576,7 @@ template <typename Mesh>
 void VenantKirchhofSolver<Mesh>::
 evalResidual( Vector &res, const Vector& sol, int /*iter*/)
 {
-    std::cout << "S-    Computing residual... ";
+    std::cout << "    s-    Computing residual... ";
     Chrono chrono;
     chrono.start();
 
@@ -857,8 +862,9 @@ solveJacobian( Real /*time*/ )
 
     _linearSolver.setRecursionLevel( _recur );
 
-    std::cout << "  S-  Solving system                      ... "<< std::flush;
+    std::cout << "  S-  Solving system                      ... " << std::flush;
     chrono.start();
+
     _linearSolver.solve( M_ddisp , _f );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
@@ -906,6 +912,7 @@ solveJacobian( const Real /*time*/ , bchandler_type& BCd)
     _linearSolver.setRecursionLevel( _recur );
 
     std::cout << "  S-  Solving system                      ... "<< std::flush;
+
     chrono.start();
     _linearSolver.solve( M_ddisp , _f );
     chrono.stop();
