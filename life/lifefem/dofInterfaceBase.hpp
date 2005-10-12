@@ -80,6 +80,12 @@ public:
     //! output
     std::ostream& showMe( bool verbose = false, std::ostream& out = std::cout ) const;
 
+    void set(ID key, ID value);
+    void buildInverse( const DofInterfaceBase& dofBase);
+
+    const std::map<ID, ID> & locDofMap(){return _locDofMap;}
+
+
 protected:
 
     //!  STL map container which holds the connections between Dof at the interface

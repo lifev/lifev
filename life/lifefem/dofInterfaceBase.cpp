@@ -90,4 +90,22 @@ std::ostream& DofInterfaceBase::showMe( bool verbose, std::ostream& out ) const
     out << "------------------------------" << std::endl;
     return out;
 }
+
+
+void DofInterfaceBase::set( ID key, ID value )
+{
+    _locDofMap.find(key)->second = value;
+}
+
+void DofInterfaceBase::buildInverse( const DofInterfaceBase& dofBase)
+{
+    for ( std::map<ID, ID>::const_iterator it = dofBase._locDofMap.begin(); it != dofBase._locDofMap.end(); ++it )
+    {
+        _locDofMap[it->second] = it->first;
+    }
+
+}
+
+
+
 }

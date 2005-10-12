@@ -21,6 +21,30 @@
 namespace LifeV
 {
 
+//! Constructor for interfacing Dof of the same type (RefFE)
+/*!
+  \param refFe the part of the reference FE that contains the dof patterns (nbDofPerEdge...)
+  \param dof1 the Dof object of the mesh in which we want to make the computations
+*/
+DofInterface3Dto2D::DofInterface3Dto2D( const LocalDofPattern& refFE, const Dof& dof1 ) :
+        _interfRef( 0 ), _refFE1( &refFE ), _dof1( &dof1 )
+{
+    _finalized = false;
+}
+
+
+// Member functions
+
+void
+DofInterface3Dto2D::setup( const LocalDofPattern& refFE1, const Dof& dof1 )
+{
+    _refFE1    = &refFE1;
+    _dof1      = &dof1;
+
+    _finalized = false;
+}
+
+
 
 void RemoveMultiple( const std::list<ID> & list0, std::list< std::pair<ID, ID> > & listf )
 {
@@ -46,22 +70,13 @@ void RemoveMultiple( const std::list<ID> & list0, std::list< std::pair<ID, ID> >
         }
     }
 }
-//! Constructor for interfacing Dof of the same type (RefFE)
-/*!
-  \param refFe the part of the reference FE that contains the dof patterns (nbDofPerEdge...)
-  \param dof1 the Dof object of the mesh in which we want to make the computations
-*/
-DofInterface3Dto2D::DofInterface3Dto2D( const LocalDofPattern& refFE, const Dof& dof1 ) :
-        _interfRef( 0 ), _refFE1( &refFE ), _dof1( &dof1 )
-{
-    _finalized = false;
-}
 
 //! Returns the reference of the interface
 EntityFlag DofInterface3Dto2D::InterfaceRef() const
 {
     return _interfRef;
 }
+
 
 //! Returns the identity of the i-th elements in the (finalised) face list
 //! (counting from 0 ' a la C')
@@ -84,7 +99,7 @@ DofInterface3Dto2D & DofInterface3Dto2D::operator=( const DofInterface3Dto2D& do
     _vertexList = dofi._vertexList;
     // _edgePerFaceList   = dofi._edgePerFaceList; // (empty)
     // _edgeList          = dofi._edgeList;
-    _locDof = dofi._locDof;            // (empty)
+    //_locDof = dofi._locDof;            // (empty)
     _locDofMap = dofi._locDofMap;
     _finalized = dofi._finalized;
 
@@ -104,7 +119,7 @@ void DofInterface3Dto2D::ClearLists()
     _vertexList.clear();
     //  _edgePerFaceList.clear();
     //  _edgeList.clear();
-    _locDof.clear();
+    //_locDof.clear();
 }
 
 
