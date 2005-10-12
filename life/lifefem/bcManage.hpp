@@ -780,11 +780,12 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
                 // Loop on components involved in this boundary condition
                 for ( ID j = 1; j <= nComp; ++j )
                 {
+                    ID id = BCb(i)->id();
                     // Glogal Dof
-                    idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
+                    idDof = id + ( BCb.component( j ) - 1 ) * totalDof;
 
                     // Modifying right hand side (assuming BCvector is a flux)
-                    b[ idDof - 1 ] += BCb( BCb( i ) ->id(), BCb.component( j ) );
+                    b[ idDof - 1 ] += BCb( id , BCb.component( j ) );
                 }
             }
             break;
