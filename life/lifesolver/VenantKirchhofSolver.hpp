@@ -103,9 +103,9 @@ public:
     //! BCHandler getter and setter
 
 //    LIFEV_DEPRECATED BCHandler const & BC_solid() const {return BCh_solid();}
-    BCHandler const & BChandler() const {return BCh_solid();}
+    BCHandler const & BChandler() const {return this->BCh_solid();}
 
-    void setBC(const BCHandler & BCd) {_BCh = BCd;}
+    void setBC(const BCHandler & BCd) {this->_BCh = BCd;}
 
     //! residual getter
     Vector& residual() {return _residual_d;}
@@ -270,21 +270,21 @@ VenantKirchhofSolver( const GetPot& data_file, const RefFE& refFE, const QuadRul
 
     // Elementary computation and matrix assembling
     // Loop on elements
-    for ( UInt i = 1; i <= _mesh.numVolumes(); i++ )
+    for ( UInt i = 1; i <= this->_mesh.numVolumes(); i++ )
     {
-        this->_fe.updateFirstDerivQuadPt( _mesh.volumeList( i ) );
+        this->_fe.updateFirstDerivQuadPt( this->_mesh.volumeList( i ) );
 
         _elmatK.zero();
         _elmatM.zero();
 
         // stiffness
-        stiff_strain( _mu, _elmatK, this->_fe );
-        stiff_div ( 0.5 * _lambda, _elmatK, this->_fe );
+        stiff_strain( this->_mu, _elmatK, this->_fe );
+        stiff_div ( 0.5 * this->_lambda, _elmatK, this->_fe );
 
         _elmatC.mat() = _elmatK.mat();
 
         // mass
-        mass( dti2 * _rho, _elmatM, this->_fe, 0, 0, nDimensions );
+        mass( dti2 * this->_rho, _elmatM, this->_fe, 0, 0, nDimensions );
 
         _elmatC.mat() += _elmatM.mat();
 
@@ -363,22 +363,22 @@ VenantKirchhofSolver( const GetPot&   data_file,
 
     // Elementary computation and matrix assembling
     // Loop on elements
-    for ( UInt i = 1; i <= _mesh.numVolumes(); i++ )
+    for ( UInt i = 1; i <= this->_mesh.numVolumes(); i++ )
     {
 
-        this->_fe.updateFirstDerivQuadPt( _mesh.volumeList( i ) );
+        this->_fe.updateFirstDerivQuadPt( this->_mesh.volumeList( i ) );
 
         _elmatK.zero();
         _elmatM.zero();
 
         // stiffness
-        stiff_strain( _mu, _elmatK, this->_fe );
-        stiff_div ( 0.5 * _lambda, _elmatK, this->_fe );
+        stiff_strain( this->_mu, _elmatK, this->_fe );
+        stiff_div ( 0.5 * this->_lambda, _elmatK, this->_fe );
 
         _elmatC.mat() = _elmatK.mat();
 
         // mass
-        mass( dti2 * _rho, _elmatM, this->_fe, 0, 0, nDimensions );
+        mass( dti2 * this->_rho, _elmatM, this->_fe, 0, 0, nDimensions );
 
         _elmatC.mat() += _elmatM.mat();
 
@@ -430,10 +430,10 @@ timeAdvance( source_type const& source, const Real& time )
     {
 
         // l`oop on volumes: assembling source term
-        for ( UInt i = 1; i <= _mesh.numVolumes(); ++i )
+        for ( UInt i = 1; i <= this->_mesh.numVolumes(); ++i )
         {
 
-            this->_fe.updateFirstDerivQuadPt( _mesh.volumeList( i ) );
+            this->_fe.updateFirstDerivQuadPt( this->_mesh.volumeList( i ) );
 
             _elmatK.zero();
 
@@ -449,10 +449,10 @@ timeAdvance( source_type const& source, const Real& time )
 
             // stiffness for non-linear terms
             // 1/2 * \mu * ( [\grad d^k]^T \grad d : \grad v  )
-            stiff_dergradbis( _mu * 0.5, _dk_loc, _elmatK, this->_fe );
+            stiff_dergradbis( this->_mu * 0.5, _dk_loc, _elmatK, this->_fe );
 
             // 1/4 * \lambda * ( \tr { [\grad d^k]^T \grad d }, \div v  )
-            stiff_derdiv( _lambda * 0.25, _dk_loc, _elmatK, this->_fe );
+            stiff_derdiv( this->_lambda * 0.25, _dk_loc, _elmatK, this->_fe );
 
             for ( UInt ic = 0; ic < nc; ++ic )
             {
@@ -466,10 +466,10 @@ timeAdvance( source_type const& source, const Real& time )
     _rhsWithoutBC = ZeroVector( _rhsWithoutBC.size() );
 
     // loop on volumes: assembling source term
-    for ( UInt i = 1; i <= _mesh.numVolumes(); ++i )
+    for ( UInt i = 1; i <= this->_mesh.numVolumes(); ++i )
     {
 
-        this->_fe.updateFirstDerivQuadPt( _mesh.volumeList( i ) );
+        this->_fe.updateFirstDerivQuadPt( this->_mesh.volumeList( i ) );
 
         _elvec.zero();
 
@@ -481,15 +481,15 @@ timeAdvance( source_type const& source, const Real& time )
     }
 
     // right hand side without boundary load terms
-    Vector __z = this->_d + this->_dt * _w;
+    Vector __z = this->_d + this->_dt * this->_w;
     _rhsWithoutBC += _M * __z;
     _rhsWithoutBC -= _K * this->_d;
 
-    _rhs_w = ( 2.0 / this->_dt ) * this->_d + _w;
+    _rhs_w = ( 2.0 / this->_dt ) * this->_d + this->_w;
     std::cout << std::endl;
     std::cout << "rhsWithoutBC norm = " << norm_2(_rhsWithoutBC) << std::endl;
     std::cout << "_rhs_w norm       = " << norm_2(_rhs_w) << std::endl;
-    std::cout << "    _w norm       = " << norm_2(_w) << std::endl;
+    std::cout << "    _w norm       = " << norm_2(this->_w) << std::endl;
     //
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
@@ -521,7 +521,7 @@ iterate()
         _out_iter << _time << " " << maxiter << std::endl;
     }
 
-    _w = ( 2.0 / this->_dt ) * this->_d - _rhs_w;
+    this->_w = ( 2.0 / this->_dt ) * this->_d - _rhs_w;
 
 //    evalResidual(_residual_d, _d, 0);
 //    _residual_d = -1*(_C*this->_d);
@@ -555,11 +555,11 @@ iterate(Vector &_sol)
         _out_iter << _time << " " << maxiter << std::endl;
     }
 
-    _w = ( 2.0 / this->_dt ) * this->_d - _rhs_w;
+    this->_w = ( 2.0 / this->_dt ) * this->_d - _rhs_w;
 
-    std::cout << "sol norm = " << norm(_sol) << std::endl;
+    std::cout << "sol norm = " << norm(this->_sol) << std::endl;
 
-    _residual_d = _C*_sol - _rhsWithoutBC;
+    _residual_d = _C*this->_sol - _rhsWithoutBC;
 }
 
 
@@ -593,10 +593,10 @@ evalResidual( Vector &res, const Vector& sol, int /*iter*/)
 
         // Elementary computation and matrix assembling
         // Loop on elements
-        for ( UInt i = 1; i <= _mesh.numVolumes(); i++ )
+        for ( UInt i = 1; i <= this->_mesh.numVolumes(); i++ )
         {
 
-            this->_fe.updateFirstDerivQuadPt( _mesh.volumeList( i ) );
+            this->_fe.updateFirstDerivQuadPt( this->_mesh.volumeList( i ) );
 
             _elmatK.zero();
 
@@ -612,10 +612,10 @@ evalResidual( Vector &res, const Vector& sol, int /*iter*/)
             // stiffness for non-linear terms
 
             // 1/2 * \mu * ( [\grad d^k]^T \grad d : \grad v  )
-            stiff_dergradbis( _mu * 0.5, _dk_loc, _elmatK, this->_fe );
+            stiff_dergradbis( this->_mu * 0.5, _dk_loc, _elmatK, this->_fe );
 
             // 1/4 * \lambda * ( \tr { [\grad d^k]^T \grad d }, \div v  )
-            stiff_derdiv( _lambda * 0.25, _dk_loc , _elmatK, this->_fe );
+            stiff_derdiv( this->_lambda * 0.25, _dk_loc , _elmatK, this->_fe );
 
             // assembling
             for ( UInt ic = 0;ic < nc;ic++ )
@@ -626,14 +626,14 @@ evalResidual( Vector &res, const Vector& sol, int /*iter*/)
 
     std::cout << "updating the boundary conditions" << std::flush;
     if ( !this->BCh_solid().bdUpdateDone() )
-        this->BCh_solid().bdUpdate( _mesh, _feBd, this->_dof );
+        this->BCh_solid().bdUpdate( this->_mesh, this->_feBd, this->_dof );
     std::cout << std::endl;
 
-    bcManageMatrix( _K, _mesh, this->_dof, this->BCh_solid(), _feBd, 1.0 );
+    bcManageMatrix( _K, this->_mesh, this->_dof, this->BCh_solid(), this->_feBd, 1.0 );
 
     _rhs = _rhsWithoutBC;
 
-    bcManageVector( _rhs, _mesh, this->_dof, this->BCh_solid(), _feBd, _time, 1.0 );
+    bcManageVector( _rhs, this->_mesh, this->_dof, this->BCh_solid(), this->_feBd, _time, 1.0 );
 
     res = _K * sol - _rhs;
 
@@ -666,33 +666,33 @@ updateJacobian( Vector& sol, int iter )
         UInt nc = this->_d.nbcomp();
 
         // loop on volumes: assembling source term
-        for ( UInt i = 1; i <= _mesh.numVolumes(); ++i )
+        for ( UInt i = 1; i <= this->_mesh.numVolumes(); ++i )
         {
-            _fe.updateFirstDerivQuadPt( _mesh.volumeList( i ) );
+            this->_fe.updateFirstDerivQuadPt( this->_mesh.volumeList( i ) );
 
             _elmatK.zero();
 
             // _dk_loc contains the displacement in the nodes
-            for ( UInt j = 0 ; j < ( UInt ) _fe.nbNode ; ++j )
+            for ( UInt j = 0 ; j < ( UInt ) this->_fe.nbNode ; ++j )
             {
                 for ( UInt ic = 0; ic < nc; ++ic )
                 {
                     ig = this->_dof.localToGlobal( i, j + 1 ) - 1 + ic * this->_dim;
-                    _dk_loc[ j + ic * _fe.nbNode ] = sol[ ig ];
+                    _dk_loc[ j + ic * this->_fe.nbNode ] = sol[ ig ];
                 }
             }
 
             // stiffness for non-linear terms
             // 1/2 * \mu * ( [\grad \delta d]^T \grad d^k + [\grad d^k]^T \grad \delta d : \grad v  )
-            stiff_dergrad( _mu * 0.5, _dk_loc, _elmatK, _fe );
+            stiff_dergrad( this->_mu * 0.5, _dk_loc, _elmatK, this->_fe );
 
             // 1/2 * \lambda * ( \tr { [\grad u^k]^T \grad u }, \div v  )
-            stiff_derdiv( 0.5 * _lambda, _dk_loc, _elmatK, _fe );
+            stiff_derdiv( 0.5 * this->_lambda, _dk_loc, _elmatK, this->_fe );
 
             // assembleing
             for ( UInt ic = 0; ic < nc; ++ic )
                 for ( UInt jc = 0; jc < nc; jc++ )
-                    assemb_mat( _J, _elmatK, _fe, this->_dof, ic, jc );
+                    assemb_mat( _J, _elmatK, this->_fe, this->_dof, ic, jc );
         }
     }
 //     if (iter == 1)
@@ -723,9 +723,9 @@ solveJac( Vector &step, const Vector& res, double& /*linear_rel_tol*/)
 
     // BC manage for the velocity
     if ( !this->BCh_solid().bdUpdateDone() )
-        this->BCh_solid().bdUpdate( _mesh, _feBd, this->_dof );
+        this->BCh_solid().bdUpdate( this->_mesh, this->_feBd, this->_dof );
 
-    bcManageMatrix( _J, _mesh, this->_dof, this->BCh_solid(), _feBd, tgv );
+    bcManageMatrix( _J, this->_mesh, this->_dof, this->BCh_solid(), this->_feBd, tgv );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
@@ -764,9 +764,9 @@ solveJac( Vector &step, const Vector& res, double& /*linear_rel_tol*/,
 
     // BC manage for the velocity
     if ( BCh->bdUpdateDone() )
-        BCh->bdUpdate( _mesh, _feBd, this->_dof );
+        BCh->bdUpdate( this->_mesh, this->_feBd, this->_dof );
 
-    bcManageMatrix( _J, _mesh, this->_dof, *BCh, _feBd, tgv );
+    bcManageMatrix( _J, this->_mesh, this->_dof, *BCh, this->_feBd, tgv );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
@@ -803,9 +803,9 @@ solveJac( Vector &step, const Vector& res, double& /*linear_rel_tol*/,
 
 //     // BC manage for the velocity
 //     if ( !BCd.bdUpdateDone() )
-//         BCd.bdUpdate( _mesh, _feBd, this->_dof );
+//         BCd.bdUpdate( this->_mesh, this->_feBd, this->_dof );
 
-//     bcManageMatrix( _J, _mesh, this->_dof, BCd, _feBd, tgv );
+//     bcManageMatrix( _J, this->_mesh, this->_dof, BCd, this->_feBd, tgv );
 //     chrono.stop();
 //     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
@@ -847,16 +847,16 @@ solveJacobian( Real /*time*/ )
 
     // BC manage for the velocity
     if ( !this->BCh_solid().bdUpdateDone() )
-        this->BCh_solid().bdUpdate( _mesh, _feBd, this->_dof );
+        this->BCh_solid().bdUpdate( this->_mesh, this->_feBd, this->_dof );
 
     bcManageVector(_f,
-                   _mesh,
+                   this->_mesh,
                    this->_dof,
-                   BCh_solid(),
-                   _feBd,
+                   this->BCh_solid(),
+                   this->_feBd,
                    1., 1.);
 
-    bcManageMatrix( _J, _mesh, this->_dof, this->BCh_solid(), _feBd, tgv );
+    bcManageMatrix( _J, this->_mesh, this->_dof, this->BCh_solid(), this->_feBd, tgv );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
@@ -869,7 +869,7 @@ solveJacobian( Real /*time*/ )
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
-    _w = ( 2.0 / this->_dt ) * M_ddisp - _rhs_w;
+    this->_w = ( 2.0 / this->_dt ) * M_ddisp - _rhs_w;
 
 //    std::cout << "  S-  Computing residual                  ... " << std::flush;
     _residual_d = _C*M_ddisp;
@@ -896,16 +896,16 @@ solveJacobian( const Real /*time*/ , bchandler_type& BCd)
 
     // BC manage for the velocity
     if ( !(*BCd).bdUpdateDone() )
-        (*BCd).bdUpdate( _mesh, _feBd, this->_dof );
+        (*BCd).bdUpdate( this->_mesh, this->_feBd, this->_dof );
 
     bcManageVector(_f,
-                   _mesh,
+                   this->_mesh,
                    this->_dof,
                    *BCd,
-                   _feBd,
+                   this->_feBd,
                    1., 1.);
 
-    bcManageMatrix( _J, _mesh, this->_dof, *BCd, _feBd, tgv );
+    bcManageMatrix( _J, this->_mesh, this->_dof, *BCd, this->_feBd, tgv );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
@@ -918,7 +918,7 @@ solveJacobian( const Real /*time*/ , bchandler_type& BCd)
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
-    _w = ( 2.0 / this->_dt ) * M_ddisp - _rhs_w;
+    this->_w = ( 2.0 / this->_dt ) * M_ddisp - _rhs_w;
 
 //    std::cout << "  S-  Computing residual                  ... " << std::flush;
     _residual_d = _C*M_ddisp;
