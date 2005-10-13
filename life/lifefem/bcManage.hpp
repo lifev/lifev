@@ -756,7 +756,7 @@ template <typename VectorType, typename MeshType, typename DataType>
 void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const BCBase& BCb,
                       CurrentBdFE& bdfem, const DataType& t )
 {
-
+  
     // Number of local Dof (i.e. nodes) in this face
     UInt nDofF = bdfem.nbNode;
 
@@ -768,6 +768,7 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
 
     const IdentifierNatural* pId;
     ID ibF, idDof, icDof, gDof;
+    Real sum;
 
     if ( BCb.dataVector() )
     { //! If BC is given under a vectorial form
@@ -805,62 +806,75 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
 
                 // Loop on total Dof per Face
                 for ( ID l = 1; l <= nDofF; ++l )
-                {
+		  {
 
                     gDof = pId->bdLocalToGlobal( l );
 
                     // Loop on components involved in this boundary condition
                     for ( UInt ic = 0; ic < nComp; ++ic )
-                    {
-                        icDof = gDof + ic * totalDof;
+		      {
+			icDof = gDof + ic * totalDof;
 
                         // Loop on quadrature points
                         for ( int iq = 0; iq < bdfem.nbQuadPt; ++iq )
-                        {
-                            // Adding right hand side contribution
-                            b[ icDof - 1 ] += BCb( gDof , 1 ) * bdfem.phi( int( l - 1 ), iq ) * bdfem.normal( int( ic ), iq ) * bdfem.weightMeas( iq );
-                        }
-                    }
-                }
+			  {
+			    sum=0.0;
+			    // data on quadrature point
+			    for ( ID m = 1; m <= nDofF; ++m ) 
+			      sum +=  BCb( pId->bdLocalToGlobal( m ) , 1 ) * bdfem.phi( int( m - 1 ), iq );
+			    
+			    // Adding right hand side contribution 	
+			    b[ icDof - 1 ] += sum * bdfem.phi( int( l - 1 ), iq ) * bdfem.normal( int( ic ), iq ) 
+			      * bdfem.weightMeas( iq );
+			  }
+		      }
+		  }
             }
             break;
-    case 2:  // if the BC is a vector of values with components to be integrated
-      // Loop on BC identifiers
-      for ( ID i = 1; i <= BCb.list_size(); ++i )
+	case 2:  // if the BC is a vector of values with components to be integrated
+	  // Loop on BC identifiers
+	  for ( ID i = 1; i <= BCb.list_size(); ++i )
             {
-
-          // Pointer to the i-th itdentifier in the list
-          pId = static_cast< const IdentifierNatural* >( BCb( i ) );
-
-          // Number of the current boundary face
-          ibF = pId->id();
-
-          // Updating face stuff
-          bdfem.updateMeasNormalQuadPt( mesh.boundaryFace( ibF ) );
-
-          // Loop on total Dof per Face
-          for ( ID l = 1; l <= nDofF; ++l )
+	      
+	      // Pointer to the i-th itdentifier in the list
+	      pId = static_cast< const IdentifierNatural* >( BCb( i ) );
+	      
+	      // Number of the current boundary face
+	      ibF = pId->id();
+	      
+	      // Updating face stuff
+	      bdfem.updateMeasNormalQuadPt( mesh.boundaryFace( ibF ) );
+	      
+	      // Loop on total Dof per Face
+	      for ( ID l = 1; l <= nDofF; ++l )
                 {
-
-          gDof = pId->bdLocalToGlobal( l );
-
-          // Loop on space dimensions condition
-          for ( UInt ic = 0; ic < nDimensions; ++ic )
+		  
+		  gDof = pId->bdLocalToGlobal( l );
+		  
+		  // Loop on space dimensions
+		  for ( UInt ic = 0; ic < nDimensions; ++ic )
                     {
-              // Loop on quadrature points
-              for ( int iq = 0; iq < bdfem.nbQuadPt; ++iq )
-                        {
-              // Adding right hand side contribution
-              b[ gDof - 1 ] += BCb( gDof , ic+1 ) * bdfem.phi( int( l - 1 ), iq ) * bdfem.normal( int( ic ), iq ) * bdfem.weightMeas( iq );
-                        }
-                    }
-                }
-            }
-      break;
-        default:
-      ERROR_MSG( "This type of BCVector does not exists" );
-        }
+		      // Loop on quadrature points
+		      for ( int iq = 0; iq < bdfem.nbQuadPt; ++iq )
+			{
+			  sum = 0;
+			  // data on quadrature point
+			  for ( ID m = 1; m <= nDofF; ++m )
+			    sum +=  BCb( pId->bdLocalToGlobal( m ) , ic+1 ) * bdfem.phi( int( m - 1 ), iq );
+			  
+			  // Adding right hand side contribution
+			  b[ gDof - 1 ] += sum *  bdfem.phi( int( l - 1 ), iq ) * 
+			    bdfem.normal( int( ic ), iq ) * bdfem.weightMeas( iq );
+			}
+		    }
+		}
+	    }
+	  break;
+	default:
+	  ERROR_MSG( "This type of BCVector does not exist" );
+	}
     }
+	
     /*
       MODIFIED by V. Martin : what follows...
 
