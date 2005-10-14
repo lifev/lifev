@@ -4,7 +4,7 @@
 #-------------------------------------------------
 
 
-FSIalgo = 3   # 1 Exact Newton, 2 Quasi-Newton (linearized ns), 3 Quasi-Newton (reduced fluid)
+FSIalgo = 1   # 1 Exact Newton, 2 Quasi-Newton (linearized ns), 3 Quasi-Newton (reduced fluid)
 
 [fluid]
 
