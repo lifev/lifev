@@ -323,8 +323,7 @@ void mass( Real coef, ElemMat& elmat, const CurrentFE& fe,
     }
 }
 
-// Miguel 12/2003
-//
+
 void ipstab_grad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2,
                   const CurrentBdFE& bdfe, int iblock, int jblock )
 {
@@ -418,8 +417,7 @@ void ipstab_grad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const C
 
 
 
-// Miguel 12/2003
-//
+
 void ipstab_grad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2,
                   const CurrentBdFE& bdfe, int iblock, int jblock, int nb )
 {
@@ -517,8 +515,7 @@ void ipstab_grad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const C
 
 
 
-// Miguel 2/2004
-//
+
 void ipstab_bgrad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2,
                    const ElemVec& beta, const CurrentBdFE& bdfe, int iblock,
                    int jblock, int nb )
@@ -642,8 +639,7 @@ void ipstab_bgrad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const 
 
 
 
-// Miguel 2/2004
-//
+
 void ipstab_div( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2,
                  const CurrentBdFE& bdfe, int iblock, int jblock )
 {
@@ -1443,7 +1439,7 @@ void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
     }
 }
 
-// Miguel 10/2003:
+
 /*
   Stiffness matrix: coef * ( div u , div v )
 */
@@ -1480,7 +1476,6 @@ void stiff_div( Real coef, ElemMat& elmat, const CurrentFE& fe )
 
 
 
-// Miguel 10/2003:
 /*
   Stiffness matrix: coef * ( [\grad u^k]^T \grad d : \grad v  )
 */
@@ -1540,7 +1535,7 @@ void stiff_dergradbis( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const C
 
 
 
-// Miguel 10/2003:
+
 /*
   Stiffness matrix: coef * ( [\grad u]^T \grad u^k [\grad u^k]^T \grad u : \grad v  ) for Newton on St-Venant
 */
@@ -1604,7 +1599,7 @@ void stiff_dergrad( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const Curr
 
 
 
-// Miguel 10/2003:
+
 //
 // coef * ( \tr { [\grad u^k]^T \grad u }, \div v  ) for Newton on St-Venant
 //
@@ -1663,7 +1658,7 @@ void stiff_derdiv( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const Curre
 
 
 
-// Miguel 26/03/2003:
+
 void stiff_strain( Real coef, ElemMat& elmat, const CurrentFE& fe )
 /*
   Stiffness matrix: coef * ( e(u) , e(v) )
@@ -1713,7 +1708,7 @@ void stiff_strain( Real coef, ElemMat& elmat, const CurrentFE& fe )
 }
 
 
-// Miguel 05/2003:
+
 void mass_divw( Real coef, const ElemVec& w_loc, ElemMat& elmat, const CurrentFE& fe,
                 int iblock, int jblock, int nb )
 /*
@@ -1786,7 +1781,7 @@ void mass_divw( Real coef, const ElemVec& w_loc, ElemMat& elmat, const CurrentFE
 
 
 
-// Miguel 05/2003:
+
 void mass_gradu( Real coef, const ElemVec& u0_loc, ElemMat& elmat, const CurrentFE& fe )
 /*
   modified mass matrix: ( grad u0 u,v )
@@ -2362,15 +2357,11 @@ void source_fhn( Real coef_f, Real coef_a, ElemVec& u, ElemVec& elvec, const Cur
 
 }
 
-
-
-// Miguel & Marwan 06/2003:
+// coef * ( - \grad w^k :[I\div d - (\grad d)^T] u^k + convect^T[I\div d - (\grad d)^T] (\grad u^k)^T , v  ) for Newton FSI
 //
-// coef * ( \grad (convect):[I\div d - (\grad d)^T] u^k + convect^T[I\div d - (\grad d)^T] (\grad u^k)^T , v  ) for Newton FSI
+// Remark: convect = u^n-w^k
 //
-// Remark: convect = u^n-u^k
-//
-void source_mass1( Real coef, const ElemVec& uk_loc, const ElemVec& convect_loc,
+void source_mass1( Real coef, const ElemVec& uk_loc, const ElemVec& wk_loc, const ElemVec& convect_loc,
                    const ElemVec& d_loc, ElemVec& elvec, const CurrentFE& fe )
 {
     ASSERT_PRE( fe.hasFirstDeriv(),
@@ -2379,7 +2370,7 @@ void source_mass1( Real coef, const ElemVec& uk_loc, const ElemVec& convect_loc,
 
     Real B[ fe.nbCoor ][ fe.nbCoor ];                 // \grad (convect) at a quadrature point
     Real A[ fe.nbCoor ][ fe.nbCoor ];                 // I\div d - (\grad d)^T at a quadrature point
-    Real aux[ fe.nbQuadPt ];                        // grad (convect):[I\div d - (\grad d)^T] at  quadrature points
+    Real aux[ fe.nbQuadPt ];                        // grad (- w^k):[I\div d - (\grad d)^T] at  quadrature points
     Real uk[ fe.nbQuadPt ][ fe.nbCoor ];              // u^k quadrature points
     Real guk[ fe.nbQuadPt ][ fe.nbCoor ][ fe.nbCoor ];  // \grad u^k at quadrature points
     Real convect[ fe.nbCoor ];                      // convect at quadrature points
@@ -2419,7 +2410,7 @@ void source_mass1( Real coef, const ElemVec& uk_loc, const ElemVec& convect_loc,
                 for ( i = 0;i < fe.nbNode;i++ )
                 {
                     sG += fe.phiDer( i, jcoor, ig ) * uk_loc.vec() [ i + icoor * fe.nbNode ]; //  \grad u^k at each quadrature point
-                    sB += fe.phiDer( i, jcoor, ig ) * convect_loc.vec() [ i + icoor * fe.nbNode ]; //  \grad (convect) at this quadrature point
+                    sB -= fe.phiDer( i, jcoor, ig ) * wk_loc.vec() [ i + icoor * fe.nbNode ]; //  \grad (- w^k) at this quadrature point
                     sA -= fe.phiDer( i, icoor, ig ) * d_loc.vec() [ i + jcoor * fe.nbNode ]; //  - (\grad d) ^T at this quadrature point
                 }
                 guk[ ig ][ icoor ][ jcoor ] = sG; // \grad u^k at each quadrature point
@@ -2438,7 +2429,7 @@ void source_mass1( Real coef, const ElemVec& uk_loc, const ElemVec& convect_loc,
         s = 0;
         for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
             for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
-                s += B[ icoor ][ jcoor ] * A[ icoor ][ jcoor ]; // \grad (convect):[I\div d - (\grad d)^T] at each quadrature point
+                s += B[ icoor ][ jcoor ] * A[ icoor ][ jcoor ]; // \grad (-w^k):[I\div d - (\grad d)^T] at each quadrature point
         aux[ ig ] = s;
 
         s = 0;
@@ -2453,7 +2444,7 @@ void source_mass1( Real coef, const ElemVec& uk_loc, const ElemVec& convect_loc,
     // At this point we have:
     //    v  \grad u^k at each quadrature point: guk
     //    v  convect^T [I\div d - (\grad d)^T] at each quadrature point: convect_A
-    //    v  \grad (convect):[I\div d - (\grad d)^T]: aux
+    //    v  \grad (-w^k):[I\div d - (\grad d)^T]: aux
 
 
     //
@@ -2476,7 +2467,7 @@ void source_mass1( Real coef, const ElemVec& uk_loc, const ElemVec& convect_loc,
             for ( ig = 0;ig < fe.nbQuadPt;ig++ )
             {
 
-                // \grad (convect):[I\div d - (\grad d)^T] \phi_i
+                // \grad ( - w^k ):[I\div d - (\grad d)^T] \phi_i
                 s += aux[ ig ] * uk[ ig ][ icoor ] * fe.phi( i, ig ) * fe.weightDet( ig );
 
                 // convect^T [I\div d - (\grad d)^T] (\grad u^k)^T \phi_i
@@ -2489,7 +2480,7 @@ void source_mass1( Real coef, const ElemVec& uk_loc, const ElemVec& convect_loc,
 }
 
 
-// Miguel & Marwan 06/2003:
+
 //
 // coef * ( \grad u^k dw, v  ) for Newton FSI
 //
@@ -2566,7 +2557,103 @@ void source_mass2( Real coef, const ElemVec& uk_loc, const ElemVec& dw_loc,
 }
 
 
-// Miguel & Marwan 06/2003:
+
+//
+// coef * ( \grad u^n :[2 I \div d - (\grad d)^T]  u^k , v  ) for Newton FSI
+//
+//
+void source_mass3( Real coef, const ElemVec& un_loc, const ElemVec& uk_loc, const ElemVec& d_loc,
+                   ElemVec& elvec, const CurrentFE& fe )
+{
+    ASSERT_PRE( fe.hasFirstDeriv(),
+                "source_mass needs at least the first derivatives" );
+
+
+    Real B[ fe.nbCoor ][ fe.nbCoor ];                 // \grad u^n at a quadrature point
+    Real A[ fe.nbCoor ][ fe.nbCoor ];                 // I\div d - (\grad d)^T at a quadrature point
+    Real aux[ fe.nbQuadPt ];                        //  \div d  \div u^n  + grad u^n:[I\div d - (\grad d)^T] at  quadrature points
+    Real uk[ fe.nbQuadPt ][ fe.nbCoor ];              // u^k quadrature points
+
+    Real s, sA, sB;
+
+
+    int icoor, jcoor, ig, i;
+    // loop on quadrature points
+    for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+    {
+
+        // loop on space coordindates
+        for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+        {
+
+            // each compontent of uk at each quadrature points
+            s = 0.0;
+            for ( i = 0;i < fe.nbNode;i++ )
+                s += fe.phi( i, ig ) * uk_loc.vec() [ i + icoor * fe.nbNode ];
+            uk[ ig ][ icoor ] = s;
+
+
+            // loop  on space coordindates
+            for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
+            {
+                sB = 0.0;
+                sA = 0.0;
+                for ( i = 0;i < fe.nbNode;i++ )
+                {
+                    sB += fe.phiDer( i, jcoor, ig ) * un_loc.vec() [ i + icoor * fe.nbNode ]; //  \grad u^n at this quadrature point
+                    sA -= fe.phiDer( i, icoor, ig ) * d_loc.vec() [ i + jcoor * fe.nbNode ]; //  - (\grad d) ^T at this quadrature point
+                }
+		B[ icoor ][ jcoor ] = sB; // \grad u^n at this quadrature point
+                A[ icoor ][ jcoor ] = sA; // -(\grad d) ^T at this quadrature point
+            }
+        }
+
+        s = 0.0;
+        for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
+	  s -= A[ jcoor ][ jcoor ];  // \div d at this quadrature point ( - trace( A ) )
+
+        for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
+	  A[ jcoor ][ jcoor ] += 2 * s;  // 2 * I\div d - (\grad d)^T at this quadrature point
+
+        s = 0;
+        for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+            for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
+                s += B[ icoor ][ jcoor ] * A[ icoor ][ jcoor ]; // \grad u^n:[2 * I\div d - (\grad d)^T] at each quadrature point
+        aux[ ig ] = s;
+    }
+
+    // At this point we have:
+    //    v u^k at each quadrature point: uk
+    //    v  \grad u^n:[ 2 * I\div d - (\grad d)^T]: aux
+
+
+    //
+    // Numerical integration
+    //
+
+    // loop on coordinates, i.e. loop on elementary vector blocks
+    for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+    {
+
+      // the block iccor of the elementary vector
+      ElemVec::vector_view vec = elvec.block( icoor );
+      
+      // loop on nodes, i.e. loop on components of this block
+      for ( i = 0;i < fe.nbNode;i++ )
+        {
+	  // loop on quadrature points
+	  s = 0;
+	  for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+	    // \grad u^n:[2 * I\div d - (\grad d)^T] u^k \phi_i
+	    s += aux[ ig ] * uk[ ig ][ icoor ] * fe.phi( i, ig ) * fe.weightDet( ig );
+	  vec( i ) += coef * s;
+        }
+    }
+}
+
+
+
+
 //
 // coef * ( [-p^k I + 2*mu e(u^k)] [I\div d - (\grad d)^T] , \grad v  ) for Newton FSI
 //
@@ -2666,7 +2753,6 @@ void source_stress( Real coef, Real mu, const ElemVec& uk_loc, const ElemVec& pk
 }
 
 
-// Miguel & Marwan 10/2003:
 //
 // + \mu ( \grad u^k \grad d + [\grad d]^T[\grad u^k]^T : \grad v )
 //
@@ -2745,15 +2831,11 @@ void source_stress2( Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, Ele
 }
 
 
-
-
-
-// Miguel & Marwan 06/2003:
 //
 // coef * (  (\grad u^k):[I\div d - (\grad d)^T] , q  ) for Newton FSI
 //
 void source_press( Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, ElemVec& elvec,
-                   const CurrentFE& fe_u, const CurrentFE& fe_p )
+                   const CurrentFE& fe_u, const CurrentFE& fe_p, int iblock )
 {
 
     ASSERT_PRE( fe_u.hasFirstDeriv(),
@@ -2761,6 +2843,7 @@ void source_press( Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, ElemV
     Real A[ fe_u.nbCoor ][ fe_u.nbCoor ];     //  I\div d - (\grad d)^T at a quadrature point
     Real guk[ fe_u.nbCoor ][ fe_u.nbCoor ];   // \grad u^k at a quadrature point
     Real aux[ fe_u.nbQuadPt ];              // grad u^k:[I\div d - (\grad d)^T] at each quadrature point
+    ElemVec::vector_view vec = elvec.block( iblock );
 
     Real s, sA, sG;
     int icoor, jcoor, ig, i;
@@ -2817,9 +2900,94 @@ void source_press( Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, ElemV
         {
             s += aux[ ig ] * fe_p.phi( i, ig ) * fe_u.weightDet( ig );
         }
-        elvec.vec() [ i ] += coef * s;
+        vec [ i ] += coef * s;
     }
 }
+
+
+//
+// coef * ( [I\div d - (\grad d)^T - \grad d] \grap p, \grad q  ) for Newton FSI
+//
+void source_press2( Real coef, const ElemVec& p_loc, const ElemVec& d_loc, ElemVec& elvec,
+		    const CurrentFE& fe, int iblock )
+{
+  
+  ASSERT_PRE( fe.hasFirstDeriv(),
+	      "source_stress needs at least the velocity shape functions first derivatives" );
+  
+  Real A[ fe.nbCoor ][ fe.nbCoor ];     //  I\div d - (\grad d)^T - \grad d at a quadrature point
+  Real B[ fe.nbCoor ][ fe.nbCoor ];     // - \grad d 
+  Real gpk[ fe.nbCoor ];   // \grad p^k at a quadrature point
+  Real aux[ fe.nbQuadPt ][fe.nbCoor];              // [I\div d - (\grad d)^T - \grad d ]\grad p^k at each quadrature point
+  
+  ElemVec::vector_view vec = elvec.block( iblock );
+
+  Real s, sA, sG;
+  int icoor, jcoor, ig, i;
+
+
+  // loop on quadrature points
+  for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+    {
+     
+    
+      // loop on space coordinates
+      for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+        {
+
+	  sG = 0.0;
+	  for ( i = 0;i < fe.nbNode;i++ )
+	    sG += fe.phiDer( i, icoor, ig ) * p_loc.vec() [ i ]; //  \grad p^k at a quadrature point
+	  gpk[ icoor ] = sG;
+	 
+	  // loop  on space coordinates
+	  for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
+            {
+	      sA = 0.0;
+	      for ( i = 0;i < fe.nbNode;i++ )
+		sA -= fe.phiDer( i, icoor, ig ) * d_loc.vec() [ i + jcoor * fe.nbNode ]; //  - (\grad d) ^T at a quadrature point
+	      A[ icoor ][ jcoor ] = sA;
+	      B[ jcoor ][ icoor ] = sA;
+            }
+        }
+
+        s = 0.0;
+        for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
+            s -= A[ jcoor ][ jcoor ];  // \div d at this quadrature point ( - trace( A ) )
+
+        for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
+            A[ jcoor ][ jcoor ] += s;  // I\div d - (\grad d)^T at this quadrature point
+ 
+	for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+	  for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
+	    A[ icoor ][ jcoor ] += B[ icoor ][ jcoor ]; // I\div d - (\grad d)^T - \grad d at this quadrature point
+
+        s = 0;
+        for ( icoor = 0;icoor < fe.nbCoor;icoor++ ) 
+	  {
+            for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
+	      s += A[ icoor ][ jcoor ] * gpk[jcoor]; // [I\div d - (\grad d)^T -\grad d] \grad p^k at each quadrature point
+	    aux[ ig ][icoor] = s;
+	  }
+    }
+
+    //
+    // Numerical integration
+    //
+
+    // Loop on nodes, i.e. loop on elementary vector components
+    for ( i = 0;i < fe.nbNode;i++ )
+    {
+
+        // loop on quadrature points
+        s = 0;
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+	  for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
+            s += aux[ ig ][icoor] * fe.phiDer( i, icoor, ig ) * fe.weightDet( ig );       
+        vec [ i ] += coef * s;
+    }
+}
+
 
 
 //----------------------------------------------------------------------
