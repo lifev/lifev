@@ -150,7 +150,7 @@ protected:
     PhysVectUnknown<Vector> _dwInterp;
 
 
-    //! This method interpolates the mesh velocity when necessary (refFE_u.nbNodes > _mesh.getRefFE().nbNodes)
+    //! This method interpolates the mesh velocity when necessary (refFE_u.nbNodes > this->_mesh.getRefFE().nbNodes)
     void _interpolate( const UInt nbcomp, const Vector& w, Vector& wInterp );
 
 private:
@@ -189,16 +189,16 @@ NavierStokesAleHandler( const GetPot&   data_file,
                                    bdQr_p,
                                    BCh_u ),
         M_harmonicExtension        ( data_file,
-                                     _mesh,
+                                     this->_mesh,
                                      1.0,
                                      quadRuleTetra4pt,
                                      quadRuleTria3pt,
                                      BCh_mesh ),
         _dispOld                 ( M_harmonicExtension.dofMesh().numTotalDof() ),
         _w                       ( M_harmonicExtension.dofMesh().numTotalDof() ),
-        _wInterp                 ( _dim_u ),
-        _dInterp                 ( _dim_u ),
-        _dwInterp                ( _dim_u )
+        _wInterp                 ( this->_dim_u ),
+        _dInterp                 ( this->_dim_u ),
+        _dwInterp                ( this->_dim_u )
 {
     _factor   = data_file ( "fluid/miscellaneous/factor", 1.0 );
     _dispOld  = ZeroVector( _dispOld.size() );
@@ -226,15 +226,15 @@ NavierStokesAleHandler( const GetPot&   data_file,
                                    Qr_p,
                                    bdQr_p ),
         M_harmonicExtension        ( data_file,
-                                     _mesh,
+                                     this->_mesh,
                                      1.0,
                                      quadRuleTetra4pt,
                                      quadRuleTria3pt ),
         _dispOld                 ( M_harmonicExtension.dofMesh().numTotalDof() ),
         _w                       ( M_harmonicExtension.dofMesh().numTotalDof() ),
-        _wInterp                 ( _dim_u ),
-        _dInterp                 ( _dim_u ),
-        _dwInterp                ( _dim_u )
+        _wInterp                 ( this->_dim_u ),
+        _dInterp                 ( this->_dim_u ),
+        _dwInterp                ( this->_dim_u )
 {
     _factor   = data_file ( "fluid/miscellaneous/factor", 1.0 );
     _dispOld  = ZeroVector( _dispOld.size() );
@@ -252,13 +252,13 @@ updateMesh( const Real& time )
 {
     // Updating mesh displacement and velocity
     std::cout << "Updating the harmonic extension mesh ... " << std::flush;
-    M_harmonicExtension.updateExtension( _mesh, time );
+    M_harmonicExtension.updateExtension( this->_mesh, time );
 
-    Real dti = 1.0 / _dt;
+    Real dti = 1.0 / this->_dt;
     _w = ( M_harmonicExtension.getDisplacement() - _dispOld ) * dti;
     _interpolate( _w.nbcomp(), _w, _wInterp );
     // Updating mesh points
-    _mesh.moveMesh( M_harmonicExtension.getDisplacement() );
+    this->_mesh.moveMesh( M_harmonicExtension.getDisplacement() );
     std::cout << "ok." << std::flush << std::endl;
 }
 
@@ -269,10 +269,10 @@ void NavierStokesAleHandler<Mesh>::
 updateMeshTransp( const Real& time )
 {
 
-    M_harmonicExtension.updateExtensionTransp( _mesh, time );
-    Real dti = 1.0 / _dt;
+    M_harmonicExtension.updateExtensionTransp( this->_mesh, time );
+    Real dti = 1.0 / this->_dt;
     _w = ( M_harmonicExtension.getDisplacement() - _dispOld ) * dti;
-    _interpMeshVelocity();
+    this->_interpMeshVelocity();
 }
 
 
@@ -282,9 +282,9 @@ void NavierStokesAleHandler<Mesh>::
 updateDispVelo()
 {
     // Updating mesh displacement and velocity
-    M_harmonicExtension.updateExtension( _mesh, 0.0, 1 );
+    M_harmonicExtension.updateExtension( this->_mesh, 0.0, 1 );
 
-    Real dti = 1.0 / _dt;
+    Real dti = 1.0 / this->_dt;
 
     std::cout << " max norm dx = " << norm_inf( M_harmonicExtension.getDisplacement() ) << std::endl;
 
@@ -331,13 +331,13 @@ NavierStokesAleHandler<Mesh>::initialize( const std::string& velName,
                                           const std::string& velwName,
                                           double             startT)
 {
-    std::cout << "  F- restarting at time = " << startT << " " << _dt << std::endl;
+    std::cout << "  F- restarting at time = " << startT << " " << this->_dt << std::endl;
 
-    _count = (UInt) (startT/_dt - 0.5);
+    this->_count = (UInt) (startT/this->_dt - 0.5);
 
     NavierStokesHandler<Mesh>::initialize( velName, pressName);
 
-    UInt nnode = _mesh.pointList.size();
+    UInt nnode = this->_mesh.pointList.size();
 
     std::string filenamep = pressName;
     std::string ext       = ".mesh";
@@ -382,9 +382,9 @@ NavierStokesAleHandler<Mesh>::initialize( const std::string& velName,
              >> disp[inode + 2*nnode]
              >> idummy;
 
-        disp[inode + 0*nnode] = (disp[inode + 0*nnode] - _mesh.pointList(inode + 1).x())/_factor;
-        disp[inode + 1*nnode] = (disp[inode + 1*nnode] - _mesh.pointList(inode + 1).y())/_factor;
-        disp[inode + 2*nnode] = (disp[inode + 2*nnode] - _mesh.pointList(inode + 1).z())/_factor;
+        disp[inode + 0*nnode] = (disp[inode + 0*nnode] - this->_mesh.pointList(inode + 1).x())/_factor;
+        disp[inode + 1*nnode] = (disp[inode + 1*nnode] - this->_mesh.pointList(inode + 1).y())/_factor;
+        disp[inode + 2*nnode] = (disp[inode + 2*nnode] - this->_mesh.pointList(inode + 1).z())/_factor;
     }
 
     M_harmonicExtension.setDisplacement(disp);
@@ -397,9 +397,9 @@ NavierStokesAleHandler<Mesh>::initialize( const std::string& velName,
 
     //now we must compute the "old" displacement
 
-    _dispOld = disp - _w*_dt;
+    _dispOld = disp - _w*this->_dt;
 
-//    _mesh.moveMesh(_disp);
+//    this->_mesh.moveMesh(_disp);
 
 }
 
@@ -415,7 +415,7 @@ NavierStokesAleHandler<Mesh>::readUnknown( const std::string       &name,
     int nsx, nsy, nsz;
     int ndim;
 
-    int nDof = _mesh.pointList.size();
+    int nDof = this->_mesh.pointList.size();
 
     std::string filenamex = name;
     ext = "_x.bb";
@@ -537,11 +537,11 @@ NavierStokesAleHandler<Mesh>::postProcess()
     std::ostringstream index;
     std::string name;
 
-    ++_count;
-    if ( fmod( float( _count ), float( _verbose ) ) == 0.0 )
+    ++this->_count;
+    if ( fmod( float( this->_count ), float( this->_verbose ) ) == 0.0 )
     {
         std::cout << "  F-  Post-processing \n";
-        index << ( _count / _verbose );
+        index << ( this->_count / this->_verbose );
 
         switch ( index.str().size() )
         {
@@ -557,24 +557,24 @@ NavierStokesAleHandler<Mesh>::postProcess()
         }
 
 
-        wr_medit_ascii_scalar( "press." + name + ".bb", _p.giveVec(), _p.size() );
+        wr_medit_ascii_scalar( "press." + name + ".bb", this->_p.giveVec(), this->_p.size() );
 
 //         wr_medit_ascii_scalar( "disp_x." + name + ".bb", _disp.giveVec(), this->_mesh.numVertices() );
-//         wr_medit_ascii_scalar( "disp_y." + name + ".bb", _disp.giveVec() + _dim_u, this->_mesh.numVertices() );
-//         wr_medit_ascii_scalar( "disp_z." + name + ".bb", _disp.giveVec() + 2 * _dim_u, this->_mesh.numVertices() );
+//         wr_medit_ascii_scalar( "disp_y." + name + ".bb", _disp.giveVec() + this->_dim_u, this->_mesh.numVertices() );
+//         wr_medit_ascii_scalar( "disp_z." + name + ".bb", _disp.giveVec() + 2 * this->_dim_u, this->_mesh.numVertices() );
 
-        wr_medit_ascii_scalar( "vel_x." + name + ".bb", _u.giveVec(), _mesh.numVertices() );
-        wr_medit_ascii_scalar( "vel_y." + name + ".bb", _u.giveVec() + _dim_u, _mesh.numVertices() );
-        wr_medit_ascii_scalar( "vel_z." + name + ".bb", _u.giveVec() + 2 * _dim_u, _mesh.numVertices() );
+        wr_medit_ascii_scalar( "vel_x." + name + ".bb", this->_u.giveVec(), this->_mesh.numVertices() );
+        wr_medit_ascii_scalar( "vel_y." + name + ".bb", this->_u.giveVec() + this->_dim_u, this->_mesh.numVertices() );
+        wr_medit_ascii_scalar( "vel_z." + name + ".bb", this->_u.giveVec() + 2 * this->_dim_u, this->_mesh.numVertices() );
 
-        wr_medit_ascii_scalar("velw_x."+name+".bb",_w.giveVec(),_mesh.numVertices());
-        wr_medit_ascii_scalar("velw_y."+name+".bb",_w.giveVec() + _mesh.numVertices(),_mesh.numVertices());
-        wr_medit_ascii_scalar("velw_z."+name+".bb",_w.giveVec() + 2*_mesh.numVertices(),_mesh.numVertices());
+        wr_medit_ascii_scalar("velw_x."+name+".bb",_w.giveVec(),this->_mesh.numVertices());
+        wr_medit_ascii_scalar("velw_y."+name+".bb",_w.giveVec() + this->_mesh.numVertices(), this->_mesh.numVertices());
+        wr_medit_ascii_scalar("velw_z."+name+".bb",_w.giveVec() + 2*this->_mesh.numVertices(), this->_mesh.numVertices());
 
 
-        //wr_medit_ascii("press."+name+".mesh", _mesh);
-        wr_medit_ascii( "press." + name + ".mesh", _mesh, M_harmonicExtension.getDisplacement(), _factor );
-        // wr_medit_ascii_vector("veloc."+name+".bb",_u.giveVec(),_mesh.numVertices(),_dim_u);
+        //wr_medit_ascii("press."+name+".mesh", this->_mesh);
+        wr_medit_ascii( "press." + name + ".mesh", this->_mesh, M_harmonicExtension.getDisplacement(), _factor );
+        // wr_medit_ascii_vector("veloc."+name+".bb",_u.giveVec(), this->_mesh.numVertices(),_dim_u);
         system( ( "ln -s press." + name + ".mesh vel_x." + name + ".mesh" ).data() );
         system( ( "ln -s press." + name + ".mesh vel_y." + name + ".mesh" ).data() );
         system( ( "ln -s press." + name + ".mesh vel_z." + name + ".mesh" ).data() );
@@ -615,7 +615,7 @@ PhysVectUnknown<Vector>& NavierStokesAleHandler<Mesh>::w()
 }
 
 
-// This method interpolates the mesh velocity when necessary (refFE_u.nbNodes > _mesh.getRefFE().nbNodes)
+// This method interpolates the mesh velocity when necessary (refFE_u.nbNodes > this->_mesh.getRefFE().nbNodes)
 template <typename Mesh>
 void NavierStokesAleHandler<Mesh>::
 _interpolate( const UInt nbComp, const Vector& w, Vector& wInterp )
@@ -623,16 +623,16 @@ _interpolate( const UInt nbComp, const Vector& w, Vector& wInterp )
 
     typedef typename Mesh::VolumeShape GeoShape; // Element shape
 
-    UInt nDofpV = _refFE_u.nbDofPerVertex; // number of Dof per vertex
-    UInt nDofpE = _refFE_u.nbDofPerEdge;   // number of Dof per edge
-    UInt nDofpF = _refFE_u.nbDofPerFace;   // number of Dof per face
-    UInt nDofpEl = _refFE_u.nbDofPerVolume; // number of Dof per Volume
+    UInt nDofpV = this->_refFE_u.nbDofPerVertex; // number of Dof per vertex
+    UInt nDofpE = this->_refFE_u.nbDofPerEdge;   // number of Dof per edge
+    UInt nDofpF = this->_refFE_u.nbDofPerFace;   // number of Dof per face
+    UInt nDofpEl = this->_refFE_u.nbDofPerVolume; // number of Dof per Volume
 
     UInt nElemV = GeoShape::numVertices; // Number of element's vertices
     UInt nElemE = GeoShape::numEdges;    // Number of element's edges
     UInt nElemF = GeoShape::numFaces;    // Number of element's faces
 
-    UInt nDofElem = _mesh.getRefFE().nbDof; // Number of local dof per element of the _mesh (_mesh.getRefFE().nbDof)
+    UInt nDofElem = this->_mesh.getRefFE().nbDof; // Number of local dof per element of the this->_mesh (_mesh.getRefFE().nbDof)
 
     UInt nDofElemV = nElemV * nDofpV; // number of vertex's Dof on a Element
     UInt nDofElemE = nElemE * nDofpE; // number of edge's Dof on a Element
@@ -646,7 +646,7 @@ _interpolate( const UInt nbComp, const Vector& w, Vector& wInterp )
     ID lDof;
 
     // Loop on elements of the mesh
-    for ( ID iElem = 1; iElem <= _mesh.numVolumes(); ++iElem )
+    for ( ID iElem = 1; iElem <= this->_mesh.numVolumes(); ++iElem )
     {
 
         // Updating the local mesh velocity in this mesh elment
@@ -670,9 +670,9 @@ _interpolate( const UInt nbComp, const Vector& w, Vector& wInterp )
                     lDof = ( iVe - 1 ) * nDofpV + l; // Local dof in this element
 
                     // Nodal coordinates
-                    x = _refFE_u.xi( lDof - 1 );
-                    y = _refFE_u.eta( lDof - 1 );
-                    z = _refFE_u.zeta( lDof - 1 );
+                    x = this->_refFE_u.xi( lDof - 1 );
+                    y = this->_refFE_u.eta( lDof - 1 );
+                    z = this->_refFE_u.zeta( lDof - 1 );
 
                     // Loop on data vector components
                     for ( UInt icmp = 0; icmp < nbComp; ++icmp )
@@ -681,10 +681,10 @@ _interpolate( const UInt nbComp, const Vector& w, Vector& wInterp )
                         // Interpolating data at the nodal point
                         double __sum = 0;
                         for ( ID idof = 0; idof < nDofElem; ++idof )  // Loop on local Dof on the element
-                            __sum += wLoc( icmp * nDofElem + idof ) * _mesh.getRefFE().phi( idof, x, y, z );
+                            __sum += wLoc( icmp * nDofElem + idof ) * this->_mesh.getRefFE().phi( idof, x, y, z );
 
                         // Updating interpolated mesh velocity
-                        wInterp( icmp * _dof_u.numTotalDof() + _dof_u.localToGlobal( iElem, lDof ) - 1 ) = __sum;
+                        wInterp( icmp * this->_dof_u.numTotalDof() + this->_dof_u.localToGlobal( iElem, lDof ) - 1 ) = __sum;
                     }
                 }
             }
@@ -704,9 +704,9 @@ _interpolate( const UInt nbComp, const Vector& w, Vector& wInterp )
                     lDof = nDofElemV + ( iEd - 1 ) * nDofpE + l; // Local dof in the adjacent Element
 
                     // Nodal coordinates
-                    x = _refFE_u.xi( lDof - 1 );
-                    y = _refFE_u.eta( lDof - 1 );
-                    z = _refFE_u.zeta( lDof - 1 );
+                    x = this->_refFE_u.xi( lDof - 1 );
+                    y = this->_refFE_u.eta( lDof - 1 );
+                    z = this->_refFE_u.zeta( lDof - 1 );
 
                     // Loop on data vector components
                     for ( UInt icmp = 0; icmp < nbComp; ++icmp )
@@ -715,10 +715,10 @@ _interpolate( const UInt nbComp, const Vector& w, Vector& wInterp )
                         // Interpolating data at the nodal point
                         double __sum = 0;
                         for ( ID idof = 0; idof < nDofElem; ++idof )   // Loop on local Dof on the adjacent element
-                            __sum += wLoc( icmp * nDofElem + idof ) * _mesh.getRefFE().phi( idof, x, y, z );
+                            __sum += wLoc( icmp * nDofElem + idof ) * this->_mesh.getRefFE().phi( idof, x, y, z );
 
                         // Updating interpolating vector
-                        wInterp( icmp * _dof_u.numTotalDof() + _dof_u.localToGlobal( iElem, lDof ) - 1 ) = __sum;
+                        wInterp( icmp * this->_dof_u.numTotalDof() + this->_dof_u.localToGlobal( iElem, lDof ) - 1 ) = __sum;
                     }
                 }
             }
@@ -739,9 +739,9 @@ _interpolate( const UInt nbComp, const Vector& w, Vector& wInterp )
                     lDof = nDofElemE + nDofElemV + ( iFa - 1 ) * nDofpF + l; // Local dof in the adjacent Element
 
                     // Nodal coordinates
-                    x = _refFE_u.xi( lDof - 1 );
-                    y = _refFE_u.eta( lDof - 1 );
-                    z = _refFE_u.zeta( lDof - 1 );
+                    x = this->_refFE_u.xi( lDof - 1 );
+                    y = this->_refFE_u.eta( lDof - 1 );
+                    z = this->_refFE_u.zeta( lDof - 1 );
 
                     // Loop on data vector components
                     for ( UInt icmp = 0; icmp < nbComp; ++icmp )
@@ -750,10 +750,10 @@ _interpolate( const UInt nbComp, const Vector& w, Vector& wInterp )
                         // Interpolating data at the nodal point
                         double __sum = 0;
                         for ( ID idof = 0; idof < nDofElem; ++idof )  // Loop on local Dof on the adjacent element
-                            __sum += wLoc( icmp * nDofElem + idof ) * _mesh.getRefFE().phi( idof, x, y, z );
+                            __sum += wLoc( icmp * nDofElem + idof ) * this->_mesh.getRefFE().phi( idof, x, y, z );
 
                         // Updating interpolating vector
-                        wInterp( icmp * _dof_u.numTotalDof() + _dof_u.localToGlobal( iElem, lDof ) - 1 ) = __sum;
+                        wInterp( icmp * this->_dof_u.numTotalDof() + this->_dof_u.localToGlobal( iElem, lDof ) - 1 ) = __sum;
                     }
                 }
             }
@@ -766,9 +766,9 @@ _interpolate( const UInt nbComp, const Vector& w, Vector& wInterp )
             lDof = nDofElemF + nDofElemE + nDofElemV + l; // Local dof in the Element
 
             // Nodal coordinates
-            x = _refFE_u.xi( lDof - 1 );
-            y = _refFE_u.eta( lDof - 1 );
-            z = _refFE_u.zeta( lDof - 1 );
+            x = this->_refFE_u.xi( lDof - 1 );
+            y = this->_refFE_u.eta( lDof - 1 );
+            z = this->_refFE_u.zeta( lDof - 1 );
 
             // Loop on data vector components
             for ( UInt icmp = 0; icmp < nbComp; ++icmp )
@@ -777,10 +777,10 @@ _interpolate( const UInt nbComp, const Vector& w, Vector& wInterp )
                 // Interpolating data at the nodal point
                 double __sum = 0;
                 for ( ID idof = 0; idof < nDofElem; ++idof )  // Loop on local Dof on the adjacent element
-                    __sum += wLoc( icmp * nDofElem + idof ) * _mesh.getRefFE().phi( idof, x, y, z );
+                    __sum += wLoc( icmp * nDofElem + idof ) * this->_mesh.getRefFE().phi( idof, x, y, z );
 
                 // Updating interpolating vector
-                wInterp( icmp * _dof_u.numTotalDof() + _dof_u.localToGlobal( iElem, lDof ) - 1 ) = __sum;
+                wInterp( icmp * this->_dof_u.numTotalDof() + this->_dof_u.localToGlobal( iElem, lDof ) - 1 ) = __sum;
             }
         }
     }

@@ -162,7 +162,7 @@ public:
     virtual void iterate( const Real& time ) = 0;
 
     //! returns the mesh
-    mesh_type& mesh() { return _mesh;}
+    mesh_type& mesh() { return this->_mesh;}
 
     //! Returns the velocity vector
     PhysVectUnknown<Vector>& u();
@@ -469,7 +469,7 @@ NavierStokesHandler( const GetPot& data_file, const RefFE& refFE_u,
     _ns_post_proc                      ( this->_mesh, _feBd_u, _dof_u, NDIM ),
     _count                             ( 0 ),
     //! stuff to compute the fluxes at each section (ex. of mesh: tube20.mesh)
-    M_nb_sections                      ( NbZSections() ),
+    M_nb_sections                      ( this->NbZSections() ),
     M_z_section                        ( M_nb_sections ),
     M_list_of_faces_on_section_velocity( M_nb_sections ),
     M_list_of_faces_on_section_pressure( M_nb_sections ),
@@ -528,7 +528,7 @@ NavierStokesHandler( const GetPot&   data_file,
     _ns_post_proc                      ( this->_mesh, _feBd_u, _dof_u, NDIM ),
     _count                             ( 0 ),
     //! stuff to compute the fluxes at each section (ex. of mesh: tube20.mesh)
-    M_nb_sections                      ( NbZSections() ),
+    M_nb_sections                      ( this->NbZSections() ),
     M_z_section                        ( M_nb_sections ),
     M_list_of_faces_on_section_velocity( M_nb_sections ),
     M_list_of_faces_on_section_pressure( M_nb_sections ),
@@ -1458,7 +1458,7 @@ NavierStokesHandler<Mesh, DataType>::MeanPressure( const face_dof_type & __faces
 template <typename Mesh, typename DataType>
 void NavierStokesHandler<Mesh, DataType>::PostProcessPressureAreaAndFlux( const Real & __time )
 {
-    if ( computeMeanValuesPerSection() != 1 )
+    if ( this->computeMeanValuesPerSection() != 1 )
         ERROR_MSG("This function is disabled, if you don't ask to compute the Mean Values. (in data file)");
 
     M_out_areas  << "$ DATA = CURVE2D\n %% xlabel='z'\n"
@@ -1651,16 +1651,16 @@ Real NavierStokesHandler<Mesh, DataType>::pErrorL2( const Function& pexact,
     Real sum0 = 0.;
     Real sumExact2 = 0.;
     Real sumExact1 = 0.;
-    for ( UInt iVol = 1; iVol <= _mesh.numVolumes(); iVol++ )
+    for ( UInt iVol = 1; iVol <= this->_mesh.numVolumes(); iVol++ )
     {
-        _fe_p.updateFirstDeriv( _mesh.volumeList( iVol ) );
-        sum2 += elem_L2_diff_2( _p, pexact, _fe_p, _dof_p, time, 1 );
-        sum1 += elem_integral_diff( _p, pexact, _fe_p, _dof_p, time, 1 );
+        _fe_p.updateFirstDeriv( this->_mesh.volumeList( iVol ) );
+        sum2 += elem_L2_diff_2( this->_p, pexact, this->_fe_p, this->_dof_p, time, 1 );
+        sum1 += elem_integral_diff( this->_p, pexact, this->_fe_p, this->_dof_p, time, 1 );
         sum0 += _fe_p.measure();
         if (relError)
         {
-            sumExact2 += elem_L2_2( pexact, _fe_p, time, 1 );
-            sumExact1 += elem_integral( pexact, _fe_p, time, 1 );
+            sumExact2 += elem_L2_2( pexact, this->_fe_p, time, 1 );
+            sumExact1 += elem_integral( pexact, this->_fe_p, time, 1 );
         }
     }
     Real absError = sqrt( sum2 - sum1*sum1/sum0 );
@@ -1680,14 +1680,14 @@ Real NavierStokesHandler<Mesh, DataType>::uErrorL2( const Function& uexact,
     Real normU = 0.;
     UInt nbCompU = _u.nbcomp();
     Real sumExact = 0.;
-    for ( UInt iVol = 1; iVol <= _mesh.numVolumes(); iVol++ )
+    for ( UInt iVol = 1; iVol <= this->_mesh.numVolumes(); iVol++ )
     {
-        _fe_u.updateFirstDeriv( _mesh.volumeList( iVol ) );
-        normU += elem_L2_diff_2( _u, uexact, _fe_u, _dof_u, time,
+        _fe_u.updateFirstDeriv( this->_mesh.volumeList( iVol ) );
+        normU += elem_L2_diff_2( _u, uexact, this->_fe_u, this->_dof_u, time,
                                  int( nbCompU ) );
         if (relError)
         {
-            sumExact += elem_L2_2( uexact, _fe_u, time, int( nbCompU ) );
+            sumExact += elem_L2_2( uexact, this->_fe_u, time, int( nbCompU ) );
         }
     }
     if (relError)
@@ -1728,7 +1728,7 @@ void NavierStokesHandler<Mesh, DataType>::initializeMeanValuesPerSection()
             "Error on the z given to compute the sections.");
 
     for ( int izs = 0; izs < M_nb_sections ; izs ++  ){
-        M_z_section[ izs ] = ZSectionInit() + Real(izs) * ( ZSectionFinal() - ZSectionInit() )
+        M_z_section[ izs ] = this->ZSectionInit() + Real(izs) * ( this->ZSectionFinal() - this->ZSectionInit() )
             / Real(M_nb_sections-1); // mesh dependent (length of tube=5)
     }
 
@@ -1746,8 +1746,8 @@ void NavierStokesHandler<Mesh, DataType>::initializeMeanValuesPerSection()
         this->FacesOnSection( PlaneCoeff,
                               M_list_of_faces_on_section_velocity[izs],
                               M_list_of_faces_on_section_pressure[izs],
-                              ToleranceSection(),
-                              XSectionFrontier(), M_list_of_points_on_boundary[izs] );
+                              this->ToleranceSection(),
+                              this->XSectionFrontier(), M_list_of_points_on_boundary[izs] );
         if ( M_list_of_faces_on_section_velocity[izs].size() == 0 ||
              M_list_of_faces_on_section_pressure[izs].size() == 0  ) {
             std::cout << "section z=" << M_z_section[izs] << " size="
@@ -1815,8 +1815,8 @@ void NavierStokesHandler<Mesh, DataType>::initializeSectionsBifurc()
         this->FacesOnSection( PlaneCoeff,
                               M_list_of_faces_on_section_velocity[izs],
                               M_list_of_faces_on_section_pressure[izs],
-                              ToleranceSection(),
-                              XSectionFrontier(), M_list_of_points_on_boundary[izs] );
+                              this->ToleranceSection(),
+                              this->XSectionFrontier(), M_list_of_points_on_boundary[izs] );
         if ( M_list_of_faces_on_section_velocity[izs].size() == 0 ||
              M_list_of_faces_on_section_pressure[izs].size() == 0  ) {
             std::cout << "section z=" << M_z_section[izs] << " size="
