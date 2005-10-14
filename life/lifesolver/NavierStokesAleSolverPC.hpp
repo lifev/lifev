@@ -118,7 +118,7 @@ public:
     //LIFEV_DEPREPCATED BCHandler & BC_fluid() {return BCh_HarmonicExtension();}
 
     Vector& residual();
-    Vector  getDeltaLambda() {return _dt*_du;}
+    Vector  getDeltaLambda() {return this->_dt*_du;}
 
     void setFullEssential(bool _full)
         {
@@ -256,12 +256,12 @@ NavierStokesAleSolverPC( const GetPot& data_file, const RefFE& refFE_u, const Re
                                       bdQr_p,
                                       BCh_u,
                                       BCh_mesh ),
-        _pattM_u_block( _dof_u ),
+        _pattM_u_block( this->_dof_u ),
         _pattM_u( _pattM_u_block, "diag" ),
-        _pattC( _dof_u, 3 ),
-        _pattD_block( _dof_p, _dof_u ),
+        _pattC( this->_dof_u, 3 ),
+        _pattD_block( this->_dof_p, this->_dof_u ),
         _pattD( _pattD_block ),
-        _pattDtr_block( _dof_u, _dof_p ),
+        _pattDtr_block( this->_dof_u, this->_dof_p ),
         _pattDtr( _pattDtr_block ),
         _D( _pattD ),
         _trD( _pattDtr ),
@@ -273,27 +273,27 @@ NavierStokesAleSolverPC( const GetPot& data_file, const RefFE& refFE_u, const Re
         _C( _pattC ),
         _CAux( _pattC ),
         _H( _pattC.nRows() ),
-        _elmatC( _fe_u.nbNode, nDimensions, nDimensions ),
-        _elmatM_u( _fe_u.nbNode, nDimensions, nDimensions ),
-        _elmatDtr( _fe_u.nbNode, nDimensions, 0, _fe_p.nbNode, 0, 1 ),
-        _elvec( _fe_u.nbNode, nDimensions ),
-        _elvec_du( _fe_u.nbNode, nDimensions ),
-        _elvec_dp( _fe_p.nbNode, 1 ),
-        _w_loc( _fe_u.nbNode, nDimensions ),
-        _uk_loc( _fe_u.nbNode, nDimensions ),
-        _pk_loc( _fe_p.nbNode, 1 ),
-        _convect( _fe_u.nbNode, nDimensions ),
-        _d_loc( _fe_u.nbNode, nDimensions ),
-        _dw_loc( _fe_u.nbNode, nDimensions ),
-        _un( _dim_u ),
-        _dp( _dim_p ),
-        _du( _dim_u ),
-        _f_u( _dim_u ),
-        _f_duWithOutBC( _dim_u ),
-        _f_p( _dim_p ),
-        _f_uWithOutBC( _dim_u ),
-        _residual_u( _dim_u ),
-        _invCtrDP( _dim_u ),
+        _elmatC( this->_fe_u.nbNode, nDimensions, nDimensions ),
+        _elmatM_u( this->_fe_u.nbNode, nDimensions, nDimensions ),
+        _elmatDtr( this->_fe_u.nbNode, nDimensions, 0, this->_fe_p.nbNode, 0, 1 ),
+        _elvec( this->_fe_u.nbNode, nDimensions ),
+        _elvec_du( this->_fe_u.nbNode, nDimensions ),
+        _elvec_dp( this->_fe_p.nbNode, 1 ),
+        _w_loc( this->_fe_u.nbNode, nDimensions ),
+        _uk_loc( this->_fe_u.nbNode, nDimensions ),
+        _pk_loc( this->_fe_p.nbNode, 1 ),
+        _convect( this->_fe_u.nbNode, nDimensions ),
+        _d_loc( this->_fe_u.nbNode, nDimensions ),
+        _dw_loc( this->_fe_u.nbNode, nDimensions ),
+        _un( this->_dim_u ),
+        _dp( this->_dim_p ),
+        _du( this->_dim_u ),
+        _f_u( this->_dim_u ),
+        _f_duWithOutBC( this->_dim_u ),
+        _f_p( this->_dim_p ),
+        _f_uWithOutBC( this->_dim_u ),
+        _residual_u( this->_dim_u ),
+        _invCtrDP( this->_dim_u ),
         _dataAztec_i( data_file, "fluid/aztec_i" ),
         _dataAztec_ii( data_file, "fluid/aztec_ii" ),
         _dataAztec_s( data_file, "fluid/aztec_s" ),
@@ -301,30 +301,30 @@ NavierStokesAleSolverPC( const GetPot& data_file, const RefFE& refFE_u, const Re
         _factor_data_jacobian( _C, _D, _trD, _H, _HinvC, _HinvDtr, _invCtrDP, _dataAztec_i, _dataAztec_s, this->bcHandler().hasOnlyEssential(), 2 )
 {
     std::cout << std::endl;
-    std::cout << "F-  Pressure unknowns: " << _dim_p << std::endl;
-    std::cout << "F-  Velocity unknowns: " << _dim_u << std::endl << std::endl;
+    std::cout << "F-  Pressure unknowns: " << this->_dim_p << std::endl;
+    std::cout << "F-  Velocity unknowns: " << this->_dim_u << std::endl << std::endl;
     std::cout << "F-  Computing mass matrix... ";
 
     Chrono chrono;
     chrono.start();
 
     // Number of velocity components
-    UInt nc_u = _u.nbcomp();
+    UInt nc_u = this->_u.nbcomp();
 
     // Initializing mass matrix
     _M_u.zeros();
 
-    Real dti = 1.0 / _dt;
+    Real dti = 1.0 / this->_dt;
 
     // loop on volumes: assembling mass term
-    for ( UInt i = 1; i <= _mesh.numVolumes(); ++i )
+    for ( UInt i = 1; i <= this->_mesh.numVolumes(); ++i )
     {
-        _fe_u.updateFirstDerivQuadPt( _mesh.volumeList( i ) );
+        this->_fe_u.updateFirstDerivQuadPt( this->_mesh.volumeList( i ) );
         _elmatM_u.zero();
-        mass( _rho * dti, _elmatM_u, _fe_u, 0, 0, nc_u );
+        mass( this->_rho * dti, _elmatM_u, this->_fe_u, 0, 0, nc_u );
         for ( UInt ic = 0; ic < nc_u; ++ic )
         {
-            assemb_mat( _M_u, _elmatM_u, _fe_u, _dof_u, ic, ic );
+            assemb_mat( _M_u, _elmatM_u, this->_fe_u, this->_dof_u, ic, ic );
         }
     }
 
@@ -349,12 +349,12 @@ NavierStokesAleSolverPC( const GetPot& data_file,
                                   bdQr_u,
                                   Qr_p,
                                   bdQr_p),
-    _pattM_u_block       ( _dof_u ),
+    _pattM_u_block       ( this->_dof_u ),
     _pattM_u             ( _pattM_u_block, "diag" ),
-    _pattC               ( _dof_u, 3 ),
-    _pattD_block         ( _dof_p, _dof_u ),
+    _pattC               ( this->_dof_u, 3 ),
+    _pattD_block         ( this->_dof_p, this->_dof_u ),
     _pattD               ( _pattD_block ),
-    _pattDtr_block       ( _dof_u, _dof_p ),
+    _pattDtr_block       ( this->_dof_u, this->_dof_p ),
     _pattDtr             ( _pattDtr_block ),
     _D                   ( _pattD ),
     _trD                 ( _pattDtr ),
@@ -366,27 +366,27 @@ NavierStokesAleSolverPC( const GetPot& data_file,
     _C                   ( _pattC ),
     _CAux                ( _pattC ),
     _H                   ( _pattC.nRows() ),
-    _elmatC              ( _fe_u.nbNode, nDimensions, nDimensions ),
-    _elmatM_u            ( _fe_u.nbNode, nDimensions, nDimensions ),
-    _elmatDtr            ( _fe_u.nbNode, nDimensions, 0, _fe_p.nbNode, 0, 1 ),
-    _elvec               ( _fe_u.nbNode, nDimensions ),
-    _elvec_du            ( _fe_u.nbNode, nDimensions ),
-    _elvec_dp            ( _fe_p.nbNode, 1 ),
-    _w_loc               ( _fe_u.nbNode, nDimensions ),
-    _uk_loc              ( _fe_u.nbNode, nDimensions ),
-    _pk_loc              ( _fe_p.nbNode, 1 ),
-    _convect             ( _fe_u.nbNode, nDimensions ),
-    _d_loc               ( _fe_u.nbNode, nDimensions ),
-    _dw_loc              ( _fe_u.nbNode, nDimensions ),
-    _dp                  ( _dim_p ),
-    _un                  ( _dim_u ),
-    _du                  ( _dim_u ),
-    _f_u                 ( _dim_u ),
-    _f_duWithOutBC       ( _dim_u ),
-    _f_p                 ( _dim_p ),
-    _f_uWithOutBC        ( _dim_u ),
-    _residual_u          ( _dim_u ),
-    _invCtrDP            ( _dim_u ),
+    _elmatC              ( this->_fe_u.nbNode, nDimensions, nDimensions ),
+    _elmatM_u            ( this->_fe_u.nbNode, nDimensions, nDimensions ),
+    _elmatDtr            ( this->_fe_u.nbNode, nDimensions, 0, this->_fe_p.nbNode, 0, 1 ),
+    _elvec               ( this->_fe_u.nbNode, nDimensions ),
+    _elvec_du            ( this->_fe_u.nbNode, nDimensions ),
+    _elvec_dp            ( this->_fe_p.nbNode, 1 ),
+    _w_loc               ( this->_fe_u.nbNode, nDimensions ),
+    _uk_loc              ( this->_fe_u.nbNode, nDimensions ),
+    _pk_loc              ( this->_fe_p.nbNode, 1 ),
+    _convect             ( this->_fe_u.nbNode, nDimensions ),
+    _d_loc               ( this->_fe_u.nbNode, nDimensions ),
+    _dw_loc              ( this->_fe_u.nbNode, nDimensions ),
+    _dp                  ( this->_dim_p ),
+    _un                  ( this->_dim_u ),
+    _du                  ( this->_dim_u ),
+    _f_u                 ( this->_dim_u ),
+    _f_duWithOutBC       ( this->_dim_u ),
+    _f_p                 ( this->_dim_p ),
+    _f_uWithOutBC        ( this->_dim_u ),
+    _residual_u          ( this->_dim_u ),
+    _invCtrDP            ( this->_dim_u ),
     _dataAztec_i         ( data_file, "fluid/aztec_i" ),
     _dataAztec_ii        ( data_file, "fluid/aztec_ii" ),
     _dataAztec_s         ( data_file, "fluid/aztec_s" ),
@@ -394,30 +394,30 @@ NavierStokesAleSolverPC( const GetPot& data_file,
     _factor_data_jacobian( _C, _D, _trD, _H, _HinvC, _HinvDtr, _invCtrDP, _dataAztec_i, _dataAztec_s, true, 2 )
 {
     std::cout << std::endl;
-    std::cout << "F-  Pressure unknowns: " << _dim_p << std::endl;
-    std::cout << "F-  Velocity unknowns: " << _dim_u << std::endl << std::endl;
+    std::cout << "F-  Pressure unknowns: " << this->_dim_p << std::endl;
+    std::cout << "F-  Velocity unknowns: " << this->_dim_u << std::endl << std::endl;
     std::cout << "F-  Computing mass matrix... ";
 
     Chrono chrono;
     chrono.start();
 
     // Number of velocity components
-    UInt nc_u = _u.nbcomp();
+    UInt nc_u = this->_u.nbcomp();
 
     // Initializing mass matrix
     _M_u.zeros();
 
-    Real dti = 1.0 / _dt;
+    Real dti = 1.0 / this->_dt;
 
     // loop on volumes: assembling mass term
-    for ( UInt i = 1; i <= _mesh.numVolumes(); ++i )
+    for ( UInt i = 1; i <= this->_mesh.numVolumes(); ++i )
     {
-        _fe_u.updateFirstDerivQuadPt( _mesh.volumeList( i ) );
+        this->_fe_u.updateFirstDerivQuadPt( this->_mesh.volumeList( i ) );
         _elmatM_u.zero();
-        mass( _rho * dti, _elmatM_u, _fe_u, 0, 0, nc_u );
+        mass( this->_rho * dti, _elmatM_u, this->_fe_u, 0, 0, nc_u );
         for ( UInt ic = 0; ic < nc_u; ++ic )
         {
-            assemb_mat( _M_u, _elmatM_u, _fe_u, _dof_u, ic, ic );
+            assemb_mat( _M_u, _elmatM_u, this->_fe_u, this->_dof_u, ic, ic );
         }
     }
 
@@ -451,7 +451,7 @@ timeAdvance( source_type const& source, const Real& time )
 
     M_time = time;
     // Number of velocity components
-    UInt nc_u = _u.nbcomp();
+    UInt nc_u = this->_u.nbcomp();
 
     std::cout << "  F-  Updating mass term on right hand side... ";
 
@@ -462,21 +462,21 @@ timeAdvance( source_type const& source, const Real& time )
     _f_uWithOutBC = ZeroVector( _f_uWithOutBC.size() );
 
     // loop on volumes: assembling source term
-    for ( UInt i = 1; i <= _mesh.numVolumes(); ++i )
+    for ( UInt i = 1; i <= this->_mesh.numVolumes(); ++i )
     {
         _elvec.zero();
-        _fe_u.updateFirstDerivQuadPt( _mesh.volumeList( i ) );
+        this->_fe_u.updateFirstDerivQuadPt( this->_mesh.volumeList( i ) );
         for ( UInt ic = 0; ic < nc_u; ++ic )
         {
-            compute_vec( source, _elvec, _fe_u, time, ic ); // compute local vector
-            assemb_vec( _f_uWithOutBC, _elvec, _fe_u, _dof_u, ic ); // assemble local vector into global one
+            compute_vec( source, _elvec, this->_fe_u, time, ic ); // compute local vector
+            assemb_vec( _f_uWithOutBC, _elvec, this->_fe_u, this->_dof_u, ic ); // assemble local vector into global one
         }
     }
-    _f_uWithOutBC += _M_u * _u;
+    _f_uWithOutBC += _M_u * this->_u;
 
     // Save last mesh displacement and fluid velocity
-    _dispOld = harmonicExtension().getDisplacement();
-    _un = _u;
+    this->_dispOld = this->harmonicExtension().getDisplacement();
+    _un = this->_u;
 
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
@@ -491,7 +491,7 @@ iterate( const Real& time )
     Chrono chrono;
 
     // Number of velocity components
-    UInt nc_u = _u.nbcomp();
+    UInt nc_u = this->_u.nbcomp();
 
     std::cout << "  F-  Updating matrices... " << std::flush;
 
@@ -503,15 +503,15 @@ iterate( const Real& time )
     _M_u.zeros();
     _C.zeros();
 
-    Real dti = 1.0 / _dt;
+    Real dti = 1.0 / this->_dt;
 
     // Loop on elements
-    for ( UInt i = 1; i <= _mesh.numVolumes(); i++ )
+    for ( UInt i = 1; i <= this->_mesh.numVolumes(); i++ )
     {
 
-        _fe_p.update( _mesh.volumeList( i ) ); // just to provide the id number in the
+        this->_fe_p.update( this->_mesh.volumeList( i ) ); // just to provide the id number in the
         // assem_mat_mixed
-        _fe_u.updateFirstDerivQuadPt( _mesh.volumeList( i ) );
+        this->_fe_u.updateFirstDerivQuadPt( this->_mesh.volumeList( i ) );
 
         // initialization of elementary matrices
         _elmatM_u.zero();
@@ -519,28 +519,28 @@ iterate( const Real& time )
         _elmatC.zero();
 
         // mass
-        mass( _rho * dti, _elmatM_u, _fe_u, 0, 0, nc_u );
+        mass( this->_rho * dti, _elmatM_u, this->_fe_u, 0, 0, nc_u );
 
         // stiffness strain
-        stiff_strain( 2.0 * _mu, _elmatC, _fe_u );
+        stiff_strain( 2.0 * this->_mu, _elmatC, this->_fe_u );
         _elmatC.mat() += _elmatM_u.mat();
 
         // Non linear term, Semi-implicit approach
         // u_loc contains the velocity values in the nodes
 
-        for ( UInt k = 0 ; k < ( UInt ) _fe_u.nbNode ; k++ )
+        for ( UInt k = 0 ; k < ( UInt ) this->_fe_u.nbNode ; k++ )
         {
-            UInt iloc = _fe_u.patternFirst( k );
+            UInt iloc = this->_fe_u.patternFirst( k );
             for ( UInt ic = 0; ic < nc_u; ++ic )
             {
-                UInt ig = _dof_u.localToGlobal( i, iloc + 1 ) - 1 + ic * _dim_u;
-                _elvec[ iloc + ic * _fe_u.nbNode ] = _rho * ( _un( ig ) - _wInterp( ig ) );
-                _w_loc[ iloc + ic * _fe_u.nbNode ] = _wInterp( ig );
+                UInt ig = this->_dof_u.localToGlobal( i, iloc + 1 ) - 1 + ic * this->_dim_u;
+                _elvec[ iloc + ic * this->_fe_u.nbNode ] = this->_rho * ( _un( ig ) - this->_wInterp( ig ) );
+                _w_loc[ iloc + ic * this->_fe_u.nbNode ] = this->_wInterp( ig );
             }
         }
 
         // ALE term: 0.5 div (u^n-w) u v
-        mass_divw( -_rho, _w_loc, _elmatC, _fe_u, 0, 0, nc_u );
+        mass_divw( -this->_rho, _w_loc, _elmatC, this->_fe_u, 0, 0, nc_u );
 
         // loop on velocity components
         for ( UInt ic = 0;ic < nc_u;ic++ )
@@ -548,19 +548,19 @@ iterate( const Real& time )
 
              for ( UInt jc = 0;jc < nc_u;jc++ )
              {
-                 grad( jc, _elvec, _elmatC, _fe_u, _fe_u, ic, ic );
-                 assemb_mat( _C, _elmatC, _fe_u, _dof_u, ic, jc );
+                 grad( jc, _elvec, _elmatC, this->_fe_u, this->_fe_u, ic, ic );
+                 assemb_mat( _C, _elmatC, this->_fe_u, this->_dof_u, ic, jc );
              }
 
             // mass
-            assemb_mat( _M_u, _elmatM_u, _fe_u, _dof_u, ic, ic );
+            assemb_mat( _M_u, _elmatM_u, this->_fe_u, this->_dof_u, ic, ic );
 
             // computing  - (p, \div v) term: the minus sign is in the inner computation
-            grad( ic, 1.0, _elmatDtr, _fe_u, _fe_p, ic, 0 );
+            grad( ic, 1.0, _elmatDtr, this->_fe_u, this->_fe_p, ic, 0 );
 
             // assembling p div v term and transposed
-            assemb_mat_mixed( _trD, _elmatDtr, _fe_u, _fe_p, _dof_u, _dof_p, ic, 0 );
-            assemb_tr_mat_mixed( 1.0, _D, _elmatDtr, _fe_p, _fe_u, _dof_p, _dof_u, 0, ic );
+            assemb_mat_mixed( _trD, _elmatDtr, this->_fe_u, this->_fe_p, this->_dof_u, this->_dof_p, ic, 0 );
+            assemb_tr_mat_mixed( 1.0, _D, _elmatDtr, this->_fe_p, this->_fe_u, this->_dof_p, this->_dof_u, 0, ic );
         }
     }
 
@@ -584,8 +584,8 @@ iterate( const Real& time )
     std::cout << "  F-  Applying boundary conditions... ";
     chrono.start();
     _f_u = _f_uWithOutBC;
-    this->bcHandler().bdUpdate( _mesh, _feBd_u, _dof_u );
-    bcManage( _C, _trD, _f_u, _mesh, _dof_u, this->bcHandler(), _feBd_u, tgv, time );
+    this->bcHandler().bdUpdate( this->_mesh, this->_feBd_u, this->_dof_u );
+    bcManage( _C, _trD, _f_u, this->_mesh, this->_dof_u, this->bcHandler(), this->_feBd_u, tgv, time );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
@@ -607,7 +607,7 @@ iterate( const Real& time )
     AZ_MATRIX *C;
     AZ_PRECOND *prec_C;
 
-    int N_eq_i = 3 * _dim_u; // number of DOF for each component
+    int N_eq_i = 3 * this->_dim_u; // number of DOF for each component
     // data_org assigned "by hands" while no parallel computation is performed
     data_org_i[ AZ_N_internal ] = N_eq_i;
     data_org_i[ AZ_N_border ] = 0;
@@ -633,7 +633,7 @@ iterate( const Real& time )
     // intermediate velocity computation
     std::cout << "  F-  Solving system (i)... ";
     chrono.start();
-    AZ_iterate( _u.giveVec(), _f_u.giveVec(), options_i, params_i, status_i,
+    AZ_iterate( this->_u.giveVec(), _f_u.giveVec(), options_i, params_i, status_i,
                 proc_config_i, C, prec_C, NULL );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
@@ -655,7 +655,7 @@ iterate( const Real& time )
     AZ_MATRIX *A_ii;
     AZ_PRECOND *pILU_ii;
 
-    int N_eq_ii = _p.size();
+    int N_eq_ii = this->_p.size();
 
     A_ii = AZ_matrix_create( N_eq_ii );
     // data containing the matrices C, D, trD and H as pointers
@@ -678,7 +678,7 @@ iterate( const Real& time )
     options_ii[ AZ_precond ] = AZ_user_precond;
 
     // RHS of the linear system (ii)
-    Vector vec_DV( _p.size() );
+    Vector vec_DV( this->_p.size() );
 
 
     //matrices HinvC (depends on time):
@@ -686,18 +686,18 @@ iterate( const Real& time )
 
 
     // RHS of the linear system (ii)
-    vec_DV = _D * _u;
+    vec_DV = _D * this->_u;
 
     // case of pure Dirichlet BCs:
     if ( this->bcHandler().hasOnlyEssential())
     {
-        vec_DV[ _dim_p - 1 ] = 1.0; // correction of the right hand side.
-        _p[ _dim_p - 1 ] = 1.0; // pressure value at the last node.
+        vec_DV[ this->_dim_p - 1 ] = 1.0; // correction of the right hand side.
+        this->_p[ this->_dim_p - 1 ] = 1.0; // pressure value at the last node.
     }
 
     std::cout << "  F-  Solving pressure system... ";
     chrono.start();
-    AZ_iterate( _p.giveVec(), &vec_DV[ 0 ], options_ii, params_ii, status_ii,
+    AZ_iterate( this->_p.giveVec(), &vec_DV[ 0 ], options_ii, params_ii, status_ii,
                 proc_config_ii, A_ii, pILU_ii, NULL );
 
 
@@ -709,7 +709,7 @@ iterate( const Real& time )
     // ----------------------------
 
     // everything is done...
-    _u = _u - _invCtrDP;
+    this->_u = this->_u - _invCtrDP;
     std::cout << "  F-  Velocity updated" << std::endl;
 
     AZ_matrix_destroy( &A_ii );
@@ -717,7 +717,7 @@ iterate( const Real& time )
     AZ_matrix_destroy( &C );
     AZ_precond_destroy( &prec_C );
 
-    _residual_u = _f_uWithOutBC - _CAux * _u - _trDAux * _p;
+    _residual_u = _f_uWithOutBC - _CAux * this->_u - _trDAux * this->_p;
 }
 
 
@@ -737,8 +737,8 @@ iterateTransp( const Real& time )
     std::cout << "  F-  Applying boundary conditions... ";
     chrono.start();
     _f_u = _f_uWithOutBC;
-    this->BCh_fluid().bdUpdate( _mesh, _feBd_u, _dof_u );
-    bcManage( _C, _trD, _f_u, _mesh, _dof_u, this->BCh_fluid(), _feBd_u, tgv, time );
+    this->BCh_fluid().bdUpdate( this->_mesh, this->_feBd_u, this->_dof_u );
+    bcManage( _C, _trD, _f_u, this->_mesh, this->_dof_u, this->BCh_fluid(), this->_feBd_u, tgv, time );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
@@ -759,7 +759,7 @@ iterateTransp( const Real& time )
     AZ_MATRIX *C;
     AZ_PRECOND *prec_C;
 
-    int N_eq_i = 3 * _dim_u; // number of DOF for each component
+    int N_eq_i = 3 * this->_dim_u; // number of DOF for each component
     // data_org assigned "by hands" while no parallel computation is performed
     data_org_i[ AZ_N_internal ] = N_eq_i;
     data_org_i[ AZ_N_border ] = 0;
@@ -785,7 +785,7 @@ iterateTransp( const Real& time )
     // intermediate velocity computation
     std::cout << "  F-  Solving system (i)... ";
     chrono.start();
-    AZ_iterate( _u.giveVec(), _f_u.giveVec(), options_i, params_i, status_i,
+    AZ_iterate( this->_u.giveVec(), _f_u.giveVec(), options_i, params_i, status_i,
                 proc_config_i, C, prec_C, NULL );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
@@ -840,8 +840,8 @@ iterateTransp( const Real& time )
     if ( this->BCh_fluid().hasOnlyEssential()
        )
     {
-        vec_DV[ _dim_p - 1 ] = 1.0; // correction of the right hand side.
-        _p[ _dim_p - 1 ] = 1.0; // pressure value at the last node.
+        vec_DV[ this->_dim_p - 1 ] = 1.0; // correction of the right hand side.
+        _p[ this->_dim_p - 1 ] = 1.0; // pressure value at the last node.
     }
 
     std::cout << "  F-  Solving pressure system... ";
@@ -883,7 +883,7 @@ iterateLin( const Real& time, BCHandler& BCh_du )
     Chrono chrono;
 
     // Number of velocity components
-    UInt nc_u = _u.nbcomp(), iloc, ig;
+    UInt nc_u = this->_u.nbcomp(), iloc, ig;
 
     std::cout << "  F-  LINEARIZED FLUID SYSTEM\n";
 
@@ -899,68 +899,68 @@ iterateLin( const Real& time, BCHandler& BCh_du )
     _f_p = ZeroVector( _f_p.size() );
 
     // Loop on elements
-    for ( UInt i = 1; i <= _mesh.numVolumes(); i++ )
+    for ( UInt i = 1; i <= this->_mesh.numVolumes(); i++ )
     {
 
-        _fe_p.update( _mesh.volumeList( i ) );
-        _fe_u.updateFirstDerivQuadPt( _mesh.volumeList( i ) );
+        this->_fe_p.update( this->_mesh.volumeList( i ) );
+        this->_fe_u.updateFirstDerivQuadPt( this->_mesh.volumeList( i ) );
 
         // initialization of elementary vectors
         _elvec_du.zero();
         _elvec_dp.zero();
 
-        for ( UInt k = 0 ; k < ( UInt ) _fe_u.nbNode ; k++ )
+        for ( UInt k = 0 ; k < ( UInt ) this->_fe_u.nbNode ; k++ )
         {
-            iloc = _fe_u.patternFirst( k );
+            iloc = this->_fe_u.patternFirst( k );
             for ( UInt ic = 0; ic < nc_u; ++ic )
             {
-                ig = _dof_u.localToGlobal( i, iloc + 1 ) - 1 + ic * _dim_u;
-                _convect[ iloc + ic * _fe_u.nbNode ] = _un( ig ) - _wInterp( ig );  // u^n - w^k local
-                _w_loc.vec( ) [ iloc + ic * _fe_u.nbNode ] = _wInterp( ig );                // w^k local
-                _uk_loc.vec( ) [ iloc + ic * _fe_u.nbNode ] = _u( ig );                      // u^k local
-                _d_loc.vec( ) [ iloc + ic * _fe_u.nbNode ] = _dInterp( ig );                // d local
-                _dw_loc.vec( ) [ iloc + ic * _fe_u.nbNode ] = _dwInterp( ig );               // dw local
+                ig = this->_dof_u.localToGlobal( i, iloc + 1 ) - 1 + ic * this->_dim_u;
+                _convect[ iloc + ic * this->_fe_u.nbNode ] = _un( ig ) - this->_wInterp( ig );  // u^n - w^k local
+                _w_loc.vec( ) [ iloc + ic * this->_fe_u.nbNode ] = this->_wInterp( ig );                // w^k local
+                _uk_loc.vec( ) [ iloc + ic * this->_fe_u.nbNode ] = this->_u( ig );                      // u^k local
+                _d_loc.vec( ) [ iloc + ic * this->_fe_u.nbNode ] = this->_dInterp( ig );                // d local
+                _dw_loc.vec( ) [ iloc + ic * this->_fe_u.nbNode ] = this->_dwInterp( ig );               // dw local
             }
         }
 
-        for ( UInt k = 0 ; k < ( UInt ) _fe_p.nbNode ; k++ )
+        for ( UInt k = 0 ; k < ( UInt ) this->_fe_p.nbNode ; k++ )
         {
-            iloc = _fe_p.patternFirst( k );
-            ig = _dof_p.localToGlobal( i, iloc + 1 ) - 1;
-            _pk_loc[ iloc ] = _p( ig );  // p^k local
+            iloc = this->_fe_p.patternFirst( k );
+            ig = this->_dof_p.localToGlobal( i, iloc + 1 ) - 1;
+            _pk_loc[ iloc ] = this->_p( ig );  // p^k local
         }
 
         //
         // Elementary vectors
         //
 
-        //  - \rho ( \grad( u^n-w^k ):[I\div d - (\grad d)^T] u^k + ( u^n-w^k )^T[I\div d - (\grad d)^T] (\grad u^k)^T , v  )
-        source_mass1( -_rho, _uk_loc, _convect, _d_loc, _elvec_du, _fe_u );
+        //  - \rho ( -\grad w^k:[I\div d - (\grad d)^T] u^k + ( u^n-w^k )^T[I\div d - (\grad d)^T] (\grad u^k)^T , v  )
+        source_mass1( -this->_rho, _uk_loc, _w_loc, _convect, _d_loc, _elvec_du, this->_fe_u );
 
         //  + \rho * ( \grad u^k dw, v  )
-        source_mass2( _rho, _uk_loc, _dw_loc, _elvec_du, _fe_u );
+        source_mass2( this->_rho, _uk_loc, _dw_loc, _elvec_du, this->_fe_u );
 
         //  - ( [-p^k I + 2*mu e(u^k)] [I\div d - (\grad d)^T] , \grad v  )
-        source_stress( -1.0, _mu, _uk_loc, _pk_loc, _d_loc, _elvec_du, _fe_u, _fe_p );
+        source_stress( -1.0, this->_mu, _uk_loc, _pk_loc, _d_loc, _elvec_du, this->_fe_u, this->_fe_p );
 
         // + \mu ( \grad u^k \grad d + [\grad d]^T[\grad u^k]^T : \grad v )
-        source_stress2( _mu, _uk_loc, _d_loc, _elvec_du, _fe_u );
+        source_stress2( this->_mu, _uk_loc, _d_loc, _elvec_du, this->_fe_u );
 
         //  + ( (\grad u^k):[I\div d - (\grad d)^T] , q  )
-        source_press( 1.0, _uk_loc, _d_loc, _elvec_dp, _fe_u, _fe_p );
+        source_press( 1.0, _uk_loc, _d_loc, _elvec_dp, this->_fe_u, this->_fe_p );
 
         //
         // Assembling
         //
 
         // assembling presssure right hand side
-        assemb_vec( _f_p, _elvec_dp, _fe_p, _dof_p, 0 );
+        assemb_vec( _f_p, _elvec_dp, this->_fe_p, this->_dof_p, 0 );
 
         // loop on velocity components
         for ( UInt ic = 0; ic < nc_u; ic++ )
         {
             // assembling velocity right hand side
-            assemb_vec( _f_duWithOutBC, _elvec_du, _fe_u, _dof_u, ic );
+            assemb_vec( _f_duWithOutBC, _elvec_du, this->_fe_u, this->_dof_u, ic );
         }
     }
 
@@ -978,9 +978,9 @@ iterateLin( const Real& time, BCHandler& BCh_du )
 
     _f_u = _f_duWithOutBC;
 
-    BCh_du.bdUpdate( _mesh, _feBd_u, _dof_u );
+    BCh_du.bdUpdate( this->_mesh, this->_feBd_u, this->_dof_u );
 
-    bcManage( _C, _trD, _f_u, _mesh, _dof_u, BCh_du, _feBd_u, tgv, time );
+    bcManage( _C, _trD, _f_u, this->_mesh, this->_dof_u, BCh_du, this->_feBd_u, tgv, time );
 
     chrono.stop();
     std::cout << " done in " << chrono.diff() << "s." << std::endl;
@@ -1006,7 +1006,7 @@ iterateLin( const Real& time, BCHandler& BCh_du )
     AZ_MATRIX *C;
     AZ_PRECOND *prec_C;
 
-    int N_eq_i = 3 * _dim_u; // number of DOF for each component
+    int N_eq_i = 3 * this->_dim_u; // number of DOF for each component
     // data_org assigned "by hands" while no parallel computation is performed
     data_org_i[ AZ_N_internal ] = N_eq_i;
     data_org_i[ AZ_N_border ] = 0;
@@ -1096,7 +1096,7 @@ iterateLin( const Real& time, BCHandler& BCh_du )
     if ( BCh_du.hasOnlyEssential()
        )
     {
-        vec_DV[ _dim_p - 1 ] = 1.0; // correction of the right hand side.
+        vec_DV[ this->_dim_p - 1 ] = 1.0; // correction of the right hand side.
     }
 
     _dp = ZeroVector( _dp.size() );
@@ -1145,7 +1145,7 @@ solveJacobian(  const Real& time, BCHandler& BCh_du )
     Chrono chrono;
 
     // Number of velocity components
-    UInt nc_u = _u.nbcomp(), iloc, ig;
+    UInt nc_u = this->_u.nbcomp(), iloc, ig;
 
     std::cout << "  F-  LINEARIZED FLUID SYSTEM\n";
 
@@ -1161,35 +1161,35 @@ solveJacobian(  const Real& time, BCHandler& BCh_du )
     _f_p = ZeroVector( _f_p.size() );
 
     // Loop on elements
-    for ( UInt i = 1; i <= _mesh.numVolumes(); i++ )
+    for ( UInt i = 1; i <= this->_mesh.numVolumes(); i++ )
     {
 
-        _fe_p.update( _mesh.volumeList( i ) );
-        _fe_u.updateFirstDerivQuadPt( _mesh.volumeList( i ) );
+        this->_fe_p.update( this->_mesh.volumeList( i ) );
+        this->_fe_u.updateFirstDerivQuadPt( this->_mesh.volumeList( i ) );
 
         // initialization of elementary vectors
         _elvec_du.zero();
         _elvec_dp.zero();
 
-        for ( UInt k = 0 ; k < ( UInt ) _fe_u.nbNode ; k++ )
+        for ( UInt k = 0 ; k < ( UInt ) this->_fe_u.nbNode ; k++ )
         {
-            iloc = _fe_u.patternFirst( k );
+            iloc = this->_fe_u.patternFirst( k );
             for ( UInt ic = 0; ic < nc_u; ++ic )
             {
-                ig = _dof_u.localToGlobal( i, iloc + 1 ) - 1 + ic * _dim_u;
-                _convect[ iloc + ic * _fe_u.nbNode ] = _un( ig ) - _wInterp( ig );  // u^n - w^k local
-                _w_loc.vec( ) [ iloc + ic * _fe_u.nbNode ] = _wInterp( ig );                // w^k local
-                _uk_loc.vec( ) [ iloc + ic * _fe_u.nbNode ] = _u( ig );                      // u^k local
-                _d_loc.vec( ) [ iloc + ic * _fe_u.nbNode ] = _dInterp( ig );                // d local
-                _dw_loc.vec( ) [ iloc + ic * _fe_u.nbNode ] = _dwInterp( ig );               // dw local
+                ig = this->_dof_u.localToGlobal( i, iloc + 1 ) - 1 + ic * this->_dim_u;
+                _convect[ iloc + ic * this->_fe_u.nbNode ] = _un( ig ) - this->_wInterp( ig );  // u^n - w^k local
+                _w_loc.vec( ) [ iloc + ic * this->_fe_u.nbNode ] = this->_wInterp( ig );                // w^k local
+                _uk_loc.vec( ) [ iloc + ic * this->_fe_u.nbNode ] = this->_u( ig );                      // u^k local
+                _d_loc.vec( ) [ iloc + ic * this->_fe_u.nbNode ] = this->_dInterp( ig );                // d local
+                _dw_loc.vec( ) [ iloc + ic * this->_fe_u.nbNode ] = this->_dwInterp( ig );               // dw local
             }
         }
 
-        for ( UInt k = 0 ; k < ( UInt ) _fe_p.nbNode ; k++ )
+        for ( UInt k = 0 ; k < ( UInt ) this->_fe_p.nbNode ; k++ )
         {
-            iloc = _fe_p.patternFirst( k );
-            ig = _dof_p.localToGlobal( i, iloc + 1 ) - 1;
-            _pk_loc[ iloc ] = _p( ig );  // p^k local
+            iloc = this->_fe_p.patternFirst( k );
+            ig = this->_dof_p.localToGlobal( i, iloc + 1 ) - 1;
+            _pk_loc[ iloc ] = this->_p( ig );  // p^k local
         }
 
         //
@@ -1197,32 +1197,32 @@ solveJacobian(  const Real& time, BCHandler& BCh_du )
         //
 
         //  - \rho ( \grad( u^n-w^k ):[I\div d - (\grad d)^T] u^k + ( u^n-w^k )^T[I\div d - (\grad d)^T] (\grad u^k)^T , v  )
-        source_mass1( -_rho, _uk_loc, _convect, _d_loc, _elvec_du, _fe_u );
+        source_mass1( -this->_rho, _uk_loc, _convect, _d_loc, _elvec_du, this->_fe_u );
 
         //  + \rho * ( \grad u^k dw, v  )
-        source_mass2( _rho, _uk_loc, _dw_loc, _elvec_du, _fe_u );
+        source_mass2( this->_rho, _uk_loc, _dw_loc, _elvec_du, this->_fe_u );
 
         //  - ( [-p^k I + 2*mu e(u^k)] [I\div d - (\grad d)^T] , \grad v  )
-        source_stress( -1.0, _mu, _uk_loc, _pk_loc, _d_loc, _elvec_du, _fe_u, _fe_p );
+        source_stress( -1.0, this->_mu, _uk_loc, _pk_loc, _d_loc, _elvec_du, this->_fe_u, this->_fe_p );
 
         // + \mu ( \grad u^k \grad d + [\grad d]^T[\grad u^k]^T : \grad v )
-        source_stress2( _mu, _uk_loc, _d_loc, _elvec_du, _fe_u );
+        source_stress2( this->_mu, _uk_loc, _d_loc, _elvec_du, this->_fe_u );
 
         //  + ( (\grad u^k):[I\div d - (\grad d)^T] , q  )
-        source_press( 1.0, _uk_loc, _d_loc, _elvec_dp, _fe_u, _fe_p );
+        source_press( 1.0, _uk_loc, _d_loc, _elvec_dp, this->_fe_u, this->_fe_p );
 
         //
         // Assembling
         //
 
         // assembling presssure right hand side
-        assemb_vec( _f_p, _elvec_dp, _fe_p, _dof_p, 0 );
+        assemb_vec( _f_p, _elvec_dp, this->_fe_p, this->_dof_p, 0 );
 
         // loop on velocity components
         for ( UInt ic = 0; ic < nc_u; ic++ )
         {
             // assembling velocity right hand side
-            assemb_vec( _f_duWithOutBC, _elvec_du, _fe_u, _dof_u, ic );
+            assemb_vec( _f_duWithOutBC, _elvec_du, this->_fe_u, this->_dof_u, ic );
         }
     }
 
@@ -1242,8 +1242,8 @@ solveJacobian(  const Real& time, BCHandler& BCh_du )
 
 
 
-    BCh_du.bdUpdate( _mesh, _feBd_u, _dof_u );
-    bcManage( _C, _trD, _f_u, _mesh, _dof_u, BCh_du, _feBd_u, tgv, time );
+    BCh_du.bdUpdate( this->_mesh, this->_feBd_u, this->_dof_u );
+    bcManage( _C, _trD, _f_u, this->_mesh, this->_dof_u, BCh_du, this->_feBd_u, tgv, time );
 
 
     chrono.stop();
@@ -1270,7 +1270,7 @@ solveJacobian(  const Real& time, BCHandler& BCh_du )
     AZ_MATRIX *C;
     AZ_PRECOND *prec_C;
 
-    int N_eq_i = 3 * _dim_u; // number of DOF for each component
+    int N_eq_i = 3 * this->_dim_u; // number of DOF for each component
     // data_org assigned "by hands" while no parallel computation is performed
     data_org_i[ AZ_N_internal ] = N_eq_i;
     data_org_i[ AZ_N_border ] = 0;
@@ -1360,7 +1360,7 @@ solveJacobian(  const Real& time, BCHandler& BCh_du )
     if ( BCh_du.hasOnlyEssential()
        )
     {
-        vec_DV[ _dim_p - 1 ] = 1.0; // correction of the right hand side.
+        vec_DV[ this->_dim_p - 1 ] = 1.0; // correction of the right hand side.
     }
 
     _dp = ZeroVector( _dp.size() );

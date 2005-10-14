@@ -455,7 +455,7 @@ ElasticStructureHandler<Mesh>::initialize( const std::string& depName,
 {
     std::cout << "  S- restarting at time = " << startT << std::endl;
 
-    _count = (int) (startT/_dt - 0.5);
+    _count = (int) (startT/this->_dt - 0.5);
 
     // Loop on elements of the mesh
     for ( ID iElem = 1; iElem <= this->_mesh.numVolumes(); ++iElem )
