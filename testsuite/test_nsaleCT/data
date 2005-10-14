@@ -1,0 +1,68 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file for Fluid Structure Solver 
+#-------------------------------------------------
+
+FSItest = 7
+FSIalgo = 3
+FSIsche = 2
+
+[fluid]
+
+[./physics]
+density = 1.012
+viscosity = 0.035
+endtime = 1
+
+
+[../discretization]
+mesh_dir  = ./
+mesh_file = aaa2921_coarse_30ND_IFD.mesh #imp3dt2.mesh  # mesh file
+timestep  = 0.0001
+stabilization = sd
+
+[../miscellaneous]
+verbose   = 1
+factor    = 1
+
+[../sdstab]
+gammaBeta  = 0.2
+gammaDiv   = 0.
+
+[../aztec_p]
+output          = none #all_res
+max_iter        = 300
+poly_ord        = 5
+kspace          = 100
+precond         = dom_decomp
+tol             = 1.00e-10
+drop            = 1.00e-4
+ilut_fill       = 6
+keep_info       = 1
+
+
+
+[../aztec_u]
+output          = none #all_res
+max_iter        = 300
+poly_ord        = 5
+kspace          = 100
+precond         = dom_decomp
+drop            = 1.00e-4
+ilut_fill       = 6
+tol             = 1.e-10
+keep_info       = 1
+
+
+[mesh_motion]
+
+[./aztec]
+output          = none #all_res
+max_iter        = 300
+poly_ord        = 5
+kspace          = 100
+precond         = dom_decomp
+drop            = 1.00e-4
+ilut_fill       = 6
+tol             = 1.e-10
+keep_info       = 1
