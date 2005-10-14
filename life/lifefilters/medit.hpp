@@ -18,7 +18,7 @@
 */
 
 /*!
-  \file meditPostProcess.h
+  \file medit.h
   \author M.A. Fernandez
   \date 4/2005
   \version 1.0
