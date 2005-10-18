@@ -29,6 +29,6 @@ include $(top_srcdir)/testsuite/Makefile.testsuite
 #
 
 check_PROGRAMS = test_fsi_stab
-noinst_HEADERS = operFS.hpp ud_functions.hpp NavierStokesAleSolver.hpp ipStabilization.hpp sdStabilization.hpp
+noinst_HEADERS = operFS.hpp ud_functions.hpp
 test_fsi_stab_SOURCES = main.cpp
-EXTRA_DIST = data main.cpp 
+EXTRA_DIST = data
