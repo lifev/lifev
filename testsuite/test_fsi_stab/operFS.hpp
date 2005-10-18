@@ -288,6 +288,9 @@ namespace LifeV
     
     double xnorm =  AZ_gvector_norm(dim,-1,z,proc_config);
     std::cout << " ***** norm (z)= " << xnorm << std::endl<< std::endl;
+
+    double dt = my_data->_pFS->_fluid.timestep();
+    double dti2 = 1.0/( dt * dt) ;
     
     if ( xnorm == 0.0 ) {
       for (int i=0; i <(int)dim; ++i)
@@ -304,8 +307,6 @@ namespace LifeV
 	  my_data->_pFS->_fluid.updateDispVelo();
 	  break;
 	case 3:
-	  double dt = my_data->_pFS->_fluid.timestep();
-	  double dti2 = 1.0/( dt * dt) ;
 	  for (int i=0; i <(int)dim; ++i) 
 	    my_data->_pFS->_da[i] =  - my_data->_pFS->_fluid.density() * z[i] * dti2;
 	  break;
