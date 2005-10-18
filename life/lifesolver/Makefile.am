@@ -27,9 +27,9 @@ AM_CPPFLAGS = -DNO_BLASLAPACK
 
 lib_LTLIBRARIES	= liblifesolver.la
 
-liblifesolver_la_SOURCES	= darcySolver.cpp \
-                              FSIOperator.cpp fixedPointBase.cpp steklovPoincareBase.cpp exactJacobianBase.cpp \
-                              FSISolver.cpp timeSolver.cpp reducedLinFluid.cpp
+liblifesolver_la_SOURCES	=  darcySolver.cpp \
+                               FSIOperator.cpp fixedPointBase.cpp steklovPoincareBase.cpp exactJacobianBase.cpp \
+                              FSISolver.cpp timeSolver.cpp reducedLinFluid.cpp NavierStokesAleSolverCT.cpp NavierStokesAleSolverCT.cpp
 
 liblifesolver_la_LIBADD    = ../lifefilters/liblifefilters.la ../lifearray/liblifearray.la ../lifecore/liblifecore.la $(petsc_libs) $(aztec_libs) $(boost_libs)
 
