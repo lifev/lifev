@@ -48,12 +48,6 @@
 namespace LifeV
 {
  
-  
-  void compute_divuq(Real alpha, ElemVec& uLoc,  ElemVec& elvec, const CurrentFE& fe_u, const CurrentFE& fe_p, int iblock = 0 );
-  void compute_gradpv(Real alpha, ElemVec& pLoc,  ElemVec& elvec, const CurrentFE& fe_p, const CurrentFE& fe_u, int iblock );
-
-  
-  
   /*!
     \class NavierStokesSolverCT
     
@@ -356,7 +350,7 @@ namespace LifeV
 	// we add the term - ( \grad p^{n}, v)
 	for (UInt ic=0; ic< (UInt)this->_fe_u.nbCoor; ++ic) 
 	  {
-	    compute_gradpv(-1.0, M_pLoc, M_elvec_u, this->_fe_u, this->_fe_u, ic);
+	    source_gradpv(-1.0, M_pLoc, M_elvec_u, this->_fe_u, this->_fe_u, ic);
 	    
 	    // assembling into global vector
 	    assemb_vec(M_f_u, M_elvec_u, this->_fe_u, this->_dof_u, ic); 
@@ -928,7 +922,7 @@ namespace LifeV
 	  }
 	
 	// we add the term - (1/dt) * ( \div \tilde u^{n+1}, q)
-	compute_divuq( -1.0*dti, M_uLoc, M_elvec_p, this->_fe_u, this->_fe_u);
+	source_divuq( -1.0*dti, M_uLoc, M_elvec_p, this->_fe_u, this->_fe_u);
 	assemb_vec(M_f_p, M_elvec_p, this->_fe_u, this->_dof_u); 
       }
    
