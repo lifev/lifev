@@ -2328,6 +2328,46 @@ void source( Real coef, ElemVec& f, ElemVec& elvec, const CurrentFE& fe,
     }
 }
 
+
+
+
+  void source_divuq(Real alpha, ElemVec& uLoc,  ElemVec& elvec, const CurrentFE& fe_u, const CurrentFE& fe_p, int iblock  )
+  {
+    int i, j, ic, iq;
+    ElemVec::vector_view vec = elvec.block( iblock );
+    Real s;
+    
+    for (i = 0; i < fe_p.nbNode; i++) {
+      s = 0;
+      for (iq = 0; iq < fe_p.nbQuadPt; ++iq )
+	for (j = 0; j < fe_u.nbNode; ++j)
+	  for (ic = 0; ic < (int)nDimensions; ++ic) 
+	    s += uLoc[ic*fe_u.nbNode+j]*fe_u.phiDer(j,ic,iq)*fe_p.phi(i,iq)* fe_p.weightDet( iq );
+      
+      vec( i ) += s*alpha;
+    }
+    
+  }
+
+  void source_gradpv(Real alpha, ElemVec& pLoc,  ElemVec& elvec, const CurrentFE& fe_p, const CurrentFE& fe_u, int iblock )
+  {
+    int i, j, iq;
+    ElemVec::vector_view vec = elvec.block( iblock );
+    Real s;
+    
+    for ( i = 0;i < fe_u.nbNode;i++ )
+      {
+        s = 0;
+        for (iq = 0; iq < fe_u.nbQuadPt; ++iq )
+	  for (j = 0; j < fe_p.nbNode; ++j)
+	    s += pLoc[j]*fe_p.phiDer(j,iblock,iq)*fe_u.phi(i,iq)*fe_u.weightDet( iq );
+	vec( i ) += s*alpha;
+      }
+  }
+
+
+
+
 void source_fhn( Real coef_f, Real coef_a, ElemVec& u, ElemVec& elvec, const CurrentFE& fe,
                  int fblock, int eblock )
 /*

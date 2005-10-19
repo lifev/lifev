@@ -102,8 +102,11 @@ namespace LifeV
   void source( Real constant, ElemVec& elvec, const CurrentFE& fe, int iblock );
   
   void source( Real constant, ElemVec& elvec, const CurrentFE& fe, Real t, int iblock );
+
   
-  
+  // right-hand sides for Chorin-Teman projection scheme
+  void source_divuq(Real alpha, ElemVec& uLoc,  ElemVec& elvec, const CurrentFE& fe_u, const CurrentFE& fe_p, int iblock = 0 );
+  void source_gradpv(Real alpha, ElemVec& pLoc,  ElemVec& elvec, const CurrentFE& fe_p, const CurrentFE& fe_u, int iblock );  
   
   
   //
