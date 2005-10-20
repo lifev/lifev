@@ -1,1 +1,5 @@
+.deps
+.libs
+Makefile
 Makefile.in
+test_hasOnlyEssential

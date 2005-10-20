@@ -7,3 +7,5 @@ convdiff.m
 liblifealg_testsuite.la
 mass.m
 test_linearsolvers
+test_petsc
+test_umfpack

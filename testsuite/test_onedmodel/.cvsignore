@@ -1,2 +1,6 @@
+.deps
+.libs
 Makefile
 Makefile.in
+test_onedmodel
+test_twotubes

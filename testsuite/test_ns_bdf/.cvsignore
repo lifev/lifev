@@ -3,3 +3,4 @@
 Makefile
 Makefile.in
 testBDF
+test_ns_bdf

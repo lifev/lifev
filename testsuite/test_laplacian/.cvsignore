@@ -5,4 +5,5 @@
 Makefile
 Makefile.in
 dopo.m
+test_laplacian
 test_matrix

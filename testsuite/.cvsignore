@@ -1,5 +1,7 @@
 Makefile
 Makefile.in
+atconfig
+atlocal
 gentest.pl
 package.m4
 testsuite
