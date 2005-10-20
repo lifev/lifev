@@ -5,3 +5,4 @@ Makefile.in
 poi0_pre.dx
 poi0_vel.dx
 testSStress
+test_ns_sstress
