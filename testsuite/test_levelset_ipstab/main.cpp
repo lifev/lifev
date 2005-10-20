@@ -22,6 +22,8 @@
   \After Burman-Hansbo, Comput. Methods Appl. Mech. Engrg. 193 (2004)
   \pp. 1437-1453
 */
+#include <sstream>
+
 #include <lifeconfig.h>
 
 #include <life/lifecore/GetPot.hpp>
