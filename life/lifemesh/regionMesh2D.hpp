@@ -1076,7 +1076,6 @@ RegionMesh2D<GEOSHAPE, MC>::edgeElement( EdgeType const & f, UInt const Pos ) co
 {
     ASSERT_BD( ! edgeList.empty() ) ;
     ASSERT_PRE( Pos == 1 || Pos == 2 , "Wrong position (1 or 2)" ) ;
-    ASSERT_BD( i > 0 ) ;
     if ( Pos == 1 )
     {
         return f.ad_first();
