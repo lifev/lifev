@@ -15,3 +15,4 @@ mesh_util.lo
 mesh_util_base.lo
 readMesh3D.lo
 regionMesh3D.lo
+subDomainNeighbors.lo

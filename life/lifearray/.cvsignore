@@ -10,3 +10,4 @@ elemVec.lo
 liblifearray.la
 pattern.lo
 sparseArray.lo
+vecUnknown.lo

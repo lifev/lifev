@@ -4,8 +4,10 @@ Doxyfile
 Doxylog
 Makefile
 Makefile.in
+SolverAztec.lo
 SolverPETSC.lo
 SolverPETSC.loT
+SolverUMFPACK.lo
 dataAztec.lo
 dataNewton.lo
 doxylog

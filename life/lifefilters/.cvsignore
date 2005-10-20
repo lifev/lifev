@@ -5,8 +5,11 @@ Doxylog
 Makefile
 Makefile.in
 doxylog
+importer.lo
 liblifefilters.la
 medit_wrtrs.lo
 mesh_util.lo
+openDX_wrtrs.lo
 readMesh3D.lo
+selectMarker.lo
 vtk_wrtrs.lo
