@@ -40,7 +40,9 @@ vec2elemVec( Vector& V, ElemVec& elvec, const CurrentFE& fe, const DOF& dof,
         for ( i = 0 ; i < fe.nbNode ; i++ )
         {
             ig = dof.localToGlobal( eleId, i + 1 ) - 1 + ib * totdof;
-            vec( i ) = V[ ig ];
+
+#warning TO BE FIXED
+            //vec( i ) = V[ ig ];
         }
     }
 }

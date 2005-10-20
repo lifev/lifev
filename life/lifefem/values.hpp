@@ -82,7 +82,7 @@ void assemble_first( MatrixType& M, ElemMat& elmat,
         std::cout << "assemble for vector elem mat not yet implemented\n";
         exit( 1 );
     }
-    Tab2dView mat = elmat.block( 0, 0 );
+    Tab2dView locmat = elmat.block( 0, 0 );
     int i, j;
     UInt ig, jg, eleID = geo.currentID();
     for ( UInt k = 0 ; k < FE1::nbPattern ; k++ )
@@ -91,7 +91,9 @@ void assemble_first( MatrixType& M, ElemMat& elmat,
         j = FE1::patternSecond( k );
         ig = dof.localToGlobal( eleID, i + 1 ) - 1;  // damned 1-base vs 0-base !
         jg = dof.localToGlobal( eleID, j + 1 ) - 1;  // damned 1-base vs 0-base !
-        M.set_mat_inc( ig, jg, mat( i, j ) );
+
+#warning TO BE FIXED
+        //M.set_mat_inc( ig, jg, locmat( i, j ) );
     }
 }
 
@@ -110,7 +112,9 @@ void assemble_vec( Vector& V, ElemVec& elvec, const FE1& fe1, const GeoMap& geo,
     for ( i = 0 ; i < FE1::nbNode ; i++ )
     {
         ig = dof.localToGlobal( eleID, i + 1 ) - 1;
-        V[ ig ] += vec( i );
+
+#warning TO BE FIXED
+        //V[ ig ] += vec( i );
     }
 }
 }
