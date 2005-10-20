@@ -67,7 +67,7 @@ process_marker_flag::process_marker_flag():  my_ndg(0),my_ng(0){
 void
 process_marker_flag::set_factor()
 {
-    factor = std::pow(10.0,std::max((int)my_ndg, (int)0));
+    factor = ( unsigned int )std::pow(10.0,std::max( int(my_ndg), int(0)) );
     //cout << "FACTOR: "<<factor<<std::endl;
 }
 
@@ -93,14 +93,14 @@ unsigned int  process_marker_flag::number_of_groups() const{
 
 unsigned int process_marker_flag::extract_group(MarkerFlag const &  mf, unsigned int const & group) const
 {
-    unsigned long ff = std::pow((double)factor,std::max(int(my_ng- group),int(0))); //group numbering starts from 1
+    unsigned long ff = ( unsigned long )std::pow((double)factor,std::max(int(my_ng- group),int(0))); //group numbering starts from 1
     //std::cout << "FF_GROUP: "<<ff<<std::endl;
     return (mf/ff) % factor;
 }
 
 unsigned int
 process_marker_flag::extract_digit_in_group(unsigned int const &  group , unsigned int  const &  digit) const{
-  unsigned int ff= std::pow(10.0,std::max(int(my_ndg-digit),int(0)));
+    unsigned int ff= ( unsigned int )std::pow(10.0,std::max(int(my_ndg-digit),int(0)));
   //std::cout << "FF_DIGIT: "<<ff<<std::endl;
   return (group/ff) % 10;
 }
