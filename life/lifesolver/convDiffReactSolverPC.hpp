@@ -142,21 +142,21 @@ ConvDiffReactSolverPC<Mesh>::
 ConvDiffReactSolverPC( const GetPot& data_file, const RefFE& refFE_c, const QuadRule& Qr_c,
                        const QuadRule& bdQr_c, BCHandler& BCh_c ) :
         ConvDiffReactHandler<Mesh>( data_file, refFE_c, Qr_c, bdQr_c, BCh_c ),
-        _pattM( _dof_c ),
+        _pattM( this->_dof_c ),
         _DR( _pattM ),
         _CDR( _pattM ),
         _M_c( _pattM ),
-        _elmatC( _fe_c.nbNode, 1, 1 ),
-        _elmatM_c( _fe_c.nbNode, 1, 1 ),
-        _elmatMR_c( _fe_c.nbNode, 1, 1 ),
-        _elvec( _fe_c.nbNode, 1 ),
-        _elvec_u( _fe_c.nbNode, nDimensions ),
-        _f_c( _dim_c ),
+        _elmatC( this->_fe_c.nbNode, 1, 1 ),
+        _elmatM_c( this->_fe_c.nbNode, 1, 1 ),
+        _elmatMR_c( this->_fe_c.nbNode, 1, 1 ),
+        _elvec( this->_fe_c.nbNode, 1 ),
+        _elvec_u( this->_fe_c.nbNode, nDimensions ),
+        _f_c( this->_dim_c ),
         _dataAztec_o( data_file, "masstransport/aztec_o" )
 {
 
     std::cout << std::endl;
-    std::cout << "O-  Concentration unknowns: " << _dim_c << std::endl;
+    std::cout << "O-  Concentration unknowns: " << this->_dim_c << std::endl;
     std::cout << "O-  Computing mass and stiffness matrices... ";
 
     Chrono chrono;
@@ -168,46 +168,46 @@ ConvDiffReactSolverPC( const GetPot& data_file, const RefFE& refFE_c, const Quad
     _M_c.zeros();
 
     //inverse of dt:
-    Real dti = 1. / _dt;
+    Real dti = 1. / this->_dt;
 
     // *******************************************************
     // Coefficient of the mass term at time t^{n+1}
-    Real first_coeff = _bdf.coeff_der( 0 );
+    Real first_coeff = this->_bdf.coeff_der( 0 );
     std::cout << std::endl;
     std::cout << "Bdf CDR first coeff " << first_coeff << std::endl;
 
-    _bdf.showMe();
+    this->_bdf.showMe();
 
     // Elementary computation and matrix assembling
 
-    for ( UInt i = 1; i <= _mesh.numVolumes(); i++ )
+    for ( UInt i = 1; i <= this->_mesh.numVolumes(); i++ )
     {          // Loop on elements
 
-        _fe_c.updateFirstDerivQuadPt( _mesh.volumeList( i ) );
+        this->_fe_c.updateFirstDerivQuadPt( this->_mesh.volumeList( i ) );
 
         _elmatC.zero();
         _elmatM_c.zero();
         _elmatMR_c.zero();
 
-        stiff( _diffusivity, _elmatC, _fe_c );
+        stiff( this->_diffusivity, _elmatC, this->_fe_c );
 
-        if ( _stationary )
+        if ( this->_stationary )
         {
-            mass( ( -_react ), _elmatMR_c, _fe_c );
+            mass( ( -this->_react ), _elmatMR_c, this->_fe_c );
         }
         else
         {
-            mass( ( first_coeff * dti - _react ), _elmatMR_c, _fe_c );
-            mass( dti, _elmatM_c, _fe_c );
+            mass( ( first_coeff * dti - this->_react ), _elmatMR_c, this->_fe_c );
+            mass( dti, _elmatM_c, this->_fe_c );
         }
 
         _elmatC.mat() += _elmatMR_c.mat();
 
         // stiffness + mass + reaction term
-        assemb_mat( _DR, _elmatC, _fe_c, _dof_c );
+        assemb_mat( _DR, _elmatC, this->_fe_c, this->_dof_c );
 
         // mass
-        assemb_mat( _M_c, _elmatM_c, _fe_c, _dof_c );
+        assemb_mat( _M_c, _elmatM_c, this->_fe_c, this->_dof_c );
 
     }
 
@@ -230,17 +230,17 @@ timeAdvance( source_type const& source, const Real& time )
     _f_c = ZeroVector( _f_c.size() );
 
     // loop on volumes: assembling source term
-    for ( UInt i = 1; i <= _mesh.numVolumes(); ++i )
+    for ( UInt i = 1; i <= this->_mesh.numVolumes(); ++i )
     {
         _elvec.zero();
-        _fe_c.update( _mesh.volumeList( i ) );
+        this->_fe_c.update( this->_mesh.volumeList( i ) );
 
-        compute_vec( source, _elvec, _fe_c, time, 0 ); // compute local vector
-        assemb_vec( _f_c, _elvec, _fe_c, _dof_c, 0 ); // assemble local vector into global one
+        compute_vec( source, _elvec, this->_fe_c, time, 0 ); // compute local vector
+        assemb_vec( _f_c, _elvec, this->_fe_c, this->_dof_c, 0 ); // assemble local vector into global one
     }
 
     // *******************************************************
-    _f_c += _M_c * _bdf.time_der(); //_M_u is the mass matrix divided by the time step
+    _f_c += _M_c * this->_bdf.time_der(); //_M_u is the mass matrix divided by the time step
     _f_c_noBC = _f_c;
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
@@ -252,7 +252,7 @@ void ConvDiffReactSolverPC<Mesh>::
 iterate( const Real& time )
 {
 
-    UInt nc_u = _u_c.nbcomp();
+    UInt nc_u = this->_u_c.nbcomp();
 
     Chrono chrono;
 
@@ -269,31 +269,31 @@ iterate( const Real& time )
     chrono.start();
 
     // loop on volumes
-    for ( UInt i = 1; i <= _mesh.numVolumes(); ++i )
+    for ( UInt i = 1; i <= this->_mesh.numVolumes(); ++i )
     {
 
-        _fe_c.updateFirstDeriv( _mesh.volumeList( i ) ); // as updateFirstDer
+        this->_fe_c.updateFirstDeriv( this->_mesh.volumeList( i ) ); // as updateFirstDer
 
         _elmatC.zero();
 
-        UInt eleID = _fe_c.currentId();
+        UInt eleID = this->_fe_c.currentId();
 
         // ********** copy global velocity vector to local velocity vector *************
         // ********** assuming velocity is given on concentration mesh *****************
 
-        for ( UInt k = 0 ; k < ( UInt ) _fe_c.nbNode ; k++ )
+        for ( UInt k = 0 ; k < ( UInt ) this->_fe_c.nbNode ; k++ )
         {
-            UInt iloc = _fe_c.patternFirst( k );
+            UInt iloc = this->_fe_c.patternFirst( k );
             for ( UInt ic = 0; ic < nc_u; ++ic )
             {
-                UInt ig = _dof_c.localToGlobal( eleID, iloc + 1 ) - 1 + ic * _dim_c;
-                _elvec_u[ iloc + ic * _fe_c.nbNode ] = _u_c( ig );
+                UInt ig = this->_dof_c.localToGlobal( eleID, iloc + 1 ) - 1 + ic * this->_dim_c;
+                _elvec_u[ iloc + ic * this->_fe_c.nbNode ] = this->_u_c( ig );
             }
         }
 
-        grad( 0, _elvec_u, _elmatC, _fe_c, _fe_c, _fe_c );
-        grad( 1, _elvec_u, _elmatC, _fe_c, _fe_c, _fe_c );
-        grad( 2, _elvec_u, _elmatC, _fe_c, _fe_c, _fe_c );
+        grad( 0, _elvec_u, _elmatC, this->_fe_c, this->_fe_c, this->_fe_c );
+        grad( 1, _elvec_u, _elmatC, this->_fe_c, this->_fe_c, this->_fe_c );
+        grad( 2, _elvec_u, _elmatC, this->_fe_c, this->_fe_c, this->_fe_c );
 
 
         // *************************************** Upwind ******************************
@@ -301,26 +301,26 @@ iterate( const Real& time )
         Real VLoc_infty = 0.;
         Real VLoc_mean = 0.;
         Real VLoc_c = 0.;
-        for ( UInt ih_c = 0 ; ih_c < ( UInt ) _fe_c.nbNode ; ih_c++ )
+        for ( UInt ih_c = 0 ; ih_c < ( UInt ) this->_fe_c.nbNode ; ih_c++ )
         {
-            UInt iloc = _fe_c.patternFirst( ih_c );
+            UInt iloc = this->_fe_c.patternFirst( ih_c );
             for ( UInt ic = 0; ic < nc_u;++ic )
             {
-                UInt ig = _dof_c.localToGlobal( eleID, iloc + 1 ) - 1 + ic * _dim_c;
-                _elvec_u[ iloc + ic * _fe_c.nbNode ] = _u_c( ig );
-                VLoc_c += _u_c( ig ) * _u_c( ig );
+                UInt ig = this->_dof_c.localToGlobal( eleID, iloc + 1 ) - 1 + ic * this->_dim_c;
+                _elvec_u[ iloc + ic * this->_fe_c.nbNode ] = this->_u_c( ig );
+                VLoc_c += this->_u_c( ig ) * this->_u_c( ig );
             }
             VLoc_c = sqrt( VLoc_c );
             VLoc_mean += VLoc_c;
             if ( VLoc_c > VLoc_infty )
                 VLoc_infty = VLoc_c;
         }
-        VLoc_mean = VLoc_mean / _fe_c.nbNode;
+        VLoc_mean = VLoc_mean / this->_fe_c.nbNode;
 
         Real coef_stab, Pe_loc;
-        //      coef_stab=_fe_c.diameter()*VLoc_infty; // Alessandro - method
+        //      coef_stab=this->_fe_c.diameter()*VLoc_infty; // Alessandro - method
 
-        Pe_loc = VLoc_infty * _fe_c.diameter() / ( 2.0 * _diffusivity );
+        Pe_loc = VLoc_infty * this->_fe_c.diameter() / ( 2.0 * this->_diffusivity );
 
         //      coef_stab=(1.0/tanh(Pe_loc))-(1.0/Pe_loc); // classical approach
 
@@ -335,11 +335,11 @@ iterate( const Real& time )
         }
 
         // ******************************* STREAMLINEUPWIND ****************************
-        stiff_sd( coef_stab / ( VLoc_mean * VLoc_mean ), _elvec_u, _elmatC, _fe_c, _fe_c );
+        stiff_sd( coef_stab / ( VLoc_mean * VLoc_mean ), _elvec_u, _elmatC, this->_fe_c, this->_fe_c );
 
         // ************************* Assembling ****************************************
 
-        assemb_mat( _CDR, _elmatC, _fe_c, _dof_c );
+        assemb_mat( _CDR, _elmatC, this->_fe_c, this->_dof_c );
 
     }
     chrono.stop();
@@ -351,9 +351,9 @@ iterate( const Real& time )
     std::cout << "  o-  Applying boundary conditions... ";
     chrono.start();
     // BC manage for the concentration
-    if ( !_BCh_c.bdUpdateDone() )
-        _BCh_c.bdUpdate( _mesh, _feBd_c, _dof_c );
-    bcManage( _CDR, _f_c, _mesh, _dof_c, _BCh_c, _feBd_c, tgv, time );
+    if ( !this->_BCh_c.bdUpdateDone() )
+        this->_BCh_c.bdUpdate( this->_mesh, this->_feBd_c, this->_dof_c );
+    bcManage( _CDR, _f_c, this->_mesh, this->_dof_c, this->_BCh_c, this->_feBd_c, tgv, time );
     chrono.stop();
 
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
@@ -378,7 +378,7 @@ iterate( const Real& time )
 
     AZ_set_proc_config( proc_config_o, AZ_NOT_MPI );
 
-    AZ_read_update( &N_update_o, &update_o, proc_config_o, _dim_c, 1, AZ_linear );
+    AZ_read_update( &N_update_o, &update_o, proc_config_o, this->_dim_c, 1, AZ_linear );
     AZ_defaults( options_o, params_o );
     _dataAztec_o.aztecOptionsFromDataFile( options_o, params_o );
     AZ_transform( proc_config_o, &external_o,
@@ -390,13 +390,13 @@ iterate( const Real& time )
     chrono.start();
     //    init_options_c(options_o,params_o);
 
-    AZ_solve( _c.giveVec(), _f_c.giveVec(), options_o, params_o, NULL,
+    AZ_solve( this->_c.giveVec(), _f_c.giveVec(), options_o, params_o, NULL,
               ( int * ) _pattM.giveRaw_bindx(), NULL, NULL, NULL,
               _CDR.giveRaw_value(), data_org_o, status_o, proc_config_o );
     
     chrono.stop();
     std::cout << "*** Solution (Concentration) computed in " << chrono.diff() << "s." << std::endl;
-    _bdf.shift_right( _c );
+    this->_bdf.shift_right( this->_c );
 
 }
 
@@ -409,36 +409,36 @@ getvel( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u, con
 {
 
 
-    for ( UInt i = 0; i < _mesh.numVertices(); i++ )
+    for ( UInt i = 0; i < this->_mesh.numVertices(); i++ )
     {
 
-        if ( _u_to_c[ i ].ele == 0 )
+        if ( this->_u_to_c[ i ].ele == 0 )
         {
        // Dirichlet boundary for the velocity -> get velocity for boundary function
-            Real xp = _mesh.point( i + 1 ).x();
-            Real yp = _mesh.point( i + 1 ).y();
-            Real zp = _mesh.point( i + 1 ).z();
+            Real xp = this->_mesh.point( i + 1 ).x();
+            Real yp = this->_mesh.point( i + 1 ).y();
+            Real zp = this->_mesh.point( i + 1 ).z();
             for ( ID jj = 0; jj < 3; ++jj )
-                _u_c( i + jj * _u_c.size() / 3 ) = BCh_u[ ( int ) _u_to_c[ i ].b[ 0 ] ] ( time, xp, yp, zp, BCh_u[ ( int ) _u_to_c[ i ].b[ 0 ] ].component( jj + 1 ) );
+                this->_u_c( i + jj * this->_u_c.size() / 3 ) = BCh_u[ ( int ) this->_u_to_c[ i ].b[ 0 ] ] ( time, xp, yp, zp, BCh_u[ ( int ) this->_u_to_c[ i ].b[ 0 ] ].component( jj + 1 ) );
 
         }
         else
         {
        // Velocity interpolation
-            _u_c( i ) = _u_to_c[ i ].b[ 0 ] * u( umesh.volume( _u_to_c[ i ].ele ).point( 1 ).id() - 1 ) +
-                        _u_to_c[ i ].b[ 1 ] * u( umesh.volume( _u_to_c[ i ].ele ).point( 2 ).id() - 1 ) +
-                        _u_to_c[ i ].b[ 2 ] * u( umesh.volume( _u_to_c[ i ].ele ).point( 3 ).id() - 1 ) +
-                        _u_to_c[ i ].b[ 3 ] * u( umesh.volume( _u_to_c[ i ].ele ).point( 4 ).id() - 1 );
+            this->_u_c( i ) = this->_u_to_c[ i ].b[ 0 ] * u( umesh.volume( this->_u_to_c[ i ].ele ).point( 1 ).id() - 1 ) +
+                        this->_u_to_c[ i ].b[ 1 ] * u( umesh.volume( this->_u_to_c[ i ].ele ).point( 2 ).id() - 1 ) +
+                        this->_u_to_c[ i ].b[ 2 ] * u( umesh.volume( this->_u_to_c[ i ].ele ).point( 3 ).id() - 1 ) +
+                        this->_u_to_c[ i ].b[ 3 ] * u( umesh.volume( this->_u_to_c[ i ].ele ).point( 4 ).id() - 1 );
 
-            _u_c( i + _dim_c ) = _u_to_c[ i ].b[ 0 ] * u( umesh.volume( _u_to_c[ i ].ele ).point( 1 ).id() - 1 + u.size() / 3 ) +
-                                 _u_to_c[ i ].b[ 1 ] * u( umesh.volume( _u_to_c[ i ].ele ).point( 2 ).id() - 1 + u.size() / 3 ) +
-                                 _u_to_c[ i ].b[ 2 ] * u( umesh.volume( _u_to_c[ i ].ele ).point( 3 ).id() - 1 + u.size() / 3 ) +
-                                 _u_to_c[ i ].b[ 3 ] * u( umesh.volume( _u_to_c[ i ].ele ).point( 4 ).id() - 1 + u.size() / 3 );
+            this->_u_c( i + this->_dim_c ) = this->_u_to_c[ i ].b[ 0 ] * u( umesh.volume( this->_u_to_c[ i ].ele ).point( 1 ).id() - 1 + u.size() / 3 ) +
+                                 this->_u_to_c[ i ].b[ 1 ] * u( umesh.volume( this->_u_to_c[ i ].ele ).point( 2 ).id() - 1 + u.size() / 3 ) +
+                                 this->_u_to_c[ i ].b[ 2 ] * u( umesh.volume( this->_u_to_c[ i ].ele ).point( 3 ).id() - 1 + u.size() / 3 ) +
+                                 this->_u_to_c[ i ].b[ 3 ] * u( umesh.volume( this->_u_to_c[ i ].ele ).point( 4 ).id() - 1 + u.size() / 3 );
 
-            _u_c( i + 2 * _dim_c ) = _u_to_c[ i ].b[ 0 ] * u( umesh.volume( _u_to_c[ i ].ele ).point( 1 ).id() - 1 + 2 * u.size() / 3 ) +
-                                     _u_to_c[ i ].b[ 1 ] * u( umesh.volume( _u_to_c[ i ].ele ).point( 2 ).id() - 1 + 2 * u.size() / 3 ) +
-                                     _u_to_c[ i ].b[ 2 ] * u( umesh.volume( _u_to_c[ i ].ele ).point( 3 ).id() - 1 + 2 * u.size() / 3 ) +
-                                     _u_to_c[ i ].b[ 3 ] * u( umesh.volume( _u_to_c[ i ].ele ).point( 4 ).id() - 1 + 2 * u.size() / 3 );
+            this->_u_c( i + 2 * this->_dim_c ) = this->_u_to_c[ i ].b[ 0 ] * u( umesh.volume( this->_u_to_c[ i ].ele ).point( 1 ).id() - 1 + 2 * u.size() / 3 ) +
+                                     this->_u_to_c[ i ].b[ 1 ] * u( umesh.volume( this->_u_to_c[ i ].ele ).point( 2 ).id() - 1 + 2 * u.size() / 3 ) +
+                                     this->_u_to_c[ i ].b[ 2 ] * u( umesh.volume( this->_u_to_c[ i ].ele ).point( 3 ).id() - 1 + 2 * u.size() / 3 ) +
+                                     this->_u_to_c[ i ].b[ 3 ] * u( umesh.volume( this->_u_to_c[ i ].ele ).point( 4 ).id() - 1 + 2 * u.size() / 3 );
 
         }
 
@@ -459,7 +459,7 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
     Chrono chrono;
     chrono.start();
 
-    _u_c = ScalarVector( _u_c.size(), -100 );
+    this->_u_c = ScalarVector( this->_u_c.size(), -100 );
 
     UInt vid, adjacent, minadjacent;
     LinearTetra ele;
@@ -470,17 +470,17 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
 
     SimpleVect<GeoElement3D<LinearTetra> >::iterator iv = umesh.volumeList.begin();
 
-   for ( UInt i = 0; i < _mesh.numVertices(); i++ )
+   for ( UInt i = 0; i < this->_mesh.numVertices(); i++ )
     {
-    tetrapoints( 1 ) = _mesh.point( i + 1 );
+    tetrapoints( 1 ) = this->_mesh.point( i + 1 );
 
-        if ( _mesh.point( i + 1 ).boundary() )
+        if ( this->_mesh.point( i + 1 ).boundary() )
         {
             UInt l;
 
             for ( UInt k = 0; k < BCh_u.size(); k++ )
             {
-                if ( BCh_u[ k ].flag() == _mesh.point( i + 1 ).marker() )
+                if ( BCh_u[ k ].flag() == this->_mesh.point( i + 1 ).marker() )
                 {
                     l = k;
                 }
@@ -494,7 +494,7 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
                 localcoord.b[ 2 ] = ( Real ) l;
                 localcoord.b[ 3 ] = ( Real ) l;
                 localcoord.ele = 0;
-                _u_to_c.push_back( localcoord );
+                this->_u_to_c.push_back( localcoord );
                 break;
             default:
             for ( Int found = 0;found == 0; )
@@ -550,7 +550,7 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
                                 localcoord.b[ 2 ] = b2;
                                 localcoord.b[ 3 ] = b3;
                                 localcoord.ele = vid;
-                                _u_to_c.push_back( localcoord );
+                                this->_u_to_c.push_back( localcoord );
                               
                             }
                         else
@@ -569,7 +569,7 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
                                 localcoord.b[ 2 ] = b2;
                                 localcoord.b[ 3 ] = b3;
                                 localcoord.ele = vid;
-                                _u_to_c.push_back( localcoord );
+                                this->_u_to_c.push_back( localcoord );
                                
                             }
                     }
@@ -635,7 +635,7 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
                                 localcoord.b[ 2 ] = b2;
                                 localcoord.b[ 3 ] = b3;
                                 localcoord.ele = vid;
-                                _u_to_c.push_back( localcoord );
+                                this->_u_to_c.push_back( localcoord );
                               
                             }
                         else
@@ -653,7 +653,7 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
                                 localcoord.b[ 2 ] = b2;
                                 localcoord.b[ 3 ] = b3;
                                 localcoord.ele = vid;
-                                _u_to_c.push_back( localcoord );
+                                this->_u_to_c.push_back( localcoord );
                                
                             }
                     }
