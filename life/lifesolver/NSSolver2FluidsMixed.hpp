@@ -353,29 +353,29 @@ namespace LifeV {
         :
         NavierStokesHandler<mesh_type, data_type>(data_file, refFE_u, refFE_p, qr, bd_qr, qr, bd_qr, bc_h_u),
         _M_data_file(data_file),
-        _M_pattern_D_block(pDof(), uDof()),
-        _M_pattern_G_block(uDof(), pDof()),
-        _M_pattern_C(uDof(), NDIM),
+        _M_pattern_D_block(this->pDof(), this->uDof()),
+        _M_pattern_G_block(this->uDof(), this->pDof()),
+        _M_pattern_C(this->uDof(), NDIM),
         _M_pattern_D(_M_pattern_D_block),
         _M_pattern_G(_M_pattern_G_block),
         _M_M(_M_pattern_C),
-        _M_M_L(_dim_u * NDIM),
-        _M_M_L_w(_dim_u * NDIM),
+        _M_M_L(this->_dim_u * NDIM),
+        _M_M_L_w(this->_dim_u * NDIM),
         _M_C(_M_pattern_C),
         _M_D(_M_pattern_D),
         _M_G(_M_pattern_G),
-        _M_elmat_C(fe_u().nbNode, NDIM, NDIM),
-        _M_elmat_M(fe_u().nbNode, NDIM, NDIM),
-        _M_elmat_D(fe_p().nbNode, 1, 0, fe_u().nbNode, 0, NDIM),
-        _M_elmat_G(fe_u().nbNode, NDIM, 0, fe_p().nbNode, 0, 1),
-        _M_elmat_P(fe_u().nbNode, NDIM + 1, NDIM + 1),
-        _M_elvec(fe_u().nbNode, NDIM),
-        _M_lss(_mesh, data_file, "levelset", refFE_lss, qr, bd_qr, bc_h_lss, _fe_u, _dof_u, _u),
+        _M_elmat_C(this->fe_u().nbNode, NDIM, NDIM),
+        _M_elmat_M(this->fe_u().nbNode, NDIM, NDIM),
+        _M_elmat_D(this->fe_p().nbNode, 1, 0, this->fe_u().nbNode, 0, NDIM),
+        _M_elmat_G(this->fe_u().nbNode, NDIM, 0, this->fe_p().nbNode, 0, 1),
+        _M_elmat_P(this->fe_u().nbNode, NDIM + 1, NDIM + 1),
+        _M_elvec(this->fe_u().nbNode, NDIM),
+        _M_lss(this->_mesh, data_file, "levelset", refFE_lss, qr, bd_qr, bc_h_lss, this->_fe_u, this->_dof_u, this->_u),
         _M_elvec_lss(_M_lss.fe().nbNode, 1),
-        _M_rhs_u( NDIM * _dim_u),
-        _M_rhs_p( _dim_p ),
+        _M_rhs_u( NDIM * this->_dim_u),
+        _M_rhs_p( this->_dim_p ),
         _M_beta_fct(0),
-        _M_constant_pressure( _dim_p ),
+        _M_constant_pressure( this->_dim_p ),
         _M_lsfunction(_M_lss.lsfunction())
 #if ! defined(L_NS2F_MISSING_SOLVER)
 #if L_NS2F_SOLVER == L_YOSIDA
@@ -429,15 +429,15 @@ namespace LifeV {
         _M_time = time;
 
         // Number of components for the velocity
-        UInt nbCompU = _u.nbcomp();
+        UInt nbCompU = this->_u.nbcomp();
 
         // Velocity vector for the linearization of the convection term
-        Vector betaVec(_u.size());
+        Vector betaVec(this->_u.size());
 
         if(_M_beta_fct)
             uInterpolate(*_M_beta_fct, betaVec, time);
         else
-            betaVec = _bdf.bdf_u().extrap();
+            betaVec = this->_bdf.bdf_u().extrap();
 
         // LSH and RHS initialization
         if(_M_verbose)
@@ -465,13 +465,13 @@ namespace LifeV {
         if(_M_verbose)
             std::cout << "[NSSolver2FluidsMixed::advance_NS] Assembling matrices" << std::endl;
 
-        for(UInt iVol = 1; iVol <= _mesh.numVolumes(); iVol++) {
+        for(UInt iVol = 1; iVol <= this->_mesh.numVolumes(); iVol++) {
             __chrono.start();
 
             // Do proper element updates
-            fe_u().updateFirstDeriv( _mesh.volumeList( iVol ) );
-            fe_p().updateFirstDeriv( _mesh.volumeList( iVol ) );
-            _M_lss.fe().updateJac( _mesh.volumeList( iVol ) );
+            this->fe_u().updateFirstDeriv( this->_mesh.volumeList( iVol ) );
+            this->fe_p().updateFirstDeriv( this->_mesh.volumeList( iVol ) );
+            _M_lss.fe().updateJac( this->_mesh.volumeList( iVol ) );
 
             _M_elmat_C.zero();
             _M_elmat_M.zero();
@@ -490,30 +490,30 @@ namespace LifeV {
             }
 
             // Stiffness strain
-            stiff_strain_2f(2. * viscosity(fluid1), 2. * viscosity(fluid2), _M_elvec_lss, _M_lss.fe(), _M_elmat_C, fe_u());
+            stiff_strain_2f(2. * this->viscosity(this->fluid1), 2. * this->viscosity(this->fluid2), _M_elvec_lss, _M_lss.fe(), _M_elmat_C, this->fe_u());
 
             // Mass
-            Real bdf_coeff = _bdf.bdf_u().coeff_der( 0 ) / _dt;
+            Real bdf_coeff = this->_bdf.bdf_u().coeff_der( 0 ) / this->_dt;
             for(UInt iComp = 0; iComp < nbCompU; iComp++) {
-                lumped_mass_2f(density(fluid1), density(fluid2), _M_elvec_lss, _M_lss.fe(), _M_elmat_M, fe_u(), iComp, iComp);
-                lumped_mass_2f(bdf_coeff * density(fluid1), bdf_coeff * density(fluid2), _M_elvec_lss, _M_lss.fe(),
-                               _M_elmat_C, fe_u(), iComp, iComp);
+                lumped_mass_2f(this->density(this->fluid1), this->density(this->fluid2), _M_elvec_lss, _M_lss.fe(), _M_elmat_M, this->fe_u(), iComp, iComp);
+                lumped_mass_2f(bdf_coeff * this->density(this->fluid1), bdf_coeff * this->density(this->fluid2), _M_elvec_lss, _M_lss.fe(),
+                               _M_elmat_C, this->fe_u(), iComp, iComp);
             }
 
 #if L_NS2F_PROBLEM == L_NAVIER_STOKES
             // Compute local contributions
-            element_id = _fe_u.currentId();
+            element_id = this->_fe_u.currentId();
 
             //  Extract the vector of local velocity dofs
-            for(UInt node_id = 0; node_id < (UInt)fe_u().nbNode; node_id++) {
+            for(UInt node_id = 0; node_id < (UInt)this->fe_u().nbNode; node_id++) {
                 for(UInt comp_id = 0; comp_id < nbCompU; comp_id++) {
-                    UInt iglo = uDof().localToGlobal(element_id, node_id + 1) - 1 + comp_id * _dim_u;
-                    _M_elvec.vec()[node_id + comp_id * fe_u().nbNode] = betaVec(iglo);
+                    UInt iglo = this->uDof().localToGlobal(element_id, node_id + 1) - 1 + comp_id * this->_dim_u;
+                    _M_elvec.vec()[node_id + comp_id * this->fe_u().nbNode] = betaVec(iglo);
                 }
             }
 
             // Advection
-            advection_2f(density(fluid1), density(fluid2), _M_elvec_lss, _M_lss.fe(), _M_elvec, _M_elmat_C, fe_u());
+            advection_2f(this->density(this->fluid1), this->density(this->fluid2), _M_elvec_lss, _M_lss.fe(), _M_elvec, _M_elmat_C, this->fe_u());
 #endif
             __chrono.stop();
             __cumul1 += __chrono.diff();
@@ -523,27 +523,27 @@ namespace LifeV {
                 // Assemble diagonal block
                 __chrono.start();
                 for(UInt jComp = 0; jComp < nbCompU; jComp++) {
-                    assemb_mat(_M_C, _M_elmat_C, fe_u(), uDof(), iComp, jComp);
-                    assemb_mat(_M_M, _M_elmat_M, fe_u(), uDof(), iComp, jComp);
+                    assemb_mat(_M_C, _M_elmat_C, this->fe_u(), this->uDof(), iComp, jComp);
+                    assemb_mat(_M_M, _M_elmat_M, this->fe_u(), this->uDof(), iComp, jComp);
                 }
                 __chrono.stop(); __cumul2 += __chrono.diff();
 
                 // Compute off-diagonal blocks
                 __chrono.start();
-                grad(iComp, 1.0, _M_elmat_G, fe_u(), fe_p(), iComp, 0);
+                grad(iComp, 1.0, _M_elmat_G, this->fe_u(), this->fe_p(), iComp, 0);
                 __chrono.stop();
                 __cumul1 += __chrono.diff();
 
                 // Assemble off-diagonal blocks
                 __chrono.start();
-                assemb_mat_mixed(_M_G, _M_elmat_G, fe_u(), fe_p(), uDof(), pDof(), iComp, 0);
+                assemb_mat_mixed(_M_G, _M_elmat_G, this->fe_u(), this->fe_p(), this->uDof(), this->pDof(), iComp, 0);
                 __chrono.stop();
                 __cumul3 += __chrono.diff();
 
                 // Source term
                 _M_elvec.zero();
-                compute_vec_2f(density(fluid1), density(fluid2), _M_elvec_lss, _M_lss.fe(), source, _M_elvec, fe_u(), _M_time, iComp);
-                assemb_vec(_M_rhs_u, _M_elvec, fe_u(), uDof(), iComp);
+                compute_vec_2f(this->density(this->fluid1), this->density(this->fluid2), _M_elvec_lss, _M_lss.fe(), source, _M_elvec, this->fe_u(), _M_time, iComp);
+                assemb_vec(_M_rhs_u, _M_elvec, this->fe_u(), this->uDof(), iComp);
             }
 
         } // loop over volumes
@@ -559,10 +559,10 @@ namespace LifeV {
 
         // Lump mass matrix
         _M_M_L.lumpRowSum(_M_M);
-        _M_M_L_w = ( _bdf.bdf_u().coeff_der(0) / _dt ) *_M_M_L;
+        _M_M_L_w = ( this->_bdf.bdf_u().coeff_der(0) / this->_dt ) *_M_M_L;
 
         // Add RHS terms stemming from the time derivative
-        _M_rhs_u += prod( _M_M_L, _bdf.bdf_u().time_der(_dt) );
+        _M_rhs_u += prod( _M_M_L, this->_bdf.bdf_u().time_der(this->_dt) );
 
 #if L_DEBUG_MODE
         _M_C.spy( "./results/spyCbeforebc" );
@@ -575,9 +575,9 @@ namespace LifeV {
                       << std::endl;
 
         if (!this->bcHandler().bdUpdateDone())
-            this->bcHandler().bdUpdate(_mesh, _feBd_u, uDof());
+            this->bcHandler().bdUpdate(this->_mesh, this->_feBd_u, this->uDof());
 
-        bcManage(_M_C, _M_G, _M_rhs_u, _mesh, uDof(), this->bcHandler(), _feBd_u, 1.0, _M_time );
+        bcManage(_M_C, _M_G, _M_rhs_u, this->_mesh, this->uDof(), this->bcHandler(), this->_feBd_u, 1.0, _M_time );
 
         if(_M_verbose)
             std::cout << "[NSSolver2FluidsMixed::advance_NS] Computing discrete divergence operator"
@@ -600,9 +600,9 @@ namespace LifeV {
                   << std::endl;
         std::ofstream __ofile("./results/rhsu.m");
         __ofile << "bU = [..." << std::endl;
-        for(UInt i = 0; i < NDIM * _dim_u - 1; i++)
+        for(UInt i = 0; i < NDIM * this->_dim_u - 1; i++)
             __ofile << _M_rhs_u( i ) << ";..." << std::endl;
-        __ofile << _M_rhs_u( _dim_u - 1 ) << "];" << std::endl;
+        __ofile << _M_rhs_u( this->_dim_u - 1 ) << "];" << std::endl;
 #endif
         // Solve the system
         if(_M_verbose)
@@ -616,12 +616,12 @@ namespace LifeV {
 #endif
 
         // Update bdf
-        _bdf.bdf_u().shift_right(_u);
+        this->_bdf.bdf_u().shift_right(this->_u);
     }
 
     template<typename MeshType>
     inline void NSSolver2FluidsMixed<MeshType>::advance_LS() {
-        _M_lss.setVelocity(_u);
+        _M_lss.setVelocity(this->_u);
         _M_lss.timeAdvance();
     }
 
@@ -631,19 +631,19 @@ namespace LifeV {
                                                     const function_type& lsfunction0,
                                                     Real t0, Real delta_t)
     {
-        UInt nbCompU = _u.nbcomp();
-        _bdf.bdf_u().initialize_unk(u0, _mesh, refFEu(), fe_u(), uDof(), t0, delta_t, nbCompU);
-        _bdf.bdf_p().initialize_unk(p0, _mesh, refFEp(), fe_p(), pDof(), t0, delta_t, 1);
+        UInt nbCompU = this->_u.nbcomp();
+        this->_bdf.bdf_u().initialize_unk(u0, this->_mesh, this->refFEu(), this->fe_u(), this->uDof(), t0, delta_t, nbCompU);
+        this->_bdf.bdf_p().initialize_unk(p0, this->_mesh, this->refFEp(), this->fe_p(), this->pDof(), t0, delta_t, 1);
 
         // Initialize _u and _p
-        _u = *(_bdf.bdf_u().unk().begin());
-        _p = *(_bdf.bdf_p().unk().begin());
+        this->_u = *(this->_bdf.bdf_u().unk().begin());
+        this->_p = *(this->_bdf.bdf_p().unk().begin());
 
         // Initialize level set solver
         _M_lss.initialize(lsfunction0, t0, delta_t);
 
         // Set the velocity field
-        _M_lss.setVelocity(_u);
+        _M_lss.setVelocity(this->_u);
     }
 
     template<typename MeshType>
