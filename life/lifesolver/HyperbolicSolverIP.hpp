@@ -57,6 +57,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <life/lifemesh/dataMesh.hpp>
 
 #include <life/lifecore/GetPot.hpp>
+#include <life/lifefem/assemb.hpp>
 #include <life/lifefem/bdf.hpp>
 
 

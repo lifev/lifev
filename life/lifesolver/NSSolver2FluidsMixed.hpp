@@ -173,27 +173,27 @@ namespace LifeV {
         //@{
 
         const Vector& velocity() const {
-            return _u;
+            return this->_u;
         }
 
         const Vector& pressure() const {
-            return _p;
+            return this->_p;
         }
 
         const lsfunction_type& lsfunction() {
-            return _M_lss.lsfunction();
+            return this->_M_lss.lsfunction();
         }
 
         const mesh_type& mesh() {
-            return _mesh;
+            return this->_mesh;
         }
 
         const Dof& lsDof() {
-            return _M_lss.dof();
+            return this->_M_lss.dof();
         }
 
         CurrentFE& fe_ls() {
-            return _M_lss.fe();
+            return this->_M_lss.fe();
         }
         //@}
 
@@ -226,15 +226,15 @@ namespace LifeV {
 
         void reinitialize(const std::string& method) {
             if(method == "direct")
-                _M_lss.directReinitialization();
+                this->_M_lss.directReinitialization();
         }
 
         void setVerbose() {
-            _M_verbose = true;
+            this->_M_verbose = true;
         }
 
         void unsetVerbose() {
-            _M_verbose = false;
+            this->_M_verbose = false;
         }
         //@}
 

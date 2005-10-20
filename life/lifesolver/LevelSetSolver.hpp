@@ -266,7 +266,7 @@ namespace LifeV {
 
         /*! \return the level set function */
         lsfunction_type const & lsfunction() const {
-            return u();
+            return this->u();
         }
 
         //@}
