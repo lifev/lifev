@@ -425,7 +425,7 @@ private:
     BCHandler    *M_BCh_fluid;
 
     BasePattern::PatternType M_patternType;
-  
+
 
 };
 
@@ -1701,7 +1701,7 @@ Real NavierStokesHandler<Mesh, DataType>::uErrorL2( const Function& uexact,
 
   template <typename Mesh, typename DataType>
   BasePattern::PatternType NavierStokesHandler<Mesh, DataType>::patternType() {
- 
+
     BasePattern::PatternType  pt = BasePattern::STANDARD_PATTERN;
     if ( this->stabilization() == IP_STABILIZATION )
       pt = BasePattern::EDGE_COUPLING_PATTERN;
@@ -1724,7 +1724,7 @@ void NavierStokesHandler<Mesh, DataType>::initializeMeanValuesPerSection()
         ERROR_MSG("The mesh must have all internal faces built up. Check that 'mesh_faces = all' in the data file.");
     if ( M_nb_sections < 2 )
         ERROR_MSG("We can't compute the mean values on less than 2 sections.");
-    ASSERT( ZSectionFinal() - ZSectionInit() > 0,
+    ASSERT( this->ZSectionFinal() - this->ZSectionInit() > 0,
             "Error on the z given to compute the sections.");
 
     for ( int izs = 0; izs < M_nb_sections ; izs ++  ){
