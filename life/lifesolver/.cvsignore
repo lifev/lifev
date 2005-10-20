@@ -1,5 +1,17 @@
+.deps
+.emacs-options
+.libs
 Doxyfile
 Doxylog
+FSIOperator.lo
+FSISolver.lo
 Makefile
 Makefile.in
+darcySolver.lo
 doxylog
+exactJacobianBase.lo
+fixedPointBase.lo
+liblifesolver.la
+reducedLinFluid.lo
+steklovPoincareBase.lo
+timeSolver.lo

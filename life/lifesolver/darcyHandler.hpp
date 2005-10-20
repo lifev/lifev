@@ -183,7 +183,7 @@ DarcyHandler<Mesh>::DarcyHandler( const GetPot& data_file, const RefHdivFE& refF
     dimPdof = pdof.numTotalDof();
     dimVdof = vdof.numTotalDof();
 
-    if(verbose>0){
+    if(this->verbose>0){
         std::cout << "Number of TP dof : " << dimTPdof << std::endl;
         std::cout << "Number of  P dof : " << dimPdof << std::endl;
         std::cout << "Number of  V dof : " << dimVdof << std::endl;
@@ -196,7 +196,7 @@ DarcyHandler<Mesh>::DarcyHandler( const GetPot& data_file, const RefHdivFE& refF
       after updateElementFaces(true) erase faceElement !!!!
     */
     //
-    if(verbose>2) tpdof.showMe();
+    if(this->verbose>2) tpdof.showMe();
 }
 
 }

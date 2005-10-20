@@ -112,9 +112,9 @@ public:
             _M_bc = __bch;
 
             // update the dof with the b.c.
-            _M_bc.bdUpdate(this->_mesh, feBd, tpdof);
+            _M_bc.bdUpdate(this->_mesh, this->feBd, this->tpdof);
 
-            if(verbose>2)
+            if(this->verbose>2)
                 _M_bc.showMe(true);
 
         }
@@ -193,25 +193,25 @@ DarcySolver<Mesh>::DarcySolver( const GetPot& data_file, const RefHdivFE& refFE_
                                 const QuadRule& qr_u, const QuadRule& bdqr_u):
     DarcyHandler<Mesh>( data_file, refFE_u, refFE_p, refFE_tp,
                         refFE_vdotn, refFE_pnodal, qr_u, bdqr_u ),
-    msrPattern(tpdof),
+    msrPattern(this->tpdof),
     mat(msrPattern),
-    globalTP(dimTPdof),
-    globalF(dimTPdof),
-    globalP(dimPdof),
-    globalFlux(dimTPdof),
-    elvecHyb(refTPFE.nbDof,1),
-    elvecSource(pfe.nbNode,1),
-    elvecFlux(vfe.nbNode,1),
-    elmatMix(vfe.nbNode,1,1, pfe.nbNode,0,1, refTPFE.nbDof,0,1),
-    elmatHyb(refTPFE.nbDof,1,1),
-    BtB(pfe.nbNode,pfe.nbNode),
-    CtC(refTPFE.nbDof, refTPFE.nbDof),
-    BtC(pfe.nbNode, refTPFE.nbDof),
-    signLocalFace( this->_mesh.numVolumes(),numFacesPerVolume),
+    globalTP(this->dimTPdof),
+    globalF(this->dimTPdof),
+    globalP(this->dimPdof),
+    globalFlux(this->dimTPdof),
+    elvecHyb(this->refTPFE.nbDof,1),
+    elvecSource(this->pfe.nbNode,1),
+    elvecFlux(this->vfe.nbNode,1),
+    elmatMix(this->vfe.nbNode,1,1, this->pfe.nbNode,0,1, this->refTPFE.nbDof,0,1),
+    elmatHyb(this->refTPFE.nbDof,1,1),
+    BtB(this->pfe.nbNode,this->pfe.nbNode),
+    CtC(this->refTPFE.nbDof, this->refTPFE.nbDof),
+    BtC(this->pfe.nbNode, this->refTPFE.nbDof),
+    signLocalFace( this->_mesh.numVolumes(),this->numFacesPerVolume),
     diffusion_scalar_ele( 1 /*this->_mesh.numVolumes()*/) //to save memory when possible...
 {
     signLocalFace = -1.0;
-    diffusion_scalar_ele = diffusion_scalar;
+    this->diffusion_scalar_ele = this->diffusion_scalar;
 
     /*
       Initialization of the signs of the faces:
@@ -237,13 +237,13 @@ template <typename Mesh>
 void DarcySolver<Mesh>::_element_computation(int ielem)
 {
     // update the current element for the Velocity (only).
-    vfe.updatePiola(this->_mesh.volumeList(ielem));
+    this->vfe.updatePiola(this->_mesh.volumeList(ielem));
     /*
       update the current element for the Pressure (used for the source term).
       The only necessary part is the quadpt.
       The jacobian is not used. (check...)
     */
-    pfe.updateJacQuadPt(this->_mesh.volumeList(ielem));
+    this->pfe.updateJacQuadPt(this->_mesh.volumeList(ielem));
     /*
       modify the (0,0) block (A) of the matrix
       the blocks (0,1) (B) and (0,2) (C) are independent of the element
@@ -254,8 +254,8 @@ void DarcySolver<Mesh>::_element_computation(int ielem)
 
     // coordinate of the barycenter of the current element
     double xg,yg,zg;
-    pfe.barycenter(xg,yg,zg);
-    mass_Hdiv( this->inversePermeability( xg, yg, zg ), elmatMix,vfe,0,0 );
+    this->pfe.barycenter(xg,yg,zg);
+    mass_Hdiv( this->inversePermeability( xg, yg, zg ), elmatMix,this->vfe,0,0 );
 
 }
 
@@ -264,9 +264,9 @@ void DarcySolver<Mesh>::computeHybridMatrixAndSourceRHS()
 {
     int INFO[1] = {0};
     int NBRHS[1] = {1};//  nb columns of the rhs := 1.
-    int NBP[1] = {pfe.nbNode};//  pressure dof
-    int NBU[1] = {vfe.nbNode};//  velocity dof
-    int NBL[1] = {refTPFE.nbDof};//  trace of pressure dof (lagrange multiplier)
+    int NBP[1] = {this->pfe.nbNode};//  pressure dof
+    int NBU[1] = {this->vfe.nbNode};//  velocity dof
+    int NBL[1] = {this->refTPFE.nbDof};//  trace of pressure dof (lagrange multiplier)
     double ONE_[1]      = {1.0};
     double MINUSONE_[1] = {-1.0};
     double ZERO_[1]     = {0.0};
@@ -280,14 +280,14 @@ void DarcySolver<Mesh>::computeHybridMatrixAndSourceRHS()
       Update the divergence Matrix
       (independant of the current element thanks to the Piola transform)
     */
-    grad_Hdiv(1.,elmatMix,vfe,pfe,0,1);
+    grad_Hdiv(1.,elmatMix,this->vfe,this->pfe,0,1);
     /*
       Update the Boundary Matrix
       (independant of the current element thanks to the Piola transform.)
     */
-    TP_VdotN_Hdiv(1., elmatMix, refTPFE,refVdotNFE, 0, 2 );
+    TP_VdotN_Hdiv(1., elmatMix, this->refTPFE,this->refVdotNFE, 0, 2 );
     //
-    if(verbose>3){
+    if(this->verbose>3){
         Debug( 6100 ) << "elmatHyb : \n" << "\n";
         elmatHyb.showMe();
         Debug( 6100 ) << "elmatMix : \n" << "\n";
@@ -407,7 +407,7 @@ void DarcySolver<Mesh>::computeHybridMatrixAndSourceRHS()
         elvecHyb.zero();        //  hybrid rhs : inserted in the global vector.
         ElemVec::vector_view RHSTP = elvecHyb.block(0);
 
-        source( this->sourceTerm(), elvecSource, pfe, 0 );
+        source( this->sourceTerm(), elvecSource, this->pfe, 0 );
 
         // initialize the rhs vector (clean this some day...)
         ElemVec::vector_view  rhs = elvecSource.block(0); // corresponds to F2
@@ -424,9 +424,9 @@ void DarcySolver<Mesh>::computeHybridMatrixAndSourceRHS()
         //........................
         elmatHyb.block(0,0) = CtC;  /* update the hybrid element matrix
                                        Everything is stored in the Lower part */
-        assemb_mat_symm_lower(mat,elmatHyb,refTPFE,tpdof,
+        assemb_mat_symm_lower(mat,elmatHyb,this->refTPFE,this->tpdof,
                               this->_mesh.volumeList(ivol).id(),0,0);
-        assemb_vec(globalF,elvecHyb,refTPFE,tpdof,
+        assemb_vec(globalF,elvecHyb,this->refTPFE,this->tpdof,
                    this->_mesh.volumeList(ivol).id(), 0);
         //-----------------------------------
         // END OF LOOP ON THE VOLUME ELEMENTS
@@ -437,7 +437,7 @@ void DarcySolver<Mesh>::computeHybridMatrixAndSourceRHS()
 template <typename Mesh>
 void DarcySolver<Mesh>::applyBC()
 {
-    bcManage(mat,globalF,this->_mesh,tpdof,_M_bc,feBd,1.,0.0);
+    bcManage(mat,globalF,this->_mesh,this->tpdof,_M_bc,this->feBd,1.,0.0);
 }
 
 template <typename Mesh>
@@ -448,8 +448,8 @@ void DarcySolver<Mesh>::solve()
     computePresFlux();
 
     // ********** P1 computation of the velocity **********************
-    CurrentFE fe_q1( refPFEnodal , geoMap , qr );
-    Dof dof_q1( refPFEnodal );
+    CurrentFE fe_q1( this->refPFEnodal , this->geoMap , this->qr );
+    Dof dof_q1( this->refPFEnodal );
     dof_q1.update( this->_mesh );
     UInt dim_q1 = dof_q1.numTotalDof();
     ScalUnknown<Vector> nodalPres( dim_q1 );
@@ -474,9 +474,9 @@ void DarcySolver<Mesh>::computePresFlux()
     int INFO[1] = {0};
     int NBRHS[1] = {1};// nb columns of the rhs := 1.
     int INC1[1] = {1};// increment := 1.
-    int NBP[1] = {pfe.nbNode};//  pressure dof
-    int NBU[1] = {vfe.nbNode};//  velocity dof
-    int NBL[1] = {refTPFE.nbDof};//  trace of pressure dof (lagrange multiplier)
+    int NBP[1] = {this->pfe.nbNode};//  pressure dof
+    int NBU[1] = {this->vfe.nbNode};//  velocity dof
+    int NBL[1] = {this->refTPFE.nbDof};//  trace of pressure dof (lagrange multiplier)
     double ONE_[1]      = {1.0};
     double MINUSONE_[1] = {-1.0};
     double ZERO_[1]     = {0.0};
@@ -552,7 +552,7 @@ void DarcySolver<Mesh>::computePresFlux()
 
         // The source term is computed with a test function in the Pressure space.
         // Beware: integrate the source term... ?
-        source( this->sourceTerm(), elvecSource, pfe,  0 );
+        source( this->sourceTerm(), elvecSource, this->pfe,  0 );
 
         // initialize the rhs vector (clean this some day...)
         ElemVec::vector_view rhs = elvecSource.block(0); // corresponds to F2
@@ -561,7 +561,7 @@ void DarcySolver<Mesh>::computePresFlux()
         ASSERT_PRE(!INFO[0],
                    "Lapack Computation rhs = LB^{-1} rhs is not achieved.");
         // extract the resulting TP for the current fe and put it into elvecHyb.
-        extract_vec(globalTP, elvecHyb, refTPFE, tpdof,ivol, 0);
+        extract_vec(globalTP, elvecHyb, this->refTPFE, this->tpdof,ivol, 0);
         ElemVec::vector_view  RHSTP = elvecHyb.block(0);
         // RHSTP = elvecHyb.block(0)  contains the local TP for the current fe.
         // rhs = BtC * RHSTP + rhs <- LB^{-1} Bt A^{-1} C * L + LB^{-1} F2
@@ -576,7 +576,7 @@ void DarcySolver<Mesh>::computePresFlux()
         // rhs contains the pressure for the current element.
         /* Put the pressure of the current fe ("elvecSource")
            in the global vector globalP.*/
-        assemb_vec( globalP, elvecSource, refPFE, pdof,ivol, 0);
+        assemb_vec( globalP, elvecSource, this->refPFE, this->pdof,ivol, 0);
         //__________________________________
         // 2/ Computation of the VELOCITIES
         //__________________________________
@@ -636,12 +636,12 @@ DarcySolver<Mesh>::errorL2( darcy_unknown_type __type,  pressure_solution_type _
         {
             for(UInt i=1; i<=this->_mesh.numVolumes(); ++i)
             {
-                pfe.updateFirstDeriv(this->_mesh.volumeList(i));
+                this->pfe.updateFirstDeriv(this->_mesh.volumeList(i));
 
 
-                normL2sq     += elem_L2_2(globalP,pfe,pdof);
-                normL2solsq  += elem_L2_2( __analytical_sol, pfe );
-                normL2diffsq += elem_L2_diff_2(globalP,__analytical_sol,pfe,pdof);
+                normL2sq     += elem_L2_2(globalP,this->pfe,this->pdof);
+                normL2solsq  += elem_L2_2( __analytical_sol, this->pfe );
+                normL2diffsq += elem_L2_diff_2(globalP,__analytical_sol,this->pfe,this->pdof);
             }
         }
         break;
@@ -649,8 +649,8 @@ DarcySolver<Mesh>::errorL2( darcy_unknown_type __type,  pressure_solution_type _
         {
 
             // Q1 or P1 elements
-            CurrentFE fe( refPFEnodal , geoMap , qr );
-            Dof dof( refPFEnodal );
+            CurrentFE fe( this->refPFEnodal , this->geoMap , this->qr );
+            Dof dof( this->refPFEnodal );
             dof.update( this->_mesh );
             UInt dim = dof.numTotalDof();
             ScalUnknown<Vector> nodalPres( dim );
@@ -688,8 +688,8 @@ DarcySolver<Mesh>::errorL2( velocity_solution_type __analytical_sol )
     Debug( 6100 ) << "Postprocessing of velocity (L2 projection on the nodes)\n";
 
     // Q1 or P1 elements
-    CurrentFE fe( refPFEnodal , geoMap , qr );
-    Dof dof( refPFEnodal );
+    CurrentFE fe( this->refPFEnodal , this->geoMap , this->qr );
+    Dof dof( this->refPFEnodal );
     dof.update( this->_mesh );
     UInt dim = dof.numTotalDof();
     PhysVectUnknown<Vector> nodalVel( dim );
@@ -736,8 +736,8 @@ template <typename Mesh>
 void DarcySolver<Mesh>::projectPressureQ1( ScalUnknown<Vector> & p_q1 )
 {
     // Q1 or P1 elements
-    CurrentFE fe_q1(refPFEnodal,geoMap,qr);
-    Dof dof_q1(refPFEnodal);
+    CurrentFE fe_q1(this->refPFEnodal,this->geoMap,this->qr);
+    Dof dof_q1(this->refPFEnodal);
     dof_q1.update(this->_mesh);
 
     UInt dim_q1 = dof_q1.numTotalDof();
@@ -762,9 +762,9 @@ void DarcySolver<Mesh>::projectPressureQ1( ScalUnknown<Vector> & p_q1 )
     int    options[AZ_OPTIONS_SIZE];
     double params[AZ_PARAMS_SIZE];
     // we first initialize Aztec with its defaults and user's parameters
-    aztecOptionsFromDataFile(options,params);
+    this->aztecOptionsFromDataFile(options,params);
     // next, we overload some of them
-    params[AZ_tol] = aztec_tol;
+    params[AZ_tol] = this->aztec_tol;
     options[AZ_solver] = AZ_cg;
     options[AZ_precond] = AZ_dom_decomp;
     options[AZ_subdomain_solve] = AZ_icc;
@@ -776,8 +776,8 @@ template <typename Mesh>
 void DarcySolver<Mesh>::projectVelocityQ1( PhysVectUnknown<Vector>& u_q1 )
 {
     // Q1 or P1 elements
-    CurrentFE fe_q1( refPFEnodal , geoMap , qr );
-    Dof dof_q1( refPFEnodal );
+    CurrentFE fe_q1( this->refPFEnodal , this->geoMap , this->qr );
+    Dof dof_q1( this->refPFEnodal );
     dof_q1.update( this->_mesh );
     UInt dim_q1 = dof_q1.numTotalDof();
 
@@ -785,30 +785,30 @@ void DarcySolver<Mesh>::projectVelocityQ1( PhysVectUnknown<Vector>& u_q1 )
     u_q1=ZeroVector( u_q1.size() ); // warning here number of components is 3 -> size = 3*dim_q1
     f_q1=ZeroVector( f_q1.size() ); // warning here number of components is 3 -> size = 3*dim_q1
 
-    MSRPatt pattA_q1(dof_q1,nbCoor);
+    MSRPatt pattA_q1(dof_q1,this->nbCoor);
     MSRMatr<double> A_q1(pattA_q1);
-    ElemMat elmat_hdiv(fe_q1.nbNode,nbCoor,0,
-                       vfe.nbNode,0,1);
-    ElemMat elmat(fe_q1.nbNode,nbCoor,nbCoor);
-    ElemVec elvec(fe_q1.nbNode,nbCoor);
-    ElemVec elvec_hdiv(vfe.nbNode,1);
+    ElemMat elmat_hdiv(fe_q1.nbNode,this->nbCoor,0,
+                       this->vfe.nbNode,0,1);
+    ElemMat elmat(fe_q1.nbNode,this->nbCoor,this->nbCoor);
+    ElemVec elvec(fe_q1.nbNode,this->nbCoor);
+    ElemVec elvec_hdiv(this->vfe.nbNode,1);
     ElemVec::vector_view elvec_hdiv_vec = elvec_hdiv.block(0);
 
     for(UInt i = 1; i<=this->_mesh.numVolumes(); i++){
         fe_q1.updateJac(this->_mesh.volumeList(i));
-        vfe.updatePiola(this->_mesh.volumeList(i));
+        this->vfe.updatePiola(this->_mesh.volumeList(i));
         elmat.zero();
         elmat_hdiv.zero();
-        mass(1.,elmat,fe_q1,0,0,nbCoor);
-        mass_Mixed_Hdiv(1.,elmat_hdiv,fe_q1,vfe,0,0);
-        extract_vec(globalFlux,elvec_hdiv,refVFE,vdof,this->_mesh.volumeList(i).id(),0);
+        mass(1.,elmat,fe_q1,0,0,this->nbCoor);
+        mass_Mixed_Hdiv(1.,elmat_hdiv,fe_q1,this->vfe,0,0);
+        extract_vec(globalFlux,elvec_hdiv,this->refVFE,this->vdof,this->_mesh.volumeList(i).id(),0);
         //
         for(int j=0;j<(int) this->_mesh.volumeList(i).numLocalFaces;j++){
             elvec_hdiv_vec[j] *= signLocalFace( (int)this->_mesh.volumeList(i).id() - 1, j);
         }
         //
         elvec.vec() = elmat_hdiv.mat() * elvec_hdiv.vec();
-        for(UInt icoor = 0; icoor < nbCoor; icoor++){
+        for(UInt icoor = 0; icoor < this->nbCoor; icoor++){
             assemb_mat(A_q1,elmat,fe_q1,dof_q1,icoor,icoor);
             assemb_vec(f_q1,elvec,fe_q1,dof_q1,icoor);
         }
@@ -816,9 +816,9 @@ void DarcySolver<Mesh>::projectVelocityQ1( PhysVectUnknown<Vector>& u_q1 )
     int    options[AZ_OPTIONS_SIZE];
     double params[AZ_PARAMS_SIZE];
     // we first initialize Aztec with its defaults and user's parameters
-    aztecOptionsFromDataFile(options,params);
+    this->aztecOptionsFromDataFile(options,params);
     // next, we overload some of them
-    params[AZ_tol] = aztec_tol;
+    params[AZ_tol] = this->aztec_tol;
     options[AZ_solver] = AZ_cg;
     options[AZ_precond] = AZ_dom_decomp;
     options[AZ_subdomain_solve] = AZ_icc;
@@ -877,8 +877,8 @@ void DarcySolver<Mesh>::postProcessPressureQ1()
 {
     Debug( 6100 ) << "Postprocessing of pressure (L2 projection on the nodes)\n";
     // Q1 or P1 elements
-    CurrentFE fe_q1( refPFEnodal , geoMap , qr );
-    Dof dof_q1( refPFEnodal );
+    CurrentFE fe_q1( this->refPFEnodal , this->geoMap , this->qr );
+    Dof dof_q1( this->refPFEnodal );
     dof_q1.update( this->_mesh );
     UInt dim_q1 = dof_q1.numTotalDof();
     ScalUnknown<Vector> nodalPres( dim_q1 );
@@ -913,8 +913,8 @@ void DarcySolver<Mesh>::postProcessVelocityQ1()
 {
     Debug( 6100 ) << "Postprocessing of velocity (L2 projection on the nodes)\n";
     // Q1 or P1 elements
-    CurrentFE fe_q1( refPFEnodal , geoMap , qr );
-    Dof dof_q1( refPFEnodal );
+    CurrentFE fe_q1( this->refPFEnodal , this->geoMap , this->qr );
+    Dof dof_q1( this->refPFEnodal );
     dof_q1.update( this->_mesh );
     UInt dim_q1 = dof_q1.numTotalDof();
     PhysVectUnknown<Vector> nodalVel( dim_q1 );
@@ -947,8 +947,8 @@ void DarcySolver<Mesh>::postProcessEnsight()
     Debug( 6100 ) << "Postprocessing of pressure and velocity (P1-Output)\n";
 
     // ********** P1 computation of the velocity **********************
-    CurrentFE fe_q1( refPFEnodal , geoMap , qr );
-    Dof dof_q1( refPFEnodal );
+    CurrentFE fe_q1( this->refPFEnodal , this->geoMap , this->qr );
+    Dof dof_q1( this->refPFEnodal );
     dof_q1.update( this->_mesh );
     UInt dim_q1 = dof_q1.numTotalDof();
     ScalUnknown<Vector> nodalPres( dim_q1 );
