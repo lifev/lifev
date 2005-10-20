@@ -27,10 +27,18 @@
    \date 2004-10-12
  */
 #include <life/lifecore/life.hpp>
+
+/*
+ * This header defines u0o and bc conditions it needs to come _BEFORE_
+ * \p NavierStokesWithFlux which uses these functions.
+ *
+ * \todo remove this dependence by chaning the design of \p NavierStokesWithFlux
+ */
+#include <ud_functions.hpp>
+
 #include <life/lifesolver/NavierStokesSolverPC.hpp>
 #include <life/lifesolver/NavierStokesWithFlux.hpp>
 #include <life/lifecore/chrono.hpp>
-#include <ud_functions.hpp>
 #include <life/lifecore/GetPot.hpp>
 
 namespace LifeV
