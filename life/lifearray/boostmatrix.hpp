@@ -31,6 +31,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #ifndef _BOOSTMATRIX_HPP_
 #define _BOOSTMATRIX_HPP_
 
+#include <boost/version.hpp>
+
 #include <fstream>
 
 #include <boost/numeric/ublas/matrix_sparse.hpp>
@@ -110,7 +112,11 @@ namespace LifeV
                     }
                 }
             }
+#if BOOST_VERSION / 100 %1000 <= 32
             this->index1_data()[this->size1()] = this->non_zeros();
+#else
+            this->index1_data()[this->size1()] = this->nnz();
+#endif
         }
 
         template <UInt BROWS, UInt BCOLS, typename PATTERN>
@@ -150,7 +156,7 @@ namespace LifeV
          */
         void zero_row( typename BoostMatrix::size_type iRow )
         {
-            typename BoostMatrix::iterator1 row = begin1();
+            typename BoostMatrix::iterator1 row = this->begin1();
             for ( UInt i=0; i<iRow; ++i, ++row );
             std::for_each( row.begin(), row.end(), boost::lambda::_1 = 0.0 );
         }
@@ -167,7 +173,7 @@ namespace LifeV
                           double coeff, Vector &b, double datum )
         {
             zero_row( r );
-            typename BoostMatrix::iterator2 col = begin2();
+            typename BoostMatrix::iterator2 col = this->begin2();
             for ( UInt i=0; i<r; ++i, ++col );
             for ( typename BoostMatrix::iterator1 iRow = col.begin();
                   iRow != col.end(); ++iRow )
@@ -211,8 +217,8 @@ namespace LifeV
                     " cannot be opened for writing.");
 
             file_out << "S = [ ";
-            for ( typename BoostMatrix::const_iterator1 i1=begin1();
-                  i1!=end1(); ++i1 )
+            for ( typename BoostMatrix::const_iterator1 i1=this->begin1();
+                  i1!=this->end1(); ++i1 )
                 {
                     for ( typename BoostMatrix::const_iterator2 i2=i1.begin();
                           i2!=i1.end(); ++i2 )
@@ -272,7 +278,12 @@ namespace LifeV
                 //__max_nnz_per_line = std::max( __nnz_line, __max_nnz_per_line );
             }
         }
+#if BOOST_VERSION / 100 %1000 <= 32
         this->index1_data()[this->size1()] = this->non_zeros();
+#else
+        this->index1_data()[this->size1()] = this->nnz();
+#endif
+
     }
 
     template<>
@@ -319,7 +330,12 @@ namespace LifeV
                 }
             }
         }
+#if BOOST_VERSION / 100 %1000 <= 32
         this->index1_data()[this->size2()] = this->non_zeros();
+#else
+        this->index1_data()[this->size2()] = this->nnz();
+#endif
+
     }
 
     template<>
