@@ -54,7 +54,6 @@ public:
     typedef NavierStokesSolverPC< Mesh > NS;
     typedef NavierStokesHandler<Mesh>::source_type source_type;
     typedef Real ( *Function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> source_type;
 
     //! Constructor
     /*!
