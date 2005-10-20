@@ -36,13 +36,12 @@ vec2elemVec( Vector& V, ElemVec& elvec, const CurrentFE& fe, const DOF& dof,
     UInt eleId = fe.currentId();
     for ( int ib = iblock ; ib < iblock + nb ; ib++ )
     {
-        Tab1dView vec = elvec.block( ib );
+        typename ElemVec::vector_view vec = elvec.block( ib );
         for ( i = 0 ; i < fe.nbNode ; i++ )
         {
             ig = dof.localToGlobal( eleId, i + 1 ) - 1 + ib * totdof;
 
-#warning TO BE FIXED
-            //vec( i ) = V[ ig ];
+            vec( i ) = V[ ig ];
         }
     }
 }
