@@ -196,8 +196,6 @@ namespace LifeV {
         typedef __C_matrix_type C_matrix_type;
         typedef __D_matrix_type D_matrix_type;
         typedef __D_T_matrix_type D_T_matrix_type;
-        typedef __solver_u_type solver_u_type;
-        typedef __solver_p_type solver_p_type;
         //@}
         /**!
            @name Constructors
@@ -340,7 +338,7 @@ namespace LifeV {
             chrono.start();
             std::cout << "[Yosida::solve] invert mass matrix            "
                       << std::flush;
-            M_L_matrix_type __H(_M_M_L);
+            M_L_matrix_type __H(this->_M_M_L);
             __H.invert();
             chrono.stop();
             std::cout << "in " << chrono.diff() << " s" << std::endl;
@@ -349,8 +347,8 @@ namespace LifeV {
             chrono.start();
             std::cout << "[Yosida::solve] calculate Schur product       "
                       << std::flush;
-            matrix_type __S( _M_D.size1(), _M_D_T.size2());
-            schurProduct(_M_D, __H, _M_D_T, __S);
+            matrix_type __S( this->_M_D.size1(), this->_M_D_T.size2());
+            schurProduct(this->_M_D, __H, this->_M_D_T, __S);
             chrono.stop();
             std::cout << "in " << chrono.diff() << " s" << std::endl;
 
@@ -359,15 +357,15 @@ namespace LifeV {
             __S.spy( "./results/spyS" );
 
             // Set matrices for the linear solvers
-            _M_solver_u.setMatrix(_M_C);
-            _M_solver_p.setMatrix(__S);
+            this->_M_solver_u.setMatrix(this->_M_C);
+            this->_M_solver_p.setMatrix(__S);
 
             // Intermediate velocity computation
             chrono.start();
             std::cout << "[Yosida::solve] compute intermediate velocity "
                       << std::flush;
             Vector  __u_tilde( __u.size() );
-            _M_solver_u.solve( __u_tilde, __b_u );
+            this->_M_solver_u.solve( __u_tilde, __b_u );
             chrono.stop();
             std::cout << "in " << chrono.diff() << " s" << std::endl;
 
@@ -375,7 +373,7 @@ namespace LifeV {
             chrono.start();
             std::cout << "[Yosida::solve] compute pressure              "
                       << std::flush;
-            _M_solver_p.solve( __p, prod(_M_D, __u_tilde) - __b_p );
+            this->_M_solver_p.solve( __p, prod(this->_M_D, __u_tilde) - __b_p );
             chrono.stop();
             std::cout << "in " << chrono.diff() << " s" << std::endl;
 
@@ -383,7 +381,7 @@ namespace LifeV {
             chrono.start();
             std::cout << "[Yosida::solve] compute final velocity        "
                       << std::flush;
-            _M_solver_u.solve( __u, __b_u - prod(_M_D_T, __p));
+            this->_M_solver_u.solve( __u, __b_u - prod(this->_M_D_T, __p));
             chrono.stop();
             std::cout << "in " << chrono.diff() << " s" << std::endl;
         }
