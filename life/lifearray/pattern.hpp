@@ -18,7 +18,7 @@
 */
 /*----------------------------------------------------------------------*
 |
-| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.25 2005-05-01 21:35:43 fernandez Exp $
+| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.26 2005-10-20 14:53:43 prudhomm Exp $
 |
 |
 | #Version  0.1 Experimental   07/7/00. Luca Formaggia & Alessandro Veneziani
@@ -123,7 +123,7 @@ public:
 
   /*!
       \typedef enum
-      
+
     */
     typedef enum PatternType
     {
@@ -220,7 +220,7 @@ protected:
     */
     template <typename DOF1, typename DOF2>
     bool setpatt( DOF1 const & dof1, DOF2 const & dof2, DynPattern & dynpatt,
-                  UInt const bRows = 1, UInt const bCols = 1 );
+                  UInt const bRows, UInt const bCols );
 
     static const UInt _defaultsize = 0; // MUST BE 0
 
@@ -1307,15 +1307,15 @@ bool BasePattern::setpatt( const DOF& dof, const MESH& mesh,
     //
     // for each face the local numbering of the neighboors connected
     // to this face
-    
+
     UInt p1[] = {4, 3, 1, 2};
     UInt p2[] = {4, 8, 9, 10,
                  3, 6, 7, 10,
                  1, 5, 7, 8,
                  2, 5, 6, 9};
-    
+
     UInt* a;
-    
+
     UInt iop, jop, nop; // number of opposite dof
 
     if ( dof.fe.nbLocalDof == 4 )
@@ -2244,7 +2244,7 @@ MSRPatt::MSRPatt( const DOF& dof, const MESH& mesh, const UInt nbcomp, PatternTy
 {
   bool built;
 
-  switch ( patternType  ) 
+  switch ( patternType  )
     {
     case STANDARD_PATTERN:
       built = buildPattern( dof, nbcomp );
@@ -2255,7 +2255,7 @@ MSRPatt::MSRPatt( const DOF& dof, const MESH& mesh, const UInt nbcomp, PatternTy
     default:
       ERROR_MSG( "This pattern type is not yet allowed" );
     }
- 
+
   ASSERT_PRE( built, "Error in MSR Pattern construction from DOF object" );
 }
 
