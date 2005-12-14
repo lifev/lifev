@@ -1711,15 +1711,17 @@ namespace LifeV
       }
     else
       {
+	unsetLinkSwitch( "HAS_ALL_FACES" );
+	if(faceList.size() >= numBFaces() )setLinkSwitch( "HAS_BOUNDARY_FACES" );
         if ( verb )
 	  {
-            out << "ERROR: Inconsistent numbering of faces" << std::endl;
+            out << "WARNING only some internal faces are stored" << std::endl;
             out << "Counters: Boundary=" << numBFaces() << " Total=" << numFaces() << std::endl;
             out << "Stored =" << faceList.size() << std::endl;
-            severity = 1;
+            severity = -1;
 	  }
       }
-
+    
 
     UInt count = 0;
     for ( typename Points::iterator i = pointList.begin(); i != pointList.end(); ++i )
@@ -1809,7 +1811,7 @@ namespace LifeV
       {
         if ( verb )
 	  {
-            out << "WARNING: " << adib << " internal faces have the adjacency Volume ID unset" << std::endl;
+            out << "WARNING: " << adi << " internal faces have the adjacency Volume ID unset" << std::endl;
             out << "This in general does not cause any problem" << std::endl;
             severity = -1;
 	  }
@@ -1879,27 +1881,27 @@ namespace LifeV
   {
     switch(geometry){
     case VERTEX:
-      for (typename Points::iterator p=pointList.begin();p!=pointList.end();++p){
+      for (typename Points::const_iterator p=pointList.begin();p!=pointList.end();++p){
 	if (p->hasEqualEntityFlag(flag))list.push_back(p->id());
       }
       break;
     case EDGE:
-      for (typename Edges::iterator p=edgeList.begin();p!=edgeList.end();++p){
+      for (typename Edges::const_iterator p=edgeList.begin();p!=edgeList.end();++p){
 	if (p->hasEqualEntityFlag(flag))list.push_back(p->id());
       }
       break;
     case FACE:
-      for (typename Faces::iterator p=faceList.begin();p!=faceList.end();++p){
+      for (typename Faces::const_iterator p=faceList.begin();p!=faceList.end();++p){
 	if (p->hasEqualEntityFlag(flag))list.push_back(p->id());
       }
       break;
     case VOLUME:
-      for (typename Volumes::iterator p=volumeList.begin();p!=volumeList.end();++p){
+      for (typename Volumes::const_iterator p=volumeList.begin();p!=volumeList.end();++p){
 	if (p->hasEqualEntityFlag(flag))list.push_back(p->id());
       }
       break;
     default:
-      std::cerr<<"Something weird in ExtractEntityList ABORTING"<<endl;
+      std::cerr<<"Something weird in ExtractEntityList ABORTING"<<std::endl;
     }
   }
   
@@ -2485,11 +2487,11 @@ namespace LifeV
       {
         // dump all faces in the container, to maintain the correct numbering
         // if everything is correct the numbering in the bareface structure
-        // will reflect the actual face numbering However, if I want to create
-        // the internal faces I need to make sure that I am processing only the
-        // boundary ones. So I resize the container!
-        if ( cf )
-	  faceList.resize( _numBFaces );
+        // will reflect the actual face numbering. In this version
+	// we assume that the faceList contained may contain SOME internal faces
+	// However, if it is  so they are numbered last,
+	//OLD VERSION        if ( cf )
+	//OLD VERSION   faceList.resize( _numBFaces );
 
         pair<UInt, bool> _check;
         for ( UInt j = 0; j < faceList.size();++j )
@@ -2577,8 +2579,13 @@ namespace LifeV
                     // a new face It must be internal.
                     for ( UInt k = 1;k <= FaceType::numPoints;++k )
 		      face.setPoint( k, iv->point( ele.fToP( j, k ) ) );
-                    face.ad_first() = vid;
-                    face.pos_first() = j;
+                    if (_face.second){
+		      face.ad_first() = vid;
+		      face.pos_first() = j;
+		    } else {
+		      face.ad_second() = vid;
+		      face.pos_second() = j; 
+		    }
                     // gets the marker from the RegionMesh
                     face.setMarker( this->marker() );
                     addFace( face, false ); //The id should be correct
@@ -2586,11 +2593,16 @@ namespace LifeV
                 else
 		  {
                     // We assume that BFaces have been already set so we have to do
-                    // nothing it the face is on the boundary
+                    // nothing it the face is on the boundary 
                     if ( e.first > _numBFaces )
 		      {
-                        faceList( e.first ).ad_second() = vid;
-                        faceList( e.first ).pos_second() = j;
+			if (_face.second){
+			  face.ad_first() = vid;
+			  face.pos_first() = j;
+			} else {
+			  face.ad_second() = vid;
+			  face.pos_second() = j; 
+			}
 		      }
 		  }
 	      }

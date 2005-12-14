@@ -33,21 +33,52 @@ int main()
     string dirname=datafile( "mesh_dir","." );//"../data/mesh/mesh++/";
     string fname=dirname+datafile( "mesh_file","cube_47785.m++" );//dirname+"cube_47785.m++";
     string outfile="testBuilders.dat";
+    string filetype=datafile("filetype","Mesh++");
+    
     ofstream ofile(outfile.c_str());
     if (ofile.fail()) {cerr<<" Error: Cannot creat output file"<<endl; abort();}
 
-    RegionMesh3D<QuadraticTetra> aMesh;
+    //    RegionMesh3D<QuadraticTetra> aMesh;
+    RegionMesh3D<LinearTetra> aMesh;
 
     //    aMesh.test3DBuilder();
     //    aMesh.readMppFile(mystream, id, m);
     ID m=1;
-    readMppFile(aMesh,fname, m);
-
+    
+    if (filetype == "Mesh++")
+      {
+	readMppFile(aMesh,fname, m);
+      }
+    else if (filetype == "Inria" || filetype == "Medit")
+      {
+	int watermark=datafile("watermark",0);
+	if(watermark==0){
+	  readINRIAMeshFile(aMesh,fname,m,true);
+	} else {
+	  cout<<" There ia a watermark:"<<std::endl;
+	  cout<<" vertices with flag > " <<watermark<<" are interior vertices"<<endl;
+	  readINRIAMeshFile(aMesh,fname,m,true,
+			    InternalEntitySelector(watermark));
+	}
+      }
+    else
+      {
+	cout<<"Cannot treat mesh  filetype: "<<filetype<<endl;
+	cout<<"Reading aborted"<<endl;
+	throw 100;
+      }
+    
     cout <<" **********************************************************"<<endl;
 
     cout<< "  ****************** CHECKING MESH WITH INTERNAL CHECKER"<<endl;
 
     aMesh.check(0,true,true);
+    std::vector<ID> lista;
+    aMesh.extractEntityList(lista, FACE , EntityFlag(1006));
+    cout<<"Face(1008) "<<lista.size()<<endl;
+    
+    exit(0);
+    
     Switch sw;
 
 

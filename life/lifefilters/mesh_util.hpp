@@ -459,12 +459,12 @@ bool checkMesh3D( RegionMesh3D & mesh,
 
     EnquireBFace<RegionMesh3D> enquireBFace( mesh, *bfaces );
 
-
     if ( mesh.storedFaces() == 0 ||
          mesh.numBElements() > mesh.storedFaces() ||
          bFacesFound > mesh.storedFaces() )
     {
         err << "ERROR: Not all boundary faces stored" << std::endl;
+	err <<mesh.storedFaces()<<" "<<bFacesFound<<" "<<mesh.numBElements()<<std::endl;
         if ( fix )
             sw.create( "BUILD_BFACES", true );
         if ( fix )

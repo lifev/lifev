@@ -39,7 +39,7 @@ FhNHandler::FhNHandler(const GetPot& data_file):
   dof(refFE)
 {
   // read mesh
-  readINRIAMeshFile(mesh,mesh_dir+"/"+mesh_file,1);
+  readINRIAMeshFile(mesh,mesh_dir+"/"+mesh_file,1,true);
 
   if(verbose>2) mesh.showMe();
   // build dof

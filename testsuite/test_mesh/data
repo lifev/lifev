@@ -3,6 +3,10 @@
 #      Data file for Mesh test
 #-------------------------------------------------
 
-mesh_dir   = '../data/mesh/mesh++/'  # the directory where the mesh file is
-mesh_file  = 'cube_47785.m++'        # mesh file
+mesh_dir   = '../data/mesh/inria/'  # the directory where the mesh file is
+mesh_file  = 'bif3d_stentlarge2d_tria.mesh'        # mesh file
 mesh_faces = all                   # update all faces elements
+filetype   =  Inria
+watermark=999         # vertices marked with 0 or >watermark
+	             # are considered interior vertices
+	             
