@@ -75,7 +75,11 @@ upload-api:
 MOSTLYCLEANFILES	= ChangeLog
 
 $(top_srcdir)/acinclude.m4:
-	@echo 'm4_include([admin/ac_check_aztec.m4])' > acinclude.m4
+	@echo 'm4_include([admin/libtool.m4])' > acinclude.m4	
+	@echo 'm4_include([admin/ltversion.m4])' >> acinclude.m4
+	@echo 'm4_include([admin/ltoptions.m4])' >> acinclude.m4
+	@echo 'm4_include([admin/ltsugar.m4])' >> acinclude.m4
+	@echo 'm4_include([admin/ac_check_aztec.m4])' >> acinclude.m4
 	@echo 'm4_include([admin/ac_check_boost.m4])' >> acinclude.m4
 	@echo 'm4_include([admin/ac_check_itk.m4])' >> acinclude.m4
 	@echo 'm4_include([admin/ac_check_lapack.m4])' >> acinclude.m4
