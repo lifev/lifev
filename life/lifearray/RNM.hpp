@@ -465,7 +465,7 @@ public:
     }
     int indexij( int i, int j ) const
     {
-        return index( shapei.index( i ) + shapej.index( j ) );
+        return this->index( shapei.index( i ) + shapej.index( j ) );
     }
     R & operator() ( int i,int j ) const
     {
@@ -474,7 +474,7 @@ public:
     //Alain (28/06/02): version for unsigned int.
     unsigned int indexij( unsigned int i, unsigned int j ) const
     {
-        return index( shapei.index( i ) + shapej.index( j ) );
+        return this->index( shapei.index( i ) + shapej.index( j ) );
     }
     R & operator() ( unsigned int i,unsigned int j ) const
     {
@@ -483,7 +483,7 @@ public:
     //Alain (18/10/02): version for long unsigned int.
     long unsigned int indexij( long unsigned int i, long unsigned int j ) const
     {
-        return index( shapei.index( i ) + shapej.index( j ) );
+        return this->index( shapei.index( i ) + shapej.index( j ) );
     }
     R & operator() ( long unsigned int i,long unsigned int j ) const
     {
@@ -493,11 +493,11 @@ public:
 
     KN_<R> operator() ( const char,int j ) const   // une colonne j  ('.',j)
     {
-        return KN_<R>( &this->v[ index( shapej.index( j ) ) ], shapei * this->step );
+        return KN_<R>( &this->v[ this->index( shapej.index( j ) ) ], shapei * this->step );
     }
     KN_<R> operator() ( int i ,const char ) const   // une ligne i  (i,'.')
     {
-        return KN_<R>( &this->v[ index( shapei.index( i ) ) ], shapej * this->step );
+        return KN_<R>( &this->v[ this->index( shapei.index( i ) ) ], shapej * this->step );
     }
     KN_<R> operator() ( const char,const char ) const   // tous
     {
@@ -624,7 +624,7 @@ public:
     }
     int indexijk( int i, int j, int k ) const
     {
-        return index( shapei.index( i ) + shapej.index( j ) + shapek.index( k ) );
+        return this->index( shapei.index( i ) + shapej.index( j ) + shapek.index( k ) );
     }
 
     R & operator() ( int i,int j, int k ) const
@@ -762,7 +762,7 @@ public:
     }
     int indexijk( int i, int j, int k, int l ) const
     {
-        return index( shapei.index( i ) + shapej.index( j ) + shapek.index( k ) + shapel.index( l ) );
+        return this->index( shapei.index( i ) + shapej.index( j ) + shapek.index( k ) + shapel.index( l ) );
     }
 
     R & operator() ( int i,int j, int k, int l ) const
