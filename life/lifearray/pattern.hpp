@@ -18,7 +18,7 @@
 */
 /*----------------------------------------------------------------------*
 |
-| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.26 2005-10-20 14:53:43 prudhomm Exp $
+| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.27 2005-12-18 20:24:27 prudhomm Exp $
 |
 |
 | #Version  0.1 Experimental   07/7/00. Luca Formaggia & Alessandro Veneziani
@@ -2936,7 +2936,7 @@ MixedPattern<BROWS, BCOLS, PATTERN>::neighbours( ID const d_g,
         if ( _blocks[ m ][ n ] != 0 )
         {
             _blocks[ m ][ n ] ->neighbours( _d, piece );
-            for ( Container::iterator ip = piece.begin();ip=!piece.end();++ip )
+            for ( typename Container::iterator ip = piece.begin();ip!=piece.end();++ip )
                 *ip += _coloff[ m ][ n ];
             neighs.insert( neighs.end(), piece.begin(), piece.end() );
         }
