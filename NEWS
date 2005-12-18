@@ -19,6 +19,9 @@ New in 0.7.0:
 * Fixed tons of GCC (3.3) warnings (CP)
   ** Commented out unused variables
   ** Removed always-true conditions
+* Fixed compilation gcc 3.4 & 4.x (CP CW MF)
+  ** fixed this-> issue all over the place
+  ** fixed incorrect code which is obviously never used :(
 
 [configure]
 * Added more warnings from the compiler (CP)
@@ -303,4 +306,4 @@ New in 0.1.0pre3:
 * fixed some bugs and miscompilation in a few places
 
 
- -- Christophe Prud'homme <christophe.prudhomme@epfl.ch>, Wed Jun 29 10:59:35 2005
+ -- Christophe Prud'homme <prudhomm@debian.org>, Sun Dec 18 21:38:07 2005
