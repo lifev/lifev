@@ -83,6 +83,7 @@ $(top_srcdir)/acinclude.m4:
 	@echo 'm4_include([admin/ac_check_boost.m4])' >> acinclude.m4
 	@echo 'm4_include([admin/ac_check_itk.m4])' >> acinclude.m4
 	@echo 'm4_include([admin/ac_check_lapack.m4])' >> acinclude.m4
+	@echo 'm4_include([admin/ac_check_pvm.m4])' >> acinclude.m4
 	@echo 'm4_include([admin/ac_check_mpi.m4])' >> acinclude.m4
 	@echo 'm4_include([admin/ac_check_parmetis.m4])' >> acinclude.m4
 	@echo 'm4_include([admin/ac_check_petsc.m4])' >> acinclude.m4
