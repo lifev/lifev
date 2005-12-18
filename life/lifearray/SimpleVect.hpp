@@ -54,6 +54,9 @@ public:
     {}
     ;
     SimpleVect( const SimpleVect<T, OFFSETVEC> & );
+  
+    ~SimpleVect() {}
+
     explicit SimpleVect( const raw_container & );
     SimpleVect<T, OFFSETVEC> & operator=( const SimpleVect<T, OFFSETVEC> & );
     T& fat( size_type i );
@@ -94,6 +97,8 @@ public:
     explicit SimpleArray( size_type ntot );
     explicit SimpleArray();
     explicit SimpleArray( size_type nrows, size_type ncols );
+
+    ~SimpleArray() {}
 
     reference operator() ( size_type const i )
     {
