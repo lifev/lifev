@@ -37,6 +37,7 @@ opt-3.3
 opt-3.3-64
 optimized
 report.html
+semantic.cache
 stamp-h.in
 stamp-h1
 subdirs
