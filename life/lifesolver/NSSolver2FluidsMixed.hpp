@@ -405,8 +405,8 @@ namespace LifeV {
         std::cout << "[NSSolver2FluidsMixed::constructor] Using PETSC linear solver for p" << std::endl;
         _M_solver_p.setOptionsFromGetPot(_M_data_file, "navier-stokes/yosida/solver-p");
         if ( this->bcHandler().hasOnlyEssential() ) {
-            Real constPress = 1. / sqrt( _dim_p );
-            for(UInt i = 0; i < _dim_p; ++i) {
+            Real constPress = 1. / sqrt( this->_dim_p );
+            for(UInt i = 0; i < this->_dim_p; ++i) {
                 _M_constant_pressure[ i ] = constPress;
             }
             std::vector<const Vector*> nullSpace(1);
@@ -608,7 +608,7 @@ namespace LifeV {
         if(_M_verbose)
             std::cout << "[NSSolver2FluidsMixed::advance_NS] Solving the system" << std::endl;
 #if ! defined(L_NS2F_MISSING_SOLVER)
-        _M_solver.solve(_u, _p, _M_rhs_u, _M_rhs_p);
+        _M_solver.solve( this->_u, this->_p, _M_rhs_u, _M_rhs_p);
 #endif
 
 #if L_NS2F_SOLVER == L_PRESSURE_MATRIX
