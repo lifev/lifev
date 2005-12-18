@@ -140,7 +140,6 @@ readINRIAMeshFileHead( std::ifstream & mystream,
                        UInt & numVolumes,
                        UInt & numStoredFaces,
                        ReferenceShapes & shape,
-		       std::vector<bool> &isboundary,
                        InternalEntitySelector iSelect )
 {
     unsigned done = 0;
@@ -155,6 +154,7 @@ readINRIAMeshFileHead( std::ifstream & mystream,
     numStoredFaces    = 0;
 
     //shape = NONE;
+    std::vector<bool> isboundary;
     //streampos start=mystream.tellg();
 
     while ( next_good_line( mystream, line ).good() )
@@ -181,10 +181,13 @@ readINRIAMeshFileHead( std::ifstream & mystream,
             isboundary.resize(numVertices,false);
 
             for ( i = 0;i < numVertices;++i )
-	      {
-		mystream >> x >> y >> z >> ibc;
-                if ( ! iSelect(EntityFlag(ibc)))numBVertices++;
-	      }
+            {
+                mystream >> x >> y >> z >> ibc;
+                if ( ! iSelect(EntityFlag(ibc))){
+                    numBVertices++;
+                    isboundary[i]=true;
+                }
+            }
         }
 
         if ( line.find( "Triangles" ) != std::string::npos )
@@ -193,20 +196,28 @@ readINRIAMeshFileHead( std::ifstream & mystream,
             shape = TETRA;
             numReadFaces=nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), mystream );
             numBFaces = 0;
+
             done++;
             for ( UInt k = 0;k < numReadFaces; k++ )
-	      {
+            {
                 mystream >> p1 >> p2 >> p3 >> ibc;
-                if(!iSelect(EntityFlag(ibc))){
-		  ++numBFaces;
-		  isboundary[p1-1]= isboundary[p2-1]= isboundary[p3-1]=true;
-		}
-		
-	      }
+                if(isboundary[p1-1]&&isboundary[p2-1]&&isboundary[p3-1]){
+                    if (iSelect(EntityFlag(ibc))){
+                        std::cerr<<"ATTENTION: Face "<<p1<<" "<<p2<<" "<<p3<<
+                            " has all vertices on the boundary yet is marked as interior: "<<ibc<<std::endl;
+                    }
+                    ++numBFaces;
+                } else {
+                    if (!iSelect(EntityFlag(ibc))){
+                        std::cerr<<"ATTENTION: Face "<<p1<<" "<<p2<<" "<<p3<<
+                            " has vertices in the interior yet is marked as boundary: "<<ibc<<std::endl;
+                    }
+                }
+            }
             numStoredFaces=numReadFaces;
         }
-	
-	
+
+
         if ( line.find( "Quadrilaterals" ) != std::string::npos )
         {
             ASSERT_PRE0( shape != TETRA, " Cannot have quad faces in an TETRA INRIA MESH" );
@@ -214,15 +225,20 @@ readINRIAMeshFileHead( std::ifstream & mystream,
             numReadFaces= nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), mystream );
             done++;
             numBFaces = 0;
-            for ( UInt k = 0;k < numReadFaces; k++ )
-	      {
-                mystream >> p1 >> p2 >> p3 >> p4>> ibc;
-                if(!iSelect(EntityFlag(ibc))){
-		  ++numBFaces;
-		  isboundary[p1-1]= isboundary[p2-1]= isboundary[p3-1]=isboundary[p4-1]=true;
-		}
-		
-	      }
+            for ( UInt k = 0;k < numReadFaces;k++ )
+            {
+                mystream >> p1 >> p2 >> p3 >> p4 >> ibc;
+                if(isboundary[p1-1]&&isboundary[p2-1]&&isboundary[p3-1]&&isboundary[p4-1]
+                   ){
+                    if (iSelect(EntityFlag(ibc))){
+                        std::cerr<<"ATTENTION: Face "<<p1<<" "<<p2<<" "<<p3<<" "<<p4<<
+                            " has all vertices on the boundary yet is marked as interior: "<<
+                            ibc<<std::endl;
+                    }
+                    ++numBFaces;
+                }
+
+            }
             numStoredFaces=numReadFaces;
         }
         // To cope with a mistake in INRIA Mesh files

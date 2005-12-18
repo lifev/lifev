@@ -14,7 +14,7 @@ Kr	= 6.0		# friction parameter (source term)
 
 [time]
 timebeg	 = 0.0		# inittime
-timeend	 = 0.3		# endtime
+timeend	 = 0.1		# endtime
 timestep = 1e-4		# timestep
 
 [discretization]
