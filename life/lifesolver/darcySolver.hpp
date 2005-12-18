@@ -443,24 +443,24 @@ void DarcySolver<Mesh>::applyBC()
 template <typename Mesh>
 void DarcySolver<Mesh>::solve()
 {
-    aztecSolveLinearSyst(mat,globalTP.giveVec(),globalF.giveVec(),
-                         globalTP.size(),msrPattern);
-    computePresFlux();
+  this->aztecSolveLinearSyst(mat,globalTP.giveVec(),globalF.giveVec(),
+			     globalTP.size(),msrPattern);
+  computePresFlux();
 
-    // ********** P1 computation of the velocity **********************
-    CurrentFE fe_q1( this->refPFEnodal , this->geoMap , this->qr );
-    Dof dof_q1( this->refPFEnodal );
-    dof_q1.update( this->_mesh );
-    UInt dim_q1 = dof_q1.numTotalDof();
-    ScalUnknown<Vector> nodalPres( dim_q1 );
-    projectPressureQ1( nodalPres );
-    PhysVectUnknown<Vector> nodalVel( dim_q1 );
-    projectVelocityQ1( nodalVel );
+  // ********** P1 computation of the velocity **********************
+  CurrentFE fe_q1( this->refPFEnodal , this->geoMap , this->qr );
+  Dof dof_q1( this->refPFEnodal );
+  dof_q1.update( this->_mesh );
+  UInt dim_q1 = dof_q1.numTotalDof();
+  ScalUnknown<Vector> nodalPres( dim_q1 );
+  projectPressureQ1( nodalPres );
+  PhysVectUnknown<Vector> nodalVel( dim_q1 );
+  projectVelocityQ1( nodalVel );
 
-    //solve_signal_type _M_solve_signal;
+  //solve_signal_type _M_solve_signal;
 
-    Real time = 0.01; // needed for the index of the result-files
-    outensight7Mesh3D( this->_mesh, nodalVel, nodalPres,time );
+  Real time = 0.01; // needed for the index of the result-files
+  outensight7Mesh3D( this->_mesh, nodalVel, nodalPres,time );
 
 }
 
@@ -768,8 +768,8 @@ void DarcySolver<Mesh>::projectPressureQ1( ScalUnknown<Vector> & p_q1 )
     options[AZ_solver] = AZ_cg;
     options[AZ_precond] = AZ_dom_decomp;
     options[AZ_subdomain_solve] = AZ_icc;
-    aztecSolveLinearSyst(A_q1,p_q1.giveVec(),f_q1.giveVec(),p_q1.size(),
-                         pattA_q1,options,params);
+    this->aztecSolveLinearSyst(A_q1,p_q1.giveVec(),f_q1.giveVec(),p_q1.size(),
+			       pattA_q1,options,params);
 }
 
 template <typename Mesh>
@@ -822,8 +822,8 @@ void DarcySolver<Mesh>::projectVelocityQ1( PhysVectUnknown<Vector>& u_q1 )
     options[AZ_solver] = AZ_cg;
     options[AZ_precond] = AZ_dom_decomp;
     options[AZ_subdomain_solve] = AZ_icc;
-    aztecSolveLinearSyst(A_q1,u_q1.giveVec(),f_q1.giveVec(),u_q1.size(),
-                         pattA_q1,options,params);
+    this->aztecSolveLinearSyst(A_q1,u_q1.giveVec(),f_q1.giveVec(),u_q1.size(),
+			       pattA_q1,options,params);
 }
 
 #if 0
