@@ -46,5 +46,6 @@ refFEDG.lo
 refHdivFE.lo
 refHybridFE.lo
 regionMesh3D_ALE.lo
+semantic.cache
 staticBdFE.lo
 v2elemVec.lo
