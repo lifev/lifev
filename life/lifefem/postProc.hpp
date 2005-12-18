@@ -86,7 +86,7 @@ private:
 //
 // Construction of _bdLtoG
 template <typename Mesh>
-PostProc<Mesh>::PostProc( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof, UInt ncomp = 1 ) : _mesh( mesh )
+PostProc<Mesh>::PostProc( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof, UInt /*ncomp*/ = 1 ) : _mesh( mesh )
 {
 
     typedef typename Mesh::VolumeShape GeoShape;
