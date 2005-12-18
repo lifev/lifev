@@ -283,7 +283,7 @@ public:
     */
     std::pair< Real, Real > AreaAndFlux( const face_dof_type & __faces_on_section_u,
                                          const bool& __modify_sign_normal,
-                                         const SimpleVect<Real>& __reference_normal);
+                                         const SimpleVect<Real,0>& __reference_normal);
     /*! compute the Area and Flux
       \param __faces_on_section_p : list of (faces <-> pressure dof) that were found:
       first:  global face number
@@ -913,7 +913,7 @@ NavierStokesHandler<Mesh, DataType>::flux( const EntityFlag& flag )
     FacesOnFlag( flag, _refFE_u, _dof_u, faces_on_flag ); //! reconstruct all the connectivity
 
     //! reference normal vector (unused, as we keep the positive outward normal on the boundary)
-    SimpleVect<Real> unused(3);
+    SimpleVect<Real,0> unused(3);
     unused(0) = 0.;
     unused(1) = 0.;
     unused(2) = 0.;
@@ -1290,7 +1290,7 @@ template <typename Mesh, typename DataType>
 std::pair< Real, Real >
 NavierStokesHandler<Mesh, DataType>::AreaAndFlux( const face_dof_type & __faces_on_section_u,
                                                   const bool & __modify_sign_normal,
-                                                  const SimpleVect<Real>& __reference_normal )
+                                                  const SimpleVect<Real,0>& __reference_normal )
 {
     typedef typename Mesh::FaceShape GeoBShape;
 
@@ -1472,7 +1472,7 @@ void NavierStokesHandler<Mesh, DataType>::PostProcessPressureAreaAndFlux( const 
                          << "%% toplabel='Section,time=" << __time << "'\n %% ylabel='AreaPolygonal'\n";
 #endif
 
-    SimpleVect<Real> reference_normal(3);
+    SimpleVect<Real,0> reference_normal(3);
     reference_normal(0) = 1.;
     reference_normal(1) = 0.;
     reference_normal(2) = 0.; // flux positive if (u dot reference_normal) > 0
