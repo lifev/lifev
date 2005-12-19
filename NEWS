@@ -7,6 +7,10 @@ Bugs fixed in 0.7.0:
 [lifefem]
 * Fixed a really nasty bug in elemOper.cpp::div elementary operator (DADP)
 
+[lifesolver]
+* Fixed segfault(invalid free() pointer) in NavierStokesHandler when
+  using SimpleVect<>(typical 1 vs 0 numbering bug) (CP)
+
 New in 0.7.0:
 =============
 
@@ -306,4 +310,4 @@ New in 0.1.0pre3:
 * fixed some bugs and miscompilation in a few places
 
 
- -- Christophe Prud'homme <prudhomm@debian.org>, Sun Dec 18 21:38:07 2005
+ -- Christophe Prud'homme <prudhomm@debian.org>, Mon Dec 19 08:46:35 2005
