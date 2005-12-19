@@ -47,6 +47,9 @@ New in 0.7.0:
   ** base class for applications
   ** provides generic options
 
+[lifearray]
+* Added BoostMatrix, a wrapper class for boost matrices with LifeV interface (CW)
+
 [lifealg]
 * Added the preconditioner concept(base class) (CP)
 * Added an implementation of the Givens rotation (CP)
@@ -55,12 +58,14 @@ New in 0.7.0:
 
 [lifefem]
 * Added operators for two-fluid flows (DADP)
+* Added 2 new quadrature rules on triangles and completed old ones (CW)
 
 [lifesolver]
 * Added levelset solver (DADP)
 * Added hyperbolic solver (DADP)
 * Moved Navier Stokes solver with IP stabilization to libraries (CW)
 * Added inexact flux computation strategy (CV TP)
+* Added algebraic factorization solvers (DADP CW)
 
 [testsuite]
 * Added levelset tests (DADP)
