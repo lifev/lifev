@@ -26,7 +26,7 @@ include $(top_srcdir)/testsuite/Makefile.testsuite
 
 check_HEADERS = ud_functions.hpp
 
-check_PROGRAMS = test_nsaleCT
+#check_PROGRAMS = test_nsaleCT
 test_nsaleCT_SOURCES = main.cpp
 
 EXTRA_DIST = data 

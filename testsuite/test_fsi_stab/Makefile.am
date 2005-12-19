@@ -28,7 +28,7 @@ include $(top_srcdir)/testsuite/Makefile.testsuite
 # disable test_nsale as it does not compile
 #
 
-check_PROGRAMS = test_fsi_stab
+#check_PROGRAMS = test_fsi_stab
 noinst_HEADERS = operFS.hpp ud_functions.hpp
 test_fsi_stab_SOURCES = main.cpp
 EXTRA_DIST = data

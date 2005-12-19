@@ -22,6 +22,7 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
+DO_NOT_COMPILE=test_nsale test_nsaleCT test_fsi_si test_fsi_stab
 
 SUBDIRS		= data  \
               lifecore lifearray lifealg lifefem lifefilters lifesolver \
@@ -36,7 +37,8 @@ SUBDIRS		= data  \
 	      test_masstransport test_mass_coupling test_ns_ipstab \
               test_coupling_3d0d \
               test_fhn \
-              test_levelset_ipstab test_ns_2fluids
+              test_levelset_ipstab test_ns_2fluids \
+	      $(DO_NOT_COMPILE)
 
 TESTSUITES=$(srcdir)/lifecore/testsuite.at \
 $(srcdir)/lifearray/testsuite.at \
