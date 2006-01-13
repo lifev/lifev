@@ -85,7 +85,9 @@ void pointProjectionOnPlane(const Point& P, const Point& P0,
 /*!
   Find the point where u is zero on an edge
   @param P1 first segment node
+  @param u1 value of u in P1
   @param P2 second segment node
+  @param u2 value of u in P2
   @param P the intersection point with the interface
 */
     template<class Point>

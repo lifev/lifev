@@ -43,7 +43,7 @@ namespace LifeV {
     */
 
     template<typename MeshType>
-    class DataNS2Fluids 
+    class DataNS2Fluids
         :
         public DataMesh<MeshType>,
         public DataTime
@@ -60,8 +60,8 @@ namespace LifeV {
         /** @name Constructors and destructors
          */
         //@{
-        DataNS2Fluids(const GetPot& datafile) 
-            : 
+        DataNS2Fluids(const GetPot& datafile)
+            :
             DataMesh<mesh_type>( datafile, "navier-stokes/discretization" ),
             DataTime( datafile, "navier-stokes/discretization" )
         {
@@ -133,7 +133,7 @@ namespace LifeV {
         //@{
         template<typename _MeshType>
         friend std::ostream& operator<<(std::ostream&, DataNS2Fluids<_MeshType>&);
-        
+
         //! Fake member functions introduced for compliance with the new
         //! interface requirements of NavierStokesHandler class
 
@@ -150,7 +150,7 @@ namespace LifeV {
         }
 
         Real XSectionFrontier() const {
-            return 0.;         
+            return 0.;
         }
 
         Real ZSectionInit() const {
@@ -183,7 +183,7 @@ namespace LifeV {
 
         bool _M_verbose;
 
-    };
+    }; // class DataNS2Fluids
 
     template<typename _MeshType>
     std::ostream& operator<<(std::ostream& ostr, DataNS2Fluids<_MeshType>& d) {
@@ -216,7 +216,8 @@ namespace LifeV {
         ostr << "==================================================" << std::endl;
 
         return ostr;
-    }
-}
+    } // operator <<
+
+} // namespace LifeV
 
 #endif

@@ -311,7 +311,7 @@ namespace LifeV {
         //@{
 
         /**
-           \Report the result of last call to timeAdvance() method
+           Report the result of last call to timeAdvance() method
         */
         template<typename _MeshType>
         friend std::ostream& operator<<(std::ostream&, HyperbolicSolverIP<_MeshType>&);

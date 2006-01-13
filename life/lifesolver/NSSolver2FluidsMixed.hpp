@@ -202,26 +202,26 @@ namespace LifeV {
         //@{
 
         /*!
-          \Initialize the solver
+          Initialize the solver
         */
         void initialize(const function_type&, const function_type&, const function_type&, Real, Real);
 
         /*!
-          \Time advance re-computes the whole problem matrix at every time step.
-          \This is necessary because (discontinuous) coefficient are
-          \time-dependent being so the location of the interface.
+          Time advance re-computes the whole problem matrix at every time step.
+          This is necessary because (discontinuous) coefficient are
+          time-dependent being so the location of the interface.
         */
         void timeAdvance(source_type const& source, Real const& time);
 
         /**
-           \Function iterate needs a fake implementation because it is defined
-           \as a virtual member of NavierStokesHandler
+           Function iterate needs a fake implementation because it is defined
+           as a virtual member of NavierStokesHandler
         */
 
         void iterate(const Real& /* time */) {}
 
         /**
-           \Call the proper reinitialization function for the level set solver
+           Call the proper reinitialization function for the level set solver
         */
 
         void reinitialize(const std::string& method) {

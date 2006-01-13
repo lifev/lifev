@@ -41,7 +41,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <life/lifearray/boostmatrix.hpp>
 
 namespace LifeV {
-    /*!
+
+    /**
       \class AFSolver
       \brief A class storing data common to all solvers based on algebraic
       factorization of N-S system.
@@ -55,20 +56,21 @@ namespace LifeV {
              typename __D_T_matrix_type>
     class AFSolver {
     public:
+        
         /**
-           @name Typedefs
+           \name Typedefs
         */
-        //@{
+        /*@{*/
         typedef __M_L_matrix_type M_L_matrix_type;
         typedef __C_matrix_type C_matrix_type;
         typedef __D_matrix_type D_matrix_type;
         typedef __D_T_matrix_type D_T_matrix_type;
-        //@}
+        /*@}*/
 
         /**
-           @name Constructors
+           \name Constructors
         */
-        //@{
+        /*@{*/
         AFSolver(const M_L_matrix_type& __M_L,
                  const C_matrix_type& __C,
                  const D_matrix_type& __D,
@@ -80,47 +82,48 @@ namespace LifeV {
             _M_D_T(__D_T)
         {
         }
-        //@}
+        /*@}*/
 
 //         /**
-//            @name Modifiers
+//            \name Modifiers
 //         */
-//         //@{
-//         /**!
-//            \Set lumped mass matrix used for time advancement
+//         /*@{*/
+//         /**
+//            Set lumped mass matrix used for time advancement
 //         */
 //         void setML(const M_L_matrix_type& __M_L) {
 //             _M_M_L = __M_L;
 //         }
 
-//         /**!
-//            \Set stiffness matrix
+//         /**
+//            Set stiffness matrix
 //         */
 //         void setC(const C_matrix_type& __C) {
 //             _M_C = __C;
 //         }
 
-//         /**!
-//            \Set discrete divergence operator
+//         /**
+//            Set discrete divergence operator
 //         */
 //         void setD(const D_matrix_type& __D) {
 //             _M_D = __D;
 //         }
 
-//         /**!
-//            \Set discrete gradient operator
+//         /**
+//            Set discrete gradient operator
 //         */
 //         void setDT(const D_T_matrix_type& __D_T) {
 //             _M_D_T = __D_T;
 //         }
-//         //@}
+//         /*@}*/
 
         /**
-           @name Members
+           \name Members
         */
-        //@{
-        /**!
-           \Solve member
+        /*@{*/
+        
+        /**
+           Solve member
         */
         template<typename __vector_type_u,
                  typename __vector_type_p,
@@ -130,35 +133,36 @@ namespace LifeV {
                    __vector_type_p& __p,
                    const __vector_type_b_u& __b_u,
                    const __vector_type_b_p& __b_p) const;
-        //@}
+        /*@}*/
 
     protected:
-        /**!
-           \The lumped mass matrix used for time advancement. If alfa is the
-           \first coefficient of the BDF formula, delta_t the time step and
-           \M the mass matrix:
-           \M_L = alfa / delta_t * lump(M)
+
+        /**
+           The lumped mass matrix used for time advancement. If alpha is the
+           first coefficient of the BDF formula, delta_t the time step and
+           M the mass matrix:
+           M_L = alpha / delta_t * lump(M)
         */
         const M_L_matrix_type& _M_M_L;
 
-        //! The stiffness matrix
+        /** The stiffness matrix */
         const C_matrix_type& _M_C;
 
-        //! The discrete gradient operator
+        /** The discrete gradient operator */
         const D_matrix_type& _M_D;
 
-        //! The discrete divergence operator
+        /** The discrete divergence operator */
         const D_T_matrix_type& _M_D_T;
 
-        /**!
-           The inverse of the mass matrix used for time advancement. The matrix
-           M_L must be of a type for which the member function invert() is
-           available
-        */
-        //M_L_matrix_type _M_inv_M_L;
+//        /**
+//           The inverse of the mass matrix used for time advancement. The matrix
+//           M_L must be of a type for which the member function invert() is
+//           available
+//        */
+//        M_L_matrix_type _M_inv_M_L;
     };
 
-    /*!
+    /**
       \class YosidaSolver
       \brief Base class for all flavours of algebraic solvers based on Yosida method.
 
@@ -179,28 +183,28 @@ namespace LifeV {
     {
     public:
         /**
-           @name Typedefs
+           \name Typedefs
         */
-        //@{
+        /*@{*/
         typedef __solver_u_type solver_u_type;
         typedef __solver_p_type solver_p_type;
 
         typedef BoostMatrix<boost::numeric::ublas::row_major> matrix_type;
 
-        //@}
-        /**!
-           @name Constructors
+        /*@}*/
+        /**
+           \name Constructors
         */
-        //@{
+        /*@{*/
         typedef __M_L_matrix_type M_L_matrix_type;
         typedef __C_matrix_type C_matrix_type;
         typedef __D_matrix_type D_matrix_type;
         typedef __D_T_matrix_type D_T_matrix_type;
-        //@}
-        /**!
-           @name Constructors
+        /*@}*/
+        /**
+           \name Constructors
         */
-        //@{
+        /*@{*/
         YosidaSolver(const M_L_matrix_type& __M_L,
                      const C_matrix_type& __C,
                      const D_matrix_type& __D,
@@ -225,35 +229,35 @@ namespace LifeV {
             // Set options for solver p
             //__solver_p.setOptionsFromGetPot(M_data_file, (_M_data_section + "solver-p").data());
         }
-        //@}
+        /*@}*/
 
-        /**!
-           @name Methods
+        /**
+           \name Methods
         */
-        //@{
+        /*@{*/
         template<typename __vector_type_u,
                  typename __vector_type_p,
                  typename __vector_type_b_u,
                  typename __vector_type_b_p>
         void solve(__vector_type_u& __u, __vector_type_p& __p,
                    __vector_type_b_u& __b_u, __vector_type_b_p& __b_p);
-        //@}
+        /*@}*/
 
     protected:
-        //! Data file
+        /** Data file */
         const GetPot& _M_data_file;
 
-        //! Data section
+        /** Data section */
         const std::string _M_data_section;
 
-        //! Solver for velocity systems
+        /** Solver for velocity systems */
         solver_u_type& _M_solver_u;
 
-        //! Solver for pressure systems
+        /** Solver for pressure systems */
         solver_p_type& _M_solver_p;
     };
 
-    /*!
+    /**
       \class Yosida
       \brief Yosida solver implementation as described in
 
@@ -279,10 +283,10 @@ namespace LifeV {
                  __solver_p_type>
     {
     public:
-        /**!
-           @name Typedefs
+        /**
+           \name Typedefs
         */
-        //@{
+        /*@{*/
         typedef __M_L_matrix_type M_L_matrix_type;
         typedef __C_matrix_type C_matrix_type;
         typedef __D_matrix_type D_matrix_type;
@@ -296,11 +300,12 @@ namespace LifeV {
                                       __D_T_matrix_type,
                                       __solver_u_type,
                                       __solver_p_type>::matrix_type matrix_type;
-        //@}
-        /**!
-           @name Constructors
+        /*@}*/
+        
+        /**
+           \name Constructors
         */
-        //@{
+        /*@{*/
         Yosida(const M_L_matrix_type& __M_L,
                const C_matrix_type& __C,
                const D_matrix_type& __D,
@@ -319,11 +324,12 @@ namespace LifeV {
                                           , __data_file, __data_section,
                                           __solver_u, __solver_p) {
         }
-        //@}
-        /**!
-           @name Methods
+        /*@}*/
+        
+        /**
+           \name Methods
         */
-        //@{
+        /*@{*/
         template<typename __vector_type_u,
                  typename __vector_type_p,
                  typename __vector_type_b_u,
@@ -385,7 +391,8 @@ namespace LifeV {
             chrono.stop();
             std::cout << "in " << chrono.diff() << " s" << std::endl;
         }
+        /*@}*/
     };
 }
 
-#endif
+#endif /* _AFSOLVERS_HPP_ */
