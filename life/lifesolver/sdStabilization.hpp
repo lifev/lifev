@@ -90,7 +90,7 @@ namespace LifeV
     void lapu_bgradv(const Real& coef, ElemVec& vel, ElemMat& elmat, const CurrentFE& fe,
 		     int iblock, int jblock, int nb);
     
-    void gradp_bgrav(const Real& coef, ElemVec& vel, ElemMat& elmat, const CurrentFE& fe);
+    void gradp_bgradv(const Real& coef, ElemVec& vel, ElemMat& elmat, const CurrentFE& fe);
     
     void lapu_gradq(const Real& coef, ElemMat& elmat, const CurrentFE& fe);
 
@@ -160,19 +160,19 @@ namespace LifeV
 
 	// coeffBeta  ( (beta \nabla u , \nabla q) + (\nabla p , \beta \nabla v) )
 	//
-	this->gradp_bgrav(coeffBeta, beta, M_elMat, M_fe);
+	this->gradp_bgradv(coeffBeta, beta, M_elMat, M_fe);
 	
 	// coeffBeta (\nabla p , \nabla q)
 	//
 	stiff( coeffBeta, M_elMat, M_fe, nDimensions, nDimensions );
 
-	// coeffBeta ( - L u , \beta \nabla v )
-	//
-	this->lapu_bgradv(-coeffBeta, beta, M_elMat, M_fe, 0, 0, nDimensions);
+	// coeffBeta ( - \mu L u , \beta \nabla v )
+	// 
+	this->lapu_bgradv(-coeffBeta*M_viscosity, beta, M_elMat, M_fe, 0, 0, nDimensions);
 
-	// coeffBeta ( - L u , \nabla q )
+	// coeffBeta ( - \mu L u , \nabla q )
 	//	
-        this->lapu_gradq(-coeffBeta, M_elMat, M_fe);
+        this->lapu_gradq(-coeffBeta*M_viscosity, M_elMat, M_fe);
 
 	// coeffDiv ( \div u , \div \nabla v)
 	//
@@ -237,12 +237,12 @@ namespace LifeV
 	M_elMat.zero();
 
 	// coeffBeta (beta \nabla u , \beta \nabla v)
-	//
+	//  
 	this->bgradu_bgradv(coeffBeta, beta, M_elMat, M_fe, 0, 0, nDimensions);
        
-	// coeffBeta ( - L u , \beta \nabla v )
+	// coeffBeta ( - \mu L u , \beta \nabla v )
 	//
-	this->lapu_bgradv(-coeffBeta, beta, M_elMat, M_fe, 0, 0, nDimensions);
+	this->lapu_bgradv(-coeffBeta*M_viscosity, beta, M_elMat, M_fe, 0, 0, nDimensions);
 
 	// coeffDiv ( \div u , \div \nabla v)
 	//
@@ -380,7 +380,7 @@ namespace LifeV
 
 
   template<typename MESH, typename DOF> 
-  void SDStabilization<MESH, DOF>::gradp_bgrav(const Real& coef, ElemVec& vel,
+  void SDStabilization<MESH, DOF>::gradp_bgradv(const Real& coef, ElemVec& vel,
 					       ElemMat& elmat,const CurrentFE& fe) {
     ASSERT_PRE(fe.hasFirstDeriv(),
 	       "advection_grad  matrix needs at least the first derivatives");
@@ -408,7 +408,7 @@ namespace LifeV
 	  s = 0.0;
 	  for(int ig=0;ig<fe.nbQuadPt;ig++)
 	    for(int jcoor=0;jcoor<fe.nbCoor;jcoor++)
-	      s += fe.phiDer(i,ic,ig)*v(jcoor,ig)*fe.phiDer(j,jcoor,ig)*fe.weightDet(ig);
+	      s += fe.phiDer(j,ic,ig)*v(jcoor,ig)*fe.phiDer(i,jcoor,ig)*fe.weightDet(ig);
 	  mat_ic3(i,j) += coef*s;
 	  mat_3ic(j,i) += coef*s;
 	}
@@ -501,16 +501,18 @@ namespace LifeV
     
 
     // numerical integration
-    for(int i=0;i<fe.nbNode;i++){ 
-      for(int j=0;j<fe.nbNode;j++){ 
-	s = 0.0;
-	for(int ig=0;ig<fe.nbQuadPt;ig++)
-	  for(int icoor=0;icoor<fe.nbCoor;icoor++)
-	    for(int jcoor=0;jcoor<fe.nbCoor;jcoor++)
-	      s += fe.phiDer2(i,icoor,icoor,ig)*v(jcoor,ig)*fe.phiDer(j,jcoor,ig)*fe.weightDet(ig);
-	mat_tmp(i,j) = coef*s;
-      }
-    } 
+    for(int i=0;i<fe.nbNode;i++)
+      { 
+	for(int j=0;j<fe.nbNode;j++)
+	  { 
+	    s = 0.0;
+	    for(int ig=0;ig<fe.nbQuadPt;ig++)
+	      for(int icoor=0;icoor<fe.nbCoor;icoor++)
+		for(int jcoor=0;jcoor<fe.nbCoor;jcoor++)
+		  s += fe.phiDer2(j,icoor,icoor,ig)*v(jcoor,ig)*fe.phiDer(i,jcoor,ig)*fe.weightDet(ig);
+	    mat_tmp(i,j) = coef*s;
+	  }
+      } 
     
     // copy on the components
     for(int icomp=0;icomp<nb;icomp++){
@@ -541,15 +543,15 @@ namespace LifeV
     for (int jc=0; jc < fe.nbCoor; ++jc) // loop on column blocks
       { 
 	ElemMat::matrix_view mat_view = elmat.block(fe.nbCoor,jc);
-	for(int i=0;i<fe.nbNode;i++) // local rows
+	for(int i=0;i<fe.nbNode;++i) // local rows
 	  {
-	    for(int j=0;j<fe.nbNode;j++) // local columns
+	    for(int j=0;j<fe.nbNode;++j) // local columns
 	      {
 		s = 0.0;
 		// quadrature formula
-		for(int ig=0;ig<fe.nbQuadPt;ig++)
-		  for(int jcoor=0;jcoor<fe.nbCoor;jcoor++) // lap
-		    s += fe.phiDer2(i,jcoor,jcoor,ig)*fe.phiDer(j,jc,ig)*fe.weightDet(ig);
+		for(int ig=0;ig<fe.nbQuadPt;++ig)
+		  for(int jcoor=0;jcoor<fe.nbCoor;++jcoor) // lap
+		    s += fe.phiDer2(j,jcoor,jcoor,ig)*fe.phiDer(i,jc,ig)*fe.weightDet(ig);
 		mat_view(i,j) += coef*s;
 	      }
 	  }
