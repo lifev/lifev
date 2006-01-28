@@ -32,7 +32,7 @@
 #include <life/lifecore/life.hpp>
 #include <NavierStokesSolver.hpp>
 #include <ud_functions.hpp>
-#include <meditPostProcess.hpp>
+#include <life/lifefilters/medit.hpp>
 
 #include <iostream>
 #include <set>
