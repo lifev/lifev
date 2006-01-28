@@ -70,8 +70,8 @@
 #include <life/lifefem/geoMap.hpp>
 
 
-#include <sdStabilization.hpp>
-#include <ipStabilization.hpp>
+#include <life/lifesolver/sdStabilization.hpp>
+#include <life/lifesolver/ipStabilization.hpp>
 
 
 namespace LifeV
