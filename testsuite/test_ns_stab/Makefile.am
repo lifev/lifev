@@ -24,7 +24,7 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-check_HEADERS     = ud_functions.hpp NavierStokesSolver.hpp sdStabilization.hpp ipStabilization.hpp  meditPostProcess.hpp
+check_HEADERS     = ud_functions.hpp NavierStokesSolver.hpp
 
 check_PROGRAMS     = test_ns_stab
 test_ns_stab_SOURCES = main.cpp 
