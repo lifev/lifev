@@ -830,7 +830,7 @@ fixBPoints( RegionMesh & mesh, std::ostream & clog = std::cout,
   } else {
     numitems=BElementShape::numPoints;
   }
-    
+
   for ( UInt k = 1;k <= mesh.numBElements();++k )
     for ( UInt j = 1;j <= numitems;++j )
       bpts[mesh.bElement(k).point(j).id()-1]=true;
@@ -967,7 +967,7 @@ bool fixBoundaryFaces( RegionMesh3D & mesh,
                        UInt & bfaces_found,
                        bool /* fixMarker */ = false,
                        bool verbose = false,
-                       TempFaceContainer * ext_container )
+                       TempFaceContainer * ext_container = 0 )
 {
 
     typedef typename RegionMesh3D::Volumes Volumes;
