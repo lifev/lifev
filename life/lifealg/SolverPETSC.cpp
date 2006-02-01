@@ -155,9 +155,15 @@ SolverPETSC::condEst() const
     double __value;
     PetscTruth __computed;
     PetscTruth __found;
+#if PETSC_VERSION_MAJOR == 2 && PETSC_VERSION_MINOR >= 3
     PetscOptionsGetTruth( PETSC_NULL,
                           "-ksp_set_compute_singular_values",
                           &__computed, &__found );
+#else
+    PetscOptionsGetLogical( PETSC_NULL,
+                            "-ksp_set_compute_singular_values",
+                            &__computed, &__found );
+#endif
     if ( true ) //__computed )
     {
         PetscReal __emin;
@@ -308,7 +314,11 @@ SolverPETSC::solve( array_type& __X,
 {
     PetscTruth __quiet;
     PetscTruth __found;
+#if PETSC_VERSION_MAJOR == 2 && PETSC_VERSION_MINOR >= 3
     PetscOptionsGetTruth( PETSC_NULL, "-quiet", &__quiet, &__found );
+#else
+    PetscOptionsGetLogical( PETSC_NULL, "-quiet", &__quiet, &__found );
+#endif
     if ( !__quiet )
     {
         std::cout << "[SolverPETSC::solve] Solving primal\n";
@@ -323,7 +333,11 @@ SolverPETSC::solveTranspose( array_type& __X,
 {
     PetscTruth __quiet;
     PetscTruth __found;
+#if PETSC_VERSION_MAJOR == 2 && PETSC_VERSION_MINOR >= 3
     PetscOptionsGetTruth( PETSC_NULL, "-quiet", &__quiet, &__found );
+#else
+    PetscOptionsGetLogical( PETSC_NULL, "-quiet", &__quiet, &__found );
+#endif
     if ( !__quiet )
     {
         std::cout << "[SolverPETSC::solveTranspose] Solving transpose\n";
@@ -363,8 +377,11 @@ SolverPETSC::_F_solveCommon( Mat const& __A,
 
     PetscTruth __quiet;
     PetscTruth __found;
+#if PETSC_VERSION_MAJOR == 2 && PETSC_VERSION_MINOR >= 3
     PetscOptionsGetTruth( PETSC_NULL, "-quiet", &__quiet, &__found );
-
+#else
+    PetscOptionsGetLogical( PETSC_NULL, "-quiet", &__quiet, &__found );
+#endif
     PetscInt its = 0;
 
     KSPSolve( _M_p->__ksp, __b, __x );
@@ -393,7 +410,11 @@ SolverPETSC::_F_solveCommon( Mat const& __A,
     */
     PetscTruth __flag;
     PetscTruth __flagFound;
+#if PETSC_VERSION_MAJOR == 2 && PETSC_VERSION_MINOR >= 3
     PetscOptionsGetTruth( PETSC_NULL, "-nokspview", &__flag, &__flagFound );
+#else
+    PetscOptionsGetLogical( PETSC_NULL, "-nokspview", &__flag, &__flagFound );
+#endif
     if ( !__flag )
     {
         KSPView( _M_p->__ksp, PETSC_VIEWER_STDOUT_WORLD );
@@ -454,9 +475,15 @@ void SolverPETSC::setOptionsFromGetPot( const GetPot& dataFile,
     // (not supported directly by PETSc)
     PetscTruth __compute;
     PetscTruth __found;
+#if PETSC_VERSION_MAJOR == 2 && PETSC_VERSION_MINOR >= 3
     PetscOptionsGetTruth( PETSC_NULL,
                           "-ksp_set_compute_singular_values",
                           &__compute, &__found );
+#else
+    PetscOptionsGetLogical( PETSC_NULL,
+                            "-ksp_set_compute_singular_values",
+                            &__compute, &__found );
+#endif
     KSPSetComputeSingularValues( _M_p->__ksp, __compute );
 }
 
