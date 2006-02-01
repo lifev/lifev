@@ -155,9 +155,9 @@ SolverPETSC::condEst() const
     double __value;
     PetscTruth __computed;
     PetscTruth __found;
-    PetscOptionsGetLogical( PETSC_NULL,
-                            "-ksp_set_compute_singular_values",
-                            &__computed, &__found );
+    PetscOptionsGetTruth( PETSC_NULL,
+                          "-ksp_set_compute_singular_values",
+                          &__computed, &__found );
     if ( true ) //__computed )
     {
         PetscReal __emin;
@@ -308,7 +308,7 @@ SolverPETSC::solve( array_type& __X,
 {
     PetscTruth __quiet;
     PetscTruth __found;
-    PetscOptionsGetLogical( PETSC_NULL, "-quiet", &__quiet, &__found );
+    PetscOptionsGetTruth( PETSC_NULL, "-quiet", &__quiet, &__found );
     if ( !__quiet )
     {
         std::cout << "[SolverPETSC::solve] Solving primal\n";
@@ -323,7 +323,7 @@ SolverPETSC::solveTranspose( array_type& __X,
 {
     PetscTruth __quiet;
     PetscTruth __found;
-    PetscOptionsGetLogical( PETSC_NULL, "-quiet", &__quiet, &__found );
+    PetscOptionsGetTruth( PETSC_NULL, "-quiet", &__quiet, &__found );
     if ( !__quiet )
     {
         std::cout << "[SolverPETSC::solveTranspose] Solving transpose\n";
@@ -363,7 +363,7 @@ SolverPETSC::_F_solveCommon( Mat const& __A,
 
     PetscTruth __quiet;
     PetscTruth __found;
-    PetscOptionsGetLogical( PETSC_NULL, "-quiet", &__quiet, &__found );
+    PetscOptionsGetTruth( PETSC_NULL, "-quiet", &__quiet, &__found );
 
     PetscInt its = 0;
 
@@ -393,7 +393,7 @@ SolverPETSC::_F_solveCommon( Mat const& __A,
     */
     PetscTruth __flag;
     PetscTruth __flagFound;
-    PetscOptionsGetLogical( PETSC_NULL, "-nokspview", &__flag, &__flagFound );
+    PetscOptionsGetTruth( PETSC_NULL, "-nokspview", &__flag, &__flagFound );
     if ( !__flag )
     {
         KSPView( _M_p->__ksp, PETSC_VIEWER_STDOUT_WORLD );
@@ -454,9 +454,9 @@ void SolverPETSC::setOptionsFromGetPot( const GetPot& dataFile,
     // (not supported directly by PETSc)
     PetscTruth __compute;
     PetscTruth __found;
-    PetscOptionsGetLogical( PETSC_NULL,
-                            "-ksp_set_compute_singular_values",
-                            &__compute, &__found );
+    PetscOptionsGetTruth( PETSC_NULL,
+                          "-ksp_set_compute_singular_values",
+                          &__compute, &__found );
     KSPSetComputeSingularValues( _M_p->__ksp, __compute );
 }
 
