@@ -185,27 +185,43 @@ Real EthierSteinmanUnsteady::fNeumann( const Real& t,
                                        const Real& z,
                                        const ID& i )
 {
-    Real nx=0.;
-    Real ny=0.;
-    Real nz=-1.;
+    Real nx = 0.;
+    Real ny = 0.;
+    Real nz = 0.;
+    if        ( x == -1. ) {
+        nx = -1.;
+    } else if ( x ==  1. ) {
+        nx =  1.;
+    } else if ( y == -1. ) {
+        ny = -1.;
+    } else if ( y ==  1. ) {
+        ny =  1.;
+    } else if ( z == -1. ) {
+        nz = -1.;
+    } else if ( z ==  1. ) {
+        nz =  1.;
+    } else {
+        std::cout << "strange point: x=" << x << " y=" << y << " z=" << z
+                  << std::endl;
+    }
     switch(i) {
         case 1:
-            return pexact(t, x, y, z, 1) * nx
-                - mu * ( ux(t, x, y, z, 1) * nx * 2 +
+            return - pexact(t, x, y, z, 1) * nx
+                + mu * ( ux(t, x, y, z, 1) * nx * 2 +
                          ux(t, x, y, z, 2) * ny +
                          ux(t, x, y, z, 3) * nz +
                          uy(t, x, y, z, 1) * ny +
                          uz(t, x, y, z, 1) * nz );
         case 2:
-            return pexact(t, x, y, z, 1) * ny
-                - mu * ( uy(t, x, y, z, 1) * nx +
+            return - pexact(t, x, y, z, 1) * ny
+                + mu * ( uy(t, x, y, z, 1) * nx +
                          uy(t, x, y, z, 2) * ny * 2 +
                          uy(t, x, y, z, 3) * nz +
                          ux(t, x, y, z, 2) * nx +
                          uz(t, x, y, z, 2) * nz );
         case 3:
-            return pexact(t, x, y, z, 1) * nz
-                - mu * ( uz(t, x, y, z, 1) * nx +
+            return - pexact(t, x, y, z, 1) * nz
+                + mu * ( uz(t, x, y, z, 1) * nx +
                          uz(t, x, y, z, 2) * ny +
                          uz(t, x, y, z, 3) * nz * 2 +
                          ux(t, x, y, z, 3) * nx +
