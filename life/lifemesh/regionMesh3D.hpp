@@ -96,10 +96,10 @@ namespace LifeV
     /*! Are the ones actually stored in the containers
      */
     //@{
-    typedef GeoElement3D<GEOSHAPE, MC> VolumeType;
+    typedef GeoElement3D<GEOSHAPE, MC>  VolumeType;
     typedef GeoElement2D<FaceShape, MC> FaceType;
     typedef GeoElement1D<EdgeShape, MC> EdgeType;
-    typedef GeoElement0D<MC> PointType;
+    typedef GeoElement0D<MC>            PointType;
     //@}
 
     //! \name GeoElemen Containers
@@ -207,7 +207,6 @@ namespace LifeV
     ElementType const & element( ID const & i ) const;
     BElementType & bElement( ID const & i );
     BElementType const & bElement( ID const & i ) const;
-
     //@}
     /* ============================================
        Volume Related Methods
@@ -520,7 +519,7 @@ namespace LifeV
     /*! Add a point
       This method is for advanced use only
     */
-    PointType & setPoint( ID const & position, bool const boundary = false, bool const vertices = false );
+      PointType & setPoint( ID const & position, bool const boundary = false, bool const vertices = false );
 
     //!< adds point
     UInt addPoint( ID const iden, bool const boundary = false, UInt const start = 1 );
@@ -550,18 +549,16 @@ namespace LifeV
     /*!
       It adds the IDs of the geometric entities matching an EntityFlag
       to vector of IDs.
-    
       The entity to extract is defined through the ReferenceGeometry enum:
       {VERTEX=0, EDGE = 1, FACE = 2, VOLUME = 3};
-    
     */
-    void extractEntityList(std::vector<ID> &, ReferenceGeometry const & r, EntityFlag const &) const;
+      void extractEntityList(std::vector<ID> &, ReferenceGeometry const & r, EntityFlag const &) const;
 
-    //! Prints some mesh info
+      //! Prints some mesh info
       std::ostream & showMe( bool verbose = false, std::ostream & out = std::cout ) const;
-    //! Basic tests for mesh consistency.
-    /*! For more estensive test see \link mesh_util.h */
-    int check(int level = 0, bool const fix = false, bool const verbose = true,
+      //! Basic tests for mesh consistency.
+      /*! For more estensive test see \link mesh_util.h */
+      int check(int level = 0, bool const fix = false, bool const verbose = true,
 	      std::ostream & out = std::cerr );
     //@}
 
@@ -583,7 +580,6 @@ namespace LifeV
     SimpleVect<PointType * > _bPoints; //!< Boundary points list
     //@}
 
-    
     //! Switches
     // \sa Switch
     Switch switches;
@@ -593,17 +589,14 @@ namespace LifeV
       I use a Define to use localto global array or directly the
       bareedges */
 #ifdef SAVEMEMORY
-
     BareItemsHandler<BareFace> _VToF;
     BareItemsHandler<BareEdge> _VToE;
 #else
-
     SimpleArray<UInt> _VToF;
     SimpleArray<UInt> _VToE;
 #endif
 
 #ifdef NOT_BDATA_FIRST
-
     SimpleVect<FaceType * > _bFaces;
     SimpleVect<EdgeType * > _bEdges;
 #endif
@@ -644,8 +637,8 @@ namespace LifeV
      -----------------------------------------------------------------------*/
   void set_switches_for_regionmesh( Switch & sw );
 
-  template <typename GEOSHAPE, typename MC>
-  RegionMesh3D<GEOSHAPE, MC>::RegionMesh3D() :
+template <typename GEOSHAPE, typename MC>
+RegionMesh3D<GEOSHAPE, MC>::RegionMesh3D() :
     MeshEntity(),
     MC::RegionMarker(),
     switches(),
@@ -663,8 +656,9 @@ namespace LifeV
     set_switches_for_regionmesh( switches );
   }
 
-  template <typename GEOSHAPE, typename MC>
-  RegionMesh3D<GEOSHAPE, MC>::RegionMesh3D( ID id ) :
+
+template <typename GEOSHAPE, typename MC>
+RegionMesh3D<GEOSHAPE, MC>::RegionMesh3D( ID id ) :
     MeshEntity( id ),
     MC::RegionMarker(),
     switches(),
@@ -682,22 +676,59 @@ namespace LifeV
     set_switches_for_regionmesh( switches );
   }
 
-  template <typename GEOSHAPE, typename MC>
-  RegionMesh3D<GEOSHAPE, MC>::RegionMesh3D( RegionMesh3D<GEOSHAPE, MC> const & m )
+
+template <typename GEOSHAPE, typename MC>
+RegionMesh3D<GEOSHAPE, MC>::RegionMesh3D( RegionMesh3D<GEOSHAPE, MC> const & m ):
+    MeshEntity      (m),
+    MC::RegionMarker(m),
+    pointList       (m.pointList),
+    _pointList      (m._pointList),
+    volumeList      (m.volumeList),
+    faceList        (m.faceList),
+    edgeList        (m.edgeList),
+    _bPoints        (m._bPoints),
+    switches        (m.switches),
+#ifdef SAVEMEMORY
+    _VToF           (m._VToF),
+    _VToE           (m._VtoE),
+#else
+    _VToF           (m._VToF),
+    _VToE           (m._VToE),
+#endif
+#ifdef NOT_BDATA_FIRST
+    _bFaces         (m._bFaces),
+    _bEdges         (m._bEdges),
+#endif
+    // Internal counters
+    _numVolumes     (m._numVolumes),
+    _numVertices    (m._numVertices),
+    _numBVertices   (m._numBVertices),
+    _numPoints      (m._numPoints),
+    _numBPoints     (m._numBPoints),
+    _numFaces       (m._numFaces),
+    _numBFaces      (m._numBFaces),
+    _numEdges       (m._numEdges),
+    _numBEdges      (m._numBEdges),
+    _moved          (m._moved)
   {
-    ASSERT0( true, "Copy Costructor Not Yet Implemented for RegionMesh3D" ) ;
+//       for ( ID k = 1; k <= _numVolumes; ++k )
+//       {    for ( ID i = 1; i <= ElementShape::numVertices; ++i )
+//           std::cout << "(" << volume( k ).point( i ).id() << " " << m.volume( k ).point( i ).id() << ")";
+//       std::cout << std::endl;
+//       }
+//    ASSERT0( true, "Copy Costructor Not Yet Implemented for RegionMesh3D" ) ;
   }
 
   template <typename GEOSHAPE, typename MC>
   RegionMesh3D<GEOSHAPE, MC>
   RegionMesh3D<GEOSHAPE, MC>::operator=( RegionMesh3D<GEOSHAPE, MC> const & m )
   {
-    ASSERT0( true, "Assignement Operator  Yet Not Implemented for RegionMesh3d" ) ;
   }
 
   template <typename GEOSHAPE, typename MC>
   RegionMesh3D<GEOSHAPE, MC>::~RegionMesh3D()
-  {}
+  {
+  }
 
 
 
@@ -2334,8 +2365,8 @@ namespace LifeV
       {
         // We want that the first edges be those on the boundary, in order to obay the paradigm for
         // a RegionMesh3D
-        for ( typename Faces::iterator ifa = faceList.begin();
-	      ifa != faceList.begin() + _numBFaces; ++ifa )
+          for ( typename Faces::iterator ifa = faceList.begin();
+                ifa != faceList.begin() + _numBFaces; ++ifa )
 	  {
             for ( UInt j = 1;j <= numLocalEdgesOfFace();j++ )
 	      {
@@ -2576,7 +2607,7 @@ namespace LifeV
 		  {
                     // a new face It must be internal.
                     for ( UInt k = 1;k <= FaceType::numPoints;++k )
-		      face.setPoint( k, iv->point( ele.fToP( j, k ) ) );
+                        face.setPoint( k, iv->point( ele.fToP( j, k ) ) );
                     face.ad_first() = vid;
                     face.pos_first() = j;
                     // gets the marker from the RegionMesh

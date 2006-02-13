@@ -78,7 +78,7 @@ Geo0D::showMe( bool verbose, std::ostream & out ) const
         unsigned i;
         out << " Coordinates:" << std::endl;
         Real const * c = coor();
-        for ( i = 0; i < nDimensions-1; i++ )    
+        for ( i = 0; i < nDimensions-1; i++ )
         {
             out << c[ i ] << ",  ";
         }

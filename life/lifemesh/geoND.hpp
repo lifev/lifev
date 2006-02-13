@@ -15,7 +15,7 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 /*! file geoND.h */
 #ifndef _GEOND_HH_
 #define _GEOND_HH_
@@ -26,11 +26,9 @@
 namespace LifeV
 {
 /*!  Base class for Multi-dimensional basis Geometrical Entities.
- 
   It has no boundary information, since the GeoXD boundary items will be
   ALWAYS stored first on the corresponding RegionMesh List. This is a
   paradigm of our code.
- 
 */
 template <typename GEOSHAPE, typename POINTTYPE = Geo0D>
 class GeoND

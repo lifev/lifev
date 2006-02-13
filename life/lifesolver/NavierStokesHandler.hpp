@@ -67,8 +67,8 @@ namespace LifeV
 */
 
 template <typename Mesh, typename DataType = DataNavierStokes<Mesh> >
-class NavierStokesHandler:
-            public DataType
+class NavierStokesHandler//:
+//            public DataType
 {
 
 public:
@@ -86,6 +86,7 @@ public:
     typedef __gnu_cxx::slist< std::pair< ID, SimpleVect< ID > > > face_dof_type;
     typedef face_dof_type::const_iterator const_face_dof_iterator_type;
 
+//    typedef typename NSStabilization NSStabilization;
     //! Constructors
     /*!
       \param data_file GetPot data file
@@ -99,6 +100,16 @@ public:
       \param ord_bdf order of the bdf time advancing scheme and incremental pressure approach (default: Backward Euler)
     */
     NavierStokesHandler( const GetPot&   data_file,
+                         const RefFE&    refFE_u,
+                         const RefFE&    refFE_p,
+                         const QuadRule& Qr_u,
+                         const QuadRule& bdQr_u,
+                         const QuadRule& Qr_p,
+                         const QuadRule& bdQr_p,
+                         BCHandler&      BCh_u );
+
+    NavierStokesHandler( const GetPot&   data_file,
+                         const DataNavierStokes<Mesh>& dataNavierStokes,
                          const RefFE&    refFE_u,
                          const RefFE&    refFE_p,
                          const QuadRule& Qr_u,
@@ -161,8 +172,40 @@ public:
     //! Update convective term, bc treatment and solve the linearized ns system
     virtual void iterate( const Real& time ) = 0;
 
+    // DataStokes accessors 
     //! returns the mesh
-    mesh_type& mesh() { return this->_mesh;}
+//@@    mesh_type& mesh() { return this->_mesh;}
+    const DataType & dataType() const {return M_dataType;}
+
+    mesh_type& mesh()             {return M_dataType.mesh();}
+    const mesh_type& mesh() const {return M_dataType.mesh();}
+
+    std::string meshDir() {return M_dataType.meshDir();}
+    std::string meshFile(){return M_dataType.meshFile();}
+
+    Real        dt()   {return M_dataType.timestep();}
+    Real  timestep()   {return M_dataType.timestep();}
+    Real  inittime()   {return M_dataType.inittime();}
+    Real   endtime()   {return M_dataType.endtime();}
+    Real   density()   {return M_dataType.density();}
+    Real viscosity()   {return M_dataType.viscosity();}
+
+    unsigned int order_bdf() const {return M_dataType.order_bdf();}
+
+    void showMe()  {return M_dataType.showMe();}
+    UInt verbose() {return M_dataType.verbose();}
+    Real factor()  {return M_dataType.factor();}
+
+    NSStabilization stabilization(){return M_dataType.stabilization();}
+
+    UInt computeMeanValuesPerSection(){return M_dataType.computeMeanValuesPerSection();}
+
+    UInt NbZSections()                {return M_dataType.NbZSections();}
+    Real ToleranceSection()           {return M_dataType.ToleranceSection();}
+    Real XSectionFrontier()           {return M_dataType.XSectionFrontier();}
+    Real ZSectionInit()               {return M_dataType.ZSectionInit();}
+    Real ZSectionFinal()              {return M_dataType.ZSectionFinal();}
+    UInt NbPolygonEdges()             {return M_dataType.NbPolygonEdges();}
 
     //! Returns the velocity vector
     PhysVectUnknown<Vector>& u();
@@ -324,6 +367,10 @@ public:
 
 protected:
 
+    //! data for NS solvers
+
+    DataType      M_dataType;
+
     //! source term for NS
     source_type _M_source;
 
@@ -443,11 +490,11 @@ NavierStokesHandler( const GetPot& data_file, const RefFE& refFE_u,
                      const RefFE& refFE_p, const QuadRule& Qr_u,
                      const QuadRule& bdQr_u, const QuadRule& Qr_p,
                      const QuadRule& bdQr_p, BCHandler& BCh_u ) :
-    DataType                           ( data_file ),
+    M_dataType                           ( data_file ),
     _refFE_u                           ( refFE_u ),
     _refFE_p                           ( refFE_p ),
-    _dof_u                             ( this->_mesh, _refFE_u ),
-    _dof_p                             ( this->_mesh, _refFE_p ),
+    _dof_u                             ( this->mesh(), _refFE_u ),
+    _dof_p                             ( this->mesh(), _refFE_p ),
     _dim_u                             ( _dof_u.numTotalDof() ),
     _dim_p                             ( _dof_p.numTotalDof() ),
     _Qr_u                              ( Qr_u ),
@@ -455,18 +502,18 @@ NavierStokesHandler( const GetPot& data_file, const RefFE& refFE_u,
     _Qr_p                              ( Qr_p ),
     _bdQr_p                            ( bdQr_p ),
     _fe_u                              ( _refFE_u,
-                                         getGeoMap( this->_mesh ),
+                                         getGeoMap( this->mesh() ),
                                          _Qr_u ),
     _feBd_u                            ( _refFE_u.boundaryFE(),
-                                         getGeoMap( this->_mesh ).boundaryMap(),
+                                         getGeoMap( this->mesh() ).boundaryMap(),
                                          _bdQr_u ),
     _fe_p                              ( _refFE_p,
-                                         getGeoMap( this->_mesh ),
+                                         getGeoMap( this->mesh() ),
                                          _Qr_p ),
     _u                                 ( _dim_u ),
     _p                                 ( _dim_p ),
-    _bdf                               ( this->_order_bdf ),
-    _ns_post_proc                      ( this->_mesh, _feBd_u, _dof_u, NDIM ),
+    _bdf                               ( this->order_bdf() ),
+    _ns_post_proc                      ( this->mesh(), _feBd_u, _dof_u, NDIM ),
     _count                             ( 0 ),
     //! stuff to compute the fluxes at each section (ex. of mesh: tube20.mesh)
     M_nb_sections                      ( this->NbZSections() ),
@@ -482,6 +529,7 @@ NavierStokesHandler( const GetPot& data_file, const RefFE& refFE_u,
     M_out_pressure                     ("Pressure.res"),
     M_BCh_fluid                        ( &BCh_u )
 {
+    std::cout << "Old fluid constructor ... " << std::endl;
     if ( this->computeMeanValuesPerSection() == 1 )
         initializeMeanValuesPerSection();
     /*
@@ -490,6 +538,66 @@ NavierStokesHandler( const GetPot& data_file, const RefFE& refFE_u,
     */
 }
 
+
+// Constructors
+template <typename Mesh, typename DataType>
+NavierStokesHandler<Mesh, DataType>::
+NavierStokesHandler( const GetPot& data_file,
+                     const DataNavierStokes<Mesh>& dataNavierStokes,
+                     const RefFE& refFE_u,
+                     const RefFE& refFE_p,
+                     const QuadRule& Qr_u,
+                     const QuadRule& bdQr_u,
+                     const QuadRule& Qr_p,
+                     const QuadRule& bdQr_p,
+                     BCHandler& BCh_u ) :
+    M_dataType                         ( dataNavierStokes ),
+    _refFE_u                           ( refFE_u ),
+    _refFE_p                           ( refFE_p ),
+    _dof_u                             ( this->mesh(), _refFE_u ),
+    _dof_p                             ( this->mesh(), _refFE_p ),
+    _dim_u                             ( _dof_u.numTotalDof() ),
+    _dim_p                             ( _dof_p.numTotalDof() ),
+    _Qr_u                              ( Qr_u ),
+    _bdQr_u                            ( bdQr_u ),
+    _Qr_p                              ( Qr_p ),
+    _bdQr_p                            ( bdQr_p ),
+    _fe_u                              ( _refFE_u,
+                                         getGeoMap( this->mesh() ),
+                                         _Qr_u ),
+    _feBd_u                            ( _refFE_u.boundaryFE(),
+                                         getGeoMap( this->mesh() ).boundaryMap(),
+                                         _bdQr_u ),
+    _fe_p                              ( _refFE_p,
+                                         getGeoMap( this->mesh() ),
+                                         _Qr_p ),
+    _u                                 ( _dim_u ),
+    _p                                 ( _dim_p ),
+    _bdf                               ( this->order_bdf() ),
+    _ns_post_proc                      ( this->mesh(), _feBd_u, _dof_u, NDIM ),
+    _count                             ( 0 ),
+    //! stuff to compute the fluxes at each section (ex. of mesh: tube20.mesh)
+    M_nb_sections                      ( this->NbZSections() ),
+    M_z_section                        ( M_nb_sections ),
+    M_list_of_faces_on_section_velocity( M_nb_sections ),
+    M_list_of_faces_on_section_pressure( M_nb_sections ),
+    M_list_of_points_on_boundary       ( M_nb_sections ),
+    M_out_areas                        ("Areas.res"),
+#if COMPUTE_POLYGONAL_AREA
+    M_out_areas_polygon                ("AreasPolygon.res"),
+#endif
+    M_out_fluxes                       ("Fluxes.res"),
+    M_out_pressure                     ("Pressure.res"),
+    M_BCh_fluid                        ( &BCh_u )
+{
+    std::cout << "New fluid constructor ... " << std::endl;
+    if ( this->computeMeanValuesPerSection() == 1 )
+        initializeMeanValuesPerSection();
+    /*
+    //! for simple bifurcation mesh
+        initializeSectionsBifurc();
+    */
+}
 
 
 
@@ -502,11 +610,11 @@ NavierStokesHandler( const GetPot&   data_file,
                      const QuadRule& bdQr_u,
                      const QuadRule& Qr_p,
                      const QuadRule& bdQr_p) :
-    DataType                           ( data_file ),
+    M_dataType                         ( data_file ),
     _refFE_u                           ( refFE_u ),
     _refFE_p                           ( refFE_p ),
-    _dof_u                             ( this->_mesh, _refFE_u ),
-    _dof_p                             ( this->_mesh, _refFE_p ),
+    _dof_u                             ( this->mesh(), _refFE_u ),
+    _dof_p                             ( this->mesh(), _refFE_p ),
     _dim_u                             ( _dof_u.numTotalDof() ),
     _dim_p                             ( _dof_p.numTotalDof() ),
     _Qr_u                              ( Qr_u ),
@@ -514,18 +622,18 @@ NavierStokesHandler( const GetPot&   data_file,
     _Qr_p                              ( Qr_p ),
     _bdQr_p                            ( bdQr_p ),
     _fe_u                              ( _refFE_u,
-                                         getGeoMap( this->_mesh ),
+                                         getGeoMap( this->mesh() ),
                                          _Qr_u ),
     _feBd_u                            ( _refFE_u.boundaryFE(),
-                                         getGeoMap( this->_mesh ).boundaryMap(),
+                                         getGeoMap( this->mesh() ).boundaryMap(),
                                          _bdQr_u ),
     _fe_p                              ( _refFE_p,
-                                         getGeoMap( this->_mesh ),
+                                         getGeoMap( this->mesh() ),
                                          _Qr_p ),
     _u                                 ( _dim_u ),
     _p                                 ( _dim_p ),
-    _bdf                               ( this->_order_bdf ),
-    _ns_post_proc                      ( this->_mesh, _feBd_u, _dof_u, NDIM ),
+    _bdf                               ( this->order_bdf() ),
+    _ns_post_proc                      ( this->mesh(), _feBd_u, _dof_u, NDIM ),
     _count                             ( 0 ),
     //! stuff to compute the fluxes at each section (ex. of mesh: tube20.mesh)
     M_nb_sections                      ( this->NbZSections() ),
@@ -542,6 +650,7 @@ NavierStokesHandler( const GetPot&   data_file,
     // fluid Bc conditions
     M_BCh_fluid                        ( 0 )
 {
+    std::cout << "New fluid constructor (2) ... " << std::endl;
     if ( this->computeMeanValuesPerSection() == 1 )
         initializeMeanValuesPerSection();
 }
@@ -626,10 +735,10 @@ NavierStokesHandler<Mesh, DataType>::postProcess()
 
     ++_count;
 
-    if ( fmod( float( _count ), float( this->_verbose ) ) == 0.0 )
+    if ( fmod( float( _count ), float( this->verbose() ) ) == 0.0 )
     {
         std::cout << "  F-  Post-processing \n";
-        index << ( _count / this->_verbose );
+        index << ( _count / this->verbose() );
 
         switch ( index.str().size() )
         {
@@ -645,25 +754,25 @@ NavierStokesHandler<Mesh, DataType>::postProcess()
         }
 
         // postprocess data file for GMV
-        wr_gmv_ascii( "test." + name + ".inp", this->_mesh, _dim_u,
+        wr_gmv_ascii( "test." + name + ".inp", this->mesh(), _dim_u,
                       _u.giveVec(), _p.giveVec() );
 
         // postprocess data file for medit
         wr_medit_ascii_scalar( "press." + name + ".bb", _p.giveVec(),
                                _p.size() );
         wr_medit_ascii_scalar( "vel_x." + name + ".bb", _u.giveVec(),
-                               this->_mesh.numVertices() );
+                               this->mesh().numVertices() );
         wr_medit_ascii_scalar( "vel_y." + name + ".bb", _u.giveVec() + _dim_u,
-                               this->_mesh.numVertices() );
+                               this->mesh().numVertices() );
         wr_medit_ascii_scalar( "vel_z." + name + ".bb", _u.giveVec()+2*_dim_u,
-                               this->_mesh.numVertices() );
-        system( ( "ln -s " + this->_mesh_dir + this->_mesh_file +
+                               this->mesh().numVertices() );
+        system( ( "ln -s " + this->meshDir() + this->meshFile() +
                   " press." + name + ".mesh" ).data() );
-        system( ( "ln -s " + this->_mesh_dir + this->_mesh_file +
+        system( ( "ln -s " + this->meshDir() + this->meshFile() +
                   " vel_x." + name + ".mesh" ).data() );
-        system( ( "ln -s " + this->_mesh_dir + this->_mesh_file +
+        system( ( "ln -s " + this->meshDir() + this->meshFile() +
                   " vel_y." + name + ".mesh" ).data() );
-        system( ( "ln -s " + this->_mesh_dir + this->_mesh_file +
+        system( ( "ln -s " + this->meshDir() + this->meshFile() +
                   " vel_z." + name + ".mesh" ).data() );
     }
 }
@@ -681,10 +790,10 @@ NavierStokesHandler<Mesh, DataType>::dx_write_sol( std::string const& file_sol,
     std::string file_vel = file_sol + "_vel.dx";
     std::string file_pre = file_sol + "_pre.dx";
 
-    wr_opendx_header( file_pre, this->_mesh, _dof_p, _fe_p, fe_type_pre );
+    wr_opendx_header( file_pre, this->mesh(), _dof_p, _fe_p, fe_type_pre );
     wr_opendx_scalar( file_pre, "pression", _p );
 
-    wr_opendx_header( file_vel, this->_mesh, _dof_u, _fe_u, fe_type_vel );
+    wr_opendx_header( file_vel, this->mesh(), _dof_u, _fe_u, fe_type_vel );
     wr_opendx_vector( file_vel, "velocity", _u, _u.nbcomp() );
 
 }
@@ -725,13 +834,13 @@ NavierStokesHandler<Mesh, DataType>::initialize( const Function& u0, const Funct
     ID nbComp = _u.nbcomp(); // Number of components of the velocity
 
 
-    _bdf.bdf_u().initialize_unk( u0, this->_mesh, _refFE_u, _fe_u, _dof_u, t0,
+    _bdf.bdf_u().initialize_unk( u0, this->mesh(), _refFE_u, _fe_u, _dof_u, t0,
                                  dt, nbComp );
 
     // initialize _u with the first element in bdf_u.unk (=last value)
     _u = *( _bdf.bdf_u().unk().begin() );
 
-    _bdf.bdf_p().initialize_unk( p0, this->_mesh, _refFE_p, _fe_p, _dof_p, t0,
+    _bdf.bdf_p().initialize_unk( p0, this->mesh(), _refFE_p, _fe_p, _dof_p, t0,
                                  dt, 1 );
 
     // initialize _p with the first element in bdf_p.unk (=last value)
@@ -953,7 +1062,7 @@ NavierStokesHandler<Mesh, DataType>::FacesOnFlag( const EntityFlag& __flag ,
         + __reffe.nbDofPerEdge * nFaceE
         + __reffe.nbDofPerFace;
 
-    UInt bdnF = this->_mesh.numBFaces();    // number of faces on boundary
+    UInt bdnF = this->mesh().numBFaces();    // number of faces on boundary
 
     EntityFlag marker;
     typedef face_dof_type::iterator FaceDofIterator;
@@ -964,7 +1073,7 @@ NavierStokesHandler<Mesh, DataType>::FacesOnFlag( const EntityFlag& __flag ,
     //
     for ( ID i = 1 ; i <= bdnF; ++i )
     {
-        marker = this->_mesh.boundaryFace( i ).marker();
+        marker = this->mesh().boundaryFace( i ).marker();
         if ( marker == __flag )
         {
             __faces_on_flag.push_front( make_pair( i, SimpleVect<ID>( nDofF ) ) );
@@ -1016,7 +1125,7 @@ NavierStokesHandler<Mesh, DataType>::FacesOnSection( const SimpleVect<Real> &  _
     //! geometrical data for faces
     UInt nFaceV = GeoBShape::numVertices; // Number of face's vertices
     UInt nFaceE = GeoBShape::numEdges;    // Number of face's edges
-    UInt nF = this->_mesh.numFaces();    // number of faces (all faces)
+    UInt nF = this->mesh().numFaces();    // number of faces (all faces)
 
     //! dof per face for u
     UInt nDofF_u =
@@ -1052,20 +1161,20 @@ NavierStokesHandler<Mesh, DataType>::FacesOnSection( const SimpleVect<Real> &  _
     //! search the faces on a given horizontal section
     //! loop on all faces
     for( ID iface = 1 ; iface <= nF ; iface ++ ) {
-        iglobface = this->_mesh.faceList(iface).id();
+        iglobface = this->mesh().faceList(iface).id();
 
         //! 3 points on the faces
-        Real x_VeFa1 = this->_mesh.faceList(iface).point( 1 ).x();
-        Real y_VeFa1 = this->_mesh.faceList(iface).point( 1 ).y();
-        Real z_VeFa1 = this->_mesh.faceList(iface).point( 1 ).z();
+        Real x_VeFa1 = this->mesh().faceList(iface).point( 1 ).x();
+        Real y_VeFa1 = this->mesh().faceList(iface).point( 1 ).y();
+        Real z_VeFa1 = this->mesh().faceList(iface).point( 1 ).z();
 
-        Real x_VeFa2 = this->_mesh.faceList(iface).point( 2 ).x();
-        Real y_VeFa2 = this->_mesh.faceList(iface).point( 2 ).y();
-        Real z_VeFa2 = this->_mesh.faceList(iface).point( 2 ).z();
+        Real x_VeFa2 = this->mesh().faceList(iface).point( 2 ).x();
+        Real y_VeFa2 = this->mesh().faceList(iface).point( 2 ).y();
+        Real z_VeFa2 = this->mesh().faceList(iface).point( 2 ).z();
 
-        Real x_VeFa3 = this->_mesh.faceList(iface).point( 3 ).x();
-        Real y_VeFa3 = this->_mesh.faceList(iface).point( 3 ).y();
-        Real z_VeFa3 = this->_mesh.faceList(iface).point( 3 ).z();
+        Real x_VeFa3 = this->mesh().faceList(iface).point( 3 ).x();
+        Real y_VeFa3 = this->mesh().faceList(iface).point( 3 ).y();
+        Real z_VeFa3 = this->mesh().faceList(iface).point( 3 ).z();
 
         //! check the tolerance here (depends on the mesh)
         if ( std::fabs( a_plane * x_VeFa1 + b_plane * y_VeFa1 + c_plane * z_VeFa1 + d_plane ) < __tolerance_section &&
@@ -1109,7 +1218,7 @@ NavierStokesHandler<Mesh, DataType>::FacesOnSection( const SimpleVect<Real> &  _
 
                 ID iVeFa = 1;
                 while ( ! _found_point && iVeFa <= nFaceV ) {
-                    Real x_VeFa = this->_mesh.faceList(iface).point( iVeFa ).x();
+                    Real x_VeFa = this->mesh().faceList(iface).point( iVeFa ).x();
                     if ( std::fabs( x_VeFa - __x_frontier ) < __tolerance_section ) {
                         __point_on_boundary = std::pair<ID, ID>( iglobface , iVeFa );
                         _found_point = true;
@@ -1176,10 +1285,10 @@ NavierStokesHandler<Mesh, DataType>::_updateDofFaces( face_dof_type & __faces_on
         iFace = j->first;
 
         // id of the element adjacent to the face
-        iElAd = this->_mesh.boundaryFace( iFace ).ad_first();
+        iElAd = this->mesh().boundaryFace( iFace ).ad_first();
 
         // local id of the face in its adjacent element
-        iFaEl = this->_mesh.boundaryFace( iFace ).pos_first();
+        iFaEl = this->mesh().boundaryFace( iFace ).pos_first();
 
         // Vertex based Dof
         if ( nDofpV )
@@ -1271,7 +1380,7 @@ NavierStokesHandler<Mesh, DataType>::AreaCylindric( const std::pair<ID, ID> & __
     ID iglobface = __point_on_boundary.first;
     ID iVeFa     = __point_on_boundary.second;
 
-    Real radius = this->_mesh.faceList(iglobface).point( iVeFa ).x();
+    Real radius = this->mesh().faceList(iglobface).point( iVeFa ).x();
 
     return  0.5 * __nb_edge_polygon * radius * radius * std::sin( 2. * LifeV::Pi / __nb_edge_polygon );
 }
@@ -1335,7 +1444,7 @@ NavierStokesHandler<Mesh, DataType>::AreaAndFlux( const face_dof_type & __faces_
         }
 
         // Updating quadrature data on the current face
-        _feBd_u.updateMeasNormalQuadPt( this->_mesh.boundaryFace( j->first ) );
+        _feBd_u.updateMeasNormalQuadPt( this->mesh().boundaryFace( j->first ) );
 
         __area += _feBd_u.measure();
 
@@ -1414,7 +1523,7 @@ NavierStokesHandler<Mesh, DataType>::MeanPressure( const face_dof_type & __faces
     std::vector<Real> p_local( nDofF );
 
     //! define the boundary fe for the pressure
-    CurrentBdFE __ThefeBd_p( _refFE_p.boundaryFE(), getGeoMap( this->_mesh ).boundaryMap(),
+    CurrentBdFE __ThefeBd_p( _refFE_p.boundaryFE(), getGeoMap( this->mesh() ).boundaryMap(),
                              _bdQr_p );
 
     Real area = 0.;
@@ -1430,7 +1539,7 @@ NavierStokesHandler<Mesh, DataType>::MeanPressure( const face_dof_type & __faces
         }
 
         // Updating quadrature data on the current face
-        __ThefeBd_p.updateMeasQuadPt( this->_mesh.boundaryFace( j->first ) );
+        __ThefeBd_p.updateMeasQuadPt( this->mesh().boundaryFace( j->first ) );
         area += __ThefeBd_p.measure();
 
         // Quadrature formula
@@ -1525,10 +1634,10 @@ void NavierStokesHandler<Mesh, DataType>::uInterpolate( const Function& uFct,
     ID lDof;
 
     // Loop on elements of the mesh
-    for ( ID iElem = 1; iElem <= this->_mesh.numVolumes(); ++iElem )
+    for ( ID iElem = 1; iElem <= this->mesh().numVolumes(); ++iElem )
     {
 
-        _fe_u.updateJac( this->_mesh.volume( iElem ) );
+        _fe_u.updateJac( this->mesh().volume( iElem ) );
 
         // Vertex based Dof
         if ( nDofpV )
@@ -1651,9 +1760,9 @@ Real NavierStokesHandler<Mesh, DataType>::pErrorL2( const Function& pexact,
     Real sum0 = 0.;
     Real sumExact2 = 0.;
     Real sumExact1 = 0.;
-    for ( UInt iVol = 1; iVol <= this->_mesh.numVolumes(); iVol++ )
+    for ( UInt iVol = 1; iVol <= this->mesh().numVolumes(); iVol++ )
     {
-        _fe_p.updateFirstDeriv( this->_mesh.volumeList( iVol ) );
+        _fe_p.updateFirstDeriv( this->mesh().volumeList( iVol ) );
         sum2 += elem_L2_diff_2( this->_p, pexact, this->_fe_p, this->_dof_p, time, 1 );
         sum1 += elem_integral_diff( this->_p, pexact, this->_fe_p, this->_dof_p, time, 1 );
         sum0 += _fe_p.measure();
@@ -1680,9 +1789,9 @@ Real NavierStokesHandler<Mesh, DataType>::uErrorL2( const Function& uexact,
     Real normU = 0.;
     UInt nbCompU = _u.nbcomp();
     Real sumExact = 0.;
-    for ( UInt iVol = 1; iVol <= this->_mesh.numVolumes(); iVol++ )
+    for ( UInt iVol = 1; iVol <= this->mesh().numVolumes(); iVol++ )
     {
-        _fe_u.updateFirstDeriv( this->_mesh.volumeList( iVol ) );
+        _fe_u.updateFirstDeriv( this->mesh().volumeList( iVol ) );
         normU += elem_L2_diff_2( _u, uexact, this->_fe_u, this->_dof_u, time,
                                  int( nbCompU ) );
         if (relError)
@@ -1703,7 +1812,7 @@ Real NavierStokesHandler<Mesh, DataType>::uErrorL2( const Function& uexact,
   BasePattern::PatternType NavierStokesHandler<Mesh, DataType>::patternType() {
 
     BasePattern::PatternType  pt = BasePattern::STANDARD_PATTERN;
-    if ( this->stabilization() == IP_STABILIZATION )
+    if ( M_dataType.stabilization() == IP_STABILIZATION )
       pt = BasePattern::EDGE_COUPLING_PATTERN;
     return pt;
   }
@@ -1720,7 +1829,7 @@ void NavierStokesHandler<Mesh, DataType>::initializeMeanValuesPerSection()
     //! (ex. of mesh: tube20.mesh)
     //---------------
 
-    if ( ! this->_mesh.hasInternalFaces() )
+    if ( ! this->mesh().hasInternalFaces() )
         ERROR_MSG("The mesh must have all internal faces built up. Check that 'mesh_faces = all' in the data file.");
     if ( M_nb_sections < 2 )
         ERROR_MSG("We can't compute the mean values on less than 2 sections.");
@@ -1777,7 +1886,7 @@ void NavierStokesHandler<Mesh, DataType>::initializeSectionsBifurc()
     //! (ex. of mesh: bif3d_*.mesh)
     //---------------
 
-    if ( ! this->_mesh.hasInternalFaces() )
+    if ( ! this->mesh().hasInternalFaces() )
         ERROR_MSG("The mesh must have all internal faces built up. Check that 'mesh_faces = all' in the data file.");
     if ( M_nb_sections != 3 )
         ERROR_MSG("We a priori know that the stent lives on 3 planar sections.");

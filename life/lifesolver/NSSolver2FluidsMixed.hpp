@@ -112,6 +112,8 @@ namespace LifeV {
         typedef MeshType mesh_type;
         typedef DataNS2Fluids<MeshType> data_type;
 
+        typedef typename DataNS2Fluids<mesh_type>::fluid_type fluidType;
+
         typedef LevelSetSolver<MeshType> lss_type;
         typedef typename lss_type::lsfunction_type lsfunction_type;
 
@@ -185,7 +187,7 @@ namespace LifeV {
         }
 
         const mesh_type& mesh() {
-            return this->_mesh;
+            return this->mesh();
         }
 
         const Dof& lsDof() {
@@ -337,6 +339,8 @@ namespace LifeV {
         */
 
         inline void advance_LS();
+
+
     };
 
     // Implementations
@@ -370,7 +374,7 @@ namespace LifeV {
         _M_elmat_G(this->fe_u().nbNode, NDIM, 0, this->fe_p().nbNode, 0, 1),
         _M_elmat_P(this->fe_u().nbNode, NDIM + 1, NDIM + 1),
         _M_elvec(this->fe_u().nbNode, NDIM),
-        _M_lss(this->_mesh, data_file, "levelset", refFE_lss, qr, bd_qr, bc_h_lss, this->_fe_u, this->_dof_u, this->_u),
+        _M_lss((mesh_type&) this->mesh(), data_file, "levelset", refFE_lss, qr, bd_qr, bc_h_lss, this->_fe_u, this->_dof_u, this->_u),
         _M_elvec_lss(_M_lss.fe().nbNode, 1),
         _M_rhs_u( NDIM * this->_dim_u),
         _M_rhs_p( this->_dim_p ),
@@ -425,6 +429,10 @@ namespace LifeV {
 
     template<typename MeshType>
     inline void NSSolver2FluidsMixed<MeshType>::advance_NS(source_type const& source, Real const& time) {
+
+        fluidType fluid1 = DataNS2Fluids<mesh_type>::fluid1;
+        fluidType fluid2 = DataNS2Fluids<mesh_type>::fluid2;
+
         // Set current time
         _M_time = time;
 
@@ -465,13 +473,13 @@ namespace LifeV {
         if(_M_verbose)
             std::cout << "[NSSolver2FluidsMixed::advance_NS] Assembling matrices" << std::endl;
 
-        for(UInt iVol = 1; iVol <= this->_mesh.numVolumes(); iVol++) {
+        for(UInt iVol = 1; iVol <= this->mesh().numVolumes(); iVol++) {
             __chrono.start();
 
             // Do proper element updates
-            this->fe_u().updateFirstDeriv( this->_mesh.volumeList( iVol ) );
-            this->fe_p().updateFirstDeriv( this->_mesh.volumeList( iVol ) );
-            _M_lss.fe().updateJac( this->_mesh.volumeList( iVol ) );
+            this->fe_u().updateFirstDeriv( this->mesh().volumeList( iVol ) );
+            this->fe_p().updateFirstDeriv( this->mesh().volumeList( iVol ) );
+            _M_lss.fe().updateJac( this->mesh().volumeList( iVol ) );
 
             _M_elmat_C.zero();
             _M_elmat_M.zero();
@@ -490,13 +498,13 @@ namespace LifeV {
             }
 
             // Stiffness strain
-            stiff_strain_2f(2. * this->viscosity(this->fluid1), 2. * this->viscosity(this->fluid2), _M_elvec_lss, _M_lss.fe(), _M_elmat_C, this->fe_u());
+            stiff_strain_2f(2. * this->dataType().viscosity(fluid1), 2. * this->dataType().viscosity(fluid2), _M_elvec_lss, _M_lss.fe(), _M_elmat_C, this->fe_u());
 
             // Mass
-            Real bdf_coeff = this->_bdf.bdf_u().coeff_der( 0 ) / this->_dt;
+            Real bdf_coeff = this->_bdf.bdf_u().coeff_der( 0 ) / this->dt();
             for(UInt iComp = 0; iComp < nbCompU; iComp++) {
-                lumped_mass_2f(this->density(this->fluid1), this->density(this->fluid2), _M_elvec_lss, _M_lss.fe(), _M_elmat_M, this->fe_u(), iComp, iComp);
-                lumped_mass_2f(bdf_coeff * this->density(this->fluid1), bdf_coeff * this->density(this->fluid2), _M_elvec_lss, _M_lss.fe(),
+                lumped_mass_2f(this->dataType().density(fluid1), this->dataType().density(fluid2), _M_elvec_lss, _M_lss.fe(), _M_elmat_M, this->fe_u(), iComp, iComp);
+                lumped_mass_2f(bdf_coeff * this->dataType().density(fluid1), bdf_coeff * this->dataType().density(fluid2), _M_elvec_lss, _M_lss.fe(),
                                _M_elmat_C, this->fe_u(), iComp, iComp);
             }
 
@@ -513,7 +521,7 @@ namespace LifeV {
             }
 
             // Advection
-            advection_2f(this->density(this->fluid1), this->density(this->fluid2), _M_elvec_lss, _M_lss.fe(), _M_elvec, _M_elmat_C, this->fe_u());
+            advection_2f(this->dataType().density(fluid1), this->dataType().density(fluid2), _M_elvec_lss, _M_lss.fe(), _M_elvec, _M_elmat_C, this->fe_u());
 #endif
             __chrono.stop();
             __cumul1 += __chrono.diff();
@@ -542,7 +550,7 @@ namespace LifeV {
 
                 // Source term
                 _M_elvec.zero();
-                compute_vec_2f(this->density(this->fluid1), this->density(this->fluid2), _M_elvec_lss, _M_lss.fe(), source, _M_elvec, this->fe_u(), _M_time, iComp);
+                compute_vec_2f(this->dataType().density(fluid1), this->dataType().density(fluid2), _M_elvec_lss, _M_lss.fe(), source, _M_elvec, this->fe_u(), _M_time, iComp);
                 assemb_vec(_M_rhs_u, _M_elvec, this->fe_u(), this->uDof(), iComp);
             }
 
@@ -559,10 +567,10 @@ namespace LifeV {
 
         // Lump mass matrix
         _M_M_L.lumpRowSum(_M_M);
-        _M_M_L_w = ( this->_bdf.bdf_u().coeff_der(0) / this->_dt ) *_M_M_L;
+        _M_M_L_w = ( this->_bdf.bdf_u().coeff_der(0) / this->dt() ) *_M_M_L;
 
         // Add RHS terms stemming from the time derivative
-        _M_rhs_u += prod( _M_M_L, this->_bdf.bdf_u().time_der(this->_dt) );
+        _M_rhs_u += prod( _M_M_L, this->_bdf.bdf_u().time_der(this->dt()) );
 
 #if L_DEBUG_MODE
         _M_C.spy( "./results/spyCbeforebc" );
@@ -575,9 +583,9 @@ namespace LifeV {
                       << std::endl;
 
         if (!this->bcHandler().bdUpdateDone())
-            this->bcHandler().bdUpdate(this->_mesh, this->_feBd_u, this->uDof());
+            this->bcHandler().bdUpdate(this->mesh(), this->_feBd_u, this->uDof());
 
-        bcManage(_M_C, _M_G, _M_rhs_u, this->_mesh, this->uDof(), this->bcHandler(), this->_feBd_u, 1.0, _M_time );
+        bcManage(_M_C, _M_G, _M_rhs_u, this->mesh(), this->uDof(), this->bcHandler(), this->_feBd_u, 1.0, _M_time );
 
         if(_M_verbose)
             std::cout << "[NSSolver2FluidsMixed::advance_NS] Computing discrete divergence operator"
@@ -632,8 +640,8 @@ namespace LifeV {
                                                     Real t0, Real delta_t)
     {
         UInt nbCompU = this->_u.nbcomp();
-        this->_bdf.bdf_u().initialize_unk(u0, this->_mesh, this->refFEu(), this->fe_u(), this->uDof(), t0, delta_t, nbCompU);
-        this->_bdf.bdf_p().initialize_unk(p0, this->_mesh, this->refFEp(), this->fe_p(), this->pDof(), t0, delta_t, 1);
+        this->_bdf.bdf_u().initialize_unk(u0, this->mesh(), this->refFEu(), this->fe_u(), this->uDof(), t0, delta_t, nbCompU);
+        this->_bdf.bdf_p().initialize_unk(p0, this->mesh(), this->refFEp(), this->fe_p(), this->pDof(), t0, delta_t, 1);
 
         // Initialize _u and _p
         this->_u = *(this->_bdf.bdf_u().unk().begin());

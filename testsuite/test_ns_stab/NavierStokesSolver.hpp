@@ -239,8 +239,8 @@ namespace LifeV
     NavierStokesHandler<Mesh>( dataFile, refFE, refFE, quadRule,
                                boundaryQuadRule, quadRule, boundaryQuadRule,
                                bcHandler ),
-    M_fullPattern( this->_dof_u, this->_mesh, nDimensions+1, this->patternType() ),
-    M_uPattern( this->_dof_u, this->_mesh, nDimensions, this->patternType() ),
+    M_fullPattern( this->_dof_u, this->mesh(), nDimensions+1, this->patternType() ),
+    M_uPattern( this->_dof_u, this->mesh(), nDimensions, this->patternType() ),
     M_matrMass( M_uPattern ),
     M_matrStokes( M_fullPattern ),
     M_matrFull( M_fullPattern ),
@@ -259,9 +259,9 @@ namespace LifeV
     M_betaFct( 0 ),
     M_constantPressure( ( nDimensions+1 )*this->_dim_u ),
     M_beta( nDimensions * this->_dim_u),
-    M_sdStab( dataFile, this->_mesh, this->_dof_u, this->_refFE_u, this->_Qr_u,
+    M_sdStab( dataFile, this->mesh(), this->_dof_u, this->_refFE_u, this->_Qr_u,
 	      this->viscosity() ),
-    M_ipStab( dataFile, this->_mesh, this->_dof_u, this->_refFE_u, this->_feBd_u, this->_Qr_u,
+    M_ipStab( dataFile, this->mesh(), this->_dof_u, this->_refFE_u, this->_feBd_u, this->_Qr_u,
 	      this->viscosity() )
   {
     M_steady = dataFile( "fluid/miscellaneous/steady", 1 );
@@ -269,14 +269,14 @@ namespace LifeV
     M_diagonalize = dataFile( "fluid/discretization/diagonalize", 1.);
 
     // check mesh for elements with all nodes on the boundary
-    UInt nLocalFaces = this->_mesh.numLocalFaces();
+    UInt nLocalFaces = this->mesh().numLocalFaces();
     UInt nFixedTets = 0;
-    for ( UInt iVol = 1; iVol <= this->_mesh.numVolumes(); iVol++ )
+    for ( UInt iVol = 1; iVol <= this->mesh().numVolumes(); iVol++ )
       {
         UInt nBoundaryFaces = 0;
         for ( UInt iLocalFace=1; iLocalFace<=nLocalFaces; ++iLocalFace )
 	  {
-            if ( this->_mesh.isBoundaryFace( this->_mesh.localFaceId( iVol, iLocalFace )))
+            if ( this->mesh().isBoundaryFace( this->mesh().localFaceId( iVol, iLocalFace )))
 	      {
                 ++nBoundaryFaces;
 	      }
@@ -288,7 +288,7 @@ namespace LifeV
       }
     if ( nFixedTets > 0 )
       {
-        std::cerr << "WARNING: " << nFixedTets << " of " << this->_mesh.numVolumes()
+        std::cerr << "WARNING: " << nFixedTets << " of " << this->mesh().numVolumes()
                   << " tetrahedrons have all nodes on the boundary."
                   << std::endl;
       }
@@ -330,13 +330,13 @@ namespace LifeV
     // Number of velocity components
     UInt nbCompU = this->_u.nbcomp();
 
-    Real bdfCoeff = this->_bdf.bdf_u().coeff_der( 0 ) / this->_dt;
+    Real bdfCoeff = this->_bdf.bdf_u().coeff_der( 0 ) / this->dt();
 
     // Elementary computation and matrix assembling
     // Loop on elements
-    for ( UInt iVol = 1; iVol <= this->_mesh.numVolumes(); iVol++ )
+    for ( UInt iVol = 1; iVol <= this->mesh().numVolumes(); iVol++ )
     {
-        this->_fe_u.updateFirstDeriv( this->_mesh.volumeList( iVol ) );
+        this->_fe_u.updateFirstDeriv( this->mesh().volumeList( iVol ) );
 
         M_elmatC.zero();
         M_elmatMass.zero();
@@ -344,13 +344,13 @@ namespace LifeV
         M_elmatDtr.zero();
 
         // stiffness strain
-        stiff_strain( 2.0*this->_mu, M_elmatC, this->_fe_u );
+        stiff_strain( 2.0*this->viscosity(), M_elmatC, this->_fe_u );
         //stiff_div( 0.5*_fe_u.diameter(), M_elmatC, _fe_u );
 
         // mass
         if ( !M_steady )
         {
-            mass( this->_rho*bdfCoeff, M_elmatMass, this->_fe_u, 0, 0, nDimensions );
+            mass( this->density()*bdfCoeff, M_elmatMass, this->_fe_u, 0, 0, nDimensions );
             M_elmatC.mat() += M_elmatMass.mat();
             M_elmatMass.mat() *= ( 1./bdfCoeff );
         }
@@ -408,10 +408,10 @@ namespace LifeV
     M_rhsU = ZeroVector( M_rhsU.size() );
 
     // loop on volumes: assembling source term
-    for ( UInt iVol = 1; iVol<= this->_mesh.numVolumes(); ++iVol )
+    for ( UInt iVol = 1; iVol<= this->mesh().numVolumes(); ++iVol )
     {
         M_elvec.zero();
-        this->_fe_u.updateJacQuadPt( this->_mesh.volumeList( iVol ) );
+        this->_fe_u.updateJacQuadPt( this->mesh().volumeList( iVol ) );
 
         for ( UInt iComp = 0; iComp<nbCompU; ++iComp )
         {
@@ -424,7 +424,7 @@ namespace LifeV
     }
 
     if ( !M_steady )
-      M_rhsU += M_matrMass * this->_bdf.bdf_u().time_der( this->_dt );
+      M_rhsU += M_matrMass * this->_bdf.bdf_u().time_der( this->dt() );
 
     M_rhsFull = ZeroVector( M_rhsFull.size() );
 
@@ -439,9 +439,9 @@ namespace LifeV
     if ( M_betaFct )
       this->uInterpolate( *M_betaFct, M_beta, M_time );
     else if ( M_steady )
-      M_beta = this->_rho * this->_u; // last iteration
+      M_beta = this->density() * this->_u; // last iteration
     else
-      M_beta = this->_rho * this->_bdf.bdf_u().extrap(); // bdf extrapolation
+      M_beta = this->density() * this->_bdf.bdf_u().extrap(); // bdf extrapolation
 
 
     switch ( this->stabilization() )
@@ -451,7 +451,7 @@ namespace LifeV
       case SD_STABILIZATION:
 	std::cout << "  o-  Updating SD stabilization terms (rhs)...          "
 		  << std::flush;
-	M_sdStab.apply(this->_dt,M_rhsFull, M_beta, source, M_time);
+	M_sdStab.apply(this->dt(),M_rhsFull, M_beta, source, M_time);
 	break;
       default:
 	ERROR_MSG("This stabilization is not yet implemented");
@@ -489,9 +489,9 @@ namespace LifeV
     chrono.start();
 
     // loop on volumes
-    for ( UInt iVol = 1; iVol<= this->_mesh.numVolumes(); ++iVol )
+    for ( UInt iVol = 1; iVol<= this->mesh().numVolumes(); ++iVol )
       {
-        this->_fe_u.updateFirstDeriv( this->_mesh.volumeList( iVol ) ); //as updateFirstDer
+        this->_fe_u.updateFirstDeriv( this->mesh().volumeList( iVol ) ); //as updateFirstDer
 
         M_elmatC.zero();
 
@@ -541,7 +541,7 @@ namespace LifeV
       case SD_STABILIZATION:
 	std::cout << "  o-  Updating SD stabilization terms (matrix)...          "
 		  << std::flush;
-	M_sdStab.apply(this->_dt, M_matrFull, M_beta );
+	M_sdStab.apply(this->dt(), M_matrFull, M_beta );
 	break;
       default:
 	ERROR_MSG("This stabilization is not yet implemented");
@@ -562,8 +562,8 @@ namespace LifeV
 
     // BC manage for the velocity
     if ( !this->bcHandler().bdUpdateDone() )
-      this->bcHandler().bdUpdate( this->_mesh, this->_feBd_u, this->_dof_u );
-    bcManage( M_matrFull, M_rhsFull, this->_mesh, this->_dof_u, this->bcHandler(),
+      this->bcHandler().bdUpdate( this->mesh(), this->_feBd_u, this->_dof_u );
+    bcManage( M_matrFull, M_rhsFull, this->mesh(), this->_dof_u, this->bcHandler(),
 	      this->_feBd_u, 1.0, M_time );
 
     if ( this->bcHandler().hasOnlyEssential() && M_diagonalize )
@@ -647,7 +647,7 @@ namespace LifeV
 					       Real t0, Real dt )
   {
     ID nbComp = this->_u.nbcomp(); // Number of components of the velocity
-    this->_bdf.bdf_u().initialize_unk( x0, this->_mesh, this->_refFE_u, this->_fe_u, this->_dof_u, t0,
+    this->_bdf.bdf_u().initialize_unk( x0, this->mesh(), this->_refFE_u, this->_fe_u, this->_dof_u, t0,
                                  dt, nbComp+1 );
 
     // initialize M_sol with the first element in bdf_u.unk (=last value)
@@ -726,9 +726,9 @@ namespace LifeV
   {
     Real sum1 = 0.;
     Real sum0 = 0.;
-    for ( UInt iVol = 1; iVol <= this->_mesh.numVolumes(); iVol++ )
+    for ( UInt iVol = 1; iVol <= this->mesh().numVolumes(); iVol++ )
       {
-        this->_fe_p.updateFirstDeriv( this->_mesh.volumeList( iVol ) );
+        this->_fe_p.updateFirstDeriv( this->mesh().volumeList( iVol ) );
         sum1 += elem_integral( x, this->_fe_p, this->_dof_p, comp );
         sum0 += this->_fe_p.measure();
       }
@@ -749,7 +749,7 @@ namespace LifeV
     Real liftCoeff = 0;
 
     for (ID i=1; i <= this->_dim_u; ++i)
-      if (this->_mesh.pointList( i ).marker() == marker)
+      if (this->mesh().pointList( i ).marker() == marker)
 	liftCoeff += M_res[ this->_dim_u + i-1 ];
 
     return liftCoeff;

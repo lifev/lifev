@@ -31,7 +31,11 @@ class MeshEntity
 {
 public:
     MeshEntity() : _id( 0 )
-    {}
+        {}
+    ;
+    MeshEntity(const MeshEntity& meshEntity):
+        _id(meshEntity._id)
+        {}
     ;
     MeshEntity( ID i ) : _id( i )
     {}
@@ -69,6 +73,11 @@ public:
     MeshEntityWithBoundary() : MeshEntity(), _boundary( false )
     {}
     ;
+    MeshEntityWithBoundary( const MeshEntityWithBoundary& meshEntityWithBoundary ) :
+        MeshEntity( meshEntityWithBoundary ),
+        _boundary( meshEntityWithBoundary._boundary )
+    {}
+    ;
     MeshEntityWithBoundary( ID i, bool boundary = false ) : MeshEntity( i ), _boundary( boundary )
     {}
     ;
@@ -93,6 +102,11 @@ class OrientedMeshEntity: public MeshEntity
 {
 public:
     OrientedMeshEntity() : MeshEntity(), _orient( true )
+    {}
+    ;
+    OrientedMeshEntity(const OrientedMeshEntity& orientedMeshEntity) :
+        MeshEntity( orientedMeshEntity ),
+        _orient(orientedMeshEntity._orient )
     {}
     ;
     OrientedMeshEntity( ID i, bool o = true ) : MeshEntity( i ), _orient( o )

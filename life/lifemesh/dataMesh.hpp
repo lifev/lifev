@@ -54,25 +54,25 @@ public:
     */
     DataMesh( const GetPot& dfile, const std::string& section = "discretization" );
 
+    DataMesh(const DataMesh &dataMesh);
     //! Output
     virtual void showMe( std::ostream& c = std::cout ) const;
 
-
-  std::string meshDir() {return _mesh_dir;}
-  std::string meshFile() {return _mesh_file;}
-  
+    std::string meshDir() {return _mesh_dir;}
+    std::string meshFile() {return _mesh_file;}
 
     //! The mesh
     Mesh& mesh();
-
-
-
-
+    const Mesh& mesh() const;
 
     //! Virtual destructor
     virtual ~DataMesh();
 
 protected:
+
+    //! operator
+    DataMesh DataMesh::operator = (const DataMesh &dataMesh)
+        {};
 
     //! mesh
     std::string _mesh_dir;   // mesh dir
@@ -81,7 +81,6 @@ protected:
     std::string _mesh_faces; // update all mesh faces
     std::string _mesh_edges; // update all mesh edges
     Mesh _mesh;       // the mesh
-
 };
 
 
@@ -123,6 +122,27 @@ DataMesh( const GetPot& dfile, const std::string& section )
 
 }
 
+template <typename Mesh>
+DataMesh<Mesh>::
+DataMesh( const DataMesh& dataMesh ):
+    _mesh_dir    (dataMesh._mesh_dir),
+    _mesh_file   (dataMesh._mesh_file),
+    _mesh_type   (dataMesh._mesh_type),
+    _mesh_faces  (dataMesh._mesh_faces),
+    _mesh_edges  (dataMesh._mesh_edges),
+    _mesh        (dataMesh._mesh)
+{
+    if ( _mesh_edges == "all" )
+        _mesh.updateElementEdges( true );
+    else
+        _mesh.updateElementEdges();
+    if ( _mesh_faces == "all" )
+        _mesh.updateElementFaces( true );
+    else
+        _mesh.updateElementFaces();
+}
+
+
 // Destructor
 template <typename Mesh>
 DataMesh<Mesh>::
@@ -148,6 +168,13 @@ showMe( std::ostream& c ) const
 template <typename Mesh>
 Mesh& DataMesh<Mesh>::
 mesh()
+{
+    return _mesh;
+}
+
+template <typename Mesh>
+const Mesh& DataMesh<Mesh>::
+mesh() const
 {
     return _mesh;
 }

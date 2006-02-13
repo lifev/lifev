@@ -23,8 +23,14 @@ namespace LifeV
 // Constructor
 DataTime::DataTime( const GetPot& dfile, const std::string& section )
 {
-    _dt = dfile( ( section + "/timestep" ).data(), 1. );
+    _dt        = dfile( ( section + "/timestep" ).data(), 1. );
     _order_bdf = dfile( ( section + "/order_bdf" ).data(), 1 );
+}
+
+DataTime::DataTime(const DataTime& dataTime)
+{
+    _dt        = dataTime._dt;
+    _order_bdf = dataTime._order_bdf;
 }
 
 // Destructor

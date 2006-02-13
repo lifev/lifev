@@ -65,6 +65,7 @@ class FSIOperator {
 
 public:
 
+    typedef RegionMesh3D_ALE<LinearTetra> Mesh;
     typedef VenantKirchhofSolver< RegionMesh3D_ALE<LinearTetra> >    solid_raw_type;
     typedef NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> > fluid_raw_type;
 
@@ -374,7 +375,6 @@ typedef singleton<factory<FSIOperator,  std::string> > FSIFactory;
             (BC_fluidInterface.pointerToBCVector());                \
                                                                     \
         assert( BCVInterface != 0 );                                \
-                                                                    \
         ID IDsolid = BCVInterface->                                 \
             dofInterface().getInterfaceDof(IDfluid);                \
         for (UInt jDim = 0; jDim < nDimF; ++jDim)                   \

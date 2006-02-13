@@ -1,20 +1,20 @@
 /*
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
+  This file is part of the LifeV library
+  Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 /*!
   \file dataNavierStokes.h
@@ -43,50 +43,50 @@ namespace LifeV
 
 
 
-  /*!
-    \typedef enum
-    
-  */
-  typedef enum NSStabilization
-    {
-      NO_STABILIZATION,     //!< No stabilization
-      IP_STABILIZATION,       //!< Interior penalty
-      SD_STABILIZATION        //!< Stream-line diffusion
-    };
-  
-  
-  /*!
-    \class DataNavierStokes
-    
-    Base class which holds usual data for the NavierStokes equations solvers
-    
-  */
-  template <typename Mesh>
-  class DataNavierStokes:
-    public DataMesh<Mesh>,
-    public DataTime
-  {
-  public:
-    
+/*!
+  \typedef enum
+*/
+typedef enum NSStabilization
+{
+    NO_STABILIZATION,     //!< No stabilization
+    IP_STABILIZATION,       //!< Interior penalty
+    SD_STABILIZATION        //!< Stream-line diffusion
+};
+
+/*!
+  \class DataNavierStokes
+
+  Base class which holds usual data for the NavierStokes equations solvers
+
+*/
+template <typename Mesh>
+class DataNavierStokes:
+        public DataMesh<Mesh>,
+        public DataTime
+{
+public:
+
     //! Constructor
     DataNavierStokes( const GetPot& dfile );
-    
+
+    DataNavierStokes( const DataNavierStokes& dataNavierStokes );
+
     //! Ouptut
     void showMe( std::ostream& c = std::cout );
-    
+
     //! End time
     Real density() const;
     Real viscosity() const;
     Real inittime() const;
     Real endtime() const;
-    
+
     UInt verbose() const;
     Real dump_init() const;
     UInt dump_period() const;
     Real factor() const;
-    
+
     NSStabilization stabilization() const;
-    
+
     //! a way to obtain the Mean Flux, Mean Pressure and
     //! Mean Area at a section defined by z=z_data.
     UInt computeMeanValuesPerSection() const;
@@ -96,27 +96,28 @@ namespace LifeV
     Real ZSectionInit() const;
     Real ZSectionFinal() const;
     UInt NbPolygonEdges() const;
-    
-    
-  protected:
+
+protected:
     //! Physics
     Real _rho; // density
     Real _mu; // viscosity
     Real _inittime; // initial time (Alex December 2003)
     Real _endtime; // end time
-    
-    
+
     //! Miscellaneous
     UInt _verbose; // temporal output verbose
     Real _dump_init; // time for starting the dumping of the results (Alex December 2003)
     UInt _dump_period; // frequency of the dumping (one dump after _dump_period time steps) (Alex December 2003)
     Real M_factor; // amplification factor for moving domains
-    
+
     //! Discretization
     NSStabilization M_stab_method;
-    
-    
-  private:
+
+private:
+    //! constructors setup
+
+    void setUp();
+
     //! To extract Mean Values at a given section z
     UInt M_computeMeanValuesPerSection; //! switch: 0 don't compute it, 1 compute
     UInt M_NbZSections;
@@ -125,9 +126,9 @@ namespace LifeV
     Real M_ZSectionInit;
     Real M_ZSectionFinal;
     UInt M_NbPolygonEdges; //! number of edges of the polygon (in mesh) describing the circle
-    
+
     DataStringList M_stabilization_list;
-  };
+};
 
 
 //
@@ -139,13 +140,11 @@ namespace LifeV
 template <typename Mesh>
 DataNavierStokes<Mesh>::
 DataNavierStokes( const GetPot& dfile ) :
-        DataMesh<Mesh>( dfile, "fluid/discretization" ),
-        DataTime( dfile, "fluid/discretization" ),
-	M_stabilization_list( "fluid/discretization/stabilization" )
+    DataMesh<Mesh>( dfile, "fluid/discretization" ),
+    DataTime( dfile, "fluid/discretization" ),
+    M_stabilization_list( "fluid/discretization/stabilization" )
 {
 
-  
-  
     M_stabilization_list.add( "ip", IP_STABILIZATION, "interior penalty " );
     M_stabilization_list.add( "sd", SD_STABILIZATION, "stream-line difussion" );
     M_stabilization_list.add( "none", NO_STABILIZATION,  "none (default)" );
@@ -168,23 +167,49 @@ DataNavierStokes( const GetPot& dfile ) :
     // IP needs boundary faces
     bool ipfaces =  ( M_stab_method == IP_STABILIZATION ) && (this->_mesh_faces != "all" ) ;
     if ( ipfaces )
-      ERROR_MSG("ERROR: IP requires boundary faces. Put mesh_faces = all in data file." );          
+        ERROR_MSG("ERROR: IP requires boundary faces. Put mesh_faces = all in data file." );
 
     //mean values per section
     M_computeMeanValuesPerSection =
-      dfile( "fluid/valuespersection/computeMeanValuesPerSection", 0 );
+        dfile( "fluid/valuespersection/computeMeanValuesPerSection", 0 );
     M_NbZSections =
-      dfile( "fluid/valuespersection/nb_z_section", 2 );
+        dfile( "fluid/valuespersection/nb_z_section", 2 );
     M_ToleranceSection =
-      dfile( "fluid/valuespersection/tol_section", 2e-2 );
+        dfile( "fluid/valuespersection/tol_section", 2e-2 );
     M_XSectionFrontier =
-      dfile( "fluid/valuespersection/x_section_frontier", 0. );
+        dfile( "fluid/valuespersection/x_section_frontier", 0. );
     M_ZSectionInit =
-      dfile( "fluid/valuespersection/z_section_init", -1. );
+        dfile( "fluid/valuespersection/z_section_init", -1. );
     M_ZSectionFinal =
-      dfile( "fluid/valuespersection/z_section_final", 0. );
+        dfile( "fluid/valuespersection/z_section_final", 0. );
     M_NbPolygonEdges =
-      dfile( "fluid/valuespersection/nb_polygon_edges", 10 );
+        dfile( "fluid/valuespersection/nb_polygon_edges", 10 );
+}
+
+
+template <typename Mesh>
+DataNavierStokes<Mesh>::
+DataNavierStokes( const DataNavierStokes& dataNavierStokes ) :
+    DataMesh<Mesh>               ( dataNavierStokes ),
+    DataTime                     ( dataNavierStokes ),
+    _rho                         (dataNavierStokes._rho),
+    _mu                          (dataNavierStokes._mu),
+    _inittime                    (dataNavierStokes._inittime),
+    _endtime                     (dataNavierStokes._endtime),
+    _verbose                     (dataNavierStokes._verbose),
+    _dump_init                   (dataNavierStokes._dump_init),
+    _dump_period                 (dataNavierStokes._dump_period),
+    M_factor                     (dataNavierStokes.M_factor),
+    M_stab_method                (dataNavierStokes.M_stab_method),
+    M_computeMeanValuesPerSection(dataNavierStokes.M_computeMeanValuesPerSection),
+    M_NbZSections                (dataNavierStokes.M_NbZSections),
+    M_ToleranceSection           (dataNavierStokes.M_ToleranceSection),
+    M_XSectionFrontier           (dataNavierStokes.M_XSectionFrontier),
+    M_ZSectionInit               (dataNavierStokes.M_ZSectionInit),
+    M_ZSectionFinal              (dataNavierStokes.M_ZSectionFinal),
+    M_NbPolygonEdges             (dataNavierStokes.M_NbPolygonEdges),
+    M_stabilization_list         (dataNavierStokes.M_stabilization_list)
+{
 }
 
 // Output
@@ -210,18 +235,18 @@ showMe( std::ostream& c )
     DataMesh<Mesh>::showMe( c );
     DataTime::showMe( c );
     c << "stabilization = ";
-    switch( M_stab_method ) 
-      {
-      case NO_STABILIZATION:
-	c << "none" ;
-	break;
-      case IP_STABILIZATION:
-	c << "ip" ;
-	break;
-      case SD_STABILIZATION:
-	c << "sd" ;
-	break;
-      }
+    switch( M_stab_method )
+    {
+        case NO_STABILIZATION:
+            c << "none" ;
+            break;
+        case IP_STABILIZATION:
+            c << "ip" ;
+            break;
+        case SD_STABILIZATION:
+            c << "sd" ;
+            break;
+    }
     c << std::endl;
 
 
@@ -303,7 +328,7 @@ factor() const
 
 // Stabilization method
 template <typename Mesh>
- NSStabilization DataNavierStokes<Mesh>::stabilization() const
+NSStabilization DataNavierStokes<Mesh>::stabilization() const
 {
     return M_stab_method;
 }

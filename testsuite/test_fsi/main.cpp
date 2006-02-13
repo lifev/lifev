@@ -23,6 +23,7 @@
 #include <boost/timer.hpp>
 
 #include <life/lifesolver/FSISolver.hpp>
+#include <life/lifesolver/FSIOperator.hpp>
 
 //#include "ud_functions.hpp"
 #include "boundaryConditions.hpp"
@@ -41,18 +42,22 @@ public:
 
       -# initialize and setup the FSIsolver
     */
-    Problem( GetPot const& data_file, std::string _oper = "" )
+    Problem( GetPot const& data_file, std::string _oper = "" ):
+        M_dataNS(data_file)
         {
             using namespace LifeV;
 
             Debug( 10000 ) << "creating FSISolver with operator :  " << _oper << "\n";
-            _M_fsi = fsi_solver_ptr(  new FSISolver( data_file,
-                                                     BCh_fluid(),
-                                                     BCh_solid(),
-                                                     BCh_harmonicExtension(),
-                                                     _oper ));
-//            _M_fsi = fsi_solver_ptr(  new FSISolver( data_file, _oper ) );
+//            DataNavierStokes< RegionMesh3D_ALE<LinearTetra> > M_dataNS(data_file);
 
+            _M_fsi = fsi_solver_ptr( new FSISolver( data_file,
+                                                    M_dataNS,
+                                                    BCh_fluid(),
+                                                    BCh_solid(),
+                                                    BCh_harmonicExtension(),
+                                                    _oper )
+                                     );
+//            _M_fsi = fsi_solver_ptr(  new FSISolver( data_file, _oper ) );
             _M_fsi->setSourceTerms( fZero, fZero );
 
             int restart = data_file("problem/restart",0);
@@ -73,6 +78,9 @@ public:
             {
                 _M_fsi->initialize( u0, d0, w0 );
             }
+
+            std::cout << "in problem" << std::endl;
+            _M_fsi->FSIOper()->fluid().postProcess();
         }
 
     fsi_solver_ptr fsiSolver() { return _M_fsi; }
@@ -116,6 +124,7 @@ private:
 
     fsi_solver_ptr _M_fsi;
     double         _M_Tstart;
+    LifeV::DataNavierStokes< LifeV::RegionMesh3D_ALE<LifeV::LinearTetra> > M_dataNS;
 };
 
 struct FSIChecker
@@ -140,10 +149,16 @@ struct FSIChecker
 
             try
             {
+                std::cout << "calling problem constructor ... " << std::endl;
                 fsip = boost::shared_ptr<Problem>( new Problem( data_file, oper ) );
 //                fsip->fsiSolver()->FSIOperator()->setDataFromGetPot( data_file );
+                std::cout << "in operator 1" << std::endl;
+                fsip->fsiSolver()->operFSI()->fluid().postProcess();
+
                 fsip->fsiSolver()->operFSI()->setPreconditioner( prec );
 
+                std::cout << "in operator 2" << std::endl;
+                fsip->fsiSolver()->operFSI()->fluid().postProcess();
                 fsip->run( fsip->fsiSolver()->timeStep(), fsip->fsiSolver()->timeEnd() );
             }
             catch ( std::exception const& _ex )

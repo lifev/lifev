@@ -18,7 +18,7 @@
 */
 /*! file geoElement.h
 \brief Geometric elements
-\version $Revision: 1.10 $ Luca Formaggia
+\version $Revision: 1.11 $ Luca Formaggia
 
   Introduces all the geometric elements
 */
@@ -46,7 +46,7 @@ namespace LifeV
   all geometric entities. */
 template <typename MC = DefMarkerCommon>
 class
-            GeoElement0D: public Geo0D, public MC::PointMarker
+GeoElement0D: public Geo0D, public MC::PointMarker
 {
 public:
     GeoElement0D();
@@ -76,6 +76,7 @@ class GeoElement1D : public GeoND<GEOSHAPE, GeoElement0D<MC> >, public MC::EdgeM
 {
 public:
     GeoElement1D( ID id = 0 );
+    GeoElement1D( const GeoElement1D& geoElement1D);
 
     typedef GEOSHAPE GeoShape;
     typedef typename MC::EdgeMarker Marker;
@@ -145,6 +146,7 @@ class GeoElement2D
 public:
 
     GeoElement2D( ID id = 0 );
+    GeoElement2D( const GeoElement2D<GEOSHAPE, MC>& geoElement2D );
     //! Number of element edges
     static const UInt numLocalEdges = GeoND<GEOSHAPE, GeoElement0D<MC> >::numEdges; //For compatibility
 
@@ -217,6 +219,7 @@ class GeoElement3D
 public:
 
     GeoElement3D( ID id = 0 );
+    GeoElement3D( const GeoElement3D<GEOSHAPE, MC>& geoElement3D );
 
     typedef GEOSHAPE GeoShape;
     typedef typename MC::VolumeMarker Marker;
@@ -258,7 +261,7 @@ GeoElement0D<MC>::GeoElement0D( ID id, Real x, Real y, Real z, bool boundary ) :
 
 template <typename MC>
 GeoElement0D<MC>::GeoElement0D( GeoElement0D<MC> const & g ) :
-        Geo0D( g ), MC::PointMarker( g )
+    Geo0D( g ), MC::PointMarker( g )
 {}
 
 //! It calls operator= of base classes, just to be sure to do the right thing.
@@ -282,9 +285,10 @@ GeoElement0D<MC>::operator = ( GeoElement0D<MC> const & g )
 template <typename GEOSHAPE, typename MC>
 GeoElement1D<GEOSHAPE, MC>::GeoElement1D( ID id ) :
         GeoND<GEOSHAPE, GeoElement0D<MC> >( id ),
-        efirst( 0 ),
-        esecond( 0 ),
-        posfirst( 0 ),
+        MC::EdgeMarker                    ( geoElement1D ),
+        efirst   ( 0 ),
+        esecond  ( 0 ),
+        posfirst ( 0 ),
         possecond( 0 )
 #else
 template <typename GEOSHAPE, typename MC>
@@ -293,6 +297,27 @@ GeoElement1D<GEOSHAPE, MC>::GeoElement1D( ID id ) : GeoND<GEOSHAPE, GeoElement0D
 {
     ASSERT_PRE( GEOSHAPE::nDim == 1 , "geoElement2D with incorrect GeoSHape" ) ;
 }
+
+#ifdef TWODIM
+template <typename GEOSHAPE, typename MC>
+GeoElement1D<GEOSHAPE, MC>::GeoElement1D( const GeoElement1D<GEOSHAPE, MC>& geoElement1D ) :
+    GeoND<GEOSHAPE, GeoElement0D<MC> >( geoElement1D ),
+    MC::EdgeMarker                    ( geoElement1D ),
+    efirst                            ( geoElement1D.efirst ),
+    esecond                           ( geoElement1D.esecond ),
+    posfirst                          ( geoElement1D.posfirst ),
+    possecond                         ( geoElement1D.possecond )
+#else
+    template <typename GEOSHAPE, typename MC>
+GeoElement1D<GEOSHAPE, MC>::GeoElement1D( const GeoElement1D<GEOSHAPE, MC>& geoElement1D ) :
+    GeoND<GEOSHAPE, GeoElement0D<MC> >( geoElement1D ),
+    MC::EdgeMarker                    ( geoElement1D )
+#endif
+{
+    ASSERT_PRE( GEOSHAPE::nDim == 1 , "geoElement2D with incorrect GeoSHape" ) ;
+}
+
+
 
 /*-------------------------------------------------------------------------
   GeoElement2D
@@ -304,14 +329,33 @@ const UInt GeoElement2D<GEOSHAPE, MC>::numLocalEdges;
 template <typename GEOSHAPE, typename MC>
 GeoElement2D<GEOSHAPE, MC>::GeoElement2D( ID id ) :
         GeoND<GEOSHAPE, GeoElement0D<MC> >( id ),
-        efirst( 0 ),
-        esecond( 0 ),
-        posfirst( 0 ),
+        efirst   ( 0 ),
+        esecond  ( 0 ),
+        posfirst ( 0 ),
         possecond( 0 )
 #else
 template <typename GEOSHAPE, typename MC>
 GeoElement2D<GEOSHAPE, MC>::GeoElement2D( ID id ) :
         GeoND<GEOSHAPE, GeoElement0D<MC> >( id )
+#endif
+{
+    ASSERT_PRE( GEOSHAPE::nDim == 2 , "geoElement2D with incorrect GeoSHape" ) ;
+}
+
+#ifdef THREEDIM
+template <typename GEOSHAPE, typename MC>
+GeoElement2D<GEOSHAPE, MC>::GeoElement2D( const GeoElement2D<GEOSHAPE, MC>& geoElement2D ) :
+    GeoND<GEOSHAPE, GeoElement0D<MC> >( geoElement2D ),
+    MC::FaceMarker                    ( geoElement2D ),
+    efirst   ( geoElement2D.efirst    ),
+    esecond  ( geoElement2D.esecond   ),
+    posfirst ( geoElement2D.posfirst  ),
+    possecond( geoElement2D.possecond )
+#else
+template <typename GEOSHAPE, typename MC>
+GeoElement2D<GEOSHAPE, MC>::GeoElement2D( const GeoElement2D<GEOSHAPE, MC>& geoElement2D ) :
+    GeoND<GEOSHAPE, GeoElement0D<MC> >( geoElement2D ),
+    MC::FaceMarker                    ( geoElement2D )
 #endif
 {
     ASSERT_PRE( GEOSHAPE::nDim == 2 , "geoElement2D with incorrect GeoSHape" ) ;
@@ -329,7 +373,16 @@ template <typename GEOSHAPE, typename MC>
 const UInt GeoElement3D<GEOSHAPE, MC>::numLocalEdges;
 
 template <typename GEOSHAPE, typename MC>
-GeoElement3D<GEOSHAPE, MC>::GeoElement3D( ID id ) : GeoND<GEOSHAPE, GeoElement0D<MC> >( id )
+GeoElement3D<GEOSHAPE, MC>::GeoElement3D( ID id ) :
+    GeoND<GEOSHAPE, GeoElement0D<MC> >( id )
+{
+    ASSERT_PRE( GEOSHAPE::nDim == 3 , "geoElement3D with incorrect GeoSHape" )
+}
+
+template <typename GEOSHAPE, typename MC>
+GeoElement3D<GEOSHAPE, MC>::GeoElement3D( const GeoElement3D<GEOSHAPE, MC>& geoElement3D ) :
+    GeoND<GEOSHAPE, GeoElement0D<MC> >( geoElement3D ),
+    MC::VolumeMarker                  ( geoElement3D )
 {
     ASSERT_PRE( GEOSHAPE::nDim == 3 , "geoElement3D with incorrect GeoSHape" )
 }

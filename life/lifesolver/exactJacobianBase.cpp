@@ -320,7 +320,7 @@ void my_matvecJacobianEJ(double *z, double *Jz, AZ_MATRIX* J, int proc_config[])
         else
         {
             Vector da(dim);
-            double dt   = my_data->M_pFS->fluid().timestep();
+            double dt   = my_data->M_pFS->fluid().dt();
             double dti2 = 1.0/( dt*dt);
 
             da = - my_data->M_pFS->fluid().density()*dti2*zSolid;

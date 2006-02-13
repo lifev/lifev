@@ -100,6 +100,72 @@ FSISolver::FSISolver( GetPot const& data_file,
     Debug( 6220 ) << "FSISolver::FSISolver ends\n";
 }
 
+FSISolver::FSISolver( GetPot const& data_file,
+                      const DataNavierStokes<RegionMesh3D_ALE<LinearTetra> > & dataNavierStokes,
+                      fluid_bchandler_type __bcu,
+                      solid_bchandler_type __bcd,
+                      fluid_bchandler_type __bchext,
+                      std::string __oper ):
+    M_BCh_u( __bcu ),
+    M_BCh_d( __bcd ),
+    M_BCh_mesh( __bchext ),
+    M_fluid( new FSIOperator::fluid_type::value_type (data_file,
+                                                      dataNavierStokes,
+                                                      feTetraP1bubble,
+                                                      feTetraP1,
+                                                      quadRuleTetra64pt,
+                                                      quadRuleTria3pt,
+                                                      quadRuleTetra64pt,
+                                                      quadRuleTria3pt,
+                                                      *M_BCh_u,
+                                                      *M_BCh_mesh) ),
+    M_solid( new FSIOperator::solid_type::value_type (data_file,
+                                                      feTetraP1,
+                                                      quadRuleTetra4pt,
+                                                      quadRuleTria3pt,
+                                                      *M_BCh_d) ),
+    M_disp(3*M_solid->dDof().numTotalDof()),
+    M_velo(3*M_solid->dDof().numTotalDof()),
+    M_firstIter(true),
+    M_method( data_file("problem/method"    , "steklovPoincare") ),
+    M_maxpf( data_file("problem/maxSubIter", 300) ),
+    M_defomega( data_file("problem/defOmega"  , 0.01) ),
+    M_abstol( data_file("problem/abstol"  , 1.e-07) ),
+    M_reltol( data_file("problem/reltol"  , 1.e-04) ),
+    M_etamax( data_file("problem/etamax"  , 1.e-03) ),
+    M_linesearch( data_file("problem/linesearch"  , 0) ),
+    out_iter("iter"),
+    out_res ("res")
+
+{
+    Debug( 6220 ) << "FSISolver::FSISolver starts\n";
+
+    M_disp   = ZeroVector( M_disp.size() );
+    M_velo   = ZeroVector( M_velo.size() );
+
+    Debug( 6220 ) << "FSISolver::M_disp: " << M_disp.size() << "\n";
+    Debug( 6220 ) << "FSISolver::M_velo: " << M_velo.size() << "\n";
+
+    Preconditioner precond  = ( Preconditioner ) data_file("problem/precond"   , DIRICHLET_NEUMANN );
+
+    Debug( 6220 ) << "FSISolver::preconditioner: " << precond << "\n";
+
+    if ( !__oper.empty() )
+    {
+        M_method = __oper;
+    }
+
+    this->setFSIOperator( M_method );
+
+    M_oper->setDataFromGetPot( data_file );
+
+    M_oper->setPreconditioner( precond );
+
+    M_oper->setUpBC();
+
+//    M_oper->fluid().postProcess();
+    Debug( 6220 ) << "FSISolver::FSISolver ends\n";
+}
 
 
 FSISolver::FSISolver( GetPot const& data_file,
@@ -242,6 +308,7 @@ FSISolver::iterate( Real time )
     Debug( 6220 ) << "============================================================\n";
     Debug( 6220 ) << "Solving FSI at time " << time << " with FSIOperator: " << M_method  << "\n";
 
+    M_oper->fluid().postProcess();
 
     M_oper->fluid().timeAdvance( M_oper->fluid().sourceTerm(), time);
     M_oper->solid().timeAdvance( M_oper->solid().sourceTerm(), time);
@@ -295,6 +362,7 @@ FSISolver::iterate( Real time )
         out_iter << time << " " << maxiter << " "
                  << M_oper->nbEval() << std::endl;
 
+        std::cout << "in iterate" << std::endl;
         M_oper->fluid().postProcess();
 
         if( M_oper->fluid().computeMeanValuesPerSection() )

@@ -64,6 +64,7 @@ public:
     /** @name Typedefs
      */
     //@{
+//    typedef FSIOperator::fluid_type::value_type::source_type
     typedef FSIOperator::fluid_type::value_type::source_type fluid_source_type;
     typedef FSIOperator::fluid_type::value_type::source_type solid_source_type;
     typedef FSIOperator::fluid_bchandler_type fluid_bchandler_type;
@@ -89,8 +90,16 @@ public:
                fluid_bchandler_type __bchext,
                std::string __oper = "" );
 
-     FSISolver( GetPot const& datafile,
-                std::string __oper = "" );
+    FSISolver( GetPot const& datafile,
+               const DataNavierStokes<RegionMesh3D_ALE<LinearTetra> >& dataNavierStokes,
+               fluid_bchandler_type __bcu,
+               solid_bchandler_type __bcd,
+               fluid_bchandler_type __bchext,
+               std::string __oper = "" );
+
+
+    FSISolver( GetPot const& datafile,
+               std::string __oper = "" );
 
     //@}
 
@@ -109,7 +118,7 @@ public:
     //@{
 
     //! get the time step
-    Real timeStep() const { return M_fluid->timestep(); }
+    Real timeStep() const { return M_fluid->dt(); }
 
     //! get the final time
     Real timeEnd() const { return M_fluid->endtime(); }

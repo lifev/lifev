@@ -256,7 +256,7 @@ NavierStokesSolverPC( const GetPot& data_file, const RefFE& refFE_u, const RefFE
     UInt nc_u = this->_u.nbcomp();
 
     //inverse of dt:
-    Real dti = 1. / this->_dt;
+    Real dti = 1. / this->dt();
 
     flag_flux=0;
 
@@ -274,11 +274,11 @@ NavierStokesSolverPC( const GetPot& data_file, const RefFE& refFE_u, const RefFE
 
     // Elementary computation and matrix assembling
     // Loop on elements
-    for ( UInt i = 1; i <= this->_mesh.numVolumes(); i++ )
+    for ( UInt i = 1; i <= this->mesh().numVolumes(); i++ )
     {
 
-        this->_fe_p.update( this->_mesh.volumeList( i ) ); // just to provide the id number in the assem_mat_mixed
-        this->_fe_u.updateFirstDerivQuadPt( this->_mesh.volumeList( i ) );
+        this->_fe_p.update( this->mesh().volumeList( i ) ); // just to provide the id number in the assem_mat_mixed
+        this->_fe_u.updateFirstDerivQuadPt( this->mesh().volumeList( i ) );
 
         _elmatC.zero();
         _elmatM_u.zero();
@@ -286,15 +286,15 @@ NavierStokesSolverPC( const GetPot& data_file, const RefFE& refFE_u, const RefFE
         _elmatDtr.zero();
 
         if (flag_curl!=1){
-          stiff( this->_mu, _elmatC, this->_fe_u, 0, 0, nDimensions );
+          stiff( this->viscosity(), _elmatC, this->_fe_u, 0, 0, nDimensions );
         }
         if (flag_curl==1){
-          stiff_curl( this->_mu, _elmatC, this->_fe_u, 0, 0, nDimensions );
+          stiff_curl( this->viscosity(), _elmatC, this->_fe_u, 0, 0, nDimensions );
         }
         
         // *******************************************************
-        mass( first_coeff * this->_rho * dti, elmatM_u_St, this->_fe_u, 0, 0, nDimensions );
-        mass( this->_rho * dti, _elmatM_u, this->_fe_u, 0, 0, nDimensions );
+        mass( first_coeff * this->density() * dti, elmatM_u_St, this->_fe_u, 0, 0, nDimensions );
+        mass( this->density() * dti, _elmatM_u, this->_fe_u, 0, 0, nDimensions );
         // stiffness + mass
 
         _elmatC.mat() += elmatM_u_St.mat();
@@ -358,10 +358,10 @@ timeAdvance( source_type const& source, Real const& time )
     _f_u = ZeroVector( _f_u.size() );
 
     // loop on volumes: assembling source term
-    for ( UInt i = 1; i <= this->_mesh.numVolumes(); ++i )
+    for ( UInt i = 1; i <= this->mesh().numVolumes(); ++i )
     {
         _elvec.zero();
-        this->_fe_u.update( this->_mesh.volumeList( i ) );
+        this->_fe_u.update( this->mesh().volumeList( i ) );
 
         for ( UInt ic = 0; ic < nc_u; ++ic )
         {
@@ -414,10 +414,10 @@ iterate( const Real& time )
     chrono.start();
 
     // loop on volumes
-    for ( UInt i = 1; i <= this->_mesh.numVolumes(); ++i )
+    for ( UInt i = 1; i <= this->mesh().numVolumes(); ++i )
     {
 
-        this->_fe_u.updateFirstDeriv( this->_mesh.volumeList( i ) ); // as updateFirstDer
+        this->_fe_u.updateFirstDeriv( this->mesh().volumeList( i ) ); // as updateFirstDer
 
         _elmatC.zero();
 
@@ -464,8 +464,8 @@ iterate( const Real& time )
     chrono.start();
     // BC manage for the velocity
     if ( !this->bcHandler().bdUpdateDone() )
-        this->bcHandler().bdUpdate( this->_mesh, this->_feBd_u, this->_dof_u );
-    bcManage( _C, _trD, _f_u, this->_mesh, this->_dof_u, this->bcHandler(), this->_feBd_u, tgv, time );
+        this->bcHandler().bdUpdate( this->mesh(), this->_feBd_u, this->_dof_u );
+    bcManage( _C, _trD, _f_u, this->mesh(), this->_dof_u, this->bcHandler(), this->_feBd_u, tgv, time );
     chrono.stop();
     Debug( 6020 ) << "  o-  Applying boundary conditions done in " << chrono.diff() << "s." << "\n";
 
@@ -707,7 +707,7 @@ void NavierStokesSolverPC<Mesh>::ShearStressCompute( std::string filename_stress
         for ( UInt j = 0;j < NDIM;j++ )
             residual[ where - 1 + j * ss ] = sstress[ i + j * s ];
     }
-    wr_opendx_header( filename_stress, this->_mesh, this->_dof_u, this->_fe_u, fe_type );
+    wr_opendx_header( filename_stress, this->mesh(), this->_dof_u, this->_fe_u, fe_type );
     wr_opendx_vector( filename_stress, "ShearStress", residual, NDIM );
 }
 

@@ -42,6 +42,7 @@ namespace LifeV
   Base class which holds data concerning temporal discretization
 
 */
+
 class DataTime
 {
 public:
@@ -49,15 +50,16 @@ public:
     //! Constructor
     DataTime( const GetPot& dfile, const std::string& section = "discretization" );
 
+    DataTime( const DataTime& dataTime);
     //! Ouptut
     virtual void showMe( std::ostream& c = std::cout ) const;
 
     //! Time step
     Real timestep() const;
- 
+
     //! setter
     void setTimeStep(const Real& dt);
-  
+
     //! Order BDF formula
     unsigned int order_bdf() const;
 

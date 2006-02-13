@@ -32,6 +32,7 @@
 #define _NAVIERSTOKESALESOLVERPC_HH
 
 #include <life/lifesolver/NavierStokesAleHandler.hpp>
+#include <life/lifesolver/dataNavierStokes.hpp>
 #include <life/lifearray/elemMat.hpp>
 #include <life/lifearray/elemVec.hpp>
 #include <life/lifefem/elemOper.hpp>
@@ -85,6 +86,17 @@ public:
                              BCHandler& BCh_mesh );
 
     NavierStokesAleSolverPC( const GetPot& data_file,
+                             const DataNavierStokes<Mesh>& dataNavierStokes,
+                             const RefFE& refFE_u,
+                             const RefFE& refFE_p,
+                             const QuadRule& Qr_u,
+                             const QuadRule& bdQr_u,
+                             const QuadRule& Qr_p,
+                             const QuadRule& bdQr_p,
+                             BCHandler& BCh_u,
+                             BCHandler& BCh_mesh );
+
+    NavierStokesAleSolverPC( const GetPot& data_file,
                              const RefFE& refFE_u,
                              const RefFE& refFE_p,
                              const QuadRule& Qr_u,
@@ -118,7 +130,7 @@ public:
     //LIFEV_DEPREPCATED BCHandler & BC_fluid() {return BCh_HarmonicExtension();}
 
     Vector& residual();
-    Vector  getDeltaLambda() {return this->_dt*_du;}
+    Vector  getDeltaLambda() {return this->dt()*_du;}
 
     void setFullEssential(bool _full)
         {
@@ -127,6 +139,9 @@ public:
         }
 //    void setBC(BCHandler &fluidBC, BCHandler &HamonicExtensionBC);
 private:
+
+    //! constructor setup
+    void     setUp();
 
     //! simulation time
     double   M_time;
@@ -300,38 +315,78 @@ NavierStokesAleSolverPC( const GetPot& data_file, const RefFE& refFE_u, const Re
         _factor_data( _C, _D, _trD, _H, _HinvC, _HinvDtr, _invCtrDP, _dataAztec_i, _dataAztec_s, this->bcHandler().hasOnlyEssential(), 1 ),
         _factor_data_jacobian( _C, _D, _trD, _H, _HinvC, _HinvDtr, _invCtrDP, _dataAztec_i, _dataAztec_s, this->bcHandler().hasOnlyEssential(), 2 )
 {
-    std::cout << std::endl;
-    std::cout << "F-  Pressure unknowns: " << this->_dim_p << std::endl;
-    std::cout << "F-  Velocity unknowns: " << this->_dim_u << std::endl << std::endl;
-    std::cout << "F-  Computing mass matrix... ";
-
-    Chrono chrono;
-    chrono.start();
-
-    // Number of velocity components
-    UInt nc_u = this->_u.nbcomp();
-
-    // Initializing mass matrix
-    _M_u.zeros();
-
-    Real dti = 1.0 / this->_dt;
-
-    // loop on volumes: assembling mass term
-    for ( UInt i = 1; i <= this->_mesh.numVolumes(); ++i )
-    {
-        this->_fe_u.updateFirstDerivQuadPt( this->_mesh.volumeList( i ) );
-        _elmatM_u.zero();
-        mass( this->_rho * dti, _elmatM_u, this->_fe_u, 0, 0, nc_u );
-        for ( UInt ic = 0; ic < nc_u; ++ic )
-        {
-            assemb_mat( _M_u, _elmatM_u, this->_fe_u, this->_dof_u, ic, ic );
-        }
-    }
-
-    chrono.stop();
-    std::cout << "done in " << chrono.diff() << " s." << std::endl;
+    setUp();
 }
 
+template <typename Mesh>
+NavierStokesAleSolverPC<Mesh>::
+NavierStokesAleSolverPC( const GetPot&          data_file,
+                         const DataNavierStokes<Mesh>& dataNavierStokes,
+                         const RefFE&           refFE_u,
+                         const RefFE&           refFE_p,
+                         const QuadRule&        Qr_u,
+                         const QuadRule&        bdQr_u,
+                         const QuadRule&        Qr_p,
+                         const QuadRule&        bdQr_p,
+                         BCHandler&             BCh_u,
+                         BCHandler&             BCh_mesh ):
+        NavierStokesAleHandler<Mesh>( data_file,
+                                      dataNavierStokes,
+                                      refFE_u,
+                                      refFE_p,
+                                      Qr_u,
+                                      bdQr_u,
+                                      Qr_p,
+                                      bdQr_p,
+                                      BCh_u,
+                                      BCh_mesh ),
+        _pattM_u_block( this->_dof_u ),
+        _pattM_u( _pattM_u_block, "diag" ),
+        _pattC( this->_dof_u, 3 ),
+        _pattD_block( this->_dof_p, this->_dof_u ),
+        _pattD( _pattD_block ),
+        _pattDtr_block( this->_dof_u, this->_dof_p ),
+        _pattDtr( _pattDtr_block ),
+        _D( _pattD ),
+        _trD( _pattDtr ),
+        _trDAux( _pattDtr ),
+        _HinvDtr( _pattDtr ),
+        _M_u( _pattM_u ),
+        _HinvC( _pattC ),
+        _CStokes( _pattC ),
+        _C( _pattC ),
+        _CAux( _pattC ),
+        _H( _pattC.nRows() ),
+        _elmatC( this->_fe_u.nbNode, nDimensions, nDimensions ),
+        _elmatM_u( this->_fe_u.nbNode, nDimensions, nDimensions ),
+        _elmatDtr( this->_fe_u.nbNode, nDimensions, 0, this->_fe_p.nbNode, 0, 1 ),
+        _elvec( this->_fe_u.nbNode, nDimensions ),
+        _elvec_du( this->_fe_u.nbNode, nDimensions ),
+        _elvec_dp( this->_fe_p.nbNode, 1 ),
+        _w_loc( this->_fe_u.nbNode, nDimensions ),
+        _uk_loc( this->_fe_u.nbNode, nDimensions ),
+        _pk_loc( this->_fe_p.nbNode, 1 ),
+        _convect( this->_fe_u.nbNode, nDimensions ),
+        _d_loc( this->_fe_u.nbNode, nDimensions ),
+        _dw_loc( this->_fe_u.nbNode, nDimensions ),
+        _un( this->_dim_u ),
+        _dp( this->_dim_p ),
+        _du( this->_dim_u ),
+        _f_u( this->_dim_u ),
+        _f_duWithOutBC( this->_dim_u ),
+        _f_p( this->_dim_p ),
+        _f_uWithOutBC( this->_dim_u ),
+        _residual_u( this->_dim_u ),
+        _invCtrDP( this->_dim_u ),
+        _dataAztec_i( data_file, "fluid/aztec_i" ),
+        _dataAztec_ii( data_file, "fluid/aztec_ii" ),
+        _dataAztec_s( data_file, "fluid/aztec_s" ),
+        _factor_data( _C, _D, _trD, _H, _HinvC, _HinvDtr, _invCtrDP, _dataAztec_i, _dataAztec_s, this->bcHandler().hasOnlyEssential(), 1 ),
+        _factor_data_jacobian( _C, _D, _trD, _H, _HinvC, _HinvDtr, _invCtrDP, _dataAztec_i, _dataAztec_s, this->bcHandler().hasOnlyEssential(), 2 )
+{
+    std::cout << "New constructor NavierStokesALESolverPC" << std::endl;
+    setUp();
+}
 
 template <typename Mesh>
 NavierStokesAleSolverPC<Mesh>::
@@ -393,6 +448,19 @@ NavierStokesAleSolverPC( const GetPot& data_file,
     _factor_data         ( _C, _D, _trD, _H, _HinvC, _HinvDtr, _invCtrDP, _dataAztec_i, _dataAztec_s, true, 1 ),
     _factor_data_jacobian( _C, _D, _trD, _H, _HinvC, _HinvDtr, _invCtrDP, _dataAztec_i, _dataAztec_s, true, 2 )
 {
+    setUp();
+}
+
+
+
+// members
+
+
+
+template <typename Mesh>
+void NavierStokesAleSolverPC<Mesh>::
+setUp()
+{
     std::cout << std::endl;
     std::cout << "F-  Pressure unknowns: " << this->_dim_p << std::endl;
     std::cout << "F-  Velocity unknowns: " << this->_dim_u << std::endl << std::endl;
@@ -407,14 +475,14 @@ NavierStokesAleSolverPC( const GetPot& data_file,
     // Initializing mass matrix
     _M_u.zeros();
 
-    Real dti = 1.0 / this->_dt;
+    Real dti = 1.0 / this->dt();
 
     // loop on volumes: assembling mass term
-    for ( UInt i = 1; i <= this->_mesh.numVolumes(); ++i )
+    for ( UInt i = 1; i <= this->mesh().numVolumes(); ++i )
     {
-        this->_fe_u.updateFirstDerivQuadPt( this->_mesh.volumeList( i ) );
+        this->_fe_u.updateFirstDerivQuadPt( this->mesh().volumeList( i ) );
         _elmatM_u.zero();
-        mass( this->_rho * dti, _elmatM_u, this->_fe_u, 0, 0, nc_u );
+        mass( this->density() * dti, _elmatM_u, this->_fe_u, 0, 0, nc_u );
         for ( UInt ic = 0; ic < nc_u; ++ic )
         {
             assemb_mat( _M_u, _elmatM_u, this->_fe_u, this->_dof_u, ic, ic );
@@ -424,21 +492,6 @@ NavierStokesAleSolverPC( const GetPot& data_file,
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 }
-
-
-// members
-
-
-// template <typename Mesh>
-// void NavierStokesAleSolverPC<Mesh>::
-// setBC(BCHandler &fluidBC, BCHandler &HamonicExtensionBC)
-// {
-//     setFluidBC(fluidBC);
-//     setHamonixExtensionBC(HarmonicExtensionBC);
-
-//     _factor_data.setFullEssential(fluidBC.hasOnlyEssential());
-//     _factor_data_jacobian(fluidBC.hasOnlyEssential());
-// }
 
 
 template <typename Mesh>
@@ -462,10 +515,10 @@ timeAdvance( source_type const& source, const Real& time )
     _f_uWithOutBC = ZeroVector( _f_uWithOutBC.size() );
 
     // loop on volumes: assembling source term
-    for ( UInt i = 1; i <= this->_mesh.numVolumes(); ++i )
+    for ( UInt i = 1; i <= this->mesh().numVolumes(); ++i )
     {
         _elvec.zero();
-        this->_fe_u.updateFirstDerivQuadPt( this->_mesh.volumeList( i ) );
+        this->_fe_u.updateFirstDerivQuadPt( this->mesh().volumeList( i ) );
         for ( UInt ic = 0; ic < nc_u; ++ic )
         {
             compute_vec( source, _elvec, this->_fe_u, time, ic ); // compute local vector
@@ -503,15 +556,15 @@ iterate( const Real& time )
     _M_u.zeros();
     _C.zeros();
 
-    Real dti = 1.0 / this->_dt;
+    Real dti = 1.0 / this->dt();
 
     // Loop on elements
-    for ( UInt i = 1; i <= this->_mesh.numVolumes(); i++ )
+    for ( UInt i = 1; i <= this->mesh().numVolumes(); i++ )
     {
 
-        this->_fe_p.update( this->_mesh.volumeList( i ) ); // just to provide the id number in the
+        this->_fe_p.update( this->mesh().volumeList( i ) ); // just to provide the id number in the
         // assem_mat_mixed
-        this->_fe_u.updateFirstDerivQuadPt( this->_mesh.volumeList( i ) );
+        this->_fe_u.updateFirstDerivQuadPt( this->mesh().volumeList( i ) );
 
         // initialization of elementary matrices
         _elmatM_u.zero();
@@ -519,10 +572,10 @@ iterate( const Real& time )
         _elmatC.zero();
 
         // mass
-        mass( this->_rho * dti, _elmatM_u, this->_fe_u, 0, 0, nc_u );
+        mass( this->density() * dti, _elmatM_u, this->_fe_u, 0, 0, nc_u );
 
         // stiffness strain
-        stiff_strain( 2.0 * this->_mu, _elmatC, this->_fe_u );
+        stiff_strain( 2.0 * this->viscosity(), _elmatC, this->_fe_u );
         _elmatC.mat() += _elmatM_u.mat();
 
         // Non linear term, Semi-implicit approach
@@ -534,13 +587,13 @@ iterate( const Real& time )
             for ( UInt ic = 0; ic < nc_u; ++ic )
             {
                 UInt ig = this->_dof_u.localToGlobal( i, iloc + 1 ) - 1 + ic * this->_dim_u;
-                _elvec[ iloc + ic * this->_fe_u.nbNode ] = this->_rho * ( _un( ig ) - this->_wInterp( ig ) );
+                _elvec[ iloc + ic * this->_fe_u.nbNode ] = this->density() * ( _un( ig ) - this->_wInterp( ig ) );
                 _w_loc[ iloc + ic * this->_fe_u.nbNode ] = this->_wInterp( ig );
             }
         }
 
         // ALE term: 0.5 div (u^n-w) u v
-        mass_divw( -this->_rho, _w_loc, _elmatC, this->_fe_u, 0, 0, nc_u );
+        mass_divw( -this->density(), _w_loc, _elmatC, this->_fe_u, 0, 0, nc_u );
 
         // loop on velocity components
         for ( UInt ic = 0;ic < nc_u;ic++ )
@@ -584,8 +637,8 @@ iterate( const Real& time )
     std::cout << "  F-  Applying boundary conditions... ";
     chrono.start();
     _f_u = _f_uWithOutBC;
-    this->bcHandler().bdUpdate( this->_mesh, this->_feBd_u, this->_dof_u );
-    bcManage( _C, _trD, _f_u, this->_mesh, this->_dof_u, this->bcHandler(), this->_feBd_u, tgv, time );
+    this->bcHandler().bdUpdate( this->mesh(), this->_feBd_u, this->_dof_u );
+    bcManage( _C, _trD, _f_u, this->mesh(), this->_dof_u, this->bcHandler(), this->_feBd_u, tgv, time );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
@@ -620,6 +673,7 @@ iterate( const Real& time )
     prec_C = AZ_precond_create( C, AZ_precondition, NULL );
 
     AZ_set_MSR( C, ( int* ) _pattC.giveRaw_bindx(), ( double* ) _C.giveRaw_value(), data_org_i, 0, NULL, AZ_LOCAL );
+
 
     _dataAztec_i.aztecOptionsFromDataFile( options_i, params_i );
 
@@ -899,11 +953,11 @@ iterateLin( const Real& time, BCHandler& BCh_du )
     _f_p = ZeroVector( _f_p.size() );
 
     // Loop on elements
-    for ( UInt i = 1; i <= this->_mesh.numVolumes(); i++ )
+    for ( UInt i = 1; i <= this->mesh().numVolumes(); i++ )
     {
 
-        this->_fe_p.update( this->_mesh.volumeList( i ) );
-        this->_fe_u.updateFirstDerivQuadPt( this->_mesh.volumeList( i ) );
+        this->_fe_p.update( this->mesh().volumeList( i ) );
+        this->_fe_u.updateFirstDerivQuadPt( this->mesh().volumeList( i ) );
 
         // initialization of elementary vectors
         _elvec_du.zero();
@@ -935,16 +989,16 @@ iterateLin( const Real& time, BCHandler& BCh_du )
         //
 
         //  - \rho ( -\grad w^k:[I\div d - (\grad d)^T] u^k + ( u^n-w^k )^T[I\div d - (\grad d)^T] (\grad u^k)^T , v  )
-        source_mass1( -this->_rho, _uk_loc, _w_loc, _convect, _d_loc, _elvec_du, this->_fe_u );
+        source_mass1( -this->density(), _uk_loc, _w_loc, _convect, _d_loc, _elvec_du, this->_fe_u );
 
         //  + \rho * ( \grad u^k dw, v  )
-        source_mass2( this->_rho, _uk_loc, _dw_loc, _elvec_du, this->_fe_u );
+        source_mass2( this->density(), _uk_loc, _dw_loc, _elvec_du, this->_fe_u );
 
         //  - ( [-p^k I + 2*mu e(u^k)] [I\div d - (\grad d)^T] , \grad v  )
-        source_stress( -1.0, this->_mu, _uk_loc, _pk_loc, _d_loc, _elvec_du, this->_fe_u, this->_fe_p );
+        source_stress( -1.0, this->viscosity(), _uk_loc, _pk_loc, _d_loc, _elvec_du, this->_fe_u, this->_fe_p );
 
         // + \mu ( \grad u^k \grad d + [\grad d]^T[\grad u^k]^T : \grad v )
-        source_stress2( this->_mu, _uk_loc, _d_loc, _elvec_du, this->_fe_u );
+        source_stress2( this->viscosity(), _uk_loc, _d_loc, _elvec_du, this->_fe_u );
 
         //  + ( (\grad u^k):[I\div d - (\grad d)^T] , q  )
         source_press( 1.0, _uk_loc, _d_loc, _elvec_dp, this->_fe_u, this->_fe_p );
@@ -978,9 +1032,9 @@ iterateLin( const Real& time, BCHandler& BCh_du )
 
     _f_u = _f_duWithOutBC;
 
-    BCh_du.bdUpdate( this->_mesh, this->_feBd_u, this->_dof_u );
+    BCh_du.bdUpdate( this->mesh(), this->_feBd_u, this->_dof_u );
 
-    bcManage( _C, _trD, _f_u, this->_mesh, this->_dof_u, BCh_du, this->_feBd_u, tgv, time );
+    bcManage( _C, _trD, _f_u, this->mesh(), this->_dof_u, BCh_du, this->_feBd_u, tgv, time );
 
     chrono.stop();
     std::cout << " done in " << chrono.diff() << "s." << std::endl;
@@ -1161,11 +1215,11 @@ solveJacobian(  const Real& time, BCHandler& BCh_du )
     _f_p = ZeroVector( _f_p.size() );
 
     // Loop on elements
-    for ( UInt i = 1; i <= this->_mesh.numVolumes(); i++ )
+    for ( UInt i = 1; i <= this->mesh().numVolumes(); i++ )
     {
 
-        this->_fe_p.update( this->_mesh.volumeList( i ) );
-        this->_fe_u.updateFirstDerivQuadPt( this->_mesh.volumeList( i ) );
+        this->_fe_p.update( this->mesh().volumeList( i ) );
+        this->_fe_u.updateFirstDerivQuadPt( this->mesh().volumeList( i ) );
 
         // initialization of elementary vectors
         _elvec_du.zero();
@@ -1197,16 +1251,16 @@ solveJacobian(  const Real& time, BCHandler& BCh_du )
         //
 
         //  - \rho ( \grad( u^n-w^k ):[I\div d - (\grad d)^T] u^k + ( u^n-w^k )^T[I\div d - (\grad d)^T] (\grad u^k)^T , v  )
-        source_mass1( -this->_rho, _uk_loc, _convect, _d_loc, _elvec_du, this->_fe_u );
+        source_mass1( -this->density(), _uk_loc, _convect, _d_loc, _elvec_du, this->_fe_u );
 
         //  + \rho * ( \grad u^k dw, v  )
-        source_mass2( this->_rho, _uk_loc, _dw_loc, _elvec_du, this->_fe_u );
+        source_mass2( this->density(), _uk_loc, _dw_loc, _elvec_du, this->_fe_u );
 
         //  - ( [-p^k I + 2*mu e(u^k)] [I\div d - (\grad d)^T] , \grad v  )
-        source_stress( -1.0, this->_mu, _uk_loc, _pk_loc, _d_loc, _elvec_du, this->_fe_u, this->_fe_p );
+        source_stress( -1.0, this->viscosity(), _uk_loc, _pk_loc, _d_loc, _elvec_du, this->_fe_u, this->_fe_p );
 
         // + \mu ( \grad u^k \grad d + [\grad d]^T[\grad u^k]^T : \grad v )
-        source_stress2( this->_mu, _uk_loc, _d_loc, _elvec_du, this->_fe_u );
+        source_stress2( this->viscosity(), _uk_loc, _d_loc, _elvec_du, this->_fe_u );
 
         //  + ( (\grad u^k):[I\div d - (\grad d)^T] , q  )
         source_press( 1.0, _uk_loc, _d_loc, _elvec_dp, this->_fe_u, this->_fe_p );
@@ -1242,8 +1296,8 @@ solveJacobian(  const Real& time, BCHandler& BCh_du )
 
 
 
-    BCh_du.bdUpdate( this->_mesh, this->_feBd_u, this->_dof_u );
-    bcManage( _C, _trD, _f_u, this->_mesh, this->_dof_u, BCh_du, this->_feBd_u, tgv, time );
+    BCh_du.bdUpdate( this->mesh(), this->_feBd_u, this->_dof_u );
+    bcManage( _C, _trD, _f_u, this->mesh(), this->_dof_u, BCh_du, this->_feBd_u, tgv, time );
 
 
     chrono.stop();

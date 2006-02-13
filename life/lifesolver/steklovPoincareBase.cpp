@@ -156,7 +156,7 @@ void steklovPoincare::evalResidual(Vector       &res,
     computeResidualFSI();
     res = getResidualFSIOnSolid();
 
-    computeStrongResidualFSI();
+//    computeStrongResidualFSI();
 
     std::cout << "max ResidualF   = " << norm_inf(M_residualF)
               << std::endl;
@@ -283,7 +283,7 @@ void steklovPoincare::solveLinearSolid()
     this->M_solid->updateJacobian(M_dzSolid, 0);
     this->M_solid->solveJacobian(0., M_BCh_dz);
     M_dzSolid = this->M_solid->ddisp();
-    Debug(6215) << "dz norm       = " << norm_inf(M_dzSolid) << "\n";
+    Debug(6215) << "dz norm       = " << norm_2(M_dzSolid) << "\n";
     std::cout << "S-  norm_inf residual = " << norm_inf(M_solid->residual()) << "\n";
 }
 
@@ -294,8 +294,12 @@ void steklovPoincare::solveInvLinearSolid()
     this->M_solid->updateJacobian(M_dzSolid, 0);
     this->M_solid->solveJacobian(0., M_BCh_dz_inv);
     M_dzSolid = this->M_solid->ddisp();
-    Debug(  6215 ) << "dz norm       = " << norm_inf(M_dzSolid) << "\n";
-    Debug(  6215 ) << "residual norm = " << norm_inf(M_solid->residual()) << "\n";
+    Debug(  6215 ) << "dz norm       = " << norm_2(M_dzSolid) << "\n";
+    Debug(  6215 ) << "residual norm = " << norm_2(M_solid->residual()) << "\n";
+
+//     for (UInt ii = 0; ii < M_dzSolid.size();  ++ii)
+//         std::cout << ii << " " << M_dzSolid[ii] << " " << M_solid->residual()[ii] << std::endl;
+
 }
 
 
@@ -318,7 +322,7 @@ void  steklovPoincare::invSfPrime(const Vector& res,
 
     //Vector deltaLambda = this->M_fluid->getDeltaLambda();
 
-    double dt  = this->M_fluid->timestep();
+    double dt  = this->M_fluid->dt();
     double rho = this->M_fluid->density();
 
     Vector deltaLambda = dt*dt/rho*M_reducedLinFluid->residual();
@@ -381,7 +385,7 @@ void steklovPoincare::invSfSsPrime(const Vector& _res,
     options[AZ_output]   = 1;
     options[AZ_poly_ord] = 5;
     options[AZ_kspace]   = 40;
-    options[AZ_conv]     = AZ_rhs;
+    options[AZ_conv]     = AZ_r0;
     params[AZ_tol]       = _linearRelTol;
 
     //AZTEC matrix for the jacobian
@@ -400,6 +404,16 @@ void steklovPoincare::invSfSsPrime(const Vector& _res,
         _muk[i]=0.0;
 
     chrono.start();
+
+//     double normRes = norm_2(_res);
+//     Vector res     = _res/normRes;
+
+//     my_matvecSfSsPrime(const_cast<double*> (&res[0]), &_muk[0], J, proc_config);
+
+
+//     std::cout << "norm 2 muk = " << norm_2(_muk) << std::endl;
+//     std::cout << "norm 2 res = " << norm_2(_res) << std::endl;
+
     AZ_iterate(&_muk[0], const_cast<double*>( &_res[0] ), options, params,
                status, proc_config, J, NULL, NULL);
 
@@ -444,8 +458,8 @@ void my_matvecSfSsPrime(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
             my_data->M_pFS->solid().disp() = my_data->M_pFS->DDNprecond(zSolid);
 
             my_data->M_pFS->fluid().updateDispVelo();
-            my_data->M_pFS->solveLinearFluid();
 
+            my_data->M_pFS->solveLinearFluid();
             my_data->M_pFS->solveLinearSolid();
 
             my_data->M_pFS->setResidualS(my_data->M_pFS->solid().residual());
@@ -454,7 +468,7 @@ void my_matvecSfSsPrime(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
         else
         {
             Vector da(dim);
-            double dt = my_data->M_pFS->fluid().timestep();
+            double dt = my_data->M_pFS->fluid().dt();
             double dti2 = 1.0/(dt*dt) ;
 
             Vector zSolidPrec(dim);
@@ -476,7 +490,9 @@ void my_matvecSfSsPrime(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
         my_data->M_pFS->getResidualFSIOnSolid(jz);
 
         for (int i = 0; i < (int) dim; ++i)
+        {
             Jz[i] =  jz[i];
+        }
     }
 
     std::cout << " ***** norm (Jz) = "
@@ -513,7 +529,7 @@ Vector steklovPoincare::DDNprecond(Vector const &_z)
 
                 //Vector deltaLambda = this->M_fluid->getDeltaLambda();
 
-                double dt  = this->M_fluid->timestep();
+                double dt  = this->M_fluid->dt();
                 double rho = this->M_fluid->density();
 
                 Vector deltaLambda = dt*dt/rho*M_reducedLinFluid->residual();
@@ -572,6 +588,7 @@ void steklovPoincare::setBC()
 
     M_BCh_mesh->addBC("Interface", 1, Essential, Full,
                       *bcvStructureDispToHarmonicExtension(), 3);
+
     M_BCh_d->addBC("Interface", 1, Essential, Full,
                    *bcvStructureDispToSolid(), 3);
 
@@ -774,20 +791,23 @@ void steklovPoincare::computeResidualFSI()
     FOR_EACH_INTERFACE_DOF( M_residualFSI[IDfluid - 1 + jDim*totalDofFluid] =
                             M_residualF[IDfluid - 1 + jDim*totalDofFluid] -
                             M_residualS[IDsolid - 1 + jDim*totalDofSolid] );
+
 }
 
 
 void steklovPoincare::setResidualFSI(double const* _res)
 {
-    FOR_EACH_INTERFACE_DOF( M_residualFSI[IDfluid - 1 + jDim*totalDofFluid] =
-                            _res[IDsolid - 1 + jDim*totalDofSolid] );
-
+    FOR_EACH_INTERFACE_DOF(M_residualFSI[IDfluid - 1 + jDim*totalDofFluid] =
+                           _res[IDsolid - 1 + jDim*totalDofSolid] );
 }
 
 void steklovPoincare::setResidualFSI( Vector const&  _res)
 {
-    FOR_EACH_INTERFACE_DOF( M_residualFSI[IDfluid - 1 + jDim*totalDofFluid] =
-                            _res[IDsolid - 1 + jDim*totalDofSolid] );
+//     for (UInt ii = 0; ii < _res.size(); ii++)
+//         std::cout << ii << " " << _res[ii] << std::endl;
+
+    FOR_EACH_INTERFACE_DOF(M_residualFSI[IDfluid - 1 + jDim*totalDofFluid] =
+                           _res[IDsolid - 1 + jDim*totalDofSolid] );
 
 }
 
@@ -800,6 +820,7 @@ Vector steklovPoincare::getResidualFSIOnSolid()
     FOR_EACH_INTERFACE_DOF( vec[IDsolid - 1 + jDim*totalDofSolid] =
                             M_residualF[IDfluid - 1 + jDim*totalDofFluid] -
                             M_residualS[IDsolid - 1 + jDim*totalDofSolid] );
+
     return vec;
 }
 
@@ -809,6 +830,14 @@ void steklovPoincare::getResidualFSIOnSolid(Vector& _vec)
     FOR_EACH_INTERFACE_DOF( _vec[IDsolid - 1 + jDim*totalDofSolid] =
                             M_residualF[IDfluid - 1 + jDim*totalDofFluid] -
                             M_residualS[IDsolid - 1 + jDim*totalDofSolid] );
+
+    FOR_EACH_INTERFACE_DOF(std::cout << M_residualF[IDfluid + jDim*totalDofFluid - 1]
+                           << " " << M_residualS[IDsolid + jDim*totalDofSolid - 1] << std::endl);
+
+
+//     for (UInt ii = 0; ii < M_residualS.size(); ii++)
+//         std::cout << ii << " " << M_residualS[ii] << std::endl;
+
 }
 
 
