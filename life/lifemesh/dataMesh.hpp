@@ -71,7 +71,7 @@ public:
 protected:
 
     //! operator
-    DataMesh DataMesh::operator = (const DataMesh &dataMesh)
+    DataMesh operator = (const DataMesh &dataMesh)
         {};
 
     //! mesh
