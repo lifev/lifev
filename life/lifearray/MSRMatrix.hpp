@@ -27,6 +27,8 @@
    \date 2004-10-26
  */
 
+#ifndef _MSRMATRIX_HPP_
+#define _MSRMATRIX_HPP_
 
 namespace LifeV
 {
@@ -224,7 +226,8 @@ private:
     std::vector<DataType> _value;
     const MSRPatt *_Patt; // I want to link the values to a pattern, NOT to change the pattern itself  (which is const)
     //     static const DataType _DefaultValue = 0;
-};
+}; // class MSRMatr
+
 //-------------------------------------------------------------------------------------------------------
 // MSR - VALUES
 //-------------------------------------------------------------------------------------------------------
@@ -782,7 +785,6 @@ MSRMatr<DataType>::zeros()
     fill( start, end, 0.0 );
 }
 
+} // namespace LifeV
 
-
-
-}
+#endif /* _MSRMATRIX_HPP_ */
