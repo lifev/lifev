@@ -1233,7 +1233,7 @@ public:
 
     KNMK& operator*=( const KNMK_<const_R> & u )   // A. Veneziani: I guess here there was a bug
     {
-        KN_<R>::operator/=( u );
+        KN_<R>::operator*=( u );
         return *this;
     }
     KNMK& operator/=( const KNMK_<const_R> & u )    // A. Veneziani: I guess here there was a bug
@@ -1272,7 +1272,7 @@ public:
     {
         KNMKL_<R>::operator=( u );
     }
-    explicit KNMKL( const KNMK<R> & u )
+    explicit KNMKL( const KNMKL<R> & u )
             : KNMKL_<R>( new R[ u.size() ], u.N(), u.M(), u.K(), u.L() )
     {
         KNMKL_<R>::operator=( u );
@@ -1326,7 +1326,7 @@ public:
 
     KNMKL& operator*=( const KNMKL_<const_R> & u )
     {
-        KN_<R>::operator/=( u );
+        KN_<R>::operator*=( u );
         return *this;
     }
     KNMKL& operator/=( const KNMKL_<const_R> & u )
