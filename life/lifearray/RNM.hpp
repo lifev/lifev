@@ -40,7 +40,7 @@ inline void Check_Kn( const char * str, const char * file, int line )
 
 #else
 #define K_assert(i)
-#endif 
+#endif
 // version du 29 fev 2000
 //  correction   for (... lj++,ui++  qui apelle le produit scalaire
 //  petite correction  assert
@@ -1179,7 +1179,7 @@ public:
     {
         KNMK_<R>::operator=( u );
     }
-    explicit KNMK( const KNMK<R> & u )
+    KNMK( const KNMK<R> & u )
             : KNMK_<R>( new R[ u.size() ], u.N(), u.M(), u.K() )
     {
         KNMK_<R>::operator=( u );
@@ -1272,11 +1272,15 @@ public:
     {
         KNMKL_<R>::operator=( u );
     }
-    explicit KNMKL( const KNMKL<R> & u )
+    // This constructor is commented out because it is wrong: u.L() has no sense
+    // for u of type KNMK
+#if 0
+    explicit KNMKL( const KNMK<R> & u )
             : KNMKL_<R>( new R[ u.size() ], u.N(), u.M(), u.K(), u.L() )
     {
         KNMKL_<R>::operator=( u );
     }
+#endif
 
     ~KNMKL()
     {
