@@ -814,7 +814,7 @@ NavierStokesWithFlux<NSSolver>::iterate_two_fluxes( const Real& time )
     //
     Real tt = absr0/( h( 1, 0 )*h( 0, 1 )-h( 0, 0 )*h( 1, 1 ) );
     z[0] = -h( 1, 1 )*tt;
-    z[1] = -h( 1, 0 )*tt;
+    z[1] =  h( 1, 0 )*tt;
     lambda += v1*z[0]+v2*z[1];
     std::cout << "lambda = " << lambda << "\n";
 
@@ -960,7 +960,7 @@ NavierStokesWithFlux<NSSolver>::iterate_two_fluxes_inexact( const Real& time )
     //
     Real tt = absr0/( h( 1, 0 )*h( 0, 1 )-h( 0, 0 )*h( 1, 1 ) );
     z[0] = -h( 1, 1 )*tt;
-    z[1] = -h( 1, 0 )*tt;
+    z[1] =  h( 1, 0 )*tt;
     lambda += v1*z[0]+v2*z[1];
     std::cout << "lambda = " << lambda << "\n";
 
