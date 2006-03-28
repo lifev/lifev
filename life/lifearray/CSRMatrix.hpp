@@ -27,6 +27,9 @@
    \date 2004-10-26
  */
 
+#ifndef _CSRMATRIX_HPP_
+#define _CSRMATRIX_HPP_
+
 namespace LifeV
 {
 ////////////////////////////////////////////////////////////////
@@ -790,3 +793,5 @@ zeros()
 }
 
 }
+
+#endif /* _CSRMATRIX_HPP_ */
