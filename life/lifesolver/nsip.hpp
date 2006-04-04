@@ -868,8 +868,9 @@ UInt NavierStokesSolverIP<Mesh>::solveLinearSystem(Real& condEst)
 #if 1-UMFPACK_SOLVER
     M_linearSolver.setMatrix( M_matrFull );
 
+    bool reuse = M_reusePC;
     solveLinearSystemOnce( M_reusePC );
-    if ( M_reusePC && !M_linearSolver.converged() ) // retry if not converged
+    if ( reuse && !M_linearSolver.converged() ) // retry if not converged
         solveLinearSystemOnce( false );
 #else
     M_linearSolver.setMatrix( M_matrFull, true );
