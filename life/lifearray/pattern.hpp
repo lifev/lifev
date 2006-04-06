@@ -18,7 +18,6 @@
 */
 /*----------------------------------------------------------------------*
 |
-| $Header: /cvsroot/lifev/lifev/life/lifearray/Attic/pattern.hpp,v 1.27 2005-12-18 20:24:27 prudhomm Exp $
 |
 |
 | #Version  0.1 Experimental   07/7/00. Luca Formaggia & Alessandro Veneziani
@@ -1992,7 +1991,7 @@ CSRPatt rowUnify( CSRPatt const &patt1, UInt const nrowZero );
 // zero on the top
 CSRPatt rowUnify( UInt const nrowZero, CSRPatt const &patt1 );
 
-// Costruzione di una Matrice diagonale a blocchi
+// construction of a block diagonal matrix
 CSRPatt diagblockMatrix( CSRPatt const &patt, UInt const nblock );
 
 ////////////////////////////////////////////////////////////////////////
