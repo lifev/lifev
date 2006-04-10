@@ -1,5 +1,5 @@
 # -*- autoconf -*-
-# 
+#
 #
 AC_INIT([lifev], [0.7.0], [lifev-dev@webmail.mate.polimi.it])
 
@@ -43,7 +43,7 @@ AM_CONFIG_HEADER(lifeconfig.h)
 LIFEV_CHECK_COMPILERS
 
 
-# no need for static libs 
+# no need for static libs
 AC_DISABLE_STATIC
 AC_PROG_LIBTOOL
 
@@ -89,7 +89,7 @@ AM_CONDITIONAL(HAVE_BOOST_PROGRAM_OPTIONS, test "x$boost_program_options_error" 
 
 dnl
 dnl checks for some scientific computing libraries
-dnl 
+dnl
 dnl libm
 AC_CHECK_LIB(m,cos,[LIBS="-lm ${LIBS}"],${LIBS})
 dnl umfpack
@@ -105,13 +105,13 @@ AM_CONDITIONAL(HAVE_UMFPACK, test "x$umfpack_libs" != "x" )
 dnl aztec
 AC_CHECK_AZTEC
 dnl petsc
-AC_CHECK_PETSC(2.1.6) #
+dnl AC_CHECK_PETSC(2.1.6) #
 AM_CONDITIONAL(HAVE_PETSC, test "x$petsc_libs" != "x" )
 
 dnl parmetis
 AC_CHECK_PARMETIS
 
-dnl grace 
+dnl grace
 AC_CHECK_HEADERS([grace_np.h])
 AC_CHECK_LIB([grace_np],GraceClose,[grace_libs="-lgrace_np"],[grace_libs=""])
 AC_SUBST(grace_libs)
@@ -138,7 +138,7 @@ LIFEV_LIBS="-llifefilters -llifesolver -llifefem -llifealg -llifemesh -llifearra
 
 #
 # setting prefix
-#  
+#
 prefix=${prefix:-"/usr"}
 if test "x${prefix}" = "xNONE"; then
     prefix=/usr
