@@ -38,6 +38,9 @@
 
 #include <life/lifealg/SolverPETSC.hpp>
 
+/* uncomment following line if you have PETSc 2.3.1 or later */
+/* #define PETSC_VERSION_231 */
+
 namespace LifeV
 {
 
@@ -103,13 +106,24 @@ SolverPETSC::SolverPETSC( std::string const& __ksp_type,
 
     if ( __pc_type == "ilu" )
     {
+#if PETSC_VERSION_MAJOR == 2 && PETSC_VERSION_MINOR >= 3
+
+#ifndef PETSC_VERSION_231
         //ierr = PCILUSetLevels( _M_p->__pc, 2 );
-        //CHKERRQ(ierr);
         ierr = PCILUSetUseDropTolerance( _M_p->__pc, 1e-6, 0.1, 200 );
+#else
+        //ierr = PCFactorSetLevels( _M_p->__pc, 2 );
+        ierr = PCFactorSetUseDropTolerance( _M_p->__pc, 1e-6, 0.1, 200 );
+#endif
+        //CHKERRQ(ierr);
     }
     if ( __pc_type == "icc" )
     {
+#ifndef PETSC_VERSION_231
         ierr = PCICCSetLevels( _M_p->__pc, 2 );
+#else
+        ierr = PCFactorSetLevels( _M_p->__pc, 2 );
+#endif
         //CHKERRQ(ierr);
     }
     ierr = KSPSetTolerances( _M_p->__ksp, _M_p->__tolerance,
