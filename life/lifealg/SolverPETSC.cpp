@@ -106,8 +106,6 @@ SolverPETSC::SolverPETSC( std::string const& __ksp_type,
 
     if ( __pc_type == "ilu" )
     {
-#if PETSC_VERSION_MAJOR == 2 && PETSC_VERSION_MINOR >= 3
-
 #ifndef PETSC_VERSION_231
         //ierr = PCILUSetLevels( _M_p->__pc, 2 );
         ierr = PCILUSetUseDropTolerance( _M_p->__pc, 1e-6, 0.1, 200 );
