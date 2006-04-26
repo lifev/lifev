@@ -25,7 +25,7 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 lib_LTLIBRARIES	= liblifefilters.la
 
 liblifefilters_la_SOURCES	= medit_wrtrs.cpp vtk_wrtrs.cpp readMesh3D.cpp\
-				  openDX_wrtrs.cpp importer.cpp selectMarker.cpp
+				  openDX_wrtrs.cpp importer.cpp selectMarker.cpp ensight.cpp
 liblifefilters_la_LIBADD	= ../lifefem/liblifefem.la
 
 include $(top_srcdir)/admin/Doxyfile.am
