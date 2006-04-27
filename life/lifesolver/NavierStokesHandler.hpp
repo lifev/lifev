@@ -172,7 +172,7 @@ public:
     //! Update convective term, bc treatment and solve the linearized ns system
     virtual void iterate( const Real& time ) = 0;
 
-    // DataStokes accessors 
+    // DataStokes accessors
     //! returns the mesh
 //@@    mesh_type& mesh() { return this->_mesh;}
     const DataType & dataType() const {return M_dataType;}
@@ -296,7 +296,7 @@ public:
 
       This function is VERY mesh dependent!! Use it with caution.
     */
-    void FacesOnSection( const SimpleVect<Real> &  __planar_section,
+    void FacesOnSection( const SimpleVect<Real,0> &  __planar_section,
                          face_dof_type & __faces_on_section_u,
                          face_dof_type & __faces_on_section_p,
                          const Real& __tolerance_section,
@@ -1113,7 +1113,7 @@ NavierStokesHandler<Mesh, DataType>::FacesOnFlag( const EntityFlag& __flag ,
 */
 template <typename Mesh, typename DataType>
 void
-NavierStokesHandler<Mesh, DataType>::FacesOnSection( const SimpleVect<Real> &  __planar_section,
+NavierStokesHandler<Mesh, DataType>::FacesOnSection( const SimpleVect<Real,0> &  __planar_section,
                                            face_dof_type & __faces_on_section_u,
                                            face_dof_type & __faces_on_section_p,
                                            const Real& __tolerance_section ,
@@ -1772,6 +1772,7 @@ Real NavierStokesHandler<Mesh, DataType>::pErrorL2( const Function& pexact,
             sumExact1 += elem_integral( pexact, this->_fe_p, time, 1 );
         }
     }
+
     Real absError = sqrt( sum2 - sum1*sum1/sum0 );
     if (relError)
     {
@@ -1842,7 +1843,7 @@ void NavierStokesHandler<Mesh, DataType>::initializeMeanValuesPerSection()
     }
 
     //! coefficients defining the planar section: ax + by + cz + d = 0
-    SimpleVect<Real> PlaneCoeff(4);
+    SimpleVect<Real,0> PlaneCoeff(4);
     //! Assuming a plane parallel to the Oz axis
     PlaneCoeff(0) = 0.; // a
     PlaneCoeff(1) = 0.; // b
@@ -1892,7 +1893,7 @@ void NavierStokesHandler<Mesh, DataType>::initializeSectionsBifurc()
         ERROR_MSG("We a priori know that the stent lives on 3 planar sections.");
 
     //! coefficients defining the planar section: ax + by + cz + d = 0
-    SimpleVect<Real> PlaneCoeff(4);
+    SimpleVect<Real,0> PlaneCoeff(4);
 
     //! values of "d"
     M_z_section[ 0 ] = 0.5;  // plane x=0.5
