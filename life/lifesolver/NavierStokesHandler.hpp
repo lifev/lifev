@@ -229,10 +229,15 @@ public:
 
     //! returns the current FE for the velocity u
     CurrentFE&   fe_u()   {return _fe_u;}
+
+    //! returns the current boundary FE for the velocity u
     CurrentBdFE& feBd_u() {return _feBd_u;}
 
     //! returns the current FE for the pressure p
-    CurrentFE& fe_p() {return _fe_p;}
+    CurrentFE&   fe_p()   {return _fe_p;}
+
+    //! returns the current boundary FE for the pressure p
+    CurrentBdFE& feBd_p() {return _feBd_p;}
 
     //! Postprocessing
     void postProcess();
@@ -410,6 +415,7 @@ protected:
 
     //! Current FE for the pressure p
     CurrentFE _fe_p;
+    CurrentBdFE _feBd_p;
 
     //! The velocity
     PhysVectUnknown<Vector> _u;
@@ -510,6 +516,9 @@ NavierStokesHandler( const GetPot& data_file, const RefFE& refFE_u,
     _fe_p                              ( _refFE_p,
                                          getGeoMap( this->mesh() ),
                                          _Qr_p ),
+    _feBd_p                            ( _refFE_p.boundaryFE(),
+                                         getGeoMap( this->mesh() ).boundaryMap(),
+                                         _bdQr_p ),
     _u                                 ( _dim_u ),
     _p                                 ( _dim_p ),
     _bdf                               ( this->order_bdf() ),
@@ -571,6 +580,9 @@ NavierStokesHandler( const GetPot& data_file,
     _fe_p                              ( _refFE_p,
                                          getGeoMap( this->mesh() ),
                                          _Qr_p ),
+    _feBd_p                            ( _refFE_p.boundaryFE(),
+                                         getGeoMap( this->mesh() ).boundaryMap(),
+                                         _bdQr_p ),
     _u                                 ( _dim_u ),
     _p                                 ( _dim_p ),
     _bdf                               ( this->order_bdf() ),
@@ -630,6 +642,9 @@ NavierStokesHandler( const GetPot&   data_file,
     _fe_p                              ( _refFE_p,
                                          getGeoMap( this->mesh() ),
                                          _Qr_p ),
+    _feBd_p                            ( _refFE_p.boundaryFE(),
+                                         getGeoMap( this->mesh() ).boundaryMap(),
+                                         _bdQr_p ),
     _u                                 ( _dim_u ),
     _p                                 ( _dim_p ),
     _bdf                               ( this->order_bdf() ),
@@ -1522,10 +1537,6 @@ NavierStokesHandler<Mesh, DataType>::MeanPressure( const face_dof_type & __faces
     // Nodal values of the pressure in the current face
     std::vector<Real> p_local( nDofF );
 
-    //! define the boundary fe for the pressure
-    CurrentBdFE __ThefeBd_p( _refFE_p.boundaryFE(), getGeoMap( this->mesh() ).boundaryMap(),
-                             _bdQr_p );
-
     Real area = 0.;
 
     // Loop on faces
@@ -1539,19 +1550,19 @@ NavierStokesHandler<Mesh, DataType>::MeanPressure( const face_dof_type & __faces
         }
 
         // Updating quadrature data on the current face
-        __ThefeBd_p.updateMeasQuadPt( this->mesh().boundaryFace( j->first ) );
-        area += __ThefeBd_p.measure();
+        _feBd_p.updateMeasQuadPt( this->mesh().boundaryFace( j->first ) );
+        area += _feBd_p.measure();
 
         // Quadrature formula
         // Loop on quadrature points for velocities
-        for ( int iq = 0; iq < __ThefeBd_p.nbQuadPt; ++iq )
+        for ( int iq = 0; iq < _feBd_p.nbQuadPt; ++iq )
         {
             // Interpolation
             // Loop on local dof
             for ( ID l = 1; l <= nDofF; ++l )
-                __pressure += __ThefeBd_p.weightMeas( iq ) *
+                __pressure += _feBd_p.weightMeas( iq ) *
                     p_local[ l - 1 ] *
-                    __ThefeBd_p.phi( int( l - 1 ), iq );
+                    _feBd_p.phi( int( l - 1 ), iq );
 
         }
     }
