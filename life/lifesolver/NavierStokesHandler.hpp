@@ -49,6 +49,7 @@
 #include <life/lifearray/pattern.hpp>
 #include <cmath>
 #include <sstream>
+#include <iomanip>
 #include <ext/slist>
 #include <life/lifearray/SimpleVect.hpp>
 #include <utility>
@@ -220,11 +221,9 @@ public:
     const Dof& pDof() const;
 
     //! returns the FE ref for the velocity
-
     const RefFE& refFEu() const {return _refFE_u;}
 
     //! returns the FE ref for the pressure
-
     const RefFE& refFEp() const {return _refFE_p;}
 
     //! returns the current FE for the velocity u
@@ -753,20 +752,9 @@ NavierStokesHandler<Mesh, DataType>::postProcess()
     if ( fmod( float( _count ), float( this->verbose() ) ) == 0.0 )
     {
         std::cout << "  F-  Post-processing \n";
+        index << std::setfill('0') << std::setw(3);
         index << ( _count / this->verbose() );
-
-        switch ( index.str().size() )
-        {
-        case 1:
-            name = "00" + index.str();
-            break;
-        case 2:
-            name = "0" + index.str();
-            break;
-        case 3:
-            name = index.str();
-            break;
-        }
+        name = index.str();
 
         // postprocess data file for GMV
         wr_gmv_ascii( "test." + name + ".inp", this->mesh(), _dim_u,
