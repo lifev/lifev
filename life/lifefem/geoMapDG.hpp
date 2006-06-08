@@ -72,7 +72,7 @@ class GeoMapDG:public RefEleDG{
 
     bdMap : a pointer on the natural associated mapping for the boundary of the element
   */
-  GeoMapDG::GeoMapDG(std::string _name,
+    GeoMapDG(std::string _name,
              ReferenceShapes _shape,
              int _nbDof,
              int _nbCoor,

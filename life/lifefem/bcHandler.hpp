@@ -302,7 +302,7 @@ public:
 
     // get the BC number from the list using its name
 
-    const UInt BCHandler::getBCbyName(const std::string _BCName) const;
+    const UInt getBCbyName(const std::string _BCName) const;
 
     //! output
     std::ostream& showMe( bool verbose = false, std::ostream & out = std::cout ) const;
@@ -384,7 +384,7 @@ private:
 
 /**
    The update method must be a method of \c BCHandler.
-   
+
    It updates \c BCHandler objects not \c Dof objects
    Build the boundary stuff
 */
@@ -392,23 +392,23 @@ template <typename Mesh>
 void
 BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
 {
-    
+
     typedef typename Mesh::VolumeShape GeoShape;
-    
+
     // Some useful local variables, to save some typing
     UInt nDofpV = dof.fe.nbDofPerVertex; // number of Dof per vertices
     UInt nDofpE = dof.fe.nbDofPerEdge;   // number of Dof per edges
     UInt nDofpF = dof.fe.nbDofPerFace;   // number of Dof per faces
-    
+
     UInt bdnF = mesh.numBFaces();    // number of faces on boundary
-    
+
     EntityFlag marker; //will store the marker of each geometric entity
-    
+
     typedef typename GeoShape::GeoBShape GeoBShape;
-    
+
     UInt nFaceV = GeoBShape::numVertices; // Number of face's vertices
     UInt nFaceE = GeoBShape::numEdges;    // Number of face's edges
-    
+
     UInt nElemV = GeoShape::numVertices; // Number of element's vertices
     UInt nElemE = GeoShape::numEdges;    // Number of element's edges
 
@@ -436,7 +436,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
     // ===================================================
     for ( ID ibF = 1 ; ibF <= bdnF; ++ibF )
     {
-    
+
         iElAd = mesh.boundaryFace( ibF ).ad_first();  // id of the element adjacent to the face
         iFaEl = mesh.boundaryFace( ibF ).pos_first(); // local id of the face in its adjacent element
         feBd.updateMeas( mesh.boundaryFace( ibF ) );  // updating finite element information
@@ -446,14 +446,14 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
         // ===================================================
         if ( nDofpV )
         {
-        
+
             // loop on face vertices
             for ( ID iVeFa = 1; iVeFa <= nFaceV; ++iVeFa )
             {
 
                 marker = mesh.boundaryFace( ibF ).point( iVeFa ).marker(); // vertex marker
                 iVeEl = GeoShape::fToP( iFaEl, iVeFa ); // local vertex number (in element)
-        
+
                 // Finding this marker on the BC list
                 whereList.clear();
                 where = M_bcList.begin();
@@ -466,15 +466,15 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                 {
                     notFoundMarkersCurrent.insert(marker);
                 }
-        
+
                 // Loop number of Dof per vertex
                 for ( ID l = 1; l <= nDofpV; ++l )
                 {
-            
+
                     lDof = ( iVeFa - 1 ) * nDofpV + l ; // local Dof
                     gDof = dof.localToGlobal( iElAd, ( iVeEl - 1 ) * nDofpV + l ); // global Dof
                     bdltg( lDof ) = gDof; // local to global on this face
-            
+
                     // Adding identifier
                     for ( UInt i = 0 ; i < whereList.size(); ++i )
                     {
@@ -506,7 +506,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                                         case 1:  // if the BC is a vector of values to be integrated
                                             break;
                                         case 2:  // if the BC is a vector of values to be integrated
-                                            break; 
+                                            break;
                                         default:
                                             ERROR_MSG( "This boundary condition type is not yet implemented" );
                                     }
@@ -526,22 +526,22 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                 }
             }
         }
-    
-    
-    
+
+
+
         // ===================================================
         // Edge based Dof
         // ===================================================
         if ( nDofpE )
         {
-        
+
             // loop on face edges
             for ( ID iEdFa = 1; iEdFa <= nFaceE; ++iEdFa )
             {
-        
+
                 iEdEl = GeoShape::fToE( iFaEl, iEdFa ).first; // local edge number (in element)
                 marker = mesh.boundaryEdge( mesh.localEdgeId( iElAd, iEdEl ) ).marker(); // edge marker
-        
+
                 // Finding this marker on the BC list
                 whereList.clear();
                 where = M_bcList.begin();
@@ -554,15 +554,15 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                 {
                     notFoundMarkersCurrent.insert(marker);
                 }
-        
+
                 // Loop number of Dof per edge
                 for ( ID l = 1; l <= nDofpE; ++l )
                 {
-            
+
                     lDof = nDofFV + ( iEdFa - 1 ) * nDofpE + l ; // local Dof
                     gDof = dof.localToGlobal( iElAd, nDofElemV + ( iEdEl - 1 ) * nDofpE + l ); // global Dof
                     bdltg( lDof ) = gDof; // local to global on this face
-            
+
                     // Adding identifier
                     for ( UInt i = 0 ; i < whereList.size(); ++i )
                     {
@@ -615,14 +615,14 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                 }
             }
         }
-    
-    
-    
+
+
+
         // ===================================================
         // Face based Dof
         // ===================================================
         marker = mesh.boundaryFace( ibF ).marker(); // edge marker
-    
+
         // Finding this marker on the BC list
         whereList.clear();
         where = M_bcList.begin();
@@ -635,7 +635,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
         {
             notFoundMarkersCurrent.insert(marker);
         }
-    
+
         // Adding identifier
         for ( UInt i = 0 ; i < whereList.size(); ++i )
         {
@@ -661,12 +661,12 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                     }
                     break;
                 case Natural:
-        
+
                     // Why kind of data ?
                     // vincent please check again for your Mixte-FE it doesn't work for Q1
                     if ( where->dataVector() )
                     { // With data vector
-                        UInt type = where->pointerToBCVector()->type() ; 
+                        UInt type = where->pointerToBCVector()->type() ;
                         if ( type == 0 )
                         {
                             // if the BC is a vector which values don't need to be integrated
@@ -677,7 +677,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                                 where->addIdentifier( new IdentifierNatural( gDof ) );
                             }
                         }
-                        else if ( (type == 1) || (type == 2) ) 
+                        else if ( (type == 1) || (type == 2) )
                         {
                             // Loop on number of Dof per face
                             for ( ID l = 1; l <= nDofpF; ++l )
@@ -688,10 +688,10 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                             }
                             where->addIdentifier( new IdentifierNatural( ibF, bdltg ) );
                         }
-            
+
                         else
                             ERROR_MSG( "This BCVector type is not yet implemented" );
-            
+
                     }
                     else
                     {
@@ -731,7 +731,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
             }
         }
     }
-    
+
     std::set<EntityFlag> notFoundMarkersNew;
     for( std::set<EntityFlag>::iterator it = notFoundMarkersCurrent.begin();
          it != notFoundMarkersCurrent.end(); ++it )
@@ -741,7 +741,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
         }
     }
 
-    
+
     if( notFoundMarkersNew.size() > 0 )
     {
         std::cerr <<
@@ -756,7 +756,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
         std::cerr << std::endl;
     }
     M_notFoundMarkers = notFoundMarkersCurrent;
-    
+
     whereList.clear();
     // ============================================================================
     // There is no more identifiers to add to the boundary conditions
@@ -766,10 +766,10 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
     {
         it->finalise();
     }
-    
+
     M_bdUpdateDone = true;
 } // bdUpdate
-  
+
 } // namespace LifeV
 
 #endif /* __BCHandler_H */
