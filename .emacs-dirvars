@@ -9,3 +9,5 @@ c-basic-offset: 4
 evaluate: (c-set-offset 'innamespace '0)
 show-trailing-whitespace: t
 indicate-empty-lines: t
+evaluate: (add-hook 'write-file-hooks 'delete-trailing-whitespace)
+
