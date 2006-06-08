@@ -499,7 +499,7 @@ inline
 id_type
 BareItemsHandler<BareItem>::id( const BareItem & s ) const
 {
-    const_iterator i = find( s );
+    const_iterator i = this->find( s );
     if ( i != container::end() )
         return i->second;
     else
