@@ -172,9 +172,6 @@ namespace LifeV
     ElemMat M_elmatP;
     ElemVec M_elvec; // Elementary right hand side
 
-    //! Right  hand side for the velocity
-    Vector M_rhsU;
-
     //! Right  hand side global
     Vector M_rhsFull, M_rhsFullAux;
 
@@ -241,7 +238,7 @@ namespace LifeV
                                bcHandler ),
     M_fullPattern( this->_dof_u, this->mesh(), nDimensions+1, this->patternType() ),
     M_uPattern( this->_dof_u, this->mesh(), nDimensions, this->patternType() ),
-    M_matrMass( M_uPattern ),
+    M_matrMass( M_fullPattern ),
     M_matrStokes( M_fullPattern ),
     M_matrFull( M_fullPattern ),
     M_matrFullAux( M_fullPattern ),
@@ -251,7 +248,6 @@ namespace LifeV
     M_elmatDtr( this->_fe_u.nbNode, nDimensions, nDimensions+1 ),
     M_elmatP( this->_fe_u.nbNode, nDimensions+1, nDimensions+1 ),
     M_elvec( this->_fe_u.nbNode, nDimensions ),
-    M_rhsU( nDimensions*this->_dim_u ),
     M_rhsFull( ( nDimensions+1 )*this->_dim_u ),
     M_rhsFullAux( ( nDimensions+1 )*this->_dim_u ),
     M_sol( ( nDimensions+1 )*this->_dim_u ),
@@ -405,7 +401,7 @@ namespace LifeV
     chrono.start();
 
     // Right hand side for the velocity at time
-    M_rhsU = ZeroVector( M_rhsU.size() );
+    M_rhsFull = ZeroVector( M_rhsFull.size() );
 
     // loop on volumes: assembling source term
     for ( UInt iVol = 1; iVol<= this->mesh().numVolumes(); ++iVol )
@@ -419,17 +415,13 @@ namespace LifeV
             compute_vec( source, M_elvec, this->_fe_u, M_time, iComp );
 
             // assemble local vector into global one
-            assemb_vec( M_rhsU, M_elvec, this->_fe_u, this->_dof_u, iComp );
+            assemb_vec( M_rhsFull, M_elvec, this->_fe_u, this->_dof_u, iComp );
         }
     }
 
     if ( !M_steady )
-      M_rhsU += M_matrMass * this->_bdf.bdf_u().time_der( this->dt() );
+      M_rhsFull+= M_matrMass * this->_bdf.bdf_u().time_der( this->dt() );
 
-    M_rhsFull = ZeroVector( M_rhsFull.size() );
-
-    for ( UInt iDof = 0; iDof<nDimensions*this->_dim_u; ++iDof )
-         M_rhsFull[ iDof ] = M_rhsU[ iDof ];
 
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
