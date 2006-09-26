@@ -12,7 +12,7 @@ viscosity       = 0.01       # viscosity
 
 
 [../discretization]
-mesh_dir        = ../../../lifev/testsuite/data/mesh/inria/  # the directory where the mesh file is
+mesh_dir        = ../data/mesh/inria/  # the directory where the mesh file is
 mesh_file       = cyl2D.mesh          # mesh file
 mesh_faces      = all
 timestep        = 0.3                   # timestep
