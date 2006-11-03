@@ -30,6 +30,11 @@
 #ifndef _NSIPTERMS_HPP
 #define _NSIPTERMS_HPP
 
+#include <life/lifecore/chrono.hpp>
+#include <life/lifearray/elemMat.hpp>
+#include <life/lifearray/elemVec.hpp>
+#include <life/lifefem/elemOper.hpp>
+
 #define USE_OLD_PARAMETERS 0
 #define WITH_DIVERGENCE 1
 
