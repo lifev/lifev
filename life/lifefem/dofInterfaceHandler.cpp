@@ -218,7 +218,7 @@ UInt DofInterfaceHandler::IndexOfInterfaceRef( const Int& interfref ) const
 {
     std::map<Int, UInt>::const_iterator it = _indexInterfRefMap.find( interfref );
     if ( it == _indexInterfRefMap.end() )
-        ERROR_MSG( "Dof number not found" );
+        ERROR_MSG( "Dof number " << interfref << " not found" );
     return it->second;
 }
 
