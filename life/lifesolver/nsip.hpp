@@ -132,6 +132,9 @@ public:
     //! removes mean of component comp of vector x
     void removeMean( Vector& x, UInt comp=1 );
 
+    //! returns the residual vector
+    Vector residual();
+
     //! calculates boundary force on a boundary specified by BCBase object
     void calculateBoundaryForce( EntityFlag flag,
                                  Real& fx , Real& fy, Real& fz );
@@ -157,13 +160,15 @@ private:
     //MixedPattern<nDimensions, nDimensions, MSRPatt> M_pattMassU;
 
     //! Block pattern of full matrix
-    MSRPatt M_fullPattern;
 
 #if AZTEC_SOLVER
+    MSRPatt M_fullPattern;
     typedef MSRMatr<double> matrix_type;
 #elif PETSC_SOLVER
+    CSRPatt M_fullPattern;
     typedef BoostMatrix<boost::numeric::ublas::row_major> matrix_type;
 #elif UMFPACK_SOLVER
+    MSRPatt M_fullPattern;
     typedef BoostMatrix<boost::numeric::ublas::column_major> matrix_type;
 #endif
 
@@ -184,11 +189,11 @@ private:
     matrix_type M_matrNoBC;
 
     //! Elementary matrices and vectors
-    ElemMat M_elmatS;    // velocity Stokes
-    ElemMat M_elmatC;    // velocity Stokes + coeff*mass
-    ElemMat M_elmatMass; // velocity mass
-    ElemMat M_elmatD;
-    ElemMat M_elmatDtr;
+    ElemMat M_elmatStiff;
+    ElemMat M_elmatBdfMass;
+    ElemMat M_elmatMass;
+    ElemMat M_elmatDiv;
+    ElemMat M_elmatGrad;
     ElemVec M_elvec; // Elementary right hand side
 
     //! Right hand side for the velocity
@@ -261,18 +266,24 @@ NavierStokesSolverIP( const GetPot& dataFile,
                                bcHandler ),
     //M_pattMassUblock( uDof() ),
     //M_pattMassU( M_pattMassUblock, "diag" ),
+#if AZTEC_SOLVER
     M_fullPattern( this->uDof(), this->mesh(), nDimensions+1 ),
+#elif PETSC_SOLVER
+    M_fullPattern( this->uDof(), nDimensions+1, this->mesh() ),
+#elif UMFPACK_SOLVER
+    M_fullPattern( this->uDof(), this->mesh(), nDimensions+1 ),
+#endif
     //M_matrMassU( M_pattMassU ),
     M_matrMass( M_fullPattern ),
     M_matrStokes( M_fullPattern ),
     M_matrConst( M_fullPattern ),
     M_matrFull( M_fullPattern ),
     M_matrNoBC( M_fullPattern ),
-    M_elmatS( this->fe_u().nbNode, nDimensions, nDimensions ),
-    M_elmatC( this->fe_u().nbNode, nDimensions, nDimensions ),
-    M_elmatMass( this->fe_u().nbNode, nDimensions, nDimensions ),
-    M_elmatD( this->fe_u().nbNode, nDimensions+1, nDimensions ),
-    M_elmatDtr( this->fe_u().nbNode, nDimensions, nDimensions+1 ),
+    M_elmatStiff  ( this->fe_u().nbNode, nDimensions, nDimensions ),
+    M_elmatBdfMass( this->fe_u().nbNode, nDimensions, nDimensions ),
+    M_elmatMass   ( this->fe_u().nbNode, nDimensions, nDimensions ),
+    M_elmatDiv    ( this->fe_u().nbNode, nDimensions+1, nDimensions ),
+    M_elmatGrad   ( this->fe_u().nbNode, nDimensions, nDimensions+1 ),
     M_elvec( this->fe_u().nbNode, nDimensions ),
     M_rhsNoBC( ( nDimensions+1 )*dim_u() ),
     M_rhsFull( ( nDimensions+1 )*dim_u() ),
@@ -367,56 +378,59 @@ NavierStokesSolverIP( const GetPot& dataFile,
     {
         this->fe_u().updateFirstDeriv( this->mesh().volumeList( iVol ) );
 
-        M_elmatS.zero();
-        M_elmatC.zero();
+        M_elmatStiff.zero();
+        M_elmatBdfMass.zero();
         M_elmatMass.zero();
-        M_elmatD.zero();
-        M_elmatDtr.zero();
+        M_elmatDiv.zero();
+        M_elmatGrad.zero();
 
-        // stiffness strain
-        stiff_strain( 2.0*this->viscosity(), M_elmatS, this->fe_u() );
-        //stiff_div( 0.5*fe_u().diameter(), M_elmatS, fe_u() );
-        M_elmatC.mat()= M_elmatS.mat();
+        // stiffness strain computation
+        stiff_strain( 2.0*this->viscosity(), M_elmatStiff, this->fe_u() );
+        //stiff_div( 0.5*fe_u().diameter(), M_elmatStiff, fe_u() );
 
-        // mass
+        // mass computation
         if ( !M_steady )
         {
-            mass( this->density()*bdfCoeff, M_elmatMass, this->fe_u(), 0, 0, nDimensions );
-            M_elmatC.mat() += M_elmatMass.mat();
-            M_elmatMass.mat() *= ( 1./bdfCoeff );
+            mass( this->density(), M_elmatMass, this->fe_u(), 0, 0, nDimensions );
+            M_elmatBdfMass.mat() = M_elmatMass.mat();
+            M_elmatBdfMass.mat() *= bdfCoeff;
         }
 
         for ( UInt iComp = 0; iComp<nbCompU; iComp++ )
         {
             for ( UInt jComp = 0; jComp<nbCompU; jComp++ )
             {
-                // stiffness
-                assemb_mat( M_matrConst, M_elmatC, this->fe_u(), this->uDof(),
-			    iComp, jComp );
-                assemb_mat( M_matrStokes, M_elmatS, this->fe_u(), this->uDof(),
-			    iComp, jComp );
-                if ( !M_steady )
-                {
-                    assemb_mat( M_matrMass, M_elmatMass, this->fe_u(),
-				this->uDof(), iComp, jComp);
-                }
+                // stiffness strain assembly
+                assemb_mat( M_matrConst, M_elmatStiff, this->fe_u(),
+                            this->uDof(), iComp, jComp );
+                assemb_mat( M_matrStokes, M_elmatStiff, this->fe_u(),
+                            this->uDof(), iComp, jComp );
             }
-            // mass
-            //assemb_mat( M_matrMassU, M_elmatMass, fe_u(),uDof(),iComp,iComp );
 
-            // div
-            grad( iComp, 1.0, M_elmatDtr, this->fe_u(), this->fe_u(), iComp, nDimensions );
-            div( iComp, -1.0, M_elmatD  , this->fe_u(), this->fe_u(), nbCompU, iComp );
+            // mass assembly
+            if ( !M_steady )
+            {
+                assemb_mat( M_matrMass, M_elmatMass, this->fe_u(),
+                            this->uDof(), iComp, iComp);
+                assemb_mat( M_matrConst, M_elmatBdfMass, this->fe_u(),
+                            this->uDof(), iComp, iComp);
+            }
 
-            // assembling
-            assemb_mat( M_matrConst, M_elmatDtr, this->fe_u(), this->uDof(), iComp,
-                        nbCompU );
-            assemb_mat( M_matrConst, M_elmatD, this->fe_u(), this->uDof(), nbCompU,
-                        iComp );
-            assemb_mat( M_matrStokes, M_elmatDtr, this->fe_u(), this->uDof(), iComp,
-                        nbCompU );
-            assemb_mat( M_matrStokes, M_elmatD, this->fe_u(), this->uDof(), nbCompU,
-                        iComp );
+            // grad and div computation
+            grad( iComp,  1.0, M_elmatGrad, this->fe_u(), this->fe_u(), iComp,
+                  nDimensions);
+            div ( iComp, -1.0, M_elmatDiv,  this->fe_u(), this->fe_u(), nbCompU,
+                  iComp );
+
+            // grad and div assembly
+            assemb_mat( M_matrConst,  M_elmatGrad, this->fe_u(), this->uDof(),
+                        iComp, nbCompU );
+            assemb_mat( M_matrConst,  M_elmatDiv,  this->fe_u(), this->uDof(),
+                        nbCompU, iComp );
+            assemb_mat( M_matrStokes, M_elmatGrad, this->fe_u(), this->uDof(),
+                        iComp, nbCompU );
+            assemb_mat( M_matrStokes, M_elmatDiv,  this->fe_u(), this->uDof(),
+                        nbCompU, iComp );
 
         }
     }
@@ -430,7 +444,9 @@ NavierStokesSolverIP( const GetPot& dataFile,
 
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
-    // M_matrConst.spy( "CS.m" );
+    //M_matrStokes.spy( "stokes.m" );
+    //M_matrConst.spy( "const.m" );
+    //M_matrMass.spy("mass.m");
 
 
 } // NavierStokesSolverIP() [Constructor]
@@ -531,7 +547,7 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
     {
         this->fe_u().updateFirstDeriv( this->mesh().volumeList( iVol ) ); //as updateFirstDer
 
-        M_elmatC.zero();
+        M_elmatStiff.zero();
 
         UInt eleID = this->fe_u().currentId();
         // Non linear term, Semi-implicit approach
@@ -541,25 +557,32 @@ void NavierStokesSolverIP<Mesh>::iterate( const Real& time )
             UInt  iloc = this->fe_u().patternFirst( iNode );
             for ( UInt iComp = 0; iComp<nbCompU; ++iComp )
             {
-                UInt ig = this->uDof().localToGlobal( eleID, iloc+1 )-1+iComp*dim_u();
-                M_elvec.vec()[ iloc+iComp*this->fe_u().nbNode ] = this->density() * betaVec(ig);
+                UInt ig = this->uDof().localToGlobal( eleID, iloc+1 ) - 1 +
+                    iComp*dim_u();
+                M_elvec.vec()[ iloc+iComp*this->fe_u().nbNode ] =
+                    this->density() * betaVec(ig);
             }
         }
 
         // Stabilising term: div u^n u v
         if ( M_divBetaUv )
         {
-            mass_divw( 0.5*this->density(), M_elvec, M_elmatC, this->fe_u(), 0, 0, nbCompU );
+            mass_divw( 0.5*this->density(), M_elvec, M_elmatStiff, this->fe_u(),
+                       0, 0, nbCompU );
         }
 
         // loop on components
         for ( UInt iComp = 0; iComp<nbCompU; ++iComp )
         {
             // compute local convective term and assembling
-            grad( 0, M_elvec, M_elmatC, this->fe_u(), this->fe_u(), iComp, iComp );
-            grad( 1, M_elvec, M_elmatC, this->fe_u(), this->fe_u(), iComp, iComp );
-            grad( 2, M_elvec, M_elmatC, this->fe_u(), this->fe_u(), iComp, iComp );
-            assemb_mat( M_matrFull, M_elmatC, this->fe_u(), this->uDof(), iComp, iComp );
+            grad( 0, M_elvec, M_elmatStiff, this->fe_u(), this->fe_u(),
+                  iComp, iComp );
+            grad( 1, M_elvec, M_elmatStiff, this->fe_u(), this->fe_u(),
+                  iComp, iComp );
+            grad( 2, M_elvec, M_elmatStiff, this->fe_u(), this->fe_u(),
+                  iComp, iComp );
+            assemb_mat( M_matrFull, M_elmatStiff, this->fe_u(), this->uDof(),
+                        iComp, iComp);
         }
     }
 
@@ -942,6 +965,15 @@ void NavierStokesSolverIP<Mesh>::solveLinearSystemOnce( bool reusePC )
         M_nUsePC = 1;
     }
 } // solveLinearSystemOnce
+
+template <typename Mesh>
+Vector NavierStokesSolverIP<Mesh>::residual()
+{
+    Vector residual( ( nDimensions+1 )*dim_u() );
+    residual = M_rhsNoBC;
+    residual -= M_matrNoBC * M_sol;
+    return residual;
+}
 
 template <typename Mesh>
 void NavierStokesSolverIP<Mesh>::calculateBoundaryForce( EntityFlag flag,
