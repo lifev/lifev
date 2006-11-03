@@ -165,7 +165,7 @@ DataNavierStokes( const GetPot& dfile ) :
     M_stab_method = NSStabilization ( M_stabilization_list.value( dfile( "fluid/discretization/stabilization", "none") ) );
 
     // IP needs boundary faces
-    bool ipfaces =  ( M_stab_method == IP_STABILIZATION ) && (this->meshFaces() != "all" ) ;
+    bool ipfaces =  ( M_stab_method == IP_STABILIZATION ) && (this->_mesh_faces != "all" ) ;
     if ( ipfaces )
         ERROR_MSG("ERROR: IP requires boundary faces. Put mesh_faces = all in data file." );
 
