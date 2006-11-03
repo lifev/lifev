@@ -74,6 +74,8 @@ class NavierStokesHandler//:
 
 public:
 
+    typedef DataType data_type;
+    
     typedef Real ( *Function ) ( const Real&, const Real&, const Real&,
                                  const Real&, const ID& );
     typedef boost::function<Real ( Real const&, Real const&, Real const&,
@@ -109,15 +111,14 @@ public:
                          const QuadRule& bdQr_p,
                          BCHandler&      BCh_u );
 
-    NavierStokesHandler( const GetPot&   data_file,
-                         const DataNavierStokes<Mesh>& dataNavierStokes,
-                         const RefFE&    refFE_u,
-                         const RefFE&    refFE_p,
-                         const QuadRule& Qr_u,
-                         const QuadRule& bdQr_u,
-                         const QuadRule& Qr_p,
-                         const QuadRule& bdQr_p,
-                         BCHandler&      BCh_u );
+    NavierStokesHandler( const DataType&         dataNavierStokes,
+                         const RefFE&           refFE_u,
+                         const RefFE&           refFE_p,
+                         const QuadRule&        Qr_u,
+                         const QuadRule&        bdQr_u,
+                         const QuadRule&        Qr_p,
+                         const QuadRule&        bdQr_p,
+                         BCHandler&             BCh_u );
 
     /*! constructor without BCs */
     NavierStokesHandler( const GetPot&   data_file,
@@ -373,16 +374,16 @@ protected:
 
     //! data for NS solvers
 
-    DataType      M_dataType;
+    data_type     M_dataType;
 
     //! source term for NS
-    source_type _M_source;
+    source_type   _M_source;
 
     //! Reference FE for the velocity
-    const RefFE& _refFE_u;
+    const RefFE&  _refFE_u;
 
     //! Reference FE for the pressure
-    const RefFE& _refFE_p;
+    const RefFE&  _refFE_p;
 
     //! The Dof object associated with the velocity
     Dof _dof_u;
@@ -550,14 +551,13 @@ NavierStokesHandler( const GetPot& data_file, const RefFE& refFE_u,
 // Constructors
 template <typename Mesh, typename DataType>
 NavierStokesHandler<Mesh, DataType>::
-NavierStokesHandler( const GetPot& data_file,
-                     const DataNavierStokes<Mesh>& dataNavierStokes,
-                     const RefFE& refFE_u,
-                     const RefFE& refFE_p,
-                     const QuadRule& Qr_u,
-                     const QuadRule& bdQr_u,
-                     const QuadRule& Qr_p,
-                     const QuadRule& bdQr_p,
+NavierStokesHandler( const DataType&   dataNavierStokes,
+                     const RefFE&     refFE_u,
+                     const RefFE&     refFE_p,
+                     const QuadRule&  Qr_u,
+                     const QuadRule&  bdQr_u,
+                     const QuadRule&  Qr_p,
+                     const QuadRule&  bdQr_p,
                      BCHandler& BCh_u ) :
     M_dataType                         ( dataNavierStokes ),
     _refFE_u                           ( refFE_u ),

@@ -110,6 +110,7 @@ public:
 
     //! Interpolated mesh velocity
     PhysVectUnknown<Vector>& dwInterpolated();
+    PhysVectUnknown<Vector>& dw();
 
     //! Updating mesh
     void updateMesh( const Real& time );
@@ -156,10 +157,13 @@ protected:
     PhysVectUnknown<Vector> _wInterp;
 
     //! The interpolated displacement dervivative (right hand sized linearized)
+
     PhysVectUnknown<Vector> _dInterp;
+    PhysVectUnknown<Vector> _dx;
 
     //! The interpolated mesh velocity mesh velocity (right hand sized linearized)
     PhysVectUnknown<Vector> _dwInterp;
+    PhysVectUnknown<Vector> _dw;
 
 
     //! This method interpolates the mesh velocity when necessary (refFE_u.nbNodes > this->_mesh.getRefFE().nbNodes)
@@ -208,6 +212,7 @@ NavierStokesAleHandler( const GetPot&   data_file,
                                      BCh_mesh ),
         _dispOld                 ( M_harmonicExtension.dofMesh().numTotalDof() ),
         _w                       ( M_harmonicExtension.dofMesh().numTotalDof() ),
+        _dw                      ( M_harmonicExtension.dofMesh().numTotalDof() ),
         _wInterp                 ( this->_dim_u ),
         _dInterp                 ( this->_dim_u ),
         _dwInterp                ( this->_dim_u )
@@ -233,8 +238,7 @@ NavierStokesAleHandler( const GetPot&   data_file,
                         const QuadRule& bdQr_p,
                         BCHandler&      BCh_u,
                         BCHandler&      BCh_mesh ) :
-        NavierStokesHandler<Mesh>( data_file,
-                                   dataNavierStokes,
+        NavierStokesHandler<Mesh>( dataNavierStokes,
                                    refFE_u,
                                    refFE_p,
                                    Qr_u,
@@ -249,6 +253,7 @@ NavierStokesAleHandler( const GetPot&   data_file,
                                      quadRuleTria3pt,
                                      BCh_mesh ),
         _dispOld                 ( M_harmonicExtension.dofMesh().numTotalDof() ),
+        _dw                      ( M_harmonicExtension.dofMesh().numTotalDof() ),
         _w                       ( M_harmonicExtension.dofMesh().numTotalDof() ),
         _wInterp                 ( this->_dim_u ),
         _dInterp                 ( this->_dim_u ),
@@ -285,6 +290,7 @@ NavierStokesAleHandler( const GetPot&   data_file,
                                      quadRuleTetra4pt,
                                      quadRuleTria3pt ),
         _dispOld                 ( M_harmonicExtension.dofMesh().numTotalDof() ),
+        _dw                      ( M_harmonicExtension.dofMesh().numTotalDof() ),
         _w                       ( M_harmonicExtension.dofMesh().numTotalDof() ),
         _wInterp                 ( this->_dim_u ),
         _dInterp                 ( this->_dim_u ),
@@ -341,6 +347,9 @@ updateDispVelo()
     Real dti = 1.0 / this->dt();
 
     std::cout << " max norm dx = " << norm_inf( M_harmonicExtension.getDisplacement() ) << std::endl;
+
+    _dx = M_harmonicExtension.getDisplacement();
+    _dw = _dx*dti;
 
     _interpolate( _w.nbcomp(), M_harmonicExtension.getDisplacement(), _dInterp );
 
@@ -666,6 +675,12 @@ template <typename Mesh>
 PhysVectUnknown<Vector>& NavierStokesAleHandler<Mesh>::w()
 {
     return _w;
+}
+
+template <typename Mesh>
+PhysVectUnknown<Vector>& NavierStokesAleHandler<Mesh>::dw()
+{
+    return _dw;
 }
 
 
