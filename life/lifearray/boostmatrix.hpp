@@ -59,8 +59,8 @@ public:
 //        typedef boost::numeric::ublas::compressed_matrix<double, storage_scheme, 0, boost::numeric::ublas::unbounded_array<int> > super;
     typedef boost::numeric::ublas::compressed_matrix<double, storage_scheme> super;
     //! empty constructor
-    BoostMatrix( typename BoostMatrix::size_type size1,
-                 typename BoostMatrix::size_type size2 )
+    BoostMatrix( typename BoostMatrix::size_type size1 = 0,
+                 typename BoostMatrix::size_type size2 = 0 )
         : super( size1, size2 ) { }
 
     //! Copy constructor
@@ -133,6 +133,10 @@ public:
 #endif
     }
 
+    //! Constructor from a CSR pattern object
+    BoostMatrix( const CSRPatt& pattern );
+
+    //! Constructor from a MixedPattern object
     template <UInt BROWS, UInt BCOLS, typename PATTERN>
     BoostMatrix( const MixedPattern<BROWS, BCOLS, PATTERN>& pattern );
 
@@ -246,6 +250,56 @@ public:
         }
 
 }; // class BoostMatrix
+
+
+// BoostMatrix IMPLEMENTATIONS
+
+template<>
+BoostMatrix<boost::numeric::ublas::row_major>::BoostMatrix( const CSRPatt& pattern )
+    : super( pattern.nRows(), pattern.nCols(), pattern.nNz() )
+{
+
+    this->reserve( pattern.nNz(), false );
+    ASSERT( this->value_data().size() == pattern.nNz(),
+            "reserve didn't work" );
+#if BOOST_VERSION / 100 %1000 <= 32
+    this->filled1() = pattern.ia().size();
+    this->filled2() = pattern.nNz();
+#else
+    this->set_filled( pattern.ia().size(), pattern.nNz() );
+#endif
+
+    std::for_each( this->value_data().begin(),
+                   this->value_data().end(),
+                   boost::lambda::_1 = 0.0 );
+
+    std::copy( pattern.ia().begin(),
+               pattern.ia().end(),
+               this->index1_data().begin() );
+
+    for(UInt row=0; row<this->size2(); ++row)
+    {
+        UInt posP = pattern.ia()[row];
+        UInt posPend = pattern.ia()[row+1];
+        BoostMatrix::size_type posB = posP;
+        BoostMatrix::size_type jDiag = pattern.ja()[posB];
+        ++posP;
+        while ( posP < posPend && pattern.ja()[posP] < jDiag )
+        {
+            this->index2_data()[posB] = pattern.ja()[posP];
+            ++posP;
+            ++posB;
+        }
+        this->index2_data()[posB] = jDiag;
+        ++posB;
+        while ( posP < posPend )
+        {
+            this->index2_data()[posB] = pattern.ja()[posP];
+            ++posP;
+            ++posB;
+        }
+    }
+}
 
 template<>
 template<UInt BROWS, UInt BCOLS, typename PATTERN>
@@ -409,6 +463,10 @@ void BoostMatrix<boost::numeric::ublas::column_major>::zeros()
     }
 }
 
+
+// CLASS DIAGONALBOOSTMATRIX
+
+
 class DiagonalBoostMatrix
 //        : public boost::numeric::ublas::compressed_matrix<double, boost::numeric::ublas::row_major, 0, boost::numeric::ublas::unbounded_array<int> >
     : public boost::numeric::ublas::compressed_matrix<double, boost::numeric::ublas::row_major>
@@ -416,6 +474,9 @@ class DiagonalBoostMatrix
 public:
 //        typedef boost::numeric::ublas::compressed_matrix<double, boost::numeric::ublas::row_major, 0, boost::numeric::ublas::unbounded_array<int> > super;
     typedef boost::numeric::ublas::compressed_matrix<double, boost::numeric::ublas::row_major> super;
+
+
+    //! Constructor
     DiagonalBoostMatrix( size_type n )
         : super( n, n, n )
         {
@@ -425,12 +486,14 @@ public:
             }
         }
 
-    //! Copy constructor
 
+    //! Copy constructor
     template<typename __E>
     DiagonalBoostMatrix( const boost::numeric::ublas::matrix_expression<__E>& M)
         : super(M) { }
 
+
+    //! invert matrix
     void invert()
         {
             for ( size_type i=0; i<this->size1(); ++i )
@@ -439,12 +502,15 @@ public:
             }
         }
 
+
     //! Operator =
     template<typename __E>
     DiagonalBoostMatrix operator=(const boost::numeric::ublas::matrix_expression<__E>& M) {
         return super::operator=(M);
     }
 
+
+    //! Lump a matrix into this matrix with row sum lumping
     template<typename matrix_type>
     void lumpRowSum( const matrix_type& m )
         {
@@ -461,6 +527,8 @@ public:
             }
         }
 
+
+    //! Lump a matrix into this matrix with diagonal scaling
     template<typename matrix_type>
     void lumpDiagonalScaling( const matrix_type& m )
         {
@@ -482,6 +550,7 @@ public:
                 this->operator()( i, i ) = m( i, i ) * factor;
             }
         }
+
 
     //! Dump matrix to file in Matlab format and spy
     void spy( std::string const &filename ) const
@@ -527,6 +596,7 @@ public:
 
 }; // class DiagonalBoostMatrix
 
+
 /** efficient (Schur) product of sparse, diagonal, and sparse matrix D*H*G
     @param D first matrix
     @param H second matrix, diagonal
@@ -565,6 +635,7 @@ void schurProduct( const BoostMatrix<boost::numeric::ublas::row_major>& D,
       }
     */
 }
+
 } // namespace LifeV
 
 #endif /* _BOOSTMATRIX_HPP_ */
