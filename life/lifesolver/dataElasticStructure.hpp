@@ -54,6 +54,11 @@ public:
     //! End time
     Real endtime() const;
 
+    //! getters
+
+    Real young(){return _E;}
+    Real poisson(){return _nu;}
+
 protected:
     //! Physics
     Real _rho; // densisty
