@@ -131,7 +131,7 @@ void bcManageMtimeUDep( MatrixType& M, const Dof& dof,
               // Loop on components involved in this boundary condition
               for ( ID j = 1; j <= nComp; ++j )
               {
-                // Glogal Dof
+                // Global Dof
                 idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
 
 #if USE_BOOST_MATRIX
@@ -334,7 +334,7 @@ void bcEssentialManageUDep( MatrixType& A, VectorType& b, const MeshType& mesh, 
             // Loop on components involved in this boundary condition
             for ( ID j = 1; j <= nComp; ++j )
             {
-                // Glogal Dof
+                // Global Dof
                 idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
                 // Coordinates of the node where we impose the value
                 x = static_cast< const IdentifierEssential* >( BCb( i ) ) ->x();
@@ -413,7 +413,7 @@ void bcEssentialManage( MatrixType& A, VectorType& b, const MeshType& /*mesh*/, 
             // Loop on components involved in this boundary condition
             for ( ID j = 1; j <= nComp; ++j )
             {
-                // Glogal Dof
+                // Global Dof
                 idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
                 // Coordinates of the node where we impose the value
                 x = static_cast< const IdentifierEssential* >( BCb( i ) ) ->x();
@@ -463,7 +463,7 @@ void bcEssentialManageMatrix( MatrixType& A, const Dof& dof, const BCBase& BCb, 
         // Loop on components involved in this boundary condition
         for ( ID j = 1; j <= nComp; ++j )
         {
-            // Glogal Dof
+            // Global Dof
             idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
             // Modifying ONLY matrix
             A.diagonalize_row( idDof - 1, coef );
@@ -497,7 +497,7 @@ void bcEssentialManageVector( VectorType& b, const Dof& dof, const BCBase& BCb, 
             for ( ID j = 1; j <= nComp; ++j )
             {
 
-                // Glogal Dof
+                // Global Dof
                 idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
                 // Modifying right hand side
                 b( idDof - 1 ) = coef * BCb( BCb( i ) ->id(), BCb.component( j ) );
@@ -514,7 +514,7 @@ void bcEssentialManageVector( VectorType& b, const Dof& dof, const BCBase& BCb, 
             // Loop on components involved in this boundary condition
             for ( ID j = 1; j <= nComp; ++j )
             {
-                // Glogal Dof
+                // Global Dof
                 idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
                 // Coordinates of the node where we impose the value
                 x = static_cast< const IdentifierEssential* >( BCb( i ) ) ->x();
@@ -561,7 +561,7 @@ void bcEssentialManage( MatrixType1& A,
             // Loop on components involved in this boundary condition
             for ( ID j = 1; j <= nComp; ++j )
             {
-                // Glogal Dof
+                // Global Dof
                 idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
                 // Modifying matrix and right hand side
                 A.diagonalize( idDof - 1, coef, b, BCb( BCb( i ) ->id(), BCb.component( j ) ) );
@@ -580,7 +580,7 @@ void bcEssentialManage( MatrixType1& A,
             for ( ID j = 1; j <= nComp; ++j )
             {
 
-                // Glogal Dof
+                // Global Dof
                 idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
                 // Coordinates of the node where we impose the value
                 x = static_cast< const IdentifierEssential* >( BCb( i ) ) ->x();
@@ -623,7 +623,7 @@ void bcEssentialManage( MatrixType1& A, MatrixType2& trD, MatrixType3& D,
             // Loop on components involved in this boundary condition
             for ( ID j = 1; j <= nComp; ++j )
             {
-                // Glogal Dof
+                // Global Dof
                 idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
                 // Modifying matrix and right hand side
                 A.diagonalize( idDof - 1, coef, b, BCb( BCb( i ) ->id(), BCb.component( j ) ) );
@@ -642,7 +642,7 @@ void bcEssentialManage( MatrixType1& A, MatrixType2& trD, MatrixType3& D,
             for ( ID j = 1; j <= nComp; ++j )
             {
 
-                // Glogal Dof
+                // Global Dof
                 idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
                 // Coordinates of the node where we impose the value
                 x = static_cast< const IdentifierEssential* >( BCb( i ) ) ->x();
@@ -723,7 +723,7 @@ void bcNaturalManageUDep( Real (*mu)(Real t,Real x, Real y, Real z, Real u),
                 for ( ID j = 1; j <= nComp; ++j )
                 {
 
-                    //glogal Dof
+                    //global Dof
                     idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof;
 
                     // Loop on quadrature points
@@ -756,7 +756,7 @@ template <typename VectorType, typename MeshType, typename DataType>
 void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const BCBase& BCb,
                       CurrentBdFE& bdfem, const DataType& t )
 {
-  
+
     // Number of local Dof (i.e. nodes) in this face
     UInt nDofF = bdfem.nbNode;
 
@@ -782,7 +782,7 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
                 for ( ID j = 1; j <= nComp; ++j )
                 {
                     ID id = BCb(i)->id();
-                    // Glogal Dof
+                    // Global Dof
                     idDof = id + ( BCb.component( j ) - 1 ) * totalDof;
 
                     // Modifying right hand side (assuming BCvector is a flux)
@@ -820,11 +820,11 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
 			  {
 			    sum=0.0;
 			    // data on quadrature point
-			    for ( ID m = 1; m <= nDofF; ++m ) 
+			    for ( ID m = 1; m <= nDofF; ++m )
 			      sum +=  BCb( pId->bdLocalToGlobal( m ) , 1 ) * bdfem.phi( int( m - 1 ), iq );
-			    
+			
 			    // Adding right hand side contribution 	
-			    b[ icDof - 1 ] += sum * bdfem.phi( int( l - 1 ), iq ) * bdfem.normal( int( ic ), iq ) 
+			    b[ icDof - 1 ] += sum * bdfem.phi( int( l - 1 ), iq ) * bdfem.normal( int( ic ), iq )
 			      * bdfem.weightMeas( iq );
 			  }
 		      }
@@ -835,22 +835,22 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
 	  // Loop on BC identifiers
 	  for ( ID i = 1; i <= BCb.list_size(); ++i )
             {
-	      
+	
 	      // Pointer to the i-th itdentifier in the list
 	      pId = static_cast< const IdentifierNatural* >( BCb( i ) );
-	      
+	
 	      // Number of the current boundary face
 	      ibF = pId->id();
-	      
+	
 	      // Updating face stuff
 	      bdfem.updateMeasNormalQuadPt( mesh.boundaryFace( ibF ) );
-	      
+	
 	      // Loop on total Dof per Face
 	      for ( ID l = 1; l <= nDofF; ++l )
                 {
-		  
+		
 		  gDof = pId->bdLocalToGlobal( l );
-		  
+		
 		  // Loop on space dimensions
 		  for ( UInt ic = 0; ic < nDimensions; ++ic )
                     {
@@ -861,9 +861,9 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
 			  // data on quadrature point
 			  for ( ID m = 1; m <= nDofF; ++m )
 			    sum +=  BCb( pId->bdLocalToGlobal( m ) , ic+1 ) * bdfem.phi( int( m - 1 ), iq );
-			  
+			
 			  // Adding right hand side contribution
-			  b[ gDof - 1 ] += sum *  bdfem.phi( int( l - 1 ), iq ) * 
+			  b[ gDof - 1 ] += sum *  bdfem.phi( int( l - 1 ), iq ) *
 			    bdfem.normal( int( ic ), iq ) * bdfem.weightMeas( iq );
 			}
 		    }
@@ -910,7 +910,7 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
     // Loop on components involved in this boundary condition
     for (ID j=1; j<=nComp; ++j) {
 
-     //glogal Dof
+     //global Dof
      idDof  =  BCb(i)->id() + (BCb.component(j)-1)*totalDof;
 
      // Loop on quadrature points
@@ -952,7 +952,7 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
                 for ( ID j = 1; j <= nComp; ++j )
                 {
 
-                    //glogal Dof
+                    //global Dof
                     idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof;
 
                     // Loop on quadrature points
@@ -969,7 +969,7 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
             }
         }
     }
-}
+} // bcNaturalManage
 
 // ===================================================
 // Mixte BC
@@ -1076,7 +1076,7 @@ void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Do
 
                         sum = 0;
 
-                        // Glogals Dof: row and columns
+                        // Globals Dof: row and columns
                         //vincent please check again for your Mixte-FE it doesn't work for Q1:
                         //     idDof  =  BCb(i)->id() + (BCb.component(j)-1)*totalDof;
                         //     jdDof  =  BCb(k)->id() + (BCb.component(j)-1)*totalDof;
@@ -1145,7 +1145,7 @@ void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Do
 
                     sum = 0;
 
-                    // Glogal Dof (outside the quad point loop. V. Martin)
+                    // Global Dof (outside the quad point loop. V. Martin)
                     idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof;
 
                     // Loop on quadrature points
@@ -1158,7 +1158,7 @@ void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Do
                         sum += pBcF->coef( t, x, y, z, j ) * bdfem.phi( int( idofF - 1 ), l ) * bdfem.phi( int( idofF - 1 ), l ) *
                                bdfem.weightMeas( l );
 
-                        // Glogal Dof (Why inside this loop?? V. Martin)
+                        // Global Dof (Why inside this loop?? V. Martin)
                         // idDof = pId->bdLocalToGlobal(idofF) + (BCb.component(j)-1)*totalDof;
 
                         // Adding right hand side contribution
@@ -1194,7 +1194,7 @@ void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Do
                                    bdfem.weightMeas( l );
                         }
 
-                        // Glogals Dof: row and columns
+                        // Globals Dof: row and columns
                         idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof;
                         jdDof = pId->bdLocalToGlobal( k ) + ( BCb.component( j ) - 1 ) * totalDof;
 
@@ -1262,7 +1262,7 @@ void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
 
                     sum = 0;
 
-                    // Glogal Dof
+                    // Global Dof
                     idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
 
                     // Loop on quadrature points
@@ -1297,7 +1297,7 @@ void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
                                    bdfem.weightMeas( l );
                         }
 
-                        // Glogals Dof: row and columns
+                        // Globals Dof: row and columns
                         idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
                         jdDof = BCb( k ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
 
@@ -1341,7 +1341,7 @@ void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
 
                     sum = 0;
 
-                    // Glogal Dof (outside the quad point loop. V. Martin)
+                    // Global Dof (outside the quad point loop. V. Martin)
                     idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof;
 
                     // Loop on quadrature points
@@ -1354,7 +1354,7 @@ void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
                         sum += pBcF->coef( t, x, y, z, j ) * bdfem.phi( int( idofF - 1 ), l ) * bdfem.phi( int( idofF - 1 ), l ) *
                                bdfem.weightMeas( l );
 
-                        // Glogal Dof (Why inside this loop?? V. Martin)
+                        // Global Dof (Why inside this loop?? V. Martin)
                         // idDof = pId->bdLocalToGlobal(idofF) + (BCb.component(j)-1)*totalDof;
                     }
 
@@ -1386,7 +1386,7 @@ void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
                                    bdfem.weightMeas( l );
                         }
 
-                        // Glogals Dof: row and columns
+                        // Globals Dof: row and columns
                         idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof;
                         jdDof = pId->bdLocalToGlobal( k ) + ( BCb.component( j ) - 1 ) * totalDof;
 
@@ -1446,7 +1446,7 @@ void bcMixteManageVector( VectorType& b, const MeshType& mesh, const Dof& dof,
                 // Loop on components invoved in this boundary condition
                 for ( ID j = 1; j <= nComp; ++j )
                 {
-                    // Glogal Dof
+                    // Global Dof
                     idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
 
                     // Loop on quadrature points
@@ -1488,7 +1488,7 @@ void bcMixteManageVector( VectorType& b, const MeshType& mesh, const Dof& dof,
                 for ( ID j = 1; j <= nComp; ++j )
                 {
 
-                    // Glogal Dof (outside the quad point loop. V. Martin)
+                    // Global Dof (outside the quad point loop. V. Martin)
                     idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof;
 
                     // Loop on quadrature points
@@ -1497,7 +1497,7 @@ void bcMixteManageVector( VectorType& b, const MeshType& mesh, const Dof& dof,
 
                         bdfem.coorQuadPt( x, y, z, l ); // quadrature point coordinates
 
-                        // Glogal Dof (Why inside this loop?? V. Martin)
+                        // Global Dof (Why inside this loop?? V. Martin)
                         // idDof = pId->bdLocalToGlobal(idofF) + (BCb.component(j)-1)*totalDof;
 
                         // Adding right hand side contribution
@@ -1568,7 +1568,7 @@ void bcMixteManage( MatrixType1& A, MatrixType2 & trD, VectorType& b,
                     sum += pBcF->coef( t, x, y, z, j ) * bdfem.phi( int( i - 1 ), l ) * bdfem.phi( int( i - 1 ), l ) *
                            bdfem.weightMeas( l );
 
-                    // Glogal Dof
+                    // Global Dof
                     idDof = pId->bdLocalToGlobal( i ) + ( BCb.component( j ) - 1 ) * totalDof;
 
                     // Adding right hand side contribution
@@ -1604,7 +1604,7 @@ void bcMixteManage( MatrixType1& A, MatrixType2 & trD, VectorType& b,
                                bdfem.weightMeas( l );
                     }
 
-                    // Glogals Dof: row and columns
+                    // Globals Dof: row and columns
                     idDof = pId->bdLocalToGlobal( i ) + ( BCb.component( j ) - 1 ) * totalDof;
                     jdDof = pId->bdLocalToGlobal( k ) + ( BCb.component( j ) - 1 ) * totalDof;
 
@@ -1674,7 +1674,7 @@ void bcMixteManage( MatrixType1& A, MatrixType2 & trD, MatrixType3 & D,
                     sum += pBcF->coef( t, x, y, z, j ) * bdfem.phi( int( i - 1 ), l ) * bdfem.phi( int( i - 1 ), l ) *
                            bdfem.weightMeas( l );
 
-                    // Glogal Dof
+                    // Global Dof
                     idDof = pId->bdLocalToGlobal( i ) + ( BCb.component( j ) - 1 ) * totalDof;
 
                     // Adding right hand side contribution
@@ -1710,7 +1710,7 @@ void bcMixteManage( MatrixType1& A, MatrixType2 & trD, MatrixType3 & D,
                                bdfem.weightMeas( l );
                     }
 
-                    // Glogals Dof: row and columns
+                    // Global Dof: row and columns
                     idDof = pId->bdLocalToGlobal( i ) + ( BCb.component( j ) - 1 ) * totalDof;
                     jdDof = pId->bdLocalToGlobal( k ) + ( BCb.component( j ) - 1 ) * totalDof;
 
