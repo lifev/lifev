@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #ifndef _POST_PROC_H
 #define _POST_PROC_H
+
 #include <string>
 #include <iostream>
 #include <life/lifecore/GetPot.hpp>
@@ -548,7 +549,9 @@ Vector PostProc<Mesh>::compute_sstress( Vector r, UInt ncomp )
     //  count++;}
 
     return sstress;
-}
-}
-#endif
+} // compute_sstress
+
+} // namespace LifeV
+
+#endif /* _POST_PROC_H */
 
