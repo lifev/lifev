@@ -324,11 +324,13 @@ CSRPatt colUnify( CSRPatt const &patt1, CSRPatt const &patt2 )
     typedef PatternDefs::Container::const_iterator ConstIter;
     typedef PatternDefs::Container::iterator Iter;
 
-    UInt nnz1 = patt1._nnz, nnz2 = patt2._nnz;
-    UInt nrows1 = patt1._nrows, nrows2 = patt2._nrows;
-    UInt ncols1 = patt1._ncols, ncols2 = patt2._ncols;
+    UInt nnz1 = patt1._nnz;
+    UInt nnz2 = patt2._nnz;
+    UInt nrows1 = patt1._nrows;
+    UInt ncols1 = patt1._ncols;
+    UInt ncols2 = patt2._ncols;
 
-    ASSERT( nrows1 == nrows2, "pattern1 and pattern2 must have same nrows" );
+    ASSERT( nrows1 == patt2._nrows, "pattern1 and pattern2 must have same nrows" );
 
 
     UInt nnz = nnz1 + nnz2;
@@ -516,11 +518,13 @@ CSRPatt rowUnify( CSRPatt const &patt1, CSRPatt const &patt2 )
     typedef PatternDefs::Container::const_iterator ConstIter;
     typedef PatternDefs::Container::iterator Iter;
 
-    UInt nnz1 = patt1._nnz, nnz2 = patt2._nnz;
-    UInt nrows1 = patt1._nrows, nrows2 = patt2._nrows;
-    UInt ncols1 = patt1._ncols, ncols2 = patt2._ncols;
+    UInt nnz1 = patt1._nnz;
+    UInt nnz2 = patt2._nnz;
+    UInt nrows1 = patt1._nrows;
+    UInt nrows2 = patt2._nrows;
+    UInt ncols1 = patt1._ncols;
 
-    ASSERT( ncols1 == ncols2, "pattern1 and pattern2 must have same ncols" );
+    ASSERT( ncols1 == patt2._ncols, "pattern1 and pattern2 must have same ncols" );
 
     UInt nnz = nnz1 + nnz2;
     UInt nrows = nrows1 + nrows2;
