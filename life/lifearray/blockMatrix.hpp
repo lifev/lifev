@@ -30,6 +30,8 @@
 #ifndef BLOCKMATRIX_HPP
 #define BLOCKMATRIX_HPP
 
+#include <boost/numeric/ublas/vector_proxy.hpp>
+
 // forward declarations for aztec
 // struct AZ_MATRIX_STRUCT;
 // typedef struct AZ_MATRIX_STRUCT AZ_MATRIX;
