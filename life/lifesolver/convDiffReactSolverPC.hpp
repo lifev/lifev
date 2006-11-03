@@ -168,7 +168,7 @@ ConvDiffReactSolverPC( const GetPot& data_file, const RefFE& refFE_c, const Quad
     _M_c.zeros();
 
     //inverse of dt:
-    Real dti = 1. / this->_dt;
+    Real dti = 1. / this->timestep();
 
     // *******************************************************
     // Coefficient of the mass term at time t^{n+1}
@@ -180,10 +180,10 @@ ConvDiffReactSolverPC( const GetPot& data_file, const RefFE& refFE_c, const Quad
 
     // Elementary computation and matrix assembling
 
-    for ( UInt i = 1; i <= this->_mesh.numVolumes(); i++ )
+    for ( UInt i = 1; i <= this->mesh().numVolumes(); i++ )
     {          // Loop on elements
 
-        this->_fe_c.updateFirstDerivQuadPt( this->_mesh.volumeList( i ) );
+        this->_fe_c.updateFirstDerivQuadPt( this->mesh().volumeList( i ) );
 
         _elmatC.zero();
         _elmatM_c.zero();
@@ -230,10 +230,10 @@ timeAdvance( source_type const& source, const Real& time )
     _f_c = ZeroVector( _f_c.size() );
 
     // loop on volumes: assembling source term
-    for ( UInt i = 1; i <= this->_mesh.numVolumes(); ++i )
+    for ( UInt i = 1; i <= this->mesh().numVolumes(); ++i )
     {
         _elvec.zero();
-        this->_fe_c.update( this->_mesh.volumeList( i ) );
+        this->_fe_c.update( this->mesh().volumeList( i ) );
 
         compute_vec( source, _elvec, this->_fe_c, time, 0 ); // compute local vector
         assemb_vec( _f_c, _elvec, this->_fe_c, this->_dof_c, 0 ); // assemble local vector into global one
@@ -269,10 +269,10 @@ iterate( const Real& time )
     chrono.start();
 
     // loop on volumes
-    for ( UInt i = 1; i <= this->_mesh.numVolumes(); ++i )
+    for ( UInt i = 1; i <= this->mesh().numVolumes(); ++i )
     {
 
-        this->_fe_c.updateFirstDeriv( this->_mesh.volumeList( i ) ); // as updateFirstDer
+        this->_fe_c.updateFirstDeriv( this->mesh().volumeList( i ) ); // as updateFirstDer
 
         _elmatC.zero();
 
@@ -352,8 +352,8 @@ iterate( const Real& time )
     chrono.start();
     // BC manage for the concentration
     if ( !this->_BCh_c.bdUpdateDone() )
-        this->_BCh_c.bdUpdate( this->_mesh, this->_feBd_c, this->_dof_c );
-    bcManage( _CDR, _f_c, this->_mesh, this->_dof_c, this->_BCh_c, this->_feBd_c, tgv, time );
+        this->_BCh_c.bdUpdate( this->mesh(), this->_feBd_c, this->_dof_c );
+    bcManage( _CDR, _f_c, this->mesh(), this->_dof_c, this->_BCh_c, this->_feBd_c, tgv, time );
     chrono.stop();
 
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
@@ -409,15 +409,15 @@ getvel( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u, con
 {
 
 
-    for ( UInt i = 0; i < this->_mesh.numVertices(); i++ )
+    for ( UInt i = 0; i < this->mesh().numVertices(); i++ )
     {
 
         if ( this->_u_to_c[ i ].ele == 0 )
         {
        // Dirichlet boundary for the velocity -> get velocity for boundary function
-            Real xp = this->_mesh.point( i + 1 ).x();
-            Real yp = this->_mesh.point( i + 1 ).y();
-            Real zp = this->_mesh.point( i + 1 ).z();
+            Real xp = this->mesh().point( i + 1 ).x();
+            Real yp = this->mesh().point( i + 1 ).y();
+            Real zp = this->mesh().point( i + 1 ).z();
             for ( ID jj = 0; jj < 3; ++jj )
                 this->_u_c( i + jj * this->_u_c.size() / 3 ) = BCh_u[ ( int ) this->_u_to_c[ i ].b[ 0 ] ] ( time, xp, yp, zp, BCh_u[ ( int ) this->_u_to_c[ i ].b[ 0 ] ].component( jj + 1 ) );
 
@@ -470,17 +470,17 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
 
     SimpleVect<GeoElement3D<LinearTetra> >::iterator iv = umesh.volumeList.begin();
 
-   for ( UInt i = 0; i < this->_mesh.numVertices(); i++ )
+   for ( UInt i = 0; i < this->mesh().numVertices(); i++ )
     {
-    tetrapoints( 1 ) = this->_mesh.point( i + 1 );
+    tetrapoints( 1 ) = this->mesh().point( i + 1 );
 
-        if ( this->_mesh.point( i + 1 ).boundary() )
+        if ( this->mesh().point( i + 1 ).boundary() )
         {
             UInt l;
 
             for ( UInt k = 0; k < BCh_u.size(); k++ )
             {
-                if ( BCh_u[ k ].flag() == this->_mesh.point( i + 1 ).marker() )
+                if ( BCh_u[ k ].flag() == this->mesh().point( i + 1 ).marker() )
                 {
                     l = k;
                 }
@@ -525,7 +525,7 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
             }
                        if (volume < minvolume)
                         {
-                            if (adjacent != 0) 
+                            if (adjacent != 0)
                                 {
                                     minvolume = volume;
                                     minadjacent=adjacent;
@@ -551,7 +551,6 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
                                 localcoord.b[ 3 ] = b3;
                                 localcoord.ele = vid;
                                 this->_u_to_c.push_back( localcoord );
-                              
                             }
                         else
                             {
@@ -563,14 +562,12 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
                 tetrapoints_found( 4 ) = umesh.point( ( iv->point( 4 ) ).id() );
 
                 test( tetrapoints_found, tetrapoints, b1, b2, b3 );
-                               
                                 localcoord.b[ 0 ] = 1.0 - b1 - b2 - b3;
                                 localcoord.b[ 1 ] = b1;
                                 localcoord.b[ 2 ] = b2;
                                 localcoord.b[ 3 ] = b3;
                                 localcoord.ele = vid;
                                 this->_u_to_c.push_back( localcoord );
-                               
                             }
                     }
         }
@@ -608,7 +605,7 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
             }
                        if (volume < minvolume)
                         {
-                            if (adjacent != 0) 
+                            if (adjacent != 0)
                                 {
                                     minvolume = volume;
                                     minadjacent=adjacent;
@@ -636,7 +633,6 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
                                 localcoord.b[ 3 ] = b3;
                                 localcoord.ele = vid;
                                 this->_u_to_c.push_back( localcoord );
-                              
                             }
                         else
                             {
@@ -647,14 +643,12 @@ getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
                 tetrapoints_found( 4 ) = umesh.point( ( iv->point( 4 ) ).id() );
 
                 test( tetrapoints_found, tetrapoints, b1, b2, b3 );
-                               
                                 localcoord.b[ 0 ] = 1.0 - b1 - b2 - b3;
                                 localcoord.b[ 1 ] = b1;
                                 localcoord.b[ 2 ] = b2;
                                 localcoord.b[ 3 ] = b3;
                                 localcoord.ele = vid;
                                 this->_u_to_c.push_back( localcoord );
-                               
                             }
                     }
             }

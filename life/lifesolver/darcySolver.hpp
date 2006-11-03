@@ -112,7 +112,7 @@ public:
             _M_bc = __bch;
 
             // update the dof with the b.c.
-            _M_bc.bdUpdate(this->_mesh, this->feBd, this->tpdof);
+            _M_bc.bdUpdate(this->mesh(), this->feBd, this->tpdof);
 
             if(this->verbose>2)
                 _M_bc.showMe(true);
@@ -207,8 +207,8 @@ DarcySolver<Mesh>::DarcySolver( const GetPot& data_file, const RefHdivFE& refFE_
     BtB(this->pfe.nbNode,this->pfe.nbNode),
     CtC(this->refTPFE.nbDof, this->refTPFE.nbDof),
     BtC(this->pfe.nbNode, this->refTPFE.nbDof),
-    signLocalFace( this->_mesh.numVolumes(),this->numFacesPerVolume),
-    diffusion_scalar_ele( 1 /*this->_mesh.numVolumes()*/) //to save memory when possible...
+    signLocalFace( this->mesh().numVolumes(),this->numFacesPerVolume),
+    diffusion_scalar_ele( 1 /*this->mesh().numVolumes()*/) //to save memory when possible...
 {
     signLocalFace = -1.0;
     this->diffusion_scalar_ele = this->diffusion_scalar;
@@ -218,14 +218,14 @@ DarcySolver<Mesh>::DarcySolver( const GetPot& data_file, const RefHdivFE& refFE_
       the rule is the following: if
     */
     ID iglobface,iglobvol;
-    for( ID ivol = 1 ; ivol <= this->_mesh.numVolumes() ; ivol++ ) {
-        iglobvol = this->_mesh.volumeList(ivol).id();
+    for( ID ivol = 1 ; ivol <= this->mesh().numVolumes() ; ivol++ ) {
+        iglobvol = this->mesh().volumeList(ivol).id();
         for( ID ilocface=1 ;
-             ilocface <= this->_mesh.volumeList(ivol).numLocalFaces ;
+             ilocface <= this->mesh().volumeList(ivol).numLocalFaces ;
              ilocface++ ) {
 
-            iglobface = this->_mesh.localFaceId(iglobvol,ilocface);
-            if( this->_mesh.faceElement(iglobface,1) == iglobvol ) {
+            iglobface = this->mesh().localFaceId(iglobvol,ilocface);
+            if( this->mesh().faceElement(iglobface,1) == iglobvol ) {
                 signLocalFace(iglobvol-1,ilocface-1) = 1.;
             }
         }
@@ -237,13 +237,13 @@ template <typename Mesh>
 void DarcySolver<Mesh>::_element_computation(int ielem)
 {
     // update the current element for the Velocity (only).
-    this->vfe.updatePiola(this->_mesh.volumeList(ielem));
+    this->vfe.updatePiola(this->mesh().volumeList(ielem));
     /*
       update the current element for the Pressure (used for the source term).
       The only necessary part is the quadpt.
       The jacobian is not used. (check...)
     */
-    this->pfe.updateJacQuadPt(this->_mesh.volumeList(ielem));
+    this->pfe.updateJacQuadPt(this->mesh().volumeList(ielem));
     /*
       modify the (0,0) block (A) of the matrix
       the blocks (0,1) (B) and (0,2) (C) are independent of the element
@@ -341,8 +341,8 @@ void DarcySolver<Mesh>::computeHybridMatrixAndSourceRHS()
     ElemMat::matrix_type BB = elmatMix.block(0,1);
     ElemMat::matrix_type CC = elmatMix.block(0,2);
 
-    Debug( 6100 ) << "number of volumes: " << this->_mesh.numVolumes() << "\n";
-    for(UInt ivol = 1; ivol<= this->_mesh.numVolumes(); ivol++){
+    Debug( 6100 ) << "number of volumes: " << this->mesh().numVolumes() << "\n";
+    for(UInt ivol = 1; ivol<= this->mesh().numVolumes(); ivol++){
         //----------------------------
         // LOOP ON THE VOLUME ELEMENTS
         //----------------------------
@@ -425,9 +425,9 @@ void DarcySolver<Mesh>::computeHybridMatrixAndSourceRHS()
         elmatHyb.block(0,0) = CtC;  /* update the hybrid element matrix
                                        Everything is stored in the Lower part */
         assemb_mat_symm_lower(mat,elmatHyb,this->refTPFE,this->tpdof,
-                              this->_mesh.volumeList(ivol).id(),0,0);
+                              this->mesh().volumeList(ivol).id(),0,0);
         assemb_vec(globalF,elvecHyb,this->refTPFE,this->tpdof,
-                   this->_mesh.volumeList(ivol).id(), 0);
+                   this->mesh().volumeList(ivol).id(), 0);
         //-----------------------------------
         // END OF LOOP ON THE VOLUME ELEMENTS
         //-----------------------------------
@@ -437,7 +437,7 @@ void DarcySolver<Mesh>::computeHybridMatrixAndSourceRHS()
 template <typename Mesh>
 void DarcySolver<Mesh>::applyBC()
 {
-    bcManage(mat,globalF,this->_mesh,this->tpdof,_M_bc,this->feBd,1.,0.0);
+    bcManage(mat,globalF,this->mesh(),this->tpdof,_M_bc,this->feBd,1.,0.0);
 }
 
 template <typename Mesh>
@@ -450,7 +450,7 @@ void DarcySolver<Mesh>::solve()
   // ********** P1 computation of the velocity **********************
   CurrentFE fe_q1( this->refPFEnodal , this->geoMap , this->qr );
   Dof dof_q1( this->refPFEnodal );
-  dof_q1.update( this->_mesh );
+  dof_q1.update( this->mesh() );
   UInt dim_q1 = dof_q1.numTotalDof();
   ScalUnknown<Vector> nodalPres( dim_q1 );
   projectPressureQ1( nodalPres );
@@ -460,7 +460,7 @@ void DarcySolver<Mesh>::solve()
   //solve_signal_type _M_solve_signal;
 
   Real time = 0.01; // needed for the index of the result-files
-  outensight7Mesh3D( this->_mesh, nodalVel, nodalPres,time );
+  outensight7Mesh3D( this->mesh(), nodalVel, nodalPres,time );
 
 }
 
@@ -495,7 +495,7 @@ void DarcySolver<Mesh>::computePresFlux()
     ElemMat::matrix_type CC = elmatMix.block(0,2);
 
     ID iglobface;
-    for( ID ivol = 1 ; ivol <= this->_mesh.numVolumes(); ivol++ ) {
+    for( ID ivol = 1 ; ivol <= this->mesh().numVolumes(); ivol++ ) {
         _element_computation(ivol);
         // initialize the temporary matrices
 
@@ -602,10 +602,10 @@ void DarcySolver<Mesh>::computePresFlux()
         //---------------------------------------
 
         for( ID ilocface=1 ;
-             ilocface <= this->_mesh.volumeList(ivol).numLocalFaces ;
+             ilocface <= this->mesh().volumeList(ivol).numLocalFaces ;
              ilocface++ ) {
-            iglobface = this->_mesh.localFaceId( ivol , ilocface );
-            if( this->_mesh.faceElement( iglobface , 1 ) == ivol ){
+            iglobface = this->mesh().localFaceId( ivol , ilocface );
+            if( this->mesh().faceElement( iglobface , 1 ) == ivol ){
                 global_flux[iglobface-1] = flux( ilocface-1 );
             }
         }
@@ -634,9 +634,9 @@ DarcySolver<Mesh>::errorL2( darcy_unknown_type __type,  pressure_solution_type _
     {
         case DARCY_PRESSURE_GLOBAL:
         {
-            for(UInt i=1; i<=this->_mesh.numVolumes(); ++i)
+            for(UInt i=1; i<=this->mesh().numVolumes(); ++i)
             {
-                this->pfe.updateFirstDeriv(this->_mesh.volumeList(i));
+                this->pfe.updateFirstDeriv(this->mesh().volumeList(i));
 
 
                 normL2sq     += elem_L2_2(globalP,this->pfe,this->pdof);
@@ -651,16 +651,16 @@ DarcySolver<Mesh>::errorL2( darcy_unknown_type __type,  pressure_solution_type _
             // Q1 or P1 elements
             CurrentFE fe( this->refPFEnodal , this->geoMap , this->qr );
             Dof dof( this->refPFEnodal );
-            dof.update( this->_mesh );
+            dof.update( this->mesh() );
             UInt dim = dof.numTotalDof();
             ScalUnknown<Vector> nodalPres( dim );
             projectPressureQ1( nodalPres );
 
             Debug( 6100 ) << "Postprocessing of pressure (L2 projection on the nodes)\n";
-            for(UInt i=1; i<=this->_mesh.numVolumes(); ++i)
+            for(UInt i=1; i<=this->mesh().numVolumes(); ++i)
             {
 
-                fe.updateFirstDeriv(this->_mesh.volumeList(i));
+                fe.updateFirstDeriv(this->mesh().volumeList(i));
 
                 normL2sq     += elem_L2_2( nodalPres, fe, dof );
                 normL2solsq  += elem_L2_2( __analytical_sol, fe );
@@ -690,7 +690,7 @@ DarcySolver<Mesh>::errorL2( velocity_solution_type __analytical_sol )
     // Q1 or P1 elements
     CurrentFE fe( this->refPFEnodal , this->geoMap , this->qr );
     Dof dof( this->refPFEnodal );
-    dof.update( this->_mesh );
+    dof.update( this->mesh() );
     UInt dim = dof.numTotalDof();
     PhysVectUnknown<Vector> nodalVel( dim );
     projectVelocityQ1( nodalVel );
@@ -700,9 +700,9 @@ DarcySolver<Mesh>::errorL2( velocity_solution_type __analytical_sol )
     double normL2solsq=0.;
 
 
-    for(UInt i=1; i<=this->_mesh.numVolumes(); ++i)
+    for(UInt i=1; i<=this->mesh().numVolumes(); ++i)
     {
-        fe.updateFirstDeriv(this->_mesh.volumeList(i));
+        fe.updateFirstDeriv(this->mesh().volumeList(i));
 
         normL2sq     += elem_L2_2( nodalVel, fe, dof, 3 );
         normL2solsq  += elem_L2_2( __analytical_sol, fe, 0.0, 3 );
@@ -722,8 +722,8 @@ Real DarcySolver<Mesh>::computeFluxFlag(int flag)
     //
     //
     Fl = 0.;
-    for( ID iface = 1 ; iface <= this->_mesh.numBFaces() ; iface++ ) {
-        marker = this->_mesh.faceList(iface).marker();
+    for( ID iface = 1 ; iface <= this->mesh().numBFaces() ; iface++ ) {
+        marker = this->mesh().faceList(iface).marker();
         faceflux = globalFlux_vec[ iface - 1 ];
         if( marker == flag ) {
             Fl += faceflux;
@@ -738,7 +738,7 @@ void DarcySolver<Mesh>::projectPressureQ1( ScalUnknown<Vector> & p_q1 )
     // Q1 or P1 elements
     CurrentFE fe_q1(this->refPFEnodal,this->geoMap,this->qr);
     Dof dof_q1(this->refPFEnodal);
-    dof_q1.update(this->_mesh);
+    dof_q1.update(this->mesh());
 
     UInt dim_q1 = dof_q1.numTotalDof();
 
@@ -750,8 +750,8 @@ void DarcySolver<Mesh>::projectPressureQ1( ScalUnknown<Vector> & p_q1 )
     MSRMatr<double> A_q1(pattA_q1);
     ElemMat elmat(fe_q1.nbNode,1,1);
     ElemVec elvec(fe_q1.nbNode,1);
-    for(UInt i = 1; i<=this->_mesh.numVolumes(); i++){
-        fe_q1.updateJac(this->_mesh.volumeList(i));
+    for(UInt i = 1; i<=this->mesh().numVolumes(); i++){
+        fe_q1.updateJac(this->mesh().volumeList(i));
         elmat.zero();
         elvec.zero();
         mass(1.,elmat,fe_q1);
@@ -778,7 +778,7 @@ void DarcySolver<Mesh>::projectVelocityQ1( PhysVectUnknown<Vector>& u_q1 )
     // Q1 or P1 elements
     CurrentFE fe_q1( this->refPFEnodal , this->geoMap , this->qr );
     Dof dof_q1( this->refPFEnodal );
-    dof_q1.update( this->_mesh );
+    dof_q1.update( this->mesh() );
     UInt dim_q1 = dof_q1.numTotalDof();
 
     PhysVectUnknown<Vector> f_q1( dim_q1 );
@@ -794,17 +794,17 @@ void DarcySolver<Mesh>::projectVelocityQ1( PhysVectUnknown<Vector>& u_q1 )
     ElemVec elvec_hdiv(this->vfe.nbNode,1);
     ElemVec::vector_view elvec_hdiv_vec = elvec_hdiv.block(0);
 
-    for(UInt i = 1; i<=this->_mesh.numVolumes(); i++){
-        fe_q1.updateJac(this->_mesh.volumeList(i));
-        this->vfe.updatePiola(this->_mesh.volumeList(i));
+    for(UInt i = 1; i<=this->mesh().numVolumes(); i++){
+        fe_q1.updateJac(this->mesh().volumeList(i));
+        this->vfe.updatePiola(this->mesh().volumeList(i));
         elmat.zero();
         elmat_hdiv.zero();
         mass(1.,elmat,fe_q1,0,0,this->nbCoor);
         mass_Mixed_Hdiv(1.,elmat_hdiv,fe_q1,this->vfe,0,0);
-        extract_vec(globalFlux,elvec_hdiv,this->refVFE,this->vdof,this->_mesh.volumeList(i).id(),0);
+        extract_vec(globalFlux,elvec_hdiv,this->refVFE,this->vdof,this->mesh().volumeList(i).id(),0);
         //
-        for(int j=0;j<(int) this->_mesh.volumeList(i).numLocalFaces;j++){
-            elvec_hdiv_vec[j] *= signLocalFace( (int)this->_mesh.volumeList(i).id() - 1, j);
+        for(int j=0;j<(int) this->mesh().volumeList(i).numLocalFaces;j++){
+            elvec_hdiv_vec[j] *= signLocalFace( (int)this->mesh().volumeList(i).id() - 1, j);
         }
         //
         elvec.vec() = elmat_hdiv.mat() * elvec_hdiv.vec();
@@ -879,7 +879,7 @@ void DarcySolver<Mesh>::postProcessPressureQ1()
     // Q1 or P1 elements
     CurrentFE fe_q1( this->refPFEnodal , this->geoMap , this->qr );
     Dof dof_q1( this->refPFEnodal );
-    dof_q1.update( this->_mesh );
+    dof_q1.update( this->mesh() );
     UInt dim_q1 = dof_q1.numTotalDof();
     ScalUnknown<Vector> nodalPres( dim_q1 );
     projectPressureQ1( nodalPres );
@@ -899,7 +899,7 @@ void DarcySolver<Mesh>::postProcessPressureQ1()
     } else if (post_proc_format == "vtk"){
         //vtkname = post_dir + "/presQ1" + (string) str_iter + ".vtk";
         vtkname = post_dir + "/presQ1.vtk";
-        wr_vtk_ascii_header(vtkname,"Pressure",this->_mesh, dof_q1, fe_q1);
+        wr_vtk_ascii_header(vtkname,"Pressure",this->mesh(), dof_q1, fe_q1);
         wr_vtk_ascii_scalar(vtkname,"P",nodalPres.giveVec(), nodalPres.size());
     }
     //iter_post ++;
@@ -915,7 +915,7 @@ void DarcySolver<Mesh>::postProcessVelocityQ1()
     // Q1 or P1 elements
     CurrentFE fe_q1( this->refPFEnodal , this->geoMap , this->qr );
     Dof dof_q1( this->refPFEnodal );
-    dof_q1.update( this->_mesh );
+    dof_q1.update( this->mesh() );
     UInt dim_q1 = dof_q1.numTotalDof();
     PhysVectUnknown<Vector> nodalVel( dim_q1 );
     projectVelocityQ1( nodalVel );
@@ -935,7 +935,7 @@ void DarcySolver<Mesh>::postProcessVelocityQ1()
     } else if (post_proc_format == "vtk"){
         //vtkname = post_dir + "/vel" + (string) str_iter + ".vtk";
         vtkname = post_dir + "/velQ1.vtk";
-        wr_vtk_ascii_header(vtkname,"Velocity",this->_mesh, dof_q1, fe_q1);
+        wr_vtk_ascii_header(vtkname,"Velocity",this->mesh(), dof_q1, fe_q1);
         wr_vtk_ascii_vector(vtkname,"U",nodalVel.giveVec(), nodalVel.size());
     }
 }
@@ -949,7 +949,7 @@ void DarcySolver<Mesh>::postProcessEnsight()
     // ********** P1 computation of the velocity **********************
     CurrentFE fe_q1( this->refPFEnodal , this->geoMap , this->qr );
     Dof dof_q1( this->refPFEnodal );
-    dof_q1.update( this->_mesh );
+    dof_q1.update( this->mesh() );
     UInt dim_q1 = dof_q1.numTotalDof();
     ScalUnknown<Vector> nodalPres( dim_q1 );
     projectPressureQ1( nodalPres );
@@ -957,7 +957,7 @@ void DarcySolver<Mesh>::postProcessEnsight()
     projectVelocityQ1( nodalVel );
 
     Real time = 0.01; // needed for the index of the result-files
-    outensight7Mesh3D( this->_mesh, nodalVel, nodalPres,time );
+    outensight7Mesh3D( this->mesh(), nodalVel, nodalPres,time );
 
 }
 #endif

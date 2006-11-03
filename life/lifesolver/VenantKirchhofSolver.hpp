@@ -59,9 +59,9 @@ class VenantKirchhofSolver:
 {
 public:
 
-    typedef ElasticStructureHandler<Mesh> super;
-    typedef typename super::Function Function;
-    typedef typename super::source_type source_type;
+    typedef ElasticStructureHandler<Mesh>  super;
+    typedef typename super::Function       Function;
+    typedef typename super::source_type    source_type;
     typedef typename super::bchandler_type bchandler_type;
 
     //! Constructors
@@ -266,13 +266,13 @@ VenantKirchhofSolver( const GetPot& data_file, const RefFE& refFE, const QuadRul
     UInt nc = this->_d.nbcomp();
 
     //inverse of dt:
-    Real dti2 = 2.0 / ( this->_dt * this->_dt );
+    Real dti2 = 2.0 / ( this->timestep() * this->timestep() );
 
     // Elementary computation and matrix assembling
     // Loop on elements
-    for ( UInt i = 1; i <= this->_mesh.numVolumes(); i++ )
+    for ( UInt i = 1; i <= this->mesh().numVolumes(); i++ )
     {
-        this->_fe.updateFirstDerivQuadPt( this->_mesh.volumeList( i ) );
+        this->_fe.updateFirstDerivQuadPt( this->mesh().volumeList( i ) );
 
         _elmatK.zero();
         _elmatM.zero();
@@ -359,14 +359,14 @@ VenantKirchhofSolver( const GetPot&   data_file,
     UInt nc = this->_d.nbcomp();
 
     //inverse of dt:
-    Real dti2 = 2.0 / ( this->_dt * this->_dt );
+    Real dti2 = 2.0 / ( this->timestep() * this->timestep() );
 
     // Elementary computation and matrix assembling
     // Loop on elements
-    for ( UInt i = 1; i <= this->_mesh.numVolumes(); i++ )
+    for ( UInt i = 1; i <= this->mesh().numVolumes(); i++ )
     {
 
-        this->_fe.updateFirstDerivQuadPt( this->_mesh.volumeList( i ) );
+        this->_fe.updateFirstDerivQuadPt( this->mesh().volumeList( i ) );
 
         _elmatK.zero();
         _elmatM.zero();
@@ -430,10 +430,10 @@ timeAdvance( source_type const& source, const Real& time )
     {
 
         // l`oop on volumes: assembling source term
-        for ( UInt i = 1; i <= this->_mesh.numVolumes(); ++i )
+        for ( UInt i = 1; i <= this->mesh().numVolumes(); ++i )
         {
 
-            this->_fe.updateFirstDerivQuadPt( this->_mesh.volumeList( i ) );
+            this->_fe.updateFirstDerivQuadPt( this->mesh().volumeList( i ) );
 
             _elmatK.zero();
 
@@ -466,10 +466,10 @@ timeAdvance( source_type const& source, const Real& time )
     _rhsWithoutBC = ZeroVector( _rhsWithoutBC.size() );
 
     // loop on volumes: assembling source term
-    for ( UInt i = 1; i <= this->_mesh.numVolumes(); ++i )
+    for ( UInt i = 1; i <= this->mesh().numVolumes(); ++i )
     {
 
-        this->_fe.updateFirstDerivQuadPt( this->_mesh.volumeList( i ) );
+        this->_fe.updateFirstDerivQuadPt( this->mesh().volumeList( i ) );
 
         _elvec.zero();
 
@@ -481,11 +481,11 @@ timeAdvance( source_type const& source, const Real& time )
     }
 
     // right hand side without boundary load terms
-    Vector __z = this->_d + this->_dt * this->_w;
+    Vector __z = this->_d + this->timestep() * this->_w;
     _rhsWithoutBC += _M * __z;
     _rhsWithoutBC -= _K * this->_d;
 
-    _rhs_w = ( 2.0 / this->_dt ) * this->_d + this->_w;
+    _rhs_w = ( 2.0 / this->timestep() ) * this->_d + this->_w;
     std::cout << std::endl;
     std::cout << "rhsWithoutBC norm = " << norm_2(_rhsWithoutBC) << std::endl;
     std::cout << "_rhs_w norm       = " << norm_2(_rhs_w) << std::endl;
@@ -517,17 +517,13 @@ iterate()
     }
     else
     {
-        std::cout << "Number of inner iterations       : " << maxiter << std::endl;
+        std::cout << "Number of inner iterations       : " << maxiter << " " << this->timestep() << std::endl;
         _out_iter << _time << " " << maxiter << std::endl;
     }
 
-    this->_w = ( 2.0 / this->_dt ) * this->_d - _rhs_w;
+    this->_w = ( 2.0 / this->timestep() ) * this->_d - _rhs_w;
 
-//    evalResidual(_residual_d, _d, 0);
-//    _residual_d = -1*(_C*this->_d);
-//    std::cout << "rhsWithoutBC norm = " << norm_2(_rhsWithoutBC) << std::endl;
     _residual_d = _C*this->_d - _rhsWithoutBC;
-//    _residual_d = -1.*_residual_d;
 
     std::cout << " ok. " << std::flush;
 }
@@ -555,7 +551,7 @@ iterate(Vector &_sol)
         _out_iter << _time << " " << maxiter << std::endl;
     }
 
-    this->_w = ( 2.0 / this->_dt ) * this->_d - _rhs_w;
+    this->_w = ( 2.0 / this->timestep() ) * this->_d - _rhs_w;
 
     std::cout << "sol norm = " << norm(this->_sol) << std::endl;
 
@@ -593,10 +589,10 @@ evalResidual( Vector &res, const Vector& sol, int /*iter*/)
 
         // Elementary computation and matrix assembling
         // Loop on elements
-        for ( UInt i = 1; i <= this->_mesh.numVolumes(); i++ )
+        for ( UInt i = 1; i <= this->mesh().numVolumes(); i++ )
         {
 
-            this->_fe.updateFirstDerivQuadPt( this->_mesh.volumeList( i ) );
+            this->_fe.updateFirstDerivQuadPt( this->mesh().volumeList( i ) );
 
             _elmatK.zero();
 
@@ -626,14 +622,14 @@ evalResidual( Vector &res, const Vector& sol, int /*iter*/)
 
     std::cout << "updating the boundary conditions" << std::flush;
     if ( !this->BCh_solid().bdUpdateDone() )
-        this->BCh_solid().bdUpdate( this->_mesh, this->_feBd, this->_dof );
+        this->BCh_solid().bdUpdate( this->mesh(), this->_feBd, this->_dof );
     std::cout << std::endl;
 
-    bcManageMatrix( _K, this->_mesh, this->_dof, this->BCh_solid(), this->_feBd, 1.0 );
+    bcManageMatrix( _K, this->mesh(), this->_dof, this->BCh_solid(), this->_feBd, 1.0 );
 
     _rhs = _rhsWithoutBC;
 
-    bcManageVector( _rhs, this->_mesh, this->_dof, this->BCh_solid(), this->_feBd, _time, 1.0 );
+    bcManageVector( _rhs, this->mesh(), this->_dof, this->BCh_solid(), this->_feBd, _time, 1.0 );
 
     res = _K * sol - _rhs;
 
@@ -666,9 +662,9 @@ updateJacobian( Vector& sol, int iter )
         UInt nc = this->_d.nbcomp();
 
         // loop on volumes: assembling source term
-        for ( UInt i = 1; i <= this->_mesh.numVolumes(); ++i )
+        for ( UInt i = 1; i <= this->mesh().numVolumes(); ++i )
         {
-            this->_fe.updateFirstDerivQuadPt( this->_mesh.volumeList( i ) );
+            this->_fe.updateFirstDerivQuadPt( this->mesh().volumeList( i ) );
 
             _elmatK.zero();
 
@@ -723,9 +719,9 @@ solveJac( Vector &step, const Vector& res, double& /*linear_rel_tol*/)
 
     // BC manage for the velocity
     if ( !this->BCh_solid().bdUpdateDone() )
-        this->BCh_solid().bdUpdate( this->_mesh, this->_feBd, this->_dof );
+        this->BCh_solid().bdUpdate( this->mesh(), this->_feBd, this->_dof );
 
-    bcManageMatrix( _J, this->_mesh, this->_dof, this->BCh_solid(), this->_feBd, tgv );
+    bcManageMatrix( _J, this->mesh(), this->_dof, this->BCh_solid(), this->_feBd, tgv );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
@@ -764,9 +760,9 @@ solveJac( Vector &step, const Vector& res, double& /*linear_rel_tol*/,
 
     // BC manage for the velocity
     if ( BCh->bdUpdateDone() )
-        BCh->bdUpdate( this->_mesh, this->_feBd, this->_dof );
+        BCh->bdUpdate( this->mesh(), this->_feBd, this->_dof );
 
-    bcManageMatrix( _J, this->_mesh, this->_dof, *BCh, this->_feBd, tgv );
+    bcManageMatrix( _J, this->mesh(), this->_dof, *BCh, this->_feBd, tgv );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
@@ -803,9 +799,9 @@ solveJac( Vector &step, const Vector& res, double& /*linear_rel_tol*/,
 
 //     // BC manage for the velocity
 //     if ( !BCd.bdUpdateDone() )
-//         BCd.bdUpdate( this->_mesh, this->_feBd, this->_dof );
+//         BCd.bdUpdate( this->mesh(), this->_feBd, this->_dof );
 
-//     bcManageMatrix( _J, this->_mesh, this->_dof, BCd, this->_feBd, tgv );
+//     bcManageMatrix( _J, this->mesh(), this->_dof, BCd, this->_feBd, tgv );
 //     chrono.stop();
 //     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
@@ -847,16 +843,16 @@ solveJacobian( Real /*time*/ )
 
     // BC manage for the velocity
     if ( !this->BCh_solid().bdUpdateDone() )
-        this->BCh_solid().bdUpdate( this->_mesh, this->_feBd, this->_dof );
+        this->BCh_solid().bdUpdate( this->mesh(), this->_feBd, this->_dof );
 
     bcManageVector(_f,
-                   this->_mesh,
+                   this->mesh(),
                    this->_dof,
                    this->BCh_solid(),
                    this->_feBd,
                    1., 1.);
 
-    bcManageMatrix( _J, this->_mesh, this->_dof, this->BCh_solid(), this->_feBd, tgv );
+    bcManageMatrix( _J, this->mesh(), this->_dof, this->BCh_solid(), this->_feBd, tgv );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
@@ -869,7 +865,7 @@ solveJacobian( Real /*time*/ )
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
-    this->_w = ( 2.0 / this->_dt ) * M_ddisp - _rhs_w;
+    this->_w = ( 2.0 / this->timestep() ) * M_ddisp - _rhs_w;
 
 //    std::cout << "  S-  Computing residual                  ... " << std::flush;
     _residual_d = _C*M_ddisp;
@@ -896,16 +892,16 @@ solveJacobian( const Real /*time*/ , bchandler_type& BCd)
 
     // BC manage for the velocity
     if ( !(*BCd).bdUpdateDone() )
-        (*BCd).bdUpdate( this->_mesh, this->_feBd, this->_dof );
+        (*BCd).bdUpdate( this->mesh(), this->_feBd, this->_dof );
 
     bcManageVector(_f,
-                   this->_mesh,
+                   this->mesh(),
                    this->_dof,
                    *BCd,
                    this->_feBd,
                    1., 1.);
 
-    bcManageMatrix( _J, this->_mesh, this->_dof, *BCd, this->_feBd, tgv );
+    bcManageMatrix( _J, this->mesh(), this->_dof, *BCd, this->_feBd, tgv );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
@@ -918,7 +914,7 @@ solveJacobian( const Real /*time*/ , bchandler_type& BCd)
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
-    this->_w = ( 2.0 / this->_dt ) * M_ddisp - _rhs_w;
+    this->_w = ( 2.0 / this->timestep() ) * M_ddisp - _rhs_w;
 
 //    std::cout << "  S-  Computing residual                  ... " << std::flush;
     _residual_d = _C*M_ddisp;

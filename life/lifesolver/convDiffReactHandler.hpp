@@ -170,16 +170,16 @@ ConvDiffReactHandler( const GetPot& data_file, const RefFE& refFE_c,
                       const QuadRule& Qr_c, const QuadRule& bdQr_c, BCHandler& BCh_c ) :
         DataConvDiffReact<Mesh>( data_file ),
         _refFE_c( refFE_c ),
-        _dof_c( this->_mesh, _refFE_c ),
+        _dof_c( this->mesh(), _refFE_c ),
         _dim_c( _dof_c.numTotalDof() ),
         _Qr_c( Qr_c ),
         _bdQr_c( bdQr_c ),
-        _fe_c( _refFE_c, getGeoMap( this->_mesh ), _Qr_c ),
-        _feBd_c( _refFE_c.boundaryFE(), getGeoMap( this->_mesh ).boundaryMap(), _bdQr_c ),
+        _fe_c( _refFE_c, getGeoMap( this->mesh() ), _Qr_c ),
+        _feBd_c( _refFE_c.boundaryFE(), getGeoMap( this->mesh() ).boundaryMap(), _bdQr_c ),
         _c( _dim_c ),
         _u_c( _dim_c ),
         _BCh_c( BCh_c ),
-        _bdf( this->_order_bdf )
+        _bdf( this->order_bdf() )
 {}
 
 
@@ -223,7 +223,7 @@ void
 ConvDiffReactHandler<Mesh>::initialize( const Function& c0, Real t0, Real dt )
 {
 
-    _bdf.initialize_unk( c0, this->_mesh, _refFE_c, _fe_c, _dof_c, t0, dt, 1 );
+    _bdf.initialize_unk( c0, this->mesh(), _refFE_c, _fe_c, _dof_c, t0, dt, 1 );
     _c = *( _bdf.unk().begin() );
 
     _bdf.showMe();

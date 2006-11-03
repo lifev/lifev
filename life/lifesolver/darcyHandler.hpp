@@ -148,7 +148,7 @@ DarcyHandler<Mesh>::DarcyHandler( const GetPot& data_file, const RefHdivFE& refF
     DataDarcy<Mesh>(data_file),
     DataAztec(data_file, "darcy/aztec"),
     nbCoor(nDimensions),
-    geoMap( getGeoMap( this->_mesh ) ),
+    geoMap( getGeoMap( this->mesh() ) ),
     qr( qr_u ),
     geoMapBd( geoMap.boundaryMap() ),
     qrBd( bdqr_u ),
@@ -164,20 +164,20 @@ DarcyHandler<Mesh>::DarcyHandler( const GetPot& data_file, const RefHdivFE& refF
     vdof( refVFE ),
     pdof( refPFE ),
     tpdof( refTPFE ),
-    numFacesPerVolume( this->_mesh.volumeList(1).numLocalFaces )
+    numFacesPerVolume( this->mesh().volumeList(1).numLocalFaces )
         /* we assume that all element have the same number
            of faces, so we just look at the first one */
 {
     //! This function should be already called in DataMesh construction
-    // this->_mesh.updateElementFaces(true);
+    // this->mesh().updateElementFaces(true);
     /*the "true" flag is to build the faceList
       of all faces (and not only the boundary) */
 
-    if(this->verbose>2) this->_mesh.showMe();
+    if(this->verbose>2) this->mesh().showMe();
     // build dof
-    vdof.update(this->_mesh);
-    pdof.update(this->_mesh);
-    tpdof.update(this->_mesh);
+    vdof.update(this->mesh());
+    pdof.update(this->mesh());
+    tpdof.update(this->mesh());
 
     dimTPdof = tpdof.numTotalDof();
     dimPdof = pdof.numTotalDof();
@@ -192,7 +192,7 @@ DarcyHandler<Mesh>::DarcyHandler( const GetPot& data_file, const RefHdivFE& refF
     /*
     // check the mesh after b.c.
       BE CAREFUL: calling
-      this->_mesh.check(true,true);
+      this->mesh().check(true,true);
       after updateElementFaces(true) erase faceElement !!!!
     */
     //

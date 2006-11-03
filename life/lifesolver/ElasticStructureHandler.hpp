@@ -190,12 +190,12 @@ ElasticStructureHandler( const GetPot&   data_file,
                          BCHandler&      BCh ):
     DataElasticStructure<Mesh>( data_file ),
     _refFE( refFE ),
-    _dof( this->_mesh, _refFE ),
+    _dof( this->mesh(), _refFE ),
     _dim( _dof.numTotalDof() ),
     _Qr( Qr ),
     _bdQr( bdQr ),
-    _fe( _refFE, getGeoMap( this->_mesh ), _Qr ),
-    _feBd( _refFE.boundaryFE(), getGeoMap( this->_mesh ).boundaryMap(), _bdQr ),
+    _fe( _refFE, getGeoMap( this->mesh() ), _Qr ),
+    _feBd( _refFE.boundaryFE(), getGeoMap( this->mesh() ).boundaryMap(), _bdQr ),
     _d( _dim ),
     _dRhs( _dim ),
     _w( _dim ),
@@ -212,12 +212,12 @@ ElasticStructureHandler( const GetPot& data_file,
                          const QuadRule& bdQr):
     DataElasticStructure<Mesh>( data_file ),
     _refFE( refFE ),
-    _dof( this->_mesh, _refFE ),
+    _dof( this->mesh(), _refFE ),
     _dim( _dof.numTotalDof() ),
     _Qr( Qr ),
     _bdQr( bdQr ),
-    _fe( _refFE, getGeoMap( this->_mesh ), _Qr ),
-    _feBd( _refFE.boundaryFE(), getGeoMap( this->_mesh ).boundaryMap(), _bdQr ),
+    _fe( _refFE, getGeoMap( this->mesh() ), _Qr ),
+    _feBd( _refFE.boundaryFE(), getGeoMap( this->mesh() ).boundaryMap(), _bdQr ),
     _d( _dim ),
     _dRhs( _dim ),
     _w( _dim ),
@@ -290,25 +290,25 @@ ElasticStructureHandler<Mesh>::postProcess()
         }
 
         namedef = "defor." + name + ".mesh";
-        wr_medit_ascii_scalar( "dep_x." + name + ".bb", _d.giveVec(), this->_mesh.numVertices() );
-        wr_medit_ascii_scalar( "dep_y." + name + ".bb", _d.giveVec() + _dim, this->_mesh.numVertices() );
-        wr_medit_ascii_scalar( "dep_z." + name + ".bb", _d.giveVec() + 2 * _dim, this->_mesh.numVertices() );
-        wr_medit_ascii2( namedef, this->_mesh, _d, this->_factor );
-        // wr_medit_ascii_vector("veloc."+name+".bb",_u.giveVec(),this->_mesh.numVertices(),_dim_u);
+        wr_medit_ascii_scalar( "dep_x." + name + ".bb", _d.giveVec(), this->mesh().numVertices() );
+        wr_medit_ascii_scalar( "dep_y." + name + ".bb", _d.giveVec() + _dim, this->mesh().numVertices() );
+        wr_medit_ascii_scalar( "dep_z." + name + ".bb", _d.giveVec() + 2 * _dim, this->mesh().numVertices() );
+        wr_medit_ascii2( namedef, this->mesh(), _d, this->_factor );
+        // wr_medit_ascii_vector("veloc."+name+".bb",_u.giveVec(),this->mesh().numVertices(),_dim_u);
         system( ( "ln -s " + namedef + " dep_x." + name + ".mesh" ).data() );
         system( ( "ln -s " + namedef + " dep_y." + name + ".mesh" ).data() );
         system( ( "ln -s " + namedef + " dep_z." + name + ".mesh" ).data() );
-        // system(("ln -s "+this->_mesh_file+" veloc."+name+".mesh").data());
+        // system(("ln -s "+this->mesh()_file+" veloc."+name+".mesh").data());
 
-        wr_medit_ascii_scalar( "veld_x." + name + ".bb", _w.giveVec(), this->_mesh.numVertices() );
-        wr_medit_ascii_scalar( "veld_y." + name + ".bb", _w.giveVec() + _dim, this->_mesh.numVertices() );
-        wr_medit_ascii_scalar( "veld_z." + name + ".bb", _w.giveVec() + 2 * _dim, this->_mesh.numVertices() );
+        wr_medit_ascii_scalar( "veld_x." + name + ".bb", _w.giveVec(), this->mesh().numVertices() );
+        wr_medit_ascii_scalar( "veld_y." + name + ".bb", _w.giveVec() + _dim, this->mesh().numVertices() );
+        wr_medit_ascii_scalar( "veld_z." + name + ".bb", _w.giveVec() + 2 * _dim, this->mesh().numVertices() );
 
-//         // wr_medit_ascii_vector("veloc."+name+".bb",_u.giveVec(),this->_mesh.numVertices(),_dim_u);
+//         // wr_medit_ascii_vector("veloc."+name+".bb",_u.giveVec(),this->mesh().numVertices(),_dim_u);
         system( ( "ln -s " + namedef + " veld_x." + name + ".mesh" ).data() );
         system( ( "ln -s " + namedef + " veld_y." + name + ".mesh" ).data() );
         system( ( "ln -s " + namedef + " veld_z." + name + ".mesh" ).data() );
-//         system(("ln -s "+this->_mesh_file+" veloc."+name+".mesh").data());
+//         system(("ln -s "+this->mesh()_file+" veloc."+name+".mesh").data());
     }
 }
 
@@ -343,10 +343,10 @@ ElasticStructureHandler<Mesh>::initialize( const Function& d0, const Function& w
     ID lDof;
 
     // Loop on elements of the mesh
-    for ( ID iElem = 1; iElem <= this->_mesh.numVolumes(); ++iElem )
+    for ( ID iElem = 1; iElem <= this->mesh().numVolumes(); ++iElem )
     {
 
-        _fe.updateJac( this->_mesh.volume( iElem ) );
+        _fe.updateJac( this->mesh().volume( iElem ) );
 
         // Vertex based Dof
         if ( nDofpV )
@@ -455,12 +455,12 @@ ElasticStructureHandler<Mesh>::initialize( const std::string& depName,
 {
     std::cout << "  S- restarting at time = " << startT << std::endl;
 
-    _count = (int) (startT/this->_dt - 0.5);
+    _count = (int) (startT/this->timestep() - 0.5);
 
     // Loop on elements of the mesh
-    for ( ID iElem = 1; iElem <= this->_mesh.numVolumes(); ++iElem )
+    for ( ID iElem = 1; iElem <= this->mesh().numVolumes(); ++iElem )
     {
-        _fe.updateJac( this->_mesh.volume( iElem ) );
+        _fe.updateJac( this->mesh().volume( iElem ) );
     }
     readUnknown(depName, _d);
     readUnknown(velName, _w);
