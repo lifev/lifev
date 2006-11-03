@@ -128,7 +128,7 @@ void exactJacobian::setUpBC()
     //
     // Passing data from structure to the harmonic Extension: motion of the fluid domain
     //
-    setStructureDispToHarmonicExtension((LifeV::Vector&) this->M_solid->disp());
+    setStructureDispToHarmonicExtension(this->M_solid->disp());
     //========================================================================================
     //  Interface BOUNDARY CONDITIONS
     //========================================================================================
