@@ -769,13 +769,13 @@ NavierStokesHandler<Mesh, DataType>::postProcess()
                                this->mesh().numVertices() );
         wr_medit_ascii_scalar( "vel_z." + name + ".bb", _u.giveVec()+2*_dim_u,
                                this->mesh().numVertices() );
-        system( ( "ln -s " + this->meshDir() + this->meshFile() +
+        system( ( "ln -s -f " + this->meshDir() + this->meshFile() +
                   " press." + name + ".mesh" ).data() );
-        system( ( "ln -s " + this->meshDir() + this->meshFile() +
+        system( ( "ln -s -f " + this->meshDir() + this->meshFile() +
                   " vel_x." + name + ".mesh" ).data() );
-        system( ( "ln -s " + this->meshDir() + this->meshFile() +
+        system( ( "ln -s -f " + this->meshDir() + this->meshFile() +
                   " vel_y." + name + ".mesh" ).data() );
-        system( ( "ln -s " + this->meshDir() + this->meshFile() +
+        system( ( "ln -s -f " + this->meshDir() + this->meshFile() +
                   " vel_z." + name + ".mesh" ).data() );
     }
 }
