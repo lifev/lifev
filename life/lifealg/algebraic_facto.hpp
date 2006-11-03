@@ -1034,8 +1034,8 @@ template <typename MatrixTypeC,
           typename MatrixTypeH,
           typename MatrixTypeMpLp,
           typename VectorType>
-void my_precSchur_CC( double *z, int *options, int *proc_config, double *params,
-                      AZ_MATRIX *Amat, AZ_PRECOND *prec )
+void my_precSchur_CC( double *z, int */*options*/, int *proc_config, double */*params*/,
+                      AZ_MATRIX */*Amat*/, AZ_PRECOND *prec )
 {
     // Extraction of Mp, H, D, HinvC, HinvDtr and trD stored in
     // the structure AZ_MATRIX
@@ -1076,7 +1076,7 @@ void my_precSchur_CC( double *z, int *options, int *proc_config, double *params,
 
     // temporary vector z1
     Vector z1( dim );
-    z1 = 0.;
+    z1 = ZeroVector( dim );
 
     //initialisation of first recursion level for AZTEC memory manager
     options_s[ AZ_recursion_level ] = my_data->_recur;
