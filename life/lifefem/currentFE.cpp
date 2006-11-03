@@ -384,7 +384,7 @@ void CurrentFE::_comp_inv_jacobian_and_det()
     */
 
     Real a, b, c, d, e, f, g, h, i, ei, fh, bi, ch, bf, ce, det;
-    //! determinant on integrations points an inverse tranpose jacobian
+    //! determinant on integrations points an inverse transpose jacobian
     switch ( nbCoor )
     {
     case 1:    //! 1D
@@ -511,7 +511,7 @@ void CurrentFE::_comp_phiDerDer2()
                 x1 = 0.;
                 for ( int jcoor = 0;jcoor < nbCoor;jcoor++ )
                 {
-            x1 += tInvJac(icoor,jcoor,ig)*dPhiRef(j,jcoor,ig); 
+            x1 += tInvJac(icoor,jcoor,ig)*dPhiRef(j,jcoor,ig);
                     x2 = 0.;
                     for ( int k1 = 0;k1 < nbCoor;k1++ )
                     {
