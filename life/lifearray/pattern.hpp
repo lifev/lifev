@@ -1170,13 +1170,13 @@ ID PatternDefs::_i2d( Index_t const i ) const
 inline
 PatternDefs::Diff_t PatternDefs::_i2o( Index_t const i ) const
 {
-    return i -PatternOffset;
+    return i - PatternOffset;
 } // From index to offsets
 
 inline
 PatternDefs::Diff_t PatternDefs::_d2o( ID const d ) const
 {
-    return d -1;
+    return d - 1;
 }
 
 inline
