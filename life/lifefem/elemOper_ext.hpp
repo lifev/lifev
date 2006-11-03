@@ -65,13 +65,13 @@ public:
         }
     }
 
-    //Operatore di assegnamento
+    // assignment operator
     void operator() ( int i,int j, A a )
     {
         m[ i ][ j ] = a;
     }
 
-    //Operatori di restituzione
+    // access operators
     A operator() ( int i,int j )
     {
         return ( m[ i ][ j ] );
@@ -127,7 +127,7 @@ public:
         return _fe;
     };
 
-    // Versione semplice: DOVREBBE ANDARE BENE PER MOLTE COSE
+    // simple version: should work well for many things
     Real operator() ( int i, int j, int iq, Real x, Real y, Real z, int ic, int jc )
     {
         if ( ic == jc )
@@ -136,8 +136,7 @@ public:
             return 0;
     }
 
-
-    // CHIEDRE AD ALAIN per quanto segue
+    // ask alain for what follows
     // For the VBR Pattern (Aztec): operator returns the single component of the local matrix
     // (for each quadrature node) which is a _ncomp*_ncomp vector organized as in the inner comment
     std::vector<Real> operator() ( int i, int j, int iq, Real x, Real y, Real z )
@@ -156,7 +155,7 @@ public:
 
 private:
     CurrentFE* _fe; // MUST be a pointer
-    int _ncomp; // CHIEDERE A LUCA: IO LO SPECIFICHEREI STATIC CONST: che ne pensi ????
+    int _ncomp; // ask Luca: I would specify it static const: what do you think ????
 };
 
 /////
@@ -290,7 +289,7 @@ public:
         return s;
     }
 
-    // Versione semplice: DOVREBBE ANDARE BENE PER MOLTE COSE
+    // simple version: should work well for many things
     Real operator() ( int i, int j, int iq, Real x, Real y, Real z, int ic, int jc )
     {
         if ( ic == jc )
@@ -307,7 +306,7 @@ public:
     }
 
 
-    // CHIEDERE AD ALAIN per quanto segue
+    // ask alain for what follows
     // For the VBR Pattern (Aztec): operator returns the single component of the local matrix
     // (for each quadtarure node) which is a _ncomp*_ncom vector organized as in the inner comment
     std::vector<Real> operator() ( int i, int j, int iq, Real x, Real y, Real z )
@@ -326,7 +325,7 @@ public:
 
 private:
     CurrentFE* _fe; // MUST be a pointer
-    int _ncomp; // CHIEDERE A LUCA: IO LO SPECIFICHEREI STATIC CONST: che ne pensi ????
+    int _ncomp; // ask Luca: I would specify it static const: what do you think ????
 };
 
 
@@ -817,10 +816,10 @@ operator*( const EOExpr<P, A>& a, const Function& f )
 
 // STABILIZATION STUFF
 
-/****************AJOUT DE PATRICK************************/
-// Test d'AJOUT de PHIFCT sur l'operateur ASSEMBLE
+/****************ADDITION BY PATRICK************************/
+// Test of ADDITION of PHIFCT on operator ASSEMBLE
 //===========================================
-// Function TSquare: da 3 a 5 volte + veloce di pow(InValue,2)
+// Function TSquare: 3 to 5 times faster than pow(InValue,2)
 //===========================================
 template < typename T >
 inline T TSquare( T InValue )
@@ -829,7 +828,7 @@ inline T TSquare( T InValue )
 }
 
 //===========================================
-// Class PhiFct: Serve per l`assemblaggio del vettore dei termini noti del sistema lineare
+// Class PhiFct: For assembly of right hand side vector of linear system.
 //===========================================
 template <typename FCT>
 class PhiFct
@@ -945,7 +944,7 @@ private:
     CurrentFE* _fe;
 };
 
-// Operatori da usare nell`implementazione dei metodi di stabilizzazione:
+// Operators to be used in the implementation of stabilization methods:
 //===========================================
 // Class Laplacian
 //===========================================
@@ -1135,27 +1134,27 @@ public:
 
 private:
 
-    OLS _ols;    // Parte simmetrica dell'operatore
-    OLSS _olss;           // Parte antisimmetrica dell'operatore
+    OLS _ols;    // symmetric part of the operator
+    OLSS _olss;           // antisymmetric part of the operator
     FCT _fct;
-    // Termine noto dell'equazione differenziale
-    Real _Delta;           // Parametro di stabilizzazione da calcolare
-    int _Ro;    // Seleziono il metodo di stabilizzazione (costruttore)
-    Real _V;    // Volume Tetraedro (calcolare con geomap)
-    Real _T;    // Modulo del trasporto (calcolare dal vettore di trasporto: costruttore)
-    Real _S;    // Sfericita' (calcolare per ogni tetraedro)
-    Real _At;    // Area totale del tetraedro in esame
-    Real _Pe;    // Peclet (viene calcolato per ogni tetredro)
-    Real _Mu;    // Diffusione (inizializzata dal costruttore)
-    int _Cn;    // Contatore tetredri (inizializzata dal costruttore a 1)
+    // right hand side of differential equation
+    Real _Delta;           // stabilization parameter to be calculated
+    int _Ro;    // selection of stabilization method (constructor)
+    Real _V;    // tetrahedron volume (calculate with geomap)
+    Real _T;    // transport modulus (calculate from transport vector: constructor)
+    Real _S;    // sphericity (calculate for every tetrahedron)
+    Real _At;    // total area of tetrahedron in consideration
+    Real _Pe;    // Peclet number (is calculated for every tetrahedron)
+    Real _Mu;    // Diffusion (initialized by constructor)
+    int _Cn;    // tetrahedron counter (initialized to 1 by constructor)
 
-    std::vector<double> _Tv;         // Vettore componenti trasporto (costruttore)
+    std::vector<double> _Tv;         // component vector of transport (constructor)
 
-    int _C[ 4 ][ 3 ];   // Matrice connessione del tetraedro (inizializzata dal costruttore)
-    Real _Vcoor[ 4 ][ 3 ];  // Coordinate dei vertici del tetraedro
-    Real _L[ 6 ];   // Lunghezza dei lati
+    int _C[ 4 ][ 3 ];   // connection matrix of tetrahedron (initialized by constructor)
+    Real _Vcoor[ 4 ][ 3 ];  // coordinates of vertices of tetrahedron
+    Real _L[ 6 ];   // lengths of edges
     Real _P[ 4 ];   // Semiperimetri
-    Real _A[ 4 ];   // Aree delle facce
+    Real _A[ 4 ];   // face areas
 
     MESH const & _Me;  // Riferimento alla RegionMesh3D (costruttore): estraggo le coordinate dei vertici
     CurrentFE* _fe;   // Riferimento al CurrentFE (costruttore): calcolo i volumi con measure
@@ -1181,7 +1180,7 @@ inline HMStab<OLS, OLSS, FCT, MESH>::HMStab( OLS& ols, OLSS& olss, FCT& fct, MES
     int j = 0;
     Real somma = 0;
 
-    // Inizializzo la matrice di connessione
+    // initialization of connection matrix
     _C[ 0 ][ 0 ] = 0 ;
     _C[ 1 ][ 0 ] = 3 ;
     _C[ 2 ][ 0 ] = 0 ;
@@ -1195,7 +1194,7 @@ inline HMStab<OLS, OLSS, FCT, MESH>::HMStab( OLS& ols, OLSS& olss, FCT& fct, MES
     _C[ 2 ][ 2 ] = 3 ;
     _C[ 3 ][ 2 ] = 5 ;
 
-    // Inizializzo le coordinate dei vertici
+    // initialization of vertex coordinates
     for ( i = 0;i < 4;i++ )
     {
         for ( j = 0;j < 3;j++ )
@@ -1204,20 +1203,20 @@ inline HMStab<OLS, OLSS, FCT, MESH>::HMStab( OLS& ols, OLSS& olss, FCT& fct, MES
         }
     }
 
-    // Inizializzo le lunghezze dei lati
+    // initialization of edge lengths
     for ( i = 0;i < 6;i++ )
     {
         _L[ i ] = 0.;
     }
 
-    // Inizializzo i semiperimetri e le Aree
+    // initialization of semiperimetri and areas
     for ( i = 0;i < 4;i++ )
     {
         _P[ i ] = 0.;
         _A[ i ] = 0.;
     }
 
-    // Inizializzo il modulo del trasporto
+    // initialization of modulus of transport
     for ( i = 0;i < 3;i++ )
     {
         somma += TSquare( _Tv[ i ] );               //pow(_Tv[i],2);
@@ -1247,7 +1246,7 @@ inline void HMStab<OLS, OLSS, FCT, MESH>::updateLocalElement()
         _Vcoor[ j - 1 ][ 2 ] = _Me.volumeList( _Cn ).point( j ).z();
     }
 
-    // Calcolo i lati del tetredro in esame:
+    // calculate the edges of the tetrahedron in consideration
 
     for ( j = 0;j < 3;j++ )
     {
@@ -1273,7 +1272,7 @@ inline void HMStab<OLS, OLSS, FCT, MESH>::updateLocalElement()
         _L[ 5 ] = sqrt( somma ) ;                                // pow(somma,.5);
     }
 
-    // Calcolo i semiperimetri del tetredro in esame:
+    // calculate the semiperimetri of the tetrahedron in consideration
 
     for ( i = 0;i < 4;i++ )
     {
