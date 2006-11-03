@@ -198,7 +198,7 @@ readINRIAMeshFileHead( std::ifstream & mystream,
             numBFaces = 0;
 
             done++;
-            for ( UInt k = 0;k < numReadFaces; k++ )
+            for ( UInt k = 0; k < numReadFaces; k++ )
             {
                 mystream >> p1 >> p2 >> p3 >> ibc;
                 if(isboundary[p1-1]&&isboundary[p2-1]&&isboundary[p3-1]){
