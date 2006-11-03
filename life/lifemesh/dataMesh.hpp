@@ -47,6 +47,8 @@ template <typename Mesh>
 class DataMesh
 {
 public:
+    typedef Mesh                             mesh_raw_type;
+    typedef boost::shared_ptr<mesh_raw_type> mesh_type;
 
     //! Constructor
     /*!
@@ -54,34 +56,39 @@ public:
     */
     DataMesh( const GetPot& dfile, const std::string& section = "discretization" );
 
-    DataMesh(const DataMesh &dataMesh);
+    DataMesh(const DataMesh  &dataMesh);
+
     //! Output
     virtual void showMe( std::ostream& c = std::cout ) const;
 
-    std::string meshDir() {return _mesh_dir;}
-    std::string meshFile() {return _mesh_file;}
-
+    std::string meshDir()   {return M_mesh_dir;}
+    std::string meshFile()  {return M_mesh_file;}
+    std::string meshFaces() {return M_mesh_faces;}
     //! The mesh
-    Mesh& mesh();
+
+    void  setMesh   (mesh_raw_type* _mesh);
+    Mesh& mesh      ();
     const Mesh& mesh() const;
 
     //! Virtual destructor
     virtual ~DataMesh();
 
-protected:
+private:
 
     //! operator
     DataMesh operator = (const DataMesh &dataMesh)
         {};
 
     //! mesh
-    std::string _mesh_dir;   // mesh dir
-    std::string _mesh_file;  // mesh files
-    std::string _mesh_type;  // mesh fil
-    std::string _mesh_faces; // update all mesh faces
-    std::string _mesh_edges; // update all mesh edges
-    Mesh _mesh;       // the mesh
+    std::string M_mesh_dir;   // mesh dir
+    std::string M_mesh_file;  // mesh files
+    std::string M_mesh_type;  // mesh type
+    std::string M_mesh_faces; // update all mesh faces
+    std::string M_mesh_edges; // update all mesh edges
+
+    mesh_raw_type*   M_mesh;       // the mesh
 };
+
 
 
 //
@@ -92,54 +99,57 @@ protected:
 // Constructor
 template <typename Mesh>
 DataMesh<Mesh>::
-DataMesh( const GetPot& dfile, const std::string& section )
+DataMesh( const GetPot& dfile, const std::string& section ):
+    M_mesh(new Mesh)
 {
-    _mesh_dir = dfile( ( section + "/mesh_dir" ).data(), "./" );
-    _mesh_file = dfile( ( section + "/mesh_file" ).data(), "mesh.mesh" );
-    _mesh_type = dfile( ( section + "/mesh_type" ).data(), ".mesh" );
-    _mesh_faces = dfile( ( section + "/mesh_faces" ).data(), "boundary" );
-    _mesh_edges = dfile( ( section + "/mesh_edges" ).data(), "boundary" );
+    M_mesh_dir = dfile( ( section + "/mesh_dir" ).data(), "./" );
+    M_mesh_file = dfile( ( section + "/mesh_file" ).data(), "mesh.mesh" );
+    M_mesh_type = dfile( ( section + "/mesh_type" ).data(), ".mesh" );
+    M_mesh_faces = dfile( ( section + "/mesh_faces" ).data(), "boundary" );
+    M_mesh_edges = dfile( ( section + "/mesh_edges" ).data(), "boundary" );
     bool verbose = dfile( ( section + "/verbose" ).data(), 0 );
 
 
-    if ( _mesh_type == ".mesh" )
-        readINRIAMeshFile( _mesh, _mesh_dir + _mesh_file, 1, verbose );
-    else if ( _mesh_type == ".m++" )
-        readMppFile( _mesh, _mesh_dir + _mesh_file, 1, verbose );
-    else if ( _mesh_type == ".msh" )
-        readGmshFile( _mesh, _mesh_dir + _mesh_file, 1 );
+    if ( M_mesh_type == ".mesh" )
+        readINRIAMeshFile( *M_mesh, M_mesh_dir + M_mesh_file, 1, verbose );
+    else if ( M_mesh_type == ".m++" )
+        readMppFile( *M_mesh, M_mesh_dir + M_mesh_file, 1, verbose );
+    else if ( M_mesh_type == ".msh" )
+        readGmshFile( *M_mesh, M_mesh_dir + M_mesh_file, 1 );
     else
         ERROR_MSG( "Sorry, this mesh file can not be loaded" );
 
-    if ( _mesh_edges == "all" )
-        _mesh.updateElementEdges( true );
+    if ( M_mesh_edges == "all" )
+        M_mesh->updateElementEdges( true );
     else
-        _mesh.updateElementEdges();
-    if ( _mesh_faces == "all" )
-        _mesh.updateElementFaces( true );
+        M_mesh->updateElementEdges();
+    if ( M_mesh_faces == "all" )
+        M_mesh->updateElementFaces( true );
     else
-        _mesh.updateElementFaces();
+        M_mesh->updateElementFaces();
 
 }
+
 
 template <typename Mesh>
 DataMesh<Mesh>::
 DataMesh( const DataMesh& dataMesh ):
-    _mesh_dir    (dataMesh._mesh_dir),
-    _mesh_file   (dataMesh._mesh_file),
-    _mesh_type   (dataMesh._mesh_type),
-    _mesh_faces  (dataMesh._mesh_faces),
-    _mesh_edges  (dataMesh._mesh_edges),
-    _mesh        (dataMesh._mesh)
+    M_mesh_dir    (dataMesh.M_mesh_dir),
+    M_mesh_file   (dataMesh.M_mesh_file),
+    M_mesh_type   (dataMesh.M_mesh_type),
+    M_mesh_faces  (dataMesh.M_mesh_faces),
+    M_mesh_edges  (dataMesh.M_mesh_edges),
+    M_mesh        (dataMesh.M_mesh)
 {
-    if ( _mesh_edges == "all" )
-        _mesh.updateElementEdges( true );
+    if ( M_mesh_edges == "all" )
+        M_mesh->updateElementEdges( true );
     else
-        _mesh.updateElementEdges();
-    if ( _mesh_faces == "all" )
-        _mesh.updateElementFaces( true );
+        M_mesh->updateElementEdges();
+
+    if ( M_mesh_faces == "all" )
+        M_mesh->updateElementFaces( true );
     else
-        _mesh.updateElementFaces();
+        M_mesh->updateElementFaces();
 }
 
 
@@ -156,27 +166,36 @@ void DataMesh<Mesh>::
 showMe( std::ostream& c ) const
 {
     // mesh
-    c << "mesh_dir   = " << _mesh_dir << std::endl;
-    c << "mesh_file  = " << _mesh_file << std::endl;
-    c << "mesh_type  = " << _mesh_type << std::endl;
-    c << "mesh_edges = " << _mesh_edges << std::endl;
-    c << "mesh_faces = " << _mesh_faces << std::endl;
+    c << "mesh_dir   = " << M_mesh_dir << std::endl;
+    c << "mesh_file  = " << M_mesh_file << std::endl;
+    c << "mesh_type  = " << M_mesh_type << std::endl;
+    c << "mesh_edges = " << M_mesh_edges << std::endl;
+    c << "mesh_faces = " << M_mesh_faces << std::endl;
 }
 
 
 // The mesh
+
+template <typename Mesh>
+inline
+void DataMesh<Mesh>::
+setMesh(mesh_raw_type* _mesh)
+{
+    M_mesh = _mesh;
+}
+
 template <typename Mesh>
 Mesh& DataMesh<Mesh>::
 mesh()
 {
-    return _mesh;
+    return *M_mesh;
 }
 
 template <typename Mesh>
 const Mesh& DataMesh<Mesh>::
 mesh() const
 {
-    return _mesh;
+    return *M_mesh;
 }
 }
 #endif
