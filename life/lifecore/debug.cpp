@@ -134,7 +134,9 @@ initDebugAreas ()
             fin.open ( "../debug.areas" );
             if ( fin.fail() )
             {
-                Warning() << "The file debug.areas was not found.\n";
+                Warning() << "The file debug.areas was not found.\n"
+                          << "                 searched at ../debug.areas and\n"
+                          << "                 " << __path.str() << "\n";
             }
         }
         while ( fin )
