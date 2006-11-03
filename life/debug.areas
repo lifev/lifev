@@ -5,6 +5,7 @@
 3000 -- LifeV::array
 4000 -- LifeV::mesh
 5000 -- LifeV::fem
+5010 -- LifeV::BCHandler
 6000 -- LifeV::solver
 6010 -- LifeV::NavierStokesWithFlux
 6020 -- LifeV::NavierStokesSolverPC
