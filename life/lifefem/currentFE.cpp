@@ -22,17 +22,28 @@ namespace LifeV
 {
 CurrentFE::CurrentFE( const RefFE& _refFE, const GeoMap& _geoMap, const QuadRule& _qr )
         :
-        nbGeoNode( _geoMap.nbDof ), nbNode( _refFE.nbDof ), nbCoor( _refFE.nbCoor ),
-        nbQuadPt( _qr.nbQuadPt ), nbDiag( _refFE.nbDiag() ),
-        nbUpper( _refFE.nbUpper() ) , nbPattern( _refFE.nbPattern() ),
+        nbGeoNode( _geoMap.nbDof ),
+        nbNode( _refFE.nbDof ),
+        nbCoor( _refFE.nbCoor ),
+        nbQuadPt( _qr.nbQuadPt ),
+        nbDiag( _refFE.nbDiag() ),
+        nbUpper( _refFE.nbUpper() ) ,
+        nbPattern( _refFE.nbPattern() ),
         point( nbGeoNode, nbCoor ),
-        refFE( _refFE ), geoMap( _geoMap ), qr( _qr ),
-        phi( nbNode, nbQuadPt ), dPhiRef( nbNode, nbCoor, nbQuadPt ),
+        refFE( _refFE ),
+        geoMap( _geoMap ),
+        qr( _qr ),
+        phi( nbNode, nbQuadPt ),
+        dPhiRef( nbNode, nbCoor, nbQuadPt ),
         dPhiRef2( nbNode, nbCoor, nbCoor, nbQuadPt ),
         phiDer( nbNode, nbCoor, nbQuadPt ),
-        jacobian( nbCoor, nbCoor, nbQuadPt ), tInvJac( nbCoor, nbCoor, nbQuadPt ),
-        phiGeo( nbGeoNode, nbQuadPt ), dPhiGeo( nbGeoNode, nbCoor, nbQuadPt ),
-        weightDet( nbQuadPt ), detJac( nbQuadPt ), quadPt( nbQuadPt, 3 ),
+        jacobian( nbCoor, nbCoor, nbQuadPt ),
+        tInvJac( nbCoor, nbCoor, nbQuadPt ),
+        phiGeo( nbGeoNode, nbQuadPt ),
+        dPhiGeo( nbGeoNode, nbCoor, nbQuadPt ),
+        weightDet( nbQuadPt ),
+        detJac( nbQuadPt ),
+        quadPt( nbQuadPt, 3 ),
         phiDer2( nbNode, nbCoor, nbCoor, nbQuadPt )
 {
     CONSTRUCTOR( "CurrentFE" );
