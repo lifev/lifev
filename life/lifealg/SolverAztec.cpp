@@ -61,6 +61,9 @@ SolverAztec::SolverAztec( std::string filename )
     M_options[ AZ_precond ] = AZ_dom_decomp;
     M_options[ AZ_subdomain_solve ] = AZ_ilu;
 
+    // allow preconditioner reuse by default
+    M_options[AZ_keep_info] = 1;
+
     // set options from file if given
     if ( !filename.empty() )
     {
@@ -79,6 +82,7 @@ SolverAztec::~SolverAztec()
     {
         AZ_precond_destroy( &M_precond );
     }
+    AZ_free_memory( M_dataOrg[ AZ_name ] );
 }
 
 SolverAztec* SolverAztec::New()
@@ -193,8 +197,9 @@ void SolverAztec::solve( array_type& x,
                 break;
         }
     }
+    array_type b_copy(b);
     AZ_iterate( x.data().begin(),
-                const_cast<double*>( b.data().begin() ),
+                b_copy.data().begin(),
                 M_options, M_params, M_status,
                 M_procConfig, M_matrix, M_precond, NULL );
 }
