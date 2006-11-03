@@ -92,9 +92,9 @@ void exactJacobian::evalResidual(Vector &_res,
     M_dispStruct = this->M_solid->disp();
     M_velo       = this->M_solid->w();
 
-    std::cout << " ::: norm(disp     ) = " << norm_2(_disp)  << std::endl;
-    std::cout << " ::: norm(dispNew  ) = " << norm_2(M_dispStruct) << std::endl;
-    std::cout << " ::: norm(velo     ) = " << norm_2(M_velo) << std::endl;
+    std::cout << " ::: norm(disp     ) = " << norm_inf(_disp)  << std::endl;
+    std::cout << " ::: norm(dispNew  ) = " << norm_inf(M_dispStruct) << std::endl;
+    std::cout << " ::: norm(velo     ) = " << norm_inf(M_velo) << std::endl;
 
     std::cout << "Max ResidualF   = " << norm_inf(M_fluid->residual())
               << std::endl;
@@ -128,7 +128,7 @@ void exactJacobian::setUpBC()
     //
     // Passing data from structure to the harmonic Extension: motion of the fluid domain
     //
-    setStructureDispToHarmonicExtension(this->M_solid->disp());
+    setStructureDispToHarmonicExtension((LifeV::Vector&) this->M_solid->disp());
     //========================================================================================
     //  Interface BOUNDARY CONDITIONS
     //========================================================================================
@@ -336,6 +336,7 @@ void my_matvecJacobianEJ(double *z, double *Jz, AZ_MATRIX* J, int proc_config[])
     std::cout << " ***** norm (Jz)= " << AZ_gvector_norm(dim, -1, Jz, proc_config)
               << std::endl << std::endl;
 }
+
 
 //
 // add steklovPoincare to factory
