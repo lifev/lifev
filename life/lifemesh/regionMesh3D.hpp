@@ -513,7 +513,7 @@ namespace LifeV
     */
     PointType & addPoint( PointType const & p, bool const boundary = false, bool const vertices = false );
     /*! Add a point
-      This methos is for advanced use only
+      This method is for advanced use only
     */
     PointType & setPoint( PointType const & p, ID const position, bool const boundary = false, bool const vertices = false );
     /*! Add a point
@@ -545,7 +545,7 @@ namespace LifeV
       Useful methods
     */
     //@{
-    //! Estracts from the mesh a list of entities matchin a marker flag
+    //! Extracts from the mesh a list of entities matchin a marker flag
     /*!
       It adds the IDs of the geometric entities matching an EntityFlag
       to vector of IDs.
@@ -1460,7 +1460,7 @@ RegionMesh3D<GEOSHAPE, MC>::RegionMesh3D( RegionMesh3D<GEOSHAPE, MC> const & m )
       }
     return *pp;
   }
-  
+
   template <typename GEOSHAPE, typename MC>
   INLINE
   //RegionMesh3D<GEOSHAPE,MC>::PointType &
@@ -1641,7 +1641,7 @@ RegionMesh3D<GEOSHAPE, MC>::RegionMesh3D( RegionMesh3D<GEOSHAPE, MC> const & m )
   bool checkMesh3D( RegionMesh3D & mesh, Switch & sw, bool fix, bool verbose,
 		    std::ostream & out, std::ostream & err, std::ostream & clog );
 
-  
+
   template <typename GEOSHAPE, typename MC>
   int
   RegionMesh3D<GEOSHAPE, MC>::check( int level, bool const fix, bool const verb, std::ostream & out )
@@ -1933,7 +1933,7 @@ RegionMesh3D<GEOSHAPE, MC>::RegionMesh3D( RegionMesh3D<GEOSHAPE, MC> const & m )
       std::cerr<<"Something weird in ExtractEntityList ABORTING"<<endl;
     }
   }
-  
+
 
   template <typename GEOSHAPE, typename MC>
   INLINE
