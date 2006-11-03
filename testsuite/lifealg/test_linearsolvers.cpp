@@ -119,12 +119,16 @@ bool test_petsc( Mat& __mat )
 template<typename Mat>
 bool test_aztec( Mat& __mat )
 {
+    LifeV::Debug( 10000 ) << "Aztec solver test\n";
     int Nrows = __mat.matrix().Patt()->nRows();
 
     double __relTol = 1.e-14;
 
+    LifeV::Debug( 10000 ) << "create solver\n";
     LifeV::SolverAztec __aztec;
+    LifeV::Debug( 10000 ) << "set matrix\n";
     __aztec.setMatrix(__mat.matrix());
+    LifeV::Debug( 10000 ) << "set tolerance\n";
     __aztec.setTolerance( __relTol );
 
     Vector __x( Nrows );
@@ -135,6 +139,7 @@ bool test_aztec( Mat& __mat )
     __b = __mat.matrix() * __sol;
 
     __x = ZeroVector( Nrows );
+    LifeV::Debug( 10000 ) << "solving\n";
     __aztec.solve( __x, __b );
 
     LifeV::Debug( 10000 )  << "norm_2(x) = " << norm_2( __x ) << "\n";
