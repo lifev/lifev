@@ -606,7 +606,7 @@ INLINE
 bool
 RegionMesh2D<GEOSHAPE, MC>::getLinkSwitch( std::string const & _s ) const
 {
-    switches.test( _s );
+    return switches.test( _s );
 };
 
 template <typename GEOSHAPE, typename MC>
