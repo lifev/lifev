@@ -1012,10 +1012,10 @@ void stiff( Real coef, ElemMat& elmat, const CurrentFE& fe,
     }
 }
 
-// VC - Dicembre 2004
+// VC - December 2004
 //
 void stiff_curl( Real coef, ElemMat& elmat, const CurrentFE& fe,
-                 int iblock, int jblock, int nb )
+                 int iblock, int jblock, int /*nb*/ )
 
 
 /*
