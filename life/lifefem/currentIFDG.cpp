@@ -35,7 +35,7 @@ CurrentIFDG::~CurrentIFDG()
 // Find the corresponding nodes on the opposite element
 
 void CurrentIFDG::_comp_corresp_node_op() {
-  bool same_point;
+  bool same_point(false);
   Real xi, eta, zeta, s, t;
 
   for(int i = 0; i < nbGeoNode; i++){
