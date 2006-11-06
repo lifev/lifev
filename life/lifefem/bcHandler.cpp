@@ -354,7 +354,7 @@ const UInt BCHandler::getBCbyName(const std::string __BCName) const
 
 BCType BCHandler::boundaryType(const EntityFlag& aFlag) const
 {
-    BCType CurrType;
+    BCType CurrType(Natural);
 
     for(UInt i = 0; i <= M_bcList.size(); i++){
         if(aFlag == M_bcList[i].flag()){
