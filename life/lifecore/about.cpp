@@ -69,7 +69,7 @@ class AboutDataPrivate
 public:
     AboutDataPrivate()
         {}
-    AboutDataPrivate( AboutDataPrivate const& adp )
+    AboutDataPrivate( AboutDataPrivate const& /* adp */ )
         {}
     ~AboutDataPrivate()
         {
@@ -324,7 +324,7 @@ AboutData::copyrightStatement() const
 }
 
 std::ostream&
-operator<<( std::ostream& os, AboutData const& about )
+operator<<( std::ostream& os, AboutData const& /* about */ )
 {
     return os;
 }
