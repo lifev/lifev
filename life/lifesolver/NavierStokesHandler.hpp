@@ -111,7 +111,7 @@ public:
                          const QuadRule& bdQr_p,
                          BCHandler&      BCh_u );
 
-    NavierStokesHandler( const DataType&         dataNavierStokes,
+    NavierStokesHandler( const DataType&        dataNavierStokes,
                          const RefFE&           refFE_u,
                          const RefFE&           refFE_p,
                          const QuadRule&        Qr_u,
@@ -217,9 +217,11 @@ public:
 
     //! Returns the velocity Dof
     const Dof& uDof() const;
+    Dof& uDof();
 
     //! Returns the pressure Dof
     const Dof& pDof() const;
+    Dof& pDof();
 
     //! returns the FE ref for the velocity
     const RefFE& refFEu() const {return _refFE_u;}
@@ -551,7 +553,7 @@ NavierStokesHandler( const GetPot& data_file, const RefFE& refFE_u,
 // Constructors
 template <typename Mesh, typename DataType>
 NavierStokesHandler<Mesh, DataType>::
-NavierStokesHandler( const DataType&   dataNavierStokes,
+NavierStokesHandler( const DataType&  dataNavierStokes,
                      const RefFE&     refFE_u,
                      const RefFE&     refFE_p,
                      const QuadRule&  Qr_u,
@@ -559,6 +561,7 @@ NavierStokesHandler( const DataType&   dataNavierStokes,
                      const QuadRule&  Qr_p,
                      const QuadRule&  bdQr_p,
                      BCHandler& BCh_u ) :
+    
     M_dataType                         ( dataNavierStokes ),
     _refFE_u                           ( refFE_u ),
     _refFE_p                           ( refFE_p ),
@@ -601,7 +604,7 @@ NavierStokesHandler( const DataType&   dataNavierStokes,
     M_out_pressure                     ("Pressure.res"),
     M_BCh_fluid                        ( &BCh_u )
 {
-    std::cout << "New fluid constructor ... " << std::endl;
+    std::cout << "New fluid constructor ... " << std::flush << std::endl;
     if ( this->computeMeanValuesPerSection() == 1 )
         initializeMeanValuesPerSection();
     /*
@@ -693,10 +696,25 @@ NavierStokesHandler<Mesh, DataType>::uDof() const
     return _dof_u;
 }
 
+template <typename Mesh, typename DataType>
+Dof&
+NavierStokesHandler<Mesh, DataType>::uDof()
+{
+    return _dof_u;
+}
+
 // Returns the pressure Dof
 template <typename Mesh, typename DataType>
 const Dof&
 NavierStokesHandler<Mesh, DataType>::pDof() const
+{
+    return _dof_p;
+}
+
+
+template <typename Mesh, typename DataType>
+Dof&
+NavierStokesHandler<Mesh, DataType>::pDof()
 {
     return _dof_p;
 }
