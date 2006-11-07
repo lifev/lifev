@@ -604,7 +604,7 @@ NavierStokesHandler( const DataType&  dataNavierStokes,
     M_out_pressure                     ("Pressure.res"),
     M_BCh_fluid                        ( &BCh_u )
 {
-    std::cout << "New fluid constructor ... " << std::flush << std::endl;
+    std::cout << "New fluid constructor ... " << std::endl;
     if ( this->computeMeanValuesPerSection() == 1 )
         initializeMeanValuesPerSection();
     /*
