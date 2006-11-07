@@ -1,20 +1,20 @@
 /*
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
+  This file is part of the LifeV library
+  Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 /*!
   \file dof.h
@@ -48,17 +48,17 @@ namespace LifeV
 {
 /*! Local-to-global table
 
- This class provides the localtoglobal table that relates the local DOF of
- a finite element to its global numbering. It needs a LocalDofPattern in
- order to obtain all the necessary information about the local pattern. In
- fact it stores a copy of it so to make the local pattern available, if
- needed.
+This class provides the localtoglobal table that relates the local DOF of
+a finite element to its global numbering. It needs a LocalDofPattern in
+order to obtain all the necessary information about the local pattern. In
+fact it stores a copy of it so to make the local pattern available, if
+needed.
 
- It is useless until is has not been set up on a specific RegionMesh. This is accomplished either by
- passing the mesh to the constructor, or calling the method Dof::update().
+It is useless until is has not been set up on a specific RegionMesh. This is accomplished either by
+passing the mesh to the constructor, or calling the method Dof::update().
 
- \note The methods bulds the table for ALL degrees of freedom, i.e. it does not handle any essential
- boundary condition.
+\note The methods bulds the table for ALL degrees of freedom, i.e. it does not handle any essential
+boundary condition.
 */
 class Dof
 {
@@ -99,15 +99,19 @@ public:
 
     //! The total number of Dof
     inline UInt numTotalDof() const
-    {
-        return _totalDof;
-    }
+        {
+            return _totalDof;
+        }
 
+    inline UInt setTotalDof(const UInt totalDof)
+        {
+            _totalDof = totalDof;
+        }
     //! The number of local Dof (nodes) in the finite element
     inline UInt numLocalDof() const
-    {
-        return fe.nbLocalDof;
-    }
+        {
+            return fe.nbLocalDof;
+        }
 
     //! Return the specified entries of the localToGlobal table
     /*!
@@ -117,33 +121,33 @@ public:
       \return The numbering of the DOF
     */
     inline ID localToGlobal( const ID ElId, const ID localNode ) const
-    {
-        return _ltg( localNode, ElId );
-    }
+        {
+            return _ltg( localNode, ElId );
+        }
 
     //! Number of elements in mesh
     UInt numElements() const
-    {
-        return _nEl;
-    }
+        {
+            return _nEl;
+        }
 
     //! Number of local vertices (in a elment)
     UInt numLocalVertices() const
-    {
-        return nlv;
-    }
+        {
+            return nlv;
+        }
 
     //! Number of local edges (in a elment)
     UInt numLocalEdges() const
-    {
-        return nle;
-    }
+        {
+            return nle;
+        }
 
     //! Number of local faces (in a elment)
     UInt numLocalFaces() const
-    {
-        return nlf;
-    }
+        {
+            return nlf;
+        }
 
     //! Ouput
     void showMe( std::ostream & out = std::cout, bool verbose = false ) const;
@@ -168,7 +172,7 @@ private:
 //! Constructor that builds the localToglobal table
 template <typename Mesh>
 Dof::Dof( Mesh& mesh, const LocalDofPattern& _fe, UInt off ) : fe( _fe ), _offset( off ), _totalDof( 0 ),
-        _nEl( 0 ), nlv( 0 ), nle( 0 ), nlf( 0 ), _ltg()
+                                                               _nEl( 0 ), nlv( 0 ), nle( 0 ), nlf( 0 ), _ltg()
 {
     for ( UInt i = 0; i < 5; ++i )
         _ncount[ i ] = 0;
