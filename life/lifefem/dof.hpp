@@ -105,7 +105,7 @@ public:
 
     inline UInt setTotalDof(const UInt totalDof)
         {
-            _totalDof = totalDof;
+            return (_totalDof = totalDof );
         }
     //! The number of local Dof (nodes) in the finite element
     inline UInt numLocalDof() const
