@@ -346,41 +346,57 @@ namespace LifeV
         
         geof<< std::endl;
       } 
-    
-    geof<< "part";
-    geof.width(8);
-    ++part;
-    geof<< part << std::endl;
-    geof<<"full geometry"<<std::endl;
-    // elements
-    geof<< M_FEstr << std::endl;
-    geof.width(8);
-    geof<< nE << std::endl;
+
+    // volume parts
+    EntityFlag marker;
+    std::set<EntityFlag> flags;
+    std::map< EntityFlag, __gnu_cxx::slist<ID> > geo;
+
+    typedef std::set<EntityFlag>::const_iterator Iterator_flag;
+    typedef __gnu_cxx::slist<ID>::const_iterator Iterator_geo;
+    Iterator_flag result;
+
     for (ID i=1; i <= nE; ++i)
       {
-        for (ID j=1; j<= M_nbLocalDof; ++j)
-          {
-            geof.width(8);
-            geof << M_mesh.volume(i).point(j).id();
-          }
-        geof<< "\n";
-        
+        marker = M_mesh.volume(i).marker();
+        flags.insert(marker);
+        geo[marker].push_front(i);
       }
-
-    // boundary parts
+    for (Iterator_flag i=flags.begin(); i!= flags.end(); ++i)
+      {
+        marker = *i;
+        geof<< "part ";
+        geof.width(8);
+        ++part;
+        geof<< part << std::endl;
+        geof<<"subdomain ref "<< marker << std::endl;
+        __gnu_cxx::slist<ID>& volumeList= geo[marker];
+        geof<< M_FEstr << std::endl;
+        geof.width(8);
+        geof<< volumeList.size() << std::endl;
+        for (Iterator_geo j=volumeList.begin(); j!= volumeList.end(); ++j) 
+          {
+            for( ID k=1; k <= M_nbLocalDof; ++k) 
+              {
+                geof.width(8);
+                geof << M_mesh.volume(*j).point(k).id();
+              }
+            geof<<"\n";
+          }
+      }
     
-    std::set<EntityFlag> flags;
-    std::map< EntityFlag, __gnu_cxx::slist<ID> > faces;
-    EntityFlag marker;
-    typedef std::set<EntityFlag>::const_iterator Iterator_flag;
-    typedef __gnu_cxx::slist<ID>::const_iterator Iterator_face;
-
-    Iterator_flag result;
+    geo.clear();
+    flags.clear();
+    
+    
+    // boundary parts
+       
+   
     for (ID i=1; i <= nBF; ++i)
       {
         marker = M_mesh.boundaryFace(i).marker();
         flags.insert(marker);
-        faces[marker].push_front(i);
+        geo[marker].push_front(i);
       }
       
     for (Iterator_flag i=flags.begin(); i!= flags.end(); ++i)
@@ -391,11 +407,11 @@ namespace LifeV
         ++part;
         geof<< part << std::endl;
         geof<<"boundary ref "<< marker << std::endl;
-        __gnu_cxx::slist<ID>& faceList= faces[marker];
+        __gnu_cxx::slist<ID>& faceList= geo[marker];
         geof<< M_bdFEstr << std::endl;
         geof.width(8);
         geof<< faceList.size() << std::endl;
-        for (Iterator_face j=faceList.begin(); j!= faceList.end(); ++j) 
+        for (Iterator_geo j=faceList.begin(); j!= faceList.end(); ++j) 
           {
             for( ID k=1; k <= M_nbLocalBdDof; ++k) 
               {
@@ -405,6 +421,9 @@ namespace LifeV
             geof<<"\n";
           }
       }
+     
+    geo.clear();
+    flags.clear();
     geof.close();
   }
   
