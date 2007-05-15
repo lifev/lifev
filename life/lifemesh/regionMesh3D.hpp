@@ -199,10 +199,10 @@ public:
      * It is a generic interface common for all RegionMeshes (3D -- 1D).
      */
     //@{
-    UInt numElements() const; //!< Number of elements (volumes)
-    UInt & numElements(); //!< Number of elements (volumes)
-    UInt numBElements() const; //!< Number of Boundary elements (faces)
-    UInt & numBElements(); //!< Number of boundary elements (faces)
+    UInt const numElements() const; //!< Number of elements (volumes)
+    void setNumElements( UInt const n ); //!< Number of elements (volumes)
+    UInt const numBElements() const; //!< Number of Boundary elements (faces)
+    void setNumBElements( UInt const n ); //!< Number of boundary elements (faces)
     ElementType & element( ID const & i );
     ElementType const & element( ID const & i ) const;
     BElementType & bElement( ID const & i );
@@ -238,13 +238,15 @@ public:
     */
     //@{
     /*! Returns number of Volume elements in the mesh as given by the internal counter.*/
-    UInt numVolumes() const;
-    UInt & numVolumes();    /*!< Access number of Volumes (internal counter)*/
+    UInt const numVolumes() const;
+    //        UInt & numVolumes();    /*!< Access number of Volumes (internal counter)*/
     UInt storedVolumes() const; //!< volumes actully stored in list
     /*! Current capacity of Volumes  Container, i.e. how many elements may be stored */
     UInt maxNumVolumes() const;
     /*! Changes Current capacity of Volumes  (Optionally sets internal counter.) */
     void setMaxNumVolumes( UInt const n, bool const setcounter = false );
+
+    void setNumVolumes      ( UInt const n );
     /*! Adds volumes.
       Volume Id is computed automatically. Return ref to added Volume
     */
@@ -367,8 +369,8 @@ public:
     */
 
     //@{
-    UInt numFaces() const; //!<Number of total faces in mesh (uses counter).
-    UInt & numFaces();    //!<Number of total faces (may modify)
+    UInt const numFaces() const; //!<Number of total faces in mesh (uses counter).
+    //UInt & numFaces();    //!<Number of total faces (may modify)
     UInt storedFaces() const; //!< Number of stored faces
     UInt maxNumFaces() const;  //!< Max number of faces that can be stored
     //! Set Maximum Number of Faces in the Faces container
@@ -385,10 +387,11 @@ public:
     FaceType & face( ID const i ); //!< ith mesh face (may  modify!)
     FaceType const & boundaryFace( ID const i ) const; //!< ith boundary face.
     FaceType & boundaryFace( ID const i ); //!< ith boundary  face.
+    void setNumFaces( UInt const n ) ; //<! Set counter of boundary faces
     void setNumBFaces( UInt const n ) ; //<! Set counter of boundary faces
     bool hasFaces() const;  //<! Do I store mesh faces?
     bool hasInternalFaces() const; //<! Do I store also internal faces?
-    UInt numBFaces() const;  //<! Number of Boundary Faces
+    UInt const numBFaces() const;  //<! Number of Boundary Faces
     bool isBoundaryFace( FaceType const & f ) const;  //<!Is this face on boundary?
     bool isBoundaryFace( ID const & id ) const;  //<!Is  face whose ID is id on boundary?
 
@@ -445,8 +448,8 @@ public:
 
     /*                          EDGES METHODS                           */
     //@{
-    UInt numEdges() const;
-    UInt & numEdges();
+    UInt const numEdges() const;
+    // UInt & numEdges();
     UInt storedEdges() const;
     UInt maxNumEdges() const;
     void setMaxNumEdges( UInt const n, bool const setcounter = false );
@@ -459,6 +462,7 @@ public:
     EdgeType const & boundaryEdge( ID const i ) const; //!< ith b. edge.
     EdgeType & boundaryEdge( ID const i ); //!< ith b. edge.
     UInt numBEdges() const;
+    void setNumEdges ( UInt const n);
     void setNumBEdges( ID const n ) ; //<! Set counter of boundary edges
     bool hasEdges() const;         //<! Do I store edges?
     bool hasInternalEdges() const;         //<! Do I store internal edges?
@@ -495,9 +499,12 @@ public:
     */
     //@{
     //! Returns number of points in the mesh (interrogate counter)
-    UInt numPoints() const;
+    UInt const numPoints() const;
+
     //! Changes number of points in the mesh (interrogate counter)
-    UInt & numPoints();
+    // UInt & numPoints();
+    void setNumPoints( UInt const n);
+
     //! Returns number of points currently stored in Points container
     /*! (interrogates container)*/
     UInt storedPoints() const;
@@ -530,10 +537,12 @@ public:
     PointType & boundaryPoint( ID const i ); //!< ith b. point.
     UInt numBPoints() const; //!< counter of boundary points
     void setNumBPoints( UInt const n ); //<! Sets counter of boundary points
-    UInt numVertices() const; //!< Number of vertices in Region
-    UInt & numVertices(); //!< Allows to change number of vertices in Region
-    UInt numBVertices() const; //!< Number of boundary vertices in RegionMesh
-    UInt & numBVertices();
+    UInt const numVertices() const; //!< Number of vertices in Region
+    //UInt & numVertices(); //!< Allows to change number of vertices in Region
+    void setNumVertices       ( UInt const n );
+    UInt const numBVertices() const; //!< Number of boundary vertices in RegionMesh
+    //  UInt & numBVertices();
+    void setNumBVertices      ( UInt const n );
     bool isVertex( ID const & id ) const;  //<!Is this point a Vertex?
     bool isVertex( PointType const & p ) const;  //<!Is this point a Vertex?
     bool isBoundaryPoint( PointType const & p ) const;  //<!Is this point on boundary?
@@ -707,13 +716,15 @@ RegionMesh3D<GEOSHAPE, MC>::RegionMesh3D( RegionMesh3D<GEOSHAPE, MC> const & m )
 //           std::cout << "(" << volume( k ).point( i ).id() << " " << m.volume( k ).point( i ).id() << ")";
 //       std::cout << std::endl;
 //       }
-//    ASSERT0( true, "Copy Costructor Not Yet Implemented for RegionMesh3D" ) ;
+    ASSERT0( true, "Copy Costructor Not Yet Implemented for RegionMesh3D" ) ;
 }
+
 
 template <typename GEOSHAPE, typename MC>
 RegionMesh3D<GEOSHAPE, MC>
 RegionMesh3D<GEOSHAPE, MC>::operator=( RegionMesh3D<GEOSHAPE, MC> const & m )
 {
+	ASSERT0( true, "Operator= Not Yet Implemented for RegionMesh3D" ) ;
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -780,28 +791,28 @@ RegionMesh3D<GEOSHAPE, MC>::numLocalEdgesOfFace() const
 
 // Generic Methods
 template <typename GEOSHAPE, typename MC>
-UInt
+UInt const
 RegionMesh3D<GEOSHAPE, MC>::numElements() const
 {
     return _numVolumes;
 }
 
 template <typename GEOSHAPE, typename MC>
-UInt & RegionMesh3D<GEOSHAPE, MC>::numElements()
+void RegionMesh3D<GEOSHAPE, MC>::setNumElements(UInt const n)
 {
-    return _numVolumes;
+    _numVolumes = n;
 }
 
 template <typename GEOSHAPE, typename MC>
-UInt RegionMesh3D<GEOSHAPE, MC>::numBElements() const
+UInt const RegionMesh3D<GEOSHAPE, MC>::numBElements() const
 {
     return _numBFaces;
 }
 
 template <typename GEOSHAPE, typename MC>
-UInt & RegionMesh3D<GEOSHAPE, MC>::numBElements()
+void RegionMesh3D<GEOSHAPE, MC>::setNumBElements(UInt const n)
 {
-    return _numBFaces;
+    _numBFaces = n;
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -872,18 +883,20 @@ setMaxNumItems( SimpleVect< T> & list, UInt n, std::string title )
 
 // ***************************** VOLUMES
 template <typename GEOSHAPE, typename MC>
-UInt
+UInt const
 RegionMesh3D<GEOSHAPE, MC>::numVolumes() const
 {
     return _numVolumes;
 }
 
+/*
 template <typename GEOSHAPE, typename MC>
-UInt &
+UInt const&
 RegionMesh3D<GEOSHAPE, MC>::numVolumes()
 {
     return _numVolumes;
 }
+*/
 
 template <typename GEOSHAPE, typename MC>
 UInt
@@ -906,6 +919,13 @@ RegionMesh3D<GEOSHAPE, MC>::setMaxNumVolumes( UInt const n, bool const setcounte
     setMaxNumItems( volumeList, n, "Volume" );
     if ( setcounter )
         _numVolumes = n;
+}
+
+template <typename GEOSHAPE, typename MC>
+void
+RegionMesh3D<GEOSHAPE, MC>::setNumVolumes( UInt const n )
+{
+    _numVolumes = n;
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -976,17 +996,17 @@ RegionMesh3D<GEOSHAPE, MC>::volume( ID const i )
 
 // ************************* FACES ******************************
 template <typename GEOSHAPE, typename MC>
-UInt
+UInt const
 RegionMesh3D<GEOSHAPE, MC>::numFaces() const
 {
     return _numFaces;
 }
 
 template <typename GEOSHAPE, typename MC>
-UInt &
-RegionMesh3D<GEOSHAPE, MC>::numFaces()
+void
+RegionMesh3D<GEOSHAPE, MC>::setNumFaces(UInt const n)
 {
-    return _numFaces;
+    _numFaces = n;
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -1104,7 +1124,7 @@ RegionMesh3D<GEOSHAPE, MC>::boundaryFace( ID const i )
 }
 
 template <typename GEOSHAPE, typename MC>
-UInt
+UInt const
 RegionMesh3D<GEOSHAPE, MC>::numBFaces() const
 {
     return _numBFaces;
@@ -1119,17 +1139,17 @@ RegionMesh3D<GEOSHAPE, MC>::setNumBFaces( UInt const n )
 
 // ************************* EDGES ******************************
 template <typename GEOSHAPE, typename MC>
-UInt
+UInt const 
 RegionMesh3D<GEOSHAPE, MC>::numEdges() const
 {
     return _numEdges;
 }
 
 template <typename GEOSHAPE, typename MC>
-UInt &
-RegionMesh3D<GEOSHAPE, MC>::numEdges()
+void
+RegionMesh3D<GEOSHAPE, MC>::setNumEdges(UInt const n)
 {
-    return _numEdges;
+    _numEdges = n;
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -1256,17 +1276,17 @@ RegionMesh3D<GEOSHAPE, MC>::setNumBEdges( UInt const n )
 // ************************ Points/Vertices
 
 template <typename GEOSHAPE, typename MC>
-UInt
+UInt const
 RegionMesh3D<GEOSHAPE, MC>::numPoints() const
 {
     return _numPoints;
 }
 
 template <typename GEOSHAPE, typename MC>
-UInt &
-RegionMesh3D<GEOSHAPE, MC>::numPoints()
+void
+RegionMesh3D<GEOSHAPE, MC>::setNumPoints( UInt const n )
 {
-    return _numPoints;
+    _numPoints = n;
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -1335,9 +1355,8 @@ RegionMesh3D<GEOSHAPE, MC>::setPoint( PointType const & p, ID position, bool con
     ASSERT_PRE( position <= pointList.capacity(), "Position  exceed lpoint list capacity" <<
                 position << " " << pointList.capacity() ) ;
     bool found( false );
-    pointList( position ) = p;
-    PointType * pp = & pointList( position );
-    pp->id() = position;
+    pointList.push_back(  p);
+    PointType * pp = & pointList.back();
     if ( boundary )
     {
         pp->boundary() = true;
@@ -1404,7 +1423,7 @@ RegionMesh3D<GEOSHAPE, MC>::addPoint( UInt const iden, bool const boundary, UInt
 
     pointList.push_back( PointType() );
     PointType * pp = & pointList.back();
-    pp->id() = iden;
+    pp->setId( iden);
     if ( boundary )
     {
         ASSERT_PRE( _bPoints.size() <= _bPoints.capacity(), "Boundary Point list size exceeded" <<
@@ -1479,32 +1498,32 @@ RegionMesh3D<GEOSHAPE, MC>::setNumBPoints( UInt const n )
 }
 
 template <typename GEOSHAPE, typename MC>
-UInt
+UInt const
 RegionMesh3D<GEOSHAPE, MC>::numVertices() const
 {
     return _numVertices;
 }
 
 template <typename GEOSHAPE, typename MC>
-UInt &
-RegionMesh3D<GEOSHAPE, MC>::numVertices()
+void
+RegionMesh3D<GEOSHAPE, MC>::setNumVertices(UInt const n)
 {
-    return _numVertices;
+    _numVertices = n;
 }
 
 
 template <typename GEOSHAPE, typename MC>
-UInt
+UInt const
 RegionMesh3D<GEOSHAPE, MC>::numBVertices() const
 {
     return _numBVertices;
 }
 
 template <typename GEOSHAPE, typename MC>
-UInt &
-RegionMesh3D<GEOSHAPE, MC>::numBVertices()
+void
+RegionMesh3D<GEOSHAPE, MC>::setNumBVertices(UInt const n)
 {
-    return _numBVertices;
+    _numBVertices = n;
 }
 
 // *************** GENERAL *******************
@@ -1698,6 +1717,9 @@ RegionMesh3D<GEOSHAPE, MC>::check( int level, bool const fix, bool const verb, s
             out.flush();
         }
     }
+
+#if 1 // This part of the code seems to be a nonsense. 
+      // Probably it was here to correct a bug in the matrix assembly.
     UInt badid = 0;
     //  for (UInt i=1; i<= storedPoints(); ++i)
     for ( UInt i = 1; i <= _numVertices; ++i ) // PERICOLOSISSIMO DOMANDARE ALEX
@@ -1793,7 +1815,7 @@ RegionMesh3D<GEOSHAPE, MC>::check( int level, bool const fix, bool const verb, s
         severity = 5;
         out << " SEVERITY ERROR:" << badid << "Volumes ids are wrong";
     }
-
+#endif
 
     if ( _numVertices == 0 )
     {
@@ -2109,6 +2131,9 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementEdges( bool ce, UInt ee )
 {
     // If the counter is set we trust it! Otherwise we use Euler formula
     // this is ok for domains with at most 1 hole!
+
+    std::cout << "     Updating element edges ... " << std::flush;
+
     if ( ce && ee == 0 )
         ee = _numEdges > _numBEdges ? _numEdges : ( GEOSHAPE::numFaces / 2 - 1 ) * numVolumes() + _numBFaces / 2 + numVertices();
 
@@ -2160,10 +2185,16 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementEdges( bool ce, UInt ee )
                 i1 = ( ifa->point( i1 ) ).id();
                 i2 = ( ifa->point( i2 ) ).id();
                 _edge = makeBareEdge( i1, i2 );
+
+                e = _be.addIfNotThere( _edge.first );
+
                 if ( ce && e.second )
-                {
-                    for ( UInt k = 1;k <= 2 + FaceShape::nbPtsPerEdge; k++ )
-                        edg.setPoint( k, ifa->point( k ) );
+        	    {
+                    for ( UInt k = 1; k <= 2 + FaceShape::nbPtsPerEdge; k++ )
+                    {
+                        UInt inode = bele.eToP(j, k);
+                        edg.setPoint( k, ifa->point( inode ) );
+                    }
                     inheritWeakerMarker( edg );
                     addEdge( edg, true );
                 }
@@ -2195,8 +2226,11 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementEdges( bool ce, UInt ee )
 
             if ( ce && e.second )
             {
-                for ( UInt k = 1;k <= 2 + VolumeShape::nbPtsPerEdge;j++ )
-                    edg.setPoint( k, iv->point( k ) );
+                for ( UInt k = 1;k <= 2 + VolumeShape::nbPtsPerEdge;k++ )
+                {
+                    UInt inode = ele.eToP(j, k);
+                    edg.setPoint( k, iv->point( inode ) );
+                }
                 inheritWeakerMarker( edg );
                 addEdge( edg, false );
             }
@@ -2214,6 +2248,7 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementEdges( bool ce, UInt ee )
         _numEdges = n;
     ASSERT_POS( n == _numEdges , "#Edges found is not equal to that in RegionMesh" << n << " " << _numEdges ) ;
     setLinkSwitch( std::string( "HAS_VOLUME_TO_EDGES" ) );
+    std::cout << " done." << std::endl;
 }
 
 template <typename GEOSHAPE, typename MC>
@@ -2221,6 +2256,7 @@ void
 RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, UInt ef )
 {
 
+    std::cout << "     Updating element faces ... " << std::flush;
 
     ASSERT0( ! cf || _numBFaces > 0, "Boundary Faces Must have been set" <<
              "in order to call updateElementFaces with createFaces=true" << std::endl <<
@@ -2358,6 +2394,8 @@ RegionMesh3D<GEOSHAPE, MC>::updateElementFaces( bool cf, UInt ef )
         setLinkSwitch( "HAS_ALL_FACES" );
     if ( cf )
         setLinkSwitch( "FACES_HAVE_ADIACENCY" );
+
+    std::cout << " done." << std::endl;
 }
 
 template <typename GEOSHAPE, typename MC>
