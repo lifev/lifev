@@ -158,15 +158,15 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
     // I store all Points
     mesh.setMaxNumPoints( nPo, true );
     mesh.setNumBPoints( nBPo );
-    mesh.numVertices() = nVe;
-    mesh.numBVertices() = nBVe;
+    mesh.setNumVertices( nVe);
+    mesh.setNumBVertices( nBVe );
     // Only Boundary Edges (in a next version I will allow for different choices)
     mesh.setMaxNumEdges( nBEd );
-    mesh.numEdges() = nEd; // Here the REAL number of edges (all of them)
+    mesh.setNumEdges( nEd ); // Here the REAL number of edges (all of them)
     mesh.setNumBEdges( nBEd );
     // Only Boundary Faces
     mesh.setMaxNumFaces( nBFa );
-    mesh.numFaces() = nFa; // Here the REAL number of edges (all of them)
+    mesh.setNumFaces( nFa ); // Here the REAL number of edges (all of them)
     mesh.setNumBFaces( nBFa );
 
     mesh.setMaxNumVolumes( nVo, true );
@@ -461,15 +461,15 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
     // I store all Points
     mesh.setMaxNumPoints( nPo, true );
     mesh.setNumBPoints( nBPo );
-    mesh.numVertices() = nVe;
-    mesh.numBVertices() = nBVe;
+    mesh.setNumVertices( nVe );
+    mesh.setNumBVertices( nBVe );
     // Only Boundary Edges (in a next version I will allow for different choices)
     mesh.setMaxNumEdges( nBEd );
-    mesh.numEdges() = nEd; // Here the REAL number of edges (all of them)
+    mesh.setNumEdges( nEd ); // Here the REAL number of edges (all of them)
     mesh.setNumBEdges( nBEd );
     // Only Boundary Faces
     mesh.setMaxNumFaces( numStoredFaces );
-    mesh.numFaces() = nFa; // Here the REAL number of faces (all of them)
+    mesh.setNumFaces( nFa ); // Here the REAL number of faces (all of them)
     mesh.setNumBFaces( nBFa );
 
     mesh.setMaxNumVolumes( nVo, true );
@@ -814,13 +814,13 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
 
     // Only Boundary Edges (in a next version I will allow for different choices)
     mesh.setMaxNumEdges( __gt[1] );
-    mesh.numEdges() = __gt[1]; // Here the REAL number of edges (all of them)
+    mesh.setNumEdges(  __gt[1] ); // Here the REAL number of edges (all of them)
     mesh.setNumBEdges( __gt[1] );
 
     Debug() << "number of edges= " << __gt[1] << "\n";
     // Only Boundary Faces
     mesh.setMaxNumFaces( n_faces_total );
-    mesh.numFaces() = n_faces_total; // Here the REAL number of edges (all of them)
+    mesh.setNumFaces(  n_faces_total ); // Here the REAL number of edges (all of them)
     mesh.setNumBFaces( n_faces_boundary );
     Debug() << "number of faces= " << n_faces_total << "\n";
     mesh.setMaxNumVolumes( n_volumes, true );
@@ -849,8 +849,8 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
     typename RegionMesh3D<GeoShape, MC>::PointType * pp = 0;
 
     mesh.setMaxNumPoints( __n, true );
-    mesh.numVertices() = __n;
-    mesh.numBVertices() = std::count( __isonboundary.begin(), __isonboundary.end(), true );
+    mesh.setNumVertices( __n );
+    mesh.setNumBVertices( std::count( __isonboundary.begin(), __isonboundary.end(), true ) );
     mesh.setNumBPoints( mesh.numBVertices() );
 
     Debug() << "number of points : " << mesh.numPoints() << "\n";
@@ -1174,15 +1174,15 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
     // I store all Points
     mesh.setMaxNumPoints(nPo,true);
     mesh.setNumBPoints(nBPo);
-    mesh.numVertices()=nVe;
-    mesh.numBVertices()=nBVe;
+    mesh.setNumVertices(nVe);
+    mesh.setNumBVertices(nBVe);
     // Only Boundary Edges (in a next version I will allow for different choices)
     mesh.setMaxNumEdges(nBEd);
-    mesh.numEdges()=nEd; // Here the REAL number of edges (all of them)
+    mesh.setNumEdges(nEd); // Here the REAL number of edges (all of them)
     mesh.setNumBEdges(nBEd);    /////////????????????
     // Only Boundary Faces
     mesh.setMaxNumFaces(nBFa);
-    mesh.numFaces()=nFa; // Here the REAL number of edges (all of them)
+    mesh.setNumFaces(nFa); // Here the REAL number of edges (all of them)
     mesh.setNumBFaces(nBFa);
 
     mesh.setMaxNumVolumes(nVo,true);
