@@ -376,6 +376,7 @@ NavierStokesSolverIP( const GetPot& dataFile,
     // Loop on elements
     for ( UInt iVol = 1; iVol <= this->mesh().numVolumes(); iVol++ )
     {
+        this->fe_p().update( this->mesh().volumeList( iVol ) ); // just to provide the id number in the assem_mat_mixed
         this->fe_u().updateFirstDeriv( this->mesh().volumeList( iVol ) );
 
         M_elmatStiff.zero();
