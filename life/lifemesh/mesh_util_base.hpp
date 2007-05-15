@@ -782,7 +782,7 @@ setBPointsCounters( RegionMesh & mesh )
         }
     }
 
-    mesh.numBVertices() = countBV;
+    mesh.setNumBVertices( countBV );
     mesh.setNumBPoints( countBP );
     mesh._bPoints.clear();
     mesh._bPoints.reserve( countBP );
@@ -1209,7 +1209,7 @@ bool buildFaces( RegionMesh3D & mesh,
     if ( !buildinternal )
     {
         mesh.setMaxNumFaces( bfaces_found, false );
-        mesh.numFaces() = numInternalFaces + bfaces_found;
+        mesh.setNumFaces( numInternalFaces + bfaces_found );
     }
     else
     {
@@ -1459,7 +1459,7 @@ bool buildEdges( RegionMesh3D & mesh,
         }
     }
     mesh.setNumBEdges( bedges_found );
-    mesh.numEdges() = ( bedges_found + iedges_found );
+    mesh.setNumEdges( bedges_found + iedges_found );
     if ( buildboundary )
         mesh.edgeList.clear();
     if ( buildboundary && ! buildinternal )
@@ -1587,6 +1587,9 @@ p1top2( RegionMesh & mesh, std::ostream & out = std::cout )
     typename RegionMesh::ElementShape ele;
     out << "Processing " << mesh.storedEdges() << " P1 Edges" << std::endl;
     UInt nbe = mesh.numBEdges();
+
+    mesh._bPoints.reserve(mesh._bPoints.size() +  nbe + 1); // guessing how many boundary points on this processor.
+
     for ( UInt j = 1; j <= mesh.storedEdges();++j )
     {
         pe = & mesh.edge( j );
