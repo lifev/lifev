@@ -395,7 +395,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
         err << "WARNING: Mesh Volumes must be at least "
             << mesh.storedVolumes() << std::endl;
         if ( fix )
-            mesh.numVolumes() = mesh.storedVolumes();
+            mesh.setNumVolumes( mesh.storedVolumes() );
         if ( fix )
             sw.create( "FIXED_VOLUME_COUNTER", true );
     }
@@ -558,7 +558,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
         if ( fix )
             err << "        Fixing" << std::endl;
         if ( fix )
-            mesh.numFaces() = bFacesFound + numInternalFaces;
+            mesh.setNumFaces(  bFacesFound + numInternalFaces );
         if ( fix )
             sw.create( "FIXED_FACE_COUNTER", true );
     }
@@ -674,7 +674,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
         if ( fix )
         {
             err << " **FIXED" << std::endl;
-            mesh.numEdges() = Ned;
+            mesh.setNumEdges( Ned );
         }
         std::cerr << std::endl;
     }
@@ -752,7 +752,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
     {
         err << "WARNING Points Counter unset" << std::endl;
         if ( fix )
-            mesh.numPoints() = mesh.storedPoints();
+            mesh.setNumPoints( mesh.storedPoints() );
         if ( fix )
             sw.create( "FIXED_POINTS_COUNTER", true );
     }
