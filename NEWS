@@ -1,6 +1,18 @@
 # -*- readme-debian -*-
 
 
+Bugs fixed in 0.8.0:
+====================
+
+[lifefilters]
+* ensight.hpp: Bug fixed when dealing with different subdomain markers
+
+[lifemesh]
+* regionMesh3D.hpp: fixed bugs releated to numbering
+
+[all]
+* many protected methods are now private
+
 Bugs fixed in 0.7.0:
 ====================
 

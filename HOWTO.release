@@ -14,6 +14,11 @@ HOWTO to make a release X_Y_Z
 
     where <n> is the number of processes you want to launch concurrently
 
+e.g.:
+
+ make distcheck DISTCHECK_CONFIGURE_FLAGS="--enable-debug --with-aztec=/usr/people1e/deparis/CODICE/supersizing/local/   --with-mpi-include=/usr/lib/mpich/include/ --with-mpi-lib=/usr/lib/mpich/lib/  F77=gfortran" 
+
+
    o ensures that the generated tarball is complete
    o runs all tests from the tarball
 
