@@ -3,6 +3,12 @@
 
 Bugs fixed in 0.8.0:
 ====================
+[configure]
+* ac_aztec was missconfigured. Actually, aztecoo is not supported, you should 
+  use plain aztec.
+
+Bugs fixed in 0.8.0:
+====================
 
 [lifefilters]
 * ensight.hpp: Bug fixed when dealing with different subdomain markers

@@ -1,11 +1,11 @@
 # -*- autoconf -*-
 #
 #
-AC_INIT([lifev], [0.8.0], [lifev-dev@webmail.mate.polimi.it])
+AC_INIT([lifev], [0.8.1], [lifev-dev@webmail.mate.polimi.it])
 
 LIFEV_VERSION_MAJOR=0
 LIFEV_VERSION_MINOR=8
-LIFEV_VERSION_MICRO=0
+LIFEV_VERSION_MICRO=1
 LIFEV_VERSION_EXTRA=
 AC_SUBST(LIFEV_VERSION_MAJOR)
 AC_SUBST(LIFEV_VERSION_MINOR)
