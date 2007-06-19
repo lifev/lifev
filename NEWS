@@ -1,7 +1,7 @@
 # -*- readme-debian -*-
 
 
-Bugs fixed in 0.8.0:
+Bugs fixed in 0.8.1:
 ====================
 [configure]
 * ac_aztec was missconfigured. Actually, aztecoo is not supported, you should 
