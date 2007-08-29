@@ -24,9 +24,22 @@
 
 #include <life/lifesolver/FSISolver.hpp>
 #include <life/lifesolver/FSIOperator.hpp>
+#include <life/lifesolver/fixedPointBase.hpp>
+#include <life/lifesolver/dataNavierStokes.hpp>
 
-//#include "ud_functions.hpp"
+
+#include "Epetra_config.h"
+#ifdef HAVE_MPI
+#include "Epetra_MpiComm.h"
+#else
+#include "Epetra_SerialComm.h"
+#endif
+
+
+#include "ud_functions.hpp"
 #include "boundaryConditions.hpp"
+
+
 
 
 class Problem
@@ -42,26 +55,30 @@ public:
 
       -# initialize and setup the FSIsolver
     */
-    Problem( GetPot const& data_file, std::string _oper = "" ):
-        M_dataNS(data_file)
+    Problem( GetPot const& data_file, std::string _oper = "" )
         {
             using namespace LifeV;
+
 
             Debug( 10000 ) << "creating FSISolver with operator :  " << _oper << "\n";
 //            DataNavierStokes< RegionMesh3D_ALE<LinearTetra> > M_dataNS(data_file);
 
-            _M_fsi = fsi_solver_ptr( new FSISolver( data_file,
-                                                    M_dataNS,
-                                                    BCh_fluid(),
-                                                    BCh_solid(),
-                                                    BCh_harmonicExtension(),
-                                                    _oper )
-                                     );
-//            _M_fsi = fsi_solver_ptr(  new FSISolver( data_file, _oper ) );
-            _M_fsi->setSourceTerms( fZero, fZero );
+            M_fsi = fsi_solver_ptr(  new FSISolver( data_file, _oper ) );
+            Debug( 10000 ) << _oper << " set \n";
+
+            MPI_Barrier(MPI_COMM_WORLD);
+
+//            M_fsi->setSourceTerms( fZero, fZero );
+
+            Debug( 10000 ) << "Setting up the BC \n";
+            M_fsi->setFluidBC(BCh_fluid(*M_fsi->operFSI()));
+            M_fsi->setHarmonicExtensionBC (BCh_harmonicExtension(*M_fsi->operFSI()));
+            M_fsi->setSolidBC(BCh_solid(*M_fsi->operFSI()));
+            Debug( 10000 ) << "BC set\n";
+
 
             int restart = data_file("problem/restart",0);
-            _M_Tstart = 0.;
+            M_Tstart = 0.;
 
             if (restart)
             {
@@ -70,20 +87,20 @@ public:
                 std::string velwName  = data_file("fluid/miscellaneous/velwname", "velw");
                 std::string depName   = data_file("solid/miscellaneous/depname"  ,"dep");
                 std::string velSName  = data_file("solid/miscellaneous/velname"  ,"velw");
-                _M_Tstart= data_file("problem/Tstart"   ,0.);
-                std::cout << "Starting time = " << _M_Tstart << std::endl;
-                _M_fsi->initialize(velFName, pressName, velwName, depName, velSName, _M_Tstart);
+                M_Tstart= data_file("problem/Tstart"   ,0.);
+                std::cout << "Starting time = " << M_Tstart << std::endl;
+                M_fsi->initialize(velFName, pressName, velwName, depName, velSName, M_Tstart);
             }
             else
             {
-                _M_fsi->initialize( u0, d0, w0 );
+//                 M_fsi->initialize( u0, p0, d0, w0 );
             }
 
-            std::cout << "in problem" << std::endl;
-            _M_fsi->FSIOper()->fluid().postProcess();
+//            std::cout << "in problem" << std::endl;
+//            M_fsi->FSIOper()->fluid().postProcess();
         }
 
-    fsi_solver_ptr fsiSolver() { return _M_fsi; }
+    fsi_solver_ptr fsiSolver() { return M_fsi; }
 
 
     /*!
@@ -96,19 +113,19 @@ public:
 
             boost::timer _overall_timer;
 
-            if (_M_Tstart != 0.) _M_Tstart -= dt;
+            if (M_Tstart != 0.) M_Tstart -= dt;
 
             int _i = 1;
 
-            for (double time=_M_Tstart + dt; time <= T; time += dt, ++_i)
+            for (double time=M_Tstart + dt; time <= T; time += dt, ++_i)
             {
                 boost::timer _timer;
 
-                _M_fsi->iterate( time );
+                M_fsi->iterate( time );
 
 //                 ofile << time << " ";
-//                 ofile << _M_fsi->operFSI()->fluid().flux(2) << " ";
-//                 ofile << _M_fsi->operFSI()->fluid().flux(3) << " ";
+//                 ofile << M_fsi->operFSI()->fluid().flux(2) << " ";
+//                 ofile << M_fsi->operFSI()->fluid().flux(3) << " ";
 //                 ofile << std::endl;
 
                 std::cout << "[fsi_run] Iteration " << _i << " was done in : "
@@ -122,9 +139,11 @@ public:
 
 private:
 
-    fsi_solver_ptr _M_fsi;
-    double         _M_Tstart;
-    LifeV::DataNavierStokes< LifeV::RegionMesh3D_ALE<LifeV::LinearTetra> > M_dataNS;
+    fsi_solver_ptr M_fsi;
+    double         M_Tstart;
+//    LifeV::DataNavierStokes< LifeV::RegionMesh3D<LifeV::LinearTetra> > M_dataNS;
+
+    MPI_Comm*      M_comm;
 };
 
 struct FSIChecker
@@ -149,16 +168,19 @@ struct FSIChecker
 
             try
             {
-                std::cout << "calling problem constructor ... " << std::endl;
+                std::cout << "calling problem constructor ... " << std::flush;
                 fsip = boost::shared_ptr<Problem>( new Problem( data_file, oper ) );
+                std::cout << "problem set" << std::endl;
+
 //                fsip->fsiSolver()->FSIOperator()->setDataFromGetPot( data_file );
-                std::cout << "in operator 1" << std::endl;
-                fsip->fsiSolver()->operFSI()->fluid().postProcess();
+//                 std::cout << "in operator 1" << std::endl;
+//                 fsip->fsiSolver()->operFSI()->fluid().postProcess();
+//                 fsip->fsiSolver()->operFSI()->solid().postProcess();
 
                 fsip->fsiSolver()->operFSI()->setPreconditioner( prec );
 
-                std::cout << "in operator 2" << std::endl;
-                fsip->fsiSolver()->operFSI()->fluid().postProcess();
+//                std::cout << "in operator 2" << std::endl;
+//                fsip->fsiSolver()->operFSI()->fluid().postProcess();
                 fsip->run( fsip->fsiSolver()->timeStep(), fsip->fsiSolver()->timeEnd() );
             }
             catch ( std::exception const& _ex )
@@ -166,7 +188,7 @@ struct FSIChecker
                 std::cout << "caught exception :  " << _ex.what() << "\n";
             }
 
-            disp = fsip->fsiSolver()->operFSI()->displacementOnInterface();
+            //@disp = fsip->fsiSolver()->operFSI()->displacementOnInterface();
         }
 
     GetPot                data_file;
@@ -178,9 +200,17 @@ struct FSIChecker
 
 int main(int argc, char** argv)
 {
+#ifdef HAVE_MPI
+    MPI_Init(&argc, &argv);
+    cout << "% using MPI" << endl;
+#else
+    cout << "% using serial Version" << endl;
+#endif
+
     GetPot command_line(argc,argv);
     const char* data_file_name = command_line.follow("data", 2, "-f","--file");
     GetPot data_file(data_file_name);
+
 
     const bool check = command_line.search(2, "-c", "--check");
 
@@ -217,6 +247,10 @@ int main(int argc, char** argv)
         FSIChecker _sp_check( data_file );
         _sp_check();
     }
+
+#ifdef HAVE_MPI
+    MPI_Finalize();
+#endif
 
     return 0;
 
