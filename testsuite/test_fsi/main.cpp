@@ -177,7 +177,7 @@ public:
 
                 if ( M_fsi->isSolid() )
                     {
-                        *M_solidDispl = M_fsi->FSIOper()->solid().solution();
+                        *M_solidDispl = M_fsi->FSIOper()->solid().disp();
                         M_ensightSolid->postProcess( time );
                     }
 
