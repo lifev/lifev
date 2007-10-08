@@ -26,6 +26,7 @@
 #include <life/lifesolver/FSIOperator.hpp>
 #include <life/lifesolver/fixedPointBase.hpp>
 #include <life/lifesolver/dataNavierStokes.hpp>
+#include <life/lifefilters/ensight.hpp>
 
 
 #include "Epetra_config.h"
@@ -46,6 +47,12 @@ class Problem
 {
 public:
     typedef boost::shared_ptr<LifeV::FSISolver> fsi_solver_ptr;
+
+    typedef LifeV::FSIOperator::vector_type        vector_type;
+    typedef LifeV::FSIOperator::vector_ptrtype     vector_ptrtype;
+
+    typedef LifeV::Ensight<LifeV::FSIOperator::mesh_type>  filter_type;
+    typedef boost::shared_ptr<filter_type>                 filter_ptrtype;
 
     /*!
       This routine sets up the problem:
@@ -96,6 +103,39 @@ public:
 //                 M_fsi->initialize( u0, p0, d0, w0 );
             }
 
+            if (M_fsi->isFluid())
+                {
+                    M_ensightFluid.reset( new  filter_type( data_file, "fixedPtFluid") );
+
+                    //assert( M_fsi->FSIOper()->uFESpace().get() );
+                    //assert( M_fsi->FSIOper()->uFESpace().mesh().get() );
+
+                    M_ensightFluid->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().Comm().MyPID());
+
+                    M_velAndPressure.reset( new vector_type( M_fsi->FSIOper()->fluid().getRepeatedEpetraMap() ));
+                    M_ensightFluid->addVariable( EnsightData::Vector, "velocity", M_velAndPressure,
+                                                 UInt(0), M_fsi->FSIOper()->uFESpace().dof().numTotalDof() );
+
+                    M_ensightFluid->addVariable( EnsightData::Scalar, "pressure", M_velAndPressure,
+                                                 UInt(3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()),
+                                                 UInt(3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()+M_fsi->FSIOper()->pFESpace().dof().numTotalDof()) );
+
+                }
+            if (M_fsi->isSolid())
+                {
+                    M_ensightSolid.reset( new  filter_type ( data_file, "fixedPtSolid") );
+
+                    //assert( M_fsi->FSIOper()->uFESpace().get() );
+                    //assert( M_fsi->FSIOper()->uFESpace().mesh().get() );
+
+                    M_ensightSolid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().Comm().MyPID());
+
+                    M_solidDispl.reset( new vector_type( M_fsi->FSIOper()->solid().getRepeatedEpetraMap() ));
+                    M_ensightSolid->addVariable( EnsightData::Vector, "displacement", M_solidDispl,
+                                                 UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
+
+                }
+
 //            std::cout << "in problem" << std::endl;
 //            M_fsi->FSIOper()->fluid().postProcess();
         }
@@ -128,6 +168,21 @@ public:
 //                 ofile << M_fsi->operFSI()->fluid().flux(3) << " ";
 //                 ofile << std::endl;
 
+
+                if ( M_fsi->isFluid() )
+                    {
+                        *M_velAndPressure = M_fsi->FSIOper()->fluid().solution();
+                        M_ensightFluid->postProcess( time );
+                    }
+
+                if ( M_fsi->isSolid() )
+                    {
+                        *M_solidDispl = M_fsi->FSIOper()->solid().solution();
+                        M_ensightSolid->postProcess( time );
+                    }
+
+
+
                 std::cout << "[fsi_run] Iteration " << _i << " was done in : "
                           << _timer.elapsed() << "\n";
             }
@@ -144,6 +199,13 @@ private:
 //    LifeV::DataNavierStokes< LifeV::RegionMesh3D<LifeV::LinearTetra> > M_dataNS;
 
     MPI_Comm*      M_comm;
+
+    filter_ptrtype M_ensightFluid;
+    filter_ptrtype M_ensightSolid;
+
+    vector_ptrtype M_velAndPressure;
+    vector_ptrtype M_solidDispl;
+
 };
 
 struct FSIChecker
@@ -239,6 +301,9 @@ int main(int argc, char** argv)
                   << "norm_2(SP displacement)          = " << LifeV::norm_2( _sp_check.disp ) << " \n"
                   << "norm_2(displacement error EJ/SP) = " << norm1 << "\n";
 
+#ifdef HAVE_MPI
+        MPI_Finalize();
+#endif
         if (norm1 < 1e-04) return 0;
         else return -1;
     }
