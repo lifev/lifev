@@ -27,53 +27,6 @@
 
 namespace LifeV
 {
-//! returns the square of the L2 norm of u on the current element
-template <typename VectorType>
-Real
-elem_L2_2( const VectorType & u, const CurrentFE& fe, const Dof& dof )
-{
-    int i, inod, ig;
-    UInt eleID = fe.currentId();
-    Real s = 0, u_ig;
-    for ( ig = 0;ig < fe.nbQuadPt;ig++ )
-    {
-        u_ig = 0.;
-        for ( i = 0;i < fe.nbNode;i++ )
-        {
-            inod = dof.localToGlobal( eleID, i + 1 ) - 1;
-            u_ig += u( inod ) * fe.phi( i, ig );
-        }
-        s += u_ig * u_ig * fe.weightDet( ig );
-    }
-    return s;
-}
-
-//! version for vectorial problem
-template <typename VectorType>
-Real
-elem_L2_2( const VectorType & u, const CurrentFE& fe, const Dof& dof,
-           const int nbcomp )
-{
-    int i, inod, ig;
-    UInt eleID = fe.currentId();
-    UInt ic;
-    Real s = 0, u_ig;
-    for ( ic = 0; ic < (UInt)nbcomp; ic++ )
-    {
-        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
-        {
-            u_ig = 0.;
-            for ( i = 0;i < fe.nbNode;i++ )
-            {
-                inod = dof.localToGlobal( eleID, i + 1 ) - 1 + ic * dof.numTotalDof();
-                u_ig += u( inod ) * fe.phi( i, ig );
-            }
-            s += u_ig * u_ig * fe.weightDet( ig );
-        }
-    }
-    return s;
-}
-
 //! returns the square of the L2 norm of fct on the current element
 inline Real
 elem_L2_2( boost::function<double( double,double,double )> fct,
@@ -92,7 +45,89 @@ elem_L2_2( boost::function<double( double,double,double )> fct,
 //! for time dependent+vectorial.
 inline Real
 elem_L2_2( boost::function<double( double, double, double, double, UInt )> fct,
-           const CurrentFE& fe, const Real t, const UInt nbcomp )
+         const CurrentFE& fe, const Real t, const UInt nbcomp )
+{
+    int ig;
+    UInt ic;
+    Real s = 0., f, x, y, z;
+    for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+    {
+        fe.coorQuadPt( x, y, z, ig );
+        for ( ic = 0; ic < nbcomp; ic++ )
+        {
+            f = fct( t, x, y, z, ic + 1 );
+            s += f * f * fe.weightDet( ig );
+        }
+    }
+    return s;
+}
+
+//! returns the square of the L2 norm of u on the current element
+template <typename VectorType>
+Real
+elem_L2_2( const VectorType & u, const CurrentFE& fe, const Dof& dof )
+{
+    int i, inod, ig;
+    UInt eleID = fe.currentLocalId();
+    Real s = 0, u_ig;
+    for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+    {
+        u_ig = 0.;
+        for ( i = 0;i < fe.nbNode;i++ )
+        {
+            inod = dof.localToGlobal( eleID, i + 1 );
+            u_ig += u( inod ) * fe.phi( i, ig );
+        }
+        s += u_ig * u_ig * fe.weightDet( ig );
+    }
+    return s;
+}
+
+//! version for vectorial problem
+template <typename VectorType>
+Real
+elem_L2_2( const VectorType & u, const CurrentFE& fe, const Dof& dof,
+           const int nbcomp )
+{
+    int i, inod, ig;
+    UInt eleID = fe.currentLocalId();
+    UInt ic;
+    Real s = 0, u_ig;
+    for ( ic = 0; ic < (UInt)nbcomp; ic++ )
+    {
+        for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+        {
+            u_ig = 0.;
+            for ( i = 0;i < fe.nbNode;i++ )
+            {
+                inod = dof.localToGlobal( eleID, i + 1 ) + ic * dof.numTotalDof();
+                u_ig += u( inod ) * fe.phi( i, ig );
+            }
+            s += u_ig * u_ig * fe.weightDet( ig );
+        }
+    }
+    return s;
+}
+
+//! returns the square of the L2 norm of fct on the current element
+inline Real
+elem_f_L2_2( boost::function<double( double,double,double )> fct,
+           const CurrentFE& fe )
+{
+    Real s = 0., f, x, y, z;
+    for ( int ig = 0;ig < fe.nbQuadPt;ig++ )
+    {
+        fe.coorQuadPt( x, y, z, ig );
+        f = fct( x, y, z );
+        s += f * f * fe.weightDet( ig );
+    }
+    return s;
+}
+
+//! for time dependent+vectorial.
+inline Real
+elem_f_L2_2( boost::function<double( double, double, double, double, UInt )> fct,
+         const CurrentFE& fe, const Real t, const UInt nbcomp )
 {
     int ig;
     UInt ic;
@@ -115,7 +150,7 @@ Real
 elem_H1_2( const VectorType & u, const CurrentFE& fe, const Dof& dof )
 {
     int i, inod, ig;
-    UInt eleID = fe.currentId();
+    UInt eleID = fe.currentLocalId();
     Real s = 0, u_ig, dx_u_ig, dy_u_ig, dz_u_ig;
     for ( ig = 0;ig < fe.nbQuadPt;ig++ )
     {
@@ -125,7 +160,7 @@ elem_H1_2( const VectorType & u, const CurrentFE& fe, const Dof& dof )
         dz_u_ig = 0.;
         for ( i = 0;i < fe.nbNode;i++ )
         {
-            inod = dof.localToGlobal( eleID, i + 1 ) - 1;
+            inod = dof.localToGlobal( eleID, i + 1 );
             u_ig += u( inod ) * fe.phi( i, ig );
             dx_u_ig += u( inod ) * fe.phiDer( i, 0, ig );
             dy_u_ig += u( inod ) * fe.phiDer( i, 1, ig );
@@ -186,18 +221,20 @@ Real elem_L2_diff_2( VectorType & u,
                      const Dof& dof )
 {
     int i, inod, ig;
-    UInt eleID = fe.currentId();
+    UInt eleID = fe.currentLocalId();
     Real s = 0., u_ig, u_minus_f, x, y, z;
     for ( ig = 0;ig < fe.nbQuadPt;ig++ )
     {
         u_ig = 0.;
         for ( i = 0;i < fe.nbNode;i++ )
         {
-            inod = dof.localToGlobal( eleID, i + 1 ) - 1;
+            inod = dof.localToGlobal( eleID, i + 1 );
             u_ig += u( inod ) * fe.phi( i, ig );
         }
+
         fe.coorQuadPt( x, y, z, ig );
         u_minus_f = u_ig - fct( x, y, z );
+
         s += u_minus_f * u_minus_f * fe.weightDet( ig );
     }
     return s;
@@ -213,7 +250,7 @@ Real elem_L2_diff_2( VectorType & u,
 {
     // returns the square of the L2 norm of (u-fct) on the current element
     int i, inod, ig;
-    UInt eleID = fe.currentId();
+    UInt eleID = fe.currentLocalId();
     int ic;
     Real s = 0., u_ig, u_minus_f, x, y, z;
     for ( ig = 0;ig < fe.nbQuadPt;ig++ )
@@ -223,14 +260,17 @@ Real elem_L2_diff_2( VectorType & u,
             u_ig = 0.;
             for ( i = 0;i < fe.nbNode;i++ )
             {
-                inod = dof.localToGlobal( eleID, i + 1 ) - 1 + ic * dof.numTotalDof();
+                inod = dof.localToGlobal( eleID, i + 1 ) + ic * dof.numTotalDof();
+//                std::cout << "inode = " << inod << " eleID = " << eleID << std::endl;
                 u_ig += u( inod ) * fe.phi( i, ig );
+//                std::cout << i << " " << u(inod) << std::endl;
             }
             fe.coorQuadPt( x, y, z, ig );
             u_minus_f = u_ig - fct( t, x, y, z, ic + 1 );
             s += u_minus_f * u_minus_f * fe.weightDet( ig );
         }
     }
+//    std::cout << std::endl;
     return s;
 }
 
@@ -240,7 +280,7 @@ Real elem_H1_diff_2( const VectorType & u, const UsrFct& fct, const CurrentFE& f
                      const Dof& dof )
 {
     int i, inod, ig;
-    UInt eleID = fe.currentId();
+    UInt eleID = fe.currentLocalId();
     Real s = 0., u_ig, u_minus_f, x, y, z, dx_u_ig, dy_u_ig, dz_u_ig, u_minus_fx, u_minus_fy, u_minus_fz;
     for ( ig = 0;ig < fe.nbQuadPt;ig++ )
     {
@@ -251,7 +291,7 @@ Real elem_H1_diff_2( const VectorType & u, const UsrFct& fct, const CurrentFE& f
 
         for ( i = 0;i < fe.nbNode;i++ )
         {
-            inod = dof.localToGlobal( eleID, i + 1 ) - 1;
+            inod = dof.localToGlobal( eleID, i + 1 );
             u_ig += u( inod ) * fe.phi( i, ig );
             dx_u_ig += u( inod ) * fe.phiDer( i, 0, ig );
             dy_u_ig += u( inod ) * fe.phiDer( i, 1, ig );
@@ -279,7 +319,7 @@ Real elem_H1_diff_2( const VectorType & u, const UsrFct& fct, const CurrentFE& f
 {
     int i, inod, ig;
     UInt ic;
-    UInt eleID = fe.currentId();
+    UInt eleID = fe.currentLocalId();
     Real s = 0., u_ig, u_minus_f, x, y, z, dx_u_ig, dy_u_ig, dz_u_ig, u_minus_fx, u_minus_fy, u_minus_fz;
     for ( ig = 0;ig < fe.nbQuadPt;ig++ )
     {
@@ -292,7 +332,7 @@ Real elem_H1_diff_2( const VectorType & u, const UsrFct& fct, const CurrentFE& f
 
             for ( i = 0;i < fe.nbNode;i++ )
             {
-                inod = dof.localToGlobal( eleID, i + 1 ) - 1 + ic * dof.numTotalDof();
+                inod = dof.localToGlobal( eleID, i + 1 ) + ic * dof.numTotalDof();
                 u_ig += u( inod ) * fe.phi( i, ig );
                 dx_u_ig += u( inod ) * fe.phiDer( i, 0, ig );
                 dy_u_ig += u( inod ) * fe.phiDer( i, 1, ig );
@@ -323,7 +363,7 @@ Real elem_integral_diff( VectorType & u,
                          const Dof& dof, const Real t, const int nbcomp )
 {
     int i, inod, ig;
-    UInt eleID = fe.currentId();
+    UInt eleID = fe.currentLocalId();
     Real s = 0., u_ig, u_minus_f, x, y, z;
     for ( ig = 0;ig < fe.nbQuadPt;ig++ )
     {
@@ -332,7 +372,7 @@ Real elem_integral_diff( VectorType & u,
         for ( i = 0;i < fe.nbNode;i++ )
         {
             inod = dof.localToGlobal( eleID, i + 1 )
-                - 1 + (nbcomp-1) * dof.numTotalDof();
+                + (nbcomp-1) * dof.numTotalDof();
             u_ig += u( inod ) * fe.phi( i, ig );
         }
         u_minus_f = u_ig - fct( t, x, y, z, nbcomp );
@@ -349,7 +389,7 @@ Real elem_integral( VectorType & u,
                     const Dof& dof, const int nbcomp )
 {
     int i, inod, ig;
-    UInt eleID = fe.currentId();
+    UInt eleID = fe.currentLocalId();
     Real s = 0., u_ig;
     for ( ig = 0;ig < fe.nbQuadPt;ig++ )
     {
@@ -357,7 +397,7 @@ Real elem_integral( VectorType & u,
         for ( i = 0;i < fe.nbNode;i++ )
         {
             inod = dof.localToGlobal( eleID, i + 1 )
-                - 1 + (nbcomp-1) * dof.numTotalDof();
+                + (nbcomp-1) * dof.numTotalDof();
             u_ig += u( inod ) * fe.phi( i, ig );
         }
         s += u_ig * fe.weightDet( ig );

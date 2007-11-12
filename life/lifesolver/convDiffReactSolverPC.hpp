@@ -34,7 +34,7 @@
 #include <life/lifefem/elemOper.hpp>
 #include <life/lifefem/values.hpp>
 #include <life/lifearray/pattern.hpp>
-#include <life/lifefem/assemb.hpp>
+#include <life/lifefem/assembGeneric.hpp>
 #include <life/lifefem/bcManage.hpp>
 #include <life/lifealg/algebraic_facto.hpp>
 #include <life/lifefem/bcHandler.hpp>
@@ -393,7 +393,7 @@ iterate( const Real& time )
     AZ_solve( this->_c.giveVec(), _f_c.giveVec(), options_o, params_o, NULL,
               ( int * ) _pattM.giveRaw_bindx(), NULL, NULL, NULL,
               _CDR.giveRaw_value(), data_org_o, status_o, proc_config_o );
-    
+
     chrono.stop();
     std::cout << "*** Solution (Concentration) computed in " << chrono.diff() << "s." << std::endl;
     this->_bdf.shift_right( this->_c );
@@ -450,7 +450,7 @@ getvel( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u, con
 template <typename Mesh>
 template <typename RegionMesh3D>
 void ConvDiffReactSolverPC<Mesh>::
-getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & u, BCHandler& BCh_u )
+getcoord( RegionMesh3D & umesh, PhysVectUnknown<Vector> & /*u*/, BCHandler& BCh_u )
 {
 
     Real b1, b2, b3;

@@ -1,11 +1,11 @@
 # -*- autoconf -*-
 #
 #
-AC_INIT([lifev], [0.8.1], [lifev-dev@webmail.mate.polimi.it])
+AC_INIT([lifev], [0.9.0], [lifev-dev@webmail.mate.polimi.it])
 
 LIFEV_VERSION_MAJOR=0
-LIFEV_VERSION_MINOR=8
-LIFEV_VERSION_MICRO=1
+LIFEV_VERSION_MINOR=9
+LIFEV_VERSION_MICRO=0
 LIFEV_VERSION_EXTRA=
 AC_SUBST(LIFEV_VERSION_MAJOR)
 AC_SUBST(LIFEV_VERSION_MINOR)
@@ -43,14 +43,14 @@ AM_CONFIG_HEADER(lifeconfig.h)
 LIFEV_CHECK_COMPILERS
 
 
-# no need for static libs
-AC_DISABLE_STATIC
+AC_ENABLE_STATIC
 AC_PROG_LIBTOOL
-
-AC_CHECK_TYPE(size_t, unsigned)
 
 AC_LANG_SAVE
 AC_LANG_CPLUSPLUS
+
+dnl under amd64 size_t, unsigned do not have the same type
+dnl AC_CHECK_TYPE(size_t, unsigned)
 
 AC_MSG_CHECKING(for size_t == uint)
 AC_TRY_RUN(AC_LANG_PROGRAM([
@@ -67,7 +67,8 @@ return !(sizeof(size_t)==sizeof(uint));
   AC_MSG_RESULT(no)
   size_t_same_as_uint=no
 ])
-AC_LANG_RESTORE
+
+dnl AC_LANG_RESTORE
 
 # pdflatex
 AC_CHECK_PROG(PDFLATEX, pdflatex,[pdflatex],[no])
@@ -91,19 +92,19 @@ dnl
 dnl checks for some scientific computing libraries
 dnl
 dnl libm
-AC_CHECK_LIB(m,cos,[LIBS="-lm ${LIBS}"],${LIBS})
+AC_CHECK_LIB(m,cos,[LIBS="-lm ${LIBS}"],[ echo "simple math functions not found"; exit 1;])
 dnl umfpack
 # disable it for not since it is not used yet: need to check for "NO"
 # AC_CHECK_UMFPACK(4.3.0) # at least umfpack 4.3
 AM_CONDITIONAL(HAVE_UMFPACK, test "x$umfpack_libs" != "x" )
 
-dnl lapack, blas, g2c
+dnl lapack, blas
 AC_CHECK_LAPACK
-AC_CHECK_UMFPACK
-AM_CONDITIONAL(HAVE_UMFPACK, test "x$umfpack_libs" != "x" )
+dnl AC_CHECK_UMFPACK
+dnl AM_CONDITIONAL(HAVE_UMFPACK, test "x$umfpack_libs" != "x" )
 
-dnl aztec
-AC_CHECK_AZTEC
+dnl trilinos
+AC_CHECK_TRILINOS
 dnl petsc
 dnl AC_CHECK_PETSC(2.1.6) #
 AM_CONDITIONAL(HAVE_PETSC, test "x$petsc_libs" != "x" )
@@ -117,16 +118,16 @@ AC_CHECK_LIB([grace_np],GraceClose,[grace_libs="-lgrace_np"],[grace_libs=""])
 AC_SUBST(grace_libs)
 
 dnl pvm
-AC_CHECK_PVM
-AM_CONDITIONAL(HAVE_PVM, test "x$pvm_libs" != "x" )
+dnl AC_CHECK_PVM
+dnl AM_CONDITIONAL(HAVE_PVM, test "x$pvm_libs" != "x" )
 
 
 #all_includes="-I\$(top_srcdir) -I\$(top_srcdir)/life/lifecore -I\$(top_srcdir)/life/lifearray  -I\$(top_srcdir)/life/lifemesh -I\$(top_srcdir)/life/lifealg  -I\$(top_srcdir)/life/lifefem -I\$(top_srcdir)/life/lifesolver -I\$(top_srcdir)/life/lifefilters"
 #AC_SUBST(all_includes)
 
-CPPFLAGS="-I\$(top_srcdir) ${CPPFLAGS}"
+CPPFLAGS="-I\${top_srcdir} ${CPPFLAGS}"
 
-life_libs="\$(top_builddir)/life/lifefilters/liblifefilters.la \$(top_builddir)/life/lifesolver/liblifesolver.la  \$(top_builddir)/life/lifefem/liblifefem.la \$(top_builddir)/life/lifealg/liblifealg.la \$(top_builddir)/life/lifemesh/liblifemesh.la \$(top_builddir)/life/lifearray/liblifearray.la \$(top_builddir)/life/lifecore/liblifecore.la"
+life_libs="\${top_builddir}/life/lifefilters/liblifefilters.la \${top_builddir}/life/lifesolver/liblifesolver.la  \${top_builddir}/life/lifefem/liblifefem.la \${top_builddir}/life/lifealg/liblifealg.la \${top_builddir}/life/lifemesh/liblifemesh.la \${top_builddir}/life/lifearray/liblifearray.la \${top_builddir}/life/lifecore/liblifecore.la"
 
 #life_libs="\$(top_builddir)/life/lifefilters/liblifefilters.la  \$(top_builddir)/life/lifesolver/liblifesolver.la \$(top_builddir)/life/lifefem/liblifefem.la \$(top_builddir)/life/lifealg/liblifealg.la \$(top_builddir)/life/lifemesh/liblifemesh.la \$(top_builddir)/life/lifearray/liblifearray.la \$(top_builddir)/life/lifecore/liblifecore.la"
 

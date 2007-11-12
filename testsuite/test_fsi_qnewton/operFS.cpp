@@ -203,8 +203,8 @@ namespace LifeV
     _rhs_dz = ZeroVector( _rhs_dz.size() );
     
     if ( !_BCh_dz.bdUpdateDone() )
-    _BCh_dz.bdUpdate(_solid.mesh(),_solid.feBd(),_solid.dof());
-    bcManageVector(_rhs_dz,_solid.mesh(),_solid.dof(),_BCh_dz,_solid.feBd(), 1.0, 1.0);
+    _BCh_dz.bdUpdate(_solid.mesh(),_solid.feBd(),_solid.dDof());
+    bcManageVector(_rhs_dz,_solid.mesh(),_solid.dDof(),_BCh_dz,_solid.feBd(), 1.0, 1.0);
     
     Real tol=1.e-10;
     

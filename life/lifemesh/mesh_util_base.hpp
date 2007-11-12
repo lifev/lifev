@@ -476,7 +476,7 @@ hierarchy is defined in the marker.h file.  It returns a bool indicating if
 the flag has changed. If any of the vertices has an unset marker the result
 is an unset flag for the GeoElement.
 
-  \warning It overrides the original marker flag.*/
+\warning It overrides the original marker flag.*/
 template <typename GeoElement>
 EntityFlag inheritWeakerMarker( GeoElement & fp )
 {
@@ -744,7 +744,7 @@ void fixIdnumber( MeshEntityList & list )
     unsigned int count( 0 );
     typedef typename MeshEntityList::iterator Iter;
     for ( Iter l = list.begin() ;l != list.end(); ++l )
-        l->id() = ++count;
+        l->setId( ++count );
 }
 
 /*! \brief Fixes boundary points counter
@@ -782,7 +782,7 @@ setBPointsCounters( RegionMesh & mesh )
         }
     }
 
-    mesh.setNumBVertices( countBV );
+    mesh.numBVertices() = countBV;
     mesh.setNumBPoints( countBP );
     mesh._bPoints.clear();
     mesh._bPoints.reserve( countBP );
@@ -1587,9 +1587,6 @@ p1top2( RegionMesh & mesh, std::ostream & out = std::cout )
     typename RegionMesh::ElementShape ele;
     out << "Processing " << mesh.storedEdges() << " P1 Edges" << std::endl;
     UInt nbe = mesh.numBEdges();
-
-    mesh._bPoints.reserve(mesh._bPoints.size() +  nbe + 1); // guessing how many boundary points on this processor.
-
     for ( UInt j = 1; j <= mesh.storedEdges();++j )
     {
         pe = & mesh.edge( j );

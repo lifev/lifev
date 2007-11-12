@@ -25,29 +25,51 @@ namespace LifeV
 {
 class Chrono
 {
-    clock_t _t1, _t2, _dt;
 public:
     Chrono()
+        :
+        _t1(0), _t2(0), _dt(0),
+        running(false)
+    {
+    }
+    void Reset()
     {
         _dt = 0;
+        running = false;
     }
     void start()
     {
         _t1 = clock();
+        running = true;
     };
     void stop()
     {
-        _t2 = clock();
-        _dt += _t2 - _t1;
+        if (running)
+        {
+            _t2 = clock();
+            _dt += _t2 - _t1;
+            running = false;
+        }
     };
     double diff()
     {
+        if (running)
+            return ( 1. * ( clock() - _t1 ) ) / CLOCKS_PER_SEC;
+
         return ( 1. * ( _t2 - _t1 ) ) / CLOCKS_PER_SEC;
     };
     double diff_cumul()
     {
+        if (running)
+            return ( 1. * ( _dt +  clock() - _t1 ) ) / CLOCKS_PER_SEC;
+
         return ( 1. * _dt / CLOCKS_PER_SEC );
     };
+
+private:
+    clock_t _t1, _t2, _dt;
+    bool    running;
+
 };
 }
 #endif

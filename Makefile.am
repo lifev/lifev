@@ -56,7 +56,7 @@ apidox-all:
 	make apidox
 	cd life && make apidox
 
-all-local: 
+all-local:
 	make apidox-all
 	@echo ""
 	@echo "************************************************************"
@@ -75,11 +75,11 @@ upload-api:
 MOSTLYCLEANFILES	= ChangeLog
 
 $(top_srcdir)/acinclude.m4:
-	@echo 'm4_include([admin/libtool.m4])' > acinclude.m4	
+	@echo 'm4_include([admin/libtool.m4])' > acinclude.m4
 	@echo 'm4_include([admin/ltversion.m4])' >> acinclude.m4
 	@echo 'm4_include([admin/ltoptions.m4])' >> acinclude.m4
 	@echo 'm4_include([admin/ltsugar.m4])' >> acinclude.m4
-	@echo 'm4_include([admin/ac_check_aztec.m4])' >> acinclude.m4
+	@echo 'm4_include([admin/ac_check_trilinos.m4])' >> acinclude.m4
 	@echo 'm4_include([admin/ac_check_boost.m4])' >> acinclude.m4
 	@echo 'm4_include([admin/ac_check_itk.m4])' >> acinclude.m4
 	@echo 'm4_include([admin/ac_check_lapack.m4])' >> acinclude.m4
@@ -91,6 +91,8 @@ $(top_srcdir)/acinclude.m4:
 	@echo 'm4_include([admin/ac_find_file.m4])' >> acinclude.m4
 	@echo 'm4_include([admin/lifev_check_compilers.m4])'>>acinclude.m4
 	@echo 'm4_include([admin/lifev_default_paths.m4])'>>acinclude.m4
+	@echo 'm4_include([admin/ax_create_pkgconfig_info.m4])'>>acinclude.m4
+	@echo 'm4_include([admin/lifev_create_subdirlist.m4])'>>acinclude.m4
 
 
 #Makefile.headers: tools/update-headers

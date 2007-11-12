@@ -31,6 +31,8 @@
   Added a class for handling high order discretization schemes
 */
 
+#warning: NavierStokesHandler.hpp NavierStokesSolverPC.hpp  are obselete, should be removed from lifev-parallel
+
 #ifndef _NAVIERSTOKESSOLVERPC_H_
 #define _NAVIERSTOKESSOLVERPC_H_
 
@@ -99,9 +101,6 @@ public:
     void timeAdvance( source_type const& source, Real const& time );
 
     //! Update convective term, bc treatment and solve the linearized ns system
-    void initializeStokes( const Real& time );
-
-    //! Update convective term, bc treatment and solve the linearized ns system
     void iterate( const Real& time );
 
     // ! Residual Computation
@@ -146,9 +145,6 @@ private:
 
     //! Matrix HinvC: H^{-1}C
     MixedMatr<3, 3, MSRPatt, double> _HinvC;
-
-    //! Matrix C: mu*Vstiff operator
-    MixedMatr<3, 3, MSRPatt, double> _CStiff;
 
     //! Matrix C: rho/dt*Vmass + mu*Vstiff operator
     MixedMatr<3, 3, MSRPatt, double> _CStokes;
@@ -223,7 +219,6 @@ NavierStokesSolverPC( const GetPot& data_file, const RefFE& refFE_u, const RefFE
         _HinvDtr( _pattDtr ),
         _M_u( _pattC ),
         _HinvC( _pattC ),
-        _CStiff ( _pattC ),
         _CStokes( _pattC ),
         _C( _pattC ),
         _H( _pattC.nRows() ),
@@ -252,7 +247,6 @@ NavierStokesSolverPC( const GetPot& data_file, const RefFE& refFE_u, const RefFE
     _D.zeros();
     _trD.zeros();
     _M_u.zeros();
-    _CStiff.zeros();
     _CStokes.zeros();
     _C.zeros();
 
@@ -299,15 +293,11 @@ NavierStokesSolverPC( const GetPot& data_file, const RefFE& refFE_u, const RefFE
         if (flag_curl==1){
           stiff_curl( this->viscosity(), _elmatC, this->_fe_u, 0, 0, nDimensions );
         }
-        
+
         // *******************************************************
         mass( first_coeff * this->density() * dti, elmatM_u_St, this->_fe_u, 0, 0, nDimensions );
         mass( this->density() * dti, _elmatM_u, this->_fe_u, 0, 0, nDimensions );
         // stiffness + mass
-
-	// stiffness
-        for ( UInt ic = 0;ic < nc_u;ic++ )
-            assemb_mat( _CStiff, _elmatC, this->_fe_u, this->_dof_u, ic, ic );
 
         _elmatC.mat() += elmatM_u_St.mat();
 
@@ -394,255 +384,6 @@ timeAdvance( source_type const& source, Real const& time )
 }
 
 
-
-template <typename Mesh>
-void NavierStokesSolverPC<Mesh>::
-initializeStokes( const Real& time )
-{
-
-    // Number of velocity components
-    UInt nc_u = this->_u.nbcomp();
-
-    Chrono chrono;
-
-    // C = CStokes + convective term
-    chrono.start();
-    _C = _CStiff;
-    chrono.stop();
-
-
-    Debug( 6020 ) << "  o-  Stokes matrix was copied in " << chrono.diff() << "s." << "\n";
-
-    _CnoBc = _C;
-    _trDnoBc = _trD;
-    _f_u_noBc = _f_u;
-    //for (UInt myindex=0;myindex<_dim_u;myindex++) _f_u_noBc[myindex] = _f_u[myindex];
-
-
-    // for BC treatment (done at each time-step)
-    Real tgv = 1.e02;
-
-    Debug( 6020 ) << "  o-  Applying boundary conditions... \n";
-    chrono.start();
-    // BC manage for the velocity
-    if ( !this->bcHandler().bdUpdateDone() )
-        this->bcHandler().bdUpdate( this->mesh(), this->_feBd_u, this->_dof_u );
-    bcManage( _C, _trD, _f_u, this->mesh(), this->_dof_u, this->bcHandler(), this->_feBd_u, tgv, time );
-    chrono.stop();
-    Debug( 6020 ) << "  o-  Applying boundary conditions done in " << chrono.diff() << "s." << "\n";
-
-    //matrices HinvDtr:
-    MultInvDiag( _H, _trD, _HinvDtr );
-
-    // AZTEC specifications for each system
-    int data_org_i1[ AZ_COMM_SIZE ];   // data organisation for C1
-    int data_org_i2[ AZ_COMM_SIZE ];   // data organisation for C2
-    int data_org_i3[ AZ_COMM_SIZE ];   // data organisation for C3
-
-    // identical for each system
-    int proc_config_i[ AZ_PROC_SIZE ]; // Processor information:
-    int options_i[ AZ_OPTIONS_SIZE ]; // Array used to select solver options.
-    double params_i[ AZ_PARAMS_SIZE ];   // User selected solver paramters.
-    double status_i[ AZ_STATUS_SIZE ];   // Information returned from AZ_solve()
-    // indicating success or failure.
-    AZ_set_proc_config( proc_config_i, AZ_NOT_MPI );
-
-    //AZTEC matrix and preconditioner
-    AZ_MATRIX *C1, *C2, *C3;
-    AZ_PRECOND *prec_C1, *prec_C2, *prec_C3;
-
-    int N_eq_i = this->_dim_u; // number of DOF for each component
-
-    // set each block
-    C1 = AZ_matrix_create( N_eq_i );
-    C2 = AZ_matrix_create( N_eq_i );
-    C3 = AZ_matrix_create( N_eq_i );
-
-    // create preconditioner for each block
-    prec_C1 = AZ_precond_create( C1, AZ_precondition, NULL );
-    prec_C2 = AZ_precond_create( C2, AZ_precondition, NULL );
-    prec_C3 = AZ_precond_create( C3, AZ_precondition, NULL );
-
-    // data_org assigned "by hands" while no parallel computation is performed
-    data_org_i1[ AZ_N_internal ] = N_eq_i;
-    data_org_i1[ AZ_N_border ] = 0;
-    data_org_i1[ AZ_N_external ] = 0;
-    data_org_i1[ AZ_N_neigh ] = 0;
-    data_org_i1[ AZ_name ] = DATA_NAME_AZTEC1;
-
-    data_org_i2[ AZ_N_internal ] = N_eq_i;
-    data_org_i2[ AZ_N_border ] = 0;
-    data_org_i2[ AZ_N_external ] = 0;
-    data_org_i2[ AZ_N_neigh ] = 0;
-    data_org_i2[ AZ_name ] = DATA_NAME_AZTEC2;
-
-    data_org_i3[ AZ_N_internal ] = N_eq_i;
-    data_org_i3[ AZ_N_border ] = 0;
-    data_org_i3[ AZ_N_external ] = 0;
-    data_org_i3[ AZ_N_neigh ] = 0;
-    data_org_i3[ AZ_name ] = DATA_NAME_AZTEC3;
-
-    // --------------------------------------
-    // (ii) (D*C^{-1}*trD) * \delta P =  D*V
-    // --------------------------------------
-
-    // AZTEC specifications for the second system
-    int proc_config_ii[ AZ_PROC_SIZE ]; // Processor information:
-    //  proc_config[AZ_node] = node name
-    //  proc_config[AZ_N_procs] = # of nodes
-    int options_ii[ AZ_OPTIONS_SIZE ]; // Array used to select solver options.
-    double params_ii[ AZ_PARAMS_SIZE ];   // User selected solver paramters.
-    double status_ii[ AZ_STATUS_SIZE ];   // Information returned from AZ_solve()
-    // indicating success or failure.
-    //
-
-    AZ_set_proc_config( proc_config_ii, AZ_NOT_MPI );
-
-    //AZTEC matrix for A_ii=(D*C^{-1}*trD)
-    AZ_MATRIX *A_ii;
-    AZ_PRECOND *pILU_ii;
-
-    int N_eq_ii = this->_p.size();
-
-    A_ii = AZ_matrix_create( N_eq_ii );
-    // data containing the matrices C, D, trD and H as pointers
-    // are passed through A_ii and pILU_ii:
-    AZ_set_MATFREE( A_ii, &_factor_data,
-                    my_matvec_block <
-                    MixedMatr<3, 3, MSRPatt, double>,
-                    MixedMatr<1, 3, CSRPatt, double>,
-                    MixedMatr<3, 1, CSRPatt, double>,
-                    std::vector<double>,
-                    MSRMatr<double>,
-                    Vector> );
-
-    pILU_ii = AZ_precond_create( A_ii, my_precSchur_PC <
-                                 MixedMatr<3, 3, MSRPatt, double>,
-                                 MixedMatr<1, 3, CSRPatt, double>,
-                                 MixedMatr<3, 1, CSRPatt, double>,
-                                 std::vector<double>,
-                                 MSRMatr<double>,
-                                 Vector > , &_factor_data );
-
-
-    _dataAztec_ii.aztecOptionsFromDataFile( options_ii, params_ii );
-
-    // user preconditioning:
-    options_ii[ AZ_precond ] = AZ_user_precond;
-
-    // RHS of the linear system (ii)
-    Vector vec_DV( this->_p.size() );
-
-    //matrices HinvC (depends on time):
-    MultInvDiag( _H, _C, _HinvC );
-
-    // ---------------
-    // (i) C * V = F_V
-    // ---------------
-    Debug( 6020 ) << "  o-  Solving first system... ";
-
-    AZ_set_MSR( C1, ( int* ) _pattC_block.giveRaw_bindx(),
-                ( double* ) _C.giveRaw_value( 0, 0 ),
-                data_org_i1, 0, NULL, AZ_LOCAL );
-    AZ_set_MSR( C2, ( int* ) _pattC_block.giveRaw_bindx(),
-                ( double* ) _C.giveRaw_value( 1, 1 ),
-                data_org_i2, 0, NULL, AZ_LOCAL );
-    AZ_set_MSR( C3, ( int* ) _pattC_block.giveRaw_bindx(),
-                ( double* ) _C.giveRaw_value( 2, 2 ),
-                data_org_i3, 0, NULL, AZ_LOCAL );
-
-    _dataAztec_i.aztecOptionsFromDataFile( options_i, params_i );
-
-    //keep C factorisation and preconditioner reused in my_matvec
-    options_i[ AZ_keep_info ] = 1;               // keep information
-
-    // ---------------
-    // (i) C * V = F_V (= forcing term + bc - D^T*P^n)
-    // ---------------
-    // intermediate velocity computation
-
-    chrono.start();
-
-
-    //for each block
-    AZ_iterate( this->_u.giveVec(), _f_u.giveVec(), options_i, params_i, status_i,
-                proc_config_i, C1, prec_C1, NULL );
-    AZ_iterate( this->_u.giveVec() + this->_dim_u, _f_u.giveVec() + this->_dim_u, options_i, params_i,
-                status_i, proc_config_i, C2, prec_C2, NULL );
-    AZ_iterate( this->_u.giveVec() + 2 * this->_dim_u, _f_u.giveVec() + 2 * this->_dim_u, options_i, params_i,
-                status_ii, proc_config_i, C3, prec_C3, NULL );
-
-    //
-    chrono.stop();
-    Debug( 6020 ) << "  o-  Solving first system done in " << chrono.diff() << " s." << "\n";
-
-    // ---------------------------------------------------
-    // (ii) (D*C^(-1)*trD) * \delta P = D*C^{-1}*F_V = D*V
-    // ---------------------------------------------------
-
-    // RHS of the linear system (ii)
-    vec_DV = _D * this->_u;
-    this->_p = ZeroVector( this->_p.size() ); // AT this point, this vector stands for the "pressure increment"
-
-    // case of pure Dirichlet BCs:
-    if ( this->bcHandler().hasOnlyEssential() )
-    {
-        vec_DV[ this->_dim_p - 1 ] = 0.0; // correction of the right hand side.
-        this->_p[ this->_dim_p - 1 ] = 0.0; // pressure value at the last node.
-    }
-
-    Debug( 6020 ) << "  o-  Solving second system... \n";
-
-    chrono.start();
-
-    AZ_iterate( this->_p.giveVec(), &vec_DV[ 0 ], options_ii, params_ii, status_ii,
-                proc_config_ii, A_ii, pILU_ii, NULL );
-
-    chrono.stop();
-    Debug( 6020 ) << "  o-  Solving second system done in " << chrono.diff() << " s." << "\n";
-
-    // ------------------------------------
-    // (iii) V = V-(C^(-1)*trD) * \delta P
-    // ------------------------------------
-
-
-    // everything is done...
-    this->_u = this->_u - _invCtrDP;
-    Debug( 6020 ) << "  o-  Velocity updated" << "\n";
-
-    // *******************************************************
-    // initialize the array of the solutions
-
-    this->_bdf.bdf_u().initialize_unk( this->_u );
-
-    // initialize _u with the first element in bdf_u.unk (=last value)
-    //this->_u = *( this->_bdf.bdf_u().unk().begin() );
-
-    this->_bdf.bdf_p().initialize_unk( this->_p );
-
-    // initialize _p with the first element in bdf_p.unk (=last value)
-    //    this->_p = *( this->_bdf.bdf_p().unk().begin() );
-
-
-    // update the array of the previous solutions
-    //    this->_bdf.bdf_u().shift_right( this->_u );
-    //    this->_bdf.bdf_p().shift_right( this->_p );
-
-    this->_bdf.bdf_u().showMe();
-    this->_bdf.bdf_p().showMe();
-
-
-    // destroy Ci and prec_Ci
-    AZ_matrix_destroy( &C1 );
-    AZ_precond_destroy( &prec_C1 );
-    AZ_matrix_destroy( &C2 );
-    AZ_precond_destroy( &prec_C2 );
-    AZ_matrix_destroy( &C3 );
-    AZ_precond_destroy( &prec_C3 );
-    // destroy A_ii and pILU_ii
-    AZ_matrix_destroy( &A_ii );
-    AZ_precond_destroy( &pILU_ii );
-}
 
 template <typename Mesh>
 void NavierStokesSolverPC<Mesh>::

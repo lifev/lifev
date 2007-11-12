@@ -42,6 +42,8 @@
 #include <life/lifearray/elemVec.hpp>
 #include <life/lifefem/localDofPattern.hpp>
 #include <life/lifefem/bcHandler.hpp>
+#include <life/lifearray/EpetraMatrix.hpp>
+#include <life/lifearray/EpetraVector.hpp>
 
 namespace LifeV
 {
@@ -53,10 +55,10 @@ namespace LifeV
 // in "assemble". It will be done (I have to understand "how") **** AV January 2002
 
 template <typename Oper, typename DOF, typename RegionMesh,
-typename UsrSourceFct, typename Matrix, typename Vector>
+typename UsrSourceFct>
 void
 assemble( Oper oper, const RegionMesh& mesh, CurrentFE& fe,
-          const DOF& dof, const UsrSourceFct& source_fct, Matrix& A, Vector& b )
+          const DOF& dof, const UsrSourceFct& source_fct, EpetraMatrix<double>& A, EpetraVector<double>& b )
 {
     UInt i, ic, jc;
     UInt nc = b.size() / dof.numTotalDof();
@@ -91,10 +93,10 @@ assemble( Oper oper, const RegionMesh& mesh, CurrentFE& fe,
 }
 // version with source term depending on time t
 template <typename Oper, typename DOF, typename RegionMesh,
-typename UsrSourceFct, typename Matrix, typename Vector>
+typename UsrSourceFct>
 void
 assemble( Oper oper, const RegionMesh& mesh, CurrentFE& fe, const DOF& dof,
-          const UsrSourceFct& source_fct, Matrix& A, Vector& b, Real const t )
+          const UsrSourceFct& source_fct, EpetraMatrix<double>& A, EpetraVector<double>& b, Real const t )
 {
     UInt i, ic, jc;
     UInt nc = b.size() / dof.numTotalDof(); // it should be F.Size() if F is for instance a Physical Vector (like the unknown....)
@@ -136,12 +138,12 @@ assemble( Oper oper, const RegionMesh& mesh, CurrentFE& fe, const DOF& dof,
 //! to FE1 and FE2: respectively nc1 and nc2. Is it possible to know it
 //! through the other parameters ?
 template <typename Oper, typename DOF1, typename DOF2, typename RegionMesh,
-typename UsrSourceFct, typename Matrix, typename Vector>
+typename UsrSourceFct>
 void
 assemble_mixed( Oper oper, const RegionMesh& mesh, CurrentFE& fe1,
                 CurrentFE& fe2, const DOF1& dof1, const DOF2& dof2,
                 UInt const nc1, UInt const nc2, const UsrSourceFct& source_fct,
-                Matrix& A, Vector& b )
+                EpetraMatrix<double>& A, EpetraVector<double>& b )
 {
     UInt i, ic, jc;
     ElemMat elmat( fe1.nbNode, nc1, 0, fe2.nbNode, 0, nc2 );
@@ -172,12 +174,12 @@ assemble_mixed( Oper oper, const RegionMesh& mesh, CurrentFE& fe1,
 }
 // version with source term depending on time
 template <typename Oper, typename DOF1, typename DOF2, typename RegionMesh,
-typename UsrSourceFct, typename Matrix, typename Vector>
+typename UsrSourceFct>
 void
 assemble_mixed( Oper oper, const RegionMesh& mesh, CurrentFE& fe1,
                 CurrentFE& fe2, const DOF1& dof1, const DOF2& dof2,
                 UInt const nc1, UInt const nc2, const UsrSourceFct& source_fct,
-                Matrix& A, Vector& b, Real const t )
+                EpetraMatrix<double>& A, EpetraVector<double>& b, Real const t )
 {
     UInt i, ic, jc;
     ElemMat elmat( fe1.nbNode, nc1, 0, fe2.nbNode, 0, nc2 );
@@ -209,10 +211,10 @@ assemble_mixed( Oper oper, const RegionMesh& mesh, CurrentFE& fe1,
 ///////////////////
 // version with source term depending on time t
 template <typename Oper, typename DOF, typename RegionMesh,
-typename UsrSourceFct, typename Matrix, typename Vector>
+typename UsrSourceFct>
 void
 assemble_symm( Oper oper, const RegionMesh& mesh, CurrentFE& fe, const DOF& dof,
-               const UsrSourceFct& source_fct, Matrix& A, Vector& b, Real const t )
+               const UsrSourceFct& source_fct, EpetraMatrix<double>& A, EpetraVector<double>& b, Real const t )
 {
     UInt i, ic, jc;
     UInt nc = b.size() / dof.numTotalDof(); // it should be F.Size() if F is for instance a Physical Vector (like the unknown....)
@@ -246,10 +248,10 @@ assemble_symm( Oper oper, const RegionMesh& mesh, CurrentFE& fe, const DOF& dof,
 // BLOCK DIAGONAL OPERATOR ASSEMBLING
 // It assembles the same scalar operator over the (3) diagonal blocks
 template <typename Oper, typename DOF, typename RegionMesh,
-typename UsrSourceFct, typename Matrix, typename Vector>
+typename UsrSourceFct>
 void
 assemble_symm_block_diagonal( Oper oper, const RegionMesh& mesh, CurrentFE& fe, const DOF& dof,
-                              const UsrSourceFct& source_fct, Matrix& A, Vector& b, Real const t )
+                              const UsrSourceFct& source_fct, EpetraMatrix<double>& A, EpetraVector<double>& b, Real const t )
 {
     UInt i, ic = 0;
     UInt nc = b.size() / dof.numTotalDof(); // it should be F.Size() if F is for instance a Physical Vector (like the unknown....)
@@ -293,15 +295,14 @@ void compute_vec_DG_BF(const BCHandler& BCh, ElemVec& bfvec, const CurrentBFDG& 
 
 template<typename OperDG, typename OperDGIF, typename OperDGBF,
      typename DOF, typename DOFBYFACE,
-     typename RegionMesh, typename UsrSourceFct,
-     typename Matrix, typename Vector>
+     typename RegionMesh, typename UsrSourceFct>
   void assemble_DG(OperDG operDG, OperDGIF operDGIF, OperDGBF operDGBF,
            const RegionMesh& mesh,
            const BCHandler& BCh,
            CurrentFEDG& feDG, CurrentIFDG& feIFDG, CurrentBFDG& feBFDG,
            const DOF& dof, const DOFBYFACE& dofbyface,
            const UsrSourceFct& source_fct,
-           Matrix& A, Vector& b)
+           EpetraMatrix<double>& A, EpetraVector<double>& b)
 {
   UInt i, ic, jc;
   UInt nc = b.size() / dof.numTotalDof();
@@ -390,7 +391,7 @@ template<typename OperDG, typename OperDGIF, typename OperDGBF,
 template<typename OperDG,  typename OperDGIF, typename OperDGBF,
      typename DOF, typename DOFBYFACE,
      typename RegionMesh, typename UsrSourceFct,
-     typename Matrix, typename Vector, typename Velocity>
+         typename Velocity>
   void assemble_AdvecDG(OperDG operDG, OperDGIF operDGIF, OperDGBF operDGBF,
             const RegionMesh& mesh,
             const BCHandler& BCh,
@@ -398,7 +399,7 @@ template<typename OperDG,  typename OperDGIF, typename OperDGBF,
             CurrentFEDG& feDG, CurrentIFDG& feIFDG, CurrentBFDG& feBFDG,
             const DOF& dof, const DOFBYFACE& dofbyface,
             const UsrSourceFct& source_fct,
-            Matrix& A, Matrix& M, Vector& b)
+            EpetraMatrix<double>& A, EpetraMatrix<double>& M, EpetraVector<double>& b)
 {
   UInt i, ic, jc;
   UInt nc = b.size() / dof.numTotalDof();
@@ -687,12 +688,293 @@ void compute_mat_symm( ElemMat& elmat, Oper& oper,
         mat( ( int ) jloc, ( int ) iloc ) += s;
     }
 }
+
 //
 /////////////////////////////////
 //
-template <typename Matrix, typename DOF>
+
+
+
+
+template <typename DOF>
 void
-assemb_mat( Matrix& M, ElemMat& elmat, const CurrentFE& fe, const DOF& dof, int iblock = 0, int jblock = 0 )
+assembleVector( EpetraVector<double>&          vec,
+                ElemVec&         elvec,
+                const CurrentFE& fe,
+                const DOF&       dof,
+                int              iblock,
+                int              ipos = 0)
+
+{
+//    elmat.showMe();
+    ElemVec::vector_view vecView = elvec.block( iblock );
+
+    UInt totdof = dof.numTotalDof();
+
+    int i;
+    UInt ig;
+
+    UInt eleID = fe.currentLocalId();
+
+    bool verbose = false;
+
+    for ( i = 0 ; i < fe.nbNode ; i++ )
+    {
+            ig = dof.localToGlobal( eleID, i + 1 ) - 1 + ipos ; //iblock*totdof1;  // damned 1-base vs 0-base !
+            vec[ ig + 1 ] += vecView( i );
+    }
+
+    if (verbose)
+        std::cout << "ok." << std::endl;
+}
+
+
+
+
+
+template <typename DOF>
+void
+assembleMatrix( EpetraMatrix<double>& M,
+                ElemMat&              elmat,
+                const CurrentFE&      fe,
+                const DOF&            dof,
+                int                   iblock,
+                int                   jblock,
+                int                   ipos,
+                int                   jpos)
+
+{
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+
+    int i, j, k;
+    UInt ig, jg;
+
+    UInt eleID = fe.currentLocalId();
+
+//    std::cout << "fe.nbPattern = " << fe.nbPattern << std::endl;
+
+    for ( k = 0 ; k < fe.nbPattern ; k++ )
+    {
+        i = fe.patternFirst ( k );
+        j = fe.patternSecond( k );
+
+        if (mat(i,j) != 0.)
+            {
+                ig = dof.localToGlobal( eleID, i + 1 ) - 1 + ipos ; //iblock*totdof1;  // damned 1-base vs 0-base !
+                jg = dof.localToGlobal( eleID, j + 1 ) - 1 + jpos ; //jblock*totdof2;  // damned 1-base vs 0-base !
+                M.set_mat_inc( ig, jg, mat( i, j ) );
+            }
+    }
+
+}
+
+template <typename DOF1, typename DOF2>
+void
+assembleMatrix( EpetraMatrix<double>&          M,
+                ElemMat&         elmat,
+                const CurrentFE& fe1,
+                const CurrentFE& fe2,
+                const DOF1&      dof1,
+                const DOF2&      dof2,
+                int              iblock,
+                int              jblock,
+                int              ipos,
+                int              jpos,
+                bool             verbose = false)
+
+{
+//    elmat.showMe();
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+
+    int i, j, k1, k2;
+
+    UInt eleID1 = fe1.currentLocalId();
+    UInt eleID2 = fe2.currentLocalId();
+
+    int ilist[fe1.nbNode];
+    int jlist[fe2.nbNode];
+
+    double* matPtr[fe2.nbNode];
+
+
+    for ( k1 = 0 ; k1 < fe1.nbNode ; k1++ )
+    {
+        i = fe1.patternFirst( k1 );
+        // warning : +1 already here
+        ilist[k1] = dof1.localToGlobal( eleID1, i + 1 ) + ipos ; //iblock*totdof1;  // damned 1-base vs 0-base !
+    }
+
+    for ( k2 = 0 ; k2 < fe2.nbNode ; k2++ )
+    {
+        j = fe2.patternFirst( k2 );
+        // warning : +1 already here, not to be added in set_mat_inc
+        jlist[k2]  = dof2.localToGlobal( eleID2, j + 1 ) + jpos ; //iblock*totdof1;  // damned 1-base vs 0-base !
+        matPtr[k2] = &(mat(0,j));
+    }
+
+    // coded a version to insert the little matrix directly.
+    // This needs that mat has the shape checked by the following line:
+    assert(mat.indexij( int (1), int(0) ) == 1);
+
+    M.set_mat_inc( fe1.nbNode, fe2.nbNode, ilist, jlist, matPtr );
+
+#ifdef ONLY_FOR_DEBUGGING
+
+    for ( k1 = 0 ; k1 < fe1.nbNode ; k1++ )
+    {
+        i = fe1.patternFirst( k1 );
+        for ( k2 = 0 ; k2 < fe2.nbNode ; k2++ )
+        {
+            j  = fe2.patternSecond( k2 );
+            //            if (mat(i,j) != 0.)
+                {
+                    ig = dof1.localToGlobal( eleID1, i + 1 ) - 1 + ipos ; //iblock*totdof1;  // damned 1-base vs 0-base !
+                    jg = dof2.localToGlobal( eleID2, j + 1 ) - 1 + jpos ; //jblock*totdof2;  // damned 1-base vs 0-base !
+                    matPtr[k2] = &(mat(0,j));
+
+                    assert(matPtr[k2][k1] ==  mat( i, j ));
+
+//                     std::cout << "ig, jg, mat( i, j ) = "
+//                               << ig << " " <<  jg << " "<<  mat( i, j ) << " "
+//                               << matPtr[k1] - mat( i, j )
+//                               << std::endl
+//                               << "                      "
+//                               << ilist[k1] << " " <<  jg << " "<<  matPtr[k1]
+//                               << std::endl;
+
+                    //M.set_mat_inc( ig, jg, mat( i, j ) );
+                }
+        }
+    }
+#endif
+
+}
+
+template <typename DOF1, typename DOF2>
+void
+assembleTransposeMatrix( EpetraMatrix<double>&          M,
+                         Real             val,
+                         ElemMat&         elmat,
+                         const CurrentFE& fe1,
+                         const CurrentFE& fe2,
+                         const DOF1&      dof1,
+                         const DOF2&      dof2,
+                         int              iblock,
+                         int              jblock,
+                         int              ipos ,
+                         int              jpos )
+
+{
+    ElemMat::matrix_type mat(elmat.block( jblock, iblock ));
+    mat *= val;
+
+    int i, j, k1, k2;
+
+    UInt eleID1 = fe1.currentLocalId();
+    UInt eleID2 = fe2.currentLocalId();
+
+    int ilist[fe1.nbNode];
+    int jlist[fe2.nbNode];
+
+    double* matPtr[fe1.nbNode];
+
+
+    for ( k1 = 0 ; k1 < fe1.nbNode ; k1++ )
+    {
+        i = fe1.patternFirst( k1 );
+        // warning : +1 already here
+        ilist[k1] = dof1.localToGlobal( eleID1, i + 1 ) + ipos ; //iblock*totdof1;  // damned 1-base vs 0-base !
+        matPtr[k1] = &(mat(0,i));
+    }
+
+    for ( k2 = 0 ; k2 < fe2.nbNode ; k2++ )
+    {
+        j = fe2.patternFirst( k2 );
+        // warning : +1 already here, not to be added in set_mat_inc
+        jlist[k2]  = dof2.localToGlobal( eleID2, j + 1 ) + jpos ; //iblock*totdof1;  // damned 1-base vs 0-base !
+    }
+
+    // coded a version to insert the little matrix directly.
+    // This needs that mat has the shape checked by the following line:
+    assert(mat.indexij( int (1), int(0) ) == 1);
+
+    M.set_mat_inc( fe1.nbNode, fe2.nbNode, ilist, jlist, matPtr, Epetra_FECrsMatrix::ROW_MAJOR );
+
+    //#define ONLY_FOR_DEBUGGING
+#ifdef ONLY_FOR_DEBUGGING
+    ElemMat::matrix_view matView(elmat.block( jblock, iblock ));
+
+    for ( k1 = 0 ; k1 < fe1.nbNode ; k1++ )
+    {
+        i = fe1.patternFirst( k1 );
+        for ( k2 = 0 ; k2 < fe2.nbNode ; k2++ )
+        {
+            j = fe2.patternSecond( k2 );
+            ig = dof1.localToGlobal( eleID1, i + 1 ) - 1 + ipos;  // damned 1-base vs 0-base !
+            jg = dof2.localToGlobal( eleID2, j + 1 ) - 1 + jpos;  // damned 1-base vs 0-base !
+
+            assert(matPtr[k1][k2] ==  mat( j, i ));
+            assert(matPtr[k1][k2] ==  val*matView( j, i ));
+            //M.set_mat_inc( ig, jg, mat( j, i ) );
+        }
+    }
+
+    std::cout << "\nhere again, change way of inserting values" << std::endl;
+#endif
+
+}
+
+    /*    double** matPtr;
+    matPtr = new double*[fe1.nbNode];
+
+    for ( k2 = 0 ; k2 < fe2.nbNode ; k2++ )
+    {
+        j = fe2.patternFirst( k2 );
+        // warning : +1 already here, not to be added in set_mat_inc
+        jlist[k2]  = dof2.localToGlobal( eleID2, j + 1 ) + jpos ; //iblock*totdof1;  // damned 1-base vs 0-base !
+
+    }
+
+    for ( k1 = 0 ; k1 < fe1.nbNode ; k1++ )
+    {
+        matPtr[k1] = new double[fe2.nbNode];
+
+        i = fe1.patternFirst( k1 );
+        // warning : +1 already here
+        ilist[k1] = dof1.localToGlobal( eleID1, i + 1 ) + ipos ; //iblock*totdof1;  // damned 1-base vs 0-base !
+
+        for ( k2 = 0 ; k2 < fe2.nbNode ; k2++ )
+            {
+                j = fe2.patternFirst( k2 );
+
+                matPtr[k1][k2] = val * mat(j,i);
+
+            }
+
+    }
+
+
+    // coded a version to insert the little matrix directly.
+    // This needs that mat has the shape checked by the following line:
+    assert(mat.indexij( int (1), int(0) ) == 1);
+    //    assert( val == 1 );
+
+    M.set_mat_inc( fe2.nbNode, fe1.nbNode, jlist, ilist, matPtr );
+
+    for ( k1 = 0 ; k1 < fe1.nbNode ; k1++ )
+        delete[] matPtr[k1];
+    delete[] matPtr;
+
+    */
+
+
+
+//
+/////////////////////////////////
+//
+template < typename DOF>
+void
+assemb_mat( EpetraMatrix<double>& M, ElemMat& elmat, const CurrentFE& fe, const DOF& dof, int iblock = 0, int jblock = 0 )
 {
     ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     UInt totdof = dof.numTotalDof();
@@ -706,6 +988,8 @@ assemb_mat( Matrix& M, ElemMat& elmat, const CurrentFE& fe, const DOF& dof, int 
         ig = dof.localToGlobal( eleId, i + 1 ) - 1 + iblock * totdof;  // damned 1-base vs 0-base !
         jg = dof.localToGlobal( eleId, j + 1 ) - 1 + jblock * totdof;  // damned 1-base vs 0-base !
         M.set_mat_inc( ig, jg, mat( i, j ) );
+//        std::cout << ig << " " << jg << " " << mat(i, j) << std::endl;
+
     }
 }
 
@@ -715,9 +999,9 @@ assemb_mat( Matrix& M, ElemMat& elmat, const CurrentFE& fe, const DOF& dof, int 
 //
 // Miguel 01/2004: matrix assembling of interior penalty terms
 //
-template <typename Matrix, typename DOF>
+template < typename DOF>
 void
-assemb_mat( Matrix& M, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2, const DOF& dof, int iblock = 0, int jblock = 0 )
+assemb_mat( EpetraMatrix<double>& M, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2, const DOF& dof, int iblock = 0, int jblock = 0 )
 {
     ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     UInt totdof = dof.numTotalDof();
@@ -740,8 +1024,8 @@ assemb_mat( Matrix& M, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe
 //
 //! Added by V. Martin 09/2002 (slightly different from the previous function...)
 //!    Works with a reference hybrid element, and a given number of the current geo element.
-template <typename DOF, typename Matrix>
-void assemb_mat( Matrix& M, ElemMat& elmat, const LocalDofPattern& fe, const DOF& dof,
+template <typename DOF>
+void assemb_mat( EpetraMatrix<double>& M, ElemMat& elmat, const LocalDofPattern& fe, const DOF& dof,
                  const UInt feId, int iblock = 0, int jblock = 0 )
 {
     //  if(elmat.nBlockRow()!=1 || elmat.nBlockCol() != 1){
@@ -756,8 +1040,8 @@ void assemb_mat( Matrix& M, ElemMat& elmat, const LocalDofPattern& fe, const DOF
 
     for ( k = 0 ; k < fe.nbPattern() ; k++ )
     { //! instead of currentFE::nbPattern  ...
-        i = fe.patternFirst( k );
-        j = fe.patternSecond( k );
+        i  = fe.patternFirst( k );
+        j  = fe.patternSecond( k );
         ig = dof.localToGlobal( eleId, i + 1 ) - 1 + iblock * totdof;  // damned 1-base vs 0-base !
         jg = dof.localToGlobal( eleId, j + 1 ) - 1 + jblock * totdof;  // damned 1-base vs 0-base !
         M.set_mat_inc( ig, jg, mat( i, j ) );
@@ -770,8 +1054,8 @@ void assemb_mat( Matrix& M, ElemMat& elmat, const LocalDofPattern& fe, const DOF
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-template<typename DOF, typename Matrix>
-void assemb_mat_DG(Matrix& M, ElemMat& elmat, const CurrentFEDG& fe, const DOF& dof,
+template<typename DOF>
+void assemb_mat_DG(EpetraMatrix<double>& M, ElemMat& elmat, const CurrentFEDG& fe, const DOF& dof,
         const UInt feId, int iblock = 0,int jblock = 0)
 {
   ElemMat::matrix_view mat = elmat.block(iblock, jblock);
@@ -793,8 +1077,8 @@ void assemb_mat_DG(Matrix& M, ElemMat& elmat, const CurrentFEDG& fe, const DOF& 
   }
 }
 
-template<typename DOF, typename Matrix>
-void assemb_mass_DG(Matrix& M, KNM<Real>& mat, const CurrentFEDG& fe, const DOF& dof,
+template<typename DOF>
+void assemb_mass_DG(EpetraMatrix<double>& M, KNM<Real>& mat, const CurrentFEDG& fe, const DOF& dof,
         const UInt feId, int iblock = 0,int jblock = 0)
 {
   UInt totdof = dof.numTotalDof();
@@ -815,8 +1099,8 @@ void assemb_mass_DG(Matrix& M, KNM<Real>& mat, const CurrentFEDG& fe, const DOF&
   }
 }
 
-template<typename DOFBYFACE, typename Matrix>
-void assemb_mat_DG_IF(Matrix& M, ElemMat& ifmat, const CurrentFEDG& fe, const DOFBYFACE& dofbyface,
+template<typename DOFBYFACE>
+void assemb_mat_DG_IF(EpetraMatrix<double>& M, ElemMat& ifmat, const CurrentFEDG& fe, const DOFBYFACE& dofbyface,
         const UInt ifId, int iblock=0,int jblock=0)
 {
   ElemMat::matrix_view mat = ifmat.block(iblock, jblock);
@@ -839,8 +1123,8 @@ void assemb_mat_DG_IF(Matrix& M, ElemMat& ifmat, const CurrentFEDG& fe, const DO
   }
 }
 
-template<typename DOF, typename Matrix>
-void assemb_mat_DG_BF(Matrix& M, ElemMat& bfmat, const CurrentFEDG& fe, const DOF& dof,
+template<typename DOF>
+void assemb_mat_DG_BF(EpetraMatrix<double>& M, ElemMat& bfmat, const CurrentFEDG& fe, const DOF& dof,
         const UInt AdId, int iblock=0,int jblock=0)
 {
   ElemMat::matrix_view mat = bfmat.block(iblock, jblock);
@@ -872,8 +1156,8 @@ void assemb_mat_DG_BF(Matrix& M, ElemMat& bfmat, const CurrentFEDG& fe, const DO
 //! How to make it more general? For the upper?? (without too much efficiency loss)
 //! CAUTION: TESTED ONLY WITH THE STANDARD PATTERN...
 //! V. Martin.
-template <typename DOF, typename Matrix>
-void assemb_mat_symm_lower( Matrix& M, ElemMat& elmat, const LocalDofPattern& fe,
+template <typename DOF>
+void assemb_mat_symm_lower( EpetraMatrix<double>& M, ElemMat& elmat, const LocalDofPattern& fe,
                             const DOF& dof, const UInt feId, int iblock = 0, int jblock = 0 )
 {
     //  if(elmat.nBlockRow()!=1 || elmat.nBlockCol() != 1){
@@ -925,8 +1209,8 @@ void assemb_mat_symm_lower( Matrix& M, ElemMat& elmat, const LocalDofPattern& fe
 //! How to make it more general? For the upper?? (without too much efficiency loss)
 //! CAUTION: TESTED ONLY WITH THE STANDARD PATTERN...
 //! V. Martin.
-template <typename DOF, typename Matrix>
-void assemb_mat_symm_upper( Matrix& M, ElemMat& elmat, const LocalDofPattern& fe,
+template <typename DOF>
+void assemb_mat_symm_upper( EpetraMatrix<double>& M, ElemMat& elmat, const LocalDofPattern& fe,
                             const DOF& dof, const UInt feId, int iblock = 0, int jblock = 0 )
 {
     //  if(elmat.nBlockRow()!=1 || elmat.nBlockCol() != 1){
@@ -972,9 +1256,9 @@ void assemb_mat_symm_upper( Matrix& M, ElemMat& elmat, const LocalDofPattern& fe
 //! assembling of the elementary matrix into the global one for
 //! mixed FE
 //Alain 1/02/02.
-template <typename DOF1, typename DOF2, typename Matrix>
+template <typename DOF1, typename DOF2>
 void
-assemb_mat_mixed( Matrix& M, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2,
+assemb_mat_mixed( EpetraMatrix<double>& M, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2,
                   const DOF1& dof1, const DOF2& dof2, int iblock = 0, int jblock = 0 )
 {
     ElemMat::matrix_view mat = elmat.block( iblock, jblock );
@@ -1002,9 +1286,9 @@ assemb_mat_mixed( Matrix& M, ElemMat& elmat, const CurrentFE& fe1, const Current
   Assemble the transposed of an element matrix (multiplied by a
   constant "mulfac") JFG 03/09/02.
 */
-template <typename DOF1, typename DOF2, typename Matrix>
+template <typename DOF1, typename DOF2>
 void
-assemb_tr_mat_mixed( Real mulfac, Matrix& M, ElemMat& elmat,
+assemb_tr_mat_mixed( Real mulfac, EpetraMatrix<double>& M, ElemMat& elmat,
                      const CurrentFE& fe1, const CurrentFE& fe2,
                      const DOF1& dof1, const DOF2& dof2,
                      int iblock = 0, int jblock = 0 )
@@ -1191,9 +1475,9 @@ void compute_vec_stab( OperFct& fct, ElemVec& elvec, const CurrentFE& fe, Real t
 //
 
 
-template <typename DOF, typename Vector, typename ElemVec>
+template <typename DOF, typename ElemVec>
 void
-assemb_vec( Vector& V, ElemVec& elvec, const CurrentFE& fe, const DOF& dof, int iblock=0 )
+assemb_vec( EpetraVector<double>& V, ElemVec& elvec, const CurrentFE& fe, const DOF& dof, int iblock=0 )
 {
     UInt totdof = dof.numTotalDof();
     typename ElemVec::vector_view vec = elvec.block( iblock );
@@ -1214,8 +1498,8 @@ assemb_vec( Vector& V, ElemVec& elvec, const CurrentFE& fe, const DOF& dof, int 
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-template<typename DOF, typename Vector, typename ElemVec>
-void assemb_vec_DG(Vector& V, ElemVec& elvec,const CurrentFEDG& feDG, const DOF& dof, int iblock)
+template<typename DOF, typename ElemVec>
+void assemb_vec_DG(EpetraVector<double>& V, ElemVec& elvec,const CurrentFEDG& feDG, const DOF& dof, int iblock)
 {
   UInt totdof = dof.numTotalDof();
   typename ElemVec::vector_view vec = elvec.block(iblock);
@@ -1228,8 +1512,8 @@ void assemb_vec_DG(Vector& V, ElemVec& elvec,const CurrentFEDG& feDG, const DOF&
     V[ig] += vec(i);
   }
 }
-template<typename DOF, typename Vector, typename ElemVec>
-void assemb_vec_DG_BF(Vector& V,ElemVec& bfvec, const CurrentBFDG& bfDG, UInt iAd, const DOF& dof, int iblock){
+template<typename DOF, typename ElemVec>
+void assemb_vec_DG_BF(EpetraVector<double>& V,ElemVec& bfvec, const CurrentBFDG& bfDG, UInt iAd, const DOF& dof, int iblock){
   UInt totdof = dof.numTotalDof();
   typename ElemVec::vector_view vec = bfvec.block(iblock);
   int i;
@@ -1250,9 +1534,9 @@ void assemb_vec_DG_BF(Vector& V,ElemVec& bfvec, const CurrentBFDG& bfDG, UInt iA
 //////////////////
 /// V. Martin  09/2002
 //! version of assemb_vec that works with a LocalDofPattern (and also a RefHybridFE)...
-template <typename DOF, typename Vector, typename ElemVec>
+template <typename DOF, typename ElemVec>
 void
-assemb_vec( Vector& V, ElemVec& elvec, const LocalDofPattern& fe, const DOF& dof,
+assemb_vec( EpetraVector<double>& V, ElemVec& elvec, const LocalDofPattern& fe, const DOF& dof,
             const UInt feId, int iblock )
 {
     //  if(elvec.nBlockRow()!=1){
@@ -1281,9 +1565,9 @@ assemb_vec( Vector& V, ElemVec& elvec, const LocalDofPattern& fe, const DOF& dof
 //! \function extract_vec
 //! \brief from a global vector, extract a vector corresponding to the element feId.
 //! works with a LocalDofPattern (and also a RefHybridFE)...
-template <typename DOF, typename Vector, typename ElemVec>
+template <typename DOF, typename ElemVec>
 void
-extract_vec( Vector& V, ElemVec& elvec, const LocalDofPattern& fe, const DOF& dof,
+extract_vec( EpetraVector<double>& V, ElemVec& elvec, const LocalDofPattern& fe, const DOF& dof,
              const UInt feId, int iblock )
 {
     //  if(elvec.nBlockRow()!=1){

@@ -65,7 +65,7 @@ namespace LifeV
      * @return the version number, encoded in a single uint
      * @since 0.7
      */
-    LIFEV_EXPORT uint version();
+    LIFEV_EXPORT unsigned int version();
 
     /**
      * Returns the major number of LIFEV's version, e.g.
@@ -73,7 +73,7 @@ namespace LifeV
      * @return the major version number
      * @since 0.7
      */
-    LIFEV_EXPORT uint versionMajor();
+    LIFEV_EXPORT unsigned int versionMajor();
 
     /**
      * Returns the minor number of LIFEV's version, e.g.
@@ -81,7 +81,7 @@ namespace LifeV
      * @return the minor version number
      * @since 0.7
      */
-    LIFEV_EXPORT uint versionMinor();
+    LIFEV_EXPORT unsigned int versionMinor();
 
     /**
      * Returns the micro number of LIFEV's version, e.g.
@@ -89,7 +89,7 @@ namespace LifeV
      * @return the extra information
      * @since 0.7
      */
-    LIFEV_EXPORT uint versionMicro();
+    LIFEV_EXPORT unsigned int versionMicro();
 
     /**
      * Returns the LIFEV version as string, e.g. "0.7.0".

@@ -79,7 +79,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <life/lifefem/values.hpp>
 #include <life/lifefem/bcManage.hpp>
 #include <life/lifefem/bcHandler.hpp>
-#include <life/lifefem/assemb.hpp>
+#include <life/lifefem/assembGeneric.hpp>
 
 #include <life/lifesolver/AFSolvers.hpp>
 #include <life/lifealg/PressureMatrixSolver.hpp>

@@ -40,6 +40,7 @@ public:
 
     GeoND();
     explicit GeoND( ID id );
+    explicit GeoND( ID id, ID localID );
     GeoND( const GeoND<GEOSHAPE, POINTTYPE> & );
     GeoND & operator=( GeoND const & G );
     ~GeoND();
@@ -111,18 +112,28 @@ GeoND<GEOSHAPE, POINTTYPE>::GeoND() :
         MeshEntity( 0 )
 {}
 
+
+
+
 template <typename GEOSHAPE, typename POINTTYPE>
 GeoND<GEOSHAPE, POINTTYPE>::GeoND( ID id ) :
-        MeshEntity( id )
+        MeshEntity( id, id )
+{}
+
+template <typename GEOSHAPE, typename POINTTYPE>
+GeoND<GEOSHAPE, POINTTYPE>::GeoND( ID id, ID localId ) :
+        MeshEntity( id, localId )
 {}
 
 template <typename GEOSHAPE, typename POINTTYPE>
 GeoND<GEOSHAPE, POINTTYPE>::GeoND( GeoND<GEOSHAPE, POINTTYPE> const & G ) :
         // Copy constructor
-        MeshEntity( G._id )
+        MeshEntity( G.id(), G.localId() )
 {
     for ( UInt i = 0; i < GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints; ++i )
-        _points[ i ] = G._points[ i ];
+        {
+            _points[ i ] = G._points[ i ];
+        }
 }
 
 template <typename GEOSHAPE, typename POINTTYPE>
@@ -138,9 +149,12 @@ GeoND<GEOSHAPE, POINTTYPE>::operator=( GeoND<GEOSHAPE, POINTTYPE> const & G )
 {
     if ( this != &G )
     {
-        _id = G._id;
+        this->setId     (G.id());
+        this->setLocalId(G.localId());
         for ( UInt i = 0; i < GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints; ++i )
-            _points[ i ] = G._points[ i ];
+            {
+                _points[ i ] = G._points[ i ];
+            }
     }
     return *this;
 }
@@ -231,15 +245,16 @@ std::ostream & GeoND<GEOSHAPE, POINTTYPE>::
 showMe( bool verbose, std::ostream & out ) const
 {
     out << " GeoND object " << std::endl;
-    out << " Number of Vertices=" << GEOSHAPE::numVertices << std::endl;
-    out << " Number of Points=" << GEOSHAPE::numPoints << std::endl;
-    out << "ID= " << id() << std::endl;
+    out << " Number of Vertices = " << GEOSHAPE::numVertices << std::endl;
+    out << " Number of Points   = " << GEOSHAPE::numPoints << std::endl;
+    out << " ID                 = " << id() << std::endl;
+    out << " local ID           = " << localId() << std::endl;
     if ( verbose )
     {
         out << " POINTS INFORMATION" << std::endl << std::endl;
         for ( unsigned i = 1 ; i <= GEOSHAPE::numVertices; i++ )
         {
-            out << "POINT ID." << i << std::endl;
+            out << "POINT ID. " << i << std::endl;
             out << point( i ).showMe( verbose, out );
         }
     }

@@ -19,7 +19,7 @@
 
 
 #include <life/lifesolver/exactJacobianBase.hpp>
-#include <life/lifesolver/reducedLinFluid.hpp>
+//#include <life/lifesolver/reducedLinFluid.hpp>
 
 
 namespace LifeV
@@ -49,146 +49,151 @@ exactJacobian::setup()
 {
     super::setup();
 
-    M_dz.resize(3*M_solid->dDof().numTotalDof());
-    M_rhs_dz.resize(3*M_solid->dDof().numTotalDof());
-    M_reducedLinFluid.reset(new reducedLinFluid(this, M_fluid, M_solid));
+    M_dz.reset    (new vector_type(*this->M_solidInterfaceMap));
+    M_rhs_dz.reset(new vector_type(*this->M_solidInterfaceMap));
+
+    if ( this->isFluid() )
+    {
+        M_rhsNew.reset(new vector_type(this->M_fluid->getMap()));
+        M_beta.reset(new vector_type(this->M_fluid->getMap()));
+    }
+//    M_reducedLinFluid.reset(new reducedLinFluid(this, M_fluid, M_solid));
 }
 //
 // Residual computation
 //
 
-void exactJacobian::eval(const Vector &_disp,
-                         const int     _status)
+void exactJacobian::eval(vector_type&       dispNew,
+                         vector_type&       velo,
+                         const vector_type &disp,
+                         const int          status)
 {
-    if(_status) M_nbEval = 0; // new time step
+
+    if(status)
+        {
+            M_nbEval = 0; // new time step
+            this->M_fluid->resetPrec();
+            this->M_solid->resetPrec();
+        }
+
     M_nbEval++ ;
 
-    this->M_solid->disp() = _disp;
 
-    this->M_fluid->updateMesh(time());
-    this->M_fluid->iterate   (time());
+    MPI_Barrier(MPI_COMM_WORLD);
 
-    this->M_solid->setRecur(0);
-    this->M_solid->iterate();
+    // possibly unsafe when using more cpus, since both has repeated maps
+    *M_lambdaFluid       = disp;
 
-//      this->M_fluid->postProcess();
-//      this->M_solid->postProcess();
+
+    *this->M_sigmaFluid *= 0.;
+
+    if (this->isFluid())
+    {
+        this->M_meshMotion->iterate();
+
+        vector_type const meshDisplacement( M_meshMotion->displacement(), this->M_meshMotion->getRepeatedEpetraMap() );
+
+        this->transferMeshMotionOnFluid(meshDisplacement,
+                                        *this->M_veloFluidMesh);
+
+        *this->M_veloFluidMesh    -= *M_dispFluidMeshOld;
+        *this->M_veloFluidMesh    *= 1./(M_dataFluid->timestep());
+
+        // copying displacement to a repeated indeces displacement, otherwise the mesh wont know
+        // the value of the displacement for some points
+
+        this->moveMesh(meshDisplacement);
+
+        *M_beta *= 0.;
+
+        vector_type const meshDispDiff( M_meshMotion->dispDiff(), this->M_meshMotion->getRepeatedEpetraMap() );
+
+        this->interpolateVelocity(meshDispDiff, *M_beta);
+
+        *M_beta *= -1./M_dataFluid->timestep();
+
+        *M_beta  += *this->M_un;
+
+        double alpha = 1./M_dataFluid->timestep();
+
+        *M_rhsNew   = *this->M_rhs;
+        *M_rhsNew  *= alpha;
+
+        this->M_fluid->updateSystem( alpha, *M_beta, *M_rhsNew );
+
+        this->M_fluid->iterate( *M_BCh_u );
+
+        this->transferFluidOnInterface(this->M_fluid->residual(), *this->M_sigmaFluid);
+
+    }
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+     if ( false && this->isFluid() )
+         {
+//             *M_velAndPressure = this->M_fluid->solution();
+//             M_ensightFluid->postProcess( M_nbEval );
+         }
+
+
+
+    // possibly unsafe when using more cpus, since both has repeated maps
+    *this->M_sigmaSolid = *this->M_sigmaFluid;
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+
+    if (this->isSolid())
+    {
+        this->M_solid->iterate( *M_BCh_d );
+        this->transferSolidOnInterface(this->M_solid->disp(), *this->M_lambdaSolid);
+        this->transferSolidOnInterface(this->M_solid->vel() , *this->M_lambdaDotSolid);
+        this->transferSolidOnInterface(this->M_solid->residual() , *this->M_sigmaSolid);
+    }
+
+    // possibly unsafe when using more cpus, since both has repeated maps
+
+
+//     dispNew = *this->M_lambdaSolid;
+//     velo    = *this->M_lambdaDotSolid;
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+
+    std::cout << " ::: norm(disp     )    = " << disp.NormInf() << std::endl;
+    std::cout << " ::: norm(dispNew  )    = " << dispNew.NormInf() << std::endl;
+    std::cout << " ::: norm(velo     )    = " << velo.NormInf() << std::endl;
+    std::cout << " ::: max Residual Fluid = " << M_sigmaFluid->NormInf() << std::endl;
+    std::cout << " ::: max Residual Solid = " << M_sigmaSolid->NormInf() << std::endl;
+
+    if (this->isFluid())
+        std::cout << "Max ResidualF        = " << M_fluid->residual().NormInf() << std::endl;
+    if (this->isSolid())
+        {
+            std::cout << "NL2 DiplacementS     = " << M_solid->disp().Norm2() << std::endl;
+            std::cout << "Max ResidualS        = " << M_solid->residual().NormInf() << std::endl;
+        }
+
+
+
 }
 
-void exactJacobian::evalResidual(Vector &_res,
-                                 const Vector &_disp,
-                                 const int     _iter)
+void exactJacobian::evalResidual(vector_type&       res,
+                                 const vector_type& disp,
+                                 const int     iter)
 {
     int status = 0;
 
-    if(_iter == 0) status = 1;
+    if(iter == 0) status = 1;
 
-    std::cout << "*** Exact Jacobian: Residual computation g(x_" << _iter <<")";
+    std::cout << "*** Exact Jacobian: Residual computation g(x_" << iter <<")";
     if (status) std::cout << " [NEW TIME STEP] ";
     std::cout << std::endl;
 
-    eval(_disp, status);
+    eval(*M_lambdaSolid, *M_lambdaDotSolid, disp, status);
 
-    M_dispStruct = this->M_solid->disp();
-    M_velo       = this->M_solid->w();
-
-    std::cout << " ::: norm(disp     ) = " << norm_inf(_disp)  << std::endl;
-    std::cout << " ::: norm(dispNew  ) = " << norm_inf(M_dispStruct) << std::endl;
-    std::cout << " ::: norm(velo     ) = " << norm_inf(M_velo) << std::endl;
-
-    std::cout << "Max ResidualF   = " << norm_inf(M_fluid->residual())
-              << std::endl;
-    std::cout << "Max ResidualS   = " << norm_inf(M_solid->residual())
-              << std::endl;
-
-    _res = _disp - M_dispStruct;
-}
-
-
-//
-// Boundary conditions setup
-//
-
-
-void exactJacobian::setUpBC()
-{
-    std::cout << "Boundary Conditions setup ... ";
-
-    UInt dim_solid        = this->M_solid->dDof().numTotalDof();
-    UInt dim_fluid        = this->M_fluid->uDof().numTotalDof();
-    UInt dim_reducedfluid = this->M_fluid->pDof().numTotalDof();
-
-    //========================================================================================
-    //  DATA INTERFACING BETWEEN BOTH SOLVERS
-    //========================================================================================
-    //
-    // Passing data from the fluid to the structure: fluid load at the interface
-    //
-    setFluidLoadToStructure(this->M_fluid->residual());
-    //
-    // Passing data from structure to the harmonic Extension: motion of the fluid domain
-    //
-    setStructureDispToHarmonicExtension(this->M_solid->disp());
-    //========================================================================================
-    //  Interface BOUNDARY CONDITIONS
-    //========================================================================================
-
-    BCFunctionBase bcf(fzeroEJ);
-
-    // Boundary conditions for the harmonic extension of the
-    // interface solid displacement
-    M_BCh_mesh->addBC("Interface", 1, Essential, Full,
-                      *bcvStructureDispToHarmonicExtension(), 3);
-
-//     M_BCh_mesh->bdUpdate(this->M_fluid->mesh(),
-//                          this->M_fluid->feBd_u(),
-//                          this->M_fluid->uDof());
-
-    // Boundary conditions for the solid displacement
-    M_BCh_d->addBC("Interface", 1, Natural,   Full,
-                   *bcvFluidLoadToStructure(), 3);
-
-    //========================================================================================
-    //  Linear operators BOUNDARY CONDITIONS
-    //========================================================================================
-
-    if (!reducedFluid())
-    {
-        // Passing data from the harmonic extension to the fluid
-        setDerHarmonicExtensionVelToFluid(this->M_fluid->dwInterpolated());
-        // Passing data from fluid to the structure: du -> dz
-        setDerFluidLoadToStructure(this->M_fluid->residual());
-        // Boundary conditions for du
-        M_BCh_du->addBC("Wall",   1,  Essential, Full,
-                        *bcvDerHarmonicExtensionVelToFluid(), 3);
-        M_BCh_du->addBC("Edges",  20, Essential, Full, bcf,      3);
-        M_BCh_du->addBC("InFlow", 2,  Natural,   Full, bcf,      3);
-        M_BCh_du->addBC("OutFlow",3,  Natural,   Full, bcf,      3);
-
-
-        // Boundary conditions for dz
-        M_BCh_dz->addBC("Interface", 1, Natural,   Full,
-                        *bcvDerFluidLoadToStructure(), 3);
-        M_BCh_dz->addBC("Top",       3, Essential, Full, bcf,  3);
-        M_BCh_dz->addBC("Base",      2, Essential, Full, bcf,  3);
-    }
-    else
-    {
-        setDerStructureAccToReducedFluid(M_reducedLinFluid->dacc(), 2);
-        M_BCh_dp->addBC("Wall",        1, Natural,   Scalar, //da_wall);
-                        *bcvDerStructureAccToReducedFluid());
-        M_BCh_dp->addBC("Wall_Edges", 20, Essential, Scalar, bcf);
-        M_BCh_dp->addBC("InFlow",      2, Essential, Scalar, bcf);
-        M_BCh_dp->addBC("OutFlow",     3, Essential, Scalar, bcf);
-
-        M_reducedLinFluid->setUpBC(M_BCh_dp);
-
-        setDerReducedFluidLoadToStructure(M_reducedLinFluid->minusdp(), 1);
-        M_BCh_dz->addBC("Interface", 1, Natural,   Full, //dg_wall, 3);
-                        *bcvDerReducedFluidLoadToStructure(), 2);
-        M_BCh_dz->addBC("Top",       3, Essential, Full, bcf,     3);
-        M_BCh_dz->addBC("Base",      2, Essential, Full, bcf,     3);
-    }
+    res  = *M_lambdaSolid;
+    res -= disp;
 }
 
 
@@ -197,8 +202,8 @@ void exactJacobian::setUpBC()
 //
 
 
-void  exactJacobian::solveJac(Vector         &_muk,
-                              const Vector  &_res,
+void  exactJacobian::solveJac(vector_type         &_muk,
+                              const vector_type  &_res,
                               const double   _linearRelTol)
 {
     // AZTEC specifications for the second system
@@ -253,7 +258,8 @@ void  exactJacobian::solveJac(Vector         &_muk,
 
 void  exactJacobian::solveLinearFluid()
 {
-    this->M_fluid->iterateLin(time(), *M_BCh_du);
+//    this->M_fluid->updateLinearSystem(
+    this->M_fluidLin->iterate(*M_BCh_du);
 }
 
 
@@ -262,79 +268,65 @@ void  exactJacobian::solveLinearFluid()
 
 void  exactJacobian::solveLinearSolid()
 {
-    M_rhs_dz = ZeroVector( M_rhs_dz.size() );
-    M_dz     = ZeroVector( M_dz.size() );
+//     M_rhs_dz = Zerovector_type( M_rhs_dz.size() );
+//     M_dz     = Zerovector_type( M_dz.size() );
 
-    if ( !M_BCh_dz->bdUpdateDone() )
-        M_BCh_dz->bdUpdate(this->M_solid->mesh(),
-                          this->M_solid->feBd(),
-                          this->M_solid->dof());
+//     if ( !M_BCh_dz->bdUpdateDone() )
+//         M_BCh_dz->bdUpdate(this->M_solid->mesh(),
+//                            this->M_solid->feBd(),
+//                            this->M_solid->dDof());
 
-    bcManageVector(M_rhs_dz,
-                   this->M_solid->mesh(),
-                   this->M_solid->dof(),
-                   *M_BCh_dz,
-                   this->M_solid->feBd(),
-                   1., 1.);
+//     bcManageVector(M_rhs_dz,
+//                    this->M_solid->mesh(),
+//                    this->M_solid->dDof(),
+//                    *M_BCh_dz,
+//                    this->M_solid->feBd(),
+//                    1., 1.);
 
-    Real tol       = 1.e-10;
-//    std::cout << "rhs_dz norm = " << norm_2(M_rhs_dz) << std::endl;
-    this->M_solid->setRecur(1);
-    this->M_solid->solveJac(M_dz, M_rhs_dz, tol, M_BCh_dz);
-//    std::cout << "dz norm     = " << norm_inf(M_dz) << std::endl;
+//     Real tol       = 1.e-10;
+//     std::cout << "rhs_dz norm = " << norm_2(M_rhs_dz) << std::endl;
+//     this->M_solid->setRecur(1);
+//     this->M_solid->solveJac(M_dz, M_rhs_dz, tol, M_BCh_dz);
+//     std::cout << "dz norm     = " << norm_inf(M_dz) << std::endl;
 }
 
 
 void my_matvecJacobianEJ(double *z, double *Jz, AZ_MATRIX* J, int proc_config[])
 {
     // Extraction of data from J
-    exactJacobian::dataJacobian* my_data = static_cast< exactJacobian::dataJacobian* >(AZ_get_matvec_data(J));
+//     exactJacobian::dataJacobian* my_data = static_cast< exactJacobian::dataJacobian* >(AZ_get_matvec_data(J));
 
-    UInt dim = my_data->M_pFS->dz().size();
+// //     UInt dim = my_data->M_pFS->dz().size();
 
-    double xnorm =  AZ_gvector_norm(dim,-1,z,proc_config);
-    std::cout << " ***** norm (z)= " << xnorm << std::endl << std::endl;
+// //     double xnorm =  AZ_gvector_norm(dim, -1, z, proc_config);
+// //     std::cout << " ***** norm (z)= " << xnorm << std::endl << std::endl;
 
-    Vector zSolid(dim);
+//     exactJacoian::vector_type zSolid(z);
 
-    for (int ii = 0; ii < (int) dim; ++ii)
-        zSolid[ii] = z[ii];
+// //     for (int ii = 0; ii < (int) dim; ++ii)
+// //         zSolid[ii] = z[ii];
 
-    if ( xnorm == 0.0 )
-    {
-        for (int i=0; i <(int)dim; ++i)
-            Jz[i] =  0.0;
-    }
-    else
-    {
-        if (!my_data->M_pFS->reducedFluid())
-        {
-            for (int i=0; i <(int)dim; ++i)
-            {
-                my_data->M_pFS->solid().disp()[i] =  z[i];
-            }
-            my_data->M_pFS->fluid().updateDispVelo();
-            my_data->M_pFS->solveLinearFluid();
-            my_data->M_pFS->solveLinearSolid();
-        }
-        else
-        {
-            Vector da(dim);
-            double dt   = my_data->M_pFS->fluid().dt();
-            double dti2 = 1.0/( dt*dt);
+//     if ( xnorm == 0.0 )
+//     {
+//         for (int i=0; i <(int)dim; ++i)
+//             Jz[i] =  0.0;
+//     }
+//     else
+//     {
+//         for (int i = 0; i <( int) dim; ++i)
+//         {
+//             my_data->M_pFS->solid().disp()[i] =  z[i];
+//         }
+// //         my_data->M_pFS->fluid().updateDispVelo();
+//         my_data->M_pFS->solveLinearFluid();
+//         my_data->M_pFS->solveLinearSolid();
+//     }
 
-            da = - my_data->M_pFS->fluid().density()*dti2*zSolid;
+// //     for (int i=0; i <(int)dim; ++i)
+// //         Jz[i] =  z[i] - my_data->M_pFS->dz()[i];
 
-            my_data->M_pFS->getReducedLinFluid()->setDacc(da);
-            my_data->M_pFS->getReducedLinFluid()->solveReducedLinearFluid();
-            my_data->M_pFS->solveLinearSolid();
-        }
-        for (int i=0; i <(int)dim; ++i)
-            Jz[i] =  z[i] - my_data->M_pFS->dz()[i];
-    }
-
-    std::cout << " ***** norm (Jz)= " << AZ_gvector_norm(dim, -1, Jz, proc_config)
-              << std::endl << std::endl;
+//     std::cout << " ***** norm (Jz)= " << AZ_gvector_norm(dim, -1, Jz, proc_config)
+//               << std::endl << std::endl;
 }
 
 

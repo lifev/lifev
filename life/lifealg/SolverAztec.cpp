@@ -30,8 +30,6 @@
 #include <iostream>
 #include <fstream>
 
-#include <boost/utility.hpp>
-
 #include <life/lifealg/SolverAztec.hpp>
 
 class GetPot;

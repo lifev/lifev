@@ -24,11 +24,8 @@
 #include <fstream>
 #include <vector>
 
-extern "C"
-{
     //! Aztec include
 #include "az_aztec.h"
-}
 
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifearray/sparseArray.hpp>
@@ -41,17 +38,17 @@ namespace LifeV
   \author J.-F. Gerbeau
   \date 11/2002
         01/2003 M.A. Fernandez, GetPot sections as parameter
- 
+
   \brief To use Aztec with GetPot
- 
+
   All the parameters and options can be selected from a GetPot
   file. Some of them (solvers, preconditionner,...) can be
   given with a string (e.g.: gmres, ilut, ...)
- 
+
   To see the values (including the default ones): dataAztecShowMe()
- 
+
   To see all the possible choices:  dataAztecHelp()
- 
+
   \todo dataAztecHelp() is not complete, and other items could
   be named with a string rather than with an integer
 */

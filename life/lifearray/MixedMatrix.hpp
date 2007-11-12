@@ -130,6 +130,11 @@ public:
     void diagonalize_row( UInt const r, DataType const coeff );
     //! assign a row to zero. Remark, zero might be defined for any DataType
     void zero_row( UInt const row );
+
+    //! set entries (rVec(i),rVec(i)) to coeff and rest of row r(i) to zero
+    template < typename VectorType >
+    void diagonalize( std::vector<UInt> const rVec, DataType const coeff, VectorType &b,
+                      std::vector<DataType> datum );
     //! Assigns matrix diagonal element (r,r) to coeff, other elts
     //! of row r to zero, and vector b element b(r) to coeff*datum.
     template < typename VectorType >
@@ -264,6 +269,12 @@ public:
     void diagonalize_row( UInt const r, double const coeff );
     //! assign a row to zero. Remark, zero might be defined for any double
     void zero_row( UInt const row );
+
+    //! set entries (rVec(i),rVec(i)) to coeff and rest of row r(i) to zero
+    template < typename VectorType >
+    void diagonalize( std::vector<UInt> const rVec, double const coeff, VectorType &b,
+		      std::vector<double> datum );
+
     //! Assigns matrix diagonal element (r,r) to coeff, other elts
     //! of row r to zero, and vector b element b(r) to coeff*datum.
     template < typename VectorType >
@@ -396,6 +407,12 @@ public:
     void diagonalize_row( UInt const r, double const coeff );
     //! assign a row to zero. Remark, zero might be defined for any double
     void zero_row( UInt const row );
+
+    //! set entries (rVec(i),rVec(i)) to coeff and rest of row r(i) to zero
+    template < typename VectorType >
+    void diagonalize( std::vector<UInt> const rVec, double const coeff, VectorType &b,
+                      std::vector<double> datum );
+
     //! Assigns matrix diagonal element (r,r) to coeff, other elts
     //! of row r to zero, and vector b element b(r) to coeff*datum.
     template < typename VectorType >
@@ -819,6 +836,26 @@ MixedMatr<BRows, BCols, PatternType, DataType>::
 zero_row( UInt const row )
 {
     diagonalize_row( row, 0.0 );
+}
+
+template <UInt BRows, UInt BCols, typename PatternType, typename DataType>
+template < typename VectorType >
+void
+MixedMatr<BRows, BCols, PatternType, DataType>::
+diagonalize( std::vector<UInt> const rVec,
+				DataType const coeff,
+				VectorType &b,
+				std::vector<DataType> datumVec )
+{
+     UInt sizeVec(rVec.size());
+     if ( sizeVec != datumVec.size()) 
+     { //! vectors must be of the same size
+         ERROR_MSG( "diagonalize: vectors must be of the same size\n" );
+     }
+      
+     for (UInt i=0; i < sizeVec; i++)
+       diagonalize( rVec[i], coeff, b, datumVec[i]);
+      
 }
 
 // Assigns matrix diagonal element (r,r) to coeff, other elts
@@ -1438,6 +1475,27 @@ MixedMatr<BRows, BCols, MSRPatt, double>::
 zero_row( UInt const row )
 {
     diagonalize_row( row, 0.0 );
+}
+
+template <UInt BRows, UInt BCols>
+template < typename VectorType >
+void
+MixedMatr<BRows, BCols, MSRPatt, double>::
+diagonalize( std::vector<UInt> const rVec,
+				double const coeff,
+				VectorType &b,
+				std::vector<double> datumVec )
+{
+     UInt sizeVec(rVec.size());
+     if ( sizeVec != datumVec.size()) 
+     { //! vectors must be of the same size
+         ERROR_MSG( "diagonalize: vectors must be of the same size\n" );
+     }
+      
+
+     for (UInt i=0; i < sizeVec; i++)
+       diagonalize( rVec[i], coeff, b, datumVec[i]);
+      
 }
 
 // Assigns matrix diagonal element (r,r) to coeff, other elts
@@ -2075,6 +2133,26 @@ MixedMatr<BRows, BCols, CSRPatt, double>::
 zero_row( UInt const row )
 {
     diagonalize_row( row, 0.0 );
+}
+
+template <UInt BRows, UInt BCols>
+template < typename VectorType >
+void
+MixedMatr<BRows, BCols, CSRPatt, double>::
+diagonalize( std::vector<UInt> const rVec,
+	     double const coeff,
+	     VectorType &b,
+	     std::vector<double> datumVec )
+{
+     UInt sizeVec(rVec.size());
+     if ( sizeVec != datumVec.size()) 
+     { //! vectors must be of the same size
+         ERROR_MSG( "diagonalize: vectors must be of the same size\n" );
+     }
+      
+     for (UInt i=0; i < sizeVec; i++)
+       diagonalize( rVec[i], coeff, b, datumVec[i]);
+      
 }
 
 // Assigns matrix diagonal element (r,r) to coeff, other elts

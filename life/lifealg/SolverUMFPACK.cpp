@@ -31,7 +31,6 @@
 #include <life/lifealg/SolverUMFPACK.hpp>
 
 #include <boost/numeric/ublas/matrix_sparse.hpp>
-#include <boost/numeric/ublas/io.hpp>
 
 namespace LifeV
 {

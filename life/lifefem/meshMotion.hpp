@@ -38,7 +38,7 @@
 #include <life/lifefem/elemOper.hpp>
 #include <life/lifefem/refFE.hpp>
 #include <life/lifefem/values.hpp>
-#include <life/lifefem/assemb.hpp>
+#include <life/lifefem/assembGeneric.hpp>
 #include <life/lifefem/bcManage.hpp>
 #include <life/lifealg/SolverAztec.hpp>
 
@@ -118,9 +118,9 @@ public:
     const Dof& dofMesh() const;
 
     //! checking if BC are set
-    const bool setHarmonicExtensionBC() const {return M_setBC;}
+    const bool harmonicExtensionBC() const {return M_setBC;}
     //! set the mesh BCs
-    void setHarmonicExtensionBC(BCHandler &BCh_harmonicExtension);
+    void setBC(BCHandler &BCh_harmonicExtension);
     //! returns the BCHandler
     //const BCHandler& BCh_harmonicExtension() const {return *M_BCh_harmonicExtension;}
     const BCHandler& bcHandler() const {return *M_BCh_harmonicExtension;}
@@ -277,6 +277,7 @@ void HarmonicExtension::updateExtension( Mesh& mesh, const Real& time, const UIn
         // BC boundary information update
         M_BCh_harmonicExtension->bdUpdate( mesh, _feBd, _dof_mesh );
 
+        std::cout << "bcmanage matrix" << std::endl;
         // Boundary conditions treatment on the matrix
         bcManageMatrix( _a, mesh, _dof_mesh, *M_BCh_harmonicExtension, _feBd, 1.0 );
     }
@@ -285,6 +286,8 @@ void HarmonicExtension::updateExtension( Mesh& mesh, const Real& time, const UIn
     _f = ZeroVector( _f.size() );
     _disp = ZeroVector( _disp.size() );
 
+    std::cout << "bcmanage vector" << std::endl;
+
     // Boundary conditions treatment
     bcManageVector( _f, mesh, _dof_mesh, *M_BCh_harmonicExtension, _feBd, time, 1.0 );
 
@@ -292,11 +295,12 @@ void HarmonicExtension::updateExtension( Mesh& mesh, const Real& time, const UIn
 
     _linearSolver.solve( _disp, _f, SolverAztec::SAME_PRECONDITIONER);
 
+    std::cout << "out" << std::endl;
 }
 
 
 
-// This method updates the extension of the displacement, i.e. it solves the laplacian proglem
+// This method updates the extension of the displacement, i.e. it solves the laplacian problem
 template <typename Mesh>
 void HarmonicExtension::updateExtensionTransp( Mesh& mesh, const Real& time )
 {

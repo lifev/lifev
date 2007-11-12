@@ -34,6 +34,7 @@
 #include <life/lifearray/elemMat.hpp>
 #include <life/lifearray/elemVec.hpp>
 #include <life/lifefem/elemOper.hpp>
+#include <boost/shared_ptr.hpp>
 
 #define USE_OLD_PARAMETERS 0
 #define WITH_DIVERGENCE 1
@@ -49,8 +50,10 @@ class IPStabilization
 {
 public:
 
+    typedef boost::shared_ptr<MESH> mesh_type;
+
     //! Constructor
-    IPStabilization( const MESH&     mesh,
+    IPStabilization( const mesh_type     mesh,
                      const DOF&      dof,
                      const RefFE&    refFE,
                      CurrentBdFE&    feBd,
@@ -65,28 +68,38 @@ public:
      *  @param state state vector for linearization of nonlinear stabilization
      */
     template<typename MATRIX, typename VECTOR>
-    void apply( MATRIX& matrix, const VECTOR& state );
+    void applyPressure( MATRIX& matrix, const VECTOR& state, bool verbose = true );
+    template<typename MATRIX, typename VECTOR>
+    void applyVelocity( MATRIX& matrix, const VECTOR& state, bool verbose = true );
 
+    void setGammaBeta (double gammaBeta) { M_gammaBeta  = gammaBeta;}
+    void setGammaDiv  (double gammaDiv)  { M_gammaDiv   = gammaDiv;}
+    void setGammaPress(double gammaPress){ M_gammaPress = gammaPress;}
 private:
 
     typedef ID ( *FTOP )( ID const localFace, ID const point );
 
-    const MESH&  M_mesh;
+    const mesh_type  M_mesh;
+
     const DOF&   M_dof;
+
     CurrentFE    M_fe1;
     CurrentFE    M_fe2;
     CurrentBdFE& M_feBd;
+
     Real         M_gammaBeta;
     Real         M_gammaDiv;
     Real         M_gammaPress;
+
     Real         M_viscosity;
+
     ElemMat      M_elMatU;
     ElemMat      M_elMatP;
     FTOP         M_fToP;
 }; // class IPStabilization
 
 template<typename MESH, typename DOF>
-IPStabilization<MESH, DOF>::IPStabilization( const MESH&     mesh,
+IPStabilization<MESH, DOF>::IPStabilization( const mesh_type mesh,
                                              const DOF&      dof,
                                              const RefFE&    refFE,
                                              CurrentBdFE&    feBd,
@@ -95,21 +108,24 @@ IPStabilization<MESH, DOF>::IPStabilization( const MESH&     mesh,
                                              Real            gammaDiv,
                                              Real            gammaPress,
                                              Real            viscosity ) :
-    M_mesh( mesh ),
-    M_dof( dof ),
-    M_fe1( refFE, getGeoMap(mesh), quadRule ),
-    M_fe2( refFE, getGeoMap(mesh), quadRule ),
-    M_feBd( feBd ),
-    M_gammaBeta( gammaBeta ),
-    M_gammaDiv( gammaDiv ),
+    M_mesh      ( mesh ),
+    M_dof       ( dof ),
+    M_fe1       ( refFE, getGeoMap(*mesh), quadRule ),
+    M_fe2       ( refFE, getGeoMap(*mesh), quadRule ),
+    M_feBd      ( feBd ),
+    M_gammaBeta ( gammaBeta ),
+    M_gammaDiv  ( gammaDiv ),
     M_gammaPress( gammaPress ),
-    M_viscosity( viscosity ),
-    M_elMatU( M_fe1.nbNode, nDimensions, nDimensions ),
-    M_elMatP( M_fe1.nbNode, nDimensions+1, nDimensions+1 )
+    M_viscosity ( viscosity ),
+    M_elMatU    ( M_fe1.nbNode, nDimensions    , nDimensions   ),
+    M_elMatP    ( M_fe1.nbNode, nDimensions + 1, nDimensions+1 )
 {
     switch( M_fe1.nbNode )
     {
         case 4:
+            M_fToP = LinearTetra::fToP;
+            break;
+        case 5:
             M_fToP = LinearTetra::fToP;
             break;
         case 10:
@@ -122,7 +138,7 @@ IPStabilization<MESH, DOF>::IPStabilization( const MESH&     mesh,
             M_fToP = QuadraticHexa::fToP;
             break;
         default:
-            ERROR_MSG( "This refFE is not allowed with IP stabilisation" );
+//            ERROR_MSG( "This refFE is not allowed with IP stabilisation" );
             break;
     }
 }
@@ -131,53 +147,57 @@ IPStabilization<MESH, DOF>::IPStabilization( const MESH&     mesh,
 
 template<typename MESH, typename DOF>
 template<typename MATRIX, typename VECTOR>
-void IPStabilization<MESH, DOF>::apply( MATRIX& matrix, const VECTOR& state )
+void IPStabilization<MESH, DOF>::applyPressure( MATRIX& matrix,  const VECTOR& state, const bool verbose )
 {
-    if ( M_gammaBeta == 0 && M_gammaDiv == 0 && M_gammaPress == 0 )
+    if ( M_gammaPress == 0.)
     {
         return;
     }
 
-    Chrono chronoBeta;
     Chrono chronoUpdate;
+    Chrono chronoBeta;
     Chrono chronoElemComp;
-    Chrono chronoAssembly;
+    Chrono chronoAssembly1;
+    Chrono chronoAssembly2;
+    Chrono chronoAssembly3;
+    Chrono chronoAssembly4;
+
     const UInt nDof = M_dof.numTotalDof();
 
     // local trace of the velocity
     ElemVec beta( M_feBd.nbNode, nDimensions );
 
     // loop on interior faces
-    for ( UInt iFace = M_mesh.numBFaces()+1; iFace<= M_mesh.numFaces();
+    for ( UInt iFace = M_mesh->numBFaces() + 1; iFace<= M_mesh->numFaces();
           ++iFace )
     {
         chronoUpdate.start();
         // update current finite elements
 #if WITH_DIVERGENCE
-        M_feBd.updateMeas( M_mesh.face( iFace ) );
+        M_feBd.updateMeas( M_mesh->face( iFace ) );
 #else
-        M_feBd.updateMeasNormal( M_mesh.face( iFace ) );
+        M_feBd.updateMeasNormal( M_mesh->face( iFace ) );
         KNM<Real>& normal = M_feBd.normal;
 #endif
         const Real hK2 = M_feBd.measure();
-        const UInt iElAd1 = M_mesh.face( iFace ).ad_first();
-        const UInt iElAd2 = M_mesh.face( iFace ).ad_second();
-        M_fe1.updateFirstDeriv( M_mesh.volumeList( iElAd1 ) );
-        M_fe2.updateFirstDeriv( M_mesh.volumeList( iElAd2 ) );
+        const UInt iElAd1 = M_mesh->face( iFace ).ad_first();
+        const UInt iElAd2 = M_mesh->face( iFace ).ad_second();
+        M_fe1.updateFirstDeriv( M_mesh->volumeList( iElAd1 ) );
+        M_fe2.updateFirstDeriv( M_mesh->volumeList( iElAd2 ) );
         chronoUpdate.stop();
 
-        chronoBeta.start();
+       chronoBeta.start();
         // determine bmax = ||\beta||_{0,\infty,K}
         // first, get the local trace of the velocity into beta
 
         // local id of the face in its adjacent element
-        UInt iFaEl = M_mesh.face( iFace ).pos_first();
+        UInt iFaEl = M_mesh->face( iFace ).pos_first();
         for ( int iNode = 0; iNode < M_feBd.nbNode; ++iNode )
         {
             UInt iloc = M_fToP( iFaEl, iNode+1 );
             for ( int iCoor = 0; iCoor < M_fe1.nbCoor; ++iCoor )
             {
-                UInt ig = M_dof.localToGlobal( iElAd1, iloc+1 )-1+iCoor*nDof;
+                UInt ig = M_dof.localToGlobal( iElAd1, iloc + 1 ) - 1 +iCoor*nDof;
                 beta.vec()[ iCoor*M_feBd.nbNode + iNode ] = state( ig );
             }
         }
@@ -189,7 +209,9 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix, const VECTOR& state )
             if ( bmax < fabs( beta.vec()[ l ] ) )
                 bmax = fabs( beta.vec()[ l ] );
         }
+
         chronoBeta.stop();
+
 
         // pressure stabilization
         if ( M_gammaPress != 0.0 )
@@ -204,44 +226,150 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix, const VECTOR& state )
 
             M_elMatP.zero();
             chronoElemComp.start();
-            ipstab_grad(coeffPress, M_elMatP, M_fe1, M_fe1, M_feBd,
+            ipstab_grad( coeffPress, M_elMatP, M_fe1, M_fe1, M_feBd,
                         nDimensions, nDimensions);
+//            M_elMatP.showMe();
             chronoElemComp.stop();
-            chronoAssembly.start();
-            assemb_mat(matrix, M_elMatP, M_fe1, M_dof,
-                       nDimensions, nDimensions);
-            chronoAssembly.stop();
+            chronoAssembly1.start();
+//             assemb_mat(matrix, M_elMatP, M_fe1, M_dof,
+//                        nDimensions, nDimensions);
+            assembleMatrix(matrix, M_elMatP, M_fe1, M_dof,
+                           nDimensions, nDimensions, nDimensions*nDof, nDimensions*nDof);
+            chronoAssembly1.stop();
 
             M_elMatP.zero();
             chronoElemComp.start();
-            ipstab_grad(coeffPress, M_elMatP, M_fe2, M_fe2, M_feBd,
+            ipstab_grad( coeffPress, M_elMatP, M_fe2, M_fe2, M_feBd,
                         nDimensions, nDimensions);
             chronoElemComp.stop();
-            chronoAssembly.start();
-            assemb_mat(matrix, M_elMatP, M_fe2, M_dof,
-                       nDimensions, nDimensions);
-            chronoAssembly.stop();
+            chronoAssembly2.start();
+//             assemb_mat(matrix, M_elMatP, M_fe2, M_dof,
+//                        nDimensions, nDimensions);
+            assembleMatrix(matrix, M_elMatP, M_fe2, M_dof,
+                           nDimensions, nDimensions, nDimensions*nDof, nDimensions*nDof);
+            chronoAssembly2.stop();
 
             M_elMatP.zero();
             chronoElemComp.start();
-            ipstab_grad(-coeffPress, M_elMatP, M_fe1, M_fe2, M_feBd,
+            ipstab_grad(- coeffPress, M_elMatP, M_fe1, M_fe2, M_feBd,
                         nDimensions, nDimensions);
             chronoElemComp.stop();
-            chronoAssembly.start();
-            assemb_mat(matrix, M_elMatP, M_fe1, M_fe2, M_dof,
-                       nDimensions, nDimensions);
-            chronoAssembly.stop();
+            chronoAssembly3.start();
+//             assemb_mat(matrix, M_elMatP, M_fe1, M_fe2, M_dof,
+//                        nDimensions, nDimensions);
+            assembleMatrix(matrix, M_elMatP, M_fe1, M_fe2, M_dof, M_dof,
+                       nDimensions, nDimensions, nDimensions*nDof, nDimensions*nDof);
+            chronoAssembly3.stop();
 
             M_elMatP.zero();
             chronoElemComp.start();
-            ipstab_grad(-coeffPress, M_elMatP, M_fe2, M_fe1, M_feBd,
+            ipstab_grad(- coeffPress, M_elMatP, M_fe2, M_fe1, M_feBd,
                         nDimensions, nDimensions);
             chronoElemComp.stop();
-            chronoAssembly.start();
-            assemb_mat(matrix, M_elMatP, M_fe2, M_fe1, M_dof,
-                       nDimensions, nDimensions);
-            chronoAssembly.stop();
+            chronoAssembly4.start();
+//             assemb_mat(matrix, M_elMatP, M_fe2, M_fe1, M_dof,
+//                        nDimensions, nDimensions);
+            assembleMatrix(matrix, M_elMatP, M_fe2, M_fe1, M_dof, M_dof,
+                       nDimensions, nDimensions, nDimensions*nDof, nDimensions*nDof);
+            chronoAssembly4.stop();
         }
+
+
+    } // loop on interior faces
+    if (verbose)
+        {
+            std::cout << std::endl;
+            std::cout << "   .   Updating of element   done in "
+                      << chronoUpdate.diff_cumul()   << " s." << std::endl;
+            std::cout << "   .   Determination of beta done in "
+                      << chronoBeta.diff_cumul()     << " s." << std::endl;
+            std::cout << "   .   Element computations  done in "
+                      << chronoElemComp.diff_cumul() << " s." << std::endl;
+//             std::cout << "   .   Assembly              done in "
+//                       << chronoAssembly.diff_cumul() << " s." << std::endl;
+        }
+
+
+//     std::cout << chronoAssembly1.diff_cumul() << " s." << std::endl;
+//     std::cout << chronoAssembly1.diff_cumul() << " s." << std::endl;
+//     std::cout << chronoAssembly2.diff_cumul() << " s." << std::endl;
+//     std::cout << chronoAssembly3.diff_cumul() << " s." << std::endl;
+//     std::cout << chronoAssembly4.diff_cumul() << " s." << std::endl;
+//     std::cout << chronoAssembly5.diff_cumul() << " s." << std::endl;
+//     std::cout << chronoAssembly6.diff_cumul() << " s." << std::endl;
+//     std::cout << chronoAssembly7.diff_cumul() << " s." << std::endl;
+//     std::cout << chronoAssembly8.diff_cumul() << " s." << std::endl;
+
+} // apply(...)
+
+
+
+template<typename MESH, typename DOF>
+template<typename MATRIX, typename VECTOR>
+void IPStabilization<MESH, DOF>::applyVelocity( MATRIX& matrix, const VECTOR& state, const bool verbose )
+{
+    if ( M_gammaBeta == 0 && M_gammaDiv == 0 )
+    {
+        return;
+    }
+
+    Chrono chronoBeta;
+    Chrono chronoUpdate;
+    Chrono chronoElemComp;
+    Chrono chronoAssembly5;
+    Chrono chronoAssembly6;
+    Chrono chronoAssembly7;
+    Chrono chronoAssembly8;
+    Chrono chronoAssembly;
+
+    const UInt nDof = M_dof.numTotalDof();
+
+    // local trace of the velocity
+    ElemVec beta( M_feBd.nbNode, nDimensions );
+
+    // loop on interior faces
+    for ( UInt iFace = M_mesh->numBFaces() + 1; iFace<= M_mesh->numFaces();
+          ++iFace )
+    {
+        chronoUpdate.start();
+        // update current finite elements
+#if WITH_DIVERGENCE
+        M_feBd.updateMeas( M_mesh->face( iFace ) );
+#else
+        M_feBd.updateMeasNormal( M_mesh->face( iFace ) );
+        KNM<Real>& normal = M_feBd.normal;
+#endif
+        const Real hK2 = M_feBd.measure();
+        const UInt iElAd1 = M_mesh->face( iFace ).ad_first();
+        const UInt iElAd2 = M_mesh->face( iFace ).ad_second();
+        M_fe1.updateFirstDeriv( M_mesh->volumeList( iElAd1 ) );
+        M_fe2.updateFirstDeriv( M_mesh->volumeList( iElAd2 ) );
+        chronoUpdate.stop();
+
+        chronoBeta.start();
+        // determine bmax = ||\beta||_{0,\infty,K}
+        // first, get the local trace of the velocity into beta
+
+        // local id of the face in its adjacent element
+        UInt iFaEl = M_mesh->face( iFace ).pos_first();
+        for ( int iNode = 0; iNode < M_feBd.nbNode; ++iNode )
+        {
+            UInt iloc = M_fToP( iFaEl, iNode+1 );
+            for ( int iCoor = 0; iCoor < M_fe1.nbCoor; ++iCoor )
+            {
+                UInt ig = M_dof.localToGlobal( iElAd1, iloc + 1 ) - 1 +iCoor*nDof;
+                beta.vec()[ iCoor*M_feBd.nbNode + iNode ] = state( ig + 1 );
+            }
+        }
+
+        // second, calculate its max norm
+        Real bmax = fabs( beta.vec()[ 0 ] );
+        for ( int l = 1; l < int( M_fe1.nbCoor*M_feBd.nbNode ); ++l )
+        {
+            if ( bmax < fabs( beta.vec()[ l ] ) )
+                bmax = fabs( beta.vec()[ l ] );
+        }
+        chronoBeta.stop();
 
         // velocity stabilization
         if ( ( M_gammaDiv != 0 || M_gammaBeta != 0 ) && bmax > 0 )
@@ -290,12 +418,16 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix, const VECTOR& state )
             nDimensions );
 #endif
             chronoElemComp.stop();
-            chronoAssembly.start();
+            chronoAssembly5.start();
             for ( UInt iComp = 0; iComp<nDimensions; ++iComp )
                 for ( UInt jComp = 0; jComp<nDimensions; ++jComp )
-                    assemb_mat( matrix, M_elMatU, M_fe1, M_dof,
-                                iComp, jComp );
-            chronoAssembly.stop();
+                    {
+//                         assemb_mat( matrix, M_elMatU, M_fe1, M_dof,
+//                                     iComp, jComp );
+                        assembleMatrix( matrix, M_elMatU, M_fe1, M_dof,
+                                         iComp, jComp, iComp*nDof, jComp*nDof );
+                    }
+            chronoAssembly5.stop();
 
             M_elMatU.zero();
             chronoElemComp.start();
@@ -308,12 +440,16 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix, const VECTOR& state )
             nDimensions );
 #endif
             chronoElemComp.stop();
-            chronoAssembly.start();
+            chronoAssembly6.start();
             for ( UInt iComp = 0; iComp<nDimensions; ++iComp )
                 for ( UInt jComp = 0; jComp<nDimensions; ++jComp )
-                    assemb_mat( matrix, M_elMatU, M_fe2, M_dof,
-                                iComp, jComp );
-            chronoAssembly.stop();
+                    {
+//                         assemb_mat( matrix, M_elMatU, M_fe2, M_dof,
+//                                     iComp, jComp );
+                        assembleMatrix( matrix, M_elMatU, M_fe2, M_dof,
+                                        iComp, jComp, iComp*nDof, jComp*nDof );
+                    }
+            chronoAssembly6.stop();
 
             M_elMatU.zero();
             chronoElemComp.start();
@@ -326,12 +462,16 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix, const VECTOR& state )
                          nDimensions );
 #endif
             chronoElemComp.stop();
-            chronoAssembly.start();
+            chronoAssembly7.start();
             for ( UInt iComp = 0; iComp<nDimensions; ++iComp )
                 for ( UInt jComp = 0; jComp<nDimensions; ++jComp )
-                    assemb_mat( matrix, M_elMatU, M_fe1, M_fe2, M_dof,
-                                iComp, jComp );
-            chronoAssembly.stop();
+                {
+//                         assemb_mat( matrix, M_elMatU, M_fe1, M_fe2, M_dof,
+//                                 iComp, jComp );
+                    assembleMatrix( matrix, M_elMatU, M_fe1, M_fe2, M_dof, M_dof,
+                                    iComp, jComp, iComp*nDof, jComp*nDof );
+                }
+            chronoAssembly7.stop();
 
             M_elMatU.zero();
             chronoElemComp.start();
@@ -344,27 +484,47 @@ void IPStabilization<MESH, DOF>::apply( MATRIX& matrix, const VECTOR& state )
                          nDimensions );
 #endif
             chronoElemComp.stop();
-            chronoAssembly.start();
+            chronoAssembly8.start();
             for ( UInt iComp = 0; iComp<nDimensions; ++iComp )
                 for ( UInt jComp = 0; jComp<nDimensions; ++jComp )
-                    assemb_mat( matrix, M_elMatU, M_fe2, M_fe1, M_dof,
-                                iComp, jComp );
-            chronoAssembly.stop();
+                {
+//                     assemb_mat( matrix, M_elMatU, M_fe2, M_fe1, M_dof,
+//                                 iComp, jComp );
+                    assembleMatrix( matrix, M_elMatU, M_fe2, M_fe1, M_dof, M_dof,
+                                     iComp, jComp, iComp*nDof, jComp*nDof );
+                }
+            chronoAssembly8.stop();
         }
 
     } // loop on interior faces
-    std::cout << std::endl;
-    std::cout << "   .   Updating of element   done in "
-              << chronoUpdate.diff_cumul()   << " s." << std::endl;
-    std::cout << "   .   Determination of beta done in "
-              << chronoBeta.diff_cumul()     << " s." << std::endl;
-    std::cout << "   .   Element computations  done in "
-              << chronoElemComp.diff_cumul() << " s." << std::endl;
-    std::cout << "   .   Assembly              done in "
-              << chronoAssembly.diff_cumul() << " s." << std::endl;
-    std::cout << "   .   total                                   ";
+    if (verbose)
+        {
+            std::cout << std::endl;
+            std::cout << "   .   Updating of element   done in "
+                      << chronoUpdate.diff_cumul()   << " s." << std::endl;
+            std::cout << "   .   Determination of beta done in "
+                      << chronoBeta.diff_cumul()     << " s." << std::endl;
+            std::cout << "   .   Element computations  done in "
+                      << chronoElemComp.diff_cumul() << " s." << std::endl;
+            std::cout << "   .   Assembly              done in "
+                      << chronoAssembly.diff_cumul() << " s." << std::endl;
+            std::cout << "   .   total                                   ";
+        }
+
+
+//     std::cout << chronoAssembly1.diff_cumul() << " s." << std::endl;
+//     std::cout << chronoAssembly1.diff_cumul() << " s." << std::endl;
+//     std::cout << chronoAssembly2.diff_cumul() << " s." << std::endl;
+//     std::cout << chronoAssembly3.diff_cumul() << " s." << std::endl;
+//     std::cout << chronoAssembly4.diff_cumul() << " s." << std::endl;
+//     std::cout << chronoAssembly5.diff_cumul() << " s." << std::endl;
+//     std::cout << chronoAssembly6.diff_cumul() << " s." << std::endl;
+//     std::cout << chronoAssembly7.diff_cumul() << " s." << std::endl;
+//     std::cout << chronoAssembly8.diff_cumul() << " s." << std::endl;
 
 } // apply(...)
+
+
 
 } // namespace details
 

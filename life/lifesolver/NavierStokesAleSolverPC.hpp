@@ -38,7 +38,7 @@
 #include <life/lifefem/elemOper.hpp>
 #include <life/lifefem/values.hpp>
 #include <life/lifearray/pattern.hpp>
-#include <life/lifefem/assemb.hpp>
+#include <life/lifefem/assembGeneric.hpp>
 #include <life/lifefem/bcManage.hpp>
 #include <life/lifealg/algebraic_facto.hpp>
 #include <life/lifecore/chrono.hpp>
@@ -47,7 +47,7 @@
 namespace LifeV
 {
 /*!
-  \class NavierStokesSolverPC
+  \class NavierStokesALESolverPC
 
    This class implements an NavierStokes ALE solver via exact factorization. Preconditioning of the
    Schur Complement is done by an algebraic Chorin-Temam pressure-corrected preconditioner

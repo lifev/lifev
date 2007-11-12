@@ -32,6 +32,8 @@
 #include <life/lifecore/life.hpp>
 #include <life/lifemesh/dataMesh.hpp>
 #include <life/lifefem/dataTime.hpp>
+#include <map>
+#include <list>
 
 namespace LifeV
 {
@@ -47,6 +49,7 @@ public:
 
     //! Constructor
     DataElasticStructure( const GetPot& dfile );
+    DataElasticStructure( const DataElasticStructure &dataElasticStructure );
 
     //! Ouptut
     void showMe( std::ostream& c = std::cout ) const;
@@ -56,10 +59,31 @@ public:
 
     //! getters
 
-    Real young(){return _E;}
-    Real poisson(){return _nu;}
+    const Real rho()     const {return _rho;}
+//     const Real young()   const {return _E;}
+//     const Real poisson() const {return _nu;}
 
-protected:
+//     const Real lambda()  const {return _lambda;}
+//     const Real mu()      const {return _mu;}
+    const Real factor()  const {return _factor;}
+
+    const UInt verbose() const {return _verbose;}
+
+    const double poisson(int mat) const
+        {return M_poisson.find(mat)->second;}
+    const double young(int mat) const
+        {return M_young.find(mat)->second;}
+
+    const double lambda(int mat) const
+        {return M_lambda.find(mat)->second;}
+    const double mu(int mat) const
+        {return M_mu.find(mat)->second;}
+
+    const double lambda() const {return _lambda;}
+    const double mu() const {return _mu;}
+
+    std::string order() const {return M_order;}
+private:
     //! Physics
     Real _rho; // densisty
     Real _E;  // Young modulus
@@ -67,9 +91,17 @@ protected:
     Real _lambda, _mu; // Lame coefficients
     Real _endtime; // end time
 
+    std::map<int, double>  M_poisson;
+    std::map<int, double>  M_young;
+
+    std::map<int, double>  M_lambda;
+    std::map<int, double>  M_mu;
+
     //! Miscellaneous
     Real _factor; // amplification factor for deformed mesh
     UInt _verbose; // temporal output verbose
+    std::string M_order;
+
 
 };
 
@@ -84,24 +116,93 @@ protected:
 template <typename Mesh>
 DataElasticStructure<Mesh>::
 DataElasticStructure( const GetPot& dfile ) :
-        DataMesh<Mesh>( dfile, "solid/discretization" ),
-        DataTime( dfile, "solid/discretization" )
+    DataMesh<Mesh>( dfile, "solid/discretization" ),
+    DataTime( dfile, "solid/discretization" )
 {
     // physics
-    _rho = dfile( "solid/physics/density", 1. );
-    _E = dfile( "solid/physics/young" , 1. );
-    _nu = dfile( "solid/physics/poisson" , 0.25 );
+    _rho     = dfile( "solid/physics/density", 1. );
+    _E       = dfile( "solid/physics/young" , 1. );
+    _nu      = dfile( "solid/physics/poisson" , 0.25 );
     _endtime = dfile( "solid/physics/endtime", 1. );
 
     // miscellaneous
-    _factor = dfile( "solid/miscellaneous/factor", 1.0 );
+    _factor  = dfile( "solid/miscellaneous/factor", 1.0 );
+    std::cout << "factor " << _factor << std::endl;
     _verbose = dfile( "solid/miscellaneous/verbose", 1 );
 
+    M_order  = dfile( "solid/discretization/order", "P1");
+
     // Lame coefficients
-    _lambda = _E * _nu / ( ( 1.0 + _nu ) * ( 1.0 - 2.0 * _nu ) );
-    _mu = _E / ( 2.0 * ( 1.0 + _nu ) );
+    _lambda  = _E * _nu / ( ( 1.0 + _nu ) * ( 1.0 - 2.0 * _nu ) );
+    _mu      = _E / ( 2.0 * ( 1.0 + _nu ) );
+
+    std::string flagList;
+    flagList = dfile("solid/physics/material_flag", "0");
+    std::list<int> fList;
+    parseList(flagList, fList);
+
+    std::string youngList;
+    youngList =  dfile("solid/physics/young", "0.");
+    std::list<double> yList;
+    parseList(youngList, yList);
+
+    std::string poissonList;
+    poissonList = dfile("solid/physics/poisson", "0.");
+    std::list<double> pList;
+    parseList(poissonList, pList);
+
+//    if ((fList.size() != yList.size()) || (flist.size() != pList.size()))
+    ASSERT((fList.size() == yList.size()) && (fList.size() == pList.size()),"problem with the young modulus and poisson coef definiton : inconsistant sizes");
+
+    std::list<int>::iterator    fit;
+    std::list<double>::iterator yit = yList.begin();
+    std::list<double>::iterator pit = pList.begin();
+
+    std::cout << "flag       young       poisson" << std::endl;
+    for (fit = fList.begin(); fit != fList.end(); ++fit, ++yit, ++pit)
+    {
+        double young   = *yit;
+        double poisson = *pit;
+
+        M_young.insert(make_pair(*fit, young));
+        M_poisson.insert(make_pair(*fit, poisson));
+
+        std::cout << *fit << " " << young << " " << poisson << std::endl;
+
+        double lambda = young*poisson/( ( 1.0 + poisson ) * ( 1.0 - 2.0 * poisson ) );
+        M_lambda.insert(make_pair(*fit, lambda));
+
+        double mu = young/( 2.0 * ( 1.0 + poisson ) );
+        M_mu.insert(make_pair(*fit, mu));
+
+        std::cout << *fit << " " << lambda << " " << mu << std::endl;
+    }
 
 }
+
+
+template <typename Mesh>
+DataElasticStructure<Mesh>::
+DataElasticStructure( const DataElasticStructure& dataElasticStructure ):
+    DataMesh<Mesh>               ( dataElasticStructure ),
+    DataTime                     ( dataElasticStructure ),
+    _rho                         ( dataElasticStructure._rho ),
+    _E                           ( dataElasticStructure._E ),
+    _nu                          ( dataElasticStructure._nu ),
+    _lambda                      ( dataElasticStructure._lambda ),
+    _mu                          ( dataElasticStructure._mu ),
+    _endtime                     ( dataElasticStructure._endtime ),
+    M_young                      ( dataElasticStructure.M_young ),
+    M_poisson                    ( dataElasticStructure.M_poisson ),
+    M_lambda                     ( dataElasticStructure.M_lambda ),
+    M_mu                         ( dataElasticStructure.M_mu ),
+    _factor                      ( dataElasticStructure._factor ),
+    _verbose                     ( dataElasticStructure._verbose ),
+    M_order                      ( dataElasticStructure.M_order )
+{
+}
+
+
 
 
 // Output

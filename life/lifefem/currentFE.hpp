@@ -22,7 +22,7 @@
 #include <life/lifecore/life.hpp>
 #include <life/lifefem/geoMap.hpp>
 #include <life/lifefem/refFE.hpp>
-#include <life/lifefem/geoMap.hpp>
+//#include <life/lifefem/geoMap.hpp>
 /*!
   \file currentFE.h
   \brief Structure for the current finite element
@@ -76,6 +76,10 @@ private:
 
 
     UInt _currentId;
+    UInt _currentLocalId;
+
+
+
 #ifdef TEST_PRE
 
     bool _hasJac;
@@ -121,6 +125,11 @@ public:
     inline UInt currentId() const
     {
         return _currentId;
+    }
+
+    inline UInt currentLocalId() const
+    {
+        return _currentLocalId;
     }
 #ifdef TEST_PRE
     /*!
@@ -317,7 +326,8 @@ void CurrentFE::update( const GEOELE& geoele )
     _hasQuadPtCoor = false;
 #endif
 
-    _currentId = geoele.id();
+    _currentId      = geoele.id();
+    _currentLocalId = geoele.localId();
 }
 
 /*!
@@ -334,7 +344,8 @@ void CurrentFE::updateJac( const GEOELE& geoele )
     _hasQuadPtCoor = false;
 #endif
 
-    _currentId = geoele.id();
+    _currentId      = geoele.id();
+    _currentLocalId = geoele.localId();
     //! update the definition of the geo points
     _update_point( geoele );
     //! compute the jacobian and its determinant...
@@ -355,7 +366,8 @@ void CurrentFE::updateJacQuadPt( const GEOELE& geoele )
     _hasQuadPtCoor = true;
 #endif
 
-    _currentId = geoele.id();
+    _currentId      = geoele.id();
+    _currentLocalId = geoele.localId();
     //! update the definition of the geo points
     _update_point( geoele );
     //! compute the jacobian and its determinant...
@@ -378,7 +390,8 @@ void CurrentFE::updateFirstDeriv( const GEOELE& geoele )
     _hasQuadPtCoor = false;
 #endif
 
-    _currentId = geoele.id();
+    _currentId      = geoele.id();
+    _currentLocalId = geoele.localId();
     //! update the definition of the geo points
     _update_point( geoele );
     //! compute the inverse jacobian...
@@ -401,7 +414,8 @@ void CurrentFE::updateFirstDerivQuadPt( const GEOELE& geoele )
     _hasQuadPtCoor = true;
 #endif
 
-    _currentId = geoele.id();
+    _currentId      = geoele.id();
+    _currentLocalId = geoele.localId();
     //! update the definition of the geo points
     _update_point( geoele );
     //! compute the inverse jacobian...
@@ -427,7 +441,8 @@ void CurrentFE::updateSecondDeriv( const GEOELE& geoele )
     _hasQuadPtCoor = false;
 #endif
 
-    _currentId = geoele.id();
+    _currentId      = geoele.id();
+    _currentLocalId = geoele.localId();
     //! update the definition of the geo points
     _update_point( geoele );
     //! compute the inverse jacobian...
@@ -450,7 +465,8 @@ void CurrentFE::updateSecondDerivQuadPt( const GEOELE& geoele )
     _hasQuadPtCoor = true;
 #endif
 
-    _currentId = geoele.id();
+    _currentId      = geoele.id();
+    _currentLocalId = geoele.localId();
     //! update the definition of the geo points
     _update_point( geoele );
     //! compute the inverse jacobian...
@@ -474,7 +490,8 @@ void CurrentFE::updateFirstSecondDeriv( const GEOELE& geoele )
     _hasQuadPtCoor = false;
 #endif
 
-    _currentId = geoele.id();
+    _currentId      = geoele.id();
+    _currentLocalId = geoele.localId();
     //! update the definition of the geo points
     _update_point( geoele );
     //! compute the inverse jacobian...
@@ -496,7 +513,8 @@ void CurrentFE::updateFirstSecondDerivQuadPt( const GEOELE& geoele )
     _hasQuadPtCoor = true;
 #endif
 
-    _currentId = geoele.id();
+    _currentId      = geoele.id();
+    _currentLocalId = geoele.localId();
     //! update the definition of the geo points
     _update_point( geoele );
     //! compute the inverse jacobian...

@@ -13,7 +13,7 @@ diffusion_scalar  = 1.  # scalar diffusion coefficient
 diffusion_tensor  = '1. 0. 0.  0. 1. 0  0. 0. 1.' # diffusion tensor
 
 [../linearsolver]
-theLinearSolver   = 0    # 0: Aztec, 1: UMFPack (UMFPack not implemented yet)
+theLinearSolver   = 1    # 0: Aztec, 1: UMFPack (UMFPack not implemented yet)
 
 [../discretization]
 mesh_dir    = ../data/mesh/inria/ # the directory where the mesh file is

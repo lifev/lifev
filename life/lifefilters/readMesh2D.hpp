@@ -293,7 +293,7 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
     char __buf[256];
     __is >> __buf;
     Debug() << "buf: "<< __buf << "\n";
-    uint __n;
+    UInt __n;
     __is >> __n;
     Debug() << "number of nodes: " << __n;
 
@@ -303,12 +303,12 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
 
     std::vector<double> __x(3*__n);
     std::vector<bool> __isonboundary(__n);
-    std::vector<uint> __whichboundary(__n);
+    std::vector<UInt> __whichboundary(__n);
     Debug() << "reading "<< __n << " nodes\n";
     std::map<int,int> itoii;
-    for( uint __i = 0; __i < __n;++__i )
+    for( UInt __i = 0; __i < __n;++__i )
     {
-        uint __ni;
+        UInt __ni;
         __is >> __ni
              >> __x[3*__i]
              >> __x[3*__i+1]
@@ -320,7 +320,7 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
     Debug() << "buf: "<< __buf << "\n";
     __is >> __buf;
     Debug() << "buf: "<< __buf << "\n";
-    uint __nele;
+    UInt __nele;
     __is >> __nele;
 
     typename RegionMesh2D<GeoShape, MC>::EdgeType * pe = 0;
@@ -333,7 +333,7 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
     std::vector<int> __gt(16);
     __gt.assign( 16, 0 );
 
-    for( uint __i = 0; __i < __nele;++__i )
+    for( UInt __i = 0; __i < __nele;++__i )
     {
         int __ne, __t, __tag, __np, __dummy;
         __is >> __ne
@@ -361,7 +361,7 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
     std::cout << "\n";
 
     // Euler formulas
-    uint n_elements = __gt[2];
+    UInt n_elements = __gt[2];
  
     // Only Boundary Edges (in a next version I will allow for different choices)
     mesh.setMaxNumEdges( __gt[1] );
@@ -383,7 +383,7 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
 
     __isonboundary.assign( __n, false );
     __whichboundary.assign( __n, 0 );
-    for( uint __i = 0; __i < __nele;++__i )
+    for( UInt __i = 0; __i < __nele;++__i )
     {
         switch( __etype[__i] )
         {
@@ -413,7 +413,7 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
     Debug() << "number of vertices : " << mesh.numVertices() << "\n";
     Debug() << "number of boundary vertices : " << mesh.numBVertices() << "\n";
 
-    for( uint __i = 0; __i < __n;++__i )
+    for( UInt __i = 0; __i < __n;++__i )
     {
         pp = &mesh.addPoint( __isonboundary[ __i ] );
         pp->setMarker( __whichboundary[__i] );
@@ -422,7 +422,7 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
     }
 
     // add the element to the mesh
-    for( uint __i = 0; __i < __nele;++__i )
+    for( UInt __i = 0; __i < __nele;++__i )
     {
         switch( __etype[__i] )
         {

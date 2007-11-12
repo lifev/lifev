@@ -30,9 +30,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 #include <cstdlib>
 
+#include <boost/shared_ptr.hpp>
+
 namespace LifeV
 {
-template <class Vector, class Real>
+template <typename VectorType, typename DataType>
 class generalizedAitken
 {
     /*!
@@ -40,26 +42,25 @@ class generalizedAitken
       See "A domain decompostion framework for fluid/structure interaction problems"
       by Simone Deparis, Marco Discacciati and Alfio Quarteroni for references
     */
+    typedef VectorType                     vector_type;
+    typedef boost::shared_ptr<vector_type> vector_ptrtype;
 
 public:
 
     // Constructors
 
-    generalizedAitken()
-        :
-        M_nDof ( 0 ),
-        M_lambda (),
-        M_muS (),
-        M_muF (),
+    generalizedAitken():
+        M_lambda    ( ),
+        M_muS       ( ),
+        M_muF       ( ),
         M_defOmegaS ( 0.1 ),
         M_defOmegaF ( 0.1 ),
-        M_firstCall( true ),
-        M_issetup( false )
+        M_firstCall ( true ),
+        M_issetup   ( false )
         {}
 
-    generalizedAitken( const int _nDof,
-                       const Real _defOmegaS = 0.1,
-                       const Real _defOmegaF = 0.1 );
+    generalizedAitken( const DataType _defOmegaS,
+                       const DataType _defOmegaF = 0.1 );
 
 
     // Destructor
@@ -68,37 +69,34 @@ public:
 
     // Member functions
 
-    void setup( const int _nDof );
-
-    void setDefault( const Real _defOmegaS = 0.1,
-                     const Real _defOmegaF = 0.1 );
+    void setDefault( const DataType _defOmegaS = 0.1,
+                     const DataType _defOmegaF = 0.1 );
     void restart();
 
-    Vector computeDeltaLambda( const Vector &,
-                               const Vector &,
-                               const Vector & );
+    vector_type computeDeltaLambda( const vector_type &,
+                                    const vector_type &,
+                                   const vector_type & );
 
-    Vector computeDeltaLambda( const Vector &,
-                               const Vector & );
+    vector_type computeDeltaLambda( const vector_type &,
+                                   const vector_type & );
 
 
 private:
 
     //! fluid/structure interface dof count
-    UInt M_nDof;
 
     //! \lambda^{k - 1}
-    Vector M_lambda;
+    vector_ptrtype M_lambda;
 
     //! \mu_s^{k - 1}
-    Vector M_muS;
+    vector_ptrtype M_muS;
 
     //! \mu_f^{k - 1}
-    Vector M_muF;
+    vector_ptrtype M_muF;
 
     //! defaults \omega_s and \omega_f
-    Real M_defOmegaS;
-    Real M_defOmegaF;
+    DataType M_defOmegaS;
+    DataType M_defOmegaF;
 
     //! first time call boolean
     bool M_firstCall;
@@ -115,55 +113,33 @@ private:
 // Constructors
 //
 
-template <class Vector, class Real>
-generalizedAitken<Vector, Real>::generalizedAitken( const int _nDof,
-                                                    const Real _defOmegaF,
-                                                    const Real _defOmegaS ) :
-    M_nDof ( _nDof ),
-    M_lambda ( ZeroVector( _nDof ) ),
-    M_muS ( ZeroVector( _nDof ) ),
-    M_muF ( ZeroVector( _nDof ) ),
-    M_defOmegaS ( _defOmegaS ),
-    M_defOmegaF ( _defOmegaF ),
-    M_firstCall( true )
+template <class VectorType, class DataType>
+generalizedAitken<VectorType, DataType>::generalizedAitken( const DataType _defOmegaF,
+                                                            const DataType _defOmegaS ) :
+    M_lambda    ( ),
+    M_muS       ( ),
+    M_muF       ( ),
+    M_firstCall ( true )
 {
-    if (( M_defOmegaS < 0 ) || ( M_defOmegaF< 0 ))
-    {
-        M_useDefault = true;
-        M_defOmegaS = std::fabs(M_defOmegaS);
-        M_defOmegaF = std::fabs(M_defOmegaF);
-    } else {
-        M_useDefault = false;
-    }
-    M_issetup = true;
+    setDefault(_defOmegaF, _defOmegaS);
 }
 
 //
 // Destructor
 //
 
-template <class Vector, class Real>
-generalizedAitken<Vector, Real>::~generalizedAitken()
+template <class VectorType, class DataType>
+generalizedAitken<VectorType, DataType>::~generalizedAitken()
 { //nothing needs to be done
 }
 
 //
 // Member functions
 //
-template <class Vector, class Real>
-void generalizedAitken<Vector, Real>::
-setup( const int _nDof )
-{
-    M_nDof =  _nDof;
-    M_lambda =  ZeroVector( _nDof );
-    M_muS = ZeroVector( _nDof );
-    M_muF = ZeroVector( _nDof );
-    M_issetup = true;
-}
-template <class Vector, class Real>
-void generalizedAitken<Vector, Real>::
-setDefault( const Real _defOmegaS,
-            const Real _defOmegaF )
+template <class VectorType, class DataType>
+void generalizedAitken<VectorType, DataType>::
+setDefault( const DataType _defOmegaS,
+            const DataType _defOmegaF )
 {
     if (( _defOmegaS < 0 ) || ( _defOmegaF< 0 ))
     {
@@ -175,10 +151,13 @@ setDefault( const Real _defOmegaS,
         M_defOmegaS = _defOmegaS;
         M_defOmegaF = _defOmegaF;
     }
+
+    M_issetup = true;
+
 }
 
-template <class Vector, class Real>
-void generalizedAitken<Vector, Real>::
+template <class VectorType, class DataType>
+void generalizedAitken<VectorType, DataType>::
 restart()
 {
     M_firstCall = true;
@@ -190,46 +169,58 @@ restart()
   _muF    is \mu_f^{k}
 */
 
-template <class Vector, class Real>
-Vector generalizedAitken<Vector, Real>::
-computeDeltaLambda( const Vector &_lambda,
-                    const Vector &_muF,
-                    const Vector &_muS )
+template <class VectorType, class DataType>
+typename generalizedAitken<VectorType, DataType>::vector_type generalizedAitken<VectorType, DataType>::
+computeDeltaLambda( const vector_type &_lambda,
+                    const vector_type &_muF,
+                    const vector_type &_muS )
 {
-    Vector deltaLambda;
+    VectorType deltaLambda(_lambda.Map());
 
     if (( !M_firstCall ) && ( !M_useDefault ))
     {
-        Real a11 = 0.;
-        Real a21 = 0.;
-        Real a22 = 0.;
-        Real b1  = 0.;
-        Real b2  = 0.;
+        DataType a11 = 0.;
+        DataType a21 = 0.;
+        DataType a22 = 0.;
+        DataType b1  = 0.;
+        DataType b2  = 0.;
 
-        Real muS( 0 );
-        Real muF( 0 );
+        DataType muS( 0 );
+        DataType muF( 0 );
 
         /*! bulding the matrix and the right hand side
           see eq. (16) page 10
         */
 
+        muS = (_muS - M_muS);
+        muF = (_muF - M_muF);
+
+        a11 = muF*muF;
+        a21 = muF*muS;
+        a22 = muS*muS;
+
+        b1 = muF * ( _lambda - *M_lambda);
+        b2 = muS * ( _lambda - *M_lambda);
+
+        /*
         for ( UInt ii = 0; ii < M_nDof; ++ii )
         {
-            muS = _muS[ ii ] - M_muS[ ii ];
-            muF = _muF[ ii ] - M_muF[ ii ];
+            muS = _muS[ ii ] - *M_muS[ ii ];
+            muF = _muF[ ii ] - *M_muF[ ii ];
 
             a11 += muF * muF;
             a21 += muF * muS;
             a22 += muS * muS;
 
-            b1 += muF * ( _lambda[ ii ] - M_lambda[ ii ] );
-            b2 += muS * ( _lambda[ ii ] - M_lambda[ ii ] );
+            b1 += muF * ( _lambda[ ii ] - *M_lambda[ ii ] );
+            b2 += muS * ( _lambda[ ii ] - *M_lambda[ ii ] );
         }
+        */
 
-        Real omegaS ( M_defOmegaS );
-        Real omegaF ( M_defOmegaF );
+        DataType omegaS ( M_defOmegaS );
+        DataType omegaF ( M_defOmegaF );
 
-        Real det ( a22 * a11 - a21 * a21 );
+        DataType det ( a22 * a11 - a21 * a21 );
 
         if ( std::fabs(det) != 0. )  //! eq. (12) page 8
         {
@@ -265,9 +256,9 @@ computeDeltaLambda( const Vector &_lambda,
 
         deltaLambda = omegaF * _muF + omegaS * _muS;
 
-        M_lambda = _lambda;
-        M_muF = _muF;
-        M_muS = _muS;
+        *M_lambda = _lambda;
+        *M_muF = _muF;
+        *M_muS = _muS;
     }
     else
     {
@@ -283,9 +274,9 @@ computeDeltaLambda( const Vector &_lambda,
         std::cout << "generalizedAitken: omegaS = " << M_defOmegaS
                   << " omegaF = " << M_defOmegaF << std::endl;
 
-        M_lambda = _lambda;
-        M_muF = _muF;
-        M_muS = _muS;
+        M_lambda.reset( new vector_type(_lambda) );
+        M_muF.reset( new vector_type(_muF) );
+        M_muS.reset( new vector_type(_muS) );
     }
 
 
@@ -294,30 +285,37 @@ computeDeltaLambda( const Vector &_lambda,
 
 
 /*! one parameter version of the generalized aitken method.*/
-template <class Vector, class Real>
-Vector generalizedAitken<Vector, Real>::
-computeDeltaLambda( const Vector &_lambda,
-                    const Vector &_mu )
+template <class VectorType, class DataType>
+typename generalizedAitken<VectorType, DataType>::vector_type generalizedAitken<VectorType, DataType>::
+computeDeltaLambda( const vector_type &_lambda,
+                    const vector_type &_mu )
 {
-    Vector deltaLambda;
+    VectorType deltaLambda(_lambda.Map());
 
     if (( !M_firstCall ) && ( !M_useDefault ))
     {
-        Vector deltaMu = _mu - M_muS;
-        Real omega = 0.;
-        Real norm  = 0.;
+        VectorType deltaMu = _mu;
+        deltaMu -= *M_muS;
 
-        deltaLambda = _lambda - M_lambda;
+        DataType omega = 0.;
+        DataType norm  = 0.;
 
+        deltaLambda  = _lambda;
+        deltaLambda -= *M_lambda;
 
+        omega = deltaLambda * deltaMu;
+        norm  = deltaMu * deltaMu;
+
+        /*
         for ( UInt ii = 0; ii < deltaLambda.size(); ++ii )
         {
             omega += deltaLambda[ ii ] * deltaMu[ ii ];
             norm  += deltaMu[ ii ] * deltaMu[ ii ];
         }
+        */
 
-        M_lambda = _lambda;
-        M_muS    = _mu;
+        *M_lambda = _lambda;
+        *M_muS    = _mu;
 
         omega    = - omega / norm ;
 
@@ -342,8 +340,8 @@ computeDeltaLambda( const Vector &_lambda,
 
         std::cout << "generalizedAitken: omega = " << M_defOmegaS << std::endl;
 
-        M_lambda = _lambda;
-        M_muS = _mu;
+        M_lambda.reset( new vector_type( _lambda) );
+        M_muS.reset( new vector_type(_mu) );
     }
 
     return deltaLambda;

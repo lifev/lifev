@@ -37,7 +37,7 @@
 #include <life/lifefem/elemOper.hpp>
 #include <life/lifefem/values.hpp>
 #include <life/lifearray/pattern.hpp>
-#include <life/lifefem/assemb.hpp>
+#include <life/lifefem/assembGeneric.hpp>
 #include <life/lifefem/bcManage.hpp>
 #include <life/lifecore/chrono.hpp>
 #include <life/lifefem/meshMotion.hpp>
@@ -197,9 +197,9 @@ namespace LifeV
     M_elvec_u(  this->_fe_u.nbNode, this->_fe_u.nbCoor ),
     M_elvec_p(  this->_fe_u.nbNode, 1),
     M_uLoc( this->_fe_u.nbNode, this->_fe_u.nbCoor ),
-    M_betaLoc( this->_fe_u.nbNode, this->_fe_u.nbCoor ),	
+    M_betaLoc( this->_fe_u.nbNode, this->_fe_u.nbCoor ),
     M_pLoc( this->_fe_u.nbNode, 1 ),
-    M_wLoc( this->_fe_u.nbNode,  this->_fe_u.nbCoor ),	
+    M_wLoc( this->_fe_u.nbNode,  this->_fe_u.nbCoor ),
     M_f_u( this->_fe_u.nbCoor*this->_dim_u ),
     M_f_p( this->_dim_p ),
     M_du( this->_fe_u.nbCoor*this->_dim_u ),
@@ -337,7 +337,7 @@ namespace LifeV
       {
 
 	this->_fe_u.updateFirstDeriv( this->_mesh.volumeList( i ) );
-	
+
 	M_elvec_u.zero();
 
 	// updating pressure  \tilde p^{n} on the current element
@@ -346,12 +346,12 @@ namespace LifeV
 	    ig = this->_dof_u.localToGlobal( i, k + 1 ) - 1;
 	    M_pLoc[ k ] = this->_p[ig];
 	  }
-	
+
 	// we add the term - ( \grad p^{n}, v)
 	for (UInt ic=0; ic< (UInt)this->_fe_u.nbCoor; ++ic)
 	  {
 	    source_gradpv(-1.0, M_pLoc, M_elvec_u, this->_fe_u, this->_fe_u, ic);
-	
+
 	    // assembling into global vector
 	    assemb_vec(M_f_u, M_elvec_u, this->_fe_u, this->_dof_u, ic);
 	  }
@@ -479,7 +479,7 @@ namespace LifeV
 
     if (shapeTerms) {
       /*
-	
+
       @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
       No taking into account source terms
       i.e f = 0. To be modified
@@ -497,10 +497,10 @@ namespace LifeV
       for ( UInt i = 1; i <= this->_mesh.numVolumes(); ++i )
 	{
 	  this->_fe_u.updateFirstDeriv( this->_mesh.volumeList( i ) );
-	
+
 
 	  M_elvec_u.zero();
-	
+
 	  for ( UInt k = 0 ; k < ( UInt ) this->_fe_u.nbNode ; ++k )
 	    {
 	      iloc = this->_fe_u.patternFirst( k );
@@ -521,7 +521,7 @@ namespace LifeV
 
 	  //  - \rho ( -\grad w^k :[I\div d - (\grad d)^T] u^k + ( u^n-w^k )^T[I\div d - (\grad d)^T] (\grad u^k)^T , v  )
 	  source_mass1( -this->_rho, M_uLoc, M_wLoc, M_betaLoc, dLoc, M_elvec_u, this->_fe_u );
-	
+
 	  //  + \rho * ( \grad u^k dw, v  )
 	  source_mass2( this->_rho, M_uLoc, dwLoc, M_elvec_u, this->_fe_u );
 
@@ -530,7 +530,7 @@ namespace LifeV
 
 	  //  - ( [-p^k I + 2*mu e(u^k)] [I\div d - (\grad d)^T] , \grad v  )
 	  source_stress( -1.0, this->_mu, M_uLoc, M_pLoc, dLoc, M_elvec_u, this->_fe_u, this->_fe_u );
-	
+
 	  // + \mu ( \grad u^k \grad d + [\grad d]^T[\grad u^k]^T : \grad v )
 	  source_stress2( this->_mu, M_uLoc, dLoc, M_elvec_u, this->_fe_u );
 
@@ -541,7 +541,7 @@ namespace LifeV
 	      assemb_vec( M_f_uAux, M_elvec_u, this->_fe_u, this->_dof_u, ic );
 	    }
 	}
-	
+
     }
 
 
@@ -587,28 +587,28 @@ namespace LifeV
     if (shapeTerms)
       {
 	/*
-	
+
 	@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 	No taking into account source terms
 	i.e f = 0. To be modified
 	@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-	
+
 	*/
-	
+
 	std::cout << "    F-LINEAR-  Updating pressure rhs (shape derivative terms)... ";
 	UInt iloc,ig,icloc;
-	
+
 	chrono.start();
-	
+
 	// Elementary computation and right hand-side assembling
 	// Loop on elements
 	for ( UInt i = 1; i <= this->_mesh.numVolumes(); ++i )
 	  {
 	    this->_fe_u.updateFirstDeriv( this->_mesh.volumeList( i ) );
-	
-	
+
+
 	    M_elvec_p.zero();
-	
+
 	    for ( UInt k = 0 ; k < ( UInt ) this->_fe_u.nbNode ; ++k )
 	      {
 		iloc = this->_fe_u.patternFirst( k );
@@ -627,7 +627,7 @@ namespace LifeV
 	    assemb_vec( M_f_p, M_elvec_p, this->_fe_u, this->_dof_u);
 
 	  }
-	
+
       }
 
 
@@ -753,7 +753,7 @@ namespace LifeV
         this->_fe_u.updateJac( this->_mesh.volumeList( i ) );
         M_elmatM_u.zero();
         mass( this->_rho * dti, M_elmatM_u, this->_fe_u, 0, 0,  this->_fe_u.nbCoor );
-	
+
 	for ( UInt ic = 0; ic < (UInt)this->_fe_u.nbCoor; ++ic )
 	  assemb_mat( M_M_u, M_elmatM_u, this->_fe_u, this->_dof_u, ic, ic );
       }
@@ -784,21 +784,21 @@ namespace LifeV
     // Loop on elements
     for ( UInt i = 1; i <= this->_mesh.numVolumes(); i++ )
       {
-	
+
 	// assem_mat_mixed
 	this->_fe_u.updateFirstDerivQuadPt( this->_mesh.volumeList( i ) );
-	
+
 	// initialization of elementary matrices
 	M_elmatM_u.zero();
 	M_elmatC_u.zero();
-	
+
 	// mass
 	mass( this->_rho * dti, M_elmatM_u, this->_fe_u, 0, 0,  this->_fe_u.nbCoor );
-	
+
 	// stiffness strain
 	stiff_strain( 2.0 * this->_mu, M_elmatC_u, this->_fe_u );
 	M_elmatC_u.mat() += M_elmatM_u.mat();
-	
+
 	// Non linear term, Semi-implicit approach
 	// (\tilde u^{n} - w^{n+1})  on the current element
 	for ( UInt k = 0; k < ( UInt ) this->_fe_u.nbNode; ++k )
@@ -806,12 +806,12 @@ namespace LifeV
 	    for ( UInt ic = 0; ic < (UInt)this->_fe_u.nbCoor; ++ic )
 	      {
 		ig = this->_dof_u.localToGlobal( i, k + 1 ) - 1 + ic * this->_dim_u;
-		M_betaLoc[ k + ic * this->_fe_u.nbNode ] = M_beta[ig];	
+		M_betaLoc[ k + ic * this->_fe_u.nbNode ] = M_beta[ig];
 		M_uLoc[ k + ic * this->_fe_u.nbNode ] = M_un[ig];
 		M_wLoc[ k + ic * this->_fe_u.nbNode ] = M_w[ig];
 	      }
 	  }
-	
+
 	// ALE term: -  \rho * (div w u, v)
 	mass_divw( -this->_rho, M_wLoc, M_elmatC_u, this->_fe_u, 0, 0, this->_fe_u.nbCoor );
 
@@ -829,7 +829,7 @@ namespace LifeV
 	  {
 	    for ( UInt jc = 0;jc < (UInt)this->_fe_u.nbCoor;jc++ )
 		assemb_mat( M_C_u, M_elmatC_u, this->_fe_u, this->_dof_u, ic, jc );
-	
+
 	    // mass
 	    assemb_mat( M_M_u, M_elmatM_u, this->_fe_u, this->_dof_u, ic, ic );
 	  }
@@ -847,7 +847,7 @@ namespace LifeV
 	std::cout << "  o-  Updating SD stabilization terms (matrix)...          "
 		  << std::flush;
 	M_sdStab.applyCT(this->_dt, M_C_u, M_beta );
-	
+
 	// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 	// source has to be puted here
 	// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -910,7 +910,7 @@ namespace LifeV
       {
 	this->_fe_u.updateFirstDeriv( this->_mesh.volumeList( i ) );
 	M_elvec_p.zero();
-	
+
 	// updating velocity  \tilde u^{n+1} on the current element
 	for ( UInt k = 0; k < ( UInt ) this->_fe_u.nbNode; ++k )
 	  {
@@ -920,7 +920,7 @@ namespace LifeV
 		M_uLoc[ k + ic * this->_fe_u.nbNode ] = tilde_u[ig];
 	      }
 	  }
-	
+
 	// we add the term - (1/dt) * ( \div \tilde u^{n+1}, q)
 	source_divuq( -1.0*dti, M_uLoc, M_elvec_p, this->_fe_u, this->_fe_u);
 	assemb_vec(M_f_p, M_elvec_p, this->_fe_u, this->_dof_u);
@@ -944,13 +944,13 @@ namespace LifeV
     for ( UInt i = 1; i <= this->_mesh.numVolumes(); i++ )
       {
 	this->_fe_u.updateFirstDeriv( this->_mesh.volumeList( i ) );
-	
+
 	M_elmatC_p.zero();
-	
+
 	stiff(1.0, M_elmatC_p, this->_fe_u );
-	
+
 	assemb_mat( M_C_p, M_elmatC_p, this->_fe_u, this->_dof_u, 0, 0);
-	
+
       }
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
@@ -1029,7 +1029,7 @@ namespace LifeV
 	chrono.start();
 	M_linearSolver_u.solve( this->_u, M_f_u, SolverAztec::SAME_PRECONDITIONER );
 	chrono.stop();
-	
+
         if ( M_nUsePC_u == 1 )
 	  {
 	    M_tThisSolve_u = chrono.diff();
@@ -1093,7 +1093,7 @@ namespace LifeV
 	chrono.start();
 	M_linearSolver_p.solve( this->_p, M_f_p, SolverAztec::SAME_PRECONDITIONER );
 	chrono.stop();
-	
+
         if ( M_nUsePC_p == 1 )
 	  {
 	    M_tThisSolve_p = chrono.diff();

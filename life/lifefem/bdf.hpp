@@ -41,7 +41,7 @@
 
 namespace LifeV
 {
-const uint BDF_MAX_ORDER = 3;
+const UInt BDF_MAX_ORDER = 3;
 
 typedef Real ( *Funct ) ( const Real&, const Real&, const Real&, const Real&,
                           const ID& );
@@ -171,7 +171,8 @@ private:
 template <typename Mesh, typename RefFE, typename CurrFE, typename Dof>
 void Bdf::initialize_unk( const Funct& u0,
                           Mesh& mesh,
-                          RefFE& refFE, CurrFE& currFE,
+                          RefFE& refFE,
+                          CurrFE& currFE,
                           Dof& dof,
                           Real t0, Real dt,
                           UInt nbComp = 1 )
@@ -196,6 +197,7 @@ void Bdf::initialize_unk( const Funct& u0,
 
 
     UInt size_comp = dof.numTotalDof();
+
     _M_size = size_comp * nbComp; // Inizialization of the dimension of the vector
 
     Vector aux( _M_size );

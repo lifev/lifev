@@ -435,7 +435,7 @@ bool BCBase::dataVector() const
 void
 BCBase::setBCVector( BCVectorBase& __v )
 {
-    _M_bcv = boost::shared_ptr<BCVectorBase>( FactoryCloneBCVector::instance().createObject( &__v ) );
+    _M_bcv = boost::shared_ptr<BCVectorBase >( FactoryCloneBCVector::instance().createObject( &__v ) );
     _M_dataVector = true;
     _M_isUDep=false;
 }

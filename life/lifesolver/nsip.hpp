@@ -43,7 +43,7 @@
 #include <life/lifefem/elemOper.hpp>
 #include <life/lifefem/values.hpp>
 #include <life/lifearray/pattern.hpp>
-#include <life/lifefem/assemb.hpp>
+#include <life/lifefem/assembGeneric.hpp>
 #include <life/lifefem/bcManage.hpp>
 
 #if AZTEC_SOLVER
@@ -376,7 +376,6 @@ NavierStokesSolverIP( const GetPot& dataFile,
     // Loop on elements
     for ( UInt iVol = 1; iVol <= this->mesh().numVolumes(); iVol++ )
     {
-        this->fe_p().update( this->mesh().volumeList( iVol ) ); // just to provide the id number in the assem_mat_mixed
         this->fe_u().updateFirstDeriv( this->mesh().volumeList( iVol ) );
 
         M_elmatStiff.zero();

@@ -1,20 +1,20 @@
 /*
- This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
+  This file is part of the LifeV library
+  Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 #ifndef _MEDIT_WRTRS_H
 #define _MEDIT_WRTRS_H
@@ -59,7 +59,7 @@ namespace LifeV
   wr_medit_ascii_scalar("meshname.bb",pressure.giveVec(),pressure.size());
 */
 
-void wr_medit_ascii_scalar( std::string fname, Real const* U, int Usize, int type = 2 );
+    void wr_medit_ascii_scalar( std::string fname, Real const* U, int Usize, int type = 2 );
 
 /*!
   A simple medit vector writer.
@@ -79,7 +79,7 @@ void wr_medit_ascii_scalar( std::string fname, Real const* U, int Usize, int typ
   PhysVectUnknown<Vector> velocity(nbDof);
   wr_medit_ascii_vector("meshname.bb",velocity.giveVec(),velocity.size());
 */
-void wr_medit_ascii_vector( std::string fname, Real const* U, int Usize, int type = 2 );
+    void wr_medit_ascii_vector( std::string fname, Real const* U, int Usize, int type = 2 );
 
 /*!
   A simple medit scalar reader.
@@ -102,7 +102,7 @@ void wr_medit_ascii_vector( std::string fname, Real const* U, int Usize, int typ
   wr_medit_ascii_scalar("meshname.bb",pressure.giveVec(),pressure.size());
 */
 
-void rd_medit_ascii_scalar( std::string fname, Real * U, const UInt& Usize, UInt& type );
+    void rd_medit_ascii_scalar( std::string fname, Real * U, const UInt& Usize, UInt& type );
 
 /*!
   A simple medit vector reader.
@@ -124,7 +124,7 @@ void rd_medit_ascii_scalar( std::string fname, Real * U, const UInt& Usize, UInt
   PhysVectUnknown<Vector> velocity(nbDof);
   wr_medit_ascii_vector("meshname.bb",velocity.giveVec(),velocity.size());
 */
-void rd_medit_ascii_vector( std::string fname, Real * U, const UInt& Usize, UInt& type );
+    void rd_medit_ascii_vector( std::string fname, Real * U, const UInt& Usize, UInt& type );
 
 
 /*!
@@ -133,84 +133,247 @@ void rd_medit_ascii_vector( std::string fname, Real * U, const UInt& Usize, UInt
   \param fname : name of the mesh file.
   \param mesh : the Mesh object
 */
-template <typename Mesh>
-void wr_medit_ascii( std::string fname, const Mesh& mesh )
-{
 
-    std::ofstream ofile( fname.c_str() );
+     template <typename Mesh>
+     void writeMesh  (std::string fname, Mesh& mesh )
+     {
 
-    ASSERT( ofile, "Error: Output file cannot be open" );
+         std::ofstream ofile( fname.c_str() );
 
-    ofile << "MeshVersionFormatted 1\n";
-    ofile << "Dimension 3\n";
-    ofile << std::endl;
-    ofile << "Vertices\n";
+         ASSERT( ofile, "Error: Output file cannot be open" );
 
-    UInt nV = mesh.numVertices();
-    ofile << nV << std::endl;
+         ofile << "MeshVersionFormatted 1\n";
+         ofile << "Dimension\n3\n";
+         ofile << "\n";
+         ofile << "Vertices\n";
 
-    for ( UInt i = 1; i <= nV; ++i )
-        ofile << mesh.pointList( i ).x() << " "
-        << mesh.pointList( i ).y() << " "
-        << mesh.pointList( i ).z() << " "
-        << mesh.pointList( i ).marker() << std::endl;
-    ofile << std::endl;
+         UInt nV = mesh.numVertices();
+         ofile << nV << "\n";
 
-    typedef typename Mesh::FaceShape FaceShape;
+         int ig;
 
-    switch ( FaceShape::Shape )
+         std::map<int, int> localToGlobalNode = mesh.localToGlobalNode();
+         std::map<int, int>::iterator im;
+
+
+         for ( UInt i = 1; i <= nV; ++i )
+         {
+             ofile << mesh.pointList( i ).x() << " "
+                   << mesh.pointList( i ).y() << " "
+                   << mesh.pointList( i ).z() << " "
+                   << mesh.pointList( i ).marker() << "\n";
+         }
+         ofile << "\n";
+
+//         std::map<int, int>::iterator im;
+//    UInt iface;
+/*
+         typedef typename Mesh::FaceShape FaceShape;
+
+         switch ( FaceShape::Shape )
+         {
+             case QUAD:
+                 ofile << "Quadrilaterals\n";
+                 break;
+             case TRIANGLE:
+                 ofile << "Triangles\n";
+                 break;
+             default:
+                 ERROR_MSG( "BdShape not implement in MEDIT writer" );
+         }
+
+         UInt nBdF = mesh. numBFaces();
+         ofile << nBdF << "\n";
+
+         UInt nVpF = FaceShape::numVertices;
+
+
+         for ( ID k = 1; k <= nBdF; ++k )
+         {
+             for ( ID i = 1; i <= nVpF; ++i )
+             {
+//            iface = mesh.boundaryFace( k ).point( i ).id();
+                 ofile << mesh.boundaryFace( k ).point( i ).id()
+                       << " ";
+             }
+             ofile << mesh.boundaryFace( k ).marker() << "\n";
+         }
+         ofile << "\n";
+*/
+         typedef typename Mesh::VolumeShape ElementShape;
+
+         switch ( ElementShape::Shape )
+         {
+             case HEXA:
+                 ofile << "Hexaedra\n";
+                 break;
+             case TETRA:
+                 ofile << "Tetrahedra\n";
+                 break;
+             default:
+                 ERROR_MSG( "Shape not implement in MEDIT writer" );
+         }
+
+         UInt nE = mesh.numVolumes();
+         ofile << nE << "\n";
+
+         UInt nVpE = ElementShape::numVertices;
+
+         UInt ielem;
+
+         for ( ID k = 1; k <= nE; ++k )
+         {
+             for ( ID i = 1; i <= nVpE; ++i )
+             {
+                 ielem =  mesh.volume( k ).point( i ).localId();
+
+                 im = localToGlobalNode.find(ielem);
+                 ig = im->second;
+//                  std::cout << ig << " <-> " << ielem << std::endl;
+
+//                 ielem =  mesh.volume( k ).point( i ).localId();
+                 ofile << ielem
+                       << " ";
+             }
+             ofile << mesh.volume( k ).marker() << "\n";
+         }
+        ofile.close();
+     }
+
+
+/*!
+  A simple medit mesh solutionb writer.
+
+  \param fname : name of the mesh file.
+  \param mesh  : the Mesh object
+  \param sol   : solution,
+  \param iStart: offset in the solution array.
+
+*/
+
+
+
+
+    template<typename Mesh, typename VectorType>
+    void meditSolutionWriter( std::string        fname,
+                              Mesh&              mesh,
+                              const VectorType&  sol,
+                              const int          iStart)
     {
-    case QUAD:
-        ofile << "Quadrilaterals\n";
-        break;
-    case TRIANGLE:
-        ofile << "Triangles\n";
-        break;
-    default:
-        ERROR_MSG( "BdShape not implement in MEDIT writer" );
+        std::ofstream ofile( fname.c_str() );
+        ASSERT( ofile, "Error: Output file cannot be opened." );
+
+        int size = sol.size();
+        int type = 2;
+
+        ofile << nDimensions << " 1 " << size << " " << type << "\n";
+
+        ofile.precision(12);
+
+        UInt nVert       = mesh.numVertices();
+
+        std::map<int, int> localToGlobalNode = mesh.localToGlobalNode();
+        std::map<int, int>::iterator im;
+
+        int ig;
+
+        for(int i = 1; i <= nVert; ++i)
+        {
+            int id = mesh.pointList( i ).id();
+
+            im = localToGlobalNode.find(id);
+            ig = im->second;
+
+            ofile << sol[id + iStart] << "\n";
+        }
+
+        ofile.close();
     }
 
-    UInt nBdF = mesh. numBFaces();
-    ofile << nBdF << std::endl;
-
-    UInt nVpF = FaceShape::numVertices;
 
 
-    for ( ID k = 1; k <= nBdF; ++k )
+
+
+
+
+    template <typename Mesh>
+    void wr_medit_ascii( std::string fname, const Mesh& mesh )
     {
-        for ( ID i = 1; i <= nVpF; ++i )
-            ofile << mesh.boundaryFace( k ).point( i ).id() << " ";
-        ofile << mesh.boundaryFace( k ).marker() << std::endl;
+
+        std::ofstream ofile( fname.c_str() );
+
+        ASSERT( ofile, "Error: Output file cannot be open" );
+
+        ofile << "MeshVersionFormatted 1\n";
+        ofile << "Dimension 3\n";
+        ofile << "\n";
+        ofile << "Vertices\n";
+
+        UInt nV = mesh.numVertices();
+        ofile << nV << "\n";
+
+        for ( UInt i = 1; i <= nV; ++i )
+            ofile << mesh.pointList( i ).x() << " "
+                  << mesh.pointList( i ).y() << " "
+                  << mesh.pointList( i ).z() << " "
+                  << mesh.pointList( i ).marker() << "\n";
+        ofile << "\n";
+
+        typedef typename Mesh::FaceShape FaceShape;
+
+        switch ( FaceShape::Shape )
+        {
+            case QUAD:
+                ofile << "Quadrilaterals\n";
+                break;
+            case TRIANGLE:
+                ofile << "Triangles\n";
+                break;
+            default:
+                ERROR_MSG( "BdShape not implement in MEDIT writer" );
+        }
+
+        UInt nBdF = mesh. numBFaces();
+        ofile << nBdF << "\n";
+
+        UInt nVpF = FaceShape::numVertices;
+
+
+        for ( ID k = 1; k <= nBdF; ++k )
+        {
+            for ( ID i = 1; i <= nVpF; ++i )
+                ofile << mesh.boundaryFace( k ).point( i ).id() << " ";
+            ofile << mesh.boundaryFace( k ).marker() << "\n";
+        }
+        ofile << "\n";
+
+        typedef typename Mesh::VolumeShape ElementShape;
+
+        switch ( ElementShape::Shape )
+        {
+            case ElementShape::HEXA:
+                ofile << "Hexaedra\n";
+                break;
+            case ElementShape::TETRA:
+                ofile << "Tetrahedra\n";
+                break;
+            default:
+                ERROR_MSG( "Shape not implement in MEDIT writer" );
+        }
+
+        UInt nE = mesh.numVolumes();
+        ofile << nE << "\n";
+
+        UInt nVpE = ElementShape::numVertices;
+
+        for ( ID k = 1; k <= nE; ++k )
+        {
+            for ( ID i = 1; i <= nVpE; ++i )
+                ofile << mesh.volume( k ).point( i ).id() << " ";
+            ofile << mesh.volume( k ).marker() << "\n";
+        }
+        ofile.close();
     }
-    ofile << std::endl;
-
-    typedef typename Mesh::VolumeShape ElementShape;
-
-    switch ( ElementShape::Shape )
-    {
-    case ElementShape::HEXA:
-        ofile << "Hexaedra\n";
-        break;
-    case ElementShape::TETRA:
-        ofile << "Tetrahedra\n";
-        break;
-    default:
-        ERROR_MSG( "Shape not implement in MEDIT writer" );
-    }
-
-    UInt nE = mesh.numVolumes();
-    ofile << nE << std::endl;
-
-    UInt nVpE = ElementShape::numVertices;
-
-    for ( ID k = 1; k <= nE; ++k )
-    {
-        for ( ID i = 1; i <= nVpE; ++i )
-            ofile << mesh.volume( k ).point( i ).id() << " ";
-        ofile << mesh.volume( k ).marker() << std::endl;
-    }
-
-}
 
 
 /*!
@@ -219,84 +382,88 @@ void wr_medit_ascii( std::string fname, const Mesh& mesh )
   \param fname : name of the mesh file.
   \param mesh : the Mesh object
 */
-template <typename Mesh, typename Vector>
-void wr_medit_ascii( std::string fname, const Mesh& mesh, const Vector& disp, const Real& factor )
-{
-
-    std::ofstream ofile( fname.c_str() );
-
-    ASSERT( ofile, "Error: Output file cannot be open" );
-
-    ofile << "MeshVersionFormatted 1\n";
-    ofile << "Dimension 3\n";
-    ofile << std::endl;
-    ofile << "Vertices\n";
-
-    UInt nV = mesh.numVertices();
-    ofile << nV << std::endl;
-
-    for ( UInt i = 1; i <= nV; ++i )
-        ofile << ( mesh.pointList( i ).x() - disp[ i - 1 ] ) + factor * disp[ i - 1 ] << " "
-        << ( mesh.pointList( i ).y() - disp[ i - 1 + nV ] ) + factor * disp[ i - 1 + nV ] << " "
-        << ( mesh.pointList( i ).z() - disp[ i - 1 + 2 * nV ] ) + factor * disp[ i - 1 + 2 * nV ] << " "
-        << mesh.pointList( i ).marker() << std::endl;
-    ofile << std::endl;
-
-    typedef typename Mesh::FaceShape FaceShape;
-
-    switch ( FaceShape::Shape )
+    template <typename Mesh, typename Vector>
+    void wr_medit_ascii( std::string fname, const Mesh& mesh, const Vector& disp, const Real& factor )
     {
-    case QUAD:
-        ofile << "Quadrilaterals\n";
-        break;
-    case TRIANGLE:
-        ofile << "Triangles\n";
-        break;
-    default:
-        ERROR_MSG( "BdShape not implement in MEDIT writer" );
+
+        std::cout << "writing the mesh" << std::endl;
+        std::ofstream ofile( fname.c_str() );
+
+        ASSERT( ofile, "Error: Output file cannot be open" );
+
+        ofile << "MeshVersionFormatted 1\n";
+        ofile << "Dimension 3\n";
+        ofile << "\n";
+        ofile << "Vertices\n";
+
+        UInt nV = mesh.numVertices();
+        ofile << nV << "\n";
+
+        for ( UInt i = 1; i <= nV; ++i )
+        {
+            int id = mesh.pointList(i).id();
+            ofile << ( mesh.pointList( i ).x() - disp[ id  + 0*nV ] ) + factor * disp[ id + 0*nV ] << " "
+                  << ( mesh.pointList( i ).y() - disp[ id  + 1*nV ] ) + factor * disp[ id + 1*nV ] << " "
+                  << ( mesh.pointList( i ).z() - disp[ id  + 2*nV ] ) + factor * disp[ id + 2*nV ] << " "
+                  << mesh.pointList( i ).marker() << "\n";
+        }
+        ofile << "\n";
+
+        typedef typename Mesh::FaceShape FaceShape;
+
+        switch ( FaceShape::Shape )
+        {
+            case QUAD:
+                ofile << "Quadrilaterals\n";
+                break;
+            case TRIANGLE:
+                ofile << "Triangles\n";
+                break;
+            default:
+                ERROR_MSG( "BdShape not implement in MEDIT writer" );
+        }
+
+        UInt nBdF = mesh. numBFaces();
+        ofile << nBdF << "\n";
+
+        UInt nVpF = FaceShape::numVertices;
+
+
+        for ( ID k = 1; k <= nBdF; ++k )
+        {
+            for ( ID i = 1; i <= nVpF; ++i )
+                ofile << mesh.boundaryFace( k ).point( i ).id() << " ";
+            ofile << mesh.boundaryFace( k ).marker() << "\n";
+        }
+        ofile << "\n";
+
+        typedef typename Mesh::VolumeShape ElementShape;
+
+        switch ( ElementShape::Shape )
+        {
+            case HEXA:
+                ofile << "Hexaedra\n";
+                break;
+            case TETRA:
+                ofile << "Tetrahedra\n";
+                break;
+            default:
+                ERROR_MSG( "Shape not implement in MEDIT writer" );
+        }
+
+        UInt nE = mesh.numVolumes();
+        ofile << nE << "\n";
+
+        UInt nVpE = ElementShape::numVertices;
+
+        for ( ID k = 1; k <= nE; ++k )
+        {
+            for ( ID i = 1; i <= nVpE; ++i )
+                ofile << mesh.volume( k ).point( i ).id() << " ";
+            ofile << mesh.volume( k ).marker() << "\n";
+        }
+        ofile.close();
     }
-
-    UInt nBdF = mesh. numBFaces();
-    ofile << nBdF << std::endl;
-
-    UInt nVpF = FaceShape::numVertices;
-
-
-    for ( ID k = 1; k <= nBdF; ++k )
-    {
-        for ( ID i = 1; i <= nVpF; ++i )
-            ofile << mesh.boundaryFace( k ).point( i ).id() << " ";
-        ofile << mesh.boundaryFace( k ).marker() << std::endl;
-    }
-    ofile << std::endl;
-
-    typedef typename Mesh::VolumeShape ElementShape;
-
-    switch ( ElementShape::Shape )
-    {
-    case HEXA:
-        ofile << "Hexaedra\n";
-        break;
-    case TETRA:
-        ofile << "Tetrahedra\n";
-        break;
-    default:
-        ERROR_MSG( "Shape not implement in MEDIT writer" );
-    }
-
-    UInt nE = mesh.numVolumes();
-    ofile << nE << std::endl;
-
-    UInt nVpE = ElementShape::numVertices;
-
-    for ( ID k = 1; k <= nE; ++k )
-    {
-        for ( ID i = 1; i <= nVpE; ++i )
-            ofile << mesh.volume( k ).point( i ).id() << " ";
-        ofile << mesh.volume( k ).marker() << std::endl;
-    }
-
-}
 
 
 /*!
@@ -305,84 +472,92 @@ void wr_medit_ascii( std::string fname, const Mesh& mesh, const Vector& disp, co
   \param fname : name of the mesh file.
   \param mesh : the Mesh object
 */
-template <typename Mesh, typename Vector>
-void wr_medit_ascii2( std::string fname, const Mesh& mesh, const Vector& disp, const Real& factor )
-{
-
-    std::ofstream ofile( fname.c_str() );
-
-    ASSERT( ofile, "Error: Output file cannot be open" );
-
-    ofile << "MeshVersionFormatted 1\n";
-    ofile << "Dimension 3\n";
-    ofile << std::endl;
-    ofile << "Vertices\n";
-
-    UInt nV = mesh.numVertices();
-    ofile << nV << std::endl;
-
-    for ( UInt i = 1; i <= nV; ++i )
-        ofile << mesh.pointList( i ).x() + factor * disp[ i - 1 ] << " "
-        << mesh.pointList( i ).y() + factor * disp[ i - 1 + nV ] << " "
-        << mesh.pointList( i ).z() + factor * disp[ i - 1 + 2 * nV ] << " "
-        << mesh.pointList( i ).marker() << std::endl;
-    ofile << std::endl;
-
-    typedef typename Mesh::FaceShape FaceShape;
-
-    switch ( FaceShape::Shape )
+    template <typename Mesh, typename Vector>
+    void wr_medit_ascii2( std::string fname, const Mesh& mesh, const Vector& disp, const Real& factor )
     {
-    case QUAD:
-        ofile << "Quadrilaterals\n";
-        break;
-    case TRIANGLE:
-        ofile << "Triangles\n";
-        break;
-    default:
-        ERROR_MSG( "BdShape not implement in MEDIT writer" );
+
+        std::ofstream ofile( fname.c_str() );
+
+        ASSERT( ofile, "Error: Output file cannot be open" );
+
+        ofile << "MeshVersionFormatted 1\n";
+        ofile << "Dimension 3\n";
+        ofile << "\n";
+        ofile << "Vertices\n";
+
+        UInt nVlocal  = mesh.numVertices();
+        UInt nVglobal = mesh.numGlobalVertices();
+
+        ofile << nVlocal << "\n";
+
+        for ( UInt i = 1; i <= nVlocal; ++i )
+        {
+            int id = mesh.pointList(i).id() + 1;
+
+
+            ofile << mesh.pointList( i ).x() + factor * disp[ id - 1 + 0 * nVglobal ] << " "
+                  << mesh.pointList( i ).y() + factor * disp[ id - 1 + 1 * nVglobal ] << " "
+                  << mesh.pointList( i ).z() + factor * disp[ id - 1 + 2 * nVglobal ] << " "
+                  << mesh.pointList( i ).marker() << "\n";
+        }
+
+        ofile << "\n";
+
+        typedef typename Mesh::FaceShape FaceShape;
+
+        switch ( FaceShape::Shape )
+        {
+            case QUAD:
+                ofile << "Quadrilaterals\n";
+                break;
+            case TRIANGLE:
+                ofile << "Triangles\n";
+                break;
+            default:
+                ERROR_MSG( "BdShape not implement in MEDIT writer" );
+        }
+
+        UInt nBdF = mesh.numBFaces();
+        ofile << nBdF << "\n";
+
+        UInt nVpF = FaceShape::numVertices;
+
+
+        for ( ID k = 1; k <= nBdF; ++k )
+        {
+            for ( ID i = 1; i <= nVpF; ++i )
+                ofile << mesh.boundaryFace( k ).point( i ).localId() << " ";
+            ofile << mesh.boundaryFace( k ).marker() << "\n";
+        }
+        ofile << "\n";
+
+        typedef typename Mesh::VolumeShape ElementShape;
+
+        switch ( ElementShape::Shape )
+        {
+            case HEXA:
+                ofile << "Hexaedra\n";
+                break;
+            case TETRA:
+                ofile << "Tetrahedra\n";
+                break;
+            default:
+                ERROR_MSG( "Shape not implement in MEDIT writer" );
+        }
+
+        UInt nE = mesh.numVolumes();
+        ofile << nE << "\n";
+
+        UInt nVpE = ElementShape::numVertices;
+
+        for ( ID k = 1; k <= nE; ++k )
+        {
+            for ( ID i = 1; i <= nVpE; ++i )
+                ofile << mesh.volume( k ).point( i ).localId() << " ";
+            ofile << mesh.volume( k ).marker() << "\n";
+        }
+        ofile.close();
     }
-
-    UInt nBdF = mesh. numBFaces();
-    ofile << nBdF << std::endl;
-
-    UInt nVpF = FaceShape::numVertices;
-
-
-    for ( ID k = 1; k <= nBdF; ++k )
-    {
-        for ( ID i = 1; i <= nVpF; ++i )
-            ofile << mesh.boundaryFace( k ).point( i ).id() << " ";
-        ofile << mesh.boundaryFace( k ).marker() << std::endl;
-    }
-    ofile << std::endl;
-
-    typedef typename Mesh::VolumeShape ElementShape;
-
-    switch ( ElementShape::Shape )
-    {
-    case HEXA:
-        ofile << "Hexaedra\n";
-        break;
-    case TETRA:
-        ofile << "Tetrahedra\n";
-        break;
-    default:
-        ERROR_MSG( "Shape not implement in MEDIT writer" );
-    }
-
-    UInt nE = mesh.numVolumes();
-    ofile << nE << std::endl;
-
-    UInt nVpE = ElementShape::numVertices;
-
-    for ( ID k = 1; k <= nE; ++k )
-    {
-        for ( ID i = 1; i <= nVpE; ++i )
-            ofile << mesh.volume( k ).point( i ).id() << " ";
-        ofile << mesh.volume( k ).marker() << std::endl;
-    }
-
-}
 }
 
 #endif

@@ -159,8 +159,11 @@ public:
      */
     void spy( std::string const &filename );
 
+    //! set entries (rVec(i),rVec(i)) to coeff and rest of row r(i) to zero
+    void diagonalize( std::vector<UInt> const rVec, DataType const coeff);
+
     //! set entry (r,r) to coeff and rest of row r to zero
-    void diagonalize_row ( UInt const r, DataType const coeff );
+    void diagonalize ( UInt const r, DataType const coeff );
 
     /*! apply constraint on row r
      *  @param r row number
@@ -170,6 +173,17 @@ public:
      */
     void diagonalize ( UInt const r, DataType const coeff,
                        std::vector<DataType> &b, DataType datum );
+
+    /*! apply constraint on all rows rVec
+     *  @param rVec vector of rows
+     *  @param coeff value to set entry (r,r) at
+     *  @param b right hand side Vector of the system to be adapted accordingly
+     *  @param datumVec vector of values to constrain entry r of the solution at
+     */
+    void diagonalize( std::vector<UInt> const rVec,
+		      DataType const coeff,
+		      Vector &b,
+		      std::vector<DataType> datumVec );
     /*! apply constraint on row r
      *  @param r row number
      *  @param coeff value to set entry (r,r) at
@@ -282,7 +296,7 @@ MSRMatr( const MSRPatt* ex_pattern, const std::vector<DataType> &ex_value ) :
     //  _nnz = ex_pattern.nnz();
     //  _nrows = ex_pattern.nrow();
     //  _ncols = ex_pattern.ncol();
-    ASSERT( _Patt->nNz() == ex_value.size() - 1, "Error in MSR Values . _Patt->nNz() = " 
+    ASSERT( _Patt->nNz() == ex_value.size() - 1, "Error in MSR Values . _Patt->nNz() = "
             << _Patt->nNz() << " ex_value.size() - 1 " << ex_value.size() - 1 ); // in MSR value has lenghth nnz+1
 }
 
@@ -363,7 +377,7 @@ std::vector<DataType>
 MSRMatr<DataType>::operator* ( const std::vector<DataType> &v ) const
 {
     UInt nrows = _Patt->nRows();
-    ASSERT( nrows == v.size(), "Error in Matrix Vector product. nrows = " 
+    ASSERT( nrows == v.size(), "Error in Matrix Vector product. nrows = "
             << nrows << " v.size() = " << v.size() );
 
     std::vector<DataType> ans;
@@ -384,7 +398,7 @@ MSRMatr<DataType>::
 operator*( const Vector &v ) const
 {
     UInt nrows = _Patt->nRows();
-    ASSERT( nrows == v.size(), "Error in Matrix Vector product. nrows = " 
+    ASSERT( nrows == v.size(), "Error in Matrix Vector product. nrows = "
             << nrows << " v.size() = " << v.size()  );
     Vector ans( nrows );
     ans = ZeroVector( nrows );
@@ -421,7 +435,7 @@ MSRMatr<DataType>::
 trans_mult( const Vector &v ) const
 {
     UInt nrows = _Patt->nRows();
-    ASSERT( nrows == v.size(), "Error in Matrix Vector product. nrows = " 
+    ASSERT( nrows == v.size(), "Error in Matrix Vector product. nrows = "
             << nrows << " v.size() = " << v.size() );
     Vector ans( nrows );
     ans = 0.;
@@ -677,7 +691,17 @@ MSRMatr<DataType>::giveDiag() const
 
 template <typename DataType>
 void
-MSRMatr<DataType>::diagonalize_row( UInt const r, DataType const coeff )
+MSRMatr<DataType>::diagonalize( std::vector<UInt> const rVec,
+				DataType const coeff)
+{
+    for (UInt i=0; i < rVec.size(); i++)
+        diagonalize( rVec[i], coeff);
+      
+}
+
+template <typename DataType>
+void
+MSRMatr<DataType>::diagonalize( UInt const r, DataType const coeff )
 {
     _value[ r - OFFSET ] = coeff;
 
@@ -694,6 +718,25 @@ MSRMatr<DataType>::diagonalize_row( UInt const r, DataType const coeff )
     }
 
     return ;
+}
+
+
+template <typename DataType>
+void
+MSRMatr<DataType>::diagonalize( std::vector<UInt> const rVec,
+				DataType const coeff,
+				Vector &b,
+				std::vector<DataType> datumVec )
+{
+     UInt sizeVec(rVec.size());
+     if ( sizeVec != datumVec.size()) 
+     { //! vectors must be of the same size
+         ERROR_MSG( "diagonalize: vectors must be of the same size\n" );
+     }
+      
+     for (UInt i=0; i < sizeVec; i++)
+       diagonalize( rVec[i], coeff, b, datumVec[i]);
+      
 }
 
 template <typename DataType>

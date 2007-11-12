@@ -4,7 +4,7 @@
 Bugs fixed in 0.8.1:
 ====================
 [configure]
-* ac_aztec was missconfigured. Actually, aztecoo is not supported, you should 
+* ac_aztec was missconfigured. Actually, aztecoo is not supported, you should
   use plain aztec.
 
 Bugs fixed in 0.8.0:
@@ -55,11 +55,11 @@ New in 0.7.0:
   ** Renamed lifeV.hpp to life.hpp and split it
   ** lifeversion.hpp to handle macros and functions to interrogate
      life version
-  ** lifemacros.hpp for deprecation, (no)export macros 
+  ** lifemacros.hpp for deprecation, (no)export macros
   ** lifeassert.hpp for assertions macros
 * Added SmartAssert class and LIFEV_ASSERT macro (CP)
-* Added AboutData class (CP) 
-  ** provides information on authors and contributors to an application 
+* Added AboutData class (CP)
+  ** provides information on authors and contributors to an application
   ** provides license, copyright and a few other information
 * Added Application class (CP)
   ** base class for applications
@@ -97,9 +97,9 @@ New in 0.7.0:
 New in 0.6.0:
 =============
 [configure]
-* Cleanup, homogenized and centralized lookup directories 
+* Cleanup, homogenized and centralized lookup directories
   for 3rd party libraries (CP,CW)
-* Added support for AMD ACML and Intel MKL for both 32bits 
+* Added support for AMD ACML and Intel MKL for both 32bits
   and 64bits arch(CP)
 
 * [lifefem]
@@ -172,9 +172,9 @@ New in 0.5.0:
 * Added FSISolver class (CP)
 
 [lifefilters]
-* Added netgen reader/writer(solution) (MM) 
-* Added gmsh reader (CP) 
-* Added frontend for mesh readers (CP) 
+* Added netgen reader/writer(solution) (MM)
+* Added gmsh reader (CP)
+* Added frontend for mesh readers (CP)
 
 [testsuite]
 * Added test for 3D/0D coupling (AM)
@@ -184,7 +184,7 @@ New in 0.5.0:
 * Removed test_darcytetra (VM)
 * oned solver can solve 2 coupled tubes (VM)
 * Centralized all FSI tests in test_fsi (GF)
-* Added test for netgen in lifefilters (MM) 
+* Added test for netgen in lifefilters (MM)
 
 
 Bugs fixed in 0.4.0:
@@ -301,9 +301,9 @@ New in 0.1.0pre5:
 =================
 * added --enable-debug and --enable-opt to configure script
 * LifeV is finally copyrighted properly
-* LifeV libraries are now LGPL. Header and implementation have 
+* LifeV libraries are now LGPL. Header and implementation have
   been updated accordingly.
-* LifeV testsuite is now GPL. Header and implementation have 
+* LifeV testsuite is now GPL. Header and implementation have
   been updated accordingly.
 
 
@@ -317,7 +317,7 @@ New in 0.1.0pre4:
 =================
 * 'make distcheck' works from start to finish properly
 * lifev compiles entirely included all testsuite tests
-* removed entirely testsuite/development: either created a proper 
+* removed entirely testsuite/development: either created a proper
   testsuite/test_{} test or moved the test to the lifev-sandbox
 * added lifecore/testsuite for small tests programs related to lifecore
 * life libraries should be std:: clean. no more using namespace std::

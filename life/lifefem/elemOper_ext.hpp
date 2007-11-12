@@ -45,7 +45,7 @@ typedef double Real;
 class Function
 {
 public:
-    virtual Real operator() ( Real x, Real y, Real z )
+    virtual Real operator() ( Real /*x*/, Real /*y*/, Real /*z*/ )
     {
         return 0;
     }
@@ -104,7 +104,7 @@ public:
         return _fe;
     };
 
-    Real operator() ( int i, int j, int iq, Real x, Real y, Real z, int ic = 0, int jc = 0 )
+    Real operator() ( int i, int j, int iq, Real /*x*/, Real /*y*/, Real /*z*/, int /*ic*/ = 0, int /*jc*/ = 0 )
     {
         return _fe->phi( i, iq ) * _fe->phi( j, iq );
     }
@@ -128,7 +128,7 @@ public:
     };
 
     // simple version: should work well for many things
-    Real operator() ( int i, int j, int iq, Real x, Real y, Real z, int ic, int jc )
+    Real operator() ( int i, int j, int iq, Real /*x*/, Real /*y*/, Real /*z*/, int ic, int jc )
     {
         if ( ic == jc )
             return _fe->phi( i, iq ) * _fe->phi( j, iq );
@@ -139,7 +139,7 @@ public:
     // ask alain for what follows
     // For the VBR Pattern (Aztec): operator returns the single component of the local matrix
     // (for each quadrature node) which is a _ncomp*_ncomp vector organized as in the inner comment
-    std::vector<Real> operator() ( int i, int j, int iq, Real x, Real y, Real z )
+    std::vector<Real> operator() ( int i, int j, int iq, Real /*x*/, Real /*y*/, Real /*z*/ )
     {
         std::vector<Real> v( _ncomp * _ncomp );
         for ( int jc = 1;jc <= _ncomp;++jc )
@@ -175,7 +175,7 @@ public:
         return _fe;
     };
 
-    Real operator() ( int i, int j, int iq, Real x, Real y, Real z, int ic = 0, int jc = 0 )
+    Real operator() ( int i, int j, int iq, Real /*x*/, Real /*y*/, Real /*z*/, int /*ic*/ = 0, int /*jc*/ = 0 )
     {
         Real s = 0;
         for ( int icoor = 0; icoor < _fe->nbCoor;icoor++ )
@@ -185,7 +185,7 @@ public:
         return s;
     }
 
-    Real operator() ( int i, int j, int iq, int icoor, int jcoor, int ic = 0, int jc = 0 )
+    Real operator() ( int i, int j, int iq, int icoor, int jcoor, int /*ic*/ = 0, int /*jc*/ = 0 )
     {
         return _fe->phiDer( i, icoor, iq ) * _fe->phiDer( j, jcoor, iq );
     }
@@ -225,7 +225,7 @@ class JumpBF {
   JumpBF(CurrentBFDG* fe):_fe(fe){};
   CurrentBFDG* fe_ptr() {return _fe;};
 
-  Real operator()(int i, int icoor, int iq, int H)
+  Real operator()(int i, int icoor, int iq, int /*H*/)
     {
       // returns the coor-th component of jump(phi^H_i)
       return _fe -> phiAd(i, iq) * _fe -> normal(icoor, iq);
@@ -257,7 +257,7 @@ class AvgBF {
   AvgBF(CurrentBFDG* fe):_fe(fe){};
   CurrentBFDG* fe_ptr() {return _fe;};
 
-  Real operator()(int i, int icoor, int iq, int H)
+  Real operator()(int i, int /*icoor*/, int iq, int /*H*/)
     {
       // returns the average of phi^H_i
       return _fe -> phiAd(i, iq);
@@ -280,7 +280,7 @@ public:
         return _fe;
     };
 
-    Real by_comp( int i, int j, int iq, Real x, Real y, Real z )
+    Real by_comp( int i, int j, int iq, Real /*x*/, Real /*y*/, Real /*z*/ )
     {
         Real s = 0;
         for ( int icoor = 0; icoor < _fe->nbCoor;icoor++ )
@@ -290,7 +290,7 @@ public:
     }
 
     // simple version: should work well for many things
-    Real operator() ( int i, int j, int iq, Real x, Real y, Real z, int ic, int jc )
+    Real operator() ( int i, int j, int iq, Real /*x*/, Real /*y*/, Real /*z*/, int ic, int jc )
     {
         if ( ic == jc )
         {
@@ -356,7 +356,7 @@ public:
     //   }
 
     // Correction Alain, 25/01/02, ic and jc were missing.
-    Real operator() ( int i, int j, int iq, Real x, Real y, Real z, int ic = 0, int jc = 0 )
+    Real operator() ( int i, int j, int iq, Real /*x*/, Real /*y*/, Real /*z*/, int /*ic*/ = 0, int /*jc*/ = 0 )
     {
         return _fe2->phi( i, iq ) * _fe1->phiDer( j, coor, iq );
     }
@@ -387,8 +387,7 @@ public:
     Vdiv( CurrentFE * fe1, CurrentFE * fe2, int ncomp ) : _fe1( fe1 ), _fe2( fe2 ), _ncomp( ncomp )
     {}
 
-    Real operator() ( int i, int j, int iq, Real x, Real y,
-                      Real z, int ic, int jc )
+    Real operator() ( int i, int j, int iq, Real /*x*/, Real /*y*/, Real /*z*/, int /*ic*/, int jc )
     {
         return -_fe1->phi( i, iq ) * _fe2->phiDer( j, jc, iq );
     }
@@ -420,8 +419,7 @@ public:
     trVdiv( CurrentFE * fe1, CurrentFE * fe2, int ncomp ) : _fe1( fe1 ), _fe2( fe2 ), _ncomp( ncomp )
     {}
 
-    Real operator() ( int i, int j, int iq, Real x, Real y,
-                      Real z, int ic, int jc )
+    Real operator() ( int i, int j, int iq, Real /*x*/, Real /*y*/, Real /*z*/, int ic, int /*jc*/ )
     {
         return -_fe2->phi( j, iq ) * _fe1->phiDer( i, ic, iq );
     }
@@ -652,7 +650,7 @@ public:
     {}
     ;
 
-    P operator() ( int i, int j, int iq, Real x, Real y, Real z, int ic = 0, int jc = 0 ) const
+    P operator() ( int i, int j, int iq, Real /*x*/, Real /*y*/, Real /*z*/, int ic = 0, int jc = 0 ) const
     {
         P s = 0;
         for ( int icoor = 0; icoor < NDIM; icoor++ )
@@ -666,7 +664,7 @@ public:
     }
 
   // D. A. Di Pietro: This overloading of operator() is necessary to handle DG operators
-  P operator()(int i, int j, int iq, Real x, Real y, Real z, int K, int H, int ic, int jc) const {
+  P operator()(int i, int j, int iq, Real /*x*/, Real /*y*/, Real /*z*/, int K, int H, int ic, int jc) const {
     P s=0;
     for(int icoor=0; icoor<NDIM; icoor++) {
       for(int jcoor=0; jcoor<NDIM; jcoor++) {
@@ -677,7 +675,7 @@ public:
   }
 
   // D. A. Di Pietro: This overloading of operator() includes time dependence
-  P operator()(int i, int j, int iq, Real t, Real x, Real y, Real z, int K, int H, int ic, int jc) const {
+  P operator()(int i, int j, int iq, Real t, Real /*x*/, Real /*y*/, Real /*z*/, int K, int H, int ic, int jc) const {
     P s=0;
     for(int icoor=0; icoor<NDIM; icoor++) {
       for(int jcoor=0; jcoor<NDIM; jcoor++) {
@@ -1074,7 +1072,7 @@ public:
     VStab<LS, LSS, FCT>( LS& ols, LSS& olss, FCT& fct, Real Delta, Real Ro ) : _ols( ols ), _olss( olss ), _fct( fct ), _Delta( Delta ), _Ro( Ro )
     {}
 
-    Real operator() ( UInt i,UInt j, UInt iq, Real x, Real y, Real z, UInt ic, UInt jc )
+    Real operator() ( UInt i,UInt j, UInt iq, Real /*x*/, Real /*y*/, Real /*z*/, UInt ic, UInt jc )
     {
         if ( ic == jc )
             return _Delta * ( ( _ols( i, iq ) + _olss( i, iq ) ) * ( _olss( j, iq ) + _Ro * ( _ols( j, iq ) ) ) );
@@ -1112,7 +1110,7 @@ public:
 
     void updateLocalElement();
 
-    Real operator() ( UInt i,UInt j, UInt ig, Real x, Real y, Real z, UInt ic = 0, UInt jc = 0 )
+    Real operator() ( UInt i,UInt j, UInt ig, Real /*x*/, Real /*y*/, Real /*z*/, UInt ic = 0, UInt jc = 0 )
     {
         if ( ic == jc )  // da verificare !!!!!!!!!! A. Veneziani - Novembre 2002
         {

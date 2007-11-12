@@ -22,13 +22,13 @@ namespace LifeV
 {
 // This method gives a reference to the computed harmonic extension.
 const Vector&
-HarmonicExtension::getDisplacement() const 
+HarmonicExtension::getDisplacement() const
 {
     return _disp;
 }
 
 
-void HarmonicExtension::setHarmonicExtensionBC( BCHandler &BCh_harmonicExtension )
+void HarmonicExtension::setBC( BCHandler &BCh_harmonicExtension )
 {
     M_BCh_harmonicExtension = &BCh_harmonicExtension;
     M_setBC                 = true;

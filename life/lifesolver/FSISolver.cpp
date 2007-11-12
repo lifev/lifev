@@ -33,52 +33,157 @@
 namespace LifeV
 {
 
+Real zero_scalar( const Real& /* t */,
+                  const Real& /* x */,
+                  const Real& /* y */,
+                  const Real& /* z */,
+                  const ID& /* i */ )
+{
+    return 0.;
+}
 
 //! constructors
 
 FSISolver::FSISolver( GetPot const& data_file,
-                      fluid_bchandler_type __bcu,
-                      solid_bchandler_type __bcd,
-                      fluid_bchandler_type __bchext,
-                      std::string __oper ):
-    M_BCh_u( __bcu ),
-    M_BCh_d( __bcd ),
-    M_BCh_mesh( __bchext ),
-    M_fluid( new FSIOperator::fluid_type::value_type (data_file,
-                                                      feTetraP1bubble,
-                                                      feTetraP1,
-                                                      quadRuleTetra64pt,
-                                                      quadRuleTria3pt,
-                                                      quadRuleTetra64pt,
-                                                      quadRuleTria3pt,
-                                                      *M_BCh_u,
-                                                      *M_BCh_mesh) ),
-    M_solid( new FSIOperator::solid_type::value_type (data_file,
-                                                      feTetraP1,
-                                                      quadRuleTetra4pt,
-                                                      quadRuleTria3pt,
-                                                      *M_BCh_d) ),
-    M_disp(3*M_solid->dDof().numTotalDof()),
-    M_velo(3*M_solid->dDof().numTotalDof()),
-    M_firstIter(true),
-    M_method( data_file("problem/method"    , "steklovPoincare") ),
-    M_maxpf( data_file("problem/maxSubIter", 300) ),
-    M_defomega( data_file("problem/defOmega"  , 0.01) ),
-    M_abstol( data_file("problem/abstol"  , 1.e-07) ),
-    M_reltol( data_file("problem/reltol"  , 1.e-04) ),
-    M_etamax( data_file("problem/etamax"  , 1.e-03) ),
-    M_linesearch( data_file("problem/linesearch"  , 0) ),
-    out_iter("iter"),
-    out_res ("res")
+                      std::string   __oper ):
+//     M_dataFluid ( data_file ),
+//     M_dataSolid ( data_file ),
+//     M_BCh_u     (new fluid_bchandler_raw_type),
+//     M_BCh_du    (new fluid_bchandler_raw_type),
+//     M_BCh_d     (new fluid_bchandler_raw_type),
+//     M_BCh_mesh  (new fluid_bchandler_raw_type),
+    M_lambda      (),
+    M_lambdaDot      (),
+    M_firstIter (true),
+    M_method    ( data_file("problem/method"     , "steklovPoincare") ),
+    M_maxpf     ( data_file("problem/maxSubIter" , 300) ),
+    M_defomega  ( data_file("problem/defOmega"   , 0.01) ),
+    M_abstol    ( data_file("problem/abstol"     , 1.e-07) ),
+    M_reltol    ( data_file("problem/reltol"     , 1.e-04) ),
+    M_etamax    ( data_file("problem/etamax"     , 1.e-03) ),
+    M_linesearch( data_file("problem/linesearch" , 0) ),
+    M_epetraComm(),
+    M_epetraWorldComm(),
+    M_localComm (new MPI_Comm),
+    M_interComm (new MPI_Comm),
+    out_iter    ("iter"),
+    out_res     ("res")
 
 {
     Debug( 6220 ) << "FSISolver::FSISolver starts\n";
 
-    M_disp   = ZeroVector( M_disp.size() );
-    M_velo   = ZeroVector( M_velo.size() );
+//     M_lambda   = ZeroVector( M_lambda.size() );
+//     M_lambdaDot   = ZeroVector( M_lambdaDot.size() );
 
-    Debug( 6220 ) << "FSISolver::M_disp: " << M_disp.size() << "\n";
-    Debug( 6220 ) << "FSISolver::M_velo: " << M_velo.size() << "\n";
+//     Debug( 6220 ) << "FSISolver::M_lambda: " << M_lambda.size() << "\n";
+//     Debug( 6220 ) << "FSISolver::M_lambdaDot: " << M_lambdaDot.size() << "\n";
+    int rank, numtasks;
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
+
+    bool fluid = false;
+    bool solid = false;
+
+    int  fluidLeader;
+    int  solidLeader;
+
+    MPI_Group  originGroup, newGroup;
+    MPI_Comm   newComm;
+
+    MPI_Comm_group(MPI_COMM_WORLD, &originGroup);
+
+    if (numtasks == 1)
+    {
+        std::cout << "Serial Fluid/Structure computation" << std::endl;
+        newComm = MPI_COMM_WORLD;
+        fluid = true;
+        solid = true;
+        fluidLeader = 0;
+        solidLeader = 0;
+    }
+    else
+    {
+        int members[numtasks];
+
+        if (rank == 0)
+            {
+                members[0] = 0;
+                int ierr;
+                ierr = MPI_Group_incl(originGroup, 1, members, &newGroup);
+                solid = true;
+            }
+        else
+            {
+                for (int ii = 1; ii <= numtasks; ++ii)
+                    members[ii - 1] = ii;
+                int ierr;
+                ierr = MPI_Group_incl(originGroup, numtasks - 1, members, &newGroup);
+                fluid = true;
+            }
+
+        solidLeader = 0;
+        fluidLeader = 1;
+
+        MPI_Comm* localComm = new MPI_Comm;
+        MPI_Comm_create(MPI_COMM_WORLD, newGroup, localComm);
+        M_localComm.reset(localComm);
+    }
+
+    M_epetraComm.reset(new Epetra_MpiComm(*M_localComm.get()));
+    M_epetraWorldComm.reset(new Epetra_MpiComm(MPI_COMM_WORLD));
+
+    if (fluid)
+    {
+        std::cout << M_epetraComm->MyPID()
+                  << " ( " << rank << " ) "
+                  << " out of " << M_epetraComm->NumProc()
+                  << " ( " << numtasks << " ) "
+                  << " is fluid." << std::endl;
+        //partitionMesh< RegionMesh3D<LinearTetra> >  meshPart(M_dataFluid.mesh(), *M_epetraComm);
+    }
+    if (solid)
+    {
+        std::cout << M_epetraComm->MyPID()
+                  << " ( " << rank << " ) "
+                  << " out of " << M_epetraComm->NumProc()
+                  << " ( " << numtasks << " ) "
+                  << " is solid." << std::endl;
+    }
+
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+
+
+    if (solid)
+    {
+        std::cout << "fluid: Building the intercommunicators ... " << std::flush;
+        MPI_Comm* interComm = new MPI_Comm;
+        int ierr = MPI_Intercomm_create(*M_localComm, 0, MPI_COMM_WORLD, 1, 1, interComm);
+        std::cout << ierr << std::endl;
+        M_interComm.reset(interComm);
+    }
+
+
+    if (fluid)
+    {
+        std::cout << "solid: Building the intercommunicators ... " << std::flush;
+        MPI_Comm* interComm = new MPI_Comm;
+        int ierr =  MPI_Intercomm_create(*M_localComm, 0, MPI_COMM_WORLD, 0, 1, interComm);
+        std::cout << ierr << std::endl;
+        M_interComm.reset(interComm);
+    }
+
+    std::cout << M_interComm.get() << std::endl;
+
+    //M_oper->setInterComm(M_interComm.get());
+
+    std::cout << "done." << std::endl;
+
+
+
+    MPI_Barrier(MPI_COMM_WORLD);
 
     Preconditioner precond  = ( Preconditioner ) data_file("problem/precond"   , DIRICHLET_NEUMANN );
 
@@ -89,135 +194,62 @@ FSISolver::FSISolver( GetPot const& data_file,
         M_method = __oper;
     }
 
+    Debug( 6220 ) << "FSISolver::setFSIOperator " << M_method << "\n";
+
     this->setFSIOperator( M_method );
 
-    M_oper->setDataFromGetPot( data_file );
+//    M_oper = oper_fsi_ptr_mpi(new fixedPoint);
 
+    M_oper->setFluid(fluid);
+    M_oper->setSolid(solid);
+
+    M_oper->setFluidLeader(fluidLeader);
+    M_oper->setSolidLeader(solidLeader);
+
+    Debug( 6220 ) << "FSISolver::setPreconditioner " << precond << "\n";
+
+    M_oper->setComm(M_epetraComm, M_epetraWorldComm);
+    M_oper->setDataFromGetPot( data_file );
     M_oper->setPreconditioner( precond );
 
-    M_oper->setUpBC();
+    M_oper->setup();
 
-    Debug( 6220 ) << "FSISolver::FSISolver ends\n";
-}
+    Debug( 6220 ) << "FSISolver:: variable setup " << precond << "\n";
 
-FSISolver::FSISolver( GetPot const& data_file,
-                      const DataNavierStokes<RegionMesh3D_ALE<LinearTetra> > & dataNavierStokes,
-                      fluid_bchandler_type __bcu,
-                      solid_bchandler_type __bcd,
-                      fluid_bchandler_type __bchext,
-                      std::string __oper ):
-    M_BCh_u( __bcu ),
-    M_BCh_d( __bcd ),
-    M_BCh_mesh( __bchext ),
-    M_fluid( new FSIOperator::fluid_type::value_type (data_file,
-                                                      dataNavierStokes,
-                                                      feTetraP1bubble,
-                                                      feTetraP1,
-                                                      quadRuleTetra64pt,
-                                                      quadRuleTria3pt,
-                                                      quadRuleTetra64pt,
-                                                      quadRuleTria3pt,
-                                                      *M_BCh_u,
-                                                      *M_BCh_mesh) ),
-    M_solid( new FSIOperator::solid_type::value_type (data_file,
-                                                      feTetraP1,
-                                                      quadRuleTetra4pt,
-                                                      quadRuleTria3pt,
-                                                      *M_BCh_d) ),
-    M_disp(3*M_solid->dDof().numTotalDof()),
-    M_velo(3*M_solid->dDof().numTotalDof()),
-    M_firstIter(true),
-    M_method( data_file("problem/method"    , "steklovPoincare") ),
-    M_maxpf( data_file("problem/maxSubIter", 300) ),
-    M_defomega( data_file("problem/defOmega"  , 0.01) ),
-    M_abstol( data_file("problem/abstol"  , 1.e-07) ),
-    M_reltol( data_file("problem/reltol"  , 1.e-04) ),
-    M_etamax( data_file("problem/etamax"  , 1.e-03) ),
-    M_linesearch( data_file("problem/linesearch"  , 0) ),
-    out_iter("iter"),
-    out_res ("res")
+    M_lambda.reset   (new vector_type(M_oper->solidInterfaceMap()));
+    M_lambdaDot.reset(new vector_type(M_oper->solidInterfaceMap()));
 
-{
-    Debug( 6220 ) << "FSISolver::FSISolver starts\n";
+    *M_lambda *= 0.;
+    *M_lambdaDot *= 0.;
 
-    M_disp   = ZeroVector( M_disp.size() );
-    M_velo   = ZeroVector( M_velo.size() );
 
-    Debug( 6220 ) << "FSISolver::M_disp: " << M_disp.size() << "\n";
-    Debug( 6220 ) << "FSISolver::M_velo: " << M_velo.size() << "\n";
+    if (fluid)
+        {
+            M_oper->fluid().setUp(data_file);
+            M_oper->meshMotion().setUp(data_file);
+        }
+    if (solid)
+        M_oper->solid().setUp(data_file);
 
-    Preconditioner precond  = ( Preconditioner ) data_file("problem/precond"   , DIRICHLET_NEUMANN );
+    Debug( 6220 ) << "FSISolver:: building the fluid and solid systems " << precond << "\n";
 
-    Debug( 6220 ) << "FSISolver::preconditioner: " << precond << "\n";
-
-    if ( !__oper.empty() )
+    if (fluid)
     {
-        M_method = __oper;
+        M_oper->fluid().buildSystem();
     }
 
-    this->setFSIOperator( M_method );
-
-    M_oper->setDataFromGetPot( data_file );
-
-    M_oper->setPreconditioner( precond );
-
-    M_oper->setUpBC();
-
-//    M_oper->fluid().postProcess();
-    Debug( 6220 ) << "FSISolver::FSISolver ends\n";
-}
-
-
-FSISolver::FSISolver( GetPot const& data_file,
-                      std::string __oper ):
-    M_fluid( new FSIOperator::fluid_type::value_type (data_file,
-                                                      feTetraP1bubble,
-                                                      feTetraP1,
-                                                      quadRuleTetra64pt,
-                                                      quadRuleTria3pt,
-                                                      quadRuleTetra64pt,
-                                                      quadRuleTria3pt)),
-    M_solid( new FSIOperator::solid_type::value_type (data_file,
-                                                      feTetraP1,
-                                                      quadRuleTetra4pt,
-                                                      quadRuleTria3pt)),
-    M_disp(3*M_solid->dDof().numTotalDof()),
-    M_velo(3*M_solid->dDof().numTotalDof()),
-    M_firstIter(true),
-    M_method( data_file("problem/method"    , "steklovPoincare") ),
-    M_maxpf( data_file("problem/maxSubIter", 300) ),
-    M_defomega( data_file("problem/defOmega"  , 0.01) ),
-    M_abstol( data_file("problem/abstol"  , 1.e-07) ),
-    M_reltol( data_file("problem/reltol"  , 1.e-04) ),
-    M_etamax( data_file("problem/etamax"  , 1.e-03) ),
-    M_linesearch( data_file("problem/linesearch"  , 0) ),
-    out_iter("iter"),
-    out_res ("res")
-
-{
-    Debug( 6220 ) << "FSISolver::FSISolver starts\n";
-
-    M_disp   = ZeroVector( M_disp.size() );
-    M_velo   = ZeroVector( M_velo.size() );
-
-    Debug( 6220 ) << "FSISolver::M_disp: " << M_disp.size() << "\n";
-    Debug( 6220 ) << "FSISolver::M_velo: " << M_velo.size() << "\n";
-
-    Preconditioner precond  = ( Preconditioner ) data_file("problem/precond"   , DIRICHLET_NEUMANN );
-
-    Debug( 6220 ) << "FSISolver::preconditioner: " << precond << "\n";
-
-    if ( !__oper.empty() )
+    if (solid)
     {
-        M_method = __oper;
+        M_oper->solid().buildSystem();
     }
 
-    this->setFSIOperator( M_method );
+    MPI_Barrier(MPI_COMM_WORLD);
 
-    M_oper->setDataFromGetPot( data_file );
-    M_oper->setPreconditioner( precond );
 
-    Debug( 6220 ) << "FSISolver::FSISolver ends\n";
+    Debug( 6220 ) << "FSISolver constructor ends\n";
+
+//@     M_lambda.resize(M_oper->displacement().size());
+//@     M_lambdaDot.resize(M_oper->velocity().size());
 }
 
 
@@ -227,76 +259,78 @@ FSISolver::FSISolver( GetPot const& data_file,
 void
 FSISolver::setFSIOperator( std::string const& __op )
 {
+
+
     Debug( 6220 ) << "FSISolver::setFSIOperator with operator " << __op << "\n";
 
-    M_oper = oper_fsi_ptr( FSIFactory::instance().createObject( __op ) );
-    M_oper->setFluid( M_fluid );
-    M_oper->setSolid( M_solid );
+    M_oper = oper_fsi_ptr_mpi( FSIFactory::instance().createObject( __op ) );
+//    M_oper = oper_fsi_ptr_mpi(new exactJacobian);
 
-    M_oper->setHarmonicExtensionVelToFluid(M_oper->fluid().wInterpolated());
-    // Boundary conditions for the fluid velocity
-    M_BCh_u->addBC("Interface",   1,  Essential, Full,
-                   *M_oper->bcvHarmonicExtensionVelToFluid(),  3);
-
-    M_oper->setBC( M_BCh_u, M_BCh_d, M_BCh_mesh );
-    M_oper->setup();
+//    M_oper->setup();
     Debug( 6220 ) << "FSISolver::setFSIOperator done\n";
 }
 
 
 void
-FSISolver::setFluidBC(fluid_bchandler_type &bc_fluid)
+FSISolver::setFluidBC(fluid_bchandler_type bc_fluid)
 {
-    M_oper->setFluidBC(bc_fluid);
+    if (this->isFluid())
+        M_oper->setFluidBC(bc_fluid);
 }
 
 void
-FSISolver::setLinFluidBC(fluid_bchandler_type &bc_dfluid)
+FSISolver::setLinFluidBC(fluid_bchandler_type bc_dfluid)
 {
-    M_oper->setLinFluidBC(bc_dfluid);
+    if (this->isFluid())
+        M_oper->setLinFluidBC(bc_dfluid);
 }
 
 void
-FSISolver::setInvLinFluidBC(fluid_bchandler_type &bc_dfluid_inv)
+FSISolver::setInvLinFluidBC(fluid_bchandler_type bc_dfluid_inv)
 {
-    M_oper->setInvLinFluidBC(bc_dfluid_inv);
+    if (this->isFluid())
+        M_oper->setInvLinFluidBC(bc_dfluid_inv);
 }
 
 void
-FSISolver::setHarmonicExtensionBC(fluid_bchandler_type &bc_he)
+FSISolver::setHarmonicExtensionBC(fluid_bchandler_type bc_he)
 {
-    M_oper->setHarmonicExtensionBC(bc_he);
+    if (this->isFluid())
+        M_oper->setHarmonicExtensionBC(bc_he);
 }
 
 void
-FSISolver::setSolidBC(solid_bchandler_type &bc_solid)
+FSISolver::setSolidBC(solid_bchandler_type bc_solid)
 {
-    M_oper->setSolidBC(bc_solid);
+    if (this->isSolid())
+        M_oper->setSolidBC(bc_solid);
 }
 
 void
-FSISolver::setLinSolidBC(solid_bchandler_type &bc_dsolid)
+FSISolver::setLinSolidBC(solid_bchandler_type bc_dsolid)
 {
-    M_oper->setLinSolidBC(bc_dsolid);
+    if (this->isSolid())
+        M_oper->setLinSolidBC(bc_dsolid);
 }
 
 void
-FSISolver::setInvLinSolidBC(solid_bchandler_type &bc_dsolid_inv)
+FSISolver::setInvLinSolidBC(solid_bchandler_type bc_dsolid_inv)
 {
-    M_oper->setInvLinSolidBC(bc_dsolid_inv);
+    if (this->isSolid())
+        M_oper->setInvLinSolidBC(bc_dsolid_inv);
 }
 
-void
-FSISolver::setReducedLinFluidBC(fluid_bchandler_type &bc_dredfluid)
-{
-    M_oper->setReducedLinFluidBC(bc_dredfluid);
-}
+// void
+// FSISolver::setReducedLinFluidBC(fluid_bchandler_type bc_dredfluid)
+// {
+//     M_oper->setReducedLinFluidBC(bc_dredfluid);
+// }
 
-void
-FSISolver::setInvReducedLinFluidBC(fluid_bchandler_type &bc_dredfluid_inv)
-{
-    M_oper->setInvReducedLinFluidBC(bc_dredfluid_inv);
-}
+// void
+// FSISolver::setInvReducedLinFluidBC(fluid_bchandler_type bc_dredfluid_inv)
+// {
+//     M_oper->setInvReducedLinFluidBC(bc_dredfluid_inv);
+// }
 
 
 //
@@ -307,46 +341,71 @@ FSISolver::iterate( Real time )
 {
     Debug( 6220 ) << "============================================================\n";
     Debug( 6220 ) << "Solving FSI at time " << time << " with FSIOperator: " << M_method  << "\n";
+    Debug( 6220 ) << "============================================================\n";
 
-    M_oper->fluid().postProcess();
 
-    M_oper->fluid().timeAdvance( M_oper->fluid().sourceTerm(), time);
-    M_oper->solid().timeAdvance( M_oper->solid().sourceTerm(), time);
     M_oper->setTime(time);
 
+//     M_oper->fluid().timeAdvance( M_oper->fluid().sourceTerm(), time);
+//     M_oper->solid().timeAdvance( M_oper->solid().sourceTerm(), time);
+
+    fct_type fluidSource(zero_scalar);
+    fct_type solidSource(zero_scalar);
+    M_oper->updateSystem(fluidSource, solidSource);
     // displacement prediction
+    MPI_Barrier(MPI_COMM_WORLD);
+
     if (M_firstIter)
     {
         M_firstIter = false;
-        M_disp   = M_oper->solid().disp() + timeStep()*M_oper->solid().w();
-        M_velo   = M_oper->solid().w();
+        *M_lambda      = M_oper->lambdaSolid();
+        *M_lambda     += timeStep()*M_oper->lambdaDotSolid();
+        *M_lambdaDot   = M_oper->velocity();
     }
     else
     {
-        M_disp   = M_oper->solid().disp() + timeStep()*(1.5*M_oper->solid().w() - 0.5*M_velo);
-        M_velo   = M_oper->solid().w();
+        *M_lambda      = M_oper->lambdaSolid();
+        *M_lambda     += 1.5*timeStep()*M_oper->lambdaDotSolid(); // *1.5
+        *M_lambda     -= timeStep()*0.5*(*M_lambdaDot);
+        *M_lambdaDot   = M_oper->velocity();
     }
 
-    std::cout << "norm( disp ) init = " << norm_inf(M_disp)   << std::endl;
-    std::cout << "norm( velo ) init = " << norm_inf(M_velo) << std::endl;
+
+//     if (M_oper->isSolid())
+//     {
+        std::cout << "norm( disp ) init = " << M_lambda->NormInf() << std::endl;
+        std::cout << "norm( velo ) init = " << M_lambdaDot->NormInf() << std::endl;
+//     }
+
+    MPI_Barrier(MPI_COMM_WORLD);
 
     int maxiter = M_maxpf;
 
     // the newton solver
-    uint status = 1;
-//     if ( M_method == "exactJacobian" )
-//     {
-//         status = newton(M_disp, *M_oper, norm_inf_adaptor(),
-//                         M_abstol, M_reltol, maxiter, M_etamax,
-//                         M_linesearch, out_res, time);
-//     }
-//     else
-//     {
-        status = nonLinRichardson(M_disp, *M_oper, norm_inf_adaptor(),
-                                  M_abstol, M_reltol, maxiter, M_etamax,
-                                  M_linesearch, out_res, time);
-//        , M_defomega);
-//     }
+    UInt status = 1;
+    Debug( 6220 ) << "Calling non-linear Richardson \n";
+
+    status = nonLinRichardson(*M_lambda,
+//    status = newton(M_lambda,
+                              *M_oper,
+                              norm_inf_adaptor(),
+                              M_abstol,
+                              M_reltol,
+                              maxiter,
+                              M_etamax,
+                              M_linesearch,
+                              out_res,
+                              time);
+//     status = newton(disp,
+//                     oper,
+//                     norm_inf_adaptor(),
+//                     abstol,
+//                     reltol,
+//                     maxiter,
+//                     etamax,
+//                     linesearch,
+//                     out_res,
+//                     time);
 
     if(status == 1)
     {
@@ -362,14 +421,15 @@ FSISolver::iterate( Real time )
         out_iter << time << " " << maxiter << " "
                  << M_oper->nbEval() << std::endl;
 
-        std::cout << "in iterate" << std::endl;
-        M_oper->fluid().postProcess();
-
-        if( M_oper->fluid().computeMeanValuesPerSection() )
-            M_oper->fluid().PostProcessPressureAreaAndFlux( time );
-
-        M_oper->solid().postProcess();
+#warning: removed postprocessing from solver
+        //        M_oper->fluid().postProcess();
+        if (M_oper->isSolid()) M_oper->solid().postProcess();
+        if (M_oper->isFluid()) M_oper->fluid().postProcess();
+//        if (M_oper->isSolid()) M_oper->solid().postProcess();
     }
+
+    M_oper->shiftSolution();
+
 
     Debug( 6220 ) << "FSISolver iteration at time " << time << " done\n";
     Debug( 6220 ) << "============================================================\n";

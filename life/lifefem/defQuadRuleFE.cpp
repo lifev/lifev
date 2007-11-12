@@ -3522,6 +3522,7 @@ const RefFE feQuadQ2( "Lagrange Q2 on a quadrangle", FE_Q2_2D, QUAD, 1, 1, 1, 0,
 const RefFE feTetraP0( "Lagrange P0 on a tetraedra", FE_P0_3D, TETRA, 0, 0, 0, 1, 1, 3,
                        fct_P0_3D, derfct_P0_3D, der2fct_P0_3D, refcoor_P0_3D,
                        allQuadRuleTetra, STANDARD_PATTERN, &feTriaP0 );
+
 //======================================================================
 //
 //                            P1  (3D)

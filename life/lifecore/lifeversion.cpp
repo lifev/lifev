@@ -32,22 +32,22 @@
 
 namespace LifeV
 {
-uint version()
+unsigned int version()
 {
     return LIFEV_VERSION;
 }
 
-uint versionMajor()
+unsigned int versionMajor()
 {
     return LIFEV_VERSION_MAJOR;
 }
 
-uint versionMinor()
+unsigned int versionMinor()
 {
     return LIFEV_VERSION_MINOR;
 }
 
-uint versionMicro()
+unsigned int versionMicro()
 {
     return LIFEV_VERSION_MICRO;
 }

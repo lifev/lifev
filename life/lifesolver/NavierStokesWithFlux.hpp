@@ -368,7 +368,7 @@ NavierStokesWithFlux<NSSolver>::initialize( const Function& u0, const Function& 
 
 template<typename NSSolver>
 void
-NavierStokesWithFlux<NSSolver>::initialize_one_flux( const Function& u0, const Function& p0, Real t0, Real dt )
+NavierStokesWithFlux<NSSolver>::initialize_one_flux( const Function& u0, const Function& p0, Real /*t0*/, Real dt )
 {
     Debug( 6020 ) << "start NSo\n";
 
@@ -411,14 +411,14 @@ NavierStokesWithFlux<NSSolver>::initialize_one_flux( const Function& u0, const F
 
 template<typename NSSolver>
 void
-NavierStokesWithFlux<NSSolver>::initialize_two_fluxes( const Function& u0, const Function& p0, Real t0, Real dt )
+NavierStokesWithFlux<NSSolver>::initialize_two_fluxes( const Function& u0, const Function& p0, Real /*t0*/, Real dt )
 {
     _M_solver->initialize(u0,p0,0.0,dt);
 }
 
 template<typename NSSolver>
 void
-NavierStokesWithFlux<NSSolver>::initialize_two_fluxes_inexact( const Function& u0, const Function& p0, Real t0, Real dt )
+NavierStokesWithFlux<NSSolver>::initialize_two_fluxes_inexact( const Function& u0, const Function& p0, Real /*t0*/, Real dt )
 {
     Debug( 6020 ) << "start NSo1\n";
 

@@ -59,6 +59,9 @@ public:
     //! return the identity of the point
     UInt id() const {return _M_id;}
 
+    //! return the local identity of the point
+    UInt localId() const {return _M_localId;}
+
     //! return the abscissae (and other coordinates :=0)
     Real x() const {return _M_x;}
     Real y() const {return 0.;}
@@ -70,6 +73,9 @@ protected:
 
     //! identity
     UInt _M_id;
+
+    //! local identity
+    UInt _M_localId;
 };
 
 /*!
@@ -98,6 +104,9 @@ public:
     //! return the identity of the edge
     UInt id() const {return _M_id;};
 
+    //! return the local identity of the point
+    UInt localId() const {return _M_localId;}
+
     //! return the length of the edge
     Real length() const {return _M_length;};
 
@@ -119,6 +128,10 @@ protected:
 
     //! identity
     UInt _M_id;
+
+    //! local identity
+    UInt _M_localId;
+
 };
 
 /*!

@@ -22,6 +22,7 @@
 #define _FP_HPP
 
 #include <life/lifesolver/FSIOperator.hpp>
+#include <life/lifefilters/ensight.hpp>
 
 namespace LifeV
 {
@@ -31,10 +32,11 @@ class fixedPoint : public FSIOperator
 public:
 
     typedef FSIOperator super;
-    typedef super::fluid_type fluid_type;
-    typedef super::solid_type solid_type;
+    typedef super::fluid_type           fluid_type;
+    typedef super::solid_type           solid_type;
     typedef super::fluid_bchandler_type bchandler_type;
 
+    typedef fluid_raw_type::vector_type  vector_type;
     // constructors
 
     fixedPoint();
@@ -45,12 +47,13 @@ public:
 
     // member functions
 
-    void evalResidual(Vector       &_res,
-                      const Vector &_disp,
-                      const int     _iter);
-    void solveJac(Vector       &_muk,
-                  const Vector &_res,
-                  const double  _linearRelTol);
+    void evalResidual(vector_type&        _res,
+                      const vector_type&  _disp,
+                      const int           _iter);
+
+    void solveJac     (vector_type&       _muk,
+                       const vector_type& _res,
+                       const double       _linearRelTol);
 
     void setUpBC     ();
 
@@ -60,14 +63,36 @@ public:
 
     void setup();
 
+    //vector_type& displacement()    {return *M_displacement;}
+    //vector_type& residual()        {return *M_stress;}
+    //vector_type& velocity()        {return *M_velocity;}
+    //vector_type& residualFSI()     {return *M_residualFSI;}
+
 private:
 
-    Real                    M_defOmega;
-    generalizedAitken<Vector, Real> M_aitkFS;
+    Real                                 M_defOmega;
+    generalizedAitken<vector_type, Real> M_aitkFS;
 
-    void eval(Vector& dispNew, Vector& velo, const Vector& disp, int status);
+    boost::shared_ptr<vector_type>       M_displacement;
+    boost::shared_ptr<vector_type>       M_stress;
+    boost::shared_ptr<vector_type>       M_velocity;
+    boost::shared_ptr<vector_type>       M_residualFSI;
+
+    boost::shared_ptr<vector_type>       M_rhsNew;
+    boost::shared_ptr<vector_type>       M_beta;
+
+    boost::shared_ptr< Ensight< RegionMesh3D<LinearTetra> > > M_ensightFluid;
+    boost::shared_ptr<vector_type>                            M_velAndPressure;
+
+    void eval(vector_type& dispNew, vector_type& velo, const vector_type& disp, int status);
+
+//    FSIOperator* createFP(){ return new fixedPoint(); }
+    static bool              reg;
 
 };
+
+
+//FSIOperator* createFP(){ return new fixedPoint();}
 
 }
 

@@ -45,13 +45,13 @@ BCVectorBase::BCVectorBase()
 {}
 
 //! Constructor
-BCVectorBase::BCVectorBase( const Vector& vec, const UInt nbTotalDof, UInt type )
+BCVectorBase::BCVectorBase( const EpetraVector<double>& vec, const UInt nbTotalDof, UInt type )
     :
-    _M_vec( &vec ),
+    _M_vec       ( &vec ),
     _M_nbTotalDof( nbTotalDof ),
-    _M_mixteCoef( 0.0 ),
-    _M_type( type ),
-    _M_finalized( false )
+    _M_mixteCoef ( 0.0 ),
+    _M_type      ( type ),
+    _M_finalized ( false )
 {}
 
 BCVectorBase&
@@ -60,11 +60,11 @@ BCVectorBase::operator=( BCVectorBase const& __bcv )
     if ( this == &__bcv )
         return *this;
 
-    _M_vec = __bcv._M_vec;
+    _M_vec        = __bcv._M_vec;
     _M_nbTotalDof = __bcv._M_nbTotalDof;
-    _M_mixteCoef = __bcv._M_mixteCoef;
-    _M_type = __bcv._M_type;
-    _M_finalized = __bcv._M_finalized;
+    _M_mixteCoef  = __bcv._M_mixteCoef;
+    _M_type       = __bcv._M_type;
+    _M_finalized  = __bcv._M_finalized;
 
     return *this;
 }
@@ -87,7 +87,7 @@ BCVectorBase::MixteVec ( const ID& iDof, const ID& iComp ) const
 
 
 void
-BCVectorBase::setVector( Vector& __vec, UInt __nbTotalDof, UInt type )
+BCVectorBase::setVector( EpetraVector<double>& __vec, UInt __nbTotalDof, UInt type )
 {
     _M_vec = &__vec ;
     _M_nbTotalDof = __nbTotalDof;
@@ -104,7 +104,7 @@ BCVector::BCVector()
 {}
 
 //! Constructor
-BCVector::BCVector( Vector& vec, UInt const nbTotalDof, UInt type )
+BCVector::BCVector( EpetraVector<double>& vec, UInt const nbTotalDof, UInt type )
     :
     BCVectorBase( vec, nbTotalDof, type )
 {
@@ -155,7 +155,7 @@ BCVectorInterface::BCVectorInterface()
 {}
 
 //! Constructor
-BCVectorInterface::BCVectorInterface( const Vector& vec, UInt nbTotalDof,
+BCVectorInterface::BCVectorInterface( const EpetraVector<double>& vec, UInt nbTotalDof,
                                       dof_interface_type dofIn, UInt type )
     :
     BCVectorBase( vec, nbTotalDof, type ),
@@ -166,7 +166,7 @@ BCVectorInterface::BCVectorInterface( const Vector& vec, UInt nbTotalDof,
 
 //! setup after default constructor
 
-void BCVectorInterface::setup( const Vector& vec, UInt nbTotalDof, dof_interface_type dofIn, UInt type )
+void BCVectorInterface::setup( const EpetraVector<double>& vec, UInt nbTotalDof, dof_interface_type dofIn, UInt type )
 {
     _M_vec        = &vec;
     _M_nbTotalDof = nbTotalDof;
@@ -178,7 +178,7 @@ void BCVectorInterface::setup( const Vector& vec, UInt nbTotalDof, dof_interface
 
 //!set the BC vector (after default construction)
 void
-BCVectorInterface::setVector( Vector& vec, UInt nbTotalDof, dof_interface_type dofIn, UInt type )
+BCVectorInterface::setVector( EpetraVector<double>& vec, UInt nbTotalDof, dof_interface_type dofIn, UInt type )
 {
     ASSERT_PRE( !this->isFinalized(), "BC Vector cannot be set twice." );
 
@@ -194,7 +194,10 @@ Real
 BCVectorInterface::operator() ( const ID& iDof, const ID& iComp ) const
 {
     ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
-    return ( *_M_vec ) ( ( iComp - 1 ) * _M_nbTotalDof + _M_dofIn->getInterfaceDof( iDof ) - 1 );
+//     std::cout << iDof << " " << std::flush
+//                  << ( iComp - 1 ) * _M_nbTotalDof + _M_dofIn->getInterfaceDof( iDof ) << " "
+//                  <<  ( *_M_vec ) ( ( iComp - 1 ) * _M_nbTotalDof + _M_dofIn->getInterfaceDof( iDof )  ) << std::endl;
+    return ( *_M_vec ) (( iComp - 1 ) * _M_nbTotalDof + _M_dofIn->getInterfaceDof( iDof ));
 }
 
 
@@ -203,7 +206,7 @@ Real
 BCVectorInterface::MixteVec( const ID& iDof, const ID& iComp ) const
 {
     ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
-    return ( *_M_vec_mixte ) ( ( iComp - 1 ) * _M_nbTotalDof + _M_dofIn->getInterfaceDof( iDof ) - 1 );
+    return ( *_M_vec_mixte ) (( iComp - 1 ) * _M_nbTotalDof + _M_dofIn->getInterfaceDof( iDof ));
 }
 
 

@@ -27,7 +27,6 @@
 
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/io.hpp>
 
 #include <life/lifecore/life.hpp>
 
@@ -338,5 +337,18 @@ struct norm_inf_adaptor
             return norm_inf( __v );
         }
 };
+
+
+/* print operations */
+inline
+std::ostream & operator << (std::ostream & s, const Vector& x)
+{
+    for (UInt iz = 0; iz < x.size() ; iz ++ )
+      s << x[iz] << " " ;
+
+    return s;
+};
+
+
 }
 #endif

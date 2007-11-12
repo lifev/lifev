@@ -27,11 +27,11 @@ void wr_medit_ascii_scalar( std::string fname, Real const* U, int Usize, int typ
 
     ASSERT( ofile, "Error: Output file cannot be opened." );
 
-  ofile << nDimensions << " 1 " << Usize << " " << type << std::endl;
-  ofile.setf(std::ios::scientific,std::ios::floatfield);
-  ofile.precision(12);
-  for(int i = 0; i< Usize; i++){
-    ofile << U[i] << std::endl;
+    ofile << nDimensions << " 1 " << Usize << " " << type << std::endl;
+    ofile.setf(std::ios::scientific,std::ios::floatfield);
+    ofile.precision(12);
+    for(int i = 0; i< Usize; i++){
+        ofile << U[i] << std::endl;
   }
 }
 

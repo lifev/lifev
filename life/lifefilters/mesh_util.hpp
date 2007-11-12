@@ -335,6 +335,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
         return false;
     }
 
+#if 0
     if ( !checkIdnumber( mesh.pointList ) )
     {
         err << "ERROR: points ids where wrongly set" << std::endl;
@@ -344,6 +345,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
         if ( fix )
             fixIdnumber( mesh.pointList );
     }
+#endif
 
     if ( !checkMarkerSet( mesh.pointList ) )
     {
@@ -485,7 +487,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
 	    mesh.setNumBFaces( bFacesFound);
 	  }
       }
-      
+
       if ( mesh.numBFaces() < mesh.storedFaces() )
         {
 	  if ( fix )
@@ -496,8 +498,8 @@ bool checkMesh3D( RegionMesh3D & mesh,
 	  if ( fix )
 	    sw.create( "FIXED_BFACES_FIRST" );
         }
-      
-      
+
+
         if ( !checkIdnumber( mesh.faceList ) )
         {
 	  err << "ERROR: face ids where wrongly set" << std::endl;
@@ -558,7 +560,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
         if ( fix )
             err << "        Fixing" << std::endl;
         if ( fix )
-            mesh.setNumFaces(  bFacesFound + numInternalFaces );
+            mesh.setNumFaces( bFacesFound + numInternalFaces );
         if ( fix )
             sw.create( "FIXED_FACE_COUNTER", true );
     }
@@ -611,7 +613,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
 	    mesh.setNumBEdges( bEdgesFound);
 	  }
       }
-      
+
         if ( fix )
             std::stable_partition( mesh.edgeList.begin(), mesh.edgeList.end(),
                                    enquireBEdge );
@@ -698,8 +700,11 @@ bool checkMesh3D( RegionMesh3D & mesh,
     //-----------------------------------------------------
     // Now that boundary faces have been correctly set we may work out
     // boundaty points
+
     if (fix) fixBPoints(mesh,clog,err,verbose);
+
     EnquireBPoint<RegionMesh3D> enquirebpoint( mesh );
+
     UInt foundBPoints = std::count_if( mesh.pointList.begin(),
                                        mesh.pointList.end(), enquirebpoint );
 
@@ -752,7 +757,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
     {
         err << "WARNING Points Counter unset" << std::endl;
         if ( fix )
-            mesh.setNumPoints( mesh.storedPoints() );
+            mesh.numPoints() = mesh.storedPoints();
         if ( fix )
             sw.create( "FIXED_POINTS_COUNTER", true );
     }

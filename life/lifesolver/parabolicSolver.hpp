@@ -17,7 +17,7 @@ where you enter epsilon in the call to automaticSolver.
 
 #include <life/lifesolver/timeSolver.hpp>
 #include <life/lifefem/bcManage.hpp>
-#include <life/lifefem/assemb.hpp>
+#include <life/lifefem/assembGeneric.hpp>
 #include <life/lifefilters/readMesh3D.hpp>    //if someone moves saveNetgenSolution from here, plz update
 #include <stdio.h>    //for NULL
 
@@ -77,7 +77,7 @@ public:
     UInt getStep();
 
     void automaticSolver(Real epsilon=0.1,UInt maxiter=10,UInt steps=0);
-  
+
     vector_type getU(UInt _nStep);
     void setUin(const vector_type& _Uin);
     void saveSolution(std::string dir="sol");
@@ -90,7 +90,7 @@ private:
     function_type _m_nu,_m_mu,_m_sigma,_m_fct;
     const mesh_type& _m_mesh;
     /* warning: this objects haven't a good copy constructor,
-       so I keep references to them, but please don't destroy 
+       so I keep references to them, but please don't destroy
        them from the outside while still used by ParabolicSolver */
     CurrentFE& _m_fe;
     CurrentBdFE& _m_feBd;
@@ -160,7 +160,7 @@ ParabolicSolver<MESHTYPE>::ParabolicSolver(function_type _nu,
 }
 template <typename MESHTYPE>
 ParabolicSolver<MESHTYPE>::ParabolicSolver(function_type _nu,
-                                           function_type _mu, 
+                                           function_type _mu,
                                            const mesh_type& _mesh,CurrentFE& _fe,
                                            CurrentBdFE& _feBd,
                                            const Dof& _dof,
@@ -263,7 +263,7 @@ ParabolicSolver<MESHTYPE>::automaticSolver(Real epsilon,UInt maxiter,UInt steps)
                     norm_u2=sqrt(dot(u2,u2));
                     norm_diff=sqrt(dot((u1-u2),(u1-u2)));
                     std::cout<<"automaticSolver: iter "<<_m_nStepCur<<"->"<<iter<<" norm_u2="
-                             <<norm_u2<<" norm_diff="<<norm_diff<<std::endl; 
+                             <<norm_u2<<" norm_diff="<<norm_diff<<std::endl;
                 } while(norm_diff>epsilon*norm_u2 && ++iter<maxiter);
             if(iter==maxiter)std::cout<<"ParabolicSolver: warning "<<iter<<" iterations"
                                  " not enought"<<std::endl;
@@ -333,7 +333,7 @@ ParabolicSolver<MESHTYPE>::assemble()
         bcManage(_m_mu,_m_At,_m_bt,_m_mesh,_m_dof,_m_BCh,_m_feBd,1.0,_m_timeCur,_m_Uin);
         timeInc();
     }
-    assembleM();    
+    assembleM();
     assembleAt();
     assembleBt();
     bcManage(_m_mu,_m_At,_m_bt,_m_mesh,_m_dof,_m_BCh,_m_feBd,1.0,_m_timeCur,_m_Uin);
@@ -362,7 +362,7 @@ ParabolicSolver<MESHTYPE>::solve()
 }
 
 template <typename MESHTYPE>
-typename ParabolicSolver<MESHTYPE>::vector_type 
+typename ParabolicSolver<MESHTYPE>::vector_type
 ParabolicSolver<MESHTYPE>::getU(UInt _nStep)
 {
     if(_nStep>_m_nStepCur)

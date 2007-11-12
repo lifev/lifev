@@ -86,7 +86,8 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
     int ity, ity_id;
     UInt p1, p2, p3, p4;
     UInt nVe( 0 ), nBVe( 0 ), nFa( 0 ), nBFa( 0 ), nPo( 0 ), nBPo( 0 );
-    UInt nVo( 0 ), nEd( 0 ), nBEd( 0 );
+    UInt nVo( 0 ), nBEd( 0 );
+    UInt nEd( 0 );
     UInt i;
 
     std::stringstream discardedLog;
@@ -157,21 +158,27 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
 
     // I store all Points
     mesh.setMaxNumPoints( nPo, true );
-    mesh.setNumBPoints( nBPo );
-    mesh.setNumVertices( nVe);
+    mesh.setMaxNumGlobalPoints( nPo );
+    mesh.setNumBPoints  ( nBPo );
+    mesh.setNumVertices ( nVe );
+    mesh.setNumGlobalVertices(nVe);
     mesh.setNumBVertices( nBVe );
     // Only Boundary Edges (in a next version I will allow for different choices)
-    mesh.setMaxNumEdges( nBEd );
-    mesh.setNumEdges( nEd ); // Here the REAL number of edges (all of them)
-    mesh.setNumBEdges( nBEd );
+    mesh.setMaxNumEdges ( nEd );
+    mesh.setMaxNumGlobalEdges ( nEd );
+    mesh.setNumEdges    ( nEd ); // Here the REAL number of edges (all of them)
+    mesh.setNumBEdges   ( nBEd );
     // Only Boundary Faces
-    mesh.setMaxNumFaces( nBFa );
-    mesh.setNumFaces( nFa ); // Here the REAL number of edges (all of them)
-    mesh.setNumBFaces( nBFa );
+    mesh.setMaxNumFaces ( nBFa );
+    mesh.setMaxNumGlobalFaces ( nBFa );
+    mesh.setNumFaces    ( nFa ); // Here the REAL number of edges (all of them)
+    mesh.setNumBFaces   ( nBFa );
 
     mesh.setMaxNumVolumes( nVo, true );
+    mesh.setMaxNumGlobalVolumes( nVo);
 
     mesh.setMarker( regionFlag ); // Mark the region
+
 
     typename RegionMesh3D<GeoShape, MC>::PointType * pp = 0;
     typename RegionMesh3D<GeoShape, MC>::EdgeType * pe = 0;
@@ -274,7 +281,9 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
             {
                 mystream >> p1 >> p2 >> p3 >> p4;
                 pv = &mesh.addVolume();
-                pv->id() = i + 1;
+                pv->setId     ( i + 1 );
+                pv->setLocalId( i + 1);
+//                pv->id() = i + 1;
                 pv->setPoint( 1, mesh.point( p1 ) );
                 pv->setPoint( 2, mesh.point( p2 ) );
                 pv->setPoint( 3, mesh.point( p3 ) );
@@ -364,9 +373,11 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
     std::string line;
     Real x, y, z;
     UInt p1, p2, p3, p4, p5, p6, p7, p8;
-    UInt nVe( 0 ), nBVe( 0 ), nFa( 0 ), nBFa( 0 ), nPo( 0 ), nBPo( 0 );
+    UInt nVe( 0 ), nFa( 0 ), nBFa( 0 ), nPo( 0 ), nBPo( 0 );
+    UInt nBVe(0);
     UInt numStoredFaces(0);
-    UInt nVo( 0 ), nEd( 0 ), nBEd( 0 );
+    UInt nVo( 0 ), nBEd( 0 );
+    UInt nEd;
     UInt i;
     ReferenceShapes shape;
     std::vector<FiveNumbers> faceHelp;
@@ -410,7 +421,13 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
 
     // Euler formulas to get number of faces and number of edges
     nFa = 2 * nVo + ( nBFa / 2 );
-    nEd = nVo + nVe + ( 3 * nBFa - 2 * nBVe ) / 4;
+    int num1  = nVe + nVo;
+    int num2  = nBVe;
+    int num3  = nBFa;
+
+    nEd = (3*num3 - 2*num2)/4 + num1;
+
+//    nEd = (int) nVo + nVe + ( 3 * nBFa + dummy ) / 4;
 
     // Be a little verbose
     switch ( shape )
@@ -447,10 +464,10 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
 
     std::cout << "#Vertices = "          << std::setw(10) << nVe
               << "  #BVertices       = " << std::setw(10) << nBVe << std::endl;
-    oStr      << "#Faces    = "          << std::setw(10) << nFa
+    std::cout << "#Faces    = "          << std::setw(10) << nFa
               << "  #Boundary Faces  = " << std::setw(10) << nBFa << std::endl
               << "#Stored Faces = " << std::setw(10) << numStoredFaces<< std::endl;
-    oStr      << "#Edges    = "          << std::setw(10) << nEd
+    std::cout << "#Edges    = "          << std::setw(10) << nEd
               << "  #Boundary Edges  = " << std::setw(10) << nBEd << std::endl;
     std::cout << "#Points   = "          << std::setw(10) << nPo
               << "  #Boundary Points = " << std::setw(10) << nBPo << std::endl;
@@ -459,22 +476,27 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
     // Set all basic data structure
 
     // I store all Points
-    mesh.setMaxNumPoints( nPo, true );
-    mesh.setNumBPoints( nBPo );
-    mesh.setNumVertices( nVe );
-    mesh.setNumBVertices( nBVe );
+    mesh.setMaxNumPoints   ( nPo, true );
+    mesh.setMaxNumGlobalPoints( nPo );
+    mesh.setNumBPoints     ( nBPo );
+    mesh.setNumVertices    ( nVe );
+    mesh.setNumGlobalVertices(nVe);
+    mesh.setNumBVertices   ( nBVe );
     // Only Boundary Edges (in a next version I will allow for different choices)
-    mesh.setMaxNumEdges( nBEd );
-    mesh.setNumEdges( nEd ); // Here the REAL number of edges (all of them)
-    mesh.setNumBEdges( nBEd );
+    mesh.setMaxNumEdges    ( nBEd );
+    mesh.setMaxNumGlobalEdges ( nEd );
+    mesh.setNumEdges       ( nEd ); // Here the REAL number of edges (all of them)
+    mesh.setNumBEdges      ( nBEd );
     // Only Boundary Faces
-    mesh.setMaxNumFaces( numStoredFaces );
-    mesh.setNumFaces( nFa ); // Here the REAL number of faces (all of them)
-    mesh.setNumBFaces( nBFa );
+    mesh.setMaxNumFaces    ( numStoredFaces );
+    mesh.setMaxNumGlobalFaces ( nBFa );
+    mesh.setNumFaces       ( nFa ); // Here the REAL number of faces (all of them)
+    mesh.setNumBFaces      ( nBFa );
 
-    mesh.setMaxNumVolumes( nVo, true );
+    mesh.setMaxNumVolumes  ( nVo, true );
+    mesh.setMaxNumGlobalVolumes( nVo);
 
-    mesh.setMarker( regionFlag ); // Add Marker to list of Markers
+    mesh.setMarker         ( regionFlag ); // Add Marker to list of Markers
 
     typename RegionMesh3D<GeoShape, MC>::PointType * pp = 0;
     typename RegionMesh3D<GeoShape, MC>::EdgeType * pe = 0;
@@ -498,9 +520,12 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
         if ( line.find( "Vertices" ) != std::string::npos )
         {
             nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), mystream );
-            for ( i = 0;i < nVe;i++ )
+            for ( i = 0; i < nVe; i++ )
             {
                 mystream >> x >> y >> z >> ibc;
+
+//                if (ibc == 1 ) ibc = 100;
+
                 if ( !iSelect(EntityFlag(ibc)))
                 {
                     ++count;
@@ -511,10 +536,13 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
                 {
                     pp = &mesh.addPoint( false );
                 }
+                pp->setId     ( i + 1 );
+                pp->setLocalId( i + 1 );
                 pp->x() = x;
                 pp->y() = y;
                 pp->z() = z;
                 pp->setMarker( EntityFlag( ibc ) );
+
             }
             oStr << "Vertices Read " << std::endl;
             done++;
@@ -647,7 +675,8 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
             {
                 mystream >> p1 >> p2 >> p3 >> p4 >> ibc;
                 pv = &mesh.addVolume();
-                pv->id() = i + 1;
+                pv->setId     ( i + 1 );
+                pv->setLocalId( i + 1);
                 pv->setPoint( 1, mesh.point( p1 ) );
                 pv->setPoint( 2, mesh.point( p2 ) );
                 pv->setPoint( 3, mesh.point( p3 ) );
@@ -667,7 +696,9 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
             {
                 mystream >> p1 >> p2 >> p3 >> p4 >> p5 >> p6 >> p7 >> p8 >> ibc;
                 pv = &mesh.addVolume();
-                pv->id() = i + 1;
+                pv->setId     ( i + 1 );
+                pv->setLocalId( i + 1);
+//                pv->id() = i + 1;
                 pv->setPoint( 1, mesh.point( p1 ) );
                 pv->setPoint( 2, mesh.point( p2 ) );
                 pv->setPoint( 3, mesh.point( p3 ) );
@@ -688,8 +719,8 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
     // Test mesh
     Switch sw;
 
-    if ( !checkMesh3D( mesh, sw, true, verbose, oStr, std::cerr, oStr ) )
-        abort();
+    if ( !checkMesh3D( mesh, sw, true, false, oStr, std::cerr, oStr ) )
+         abort();
     // if(!checkMesh3D(mesh, sw, true,true, oStr,oStr,oStr)) abort();//verbose version
 
     // This part is to build a P2 mesh from a P1 geometry
@@ -712,6 +743,8 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
     return done == 4 ;
 
 }
+
+
 //
 // GMSH
 //
@@ -732,11 +765,12 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
               bool verbose=false )
 {
     std::ifstream __is ( filename.c_str() );
+    Debug() << "gmsh reading: "<< filename << "\n";
 
     char __buf[256];
     __is >> __buf;
     Debug() << "buf: "<< __buf << "\n";
-    uint __n;
+    UInt __n;
     __is >> __n;
     Debug() << "number of nodes: " << __n;
 
@@ -746,12 +780,12 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
 
     std::vector<double> __x(3*__n);
     std::vector<bool> __isonboundary(__n);
-    std::vector<uint> __whichboundary(__n);
+    std::vector<UInt> __whichboundary(__n);
     Debug() << "reading "<< __n << " nodes\n";
     std::map<int,int> itoii;
-    for( uint __i = 0; __i < __n;++__i )
+    for( UInt __i = 0; __i < __n;++__i )
     {
-        uint __ni;
+        UInt __ni;
         __is >> __ni
              >> __x[3*__i]
              >> __x[3*__i+1]
@@ -763,7 +797,7 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
     Debug() << "buf: "<< __buf << "\n";
     __is >> __buf;
     Debug() << "buf: "<< __buf << "\n";
-    uint __nele;
+    UInt __nele;
     __is >> __nele;
 
     typename RegionMesh3D<GeoShape, MC>::EdgeType * pe = 0;
@@ -780,7 +814,7 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
     std::vector<int> __gt(16);
     __gt.assign( 16, 0 );
 
-    for( uint __i = 0; __i < __nele;++__i )
+    for( UInt __i = 0; __i < __nele;++__i )
     {
         int __ne, __t, __tag, __np, __dummy;
         __is >> __ne
@@ -808,27 +842,32 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
     std::cout << "\n";
 
     // Euler formulas
-    uint n_volumes = __gt[4];
-    uint n_faces_boundary = __gt[2];
-    uint n_faces_total = 2*n_volumes+(n_faces_boundary/2);
+    UInt n_volumes = __gt[4];
+    UInt n_faces_boundary = __gt[2];
+    UInt n_faces_total = 2*n_volumes+(n_faces_boundary/2);
 
+    mesh.setMaxNumGlobalPoints( __n );
     // Only Boundary Edges (in a next version I will allow for different choices)
     mesh.setMaxNumEdges( __gt[1] );
-    mesh.setNumEdges(  __gt[1] ); // Here the REAL number of edges (all of them)
-    mesh.setNumBEdges( __gt[1] );
-
+    mesh.setNumEdges   ( __gt[1] ); // Here the REAL number of edges (all of them)
+    mesh.setNumBEdges  ( __gt[1] );
+    mesh.setMaxNumGlobalEdges( __gt[1] );
     Debug() << "number of edges= " << __gt[1] << "\n";
     // Only Boundary Faces
     mesh.setMaxNumFaces( n_faces_total );
-    mesh.setNumFaces(  n_faces_total ); // Here the REAL number of edges (all of them)
-    mesh.setNumBFaces( n_faces_boundary );
-    Debug() << "number of faces= " << n_faces_total << "\n";
+    mesh.setNumFaces   ( n_faces_total ); // Here the REAL number of edges (all of them)
+    //mesh.setMaxNumFaces( n_faces_boundary );
+    //mesh.setNumFaces   ( n_faces_boundary ); // Here the REAL number of edges (all of them)
+    mesh.setNumBFaces  ( n_faces_boundary );
+    mesh.setMaxNumGlobalFaces( n_faces_total );
+    Debug() << "number of faces= " << n_faces_boundary << "\n";
     mesh.setMaxNumVolumes( n_volumes, true );
+    mesh.setMaxNumGlobalVolumes( n_volumes );
     Debug() << "number of volumes= " << n_volumes << "\n";
 
     __isonboundary.assign( __n, false );
     __whichboundary.assign( __n, 0 );
-    for( uint __i = 0; __i < __nele;++__i )
+    for( UInt __i = 0; __i < __nele;++__i )
     {
         switch( __etype[__i] )
         {
@@ -849,26 +888,29 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
     typename RegionMesh3D<GeoShape, MC>::PointType * pp = 0;
 
     mesh.setMaxNumPoints( __n, true );
-    mesh.setNumVertices( __n );
+    mesh.setNumVertices ( __n );
     mesh.setNumBVertices( std::count( __isonboundary.begin(), __isonboundary.end(), true ) );
-    mesh.setNumBPoints( mesh.numBVertices() );
+    mesh.setNumBPoints  ( mesh.numBVertices() );
 
     Debug() << "number of points : " << mesh.numPoints() << "\n";
     Debug() << "number of boundary points : " << mesh.numBPoints() << "\n";
     Debug() << "number of vertices : " << mesh.numVertices() << "\n";
     Debug() << "number of boundary vertices : " << mesh.numBVertices() << "\n";
 
-    for( uint __i = 0; __i < __n;++__i )
+    for( UInt __i = 0; __i < __n;++__i )
     {
         pp = &mesh.addPoint( __isonboundary[ __i ] );
         pp->setMarker( __whichboundary[__i] );
+        pp->setId     ( __i + 1 );
+        pp->setLocalId( __i + 1 );
         pp->x() = __x[3*__i];
         pp->y() = __x[3*__i+1];
         pp->z() = __x[3*__i+2];
     }
 
+    int nVo = 1;
     // add the element to the mesh
-    for( uint __i = 0; __i < __nele;++__i )
+    for( UInt __i = 0; __i < __nele;++__i )
     {
         switch( __etype[__i] )
         {
@@ -910,7 +952,9 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
             case 4:
             {
                 pv = &( mesh.addVolume() );
-                pv->id() = __i + 1;
+                pv->setId     ( nVo );
+                pv->setLocalId( nVo++);
+//                pv->id() = __i + 1;
                 pv->setMarker( EntityFlag( __et[__i] ) );
                 pv->setPoint( 1, mesh.point( __e[__i][0] ) );
                 pv->setPoint( 2, mesh.point( __e[__i][1] ) );
@@ -923,7 +967,9 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
             {
                 pv = &( mesh.addVolume() );
 
-                pv->id() = __i + 1;
+                pv->setId     ( __i + 1 );
+                pv->setLocalId( __i + 1 );
+//                pv->id() = __i + 1;
                 pv->setMarker( EntityFlag( __et[__i] ) );
                 pv->setPoint( 1, mesh.point( __e[__i][0] ) );
                 pv->setPoint( 2, mesh.point( __e[__i][1] ) );
@@ -1172,18 +1218,18 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
     // Set all basic data structure
 
     // I store all Points
-    mesh.setMaxNumPoints(nPo,true);
-    mesh.setNumBPoints(nBPo);
-    mesh.setNumVertices(nVe);
-    mesh.setNumBVertices(nBVe);
+    mesh.setMaxNumPoints( nPo,true );
+    mesh.setNumBPoints  ( nBPo );
+    mesh.setNumVertices ( nVe  );
+    mesh.setNumBVertices( nBVe );
     // Only Boundary Edges (in a next version I will allow for different choices)
-    mesh.setMaxNumEdges(nBEd);
-    mesh.setNumEdges(nEd); // Here the REAL number of edges (all of them)
-    mesh.setNumBEdges(nBEd);    /////////????????????
+    mesh.setMaxNumEdges (nBEd);
+    mesh.setNumEdges    ( nEd ); // Here the REAL number of edges (all of them)
+    mesh.setNumBEdges   (nBEd);    /////////????????????
     // Only Boundary Faces
-    mesh.setMaxNumFaces(nBFa);
-    mesh.setNumFaces(nFa); // Here the REAL number of edges (all of them)
-    mesh.setNumBFaces(nBFa);
+    mesh.setMaxNumFaces (nBFa);
+    mesh.setNumFaces    ( nFa ); // Here the REAL number of edges (all of them)
+    mesh.setNumBFaces   (nBFa);
 
     mesh.setMaxNumVolumes(nVo,true);
 
@@ -1251,7 +1297,9 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
             for(i=0;i<nVo;i++){
                 fstream5>>matnr>>np>>p1>>p2>>p3>>p4;
                 pv=&mesh.addVolume();
-                pv->id()=i+1;
+                pv->setId     ( i + 1 );
+                pv->setLocalId( i + 1);
+//                pv->id()=i+1;
                 pv->setPoint(1, mesh.point(p1) );
                 pv->setPoint(2, mesh.point(p2) );
                 pv->setPoint(3, mesh.point(p3) );

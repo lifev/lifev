@@ -176,8 +176,7 @@ LinearTetra::fToE( id_type const _localFace, id_type const _edge )   // indexing
     ASSERT_BD( _edge > 0 && _edge < 4 ) ;
     ASSERT_BD( _localFace > 0 && _localFace <= numFaces ) ;
 
-    return
-        make_pair( _fToE[ 3 * _localFace + _edge - 4 ], _orient[ 3 * _localFace + _edge - 4 ] );
+    return make_pair( _fToE[ 3 * _localFace + _edge - 4 ], _orient[ 3 * _localFace + _edge - 4 ] );
 }
 
 ///////////////////////

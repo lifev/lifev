@@ -48,7 +48,7 @@ std::set<UInt> parseList( const std::string& list )
     {
         return setList;
     }
-    std::string::size_type commaPos = 0;
+    UInt commaPos = 0;
     while ( commaPos != std::string::npos )
     {
         commaPos = stringList.find( "," );

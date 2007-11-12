@@ -51,7 +51,7 @@ Geo0D::Geo0D( ID id, Real x, Real y, Real z, bool boundary )
 
 Geo0D::Geo0D( Geo0D const & G )
     :
-    MeshEntityWithBoundary( G._id, G._boundary ),
+    MeshEntityWithBoundary( G.id(), G._boundary ),
     _coor( G._coor )
 {
 }
@@ -61,7 +61,7 @@ Geo0D::operator=( Geo0D const & G )
 {
     if (  this == &G )
         return *this;
-    _id = G._id;
+    this->setId(G.id());
     _boundary = G._boundary;
     _coor = G._coor;
     return *this;
@@ -84,7 +84,9 @@ Geo0D::showMe( bool verbose, std::ostream & out ) const
         }
         out << c[i] << std::endl << std::endl;
     }
-    out << "ID= " << id() << "  ";
+    out << " ID       = " << id()      << std::endl;
+    out << " local ID = " << localId() << std::endl;
+
     out << "----- END OF Geo0D data ---" << std::endl << std::endl;
     return out;
 }

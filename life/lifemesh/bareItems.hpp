@@ -514,7 +514,7 @@ BareItemsHandler<BareItem>::addIfNotThere( const BareItem & s )
     std::pair<typename BareItemsHandler<BareItem>::iterator, bool> i( insert( std::make_pair( s, _idCount + 1 ) ) );
     if ( i.second )
         ++_idCount;
-    return std::make_pair( ( i.first ) ->second, i.second );
+    return std::make_pair( ( i.first )->second, i.second );
 }
 
 template <class BareItem>

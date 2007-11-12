@@ -40,8 +40,7 @@
 
 #include <life/lifecore/life.hpp>
 #include <life/lifefem/dofInterfaceBase.hpp>
-#include <life/lifearray/vecUnknown.hpp>
-
+#include <life/lifearray/EpetraVector.hpp>
 #include <life/lifecore/singleton.hpp>
 #include <life/lifecore/factory.hpp>
 
@@ -70,7 +69,8 @@ public:
       \warning (implemented only for the Natural BC AM 10/2004)
       -# 2:  needs boundary integration of \f$\mathbf{\lambda} \cdot n \phi_i\f$
     */
-    BCVectorBase( const Vector& vec, const UInt nbTotalDof, UInt type=0 );
+
+    BCVectorBase( const EpetraVector<double>& vec, const UInt nbTotalDof, UInt type = 0 );
 
 
     //! Default Constructor (the user must call setBCVector(..))
@@ -157,14 +157,14 @@ public:
         }
 
     //! set the Mixte coefficient data vector
-    void setMixteVec( Vector& vec_mixte )
+    void setMixteVec( EpetraVector<double>& vec_mixte )
         {
             _M_vec_mixte= &vec_mixte;
         }
 
 
     //! set the vector
-    void setVector( Vector& __vec, UInt nbDOF, UInt type=0 );
+    void setVector( EpetraVector<double>& __vec, UInt nbDOF, UInt type=0 );
 
     //@}
 
@@ -178,10 +178,10 @@ public:
 protected:
 
     //! The data vector
-    const Vector* _M_vec;
+    const EpetraVector<double>* _M_vec;
 
     //! The data vector of the mixte coefficient
-    Vector* _M_vec_mixte;
+    EpetraVector<double>* _M_vec_mixte;
 
     //! Number of total dof in the vector of data
     UInt _M_nbTotalDof;
@@ -239,7 +239,7 @@ public:
       -# needs boundary integration of \f$\lambda n \cdot  \mathbf{\phi}_i\f$ \warning (not yet implemented - AM 10/2004)
       -# needs boundary integration of \f$\mathbf{\lambda} \cdot n \phi_i\f$ \warning (implemented only for the Natural BC - AM 10/2004)
     */
-    BCVector( Vector& vec, UInt const nbTotalDof, UInt type=0 );
+    BCVector( EpetraVector<double>& vec, UInt const nbTotalDof, UInt type=0 );
 
     //! Default Constructor (the user must call setVector(..))
     BCVector();
@@ -276,6 +276,8 @@ class BCVectorInterface
 public:
 
     //! super class
+
+//    typedef FSIOperator::vector_type vector_type;
     typedef BCVectorBase super;
     typedef boost::shared_ptr<DofInterfaceBase> dof_interface_type;
 
@@ -291,17 +293,17 @@ public:
       \warning: implemented only for the Natural BC
       -# 2:  needs boundary integration of \f$\mathbf{\lambda} \cdot n \phi_i\f$
     */
-    BCVectorInterface( const Vector& vec, UInt nbTotalDof, dof_interface_type dofIn, UInt type=0 );
+    BCVectorInterface( const EpetraVector<double>& vec, UInt nbTotalDof, dof_interface_type dofIn, UInt type=0 );
 
     //! Default Constructor (the user must call setBCVector(..))
     BCVectorInterface ();
 
     //! setup after default constructor
 
-    void setup ( const Vector& vec, UInt nbTotalDof, dof_interface_type dofIn, UInt type=0 );
+    void setup ( const EpetraVector<double>& vec, UInt nbTotalDof, dof_interface_type dofIn, UInt type=0 );
 
     //! set the BC vector (after default construction)
-    void setVector( Vector& vec, UInt nbTotalDof, dof_interface_type dofIn, UInt type=0);
+    void setVector( EpetraVector<double>& vec, UInt nbTotalDof, dof_interface_type dofIn, UInt type=0);
 
     /*!
       This method returns the value to be imposed in the component iComp of the dof iDof.

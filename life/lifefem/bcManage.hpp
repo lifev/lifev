@@ -125,6 +125,9 @@ void bcManageMtimeUDep( MatrixType& M, const Dof& dof,
           else
           { //! If BC is given under a functional form
 
+	    std::vector<ID>   idDofVec(0);
+	    idDofVec.reserve(BCb.list_size()*nComp);
+
             // Loop on BC identifiers
             for ( ID i = 1; i <= BCb.list_size(); ++i )
             {
@@ -133,6 +136,7 @@ void bcManageMtimeUDep( MatrixType& M, const Dof& dof,
               {
                 // Global Dof
                 idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
+		idDofVec.push_back(idDof-1);
 
 #if USE_BOOST_MATRIX
                 using namespace boost::numeric::ublas;
@@ -141,10 +145,16 @@ void bcManageMtimeUDep( MatrixType& M, const Dof& dof,
                 M( idDof-1, idDof-1 ) = coef;
 #else
                 // Modifying matrix
-                M.diagonalize_row( idDof - 1, coef);
+                //M.diagonalize( idDof - 1, coef);
 #endif
               }
             }
+#if USE_BOOST_MATRIX
+#else
+	    // Modifying ONLY matrix
+	    M.diagonalize( idDofVec, coef );
+#endif
+
           }
         }
     }
@@ -305,8 +315,8 @@ void bcManage( MatrixType1& C, MatrixType2& trD, MatrixType3& D,
 // Essential BC
 // ===================================================
 template <typename MatrixType, typename VectorType, typename MeshType, typename DataType>
-void bcEssentialManageUDep( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& dof,
-    const BCBase& BCb, const CurrentBdFE& bdfem, const DataType& coef,
+void bcEssentialManageUDep( MatrixType& A, VectorType& b, const MeshType& /*mesh*/, const Dof& dof,
+    const BCBase& BCb, const CurrentBdFE& /*bdfem*/, const DataType& coef,
     const DataType& t, const VectorType& U )
 {
 
@@ -327,6 +337,12 @@ void bcEssentialManageUDep( MatrixType& A, VectorType& b, const MeshType& mesh, 
     else
     { //! If BC is given under a functional form
 
+        std::vector<ID>   idDofVec(0);
+        std::vector<Real> datumVec(0);
+
+	idDofVec.reserve(BCb.list_size()*nComp);
+	datumVec.reserve(BCb.list_size()*nComp);
+
         DataType x, y, z;
         // Loop on BC identifiers
         for ( ID i = 1; i <= BCb.list_size(); ++i )
@@ -343,6 +359,8 @@ void bcEssentialManageUDep( MatrixType& A, VectorType& b, const MeshType& mesh, 
 
                 Real datum = BCb( t, x, y, z, BCb.component( j ) ,U[idDof-1]);
 
+		datumVec.push_back(datum);
+		idDofVec.push_back(idDof-1);
 
 #if USE_BOOST_MATRIX
                 using namespace boost::numeric::ublas;
@@ -355,10 +373,16 @@ void bcEssentialManageUDep( MatrixType& A, VectorType& b, const MeshType& mesh, 
                 b( idDof-1 ) = coef*datum;
 #else
                 // Modifying matrix and right hand side
-                A.diagonalize( idDof - 1, coef, b, datum );
+                // A.diagonalize( idDof - 1, coef, b, datum );
 #endif
             }
         }
+
+#if USE_BOOST_MATRIX
+#else
+	// Modifying matrix and right hand side
+	A.diagonalize( idDofVec, coef, b, datumVec );
+#endif
     }
 }
 template <typename MatrixType, typename VectorType, typename MeshType, typename DataType>
@@ -374,6 +398,13 @@ void bcEssentialManage( MatrixType& A, VectorType& b, const MeshType& /*mesh*/, 
     // Number of total scalar Dof
     UInt totalDof = dof.numTotalDof();
 
+
+    std::vector<ID>   idDofVec(0);
+    std::vector<Real> datumVec(0);
+
+    idDofVec.reserve(BCb.list_size()*nComp);
+    datumVec.reserve(BCb.list_size()*nComp);
+
     if ( BCb.dataVector() )
     { //! If BC is given under a vectorial form
 
@@ -384,7 +415,11 @@ void bcEssentialManage( MatrixType& A, VectorType& b, const MeshType& /*mesh*/, 
             for ( ID j = 1; j <= nComp; ++j )
             {
                 // Global Dof
-                idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
+                idDof = BCb( i )->id() + ( BCb.component( j ) - 1 ) * totalDof;
+
+                datumVec.push_back(BCb( BCb( i ) ->id(), BCb.component( j ) ));
+                idDofVec.push_back(idDof - 1);
+
 #if USE_BOOST_MATRIX
                 Real datum = BCb( BCb( i ) ->id(), BCb.component( j ) );
 
@@ -398,7 +433,7 @@ void bcEssentialManage( MatrixType& A, VectorType& b, const MeshType& /*mesh*/, 
                 b( idDof-1 ) = coef*datum;
 #else
                 // Modifying matrix and right hand side
-                A.diagonalize( idDof - 1, coef, b, BCb( BCb( i ) ->id(), BCb.component( j ) ) );
+                // A.diagonalize( idDof - 1, coef, b, BCb( BCb( i ) ->id(), BCb.component( j ) ) );
 #endif
             }
         }
@@ -420,6 +455,9 @@ void bcEssentialManage( MatrixType& A, VectorType& b, const MeshType& /*mesh*/, 
                 y = static_cast< const IdentifierEssential* >( BCb( i ) ) ->y();
                 z = static_cast< const IdentifierEssential* >( BCb( i ) ) ->z();
 
+                datumVec.push_back(BCb( t, x, y, z, BCb.component( j ) ));
+                idDofVec.push_back(idDof - 1);
+
 #if USE_BOOST_MATRIX
                 Real datum = BCb( t, x, y, z, BCb.component( j ) );
 
@@ -430,15 +468,22 @@ void bcEssentialManage( MatrixType& A, VectorType& b, const MeshType& /*mesh*/, 
                 matrix_column<MatrixType> mc (A, idDof-1);
                 b -= mc*datum; // correct rhs
                 mc *= 0;
-                A( idDof-1, idDof-1 ) = coef;
-                b( idDof-1 ) = coef*datum;
+                A( idDof - 1, idDof - 1 ) = coef;
+                b( idDof - 1 ) = coef*datum;
 #else
                 // Modifying matrix and right hand side
-                A.diagonalize( idDof - 1, coef, b, BCb( t, x, y, z, BCb.component( j ) ) );
+                // A.diagonalize( idDof - 1, coef, b, BCb( t, x, y, z, BCb.component( j ) ) );
 #endif
             }
         }
     }
+
+#if USE_BOOST_MATRIX
+#else
+	// Modifying matrix and right hand side
+	A.diagonalize( idDofVec, coef, b, datumVec );
+#endif
+
 }
 
 
@@ -457,6 +502,9 @@ void bcEssentialManageMatrix( MatrixType& A, const Dof& dof, const BCBase& BCb, 
     // Number of components involved in this boundary condition
     UInt nComp = BCb.numberOfComponents();
 
+    std::vector<ID>   idDofVec(0);
+    idDofVec.reserve(BCb.list_size()*nComp);
+
     // Loop on BC identifiers
     for ( ID i = 1; i <= BCb.list_size(); ++i )
     {
@@ -465,10 +513,14 @@ void bcEssentialManageMatrix( MatrixType& A, const Dof& dof, const BCBase& BCb, 
         {
             // Global Dof
             idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
+	    idDofVec.push_back(idDof-1);
             // Modifying ONLY matrix
-            A.diagonalize_row( idDof - 1, coef );
+            //A.diagonalize( idDof - 1, coef );
         }
     }
+    // Modifying ONLY matrix
+    A.diagonalize( idDofVec, coef);
+
 }
 
 //Version that treates only the vector modifications
@@ -499,8 +551,22 @@ void bcEssentialManageVector( VectorType& b, const Dof& dof, const BCBase& BCb, 
 
                 // Global Dof
                 idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
+//                 std::cout << "iDof = " << idDof << " -> " << std::flush;
+//                 std::cout << "  :-( " << std::endl;
+//                 std::cout <<  coef * BCb( BCb( i ) ->id(), BCb.component( j ) ); // BASEINDEX + 1;
+//                 std::cout << "  :-) " << std::endl;
                 // Modifying right hand side
-                b( idDof - 1 ) = coef * BCb( BCb( i ) ->id(), BCb.component( j ) );
+
+                /*
+                { // for debugging purpuses: check that somebody owns this idDof:
+                    int pid, lid, dof(idDof);
+                    b.Map().RemoteIDList(1, &dof, &pid, &lid);
+                    std::cout << "iDof = " << idDof << " -> " << pid << " " << lid << std::endl;
+                }
+                */
+
+                if (b.Map().LID(idDof) >= 0)
+                    b( idDof ) = coef * BCb( BCb( i ) ->id(), BCb.component( j ) ); // BASEINDEX + 1
             }
         }
     }
@@ -521,7 +587,7 @@ void bcEssentialManageVector( VectorType& b, const Dof& dof, const BCBase& BCb, 
                 y = static_cast< const IdentifierEssential* >( BCb( i ) ) ->y();
                 z = static_cast< const IdentifierEssential* >( BCb( i ) ) ->z();
                 // Modifying right hand side
-                b( idDof - 1 ) = coef * BCb( t, x, y, z, BCb.component( j ) );
+                b( idDof ) = coef * BCb( t, x, y, z, BCb.component( j ) ); // BASEINDEX + 1
             }
         }
     }
@@ -552,6 +618,13 @@ void bcEssentialManage( MatrixType1& A,
     // Number of components involved in this boundary condition
     UInt nComp = BCb.numberOfComponents();
 
+    std::vector<ID>   idDofVec(0);
+    std::vector<Real> datumVec(0);
+
+    idDofVec.reserve(BCb.list_size()*nComp);
+    datumVec.reserve(BCb.list_size()*nComp);
+
+
     if ( BCb.dataVector() )
     {  //! If BC is given under a vectorial form
 
@@ -564,7 +637,11 @@ void bcEssentialManage( MatrixType1& A,
                 // Global Dof
                 idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
                 // Modifying matrix and right hand side
-                A.diagonalize( idDof - 1, coef, b, BCb( BCb( i ) ->id(), BCb.component( j ) ) );
+
+		datumVec.push_back(BCb( BCb( i ) ->id(), BCb.component( j ) ));
+		idDofVec.push_back(idDof-1);
+
+                //A.diagonalize( idDof - 1, coef, b, BCb( BCb( i ) ->id(), BCb.component( j ) ) );
                 trD.zero_row( idDof - 1 );
             }
         }
@@ -586,12 +663,18 @@ void bcEssentialManage( MatrixType1& A,
                 x = static_cast< const IdentifierEssential* >( BCb( i ) ) ->x();
                 y = static_cast< const IdentifierEssential* >( BCb( i ) ) ->y();
                 z = static_cast< const IdentifierEssential* >( BCb( i ) ) ->z();
+
                 // Modifying matrix and right hand side
-                A.diagonalize( idDof - 1, coef, b, BCb( t, x, y, z, BCb.component( j ) ) );
+                datumVec.push_back(BCb( t, x, y, z, BCb.component( j ) ));
+                idDofVec.push_back(idDof-1);
+                //A.diagonalize( idDof - 1, coef, b, BCb( t, x, y, z, BCb.component( j ) ) );
                 trD.zero_row( idDof - 1 );
             }
         }
     }
+
+    // Modifying matrix and right hand side
+    A.diagonalize( idDofVec, coef, b, datumVec );
 }
 
 //! version with column diagonalization of D.
@@ -614,6 +697,12 @@ void bcEssentialManage( MatrixType1& A, MatrixType2& trD, MatrixType3& D,
     // Number of components involved in this boundary condition
     UInt nComp = BCb.numberOfComponents();
 
+    std::vector<ID>   idDofVec(0);
+    std::vector<Real> datumVec(0);
+
+    idDofVec.reserve(BCb.list_size()*nComp);
+    datumVec.reserve(BCb.list_size()*nComp);
+
     if ( BCb.dataVector() )
     {  //! If BC is given under a vectorial form
 
@@ -626,7 +715,10 @@ void bcEssentialManage( MatrixType1& A, MatrixType2& trD, MatrixType3& D,
                 // Global Dof
                 idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
                 // Modifying matrix and right hand side
-                A.diagonalize( idDof - 1, coef, b, BCb( BCb( i ) ->id(), BCb.component( j ) ) );
+                datumVec.push_back(BCb( BCb( i ) ->id(), BCb.component( j ) ));
+                idDofVec.push_back(idDof-1);
+
+                //A.diagonalize( idDof - 1, coef, b, BCb( BCb( i ) ->id(), BCb.component( j ) ) );
                 zero_row_col( idDof - 1, trD, D, bp, BCb( t, x, y, z, BCb.component( j ) ) );
             }
         }
@@ -649,11 +741,17 @@ void bcEssentialManage( MatrixType1& A, MatrixType2& trD, MatrixType3& D,
                 y = static_cast< const IdentifierEssential* >( BCb( i ) ) ->y();
                 z = static_cast< const IdentifierEssential* >( BCb( i ) ) ->z();
                 // Modifying matrix and right hand side
-                A.diagonalize( idDof - 1, coef, b, BCb( t, x, y, z, BCb.component( j ) ) );
+                datumVec.push_back(BCb( t, x, y, z, BCb.component( j ) ));
+                idDofVec.push_back(idDof-1);
+                //A.diagonalize( idDof - 1, coef, b, BCb( t, x, y, z, BCb.component( j ) ) );
                 zero_row_col( idDof - 1, trD, D, bp, BCb( t, x, y, z, BCb.component( j ) ) );
             }
         }
     }
+
+    // Modifying matrix and right hand side
+    A.diagonalize( idDofVec, coef, b, datumVec );
+
 }
 
 // ===================================================
@@ -740,8 +838,8 @@ void bcNaturalManageUDep( Real (*mu)(Real t,Real x, Real y, Real z, Real u),
             }
 
                         // Adding right hand side contribution
-                        b[ idDof - 1 ] += bdfem.phi( int( idofF - 1 ), l ) * BCb( t, x, y, z, BCb.component( j ),uPt ) *
-                    mu(t,x,y,z,uPt)*bdfem.weightMeas( l );
+                        b[ idDof ] += bdfem.phi( int( idofF - 1 ), l ) * BCb( t, x, y, z, BCb.component( j ),uPt ) *
+                    mu(t,x,y,z,uPt)*bdfem.weightMeas( l ); // BASEINDEX + 1
 //    Debug(800)<<"debug* naturalManageUDep done one ulocU\n";
                     }
                 }
@@ -782,11 +880,12 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
                 for ( ID j = 1; j <= nComp; ++j )
                 {
                     ID id = BCb(i)->id();
+//                    std::cout << id << std::endl;
                     // Global Dof
                     idDof = id + ( BCb.component( j ) - 1 ) * totalDof;
 
                     // Modifying right hand side (assuming BCvector is a flux)
-                    b[ idDof - 1 ] += BCb( id , BCb.component( j ) );
+                    b[ idDof ] += BCb( id , BCb.component( j ) ); // BASEINDEX + 1
                 }
             }
             break;
@@ -822,8 +921,8 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
 			    // data on quadrature point
 			    for ( ID m = 1; m <= nDofF; ++m )
 			      sum +=  BCb( pId->bdLocalToGlobal( m ) , 1 ) * bdfem.phi( int( m - 1 ), iq );
-			
-			    // Adding right hand side contribution 	
+
+			    // Adding right hand side contribution
 			    b[ icDof - 1 ] += sum * bdfem.phi( int( l - 1 ), iq ) * bdfem.normal( int( ic ), iq )
 			      * bdfem.weightMeas( iq );
 			  }
@@ -835,22 +934,22 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
 	  // Loop on BC identifiers
 	  for ( ID i = 1; i <= BCb.list_size(); ++i )
             {
-	
+
 	      // Pointer to the i-th itdentifier in the list
 	      pId = static_cast< const IdentifierNatural* >( BCb( i ) );
-	
+
 	      // Number of the current boundary face
 	      ibF = pId->id();
-	
+
 	      // Updating face stuff
 	      bdfem.updateMeasNormalQuadPt( mesh.boundaryFace( ibF ) );
-	
+
 	      // Loop on total Dof per Face
 	      for ( ID l = 1; l <= nDofF; ++l )
                 {
-		
+
 		  gDof = pId->bdLocalToGlobal( l );
-		
+
 		  // Loop on space dimensions
 		  for ( UInt ic = 0; ic < nDimensions; ++ic )
                     {
@@ -861,7 +960,7 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
 			  // data on quadrature point
 			  for ( ID m = 1; m <= nDofF; ++m )
 			    sum +=  BCb( pId->bdLocalToGlobal( m ) , ic+1 ) * bdfem.phi( int( m - 1 ), iq );
-			
+
 			  // Adding right hand side contribution
 			  b[ gDof - 1 ] += sum *  bdfem.phi( int( l - 1 ), iq ) *
 			    bdfem.normal( int( ic ), iq ) * bdfem.weightMeas( iq );
@@ -874,7 +973,7 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
 	  ERROR_MSG( "This type of BCVector does not exist" );
 	}
     }
-	
+
     /*
       MODIFIED by V. Martin : what follows...
 
@@ -939,7 +1038,6 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
 
             // Number of the current boundary face
             ibF = pId->id();
-
             // Updating face stuff
             bdfem.updateMeas( mesh.boundaryFace( ibF ) );
 
@@ -962,8 +1060,8 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
                         bdfem.coorQuadPt( x, y, z, l ); // quadrature point coordinates
 
                         // Adding right hand side contribution
-                        b[ idDof - 1 ] += bdfem.phi( int( idofF - 1 ), l ) * BCb( t, x, y, z, BCb.component( j ) ) *
-                                          bdfem.weightMeas( l );
+                        b[ idDof ] += bdfem.phi( int( idofF - 1 ), l ) * BCb( t, x, y, z, BCb.component( j ) ) *
+                                          bdfem.weightMeas( l ); // BASEINDEX + 1
                     }
                 }
             }
@@ -1058,7 +1156,7 @@ void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Do
                         // Adding right hand side contribution
                         //vincent please check again for your Mixte-FE it doesn't work for Q1:
                         //     b[idDof-1] += bdfem.phi(int(idofF-1),l) * BCb(BCb(i)->id(),BCb.component(j)) *
-                        b[ idDof - 1 ] += bdfem.phi( int( idofF - 1 ), l ) * mbcb *
+                        b[ idDof ] += bdfem.phi( int( idofF - 1 ), l ) * mbcb * // BASEINDEX + 1
                                           bdfem.weightMeas( l );
                     }
 
@@ -1162,7 +1260,7 @@ void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Do
                         // idDof = pId->bdLocalToGlobal(idofF) + (BCb.component(j)-1)*totalDof;
 
                         // Adding right hand side contribution
-                        b[ idDof - 1 ] += bdfem.phi( int( idofF - 1 ), l ) * BCb( t, x, y, z, BCb.component( j ) ) *
+                        b[ idDof ] += bdfem.phi( int( idofF - 1 ), l ) * BCb( t, x, y, z, BCb.component( j ) ) * // BASEINDEX + 1
                                           bdfem.weightMeas( l );
                     }
 
@@ -1453,7 +1551,7 @@ void bcMixteManageVector( VectorType& b, const MeshType& mesh, const Dof& dof,
                     for ( int l = 0; l < bdfem.nbQuadPt; ++l )
                     {
                         // Adding right hand side contribution
-                        b[ idDof - 1 ] += bdfem.phi( int( idofF - 1 ), l ) * BCb( BCb( i ) ->id(), BCb.component( j ) ) *
+                        b[ idDof ] += bdfem.phi( int( idofF - 1 ), l ) * BCb( BCb( i ) ->id(), BCb.component( j ) ) * // BASEINDEX + 1
                                           bdfem.weightMeas( l );
                     }
                 }
@@ -1501,7 +1599,7 @@ void bcMixteManageVector( VectorType& b, const MeshType& mesh, const Dof& dof,
                         // idDof = pId->bdLocalToGlobal(idofF) + (BCb.component(j)-1)*totalDof;
 
                         // Adding right hand side contribution
-                        b[ idDof - 1 ] += bdfem.phi( int( idofF - 1 ), l ) * BCb( t, x, y, z, BCb.component( j ) ) *
+                        b[ idDof ] += bdfem.phi( int( idofF - 1 ), l ) * BCb( t, x, y, z, BCb.component( j ) ) *// BASEINDEX + 1
                                           bdfem.weightMeas( l );
                     }
                 }
@@ -1572,7 +1670,7 @@ void bcMixteManage( MatrixType1& A, MatrixType2 & trD, VectorType& b,
                     idDof = pId->bdLocalToGlobal( i ) + ( BCb.component( j ) - 1 ) * totalDof;
 
                     // Adding right hand side contribution
-                    b[ idDof - 1 ] += bdfem.phi( int( i - 1 ), l ) * BCb( t, x, y, z, BCb.component( j ) ) * bdfem.weightMeas( l );
+                    b[ idDof ] += bdfem.phi( int( i - 1 ), l ) * BCb( t, x, y, z, BCb.component( j ) ) * bdfem.weightMeas( l ); // BASEINDEX + 1
                 }
 
                 // Global Dof
@@ -1678,7 +1776,7 @@ void bcMixteManage( MatrixType1& A, MatrixType2 & trD, MatrixType3 & D,
                     idDof = pId->bdLocalToGlobal( i ) + ( BCb.component( j ) - 1 ) * totalDof;
 
                     // Adding right hand side contribution
-                    b[ idDof - 1 ] += bdfem.phi( int( i - 1 ), l ) * BCb( t, x, y, z, BCb.component( j ) ) * bdfem.weightMeas( l );
+                    b[ idDof ] += bdfem.phi( int( i - 1 ), l ) * BCb( t, x, y, z, BCb.component( j ) ) * bdfem.weightMeas( l ); // BASEINDEX + 1
                 }
 
                 // Global Dof

@@ -29,12 +29,12 @@
 
 //! previously called quasiNewton in the CVS repository
 
-#ifndef _QNEWTON
-#define _QNEWTON
+#ifndef _QNEWTON_
+#define _QNEWTON_
 
 
 #include <life/lifecore/life.hpp>
-#include <life/lifesolver/FSIOperator.hpp>
+#include "life/lifesolver/FSIOperator.hpp"
 #include <life/lifesolver/NavierStokesAleSolverPC.hpp>
 #include <life/lifesolver/VenantKirchhofSolver.hpp>
 #include <life/lifefem/regionMesh3D_ALE.hpp>
@@ -46,8 +46,8 @@ namespace LifeV
 
 class reducedLinFluid{
 
-    typedef FSIOperator::fluid_type     fluid_type;
-    typedef FSIOperator::solid_type     solid_type;
+    typedef FSIOperator::fluid_type           fluid_type;
+    typedef FSIOperator::solid_type           solid_type;
     typedef FSIOperator::fluid_bchandler_type bchandler_type;
 
 public:
@@ -55,8 +55,8 @@ public:
 
     //! constructor
     reducedLinFluid(FSIOperator* const _op,
-                    fluid_type _fluid,
-                    solid_type _solid);
+                       fluid_type _fluid,
+                       solid_type _solid);
 
     //! bondary conditions setup
 

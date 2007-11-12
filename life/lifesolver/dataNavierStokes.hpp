@@ -67,12 +67,18 @@ class DataNavierStokes:
 public:
 
     //! Constructor
+
     DataNavierStokes( const GetPot& dfile );
 
     DataNavierStokes( const DataNavierStokes& dataNavierStokes );
 
     //! Ouptut
     void showMe( std::ostream& c = std::cout );
+
+
+    //! external setup
+
+    void setup( const GetPot& dfile );
 
     //! End time
     Real density() const;
@@ -84,6 +90,9 @@ public:
     Real dump_init() const;
     UInt dump_period() const;
     Real factor() const;
+
+    std::string uOrder() const;
+    std::string pOrder() const;
 
     NSStabilization stabilization() const;
 
@@ -110,13 +119,13 @@ protected:
     UInt _dump_period; // frequency of the dumping (one dump after _dump_period time steps) (Alex December 2003)
     Real M_factor; // amplification factor for moving domains
 
+    std::string  M_uOrder;
+    std::string  M_pOrder;
+
     //! Discretization
     NSStabilization M_stab_method;
 
 private:
-    //! constructors setup
-
-    void setUp();
 
     //! To extract Mean Values at a given section z
     UInt M_computeMeanValuesPerSection; //! switch: 0 don't compute it, 1 compute
@@ -137,6 +146,11 @@ private:
 
 
 // Constructor
+
+
+
+
+
 template <typename Mesh>
 DataNavierStokes<Mesh>::
 DataNavierStokes( const GetPot& dfile ) :
@@ -144,7 +158,44 @@ DataNavierStokes( const GetPot& dfile ) :
     DataTime( dfile, "fluid/discretization" ),
     M_stabilization_list( "fluid/discretization/stabilization" )
 {
+    setup(dfile);
+}
 
+template <typename Mesh>
+DataNavierStokes<Mesh>::
+DataNavierStokes( const DataNavierStokes& dataNavierStokes ) :
+    DataMesh<Mesh>               ( dataNavierStokes ),
+    DataTime                     ( dataNavierStokes ),
+    _rho                         (dataNavierStokes._rho),
+    _mu                          (dataNavierStokes._mu),
+    _inittime                    (dataNavierStokes._inittime),
+    _endtime                     (dataNavierStokes._endtime),
+    _verbose                     (dataNavierStokes._verbose),
+    _dump_init                   (dataNavierStokes._dump_init),
+    _dump_period                 (dataNavierStokes._dump_period),
+    M_factor                     (dataNavierStokes.M_factor),
+    M_uOrder                     (dataNavierStokes.M_uOrder),
+    M_pOrder                     (dataNavierStokes.M_pOrder),
+    M_stab_method                (dataNavierStokes.M_stab_method),
+    M_computeMeanValuesPerSection(dataNavierStokes.M_computeMeanValuesPerSection),
+    M_NbZSections                (dataNavierStokes.M_NbZSections),
+    M_ToleranceSection           (dataNavierStokes.M_ToleranceSection),
+    M_XSectionFrontier           (dataNavierStokes.M_XSectionFrontier),
+    M_ZSectionInit               (dataNavierStokes.M_ZSectionInit),
+    M_ZSectionFinal              (dataNavierStokes.M_ZSectionFinal),
+    M_NbPolygonEdges             (dataNavierStokes.M_NbPolygonEdges),
+    M_stabilization_list         (dataNavierStokes.M_stabilization_list)
+{
+}
+
+
+
+
+template <typename Mesh>
+void
+DataNavierStokes<Mesh>::
+setup(  const GetPot& dfile )
+{
     M_stabilization_list.add( "ip", IP_STABILIZATION, "interior penalty " );
     M_stabilization_list.add( "sd", SD_STABILIZATION, "stream-line difussion" );
     M_stabilization_list.add( "none", NO_STABILIZATION,  "none (default)" );
@@ -161,6 +212,9 @@ DataNavierStokes( const GetPot& dfile ) :
     _dump_init = dfile( "fluid/miscellaneous/dump_init", _inittime );
     _dump_period = dfile( "fluid/miscellaneous/dump_period", 1 );
     M_factor = dfile( "fluid/miscellaneous/factor", 0. );
+
+    M_uOrder = dfile( "fluid/discretization/vel_order", "P1");
+    M_pOrder = dfile( "fluid/discretization/press_order", "P1");
 
     M_stab_method = NSStabilization ( M_stabilization_list.value( dfile( "fluid/discretization/stabilization", "none") ) );
 
@@ -184,32 +238,6 @@ DataNavierStokes( const GetPot& dfile ) :
         dfile( "fluid/valuespersection/z_section_final", 0. );
     M_NbPolygonEdges =
         dfile( "fluid/valuespersection/nb_polygon_edges", 10 );
-}
-
-
-template <typename Mesh>
-DataNavierStokes<Mesh>::
-DataNavierStokes( const DataNavierStokes& dataNavierStokes ) :
-    DataMesh<Mesh>               ( dataNavierStokes ),
-    DataTime                     ( dataNavierStokes ),
-    _rho                         (dataNavierStokes._rho),
-    _mu                          (dataNavierStokes._mu),
-    _inittime                    (dataNavierStokes._inittime),
-    _endtime                     (dataNavierStokes._endtime),
-    _verbose                     (dataNavierStokes._verbose),
-    _dump_init                   (dataNavierStokes._dump_init),
-    _dump_period                 (dataNavierStokes._dump_period),
-    M_factor                     (dataNavierStokes.M_factor),
-    M_stab_method                (dataNavierStokes.M_stab_method),
-    M_computeMeanValuesPerSection(dataNavierStokes.M_computeMeanValuesPerSection),
-    M_NbZSections                (dataNavierStokes.M_NbZSections),
-    M_ToleranceSection           (dataNavierStokes.M_ToleranceSection),
-    M_XSectionFrontier           (dataNavierStokes.M_XSectionFrontier),
-    M_ZSectionInit               (dataNavierStokes.M_ZSectionInit),
-    M_ZSectionFinal              (dataNavierStokes.M_ZSectionFinal),
-    M_NbPolygonEdges             (dataNavierStokes.M_NbPolygonEdges),
-    M_stabilization_list         (dataNavierStokes.M_stabilization_list)
-{
 }
 
 // Output
@@ -325,6 +353,20 @@ factor() const
 {
     return M_factor;
 }
+
+template <typename Mesh>
+std::string
+DataNavierStokes<Mesh>::uOrder() const
+{
+    return M_uOrder;
+}
+
+template <typename Mesh>
+std::string DataNavierStokes<Mesh>::pOrder() const
+{
+    return M_pOrder;
+}
+
 
 // Stabilization method
 template <typename Mesh>

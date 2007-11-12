@@ -103,10 +103,11 @@ public:
             return _totalDof;
         }
 
-    inline UInt setTotalDof(const UInt totalDof)
+    inline void setTotalDof(const UInt totalDof)
         {
-            return (_totalDof = totalDof );
+            _totalDof = totalDof;
         }
+
     //! The number of local Dof (nodes) in the finite element
     inline UInt numLocalDof() const
         {
@@ -199,10 +200,17 @@ void Dof::update( Mesh& M )
 
     _nEl = M.numElements();
 
-    UInt nV = M.numVolumes();
-    UInt ne = M.numEdges();
-    UInt nv = M.numVertices();
-    UInt nf = M.numFaces();
+    UInt nV = M.numGlobalVolumes();
+    UInt ne = M.numGlobalEdges();
+    UInt nv = M.numGlobalVertices();
+    UInt nf = M.numGlobalFaces();
+
+//    std::cout << "Num global Edges = " << ne << std::endl;
+
+//    std::cout << M.numGlobalVolumes()  << std::endl;
+//    std::cout << M.numGlobalEdges()    << std::endl;
+//    std::cout << M.numGlobalVertices() << std::endl;
+//    std::cout << M.numGlobalFaces()    << std::endl;
 
     UInt i, l, ie;
 
@@ -240,7 +248,9 @@ void Dof::update( Mesh& M )
             lc = 0;
             for ( i = 1; i <= nlv; ++i )
                 for ( l = 0; l < nldpv; ++l )
-                    _ltg( ++lc, ie ) = gcount + ( M.volume( ie ).point( i ).id() - 1 ) * nldpv + l;
+                    {
+                        _ltg( ++lc, ie ) = gcount + ( M.volume( ie ).point( i ).id() - 1 ) * nldpv + l;
+                    }
         }
     // Edge Based Dof
     gcount += nldpv * nv;
@@ -252,10 +262,18 @@ void Dof::update( Mesh& M )
             lc = lcount;
             for ( i = 1; i <= nle; ++i )
                 for ( l = 0; l < nldpe; ++l )
-                    _ltg( ++lc, ie ) = gcount + ( M.localEdgeId( ie, i ) - 1 ) * nldpe + l;
-        }
+                {
+                    UInt eID = M.edgeList(M.localEdgeId(ie, i)).id();
+                    _ltg( ++lc, ie ) = gcount + ( eID - 1 ) * nldpe + l;
 
-    // Face  Based Dof
+//                     std::cout << eID - 1 << " "
+//                               << ie << " "
+//                               <<  gcount + ( eID - 1 ) * nldpe + l << " "
+//                               << M.localEdgeId(ie, i) << std::endl;
+
+                }
+        }
+    // Face  Based Dof @@ possibly bugged since
 
     gcount += ne * nldpe;
     lcount += nldpe * nle;
@@ -266,7 +284,10 @@ void Dof::update( Mesh& M )
             lc = lcount;
             for ( i = 1; i <= nlf; ++i )
                 for ( l = 0; l < nldpf; ++l )
-                    _ltg( ++lc, ie ) = gcount + ( M.localFaceId( ie, i ) - 1 ) * nldpf + l;
+                {
+                    UInt fID = M.faceList( M.localFaceId( ie, i ) ).id();
+                    _ltg( ++lc, ie ) = gcount + ( fID - 1 ) * nldpf + l;
+                }
         }
 
     // Volume  Based Dof
@@ -278,11 +299,14 @@ void Dof::update( Mesh& M )
         {
             lc = lcount;
             for ( l = 0; l < nldpV; ++l )
-                _ltg( ++lc, ie ) = gcount + ( ie - 1 ) * nldpV + l;
+                {
+                    _ltg( ++lc, ie ) = gcount + (M.volume( ie ).id() - 1) * nldpv + l;
+                }
         }
     gcount += nV * nldpV;
     _ncount[ 4 ] = gcount;
     ASSERT_POS( gcount - _offset == _totalDof , "Something wrong in Dof Setup " << gcount << " " << _offset << " " << _totalDof ) ;
+
     if ( update_edges )
         M.cleanElementEdges();
     if ( update_faces )

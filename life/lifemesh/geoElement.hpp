@@ -18,7 +18,7 @@
 */
 /*! file geoElement.h
 \brief Geometric elements
-\version $Revision: 1.11 $ Luca Formaggia
+\version $Revision: 1.12 $ Luca Formaggia
 
   Introduces all the geometric elements
 */
@@ -284,15 +284,16 @@ GeoElement0D<MC>::operator = ( GeoElement0D<MC> const & g )
 #ifdef TWODIM
 template <typename GEOSHAPE, typename MC>
 GeoElement1D<GEOSHAPE, MC>::GeoElement1D( ID id ) :
-        GeoND<GEOSHAPE, GeoElement0D<MC> >( id ),
-        MC::EdgeMarker                    ( geoElement1D ),
-        efirst   ( 0 ),
-        esecond  ( 0 ),
-        posfirst ( 0 ),
-        possecond( 0 )
+    GeoND<GEOSHAPE, GeoElement0D<MC> >( id ),
+    MC::EdgeMarker                    ( geoElement1D ),
+    efirst   ( 0 ),
+    esecond  ( 0 ),
+    posfirst ( 0 ),
+    possecond( 0 )
 #else
 template <typename GEOSHAPE, typename MC>
-GeoElement1D<GEOSHAPE, MC>::GeoElement1D( ID id ) : GeoND<GEOSHAPE, GeoElement0D<MC> >( id )
+GeoElement1D<GEOSHAPE, MC>::GeoElement1D( ID id ) :
+    GeoND<GEOSHAPE, GeoElement0D<MC> >( id )
 #endif
 {
     ASSERT_PRE( GEOSHAPE::nDim == 1 , "geoElement2D with incorrect GeoSHape" ) ;

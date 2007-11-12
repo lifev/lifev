@@ -1,0 +1,85 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#----------------------------------------------------------------
+#      Data file for cylinder test with Navier-Stokes IP Solver
+#----------------------------------------------------------------
+
+[ensight]
+multimesh  = false
+save       = 1
+
+[fluid]
+
+
+
+
+[./physics]
+endtime         = 1.0
+density         = 1.0          # density
+viscosity       = 0.005         # viscosity
+
+
+[../discretization]
+mesh_dir        = ./Mesh/
+#mesh_file       = tube20.mesh          # "big file"
+#mesh_file       = cyl3D-2.mesh          # "big file"
+mesh_file       = cyl3D.2.2.00.mesh
+#mesh_file       = cyl2D.mesh             # "reasonable file"
+
+mesh_type       = .mesh
+
+mesh_faces      = all                   # update all faces elements
+mesh_edges      = all                   # update all faces elements
+timestep        = 0.1                   # timestep
+verbose         = 0                     # verbose during mesh-reading
+order_bdf       = 1
+linearized      = 0
+diagonalize     = 0 # weight, 0=off
+div_beta_u_v    = 1 # 1=on, 0=off
+vel_order       = P1Bubble		# P1, P1Bubble, P2
+press_order     = P1		# P1, P2
+
+[../miscellaneous]
+verbose         = 1
+save            = 1
+steady          = 0
+
+[../solver]
+solver          = gmres
+scaling         = none
+output          = all_res # all_res
+conv            = rhs
+max_iter        = 100
+kspace          = 100
+precond         = dom_decomp #none,jacobi,sym_gs,neumann,ls,smoother,dom_decomp
+subdomain_solve = ilut
+overlap         = 1
+ilut_fill       = 2
+graph_fill      = 0
+drop            = 1.e-4
+tol             = 1.00e-9
+keep_info       = 1
+
+[../prec]
+
+reuse           = true
+overlap         = 10
+droptol         = 1.e-5
+fill 		= 2
+
+
+[../ipstab]
+gammaBeta  = 0.125
+gammaDiv   = 0.125
+gammaPress = 0.03125
+#gammaBeta  = 0.125
+#gammaDiv   = 0.125
+#gammaPress = 0.03125
+
+[./problem]
+
+# for  cyl3D.2.2.00.mesh
+Re 	= 1.0
+nu 	= 1.5
+D  	= 1.
+H  	= 20.
+centered = 1

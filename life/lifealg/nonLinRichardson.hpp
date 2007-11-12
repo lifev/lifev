@@ -24,6 +24,9 @@
 #include <life/lifealg/linesearch_cubic.hpp>
 #include <life/lifealg/generalizedAitken.hpp>
 
+// debug
+#include <life/lifefilters/medit_wrtrs.hpp>
+//
 namespace LifeV
 {
 template <class Fct, class VectorType, class Real, class Norm>
@@ -78,12 +81,10 @@ int nonLinRichardson( VectorType& sol,
 
     int iter = 0;
 
-    int nDofFS = sol.size();
+    VectorType residual ( sol.Map() );
+    VectorType step     ( sol.Map() );
 
-    VectorType residual ( sol.size() );
-    VectorType step     ( sol.size() );
-
-    step = ZeroVector( step.size() );
+    step *= 0.;
 
     Real normResOld = 1;
 
@@ -92,7 +93,7 @@ int nonLinRichardson( VectorType& sol,
     std::cout << "------------------------------------------------------------------" << std::endl;
     f.evalResidual( residual, sol, iter );
 
-    Real normRes      = norm( residual );
+    Real normRes      = residual.NormInf();
     Real stop_tol     = abstol + reltol*normRes;
     Real linearRelTol = fabs(eta_max);
     Real eta_old;
@@ -109,7 +110,7 @@ int nonLinRichardson( VectorType& sol,
     out_res << time << "   " << "initial norm_res " <<  normRes
             << " stop tol = " << stop_tol
             << "initial norm_sol "
-            << norm_2(sol) << std::endl;
+            << sol.NormInf() << std::endl;
     out_res << "#iter      disp_norm       step_norm       residual_norm" << std::endl;
 
     while ( normRes > stop_tol && iter < maxit )
@@ -124,11 +125,15 @@ int nonLinRichardson( VectorType& sol,
 
         iter++;
 
-        ratio = normRes/normResOld;
+        ratio      = normRes/normResOld;
         normResOld = normRes;
-        normRes = norm(residual);
+        normRes    = residual.NormInf();
 
         f.solveJac(step, -1.*residual, linearRelTol);
+
+        out_res   << std::setw(5) << iter
+                  << std::setw(15) << sol.NormInf()
+                  << std::setw(15) << step.NormInf();
 
         linres = linearRelTol;
 
@@ -140,7 +145,7 @@ int nonLinRichardson( VectorType& sol,
             case 0: // no linesearch
                 sol += step;
                 f.evalResidual( residual, sol, iter);
-                normRes = norm( residual );
+//                normRes = residual.NormInf();
                 break;
             case 1:
                 lineSearch_parab( f, norm, residual, sol, step, normRes, lambda, iter );
@@ -154,12 +159,9 @@ int nonLinRichardson( VectorType& sol,
         }
 
 
-        out_res   << std::setw(5) << iter
-                  << std::setw(15) << norm_2  (sol)
-                  << std::setw(15) << norm_2  (step);
 
-        f.displacementOnInterface();
-        normRes = norm( residual );
+        //f.displacementOnInterface();
+        normRes = residual.NormInf();
 
         out_res << std::setw(15) << normRes << std::endl;
 
@@ -177,6 +179,7 @@ int nonLinRichardson( VectorType& sol,
                                                              .5 * stop_tol / normRes ) );
             std::cout << "    Newton: forcing term eta = " << linearRelTol << std::endl;
         }
+
     }
 
     if ( normRes > stop_tol )
@@ -186,7 +189,7 @@ int nonLinRichardson( VectorType& sol,
         return 1;
     }
 
-    f.displacementOnInterface();
+    //f.displacementOnInterface();
     std::cout << "------------------------------------------------------------------" << std::endl;
     std::cout << "--- NonLinRichardson: convergence (" << normRes
               <<") in " << iter << " iterations\n\n";

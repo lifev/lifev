@@ -32,7 +32,7 @@ Real fZero(const Real& t, const Real& x, const Real& y, const Real& z, const ID&
 
 // Initial velocity
 Real u0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
-
+Real p0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
 Real u2(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 

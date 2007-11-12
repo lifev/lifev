@@ -62,6 +62,7 @@
 
 #include <life/lifefem/bcVector.hpp>
 #include <life/lifefem/bcFunction.hpp>
+#include <life/lifearray/EpetraVector.hpp>
 
 
 namespace LifeV
@@ -420,7 +421,7 @@ private:
 
 
     //! Pointer to a user given data vector
-    boost::shared_ptr<BCVectorBase> _M_bcv;
+    boost::shared_ptr<BCVectorBase > _M_bcv;
 
     //! True is a data vector has been provided
     bool _M_dataVector;

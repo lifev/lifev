@@ -488,7 +488,8 @@ void DofInterface3Dto3D::_updateDofConnections( const Mesh& mesh1, const Dof& do
 */
 template <typename Mesh>
 void DofInterface3Dto3D::update( Mesh& mesh1, const EntityFlag& flag1,
-                                 Mesh& mesh2, const EntityFlag& flag2, const Real& tol )
+                                 Mesh& mesh2, const EntityFlag& flag2,
+                                 const Real& tol )
 {
 
     // Updating face connections at the interface
@@ -519,7 +520,7 @@ void DofInterface3Dto3D::update( Mesh& mesh1, const EntityFlag& flag1,
   template <typename Mesh>
   void DofInterface3Dto3D::interpolate( Mesh& mesh2, const UInt nbComp, const Vector& v, Vector& vI )
   {
-    
+
     typedef typename Mesh::VolumeShape GeoShape; // Element shape
     typedef typename Mesh::FaceShape GeoBShape;  // Face Shape
 

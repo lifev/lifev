@@ -27,17 +27,17 @@ namespace LifeV
 {
 /*
   This line search algorithm comes from Dennis & Schnabel
- 
+
   (i)   lambda given (usually 1 when Newton method is used)
   (ii)  sol_test = sol + lambda step_test
   (iii) Goldstein - Price + cubic interpolation
- 
+
   sigma0, sigma1: safeguarding bounds (default values 0.1 and 0.5)
   m1, m2
   max_linesearch: maximum number of steplength reductions before
   failure is reported (default 50)
- 
- 
+
+
 */
 
 template <class Fct, class Vector, class Real, class Norm>
@@ -66,7 +66,7 @@ void lineSearch_cubic( Fct& f, Norm& norm, Vector& residual, Vector& sol, Vector
     sol += lambda * step;
     f.evalResidual( residual, sol, iter );
 //    f.evalResidual( sol, iter, residual );
-    normRes_test = norm( residual );
+    normRes_test = residual.NormInf();
     ftest = 0.5 * normRes_test * normRes_test;
     fold = ftest;
     iter_linesearch = 0;
@@ -75,13 +75,14 @@ void lineSearch_cubic( Fct& f, Norm& norm, Vector& residual, Vector& sol, Vector
     {
         iter_linesearch++;
         lambda *= 2;
-        sol = sol_cur + lambda * step;
+        sol =  sol_cur;
+        sol += lambda * step;
         std::cout << "--- line search (extrapolation, Goldstein rule)" << std::endl;
         f.evalResidual( residual, sol, iter );
 //        f.evalResidual( sol, iter, residual );
         std::cout << "    line search iter : " << iter_linesearch << " residual test = "
         << normRes_test << ", lambda = " << lambda << std::endl;
-        normRes_test = norm( residual );
+        normRes_test = residual.NormInf();
         ftest = 0.5 * normRes_test * normRes_test;
     }
     if ( iter_linesearch == max_linesearch )
@@ -130,11 +131,12 @@ void lineSearch_cubic( Fct& f, Norm& norm, Vector& residual, Vector& sol, Vector
         else
             lambda = lambda_tmp;
         //--
-        sol = sol_cur + lambda * step;
+        sol =  sol_cur;
+        sol += lambda * step;
         std::cout << "--- line search (cubic interpolation, Armijo rule)" << std::endl;
 //        f.evalResidual( sol, iter, residual );
         f.evalResidual( residual, sol, iter );
-        normRes_test = norm( residual );
+        normRes_test = residual.NormInf();
         std::cout << "    line search iter : " << iter_linesearch << " residual test = "
         << normRes_test << ", lambda = " << lambda << std::endl;
         ftest = 0.5 * normRes_test * normRes_test;

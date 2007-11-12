@@ -61,14 +61,14 @@ public:
     //! Output
     virtual void showMe( std::ostream& c = std::cout ) const;
 
-    std::string meshDir()   {return M_mesh_dir;}
-    std::string meshFile()  {return M_mesh_file;}
-    std::string meshFaces() {return M_mesh_faces;}
+    const std::string meshDir()   const {return M_mesh_dir;}
+    const std::string meshFile()  const {return M_mesh_file;}
+    const std::string meshFaces() const {return M_mesh_faces;}
     //! The mesh
 
-    void  setMesh   (mesh_raw_type* _mesh);
-    Mesh& mesh      ();
-    const Mesh& mesh() const;
+    void  setMesh   (mesh_type _mesh);
+    mesh_type mesh      ();
+    const mesh_type mesh() const;
 
     //! Virtual destructor
     virtual ~DataMesh();
@@ -86,7 +86,7 @@ private:
     std::string M_mesh_faces; // update all mesh faces
     std::string M_mesh_edges; // update all mesh edges
 
-    mesh_raw_type*   M_mesh;       // the mesh
+    mesh_type   M_mesh;       // the mesh
 };
 
 
@@ -120,11 +120,11 @@ DataMesh( const GetPot& dfile, const std::string& section ):
         ERROR_MSG( "Sorry, this mesh file can not be loaded" );
 
     if ( M_mesh_edges == "all" )
-        M_mesh->updateElementEdges( true );
+        M_mesh->updateElementEdges(true);
     else
         M_mesh->updateElementEdges();
     if ( M_mesh_faces == "all" )
-        M_mesh->updateElementFaces( true );
+        M_mesh->updateElementFaces(true);
     else
         M_mesh->updateElementFaces();
 
@@ -142,12 +142,12 @@ DataMesh( const DataMesh& dataMesh ):
     M_mesh        (dataMesh.M_mesh)
 {
     if ( M_mesh_edges == "all" )
-        M_mesh->updateElementEdges( true );
+        M_mesh->updateElementEdges();
     else
         M_mesh->updateElementEdges();
 
     if ( M_mesh_faces == "all" )
-        M_mesh->updateElementFaces( true );
+        M_mesh->updateElementFaces();
     else
         M_mesh->updateElementFaces();
 }
@@ -179,23 +179,23 @@ showMe( std::ostream& c ) const
 template <typename Mesh>
 inline
 void DataMesh<Mesh>::
-setMesh(mesh_raw_type* _mesh)
+setMesh(mesh_type _mesh)
 {
     M_mesh = _mesh;
 }
 
 template <typename Mesh>
-Mesh& DataMesh<Mesh>::
+typename DataMesh<Mesh>::mesh_type DataMesh<Mesh>::
 mesh()
 {
-    return *M_mesh;
+    return M_mesh;
 }
 
 template <typename Mesh>
-const Mesh& DataMesh<Mesh>::
+const typename DataMesh<Mesh>::mesh_type DataMesh<Mesh>::
 mesh() const
 {
-    return *M_mesh;
+    return M_mesh;
 }
 }
 #endif

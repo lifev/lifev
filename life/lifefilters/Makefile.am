@@ -20,12 +20,12 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
+SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 lib_LTLIBRARIES	= liblifefilters.la
 
 liblifefilters_la_SOURCES	= medit_wrtrs.cpp vtk_wrtrs.cpp readMesh3D.cpp\
-				  openDX_wrtrs.cpp importer.cpp selectMarker.cpp ensight.cpp
+				  openDX_wrtrs.cpp importer.cpp selectMarker.cpp exporter.cpp
 liblifefilters_la_LIBADD	= ../lifefem/liblifefem.la
 
 include $(top_srcdir)/admin/Doxyfile.am

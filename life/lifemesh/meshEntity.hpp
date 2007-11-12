@@ -30,38 +30,74 @@ namespace LifeV
 class MeshEntity
 {
 public:
-    MeshEntity() : _id( 0 )
+    MeshEntity():
+        M_id( 0 ),
+        M_localId( 0 )
         {}
     ;
     MeshEntity(const MeshEntity& meshEntity):
-        _id(meshEntity._id)
+        M_id     (meshEntity.M_id),
+        M_localId(meshEntity.M_localId)
         {}
     ;
-    MeshEntity( ID i ) : _id( i )
-    {}
+    MeshEntity( ID id ):
+        M_id( id ),
+        M_localId( id )
+        {}
+
+    MeshEntity( ID id, ID lid ):
+        M_id( id ),
+        M_localId( lid )
+        {}
     ;
     ID id() const
-    {
-        return _id;
-    }
-    ID & id()
-    {
-        return _id;
-    }
+        {
+            return M_id;
+        }
+
+    ID localId() const
+        {
+            return M_localId;
+        }
+
+    void setId( ID id)
+        {
+            M_id = id;
+        }
+
+    void setLocalId( ID id)
+        {
+            M_localId = id;
+        }
+
+
+
+//     ID & id()
+//     {
+//         return M_id;
+//     }
+
     bool operator==( MeshEntity & e ) const
     {
-        return _id == e.id();
+        bool res = ( ( M_id == e.id() ) && ( M_localId == e.M_localId ));
+        return res;
     };
+
+
     bool operator<=( MeshEntity & e ) const
     {
-        return _id <= e.id();
+        return M_id <= e.id();
     };
+
     bool operator>=( MeshEntity & e ) const
     {
-        return _id >= e.id();
+        return M_id >= e.id();
     };
-protected:
-    ID _id;
+
+private:
+    ID M_id;
+    ID M_localId;
+
 };
 
 
@@ -78,7 +114,9 @@ public:
         _boundary( meshEntityWithBoundary._boundary )
     {}
     ;
-    MeshEntityWithBoundary( ID i, bool boundary = false ) : MeshEntity( i ), _boundary( boundary )
+    MeshEntityWithBoundary( ID i, bool boundary = false ) :
+        MeshEntity( i ),
+        _boundary( boundary )
     {}
     ;
     //! Tells if  item is on the boundary
@@ -101,7 +139,9 @@ protected:
 class OrientedMeshEntity: public MeshEntity
 {
 public:
-    OrientedMeshEntity() : MeshEntity(), _orient( true )
+    OrientedMeshEntity() :
+        MeshEntity(),
+        _orient( true )
     {}
     ;
     OrientedMeshEntity(const OrientedMeshEntity& orientedMeshEntity) :
@@ -109,7 +149,9 @@ public:
         _orient(orientedMeshEntity._orient )
     {}
     ;
-    OrientedMeshEntity( ID i, bool o = true ) : MeshEntity( i ), _orient( o )
+    OrientedMeshEntity( ID i, bool o = true ) :
+        MeshEntity( i ),
+        _orient( o )
     {}
     //! Return entity orientation
     bool orientation() const

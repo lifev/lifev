@@ -34,7 +34,6 @@
 
 
 #include <life/lifecore/life.hpp>
-#include <life/lifearray/vecUnknown.hpp>
 
 namespace LifeV
 {
@@ -52,6 +51,7 @@ class DofInterfaceBase
 {
 public:
 
+//    typedef VectorType vector_type;
     //! Default Constructor
     DofInterfaceBase();
 
@@ -65,7 +65,7 @@ public:
      USAGE: file datavec.txt : nb_couples
                                couple:(idof, value) repeated nb_couples times
     */
-    void ReadVectorDataAndDofMap( const std::string filename, Vector& dataVec );
+//     void ReadVectorDataAndDofMap( const std::string filename, vector_type& dataVec );
 
     //! This method returns the corrresponding dof number of the mesh2 at the interface
     //! for a specific dof number at the interface in mesh1
@@ -92,6 +92,7 @@ protected:
     std::map<ID, ID> _locDofMap;
 
 };
+
 }
 #endif
 

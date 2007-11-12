@@ -784,7 +784,7 @@ RegionMesh2D<GEOSHAPE, MC>::addFace( FaceType const & v )
     ASSERT_PRE( faceList.size() < faceList.capacity() , "Face list size exceeded" <<
                 faceList.size() + 1 << " " << faceList.capacity() ) ;
     faceList.push_back( v );
-    ( faceList.back() ).id() = faceList.size();
+    ( faceList.back() ).setId(faceList.size());
     return faceList.back();
 }
 // \todo Use setItem
@@ -797,7 +797,7 @@ RegionMesh2D<GEOSHAPE, MC>::setFace( FaceType const & v, ID const pos )
     ASSERT_PRE( pos <= faceList.capacity() , "position requested exceed capacity" <<
                 pos << " " << faceList.capacity() ) ;
     faceList( pos ) = v;
-    faceList( pos ).id() = pos;
+    faceList( pos ).setId(pos);
     return faceList( pos );
 }
 
@@ -891,7 +891,7 @@ RegionMesh2D<GEOSHAPE, MC>::addEdge( EdgeType const & f, bool const boundary )
     ASSERT_PRE( edgeList.size() < edgeList.capacity(), "Edge list size exceeded" <<
                 edgeList.size() + 1 << " " << edgeList.capacity() ) ;
     edgeList.push_back( f );
-    ( edgeList.back() ).id() = edgeList.size();
+    ( edgeList.back() ).setId( edgeList.size() );
     if ( boundary )
     {
 #ifdef NOT_BDATA_FIRST
@@ -912,7 +912,7 @@ RegionMesh2D<GEOSHAPE, MC>::setEdge( EdgeType const & f, ID position, bool const
     ASSERT_PRE( position <= edgeList.capacity(), "Edge list size exceeded" <<
                 position << " " << edgeList.capacity() ) ;
     edgeList( position ) = f;
-    edgeList( position ).id() = position;
+    edgeList( position ).setId( position );
 #ifdef NOT_BDATA_FIRST
 
     if ( boundary )
@@ -1149,7 +1149,7 @@ RegionMesh2D<GEOSHAPE, MC>::addPoint( PointType const & p, bool const boundary, 
                 pointList.size() + 1 << " " << pointList.capacity() ) ;
     pointList.push_back( p );
     PointType * pp = & pointList.back();
-    pp->id() = pointList.size();
+    pp->setId( pointList.size() );
     if ( boundary )
     {
         ASSERT_PRE( _bPoints.size() < _bPoints.capacity(), "Boundary Point list size exceeded" <<
@@ -1171,7 +1171,7 @@ RegionMesh2D<GEOSHAPE, MC>::setPoint
     bool found( false );
     pointList( position ) = p;
     PointType * pp = & pointList( position );
-    pp->id() = position;
+    pp->setId( position );
     if ( boundary )
     {
         pp->boundary() = true;
@@ -1491,7 +1491,7 @@ std::ostream & RegionMesh2D<GEOSHAPE, MC>::showMe( bool verbose, std::ostream & 
     out << "                      RegionMesh2D                " << std::endl;
     out << "**************************************************" << std::endl;
     out << "**************************************************" << std::endl;
-    out << " ID: " << _id << std::endl;
+    out << " ID: " << this->id() << std::endl;
     out << "Edges local to  faces stored: " << hasLocalEdges() << std::endl;
     //out <<"Edges local to  faces   stored:"<<switches.test("FACEtoEDGE")<<std::endl;
     //out <<"Faces adjacent to Edges stored: "<<switches.test("EDGEtoFACE")<<std::endl<<std::endl;
@@ -1517,11 +1517,12 @@ template <typename GEOSHAPE, typename MC>
 int
 RegionMesh2D<GEOSHAPE, MC>::check( int level, bool const fix, bool const verb, std::ostream & out )
 {
+    int severity = 0;
     if ( verb )
     {
         out << "**************************************************" << std::endl;
         out << "         Checkin  RegionMesh2D                " << std::endl;
-        out << " ID: " << _id << std::endl;
+        out << " ID: " << this->id() << std::endl;
         out << "**************************************************" << std::endl;
     }
     if ( pointList.size() != _numPoints )
@@ -1536,9 +1537,11 @@ RegionMesh2D<GEOSHAPE, MC>::check( int level, bool const fix, bool const verb, s
         }
     }
     if ( edgeList.size() == 0 )
+    {
         if ( verb )
             out << "Warning: No Edges Stored" << std::endl;
-
+        severity = -1;
+    }
     if ( faceList.size() == 0 )
         if ( verb )
             out << "Warning: No Faces Stored" << std::endl;
@@ -1565,38 +1568,64 @@ RegionMesh2D<GEOSHAPE, MC>::check( int level, bool const fix, bool const verb, s
         if ( point( i ).id() != i )
             ++badid;
     if ( badid != 0 )
+    {
         out << " SEVERITY ERROR:" << badid << "Points ids are wrong";
+        severity = 5;
+    }
 
     badid = 0;
     for ( UInt i = 1; i <= storedEdges(); ++i )
         if ( edge( i ).id() != i )
             ++badid;
     if ( badid != 0 )
+    {
         out << " SEVERITY ERROR:" << badid << "Edges ids are wrong";
+        severity = 5;
+    }
 
     badid = 0;
     for ( UInt i = 1; i <= storedFaces(); ++i )
         if ( face( i ).id() != i )
             ++badid;
     if ( badid != 0 )
+    {
         out << " SEVERITY ERROR:" << badid << "Faces ids are wrong";
+        severity = 5;
+    }
 
     badid = 0;
 
     if ( _numVertices == 0 )
+    {
         out << " SEVERITY ERROR: internal Vertices Counter unset";
+        severity = 6;
+    }
     if ( _numPoints == 0 )
+    {
         out << " SEVERITY ERROR: internal Points Counter unset";
+        severity = 6;
+    }
     if ( _numPoints == 0 )
+    {
         out << " SEVERITY ERROR: internal Points Counter unset";
+        severity = 6;
+    }
     if ( _numBPoints == 0 )
+    {
         out << " SEVERITY ERROR: boundary Points Counter unset";
+        severity = 6;
+    }
     if ( _numBVertices == 0 )
+    {
         out << " SEVERITY ERROR: boundary Vertices Counter unset";
+        severity = 6;
+    }
 
     if ( verb )
         out << "   Check Finished              " << std::endl <<
         "***********************************************" << std::endl;
+
+    return severity;
 }
 }
 #endif

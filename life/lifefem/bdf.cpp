@@ -137,7 +137,7 @@ double
 Bdf::coeff_der( UInt i ) const
 {
     // Pay attention: i is c-based indexed
-    ASSERT( i >= 0 & i < _M_order + 1,
+    ASSERT( i < _M_order + 1,
             "Error in specification of the time derivative coefficient for the BDF formula (out of range error)" );
     return _M_alpha[ i ];
 }
@@ -146,7 +146,7 @@ double
 Bdf::coeff_ext( UInt i ) const
 {
     // Pay attention: i is c-based indexed
-    ASSERT( i >= 0 & i < _M_order,
+    ASSERT( i < _M_order,
             "Error in specification of the time derivative coefficient for the BDF formula (out of range error)" );
     return _M_beta[ i ];
 }
@@ -254,6 +254,7 @@ Vector
 Bdf::extrap() const
 {
     Vector ue( _M_size );
+
     for ( UInt j = 0;j < _M_size;++j )
         ue[ j ] = 0.;
 

@@ -113,12 +113,17 @@ public:
                     M_ensightFluid->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().Comm().MyPID());
 
                     M_velAndPressure.reset( new vector_type( M_fsi->FSIOper()->fluid().getRepeatedEpetraMap() ));
-                    M_ensightFluid->addVariable( EnsightData::Vector, "velocity", M_velAndPressure,
+                    M_fluidDisp.reset     ( new vector_type( M_fsi->FSIOper()->meshMotion().getRepeatedEpetraMap() ));
+                    M_ensightFluid->addVariable( ExporterData::Vector, "f-velocity", M_velAndPressure,
                                                  UInt(0), M_fsi->FSIOper()->uFESpace().dof().numTotalDof() );
 
-                    M_ensightFluid->addVariable( EnsightData::Scalar, "pressure", M_velAndPressure,
+                    M_ensightFluid->addVariable( ExporterData::Scalar, "f-pressure", M_velAndPressure,
                                                  UInt(3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()),
                                                  UInt(3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof()+M_fsi->FSIOper()->pFESpace().dof().numTotalDof()) );
+
+                    M_ensightFluid->addVariable( ExporterData::Vector, "f-displacement", M_fluidDisp,
+                                                 UInt(0), M_fsi->FSIOper()->mmFESpace().dof().numTotalDof() );
+
 
                 }
             if (M_fsi->isSolid())
@@ -130,8 +135,11 @@ public:
 
                     M_ensightSolid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().Comm().MyPID());
 
-                    M_solidDispl.reset( new vector_type( M_fsi->FSIOper()->solid().getRepeatedEpetraMap() ));
-                    M_ensightSolid->addVariable( EnsightData::Vector, "displacement", M_solidDispl,
+                    M_solidDisp.reset( new vector_type( M_fsi->FSIOper()->solid().getRepeatedEpetraMap() ));
+                    M_solidVel.reset( new vector_type( M_fsi->FSIOper()->solid().getRepeatedEpetraMap() ));
+                    M_ensightSolid->addVariable( ExporterData::Vector, "s-displacement", M_solidDisp,
+                                                 UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
+                    M_ensightSolid->addVariable( ExporterData::Vector, "s-velocity", M_solidVel,
                                                  UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
 
                 }
@@ -172,15 +180,16 @@ public:
                 if ( M_fsi->isFluid() )
                     {
                         *M_velAndPressure = M_fsi->FSIOper()->fluid().solution();
+                        *M_fluidDisp      = M_fsi->FSIOper()->meshMotion().displacement();
                         M_ensightFluid->postProcess( time );
                     }
 
                 if ( M_fsi->isSolid() )
                     {
-                        *M_solidDispl = M_fsi->FSIOper()->solid().disp();
+                        *M_solidDisp = M_fsi->FSIOper()->solid().disp();
+                        *M_solidVel = M_fsi->FSIOper()->solid().vel();
                         M_ensightSolid->postProcess( time );
                     }
-
 
 
                 std::cout << "[fsi_run] Iteration " << _i << " was done in : "
@@ -204,7 +213,9 @@ private:
     filter_ptrtype M_ensightSolid;
 
     vector_ptrtype M_velAndPressure;
-    vector_ptrtype M_solidDispl;
+    vector_ptrtype M_fluidDisp;
+    vector_ptrtype M_solidDisp;
+    vector_ptrtype M_solidVel;
 
 };
 

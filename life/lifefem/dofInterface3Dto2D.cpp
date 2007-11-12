@@ -83,7 +83,7 @@ EntityFlag DofInterface3Dto2D::InterfaceRef() const
 ID DofInterface3Dto2D::operator[] ( const UInt& i ) const
 {
     ASSERT_PRE( _finalized, "The face List should be finalised before being accessed" );
-    ASSERT_BD( i >= 0 && i < _faceList.size() );
+    ASSERT_BD( i < _faceList.size() );
     return _faceList[ i ].first;  // _faceList must be a vector!
 }
 

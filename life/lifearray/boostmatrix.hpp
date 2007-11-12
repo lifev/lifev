@@ -179,6 +179,26 @@ public:
             std::for_each( row.begin(), row.end(), boost::lambda::_1 = 0.0 );
         }
 
+    /*! apply constraint on all rows rVec
+     *  @param rVec vector of rows
+     *  @param coeff value to set entry (r,r) at
+     *  @param b right hand side Vector of the system to be adapted accordingly
+     *  @param datumVec vector of values to constrain entry r of the solution at
+     */
+    void diagonalize( std::vector<ID> rVec,
+                      double coeff, Vector &b, std::vector<double> datumVec )
+    {
+	UInt sizeVec(rVec.size());
+	if ( sizeVec != datumVec.size()) 
+	  { //! vectors must be of the same size
+	    ERROR_MSG( "diagonalize: vectors must be of the same size\n" );
+	  }
+
+	for (UInt i=0; i < sizeVec; i++)
+	  diagonalize( rVec[i], coeff, b, datumVec[i]);
+    }
+
+
     /** Diagonalization of row r of the system. Done by setting A(r,r) = coeff,
      *  A(r,j) = 0 and A(j,r) = 0 for j!=r, and suitably correcting the right
      *  hand side of the system.

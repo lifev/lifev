@@ -59,16 +59,20 @@ public:
 
     //! setter
     void setTimeStep(const Real& dt);
+    void setTime (Real time){ _time = time;}
+    //! getter
 
+    const Real time() const {return _time;}
     //! Order BDF formula
     unsigned int order_bdf() const;
 
     //! Virtual destructor
     virtual ~DataTime();
 
-protected:
+private:
 
-    Real _dt; // time step
+    Real         _time;
+    Real         _dt; // time step
     unsigned int _order_bdf; //order of the time discretization formula
 };
 }

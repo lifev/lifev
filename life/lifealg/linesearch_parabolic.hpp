@@ -24,7 +24,7 @@ namespace LifeV
 /*
   This line search algorithm comes from C.T. Kelley, Iterative methods for linear
   and nonlinear equations, SIAM 1995 (Chap. 8).
- 
+
     (i)   lambda given (usually 1 when Newton method is used)
     (ii)  sol_test = sol + lambda step_test
     (iii) if residu_test < (1 - alpha lambda) residu
@@ -33,15 +33,15 @@ namespace LifeV
         (that does not net the derivative) and apply a safeguarding
         step: if lambda < sigma0 lambda_cur then lambda = sigma0 lambda_cur
                      if lambda > sigma1 lambda_cur then lambda = sigma1 lamnda_cur
- 
+
     Constant parameters:
- 
+
     sigma0, sigma1: safeguarding bounds (default values 0.1 and 0.5)
     alpha         : parameter to measure sufficient decrease (default 1e-4)
     max_linesearch: maximum number of steplength reductions before
                     failure is reported (default 50)
- 
- 
+
+
   */
 
 template <class Fct, class Vector, class Real, class Norm>
@@ -66,7 +66,7 @@ void lineSearch_parab( Fct& f, Norm& norm, Vector& residual, Vector& sol, Vector
     sol += lambda * step;
 //    f.evalResidual( sol, iter, residual );
     f.evalResidual( residual, sol, iter );
-    normRes_test = norm( residual );
+    normRes_test = residual.NormInf();
     res_test2 = normRes_test * normRes_test;
     res_test_old2 = res_test2;
     iter_linesearch = 0;
@@ -90,13 +90,14 @@ void lineSearch_parab( Fct& f, Norm& norm, Vector& residual, Vector& sol, Vector
         std::cout << "--- line search " << iter_linesearch << " : residual test = "
         << normRes_test << ", reduction = " << lambda << std::endl;
         // update sol_test
-        sol = sol_cur + lambda * step;
+        sol =  sol_cur;
+        sol += lambda * step;
         lambda_old = lambda_cur;
         lambda_cur = lambda;
         // eval norms
 //        f.evalResidual( sol, iter, residual );
         f.evalResidual( residual, sol, iter );
-        normRes_test = norm( residual );
+        normRes_test = residual.NormInf();
         res_test_old2 = res_test2;
         res_test2 = normRes_test * normRes_test;
         if ( iter_linesearch > max_linesearch )

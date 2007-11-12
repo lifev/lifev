@@ -102,7 +102,7 @@ struct DebugStream::Private
 //
 // getDescription
 //
-static std::map<uint, std::string>* DebugAreas = 0;
+static std::map<unsigned int, std::string>* DebugAreas = 0;
 static std::string* StringNull = 0;
 static std::list<int>* AREAS;
 static std::string* DEBUG_AREA = 0;
@@ -120,7 +120,7 @@ initDebugAreas ()
         DEBUG_AREA = new std::string ( "" );
         AREAS = new std::list<int>;
         StringNull = new std::string ( "" );
-        DebugAreas = new std::map<uint, std::string>;
+        DebugAreas = new std::map<unsigned int, std::string>;
         alloc = true;
 
 
@@ -173,12 +173,12 @@ initDebugAreas ()
     }
 }
 std::string
-getDescription ( uint __area )
+getDescription ( unsigned int __area )
 {
     if ( DebugAreas->empty() )
         return std::string( "Area " ) + boost::lexical_cast<std::string>(__area);
 
-    std::map<uint, std::string>::iterator entry_it = DebugAreas->find ( __area );
+    std::map<unsigned int, std::string>::iterator entry_it = DebugAreas->find ( __area );
 
     if ( entry_it != DebugAreas->end() )
         return entry_it->second;

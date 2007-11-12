@@ -67,16 +67,16 @@ public:
       \param bdQr surface quadrature
       \param BCh boundary conditions for the displacement
     */
-    ElasticStructureHandler( const GetPot&   data_file,
-                             const RefFE&    refFE,
-                             const QuadRule& Qr,
-                             const QuadRule& bdQr,
-                             BCHandler&      BCh );
+    ElasticStructureHandler( const DataElasticStructure<Mesh>& data,
+                             const RefFE&                      refFE,
+                             const QuadRule&                   Qr,
+                             const QuadRule&                   bdQr,
+                             BCHandler&                        BCh );
 
-    ElasticStructureHandler( const GetPot&   data_file,
-                             const RefFE&    refFE,
-                             const QuadRule& Qr,
-                             const QuadRule& bdQr);
+    ElasticStructureHandler( const DataElasticStructure<Mesh>& data,
+                             const RefFE&                      refFE,
+                             const QuadRule&                   Qr,
+                             const QuadRule&                   bdQr);
 
     //! Sets initial condition for the displacment en velocity
     void initialize( const Function& d0, const Function& w0 );
@@ -100,11 +100,11 @@ public:
     //! Returns the velocity vector
     PhysVectUnknown<Vector>& w();
 
-    //! Returns the displacement Dof
-    const Dof& dDof() const;
+    //! Returns the number of unknowns
+    const UInt dim() const {return _dim;}
 
+    //
     //! Returns the quadrature rule
-    CurrentFE& currentFE();
 
     //! Postprocessing
     void postProcess();
@@ -115,8 +115,12 @@ public:
 
     //! getters and setters
 
-    CurrentBdFE & feBd(){return _feBd;}
-    Dof         & dof() {return _dof;}
+    const RefFE&          refFE() const {return _refFE;}
+    CurrentFE&            fe   () {return _fe;}
+    const CurrentFE&      fe   () const  {return _fe;}
+    CurrentBdFE&    feBd () {return _feBd;}
+    const CurrentBdFE&    feBd () const {return _feBd;}
+    const Dof&            dDof () const {return _dof;}
 
     //! checking if BC are set
     const bool setSolidBC() const {return M_setBC;}
@@ -125,7 +129,7 @@ public:
         {M_BCh_solid = &BCh_solid; M_setBC = true;}
     BCHandler &BCh_solid() {return *M_BCh_solid;}
 
-protected:
+private:
 
     //! Reference FE
     const RefFE& _refFE;
@@ -162,8 +166,6 @@ protected:
     //! Aux. var. for PostProc
     UInt _count;
 
-private:
-
     //! The BC handler
     BCHandler *M_BCh_solid;
 
@@ -183,48 +185,48 @@ private:
 // Constructor
 template <typename Mesh>
 ElasticStructureHandler<Mesh>::
-ElasticStructureHandler( const GetPot&   data_file,
-                         const RefFE&    refFE,
-                         const QuadRule& Qr,
-                         const QuadRule& bdQr,
-                         BCHandler&      BCh ):
-    DataElasticStructure<Mesh>( data_file ),
-    _refFE( refFE ),
-    _dof( this->mesh(), _refFE ),
-    _dim( _dof.numTotalDof() ),
-    _Qr( Qr ),
-    _bdQr( bdQr ),
-    _fe( _refFE, getGeoMap( this->mesh() ), _Qr ),
-    _feBd( _refFE.boundaryFE(), getGeoMap( this->mesh() ).boundaryMap(), _bdQr ),
-    _d( _dim ),
-    _dRhs( _dim ),
-    _w( _dim ),
-    _time( 0 ),
-    _count( 0 ),
-    M_BCh_solid( &BCh )
+ElasticStructureHandler( const DataElasticStructure<Mesh>& data,
+                         const RefFE&                      refFE,
+                         const QuadRule&                   Qr,
+                         const QuadRule&                   bdQr,
+                         BCHandler&                        BCh ):
+    DataElasticStructure<Mesh>( data ),
+    _refFE                    ( refFE ),
+    _dof                      ( this->mesh(), _refFE ),
+    _dim                      ( _dof.numTotalDof() ),
+    _Qr                       ( Qr ),
+    _bdQr                     ( bdQr ),
+    _fe                       ( _refFE, getGeoMap( this->mesh() ), _Qr ),
+    _feBd                     ( _refFE.boundaryFE(), getGeoMap( this->mesh() ).boundaryMap(), _bdQr ),
+    _d                        ( _dim ),
+    _dRhs                     ( _dim ),
+    _w                        ( _dim ),
+    _time                     ( 0 ),
+    _count                    ( 0 ),
+    M_BCh_solid               ( &BCh )
 {}
 
 template <typename Mesh>
 ElasticStructureHandler<Mesh>::
-ElasticStructureHandler( const GetPot& data_file,
-                         const RefFE& refFE,
-                         const QuadRule& Qr,
-                         const QuadRule& bdQr):
-    DataElasticStructure<Mesh>( data_file ),
-    _refFE( refFE ),
-    _dof( this->mesh(), _refFE ),
-    _dim( _dof.numTotalDof() ),
-    _Qr( Qr ),
-    _bdQr( bdQr ),
-    _fe( _refFE, getGeoMap( this->mesh() ), _Qr ),
-    _feBd( _refFE.boundaryFE(), getGeoMap( this->mesh() ).boundaryMap(), _bdQr ),
-    _d( _dim ),
-    _dRhs( _dim ),
-    _w( _dim ),
+ElasticStructureHandler( const DataElasticStructure<Mesh>& data,
+                         const RefFE&                      refFE,
+                         const QuadRule&                   Qr,
+                         const QuadRule&                   bdQr):
+    DataElasticStructure<Mesh>( data ),
+    _refFE                    ( refFE ),
+    _dof                      ( this->mesh(), _refFE ),
+    _dim                      ( _dof.numTotalDof() ),
+    _Qr                       ( Qr ),
+    _bdQr                     ( bdQr ),
+    _fe                       ( _refFE, getGeoMap( this->mesh() ), _Qr ),
+    _feBd                     ( _refFE.boundaryFE(), getGeoMap( this->mesh() ).boundaryMap(), _bdQr ),
+    _d                        ( _dim ),
+    _dRhs                     ( _dim ),
+    _w                        ( _dim ),
 //    _BCh( new BCHandler(0)),
-    _time( 0 ),
-    _count( 0 ),
-    M_BCh_solid( 0 )
+    _time                     ( 0 ),
+    _count                    ( 0 ),
+    M_BCh_solid               ( 0 )
 {}
 
 
@@ -245,21 +247,6 @@ ElasticStructureHandler<Mesh>::w()
     return _w;
 }
 
-// Returns the velocity displacement
-template <typename Mesh>
-const Dof&
-ElasticStructureHandler<Mesh>::dDof() const
-{
-    return _dof;
-}
-
-// Returns the velocity displacement
-template <typename Mesh>
-CurrentFE&
-ElasticStructureHandler<Mesh>::currentFE()
-{
-    return _fe;
-}
 
 // Postprocessing
 template <typename Mesh>
@@ -294,21 +281,26 @@ ElasticStructureHandler<Mesh>::postProcess()
         wr_medit_ascii_scalar( "dep_y." + name + ".bb", _d.giveVec() + _dim, this->mesh().numVertices() );
         wr_medit_ascii_scalar( "dep_z." + name + ".bb", _d.giveVec() + 2 * _dim, this->mesh().numVertices() );
         wr_medit_ascii2( namedef, this->mesh(), _d, this->_factor );
+
         // wr_medit_ascii_vector("veloc."+name+".bb",_u.giveVec(),this->mesh().numVertices(),_dim_u);
-        system( ( "ln -s " + namedef + " dep_x." + name + ".mesh" ).data() );
-        system( ( "ln -s " + namedef + " dep_y." + name + ".mesh" ).data() );
-        system( ( "ln -s " + namedef + " dep_z." + name + ".mesh" ).data() );
+
+        system( ( "ln -sf " + namedef + " dep_x." + name + ".mesh" ).data() );
+        system( ( "ln -sf " + namedef + " dep_y." + name + ".mesh" ).data() );
+        system( ( "ln -sf " + namedef + " dep_z." + name + ".mesh" ).data() );
+
         // system(("ln -s "+this->mesh()_file+" veloc."+name+".mesh").data());
 
         wr_medit_ascii_scalar( "veld_x." + name + ".bb", _w.giveVec(), this->mesh().numVertices() );
         wr_medit_ascii_scalar( "veld_y." + name + ".bb", _w.giveVec() + _dim, this->mesh().numVertices() );
         wr_medit_ascii_scalar( "veld_z." + name + ".bb", _w.giveVec() + 2 * _dim, this->mesh().numVertices() );
 
-//         // wr_medit_ascii_vector("veloc."+name+".bb",_u.giveVec(),this->mesh().numVertices(),_dim_u);
-        system( ( "ln -s " + namedef + " veld_x." + name + ".mesh" ).data() );
-        system( ( "ln -s " + namedef + " veld_y." + name + ".mesh" ).data() );
-        system( ( "ln -s " + namedef + " veld_z." + name + ".mesh" ).data() );
-//         system(("ln -s "+this->mesh()_file+" veloc."+name+".mesh").data());
+        // wr_medit_ascii_vector("veloc."+name+".bb",_u.giveVec(),this->mesh().numVertices(),_dim_u);
+
+        system( ( "ln -sf " + namedef + " veld_x." + name + ".mesh" ).data() );
+        system( ( "ln -sf " + namedef + " veld_y." + name + ".mesh" ).data() );
+        system( ( "ln -sf " + namedef + " veld_z." + name + ".mesh" ).data() );
+
+        // system(("ln -s "+this->mesh()_file+" veloc."+name+".mesh").data());
     }
 }
 
@@ -474,7 +466,7 @@ ElasticStructureHandler<Mesh>::readUnknown( const std::string       &name,
 {
     std::string sdummy;
     std::string ext;
-    int nsx, nsy, nsz;
+    UInt nsx, nsy, nsz;
     int ndim;
 
     int nDof = _dim;
@@ -504,7 +496,7 @@ ElasticStructureHandler<Mesh>::readUnknown( const std::string       &name,
 
     filex >> sdummy;
 
-    for (int ix = 0; ix < nsx; ++ix)
+    for (UInt ix = 0; ix < nsx; ++ix)
         {
             filex >> unknown[ix + 0*nDof];
 //            unknown[ix + 0*nDof] /= factor;
@@ -537,7 +529,7 @@ ElasticStructureHandler<Mesh>::readUnknown( const std::string       &name,
 
     filey >> sdummy;
 
-    for (int iy = 0; iy < nsy; ++iy)
+    for (UInt iy = 0; iy < nsy; ++iy)
     {
         filey >> unknown[iy + 1*nDof];
 //        unknown[iy + 1*nDof] /= factor;
@@ -573,7 +565,7 @@ ElasticStructureHandler<Mesh>::readUnknown( const std::string       &name,
 
     filez >> sdummy;
 
-    for (int iz = 0; iz < nsz; ++iz)
+    for (UInt iz = 0; iz < nsz; ++iz)
     {
         filez >> unknown[iz + 2*nDof];
 //        unknown[iz + 2*nDof] /= factor;

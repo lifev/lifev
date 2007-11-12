@@ -25,28 +25,28 @@ DofInterfaceBase::DofInterfaceBase()
 {}
 
 
-void DofInterfaceBase::ReadVectorDataAndDofMap( const std::string filename,
-        Vector& dataVec )
-{
+// void DofInterfaceBase::ReadVectorDataAndDofMap( const std::string filename,
+//         Vector& dataVec )
+// {
 
-    UInt vecsize, idof;
-    Real val;
+//     UInt vecsize, idof;
+//     Real val;
 
-    std::ifstream ifile( filename.c_str() );
+//     std::ifstream ifile( filename.c_str() );
 
-    ASSERT( ifile, "Error: Input Dof External BC file cannot be opened." );
+//     ASSERT( ifile, "Error: Input Dof External BC file cannot be opened." );
 
-    ifile >> vecsize;
-    ASSERT( dataVec.size() == vecsize,
-            "The vector in input must have the same dimension as the interface vector." );
+//     ifile >> vecsize;
+//     ASSERT( dataVec.size() == vecsize,
+//             "The vector in input must have the same dimension as the interface vector." );
 
-    for ( UInt i = 0; i < vecsize; i++ )
-    {
-        ifile >> idof >> val;
-        dataVec[ i ] = val;
-        _locDofMap[ idof ] = i + 1;
-    }
-}
+//     for ( UInt i = 0; i < vecsize; i++ )
+//     {
+//         ifile >> idof >> val;
+//         dataVec[ i ] = val;
+//         _locDofMap[ idof ] = i + 1;
+//     }
+// }
 
 
 //! This method returns the corresponding dof number of the mesh2 at the interface
@@ -59,8 +59,8 @@ ID DofInterfaceBase::getInterfaceDof( const ID& i ) const
     std::map<ID, ID>::const_iterator it = _locDofMap.find( i );
     if ( it == _locDofMap.end() )
         {
-            std::cout << i << " : ";
-            ERROR_MSG( "Dof number not found" );
+            std::cout << i << " : " << std::flush;
+            ERROR_MSG( "DofInterfaceBase::getInterfaceDof : Dof number not found" );
         }
     return it->second;
 }

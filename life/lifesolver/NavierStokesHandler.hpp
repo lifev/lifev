@@ -26,6 +26,8 @@
 
 */
 
+#warning: NavierStokesHandler.hpp NavierStokesSolverPC.hpp  are obselete should be removed from lifev-parallel
+
 #ifndef _NAVIERSTOKESHANDLER_H_
 #define _NAVIERSTOKESHANDLER_H_
 
@@ -75,7 +77,7 @@ class NavierStokesHandler//:
 public:
 
     typedef DataType data_type;
-    
+
     typedef Real ( *Function ) ( const Real&, const Real&, const Real&,
                                  const Real&, const ID& );
     typedef boost::function<Real ( Real const&, Real const&, Real const&,
@@ -561,7 +563,6 @@ NavierStokesHandler( const DataType&  dataNavierStokes,
                      const QuadRule&  Qr_p,
                      const QuadRule&  bdQr_p,
                      BCHandler& BCh_u ) :
-    
     M_dataType                         ( dataNavierStokes ),
     _refFE_u                           ( refFE_u ),
     _refFE_p                           ( refFE_p ),
@@ -604,7 +605,7 @@ NavierStokesHandler( const DataType&  dataNavierStokes,
     M_out_pressure                     ("Pressure.res"),
     M_BCh_fluid                        ( &BCh_u )
 {
-    std::cout << "New fluid constructor ... " << std::endl;
+    std::cout << "New fluid constructor ... " << std::flush << std::endl;
     if ( this->computeMeanValuesPerSection() == 1 )
         initializeMeanValuesPerSection();
     /*

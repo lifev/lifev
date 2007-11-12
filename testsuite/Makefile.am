@@ -1,6 +1,6 @@
 # -*- makefile; indent-tabs-mode: t -*-
 #
-# 
+#
 #
 # Copyright (C) 2004 Christophe Prud'homme (christophe.prudhomme@epfl.ch)
 #
@@ -22,57 +22,16 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
-DO_NOT_COMPILE=test_nsale test_nsaleCT test_fsi_si test_fsi_stab
+DO_NOT_COMPILE=test_nsale test_nsaleCT test_fsi_si test_fsi_stab test_ns_cyl_ipstab test_ns_ipstab
 
 SUBDIRS		= data  \
-              lifecore lifearray lifealg lifefem lifefilters lifesolver \
-              test_mesh test_laplacian test_naturalbc test_essentialbc \
-              test_q1 test_p2 test_mixte test_fe test_dg \
-              test_postproc test_bdf \
-	      test_linearelasticity \
-	      test_darcy test_onedmodel\
-	      test_ns_bdf test_ns_cyl test_ns_cyl_flux test_ns_bcvec test_ns_sstress\
-	      test_ns_stab test_ns_cyl_ipstab \
-	      test_fsi test_fsi_qnewton\
-	      test_masstransport test_mass_coupling test_ns_ipstab \
-              test_coupling_3d0d \
-              test_fhn \
-              test_levelset_ipstab test_ns_2fluids \
+              test_cylinder test_structure test_ethiersteinman \
 	      $(DO_NOT_COMPILE)
 
-TESTSUITES=$(srcdir)/lifecore/testsuite.at \
-$(srcdir)/lifearray/testsuite.at \
-$(srcdir)/lifealg/testsuite.at \
-$(srcdir)/test_bdf/testsuite.at \
-$(srcdir)/test_bdf/testsuite.at \
-$(srcdir)/test_coupling_3d0d/testsuite.at \
-$(srcdir)/test_darcy/testsuite.at \
-$(srcdir)/test_essentialbc/testsuite.at \
-$(srcdir)/test_fe/testsuite.at \
-$(srcdir)/test_fhn/testsuite.at \
-$(srcdir)/test_linearelasticity/testsuite.at \
-$(srcdir)/test_fsi/testsuite.at \
-$(srcdir)/test_masstransport/testsuite.at \
-$(srcdir)/test_mass_coupling/testsuite.at \
-$(srcdir)/test_laplacian/testsuite.at \
-$(srcdir)/test_mesh/testsuite.at \
-$(srcdir)/test_mixte/testsuite.at \
-$(srcdir)/test_naturalbc/testsuite.at \
-$(srcdir)/test_ns_bdf/testsuite.at \
-$(srcdir)/test_ns_bcvec/testsuite.at \
-$(srcdir)/test_ns_cyl/testsuite.at \
-$(srcdir)/test_ns_cyl_flux/testsuite.at \
-$(srcdir)/test_ns_ipstab/testsuite.at \
-$(srcdir)/test_levelset_ipstab/testsuite.at \
-$(srcdir)/test_ns_2fluids/testsuite.at \
-$(srcdir)/test_ns_sstress/testsuite.at \
-$(srcdir)/test_onedmodel/testsuite.at \
-$(srcdir)/test_p2/testsuite.at \
-$(srcdir)/test_postproc/testsuite.at \
-$(srcdir)/test_q1/testsuite.at \
-$(srcdir)/lifefilters/testsuite.at \
-$(srcdir)/lifesolver/testsuite.at \
-$(srcdir)/lifefem/testsuite.at 
+TESTSUITES=$(srcdir)/test_cylinder/testsuite.at \
+$(srcdir)/test_structure/testsuite.at \
+$(srcdir)/test_ethiersteinman/testsuite.at
+
 
 $(srcdir)/package.m4: $(top_srcdir)/configure.in.in
 	{									   \

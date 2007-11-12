@@ -7,22 +7,22 @@ HOWTO to make a release X_Y_Z
 
 2- update NEWS
 
-3- run make distcheck 
+3- run make distcheck
    o you can try the following command to speed up this check
 
- make distcheck DISTCHECK_CONFIGURE_FLAGS="--enable-opt2" AM_MAKEFLAGS="-j <n>" 
+ make distcheck DISTCHECK_CONFIGURE_FLAGS="--enable-opt2" AM_MAKEFLAGS="-j <n>"
 
     where <n> is the number of processes you want to launch concurrently
 
 e.g.:
 
- make distcheck DISTCHECK_CONFIGURE_FLAGS="--enable-debug --with-aztec=/usr/people1e/deparis/CODICE/supersizing/local/   --with-mpi-include=/usr/lib/mpich/include/ --with-mpi-lib=/usr/lib/mpich/lib/  F77=gfortran" 
+ make distcheck DISTCHECK_CONFIGURE_FLAGS="--enable-debug --with-aztec=/usr/people1e/deparis/CODICE/supersizing/local/   --with-mpi-include=/usr/lib/mpich/include/ --with-mpi-lib=/usr/lib/mpich/lib/  F77=gfortran"
 
 
    o ensures that the generated tarball is complete
    o runs all tests from the tarball
 
-If step 3 went fine then 
+If step 3 went fine then
 
 4- tag HEAD with the tag LIFEV_X_Y_Z_BRANCH
    cd top_srcdir
