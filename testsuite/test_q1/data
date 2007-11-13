@@ -1,8 +1,0 @@
-# -*- getpot -*- (GetPot mode activation for emacs)
-#-------------------------------------------------
-#      Data file for Mesh test
-#-------------------------------------------------
-
-mesh_dir   = '../data/mesh/inria/'  # the directory where the mesh file is
-mesh_file  = 'cylhexa.mesh'       # mesh file
-mesh_faces = all                    # update all faces elements
