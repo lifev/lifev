@@ -24,69 +24,28 @@
 # \file testsuite.at
 # \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
 # \date 2004-08-29
-# 
+#
 AT_INIT([lifev testsuite])
 
 
 #lifecore tests
-m4_include([lifecore/testsuite.at])
+##m4_include([lifecore/testsuite.at])
 
 #lifearray tests
-m4_include([lifearray/testsuite.at])
+##m4_include([lifearray/testsuite.at])
 
 #lifealg tests
-m4_include([lifealg/testsuite.at])
+##m4_include([lifealg/testsuite.at])
 
 # mesh tests
-AT_BANNER([life/lifemesh testsuite ...])
-m4_include([test_mesh/testsuite.at])
-
-# fem tests
-AT_BANNER([life/lifefem testsuite ...])
-m4_include([lifefem/testsuite.at])
-m4_include([test_p2/testsuite.at])
-m4_include([test_q1/testsuite.at])
-m4_include([test_fe/testsuite.at])
-m4_include([test_mixte/testsuite.at])
-m4_include([test_dg/testsuite.at])
+##AT_BANNER([life/lifemesh testsuite ...])
+##m4_include([test_mesh/testsuite.at])
 
 # solver tests
 AT_BANNER([life/lifesolver testsuite ...])
-m4_include([lifesolver/testsuite.at])
-m4_include([test_laplacian/testsuite.at])
-m4_include([test_postproc/testsuite.at])
-m4_include([test_essentialbc/testsuite.at])
-m4_include([test_naturalbc/testsuite.at])
-m4_include([test_onedmodel/testsuite.at])
-m4_include([test_darcy/testsuite.at])
-m4_include([test_linearelasticity/testsuite.at])
-m4_include([test_fhn/testsuite.at])
-m4_include([test_bdf/testsuite.at])
-m4_include([test_ns_bdf/testsuite.at])
-m4_include([test_ns_bcvec/testsuite.at])
-m4_include([test_ns_cyl/testsuite.at])
-m4_include([test_ns_cyl_flux/testsuite.at])
-m4_include([test_ns_ipstab/testsuite.at])
-m4_include([test_ns_cyl_ipstab/testsuite.at])
-m4_include([test_ns_stab/testsuite.at])
-m4_include([test_ns_2fluids/testsuite.at])
-m4_include([test_levelset_ipstab/testsuite.at])
-#m4_include([lifesolver/testsuite.at])
-
-AT_BANNER([test_ns_sstress test is broken, skipping/disabling it for now])
-#m4_include([test_ns_sstress/testsuite.at])
-
-# disabled for now as it seems to run endlessly
+#m4_include([test_bdf/testsuite.at])
+m4_include([test_cylinder/testsuite.at])
+m4_include([test_ethiersteinman/testsuite.at])
+m4_include([test_structure/testsuite.at])
 m4_include([test_fsi/testsuite.at])
-
-#AT_BANNER([test_fsi_newton test takes too much time, skipping/disabling it for now])
-#m4_include([test_fsi_newton/testsuite.at])
-
-m4_include([test_masstransport/testsuite.at])
-m4_include([test_mass_coupling/testsuite.at])
-
-m4_include([test_coupling_3d0d/testsuite.at])
-
-AT_BANNER([test_netgen test using netgen meshes])
-m4_include([lifefilters/testsuite.at])
 

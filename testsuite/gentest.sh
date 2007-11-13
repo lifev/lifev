@@ -36,7 +36,7 @@ do
       echo "AT_KEYWORDS([$keywords])" >> $i/testsuite.at
       if test -f $i/data; then
 	  top_builddir=`cat Makefile.in| grep top_builddir | head -1 | sed "s/top_builddir = //g"`
-	  
+
 	  meshfile=`cat $i/data | grep mesh_file | head -1 | sed "s/ //g" | awk 'BEGIN{FS="="}{print $2}'|awk 'BEGIN{FS="#"}{print $1}'`
 	  meshdir=`cat $i/data | grep mesh_dir | head -1 | sed "s/ //g" |sed "s/\.\.\///g" | awk 'BEGIN{FS="="}{print $2}'|awk 'BEGIN{FS="#"}{print $1}'`
 	  datafile=`cat $i/data | sed "s/mesh_dir[ \t]*=.*$/mesh_dir = .\//g"`

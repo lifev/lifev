@@ -1,6 +1,0 @@
-.deps
-.libs
-Makefile
-Makefile.in
-test_coupling_FSI0d
-test_coupling_NS0d

@@ -1,6 +1,6 @@
 #! /bin/sh
 #
-#   SUMMARY: 
+#   SUMMARY:
 #     USAGE:
 #
 #    AUTHOR: Christophe Prud'homme
@@ -38,7 +38,7 @@ fi
 
 run()
 {
-cd $1 && ./$1 > $1.log 2>&1;
+cd $1 && mpirun ./$1 > $1.log 2>&1;
 if test "$?" != "0"; then
  exit 1;
 fi
@@ -54,11 +54,11 @@ do
   fi
 
   ac_optarg=`expr "x$ac_option" : 'x[^=]*=\(.*\)'`
-  
+
   # Accept the important Cygnus configure options, so we can diagnose typos.
-  
+
   case $ac_option in
-      
+
       -c)
 	  do_compile=1;;
       -e)
@@ -80,7 +80,7 @@ if test "$do_run" = "1"; then
 fi
 
 if test  "$do_diff" = "1"; then
-    
+
     #echo "test results of $the_test..."
     cmd=`diff $the_test/$the_test.log $the_srcdir/$the_test/main_sample.out`;
     if ! test -z "$cmd"; then

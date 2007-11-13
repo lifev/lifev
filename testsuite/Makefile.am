@@ -22,15 +22,19 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
-DO_NOT_COMPILE=test_nsale test_nsaleCT test_fsi_si test_fsi_stab test_ns_cyl_ipstab test_ns_ipstab
+DO_NOT_COMPILE=
 
 SUBDIRS		= data  \
-              test_cylinder test_structure test_ethiersteinman \
-	      $(DO_NOT_COMPILE)
+              test_cylinder \
+              test_structure \
+              test_ethiersteinman \
+              test_fsi \
+	          $(DO_NOT_COMPILE)
 
 TESTSUITES=$(srcdir)/test_cylinder/testsuite.at \
-$(srcdir)/test_structure/testsuite.at \
-$(srcdir)/test_ethiersteinman/testsuite.at
+           $(srcdir)/test_structure/testsuite.at \
+           $(srcdir)/test_ethiersteinman/testsuite.at\
+           $(srcdir)/test_fsi/testsuite.at
 
 
 $(srcdir)/package.m4: $(top_srcdir)/configure.in.in
