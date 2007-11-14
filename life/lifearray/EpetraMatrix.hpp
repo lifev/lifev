@@ -155,10 +155,10 @@ EpetraMatrix<DataType>::operator += ( const EpetraMatrix& _matrix)
 {
 //    EpetraMatrix matrix(Copy, _matrix.RowMap(), _matrix.GlobalMaxNumEntries());
 
-#ifdef  Trilinos8
-    EpetraExt::MatrixMatrix::Add(_matrix.getEpetraMatrix(), false, 1., (*this).getEpetraMatrix(), 1.);
-#else // trilinos6
+#ifdef HAVE_TRILINOS_EPETRAEXT_31 // trilinos6
     EpetraExt::MatrixMatrix::Add(_matrix.getEpetraMatrix(), false, 1., (*this).getEpetraMatrix(), 1., false);
+#else // trilinos8
+    EpetraExt::MatrixMatrix::Add(_matrix.getEpetraMatrix(), false, 1., (*this).getEpetraMatrix(), 1.);
 #endif
 
     return *this;
