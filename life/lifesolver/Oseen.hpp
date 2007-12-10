@@ -137,6 +137,12 @@ public:
 
     virtual void buildSystem();
 
+    virtual void updateRHS(vector_type const& sourceVec)
+    {
+        M_rhsNoBC = sourceVec;
+        M_rhsNoBC.GlobalAssemble();
+    }
+
     virtual void updateSystem(double       alpha,
                               vector_type& betaVec,
                               vector_type& sourceVec
@@ -204,6 +210,8 @@ public:
     Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getRepeatedEpetra_Map(); }
 
     EpetraMap const& getMap() const { return M_localMap; }
+
+    const Epetra_Comm& comm() const {return *M_comm;}
 
     void recomputeMatrix(bool const recomp){M_recomputeMatrix = recomp;}
 
@@ -313,6 +321,7 @@ protected:
     //! boolean that indicates if le precond has to be recomputed
 
     bool                           M_reusePrec;
+    int                            M_maxIterForReuse;
     bool                           M_resetPrec;
 
     //! interger storing the max number of solver iteration with prec recomputing
@@ -436,6 +445,7 @@ Oseen( const data_type&          dataType,
     M_verbose                ( M_me == 0),
     M_updated                ( false ),
     M_reusePrec              ( true ),
+    M_maxIterForReuse        ( -1 ),
     M_resetPrec              ( true ),
     M_maxIterSolver          ( -1 ),
     M_recomputeMatrix        ( false )
@@ -463,7 +473,6 @@ void Oseen<Mesh, SolverType>::setUp( const GetPot& dataFile )
     M_divBetaUv   = dataFile( "fluid/discretization/div_beta_u_v", 0  );
     M_diagonalize = dataFile( "fluid/discretization/diagonalize",  1. );
 
-    M_reusePrec   = dataFile( "fluid/prec/reuse", true);
 
     M_linearSolver.setDataFromGetPot( dataFile, "fluid/solver" );
 
@@ -471,7 +480,9 @@ void Oseen<Mesh, SolverType>::setUp( const GetPot& dataFile )
     M_ipStab.setGammaDiv  (M_gammaDiv);
     M_ipStab.setGammaPress(M_gammaPress);
 
-    M_maxIterSolver = dataFile( "fluid/solver/max_iter", -1);
+    M_maxIterSolver   = dataFile( "fluid/solver/max_iter", -1);
+    M_reusePrec       = dataFile( "fluid/prec/reuse", true);
+    M_maxIterForReuse = dataFile( "fluid/prec/max_iter_reuse", M_maxIterSolver*8/10);
 
     M_prec->setDataFromGetPot( dataFile, "fluid/prec" );
 }
@@ -716,7 +727,7 @@ updateSystem(double       alpha,
 
     // Right hand side for the velocity at time
 
-    M_rhsNoBC = sourceVec;
+    updateRHS(sourceVec);
 
     chrono.stop();
 
@@ -875,7 +886,6 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
 
 
     M_matrNoBC->GlobalAssemble();
-    M_rhsNoBC.GlobalAssemble();
 
     matrix_ptrtype matrFull( new matrix_type(*M_matrNoBC) );
     vector_type    rhsFull = M_rhsNoBC;
@@ -934,10 +944,7 @@ void Oseen<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
 
     // overlapping schwarz preconditioner
 
-//     if (M_verbose)
-//          std::cout << M_reusePrec << " " << M_resetPrec << std::endl;
-
-    if ( !M_reusePrec || M_resetPrec )
+    if ( !M_reusePrec || M_resetPrec || !M_prec->set() )
     {
         chrono.start();
 
@@ -954,20 +961,18 @@ void Oseen<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
         if (M_verbose)
         {
             std::cout << "done in " << chrono.diff() << " s.\n";
-            std::cout << "         Estimated condition number = " << condest << "\n" <<  std::flush;
+            std::cout << "  f-       Estimated condition number = " << condest << "\n" <<  std::flush;
         }
 
-        M_resetPrec = false;
+
     }
     else
     {
         if (M_verbose)
             std::cout << "  f-  Reusing  precond ...                \n" <<  std::flush;
-//        M_linearSolver.setReuse();
     }
 
 
-//    std::cout << M_linearSolver.precSet() << std::endl;
     chrono.start();
 
     if (M_verbose)
@@ -975,7 +980,34 @@ void Oseen<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
 
     int numIter = M_linearSolver.solve(M_sol, rhsFull);
 
-//    M_reusePrec = (numIter < 50);
+    if (numIter > M_maxIterSolver)
+    {
+        chrono.start();
+
+        if (M_verbose)
+            std::cout << "  f- Iterative solver failed, recomputing the precond ...                ";
+
+        M_prec->buildPreconditioner(matrFull);
+
+        double condest = M_prec->Condest();
+
+        M_linearSolver.setPreconditioner(M_prec);
+
+        chrono.stop();
+        if (M_verbose)
+        {
+            std::cout << "done in " << chrono.diff() << " s.\n";
+            std::cout << "  f-      Estimated condition number = " << condest << "\n" <<  std::flush;
+        }
+
+        numIter = M_linearSolver.solve(M_sol, rhsFull);
+
+        if (numIter > M_maxIterSolver && M_verbose)
+            std::cout << "  f- ERROR: Iterative solver failed again.\n";
+
+    }
+
+    M_resetPrec = (numIter > M_maxIterForReuse);
 
     chrono.stop();
     if (M_verbose)
@@ -983,12 +1015,6 @@ void Oseen<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
         std::cout << "\ndone in " << chrono.diff()
                   << " s. ( " << numIter << "  iterations. ) \n"
                   << std::flush;
-    }
-
-
-    if (numIter > M_maxIterSolver)
-    {
-        M_resetPrec = true;
     }
 
     M_comm->Barrier();
