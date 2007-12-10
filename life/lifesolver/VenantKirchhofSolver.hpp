@@ -38,7 +38,6 @@
 #include <life/lifefem/bcManage.hpp>
 #include <life/lifefem/bcHandler.hpp>
 #include <life/lifecore/chrono.hpp>
-#include <life/lifealg/SolverAztec.hpp>
 #include <life/lifealg/dataNewton.hpp>
 #include <life/lifealg/newton.hpp>
 //

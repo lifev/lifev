@@ -21,7 +21,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <life/lifealg/SolverAztec.hpp>
+//#include <life/lifealg/SolverAztec.hpp>
 #include <life/lifearray/vecUnknown.hpp>
 #include <life/lifearray/elemMat.hpp>
 #include <life/lifearray/elemVec.hpp>

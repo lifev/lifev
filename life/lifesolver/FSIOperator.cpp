@@ -433,7 +433,7 @@ FSIOperator::setup()
 void
 FSIOperator::setDataFromGetPot( GetPot const& data_file )
 {
-    M_solverAztec.setOptionsFromGetPot(data_file,"jacobian/aztec");
+    //M_solverAztec.setOptionsFromGetPot(data_file,"jacobian/aztec");
     M_method  = data_file("problem/method" ,"steklovPoincare");
 
     M_dataFluid.reset(new data_fluid(data_file));

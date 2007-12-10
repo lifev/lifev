@@ -32,7 +32,6 @@
 #include <life/lifesolver/VenantKirchhofSolver.hpp>
 #include <life/lifesolver/HarmonicExtensionSolver.hpp>
 #include <life/lifemesh/regionMesh3D.hpp>
-#include <life/lifealg/SolverAztec.hpp>
 #include <life/lifealg/generalizedAitken.hpp>
 #include <life/lifefem/bcHandler.hpp>
 #include <life/lifefem/bcFunction.hpp>
@@ -557,7 +556,6 @@ protected:
     boost::shared_ptr<vector_type>                    M_rhs;
 
 
-    SolverAztec                                       M_solverAztec;
 
     Real                                              M_time;
 
