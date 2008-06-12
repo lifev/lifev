@@ -26,6 +26,7 @@
 
 the_test=
 the_srcdir=`cat Makefile | grep "^srcdir =" | awk 'BEGIN{FS="="}{ print $2} '`
+top_builddir=`cat Makefile | grep "^top_builddir =" | awk 'BEGIN{FS="="}{ print $2} '`
 
 
 compile()
