@@ -27,6 +27,7 @@ namespace LifeV
 fixedPoint::fixedPoint():
     super(),
     M_defOmega( 0.001 ),
+    M_updateEvery(1),
     M_aitkFS(),
     //    M_displacement(),
     //    M_stress(),
@@ -54,6 +55,13 @@ fixedPoint::setDataFromGetPot( GetPot const& data )
     Debug( 6205 ) << "fixedPoint::setDataFromGetPot(GetPot) OmegaS = " << M_defOmega << "\n";
 
     M_aitkFS.setDefault(M_defOmega, 0.001);
+
+    // 0-order transpiration bnd conditions
+    // If M_updateEvery == 1, normal fixedPoint algorithm
+    // If M_updateEvery  > 1, recompute computational domain every M_updateEvery iterations (transpiration)
+    // If M_updateEvery <= 0, recompute computational domain and matrices only at first subiteration (semi-implicit)
+    M_updateEvery = data("problem/updateEvery", 1);
+
 
     if (false && this->isFluid())
         M_ensightFluid.reset( new  Ensight<RegionMesh3D<LinearTetra> > ( data, "fixedPtFluidInnerIterations") );
@@ -89,7 +97,7 @@ fixedPoint::setup()
             M_ensightFluid->setMeshProcId(M_uFESpace->mesh(), M_uFESpace->map().Comm().MyPID());
 
             assert( this->M_fluid.get() );
-            M_velAndPressure.reset( new vector_type( this->M_fluid->getRepeatedEpetraMap() ));
+            M_velAndPressure.reset( new vector_type( this->M_fluid->getMap() , Repeated ));
 
             M_ensightFluid->addVariable( ExporterData::Vector, "velocityInner", M_velAndPressure,
                                          UInt(0), M_uFESpace->dof().numTotalDof() );
@@ -103,16 +111,23 @@ fixedPoint::setup()
 //@    setUpBC();
 }
 
-void fixedPoint::eval(vector_type&       dispNew,
-                      vector_type&       velo,
-                      const vector_type& disp,
-                      int                status)
+void fixedPoint::eval( const vector_type& _disp,
+                       int                iter)
 {
-    if(status)
+    // If M_updateEvery == 1, normal fixedPoint algorithm
+    // If M_updateEvery  > 1, recompute computational domain every M_updateEvery iterations (transpiration)
+    // If M_updateEvery <= 0, recompute computational domain and matrices only at first subiteration (semi-implicit)
+    bool recomputeMatrices ( iter == 0 || ( M_updateEvery > 0 && iter % M_updateEvery == 0 ) );
+
+    std::cout << "recomputeMatrices = " << recomputeMatrices << " == " << true
+              << "; iter = " << iter
+              << "; M_updateEvery = " << M_updateEvery << std::endl;
+
+    if (iter == 0)
         {
             M_nbEval = 0; // new time step
             this->M_fluid->resetPrec();
-            this->M_solid->resetPrec();
+            //this->M_solid->resetPrec();
         }
 
     M_nbEval++ ;
@@ -120,34 +135,34 @@ void fixedPoint::eval(vector_type&       dispNew,
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    // possibly unsafe when using more cpus, since both has repeated maps
-    *M_lambdaFluid       = disp;
+    // possibly unsafe when using more cpus,
+    this->setLambdaFluid(_disp);
 
-
-    *this->M_sigmaFluid *= 0.;
+    vector_type sigmaFluidUnique (this->sigmaFluid(), Unique);
 
     if (this->isFluid())
     {
         this->M_meshMotion->iterate();
 
-        vector_type const meshDisplacement( M_meshMotion->displacement(), this->M_meshMotion->getRepeatedEpetraMap() );
+        this->transferMeshMotionOnFluid(M_meshMotion->displacement(),
+                                        this->veloFluidMesh());
 
-        this->transferMeshMotionOnFluid(meshDisplacement,
-                                        *this->M_veloFluidMesh);
-
-        *this->M_veloFluidMesh    -= *M_dispFluidMeshOld;
-        *this->M_veloFluidMesh    *= 1./(M_dataFluid->timestep());
+        this->veloFluidMesh()    -= this->dispFluidMeshOld();
+        this->veloFluidMesh()    *= 1./(M_dataFluid->timestep());
 
         // copying displacement to a repeated indeces displacement, otherwise the mesh wont know
         // the value of the displacement for some points
 
+        vector_type const meshDisplacement( M_meshMotion->displacement(), Repeated );
         this->moveMesh(meshDisplacement);
+        /*
+        vector_type const meshDisplacement( M_meshMotion->dispDiff(), Repeated );
+        this->moveMesh(meshDispDiff);
+        */
 
         *M_beta *= 0.;
 
-        vector_type const meshDispDiff( M_meshMotion->dispDiff(), this->M_meshMotion->getRepeatedEpetraMap() );
-
-        this->interpolateVelocity(meshDispDiff, *M_beta);
+        this->transferMeshMotionOnFluid(M_meshMotion->dispDiff(),  *M_beta);
 
         *M_beta *= -1./M_dataFluid->timestep();
 
@@ -155,74 +170,120 @@ void fixedPoint::eval(vector_type&       dispNew,
 
         double alpha = this->M_bdf->coeff_der( 0 ) / M_dataFluid->timestep();
 
-        *M_rhsNew   = *this->M_rhs;
-        *M_rhsNew  *= alpha;
+        //*M_rhsNew   = *this->M_rhs;
+        //*M_rhsNew  *= alpha;
 
-        this->M_fluid->updateSystem( alpha, *M_beta, *M_rhsNew );
+
+        if (recomputeMatrices)
+            {
+
+                this->M_fluid->updateSystem( alpha, *M_beta, *M_rhs );
+            }
+        else
+            {
+                this->M_fluid->updateRHS( *M_rhs );
+            }
+
 
         this->M_fluid->iterate( *M_BCh_u );
 
-        this->transferFluidOnInterface(this->M_fluid->residual(), *this->M_sigmaFluid);
+        std::cout << "Finished iterate, transfering to interface \n" << std::flush;
 
-//        this->shiftSolution();
+        this->transferFluidOnInterface(this->M_fluid->residual(), sigmaFluidUnique);
+
     }
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-     if ( false && this->isFluid() )
-         {
-             *M_velAndPressure = this->M_fluid->solution();
-             M_ensightFluid->postProcess( M_nbEval );
-         }
+    if ( true && this->isFluid() )
+        {
+            vector_type vel  (this->fluid().velFESpace().map());
+            vector_type press(this->fluid().pressFESpace().map());
+
+            vel.subset(this->M_fluid->solution());
+            press.subset(this->M_fluid->solution(), this->fluid().velFESpace().dim()*this->fluid().pressFESpace().fieldDim());
+
+            std::cout << "norm_inf( vel ) " << vel.NormInf() << std::endl;
+            std::cout << "norm_inf( press ) " << press.NormInf() << std::endl;
+
+            //              this->M_fluid->postProcess();
+            //              *M_velAndPressure = this->M_fluid->solution();
+            //              M_ensightFluid->postProcess( M_nbEval );
+
+
+        }
 
 
 
-    // possibly unsafe when using more cpus, since both has repeated maps
-    *this->M_sigmaSolid = *this->M_sigmaFluid;
+     this->setSigmaFluid( sigmaFluidUnique );
+     this->setSigmaSolid( sigmaFluidUnique );
     //*this->M_sigmaSolid = -1.0 * *this->M_sigmaFluid;
 
 //    this->M_sigmaSolid->spy("sigmasolid");
     MPI_Barrier(MPI_COMM_WORLD);
 
 
+    vector_type lambdaSolidUnique   (this->lambdaSolid(),    Unique);
+    vector_type lambdaDotSolidUnique(this->lambdaDotSolid(), Unique);
+    vector_type sigmaSolidUnique    (this->sigmaSolid(),     Unique);
+
     if (this->isSolid())
     {
         this->M_solid->iterate( *M_BCh_d );
-        this->transferSolidOnInterface(this->M_solid->disp(), *this->M_lambdaSolid);
-        this->transferSolidOnInterface(this->M_solid->vel() , *this->M_lambdaDotSolid);
-        this->transferSolidOnInterface(this->M_solid->residual() , *this->M_sigmaSolid);
+        this->transferSolidOnInterface(this->M_solid->disp(),     lambdaSolidUnique);
+        this->transferSolidOnInterface(this->M_solid->vel(),      lambdaDotSolidUnique);
+        this->transferSolidOnInterface(this->M_solid->residual(), sigmaSolidUnique);
     }
 
-    // possibly unsafe when using more cpus, since both has repeated maps
-//    *this->M_lambdaFluid    = *this->M_lambdaSolid;
+    this->setLambdaSolid( lambdaSolidUnique );
+    this->setLambdaDotSolid( lambdaDotSolidUnique );
+    this->setSigmaSolid( sigmaSolidUnique );
 
-//    this->M_lambdaFluid->getEpetraVector().Print(std::cout);
-
-//    *this->M_lambdaDotFluid = *this->M_lambdaDotSolid;
-
-
-    dispNew = *this->M_lambdaSolid;
-    velo    = *this->M_lambdaDotSolid;
+//     dispNew = *this->M_lambdaSolid;
+//     velo    = *this->M_lambdaDotSolid;
 
     MPI_Barrier(MPI_COMM_WORLD);
 
 
-//      if (this->isSolid())
-//      {
-    std::cout << " ::: norm(disp     )    = " << disp.NormInf() << std::endl;
-    std::cout << " ::: norm(dispNew  )    = " << dispNew.NormInf() << std::endl;
-    std::cout << " ::: norm(velo     )    = " << velo.NormInf() << std::endl;
-//      }
-    std::cout << " ::: max Residual Fluid = " << M_sigmaFluid->NormInf() << std::endl;
-    std::cout << " ::: max Residual Solid = " << M_sigmaSolid->NormInf() << std::endl;
+    // Some displays:
+    Real norm;
+
+    norm = _disp.NormInf();
+    if (this->isSolid() && this->isLeader())
+        std::cout << " ::: norm(disp     )    = " << norm << std::endl;
+
+    norm = this->lambdaSolid().NormInf();
+    if (this->isSolid() && this->isLeader())
+        std::cout << " ::: norm(dispNew  )    = " << norm << std::endl;
+
+    norm = this->lambdaDotSolid().NormInf();
+    if (this->isSolid() && this->isLeader())
+        std::cout << " ::: norm(velo     )    = " << norm << std::endl;
+
+    norm = this->sigmaFluid().NormInf();
+    if (this->isSolid() && this->isLeader())
+        std::cout << " ::: max Residual Fluid = " << norm << std::endl;
+
+    norm = this->sigmaSolid().NormInf();
+    if (this->isSolid() && this->isLeader())
+        std::cout << " ::: max Residual Solid = " << norm  << std::endl;
 
     if (this->isFluid())
-        std::cout << "Max ResidualF        = " << M_fluid->residual().NormInf() << std::endl;
+    {
+        norm = M_fluid->residual().NormInf();
+        if (this->isLeader())
+            std::cout << "Max ResidualF        = " << norm << std::endl;
+    }
     if (this->isSolid())
-        {
-            std::cout << "NL2 DiplacementS     = " << M_solid->disp().Norm2() << std::endl;
-            std::cout << "Max ResidualS        = " << M_solid->residual().NormInf() << std::endl;
-        }
+    {
+        norm = M_solid->disp().Norm2();
+        if (this->isLeader())
+            std::cout << "NL2 DiplacementS     = " << norm << std::endl;
+
+        norm = M_solid->residual().NormInf();
+        if (this->isLeader())
+            std::cout << "Max ResidualS        = " << norm << std::endl;
+    }
 
 }
 
@@ -230,29 +291,23 @@ void fixedPoint::eval(vector_type&       dispNew,
 //
 void fixedPoint::evalResidual(vector_type &res, const vector_type& disp, int iter)
 {
-    int status = 0;
-    if(iter == 0) status = 1;
 
 
     if (this->isSolid())
     {
         std::cout << "*** Residual computation g(x_" << iter <<" )";
-        if (status) std::cout << " [NEW TIME STEP] ";
+        if (iter == 0) std::cout << " [NEW TIME STEP] ";
         std::cout << std::endl;
     }
 
-    M_lambdaSolidOld.reset(new vector_type(disp));
+    this->setLambdaSolidOld(disp);
 
-    eval(*M_lambdaSolid, *M_lambdaDotSolid, disp, status);
+    eval(disp, iter);
 
-    res  = *M_lambdaSolid;
-    res -= disp;
-
-//    res.getEpetraVector().Print(std::cout);
-//     transferOnInterface(res,
-//                         M_solid->BC_solid(),
-//                         "Interface",
-//                         res);
+    res  = disp;
+    res -= this->lambdaSolid();
+//     res  = this->lambdaSolid();
+//     res -= disp;
 }
 
 
@@ -267,7 +322,7 @@ void  fixedPoint::solveJac(vector_type        &_muk,
 {
     if (M_nbEval == 1) M_aitkFS.restart();
     //    _muk = 0.001*_res;
-    _muk = M_aitkFS.computeDeltaLambda(*M_lambdaSolidOld, -1.*_res);
+    _muk = M_aitkFS.computeDeltaLambda(this->lambdaSolidOld(), -1.*_res);
 }
 
 

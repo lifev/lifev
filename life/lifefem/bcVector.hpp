@@ -70,7 +70,7 @@ public:
       -# 2:  needs boundary integration of \f$\mathbf{\lambda} \cdot n \phi_i\f$
     */
 
-    BCVectorBase( const EpetraVector<double>& vec, const UInt nbTotalDof, UInt type = 0 );
+    BCVectorBase( const EpetraVector& vec, const UInt nbTotalDof, UInt type = 0 );
 
 
     //! Default Constructor (the user must call setBCVector(..))
@@ -157,14 +157,14 @@ public:
         }
 
     //! set the Mixte coefficient data vector
-    void setMixteVec( EpetraVector<double>& vec_mixte )
+    void setMixteVec( EpetraVector& vec_mixte )
         {
             _M_vec_mixte= &vec_mixte;
         }
 
 
     //! set the vector
-    void setVector( EpetraVector<double>& __vec, UInt nbDOF, UInt type=0 );
+    void setVector( EpetraVector& __vec, UInt nbDOF, UInt type=0 );
 
     //@}
 
@@ -178,10 +178,10 @@ public:
 protected:
 
     //! The data vector
-    const EpetraVector<double>* _M_vec;
+    const EpetraVector* _M_vec;
 
     //! The data vector of the mixte coefficient
-    EpetraVector<double>* _M_vec_mixte;
+    EpetraVector* _M_vec_mixte;
 
     //! Number of total dof in the vector of data
     UInt _M_nbTotalDof;
@@ -239,7 +239,7 @@ public:
       -# needs boundary integration of \f$\lambda n \cdot  \mathbf{\phi}_i\f$ \warning (not yet implemented - AM 10/2004)
       -# needs boundary integration of \f$\mathbf{\lambda} \cdot n \phi_i\f$ \warning (implemented only for the Natural BC - AM 10/2004)
     */
-    BCVector( EpetraVector<double>& vec, UInt const nbTotalDof, UInt type=0 );
+    BCVector( EpetraVector& vec, UInt const nbTotalDof, UInt type=0 );
 
     //! Default Constructor (the user must call setVector(..))
     BCVector();
@@ -293,17 +293,17 @@ public:
       \warning: implemented only for the Natural BC
       -# 2:  needs boundary integration of \f$\mathbf{\lambda} \cdot n \phi_i\f$
     */
-    BCVectorInterface( const EpetraVector<double>& vec, UInt nbTotalDof, dof_interface_type dofIn, UInt type=0 );
+    BCVectorInterface( const EpetraVector& vec, UInt nbTotalDof, dof_interface_type dofIn, UInt type=0 );
 
     //! Default Constructor (the user must call setBCVector(..))
     BCVectorInterface ();
 
     //! setup after default constructor
 
-    void setup ( const EpetraVector<double>& vec, UInt nbTotalDof, dof_interface_type dofIn, UInt type=0 );
+    void setup ( const EpetraVector& vec, UInt nbTotalDof, dof_interface_type dofIn, UInt type=0 );
 
     //! set the BC vector (after default construction)
-    void setVector( EpetraVector<double>& vec, UInt nbTotalDof, dof_interface_type dofIn, UInt type=0);
+    void setVector( EpetraVector& vec, UInt nbTotalDof, dof_interface_type dofIn, UInt type=0);
 
     /*!
       This method returns the value to be imposed in the component iComp of the dof iDof.

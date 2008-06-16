@@ -32,8 +32,6 @@
 #ifndef _EPETRAVECTOR_HPP_
 #define _EPETRAVECTOR_HPP_
 
-#include <life/lifealg/SolverAztec.hpp>
-
 #include "Epetra_FEVector.h"
 #include "life/lifecore/life.hpp"
 //#include <life/lifearray/pattern.hpp>
@@ -55,14 +53,12 @@ namespace LifeV
 
 
 
-
-
-template <typename DataType = Real>
 class EpetraVector
 {
 public:
 
     typedef Epetra_FEVector vector_type;
+    typedef Real data_type;
 
 //    EpetraVector(); //!< default constructor : NULL pattern
     //
@@ -74,28 +70,54 @@ public:
 //                   const Epetra_Map& _mapRow );//,
 //                  const Epetra_Map& _mapCol );
 
-    EpetraVector( const EpetraMap&          _map );
-    EpetraVector( const Epetra_BlockMap&    _map );
+    EpetraVector( const EpetraMap& _map, EpetraMapType maptype = Unique );
+
+    // The following constructor does not use the EpetraMap.
+    //EpetraVector( const Epetra_BlockMap&    _map );
 
     EpetraVector( const EpetraVector& _vector);
+
+    EpetraVector( const EpetraVector& _vector, EpetraMapType maptype);
+
+    EpetraVector( const EpetraVector& _vector, EpetraMapType maptype,
+                  Epetra_CombineMode combineMode);
+
+    // Copies _vector to FEvector that comes as Multivector
+    EpetraVector( const Epetra_MultiVector&    _vector,
+                  boost::shared_ptr<EpetraMap> _map,
+                  EpetraMapType                maptype );
+
 
 //! Copies _vector to a vector which resides only on the processor "reduceToProc"
     EpetraVector( const EpetraVector& _vector, const int reduceToProc);
 
- //! Copies _vector to a vector whith different map (usually the repeated map from EpetraMatrix)
-    EpetraVector( const EpetraVector&     _vector,
-                  const Epetra_BlockMap&  _map    );
+    // The following constructor does not use the EpetraMap.
+    //! Copies _vector to a vector with different map (usually the repeated map from EpetraMatrix)
+    //    EpetraVector( const EpetraVector&     _vector,
+    //                  const Epetra_BlockMap&  _map    );
 
-    DataType& operator[] (const UInt row);
-    const DataType& operator[] (const UInt row) const;
-    DataType& operator() (const UInt row);
-    const DataType& operator() (const UInt row) const;
+    data_type& operator[] (const UInt row);
+    const data_type& operator[] (const UInt row) const;
+    data_type& operator() (const UInt row);
+    const data_type& operator() (const UInt row) const;
+
+
+    //! if row is mine returns the LID
+    //! if row is not mine and if the numCpus > 1, returns -1
+    //! if row is not mine and if the numCpus == 1, asserts
+    int checkLID(const UInt row) const;
+
+    //! if row is mine sets this[row] = value and return true
+    //! if row is not mine and if the numCpus > 1, returns false
+    //! if row is not mine and if the numCpus == 1, asserts
+    bool checkAndSet(const UInt row, const data_type& value);
+
+    //! Set the row row of the vector to value. If it isn't on this processor,
+    //! store it and send it and send it at next GlobalAssemble
+    int replaceGlobalValues(const std::vector<int> rVec, const std::vector<double> datumVec);
 
     //! insert a global value. After insertion, you will have to call global assemble.
     int sumIntoGlobalValues (const int GID, const double value);
-
-    const Epetra_BlockMap& Map() const;
-
 
     double Norm2()   const;
     double NormInf() const;
@@ -109,23 +131,15 @@ public:
 
     const int  size() const { return M_epetraVector.GlobalLength(); }
 
-    void spy ( std::string const &filename );
+    void spy ( std::string const &filename ) const;
 
     //! copies the value of a vector u. If the map is not the same,
     //! try to import the values. Calls Import with Add.
     EpetraVector& operator=(const EpetraVector& _vector);
-    //! copies the value of a vector u. If the map is not the same,
-    //! try to import the values. Let you decide wether to add or replace shared nodes:
-    /*
-        CombineMode Valuse:
-        Add         Components on the receiving processor will be added together.
-        Insert 	    Off-processor components will be inserted into locations on receiving processor replacing existing values.
-        InsertAdd 	Off-processor components will be inserted into locations on receiving processor and added to existing values.
-        Average 	Off-processor components will be averaged with existing components on the receiving processor.
-        (+ Zero and AbsMax, probably never useful)
-    */
-    EpetraVector& Import   (const EpetraVector& _vector,
-                            Epetra_CombineMode combineMode);
+
+    //! copies the value of a Epetra_MultiVector u (assumed of width 1). If the map is not the same,
+    //! try to import the values. Calls Import with Add.
+    EpetraVector& operator=(const Epetra_MultiVector& _vector);
 
     /* adds to this the vector _vector with an offset.
        typically to do: (u,p) += p or (u,p) += u.
@@ -143,361 +157,76 @@ public:
        a) if _vector has a unique map: then this should also (otherwise run time error)
        b) if _vector has a repeated map: then this should also. (otherwise wrong)
      */
-    EpetraVector<DataType>& subset(const EpetraVector& _vector,
+    EpetraVector& subset(const EpetraVector& _vector,
                                    const int           offset = 0);
 
     //! if the map is not the same, try to import values
     EpetraVector& operator+=(const EpetraVector& _vector);
     EpetraVector& operator-=(const EpetraVector& _vector);
 
-    EpetraVector& operator*=(DataType t);
+    EpetraVector& operator*=(data_type t);
 
-    DataType operator*(EpetraVector const& a) const;
+    data_type operator*(EpetraVector const& a) const;
+
+    int GlobalAssemble(Epetra_CombineMode mode=Add) { return  M_epetraVector.GlobalAssemble(); }
+
+    const Epetra_Comm& Comm() const { return BlockMap().Comm(); }
+
+    const EpetraMapType getMaptype() const  { return  M_maptype; }
+
+    const EpetraMap&  getMap() const  { return  *M_epetraMap; }
+
+    const Epetra_BlockMap& BlockMap() const;
 
 
-    int GlobalAssemble() { return  M_epetraVector.GlobalAssemble(); }
+
 
 private:
 
+    //! copies the value of a vector u. If the map is not the same,
+    //! try to import the values. Let you decide wether to add or replace shared nodes:
+    //! note:
+    //!  if the original source vector _vector is not repeated : use Import
+    //!  if the original source vector _vector is repeated : use Export
+    /*
+        CombineMode Valuse:
+        Add         Components on the receiving processor will be added together.
+        Insert 	    Off-processor components will be inserted into locations on receiving processor replacing existing values.
+        InsertAdd 	Off-processor components will be inserted into locations on receiving processor and added to existing values.
+        Average 	Off-processor components will be averaged with existing components on the receiving processor.
+        (+ Zero and AbsMax, probably never useful)
+    */
+    EpetraVector& Import (const Epetra_FEVector& _vector,
+                          Epetra_CombineMode combineMode);
+
+    //! copies the value of this to a vector _vector. If the map is not the same,
+    //! try to import the values. Let you decide wether to add or replace shared nodes:
+    //! note: tested only if the destination source vector _vector is not repeated
+    /*
+        CombineMode Valuse:
+        Add         Components on the receiving processor will be added together.
+        Insert 	    Off-processor components will be inserted into locations on receiving processor replacing existing values.
+        InsertAdd 	Off-processor components will be inserted into locations on receiving processor and added to existing values.
+        Average 	Off-processor components will be averaged with existing components on the receiving processor.
+        (+ Zero and AbsMax, probably never useful)
+    */
+    EpetraVector& Export (const Epetra_FEVector& _vector,
+                          Epetra_CombineMode combineMode);
+
+
     vector_type      M_epetraVector;
+
+    boost::shared_ptr<EpetraMap>  M_epetraMap;
+    EpetraMapType    M_maptype;
+
 };
 
-//-------------------------------------------------------------------------------------------------------
-// CSR - VALUES
-//------------------------------------------------------------------------------------------------------
 
-template <typename DataType>
-EpetraVector<DataType>::EpetraVector( const EpetraVector& _vector):
-    M_epetraVector(_vector.M_epetraVector)
-{
-}
+EpetraVector operator * (EpetraVector::data_type t, const EpetraVector& _vector);
 
-template <typename DataType>
-EpetraVector<DataType>::EpetraVector( const EpetraMap& _map ):
-    M_epetraVector( *_map.getUniqueEpetra_Map(), false)
-{
-}
 
-template <typename DataType>
-EpetraVector<DataType>::EpetraVector( const Epetra_BlockMap& _map ):
-    M_epetraVector( _map, false)
-{
-}
+} // end namespace LifeV
 
-
-// Copies _vector to a vector which resides only on the processor "reduceToProc"
-template <typename DataType>
-EpetraVector<DataType>::EpetraVector( const EpetraVector& _vector, const int reduceToProc):
-    M_epetraVector( Epetra_BlockMap( _vector.Map().NumGlobalElements(),
-                                     (_vector.Map().Comm().MyPID() == reduceToProc) * _vector.Map().NumGlobalElements(),
-                                     _vector.Map().ElementSize(),
-                                     _vector.Map().MinAllGID(),
-                                     _vector.Map().Comm()  ),
-                    false)
-{
-    operator = (_vector);
-
-    /*
-    Epetra_Export reducedExport(this->Map(), _vector.Map());
-    M_epetraVector.Import(_vector.M_epetraVector, reducedExport, Add);
-    */
-}
-
-// Copies _vector to a vector whitha different map (usually the repeated map from EpetraMatrix)
-template <typename DataType>
-EpetraVector<DataType>::EpetraVector( const EpetraVector&     _vector,
-                                      const Epetra_BlockMap&  _map   ):
-    M_epetraVector( _map, false )
-{
-    operator = (_vector);
-
-    /*
-    if (this->Map().SameAs(_vector.Map()) )
-        M_epetraVector = _vector.M_epetraVector;
-    else
-        {
-            Epetra_Export reducedExport(this->Map(), _vector.Map());
-            M_epetraVector.Import(_vector.M_epetraVector, reducedExport, Add);
-        }
-    */
-}
-
-
-template <typename DataType>
-DataType&
-EpetraVector<DataType>::operator []( const UInt row )
-{
-    int lrow = Map().LID(row); // BASEINDEX + 1, row + 1
-
-    // hint: with gdb: break LifeV::EpetraVector<double>::operator[](unsigned int)
-    if (lrow < 0 )
-    {
-        std::cout << M_epetraVector.Comm().MyPID() << " " << row << " " << lrow << std::endl;
-        ERROR_MSG( "EpetraVector<DataType>::operator [] ERROR : !! lrow < 0\n" );
-    }
-    return (M_epetraVector[0][lrow]);
-
-}
-
-template <typename DataType>
-DataType&
-EpetraVector<DataType>::operator ()( const UInt row )
-{
-    return operator[](row);
-}
-
-
-template <typename DataType>
-const DataType&
-EpetraVector<DataType>::operator ()( const UInt row ) const
-{
-    return operator[](row);
-}
-
-
-template <typename DataType>
-const DataType&
-EpetraVector<DataType>::operator [] ( const UInt row ) const
-{
-    int lrow = Map().LID(row); // BASEINDEX + 1 row+1
-
-    if (lrow < 0 )
-    {
-        std::cout << M_epetraVector.Comm().MyPID() << " " << row << " " << lrow << std::endl;
-        ERROR_MSG( "EpetraVector<DataType>::operator () ERROR : !! lrow < 0\n" );
-    }
-
-    return (M_epetraVector[0][lrow]);
-
-}
-
-template <typename DataType>
-int
-EpetraVector<DataType>::sumIntoGlobalValues (const int GID, const double value)
-{
-    return M_epetraVector.SumIntoGlobalValues(1, &GID, &value);
-}
-
-
-template <typename DataType>
-const Epetra_BlockMap&
-EpetraVector<DataType>::Map() const
-{
-    return M_epetraVector.Map();
-}
-
-
-template <typename DataType>
-double
-EpetraVector<DataType>::Norm2() const
-{
-    double res;
-    M_epetraVector.Norm2(&res);
-    return res;
-}
-
-template <typename DataType>
-void
-EpetraVector<DataType>::Norm2(double* res) const
-{
-    M_epetraVector.Norm2(res);
-}
-
-template <typename DataType>
-double
-EpetraVector<DataType>::NormInf() const
-{
-    double res;
-    M_epetraVector.NormInf(&res);
-    return res;
-}
-
-template <typename DataType>
-void
-EpetraVector<DataType>::NormInf(double* res) const
-{
-    M_epetraVector.NormInf(res);
-}
-
-
-template <typename DataType>
-void EpetraVector<DataType>::spy( std::string const &filename )
-{
-    // Purpose: Matlab dumping and spy
-    std::string nome = filename;
-
-    EpetraVector redVec(*this,0); // reduced vector (all at proc 0)
-
-    int  me    = redVec.M_epetraVector.Comm().MyPID();
-
-    if (me) return; // do not need other CPUs now
-
-    //
-    // check on the file name
-    //
-
-    std::ostringstream myStream;
-    myStream << me;
-
-    nome = filename + ".m";
-
-    std::ofstream file_out( nome.c_str() );
-    ASSERT( file_out, "Error: Output Vector (Values) file cannot be open" );
-
-    file_out << "v = [";
-
-    int           NumEntries = redVec.M_epetraVector.GlobalLength ();
-    const double* Values     = redVec.M_epetraVector[0];
-    const int*    Index      = redVec.Map().MyGlobalElements();
-
-    for (int i = 0; i < NumEntries; i++)
-    {
-        file_out.width(20);
-        file_out << Index[i] << " ";
-        file_out << Values[i];
-        file_out << "\n";
-    }
-
-
-    file_out << "];" << std::endl;
-
-}
-
-
-
-// copies the value of a vector u. If the map is not the same,
-// try to import the values.
-template <typename DataType>
-EpetraVector<DataType>& EpetraVector<DataType>::
-operator = (const EpetraVector& _vector)
-{
-
-    return Import(_vector, Add);
-
-}
-
-// copies the value of a vector u. If the map is not the same,
-// try to import the values.
-template <typename DataType>
-EpetraVector<DataType>& EpetraVector<DataType>::
-Import (const EpetraVector& _vector, Epetra_CombineMode combineMode)
-{
-    if (&_vector.getEpetraVector() == &this->getEpetraVector())
-        return *this;
-
-    if (this->Map().SameAs(_vector.Map()) )
-        M_epetraVector = _vector.M_epetraVector;
-    else
-        {
-            *this *= 0.; // because of a buggy behaviour in case of multidefined indeces.
-            Epetra_Export reducedExport(this->Map(), _vector.Map());
-            M_epetraVector.Import(_vector.M_epetraVector, reducedExport, combineMode);
-        }
-    return *this;
-}
-
-template <typename DataType>
-EpetraVector<DataType>& EpetraVector<DataType>::
-add(const EpetraVector& _vector,
-    const int           offset )
-{
-    if ( offset == 0 )
-        return operator+= (_vector);
-
-    int numMyEntries = _vector.M_epetraVector.MyLength ();
-    const int*    gids       = _vector.M_epetraVector.Map().MyGlobalElements();
-
-    // eg: (u,p) += p or (u,p) += u
-    for (int i = 0; i < numMyEntries; ++i)
-        {
-            //        std::cout << gids[i] + offset << " " << gids[i] << std::endl;
-            (*this)[gids[i]+offset] += _vector(gids[i]);
-        }
-
-    return *this;
-}
-
-template <typename DataType>
-EpetraVector<DataType>& EpetraVector<DataType>::
-subset(const EpetraVector& _vector,
-       const int           offset )
-{
-    (*this) *= 0;
-
-    int numMyEntries = M_epetraVector.MyLength ();
-    const int*    gids       = M_epetraVector.Map().MyGlobalElements();
-
-    // eg:  p = (u,p) or u = (u,p)
-    for (int i = 0; i < numMyEntries; ++i)
-        {
-            //        std::cout << gids[i] + offset << " " << gids[i] << std::endl;
-            (*this)[gids[i]] += _vector(gids[i]+offset);
-        }
-
-    return *this;
-}
-
-
-// if the map is not the same, try to import values
-template <typename DataType>
-EpetraVector<DataType>& EpetraVector<DataType>::
-operator+=(const EpetraVector& _vector)
-{
-    if (this->Map().SameAs(_vector.Map()) )
-        M_epetraVector.Update(1., _vector.M_epetraVector, 1.);
-    else
-        {
-            EpetraVector<DataType> vCopy(_vector, this->Map());
-            M_epetraVector.Update(1., vCopy.M_epetraVector, 1.);
-        }
-
-    return *this;
-}
-
-template <typename DataType>
-EpetraVector<DataType>& EpetraVector<DataType>::
-operator-=(const EpetraVector& _vector)
-{
-    if (this->Map().SameAs(_vector.Map()) )
-        M_epetraVector.Update(-1., _vector.M_epetraVector, 1.);
-    else
-        {
-            EpetraVector<DataType> vCopy(_vector, this->Map());
-            M_epetraVector.Update(-1., vCopy.M_epetraVector, 1.);
-        }
-
-    return *this;
-}
-
-template <typename DataType>
-EpetraVector<DataType>& EpetraVector<DataType>::
-operator *= (DataType t)
-{
-    M_epetraVector.Scale(t);
-    return *this;
-}
-
-template <typename DataType>
-DataType EpetraVector<DataType>::
-operator * ( EpetraVector<DataType> const& a) const
-{
-    DataType result;
-    M_epetraVector.Dot(a.getEpetraVector(), &result);
-    return result;
-}
-
-
-//! multiply scalar * vector.
-template <typename DataType>
-EpetraVector<DataType>
-operator * (DataType t, const EpetraVector<DataType>& _vector)
-{
-    EpetraVector<DataType> result(_vector);
-    return result *= t;
-}
-
-
-}
 //@@
 //#undef OFFSET
 

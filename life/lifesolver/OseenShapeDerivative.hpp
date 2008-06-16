@@ -72,12 +72,15 @@ public:
 
 
     void iterateLin( bchandler_raw_type& bch );
-    void updateLinearSystem( double       alpha,
-                             vector_type& betaVec,
-                             vector_type& w,
-                             vector_type& dw,
-                             vector_type& disp,
-                             vector_type& sourceVec );
+
+    void updateLinearSystem( const matrix_type& matrNoBC,
+                             double       alpha,
+                             const vector_type& un,
+                             const vector_type& uk,
+                             const vector_type& disp,
+                             const vector_type& w,
+                             const vector_type& dw,
+                             const vector_type& sourceVec);
 
 private:
 
@@ -86,7 +89,8 @@ private:
     vector_type               M_rhsLinFull;
 
 
-    ElemVec                   M_elvec_du; // Elementary right hand side for the linearized velocity
+//    ElemVec                   M_elvec_du; // Elementary right hand side for the linearized velocity
+    ElemVec                   M_elvec_du; // Elementary right hand side for the linearized pressure
     ElemVec                   M_elvec_dp; // Elementary right hand side for the linearized pressure
     ElemVec                   M_w_loc;    // Elementary mesh velocity
     ElemVec                   M_uk_loc;   // Elementary velocity
@@ -94,7 +98,7 @@ private:
     ElemVec                   M_elvec;    // Elementary convection velocity
     ElemVec                   M_d_loc;    // Elementary displacement for right hand side
     ElemVec                   M_dw_loc;   // Elementary mesh velocity for right hand side
-
+    ElemVec                   M_u_loc;
 
 
 };
@@ -114,14 +118,16 @@ OseenShapeDerivative( const data_type&          dataType,
                       comm),
     M_rhsLinNoBC     ( this->getMap()),
     M_rhsLinFull     ( this->getMap()),
+//    M_elvec_du       ( this->M_uFESpace.fe().nbNode, nDimensions ),
     M_elvec_du       ( this->M_uFESpace.fe().nbNode, nDimensions ),
-    M_elvec_dp       ( this->M_pFESpace.fe().nbNode, nDimensions ),
+    M_elvec_dp       ( this->M_pFESpace.fe().nbNode, 1 ),
     M_w_loc          ( this->M_uFESpace.fe().nbNode, nDimensions ),
     M_uk_loc         ( this->M_uFESpace.fe().nbNode, nDimensions ),
     M_pk_loc         ( this->M_pFESpace.fe().nbNode, 1 ),
     M_elvec          ( this->M_uFESpace.fe().nbNode, nDimensions ),
     M_d_loc          ( this->M_uFESpace.fe().nbNode, nDimensions ),
-    M_dw_loc         ( this->M_uFESpace.fe().nbNode, nDimensions )
+    M_dw_loc         ( this->M_uFESpace.fe().nbNode, nDimensions ),
+    M_u_loc          ( this->M_uFESpace.fe().nbNode, nDimensions )
 {
 
 }
@@ -139,13 +145,15 @@ OseenShapeDerivative( const data_type&          dataType,
     M_rhsLinNoBC     ( this->getMap()),
     M_rhsLinFull     ( this->getMap()),
     M_elvec_du       ( this->M_uFESpace.fe().nbNode, nDimensions ),
-    M_elvec_dp       ( this->M_pFESpace.fe().nbNode, nDimensions ),
+    M_elvec_dp       ( this->M_pFESpace.fe().nbNode, 1 ),
+//    M_elvec_dp       ( this->M_pFESpace.fe().nbNode, nDimensions ),
     M_w_loc          ( this->M_uFESpace.fe().nbNode, nDimensions ),
     M_uk_loc         ( this->M_uFESpace.fe().nbNode, nDimensions ),
     M_pk_loc         ( this->M_pFESpace.fe().nbNode, 1 ),
     M_elvec          ( this->M_uFESpace.fe().nbNode, nDimensions ),
     M_d_loc          ( this->M_uFESpace.fe().nbNode, nDimensions ),
-    M_dw_loc         ( this->M_uFESpace.fe().nbNode, nDimensions )
+    M_dw_loc         ( this->M_uFESpace.fe().nbNode, nDimensions ),
+    M_u_loc          ( this->M_uFESpace.fe().nbNode, nDimensions )
 {
 
 }
@@ -160,18 +168,25 @@ void OseenShapeDerivative<Mesh, SolverType>::iterateLin( bchandler_raw_type& bch
     // matrix and vector assembling communication
 
     if (this->M_verbose)
-        {
-            std::cout << "  f-  Finalizing the matrix and vectors ...    ";
-        }
+    {
+        std::cout << "  f-  Finalizing the matrix and vectors ...    ";
+    }
 
     chrono.start();
 
 
     this->M_matrNoBC->GlobalAssemble();
+    if (this->M_stab)
+        this->M_matrStab->GlobalAssemble();
+
     M_rhsLinNoBC.GlobalAssemble();
 
-    matrix_ptrtype matrFull( new matrix_type(*this->M_matrNoBC) );
-    vector_type    rhsFull = M_rhsLinNoBC;
+    matrix_ptrtype matrFull( new matrix_type( this->M_localMap, this->M_matrNoBC->getMeanNumEntries()));
+    *matrFull += *this->M_matrNoBC;
+    if (this->M_stab)
+        *matrFull += *this->M_matrStab;
+
+    vector_type    rhsFull(M_rhsLinNoBC);
 
     chrono.stop();
 
@@ -180,193 +195,173 @@ void OseenShapeDerivative<Mesh, SolverType>::iterateLin( bchandler_raw_type& bch
                   << std::flush;
 
     // boundary conditions update
-    this->M_comm->Barrier();
 
     if (this->M_verbose) std::cout << "  f-  Applying boundary conditions...          "
               << std::flush;
 
+//    std::cout << "    norm_inf( rhsFullNoBC )     = " << rhsFull.NormInf() << std::endl;
+
     chrono.start();
+
+    bch.bdUpdate( *this->M_uFESpace.mesh(), this->M_uFESpace.feBd(), this->M_uFESpace.dof() );
     applyBoundaryConditions( *matrFull, rhsFull, bch );
 
     chrono.stop();
 
-    this->M_comm->Barrier();
+//    this->M_comm->Barrier();
 
     if (this->M_verbose) std::cout << "done in " << chrono.diff() << " s.\n" << std::flush;
 
+    std::cout << "    norm_inf( rhsFull )     = " << rhsFull.NormInf() << std::endl;
     // solving the system
 
     solveSystem( matrFull, rhsFull );
 
     this->M_residual  = M_rhsLinNoBC;
     this->M_residual -= *this->M_matrNoBC*this->M_sol;
-}
+
+    std::cout << "NormInf Residual Lin = " << this->M_residual.NormInf() << std::endl;
+    std::cout << "NormInf Solution Lin = " << this->M_sol.NormInf() << std::endl;
+} // iterateLin
 
 
 
 template<typename Mesh, typename SolverType>
-void OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( double       alpha,
-                                                                 vector_type& betaVec,
-                                                                 vector_type& w,
-                                                                 vector_type& dw,
-                                                                 vector_type& disp,
-                                                                 vector_type& sourceVec )
+void
+OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& matrNoBC,
+                                                            double       alpha,
+                                                            const vector_type& un,
+                                                            const vector_type& uk,
+                                                            const vector_type& disp,
+                                                            const vector_type& w,
+                                                            const vector_type& dw,
+                                                            const vector_type& sourceVec)
 {
     std::cout << "  f-  LINEARIZED FLUID SYSTEM\n";
 
     Chrono chrono;
 
-    if (this->M_verbose)
-            std::cout << "  f-  Updating mass term on right hand side... "
-                  << std::flush;
-
-    chrono.start();
-
-    UInt velTotalDof   = this->M_uFESpace.dof().numTotalDof();
-//    UInt pressTotalDof = M_pFESpace.dof().numTotalDof();
-
-    // Right hand side for the velocity at time
-
-    M_rhsLinNoBC = sourceVec;
-
-    chrono.stop();
-
-    if (this->M_verbose)
-        std::cout << "done in " << chrono.diff() << " s.\n"  << std::flush;
-
-
-    this->M_updated = false;
-
-//
-
-    if (this->M_recomputeMatrix)
-        this->buildSystem();
-
-    if (this->M_verbose)
-          std::cout << "  f-  Copying the matrices ...                 "
-                    << std::flush;
-
-    chrono.start();
-
-    this->M_matrFull.reset( new matrix_type(this->M_localMap, this->M_matrStokes->getMeanNumEntries() ));
-
-    *(this->M_matrFull) += *(this->M_matrStokes);
-
-    if (alpha != 0. )
-    {
-        *(this->M_matrFull) += *(this->M_matrMass)*alpha;
-    }
-
-
-    chrono.stop();
-    if (this->M_verbose) std::cout << "done in " << chrono.diff() << " s.\n"
-                             << std::flush;
-
-
-    //! managing the convective term
-
-    double normInf;
-    betaVec.NormInf(&normInf);
-
-
-
-
-
-    if (alpha != 0.)
-     {
-         this->M_matrFull->GlobalAssemble();
-     }
-
+     this->M_matrNoBC.reset( new matrix_type(matrNoBC));
 
     int nbCompU = nDimensions;
 
-    std::cout << "    F-  Updating right hand side... ";
+    std::cout << "  f-  Updating right hand side... ";
 
     //
     // RIGHT HAND SIDE FOR THE LINEARIZED ALE SYSTEM
     //
     chrono.start();
 
-    //initialize right hand side
- //    _f_duWithOutBC = ZeroVector( _f_duWithOutBC.size() );
-//     _f_p = ZeroVector( _f_p.size() );
 
-    // Loop on elements
-
-    vector_type betaVecRep( betaVec, *this->M_localMap.getRepeatedEpetra_Map() );
-    vector_type wRep      ( w,       *this->M_localMap.getRepeatedEpetra_Map() );
-    vector_type dwRep     ( dw,      *this->M_localMap.getRepeatedEpetra_Map() );
-    vector_type dispRep   ( disp,    *this->M_localMap.getRepeatedEpetra_Map() );
-
-
-    for ( UInt i = 1; i <= this->mesh().numVolumes(); i++ )
-    {
-
-        this->M_pFESpace.update( this->mesh().volumeList( i ) );
-        this->M_uFESpace.updateFirstDerivQuadPt( this->mesh().volumeList( i ) );
-
-        // initialization of elementary vectors
-        M_elvec_du.zero();
-        M_elvec_dp.zero();
-
-        for ( UInt k = 0 ; k < ( UInt ) this->M_uFESpace.fe().nbNode ; k++ )
+    M_rhsLinNoBC = sourceVec;//which is usually zero
+    if(!this->M_data.semiImplicit())
         {
-            UInt iloc = this->M_uFESpace.patternFirst( k );
+            // Loop on elements
 
-            for ( UInt ic = 0; ic < nbCompU; ++ic )
-            {
-                UInt ig = this->M_uFESpace.dof().localToGlobal( i, iloc + 1 ) + ic * this->_dim_u;
+            vector_type vel(this->M_uFESpace.map());
+            vector_type press(this->M_pFESpace.map());
 
-                M_elvec( )      [ iloc + ic * this->M_uFESpace.fe().nbNode ] = betaVecRep( ig );             // u^n - w^k local
-                M_w_loc.vec( )  [ iloc + ic * this->M_uFESpace.fe().nbNode ] = wRep( ig );  // w^k local
-                M_uk_loc.vec( ) [ iloc + ic * this->M_uFESpace.fe().nbNode ] = betaVecRep( ig );      // u^k local
-                M_d_loc.vec( )  [ iloc + ic * this->M_uFESpace.fe().nbNode ] = dispRep( ig );  // d local
-                M_dw_loc.vec( ) [ iloc + ic * this->M_uFESpace.fe().nbNode ] = dwRep( ig ); // dw local
-            }
-        }
+            vel.subset(uk);
+            press.subset(uk, this->M_uFESpace.dim()*this->M_uFESpace.fieldDim());
 
-        for ( UInt k = 0 ; k < ( UInt ) this->M_pFESpace.nbNode ; k++ )
-        {
-            UInt iloc = this->M_pFESpace.fe().patternFirst( k );
-            UInt ig   = this->M_pFESpace.dof().localToGlobal( i, iloc + 1 );
+            vector_type unRep  ( un  , Repeated );
+            vector_type ukRep  ( uk  , Repeated );
+            vector_type dispRep( disp, Repeated );
+            vector_type wRep   ( w   , Repeated );
+            vector_type dwRep  ( dw  , Repeated );
 
-            M_pk_loc[ iloc ] = this->p( ig );  // p^k local
-        }
+//     std::cout << wRep.NormInf() << std::endl;
+//     std::cout << dwRep.NormInf() << std::endl;
+//     std::cout << dispRep.NormInf() << std::endl;
+
+     vector_type rhsLinNoBC( M_rhsLinNoBC, Repeated, Zero); // ignoring non-local entries, Otherwise they are summed up lately
+
+
+
+            for ( UInt i = 1; i <= this->M_uFESpace.mesh()->numVolumes(); i++ )
+                {
+
+                    this->M_pFESpace.fe().update( this->M_pFESpace.mesh()->volumeList( i ) );
+                    this->M_uFESpace.fe().updateFirstDerivQuadPt( this->M_uFESpace.mesh()->volumeList( i ) );
+
+                    // initialization of elementary vectors
+                    M_elvec_du.zero();
+                    M_elvec_dp.zero();
+
+                    for ( UInt k = 0 ; k < ( UInt ) this->M_uFESpace.fe().nbNode ; k++ )
+                        {
+                            UInt iloc = this->M_uFESpace.fe().patternFirst( k ); // iloc = k
+
+                            for ( UInt ic = 0; ic < nbCompU; ++ic )
+                                {
+                                    UInt ig    = this->M_uFESpace.dof().localToGlobal( i, iloc + 1 ) + ic * this->dim_u();
+
+                                    M_elvec.vec( )  [ iloc + ic*this->M_uFESpace.fe().nbNode ] = unRep(ig) - wRep( ig ); // u^n - w^k local
+                                    M_w_loc.vec( )  [ iloc + ic*this->M_uFESpace.fe().nbNode ] = wRep( ig );             // w^k local
+                                    M_uk_loc.vec( ) [ iloc + ic*this->M_uFESpace.fe().nbNode ] = ukRep( ig );            // u^k local
+                                    M_d_loc.vec( )  [ iloc + ic*this->M_uFESpace.fe().nbNode ] = dispRep( ig );          // d local
+                                    M_dw_loc.vec( ) [ iloc + ic*this->M_uFESpace.fe().nbNode ] = dwRep( ig );            // dw local
+                                    M_u_loc.vec()   [ iloc + ic*this->M_uFESpace.fe().nbNode ] = unRep( ig );            // un local
+                                }
+                        }
+
+
+                    for ( UInt k = 0 ; k < ( UInt ) this->M_pFESpace.fe().nbNode ; k++ )
+                        {
+                            UInt iloc = this->M_pFESpace.fe().patternFirst( k ); // iloc = k
+                            UInt ig   = this->M_pFESpace.dof().localToGlobal( i, iloc + 1 ) + nbCompU*this->dim_u();
+                            M_pk_loc[ iloc ] = ukRep[ ig ];  // p^k local
+
+                        }
 
         //
         // Elementary vectors
         //
 
-        //  - \rho ( \grad( u^n-w^k ):[I\div d - (\grad d)^T] u^k + ( u^n-w^k )^T[I\div d - (\grad d)^T] (\grad u^k)^T , v  )
-        source_mass1( - this->density(), M_uk_loc, M_elvec, M_d_loc, M_elvec_du, this->M_uFESpace );
+                    //  - \rho ( \grad( u^n-w^k ):[I\div d - (\grad d)^T] u^k + ( u^n-w^k )^T[I\div d - (\grad d)^T] (\grad u^k)^T , v  )
+                    source_mass1( - this->M_data.density(), M_uk_loc, M_w_loc, M_elvec, M_d_loc, M_elvec_du, this->M_uFESpace.fe() );
 
-        //  + \rho * ( \grad u^k dw, v  )
-        source_mass2( this->density(), M_uk_loc, M_dw_loc, M_elvec_du, this->M_uFESpace );
+                    //  + \rho * ( \grad u^k dw, v  )
+                    source_mass2( this->M_data.density(), M_uk_loc, M_dw_loc, M_elvec_du, this->M_uFESpace.fe() );
 
-        //  - ( [-p^k I + 2*mu e(u^k)] [I\div d - (\grad d)^T] , \grad v  )
-        source_stress( -1.0, this->viscosity(), M_uk_loc, M_pk_loc, M_d_loc, M_elvec_du, this->M_uFESpace, this->M_pFESpace );
+                    //  - \rho/2 ( \nabla u^n:[2 * I\div d - (\grad d)^T]  u^k , v  )
+                    source_mass3( - 0.5*this->M_data.density(), M_u_loc, M_uk_loc, M_d_loc, M_elvec_du, this->M_uFESpace.fe() );
 
-        // + \mu ( \grad u^k \grad d + [\grad d]^T[\grad u^k]^T : \grad v )
-        source_stress2( this->viscosity(), M_uk_loc, M_d_loc, M_elvec_du, this->M_uFESpace );
+                    //  - ( [-p^k I + 2*mu e(u^k)] [I\div d - (\grad d)^T] , \grad v  )
+                    source_stress( - 1.0, this->M_data.viscosity(), M_uk_loc, M_pk_loc, M_d_loc, M_elvec_du, this->M_uFESpace.fe(), this->M_pFESpace.fe() );
 
-        //  + ( (\grad u^k):[I\div d - (\grad d)^T] , q  )
-        source_press( 1.0, M_uk_loc, M_d_loc, M_elvec_dp, this->M_uFESpace, this->M_pFESpace );
+                    // + \mu ( \grad u^k \grad d + [\grad d]^T[\grad u^k]^T : \grad v )
+                    source_stress2( this->M_data.viscosity(), M_uk_loc, M_d_loc, M_elvec_du, this->M_uFESpace.fe() );
 
-        //
-        // Assembling
-        //
+                    //  + ( (\grad u^k):[I\div d - (\grad d)^T] , q  )
+                    source_press( 1.0, M_uk_loc, M_d_loc, M_elvec_dp, this->M_uFESpace.fe(), this->M_pFESpace.fe() );
 
-        // assembling presssure right hand side
-        assemb_vec( M_rhsLinNoBC, M_elvec_dp, this->M_pFESpace, this->_dof_p, nbCompU );
+                    //
+                    // Assembling
+                    //
 
-        // loop on velocity components
-        for ( UInt ic = 0; ic < nbCompU; ic++ )
-        {
-            // assembling velocity right hand side
-            assemb_vec( M_rhsLinNoBC, M_elvec_du, this->M_uFESpace, this->_dof_u, ic );
+//         std::cout << "debut ====================" << std::endl;
+//         M_elvec_dp.showMe(std::cout);
+//         M_elvec_du.showMe(std::cout);
+//         std::cout << "fin   ====================" << std::endl;
+
+                    // assembling presssure right hand side
+                    assembleVector( rhsLinNoBC, M_elvec_dp, this->M_pFESpace.fe(), this->M_pFESpace.dof(), 0, nbCompU*this->dim_u() );
+
+           // loop on velocity components
+                    for ( UInt ic = 0; ic < nbCompU; ic++ )
+                        {
+                            // assembling velocity right hand side
+                            assembleVector( rhsLinNoBC, M_elvec_du, this->M_uFESpace.fe(), this->M_uFESpace.dof(), ic );
+                        }
+                }
+
+
+            M_rhsLinNoBC = rhsLinNoBC;
+
+            std::cout << "norm( M_rhsLinNoBC)  = " << M_rhsLinNoBC.NormInf() << "  ";
+
         }
-    }
-
 
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;

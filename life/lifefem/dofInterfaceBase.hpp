@@ -74,6 +74,13 @@ public:
     */
     ID getInterfaceDof( const ID& i ) const;
 
+    //! This method says whether a specific dof number at the interface in mesh1 is on this processor
+    /*!
+      \param i a dof number in mesh1
+    */
+    bool isMyInterfaceDof( const ID& i ) const;
+
+
     //! This method returns the number of dof that live on the interface
     ID nbInterfaceDof() const;
 

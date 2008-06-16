@@ -32,13 +32,13 @@ bdf.cpp bdfNS.cpp dataTime.cpp dataTransient.cpp \
 currentFE.cpp currentBdFE.cpp currentHdivFE.cpp defQuadRuleFE.cpp dof.cpp \
 dofInterface3Dto2D.cpp dofInterface3Dto3D.cpp dofInterfaceBase.cpp dofInterfaceHandler.cpp \
 elemOper.cpp  geoMap.cpp \
-localDofPattern.cpp meshMotion.cpp quadRule.cpp refEle.cpp refFE.cpp \
+localDofPattern.cpp quadRule.cpp refEle.cpp refFE.cpp \
 refHdivFE.cpp refHybridFE.cpp staticBdFE.cpp regionMesh3D_ALE.cpp v2elemVec.cpp \
 refEleDG.cpp geoMapDG.cpp refFEDG.cpp \
 currentFEDG.cpp currentBdDG.cpp currentBFDG.cpp currentIFDG.cpp \
 dofDG.cpp dofByFace.cpp
 
-liblifefem_la_LIBADD	= ../lifemesh/liblifemesh.la ../lifealg/liblifealg.la 
+liblifefem_la_LIBADD	= ../lifemesh/liblifemesh.la ../lifealg/liblifealg.la
 
 
 include $(top_srcdir)/admin/Doxyfile.am

@@ -40,8 +40,8 @@
 #include <life/lifefem/assembGeneric.hpp>
 #include <life/lifefem/bcManage.hpp>
 #include <life/lifecore/chrono.hpp>
-#include <life/lifefem/meshMotion.hpp>
-#include <life/lifealg/SolverAztec.hpp>
+//#include <life/lifefem/meshMotion.hpp>
+//#include <life/lifealg/SolverAztec.hpp>
 #include <life/lifesolver/sdStabilization.hpp>
 
 

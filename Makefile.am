@@ -79,6 +79,7 @@ $(top_srcdir)/acinclude.m4:
 	@echo 'm4_include([admin/ltversion.m4])' >> acinclude.m4
 	@echo 'm4_include([admin/ltoptions.m4])' >> acinclude.m4
 	@echo 'm4_include([admin/ltsugar.m4])' >> acinclude.m4
+	@echo 'm4_include([admin/ac_check_hdf5.m4])' >> acinclude.m4
 	@echo 'm4_include([admin/ac_check_trilinos.m4])' >> acinclude.m4
 	@echo 'm4_include([admin/ac_check_boost.m4])' >> acinclude.m4
 	@echo 'm4_include([admin/ac_check_itk.m4])' >> acinclude.m4

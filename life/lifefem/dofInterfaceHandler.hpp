@@ -84,22 +84,22 @@ public:
     DofInterface3Dto2D & operator[] ( const UInt & i ) ;
 
     //! extracting a Vector in the Input _InIBCList list (starts from 0)
-    const EpetraVector<double> & InIBC( const UInt & i ) const;
-    EpetraVector<double> & InIBC( const UInt & i ) ;
+    const EpetraVector & InIBC( const UInt & i ) const;
+    EpetraVector & InIBC( const UInt & i ) ;
 
     //! extracting a Vector in the Input _InIBCList list (starts from 0)
     //! using the reference of the interface
-    const EpetraVector<double> & InIBC_byRefInterf( const Int & refinterf ) const;
-    EpetraVector<double> & InIBC_byRefInterf( const Int & refinterf ) ;
+    const EpetraVector & InIBC_byRefInterf( const Int & refinterf ) const;
+    EpetraVector & InIBC_byRefInterf( const Int & refinterf ) ;
 
     //! extracting a Vector in the Output _OutIBCList list (starts from 0)
-    const EpetraVector<double> & OutIBC( const UInt & i ) const;
-    EpetraVector<double> & OutIBC( const UInt & i ) ;
+    const EpetraVector & OutIBC( const UInt & i ) const;
+    EpetraVector & OutIBC( const UInt & i ) ;
 
     //! extracting a Vector in the Output _OutIBCList list (starts from 0)
     //! using the reference of the interface
-    const EpetraVector<double> & OutIBC_byRefInterf( const Int & refinterf ) const;
-    EpetraVector<double> & OutIBC_byRefInterf( const Int & refinterf ) ;
+    const EpetraVector & OutIBC_byRefInterf( const Int & refinterf ) const;
+    EpetraVector & OutIBC_byRefInterf( const Int & refinterf ) ;
 
     //! extracting a BCVector in the _bcvList list (starts from 0)
     const BCVectorInterface & BCvec( const UInt & i ) const;
@@ -129,13 +129,13 @@ private:
     //! (This is the vector of unknows that lives on the interfaces of the
     //! current subdomain in a domain decomposition method).
     //! It is also the vector that contains the interface boundary conditions data.
-    std::vector< EpetraVector<double> > _InIBCList;
+    std::vector< EpetraVector > _InIBCList;
 
     //! list of OUTPUT Vectors that live on the interfaces (one per interface)
     //! OUTPUT interface Boundary Conditions values.
     //! (This is the vector of unknows that live on the interfaces of the
     //! current subdomain in a domain decomposition method).
-    std::vector< EpetraVector<double> > _OutIBCList;
+    std::vector< EpetraVector > _OutIBCList;
 
     //! list of classes of BCVectorInterface (one per interface)
     std::vector< BCVectorInterface > _bcvList;

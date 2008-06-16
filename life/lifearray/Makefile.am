@@ -24,7 +24,7 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .cc
 lib_LTLIBRARIES	= liblifearray.la
 
 liblifearray_la_SOURCES	= elemMat.cpp elemVec.cpp pattern.cpp sparseArray.cpp \
-			  vecUnknown.cpp 
+			  vecUnknown.cpp EpetraVector.cpp
 
 liblifearray_la_LIBADD	= ../lifecore/liblifecore.la
 

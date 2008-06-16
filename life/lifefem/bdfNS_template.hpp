@@ -40,7 +40,7 @@
 
 namespace LifeV
 {
-template<typename VectorType = EpetraVector<double> >
+template<typename VectorType = EpetraVector >
 class BdfTNS
 {
 public:

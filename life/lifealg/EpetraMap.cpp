@@ -8,13 +8,16 @@
 /** \file EpetraMap.cpp
 */
 
-#include "EpetraMap.hpp"
+#include <life/lifealg/EpetraMap.hpp>
+#include <Epetra_Util.h>
 
 namespace LifeV
 {
 EpetraMap::EpetraMap():
-    M_epetraMap(0),
-    M_uniqueEpetraMap(0)
+    M_repeatedEpetra_Map(),
+    M_uniqueEpetraMap(),
+    M_exporter(),
+    M_importer()
 {}
 
 
@@ -24,8 +27,10 @@ EpetraMap::EpetraMap(int                NumGlobalElements,
                      int*               MyGlobalElements,
                      int                IndexBase,
                      const Epetra_Comm& Comm):
-    M_epetraMap(0),
-    M_uniqueEpetraMap(0)
+    M_repeatedEpetra_Map(),
+    M_uniqueEpetraMap(),
+    M_exporter(),
+    M_importer()
 {
     createMap( NumGlobalElements,
                NumMyElements,
@@ -34,10 +39,60 @@ EpetraMap::EpetraMap(int                NumGlobalElements,
                Comm);
 }
 
-EpetraMap::~EpetraMap()
+EpetraMap::map_ptrtype const &
+EpetraMap::getMap( EpetraMapType maptype)   const
 {
-    delete M_epetraMap;
-    delete M_uniqueEpetraMap;
+    switch (maptype)
+    {
+        case Unique:
+            return getUniqueMap();
+        case Repeated:
+            return getRepeatedMap();
+    }
+    return getUniqueMap();
+}
+
+
+EpetraMap::map_type
+EpetraMap::getRootMap( int root)   const
+{
+    return Epetra_Util::Create_Root_Map(*getUniqueMap(), root);
+}
+
+
+/*! Builds a submap of map _epetraMap with a given positive offset and
+  the maximum id to consider (in the new count)
+  eg: offset = 2, maxid = 6;
+  _epetraMap = [ 0 2 5 7 8 10 1]
+  this  =      [   0 3 5 ]
+*/
+EpetraMap::EpetraMap(const Epetra_BlockMap& _blockMap, const int offset, const int maxid )
+     :
+    M_repeatedEpetra_Map(),
+    M_uniqueEpetraMap(),
+    M_exporter(),
+    M_importer()
+{
+    std::vector<int> MyGlobalElements;
+    int* sourceGlobalElements(_blockMap.MyGlobalElements());
+    int const maxIdOrig(maxid + offset);
+    const int maxMyElements = std::min(maxid, _blockMap.NumMyElements());
+    MyGlobalElements.reserve(maxMyElements);
+
+
+
+    // We consider that the source Map may not be ordered
+    for (int i(0); i < _blockMap.NumMyElements(); ++i)
+        if (sourceGlobalElements[i] < maxIdOrig && sourceGlobalElements[i] >= offset)
+            MyGlobalElements.push_back(sourceGlobalElements[i] - offset);
+
+    createMap( -1,
+               MyGlobalElements.size(),
+               &MyGlobalElements.front(),
+               _blockMap.IndexBase(),
+               _blockMap.Comm() );
+
+
 }
 
 
@@ -47,19 +102,10 @@ EpetraMap::operator = (const EpetraMap& _epetraMap)
 
    if (this != &_epetraMap)
    {
-       if (!_epetraMap.getEpetra_Map() == 0)
-       {
-           if (M_epetraMap != 0)
-           {
-               *M_epetraMap = *_epetraMap.getEpetra_Map();
-               *M_uniqueEpetraMap = *_epetraMap.getUniqueEpetra_Map();
-           }
-           else
-            {
-                M_epetraMap = new Epetra_Map(*_epetraMap.getEpetra_Map());
-                M_uniqueEpetraMap = new Epetra_Map(*_epetraMap.getUniqueEpetra_Map());
-            }
-       }
+       M_repeatedEpetra_Map = _epetraMap.M_repeatedEpetra_Map;
+       M_uniqueEpetraMap    = _epetraMap.M_uniqueEpetraMap;
+       M_exporter           = _epetraMap.M_exporter;
+       M_importer           = _epetraMap.M_importer;
    }
 
    return *this;
@@ -69,67 +115,67 @@ EpetraMap::operator = (const EpetraMap& _epetraMap)
 EpetraMap &
 EpetraMap::operator += (const EpetraMap& _epetraMap)
 {
-    if (this->getEpetra_Map() == 0)
+    if (! _epetraMap.getUniqueMap())
+        return *this;
+
+    if (! this->getUniqueMap())
     {
         this->operator = (_epetraMap);
         return *this;
     }
 
-    if (_epetraMap.getEpetra_Map() == 0)
-        return *this;
-
     int*             pointer;
     std::vector<int> map;
 
-    pointer = M_epetraMap->MyGlobalElements();
-    for (int ii = 0; ii < M_epetraMap->NumMyElements(); ++ii, ++pointer)
+    pointer = getRepeatedMap()->MyGlobalElements();
+    for (int ii = 0; ii < getRepeatedMap()->NumMyElements(); ++ii, ++pointer)
     {
         map.push_back(*pointer);
     }
 
-    int numGlobalElements = getUniqueEpetra_Map()->NumGlobalElements();
+    int numGlobalElements = getUniqueMap()->NumGlobalElements();
 
 //    std::cout << "NumGlobalElements = " << numGlobalElements << std::endl;
 
-    pointer = _epetraMap.getEpetra_Map()->MyGlobalElements();
-    for (int ii = 0; ii < _epetraMap.getEpetra_Map()->NumMyElements(); ++ii, ++pointer)
+    pointer = _epetraMap.getRepeatedMap()->MyGlobalElements();
+    for (int ii = 0; ii < _epetraMap.getRepeatedMap()->NumMyElements(); ++ii, ++pointer)
     {
 //        std::cout << "pointer = " << *pointer << std::endl;
         map.push_back(*pointer + numGlobalElements);
     }
 
-    int IndexBase = M_epetraMap->IndexBase();
-    delete M_epetraMap;
+    int IndexBase = getRepeatedMap()->IndexBase();
 
-    M_epetraMap       = new Epetra_Map(-1, map.size(), &map[0], IndexBase, _epetraMap.getEpetra_Map()->Comm());
+    M_repeatedEpetra_Map.reset( new Epetra_Map(-1, map.size(), &map[0], IndexBase, _epetraMap.getRepeatedMap()->Comm()) );
 
     map.resize(0);
-    pointer = M_uniqueEpetraMap->MyGlobalElements();
+    pointer = getUniqueMap()->MyGlobalElements();
 
-    for (int ii = 0; ii < M_uniqueEpetraMap->NumMyElements(); ++ii, ++pointer)
+    for (int ii = 0; ii < getUniqueMap()->NumMyElements(); ++ii, ++pointer)
     {
         map.push_back(*pointer);
     }
 
-    pointer = _epetraMap.getUniqueEpetra_Map()->MyGlobalElements();
-    for (int ii = 0; ii < _epetraMap.getUniqueEpetra_Map()->NumMyElements(); ++ii, ++pointer)
+    pointer = _epetraMap.getUniqueMap()->MyGlobalElements();
+    for (int ii = 0; ii < _epetraMap.getUniqueMap()->NumMyElements(); ++ii, ++pointer)
     {
         map.push_back(*pointer + numGlobalElements);
     }
 
-    delete M_uniqueEpetraMap;
+    M_uniqueEpetraMap.reset( new Epetra_Map(-1, map.size(), &map[0], IndexBase, _epetraMap.getRepeatedMap()->Comm()) );
 
-    M_uniqueEpetraMap       = new Epetra_Map(-1, map.size(), &map[0], IndexBase, _epetraMap.getEpetra_Map()->Comm());
-
-//    uniqueMap();
+    M_exporter.reset();
+    M_importer.reset();
 
     return *this;
 }
 
 
 EpetraMap::EpetraMap(const EpetraMap& _epetraMap):
-    M_epetraMap      (0),
-    M_uniqueEpetraMap(0)
+    M_repeatedEpetra_Map(),
+    M_uniqueEpetraMap(),
+    M_exporter(),
+    M_importer()
 {
     this->operator=(_epetraMap);
 }
@@ -142,14 +188,11 @@ EpetraMap::createMap(int  NumGlobalElements,
                      int  IndexBase,
                      const Epetra_Comm &Comm)
 {
-    delete M_epetraMap;
-    delete M_uniqueEpetraMap;
-
-    M_epetraMap = new Epetra_Map(NumGlobalElements,
-                                 NumMyElements,
-                                 MyGlobalElements,
-                                 IndexBase,
-                                 Comm);
+    M_repeatedEpetra_Map.reset( new Epetra_Map(NumGlobalElements,
+                                               NumMyElements,
+                                               MyGlobalElements,
+                                               IndexBase,
+                                               Comm) );
     uniqueMap();
 }
 
@@ -157,17 +200,23 @@ EpetraMap::createMap(int  NumGlobalElements,
 void
 EpetraMap::uniqueMap()
 {
-  int MyPID    ( M_epetraMap->Comm().MyPID() );
-  int NumIDs   ( M_epetraMap->NumMyElements() );
-  int indexBase( M_epetraMap->MinAllGID() );
+    M_uniqueEpetraMap.reset( new Epetra_Map( Epetra_Util::Create_OneToOne_Map (*getRepeatedMap(), false) ) );
+    M_exporter.reset();
+    M_importer.reset();
+    return;
+
+
+  int MyPID    ( getRepeatedMap()->Comm().MyPID() );
+  int NumIDs   ( getRepeatedMap()->NumMyElements() );
+  int indexBase( getRepeatedMap()->MinAllGID() );
 
   Epetra_IntSerialDenseVector GIDList  (NumIDs);
-  M_epetraMap->MyGlobalElements(GIDList.Values());
+  getRepeatedMap()->MyGlobalElements(GIDList.Values());
 
   Epetra_IntSerialDenseVector PIDList  (NumIDs);
   Epetra_IntSerialDenseVector LIDList  (NumIDs);
 
-  M_epetraMap->RemoteIDList(NumIDs, GIDList.Values(), PIDList.Values(), LIDList.Values());
+  getRepeatedMap()->RemoteIDList(NumIDs, GIDList.Values(), PIDList.Values(), LIDList.Values());
 
 // now use LIDList has a helping pointer
 
@@ -181,12 +230,14 @@ EpetraMap::uniqueMap()
 
   bubbleSort(LIDList);
 
-  delete M_uniqueEpetraMap;
-  M_uniqueEpetraMap = new Epetra_Map(-1,
-                                     LIDList.Length(),
-                                     LIDList.Values(),
-                                     indexBase,
-                                     M_epetraMap->Comm());
+  M_uniqueEpetraMap.reset( new Epetra_Map(-1,
+                                          LIDList.Length(),
+                                          LIDList.Values(),
+                                          indexBase,
+                                          getRepeatedMap()->Comm()) );
+  M_exporter.reset();
+  M_importer.reset();
+
 
 }
 
@@ -243,6 +294,61 @@ EpetraMap::setUp(const RefFE&               refFE,
         EpetraMap repeatedElemMap(-1, numElem, &repeatedElemVector[0], indexBase,  _comm);
         operator+=(repeatedElemMap);
     }
+
+    createImportExport();
 }
 
+
+Epetra_Export const&
+EpetraMap::getExporter()
+{
+    createImportExport();
+    return **M_exporter;
 }
+
+Epetra_Import const&
+EpetraMap::getImporter()
+{
+    createImportExport();
+    return **M_importer;
+}
+
+
+void
+EpetraMap::createImportExport()
+{
+
+    if ( !getRepeatedMap() || !getUniqueMap() ) return;
+
+    // The exporter is needed to import to a repeated vector
+    if ( M_exporter.get() == 0 )
+        M_exporter.reset( new boost::shared_ptr<Epetra_Export> );
+
+    if ( M_exporter->get() == 0 )
+        M_exporter->reset( new Epetra_Export(*getRepeatedMap(), *getUniqueMap()) );
+
+    if ( M_importer.get() == 0 )
+        M_importer.reset( new boost::shared_ptr<Epetra_Import> );
+
+    if ( M_importer->get() == 0 )
+        M_importer->reset( new Epetra_Import(*getRepeatedMap(), *getUniqueMap()) );
+
+}
+
+bool
+EpetraMap::MapsAreSimilar( EpetraMap const& _epetraMap) const
+{
+
+    if ( this == &_epetraMap )
+        return true;
+
+    return( getUniqueMap()->SameAs( *_epetraMap.getUniqueMap()) &&
+            getRepeatedMap()->SameAs( *_epetraMap.getRepeatedMap()) );
+
+
+}
+
+
+
+} // end namespace LifeV
+

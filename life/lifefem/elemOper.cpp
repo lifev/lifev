@@ -2336,17 +2336,17 @@ void source( Real coef, ElemVec& f, ElemVec& elvec, const CurrentFE& fe,
     int i, j, ic, iq;
     ElemVec::vector_view vec = elvec.block( iblock );
     Real s;
-    
+
     for (i = 0; i < fe_p.nbNode; i++) {
       s = 0;
       for (iq = 0; iq < fe_p.nbQuadPt; ++iq )
 	for (j = 0; j < fe_u.nbNode; ++j)
-	  for (ic = 0; ic < (int)nDimensions; ++ic) 
+	  for (ic = 0; ic < (int)nDimensions; ++ic)
 	    s += uLoc[ic*fe_u.nbNode+j]*fe_u.phiDer(j,ic,iq)*fe_p.phi(i,iq)* fe_p.weightDet( iq );
-      
+
       vec( i ) += s*alpha;
     }
-    
+
   }
 
   void source_gradpv(Real alpha, ElemVec& pLoc,  ElemVec& elvec, const CurrentFE& fe_p, const CurrentFE& fe_u, int iblock )
@@ -2354,7 +2354,7 @@ void source( Real coef, ElemVec& f, ElemVec& elvec, const CurrentFE& fe,
     int i, j, iq;
     ElemVec::vector_view vec = elvec.block( iblock );
     Real s;
-    
+
     for ( i = 0;i < fe_u.nbNode;i++ )
       {
         s = 0;
@@ -2399,7 +2399,7 @@ void source_fhn( Real coef_f, Real coef_a, ElemVec& u, ElemVec& elvec, const Cur
 
 // coef * ( - \grad w^k :[I\div d - (\grad d)^T] u^k + convect^T[I\div d - (\grad d)^T] (\grad u^k)^T , v  ) for Newton FSI
 //
-// Remark: convect = u^n-w^k
+// Remark: convect = u^n-w^k relative vel.
 //
 void source_mass1( Real coef, const ElemVec& uk_loc, const ElemVec& wk_loc, const ElemVec& convect_loc,
                    const ElemVec& d_loc, ElemVec& elvec, const CurrentFE& fe )
@@ -2432,7 +2432,7 @@ void source_mass1( Real coef, const ElemVec& uk_loc, const ElemVec& wk_loc, cons
             s = 0.0;
             for ( i = 0;i < fe.nbNode;i++ )
                 s += fe.phi( i, ig ) * uk_loc.vec() [ i + icoor * fe.nbNode ];
-            uk[ ig ][ icoor ] = s;
+            uk[ ig ][ icoor ] = s;//uk_x(pt_ig), uk_y(pt_ig), uk_z(pt_ig)
 
             // each compontent of convect at this quadrature point
             s = 0.0;
@@ -2464,7 +2464,7 @@ void source_mass1( Real coef, const ElemVec& uk_loc, const ElemVec& wk_loc, cons
             s -= A[ jcoor ][ jcoor ];  // \div d at this quadrature point ( - trace( A ) )
 
         for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
-            A[ jcoor ][ jcoor ] += s;  // I\div d - (\grad d)^T at this quadrature point
+            A[ jcoor ][ jcoor ] += s;  // I\div d - (\grad d)^T at this quadrature point (A+I(-tr(A)))
 
         s = 0;
         for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
@@ -2677,7 +2677,7 @@ void source_mass3( Real coef, const ElemVec& un_loc, const ElemVec& uk_loc, cons
 
       // the block iccor of the elementary vector
       ElemVec::vector_view vec = elvec.block( icoor );
-      
+
       // loop on nodes, i.e. loop on components of this block
       for ( i = 0;i < fe.nbNode;i++ )
         {
@@ -2938,6 +2938,7 @@ void source_press( Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, ElemV
         s = 0;
         for ( ig = 0;ig < fe_u.nbQuadPt;ig++ )
         {
+//            std::cout << ig << " " << fe_p.phi(i, ig) << std::endl;
             s += aux[ ig ] * fe_p.phi( i, ig ) * fe_u.weightDet( ig );
         }
         vec [ i ] += coef * s;
@@ -2951,15 +2952,15 @@ void source_press( Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, ElemV
 void source_press2( Real coef, const ElemVec& p_loc, const ElemVec& d_loc, ElemVec& elvec,
 		    const CurrentFE& fe, int iblock )
 {
-  
+
   ASSERT_PRE( fe.hasFirstDeriv(),
 	      "source_stress needs at least the velocity shape functions first derivatives" );
-  
+
   Real A[ fe.nbCoor ][ fe.nbCoor ];     //  I\div d - (\grad d)^T - \grad d at a quadrature point
-  Real B[ fe.nbCoor ][ fe.nbCoor ];     // - \grad d 
+  Real B[ fe.nbCoor ][ fe.nbCoor ];     // - \grad d
   Real gpk[ fe.nbCoor ];   // \grad p^k at a quadrature point
   Real aux[ fe.nbQuadPt ][fe.nbCoor];              // [I\div d - (\grad d)^T - \grad d ]\grad p^k at each quadrature point
-  
+
   ElemVec::vector_view vec = elvec.block( iblock );
 
   Real s, sA, sG;
@@ -2969,8 +2970,8 @@ void source_press2( Real coef, const ElemVec& p_loc, const ElemVec& d_loc, ElemV
   // loop on quadrature points
   for ( ig = 0;ig < fe.nbQuadPt;ig++ )
     {
-     
-    
+
+
       // loop on space coordinates
       for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
         {
@@ -2979,7 +2980,7 @@ void source_press2( Real coef, const ElemVec& p_loc, const ElemVec& d_loc, ElemV
 	  for ( i = 0;i < fe.nbNode;i++ )
 	    sG += fe.phiDer( i, icoor, ig ) * p_loc.vec() [ i ]; //  \grad p^k at a quadrature point
 	  gpk[ icoor ] = sG;
-	 
+
 	  // loop  on space coordinates
 	  for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
             {
@@ -2997,13 +2998,13 @@ void source_press2( Real coef, const ElemVec& p_loc, const ElemVec& d_loc, ElemV
 
         for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
             A[ jcoor ][ jcoor ] += s;  // I\div d - (\grad d)^T at this quadrature point
- 
+
 	for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
 	  for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
 	    A[ icoor ][ jcoor ] += B[ icoor ][ jcoor ]; // I\div d - (\grad d)^T - \grad d at this quadrature point
 
         s = 0;
-        for ( icoor = 0;icoor < fe.nbCoor;icoor++ ) 
+        for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
 	  {
             for ( jcoor = 0;jcoor < fe.nbCoor;jcoor++ )
 	      s += A[ icoor ][ jcoor ] * gpk[jcoor]; // [I\div d - (\grad d)^T -\grad d] \grad p^k at each quadrature point
@@ -3023,7 +3024,7 @@ void source_press2( Real coef, const ElemVec& p_loc, const ElemVec& d_loc, ElemV
         s = 0;
         for ( ig = 0;ig < fe.nbQuadPt;ig++ )
 	  for ( icoor = 0;icoor < fe.nbCoor;icoor++ )
-            s += aux[ ig ][icoor] * fe.phiDer( i, icoor, ig ) * fe.weightDet( ig );       
+            s += aux[ ig ][icoor] * fe.phiDer( i, icoor, ig ) * fe.weightDet( ig );
         vec [ i ] += coef * s;
     }
 }

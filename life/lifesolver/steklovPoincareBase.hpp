@@ -34,6 +34,7 @@ public:
     typedef FSIOperator super;
     typedef super::fluid_type fluid_type;
     typedef super::solid_type solid_type;
+
     typedef super::fluid_bchandler_type bchandler_type;
 
     typedef super::vector_type vector_type;
@@ -152,16 +153,7 @@ public:
 
 private:
 
-    vector_type*            M_dzSolid;
-    vector_type*            M_dzFluid;
-
-    vector_type*            M_rhs_dz;
-
-    vector_type*            M_residualS;
-    vector_type*            M_residualF;
-    vector_type*            M_residualFSI;
     //! FS strong residual
-    vector_type*            M_strongResidualFSI;
 
     Real                    M_defOmega;
     Real                    M_defOmegaS;
@@ -169,27 +161,15 @@ private:
 
     generalizedAitken<vector_type, Real> M_aitkFS;
 
-    UInt                    M_interfaceNbreDof;
-    vector_type*            M_interfaceDisplacement;
-    vector_type*            M_interfaceStress;
-    vector_type*            M_interfaceVelocity;
+    boost::shared_ptr<vector_type>       M_dz;
 
-    bc_vector_interface     M_bcvSolidInterfaceDisp;
-    bc_vector_interface     M_bcvSolidLinInterfaceDisp;
-    bc_vector_interface     M_bcvSolidInterfaceStress;
-    bc_vector_interface     M_bcvSolidLinInterfaceStress;
-    bc_vector_interface     M_bcvSolidInvLinInterfaceStress;
+    boost::shared_ptr<vector_type>       M_residualFSI;
 
-    bc_vector_interface     M_bcvFluidInterfaceDisp;
-    bc_vector_interface     M_bcvFluidLinInterfaceDisp;
-    bc_vector_interface     M_bcvFluidLinInterfaceVel;
-    bc_vector_interface     M_bcvFluidInterfaceStress;
-    bc_vector_interface     M_bcvFluidLinInterfaceStress;
+    boost::shared_ptr<vector_type>       M_interfaceDisplacement;
+    boost::shared_ptr<vector_type>       M_interfaceStress;
 
-    bc_vector_interface     M_bcvReducedFluidInterfaceAcc;
-    bc_vector_interface     M_bcvReducedFluidInvInterfaceAcc;
-
-    Real                    M_linearRelTol;
+    boost::shared_ptr<vector_type>       M_rhsNew;
+    boost::shared_ptr<vector_type>       M_beta;
 
 
     void eval           (const  vector_type &disp,
@@ -216,33 +196,62 @@ private:
     DataJacobian            M_dataJacobian;
 };
 
+
+class Epetra_SteklovPoincare:
+    public Epetra_Operator
+{
+
+public:
+
+    Epetra_SteklovPoincare(exactJacobian* ej):
+        M_ej               (ej),
+        M_operatorDomainMap(*M_ej->solidInterfaceMap().getEpetra_Map()),
+        M_operatorRangeMap (*M_ej->solidInterfaceMap().getEpetra_Map()),
+        M_comm             (&M_ej->worldComm())
+        {
+//             std::cout << ej << std::endl;
+//             std::cout << M_ej->fluidInterfaceMap().getEpetra_Map() << std::endl;
+//             std::cout << M_ej->solidInterfaceMap().getEpetra_Map() << std::endl;
+//             std::cout << "ok" << std::endl;
+        };
+
+    virtual ~Epetra_SteklovPoincare(){};
+
+    int 	SetUseTranspose (bool  UseTranspose)
+        {std::cout << "********* SP : transpose not available\n"; return -1;}
+    int 	Apply           (const Epetra_MultiVector &X, Epetra_MultiVector &Y) const;
+    int 	ApplyInverse    (const Epetra_MultiVector &X, Epetra_MultiVector &Y) const
+        {std::cout << "********* SP : inverse not available\n"; return -1;}
+    double 	NormInf         () const
+        {std::cout << "********* SP : NormInf not available\n"; return 1.;}
+    const char * Label      () const {return "exactJacobian";}
+    bool 	UseTranspose    () const {return false;}
+    bool 	HasNormInf      () const {return false;}
+
+    const Epetra_Comm&  Comm () const { return *M_comm; }
+    const Epetra_Map & 	OperatorDomainMap () const {return M_operatorDomainMap;}
+    const Epetra_Map & 	OperatorRangeMap  () const {return M_operatorRangeMap;}
+
+    void setOperator( exactJacobian* ej) {M_ej.reset(new exactJacobian(*ej));}
+
+private:
+
+    boost::shared_ptr<exactJacobian>     M_ej;
+
+    const Epetra_Map                     M_operatorDomainMap;
+    const Epetra_Map                     M_operatorRangeMap;
+
+    const boost::shared_ptr<Epetra_Comm> M_comm;
+
+};
+
+
+
 Real fzeroSP(const Real& t,
              const Real& x,
              const Real& y,
              const Real& z,
              const ID& i);
-
-void my_matvecSfSsPrime(double *z,
-                        double *Jz,
-                        AZ_MATRIX* J,
-                        int proc_config[]);
-}
-
-
-#define FOR_EACH_DOF_INTERFACE( Expr )                              \
-{   \
- for (std::map<ID,ID>::const_iterator it = FSIDofMap.begin(); it != FSIDofMap.end(); ++it) \
-     {                                                                                     \
-        ID dofF = it->first;                        \
-        ID dofS = it->second;                       \
-        ID localS = solidDofMap.find(dofS)->second; \
-        ID localF = fluidDofMap.find(dofF)->second; \
-        for (UInt jDim = 0; jDim < 3; ++jDim)       \
-            {                                       \
-               (Expr);                              \
-            }                                       \
-     }                                              \
-}
 
 
 #endif

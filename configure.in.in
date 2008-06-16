@@ -103,6 +103,9 @@ AC_CHECK_LAPACK
 dnl AC_CHECK_UMFPACK
 dnl AM_CONDITIONAL(HAVE_UMFPACK, test "x$umfpack_libs" != "x" )
 
+dnl hdf5
+AC_CHECK_HDF5
+
 dnl trilinos
 AC_CHECK_TRILINOS
 dnl petsc

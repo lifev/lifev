@@ -205,16 +205,28 @@ public:
     //! Postprocessing
     void postProcess(bool _writeMesh = false);
 
-    void resetPrec() {M_resetPrec = true;}
+    void resetPrec() {M_resetPrec = true; M_resetStab = true;}
+    // as for now resetting stabilization matrix at the same time as the preconditioner
+    // void resetStab() {M_resetStab = true;}
 
-    Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getRepeatedEpetra_Map(); }
+    //Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getRepeatedEpetra_Map(); }
 
     EpetraMap const& getMap() const { return M_localMap; }
 
     const Epetra_Comm& comm() const {return *M_comm;}
 
+    bool isLeader() const
+    {
+        return comm().MyPID() == 0;
+    }
+
+
     void recomputeMatrix(bool const recomp){M_recomputeMatrix = recomp;}
 
+    matrix_type& matrNoBC()
+        {
+            return *M_matrNoBC;
+        }
     matrix_type& matrMass()
         {
             return *M_matrMass;
@@ -222,6 +234,9 @@ public:
 
 
 protected:
+
+    UInt dim_u() const           { return M_uFESpace.dim(); }
+    UInt dim_p() const           { return M_pFESpace.dim(); }
 
 
     void solveSystem            (  matrix_ptrtype matrFull,
@@ -269,6 +284,10 @@ protected:
 
     matrix_ptrtype                 M_matrNoBC;
 
+    //! stabilization matrix
+    matrix_ptrtype                 M_matrStab;
+
+
     //! source term for NS
     source_type                    M_source;
 
@@ -294,6 +313,8 @@ protected:
 
     //! Stabilization
     bool                           M_stab;
+    bool                           M_resetStab;
+    bool                           M_reuseStab;
 
     details::
     IPStabilization<Mesh, Dof>     M_ipStab;
@@ -342,8 +363,6 @@ private:
     ElemMat                        M_elmatGrad;
     ElemVec                        M_elvec;           // Elementary right hand side
 
-    UInt dim_u() const           { return M_uFESpace.dim(); }
-    UInt dim_p() const           { return M_pFESpace.dim(); }
 
 }; // class Oseen
 
@@ -375,6 +394,7 @@ Oseen( const data_type&          dataType,
     M_matrStokes             ( ),
 //    M_matrFull               ( ),
     M_matrNoBC               ( ),
+    M_matrStab               ( ),
     M_elmatStiff             ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
     M_elmatMass              ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
     M_elmatP                 ( M_pFESpace.fe().nbNode, 1, 1 ),
@@ -386,6 +406,8 @@ Oseen( const data_type&          dataType,
     M_sol                    ( M_localMap ),
     M_residual               ( M_localMap ),
     M_stab                   ( false ),
+    M_resetStab              ( true ),
+    M_reuseStab              ( true ),
     M_ipStab                 ( M_uFESpace.mesh(),
                                M_uFESpace.dof(), M_uFESpace.refFE(),
                                M_uFESpace.feBd(), M_uFESpace.qr(),
@@ -396,6 +418,7 @@ Oseen( const data_type&          dataType,
     M_verbose                ( M_me == 0),
     M_updated                ( false ),
     M_reusePrec              ( true ),
+    M_maxIterForReuse        ( -1 ),
     M_resetPrec              ( true ),
     M_maxIterSolver          ( -1 ),
     M_recomputeMatrix        ( false )
@@ -424,6 +447,7 @@ Oseen( const data_type&          dataType,
     M_matrStokes             ( ),
 //    M_matrFull               ( ),
     M_matrNoBC               ( ),
+    M_matrStab               ( ),
     M_elmatStiff             ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
     M_elmatMass              ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
     M_elmatP                 ( M_pFESpace.fe().nbNode, 1, 1 ),
@@ -435,7 +459,9 @@ Oseen( const data_type&          dataType,
     M_rhsFull                ( M_localMap ),
     M_sol                    ( M_localMap ),
     M_stab                   ( false ),
-    M_ipStab                 ( M_data.mesh(),
+    M_resetStab              ( true ),
+    M_reuseStab              ( true ),
+    M_ipStab                 ( M_uFESpace.mesh(),
                                M_uFESpace.dof(), M_uFESpace.refFE(),
                                M_uFESpace.feBd(), M_uFESpace.qr(),
                                0., 0., 0.,
@@ -470,7 +496,8 @@ void Oseen<Mesh, SolverType>::setUp( const GetPot& dataFile )
     M_gammaBeta   = dataFile( "fluid/ipstab/gammaBeta",            0. );
     M_gammaDiv    = dataFile( "fluid/ipstab/gammaDiv",             0. );
     M_gammaPress  = dataFile( "fluid/ipstab/gammaPress",           0. );
-    M_divBetaUv   = dataFile( "fluid/discretization/div_beta_u_v", 0  );
+    M_reuseStab   = dataFile( "fluid/ipstab/reuse",               true);
+    M_divBetaUv   = dataFile( "fluid/discretization/div_beta_u_v",false);
     M_diagonalize = dataFile( "fluid/discretization/diagonalize",  1. );
 
 
@@ -623,26 +650,6 @@ void Oseen<Mesh, SolverType>::buildSystem()
         }
     }
 
-//     if (M_stab)
-//         {
-//             chronoStab.start();
-//             if (M_verbose)
-//                 std::cout << "  f-  Updating convective ip terms... "
-//                           << std::flush;
-//             vector_type betaVec( *M_localMap.getRepeatedEpetra_Map() );
-//             if (M_verbose)
-//                 std::cout << "(repeated vector created in " << chronoStab.diff() <<" s.)" << std::flush;
-//             M_ipStab.applyPressure( *M_matrStokes, betaVec, M_verbose );
-//             M_ipStab.applyVelocity( *M_matrStokes, betaVec, M_verbose );
-
-//             //MPI_Barrier(MPI_COMM_WORLD);
-
-//             chronoStab.stop();
-
-//             if (M_verbose)
-//                 std::cout << "      done in " << chronoStab.diff() <<" s.\n" << std::flush;
-//         }
-
 
     for (UInt ii = nDimensions*dim_u(); ii < nDimensions*dim_u() + dim_p(); ++ii)
         M_matrStokes->set_mat_inc( ii ,ii, 0. );
@@ -666,7 +673,6 @@ void Oseen<Mesh, SolverType>::buildSystem()
     if (false)
         std::cout << "partial times:  \n"
                   << " Der            " << chronoDer.diff_cumul() << " s.\n"
-                  << " Stab           " << chronoStab.diff_cumul() << " s.\n"
                   << " Zero           " << chronoZero.diff_cumul() << " s.\n"
                   << " Stiff          " << chronoStiff.diff_cumul() << " s.\n"
                   << " Stiff Assemble " << chronoStiffAssemble.diff_cumul() << " s.\n"
@@ -748,7 +754,10 @@ updateSystem(double       alpha,
 
     chrono.start();
 
-    M_matrNoBC.reset(new matrix_type(M_localMap, M_matrStokes->getMeanNumEntries() ));
+    if (M_matrNoBC)
+        M_matrNoBC.reset(new matrix_type(M_localMap, M_matrNoBC->getMeanNumEntries() ));
+    else
+        M_matrNoBC.reset(new matrix_type(M_localMap, M_matrStokes->getMeanNumEntries() ));
 
     *M_matrNoBC += *M_matrStokes;
 
@@ -779,7 +788,7 @@ updateSystem(double       alpha,
 
         // vector with repeated nodes over the processors
 
-        vector_type betaVecRep(betaVec,*M_localMap.getRepeatedEpetra_Map() );
+        vector_type betaVecRep(betaVec, Repeated );
 
         chrono.start();
 
@@ -836,20 +845,23 @@ updateSystem(double       alpha,
         if (M_verbose) std::cout << "done in " << chrono.diff() << " s.\n"
                                  << std::flush;
 
-        if (M_stab)
-        {  // if there is a problem of indeces here, you should use the repeated version of beta
-            //M_ipStab.applyPressure( *M_matrFull, betaVecRep, M_verbose );
-            M_ipStab.applyVelocity( *M_matrNoBC, betaVecRep, M_verbose );
+        if ( M_stab && (!M_reuseStab || M_resetStab || !M_matrStab ) )
+        {
+            M_matrStab.reset  ( new matrix_type(M_localMap) );
+            M_ipStab.apply( *M_matrStab, betaVecRep, M_verbose );
+            M_resetStab = false;
         }
 
+    } else {
+        if ( M_stab && (!M_reuseStab || M_resetStab || !M_matrStab ) )
+        {
+            M_matrStab.reset  ( new matrix_type(M_localMap) );
+            M_ipStab.apply( *M_matrStab, betaVec, M_verbose );
+            M_resetStab = false;
+        }
     }
 
     M_updated = true;
-
-     if (alpha != 0.)
-     {
-         M_matrNoBC->GlobalAssemble();
-     }
 
 }
 
@@ -886,8 +898,14 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
 
 
     M_matrNoBC->GlobalAssemble();
+    if (M_stab)
+        M_matrStab->GlobalAssemble();
 
-    matrix_ptrtype matrFull( new matrix_type(*M_matrNoBC) );
+    matrix_ptrtype matrFull( new matrix_type( M_localMap, M_matrNoBC->getMeanNumEntries()));
+    *matrFull += *M_matrNoBC;
+    if (M_stab)
+        *matrFull += *M_matrStab;
+
     vector_type    rhsFull = M_rhsNoBC;
 
 //     matrFull.reset(new matrix_type(*M_matrNoBC));
@@ -907,6 +925,8 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
     chrono.start();
 
     applyBoundaryConditions( *matrFull, rhsFull, bch);
+
+    matrFull->GlobalAssemble();
 
     chrono.stop();
 
@@ -949,7 +969,7 @@ void Oseen<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
         chrono.start();
 
         if (M_verbose)
-            std::cout << "  f-  Computing the precond ...                ";
+            std::cout << "  f-  Computing the precond ...                "  <<  std::flush;
 
         M_prec->buildPreconditioner(matrFull);
 
@@ -976,7 +996,7 @@ void Oseen<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
     chrono.start();
 
     if (M_verbose)
-        std::cout << "  f-  Solving system ...                                ";
+        std::cout << "  f-  Solving system ...                                " <<  std::flush;
 
     int numIter = M_linearSolver.solve(M_sol, rhsFull);
 
@@ -985,7 +1005,9 @@ void Oseen<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
         chrono.start();
 
         if (M_verbose)
-            std::cout << "  f- Iterative solver failed, recomputing the precond ...                ";
+            std::cout << "  f- Iterative solver failed, numiter = " << numIter
+                      << " (maxIterSolver = " << M_maxIterSolver << ")\n"
+                      << "     recomputing the precond ...            " <<  std::flush;
 
         M_prec->buildPreconditioner(matrFull);
 
@@ -1003,7 +1025,7 @@ void Oseen<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
         numIter = M_linearSolver.solve(M_sol, rhsFull);
 
         if (numIter > M_maxIterSolver && M_verbose)
-            std::cout << "  f- ERROR: Iterative solver failed again.\n";
+            std::cout << "  f- ERROR: Iterative solver failed again.\n" <<  std::flush;
 
     }
 
@@ -1095,16 +1117,12 @@ void Oseen<Mesh, SolverType>::applyBoundaryConditions( matrix_type&        matri
         BCh.bdUpdate( *M_uFESpace.mesh(), M_uFESpace.feBd(), M_uFESpace.dof() );
     }
 
-    vector_type rhsFull(*M_localMap.getRepeatedEpetra_Map());
-
-
-    rhsFull.Import(M_rhsNoBC, Zero); // ignoring non-local entries, Otherwise they are summed up lately
+    vector_type rhsFull(rhs, Repeated, Zero); // ignoring non-local entries, Otherwise they are summed up lately
 
     bcManage( matrix, rhsFull, *M_uFESpace.mesh(), M_uFESpace.dof(), BCh, M_uFESpace.feBd(), 1.,
               M_data.time() );
 
     rhs = rhsFull;
-
 
     if ( BCh.hasOnlyEssential() && M_diagonalize )
     {
@@ -1151,7 +1169,8 @@ Oseen<Mesh, SolverType>::postProcess(bool _writeMesh)
 //     if (_writeMesh || (M_count / M_data.verbose() == 0) )
 //         writeMesh  ("partedMesh." + me + ".mesh", M_pFESpace.mesh() );
 
-//     vector_type velAndPressure(M_sol,*M_localMap.getRepeatedEpetra_Map());
+    vector_type velAndPressure(M_sol, Repeated);
+    vector_type res(M_residual, Repeated);
 
 
 //         if ( fmod( float( M_count ), float( M_data.verbose() ) ) == 0.0 )
@@ -1171,38 +1190,76 @@ Oseen<Mesh, SolverType>::postProcess(bool _writeMesh)
     if (M_me == 0)
     {
         // postprocess data file for medit
-        wr_medit_ascii_scalar( "vel_x." + name + ".bb", u.giveVec(),
-                               M_data.mesh()->numGlobalVertices() );
-        wr_medit_ascii_scalar( "vel_y." + name + ".bb", u.giveVec() + this->dim_u(),
-                               M_data.mesh()->numGlobalVertices() );
-        wr_medit_ascii_scalar( "vel_z." + name + ".bb", u.giveVec()+2*this->dim_u(),
-                               M_data.mesh()->numGlobalVertices() );
-        wr_medit_ascii_scalar( "press." + name + ".bb", p.giveVec(),
-                               p.size() );
+//         wr_medit_ascii_scalar( "vel_x." + name + ".bb", u.giveVec(),
+//                                M_data.mesh()->numGlobalVertices() );
+//         wr_medit_ascii_scalar( "vel_y." + name + ".bb", u.giveVec() + this->dim_u(),
+//                                M_data.mesh()->numGlobalVertices() );
+//         wr_medit_ascii_scalar( "vel_z." + name + ".bb", u.giveVec()+2*this->dim_u(),
+//                                M_data.mesh()->numGlobalVertices() );
+//         wr_medit_ascii_scalar( "press." + name + ".bb", p.giveVec(),
+//                                p.size() );
 
-//  meditSolutionWriter( "vel_x." + name + "." + me + ".bb",
-//                              M_uFESpace.mesh(), velAndPressure, M_uFESpace.dof().numTotalDof()*0);
-//         meditSolutionWriter( "vel_y." + name + "." + me + ".bb",
-//                              M_uFESpace.mesh(), velAndPressure, M_uFESpace.dof().numTotalDof()*1);
-//         meditSolutionWriter( "vel_z." + name + "." + me + ".bb",
-//                              M_uFESpace.mesh(), velAndPressure, M_uFESpace.dof().numTotalDof()*2);
+        double dt = M_data.timestep();
 
 
-//         meditSolutionWriter( "press." + name + "." + me + ".bb",
-//                              M_pFESpace.mesh(), velAndPressure, M_uFESpace.dof().numTotalDof()*3);
+       writeMesh("vel_x." + me + "." + name + ".mesh", *M_uFESpace.mesh());
+       writeMesh("resf_x." + me +  "." + name + ".mesh", *M_uFESpace.mesh());
+
+       writeMesh("vel_y." + me + "." + name + ".mesh", *M_uFESpace.mesh());
+       writeMesh("resf_y." + me +  "." + name + ".mesh", *M_uFESpace.mesh());
+
+       writeMesh("vel_z." + me + "." + name + ".mesh", *M_uFESpace.mesh());
+       writeMesh("resf_z." + me +  "." + name + ".mesh", *M_uFESpace.mesh());
+
+       writeMesh("press." + me +  "." + name + ".mesh", *M_uFESpace.mesh());
+
+
+        meditSolutionWriter( "vel_x." + me + "." + name + ".bb",
+                             *M_uFESpace.mesh(), velAndPressure, M_uFESpace.dof().numTotalDof()*0);
+        meditSolutionWriter( "vel_y." + me + "." + name + ".bb",
+                             *M_uFESpace.mesh(), velAndPressure, M_uFESpace.dof().numTotalDof()*1);
+        meditSolutionWriter( "vel_z." + me + "." + name + ".bb",
+                             *M_uFESpace.mesh(), velAndPressure, M_uFESpace.dof().numTotalDof()*2);
+
+//         wr_medit_ascii2("vel_x." + me + "." + name + ".mesh",
+//                         *M_uFESpace.mesh(), disp, M_data.factor() );
+//         wr_medit_ascii2("vel_y." + me + "." + name + ".mesh",
+//                         *M_uFESpace.mesh(), disp, M_data.factor() );
+//         wr_medit_ascii2("vel_z." + me + "." + name + ".mesh",
+//                         *M_uFESpace.mesh(), disp, M_data.factor() );
+
+
+//         wr_medit_ascii2("resf_x." + me + "." + name + ".mesh",
+//                         *M_uFESpace.mesh(), disp, M_data.factor() );
+//         wr_medit_ascii2("resf_y." + me + "." + name + ".mesh",
+//                         *M_uFESpace.mesh(), disp, M_data.factor() );
+//         wr_medit_ascii2("resf_z." + me + "." + name + ".mesh",
+//                         *M_uFESpace.mesh(), disp, M_data.factor() );
+
+        meditSolutionWriter( "resf_x." + me + "." + name + ".bb",
+                             *M_uFESpace.mesh(), res, M_uFESpace.dof().numTotalDof()*0);
+        meditSolutionWriter( "resf_y." + me + "." + name + ".bb",
+                             *M_uFESpace.mesh(), res, M_uFESpace.dof().numTotalDof()*1);
+        meditSolutionWriter( "resf_z." + me + "." + name + ".bb",
+                             *M_uFESpace.mesh(), res, M_uFESpace.dof().numTotalDof()*2);
+
+
+        meditSolutionWriter( "press." + me + "." + name + ".bb",
+                             *M_pFESpace.mesh(), velAndPressure, M_uFESpace.dof().numTotalDof()*3);
 
 
 //    cout << ( "should do ln -s -f " + M_data.meshDir() + M_data.meshFile() +
 //             " press." + name + "." + me + ".mesh" ).data()  ;
 
-        system( ( "ln -s -f " + M_data.meshDir() + M_data.meshFile() +
-                  " press." + name + ".mesh" ).data() );
-        system( ( "ln -s -f " + M_data.meshDir() + M_data.meshFile() +
-                  " vel_x." + name + ".mesh" ).data() );
-        system( ( "ln -s -f " + M_data.meshDir() + M_data.meshFile() +
-                  " vel_y." + name + ".mesh" ).data() );
-        system( ( "ln -s -f " + M_data.meshDir() + M_data.meshFile() +
-                  " vel_z." + name + ".mesh" ).data() );
+//         system( ( "ln -s -f " + M_data.meshDir() + M_data.meshFile() +
+//                   " press." + name + ".mesh" ).data() );
+//         system( ( "ln -s -f " + M_data.meshDir() + M_data.meshFile() +
+//                   " vel_x." + name + ".mesh" ).data() );
+//         system( ( "ln -s -f " + M_data.meshDir() + M_data.meshFile() +
+//                   " vel_y." + name + ".mesh" ).data() );
+//         system( ( "ln -s -f " + M_data.meshDir() + M_data.meshFile() +
+//                   " vel_z." + name + ".mesh" ).data() );
+
     }
 //    }
 

@@ -3,8 +3,10 @@
 #      Data file for Fluid Structure Solver
 #-------------------------------------------------
 
-[ensight]
+
+[exporter]
 multimesh  = false
+start      = 0
 save       = 1
 
 [solid]

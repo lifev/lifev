@@ -68,9 +68,7 @@ public:
      *  @param state state vector for linearization of nonlinear stabilization
      */
     template<typename MATRIX, typename VECTOR>
-    void applyPressure( MATRIX& matrix, const VECTOR& state, bool verbose = true );
-    template<typename MATRIX, typename VECTOR>
-    void applyVelocity( MATRIX& matrix, const VECTOR& state, bool verbose = true );
+    void apply( MATRIX& matrix, const VECTOR& state, bool verbose = true );
 
     void setGammaBeta (double gammaBeta) { M_gammaBeta  = gammaBeta;}
     void setGammaDiv  (double gammaDiv)  { M_gammaDiv   = gammaDiv;}
@@ -147,30 +145,52 @@ IPStabilization<MESH, DOF>::IPStabilization( const mesh_type mesh,
 
 template<typename MESH, typename DOF>
 template<typename MATRIX, typename VECTOR>
-void IPStabilization<MESH, DOF>::applyPressure( MATRIX& matrix,  const VECTOR& state, const bool verbose )
+void IPStabilization<MESH, DOF>::apply( MATRIX& matrix,  const VECTOR& state, const bool verbose )
 {
-    if ( M_gammaPress == 0.)
+    if ( M_gammaBeta == 0. && M_gammaDiv == 0. && M_gammaPress == 0. )
     {
         return;
     }
 
-    Chrono chronoUpdate;
-    Chrono chronoBeta;
-    Chrono chronoElemComp;
-    Chrono chronoAssembly1;
-    Chrono chronoAssembly2;
-    Chrono chronoAssembly3;
-    Chrono chronoAssembly4;
+    ChronoFake chronoUpdate;
+    ChronoFake chronoBeta;
+    ChronoFake chronoElemComp;
+    ChronoFake chronoAssembly1;
+    ChronoFake chronoAssembly2;
+    ChronoFake chronoAssembly3;
+    ChronoFake chronoAssembly4;
+    ChronoFake chronoAssembly5;
+    ChronoFake chronoAssembly6;
+    ChronoFake chronoAssembly7;
+    ChronoFake chronoAssembly8;
+    ChronoFake chronoAssembly9;
+    Chrono chronoAssembly;
 
     const UInt nDof = M_dof.numTotalDof();
+
+    double normInf;
+    state.NormInf(&normInf);
 
     // local trace of the velocity
     ElemVec beta( M_feBd.nbNode, nDimensions );
 
+    UInt myFaces(0);
+
+    chronoAssembly.start();
     // loop on interior faces
     for ( UInt iFace = M_mesh->numBFaces() + 1; iFace<= M_mesh->numFaces();
           ++iFace )
     {
+        const UInt iElAd1 = M_mesh->face( iFace ).ad_first();
+        const UInt iElAd2 = M_mesh->face( iFace ).ad_second();
+
+        if ( iElAd1 == iElAd2 || iElAd1 == 0 || iElAd2 == 0)
+        {
+            //std::cout << "iElAd1 = " << iElAd1 << "; iElAd2 = " << iElAd2 << std::endl;
+            continue;
+        }
+        ++myFaces;
+
         chronoUpdate.start();
         // update current finite elements
 #if WITH_DIVERGENCE
@@ -180,37 +200,41 @@ void IPStabilization<MESH, DOF>::applyPressure( MATRIX& matrix,  const VECTOR& s
         KNM<Real>& normal = M_feBd.normal;
 #endif
         const Real hK2 = M_feBd.measure();
-        const UInt iElAd1 = M_mesh->face( iFace ).ad_first();
-        const UInt iElAd2 = M_mesh->face( iFace ).ad_second();
+
+
         M_fe1.updateFirstDeriv( M_mesh->volumeList( iElAd1 ) );
         M_fe2.updateFirstDeriv( M_mesh->volumeList( iElAd2 ) );
         chronoUpdate.stop();
 
-       chronoBeta.start();
-        // determine bmax = ||\beta||_{0,\infty,K}
-        // first, get the local trace of the velocity into beta
-
-        // local id of the face in its adjacent element
-        UInt iFaEl = M_mesh->face( iFace ).pos_first();
-        for ( int iNode = 0; iNode < M_feBd.nbNode; ++iNode )
+        Real bmax(0);
+        if (normInf != 0.)
         {
-            UInt iloc = M_fToP( iFaEl, iNode+1 );
-            for ( int iCoor = 0; iCoor < M_fe1.nbCoor; ++iCoor )
+            chronoBeta.start();
+            // determine bmax = ||\beta||_{0,\infty,K}
+            // first, get the local trace of the velocity into beta
+
+            // local id of the face in its adjacent element
+            UInt iFaEl = M_mesh->face( iFace ).pos_first();
+            for ( int iNode = 0; iNode < M_feBd.nbNode; ++iNode )
             {
-                UInt ig = M_dof.localToGlobal( iElAd1, iloc + 1 ) - 1 +iCoor*nDof;
-                beta.vec()[ iCoor*M_feBd.nbNode + iNode ] = state( ig );
+                UInt iloc = M_fToP( iFaEl, iNode+1 );
+                for ( int iCoor = 0; iCoor < M_fe1.nbCoor; ++iCoor )
+                {
+                    UInt ig = M_dof.localToGlobal( iElAd1, iloc + 1 ) - 1 +iCoor*nDof;
+                    if (state.BlockMap().LID(ig + 1) >= 0)
+                        beta.vec()[ iCoor*M_feBd.nbNode + iNode ] = state( ig + 1); // BASEINDEX + 1
+                }
             }
-        }
 
-        // second, calculate its max norm
-        Real bmax = fabs( beta.vec()[ 0 ] );
-        for ( int l = 1; l < int( M_fe1.nbCoor*M_feBd.nbNode ); ++l )
-        {
-            if ( bmax < fabs( beta.vec()[ l ] ) )
-                bmax = fabs( beta.vec()[ l ] );
-        }
+            // second, calculate its max norm
+            for ( int l = 0; l < int( M_fe1.nbCoor*M_feBd.nbNode ); ++l )
+            {
+                if ( bmax < fabs( beta.vec()[ l ] ) )
+                    bmax = fabs( beta.vec()[ l ] );
+            }
 
-        chronoBeta.stop();
+            chronoBeta.stop();
+        }
 
 
         // pressure stabilization
@@ -273,103 +297,6 @@ void IPStabilization<MESH, DOF>::applyPressure( MATRIX& matrix,  const VECTOR& s
                        nDimensions, nDimensions, nDimensions*nDof, nDimensions*nDof);
             chronoAssembly4.stop();
         }
-
-
-    } // loop on interior faces
-    if (verbose)
-        {
-            std::cout << std::endl;
-            std::cout << "   .   Updating of element   done in "
-                      << chronoUpdate.diff_cumul()   << " s." << std::endl;
-            std::cout << "   .   Determination of beta done in "
-                      << chronoBeta.diff_cumul()     << " s." << std::endl;
-            std::cout << "   .   Element computations  done in "
-                      << chronoElemComp.diff_cumul() << " s." << std::endl;
-//             std::cout << "   .   Assembly              done in "
-//                       << chronoAssembly.diff_cumul() << " s." << std::endl;
-        }
-
-
-//     std::cout << chronoAssembly1.diff_cumul() << " s." << std::endl;
-//     std::cout << chronoAssembly1.diff_cumul() << " s." << std::endl;
-//     std::cout << chronoAssembly2.diff_cumul() << " s." << std::endl;
-//     std::cout << chronoAssembly3.diff_cumul() << " s." << std::endl;
-//     std::cout << chronoAssembly4.diff_cumul() << " s." << std::endl;
-//     std::cout << chronoAssembly5.diff_cumul() << " s." << std::endl;
-//     std::cout << chronoAssembly6.diff_cumul() << " s." << std::endl;
-//     std::cout << chronoAssembly7.diff_cumul() << " s." << std::endl;
-//     std::cout << chronoAssembly8.diff_cumul() << " s." << std::endl;
-
-} // apply(...)
-
-
-
-template<typename MESH, typename DOF>
-template<typename MATRIX, typename VECTOR>
-void IPStabilization<MESH, DOF>::applyVelocity( MATRIX& matrix, const VECTOR& state, const bool verbose )
-{
-    if ( M_gammaBeta == 0 && M_gammaDiv == 0 )
-    {
-        return;
-    }
-
-    Chrono chronoBeta;
-    Chrono chronoUpdate;
-    Chrono chronoElemComp;
-    Chrono chronoAssembly5;
-    Chrono chronoAssembly6;
-    Chrono chronoAssembly7;
-    Chrono chronoAssembly8;
-    Chrono chronoAssembly;
-
-    const UInt nDof = M_dof.numTotalDof();
-
-    // local trace of the velocity
-    ElemVec beta( M_feBd.nbNode, nDimensions );
-
-    // loop on interior faces
-    for ( UInt iFace = M_mesh->numBFaces() + 1; iFace<= M_mesh->numFaces();
-          ++iFace )
-    {
-        chronoUpdate.start();
-        // update current finite elements
-#if WITH_DIVERGENCE
-        M_feBd.updateMeas( M_mesh->face( iFace ) );
-#else
-        M_feBd.updateMeasNormal( M_mesh->face( iFace ) );
-        KNM<Real>& normal = M_feBd.normal;
-#endif
-        const Real hK2 = M_feBd.measure();
-        const UInt iElAd1 = M_mesh->face( iFace ).ad_first();
-        const UInt iElAd2 = M_mesh->face( iFace ).ad_second();
-        M_fe1.updateFirstDeriv( M_mesh->volumeList( iElAd1 ) );
-        M_fe2.updateFirstDeriv( M_mesh->volumeList( iElAd2 ) );
-        chronoUpdate.stop();
-
-        chronoBeta.start();
-        // determine bmax = ||\beta||_{0,\infty,K}
-        // first, get the local trace of the velocity into beta
-
-        // local id of the face in its adjacent element
-        UInt iFaEl = M_mesh->face( iFace ).pos_first();
-        for ( int iNode = 0; iNode < M_feBd.nbNode; ++iNode )
-        {
-            UInt iloc = M_fToP( iFaEl, iNode+1 );
-            for ( int iCoor = 0; iCoor < M_fe1.nbCoor; ++iCoor )
-            {
-                UInt ig = M_dof.localToGlobal( iElAd1, iloc + 1 ) - 1 +iCoor*nDof;
-                beta.vec()[ iCoor*M_feBd.nbNode + iNode ] = state( ig + 1 );
-            }
-        }
-
-        // second, calculate its max norm
-        Real bmax = fabs( beta.vec()[ 0 ] );
-        for ( int l = 1; l < int( M_fe1.nbCoor*M_feBd.nbNode ); ++l )
-        {
-            if ( bmax < fabs( beta.vec()[ l ] ) )
-                bmax = fabs( beta.vec()[ l ] );
-        }
-        chronoBeta.stop();
 
         // velocity stabilization
         if ( ( M_gammaDiv != 0 || M_gammaBeta != 0 ) && bmax > 0 )
@@ -497,30 +424,37 @@ void IPStabilization<MESH, DOF>::applyVelocity( MATRIX& matrix, const VECTOR& st
         }
 
     } // loop on interior faces
+    chronoAssembly.stop();
     if (verbose)
         {
             std::cout << std::endl;
-            std::cout << "   .   Updating of element   done in "
+            std::cout << state.BlockMap().Comm().MyPID()
+                      <<  "  .   Updating of element   done in "
                       << chronoUpdate.diff_cumul()   << " s." << std::endl;
             std::cout << "   .   Determination of beta done in "
                       << chronoBeta.diff_cumul()     << " s." << std::endl;
             std::cout << "   .   Element computations  done in "
                       << chronoElemComp.diff_cumul() << " s." << std::endl;
-            std::cout << "   .   Assembly              done in "
-                      << chronoAssembly.diff_cumul() << " s." << std::endl;
-            std::cout << "   .   total                                   ";
+            std::cout << "   .   chrono 1              done in "
+                      << chronoAssembly1.diff_cumul() << " s." << std::endl;
+            std::cout << "   .   chrono 2              done in "
+                      << chronoAssembly2.diff_cumul() << " s." << std::endl;
+            std::cout << "   .   chrono 3              done in "
+                      << chronoAssembly3.diff_cumul() << " s." << std::endl;
+            std::cout << "   .   chrono 4              done in "
+                      << chronoAssembly4.diff_cumul() << " s." << std::endl;
+            std::cout << "   .   chrono 5              done in "
+                      << chronoAssembly5.diff_cumul() << " s." << std::endl;
+            std::cout << "   .   chrono 6              done in "
+                      << chronoAssembly6.diff_cumul() << " s." << std::endl;
+            std::cout << "   .   chrono 7              done in "
+                      << chronoAssembly7.diff_cumul() << " s." << std::endl;
+            std::cout << "   .   chrono 8              done in "
+                      << chronoAssembly8.diff_cumul() << " s." << std::endl;
+            std::cout << "   .   total                                   "
+                      << chronoAssembly.diff_cumul() << " s."
+                      << " myFaces = " << myFaces << std::endl;
         }
-
-
-//     std::cout << chronoAssembly1.diff_cumul() << " s." << std::endl;
-//     std::cout << chronoAssembly1.diff_cumul() << " s." << std::endl;
-//     std::cout << chronoAssembly2.diff_cumul() << " s." << std::endl;
-//     std::cout << chronoAssembly3.diff_cumul() << " s." << std::endl;
-//     std::cout << chronoAssembly4.diff_cumul() << " s." << std::endl;
-//     std::cout << chronoAssembly5.diff_cumul() << " s." << std::endl;
-//     std::cout << chronoAssembly6.diff_cumul() << " s." << std::endl;
-//     std::cout << chronoAssembly7.diff_cumul() << " s." << std::endl;
-//     std::cout << chronoAssembly8.diff_cumul() << " s." << std::endl;
 
 } // apply(...)
 

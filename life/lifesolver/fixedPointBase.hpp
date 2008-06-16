@@ -71,12 +71,17 @@ public:
 private:
 
     Real                                 M_defOmega;
+
+    // If M_updateEvery == 1, normal fixedPoint algorithm
+    // If M_updateEvery  > 1, recompute computational domain every M_updateEvery iterations (transpiration)
+    // If M_updateEvery <= 0, recompute computational domain and matrices only at first subiteration (semi-implicit)
+    int                                  M_updateEvery;
     generalizedAitken<vector_type, Real> M_aitkFS;
 
-    boost::shared_ptr<vector_type>       M_displacement;
-    boost::shared_ptr<vector_type>       M_stress;
-    boost::shared_ptr<vector_type>       M_velocity;
-    boost::shared_ptr<vector_type>       M_residualFSI;
+//     boost::shared_ptr<vector_type>       M_displacement;
+//     boost::shared_ptr<vector_type>       M_stress;
+//     boost::shared_ptr<vector_type>       M_velocity;
+//     boost::shared_ptr<vector_type>       M_residualFSI;
 
     boost::shared_ptr<vector_type>       M_rhsNew;
     boost::shared_ptr<vector_type>       M_beta;
@@ -84,7 +89,7 @@ private:
     boost::shared_ptr< Ensight< RegionMesh3D<LinearTetra> > > M_ensightFluid;
     boost::shared_ptr<vector_type>                            M_velAndPressure;
 
-    void eval(vector_type& dispNew, vector_type& velo, const vector_type& disp, int status);
+    void eval( const vector_type& disp, int status );
 
 //    FSIOperator* createFP(){ return new fixedPoint(); }
     static bool              reg;

@@ -101,37 +101,46 @@ FSISolver::FSISolver( GetPot const& data_file,
         solid = true;
         fluidLeader = 0;
         solidLeader = 0;
+
+        M_epetraWorldComm.reset(new Epetra_MpiComm(MPI_COMM_WORLD));
+        M_epetraComm = M_epetraWorldComm;
+
     }
     else
     {
         int members[numtasks];
 
-        if (rank == 0)
+        solidLeader = 0;
+        fluidLeader = 1-solidLeader;
+
+        if (rank == solidLeader)
             {
-                members[0] = 0;
+                members[0] = solidLeader;
                 int ierr;
                 ierr = MPI_Group_incl(originGroup, 1, members, &newGroup);
                 solid = true;
             }
         else
             {
-                for (int ii = 1; ii <= numtasks; ++ii)
-                    members[ii - 1] = ii;
+                for (int ii = 0; ii <= numtasks; ++ii)
+                    {
+                        if ( ii < solidLeader)
+                            members[ii] = ii;
+                        else if ( ii > solidLeader)
+                            members[ii - 1] = ii;
+                    }
                 int ierr;
                 ierr = MPI_Group_incl(originGroup, numtasks - 1, members, &newGroup);
                 fluid = true;
             }
 
-        solidLeader = 0;
-        fluidLeader = 1;
-
         MPI_Comm* localComm = new MPI_Comm;
         MPI_Comm_create(MPI_COMM_WORLD, newGroup, localComm);
         M_localComm.reset(localComm);
-    }
 
-    M_epetraComm.reset(new Epetra_MpiComm(*M_localComm.get()));
-    M_epetraWorldComm.reset(new Epetra_MpiComm(MPI_COMM_WORLD));
+        M_epetraComm.reset(new Epetra_MpiComm(*M_localComm.get()));
+        M_epetraWorldComm.reset(new Epetra_MpiComm(MPI_COMM_WORLD));
+    }
 
     if (fluid)
     {
@@ -155,7 +164,7 @@ FSISolver::FSISolver( GetPot const& data_file,
     MPI_Barrier(MPI_COMM_WORLD);
 
 
-
+    /*
     if (solid)
     {
         std::cout << "fluid: Building the intercommunicators ... " << std::flush;
@@ -180,7 +189,7 @@ FSISolver::FSISolver( GetPot const& data_file,
     //M_oper->setInterComm(M_interComm.get());
 
     std::cout << "done." << std::endl;
-
+    */
 
 
     MPI_Barrier(MPI_COMM_WORLD);
@@ -208,40 +217,57 @@ FSISolver::FSISolver( GetPot const& data_file,
 
     Debug( 6220 ) << "FSISolver::setPreconditioner " << precond << "\n";
 
+    std::cout << std::flush;
     M_oper->setComm(M_epetraComm, M_epetraWorldComm);
+
+    Debug( 6220 ) << "FSISolver::setDataFromGetPot " << precond << "\n";
+    std::cout << std::flush;
+
     M_oper->setDataFromGetPot( data_file );
+
+
+    Debug( 6220 ) << "FSISolver::setPrecond " << precond << "\n";
+    std::cout << std::flush;
+
     M_oper->setPreconditioner( precond );
 
     M_oper->setup();
 
     Debug( 6220 ) << "FSISolver:: variable setup " << precond << "\n";
 
-    M_lambda.reset   (new vector_type(M_oper->solidInterfaceMap()));
-    M_lambdaDot.reset(new vector_type(M_oper->solidInterfaceMap()));
+    M_oper->setUpSystem(data_file);
+
+    M_lambda.reset   (new vector_type(*M_oper->solidInterfaceMap()));
+    M_lambdaDot.reset(new vector_type(*M_oper->solidInterfaceMap()));
 
     *M_lambda *= 0.;
     *M_lambdaDot *= 0.;
 
 
-    if (fluid)
-        {
-            M_oper->fluid().setUp(data_file);
-            M_oper->meshMotion().setUp(data_file);
-        }
-    if (solid)
-        M_oper->solid().setUp(data_file);
+
+//     M_oper->
+//     if (fluid)
+//         {
+//             M_oper->fluid().setUp(data_file);
+// //            M_oper->fluidLin().setUp(data_file);
+//             M_oper->meshMotion().setUp(data_file);
+//         }
+//     if (solid)
+//         M_oper->solid().setUp(data_file);
 
     Debug( 6220 ) << "FSISolver:: building the fluid and solid systems " << precond << "\n";
 
-    if (fluid)
-    {
-        M_oper->fluid().buildSystem();
-    }
+//     if (fluid)
+//     {
+//         M_oper->fluid().buildSystem();
+//     }
 
-    if (solid)
-    {
-        M_oper->solid().buildSystem();
-    }
+//     if (solid)
+//     {
+//         M_oper->solid().buildSystem();
+//     }
+
+    M_oper->buildSystem();
 
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -351,7 +377,9 @@ FSISolver::iterate( Real time )
 
     fct_type fluidSource(zero_scalar);
     fct_type solidSource(zero_scalar);
+
     M_oper->updateSystem(fluidSource, solidSource);
+
     // displacement prediction
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -360,14 +388,14 @@ FSISolver::iterate( Real time )
         M_firstIter = false;
         *M_lambda      = M_oper->lambdaSolid();
         *M_lambda     += timeStep()*M_oper->lambdaDotSolid();
-        *M_lambdaDot   = M_oper->velocity();
+        *M_lambdaDot   = M_oper->lambdaDotSolid();
     }
     else
     {
         *M_lambda      = M_oper->lambdaSolid();
         *M_lambda     += 1.5*timeStep()*M_oper->lambdaDotSolid(); // *1.5
         *M_lambda     -= timeStep()*0.5*(*M_lambdaDot);
-        *M_lambdaDot   = M_oper->velocity();
+        *M_lambdaDot   = M_oper->lambdaDotSolid();
     }
 
 
@@ -386,7 +414,6 @@ FSISolver::iterate( Real time )
     Debug( 6220 ) << "Calling non-linear Richardson \n";
 
     status = nonLinRichardson(*M_lambda,
-//    status = newton(M_lambda,
                               *M_oper,
                               norm_inf_adaptor(),
                               M_abstol,
@@ -396,16 +423,6 @@ FSISolver::iterate( Real time )
                               M_linesearch,
                               out_res,
                               time);
-//     status = newton(disp,
-//                     oper,
-//                     norm_inf_adaptor(),
-//                     abstol,
-//                     reltol,
-//                     maxiter,
-//                     etamax,
-//                     linesearch,
-//                     out_res,
-//                     time);
 
     if(status == 1)
     {
@@ -422,10 +439,8 @@ FSISolver::iterate( Real time )
                  << M_oper->nbEval() << std::endl;
 
 #warning: removed postprocessing from solver
-        //        M_oper->fluid().postProcess();
-        if (M_oper->isSolid()) M_oper->solid().postProcess();
-        if (M_oper->isFluid()) M_oper->fluid().postProcess();
-//        if (M_oper->isSolid()) M_oper->solid().postProcess();
+// 	if (M_oper->isSolid()) M_oper->solid().postProcess();
+//      if (M_oper->isFluid()) M_oper->fluid().postProcess();
     }
 
     M_oper->shiftSolution();
@@ -433,5 +448,6 @@ FSISolver::iterate( Real time )
 
     Debug( 6220 ) << "FSISolver iteration at time " << time << " done\n";
     Debug( 6220 ) << "============================================================\n";
+    std::cout << std::flush;
 }
 }

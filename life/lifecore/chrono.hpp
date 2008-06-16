@@ -71,6 +71,33 @@ private:
     bool    running;
 
 };
+
+class ChronoFake
+{
+public:
+    ChronoFake()
+    {
+    }
+    void Reset()
+    {
+    }
+    void start()
+    {
+    }
+    void stop()
+    {
+    }
+    double diff()
+    {
+        return -1.;
+    };
+    double diff_cumul()
+    {
+        return -1.;
+    };
+
+};
+
 }
 #endif
 

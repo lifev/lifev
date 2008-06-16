@@ -169,6 +169,26 @@ void bcManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& do
 {
 
 
+
+    // Loop on boundary conditions
+    for ( Index_t i = 0; i < BCh.size(); ++i )
+    {
+
+        switch ( BCh[ i ].type() )
+        {
+        case Essential:  // Essential boundary conditions (Dirichlet)
+        case Natural:  // Natural boundary conditions (Neumann)
+            break;
+        case Mixte:  // Mixte boundary conditions (Robin)
+            bcMixteManage( A, b, mesh, dof, BCh[ i ], bdfem, t );
+            break;
+        default:
+            ERROR_MSG( "This BC type is not yet implemented" );
+        }
+    }
+
+    A.GlobalAssemble();
+
     // Loop on boundary conditions
     for ( Index_t i = 0; i < BCh.size(); ++i )
     {
@@ -182,7 +202,6 @@ void bcManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& do
             bcNaturalManage( b, mesh, dof, BCh[ i ], bdfem, t );
             break;
         case Mixte:  // Mixte boundary conditions (Robin)
-            bcMixteManage( A, b, mesh, dof, BCh[ i ], bdfem, t );
             break;
         default:
             ERROR_MSG( "This BC type is not yet implemented" );
@@ -408,9 +427,18 @@ void bcEssentialManage( MatrixType& A, VectorType& b, const MeshType& /*mesh*/, 
     if ( BCb.dataVector() )
     { //! If BC is given under a vectorial form
 
+        const BCVectorInterface* pId = static_cast< const BCVectorInterface* > (BCb.pointerToBCVector());
+        assert( pId != 0);
+
         // Loop on BC identifiers
         for ( ID i = 1; i <= BCb.list_size(); ++i )
         {
+
+            if ( !pId->dofInterface().isMyInterfaceDof(BCb( i ) ->id()))
+                {
+                    continue;
+                }
+
             // Loop on components involved in this boundary condition
             for ( ID j = 1; j <= nComp; ++j )
             {
@@ -539,6 +567,12 @@ void bcEssentialManageVector( VectorType& b, const Dof& dof, const BCBase& BCb, 
     // Number of components involved in this boundary condition
     UInt nComp = BCb.numberOfComponents();
 
+    std::vector<int>   idDofVec(0);
+    idDofVec.reserve(BCb.list_size()*nComp);
+    std::vector<Real> datumVec(0);
+    datumVec.reserve(BCb.list_size()*nComp);
+
+
     if ( BCb.dataVector() )
     {  //! If BC is given under a vectorial form
 
@@ -565,8 +599,8 @@ void bcEssentialManageVector( VectorType& b, const Dof& dof, const BCBase& BCb, 
                 }
                 */
 
-                if (b.Map().LID(idDof) >= 0)
-                    b( idDof ) = coef * BCb( BCb( i ) ->id(), BCb.component( j ) ); // BASEINDEX + 1
+                idDofVec.push_back(idDof);
+                datumVec.push_back( coef * BCb( BCb( i ) ->id(), BCb.component( j ) ) );
             }
         }
     }
@@ -587,10 +621,15 @@ void bcEssentialManageVector( VectorType& b, const Dof& dof, const BCBase& BCb, 
                 y = static_cast< const IdentifierEssential* >( BCb( i ) ) ->y();
                 z = static_cast< const IdentifierEssential* >( BCb( i ) ) ->z();
                 // Modifying right hand side
-                b( idDof ) = coef * BCb( t, x, y, z, BCb.component( j ) ); // BASEINDEX + 1
+                idDofVec.push_back(idDof);
+                datumVec.push_back( coef * BCb( t, x, y, z, BCb.component( j ) ) );
             }
         }
     }
+
+    b.replaceGlobalValues( idDofVec, datumVec);
+    b.GlobalAssemble(Insert);
+
 }
 
 
@@ -923,7 +962,7 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
 			      sum +=  BCb( pId->bdLocalToGlobal( m ) , 1 ) * bdfem.phi( int( m - 1 ), iq );
 
 			    // Adding right hand side contribution
-			    b[ icDof - 1 ] += sum * bdfem.phi( int( l - 1 ), iq ) * bdfem.normal( int( ic ), iq )
+			    b[ icDof ] += sum * bdfem.phi( int( l - 1 ), iq ) * bdfem.normal( int( ic ), iq )
 			      * bdfem.weightMeas( iq );
 			  }
 		      }
@@ -942,7 +981,7 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
 	      ibF = pId->id();
 
 	      // Updating face stuff
-	      bdfem.updateMeasNormalQuadPt( mesh.boundaryFace( ibF ) );
+	      bdfem.updateMeas( mesh.boundaryFace( ibF ) );
 
 	      // Loop on total Dof per Face
 	      for ( ID l = 1; l <= nDofF; ++l )
@@ -953,6 +992,9 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
 		  // Loop on space dimensions
 		  for ( UInt ic = 0; ic < nDimensions; ++ic )
                     {
+
+                        icDof = gDof + ic * totalDof;
+
 		      // Loop on quadrature points
 		      for ( int iq = 0; iq < bdfem.nbQuadPt; ++iq )
 			{
@@ -962,8 +1004,8 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
 			    sum +=  BCb( pId->bdLocalToGlobal( m ) , ic+1 ) * bdfem.phi( int( m - 1 ), iq );
 
 			  // Adding right hand side contribution
-			  b[ gDof - 1 ] += sum *  bdfem.phi( int( l - 1 ), iq ) *
-			    bdfem.normal( int( ic ), iq ) * bdfem.weightMeas( iq );
+			  b[ icDof ] += sum *  bdfem.phi( int( l - 1 ), iq ) *
+			    bdfem.weightMeas( iq );
 			}
 		    }
 		}
@@ -1142,7 +1184,7 @@ void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Do
 		       mbcb = 0.0;
 		       for( ID n = 1; n <= nDofF; ++n)
 		       {
-			  kdDof=pId->bdLocalToGlobal( n ) + ( BCb.component( j ) - 1 ) * totalDof;
+                   kdDof=pId->bdLocalToGlobal( n ); // + ( BCb.component( j ) - 1 ) * totalDof;
 			  mcoef += BCb.MixteVec( kdDof, BCb.component( j ) ) * bdfem.phi( int( n - 1 ), l );
 			  mbcb += BCb( kdDof, BCb.component( j ) ) * bdfem.phi( int( n - 1 ), l );
 		       }
@@ -1158,6 +1200,7 @@ void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Do
                         //     b[idDof-1] += bdfem.phi(int(idofF-1),l) * BCb(BCb(i)->id(),BCb.component(j)) *
                         b[ idDof ] += bdfem.phi( int( idofF - 1 ), l ) * mbcb * // BASEINDEX + 1
                                           bdfem.weightMeas( l );
+
                     }
 
                     // Assembling diagonal entry
@@ -1190,8 +1233,8 @@ void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Do
 		       mcoef = 0.0;
 		       for( ID n = 1; n <= nDofF; ++n)
 		       {
-			  kdDof=pId->bdLocalToGlobal( n ) + ( BCb.component( j ) - 1 ) * totalDof;
-			  mcoef += BCb.MixteVec( kdDof, BCb.component( j ) ) * bdfem.phi( int( n - 1 ), l );
+                   kdDof=pId->bdLocalToGlobal( n ); // + ( BCb.component( j ) - 1 ) * totalDof;
+                   mcoef += BCb.MixteVec( kdDof, BCb.component( j ) ) * bdfem.phi( int( n - 1 ), l );
 		       }
 
 

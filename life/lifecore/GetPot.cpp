@@ -15,7 +15,7 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 //  -*- c++ -*-
 //  GetPot Version 1.0                                        Sept/13/2002
 //
@@ -453,9 +453,15 @@ inline double
 GetPot::__convert_to_type( const std::string& String, double Default ) const
 {
     double tmp;
-    if ( sscanf( String.c_str(), "%lf", &tmp ) != 1 )
-        return Default;
-    return tmp;
+    if ( sscanf( String.c_str(), "%lf", &tmp ) == 1 )
+        return tmp;
+    if ( String.compare("true") == 0 )
+        return true;
+    if ( String.compare("false") == 0 )
+        return false;
+
+    return Default;
+
 }
 
 // convert string to INT, if not possible return Default
@@ -463,9 +469,14 @@ inline int
 GetPot::__convert_to_type( const std::string& String, int Default ) const
 {
     int tmp;
-    if ( sscanf( String.c_str(), "%i", &tmp ) != 1 )
-        return Default;
-    return tmp;
+    if ( sscanf( String.c_str(), "%i", &tmp ) == 1 )
+        return tmp;
+    if ( String.compare("true") == 0 )
+        return true;
+    if ( String.compare("false") == 0 )
+        return false;
+
+    return Default;
 }
 
 //////////////////////////////////////////////////////////////////////////////

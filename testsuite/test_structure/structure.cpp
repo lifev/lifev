@@ -309,8 +309,8 @@ Structure::run3d()
     Real dt = dataStructure.timestep();
     Real T  = dataStructure.endtime();
 
-    EpetraVector<double> disp(solid.disp(),*fullMap.getRepeatedEpetra_Map());
-    EpetraVector<double> vel (solid.vel(),*fullMap.getRepeatedEpetra_Map());
+    EpetraVector disp(solid.disp(), Unique);
+    EpetraVector vel (solid.vel(), Unique);
 
     dFESpace.interpolate(d0, disp, 0.0);
     dFESpace.interpolate(w0, vel , 0.0);
@@ -328,8 +328,8 @@ Structure::run3d()
 
     Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "structure", d->comm->MyPID());
 
-    vector_ptrtype solidDisp ( new vector_type(solid.disp(), solid.getRepeatedEpetraMap() ) );
-    vector_ptrtype solidVel  ( new vector_type(solid.vel(), solid.getRepeatedEpetraMap() ) );
+    vector_ptrtype solidDisp ( new vector_type(solid.disp(), Repeated ) );
+    vector_ptrtype solidVel  ( new vector_type(solid.vel(),  Repeated ) );
 
     ensight.addVariable( ExporterData::Vector, "displacement", solidDisp,
                          UInt(0), dFESpace.dof().numTotalDof() );
@@ -362,6 +362,7 @@ Structure::run3d()
         *solidDisp = solid.disp();
         *solidVel  = solid.vel();
         ensight.postProcess( time );
+
 
     }
 

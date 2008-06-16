@@ -36,7 +36,7 @@
 #include <life/lifecore/life.hpp>
 #include <life/lifesolver/dataConvDiffReact.hpp>
 #include <life/lifefem/geoMap.hpp>
-#include <life/lifealg/dataAztec.hpp>
+//#include <life/lifealg/dataAztec.hpp>
 #include <life/lifefem/refFE.hpp>
 #include <life/lifefem/dof.hpp>
 #include <life/lifefilters/medit_wrtrs.hpp>

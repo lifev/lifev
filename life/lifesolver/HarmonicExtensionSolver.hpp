@@ -20,8 +20,8 @@
   \file meshMotion.h
   \brief Classes to hold algorithms for the mesh motion, for instance, involved in a ALE formulation.
   \version 1.0
-  \author M.A. Fernandez
-  \date 11/2002
+  \author G. Fourestey
+  \date 10/2007
 
   This file contains classes which may be used to compute the extension inside the reference domain of a given
   displacement at a specified interface
@@ -123,6 +123,7 @@ public:
     const vector_type& displacementOld() const {return M_dispOld;}
 
     vector_type& dispDiff() {return M_dispDiff;}
+    vector_type& disp()     {return M_disp;}
 
 
     void setDisplacement(const Vector &disp) { M_disp = disp;}
@@ -143,11 +144,21 @@ public:
     const BCHandler& bcHandler() const {return *M_BCh;}
 
     EpetraMap const& getMap() const { return M_localMap; }
-    Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getRepeatedEpetra_Map(); }
+    //Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getRepeatedEpetra_Map(); }
+
+    const Epetra_Comm& comm() const {return *M_comm;}
+
+    bool isLeader() const
+    {
+        return comm().MyPID() == 0;
+    }
+
+    void resetPrec() {M_resetPrec = true;}
 
 
 private:
 
+    void computeMatrix( );
 
     //! Finite Element Space
 
@@ -187,6 +198,11 @@ private:
 
     prec_type                      M_prec;
 
+    //! boolean that indicates if le precond has to be recomputed
+    bool                           M_reusePrec;
+    int                            M_maxIterForReuse;
+    bool                           M_resetPrec;
+
     //! BC holding the imposed boundary displacement
     BCHandler*                     M_BCh;
     bool                           M_setBC;
@@ -217,7 +233,7 @@ HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
                          Epetra_Comm&              comm ):
     M_FESpace               ( mmFESpace ),
     M_localMap              ( M_FESpace.map() ),
-    M_matrHE                ( new matrix_type (M_FESpace.map() ) ),
+    M_matrHE                ( ),
     M_comm                  ( &comm ),
     M_me                    ( M_comm->MyPID() ),
     M_verbose               ( M_me == 0 ),
@@ -227,6 +243,9 @@ HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
     M_f                     ( M_FESpace.map() ),
     M_elmat                 ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
     M_prec                  ( new prec_raw_type() ),
+    M_reusePrec              ( true ),
+    M_maxIterForReuse        ( -1 ),
+    M_resetPrec              ( true ),
     M_BCh                   ( &bcHandler ),
     M_diffusion             ( 1. )
 
@@ -250,6 +269,9 @@ HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
     M_f                     ( M_FESpace.map() ),
     M_elmat                 ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
     M_prec                   ( new prec_raw_type() ),
+    M_reusePrec              ( true ),
+    M_maxIterForReuse        ( -1 ),
+    M_resetPrec              ( true ),
     M_diffusion             ( 1. )
 {
 }
@@ -260,12 +282,29 @@ template <typename Mesh, typename SolverType>
 void HarmonicExtensionSolver<Mesh, SolverType>::setUp( const GetPot& dataFile )
 {
 
+    M_linearSolver.setDataFromGetPot( dataFile, "mesh_motion/solver" );
+    M_prec->setDataFromGetPot( dataFile, "mesh_motion/prec" );
+    M_diffusion = dataFile("mesh_motion/diffusion",1.0);
+
+    int maxIterSolver   = dataFile( "mesh_motion/solver/max_iter", -1);
+    M_reusePrec       = dataFile( "mesh_motion/prec/reuse", true);
+    M_maxIterForReuse = dataFile( "mesh_motion/solver/max_iter_reuse", maxIterSolver*8/10);
+
+    computeMatrix( );
+
+}
+
+
+template <typename Mesh, typename SolverType>
+void HarmonicExtensionSolver<Mesh, SolverType>::computeMatrix( )
+{
     Chrono chrono;
+    chrono.start();
 
     if (M_verbose)
-        std::cout << " he-  Computing constant matrices ...        ";
+        std::cout << " he-  Computing constant matrices ...        " <<  std::flush;
 
-    chrono.start();
+    M_matrHE.reset( new matrix_type (M_FESpace.map() ) );
 
     UInt totalDof   = M_FESpace.dof().numTotalDof();
     // Loop on elements
@@ -293,24 +332,12 @@ void HarmonicExtensionSolver<Mesh, SolverType>::setUp( const GetPot& dataFile )
     // Initializations
     //M_disp = ZeroVector( _disp.size() );
 
-    M_linearSolver.setDataFromGetPot( dataFile, "mesh_motion/solver" );
     M_linearSolver.setMatrix( *M_matrHE );
-
-    M_diffusion = dataFile("meshMotion/miscallaneous/diffusion",1.0);
-
-    M_prec->setDataFromGetPot( dataFile, "fluid/prec" );
-
-    // Modify the matrix to handle boundary conditions
 
 
 }
 
-
 //! timeadvance method
-
-
-
-
 // This method updates the extension of the displacement, i.e. it solves the laplacian problem
 
 template <typename Mesh, typename SolverType>
@@ -332,39 +359,66 @@ HarmonicExtensionSolver<Mesh, SolverType>::iterate()
     {
         // BC boundary information update
         M_BCh->bdUpdate( *M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
+        bcManageMatrix( *M_matrHE, *M_FESpace.mesh(), M_FESpace.dof(), *M_BCh, M_FESpace.feBd(), 1.0, 0. );
+
     }
+
+    Chrono chrono;
 
 
     // Initializations
     M_f    *= 0.;
 
-    //bcManageMatrix( *M_matrHE, *M_FESpace.mesh(), M_FESpace.dof(), *M_BCh, M_FESpace.feBd(), 1.0 );
-    bcManage( *M_matrHE, M_f, *M_FESpace.mesh(), M_FESpace.dof(), *M_BCh, M_FESpace.feBd(), 1.0, 0. );
+    bcManageVector(M_f, *M_FESpace.mesh(), M_FESpace.dof(), *M_BCh, M_FESpace.feBd(), 0., 1.0 );
 
 
-    M_prec->buildPreconditioner(M_matrHE);
+    if ( !M_reusePrec || M_resetPrec || !M_prec->set() )
+    {
+        chrono.start();
 
-    M_linearSolver.setPreconditioner(M_prec);
+        if (M_verbose)
+            std::cout << "  HE-  Computing the precond ...                "  <<  std::flush;
 
-    //M_matrHE->spy("H");
+        M_prec->buildPreconditioner(M_matrHE);
 
-    //exit(0);
+        double condest = M_prec->Condest();
+
+        M_linearSolver.setPreconditioner(M_prec);
+
+        chrono.stop();
+        if (M_verbose)
+        {
+            std::cout << "done in " << chrono.diff() << " s.\n";
+            std::cout << "  f-       Estimated condition number = " << condest << "\n" <<  std::flush;
+        }
 
 
+    }
+    else
+    {
+        if (M_verbose)
+            std::cout << "  f-  Reusing  precond ...                \n" <<  std::flush;
+    }
 
-    // Boundary conditions treatment
-    //   bcManageVector( M_f, *M_FESpace.mesh(), M_FESpace.dof(), *M_BCh, M_FESpace.feBd(), 1.0, 1.0 );
+
+    Real f_norm_inf(M_f.NormInf());
 
     if (M_verbose)
-        std::cout << "done.\n" << std::flush;
+        std::cout << "  HE- Solving the system ... \n" << std::flush;
 
+    int numIter =  M_linearSolver.solve( M_disp, M_f );
+
+    M_resetPrec = (numIter > M_maxIterForReuse);
+
+
+    chrono.stop();
     if (M_verbose)
-        std::cout << "  HE- Solving the system ... " << std::flush;
+    {
+        std::cout << "HE- system solved in " << chrono.diff()
+                  << " s. ( " << numIter << "  iterations. ) \n"
+                  << std::flush;
+    }
 
-    M_linearSolver.solve( M_disp, M_f );
-
-    if (M_verbose)
-        std::cout << "done.\n" << std::flush;
 
     M_dispDiff =  M_disp ;
     M_dispDiff -= M_dispOld;

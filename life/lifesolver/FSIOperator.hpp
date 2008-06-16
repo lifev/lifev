@@ -87,7 +87,8 @@ public:
 //     typedef NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> > fluid_raw_type;
     typedef RegionMesh3D<LinearTetra>              mesh_type;
 
-    typedef Oseen                  <mesh_type>     fluid_raw_type;
+//    typedef Oseen                  <mesh_type>     fluid_raw_type;
+    typedef OseenShapeDerivative   <mesh_type>     fluid_raw_type;
     typedef VenantKirchhofSolver   <mesh_type>     solid_raw_type;
     typedef HarmonicExtensionSolver<mesh_type>     meshmotion_raw_type;
 
@@ -167,6 +168,11 @@ public:
         M_dofSolid                           ( new DofInterface3Dto2D ),
         M_dofSolidInv                        ( new DofInterface3Dto2D ),
         M_dofFluidInv                        ( new DofInterface3Dto2D ),
+        M_fluidInterfaceFlag                 ( 1 ),
+        M_solidInterfaceFlag                 ( 1 ),
+        M_structureInterfaceFlag             ( 1 ),
+        M_harmonicInterfaceFlag              ( 1 ),
+        M_interfaceTolerance                 ( 0. ),
 // boundary vector interfaces
         M_bcvFluidInterfaceDisp              ( new  BCVectorInterface ),
         M_bcvFluidLoadToStructure            ( new  BCVectorInterface ),
@@ -184,10 +190,15 @@ public:
 //         M_bcvDerStructureAccToReducedFluid   ( new  BCVectorInterface ),
         M_lambdaFluid(),
         M_lambdaSolid(),
+        M_lambdaFluidRepeated(),
+        M_lambdaSolidRepeated(),
         M_lambdaDotSolid(),
         M_lambdaSolidOld(),
+        M_lambdaDotSolidRepeated(),
         M_sigmaFluid(),
         M_sigmaSolid(),
+        M_sigmaFluidRepeated(),
+        M_sigmaSolidRepeated(),
         M_dispFluidMeshOld(),
         M_veloFluidMesh(),
         M_nbEval( 0 ),
@@ -221,16 +232,22 @@ public:
 
     //    vector_type & displacement()    { return *M_lambdaSolid; }
     //    vector_type & displacementOld() { return *M_lambdaSolidOld; }
-    vector_type & residual()     ;
-    vector_type & velocity()        { return *M_lambdaDotSolid; }
-    vector_type & residualFSI()  ;
+    //vector_type & residual()     ;
+    //vector_type const & velocity() const { return *M_lambdaDotSolid; }
+    //vector_type & residualFSI()  ;
 
-    vector_type& lambdaFluid() {return *M_lambdaFluid;}
-    vector_type& sigmaFluid()  {return *M_sigmaFluid;}
-    vector_type& lambdaSolid() {return *M_lambdaSolid;}
-    vector_type& sigmaSolid()  {return *M_sigmaSolid;}
-    vector_type& lambdaDotSolid() {return *M_lambdaDotSolid;}
+    vector_type const& lambdaFluid()    const {return *M_lambdaFluid;}
+    vector_type const& sigmaFluid()     const {return *M_sigmaFluid;}
+    vector_type const& lambdaSolid()    const {return *M_lambdaSolid;}
+    vector_type const& lambdaSolidOld()    const {return *M_lambdaSolidOld;}
+    vector_type const& sigmaSolid()     const {return *M_sigmaSolid;}
+    vector_type const& lambdaDotSolid() const {return *M_lambdaDotSolid;}
 
+    vector_type const& lambdaFluidRepeated()    const {return *M_lambdaFluidRepeated;}
+    vector_type const& sigmaFluidRepeated()     const {return *M_sigmaFluidRepeated;}
+    vector_type const& lambdaSolidRepeated()    const {return *M_lambdaSolidRepeated;}
+    vector_type const& sigmaSolidRepeated()     const {return *M_sigmaSolidRepeated;}
+    vector_type const& lambdaDotSolidRepeated() const {return *M_lambdaDotSolidRepeated;}
 
     // member functions
 
@@ -257,8 +274,12 @@ public:
         {return M_nbEval;}
 
     meshmotion_type::value_type& meshMotion() {return *M_meshMotion;}
+
     fluid_type::value_type&      fluid()      {return *M_fluid;}
     solid_type::value_type&      solid()      {return *M_solid;}
+
+    fluidlin_type::value_type&   fluidLin()   {return *M_fluidLin;}
+    solidlin_type::value_type&   solidLin()   {return *M_solidLin;}
 
     void setPreconditioner   ( Preconditioner    _p ) { M_precond = _p; }
     void setDDNPreconditioner( DDNPreconditioner _p ) { M_DDNprecond = _p; }
@@ -299,22 +320,32 @@ public:
 //     void setFluidMpi(bool fluid){M_isFluidMpi = fluid;}
 //     void setSolidMpi(bool solid){M_issolidMpi = solid;}
 
-    bool mpi(){return M_mpi;}
-    bool isFluid(){return M_isFluid;}
-    bool isSolid(){return M_isSolid;}
+//    bool mpi(){return M_mpi;}
+    bool isFluid() const {return M_isFluid;}
+    bool isSolid() const {return M_isSolid;}
 
+    void setUpSystem( GetPot const& data_file );
+    void buildSystem();
 
     void setComm     (   boost::shared_ptr<Epetra_MpiComm> comm,
                          boost::shared_ptr<Epetra_MpiComm> worldComm);
 
+    Epetra_Comm& worldComm(){ return *M_epetraWorldComm; }
+
     //
 
-    EpetraMap& fluidInterfaceMap() {return *M_fluidInterfaceMap;}
-    EpetraMap& solidInterfaceMap() {return *M_solidInterfaceMap;}
+    boost::shared_ptr<EpetraMap>& fluidInterfaceMap() {return M_fluidInterfaceMap;}
+    boost::shared_ptr<EpetraMap>& solidInterfaceMap() {return M_solidInterfaceMap;}
 
 
     void setFluidLeader(int fluidLeader){M_fluidLeader = fluidLeader;}
     void setSolidLeader(int solidLeader){M_solidLeader = solidLeader;}
+
+    bool isLeader() const
+    {
+        if (isFluid()) return M_fluid->isLeader();
+        return M_fluid->isLeader();
+    }
 
     virtual void setDataFromGetPot( GetPot const& data );
 
@@ -335,8 +366,38 @@ public:
     void setInvLinSolidBC       (solid_bchandler_type bc_dsolid_inv);
 
 
+    void setLambdaFluid(const vector_type lambda);
+    void setLambdaSolid(const vector_type& lambda);
 
-    //@ getters
+    void setLambdaSolidOld(const vector_type& lambda);
+
+    void setLambdaDotSolid(const vector_type& lambda);
+
+    void setSigmaFluid(const vector_type sigma);
+    void setSigmaSolid(const vector_type& sigma);
+
+
+    void transferFluidOnInterface(const vector_type& _vec1,
+                                  vector_type&       _vec2);
+
+    //works in serial but no yet in parallel
+    void transferSolidOnFluid(const vector_type& _vec1,
+                                  vector_type&       _vec2);
+
+    void transferSolidOnInterface(const vector_type& _vec1,
+                                  vector_type&       _vec2);
+
+    void transferInterfaceOnSolid(const vector_type& _vec1,
+                                  vector_type&       _vec2);
+
+
+
+//@ getters
+
+    const fluid_raw_type& fluid()      const {return *M_fluid;}
+    const solid_raw_type& solid()      const {return *M_solid;}
+    const meshmotion_raw_type& meshMotion() const {return *M_meshMotion;}
+
 
     const data_fluid& dataFluid() const {return *M_dataFluid;}
     const data_solid& dataSolid() const {return *M_dataSolid;}
@@ -351,6 +412,10 @@ public:
 
     const vector_type& veloFluidMesh() const {return *M_veloFluidMesh;}
     vector_type& veloFluidMesh() {return *M_veloFluidMesh;}
+    const vector_type& dispFluidMeshOld() const {return *M_dispFluidMeshOld;}
+
+    const vector_type& derVeloFluidMesh() const {return *M_derVeloFluidMesh;}
+    vector_type& derVeloFluidMesh() {return *M_derVeloFluidMesh;}
 
 
     const dof_interface_type3D& dofFluidToStructure()             const {return M_dofFluidToStructure;}
@@ -369,39 +434,39 @@ public:
 
     // BC Vector Interface setters and getters
 
-    void setFluidInterfaceDisp      (vector_type &disp, UInt type = 0);
+    void setFluidInterfaceDisp      (vector_type const& disp, UInt type = 0);
     bc_vector_interface bcvFluidInterfaceDisp()
         {return M_bcvFluidInterfaceDisp;}
 
-    void setHarmonicExtensionVelToFluid(const vector_type &vel, UInt type = 0);
+    void setHarmonicExtensionVelToFluid(vector_type const& vel, UInt type = 0);
     bc_vector_interface bcvHarmonicExtensionVelToFluid()
         {return M_bcvHarmonicExtensionVelToFluid;}
 
-    void setDerHarmonicExtensionVelToFluid(vector_type &dvel, UInt type = 0);
+    void setDerHarmonicExtensionVelToFluid(vector_type const& dvel, UInt type = 0);
     bc_vector_interface bcvDerHarmonicExtensionVelToFluid()
         {return M_bcvDerHarmonicExtensionVelToFluid;}
 
-    void setStructureDispToHarmonicExtension(vector_type &disp, UInt type = 0);
+    void setStructureDispToHarmonicExtension(vector_type const& disp, UInt type = 0);
     bc_vector_interface bcvStructureDispToHarmonicExtension()
         {return M_bcvStructureDispToHarmonicExtension;}
 
-    void setStructureDispToSolid(vector_type &disp, UInt type = 0);
+    void setStructureDispToSolid(vector_type const& disp, UInt type = 0);
     bc_vector_interface bcvStructureDispToSolid()
         {return M_bcvStructureDispToSolid;}
 
-    void setDerStructureDispToSolid(vector_type &ddisp, UInt type = 0);
+    void setDerStructureDispToSolid(vector_type const& ddisp, UInt type = 0);
     bc_vector_interface bcvDerStructureDispToSolid()
         {return M_bcvDerStructureDispToSolid;}
 
-    void setFluidLoadToStructure(vector_type &load, UInt type = 0);
+    void setFluidLoadToStructure(vector_type const& load, UInt type = 0);
     bc_vector_interface bcvFluidLoadToStructure()
         {return M_bcvFluidLoadToStructure;}
 
-    void setDerFluidLoadToStructure(vector_type &dload, UInt type = 0);
+    void setDerFluidLoadToStructure(vector_type const& dload, UInt type = 0);
     bc_vector_interface bcvDerFluidLoadToStructure()
         {return M_bcvDerFluidLoadToStructure;}
 
-    void setDerFluidLoadToFluid(vector_type &dload, UInt type = 0);
+    void setDerFluidLoadToFluid(vector_type const& dload, UInt type = 0);
     bc_vector_interface bcvDerFluidLoadToFluid()
         {return M_bcvDerFluidLoadToFluid;}
 
@@ -446,16 +511,8 @@ public:
 
 protected:
 
-    void sendToFluid(const vector_type& vec);
-    void receiveFromSolid(vector_type& vec);
-
     void transferMeshMotionOnFluid(const vector_type &_vec1,
                                    vector_type       &_vec2);
-    void transferFluidOnInterface(const vector_type& _vec1,
-                                  vector_type&       _vec2);
-
-    void transferSolidOnInterface(const vector_type& _vec1,
-                                  vector_type&       _vec2);
 
     void interpolateVelocity(const vector_type& _vec1,
                              vector_type& _vec2);
@@ -513,6 +570,12 @@ protected:
 //     dof_interface_type3D      M_dofStructureToReducedFluid;
 //     dof_interface_type3D      M_dofReducedFluidToStructure;
 
+    int                                              M_fluidInterfaceFlag;
+    int                                              M_solidInterfaceFlag;
+    int                                              M_structureInterfaceFlag;
+    int                                              M_harmonicInterfaceFlag;
+    Real                                              M_interfaceTolerance;
+
     dof_interface_type2D                              M_dofFluid;
     dof_interface_type2D                              M_dofSolid;
     dof_interface_type2D                              M_dofSolidInv;
@@ -535,15 +598,24 @@ protected:
 //     bc_vector_interface       M_bcvDerStructureAccToReducedFluid;
 
 
+private:
     // displacement on the interface
     boost::shared_ptr<vector_type>                    M_lambdaFluid;
     boost::shared_ptr<vector_type>                    M_lambdaSolid;
 
+    boost::shared_ptr<vector_type>                    M_lambdaFluidRepeated;
+    boost::shared_ptr<vector_type>                    M_lambdaSolidRepeated;
+
     boost::shared_ptr<vector_type>                    M_lambdaDotSolid;
     boost::shared_ptr<vector_type>                    M_lambdaSolidOld;
 
+    boost::shared_ptr<vector_type>                    M_lambdaDotSolidRepeated;
+
     boost::shared_ptr<vector_type>                    M_sigmaFluid;
     boost::shared_ptr<vector_type>                    M_sigmaSolid;
+
+    boost::shared_ptr<vector_type>                    M_sigmaFluidRepeated;
+    boost::shared_ptr<vector_type>                    M_sigmaSolidRepeated;
 
     //    boost::shared_ptr<vector_type>                    M_dispStruct;
     //    boost::shared_ptr<vector_type>                    M_dispStructOld;
@@ -552,10 +624,14 @@ protected:
 
     boost::shared_ptr<vector_type>                    M_dispFluidMeshOld;
     boost::shared_ptr<vector_type>                    M_veloFluidMesh;
+    boost::shared_ptr<vector_type>                    M_derVeloFluidMesh;
+
+protected:
     boost::shared_ptr<vector_type>                    M_un;
     boost::shared_ptr<vector_type>                    M_rhs;
 
-
+//     boost::shared_ptr<vector_type>                    M_w;
+//     boost::shared_ptr<vector_type>                    M_dw;
 
     Real                                              M_time;
 

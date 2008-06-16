@@ -48,9 +48,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <life/lifefem/assembGeneric.hpp>
 #include <life/lifefem/bcManage.hpp>
 
-#include <life/lifefem/meshMotion.hpp>
+//#include <life/lifefem/meshMotion.hpp>
 
-#include <life/lifealg/SolverAztec.hpp>
+//#include <life/lifealg/SolverAztec.hpp>
 
 #include <life/lifefem/bcHandler.hpp>
 #include <life/lifecore/chrono.hpp>
@@ -700,6 +700,13 @@ namespace LifeV
         UInt nbCompU = this->_u.nbcomp();
         UInt iloc, ig;
 
+        std::cout << norm_inf(M_un);
+        std::cout << norm_inf(_w);
+        std::cout << norm_inf(_dw);
+        std::cout << norm_inf(_u);
+        std::cout << norm_inf(this->harmonicExtension().getDisplacement()); // d local
+
+
         if (shapeTerms) {
             /*
 
@@ -731,12 +738,12 @@ namespace LifeV
                     {
                         ig = this->_dof_u.localToGlobal( i, iloc + 1 ) - 1 + ic * this->_dim_u;
                         icloc = iloc + ic * this->_fe_u.nbNode ;
-                        M_elvec.vec() [ icloc  ] = M_un( ig ) - this->_w( ig );  // u^n - w^k local
-                        M_w_loc.vec() [ icloc  ] = this->_w( ig );               // w^k local
-                        M_uk_loc.vec()[ icloc  ] = this->_u( ig );          // u^k local
-                        M_d_loc.vec() [ icloc  ] = this->harmonicExtension().getDisplacement()( ig ); // d local
-                        M_dw_loc.vec()[ icloc  ] = this->_dw( ig );              // dw local
-                        M_uLoc.vec()  [ icloc  ] = M_un( ig );              // u^n local
+                         M_elvec.vec() [ icloc  ] = M_un( ig ) - this->_w( ig );  // u^n - w^k local
+                         M_w_loc.vec() [ icloc  ] = this->_w( ig );               // w^k local
+                         M_uk_loc.vec()[ icloc  ] = this->_u( ig );          // u^k local
+                         M_d_loc.vec() [ icloc  ] = this->harmonicExtension().getDisplacement()( ig ); // d local
+                         M_dw_loc.vec()[ icloc  ] = this->_dw( ig );              // dw local
+                         M_uLoc.vec()  [ icloc  ] = M_un( ig );              // u^n local
                     }
                     ig = this->_dof_u.localToGlobal( i, iloc + 1 ) - 1;
                     M_pk_loc[ iloc ] = this->_p( ig );  // p^k local
@@ -746,7 +753,7 @@ namespace LifeV
                 // Elementary vectors
                 //
                 //  - \rho ( -\grad w^k :[I\div d - (\grad d)^T] u^k + ( u^n-w^k )^T[I\div d - (\grad d)^T] (\grad u^k)^T , v  )
-                source_mass1( -this->density(), M_uk_loc,  M_w_loc, M_elvec, M_d_loc, M_elvec_dudp, this->_fe_u );
+                source_mass1( -this->density(), M_uk_loc,  M_elvec, M_d_loc, M_elvec_dudp, this->_fe_u );
 
                 //  + \rho * ( \grad u^k dw, v  )
                 source_mass2( this->density(), M_uk_loc, M_dw_loc, M_elvec_dudp, this->_fe_u );

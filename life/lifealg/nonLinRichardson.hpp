@@ -81,8 +81,8 @@ int nonLinRichardson( VectorType& sol,
 
     int iter = 0;
 
-    VectorType residual ( sol.Map() );
-    VectorType step     ( sol.Map() );
+    VectorType residual ( sol.getMap() );
+    VectorType step     ( sol.getMap() );
 
     step *= 0.;
 
@@ -91,6 +91,7 @@ int nonLinRichardson( VectorType& sol,
     std::cout << "------------------------------------------------------------------" << std::endl;
     std::cout << "  NonLinRichardson: starting " << std::endl;
     std::cout << "------------------------------------------------------------------" << std::endl;
+
     f.evalResidual( residual, sol, iter );
 
     Real normRes      = residual.NormInf();

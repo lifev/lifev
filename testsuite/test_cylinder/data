@@ -1,19 +1,17 @@
 # -*- getpot -*- (GetPot mode activation for emacs)
 #----------------------------------------------------------------
-#      Data file for cylinder test with Navier-Stokes IP Solver
+#      Data file for cylinder test with Navier-Stokes
 #----------------------------------------------------------------
 
-[ensight]
+[exporter]
 multimesh  = false
+start      = 0
 save       = 1
 
 [fluid]
 
-
-
-
 [./physics]
-endtime         = 1.0
+endtime         = .2
 density         = 1.0          # density
 viscosity       = 0.005         # viscosity
 
@@ -35,13 +33,8 @@ order_bdf       = 1
 linearized      = 0
 diagonalize     = 0 # weight, 0=off
 div_beta_u_v    = 1 # 1=on, 0=off
-vel_order       = P1Bubble		# P1, P1Bubble, P2
+vel_order       = P1		# P1, P1Bubble, P2
 press_order     = P1		# P1, P2
-
-[../miscellaneous]
-verbose         = 1
-save            = 1
-steady          = 0
 
 [../solver]
 solver          = gmres
@@ -50,32 +43,24 @@ output          = all_res # all_res
 conv            = rhs
 max_iter        = 100
 kspace          = 100
-precond         = dom_decomp #none,jacobi,sym_gs,neumann,ls,smoother,dom_decomp
-subdomain_solve = ilut
-overlap         = 1
-ilut_fill       = 2
-graph_fill      = 0
-drop            = 1.e-4
-tol             = 1.00e-9
-keep_info       = 1
 
-[../prec]
-
+[../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
+prectype        = Amesos # Amesos (does a local LU factorization), ILUT (not ILU)
 reuse           = true
-overlap         = 10
-droptol         = 1.e-5
-fill 		= 2
-
+overlap         = 2
+#droptol         = 1.e-5 ??
+fill            = 4
+relax_value     = 1
 
 [../ipstab]
-gammaBeta  = 0.125
-gammaDiv   = 0.125
-gammaPress = 0.03125
+gammaBeta  = 0.02
+gammaDiv   = 0.2
+gammaPress = 0.2
 #gammaBeta  = 0.125
 #gammaDiv   = 0.125
 #gammaPress = 0.03125
 
-[./problem]
+[../problem]
 
 # for  cyl3D.2.2.00.mesh
 Re 	= 1.0

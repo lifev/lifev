@@ -160,7 +160,7 @@ private:
     UInt nlv;
     UInt nle;
     UInt nlf;
-    Container _ltg;
+    Container _ltg; // container is:  typedef SimpleArray<UInt> Container;
     UInt _ncount[ 5 ];
 };
 
@@ -243,17 +243,19 @@ void Dof::update( Mesh& M )
     // Vertex Based Dof
     _ncount[ 0 ] = gcount;
     if ( nldpv > 0 )
-        for ( ie = 1; ie <= _nEl; ++ie )
+        for ( ie = 1; ie <= _nEl; ++ie )//for each element
         {
             lc = 0;
-            for ( i = 1; i <= nlv; ++i )
-                for ( l = 0; l < nldpv; ++l )
+            for ( i = 1; i <= nlv; ++i )//for each vertex in the element
+                for ( l = 0; l < nldpv; ++l )//for each degree of freedom per vertex
                     {
+                        //                       label of the ith point of the mesh element-1
                         _ltg( ++lc, ie ) = gcount + ( M.volume( ie ).point( i ).id() - 1 ) * nldpv + l;
-                    }
+                        //_ltg(++lc, ie) is the global label assigned to the ++lc dof of the element.
+}
         }
     // Edge Based Dof
-    gcount += nldpv * nv;
+    gcount += nldpv * nv;//dof per vertex * total # vertices
     lcount = nldpv * nlv;
     _ncount[ 1 ] = gcount;
     if ( nldpe > 0 )

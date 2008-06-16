@@ -32,14 +32,15 @@
 #ifndef _EPETRAMATRIX_HPP_
 #define _EPETRAMATRIX_HPP_
 
-#include <life/lifealg/SolverAztec.hpp>
 
-#include "Epetra_FECrsMatrix.h"
-#include "EpetraExt_MatrixMatrix.h"
-#include "EpetraExt_RowMatrixOut.h"
-#include "life/lifecore/life.hpp"
-//#include <life/lifearray/pattern.hpp>
-#include "EpetraVector.hpp"
+#include <lifeconfig.h>
+#include <Epetra_FECrsMatrix.h>
+#include <EpetraExt_MatrixMatrix.h>
+#include <EpetraExt_RowMatrixOut.h>
+#include <life/lifecore/life.hpp>
+#include <life/lifearray/EpetraVector.hpp>
+
+#include <vector>
 
 //@@
 //#define OFFSET 0
@@ -58,7 +59,7 @@ class EpetraMatrix
 public:
 
     typedef Epetra_FECrsMatrix     matrix_type;
-    typedef EpetraVector<DataType> vector_type;
+    typedef EpetraVector vector_type;
 
 //    EpetraMatrix(); //!< default constructor : NULL pattern
     //
@@ -122,7 +123,7 @@ public:
     void set_mat( UInt row, UInt col, DataType loc_val );
 
     void set_mat_inc( int const numRows, int const numCols,
-                      int* const row, int* const col,
+                      std::vector<int> const row, std::vector<int> const col,
                       DataType* const* const loc_val,
                       int format = Epetra_FECrsMatrix::COLUMN_MAJOR);
 
@@ -157,8 +158,10 @@ EpetraMatrix<DataType>::operator += ( const EpetraMatrix& _matrix)
 
 #ifdef HAVE_TRILINOS_EPETRAEXT_31 // trilinos6
     EpetraExt::MatrixMatrix::Add(_matrix.getEpetraMatrix(), false, 1., (*this).getEpetraMatrix(), 1., false);
-#else // trilinos8
+#elif defined HAVE_TRILINOS_EPETRAEXT // trilinos8
     EpetraExt::MatrixMatrix::Add(_matrix.getEpetraMatrix(), false, 1., (*this).getEpetraMatrix(), 1.);
+#else
+#error error: do not have nor EpetraExt 6 nor 7 or 8
 #endif
 
     return *this;
@@ -198,7 +201,7 @@ EpetraMatrix<DataType>::operator * (const DataType val) const
 
 template <typename DataType>
 EpetraMatrix<DataType>::EpetraMatrix( const EpetraMap& _map, int numEntries ):
-    M_epetraCrs( Copy, *_map.getUniqueEpetra_Map(), numEntries, false)
+    M_epetraCrs( Copy, *_map.getMap(Unique), numEntries, false)
 //    M_epetraCrs( Copy, *_map.getEpetra_Map(), 0, false)
 {
 }
@@ -250,6 +253,7 @@ set_mat( UInt row, UInt col, DataType loc_val )
 {
 //     if (M_epetraCrs.RowMap()
 
+    // incrementing row and cols by one;
     int irow(row + 1);
     int icol(col + 1);
 
@@ -263,6 +267,7 @@ void EpetraMatrix<DataType>::
 set_mat_inc( UInt row, UInt col, DataType loc_val )
 {
 
+    // incrementing row and cols by one;
     int irow(row + 1);
     int icol(col + 1);
 
@@ -279,12 +284,27 @@ set_mat_inc( UInt row, UInt col, DataType loc_val )
 template <typename DataType>
 void EpetraMatrix<DataType>::
 set_mat_inc( int const numRows, int const numCols,
-             int* const row, int* const col,
+             std::vector<int> const row, std::vector<int> const col,
              DataType* const* const loc_val,
              int format)
 {
 
-    int ierr = M_epetraCrs.InsertGlobalValues (numRows, row, numCols, col, loc_val, format);
+    // incrementing row and cols by one;
+    std::vector<int> irow(numRows);
+    std::vector<int> icol(numCols);
+
+    std::vector<int>::const_iterator pt;
+
+    pt = row.begin();
+    for (std::vector<int>::iterator i(irow.begin()); i !=  irow.end() && pt != row.end(); ++i, ++pt)
+        *i = *pt + 1;
+
+    pt = col.begin();
+    for (std::vector<int>::iterator i(icol.begin()); i !=  icol.end() && pt != col.end(); ++i, ++pt)
+        *i = *pt + 1;
+
+
+    int ierr = M_epetraCrs.InsertGlobalValues (numRows, &irow[0], numCols, &icol[0], loc_val, format);
 
     if (ierr < 0) std::cout << " error in matrix insertion " << ierr << std::endl;
 //    std::cout << ierr << std::endl;
@@ -295,7 +315,7 @@ set_mat_inc( int const numRows, int const numCols,
 //! set entries (rVec(i),rVec(i)) to coeff and rest of row r(i) to zero
 template <typename DataType>
 void EpetraMatrix<DataType>::diagonalize ( std::vector<UInt> rVec,
-					   DataType const coeff )
+                                           DataType const coeff )
 {
 
     const Epetra_Comm&  Comm(M_epetraCrs.Comm());
@@ -377,7 +397,7 @@ void EpetraMatrix<DataType>::diagonalize( UInt const r,
         }
 
 	DataType coeff_(coeff);
-	M_epetraCrs.ReplaceMyValues(myRow, 1, &coeff_ &myCol); // A(r,r) = coeff
+	M_epetraCrs.ReplaceMyValues(myRow, 1, &coeff_, &myCol); // A(r,r) = coeff
 
 
     }
@@ -518,7 +538,14 @@ void EpetraMatrix<DataType>::diagonalize( UInt const r,
 template <typename DataType>
 int EpetraMatrix<DataType>::getMeanNumEntries() const
 {
-    return M_epetraCrs.NumMyNonzeros()/M_epetraCrs.NumMyRows();
+    const int minEntries = M_epetraCrs.MaxNumEntries ()/2;
+    if ( M_epetraCrs.NumMyRows() )
+        return minEntries;
+
+    int meanNumEntries = M_epetraCrs.NumMyNonzeros()/M_epetraCrs.NumMyRows();
+    if ( meanNumEntries < minEntries || meanNumEntries > 2*minEntries )
+        return minEntries;
+    return meanNumEntries;
 }
 
 template <typename DataType>

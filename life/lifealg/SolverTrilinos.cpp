@@ -69,6 +69,11 @@ void SolverTrilinos::setMatrix( matrix_type& m)
     M_solver.SetUserMatrix(&m.getEpetraMatrix());
 }
 
+void SolverTrilinos::setOperator( Epetra_Operator& op)
+{
+    M_solver.SetUserOperator(&op);
+}
+
 //! set Epetra_Operator preconditioner
 void SolverTrilinos::setPreconditioner( prec_type _prec )
 {
@@ -156,7 +161,7 @@ void SolverTrilinos::setDataFromGetPot( const GetPot& dfile, const std::string& 
     // Convergence type
     //
     M_TrilinosParameterList.set("conv",
-                             dfile( ( section + "/conv" ).data(), "r0" ));
+                             dfile( ( section + "/conv" ).data(), "rhs" ));
     //
     // output
     //
@@ -244,6 +249,8 @@ void SolverTrilinos::setDataFromGetPot( const GetPot& dfile, const std::string& 
 
     M_TrilinosParameterList.set("update_reduction",
                              dfile( ( section + "/update_reduction" ).data(), 10e10 ));
+
+
 }
 
 
@@ -295,31 +302,45 @@ SolverTrilinos::solve( vector_type& x, vector_type& b )
     if ( precSet() )
         M_solver.SetPrecOperator(M_prec->getPrec());
 
-     int    maxiter(M_maxIter);
-     double mytol  (M_tol);
+    int    maxiter(M_maxIter);
+    double mytol  (M_tol);
 
-    M_solver.Iterate(maxiter, mytol);
+    int status = M_solver.Iterate(maxiter, mytol);
+    /* if status:
+       0  AZ_normal
+       1  AZ_maxits
+       if < 0 see AztecOO.cpp
+    */
 
-    //#ifdef DEBUG
-    const Epetra_Comm& Comm(M_solver.GetUserMatrix()->Comm());
+//#ifdef DEBUG
+    const Epetra_Comm* Comm(0);
+    if (M_solver.GetUserOperator()) Comm = &M_solver.GetUserOperator()->Comm();
+    else if (M_solver.GetUserMatrix()) Comm = &M_solver.GetUserMatrix()->Comm();
 
-    Comm.Barrier();
+    if (! Comm)
+        {
+            Comm->Barrier();
 
-    if( Comm.MyPID() == 0 ) {
-        std::cout << "  o-  Solver performed " << M_solver.NumIters()
-             << " iterations.\n";
-        std::cout << "  o-  Norm of the true residual = " << M_solver.TrueResidual() << std::endl;
-        std::cout << "  o-  Norm of the true ratio    = " << M_solver.ScaledResidual() << std::endl;
-    }
-    //#endif
+            if( Comm->MyPID() == 0 ) {
+                std::cout << "  o-  Solver performed " << M_solver.NumIters()
+                          << " iterations.\n";
+                std::cout << "  o-  Norm of the true residual = " << M_solver.TrueResidual() << std::endl;
+                std::cout << "  o-  Norm of the true ratio    = " << M_solver.ScaledResidual() << std::endl;
+            }
+        }
+//#endif
+
+    if (status)
+        return(M_maxIter+1);
 
     return(M_solver.NumIters());
+
 }
 
 double
 SolverTrilinos::computeResidual( vector_type& x, vector_type& b )
 {
-    vector_type Ax(x.Map());
+    vector_type Ax(x.getMap());
     vector_type res(b);
 
     M_solver.GetUserMatrix()->Apply(x.getEpetraVector(),Ax.getEpetraVector());

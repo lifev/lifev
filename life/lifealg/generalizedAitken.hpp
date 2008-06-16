@@ -290,7 +290,7 @@ typename generalizedAitken<VectorType, DataType>::vector_type generalizedAitken<
 computeDeltaLambda( const vector_type &_lambda,
                     const vector_type &_mu )
 {
-    VectorType deltaLambda(_lambda.Map());
+    VectorType deltaLambda(_lambda.getMap());
 
     if (( !M_firstCall ) && ( !M_useDefault ))
     {

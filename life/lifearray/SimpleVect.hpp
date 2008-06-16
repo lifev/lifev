@@ -54,7 +54,7 @@ public:
     {}
     ;
     SimpleVect( const SimpleVect<T, OFFSETVEC> & );
-  
+
     ~SimpleVect() {}
 
     explicit SimpleVect( const raw_container & );
@@ -63,11 +63,13 @@ public:
     const T& fat( size_type i ) const;
     inline reference operator() ( size_type const i )
     {
-        return * ( this->begin() + ( i - OFFSETVEC ) );
+        //return * ( this->begin() + ( i - OFFSETVEC ) );
+        return ( this->operator[] ( i - OFFSETVEC ) );
     }
     inline const_reference operator() ( size_type const i ) const
     {
-        return * ( this->begin() + ( i - OFFSETVEC ) );
+        //return * ( this->begin() + ( i - OFFSETVEC ) );
+        return ( this->operator[] ( i - OFFSETVEC ) );
     }
     //! Completely clear out the container, returning memory to the system
     void clean()

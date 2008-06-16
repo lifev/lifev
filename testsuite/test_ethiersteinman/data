@@ -1,19 +1,25 @@
 # -*- getpot -*- (GetPot mode activation for emacs)
 #-------------------------------------------------
-#      Data file for EthierSteinmann test case
+#      Data file for EthierSteinman test case
 #-------------------------------------------------
+
+
+[exporter]
+multimesh  = false
+start      = 2
+save       = 5
 
 [fluid]
 
 [./physics]
-endtime         = 0.1          # endtime
+endtime         = 0.04          # endtime
 density         = 1.0          # density
 viscosity       = .01       # viscosity
 
 
 [../discretization]
 mesh_dir        = ./Mesh/   # the directory where the mesh file is
-mesh_file       = cube8x8.mesh          # mesh file
+mesh_file       = cube4x4.mesh          # mesh file
 mesh_faces      = all                   # update all faces elements
 timestep        = 0.01                   # timestep
 verbose         = 0
@@ -21,7 +27,7 @@ order_bdf       = 1
 linearized      = 0
 diagonalize     = 1 # weight, 0=off
 div_beta_u_v    = 0 # 1=on, 0=off
-vel_order         = P1Bubble
+vel_order         = P1
 press_order       = P1
 mesh_faces      = all                   # update all faces elements
 mesh_edges      = all                   # update all faces elements
@@ -40,22 +46,24 @@ output          = all_res # all_res
 conv            = r0
 max_iter        = 100
 kspace          = 100
-precond         = dom_decomp #none,jacobi,sym_gs,neumann,ls,smoother,dom_decomp
-subdomain_solve = ilut
-ilut_fill       = 6
-drop            = 1.e-5
 tol             = 1.00e-10
-keep_info       = 1
 
 
-[../prec]
-reuse_prec      = false;
+[../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
+prectype        = ILUT   # Amesos (does a local LU factorization), ILUT (not ILU)
+reuse           = true
 overlap         = 2
+droptol         = 1.e-10 # ??
+fill            = 4
+athr            = 1e-3 # ~h^2. for h=0.25: athr~1e-3
+rthr            = 1
+relax_value     = 1
+
 
 [../ipstab]
-gammaBeta  = 0.125
-gammaDiv   = 0.125
-gammaPress = 0.03125
+gammaBeta  = 0.02
+gammaDiv   = 0.2
+gammaPress = 0.2
 
 [../problem]
 a = 1.57

@@ -130,6 +130,7 @@ public:
     //! Solve the non-linear system
 
     void iterate( bchandler_raw_type& bch );
+    void iterateLin( bchandler_raw_type& bch );
 
     void iterate(vector_type &_sol);
 
@@ -203,7 +204,17 @@ public:
     void reduceSolution( Vector& disp,
                          Vector& vel );
 
-    Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getRepeatedEpetra_Map(); }
+    //Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getRepeatedEpetra_Map(); }
+    EpetraMap const& getMap() const { return M_localMap; }
+
+    const Epetra_Comm& comm() const {return *M_comm;}
+
+    bool isLeader() const
+    {
+        return comm().MyPID() == 0;
+    }
+
+
 
 private:
 
@@ -282,6 +293,7 @@ private:
     prec_type                      M_prec;
 
     bool                           M_reusePrec;
+    int                            M_maxIterForReuse;
     bool                           M_resetPrec;
 
     int                            M_maxIterSolver;
@@ -343,6 +355,7 @@ VenantKirchhofSolver( const data_type&          data,
     M_out_iter                   ( "out_iter_solid" ),
     M_out_res                    ( "out_res_solid" ),
     M_reusePrec                  ( true ),
+    M_maxIterForReuse            ( -1 ),
     M_resetPrec                  ( true ),
     M_maxIterSolver              ( -1 ),
     M_count                      ( 0 )
@@ -377,7 +390,7 @@ VenantKirchhofSolver( const data_type& data,
     M_vel                        ( M_localMap ),
     M_rhs                        ( M_localMap ),
     M_rhsW                       ( M_localMap ),
-    M_rhsNoBC               ( M_localMap ),
+    M_rhsNoBC                    ( M_localMap ),
     M_f                          ( M_localMap),
     M_residual_d                 ( M_localMap ),
     M_sxx                        ( M_localMap ),
@@ -385,8 +398,9 @@ VenantKirchhofSolver( const data_type& data,
     M_szz                        ( M_localMap ),
     M_out_iter                   ( "out_iter_solid" ),
     M_out_res                    ( "out_res_solid" ),
-    M_reusePrec                  ( false ),
-    M_resetPrec                  ( false ),
+    M_reusePrec                  ( true ),
+    M_maxIterForReuse            ( -1 ),
+    M_resetPrec                  ( true ),
     M_maxIterSolver              ( -1 ),
     M_count                      ( 0 )
 {
@@ -414,6 +428,8 @@ setUp( const GetPot& dataFile )
 
     M_reusePrec     = dataFile( "solid/prec/reuse", true);
     M_maxIterSolver = dataFile( "solid/solver/max_iter", -1);
+    M_maxIterForReuse = dataFile( "solid/solver/max_iter_reuse", M_maxIterSolver*8/10);
+
 }
 
 
@@ -532,7 +548,6 @@ void VenantKirchhofSolver<Mesh, SolverType>::
 updateSystem()
 {
 
-    UInt ig;
 
     if (M_verbose)
     {
@@ -546,67 +561,6 @@ updateSystem()
 
     // Number of displacement components
     UInt nc = nDimensions;
-
-    /*
-      if ( _maxiter > 1 )
-     {
-
-        // loop on volumes: assembling source term
-        for ( UInt i = 1; i <= M_FESpace.mesh()->numVolumes(); ++i )
-        {
-
-            this->M_FESpace.fe().updateFirstDerivQuadPt( M_FESpace.mesh()->volumeList( i ) );
-
-            _elmatK.zero();
-
-            // _dk_loc contains the displacement in the nodes
-            for ( UInt j = 0 ; j < ( UInt ) M_FESpace.fe().nbNode ; ++j )
-            {
-                for ( UInt ic = 0; ic < nc; ++ic )
-                {
-                    ig = M_FESpace.dof().localToGlobal( i, j + 1 ) - 1 + ic * this->dim();
-                    _dk_loc[ j + ic * M_FESpace.fe().nbNode ] = this->_d( ig );
-                }
-            }
-
-            // stiffness for non-linear terms
-            // 1/2 * \mu * ( [\grad d^k]^T \grad d : \grad v  )
-            stiff_dergradbis( this->_mu * 0.5, _dk_loc, _elmatK, M_FESpace.fe() );
-
-            // 1/4 * \lambda * ( \tr { [\grad d^k]^T \grad d }, \div v  )
-            stiff_derdiv( this->_lambda * 0.25, _dk_loc, _elmatK, M_FESpace.fe() );
-
-            for ( UInt ic = 0; ic < nc; ++ic )
-            {
-                for ( UInt jc = 0;jc < nc;jc++ )
-                    assembleMatrix( M_stiff, _elmatK, M_FESpace.fe(), M_FESpace.dof(), ic, jc );
-            }
-        }
-    }
-    */
-
-    // Right hand side for the velocity at time
-
-//     M_rhsNoBC *= 0.;// ZeroVector( M_rhsNoBC.size() );
-
-//     // loop on volumes: assembling source term
-//     for ( UInt i = 1; i <= M_FESpace.mesh()->numVolumes(); ++i )
-//     {
-
-//         M_FESpace.fe().updateFirstDerivQuadPt( M_FESpace.mesh()->volumeList( i ) );
-
-//         M_elvec.zero();
-
-//         for ( UInt ic = 0; ic < nc; ++ic )
-//         {
-//             compute_vec( source, M_elvec, M_FESpace.fe(), M_data.time(), ic ); // compute local vector
-//             assembleVector( M_rhsNoBC, M_elvec, M_FESpace.fe(), M_FESpace.dof(), ic ); // assemble local vector into global one
-//         }
-//     }
-
-
-    // right hand side without boundary load terms
-//    vector_type __z = this->_d + M_data.timestep() * this->_w;
 
     double coef;
 
@@ -625,9 +579,9 @@ updateSystem()
 
     if (M_verbose) std::cout << std::endl;
 
-    std::cout << "rhsWithoutBC norm = " << M_rhsNoBC.NormInf() << std::endl;
-    std::cout << "M_rhsW norm       = " << M_rhsW.NormInf() << std::endl;
-    std::cout << "    _w norm       = " << M_vel.NormInf() << std::endl;
+//     std::cout << "rhsWithoutBC norm = " << M_rhsNoBC.NormInf() << std::endl;
+//     std::cout << "M_rhsW norm       = " << M_rhsW.NormInf() << std::endl;
+//     std::cout << "    _w norm       = " << M_vel.NormInf() << std::endl;
 
     //
     chrono.stop();
@@ -646,7 +600,7 @@ iterate( bchandler_raw_type& bch )
 {
     Chrono chrono;
 
-    std::cout << "  S-  Solving the system ... " << std::endl << std::flush;
+    std::cout << "  S-  Solving the system ... \n"  << std::flush;
 
     std::cout << "  S-  Updating the boundary conditions ... " << std::flush;
 
@@ -659,9 +613,100 @@ iterate( bchandler_raw_type& bch )
     M_rhsNoBC.GlobalAssemble();
     M_rhsW.GlobalAssemble();
 
-    vector_type rhs = M_rhsNoBC;
+    vector_type rhs (M_rhsNoBC);
 
     applyBoundaryConditions( *matrFull, rhs, bch );
+
+    chrono.stop();
+    std::cout << "done in " << chrono.diff() << " s \n" <<  std::flush;
+
+//    M_comm->Barrier();
+
+    M_linearSolver.setMatrix(*matrFull);
+
+    if ( !M_reusePrec || M_resetPrec || !M_prec->set() )
+    {
+        chrono.start();
+
+        if (M_verbose)
+            std::cout << "  S-  Computing the precond ...                " <<  std::flush;
+
+        M_prec->buildPreconditioner(matrFull);
+
+//    M_disp *= 0.;
+        double condest = M_prec->Condest();
+
+        M_linearSolver.setPreconditioner(M_prec);
+
+        chrono.stop();
+        if (M_verbose)
+        {
+            std::cout << "done in " << chrono.diff() << " s.\n";
+            std::cout << "         Estimated condition number = " << condest << "\n" <<  std::flush;
+        }
+
+        M_resetPrec = false;
+
+    }
+    else
+    {
+        if (M_verbose)
+            std::cout << "  S-  Reusing  precond ...                \n" <<  std::flush;
+    }
+
+    int numIter = M_linearSolver.solve(M_disp, rhs);
+
+    M_vel  = ( 2.0 / M_data.timestep() ) * M_disp;
+    M_vel -= M_rhsW;
+
+    M_residual_d =  M_massStiff*M_disp;
+    M_residual_d -= M_rhsNoBC;
+//    reduceSolution(M_disp, M_vel);
+
+    std::cout << "  . " << std::endl;
+    if (M_verbose)
+    {
+        std::cout << "S- system solved in " << chrono.diff()
+                  << " s. ( " << numIter << "  iterations. ) \n"
+                  << std::flush;
+    }
+
+
+    if (numIter > M_maxIterSolver)
+    {
+        M_resetPrec = true;
+    }
+
+
+
+//    postProcess();
+
+}
+
+
+
+template <typename Mesh, typename SolverType>
+void VenantKirchhofSolver<Mesh, SolverType>::
+iterateLin( bchandler_raw_type& bch )
+{
+    Chrono chrono;
+
+    std::cout << "  S-  Solving the system ... " << std::endl << std::flush;
+
+    std::cout << "  S-  Updating the boundary conditions ... " << std::flush;
+
+    chrono.start();
+
+    matrix_ptrtype matrFull( new matrix_type(M_massStiff) );
+
+    matrFull->GlobalAssemble();
+
+    vector_type rhs(M_FESpace.map());
+    rhs *= 0.;
+
+    applyBoundaryConditions( *matrFull, rhs, bch );
+
+    std::cout << "rhs_dz norm = " << rhs.NormInf() << std::endl;
 
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s \n";
@@ -669,8 +714,6 @@ iterate( bchandler_raw_type& bch )
 //    M_comm->Barrier();
 
     M_linearSolver.setMatrix(*matrFull);
-
-
 
     if  ( !M_reusePrec || M_resetPrec )
     {
@@ -699,19 +742,19 @@ iterate( bchandler_raw_type& bch )
     else
     {
         if (M_verbose)
-            std::cout << "  f-  Reusing  precond ...                \n" <<  std::flush;
+            std::cout << "  S-  Reusing  precond ...                \n" <<  std::flush;
     }
 
     int numIter = M_linearSolver.solve(M_disp, rhs);
 
-    M_vel  = ( 2.0 / M_data.timestep() ) * M_disp;
-    M_vel -= M_rhsW;
+    std::cout << "dz norm     = " << M_disp.NormInf() << std::endl;
+
 
     M_residual_d =  M_massStiff*M_disp;
-    M_residual_d -= M_rhsNoBC;
+//    M_residual_d -= M_rhsNoBC;
 //    reduceSolution(M_disp, M_vel);
 
-    std::cout << "  S- system solved. " << std::flush;
+    std::cout << "  S- system solved. " << std::endl;
 
     if (numIter > M_maxIterSolver)
     {
@@ -724,6 +767,18 @@ iterate( bchandler_raw_type& bch )
 
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
 template <typename Mesh, typename SolverType>
 void VenantKirchhofSolver<Mesh, SolverType>::
 iterate(vector_type &_sol)
@@ -732,23 +787,6 @@ iterate(vector_type &_sol)
     int status;
 
     vector_type sol(M_localMap);
-//    int maxiter = _maxiter;
-
-//    status = newton( _sol, *this, norm_inf_adaptor(), _abstol, _reltol, maxiter, _etamax, ( int ) _linesearch, _out_res, _time );
-
-//     if ( status == 1 )
-//     {
-//         std::ostringstream __ex;
-//         __ex << "VenantKirchhofSolver::iterate( Vector ) Inners newton iterations failed to converge\n";
-//         throw std::logic_error( __ex.str() );
-//     }
-//     else
-//     {
-//         std::cout << "Number of inner iterations       : " << maxiter << std::endl;
-//         _out_iter << _time << " " << maxiter << std::endl;
-//     }
-
-//    this->_w = ( 2.0 / M_data.timestep() ) * this->_d - MM_rhsW;
 
     M_vel  = ( 2.0 / M_data.timestep() ) * M_disp;
     M_vel -= M_rhsW;
@@ -759,13 +797,6 @@ iterate(vector_type &_sol)
     M_residual_d -= M_rhsNoBC;
 }
 
-
-// template <typename Mesh, typename SolverType>
-// void VenantKirchhofSolver<Mesh, SolverType>::
-// showMe( std::ostream& c ) const
-// {
-//     DataElasticStructure<Mesh, SolverType>::showMe( c );
-// }
 
 template <typename Mesh, typename SolverType>
 void VenantKirchhofSolver<Mesh, SolverType>::
@@ -778,48 +809,6 @@ evalResidual( vector_type &res, const vector_type& sol, int /*iter*/)
     // Matrices initialization
     M_stiff = M_massStiff;
 
-    /*
-//     if ( _maxiter > 1 )
-//     {
-
-        UInt ig;
-
-        // Number of displacement components
-        UInt nc = this->_d.nbcomp();
-
-        // Elementary computation and matrix assembling
-        // Loop on elements
-        for ( UInt i = 1; i <= M_FESpace.mesh()->numVolumes(); i++ )
-        {
-
-            M_FESpace.fe().updateFirstDerivQuadPt( M_FESpace.mesh()->volumeList( i ) );
-
-            _elmatK.zero();
-
-            // _dk_loc contains the displacement in the nodes
-            for ( UInt j = 0 ; j < ( UInt ) M_FESpace.fe().nbNode ; ++j )
-            {
-                for ( UInt ic = 0; ic < nc; ++ic )
-                {
-                    ig = M_FESpace.dof().localToGlobal( i, j + 1 ) - 1 + ic * this->dim();
-                    _dk_loc[ j + ic * M_FESpace.fe().nbNode ] = sol( ig );
-                }
-            }
-            // stiffness for non-linear terms
-
-            // 1/2 * \mu * ( [\grad d^k]^T \grad d : \grad v  )
-            stiff_dergradbis( this->_mu * 0.5, _dk_loc, _elmatK, M_FESpace.fe() );
-
-            // 1/4 * \lambda * ( \tr { [\grad d^k]^T \grad d }, \div v  )
-            stiff_derdiv( this->_lambda * 0.25, _dk_loc , _elmatK, M_FESpace.fe() );
-
-            // assembling
-            for ( UInt ic = 0;ic < nc;ic++ )
-                for ( UInt jc = 0;jc < nc;jc++ )
-                    assembleMatrix( M_stiff, _elmatK, M_FESpace.fe(), M_FESpace.dof(), ic, jc );
-        }
-//     }
-*/
 
     std::cout << "updating the boundary conditions" << std::flush;
     if ( !M_BCh->bdUpdateDone() )
@@ -1092,6 +1081,7 @@ solveJac( vector_type &step, const vector_type& res, double& /*linear_rel_tol*/)
     chrono.stop();
     std::cout << "done in " << chrono.diff() << "s." << std::endl;
 
+    M_jacobian.spy("jacobian");
 //    M_linearSolver.setRecursionLevel( _recur );
 
     std::cout << "   S-  Solving system                    ... "<< std::flush;
@@ -1251,8 +1241,8 @@ solveJacobian( const Real /*time*/ , bchandler_type& BCd)
 
 template<typename Mesh, typename SolverType>
 void VenantKirchhofSolver<Mesh, SolverType>::
-applyBoundaryConditions(matrix_type &matrix,
-                        vector_type &rhs,
+applyBoundaryConditions(matrix_type&        matrix,
+                        vector_type&        rhs,
                         bchandler_raw_type& BCh)
 {
 
@@ -1260,8 +1250,7 @@ applyBoundaryConditions(matrix_type &matrix,
     if ( !BCh.bdUpdateDone() )
         BCh.bdUpdate( *M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
 
-    vector_type rhsFull(*M_localMap.getRepeatedEpetra_Map());
-    rhsFull.Import(M_rhsNoBC, Zero); // ignoring non-local entries, Otherwise they are summed up lately
+    vector_type rhsFull(rhs, Repeated, Zero); // ignoring non-local entries, Otherwise they are summed up lately
 
     bcManage( matrix, rhsFull, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 1.,
               M_data.time() );
@@ -1304,9 +1293,9 @@ VenantKirchhofSolver<Mesh, SolverType>::postProcess()
 
     M_count++;
 
-    std::cout << "factor " << M_data.factor() << std::endl;
-//     if (M_verbose)
-//     {
+//    std::cout << "factor " << M_data.factor() << std::endl;
+     if (M_verbose)
+     {
         if ( fmod( float( M_count ), float( M_data.verbose() ) ) == 0.0 )
         {
             if (M_verbose) std::cout << "  S-  Post-processing \n";
@@ -1340,8 +1329,8 @@ VenantKirchhofSolver<Mesh, SolverType>::postProcess()
                     break;
             }
 
-            vector_type disp(M_disp,*M_localMap.getRepeatedEpetra_Map());
-            vector_type vel (M_vel,*M_localMap.getRepeatedEpetra_Map());
+            vector_type disp(M_disp, Repeated);
+            vector_type vel (M_vel,  Repeated);
 
 
             namedef = "defor." + me + "." + name + ".mesh";
@@ -1350,13 +1339,13 @@ VenantKirchhofSolver<Mesh, SolverType>::postProcess()
             meditSolutionWriter( "dep_y." + me + "." + name + ".bb", *M_FESpace.mesh(), disp, M_FESpace.dof().numTotalDof()*1);
             meditSolutionWriter( "dep_z." + me + "." + name + ".bb", *M_FESpace.mesh(), disp, M_FESpace.dof().numTotalDof()*2);
 
-            meditSolutionWriter( "res_x." + me + "." + name + ".bb", *M_FESpace.mesh(), M_sxx, M_FESpace.dof().numTotalDof()*0);
-            meditSolutionWriter( "res_y." + me + "." + name + ".bb", *M_FESpace.mesh(), M_syy, M_FESpace.dof().numTotalDof()*1);
-            meditSolutionWriter( "res_z." + me + "." + name + ".bb", *M_FESpace.mesh(), M_szz, M_FESpace.dof().numTotalDof()*2);
+//             meditSolutionWriter( "res_x." + me + "." + name + ".bb", *M_FESpace.mesh(), M_sxx, M_FESpace.dof().numTotalDof()*0);
+//             meditSolutionWriter( "res_y." + me + "." + name + ".bb", *M_FESpace.mesh(), M_syy, M_FESpace.dof().numTotalDof()*1);
+//             meditSolutionWriter( "res_z." + me + "." + name + ".bb", *M_FESpace.mesh(), M_szz, M_FESpace.dof().numTotalDof()*2);
 
-            meditSolutionWriter( "rez_x." + me + "." + name + ".bb", *M_FESpace.mesh(), M_residual_d, M_FESpace.dof().numTotalDof()*0);
-            meditSolutionWriter( "rez_y." + me + "." + name + ".bb", *M_FESpace.mesh(), M_residual_d, M_FESpace.dof().numTotalDof()*1);
-            meditSolutionWriter( "rez_z." + me + "." + name + ".bb", *M_FESpace.mesh(), M_residual_d, M_FESpace.dof().numTotalDof()*2);
+            meditSolutionWriter( "resd_x." + me + "." + name + ".bb", *M_FESpace.mesh(), M_residual_d, M_FESpace.dof().numTotalDof()*0);
+            meditSolutionWriter( "resd_y." + me + "." + name + ".bb", *M_FESpace.mesh(), M_residual_d, M_FESpace.dof().numTotalDof()*1);
+            meditSolutionWriter( "resd_z." + me + "." + name + ".bb", *M_FESpace.mesh(), M_residual_d, M_FESpace.dof().numTotalDof()*2);
 
 //             wr_medit_ascii_scalar( "dep_x." + name + "." + me + ".bb", disp.getEpetraVector().Values() + 0*dim(), M_FESpace.mesh()->numVertices() );
 //             wr_medit_ascii_scalar( "dep_y." + name + "." + me + ".bb", disp.getEpetraVector().Values() + 1*dim(), M_FESpace.mesh()->numVertices() );
@@ -1369,13 +1358,13 @@ VenantKirchhofSolver<Mesh, SolverType>::postProcess()
             system( ( "ln -sf " + namedef + " dep_y." + me + "." + name + ".mesh" ).data() );
             system( ( "ln -sf " + namedef + " dep_z." + me + "." + name + ".mesh" ).data() );
 
-            system( ( "ln -sf " + namedef + " res_x." + me + "." + name + ".mesh" ).data() );
-            system( ( "ln -sf " + namedef + " res_y." + me + "." + name + ".mesh" ).data() );
-            system( ( "ln -sf " + namedef + " res_z." + me + "." + name + ".mesh" ).data() );
+//             system( ( "ln -sf " + namedef + " res_x." + me + "." + name + ".mesh" ).data() );
+//             system( ( "ln -sf " + namedef + " res_y." + me + "." + name + ".mesh" ).data() );
+//             system( ( "ln -sf " + namedef + " res_z." + me + "." + name + ".mesh" ).data() );
 
-            system( ( "ln -sf " + namedef + " rez_x." + me + "." + name + ".mesh" ).data() );
-            system( ( "ln -sf " + namedef + " rez_y." + me + "." + name + ".mesh" ).data() );
-            system( ( "ln -sf " + namedef + " rez_z." + me + "." + name + ".mesh" ).data() );
+            system( ( "ln -sf " + namedef + " resd_x." + me + "." + name + ".mesh" ).data() );
+            system( ( "ln -sf " + namedef + " resd_y." + me + "." + name + ".mesh" ).data() );
+            system( ( "ln -sf " + namedef + " resd_z." + me + "." + name + ".mesh" ).data() );
 
             // system(("ln -s "+M_FESpace.mesh()_file+" veloc."+name+".mesh").data());
 
@@ -1392,7 +1381,7 @@ VenantKirchhofSolver<Mesh, SolverType>::postProcess()
             // system(("ln -s "+M_FESpace.mesh()_file+" veloc."+name+".mesh").data());
 
         }
-//     }
+     }
 }
 
 }

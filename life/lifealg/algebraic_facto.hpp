@@ -58,7 +58,7 @@
 #endif
 
 #include <life/lifearray/sparseArray.hpp>
-#include <life/lifealg/dataAztec.hpp>
+//#include <life/lifealg/dataAztec.hpp>
 
 namespace LifeV
 {

@@ -42,7 +42,7 @@
 #include <life/lifefem/bcManage.hpp>
 #include <life/lifealg/algebraic_facto.hpp>
 #include <life/lifecore/chrono.hpp>
-#include <life/lifealg/dataAztec.hpp>
+//#include <life/lifealg/dataAztec.hpp>
 
 namespace LifeV
 {
@@ -593,7 +593,7 @@ iterate( const Real& time )
         }
 
         // ALE term: 0.5 div (u^n-w) u v
-        mass_divw( -this->density(), _w_loc, _elmatC, this->_fe_u, 0, 0, nc_u );
+        mass_divw( - this->density(), _w_loc, _elmatC, this->_fe_u, 0, 0, nc_u );
 
         // loop on velocity components
         for ( UInt ic = 0;ic < nc_u;ic++ )
@@ -976,6 +976,8 @@ iterateLin( const Real& time, BCHandler& BCh_du )
                 _dw_loc.vec( ) [ iloc + ic * this->_fe_u.nbNode ] = this->_dwInterp( ig );               // dw local
             }
         }
+
+
 
         for ( UInt k = 0 ; k < ( UInt ) this->_fe_p.nbNode ; k++ )
         {

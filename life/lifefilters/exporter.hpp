@@ -54,12 +54,12 @@ namespace LifeV
 {
 
 //typedef boost::numeric::ublas::vector_range< Vector >  VectorRange;
-//typedef EpetraVector<double> VectorRange;
+//typedef EpetraVector VectorRange;
 //typedef double* VectorRange;
 
 class ExporterData {
 
-    typedef EpetraVector<double> vector_rawtype;
+    typedef EpetraVector vector_rawtype;
     typedef boost::shared_ptr<vector_rawtype> vector_ptrtype;
 
 public:
@@ -72,6 +72,7 @@ public:
     UInt dim() const;
     UInt start() const { return M_start; }
     Type type() const;
+    const vector_ptrtype getPtr() const { return M_vr; }
 
 private:
     std::string M_prefix;
@@ -90,6 +91,7 @@ class Exporter {
 
 public:
     typedef boost::shared_ptr<Mesh> mesh_ptrtype;
+    typedef ExporterData::vector_rawtype vector_rawtype;
     typedef ExporterData::vector_ptrtype vector_ptrtype;
 
     /**
@@ -172,9 +174,9 @@ Exporter<Mesh>::Exporter(const GetPot& dfile, mesh_ptrtype mesh, const std::stri
 						 int const procId)
     :
     M_prefix(prefix),
-    M_count(dfile("ensight/start",0)),
-    M_save(dfile("ensight/save",1)),
-    M_multimesh(dfile("ensight/multimesh",0)),
+    M_count(dfile("exporter/start",0)),
+    M_save(dfile("exporter/save",1)),
+    M_multimesh(dfile("exporter/multimesh",true)),
     M_steps(0)
 {
     setMeshProcId(mesh,procId);
@@ -185,7 +187,7 @@ Exporter<Mesh>::Exporter(const GetPot& dfile, const std::string prefix):
     M_prefix(prefix),
     M_count(dfile("ensight/start",0)),
     M_save(dfile("ensight/save",1)),
-    M_multimesh(dfile("ensight/multimesh",0)),
+    M_multimesh(dfile("ensight/multimesh",true)),
     M_steps(0)
 {
 }

@@ -33,39 +33,15 @@ Real fzeroSP(const Real& /*t*/,
 
 steklovPoincare::steklovPoincare():
     super                                ( ),
-    M_dzSolid                            ( ),
-    M_dzFluid                            ( ),
-    M_rhs_dz                             ( ),
-    M_residualS                          ( ),
-    M_residualF                          ( ),
-    M_residualFSI                        ( ),
-    M_strongResidualFSI                  ( ),
+    dz                                   ( ),
     M_defOmega                           ( 0.005 ),
     M_defOmegaS                          ( 0.005 ),
     M_defOmegaF                          ( 0.005 ),
     M_aitkFS                             ( ),
-    M_interfaceNbreDof                   ( 0 ),
-    M_interfaceDisplacement              ( 0 ),
-    M_interfaceStress                    ( 0 ),
-    M_interfaceVelocity                  ( 0 ),
-    M_bcvSolidInterfaceDisp              ( new  BCVectorInterface ),
-    M_bcvSolidLinInterfaceDisp           ( new  BCVectorInterface ),
-    M_bcvSolidInvLinInterfaceStress      ( new  BCVectorInterface ),
-    M_bcvSolidInterfaceStress            ( new  BCVectorInterface ),
-    M_bcvSolidLinInterfaceStress         ( new  BCVectorInterface ),
-    M_bcvFluidInterfaceDisp              ( new  BCVectorInterface ),
-    M_bcvFluidLinInterfaceDisp           ( new  BCVectorInterface ),
-    M_bcvFluidLinInterfaceVel            ( new  BCVectorInterface ),
-    M_bcvFluidInterfaceStress            ( new  BCVectorInterface ),
-    M_bcvReducedFluidInterfaceAcc        ( new  BCVectorInterface ),
-    M_bcvReducedFluidInvInterfaceAcc     ( new  BCVectorInterface ),
-//     M_dofFluid(),
-//     M_dofSolid(),
-    M_dataJacobian                       ( this )
 {
     this->setPreconditioner( NEWTON );
     this->setDDNPreconditioner( DDN_DIRICHLET_NEUMANN );
-    M_aitkFS.setDefault( M_defOmegaS, M_defOmegaF );
+//     M_aitkFS.setDefault( M_defOmegaS, M_defOmegaF );
 }
 
 steklovPoincare::~steklovPoincare()
@@ -97,95 +73,22 @@ steklovPoincare::setup()
 {
 
     // call FSIOperator setup()
+    setLinearFluid(true);
+    setLinearSolid(true);
 
     super::setup();
 
-    if ( this->M_solid && this->M_fluid )
+    M_dz.reset    (new vector_type(*this->M_solidInterfaceMap));
+
+    M_epetraOper.reset( new Epetra_SteklovPoincare(this));
+
+    if ( this->isFluid() )
     {
-        M_dofFluid->setup(this->M_fluid->velFESpace().refFE(), this->M_fluid->velFESpace().dof());
-        M_dofFluid->update(M_fluid->velFESpace().mesh(), 1);
-
-        M_dofSolid->setup(this->M_solid->dFESpace().refFE(), this->M_solid->dFESpace().dof());
-        M_dofSolid->update(M_solid->dFESpace().mesh(), 1);
-
-
-        const std::map<ID, ID>& fluidDofMap = M_dofFluid->locDofMap();
-        const std::map<ID, ID>& solidDofMap = M_dofSolid->locDofMap();
-        const std::map<ID, ID>& FSIDofMap   = M_dofStructureToHarmonicExtension->locDofMap();
-
-
-        for (std::map<ID,ID>::const_iterator it = FSIDofMap.begin(); it != FSIDofMap.end(); ++it)
-        {
-            // dof number on the solid mesh
-            ID dofF = it->first;
-            // entry number in the solid.residual()
-            ID dofS = it->second;
-
-            std::map<ID, ID>::const_iterator dofF1 = fluidDofMap.find(dofF);
-            std::map<ID, ID>::const_iterator dofS1 = solidDofMap.find(dofS);
-
-//            ID iLocalF = dofF1->second;
-            ID iLocalS = dofS1->second;
-
-//             std::cout << iLocalF << " " << iLocalS << std::endl;
-            M_dofFluid->set(dofF1->first, iLocalS);
-        }
-
-        // building the inverse solild dof map
-        M_dofSolidInv->buildInverse(*M_dofSolid);
-        M_dofFluidInv->buildInverse(*M_dofFluid);
-    }
-    else
-    {
-        std::cout << "Fluid or Structure not set ... " << std::endl;
-        exit(1);
+        M_rhsNew.reset(new vector_type(this->M_fluid->getMap()));
+        M_beta.reset  (new vector_type(this->M_fluid->getMap()));
     }
 
-//    M_interfaceNbreDof      = this->M_dofHarmonicExtensionToFluid->nbInterfaceDof();
 
-    M_interfaceNbreDof      = this->M_dofFluid->nbInterfaceDof();
-
-    M_interfaceDisplacement = ZeroVector(3*M_interfaceNbreDof);
-    M_interfaceStress       = ZeroVector(3*M_interfaceNbreDof);
-    M_interfaceVelocity     = ZeroVector(3*M_interfaceNbreDof);
-
-    Debug(6205) << "Nbre dof Interface: " << M_interfaceDisplacement.size() << "\n";
-
-    BCHandler BCh;
-
-    BCFunctionBase f0( fzeroSP);
-
-    BCh.addBC("Interface", 1, Natural,   Full, f0, 3);
-    BCh.addBC("interface", 1, Essential, Full, f0, 3);
-
-    BCh.bdUpdate(this->fluid().velFESpace().mesh(),
-                 this->fluid().velFESpace().feBd(),
-                 this->fluid().velFESpace().dof());
-
-    BCBase const &BCbEss = BCh[1];
-
-    // Number of local Dof (i.e. nodes) in this face
-    UInt nDofF = this->fluid().velFESpace().feBd().nbNode;
-
-    // Number of total scalar Dof
-    UInt totalDof = this->fluid().velFESpace().dof().numTotalDof();
-
-    // Number of components involved in this boundary condition
-    UInt nComp = BCbEss.numberOfComponents();
-
-    M_dzSolid.resize( 3*M_solid->dFESpace().dof().numTotalDof() );
-    M_dzFluid.resize( 3*M_fluid->velFESpace().dof().numTotalDof() );
-
-    M_rhs_dz.resize( 3*M_solid->dFESpace().dof().numTotalDof() );
-
-    M_residualS.resize( M_solid->dFESpace().dof().numTotalDof() );
-    M_residualF.resize( M_fluid->velFESpace().dof().numTotalDof() );
-    M_residualFSI.resize( M_fluid->velFESpace().dof().numTotalDof() );
-    M_strongResidualFSI.resize( M_fluid->velFESpace().dof().numTotalDof() );
-
-    M_aitkFS.setup( 3*M_solid->dFESpace().dof().numTotalDof() );
-
-    M_reducedLinFluid.reset(new reducedLinFluid(this, M_fluid, M_solid));
 }
 
 
@@ -203,35 +106,117 @@ void steklovPoincare::eval(const vector_type& disp,
                            vector_type&       dispNew,
                            vector_type&       velo)
 {
-    if(status) M_nbEval = 0; // new time step
-    M_nbEval++;
 
-    M_interfaceDisplacement = disp;
+    if(status)
+        {
+            M_nbEval = 0; // new time step
+            this->M_fluid->resetPrec();
+            //this->M_solid->resetPrec();
+        }
 
-    std::cout << this->fluidMpi() << " " << this->solidMpi() << std::endl;
+    M_nbEval++ ;
 
-    if (this->fluidMpi())
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    // possibly unsafe when using more cpus, since both has repeated maps
+    *M_lambdaFluid       = _disp;
+    *M_lambdaSolid       = _disp
+
+    *this->M_sigmaFluid *= 0.;
+
+    if (this->isFluid())
     {
-//         M_fluid->updateMesh(M_time);
-//         M_fluid->iterate   (M_time);
+        this->M_meshMotion->iterate();
+
+        vector_type const meshDisplacement( M_meshMotion->displacement(), this->M_meshMotion->getRepeatedEpetraMap() );
+        this->moveMesh(meshDisplacement);
+
+        this->transferMeshMotionOnFluid(meshDisplacement,
+                                        *this->M_veloFluidMesh);
+
+        *this->M_veloFluidMesh    -= *M_dispFluidMeshOld;
+        *this->M_veloFluidMesh    *= 1./(M_dataFluid->timestep());
+
+        // copying displacement to a repeated indeces displacement, otherwise the mesh wont know
+        // the value of the displacement for some points
+
+        this->moveMesh(meshDisplacement);
+
+        *M_beta *= 0.;
+
+        vector_type const meshDispDiff( M_meshMotion->dispDiff(), this->M_meshMotion->getRepeatedEpetraMap() );
+
+        this->interpolateVelocity(meshDispDiff, *M_beta);
+
+        *M_beta *= -1./M_dataFluid->timestep();
+
+        *M_beta  += *this->M_un;
+
+        double alpha = 1./M_dataFluid->timestep();
+
+        *M_rhsNew   = *this->M_rhs;
+        *M_rhsNew  *= alpha;
+
+        this->M_fluid->updateSystem( alpha, *M_beta, *M_rhsNew );
+
+        this->M_fluid->iterate( *M_BCh_u );
+
+        this->transferFluidOnInterface(this->M_fluid->residual(), *this->M_sigmaFluid);
+
     }
 
-    if (this->solidMpi())
+
+     if ( true && this->isFluid() )
+         {
+             vector_type vel  (this->fluid().velFESpace().map());
+             vector_type press(this->fluid().pressFESpace().map());
+
+             vel.subset(this->M_fluid->solution());
+             press.subset(this->M_fluid->solution(), this->fluid().velFESpace().dim()*this->fluid().pressFESpace().fieldDim());
+
+
+             std::cout << "norm_inf( vel ) " << vel.NormInf() << std::endl;
+             std::cout << "norm_inf( press ) " << press.NormInf() << std::endl;
+             this->M_fluid->postProcess();
+         }
+
+
+
+    if (this->isSolid())
     {
-//         M_solid->setRecur(0);
-//         M_solid->iterate();
+        this->M_solid->iterate( *M_BCh_d );
+        this->transferSolidOnInterface(this->M_solid->disp(),      *this->M_lambdaSolid);
+        this->transferSolidOnInterface(this->M_solid->vel(),       *this->M_lambdaDotSolid);
+        this->transferSolidOnInterface(this->M_solid->residual() , *this->M_sigmaSolid);
     }
 
 
-    dispNew = M_solid->disp();
-    velo    = M_solid->w();
+     if ( true && this->isSolid() )
+     {
+         this->solid().postProcess();
+     }
 
-    std::cout << "                ::: norm(disp     ) = "
-              << disp.NomrInf() << std::endl;
-    std::cout << "                ::: norm(dispNew  ) = "
-              << dispNew.NormInf() << std::endl;
-    std::cout << "                ::: norm(velo     ) = "
-              << velo.NormInf() << std::endl;
+// possibly unsafe when using more cpus, since both has repeated maps
+
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+
+    std::cout << " ::: norm(disp     )    = " << _disp.NormInf() << std::endl;
+    std::cout << " ::: norm(dispNew  )    = " << this->M_lambdaSolid->NormInf() << std::endl;
+    std::cout << " ::: norm(velo     )    = " << this->M_lambdaDotSolid->NormInf() << std::endl;
+    std::cout << " ::: max Residual Fluid = " << M_sigmaFluid->NormInf() << std::endl;
+    std::cout << " ::: max Residual Solid = " << M_sigmaSolid->NormInf() << std::endl;
+
+    if (this->isFluid())
+        std::cout << "Max ResidualF        = " << M_fluid->residual().NormInf() << std::endl;
+    if (this->isSolid())
+        {
+            std::cout << "NL2 DiplacementS     = " << M_solid->disp().Norm2() << std::endl;
+            std::cout << "Max ResidualS        = " << M_solid->residual().NormInf() << std::endl;
+        }
+
 }
 
 void steklovPoincare::evalResidual(Vector       &res,
@@ -976,149 +961,6 @@ void steklovPoincare::computeResidualFSI()
 
 }
 
-
-// transfer from the solid domain to the interface
-Vector steklovPoincare::transferFluidOnInterface(Vector const& _vec)
-{
-
-    // Add the solid vector on the interface to get the residual
-
-
-    Vector vec = ZeroVector(3*M_interfaceNbreDof);
-
-    FOR_EACH_INTERFACE_DOF_FLUID( vec[dofFS + jDim*M_interfaceNbreDof] =
-                                  _vec[dofF  + jDim*totalDofFluid]);
-
-//     FOR_EACH_INTERFACE_DOF_FLUID( std::cout << dofF  + jDim*totalDofFluid << " " <<
-//                                   dofFS + jDim*M_interfaceNbreDof << " -> "
-//                                   << _vec[dofFS + jDim*M_interfaceNbreDof] << std::endl
-//                                   );
-    return vec;
-
-}
-
-
-
-// transfer from the interface on the solid domain
-Vector steklovPoincare::transferInterfaceOnFluid(Vector const& _vec)
-{
-
-    // Add the fluid and solid stress on the interface to get the residual
-
-//!BUG
-    Vector vec = ZeroVector(3*M_interfaceNbreDof);
-//
-    FOR_EACH_INTERFACE_DOF_FLUID( vec[dofF  + jDim*totalDofFluid] =
-                                  _vec[dofFS + jDim*M_interfaceNbreDof]
-                                  );
-
-
-    return vec;
-}
-
-
-// transfer from the solid domain to the interface
-Vector steklovPoincare::transferSolidOnInterface(Vector const& _vec)
-{
-
-    // Add the solid vector on the interface to get the residual
-
-
-    Vector vec = ZeroVector(3*M_interfaceNbreDof);
-
-    FOR_EACH_INTERFACE_DOF_SOLID( vec[dofFS + jDim*M_interfaceNbreDof] =
-                                  _vec[dofS  + jDim*totalDofSolid]);
-
-    return vec;
-
-}
-
-
-
-// transfer from the interface on the solid domain
-Vector steklovPoincare::transferInterfaceOnSolid(Vector const& _vec)
-{
-
-    // Add the fluid and solid stress on the interface to get the residual
-
-
-    Vector vec = ZeroVector(3*M_interfaceNbreDof);
-
-    FOR_EACH_INTERFACE_DOF_SOLID( vec[dofS  + jDim*totalDofSolid] =
-                                  _vec[dofFS + jDim*M_interfaceNbreDof]);
-
-    return vec;
-}
-
-
-
-
-
-
-
-void steklovPoincare::setResidualFSI(double const* _res)
-{
-    FOR_EACH_INTERFACE_DOF( M_residualFSI[IDfluid - 1 + jDim*totalDofFluid] =
-                            _res[IDsolid - 1 + jDim*totalDofSolid] );
-
-}
-
-void steklovPoincare::setResidualFSI( Vector const&  _res)
-{
-    FOR_EACH_INTERFACE_DOF( M_residualFSI[IDfluid - 1 + jDim*totalDofFluid] =
-                            _res[IDsolid - 1 + jDim*totalDofSolid] );
-
-}
-
-
-Vector steklovPoincare::getResidualFSIOnSolid()
-{
-    Vector vec(M_residualS.size());
-    vec = ZeroVector( vec.size() );
-
-    FOR_EACH_INTERFACE_DOF( vec[IDsolid - 1 + jDim*totalDofSolid] =
-                            M_residualF[IDfluid - 1 + jDim*totalDofFluid] -
-                            M_residualS[IDsolid - 1 + jDim*totalDofSolid] );
-    return vec;
-}
-
-
-void steklovPoincare::getResidualFSIOnSolid(Vector& _vec)
-{
-    FOR_EACH_INTERFACE_DOF( _vec[IDsolid - 1 + jDim*totalDofSolid] =
-                            M_residualF[IDfluid - 1 + jDim*totalDofFluid] -
-                            M_residualS[IDsolid - 1 + jDim*totalDofSolid] );
-}
-
-
-Vector steklovPoincare::getSolidInterfaceOnFluid(Vector const& _vec)
-{
-    Vector vec(M_residualF.size());
-
-    FOR_EACH_INTERFACE_DOF( vec[IDfluid - 1 + jDim*totalDofFluid] =
-                            _vec[IDsolid - 1 + jDim*totalDofSolid] );
-    return vec;
-}
-
-Vector steklovPoincare::getSolidInterfaceOnSolid(double const* _vec)
-{
-    Vector vec(M_residualF.size());
-
-    FOR_EACH_INTERFACE_DOF( vec[IDsolid - 1 + jDim*totalDofSolid] =
-                            _vec[IDsolid - 1 + jDim*totalDofSolid] );
-    return vec;
-}
-
-
-Vector steklovPoincare::getFluidInterfaceOnSolid(Vector const& _vec)
-{
-    Vector vec(M_residualS.size());
-
-    FOR_EACH_INTERFACE_DOF( vec[IDsolid - 1 + jDim*totalDofSolid] =
-                            _vec[IDfluid - 1 + jDim*totalDofSolid] );
-
-    return vec;
-}
 
 //
 // add steklovPoincare to factory

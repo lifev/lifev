@@ -18,43 +18,55 @@
 */
 
 /*!
-  \file ensight.hpp
-  \author M.A. Fernandez, C. Prud'homme, S. Deparis
-  \date 10/2005 08/2007
+  \file hdf5exporter.hpp
+  \author S. Deparis
+  \date 11/2007
   \version 1.0
 
-  \brief This file provides an interface for post-processing with ensight
+  \brief This file provides an interface for post-processing with hdf5
 
   Usage: two steps
   - first: add the variables using addVariable
   - second: call postProcess( time );
 */
-#ifndef _ENSIGHT_H_
-#define _ENSIGHT_H_
+
+#ifndef _HDF5EXPORTER_H_
+#define _HDF5EXPORTER_H_
+
+
+#include <lifeconfig.h>
+#ifndef HAVE_HDF5
+#error you should reconfigure with --with-hdf5=... flag
+#endif
 
 #include <life/lifefilters/exporter.hpp>
-
+#include <hdf5.h>
+#include <EpetraExt_HDF5.h>
 
 namespace LifeV
 {
 
 /**
- * \class Ensight
- * \brief Ensight data exporter
+ * \class Hdf5exporter
+ * \brief Hdf5exporter data exporter
  */
 template<typename Mesh>
-class Ensight : public Exporter<Mesh> {
+class Hdf5exporter : public Exporter<Mesh> {
 
     typedef Exporter<Mesh> super;
     typedef typename super::mesh_ptrtype  mesh_ptrtype;
+    typedef typename super::vector_rawtype vector_type;
     typedef typename super::vector_ptrtype vector_ptrtype;
+
+    typedef EpetraExt::HDF5         hdf5_type;
+    typedef boost::shared_ptr<hdf5_type> hdf5_ptrtype;
 
 public:
 
     /**
-       Constructor for Ensight
+       Constructor for Hdf5exporter
 
-       \param dfile the GetPot data file where you must provide and [ensight] section with:
+       \param dfile the GetPot data file where you must provide and [hdf5exporter] section with:
        "start" (start index for filenames 0 for 000, 1 for 001 etc.),
        "save" (how many time steps per posptrocessing)
        "multimesh" (=true if the mesh has to be saved at each post-processing step)
@@ -65,9 +77,9 @@ public:
 
        \param the procId determines de CPU id. if negative, it ussemes there is only one processor
     */
-    Ensight(const GetPot& dfile, mesh_ptrtype mesh, const std::string prefix, const int procId );
+    Hdf5exporter(const GetPot& dfile, mesh_ptrtype mesh, const std::string prefix, const int procId);
 
-    Ensight(const GetPot& dfile, const std::string prefix);
+    Hdf5exporter(const GetPot& dfile, const std::string prefix);
 
 
     /**
@@ -87,15 +99,17 @@ public:
 
 private:
 
-    void M_wr_case(const Real& time);
-    void M_wr_ascii_geo( const std::string geo_file );
+    void M_wr_Xdmf(const Real& time);
+    void M_wr_geo( const std::string geo_file );
     //void M_getPostfix();
-    void M_wr_ascii(const ExporterData& dvar);
-    void M_wr_ascii_scalar(const ExporterData& dvar);
-    void M_wr_ascii_vector(const ExporterData& dvar);
-    void M_case_mesh_section(std::ofstream& casef);
-    void M_case_variable_section(std::ofstream& casef);
-    void M_case_time_section(std::ofstream& casef, const Real& time);
+    void M_wr_var(const ExporterData& dvar);
+    void M_wr_scalar(const ExporterData& dvar);
+    void M_wr_vector(const ExporterData& dvar);
+    void M_Xdmf_mesh_section(std::ofstream& casef);
+    void M_Xdmf_variable_section(std::ofstream& casef);
+    void M_Xdmf_time_section(std::ofstream& casef, const Real& time);
+
+    hdf5_ptrtype HDF5;
 
 };
 
@@ -104,22 +118,23 @@ private:
 // Implementation
 //
 template<typename Mesh>
-Ensight<Mesh>::Ensight(const GetPot& dfile, mesh_ptrtype mesh, const std::string prefix,
-                       int const procId)
+Hdf5exporter<Mesh>::Hdf5exporter(const GetPot& dfile, mesh_ptrtype mesh, const std::string prefix,
+                                 const int procId)
     :
-    super(dfile, mesh, prefix,procId)
+    super(dfile, mesh, prefix,procId),
+    HDF5()
 {
     setMeshProcId(mesh,procId);
 }
 
 template<typename Mesh>
-Ensight<Mesh>::Ensight(const GetPot& dfile, const std::string prefix):
+Hdf5exporter<Mesh>::Hdf5exporter(const GetPot& dfile, const std::string prefix):
     super(dfile,prefix)
 {
 }
 
 template<typename Mesh>
-void Ensight<Mesh>::setMeshProcId( mesh_ptrtype mesh , int const procId )
+void Hdf5exporter<Mesh>::setMeshProcId( mesh_ptrtype mesh , int const procId )
 {
 
     initMeshProcId( mesh, procId );
@@ -141,51 +156,56 @@ void Ensight<Mesh>::setMeshProcId( mesh_ptrtype mesh , int const procId )
             this->M_nbLocalDof = 8;
             break;
         default:
-            ERROR_MSG( "FE not allowed in Ensight writer" );
+            ERROR_MSG( "FE not allowed in Hdf5exporter writer" );
         }
-
-    if (!this->M_multimesh)
-      M_wr_ascii_geo( this->M_prefix+this->M_me+".geo" );
-
-
 }
 
 template<typename Mesh>
-void Ensight<Mesh>::postProcess(const Real& time)
+void Hdf5exporter<Mesh>::postProcess(const Real& time)
 {
+    if ( HDF5.get() == 0)
+        {
+            HDF5.reset(new hdf5_type(this->M_listData.begin()->getPtr()->Comm()));
+            HDF5->Create(this->M_prefix+".h5");
+
+            if (!this->M_multimesh)
+                M_wr_geo( "geo" );
+        }
+
+
     typedef std::list< ExporterData >::const_iterator Iterator;
 
     this->getPostfix();
 
     if ( this->M_postfix != "***" )
         {
-            if (!this->M_procId) std::cout << "  x-  Ensight post-processing..."<< std::endl;
+            if (!this->M_procId) std::cout << "  x-  Hdf5exporter post-processing..."<< std::endl;
             Chrono chrono;
             chrono.start();
             for (Iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
                 {
-                    M_wr_ascii(*i);
+                    M_wr_var(*i);
                 }
-            M_wr_case(time);
+            M_wr_Xdmf(time);
 
             if (this->M_multimesh)
-                M_wr_ascii_geo( this->M_prefix+"."+this->M_postfix+this->M_me+".geo" );
+                M_wr_geo( "geo." + this->M_postfix);
             chrono.stop();
             if (!this->M_procId) std::cout << "      done in " << chrono.diff() << " s." << std::endl;
         }
 }
 
 template <typename Mesh>
-void Ensight<Mesh>::M_wr_ascii(const ExporterData& dvar)
+void Hdf5exporter<Mesh>::M_wr_var(const ExporterData& dvar)
 {
 
     switch( dvar.type() )
         {
         case ExporterData::Scalar:
-            M_wr_ascii_scalar(dvar);
+            M_wr_scalar(dvar);
             break;
         case ExporterData::Vector:
-            M_wr_ascii_vector(dvar);
+            M_wr_vector(dvar);
             break;
         }
 
@@ -194,73 +214,47 @@ void Ensight<Mesh>::M_wr_ascii(const ExporterData& dvar)
 
 
 template <typename Mesh>
-void Ensight<Mesh>::M_wr_ascii_scalar(const ExporterData& dvar)
+void Hdf5exporter<Mesh>::M_wr_scalar(const ExporterData& dvar)
 {
+    /* Examples:
+    HDF5->Write("map-" + toString(Comm.NumProc()), Map);
+    HDF5->Write("matrix", Matrix);
+    HDF5->Write("LHS", LHS);
+    HDF5->Write("RHS", RHS);
+    */
 
-    std::ofstream sclf( (dvar.prefix()+"."+this->M_postfix+this->M_me+".scl").c_str() );
+    std::string scalars ("Scalars");
+    std::string varname (dvar.prefix()+"."+this->M_postfix);
 
-    UInt count=0;
 
-    UInt start = dvar.start();
-    UInt nVert = this->M_mesh->numVertices();
-    sclf<<"Scalar per node\n";
-    //for (UInt i=start;i<dim;++i)
-
-    sclf.setf(std::ios::right | std::ios_base::scientific);
-    sclf.precision(5);
-
-    for (UInt i=1;i<=nVert;++i)
-        {
-            int id = this->M_mesh->pointList( i ).id();
-            sclf.width(12);
-            sclf << dvar(start+id) ;
-            ++count;
-            if ( count == 6 )
-                {
-                    sclf << "\n";
-                    count=0;
-                }
-        }
-    sclf << std::endl;
-    sclf.close();
+    HDF5->Write(varname, dvar.getPtr()->getEpetraVector());
 }
 
-template <typename Mesh> void Ensight<Mesh>::M_wr_ascii_vector(const ExporterData& dvar)
+template <typename Mesh> void Hdf5exporter<Mesh>::M_wr_vector(const ExporterData& dvar)
 {
-    std::ofstream vctf( (dvar.prefix()+"."+this->M_postfix+this->M_me+".vct").c_str() );
-
-    UInt count=0;
 
     UInt dim   = dvar.dim();
     UInt start = dvar.start();
     UInt nVert = this->M_mesh->numVertices();
 
-    vctf<<"Vector per node\n";
-    //for (UInt i=start;i<dim;++i)
+    for (UInt d ( 0 ); d < nDimensions; ++d)
+        {
+            EpetraMap subMap(dvar.getPtr()->Map(), start, dim);
+            vector_type subVar(subMap);
+            subVar.subset(*dvar.getPtr(),start);
 
-    vctf.setf(std::ios::right | std::ios_base::scientific);
-    vctf.precision(5);
+            std::string vectors ("Vectors");
+            std::ostringstream varname;
+            varname << dvar.prefix() << "." << d << "." << this->M_postfix;
+            HDF5->Write(varname.str(), subVar.getEpetraVector());
 
-    for (UInt i=1;i<=nVert;++i)
-        for (UInt j=0; j< nDimensions;++j)
-            {
-                int id = this->M_mesh->pointList( i ).id();
-                vctf.width(12);
-                vctf << dvar(start+j*dim+id) ;
-                ++count;
-                if ( count == 6 )
-                    {
-                        vctf << "\n";
-                        count=0;
-                    }
-            }
-    vctf << std::endl;
-    vctf.close();
+        }
+
 }
 
-
-template <typename Mesh> void Ensight<Mesh>::M_wr_ascii_geo(const std::string geo_file)
+template <typename Mesh> void Hdf5exporter<Mesh>::M_wr_geo(const std::string geo_name)
 {
+#if 0
     std::ofstream geof( geo_file.c_str() );
     ID nV = this->M_mesh->numVertices();
     ID nE = this->M_mesh->numVolumes();
@@ -312,63 +306,23 @@ template <typename Mesh> void Ensight<Mesh>::M_wr_ascii_geo(const std::string ge
 
         }
 
-    // boundary parts
-#if 0
-    std::set<EntityFlag> flags;
-    std::map< EntityFlag, __gnu_cxx::slist<ID> > faces;
-    EntityFlag marker;
-    typedef std::set<EntityFlag>::const_iterator Iterator_flag;
-    typedef __gnu_cxx::slist<ID>::const_iterator Iterator_face;
-
-    Iterator_flag result;
-
-    ID nBF = M_mesh->numBFaces();
-    for (ID i=1; i <= nBF; ++i)
-        {
-            marker = M_mesh->boundaryFace(i).marker();
-            flags.insert(marker);
-            faces[marker].push_front(i);
-        }
-
-    for (Iterator_flag i=flags.begin(); i!= flags.end(); ++i)
-        {
-            marker = *i;
-            geof<< "part";
-            geof.width(8);
-            ++part;
-            geof<< part << "\n";
-            geof<<"boundary ref "<< marker << "\n";
-            __gnu_cxx::slist<ID>& faceList= faces[marker];
-            geof<< M_bdFEstr << "\n";
-            geof.width(8);
-            geof<< faceList.size() << "\n";
-            for (Iterator_face j=faceList.begin(); j!= faceList.end(); ++j)
-                {
-                    for( ID k=1; k <= M_nbLocalBdDof; ++k)
-                        {
-                            geof.width(8);
-                            geof << M_mesh->boundaryFace(*j).point(k).id();
-                        }
-                    geof << "\n";
-                }
-        }
-#endif
     geof.close();
+#endif
 }
 
 template
-<typename Mesh> void Ensight<Mesh>::M_wr_case(const Real& time)
+<typename Mesh> void Hdf5exporter<Mesh>::M_wr_Xdmf(const Real& time)
 {
   std::ofstream casef( (this->M_prefix+this->M_me+".case").c_str() );
     casef << "FORMAT\n";
-    casef << "type: ensight\n";
-    M_case_mesh_section(casef);
-    M_case_variable_section(casef);
-    M_case_time_section(casef,time);
+    casef << "type: hdf5exporter\n";
+    M_Xdmf_mesh_section(casef);
+    M_Xdmf_variable_section(casef);
+    M_Xdmf_time_section(casef,time);
     casef.close();
 }
 
-template <typename Mesh> void Ensight<Mesh>::M_case_mesh_section(std::ofstream& casef)
+template <typename Mesh> void Hdf5exporter<Mesh>::M_Xdmf_mesh_section(std::ofstream& casef)
 {
     casef << "GEOMETRY\n";
     if ( this->M_multimesh )
@@ -380,7 +334,7 @@ template <typename Mesh> void Ensight<Mesh>::M_case_mesh_section(std::ofstream& 
 
 
 
-template <typename Mesh> void Ensight<Mesh>::M_case_time_section(std::ofstream& casef, const Real& time)
+template <typename Mesh> void Hdf5exporter<Mesh>::M_Xdmf_time_section(std::ofstream& casef, const Real& time)
 {
     this->M_timeSteps.push_back(time);
     ++this->M_steps;
@@ -406,7 +360,7 @@ template <typename Mesh> void Ensight<Mesh>::M_case_time_section(std::ofstream& 
         }
 }
 
-template <typename Mesh> void Ensight<Mesh>::M_case_variable_section(std::ofstream& casef)
+template <typename Mesh> void Hdf5exporter<Mesh>::M_Xdmf_variable_section(std::ofstream& casef)
 {
     typedef std::list< ExporterData >::const_iterator Iterator;
     casef << "VARIABLE\n";

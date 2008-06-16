@@ -35,5 +35,10 @@ link:
 	test -a data || ln -s $(srcdir)/data
 	test -a Mesh || ln -s $(top_srcdir)/testsuite/data/mesh/inria/ Mesh
 
+recheck: clean_PROGRAMS check
+
+clean_PROGRAMS:
+	-rm $(check_PROGRAMS)
+
 clean-results:
 	-rm *.vct *.scl *.case *.geo

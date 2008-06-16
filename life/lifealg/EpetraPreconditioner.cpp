@@ -53,15 +53,20 @@ void Preconditioner::setDataFromGetPot( const GetPot& dataFile, const std::strin
 {
     M_precType = dataFile((section + "/prectype").data(),"Amesos");
 
-    M_overlapLevel       = dataFile((section + "/overlap").data(),    5);
-    double dropTolerance = dataFile((section + "/droptol").data(),    1e-5);
-    int    levelOfFill   = dataFile((section + "/fill").data(),       1);
-    int    localParts    = dataFile((section + "/localparts").data(), 4);
+    M_overlapLevel       = dataFile((section + "/overlap").data(),     4);
+    double dropTolerance = dataFile((section + "/droptol").data(),     1e-5);
+    double levelOfFill   = dataFile((section + "/fill").data(),        4.);
+    double athr   = dataFile((section + "/athr").data(),        0.);
+    double rthr   = dataFile((section + "/rthr").data(),        1.);
+    //double relax_value   = dataFile((section + "/relax_value").data(), 0.);
+    //int    localParts    = dataFile((section + "/localparts").data(),  4);
 
     M_List.set("fact: drop tolerance",     dropTolerance);
-    M_List.set("fact: level-of-fill",      levelOfFill);
-    M_List.set("partitioner: local parts", localParts);
-    M_List.set("partitioner: overlap",     M_overlapLevel);
+    M_List.set("fact: ilut level-of-fill", levelOfFill);
+    M_List.set("fact: absolute threshold", athr);
+    M_List.set("fact: relative threshold", rthr);
+    //M_List.set("fact: level-of-fill",      levelOfFill);
+    //M_List.set("fact: relax value",      relax_value);
 
 }
 
@@ -70,6 +75,7 @@ int Preconditioner::buildPreconditioner(operator_type& oper)
     M_Oper = oper;
 
     //List.set("schwarz: combine mode", "Zero"); //
+    M_List.set("schwarz: filter singletons", true);
 
 //    List.set("amesos: solver type", "Amesos_Lapack");
 

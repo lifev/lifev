@@ -81,6 +81,8 @@ public:
             M_fsi->setFluidBC(BCh_fluid(*M_fsi->operFSI()));
             M_fsi->setHarmonicExtensionBC (BCh_harmonicExtension(*M_fsi->operFSI()));
             M_fsi->setSolidBC(BCh_solid(*M_fsi->operFSI()));
+            M_fsi->setLinFluidBC(BCh_fluidLin(*M_fsi->operFSI()));
+            M_fsi->setLinSolidBC(BCh_solidLin(*M_fsi->operFSI()));
             Debug( 10000 ) << "BC set\n";
 
 
@@ -112,8 +114,8 @@ public:
 
                     M_ensightFluid->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().Comm().MyPID());
 
-                    M_velAndPressure.reset( new vector_type( M_fsi->FSIOper()->fluid().getRepeatedEpetraMap() ));
-                    M_fluidDisp.reset     ( new vector_type( M_fsi->FSIOper()->meshMotion().getRepeatedEpetraMap() ));
+                    M_velAndPressure.reset( new vector_type( M_fsi->FSIOper()->fluid().getMap(), Repeated ));
+                    M_fluidDisp.reset     ( new vector_type( M_fsi->FSIOper()->meshMotion().getMap(), Repeated ));
                     M_ensightFluid->addVariable( ExporterData::Vector, "f-velocity", M_velAndPressure,
                                                  UInt(0), M_fsi->FSIOper()->uFESpace().dof().numTotalDof() );
 
@@ -135,15 +137,14 @@ public:
 
                     M_ensightSolid->setMeshProcId(M_fsi->FSIOper()->dFESpace().mesh(), M_fsi->FSIOper()->dFESpace().map().Comm().MyPID());
 
-                    M_solidDisp.reset( new vector_type( M_fsi->FSIOper()->solid().getRepeatedEpetraMap() ));
-                    M_solidVel.reset( new vector_type( M_fsi->FSIOper()->solid().getRepeatedEpetraMap() ));
+                    M_solidDisp.reset( new vector_type( M_fsi->FSIOper()->solid().getMap(), Repeated ));
+                    M_solidVel.reset( new vector_type( M_fsi->FSIOper()->solid().getMap(), Repeated ));
                     M_ensightSolid->addVariable( ExporterData::Vector, "s-displacement", M_solidDisp,
                                                  UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
                     M_ensightSolid->addVariable( ExporterData::Vector, "s-velocity", M_solidVel,
                                                  UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
 
                 }
-
 //            std::cout << "in problem" << std::endl;
 //            M_fsi->FSIOper()->fluid().postProcess();
         }
@@ -190,7 +191,6 @@ public:
                         *M_solidVel = M_fsi->FSIOper()->solid().vel();
                         M_ensightSolid->postProcess( time );
                     }
-
 
                 std::cout << "[fsi_run] Iteration " << _i << " was done in : "
                           << _timer.elapsed() << "\n";
@@ -275,9 +275,9 @@ int main(int argc, char** argv)
 {
 #ifdef HAVE_MPI
     MPI_Init(&argc, &argv);
-    cout << "% using MPI" << endl;
+    std::cout << "% using MPI" << std::endl;
 #else
-    cout << "% using serial Version" << endl;
+    std::cout << "% using serial Version" << std::endl;
 #endif
 
     GetPot command_line(argc,argv);

@@ -195,7 +195,7 @@ POINTTYPE const & GeoND<GEOSHAPE, POINTTYPE>::reversepoint( ID const i ) const
 
 template <typename GEOSHAPE, typename POINTTYPE>
 INLINE
-void GeoND<GEOSHAPE, POINTTYPE>::setPoint( UInt const i, Geo0D const & p )
+void GeoND<GEOSHAPE, POINTTYPE>::setPoint( ID const i, Geo0D const & p )
 {
     ASSERT_BD( ( i > 0 && i <= GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints ) ) ;
     _points[ i - 1 ] = const_cast<Geo0D *>( &p );
@@ -203,7 +203,7 @@ void GeoND<GEOSHAPE, POINTTYPE>::setPoint( UInt const i, Geo0D const & p )
 
 
 template <typename GEOSHAPE, typename POINTTYPE>
-bool GeoND<GEOSHAPE, POINTTYPE>::setPointBD( UInt const i, Geo0D const & p )
+bool GeoND<GEOSHAPE, POINTTYPE>::setPointBD( ID const i, Geo0D const & p )
 {
     ASSERT_BD0( ( i > 0 && i <= GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints ) ) ;
 
@@ -218,7 +218,7 @@ bool GeoND<GEOSHAPE, POINTTYPE>::setPointBD( UInt const i, Geo0D const & p )
 
 template <typename GEOSHAPE, typename POINTTYPE>
 INLINE
-void GeoND<GEOSHAPE, POINTTYPE>::setPoint( UInt const i, Geo0D const * p )
+void GeoND<GEOSHAPE, POINTTYPE>::setPoint( ID const i, Geo0D const * p )
 {
     ASSERT_BD( ( i > 0 && i <= GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints ) ) ;
     _points[ i - 1 ] = const_cast<Geo0D *>( p );
@@ -226,7 +226,7 @@ void GeoND<GEOSHAPE, POINTTYPE>::setPoint( UInt const i, Geo0D const * p )
 
 
 template <typename GEOSHAPE, typename POINTTYPE>
-bool GeoND<GEOSHAPE, POINTTYPE>::setPointBD( UInt const i, Geo0D const * p )
+bool GeoND<GEOSHAPE, POINTTYPE>::setPointBD( ID const i, Geo0D const * p )
 {
     ASSERT_BD0( ( i > 0 && i <= GeoND<GEOSHAPE, POINTTYPE>::numLocalPoints ) ) ;
 

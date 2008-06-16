@@ -148,7 +148,7 @@ namespace LifeV
          */
         //@{
         //! Returns the number of switches which have been set
-        const UInt numSwitches() const
+        /*const*/ UInt numSwitches() const
             {
                 return switches.size();
             };
@@ -233,8 +233,8 @@ namespace LifeV
         */
         //@{
         /*! Returns number of Volume elements in the mesh as given by the internal counter.*/
-        UInt const numVolumes() const;
-        UInt const numGlobalVolumes() const;
+        UInt /*const*/ numVolumes() const;
+        UInt /*const*/ numGlobalVolumes() const;
 //        UInt & numVolumes();    /*!< Access number of Volumes (internal counter)*/
         UInt storedVolumes() const; //!< volumes actully stored in list
         /*! Current capacity of Volumes  Container, i.e. how many elements may be stored */
@@ -366,8 +366,8 @@ namespace LifeV
         */
 
         //@{
-        UInt const numFaces() const; //!<Number of total faces in mesh (uses counter).
-        UInt const numGlobalFaces() const; //!<Number of total faces in mesh (uses counter).
+        UInt /*const*/ numFaces() const; //!<Number of total faces in mesh (uses counter).
+        UInt /*const*/ numGlobalFaces() const; //!<Number of total faces in mesh (uses counter).
 //        UInt & numFaces();    //!<Number of total faces (may modify)
         UInt storedFaces() const; //!< Number of stored faces
         UInt maxNumFaces() const;  //!< Max number of faces that can be stored
@@ -447,8 +447,8 @@ namespace LifeV
 
         /*                          EDGES METHODS                           */
         //@{
-        UInt const numEdges() const;
-        UInt const numGlobalEdges() const;
+        UInt /*const*/ numEdges() const;
+        UInt /*const*/ numGlobalEdges() const;
 //        UInt & numEdges();
         UInt storedEdges() const;
         UInt maxNumEdges() const;
@@ -541,8 +541,8 @@ namespace LifeV
         PointType & boundaryPoint( ID const i ); //!< ith b. point.
         UInt numBPoints() const; //!< counter of boundary points
         void setNumBPoints( UInt const n ); //<! Sets counter of boundary points
-        UInt const numVertices() const; //!< Number of vertices in Region
-        UInt const numGlobalVertices() const; //!< Number of vertices in Region
+        UInt /*const*/ numVertices() const; //!< Number of vertices in Region
+        UInt /*const*/ numGlobalVertices() const; //!< Number of vertices in Region
 //        UInt & numVertices(); //!< Allows to change number of vertices in Region
         UInt numBVertices() const; //!< Number of boundary vertices in RegionMesh
         UInt & numBVertices();
@@ -777,7 +777,7 @@ namespace LifeV
             for ( ID j = 1; j <= nDimensions; ++j )
             {
                 int id = pointList[i].id();
-                if ( disp.Map().LID(id + dim*(j - 1)) >= 0 )
+                if ( disp.BlockMap().LID(id + dim*(j - 1)) >= 0 )
                 {
                     pointList[ i ].coordinate( j ) = _pointList[ i ].coordinate( j ) + disp[ ( j - 1 ) * dim + id ];
                 }
@@ -908,14 +908,14 @@ namespace LifeV
     // ***************************** VOLUMES
 
     template <typename GEOSHAPE, typename MC>
-    UInt const
+    UInt /*const*/
     RegionMesh3D<GEOSHAPE, MC>::numVolumes() const
     {
         return M_numVolumes;
     }
 
     template <typename GEOSHAPE, typename MC>
-    UInt const
+    UInt /*const*/
     RegionMesh3D<GEOSHAPE, MC>::numGlobalVolumes() const
     {
         return M_numGlobalVolumes;
@@ -1039,14 +1039,14 @@ namespace LifeV
 
     // ************************* FACES ******************************
     template <typename GEOSHAPE, typename MC>
-    UInt const
+    UInt /*const*/
     RegionMesh3D<GEOSHAPE, MC>::numFaces() const
     {
         return M_numFaces;
     }
 
     template <typename GEOSHAPE, typename MC>
-    UInt const
+    UInt /*const*/
     RegionMesh3D<GEOSHAPE, MC>::numGlobalFaces() const
     {
         return M_numGlobalFaces;
@@ -1204,14 +1204,14 @@ namespace LifeV
     // ************************* EDGES ******************************
 
     template <typename GEOSHAPE, typename MC>
-    UInt const
+    UInt /*const*/
     RegionMesh3D<GEOSHAPE, MC>::numEdges() const
     {
         return M_numEdges;
     }
 
     template <typename GEOSHAPE, typename MC>
-    UInt const
+    UInt /*const*/
     RegionMesh3D<GEOSHAPE, MC>::numGlobalEdges() const
     {
         return M_numGlobalEdges;
@@ -1354,7 +1354,7 @@ namespace LifeV
 
     template <typename GEOSHAPE, typename MC>
     void
-    RegionMesh3D<GEOSHAPE, MC>::setNumBEdges( UInt const n )
+    RegionMesh3D<GEOSHAPE, MC>::setNumBEdges( ID const n )
     {
         M_numBEdges = n;
     }
@@ -1540,7 +1540,7 @@ namespace LifeV
     INLINE
     //RegionMesh3D<GEOSHAPE,MC>::PointType &
     UInt
-    RegionMesh3D<GEOSHAPE, MC>::addPoint( UInt const iden, bool const boundary, UInt const start )
+    RegionMesh3D<GEOSHAPE, MC>::addPoint( ID const iden, bool const boundary, UInt const start )
     {
         ASSERT_PRE( pointList.size() <= pointList.capacity(), "Point list size exceeded" <<
                     pointList.size() << " " << pointList.capacity() ) ;
@@ -1573,7 +1573,7 @@ namespace LifeV
     template <typename GEOSHAPE, typename MC>
     INLINE
     typename RegionMesh3D<GEOSHAPE, MC>::PointType const &
-    RegionMesh3D<GEOSHAPE, MC>::point( UInt const i ) const
+    RegionMesh3D<GEOSHAPE, MC>::point( ID const i ) const
     {
         ASSERT_BD( i > 0 && i <= pointList.size() ) ;
 
@@ -1581,7 +1581,7 @@ namespace LifeV
         im = M_globalToLocalNode.find(i);
 
         if (im == M_globalToLocalNode.end())
-            ASSERT_BD( "error in point()" ) ;
+            { ASSERT_BD( "error in point()" ) ; }
 
 //        return pointList( (*im).second );
         return pointList( i );
@@ -1590,7 +1590,7 @@ namespace LifeV
     template <typename GEOSHAPE, typename MC>
     INLINE
     typename RegionMesh3D<GEOSHAPE, MC>::PointType &
-    RegionMesh3D<GEOSHAPE, MC>::point( UInt const i )
+    RegionMesh3D<GEOSHAPE, MC>::point( ID const i )
     {
         ASSERT_BD( i > 0 && i <= pointList.size() ) ;
 
@@ -1598,7 +1598,7 @@ namespace LifeV
         im = M_globalToLocalNode.find(i);
 
         if (im == M_globalToLocalNode.end())
-            ASSERT_BD( "error in point()" ) ;
+            { ASSERT_BD( "error in point()" ) ; }
 
 //        return pointList( (*im).second );
         return pointList( i );
@@ -1641,14 +1641,14 @@ namespace LifeV
     }
 
     template <typename GEOSHAPE, typename MC>
-    UInt const
+    UInt /*const*/
     RegionMesh3D<GEOSHAPE, MC>::numVertices() const
     {
         return M_numVertices;
     }
 
     template <typename GEOSHAPE, typename MC>
-    UInt const
+    UInt /*const*/
     RegionMesh3D<GEOSHAPE, MC>::numGlobalVertices() const
     {
         return M_numGlobalVertices;
@@ -2010,22 +2010,22 @@ namespace LifeV
     {
         switch(geometry){
             case VERTEX:
-                for (typename Points::iterator p=pointList.begin();p!=pointList.end();++p){
+                for (typename Points::const_iterator p=pointList.begin();p!=pointList.end();++p){
                     if (p->hasEqualEntityFlag(flag))list.push_back(p->id());
                 }
                 break;
             case EDGE:
-                for (typename Edges::iterator p=edgeList.begin();p!=edgeList.end();++p){
+                for (typename Edges::const_iterator p=edgeList.begin();p!=edgeList.end();++p){
                     if (p->hasEqualEntityFlag(flag))list.push_back(p->id());
                 }
                 break;
             case FACE:
-                for (typename Faces::iterator p=faceList.begin();p!=faceList.end();++p){
+                for (typename Faces::const_iterator p=faceList.begin();p!=faceList.end();++p){
                     if (p->hasEqualEntityFlag(flag))list.push_back(p->id());
                 }
                 break;
             case VOLUME:
-                for (typename Volumes::iterator p=volumeList.begin();p!=volumeList.end();++p){
+                for (typename Volumes::const_iterator p=volumeList.begin();p!=volumeList.end();++p){
                     if (p->hasEqualEntityFlag(flag))list.push_back(p->id());
                 }
                 break;
@@ -2037,7 +2037,7 @@ namespace LifeV
 
     template <typename GEOSHAPE, typename MC>
     INLINE
-    UInt
+    ID
     RegionMesh3D<GEOSHAPE, MC>::faceElement( ID const i, UInt const Pos ) const
     {
         ASSERT_PRE( i <= faceList.size(), "Not enough faces stored" ) ;
@@ -2055,7 +2055,7 @@ namespace LifeV
 
     template <typename GEOSHAPE, typename MC>
     INLINE
-    UInt
+    ID
     RegionMesh3D<GEOSHAPE, MC>::faceElement( FaceType const & f, UInt const Pos ) const
     {
         ASSERT_BD( ! faceList.empty() ) ;
@@ -2077,7 +2077,9 @@ namespace LifeV
     void
     RegionMesh3D<GEOSHAPE, MC>::setLinkSwitch( std::string const & _s )
     {
-        ASSERT0( switches.set( _s ), "Switch named " << _s << " is not allowed" );
+    	std::ostringstream _err_msg;
+    	_err_msg <<  "Switch named " << _s << " is not allowed";
+        ASSERT0( switches.set( _s ), _err_msg.str().c_str() );
     }
 
     template <typename GEOSHAPE, typename MC>
@@ -2085,7 +2087,9 @@ namespace LifeV
     void
     RegionMesh3D<GEOSHAPE, MC>::unsetLinkSwitch( std::string const & _s )
     {
-        ASSERT0( switches.unset( _s ), "Switch named " << _s << " is not allowed" );
+    	std::ostringstream _err_msg;
+    	_err_msg << "Switch named " << _s << " is not allowed";
+        ASSERT0( switches.unset( _s ), _err_msg.str().c_str() );
     }
 
     template <typename GEOSHAPE, typename MC>
@@ -2222,8 +2226,8 @@ namespace LifeV
 
     template <typename GEOSHAPE, typename MC>
     INLINE
-    ID
-    RegionMesh3D<GEOSHAPE, MC>::localEdgeId( ID const volId, ID const locE )
+    UInt
+    RegionMesh3D<GEOSHAPE, MC>::localEdgeId( UInt const volId, UInt const locE )
         const
     {
         ASSERT_PRE( !_VToE.empty(), "Volume to Edges array not  set" );
@@ -2244,8 +2248,8 @@ namespace LifeV
 
     template <typename GEOSHAPE, typename MC>
     INLINE
-    ID
-    RegionMesh3D<GEOSHAPE, MC>::localEdgeId( const VolumeType & iv, ID const locE )
+    UInt
+    RegionMesh3D<GEOSHAPE, MC>::localEdgeId( const VolumeType & iv, UInt const locE )
         const
     {
         ASSERT_PRE( !_VToE.empty(), "Volume to Edges array not  set" );
@@ -2414,10 +2418,11 @@ namespace LifeV
     {
 
         std::cout << "     Updating element faces ... " << std::flush;
-
-        ASSERT0( ! cf || M_numBFaces > 0, "Boundary Faces Must have been set" <<
-                 "in order to call updateElementFaces with createFaces=true" << std::endl <<
-                 "Use buildBoundaryFaces(..) from mesh_util.h" );
+        std::ostringstream _err_msg;
+        _err_msg << "Boundary Faces Must have been set" <<
+        "in order to call updateElementFaces with createFaces=true" << std::endl <<
+        "Use buildBoundaryFaces(..) from mesh_util.h";
+        ASSERT0( ! cf || M_numBFaces > 0, _err_msg.str().c_str() );
         // If the counter is set we trust it! Otherwise we use Euler formula
 
         if ( cf && ef == 0 )
@@ -2442,7 +2447,7 @@ namespace LifeV
         // If we have all faces and the faces store all adjacency info
         // everything is easier
 //        std::cout <<  (faceList.size() == numFaces()) <<  getLinkSwitch( "FACES_HAVE_ADIACENCY" ) <<  getLinkSwitch( "HAS_ALL_FACES" ) << std::endl;
-        if ( faceList.size() == numFaces() & getLinkSwitch( "FACES_HAVE_ADIACENCY" ) & getLinkSwitch( "HAS_ALL_FACES" ) )
+        if ( (faceList.size() == numFaces()) & getLinkSwitch( "FACES_HAVE_ADIACENCY" ) & getLinkSwitch( "HAS_ALL_FACES" ) )
         {
             for ( typename Faces::iterator itf = faceList.begin();itf != faceList.end();++itf )
             {

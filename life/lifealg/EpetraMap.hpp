@@ -3,9 +3,10 @@
   This file is part of the LifeV library
 
   Author(s): Gilles Fourestey gilles.fourestey@epfl.ch
-       Date: 2004-10-26
+             Simone Deparis   simone.deparis@epfl.ch
+       Date: 2006-10-26
 
-  Copyright (C) 2004 EPFL
+  Copyright (C) 2006 EPFL
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -30,12 +31,17 @@
 #ifndef _EPETRAMAP_
 #define _EPETRAMAP_
 
+
+#include <boost/shared_ptr.hpp>
+
 #include <life/lifefem/refFE.hpp>
 
-#include "Epetra_Map.h"
-#include "Epetra_Comm.h"
-#include "life/lifecore/life.hpp"
-#include "life/lifemesh/partitionMesh.hpp"
+#include <Epetra_Map.h>
+#include <Epetra_Export.h>
+#include <Epetra_Import.h>
+#include <Epetra_Comm.h>
+#include <life/lifecore/life.hpp>
+#include <life/lifemesh/partitionMesh.hpp>
 
 
 
@@ -47,10 +53,21 @@ namespace LifeV
 //
 ///////////////////////////////////////////////////////////////
 
+enum EpetraMapType {Unique = 0, Repeated};
 
 class EpetraMap
 {
 public:
+
+
+    /** @name Typedefs
+     */
+    //@{
+    typedef Epetra_Map map_type;
+    typedef boost::shared_ptr<map_type> map_ptrtype;
+    typedef boost::shared_ptr< boost::shared_ptr<Epetra_Export> > exporter_ptrtype;
+    typedef boost::shared_ptr< boost::shared_ptr<Epetra_Import> > importer_ptrtype;
+    //@}
 
     EpetraMap();
     EpetraMap(int                NumGlobalElements,
@@ -59,54 +76,79 @@ public:
               int                IndexBase,
               const Epetra_Comm& Comm);
 
+    // Calls createImportExport from setUp()
     template<typename Mesh>
     EpetraMap(const RefFE&         refFE,
               const partitionMesh<Mesh>& meshPart,
               Epetra_Comm&         _comm);
 
+    // Calls createImportExport from setUp()
     template<typename Mesh>
     EpetraMap(const RefFE&         refFE,
               const Mesh&          mesh,
               Epetra_Comm&         _comm);
 
-
-
     EpetraMap(const EpetraMap& _epetraMap);
 
-    ~EpetraMap();
+    /*! Builds a submap of map _epetraMap with a given positive offset and
+      the maximum id to consider
+    */
+    EpetraMap(const Epetra_BlockMap& _blockMap, const int offset, const int maxid );
 
+    ~EpetraMap() {}
+
+    // The copy operator will copy the pointers of the maps, exporter and importer
     EpetraMap&         operator  = (const EpetraMap& _epetraMap);
+
     EpetraMap&         operator += (const EpetraMap& _epetraMap);
     EpetraMap          operator +  (const EpetraMap& _epetraMap)
         {
             EpetraMap map( *this );
-            return map += _epetraMap;
+            map += _epetraMap;
+            createImportExport();
+            return map;
         }
-
-    Epetra_Map const * getEpetra_Map()       const
-        {return M_epetraMap;}
-    Epetra_Map const * getRepeatedEpetra_Map() const
-        {return M_epetraMap;}
-    Epetra_Map const * getUniqueEpetra_Map()   const
-        {return M_uniqueEpetraMap;}
 
     Epetra_Comm const& Comm() const { return M_uniqueEpetraMap->Comm(); }
 
-//    Epetra_Map*        getEpetra_Map(){return M_epetraMap;}
+//    Epetra_Map*        getRepeatedEpetra_Map(){return M_repeatedEpetra_Map;}
 
+    // createMap does not call createImportExport
     void               createMap(int   NumGlobalElements,
                                  int   NumMyElements,
                                  int*  MyGlobalElements,
                                  int   IndexBase,
                                  const Epetra_Comm &Comm)  ;
 
+    map_ptrtype const & getMap( EpetraMapType maptype)   const;
+    map_type            getRootMap( int root)   const;
+
+    Epetra_Export const& getExporter();
+    Epetra_Import const& getImporter();
+
+
+    bool MapsAreSimilar( EpetraMap const& _epetraMap) const;
+
+
 //    EpetraMap&          uniqueMap();
 
 private:
 
-    void               uniqueMap();
-    void               bubbleSort(Epetra_IntSerialDenseVector& Elements);
+    /*
+    Epetra_Map const * getRepeatedEpetra_Map()       const
+        {return M_repeatedEpetra_Map;}
+    Epetra_Map const * getUniqueEpetra_Map()   const
+        {return M_uniqueEpetraMap;}
+    */
+    map_ptrtype const & getRepeatedMap() const { return M_repeatedEpetra_Map; }
+    map_ptrtype const & getUniqueMap()   const { return M_uniqueEpetraMap; }
 
+
+    void  uniqueMap();
+    void  createImportExport();
+    void  bubbleSort(Epetra_IntSerialDenseVector& Elements);
+
+    // Calls createImportExport
     void setUp(const RefFE&               refFE,
                Epetra_Comm&               _comm,
                std::vector<int>& repeatedNodeVector,
@@ -114,8 +156,11 @@ private:
                std::vector<int>& repeatedFaceVector,
                std::vector<int>& repeatedElemVector);
 
-    Epetra_Map*        M_epetraMap;
-    Epetra_Map*        M_uniqueEpetraMap;
+    map_ptrtype        M_repeatedEpetra_Map;
+    map_ptrtype        M_uniqueEpetraMap;
+    exporter_ptrtype   M_exporter;
+    importer_ptrtype   M_importer;
+
 
 };
 
@@ -124,8 +169,10 @@ EpetraMap::
 EpetraMap(const RefFE&               refFE,
           const partitionMesh<Mesh>& meshPart,
           Epetra_Comm&               _comm):
-    M_epetraMap(0),
-    M_uniqueEpetraMap(0)
+    M_repeatedEpetra_Map(),
+    M_uniqueEpetraMap(),
+    M_exporter(),
+    M_importer()
 {
 
     // Epetra_Map is "badly" coded, in fact its constructor needs a non-constant pointer to indices, but it
@@ -146,8 +193,10 @@ EpetraMap::
 EpetraMap(const RefFE&               refFE,
           const Mesh&                mesh,
           Epetra_Comm&               _comm):
-    M_epetraMap(0),
-    M_uniqueEpetraMap(0)
+    M_repeatedEpetra_Map(),
+    M_uniqueEpetraMap(),
+    M_exporter(),
+    M_importer()
 {
 
     std::vector<int> repeatedNodeVector;

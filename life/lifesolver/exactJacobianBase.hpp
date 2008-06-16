@@ -22,33 +22,15 @@
 #define _EJ_HPP
 
 #include <life/lifesolver/FSIOperator.hpp>
+#include <life/lifefilters/ensight.hpp>
 
 namespace LifeV
 {
 
 
-class Epetra_ExactJacobian:
-    Epetra_Operator
-{
+class Epetra_ExactJacobian;
+//class Epetra_ExactJacobian;
 
-public:
-
-    ~Epetra_ExactJacobian ();
-
-    int 	SetUseTranspose (bool UseTranspose);
-    int 	Apply (const Epetra_MultiVector &X, Epetra_MultiVector &Y) const;
-    int 	ApplyInverse (const Epetra_MultiVector &X, Epetra_MultiVector &Y) const;
-    double 	NormInf () const;
-    const char * 	Label () const;
-    bool 	UseTranspose () const;
-    bool 	HasNormInf () const;
-    const Epetra_Comm & 	Comm () const;
-    const Epetra_Map & 	OperatorDomainMap () const;
-    const Epetra_Map & 	OperatorRangeMap () const;
-
-private:
-
-};
 
 
 
@@ -57,6 +39,7 @@ class exactJacobian : public FSIOperator
 public:
 
     typedef FSIOperator super;
+
     typedef super::fluid_type fluid_type;
     typedef super::solid_type solid_type;
 
@@ -65,12 +48,7 @@ public:
     typedef fluid_raw_type::vector_type  vector_type;
 
     // default constructor
-    exactJacobian():
-        super(),
-        M_dz     (),
-        M_rhs_dz (),
-        M_dataJacobian(this)
-        {}
+    exactJacobian();
 
     // destructor
     ~exactJacobian();
@@ -79,17 +57,17 @@ public:
 
     void evalResidual(vector_type       &_res,
                       const vector_type &_disp,
-                      const int     _iter);
+                      const int          _iter);
     void solveJac(vector_type       &_muk,
                   const vector_type &_res,
-                  const double  _linearRelTol);
+                  const double       _linearRelTol);
 
     void solveLinearFluid();
     void solveLinearSolid();
 
     void setup();
 
-//     vector_type dz() {return *M_dz;}
+    void setDataFromGetPot( GetPot const& data );
 
 //     vector_type & displacement()    {return this->solid().disp();}
 //     vector_type & residual()        {return M_interfaceStress;}
@@ -119,6 +97,8 @@ public:
     // Fluid, Lin. Fluid, and inverses
 
     void setFluidInterfaceDisp      (vector_type &disp, UInt type = 0);
+
+
 //    void setFluidLinInterfaceStress (vector_type &disp, UInt type = 0);
 
 //     bc_vector_interface bcvFluidLoadToSolid()       {return M_bcvFluidLoadToSolid;}
@@ -129,44 +109,114 @@ public:
 //     bc_vector_interface bcvReducedFluidInterfaceAcc()    {return M_bcvReducedFluidInterfaceAcc;}
 //     bc_vector_interface bcvReducedFluidInvInterfaceAcc() {return M_bcvReducedFluidInvInterfaceAcc;}
 
-    struct dataJacobian
-    {
+//     struct dataJacobian
+//     {
 
-        dataJacobian()
-            :
-            M_pFS( 0 )
-            {}
+//         dataJacobian():
+//             M_pFS( 0 )
+//             {}
 
-        dataJacobian(exactJacobian* oper)
-            :
-            M_pFS(oper){}
+//         dataJacobian(exactJacobian* oper):
+//             M_pFS(oper)
+//             {}
 
-        exactJacobian* M_pFS;
+//         exactJacobian* M_pFS;
+//     };
 
-    };
+    void fluidPostProcess() {
+        if ( false && this->isFluid() )
+         {
+             *M_velAndPressure = this->M_fluid->solution();
+             M_ensightFluid->postProcess( M_nbEvalAux++ );
+         }
+    }
+
 
 private:
+    int M_updateEvery;
 
-     boost::shared_ptr<vector_type>      M_dz;
-     boost::shared_ptr<vector_type>      M_rhs_dz;
+//     boost::shared_ptr<vector_type>       M_residualFSI;
 
-     boost::shared_ptr<vector_type>      M_residualFSI;
-
-     boost::shared_ptr<vector_type>      M_interfaceDisplacement;
-     boost::shared_ptr<vector_type>      M_interfaceStress;
+//     boost::shared_ptr<vector_type>       M_interfaceDisplacement;
+//     boost::shared_ptr<vector_type>       M_interfaceStress;
 
     boost::shared_ptr<vector_type>       M_rhsNew;
     boost::shared_ptr<vector_type>       M_beta;
 
+    Real                                 M_defOmega;
+    generalizedAitken<vector_type, Real> M_aitkFS;
+
+
+    boost::shared_ptr< Ensight< RegionMesh3D<LinearTetra> > > M_ensightFluid;
+    boost::shared_ptr<vector_type>                            M_velAndPressure;
+
 //     bc_vector_interface     M_bcvFluidLoadToStructure;
 
-    void eval(vector_type& dispNew, vector_type& velo, const vector_type& disp, int status);
+    void eval(const vector_type& _res, int status);
 
-    dataJacobian                         M_dataJacobian;
+//    dataJacobian                         M_dataJacobian;
+
+    LifeV::Epetra::SolverTrilinos        M_linearSolver;
+
+    boost::shared_ptr<Epetra_ExactJacobian> M_epetraOper;
+
+    int M_nbEvalAux;
+
+}; // end class exactJacobian
+
+
+class Epetra_ExactJacobian:
+    public Epetra_Operator
+{
+
+public:
+
+    typedef exactJacobian::vector_type  vector_type;
+
+    Epetra_ExactJacobian(exactJacobian* ej):
+        M_ej               (ej),
+        M_operatorDomainMap(*M_ej->solidInterfaceMap()->getMap(Repeated)),
+        M_operatorRangeMap (*M_ej->solidInterfaceMap()->getMap(Repeated)),
+        M_comm             (&M_ej->worldComm())
+        {
+//             std::cout << ej << std::endl;
+//             std::cout << M_ej->fluidInterfaceMap().getEpetra_Map() << std::endl;
+//             std::cout << M_ej->solidInterfaceMap().getEpetra_Map() << std::endl;
+//             std::cout << "ok" << std::endl;
+        };
+
+    virtual ~Epetra_ExactJacobian(){};
+
+    int 	SetUseTranspose (bool  UseTranspose)
+        {std::cout << "********* EJ : transpose not available\n"; return -1;}
+    int 	Apply           (const Epetra_MultiVector &X, Epetra_MultiVector &Y) const;
+    int 	ApplyInverse    (const Epetra_MultiVector &X, Epetra_MultiVector &Y) const
+        {std::cout << "********* EJ : inverse not available\n"; return -1;}
+    double 	NormInf         () const
+        {std::cout << "********* EJ : NormInf not available\n"; return 1.;}
+    const char * Label      () const {return "exactJacobian";}
+    bool 	UseTranspose    () const {return false;}
+    bool 	HasNormInf      () const {return false;}
+
+    const Epetra_Comm&  Comm () const { return *M_comm; }
+    const Epetra_Map & 	OperatorDomainMap () const {return M_operatorDomainMap;}
+    const Epetra_Map & 	OperatorRangeMap  () const {return M_operatorRangeMap;}
+
+    void setOperator( exactJacobian* ej) {M_ej = ej;}
+
+private:
+
+
+
+    exactJacobian*     M_ej;
+
+    const Epetra_Map                     M_operatorDomainMap;
+    const Epetra_Map                     M_operatorRangeMap;
+
+    Epetra_Comm* M_comm;
+
 };
 
-
-void my_matvecJacobianEJ(double *z, double *Jz, AZ_MATRIX* J, int proc_config[]);
 
 Real fzeroEJ(const Real& t,
              const Real& x,

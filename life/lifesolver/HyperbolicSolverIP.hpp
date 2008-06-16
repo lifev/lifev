@@ -62,7 +62,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
 #if L_HSIP_LINEAR_SOLVER == L_HSIP_AZTEC
-#include <life/lifealg/SolverAztec.hpp>
+//#include <life/lifealg/SolverAztec.hpp>
 #elif L_HSIP_LINEAR_SOLVER == L_HSIP_UMFPACK
 #include <life/lifealg/SolverUMFPACK.hpp>
 #elif L_HSIP_LINEAR_SOLVER == L_HSIP_PETSC

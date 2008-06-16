@@ -105,6 +105,8 @@ public:
     Real ZSectionInit() const;
     Real ZSectionFinal() const;
     UInt NbPolygonEdges() const;
+    const int semiImplicit() const;
+    void setSemiImplicit(const int& SI);
 
 protected:
     //! Physics
@@ -124,6 +126,7 @@ protected:
 
     //! Discretization
     NSStabilization M_stab_method;
+    int M_semiImplicit;
 
 private:
 
@@ -156,7 +159,8 @@ DataNavierStokes<Mesh>::
 DataNavierStokes( const GetPot& dfile ) :
     DataMesh<Mesh>( dfile, "fluid/discretization" ),
     DataTime( dfile, "fluid/discretization" ),
-    M_stabilization_list( "fluid/discretization/stabilization" )
+    M_stabilization_list( "fluid/discretization/stabilization" ),
+    M_semiImplicit(0)
 {
     setup(dfile);
 }
@@ -184,7 +188,8 @@ DataNavierStokes( const DataNavierStokes& dataNavierStokes ) :
     M_ZSectionInit               (dataNavierStokes.M_ZSectionInit),
     M_ZSectionFinal              (dataNavierStokes.M_ZSectionFinal),
     M_NbPolygonEdges             (dataNavierStokes.M_NbPolygonEdges),
-    M_stabilization_list         (dataNavierStokes.M_stabilization_list)
+    M_stabilization_list         (dataNavierStokes.M_stabilization_list),
+    M_semiImplicit               (0)
 {
 }
 
@@ -428,7 +433,15 @@ NbPolygonEdges() const
     return M_NbPolygonEdges;
 }
 
+template <typename Mesh>
+void DataNavierStokes<Mesh>::
+setSemiImplicit(const int& SI)
+{ M_semiImplicit = SI; }
 
+template <typename Mesh>
+const int DataNavierStokes<Mesh>::
+semiImplicit() const
+ { return M_semiImplicit; }
 }
 #endif
 

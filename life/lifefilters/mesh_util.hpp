@@ -582,7 +582,7 @@ bool checkMesh3D( RegionMesh3D & mesh,
     UInt bEdgesFound = findBoundaryEdges( mesh, *bedges );
     EnquireBEdge<RegionMesh3D> enquireBEdge( mesh, *bedges );
 
-    UInt intedge;
+    UInt intedge (0);
     UInt Ned = 0;
     TempEdgeContainer iedges;
 

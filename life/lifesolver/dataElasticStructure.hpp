@@ -127,7 +127,7 @@ DataElasticStructure( const GetPot& dfile ) :
 
     // miscellaneous
     _factor  = dfile( "solid/miscellaneous/factor", 1.0 );
-    std::cout << "factor " << _factor << std::endl;
+//    std::cout << "factor " << _factor << std::endl;
     _verbose = dfile( "solid/miscellaneous/verbose", 1 );
 
     M_order  = dfile( "solid/discretization/order", "P1");
@@ -158,7 +158,7 @@ DataElasticStructure( const GetPot& dfile ) :
     std::list<double>::iterator yit = yList.begin();
     std::list<double>::iterator pit = pList.begin();
 
-    std::cout << "flag       young       poisson" << std::endl;
+    std::cout << "flag       young       poisson \\\\ flag    lambda     mu" << std::endl;
     for (fit = fList.begin(); fit != fList.end(); ++fit, ++yit, ++pit)
     {
         double young   = *yit;

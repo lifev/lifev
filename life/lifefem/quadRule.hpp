@@ -128,6 +128,7 @@ public:
 */
 class QuadRule
 {
+private:
     const QuadPoint* _pt;
 public:
     QuadRule( const QuadPoint* pt, int _id, std::string _name, ReferenceShapes _shape,

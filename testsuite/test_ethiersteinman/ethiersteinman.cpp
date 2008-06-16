@@ -53,6 +53,7 @@
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/bdfNS_template.hpp>
 #include <life/lifefilters/ensight.hpp>
+//#include <life/lifefilters/hdf5exporter.hpp>
 
 #include <life/lifesolver/Oseen.hpp>
 
@@ -178,8 +179,6 @@ Ethiersteinman::run()
     //
     GetPot dataFile( d->data_file_name.c_str() );
 
-    int save = dataFile("fluid/miscellaneous/save", 1);
-
     bool verbose = (d->comm->MyPID() == 0);
 
 
@@ -222,9 +221,9 @@ Ethiersteinman::run()
 
     std::string uOrder =  dataFile( "fluid/discretization/vel_order", "P1");
 
-    const RefFE*    refFE_vel;
-    const QuadRule* qR_vel;
-    const QuadRule* bdQr_vel;
+    const RefFE*    refFE_vel(0);
+    const QuadRule* qR_vel(0);
+    const QuadRule* bdQr_vel(0);
 
     const RefFE*    refFE_press;
     const QuadRule* qR_press;
@@ -306,8 +305,8 @@ Ethiersteinman::run()
 
 
 
-    UInt totalVelDof   = uFESpace.map().getUniqueEpetra_Map()->NumGlobalElements();
-    UInt totalPressDof = pFESpace.map().getUniqueEpetra_Map()->NumGlobalElements();
+    UInt totalVelDof   = uFESpace.map().getMap(Unique)->NumGlobalElements();
+    UInt totalPressDof = pFESpace.map().getMap(Unique)->NumGlobalElements();
 
 
     if (verbose) std::cout << "Total Velocity Dof = " << totalVelDof << std::endl;
@@ -346,8 +345,8 @@ Ethiersteinman::run()
 
     dataNavierStokes.setTime(t0);
 
-    vector_type beta( *fullMap.getEpetra_Map() );
-    vector_type rhs ( *fullMap.getEpetra_Map() );
+    vector_type beta( fullMap );
+    vector_type rhs ( fullMap );
 
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -383,11 +382,10 @@ Ethiersteinman::run()
 
     out_norm << "time / u L2 error / L2 rel error   p L2 error / L2 rel error \n" << std::flush;
 
-    vector_type vel  (*uFESpace.map().getRepeatedEpetra_Map());
-    vector_type press(*pFESpace.map().getRepeatedEpetra_Map());
+    vector_type vel  (uFESpace.map(), Repeated);
+    vector_type press(pFESpace.map(), Repeated);
 
-    vector_type velpressure(*fullMap.getRepeatedEpetra_Map());
-    velpressure   = fluid.solution();
+    vector_type velpressure ( fluid.solution(), Repeated );
 
     vel.subset(velpressure);
     press.subset(velpressure, uFESpace.dim()*uFESpace.fieldDim());
@@ -416,17 +414,23 @@ Ethiersteinman::run()
 
     fluid.resetPrec();
 
-    Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "ethiersteinmann", d->comm->MyPID());
+    boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
 
-    vector_ptrtype velAndPressure ( new vector_type(fluid.solution(), fluid.getRepeatedEpetraMap() ) );
+    exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
+    // hdf5 exporter, still under development
+    //    exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
 
-    ensight.addVariable( ExporterData::Vector, "velocity", velAndPressure,
+    //    Ensight<RegionMesh3D<LinearTetra> > exporter( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID());
+
+    vector_ptrtype velAndPressure ( new vector_type(fluid.solution(), Repeated ) );
+
+    exporter->addVariable( ExporterData::Vector, "velocity", velAndPressure,
                          UInt(0), uFESpace.dof().numTotalDof() );
 
-    ensight.addVariable( ExporterData::Scalar, "pressure", velAndPressure,
+    exporter->addVariable( ExporterData::Scalar, "pressure", velAndPressure,
                          UInt(3*uFESpace.dof().numTotalDof()),
                          UInt(3*uFESpace.dof().numTotalDof()+pFESpace.dof().numTotalDof()) );
-    ensight.postProcess( 0 );
+    exporter->postProcess( 0 );
 
     // Temporal loop
 
@@ -467,8 +471,8 @@ Ethiersteinman::run()
 
         velpressure   = fluid.solution();
 
-        vector_type vel  (*uFESpace.map().getRepeatedEpetra_Map());
-        vector_type press(*pFESpace.map().getRepeatedEpetra_Map());
+        vector_type vel  (uFESpace.map(), Repeated);
+        vector_type press(pFESpace.map(), Repeated);
 
         vel.subset(velpressure);
         press.subset(velpressure, uFESpace.dim()*uFESpace.fieldDim());
@@ -488,7 +492,7 @@ Ethiersteinman::run()
 //         if (((iter % save == 0) || (iter == 1 )))
 //         {
         *velAndPressure = fluid.solution();
-        ensight.postProcess( time );
+        exporter->postProcess( time );
         //            fluid.postProcess();
 //         }
 

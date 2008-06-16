@@ -63,25 +63,32 @@ using namespace LifeV;
 
 
 //cylinder
-//#define CYL2D_MESH_SETTINGS
+
+// //#define CYL2D_MESH_SETTINGS
+#define CYL3D_2_MESH_SETTINGS
+//#define TUBE20_MESH_SETTINGS
+
+
 // #ifdef CYL2D_MESH_SETTINGS // cyl2D.mesh
 // const int INLET    = 1;
 // const int WALL     = 1;
 // const int SLIPWALL = 20;
 // const int OUTLET   = 0;
 // const int CYLINDER = 2;
-// #else   // cyl3D-2.mesh
+// #endif
+#ifdef CYL3D_2_MESH_SETTINGS // cyl3D-2.mesh
 const int INLET    = 40;
 const int WALL     = 60;
 const int SLIPWALL = 61;
 const int OUTLET   = 50;
 const int CYLINDER = 70;
-// #endif
-
-// const int INLET    = 2;
-// const int WALL     = 1;
-// const int SLIPWALL = 20;
-// const int OUTLET   = 3;
+#endif
+#ifdef TUBE20_MESH_SETTINGS
+ const int INLET    = 2;
+ const int WALL     = 1;
+ const int SLIPWALL = 20;
+ const int OUTLET   = 3;
+#endif
 
 
 
@@ -219,6 +226,27 @@ struct Cylinder::Private
             return f;
         }
 
+    /**
+     * one flat (1,1,1)
+     *
+     * Define the velocity profile at the inlet for the 2D cylinder
+     */
+    Real oneU( const Real& /*t*/,
+               const Real& /*x*/,
+               const Real& y,
+               const Real& /*z*/,
+               const ID&   id ) const
+        {
+            return 1.;
+        }
+
+    fct_type getU_one()
+        {
+            fct_type f;
+            f = boost::bind(&Cylinder::Private::oneU, this, _1, _2, _3, _4, _5);
+            return f;
+        }
+
 
 };
 
@@ -280,12 +308,14 @@ Cylinder::run()
     // Boundary conditions
     BCHandler bcH( 5, BCHandler::HINT_BC_NONE );
     BCFunctionBase uZero( zero_scalar );
-    BCFunctionBase uIn  (  d->getU_2d() );
     std::vector<ID> zComp(1);
     zComp[0] = 3;
 
 
-    //cylindre
+#ifdef CYL3D_2_MESH_SETTINGS // cyl3D-2.mesh
+    BCFunctionBase uIn  (  d->getU_2d() );
+
+    //cylinder
     bcH.addBC( "Inlet",    INLET,    Essential,   Full,      uIn,   3 );
     bcH.addBC( "Outlet",   OUTLET,   Natural,   Full,      uZero, 3 );
 //     if ( WALL != INLET )
@@ -293,6 +323,21 @@ Cylinder::run()
     bcH.addBC( "Slipwall", SLIPWALL, Essential, Component, uZero, zComp );
     bcH.addBC( "Cylinder", CYLINDER, Essential, Full,      uZero, 3 );
 //    bcH.addBC( "Slipwall", SLIPWALL, Essential, Full, uZero , 3 );
+#endif
+#ifdef TUBE20_MESH_SETTINGS
+    BCFunctionBase uIn  (  d->getU_one() );
+    //BCFunctionBase unormal(  d->get_normal() );
+
+    //cylinder
+    bcH.addBC( "Inlet",    INLET,    Essential,   Full,      uIn, 3 );
+    bcH.addBC( "Outlet",   OUTLET,   Essential,   Full,      uIn, 3 );
+
+    //bcH.addBC( "Wall",     WALL,     Natural,     Full,      uNormal, 3 );
+    //    bcH.addBC( "Wall",     WALL,     Natural,     Full,      uZero, 3 );
+
+    bcH.addBC( "Slipwall", SLIPWALL, Essential,   Full,      uIn, 3 );
+#endif
+
 
 //    bcH.showMe();
 
@@ -387,8 +432,8 @@ Cylinder::run()
 
 
 
-    UInt totalVelDof   = uFESpace.map().getUniqueEpetra_Map()->NumGlobalElements();
-    UInt totalPressDof = pFESpace.map().getUniqueEpetra_Map()->NumGlobalElements();
+    UInt totalVelDof   = uFESpace.map().getMap(Unique)->NumGlobalElements();
+    UInt totalPressDof = pFESpace.map().getMap(Unique)->NumGlobalElements();
 
 
     if (verbose) std::cout << "Total Velocity Dof = " << totalVelDof << std::endl;
@@ -402,6 +447,40 @@ Cylinder::run()
                                               bcH,
                                               *d->comm);
     EpetraMap fullMap(fluid.getMap());
+
+
+#ifdef TUBE20_MESH_SETTINGS
+    vector_type vec_lambda_aux(fullMap),	mixtevec_aux(fullMap);
+    vec_lambda_aux.getEpetraVector().PutScalar(1);
+    vec_lambda_aux.GlobalAssemble();
+    mixtevec_aux.getEpetraVector().PutScalar(1);
+    mixtevec_aux.GlobalAssemble();
+
+    vector_type vec_lambda(fluid.getMap(), Repeated), mixtevec(fluid.getMap(), Repeated);
+
+    vec_lambda = vec_lambda_aux;
+    mixtevec = mixtevec_aux;
+
+    // Robin BC
+    BCVector robin_wall(vec_lambda, uFESpace.dof().numTotalDof());
+
+    // Neumann BC, normal component
+    //BCVector robin_wall(vec_lambda, uFESpace.dof().numTotalDof(),1);
+
+    robin_wall.setMixteCoef(0);
+    robin_wall.setMixteVec(mixtevec);
+
+    vec_lambda_aux.spy("lambda");
+    vec_lambda.spy("lambdaRep");
+
+
+
+    bcH.addBC( "Wall",      1, Mixte, Full,  robin_wall, 3 );
+    //bcH.addBC( "Wall",      1, Natural, Full,  robin_wall, 3 );
+#endif
+
+
+
 
     if (verbose) std::cout << "ok." << std::endl;
 
@@ -447,7 +526,7 @@ Cylinder::run()
 
     Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "cylinder", d->comm->MyPID());
 
-    vector_ptrtype velAndPressure ( new vector_type(fluid.solution(), fluid.getRepeatedEpetraMap() ) );
+    vector_ptrtype velAndPressure ( new vector_type(fluid.solution(), Repeated ) );
 
     ensight.addVariable( ExporterData::Vector, "velocity", velAndPressure,
                          UInt(0), uFESpace.dof().numTotalDof() );

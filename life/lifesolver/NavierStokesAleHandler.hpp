@@ -31,7 +31,7 @@
 #define _NAVIERSTOKESALEHANDLER_H_
 #include <life/lifesolver/NavierStokesHandler.hpp>
 //#include <life/lifesolver/dataNavierStokes.hpp>
-#include <life/lifefem/meshMotion.hpp>
+//#include <life/lifefem/meshMotion.hpp>
 #include <life/lifecore/life.hpp>
 #include <boost/function.hpp>
 

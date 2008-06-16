@@ -413,8 +413,7 @@ FESpace<Mesh, Map>::interpolate( const Function& fct,
                     for ( UInt icmp = 0; icmp < nbComp; ++icmp )
                     {
                         int iDof = icmp * dim() + dof().localToGlobal( elemId, lDof  );
-                        if (vect.Map().LID( iDof ) >= 0)
-                            vect( iDof ) = fct( time, x, y, z, icmp + 1 );
+                        vect.checkAndSet( iDof, fct( time, x, y, z, icmp + 1 ));
                     }
                 }
             }
@@ -439,8 +438,7 @@ FESpace<Mesh, Map>::interpolate( const Function& fct,
                     for ( UInt icmp = 0; icmp < nbComp; ++icmp )
                     {
                         int iDof = icmp * dim() + dof().localToGlobal( elemId, lDof  );
-                        if (vect.Map().LID( iDof ) >= 0)
-                            vect( iDof ) = fct( time, x, y, z, icmp + 1 );
+                        vect.checkAndSet( iDof, fct( time, x, y, z, icmp + 1 ));
                     }
                 }
             }
@@ -506,7 +504,7 @@ FESpace<Mesh, Map>::L2ScalarProduct( const Function& fct, vector_type& vec, cons
     {
         this->fe().updateFirstDeriv( this->mesh()->volumeList( iVol ) );
 
-        Real s = 0., f, x, y, z;
+        Real f, x, y, z;
 
         int i, inod, ig;
         UInt eleID = this->fe().currentLocalId();
@@ -637,7 +635,7 @@ FESpace<Mesh, Map>::L2Error( const Function&    fexact,
     this->map().Comm().SumAll(&sendbuff[0], &recvbuff[0], 2);
 
 
-    int me = this->map().Comm().MyPID();
+//    int me = this->map().Comm().MyPID();
 
 //     if (me == 0)
 //     {

@@ -78,7 +78,7 @@ const UInt BDFT_MAX_ORDER = 3;
 
   \f$ u_{k+1} \approx \sum_{i=0}^{n-1} \beta_i u_{k-i} \f$
 */
-template<typename VectorType = EpetraVector<double> >
+template<typename VectorType = EpetraVector >
 class BdfT // T means template
 {
 public:

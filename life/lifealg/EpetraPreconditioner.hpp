@@ -33,14 +33,15 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "Ifpack_config.h"
-#include "Ifpack.h"
-#include "Ifpack_Preconditioner.h"
-#include "Ifpack_AdditiveSchwarz.h"
-#include "Ifpack_Amesos.h"
-#include "Ifpack_ILU.h"
+#include <Ifpack_config.h>
+#include <Ifpack.h>
+#include <Ifpack_Preconditioner.h>
+#include <Ifpack_AdditiveSchwarz.h>
+#include <Ifpack_Amesos.h>
+#include <Ifpack_ILU.h>
 
-#include "life/lifearray/EpetraMatrix.hpp"
+#include <life/lifecore/GetPot.hpp>
+#include <life/lifearray/EpetraMatrix.hpp>
 
 namespace LifeV
 {
@@ -89,7 +90,7 @@ public:
 
     void        precReset();
 
-
+    //! returns true if prec exists
     const bool  set() const {return M_Prec;}
 
 private:

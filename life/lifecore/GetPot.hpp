@@ -15,7 +15,7 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/ 
+*/
 //! \file util_string.h
 //  -*- c++ -*-
 //  GetPot Version 1.0-LifeV             Sept/13/2002
@@ -24,24 +24,24 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 /*!
   WEBSITE: http://getpot.sourceforge.net
- 
+
   This library is  free software; you can redistribute  it and/or modify
   it  under  the terms  of  the GNU  Lesser  General  Public License  as
   published by the  Free Software Foundation; either version  2.1 of the
   License, or (at your option) any later version.
-  
+
   This library  is distributed in the  hope that it will  be useful, but
   WITHOUT   ANY  WARRANTY;   without  even   the  implied   warranty  of
   MERCHANTABILITY  or FITNESS  FOR A  PARTICULAR PURPOSE.   See  the GNU
   Lesser General Public License for more details.
-  
+
   You  should have  received a  copy of  the GNU  Lesser  General Public
   License along  with this library; if  not, write to  the Free Software
   Foundation, Inc.,  59 Temple Place,  Suite 330, Boston,  MA 02111-1307
   USA
-  
-  (C) 2001-2002 Frank R. Schaefer  
-*/ 
+
+  (C) 2001-2002 Frank R. Schaefer
+*/
 //==========================================================================
 #ifndef __GETPOT_H__
 #define __GETPOT_H__
@@ -59,9 +59,9 @@ typedef std::vector<std::string> StringVector;
 \version 1.0-LifeV
 This class handles the parsing of command line and options file according to the
 rules set up in the getpot manual.
- 
+
 This is a version modified for the LifeV library, based on the official release 1.0
- 
+
 <ul>
 <li>It has been split into two files: one for the declarations (GetPot.h) and
 one for the definitions (GetPot.cc) in order to comply with the LifeV
@@ -70,10 +70,10 @@ general organization.</li>
 the data base will be constructed as the union of the data contained in all
 the files in the list</li>
 </ul>
- 
+
 \note: in order to upgrade from a newer official version the same
 modifications have to be carried out.
- 
+
 */
 class GetPot
 {

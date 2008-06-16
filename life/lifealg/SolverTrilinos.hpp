@@ -74,7 +74,7 @@ public:
     typedef SolverTrilinos                   solver_type;
 
     typedef EpetraMatrix<double>             matrix_type;
-    typedef EpetraVector<double>             vector_type;
+    typedef EpetraVector                     vector_type;
 
     typedef Preconditioner                   prec_raw_type;
     typedef boost::shared_ptr<prec_raw_type> prec_type;
@@ -111,6 +111,8 @@ public:
     //! set matrix from EpetraMatrix
     void setMatrix(matrix_type& m);
 
+    void setOperator(Epetra_Operator& op);
+
     //! set Epetra_Operator preconditioner
     void setPreconditioner( prec_type _prec );
 
@@ -145,6 +147,8 @@ public:
       solve the problem \f$ A x = b \f$
 
       \c A has been entered via \c setMatrix .
+
+      return the number of iterations, M_maxIter+1 if solve failed
 
     */
     int solve( vector_type& x, vector_type& b );

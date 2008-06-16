@@ -41,7 +41,7 @@
 #include <life/lifefem/dof.hpp>
 #include <life/lifefem/geoMap.hpp>
 #include <life/lifesolver/dataNavierStokes.hpp>
-#include <life/lifealg/dataAztec.hpp>
+//#include <life/lifealg/dataAztec.hpp>
 #include <life/lifefilters/medit_wrtrs.hpp>
 #include <life/lifefilters/gmv_wrtrs.hpp>
 #include <life/lifefem/bcHandler.hpp>

@@ -139,7 +139,7 @@ public:
     //! get the FSI operator
     oper_fsi_ptr_mpi const& operFSI() const { return M_oper; }
 
-    //! get the displacement
+    //! get the displacement, which will be on the solidInterfaceMap
     vector_type const& displacement() const { return *M_lambda; }
 
     //! get access to the \c bchandler_type for the velocity

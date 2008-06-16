@@ -20,13 +20,13 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
-SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
+SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 AM_CPPFLAGS = -DNO_BLASLAPACK
 
 lib_LTLIBRARIES	= liblifesolver.la
 
-liblifesolver_la_SOURCES   = darcySolver.cpp FSIOperator.cpp fixedPointBase.cpp exactJacobianBase.cpp FSISolver.cpp timeSolver.cpp
+liblifesolver_la_SOURCES   = FSIOperator.cpp fixedPointBase.cpp exactJacobianBase.cpp FSISolver.cpp
 
 liblifesolver_la_LIBADD    = ../lifefilters/liblifefilters.la ../lifearray/liblifearray.la ../lifecore/liblifecore.la $(petsc_libs) $(aztec_libs) $(boost_libs)
 

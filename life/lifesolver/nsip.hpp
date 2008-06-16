@@ -47,7 +47,7 @@
 #include <life/lifefem/bcManage.hpp>
 
 #if AZTEC_SOLVER
-#include <life/lifealg/SolverAztec.hpp>
+//#include <life/lifealg/SolverAztec.hpp>
 #else
 
 #include <life/lifearray/boostmatrix.hpp>

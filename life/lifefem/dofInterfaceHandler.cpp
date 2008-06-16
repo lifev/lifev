@@ -70,14 +70,14 @@ void DofInterfaceHandler::initVectors()
     for ( UInt iter = 0 ; iter < _nbNeigh ; ++iter )
     {
         ASSERT_PRE( _neighList[ iter ]->finalized(), "The DofInterface3Dto2D should be updated before calling initVectors (InIBC)." );
-//@        _InIBCList.push_back( EpetraVector<double>( _neighList[ iter ]->nbInterfaceDof() ) );
+//@        _InIBCList.push_back( EpetraVector( _neighList[ iter ]->nbInterfaceDof() ) );
 
     }
     ASSERT_PRE( _nbNeigh != _OutIBCList.size() || _nbNeigh == 0 , "The list of OutIBC Vectors in the Handler is full." );
     for ( UInt iter = 0 ; iter < _nbNeigh ; ++iter )
     {
         ASSERT_PRE( _neighList[ iter ]->finalized(), "The DofInterface3Dto2D should be updated before calling initVectors (OutIBC)." );
-//@        _OutIBCList.push_back( EpetraVector<double>( _neighList[ iter ]->nbInterfaceDof() ) );
+//@        _OutIBCList.push_back( EpetraVector( _neighList[ iter ]->nbInterfaceDof() ) );
 
         _indexInterfRefMap[ _neighList[ iter ]->InterfaceRef() ] = iter;
     }
@@ -138,13 +138,13 @@ const DofInterface3Dto2D& DofInterfaceHandler::operator[] ( const UInt& i ) cons
 
 
 //! extracting a Vector in the _InIBCList list (starts from 0)
-const EpetraVector<double> & DofInterfaceHandler::InIBC( const UInt & i ) const
+const EpetraVector & DofInterfaceHandler::InIBC( const UInt & i ) const
 {
     ASSERT_PRE( _nbNeigh == _InIBCList.size(), "Some Vectors have not been added to the list (InIBC)." );
     ASSERT_BD( i < _nbNeigh );
     return _InIBCList[ i ];
 }
-EpetraVector<double> & DofInterfaceHandler::InIBC( const UInt & i )
+EpetraVector & DofInterfaceHandler::InIBC( const UInt & i )
 {
     ASSERT_PRE( _nbNeigh == _InIBCList.size(), "Some Vectors have not been added to the list (InIBC)." );
     ASSERT_BD( i < _nbNeigh );
@@ -153,13 +153,13 @@ EpetraVector<double> & DofInterfaceHandler::InIBC( const UInt & i )
 
 //! extracting a Vector in the _InIBCList list (starts from 0)
 //! using the reference of the interface
-const EpetraVector<double> & DofInterfaceHandler::InIBC_byRefInterf( const Int & refinterf ) const
+const EpetraVector & DofInterfaceHandler::InIBC_byRefInterf( const Int & refinterf ) const
 {
     ASSERT_PRE( _nbNeigh == _InIBCList.size(), "Some Vectors have not been added to the list (InIBC)." );
     UInt i = IndexOfInterfaceRef( refinterf );
     return _InIBCList[ i ];
 }
-EpetraVector<double> & DofInterfaceHandler::InIBC_byRefInterf( const Int & refinterf )
+EpetraVector & DofInterfaceHandler::InIBC_byRefInterf( const Int & refinterf )
 {
     ASSERT_PRE( _nbNeigh == _InIBCList.size(), "Some Vectors have not been added to the list (InIBC)." );
     UInt i = IndexOfInterfaceRef( refinterf );
@@ -167,13 +167,13 @@ EpetraVector<double> & DofInterfaceHandler::InIBC_byRefInterf( const Int & refin
 }
 
 //! extracting a Vector in the _OutIBCList list (starts from 0)
-const EpetraVector<double> & DofInterfaceHandler::OutIBC( const UInt & i ) const
+const EpetraVector & DofInterfaceHandler::OutIBC( const UInt & i ) const
 {
     ASSERT_PRE( _nbNeigh == _OutIBCList.size(), "Some Vectors have not been added to the list (OutIBC)." );
     ASSERT_BD( i < _nbNeigh );
     return _OutIBCList[ i ];
 }
-EpetraVector<double> & DofInterfaceHandler::OutIBC( const UInt & i )
+EpetraVector & DofInterfaceHandler::OutIBC( const UInt & i )
 {
     ASSERT_PRE( _nbNeigh == _OutIBCList.size(), "Some Vectors have not been added to the list (OutIBC)." );
     ASSERT_BD( i < _nbNeigh );
@@ -182,13 +182,13 @@ EpetraVector<double> & DofInterfaceHandler::OutIBC( const UInt & i )
 
 //! extracting a Vector in the _OutIBCList list (starts from 0)
 //! using the reference of the interface
-const EpetraVector<double> & DofInterfaceHandler::OutIBC_byRefInterf( const Int & refinterf ) const
+const EpetraVector & DofInterfaceHandler::OutIBC_byRefInterf( const Int & refinterf ) const
 {
     ASSERT_PRE( _nbNeigh == _OutIBCList.size(), "Some Vectors have not been added to the list (OutIBC)." );
     UInt i = IndexOfInterfaceRef( refinterf );
     return _OutIBCList[ i ];
 }
-EpetraVector<double> & DofInterfaceHandler::OutIBC_byRefInterf( const Int & refinterf )
+EpetraVector & DofInterfaceHandler::OutIBC_byRefInterf( const Int & refinterf )
 {
     ASSERT_PRE( _nbNeigh == _OutIBCList.size(), "Some Vectors have not been added to the list (OutIBC)." );
     UInt i = IndexOfInterfaceRef( refinterf );

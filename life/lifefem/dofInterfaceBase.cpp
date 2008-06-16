@@ -65,6 +65,11 @@ ID DofInterfaceBase::getInterfaceDof( const ID& i ) const
     return it->second;
 }
 
+bool DofInterfaceBase::isMyInterfaceDof( const ID& i ) const
+{
+    std::map<ID, ID>::const_iterator it = _locDofMap.find( i );
+    return ( it != _locDofMap.end() );
+}
 
 //! This method returns the number of dof that live on the interface
 ID DofInterfaceBase::nbInterfaceDof() const
