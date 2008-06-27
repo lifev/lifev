@@ -200,8 +200,9 @@ typedef uint32_type UInt;
 typedef uint16_type USInt;
 
 //! IDs (which starts ALWAYS from 1)
-typedef uint16_type id_type;
+typedef uint32_type id_type;
 typedef id_type ID;
+typedef id_type Index_t;
 
 //! dimension type
 typedef uint8_type dim_type;

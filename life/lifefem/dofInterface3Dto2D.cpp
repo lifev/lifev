@@ -134,6 +134,8 @@ ID DofInterface3Dto2D::_Vtx3Dto2D( const ID& idpoint3D ) const
             return it->second;
     }
     ERROR_MSG( "There is no such 3D index of vertex in the _vertexList." );
+    
+    return ID();
 }
 
 

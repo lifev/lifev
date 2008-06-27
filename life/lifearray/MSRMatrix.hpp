@@ -296,8 +296,10 @@ MSRMatr( const MSRPatt* ex_pattern, const std::vector<DataType> &ex_value ) :
     //  _nnz = ex_pattern.nnz();
     //  _nrows = ex_pattern.nrow();
     //  _ncols = ex_pattern.ncol();
-    ASSERT( _Patt->nNz() == ex_value.size() - 1, "Error in MSR Values . _Patt->nNz() = "
-            << _Patt->nNz() << " ex_value.size() - 1 " << ex_value.size() - 1 ); // in MSR value has lenghth nnz+1
+	std::ostringstream _err_msg;
+	_err_msg << "Error in MSR Values . _Patt->nNz() = " << _Patt->nNz()
+	<< " ex_value.size() - 1 " << ex_value.size() - 1;
+    ASSERT( _Patt->nNz() == ex_value.size() - 1, _err_msg.str().c_str() ); // in MSR value has lenghth nnz+1
 }
 
 template <class DataType>
@@ -377,8 +379,10 @@ std::vector<DataType>
 MSRMatr<DataType>::operator* ( const std::vector<DataType> &v ) const
 {
     UInt nrows = _Patt->nRows();
-    ASSERT( nrows == v.size(), "Error in Matrix Vector product. nrows = "
-            << nrows << " v.size() = " << v.size() );
+    std::ostringstream _err_msg;
+    _err_msg <<  "Error in Matrix Vector product. nrows = "
+    << nrows << " v.size() = " << v.size();
+    ASSERT( nrows == v.size(), _err_msg.str().c_str() );
 
     std::vector<DataType> ans;
     ans.resize( nrows, 0.0 );
@@ -398,8 +402,10 @@ MSRMatr<DataType>::
 operator*( const Vector &v ) const
 {
     UInt nrows = _Patt->nRows();
-    ASSERT( nrows == v.size(), "Error in Matrix Vector product. nrows = "
-            << nrows << " v.size() = " << v.size()  );
+    std::ostringstream _err_msg;
+    _err_msg << "Error in Matrix Vector product. nrows = "
+    << nrows << " v.size() = " << v.size();
+    ASSERT( nrows == v.size(), _err_msg.str().c_str() );
     Vector ans( nrows );
     ans = ZeroVector( nrows );
 
@@ -435,8 +441,10 @@ MSRMatr<DataType>::
 trans_mult( const Vector &v ) const
 {
     UInt nrows = _Patt->nRows();
-    ASSERT( nrows == v.size(), "Error in Matrix Vector product. nrows = "
-            << nrows << " v.size() = " << v.size() );
+    std::ostringstream _err_msg;
+    _err_msg <<  "Error in Matrix Vector product. nrows = "
+    << nrows << " v.size() = " << v.size();
+    ASSERT( nrows == v.size(), _err_msg.str().c_str() );
     Vector ans( nrows );
     ans = 0.;
 

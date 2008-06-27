@@ -57,6 +57,8 @@
 
 #include "life/lifefem/FESpace.hpp"
 
+#include <list>
+
 namespace LifeV
 {
 /*!
@@ -177,7 +179,7 @@ public:
 
 
     //! Bounday Conditions
-    const bool BCset() const {return M_setBC;}
+    /*const*/ bool BCset() const {return M_setBC;}
     //! set the fluid BCs
     void setBC(BCHandler &BCh_u)
         {
@@ -201,6 +203,11 @@ public:
             return M_source;
         }
 
+    // compute area on a face with given flag
+    Real area(const EntityFlag& flag);
+
+    // compute flux on a face with given flag
+    Real flux(const EntityFlag& flag);
 
     //! Postprocessing
     void postProcess(bool _writeMesh = false);
@@ -383,28 +390,21 @@ Oseen( const data_type&          dataType,
     M_data                   ( dataType ),
     M_uFESpace               ( uFESpace ),
     M_pFESpace               ( pFESpace ),
-    M_BCh_fluid              ( &BCh_u ),
-    M_setBC                  ( true ),
     M_comm                   ( &comm ),
     M_me                     ( M_comm->MyPID() ),
-    M_linearSolver           ( ),
-    M_prec                   ( new prec_raw_type() ),
+    M_BCh_fluid              ( &BCh_u ),
+    M_setBC                  ( true ),
     M_localMap               ( M_uFESpace.map()  + M_pFESpace.map() ),
     M_matrMass               ( ),
     M_matrStokes             ( ),
 //    M_matrFull               ( ),
     M_matrNoBC               ( ),
-    M_matrStab               ( ),
-    M_elmatStiff             ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
-    M_elmatMass              ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
-    M_elmatP                 ( M_pFESpace.fe().nbNode, 1, 1 ),
-    M_elmatDiv               ( M_pFESpace.fe().nbNode, 1, 0, M_uFESpace.fe().nbNode, 0, nDimensions ),
-    M_elmatGrad              ( M_uFESpace.fe().nbNode, nDimensions, 0, M_pFESpace.fe().nbNode, 0, 1 ),
-    M_elvec                  ( M_uFESpace.fe().nbNode, nDimensions ),
     M_rhsNoBC                ( M_localMap ),
     M_rhsFull                ( M_localMap ),
     M_sol                    ( M_localMap ),
     M_residual               ( M_localMap ),
+    M_linearSolver           ( ),
+    M_prec                   ( new prec_raw_type() ),
     M_stab                   ( false ),
     M_resetStab              ( true ),
     M_reuseStab              ( true ),
@@ -421,7 +421,13 @@ Oseen( const data_type&          dataType,
     M_maxIterForReuse        ( -1 ),
     M_resetPrec              ( true ),
     M_maxIterSolver          ( -1 ),
-    M_recomputeMatrix        ( false )
+    M_recomputeMatrix        ( false ),
+    M_elmatStiff             ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
+    M_elmatMass              ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
+    M_elmatP                 ( M_pFESpace.fe().nbNode, 1, 1 ),
+    M_elmatDiv               ( M_pFESpace.fe().nbNode, 1, 0, M_uFESpace.fe().nbNode, 0, nDimensions ),
+    M_elmatGrad              ( M_uFESpace.fe().nbNode, nDimensions, 0, M_pFESpace.fe().nbNode, 0, 1 ),
+    M_elvec                  ( M_uFESpace.fe().nbNode, nDimensions )
 {
     M_stab = (&M_uFESpace.refFE() == &M_pFESpace.refFE());
 }
@@ -437,27 +443,20 @@ Oseen( const data_type&          dataType,
     M_data               ( dataType ),
     M_uFESpace               ( uFESpace ),
     M_pFESpace               ( pFESpace ),
-    M_setBC                  ( false ),
     M_comm                   ( &comm ),
     M_me                     ( M_comm->MyPID() ),
-    M_linearSolver           ( ),
-    M_prec                   ( new prec_raw_type() ),
+    M_setBC                  ( false ),
     M_localMap               ( M_uFESpace.map() + M_pFESpace.map() ),
     M_matrMass               ( ),
     M_matrStokes             ( ),
 //    M_matrFull               ( ),
     M_matrNoBC               ( ),
-    M_matrStab               ( ),
-    M_elmatStiff             ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
-    M_elmatMass              ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
-    M_elmatP                 ( M_pFESpace.fe().nbNode, 1, 1 ),
-    M_elmatDiv               ( M_pFESpace.fe().nbNode, 1, 0, M_uFESpace.fe().nbNode, 0, nDimensions ),
-    M_elmatGrad              ( M_uFESpace.fe().nbNode, nDimensions, 0, M_pFESpace.fe().nbNode, 0, 1 ),
-    M_elvec                  ( M_uFESpace.fe().nbNode, nDimensions ),
     M_rhsNoBC                ( M_localMap ),
-    M_residual               ( M_localMap ),
     M_rhsFull                ( M_localMap ),
     M_sol                    ( M_localMap ),
+    M_residual               ( M_localMap ),
+    M_linearSolver           ( ),
+    M_prec                   ( new prec_raw_type() ),
     M_stab                   ( false ),
     M_resetStab              ( true ),
     M_reuseStab              ( true ),
@@ -474,7 +473,13 @@ Oseen( const data_type&          dataType,
     M_maxIterForReuse        ( -1 ),
     M_resetPrec              ( true ),
     M_maxIterSolver          ( -1 ),
-    M_recomputeMatrix        ( false )
+    M_recomputeMatrix        ( false ),
+    M_elmatStiff             ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
+    M_elmatMass              ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
+    M_elmatP                 ( M_pFESpace.fe().nbNode, 1, 1 ),
+    M_elmatDiv               ( M_pFESpace.fe().nbNode, 1, 0, M_uFESpace.fe().nbNode, 0, nDimensions ),
+    M_elmatGrad              ( M_uFESpace.fe().nbNode, nDimensions, 0, M_pFESpace.fe().nbNode, 0, 1 ),
+    M_elvec                  ( M_uFESpace.fe().nbNode, nDimensions )
 {
     M_stab = (&M_uFESpace.refFE() == &M_pFESpace.refFE());
 }
@@ -1135,13 +1140,214 @@ void Oseen<Mesh, SolverType>::applyBoundaryConditions( matrix_type&        matri
 } // applyBoundaryCondition
 
 
+//! Computes the flux on a given part of the boundary
+template<typename Mesh, typename SolverType> Real
+Oseen<Mesh, SolverType>::flux(const EntityFlag& flag) {
+
+  Real flux = 0.0;
+
+  PhysVectUnknown<Vector> u(nDimensions*dim_u());
+	ScalUnknown<Vector> p(dim_p());
+
+	reduceSolution(u, p);
+
+  if (M_verbose)
+  {
+	  typedef  typename Mesh::VolumeShape GeoShape;
+	  typedef  typename Mesh::FaceShape GeoBShape;
+	
+	  // Some useful local variables, to save some typing
+	  UInt nDofpV = M_uFESpace.refFE().nbDofPerVertex; // number of Dof per vertices
+	  UInt nDofpE = M_uFESpace.refFE().nbDofPerEdge;   // number of Dof per edges
+	  UInt nDofpF = M_uFESpace.refFE().nbDofPerFace;   // number of Dof per faces
+	
+	  UInt nFaceV = GeoBShape::numVertices; // Number of face's vertices
+	  UInt nFaceE = GeoBShape::numEdges;    // Number of face's edges
+	
+	  UInt nElemV = GeoShape::numVertices; // Number of element's vertices
+	  UInt nElemE = GeoShape::numEdges;    // Number of element's edges
+	
+	  UInt nDofFV = nDofpV * nFaceV; // number of vertex's Dof on a face
+	  UInt nDofFE = nDofpE * nFaceE; // number of edge's Dof on a face
+	
+	  UInt nDofF  = nDofFV+nDofFE+nDofpF; // number of total Dof on a face
+	
+	  UInt nDofElemV = nElemV*nDofpV; // number of vertex's Dof on a Element
+	  UInt nDofElemE = nElemE*nDofpE; // number of edge's Dof on a Element
+	
+	  UInt bdnF  = M_data.mesh()->numBFaces();    // number of faces on boundary
+	
+	  std::list<std::pair<ID, SimpleVect<ID> > > faces;
+	  ID ibF;
+	  UInt iElAd, iVeEl, iFaEl, iEdEl;
+	  ID lDof, gDof, numTotalDof=M_uFESpace.dof().numTotalDof();
+	
+	  EntityFlag marker;
+	  typedef std::list<pair<ID, SimpleVect<ID> > >::iterator Iterator;
+	
+	  //
+	  // Loop on boundary faces: List of boundary faces
+	  // with marker = flag
+	  //
+	  for (ID i=1 ; i<=bdnF; ++i) {
+	    marker = M_data.mesh()->boundaryFace(i).marker();
+	    if ( marker == flag  ) {
+	      faces.push_front(make_pair(i,SimpleVect<ID>(nDofF)));
+	    }
+	  }
+	
+	  //
+	  // Loop on faces: building the local to global vector
+	  // for these boundary faces
+	  //
+	  for (Iterator j=faces.begin(); j != faces.end(); ++j) {
+	
+	    ibF = j->first;
+	
+	    iElAd = M_data.mesh()->boundaryFace(ibF).ad_first();  // id of the element adjacent to the face
+	    iFaEl = M_data.mesh()->boundaryFace(ibF).pos_first(); // local id of the face in its adjacent element
+	
+	    // Vertex based Dof
+	    if ( nDofpV ) {
+	
+	      // loop on face vertices
+	      for (ID iVeFa=1; iVeFa<=nFaceV; ++iVeFa){
+	
+	      	iVeEl = GeoShape::fToP(iFaEl,iVeFa); // local vertex number (in element)
+	
+	      	// Loop number of Dof per vertex
+	      	for (ID l=1; l<=nDofpV; ++l) {
+	      		lDof =   (iVeFa-1) * nDofpV + l ; // local Dof j-esimo grado di liberta' su una faccia
+	      		gDof =  M_uFESpace.dof().localToGlobal( iElAd, (iVeEl-1)*nDofpV + l); // global Dof
+	      		j->second( lDof ) =  gDof; // local to global on this face
+	      	}
+	      }
+	    }
+	
+	    // Edge based Dof
+	    if (nDofpE) {
+	
+	      // loop on face edges
+	      for (ID iEdFa=1; iEdFa<=nFaceE; ++iEdFa) {
+	
+	      	iEdEl  = GeoShape::fToE(iFaEl,iEdFa).first; // local edge number (in element)
+	      	// Loop number of Dof per edge
+	      	for (ID l=1; l<=nDofpE; ++l) {
+	
+	      		lDof =  nDofFV + (iEdFa-1) * nDofpE + l ; // local Dof sono messi dopo gli lDof dei vertici
+	      		gDof =  M_uFESpace.dof().localToGlobal( iElAd, nDofElemV + (iEdEl-1)*nDofpE + l); // global Dof
+	      		j->second( lDof ) =  gDof; // local to global on this face
+	      	}
+	      }
+	    }
+	    // Face based Dof
+	    if (nDofpF) {
+	
+	      // Loop on number of Dof per face
+	      for (ID l=1; l<=nDofpF; ++l) {
+	      	lDof = nDofFE + nDofFV + l; // local Dof sono messi dopo gli lDof dei vertici e dopo quelli degli spigoli
+	      	gDof = M_uFESpace.dof().localToGlobal( iElAd, nDofElemE + nDofElemV + (iFaEl-1)*nDofpF + l); // global Dof
+	      	j->second( lDof ) =  gDof; // local to global on this face
+	      }
+	    }
+	  }
+	
+	  // Number of velocity components
+	  UInt nc_u=nDimensions;
+	
+	  // Nodal values of the velocity in the current face
+	  std::vector<Real> u_local(nc_u*nDofF);
+	
+	  // Loop on faces
+	  for (Iterator j=faces.begin(); j != faces.end(); ++j) {
+	
+	    // Extracting nodal values of the velocity in the current face
+	    for (UInt ic =0; ic<nc_u; ++ic) {
+	      for (ID l=1; l<=nDofF; ++l) {
+	      	gDof = j->second(l);
+	      	u_local[ic*nDofF+l-1] = u(ic*numTotalDof+gDof-1);
+	      }
+	    }
+	
+	    // Updating quadrature data on the current face
+	    M_uFESpace.feBd().updateMeasNormalQuadPt(M_data.mesh()->boundaryFace(j->first));
+	
+	    // Quadrature formula
+	    // Loop on quadrature points
+	    for(int iq=0; iq< M_uFESpace.feBd().nbQuadPt; ++iq) {
+	
+	      // Dot product
+	      // Loop on components
+	      for (UInt ic =0; ic<nc_u; ++ic) {
+	
+	      	// Interpolation
+	      	// Loop on local dof
+	      	for (ID l=1; l<=nDofF; ++l)
+	      		flux += M_uFESpace.feBd().weightMeas(iq)
+	      							* u_local[ic*nDofF+l-1]
+	      		          * M_uFESpace.feBd().phi(int(l-1),iq)
+	      		          * M_uFESpace.feBd().normal(int(ic),iq);
+	      	}
+	    	}
+	  	}
+  }	
+  
+  return flux;
+}
+
+
+
+//! Computes the area on a given part of the boundary
+template<typename Mesh, typename SolverType> Real
+Oseen<Mesh, SolverType>::area(const EntityFlag& flag) {
+
+  EpetraVector area( EpetraMap( M_comm->NumProc(), 1, &M_me, 0, *M_comm) );
+  area *= 0.0;
+
+	UInt bdnF  = M_data.mesh()->numBFaces();    // number of faces on boundary
+	
+  std::list<ID> faces;
+  typedef std::list<ID>::iterator Iterator;
+
+  EntityFlag marker;
+  //
+  // Loop on boundary faces: List of boundary faces
+  // with marker = flag
+  //
+  for (ID i=1 ; i<=bdnF; ++i) {
+    marker = M_data.mesh()->boundaryFace(i).marker();
+    if ( marker == flag  ) {
+      faces.push_front(i);
+    }
+  }
+
+  //
+  // Loop on processor faces
+  //
+  for (Iterator j=faces.begin(); j != faces.end(); ++j) {
+
+    M_uFESpace.feBd().updateMeas( M_data.mesh()->boundaryFace( *j ) );  // updating finite element information
+
+    area[M_me] += M_uFESpace.feBd().measure();
+
+  }
+
+  Real total_area(0.);
+  EpetraVector local_area( area, M_me );
+  for( int i=0; i<M_comm->NumProc(); ++i )
+  	total_area += local_area[i];
+  
+//  area.MeanValue( &total_area );
+
+	return total_area;
+}
 
 
 
 // Postprocessing
 template <typename Mesh, typename SolverType>
 void
-Oseen<Mesh, SolverType>::postProcess(bool _writeMesh)
+Oseen<Mesh, SolverType>::postProcess(bool /*_writeMesh*/)
 {
     std::ostringstream index;
     std::ostringstream indexMe;
@@ -1199,7 +1405,7 @@ Oseen<Mesh, SolverType>::postProcess(bool _writeMesh)
 //         wr_medit_ascii_scalar( "press." + name + ".bb", p.giveVec(),
 //                                p.size() );
 
-        double dt = M_data.timestep();
+    	// double dt = M_data.timestep();
 
 
        writeMesh("vel_x." + me + "." + name + ".mesh", *M_uFESpace.mesh());

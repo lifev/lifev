@@ -246,7 +246,7 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
     int nProc;
     nProc = M_comm->NumProc();
 
-    std::vector< std::vector<int> > locProc(nProc, 0);
+    std::vector< std::vector<int> > locProc(nProc);
 
     std::vector<int>           locVolume(0);
 
@@ -255,13 +255,26 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
         locProc[part[ii]].push_back(ii + vertexDist()[M_me]);
     }
 
+		// sizeof(MPI_INT) is expressed in bytes
+		// MPI_INT range is ( -2^(7*sizeof(MPI_INT), 2^(7*sizeof(MPI_INT) - 1 )
+		// (MPI_INT is not unsigned int)
+		int _exp(7*sizeof(MPI_INT));
+		int _max_int( std::pow(2., _exp) - 1 );
+
     for (int iproc = 0; iproc < nProc; ++iproc)
     {
         if (int(M_me) != iproc)
             {
                 int size = locProc[iproc].size();
                 MPI_Send(&size, 1, MPI_INT, iproc, 666, MPIcomm);
-                MPI_Send(&locProc[iproc][0], size, MPI_INT, iproc, 666, MPIcomm);
+                int i(0);
+                while(size>_max_int)
+                {
+                	MPI_Send(&locProc[iproc][i*_max_int], _max_int, MPI_INT, iproc, 666, MPIcomm);
+                	size=size-_max_int;
+                	++i;
+                }
+              	MPI_Send(&locProc[iproc][i*_max_int], size, MPI_INT, iproc, 666, MPIcomm);
             }
     }
 
@@ -274,7 +287,14 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
             MPI_Status status;
             MPI_Recv(&size, 1, MPI_INT, iproc, 666, MPIcomm, &status);
             std::vector<int> stack(size, 0);
-            MPI_Recv(&stack[0], size, MPI_INT, iproc, 666, MPIcomm, &status);
+            int i(0);
+            while(size>_max_int)
+            {
+            	MPI_Recv(&stack[i*_max_int], _max_int, MPI_INT, iproc, 666, MPIcomm, &status);
+            	size=size-_max_int;
+            	++i;
+            }
+          	MPI_Recv(&stack[i*_max_int], size, MPI_INT, iproc, 666, MPIcomm, &status);
 
             for (int jj = 0; jj < size; ++jj)
             {

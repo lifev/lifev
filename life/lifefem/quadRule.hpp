@@ -150,7 +150,7 @@ public:
         return _pt[ ig ].weight();
     }
     //! quadPointCoor(ig,icoor) is the coordinate icoor of the quadrature point ig
-    inline const Real quadPointCoor( int ig, int icoor ) const
+    inline /*const*/ Real quadPointCoor( int ig, int icoor ) const
     {
         ASSERT_BD( ig < nbQuadPt );
         return _pt[ ig ].coor( icoor );
@@ -191,7 +191,7 @@ public:
         return _maxIdQuadRule;
     };
     //! posQuadRule(t) = position in the set of the quadrature of id t
-    const int posQuadRule( int t ) const
+    /*const*/ int posQuadRule( int t ) const
     {
         ASSERT_BD( t >= 0 && t < _maxIdQuadRule )
         return _posQuadRule[ t ];

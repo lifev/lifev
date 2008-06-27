@@ -220,6 +220,12 @@ readMppFile( RegionMesh3D<GeoShape, MC> & mesh,
                 pp->y() = y;
                 pp->z() = z;
                 pp->setMarker( EntityFlag( ibc ) );
+
+                pp->setId     ( i + 1 );
+                pp->setLocalId( i + 1 );
+
+                mesh.localToGlobalNode().insert(std::make_pair(i+1, i+1));
+                mesh.globalToLocalNode().insert(std::make_pair(i+1, i+1));
             }
             oStr << "Vertices Read " << std::endl;
             done++;
@@ -543,6 +549,8 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
                 pp->z() = z;
                 pp->setMarker( EntityFlag( ibc ) );
 
+                mesh.localToGlobalNode().insert(std::make_pair(i+1, i+1));
+                mesh.globalToLocalNode().insert(std::make_pair(i+1, i+1));
             }
             oStr << "Vertices Read " << std::endl;
             done++;
@@ -682,6 +690,8 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
                 pv->setPoint( 3, mesh.point( p3 ) );
                 pv->setPoint( 4, mesh.point( p4 ) );
                 pv->setMarker( EntityFlag( ibc ) );
+//                mesh.localToGlobalElem().insert(std::make_pair(i+1, i+1));
+//                mesh.globalToLocalElem().insert(std::make_pair(i+1, i+1));
                 count++;
             }
             oStr << count << " Volume elements Read" << std::endl;
@@ -906,6 +916,8 @@ readGmshFile( RegionMesh3D<GeoShape, MC> & mesh,
         pp->x() = __x[3*__i];
         pp->y() = __x[3*__i+1];
         pp->z() = __x[3*__i+2];
+        mesh.localToGlobalNode().insert(std::make_pair(__i+1, __i+1));
+        mesh.globalToLocalNode().insert(std::make_pair(__i+1, __i+1));
     }
 
     int nVo = 1;
@@ -1218,20 +1230,27 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
     // Set all basic data structure
 
     // I store all Points
-    mesh.setMaxNumPoints( nPo,true );
-    mesh.setNumBPoints  ( nBPo );
-    mesh.setNumVertices ( nVe  );
-    mesh.setNumBVertices( nBVe );
+    mesh.setMaxNumPoints   ( nPo, true );
+    mesh.setMaxNumGlobalPoints( nPo );
+    mesh.setNumBPoints     ( nBPo );
+    mesh.setNumVertices    ( nVe );
+    mesh.setNumGlobalVertices(nVe);
+    mesh.setNumBVertices   ( nBVe );
     // Only Boundary Edges (in a next version I will allow for different choices)
-    mesh.setMaxNumEdges (nBEd);
-    mesh.setNumEdges    ( nEd ); // Here the REAL number of edges (all of them)
-    mesh.setNumBEdges   (nBEd);    /////////????????????
+    mesh.setMaxNumEdges    ( nEd );
+    mesh.setMaxNumGlobalEdges ( nEd );
+    mesh.setNumEdges       ( nEd ); // Here the REAL number of edges (all of them)
+    mesh.setNumBEdges      ( nBEd );
     // Only Boundary Faces
-    mesh.setMaxNumFaces (nBFa);
-    mesh.setNumFaces    ( nFa ); // Here the REAL number of edges (all of them)
-    mesh.setNumBFaces   (nBFa);
+    mesh.setMaxNumFaces    ( nFa );
+    mesh.setMaxNumGlobalFaces ( nFa );
+    mesh.setNumFaces       ( nFa ); // Here the REAL number of faces (all of them)
+    mesh.setNumBFaces      ( nBFa );
 
-    mesh.setMaxNumVolumes(nVo,true);
+    mesh.setMaxNumVolumes  ( nVo, true );
+    mesh.setMaxNumGlobalVolumes( nVo);
+
+    mesh.setMarker         ( regionFlag ); // Add Marker to list of Markers
 
     mesh.setMarker(regionFlag); // Mark the region ????????what if more then one<<<<<<<
 
@@ -1255,9 +1274,13 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
                 fstream4>>x>>y>>z;
                 pp=&mesh.addPoint(bpoints[i+1]); //true if boundary point
                 pp->setMarker(bcnpoints[i+1]);
+                pp->setId     ( i + 1 );
+                pp->setLocalId( i + 1 );
                 pp->x()=x;
                 pp->y()=y;
                 pp->z()=z;
+                mesh.localToGlobalNode().insert(std::make_pair(i+1, i+1));
+                mesh.globalToLocalNode().insert(std::make_pair(i+1, i+1));
             }
             flag&=~1;
             break;
@@ -1304,6 +1327,7 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
                 pv->setPoint(2, mesh.point(p2) );
                 pv->setPoint(3, mesh.point(p3) );
                 pv->setPoint(4, mesh.point(p4) );
+                pv->setMarker( EntityFlag(matnr) );
             }
             flag&=~4;
         }

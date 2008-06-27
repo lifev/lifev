@@ -145,7 +145,7 @@ void Ensight<Mesh>::setMeshProcId( mesh_ptrtype mesh , int const procId )
         }
 
     if (!this->M_multimesh)
-      M_wr_ascii_geo( this->M_prefix+this->M_me+".geo" );
+      M_wr_ascii_geo( this->M_post_dir+this->M_prefix+this->M_me+".geo" );
 
 
 }
@@ -153,7 +153,7 @@ void Ensight<Mesh>::setMeshProcId( mesh_ptrtype mesh , int const procId )
 template<typename Mesh>
 void Ensight<Mesh>::postProcess(const Real& time)
 {
-    typedef std::list< ExporterData >::const_iterator Iterator;
+    typedef std::list< ExporterData >::iterator Iterator;
 
     this->getPostfix();
 
@@ -164,12 +164,14 @@ void Ensight<Mesh>::postProcess(const Real& time)
             chrono.start();
             for (Iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
                 {
-                    M_wr_ascii(*i);
+            	if (i->steady() < 2 )
+            	    		M_wr_ascii(*i);
+            	if (i->steady() == 1) i->set_steady(2);
                 }
             M_wr_case(time);
 
             if (this->M_multimesh)
-                M_wr_ascii_geo( this->M_prefix+"."+this->M_postfix+this->M_me+".geo" );
+                M_wr_ascii_geo( this->M_post_dir+this->M_prefix+this->M_postfix+this->M_me+".geo" );
             chrono.stop();
             if (!this->M_procId) std::cout << "      done in " << chrono.diff() << " s." << std::endl;
         }
@@ -196,9 +198,12 @@ void Ensight<Mesh>::M_wr_ascii(const ExporterData& dvar)
 template <typename Mesh>
 void Ensight<Mesh>::M_wr_ascii_scalar(const ExporterData& dvar)
 {
-
-    std::ofstream sclf( (dvar.prefix()+"."+this->M_postfix+this->M_me+".scl").c_str() );
-
+	std::ofstream sclf;
+	if (dvar.steady() )
+		sclf.open( (this->M_post_dir+dvar.prefix()+this->M_me+".scl").c_str() );
+	else
+		sclf.open( (this->M_post_dir+dvar.prefix()+this->M_postfix+this->M_me+".scl").c_str() );
+		
     UInt count=0;
 
     UInt start = dvar.start();
@@ -226,9 +231,13 @@ void Ensight<Mesh>::M_wr_ascii_scalar(const ExporterData& dvar)
 }
 
 template <typename Mesh> void Ensight<Mesh>::M_wr_ascii_vector(const ExporterData& dvar)
-{
-    std::ofstream vctf( (dvar.prefix()+"."+this->M_postfix+this->M_me+".vct").c_str() );
+{	std::ofstream vctf;
 
+	if (dvar.steady() )
+		vctf.open( (this->M_post_dir+dvar.prefix()+this->M_me+".vct").c_str() );
+	else
+		vctf.open( (this->M_post_dir+dvar.prefix()+this->M_postfix+this->M_me+".vct").c_str() );
+		
     UInt count=0;
 
     UInt dim   = dvar.dim();
@@ -261,7 +270,7 @@ template <typename Mesh> void Ensight<Mesh>::M_wr_ascii_vector(const ExporterDat
 
 template <typename Mesh> void Ensight<Mesh>::M_wr_ascii_geo(const std::string geo_file)
 {
-    std::ofstream geof( geo_file.c_str() );
+    std::ofstream geof(geo_file.c_str() );
     ID nV = this->M_mesh->numVertices();
     ID nE = this->M_mesh->numVolumes();
     UInt part=0;
@@ -359,7 +368,7 @@ template <typename Mesh> void Ensight<Mesh>::M_wr_ascii_geo(const std::string ge
 template
 <typename Mesh> void Ensight<Mesh>::M_wr_case(const Real& time)
 {
-  std::ofstream casef( (this->M_prefix+this->M_me+".case").c_str() );
+  std::ofstream casef( (this->M_post_dir+this->M_prefix+this->M_me+".case").c_str() );
     casef << "FORMAT\n";
     casef << "type: ensight\n";
     M_case_mesh_section(casef);
@@ -410,17 +419,21 @@ template <typename Mesh> void Ensight<Mesh>::M_case_variable_section(std::ofstre
 {
     typedef std::list< ExporterData >::const_iterator Iterator;
     casef << "VARIABLE\n";
-    std::string aux;
+    std::string aux, str;
     for (Iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
-        {
+        {	
+    		if (i-> steady() ) 
+    			str = ""; 
+    		else
+    			str = ".***";
             aux = i->prefix()+" "+i->prefix();
             switch( i->type() )
                 {
                 case ExporterData::Scalar:
-		  casef << "scalar per node: 1 "+aux+".***" << this->M_me << ".scl\n";
+		  casef << "scalar per node: 1 "+ aux + str << this->M_me << ".scl\n";
                     break;
                 case ExporterData::Vector:
-                    casef << "vector per node: 1 "+aux+".***" << this->M_me << ".vct\n";
+                    casef << "vector per node: 1 "+ aux+ str << this->M_me << ".vct\n";
                     break;
                 }
         }

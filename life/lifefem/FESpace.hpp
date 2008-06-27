@@ -48,7 +48,8 @@
 #include <life/lifearray/SimpleVect.hpp>
 #include <utility>
 #include <life/lifemesh/partitionMesh.hpp>
-
+#include <life/lifefem/currentFE.hpp>
+#include <life/lifefem/currentBdFE.hpp>
 
 using std::pair;
 
@@ -168,8 +169,8 @@ public:
 
     //! FE space dimension
 
-    const UInt dim()      const {return M_dim;}
-    const UInt fieldDim() const {return M_fieldDim;}
+    /*const*/ UInt dim()      const {return M_dim;}
+    /*const*/ UInt fieldDim() const {return M_fieldDim;}
     //! map getter
 
     const map_type& map() const {return M_map;}
@@ -372,7 +373,7 @@ FESpace<Mesh, Map>::interpolate( const Function& fct,
     UInt nDofpV    = refFE().nbDofPerVertex; // number of Dof per vertex
     UInt nDofpE    = refFE().nbDofPerEdge;   // number of Dof per edge
     UInt nDofpF    = refFE().nbDofPerFace;   // number of Dof per face
-    UInt nDofpEl   = refFE().nbDofPerVolume; // number of Dof per Volume
+//    UInt nDofpEl   = refFE().nbDofPerVolume; // number of Dof per Volume
 
     UInt nElemV    = GeoShape::numVertices; // Number of element's vertices
     UInt nElemE    = GeoShape::numEdges;    // Number of element's edges
@@ -380,7 +381,7 @@ FESpace<Mesh, Map>::interpolate( const Function& fct,
 
     UInt nDofElemV = nElemV * nDofpV; // number of vertex's Dof on a Element
     UInt nDofElemE = nElemE * nDofpE; // number of edge's Dof on a Element
-    UInt nDofElemF = nElemF * nDofpF; // number of face's Dof on a Element
+//    UInt nDofElemF = nElemF * nDofpF; // number of face's Dof on a Element
 
     ID nbComp = M_fieldDim; // Number of components of the mesh velocity
 

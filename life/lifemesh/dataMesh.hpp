@@ -116,6 +116,8 @@ DataMesh( const GetPot& dfile, const std::string& section ):
         readMppFile( *M_mesh, M_mesh_dir + M_mesh_file, 1, verbose );
     else if ( M_mesh_type == ".msh" )
         readGmshFile( *M_mesh, M_mesh_dir + M_mesh_file, 1 );
+    else if ( M_mesh_type == ".vol" )
+        readNetgenMesh( *M_mesh, M_mesh_dir + M_mesh_file, 1, verbose );
     else
         ERROR_MSG( "Sorry, this mesh file can not be loaded" );
 

@@ -249,10 +249,10 @@ public:
     void set_mat_inc( UInt ib, UInt jb, UInt row, UInt col, double loc_val );
     //! Returns the matrix element (i,j) value.
     double& get_value( UInt i, UInt j );
-    const double get_value( UInt i, UInt j ) const;
+    /*const*/ double get_value( UInt i, UInt j ) const;
     //! Returns the matrix element (i,j) value of block (ib,jb).
     double& get_value( UInt ib, UInt jb, UInt i, UInt j );
-    const double get_value( UInt ib, UInt jb, UInt i, UInt j ) const;
+    /*const*/ double get_value( UInt ib, UInt jb, UInt i, UInt j ) const;
     //! Shows the matrix (only the pattern here).
     void ShowMe()
     {
@@ -387,10 +387,10 @@ public:
     void set_mat_inc( UInt ib, UInt jb, UInt row, UInt col, double loc_val );
     //! Returns the matrix element (i,j) value.
     double& get_value( UInt i, UInt j );
-    const double get_value( UInt i, UInt j ) const;
+    /*const*/ double get_value( UInt i, UInt j ) const;
     //! Returns the matrix element (i,j) value of block (ib,jb).
     double& get_value( UInt ib, UInt jb, UInt i, UInt j );
-    const double get_value( UInt ib, UInt jb, UInt i, UInt j ) const;
+    /*const*/ double get_value( UInt ib, UInt jb, UInt i, UInt j ) const;
     //! Shows the matrix (only the pattern here).
     void ShowMe()
     {
@@ -1350,7 +1350,7 @@ get_value( UInt i, UInt j )
 }
 // const qualifyer version
 template <UInt BRows, UInt BCols>
-const double
+/*const*/ double
 MixedMatr<BRows, BCols, MSRPatt, double>::
 get_value( UInt i, UInt j ) const
 {
@@ -1373,7 +1373,7 @@ get_value( UInt ib, UInt jb, UInt i, UInt j )
 }
 // const qualifyer version
 template <UInt BRows, UInt BCols>
-const double
+/*const*/ double
 MixedMatr<BRows, BCols, MSRPatt, double>::
 get_value( UInt ib, UInt jb, UInt i, UInt j ) const
 {
@@ -1998,7 +1998,7 @@ get_value( UInt i, UInt j )
 }
 // const qualifyer version
 template <UInt BRows, UInt BCols>
-const double
+/*const*/ double
 MixedMatr<BRows, BCols, CSRPatt, double>::
 get_value( UInt i, UInt j ) const
 {
@@ -2021,7 +2021,7 @@ get_value( UInt ib, UInt jb, UInt i, UInt j )
 }
 // const qualifyer version
 template <UInt BRows, UInt BCols>
-const double
+/*const*/ double
 MixedMatr<BRows, BCols, CSRPatt, double>::
 get_value( UInt ib, UInt jb, UInt i, UInt j ) const
 {

@@ -68,7 +68,7 @@ int nonLinRichardson( VectorType& sol,
       before failure is reported
     */
 
-    const int max_increase_res = 5;
+//    const int max_increase_res = 5;
 
     /*
       Parameters for the linear solver, gamma: Default value = 0.9

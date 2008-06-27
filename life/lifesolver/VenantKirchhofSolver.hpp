@@ -373,8 +373,6 @@ VenantKirchhofSolver( const data_type& data,
     M_comm                       ( &comm ),
     M_me                         ( comm.MyPID() ),
     M_verbose                    ( M_me == 0 ),
-    M_linearSolver               ( ),
-    M_prec                       ( new prec_raw_type() ),
     M_localMap                   ( M_FESpace.map() ),
     M_mass                       ( M_localMap ),
     M_linearStiff                ( M_localMap ),
@@ -398,6 +396,8 @@ VenantKirchhofSolver( const data_type& data,
     M_szz                        ( M_localMap ),
     M_out_iter                   ( "out_iter_solid" ),
     M_out_res                    ( "out_res_solid" ),
+    M_linearSolver               ( ),
+    M_prec                       ( new prec_raw_type() ),
     M_reusePrec                  ( true ),
     M_maxIterForReuse            ( -1 ),
     M_resetPrec                  ( true ),
@@ -560,7 +560,7 @@ updateSystem()
     M_stiff = M_linearStiff;
 
     // Number of displacement components
-    UInt nc = nDimensions;
+//    UInt nc = nDimensions;
 
     double coef;
 
@@ -900,7 +900,7 @@ void VenantKirchhofSolver<Mesh, SolverType>::
 evalConstraintTensor()
 {
 
-    double tmp;
+//    double tmp;
 
     vector_type count(M_localMap);
 
@@ -1028,7 +1028,7 @@ evalConstraintTensor()
 
     }
 
-    for (int ii = 1; ii <= M_FESpace.dim(); ++ii)
+    for (int ii = 1; ii <= (int)M_FESpace.dim(); ++ii)
     {
         M_sxx[ii] /= count[ii];
         M_syy[ii] /= count[ii];

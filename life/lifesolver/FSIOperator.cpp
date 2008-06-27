@@ -364,7 +364,7 @@ FSIOperator::setup()
     if (this->isFluid())
     {
 
-        for (int dim = 0; dim < nDimensions; ++dim)
+        for (int dim = 0; dim < (int)nDimensions; ++dim)
             for ( Iterator i = locDofMap.begin(); i != locDofMap.end(); ++i )
                 {
                     dofInterfaceFluid.push_back(i->second + dim*dDof.numTotalDof()); // in solid numerotation
@@ -394,7 +394,7 @@ FSIOperator::setup()
         if (true)
         {
             std::cout << "solid" << std::endl;
-            for (int dim = 0; dim < nDimensions; ++dim)
+            for (int dim = 0; dim < (int)nDimensions; ++dim)
                 for ( Iterator i = locDofMap.begin(); i != locDofMap.end(); ++i )
                     {
                         dofInterfaceSolid.push_back(i->second + dim*dDof.numTotalDof()); // in solid numerotation
@@ -511,7 +511,7 @@ FSIOperator::buildSystem()
 
 
 void
-FSIOperator::updateSystem(fluid_source_type& fluidSource, solid_source_type& solidSource)
+FSIOperator::updateSystem(fluid_source_type& /*fluidSource*/, solid_source_type& /*solidSource*/)
 {
 
     shiftSolution();
@@ -625,7 +625,7 @@ FSIOperator::transferMeshMotionOnFluid(const vector_type &_vec1,
 
     typedef std::map<ID, ID>::iterator Iterator;
 
-    for (int dim = 0; dim < nDimensions; ++dim)
+    for (int dim = 0; dim < (int)nDimensions; ++dim)
         for ( Iterator it = locDofMap.begin(); it != locDofMap.end(); ++it )
             {
 //                 std::cout << " doing: for " << it->second << " to " << it->second
@@ -685,7 +685,7 @@ FSIOperator::interpolateVelocity(const vector_type &_vec1,
     {
 
 
-        int elemId = M_uFESpace->mesh()->volume( iElem ).localId();
+        UInt elemId = M_uFESpace->mesh()->volume( iElem ).localId();
         if (elemId != iElem)
             std::cout << " elemId = " << elemId << " iElem = " << iElem << std::endl;
 
@@ -873,7 +873,7 @@ FSIOperator::transferFluidOnInterface(const vector_type &_vec1,
 
     typedef std::map<ID, ID>::iterator Iterator;
 
-    for (int dim = 0; dim < nDimensions; ++dim)
+    for (int dim = 0; dim < (int)nDimensions; ++dim)
         for ( Iterator it = locDofMap.begin(); it != locDofMap.end(); ++it )
             {
                 _vec2.checkAndSet( it->first + dim*numTotalDofSolid,
@@ -915,7 +915,7 @@ FSIOperator::transferSolidOnFluid(const vector_type &_vec1,//not working in para
 
     typedef std::map<ID, ID>::iterator Iterator;
 
-    for (int dim = 0; dim < nDimensions; ++dim)
+    for (UInt dim = 0; dim < nDimensions; ++dim)
         for ( Iterator it = locDofMap.begin(); it != locDofMap.end(); ++it )
             {
                 _vec2.checkAndSet( it->second + dim*numTotalDofFluid,
@@ -958,7 +958,7 @@ FSIOperator::transferSolidOnInterface(const vector_type &_vec1,
 
     typedef std::map<ID, ID>::iterator Iterator;
 
-    for (int dim = 0; dim < nDimensions; ++dim)
+    for (UInt dim = 0; dim < nDimensions; ++dim)
         for ( Iterator it = locDofMap.begin(); it != locDofMap.end(); ++it )
             {
                 _vec2.checkAndSet( it->second + dim*numTotalDofSolid,
@@ -999,7 +999,7 @@ FSIOperator::transferInterfaceOnSolid(const vector_type& _vec1,
 
     typedef std::map<ID, ID>::iterator Iterator;
 
-    for (int dim = 0; dim < nDimensions; ++dim)
+    for (int dim = 0; dim < (int)nDimensions; ++dim)
         for ( Iterator it = locDofMap.begin(); it != locDofMap.end(); ++it )
             {
                 _vec2.checkAndSet( it->second + dim*numTotalDofSolid,

@@ -91,7 +91,7 @@ public:
     void        precReset();
 
     //! returns true if prec exists
-    const bool  set() const {return M_Prec;}
+    /*const*/ bool  set() const {return M_Prec;}
 
 private:
 

@@ -155,7 +155,7 @@ public:
      *
      * @return the number of switches which have been set
      */
-    const UInt numSwitches() const
+    /*const*/ UInt numSwitches() const
     {
         return switches.size();
     };
@@ -598,7 +598,9 @@ INLINE
 void
 RegionMesh2D<GEOSHAPE, MC>::setLinkSwitch( std::string const & _s )
 {
-    ASSERT0( switches.set( _s ), "Switch named " << _s << " is not allowed" );
+	std::ostringstream _err_msg;
+	_err_msg << "Switch named " << _s << " is not allowed";
+    ASSERT0( switches.set( _s ), _err_msg.str().c_str() );
 };
 
 template <typename GEOSHAPE, typename MC>
@@ -614,7 +616,9 @@ INLINE
 void
 RegionMesh2D<GEOSHAPE, MC>::unsetLinkSwitch( std::string const & _s )
 {
-    ASSERT0( switches.unset( _s ), "Switch named " << _s << " is not allowed" );
+	std::ostringstream _err_msg;
+	_err_msg << "Switch named " << _s << " is not allowed";
+    ASSERT0( switches.unset( _s ), _err_msg );
 };
 
 
@@ -1054,7 +1058,7 @@ RegionMesh2D<GEOSHAPE, MC>::isBoundaryEdge( ID const & id ) const
 template <typename GEOSHAPE, typename MC>
 INLINE
 bool
-RegionMesh2D<GEOSHAPE, MC>::isFullEdge( ID const & id ) const
+RegionMesh2D<GEOSHAPE, MC>::isFullEdge( UInt const & id ) const
 {
     return edgeList.size() >= id;
 }
@@ -1205,7 +1209,7 @@ RegionMesh2D<GEOSHAPE, MC>::lastPoint()
 template <typename GEOSHAPE, typename MC>
 INLINE
 typename RegionMesh2D<GEOSHAPE, MC>::PointType const &
-RegionMesh2D<GEOSHAPE, MC>::point( UInt const i ) const
+RegionMesh2D<GEOSHAPE, MC>::point( ID const i ) const
 {
     ASSERT_BD( i > 0 && i <= pointList.size() ) ;
     return pointList( i );
@@ -1214,7 +1218,7 @@ RegionMesh2D<GEOSHAPE, MC>::point( UInt const i ) const
 template <typename GEOSHAPE, typename MC>
 INLINE
 typename RegionMesh2D<GEOSHAPE, MC>::PointType &
-RegionMesh2D<GEOSHAPE, MC>::point( UInt const i )
+RegionMesh2D<GEOSHAPE, MC>::point( ID const i )
 {
     ASSERT_BD( i > 0 && i <= pointList.size() ) ;
     return pointList( i );
@@ -1364,8 +1368,9 @@ RegionMesh2D<GEOSHAPE, MC>::localEdgeId( ID const facId, ID const locE ) const
 
 template <typename GEOSHAPE, typename MC>
 INLINE
-ID
-RegionMesh2D<GEOSHAPE, MC>::localEdgeId( const FaceType & ifac, ID const locE )
+UInt
+RegionMesh2D<GEOSHAPE, MC>::localEdgeId( const FaceType & ifac,
+                                         UInt const locE )
 const
 {
     return _FToE( ifac.id(), locE );
@@ -1373,8 +1378,8 @@ const
 
 template <typename GEOSHAPE, typename MC>
 INLINE
-ID
-RegionMesh2D<GEOSHAPE, MC>::localEdgeId( ID const facId, ID const locE )
+UInt
+RegionMesh2D<GEOSHAPE, MC>::localEdgeId( ID const facId, UInt const locE )
 const
 {
     ASSERT_PRE( !_FToE.empty(), "Face to Edges array not  set" );

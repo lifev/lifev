@@ -1,0 +1,231 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#   Data file for One D Model (Non Linear)
+#-------------------------------------------------
+
+[1dnetwork]
+num_vessels = 2
+num_interfaces = 3
+timebeg	 = 0.0
+timeend	 = 1e-1
+timestep = 1e-5
+postprocess_timestep = 1e-3
+setparam = 1
+
+[./interfacemap]
+
+##############
+# first tube #
+##############
+
+[1dnetwork/tube1]
+left_interface = 1
+right_interface = 2
+
+[./parameters]
+use_physical_values = false
+Area0 = 1
+alphaCor	= 1 		# coriolis coeff
+# alphaCor	= 1.333333333		# coriolis coeff
+beta0	= -3.5e6		# pressure law exponent
+beta1	= -0.5		# pressure law exponent
+Kr	= 2.419026343 		# friction parameter (source term)
+# Kr	= 0.879645943		# friction parameter (source term)
+
+[../1d_physics]
+young	= 1.e6
+thickness = 0.05
+radius	= 0.5
+density = 1.
+viscosity = 0.035
+ksi = 0.5
+
+[../time]
+sysperiod = 0.3
+cycleperiod = 0.9
+
+[../discretization]
+x_left	= 0.
+x_right	= 10.
+nb_elem	= 100
+
+[../miscellaneous]
+post_dir = ./
+post_file = sol1
+verbose = 100
+show_graceplot = 0
+
+
+##############
+# second tube #
+##############
+
+[1dnetwork/tube2]
+left_interface = 2
+right_interface = 3
+
+[./parameters]
+use_physical_values = false
+Area0 = 1
+alphaCor	= 1 		# coriolis coeff
+# alphaCor	= 1.333333333		# coriolis coeff
+beta0	= -3.5e6		# pressure law exponent
+beta1	= -0.5		# pressure law exponent
+Kr	= 2.419026343 		# friction parameter (source term)
+# Kr	= 0.879645943		# friction parameter (source term)
+R = 20000
+
+[../time]
+sysperiod = 0.3
+cycleperiod = 0.9
+
+[../discretization]
+x_left	= 0.
+x_right	= 10.
+nb_elem	= 100
+
+[../miscellaneous]
+post_dir = ./
+post_file = sol2
+verbose = 100
+show_graceplot = 0
+
+
+##############
+# third tube #
+##############
+
+[1dnetwork/tube3]
+left_interface = 4
+right_interface = 2
+
+[./parameters]
+use_physical_values = false
+Area0 = 1
+alphaCor	= 1 		# coriolis coeff
+# alphaCor	= 1.333333333		# coriolis coeff
+beta0	= -3.5e6		# pressure law exponent
+beta1	= -0.5		# pressure law exponent
+Kr	= 2.419026343 		# friction parameter (source term)
+# Kr	= 0.879645943		# friction parameter (source term)
+
+[../time]
+sysperiod = 0.3
+cycleperiod = 0.9
+
+[../discretization]
+x_left	= 0.
+x_right	= 10.
+nb_elem	= 100
+
+[../miscellaneous]
+post_dir = ./
+post_file = sol3
+verbose = 100
+show_graceplot = 0
+
+
+##############
+# fourth tube #
+##############
+
+[1dnetwork/tube4]
+left_interface = 2
+right_interface = 5
+
+[./parameters]
+use_physical_values = false
+Area0 = 1
+alphaCor	= 1 		# coriolis coeff
+# alphaCor	= 1.333333333		# coriolis coeff
+beta0	= -3.5e6		# pressure law exponent
+beta1	= -0.5		# pressure law exponent
+Kr	= 2.419026343 		# friction parameter (source term)
+# Kr	= 0.879645943		# friction parameter (source term)
+R = 20000
+
+[../time]
+sysperiod = 0.3
+cycleperiod = 0.9
+
+[../discretization]
+x_left	= 0.
+x_right	= 10.
+nb_elem	= 100
+
+[../miscellaneous]
+post_dir = ./
+post_file = sol4
+verbose = 100
+show_graceplot = 0
+
+
+##############
+# fifth tube #
+##############
+
+[1dnetwork/tube5]
+left_interface = 6
+right_interface = 2
+
+[./parameters]
+use_physical_values = false
+Area0 = 1
+alphaCor	= 1 		# coriolis coeff
+# alphaCor	= 1.333333333		# coriolis coeff
+beta0	= -3.5e6		# pressure law exponent
+beta1	= -0.5		# pressure law exponent
+Kr	= 2.419026343 		# friction parameter (source term)
+# Kr	= 0.879645943		# friction parameter (source term)
+
+[../time]
+sysperiod = 0.3
+cycleperiod = 0.9
+
+[../discretization]
+x_left	= 0.
+x_right	= 10.
+nb_elem	= 100
+
+[../miscellaneous]
+post_dir = ./
+post_file = sol5
+verbose = 100
+show_graceplot = 0
+
+
+##############
+# sixth tube #
+##############
+
+[1dnetwork/tube6]
+left_interface = 2
+right_interface = 7
+
+[./parameters]
+use_physical_values = false
+Area0 = 1
+alphaCor	= 1 		# coriolis coeff
+# alphaCor	= 1.333333333		# coriolis coeff
+beta0	= -3.5e6		# pressure law exponent
+beta1	= -0.5		# pressure law exponent
+Kr	= 2.419026343 		# friction parameter (source term)
+# Kr	= 0.879645943		# friction parameter (source term)
+R = 20000
+
+[../time]
+sysperiod = 0.3
+cycleperiod = 0.9
+
+[../discretization]
+x_left	= 0.
+x_right	= 10.
+nb_elem	= 100
+
+[../miscellaneous]
+post_dir = ./
+post_file = sol6
+verbose = 100
+show_graceplot = 0
+
+

@@ -39,7 +39,7 @@
 
 namespace LifeV
 {
-typedef enum darcy_unknown_type
+enum darcy_unknown_type
 {
     DARCY_PRESSURE_GLOBAL,
     DARCY_PRESSURE,

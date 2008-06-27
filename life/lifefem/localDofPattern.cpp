@@ -79,7 +79,9 @@ LocalDofPattern::LocalDofPattern( int _nbLocalDof, int _nbDofPerVertex, int _nbD
             }
         }
     default:
-        ERROR_MSG( "Unknown pattern " << patternType << "I cannot build local pattern!" );
+    		std::ostringstream _err_msg;
+    		_err_msg << "Unknown pattern " << patternType << "I cannot build local pattern!";
+        ERROR_MSG( _err_msg.str().c_str() );
     }
 }
 }

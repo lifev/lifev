@@ -628,7 +628,7 @@ void bcEssentialManageVector( VectorType& b, const Dof& dof, const BCBase& BCb, 
     }
 
     b.replaceGlobalValues( idDofVec, datumVec);
-    b.GlobalAssemble(Insert);
+    b.GlobalAssemble(/*Insert*/);
 
 }
 

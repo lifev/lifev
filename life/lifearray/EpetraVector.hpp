@@ -119,9 +119,12 @@ public:
     //! insert a global value. After insertion, you will have to call global assemble.
     int sumIntoGlobalValues (const int GID, const double value);
 
+    double Norm1()   const;
     double Norm2()   const;
     double NormInf() const;
 
+    void MeanValue  (double* res) const;
+    void Norm1  (double* res) const;
     void Norm2  (double* res) const;
     void NormInf(double* res) const;
 
@@ -129,7 +132,7 @@ public:
     vector_type& getEpetraVector()             {return M_epetraVector;}
     const vector_type& getEpetraVector() const {return M_epetraVector;}
 
-    const int  size() const { return M_epetraVector.GlobalLength(); }
+    /*const*/ int  size() const { return M_epetraVector.GlobalLength(); }
 
     void spy ( std::string const &filename ) const;
 
@@ -168,11 +171,11 @@ public:
 
     data_type operator*(EpetraVector const& a) const;
 
-    int GlobalAssemble(Epetra_CombineMode mode=Add) { return  M_epetraVector.GlobalAssemble(); }
+    int GlobalAssemble(/*Epetra_CombineMode mode=Add*/) { return  M_epetraVector.GlobalAssemble(); }
 
     const Epetra_Comm& Comm() const { return BlockMap().Comm(); }
 
-    const EpetraMapType getMaptype() const  { return  M_maptype; }
+    EpetraMapType getMaptype() const  { return  M_maptype; }
 
     const EpetraMap&  getMap() const  { return  *M_epetraMap; }
 

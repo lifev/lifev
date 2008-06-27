@@ -321,7 +321,7 @@ void EpetraMatrix<DataType>::diagonalize ( std::vector<UInt> rVec,
     const Epetra_Comm&  Comm(M_epetraCrs.Comm());
     int numProcs(Comm.NumProc());
     int MyPID   (Comm.MyPID()   );
-    UInt i;
+    int i;
 
     // Note: Epetra_Comm::broadcast does not support passing of uint, hence
     //       I define an int pointer to make the broadcast but then come back to an
@@ -387,7 +387,7 @@ void EpetraMatrix<DataType>::diagonalize( UInt const r,
         int    NumEntries;
         double* Values;
         int* Indices;
-        int globCol;
+        // int globCol;
 
         M_epetraCrs.ExtractMyRowView(myRow, NumEntries, Values, Indices);
 

@@ -104,6 +104,13 @@ CSRPatt::CSRPatt( const CSRPatt &RightHandCSRP ) :
 {}
 
 
+CSRPatt::CSRPatt( const VBRPatt &RightHandVBRP ) :
+    BasePattern( RightHandVBRP ),
+    _ia( RightHandVBRP.ia() ),
+    _ja( RightHandVBRP.ja() )
+{}
+
+
 CSRPatt::CSRPatt( MSRPatt const& msrPatt )
         : BasePattern( msrPatt.nNz(), msrPatt.nRows(), msrPatt.nCols() )
 {
@@ -801,7 +808,7 @@ VBRPatt::VBRPatt( UInt ex_nnz, UInt ex_nrow, UInt ex_ncol, const
 }
 VBRPatt::VBRPatt( const VBRPatt &RightHandVBRP )
     :
-    //CSRPatt(RightHandVBRP),
+    CSRPatt(RightHandVBRP),
     _indx( RightHandVBRP.indx() ),
     _rpntr( RightHandVBRP.rpntr() ),
     _cpntr( RightHandVBRP.cpntr() )
@@ -1051,7 +1058,7 @@ CSRPattSymm::nbNeighbours( ID const d ) const
 
     UInt counter = _ia[ d ] - _ia[ d - 1 ]; // upper diagonal
     Index_t _ind = _d2i( d );
-    for ( UInt i = 0; i < d - 1;++i )
+    for ( UInt i = 0; i < UInt(d - 1);++i )
     {
         if ( binary_search( _ja.begin() + _row_off( i ) + 1,
                             _ja.begin() + _row_off( i + 1 ), _ind ) )
@@ -1112,7 +1119,7 @@ CSRPattSymm::neighbours( ID const d, Container & neighs ) const
     neighs.push_back( d ); // Diagonal first
     Index_t _row = _d2i( d );
 
-    for ( UInt i = 0; i < d - 1;++i )
+    for ( UInt i = 0; i < UInt(d - 1);++i )
     {
         start = _ja.begin() + _i2o( _ia[ i ] ) + 1; // no need to search diag
         finish = _ja.begin() + _i2o( _ia[ i + 1 ] );

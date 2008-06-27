@@ -136,7 +136,7 @@ public:
 //    const Dof& dofMesh() const;
 
     //! checking if BC are set
-    const bool BCset() const {return M_setBC;}
+    /*const*/ bool BCset() const {return M_setBC;}
     //! set the mesh BCs
     void setBC(BCHandler &BCh_harmonicExtension);
     //! returns the BCHandler
@@ -240,8 +240,8 @@ HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
     M_disp                  ( M_FESpace.map() ),
     M_dispOld               ( M_FESpace.map() ),
     M_dispDiff              ( M_FESpace.map() ),
-    M_f                     ( M_FESpace.map() ),
     M_elmat                 ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
+    M_f                     ( M_FESpace.map() ),
     M_prec                  ( new prec_raw_type() ),
     M_reusePrec              ( true ),
     M_maxIterForReuse        ( -1 ),
@@ -263,11 +263,11 @@ HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
     M_comm                  ( &comm ),
     M_me                    ( M_comm->MyPID() ),
     M_verbose               ( M_me == 0 ),
+    M_elmat                 ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
     M_disp                  ( M_FESpace.map() ),
     M_dispOld               ( M_FESpace.map() ),
     M_dispDiff              ( M_FESpace.map() ),
     M_f                     ( M_FESpace.map() ),
-    M_elmat                 ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
     M_prec                   ( new prec_raw_type() ),
     M_reusePrec              ( true ),
     M_maxIterForReuse        ( -1 ),
@@ -401,7 +401,7 @@ HarmonicExtensionSolver<Mesh, SolverType>::iterate()
     }
 
 
-    Real f_norm_inf(M_f.NormInf());
+    // Real f_norm_inf(M_f.NormInf());
 
     if (M_verbose)
         std::cout << "  HE- Solving the system ... \n" << std::flush;

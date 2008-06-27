@@ -328,7 +328,7 @@ const BCBase& BCHandler::GetBCWithFlag(const EntityFlag& aFlag) const {
 }
 
 
-const UInt BCHandler::getBCbyName(const std::string __BCName) const
+/*const*/ UInt BCHandler::getBCbyName(const std::string __BCName) const
 {
     UInt iBC( ( UInt )-1 );
 

@@ -224,7 +224,9 @@ void DataAztec::aztecSolveLinearSyst( MSRMatr<double>& mat,
     int *update_index;            // ordering of update[] and external[]
     int *extern_index;            // locally on this processor.
     int N_update;                 // # of unknowns updated on this node
+#ifdef __OLD_MPI_SUPPORT
     AZ_set_proc_config( proc_config, AZ_NOT_MPI );
+#endif
     AZ_read_update( &N_update, &update, proc_config, unknown_size, 1, AZ_linear );
     AZ_transform( proc_config, &external,
                   ( int * ) pattern.giveRaw_bindx(), mat.giveRaw_value(),
@@ -251,7 +253,9 @@ void DataAztec::aztecSolveLinearSyst( MSRMatr<double>& mat,
   int    *update_index;            // ordering of update[] and external[]
   int    *extern_index;            // locally on this processor.
   int    N_update;                 // # of unknowns updated on this node
+#ifdef __OLD_MPI_SUPPORT
   AZ_set_proc_config(proc_config, AZ_NOT_MPI);
+#endif
   AZ_read_update(&N_update, &update, proc_config, unknown_size,1,AZ_linear);
 
   //  cout << "1) data_org[AZ_name] = " << data_org[AZ_name] << endl;
@@ -306,7 +310,9 @@ void DataAztec::aztecSolveLinearSyst(MSRMatr<double>& mat,
   int    *update_index;            // ordering of update[] and external[]
   int    *extern_index;            // locally on this processor.
   int    N_update;                 // # of unknowns updated on this node
+#ifdef __OLD_MPI_SUPPORT
   AZ_set_proc_config(proc_config, AZ_NOT_MPI);
+#endif
   AZ_read_update(&N_update, &update, proc_config, unknown_size,1,AZ_linear);
 
   AZ_transform(proc_config, &external,

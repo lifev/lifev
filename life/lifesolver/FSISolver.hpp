@@ -201,12 +201,12 @@ public:
                 M_oper->fluid().initialize(u0, p0);
         }
 
-    void initialize( std::string velFName,
-                     std::string pressName,
-                     std::string velwName,
-                     std::string depName,
-                     std::string velSName,
-                     double      Tstart = 0.)
+    void initialize( std::string /*velFName*/,
+                     std::string /*pressName*/,
+                     std::string /*velwName*/,
+                     std::string /*depName*/,
+                     std::string /*velSName*/,
+                     double      /*Tstart = 0.*/)
         {
 //             M_oper->fluid().initialize(velFName, pressName, velwName, Tstart);
 //             M_oper->solid().initialize(depName, velSName, Tstart);

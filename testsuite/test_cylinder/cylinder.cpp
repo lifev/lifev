@@ -233,9 +233,9 @@ struct Cylinder::Private
      */
     Real oneU( const Real& /*t*/,
                const Real& /*x*/,
-               const Real& y,
+               const Real& /*y*/,
                const Real& /*z*/,
-               const ID&   id ) const
+               const ID&   /*id*/ ) const
         {
             return 1.;
         }
@@ -276,7 +276,7 @@ Cylinder::Cylinder( int argc,
 
     d->comm = new Epetra_MpiComm( MPI_COMM_WORLD );
     int ntasks;
-    int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
+//    int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
 #else
     d->comm = new Epetra_SerialComm();
 #endif
@@ -301,7 +301,7 @@ Cylinder::run()
     //
     GetPot dataFile( d->data_file_name.c_str() );
 
-    int save = dataFile("fluid/miscellaneous/save", 1);
+//    int save = dataFile("fluid/miscellaneous/save", 1);
 
     bool verbose = (d->comm->MyPID() == 0);
 

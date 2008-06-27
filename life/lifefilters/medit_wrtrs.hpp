@@ -277,7 +277,7 @@ namespace LifeV
 
         int ig;
 
-        for(int i = 1; i <= nVert; ++i)
+        for(int i = 1; i <= (int)nVert; ++i)
         {
             int id = mesh.pointList( i ).id();
 

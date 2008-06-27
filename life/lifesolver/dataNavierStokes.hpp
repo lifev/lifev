@@ -46,7 +46,7 @@ namespace LifeV
 /*!
   \typedef enum
 */
-typedef enum NSStabilization
+enum NSStabilization
 {
     NO_STABILIZATION,     //!< No stabilization
     IP_STABILIZATION,       //!< Interior penalty
@@ -105,7 +105,7 @@ public:
     Real ZSectionInit() const;
     Real ZSectionFinal() const;
     UInt NbPolygonEdges() const;
-    const int semiImplicit() const;
+    int semiImplicit() const;
     void setSemiImplicit(const int& SI);
 
 protected:
@@ -159,8 +159,8 @@ DataNavierStokes<Mesh>::
 DataNavierStokes( const GetPot& dfile ) :
     DataMesh<Mesh>( dfile, "fluid/discretization" ),
     DataTime( dfile, "fluid/discretization" ),
-    M_stabilization_list( "fluid/discretization/stabilization" ),
-    M_semiImplicit(0)
+    M_semiImplicit(0),
+    M_stabilization_list( "fluid/discretization/stabilization" )
 {
     setup(dfile);
 }
@@ -225,8 +225,8 @@ setup(  const GetPot& dfile )
 
     // IP needs boundary faces
     bool ipfaces =  ( M_stab_method == IP_STABILIZATION ) && (this->meshFaces() != "all" ) ;
-    if ( ipfaces )
-        ERROR_MSG("ERROR: IP requires boundary faces. Put mesh_faces = all in data file." );
+    if ( ipfaces ) {
+        ERROR_MSG("ERROR: IP requires boundary faces. Put mesh_faces = all in data file." ); }
 
     //mean values per section
     M_computeMeanValuesPerSection =
@@ -439,7 +439,7 @@ setSemiImplicit(const int& SI)
 { M_semiImplicit = SI; }
 
 template <typename Mesh>
-const int DataNavierStokes<Mesh>::
+int DataNavierStokes<Mesh>::
 semiImplicit() const
  { return M_semiImplicit; }
 }

@@ -47,7 +47,9 @@ SolverAztec::SolverAztec( std::string filename )
     M_dataOrg[ AZ_N_external ] = 0;
     M_dataOrg[ AZ_N_neigh ] = 0;
     M_dataOrg[ AZ_name ] = S_solverNumber++;
+#ifdef __OLD_MPI_SUPPORT
     AZ_set_proc_config( M_procConfig, AZ_NOT_MPI );
+#endif
     M_status[ AZ_its ] = -1; // to detect whether a solve has been done yet
 
     // let dataAztec set the defaults

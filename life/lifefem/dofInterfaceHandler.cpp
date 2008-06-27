@@ -114,8 +114,8 @@ UInt DofInterfaceHandler::NbInterfaceUnknowns() const
     UInt counter = 0;
     for ( UInt iter = 0 ; iter < _nbNeigh ; ++iter )
     {
-        ASSERT_PRE( _neighList[ iter ]->nbInterfaceDof() == _InIBCList[ iter ].size() &&
-                    _neighList[ iter ]->nbInterfaceDof() == _OutIBCList[ iter ].size(),
+        ASSERT_PRE( (int)_neighList[ iter ]->nbInterfaceDof() == _InIBCList[ iter ].size() &&
+                    (int)_neighList[ iter ]->nbInterfaceDof() == _OutIBCList[ iter ].size(),
                     "The IBC vectors must have the same size as the number of interface dof." );
         counter += _neighList[ iter ]->nbInterfaceDof();
     }
@@ -217,8 +217,11 @@ BCVectorInterface & DofInterfaceHandler::BCvec( const UInt & i )
 UInt DofInterfaceHandler::IndexOfInterfaceRef( const Int& interfref ) const
 {
     std::map<Int, UInt>::const_iterator it = _indexInterfRefMap.find( interfref );
-    if ( it == _indexInterfRefMap.end() )
-        ERROR_MSG( "Dof number " << interfref << " not found" );
+    if ( it == _indexInterfRefMap.end() ) {
+    	std::ostringstream _err_msg;
+    	_err_msg << "Dof number " << interfref << " not found";
+        ERROR_MSG( _err_msg.str().c_str() );
+    }
     return it->second;
 }
 

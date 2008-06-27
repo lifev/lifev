@@ -115,7 +115,7 @@ Preconditioner::precReset()
 }
 
 void
-Preconditioner::createList( const GetPot& dataFile )
+Preconditioner::createList( const GetPot& /*dataFile*/ )
 {
 }
 

@@ -229,6 +229,26 @@ EpetraVector::BlockMap() const
     return M_epetraVector.Map();
 }
 
+void
+EpetraVector::MeanValue(double* res) const
+{
+    M_epetraVector.MeanValue(res);
+}
+
+double
+EpetraVector::Norm1() const
+{
+    double res;
+    M_epetraVector.Norm1(&res);
+    return res;
+}
+
+void
+EpetraVector::Norm1(double* res) const
+{
+    M_epetraVector.Norm1(res);
+}
+
 double
 EpetraVector::Norm2() const
 {

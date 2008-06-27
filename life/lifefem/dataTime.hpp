@@ -62,7 +62,7 @@ public:
     void setTime (Real time){ _time = time;}
     //! getter
 
-    const Real time() const {return _time;}
+    /*const*/ Real time() const {return _time;}
     //! Order BDF formula
     unsigned int order_bdf() const;
 

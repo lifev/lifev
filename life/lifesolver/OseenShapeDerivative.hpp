@@ -229,7 +229,7 @@ void OseenShapeDerivative<Mesh, SolverType>::iterateLin( bchandler_raw_type& bch
 template<typename Mesh, typename SolverType>
 void
 OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& matrNoBC,
-                                                            double       alpha,
+                                                            double       /*alpha*/,
                                                             const vector_type& un,
                                                             const vector_type& uk,
                                                             const vector_type& disp,
@@ -292,7 +292,7 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& m
                         {
                             UInt iloc = this->M_uFESpace.fe().patternFirst( k ); // iloc = k
 
-                            for ( UInt ic = 0; ic < nbCompU; ++ic )
+                            for ( int ic = 0; ic < nbCompU; ++ic )
                                 {
                                     UInt ig    = this->M_uFESpace.dof().localToGlobal( i, iloc + 1 ) + ic * this->dim_u();
 
@@ -349,7 +349,7 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& m
                     assembleVector( rhsLinNoBC, M_elvec_dp, this->M_pFESpace.fe(), this->M_pFESpace.dof(), 0, nbCompU*this->dim_u() );
 
            // loop on velocity components
-                    for ( UInt ic = 0; ic < nbCompU; ic++ )
+                    for ( int ic = 0; ic < nbCompU; ic++ )
                         {
                             // assembling velocity right hand side
                             assembleVector( rhsLinNoBC, M_elvec_du, this->M_uFESpace.fe(), this->M_uFESpace.dof(), ic );

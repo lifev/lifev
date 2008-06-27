@@ -60,7 +60,7 @@ namespace LifeV
 //Fluid-Structure operator Class
 
 
-typedef enum Preconditioner
+enum Preconditioner
 {
     NO_PRECONDITIONER = -1,
     NEUMANN_DIRICHLET,
@@ -69,7 +69,7 @@ typedef enum Preconditioner
     NEWTON
 };
 
-typedef enum DDNPreconditioner
+enum DDNPreconditioner
 {
     DDN_NO_PRECONDITIONER = -1,
     DDN_NEUMANN_DIRICHLET,
@@ -164,15 +164,15 @@ public:
         M_dofHarmonicExtensionToFluid        ( new DofInterface3Dto3D ),
 //         M_dofStructureToReducedFluid         ( new DofInterface3Dto3D ),
 //         M_dofReducedFluidToStructure         ( new DofInterface3Dto3D ),
-        M_dofFluid                           ( new DofInterface3Dto2D ),
-        M_dofSolid                           ( new DofInterface3Dto2D ),
-        M_dofSolidInv                        ( new DofInterface3Dto2D ),
-        M_dofFluidInv                        ( new DofInterface3Dto2D ),
         M_fluidInterfaceFlag                 ( 1 ),
         M_solidInterfaceFlag                 ( 1 ),
         M_structureInterfaceFlag             ( 1 ),
         M_harmonicInterfaceFlag              ( 1 ),
         M_interfaceTolerance                 ( 0. ),
+        M_dofFluid                           ( new DofInterface3Dto2D ),
+        M_dofSolid                           ( new DofInterface3Dto2D ),
+        M_dofSolidInv                        ( new DofInterface3Dto2D ),
+        M_dofFluidInv                        ( new DofInterface3Dto2D ),
 // boundary vector interfaces
         M_bcvFluidInterfaceDisp              ( new  BCVectorInterface ),
         M_bcvFluidLoadToStructure            ( new  BCVectorInterface ),
@@ -202,13 +202,13 @@ public:
         M_dispFluidMeshOld(),
         M_veloFluidMesh(),
         M_nbEval( 0 ),
+        M_epetraComm(),
+        M_epetraWorldComm (),
         M_method(),
         M_precond( NO_PRECONDITIONER ),
         M_mpi(true),
         M_isFluid(false),
-        M_isSolid(false),
-        M_epetraComm(),
-        M_epetraWorldComm ()
+        M_isSolid(false)
         {}
 
     // destructor

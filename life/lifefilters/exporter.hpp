@@ -52,7 +52,6 @@
 
 namespace LifeV
 {
-
 //typedef boost::numeric::ublas::vector_range< Vector >  VectorRange;
 //typedef EpetraVector VectorRange;
 //typedef double* VectorRange;
@@ -65,7 +64,7 @@ class ExporterData {
 public:
     enum Type{Scalar,Vector};
 
-    ExporterData(const Type type, const std::string prefix, vector_ptrtype const& vec, UInt start, UInt size );
+    ExporterData(const Type type, const std::string prefix, vector_ptrtype const& vec, UInt start, UInt size, UInt steady);
 
     std::string prefix() const;
     Real operator()(const UInt i) const;
@@ -73,6 +72,8 @@ public:
     UInt start() const { return M_start; }
     Type type() const;
     const vector_ptrtype getPtr() const { return M_vr; }
+    UInt steady() const {return M_steady; }
+    void set_steady(UInt i) {M_steady = i;}
 
 private:
     std::string M_prefix;
@@ -80,6 +81,8 @@ private:
     UInt M_dim;
     UInt M_start;
     Type M_type;
+    UInt M_steady;
+    
 };
 
 /**
@@ -133,7 +136,7 @@ public:
 
        \param dim the number of Dof for that variable
     */
-    void addVariable(const ExporterData::Type type, const std::string prefix, vector_ptrtype const& map, UInt start, UInt size );
+    void addVariable(const ExporterData::Type type, const std::string prefix, vector_ptrtype const& map, UInt start, UInt size, UInt steady =0 );
 
 
     /**
@@ -149,6 +152,7 @@ protected:
 
     mesh_ptrtype M_mesh;
     std::string M_prefix;
+    std::string M_post_dir;
     UInt M_count;
     UInt M_save;
     bool M_multimesh;
@@ -174,6 +178,7 @@ Exporter<Mesh>::Exporter(const GetPot& dfile, mesh_ptrtype mesh, const std::stri
 						 int const procId)
     :
     M_prefix(prefix),
+    M_post_dir(dfile("exporter/post_dir", "./")),
     M_count(dfile("exporter/start",0)),
     M_save(dfile("exporter/save",1)),
     M_multimesh(dfile("exporter/multimesh",true)),
@@ -185,6 +190,7 @@ Exporter<Mesh>::Exporter(const GetPot& dfile, mesh_ptrtype mesh, const std::stri
 template<typename Mesh>
 Exporter<Mesh>::Exporter(const GetPot& dfile, const std::string prefix):
     M_prefix(prefix),
+    M_post_dir(dfile("ensight/post_dir", "./")),
     M_count(dfile("ensight/start",0)),
     M_save(dfile("ensight/save",1)),
     M_multimesh(dfile("ensight/multimesh",true)),
@@ -221,12 +227,12 @@ template <typename Mesh> void Exporter<Mesh>::getPostfix()
 
     std::ostringstream index;
     index.fill( '0' );
-
+    
     if (M_count % M_save == 0)
         {
             index << std::setw(3) << ( M_count / M_save );
 
-            M_postfix = index.str();
+            M_postfix = "." + index.str();
 
         }
     else
@@ -237,9 +243,9 @@ template <typename Mesh> void Exporter<Mesh>::getPostfix()
 
 
 template<typename Mesh>
-void Exporter<Mesh>::addVariable(const ExporterData::Type type, const std::string prefix, vector_ptrtype const& vr, UInt start, UInt dim )
+void Exporter<Mesh>::addVariable(const ExporterData::Type type, const std::string prefix, vector_ptrtype const& vr, UInt start, UInt dim, UInt steady)
 {
-    M_listData.push_back( ExporterData(type,prefix,vr,start, dim) );
+    M_listData.push_back( ExporterData(type,prefix,vr,start, dim, steady) );
 }
 
 

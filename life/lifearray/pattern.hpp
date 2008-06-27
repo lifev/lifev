@@ -124,7 +124,7 @@ public:
       \typedef enum
 
     */
-    typedef enum PatternType
+    enum PatternType
     {
         STANDARD_PATTERN,          //!< Standard pattern
         EDGE_COUPLING_PATTERN      //!< Additional coupling trhough edges
@@ -238,6 +238,8 @@ protected:
 
 class MSRPatt;
 
+class VBRPatt;
+
 class CSRPatt : public BasePattern
 {
 public:
@@ -272,6 +274,9 @@ public:
 
     //! Copy constructor
     CSRPatt( const CSRPatt &RightHandCSRP );
+
+    //! Copy constructor
+    CSRPatt( const VBRPatt &RightHandVBRP );
 
     //! Constructor for single DOF (square matrix), possibly with more than
     //! one component
@@ -3133,14 +3138,16 @@ void
 MixedPattern<BROWS, BCOLS, PATTERN>::
 linkBlockToPattern( UInt const m, UInt const n, PATTERN & pattern )
 {
-    if ( m > 0 )
+    if ( m > 0 ) {
         ASSERT_PRE( isSet( m - 1, n ),
                     "pattern must be set starting from block row=0" );
+    }
 
-    if ( n > 0 )
+    if ( n > 0 ) {
         ASSERT_PRE( isSet( m, n - 1 ),
                     "pattern must be set starting from block col=0" );
-
+    }
+    
     ASSERT_PRE( m < BROWS, " Invalid block row address" );
     ASSERT_PRE( n < BCOLS, " Invalid block column address" );
     if ( _blocks[ m ][ n ] != 0 && !_linked[ m ][ n ] )

@@ -786,7 +786,7 @@ assembleMatrix( EpetraMatrix<double>& M,
                 const DOF2&      dof2,
                 int              ipos,
                 int              jpos,
-                bool             verbose = false)
+                bool             /*verbose = false*/)
 
 {
     int i, j, k1, k2;

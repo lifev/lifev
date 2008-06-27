@@ -47,8 +47,9 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag,
     _M_comp( comp ),
     _M_finalised( false )
 {
-    if ( _M_mode != Component )
+    if ( _M_mode != Component ) {
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
+    }
 }
 
 //! Constructor for BC without components for Scalar, Tangential or Normal  mode problems
@@ -105,9 +106,9 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& t
     _M_comp(),
     _M_finalised( false )
 {
-    if ( _M_mode != Full )
+    if ( _M_mode != Full ) {
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
-
+    }
     _M_comp.reserve( nComp );
     for ( ID i = 1; i <= nComp; ++i )
         _M_comp.push_back( i );
@@ -131,8 +132,9 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& t
     _M_comp(comp),
     _M_finalised( false )
 {
-    if ( mode != Component )
+    if ( mode != Component ) {
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
+    }
 }
 
 //! Constructor for BC with data vector, without components for Scalar, Tangential or Normal  mode problems
@@ -193,8 +195,9 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& t
     _M_comp(),
     _M_finalised( false )
 {
-    if ( mode != Full )
+    if ( mode != Full ) {
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
+    }
 
     _M_comp.reserve( nComp );
     for ( ID i = 1; i <= nComp; ++i )
@@ -215,8 +218,9 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag,
     _M_comp( comp ),
     _M_finalised( false )
 {
-    if ( _M_mode != Component )
+    if ( _M_mode != Component ) {
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
+    }
 }
 BCBase::BCBase( const std::string& name, const EntityFlag& flag,
         const BCType& type, const BCMode& mode,
@@ -269,9 +273,10 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag,
     _M_comp(),
     _M_finalised( false )
 {
-    if ( _M_mode != Full )
+    if ( _M_mode != Full ) {
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
-
+    }
+        
     _M_comp.reserve( nComp );
     for ( ID i = 1; i <= nComp; ++i )
         _M_comp.push_back( i );
@@ -312,9 +317,10 @@ BCBase & BCBase::operator=( const BCBase& BCb )
     // the boundary update (see BCHandler::bdUpdate)
 
     // The list of ID's must be empty
-    if ( !_M_idList.empty() || !BCb._M_idList.empty() )
+    if ( !_M_idList.empty() || !BCb._M_idList.empty() ) {
         ERROR_MSG( "BCBase::operator= : The BC assigment operator does not work with lists of identifiers which are not empty" );
-
+    }
+    
     return *this;
 }
 
@@ -337,8 +343,9 @@ BCBase::BCBase( const BCBase& BCb )
     // an auxiliary container used at the moment of the boundary update (see BCHandler::bdUpdate)
 
     // The list of ID's must be empty
-    if ( !_M_idList.empty() || !BCb._M_idList.empty() )
+    if ( !_M_idList.empty() || !BCb._M_idList.empty() ) {
         ERROR_MSG( "BCBase::BCBase : The BC copy constructor does not work whith list of identifiers which are not empty" );
+    }
 }
 
 //! Returns the BC name

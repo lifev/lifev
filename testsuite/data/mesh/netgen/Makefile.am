@@ -22,7 +22,8 @@
 
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc 
 
-dist_pkgdata_DATA	= cubeBc312_x16.vol cubeBc312_x4.vol cube.geo
+dist_pkgdata_DATA	= cubeBc312_x16.vol cubeBc312_x4.vol cube.geo \
+						cylinder_coarse.vol
 
 check-local:
 	@if test "$(top_srcdir)" != "$(top_builddir)"; then\

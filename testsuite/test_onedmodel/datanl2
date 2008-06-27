@@ -1,0 +1,38 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#   Data file for One D Model (Non Linear)
+#-------------------------------------------------
+
+[boundcond]
+[./left]
+name	= internal_node
+[../right]
+name	= W2imposed
+
+[parameters]
+alphaCor	= 1.0		# coriolis coeff
+beta1	= 0.5		# pressure law exponent
+Kr	= 1.0		# friction parameter (source term)
+
+[time]
+timebeg	 = 0.0		# inittime
+timeend	 = 0.3		# endtime
+timestep = 1e-4		# timestep
+
+[1d_physics]
+young	= 8.e6
+
+[discretization]
+mesh_file	= 	# mesh file name
+mesh_dir	= ../data/mesh/inria
+		# the directory where the mesh file is
+x_left	= 30.
+x_right	= 60.
+nb_elem	= 30	#   number of elements
+
+[miscellaneous]
+post_dir = ./                 # the directory for postprocessing files
+post_file = soltube2               # the file name
+verbose = 5
+show_graceplot = 0                # 0: no grace plot, 1: show grace plots
+

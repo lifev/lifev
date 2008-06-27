@@ -1,13 +1,14 @@
 #include <life/lifefilters/exporter.hpp>
 namespace LifeV
 {
-ExporterData::ExporterData(const  ExporterData::Type type, const std::string prefix, const vector_ptrtype& vr, UInt start, UInt dim):
+ExporterData::ExporterData(const  ExporterData::Type type, const std::string prefix, const vector_ptrtype& vr, UInt start, UInt dim, UInt steady):
     M_prefix(prefix),
     M_vr(vr),
     M_dim(dim),
     M_start( start ),
-    M_type(type)
-{}
+    M_type(type),
+    M_steady(steady)
+{};
 
 std::string ExporterData::prefix() const
 {

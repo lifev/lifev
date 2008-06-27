@@ -519,8 +519,10 @@ UInt testClosedDomain_Top( RegionMesh3D const & mesh, UInt & numBEdges )
 
     for ( UInt k = 0;k < mesh.numBFaces();++k )
     {
-        ASSERT( iv != mesh.faceList.end(), " Trying to get not existing face"
-                << k << " " << mesh.numBFaces() );
+    	std::ostringstream _err_msg;
+    	_err_msg << " Trying to get not existing face"
+      << k << " " << mesh.numBFaces();
+        ASSERT( iv != mesh.faceList.end(), _err_msg.str().c_str() );
 
         for ( ID j = 1;j <= FaceType::numEdges;++j )
         {
@@ -989,7 +991,7 @@ bool fixBoundaryFaces( RegionMesh3D & mesh,
     bool notfound( false );
     bool extcont( false );
 
-    if ( extcont = ( ext_container != 0 ) )
+    if ( (extcont = ( ext_container != 0 )) )
     {
         bfaces = ext_container;
         bfaces_found = bfaces->size();
@@ -1192,7 +1194,7 @@ bool buildFaces( RegionMesh3D & mesh,
     ID j, id;
     ID vol;
 
-    if ( extcont = ( ext_container != 0 ) )
+    if ( (extcont = ( ext_container != 0 )) )
     {
         bfaces = ext_container;
         bfaces_found = bfaces->size();
@@ -1429,7 +1431,7 @@ bool buildEdges( RegionMesh3D & mesh,
     bool extcont( false );
 
 
-    if ( extcont = ( ext_container != 0 ) )
+    if ( (extcont = ( ext_container != 0 )) )
     {
         bedges = ext_container;
         bedges_found = bedges->size();

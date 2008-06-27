@@ -70,7 +70,7 @@ void parseList( const std::string& slist, std::list<T>& list )
 
     int commaPos = 0;
 
-    while ( commaPos != std::string::npos )
+    while ( commaPos != (int)std::string::npos )
     {
         commaPos = stringList.find( "," );
 

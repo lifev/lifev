@@ -74,7 +74,7 @@ public:
       \typedef enum
       Hints about the nature of the BCs
     */
-    typedef enum BCHints
+    enum BCHints
     {
         HINT_BC_NONE,          //!< no hint
         HINT_BC_ONLY_ESSENTIAL //!< BCs are only essential
@@ -302,7 +302,7 @@ public:
 
     // get the BC number from the list using its name
 
-    const UInt getBCbyName(const std::string _BCName) const;
+    /*const*/ UInt getBCbyName(const std::string _BCName) const;
 
     //! output
     std::ostream& showMe( bool verbose = false, std::ostream & out = std::cout ) const;

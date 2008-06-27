@@ -1,0 +1,102 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#----------------------------------------------------------------
+#      Data file for cylinder test with Navier-Stokes IP Solver
+#----------------------------------------------------------------
+
+[ensight]
+multimesh  = false
+save       = 5
+post_dir = ./
+
+[electric]
+
+[./physics]
+
+test_case   = 2                  # in particular for b.c. condition
+ion_model = 2		# 1: RM 	2: LR
+
+Chi		= 1e3 #originale: 1e3 		#cm^-1
+Cm		= 1e-3 #funz:10 #originale: 1e-3 //con 1 e mesh vecchia non esplode		#mF/cm^2
+#D       = 0.001 #LR=0.001 RM=0.05 #0.005 #0.001 è per luorudy; 0.05 #funz: 1e3 #originale: 1e-3// "   1e3	 "	#per il momento caso isotropo
+
+#sigmal		= 1.2e-1 #1.2e-3 #1.2e-3 è per luorudy 1.2e-1  #0.2 #0.12 #1 #1.2e-1 #funz:1.2e3 #originale: 1.2e-3	#O^-1cm^-1
+#sigmat		= 2.5562e-2 #2.5562e-4 # 2.5562e-4 è per luorudy 2.5562e-2 #0.01 #0.025 #1.2 #2.5562e-2 #funz:2.5e2 #originale: 2.5562e-4	#O^-1cm^-1
+
+heart_diff_fct = 0
+
+# case 0: normal diffusion,
+# case 1: reduced diffusion in sphere region
+# case 2: reduced diffusion in cyl region
+# case 3: reduced diffusion in box region
+
+stim_center_1 = '-0.137 0.64 -3.27'   #'-3.01 -0.796 -6.88' #'-0.96 -0.82 -2.5' #'0 0 0' #'-0.96 -0.82 -2.5' #'-1.2 -0.862 -3.51' #'0 0 0' #'-1.2 -0.862 -3.51' #'0.653 -1.83 -3.23'  #'0 0 0' #'0.653 -1.83 -3.23'    #'-1.25 -1.25 -0.5' #'-0.5 -1.4 -1.5'  #'10.719 -17.227 10.477' #'-0.5 -1.4 -1.5'
+stim_radius_1 = 1.5 #0.8 #0.3 #1.5 #0.8
+stim_start_1 = 0
+stim_stop_1 = 1 #RM=3
+stim_value_1 = 50 #LR=50 RM=100
+stim_period_1 = 500 #350
+
+#per reduced_sigma_sphere (heart_diff_fct=1)
+sigma_reduction  = '0.1, 1.'
+sphere_center = '0., 0., 0.'
+sphere_radius = 0.5
+
+#per reduced_sigma_box (heart_diff_fct=3)
+#sigma_reduction  = '0.001, 1.'
+#box_vertex_min = '0., 0., 0.'
+#box_vertex_max = '1., 1., 1.'
+
+
+
+endtime         = 400
+density         = 1.0          # density
+viscosity       = 0.005         # viscosity
+init_data = 0
+uinit = 0
+
+[../discretization]
+mesh_dir        = ./Mesh/
+mesh_file       = ellissoide29560.mesh #ellissoide39850.mesh #ellissoide12586.mesh  #ellissoide12586.mesh #slab5849.mesh #ventricolosx66769.mesh # realgeomsize91111.mesh #ventricolosx66769.mesh #2ellissoidi02.mesh #ventricolosx66769.mesh #ventricolosx5923.mesh #slabmini.mesh #ventricolosx66769.mesh #ventricolosx21602.mesh #slabprova.mesh #ventricolosx21602.mesh #ventricolosx5923.mesh #ventricolosx64665.mesh #ventricolosx21602.mesh #ventricolosx5923.mesh #-3.51 slabprova.mesh #cubo_regina.vol #ventricolosx5923.mesh # heartvol_cut_77354.vol #ventricolosx64665.mesh
+mesh_type       = .mesh
+
+mesh_faces      = all                   # update all faces elements
+mesh_edges      = all                   # update all faces elements
+timestep        = 0.1                	# timestep
+verbose         = 1                     # verbose during mesh-reading
+
+has_fibers = 1
+
+
+order_bdf       = 1
+linearized      = 0
+diagonalize     = 0 # weight, 0=off
+
+[../miscellaneous]
+verbose         = 1
+
+
+[../solver]
+solver          = cg    #cg , gmres, cgs, tfqmr, bicgstab, slu, symmlq, fixed_pt, lu
+scaling         = none
+output          = all_res # all_res, warnings , none , all, all_res, last
+conv            = rhs
+max_iter        = 100
+kspace          = 100
+precond         = dom_decomp #none,jacobi,sym_gs,neumann,ls,smoother,dom_decomp
+subdomain_solve = icc #ilu, ilut
+overlap         = 1
+ilut_fill       = 2
+graph_fill      = 0
+drop            = 1.e-4
+tol             = 1.00e-5 
+keep_info       = 1
+
+[../prec]
+
+reuse           = true
+overlap         = 1
+droptol         = 1.e-5
+fill 		= 1
+
+
+

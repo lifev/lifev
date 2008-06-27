@@ -272,6 +272,9 @@ void DarcySolver<Mesh>::computeHybridMatrixAndSourceRHS()
     double MINUSONE_[1] = {-1.0};
     double ZERO_[1]     = {0.0};
     //
+    char _param_L[1], _param_N[1], _param_T[1];
+    _param_L[0] = 'L'; _param_N[0] = 'N'; _param_T[0] = 'T'; 
+    //
     elvecHyb.zero();
     elvecSource.zero();
     elvecFlux.zero();
@@ -357,38 +360,38 @@ void DarcySolver<Mesh>::computeHybridMatrixAndSourceRHS()
         // MATRIX OPERATIONS
         //....................
         //   AA <- L and Lt where L Lt is the Cholesky factorization of A
-        dpotrf_("L", NBU, AA , NBU , INFO );
+        dpotrf_(_param_L, NBU, AA , NBU , INFO );
         ASSERT_PRE(!INFO[0],"Lapack factorization of A is not achieved.");
 
         // Compute BB <-  L^{-1} B (solve triangular system)
-        dtrtrs_("L", "N", "N", NBU, NBP, AA, NBU, BB, NBU, INFO);
+        dtrtrs_(_param_L, _param_N, _param_N, NBU, NBP, AA, NBU, BB, NBU, INFO);
         ASSERT_PRE(!INFO[0],"Lapack Computation B = L^{-1} B  is not achieved.");
 
         // Compute CC <-  L^{-1} C (solve triangular system)
-        dtrtrs_("L", "N", "N", NBU, NBL, AA, NBU, CC, NBU, INFO);
+        dtrtrs_(_param_L, _param_N, _param_N, NBU, NBL, AA, NBU, CC, NBU, INFO);
         ASSERT_PRE(!INFO[0],"Lapack Computation C = L^{-1} C  is not achieved.");
 
         // Compute BtB <-  Bt L^{-t} L^{-1} B = Bt A^{-1} B
         // (BtB stored only on lower part)
-        dsyrk_("L", "T", NBP, NBU, ONE_, BB, NBU, ZERO_, BtB, NBP);
+        dsyrk_(_param_L, _param_T, NBP, NBU, ONE_, BB, NBU, ZERO_, BtB, NBP);
         // Compute CtC <-  Ct L^{-t} L^{-1} C = Ct A^{-1} C
         // (CtC stored only on lower part)
-        dsyrk_("L", "T", NBL, NBU, ONE_, CC, NBU, ZERO_, CtC, NBL);
+        dsyrk_(_param_L, _param_T, NBL, NBU, ONE_, CC, NBU, ZERO_, CtC, NBL);
         // Compute BtC <- Bt L^{-t} L^{-1} C = Bt A^{-1} C
         // (BtC fully stored)
-        dgemm_("T", "N", NBP, NBL, NBU, ONE_, BB, NBU, CC, NBU,
+        dgemm_(_param_T, _param_N, NBP, NBL, NBU, ONE_, BB, NBU, CC, NBU,
                ZERO_, BtC, NBP );
         //BtB <- LB and LBt where LB LBt is the cholesky factorization of Bt A^{-1} B
-        dpotrf_("L", NBP, BtB , NBP, INFO );
+        dpotrf_(_param_L, NBP, BtB , NBP, INFO );
         ASSERT_PRE(!INFO[0],"Lapack factorization of BtB is not achieved.");
 
         // Compute BtC = LB^{-1} BtC <-  LB^{-1} Bt A^{-1} C
-        dtrtrs_("L", "N", "N", NBP, NBL, BtB, NBP, BtC, NBP, INFO);
+        dtrtrs_(_param_L, _param_N, _param_N, NBP, NBL, BtB, NBP, BtC, NBP, INFO);
         ASSERT_PRE(!INFO[0],"Lapack Computation BtC = LB^{-1} BtC is not achieved.");
         // CtC = CtC - (BtC)t BtC
         // (result stored only on lower part)
         // CtC <- Ct A^{-1} C - Ct A^{-t} B (Bt A^{-1} B)^{-1}  Bt A^{-1} C
-        dsyrk_("L", "T", NBL, NBP, MINUSONE_, BtC, NBP, ONE_, CtC, NBL);
+        dsyrk_(_param_L, _param_T, NBL, NBP, MINUSONE_, BtC, NBP, ONE_, CtC, NBL);
         //...........................
         // END OF MATRIX OPERATIONS
         //...........................
@@ -413,11 +416,11 @@ void DarcySolver<Mesh>::computeHybridMatrixAndSourceRHS()
         // initialize the rhs vector (clean this some day...)
         ElemVec::vector_view  rhs = elvecSource.block(0); // corresponds to F2
         // Compute rhs = LB^{-1} rhs <- LB^{-1} F2
-        dtrtrs_("L", "N", "N", NBP, NBRHS, BtB, NBP, rhs, NBP, INFO);
+        dtrtrs_(_param_L, _param_N, _param_N, NBP, NBRHS, BtB, NBP, rhs, NBP, INFO);
         ASSERT_PRE(!INFO[0],"Lapack Computation rhs = LB^{-1} rhs is not achieved.");
         // Compute RHSTP = t(BtC) rhs <- Ct A^{-1} Bt (Bt A^{-1} B)^{-1} F2
         // (fully stored)
-        dgemm_("T", "N", NBL, NBRHS, NBP, ONE_, BtC, NBP, rhs, NBP,
+        dgemm_(_param_T, _param_N, NBL, NBRHS, NBP, ONE_, BtC, NBP, rhs, NBP,
                ZERO_, RHSTP, NBL );
         //........................
         // END OF VECTOR OPERATIONS.
@@ -481,6 +484,9 @@ void DarcySolver<Mesh>::computePresFlux()
     double ONE_[1]      = {1.0};
     double MINUSONE_[1] = {-1.0};
     double ZERO_[1]     = {0.0};
+    //
+    char _param_L[1], _param_N[1], _param_T[1];
+    _param_L[0] = 'L'; _param_N[0] = 'N'; _param_T[0] = 'T'; 
 
     /*==========================================
       POST PROCESSING
@@ -507,26 +513,26 @@ void DarcySolver<Mesh>::computePresFlux()
         // MATRIX OPERATIONS.
         //...................
         //   AA <- L and Lt where L Lt is the Cholesky factorization of A
-        dpotrf_("L", NBU, AA , NBU , INFO );
+        dpotrf_(_param_L, NBU, AA , NBU , INFO );
         ASSERT_PRE(!INFO[0],"Lapack factorization of A is not achieved.");
         // Compute BB <-  L^{-1} B (solve triangular system)
-        dtrtrs_("L", "N", "N", NBU, NBP, AA, NBU, BB, NBU, INFO);
+        dtrtrs_(_param_L, _param_N, _param_N, NBU, NBP, AA, NBU, BB, NBU, INFO);
         ASSERT_PRE(!INFO[0],"Lapack Computation B = L^{-1} B  is not achieved.");
         // Compute CC <-  L^{-1} C (solve triangular system)
-        dtrtrs_("L", "N", "N", NBU, NBL, AA, NBU, CC, NBU, INFO);
+        dtrtrs_(_param_L, _param_N, _param_N, NBU, NBL, AA, NBU, CC, NBU, INFO);
         ASSERT_PRE(!INFO[0],"Lapack Computation C = L^{-1} C  is not achieved.");
         // Compute BtB <-  Bt L^{-t} L^{-1} B = Bt A^{-1} B
         // (BtB stored only on lower part)
-        dsyrk_("L", "T", NBP, NBU, ONE_, BB, NBU, ZERO_, BtB, NBP);
+        dsyrk_(_param_L, _param_T, NBP, NBU, ONE_, BB, NBU, ZERO_, BtB, NBP);
         // Compute BtC <- Bt L^{-t} L^{-1} C = Bt A^{-1} C
         // (BtC fully stored)
-        dgemm_("T", "N", NBP, NBL, NBU, ONE_, BB, NBU, CC, NBU,
+        dgemm_(_param_T, _param_N, NBP, NBL, NBU, ONE_, BB, NBU, CC, NBU,
                ZERO_, BtC, NBP );
         //BtB <- LB and LBt where LB LBt is the cholesky factorization of Bt A^{-1} B
-        dpotrf_("L", NBP, BtB , NBP, INFO );
+        dpotrf_(_param_L, NBP, BtB , NBP, INFO );
         ASSERT_PRE(!INFO[0],"Lapack factorization of BtB is not achieved.");
         // Compute BtC = LB^{-1} BtC <-  LB^{-1} Bt A^{-1} C
-        dtrtrs_("L", "N", "N", NBP, NBL, BtB, NBP, BtC, NBP, INFO);
+        dtrtrs_(_param_L, _param_N, _param_N, NBP, NBL, BtB, NBP, BtC, NBP, INFO);
         ASSERT_PRE(!INFO[0],"Lapack Computation BtC = LB^{-1} BtC is not achieved.");
         //...........................
         // END OF MATRIX OPERATIONS.
@@ -558,7 +564,7 @@ void DarcySolver<Mesh>::computePresFlux()
         // initialize the rhs vector (clean this some day...)
         ElemVec::vector_view rhs = elvecSource.block(0); // corresponds to F2
         // Compute rhs = LB^{-1} rhs <- LB^{-1} F2
-        dtrtrs_("L", "N", "N", NBP, NBRHS, BtB, NBP, rhs, NBP, INFO);
+        dtrtrs_(_param_L, _param_N, _param_N, NBP, NBRHS, BtB, NBP, rhs, NBP, INFO);
         ASSERT_PRE(!INFO[0],
                    "Lapack Computation rhs = LB^{-1} rhs is not achieved.");
         // extract the resulting TP for the current fe and put it into elvecHyb.
@@ -566,12 +572,12 @@ void DarcySolver<Mesh>::computePresFlux()
         ElemVec::vector_view  RHSTP = elvecHyb.block(0);
         // RHSTP = elvecHyb.block(0)  contains the local TP for the current fe.
         // rhs = BtC * RHSTP + rhs <- LB^{-1} Bt A^{-1} C * L + LB^{-1} F2
-        dgemm_("N", "N", NBP, NBRHS, NBL, MINUSONE_, BtC, NBP, RHSTP, NBL,
+        dgemm_(_param_N, _param_N, NBP, NBRHS, NBL, MINUSONE_, BtC, NBP, RHSTP, NBL,
                MINUSONE_, rhs, NBP );
         //  rhs = LB^{-T} rhs
         //  rhs <- - (Bt A^{-1} B)^{-1} Bt A^{-1} C * L - (Bt A^{-1} B)^{-1} F2
         // TO DO : the case when F1 and F3 are not zero
-        dtrtrs_("L", "T", "N", NBP, NBRHS, BtB, NBP, rhs, NBP, INFO);
+        dtrtrs_(_param_L, _param_T, _param_N, NBP, NBRHS, BtB, NBP, rhs, NBP, INFO);
         ASSERT_PRE(!INFO[0],
                    "Lapack Computation rhs = LB^{-T} rhs is not achieved.");
         // rhs contains the pressure for the current element.
@@ -587,12 +593,12 @@ void DarcySolver<Mesh>::computePresFlux()
         ElemVec::vector_view flux = elvecFlux.block(0);
         flux = elvecFlux.block(0);
         // Compute  flux = BB * rhs <- L^{-1} B P
-        dgemv_("N", NBU, NBP, ONE_, BB, NBU, rhs, INC1, ZERO_, flux, INC1 );
+        dgemv_(_param_N, NBU, NBP, ONE_, BB, NBU, rhs, INC1, ZERO_, flux, INC1 );
         // Compute  flux = - CC * RHSTP - flux <-   - L^{-1} C TP - L^{-1} B P
-        dgemv_("N", NBU, NBL, MINUSONE_, CC, NBL, RHSTP, INC1, MINUSONE_,
+        dgemv_(_param_N, NBU, NBL, MINUSONE_, CC, NBL, RHSTP, INC1, MINUSONE_,
                flux, INC1 );
         // Compute flux = L^{-T} flux <-  - A^{-1} Ct TP - A^{-1} Bt P
-        dtrtrs_("L", "T", "N", NBU, NBRHS, AA, NBU, flux, NBU, INFO);
+        dtrtrs_(_param_L, _param_T, _param_N, NBU, NBRHS, AA, NBU, flux, NBU, INFO);
         ASSERT_PRE(!INFO[0],
                    "Lapack Computation flux = L^{-T} flux is not achieved.");
         // TO DO: the case when F1 is not zero (done, no!??)

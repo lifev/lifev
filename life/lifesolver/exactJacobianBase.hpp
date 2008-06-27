@@ -187,10 +187,10 @@ public:
 
     virtual ~Epetra_ExactJacobian(){};
 
-    int 	SetUseTranspose (bool  UseTranspose)
+    int 	SetUseTranspose (bool  /*UseTranspose*/)
         {std::cout << "********* EJ : transpose not available\n"; return -1;}
     int 	Apply           (const Epetra_MultiVector &X, Epetra_MultiVector &Y) const;
-    int 	ApplyInverse    (const Epetra_MultiVector &X, Epetra_MultiVector &Y) const
+    int 	ApplyInverse    (const Epetra_MultiVector &/*X*/, Epetra_MultiVector &/*Y*/) const
         {std::cout << "********* EJ : inverse not available\n"; return -1;}
     double 	NormInf         () const
         {std::cout << "********* EJ : NormInf not available\n"; return 1.;}

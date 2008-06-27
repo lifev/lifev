@@ -201,8 +201,8 @@ DebugStream::DebugStream( int area, int /*level*/, bool print )
     if ( DEBUG_AREA && ! DEBUG_AREA->empty() )
     {
         __p->debug =  ( std::find ( AREAS->begin (), AREAS->end (), area ) != AREAS->end() &&
-                        print ||
-                        !area );
+                        print ) ||
+                       ( !area );
     }
     else
     {
@@ -220,8 +220,8 @@ DebugStream::DebugStream( const char* initialString, int area, int /*level*/, bo
     if ( DEBUG_AREA && ! DEBUG_AREA->empty() )
     {
         __p->debug =  ( std::find ( AREAS->begin (), AREAS->end (), area ) != AREAS->end() &&
-                        print ||
-                        !area );
+                        print ) ||
+                        ( !area );
     }
     else
     {

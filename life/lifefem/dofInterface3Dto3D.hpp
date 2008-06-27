@@ -372,7 +372,7 @@ void DofInterface3Dto3D::_updateDofConnections( const Mesh& mesh1, const Dof& do
                             feBd2.coorMap( x2, y2, z2, feBd2.refFE.xi( lDof2 - 1 ), feBd2.refFE.eta( lDof2 - 1 ) ); // Nodal coordinates on the current face (mesh2)
 
                             // Do the nodal points match?
-                            if ( test = coincide( x1, y1, z1, x2, y2, z2, tol ) )
+                            if ( (test = coincide( x1, y1, z1, x2, y2, z2, tol )) )
                             {
                                 gDof1 = dof1.localToGlobal( iElAd1, ( iVeEl1 - 1 ) * nDofpV1 + l ); // Global Dof on mesh1
                                 gDof2 = dof2.localToGlobal( iElAd2, ( iVeEl2 - 1 ) * nDofpV2 + k ); // Global Dof on mesh2
@@ -423,7 +423,7 @@ void DofInterface3Dto3D::_updateDofConnections( const Mesh& mesh1, const Dof& do
                             feBd2.coorMap( x2, y2, z2, feBd2.refFE.xi( lDof2 - 1 ), feBd2.refFE.eta( lDof2 - 1 ) ); // Nodal coordinates on the current face (mesh2)
 
                             // Do the nodal points match?
-                            if ( test = coincide( x1, y1, z1, x2, y2, z2, tol ) )
+                            if ( (test = coincide( x1, y1, z1, x2, y2, z2, tol )) )
                             {
                                 gDof1 = dof1.localToGlobal( iElAd1, nDofElemV1 + ( iEdEl1 - 1 ) * nDofpE1 + l ); // Global Dof on mesh1
                                 gDof2 = dof2.localToGlobal( iElAd2, nDofElemV2 + ( iEdEl2 - 1 ) * nDofpE2 + k ); // Global Dof on mesh2

@@ -59,28 +59,28 @@ public:
 
     //! getters
 
-    const Real rho()     const {return _rho;}
+    /*const*/ Real rho()     const {return _rho;}
 //     const Real young()   const {return _E;}
 //     const Real poisson() const {return _nu;}
 
 //     const Real lambda()  const {return _lambda;}
 //     const Real mu()      const {return _mu;}
-    const Real factor()  const {return _factor;}
+    /*const*/ Real factor()  const {return _factor;}
 
-    const UInt verbose() const {return _verbose;}
+    /*const*/ UInt verbose() const {return _verbose;}
 
-    const double poisson(int mat) const
+    /*const*/ double poisson(int mat) const
         {return M_poisson.find(mat)->second;}
-    const double young(int mat) const
+    /*const*/ double young(int mat) const
         {return M_young.find(mat)->second;}
 
-    const double lambda(int mat) const
+    /*const*/ double lambda(int mat) const
         {return M_lambda.find(mat)->second;}
-    const double mu(int mat) const
+    /*const*/ double mu(int mat) const
         {return M_mu.find(mat)->second;}
 
-    const double lambda() const {return _lambda;}
-    const double mu() const {return _mu;}
+    /*const*/ double lambda() const {return _lambda;}
+    /*const*/ double mu() const {return _mu;}
 
     std::string order() const {return M_order;}
 private:
