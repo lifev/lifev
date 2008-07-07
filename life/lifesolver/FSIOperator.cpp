@@ -47,11 +47,11 @@ FSIOperator::setup()
     int me       = M_epetraComm->MyPID();
     bool verbose = (me == 0);
 
-    if (verbose) std::cout << "velocity order = " << uOrder << std::endl;
+    leaderPrint("velocity order = " + uOrder);
 
     if ( uOrder.compare("P2") == 0 )
     {
-        if (verbose) std::cout << "P2 velocity " << std::flush;
+        leaderPrint( "P2 velocity ");
         refFE_vel = &feTetraP2;
         qR_vel    = &quadRuleTetra15pt; // DoE 5
         bdQr_vel  = &quadRuleTria3pt;   // DoE 2
@@ -59,7 +59,7 @@ FSIOperator::setup()
     else
         if ( uOrder.compare("P1") == 0 )
         {
-            if (verbose) std::cout << "P1 velocity ";
+	    leaderPrint("P1 velocity ");
             refFE_vel = &feTetraP1;
             qR_vel    = &quadRuleTetra4pt;  // DoE 2
             bdQr_vel  = &quadRuleTria3pt;   // DoE 2
@@ -67,7 +67,7 @@ FSIOperator::setup()
         else
             if ( uOrder.compare("P1Bubble") == 0 )
             {
-                if (verbose) std::cout << "P1-bubble velocity " << std::flush;
+                leaderPrint("P1-bubble velocity ");
                 refFE_vel = &feTetraP1bubble;
                 qR_vel    = &quadRuleTetra64pt;  // DoE 2
                 bdQr_vel  = &quadRuleTria3pt;   // DoE 2
@@ -84,14 +84,14 @@ FSIOperator::setup()
     std::string pOrder =  M_dataFluid->pOrder();
     if ( pOrder.compare("P2") == 0 )
     {
-        if (verbose) std::cout << "P2 pressure " << std::flush;
+        leaderPrint("P2 pressure ");
         refFE_press = &feTetraP2;
         qR_press    = qR_vel; // DoE 5
         bdQr_press  = &quadRuleTria3pt;   // DoE 2
     }
     else if ( pOrder.compare("P1") == 0 )
     {
-        if (verbose) std::cout << "P1 pressure";
+        leaderPrint("P1 pressure");
         refFE_press = &feTetraP1;
 //        qR_press    = &quadRuleTetra64pt;  // DoE 2
         qR_press    = qR_vel;  // DoE 2
@@ -103,7 +103,7 @@ FSIOperator::setup()
         exit(0);
     }
 
-    if (verbose) std::cout << std::endl;
+    leaderPrint("\n");
 
     Dof uDof(*M_dataFluid->mesh(), *refFE_vel);
     Dof pDof(*M_dataFluid->mesh(), *refFE_press);
@@ -115,27 +115,27 @@ FSIOperator::setup()
     std::string dOrder = M_dataSolid->order();
     if ( dOrder.compare("P2") == 0 )
     {
-        if (verbose) std::cout << "P2 displacement " << std::flush;
+        leaderPrint("P2 displacement ");
         refFE_struct = &feTetraP2;
         qR_struct    = &quadRuleTetra15pt; // DoE 5
         bdQr_struct  = &quadRuleTria3pt;   // DoE 2
     }
     else if ( dOrder.compare("P1") == 0 )
     {
-        if (verbose) std::cout << "P1 displacement";
+        leaderPrint("P1 displacement");
         refFE_struct = &feTetraP1;
         qR_struct    = &quadRuleTetra4pt;  // DoE 2
         bdQr_struct  = &quadRuleTria3pt;   // DoE 2
     }
 
+    leaderPrint("\n");
 
     MPI_Barrier(MPI_COMM_WORLD);
 
     Dof dDof(*M_dataSolid->mesh(), *refFE_struct);
 
 
-    if (verbose)
-        std::cout << "fluid: building the FE space ... " << std::flush;
+    leaderPrint("fluid: building the FE space ... " );
 
 
     if (this->isFluid())
@@ -173,8 +173,7 @@ FSIOperator::setup()
                                                             1,
                                                             *M_epetraComm));
 
-        if (verbose)
-            std::cout << "fluid: ok." << std::endl;
+        leaderPrint("fluid: ok.\n");
 
         M_fluid.reset(new FSIOperator::fluid_raw_type(dataFluid(),
                                                       *M_uFESpace,
@@ -227,8 +226,7 @@ FSIOperator::setup()
                                                             1,
                                                             *M_epetraComm));
 
-        if (verbose)
-            std::cout << "fluid: ok." << std::endl;
+        leaderPrint("fluid: ok.\n");
 
         M_fluid.reset(new FSIOperator::fluid_raw_type(dataFluid(),
                                                       *M_uFESpace,
@@ -245,8 +243,7 @@ FSIOperator::setup()
 
 
 
-    if (verbose)
-        std::cout << "solid: building the FE space ... " << std::flush;
+    leaderPrint("solid: building the FE space ... " );
 
     if (this->isSolid())
     {
@@ -259,8 +256,7 @@ FSIOperator::setup()
                                                            3,
                                                            *M_epetraComm));
 
-        if (verbose)
-            std::cout << "solid: ok." << std::endl;
+        leaderPrint("solid: ok.\n");
 
 
         M_solid.reset(new FSIOperator::solid_raw_type(dataSolid(),
@@ -283,8 +279,7 @@ FSIOperator::setup()
                                                            3,
                                                            *M_epetraComm));
 
-        if (verbose)
-            std::cout << "solid: ok." << std::endl;
+        leaderPrint( "solid: ok.\n");
 
 
         M_solid.reset(new FSIOperator::solid_raw_type(dataSolid(),
@@ -354,8 +349,7 @@ FSIOperator::setup()
     // now we build the sigma and lambda variables on each proc
 
 
-    if (verbose)
-        std::cout << "building the variables ... " << std::flush;
+    leaderPrint("building the variables ... ");
 
 
 
@@ -393,14 +387,14 @@ FSIOperator::setup()
     {
         if (true)
         {
-            std::cout << "solid" << std::endl;
+            //std::cout << "solid" << std::endl;
             for (int dim = 0; dim < (int)nDimensions; ++dim)
                 for ( Iterator i = locDofMap.begin(); i != locDofMap.end(); ++i )
                     {
                         dofInterfaceSolid.push_back(i->second + dim*dDof.numTotalDof()); // in solid numerotation
                     }
         } else {
-            std::cout << "solid" << std::endl;
+	  //std::cout << "solid" << std::endl;
             dofInterfaceSolid.resize( M_solid->getMap().getMap(Repeated)->NumMyElements() );
             M_solid->getMap().getMap(Repeated)->MyGlobalElements( &dofInterfaceSolid[0] );
         }
@@ -425,7 +419,7 @@ FSIOperator::setup()
 
     M_epetraWorldComm->Barrier();
 
-    if (verbose) std::cout << "done." << std::endl;
+    leaderPrint(" done.\n");
 //    M_dofStructureToHarmonicExtension->showMe(true, std::cout);
 //    M_dofHarmonicExtensionToFluid->showMe(true, std::cout);
 //    M_dofStructureToReducedFluid->setup(uFESpace.refFE(), M_fluid->pressFESpace().dof(),
@@ -461,11 +455,63 @@ FSIOperator::setDataFromGetPot( GetPot const& data_file )
     M_dataSolid.reset(new data_solid(data_file));
 }
 
+
+void FSIOperator::leaderPrint(string const message, double const number) const
+{
+  if ( isLeader() )
+    std::cout << message << number << std::endl;
+
+}
+
+void FSIOperator::leaderPrint(string const message) const
+{
+  if ( isLeader() )
+    std::cout << message << std::flush;
+
+}
+
+void FSIOperator::leaderPrintMax(string const message, double const number) const
+{
+  double num(number);
+  double globalMax;
+  M_epetraWorldComm->MaxAll(&num, &globalMax, 1);
+
+  leaderPrint( message , globalMax );
+
+}
+
+
 //
 
 void
 FSIOperator::updateJacobian(vector_type& /*sol*/,int /*iter*/)
 {
+}
+
+
+void
+FSIOperator::initializeFluid( const vector_type& velAndPressure,
+                              const vector_type& displacement )
+{
+    this->fluid().initialize( velAndPressure );
+    this->meshMotion().initialize( displacement );
+    this->moveMesh( displacement);
+}
+
+void
+FSIOperator::initializeSolid( const vector_type& displacement,
+                          const vector_type& velocity )
+{
+    this->solid().initialize( displacement, velocity);
+}
+
+void
+FSIOperator::moveMesh(vector_type const &dep)
+{
+    leaderPrint( "  Moving the mesh ... ");
+    M_fluidMeshPart->mesh()->moveMesh(dep,  this->M_mmFESpace->dof().numTotalDof());
+    leaderPrint(  " done.\n" );
+    M_fluid->recomputeMatrix(true);
 }
 
 
@@ -530,7 +576,7 @@ FSIOperator::updateSystem(fluid_source_type& /*fluidSource*/, solid_source_type&
 
         M_meshMotion->updateSystem();
 
-        transferMeshMotionOnFluid(M_meshMotion->displacement(),
+        transferMeshMotionOnFluid(M_meshMotion->disp(),
                                   *this->M_dispFluidMeshOld);
 
         *this->M_un                = M_fluid->solution();
@@ -1179,7 +1225,7 @@ void FSIOperator::setDerFluidLoadToFluid(vector_type const& dload,
 //                                               type);
 // }
 
-void  FSIOperator::setLambdaFluid(const vector_type lambda)
+void  FSIOperator::setLambdaFluid(const vector_type& lambda)
 {
     if ( lambda.getMaptype() == Unique )
         *M_lambdaFluid         = lambda;
@@ -1220,7 +1266,7 @@ void FSIOperator::setLambdaDotSolid(const vector_type& lambda)
     *M_lambdaDotSolidRepeated     = lambda;
 }
 
-void  FSIOperator::setSigmaFluid(const vector_type sigma)
+void  FSIOperator::setSigmaFluid(const vector_type& sigma)
 {
     if ( sigma.getMaptype() == Unique )
         *M_sigmaFluid         = sigma;

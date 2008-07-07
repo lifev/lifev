@@ -25,9 +25,12 @@ reltol     =  1.e-6
 etamax     = 1.e-10 # tolerance of the interface problem (GMRES),
                     # if semiImplicit, set   etamax = 1.e-10,
                     # else (e.g.)            etamax = 1.e-3
-restart    = 0
 ifSemiImplicit = 1 # 0=false, -1=quasi-Newton,  otherwise=true (only valid for method = exactJacobian).
 maxSubIter = 20
+
+restart    = false   # restart the computations (see also importer)
+#restart    = true
+#Tstart     = 0.005 # restart from time Tstart
 
 [interface] # mesh dependent flags for the interface.
 fluid_flag      =  1 # default: 1
@@ -39,6 +42,7 @@ tolerance       =  0 # how far points are to be considered the same on the inter
 [exporter]
 multimesh  =    false   # actually we export also the displacement
 start      = 0
+#start      = 4
 save       = 1
 
 [fluid]
@@ -94,6 +98,26 @@ gammaDiv   = 0.2
 gammaPress = 0.2
 reuse      = true
 
+[lin_fluid]
+[../solver]
+solver          = gmres
+scaling         = none
+output          = all_res  #none
+conv            = rhs
+max_iter        = 100
+kspace          = 100
+tol             = 1.e-10    # AztecOO tolerance
+
+# see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/index.html
+[../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
+prectype        = Amesos # Amesos (does a local LU factorization), ILUT (not ILU)
+reuse           = true
+overlap         = 2
+droptol         = 1.e-5
+fill            = 4
+athr            = 1.2500e-04 # ~h^2. for h=0.25: athr~1e-3
+rthr            = 1
+relax_value     = 1
 
 
 [solid]

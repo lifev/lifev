@@ -54,6 +54,8 @@ public:
     typedef typename super::matrix_type         matrix_type;
     typedef typename super::matrix_ptrtype      matrix_ptrtype;
     typedef typename super::data_type           data_type;
+    typedef typename super::prec_type           prec_type;
+    typedef typename super::prec_raw_type       prec_raw_type;
 
     typedef typename super::bchandler_raw_type bchandler_raw_type;
 
@@ -69,6 +71,10 @@ public:
                           FESpace<Mesh, EpetraMap>& uFESpace,
                           FESpace<Mesh, EpetraMap>& pFESpace,
                           Epetra_Comm&              comm );
+
+    ~OseenShapeDerivative();
+
+    void setUp( const GetPot& dataFile );
 
 
     void iterateLin( bchandler_raw_type& bch );
@@ -87,6 +93,11 @@ private:
 
     vector_type               M_rhsLinNoBC;
     vector_type               M_rhsLinFull;
+
+    vector_type               M_linSol;
+
+    SolverType                M_linearLinSolver;
+    prec_type                 M_linPrec;
 
 
 //    ElemVec                   M_elvec_du; // Elementary right hand side for the linearized velocity
@@ -118,6 +129,9 @@ OseenShapeDerivative( const data_type&          dataType,
                       comm),
     M_rhsLinNoBC     ( this->getMap()),
     M_rhsLinFull     ( this->getMap()),
+    M_linSol         ( this->getMap()),
+    M_linearLinSolver( ),
+    M_linPrec        ( new prec_raw_type() ),
 //    M_elvec_du       ( this->M_uFESpace.fe().nbNode, nDimensions ),
     M_elvec_du       ( this->M_uFESpace.fe().nbNode, nDimensions ),
     M_elvec_dp       ( this->M_pFESpace.fe().nbNode, 1 ),
@@ -144,6 +158,9 @@ OseenShapeDerivative( const data_type&          dataType,
                       comm),
     M_rhsLinNoBC     ( this->getMap()),
     M_rhsLinFull     ( this->getMap()),
+    M_linSol         ( this->getMap()),
+    M_linearLinSolver( ),
+    M_linPrec        ( new prec_raw_type() ),
     M_elvec_du       ( this->M_uFESpace.fe().nbNode, nDimensions ),
     M_elvec_dp       ( this->M_pFESpace.fe().nbNode, 1 ),
 //    M_elvec_dp       ( this->M_pFESpace.fe().nbNode, nDimensions ),
@@ -159,6 +176,24 @@ OseenShapeDerivative( const data_type&          dataType,
 }
 
 
+template<typename Mesh, typename SolverType>
+OseenShapeDerivative<Mesh, SolverType>::
+~OseenShapeDerivative()
+{
+
+}
+
+template<typename Mesh, typename SolverType>
+void OseenShapeDerivative<Mesh, SolverType>::setUp( const GetPot& dataFile )
+{
+    super::setUp( dataFile );
+
+    M_linearLinSolver.setDataFromGetPot( dataFile, "lin_fluid/solver" );
+    M_linPrec->setDataFromGetPot( dataFile, "lin_fluid/prec" );
+
+}
+
+
 
 template<typename Mesh, typename SolverType>
 void OseenShapeDerivative<Mesh, SolverType>::iterateLin( bchandler_raw_type& bch )
@@ -167,10 +202,7 @@ void OseenShapeDerivative<Mesh, SolverType>::iterateLin( bchandler_raw_type& bch
 
     // matrix and vector assembling communication
 
-    if (this->M_verbose)
-    {
-        std::cout << "  f-  Finalizing the matrix and vectors ...    ";
-    }
+    this->leaderPrint("  f-  Finalizing the matrix and vectors ...    ");
 
     chrono.start();
 
@@ -190,14 +222,11 @@ void OseenShapeDerivative<Mesh, SolverType>::iterateLin( bchandler_raw_type& bch
 
     chrono.stop();
 
-    if (this->M_verbose)
-        std::cout << "done in " << chrono.diff() << " s.\n"
-                  << std::flush;
+    this->leaderPrintMax("done in " , chrono.diff());
 
     // boundary conditions update
 
-    if (this->M_verbose) std::cout << "  f-  Applying boundary conditions...          "
-              << std::flush;
+    this->leaderPrint("  f-  Applying boundary conditions...          ");
 
 //    std::cout << "    norm_inf( rhsFullNoBC )     = " << rhsFull.NormInf() << std::endl;
 
@@ -210,18 +239,20 @@ void OseenShapeDerivative<Mesh, SolverType>::iterateLin( bchandler_raw_type& bch
 
 //    this->M_comm->Barrier();
 
-    if (this->M_verbose) std::cout << "done in " << chrono.diff() << " s.\n" << std::flush;
+    this->leaderPrintMax("done in ", chrono.diff() );
 
-    std::cout << "    norm_inf( rhsFull )     = " << rhsFull.NormInf() << std::endl;
+    this->leaderPrint("    norm_inf( rhsFull )     = " , rhsFull.NormInf());
     // solving the system
 
-    solveSystem( matrFull, rhsFull );
+    // using the same preconditioner as for the non linear problem (the matrix changes only in the 
+    // boundary terms.
+    solveSystem( matrFull, rhsFull, M_linSol, M_linearLinSolver, this->M_prec);
 
     this->M_residual  = M_rhsLinNoBC;
-    this->M_residual -= *this->M_matrNoBC*this->M_sol;
+    this->M_residual -= *this->M_matrNoBC*this->M_linSol;
 
-    std::cout << "NormInf Residual Lin = " << this->M_residual.NormInf() << std::endl;
-    std::cout << "NormInf Solution Lin = " << this->M_sol.NormInf() << std::endl;
+    this->leaderPrintMax( "NormInf Residual Lin = " , this->M_residual.NormInf());
+    this->leaderPrintMax( "NormInf Solution Lin = " , this->M_linSol.NormInf());
 } // iterateLin
 
 
@@ -237,7 +268,7 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& m
                                                             const vector_type& dw,
                                                             const vector_type& sourceVec)
 {
-    std::cout << "  f-  LINEARIZED FLUID SYSTEM\n";
+    this->leaderPrint("  f-  LINEARIZED FLUID SYSTEM\n");
 
     Chrono chrono;
 
@@ -245,7 +276,7 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& m
 
     int nbCompU = nDimensions;
 
-    std::cout << "  f-  Updating right hand side... ";
+    this->leaderPrint("  f-  Updating right hand side... ");
 
     //
     // RIGHT HAND SIDE FOR THE LINEARIZED ALE SYSTEM
@@ -359,12 +390,12 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& m
 
             M_rhsLinNoBC = rhsLinNoBC;
 
-            std::cout << "norm( M_rhsLinNoBC)  = " << M_rhsLinNoBC.NormInf() << "  ";
+            this->leaderPrint( "norm( M_rhsLinNoBC)  = " , M_rhsLinNoBC.NormInf() );
 
         }
 
     chrono.stop();
-    std::cout << "done in " << chrono.diff() << "s." << std::endl;
+    this->leaderPrintMax("done in ", chrono.diff() );
 
 }
 

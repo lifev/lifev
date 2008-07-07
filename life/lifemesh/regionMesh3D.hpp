@@ -2077,9 +2077,7 @@ namespace LifeV
     void
     RegionMesh3D<GEOSHAPE, MC>::setLinkSwitch( std::string const & _s )
     {
-    	std::ostringstream _err_msg;
-    	_err_msg <<  "Switch named " << _s << " is not allowed";
-        ASSERT0( switches.set( _s ), _err_msg.str().c_str() );
+        ASSERT0( switches.set( _s ), "Switch named " + _s + " is not allowed" );
     }
 
     template <typename GEOSHAPE, typename MC>
@@ -2087,9 +2085,7 @@ namespace LifeV
     void
     RegionMesh3D<GEOSHAPE, MC>::unsetLinkSwitch( std::string const & _s )
     {
-    	std::ostringstream _err_msg;
-    	_err_msg << "Switch named " << _s << " is not allowed";
-        ASSERT0( switches.unset( _s ), _err_msg.str().c_str() );
+        ASSERT0( switches.unset( _s ), "Switch named " + _s + " is not allowed" );
     }
 
     template <typename GEOSHAPE, typename MC>
@@ -2418,11 +2414,8 @@ namespace LifeV
     {
 
         std::cout << "     Updating element faces ... " << std::flush;
-        std::ostringstream _err_msg;
-        _err_msg << "Boundary Faces Must have been set" <<
-        "in order to call updateElementFaces with createFaces=true" << std::endl <<
-        "Use buildBoundaryFaces(..) from mesh_util.h";
-        ASSERT0( ! cf || M_numBFaces > 0, _err_msg.str().c_str() );
+
+        ASSERT0( ! cf || M_numBFaces > 0, "Boundary Faces Must have been set in order to call updateElementFaces with createFaces=true\nUse buildBoundaryFaces(..) from mesh_util.h" );
         // If the counter is set we trust it! Otherwise we use Euler formula
 
         if ( cf && ef == 0 )

@@ -20,6 +20,11 @@ Real ExporterData::operator()(const UInt i) const
     return (*M_vr)[i];
 }
 
+Real& ExporterData::operator()(const UInt i)
+{
+    return (*M_vr)[i];
+}
+
 UInt ExporterData::dim() const {
     return M_dim;
 }

@@ -268,6 +268,11 @@ struct Assert
             return level( lvl_error, strMsg);
         }
 
+    Assert & error( const std::string strMsg )
+        {
+            return level( lvl_error, strMsg.c_str());
+        }
+
     Assert & fatal( const char * strMsg = 0)
         {
             return  level( lvl_fatal, strMsg);

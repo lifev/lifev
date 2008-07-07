@@ -504,7 +504,7 @@ buildSystem()
 
     M_linearStiff.GlobalAssemble();
     M_massStiff.GlobalAssemble();
-    M_mass.getEpetraMatrix().GlobalAssemble();
+    M_mass.GlobalAssemble();
 
 //     M_linearStiff.spy("linearStiff");
 //     M_massStiff.spy("massStiff");
@@ -606,9 +606,8 @@ iterate( bchandler_raw_type& bch )
 
     chrono.start();
 
-    matrix_ptrtype matrFull( new matrix_type(M_massStiff) );
-
-    matrFull->GlobalAssemble();
+    matrix_ptrtype matrFull( new matrix_type( M_localMap, M_massStiff.getMeanNumEntries()));
+    *matrFull += M_massStiff;
 
     M_rhsNoBC.GlobalAssemble();
     M_rhsW.GlobalAssemble();
@@ -697,9 +696,8 @@ iterateLin( bchandler_raw_type& bch )
 
     chrono.start();
 
-    matrix_ptrtype matrFull( new matrix_type(M_massStiff) );
-
-    matrFull->GlobalAssemble();
+    matrix_ptrtype matrFull( new matrix_type( M_localMap, M_massStiff.getMeanNumEntries()));
+    *matrFull += M_massStiff;
 
     vector_type rhs(M_FESpace.map());
     rhs *= 0.;
@@ -1254,6 +1252,8 @@ applyBoundaryConditions(matrix_type&        matrix,
 
     bcManage( matrix, rhsFull, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 1.,
               M_data.time() );
+
+    // matrix should be GlobalAssembled by  bcManage
 
     rhs = rhsFull;
 

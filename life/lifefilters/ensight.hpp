@@ -45,11 +45,11 @@ namespace LifeV
 template<typename Mesh>
 class Ensight : public Exporter<Mesh> {
 
+public:
+
     typedef Exporter<Mesh> super;
     typedef typename super::mesh_ptrtype  mesh_ptrtype;
     typedef typename super::vector_ptrtype vector_ptrtype;
-
-public:
 
     /**
        Constructor for Ensight
@@ -83,7 +83,7 @@ public:
     */
     void postProcess(const Real& time);
 
-
+    void import(const Real& Tstart, const Real& dt); // dt is used to rebuild the history up to now
 
 private:
 
@@ -96,6 +96,12 @@ private:
     void M_case_mesh_section(std::ofstream& casef);
     void M_case_variable_section(std::ofstream& casef);
     void M_case_time_section(std::ofstream& casef, const Real& time);
+
+    void M_rd_ascii       ( ExporterData& dvar );
+    void M_rd_ascii_scalar( ExporterData& dvar );
+    void M_rd_ascii_vector( ExporterData& dvar );
+
+
 
 };
 
@@ -438,6 +444,133 @@ template <typename Mesh> void Ensight<Mesh>::M_case_variable_section(std::ofstre
                 }
         }
 }
+
+template<typename Mesh>
+void Ensight<Mesh>::import(const Real& Tstart, const Real& dt)
+{
+    // dt is used to rebuild the history up to now
+    Real time(Tstart - this->M_count*dt);
+
+    for ( int count(0); count <= this->M_count; ++count)
+    {
+        this->M_timeSteps.push_back(time);
+        ++this->M_steps;
+        time += dt;
+    }
+
+    typedef std::list< ExporterData >::iterator Iterator;
+
+    this->getPostfix();
+
+    assert( this->M_postfix != "***" );
+
+    if (!this->M_procId) std::cout << "  x-  Ensight importing ..."<< std::endl;
+
+    Chrono chrono;
+    chrono.start();
+    for (Iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
+        {
+            M_rd_ascii(*i);
+        }
+    chrono.stop();
+    if (!this->M_procId) std::cout << "      done in " << chrono.diff() << " s." << std::endl;
+
+}
+
+template <typename Mesh>
+void Ensight<Mesh>::M_rd_ascii( ExporterData& dvar)
+{
+
+    switch( dvar.type() )
+        {
+        case ExporterData::Scalar:
+            M_rd_ascii_scalar(dvar);
+            break;
+        case ExporterData::Vector:
+            M_rd_ascii_vector(dvar);
+            break;
+        }
+
+}
+
+
+
+template <typename Mesh>
+void Ensight<Mesh>::M_rd_ascii_scalar( ExporterData& dvar)
+{
+
+    std::ifstream sclf( (dvar.prefix()+"."+this->M_postfix+this->M_me+".scl").c_str() );
+
+    UInt count=0;
+
+    UInt start = dvar.start();
+    UInt nVert = this->M_mesh->numVertices();
+
+    std::string trashcan;
+
+    sclf >> trashcan >> trashcan >> trashcan; // <<"Scalar per node\n";
+
+    sclf.setf(std::ios::right | std::ios_base::scientific);
+    sclf.precision(5);
+
+    for (UInt i=1;i<=nVert;++i)
+        {
+            ASSERT(sclf.good(), "There is an error while reading the file");
+
+            int id = this->M_mesh->pointList( i ).id();
+            sclf.width(12);
+            sclf >> dvar(start+id) ;
+            /*
+            ++count;
+            if ( count == 6 )
+                {
+                    sclf << "\n";
+                    count=0;
+                }
+            */
+        }
+    ASSERT(!sclf.fail(), "There is an error while reading the file");
+    sclf.close();
+}
+
+template <typename Mesh> void Ensight<Mesh>::M_rd_ascii_vector(ExporterData& dvar)
+{
+    std::ifstream vctf( (dvar.prefix()+"."+this->M_postfix+this->M_me+".vct").c_str() );
+
+    UInt count=0;
+
+    UInt dim   = dvar.dim();
+    UInt start = dvar.start();
+    UInt nVert = this->M_mesh->numVertices();
+
+    std::string trashcan;
+
+    vctf >> trashcan >> trashcan >> trashcan;  // <<"Vector per node\n";
+
+    vctf.setf(std::ios::right | std::ios_base::scientific);
+    vctf.precision(5);
+
+    for (UInt i=1;i<=nVert;++i)
+        for (UInt j=0; j< nDimensions;++j)
+            {
+                ASSERT(vctf.good(), "There is an error while reading the file");
+
+                int id = this->M_mesh->pointList( i ).id();
+                vctf.width(12);
+                vctf >> dvar(start+j*dim+id) ;
+                /*
+                ++count;
+                if ( count == 6 )
+                    {
+                        vctf << "\n";
+                        count=0;
+                    }
+                */
+            }
+    ASSERT(!vctf.fail(), "There is an error while reading the file");
+    vctf.close();
+}
+
 
 
 }

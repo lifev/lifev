@@ -154,7 +154,7 @@ void exactJacobian::eval(const vector_type& _disp,
     {
         this->M_meshMotion->iterate();
 
-        this->transferMeshMotionOnFluid(M_meshMotion->displacement(),
+        this->transferMeshMotionOnFluid(M_meshMotion->disp(),
                                         this->veloFluidMesh());
 
         this->veloFluidMesh()    -= dispFluidMeshOld();
@@ -197,7 +197,7 @@ void exactJacobian::eval(const vector_type& _disp,
 
     M_epetraWorldComm->Barrier();
     chronoFluid.stop();
-    std::cout << "Fluid solution: total time : " << chronoFluid.diff() << std::endl;
+    this->leaderPrintMax( "Fluid solution: total time : " , chronoFluid.diff() );
 
     if ( false && this->isFluid() )
     {
@@ -238,7 +238,7 @@ void exactJacobian::eval(const vector_type& _disp,
 
     M_epetraWorldComm->Barrier();
     chronoSolid.stop();
-    std::cout << "Solid solution: total time : " << chronoSolid.diff() << std::endl;
+    this->leaderPrintMax( "Solid solution: total time : " , chronoSolid.diff() );
     chronoInterface.start();
 
     this->setLambdaSolid(    lambdaSolidUnique);
@@ -246,30 +246,29 @@ void exactJacobian::eval(const vector_type& _disp,
     this->setSigmaSolid(     sigmaSolidUnique);
 
     chronoInterface.stop();
-    std::cout << "Interface transfer: total time : " << chronoInterface.diff_cumul() << std::endl;
+    this->leaderPrintMax( "Interface transfer: total time : " , chronoInterface.diff_cumul() );
 
-     if ( false && this->isSolid() )
-     {
-         this->solid().postProcess();
-     }
+    if ( false && this->isSolid() )
+    {
+        this->solid().postProcess();
+    }
 
 // possibly unsafe when using more cpus, since both has repeated maps
 
 
 
-
-    std::cout << " ::: norm(disp     )    = " << _disp.NormInf() << std::endl;
-    std::cout << " ::: norm(dispNew  )    = " << this->lambdaSolid().NormInf() << std::endl;
-    std::cout << " ::: norm(velo     )    = " << this->lambdaDotSolid().NormInf() << std::endl;
-    std::cout << " ::: max Residual Fluid = " << this->sigmaFluid().NormInf() << std::endl;
-    std::cout << " ::: max Residual Solid = " << this->sigmaSolid().NormInf() << std::endl;
+    this->leaderPrint( " ::: norm(disp     )    = ", _disp.NormInf());
+    this->leaderPrint( " ::: norm(dispNew  )    = " , this->lambdaSolid().NormInf() );
+    this->leaderPrint( " ::: norm(velo     )    = " , this->lambdaDotSolid().NormInf() );
+    this->leaderPrint( " ::: max Residual Fluid = " , this->sigmaFluid().NormInf() );
+    this->leaderPrint( " ::: max Residual Solid = " , this->sigmaSolid().NormInf() );
 
     if (this->isFluid())
-        std::cout << "Max ResidualF        = " << M_fluid->residual().NormInf() << std::endl;
+        this->leaderPrint( "Max ResidualF        = " , M_fluid->residual().NormInf() );
     if (this->isSolid())
         {
-            std::cout << "NL2 DiplacementS     = " << M_solid->disp().Norm2() << std::endl;
-            std::cout << "Max ResidualS        = " << M_solid->residual().NormInf() << std::endl;
+            this->leaderPrint( "NL2 DiplacementS     = " , M_solid->disp().Norm2() );
+            this->leaderPrint( "Max ResidualS        = " , M_solid->residual().NormInf() );
         }
 }
 
@@ -292,8 +291,8 @@ void exactJacobian::evalResidual(vector_type&       res,
     res  = this->lambdaSolid();
     res -=  disp;
 
-    std::cout << "NormInf res   " << res.NormInf() << std::endl;
-    std::cout << "NormInf res_d " << this->solid().residual().NormInf() << std::endl;
+    this->leaderPrint( "NormInf res   " , res.NormInf() );
+    this->leaderPrint( "NormInf res_d " , this->solid().residual().NormInf() );
 
 }
 
@@ -307,10 +306,10 @@ void  exactJacobian::solveJac(vector_type         &_muk,
                               const vector_type   &_res,
                               const double         _linearRelTol)
 {
-    if (this->isFluid()) std::cout << "  f- ";
-    if (this->isSolid()) std::cout << "  s- ";
+    if (this->isFluid() && this->isLeader()) std::cout << "  f- ";
+    if (this->isSolid() && this->isLeader()) std::cout << "  s- ";
 
-    std::cout << "solveJac: NormInf res " << _res.NormInf() << std::endl;
+    this->leaderPrint( "solveJac: NormInf res " , _res.NormInf() );
     _muk *= 0.;
 
     M_linearSolver.setTolMaxiter(_linearRelTol, 100);
@@ -319,10 +318,10 @@ void  exactJacobian::solveJac(vector_type         &_muk,
 
     M_linearSolver.setOperator(*M_epetraOper);
 
-    std::cout << "Solving Jacobian system... " << std::endl;
+    this->leaderPrint( "Solving Jacobian system... " );
     M_linearSolver.solve(_muk, res);
 
-    std::cout << "done." << std::endl;
+    this->leaderPrint( "done.\n" );
 }
 
 
@@ -349,7 +348,7 @@ void  exactJacobian::solveLinearFluid()
     else
         {
 
-            this->transferMeshMotionOnFluid(M_meshMotion->displacement(),
+            this->transferMeshMotionOnFluid(M_meshMotion->disp(),
                                             dispFluidMesh);
         }
 
@@ -357,7 +356,7 @@ void  exactJacobian::solveLinearFluid()
 
     this->derVeloFluidMesh() *= 1./(M_dataFluid->timestep());
 
-    std::cout << " norm inf dw = " << this->derVeloFluidMesh().NormInf() << std::endl;
+    this->leaderPrint( " norm inf dw = " , this->derVeloFluidMesh().NormInf() );
 
     *M_rhsNew *= 0.;
 
@@ -409,7 +408,7 @@ int Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epetra_MultiVector 
     {
         FSIOperator::vector_type const z(X,  M_ej->solidInterfaceMap(), Unique);
 
-        std::cout << "NormInf res   " << z.NormInf() << std::endl;
+        M_ej->leaderPrint( "NormInf res   " , z.NormInf() );
 
         //M_ej->solid().residual() *= 0.;
         //M_ej->transferInterfaceOnSolid(z, M_ej->solid().residual());
@@ -437,7 +436,7 @@ int Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epetra_MultiVector 
                 if(true || ( !this->M_ej->dataFluid().semiImplicit() || this->M_ej->dataFluid().semiImplicit()==-1))
                     M_ej->meshMotion().iterate();
 
-                std::cout << " norm inf dx = " << M_ej->meshMotion().disp().NormInf() << std::endl;
+                M_ej->leaderPrint( " norm inf dx = " , M_ej->meshMotion().disp().NormInf() );
 
                 M_ej->solveLinearFluid();
 
@@ -448,7 +447,7 @@ int Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epetra_MultiVector 
 
         M_comm->Barrier();
         chronoFluid.stop();
-        std::cout << "Fluid linear solution: total time : " << chronoFluid.diff() << std::endl;
+        M_ej->leaderPrintMax( "Fluid linear solution: total time : ", chronoFluid.diff() );
 
 
         chronoInterface.start();
@@ -470,13 +469,13 @@ int Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epetra_MultiVector 
 
         M_comm->Barrier();
         chronoSolid.stop();
-        std::cout << "Solid linear solution: total time : " << chronoSolid.diff() << std::endl;
+        M_ej->leaderPrintMax( "Solid linear solution: total time : " , chronoSolid.diff() );
 
         chronoInterface.start();
         M_ej->setLambdaSolid(lambdaSolidUnique);
 
         chronoInterface.stop();
-        std::cout << "Interface linear transfer: total time : " << chronoInterface.diff_cumul() << std::endl;
+        M_ej->leaderPrintMax( "Interface linear transfer: total time : " , chronoInterface.diff_cumul() );
 
         dz = lambdaSolidUnique.getEpetraVector();
 

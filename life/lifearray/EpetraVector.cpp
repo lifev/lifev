@@ -210,10 +210,65 @@ bool EpetraVector::checkAndSet(const UInt row, const data_type& value)
 
 //! Set the row row of the vector to value. If it isn't on this processor,
 //! store it and send it and send it at next GlobalAssemble
-int EpetraVector::replaceGlobalValues(const std::vector<int> rVec, const std::vector<double> datumVec)
+int EpetraVector::replaceGlobalValues(std::vector<int>& rVec, std::vector<double>& datumVec)
 {
     ASSERT( rVec.size() == datumVec.size(), "Error: rVec and datumVec should have the same size" );
-    return M_epetraVector.ReplaceGlobalValues(rVec.size(), &rVec.front(), &datumVec.front());
+    ASSERT( M_maptype == Unique, "Error: Vector must have a unique map" );
+
+    // Coding this part by hands, in fact I do not trust the following line (Simone, June 2008)
+    // return M_epetraVector.ReplaceGlobalValues(rVec.size(), &rVec.front(), &datumVec.front());
+
+    const Epetra_Comm&  Comm(M_epetraVector.Comm());
+    int numProcs(Comm.NumProc());
+    int MyPID   (Comm.MyPID()   );
+    int i;
+
+    // Note: Epetra_Comm::broadcast does not support passing of uint, hence
+    //       I define an int pointer to make the broadcast but then come back to an
+    //       UInt pointer to insert the data
+    int*       r;
+    data_type* datum;
+
+
+    // loop on all proc
+    for ( int p(0); p < numProcs; p++)
+        {
+            int sizeVec(rVec.size());
+            if ( sizeVec != int(datumVec.size()))
+                { //! vectors must be of the same size
+                    ERROR_MSG( "diagonalize: vectors must be of the same size\n" );
+                }
+
+            Comm.Broadcast(&sizeVec, 1, p);
+
+            if ( p == MyPID )
+                {
+                    r    =  &rVec    .front();
+                    datum = &datumVec.front();
+                }
+            else
+                {
+                    r    = new int     [sizeVec];
+                    datum = new data_type[sizeVec];
+                }
+
+            Comm.Broadcast(r,    sizeVec, p);
+            Comm.Broadcast(datum,sizeVec, p);
+
+            // row: if r is mine, Assign values
+            for (i=0; i < sizeVec; ++i)
+                checkAndSet(r[i], datum[i]);
+
+            if ( p != MyPID )
+                {
+                    delete[] r;
+                    delete[] datum;
+                }
+
+        }
+
+    return 0;
+
 }
 
 int
@@ -521,6 +576,13 @@ operator *= (data_type t)
     return *this;
 }
 
+EpetraVector& EpetraVector::
+operator = (data_type t)
+{
+    M_epetraVector.PutScalar(t);
+    return *this;
+}
+
 EpetraVector::data_type
 EpetraVector::
 operator * ( EpetraVector const& a) const
@@ -538,6 +600,7 @@ operator * (EpetraVector::data_type t, const EpetraVector& _vector)
     EpetraVector result(_vector);
     return result *= t;
 }
+
 
 
 }  // end namespace LifeV

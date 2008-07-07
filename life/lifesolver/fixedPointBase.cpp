@@ -144,7 +144,7 @@ void fixedPoint::eval( const vector_type& _disp,
     {
         this->M_meshMotion->iterate();
 
-        this->transferMeshMotionOnFluid(M_meshMotion->displacement(),
+        this->transferMeshMotionOnFluid(M_meshMotion->disp(),
                                         this->veloFluidMesh());
 
         this->veloFluidMesh()    -= this->dispFluidMeshOld();
@@ -153,7 +153,7 @@ void fixedPoint::eval( const vector_type& _disp,
         // copying displacement to a repeated indeces displacement, otherwise the mesh wont know
         // the value of the displacement for some points
 
-        vector_type const meshDisplacement( M_meshMotion->displacement(), Repeated );
+        vector_type const meshDisplacement( M_meshMotion->disp(), Repeated );
         this->moveMesh(meshDisplacement);
         /*
         vector_type const meshDisplacement( M_meshMotion->dispDiff(), Repeated );

@@ -108,6 +108,9 @@ public:
 
     void setUp        ( const GetPot& dataFile );
 
+    void initialize   ( const vector_type& disp )  { setDisplacement(disp); }
+
+
     void buildSystem();
     void updateSystem();
 
@@ -119,14 +122,14 @@ public:
 //     void updateExtensionTransp( Mesh& mesh, const Real& time = 0.0 );
     //! This method gives a reference to the computed harmonic extension.
 
-    const vector_type& displacement() const {return M_disp;}
-    const vector_type& displacementOld() const {return M_dispOld;}
+    //const vector_type& displacement() const {return M_disp;}
+    vector_type const& dispOld() const  {return M_dispOld;}
 
-    vector_type& dispDiff() {return M_dispDiff;}
-    vector_type& disp()     {return M_disp;}
+    vector_type const& dispDiff() const {return M_dispDiff;}
+    vector_type const& disp()     const {return M_disp;}
 
 
-    void setDisplacement(const Vector &disp) { M_disp = disp;}
+    void setDisplacement(const vector_type &disp) { M_disp = disp;}
 
     //! This method interpolates the mesh velocity when necessary (refFE_u.nbNodes > _mesh.getRefFE().nbNodes)
 //     template <typename Mesh>
@@ -136,7 +139,7 @@ public:
 //    const Dof& dofMesh() const;
 
     //! checking if BC are set
-    /*const*/ bool BCset() const {return M_setBC;}
+    bool BCset() const {return M_setBC;}
     //! set the mesh BCs
     void setBC(BCHandler &BCh_harmonicExtension);
     //! returns the BCHandler
@@ -237,11 +240,11 @@ HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
     M_comm                  ( &comm ),
     M_me                    ( M_comm->MyPID() ),
     M_verbose               ( M_me == 0 ),
-    M_disp                  ( M_FESpace.map() ),
-    M_dispOld               ( M_FESpace.map() ),
-    M_dispDiff              ( M_FESpace.map() ),
+    M_disp                  ( M_localMap ),
+    M_dispOld               ( M_localMap ),
+    M_dispDiff              ( M_localMap ),
     M_elmat                 ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
-    M_f                     ( M_FESpace.map() ),
+    M_f                     ( M_localMap ),
     M_prec                  ( new prec_raw_type() ),
     M_reusePrec              ( true ),
     M_maxIterForReuse        ( -1 ),
@@ -259,15 +262,15 @@ HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
                          Epetra_Comm&              comm ):
     M_FESpace               ( mmFESpace ),
     M_localMap              ( M_FESpace.map() ),
-    M_matrHE                ( new matrix_type (M_FESpace.map() ) ),
+    M_matrHE                ( new matrix_type (M_localMap ) ),
     M_comm                  ( &comm ),
     M_me                    ( M_comm->MyPID() ),
     M_verbose               ( M_me == 0 ),
     M_elmat                 ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
-    M_disp                  ( M_FESpace.map() ),
-    M_dispOld               ( M_FESpace.map() ),
-    M_dispDiff              ( M_FESpace.map() ),
-    M_f                     ( M_FESpace.map() ),
+    M_disp                  ( M_localMap ),
+    M_dispOld               ( M_localMap ),
+    M_dispDiff              ( M_localMap ),
+    M_f                     ( M_localMap ),
     M_prec                   ( new prec_raw_type() ),
     M_reusePrec              ( true ),
     M_maxIterForReuse        ( -1 ),
@@ -304,7 +307,7 @@ void HarmonicExtensionSolver<Mesh, SolverType>::computeMatrix( )
     if (M_verbose)
         std::cout << " he-  Computing constant matrices ...        " <<  std::flush;
 
-    M_matrHE.reset( new matrix_type (M_FESpace.map() ) );
+    M_matrHE.reset( new matrix_type (M_localMap ) );
 
     UInt totalDof   = M_FESpace.dof().numTotalDof();
     // Loop on elements

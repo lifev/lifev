@@ -156,7 +156,9 @@ public:
 //                             );
 
     void initialize( const Function&, const Function&  );
-    void initialize( const vector_type&, const vector_type& );
+    void initialize( const vector_type& u0, const vector_type& p0);
+
+    void initialize( const vector_type& velAndPressure);
 
     //! returns the local solution vector
 
@@ -224,8 +226,13 @@ public:
 
     bool isLeader() const
     {
+        assert( M_comm != 0);
         return comm().MyPID() == 0;
     }
+
+    void leaderPrint   (string const message, double const number) const;
+    void leaderPrint   (string const message) const;
+    void leaderPrintMax(string const message, double const number) const;
 
 
     void recomputeMatrix(bool const recomp){M_recomputeMatrix = recomp;}
@@ -247,7 +254,10 @@ protected:
 
 
     void solveSystem            (  matrix_ptrtype matrFull,
-                                   vector_type&   rhsFull );
+                                   vector_type&   rhsFull,
+                                   vector_type&    sol,
+                                   SolverType&     linearSolver,
+                                   prec_type&      prec );
 
     void applyBoundaryConditions(  matrix_type&        matrix,
                                    vector_type&        rhs,
@@ -256,7 +266,7 @@ protected:
     void echo(std::string message);
 
     //! removes mean of component comp of vector x
-    void removeMean( vector_type& x, UInt comp = 1 );
+    Real removeMean( vector_type& x );
 
     //private members
 
@@ -280,6 +290,10 @@ protected:
     //! mass matrix
 
     matrix_ptrtype                   M_matrMass;
+
+    //! mass matrix
+
+    matrix_ptrtype                   M_matrMassPr;
 
     //! Stokes matrix: mu*stiff
     matrix_ptrtype                   M_matrStokes;
@@ -396,6 +410,7 @@ Oseen( const data_type&          dataType,
     M_setBC                  ( true ),
     M_localMap               ( M_uFESpace.map()  + M_pFESpace.map() ),
     M_matrMass               ( ),
+    M_matrMassPr             ( ),
     M_matrStokes             ( ),
 //    M_matrFull               ( ),
     M_matrNoBC               ( ),
@@ -448,6 +463,7 @@ Oseen( const data_type&          dataType,
     M_setBC                  ( false ),
     M_localMap               ( M_uFESpace.map() + M_pFESpace.map() ),
     M_matrMass               ( ),
+    M_matrMassPr             ( ),
     M_matrStokes             ( ),
 //    M_matrFull               ( ),
     M_matrNoBC               ( ),
@@ -493,6 +509,37 @@ Oseen<Mesh, SolverType>::
 
 }
 
+template<typename Mesh, typename SolverType>
+void Oseen<Mesh, SolverType>::
+leaderPrint(string const message, double const number) const
+{
+  if ( isLeader() )
+    std::cout << message << number << std::endl;
+
+}
+
+template<typename Mesh, typename SolverType>
+void Oseen<Mesh, SolverType>::
+leaderPrint(string const message) const
+{
+  if ( isLeader() )
+    std::cout << message << std::flush;
+
+}
+
+template<typename Mesh, typename SolverType>
+void Oseen<Mesh, SolverType>::
+leaderPrintMax(string const message, double const number) const
+{
+  double num(number);
+  double globalMax;
+  M_comm->MaxAll(&num, &globalMax, 1);
+
+  leaderPrint( message , globalMax );
+
+}
+
+
 
 template<typename Mesh, typename SolverType>
 void Oseen<Mesh, SolverType>::setUp( const GetPot& dataFile )
@@ -529,7 +576,7 @@ void Oseen<Mesh, SolverType>::buildSystem()
 
 //    M_comm->Barrier();
 
-    if (M_verbose) std::cout << "  f-  Computing constant matrices ...        ";
+    leaderPrint("  f-  Computing constant matrices ...        ");
 
     Chrono chrono;
 
@@ -663,17 +710,17 @@ void Oseen<Mesh, SolverType>::buildSystem()
     M_comm->Barrier();
 
     chrono.stop();
-    if (M_verbose) std::cout << "done in " << chrono.diff() << " s.\n" << std::flush;
+    leaderPrintMax( "done in " , chrono.diff());
 
 
-    if (M_verbose) std::cout << "  f-  Finalizing the matrices     ...        " << std::flush;
+    leaderPrint( "  f-  Finalizing the matrices     ...        ");
     chrono.start();
 
     M_matrStokes->GlobalAssemble();
     M_matrMass->GlobalAssemble();
 
     chrono.stop();
-    if (M_verbose) std::cout << "done in " << chrono.diff() << " s." << std::endl;
+    leaderPrintMax("done in " , chrono.diff() );;
 
     if (false)
         std::cout << "partial times:  \n"
@@ -716,6 +763,14 @@ initialize( const vector_type& u0, const vector_type& p0 )
 
 }
 
+template<typename Mesh, typename SolverType>
+void Oseen<Mesh, SolverType>::
+initialize( const vector_type& velAndPressure)
+{
+
+    M_sol = velAndPressure;
+
+}
 
 template<typename Mesh, typename SolverType>
 void Oseen<Mesh, SolverType>::
@@ -727,9 +782,11 @@ updateSystem(double       alpha,
 
     Chrono chrono;
 
-    if (M_verbose)
-            std::cout << "  f-  Updating mass term on right hand side... "
-                  << std::flush;
+    // clearing pressure mass matrix in case we need it in removeMean;
+    M_matrMassPr.reset( );
+
+
+    leaderPrint("  f-  Updating mass term on right hand side... ");
 
     chrono.start();
 
@@ -742,8 +799,7 @@ updateSystem(double       alpha,
 
     chrono.stop();
 
-    if (M_verbose)
-        std::cout << "done in " << chrono.diff() << " s.\n"  << std::flush;
+    leaderPrintMax("done in ", chrono.diff());
 
 
     M_updated = false;
@@ -753,9 +809,7 @@ updateSystem(double       alpha,
     if (M_recomputeMatrix)
         buildSystem();
 
-    if (M_verbose)
-          std::cout << "  f-  Copying the matrices ...                 "
-                    << std::flush;
+    leaderPrint( "  f-  Copying the matrices ...                 ");
 
     chrono.start();
 
@@ -773,8 +827,7 @@ updateSystem(double       alpha,
 
 
     chrono.stop();
-    if (M_verbose) std::cout << "done in " << chrono.diff() << " s.\n"
-                             << std::flush;
+    leaderPrintMax( "done in " , chrono.diff() );
 
 
     UInt nbCompU       = nDimensions;
@@ -787,9 +840,7 @@ updateSystem(double       alpha,
     if (normInf != 0.)
     {
 
-        if (M_verbose)
-            std::cout << "  f-  Updating the convective terms ...        "
-                      << std::flush;
+        leaderPrint("  f-  Updating the convective terms ...        ");
 
         // vector with repeated nodes over the processors
 
@@ -847,8 +898,7 @@ updateSystem(double       alpha,
         }
 
         chrono.stop();
-        if (M_verbose) std::cout << "done in " << chrono.diff() << " s.\n"
-                                 << std::flush;
+        leaderPrintMax( "done in " , chrono.diff() );
 
         if ( M_stab && (!M_reuseStab || M_resetStab || !M_matrStab ) )
         {
@@ -871,8 +921,6 @@ updateSystem(double       alpha,
 }
 
 
-
-
 template<typename Mesh, typename SolverType>
 void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
 {
@@ -880,24 +928,9 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
     Chrono chrono;
 
 
-    // updating the matrix ...
-
-//     if (M_verbose)
-//         std::cout << "  f-  Updating the matrix ...    ";
-
-//     chrono.start();
-
-// //    updateSystem);
-
-//     chrono.stop();
-
-
     // matrix and vector assembling communication
 
-    if (M_verbose)
-        {
-            std::cout << "  f-  Finalizing the matrix and vectors ...    ";
-        }
+    leaderPrint("  f-  Finalizing the matrix and vectors ...    ");
 
     chrono.start();
 
@@ -918,14 +951,11 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
 
     chrono.stop();
 
-    if (M_verbose)
-        std::cout << "done in " << chrono.diff() << " s.\n"
-                  << std::flush;
+    leaderPrintMax("done in ", chrono.diff() );
 
     // boundary conditions update
     M_comm->Barrier();
-    if (M_verbose) std::cout << "  f-  Applying boundary conditions ...         "
-              << std::flush;
+    leaderPrint("  f-  Applying boundary conditions ...         ");
 
     chrono.start();
 
@@ -937,10 +967,10 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
 
     M_comm->Barrier();
 
-    if (M_verbose) std::cout << "done in " << chrono.diff() << " s.\n" << std::flush;
+    leaderPrintMax("done in " , chrono.diff());
     // solving the system
 
-    solveSystem( matrFull, rhsFull );
+    solveSystem( matrFull, rhsFull, M_sol, M_linearSolver, M_prec);
 
     M_residual  = M_rhsNoBC;
     M_residual -= *M_matrNoBC*M_sol;
@@ -951,83 +981,72 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
 
 template<typename Mesh, typename SolverType>
 void Oseen<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
-                                           vector_type&    rhsFull )
+                                           vector_type&    rhsFull,
+                                           vector_type&    sol,
+                                           SolverType&     linearSolver,
+                                           prec_type&      prec)
 {
     Chrono chrono;
 
-    if (M_verbose)
-        std::cout << "  f-  Setting up the solver ...                ";
+    leaderPrint("  f-  Setting up the solver ...                ");
 
     chrono.start();
 //    assert (M_matrFull.get() != 0);
-    M_linearSolver.setMatrix(*matrFull);
+    linearSolver.setMatrix(*matrFull);
     chrono.stop();
 
-    if (M_verbose)
-        std::cout << "done in " << chrono.diff() << " s.\n"
-                  << std::flush;
+    leaderPrintMax("done in " , chrono.diff());
 
     // overlapping schwarz preconditioner
 
-    if ( !M_reusePrec || M_resetPrec || !M_prec->set() )
+    if ( !M_reusePrec || M_resetPrec || !prec->set() )
     {
         chrono.start();
 
-        if (M_verbose)
-            std::cout << "  f-  Computing the precond ...                "  <<  std::flush;
+        leaderPrint("  f-  Computing the precond ...                ");
 
-        M_prec->buildPreconditioner(matrFull);
+        prec->buildPreconditioner(matrFull);
 
-        double condest = M_prec->Condest();
+        double condest = prec->Condest();
 
-        M_linearSolver.setPreconditioner(M_prec);
+        linearSolver.setPreconditioner(prec);
 
         chrono.stop();
-        if (M_verbose)
-        {
-            std::cout << "done in " << chrono.diff() << " s.\n";
-            std::cout << "  f-       Estimated condition number = " << condest << "\n" <<  std::flush;
-        }
-
+        leaderPrintMax( "done in " , chrono.diff() );
+	leaderPrint("  f-       Estimated condition number = " , condest );
 
     }
     else
     {
-        if (M_verbose)
-            std::cout << "  f-  Reusing  precond ...                \n" <<  std::flush;
+        leaderPrint("  f-  Reusing  precond ...                \n");
     }
 
 
     chrono.start();
 
-    if (M_verbose)
-        std::cout << "  f-  Solving system ...                                " <<  std::flush;
+    leaderPrint("  f-  Solving system ...                                ");
 
-    int numIter = M_linearSolver.solve(M_sol, rhsFull);
+    int numIter = linearSolver.solve(sol, rhsFull);
 
     if (numIter > M_maxIterSolver)
     {
         chrono.start();
 
-        if (M_verbose)
-            std::cout << "  f- Iterative solver failed, numiter = " << numIter
-                      << " (maxIterSolver = " << M_maxIterSolver << ")\n"
-                      << "     recomputing the precond ...            " <<  std::flush;
+	leaderPrint("  f- Iterative solver failed, numiter = " , numIter);
+        leaderPrint("     maxIterSolver = " , M_maxIterSolver );
+	leaderPrint("     recomputing the precond ...            ");
 
-        M_prec->buildPreconditioner(matrFull);
+        prec->buildPreconditioner(matrFull);
 
-        double condest = M_prec->Condest();
+        double condest = prec->Condest();
 
-        M_linearSolver.setPreconditioner(M_prec);
+        linearSolver.setPreconditioner(prec);
 
         chrono.stop();
-        if (M_verbose)
-        {
-            std::cout << "done in " << chrono.diff() << " s.\n";
-            std::cout << "  f-      Estimated condition number = " << condest << "\n" <<  std::flush;
-        }
+        leaderPrintMax( "done in " , chrono.diff() );
+	leaderPrint("  f-       Estimated condition number = " , condest );
 
-        numIter = M_linearSolver.solve(M_sol, rhsFull);
+        numIter = linearSolver.solve(sol, rhsFull);
 
         if (numIter > M_maxIterSolver && M_verbose)
             std::cout << "  f- ERROR: Iterative solver failed again.\n" <<  std::flush;
@@ -1036,13 +1055,8 @@ void Oseen<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
 
     M_resetPrec = (numIter > M_maxIterForReuse);
 
-    chrono.stop();
-    if (M_verbose)
-    {
-        std::cout << "\ndone in " << chrono.diff()
-                  << " s. ( " << numIter << "  iterations. ) \n"
-                  << std::flush;
-    }
+    leaderPrintMax( "done in " , chrono.diff() );
+    leaderPrint("  f- numiter = " , numIter);
 
     M_comm->Barrier();
 
@@ -1087,24 +1101,57 @@ void Oseen<Mesh, SolverType>::reduceResidual( Vector& res )
 
 
 template<typename Mesh, typename SolverType>
-void Oseen<Mesh, SolverType>::removeMean( vector_type& x, UInt comp )
+Real Oseen<Mesh, SolverType>::removeMean( vector_type& x )
 {
-    Real sum1 = 0.;
-    Real sum0 = 0.;
+
+    Chrono chrono;
+    chrono.start();
+
+    UInt const nbCompU (nDimensions);
+    UInt const velTotalDof (M_uFESpace.dof().numTotalDof());
+
+
+    if ( M_matrMassPr.get() == 0)
+        M_matrMassPr.reset  ( new matrix_type(M_localMap) );
 
     for ( UInt iVol = 1; iVol <= M_uFESpace.mesh()->numVolumes(); iVol++ )
     {
-        M_pFESpace.fe().updateFirstDeriv( M_uFESpace.mesh()->volumeList( iVol ) );
-        sum1 += elem_integral( x, M_pFESpace.fe(), M_pFESpace.dof(), comp );
-        sum0 += M_pFESpace.fe().measure();
-    }
-    Real mean = sum1/sum0;
+        chrono.start();
+        M_pFESpace.fe().update( M_pFESpace.mesh()->volumeList( iVol ) ); // just to provide the id number in the assem_mat_mixed
 
-    std::cout << "   Mean pressure value : " << mean << std::endl;
-    for ( UInt iNode = (comp - 1)*dim_u(); iNode < comp*dim_u(); ++iNode )
-    {
-        x[ iNode + 1 ] -= mean; // BASEINDEX + 1
+
+
+        M_elmatP.zero();
+        // mass
+        chrono.start();
+        mass( 1, M_elmatP, M_pFESpace.fe(), 0, 0, nDimensions );
+        chrono.stop();
+
+        chrono.start();
+        assembleMatrix( *M_matrMassPr,
+                        M_elmatP,
+                        M_pFESpace.fe(),
+                        M_pFESpace.fe(),
+                        M_pFESpace.dof(),
+                        M_pFESpace.dof(),
+                        nbCompU, nbCompU,
+                        nbCompU*velTotalDof, nbCompU*velTotalDof);
+        chrono.stop();
     }
+
+    M_matrMassPr->GlobalAssemble();
+
+    vector_type ones(M_sol);
+    ones = 1.0;
+
+    Real mean;
+    mean = ones* ( M_matrMassPr * x);
+    x += (-mean);
+
+    ASSERT( abs(ones* ( M_matrMassPr * x)) < 1e-9 , "after removeMean the mean pressure should be zero!");
+
+    return mean;
+
 
 } // removeMean()
 

@@ -228,6 +228,14 @@ public:
                             const double       _linearRelTol) = 0;
 
 
+    void initializeFluid( const vector_type& velAndPressure,
+                          const vector_type& displacement );
+
+    void initializeSolid( const vector_type& displacement,
+                          const vector_type& velocity );
+
+
+
     // unknows on the structure mesh
 
     //    vector_type & displacement()    { return *M_lambdaSolid; }
@@ -257,13 +265,7 @@ public:
     void updateSystem(fluid_source_type &fluidSource, solid_source_type &solidSource);
     void shiftSolution();
 
-    void moveMesh(vector_type const &dep)
-        {
-            std::cout << "  Moving the mesh ... " << std::flush;
-            M_fluidMeshPart->mesh()->moveMesh(dep,  this->M_mmFESpace->dof().numTotalDof());
-            std::cout << " done." << std::endl;
-            M_fluid->recomputeMatrix(true);
-        }
+    void moveMesh(vector_type const &dep);
 
     void solveLinearFluid();
     void solveLinearSolid();
@@ -343,9 +345,20 @@ public:
 
     bool isLeader() const
     {
-        if (isFluid()) return M_fluid->isLeader();
-        return M_fluid->isLeader();
+        if (isFluid())
+        {
+            if (M_fluid.get() == 0)
+                return (M_epetraComm->MyPID() == 0);
+            return M_fluid->isLeader();
+        }
+        if (M_solid.get() == 0)
+            return (M_epetraComm->MyPID() == 0);
+        return M_solid->isLeader();
     }
+
+    void leaderPrint   (string const message, double const number) const;
+    void leaderPrint   (string const message) const;
+    void leaderPrintMax(string const message, double const number) const;
 
     virtual void setDataFromGetPot( GetPot const& data );
 
@@ -366,14 +379,14 @@ public:
     void setInvLinSolidBC       (solid_bchandler_type bc_dsolid_inv);
 
 
-    void setLambdaFluid(const vector_type lambda);
+    void setLambdaFluid(const vector_type& lambda);
     void setLambdaSolid(const vector_type& lambda);
 
     void setLambdaSolidOld(const vector_type& lambda);
 
     void setLambdaDotSolid(const vector_type& lambda);
 
-    void setSigmaFluid(const vector_type sigma);
+    void setSigmaFluid(const vector_type& sigma);
     void setSigmaSolid(const vector_type& sigma);
 
 

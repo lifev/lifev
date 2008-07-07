@@ -131,10 +131,16 @@ public:
 
     void spy    ( std::string const &filename );
 
-    int GlobalAssemble() { return  M_epetraCrs.GlobalAssemble(); }
+    // Calls insertZeroDiagonal and then epetra.globalAssemble;
+    int GlobalAssemble();
+
     int MyPID() { return  M_epetraCrs.Comm().MyPID(); }
 
 private:
+
+    //! insert zeros into the diagonal to ensure the matrix' graph has a entry there
+    //! This method does not remove non zero entries in the diagonal.
+    void insertZeroDiagonal();
 
     matrix_type      M_epetraCrs;
 };
@@ -310,6 +316,44 @@ set_mat_inc( int const numRows, int const numCols,
 //    std::cout << ierr << std::endl;
 }
 
+
+template <typename DataType>
+int EpetraMatrix<DataType>::GlobalAssemble()
+{
+    if ( M_epetraCrs.Filled ())
+    {
+        std::cout << "Matrix is already filled" << std::endl;
+        return -1;
+    }
+
+    insertZeroDiagonal();
+    return  M_epetraCrs.GlobalAssemble();
+}
+
+// Adds zeros into the diagonal to ensure the matrix' graph has a entry there
+// This method does not remove non zero entries in the diagonal.
+template <typename DataType>
+void EpetraMatrix<DataType>::insertZeroDiagonal()
+{
+
+    if ( M_epetraCrs.Filled ())
+    {
+        std::cout << "Matrix is already filled, it is impossible to insert the diagonal now" << std::endl;
+        return;
+    }
+
+    int* p =  M_epetraCrs.RowMap().MyGlobalElements();
+    int ierr;
+    DataType const zero(0);
+
+    for (int i(0); i <  M_epetraCrs.RowMap().NumMyElements(); ++i, ++p)
+    {
+        ierr = M_epetraCrs.InsertGlobalValues (1, p, 1, p, &zero);
+
+        if (ierr < 0) std::cout << " error in matrix insertion " << ierr << std::endl;
+    }
+
+}
 
 
 //! set entries (rVec(i),rVec(i)) to coeff and rest of row r(i) to zero

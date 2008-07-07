@@ -19,6 +19,7 @@
 #include <cassert>
 
 #include <life/lifecore/life.hpp>
+#include <life/lifecore/chrono.hpp>
 
 #include <boost/timer.hpp>
 
@@ -86,31 +87,12 @@ public:
             Debug( 10000 ) << "BC set\n";
 
 
-            int restart = data_file("problem/restart",0);
+            bool restart = data_file("problem/restart",false);
             M_Tstart = 0.;
-
-            if (restart)
-            {
-                std::string velFName  = data_file("fluid/miscellaneous/velname"  ,"vel");
-                std::string pressName = data_file("fluid/miscellaneous/pressname","press");
-                std::string velwName  = data_file("fluid/miscellaneous/velwname", "velw");
-                std::string depName   = data_file("solid/miscellaneous/depname"  ,"dep");
-                std::string velSName  = data_file("solid/miscellaneous/velname"  ,"velw");
-                M_Tstart= data_file("problem/Tstart"   ,0.);
-                std::cout << "Starting time = " << M_Tstart << std::endl;
-                M_fsi->initialize(velFName, pressName, velwName, depName, velSName, M_Tstart);
-            }
-            else
-            {
-//                 M_fsi->initialize( u0, p0, d0, w0 );
-            }
 
             if (M_fsi->isFluid())
                 {
                     M_ensightFluid.reset( new  filter_type( data_file, "fixedPtFluid") );
-
-                    //assert( M_fsi->FSIOper()->uFESpace().get() );
-                    //assert( M_fsi->FSIOper()->uFESpace().mesh().get() );
 
                     M_ensightFluid->setMeshProcId(M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().Comm().MyPID());
 
@@ -145,6 +127,42 @@ public:
                                                  UInt(0), M_fsi->FSIOper()->dFESpace().dof().numTotalDof() );
 
                 }
+
+            if (restart)
+            {
+                std::string velFName  = data_file("fluid/miscellaneous/velname"  ,"vel");
+                std::string pressName = data_file("fluid/miscellaneous/pressname","press");
+                std::string velwName  = data_file("fluid/miscellaneous/velwname", "velw");
+                std::string depName   = data_file("solid/miscellaneous/depname"  ,"dep");
+                std::string velSName  = data_file("solid/miscellaneous/velname"  ,"velw");
+                M_Tstart= data_file("problem/Tstart"   ,0.);
+                std::cout << "Starting time = " << M_Tstart << std::endl;
+
+                //M_fsi->initialize(velFName, pressName, velwName, depName, velSName, M_Tstart);
+
+                if (M_fsi->isFluid())
+                {
+
+                    M_ensightFluid->import(M_Tstart, M_fsi->timeStep());
+                    M_fsi->FSIOper()->initializeFluid( *M_velAndPressure, *M_fluidDisp );
+
+
+                }
+                if (M_fsi->isSolid())
+                {
+                    M_ensightSolid->import(M_Tstart, M_fsi->timeStep());
+
+                    M_fsi->FSIOper()->initializeSolid( *M_solidDisp, *M_solidVel );
+
+                }
+
+            }
+            else
+            {
+
+
+            }
+
 //            std::cout << "in problem" << std::endl;
 //            M_fsi->FSIOper()->fluid().postProcess();
         }
@@ -162,7 +180,7 @@ public:
 
             boost::timer _overall_timer;
 
-            if (M_Tstart != 0.) M_Tstart -= dt;
+            //if (M_Tstart != 0.) M_Tstart -= dt;
 
             int _i = 1;
 
@@ -181,7 +199,7 @@ public:
                 if ( M_fsi->isFluid() )
                     {
                         *M_velAndPressure = M_fsi->FSIOper()->fluid().solution();
-                        *M_fluidDisp      = M_fsi->FSIOper()->meshMotion().displacement();
+                        *M_fluidDisp      = M_fsi->FSIOper()->meshMotion().disp();
                         M_ensightFluid->postProcess( time );
                     }
 
@@ -280,6 +298,9 @@ int main(int argc, char** argv)
     std::cout << "% using serial Version" << std::endl;
 #endif
 
+    LifeV::Chrono chrono;
+    chrono.start();
+
     GetPot command_line(argc,argv);
     const char* data_file_name = command_line.follow("data", 2, "-f","--file");
     GetPot data_file(data_file_name);
@@ -323,6 +344,8 @@ int main(int argc, char** argv)
         FSIChecker _sp_check( data_file );
         _sp_check();
     }
+
+    std::cout << "Total sum up " << chrono.diff_cumul() << " s." << std::endl;
 
 #ifdef HAVE_MPI
     MPI_Finalize();

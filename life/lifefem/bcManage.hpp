@@ -72,23 +72,41 @@ void bcManage( Real (*mu)(Real t,Real x, Real y, Real z, Real u),
         switch ( BCh[ i ].type() )
         {
         case Essential:  // Essential boundary conditions (Dirichlet)
-        if(BCh[ i ].isUDep())
-          bcEssentialManageUDep(A, b, mesh, dof, BCh[ i ], bdfem, coef, t,U);
-        else
-              bcEssentialManage( A, b, mesh, dof, BCh[ i ], bdfem, coef, t );
-            break;
         case Natural:  // Natural boundary conditions (Neumann)
-        if(BCh[ i ].isUDep())
-          bcNaturalManageUDep(mu, b, mesh, dof, BCh[ i ], bdfem, t,U);
-            else
-          //in this case mu must be a constant, think about (not still implemented)
-              bcNaturalManage( b, mesh, dof, BCh[ i ], bdfem, t );
             break;
         case Mixte:  // Mixte boundary conditions (Robin)
-        if(BCh[ i ].isUDep())
-          bcMixteManageUDep( A, b, mesh, dof, BCh[ i ], bdfem, t, U);    //not still implemented
-        else
-              bcMixteManage( A, b, mesh, dof, BCh[ i ], bdfem, t );
+            if(BCh[ i ].isUDep())
+                bcMixteManageUDep( A, b, mesh, dof, BCh[ i ], bdfem, t, U);    //not still implemented
+            else
+                bcMixteManage( A, b, mesh, dof, BCh[ i ], bdfem, t );
+            break;
+        default:
+            ERROR_MSG( "This BC type is not yet implemented" );
+        }
+    }
+
+    A.GlobalAssemble();
+
+    // Loop on boundary conditions
+    for ( Index_t i = 0; i < BCh.size(); ++i )
+    {
+
+        switch ( BCh[ i ].type() )
+        {
+        case Essential:  // Essential boundary conditions (Dirichlet)
+            if(BCh[ i ].isUDep())
+                bcEssentialManageUDep(A, b, mesh, dof, BCh[ i ], bdfem, coef, t,U);
+            else
+                bcEssentialManage( A, b, mesh, dof, BCh[ i ], bdfem, coef, t );
+            break;
+        case Natural:  // Natural boundary conditions (Neumann)
+            if(BCh[ i ].isUDep())
+                bcNaturalManageUDep(mu, b, mesh, dof, BCh[ i ], bdfem, t,U);
+            else
+                //in this case mu must be a constant, think about (not still implemented)
+                bcNaturalManage( b, mesh, dof, BCh[ i ], bdfem, t );
+            break;
+        case Mixte:  // Mixte boundary conditions (Robin)
             break;
         default:
             ERROR_MSG( "This BC type is not yet implemented" );
@@ -218,6 +236,26 @@ void bcManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
                        CurrentBdFE& bdfem, const DataType& coef, const DataType& t = 0 )
 {
 
+
+    // Loop on boundary conditions
+    for ( Index_t i = 0; i < BCh.size(); ++i )
+    {
+
+        switch ( BCh[ i ].type() )
+        {
+        case Essential:  // Essential boundary conditions (Dirichlet)
+        case Natural:  // Natural boundary conditions (Neumann)
+            break;
+        case Mixte:  // Mixte boundary conditions (Robin)
+            bcMixteManageMatrix( A, mesh, dof, BCh[ i ], bdfem, t );
+            break;
+        default:
+            ERROR_MSG( "This BC type is not yet implemented" );
+        }
+    }
+
+    A.GlobalAssemble();
+
     // Loop on boundary conditions
     for ( Index_t i = 0; i < BCh.size(); ++i )
     {
@@ -231,7 +269,6 @@ void bcManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
             // Do nothing
             break;
         case Mixte:  // Mixte boundary conditions (Robin)
-            bcMixteManageMatrix( A, mesh, dof, BCh[ i ], bdfem, t );
             break;
         default:
             ERROR_MSG( "This BC type is not yet implemented" );
@@ -366,15 +403,16 @@ void bcEssentialManageUDep( MatrixType& A, VectorType& b, const MeshType& /*mesh
         // Loop on BC identifiers
         for ( ID i = 1; i <= BCb.list_size(); ++i )
         {
+            // Coordinates of the node where we impose the value
+            x = static_cast< const IdentifierEssential* >( BCb( i ) ) ->x();
+            y = static_cast< const IdentifierEssential* >( BCb( i ) ) ->y();
+            z = static_cast< const IdentifierEssential* >( BCb( i ) ) ->z();
+
             // Loop on components involved in this boundary condition
             for ( ID j = 1; j <= nComp; ++j )
             {
                 // Global Dof
                 idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
-                // Coordinates of the node where we impose the value
-                x = static_cast< const IdentifierEssential* >( BCb( i ) ) ->x();
-                y = static_cast< const IdentifierEssential* >( BCb( i ) ) ->y();
-                z = static_cast< const IdentifierEssential* >( BCb( i ) ) ->z();
 
                 Real datum = BCb( t, x, y, z, BCb.component( j ) ,U[idDof-1]);
 
@@ -473,15 +511,16 @@ void bcEssentialManage( MatrixType& A, VectorType& b, const MeshType& /*mesh*/, 
         // Loop on BC identifiers
         for ( ID i = 1; i <= BCb.list_size(); ++i )
         {
+            // Coordinates of the node where we impose the value
+            x = static_cast< const IdentifierEssential* >( BCb( i ) ) ->x();
+            y = static_cast< const IdentifierEssential* >( BCb( i ) ) ->y();
+            z = static_cast< const IdentifierEssential* >( BCb( i ) ) ->z();
+
             // Loop on components involved in this boundary condition
             for ( ID j = 1; j <= nComp; ++j )
             {
                 // Global Dof
                 idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
-                // Coordinates of the node where we impose the value
-                x = static_cast< const IdentifierEssential* >( BCb( i ) ) ->x();
-                y = static_cast< const IdentifierEssential* >( BCb( i ) ) ->y();
-                z = static_cast< const IdentifierEssential* >( BCb( i ) ) ->z();
 
                 datumVec.push_back(BCb( t, x, y, z, BCb.component( j ) ));
                 idDofVec.push_back(idDof - 1);
@@ -611,15 +650,16 @@ void bcEssentialManageVector( VectorType& b, const Dof& dof, const BCBase& BCb, 
         // Loop on BC identifiers
         for ( ID i = 1; i <= BCb.list_size(); ++i )
         {
+            // Coordinates of the node where we impose the value
+            x = static_cast< const IdentifierEssential* >( BCb( i ) ) ->x();
+            y = static_cast< const IdentifierEssential* >( BCb( i ) ) ->y();
+            z = static_cast< const IdentifierEssential* >( BCb( i ) ) ->z();
+
             // Loop on components involved in this boundary condition
             for ( ID j = 1; j <= nComp; ++j )
             {
                 // Global Dof
                 idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
-                // Coordinates of the node where we impose the value
-                x = static_cast< const IdentifierEssential* >( BCb( i ) ) ->x();
-                y = static_cast< const IdentifierEssential* >( BCb( i ) ) ->y();
-                z = static_cast< const IdentifierEssential* >( BCb( i ) ) ->z();
                 // Modifying right hand side
                 idDofVec.push_back(idDof);
                 datumVec.push_back( coef * BCb( t, x, y, z, BCb.component( j ) ) );
@@ -628,7 +668,7 @@ void bcEssentialManageVector( VectorType& b, const Dof& dof, const BCBase& BCb, 
     }
 
     b.replaceGlobalValues( idDofVec, datumVec);
-    b.GlobalAssemble(/*Insert*/);
+//     b.GlobalAssemble(Insert);
 
 }
 
@@ -692,17 +732,17 @@ void bcEssentialManage( MatrixType1& A,
         for ( ID i = 1; i <= BCb.list_size(); ++i )
         {
 
+            // Coordinates of the node where we impose the value
+            x = static_cast< const IdentifierEssential* >( BCb( i ) ) ->x();
+            y = static_cast< const IdentifierEssential* >( BCb( i ) ) ->y();
+            z = static_cast< const IdentifierEssential* >( BCb( i ) ) ->z();
+
             // Loop on components involved in this boundary condition
             for ( ID j = 1; j <= nComp; ++j )
             {
 
                 // Global Dof
                 idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
-                // Coordinates of the node where we impose the value
-                x = static_cast< const IdentifierEssential* >( BCb( i ) ) ->x();
-                y = static_cast< const IdentifierEssential* >( BCb( i ) ) ->y();
-                z = static_cast< const IdentifierEssential* >( BCb( i ) ) ->z();
-
                 // Modifying matrix and right hand side
                 datumVec.push_back(BCb( t, x, y, z, BCb.component( j ) ));
                 idDofVec.push_back(idDof-1);
@@ -769,16 +809,17 @@ void bcEssentialManage( MatrixType1& A, MatrixType2& trD, MatrixType3& D,
         for ( ID i = 1; i <= BCb.list_size(); ++i )
         {
 
+            // Coordinates of the node where we impose the value
+            x = static_cast< const IdentifierEssential* >( BCb( i ) ) ->x();
+            y = static_cast< const IdentifierEssential* >( BCb( i ) ) ->y();
+            z = static_cast< const IdentifierEssential* >( BCb( i ) ) ->z();
+
             // Loop on components involved in this boundary condition
             for ( ID j = 1; j <= nComp; ++j )
             {
 
                 // Global Dof
                 idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
-                // Coordinates of the node where we impose the value
-                x = static_cast< const IdentifierEssential* >( BCb( i ) ) ->x();
-                y = static_cast< const IdentifierEssential* >( BCb( i ) ) ->y();
-                z = static_cast< const IdentifierEssential* >( BCb( i ) ) ->z();
                 // Modifying matrix and right hand side
                 datumVec.push_back(BCb( t, x, y, z, BCb.component( j ) ));
                 idDofVec.push_back(idDof-1);

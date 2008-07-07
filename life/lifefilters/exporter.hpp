@@ -52,6 +52,7 @@
 
 namespace LifeV
 {
+
 //typedef boost::numeric::ublas::vector_range< Vector >  VectorRange;
 //typedef EpetraVector VectorRange;
 //typedef double* VectorRange;
@@ -68,6 +69,7 @@ public:
 
     std::string prefix() const;
     Real operator()(const UInt i) const;
+    Real& operator()(const UInt i);
     UInt dim() const;
     UInt start() const { return M_start; }
     Type type() const;
@@ -82,7 +84,7 @@ private:
     UInt M_start;
     Type M_type;
     UInt M_steady;
-    
+
 };
 
 /**
@@ -190,10 +192,10 @@ Exporter<Mesh>::Exporter(const GetPot& dfile, mesh_ptrtype mesh, const std::stri
 template<typename Mesh>
 Exporter<Mesh>::Exporter(const GetPot& dfile, const std::string prefix):
     M_prefix(prefix),
-    M_post_dir(dfile("ensight/post_dir", "./")),
-    M_count(dfile("ensight/start",0)),
-    M_save(dfile("ensight/save",1)),
-    M_multimesh(dfile("ensight/multimesh",true)),
+    M_post_dir(dfile("exporter/post_dir", "./")),
+    M_count(dfile("exporter/start",0)),
+    M_save(dfile("exporter/save",1)),
+    M_multimesh(dfile("exporter/multimesh",true)),
     M_steps(0)
 {
 }
@@ -227,7 +229,7 @@ template <typename Mesh> void Exporter<Mesh>::getPostfix()
 
     std::ostringstream index;
     index.fill( '0' );
-    
+
     if (M_count % M_save == 0)
         {
             index << std::setw(3) << ( M_count / M_save );

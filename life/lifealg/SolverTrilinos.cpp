@@ -330,8 +330,28 @@ SolverTrilinos::solve( vector_type& x, vector_type& b )
         }
 //#endif
 
-    if (status)
-        return(M_maxIter+1);
+    if (status == -2 || status == -3 ) // try to solve again (reason may be:
+        {
+            maxiter = M_maxIter;
+            mytol = M_tol;
+            int olditer = M_solver.NumIters();
+            status = M_solver.Iterate(maxiter, mytol);
+
+//#ifdef DEBUG
+    if (! Comm)
+        {
+            Comm->Barrier();
+
+            if( Comm->MyPID() == 0 ) {
+                std::cout << "  o-  Second run: solver performed " << M_solver.NumIters()
+                          << " iterations.\n";
+                std::cout << "  o-  Norm of the true residual = " << M_solver.TrueResidual() << std::endl;
+                std::cout << "  o-  Norm of the true ratio    = " << M_solver.ScaledResidual() << std::endl;
+            }
+        }
+//#endif
+            return(M_solver.NumIters() + olditer);
+        }
 
     return(M_solver.NumIters());
 

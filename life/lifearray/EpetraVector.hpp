@@ -114,7 +114,7 @@ public:
 
     //! Set the row row of the vector to value. If it isn't on this processor,
     //! store it and send it and send it at next GlobalAssemble
-    int replaceGlobalValues(const std::vector<int> rVec, const std::vector<double> datumVec);
+    int replaceGlobalValues(std::vector<int>& rVec, std::vector<double>& datumVec);
 
     //! insert a global value. After insertion, you will have to call global assemble.
     int sumIntoGlobalValues (const int GID, const double value);
@@ -132,7 +132,7 @@ public:
     vector_type& getEpetraVector()             {return M_epetraVector;}
     const vector_type& getEpetraVector() const {return M_epetraVector;}
 
-    /*const*/ int  size() const { return M_epetraVector.GlobalLength(); }
+    int  size() const { return M_epetraVector.GlobalLength(); }
 
     void spy ( std::string const &filename ) const;
 
@@ -169,9 +169,11 @@ public:
 
     EpetraVector& operator*=(data_type t);
 
+    EpetraVector& operator=(data_type t);
+
     data_type operator*(EpetraVector const& a) const;
 
-    int GlobalAssemble(/*Epetra_CombineMode mode=Add*/) { return  M_epetraVector.GlobalAssemble(); }
+    int GlobalAssemble(Epetra_CombineMode mode=Add) { return  M_epetraVector.GlobalAssemble(mode); }
 
     const Epetra_Comm& Comm() const { return BlockMap().Comm(); }
 
