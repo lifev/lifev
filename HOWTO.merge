@@ -47,12 +47,16 @@ cd lifev-parallel/
 cvs ci -m"Merging from lifev"
 cvs tag LATEST_MERGE_parallel_to_head_2007_11_14
 
+note: to see differences btw directories
+diff --suppress-common-lines -r -N  -x .#* -x Entries* -x Tag -x output.[0-9] -x traces.[0-9] -x configure -x configure.in ./ ../lifev/ |less
+
+
 =============================================================================
 put here the latest tags:
-PRESENT_MERGE_head_to_parallel_2007_11_14
-PRESENT_MERGE_parallel_to_head_2007_11_14
-LATEST_MERGE_head_to_parallel_2007_11_14
-LATEST_MERGE_parallel_to_head_2007_11_14
+PRESENT_MERGE_head_to_parallel_2008_07_02
+PRESENT_MERGE_parallel_to_head_2008_07_02
+LATEST_MERGE_head_to_parallel_2008_07_02
+LATEST_MERGE_parallel_to_head_2008_07_02
 
 PRESENT_MERGE_head_to_mox_2007_11_16
 PRESENT_MERGE_mox_to_head_2007_11_16
