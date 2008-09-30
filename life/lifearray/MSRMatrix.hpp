@@ -235,6 +235,8 @@ public:
 
     //! set the matrix to zero
     void zeros();
+    
+    void print_matlab( std::string const &filename, std::string const & matr_name="A" );    
 
 private:
     std::vector<DataType> _value;
@@ -610,16 +612,57 @@ MSRMatr<DataType>::spy( std::string const &filename )
     file_out << "S = [ ";
     for ( UInt i = 1;i <= _Patt->nRows();++i )
     {
-        file_out << i << uti << i << uti << _value[ i - 1 ] << std::endl;
+        file_out << i << uti << i << uti <<std::setprecision(15)<< _value[ i - 1 ] << std::endl;
         for ( UInt ii = _Patt->give_bindx() [ i - 1 ];ii < _Patt->give_bindx() [ i ];++ii )
             file_out << i << uti << _Patt->give_bindx() [ ii ] + 1 - OFFSET <<
-            uti << _value[ ii ] << std::endl;
+            uti <<std::setprecision(15)<< _value[ ii ] << std::endl;
     }
 
     file_out << "];" << std::endl;
 
     file_out << "I=S(:,1); J=S(:,2); S=S(:,3); A=sparse(I,J,S); spy(A);" << std::endl;
 }
+
+
+template <typename DataType>
+void
+MSRMatr<DataType>::print_matlab( std::string const &filename, std::string const & matr_name )
+{
+    // Purpose: Matlab dumping and spy
+    std::string nome = filename, uti = " , ";
+    //
+    // check on the file name
+    //
+    int i = filename.find( "." );
+
+    if ( i <= 0 )
+        nome = filename + ".m";
+    else
+    {
+        if ( ( unsigned int ) i != filename.size() - 2 || filename[ i + 1 ] != 'm' )
+        {
+            std::cerr << "Wrong file name ";
+            nome = filename + ".m";
+        }
+    }
+
+    std::ofstream file_out( nome.c_str() );
+
+    file_out << "S = [ ";
+    for ( UInt i = 1;i <= _Patt->nRows();++i )
+    {
+        file_out << i << uti << i << uti <<std::setprecision(15)<< _value[ i - 1 ] << std::endl;
+        for ( UInt ii = _Patt->give_bindx() [ i - 1 ];ii < _Patt->give_bindx() [ i ];++ii )
+            file_out << i << uti << _Patt->give_bindx() [ ii ] + 1 - OFFSET <<
+            uti <<std::setprecision(15)<< _value[ ii ] << std::endl;
+    }
+
+    file_out << "];" << std::endl;
+
+    file_out << "I=S(:,1); J=S(:,2); S=S(:,3); "<<matr_name<<"=sparse(I,J,S); clear I J S;" << std::endl;
+
+}
+
 
 template <typename DataType>
 void
