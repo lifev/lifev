@@ -1,0 +1,138 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file for Fluid Structure Solver
+#-------------------------------------------------
+
+[problem]
+
+method     = fixedPoint # fixedPoint, steklovPoincare, exactJacobian
+precond    = 3 # 0 = lin fluid, 1 lin structure, 2 = both, 3 = DD-Newton
+DDNprecond = 1 # precond for DD-newton, 0 = lin fluid, 1 lin structure, 2 = both
+reducedFluid = 0 # 0 = exact, 1 = inexact
+defOmega   = 0.01 # usually 0.01 for precond = 0 or 1; -1 for precond = 2
+defOmegaS  = 0.01 # matters only with  precond = 2
+defOmegaF  = 0.01 # matters only with  precond = 2
+# only for fixed point and exactJacobian:
+# if updateEvery == 1, normal fixedPoint algorithm
+# if updateEvery  > 1, recompute computational domain every M_updateEvery iterations (transpiration)
+# if updateEvery <= 0, recompute computational domain and matrices only at first subiteration (semi-implicit).
+#                        Deprecated when using exactJacobian (better to set ifSemiImplicit=1)
+updateEvery = 1
+linesearch = 0
+# NonLinearRichardson: stop_tol  = abstol + reltol*normRes;
+abstol     =  1.e-6
+reltol     =  1.e-6
+etamax     = 1.e-10 # tolerance of the interface problem (GMRES),
+                    # if semiImplicit, set   etamax = 1.e-10,
+                    # else (e.g.)            etamax = 1.e-3
+ifSemiImplicit = 1 # 0=false, -1=quasi-Newton,  otherwise=true (only valid for method = exactJacobian).
+maxSubIter = 20
+
+restart    = false   # restart the computations (see also importer)
+#restart    = true
+#Tstart     = 0.005 # restart from time Tstart
+
+[interface] # mesh dependent flags for the interface.
+fluid_flag      =  1 # default: 1
+#solid_flag      =  1 # default: fluid_flag
+#structure_flag  =  1 # default: fluid_flag
+#harmonic_flag   =  1 # default: fluid_flag
+tolerance       =  0 # how far points are to be considered the same on the interface
+
+[exporter]
+multimesh  =    false   # actually we export also the displacement
+start      = 0
+#start      = 4
+save       = 1
+
+[fluid]
+
+[./physics]
+endtime   = .1             # endtime
+density   = 1.0               # density
+viscosity = 6.e-6              # viscosity
+
+[../discretization]
+#mesh_dir  = ./ # the directory where the mesh file is
+mesh_dir  = ./Mesh/ # the directory where the mesh file is
+#mesh_file = 179347_cm_fluid.mesh  # mesh file
+#mesh_file = tube20.mesh  # mesh file
+mesh_file = rclux-small.mesh  # mesh file
+timestep  = 0.001             # timestep
+vel_order       = P1Bubble # P1, P1Bubble, P2
+press_order     = P1            # P1, P2
+order_bdf       = 1
+mesh_faces      = all                   # update all faces elements
+mesh_edges      = all                   # update all faces elements
+
+
+
+[../miscellaneous]
+verbose   = 1
+velname   = vel
+pressname = press
+steady    = 0
+factor    = 1
+
+[../solver]
+solver          = gmres
+scaling         = none
+output          = all_res  #none
+conv            = rhs
+max_iter        = 100
+kspace          = 100
+tol             = 1.e-10    # AztecOO tolerance
+
+# see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/index.html
+[../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
+prectype        = Amesos # Amesos (does a local LU factorization), ILUT (not ILU)
+reuse           = true
+overlap         = 2
+droptol         = 1.e-5
+fill            = 4
+athr            = 1.2500e-04 # ~h^2. for h=0.25: athr~1e-3
+rthr            = 1
+relax_value     = 1
+
+[../ipstab]
+gammaBeta  = 0.02
+gammaDiv   = 0.2
+gammaPress = 0.2
+reuse      = true
+
+[../problem]
+Re      = 200.0
+D       = .002
+centered = 1
+
+
+[adr]
+
+[./physics]
+diffusivity     = 1.e-5           # diffusivity
+react           = 0.0               # reaction coefficient
+
+[../discretization]
+order     = P1
+mesh_dir  = ../data/mesh/inria/  # the directory where the mesh file is
+mesh_file = cyltetra.mesh     # mesh file
+timestep  = 0.001              # timestep
+
+[../solver]
+solver          = gmres
+scaling         = none
+output          = all_res  #none
+conv            = rhs
+max_iter        = 100
+kspace          = 100
+tol             = 1.e-10    # AztecOO tolerance
+
+[../solver]
+solver          = gmres
+scaling         = none
+output          = all_res  #none
+conv            = r0
+max_iter        = 100
+kspace          = 100
+tol             = 1.e-10    # AztecOO tolerance
+

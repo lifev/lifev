@@ -161,9 +161,9 @@ public:
     void resetPrec() {M_resetPrec = true;}
 
     //! Return maps
-    Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getRepeatedEpetra_Map(); }
+    Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getMap(Repeated); }
     
-    Epetra_Map const& getRepeatedEpetraMapVec() const { return *M_localMapVec.getRepeatedEpetra_Map(); }
+    Epetra_Map const& getRepeatedEpetraMapVec() const { return *M_localMapVec.getMap(Repeated); }
 
     EpetraMap const& getMap() const { return M_localMap; }
 
@@ -303,15 +303,15 @@ MonodomainSolver( const data_type&          dataType,
 	        ifstream fibers(M_data.fibers_file().c_str());
 	        
 	        std::cout << "fiber_file: " <<  M_data.fibers_file().c_str() << std::endl;
-	        UInt NumGlobalElements= M_localMapVec.getRepeatedEpetra_Map()->NumGlobalElements();
+	        UInt NumGlobalElements= M_localMapVec.getMap(Repeated)->NumGlobalElements();
 	        std::vector<Real> fiber_global_vector(NumGlobalElements);
 	                
 	        for( UInt i=0; i< NumGlobalElements; ++i)
 	    		fibers>>fiber_global_vector[i];
-	    	 UInt NumMyElements = M_localMapVec.getRepeatedEpetra_Map()->NumMyElements();    	 
+	    	 UInt NumMyElements = M_localMapVec.getMap(Repeated)->NumMyElements();    	 
 	    	for(UInt j=0; j< NumMyElements; ++j)
 	    	{
-	    		UInt ig= M_localMapVec.getRepeatedEpetra_Map()->MyGlobalElements()[j];
+	    		UInt ig= M_localMapVec.getMap(Repeated)->MyGlobalElements()[j];
 	    		M_fiber_vector[ig]= fiber_global_vector[ig-1]; 
 	    		}
 	    	std::cout << std::endl;
@@ -737,7 +737,7 @@ void MonodomainSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_type&  
         BCh.bdUpdate( *M_uFESpace.mesh(), M_uFESpace.feBd(), M_uFESpace.dof() );
     }
 
-    vector_type rhsFull(*M_localMap.getRepeatedEpetra_Map());
+    vector_type rhsFull(*M_localMap.getMap(Repeated));
 
 
     rhsFull.Import(M_rhsNoBC, Zero); // ignoring non-local entries, Otherwise they are summed up lately

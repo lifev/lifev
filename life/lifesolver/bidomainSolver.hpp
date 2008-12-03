@@ -164,9 +164,9 @@ public:
     void resetPrec() {M_resetPrec = true;}
 
     //! Return maps
-    Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getRepeatedEpetra_Map(); }
+    Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getMap(Repeated); }
     
-    Epetra_Map const& getRepeatedEpetraMapVec() const { return *M_localMapVec.getRepeatedEpetra_Map(); }
+    Epetra_Map const& getRepeatedEpetraMapVec() const { return *M_localMapVec.getMap(Repeated); }
 
     EpetraMap const& getMap() const { return M_localMap; }
 
@@ -298,7 +298,7 @@ BidomainSolver( const data_type&          dataType,
     M_rhsNoBC                ( M_localMap ),
     M_sol_uiue                ( M_localMap ),
     M_sol_u                  ( M_localMap_u ),
-    M_fiber_vector           ( getRepeatedEpetraMapVec() ),
+    M_fiber_vector           ( M_localMapVec, Repeated ),
     M_residual               ( M_localMap ),
     M_verbose                ( M_me == 0),
     M_updated                ( false ),
@@ -313,15 +313,15 @@ BidomainSolver( const data_type&          dataType,
 	    	std::stringstream MyPID;
 	        ifstream fibers(M_data.fibers_file().c_str());
 	        
-	        UInt NumGlobalElements= M_localMapVec.getRepeatedEpetra_Map()->NumGlobalElements();
+	        UInt NumGlobalElements= M_localMapVec.getMap(Repeated)->NumGlobalElements();
 	        std::vector<Real> fiber_global_vector(NumGlobalElements);
 	                
 	        for( UInt i=0; i< NumGlobalElements; ++i)
 	    		fibers>>fiber_global_vector[i];
-	    	 UInt NumMyElements = M_localMapVec.getRepeatedEpetra_Map()->NumMyElements();    	 
+	    	 UInt NumMyElements = M_localMapVec.getMap(Repeated)->NumMyElements();    	 
 	    	for(UInt j=0; j< NumMyElements; ++j)
 	    	{
-	    		UInt ig= M_localMapVec.getRepeatedEpetra_Map()->MyGlobalElements()[j];
+	    		UInt ig= M_localMapVec.getMap(Repeated)->MyGlobalElements()[j];
 	    		M_fiber_vector[ig]= fiber_global_vector[ig-1]; 
 	    		}
 	    	std::cout << std::endl;
@@ -600,7 +600,7 @@ initialize( const vector_type& ui0, const vector_type& ue0 )
    M_sol_uiue.add(ue0, M_uFESpace.dof().numTotalDof());
     for ( int i = 0 ; i < M_sol_u.getEpetraVector().MyLength() ; i++ )
    	{	
-   		int ig=M_sol_u.Map().MyGlobalElements()[i];
+   		int ig=M_sol_u.BlockMap().MyGlobalElements()[i];
         M_sol_u[ig] = M_sol_uiue[ig] - M_sol_uiue[ig+dim_u()]; // BASEINDEX + 1
                }
 }
@@ -801,7 +801,7 @@ void BidomainSolver<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
     
     for ( UInt i = 0 ; i < M_sol_u.getEpetraVector().MyLength() ; i++ )
        	{	
-       		UInt ig=M_sol_u.Map().MyGlobalElements()[i];
+       		UInt ig=M_sol_u.BlockMap().MyGlobalElements()[i];
             M_sol_u[ig] = M_sol_uiue[ig] - M_sol_uiue[ig+dim_u()]; // BASEINDEX + 1
                    }
     
@@ -825,10 +825,10 @@ void BidomainSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_type&    
         BCh.bdUpdate( *M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
     }
 
-    vector_type rhsFull(*M_localMap.getRepeatedEpetra_Map());
+    vector_type rhsFull(M_rhsNoBC,Repeated, Zero);
 
 
-    rhsFull.Import(M_rhsNoBC, Zero); // ignoring non-local entries, Otherwise they are summed up lately
+//    rhsFull.Import(M_rhsNoBC, Zero); // ignoring non-local entries, Otherwise they are summed up lately
 
     bcManage( matrix, rhsFull, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 1.,
               M_data.time() );

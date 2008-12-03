@@ -1,6 +1,6 @@
 /*
   This file is part of the LifeV library
-  Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
+  Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -1039,33 +1039,40 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
                EntityFlag regionFlag,
                bool verbose=false )
 {
+	// I will extract lines from iostream
     std::string line;
-    UInt nVe(0), nBVe(0),nFa(0),nBFa(0),nPo(0),nBPo(0);
-    UInt nVo(0),nEd(0),nBEd(0);
-    UInt i;
-    UInt fake;
-    UInt surfnr,bcnr,domin,domout;
-    UInt surf1,surf2,matnr,np,p1,p2,p3,p4,t;
-    Real x,y,z;
+    // number of Geo Elements
+    UInt nVe(0), nBVe(0), nPo(0), nBPo(0);
+    UInt nEd(0), nBEd(0), nFa(0), nBFa(0);
+    UInt nVo(0);
+    // During the first access to file, build list of structures
+    Vector pointcoor;
+    std::vector<UInt> edgepointID, facepointID, volumepointID;
+    // for poit i-th: is it a boindary point?
     std::vector<bool> bpoints;
-//  std::vector<bool> bedges;
+    // build a list of boundary edges, since netgen is not writing all of them
     BareItemsHandler<BareEdge> bihBedges;
-    std::vector<EntityFlag> bcnsurf,bcnpoints;
+    // flags for boundary entities
+    std::vector<EntityFlag> bcnsurf, bcnpoints;
+    // bitstream to check which file section has already been visited
     UInt flag;
+
     typename MC::PointMarker PMarker;
     typename MC::EdgeMarker EMarker;
 
-
-    std::ifstream fstream1(filename.c_str());
-    if (fstream1.fail()) {
-        std::cerr<<"Error in readNetgenMesh: File not found or locked"<<std::endl;
+    // open file stream to look for points information
+    std::ifstream fstreamp( filename.c_str() );
+    if (fstreamp.fail()) {
+        std::cerr << "Error in readNetgenMesh: File not found or locked" << std::endl;
         abort();
     }
-    std::cout<< "Reading netgen mesh file: "<<filename<<std::endl;
-    fstream1>>line;
-    if(line!="mesh3d"){
-        std::cerr<<"Error in readNetgenMesh: mesh file is not in mesh3d format (netgen)"\
-                 <<std::endl;
+
+    std::cout << "Reading netgen mesh file: " << filename << std::endl;
+    getline(fstreamp, line);
+
+    if( line.find("mesh3d") == std::string::npos ){
+        std::cerr << "Error in readNetgenMesh: mesh file is not in mesh3d format (netgen)"\
+                  << std::endl;
         abort();
     }
 
@@ -1076,134 +1083,216 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
        which, so I'll find them from myself
     */
     flag=1|2|4|8;
-    while(!fstream1.eof())
-    {
-        fstream1>>line;
 
-        if(line=="points" && flag&1){
-            fstream1>>nVe;
-            bcnpoints.reserve(nVe+1);
-            bpoints.reserve(nVe+1);
-            for(i=0;i<nVe+1;i++){
-                bpoints[i]=false;
-                bcnpoints[i]=NULLFLAG;
+    while( getline(fstreamp, line) ) {
+
+        if( line.find("points") != std::string::npos && flag&1 ) {
+            getline(fstreamp, line);
+            std::stringstream parseline(line);
+
+            parseline >> nVe;
+            std::cout << "[readNetgenMesh] found " << nVe << " vertices... " << std::flush;
+
+            bcnpoints.resize( nVe+1 );
+            bpoints.resize( nVe+1 );
+            pointcoor.resize( nDimensions * nVe );
+
+            for(UInt i=0; i<nVe; i++) {
+                // helping variables to read netgen file fields
+                Real x, y, z;
+
+                getline(fstreamp, line);
+                std::stringstream parseline(line);
+
+                parseline >> x >> y >> z;
+
+                pointcoor[i*nDimensions] = x;
+                pointcoor[i*nDimensions+1] = y;
+                pointcoor[i*nDimensions+2] = z;
+                bpoints[i] = false;
+                bcnpoints[i] = NULLFLAG;
             }
+            bpoints[nVe] = false;
+            bcnpoints[nVe] = NULLFLAG;
+
+            // done parsing point section
             flag&=~1;
+            std::cout<< "loaded."<<std::endl;
             break;
         }
     }
-    fstream1.close();
+    fstreamp.close();
 
-/* as Forma told, I have found sometimes problems with seekg, becouse
-   it seems that sometimes it put the stream in a non consistent state,
-   so I open new files instead of seeking, I have had not compile errors
-   only sometimes problems on big mesh files with seekg
-*/
-//  fstream.seekg(0,std::ios_base::beg);
-    std::ifstream fstream2(filename.c_str());
-    while(!fstream2.eof())
-    {
-        fstream2>>line;
+    /* as Forma told, I have found sometimes problems with seekg, becouse
+       it seems that sometimes it put the stream in a non consistent state,
+       so I open new files instead of seeking, I have had not compile errors
+       only sometimes problems on big mesh files with seekg
+    */
+    //  fstream.seekg(0,std::ios_base::beg);
 
-        if(line=="surfaceelementsgi" && flag&8){
-            fstream2>>nBFa;
-            bcnsurf.reserve(nBFa+1);
+    /* I assume as I tested that edges stored are only a part of
+       boundary ones, so really they are meaningless to me
+       unless I'm working with 2D meshes: in that case
+       I can extract from here information about boundary vertices */
+    std::ifstream fstreame(filename.c_str());
+    while( getline(fstreame, line) ) {
+
+        if( line.find("edgesegmentsgi2") != std::string::npos && flag&2 ) {
+            getline(fstreame, line);
+            std::stringstream parseline(line);
+
+            parseline >> nBEd; // this will be discarded in 3D meshes
+
+            std::cout << "[readNetgenMesh] found " << nBEd << " boundary edges... " << std::flush;
+            edgepointID.resize(2*nBEd);
+
+            for(UInt i=0; i<nBEd; ++i) {
+                UInt surfnr, t, p1, p2;
+
+                getline(fstreame, line);
+                std::stringstream parseline(line);
+                //          surfid  0   p1   p2   trignum1    trignum2   domin/surfnr1    domout/surfnr2
+                //          ednr1   dist1   ednr2   dist2
+                parseline >> surfnr >> t >> p1 >> p2; //>>t>>t>>t>>t>>t>>t>>t>>t;
+
+                edgepointID[2*i] = p1;
+                edgepointID[2*i+1] = p2; //>>t>>t>>t>>t>>t>>t>>t>>t;
+
+            }
+
+            // done parsing edge section
+            flag&=~2;
+            std::cout<< "loaded."<<std::endl;
+            break;
+        }
+    }
+
+    std::ifstream fstreamv(filename.c_str());
+    while( getline(fstreamv, line) ) {
+
+        if( line.find("volumeelements") != std::string::npos && flag&8) {
+            getline(fstreamv, line);
+            std::stringstream parseline(line);
+
+            parseline >> nVo;
+            std::cout << "[readNetgenMesh] found " << nVo << " volumes... " << std::flush;
+
+            volumepointID.resize(4*nVo);
+
+            for(UInt i=0; i<nVo; i++) {
+                UInt matnr, np, p1, p2, p3, p4;
+
+                getline(fstreamv, line);
+                std::stringstream parseline(line);
+
+                parseline >> matnr >> np >> p1 >> p2 >> p3 >> p4;
+
+                volumepointID[4*i] = p1; volumepointID[4*i+1] = p2;
+                volumepointID[4*i+2] = p3; volumepointID[4*i+3] = p4;
+
+                ASSERT(np==4, "Error in readNetgenMesh: only tetrahedra elements supported")
+                    }
+            // done parsing volume section
+            flag&=~8;
+            std::cout<< "loaded."<<std::endl;
+            break;
+        }
+    }
+    fstreamv.close();
+
+    std::ifstream fstreamf(filename.c_str());
+    while( getline(fstreamf, line) ) {
+
+        // TP 08/2008
+        // surface elements section in a .vol file
+        // is identified by key word "surfaceelements" in Netgen 4.5 (tested in RC2)
+        // "surfaceelementsgi" is used in previous releases
+        if( (line.find("surfaceelements") != std::string::npos) && flag&4) {
+            getline(fstreamf, line);
+            std::stringstream parseline(line);
+
+            parseline >> nBFa;
+            std::cout << "[readNetgenMesh] found " << nBFa
+                      << " boundary faces... " << std::flush;
+
+            facepointID.resize(3*nBFa);
+            bcnsurf.resize(nBFa+1);
             bcnsurf[0]=NULLFLAG;
-            for(i=0;i<nBFa;i++){
-                fstream2>>surfnr>>bcnr>>domin>>domout>>np>>p1>>p2>>p3\
-                        >>t>>t>>t;
-                bcnsurf[i+1]=bcnr;
-                if(np!=3){
-                    std::cerr<<"Error in readNetgenMesh: " \
-                        "only triangular surfaces supported"<<std::endl;
-                    abort();
-                }
+
+            for(UInt i=0; i<nBFa; i++) {
+                UInt surfnr, bcnr, domin, domout, np, p1, p2, p3;
+
+                getline(fstreamf, line);
+                std::stringstream parseline(line);
+
+                parseline >> surfnr >> bcnr >> domin >> domout >> np >> p1 >> p2 >> p3;
+
+                facepointID[3*i] = p1;
+                facepointID[3*i+1] = p2;
+                facepointID[3*i+2] = p3;
+
+                bcnsurf[i+1] = bcnr;
+                //          std::cout<<"[readNetgenMesh] bcnr = " << bcnr << std::endl;
+                ASSERT(np==3, "Error in readNetgenMesh: only triangular surfaces supported")
+
                 //assume p1!=p2!=p3!=p1
-                nBVe+=bpoints[p1]?0:1;
-                nBVe+=bpoints[p2]?0:1;
-                nBVe+=bpoints[p3]?0:1;
-                bpoints[p1]=bpoints[p2]=bpoints[p3]=true;
+                nBVe += bpoints[p1]?0:1;
+                nBVe += bpoints[p2]?0:1;
+                nBVe += bpoints[p3]?0:1;
+                bpoints[p1]= bpoints[p2]= bpoints[p3]=true;
 
                 /* here I set the boundary points marker
                    note: this works only with my patch
-                   of strongerFlag */
-                bcnpoints[p1]=PMarker.setStrongerMarker(bcnpoints[p1],bcnr);
-                bcnpoints[p2]=PMarker.setStrongerMarker(bcnpoints[p2],bcnr);
-                bcnpoints[p3]=PMarker.setStrongerMarker(bcnpoints[p3],bcnr);
+                   of strongerFlag
+                   Face flag is assigned to face points
+                   A point receives the "stronger" flag of the faces it belongs to
+                    */
+                bcnpoints[p1] = PMarker.setStrongerMarker(bcnpoints[p1],bcnr);
+                bcnpoints[p2] = PMarker.setStrongerMarker(bcnpoints[p2],bcnr);
+                bcnpoints[p3] = PMarker.setStrongerMarker(bcnpoints[p3],bcnr);
 
-/* now I have the surface and points, so I can calculate
-   the num of edges on the boundary, useful in case this is
-   a quadratic tetra, I calculate the bcnr too using
-   BareItemHandler<BareEdge> to store results
-*/
-                //I've found this silly but easy way
-                BareEdge bed=setBareEdge(p1,p2);
+                /* now I have the surface and points, so I can calculate
+                   the num of edges on the boundary, useful in case this is
+                   a quadratic tetra, I calculate the bcnr too using
+                   BareItemHandler<BareEdge> to store results
+                */
+                // the following is a complete list of edges in the 2D case
+                // (only boundary edges in 3D)
+                // may be useful even in the TWODIM case
+                // (I've found this silly but easy way MM)
+                BareEdge bed = setBareEdge(p1,p2);
                 bihBedges.addIfNotThere(bed,(ID)NULLFLAG);
-                bihBedges[bed]=(ID)EMarker.setStrongerMarker(
-                    bihBedges[bed],
-                    bcnr);
+                bihBedges[bed]=(ID)EMarker.setStrongerMarker(bihBedges[bed], bcnr);
+
                 bed=setBareEdge(p2,p3);
                 bihBedges.addIfNotThere(bed,(ID)NULLFLAG);
-                bihBedges[bed]=(ID)EMarker.setStrongerMarker(
-                    bihBedges[bed],
-                    bcnr);
+                bihBedges[bed]=(ID)EMarker.setStrongerMarker(bihBedges[bed], bcnr);
+
                 bed=setBareEdge(p3,p1);
                 bihBedges.addIfNotThere(bed,(ID)NULLFLAG);
-                bihBedges[bed]=(ID)EMarker.setStrongerMarker(
-                    bihBedges[bed],
-                    bcnr);
+                bihBedges[bed]=(ID)EMarker.setStrongerMarker(bihBedges[bed], bcnr);
+
             }
-            flag&=~8;
+            flag&=~4;
+            // in the 3D case the only way to know the number of edges on boundary faces
+            // is to count them!
+            nBEd = bihBedges.howMany();
+            std::cout<< "loaded."<<std::endl;
             break;
         }
     }
-    fstream2.close();
-    nBEd=bihBedges.howMany();
+    fstreamf.close();
 
+    ASSERT(flag==0, "[readNetgenMesh] the mesh file does not have all the required sections.")
 
-
-/* I assume as I tested that edges stored are only a part of
-   boundary ones, so really they are meaningless to me */
-    std::ifstream fstream3(filename.c_str());
-    while(!fstream3.eof())
-    {
-        fstream3>>line;
-        if(line=="edgesegmentsgi2" && flag&2){
-            fstream3>>fake;        //this is not really the nBEd
-            fake*=2;        //there are twice the num of lines told, test if prob
-            for(i=0;i<fake;i++){
-                fstream3>>surf1>>surf2>>p1>>p2>>t>>t>>t>>t>>t>>t>>t>>t;
-            }
-            flag&=~2;
-        }
-        else if(line=="volumeelements" && flag&4){
-            fstream3>>nVo;
-            for(i=0;i<nVo;i++){
-                fstream3>>matnr>>np>>p1>>p2>>p3>>p4;
-                if(np!=4){
-                    std::cerr<<"Error in readNetgenMesh: " \
-                        "only tetrahedra elements supported"<<std::endl;
-                    abort();
-                }
-            }
-            flag&=~4;
-        }
-        if(!flag)break;
-    }
-    fstream3.close();
-    if(flag!=0){
-        std::cerr<<"Error in readNetgenMesh: " \
-            "the mesh file does not have all the required sections" \
-                 <<std::endl;
-        abort();
-    }
+    std::cout << "[readNetgenMesh] computed " << nBVe << " boundary vertices" << std::endl;
 
     // Euler formulas
     nFa=2*nVo+(nBFa/2);
     nEd=nVo+nVe+(3*nBFa-2*nBVe)/4;
 
     // Be a little verbose
-    if (GeoShape::numPoints > 4 ){
+    if ( GeoShape::numPoints > 4 ) {
         std::cout << "Quadratic Tetra  Mesh (from Linear geometry)" <<std::endl;
         nPo=nVe+nEd;
         nBPo=nBVe+nBEd;    // I calculated the real nBEd before
@@ -1218,9 +1307,9 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
     //points can be only vertices or on edges too
 
     std::cout << "#Vertices = "          << std::setw(10) << nVe
-             << "  #BVertices       = " << std::setw(10) << nBVe << std::endl;
-    oStr      << "#Faces    = "          << std::setw(10) << nFa
-              << "  #Boundary Faces  = " << std::setw(10) << nBFa << std::endl;
+              << "  #BVertices       = " << std::setw(10) << nBVe << std::endl;
+    oStr      << "#Faces    = "          << std::setw(10) << nFa << std::endl;
+    oStr      << "  #Boundary Faces  = " << std::setw(10) << nBFa << std::endl;
     oStr      << "#Edges    = "          << std::setw(10) << nEd
               << "  #Boundary Edges  = " << std::setw(10) << nBEd << std::endl;
     std::cout << "#Points   = "          << std::setw(10) << nPo
@@ -1237,120 +1326,100 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
     mesh.setNumGlobalVertices(nVe);
     mesh.setNumBVertices   ( nBVe );
     // Only Boundary Edges (in a next version I will allow for different choices)
-    mesh.setMaxNumEdges    ( nEd );
-    mesh.setMaxNumGlobalEdges ( nEd );
+    mesh.setMaxNumEdges    ( nBEd );
+    mesh.setMaxNumGlobalEdges ( nBEd );
     mesh.setNumEdges       ( nEd ); // Here the REAL number of edges (all of them)
     mesh.setNumBEdges      ( nBEd );
     // Only Boundary Faces
-    mesh.setMaxNumFaces    ( nFa );
-    mesh.setMaxNumGlobalFaces ( nFa );
+    mesh.setMaxNumFaces    ( nBFa );
+    mesh.setMaxNumGlobalFaces ( nBFa );
     mesh.setNumFaces       ( nFa ); // Here the REAL number of faces (all of them)
     mesh.setNumBFaces      ( nBFa );
 
     mesh.setMaxNumVolumes  ( nVo, true );
-    mesh.setMaxNumGlobalVolumes( nVo);
+    mesh.setMaxNumGlobalVolumes( nVo );
 
     mesh.setMarker         ( regionFlag ); // Add Marker to list of Markers
-
-    mesh.setMarker(regionFlag); // Mark the region ????????what if more then one<<<<<<<
 
     typename RegionMesh3D<GeoShape,MC>::PointType * pp=0;
     typename RegionMesh3D<GeoShape,MC>::EdgeType * pe=0;
     typename RegionMesh3D<GeoShape,MC>::FaceType * pf=0;
     typename RegionMesh3D<GeoShape,MC>::VolumeType * pv=0;
+
     // addPoint()/Face()/Edge() returns a reference to the last stored point
     // I use that information to set all point info, by using a pointer.
 
+    std::cout << "[readmesh3D] bpoints.size() = " << bpoints.size()
+              << ", bcnpoints.size() = " << bcnpoints.size()
+              << std::endl;
 
-    std::ifstream  fstream4(filename.c_str());
-    flag=1|2|4|8;
-    while(!fstream4.eof())
-    {
-        fstream4>>line;
+    for(UInt i=0; i<nVe; i++) {
+        pp=&mesh.addPoint(bpoints[i+1]); //true if boundary point
 
-        if(line=="points" && flag&1){
-            fstream4>>nVe;
-            for(i=0;i<nVe;i++){
-                fstream4>>x>>y>>z;
-                pp=&mesh.addPoint(bpoints[i+1]); //true if boundary point
-                pp->setMarker(bcnpoints[i+1]);
-                pp->setId     ( i + 1 );
-                pp->setLocalId( i + 1 );
-                pp->x()=x;
-                pp->y()=y;
-                pp->z()=z;
-                mesh.localToGlobalNode().insert(std::make_pair(i+1, i+1));
-                mesh.globalToLocalNode().insert(std::make_pair(i+1, i+1));
-            }
-            flag&=~1;
-            break;
-        }
+        pp->setId     ( i + 1 );
+        pp->setLocalId( i + 1 );
+        mesh.localToGlobalNode().insert(std::make_pair(i+1, i+1));
+        mesh.globalToLocalNode().insert(std::make_pair(i+1, i+1));
+
+        pp->setMarker(bcnpoints[i+1]);
+        pp->x()=pointcoor[nDimensions*i];
+        pp->y()=pointcoor[nDimensions*i+1];
+        pp->z()=pointcoor[nDimensions*i+2];
     }
-    fstream4.close();
-    std::ifstream  fstream5(filename.c_str());
+    std::cout << "[readmesh3D] added points." << std::endl;
 
-    while(flag && !fstream5.eof())  //fstream after using .seekg sometimes never reaches eof,
-        //entering infinite loop, why????? damn STL I reopen the file and put the flag to fix
-    {
-        fstream5>>line;
+    /* here I set the real boundary edges that I stored
+       in bihBedges
+    */
+    BareItemsHandler<BareEdge>::const_iterator bedge=bihBedges.begin();
+    for(UInt i=0; i<nBEd; i++) {
+    	UInt p1, p2;
 
-        if(line=="edgesegmentsgi2" && flag&2){
-            fstream5>>fake;    //this is not really the nBEd
-            fake*=2;        //there are twice the num of lines told, test if prob
-            for(i=0;i<fake;i++){
-                fstream5>>surf1>>surf2>>p1>>p2>>t>>t>>t>>t>>t>>t>>t>>t;
-            }
-            /* here I set the real boundary edges that I stored
-               in bihBedges
-            */
-            BareItemsHandler<BareEdge>::const_iterator bedge=bihBedges.begin();
-            for(i=0;i<nBEd;i++){
-                pe = &mesh.addEdge( true ); // Only boundary edges.
-                pe->setMarker( EntityFlag(bedge->second));
-                p1=bedge->first.first;
-                p2=bedge->first.second;
-                pe->setPoint( 1, mesh.point( p1 ) ); // set edge conn.
-                pe->setPoint( 2, mesh.point( p2 ) ); // set edge conn.
-                bedge++;
-            }
-            flag&=~2;
-        }
-        else if(line=="volumeelements" && flag&4){
-            fstream5>>nVo;
-            for(i=0;i<nVo;i++){
-                fstream5>>matnr>>np>>p1>>p2>>p3>>p4;
-                pv=&mesh.addVolume();
-                pv->setId     ( i + 1 );
-                pv->setLocalId( i + 1);
-//                pv->id()=i+1;
-                pv->setPoint(1, mesh.point(p1) );
-                pv->setPoint(2, mesh.point(p2) );
-                pv->setPoint(3, mesh.point(p3) );
-                pv->setPoint(4, mesh.point(p4) );
-                pv->setMarker( EntityFlag(matnr) );
-            }
-            flag&=~4;
-        }
-        else if(line=="surfaceelementsgi" && flag&8){
-            fstream5>>nFa;
-            for(i=0;i<nFa;i++){
-                fstream5>>surfnr>>bcnr>>domin>>domout>>np>>p1>>p2>>p3\
-                        >>t>>t>>t;
-                pf=&mesh.addFace(true); // Only boundary faces
-
-                pf->setMarker(EntityFlag(bcnr));
-                pf->setPoint(1,mesh.point(p1)); // set face conn.
-                pf->setPoint(2,mesh.point(p2)); // set face conn.
-                pf->setPoint(3,mesh.point(p3)); // set face conn.
-            }
-            flag&=~8;
-        }
+        pe = &mesh.addEdge( true ); // Only boundary edges.
+        pe->setMarker( EntityFlag(bedge->second) );
+        p1=bedge->first.first;
+        p2=bedge->first.second;
+        pe->setPoint( 1, mesh.point( p1 ) ); // set edge conn.
+        pe->setPoint( 2, mesh.point( p2 ) ); // set edge conn.
+        bedge++;
     }
+    std::cout << "[readmesh3D] added edges." << std::endl;
+
+    for(UInt i=0;i<nVo;i++) {
+    	UInt p1, p2, p3, p4;
+
+        pv=&mesh.addVolume();
+        pv->setId(i+1);
+        pv->setLocalId(i+1);
+        p1=volumepointID[4*i];
+        p2=volumepointID[4*i+1];
+        p3=volumepointID[4*i+2];
+        p4=volumepointID[4*i+3];
+        pv->setPoint(1, mesh.point(p1) );
+        pv->setPoint(2, mesh.point(p2) );
+        pv->setPoint(3, mesh.point(p3) );
+        pv->setPoint(4, mesh.point(p4) );
+    }
+    std::cout << "[readmesh3D] added volumes." << std::endl;
+
+    for(UInt i=0; i<nBFa; i++) {
+    	UInt p1, p2, p3;
+
+        pf=&mesh.addFace(true); // Only boundary faces
+        p1=facepointID[3*i];
+        p2=facepointID[3*i+1];
+        p3=facepointID[3*i+2];
+
+        pf->setMarker(EntityFlag(bcnsurf[i+1]));
+        pf->setPoint(1,mesh.point(p1)); // set face conn.
+        pf->setPoint(2,mesh.point(p2)); // set face conn.
+        pf->setPoint(3,mesh.point(p3)); // set face conn.
+    }
+    std::cout << "[readmesh3D] added faces." << std::endl;
 
     // This part is to build a P2 mesh from a P1 geometry
 
-    if (GeoShape::numPoints > 4 )p1top2(mesh);
-    fstream5.close();
+    if ( GeoShape::numPoints > 4 ) p1top2(mesh);
 
     // Test mesh
     Switch sw;
@@ -1382,8 +1451,8 @@ readNetgenMesh(RegionMesh3D<GeoShape,MC> & mesh,
 #include <fstream>
 
 /*
-   MM I've looked to this source, easy func
-   /usr/local/src/ng431/libsrc/interface/importsolution.cpp
+  MM I've looked to this source, easy func
+  /usr/local/src/ng431/libsrc/interface/importsolution.cpp
 */
 template <typename VectorType>
 void saveNetgenSolution(std::string filename,const VectorType& U,std::string fctname="u")

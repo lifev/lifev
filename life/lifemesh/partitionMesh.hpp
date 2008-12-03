@@ -81,7 +81,6 @@ private:
     Epetra_Comm*       M_comm;
     UInt               M_me;
 
-    int*               M_localIndex;
 }; // class partitionMesh
 
 
@@ -162,6 +161,7 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
       M_vertexDist[ i + 1 ] = M_vertexDist[ i ] + l;
       k -= l;
     }
+    ASSERT( k == 0, "At this point we should have 0 volumes left" ) ;
 
 
     // building up the neighbour arrays
@@ -255,28 +255,57 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
         locProc[part[ii]].push_back(ii + vertexDist()[M_me]);
     }
 
-		// sizeof(MPI_INT) is expressed in bytes
-		// MPI_INT range is ( -2^(7*sizeof(MPI_INT), 2^(7*sizeof(MPI_INT) - 1 )
-		// (MPI_INT is not unsigned int)
-		int _exp(7*sizeof(MPI_INT));
-		int _max_int( std::pow(2., _exp) - 1 );
+    // sizeof(MPI_INT) is expressed in bytes
+    // MPI_INT range is ( -2^(7*sizeof(MPI_INT), 2^(7*sizeof(MPI_INT) - 1 )
+    // (MPI_INT is not unsigned int)
+    //int _exp(7*sizeof(MPI_INT));
+    //int _max_int( std::ldexp(1., _exp-1) ); // taking a little less: 2^(exp-1) instead of 2^exp - 1
+    //int max_int (1000);
 
     for (int iproc = 0; iproc < nProc; ++iproc)
     {
         if (int(M_me) != iproc)
+        {                                                  //start if
+            int size = locProc[iproc].size();
+
+            MPI_Send(&size, 1, MPI_INT, iproc, 10, MPIcomm);
+
+            if (size > 1000)
             {
-                int size = locProc[iproc].size();
-                MPI_Send(&size, 1, MPI_INT, iproc, 666, MPIcomm);
-                int i(0);
-                while(size>_max_int)
+                int incr = 1 ;
+                int pos = 0;
+                int size_part =size;
+
+                while (size_part > 1000 )
                 {
-                	MPI_Send(&locProc[iproc][i*_max_int], _max_int, MPI_INT, iproc, 666, MPIcomm);
-                	size=size-_max_int;
-                	++i;
+                    incr+=1;
+                    size_part=size/incr;
                 }
-              	MPI_Send(&locProc[iproc][i*_max_int], size, MPI_INT, iproc, 666, MPIcomm);
+
+                MPI_Send(&incr, 1, MPI_INT, iproc, 20, MPIcomm);
+                MPI_Send(&size_part, 1, MPI_INT, iproc, 30, MPIcomm);
+
+                for ( int kk = 0; kk < incr; ++kk)
+                {         //for
+                    MPI_Send(&pos, 1, MPI_INT, iproc, 100+kk, MPIcomm);
+                    MPI_Send(&locProc[iproc][pos], size_part, MPI_INT, iproc, 5000000+kk, MPIcomm);
+                    pos = pos + size_part;
+                }      //endfor
+
+                int resto = size%incr;
+
+                MPI_Send(&resto, 1, MPI_INT, iproc, 80, MPIcomm);
+
+                if(resto!=0)
+                {
+                    MPI_Send(&pos, 1, MPI_INT, iproc, 40, MPIcomm);
+                    MPI_Send(&locProc[iproc][pos],  resto, MPI_INT, iproc, 50, MPIcomm);
+                }
             }
-    }
+            else
+                MPI_Send(&locProc[iproc][0], size, MPI_INT, iproc, 60, MPIcomm);
+        }                    //end if
+    }                  //end for
 
 
     for (int iproc = 0; iproc < nProc; ++iproc)
@@ -285,16 +314,33 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
         {
             int        size;
             MPI_Status status;
-            MPI_Recv(&size, 1, MPI_INT, iproc, 666, MPIcomm, &status);
+            MPI_Recv(&size, 1, MPI_INT, iproc, 10, MPIcomm, &status);
+
             std::vector<int> stack(size, 0);
-            int i(0);
-            while(size>_max_int)
+
+            if (size > 1000 )
             {
-            	MPI_Recv(&stack[i*_max_int], _max_int, MPI_INT, iproc, 666, MPIcomm, &status);
-            	size=size-_max_int;
-            	++i;
+                int size_part, pos, incr;
+
+                MPI_Recv(&incr, 1, MPI_INT, iproc, 20, MPIcomm, &status);
+                MPI_Recv(&size_part, 1, MPI_INT, iproc, 30, MPIcomm, &status);
+
+                for ( int kk = 0; kk < incr; ++kk)
+                {
+                    MPI_Recv(&pos, 1, MPI_INT, iproc, 100+kk, MPIcomm, &status);
+                    MPI_Recv(&stack[pos], size_part , MPI_INT, iproc, 5000000+kk, MPIcomm, &status);
+                }
+                int resto=0;
+                MPI_Recv(&resto, 1, MPI_INT, iproc, 80, MPIcomm, &status);
+
+                if(resto!=0)
+                {
+                    MPI_Recv(&pos, 1, MPI_INT, iproc, 40, MPIcomm, &status);
+                    MPI_Recv(&stack[pos],  resto, MPI_INT, iproc, 50, MPIcomm, &status);
+                }
             }
-          	MPI_Recv(&stack[i*_max_int], size, MPI_INT, iproc, 666, MPIcomm, &status);
+            else
+                MPI_Recv(&stack[0], size , MPI_INT, iproc, 60, MPIcomm, &status);
 
             for (int jj = 0; jj < size; ++jj)
             {
@@ -361,6 +407,7 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
 
     typename Mesh::PointType * pp = 0;
 
+    // in this loop inode is the local numbering of the points
     for (it = M_localNodes.begin(); it != M_localNodes.end(); ++it, ++inode)
     {
 
@@ -384,8 +431,8 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
         pp->setId(id);
         pp->setLocalId( inode );
 
-        M_mesh->localToGlobalNode().insert(std::make_pair(id, inode));
-        M_mesh->globalToLocalNode().insert(std::make_pair(inode, id));
+        M_mesh->localToGlobalNode().insert(std::make_pair(inode, id));
+        M_mesh->globalToLocalNode().insert(std::make_pair(id, inode));
 
 //         point.setMarker( _mesh.point(*it).marker() );
 
@@ -412,6 +459,8 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
 
     M_mesh->volumeList.reserve(M_localElements.size());
 
+    // in this loop inode is the global numbering of the points
+    // We insert the local numbering of the nodes in the local volume list
     for (it = M_localElements.begin(); it != M_localElements.end(); ++it, ++count)
     {
         pv = &M_mesh->addVolume();

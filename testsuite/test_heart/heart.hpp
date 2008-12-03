@@ -38,7 +38,6 @@
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifealg/EpetraMap.hpp>
 #include <life/lifemesh/partitionMesh.hpp>
-#include <life/lifefem/FESpace.hpp>
 #include <life/lifefilters/ensight.hpp>
 #include <iostream>
 #ifdef MONODOMAIN

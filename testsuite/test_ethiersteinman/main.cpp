@@ -35,8 +35,6 @@
 #include "Epetra_SerialComm.h"
 #endif
 
-#include <boost/program_options.hpp>
-
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/application.hpp>
 

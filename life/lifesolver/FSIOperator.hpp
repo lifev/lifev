@@ -39,7 +39,6 @@
 //#include <life/lifefem/dof.hpp>
 #include <life/lifefem/FESpace.hpp>
 //#include <life/lifefem/refFE.hpp>
-
 //#include <life/lifesolver/fixedPointBase.hpp>
 
 #include "Epetra_config.h"
@@ -87,7 +86,7 @@ public:
 //     typedef NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> > fluid_raw_type;
     typedef RegionMesh3D<LinearTetra>              mesh_type;
 
-//    typedef Oseen                  <mesh_type>     fluid_raw_type;
+    //    typedef Oseen                  <mesh_type>     fluid_raw_type;
     typedef OseenShapeDerivative   <mesh_type>     fluid_raw_type;
     typedef VenantKirchhofSolver   <mesh_type>     solid_raw_type;
     typedef HarmonicExtensionSolver<mesh_type>     meshmotion_raw_type;
@@ -146,8 +145,8 @@ public:
         M_BCh_dp_inv(new BCHandler),
         M_fluid(),
         M_solid(),
-        M_fluidLin(),
-        M_solidLin(),
+//         M_fluidLin(),
+//         M_solidLin(),
         M_meshMotion(),
         M_bdf(),
         M_dataFluid(),
@@ -280,8 +279,8 @@ public:
     fluid_type::value_type&      fluid()      {return *M_fluid;}
     solid_type::value_type&      solid()      {return *M_solid;}
 
-    fluidlin_type::value_type&   fluidLin()   {return *M_fluidLin;}
-    solidlin_type::value_type&   solidLin()   {return *M_solidLin;}
+//     fluidlin_type::value_type&   fluidLin()   {return *M_fluidLin;}
+//     solidlin_type::value_type&   solidLin()   {return *M_solidLin;}
 
     void setPreconditioner   ( Preconditioner    _p ) { M_precond = _p; }
     void setDDNPreconditioner( DDNPreconditioner _p ) { M_DDNprecond = _p; }
@@ -327,7 +326,7 @@ public:
     bool isSolid() const {return M_isSolid;}
 
     void setUpSystem( GetPot const& data_file );
-    void buildSystem();
+    virtual    void buildSystem();
 
     void setComm     (   boost::shared_ptr<Epetra_MpiComm> comm,
                          boost::shared_ptr<Epetra_MpiComm> worldComm);
@@ -521,6 +520,14 @@ public:
     solid_bchandler_type const& BCh_dz_inv(){return M_BCh_dz_inv;}
     void setBCh_solidDerInv(solid_bchandler_type BCh_solidDerInv){M_BCh_dz_inv = BCh_solidDerInv;}
 
+    //! relevant only for monolitic solver. re-Implemented there
+    virtual EpetraMap& monolithicMap() { assert(false); };
+
+    //! relevant only for monolitic solver. re-Implemented there
+    virtual void updateSystem(const vector_type& /*displacement*/) { assert(false); }
+
+    //! relevant only for monolitic solver. re-Implemented there
+    virtual void iterateMesh(const vector_type& /*disp*/) { assert(false); }
 
 protected:
 
@@ -555,8 +562,8 @@ protected:
     fluid_type                                        M_fluid;
     solid_type                                        M_solid;
 
-    fluidlin_type                                     M_fluidLin;
-    solidlin_type                                     M_solidLin;
+//     fluidlin_type                                     M_fluidLin;
+//     solidlin_type                                     M_solidLin;
 
     meshmotion_type                                   M_meshMotion;
 
@@ -640,6 +647,11 @@ private:
     boost::shared_ptr<vector_type>                    M_derVeloFluidMesh;
 
 protected:
+
+    std::string const& getMethod() const  {return M_method;}
+    bool isLinearFluid() const {return M_linearFluid;}
+    bool isLinearSolid() const {return M_linearSolid;}
+
     boost::shared_ptr<vector_type>                    M_un;
     boost::shared_ptr<vector_type>                    M_rhs;
 
@@ -657,6 +669,7 @@ private:
 
 //     UInt                      M_reducedFluid;
     std::string                                       M_method;
+    bool                                              M_monolithic;
     Preconditioner                                    M_precond;
     DDNPreconditioner                                 M_DDNprecond;
 

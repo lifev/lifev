@@ -307,6 +307,9 @@ public:
     //! output
     std::ostream& showMe( bool verbose = false, std::ostream & out = std::cout ) const;
 
+    //! the offset is used ...
+    void setOffset(UInt offset){M_offset=offset;}
+    UInt offset()const {return M_offset;}
     //@}
 
 private:
@@ -336,6 +339,7 @@ private:
     //! determine whether BCs in M_bcList are only essential
     bool listHasOnlyEssential() const;
 
+    UInt M_offset;
     //! stores status (essential or not) of the boundary associated to a marker
     class EssentialStatus
     {

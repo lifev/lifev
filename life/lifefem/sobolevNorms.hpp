@@ -144,7 +144,7 @@ elem_f_L2_2( boost::function<double( double, double, double, double, UInt )> fct
     return s;
 }
 
-//! returns the square of the H1 semi-norm of u on the current element
+//! returns the square of the H1 norm of u on the current element
 template <typename VectorType>
 Real
 elem_H1_2( const VectorType & u, const CurrentFE& fe, const Dof& dof )
@@ -172,7 +172,40 @@ elem_H1_2( const VectorType & u, const CurrentFE& fe, const Dof& dof )
     return s;
 }
 
-//! returns the square of the H1 semi-norm of fct on the current element
+//! returns the square of the H1 norm of u on the current element (vectorial version)
+template <typename VectorType>
+Real
+elem_H1_2( const VectorType & u, const CurrentFE& fe, const Dof& dof, const UInt nbcomp )
+{
+    int i, inod, ig;
+    UInt eleID = fe.currentLocalId();
+    UInt ic;
+    Real s = 0, u_ig, dx_u_ig, dy_u_ig, dz_u_ig;
+    for ( ig = 0;ig < fe.nbQuadPt;ig++ )
+    {
+    	for ( ic = 0; ic < (UInt)nbcomp; ic++ )
+    	{
+
+    		u_ig = 0.;
+    		dx_u_ig = 0.;
+    		dy_u_ig = 0.;
+    		dz_u_ig = 0.;
+    		for ( i = 0;i < fe.nbNode;i++ )
+    		{
+    			inod = dof.localToGlobal( eleID, i + 1 );
+    			u_ig += u( inod ) * fe.phi( i, ig );
+    			dx_u_ig += u( inod ) * fe.phiDer( i, 0, ig );
+    			dy_u_ig += u( inod ) * fe.phiDer( i, 1, ig );
+    			dz_u_ig += u( inod ) * fe.phiDer( i, 2, ig );
+    		}
+    		s += ( u_ig * u_ig + dx_u_ig * dx_u_ig + dy_u_ig * dy_u_ig +
+    				dz_u_ig * dz_u_ig ) * fe.weightDet( ig );
+    	}
+    }
+    return s;
+}
+
+//! returns the square of the H1 norm of fct on the current element
 template<typename UsrFct>
 Real
 elem_H1_2( const UsrFct& fct, const CurrentFE& fe )
@@ -191,7 +224,7 @@ elem_H1_2( const UsrFct& fct, const CurrentFE& fe )
     return s + s1;
 }
 
-//! returns the square of the H1 semi-norm of fct on the current element (time-dependent case)
+//! returns the square of the H1 norm of fct on the current element (time-dependent case)
 template <typename UsrFct>
 Real elem_H1_2( const UsrFct& fct, const CurrentFE& fe, const Real t, const UInt nbcomp )
 {
@@ -274,7 +307,7 @@ Real elem_L2_diff_2( VectorType & u,
     return s;
 }
 
-//! returns the square of the H1 semi-norm of (u-fct) on the current element
+//! returns the square of the H1 norm of (u-fct) on the current element
 template <typename VectorType, typename UsrFct>
 Real elem_H1_diff_2( const VectorType & u, const UsrFct& fct, const CurrentFE& fe,
                      const Dof& dof )
@@ -312,7 +345,7 @@ Real elem_H1_diff_2( const VectorType & u, const UsrFct& fct, const CurrentFE& f
     return s;
 }
 
-//! returns the square of the H1 semi-norm of (u-fct) on the current element  (time-dependent case)
+//! returns the square of the H1 norm of (u-fct) on the current element  (time-dependent case)
 template <typename VectorType, typename UsrFct>
 Real elem_H1_diff_2( const VectorType & u, const UsrFct& fct, const CurrentFE& fe,
                      const Dof& dof, const Real t, const UInt nbcomp )

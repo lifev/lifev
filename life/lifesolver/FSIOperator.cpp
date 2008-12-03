@@ -44,9 +44,7 @@ FSIOperator::setup()
 
     std::string uOrder = M_dataFluid->uOrder();
 
-    int me       = M_epetraComm->MyPID();
-    bool verbose = (me == 0);
-
+    // int me       = M_epetraComm->MyPID();
     leaderPrint("velocity order = " + uOrder);
 
     if ( uOrder.compare("P2") == 0 )
@@ -181,21 +179,19 @@ FSIOperator::setup()
                                                       *M_epetraComm));
 
 
-        if (M_linearFluid)
-            M_fluidLin.reset(new FSIOperator::fluidlin_raw_type(dataFluid(),
-                                                                *M_uFESpace,
-                                                                *M_pFESpace,
-                                                                *M_epetraComm));
+//         if (M_linearFluid)
+//             M_fluidLin.reset(new FSIOperator::fluidlin_raw_type(dataFluid(),
+//                                                                 *M_uFESpace,
+//                                                                 *M_pFESpace,
+//                                                                 *M_epetraComm));
 
 
-
-
-        vector_type u0(M_uFESpace->map() + M_pFESpace->map());
-
-        M_bdf.reset(new BdfT<vector_type>(M_dataFluid->order_bdf()));
-        M_bdf->initialize_unk(u0);
-
-
+        if(!M_monolithic)
+            {
+                vector_type u0(M_fluid->getMap());
+                M_bdf.reset(new BdfT<vector_type>(M_dataFluid->order_bdf()));
+                M_bdf->initialize_unk(u0);
+            }
     }
     else
     {
@@ -233,11 +229,11 @@ FSIOperator::setup()
                                                       *M_pFESpace,
                                                       *M_epetraComm));
 
-        if (M_linearFluid)
-            M_fluidLin.reset(new FSIOperator::fluidlin_raw_type(dataFluid(),
-                                                                *M_uFESpace,
-                                                                *M_pFESpace,
-                                                                *M_epetraComm));
+//         if (M_linearFluid)
+//             M_fluidLin.reset(new FSIOperator::fluidlin_raw_type(dataFluid(),
+//                                                                 *M_uFESpace,
+//                                                                 *M_pFESpace,
+//                                                                 *M_epetraComm));
 
     }
 
@@ -247,27 +243,39 @@ FSIOperator::setup()
 
     if (this->isSolid())
     {
-        M_solidMeshPart.reset( new  partitionMesh< FSIOperator::mesh_type > (*M_dataSolid->mesh(), *M_epetraComm));
 
-        M_dFESpace.reset(new FESpace<mesh_type, EpetraMap>(*M_solidMeshPart,
-                                                           *refFE_struct,
-                                                           *qR_struct,
-                                                           *bdQr_struct,
-                                                           3,
-                                                           *M_epetraComm));
+        if(!M_monolithic)
+            {
+                M_solidMeshPart.reset( new  partitionMesh< FSIOperator::mesh_type > (*M_dataSolid->mesh(), *M_epetraComm));
 
-        leaderPrint("solid: ok.\n");
+                M_dFESpace.reset(new FESpace<mesh_type, EpetraMap>(*M_solidMeshPart,
+                                                                   *refFE_struct,
+                                                                   *qR_struct,
+                                                                   *bdQr_struct,
+                                                                   3,
+                                                                   *M_epetraComm));
 
-
-        M_solid.reset(new FSIOperator::solid_raw_type(dataSolid(),
+                M_solid.reset(new FSIOperator::solid_raw_type(dataSolid(),
                                                       *M_dFESpace,
                                                       *M_epetraComm));
 
-        if (M_linearSolid)
-            M_solidLin.reset(new FSIOperator::solidlin_raw_type(dataSolid(),
-                                                                *M_dFESpace,
-                                                                *M_epetraComm));
+//                 if (M_linearSolid)
+//                     M_solidLin.reset(new FSIOperator::solidlin_raw_type(dataSolid(),
+//                                                                         *M_dFESpace,
+//                                                                         *M_epetraComm));
+            }
+        if(M_monolithic)
+            {   // Monolitic: In the beginning I need a non-partitioned mesh. later we will do the partitioning
+                M_dFESpace.reset(new FESpace<mesh_type, EpetraMap>(M_dataSolid->mesh(),
+                                                                   *refFE_struct,
+                                                                   *qR_struct,
+                                                                   *bdQr_struct,
+                                                                   3,
+                                                                   *M_epetraComm));
 
+            }
+
+        leaderPrint("solid: ok.\n");
 
     }
     else
@@ -287,10 +295,10 @@ FSIOperator::setup()
                                                       *M_epetraComm));
 
 
-        if (M_linearSolid)
-            M_solidLin.reset(new FSIOperator::solidlin_raw_type(dataSolid(),
-                                                                *M_dFESpace,
-                                                                *M_epetraComm));
+//         if (M_linearSolid)
+//             M_solidLin.reset(new FSIOperator::solidlin_raw_type(dataSolid(),
+//                                                                 *M_dFESpace,
+//                                                                 *M_epetraComm));
 
     }
 
@@ -298,46 +306,45 @@ FSIOperator::setup()
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    if (this->isFluid())
-    {
-        M_dispFluidMeshOld.reset(new vector_type(this->M_fluid->getMap(), Repeated) );
-        M_veloFluidMesh.reset   (new vector_type(this->M_fluid->getMap(), Repeated) );
-
-        if (M_fluidLin)
-            M_derVeloFluidMesh.reset(new vector_type(this->M_fluid->getMap(), Repeated) );
-
-        M_un.reset (new vector_type(this->M_fluid->getMap()));
-        M_rhs.reset(new vector_type(this->M_fluid->getMap()));
-    }
-
-
-
-
-    M_dofFluidToStructure->setup(M_dFESpace->refFE(), dDof,
-                                 M_uFESpace->refFE(), M_uFESpace->dof());
-    M_dofFluidToStructure->update(*M_dataSolid->mesh(), M_fluidInterfaceFlag,
-                                  *M_uFESpace->mesh(),  M_structureInterfaceFlag,
-                                  M_interfaceTolerance);
-
-    M_dofStructureToSolid->setup(M_dFESpace->refFE(), M_dFESpace->dof(),
-                                 M_dFESpace->refFE(), M_dFESpace->dof());
-    M_dofStructureToSolid->update(*M_dFESpace->mesh(), M_structureInterfaceFlag,
-                                  *M_dFESpace->mesh(), M_solidInterfaceFlag,
-                                  M_interfaceTolerance);
-
+    if(!M_monolithic)
+        {
+            M_dofFluidToStructure->setup(M_dFESpace->refFE(), dDof,
+                                         M_uFESpace->refFE(), M_uFESpace->dof());
+            M_dofFluidToStructure->update(*M_dataSolid->mesh(), M_fluidInterfaceFlag,
+                                          *M_uFESpace->mesh(),  M_structureInterfaceFlag,
+                                          M_interfaceTolerance);
+        }
+    //here the solid mesh must be non partitioned in the monolithic case
     M_dofStructureToHarmonicExtension->setup(M_uFESpace->refFE(), M_uFESpace->dof(),
                                              M_dFESpace->refFE(), M_dFESpace->dof());
     M_dofStructureToHarmonicExtension->update(*M_uFESpace->mesh(), M_structureInterfaceFlag,
                                               *M_dFESpace->mesh(), M_harmonicInterfaceFlag,
                                               M_interfaceTolerance);
 
-    M_dofHarmonicExtensionToFluid->setup(M_uFESpace->refFE(),  uDof,
-                                         M_uFESpace->refFE(),  uDof);
-    M_dofHarmonicExtensionToFluid->update(*M_dataFluid->mesh(), M_harmonicInterfaceFlag,
-                                          *M_dataFluid->mesh(), M_fluidInterfaceFlag,
+    M_dofStructureToSolid->setup(M_dFESpace->refFE(), M_dFESpace->dof(),
+                                         M_dFESpace->refFE(), M_dFESpace->dof());
+    M_dofStructureToSolid->update(*M_dFESpace->mesh(), M_structureInterfaceFlag,
+                                          *M_dFESpace->mesh(), M_solidInterfaceFlag,
                                           M_interfaceTolerance);
 
-    typedef std::map<ID, ID>::iterator Iterator;
+    M_dofHarmonicExtensionToFluid->setup(M_uFESpace->refFE(),  uDof,
+                                                 M_uFESpace->refFE(),  uDof);
+    M_dofHarmonicExtensionToFluid->update(*M_dataFluid->mesh(), M_harmonicInterfaceFlag,
+                                                  *M_dataFluid->mesh(), M_fluidInterfaceFlag,
+                                                  M_interfaceTolerance);
+
+    if(M_monolithic)// solid mesh partitioning for monolithic
+        {
+            M_solidMeshPart.reset( new  partitionMesh< FSIOperator::mesh_type > (*M_dataSolid->mesh(), *M_epetraComm));
+
+            M_dFESpace.reset(new FESpace<mesh_type, EpetraMap>(*M_solidMeshPart,
+                                                               *refFE_struct,
+                                                               *qR_struct,
+                                                               *bdQr_struct,
+                                                               3,
+                                                               *M_epetraComm));
+        }
+    typedef std::map<ID, ID>::const_iterator Iterator;
 
     std::vector<int> dofInterfaceFluid;
     dofInterfaceFluid.reserve(M_dofHarmonicExtensionToFluid->locDofMap().size());
@@ -351,9 +358,8 @@ FSIOperator::setup()
 
     leaderPrint("building the variables ... ");
 
-
-
-    std::map<ID, ID> locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
+    //is the interface map between HE (first) and solid (second)
+    std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
 
     if (this->isFluid())
     {
@@ -365,19 +371,14 @@ FSIOperator::setup()
                 }
     }
 
+    int* pointerToDofs(0);
+    if (dofInterfaceFluid.size() > 0) pointerToDofs = &dofInterfaceFluid[0];
 
     M_fluidInterfaceMap.reset(new EpetraMap(-1,
                                             dofInterfaceFluid.size(),
-                                            &dofInterfaceFluid[0],
+                                            pointerToDofs,
                                             1,
                                             *M_epetraWorldComm));
-
-    M_lambdaFluid.reset(new vector_type(*M_fluidInterfaceMap, Unique) );
-    M_sigmaFluid.reset (new vector_type(*M_fluidInterfaceMap, Unique) );
-
-    M_lambdaFluidRepeated.reset(new vector_type(*M_fluidInterfaceMap, Repeated) );
-    M_sigmaFluidRepeated.reset (new vector_type(*M_fluidInterfaceMap, Repeated) );
-
 
 //    vector_type test = *M_lambdaFluid;
     M_epetraWorldComm->Barrier();
@@ -385,37 +386,52 @@ FSIOperator::setup()
 
     if (this->isSolid())
     {
-        if (true)
-        {
-            //std::cout << "solid" << std::endl;
-            for (int dim = 0; dim < (int)nDimensions; ++dim)
-                for ( Iterator i = locDofMap.begin(); i != locDofMap.end(); ++i )
-                    {
-                        dofInterfaceSolid.push_back(i->second + dim*dDof.numTotalDof()); // in solid numerotation
-                    }
-        } else {
-	  //std::cout << "solid" << std::endl;
-            dofInterfaceSolid.resize( M_solid->getMap().getMap(Repeated)->NumMyElements() );
-            M_solid->getMap().getMap(Repeated)->MyGlobalElements( &dofInterfaceSolid[0] );
-        }
+        //std::cout << "solid" << std::endl;
+        for (int dim = 0; dim < (int)nDimensions; ++dim)
+            for ( Iterator i = locDofMap.begin(); i != locDofMap.end(); ++i )
+                {
+                    dofInterfaceSolid.push_back(i->second + dim*dDof.numTotalDof()); // in solid numerotation
+                }
     }
 
 
+    pointerToDofs = 0;
+    if (dofInterfaceSolid.size() > 0) pointerToDofs = &dofInterfaceSolid[0];
 
     M_solidInterfaceMap.reset(new EpetraMap(-1,
                                             dofInterfaceSolid.size(),
-                                            &dofInterfaceSolid[0],
+                                            pointerToDofs,
                                             1,
                                             *M_epetraWorldComm));
+    // INITIALIZATION OF THE VARIABLES
+    M_lambdaFluid.reset(new vector_type(*M_fluidInterfaceMap, Unique) );
+    M_lambdaFluidRepeated.reset(new vector_type(*M_fluidInterfaceMap, Repeated) );
 
-    M_lambdaSolid.reset   (new vector_type(*M_solidInterfaceMap, Unique) );
-    M_lambdaSolidOld.reset(new vector_type(*M_solidInterfaceMap, Unique) );
-    M_lambdaDotSolid.reset(new vector_type(*M_solidInterfaceMap, Unique) );
-    M_sigmaSolid.reset    (new vector_type(*M_solidInterfaceMap, Unique) );
+    if(!M_monolithic)//these vectors are not needed for the monolithic
+        {
+            if (this->isFluid())
+                {
+                    M_dispFluidMeshOld.reset(new vector_type(M_uFESpace->map(), Repeated) );
+                    M_veloFluidMesh.reset   (new vector_type(M_uFESpace->map(), Repeated) );
 
-    M_lambdaSolidRepeated.reset   (new vector_type(*M_solidInterfaceMap, Repeated) );
-    M_lambdaDotSolidRepeated.reset(new vector_type(*M_solidInterfaceMap, Repeated) );
-    M_sigmaSolidRepeated.reset    (new vector_type(*M_solidInterfaceMap, Repeated) );
+                    if (M_linearFluid)
+                        M_derVeloFluidMesh.reset(new vector_type(this->M_uFESpace->map(), Repeated) );
+
+                    M_un.reset (new vector_type(M_fluid->getMap()));
+                    M_rhs.reset(new vector_type(M_fluid->getMap()));
+                }
+
+            M_sigmaFluid.reset (new vector_type(*M_fluidInterfaceMap, Unique) );
+            M_sigmaFluidRepeated.reset (new vector_type(*M_fluidInterfaceMap, Repeated) );
+            M_lambdaSolid.reset   (new vector_type(*M_solidInterfaceMap, Unique) );
+            M_lambdaSolidOld.reset(new vector_type(*M_solidInterfaceMap, Unique) );
+            M_lambdaDotSolid.reset(new vector_type(*M_solidInterfaceMap, Unique) );
+            M_sigmaSolid.reset    (new vector_type(*M_solidInterfaceMap, Unique) );
+
+            M_lambdaSolidRepeated.reset   (new vector_type(*M_solidInterfaceMap, Repeated) );
+            M_lambdaDotSolidRepeated.reset(new vector_type(*M_solidInterfaceMap, Repeated) );
+            M_sigmaSolidRepeated.reset    (new vector_type(*M_solidInterfaceMap, Repeated) );
+        }
 
     M_epetraWorldComm->Barrier();
 
@@ -453,6 +469,7 @@ FSIOperator::setDataFromGetPot( GetPot const& data_file )
 
     M_dataFluid.reset(new data_fluid(data_file));
     M_dataSolid.reset(new data_solid(data_file));
+    M_monolithic  = !(M_method.compare("monolithic"));
 }
 
 
@@ -524,15 +541,15 @@ FSIOperator::setUpSystem( GetPot const& data_file )
     {
         M_fluid->setUp(data_file);
         M_meshMotion->setUp(data_file);
-        if (M_linearFluid)
-            M_fluidLin->setUp(data_file);
+//         if (M_linearFluid)
+//             M_fluidLin->setUp(data_file);
     }
 
     if (this->isSolid())
     {
         M_solid->setUp(data_file);
-        if (M_linearSolid)
-            M_solidLin->setUp(data_file);
+//         if (M_linearSolid)
+//             M_solidLin->setUp(data_file);
     }
 }
 
@@ -543,15 +560,15 @@ FSIOperator::buildSystem()
     if (this->isFluid())
     {
         M_fluid->buildSystem();
-        if (M_linearFluid)
-            M_fluidLin->buildSystem();
+//         if (M_linearFluid)
+//             M_fluidLin->buildSystem();
     }
 
     if (this->isSolid())
     {
         M_solid->buildSystem();
-        if (M_linearSolid)
-            M_solidLin->buildSystem();
+//         if (M_linearSolid)
+//             M_solidLin->buildSystem();
     }
 }
 
@@ -663,7 +680,7 @@ FSIOperator::transferMeshMotionOnFluid(const vector_type &_vec1,
 
     /*
 
-    std::map<ID, ID> locDofMap = M_dofFluidToStructure->locDofMap();
+    std::map<ID, ID> const& locDofMap = M_dofFluidToStructure->locDofMap();
 
 
     int numTotalDofMesh  = M_mmFESpace->dof().numTotalDof();
@@ -911,13 +928,13 @@ FSIOperator::transferFluidOnInterface(const vector_type &_vec1,
 
     _vec2 *= 0;
 
-    std::map<ID, ID> locDofMap = M_dofFluidToStructure->locDofMap();
+    std::map<ID, ID> const& locDofMap = M_dofFluidToStructure->locDofMap();
 
 
     int numTotalDofSolid = M_dFESpace->dof().numTotalDof();
     int numTotalDofFluid = M_uFESpace->dof().numTotalDof();
 
-    typedef std::map<ID, ID>::iterator Iterator;
+    typedef std::map<ID, ID>::const_iterator Iterator;
 
     for (int dim = 0; dim < (int)nDimensions; ++dim)
         for ( Iterator it = locDofMap.begin(); it != locDofMap.end(); ++it )
@@ -953,13 +970,13 @@ FSIOperator::transferSolidOnFluid(const vector_type &_vec1,//not working in para
 
     _vec2 *= 0;
 
-    std::map<ID, ID> locDofMap = M_dofFluidToStructure->locDofMap();
+    std::map<ID, ID> const& locDofMap = M_dofFluidToStructure->locDofMap();
 
 
     int numTotalDofSolid = M_dFESpace->dof().numTotalDof();
     int numTotalDofFluid = M_uFESpace->dof().numTotalDof();
 
-    typedef std::map<ID, ID>::iterator Iterator;
+    typedef std::map<ID, ID>::const_iterator Iterator;
 
     for (UInt dim = 0; dim < nDimensions; ++dim)
         for ( Iterator it = locDofMap.begin(); it != locDofMap.end(); ++it )
@@ -998,11 +1015,11 @@ FSIOperator::transferSolidOnInterface(const vector_type &_vec1,
 
     _vec2 *= 0;
 
-    std::map<ID, ID> locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
+    std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
 
     int numTotalDofSolid = M_dFESpace->dof().numTotalDof();
 
-    typedef std::map<ID, ID>::iterator Iterator;
+    typedef std::map<ID, ID>::const_iterator Iterator;
 
     for (UInt dim = 0; dim < nDimensions; ++dim)
         for ( Iterator it = locDofMap.begin(); it != locDofMap.end(); ++it )
@@ -1040,10 +1057,10 @@ FSIOperator::transferInterfaceOnSolid(const vector_type& _vec1,
 
     _vec2 *= 0;
 
-    std::map<ID, ID> locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
+    std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
     int numTotalDofSolid = M_dFESpace->dof().numTotalDof();
 
-    typedef std::map<ID, ID>::iterator Iterator;
+    typedef std::map<ID, ID>::const_iterator Iterator;
 
     for (int dim = 0; dim < (int)nDimensions; ++dim)
         for ( Iterator it = locDofMap.begin(); it != locDofMap.end(); ++it )

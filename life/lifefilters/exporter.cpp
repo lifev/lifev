@@ -33,4 +33,32 @@ ExporterData::Type ExporterData::type() const {
     return M_type;
 }
 
+//! returns Scalar or Vector strings
+std::string ExporterData::typeName() const
+{
+    switch (M_type) {
+    case Scalar:
+        return "Scalar";
+    case Vector:
+        return "Vector";
+    }
+
+    return "ERROR string";
+}
+
+//! returns 1 (if Scalar) or 3 (if Vector)
+UInt ExporterData::typeDim() const
+{
+    switch (M_type) {
+    case Scalar:
+        return 1;
+    case Vector:
+        return 3;
+    }
+
+    return 0;
+
+}
+
+
 }

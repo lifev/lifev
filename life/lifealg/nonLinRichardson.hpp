@@ -78,6 +78,7 @@ int nonLinRichardson( VectorType& sol,
 
     //----------------------------------------------------------------------
 
+    bool const verbose(sol.Comm().MyPID() == 0);
 
     int iter = 0;
 
@@ -88,10 +89,12 @@ int nonLinRichardson( VectorType& sol,
 
     Real normResOld = 1;
 
-    std::cout << "------------------------------------------------------------------" << std::endl;
-    std::cout << "  NonLinRichardson: starting " << std::endl;
-    std::cout << "------------------------------------------------------------------" << std::endl;
-
+    if (verbose) 
+    {
+        std::cout << "------------------------------------------------------------------" << std::endl;
+	std::cout << "  NonLinRichardson: starting " << std::endl;
+	std::cout << "------------------------------------------------------------------" << std::endl;
+    }
     f.evalResidual( residual, sol, iter );
 
     Real normRes      = residual.NormInf();
@@ -116,13 +119,16 @@ int nonLinRichardson( VectorType& sol,
 
     while ( normRes > stop_tol && iter < maxit )
     {
-        std::cout << std::endl;
-        std::cout << "------------------------------------------------------------------" << std::endl;
-        std::cout << "  NonLinRichardson: iter = " << iter
-                  << ", residual = " << normRes
-                  << ", stoping tolerance = " << stop_tol << std::endl;
-        std::cout << "------------------------------------------------------------------" << std::endl;
-        std::cout << std::endl;
+        if (verbose) 
+	{
+	    std::cout << std::endl;
+	    std::cout << "------------------------------------------------------------------" << std::endl;
+	    std::cout << "  NonLinRichardson: iter = " << iter
+		      << ", residual = " << normRes
+		      << ", stoping tolerance = " << stop_tol << std::endl;
+	    std::cout << "------------------------------------------------------------------" << std::endl;
+	    std::cout << std::endl;
+	}
 
         iter++;
 
@@ -178,24 +184,28 @@ int nonLinRichardson( VectorType& sol,
             linearRelTol = std::min<Real>( eta_max,
                                              std::max<Real>( linearRelTol,
                                                              .5 * stop_tol / normRes ) );
-            std::cout << "    Newton: forcing term eta = " << linearRelTol << std::endl;
+            if (verbose) 
+	        std::cout << "    Newton: forcing term eta = " << linearRelTol << std::endl;
         }
 
     }
 
     if ( normRes > stop_tol )
     {
-        std::cout << "!!! NonLinRichardson: convergence fails" << std::endl;
+        if (verbose) 
+	    std::cout << "!!! NonLinRichardson: convergence fails" << std::endl;
         maxit = iter;
         return 1;
     }
 
     //f.displacementOnInterface();
-    std::cout << "------------------------------------------------------------------" << std::endl;
-    std::cout << "--- NonLinRichardson: convergence (" << normRes
-              <<") in " << iter << " iterations\n\n";
-    std::cout << "------------------------------------------------------------------" << std::endl;
-
+    if (verbose) 
+    {
+	std::cout << "------------------------------------------------------------------" << std::endl;
+	std::cout << "--- NonLinRichardson: convergence (" << normRes
+		  <<") in " << iter << " iterations\n\n";
+	std::cout << "------------------------------------------------------------------" << std::endl;
+    }
     maxit = iter;
 
     return 0;

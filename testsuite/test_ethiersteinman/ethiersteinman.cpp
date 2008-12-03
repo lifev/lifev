@@ -53,7 +53,7 @@
 #include <life/lifefem/FESpace.hpp>
 #include <life/lifefem/bdfNS_template.hpp>
 #include <life/lifefilters/ensight.hpp>
-//#include <life/lifefilters/hdf5exporter.hpp>
+#include <life/lifefilters/hdf5exporter.hpp>
 
 #include <life/lifesolver/Oseen.hpp>
 
@@ -366,8 +366,8 @@ Ethiersteinman::run()
 
     beta = fluid.solution();
 
-    std::cout << "norm beta " << beta.Norm2() << std::endl;
-    std::cout << "norm rhs  " << rhs.Norm2() << std::endl;
+    fluid.leaderPrint("norm beta ", beta.Norm2());
+    fluid.leaderPrint("norm rhs  ", rhs.Norm2() );
 
 
     if (L2proj)
@@ -416,20 +416,31 @@ Ethiersteinman::run()
 
     boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
 
+
+    vector_ptrtype velAndPressure;
+
+#ifdef HAVE_HDF5
+    std::string const exporterType =  dataFile( "exporter/type", "ensight");
+
+    if (!exporterType.compare("ensight"))
+    {
+        exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
+        velAndPressure.reset( new vector_type(fluid.solution(), Unique ) );
+    } else {
+        exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
+        velAndPressure.reset( new vector_type(fluid.solution(), Repeated ) );
+    }
+#else
     exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
-    // hdf5 exporter, still under development
-    //    exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
-
-    //    Ensight<RegionMesh3D<LinearTetra> > exporter( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID());
-
-    vector_ptrtype velAndPressure ( new vector_type(fluid.solution(), Repeated ) );
+    velAndPressure.reset( new vector_type(fluid.solution(), Repeated ) );
+#endif
 
     exporter->addVariable( ExporterData::Vector, "velocity", velAndPressure,
                          UInt(0), uFESpace.dof().numTotalDof() );
 
     exporter->addVariable( ExporterData::Scalar, "pressure", velAndPressure,
                          UInt(3*uFESpace.dof().numTotalDof()),
-                         UInt(3*uFESpace.dof().numTotalDof()+pFESpace.dof().numTotalDof()) );
+                         UInt(pFESpace.dof().numTotalDof()) );
     exporter->postProcess( 0 );
 
     // Temporal loop
@@ -460,9 +471,9 @@ Ethiersteinman::run()
 //        rhs *= alpha;
 //        rhs  = bdf.bdf_u().time_der( dataNavierStokes.timestep() );
 
-        std::cout << "alpha " << alpha << std::endl;
-        std::cout << "norm beta " << beta.Norm2() << std::endl;
-        std::cout << "norm rhs  " << rhs.Norm2() << std::endl;
+        fluid.leaderPrint("alpha ", alpha);
+        fluid.leaderPrint("norm beta ", beta.Norm2());
+        fluid.leaderPrint("norm rhs  ", rhs.Norm2());
 
         fluid.updateSystem( alpha, beta, rhs );
         fluid.iterate( bcH );
@@ -481,14 +492,14 @@ Ethiersteinman::run()
         ul2error = uFESpace.L2Error(Problem::uexact, vel  , time, &urelerr );
         pl2error = pFESpace.L20Error(Problem::pexact, press, time, &prelerr );
 
-//         if (verbose)
-//         {
-        out_norm << time << " "
-                 << ul2error << " "
-                 << urelerr << " "
-                 << pl2error << " "
-                 << prelerr << "\n" << std::flush;
-//         }
+	if (verbose)
+        {
+	  out_norm << time << " "
+		   << ul2error << " "
+		   << urelerr << " "
+		   << pl2error << " "
+		   << prelerr << "\n" << std::flush;
+	}
 //         if (((iter % save == 0) || (iter == 1 )))
 //         {
         *velAndPressure = fluid.solution();

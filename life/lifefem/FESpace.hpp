@@ -39,7 +39,7 @@
 #include <life/lifefem/refFE.hpp>
 #include <life/lifefem/dof.hpp>
 #include <life/lifefem/geoMap.hpp>
-//#include <life/lifefem/bcHandler.hpp>
+#include <life/lifefem/bcHandler.hpp>
 #include <life/lifearray/pattern.hpp>
 #include <cmath>
 #include <sstream>
@@ -50,6 +50,7 @@
 #include <life/lifemesh/partitionMesh.hpp>
 #include <life/lifefem/currentFE.hpp>
 #include <life/lifefem/currentBdFE.hpp>
+#include <life/lifefem/sobolevNorms.hpp>
 
 using std::pair;
 
@@ -180,8 +181,10 @@ public:
     template<typename vector_type>
     void interpolate( const Function& fct, vector_type& vect, const Real time = 0. );
 
-    //! calculate L2 pressure error for given exact pressure function
-    //! takes into account a possible offset by a constant
+    template<typename vector_type>
+    void interpolateBC( BCHandler& BCh, vector_type&    vect, const Real      time);
+
+        //! takes into account a possible offset by a constant
     //! \param pexact the exact pressure as a function
     //! \param time the time
     //! \param relError Real* to store the relative error in
@@ -215,7 +218,10 @@ public:
 
 
     template<typename vector_type>
-    double L2Norm( vector_type& vec );
+    double L2Norm( const vector_type& vec );
+
+    template<typename vector_type>
+    double H1Norm( const vector_type& vec );
 
 
     BasePattern::PatternType patternType();
@@ -489,6 +495,58 @@ FESpace<Mesh, Map>::interpolate( const Function& fct,
 }
 
 
+template <typename Mesh, typename Map>
+template<typename vector_type>
+void
+FESpace<Mesh, Map>::interpolateBC( BCHandler& BCh,
+                                   vector_type&    vect,
+                                   const Real      time)
+{
+    //
+    ID   nbComp   = M_fieldDim; // Number of components of the mesh velocity
+    UInt totalDof = dof().numTotalDof();
+
+    //
+    ID idDof;
+
+    if ( !BCh.bdUpdateDone() )
+    {
+        BCh.bdUpdate( *mesh(), feBd(), dof() );
+    }
+
+
+    for ( UInt ibc = 0; ibc < BCh.size(); ++ibc )
+    {
+        if (BCh[ ibc ].type() == Essential)
+        {
+            // Number of components involved in this boundary condition
+            UInt nComp = BCh[ibc].numberOfComponents();
+
+            //
+
+
+            for ( ID i = 1; i <= BCh[ibc].list_size(); ++i )
+            {
+                // Coordinates of the node where we impose the value
+                double x = static_cast< const IdentifierEssential* >( BCh[ibc]( i ) ) ->x();
+                double y = static_cast< const IdentifierEssential* >( BCh[ibc]( i ) ) ->y();
+                double z = static_cast< const IdentifierEssential* >( BCh[ibc]( i ) ) ->z();
+
+                for ( ID j = 1; j <= nComp; ++j )
+                {
+                    // Global Dof
+                    idDof = BCh[ibc]( i ) ->id() + ( BCh[ibc].component( j ) - 1 ) * totalDof;
+                    double val = BCh[ibc]( time, x, y, z, BCh[ibc].component( j ) );
+
+                    vect.checkAndSet(idDof,val);
+                }
+            }
+        }
+    }
+
+
+
+}
 
 
 
@@ -695,7 +753,65 @@ FESpace<Mesh, Map>::L2Error( const Function&    fexact,
 
 // }
 
+template <typename Mesh, typename Map>
+template<typename vector_type>
+double
+FESpace<Mesh, Map>::L2Norm( const vector_type& vec)
+{
+	//
+    ID nbComp = M_fieldDim; // Number of components of the mesh velocity
+    //
+	double norm = 0.;
+	//
+	for ( UInt ielem = 1; ielem <= this->mesh()->numVolumes(); ielem++ )
+	{
+		//UInt elem = M_FESpace.mesh()->volumeList( ielem ).id();
+		this->fe().updateJacQuadPt( this->mesh()->volumeList( ielem ) );
+		//
+		norm += elem_L2_2( vec, this->fe(), this->dof(), nbComp );
+	}
 
+    double sendbuff[1] = {norm};
+    double recvbuff[1];
+
+    this->map().Comm().SumAll(&sendbuff[0], &recvbuff[0], 1);
+
+    norm    = recvbuff[0];
+
+    return sqrt( norm );
+
+}
+
+
+template <typename Mesh, typename Map>
+template<typename vector_type>
+double
+FESpace<Mesh, Map>::H1Norm(const vector_type& vec)
+{
+	//
+    ID nbComp = M_fieldDim; // Number of components of the mesh velocity
+    //
+	double norm = 0.;
+	//
+	for ( UInt ielem = 1; ielem <= this->mesh()->numVolumes(); ielem++ )
+	{
+		//UInt elem = M_FESpace.mesh()->volumeList( ielem ).id();
+		this->fe().updateFirstDerivQuadPt( this->mesh()->volumeList( ielem ) );
+		//
+//		for ( UInt j = 0; j < nbComp; ++j)
+		norm += elem_H1_2( vec, this->fe(), this->dof(), nbComp );
+	}
+
+    double sendbuff[1] = {norm};
+    double recvbuff[1];
+
+    this->map().Comm().SumAll(&sendbuff[0], &recvbuff[0], 1);
+
+    norm    = recvbuff[0];
+
+    return sqrt( norm );
+
+}
 
 
 

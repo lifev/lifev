@@ -71,8 +71,6 @@ exactJacobian::setDataFromGetPot( GetPot const& data )
 
     M_defOmega = data("problem/defOmega", 0.001);
 
-    this->M_dataFluid->setSemiImplicit( data("problem/ifSemiImplicit", 0) );
-
     Debug( 6205 ) << "fixedPoint::setDataFromGetPot(GetPot) OmegaS = " << M_defOmega << "\n";
 
     M_aitkFS.setDefault(M_defOmega, 0.001);
@@ -130,7 +128,8 @@ void exactJacobian::eval(const vector_type& _disp,
 {
     Chrono chronoFluid, chronoSolid, chronoInterface;
 
-    bool recomputeMatrices ( M_updateEvery > 0 && iter % M_updateEvery == 0 );
+    bool recomputeMatrices ( iter == 0 || ( !this->M_dataFluid->isSemiImplicit() &&
+                                            ( M_updateEvery > 0 && (iter % M_updateEvery == 0) ) ) );
 
     if(iter == 0)
         {
@@ -160,7 +159,7 @@ void exactJacobian::eval(const vector_type& _disp,
         this->veloFluidMesh()    -= dispFluidMeshOld();
         this->veloFluidMesh()    *= 1./(M_dataFluid->timestep());
 
-        if((iter==0 && this->M_dataFluid->semiImplicit())|| !this->M_dataFluid->semiImplicit() || this->M_dataFluid->semiImplicit() == -1)
+        if( iter==0 || !this->M_dataFluid->isSemiImplicit() )
             {
                 // copying displacement to a repeated indeces displacement, otherwise the mesh wont know
                 // the value of the displacement for some points
@@ -172,15 +171,15 @@ void exactJacobian::eval(const vector_type& _disp,
 
                 this->moveMesh(meshDispDiff);
 
-        this->interpolateVelocity(meshDispDiff, *M_beta);
+                this->interpolateVelocity(meshDispDiff, *M_beta);
 
-        *M_beta *= -1./M_dataFluid->timestep();
+                *M_beta *= -1./M_dataFluid->timestep();
 
-        *M_beta  += *this->M_un;
+                *M_beta  += *this->M_un;
 
-                double alpha = 1./M_dataFluid->timestep();
                 if(recomputeMatrices)
                     {
+                        double alpha = 1./M_dataFluid->timestep();
                         this->M_fluid->updateSystem( alpha, *M_beta, *M_rhs );
                     }
                 else
@@ -332,7 +331,7 @@ void  exactJacobian::solveLinearFluid()
 
     vector_type dispFluidMesh(this->derVeloFluidMesh().getMap(), Repeated);
 //if statement: in order not to iterate the mesh for each linear residual calculation, needed just for exact Jac case.
-    if(false && this->M_dataFluid->semiImplicit()==1)// not working in parallel
+    if(false && this->M_dataFluid->isSemiImplicit()==true)// not working in parallel
         {//to be corrected: up to now also in the semi implicit case the harmonic extension eq.
             //is solved at each GMRES iteration
 
@@ -433,8 +432,11 @@ int Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epetra_MultiVector 
             {
 
                 //to be used when we correct the other lines
-                if(true || ( !this->M_ej->dataFluid().semiImplicit() || this->M_ej->dataFluid().semiImplicit()==-1))
-                    M_ej->meshMotion().iterate();
+                if(true || ( !this->M_ej->dataFluid().isSemiImplicit() /*|| this->M_ej->dataFluid().semiImplicit()==-1*/))
+                    {
+                        M_ej->meshMotion().iterate();
+                        std::cout<<" mesh motion iterated!!!"<<std::endl;
+                    }
 
                 M_ej->leaderPrint( " norm inf dx = " , M_ej->meshMotion().disp().NormInf() );
 

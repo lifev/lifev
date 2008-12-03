@@ -27,7 +27,7 @@ AM_CPPFLAGS = -DNO_BLASLAPACK
 lib_LTLIBRARIES	= liblifesolver.la
 
 liblifesolver_la_SOURCES   = FSIOperator.cpp fixedPointBase.cpp \
-			exactJacobianBase.cpp FSISolver.cpp \
+			exactJacobianBase.cpp FSISolver.cpp Monolithic.cpp \
 			dataOneDModel.cpp oneDModelHandler.cpp oneDModelSolver.cpp \
 			oneDNonLinModelParam.cpp vectorFunction1D.cpp
 

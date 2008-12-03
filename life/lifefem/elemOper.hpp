@@ -118,7 +118,7 @@ namespace LifeV
 		    const CurrentFE& fe1, const CurrentFE& fe2,
 		    const CurrentBdFE& bdfe, int iblock = 0, int jblock = 0 );
 
-  // coef < \grad u1, [\grad v2 >
+  // coef < \grad u1, \grad v2 >
   void ipstab_grad( const Real coef, ElemMat& elmat,
 		    const CurrentFE& fe1, const CurrentFE& fe2,
 		    const CurrentBdFE& bdfe, int iblock, int jblock, int nb );
@@ -137,7 +137,23 @@ namespace LifeV
 		      const CurrentFE& fe1, const CurrentFE& fe2,
 		      const ElemVec& beta, const CurrentBdFE& bdfe,
 		      int iblock = 0, int jblock = 0 );
-  ///////////////////////////////////////
+
+// coef < |\beta.n| \grad p1, \grad q2 >
+// p1 lives in fe1
+// q2 lives in fe2
+// beta lives in fe3
+
+void ipstab_bagrad( const Real           coef,
+                    ElemMat&             elmat,
+                    const CurrentFE&     fe1,
+                    const CurrentFE&     fe2,
+                    const CurrentFE&     fe3,
+                    const ElemVec&       beta,
+                    const CurrentBdFE&   bdfe,
+                    int iblock = 0, int jblock = 0 );
+
+
+///////////////////////////////////////
 
 
   ////////////////////////////////////////

@@ -59,10 +59,10 @@ namespace LifeV
 
 class ExporterData {
 
+public:
     typedef EpetraVector vector_rawtype;
     typedef boost::shared_ptr<vector_rawtype> vector_ptrtype;
 
-public:
     enum Type{Scalar,Vector};
 
     ExporterData(const Type type, const std::string prefix, vector_ptrtype const& vec, UInt start, UInt size, UInt steady);
@@ -71,11 +71,17 @@ public:
     Real operator()(const UInt i) const;
     Real& operator()(const UInt i);
     UInt dim() const;
+    //! Useful in case you want to define a subrange of vector *vec
     UInt start() const { return M_start; }
     Type type() const;
     const vector_ptrtype getPtr() const { return M_vr; }
     UInt steady() const {return M_steady; }
     void set_steady(UInt i) {M_steady = i;}
+
+    //! returns Scalar or Vector strings
+    std::string typeName() const;
+    //! returns 1 (if Scalar) or 3 (if Vector)
+    UInt typeDim() const;
 
 private:
     std::string M_prefix;
@@ -102,9 +108,9 @@ public:
     /**
        Constructor for Exporter
 
-       \param dfile the GetPot data file where you must provide and [ensight] section with:
+       \param dfile the GetPot data file where you must provide an [ensight] section with:
        "start" (start index for filenames 0 for 000, 1 for 001 etc.),
-       "save" (how many time steps per posptrocessing)
+       "save" (how many time steps per postprocessing)
        "multimesh" (=true if the mesh has to be saved at each post-processing step)
 
        \param mesh the mesh
@@ -126,6 +132,10 @@ public:
     virtual void setMeshProcId( mesh_ptrtype mesh, int const procId );
     void initMeshProcId       ( mesh_ptrtype mesh, int const procId );
 
+    void initProcId       ( int const procId );
+
+    void setNodesMap       ( std::vector<int> LtGNodesMap );
+    void initNodesMap       ();
 
     /**
        Adds a new variable to be post-processed
@@ -148,6 +158,17 @@ public:
     */
     virtual void postProcess(const Real& time) = 0;
 
+    /**
+       Import data from previous simulations
+
+       \param time the solver time
+    */
+    virtual void import(const Real& Tstart, const Real& dt) = 0; // dt is used to rebuild the history up to now
+
+    //! Read  only last timestep
+    virtual void import(const Real& Tstart) = 0;
+
+
 protected:
 
     void getPostfix();
@@ -155,6 +176,7 @@ protected:
     mesh_ptrtype M_mesh;
     std::string M_prefix;
     std::string M_post_dir;
+    std::string M_import_dir;
     UInt M_count;
     UInt M_save;
     bool M_multimesh;
@@ -169,6 +191,8 @@ protected:
 
     int M_procId;
     std::string M_me;
+
+    std::vector<int> M_LtGNodesMap;
 };
 
 
@@ -181,6 +205,7 @@ Exporter<Mesh>::Exporter(const GetPot& dfile, mesh_ptrtype mesh, const std::stri
     :
     M_prefix(prefix),
     M_post_dir(dfile("exporter/post_dir", "./")),
+    M_import_dir(dfile("exporter/import_dir", "./")),
     M_count(dfile("exporter/start",0)),
     M_save(dfile("exporter/save",1)),
     M_multimesh(dfile("exporter/multimesh",true)),
@@ -193,6 +218,7 @@ template<typename Mesh>
 Exporter<Mesh>::Exporter(const GetPot& dfile, const std::string prefix):
     M_prefix(prefix),
     M_post_dir(dfile("exporter/post_dir", "./")),
+    M_import_dir(dfile("exporter/import_dir", "./")),
     M_count(dfile("exporter/start",0)),
     M_save(dfile("exporter/save",1)),
     M_multimesh(dfile("exporter/multimesh",true)),
@@ -211,6 +237,14 @@ void Exporter<Mesh>::initMeshProcId( mesh_ptrtype mesh , int const procId )
 {
     M_mesh = mesh;
 
+    initProcId(procId);
+
+    initNodesMap();
+}
+
+template<typename Mesh>
+void Exporter<Mesh>::initProcId( int const procId )
+{
     M_procId = procId;
 
     std::ostringstream index;
@@ -221,6 +255,25 @@ void Exporter<Mesh>::initMeshProcId( mesh_ptrtype mesh , int const procId )
             index << std::setw(3) << M_procId;
         }
     M_me = index.str();
+
+}
+
+template<typename Mesh>
+void Exporter<Mesh>::setNodesMap( std::vector<int> LtGNodesMap )
+{
+    M_LtGNodesMap = LtGNodesMap;
+}
+
+template<typename Mesh>
+void Exporter<Mesh>::initNodesMap()
+{
+    UInt nVert = M_mesh->numVertices();
+    M_LtGNodesMap.resize(nVert);
+    for (UInt i=0; i<nVert; ++i)
+        {
+            int id = this->M_mesh->pointList( i+1 ).id();
+            M_LtGNodesMap[i] = id;
+        }
 
 }
 

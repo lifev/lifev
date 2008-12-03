@@ -50,14 +50,14 @@ EpetraVector::EpetraVector( const EpetraVector& _vector):
 
 
 EpetraVector::EpetraVector( const EpetraMap& _map, EpetraMapType maptype ):
-    M_epetraVector(*_map.getMap(maptype), false),
+    M_epetraVector(*_map.getMap(maptype)),
     M_epetraMap   (new EpetraMap(_map)),
     M_maptype     (maptype)
 {
 }
 
 EpetraVector::EpetraVector( const EpetraVector& _vector, EpetraMapType maptype):
-    M_epetraVector(*_vector.M_epetraMap->getMap(maptype), false),
+    M_epetraVector(*_vector.M_epetraMap->getMap(maptype)),
     M_epetraMap   (_vector.M_epetraMap),
     M_maptype     (maptype)
 {
@@ -66,7 +66,7 @@ EpetraVector::EpetraVector( const EpetraVector& _vector, EpetraMapType maptype):
 
 EpetraVector::EpetraVector( const EpetraVector& _vector, EpetraMapType maptype,
                             Epetra_CombineMode combineMode):
-    M_epetraVector(*_vector.M_epetraMap->getMap(maptype), false),
+    M_epetraVector(*_vector.M_epetraMap->getMap(maptype)),
     M_epetraMap   (_vector.M_epetraMap),
     M_maptype     (maptype)
 {
@@ -102,7 +102,7 @@ EpetraVector::EpetraVector( const Epetra_MultiVector&    _vector,
                             boost::shared_ptr<EpetraMap> _map,
                             EpetraMapType                maptype )
 :
-    M_epetraVector( *_map->getMap(maptype), false),
+    M_epetraVector( *_map->getMap(maptype)),
     M_epetraMap   ( _map),
     M_maptype     (maptype)
 {
@@ -116,7 +116,7 @@ EpetraVector::EpetraVector( const Epetra_MultiVector&    _vector,
 
 // Copies _vector to a vector which resides only on the processor "reduceToProc"
 EpetraVector::EpetraVector( const EpetraVector& _vector, const int reduceToProc):
-    M_epetraVector(_vector.M_epetraMap->getRootMap(reduceToProc), false),
+    M_epetraVector(_vector.M_epetraMap->getRootMap(reduceToProc)),
     M_epetraMap   (),
     M_maptype     (Unique)
 {
@@ -198,9 +198,9 @@ int EpetraVector::checkLID(const UInt row) const
 //! if row is mine sets this[row] = value and return true
 //! if row is not mine and if the numCpus > 1, returns false
 //! if row is not mine and if the numCpus == 1, asserts
-bool EpetraVector::checkAndSet(const UInt row, const data_type& value)
+bool EpetraVector::checkAndSet(const UInt row, const data_type& value, UInt offset)
 {
-    int lrow = checkLID(row);
+    int lrow = checkLID(row + offset);
     if (lrow < 0)
         return false;
 
@@ -409,14 +409,12 @@ operator = (const EpetraVector& _vector)
             return *this;
         }
     }
-
-    // We hope we are guessing right
-    switch (M_maptype) {
-    case Unique:
-        //
-        return Export(_vector.M_epetraVector, Add);
+    switch (_vector.M_maptype) {
     case Repeated:
-        if (_vector.M_maptype != Repeated)
+        //
+        if (M_maptype != Repeated)
+            return Export(_vector.M_epetraVector, Add);
+    case Unique:
             return Import(_vector.M_epetraVector, Add);
     }
 

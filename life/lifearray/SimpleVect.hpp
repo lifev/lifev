@@ -31,7 +31,7 @@ namespace LifeV
 /#Usage:
 /                SimpleVect<float> a(10);
 /                a(10)=90; // a[9] will contain 90.0
-/                SimpleArray,int> b(3,5) // an arrray with 3 rows
+/                SimpleArray<int> b(3,5) // an arrray with 3 rows
 /                                           and 5 columns
 /                b(3,2)=5;
 /                b.reshape(2,3) // now b is 2x3
@@ -206,7 +206,7 @@ template <typename T, int OFFSETVEC>
 SimpleArray<T, OFFSETVEC>::SimpleArray( size_type ntot )
         :
         std::vector<T>( ntot ),
-        _M_nrows( nrows ),
+        _M_nrows( ntot ),
         _M_ncols( 1 )
 {}
 

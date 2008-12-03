@@ -25,8 +25,14 @@ reltol     =  1.e-6
 etamax     = 1.e-10 # tolerance of the interface problem (GMRES),
                     # if semiImplicit, set   etamax = 1.e-10,
                     # else (e.g.)            etamax = 1.e-3
-ifSemiImplicit = 1 # 0=false, -1=quasi-Newton,  otherwise=true (only valid for method = exactJacobian).
-maxSubIter = 20
+semiImplicit = true # (only valid for method = exactJacobian and monolithic).
+maxSubIter = 100
+#monolithic = 0
+
+
+restart    = false   # restart the computations (see also importer)
+#restart    = true
+#Tstart     = 0.005 # restart from time Tstart
 
 restart    = false   # restart the computations (see also importer)
 #restart    = true
@@ -47,6 +53,8 @@ save       = 1
 
 [fluid]
 
+useShapeDerivatives = true
+
 [./physics]
 endtime   = .01             # endtime
 density   = 1.0               # density
@@ -56,7 +64,7 @@ viscosity = 0.03              # viscosity
 mesh_dir  = ./Mesh/ # the directory where the mesh file is
 #mesh_file = 179347_cm_fluid.mesh  # mesh file
 mesh_file = tube20.mesh  # mesh file
-timestep  = 0.0001             # timestep
+timestep  = 0.001             # timestep
 vel_order       = P1            # P1, P1Bubble, P2
 press_order     = P1            # P1, P2
 order_bdf       = 1
@@ -66,7 +74,7 @@ mesh_edges      = all                   # update all faces elements
 
 
 [../miscellaneous]
-verbose   = 0
+verbose   = 1
 velname   = vel
 pressname = press
 steady    = 0
@@ -132,7 +140,7 @@ endtime   = .01
 mesh_dir  = ./Mesh/  # the directory where the mesh file is
 #mesh_file = 179347_cm_solid.mesh  # mesh file
 mesh_file = vessel20.mesh  # mesh file
-timestep  = 0.0001             # timestep
+timestep  = 0.001             # timestep
 order     = P1
 mesh_faces      = all                   # update all faces elements
 mesh_edges      = all                   # update all faces elements
@@ -152,7 +160,7 @@ linesearch = 0
 
 [../prec]
 reuse           = true
-overlap         = 4
+overlap         = 2
 droptol         = 1.e-5
 fill            = 2
 

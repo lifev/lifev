@@ -94,10 +94,10 @@ public:
 //    Epetra_FECrsMatrix const & getEpetraMatrix(){return M_epetraCrs;}
 
     //! set entries (rVec(i),rVec(i)) to coeff and rest of row r(i) to zero
-    void diagonalize ( std::vector<UInt> rVec, DataType const coeff );
+    void diagonalize ( std::vector<UInt> rVec, DataType const coeff, UInt offset=0 );
 
     //! set entry (r,r) to coeff and rest of row r to zero
-    void diagonalize ( UInt const r, DataType const coeff );
+    void diagonalize ( UInt const r, DataType const coeff, UInt offset=0 );
 
     /*! apply constraint on all rows rVec
      *  @param rVec vector of rows
@@ -106,9 +106,10 @@ public:
      *  @param datumVec vector of values to constrain entry r of the solution at
      */
     void diagonalize( std::vector<UInt> rVec,
-		      DataType const coeff,
-		      vector_type &b,
-		      std::vector<DataType> datumVec );
+                      DataType const coeff,
+                      vector_type &b,
+                      std::vector<DataType> datumVec,
+                      UInt offset=0 );
     /*! apply constraint on row r
      *  @param r row number
      *  @param coeff value to set entry (r,r) at
@@ -116,7 +117,8 @@ public:
      *  @param datum value to constrain entry r of the solution at
      */
     void diagonalize( UInt const r, DataType const coeff, vector_type &b,
-                      DataType datum );
+                      DataType datum,
+                      UInt offset=0 );
 
 
     int getMeanNumEntries() const ;
@@ -322,7 +324,8 @@ int EpetraMatrix<DataType>::GlobalAssemble()
 {
     if ( M_epetraCrs.Filled ())
     {
-        std::cout << "Matrix is already filled" << std::endl;
+        if (M_epetraCrs.Comm().MyPID() == 0)
+            std::cout << "Matrix is already filled" << std::endl;
         return -1;
     }
 
@@ -338,7 +341,8 @@ void EpetraMatrix<DataType>::insertZeroDiagonal()
 
     if ( M_epetraCrs.Filled ())
     {
-        std::cout << "Matrix is already filled, it is impossible to insert the diagonal now" << std::endl;
+        if (M_epetraCrs.Comm().MyPID() == 0)
+	    std::cout << "Matrix is already filled, it is impossible to insert the diagonal now" << std::endl;
         return;
     }
 
@@ -359,7 +363,8 @@ void EpetraMatrix<DataType>::insertZeroDiagonal()
 //! set entries (rVec(i),rVec(i)) to coeff and rest of row r(i) to zero
 template <typename DataType>
 void EpetraMatrix<DataType>::diagonalize ( std::vector<UInt> rVec,
-                                           DataType const coeff )
+                                           DataType const coeff,
+                                           UInt offset)
 {
 
     const Epetra_Comm&  Comm(M_epetraCrs.Comm());
@@ -395,7 +400,7 @@ void EpetraMatrix<DataType>::diagonalize ( std::vector<UInt> rVec,
 	Comm.Broadcast(r,    sizeVec, p);
 
 	for (i=0; i < sizeVec; i++)
-	  diagonalize( Ur[i], coeff);
+	  diagonalize( Ur[i], coeff, offset);
 
 	if ( p != MyPID )
 	{
@@ -409,7 +414,8 @@ void EpetraMatrix<DataType>::diagonalize ( std::vector<UInt> rVec,
 //! set entry (r,r) to coeff and rest of row r to zero
 template <typename DataType>
 void EpetraMatrix<DataType>::diagonalize( UInt const r,
-                                          DataType const coeff)
+                                          DataType const coeff,
+                                          UInt offset)
 {
 
     if ( !M_epetraCrs.Filled() )
@@ -421,10 +427,10 @@ void EpetraMatrix<DataType>::diagonalize( UInt const r,
     const Epetra_Map& colMap(M_epetraCrs.ColMap());
 
 
-    int myCol = colMap.LID(r + 1);
+    int myCol = colMap.LID(r + 1 + offset);
 
     // row: if r is mine, zero out values
-    int myRow = rowMap.LID(r + 1);
+    int myRow = rowMap.LID(r + 1 + offset);
 
     if (myRow >= 0)  // I have this row
     {
@@ -459,7 +465,8 @@ template <typename DataType>
 void EpetraMatrix<DataType>::diagonalize( std::vector<UInt> rVec,
                                           DataType const coeff,
                                           vector_type &b,
-                                          std::vector<DataType> datumVec )
+                                          std::vector<DataType> datumVec,
+                                          UInt offset)
 {
 
     const Epetra_Comm&  Comm(M_epetraCrs.Comm());
@@ -503,7 +510,7 @@ void EpetraMatrix<DataType>::diagonalize( std::vector<UInt> rVec,
 	Comm.Broadcast(datum,sizeVec, p);
 
 	for (i=0; i < sizeVec; i++)
-	  diagonalize( Ur[i], coeff, b, datum[i]);
+	  diagonalize( Ur[i], coeff, b, datum[i], offset);
 
 	if ( p != MyPID )
 	{
@@ -527,7 +534,8 @@ template <typename DataType>
 void EpetraMatrix<DataType>::diagonalize( UInt const r,
                                           DataType const coeff,
                                           vector_type &b,
-                                          DataType datum )
+                                          DataType datum,
+                                          UInt offset)
 {
 
     if ( !M_epetraCrs.Filled() )
@@ -539,7 +547,7 @@ void EpetraMatrix<DataType>::diagonalize( UInt const r,
     const Epetra_Map& colMap(M_epetraCrs.ColMap());
 
 
-    int myCol = colMap.LID(r + 1);
+    int myCol = colMap.LID(r + 1 + offset);
 
 #ifdef EPETRAMATRIX_SYMMETRIC_DIAGONALIZE
     if (myCol >= 0)  // I have this column
@@ -554,7 +562,7 @@ void EpetraMatrix<DataType>::diagonalize( UInt const r,
 #endif
 
     // row: if r is mine, zero out values
-    int myRow = rowMap.LID(r + 1);
+    int myRow = rowMap.LID(r + 1 + offset);
 
     if (myRow >= 0)  // I have this row
     {
@@ -572,7 +580,7 @@ void EpetraMatrix<DataType>::diagonalize( UInt const r,
         DataType coeff_(coeff);
 
         M_epetraCrs.ReplaceMyValues(myRow, 1, &coeff_, &myCol); // A(r,r) = coeff
-        b[ r + 1 ] = coeff * datum; // correct right hand side for row r // BASEINDEX + 1
+        b[ r + 1 + offset] = coeff * datum; // correct right hand side for row r // BASEINDEX + 1
 
     }
 

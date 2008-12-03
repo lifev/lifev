@@ -110,7 +110,7 @@ public:
     //! if row is mine sets this[row] = value and return true
     //! if row is not mine and if the numCpus > 1, returns false
     //! if row is not mine and if the numCpus == 1, asserts
-    bool checkAndSet(const UInt row, const data_type& value);
+    bool checkAndSet(const UInt row, const data_type& value, UInt offset=0);
 
     //! Set the row row of the vector to value. If it isn't on this processor,
     //! store it and send it and send it at next GlobalAssemble

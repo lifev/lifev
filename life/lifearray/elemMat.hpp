@@ -69,6 +69,11 @@ public:
             _mat = 0.0;
         };
     void showMe( std::ostream& c = std::cout );
+
+    void   operator *= (Real coef)
+    {
+        this->_mat *= coef;
+    }
 private:
 
     matrix_type _mat;

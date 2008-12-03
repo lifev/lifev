@@ -177,7 +177,7 @@ namespace LifeV
         */
 
         /*! Move the mesh according to a given displacement stored in disp.
-          Disp is a 3*numoints() vectore whcih stores the x-displacement first, then the y-displacements etc.
+          Disp is a 3*numpoints() vectore whcih stores the x-displacement first, then the y-displacements etc.
           The VECTOR object must have a size() and a standard [] addressing operator.
         */
         template <typename VECTOR>
@@ -600,6 +600,7 @@ namespace LifeV
         std::map<int,int> & globalToLocalNode(){return M_globalToLocalNode;}
         std::map<int,int> & localToGlobalNode(){return M_localToGlobalNode;}
 
+        void printLtGMap(std::ostream & os);
 
 
     private:
@@ -981,11 +982,6 @@ namespace LifeV
         ASSERT_PRE( volumeList.size() < volumeList.capacity() , "Volume list size exceeded" <<
                     volumeList.size() + 1 << " " << volumeList.capacity() ) ;
         volumeList.push_back( v );
-        int id = v.id();
-
-        if (id == 0) id = volumeList.size();
-
-        M_globalToLocalElem.insert(std::make_pair(id, volumeList.size()));
 
         ( volumeList.back() ).setId( volumeList.size() );
         return volumeList.back();
@@ -1451,11 +1447,6 @@ namespace LifeV
 
         pointList.push_back( p );
 
-        int id = p.id();
-        if (id == 0) id = pointList.size();
-
-        M_globalToLocalNode.insert(std::make_pair(id, pointList.size()));
-
         PointType * pp = & pointList.back();
 //        pp->id() = pointList.size();
 
@@ -1577,13 +1568,6 @@ namespace LifeV
     {
         ASSERT_BD( i > 0 && i <= pointList.size() ) ;
 
-        std::map<int, int>::const_iterator  im;
-        im = M_globalToLocalNode.find(i);
-
-        if (im == M_globalToLocalNode.end())
-            { ASSERT_BD( "error in point()" ) ; }
-
-//        return pointList( (*im).second );
         return pointList( i );
     }
 
@@ -1594,13 +1578,6 @@ namespace LifeV
     {
         ASSERT_BD( i > 0 && i <= pointList.size() ) ;
 
-        std::map<int, int>::iterator  im;
-        im = M_globalToLocalNode.find(i);
-
-        if (im == M_globalToLocalNode.end())
-            { ASSERT_BD( "error in point()" ) ; }
-
-//        return pointList( (*im).second );
         return pointList( i );
     }
 
@@ -2077,7 +2054,7 @@ namespace LifeV
     void
     RegionMesh3D<GEOSHAPE, MC>::setLinkSwitch( std::string const & _s )
     {
-        ASSERT0( switches.set( _s ), "Switch named " + _s + " is not allowed" );
+        ASSERT0( switches.set( _s ), std::stringstream( "Switch named " + _s + " is not allowed" ).str().c_str() );
     }
 
     template <typename GEOSHAPE, typename MC>
@@ -2085,7 +2062,7 @@ namespace LifeV
     void
     RegionMesh3D<GEOSHAPE, MC>::unsetLinkSwitch( std::string const & _s )
     {
-        ASSERT0( switches.unset( _s ), "Switch named " + _s + " is not allowed" );
+        ASSERT0( switches.unset( _s ), std::stringstream( "Switch named " + _s + " is not allowed" ).str().c_str() );
     }
 
     template <typename GEOSHAPE, typename MC>
@@ -2415,7 +2392,9 @@ namespace LifeV
 
         std::cout << "     Updating element faces ... " << std::flush;
 
-        ASSERT0( ! cf || M_numBFaces > 0, "Boundary Faces Must have been set in order to call updateElementFaces with createFaces=true\nUse buildBoundaryFaces(..) from mesh_util.h" );
+        ASSERT0( ! cf || M_numBFaces > 0, std::stringstream( std::string("Boundary Faces Must have been set") +
+        std::string("in order to call updateElementFaces with createFaces=true") +
+        std::string("\nUse buildBoundaryFaces(..) from mesh_util.h") ).str().c_str() );
         // If the counter is set we trust it! Otherwise we use Euler formula
 
         if ( cf && ef == 0 )
@@ -2606,6 +2585,24 @@ namespace LifeV
                 list_pts.push_back( i );
             }
         }
+    }
+
+
+    template <typename GEOSHAPE, typename MC>
+    void
+    RegionMesh3D<GEOSHAPE, MC>::
+    printLtGMap(std::ostream & os)
+    {
+    	std::map<int,int>::iterator iter;
+
+    	os << "[RegionMesh3D] Local to Global Map" << std::endl;
+    	os << "Number of Local Points\t=\t" << M_numPoints << std::endl;
+    	os << "Local ID\t\t\tGlobal ID" << std::endl;
+
+    	for( iter = M_localToGlobalNode.begin(); iter != M_localToGlobalNode.end(); ++iter )
+    	{
+    	    os << iter->first << "\t\t\t" << iter->second << std::endl;
+    	}
     }
 
 }

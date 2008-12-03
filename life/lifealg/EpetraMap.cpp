@@ -39,6 +39,32 @@ EpetraMap::EpetraMap(int                NumGlobalElements,
                Comm);
 }
 
+//! construct a map with entries [1:lagrangeMultipliers] distributed on all the processors
+EpetraMap::EpetraMap(std::vector<int> const& lagrangeMultipliers,
+                     const Epetra_Comm& Comm):
+    M_repeatedEpetra_Map(),
+    M_uniqueEpetraMap(),
+    M_exporter(),
+    M_importer()
+{
+    int NumGlobalElements(lagrangeMultipliers.size());
+    int NumMyElements    (NumGlobalElements);
+    std::vector<int>  MyGlobalElements(lagrangeMultipliers);
+    int IndexBase = 1;
+
+    for (int i(0); i < NumGlobalElements; ++i)
+        MyGlobalElements[i] = i;
+
+
+    createMap( NumGlobalElements,
+               NumMyElements,
+               &MyGlobalElements[0],
+               IndexBase,
+               Comm);
+
+}
+
+
 EpetraMap::map_ptrtype const &
 EpetraMap::getMap( EpetraMapType maptype)   const
 {
@@ -64,18 +90,25 @@ EpetraMap::getRootMap( int root)   const
   the maximum id to consider (in the new count)
   eg: offset = 2, maxid = 6;
   _epetraMap = [ 0 2 5 7 8 10 1]
-  this  =      [   0 3 5 ]
+  this  =      [   0 3 5 7 ]
+
+  if needed, indexBase may be changed (default values < 0 means "same as original map")
 */
-EpetraMap::EpetraMap(const Epetra_BlockMap& _blockMap, const int offset, const int maxid )
+EpetraMap::EpetraMap(const Epetra_BlockMap& _blockMap, const int offset, const int maxid,
+                     int indexbase)
      :
     M_repeatedEpetra_Map(),
     M_uniqueEpetraMap(),
     M_exporter(),
     M_importer()
 {
+
+    if (indexbase < 0) indexbase = _blockMap.IndexBase();
+
     std::vector<int> MyGlobalElements;
     int* sourceGlobalElements(_blockMap.MyGlobalElements());
-    int const maxIdOrig(maxid + offset);
+    int const startIdOrig(offset + indexbase );
+    int const endIdOrig  (startIdOrig + maxid );
     const int maxMyElements = std::min(maxid, _blockMap.NumMyElements());
     MyGlobalElements.reserve(maxMyElements);
 
@@ -83,13 +116,13 @@ EpetraMap::EpetraMap(const Epetra_BlockMap& _blockMap, const int offset, const i
 
     // We consider that the source Map may not be ordered
     for (int i(0); i < _blockMap.NumMyElements(); ++i)
-        if (sourceGlobalElements[i] < maxIdOrig && sourceGlobalElements[i] >= offset)
+        if (sourceGlobalElements[i] < endIdOrig && sourceGlobalElements[i] >= startIdOrig)
             MyGlobalElements.push_back(sourceGlobalElements[i] - offset);
 
     createMap( -1,
                MyGlobalElements.size(),
                &MyGlobalElements.front(),
-               _blockMap.IndexBase(),
+               indexbase,
                _blockMap.Comm() );
 
 
@@ -133,7 +166,8 @@ EpetraMap::operator += (const EpetraMap& _epetraMap)
         map.push_back(*pointer);
     }
 
-    int numGlobalElements = getUniqueMap()->NumGlobalElements();
+    int numGlobalElements = getUniqueMap()->NumGlobalElements()
+                          + getUniqueMap()->IndexBase() - _epetraMap.getUniqueMap()->IndexBase();
 
 //    std::cout << "NumGlobalElements = " << numGlobalElements << std::endl;
 
@@ -170,6 +204,21 @@ EpetraMap::operator += (const EpetraMap& _epetraMap)
     return *this;
 }
 
+EpetraMap &
+EpetraMap::operator += (std::vector<int> const& lagrangeMultipliers)
+{
+    if ( lagrangeMultipliers.size() <= 0)
+        return *this;
+
+    ASSERT(this->getUniqueMap(), "operator+=(const int) works only for an existing EpetraMap");
+
+    EpetraMap  lagrMap(lagrangeMultipliers, Comm());
+
+    this->operator+=(lagrMap);
+
+    return *this;
+}
+
 
 EpetraMap::EpetraMap(const EpetraMap& _epetraMap):
     M_repeatedEpetra_Map(),
@@ -188,11 +237,19 @@ EpetraMap::createMap(int  NumGlobalElements,
                      int  IndexBase,
                      const Epetra_Comm &Comm)
 {
-    M_repeatedEpetra_Map.reset( new Epetra_Map(NumGlobalElements,
-                                               NumMyElements,
-                                               MyGlobalElements,
-                                               IndexBase,
-                                               Comm) );
+
+    if (NumMyElements !=0 && MyGlobalElements == 0) // linearMap
+        M_repeatedEpetra_Map.reset( new Epetra_Map(NumGlobalElements,
+                                                   NumMyElements,
+                                                   IndexBase,
+                                                   Comm) );
+    else // classic LifeV map
+        M_repeatedEpetra_Map.reset( new Epetra_Map(NumGlobalElements,
+                                                   NumMyElements,
+                                                   MyGlobalElements,
+                                                   IndexBase,
+                                                   Comm) );
+
     uniqueMap();
 }
 
@@ -347,7 +404,6 @@ EpetraMap::MapsAreSimilar( EpetraMap const& _epetraMap) const
 
 
 }
-
 
 
 } // end namespace LifeV

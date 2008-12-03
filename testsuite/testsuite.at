@@ -48,4 +48,5 @@ m4_include([test_cylinder/testsuite.at])
 m4_include([test_ethiersteinman/testsuite.at])
 m4_include([test_structure/testsuite.at])
 m4_include([test_fsi/testsuite.at])
+m4_include([test_monolithic/testsuite.at])
 

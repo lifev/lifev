@@ -117,7 +117,7 @@ return 0.;
     FESpace<Mesh, EpetraMap>& recoveryFESpace()   {return M_uFESpace;}
 
     //! Return maps
-    Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getRepeatedEpetra_Map(); }
+    Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getMap(Repeated); }
 
     EpetraMap const& getMap() const { return M_localMap; }
 
@@ -241,7 +241,7 @@ Rogers_McCulloch( const data_type&          dataType,
        Epetra_Comm&              comm ):
     	   IonicSolver<Mesh, SolverType>( dataType, uFEspace, comm),
     	   M_sol_w                  ( IonicSolver<Mesh, SolverType>::M_localMap ),
-    	   M_wVecRep( IonicSolver<Mesh, SolverType>::getRepeatedEpetraMap() ),
+    	   M_wVecRep( M_sol_w, Repeated ),
     	   M_elvec ( IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbNode, 1 )
 {	
 }
@@ -473,8 +473,8 @@ Luo_Rudy( const data_type&          dataType,
 			M_sol_f                  ( IonicSolver<Mesh, SolverType>::M_localMap ),
 			M_sol_X                  ( IonicSolver<Mesh, SolverType>::M_localMap ),
 			M_sol_Ca                  ( IonicSolver<Mesh, SolverType>::M_localMap ),
-			M_Iion_VecRep( IonicSolver<Mesh, SolverType>::getRepeatedEpetraMap() ),
 			Iion( IonicSolver<Mesh, SolverType>::M_localMap ),
+			M_Iion_VecRep( Iion, Repeated ),
 			M_elvec_Iion ( IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbNode, 1 ),
 			k_0(5.4),
 			k_i(145.),
@@ -550,7 +550,7 @@ void Luo_Rudy<Mesh, SolverType>::ionModelSolve( const vector_type& u, const Real
 
 	for ( int i = 0 ; i < u.getEpetraVector().MyLength() ; i++ )
 	{	
-		int ig=u.Map().MyGlobalElements()[i];
+		int ig=u.BlockMap().MyGlobalElements()[i];
 //        std::cout<<"[Luo_Rudy::ionModelSolve] Processo "<<IonicSolver<Mesh, SolverType>::M_comm->MyPID()<<": u[ "<<ig<<"]= "<<u[ig]<<"\n"<<std::flush;
 
 		Real u_ig=u[ig];

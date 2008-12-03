@@ -5,9 +5,10 @@
 
 
 [exporter]
+type       = hdf5 # hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  = false
-start      = 2
-save       = 5
+start      = 0
+save       = 1
 
 [fluid]
 

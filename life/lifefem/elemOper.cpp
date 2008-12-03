@@ -324,8 +324,12 @@ void mass( Real coef, ElemMat& elmat, const CurrentFE& fe,
 }
 
 
-void ipstab_grad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2,
-                  const CurrentBdFE& bdfe, int iblock, int jblock )
+void ipstab_grad( const Real         coef,
+                  ElemMat&           elmat,
+                  const CurrentFE&   fe1,
+                  const CurrentFE&   fe2,
+                  const CurrentBdFE& bdfe,
+                  int iblock, int jblock )
 {
     /*
       Interior penalty stabilization: coef*\int_{face} grad u1_i . grad v1_j
@@ -418,12 +422,18 @@ void ipstab_grad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const C
 
 
 
-void ipstab_grad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2,
-                  const CurrentBdFE& bdfe, int iblock, int jblock, int nb )
+void ipstab_grad( const Real         coef,
+                  ElemMat&           elmat,
+                  const CurrentFE&   fe1,
+                  const CurrentFE&   fe2,
+                  const CurrentBdFE& bdfe,
+                  int iblock, int jblock,
+                  int nb )
 {
     /*
       Interior penalty stabilization: coef*\int_{face} grad u1_i . grad v1_j
     */
+
 
     ASSERT_PRE( fe1.hasFirstDeriv(),
                 "ipstab11 needs at least the first derivatives" );
@@ -516,9 +526,14 @@ void ipstab_grad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const C
 
 
 
-void ipstab_bgrad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const CurrentFE& fe2,
-                   const ElemVec& beta, const CurrentBdFE& bdfe, int iblock,
-                   int jblock, int nb )
+void ipstab_bgrad( const Real         coef,
+                   ElemMat&           elmat,
+                   const CurrentFE&   fe1,
+                   const CurrentFE&   fe2,
+                   const ElemVec&     beta,
+                   const CurrentBdFE& bdfe,
+                   int iblock, int jblock,
+                   int nb )
 {
     /*
       Interior penalty stabilization: coef*\int_{face} (\beta1 . grad u1_i) . (\beta2 . grad v2_j)
@@ -558,6 +573,7 @@ void ipstab_bgrad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const 
     //
     // this should be improved!!!
     //
+
     Real x[ 3 ], rx1[ 3 ], drp1[ 3 ], rx2[ 3 ], drp2[ 3 ];
     Real phid1[ fe1.nbNode ][ fe1.nbCoor ][ bdfe.nbQuadPt ];
     Real phid2[ fe2.nbNode ][ fe2.nbCoor ][ bdfe.nbQuadPt ];
@@ -621,14 +637,15 @@ void ipstab_bgrad( const Real coef, ElemMat& elmat, const CurrentFE& fe1, const 
             for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
                 for ( jcoor = 0; jcoor < fe1.nbCoor; ++jcoor )
                     for ( ig = 0;ig < bdfe.nbQuadPt;ig++ )
-                        sum += phid1[ i ][ icoor ][ ig ] * phid2[ j ][ jcoor ][ ig ] * b[ icoor ][ ig ]
-                            * b[ jcoor ][ ig ] * bdfe.weightMeas( ig );
+                        sum += phid1[ i ][ icoor ][ ig ]*phid2[ j ][ jcoor ][ ig ]
+                            *b[ icoor ][ ig ]*b[ jcoor ][ ig ]
+                            *bdfe.weightMeas( ig );
             mat_tmp( i, j ) = coef * sum;
         }
     }
 
     // copy on the components
-    for ( int icomp = 0;icomp < nb;icomp++ )
+    for ( int icomp = 0;icomp < nb; icomp++ )
     {
         ElemMat::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
         mat_icomp += mat_tmp;
@@ -735,7 +752,8 @@ void ipstab_bagrad( const Real coef, ElemMat& elmat,
                     int iblock, int jblock )
 {
 
-    // Interior penalty stabilization: coef*\int_{face} grad u1_i . grad v1_j
+    // Interior penalty stabilization:
+    // coef < |\beta . n|^2 / |\beta| \grad p1, \grad q2 >
 
     ASSERT_PRE( fe1.hasFirstDeriv(),
                 "ipstab11 needs at least the first derivatives" );
@@ -843,6 +861,131 @@ void ipstab_bagrad( const Real coef, ElemMat& elmat,
 
 }
 
+
+// coef < |\beta . n| \grad p1, \grad q2 >
+// p1   lives in fe1
+// q2   lives in fe2
+// beta lives in fe3
+
+
+void ipstab_bagrad( const Real         coef,
+                    ElemMat&           elmat,
+                    const CurrentFE&   fe1,
+                    const CurrentFE&   fe2,
+                    const CurrentFE&   fe3,
+                    const ElemVec&     beta,
+                    const CurrentBdFE& bdfe,
+                    int iblock, int    jblock )
+{
+
+    // Interior penalty stabilization:
+    // coef < |\beta.n| \grad p1, \grad q2 >
+
+    ASSERT_PRE( fe1.hasFirstDeriv(),
+                "ipstab11 needs at least the first derivatives" );
+    ASSERT_PRE( fe2.hasFirstDeriv(),
+                "ipstab11 needs at least the first derivatives" );
+
+    ElemMat::matrix_view mat = elmat.block( iblock, jblock );
+
+    Real sum, sum1, sum2;
+    int i, j, ig, icoor, jcoor;
+    Real phid1[ fe1.nbNode ][ fe1.nbCoor ][ bdfe.nbQuadPt ];
+    Real phid2[ fe2.nbNode ][ fe2.nbCoor ][ bdfe.nbQuadPt ];
+
+    std::vector<Real> x(3), rx1(3), drp1(3), rx2(3), drp2(3);
+    std::vector<Real> b1(3), b2(3);
+
+    fe1.coorMap( b1[ 0 ], b1[ 1 ], b1[ 2 ], 0, 0, 0 ); // translation fe1
+    fe2.coorMap( b2[ 0 ], b2[ 1 ], b2[ 2 ], 0, 0, 0 ); // translation fe2
+    const KNM<Real>& normal = bdfe.normal;
+
+    //
+    // convection velocity term |\beta . n|
+    // on the boundary quadrature points
+    //
+    Real bn[ bdfe.nbQuadPt ];
+
+    for ( ig = 0; ig < bdfe.nbQuadPt; ig++ )
+    {
+        sum1 = 0;
+        sum2 = 0;
+
+        for ( icoor = 0; icoor < fe3.nbCoor; ++icoor ) {
+            for ( i = 0; i < fe3.nbNode; ++i ) {
+                Real betaLoc = fe3.phi( i, ig ) *
+                    beta.vec() [ icoor*fe3.nbNode + i ];
+                sum1 += betaLoc * normal(icoor, ig);
+            }
+        }
+        bn[ ig ] = std::abs(sum1);
+    }
+
+    for ( int ig = 0; ig < bdfe.nbQuadPt; ++ig )
+    {  // first derivatives on quadrature points
+        bdfe.coorQuadPt( x[ 0 ], x[ 1 ], x[ 2 ], ig );       // quadrature points coordinates
+
+        // local coordinates of the quadrature point
+        for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
+        {
+            sum1 = 0;
+            sum2 = 0;
+            for ( jcoor = 0; jcoor < fe1.nbCoor; ++jcoor )
+            {
+                sum1 += fe1.tInvJac( jcoor, icoor, 0 ) * ( x[ jcoor ] - b1[ jcoor ] );
+                sum2 += fe2.tInvJac( jcoor, icoor, 0 ) * ( x[ jcoor ] - b2[ jcoor ] );
+            }
+            rx1[ icoor ] = sum1;
+            rx2[ icoor ] = sum2;
+        }
+
+        for ( i = 0; i < fe1.nbNode; ++i )
+        {
+
+            // first derivative on the reference element
+            for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
+            {
+                drp1[ icoor ] = fe1.refFE.dPhi( i, icoor, rx1[ 0 ], rx1[ 1 ], rx1[ 2 ] );
+                drp2[ icoor ] = fe2.refFE.dPhi( i, icoor, rx2[ 0 ], rx2[ 1 ], rx2[ 2 ] );
+            }
+
+            // first derivative on the current element
+            for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
+            {
+                sum1 = 0;
+                sum2 = 0;
+                for ( jcoor = 0; jcoor < fe1.nbCoor; ++jcoor )
+                {
+                    sum1 += fe1.tInvJac( icoor, jcoor, 0 ) * drp1[ jcoor ];
+                    sum2 += fe2.tInvJac( icoor, jcoor, 0 ) * drp2[ jcoor ];
+                }
+                phid1[ i ][ icoor ][ ig ] = sum1;
+                phid2[ i ][ icoor ][ ig ] = sum2;
+            }
+        }
+    }
+
+
+
+    // Loop on rows
+    for ( i = 0; i < fe1.nbNode; ++i )
+    {
+        // Loop on columns
+        for ( j = 0; j < fe2.nbNode; ++j )
+        {
+            sum = 0.0;
+            // Loop on coordinates
+            for ( icoor = 0; icoor < fe1.nbCoor; ++icoor )
+                for ( ig = 0; ig < bdfe.nbQuadPt ; ++ig )
+                    sum += bn[ ig ] *
+                        phid1[ i ][ icoor ][ ig ] *
+                        phid2[ j ][ icoor ][ ig ] *
+                        bdfe.weightMeas( ig );
+            mat( i, j ) += coef * sum;
+        }
+    }
+
+}
 
 
 void stiff( Real coef, ElemMat& elmat, const CurrentFE& fe,
@@ -2097,9 +2240,6 @@ void advection( Real /*coef*/, ElemVec& vel,
     }
 }
 
-// there should be a const in front of ElemVec !
-//
-//void grad(const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
 void grad( const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
            const CurrentFE& fe1, const CurrentFE& fe2,
            int iblock, int jblock )
@@ -2188,8 +2328,12 @@ void grad_ss( const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
 // living on the basis given by fe3
 // It is useful for advection diffusion problems driven by a NS problem
 // !/
-void grad( const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
-           const CurrentFE& fe1, const CurrentFE& fe2, const CurrentFE& fe3,
+void grad( const int icoor,
+           const ElemVec& vec_loc,
+           ElemMat& elmat,
+           const CurrentFE& fe1,
+           const CurrentFE& fe2,
+           const CurrentFE& fe3,
            int iblock, int jblock )
 /*
   \int q_j \frac{\partial v_i}{\partial x_icoor}
@@ -2205,22 +2349,23 @@ void grad( const int icoor, const ElemVec& vec_loc, ElemMat& elmat,
         double s, coef;
         int nbN1 = fe1.nbNode;
         int nbN3 = fe3.nbNode;
-        for ( i = 0;i < nbN1;i++ )
+
+        for ( i = 0; i < nbN1; i++ )
         {
-            for ( j = 0;j < fe2.nbNode;j++ )
+            for ( j = 0; j < fe2.nbNode; j++ )
             {
                 s = 0;
-                for ( iq = 0;iq < fe1.nbQuadPt;iq++ )
+                for ( iq = 0; iq < fe1.nbQuadPt; iq++ )
                 {
                     coef = 0;
 
-                    for ( int iloc = 0;iloc < nbN3;iloc++ )
-                        coef += vec_loc.vec() [ iloc + icoor * nbN3 ] * fe3.phi( iloc, iq );
+                    for ( int iloc = 0;iloc < nbN3; iloc++ )
+                        coef += vec_loc.vec() [iloc + icoor*nbN3] * fe3.phi(iloc, iq);
 
-                    s += coef * fe2.phi( i, iq ) * fe1.phiDer( j, icoor, iq ) * fe1.weightDet( iq );
+                    s += coef * fe2.phi(i, iq) * fe1.phiDer(j, icoor, iq) * fe1.weightDet(iq);
                 } // Loop on quadrature nodes
 
-                mat( i, j ) += s;
+                mat(i, j) += s;
             } //Loop on j
         } // Loop on i
     } // if

@@ -83,6 +83,7 @@ public:
     //! End time
     Real density() const;
     Real viscosity() const;
+    void viscosity( Real mu );
     Real inittime() const;
     Real endtime() const;
 
@@ -105,8 +106,10 @@ public:
     Real ZSectionInit() const;
     Real ZSectionFinal() const;
     UInt NbPolygonEdges() const;
-    int semiImplicit() const;
-    void setSemiImplicit(const int& SI);
+    bool isSemiImplicit() const;
+    bool useShapeDerivatives() const;
+    void setSemiImplicit(const bool SI);
+    void setUseShapeDerivatives(const bool SD);
 
 protected:
     //! Physics
@@ -126,11 +129,12 @@ protected:
 
     //! Discretization
     NSStabilization M_stab_method;
-    int M_semiImplicit;
 
 private:
 
     //! To extract Mean Values at a given section z
+    bool M_semiImplicit;
+    bool M_shapeDerivatives;
     UInt M_computeMeanValuesPerSection; //! switch: 0 don't compute it, 1 compute
     UInt M_NbZSections;
     Real M_ToleranceSection;
@@ -159,7 +163,8 @@ DataNavierStokes<Mesh>::
 DataNavierStokes( const GetPot& dfile ) :
     DataMesh<Mesh>( dfile, "fluid/discretization" ),
     DataTime( dfile, "fluid/discretization" ),
-    M_semiImplicit(0),
+    M_semiImplicit(false),
+    M_shapeDerivatives           (false),
     M_stabilization_list( "fluid/discretization/stabilization" )
 {
     setup(dfile);
@@ -189,7 +194,8 @@ DataNavierStokes( const DataNavierStokes& dataNavierStokes ) :
     M_ZSectionFinal              (dataNavierStokes.M_ZSectionFinal),
     M_NbPolygonEdges             (dataNavierStokes.M_NbPolygonEdges),
     M_stabilization_list         (dataNavierStokes.M_stabilization_list),
-    M_semiImplicit               (0)
+    M_semiImplicit               (false),
+    M_shapeDerivatives           (false)
 {
 }
 
@@ -227,6 +233,12 @@ setup(  const GetPot& dfile )
     bool ipfaces =  ( M_stab_method == IP_STABILIZATION ) && (this->meshFaces() != "all" ) ;
     if ( ipfaces ) {
         ERROR_MSG("ERROR: IP requires boundary faces. Put mesh_faces = all in data file." ); }
+
+    // semi-implicit and shape derivatives
+    M_semiImplicit = dfile("problem/semiImplicit", false) ;
+    M_shapeDerivatives = dfile("fluid/useShapeDerivatives", false) ;
+    setSemiImplicit(M_semiImplicit);
+
 
     //mean values per section
     M_computeMeanValuesPerSection =
@@ -309,6 +321,13 @@ Real DataNavierStokes<Mesh>::
 viscosity() const
 {
     return _mu;
+}
+
+template <typename Mesh>
+void DataNavierStokes<Mesh>::
+viscosity( Real mu )
+{
+    _mu = mu;
 }
 
 
@@ -435,14 +454,29 @@ NbPolygonEdges() const
 
 template <typename Mesh>
 void DataNavierStokes<Mesh>::
-setSemiImplicit(const int& SI)
-{ M_semiImplicit = SI; }
+setSemiImplicit(const bool SI)
+{
+    M_semiImplicit = SI;
+    // if we use semi Implicit, we shouldn't use shape derivatives.
+    if (M_semiImplicit)  setUseShapeDerivatives(false);
+}
 
 template <typename Mesh>
-int DataNavierStokes<Mesh>::
-semiImplicit() const
+void DataNavierStokes<Mesh>::
+setUseShapeDerivatives(const bool SD)
+{ M_shapeDerivatives = SD; }
+
+template <typename Mesh>
+bool DataNavierStokes<Mesh>::
+useShapeDerivatives()const
+{ return M_shapeDerivatives; }
+
+template <typename Mesh>
+bool DataNavierStokes<Mesh>::
+isSemiImplicit() const
  { return M_semiImplicit; }
-}
+
+} // end namespace LifeV
 #endif
 
 

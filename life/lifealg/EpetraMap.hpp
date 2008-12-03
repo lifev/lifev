@@ -70,10 +70,18 @@ public:
     //@}
 
     EpetraMap();
+    // epetra map constructor. To define a linear map, set MyGlobalElements = 0
     EpetraMap(int                NumGlobalElements,
               int                NumMyElements,
               int*               MyGlobalElements,
               int                IndexBase,
+              const Epetra_Comm& Comm);
+
+    //! construct a map with entries lagrangeMultipliers.
+    //! Repeated lagrange multipliers will be repeated on the repeatedmap
+    //! Again: it is not necessary that the lagrangeMltiplier vector is the same on all
+    //!       processors nor that it is different
+    EpetraMap(std::vector<int> const& lagrangeMultipliers,
               const Epetra_Comm& Comm);
 
     // Calls createImportExport from setUp()
@@ -92,8 +100,14 @@ public:
 
     /*! Builds a submap of map _epetraMap with a given positive offset and
       the maximum id to consider
+      eg: offset = 2, maxid = 6;
+      _epetraMap = [ 0 2 5 7 8 10 1]
+      this  =      [   0 3 5 7 ]
+
+      if needed, indexBase may be changed (default values < 0 means "same as original map")
     */
-    EpetraMap(const Epetra_BlockMap& _blockMap, const int offset, const int maxid );
+    EpetraMap(const Epetra_BlockMap& _blockMap, const int offset, const int maxid,
+              int indexbase = -1);
 
     ~EpetraMap() {}
 
@@ -108,6 +122,16 @@ public:
             createImportExport();
             return map;
         }
+
+    EpetraMap&         operator += (std::vector<int> const&   lagrangeMultipliers);
+    EpetraMap          operator +  (std::vector<int> const&   lagrangeMultipliers)
+        {
+            EpetraMap map( *this );
+            map += lagrangeMultipliers;
+            createImportExport();
+            return map;
+        }
+
 
     Epetra_Comm const& Comm() const { return M_uniqueEpetraMap->Comm(); }
 

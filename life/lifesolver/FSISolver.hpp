@@ -35,6 +35,7 @@
 #include <life/lifealg/newton.hpp>
 #include <life/lifesolver/fixedPointBase.hpp>
 #include <life/lifesolver/exactJacobianBase.hpp>
+#include <life/lifesolver/Monolithic.hpp>
 
 
 #include "Epetra_config.h"
@@ -294,6 +295,7 @@ private:
     /* streams */
     std::ofstream out_iter;
     std::ofstream out_res;
+    bool M_monolithic;
 
 };
 

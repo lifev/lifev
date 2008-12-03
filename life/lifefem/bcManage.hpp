@@ -75,11 +75,10 @@ void bcManage( Real (*mu)(Real t,Real x, Real y, Real z, Real u),
         case Natural:  // Natural boundary conditions (Neumann)
             break;
         case Mixte:  // Mixte boundary conditions (Robin)
-            if(BCh[ i ].isUDep())
-                bcMixteManageUDep( A, b, mesh, dof, BCh[ i ], bdfem, t, U);    //not still implemented
-            else
-                bcMixteManage( A, b, mesh, dof, BCh[ i ], bdfem, t );
-            break;
+        if(BCh[ i ].isUDep())
+            bcMixteManageUDep( A, b, mesh, dof, BCh[ i ], bdfem, t, U, BCh.offset());    //not implemented yet
+        else
+            bcMixteManage( A, b, mesh, dof, BCh[ i ], bdfem, t, BCh.offset() );
         default:
             ERROR_MSG( "This BC type is not yet implemented" );
         }
@@ -95,16 +94,17 @@ void bcManage( Real (*mu)(Real t,Real x, Real y, Real z, Real u),
         {
         case Essential:  // Essential boundary conditions (Dirichlet)
             if(BCh[ i ].isUDep())
-                bcEssentialManageUDep(A, b, mesh, dof, BCh[ i ], bdfem, coef, t,U);
+                bcEssentialManageUDep(A, b, mesh, dof, BCh[ i ], bdfem, coef, t,U, BCh.offset());
             else
-                bcEssentialManage( A, b, mesh, dof, BCh[ i ], bdfem, coef, t );
+                bcEssentialManage( A, b, mesh, dof, BCh[ i ], bdfem, coef, t, BCh.offset() );
             break;
         case Natural:  // Natural boundary conditions (Neumann)
             if(BCh[ i ].isUDep())
-                bcNaturalManageUDep(mu, b, mesh, dof, BCh[ i ], bdfem, t,U);
+                bcNaturalManageUDep(mu, b, mesh, dof, BCh[ i ], bdfem, t,U, BCh.offset());
+
             else
                 //in this case mu must be a constant, think about (not still implemented)
-                bcNaturalManage( b, mesh, dof, BCh[ i ], bdfem, t );
+                bcNaturalManage( b, mesh, dof, BCh[ i ], bdfem, t, BCh.offset() );
             break;
         case Mixte:  // Mixte boundary conditions (Robin)
             break;
@@ -153,25 +153,13 @@ void bcManageMtimeUDep( MatrixType& M, const Dof& dof,
               for ( ID j = 1; j <= nComp; ++j )
               {
                 // Global Dof
-                idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
-		idDofVec.push_back(idDof-1);
+                idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof + BCh.offset();
+                idDofVec.push_back(idDof-1);
 
-#if USE_BOOST_MATRIX
-                using namespace boost::numeric::ublas;
-                matrix_row<MatrixType> mr (M, idDof-1);
-                mr *= 0;
-                M( idDof-1, idDof-1 ) = coef;
-#else
-                // Modifying matrix
-                //M.diagonalize( idDof - 1, coef);
-#endif
               }
             }
-#if USE_BOOST_MATRIX
-#else
 	    // Modifying ONLY matrix
 	    M.diagonalize( idDofVec, coef );
-#endif
 
           }
         }
@@ -198,7 +186,7 @@ void bcManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& do
         case Natural:  // Natural boundary conditions (Neumann)
             break;
         case Mixte:  // Mixte boundary conditions (Robin)
-            bcMixteManage( A, b, mesh, dof, BCh[ i ], bdfem, t );
+            bcMixteManage( A, b, mesh, dof, BCh[ i ], bdfem, t, BCh.offset() );
             break;
         default:
             ERROR_MSG( "This BC type is not yet implemented" );
@@ -214,10 +202,10 @@ void bcManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& do
         switch ( BCh[ i ].type() )
         {
         case Essential:  // Essential boundary conditions (Dirichlet)
-            bcEssentialManage( A, b, mesh, dof, BCh[ i ], bdfem, coef, t );
+            bcEssentialManage( A, b, mesh, dof, BCh[ i ], bdfem, coef, t, BCh.offset() );
             break;
         case Natural:  // Natural boundary conditions (Neumann)
-            bcNaturalManage( b, mesh, dof, BCh[ i ], bdfem, t );
+            bcNaturalManage( b, mesh, dof, BCh[ i ], bdfem, t, BCh.offset() );
             break;
         case Mixte:  // Mixte boundary conditions (Robin)
             break;
@@ -247,7 +235,7 @@ void bcManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
         case Natural:  // Natural boundary conditions (Neumann)
             break;
         case Mixte:  // Mixte boundary conditions (Robin)
-            bcMixteManageMatrix( A, mesh, dof, BCh[ i ], bdfem, t );
+            bcMixteManageMatrix( A, mesh, dof, BCh[ i ], bdfem, t, BCh.offset() );
             break;
         default:
             ERROR_MSG( "This BC type is not yet implemented" );
@@ -263,7 +251,7 @@ void bcManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
         switch ( BCh[ i ].type() )
         {
         case Essential:  // Essential boundary conditions (Dirichlet)
-            bcEssentialManageMatrix( A, dof, BCh[ i ], coef );  //! Bug here???
+            bcEssentialManageMatrix( A, dof, BCh[ i ], coef, BCh.offset() );  //! Bug here???
             break;
         case Natural:  // Natural boundary conditions (Neumann)
             // Do nothing
@@ -291,13 +279,13 @@ void bcManageVector( VectorType& b, const MeshType& mesh, const Dof& dof,
         switch ( BCh[ i ].type() )
         {
         case Essential:  // Essential boundary conditions (Dirichlet)
-            bcEssentialManageVector( b, dof, BCh[ i ], t, coef );
+            bcEssentialManageVector( b, dof, BCh[ i ], t, coef, BCh.offset() );
             break;
         case Natural:  // Natural boundary conditions (Neumann)
-            bcNaturalManage( b, mesh, dof, BCh[ i ], bdfem, t );
+            bcNaturalManage( b, mesh, dof, BCh[ i ], bdfem, t, BCh.offset() );
             break;
         case Mixte:  // Mixte boundary conditions (Robin)
-            bcMixteManageVector( b, mesh, dof, BCh[ i ], bdfem, t );
+            bcMixteManageVector( b, mesh, dof, BCh[ i ], bdfem, t, BCh.offset() );
             break;
         default:
             ERROR_MSG( "This BC type is not yet implemented" );
@@ -321,14 +309,14 @@ void bcManage( MatrixType1& C, MatrixType2& trD, VectorType& b,
 
         switch ( BCh[ i ].type() )
         {
-        case Essential:  // Essentila boundary conditions (Dirichlet)
-            bcEssentialManage( C, trD, b, mesh, dof, BCh[ i ], bdfem, coef, t );
+        case Essential:  // Essential boundary conditions (Dirichlet)
+            bcEssentialManage( C, trD, b, mesh, dof, BCh[ i ], bdfem, coef, t, BCh.offset() );
             break;
         case Natural:  // Natural boundary conditions (Neumann)
-            bcNaturalManage( b, mesh, dof, BCh[ i ], bdfem, t );
+            bcNaturalManage( b, mesh, dof, BCh[ i ], bdfem, t, BCh.offset() );
             break;
         case Mixte:  // Mixte boundary conditions (Robin)
-            bcMixteManage( C, trD, b, mesh, dof, BCh[ i ], bdfem, t );
+            bcMixteManage( C, trD, b, mesh, dof, BCh[ i ], bdfem, t, BCh.offset() );
             break;
         default:
             ERROR_MSG( "This BC type is not yet implemented" );
@@ -353,13 +341,13 @@ void bcManage( MatrixType1& C, MatrixType2& trD, MatrixType3& D,
         switch ( BCh[ i ].type() )
         {
         case Essential:  // Essential boundary conditions (Dirichlet)
-            bcEssentialManage( C, trD, D, b, bp, mesh, dof, BCh[ i ], bdfem, coef, t );
+            bcEssentialManage( C, trD, D, b, bp, mesh, dof, BCh[ i ], bdfem, coef, t, BCh.offset() );
             break;
         case Natural:  // Natural boundary conditions (Neumann)
-            bcNaturalManage( b, mesh, dof, BCh[ i ], bdfem, t );
+            bcNaturalManage( b, mesh, dof, BCh[ i ], bdfem, t, BCh.offset() );
             break;
         case Mixte:  // Mixte boundary conditions (Robin)
-            bcMixteManage( C, trD, D, b, bp, mesh, dof, BCh[ i ], bdfem, t );
+            bcMixteManage( C, trD, D, b, bp, mesh, dof, BCh[ i ], bdfem, t, BCh.offset() );
             break;
         default:
             ERROR_MSG( "This BC type is not yet implemented" );
@@ -373,7 +361,7 @@ void bcManage( MatrixType1& C, MatrixType2& trD, MatrixType3& D,
 template <typename MatrixType, typename VectorType, typename MeshType, typename DataType>
 void bcEssentialManageUDep( MatrixType& A, VectorType& b, const MeshType& /*mesh*/, const Dof& dof,
     const BCBase& BCb, const CurrentBdFE& /*bdfem*/, const DataType& coef,
-    const DataType& t, const VectorType& U )
+    const DataType& t, const VectorType& U , UInt offset=0)
 {
 
     ID idDof;
@@ -412,39 +400,23 @@ void bcEssentialManageUDep( MatrixType& A, VectorType& b, const MeshType& /*mesh
             for ( ID j = 1; j <= nComp; ++j )
             {
                 // Global Dof
-                idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
+                idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof + offset;
 
                 Real datum = BCb( t, x, y, z, BCb.component( j ) ,U[idDof-1]);
 
-		datumVec.push_back(datum);
-		idDofVec.push_back(idDof-1);
+                datumVec.push_back(datum);
+                idDofVec.push_back(idDof-1);
 
-#if USE_BOOST_MATRIX
-                using namespace boost::numeric::ublas;
-                matrix_row<MatrixType> mr (A, idDof-1);
-                mr *= 0;
-                matrix_column<MatrixType> mc (A, idDof-1);
-                b -= mc*datum; // correct rhs
-                mc *= 0;
-                A( idDof-1, idDof-1 ) = coef;
-                b( idDof-1 ) = coef*datum;
-#else
-                // Modifying matrix and right hand side
-                // A.diagonalize( idDof - 1, coef, b, datum );
-#endif
             }
         }
 
-#if USE_BOOST_MATRIX
-#else
 	// Modifying matrix and right hand side
-	A.diagonalize( idDofVec, coef, b, datumVec );
-#endif
+	A.diagonalize( idDofVec, coef, b, datumVec);
     }
 }
 template <typename MatrixType, typename VectorType, typename MeshType, typename DataType>
 void bcEssentialManage( MatrixType& A, VectorType& b, const MeshType& /*mesh*/, const Dof& dof, const BCBase& BCb,
-                        const CurrentBdFE& /*bdfem*/, const DataType& coef, const DataType& t )
+                        const CurrentBdFE& /*bdfem*/, const DataType& coef, const DataType& t, UInt offset )
 {
 
     ID idDof;
@@ -481,26 +453,10 @@ void bcEssentialManage( MatrixType& A, VectorType& b, const MeshType& /*mesh*/, 
             for ( ID j = 1; j <= nComp; ++j )
             {
                 // Global Dof
-                idDof = BCb( i )->id() + ( BCb.component( j ) - 1 ) * totalDof;
+                idDof = BCb( i )->id() + ( BCb.component( j ) - 1 ) * totalDof + offset;
 
                 datumVec.push_back(BCb( BCb( i ) ->id(), BCb.component( j ) ));
                 idDofVec.push_back(idDof - 1);
-
-#if USE_BOOST_MATRIX
-                Real datum = BCb( BCb( i ) ->id(), BCb.component( j ) );
-
-                using namespace boost::numeric::ublas;
-                matrix_row<MatrixType> mr (A, idDof-1);
-                mr *= 0;
-                matrix_column<MatrixType> mc (A, idDof-1);
-                b -= mc*datum; // correct rhs
-                mc *= 0;
-                A( idDof-1, idDof-1 ) = coef;
-                b( idDof-1 ) = coef*datum;
-#else
-                // Modifying matrix and right hand side
-                // A.diagonalize( idDof - 1, coef, b, BCb( BCb( i ) ->id(), BCb.component( j ) ) );
-#endif
             }
         }
     }
@@ -520,36 +476,17 @@ void bcEssentialManage( MatrixType& A, VectorType& b, const MeshType& /*mesh*/, 
             for ( ID j = 1; j <= nComp; ++j )
             {
                 // Global Dof
-                idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
+                idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof + offset;
 
                 datumVec.push_back(BCb( t, x, y, z, BCb.component( j ) ));
                 idDofVec.push_back(idDof - 1);
 
-#if USE_BOOST_MATRIX
-                Real datum = BCb( t, x, y, z, BCb.component( j ) );
-
-
-                using namespace boost::numeric::ublas;
-                matrix_row<MatrixType> mr (A, idDof-1);
-                mr *= 0;
-                matrix_column<MatrixType> mc (A, idDof-1);
-                b -= mc*datum; // correct rhs
-                mc *= 0;
-                A( idDof - 1, idDof - 1 ) = coef;
-                b( idDof - 1 ) = coef*datum;
-#else
-                // Modifying matrix and right hand side
-                // A.diagonalize( idDof - 1, coef, b, BCb( t, x, y, z, BCb.component( j ) ) );
-#endif
             }
         }
     }
 
-#if USE_BOOST_MATRIX
-#else
 	// Modifying matrix and right hand side
-	A.diagonalize( idDofVec, coef, b, datumVec );
-#endif
+	A.diagonalize( idDofVec, coef, b, datumVec);
 
 }
 
@@ -557,7 +494,7 @@ void bcEssentialManage( MatrixType& A, VectorType& b, const MeshType& /*mesh*/, 
 //Version that treates only the matrix modifications
 //Miguel:10/02
 template <typename MatrixType, typename DataType>
-void bcEssentialManageMatrix( MatrixType& A, const Dof& dof, const BCBase& BCb, const DataType& coef )
+void bcEssentialManageMatrix( MatrixType& A, const Dof& dof, const BCBase& BCb, const DataType& coef, UInt offset )
 {
 
     ID idDof;
@@ -586,14 +523,14 @@ void bcEssentialManageMatrix( MatrixType& A, const Dof& dof, const BCBase& BCb, 
         }
     }
     // Modifying ONLY matrix
-    A.diagonalize( idDofVec, coef);
+    A.diagonalize( idDofVec, coef, offset);
 
 }
 
 //Version that treates only the vector modifications
 //Miguel:10/02
 template <typename VectorType, typename DataType>
-void bcEssentialManageVector( VectorType& b, const Dof& dof, const BCBase& BCb, const DataType& t, const DataType& coef )
+void bcEssentialManageVector( VectorType& b, const Dof& dof, const BCBase& BCb, const DataType& t, const DataType& coef, UInt offset )
 {
 
 
@@ -623,7 +560,7 @@ void bcEssentialManageVector( VectorType& b, const Dof& dof, const BCBase& BCb, 
             {
 
                 // Global Dof
-                idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
+                idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof + offset;
 //                 std::cout << "iDof = " << idDof << " -> " << std::flush;
 //                 std::cout << "  :-( " << std::endl;
 //                 std::cout <<  coef * BCb( BCb( i ) ->id(), BCb.component( j ) ); // BASEINDEX + 1;
@@ -659,7 +596,8 @@ void bcEssentialManageVector( VectorType& b, const Dof& dof, const BCBase& BCb, 
             for ( ID j = 1; j <= nComp; ++j )
             {
                 // Global Dof
-                idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
+
+                idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof + offset;
                 // Modifying right hand side
                 idDofVec.push_back(idDof);
                 datumVec.push_back( coef * BCb( t, x, y, z, BCb.component( j ) ) );
@@ -685,7 +623,8 @@ void bcEssentialManage( MatrixType1& A,
                         const BCBase& BCb,
                         const CurrentBdFE& /*bdfem*/,
                         const DataType& coef,
-                        const DataType& t )
+                        const DataType& t ,
+                        UInt offset)
 {
     ID idDof;
     DataType x, y, z;
@@ -753,7 +692,7 @@ void bcEssentialManage( MatrixType1& A,
     }
 
     // Modifying matrix and right hand side
-    A.diagonalize( idDofVec, coef, b, datumVec );
+    A.diagonalize( idDofVec, coef, b, datumVec, offset );
 }
 
 //! version with column diagonalization of D.
@@ -764,7 +703,8 @@ void bcEssentialManage( MatrixType1& A, MatrixType2& trD, MatrixType3& D,
                         VectorType& b, VectorType& bp, const MeshType& mesh,
                         const Dof& dof, const BCBase& BCb,
                         const CurrentBdFE& bdfem,
-                        const DataType& coef, const DataType& t )
+                        const DataType& coef, const DataType& t,
+                        UInt offset)
 {
     ID idDof;
     DataType x, y, z;
@@ -830,7 +770,7 @@ void bcEssentialManage( MatrixType1& A, MatrixType2& trD, MatrixType3& D,
     }
 
     // Modifying matrix and right hand side
-    A.diagonalize( idDofVec, coef, b, datumVec );
+    A.diagonalize( idDofVec, coef, b, datumVec, offset );
 
 }
 
@@ -841,7 +781,7 @@ template <typename VectorType, typename MeshType, typename DataType>
 void bcNaturalManageUDep( Real (*mu)(Real t,Real x, Real y, Real z, Real u),
             VectorType& b, const MeshType& mesh, const Dof& dof,
             const BCBase& BCb, CurrentBdFE& bdfem,
-            const DataType& t, const VectorType& U )
+            const DataType& t, const VectorType& U, UInt offset )
 {
 
     // Number of local Dof (i.e. nodes) in this face
@@ -887,7 +827,7 @@ void bcNaturalManageUDep( Real (*mu)(Real t,Real x, Real y, Real z, Real u),
         Real uPt;            //value in the point
         for(ID idofLocU=0;idofLocU<nDofF;idofLocU++)
         {
-            ID idGDofU=pId->bdLocalToGlobal(idofLocU+1)+( BCb.component( 1 ) - 1 ) * totalDof;
+            ID idGDofU=pId->bdLocalToGlobal(idofLocU+1)+( BCb.component( 1 ) - 1 ) * totalDof + offset;
         locU[idofLocU]=U[idGDofU-1];
             }
 
@@ -902,7 +842,7 @@ void bcNaturalManageUDep( Real (*mu)(Real t,Real x, Real y, Real z, Real u),
                 {
 
                     //global Dof
-                    idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof;
+                    idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof + offset;
 
                     // Loop on quadrature points
                     for ( int l = 0; l < bdfem.nbQuadPt; ++l )
@@ -932,7 +872,7 @@ void bcNaturalManageUDep( Real (*mu)(Real t,Real x, Real y, Real z, Real u),
 
 template <typename VectorType, typename MeshType, typename DataType>
 void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const BCBase& BCb,
-                      CurrentBdFE& bdfem, const DataType& t )
+                      CurrentBdFE& bdfem, const DataType& t, UInt offset )
 {
 
     // Number of local Dof (i.e. nodes) in this face
@@ -962,7 +902,7 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
                     ID id = BCb(i)->id();
 //                    std::cout << id << std::endl;
                     // Global Dof
-                    idDof = id + ( BCb.component( j ) - 1 ) * totalDof;
+                    idDof = id + ( BCb.component( j ) - 1 ) * totalDof + offset;
 
                     // Modifying right hand side (assuming BCvector is a flux)
                     b[ idDof ] += BCb( id , BCb.component( j ) ); // BASEINDEX + 1
@@ -992,7 +932,7 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
                     // Loop on components involved in this boundary condition
                     for ( UInt ic = 0; ic < nComp; ++ic )
 		      {
-			icDof = gDof + ic * totalDof;
+			icDof = gDof + ic * totalDof + offset;
 
                         // Loop on quadrature points
                         for ( int iq = 0; iq < bdfem.nbQuadPt; ++iq )
@@ -1034,7 +974,7 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
 		  for ( UInt ic = 0; ic < nDimensions; ++ic )
                     {
 
-                        icDof = gDof + ic * totalDof;
+                        icDof = gDof + ic * totalDof + offset;
 
 		      // Loop on quadrature points
 		      for ( int iq = 0; iq < bdfem.nbQuadPt; ++iq )
@@ -1134,7 +1074,7 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
                 {
 
                     //global Dof
-                    idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof;
+                    idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof + offset;
 
                     // Loop on quadrature points
                     for ( int l = 0; l < bdfem.nbQuadPt; ++l )
@@ -1157,13 +1097,13 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
 // ===================================================
 template <typename MatrixType, typename VectorType, typename DataType, typename MeshType>
 void bcMixteManageUDep( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& dof, const BCBase& BCb,
-                    CurrentBdFE& bdfem, const DataType& t ,const VectorType& U)
+                    CurrentBdFE& bdfem, const DataType& t ,const VectorType& U, UInt offset)
 {
   ERROR_MSG("error bcMixteManageUDep not still implemented\n");
 }
 template <typename MatrixType, typename VectorType, typename DataType, typename MeshType>
 void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& dof, const BCBase& BCb,
-                    CurrentBdFE& bdfem, const DataType& t )
+                    CurrentBdFE& bdfem, const DataType& t, UInt offset )
 {
 
     // Number of local Dof in this face
@@ -1213,7 +1153,7 @@ void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Do
                     // Global Dof
                     //vincent please check again for your Mixte-FE it doesn't work for Q1:
                     //   idDof  =  BCb(i)->id() + (BCb.component(j)-1)*totalDof;
-                    idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof;
+                    idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof + offset;
 
                     // Loop on quadrature points
                     for ( int l = 0; l < bdfem.nbQuadPt; ++l )
@@ -1262,8 +1202,8 @@ void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Do
                         //vincent please check again for your Mixte-FE it doesn't work for Q1:
                         //     idDof  =  BCb(i)->id() + (BCb.component(j)-1)*totalDof;
                         //     jdDof  =  BCb(k)->id() + (BCb.component(j)-1)*totalDof;
-                        idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof;
-                        jdDof = pId->bdLocalToGlobal( k ) + ( BCb.component( j ) - 1 ) * totalDof;
+                        idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof + offset;
+                        jdDof = pId->bdLocalToGlobal( k ) + ( BCb.component( j ) - 1 ) * totalDof + offset;
 
                         // Loop on quadrature points
                         for ( int l = 0; l < bdfem.nbQuadPt; ++l )
@@ -1328,7 +1268,7 @@ void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Do
                     sum = 0;
 
                     // Global Dof (outside the quad point loop. V. Martin)
-                    idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof;
+                    idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof + offset;
 
                     // Loop on quadrature points
                     for ( int l = 0; l < bdfem.nbQuadPt; ++l )
@@ -1377,10 +1317,10 @@ void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Do
                         }
 
                         // Globals Dof: row and columns
-                        idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof;
-                        jdDof = pId->bdLocalToGlobal( k ) + ( BCb.component( j ) - 1 ) * totalDof;
+                        idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof + offset;
+                        jdDof = pId->bdLocalToGlobal( k ) + ( BCb.component( j ) - 1 ) * totalDof + offset;
 
-                        // Assembling upper entry.  The boundary mas matrix is symetric
+                        // Assembling upper entry.  The boundary mass matrix is symetric
                         A.set_mat_inc( idDof - 1, jdDof - 1, sum );
                         A.set_mat_inc( jdDof - 1, idDof - 1, sum );
                     }
@@ -1397,7 +1337,7 @@ void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Do
 // V. Martin 02/03/2003
 template <typename MatrixType, typename DataType, typename MeshType>
 void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
-                          const BCBase& BCb, CurrentBdFE& bdfem, const DataType& t )
+                          const BCBase& BCb, CurrentBdFE& bdfem, const DataType& t, UInt offset )
 {
 
     // Number of local Dof in this face
@@ -1445,7 +1385,7 @@ void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
                     sum = 0;
 
                     // Global Dof
-                    idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
+                    idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof + offset;
 
                     // Loop on quadrature points
                     for ( int l = 0; l < bdfem.nbQuadPt; ++l )
@@ -1480,8 +1420,8 @@ void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
                         }
 
                         // Globals Dof: row and columns
-                        idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
-                        jdDof = BCb( k ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
+                        idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof + offset;
+                        jdDof = BCb( k ) ->id() + ( BCb.component( j ) - 1 ) * totalDof + offset;
 
                         // Assembling upper entry.  The boundary mass matrix is symetric
                         A.set_mat_inc( idDof - 1, jdDof - 1, sum );
@@ -1524,7 +1464,7 @@ void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
                     sum = 0;
 
                     // Global Dof (outside the quad point loop. V. Martin)
-                    idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof;
+                    idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof + offset;
 
                     // Loop on quadrature points
                     for ( int l = 0; l < bdfem.nbQuadPt; ++l )
@@ -1569,8 +1509,8 @@ void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
                         }
 
                         // Globals Dof: row and columns
-                        idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof;
-                        jdDof = pId->bdLocalToGlobal( k ) + ( BCb.component( j ) - 1 ) * totalDof;
+                        idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof + offset;
+                        jdDof = pId->bdLocalToGlobal( k ) + ( BCb.component( j ) - 1 ) * totalDof + offset;
 
                         // Assembling upper entry.  The boundary mas matrix is symetric
                         A.set_mat_inc( idDof - 1, jdDof - 1, sum );
@@ -1589,7 +1529,7 @@ void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
 // V. Martin 02/03/2003
 template <typename VectorType, typename DataType, typename MeshType>
 void bcMixteManageVector( VectorType& b, const MeshType& mesh, const Dof& dof,
-                          const BCBase& BCb, CurrentBdFE& bdfem, const DataType& t )
+                          const BCBase& BCb, CurrentBdFE& bdfem, const DataType& t, UInt offset )
 {
 
     // Number of local Dof in this face
@@ -1629,7 +1569,7 @@ void bcMixteManageVector( VectorType& b, const MeshType& mesh, const Dof& dof,
                 for ( ID j = 1; j <= nComp; ++j )
                 {
                     // Global Dof
-                    idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof;
+                    idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof + offset;
 
                     // Loop on quadrature points
                     for ( int l = 0; l < bdfem.nbQuadPt; ++l )
@@ -1671,7 +1611,7 @@ void bcMixteManageVector( VectorType& b, const MeshType& mesh, const Dof& dof,
                 {
 
                     // Global Dof (outside the quad point loop. V. Martin)
-                    idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof;
+                    idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof + offset;
 
                     // Loop on quadrature points
                     for ( int l = 0; l < bdfem.nbQuadPt; ++l )
@@ -1698,7 +1638,7 @@ template <typename MatrixType1, typename MatrixType2, typename VectorType,
 typename DataType, typename MeshType>
 void bcMixteManage( MatrixType1& A, MatrixType2 & trD, VectorType& b,
                     const MeshType& mesh, const Dof& dof, const BCBase& BCb,
-                    CurrentBdFE& bdfem, const DataType& t )
+                    CurrentBdFE& bdfem, const DataType& t, UInt offset )
 {
 
     ASSERT( !BCb.dataVector() , "BC Vector not yet implemented for this particular bcMixteManage." );
@@ -1751,14 +1691,14 @@ void bcMixteManage( MatrixType1& A, MatrixType2 & trD, VectorType& b,
                            bdfem.weightMeas( l );
 
                     // Global Dof
-                    idDof = pId->bdLocalToGlobal( i ) + ( BCb.component( j ) - 1 ) * totalDof;
+                    idDof = pId->bdLocalToGlobal( i ) + ( BCb.component( j ) - 1 ) * totalDof + offset;
 
                     // Adding right hand side contribution
                     b[ idDof ] += bdfem.phi( int( i - 1 ), l ) * BCb( t, x, y, z, BCb.component( j ) ) * bdfem.weightMeas( l ); // BASEINDEX + 1
                 }
 
                 // Global Dof
-                idDof = pId->bdLocalToGlobal( i ) + ( BCb.component( j ) - 1 ) * totalDof;
+                idDof = pId->bdLocalToGlobal( i ) + ( BCb.component( j ) - 1 ) * totalDof + offset;
 
                 // Assembling diagonal entry
                 A.set_mat_inc( idDof - 1, idDof - 1, sum );
@@ -1787,8 +1727,8 @@ void bcMixteManage( MatrixType1& A, MatrixType2 & trD, VectorType& b,
                     }
 
                     // Globals Dof: row and columns
-                    idDof = pId->bdLocalToGlobal( i ) + ( BCb.component( j ) - 1 ) * totalDof;
-                    jdDof = pId->bdLocalToGlobal( k ) + ( BCb.component( j ) - 1 ) * totalDof;
+                    idDof = pId->bdLocalToGlobal( i ) + ( BCb.component( j ) - 1 ) * totalDof + offset;
+                    jdDof = pId->bdLocalToGlobal( k ) + ( BCb.component( j ) - 1 ) * totalDof + offset;
 
                     // Assembling upper entry.  The boundary mas matrix is symetric
                     A.set_mat_inc( idDof - 1, jdDof - 1, sum );
@@ -1805,7 +1745,7 @@ typename VectorType, typename DataType, typename MeshType>
 void bcMixteManage( MatrixType1& A, MatrixType2 & trD, MatrixType3 & D,
                     VectorType& b, VectorType& bp, const MeshType& mesh,
                     const Dof& dof, const BCBase& BCb, CurrentBdFE& bdfem,
-                    const DataType& t )
+                    const DataType& t, UInt offset )
 {
     ASSERT( !BCb.dataVector() , "BC Vector not yet implemented for this particular bcMixteManage." );
 
@@ -1857,14 +1797,14 @@ void bcMixteManage( MatrixType1& A, MatrixType2 & trD, MatrixType3 & D,
                            bdfem.weightMeas( l );
 
                     // Global Dof
-                    idDof = pId->bdLocalToGlobal( i ) + ( BCb.component( j ) - 1 ) * totalDof;
+                    idDof = pId->bdLocalToGlobal( i ) + ( BCb.component( j ) - 1 ) * totalDof + offset;
 
                     // Adding right hand side contribution
                     b[ idDof ] += bdfem.phi( int( i - 1 ), l ) * BCb( t, x, y, z, BCb.component( j ) ) * bdfem.weightMeas( l ); // BASEINDEX + 1
                 }
 
                 // Global Dof
-                idDof = pId->bdLocalToGlobal( i ) + ( BCb.component( j ) - 1 ) * totalDof;
+                idDof = pId->bdLocalToGlobal( i ) + ( BCb.component( j ) - 1 ) * totalDof + offset;
 
                 // Assembling diagonal entry
                 A.set_mat_inc( idDof - 1, idDof - 1, sum );
@@ -1893,8 +1833,8 @@ void bcMixteManage( MatrixType1& A, MatrixType2 & trD, MatrixType3 & D,
                     }
 
                     // Global Dof: row and columns
-                    idDof = pId->bdLocalToGlobal( i ) + ( BCb.component( j ) - 1 ) * totalDof;
-                    jdDof = pId->bdLocalToGlobal( k ) + ( BCb.component( j ) - 1 ) * totalDof;
+                    idDof = pId->bdLocalToGlobal( i ) + ( BCb.component( j ) - 1 ) * totalDof + offset;
+                    jdDof = pId->bdLocalToGlobal( k ) + ( BCb.component( j ) - 1 ) * totalDof + offset;
 
                     // Assembling upper entry.  The boundary mas matrix is symetric
                     A.set_mat_inc( idDof - 1, jdDof - 1, sum );

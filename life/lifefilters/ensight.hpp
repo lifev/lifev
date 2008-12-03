@@ -83,7 +83,15 @@ public:
     */
     void postProcess(const Real& time);
 
+    /**
+       Import data from previous simulations
+
+       \param time the solver time
+    */
     void import(const Real& Tstart, const Real& dt); // dt is used to rebuild the history up to now
+
+    //! Read  only last timestep
+    void import(const Real& Tstart);
 
 private:
 
@@ -209,20 +217,22 @@ void Ensight<Mesh>::M_wr_ascii_scalar(const ExporterData& dvar)
 		sclf.open( (this->M_post_dir+dvar.prefix()+this->M_me+".scl").c_str() );
 	else
 		sclf.open( (this->M_post_dir+dvar.prefix()+this->M_postfix+this->M_me+".scl").c_str() );
-		
+
     UInt count=0;
 
     UInt start = dvar.start();
-    UInt nVert = this->M_mesh->numVertices();
+    //    UInt nVert = this->M_mesh->numVertices();
+    UInt nVert = this->M_LtGNodesMap.size();
     sclf<<"Scalar per node\n";
     //for (UInt i=start;i<dim;++i)
 
     sclf.setf(std::ios::right | std::ios_base::scientific);
     sclf.precision(5);
 
-    for (UInt i=1;i<=nVert;++i)
+    for (UInt i=0; i<nVert; ++i)
         {
-            int id = this->M_mesh->pointList( i ).id();
+    	    // int id = this->M_mesh->pointList( i ).id();
+            int id = this->M_LtGNodesMap[i];
             sclf.width(12);
             sclf << dvar(start+id) ;
             ++count;
@@ -243,12 +253,13 @@ template <typename Mesh> void Ensight<Mesh>::M_wr_ascii_vector(const ExporterDat
 		vctf.open( (this->M_post_dir+dvar.prefix()+this->M_me+".vct").c_str() );
 	else
 		vctf.open( (this->M_post_dir+dvar.prefix()+this->M_postfix+this->M_me+".vct").c_str() );
-		
+
     UInt count=0;
 
     UInt dim   = dvar.dim();
     UInt start = dvar.start();
-    UInt nVert = this->M_mesh->numVertices();
+    //    UInt nVert = this->M_mesh->numVertices();
+    UInt nVert = this->M_LtGNodesMap.size();
 
     vctf<<"Vector per node\n";
     //for (UInt i=start;i<dim;++i)
@@ -256,10 +267,11 @@ template <typename Mesh> void Ensight<Mesh>::M_wr_ascii_vector(const ExporterDat
     vctf.setf(std::ios::right | std::ios_base::scientific);
     vctf.precision(5);
 
-    for (UInt i=1;i<=nVert;++i)
+    for (UInt i=0; i<nVert; ++i)
         for (UInt j=0; j< nDimensions;++j)
             {
-                int id = this->M_mesh->pointList( i ).id();
+                // int id = this->M_mesh->pointList( i ).id();
+                int id = this->M_LtGNodesMap[i];
                 vctf.width(12);
                 vctf << dvar(start+j*dim+id) ;
                 ++count;
@@ -427,9 +439,9 @@ template <typename Mesh> void Ensight<Mesh>::M_case_variable_section(std::ofstre
     casef << "VARIABLE\n";
     std::string aux, str;
     for (Iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
-        {	
-    		if (i-> steady() ) 
-    			str = ""; 
+        {
+    		if (i-> steady() )
+    			str = "";
     		else
     			str = ".***";
             aux = i->prefix()+" "+i->prefix();
@@ -451,12 +463,24 @@ void Ensight<Mesh>::import(const Real& Tstart, const Real& dt)
     // dt is used to rebuild the history up to now
     Real time(Tstart - this->M_count*dt);
 
-    for ( int count(0); count <= this->M_count; ++count)
+    for ( UInt count(0); count < this->M_count; ++count)
     {
         this->M_timeSteps.push_back(time);
         ++this->M_steps;
         time += dt;
     }
+
+    time += dt;
+
+    import(time);
+
+}
+
+template<typename Mesh>
+void Ensight<Mesh>::import(const Real& time)
+{
+    this->M_timeSteps.push_back(time);
+    ++this->M_steps;
 
     typedef std::list< ExporterData >::iterator Iterator;
 
@@ -478,7 +502,7 @@ void Ensight<Mesh>::import(const Real& Tstart, const Real& dt)
 }
 
 template <typename Mesh>
-void Ensight<Mesh>::M_rd_ascii( ExporterData& dvar)
+void Ensight<Mesh>::M_rd_ascii( ExporterData& dvar )
 {
 
     switch( dvar.type() )
@@ -496,15 +520,22 @@ void Ensight<Mesh>::M_rd_ascii( ExporterData& dvar)
 
 
 template <typename Mesh>
-void Ensight<Mesh>::M_rd_ascii_scalar( ExporterData& dvar)
+void Ensight<Mesh>::M_rd_ascii_scalar( ExporterData& dvar )
 {
 
-    std::ifstream sclf( (dvar.prefix()+"."+this->M_postfix+this->M_me+".scl").c_str() );
+    std::string filename( this->M_import_dir+dvar.prefix()+this->M_postfix+this->M_me+".scl" );
+    std::ifstream sclf( filename.c_str() );
 
-    UInt count=0;
+    if (!this->M_procId) std::cout << "\tfile "<< filename << std::endl;
 
+    ASSERT(sclf.good(), std::stringstream("There is an error while reading " + filename).str().c_str() );
+
+    // UInt count=0;
+
+//    UInt dim = dvar.dim();
     UInt start = dvar.start();
-    UInt nVert = this->M_mesh->numVertices();
+    //    UInt nVert = this->M_mesh->numVertices();
+    UInt nVert = this->M_LtGNodesMap.size();
 
     std::string trashcan;
 
@@ -513,11 +544,14 @@ void Ensight<Mesh>::M_rd_ascii_scalar( ExporterData& dvar)
     sclf.setf(std::ios::right | std::ios_base::scientific);
     sclf.precision(5);
 
-    for (UInt i=1;i<=nVert;++i)
-        {
-            ASSERT(sclf.good(), "There is an error while reading the file");
+	std::map<int,int>::iterator iter;
 
-            int id = this->M_mesh->pointList( i ).id();
+    for (UInt i=0; i<nVert; ++i)
+        {
+    	    ASSERT(sclf.good(), std::stringstream("There is an error while reading " + filename).str().c_str() );
+
+            // int id = this->M_mesh->pointList( i ).id();
+            int id = this->M_LtGNodesMap[i];
             sclf.width(12);
             sclf >> dvar(start+id) ;
             /*
@@ -529,19 +563,26 @@ void Ensight<Mesh>::M_rd_ascii_scalar( ExporterData& dvar)
                 }
             */
         }
-    ASSERT(!sclf.fail(), "There is an error while reading the file");
+    ASSERT(!sclf.fail(), std::stringstream("There is an error while reading " + filename).str().c_str() );
     sclf.close();
 }
 
 template <typename Mesh> void Ensight<Mesh>::M_rd_ascii_vector(ExporterData& dvar)
 {
-    std::ifstream vctf( (dvar.prefix()+"."+this->M_postfix+this->M_me+".vct").c_str() );
 
-    UInt count=0;
+    std::string filename( this->M_import_dir+dvar.prefix()+this->M_postfix+this->M_me+".vct" );
+    std::ifstream vctf( filename.c_str() );
+
+    if (!this->M_procId) std::cout << "\tfile "<< filename << std::endl;
+
+    ASSERT(vctf.good(), std::stringstream("There is an error while reading " + filename).str().c_str() );
+
+//    UInt count=0;
 
     UInt dim   = dvar.dim();
     UInt start = dvar.start();
-    UInt nVert = this->M_mesh->numVertices();
+    //    UInt nVert = this->M_mesh->numVertices();
+    UInt nVert = this->M_LtGNodesMap.size();
 
     std::string trashcan;
 
@@ -550,12 +591,13 @@ template <typename Mesh> void Ensight<Mesh>::M_rd_ascii_vector(ExporterData& dva
     vctf.setf(std::ios::right | std::ios_base::scientific);
     vctf.precision(5);
 
-    for (UInt i=1;i<=nVert;++i)
+    for (UInt i=0; i<nVert; ++i)
         for (UInt j=0; j< nDimensions;++j)
             {
-                ASSERT(vctf.good(), "There is an error while reading the file");
+                ASSERT(vctf.good(), std::stringstream("There is an error while reading " + filename).str().c_str() );
 
-                int id = this->M_mesh->pointList( i ).id();
+                // int id = this->M_mesh->pointList( i ).id();
+                int id = this->M_LtGNodesMap[i];
                 vctf.width(12);
                 vctf >> dvar(start+j*dim+id) ;
                 /*
@@ -567,7 +609,7 @@ template <typename Mesh> void Ensight<Mesh>::M_rd_ascii_vector(ExporterData& dva
                     }
                 */
             }
-    ASSERT(!vctf.fail(), "There is an error while reading the file");
+    ASSERT(!vctf.fail(), std::stringstream("There is an error while reading " + filename).str().c_str() );
     vctf.close();
 }
 

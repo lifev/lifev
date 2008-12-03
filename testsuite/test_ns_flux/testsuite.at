@@ -1,0 +1,99 @@
+# -*- mode: m4 -*-
+#
+#  This file is part of the LifeV library
+#
+#  Author(s): Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+#       Date: 2004-08-29
+#
+#  Copyright (C) 2004 EPFL, INRIA and Politechnico di Milano
+#
+#  This library is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU Lesser General Public
+#  License as published by the Free Software Foundation; either
+#  version 2.1 of the License, or (at your option) any later version.
+#
+#  This library is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#  Lesser General Public License for more details.
+#
+#  You should have received a copy of the GNU Lesser General Public
+#  License along with this library; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+# \file testsuite.at
+# \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
+# \date 2004-08-29
+#
+AT_SETUP([test_ns_flux])
+AT_KEYWORDS([test_ns_flux fluid])
+AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
+#----------------------------------------------------------------
+#      Data file for cylinder test with Navier-Stokes
+#----------------------------------------------------------------
+
+[exporter]
+multimesh  = false
+start      = 0
+save       = 1
+
+[fluid]
+
+[./physics]
+endtime         = .2
+density         = 1.0          # density
+viscosity       = 0.005         # viscosity
+
+
+[../discretization]
+mesh_dir        = ./Mesh/
+mesh_file       = tube20.mesh          # "big file"
+
+mesh_type       = .mesh
+
+mesh_faces      = all                   # update all faces elements
+mesh_edges      = all                   # update all faces elements
+timestep        = 0.1                   # timestep
+verbose         = 0                     # verbose during mesh-reading
+order_bdf       = 1
+linearized      = 0
+diagonalize     = 0 # weight, 0=off
+div_beta_u_v    = 1 # 1=on, 0=off
+vel_order       = P1		# P1, P1Bubble, P2
+press_order     = P1		# P1, P2
+
+[../solver]
+solver          = gmres
+scaling         = none
+output          = all_res # all_res
+conv            = rhs
+max_iter        = 100
+kspace          = 100
+
+[../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
+prectype        = Amesos # Amesos (does a local LU factorization), ILUT (not ILU)
+reuse           = true
+overlap         = 2
+#droptol         = 1.e-5 ??
+fill            = 4
+relax_value     = 1
+
+[../ipstab]
+gammaBeta  = 0.02
+gammaDiv   = 0.2
+gammaPress = 0.2
+
+[../problem]
+
+Re 	= 1.0
+nu 	= 1.5
+D  	= 1.
+H  	= 20.
+centered = 1
+]])
+
+
+AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria/cyl3D.2.2.00.mesh &&
+          mpirun -np 2 $top_builddir/testsuite/test_ns_flux/test_ns_flux -c],[0],[ignore],[ignore])
+AT_CLEANUP([out_res_solid iter num_iter out_iter_solid res])
+

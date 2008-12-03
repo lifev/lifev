@@ -40,7 +40,8 @@ namespace LifeV
 
 BCHandler::BCHandler( const ID& nbc, BCHints hint ):
     M_bdUpdateDone( 0 ),
-    M_hint( hint )
+    M_hint( hint ),
+    M_offset(0)
 {
     if ( nbc > 0 )
     {
@@ -52,7 +53,8 @@ BCHandler::BCHandler( const ID& nbc, BCHints hint ):
 BCHandler::BCHandler( const BCHandler &BCh):
     M_bdUpdateDone(BCh.M_bdUpdateDone),
     M_hint(BCh.M_hint),
-    M_bcList(BCh.M_bcList)
+    M_bcList(BCh.M_bcList),
+    M_offset(0)
 {
 }
 

@@ -123,6 +123,45 @@ Real u2(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, 
   return 0;
 }
 
+void
+postProcessFluxesPressures( Oseen< RegionMesh3D<LinearTetra> >& nssolver,
+    BCHandler& bcHandler,
+    const LifeV::Real& t, bool _verbose )
+{
+  LifeV::Real Q, P;
+  UInt flag;
+
+  for( BCHandler::Iterator it = bcHandler.begin();
+  it != bcHandler.end(); ++it )
+    {
+      flag = it->flag();
+
+      Q = nssolver.flux(flag);
+      P = nssolver.pressure(flag);
+
+      if( _verbose ) {
+        std::ofstream outfile;
+        std::stringstream filenamess;
+        std::string filename;
+
+        // file name contains the label
+        filenamess << flag;
+        // writing down fluxes
+        filename = "flux_label" + filenamess.str() + ".m";
+        outfile.open(filename.c_str(),std::ios::app);
+        outfile << Q << " " << t << "\n";
+        outfile.close();
+        // writing down pressures
+        filename = "pressure_label" + filenamess.str() + ".m";
+        outfile.open(filename.c_str(),std::ios::app);
+        outfile << P << " " << t << "\n";
+        outfile.close();
+        // reset ostringstream
+        filenamess.str("");
+      }
+    }
+
+}
 
 
 struct Cylinder::Private
@@ -444,7 +483,6 @@ Cylinder::run()
     Oseen< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
                                               uFESpace,
                                               pFESpace,
-                                              bcH,
                                               *d->comm);
     EpetraMap fullMap(fluid.getMap());
 
@@ -572,6 +610,7 @@ Cylinder::run()
         ensight.postProcess( time );
 //        fluid.postProcess();
 //         }
+        postProcessFluxesPressures(fluid, bcH, time, verbose);
 
 
         MPI_Barrier(MPI_COMM_WORLD);

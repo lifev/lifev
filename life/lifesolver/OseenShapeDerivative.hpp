@@ -72,10 +72,16 @@ public:
                           FESpace<Mesh, EpetraMap>& pFESpace,
                           Epetra_Comm&              comm );
 
+    OseenShapeDerivative( const data_type&          dataType,
+                          FESpace<Mesh, EpetraMap>& uFESpace,
+                          FESpace<Mesh, EpetraMap>& pFESpace,
+                          Epetra_Comm&              comm,
+                          const EpetraMap           bigMap,
+                          const UInt                offset=0);
+
     ~OseenShapeDerivative();
 
     void setUp( const GetPot& dataFile );
-
 
     void iterateLin( bchandler_raw_type& bch );
 
@@ -175,6 +181,39 @@ OseenShapeDerivative( const data_type&          dataType,
 
 }
 
+template<typename Mesh, typename SolverType>
+OseenShapeDerivative<Mesh, SolverType>::
+OseenShapeDerivative( const data_type&          dataType,
+                      FESpace<Mesh, EpetraMap>& uFESpace,
+                      FESpace<Mesh, EpetraMap>& pFESpace,
+                      Epetra_Comm&              comm,
+                      const EpetraMap           bigMap,
+                      const UInt                offset):
+    super            (dataType,
+                      uFESpace,
+                      pFESpace,
+                      comm,
+                      bigMap,
+                      offset),
+    M_rhsLinNoBC     ( this->getMap()),
+    M_rhsLinFull     ( this->getMap()),
+    M_linSol         ( this->getMap()),
+    M_linearLinSolver( ),
+    M_linPrec        ( new prec_raw_type() ),
+    M_elvec_du       ( this->M_uFESpace.fe().nbNode, nDimensions ),
+    M_elvec_dp       ( this->M_pFESpace.fe().nbNode, 1 ),
+//    M_elvec_dp       ( this->M_pFESpace.fe().nbNode, nDimensions ),
+    M_w_loc          ( this->M_uFESpace.fe().nbNode, nDimensions ),
+    M_uk_loc         ( this->M_uFESpace.fe().nbNode, nDimensions ),
+    M_pk_loc         ( this->M_pFESpace.fe().nbNode, 1 ),
+    M_elvec          ( this->M_uFESpace.fe().nbNode, nDimensions ),
+    M_d_loc          ( this->M_uFESpace.fe().nbNode, nDimensions ),
+    M_dw_loc         ( this->M_uFESpace.fe().nbNode, nDimensions ),
+    M_u_loc          ( this->M_uFESpace.fe().nbNode, nDimensions )
+{
+
+}
+
 
 template<typename Mesh, typename SolverType>
 OseenShapeDerivative<Mesh, SolverType>::
@@ -244,7 +283,7 @@ void OseenShapeDerivative<Mesh, SolverType>::iterateLin( bchandler_raw_type& bch
     this->leaderPrint("    norm_inf( rhsFull )     = " , rhsFull.NormInf());
     // solving the system
 
-    // using the same preconditioner as for the non linear problem (the matrix changes only in the 
+    // using the same preconditioner as for the non linear problem (the matrix changes only in the
     // boundary terms.
     solveSystem( matrFull, rhsFull, M_linSol, M_linearLinSolver, this->M_prec);
 
@@ -276,17 +315,17 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& m
 
     int nbCompU = nDimensions;
 
-    this->leaderPrint("  f-  Updating right hand side... ");
-
-    //
-    // RIGHT HAND SIDE FOR THE LINEARIZED ALE SYSTEM
-    //
-    chrono.start();
-
-
     M_rhsLinNoBC = sourceVec;//which is usually zero
-    if(!this->M_data.semiImplicit())
+
+    if(this->M_data.useShapeDerivatives())
         {
+            this->leaderPrint("  f-  Updating right hand side... ");
+
+            //
+            // RIGHT HAND SIDE FOR THE LINEARIZED ALE SYSTEM
+            //
+            chrono.start();
+
             // Loop on elements
 
             vector_type vel(this->M_uFESpace.map());
@@ -305,7 +344,7 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& m
 //     std::cout << dwRep.NormInf() << std::endl;
 //     std::cout << dispRep.NormInf() << std::endl;
 
-     vector_type rhsLinNoBC( M_rhsLinNoBC, Repeated, Zero); // ignoring non-local entries, Otherwise they are summed up lately
+            vector_type rhsLinNoBC( M_rhsLinNoBC, Repeated, Zero); // ignoring non-local entries, Otherwise they are summed up lately
 
 
 
@@ -335,7 +374,12 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& m
                                     M_u_loc.vec()   [ iloc + ic*this->M_uFESpace.fe().nbNode ] = unRep( ig );            // un local
                                 }
                         }
-
+                    /*                    std::cout << M_elvec.vec() << std::endl;
+                    std::cout << M_w_loc.vec() << std::endl;
+                    std::cout << M_uk_loc.vec() << std::endl;
+                    std::cout << M_d_loc.vec() << std::endl;
+                    std::cout << M_dw_loc.vec() << std::endl;
+                    std::cout << M_u_loc.vec() << std::endl;*/
 
                     for ( UInt k = 0 ; k < ( UInt ) this->M_pFESpace.fe().nbNode ; k++ )
                         {
@@ -348,24 +392,37 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& m
         //
         // Elementary vectors
         //
+                    //commented the code to print out the elementary data. Useful for debugging.
 
                     //  - \rho ( \grad( u^n-w^k ):[I\div d - (\grad d)^T] u^k + ( u^n-w^k )^T[I\div d - (\grad d)^T] (\grad u^k)^T , v  )
                     source_mass1( - this->M_data.density(), M_uk_loc, M_w_loc, M_elvec, M_d_loc, M_elvec_du, this->M_uFESpace.fe() );
+                    //                    std::cout << "source_mass1 -> norm_inf(M_elvec_du)" << std::endl;
+                    //                    M_elvec_du.showMe(std::cout);
 
                     //  + \rho * ( \grad u^k dw, v  )
                     source_mass2( this->M_data.density(), M_uk_loc, M_dw_loc, M_elvec_du, this->M_uFESpace.fe() );
+                    //std::cout << "source_mass2 -> norm_inf(M_elvec_du)" << std::endl;
+                    //M_elvec_du.showMe(std::cout);
 
                     //  - \rho/2 ( \nabla u^n:[2 * I\div d - (\grad d)^T]  u^k , v  )
                     source_mass3( - 0.5*this->M_data.density(), M_u_loc, M_uk_loc, M_d_loc, M_elvec_du, this->M_uFESpace.fe() );
+                    //std::cout << "source_mass3 -> norm_inf(M_elvec_du)" << std::endl;
+                    //M_elvec_du.showMe(std::cout);
 
                     //  - ( [-p^k I + 2*mu e(u^k)] [I\div d - (\grad d)^T] , \grad v  )
                     source_stress( - 1.0, this->M_data.viscosity(), M_uk_loc, M_pk_loc, M_d_loc, M_elvec_du, this->M_uFESpace.fe(), this->M_pFESpace.fe() );
+                    //std::cout << "source_stress -> norm_inf(M_elvec_du)" << std::endl;
+                    //M_elvec_du.showMe(std::cout);
 
                     // + \mu ( \grad u^k \grad d + [\grad d]^T[\grad u^k]^T : \grad v )
                     source_stress2( this->M_data.viscosity(), M_uk_loc, M_d_loc, M_elvec_du, this->M_uFESpace.fe() );
+                    //std::cout << "source_stress2 -> norm_inf(M_elvec_du)" << std::endl;
+                    //M_elvec_du.showMe(std::cout);
 
                     //  + ( (\grad u^k):[I\div d - (\grad d)^T] , q  )
                     source_press( 1.0, M_uk_loc, M_d_loc, M_elvec_dp, this->M_uFESpace.fe(), this->M_pFESpace.fe() );
+                    //std::cout << "source_press -> norm_inf(M_elvec_du)"  << std::endl;
+                    //M_elvec_dp.showMe(std::cout);
 
                     //
                     // Assembling
@@ -383,7 +440,7 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& m
                     for ( int ic = 0; ic < nbCompU; ic++ )
                         {
                             // assembling velocity right hand side
-                            assembleVector( rhsLinNoBC, M_elvec_du, this->M_uFESpace.fe(), this->M_uFESpace.dof(), ic );
+                            assembleVector( rhsLinNoBC, M_elvec_du, this->M_uFESpace.fe(), this->M_uFESpace.dof(), ic, ic*this->dim_u() );
                         }
                 }
 

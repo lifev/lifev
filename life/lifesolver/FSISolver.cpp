@@ -78,6 +78,8 @@ FSISolver::FSISolver( GetPot const& data_file,
 //     Debug( 6220 ) << "FSISolver::M_lambda: " << M_lambda.size() << "\n";
 //     Debug( 6220 ) << "FSISolver::M_lambdaDot: " << M_lambdaDot.size() << "\n";
     int rank, numtasks;
+    M_monolithic = !(M_method.compare("monolithic"));
+
 
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
@@ -87,60 +89,81 @@ FSISolver::FSISolver( GetPot const& data_file,
 
     int  fluidLeader;
     int  solidLeader;
+    if(!M_monolithic)
+        {
+            MPI_Group  originGroup, newGroup;
+            MPI_Comm   newComm;
 
-    MPI_Group  originGroup, newGroup;
-    MPI_Comm   newComm;
+            MPI_Comm_group(MPI_COMM_WORLD, &originGroup);
 
-    MPI_Comm_group(MPI_COMM_WORLD, &originGroup);
+            if (numtasks == 1)
+                {
+                    std::cout << "Serial Fluid/Structure computation" << std::endl;
+                    newComm = MPI_COMM_WORLD;
+                    fluid = true;
+                    solid = true;
+                    fluidLeader = 0;
+                    solidLeader = 0;
 
-    if (numtasks == 1)
-    {
-        std::cout << "Serial Fluid/Structure computation" << std::endl;
-        newComm = MPI_COMM_WORLD;
-        fluid = true;
-        solid = true;
-        fluidLeader = 0;
-        solidLeader = 0;
+                    M_epetraWorldComm.reset(new Epetra_MpiComm(MPI_COMM_WORLD));
+                    M_epetraComm = M_epetraWorldComm;
 
-        M_epetraWorldComm.reset(new Epetra_MpiComm(MPI_COMM_WORLD));
-        M_epetraComm = M_epetraWorldComm;
+                }
+            else
+                {
+                    int members[numtasks];
 
-    }
-    else
-    {
-        int members[numtasks];
+                    solidLeader = 0;
+                    fluidLeader = 1-solidLeader;
 
-        solidLeader = 0;
-        fluidLeader = 1-solidLeader;
+                    if (rank == solidLeader)
+                        {
+                            members[0] = solidLeader;
+                            int ierr;
+                            ierr = MPI_Group_incl(originGroup, 1, members, &newGroup);
+                            solid = true;
+                        }
+                    else
+                        {
+                            for (int ii = 0; ii <= numtasks; ++ii)
+                                {
+                                    if ( ii < solidLeader)
+                                        members[ii] = ii;
+                                    else if ( ii > solidLeader)
+                                        members[ii - 1] = ii;
+                                }
+                            int ierr;
+                            ierr = MPI_Group_incl(originGroup, numtasks - 1, members, &newGroup);
+                            fluid = true;
+                        }
 
-        if (rank == solidLeader)
-            {
-                members[0] = solidLeader;
-                int ierr;
-                ierr = MPI_Group_incl(originGroup, 1, members, &newGroup);
-                solid = true;
-            }
-        else
-            {
-                for (int ii = 0; ii <= numtasks; ++ii)
-                    {
-                        if ( ii < solidLeader)
-                            members[ii] = ii;
-                        else if ( ii > solidLeader)
-                            members[ii - 1] = ii;
-                    }
-                int ierr;
-                ierr = MPI_Group_incl(originGroup, numtasks - 1, members, &newGroup);
-                fluid = true;
-            }
+                    MPI_Comm* localComm = new MPI_Comm;
+                    MPI_Comm_create(MPI_COMM_WORLD, newGroup, localComm);
+                    M_localComm.reset(localComm);
 
-        MPI_Comm* localComm = new MPI_Comm;
-        MPI_Comm_create(MPI_COMM_WORLD, newGroup, localComm);
-        M_localComm.reset(localComm);
+                    M_epetraComm.reset(new Epetra_MpiComm(*M_localComm.get()));
+                    M_epetraWorldComm.reset(new Epetra_MpiComm(MPI_COMM_WORLD));
+                }
+        }
+    if(M_monolithic)
+        {
+            //
+            M_epetraWorldComm.reset( new Epetra_MpiComm(MPI_COMM_WORLD));
+            M_epetraComm = M_epetraWorldComm;
+            std::cout << "% using MPI or not" << std::endl;
+            //                }
+            //            else
+            //                {
+            //                    Epetra_SerialComm M_epetraWorldComm.reset( new (Epetra_SerialComm()));
+            //                    M_epetraComm.reset(epetraWorldComm);
+            //                    std::cout << "% using serial Version" << std::endl;
+            //                }
+            solidLeader = 0;
+            fluidLeader = solidLeader;
+            fluid = true;
+            solid = true;
+        }
 
-        M_epetraComm.reset(new Epetra_MpiComm(*M_localComm.get()));
-        M_epetraWorldComm.reset(new Epetra_MpiComm(MPI_COMM_WORLD));
-    }
 
     if (fluid)
     {
@@ -236,14 +259,15 @@ FSISolver::FSISolver( GetPot const& data_file,
     Debug( 6220 ) << "FSISolver:: variable setup " << precond << "\n";
 
     M_oper->setUpSystem(data_file);
-
-    M_lambda.reset   (new vector_type(*M_oper->solidInterfaceMap()));
-    M_lambdaDot.reset(new vector_type(*M_oper->solidInterfaceMap()));
-
-    *M_lambda *= 0.;
-    *M_lambdaDot *= 0.;
-
-
+    if(!M_monolithic)
+        {
+            M_lambda.reset   (new vector_type(*M_oper->solidInterfaceMap()));
+            M_lambdaDot.reset(new vector_type(*M_oper->solidInterfaceMap()));
+            //            *M_lambdaDot *= 0.;
+            M_oper->buildSystem();
+        }
+    else
+            M_lambda.reset   (new vector_type(M_oper->monolithicMap(), Unique));
 
 //     M_oper->
 //     if (fluid)
@@ -267,7 +291,6 @@ FSISolver::FSISolver( GetPot const& data_file,
 //         M_oper->solid().buildSystem();
 //     }
 
-    M_oper->buildSystem();
 
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -378,7 +401,10 @@ FSISolver::iterate( Real time )
     fct_type fluidSource(zero_scalar);
     fct_type solidSource(zero_scalar);
 
-    M_oper->updateSystem(fluidSource, solidSource);
+    if(!M_monolithic)
+        M_oper->updateSystem(fluidSource, solidSource);
+    else
+        M_oper->updateSystem(*M_lambda);
 
     // displacement prediction
     MPI_Barrier(MPI_COMM_WORLD);
@@ -386,24 +412,36 @@ FSISolver::iterate( Real time )
     if (M_firstIter)
     {
         M_firstIter = false;
-        *M_lambda      = M_oper->lambdaSolid();
-        *M_lambda     += timeStep()*M_oper->lambdaDotSolid();
-        *M_lambdaDot   = M_oper->lambdaDotSolid();
+
+        if(!M_monolithic)
+            {
+                *M_lambda      = M_oper->lambdaSolid();
+                *M_lambda     += timeStep()*M_oper->lambdaDotSolid();
+                *M_lambdaDot   = M_oper->lambdaDotSolid();
+            }
+//         else
+//             *M_lambda *= 0;
     }
     else
     {
-        *M_lambda      = M_oper->lambdaSolid();
-        *M_lambda     += 1.5*timeStep()*M_oper->lambdaDotSolid(); // *1.5
-        *M_lambda     -= timeStep()*0.5*(*M_lambdaDot);
-        *M_lambdaDot   = M_oper->lambdaDotSolid();
+
+        if(!M_monolithic)
+            {
+                *M_lambda      = M_oper->lambdaSolid();
+                *M_lambda     += 1.5*timeStep()*M_oper->lambdaDotSolid(); // *1.5
+                *M_lambda     -= timeStep()*0.5*(*M_lambdaDot);
+                *M_lambdaDot   = M_oper->lambdaDotSolid();
+            }
     }
 
 
-//     if (M_oper->isSolid())
-//     {
-        std::cout << "norm( disp ) init = " << M_lambda->NormInf() << std::endl;
-        std::cout << "norm( velo ) init = " << M_lambdaDot->NormInf() << std::endl;
-//     }
+    if (!M_monolithic)
+        {
+            M_oper->leaderPrint("norm( disp  ) init = ", M_lambda->NormInf() );
+            M_oper->leaderPrint("norm( velo )  init = ", M_lambdaDot->NormInf());
+        } else {
+            M_oper->leaderPrint("norm( solution ) init = ", M_lambda->NormInf() );
+        }
 
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -432,9 +470,8 @@ FSISolver::iterate( Real time )
     }
     else
     {
-        std::cout << "End of time "<< time << std::endl;
-        std::cout << "Number of inner iterations       : "
-                  << maxiter << std::endl;
+        M_oper->leaderPrint("End of time " , time);
+        M_oper->leaderPrint("Number of inner iterations       : ", maxiter );
         out_iter << time << " " << maxiter << " "
                  << M_oper->nbEval() << std::endl;
 
@@ -442,8 +479,8 @@ FSISolver::iterate( Real time )
 // 	if (M_oper->isSolid()) M_oper->solid().postProcess();
 //      if (M_oper->isFluid()) M_oper->fluid().postProcess();
     }
-
-    M_oper->shiftSolution();
+    if(!M_monolithic)
+        M_oper->shiftSolution();
 
 
     Debug( 6220 ) << "FSISolver iteration at time " << time << " done\n";

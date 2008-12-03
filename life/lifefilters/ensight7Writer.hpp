@@ -67,6 +67,83 @@ private:
 };
 
 
+bool fromensight7Mesh3D( UInt dimDof,
+                         Vector & u,
+                         Vector & p,
+                         Real const & time,
+                         std::string prefix = "./" )
+{
+	// store the values read from file
+	std::vector<Coord> velocity( dimDof );
+	std::vector<float> pressure( dimDof );
+
+	char buffer[ 80 ], buf[ 80 ];
+
+	// index of the file
+	std::ostringstream findex;
+	findex << std::setfill('0') << std::setw(3); 
+	findex << ( time * 100 );
+
+	// name of the file to be read
+	std::string ifname( prefix + "velocity.res" );
+	ifname += findex.str();
+
+	std::fstream FileU( ifname.c_str(), std::ios::in | std::ios::binary );
+	if (FileU.is_open())
+	{
+		std::cout << "\nreading file " << ifname << std::endl;
+		// by construction, this is the header of the file
+		strcpy( buffer, "velocity field  timestep 1" );
+		FileU.read( ( char* ) & buf, sizeof( buffer ) );
+		// read the vector of coordinates
+		FileU.read( ( char* ) & velocity.front(), 
+		            3 * velocity.size() * sizeof( float ) );
+
+		FileU.close();		
+	}
+	else
+	{
+		std::cout << "Error opening file" << ifname << std::endl;
+	}
+
+  Coord nodevel;
+//	std::cout << "\nprinting velocity values:" << std::endl;
+	for( UInt i = 0; i < dimDof; ++i ) {
+		nodevel = velocity[i];
+		for( UInt d = 0; d < nDimensions; ++d ) {
+//			std::cout << nodevel[d] << " " << std::flush;
+			u[i + d*dimDof] = nodevel[d];
+		}
+	}
+//	std::cout << std::endl;
+	
+	// name of the file to be read
+	ifname = prefix + "pressure.res";
+	ifname += findex.str();
+
+	std::fstream FileP( ifname.c_str(), std::ios::in | std::ios::binary );
+	if (FileP.is_open())
+	{
+		// by construction, this is the header of the file
+		strcpy( buffer, "concentration distribution timestep " );
+		FileP.read( ( char* ) & buf, sizeof( buffer ) );
+		// read the vector of coordinates
+		FileP.read( ( char* ) & pressure.front(), 
+		            pressure.size() * sizeof( float ) );
+
+		FileP.close();
+	}
+	else
+	{
+		std::cout << "Error opening file" << ifname << std::endl;
+	}
+
+	for( UInt i = 0; i < dimDof; ++i )
+		p[i] = pressure[i];
+	
+	return 0;
+}
+
 
 template <typename RegionMesh3D>
 bool outensight7Mesh3D( RegionMesh3D const & mesh,

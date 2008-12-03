@@ -29,13 +29,19 @@ SUBDIRS		= data  \
               test_heart \
               test_structure \
               test_ethiersteinman \
-              test_fsi \
+              test_masstransport \
+		      test_fsi \
+	          test_cavity \
+              test_ns_flux \
+              test_monolithic \
 	          $(DO_NOT_COMPILE)
 
 TESTSUITES=$(srcdir)/test_cylinder/testsuite.at \
            $(srcdir)/test_structure/testsuite.at \
            $(srcdir)/test_ethiersteinman/testsuite.at\
-           $(srcdir)/test_fsi/testsuite.at
+           $(srcdir)/test_fsi/testsuite.at \
+           $(srcdir)/test_monolithic/testsuite.at \
+           $(srcdir)/test_filters/testsuite.at
 
 
 $(srcdir)/package.m4: $(top_srcdir)/configure.in.in

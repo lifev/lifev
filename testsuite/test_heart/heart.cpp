@@ -131,7 +131,7 @@ Heart::run()
     const QuadRule* qR_u;
     const QuadRule* bdQr_u;
 
-    std::cout << "\nmonna prima del partitionmesh" << std::endl;
+
     //! Construction of the partitioned mesh
     partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*_data.mesh(), *d->comm);
 
@@ -202,7 +202,7 @@ Heart::run()
 
 
 
-    UInt totalUDof  = uFESpace.map().getUniqueEpetra_Map()->NumGlobalElements();
+    UInt totalUDof  = uFESpace.map().getMap(Unique)->NumGlobalElements();
 
     if (verbose) std::cout << "Total Potential Dof = " << totalUDof << std::endl;
 
@@ -271,9 +271,9 @@ Heart::run()
     //! Setting Ensight postprocessing
     Ensight<RegionMesh3D<LinearTetra> > ensight( d->_dataFile, meshPart.mesh(), "heart", d->comm->MyPID());
 
-    vector_ptrtype Uptr( new vector_type(electricModel.solution_u(), electricModel.getRepeatedEpetraMap() ) );
+    vector_ptrtype Uptr( new vector_type(electricModel.solution_u(), Repeated ) );
 
-    vector_ptrtype Fptr( new vector_type(electricModel.fiber_vector(), electricModel.getRepeatedEpetraMapVec() ) );
+    vector_ptrtype Fptr( new vector_type(electricModel.fiber_vector(), Repeated ) );
         
     ensight.addVariable( ExporterData::Scalar,  "potential", Uptr,
                          UInt(0), uFESpace.dof().numTotalDof() );
@@ -363,7 +363,7 @@ void Heart::computeRhs( vector_type& rhs, MonodomainSolver< RegionMesh3D<LinearT
 	chrono.start();
 	
 	//! u, w with repeated map
-	vector_type uVecRep(electricModel.solution_u(), electricModel.getRepeatedEpetraMap());
+	vector_type uVecRep(electricModel.solution_u(), Repeated);
 	ionicModel->updateRepeated();
 	//vector_type wVecRep(ionicModel->solution_w(), ionicModel->getRepeatedEpetraMap() );  
 	ElemVec elvec_Iapp( electricModel.potentialFESpace().fe().nbNode, 2 ),
@@ -427,7 +427,7 @@ void Heart::computeRhs( vector_type& rhs, BidomainSolver< RegionMesh3D<LinearTet
 	chrono.start();
 	
 	//! u, w with repeated map
-	vector_type uVecRep(electricModel.solution_u(), electricModel.getRepeatedEpetraMap());
+	vector_type uVecRep(electricModel.solution_u(), Repeated);
 	ionicModel->updateRepeated();
 	//vector_type wVecRep(ionicModel->solution_w(), ionicModel->getRepeatedEpetraMap() );  
 	ElemVec elvec_Iapp( electricModel.potentialFESpace().fe().nbNode, 2 ),
@@ -467,7 +467,7 @@ void Heart::computeRhs( vector_type& rhs, BidomainSolver< RegionMesh3D<LinearTet
 		source(d->get_stim(), elvec_Iapp, electricModel.potentialFESpace().fe(), data.time(), 0);
 		source(d->get_stim(), elvec_Iapp, electricModel.potentialFESpace().fe(), data.time(), 1);
 
-		UInt totalUDof  = electricModel.potentialFESpace().map().getUniqueEpetra_Map()->NumGlobalElements();
+		UInt totalUDof  = electricModel.potentialFESpace().map().getMap(Unique)->NumGlobalElements();
 		
 		
 		//! Assembling the righthand side

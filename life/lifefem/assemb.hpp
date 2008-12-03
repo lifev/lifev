@@ -699,12 +699,12 @@ void compute_mat_symm( ElemMat& elmat, Oper& oper,
 
 template <typename DOF>
 void
-assembleVector( EpetraVector&          vec,
+assembleVector( EpetraVector&    vec,
                 ElemVec&         elvec,
                 const CurrentFE& fe,
                 const DOF&       dof,
                 int              iblock,
-                int              ipos = 0)
+                int              ipos = 0 )
 
 {
 //    elmat.showMe();
@@ -878,17 +878,17 @@ assembleMatrix( EpetraMatrix<double>&          M,
 
 template <typename DOF1, typename DOF2>
 void
-assembleTransposeMatrix( EpetraMatrix<double>&          M,
-                         Real             val,
-                         ElemMat&         elmat,
-                         const CurrentFE& fe1,
-                         const CurrentFE& fe2,
-                         const DOF1&      dof1,
-                         const DOF2&      dof2,
-                         int              iblock,
-                         int              jblock,
-                         int              ipos ,
-                         int              jpos )
+assembleTransposeMatrix( EpetraMatrix<double>& M,
+                         Real                  val,
+                         ElemMat&              elmat,
+                         const CurrentFE&      fe1,
+                         const CurrentFE&      fe2,
+                         const DOF1&           dof1,
+                         const DOF2&           dof2,
+                         int                   iblock,
+                         int                   jblock,
+                         int                   ipos ,
+                         int                   jpos )
 
 {
     ElemMat::matrix_type mat(elmat.block( jblock, iblock ));

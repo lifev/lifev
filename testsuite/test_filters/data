@@ -1,0 +1,40 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file for EthierSteinman test case
+#-------------------------------------------------
+
+
+[exporter]
+multimesh  = false
+start      = 0
+save       = 1
+
+[fluid]
+
+[./physics]
+endtime         = 0.04          # endtime
+density         = 1.0          # density
+viscosity       = .01       # viscosity
+
+
+[../discretization]
+mesh_dir        = ./Mesh/   # the directory where the mesh file is
+mesh_file       = cube4x4.mesh          # mesh file
+mesh_faces      = all                   # update all faces elements
+timestep        = 0.01                   # timestep
+verbose         = 0
+order_bdf       = 1
+linearized      = 0
+diagonalize     = 1 # weight, 0=off
+div_beta_u_v    = 0 # 1=on, 0=off
+vel_order         = P1
+press_order       = P1
+mesh_faces      = all                   # update all faces elements
+mesh_edges      = all                   # update all faces elements
+
+initialization  = interp                # initialize using proj: L2 projection
+                                        #                  interp: interpolation
+
+[../miscellaneous]
+verbose         = 1
+steady          = 0
