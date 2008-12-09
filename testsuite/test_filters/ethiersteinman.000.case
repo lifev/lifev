@@ -1,0 +1,14 @@
+FORMAT
+type: ensight
+GEOMETRY
+model: 1 ethiersteinman.000.geo
+VARIABLE
+vector per node: 1 velocity velocity.***.000.vct
+scalar per node: 1 pressure pressure.***.000.scl
+TIME
+time set: 1
+number of steps: 5
+filename start number: 0
+filename increment: 1
+time values:
+0 0.01 0.02 0.03 0.04 

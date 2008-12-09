@@ -248,7 +248,7 @@ public:
             return *M_matrMass;
         }
 
-    bool getIsDiagonalBlockPrec(){return M_isDiagonalBlockPrec;}
+    const bool    getIsDiagonalBlockPrec(){return M_isDiagonalBlockPrec;}
     void setBlockPreconditioner(matrix_ptrtype blockPrec);
     void setMatrix( matrix_type& matrFull );
 protected:
@@ -482,10 +482,10 @@ Oseen( const data_type&          dataType,
     M_resetStab              ( true ),
     M_reuseStab              ( true ),
     M_ipStab                 ( M_uFESpace.mesh(),
-                                   M_uFESpace.dof(), M_uFESpace.refFE(),
-                                   M_uFESpace.feBd(), M_uFESpace.qr(),
-                                   0., 0., 0.,
-                                   M_data.viscosity() ),
+                               M_uFESpace.dof(), M_uFESpace.refFE(),
+                               M_uFESpace.feBd(), M_uFESpace.qr(),
+                               0., 0., 0.,
+                               M_data.viscosity() ),
     M_betaFct                ( 0 ),
     M_count                  ( 0 ),
     M_verbose                ( M_me == 0),
@@ -506,7 +506,6 @@ Oseen( const data_type&          dataType,
     M_stab = (&M_uFESpace.refFE() == &M_pFESpace.refFE());
 }
 
-
 template<typename Mesh, typename SolverType>
 Oseen<Mesh, SolverType>::
 Oseen( const data_type&          dataType,
@@ -521,9 +520,8 @@ Oseen( const data_type&          dataType,
     M_me                     ( M_comm->MyPID() ),
     M_localMap               ( M_uFESpace.map() + M_pFESpace.map() + lagrangeMultipliers ),
     M_matrMass               ( ),
-    M_matrMassPr             ( ),
     M_matrStokes             ( ),
-//    M_matrFull               ( ),
+    //    M_matrFull               ( ),
     M_matrNoBC               ( ),
     M_matrStab               ( ),
     M_rhsNoBC                ( M_localMap ),
@@ -557,7 +555,8 @@ Oseen( const data_type&          dataType,
     M_elmatP                 ( M_pFESpace.fe().nbNode, 1, 1 ),
     M_elmatDiv               ( M_pFESpace.fe().nbNode, 1, 0, M_uFESpace.fe().nbNode, 0, nDimensions ),
     M_elmatGrad              ( M_uFESpace.fe().nbNode, nDimensions, 0, M_pFESpace.fe().nbNode, 0, 1 ),
-    M_elvec                  ( M_uFESpace.fe().nbNode, nDimensions )
+    M_elvec                  ( M_uFESpace.fe().nbNode, nDimensions ),
+    M_blockPrec              ()
 {
     M_stab = (&M_uFESpace.refFE() == &M_pFESpace.refFE());
 }
@@ -1018,13 +1017,6 @@ updateSystem(double       alpha,
             M_resetStab = false;
         }
     }
-    //    if(M_monolithic)
-    //        {
-            //	  M_matrNoBC->GlobalAssemble();
-            //	  matrix_type uselessMatrix(M_matrNoBC);
-            //            M_matrStab->spy("matrStab");
-
-    //        }
 
     if (alpha != 0. )
         {
@@ -1078,6 +1070,7 @@ void Oseen<Mesh, SolverType>::setMatrix( matrix_type& matrFull )
     M_matrNoBC->GlobalAssemble();
     matrFull += *M_matrNoBC;
 }
+
 template<typename Mesh, typename SolverType>
 void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
 {
@@ -1383,7 +1376,7 @@ Oseen<Mesh, SolverType>::flux(const EntityFlag& flag){
 }
 
 
-//! Computes the flux on a given part of the boundary
+//! Computes the pressure on a given part of the boundary
 template<typename Mesh, typename SolverType> Real
 Oseen<Mesh, SolverType>::pressure(const EntityFlag& flag){
 
@@ -1394,16 +1387,12 @@ Oseen<Mesh, SolverType>::pressure(const EntityFlag& flag){
   return M_post_proc.average(press, flag)[0];
 }
 
-
-
 //! Computes the area on a given part of the boundary
 template<typename Mesh, typename SolverType> Real
 Oseen<Mesh, SolverType>::area(const EntityFlag& flag) {
 
   return M_post_proc.area(flag);
 }
-
-
 
 // Postprocessing
 template <typename Mesh, typename SolverType>

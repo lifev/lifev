@@ -34,10 +34,6 @@ restart    = false   # restart the computations (see also importer)
 #restart    = true
 #Tstart     = 0.005 # restart from time Tstart
 
-restart    = false   # restart the computations (see also importer)
-#restart    = true
-#Tstart     = 0.005 # restart from time Tstart
-
 [interface] # mesh dependent flags for the interface.
 fluid_flag      =  1 # default: 1
 #solid_flag      =  1 # default: fluid_flag
