@@ -721,14 +721,13 @@ assembleVector( EpetraVector&    vec,
 
     for ( i = 0 ; i < fe.nbNode ; i++ )
     {
-            ig = dof.localToGlobal( eleID, i + 1 ) - 1 + ipos ; //iblock*totdof1;  // damned 1-base vs 0-base !
-            vec[ ig + 1 ] += vecView( i );
+        ig = dof.localToGlobal( eleID, i + 1 ) + ipos;/*+ iblock*totdof*/  // damned 1-base vs 0-base !
+            vec[ ig ] += vecView( i );
     }
 
     if (verbose)
         std::cout << "ok." << std::endl;
 }
-
 
 
 
@@ -799,22 +798,22 @@ assembleMatrix( EpetraMatrix<double>& M,
 
     for ( k1 = 0 ; k1 < fe1.nbNode ; k1++ )
     {
-        i = fe1.patternFirst( k1 );
+        i = k1;//fe1.patternFirst( k1 );
         ilist[k1] = dof1.localToGlobal( eleID1, i + 1 ) - 1 + ipos ; //iblock*totdof1;  // damned 1-base vs 0-base !
     }
 
     for ( k2 = 0 ; k2 < fe2.nbNode ; k2++ )
     {
-        j = fe2.patternFirst( k2 );
+        j = k2;//fe2.patternFirst( k2 );
         jlist[k2]  = dof2.localToGlobal( eleID2, j + 1 ) - 1 + jpos ; //iblock*totdof1;  // damned 1-base vs 0-base !
-        matPtr[k2] = &(mat(0,j));
+        matPtr[k2] = &(mat(0,k2));
     }
 
     // coded a version to insert the little matrix directly.
     // This needs that mat has the shape checked by the following line:
     assert(mat.indexij( int (1), int(0) ) == 1);
 
-    M.set_mat_inc( fe1.nbNode, fe2.nbNode, ilist, jlist, matPtr );
+    M.set_mat_inc( fe1.nbNode, fe2.nbNode, ilist, jlist, matPtr, Epetra_FECrsMatrix::COLUMN_MAJOR );
 
 #ifdef ONLY_FOR_DEBUGGING
 
@@ -907,14 +906,14 @@ assembleTransposeMatrix( EpetraMatrix<double>& M,
 
     for ( k1 = 0 ; k1 < fe1.nbNode ; k1++ )
     {
-        i = fe1.patternFirst( k1 );
+        i =  k1;
         ilist[k1] = dof1.localToGlobal( eleID1, i + 1 ) - 1 + ipos ; //iblock*totdof1;  // damned 1-base vs 0-base !
         matPtr[k1] = &(mat(0,i));
     }
 
     for ( k2 = 0 ; k2 < fe2.nbNode ; k2++ )
     {
-        j = fe2.patternFirst( k2 );
+        j = k2;
         jlist[k2]  = dof2.localToGlobal( eleID2, j + 1 ) - 1 + jpos ; //iblock*totdof1;  // damned 1-base vs 0-base !
     }
 
@@ -933,7 +932,7 @@ assembleTransposeMatrix( EpetraMatrix<double>& M,
 //
 template < typename DOF>
 void
-assemb_mat( EpetraMatrix<double>& M, ElemMat& elmat, const CurrentFE& fe, const DOF& dof, int iblock = 0, int jblock = 0 )
+assemb_mat( EpetraMatrix<double>& M, ElemMat& elmat, const CurrentFE& fe, const DOF& dof, int iblock = 0, int jblock = 0 , int offset =0)
 {
 
     UInt totdof = dof.numTotalDof();
@@ -948,13 +947,13 @@ assemb_mat( EpetraMatrix<double>& M, ElemMat& elmat, const CurrentFE& fe, const 
     ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     int i, j, k;
     UInt ig, jg;
-    UInt eleId = fe.currentId();
+    UInt eleId = fe.currentLocalId();
     for ( k = 0 ; k < fe.nbPattern ; k++ )
     {
         i = fe.patternFirst( k );
         j = fe.patternSecond( k );
-        ig = dof.localToGlobal( eleId, i + 1 ) - 1 + iblock * totdof;  // damned 1-base vs 0-base !
-        jg = dof.localToGlobal( eleId, j + 1 ) - 1 + jblock * totdof;  // damned 1-base vs 0-base !
+        ig = dof.localToGlobal( eleId, i + 1 ) - 1 + iblock * totdof + offset;  // damned 1-base vs 0-base !
+        jg = dof.localToGlobal( eleId, j + 1 ) - 1 + jblock * totdof + offset;  // damned 1-base vs 0-base !
         M.set_mat_inc( ig, jg, mat( i, j ) );
 //        std::cout << ig << " " << jg << " " << mat(i, j) << std::endl;
 

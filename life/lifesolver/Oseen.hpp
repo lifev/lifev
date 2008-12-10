@@ -148,7 +148,7 @@ public:
 
     virtual void updateSystem(double       alpha,
                               vector_type& betaVec,
-                              vector_type& rhs
+                              const vector_type& sourceVec
                               );
 
     void updateMatrix( matrix_type& matrFull );
@@ -251,6 +251,8 @@ public:
     const bool    getIsDiagonalBlockPrec(){return M_isDiagonalBlockPrec;}
     void setBlockPreconditioner(matrix_ptrtype blockPrec);
     void setMatrix( matrix_type& matrFull );
+    void updateUn( ){*M_un=M_sol;}
+    void updateUn(const vector_type& sol ){*M_un=sol;}// for the monolithic
 protected:
 
     UInt dim_u() const           { return M_uFESpace.dim(); }
@@ -387,6 +389,9 @@ private:
     ElemMat                        M_elmatGrad;
     ElemVec                        M_elvec;           // Elementary right hand side
     matrix_ptrtype                 M_blockPrec;
+    ElemVec                        M_wLoc;
+    ElemVec                        M_uLoc;
+    boost::shared_ptr<vector_type> M_un;
 }; // class Oseen
 
 
@@ -445,7 +450,10 @@ Oseen( const data_type&          dataType,
     M_elmatDiv               ( M_pFESpace.fe().nbNode, 1, 0, M_uFESpace.fe().nbNode, 0, nDimensions ),
     M_elmatGrad              ( M_uFESpace.fe().nbNode, nDimensions, 0, M_pFESpace.fe().nbNode, 0, 1 ),
     M_elvec                  ( M_uFESpace.fe().nbNode, nDimensions ),
-    M_blockPrec              ()
+    M_blockPrec              (),
+    M_wLoc                   ( M_uFESpace.fe().nbNode, nDimensions ),
+    M_uLoc                   ( M_uFESpace.fe().nbNode, nDimensions ),
+    M_un                     (new vector_type(M_localMap))
 {
     M_stab = (&M_uFESpace.refFE() == &M_pFESpace.refFE());
 }
@@ -501,7 +509,10 @@ Oseen( const data_type&          dataType,
     M_elmatDiv               ( M_pFESpace.fe().nbNode, 1, 0, M_uFESpace.fe().nbNode, 0, nDimensions ),
     M_elmatGrad              ( M_uFESpace.fe().nbNode, nDimensions, 0, M_pFESpace.fe().nbNode, 0, 1 ),
     M_elvec                  ( M_uFESpace.fe().nbNode, nDimensions ),
-    M_blockPrec              ()
+    M_blockPrec              (),
+    M_wLoc                   ( M_uFESpace.fe().nbNode, nDimensions ),
+    M_uLoc                   ( M_uFESpace.fe().nbNode, nDimensions ),
+    M_un                     (new vector_type(M_localMap))
 {
     M_stab = (&M_uFESpace.refFE() == &M_pFESpace.refFE());
 }
@@ -556,7 +567,10 @@ Oseen( const data_type&          dataType,
     M_elmatDiv               ( M_pFESpace.fe().nbNode, 1, 0, M_uFESpace.fe().nbNode, 0, nDimensions ),
     M_elmatGrad              ( M_uFESpace.fe().nbNode, nDimensions, 0, M_pFESpace.fe().nbNode, 0, 1 ),
     M_elvec                  ( M_uFESpace.fe().nbNode, nDimensions ),
-    M_blockPrec              ()
+    M_blockPrec              (),
+    M_wLoc                   ( M_uFESpace.fe().nbNode, nDimensions ),
+    M_uLoc                   ( M_uFESpace.fe().nbNode, nDimensions ),
+    M_un                     (new vector_type(M_localMap))
 {
     M_stab = (&M_uFESpace.refFE() == &M_pFESpace.refFE());
 }
@@ -736,6 +750,8 @@ void Oseen<Mesh, SolverType>::buildSystem()
             }
             else
             {
+                //for ( UInt jComp = 0; jComp < nbCompU; jComp++ )//ADDED
+                //{to use if stiff_strain(...) is called instead of stiff(...)
                 chronoStiffAssemble.start();
                 assembleMatrix( *M_matrStokes,
                                 M_elmatStiff,
@@ -818,7 +834,7 @@ void Oseen<Mesh, SolverType>::buildSystem()
     M_matrMass->GlobalAssemble();
 
     chrono.stop();
-    leaderPrintMax("done in " , chrono.diff() );;
+    leaderPrintMax("done in " , chrono.diff() );
 
     if (false)
         std::cout << "partial times:  \n"
@@ -856,8 +872,9 @@ initialize( const vector_type& u0, const vector_type& p0 )
 {
 
     M_sol = u0;
-
+    *M_un = u0;
     M_sol.add(p0, nDimensions*M_uFESpace.dof().numTotalDof());
+    M_un->add(p0, nDimensions*M_uFESpace.dof().numTotalDof());
 
 }
 
@@ -867,6 +884,7 @@ initialize( const vector_type& velAndPressure)
 {
 
     M_sol = velAndPressure;
+    *M_un = velAndPressure;
 
 }
 
@@ -874,7 +892,7 @@ template<typename Mesh, typename SolverType>
 void Oseen<Mesh, SolverType>::
 updateSystem(double       alpha,
              vector_type& betaVec,
-             vector_type& rhs
+             const vector_type& sourceVec
              )
 {
 
@@ -893,7 +911,7 @@ updateSystem(double       alpha,
 
     // Right hand side for the velocity at time
 
-    updateRHS(rhs);
+    updateRHS(sourceVec);
 
     chrono.stop();
 
@@ -943,6 +961,7 @@ updateSystem(double       alpha,
         // vector with repeated nodes over the processors
 
         vector_type betaVecRep(betaVec, Repeated );
+        vector_type unRep(*M_un, Repeated);
 
         chrono.stop();
         leaderPrintMax( "done in " , chrono.diff() );
@@ -968,15 +987,27 @@ updateSystem(double       alpha,
                 {
                     UInt ig = M_uFESpace.dof().localToGlobal( eleID, iloc + 1 ) + iComp*dim_u();
                     M_elvec.vec()[ iloc + iComp*M_uFESpace.fe().nbNode ] = M_data.density() * betaVecRep[ig]; // BASEINDEX + 1
+
+                    M_uLoc.vec() [ iloc + iComp * M_uFESpace.fe().nbNode ] = (unRep)(ig);
+                    M_wLoc.vec() [ iloc + iComp * M_uFESpace.fe().nbNode ] = (unRep)(ig)-betaVecRep(ig);
                 }
             }
 
+
+            // ALE term: - rho div w u v
+            mass_divw( -M_data.density(), M_wLoc,  M_elmatStiff , M_uFESpace.fe(), 0, 0, nbCompU );//ADDED
+
+            // ALE stab implicit: 0.5 rho div w u v
+            mass_divw( 0.5*M_data.density(), M_uLoc,  M_elmatStiff , M_uFESpace.fe(), 0, 0, nbCompU );//ADDED
+
+
             // Stabilising term: div u^n u v
+            /*
             if ( M_divBetaUv )
             {
                 mass_divw( 0.5*M_data.density(), M_elvec, M_elmatStiff, M_uFESpace.fe(), 0, 0, nbCompU );
             }
-
+            */
             // loop on components
             for ( UInt iComp = 0; iComp < nbCompU; ++iComp )
             {
@@ -1007,6 +1038,7 @@ updateSystem(double       alpha,
             M_matrStab.reset  ( new matrix_type(M_localMap) );
             M_ipStab.apply( *M_matrStab, betaVecRep, M_verbose );
             M_resetStab = false;
+            M_matrStab->GlobalAssemble();
         }
 
     } else {
@@ -1015,6 +1047,11 @@ updateSystem(double       alpha,
             M_matrStab.reset  ( new matrix_type(M_localMap) );
             M_ipStab.apply( *M_matrStab, betaVec, M_verbose );
             M_resetStab = false;
+            M_matrStab->GlobalAssemble();
+        }
+        else
+        {
+            leaderPrint("Reuse stab");
         }
     }
 
@@ -1040,8 +1077,6 @@ updateSystem(double       alpha,
                 M_matrNoBC->GlobalAssemble();
             }
         }
-    //    if(!Monolithic())
-    //    M_matrNoBC->spy("zzfluidMatrix");
 
 }
 
@@ -1058,7 +1093,6 @@ void Oseen<Mesh, SolverType>::updateMatrix( matrix_type& matrFull )
 
     if (M_stab)
         {
-        M_matrStab->GlobalAssemble();
         matrFull += *M_matrStab;
         }
 
@@ -1067,7 +1101,6 @@ void Oseen<Mesh, SolverType>::updateMatrix( matrix_type& matrFull )
 template<typename Mesh, typename SolverType>
 void Oseen<Mesh, SolverType>::setMatrix( matrix_type& matrFull )
 {
-    M_matrNoBC->GlobalAssemble();
     matrFull += *M_matrNoBC;
 }
 
@@ -1107,10 +1140,7 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
     leaderPrint("  f-  Applying boundary conditions ...         ");
 
     chrono.start();
-
     applyBoundaryConditions( *matrFull, rhsFull, bch);
-
-    matrFull->GlobalAssemble();
 
     chrono.stop();
 
@@ -1175,7 +1205,7 @@ void Oseen<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
 
     int numIter = linearSolver.solve(sol, rhsFull);
 
-    if (numIter > M_maxIterSolver)
+    if (numIter >= M_maxIterSolver)
     {
         chrono.start();
 
@@ -1195,12 +1225,12 @@ void Oseen<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
 
         numIter = linearSolver.solve(sol, rhsFull);
 
-        if (numIter > M_maxIterSolver && M_verbose)
+        if (numIter >= M_maxIterSolver && M_verbose)
             std::cout << "  f- ERROR: Iterative solver failed again.\n" <<  std::flush;
 
     }
 
-    M_resetPrec = (numIter > M_maxIterForReuse);
+    M_resetPrec = (numIter >= M_maxIterForReuse);
 
     leaderPrintMax( "done in " , chrono.diff() );
     leaderPrint("  f- numiter = " , numIter);

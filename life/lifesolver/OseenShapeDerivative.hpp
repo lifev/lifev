@@ -93,6 +93,8 @@ public:
                              const vector_type& w,
                              const vector_type& dw,
                              const vector_type& sourceVec);
+    //getter
+    vector_type rhsLinNoBC() {return M_rhsLinNoBC;}
 
 private:
 
@@ -294,8 +296,6 @@ void OseenShapeDerivative<Mesh, SolverType>::iterateLin( bchandler_raw_type& bch
     this->leaderPrintMax( "NormInf Solution Lin = " , this->M_linSol.NormInf());
 } // iterateLin
 
-
-
 template<typename Mesh, typename SolverType>
 void
 OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& matrNoBC,
@@ -311,7 +311,7 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& m
 
     Chrono chrono;
 
-     this->M_matrNoBC.reset( new matrix_type(matrNoBC));
+    //     this->M_matrNoBC.reset( new matrix_type(matrNoBC)); //WHY this line???
 
     int nbCompU = nDimensions;
 
@@ -328,12 +328,6 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& m
 
             // Loop on elements
 
-            vector_type vel(this->M_uFESpace.map());
-            vector_type press(this->M_pFESpace.map());
-
-            vel.subset(uk);
-            press.subset(uk, this->M_uFESpace.dim()*this->M_uFESpace.fieldDim());
-
             vector_type unRep  ( un  , Repeated );
             vector_type ukRep  ( uk  , Repeated );
             vector_type dispRep( disp, Repeated );
@@ -344,9 +338,7 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& m
 //     std::cout << dwRep.NormInf() << std::endl;
 //     std::cout << dispRep.NormInf() << std::endl;
 
-            vector_type rhsLinNoBC( M_rhsLinNoBC, Repeated, Zero); // ignoring non-local entries, Otherwise they are summed up lately
-
-
+            vector_type rhsLinNoBC( M_rhsLinNoBC.getMap(), Repeated);
 
             for ( UInt i = 1; i <= this->M_uFESpace.mesh()->numVolumes(); i++ )
                 {
@@ -373,14 +365,15 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& m
                                     M_dw_loc.vec( ) [ iloc + ic*this->M_uFESpace.fe().nbNode ] = dwRep( ig );            // dw local
                                     M_u_loc.vec()   [ iloc + ic*this->M_uFESpace.fe().nbNode ] = unRep( ig );            // un local
                                 }
-                        }
-                    /*                    std::cout << M_elvec.vec() << std::endl;
+                       }
+                    /*
+                    std::cout << M_elvec.vec() << std::endl;
                     std::cout << M_w_loc.vec() << std::endl;
                     std::cout << M_uk_loc.vec() << std::endl;
                     std::cout << M_d_loc.vec() << std::endl;
                     std::cout << M_dw_loc.vec() << std::endl;
-                    std::cout << M_u_loc.vec() << std::endl;*/
-
+                    std::cout << M_u_loc.vec() << std::endl;
+                    */
                     for ( UInt k = 0 ; k < ( UInt ) this->M_pFESpace.fe().nbNode ; k++ )
                         {
                             UInt iloc = this->M_pFESpace.fe().patternFirst( k ); // iloc = k
@@ -396,43 +389,49 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& m
 
                     //  - \rho ( \grad( u^n-w^k ):[I\div d - (\grad d)^T] u^k + ( u^n-w^k )^T[I\div d - (\grad d)^T] (\grad u^k)^T , v  )
                     source_mass1( - this->M_data.density(), M_uk_loc, M_w_loc, M_elvec, M_d_loc, M_elvec_du, this->M_uFESpace.fe() );
-                    //                    std::cout << "source_mass1 -> norm_inf(M_elvec_du)" << std::endl;
-                    //                    M_elvec_du.showMe(std::cout);
-
+                    /*
+                    std::cout << "source_mass1 -> norm_inf(M_elvec_du)" << std::endl;
+                    M_elvec_du.showMe(std::cout);
+                    */
                     //  + \rho * ( \grad u^k dw, v  )
                     source_mass2( this->M_data.density(), M_uk_loc, M_dw_loc, M_elvec_du, this->M_uFESpace.fe() );
-                    //std::cout << "source_mass2 -> norm_inf(M_elvec_du)" << std::endl;
-                    //M_elvec_du.showMe(std::cout);
-
+                    /*
+                    std::cout << "source_mass2 -> norm_inf(M_elvec_du)" << std::endl;
+                    M_elvec_du.showMe(std::cout);
+                    */
                     //  - \rho/2 ( \nabla u^n:[2 * I\div d - (\grad d)^T]  u^k , v  )
                     source_mass3( - 0.5*this->M_data.density(), M_u_loc, M_uk_loc, M_d_loc, M_elvec_du, this->M_uFESpace.fe() );
-                    //std::cout << "source_mass3 -> norm_inf(M_elvec_du)" << std::endl;
-                    //M_elvec_du.showMe(std::cout);
-
+                    /*
+                    std::cout << "source_mass3 -> norm_inf(M_elvec_du)" << std::endl;
+                    M_elvec_du.showMe(std::cout);
+                    */
                     //  - ( [-p^k I + 2*mu e(u^k)] [I\div d - (\grad d)^T] , \grad v  )
                     source_stress( - 1.0, this->M_data.viscosity(), M_uk_loc, M_pk_loc, M_d_loc, M_elvec_du, this->M_uFESpace.fe(), this->M_pFESpace.fe() );
-                    //std::cout << "source_stress -> norm_inf(M_elvec_du)" << std::endl;
-                    //M_elvec_du.showMe(std::cout);
-
+                    /*
+                    std::cout << "source_stress -> norm_inf(M_elvec_du)" << std::endl;
+                    M_elvec_du.showMe(std::cout);
+                    */
                     // + \mu ( \grad u^k \grad d + [\grad d]^T[\grad u^k]^T : \grad v )
                     source_stress2( this->M_data.viscosity(), M_uk_loc, M_d_loc, M_elvec_du, this->M_uFESpace.fe() );
-                    //std::cout << "source_stress2 -> norm_inf(M_elvec_du)" << std::endl;
-                    //M_elvec_du.showMe(std::cout);
-
+                    /*
+                    std::cout << "source_stress2 -> norm_inf(M_elvec_du)" << std::endl;
+                    M_elvec_du.showMe(std::cout);
+                    */
                     //  + ( (\grad u^k):[I\div d - (\grad d)^T] , q  )
-                    source_press( 1.0, M_uk_loc, M_d_loc, M_elvec_dp, this->M_uFESpace.fe(), this->M_pFESpace.fe() );
-                    //std::cout << "source_press -> norm_inf(M_elvec_du)"  << std::endl;
-                    //M_elvec_dp.showMe(std::cout);
-
+                    source_press( -1.0, M_uk_loc, M_d_loc, M_elvec_dp, this->M_uFESpace.fe(), this->M_pFESpace.fe() );
+                    /*
+                    std::cout << "source_press -> norm_inf(M_elvec_du)"  << std::endl;
+                    M_elvec_dp.showMe(std::cout);
+                    */
                     //
                     // Assembling
                     //
-
-//         std::cout << "debut ====================" << std::endl;
-//         M_elvec_dp.showMe(std::cout);
-//         M_elvec_du.showMe(std::cout);
-//         std::cout << "fin   ====================" << std::endl;
-
+                    /*
+         std::cout << "debut ====================" << std::endl;
+         M_elvec_dp.showMe(std::cout);
+         M_elvec_du.showMe(std::cout);
+         std::cout << "fin   ====================" << std::endl;
+                    */
                     // assembling presssure right hand side
                     assembleVector( rhsLinNoBC, M_elvec_dp, this->M_pFESpace.fe(), this->M_pFESpace.dof(), 0, nbCompU*this->dim_u() );
 
@@ -444,12 +443,13 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& m
                         }
                 }
 
-
-            M_rhsLinNoBC = rhsLinNoBC;
-
+            rhsLinNoBC.GlobalAssemble();
+            M_rhsLinNoBC += rhsLinNoBC;
+            //            M_rhsLinNoBC *= -1.;
             this->leaderPrint( "norm( M_rhsLinNoBC)  = " , M_rhsLinNoBC.NormInf() );
 
         }
+
 
     chrono.stop();
     this->leaderPrintMax("done in ", chrono.diff() );

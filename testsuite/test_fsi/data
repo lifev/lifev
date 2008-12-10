@@ -25,7 +25,7 @@ reltol     =  1.e-6
 etamax     = 1.e-10 # tolerance of the interface problem (GMRES),
                     # if semiImplicit, set   etamax = 1.e-10,
                     # else (e.g.)            etamax = 1.e-3
-semiImplicit = true # (only valid for method = exactJacobian and monolithic).
+semiImplicit = false # (only valid for method = exactJacobian and monolithic).
 maxSubIter = 100
 #monolithic = 0
 

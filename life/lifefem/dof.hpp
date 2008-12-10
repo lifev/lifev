@@ -220,7 +220,7 @@ void Dof::update( Mesh& M )
 
     _totalDof = nV * nldpV + ne * nldpe + nv * nldpv + nf * nldpf;
 
-    _ltg.reshape( nldof, nV );
+    _ltg.reshape( nldof, M.numVolumes() );
 
     // Make sure the mesh has everything needed
     bool update_edges( nldpe != 0 && ! M.hasLocalEdges() );
@@ -252,7 +252,7 @@ void Dof::update( Mesh& M )
                         //                       label of the ith point of the mesh element-1
                         _ltg( ++lc, ie ) = gcount + ( M.volume( ie ).point( i ).id() - 1 ) * nldpv + l;
                         //_ltg(++lc, ie) is the global label assigned to the ++lc dof of the element.
-}
+                    }
         }
     // Edge Based Dof
     gcount += nldpv * nv;//dof per vertex * total # vertices
