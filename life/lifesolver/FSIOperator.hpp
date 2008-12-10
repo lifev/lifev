@@ -175,7 +175,6 @@ public:
         M_dofSolidInv                        ( new DofInterface3Dto2D ),
         M_dofFluidInv                        ( new DofInterface3Dto2D ),
 // boundary vector interfaces
-        M_bcvStructureToFluid                ( new  BCVectorInterface ),
         M_bcvStructureDispToFluid            ( new  BCVectorInterface ),
         M_bcvFluidInterfaceDisp              ( new  BCVectorInterface ),
         M_bcvFluidLoadToStructure            ( new  BCVectorInterface ),
