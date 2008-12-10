@@ -871,7 +871,8 @@ evalResidual( bchandler_raw_type& bchFluid, bchandler_raw_type& bchSolid, const 
     if ( !bchFluid.bdUpdateDone() )
         bchFluid.bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
 
-    vector_type rhsFull(rhs, Repeated/*Unique?*/, Zero); // ignoring non-local entries, Otherwise they are summed up lately
+    //  vector_type rhsFull(rhs, Repeated/*Unique?*/, Zero); // ignoring non-local entries, Otherwise they are summed up lately
+    vector_type rhsFull(rhs, Unique);  // Why there is a ths, rhsFull, and a M_rhs, in this method?
 
     bcManage( *M_matrFull, rhsFull, *M_uFESpace->mesh(), M_uFESpace->dof(), bchFluid, M_uFESpace->feBd(), 1.,
               M_data.time() );
@@ -1571,7 +1572,8 @@ applyBoundaryConditions(matrix_type&        matrix,
     if ( !BCh.bdUpdateDone() )
         BCh.bdUpdate( *M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
 
-    vector_type rhsFull(rhs, Repeated, Zero); // ignoring non-local entries, Otherwise they are summed up lately
+    // vector_type rhsFull(rhs, Repeated, Zero); // ignoring non-local entries, Otherwise they are summed up lately
+    vector_type rhsFull(rhs, Unique);  // bcManages now manages the also repeated parts
 
     bcManage( matrix, rhsFull, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 1.,
               M_data.time() );

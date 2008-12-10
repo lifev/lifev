@@ -110,7 +110,8 @@ public:
 
     typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID
                                    & )> function_type;
-
+    typedef Real ( *bc_function_type ) ( const Real&, const Real&, const Real&,
+                                         const Real&, const ID& );
     typedef boost::shared_ptr<DofInterface3Dto3D>  dof_interface_type3D;
     typedef boost::shared_ptr<DofInterface3Dto2D>  dof_interface_type2D;
     typedef boost::shared_ptr<BCVectorInterface>   bc_vector_interface;
@@ -157,7 +158,8 @@ public:
         M_solidInterfaceMapOnZero(),
         M_dofFluidToStructure                ( new DofInterface3Dto3D ),
 //         M_dofFluidToSolid                    ( new DofInterface3Dto3D ),
-//         M_dofSolidTofluid                    ( new DofInterface3Dto3D ),
+//         M_dofSolidToFluid                    ( new DofInterface3Dto3D ),
+        M_dofStructureToFluid                ( new DofInterface3Dto3D ),
         M_dofStructureToSolid                ( new DofInterface3Dto3D ),
         M_dofStructureToHarmonicExtension    ( new DofInterface3Dto3D ),
         M_dofHarmonicExtensionToFluid        ( new DofInterface3Dto3D ),
@@ -173,8 +175,11 @@ public:
         M_dofSolidInv                        ( new DofInterface3Dto2D ),
         M_dofFluidInv                        ( new DofInterface3Dto2D ),
 // boundary vector interfaces
+        M_bcvStructureToFluid                ( new  BCVectorInterface ),
+        M_bcvStructureDispToFluid            ( new  BCVectorInterface ),
         M_bcvFluidInterfaceDisp              ( new  BCVectorInterface ),
         M_bcvFluidLoadToStructure            ( new  BCVectorInterface ),
+        M_bcvSolidLoadToStructure            ( new  BCVectorInterface ),
         M_bcvStructureDispToSolid            ( new  BCVectorInterface ),
         M_bcvStructureDispToHarmonicExtension( new  BCVectorInterface ),
         M_bcvHarmonicExtensionVelToFluid     ( new  BCVectorInterface ),
@@ -200,7 +205,11 @@ public:
         M_sigmaSolidRepeated(),
         M_dispFluidMeshOld(),
         M_veloFluidMesh(),
+        M_minusSigmaFluid(),    //sigmafluid: auxiliary variable for Robin.
+        M_minusSigmaFluidRepeated(), //sigmafluid: auxiliary variable for Robin.
         M_nbEval( 0 ),
+        M_AlphafCoef(0),
+        M_Alphaf(),                   //vector_type, for alphaf robin
         M_epetraComm(),
         M_epetraWorldComm (),
         M_method(),
@@ -255,6 +264,9 @@ public:
     vector_type const& lambdaSolidRepeated()    const {return *M_lambdaSolidRepeated;}
     vector_type const& sigmaSolidRepeated()     const {return *M_sigmaSolidRepeated;}
     vector_type const& lambdaDotSolidRepeated() const {return *M_lambdaDotSolidRepeated;}
+    // now residual is Ax-b, but we should decide for b-Ax. In the meantime, we need b-Ax:
+    vector_type const& minusSigmaFluid()  {return *M_minusSigmaFluid;}
+    vector_type const& minusSigmaFluidRepeated()  {return *M_minusSigmaFluidRepeated;}
 
     // member functions
 
@@ -387,7 +399,7 @@ public:
 
     void setSigmaFluid(const vector_type& sigma);
     void setSigmaSolid(const vector_type& sigma);
-
+    void setMinusSigmaFluid(const vector_type& sigma);
 
     void transferFluidOnInterface(const vector_type& _vec1,
                                   vector_type&       _vec2);
@@ -402,8 +414,26 @@ public:
     void transferInterfaceOnSolid(const vector_type& _vec1,
                                   vector_type&       _vec2);
 
+    void transferInterfaceOnFluid(const vector_type& _vec1,
+                                  vector_type&       _vec2);
+    //setting type of algorithm
+    string algorithm()	{ return M_algorithm;}
 
+    const vector_type& minusSigmaFluid() const { return *M_minusSigmaFluid;}
 
+//  setting Alphaf:
+
+    void setAlphafCoef();
+
+    void setAlphaf() { M_Alphaf->getEpetraVector().PutScalar(M_AlphafCoef); }
+
+    void setAlphafbcf(const bc_function_type &alphafbcf) {
+        vector_type vec( M_fluid->velFESpace().map());
+        M_fluid->velFESpace().interpolate(alphafbcf, vec, 0.0);
+        *M_Alphaf = vec ;
+    }
+
+  vector_type& Alphaf() { return *M_Alphaf;}
 //@ getters
 
     const fluid_raw_type& fluid()      const {return *M_fluid;}
@@ -429,8 +459,9 @@ public:
     const vector_type& derVeloFluidMesh() const {return *M_derVeloFluidMesh;}
     vector_type& derVeloFluidMesh() {return *M_derVeloFluidMesh;}
 
-
+    const dof_interface_type3D& dofStructureToFluid()             const {return M_dofSolidToFluid;}
     const dof_interface_type3D& dofFluidToStructure()             const {return M_dofFluidToStructure;}
+  //const dof_interface_type3D& dofStructureToFluid()             const {return M_dofStructureToFluid;}
     const dof_interface_type3D& dofStructureToSolid()             const {return M_dofStructureToSolid;}
     const dof_interface_type3D& dofStructureToHarmonicExtension() const {return M_dofStructureToHarmonicExtension;}
     const dof_interface_type3D& dofHarmonicExtensionToFluid()     const {return M_dofHarmonicExtensionToFluid;}
@@ -445,6 +476,18 @@ public:
 
 
     // BC Vector Interface setters and getters
+
+    void setStructureDispToFluid(vector_type const& vel, UInt type = 0);
+
+    bc_vector_interface bcvStructureDisptoFluid()   {return M_bcvStructureDispToFluid;}
+
+    void setStructureToFluid(vector_type const& vel, UInt type = 0);
+
+    bc_vector_interface bcvStructureToFluid()       {return M_bcvStructureToFluid;}
+
+    void setSolidLoadToStructure(vector_type const& load, UInt type = 0);
+
+    bc_vector_interface bcvSolidLoadToStructure()   {return M_bcvSolidLoadToStructure;}
 
     void setFluidInterfaceDisp      (vector_type const& disp, UInt type = 0);
     bc_vector_interface bcvFluidInterfaceDisp()
@@ -583,7 +626,9 @@ protected:
     boost::shared_ptr<EpetraMap>                      M_fluidInterfaceMapOnZero;
     boost::shared_ptr<EpetraMap>                      M_solidInterfaceMapOnZero;
 
+    dof_interface_type3D                              M_dofSolidToFluid;
     dof_interface_type3D                              M_dofFluidToStructure;
+    dof_interface_type3D                              M_dofStructureToFluid;
     dof_interface_type3D                              M_dofStructureToSolid;
     dof_interface_type3D                              M_dofStructureToHarmonicExtension;
     dof_interface_type3D                              M_dofHarmonicExtensionToFluid;
@@ -607,6 +652,8 @@ protected:
     bc_vector_interface                               M_bcvStructureDispToHarmonicExtension;
     bc_vector_interface                               M_bcvHarmonicExtensionVelToFluid;
     bc_vector_interface                               M_bcvStructureToFluid;
+    bc_vector_interface                               M_bcvStructureDispToFluid;
+    bc_vector_interface                               M_bcvSolidLoadToStructure;
 //     bc_vector_interface       M_bcvStructureToReducedFluid;
 //     bc_vector_interface       M_bcvReducedFluidToStructure;
 
@@ -637,6 +684,9 @@ private:
     boost::shared_ptr<vector_type>                    M_sigmaFluidRepeated;
     boost::shared_ptr<vector_type>                    M_sigmaSolidRepeated;
 
+    boost::shared_ptr<vector_type>                    M_minusSigmaFluid;
+    boost::shared_ptr<vector_type>                    M_minusSigmaFluidRepeated;
+
     //    boost::shared_ptr<vector_type>                    M_dispStruct;
     //    boost::shared_ptr<vector_type>                    M_dispStructOld;
     //    boost::shared_ptr<vector_type>                    M_veloStruct;
@@ -654,9 +704,13 @@ protected:
 
     boost::shared_ptr<vector_type>                    M_un;
     boost::shared_ptr<vector_type>                    M_rhs;
+    boost::shared_ptr<vector_type>                    M_Alphaf;
 
 //     boost::shared_ptr<vector_type>                    M_w;
 //     boost::shared_ptr<vector_type>                    M_dw;
+
+    Real                                              M_AlphafCoef;
+    Real                                              M_betamedio;
 
     Real                                              M_time;
 
@@ -669,6 +723,7 @@ private:
 
 //     UInt                      M_reducedFluid;
     std::string                                       M_method;
+    std::string                                       M_algorithm;
     bool                                              M_monolithic;
     Preconditioner                                    M_precond;
     DDNPreconditioner                                 M_DDNprecond;

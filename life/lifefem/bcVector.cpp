@@ -41,7 +41,12 @@ BCVectorBase::BCVectorBase()
     :
    _M_mixteCoef( 0.0 ),
    _M_type( 0 ),
-   _M_finalized( false )
+   _M_betaCoef(1.0),
+   _M_gammaCoef(1.0),
+   _M_finalized( false ),
+   _M_ismixteVec( false ),
+   _M_isbetaVec( false  ),
+   _M_isgammaVec( false )
 {}
 
 //! Constructor
@@ -50,7 +55,12 @@ BCVectorBase::BCVectorBase( const EpetraVector& vec, const UInt nbTotalDof, UInt
     _M_vec       ( &vec ),
     _M_nbTotalDof( nbTotalDof ),
     _M_mixteCoef ( 0.0 ),
+    _M_betaCoef(1.0),
+    _M_gammaCoef(1.0),
     _M_type      ( type ),
+    _M_ismixteVec( false ),
+    _M_isbetaVec( false  ),
+    _M_isgammaVec( false ),
     _M_finalized ( false )
 {}
 
@@ -63,7 +73,12 @@ BCVectorBase::operator=( BCVectorBase const& __bcv )
     _M_vec        = __bcv._M_vec;
     _M_nbTotalDof = __bcv._M_nbTotalDof;
     _M_mixteCoef  = __bcv._M_mixteCoef;
+    _M_betaCoef   = __bcv._M_betaCoef;
+    _M_gammaCoef  = __bcv._M_gammaCoef;
     _M_type       = __bcv._M_type;
+    _M_ismixteVec = __bcv._M_ismixteVec;
+    _M_isbetaVec  = __bcv._M_isbetaVec;
+    _M_isgammaVec = __bcv._M_isgammaVec;
     _M_finalized  = __bcv._M_finalized;
 
     return *this;
@@ -85,6 +100,25 @@ BCVectorBase::MixteVec ( const ID& iDof, const ID& iComp ) const
     return ( *_M_vec_mixte ) ( ( iComp - 1 ) * _M_nbTotalDof + iDof );
 }
 
+//! This method returns the value of the mixte coefficient to be imposed in the component iComp of the dof iDof
+Real
+BCVectorBase::BetaVec ( const ID& iDof, const ID& iComp ) const
+{
+
+
+    ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
+
+    return ( *_M_vec_beta ) ( ( iComp - 1 ) * _M_nbTotalDof + iDof );
+}
+
+//! This method returns the value of the mixte coefficient to be imposed in the component iComp of the dof iDof
+Real
+BCVectorBase::GammaVec ( const ID& iDof, const ID& iComp ) const
+{
+  //setgamma(true);
+    ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
+    return ( *_M_vec_beta ) ( ( iComp - 1 ) * _M_nbTotalDof + iDof );
+}
 
 void
 BCVectorBase::setVector( EpetraVector& __vec, UInt __nbTotalDof, UInt type )
@@ -171,8 +205,13 @@ void BCVectorInterface::setup( const EpetraVector& vec, UInt nbTotalDof, dof_int
     _M_vec        = &vec;
     _M_nbTotalDof = nbTotalDof;
     _M_mixteCoef  = 0.0;
+    _M_betaCoef   = 1.0;
+    _M_gammaCoef  = 1.0;
     _M_type       = type;
     _M_dofIn      = dofIn;
+    _M_ismixteVec = false;
+    _M_isbetaVec  = false;
+    _M_isgammaVec = false;
     this->setFinalized( true );
 }
 
@@ -209,6 +248,22 @@ BCVectorInterface::MixteVec( const ID& iDof, const ID& iComp ) const
     return ( *_M_vec_mixte ) (( iComp - 1 ) * _M_nbTotalDof + _M_dofIn->getInterfaceDof( iDof ));
 }
 
+//! This method returns the value of the beta coefficient to be imposed in the component iComp of the dof iDof
+Real
+BCVectorInterface::BetaVec( const ID& iDof, const ID& iComp ) const
+{
+     ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
+     return ( *_M_vec_beta ) (( iComp - 1 ) * _M_nbTotalDof + _M_dofIn->getInterfaceDof( iDof ));
+}
+
+
+//! This method returns the value of the gamma coefficient to be imposed in the component iComp of the dof iDof
+Real
+BCVectorInterface::GammaVec( const ID& iDof, const ID& iComp ) const
+{
+     ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
+     return ( *_M_vec_gamma ) (( iComp - 1 ) * _M_nbTotalDof + _M_dofIn->getInterfaceDof( iDof ));
+}
 
 //! Assignment operator for BCVectorInterface
 BCVectorInterface&

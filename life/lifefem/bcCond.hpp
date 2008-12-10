@@ -368,11 +368,35 @@ public:
     Real operator() ( const ID& iDof, const ID& iComp ) const;
 
 
-    //! Returns the value of the mixte coefficient (in BC Vector)
+    //! Returns true if mixte (in BC Vector ) is a EpetraVector (mixteVec),
+    //! false is scalar (default alphaCoef=1);
+    bool ismixteVec() const;
+
+    //! Returns true if beta (in BC Vector ) is a EpetraVector (betaVec),
+    //! false is scalar (default betaCoef=1);
+    bool isbetaVec() const;
+
+    //! Returns true if gamma (in BC Vector ) is a EpetraVector (gammaVec),
+    //! false is scalar (default gammaCoef=1);
+    bool isgammaVec() const;
+
+     //! Returns the value of the mixte coefficient (in BC Vector)
     Real mixteCoef() const;
+
+    //! Returns the value of the beta coefficient (in BC Vector)
+    Real betaCoef() const;
+
+    //! Returns the value of the gamma coefficient (in BC Vector)
+    Real gammaCoef() const;
 
     //! Returns the value of the mixte coefficient vector (in BC Vector)
     Real MixteVec( const ID& iDof, const ID& iComp ) const;
+
+    //! Returns the value of the beta coefficient vector (in BC Vector)
+    Real BetaVec( const ID& iDof, const ID& iComp ) const;
+
+    //! Returns the value of the gamma coefficient vector (in BC Vector)
+    Real GammaVec( const ID& iDof, const ID& iComp ) const;
 
     //! Returns a pointer to the i-th elements in the (finalised) list
     //! (counting from 0 ' a la C')

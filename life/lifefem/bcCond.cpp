@@ -276,7 +276,7 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag,
     if ( _M_mode != Full ) {
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
-        
+
     _M_comp.reserve( nComp );
     for ( ID i = 1; i <= nComp; ++i )
         _M_comp.push_back( i );
@@ -320,7 +320,7 @@ BCBase & BCBase::operator=( const BCBase& BCb )
     if ( !_M_idList.empty() || !BCb._M_idList.empty() ) {
         ERROR_MSG( "BCBase::operator= : The BC assigment operator does not work with lists of identifiers which are not empty" );
     }
-    
+
     return *this;
 }
 
@@ -474,6 +474,49 @@ Real BCBase::operator() ( const ID& iDof, const ID& iComp ) const
     }
 }
 
+//! Return true if mixte coefficient is bcVector, false otherside
+bool  BCBase::ismixteVec()  const
+{
+    if ( _M_dataVector )
+      {
+     	return  (*_M_bcv).ismixteVec();
+      }
+    else
+    {
+        ERROR_MSG( "BCBase::mixte : A data vector must be specified before calling this method" );
+        return 0.;
+    }
+}
+
+//! Return true if beta coefficient  is bcVector, false otherside
+bool BCBase::isbetaVec()   const
+{
+    if ( _M_dataVector )
+      {
+
+	return   (*_M_bcv).isbetaVec();
+      }
+    else
+    {
+        ERROR_MSG( "BCBase::beta: A data vector must be specified before calling this method" );
+        return 0.;
+    }
+}
+
+//! Return true if gamma coefficient is bcVector, false otherside
+bool BCBase::isgammaVec()  const
+{
+    if ( _M_dataVector )
+      {
+
+	return (*_M_bcv).isgammaVec();
+      }
+    else
+    {
+        ERROR_MSG( "BCBase::gamma : A data vector must be specified before calling this method" );
+        return 0.;
+    }
+}
 
 //! Returns the value of the mixte coefficient (in BC Vector)
 Real BCBase::mixteCoef() const
@@ -488,6 +531,31 @@ Real BCBase::mixteCoef() const
 
 }
 
+//! Returns the value of the beta coefficient (in BC Vector)
+Real BCBase::betaCoef() const
+{
+    if ( _M_dataVector )
+        return ( *_M_bcv ).betaCoef();
+    else
+    {
+        ERROR_MSG( "BCBase::mixteCoef : A data vector must be specified before calling this method" );
+        return 0.;
+    }
+
+}
+
+//! Returns the value of the gamma coefficient (in BC Vector)
+Real BCBase::gammaCoef() const
+{
+    if ( _M_dataVector )
+        return ( *_M_bcv ).gammaCoef();
+    else
+    {
+        ERROR_MSG( "BCBase::mixteCoef : A data vector must be specified before calling this method" );
+        return 0.;
+    }
+
+}
 
 //! Returns the value of the mixte coefficient vector (in BC Vector) M.Prosi
 Real BCBase::MixteVec( const ID& iDof, const ID& iComp ) const
@@ -501,6 +569,35 @@ Real BCBase::MixteVec( const ID& iDof, const ID& iComp ) const
     }
 
 }
+
+
+//! Returns the value of the beta coefficient vector (in BC Vector)
+Real BCBase::BetaVec( const ID& iDof, const ID& iComp ) const
+{
+    if ( _M_dataVector )
+        return ( *_M_bcv).BetaVec( iDof, iComp );
+    else
+    {
+        ERROR_MSG( "BCBase::MixteVec : A data vector must be specified before calling this method" );
+        return 0.;
+    }
+
+}
+
+//! Returns the value of the gamma coefficient vector (in BC Vector)
+Real BCBase::GammaVec( const ID& iDof, const ID& iComp ) const
+{
+    if ( _M_dataVector )
+        return ( *_M_bcv).GammaVec( iDof, iComp );
+    else
+    {
+        ERROR_MSG( "BCBase::MixteVec : A data vector must be specified before calling this method" );
+        return 0.;
+    }
+
+}
+
+
 //! Returns a pointer  to the i-th elements in the (finalised) list
 //! (counting from 1 ' a la FORTRAN')
 const IdentifierBase*

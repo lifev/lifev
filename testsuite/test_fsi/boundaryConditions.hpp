@@ -102,14 +102,26 @@ FSIOperator::fluid_bchandler_type BCh_fluid(FSIOperator &_oper)
 
     BCh_fluid->addBC("InFlow" , 2,  Natural,   Full, in_flow, 3);
     BCh_fluid->addBC("OutFlow", 3,  Natural,   Full, out_flow, 3);
+    BCh_fluid->addBC("Edges",  20, Essential, Full, bcf,  3);
 
-    _oper.setHarmonicExtensionVelToFluid(_oper.veloFluidMesh());
+    _oper.setStructureToFluid(_oper.veloFluidMesh());
+    // _oper.setHarmonicExtensionVelToFluid(_oper.veloFluidMesh());
 
-    BCh_fluid->addBC("Edges",  20, Essential, Full,
-                     *_oper.bcvHarmonicExtensionVelToFluid(),  3);
-    BCh_fluid->addBC("Interface",   1,  Essential, Full,
-                     *_oper.bcvHarmonicExtensionVelToFluid(),  3);
+    if(_oper.algorithm()=="RobinNeumann")
+    {
+        // _oper.setAlphafbcf(alpha); // if alpha is bcFunction define in ud_function.cpp
+        _oper.setSolidLoadToStructure( _oper.minusSigmaFluidRepeated());
 
+        BCh_fluid->addBC("Interface",   1,  Mixte, Full,
+                         *_oper.bcvStructureToFluid(),  3);
+        BCh_fluid->addBC("Interface",   1,  Natural, Full,
+                         *_oper.bcvSolidLoadToStructure(), 3);
+    }
+    else
+    {
+        BCh_fluid->addBC("Interface",   1,  Essential, Full,
+                         *_oper.bcvStructureToFluid(),  3);
+    }
     return BCh_fluid;
 }
 

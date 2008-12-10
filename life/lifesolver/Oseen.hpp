@@ -1126,7 +1126,8 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
     matrix_ptrtype matrFull( new matrix_type( M_localMap, M_matrNoBC->getMeanNumEntries()));
     updateMatrix(*matrFull);
     setMatrix(*matrFull);
-    vector_type    rhsFull = M_rhsNoBC;
+
+    vector_type rhsFull (M_rhsNoBC);
 
 //     matrFull.reset(new matrix_type(*M_matrNoBC));
 //     M_rhsFull = M_rhsNoBC;
@@ -1346,7 +1347,8 @@ void Oseen<Mesh, SolverType>::applyBoundaryConditions( matrix_type&        matri
         BCh.bdUpdate( *M_uFESpace.mesh(), M_uFESpace.feBd(), M_uFESpace.dof() );
     }
 
-    vector_type rhsFull(rhs, Repeated, Zero); // ignoring non-local entries, Otherwise they are summed up lately
+    //vector_type rhsFull(rhs, Repeated, Zero); // ignoring non-local entries, Otherwise they are summed up lately
+    vector_type rhsFull(rhs, Unique); // ignoring non-local entries, Otherwise they are summed up lately
 
     bcManage( matrix, rhsFull, *M_uFESpace.mesh(), M_uFESpace.dof(), BCh, M_uFESpace.feBd(), 1.,
               M_data.time() );

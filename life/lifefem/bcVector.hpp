@@ -97,9 +97,13 @@ public:
     //! Return the value of the Mixte coefficient vector to be imposed in the component iComp of the dof iDof
     virtual Real MixteVec( const ID& iDof, const ID& iComp ) const;
 
+    //! Return the value of the Beta coefficient vector to be imposed in the component iComp of the dof iDof
+    virtual Real BetaVec( const ID& iDof, const ID& iComp ) const;
+
+    //! Return the value of the Gamma coefficient vector to be imposed in the component iComp of the dof iDof
+    virtual Real GammaVec( const ID& iDof, const ID& iComp ) const;
+
     //@}
-
-
 
     //@{
 
@@ -137,8 +141,16 @@ public:
         {
             return _M_mixteCoef;
         }
-
-
+    //! Return the value of the beta coefficient
+    Real betaCoef() const
+        {
+            return _M_betaCoef;
+        }
+    //! Return the value of the gamma coefficient
+    Real gammaCoef() const
+        {
+            return _M_gammaCoef;
+        }
     //@}
 
 
@@ -150,6 +162,23 @@ public:
             _M_finalized = __v;
         }
 
+    //true if Mixte coefficient is a Vector
+    bool ismixteVec()const  {return _M_ismixteVec;}
+
+    //true if beta coefficient is a Vector
+    bool isbetaVec() const  {return _M_isbetaVec;}
+
+    //true if gamma coefficient is a Vector
+    bool isgammaVec() const {return _M_isgammaVec;}
+
+    //setting modes of coefficent
+
+    void setmixte(bool _s) {_M_ismixteVec = _s;}
+
+    void setisbeta(bool _s) {_M_isbetaVec = _s;}
+
+    void setisgamma(bool _s) {_M_isgammaVec =_s;}
+
     //! set the Mixte coefficient
     void setMixteCoef( const Real& coef )
         {
@@ -159,9 +188,36 @@ public:
     //! set the Mixte coefficient data vector
     void setMixteVec( EpetraVector& vec_mixte )
         {
+	    _M_ismixteVec = true;
             _M_vec_mixte= &vec_mixte;
         }
 
+    //! set the Beta coefficient data vector
+    void setBetaCoef( const Real& coef )
+        {
+            _M_betaCoef = coef;
+        }
+
+    //! set the Gamma coefficient data vector
+    void setGammaCoef( const Real& coef )
+        {
+            _M_gammaCoef = coef;
+        }
+
+
+    //! set the beta coefficient data vector
+    void setBetaVec( EpetraVector& vec_beta )
+        {
+	  _M_isbetaVec = true;
+	  _M_vec_beta= &vec_beta;
+        }
+
+    //! set the gamma coefficient data vector
+    void setGammaVec( EpetraVector& vec_gamma )
+        {
+	  _M_isgammaVec = true;
+	  _M_vec_gamma= &vec_gamma;
+        }
 
     //! set the vector
     void setVector( EpetraVector& __vec, UInt nbDOF, UInt type=0 );
@@ -182,6 +238,8 @@ protected:
 
     //! The data vector of the mixte coefficient
     EpetraVector* _M_vec_mixte;
+    EpetraVector* _M_vec_beta;
+    EpetraVector* _M_vec_gamma;
 
     //! Number of total dof in the vector of data
     UInt _M_nbTotalDof;
@@ -190,6 +248,20 @@ protected:
     /*! For the moment, it is the same for all the entries of the data vector.
      */
     Real _M_mixteCoef;
+
+    //! Coefficient for mixte boundary conditions (Robin)
+    /*! For the moment, it is the same for all the entries of the data vector.
+     */
+    Real _M_betaCoef;
+
+    //! Coefficient for  boundary conditions (Natural type 0)
+    /*! For the moment, it is the same for all the entries of the data vector.
+     */
+    Real _M_gammaCoef;
+
+    bool _M_ismixteVec;
+    bool _M_isbetaVec;
+    bool _M_isgammaVec;
 
 
     /*!
@@ -315,6 +387,12 @@ public:
 
     //! This method returns the value of the mixte coefficient to be imposed in the component iComp of the dof iDof
     Real MixteVec( const ID& iDof, const ID& iComp ) const;
+
+    //! This method returns the value of the beta coefficient to be imposed in the component iComp of the dof iDof
+    Real BetaVec( const ID& iDof, const ID& iComp ) const;
+
+    //! This method returns the value of the gamma coefficient to be imposed in the component iComp of the dof iDof
+    Real GammaVec( const ID& iDof, const ID& iComp ) const;
 
     //! Assignment operator for BCVectorInterface
     BCVectorInterface & operator=( const BCVectorInterface & BCv );

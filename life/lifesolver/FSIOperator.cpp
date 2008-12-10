@@ -322,16 +322,24 @@ FSIOperator::setup()
                                               M_interfaceTolerance);
 
     M_dofStructureToSolid->setup(M_dFESpace->refFE(), M_dFESpace->dof(),
-                                         M_dFESpace->refFE(), M_dFESpace->dof());
+                                 M_dFESpace->refFE(), M_dFESpace->dof());
     M_dofStructureToSolid->update(*M_dFESpace->mesh(), M_structureInterfaceFlag,
-                                          *M_dFESpace->mesh(), M_solidInterfaceFlag,
-                                          M_interfaceTolerance);
+                                  *M_dFESpace->mesh(), M_solidInterfaceFlag,
+                                  M_interfaceTolerance);
+
+    M_dofStructureToFluid->setup(M_uFESpace->refFE(), M_uFESpace->dof(), //modifica matteo FSI
+                                 M_dFESpace->refFE(), M_dFESpace->dof());
+
+    M_dofStructureToFluid->update(*M_uFESpace->mesh(), M_structureInterfaceFlag,
+                                  //*M_dataFluid->mesh(), M_structureInterfaceFlag,
+                                  *M_dataSolid->mesh(), M_fluidInterfaceFlag,
+                                  M_interfaceTolerance);
 
     M_dofHarmonicExtensionToFluid->setup(M_uFESpace->refFE(),  uDof,
-                                                 M_uFESpace->refFE(),  uDof);
+                                         M_uFESpace->refFE(),  uDof);
     M_dofHarmonicExtensionToFluid->update(*M_dataFluid->mesh(), M_harmonicInterfaceFlag,
-                                                  *M_dataFluid->mesh(), M_fluidInterfaceFlag,
-                                                  M_interfaceTolerance);
+                                          *M_dataFluid->mesh(), M_fluidInterfaceFlag,
+                                          M_interfaceTolerance);
 
     if(M_monolithic)// solid mesh partitioning for monolithic
         {
@@ -413,6 +421,7 @@ FSIOperator::setup()
                 {
                     M_dispFluidMeshOld.reset(new vector_type(M_uFESpace->map(), Repeated) );
                     M_veloFluidMesh.reset   (new vector_type(M_uFESpace->map(), Repeated) );
+                    M_Alphaf.reset          (new vector_type(M_uFESpace->map(), Repeated));
 
                     if (M_linearFluid)
                         M_derVeloFluidMesh.reset(new vector_type(this->M_uFESpace->map(), Repeated) );
@@ -423,6 +432,9 @@ FSIOperator::setup()
 
             M_sigmaFluid.reset (new vector_type(*M_fluidInterfaceMap, Unique) );
             M_sigmaFluidRepeated.reset (new vector_type(*M_fluidInterfaceMap, Repeated) );
+            M_minusSigmaFluid.reset (new vector_type(*M_fluidInterfaceMap, Unique) );
+            M_minusSigmaFluidRepeated.reset (new vector_type(*M_fluidInterfaceMap, Repeated) );
+
             M_lambdaSolid.reset   (new vector_type(*M_solidInterfaceMap, Unique) );
             M_lambdaSolidOld.reset(new vector_type(*M_solidInterfaceMap, Unique) );
             M_lambdaDotSolid.reset(new vector_type(*M_solidInterfaceMap, Unique) );
@@ -460,6 +472,7 @@ FSIOperator::setDataFromGetPot( GetPot const& data_file )
 {
 
     M_method  = data_file("problem/method" ,"steklovPoincare");
+    M_algorithm  = data_file("problem/algorithm" ,"DirichletNeumann");
 
     M_fluidInterfaceFlag      = data_file("interface/fluid_flag",     M_fluidInterfaceFlag );
     M_solidInterfaceFlag      = data_file("interface/solid_flag",     M_fluidInterfaceFlag );
@@ -944,7 +957,6 @@ FSIOperator::transferFluidOnInterface(const vector_type &_vec1,
             }
 }
 
-
 //works in serial but no yet in parallel
 void
 FSIOperator::transferSolidOnFluid(const vector_type &_vec1,//not working in parallel
@@ -1070,13 +1082,16 @@ FSIOperator::transferInterfaceOnSolid(const vector_type& _vec1,
             }
 }
 
+void
+FSIOperator::setAlphafCoef( )
+{
+    Real pi=3.1459265358979;
+    Real h=0.1, R=0.5;
 
-
-
-
-
-
-
+    M_AlphafCoef  = 2*(this->dataSolid().rho()*h)/this->dataFluid().timestep();
+    M_AlphafCoef += h*this->dataSolid().young(0)*this->dataFluid().timestep() /
+                    (2*pow(R,2) *(1-pow(dataSolid().poisson(0),2)));
+}
 
 void
 FSIOperator::setFluidBC             (fluid_bchandler_type bc_fluid)
@@ -1148,6 +1163,59 @@ void FSIOperator:: setComm     (   boost::shared_ptr<Epetra_MpiComm> comm,
 
 
 //
+void FSIOperator::setStructureToFluid(vector_type const&velo,  UInt type)
+{
+    M_bcvStructureToFluid->setup(velo,
+			       M_fluid->velFESpace().dof().numTotalDof(),
+               		       M_dofHarmonicExtensionToFluid,
+			       type);
+
+    this->setAlphafCoef();
+    this->setAlphaf();
+
+        if(this->algorithm()=="RobinNeumann")
+      {
+	 if(M_Alphaf.get()==0)
+	 {
+	 this->setAlphafCoef();
+	 M_bcvStructureToFluid->setMixteCoef(M_AlphafCoef);
+	 M_bcvStructureToFluid->setBetaCoef(M_AlphafCoef);
+	 }
+	 else
+	 {
+	   M_bcvStructureToFluid->setMixteVec(this->Alphaf());
+	   M_bcvStructureToFluid->setBetaVec(this->Alphaf());
+	 }
+      }
+
+}
+
+void FSIOperator::setStructureDispToFluid(vector_type const&disp,  UInt type)
+{
+  M_bcvStructureDispToFluid->setup(disp,
+				   M_fluid->velFESpace().dof().numTotalDof(),
+				   M_dofStructureToFluid,
+				   type);
+
+  if(this->algorithm()=="RobinNeumann")
+    {
+      if(M_Alphaf.get()==0)
+	{
+	  this->setAlphafCoef();
+	  M_bcvStructureToFluid->setMixteCoef(M_AlphafCoef);
+	  M_bcvStructureToFluid->setBetaCoef(M_AlphafCoef);
+	}
+      else
+	{
+	  this->setAlphafCoef();
+	  this->setAlphaf();
+	  M_bcvStructureToFluid->setMixteVec(this->Alphaf());
+	  M_bcvStructureToFluid->setBetaVec(this->Alphaf());
+	}
+    }
+}
+
+
 
 void FSIOperator::setHarmonicExtensionVelToFluid(vector_type const& vel,
                                                  UInt type)
@@ -1195,14 +1263,22 @@ void FSIOperator::setDerStructureDispToSolid(vector_type const& ddisp,
                                         type);
 }
 
-
-void FSIOperator::setFluidLoadToStructure(vector_type const& load,
+void FSIOperator::setFluidLoadToStructure(vector_type const &load,
                                           UInt type)
 {
     M_bcvFluidLoadToStructure->setup(load,
                                      M_solid->dFESpace().dof().numTotalDof(),
                                      M_dofStructureToSolid,
                                      type);
+}
+
+void FSIOperator::setSolidLoadToStructure(vector_type const &load,
+                                          UInt type)
+{
+    M_bcvSolidLoadToStructure->setup(load,
+				     M_solid->dFESpace().dof().numTotalDof(),
+				     M_dofStructureToFluid,
+				     type);
 }
 
 void FSIOperator::setDerFluidLoadToStructure(vector_type const& dload,
@@ -1261,7 +1337,7 @@ void FSIOperator::setLambdaSolid(const vector_type& lambda)
     else // to be coded, I am not sure we need this functionality.
         assert(false); // if you get here, reformulate your problem in order to get a unique map as entry
 
-    *M_lambdaSolidRepeated = lambda;
+    *M_lambdaSolidRepeated = *M_lambdaSolid;
 }
 
 void FSIOperator::setLambdaSolidOld(const vector_type& lambda)
@@ -1280,7 +1356,7 @@ void FSIOperator::setLambdaDotSolid(const vector_type& lambda)
     else // to be coded, I am not sure we need this functionality.
         assert(false); // if you get here, reformulate your problem in order to get a unique map as entry
 
-    *M_lambdaDotSolidRepeated     = lambda;
+    *M_lambdaDotSolidRepeated     = *M_lambdaDotSolid;
 }
 
 void  FSIOperator::setSigmaFluid(const vector_type& sigma)
@@ -1290,7 +1366,7 @@ void  FSIOperator::setSigmaFluid(const vector_type& sigma)
     else // to be coded, I am not sure we need this functionality.
         assert(false); // if you get here, reformulate your problem in order to get a unique map as entry
 
-    *M_sigmaFluidRepeated = sigma;
+    *M_sigmaFluidRepeated = *M_sigmaFluid;
 
 }
 
@@ -1302,9 +1378,21 @@ void FSIOperator::setSigmaSolid(const vector_type& sigma)
     else // to be coded, I am not sure we need this functionality.
         assert(false); // if you get here, reformulate your problem in order to get a unique map as entry
 
-    *M_sigmaSolidRepeated = sigma;
+    *M_sigmaSolidRepeated = *M_sigmaSolid;
 }
 
+void FSIOperator::setMinusSigmaFluid(const vector_type& sigma)
+{
+    if ( sigma.getMaptype() == Unique )
+      {
+        *M_minusSigmaFluid        =sigma;
+	*M_minusSigmaFluid       *=-1;
+      }
+    else // to be coded, I am not sure we need this functionality.
+        assert(false); // if you get here, reformulate your problem in order to get a unique map as entry
+
+    *M_minusSigmaFluidRepeated = *M_minusSigmaFluid;
+    }
 
 
 }

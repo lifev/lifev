@@ -62,6 +62,7 @@ fixedPoint::setDataFromGetPot( GetPot const& data )
     // If M_updateEvery <= 0, recompute computational domain and matrices only at first subiteration (semi-implicit)
     M_updateEvery = data("problem/updateEvery", 1);
 
+    if(this->algorithm()=="RobinNeumann")  M_aitkFS.setDefault(-1, 1); //RN
 
     if (false && this->isFluid())
         M_ensightFluid.reset( new  Ensight<RegionMesh3D<LinearTetra> > ( data, "fixedPtFluidInnerIterations") );
@@ -138,7 +139,12 @@ void fixedPoint::eval( const vector_type& _disp,
     // possibly unsafe when using more cpus,
     this->setLambdaFluid(_disp);
 
-    vector_type sigmaFluidUnique (this->sigmaFluid(), Unique);
+    //Change in sign in the residual for RN:
+    // if(this->algorithm()=="RobinNeumann")   this->setMinusSigmaFluid( sigmaSolidUnique );
+    if(this->algorithm()=="RobinNeumann")   this->setMinusSigmaFluid( this->sigmaSolid() );
+
+
+    vector_type sigmaFluidUnique (this->sigmaFluid().getMap(), Unique);
 
     if (this->isFluid())
     {
@@ -184,6 +190,7 @@ void fixedPoint::eval( const vector_type& _disp,
                 this->M_fluid->updateRHS( *M_rhs );
             }
 
+        //	if(this->algorithm()=="RobinNeumann") this->updatealphaf(this->veloFluidMesh());// this->setAlphaf();
 
         this->M_fluid->iterate( *M_BCh_u );
 
@@ -223,9 +230,9 @@ void fixedPoint::eval( const vector_type& _disp,
     MPI_Barrier(MPI_COMM_WORLD);
 
 
-    vector_type lambdaSolidUnique   (this->lambdaSolid(),    Unique);
-    vector_type lambdaDotSolidUnique(this->lambdaDotSolid(), Unique);
-    vector_type sigmaSolidUnique    (this->sigmaSolid(),     Unique);
+    vector_type lambdaSolidUnique   (this->lambdaSolid().getMap(),    Unique);
+    vector_type lambdaDotSolidUnique(this->lambdaDotSolid().getMap(), Unique);
+    vector_type sigmaSolidUnique    (this->sigmaSolid().getMap(),     Unique);
 
     if (this->isSolid())
     {
@@ -316,13 +323,20 @@ void fixedPoint::evalResidual(vector_type &res, const vector_type& disp, int ite
 //
 
 
-void  fixedPoint::solveJac(vector_type        &_muk,
-                           const vector_type  &_res,
+void  fixedPoint::solveJac(vector_type        &muk,
+                           const vector_type  &res,
                            const double   /*_linearRelTol*/)
 {
     if (M_nbEval == 1) M_aitkFS.restart();
-    //    _muk = 0.001*_res;
-    _muk = M_aitkFS.computeDeltaLambda(this->lambdaSolidOld(), -1.*_res);
+
+    if(this->algorithm()=="RobinNeumann")
+    {
+        muk = M_aitkFS.computeDeltaLambda(this->lambdaSolidOld(), res);
+    }
+    else
+    {
+        muk = M_aitkFS.computeDeltaLambda(this->lambdaSolidOld(), -1.*res);
+    }
 }
 
 
