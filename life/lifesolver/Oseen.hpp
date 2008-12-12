@@ -1229,9 +1229,11 @@ void Oseen<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
         if (numIter >= M_maxIterSolver && M_verbose)
             std::cout << "  f- ERROR: Iterative solver failed again.\n" <<  std::flush;
 
+        M_resetStab = true;
+
     }
 
-    M_resetPrec = (numIter >= M_maxIterForReuse);
+    if (numIter >= M_maxIterForReuse) resetPrec();
 
     leaderPrintMax( "done in " , chrono.diff() );
     leaderPrint("  f- numiter = " , numIter);
