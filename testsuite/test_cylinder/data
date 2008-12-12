@@ -59,6 +59,7 @@ gammaPress = 0.2
 #gammaBeta  = 0.125
 #gammaDiv   = 0.125
 #gammaPress = 0.03125
+reuse      = false
 
 [../problem]
 
