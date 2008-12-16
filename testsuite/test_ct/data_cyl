@@ -9,9 +9,11 @@ start      = 0
 save       = 1
 
 [fluid]
+#[../miscellaneous]
+#steady		= 0
 
 [./physics]
-endtime         = .2
+endtime         = 2.0
 density         = 1.0          # density
 viscosity       = 0.005         # viscosity
 
@@ -27,12 +29,12 @@ mesh_type       = .mesh
 
 mesh_faces      = all                   # update all faces elements
 mesh_edges      = all                   # update all faces elements
-timestep        = 0.1                   # timestep
+timestep        = 0.05                   # timestep
 verbose         = 0                     # verbose during mesh-reading
 order_bdf       = 1
 linearized      = 0
 diagonalize     = 0 # weight, 0=off
-div_beta_u_v    = 1 # 1=on, 0=off
+div_beta_u_v    = 0 # 1=on, 0=off
 vel_order       = P1		# P1, P1Bubble, P2
 press_order     = P1		# P1, P2
 
@@ -59,6 +61,13 @@ gammaPress = 0.2
 #gammaBeta  = 0.125
 #gammaDiv   = 0.125
 #gammaPress = 0.03125
+
+[../sdstab]
+gammaBeta = 0.02
+gammaDiv  = 0.2
+
+[../miscellaneous]
+steady		= 0
 
 [../problem]
 
