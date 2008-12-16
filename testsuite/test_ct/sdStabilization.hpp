@@ -45,13 +45,16 @@ namespace LifeV
   {
   public:
 
+    typedef boost::shared_ptr<MESH> mesh_type;
     //! Constructor
-    SDStabilization( const GetPot&   dataFile,
-                     const MESH&     mesh,
+    SDStabilization(
+                     const mesh_type     mesh,
                      const DOF&      dof,
                      const RefFE&    refFE,
                      const QuadRule& quadRule,
-                           Real      viscosity);
+                           Real	     gammaBeta = 0.,
+                           Real      gammaDiv = 0.,
+                           Real      viscosity = 1.);
 
 
     /*! compute SD stabilization terms and add them into matrix
@@ -66,10 +69,11 @@ namespace LifeV
 
     template <typename VECTOR, typename SOURCE >
     void apply(const Real dt, VECTOR& vector, const VECTOR& state, const SOURCE& source, const Real& time);
-
+    void setGammaBeta (double gammaBeta) {M_gammaBeta = gammaBeta;}
+    void setGammaDiv  (double gammaDiv)  {M_gammaDiv  = gammaDiv;}
   private:
 
-    const MESH&  M_mesh;
+    const mesh_type  M_mesh;
     const DOF&   M_dof;
     CurrentFE    M_fe;
     Real         M_viscosity;
@@ -105,18 +109,20 @@ namespace LifeV
   }; // class SDStabilization
 
   template<typename MESH, typename DOF>
-  SDStabilization<MESH, DOF>::SDStabilization( const GetPot& dataFile,
-					       const MESH&     mesh,
+  SDStabilization<MESH, DOF>::SDStabilization(
+					       const mesh_type     mesh,
 					       const DOF&      dof,
 					       const RefFE&    refFE,
 					       const QuadRule& quadRule,
+                                               Real 	       gammaBeta,
+					       Real            gammaDiv,
 					       Real            viscosity):
     M_mesh( mesh ),
     M_dof( dof ),
-    M_fe( refFE, getGeoMap(mesh), quadRule ),
+    M_fe( refFE, getGeoMap(*mesh), quadRule ),
     M_viscosity( viscosity ),
-    M_gammaBeta ( dataFile( "fluid/sdstab/gammaBeta", 0. ) ),
-    M_gammaDiv  ( dataFile( "fluid/sdstab/gammaDiv", 0. ) ),
+    M_gammaBeta ( gammaBeta ),
+    M_gammaDiv  ( gammaDiv ),
     M_elMat( M_fe.nbNode, nDimensions+1, nDimensions+1 ) ,
     M_elVec( M_fe.nbNode, nDimensions+1 ) {}
 
@@ -140,11 +146,11 @@ namespace LifeV
     ElemVec beta( M_fe.nbNode, nDimensions );
 
     // loop on elements
-    for ( UInt iVol = 1; iVol <= M_mesh.numVolumes(); iVol++ )
+    for ( UInt iVol = 1; iVol <= M_mesh->numVolumes(); iVol++ )
     {
         chronoUpdate.start();
         // update current finite elements
-        M_fe.updateFirstSecondDeriv( M_mesh.volumeList( iVol ) );
+        M_fe.updateFirstSecondDeriv( M_mesh->volumeList( iVol ) );
 
 	// stabilization parameters computation
 	chronoBeta.start();
@@ -210,6 +216,8 @@ namespace LifeV
     if ( M_gammaBeta == 0 && M_gammaDiv == 0)
       return;
 
+    const UInt nDof = M_dof.numTotalDof();
+
     Chrono chronoBeta;
     Chrono chronoUpdate;
     Chrono chronoElemComp;
@@ -222,11 +230,11 @@ namespace LifeV
     ElemVec beta( M_fe.nbNode, nDimensions );
 
     // loop on elements
-    for ( UInt iVol = 1; iVol <= M_mesh.numVolumes(); iVol++ )
+    for ( UInt iVol = 1; iVol <= M_mesh->numVolumes(); iVol++ )
     {
         chronoUpdate.start();
         // update current finite elements
-        M_fe.updateFirstSecondDeriv( M_mesh.volumeList( iVol ) );
+        M_fe.updateFirstSecondDeriv( M_mesh->volumeList( iVol ) );
 
 	// stabilization paramteres computation
 	chronoBeta.start();
@@ -253,7 +261,11 @@ namespace LifeV
 	chronoAssembly.start();
 	for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
 	  for ( UInt jComp = 0; jComp < nDimensions; ++jComp )
-	    assemb_mat( matrix, M_elMat, M_fe, M_dof, iComp, jComp );
+	  {
+            // assemb_mat( matrix, M_elMat, M_fe, M_dof, iComp, jComp );
+            assembleMatrix( matrix, M_elMat, M_fe, M_dof, iComp, jComp, 
+                            iComp*nDof, jComp*nDof);
+          }
 	chronoAssembly.stop();
 
 
@@ -292,11 +304,11 @@ namespace LifeV
     ElemVec beta( M_fe.nbNode, nDimensions );
 
     // loop on elements
-    for ( UInt iVol = 1; iVol <= M_mesh.numVolumes(); iVol++ )
+    for ( UInt iVol = 1; iVol <= M_mesh->numVolumes(); iVol++ )
     {
         chronoUpdate.start();
         // update current finite elements
-        M_fe.updateFirstDeriv( M_mesh.volumeList( iVol ) );
+        M_fe.updateFirstDeriv( M_mesh->volumeList( iVol ) );
 	// local mesh parameters
 	chronoUpdate.stop();
 
@@ -358,8 +370,9 @@ namespace LifeV
       {
 	for ( int iCoor = 0; iCoor < M_fe.nbCoor; ++iCoor )
 	  {
-	    UInt ig = M_dof.localToGlobal( iVol, iNode+1 )-1+iCoor*nDof;
-	    beta.vec()[ iCoor*M_fe.nbNode + iNode ] = state[ig];
+	    //UInt ig = M_dof.localToGlobal( iVol, iNode+1 )-1+iCoor*nDof;
+	    UInt ig = M_dof.localToGlobal( iVol, iNode+1) + iCoor*nDof; 
+            beta.vec()[ iCoor*M_fe.nbNode + iNode ] = state[ig];
 	  }
       }
 	
