@@ -32,6 +32,9 @@
 #include "life/lifefem/FESpace.hpp"
 //#include <life/lifefem/bdf_template.hpp>
 
+// header for streamline diffusion stabilization
+#include <sdStabilization.hpp>
+
 namespace LifeV
 {
 
@@ -265,18 +268,17 @@ protected:
 
     bool                           M_steady;
 
-// TODO: sd stabilization for convective effects in u system
-
-    //! Stabilization
+    //! SD Stabilization
     bool                           M_stab;
 
+    SDStabilization<Mesh, Dof>     M_sdStab;
+    
 //    details::
 //    IPStabilization<Mesh, Dof>     M_ipStab; 
-//    Real                           M_gammaBeta;
-//    Real                           M_gammaDiv;
+    Real                           M_gammaBeta;
+    Real                           M_gammaDiv;
 //    Real                           M_gammaPress;
 
-// end TODO
 
     const Function*                M_betaFct;
 
@@ -378,6 +380,14 @@ ChorinTemam( const data_type&          dataType,
     M_residual_u             ( M_localMap_u ),
     M_residual_p 	     ( M_localMap_p ), 
     M_stab                   ( false ),
+    M_sdStab                 ( M_uFESpace.mesh(), 
+                               M_uFESpace.dof(),
+                               M_uFESpace.refFE(),
+                               M_uFESpace.qr(),
+                               0., 0., 
+                               M_data.viscosity()
+                             ),
+
 /*    M_ipStab                 ( M_uFESpace.mesh(),
                                M_uFESpace.dof(), M_uFESpace.refFE(),
                                M_uFESpace.feBd(), M_uFESpace.qr(),
@@ -422,6 +432,8 @@ void ChorinTemam<Mesh, SolverType>::setUp( const GetPot& dataFile )
 //    M_gammaBeta   = dataFile( "fluid/ipstab/gammaBeta",            0. );
 //    M_gammaDiv    = dataFile( "fluid/ipstab/gammaDiv",             0. );
 //    M_gammaPress  = dataFile( "fluid/ipstab/gammaPress",           0. );
+    M_gammaBeta   = dataFile ( "fluid/sdstab/gammaBeta", 0. );
+    M_gammaDiv    = dataFile ( "fluid/sdstab/gammaDiv", 0.);
     M_divBetaUv   = dataFile( "fluid/discretization/div_beta_u_v", 0  );
     M_diagonalize_u = dataFile( "fluid/discretization/diagonalizeVel",  1. );
     M_diagonalize_p = dataFile( "fluid/discretization/diagonalizePress",  1. );
@@ -433,6 +445,8 @@ void ChorinTemam<Mesh, SolverType>::setUp( const GetPot& dataFile )
 //    M_ipStab.setGammaBeta (M_gammaBeta);
 //    M_ipStab.setGammaDiv  (M_gammaDiv);
 //    M_ipStab.setGammaPress(M_gammaPress);
+    M_sdStab.setGammaBeta (M_gammaBeta);
+    M_sdStab.setGammaDiv  (M_gammaDiv); 
 
 // TODO modify the following lines to handle different solvers for press and velocity ... 
     M_maxIterSolver_u   = dataFile( "fluid/solver/max_iter", -1);
@@ -458,6 +472,14 @@ void ChorinTemam<Mesh, SolverType>::buildSystem_u_p()
     M_matrPress.reset ( new matrix_type(M_localMap_p) );
 
     if (M_verbose) std::cout << "  f-  Computing constant matrices ...        ";
+
+    // See if we are steady
+    if (M_verbose) {
+	if (M_steady)
+		std::cout << "  fd-  Steady state ...." << std::endl;
+        else
+		std::cout << "  fd-  Unsteady state ...." << std::endl;
+    }
 
     Chrono chrono;
 
@@ -649,14 +671,14 @@ void ChorinTemam<Mesh, SolverType>::updateSystem_u(vector_type& betaVec)
     double normInf;
     betaVec.NormInf(&normInf);
 
-    normInf = 0.; 	// remove this after debug
+//    normInf = 0.; 	// remove this after debug
 			// just to prevent convective term in the absence of stabilization
 
     if (normInf != 0.)
     {
 
         if (M_verbose)
-            std::cout << "  f-  Updating the convective terms ...        "
+            std::cout << "\n  f-  Updating the convective terms ...        "
                       << std::flush;
 
         // vector with repeated nodes over the processors
@@ -725,6 +747,15 @@ void ChorinTemam<Mesh, SolverType>::updateSystem_u(vector_type& betaVec)
             M_ipStab.applyVelocity( *M_matrNoBC, betaVecRep, M_verbose );
         }
 */
+
+    // handles SD stabilization terms
+    //TODO : test wrt M_stab if we need to apply stab there  
+    if (M_verbose)
+	std::cout << "  f- Adding SD stabilization terms ..." << std::endl;
+
+    //TODO: we must multiply betaVecRep by density before thi step
+    M_sdStab.applyCT(M_data.timestep(), *M_matrNoBC_u, betaVecRep);
+
     }
 
     M_updated = true;
