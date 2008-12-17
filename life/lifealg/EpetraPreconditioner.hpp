@@ -31,6 +31,11 @@
 #ifndef _EPETRAPRECONDITIONER_HPP_
 #define _EPETRAPRECONDITIONER_HPP_
 
+
+#include <life/lifecore/factory.hpp>
+#include <life/lifecore/singleton.hpp>
+
+
 #include <boost/shared_ptr.hpp>
 
 #include <Ifpack_config.h>
@@ -45,19 +50,20 @@
 
 namespace LifeV
 {
-namespace Epetra
-{
+// namespace Epetra
+// {
 
-class Preconditioner
+class EpetraPreconditioner
 {
 public:
 
     /** @name Typedefs
      */
     //@{
-    typedef Ifpack_Preconditioner prec_raw_type;
-    typedef boost::shared_ptr<prec_raw_type> prec_type;
-    typedef EpetraMatrix<double>  operator_raw_type;
+    typedef Epetra_Operator                      prec_raw_type;
+    typedef boost::shared_ptr<prec_raw_type>     prec_type;
+
+    typedef EpetraMatrix<double>                 operator_raw_type;
     typedef boost::shared_ptr<operator_raw_type> operator_type;
     //@}
 
@@ -66,11 +72,15 @@ public:
      */
     //@{
     //! default constructor.
-    Preconditioner();
+    EpetraPreconditioner();
 
     //! constructor from matrix A.
     //! @param A EpetraMatrix<double> matrix upon which construct the preconditioner
-    Preconditioner(operator_type& A);
+//     EpetraPreconditioner(operator_type& A);
+
+    //! default virtual destructor
+
+    virtual ~EpetraPreconditioner();
 
     //@}
 
@@ -78,34 +88,45 @@ public:
     /** @name  Methods
      */
 
-    void        setDataFromGetPot ( const GetPot& dataFile, const std::string& section );
+    virtual void           setDataFromGetPot ( const GetPot& dataFile, const std::string& section ) = 0;
 
-    double      Condest ();
+    virtual double         Condest() = 0;
 
-    prec_raw_type*   getPrec();
+    virtual prec_raw_type* getPrec() = 0;
 
-    std::string precType(){return M_precType;}
+    //std::string            precType() { return M_precType; }
 
-    int         buildPreconditioner(operator_type& A);
+    virtual int            buildPreconditioner(operator_type& A) = 0;
 
-    void        precReset();
+    virtual void           precReset() = 0;
 
     //! returns true if prec exists
-    /*const*/ bool  set() const {return M_Prec;}
+    /*const*/
+    virtual bool           set() const = 0;
+
+protected:
+
+    int                    M_overlapLevel;
+
+    operator_type          M_Oper;
+
+    Teuchos::ParameterList M_List;
+    //    std::string            M_precType;
+
 
 private:
 
-    void        createList( const GetPot& dataFile );
 
-    prec_type      M_Prec;
-    operator_type  M_Oper;
-
-    Teuchos::ParameterList M_List;
-    std::string            M_precType;
-    int                    M_overlapLevel;
 
 };
 
-} // namespace Epetra
+
+
+// } // namespace Epetra
+
+typedef boost::shared_ptr<EpetraPreconditioner>                 prec_ptr;
+typedef singleton<factory<EpetraPreconditioner,  std::string> > PRECFactory;
+
+
 } // namespace LifeV
 #endif
