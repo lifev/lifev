@@ -42,13 +42,57 @@ max_iter        = 100
 kspace          = 100
 tol             = 1.e-5
 
-[../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
-prectype        = Amesos # Amesos (does a local LU factorization), ILUT (not ILU)
-reuse           = true
-overlap         = 2
-#droptol         = 1.e-5 ??
-fill            = 4
-relax_value     = 1
+
+#
+# fluid preconditioner parameters
+# see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
+#
+
+[../prec]
+prectype           = ML
+reuse              = true
+overlap            = 1
+displayList        = true
+default_parameters = SA    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+
+# Parameters for the ifpack preconditioner
+
+[./ifpack]
+prectype               = Amesos    # Amesos (does a local LU factorization), ILUT (not ILU)
+
+[./relaxation]
+type                   = Jacobi
+damping_factor         = 1.
+sweeps                 = 1
+min_diagonal_value     = 0
+zero_starting_solution = true
+
+[../partitioner]
+type                   = metis
+overlap                = 0
+local_parts            = 1
+root_node              = 0
+use_symmetric_graph    = true
+
+[../amesos]
+solvertype             = Amesos_KLU
+
+[../fact]
+drop_tolerance         = 1.e-5
+level-of-fill          = 1
+ilut_level-of-fill     = 1
+absolute_threshold     = 0.
+relative_threshold     = 0.
+relax_value            = 0.
+
+[../schwarz]
+combine_mode           = true
+reordering_type        = none
+filter_singletons      = false
+
+#
+# end of fluid preconditioner parameters
+#
 
 [../ipstab]
 gammaBeta  = 0.02
