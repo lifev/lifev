@@ -39,6 +39,7 @@
 
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/application.hpp>
+#include <life/lifealg/IfpackPreconditioner.hpp>
 
 #include <cylinder.hpp>
 #include "mpi.h"
@@ -47,18 +48,20 @@
 LifeV::AboutData
 makeAbout()
 {
-    LifeV::AboutData about( "life_turek_cylinder" ,
-                            "life_turek_cylinder" ,
+    LifeV::AboutData about( "life_cylinder" ,
+                            "life_cylinder" ,
                             "0.1",
                             "3D cylinder test case",
                             LifeV::AboutData::License_GPL,
                             "Copyright (c) 2005 EPFL");
 
-    about.addAuthor("Christophe Prud'homme", "developer", "christophe.prudhomme@epfl.ch", "");
-    about.addAuthor("Christoph Winkelmann", "developer", "christoph.winkelmann@epfl.ch", "");
+    about.addAuthor("Gilles Fourestey", "developer", "gilles.fourestey@epfl.ch", "");
     return about;
 
 }
+
+
+
 
 
 using namespace LifeV;
@@ -80,6 +83,18 @@ std::set<UInt> parseList( const std::string& list )
     }
     setList.insert( atoi( stringList.c_str() ) );
     return setList;
+}
+
+
+
+
+namespace LifeV
+{
+namespace
+{
+EpetraPreconditioner* createIfpack(){ return new IfpackPreconditioner(); }
+static bool regPREC = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
+}
 }
 
 int

@@ -25,9 +25,11 @@
 
 #include <life/lifesolver/FSISolver.hpp>
 #include <life/lifesolver/FSIOperator.hpp>
-#include <life/lifesolver/fixedPointBase.hpp>
+#include "life/lifesolver/exactJacobianBase.hpp"
+#include "life/lifesolver/fixedPointBase.hpp"
 #include <life/lifesolver/dataNavierStokes.hpp>
 #include <life/lifefilters/ensight.hpp>
+#include <life/lifealg/IfpackPreconditioner.hpp>
 
 
 #include "Epetra_config.h"
@@ -40,6 +42,23 @@
 
 #include "ud_functions.hpp"
 #include "boundaryConditions.hpp"
+
+
+
+namespace LifeV
+{
+namespace
+{
+EpetraPreconditioner* createIfpack(){return new IfpackPreconditioner(); }
+static bool regIFPACK = PRECFactory::instance().registerProduct( "Ifpack", &createIfpack );
+
+FSIOperator* createFP(){ return new fixedPoint(); }
+static bool regFP = FSIFactory::instance().registerProduct( "fixedPoint", &createFP );
+
+FSIOperator* createEJ(){ return new exactJacobian(); }
+static bool regEJ = FSIFactory::instance().registerProduct( "exactJacobian", &createEJ );
+}
+}
 
 
 
@@ -288,9 +307,9 @@ struct FSIChecker
     LifeV::Vector         disp;
 };
 
-
 int main(int argc, char** argv)
 {
+
 #ifdef HAVE_MPI
     MPI_Init(&argc, &argv);
     std::cout << "% using MPI" << std::endl;

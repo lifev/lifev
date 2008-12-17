@@ -17,8 +17,8 @@
 #include "life/lifefem/bcFunction.hpp"
 //#include "life/lifesolver/reducedLinFluid.hpp"
 
-// #include "life/lifesolver/steklovPoincareBase.hpp"
-// #include "life/lifesolver/exactJacobianBase.hpp"
+//#include "life/lifesolver/steklovPoincareBase.hpp"
+#include "life/lifesolver/exactJacobianBase.hpp"
 #include "life/lifesolver/fixedPointBase.hpp"
 
 

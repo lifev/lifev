@@ -45,7 +45,7 @@ max_iter        = 100
 kspace          = 100
 
 [../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
-prectype        = Amesos # Amesos (does a local LU factorization), ILUT (not ILU)
+prectype        = Ifpack # Amesos (does a local LU factorization), ILUT (not ILU)
 reuse           = true
 overlap         = 2
 #droptol         = 1.e-5 ??
