@@ -1,8 +1,8 @@
 /**
  *  \file main.cpp
- *  NB : we follow the "test_cylinder" (ie mixt NS FEM test) structure : 
- *      - short main 
- *      - all problem defined in the xxx.{cpp,hpp,class} : elements, bdf, update params, 
+ *  NB : we follow the "test_cylinder" (ie mixt NS FEM test) structure :
+ *      - short main
+ *      - all problem defined in the xxx.{cpp,hpp,class} : elements, bdf, update params,
  *        bcs, ...
  */
 
@@ -17,6 +17,9 @@
 
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/application.hpp>
+
+#include <life/lifealg/IfpackPreconditioner.hpp>
+#include <life/lifealg/MLPreconditioner.hpp>
 
 #include <ct.hpp>
 #include "mpi.h"
@@ -36,6 +39,19 @@ makeAbout()
 }
 
 using namespace LifeV;
+
+
+
+namespace
+{
+EpetraPreconditioner* createIfpack(){ return new IfpackPreconditioner(); }
+static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
+
+EpetraPreconditioner* createML(){ return new MLPreconditioner(); }
+static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
+}
+
+
 
 int
 main( int argc, char** argv )
