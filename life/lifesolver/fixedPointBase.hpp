@@ -92,7 +92,7 @@ private:
     void eval( const vector_type& disp, int status );
 
 //    FSIOperator* createFP(){ return new fixedPoint(); }
-    static bool              reg;
+//    static bool              reg;
 
 };
 

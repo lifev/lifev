@@ -497,11 +497,4 @@ int Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epetra_MultiVector 
     return 0;
 }
 
-
-namespace
-{
-FSIOperator* createEJ(){ return new exactJacobian(); }
-static bool reg = FSIFactory::instance().registerProduct( "exactJacobian", &createEJ );
-}
-
 }

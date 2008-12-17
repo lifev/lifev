@@ -156,7 +156,7 @@ private:
 
 //    dataJacobian                         M_dataJacobian;
 
-    LifeV::Epetra::SolverTrilinos        M_linearSolver;
+    LifeV::SolverTrilinos        M_linearSolver;
 
     boost::shared_ptr<Epetra_ExactJacobian> M_epetraOper;
 
@@ -208,7 +208,7 @@ private:
 
 
 
-    exactJacobian*     M_ej;
+    exactJacobian*                       M_ej;
 
     const Epetra_Map                     M_operatorDomainMap;
     const Epetra_Map                     M_operatorRangeMap;

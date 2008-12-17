@@ -63,7 +63,7 @@ namespace LifeV
 
 */
 template <typename Mesh,
-          typename SolverType = LifeV::Epetra::SolverTrilinos >
+          typename SolverType = LifeV::SolverTrilinos >
 
 class VenantKirchhofSolver
 {
@@ -359,7 +359,7 @@ VenantKirchhofSolver( const data_type&          data,
     M_me                         ( comm.MyPID() ),
     M_verbose                    ( M_me == 0 ),
     M_linearSolver               ( ),
-    M_prec                       ( new prec_raw_type() ),
+    M_prec                       ( ),//new prec_raw_type() ),
     M_localMap                   ( M_FESpace.map() ),
     M_mass                       ( new matrix_type(M_localMap) ),
     M_linearStiff                ( new matrix_type(M_localMap) ),
@@ -431,7 +431,7 @@ VenantKirchhofSolver( const data_type& data,
     M_out_iter                   ( "out_iter_solid" ),
     M_out_res                    ( "out_res_solid" ),
     M_linearSolver               ( ),
-    M_prec                       ( new prec_raw_type() ),
+    M_prec                       ( ),//new prec_raw_type() ),
     M_reusePrec                  ( true ),
     M_maxIterForReuse            ( -1 ),
     M_resetPrec                  ( true ),
@@ -460,7 +460,7 @@ VenantKirchhofSolver( const data_type& data,
     M_me                         ( comm.MyPID() ),
     M_verbose                    ( M_me == 0 ),
     M_linearSolver               ( ),
-    M_prec                       ( new prec_raw_type() ),
+    M_prec                       ( ),//new prec_raw_type() ),
     M_elmatK                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
     M_elmatM                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
     M_elmatC                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
@@ -511,7 +511,6 @@ setUp( const GetPot& dataFile )
 
     M_monolithic = dataFile("problem/monolithic"   , false );
     M_linearSolver.setDataFromGetPot( dataFile, "solid/solver" );
-    M_prec->setDataFromGetPot(dataFile, "solid/prec");
 //    M_linearSolver.setMatrix( M_jacobian );
     if (M_verbose)
         std::cout << "ok." << std::endl;
@@ -519,6 +518,12 @@ setUp( const GetPot& dataFile )
     M_reusePrec     = dataFile( "solid/prec/reuse", true);
     M_maxIterSolver = dataFile( "solid/solver/max_iter", -1);
     M_maxIterForReuse = dataFile( "solid/solver/max_iter_reuse", M_maxIterSolver*8/10);
+
+    std::string precType = dataFile( "solid/prec/prectype", "Ifpack");
+    M_prec               = prec_ptr( PRECFactory::instance().createObject( precType ) );
+
+    M_prec->setDataFromGetPot( dataFile, "solid/prec" );
+
 
 }
 

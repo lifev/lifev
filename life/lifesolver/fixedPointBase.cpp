@@ -345,10 +345,10 @@ void  fixedPoint::solveJac(vector_type        &muk,
 //
 
 
-namespace
-{
-FSIOperator* createFP(){ return new fixedPoint(); }
-}
-bool LifeV::fixedPoint::reg = FSIFactory::instance().registerProduct( "fixedPoint", &createFP );
+// namespace
+// {
+// FSIOperator* createFP(){ return new fixedPoint(); }
+// bool reg = FSIFactory::instance().registerProduct( "fixedPoint", &createFP );
+// }
 
 }

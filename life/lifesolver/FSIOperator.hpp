@@ -86,7 +86,6 @@ public:
 //     typedef NavierStokesAleSolverPC< RegionMesh3D_ALE<LinearTetra> > fluid_raw_type;
     typedef RegionMesh3D<LinearTetra>              mesh_type;
 
-    //    typedef Oseen                  <mesh_type>     fluid_raw_type;
     typedef OseenShapeDerivative   <mesh_type>     fluid_raw_type;
     typedef VenantKirchhofSolver   <mesh_type>     solid_raw_type;
     typedef HarmonicExtensionSolver<mesh_type>     meshmotion_raw_type;
@@ -333,14 +332,14 @@ public:
 //     void setSolidMpi(bool solid){M_issolidMpi = solid;}
 
 //    bool mpi(){return M_mpi;}
-    bool isFluid() const {return M_isFluid;}
-    bool isSolid() const {return M_isSolid;}
+    bool    isFluid() const {return M_isFluid;}
+    bool    isSolid() const {return M_isSolid;}
 
-    void setUpSystem( GetPot const& data_file );
-    virtual    void buildSystem();
+    void    setUpSystem( GetPot const& data_file );
+    virtual void buildSystem();
 
-    void setComm     (   boost::shared_ptr<Epetra_MpiComm> comm,
-                         boost::shared_ptr<Epetra_MpiComm> worldComm);
+    void    setComm     (   boost::shared_ptr<Epetra_MpiComm> comm,
+                            boost::shared_ptr<Epetra_MpiComm> worldComm);
 
     Epetra_Comm& worldComm(){ return *M_epetraWorldComm; }
 
@@ -741,7 +740,7 @@ private:
 
 };
 
-typedef boost::shared_ptr<FSIOperator> oper_fsi_ptr_mpi;
+typedef boost::shared_ptr<FSIOperator>                 oper_fsi_ptr_mpi;
 typedef singleton<factory<FSIOperator,  std::string> > FSIFactory;
 
 /*!
@@ -759,8 +758,7 @@ typedef singleton<factory<FSIOperator,  std::string> > FSIFactory;
     \
     \
     UInt iBCf = M_harmonicExtension->bcHandler().getBCbyName("Interface"); \
-    BCBase const &BC_fluidInterface = M_harmonicExtension->bcHandler()[iBCf];   \
-                                                                    \
+    BCBase const &BC_fluidInterface = M_harmonicExtension->bcHandler()[iBCf]; \
     UInt nDofInterface = BC_fluidInterface.list_size();             \
     UInt nDimF = BC_fluidInterface.numberOfComponents();            \
                                                                     \
@@ -786,7 +784,7 @@ typedef singleton<factory<FSIOperator,  std::string> > FSIFactory;
     }                                                               \
 }
 
-}
+
 
 #define FOR_EACH_INTERFACE_DOF_SOLID( Expr )                              \
 {   \
@@ -827,6 +825,8 @@ typedef singleton<factory<FSIOperator,  std::string> > FSIFactory;
             ( Expr );\
         }\
     }\
+}
+
 }
 
 #endif

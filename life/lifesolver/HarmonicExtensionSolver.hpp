@@ -16,6 +16,7 @@
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+
 /*!
   \file meshMotion.h
   \brief Classes to hold algorithms for the mesh motion, for instance, involved in a ALE formulation.
@@ -61,7 +62,7 @@ namespace LifeV
 */
 
 template< typename Mesh,
-          typename SolverType = LifeV::Epetra::SolverTrilinos>
+          typename SolverType = LifeV::SolverTrilinos>
 class HarmonicExtensionSolver
 {
 public:
@@ -245,7 +246,7 @@ HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
     M_dispDiff              ( M_localMap ),
     M_elmat                 ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
     M_f                     ( M_localMap ),
-    M_prec                  ( new prec_raw_type() ),
+    M_prec                  ( ),
     M_reusePrec              ( true ),
     M_maxIterForReuse        ( -1 ),
     M_resetPrec              ( true ),
@@ -259,7 +260,7 @@ HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
 template <typename Mesh, typename SolverType>
 HarmonicExtensionSolver<Mesh, SolverType>::
 HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
-                         Epetra_Comm&              comm ):
+                         Epetra_Comm&    comm ):
     M_FESpace               ( mmFESpace ),
     M_localMap              ( M_FESpace.map() ),
     M_matrHE                ( new matrix_type (M_localMap ) ),
@@ -271,10 +272,10 @@ HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
     M_dispOld               ( M_localMap ),
     M_dispDiff              ( M_localMap ),
     M_f                     ( M_localMap ),
-    M_prec                   ( new prec_raw_type() ),
-    M_reusePrec              ( true ),
-    M_maxIterForReuse        ( -1 ),
-    M_resetPrec              ( true ),
+    M_prec                  ( ),
+    M_reusePrec             ( true ),
+    M_maxIterForReuse       ( -1 ),
+    M_resetPrec             ( true ),
     M_diffusion             ( 1. )
 {
 }
@@ -286,12 +287,21 @@ void HarmonicExtensionSolver<Mesh, SolverType>::setUp( const GetPot& dataFile )
 {
 
     M_linearSolver.setDataFromGetPot( dataFile, "mesh_motion/solver" );
-    M_prec->setDataFromGetPot( dataFile, "mesh_motion/prec" );
+    //    M_prec->setDataFromGetPot( dataFile, "mesh_motion/prec" );
     M_diffusion = dataFile("mesh_motion/diffusion",1.0);
 
     int maxIterSolver   = dataFile( "mesh_motion/solver/max_iter", -1);
     M_reusePrec       = dataFile( "mesh_motion/prec/reuse", true);
     M_maxIterForReuse = dataFile( "mesh_motion/solver/max_iter_reuse", maxIterSolver*8/10);
+
+    std::string precType = dataFile( "mesh_motion/prec/prectype", "Ifpack");
+
+    M_prec               = prec_ptr( PRECFactory::instance().createObject( precType ) );
+
+    ASSERT(M_prec.get() != 0, "HE : Preconditioner not set");
+
+
+    M_prec->setDataFromGetPot( dataFile, "mesh_motion/prec" );
 
     computeMatrix( );
 

@@ -42,7 +42,7 @@
 namespace LifeV
 {
 template< typename Mesh,
-          typename SolverType = LifeV::Epetra::SolverTrilinos >
+          typename SolverType = LifeV::SolverTrilinos >
 class OseenShapeDerivative:
         public Oseen<Mesh, SolverType>
 {
@@ -58,13 +58,6 @@ public:
     typedef typename super::prec_raw_type       prec_raw_type;
 
     typedef typename super::bchandler_raw_type bchandler_raw_type;
-
-
-    OseenShapeDerivative( const data_type&          dataType,
-                          FESpace<Mesh, EpetraMap>& uFESpace,
-                          FESpace<Mesh, EpetraMap>& pFESpace,
-                          BCHandler&                bcHandler,
-                          Epetra_Comm&              comm );
 
 
     OseenShapeDerivative( const data_type&          dataType,
@@ -128,37 +121,6 @@ OseenShapeDerivative<Mesh, SolverType>::
 OseenShapeDerivative( const data_type&          dataType,
                       FESpace<Mesh, EpetraMap>& uFESpace,
                       FESpace<Mesh, EpetraMap>& pFESpace,
-                      BCHandler&                BCh_u,
-                      Epetra_Comm&              comm ):
-    super            (dataType,
-                      uFESpace,
-                      pFESpace,
-                      BCh_u,
-                      comm),
-    M_rhsLinNoBC     ( this->getMap()),
-    M_rhsLinFull     ( this->getMap()),
-    M_linSol         ( this->getMap()),
-    M_linearLinSolver( ),
-    M_linPrec        ( new prec_raw_type() ),
-//    M_elvec_du       ( this->M_uFESpace.fe().nbNode, nDimensions ),
-    M_elvec_du       ( this->M_uFESpace.fe().nbNode, nDimensions ),
-    M_elvec_dp       ( this->M_pFESpace.fe().nbNode, 1 ),
-    M_w_loc          ( this->M_uFESpace.fe().nbNode, nDimensions ),
-    M_uk_loc         ( this->M_uFESpace.fe().nbNode, nDimensions ),
-    M_pk_loc         ( this->M_pFESpace.fe().nbNode, 1 ),
-    M_elvec          ( this->M_uFESpace.fe().nbNode, nDimensions ),
-    M_d_loc          ( this->M_uFESpace.fe().nbNode, nDimensions ),
-    M_dw_loc         ( this->M_uFESpace.fe().nbNode, nDimensions ),
-    M_u_loc          ( this->M_uFESpace.fe().nbNode, nDimensions )
-{
-
-}
-
-template<typename Mesh, typename SolverType>
-OseenShapeDerivative<Mesh, SolverType>::
-OseenShapeDerivative( const data_type&          dataType,
-                      FESpace<Mesh, EpetraMap>& uFESpace,
-                      FESpace<Mesh, EpetraMap>& pFESpace,
                       Epetra_Comm&              comm ):
     super            (dataType,
                       uFESpace,
@@ -168,7 +130,7 @@ OseenShapeDerivative( const data_type&          dataType,
     M_rhsLinFull     ( this->getMap()),
     M_linSol         ( this->getMap()),
     M_linearLinSolver( ),
-    M_linPrec        ( new prec_raw_type() ),
+    M_linPrec        ( ),
     M_elvec_du       ( this->M_uFESpace.fe().nbNode, nDimensions ),
     M_elvec_dp       ( this->M_pFESpace.fe().nbNode, 1 ),
 //    M_elvec_dp       ( this->M_pFESpace.fe().nbNode, nDimensions ),
@@ -201,7 +163,7 @@ OseenShapeDerivative( const data_type&          dataType,
     M_rhsLinFull     ( this->getMap()),
     M_linSol         ( this->getMap()),
     M_linearLinSolver( ),
-    M_linPrec        ( new prec_raw_type() ),
+    M_linPrec        ( ),
     M_elvec_du       ( this->M_uFESpace.fe().nbNode, nDimensions ),
     M_elvec_dp       ( this->M_pFESpace.fe().nbNode, 1 ),
 //    M_elvec_dp       ( this->M_pFESpace.fe().nbNode, nDimensions ),
@@ -230,6 +192,10 @@ void OseenShapeDerivative<Mesh, SolverType>::setUp( const GetPot& dataFile )
     super::setUp( dataFile );
 
     M_linearLinSolver.setDataFromGetPot( dataFile, "lin_fluid/solver" );
+
+    std::string precType = dataFile( "lin_fluid/prec/prectype", "Ifpack");
+    M_linPrec            = prec_ptr( PRECFactory::instance().createObject( precType ) );
+
     M_linPrec->setDataFromGetPot( dataFile, "lin_fluid/prec" );
 
 }

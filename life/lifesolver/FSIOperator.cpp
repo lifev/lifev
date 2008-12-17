@@ -1392,7 +1392,7 @@ void FSIOperator::setMinusSigmaFluid(const vector_type& sigma)
         assert(false); // if you get here, reformulate your problem in order to get a unique map as entry
 
     *M_minusSigmaFluidRepeated = *M_minusSigmaFluid;
-    }
+}
 
 
 }

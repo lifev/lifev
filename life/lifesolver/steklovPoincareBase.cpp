@@ -44,6 +44,7 @@ steklovPoincare::steklovPoincare():
 //     M_aitkFS.setDefault( M_defOmegaS, M_defOmegaF );
 }
 
+
 steklovPoincare::~steklovPoincare()
 {}
 

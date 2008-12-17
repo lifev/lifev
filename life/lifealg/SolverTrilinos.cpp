@@ -38,8 +38,8 @@
 
 namespace LifeV
 {
-namespace Epetra
-{
+// namespace Epetra
+// {
 
 
 SolverTrilinos::SolverTrilinos()
@@ -376,6 +376,10 @@ SolverTrilinos::computeResidual( vector_type& x, vector_type& b )
 
 
 
-} //namespace Epetra
+// } //namespace Epetra
+
+
+
+
 } // namespace LifeV
 

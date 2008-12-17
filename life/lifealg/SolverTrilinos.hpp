@@ -42,13 +42,14 @@
 #include "life/lifearray/EpetraMatrix.hpp"
 
 #include "life/lifealg/EpetraPreconditioner.hpp"
+#include "life/lifealg/IfpackPreconditioner.hpp"
 
 class GetPot;
 
 namespace LifeV
 {
-namespace Epetra
-{
+// namespace Epetra
+// {
 /*!
   \class SolverTrilinos
   \brief wrap trilinos linear solvers
@@ -76,7 +77,7 @@ public:
     typedef EpetraMatrix<double>             matrix_type;
     typedef EpetraVector                     vector_type;
 
-    typedef Preconditioner                   prec_raw_type;
+    typedef EpetraPreconditioner             prec_raw_type;
     typedef boost::shared_ptr<prec_raw_type> prec_type;
 
     //@}
@@ -162,7 +163,7 @@ public:
 
 private:
 
-    prec_type              M_prec;
+    prec_ptr               M_prec;
 
     AztecOO                M_solver;
 
@@ -173,7 +174,7 @@ private:
 
 };
 
-} // namespace Epetra
+// } // namespace Epetra
 } // namespace LifeV
 
 #endif /* __SolverTrilinos_H */

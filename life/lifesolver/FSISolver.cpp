@@ -259,6 +259,7 @@ FSISolver::FSISolver( GetPot const& data_file,
     Debug( 6220 ) << "FSISolver:: variable setup " << precond << "\n";
 
     M_oper->setUpSystem(data_file);
+
     if(!M_monolithic)
         {
             M_lambda.reset   (new vector_type(*M_oper->solidInterfaceMap()));

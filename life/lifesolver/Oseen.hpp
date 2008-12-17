@@ -35,7 +35,10 @@
 #include <life/lifefem/bcManage.hpp>
 #include <life/lifefilters/medit_wrtrs.hpp>
 
+
 #include <life/lifealg/SolverTrilinos.hpp>
+#include <life/lifealg/EpetraPreconditioner.hpp>
+#include <life/lifealg/IfpackPreconditioner.hpp>
 #include <life/lifealg/EpetraMap.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifearray/EpetraVector.hpp>
@@ -66,7 +69,7 @@ namespace LifeV
 
 
 template< typename Mesh,
-          typename SolverType = LifeV::Epetra::SolverTrilinos >
+          typename SolverType = LifeV::SolverTrilinos >
 class Oseen
 //     :
 //     public NavierStokesHandler<Mesh>, EpetraHandler
@@ -327,7 +330,7 @@ protected:
 
     SolverType                     M_linearSolver;
 
-    prec_type                      M_prec;
+    boost::shared_ptr<EpetraPreconditioner>          M_prec;
 
     bool                           M_steady;
 
@@ -423,10 +426,10 @@ Oseen( const data_type&          dataType,
     M_sol                    ( M_localMap ),
     M_residual               ( M_localMap ),
     M_linearSolver           ( ),
-    M_prec                   ( new prec_raw_type() ),
+    M_prec                   ( ),
     M_post_proc              ( M_uFESpace.mesh(),
-        &M_uFESpace.feBd(), &M_uFESpace.dof(),
-        &M_pFESpace.feBd(), &M_pFESpace.dof(), M_localMap ),
+                               &M_uFESpace.feBd(), &M_uFESpace.dof(),
+                               &M_pFESpace.feBd(), &M_pFESpace.dof(), M_localMap ),
     M_stab                   ( false ),
     M_resetStab              ( true ),
     M_reuseStab              ( true ),
@@ -441,7 +444,7 @@ Oseen( const data_type&          dataType,
     M_updated                ( false ),
     M_reusePrec              ( true ),
     M_maxIterForReuse        ( -1 ),
-    M_resetPrec              ( true ),
+    M_resetPrec              ( false ),
     M_maxIterSolver          ( -1 ),
     M_recomputeMatrix        ( false ),
     M_elmatStiff             ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
@@ -456,6 +459,7 @@ Oseen( const data_type&          dataType,
     M_un                     (new vector_type(M_localMap))
 {
     M_stab = (&M_uFESpace.refFE() == &M_pFESpace.refFE());
+    //    M_prec = prec_ptr( PRECFactory::instance().createObject
 }
 
 template<typename Mesh, typename SolverType>
@@ -482,10 +486,10 @@ Oseen( const data_type&          dataType,
     M_sol                    ( M_localMap ),
     M_residual               ( M_localMap ),
     M_linearSolver           ( ),
-    M_prec                   ( new prec_raw_type() ),
+    M_prec                   ( ),
     M_post_proc              ( M_uFESpace.mesh(),
-        &M_uFESpace.feBd(), &M_uFESpace.dof(),
-        &M_pFESpace.feBd(), &M_pFESpace.dof(), M_localMap ),
+                               &M_uFESpace.feBd(), &M_uFESpace.dof(),
+                               &M_pFESpace.feBd(), &M_pFESpace.dof(), M_localMap ),
     M_stab                   ( false ),
     M_resetStab              ( true ),
     M_reuseStab              ( true ),
@@ -500,7 +504,7 @@ Oseen( const data_type&          dataType,
     M_updated                ( false ),
     M_reusePrec              ( true ),
     M_maxIterForReuse        ( -1 ),
-    M_resetPrec              ( true ),
+    M_resetPrec              ( false ),
     M_maxIterSolver          ( -1 ),
     M_recomputeMatrix        ( false ),
     M_elmatStiff             ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
@@ -540,7 +544,7 @@ Oseen( const data_type&          dataType,
     M_sol                    ( M_localMap ),
     M_residual               ( M_localMap ),
     M_linearSolver           ( ),
-    M_prec                   ( new prec_raw_type() ),
+    M_prec                   ( ),
     M_post_proc              ( M_uFESpace.mesh(),
                                &M_uFESpace.feBd(), &M_uFESpace.dof(),
                                &M_pFESpace.feBd(), &M_pFESpace.dof(), M_localMap ),
@@ -558,7 +562,7 @@ Oseen( const data_type&          dataType,
     M_updated                ( false ),
     M_reusePrec              ( true ),
     M_maxIterForReuse        ( -1 ),
-    M_resetPrec              ( true ),
+    M_resetPrec              ( false ),
     M_maxIterSolver          ( -1 ),
     M_recomputeMatrix        ( false ),
     M_elmatStiff             ( M_uFESpace.fe().nbNode, nDimensions, nDimensions ),
@@ -638,6 +642,16 @@ void Oseen<Mesh, SolverType>::setUp( const GetPot& dataFile )
     M_maxIterSolver   = dataFile( "fluid/solver/max_iter", -1);
     M_reusePrec       = dataFile( "fluid/prec/reuse", true);
     M_maxIterForReuse = dataFile( "fluid/prec/max_iter_reuse", M_maxIterSolver*8/10);
+
+    std::string precType = dataFile( "fluid/prec/prectype", "Ifpack");
+
+    M_prec.reset( PRECFactory::instance().createObject( precType ) );
+//     std::cout << "ok."
+//               << "precType " << precType << " "
+//               << PRECFactory::instance().createObject( precType )
+//               << " " << M_prec.get() << std::endl;
+    ASSERT(M_prec.get() != 0, "Oseen : Preconditioner not set");
+
 
     M_prec->setDataFromGetPot( dataFile, "fluid/prec" );
 }
@@ -1210,9 +1224,9 @@ void Oseen<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
     {
         chrono.start();
 
-	leaderPrint("  f- Iterative solver failed, numiter = " , numIter);
+        leaderPrint("  f- Iterative solver failed, numiter = " , numIter);
         leaderPrint("     maxIterSolver = " , M_maxIterSolver );
-	leaderPrint("     recomputing the precond ...            ");
+        leaderPrint("     recomputing the precond ...            ");
 
         prec->buildPreconditioner(matrFull);
 
@@ -1233,7 +1247,11 @@ void Oseen<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
 
     }
 
-    if (numIter >= M_maxIterForReuse) resetPrec();
+    if (numIter >= M_maxIterForReuse)
+        {
+            //            std::cout << "  Resetting the precond ... ";
+            resetPrec();
+        }
 
     leaderPrintMax( "done in " , chrono.diff() );
     leaderPrint("  f- numiter = " , numIter);
