@@ -58,6 +58,8 @@
 #include <life/lifefilters/ensight.hpp>
 
 #include <life/lifesolver/Oseen.hpp>
+#include <life/lifealg/IfpackPreconditioner.hpp>
+#include <life/lifealg/MLPreconditioner.hpp>
 
 #include <iostream>
 
@@ -115,7 +117,17 @@ makeAbout()
 
 }
 
+namespace LifeV
+{
+namespace
+{
+EpetraPreconditioner* createIfpack(){ return new IfpackPreconditioner(); }
+static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
 
+EpetraPreconditioner* createML(){ return new MLPreconditioner(); }
+static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
+}
+}
 
 int
 main( int argc, char** argv )
@@ -126,6 +138,7 @@ main( int argc, char** argv )
     // The communicator (paralell or sequential) is then given to Epetra.
     // This is standard and can be "copy/pasted"
     //
+
 
 #ifdef HAVE_MPI
     MPI_Init(&argc, &argv);
