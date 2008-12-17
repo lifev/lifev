@@ -31,7 +31,7 @@ endif
 
 lib_LTLIBRARIES	= liblifealg.la 
 
-liblifealg_la_SOURCES	= EpetraPreconditioner.cpp SolverTrilinos.cpp SolverAztec.cpp dataAztec.cpp dataNewton.cpp EpetraMap.cpp $(PETSC_SRCS) $(UMFPACK_SRCS)
+liblifealg_la_SOURCES	= EpetraPreconditioner.cpp MLPreconditioner.cpp IfpackPreconditioner.cpp SolverTrilinos.cpp SolverAztec.cpp dataAztec.cpp dataNewton.cpp EpetraMap.cpp $(PETSC_SRCS) $(UMFPACK_SRCS)
 
 liblifealg_la_LIBADD	= ../lifecore/liblifecore.la ../lifearray/liblifearray.la $(petsc_libs) $(umfpack_libs) $(aztec_libs) 
 include $(top_srcdir)/admin/Doxyfile.am
