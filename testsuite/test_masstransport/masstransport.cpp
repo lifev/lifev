@@ -428,21 +428,20 @@ MassTransport::run()
     const QuadRule* bdQr_adr(0);
 
     if ( adrOrder.compare("P1") == 0 )
-    {
-        if (verbose) std::cout << "P1 velocity " << std::flush;
-        refFE_adr = &feTetraP1;
-        qR_adr    = &quadRuleTetra4pt; // DoE 5
-        bdQr_adr  = &quadRuleTria3pt;   // DoE 2
-    }
-    else
-        if ( uOrder.compare("P2") == 0 )
         {
-            if (verbose) std::cout << "P2 velocity ";
-            refFE_adr = &feTetraP2;
-            qR_adr    = &quadRuleTetra15pt;  // DoE 2
+            if (verbose) std::cout << "P1 velocity " << std::flush;
+            refFE_adr = &feTetraP1;
+            qR_adr    = &quadRuleTetra4pt; // DoE 5
             bdQr_adr  = &quadRuleTria3pt;   // DoE 2
         }
-
+    else
+        if ( uOrder.compare("P2") == 0 )
+            {
+                if (verbose) std::cout << "P2 velocity ";
+                refFE_adr = &feTetraP2;
+                qR_adr    = &quadRuleTetra15pt;  // DoE 2
+                bdQr_adr  = &quadRuleTria3pt;   // DoE 2
+            }
 
     dataADR.setMesh(meshPart.mesh());
 
@@ -464,8 +463,6 @@ MassTransport::run()
                                                 adrFESpace,
                                                 uFESpace,
                                                 *d->comm);
-
-
 
     adr.setUp(dataFile);
     adr.buildSystem();

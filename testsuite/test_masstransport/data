@@ -53,11 +53,8 @@ density   = 1.0               # density
 viscosity = 6.e-6              # viscosity
 
 [../discretization]
-#mesh_dir  = ./ # the directory where the mesh file is
 mesh_dir  = ./Mesh/ # the directory where the mesh file is
-#mesh_file = 179347_cm_fluid.mesh  # mesh file
-#mesh_file = tube20.mesh  # mesh file
-mesh_file = rclux-small.mesh  # mesh file
+mesh_file = tube20.mesh  # mesh file
 timestep  = 0.001             # timestep
 vel_order       = P1Bubble # P1, P1Bubble, P2
 press_order     = P1            # P1, P2
@@ -85,7 +82,7 @@ tol             = 1.e-10    # AztecOO tolerance
 
 # see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/index.html
 [../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
-prectype        = Amesos # Amesos (does a local LU factorization), ILUT (not ILU)
+prectype        = Ifpack # Amesos (does a local LU factorization), ILUT (not ILU)
 reuse           = true
 overlap         = 2
 droptol         = 1.e-5

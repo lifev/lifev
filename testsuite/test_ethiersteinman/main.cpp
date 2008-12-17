@@ -65,8 +65,6 @@ makeAbout()
 using namespace LifeV;
 
 
-using namespace LifeV;
-
 namespace
 {
 EpetraPreconditioner* createIfpack(){ return new IfpackPreconditioner(); }
