@@ -55,15 +55,148 @@ void
 MLPreconditioner::setDataFromGetPot( const GetPot& dataFile, const std::string& section )
 {
 
+    // see
+
 
     std::string defaultParameters = dataFile((section + "/default_parameters").data(), "SA");
-    bool displayList = dataFile((section + "/displayList").data(),     false);
+    //    bool displayList = dataFile((section + "/displayList").data(),     false);
 
     ML_Epetra::SetDefaults(defaultParameters, M_List);
 
 
+    int MLOutput             = dataFile((section + "/ML/MLOuput").data(),       0);
+    int printUnused          = dataFile((section + "/ML/print_unused").data(), -2);
+    int MLPrintParameterList = dataFile((section + "/ML/displayList").data(),      0);
+    int PDEEquations         = dataFile((section + "/ML/pde_equations").data(),    1);
+
+    int CycleApplications    = dataFile((section + "/ML/cycle_applications").data(), 1);
+    int MaxLevels            = dataFile((section + "/ML/max_levels").data(),         10);
+    std::string IncOrDec     = dataFile((section + "/ML/inc_or_dec").data(),         "increasing");
+    std::string PrecType     = dataFile((section + "/ML/prec_type").data(),          "MGV");
+    //    int NumProjectedModes    = dataFile((section + "/ML/number_of_prejected_modes").data(), 0);
+
+    M_List.set("ML output",               MLOutput);
+    M_List.set("print unused",            printUnused);
+    M_List.set("ML print parameter list", MLPrintParameterList);
+    M_List.set("PDE equations",           PDEEquations);
+
+    M_List.set("cycle applications", CycleApplications);
+    M_List.set("max levels", MaxLevels);
+    M_List.set("increasing or decreasing", IncOrDec);
+    M_List.set("prec type", PrecType);
+
+    std::string eigenAnalysisType = dataFile((section + "/ML/eigne-analysis/type").data(), "cg");
+    int eigenAnalysisIterations   = dataFile((section + "/ML/eigne-analysis/iterations").data(), 10);
+
+    M_List.set("eigen-analysis: type",       eigenAnalysisType);
+    M_List.set("eigen-analysis: iterations", eigenAnalysisIterations);
+
+    // Aggregation options
+
+    std::string AggregationType                  = dataFile((section + "/ML/aggregation/type").data(), "Uncoupled");
+    double      AggregationThreshold             = dataFile((section + "/ML/aggregation/threshold").data(), 0.0 );
+    double      AggregationDampingFactor         = dataFile((section + "/ML/aggregation/damping_factor").data(), 4./3. );
+
+    int AggregationSmoothingSweeps               = dataFile((section + "/ML/aggregation/smoothing_sweeps").data(),    1);
+    int AggregationGlobalAggregates              = dataFile((section + "/ML/aggregation/global_aggregates").data(),   1);
+    int AggregationLocalAggregates               = dataFile((section + "/ML/aggregation/local_aggregates").data(),    1);
+    int AggregationNodesPerAggregate             = dataFile((section + "/ML/aggregation/nodes_per_aggregate").data(), 1);
+    int AggregationNextLevelAggregatesPerProcess = dataFile((section + "/ML/aggregation/next-level_aggregates_per_process").data(), 128);
+
+    bool AggregationUseTentativeRestriction      = dataFile((section + "/ML/aggregation/tentative_restriction").data(), false);
+    bool AggregationSymmetrize                   = dataFile((section + "/ML/aggregation/symmetrize").data(),            false);
+
+    bool   EnergyMinimizationEnable              = dataFile((section + "/ML/energy_minimization/enable").data(),        false);
+    int    EnergyMinimizationType                = dataFile((section + "/ML/energy_minimization/type").data(),          2);
+    double EnergyMinimizationDropTol             = dataFile((section + "/ML/energy_minimization/droptol").data(),       0.);
+    bool   EnergyMinimizationCheap               = dataFile((section + "/ML/energy_minimization/cheap").data(),         false);
 
 
+    M_List.set("aggregation: type",                              AggregationType);
+    M_List.set("aggregation: threshold",                         AggregationThreshold);
+    M_List.set("aggregation: damping factor",                    AggregationDampingFactor);
+    M_List.set("aggregation: smoothing sweeps",                  AggregationSmoothingSweeps);
+    M_List.set("aggregation: global aggregates",                 AggregationGlobalAggregates);
+    M_List.set("aggregation: local aggregates",                  AggregationLocalAggregates);
+    M_List.set("aggregation: nodes per aggregate",               AggregationNodesPerAggregate);
+    M_List.set("aggregation: use tentative restriction",         AggregationUseTentativeRestriction);
+    M_List.set("aggregation: symmetrize",                        AggregationSymmetrize);
+
+    M_List.set("energy minimization: enable",                    EnergyMinimizationEnable);
+    M_List.set("energy minimization: Type",                      EnergyMinimizationType);
+    M_List.set("energy minimization: droptol",                   EnergyMinimizationDropTol);
+    M_List.set("energy minimization: cheap",                     EnergyMinimizationCheap);
+
+    // Smoothing parameters
+
+    std::string SmootherType                = dataFile((section + "/ML/smoothers/type").data(), "Chebyshev");
+    int SmootherSweeps                      = dataFile((section + "/ML/smoothers/sweeps").data(), 2);
+    double SmootherDampingFactor            = dataFile((section + "/ML/smoothers/damping_factor").data(), 1.0);
+    std::string SmootherPreOrPost           = dataFile((section + "/ML/smoothers/pre_or_post").data(), "both");
+
+    double SmootherChebyshevAlpha           = dataFile((section + "/ML/smoothers/Chebyshev_alpha").data(), 20.);
+    bool SmootherHiptmairEfficientSymmetric = dataFile((section + "/ML/smoothers/Hiptmair_efficient_symmetric").data(), true);
+
+    std::string SubSmootherType             = dataFile((section + "/ML/subsmoothers/type").data(), "Chebyshev");
+    double SubSmootherChebyshevAlpha        = dataFile((section + "/ML/subsmoothers/Chebyshev_alpha").data(), 20.);
+    double SubSmootherSGSDampingFactor      = dataFile((section + "/ML/subsmoothers/SGS_damping_factor").data(), 1.);
+    int SubSmootherEdgeSweeps               = dataFile((section + "/ML/subsmoothers/edge_sweeps").data(), 2);
+    int SubSmootherNodeSweeps               = dataFile((section + "/ML/subsmoothers/node_sweeps").data(), 2);
+
+    M_List.set("smoother: type",                         SmootherType);
+    M_List.set("smmother: sweeps",                       SmootherSweeps);
+    M_List.set("smoother: damping factor",               SmootherDampingFactor);
+    M_List.set("smoother: pre or post",                  SmootherPreOrPost);
+    M_List.set("smoother: Chebyshev alpha",              SmootherChebyshevAlpha);
+    M_List.set("smoother: Hiptmair efficient symmetric", SmootherHiptmairEfficientSymmetric);
+
+    M_List.set("subsmoother: type",                      SubSmootherType);
+    M_List.set("subsmoother: Chebyshev alpha",           SubSmootherChebyshevAlpha);
+    M_List.set("subsmoother: SGS damping factor",        SubSmootherSGSDampingFactor);
+    M_List.set("subsmoother: edge sweeps",               SubSmootherEdgeSweeps);
+    M_List.set("subsmoother: node sweeps",               SubSmootherNodeSweeps);
+
+    // Coarsest Grid Parameters
+
+    int CoarseMaxSize                 = dataFile((section + "/ML/coarse/max_size").data(), 128);
+    std::string CoarseType            = dataFile((section + "/ML/coarse/type").data(), "AmesosKLU");
+    std::string CoarsePreOrPost       = dataFile((section + "/ML/coarse/pre_or_post").data(), "post");
+    double CoarseDampingFactor        = dataFile((section + "/ML/coarse/damping_factor").data(), 1.0);
+    std::string CoarseSubsmootherType = dataFile((section + "/ML/coarse/subsmoother_type").data(), "Chebyshev");
+    int CoarseNodeSweeps              = dataFile((section + "/ML/coarse/node_sweeps").data(), 2);
+    int CoarseEdgeSweeps              = dataFile((section + "/ML/coarse/edge_sweeps").data(), 2);
+    double CoarseChebyshevAlpha       = dataFile((section + "/ML/coarse/Chebyshev_alpha").data(), 30.);
+    int CoarseMaxProcesses            = dataFile((section + "/ML/coarse/max_processes").data(),-1);
+
+    M_List.set("coarse: max size",  CoarseMaxSize);
+    M_List.set("coarse: type ", CoarseType);
+    M_List.set("coarse: pre or post", CoarsePreOrPost);
+    M_List.set("coarse: damping factor", CoarseDampingFactor);
+    M_List.set("coarse: subsmoother type", CoarseSubsmootherType);
+    M_List.set("coarse: node sweeps", CoarseNodeSweeps);
+    M_List.set("coarse: edge sweeps", CoarseEdgeSweeps);
+    M_List.set("coarse: Chebyshev alpha", CoarseChebyshevAlpha);
+    M_List.set("coarse: max processes", CoarseMaxProcesses);
+    M_List.set("coarse: max size", CoarseMaxSize);
+
+    // Load-balancing Options
+
+    bool RepartitionEnable             = dataFile((section + "/ML/repartition/enable").data(), false);
+    std::string RepartitionPartitioner = dataFile((section + "/ML/repartition/partitioner").data(), "ParMETIS");
+    double RepartitionMaxMinRatio      = dataFile((section + "/ML/repartition/max_min_ratio").data(), 1.3);
+    int RepartitionMinPerProc          = dataFile((section + "/ML/repartition/min_per_proc").data(), 512);
+    double RepartitionNodeMaxMinRatio  = dataFile((section + "/ML/repartition/node_max_min_ratio").data(), 1.3);
+    int RepartitionNodeMinPerProc      = dataFile((section + "/ML/repartition/node_min_per_proc").data(), 170);
+    int RepartitionZoltanDimensions    = dataFile((section + "/ML/repartition/Zoltan_dimensions").data(), 2.);
+
+
+    M_List.set("repartition: enable",             RepartitionEnable);
+    M_List.set("repartition: partitioner",        RepartitionPartitioner);
+    M_List.set("repartition: max min ratio",      RepartitionMaxMinRatio);
+    M_List.set("repartition: min per proc",       RepartitionMinPerProc);
+    M_List.set("repartition: node max min ratio", RepartitionNodeMaxMinRatio);
+    M_List.set("repartition: node min per proc",  RepartitionNodeMinPerProc);
+    M_List.set("repartition: Zoltan dimensions",  RepartitionZoltanDimensions);
 
     // use Uncoupled scheme to create the aggregate
     //    M_List.set("aggregation: type", "Uncoupled");
@@ -78,7 +211,7 @@ MLPreconditioner::setDataFromGetPot( const GetPot& dataFile, const std::string& 
 //     M_List.set("PDE equations", 1);
 
     // fix the smoother to be IFPACK; can be set using (level X) syntax
-    M_List.set("smoother: type", "Aztec");
+    //    M_List.set("smoother: type", "Aztec");
 
     // now we have to specify which IFPACK preconditioner should be
     // built. Any value that is valid for the IFPACK factory. We also need
@@ -114,7 +247,7 @@ MLPreconditioner::setDataFromGetPot( const GetPot& dataFile, const std::string& 
 //     M_List.sublist("smoother: ifpack list").set("relaxation: zero starting solution",
 //                                                 false);
 
-    if (displayList) M_List.print(std::cout);
+//    if (displayList) M_List.print(std::cout);
 
     //M_List.sublist("smoother: ifpack list").set("schwarz: filter singletons", true);
 
