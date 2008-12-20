@@ -994,7 +994,7 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
 		  }
 	      }
 	    bRepeated.GlobalAssemble();
-	    ASSERT( b.getMaptype() == Repeated , "here b should passed as repeated, otherwise not sure of what happens at the cpu interfaces ." );
+	    ASSERT( b.getMaptype() == Unique , "here b should passed as repeated, otherwise not sure of what happens at the cpu interfaces ." );
 	    b += bRepeated;
 	  }
 	  break;
@@ -1003,6 +1003,7 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
 	  {
 	    VectorType bRepeated(b.getMap(),Repeated);
 
+	    // Loop on BC identifiers
 	    for ( ID i = 1; i <= BCb.list_size(); ++i )
 	      {
 		// Pointer to the i-th itdentifier in the list
@@ -1015,10 +1016,10 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
 		bdfem.updateMeas( mesh.boundaryFace( ibF ) );
 
 		// Loop on total Dof per Face
-		for ( ID l = 1; l <= nDofF; ++l )
+		for ( ID idofF = 1; idofF <= nDofF; ++idofF )
 		  {
 
-		    gDof = pId->bdLocalToGlobal( l );
+		    gDof = pId->bdLocalToGlobal( idofF );
 
 		    // Loop on space dimensions
 		    for ( ID j = 1; j <= nComp; ++j ) //modifica Matteo 28/07/08 to make "Component"
@@ -1035,14 +1036,14 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
 			      sum +=  BCb( pId->bdLocalToGlobal( m ) , BCb.component( j ) ) * bdfem.phi( int( m - 1 ), iq );  //Components passed separatedly
 
 			    // Adding right hand side contribution
-			    b[ icDof ] += sum *  bdfem.phi( int( l - 1 ), iq ) *
+			  bRepeated[ icDof ] += sum *  bdfem.phi( int( idofF - 1 ), iq ) *
 			      bdfem.weightMeas( iq );
 			  }
 		      }
 		  }
 	      }
 	    bRepeated.GlobalAssemble();
-	    ASSERT( b.getMaptype() == Repeated , "here b should passed as repeated, otherwise not sure of what happens at the cpu interfaces ." );
+	    ASSERT( b.getMaptype() == Unique , "here b should passed as repeated, otherwise not sure of what happens at the cpu interfaces ." );
 	    b += bRepeated;
 	  }
 	  break;
@@ -1103,11 +1104,12 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
     */
     else
     {  //! If BC is given under a functionnal form
-
+           
         DataType x, y, z;
-
-        // Loop on BC identifiers
-        for ( ID i = 1; i <= BCb.list_size(); ++i )
+	VectorType bRepeated(b.getMap(),Repeated);
+       
+	// Loop on BC identifiers
+        for ( int i = 1; i <= BCb.list_size(); ++i )
         {
 
             // Pointer to the i-th itdentifier in the list
@@ -1119,7 +1121,7 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
             bdfem.updateMeas( mesh.boundaryFace( ibF ) );
 
             // Loop on total Dof per Face
-            for ( ID idofF = 1; idofF <= nDofF; ++idofF )
+            for ( int idofF = 1; idofF <= nDofF; ++idofF )
             {  //! fixed a possible BUG(??): it was the same variable : i for list and nDofF! (V. Martin)
                 //! Checked only for RT0-Q0 fe. (to be tested with Q1 or Q2...)
 
@@ -1129,20 +1131,24 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
 
                     //global Dof
                     idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof + offset;
-
-                    // Loop on quadrature points
-                    for ( int l = 0; l < bdfem.nbQuadPt; ++l )
+		    // Loop on quadrature points
+                    for ( int iq = 0; iq < bdfem.nbQuadPt; ++iq )
                     {
 
-                        bdfem.coorQuadPt( x, y, z, l ); // quadrature point coordinates
+                        bdfem.coorQuadPt( x, y, z, iq ); // quadrature point coordinates
 
                         // Adding right hand side contribution
-                        b[ idDof ] += bdfem.phi( int( idofF - 1 ), l ) * BCb( t, x, y, z, BCb.component( j ) ) *
-                                          bdfem.weightMeas( l ); // BASEINDEX + 1
-                    }
+			bRepeated[ idDof ] += bdfem.phi( int( idofF - 1 ), iq ) * BCb( t, x, y, z, BCb.component( j ) ) *
+			                      bdfem.weightMeas( iq ); // BASEINDEX + 1
+		    }
                 }
             }
-        }
+	}
+	bRepeated.GlobalAssemble();
+	ASSERT( b.getMaptype() == Unique , "here b should passed as repeated, otherwise not sure of what happens at the cpu interfaces ." );
+	//  b=bRepeated;
+	b+= bRepeated;
+
     }
 } // bcNaturalManage
 
@@ -1338,7 +1344,7 @@ void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Do
 
                     // Global Dof (outside the quad point loop. V. Martin)
                     idDof = pId->bdLocalToGlobal( idofF ) + ( BCb.component( j ) - 1 ) * totalDof + offset;
-
+	 
                     // Loop on quadrature points
                     for ( int l = 0; l < bdfem.nbQuadPt; ++l )
                     {
@@ -1346,7 +1352,7 @@ void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Do
                         bdfem.coorQuadPt( x, y, z, l ); // quadrature point coordinates
 
                         // Contribution to the diagonal entry of the elementary boundary mass matrix
-			sum += pBcF->coef( t, x, y, z,BCb.component( j ) ) * bdfem.phi( int( idofF - 1 ), l ) * bdfem.phi( int( idofF - 1 ), l ) *
+			sum += pBcF->coef( t, x, y, z, BCb.component( j ) ) * bdfem.phi( int( idofF - 1 ), l ) * bdfem.phi( int( idofF - 1 ), l ) *
 			  bdfem.weightMeas( l );
 
                         // Global Dof (Why inside this loop?? V. Martin)
