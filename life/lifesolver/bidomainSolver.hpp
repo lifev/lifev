@@ -64,7 +64,7 @@ namespace LifeV
 const UInt nbComp = 2;
 
 template< typename Mesh,
-          typename SolverType = LifeV::Epetra::SolverTrilinos >
+          typename SolverType = LifeV::SolverTrilinos >
 class BidomainSolver
 {
 
@@ -125,14 +125,14 @@ public:
     //! Builds time independent parts of PDE system
     virtual void buildSystem();
 
-    //! Updates time dependent parts of PDE system    
+    //! Updates time dependent parts of PDE system
     virtual void updatePDESystem(double       alpha,
                               vector_type& sourceVec
                               );
-    
-    //! Updates time dependent parts of PDE system    
+
+    //! Updates time dependent parts of PDE system
     virtual void updatePDESystem( vector_type& sourceVec );
-    
+
     //! Initialize
     void initialize( const Function&, const Function&  );
     void initialize( const vector_type&, const vector_type& );
@@ -140,7 +140,7 @@ public:
     //! Returns the local solution vector
     const vector_type& solution_u() const {return M_sol_u;}
     const vector_type& solution_uiue() const {return M_sol_uiue;}
-    
+
     const vector_type& fiber_vector() const {return M_fiber_vector;}
 
     //! Returns the local residual vector
@@ -165,7 +165,7 @@ public:
 
     //! Return maps
     Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getMap(Repeated); }
-    
+
     Epetra_Map const& getRepeatedEpetraMapVec() const { return *M_localMapVec.getMap(Repeated); }
 
     EpetraMap const& getMap() const { return M_localMap; }
@@ -203,12 +203,12 @@ protected:
     //! Bidomain BC
     BCHandler*                     M_BCh_electric;
     bool                           M_setBC;
-    
+
     //! Map
     EpetraMap                      M_localMap;
     EpetraMap                      M_localMap_u;
     EpetraMap                      M_localMapVec;
-    
+
     //! mass matrix
     matrix_ptrtype                 M_matrMass;
 
@@ -220,14 +220,14 @@ protected:
     //! Right hand side for the PDE
     vector_type                    M_rhsNoBC;
 
-    //! Global solution _u 
+    //! Global solution _u
     vector_type                    M_sol_uiue;
-    
+
     vector_type                    M_sol_u;
 
-    //! Local fibers vector 
+    //! Local fibers vector
     vector_type                    M_fiber_vector;
-    
+
     //! residual
     vector_type                    M_residual;
 
@@ -258,7 +258,7 @@ private:
 
     //! Elementary matrices
     ElemMat                        M_elmatStiff;
-    ElemMat                        M_elmatMass; 
+    ElemMat                        M_elmatMass;
     Real 						   massCoeff;
     UInt dim_u() const           { return M_uFESpace.dim(); }
 
@@ -286,7 +286,7 @@ BidomainSolver( const data_type&          dataType,
     M_comm                   ( &comm ),
     M_me                     ( M_comm->MyPID() ),
     M_linearSolver           ( ),
-    M_prec                   ( new prec_raw_type() ),
+    M_prec                   ( ),
     M_localMap               ( M_FESpace.map()),
     M_localMap_u             ( M_uFESpace.map()),
     M_localMapVec            (M_localMap_u+M_localMap_u+M_localMap_u),
@@ -307,22 +307,22 @@ BidomainSolver( const data_type&          dataType,
     M_maxIterSolver          ( -1 ),
     M_recomputeMatrix        ( false )
 {
-	
+
 	if (M_data.has_fibers() )
-	    {   
+	    {
 	    	std::stringstream MyPID;
 	        ifstream fibers(M_data.fibers_file().c_str());
-	        
+
 	        UInt NumGlobalElements= M_localMapVec.getMap(Repeated)->NumGlobalElements();
 	        std::vector<Real> fiber_global_vector(NumGlobalElements);
-	                
+
 	        for( UInt i=0; i< NumGlobalElements; ++i)
 	    		fibers>>fiber_global_vector[i];
-	    	 UInt NumMyElements = M_localMapVec.getMap(Repeated)->NumMyElements();    	 
+	    	 UInt NumMyElements = M_localMapVec.getMap(Repeated)->NumMyElements();
 	    	for(UInt j=0; j< NumMyElements; ++j)
 	    	{
 	    		UInt ig= M_localMapVec.getMap(Repeated)->MyGlobalElements()[j];
-	    		M_fiber_vector[ig]= fiber_global_vector[ig-1]; 
+	    		M_fiber_vector[ig]= fiber_global_vector[ig-1];
 	    		}
 	    	std::cout << std::endl;
 	    	fiber_global_vector.clear();
@@ -386,7 +386,14 @@ void BidomainSolver<Mesh, SolverType>::setUp( const GetPot& dataFile )
 
     M_maxIterSolver = dataFile( "electric/solver/max_iter", -1);
 
+
+    std::string precType = dataFile( "electric/prec/prectype", "Ifpack");
+
+    M_prec.reset( PRECFactory::instance().createObject( precType ) );
+    ASSERT(M_prec.get() != 0, "bidomainSolver : Preconditioner not set");
+
     M_prec->setDataFromGetPot( dataFile, "electric/prec" );
+
 }
 
 
@@ -412,18 +419,18 @@ void BidomainSolver<Mesh, SolverType>::buildSystem()
     M_comm->Barrier();
 
     chrono.start();
-    
+
     //! Elementary computation and matrix assembling
     //! Loop on elements
-    
+
     for ( UInt iVol = 1; iVol <= M_FESpace.mesh()->numVolumes(); iVol++ )
     {
-        
-      
-        
-        
+
+
+
+
         chronoZero.start();
-        
+
         M_elmatStiff.zero();
         M_elmatMass.zero();
 
@@ -505,7 +512,7 @@ void BidomainSolver<Mesh, SolverType>::buildSystem()
 
         chronoStiffAssemble.start();
         for ( UInt iComp = 0; iComp < nbComp; iComp++ ){
-        	
+
         	assembleMatrix( *M_matrStiff,
         	                        M_elmatStiff,
         	                        M_FESpace.fe(),
@@ -519,7 +526,7 @@ void BidomainSolver<Mesh, SolverType>::buildSystem()
 
 
         chronoMassAssemble.start();
-        
+
         for ( UInt iComp = 0; iComp < nbComp; iComp++ ){
         	for ( UInt jComp = 0; jComp < nbComp; jComp++ ){
         		assembleMatrix( *M_matrMass,
@@ -537,7 +544,7 @@ void BidomainSolver<Mesh, SolverType>::buildSystem()
     }
 
     massCoeff = 1.0/ M_data.timestep();
-    
+
     M_comm->Barrier();
 
     chrono.stop();
@@ -550,15 +557,15 @@ void BidomainSolver<Mesh, SolverType>::buildSystem()
     M_matrMass->GlobalAssemble();
 
     M_comm->Barrier();
-    
+
     M_matrNoBC.reset(new matrix_type(M_localMap, M_matrStiff->getMeanNumEntries() ));
 
     //! Computing 1.0/dt * M + K
-    
+
     *M_matrNoBC += *M_matrStiff;
 
     *M_matrNoBC += *M_matrMass*massCoeff;
-    
+
     M_matrNoBC->GlobalAssemble();
 
     chrono.stop();
@@ -584,7 +591,7 @@ initialize( const Function& ui0, const Function& ue0 )
 
      vector_type ui(M_uFESpace.map());
      vector_type ue(M_uFESpace.map());
-     
+
      M_uFESpace.interpolate(ui0, ui, 0.);
      M_uFESpace.interpolate(ue0, ue, 0.);
 
@@ -599,7 +606,7 @@ initialize( const vector_type& ui0, const vector_type& ue0 )
    M_sol_uiue = ui0;
    M_sol_uiue.add(ue0, M_uFESpace.dof().numTotalDof());
     for ( int i = 0 ; i < M_sol_u.getEpetraVector().MyLength() ; i++ )
-   	{	
+   	{
    		int ig=M_sol_u.BlockMap().MyGlobalElements()[i];
         M_sol_u[ig] = M_sol_uiue[ig] - M_sol_uiue[ig+dim_u()]; // BASEINDEX + 1
                }
@@ -750,7 +757,7 @@ void BidomainSolver<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
 
         if (M_verbose)
             std::cout << "  f-  Computing the precond ...                ";
-  
+
         M_prec->buildPreconditioner(matrFull);
         std::cout << "Before condest"<<std::endl<<std::flush;
         double condest = M_prec->Condest();
@@ -783,7 +790,7 @@ void BidomainSolver<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
     int numIter = M_linearSolver.solve(M_sol_uiue, rhsFull);
 
     chrono.stop();
-    
+
     if (M_verbose)
     {
         std::cout << "\ndone in " << chrono.diff()
@@ -796,16 +803,16 @@ void BidomainSolver<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
     {
         M_resetPrec = true;
     }
-    
-    
-    
+
+
+
     for ( UInt i = 0 ; i < M_sol_u.getEpetraVector().MyLength() ; i++ )
-       	{	
+       	{
        		UInt ig=M_sol_u.BlockMap().MyGlobalElements()[i];
             M_sol_u[ig] = M_sol_uiue[ig] - M_sol_uiue[ig+dim_u()]; // BASEINDEX + 1
                    }
-    
-    
+
+
 
     M_comm->Barrier();
 

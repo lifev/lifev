@@ -73,7 +73,7 @@ namespace LifeV
 
 
 template< typename Mesh,
-          typename SolverType = LifeV::Epetra::SolverTrilinos >
+          typename SolverType = LifeV::SolverTrilinos >
 class ADRSolver
 //     :
 //     public NavierStokesHandler<Mesh>, EpetraHandler
@@ -411,7 +411,7 @@ ADRSolver( const data_type&          dataType,
     M_sol                    ( M_localMap ),
     M_residual               ( M_localMap ),
     M_linearSolver           ( ),
-    M_prec                   ( new prec_raw_type() ),
+    M_prec                   ( ),
     M_resetStab              ( true ),
     M_reuseStab              ( true ),
 //     M_ipStab                 ( M_FESpace.mesh(),
@@ -460,7 +460,7 @@ ADRSolver( const data_type&          dataType,
     M_sol                    ( M_localMap ),
     M_residual               ( M_localMap ),
     M_linearSolver           ( ),
-    M_prec                   ( new prec_raw_type() ),
+    M_prec                   ( ),
     M_resetStab              ( true ),
     M_reuseStab              ( true ),
     M_betaFct                ( 0 ),
@@ -540,6 +540,11 @@ void ADRSolver<Mesh, SolverType>::setUp( const GetPot& dataFile )
     M_maxIterSolver   = dataFile( "adr/solver/max_iter", -1);
     M_reusePrec       = dataFile( "adr/prec/reuse", true);
     M_maxIterForReuse = dataFile( "adr/prec/max_iter_reuse", M_maxIterSolver*8/10);
+
+    std::string precType = dataFile( "adr/prec/prectype", "Ifpack");
+
+    M_prec.reset( PRECFactory::instance().createObject( precType ) );
+    ASSERT(M_prec.get() != 0, "AdvectionDiffusionSolver : Preconditioner not set");
 
     M_prec->setDataFromGetPot( dataFile, "adr/prec" );
 }
