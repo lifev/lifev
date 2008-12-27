@@ -627,7 +627,7 @@ FESpace<Mesh, Map>::L20Error( const Function& fexact,
     this->map().Comm().SumAll(&sendbuff[0], &recvbuff[0], 5);
 
 
-    int me = this->map().Comm().MyPID();
+    //int me = this->map().Comm().MyPID();
 
 //     if (me == 0)
 //     {
