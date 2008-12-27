@@ -25,80 +25,86 @@
 # \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
 # \date 2004-08-29
 #
-AT_SETUP([test_cylinder])
+AT_SETUP([test_ethiersteinman])
 AT_KEYWORDS([ns fluid])
 AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 #-------------------------------------------------
-#      Data file for Fluid Structure Solver
+#      Data file for EthierSteinman test case
 #-------------------------------------------------
+
+
+[exporter]
+type       = hdf5 # hdf5 (if library compiled with hdf5 support) or ensight
+multimesh  = false
+start      = 0
+save       = 1
 
 [fluid]
 
 [./physics]
-endtime         = .02
+endtime         = 0.04          # endtime
 density         = 1.0          # density
-viscosity       = 0.005         # viscosity
+viscosity       = .01       # viscosity
 
 
 [../discretization]
-mesh_dir        = ./
-mesh_file       = cyl3D-2.mesh          # mesh file
-mesh_type       = .mesh
-
+mesh_dir        = ./   # the directory where the mesh file is
+mesh_file       = cube4x4.mesh          # mesh file
 mesh_faces      = all                   # update all faces elements
-mesh_edges      = all                   # update all faces elements
 timestep        = 0.01                   # timestep
 verbose         = 0
 order_bdf       = 1
 linearized      = 0
-diagonalize     = 0 # weight, 0=off
-div_beta_u_v    = 1 # 1=on, 0=off
-vel_order       = P1Bubble		# P1, P1Bubble, P2
-press_order     = P1		# P1, P2
+diagonalize     = 1 # weight, 0=off
+div_beta_u_v    = 0 # 1=on, 0=off
+vel_order         = P1
+press_order       = P1
+mesh_faces      = all                   # update all faces elements
+mesh_edges      = all                   # update all faces elements
+
+initialization  = interp                # initialize using proj: L2 projection
+                                        #                  interp: interpolation
 
 [../miscellaneous]
 verbose         = 1
-save            = 50
 steady          = 0
 
 [../solver]
 solver          = gmres
 scaling         = none
 output          = all_res # all_res
-conv            = rhs
+conv            = r0
 max_iter        = 100
 kspace          = 100
-precond         = dom_decomp #none,jacobi,sym_gs,neumann,ls,smoother,dom_decomp
-subdomain_solve = ilut
-overlap         = 1
-ilut_fill       = 2
-graph_fill      = 0
-drop            = 1.e-4
-tol             = 1.00e-9
-keep_info       = 1
+tol             = 1.00e-10
 
-[../prec]
 
+[../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
+prectype        = ILUT   # Amesos (does a local LU factorization), ILUT (not ILU)
 reuse           = true
-overlap         = 10
-droptol         = 1.e-5
-fill 		= 2
+overlap         = 2
+droptol         = 1.e-10 # ??
+fill            = 4
+athr            = 1e-3 # ~h^2. for h=0.25: athr~1e-3
+rthr            = 1
+relax_value     = 1
 
 
 [../ipstab]
-gammaBeta  = 0.125
-gammaDiv   = 0.125
-gammaPress = 0.03125
+gammaBeta  = 0.02
+gammaDiv   = 0.2
+gammaPress = 0.2
 
 [../problem]
-Re = 10.0
-D  = 0.1
-H  = 0.41
-centered = 0
+a = 1.57
+d = 0.78
+sigma = 0
+#neumannList =
+dirichletList = 1,2,3,4,5,6
 
 
 ]])
-AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria/cyl3D-2.mesh &&
-          mpirun -np 2 $top_builddir/testsuite/test_cylinder/test_cylinder -c],[0],[ignore],[ignore])
+AT_CHECK([ln -sf ../../data/mesh/inria/cube4x4.mesh &&
+          mpirun -np 2 ../../test_ethiersteinman/test_ethiersteinman -c],[0],[ignore],[ignore])
 AT_CLEANUP([out_res_solid iter num_iter out_iter_solid res])
 

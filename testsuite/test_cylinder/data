@@ -20,8 +20,8 @@ viscosity       = 0.005         # viscosity
 mesh_dir        = ./Mesh/
 #mesh_file       = tube20.mesh          # "big file"
 #mesh_file       = cyl3D-2.mesh          # "big file"
-mesh_file       = cyl3D.2.2.00.mesh
-#mesh_file       = cyl2D.mesh             # "reasonable file"
+#mesh_file       = cyl3D.2.2.00.mesh
+mesh_file       = cyl2D.mesh             # "reasonable file"
 
 mesh_type       = .mesh
 

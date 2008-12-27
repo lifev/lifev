@@ -49,7 +49,7 @@ viscosity       = 0.005         # viscosity
 
 [../discretization]
 mesh_dir        = ./
-mesh_file       = cyl3D.2.2.00.mesh
+mesh_file       = cyl2D.mesh
 
 mesh_type       = .mesh
 
@@ -112,7 +112,7 @@ centered = 1
 ]])
 
 
-AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria/cyl3D.2.2.00.mesh &&
-          mpirun -np 2 $top_builddir/testsuite/test_cylinder/test_cylinder -c],[0],[ignore],[ignore])
+AT_CHECK([ln -sf ../../data/mesh/inria/cyl2D.mesh;
+          mpirun -np 2 ../../test_cylinder/test_cylinder -c],[0],[ignore],[ignore])
 AT_CLEANUP([out_res_solid iter num_iter out_iter_solid res])
 

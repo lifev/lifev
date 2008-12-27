@@ -48,7 +48,7 @@ sphere_radius = 0.5
 
 
 
-endtime         = 400
+endtime         = 0.4
 density         = 1.0          # density
 viscosity       = 0.005         # viscosity
 init_data = 0

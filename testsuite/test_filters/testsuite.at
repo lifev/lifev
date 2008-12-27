@@ -66,7 +66,7 @@ verbose         = 1
 steady          = 0
 ]])
 AT_CHECK([ cp -p $(srcdir)/*.case  $(srcdir)/*.geo  $(srcdir)/*.scl $(srcdir)/*.vct  . &&
-           make link  &&
-           mpirun -np 4 $top_builddir/testsuite/test_filters/test_filters -c],[0],[ignore],[ignore])
+	   ln -sf ../../data/mesh/inria/cube4x4.mesh &&
+           mpirun -np 4 ../../test_filters/test_filters -c],[0],[ignore],[ignore])
 AT_CLEANUP([ethiersteinman.xmf ethiersteinman.h5])
 
