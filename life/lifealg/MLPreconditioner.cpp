@@ -52,13 +52,13 @@ MLPreconditioner::~MLPreconditioner()
 
 
 void
-MLPreconditioner::setDataFromGetPot( const GetPot& dataFile, const std::string& section )
+MLPreconditioner::setDataFromGetPot( const GetPot&          dataFile, 
+				     const std::string&     section)
 {
 
     // see
 
-
-    std::string defaultParameters = dataFile((section + "/default_parameters").data(), "SA");
+    std::string defaultParameters = dataFile((section + "/ML/default_parameters").data(), "SA");
     //    bool displayList = dataFile((section + "/displayList").data(),     false);
 
     ML_Epetra::SetDefaults(defaultParameters, M_List);
@@ -77,8 +77,9 @@ MLPreconditioner::setDataFromGetPot( const GetPot& dataFile, const std::string& 
 
     M_List.set("ML output",               MLOutput);
     M_List.set("print unused",            printUnused);
-    M_List.set("ML print parameter list", MLPrintParameterList);
+    // M_List.set("ML print parameter list", MLPrintParameterList);
     M_List.set("PDE equations",           PDEEquations);
+
 
     M_List.set("cycle applications", CycleApplications);
     M_List.set("max levels", MaxLevels);
@@ -123,7 +124,7 @@ MLPreconditioner::setDataFromGetPot( const GetPot& dataFile, const std::string& 
     M_List.set("aggregation: symmetrize",                        AggregationSymmetrize);
 
     M_List.set("energy minimization: enable",                    EnergyMinimizationEnable);
-    M_List.set("energy minimization: Type",                      EnergyMinimizationType);
+    M_List.set("energy minimization: type",                      EnergyMinimizationType);
     M_List.set("energy minimization: droptol",                   EnergyMinimizationDropTol);
     M_List.set("energy minimization: cheap",                     EnergyMinimizationCheap);
 
@@ -137,14 +138,14 @@ MLPreconditioner::setDataFromGetPot( const GetPot& dataFile, const std::string& 
     double SmootherChebyshevAlpha           = dataFile((section + "/ML/smoothers/Chebyshev_alpha").data(), 20.);
     bool SmootherHiptmairEfficientSymmetric = dataFile((section + "/ML/smoothers/Hiptmair_efficient_symmetric").data(), true);
 
-    std::string SubSmootherType             = dataFile((section + "/ML/subsmoothers/type").data(), "Chebyshev");
+        std::string SubSmootherType             = dataFile((section + "/ML/subsmoothers/type").data(), "Chebyshev");
     double SubSmootherChebyshevAlpha        = dataFile((section + "/ML/subsmoothers/Chebyshev_alpha").data(), 20.);
-    double SubSmootherSGSDampingFactor      = dataFile((section + "/ML/subsmoothers/SGS_damping_factor").data(), 1.);
+    //    double SubSmootherSGSDampingFactor      = dataFile((section + "/ML/subsmoothers/SGS_damping_factor").data(), 1.);
     int SubSmootherEdgeSweeps               = dataFile((section + "/ML/subsmoothers/edge_sweeps").data(), 2);
     int SubSmootherNodeSweeps               = dataFile((section + "/ML/subsmoothers/node_sweeps").data(), 2);
 
     M_List.set("smoother: type",                         SmootherType);
-    M_List.set("smmother: sweeps",                       SmootherSweeps);
+    M_List.set("smoother: sweeps",                       SmootherSweeps);
     M_List.set("smoother: damping factor",               SmootherDampingFactor);
     M_List.set("smoother: pre or post",                  SmootherPreOrPost);
     M_List.set("smoother: Chebyshev alpha",              SmootherChebyshevAlpha);
@@ -152,14 +153,14 @@ MLPreconditioner::setDataFromGetPot( const GetPot& dataFile, const std::string& 
 
     M_List.set("subsmoother: type",                      SubSmootherType);
     M_List.set("subsmoother: Chebyshev alpha",           SubSmootherChebyshevAlpha);
-    M_List.set("subsmoother: SGS damping factor",        SubSmootherSGSDampingFactor);
+    //    M_List.set("subsmoother: SGS damping factor",        SubSmootherSGSDampingFactor);
     M_List.set("subsmoother: edge sweeps",               SubSmootherEdgeSweeps);
     M_List.set("subsmoother: node sweeps",               SubSmootherNodeSweeps);
 
     // Coarsest Grid Parameters
 
     int CoarseMaxSize                 = dataFile((section + "/ML/coarse/max_size").data(), 128);
-    std::string CoarseType            = dataFile((section + "/ML/coarse/type").data(), "AmesosKLU");
+    std::string CoarseType            = dataFile((section + "/ML/coarse/type").data(), "Chebyshev");
     std::string CoarsePreOrPost       = dataFile((section + "/ML/coarse/pre_or_post").data(), "post");
     double CoarseDampingFactor        = dataFile((section + "/ML/coarse/damping_factor").data(), 1.0);
     std::string CoarseSubsmootherType = dataFile((section + "/ML/coarse/subsmoother_type").data(), "Chebyshev");
@@ -169,7 +170,7 @@ MLPreconditioner::setDataFromGetPot( const GetPot& dataFile, const std::string& 
     int CoarseMaxProcesses            = dataFile((section + "/ML/coarse/max_processes").data(),-1);
 
     M_List.set("coarse: max size",  CoarseMaxSize);
-    M_List.set("coarse: type ", CoarseType);
+    //    M_List.set("coarse: type ", CoarseType);
     M_List.set("coarse: pre or post", CoarsePreOrPost);
     M_List.set("coarse: damping factor", CoarseDampingFactor);
     M_List.set("coarse: subsmoother type", CoarseSubsmootherType);
@@ -181,7 +182,7 @@ MLPreconditioner::setDataFromGetPot( const GetPot& dataFile, const std::string& 
 
     // Load-balancing Options
 
-    bool RepartitionEnable             = dataFile((section + "/ML/repartition/enable").data(), false);
+    int RepartitionEnable             = dataFile((section + "/ML/repartition/enable").data(), 0);
     std::string RepartitionPartitioner = dataFile((section + "/ML/repartition/partitioner").data(), "ParMETIS");
     double RepartitionMaxMinRatio      = dataFile((section + "/ML/repartition/max_min_ratio").data(), 1.3);
     int RepartitionMinPerProc          = dataFile((section + "/ML/repartition/min_per_proc").data(), 512);
@@ -225,6 +226,7 @@ MLPreconditioner::setDataFromGetPot( const GetPot& dataFile, const std::string& 
     M_List.set("smoother: type (level 0)","IFPACK");
     M_List.set("smoother: type (level 1)","IFPACK");
 
+
     //extra parameters:
 //     M_List.sublist("smoother: ifpack list").set("fact: drop tolerance",
 //                                                 dropTolerance);
@@ -247,17 +249,24 @@ MLPreconditioner::setDataFromGetPot( const GetPot& dataFile, const std::string& 
 //     M_List.sublist("smoother: ifpack list").set("relaxation: zero starting solution",
 //                                                 false);
 
-//    if (displayList) M_List.print(std::cout);
+    if (MLPrintParameterList) M_List.print(std::cout);
 
     //M_List.sublist("smoother: ifpack list").set("schwarz: filter singletons", true);
 
     //    M_List.sublist("smoother: ifpack list").set("amesos: solver type", "Amesos_Lapack");
-
-
-
 }
 
-int MLPreconditioner::buildPreconditioner(operator_type& oper)
+
+  
+  void                    
+  MLPreconditioner::createList( const GetPot&              dataFile,
+				 const std::string&         section,
+				 Teuchos::ParameterList&    list)
+  {}
+
+
+int 
+MLPreconditioner::buildPreconditioner(operator_type& oper)
 {
 
     M_Oper = oper;

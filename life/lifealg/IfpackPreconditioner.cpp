@@ -176,6 +176,14 @@ IfpackPreconditioner::buildPreconditioner(operator_type& oper)
     return EXIT_SUCCESS;
 }
 
+  
+  void                   
+  IfpackPreconditioner::createList( const GetPot&              dataFile,
+				    const std::string&         section,
+				    Teuchos::ParameterList&    list)
+  {}
+  
+
 double
 IfpackPreconditioner::Condest()
 {

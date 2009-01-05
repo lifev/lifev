@@ -91,7 +91,13 @@ public:
     /** @name  Methods
      */
 
-    void                    setDataFromGetPot ( const GetPot& dataFile, const std::string& section );
+    void                    setDataFromGetPot ( const GetPot&      dataFile, 
+						const std::string& section );
+
+    void                    createList( const GetPot&              dataFile,
+					const std::string&         section,
+					Teuchos::ParameterList&    list);
+
 
     double                  Condest ();
 

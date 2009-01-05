@@ -90,8 +90,13 @@ public:
     /** @name  Methods
      */
 
-    void                   setDataFromGetPot ( const GetPot& dataFile, const std::string& section );
+    void                   setDataFromGetPot ( const GetPot&      dataFile, 
+					       const std::string& section );
 
+    void                   createList( const GetPot&              dataFile,
+				       const std::string&         section,
+				       Teuchos::ParameterList&    list);
+  
     double                 Condest ();
 
     super::prec_raw_type*  getPrec();
@@ -110,7 +115,7 @@ public:
 
 protected:
 
-    //    void                   createList( const GetPot& dataFile );
+
 
     prec_type              M_Prec;
 //     operator_type          M_Oper;
