@@ -1,10 +1,15 @@
-#ifdef HAVE_MPI
-#include "mpi.h"
+#include "Epetra_config.h"
 #include <life/lifefilters/medit_wrtrs.hpp>
 #include<life/lifemesh/dataMesh.hpp>
 #include<life/lifecore/GetPot.hpp>
+
+#ifdef HAVE_MPI
+#include "mpi.h"
+#endif
+
 int main(int argc, char** argv)
 {
+#ifdef HAVE_MPI
     MPI_Init(&argc, &argv);
     using namespace LifeV;
     GetPot command_line(argc,argv);
@@ -35,5 +40,5 @@ int main(int argc, char** argv)
             //writeMesh( "solid_ord.mesh", *solidData.mesh());
         }
     MPI_Finalize();
-}
 #endif
+}
