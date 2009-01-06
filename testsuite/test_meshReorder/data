@@ -1,0 +1,24 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file for Fluid Structure Solver
+#-------------------------------------------------
+
+
+[fluid]
+[./physics]
+[../discretization]
+mesh_dir  = ./Mesh/ #Aneurisms/ # the directory where the mesh file is
+#mesh_file = 179347_cm_fluid.mesh  # mesh file
+#mesh_file = vessel20.mesh  # mesh file
+#timestep = 0.00025
+#mesh_file = carotid_fluid.mesh
+mesh_file = aorta_solid.mesh
+#mesh_file = 100170_cm_N2H0.008_solid.mesh
+timestep  = 0.001             # timestep
+vel_order       = P1            # P1, P1Bubble, P2
+press_order     = P1            # P1, P2
+order_bdf       = 1
+mesh_faces      = all                   # update all faces elements
+mesh_edges      = all                   # update all faces elements
+mesh_type       = .mesh
+ordering = true
