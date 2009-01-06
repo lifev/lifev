@@ -1,3 +1,4 @@
+#ifdef HAVE_MPI
 #include "mpi.h"
 #include <life/lifefilters/medit_wrtrs.hpp>
 #include<life/lifemesh/dataMesh.hpp>
@@ -35,3 +36,4 @@ int main(int argc, char** argv)
         }
     MPI_Finalize();
 }
+#endif
