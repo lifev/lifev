@@ -43,6 +43,12 @@
 
 #include <life/lifemesh/basisElSh.hpp>
 
+#ifdef HAVE_MPI
+//headers useful only for reordering:
+#include "mpi.h"
+#include <parmetis.h>
+#endif
+
 namespace LifeV
 {
     /**
@@ -599,9 +605,10 @@ namespace LifeV
 
         std::map<int,int> & globalToLocalNode(){return M_globalToLocalNode;}
         std::map<int,int> & localToGlobalNode(){return M_localToGlobalNode;}
-
+#ifdef HAVE_MPI
+        void orderMesh(MPI_Comm comm);
+#endif
         void printLtGMap(std::ostream & os);
-
 
     private:
 
@@ -2586,7 +2593,132 @@ namespace LifeV
             }
         }
     }
+#ifdef HAVE_MPI
+template <typename GEOSHAPE, typename MC>
+void
+RegionMesh3D<GEOSHAPE, MC>::
+orderMesh(MPI_Comm comm) // serial reordering:
+    //a fake communicator must be passed to the function if we intend to use the serial reordering.
+    // For a parallel reordering we should pass a partitioned mesh and the real communicator (to be implemented).
+{
 
+    std::vector<int> vertexDist(2);
+    std::vector<int> adjncy;
+    std::vector<int> xadj/*(this->numVolumes()+1)*/;//dimension # elements * # nodes per element
+    std::vector<int> order(this->M_numPoints);//(this->numVolumes());
+    std::vector<int> size(2);
+
+    UInt elementNodes;
+    UInt elementFaces;
+
+    typedef VolumeShape ElementShape;
+
+    switch ( ElementShape::Shape )
+    {
+        case HEXA:
+            elementNodes = 8;
+            break;
+        case TETRA:
+            elementNodes = 4;
+            break;
+        default:
+            ERROR_MSG( "Element shape not implement in partitionMesh" );
+    }
+
+
+    switch ( FaceShape::Shape )
+    {
+        case QUAD:
+            elementFaces = 6;
+            break;
+        case TRIANGLE:
+            elementFaces = 4;
+            break;
+        default:
+            ERROR_MSG( "Face Shape not implemented in partitionMesh" );
+    }
+
+
+    adjncy.resize(0);
+    xadj.resize(0);
+    xadj.push_back(0);
+
+    UInt sum = 0;
+
+    bool flag=false;
+    for ( UInt iNode = 0; iNode < M_numPoints; ++iNode )
+    {
+        flag=false;
+                for( UInt ed = 0; ed < edgeList.size(); ++ed )
+        {
+                    if(pointList[iNode].id()==edgeList[ed].point(1).id())
+                      {
+                          adjncy.push_back(edgeList[ed].point(2).id()-1);
+                          ++sum;
+                          flag=true;
+                      }
+                    else if(pointList[iNode].id()==edgeList[ed].point(2).id())
+                        {
+                            adjncy.push_back(edgeList[ed].point(1).id()-1);
+                            ++sum;
+                            flag=true;
+
+                        }
+        }
+                ASSERT(flag==true,"vertex not inserted");
+                xadj.push_back(sum);
+    }
+
+
+    //std::vector<int> adjncy2(adjncy);
+    //std::vector<int> xadj2(xadj)/*(this->numVolumes()+1)*/;//dimension # elements * # nodes per element
+
+     int numflag=0;
+     vertexDist[0]=0;
+     //     vertexDist[1]=this->numVolumes()*elementNodes;
+     vertexDist[1]=M_numPoints;
+
+     ParMETIS_V3_NodeND((int*) &vertexDist[0],
+                        (int*) &xadj[0],
+                        (int*) &adjncy[0],
+                        &numflag,
+                        (int*) new int(0),//options[0],
+                        &order[0],// output vector, size: nb of local nodes (equal to the vector part).
+                        //&edgecut, &part[0] // output of ParMETIS_V3_PartKway
+                        &size[0],// output vector, size: 2*nb of processors.
+                        &comm );//dynamic_cast<Epetra_MpiComm*>(&this->Comm())->Comm());
+
+
+    std::vector<Real> ics(pointList.size());
+    std::vector<Real> ipsilon(pointList.size());
+    std::vector<Real> zeta(pointList.size());
+    std::vector<ID> mk(pointList.size());
+
+    for ( UInt iv = 0; iv < pointList.size(); ++iv )
+        {
+            ics[order[iv]]=pointList[iv].x();
+            ipsilon[order[iv]]=pointList[iv].y();
+            zeta[order[iv]]=pointList[iv].z();
+            mk[order[iv]]=EntityFlag( pointList[iv].marker() );
+        }
+
+    for ( UInt iv = 0; iv < pointList.size(); ++iv )
+         {
+             pointList[iv].x()=ics[iv];
+             pointList[iv].y()=ipsilon[iv];
+             pointList[iv].z()=zeta[iv];
+             pointList[iv].setMarker( mk[iv] );
+
+             pointList[iv].setId(order[iv]+1);
+             pointList[iv].setLocalId(order[iv]+1);
+        }
+    /*        for(UInt i=0; i<numVertices(); ++i)
+            {
+               std::cout<<"pointList "<<i<<"= "<<pointList[i].id()<<" oldPointList "<<i<<"= "<<newList[i].id()<<std::endl;
+               }*/
+
+    }
+#endif
 
     template <typename GEOSHAPE, typename MC>
     void
