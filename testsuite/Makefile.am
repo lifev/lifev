@@ -34,6 +34,7 @@ SUBDIRS		= data  \
 	          test_cavity \
               test_ns_flux \
               test_monolithic \
+              test_meshReorder \
 	          $(DO_NOT_COMPILE)
 
 TESTSUITES=$(srcdir)/test_cylinder/testsuite.at \
@@ -41,7 +42,9 @@ TESTSUITES=$(srcdir)/test_cylinder/testsuite.at \
            $(srcdir)/test_ethiersteinman/testsuite.at\
            $(srcdir)/test_fsi/testsuite.at \
            $(srcdir)/test_monolithic/testsuite.at \
-           $(srcdir)/test_filters/testsuite.at
+           $(srcdir)/test_filters/testsuite.at \
+           $(srcdir)/test_meshReorder/testsuite.at
+
 
 
 $(srcdir)/package.m4: $(top_srcdir)/configure.in.in
