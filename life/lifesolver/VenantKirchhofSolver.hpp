@@ -520,7 +520,10 @@ setUp( const GetPot& dataFile )
     M_maxIterForReuse = dataFile( "solid/solver/max_iter_reuse", M_maxIterSolver*8/10);
 
     std::string precType = dataFile( "solid/prec/prectype", "Ifpack");
-    M_prec               = prec_ptr( PRECFactory::instance().createObject( precType ) );
+
+    M_prec.reset( PRECFactory::instance().createObject( precType ) );
+    ASSERT(M_prec.get() != 0, "VenantKirchhof : Preconditioner not set");
+    //    M_prec               = prec_ptr( PRECFactory::instance().createObject( precType ) );
 
     M_prec->setDataFromGetPot( dataFile, "solid/prec" );
 
