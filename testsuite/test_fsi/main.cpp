@@ -50,16 +50,9 @@ namespace LifeV
 {
 namespace
 {
-EpetraPreconditioner* createIfpack(){return new IfpackPreconditioner(); }
 static bool regIF = PRECFactory::instance().registerProduct( "Ifpack", &createIfpack );
-
-EpetraPreconditioner* createML(){ std::cout << "ML" << std::endl; return new MLPreconditioner(); }
-static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
-
-FSIOperator* createFP(){ return new fixedPoint(); }
+static bool regML = PRECFactory::instance().registerProduct( "ML", &createML );
 static bool regFP = FSIFactory::instance().registerProduct( "fixedPoint", &createFP );
-
-FSIOperator* createEJ(){ return new exactJacobian(); }
 static bool regEJ = FSIFactory::instance().registerProduct( "exactJacobian", &createEJ );
 }
 }

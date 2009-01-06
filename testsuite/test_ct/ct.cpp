@@ -43,13 +43,13 @@ const int CYL_CYLINDER = 70;
 
 /*
  * The CT::Private struct contains mainly the functions that will be used
- * for computing boundary conditions 
+ * for computing boundary conditions
  * We follow the encapsulating mechanism of test_cylinder.
  */
 
 struct CT::Private
 {
-    Private() 
+    Private()
 	{}
 
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_type;
@@ -58,10 +58,10 @@ struct CT::Private
 
     Epetra_Comm*   comm;
 
-    Real u3DIn( const Real& t, 
-		const Real& x, 
-		const Real& y, 
-		const Real& z, 
+    Real u3DIn( const Real& t,
+		const Real& x,
+		const Real& y,
+		const Real& z,
 		const ID& id ) const
     {
             if ( id == 3 ) {
@@ -96,14 +96,14 @@ struct CT::Private
         }
 
     Real p3DIn( const Real& t,
-		const Real& x, 
+		const Real& x,
 		const Real& y,
 		const Real& z,
 		const ID& id ) const
     {
 	return -0.1 * cos(t) + 0.1;
     }
- 
+
     fct_type get_p3DIn()
 	{
 	    fct_type f;
@@ -149,7 +149,7 @@ CT::CT( int argc,
     d->comm = new Epetra_MpiComm( MPI_COMM_WORLD );
     int ntasks;
     int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
-    std::cout << "  t-  MPI Initialization from PID = " << d->comm->MyPID() 
+    std::cout << "  t-  MPI Initialization from PID = " << d->comm->MyPID()
 	<< " among " << ntasks << " running." << std::endl;
 #else
     d->comm = new Epetra_SerialComm();
@@ -158,7 +158,7 @@ CT::CT( int argc,
 }
 
 /*
- * CT::run() 
+ * CT::run()
  * Inspired from test_cylinder.
  */
 
@@ -168,7 +168,7 @@ CT::run()
 
     typedef ChorinTemam< RegionMesh3D<LinearTetra> >::vector_type  vector_type;
     typedef boost::shared_ptr<vector_type> vector_ptrtype;
-    
+
 
     // Reading from data file
     GetPot dataFile( d->data_file_name.c_str() );
@@ -188,7 +188,7 @@ CT::run()
     bcHu.addBC( "Inlet",    INLET,    Essential, Full,      uIn,   3 );
     bcHu.addBC( "Outlet",   OUTLET,   Natural,   Full,      uZero, 3 );
     bcHu.addBC( "Wall",     WALL,     Essential, Full,      uZero, 3 );
-    // bc for the pressure 
+    // bc for the pressure
     bcHp.addBC( "Inlet",    INLET,    Natural,   Scalar,    uZero    );
     bcHp.addBC( "Outlet",   OUTLET,   Essential, Scalar,    uZero    );
     bcHp.addBC( "Wall",	    WALL,     Natural,   Scalar,    uZero    );
@@ -336,11 +336,11 @@ CT::run()
     if (verbose) std::cout << "  t-  Calling the fluid constructor ... ";
 
     ChorinTemam< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
-                                              uFESpace,
-                                              pFESpace,
-                                              bcHu,
-					      bcHp,
-                                              *d->comm);
+                                                    uFESpace,
+                                                    pFESpace,
+                                                    bcHu,
+                                                    bcHp,
+                                                    *d->comm);
     EpetraMap fullMap_u(fluid.getMap_u());
     EpetraMap fullMap_p(fluid.getMap_p());
 

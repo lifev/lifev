@@ -49,13 +49,13 @@ tol             = 1.e-5
 #
 
 [../prec]
-prectype           = ML
+prectype           = Ifpack
 reuse              = true
 overlap            = 1
 displayList        = true
 default_parameters = SA    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
 
-# Parameters for the ifpack preconditioner
+# Parameters for the Ifpack preconditioner
 
 [./ifpack]
 prectype               = Amesos    # Amesos (does a local LU factorization), ILUT (not ILU)

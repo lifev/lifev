@@ -65,7 +65,7 @@ using namespace LifeV;
 //cylinder
 
 // //#define CYL2D_MESH_SETTINGS
-#define CYL3D_2_MESH_SETTINGS
+#define TUBE20_MESH_SETTINGS
 //#define TUBE20_MESH_SETTINGS
 
 

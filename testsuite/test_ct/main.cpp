@@ -44,10 +44,7 @@ using namespace LifeV;
 
 namespace
 {
-EpetraPreconditioner* createIfpack(){ return new IfpackPreconditioner(); }
 static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
-
-EpetraPreconditioner* createML(){ return new MLPreconditioner(); }
 static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
 }
 
