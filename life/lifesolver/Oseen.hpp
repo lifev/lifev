@@ -330,7 +330,7 @@ protected:
 
     SolverType                     M_linearSolver;
 
-    boost::shared_ptr<EpetraPreconditioner>          M_prec;
+    boost::shared_ptr<EpetraPreconditioner> M_prec;
 
     bool                           M_steady;
 
@@ -646,10 +646,6 @@ void Oseen<Mesh, SolverType>::setUp( const GetPot& dataFile )
     std::string precType = dataFile( "fluid/prec/prectype", "Ifpack");
 
     M_prec.reset( PRECFactory::instance().createObject( precType ) );
-//     std::cout << "ok."
-//               << "precType " << precType << " "
-//               << PRECFactory::instance().createObject( precType )
-//               << " " << M_prec.get() << std::endl;
     ASSERT(M_prec.get() != 0, "Oseen : Preconditioner not set");
 
 

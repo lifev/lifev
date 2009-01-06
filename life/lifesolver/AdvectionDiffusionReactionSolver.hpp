@@ -323,7 +323,7 @@ protected:
 
     SolverType                     M_linearSolver;
 
-    prec_type                      M_prec;
+     boost::shared_ptr<EpetraPreconditioner> M_prec;
 
     bool                           M_steady;
 
@@ -453,7 +453,7 @@ ADRSolver( const data_type&          dataType,
     M_setBC                  ( false ),
     M_localMap               ( M_FESpace.map() ),
     M_matrMass               ( ),
-    M_matrStiff             ( ),
+    M_matrStiff              ( ),
     M_matrNoBC               ( ),
     M_rhsNoBC                ( M_localMap ),
     M_rhsFull                ( M_localMap ),
@@ -530,12 +530,8 @@ void ADRSolver<Mesh, SolverType>::setUp( const GetPot& dataFile )
     M_reuseStab   = dataFile( "adr/stab/reuse",                  true);
     M_diagonalize = dataFile( "adr/discretization/diagonalize",  0. );
 
-    std::cout << "stab type = " << M_stab << std::endl;
-    std::cout << "gammaBeta = " << M_gammaBeta << std::endl;
 
     M_linearSolver.setDataFromGetPot( dataFile, "adr/solver" );
-
-//     M_ipStab.setGammaBeta (M_gammaBeta);
 
     M_maxIterSolver   = dataFile( "adr/solver/max_iter", -1);
     M_reusePrec       = dataFile( "adr/prec/reuse", true);
