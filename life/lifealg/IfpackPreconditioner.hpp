@@ -90,13 +90,13 @@ public:
     /** @name  Methods
      */
 
-    void                   setDataFromGetPot ( const GetPot&      dataFile, 
+    void                   setDataFromGetPot ( const GetPot&      dataFile,
 					       const std::string& section );
 
-    void                   createList( const GetPot&              dataFile,
-				       const std::string&         section,
-				       Teuchos::ParameterList&    list);
-  
+//     void                   createList( const GetPot&              dataFile,
+// 				       const std::string&         section,
+// 				       Teuchos::ParameterList&    list);
+
     double                 Condest ();
 
     super::prec_raw_type*  getPrec();
@@ -138,7 +138,13 @@ private:
 };
 
 
-// EpetraPreconditioner* createIfpack(){ std::cout << "*******************"<< std::endl;return new IfpackPreconditioner(); }
+
+void
+createIfpackList( const GetPot&              dataFile,
+                  const std::string&         section,
+                  Teuchos::ParameterList&    list);
+
+
 //bool IfpackPreconditioner::regIfpack = PRECFactory::instance().registerProduct( "Ifpack", &IfpackPreconditioner::createIfpack );
 
 

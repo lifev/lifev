@@ -46,6 +46,7 @@
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifealg/EpetraPreconditioner.hpp>
+#include <life/lifealg/IfpackPreconditioner.hpp>
 
 
 namespace LifeV
@@ -91,13 +92,8 @@ public:
     /** @name  Methods
      */
 
-    void                    setDataFromGetPot ( const GetPot&      dataFile, 
-						const std::string& section );
-
-    void                    createList( const GetPot&              dataFile,
-					const std::string&         section,
-					Teuchos::ParameterList&    list);
-
+    void                    setDataFromGetPot ( const GetPot&      dataFile,
+                                                const std::string& section );
 
     double                  Condest ();
 
@@ -120,6 +116,13 @@ private:
     std::string             M_precType;
 
 };
+
+
+void
+createMLList( const GetPot&              dataFile,
+              const std::string&         section,
+              Teuchos::ParameterList&    list);
+
 
 } // namespace LifeV
 #endif
