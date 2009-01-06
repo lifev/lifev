@@ -124,5 +124,9 @@ createMLList( const GetPot&              dataFile,
               Teuchos::ParameterList&    list);
 
 
+inline EpetraPreconditioner* createML(){return new MLPreconditioner(); }
+
+
+
 } // namespace LifeV
 #endif

@@ -145,10 +145,9 @@ createIfpackList( const GetPot&              dataFile,
                   Teuchos::ParameterList&    list);
 
 
-//bool IfpackPreconditioner::regIfpack = PRECFactory::instance().registerProduct( "Ifpack", &IfpackPreconditioner::createIfpack );
+//IfpackPreconditioner::regIfpack = PRECFactory::instance().registerProduct( "Ifpack", &IfpackPreconditioner::createIfpack );
 
-
-//Epetra::Preconditioner* createIfpack(){ std::cout << "*******************"<< std::endl;return new Epetra::IfpackPreconditioner(); }
+inline EpetraPreconditioner* createIfpack(){ return new IfpackPreconditioner(); }
 
 
 // } // namespace Epetra

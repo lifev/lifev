@@ -97,7 +97,8 @@ private:
 };
 
 
-//FSIOperator* createFP(){ return new fixedPoint();}
+
+inline FSIOperator* createFP(){ return new fixedPoint();}
 
 }
 

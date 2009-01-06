@@ -225,6 +225,8 @@ Real fzeroEJ(const Real& t,
              const ID& i);
 
 
+inline FSIOperator* createEJ(){ return new exactJacobian(); }
+
 }
 
 #endif

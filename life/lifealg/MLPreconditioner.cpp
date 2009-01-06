@@ -340,10 +340,7 @@ createMLList( const GetPot&              dataFile,
 
     //    list.sublist("smoother: ifpack list").set("amesos: solver type", "Amesos_Lapack");
 
-
-
 }
-
 
 
 } // namespace LifeV
