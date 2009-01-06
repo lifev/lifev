@@ -30,6 +30,7 @@
 #include <life/lifesolver/dataNavierStokes.hpp>
 #include <life/lifefilters/ensight.hpp>
 #include <life/lifealg/IfpackPreconditioner.hpp>
+#include <life/lifealg/MLPreconditioner.hpp>
 
 
 #include "Epetra_config.h"
@@ -50,7 +51,10 @@ namespace LifeV
 namespace
 {
 EpetraPreconditioner* createIfpack(){return new IfpackPreconditioner(); }
-static bool regIFPACK = PRECFactory::instance().registerProduct( "Ifpack", &createIfpack );
+static bool regIF = PRECFactory::instance().registerProduct( "Ifpack", &createIfpack );
+
+EpetraPreconditioner* createML(){ std::cout << "ML" << std::endl; return new MLPreconditioner(); }
+static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
 
 FSIOperator* createFP(){ return new fixedPoint(); }
 static bool regFP = FSIFactory::instance().registerProduct( "fixedPoint", &createFP );
