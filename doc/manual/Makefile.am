@@ -26,9 +26,9 @@
 SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc .tex .pdf
 
 
-PDF		= lifev-dev.pdf
+PDF		= lifev-dev.pdf lifev-manual.pdf
 
-lifev_dev_TEX	= lifev-dev.tex lifev-dev_generalities.tex lifev-dev_conventions.tex lifev-dev_overview.tex lifev-dev_howto.tex
+lifev_dev_TEX	= lifev-dev.tex lifev-install.tex lifev-examples.tex lifev-dev_conventions.tex lifev-dev_overview.tex lifev-dev_howto.tex
 
 all:$(PDF)
 
