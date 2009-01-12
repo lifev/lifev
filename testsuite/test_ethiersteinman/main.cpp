@@ -67,7 +67,9 @@ using namespace LifeV;
 namespace
 {
 static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
+#ifdef HAVE_TRILINOS_ML
 static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
+#endif
 }
 
 
