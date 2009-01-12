@@ -198,6 +198,7 @@ public:
     //! \param time the time
     //! \param relError Real* to store the relative error in
 
+    // this computes vec = \int fct phi_i
     template<typename vector_type>
     void L2ScalarProduct( const Function& fct,
                        vector_type& vec,
@@ -550,7 +551,7 @@ FESpace<Mesh, Map>::interpolateBC( BCHandler& BCh,
 
 
 
-
+// this computes vec = \int fct phi_i
 template <typename Mesh, typename Map>
 template<typename vector_type>
 void
