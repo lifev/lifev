@@ -31,6 +31,8 @@
 #ifndef _MLPRECONDITIONER_HPP_
 #define _MLPRECONDITIONER_HPP_
 
+#ifdef HAVE_TRILINOS_ML
+
 #include <boost/shared_ptr.hpp>
 
 // #include <Ifpack_config.h>
@@ -129,4 +131,6 @@ inline EpetraPreconditioner* createML(){return new MLPreconditioner(); }
 
 
 } // namespace LifeV
+
+#endif // HAVE_TRILINOS_ML
 #endif

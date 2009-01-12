@@ -28,6 +28,7 @@
  */
 
 #include "MLPreconditioner.hpp"
+#ifdef HAVE_TRILINOS_ML
 
 
 namespace LifeV
@@ -344,3 +345,4 @@ createMLList( const GetPot&              dataFile,
 
 
 } // namespace LifeV
+#endif //#ifdef HAVE_TRILINOS_ML
