@@ -338,79 +338,90 @@ Ethiersteinman::run()
 
     BdfTNS<vector_type> bdf(dataNavierStokes.order_bdf());
 
-    // initialization with stokes solution
+    // initialization with exact solution: either interpolation or "L2-NS"-projection
+    t0 -= dt * bdf.bdf_u().order();
 
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Computing the initial solution ... " << std::endl << std::endl;
-
-    dataNavierStokes.setTime(t0);
 
     vector_type beta( fullMap );
     vector_type rhs ( fullMap );
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    beta *= 0.;
-    rhs  *= 0.;
+    dataNavierStokes.setTime(t0);
+    fluid.initialize( Problem::uexact, Problem::pexact );
+    vector_type velpressure ( fluid.solution(), Repeated );
+    bdf.bdf_u().initialize_unk( fluid.solution() );
 
     std::string const proj =  dataFile( "fluid/discretization/initialization", "proj");
     bool const L2proj( !proj.compare("proj") );
-    if (L2proj)
+
+    std::ofstream out_norm("norm.txt");
+    if (verbose)
+        out_norm << "% time / u L2 error / L2 rel error   p L2 error / L2 rel error \n" << std::flush;
+
+    double urelerr;
+    double prelerr;
+    double ul2error;
+    double pl2error;
+
+    Real time = t0 + dt;
+    for (  ; time <=  dataNavierStokes.inittime() + dt/2.; time += dt)
+    {
+
+        dataNavierStokes.setTime(time);
+
+        beta *= 0.;
+        rhs  *= 0.;
+
+        if (L2proj)
         {
-            uFESpace.L2ScalarProduct(Problem::uderexact, rhs, 0.);
+            uFESpace.L2ScalarProduct(Problem::uderexact, rhs, time);
             rhs *= -1.;
         }
 
-    fluid.initialize( Problem::uexact, Problem::pexact );
-    //fluid.initialize( zero_scalar, zero_scalar);
+        fluid.initialize( Problem::uexact, Problem::pexact );
 
-    beta = fluid.solution();
+        beta = fluid.solution();
 
-    fluid.leaderPrint("norm beta ", beta.Norm2());
-    fluid.leaderPrint("norm rhs  ", rhs.Norm2() );
+        fluid.leaderPrint("norm beta ", beta.Norm2());
+        fluid.leaderPrint("norm rhs  ", rhs.Norm2() );
 
 
-    if (L2proj)
+        if (L2proj)
         {
             fluid.updateSystem( 0., beta, rhs );
             fluid.iterate(bcH);
         }
 
-    //    fluid.postProcess();
 
-    std::ofstream out_norm("norm.txt");
+        vector_type vel  (uFESpace.map(), Repeated);
+        vector_type press(pFESpace.map(), Repeated);
 
-    out_norm << "time / u L2 error / L2 rel error   p L2 error / L2 rel error \n" << std::flush;
+        velpressure = fluid.solution();
+        vel.subset(velpressure);
+        press.subset(velpressure, uFESpace.dim()*uFESpace.fieldDim());
 
-    vector_type vel  (uFESpace.map(), Repeated);
-    vector_type press(pFESpace.map(), Repeated);
+        ul2error = uFESpace.L2Error (Problem::uexact, vel  , time, &urelerr );
+        pl2error = pFESpace.L20Error(Problem::pexact, press, time, &prelerr );
 
-    vector_type velpressure ( fluid.solution(), Repeated );
-
-    vel.subset(velpressure);
-    press.subset(velpressure, uFESpace.dim()*uFESpace.fieldDim());
-
-    double urelerr;
-    double prelerr;
-
-    double ul2error = uFESpace.L2Error(Problem::uexact, vel  , 0., &urelerr );
-    double pl2error = pFESpace.L20Error(Problem::pexact, press, 0., &prelerr );
-
-//         if (verbose)
-//         {
-    out_norm << 0. << " "
-             << ul2error << " "
-             << urelerr << " "
-             << pl2error << " "
-             << prelerr << "\n" << std::flush;
+         if (verbose)
+         {
+             out_norm << time  << " "
+                      << ul2error << " "
+                      << urelerr << " "
+                      << pl2error << " "
+                      << prelerr << "\n" << std::flush;
+         }
 
 
 
-//     fluid.updateSystem(0, beta, rhs );
-//     fluid.iterate();
+         bdf.bdf_u().shift_right( fluid.solution() );
 
+    }
 
-    bdf.bdf_u().initialize_unk( fluid.solution() );
+    // end initialization step
 
     fluid.resetPrec();
 
@@ -449,7 +460,7 @@ Ethiersteinman::run()
     int iter = 1;
 
 
-    for ( Real time = t0 + dt ; time <= tFinal + dt/2.; time += dt, iter++)
+    for ( ; time <= tFinal + dt/2.; time += dt, iter++)
     {
 
         dataNavierStokes.setTime(time);
@@ -494,12 +505,12 @@ Ethiersteinman::run()
 
 	if (verbose)
         {
-	  out_norm << time << " "
-		   << ul2error << " "
-		   << urelerr << " "
-		   << pl2error << " "
-		   << prelerr << "\n" << std::flush;
-	}
+            out_norm << time << " "
+                     << ul2error << " "
+                     << urelerr << " "
+                     << pl2error << " "
+                     << prelerr << "\n" << std::flush;
+        }
 //         if (((iter % save == 0) || (iter == 1 )))
 //         {
         *velAndPressure = fluid.solution();
