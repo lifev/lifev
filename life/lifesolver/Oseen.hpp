@@ -867,10 +867,10 @@ void Oseen<Mesh, SolverType>::
 initialize( const Function& u0, const Function& p0 )
 {
      vector_type u(M_uFESpace.map());
-     M_uFESpace.interpolate(u0, u, 0.0);
+     M_uFESpace.interpolate(u0, u, M_data.time());
 
      vector_type p(M_pFESpace.map());
-     M_pFESpace.interpolate(p0, p, 0.0);
+     M_pFESpace.interpolate(p0, p, M_data.time());
 
      initialize(u, p);
 }
