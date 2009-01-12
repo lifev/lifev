@@ -155,6 +155,8 @@ public:
 
     void showMe() const;
 
+    UInt order() const {return _M_order;}
+
 private:
     //! Order of the BDF derivative/extrapolation: the time-derivative
     //! coefficients vector has size n+1, the extrapolation vector has size n
@@ -258,140 +260,6 @@ void BdfT<VectorType>::initialize_unk( VectorType u0 )
 }
 
 
-/*
-template <typename Mesh, typename RefFE, typename CurrFE, typename Dof>
-void initialize_unk( const Funct& u0, Mesh& mesh, RefFE& refFE, CurrFE& currFE,
-                     Dof& dof, Real t0, Real dt, UInt nbComp )
-{
-    typedef typename Mesh::VolumeShape GeoShape; // Element shape
-
-    UInt nDofpV    = refFE.nbDofPerVertex; // number of Dof per vertex
-    UInt nDofpE    = refFE.nbDofPerEdge;   // number of Dof per edge
-    UInt nDofpF    = refFE.nbDofPerFace;   // number of Dof per face
-    UInt nDofpEl   = refFE.nbDofPerVolume; // number of Dof per Volume
-
-    UInt nElemV    = GeoShape::numVertices; // Number of element's vertices
-    UInt nElemE    = GeoShape::numEdges;    // Number of element's edges
-    UInt nElemF    = GeoShape::numFaces;    // Number of element's faces
-
-    UInt nDofElemV = nElemV * nDofpV; // number of vertex's Dof on a Element
-    UInt nDofElemE = nElemE * nDofpE; // number of edge's Dof on a Element
-    UInt nDofElemF = nElemF * nDofpF; // number of face's Dof on a Element
-
-    ID nbComp = nDimensions; // Number of components of the mesh velocity
-
-    Real x, y, z;
-
-    ID lDof;
-
-    // Loop on elements of the mesh
-    for ( ID iElem = 1; iElem <= this->mesh().numVolumes(); ++iElem )
-    {
-
-        this->fe().updateJac( this->mesh().volume( iElem ) );
-
-        // Vertex based Dof
-        if ( nDofpV )
-        {
-
-            // loop on element vertices
-            for ( ID iVe = 1; iVe <= nElemV; ++iVe )
-            {
-
-                // Loop number of Dof per vertex
-                for ( ID l = 1; l <= nDofpV; ++l )
-                {
-                    lDof = ( iVe - 1 ) * nDofpV + l; // Local dof in this element
-
-                    // Nodal coordinates
-                    this->fe().coorMap( x, y, z, this->fe().refFE.xi( lDof - 1 ), this->fe().refFE.eta( lDof - 1 ), this->fe().refFE.zeta( lDof - 1 ) );
-
-                    // Loop on data vector components
-                    for ( UInt icmp = 0; icmp < nbComp; ++icmp )
-                    {
-                        M_disp( icmp * this->dim() + this->dDof().localToGlobal( iElem, lDof ) - 0 ) = d0( 0.0, x, y, z, icmp + 1 );
-                        M_vel ( icmp * this->dim() + this->dDof().localToGlobal( iElem, lDof ) - 0 ) = w0( 0.0, x, y, z, icmp + 1 );
-                    }
-                }
-            }
-        }
-
-        // Edge based Dof
-        if ( nDofpE )
-        {
-
-            // loop on element edges
-            for ( ID iEd = 1; iEd <= nElemE; ++iEd )
-            {
-
-                // Loop number of Dof per edge
-                for ( ID l = 1; l <= nDofpE; ++l )
-                {
-                    lDof = nDofElemV + ( iEd - 1 ) * nDofpE + l; // Local dof in the adjacent Element
-
-                    // Nodal coordinates
-                    this->fe().coorMap( x, y, z, this->fe().refFE.xi( lDof - 1 ), this->fe().refFE.eta( lDof - 1 ), this->fe().refFE.zeta( lDof - 1 ) );
-
-                    // Loop on data vector components
-                    for ( UInt icmp = 0; icmp < nbComp; ++icmp )
-                    {
-                        M_disp( icmp * this->dim() + this->dDof().localToGlobal( iElem, lDof ) - 0 ) = d0( 0.0, x, y, z, icmp + 1 );
-                        M_vel ( icmp * this->dim() + this->dDof().localToGlobal( iElem, lDof ) - 0 ) = w0( 0.0, x, y, z, icmp + 1 );
-                    }
-                }
-            }
-        }
-
-        // Face based Dof
-        if ( nDofpF )
-        {
-
-            // loop on element faces
-            for ( ID iFa = 1; iFa <= nElemF; ++iFa )
-            {
-
-                // Loop on number of Dof per face
-                for ( ID l = 1; l <= nDofpF; ++l )
-                {
-
-                    lDof = nDofElemE + nDofElemV + ( iFa - 1 ) * nDofpF + l; // Local dof in the adjacent Element
-
-                    // Nodal coordinates
-                    this->fe().coorMap( x, y, z, this->fe().refFE.xi( lDof - 1 ), this->fe().refFE.eta( lDof - 1 ), this->fe().refFE.zeta( lDof - 1 ) );
-
-                    // Loop on data vector components
-                    for ( UInt icmp = 0; icmp < nbComp; ++icmp )
-                    {
-                        M_disp( icmp * this->dim() + this->dDof().localToGlobal( iElem, lDof ) - 0 ) = d0( 0.0, x, y, z, icmp + 1 );
-                        M_vel ( icmp * this->dim() + this->dDof().localToGlobal( iElem, lDof ) - 0 ) = w0( 0.0, x, y, z, icmp + 1 );
-                    }
-                }
-            }
-        }
-        // Element based Dof
-        // Loop on number of Dof per Element
-        for ( ID l = 1; l <= nDofpEl; ++l )
-        {
-            lDof = nDofElemF + nDofElemE + nDofElemV + l; // Local dof in the Element
-
-            // Nodal coordinates
-            this->fe().coorMap( x, y, z, this->fe().refFE.xi( lDof - 1 ), this->fe().refFE.eta( lDof - 1 ), this->fe().refFE.zeta( lDof - 1 ) );
-
-            // Loop on data vector components
-            for ( UInt icmp = 0; icmp < nbComp; ++icmp )
-            {
-                disp( icmp * this->dim() + this->dDof().localToGlobal( iElem, lDof ) - 1 ) = d0( 0.0, x, y, z, icmp + 1 );
-                vel ( icmp * this->dim() + this->dDof().localToGlobal( iElem, lDof ) - 1 ) = w0( 0.0, x, y, z, icmp + 1 );
-            }
-        }
-    }
-
-
-    reduceSolution(disp, vel, 0);
-}
-*/
-
-
 template<typename VectorType>
 void BdfT<VectorType>::initialize_unk( std::vector<VectorType> uv0 )
 {
@@ -404,13 +272,13 @@ void BdfT<VectorType>::initialize_unk( std::vector<VectorType> uv0 )
 
     int i(0);
 
-    for ( ; iter != iter_end && i< n0 ; iter++ )
+    for ( ; iter != iter_end && i< n0 ; ++iter, ++i )
       {
 	delete *iter;
-	*iter = new VectorType(uv0[i++]);
+	*iter = new VectorType(uv0[i]);
       }
 
-    for ( i = _M_unknowns.size() ; i < _M_order && i< n0; i++ )
+    for ( i = _M_unknowns.size() ; i < _M_order && i< n0; ++i )
         _M_unknowns.push_back(new VectorType(uv0[i]));
 
 
