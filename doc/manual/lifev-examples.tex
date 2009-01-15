@@ -1,0 +1,110 @@
+%
+%
+% SUMMARY:
+% USAGE:
+%
+% AUTHOR:       Gilles Fourestey
+% ORG:          EPFL
+% E-MAIL:       foureste@iacspc.epfl.ch
+%
+% ORIG-DATE: 21-Nov-08 at 11:16:22
+% LAST-MOD:  8-Jan-09 at 11:22:30 by Gilles Fourestey
+%
+% DESCRIPTION:
+% DESCRIP-END.
+
+
+\chapter{Learning by examples}
+\label{cha:examples}
+
+\section{Getting started: a simple case}
+\label{sec:gettingstarted}
+
+Let us consider flow of a viscous and incompressible fluid described by its velocity $u$
+and pressure $p$. Its flow can be described, at low reynolds number, by the Oseen Problem :
+
+\begin{equation} \label{eqn-oseen}
+\left\{
+\begin{array}{lc}
+\displaystyle \alpha u + \beta \cdot \grad u - \nu \Delta u+
+\nabla p & = f \\
+\displaystyle \nabla.u & = 0  \\
+\end{array}
+\right.
+\end{equation}
+
+were $\nu$ is the kinematic viscosity of the fluid. If we set the convective
+acceleration $\beta$ and $\alpha$ to zero, we get the Stokes equations :
+
+\begin{equation} \label{eqn-stokes}
+\left\{
+\begin{array}{lc}
+- \nu \Delta u+
+\nabla p & = f \\
+\displaystyle \nabla.u & = 0  \\
+\end{array}
+\right.
+\end{equation}
+
+We want to solve the following Stokes problem :
+
+\begin{equation} \label{eqn-stokes}
+\left\{
+\begin{array}{lc}
+\displaystyle - \nu \Delta u+
+\nabla p & = f \\
+\displaystyle \nabla.u & = 0  \\
+u = (1, 0, 0) & \mbox{ on } \partial \Omega_0 \\
+u = (0, 0, 0) & \mbox{ on } \partial \Omega_1  \\
+u.n = 0 & \mbox { on } \partial \Omega_2\\
+\end{array}
+\right.
+\end{equation}
+
+on the 3D domain represented by :
+
+\vspace{0.5cm}
+\begin{center}
+\input cavity.pdf_t
+\end{center}
+\vspace{0.5cm}
+
+These equation can be written in using the following bilinear forms :
+\begin{eqnarray*}
+\displaystyle \forall u,v \in H^1(\Omega) & : &
+a(u,v) = \nu \int_{\Omega}\nabla u .\nabla v dx \\
+\displaystyle \forall v \in H^1(\Omega),\mbox{ } q \in L^2(\Omega) & : &
+b(v,q) = \int_{\Omega} q\nabla.v dx \\
+\end{eqnarray*}\\
+which lead us to the variational formulation : let $f
+\in H^{-1}(\Omega)$, find $u \in H^1_0(\Omega)$ et $p \in
+L^2_0(\Omega)$ such that
+\begin{equation} \label{eqn-varia}
+\left\{
+\begin{array}{rlr}
+\displaystyle \alpha (u,v) + a(u,v) + b(v,p) & =  (g,v)
+& \hspace{1cm} \forall t \in(0,T), \forall v \in H^1_0(\Omega) \\
+b(u,q) & = 0 & \hspace{1cm} \forall t \in (0,T), \forall q \in L^2_0(\Omega)
+\end{array}
+\right.
+\end{equation}
+%find $u_h \in X_h$ and $p_h \in M_h$ so that,
+
+\input{cavity.tex}
+
+
+
+
+
+%
+%%%%%%%%%%%%% Some Settings for emacs and auc-TeX
+% Local Variables:
+% TeX-master: t
+% TeX-command-default: "PDFLaTeX"
+% TeX-parse-self: t
+% TeX-auto-save: t
+% x-symbol-8bits: nil
+% TeX-auto-regexp-list: TeX-auto-full-regexp-list
+% eval: (ispell-change-dictionary "american")
+% End:
+%

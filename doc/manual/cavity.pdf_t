@@ -1,0 +1,33 @@
+\begin{picture}(0,0)%
+\includegraphics{cavity.pdf}%
+\end{picture}%
+\setlength{\unitlength}{2072sp}%
+%
+\begingroup\makeatletter\ifx\SetFigFontNFSS\undefined%
+\gdef\SetFigFontNFSS#1#2#3#4#5{%
+  \reset@font\fontsize{#1}{#2pt}%
+  \fontfamily{#3}\fontseries{#4}\fontshape{#5}%
+  \selectfont}%
+\fi\endgroup%
+\begin{picture}(6347,5260)(1786,-6659)
+\put(3376,-5686){\makebox(0,0)[lb]{\smash{{\SetFigFontNFSS{6}{7.2}{\rmdefault}{\mddefault}{\updefault}{\color[rgb]{0,0,0}(0, 0, L)}%
+}}}}
+\put(7426,-6586){\makebox(0,0)[lb]{\smash{{\SetFigFontNFSS{6}{7.2}{\rmdefault}{\mddefault}{\updefault}{\color[rgb]{0,0,0}(1, 0, 0)}%
+}}}}
+\put(1801,-1861){\makebox(0,0)[lb]{\smash{{\SetFigFontNFSS{6}{7.2}{\rmdefault}{\mddefault}{\updefault}{\color[rgb]{0,0,0}(0, 1, 0)}%
+}}}}
+\put(2026,-6586){\makebox(0,0)[lb]{\smash{{\SetFigFontNFSS{6}{7.2}{\rmdefault}{\mddefault}{\updefault}{\color[rgb]{0,0,0}(0, 0, 0)}%
+}}}}
+\put(4951,-1636){\makebox(0,0)[lb]{\smash{{\SetFigFontNFSS{6}{7.2}{\rmdefault}{\mddefault}{\updefault}{\color[rgb]{0,0,0}$\partial \Omega_0$}%
+}}}}
+\put(2836,-3886){\makebox(0,0)[lb]{\smash{{\SetFigFontNFSS{6}{7.2}{\rmdefault}{\mddefault}{\updefault}{\color[rgb]{0,0,0}$\partial \Omega_1$}%
+}}}}
+\put(7291,-3886){\makebox(0,0)[lb]{\smash{{\SetFigFontNFSS{6}{7.2}{\rmdefault}{\mddefault}{\updefault}{\color[rgb]{0,0,0}$\partial \Omega_1$}%
+}}}}
+\put(4951,-6136){\makebox(0,0)[lb]{\smash{{\SetFigFontNFSS{6}{7.2}{\rmdefault}{\mddefault}{\updefault}{\color[rgb]{0,0,0}$\partial \Omega_1$}%
+}}}}
+\put(5176,-3661){\makebox(0,0)[lb]{\smash{{\SetFigFontNFSS{6}{7.2}{\rmdefault}{\mddefault}{\updefault}{\color[rgb]{0,0,0}$\partial \Omega_2$}%
+}}}}
+\put(4726,-4111){\makebox(0,0)[lb]{\smash{{\SetFigFontNFSS{6}{7.2}{\rmdefault}{\mddefault}{\updefault}{\color[rgb]{0,0,0}$\partial \Omega_2$}%
+}}}}
+\end{picture}%

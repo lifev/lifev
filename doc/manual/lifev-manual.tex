@@ -1,0 +1,61 @@
+\documentclass[a4paper, 12pt, report]{lifestyle}
+
+
+\RCS $Revision: 1.2 $
+\RCS $Date: 2009-01-15 09:01:12 $
+\RCS $State: Exp $
+
+
+
+\title{\lifetitle{LifeV Developer Manual}
+%L. Formaggia\\J.-F. Gerbeau\\C. Prud'homme
+}
+\author{G. Fourestey, S. Deparis}
+%, L. Formaggia, J.-F. Gerbeau, C. Prud'homme }
+\date{}
+
+\makeindex
+\makeglossary
+
+\pagestyle{fancy}
+
+%%\includeonly{lifev-dev_generalities,lifev-dev_howto}
+\begin{document}
+\maketitle
+
+\phantom{dummy text}
+\vfill
+This manual is for LifeV (version 0.9, Novembre 2008), a library for scientific computing specially aimed at fluid-structure interaction and blood flow simulation.
+
+Copyright (C) 2001-2008 EPFL, INRIA, Polytechnico Di Milano.
+
+\tableofcontents
+
+\listoffigures
+
+\listoftables
+
+\include{lifev-install}
+\include{lifev-examples}
+%\include{lifev-dev_conventions}
+%\include{lifev-dev_overview}
+%\include{lifev-dev_howto}
+
+\bibliographystyle{plain}
+\bibliography{lifev}
+
+\printindex
+
+\end{document}
+
+%
+%%%%%%%%%%%%% Some Settings for emacs and auc-TeX
+% Local Variables:
+% TeX-master: t
+% TeX-command-default: "PDFLaTeX"
+% TeX-parse-self: t
+% TeX-auto-save: t
+%%% TeX-auto-regexp-list: TeX-auto-full-regexp-list
+% eval: (ispell-change-dictionary "american")
+% End:
+%

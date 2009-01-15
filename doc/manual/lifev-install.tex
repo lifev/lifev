@@ -1,0 +1,354 @@
+
+\chapter{Generalities}
+\label{cha:generalities}
+
+\section{Scope of the document}
+\label{sec:scope-document}
+
+This is a ``working document'' meant to drive the development of the
+software library \thelibrary. It is an informal document. All the
+people involved in the library development (from now on called the
+\emph{authors}) are supposed to freely contribute to its writing.
+
+The major objectives of this document is manifold:
+\begin{enumerate}
+\item Set up a set of rules regarding program development, coding rules
+  and standards, which must be followed by the software developers;
+\item Provide the architectural design for the libraries and classes
+  to be developed, with a special stress on public interfaces;
+\item Provide a subtask subdivision for the work to be done and a
+  (possibly accurate) \emph{scheduling}.
+\end{enumerate}
+
+\section{Language and nomenclature convection}
+\label{sec:lang-nomencl-conv}
+
+%Because of many practical reasons, the document will be written in
+%English, or at least the best English the authors can manage.
+
+We will use \texttt{typesetting font style} to indicate parts of
+actual computer code or name of variables, types, etc..
+\textbf{Boldface} is used to mark portion containing rules which
+should be followed during program development and \emph{emphasised}
+text to indicate important concepts and nomenclature.
+
+\section{Software Management}
+\label{sec:software-management}
+
+%This software is the result of the work of many people working in a
+%coordinated fashion, some rules for software management
+%must be set and agreed upon. A related problem is how to allow for the most ample discussion
+%between the authors and, at the same time, coordinate  software
+%production.
+
+
+The software source, its documentation and all related documents (this
+one included) is kept in a repository under revision control
+using \verb!CVS!\ixns{CVS}{versioning}\footnote{CVS stands for Concurrent Version System}. This is a Software Configuration Management (SCM). Its goal
+is to provide tools to mangage software developpment in a concurrent environment.
+See \url{http://cvsbook.red-bean.com/cvsbook.html#A%20Day%20With%20CVS}
+for a tutorial. CVS keywords like \verb!Id! and \verb!Log! should not be included in source files,
+they cause many unnecessary conflicts at update/commit time. Use
+\verb!cvs log! to get the information given by \verb!Id! or \verb!Log!.
+
+A web site {\it\`a la} Sourceforge\footnote{\url{http://www.sourceforge.net}} \url{http://cmcsforge.epfl.ch} has been set up to host the source code and help the software management.
+It requires that you open an account\footnote{\url{https://cmcsforge.epfl.ch/account/register.php}} there and that you declare your intentions to work on \lifev through an email to the development mailing list of \lifev.
+Once you are part of the project, you have access to all the facilities: tracker, task manager, CVS repository, forums, document manager and a few other tools which are very useful if not absolutely essential to such a project.
+
+Finally, since you will access the source repository A LOT, you should be confortable
+with \verb!ssh! \ix{ssh} and \verb!ssh-agent!\ixns{ssh-agent}{ssh}
+in order to acces the CVS repository without prompting your password everytime you issue
+a CVS command. Please refer to \url{http://mah.everybody.org/docs/ssh} in order to configure
+your ssh agent.
+
+\section{Compiling LifeV}
+\label{compile-lifev}
+
+In order to compile \lifev, certain requirements must be met in terms
+of compilation tools, and libraries to link to.
+
+\noindent In this document, we shall use \verb+$(top_srcdir)+ (aka \verb+$LIFEV_HOME+) to designate the top level \emph{source} directory
+and \verb+$(top_builddir)+ to designate the top level \emph{build}
+directory where \lifev has been \emph{configured}(see
+sections~\ref{sec:compile-cvs} and~\ref{sec:comp-from-offic}) for a
+compilation environment.  \verb+$(top_builddir)+ may be different from
+\verb+$(top_srcdir)+, see for example the configure hint in
+section~\ref{hint:configure}.
+
+\subsection{Requirements}
+
+\subsubsection{Compilation Environment}
+\label{sec:comp-envir}
+
+\lifev depends on a number of tools at compilation time, they are part
+of the \ix{autotools} from the GNU project\footnote{\url{http://www.gnu.org}}.
+
+\begin{itemize}
+\item \verb!libtool 1.5!\ixns{libtool}{autotools}
+\item \verb!automake 1.7!\ixns{automake}{autotools}
+\item \verb!autoconf 2.5x x>=2!\ixns{autoconf}{autotools}
+\item \verb!g++-4.0 x>=0!\ixns{g++}{compilers}
+\end{itemize}
+
+\lifev also depends on :
+
+\begin{itemize}
+\item \verb!the boost library!
+\item \verb!parmetis!
+\item a version of \verb!mpi!
+\item \verb!Trilinos!\ixns{aztec}{algebra} (which depends on \verb!mpi!, \verb!blas! and \verb!lapack!)
+\item \verb!libumfpack4! (set of routines for solving unsymmetric sparse linear systems)
+\end{itemize}
+
+%\subsubsection{Runtime Environment}
+%\label{sec:runtime-env}
+
+%\begin{itemize}
+%\item \verb!aztec!
+%\end{itemize}
+
+\subsection{Trilinos compilation}
+Before we start compiling \lifev, we have to compile Trilinos. A copy of the source
+code is available at \url{http://trilinos.sandia.gov/packages/}. When it is
+downloaded and unzipped in a directory ( which will be from now on reference as the Trilinos
+source directory ), create a directory where the library will be stored :
+
+\begin{verbatim}
+mkdir <path to the Trilinos library directory>/debug-openmpi
+\end{verbatim}
+
+for instance, if you want to compile the Trilinos library in debug mode using OpenMPI.
+Now go to the Trilinos source directory and start configuring :
+
+\begin{verbatim}
+../configure --prefix=/u/cmcs/foureste/local/debug/trilinos-8 \
+             --enable-debug \
+             --enable-default-packakages \
+             --prefix=/u/cmcs/foureste/Libs/trilinos-9.0.1/OpenMPI \
+             --with-ml\_metis --with-ml\_parmetis3x \
+             --disable-belos \
+             --disable-capo \
+             --disable-claps \
+             --disable-didasko \
+             --disable-komplex \
+             --disable-loca \
+             --disable-meros \
+             --enable-ml \
+             --disable-new_package \
+             --disable-pliris \
+             --disable-pytrilinos \
+             --disable-python \
+             --disable-rythmos \
+             --disable-thyra \
+             --disable-tpetra \
+             --disable-tsf \
+             --disable-tsfcore \
+             --disable-tsfcoreutils \
+             --disable-tsfextended \
+             --disable-tests \
+             --disable-examples \
+             --enable-teuchos \
+             --enable-ifpack \
+             --enable-ifpack-amesos \
+             --enable-ifpack-teuchos \
+             --enable-amesos \
+             --enable-triutils \
+             --enable-anasazi \
+             --enable-amesos \
+             --enable-aztecoo \
+             --enable-epetra-ext \
+             --enable-nox \
+             --enable-triutils \
+             --with-trilinos \
+             --with-gnumake \
+             --enable-epetra-abc \
+             --with-mpi=/usr/lib/openmpi/ \
+             CC=gcc CCC=g++ F77=gfortran \
+             --with-incdirs=''-I/usr/include/metis/ -I/usr/include/parmetis''
+\end{verbatim}
+After the configuration is done, just type
+
+\begin{verbatim}
+make
+make install
+\end{verbatim}
+The Trilinos library is now installed in the \verb!<path to the Trilinos library directory>/debug-openmpi! directory.
+
+\subsection{Compilation from CVS}
+\label{sec:compile-cvs}
+You need first to have an account on \url{http://cmcsforge.epfl.ch} and
+be part of the \lifev project, see~\ref{sec:software-management}.
+
+\noindent First, you need to checkout \lifev. \ixv{CVS} has
+been configured to use \ixv{ssh} and your \verb!ssh! keys to
+access the repository via \verb!ssh! without entering your password.
+When your ssh agent is properly configure, log into your cmcsforge account and
+go to the \verb!Account Maintenance! tab. At the bottom of the page, in the
+\verb!Shell Account Information!, you will see \verb!Edit Keys!. click on that link,
+input your public key, then click on \verb!update!. The server will take up to one
+hour to update your ssh account information, then you will be able to access the
+repositories without password.\\
+
+It is now time to download and compile the code. The first step is to checkout the repository :
+
+\begin{verbatim}
+export CVS_RSH=ssh
+cvs -z3 -d:ext:developername@cmcsforge.epfl.ch:/cvsroot/lifev co lifev
+\end{verbatim}
+
+then place yourself in the new directory :
+
+\begin{verbatim}
+cd lifev
+\end{verbatim}
+
+\noindent Second, you have to generate the compilation environment by typing:
+\begin{verbatim}
+make -f Makefile.cvs
+\end{verbatim}
+
+\noindent Third, you have to execute the script
+\ixvs{configure}{autotools}
+it will automatically check the availability of the needed components
+for \lifev compilation. You type:
+
+\begin{verbatim}
+configure --with-trilinos-lib=<your Trilinos library path>
+          --with-trilinos-include=<your trilinos include path>
+          --enable-opt --with-openmpi
+          --prefix=<your lifev library install path>
+\end{verbatim}
+
+\noindent Finally, you just have to use \ixv{make} to compile \lifev libraries. You type
+\begin{verbatim}
+make
+make install
+\end{verbatim}
+Optionally, you use \verb!-j x(x=2,3 or 4)! to speed up the compilation time.
+
+\begin{hint}{Configure}
+  \label{hint:configure}
+  \verb!configure! is extremely powerful and allows you to maintain
+  several concurrent build directories. Typically during development
+  and testing, you need to have \lifev compiled with debugging flags,
+  optimization flags and/or profiling flags. However combining
+  optimization and debugging flags does not necessarily produce
+  anything useful for debugging and testing purposes.
+
+  With configure it is possible to compile a code in a directory which
+  is different from the source directory. This is extremely useful to
+  tacke our problem. Let's consider given the source directory to be
+  store in the environment variable \verb!$LIFEV_HOME! which is not
+  mandatory.
+
+Here is what you can do to compile with debugging flags:
+\begin{verbatim}
+cd $LIFEV_HOME
+mkdir debug
+cd debug
+CXXFLAGS="-g3 -O0" ../configure
+make
+\end{verbatim}
+Here we have \verb+$(top_builddir) == $LIFEV_HOME/debug+.
+
+Here is what you can do to compile with optimization flags:
+\begin{verbatim}
+cd $LIFEV_HOME
+mkdir optimized
+cd optimized
+CXXFLAGS="-O2" ../configure
+make
+\end{verbatim}
+Here we have \verb+$(top_builddir) == $LIFEV_HOME/optimized+.
+
+\noindent Note that you may have several concurrent \verb+$(top_builddir)+
+
+\noindent Note that \verb!configure! will fail if you have already compiled
+\lifev in the source directory.
+
+
+\end{hint}
+
+
+\subsection{Compilation from Official Distribution}
+\label{sec:comp-from-offic}
+The \lifev project provides releases, they are named using the following convention:
+\begin{center}
+\verb!lifev-x.y.z.tar.gz!
+\end{center}
+
+Here is what you have to do:
+
+\begin{enumerate}
+\item download \lifev release \verb!lifev-x.y.z.tar.gz!
+\item unpack it
+\begin{verbatim}
+tar xzf lifev-x.y.z.tar.gz
+\end{verbatim}
+\item configure it
+\begin{verbatim}
+cd lifev-x.y.z
+configure
+\end{verbatim}
+\item compile it
+\begin{verbatim}
+make
+\end{verbatim}
+\end{enumerate}
+
+Some comments in section\ref{sec:compile-cvs} apply also here.
+
+\subsection{Compiling Testsuite}
+
+\noindent \lifev comes with a testsuite covering a lot of features. It is located in the directory \verb+testsuite+
+\begin{verbatim}
+|-- data
+|-- test_bdf
+|-- test_darcy
+|-- test_essentialbc
+|-- test_fe
+|-- test_fsi_newton
+|-- test_fsi_picard
+|-- test_linearelasticity
+|-- test_matrix
+|-- test_mesh
+|-- test_mixte
+|-- test_naturalbc
+|-- test_ns_bdf
+|-- test_ns_cyl
+|-- test_ns_sstress
+|-- test_p2
+|-- test_postproc
+`-- test_q1
+\end{verbatim}
+
+\noindent In order to compile the testsuite, you need the following steps
+\begin{verbatim}
+cd $(top_builddir)/testsuite
+make check
+\end{verbatim}
+
+\noindent If you just want to compile a specific test, say \verb+test_darcy+:
+\begin{verbatim}
+cd $(top_builddir)/testsuite/data
+make check
+cd $(top_builddir)/testsuite/test_darcy
+make test_darcy _OR_ make check
+\end{verbatim}
+
+\noindent Since most tests are using meshes that are located in
+\verb+$(top_srcdir)/testsuite/data+, it is mandatory to execute \verb+make check+ in
+\verb+$(builddir)/testsuite/data+ in order to create the proper
+symlinks to the meshes when \verb+$(top_builddir) != $(top_srcdir)+.
+
+%
+%%%%%%%%%%%%% Some Settings for emacs and auc-TeX
+% Local Variables:
+% TeX-master: "lifev-dev"
+% TeX-command-default: "PDFLaTeX"
+% TeX-parse-self: t
+% TeX-auto-save: t
+% TeX-auto-regexp-list: TeX-auto-full-regexp-list
+% eval: (ispell-change-dictionary "american")
+% End:
+%
