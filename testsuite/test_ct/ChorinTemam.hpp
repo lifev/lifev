@@ -39,7 +39,7 @@ namespace LifeV
 {
 
 template< typename Mesh,
-          typename SolverType = LifeV::Epetra::SolverTrilinos >
+          typename SolverType = LifeV::SolverTrilinos >
 class ChorinTemam
 
 {
@@ -263,8 +263,8 @@ protected:
     SolverType                     M_linearSolver_u;
     SolverType			   M_linearSolver_p;
 
-    prec_type                      M_prec_u;
-    prec_type			   M_prec_p;
+    boost::shared_ptr<EpetraPreconditioner>             M_prec_u;
+    boost::shared_ptr<EpetraPreconditioner>		M_prec_p;
 
     bool                           M_steady;
 
@@ -358,8 +358,8 @@ ChorinTemam( const data_type&          dataType,
     M_me                     ( M_comm->MyPID() ),
     M_linearSolver_u         ( ),
     M_linearSolver_p	     ( ),
-    M_prec_u                 ( new prec_raw_type() ),
-    M_prec_p		     ( new prec_raw_type() ),
+    M_prec_u                 ( ),
+    M_prec_p		     ( ),
     M_localMap_u             ( M_uFESpace.map() ),
     M_localMap_p	     ( M_pFESpace.map() ),
     M_matrMass               ( ),
@@ -456,6 +456,13 @@ void ChorinTemam<Mesh, SolverType>::setUp( const GetPot& dataFile )
     M_reusePrec_p       = dataFile( "fluid/prec/reuse", true);
     M_maxIterForReuse_p = dataFile( "fluid/prec/max_iter_reuse", M_maxIterSolver_p*8/10);
 
+    std::string precType = dataFile( "fluid/prec/prectype", "Ifpack" );
+
+    std::cout << "  o-  Resetting preconditioner pointers ..." << std::endl;
+    M_prec_u.reset( PRECFactory::instance().createObject(precType) );
+    M_prec_p.reset( PRECFactory::instance().createObject(precType) );  
+
+    std::cout << "  o-  Fill in preconditioners types ..." << std::endl;  
     M_prec_u->setDataFromGetPot( dataFile, "fluid/prec" );
     M_prec_p->setDataFromGetPot( dataFile, "fluid/prec" );
 }
@@ -634,6 +641,7 @@ initialize( const vector_type& u0, const vector_type& p0 )
 
     M_sol_u = u0;
     M_sol_p = p0;
+    M_sol_u_prev *= 0.0; 	// for test purpose 
 
 }
 
@@ -641,7 +649,7 @@ template<typename Mesh, typename SolverType>
 void ChorinTemam<Mesh, SolverType>::updateSystem_u(vector_type& betaVec)
 {
 	
-    Real alpha = 1./M_data.timestep();    
+    Real alpha = 1./M_data.timestep(); 
  
     /* copy matrices at the right place */     
 
@@ -754,6 +762,7 @@ void ChorinTemam<Mesh, SolverType>::updateSystem_u(vector_type& betaVec)
 	std::cout << "  f- Adding SD stabilization terms ..." << std::endl;
 
     //TODO: we must multiply betaVecRep by density before thi step
+    betaVecRep *= M_data.density();
     M_sdStab.applyCT(M_data.timestep(), *M_matrNoBC_u, betaVecRep);
 
     }
@@ -832,7 +841,6 @@ computeCTRHS_u(vector_type& p_sol)
 
     //M_rhsNoBC_u.GlobalAssemble();	// these 2 lines have no effect, and after all
 					// comm should be done after 
-
     chronoCTrhs.stop();
 
     if (M_verbose)
@@ -1115,7 +1123,7 @@ void ChorinTemam<Mesh, SolverType>::solveSystem_u( matrix_ptrtype  matrFull,
 
     int numIter = M_linearSolver_u.solve(M_sol_u, rhsFull);
 
-    if (numIter > M_maxIterSolver_u)
+    if (numIter >= M_maxIterSolver_u)
     {
         chrono.start();
 
@@ -1137,12 +1145,12 @@ void ChorinTemam<Mesh, SolverType>::solveSystem_u( matrix_ptrtype  matrFull,
 
         numIter = M_linearSolver_u.solve(M_sol_u, rhsFull);
 
-        if (numIter > M_maxIterSolver_u && M_verbose)
+        if (numIter >= M_maxIterSolver_u && M_verbose)
             std::cout << "  f- ERROR: Iterative velocity solver failed again.\n";
 
     }
 
-    M_resetPrec_u = (numIter > M_maxIterForReuse_u);
+    M_resetPrec_u = (numIter >= M_maxIterForReuse_u);
 
     chrono.stop();
     if (M_verbose)
@@ -1214,7 +1222,7 @@ std::flush;
 
     int numIter = M_linearSolver_p.solve(M_sol_p, rhsFull);
 
-    if (numIter > M_maxIterSolver_p)
+    if (numIter >= M_maxIterSolver_p)
     {
         chrono.start();
 
@@ -1236,12 +1244,12 @@ std::flush;
 
         numIter = M_linearSolver_p.solve(M_sol_p, rhsFull);
 
-        if (numIter > M_maxIterSolver_p && M_verbose)
+        if (numIter >= M_maxIterSolver_p && M_verbose)
             std::cout << "  f- ERROR: Iterative pressure solver failed again.\n";
 
     }
 
-    M_resetPrec_p = (numIter > M_maxIterForReuse_p);
+    M_resetPrec_p = (numIter >= M_maxIterForReuse_p);
 
     chrono.stop();
     if (M_verbose)

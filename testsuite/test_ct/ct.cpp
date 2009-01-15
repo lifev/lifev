@@ -38,8 +38,9 @@ const int CYL_CYLINDER = 70;
 #undef __CT_VELOCITY_TUBE	/* for velocity excitation on tube */
 #undef __CT_PRESSURE_TUBE	/* for pressure excitation on tube */
 #undef __CT_CYLINDER_CASE	/* for cylinder to compare w/ Oseen */
+#undef __CT_AERO_CASE
+//#define __CT_CYLINDER_CASE 23
 #define __CT_CYLINDER_CASE 23
-
 
 /*
  * The CT::Private struct contains mainly the functions that will be used
@@ -64,8 +65,10 @@ struct CT::Private
 		const Real& z,
 		const ID& id ) const
     {
-            if ( id == 3 ) {
-                  return 100.0 * t + 0.1;
+            Real ampl = 100.0;
+	    Real gap  = 0.0; 
+	    if ( id == 3 ) {
+                  return ampl * t + gap;
 		}
             else {
 		  return 0.0;
@@ -117,8 +120,9 @@ struct CT::Private
 		 const Real& z,
 		 const ID& id ) const
     {
+        Real ampl = 1.;
         if ( id == 1 ) {
-            return 1./(20.*20.)*(y + 20.)*(20. -y);
+            return ampl/(20.*20.)*(y + 20.)*(20. -y);
         } else {
             return 0.;
         }
@@ -130,6 +134,72 @@ struct CT::Private
             f = boost::bind(&CT::Private::u3Dcyl, this, _1, _2, _3, _4, _5);
             return f;
         }
+    
+    Real u3Dcyl_dyn( const Real& t,
+		     const Real& x,
+		     const Real& y,
+		     const Real& z,
+		     const ID& id) const 
+    {
+        Real ampl  = 100.0;
+	Real tampl = 2.0; 
+        if ( id == 1 ) {
+	    if ( t <= tampl ) { 
+	        return ampl*(t/tampl)/(20.*20.)*(y + 20.)*(20. -y);
+            } else {
+		return ampl/(20.*20.)*(y + 20.)*(20. -y);
+            }
+	} else {
+	    return 0.;
+        } 
+    }
+
+    fct_type get_u3Dcyl_dyn()
+    {
+        fct_type f;
+        f = boost::bind(&CT::Private::u3Dcyl_dyn, this, _1, _2, _3, _4, _5);
+        return f;
+    }
+
+#ifdef __CT_AERO_CASE
+    Real uInflow( const Real& t, const Real& x, const Real&y, const Real& z,
+		  const ID& id ) const
+    {
+        //profile spec
+	Real max_vel	= 200.0;
+        Real freq 	= 0.25;
+	Real twoPi 	= 2 * acos (-1.0);
+        //geometry spec
+        Real xc 	= 8.05;
+	Real yc 	= 1.70;
+	Real r		= 1.30 / 2.0;
+	Real c		= 0.94934;
+	Real s		= -0.31425;
+
+	Real profile 	= 1.0 - ((x-xc)*(x-xc) + (y-yc)*(y-yc)) / (r*r);
+	Real profile_vel = max_vel * sin(twoPi * freq * t) * profile;
+       
+        switch (id) {
+	    case 1:
+		return 0.0;
+		break;
+	    case 2:
+		return -s * profile_vel;
+		break;
+	    case 3:
+		return c * profile_vel;
+		break;
+        }
+	return 0.0; 
+    }
+
+    fct_type get_uInFlow()
+    {
+        fct_type f;
+        f = boost::bind(&CT::Private::uInflow, this, _1, _2, _3, _4, _5);
+	return f;
+    }
+#endif
 
 };
 
@@ -213,7 +283,7 @@ CT::run()
     // Boundary conditions for cylinder (same as Oseen w/ test_cylinder)
     BCHandler bcHu( 5, BCHandler::HINT_BC_NONE);
     BCHandler bcHp( 5, BCHandler::HINT_BC_NONE);
-    BCFunctionBase uIn ( d->get_u3Dcyl() );
+    BCFunctionBase uIn ( d->get_u3Dcyl_dyn() );
     BCFunctionBase uZero ( d->get_u3DZero() );
     std::vector<ID> zComp(1);
     zComp[0] = 3;
@@ -228,9 +298,26 @@ CT::run()
     bcHp.addBC( "Inlet",    CYL_INLET,    Natural,   Scalar,     uZero);
     bcHp.addBC( "Outlet",   CYL_OUTLET,   Essential, Scalar,     uZero);
     bcHp.addBC( "Wall",     CYL_WALL,     Natural,   Scalar,     uZero);
-    bcHp.addBC( "SlipWall", CYL_SLIPWALL, Natural,   Scalar,     uZero);
+    bcHp.addBC( "SlipWall", CYL_SLIPWALL, Natural,   Scalar,     uZero); 
     bcHp.addBC( "Cylinder", CYL_CYLINDER, Natural,   Scalar,     uZero);
+#endif
+#ifdef __CT_AERO_CASE 
+    // Boundary conditions for aero case
+    BCHandler bcHu (4, BCHandler::HINT_BC_NONE);
+    BCHandler bcHp (4, BCHandler::HINT_BC_NONE);
+    BCFunctionBase uIn (d->get_uInFlow());
+    BCFunctionBase uZero (d->get_u3DZero());
 
+    // bc for the velocity
+    bcHu.addBC("Freeout", 1, Natural,   Full, uZero, 3);
+    bcHu.addBC("Wallin",  2, Essential, Full, uZero, 3);
+    bcHu.addBC("Inflow",  3, Essential, Full, uIn,   3);
+    bcHu.addBC("Wallout", 4, Essential, Full, uZero, 3);
+    // bc for the pressure
+    bcHp.addBC("Freeout", 1, Essential, Scalar, uZero);
+    bcHp.addBC("Wallin",  2, Natural,   Scalar, uZero);
+    bcHp.addBC("InFlow",  3, Natural,   Scalar, uZero);
+    bcHp.addBC("Wallout", 4, Natural,   Scalar, uZero);
 #endif
 
     // fluid solver
@@ -289,8 +376,11 @@ CT::run()
         {
             if (verbose) std::cout << "P1 pressure";
             refFE_press = &feTetraP1;
-            qR_press    = &quadRuleTetra4pt;  // DoE 2
-            bdQr_press  = &quadRuleTria3pt;   // DoE 2
+            // qR_press    = &quadRuleTetra4pt;  // DoE 2
+            qR_press    = qR_vel;    // test purpose 
+	    // because we need same qrule for u and p wrt coupling CT terms
+	    // bdQr_press  = &quadRuleTria3pt;   // DoE 2
+            bdQr_press  = bdQr_vel;	 // test purpose
         }
 
     if (verbose) std::cout << std::endl;
