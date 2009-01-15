@@ -107,11 +107,12 @@ public:
 
     void                    precReset();
 
+    void                    testSmoothers(operator_type& A);
+
     //! returns true if prec exists
     /*const*/ bool  set() const {return M_Prec;}
 
 private:
-
     prec_type               M_Prec;
 
     Teuchos::ParameterList  M_List;

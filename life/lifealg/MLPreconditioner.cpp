@@ -144,13 +144,19 @@ createMLList( const GetPot&              dataFile,
               const std::string&         section,
               Teuchos::ParameterList&    list)
 {
+
+    std::string defList      = dataFile((section + "/ML/default_parameter_list").data(), "SA");
+
+    if (defList != "none")
+        ML_Epetra::SetDefaults(defList, list);
+
     int MLOutput             = dataFile((section + "/ML/MLOuput").data(),       0);
     int printUnused          = dataFile((section + "/ML/print_unused").data(), -2);
     int MLPrintParameterList = dataFile((section + "/ML/displayList").data(),      0);
     int PDEEquations         = dataFile((section + "/ML/pde_equations").data(),    1);
 
     int CycleApplications    = dataFile((section + "/ML/cycle_applications").data(), 1);
-    int MaxLevels            = dataFile((section + "/ML/max_levels").data(),         10);
+    int MaxLevels            = dataFile((section + "/ML/max_levels").data(),         2);
     std::string IncOrDec     = dataFile((section + "/ML/inc_or_dec").data(),         "increasing");
     std::string PrecType     = dataFile((section + "/ML/prec_type").data(),          "MGV");
     //    int NumProjectedModes    = dataFile((section + "/ML/number_of_prejected_modes").data(), 0);
@@ -187,12 +193,6 @@ createMLList( const GetPot&              dataFile,
     bool AggregationUseTentativeRestriction      = dataFile((section + "/ML/aggregation/tentative_restriction").data(), false);
     bool AggregationSymmetrize                   = dataFile((section + "/ML/aggregation/symmetrize").data(),            false);
 
-    bool   EnergyMinimizationEnable              = dataFile((section + "/ML/energy_minimization/enable").data(),        false);
-    int    EnergyMinimizationType                = dataFile((section + "/ML/energy_minimization/type").data(),          2);
-    double EnergyMinimizationDropTol             = dataFile((section + "/ML/energy_minimization/droptol").data(),       0.);
-    bool   EnergyMinimizationCheap               = dataFile((section + "/ML/energy_minimization/cheap").data(),         false);
-
-
     list.set("aggregation: type",                              AggregationType);
     list.set("aggregation: threshold",                         AggregationThreshold);
     list.set("aggregation: damping factor",                    AggregationDampingFactor);
@@ -202,6 +202,11 @@ createMLList( const GetPot&              dataFile,
     list.set("aggregation: nodes per aggregate",               AggregationNodesPerAggregate);
     list.set("aggregation: use tentative restriction",         AggregationUseTentativeRestriction);
     list.set("aggregation: symmetrize",                        AggregationSymmetrize);
+
+    bool   EnergyMinimizationEnable              = dataFile((section + "/ML/energy_minimization/enable").data(),        false);
+    int    EnergyMinimizationType                = dataFile((section + "/ML/energy_minimization/type").data(),          2);
+    double EnergyMinimizationDropTol             = dataFile((section + "/ML/energy_minimization/droptol").data(),       0.);
+    bool   EnergyMinimizationCheap               = dataFile((section + "/ML/energy_minimization/cheap").data(),         false);
 
     list.set("energy minimization: enable",                    EnergyMinimizationEnable);
     list.set("energy minimization: type",                      EnergyMinimizationType);
@@ -218,7 +223,7 @@ createMLList( const GetPot&              dataFile,
     double SmootherChebyshevAlpha           = dataFile((section + "/ML/smoothers/Chebyshev_alpha").data(), 20.);
     bool SmootherHiptmairEfficientSymmetric = dataFile((section + "/ML/smoothers/Hiptmair_efficient_symmetric").data(), true);
 
-        std::string SubSmootherType             = dataFile((section + "/ML/subsmoothers/type").data(), "Chebyshev");
+    std::string SubSmootherType             = dataFile((section + "/ML/subsmoothers/type").data(), "Chebyshev");
     double SubSmootherChebyshevAlpha        = dataFile((section + "/ML/subsmoothers/Chebyshev_alpha").data(), 20.);
     //    double SubSmootherSGSDampingFactor      = dataFile((section + "/ML/subsmoothers/SGS_damping_factor").data(), 1.);
     int SubSmootherEdgeSweeps               = dataFile((section + "/ML/subsmoothers/edge_sweeps").data(), 2);
@@ -268,7 +273,7 @@ createMLList( const GetPot&              dataFile,
     int RepartitionMinPerProc          = dataFile((section + "/ML/repartition/min_per_proc").data(), 512);
     double RepartitionNodeMaxMinRatio  = dataFile((section + "/ML/repartition/node_max_min_ratio").data(), 1.3);
     int RepartitionNodeMinPerProc      = dataFile((section + "/ML/repartition/node_min_per_proc").data(), 170);
-    int RepartitionZoltanDimensions    = dataFile((section + "/ML/repartition/Zoltan_dimensions").data(), 2.);
+    int RepartitionZoltanDimensions    = dataFile((section + "/ML/repartition/Zoltan_dimensions").data(), 2);
 
 
     list.set("repartition: enable",             RepartitionEnable);
@@ -334,6 +339,7 @@ createMLList( const GetPot&              dataFile,
 //                                                 1);
 //     list.sublist("smoother: ifpack list").set("relaxation: zero starting solution",
 //                                                 false);
+
 
     if (MLPrintParameterList) list.print(std::cout);
 
