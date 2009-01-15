@@ -1,0 +1,73 @@
+# -*- makefile -*-
+#
+# Author: Gilles Fourestey
+#
+# Copyright (C) 2004 @COPYRIGHT@
+#
+# Distributed under the GPL(GNU Public License):
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+
+
+# path to the compiler
+CC              = /usr/bin/g++
+
+
+LIFELIBPATH      = -L<lifev lib directory path>
+LIFELIBS         = -llifefilters -llifesolver -llifefem \
+                   -llifealg -llifearray -llifecore -llifemesh
+LIFEINCLUDEPATH  = -I<lifev include directory path>
+
+TRILLIBPATH      = -L<trilinos lib directory path>
+TRILLIBS         = -laztecoo -laztecoo -ltriutils -lml \
+                   -lifpack -lamesos -lepetraext -lepetra \
+                   -lteuchos  -llapack -lblas
+TRILINCLUDEPATH  = -I<trilinos include directory path>
+
+MPILIBPATH       = -L<mpi lib directory path>
+MPILIBS          = -lmpi_cxx -lmpi
+MPIINCLUDEPATH   = -I<mpi include directory path>
+
+METISLIBPATH	 = -L<metis lib directory path>
+METISLIBS        = -lparmetis -lmetis
+METISINCLUDEPATH = -I<metis include directory path>
+
+
+# uncomment this part for optimized compilation
+LDFLAGS         = -c -g0 -O2 -DTHREEDIM -lm
+# uncomment this part for debugging
+#LDFLAGS         = -c -g2 -O0 -DTHREEDIM -lm
+
+
+all: $(OBJECTS) $(EXECUTABLE)
+
+$(OBJECTS): $(SOURCES)
+	$(CC) $(LDFLAGS) \
+	$(MPIINCLUDEPATH) $(TRILINCLUDEPATH) $(LIFEINCLUDEPATH) \
+	$(SOURCES) -o $@
+
+$(EXECUTABLE): $(OBJECT)
+	echo "compiling the executable ... "
+	$(CC) $(CFLAGS) \
+	$(OBJECTS) $< -o $@ \
+	$(LIFELIBPATH) $(LIFELIBS) $(LIFEINCLUDEPATH) \
+	$(TRILLIBPATH) $(TRILLIBS) $(TRILINCLUDEPATH) \
+	$(METISPATH) $(METISLIBS) $(METISINCLUDE) \
+	$(MPILIBPATH) $(MPILIBS) $(MPIINCLUDEPATH) \
+
+
+clean:
+	rm -rf *o cavity
+
