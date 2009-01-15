@@ -154,7 +154,7 @@ public:
                               const vector_type& sourceVec
                               );
 
-    void updateMatrix( matrix_type& matrFull );
+    void updateStab( matrix_type& matrFull );
 
 //     void updateLinearSystem(double       alpha,
 //                             vector_type& betaVec,
@@ -253,7 +253,7 @@ public:
 
     const bool    getIsDiagonalBlockPrec(){return M_isDiagonalBlockPrec;}
     void setBlockPreconditioner(matrix_ptrtype blockPrec);
-    void setMatrix( matrix_type& matrFull );
+    void getFluidMatrix( matrix_type& matrFull );
     void updateUn( ){*M_un=M_sol;}
     void updateUn(const vector_type& sol ){*M_un=sol;}// for the monolithic
 protected:
@@ -1098,7 +1098,7 @@ void Oseen<Mesh, SolverType>::setBlockPreconditioner( matrix_ptrtype blockPrec )
 }
 
 template<typename Mesh, typename SolverType>
-void Oseen<Mesh, SolverType>::updateMatrix( matrix_type& matrFull )
+void Oseen<Mesh, SolverType>::updateStab( matrix_type& matrFull )
 {
 
     if (M_stab)
@@ -1109,7 +1109,7 @@ void Oseen<Mesh, SolverType>::updateMatrix( matrix_type& matrFull )
 }
 
 template<typename Mesh, typename SolverType>
-void Oseen<Mesh, SolverType>::setMatrix( matrix_type& matrFull )
+void Oseen<Mesh, SolverType>::getFluidMatrix( matrix_type& matrFull )
 {
     matrFull += *M_matrNoBC;
 }
@@ -1134,8 +1134,8 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
         M_matrStab->GlobalAssemble();
 
     matrix_ptrtype matrFull( new matrix_type( M_localMap, M_matrNoBC->getMeanNumEntries()));
-    updateMatrix(*matrFull);
-    setMatrix(*matrFull);
+    updateStab(*matrFull);
+    getFluidMatrix(*matrFull);
 
     vector_type rhsFull (M_rhsNoBC);
 

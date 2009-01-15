@@ -426,8 +426,8 @@ Monolithic::evalResidual( vector_type&       res,
                 monolithicMatrix.reset(new matrix_type(M_monolithicMap/*, this->M_fluid->getMeanNumEntries()*/));
 
                 //*monolithicMatrix += *this->M_fluid->getBigMatrixPtr();
-                M_fluid->updateMatrix( *monolithicMatrix);//applies the stabilization terms
-                M_fluid->setMatrix( *monolithicMatrix);
+                M_fluid->updateStab( *monolithicMatrix);//applies the stabilization terms
+                M_fluid->getFluidMatrix( *monolithicMatrix);
 
                 coupling(monolithicMatrix, this->M_rhs);
 
@@ -483,7 +483,7 @@ void  Monolithic::solveJac(vector_type         &_step,
             bigPrecPtr.reset(new matrix_type(M_monolithicMap/*, M_solid->getMatrixPtr()->getMeanNumEntries()*/));
             this->M_fluid->setBlockPreconditioner(bigPrecPtr);
                 //            *bigPrecPtr += *this->M_fluid->getBlockPrecPtr();
-            this->M_fluid->updateMatrix(*bigPrecPtr);
+            this->M_fluid->updateStab(*bigPrecPtr);
             Real entry(1.0);
             this->M_solid->setBlockPreconditioner(bigPrecPtr);
             addDiagonalEntries(entry,bigPrecPtr);
@@ -496,8 +496,8 @@ void  Monolithic::solveJac(vector_type         &_step,
             if(M_isDiagonalBlockPrec)
                 {
                     bigPrecPtr.reset(new matrix_type(M_monolithicMap/*, M_solid->getMatrixPtr()->getMeanNumEntries()*/));
-                    this->M_fluid->updateMatrix( *bigPrecPtr);//applies the stabilization terms
-                    this->M_fluid->setMatrix( *bigPrecPtr);
+                    this->M_fluid->updateStab( *bigPrecPtr);//applies the stabilization terms
+                    this->M_fluid->getFluidMatrix( *bigPrecPtr);
                     this->M_solid->setBlockPreconditioner(bigPrecPtr);
                     Real entry(1.0);
                     addDiagonalEntries(entry,bigPrecPtr);
