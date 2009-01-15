@@ -8,7 +8,7 @@
 % E-MAIL:       foureste@iacspc.epfl.ch
 %
 % ORIG-DATE: 21-Nov-08 at 11:16:22
-% LAST-MOD:  8-Jan-09 at 11:22:30 by Gilles Fourestey
+% LAST-MOD: 15-Jan-09 at 15:06:44 by Gilles Fourestey
 %
 % DESCRIPTION:
 % DESCRIP-END.
@@ -89,6 +89,83 @@ b(u,q) & = 0 & \hspace{1cm} \forall t \in (0,T), \forall q \in L^2_0(\Omega)
 \right.
 \end{equation}
 %find $u_h \in X_h$ and $p_h \in M_h$ so that,
+
+In order to solve (\ref{eqn-varia}) using \lifev, create a working directory.
+In this directory, copy the following files :
+
+\begin{itemize}
+\item Makefile-cavity
+\item cavity.cpp
+\item data-cavity
+\end{itemize}
+
+from the \verb|<lifev directory>/doc/manual/| directory. \verb!cavity.cpp! contains the
+C++ code to solve the variational problem (\ref{eqn-varia}). But before compiling it,
+let's have a look a the \ixns{Makefile}{GNU Makefile}.
+
+\begin{verbatim}
+
+# path to the compiler
+CC               = /usr/bin/g++
+
+SOURCES          = cavity.cpp
+OBJECTS          = $(SOURCES:.cpp=.o)
+EXECUTABLE       = cavity
+
+LIFELIBPATH      = -L<lifev lib directory path>
+LIFELIBS         = -llifefilters -llifesolver -llifefem \
+                   -llifealg -llifearray -llifecore -llifemesh
+LIFEINCLUDEPATH  = -I<lifev include directory path>
+
+TRILLIBPATH      = -L<trilinos lib directory path>
+TRILLIBS         = -laztecoo -laztecoo -ltriutils -lml \
+                   -lifpack -lamesos -lepetraext -lepetra \
+                   -lteuchos  -llapack -lblas
+TRILINCLUDEPATH  = -I<trilinos include directory path>
+
+MPILIBPATH       = -L<mpi lib directory path>
+MPILIBS          = -lmpi_cxx -lmpi
+MPIINCLUDEPATH   = -I<mpi include directory path>
+
+METISLIBPATH	 = -L<metis lib directory path>
+METISLIBS        = -lparmetis -lmetis
+METISINCLUDEPATH = -I<metis include directory path>
+
+# uncomment this part for optimized compilation
+LDFLAGS         = -c -g0 -O2 -DTHREEDIM -lm
+# uncomment this part for debugging
+#LDFLAGS         = -c -g2 -O0 -DTHREEDIM -lm
+
+
+all: $(OBJECTS) $(EXECUTABLE)
+
+$(OBJECTS): $(SOURCES)
+	$(CC) $(LDFLAGS) \
+	$(MPIINCLUDEPATH) $(TRILINCLUDEPATH) $(LIFEINCLUDEPATH) \
+	$(SOURCES) -o $@
+
+$(EXECUTABLE): $(OBJECT)
+	echo "compiling the executable ... "
+	$(CC) $(CFLAGS) \
+	$(OBJECTS) $< -o $@ \
+	$(LIFELIBPATH) $(LIFELIBS) $(LIFEINCLUDEPATH) \
+	$(TRILLIBPATH) $(TRILLIBS) $(TRILINCLUDEPATH) \
+	$(METISPATH) $(METISLIBS) $(METISINCLUDE) \
+	$(MPILIBPATH) $(MPILIBS) $(MPIINCLUDEPATH) \
+
+
+clean:
+	rm -rf *o cavity
+
+\end{verbatim}
+
+
+In order to make everything work, you need to fill the \verb|<...>| with your local
+configuration paths. You can also change the \verb|LDFLAGS| options in order to
+compile using the debug or the optimized mode in the g++ compiler. More information
+about the using makefiles are available at \url{http://www.gnu.org/software/make/manual/make.html}.
+
+
 
 \input{cavity.tex}
 

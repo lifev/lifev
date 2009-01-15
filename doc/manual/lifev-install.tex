@@ -121,11 +121,10 @@ for instance, if you want to compile the Trilinos library in debug mode using Op
 Now go to the Trilinos source directory and start configuring :
 
 \begin{verbatim}
-../configure --prefix=/u/cmcs/foureste/local/debug/trilinos-8 \
+../configure --prefix=<path to where you want to install the library> \
              --enable-debug \
              --enable-default-packakages \
-             --prefix=/u/cmcs/foureste/Libs/trilinos-9.0.1/OpenMPI \
-             --with-ml\_metis --with-ml\_parmetis3x \
+             --with-ml_metis --with-ml_parmetis3x \
              --disable-belos \
              --disable-capo \
              --disable-claps \
@@ -167,12 +166,11 @@ Now go to the Trilinos source directory and start configuring :
              --with-incdirs=''-I/usr/include/metis/ -I/usr/include/parmetis''
 \end{verbatim}
 After the configuration is done, just type
-
 \begin{verbatim}
 make
 make install
 \end{verbatim}
-The Trilinos library is now installed in the \verb!<path to the Trilinos library directory>/debug-openmpi! directory.
+The Trilinos library is now installed in the \verb|prefix! setting directory.
 
 \subsection{Compilation from CVS}
 \label{sec:compile-cvs}
