@@ -100,6 +100,8 @@ of the \ix{autotools} from the GNU project\footnote{\url{http://www.gnu.org}}.
 \item \verb!libumfpack4! (set of routines for solving unsymmetric sparse linear systems)
 \end{itemize}
 
+
+
 %\subsubsection{Runtime Environment}
 %\label{sec:runtime-env}
 
@@ -117,12 +119,12 @@ source directory ), create a directory where the library will be stored :
 mkdir <path to the Trilinos library directory>/debug-openmpi
 \end{verbatim}
 
-for instance, if you want to compile the Trilinos library in debug mode using OpenMPI.
-Now go to the Trilinos source directory and start configuring :
+for instance, if you want to compile the Trilinos library in debug mode using OpenMPI. You can also
+set whatever name you feel confortable with instead of \verb!debug-openmpi!. Now go to the Trilinos source directory and start configuring :
 
 \begin{verbatim}
 ../configure --prefix=<path to where you want to install the library> \
-             --enable-debug \
+             --enable-<debug or opt> \
              --enable-default-packakages \
              --with-ml_metis --with-ml_parmetis3x \
              --disable-belos \
@@ -165,12 +167,29 @@ Now go to the Trilinos source directory and start configuring :
              CC=gcc CCC=g++ F77=gfortran \
              --with-incdirs=''-I/usr/include/metis/ -I/usr/include/parmetis''
 \end{verbatim}
+Simply modify the first two lines according to your own configuration.
 After the configuration is done, just type
 \begin{verbatim}
 make
 make install
 \end{verbatim}
-The Trilinos library is now installed in the \verb|prefix! setting directory.
+\verb|make| will compile the static files, and make install will create and install
+the library files. The Trilinos library is now installed in the \verb|prefix! setting directory.
+
+\begin{hint}{Object files vs Library file}
+\verb|make| and \verb|make install| have very different purposes and should not be confused.
+\begin{itemize}
+\item make will basically build the code, turning, in UNIX systems, source code
+files into .o files using directives found in the makefile. These files are objects files, that is compiled code.
+\item make install will create the library in the specified \verb|prefix| install path.
+More precisely, it will create two subdirectories, \verb|lib| and \verb|include|, where
+it will respectively aggregate the objects files into library files (.a and .la files)
+and copy include files ( .h or .hpp files ).
+\end{itemize}
+Using the library means using the \verb|lib| and \verb|include| files, not the .o files as we will see later
+in this tutorial.
+\end{hint}
+
 
 \subsection{Compilation from CVS}
 \label{sec:compile-cvs}
