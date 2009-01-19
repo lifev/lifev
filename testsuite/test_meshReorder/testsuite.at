@@ -25,8 +25,8 @@
 # \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
 # \date 2004-08-29
 #
-AT_SETUP([test_fsi])
-AT_KEYWORDS([ns fluid solid fsi])
+AT_SETUP([test_meshReorder])
+AT_KEYWORDS([mesh reorder])
 AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 
 # -*- getpot -*- (GetPot mode activation for emacs)
@@ -35,8 +35,7 @@ AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 #-------------------------------------------------
 
 
-[fluid]
-[../discretization]
+[discretization]
 mesh_dir  = ./Mesh/ # the directory where the mesh file is
 #mesh_file = 179347_cm_fluid.mesh  # mesh file
 mesh_file = tube20.mesh  # mesh file
@@ -49,20 +48,13 @@ mesh_faces      = all                   # update all faces elements
 mesh_edges      = all                   # update all faces elements
 mesh_type       = .mesh
 ordering = true
-
-[solid]
-[../discretization]
-mesh_dir  = ./Mesh/  # the directory where the mesh file is
-#mesh_file = 179347_cm_solid.mesh  # mesh file
-mesh_file = vessel20.mesh  # mesh file
-#timestep = 0.00025
-timestep  = 0.001             # timestep
-order     = P1
-mesh_faces      = all                   # update all faces elements
-mesh_edges      = all                   # update all faces elements
 ]])
 
-AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria/tube20.mesh &&
-          ln -sf $top_builddir/testsuite/data/mesh/inria/vessel20.mesh &&
-          $top_builddir/testsuite/test_meshReorder/test_meshReorder -c],[0],[ignore],[ignore])
+AT_CHECK([ln -sf ../../data/mesh/inria/tube20.mesh &&
+          ln -sf ../../data/mesh/inria/vessel20.mesh &&
+          ../../test_monolithic/test_monolithic -c
+    #          ln -sf $top_builddir/testsuite/data/mesh/inria/tube20.mesh &&
+    #          ln -sf $top_builddir/testsuite/data/mesh/inria/vessel20.mesh &&
+    #          $top_builddir/testsuite/test_meshReorder/test_meshReorder -c
+],[0],[ignore],[ignore])
 AT_CLEANUP([])
