@@ -4,9 +4,7 @@
 #-------------------------------------------------
 
 
-[fluid]
-[./physics]
-[../discretization]
+[discretization]
 mesh_dir  = ./Mesh/ # the directory where the mesh file is
 mesh_file = vessel20.mesh  # mesh file
 #timestep = 0.00025

@@ -15,10 +15,10 @@ int main(int argc, char** argv)
     GetPot command_line(argc,argv);
     const char* data_file_name = command_line.follow("data", 2, "-f","--file");
     GetPot data_file(data_file_name);
-    DataMesh<RegionMesh3D<LinearTetra> > mesh_data(data_file, "fluid/discretization");
+    DataMesh<RegionMesh3D<LinearTetra> > mesh_data(data_file, "discretization");
     //DataMesh<RegionMesh3D<LinearTetra> > solidData(data_file, "solid/discretization");
     //const char* mesh_input = command_line.follow(data_file("fluid/discretization/mesh_file", "mesh", 0), 2, "-i","--input");
-    const char* mesh_output = command_line.follow(data_file("fluid/discretization/mesh_file", "mesh", 0), 2, "-o","--output");
+    const char* mesh_output = command_line.follow(data_file("fluid/discretization/output_mesh_file", "mesh", 0), 2, "-o","--output");
     int numtasks;
     int me;
     MPI_Comm_rank(MPI_COMM_WORLD, &me);
