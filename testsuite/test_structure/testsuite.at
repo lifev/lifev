@@ -41,8 +41,8 @@ poisson   = 0.3
 endtime   = .01
 
 [../discretization]
-mesh_dir  = Mesh/     # the directory where the mesh file is
-mesh_file = vessel2x4x20.mesh # mesh file
+mesh_dir  = ./     # the directory where the mesh file is
+mesh_file = vessel20.mesh # mesh file
 #mesh_file = hexa2x2.mesh # mesh file
 timestep  = 0.001                   # timestep
 order     = P1
@@ -70,7 +70,7 @@ tol             = 1.e-16
 
 [../precond]
 
-precond         = Amesos
+precond         = Ifpack
 
 
 ]])
