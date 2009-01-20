@@ -24,6 +24,11 @@
 # path to the compiler
 CC              = /usr/bin/g++
 
+SOURCES         = cavity.cpp
+OBJECTS         = $(SOURCES:.cpp=.o)
+EXECUTABLE      = cavity
+
+
 
 LIFELIBPATH      = -L<lifev lib directory path>
 LIFELIBS         = -llifefilters -llifesolver -llifefem \
