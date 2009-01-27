@@ -71,8 +71,6 @@ namespace LifeV
 template< typename Mesh,
           typename SolverType = LifeV::SolverTrilinos >
 class Oseen
-//     :
-//     public NavierStokesHandler<Mesh>, EpetraHandler
 {
 
 public:
@@ -251,11 +249,12 @@ public:
             return *M_matrMass;
         }
 
-    const bool    getIsDiagonalBlockPrec(){return M_isDiagonalBlockPrec;}
-    void setBlockPreconditioner(matrix_ptrtype blockPrec);
-    void getFluidMatrix( matrix_type& matrFull );
-    void updateUn( ){*M_un=M_sol;}
-    void updateUn(const vector_type& sol ){*M_un=sol;}// for the monolithic
+    const bool    getIsDiagonalBlockPrec() {return M_isDiagonalBlockPrec;}
+    void          setBlockPreconditioner(matrix_ptrtype blockPrec);
+    void          getFluidMatrix( matrix_type& matrFull );
+    void          updateUn( )                              {*M_un = M_sol;}
+    void          updateUn(const vector_type& sol )        {*M_un = sol;}// for the monolithic
+
 protected:
 
     UInt dim_u() const           { return M_uFESpace.dim(); }
@@ -1043,27 +1042,41 @@ updateSystem(double       alpha,
         chrono.stop();
         leaderPrintMax( "done in " , chrono.diff() );
 
-        if ( M_stab && (!M_reuseStab || M_resetStab || !M_matrStab ) )
+        if ( M_stab && (!M_reuseStab || M_resetStab || (M_matrStab.get() == 0) ) )
         {
+            leaderPrint("  f-  Updating the stabilization terms ...    ");
+            chrono.start();
             M_matrStab.reset  ( new matrix_type(M_localMap) );
             M_ipStab.apply( *M_matrStab, betaVecRep, M_verbose );
             M_resetStab = false;
             M_matrStab->GlobalAssemble();
+            chrono.stop();
+            leaderPrintMax( "done in " , chrono.diff() );
         }
 
-    } else {
-        if ( M_stab && (!M_reuseStab || M_resetStab || !M_matrStab ) )
-        {
-            M_matrStab.reset  ( new matrix_type(M_localMap) );
-            M_ipStab.apply( *M_matrStab, betaVec, M_verbose );
-            M_resetStab = false;
-            M_matrStab->GlobalAssemble();
-        }
-        else
-        {
-            leaderPrint("Reuse stab");
-        }
     }
+    else
+        {
+            if (M_stab)
+                {
+                    leaderPrint("  f-  Updating the Stabilization terms ...    ");
+                    chrono.start();
+
+                    if ( !M_reuseStab || M_resetStab || (M_matrStab.get() == 0) )
+                        {
+                            M_matrStab.reset  ( new matrix_type(M_localMap) );
+                            M_ipStab.apply( *M_matrStab, betaVec, M_verbose );
+                            M_resetStab = false;
+                            M_matrStab->GlobalAssemble();
+                        }
+                    else
+                        {
+                            leaderPrint("reusing stab. ");
+                        }
+                    chrono.stop();
+                    leaderPrintMax( "done in " , chrono.diff() );
+                }
+        }
 
     if (alpha != 0. )
         {
@@ -1134,6 +1147,7 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
         M_matrStab->GlobalAssemble();
 
     matrix_ptrtype matrFull( new matrix_type( M_localMap, M_matrNoBC->getMeanNumEntries()));
+
     updateStab(*matrFull);
     getFluidMatrix(*matrFull);
 
@@ -1232,7 +1246,7 @@ void Oseen<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
 
         chrono.stop();
         leaderPrintMax( "done in " , chrono.diff() );
-	leaderPrint("  f-       Estimated condition number = " , condest );
+        leaderPrint("  f-       Estimated condition number = " , condest );
 
         numIter = linearSolver.solve(sol, rhsFull);
 
