@@ -158,7 +158,14 @@ public:
 
     bool precSet() const {return (M_prec.get() !=0 && M_prec->getPrec() != 0);}
     void precReset() { M_prec->precReset(); }
-//@}
+
+
+    // return the Aztec status
+
+    const double* getAztecStatus() const {return M_solver.GetAztecStatus();}
+
+
+    //@}
 
 
 private:
