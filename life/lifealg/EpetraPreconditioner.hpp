@@ -88,34 +88,38 @@ public:
     /** @name  Methods
      */
 
-    virtual void           setDataFromGetPot ( const GetPot& dataFile, const std::string& section ) = 0;
+    virtual void            setDataFromGetPot ( const GetPot& dataFile, const std::string& section ) = 0;
 
-    virtual double         Condest() = 0;
+    virtual double          Condest() = 0;
 
-    virtual prec_raw_type* getPrec() = 0;
+    virtual prec_raw_type*  getPrec() = 0;
 
     //std::string            precType() { return M_precType; }
 
-    virtual int            buildPreconditioner(operator_type& A) = 0;
+    virtual int             buildPreconditioner(operator_type& A) = 0;
 
-    virtual void           precReset() = 0;
+    virtual void            precReset() = 0;
 
     //! returns true if prec exists
     /*const*/
-    virtual bool           set() const = 0;
+    virtual bool            set() const = 0;
+
+    // Teuchos list management
+
+    void                    setList(Teuchos::ParameterList list);
+    const Teuchos::ParameterList& getList() const;
+
 
 protected:
 
-    int                    M_overlapLevel;
+    int                     M_overlapLevel;
 
-    operator_type          M_Oper;
-
-    Teuchos::ParameterList M_List;
-    //    std::string            M_precType;
+    operator_type           M_Oper;
 
 
 private:
 
+    Teuchos::ParameterList  M_List;
 
 
 };

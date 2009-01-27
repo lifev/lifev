@@ -115,7 +115,7 @@ public:
 private:
     prec_type               M_Prec;
 
-    Teuchos::ParameterList  M_List;
+    //    Teuchos::ParameterList  M_List;
     std::string             M_precType;
 
 };

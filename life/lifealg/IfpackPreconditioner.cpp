@@ -61,10 +61,16 @@ IfpackPreconditioner::setDataFromGetPot( const GetPot& dataFile,
     //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
     //! for more informations on the parameters
 
-    M_overlapLevel = dataFile((section + "/overlap").data(),     1);
+    M_overlapLevel = dataFile((section + "/ifpack/overlap").data(),     0);
     M_precType     = dataFile((section + "/ifpack/prectype").data(),"Amesos");
 
-    createIfpackList(dataFile, section, M_List);
+    Teuchos::ParameterList list;
+
+    createIfpackList(dataFile, section, list);
+
+    this->setList(list);
+
+
 }
 
 int

@@ -44,6 +44,17 @@ EpetraPreconditioner::~EpetraPreconditioner()
 {
 }
 
+void
+EpetraPreconditioner::setList(Teuchos::ParameterList list)
+{
+    M_List = list;
+}
+
+const Teuchos::ParameterList&
+EpetraPreconditioner::getList() const
+{
+    return M_List;
+}
 
 
 // EpetraPreconditioner::EpetraPreconditioner(operator_type& oper):
