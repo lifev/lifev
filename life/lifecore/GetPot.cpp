@@ -958,6 +958,21 @@ GetPot::operator() ( const char* VarName, int Default ) const
     return __convert_to_type( sv->original, Default );
 }
 
+inline int
+GetPot::operator() ( const char* VarName, int Default, bool& found ) const
+{
+    const variable * sv = find_variable( VarName );
+
+    if ( sv == 0 )
+        {
+            found = false;
+            return Default;
+        }
+
+    found = true;
+    return __convert_to_type( sv->original, Default );
+}
+
 inline double
 GetPot::operator() ( const char* VarName, const double& Default ) const
 {
@@ -967,12 +982,41 @@ GetPot::operator() ( const char* VarName, const double& Default ) const
     return __convert_to_type( sv->original, Default );
 }
 
+inline double
+GetPot::operator() ( const char* VarName, const double& Default, bool& found ) const
+{
+    const variable * sv = find_variable( VarName );
+
+    if ( sv == 0 )
+        {
+            found= false;
+            return Default;
+        }
+
+    found = true;
+    return __convert_to_type( sv->original, Default );
+}
+
 inline const char*
 GetPot::operator() ( const char* VarName, const char* Default ) const
 {
     const variable * sv = find_variable( VarName );
     if ( sv == 0 )
         return Default;
+    return sv->original.c_str();
+}
+
+inline const char*
+GetPot::operator() ( const char* VarName, const char* Default, bool& found ) const
+{
+    const variable * sv = find_variable( VarName );
+    if ( sv == 0 )
+        {
+            found = false;
+            return Default;
+        }
+
+    found = true;
     return sv->original.c_str();
 }
 

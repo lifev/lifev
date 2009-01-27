@@ -107,8 +107,11 @@ public:
     // (*) variables -----------------------------------------------------------
     //     -- scalar values
     int operator() ( const char* VarName, int Default ) const;
+    int operator() ( const char* VarName, int Default, bool& found ) const;
     double operator() ( const char* VarName, const double& Default ) const;
+    double operator() ( const char* VarName, const double& Default, bool& found ) const;
     const char* operator() ( const char* VarName, const char* Default ) const;
+    const char* operator() ( const char* VarName, const char* Default, bool& found ) const;
     //     -- vectors
     int operator() ( const char* VarName, int Default, unsigned Idx ) const;
     double operator() ( const char* VarName, const double& Default, unsigned Idx ) const;
