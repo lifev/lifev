@@ -162,7 +162,14 @@ public:
 
     // return the Aztec status
 
-    const double* getAztecStatus() const {return M_solver.GetAztecStatus();}
+
+    void printStatus(const std::string& message,
+                     double             status[AZ_STATUS_SIZE],
+                     double             time,
+                     std::ostream&      stream = std::cout);
+
+    void getAztecStatus( double status[AZ_STATUS_SIZE])
+    { M_solver.GetAllAztecStatus( status );}
 
 
     //@}

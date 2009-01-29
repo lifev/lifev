@@ -378,6 +378,33 @@ SolverTrilinos::computeResidual( vector_type& x, vector_type& b )
 
 
 
+void
+SolverTrilinos::printStatus(const std::string& message,
+                            double             status[AZ_STATUS_SIZE],
+                            double             time,
+                            std::ostream&      stream)
+{
+    stream.width(10); stream.setf(std::ios::left);
+    stream << message;
+
+
+    if( status[AZ_why] == AZ_normal         ) stream << "Normal Convergence    ";
+    else if( status[AZ_why] == AZ_maxits    ) stream << "Maximum iters reached ";
+    else if( status[AZ_why] == AZ_loss      ) stream << "Accuracy loss         ";
+    else if( status[AZ_why] == AZ_ill_cond  ) stream << "Ill-conditioned       ";
+    else if( status[AZ_why] == AZ_breakdown ) stream << "Breakdown             ";
+
+    stream << "res = " << status[AZ_scaled_r];
+    stream.width(12); stream.setf(std::ios::left);
+    stream.width(4); stream.setf(std::ios::left);
+    stream << " " << (int)status[AZ_its] << " iters. ";
+    stream.width(15); stream.setf(std::ios::left);
+    stream << " in " << time << " secs.";
+
+
+    stream << std::endl;
+}
+
 // } //namespace Epetra
 
 
