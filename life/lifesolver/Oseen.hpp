@@ -1230,6 +1230,18 @@ void Oseen<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
 
     int numIter = linearSolver.solve(sol, rhsFull);
 
+    chrono.stop();
+    double time = chrono.diff();
+
+    double status[AZ_STATUS_SIZE];
+
+    if (M_me == 0)
+        {
+            linearSolver.getAztecStatus( status );
+
+            linearSolver.printStatus("  f- ", status, time, std::cout);
+        }
+
     if (numIter >= M_maxIterSolver)
     {
         chrono.start();
@@ -1248,12 +1260,15 @@ void Oseen<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
         leaderPrintMax( "done in " , chrono.diff() );
         leaderPrint("  f-       Estimated condition number = " , condest );
 
+        chrono.start();
         numIter = linearSolver.solve(sol, rhsFull);
 
         if (numIter >= M_maxIterSolver && M_verbose)
             std::cout << "  f- ERROR: Iterative solver failed again.\n" <<  std::flush;
 
         M_resetStab = true;
+
+
 
     }
 
@@ -1263,8 +1278,8 @@ void Oseen<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
             resetPrec();
         }
 
-    leaderPrintMax( "done in " , chrono.diff() );
-    leaderPrint("  f- numiter = " , numIter);
+//     leaderPrintMax( "done in " , chrono.diff() );
+//     leaderPrint("  f- numiter = " , numIter);
 
     M_comm->Barrier();
 
@@ -1483,8 +1498,8 @@ Oseen<Mesh, SolverType>::postProcess(bool /*_writeMesh*/)
     }
 
 
-//     if (_writeMesh || (M_count / M_data.verbose() == 0) )
-//         writeMesh  ("partedMesh." + me + ".mesh", M_pFESpace.mesh() );
+//     if ( _writeMesh || ( M_count / M_data.verbose() == 0 ) )
+//         writeMesh  ( "partedMesh." + me + ".mesh", M_pFESpace.mesh() );
 
     vector_type velAndPressure(M_sol, Repeated);
     vector_type res(M_residual, Repeated);
