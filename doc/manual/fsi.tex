@@ -1,0 +1,288 @@
+
+
+
+We now want to address the numerical solution of fluid-structure interaction problems.
+In order to address each problem in its natural setting, we
+choose to consider the fluid in an ALE (Arbitrary Lagrangian
+Eulerian) formulation and the structure in a pure Lagrangian framework.
+
+The system under investigation occupies a moving domain $\Omegat$
+in its actual configuration. It is made of a deformable structure
+$\OmegaSt$ (such as an arterial wall, a pipe-line, \ldots)
+surrounding a fluid under motion (blood, oil, \ldots) in  the
+complement $\OmegaFt$ of  $\OmegaSt$ in $\Omegat$ (see
+Fig.~\ref{fig:ALEmapping}).
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=.8\textwidth]{ALEmapping.pdf}
+\end{center}
+\caption{ALE mapping between the initial configuration and the
+configuration at time $t$.}\label{fig:ALEmapping}
+\end{figure}
+
+We assume the fluid to be Newtonian, viscous, homogeneous and
+incompressible. Its behavior is described by its velocity and
+pressure. The elastic solid under large displacements is
+described by its velocity and its stress tensor. The classical
+conservation laws of the continuum mechanics govern the evolution
+of these unknowns.
+
+We denote by $\GamInt$ and $\GamOut$ the inflow and outflow
+sections of the fluid domain, by $\uu n_\mf$ the  fluid domain's
+outward normal on $\partial \OmegaFt$ and by $\uu n_\ms$ the one
+of the structure on the reference boundary $\partial \hOmegaS$.
+The boundary conditions on the fluid inlet and outlet can be
+either natural or essential (i.e., of Neumann or Dirichlet type,
+respectively), while on the interface we impose that the fluid
+and structure velocities match and so do the normal stresses. For
+simplicity, we assume zero body forces on both the structure and
+the fluid and that the boundary conditions on the remaining part
+of the structure boundary are of Dirichlet or of Neumann type.
+
+The problem consists in finding the time evolution of the
+configuration $\OmegaFt$, as well as the velocity $\uu u$ and
+pressure $p$ for the fluid and the displacement $\D$ of
+the structure. We define the ALE mapping
+\begin{equation*}
+ \forall t \,,\;  \ALE_t : \hOmegaF \to \OmegaFt,
+\end{equation*}
+i.e. a map that retrieves at each time the current configuration
+of the computational domain $\OmegaFt$. Note in particular that on
+the reference interface $\hWall$, $\uu n_\mf \circ \ALE_t = -\uu
+n_\ms$. We denote by $\bY$ the coordinates on the reference
+configuration $\hOmegaF$ and by $\bw=\frac{d \ALE_t}{dt}$ the
+domain velocity.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\medskip
+For simplicity, we denote in short by $\NS(\ldots)$ and
+$\Str(\ldots)$ the fluid and structure problems, respectively.
+Precisely, for given vector functions $\uu u_\In$, $\uu g_\mf$ and
+$\uu f_\mf$, $\NS(\U,p,\ALE_t;\uu u_\In, \uu g_\mf, \uu f_\mf)$
+means that we consider the following problem whose solution is
+$\U$, $p$, $\ALE_t$:
+\begin{equation}\label{eq:fluid}
+  \NS(\U,p,\ALE_t;\uu u_\In, \uu g_\mf, \uu f_\mf):
+  \begin{cases}
+    \dis  \uu \Delta \ALE_{t} = 0 \text{ in } \hOmegaF, \\
+    \dis  \ALE_t = 0 \text{ on } \partial\hOmegaF \setminus\hat\Sigma, \\
+    \dis  \OmegaF_{t} = \ALE_{t}(\hOmegaF), \\
+    \dis  \rho_\mf\left(\diffALE \U + (\U-\bw)\cdot \Grad \U\right) \\
+    \dis  \qquad = \Div (2\mu\uu \epsilon(\U)) - \Grad p  + \uu f_\mf \text{ in }\OmegaF_{t}, \\
+    \dis  \Div\U=0 \text{ in }\OmegaF_{t},\\
+    \dis  \U = \uu u_\In \text{ on } \GamIn_t,\\
+    \dis  \uu\sigma_\mf (\uu u,p)\cdot\uu n_\mf = \uu g_\mf \text{ on }\GamOu_{t},
+  \end{cases}
+\end{equation}
+where $\rho_\mf$ is the fluid density, $\mu$ its viscosity,
+$\strain(\U) = \Strain u$ is the strain rate tensor and $\uu
+\sigma_\mf(\U,p)=-p Id + 2\mu\strain(\U)$ the Cauchy stress
+tensor ($ Id $ is the identity matrix). Note
+that~(\ref{eq:fluid}) does not univocally define a solution
+$(\U,p,\ALE_t)$ as no boundary data are prescribed on the
+interface $\Sigma_t$.
+
+Similarly, for given vector functions $\uu g_\ms$, $\uu f_\ms$, $\Str(\D;\uu g_\ms, \uu f_\ms)$ means that
+we consider the following problem whose solution is $\D$:
+\begin{equation}\label{eq:struct}
+  \Str(\D;\uu g_\ms, \uu f_\ms) :
+  \begin{cases}
+    \dis  \rho_\ms \frac{\partial^2 \D}{\partial t^2} = \Div(\uu \sigma_\ms(\D))
+    -\gamma \D +\uu f_\ms \text{ in }\hOmegaS, \\
+    \dis  \uu\sigma_\ms(\D) \cdot {\uu n}_\ms = \uu g_\ms
+    \text{ on }\partial\hOmegaS\setminus\hGamW,
+  \end{cases}
+\end{equation}
+where $\piola(\D)$ is the first Piola--Kirchoff stress tensor,
+$\gamma$ is a coefficient accounting for possible viscoelastic
+effects, while $\uu g_\ms$ represents the normal traction on
+external boundaries. Appropriate models have to be chosen for the
+structure depending on the specific problem at hand.
+
+Similarly to what we have noticed for~(\ref{eq:fluid}),
+problem~(\ref{eq:struct}) can not define univocally the unknown
+$\D$ because a boundary value on $\hGamW$ is missing.
+
+When coupling the two problems together, the ``missing'' boundary
+conditions are indeed supplemented by suitable matching
+conditions on the reference interface $\hWall$. More precisely,
+if we denote by $\lambda$ the interface variable corresponding to
+the displacement $\D$ on $\hWall$, at any time the coupling
+conditions on the reference interface $\hWall$ are
+\begin{equation}\label{eq:condizioni}
+\begin{array}{c}
+  \ALE_{t} = \lambda ,\\[4pt]
+  \U \circ \ALE_t = \dot{\D}_{\hWall} ,\\[4pt]
+  (\uu \sigma_\mf(\U,p) \cdot {\uu n}_\mf) \circ \ALE_t +
+  \uu \sigma_\ms(\D)\cdot {\uu n}_\ms =0,
+\end{array}
+\end{equation}
+where $\dot{\D}_{\hWall}$ denotes the temporal derivative of
+$\D_{\vert\hWall}$. The system of equations (\ref{eq:fluid})-(\ref{eq:condizioni})
+identifies our coupled fluid-structure problem.
+We suppose the problem to be discretized in time. When the
+solution is available at time $t^n$, we look for the solution at
+the new time level $t^{n+1} = t^n + \delta t$. If no ambiguity
+occurs,  all the quantities will be referred to at time
+$t=t^{n+1}$.
+Without loss of generality we consider zero body forces, i.e.,
+$\uu f_\mf =0$ and $\uu f_\ms=0$.
+
+If we are given a displacement of the interface  $\lambda(t^{n+1})$ at the
+time $t^{n+1}$, we can find its harmonic extension on the fluid domain by solving
+the  following variational formulation of
+(\ref{eq:harmonicextension}):
+
+
+find $\Df_{t^{n+1}} \in H^1(\DomFi)^3$ such that
+\begin{equation} \label{eq:variationalvelocity2}
+\left\{
+\begin{array}{rcl}
+\dis \int_{\DomFi} \Grad \Df_{t^{n+1}}\cdot \Grad \uu \phi  =  0 & & \forall \uu \phi \in H^1_0(\DomFi)^3\\
+\Df_{t^{n+1}} = \lambda({t^{n+1}}) & & \text{on } \GamFSi,
+\end{array}
+\right.
+\end{equation}
+completed with appropriate boundary conditions  on $\GamIn\cup\GamOu$.
+
+Then we compute the velocity of the fluid domain as $\dis \wf{}^{,n+1}_{|\GamFS{n+1}} = 1/\delta t\,(\Df_{t^{n+1}}{}_{|\GamFSi} - \Df_{t^n}{}_{|\GamFSi})
+\circ(\ALE {t^{n+1}})^{-1}$ and the velocity and pressure of the fluid at time
+$t^{n+1}$ by solving:
+
+find $(\U^{n+1},p^{n+1}) = (\U(t^{n+1}),p(t^{n+1})) \in V^\mf(t^{n+1})\times Q^\mf(t^{n+1})$ such
+that $\U^{n+1}_{|\GamFS{n+1}} =  \wf{}^{,n+1}_{|\GamFS{n+1}}$,
+$\U^{n+1}_{|\GamIn(t^{n+1})} =  \U_\In(t^{n+1})$
+and
+\begin{equation} \label{eq:variationalfluid}
+\left\{
+\begin{array}{l}
+\displaystyle \frac{1}{\delta t}\int_{\DomF(t^{n+1})} \rho_\mf \U^{n+1}\V^\mf
++ \displaystyle \int_{\DomF(t^{n+1})}\rho_\mf [(\U^{n+1} -  \wf{}^{,n+1})\cdot \Grad \U^{n+1}]\V^\mf\\ \quad
+\displaystyle + \mu\int_{\DomF(t^{n+1})} \Fstress[{n+1}] \cdot \Grad \V^{\mf}
+= \displaystyle \frac{1}{\delta t} \int_{\DomF(t^{n+1})} \rho_\mf \U^n \V^\mf +
+\int_{\Gamma^{\mathrm{out}}(t^{n+1})} \uu g_{\mf} \V^\mf \\
+\displaystyle \int_{\DomF(t^{n+1})} q^\mf \Div \U^{n+1}  = 0
+\end{array}
+\right.
+\end{equation}
+for all $(\V^\mf,q^\mf) \in V_0^\mf(t^{n+1}) \times Q^\mf(t^{n+1})$, with
+\begin{eqnarray*}
+V^\mf(t) & = & \left\{\V^\mf \vert \,   \V^\mf \circ \ALE {t}  \in H^1(\DomFi)^3\right\}, \\
+V_0^\mf(t) & = & \left\{\V^\mf \in V^\mf(t) \vert \,\V^\mf  \circ \ALE {t}
+= \mathbf{0} \mbox { on } \GamFSi \cup \GamIn \right\}, \\
+Q^\mf (t)& = & \left\{q^\mf  \vert \, q^\mf \circ \ALE {t} \in L^2(\DomFi)\right\},
+\end{eqnarray*}
+and where the fluid domain $\DomF(t^{n+1})$ is given by:
+\begin{equation*}
+\DomF(t^{n+1})  = \ALE {t^{n+1}}(\DomFi).
+\end{equation*}
+
+We can then compute $  (\Fstress[{n+1}] \cdot {\uu n}_\mf) \circ \ALE t $ on $ \GamFSi$,
+which by (\ref{eq:couplingconditions}) has to be equal to the structure normal stresses.
+%We call $\Sf$ the operator that given $\lambda$ computes $S_\mf(\lambda)= \sigma_\mf$.
+
+
+On the structure side, given the same displacement $\lambda(t^{n+1})$, we can use the
+following scheme to approximate the arterial deformation and the domain
+velocity (see \cite{FerMou04:NewtonFS}):
+
+find $(\ds{}^{,n+1},\ws{}^{,n+1})=(\ds(t^{n+1}),\ws(t^{n+1})) \in V^\ms\times
+V^\ms$ such that
+\begin{equation} \label{eq:variationalstructure}
+\left\{
+\begin{array}{rl}
+%    \dis  \int_{\DomSi} \rho_\ms \frac{\partial^2 \uu d^\ms}{\partial t^2}v^\ms
+    \dis  \frac{2}{\delta t^2} \int_{\DomSi} \rho_\ms \ds{}^{, n+1} \V^\ms
+    &\dis-  \frac{2}{\delta t^2} \int_{\DomSi} \rho_\ms (\ds{}^{, n} + \delta t \ws{}^{, n})\V^\ms
+    +  \int_{\DomSi} \Sstress(\ds{}^{, n+1})\cdot \Grad \V^\ms    \\
+    &\dis = \int_{\partial\DomSi\setminus\GamFSi} \uu g_\ms \cdot \V^\ms\\
+    \dis \uu w^{\ms,n+1} &\dis=  \frac{2}{\delta t}(\uu d^{\ms,n+1} - \uu d^{\ms,n}) - \ws{}^{,n}\\
+    \dis\uu d^{\ms,n+1} &\dis =  \lambda(t^{n+1}) \quad\text{ on } \GamFSi,
+    \end{array}
+\right.
+\end{equation}
+for all $\V^\ms \in V^\ms$ such that $\V^\ms_{|\GamFSi} = 0$,
+with $V^\ms = H^1(\DomSi)^3 $. As for the fluid, we can then compute the structure
+normal stresses on the interface  as $\Sstress(\Ds{}^{, n+1}) \cdot {\uu n}_\ms$  on $\GamFSi$.
+
+If for a given interface displacement $\lambda(t^{n+1})$ the fluid and structure normal stresses are
+at equilibrium,
+%  i.e.,
+% $(\Fstress \cdot {\uu n}_\mf) \circ \ALE t +
+% \Sstress(\Ds) \cdot {\uu n}_\ms = 0$,
+%$ \sigma_\mf + \sigma_\ms = 0$,
+it means that the fluid-structure problem has
+been correctly solved.
+In general we impose the equilibrium in weak form, i.e.,
+\begin{multline*}
+  \int_{\GamFS{n+1}} \Fstress \cdot \uu n_{\mf}\V^\mf + \int_{\GamFSi}
+  \Sstress(\Ds) \cdot \uu n_{\ms} \V^s = 0 \\
+  \forall (\V^\mf,
+  \V^\ms) \in V^\mf(t^{n+1}) \times V^\ms \text{ s.t. } \V^\mf\circ\ALE t =
+  \V^\ms \text{ on } \GamFSi.
+\end{multline*}
+Both integrals can be computed as residuals of
+the weak form of the equations.
+We consider the coupled problem at a particular time  $t=t^{n+1}$.
+In order to write the interface equation associated to the global
+fluid-structure problem, we introduce a fluid and structure operator
+as follows.
+
+Let $\Sf$ be the Dirichlet-to-Neumann (D-t-N) fluid map such that to any given interface
+displacement $\lambda$ it associates the normal stress
+$$
+\Sf (\lambda) = \sigma_\mf :=  (\Fstress \cdot {\uu n}_\mf) \circ \ALE t \mbox{ on } \GamFSi,
+$$
+where $(\U, p)$ is the solution of the Navier-Stokes problem (\ref{eq:variationalfluid}). On the
+other hand, we denote by $\Ss$ the D-t-N operator associated to the structure in $\GamFSi$ such
+that to any given displacement $\lambda$ of the interface $\GamFSi$ it associates the normal stress
+exerted by the structure on $\GamFSi$:
+$$
+\Ss (\lambda) = \sigma_\ms :=  (\Sstress(\Ds) \cdot {\uu n}_\ms) \mbox{ on } \GamFSi,
+$$
+where $\Ds$ is the solution of (\ref{eq:variationalstructure}).
+
+Concerning the inverse of the solid operator, we can define $S_\ms^{-1}$ as a Neumann-to-Dirichlet
+(N-t-D) map that at any given normal stress $\sigma$ on $\GamFSi$ associates the interface
+displacement $\lambda(t^{n+1}) = \D^{\ms,n+1}$ by solving a structure problem analogous to
+(\ref{eq:variationalstructure}), but with the Neumann boundary condition
+\begin{equation*}
+\uu \sigma_\ms(\D^s) \cdot\uu n_\ms = \sigma \textrm{ on } \GamFSi
+\end{equation*}
+and then computing the restriction on $\GamFSi$ of the displacement of
+the structure domain.
+
+Moreover, we denote by $S_\ms'$ the tangent operator associated to the structure problem and by
+$(S_\ms')^{-1}$ its inverse. The latter is a N-t-D map that to any given normal stress $\sigma$ on
+$\GamFSi$ associates the corresponding displacement $\lambda(t^{n+1})$ of the interface by solving
+the linearized structure problem with boundary condition $\boldsymbol{\sigma}_\ms (\Ds) \cdot \uu
+n_\ms = \sigma$ on $\GamFSi$. Analogously, by $(S_\mf')^{-1}$ we denote the inverse of the tangent
+operator $S_\mf'$. This is also a N-t-D map  that for any given normal stress $\sigma$ on $\GamFSi$
+computes the corresponding displacement $\lambda(t^{n+1})$ of the interface through the solution of
+linearized Navier-Stokes equations with the boundary condition $(\Fstress \cdot {\uu n}_\mf) \circ
+\uu x^{\mf} = \sigma$ on $\Gamma_0$.
+Using the definitions of the operators $\Sf$ and $\Ss$ and of their inverses, we can express the
+coupled fluid-structure problem in terms of the solution $\lambda$ of a nonlinear equation defined
+only on $\GamFSi$. More precisely, we can envisage three possible formulations for the interface
+equation which are all equivalent from a mathematical point of view, but give rise to different
+iterative methods.
+
+First, we have the fixed-point formulation:
+\begin{equation} \label{eq:fixedpoint}
+\mbox{find } \lambda \mbox { such that } \Ss^{-1}(-\Sf(\lambda)) = \lambda
+\mbox{ on } \GamFSi .
+\end{equation}
+This is a classical formulation in fluid-structure interaction problems, but it is worth pointing
+out that here the fixed point is the displacement of the sole interface, whereas in the
+literature the solution obtained via
+fixed-point algorithms usually represents the displacement of the whole solid domain.
+
+The second possible approach is a slight modification of the previous equation
+(\ref{eq:fixedpoint}):
+\begin{equation} \label{eq:newton}
+\mbox{find } \lambda \mbox { such that } \Ss^{-1}(-\Sf(\lambda)) - \lambda = 0 \mbox{ on } \GamFSi,
+\end{equation}
+which is more suitable for setting up a Newton iterative method.
+Again, this is applied solely to the interface displacement,
+instead of the whole solid displacement as proposed.
