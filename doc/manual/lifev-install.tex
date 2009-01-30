@@ -119,14 +119,19 @@ source directory ), create a directory where the library will be stored :
 mkdir <path to the Trilinos library directory>/debug-openmpi
 \end{verbatim}
 
-for instance, if you want to compile the Trilinos library in debug mode using OpenMPI. You can also
-set whatever name you feel confortable with instead of \verb!debug-openmpi!. Now go to the Trilinos source directory and start configuring :
+for instance, if you want to compile the Trilinos library in debug mode using OpenMPI or
+
+\begin{verbatim}
+mkdir <path to the Trilinos library directory>/opt-openmpi
+\end{verbatim}
+
+if you want to compile the library in optimized mode. You can also set whatever name you feel confortable with instead of \verb!debug-openmpi!.
+Now go to the Trilinos source directory and start configuring :
 
 \begin{verbatim}
 ../configure --prefix=<path to where you want to install the library> \
              --enable-<debug or opt> \
-             --enable-default-packakages \
-             --with-ml_metis --with-ml_parmetis3x \
+             --enable-default-packages \
              --disable-belos \
              --disable-capo \
              --disable-claps \
@@ -134,7 +139,6 @@ set whatever name you feel confortable with instead of \verb!debug-openmpi!. Now
              --disable-komplex \
              --disable-loca \
              --disable-meros \
-             --enable-ml \
              --disable-new_package \
              --disable-pliris \
              --disable-pytrilinos \
@@ -148,23 +152,24 @@ set whatever name you feel confortable with instead of \verb!debug-openmpi!. Now
              --disable-tsfextended \
              --disable-tests \
              --disable-examples \
+             --enable-ml \
              --enable-teuchos \
              --enable-ifpack \
              --enable-ifpack-amesos \
              --enable-ifpack-teuchos \
              --enable-amesos \
              --enable-triutils \
+             --enable-epetra-abc \
              --enable-anasazi \
-             --enable-amesos \
              --enable-aztecoo \
-             --enable-epetra-ext \
+             --enable-epetraext \
              --enable-nox \
              --enable-triutils \
              --with-trilinos \
              --with-gnumake \
-             --enable-epetra-abc \
+             --with-ml_metis --with-ml_parmetis3x \
              --with-mpi=/usr/lib/openmpi/ \
-             CC=gcc CCC=g++ F77=gfortran \
+             CC=gcc CXX=g++ F77=gfortran \
              --with-incdirs=''-I/usr/include/metis/ -I/usr/include/parmetis''
 \end{verbatim}
 Simply modify the first two lines according to your own configuration.
@@ -173,8 +178,11 @@ After the configuration is done, just type
 make
 make install
 \end{verbatim}
+Optionally, you use the \verb!-j x(x=2,3 or 4)! option, which set the number of processor to use,
+in order speed up the compilation time on a multiprocessor machine.
+
 \verb|make| will compile the static files, and make install will create and install
-the library files. The Trilinos library is now installed in the \verb|prefix! setting directory.
+the library files. The Trilinos library is now installed in the \verb!prefix! setting directory.
 
 \begin{hint}{Object files vs Library file}
 \verb|make| and \verb|make install| have very different purposes and should not be confused.
@@ -210,10 +218,12 @@ It is now time to download and compile the code. The first step is to checkout t
 
 \begin{verbatim}
 export CVS_RSH=ssh
+\end{verbatim}
+which should be inserted in your \verb!.profile! or shell configuration file, then
+\begin{verbatim}
 cvs -z3 -d:ext:developername@cmcsforge.epfl.ch:/cvsroot/lifev co lifev
 \end{verbatim}
-
-then place yourself in the new directory :
+where developername is your account name on cmcsforge. Place yourself in the new directory :
 
 \begin{verbatim}
 cd lifev
@@ -227,21 +237,21 @@ make -f Makefile.cvs
 \noindent Third, you have to execute the script
 \ixvs{configure}{autotools}
 it will automatically check the availability of the needed components
-for \lifev compilation. You type:
+for \lifev compilation. Type:
 
 \begin{verbatim}
 configure --with-trilinos-lib=<your Trilinos library path>
           --with-trilinos-include=<your trilinos include path>
-          --enable-opt --with-openmpi
+          <--enable-opt or --enable-debug> --with-openmpi
           --prefix=<your lifev library install path>
 \end{verbatim}
 
-\noindent Finally, you just have to use \ixv{make} to compile \lifev libraries. You type
+\noindent Finally, you just have to use \ixv{make} to compile \lifev libraries and documentation.
+Enter
 \begin{verbatim}
 make
 make install
 \end{verbatim}
-Optionally, you use \verb!-j x(x=2,3 or 4)! to speed up the compilation time.
 
 \begin{hint}{Configure}
   \label{hint:configure}

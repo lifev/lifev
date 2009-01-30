@@ -8,7 +8,7 @@
 % E-MAIL:       foureste@iacspc.epfl.ch
 %
 % ORIG-DATE: 21-Nov-08 at 11:16:22
-% LAST-MOD: 15-Jan-09 at 15:06:44 by Gilles Fourestey
+% LAST-MOD: 29-Jan-09 at 15:17:06 by Gilles Fourestey
 %
 % DESCRIPTION:
 % DESCRIP-END.
@@ -20,156 +20,17 @@
 \section{Getting started: a simple case}
 \label{sec:gettingstarted}
 
-Let us consider flow of a viscous and incompressible fluid described by its velocity $u$
-and pressure $p$. Its flow can be described, at low reynolds number, by the Oseen Problem :
-
-\begin{equation} \label{eqn-oseen}
-\left\{
-\begin{array}{lc}
-\displaystyle \alpha u + \beta \cdot \grad u - \nu \Delta u+
-\nabla p & = f \\
-\displaystyle \nabla.u & = 0  \\
-\end{array}
-\right.
-\end{equation}
-
-were $\nu$ is the kinematic viscosity of the fluid. If we set the convective
-acceleration $\beta$ and $\alpha$ to zero, we get the Stokes equations :
-
-\begin{equation} \label{eqn-stokes}
-\left\{
-\begin{array}{lc}
-- \nu \Delta u+
-\nabla p & = f \\
-\displaystyle \nabla.u & = 0  \\
-\end{array}
-\right.
-\end{equation}
-
-We want to solve the following Stokes problem :
-
-\begin{equation} \label{eqn-stokes}
-\left\{
-\begin{array}{lc}
-\displaystyle - \nu \Delta u+
-\nabla p & = f \\
-\displaystyle \nabla.u & = 0  \\
-u = (1, 0, 0) & \mbox{ on } \partial \Omega_0 \\
-u = (0, 0, 0) & \mbox{ on } \partial \Omega_1  \\
-u.n = 0 & \mbox { on } \partial \Omega_2\\
-\end{array}
-\right.
-\end{equation}
-
-on the 3D domain represented by :
-
-\vspace{0.5cm}
-\begin{center}
-\input cavity.pdf_t
-\end{center}
-\vspace{0.5cm}
-
-These equation can be written in using the following bilinear forms :
-\begin{eqnarray*}
-\displaystyle \forall u,v \in H^1(\Omega) & : &
-a(u,v) = \nu \int_{\Omega}\nabla u .\nabla v dx \\
-\displaystyle \forall v \in H^1(\Omega),\mbox{ } q \in L^2(\Omega) & : &
-b(v,q) = \int_{\Omega} q\nabla.v dx \\
-\end{eqnarray*}\\
-which lead us to the variational formulation : let $f
-\in H^{-1}(\Omega)$, find $u \in H^1_0(\Omega)$ et $p \in
-L^2_0(\Omega)$ such that
-\begin{equation} \label{eqn-varia}
-\left\{
-\begin{array}{rlr}
-\displaystyle \alpha (u,v) + a(u,v) + b(v,p) & =  (g,v)
-& \hspace{1cm} \forall t \in(0,T), \forall v \in H^1_0(\Omega) \\
-b(u,q) & = 0 & \hspace{1cm} \forall t \in (0,T), \forall q \in L^2_0(\Omega)
-\end{array}
-\right.
-\end{equation}
-%find $u_h \in X_h$ and $p_h \in M_h$ so that,
-
-In order to solve (\ref{eqn-varia}) using \lifev, create a working directory.
-In this directory, copy the following files :
-
-\begin{itemize}
-\item Makefile-cavity
-\item cavity.cpp
-\item data-cavity
-\end{itemize}
-
-from the \verb|<lifev directory>/doc/manual/| directory. \verb!cavity.cpp! contains the
-C++ code to solve the variational problem (\ref{eqn-varia}). But before compiling it,
-let's have a look a the \ixns{Makefile}{GNU Makefile}.
-
-\begin{verbatim}
-
-# path to the compiler
-CC               = /usr/bin/g++
-
-SOURCES          = cavity.cpp
-OBJECTS          = $(SOURCES:.cpp=.o)
-EXECUTABLE       = cavity
-
-LIFELIBPATH      = -L<lifev lib directory path>
-LIFELIBS         = -llifefilters -llifesolver -llifefem \
-                   -llifealg -llifearray -llifecore -llifemesh
-LIFEINCLUDEPATH  = -I<lifev include directory path>
-
-TRILLIBPATH      = -L<trilinos lib directory path>
-TRILLIBS         = -laztecoo -laztecoo -ltriutils -lml \
-                   -lifpack -lamesos -lepetraext -lepetra \
-                   -lteuchos  -llapack -lblas
-TRILINCLUDEPATH  = -I<trilinos include directory path>
-
-MPILIBPATH       = -L<mpi lib directory path>
-MPILIBS          = -lmpi_cxx -lmpi
-MPIINCLUDEPATH   = -I<mpi include directory path>
-
-METISLIBPATH	 = -L<metis lib directory path>
-METISLIBS        = -lparmetis -lmetis
-METISINCLUDEPATH = -I<metis include directory path>
-
-# uncomment this part for optimized compilation
-LDFLAGS         = -c -g0 -O2 -DTHREEDIM -lm
-# uncomment this part for debugging
-#LDFLAGS         = -c -g2 -O0 -DTHREEDIM -lm
-
-
-all: $(OBJECTS) $(EXECUTABLE)
-
-$(OBJECTS): $(SOURCES)
-	$(CC) $(LDFLAGS) \
-	$(MPIINCLUDEPATH) $(TRILINCLUDEPATH) $(LIFEINCLUDEPATH) \
-	$(SOURCES) -o $@
-
-$(EXECUTABLE): $(OBJECT)
-	echo "compiling the executable ... "
-	$(CC) $(CFLAGS) \
-	$(OBJECTS) $< -o $@ \
-	$(LIFELIBPATH) $(LIFELIBS) $(LIFEINCLUDEPATH) \
-	$(TRILLIBPATH) $(TRILLIBS) $(TRILINCLUDEPATH) \
-	$(METISPATH) $(METISLIBS) $(METISINCLUDE) \
-	$(MPILIBPATH) $(MPILIBS) $(MPIINCLUDEPATH) \
-
-
-clean:
-	rm -rf *o cavity
-
-\end{verbatim}
-
-
-In order to make everything work, you need to fill the \verb|<...>| with your local
-configuration paths. You can also change the \verb|LDFLAGS| options in order to
-compile using the debug or the optimized mode in the g++ compiler. More information
-about the using makefiles are available at \url{http://www.gnu.org/software/make/manual/make.html}.
-
 
 
 \input{cavity.tex}
 
 
+%% FSI
+
+\section{Fluid/structure interaction}
+\label{sec:gettingstarted}
+
+\input{fsi.tex}
 
 
 

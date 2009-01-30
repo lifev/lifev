@@ -8,10 +8,156 @@
 % E-MAIL:       foureste@iacspc.epfl.ch
 %
 % ORIG-DATE: 24-Nov-08 at 14:03:21
-% LAST-MOD:  8-Jan-09 at 11:30:20 by Gilles Fourestey
+% LAST-MOD: 28-Jan-09 at 17:05:35 by Gilles Fourestey
 %
 % DESCRIPTION:
 % DESCRIP-END.
+
+
+Let us consider flow of a viscous and incompressible fluid described by its velocity $u$
+and pressure $p$. Its flow can be described, at low reynolds number, by the Oseen Problem :
+
+\begin{equation} \label{eqn-oseen}
+\left\{
+\begin{array}{lc}
+\displaystyle \alpha u + \beta \cdot \grad u - \nu \Delta u+
+\nabla p & = f \\
+\displaystyle \nabla \cdot u & = 0  \\
+\end{array}
+\right.
+\end{equation}
+
+were $\nu$ is the kinematic viscosity of the fluid. If we set the convective
+acceleration $\beta$ and $\alpha$ to zero, we get the Stokes equations :
+
+\begin{equation} \label{eqn-stokes}
+\left\{
+\begin{array}{lc}
+- \nu \Delta u+
+\nabla p & = f \\
+\displaystyle \nabla \cdot u & = 0  \\
+\end{array}
+\right.
+\end{equation}
+
+We want to solve the following Stokes problem :
+
+\begin{equation} \label{eqn-stokes}
+\left\{
+\begin{array}{lc}
+\displaystyle - \nu \Delta u+
+\nabla p & = f \\
+\displaystyle \nabla \cdot u & = 0  \\
+u = (1, 0, 0) & \mbox{ on } \partial \Omega_0 \\
+u = (0, 0, 0) & \mbox{ on } \partial \Omega_1  \\
+u \cdot n = 0 & \mbox { on } \partial \Omega_2\\
+\end{array}
+\right.
+\end{equation}
+
+on the 3D domain represented by :
+
+\vspace{0.5cm}
+\begin{center}
+\input cavity.pdf_t
+\end{center}
+\vspace{0.5cm}
+
+These equation can be written in using the following bilinear forms :
+\begin{eqnarray*}
+\displaystyle \forall u,v \in H^1(\Omega) & : &
+a(u,v) = \nu \int_{\Omega}\nabla u \cdot \nabla v dx \\
+\displaystyle \forall v \in H^1(\Omega),\mbox{ } q \in L^2(\Omega) & : &
+b(v,q) = \int_{\Omega} q\nabla \cdot v dx \\
+\end{eqnarray*}\\
+which lead us to the variational formulation : let $f
+\in L_0(\Omega)$, find $u \in H^1_0(\Omega)$ et $p \in
+L^2_0(\Omega)$ such that
+\begin{equation} \label{eqn-varia}
+\left\{
+\begin{array}{rlr}
+\displaystyle \alpha (u,v) + a(u,v) + b(v,p) & =  (g,v)
+& \hspace{1cm} \forall t \in(0,T), \forall v \in H^1_0(\Omega) \\
+b(u,q) & = 0 & \hspace{1cm} \forall t \in (0,T), \forall q \in L^2_0(\Omega)
+\end{array}
+\right.
+\end{equation}
+%find $u_h \in X_h$ and $p_h \in M_h$ so that,
+
+In order to solve (\ref{eqn-varia}) using \lifev, create a working directory.
+In this directory, copy the following files :
+
+\begin{itemize}
+\item Makefile-cavity
+\item cavity.cpp
+\item data-cavity
+\end{itemize}
+
+from the \verb|<lifev directory>/doc/manual/| directory. \verb!cavity.cpp! contains the
+C++ code to solve the variational problem (\ref{eqn-varia}). But before compiling it,
+let's have a look a the \ixns{Makefile}{GNU Makefile}.
+
+\begin{verbatim}
+
+# path to the compiler
+CC               = /usr/bin/g++
+
+SOURCES          = cavity.cpp
+OBJECTS          = $(SOURCES:.cpp=.o)
+EXECUTABLE       = cavity
+
+LIFELIBPATH      = -L<lifev lib directory path>
+LIFELIBS         = -llifefilters -llifesolver -llifefem \
+                   -llifealg -llifearray -llifecore -llifemesh
+LIFEINCLUDEPATH  = -I<lifev include directory path>
+
+TRILLIBPATH      = -L<trilinos lib directory path>
+TRILLIBS         = -laztecoo -laztecoo -ltriutils -lml \
+                   -lifpack -lamesos -lepetraext -lepetra \
+                   -lteuchos  -llapack -lblas
+TRILINCLUDEPATH  = -I<trilinos include directory path>
+
+MPILIBPATH       = -L<mpi lib directory path>
+MPILIBS          = -lmpi_cxx -lmpi
+MPIINCLUDEPATH   = -I<mpi include directory path>
+
+METISLIBPATH	 = -L<parmetis lib directory path>
+METISLIBS        = -lparmetis -lmetis
+METISINCLUDEPATH = -I<parmetis include directory path>
+
+# uncomment this part for optimized compilation
+LDFLAGS         = -c -g0 -O2 -DTHREEDIM -lm
+# uncomment this part for debugging
+#LDFLAGS         = -c -g2 -O0 -DTHREEDIM -lm
+
+
+all: $(OBJECTS) $(EXECUTABLE)
+
+$(OBJECTS): $(SOURCES)
+	$(CC) $(LDFLAGS) \
+	$(MPIINCLUDEPATH) $(TRILINCLUDEPATH) $(LIFEINCLUDEPATH) \
+	$(SOURCES) -o $@
+
+$(EXECUTABLE): $(OBJECT)
+	echo "compiling the executable ... "
+	$(CC) $(CFLAGS) \
+	$(OBJECTS) $< -o $@ \
+	$(LIFELIBPATH) $(LIFELIBS) $(LIFEINCLUDEPATH) \
+	$(TRILLIBPATH) $(TRILLIBS) $(TRILINCLUDEPATH) \
+	$(METISPATH) $(METISLIBS) $(METISINCLUDE) \
+	$(MPILIBPATH) $(MPILIBS) $(MPIINCLUDEPATH) \
+
+
+clean:
+	rm -rf *o cavity
+
+\end{verbatim}
+
+
+In order to make everything work, you need to fill the \verb|<...>| with your local
+configuration paths. You can also change the \verb|LDFLAGS| options in order to
+compile using the debug or the optimized mode in the g++ compiler. More information
+about the using makefiles are available at \url{http://www.gnu.org/software/make/manual/make.html}.
 
 
 \begin{verbatim}
@@ -58,7 +204,11 @@ Without it, we have to use LifeV::RefFE instead of just RefFE for instance.
 
 \begin{verbatim}
 
-typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_type;
+typedef boost::function<Real ( Real const&,
+                               Real const&,
+                               Real const&,
+                               Real const&,
+                               ID const& )> fct_type;
 
 typedef Oseen< RegionMesh3D<LinearTetra> >::vector_type  vector_type;
 typedef boost::shared_ptr<vector_type>                   vector_ptrtype;
@@ -119,14 +269,14 @@ Real uLid(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/
 {
   switch(i) {
   case 1:
-    return x*(1 - x);
-    break;
+      return x*(1 - x);
+      break;
   case 3:
       return 0.0;
       break;
   case 2:
       return 0.0;
-    break;
+      break;
   }
   return 0;
 }
@@ -139,7 +289,7 @@ now becomes :
   u = (x(1 - x), 0, 0) & \mbox{ on } {\partial \Omega}_0 \\
 \end{equation*}
 
-We can now proceed to the main bloc of the code.
+We can now proceed to the main block of the code.
 
 \begin{verbatim}
 int
@@ -174,11 +324,12 @@ for more explanations.
             cout << "% using MPI" << endl;
             int ntasks;
             int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
-            std::cout << "My PID = " << comm.MyPID() << " out of " << ntasks << " running." << std::endl;
+            std::cout << "My PID = " << comm.MyPID() << " out of "
+                      << ntasks << " running." << std::endl;
         }
 \end{verbatim}
-This bloc, although not necessary in the comprehention of the FE resolution code, explains
-how to manage output from a parralell code. As we do not want every processor to output
+This block, although not necessary in the comprehention of the FE resolution code, explains
+how to manage output from a parallel code. As we do not want every processor to output
 every piece of information, we set a ``leader'' processor that will display relevant
 informations on the console ( 0 in our case ).
 \begin{verbatim}
@@ -249,15 +400,86 @@ In order to build a FE solver to solve our cavity problem, we need :
     // the first two are classical essential or dirichlet conditions
     bcH.addBC( "Upwall",   UPWALL,   Essential, Full,      uIn,   3 );
     bcH.addBC( "Wall",     WALL,     Essential, Full,      uZero, 3 );
+\end{verbatim}
+
+Bondary conditions \ixv{Boundary Conditions} part. Here is the prototype of the \verb!addBC! function :
+
+\begin{verbatim}
+    //! add new BC to the list (user defined function)
+    /*!
+      \param name the name of the boundary condition
+      \param flag the mesh flag identifying the part of the mesh where the boundary condtion applies
+      \param type the boundary condition type: Natural, Essential, Mixte
+      \param mode the boundary condition mode: Scalar, Full, Component, Normal, Tangential
+      \param bcf the function holding the user defined function involved in this boundary condition
+      \param std::vector<ID> storing the list of components involved in this boundary condition
+    */
+    void addBC( const std::string&     name,
+                const EntityFlag&      flag,
+                const BCType&          type,
+                const BCMode&          mode,
+                BCFunctionBase&        bcf,
+                const std::vector<ID>& comp );
+\end{verbatim}
+\verb!name! is a boundary condition description string,
+\verb!flag! is the boundary condition number as defined in the mesh,
+\verb!mode! is the mode, \verb!bcf! is the function holding the user-defined function involved
+in the boundary condition. \verb!type! and \verb!mode! are respectively the boundary condition type
+and mode. Please refer to the table (\ref{table-bcparam) for a description of their values.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+name & options & Description \\
+\hline \hline
+type &  Natural & Neumann\\
+& Essential & dirichlet \\
+& Mixte & Robin\\
+
+\hline
+mode & Scalar & 1 dimension BC \\
+& Full & 3 component BC \\
+& Component  & Sepate compenent BC \\
+& Normal & Normal BC \\
+& Tangential & Tangential BC \\
+\hline
+
+\end{tabular}
+\end{center}
+\caption{ Boundary Condition parameters description
+\ixt{Boundary Conditions parameters}{Boundary Conditions}}
+\label{table-bcparams}
+\end{table}
+
+\verb!comp! is a vector storing the components involved in the boundary condition.
+The last boundary condition we want to impose is a little more tricky.As defined
+in (\ref{eqn-stokes}), we have decided that boundary condition \verb!SLIPWALL! ( i.e 20 in the mesh file, or $\partial \Omega_2$ in (\ref{eqn-stokes}) ), will recive
+a boundary slipwall condition, i.e
+\begin{equation}\label{eqn-slipwallbc}
+u \cdot n = 0
+\end{equation}
+This means, since the two concerned planes are defined by $z = 0$ and $z = L$, that
+\begin{equation*}
+u_z = 0 \mbox{ for } z=1,L
+\end{equation*}
+In order to set our third component (\verb!z!), we define the vector :
+\begin{verbatim}
+    std::vector<ID> zComp(1);
+    zComp[0] = 3;
+\end{verbatim}
+Then, we call add an essential (Dirichlet) boundary condition on the z component by calling
+\begin{verbatim}
     // this bc is imposed only on some compenants, that is the ones given in zComp
     // Here it's the thirs, ie z, in order to have u.n = 0
     bcH.addBC( "Slipwall", SLIPWALL, Essential, Component, uZero, zComp );
 \end{verbatim}
+This will set a null function to the third component on the sleepwall. We could have just easily defined
+another function for the others components using the same procedure.
 
-Bondary conditions part.
-
-LifeV partitions meshes on the fly using the parMetis libreary, that means that you do not have to provide the
-partioned mesh in order to have the simulation running.
+Now that boundary conditions are set, let's have the mesh \ixv{Mesh}. LifeV partitions meshes \ixns{Paritioning}{Mesh}on the fly
+using the parMetis libreary, that means that you do not have to provide the partioned mesh in
+order to have the simulation running.
 
 \begin{verbatim}
 
@@ -266,8 +488,17 @@ partioned mesh in order to have the simulation running.
 
 \end{verbatim}
 
-In our case, after the call to the partitionMesh constructor, meshPart will store
-the local partitioned mesh. Using this local mesh, we can create our FE spaces.
+In our case, after the call to the \verb!partitionMesh! constructor, \verb!meshPart! will store
+the local partitioned mesh. Using this local mesh, we can create our Finite Element \ixt{Finite Element Space}{Finite Element} spaces.
+In \lifev, a Finite Element Space is a class storing :
+\begin{description}
+\item a mesh,
+\item a reference Lagrangian Finite Element,
+\item quadrature rules to integrate reference functions on the mesh elements or the boundaries.
+\end{description}
+A reference Lagrangian Finite Element in \lifev is a classe containing the geometrical definition
+of the mesh elements and the polynomial approximation order we want to use.
+Let's have a look a the code :
 
 \begin{verbatim}
 
@@ -285,6 +516,51 @@ the local partitioned mesh. Using this local mesh, we can create our FE spaces.
     qR_vel    = &quadRuleTetra15pt; // DoE 5
     bdQr_vel  = &quadRuleTria3pt;   // DoE 2
 
+\end{verbatim}
+
+After these lines, \verb!refFE_vel! contains the desired reference finite element  \ixns{Reference Finite Element}{Finite Element}. See table \ref{table-feapproxorder}
+for the descrition of available parameters.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+Name  & Description \\
+\hline \hline
+feTetraP1 & P1 finite element on Tetrahedron \\
+feTetraP1Bubble & P1-Bubble finite element on Tetrahedron \\
+feTetraP2 & P2 finite element on Tetrahedron \\
+\hline
+\end{tabular}
+\end{center}
+\caption{ Reference Finite Element parameters}
+\label{table-feapproxorder}
+\end{table}
+
+Quadrature rules \ixv{Quatrature Rules} are defined according the polynomial order we have defined.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+Name  & Description & exact p. order\\
+\hline \hline
+quadRuleTetra1pt   & 1 point & 1 \\
+quadRuleTetra3pt   & 3 point & 2 \\
+quadRuleTetra5pt   & 5 point &   \\
+quadRuleTetra15pt  & 15 point &  \\
+quadRuleTetra64pt  & 64 point &  \\
+\hline
+\end{tabular}
+\end{center}
+\caption{ Quadrature Rule description}
+\label{table-feapproxorder}
+\end{table}
+
+Everything is ready to create our Finite Element space :
+
+\begin{verbatim}
+
     // Everything is ready to build the FE space
     // first the velocity FE space
 
@@ -300,9 +576,7 @@ the local partitioned mesh. Using this local mesh, we can create our FE spaces.
 
 \end{verbatim}
 
-RefFE and QuadRule are the Reference Finite Element and the quadratic
-rules used to perform numerical integrations. In our example, we have defined the
-reference finite element as P2 and defined two quadratic rule: one general and one
+We have now defined the reference finite element as P2 and defined two quadrature rule: one general and one
 for the boundary integration. Once these classes are defined, we call the FE space
 object constructor with the following input parameters :
 \begin{itemize}
@@ -312,7 +586,9 @@ object constructor with the following input parameters :
 \item 3 is the field dimension,
 \item comm is the trilinos communicator.
 \end{itemize}
+
 Of course, we do the same with the pressure. This time, we will use a P1 discretization.
+
 \begin{verbatim}
 
     const RefFE*    refFE_press;
@@ -375,9 +651,10 @@ contained in the data file.
 
 \begin{table}
 \begin{center}
-\begin{tabular}{l|l}
-name & options\\
+\begin{tabular}{|l|l|}
 \hline
+name & options\\
+\hline \hline
 solver & cg \\
 & cg\_condnum\\
 & gmres (default)\\
@@ -385,7 +662,6 @@ solver & cg \\
 & cgs\\
 & tfqmr\\
 & bicgstab\\
-
 \hline
 conv & r0\\
 & rhs (default) \\
@@ -491,10 +767,9 @@ we give references of the solution vector and that's it.
     MPI_Barrier(MPI_COMM_WORLD);
 \end{verbatim}
 
-Here is the occasion to introduce an important concept in \lifev/Trilinos.
+Here is the occasion to introduce an important concept in \lifev/Trilinos (...).
 
 We are now set for the linear system resolution.
-
 
 \begin{verbatim}
 
@@ -507,7 +782,7 @@ We are now set for the linear system resolution.
     double alpha = 0.;
 \end{verbatim}
 
-Using the full map defined above, we set the advection and right handside to zero.
+Using the full map defined above, we set the advection term and right handside to zero.
 
 
 \begin{verbatim}
@@ -522,8 +797,16 @@ In the Oseen class, \verb|updateSystem| takes 3 arguments :
 \item \verb|beta| is the advection term,
 \item \verb|rhs| is the righthand side.
 \end{itemize}
-Setting these 3 terms to zero will result in solving the system (\ref{eqn-stokes}).
 
+Setting these 3 terms to zero will result in solving the system (\ref{eqn-stokes}).
+The linear system is solved by calling \verb!iterate!, which requires the boundary conditions
+in parameters. The member \verb!iterate! will
+
+\begin{itemize}
+\item build the full matrix,
+\item apply the boundary conditions,
+\item solve the system.
+\end{itemize}
 
 \begin{verbatim}
     // iterating the solver in order to produce the solution
@@ -535,6 +818,7 @@ Setting these 3 terms to zero will result in solving the system (\ref{eqn-stokes
 
 \end{verbatim}
 
+You may now postprocess the result using Paraview.
 
 %
 %%%%%%%%%%%%% Some Settings for emacs and auc-TeX

@@ -1,10 +1,110 @@
 \documentclass[a4paper, 12pt, report]{lifestyle}
 
 
-\RCS $Revision: 1.2 $
-\RCS $Date: 2009-01-15 09:01:12 $
+\RCS $Revision: 1.3 $
+\RCS $Date: 2009-01-30 09:55:23 $
 \RCS $State: Exp $
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% New user defined commands
+%%%%%%N%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\newcommand{\Div} {\operatorname{div}}
+\newcommand{\Grad} {\boldsymbol{\nabla}}
+\newcommand{\strain}{{\uu \epsilon}}
+\newcommand{\Strain}[1] {(\Grad{\uu{#1}} +  (\Grad{\uu{#1}})^T )/2 }
+\newcommand{\piola}{\uu \sigma_\ms}
+
+\newcommand{\St}{\operatorname{Stokes}}
+\newcommand{\NS}{\operatorname{Fluid}}
+\newcommand{\Str}{\operatorname{Str}}
+
+\newcommand{\uu}[1]{\boldsymbol{#1}}
+\newcommand{\U}{{\uu{u}}}
+\newcommand{\V}{{\uu{v}}}
+\newcommand{\bY}{{\hat {\uu x}}}
+\newcommand{\bw}{{\uu w}}
+\newcommand{\D}{{\uu d}}
+\newcommand{\Df}{{\uu d^\mf}}
+\newcommand{\Ds}{{\uu d^\ms}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+
+
+\newcommand{\Div}{\operatorname{div}}
+\newcommand{\dis}{\displaystyle}
+
+%
+
+\newcommand{\xs}{\uu x^\ms}
+\newcommand{\xf}{\uu x^\mf}
+\newcommand{\ds}{\uu d^\ms}
+\newcommand{\df}{\uu d^\mf}
+\newcommand{\mf}{{\mathrm{f}}}
+\newcommand{\ms}{{\mathrm{s}}}
+\newcommand{\wf}{\uu w^\mf}
+\newcommand{\ws}{\uu w^\ms}
+\newcommand{\disp}[1]{\lambda^{#1}}
+%\newcommand{\Omegat}[1][t]{\Omega(#1)}
+%
+% FSI commands
+%
+\newcommand{\hOmega} {\hat\Omega}
+\newcommand{\hOmegaF}{\hat\Omega^{\mf}}
+\newcommand{\hOmegaS}{\hat\Omega^{\ms}}
+\newcommand{\hGamIn} {\hat\Gamma^{\mathrm{in}}}
+\newcommand{\hGamOu} {\hat\Gamma^{\mathrm{out}}}
+%
+\newcommand{\Omegat}{\Omega(t)}
+\newcommand{\Omegai}{\Omega_0}
+\newcommand{\OmegaF} {\Omega^{\mf}}
+\newcommand{\OmegaFi} {\Omega_0^{\mf}}
+\newcommand{\OmegaFt}{\Omega^{\mf}(t)}
+\newcommand{\OmegaS} {\Omega^{\ms}}
+\newcommand{\OmegaSi} {\Omega_0^{\ms}}
+\newcommand{\OmegaSt}{\Omega^{\ms}(t)}
+%
+\newcommand{\Domt}   {\Omega(t)}
+\newcommand{\Domi}   {\Omega_0}
+\newcommand{\DomF}   {\Omega^{\mf}}
+\newcommand{\DomFi}  {\Omega_0^{\mf}}
+\newcommand{\DomFt}  {\Omega^{\mf}(t)}
+\newcommand{\DomS}   {\Omega^{\ms}}
+\newcommand{\DomSi}  {\Omega_0^{\ms}}
+\newcommand{\DomSt}  {\Omega^{\ms}(t)}
+\newcommand{\GamIn}  {\Gamma^{\mathrm{in}}}
+\newcommand{\GamIni}  {\Gamma^{\mathrm{in}}_0}
+\newcommand{\GamInt} {\Gamma^{\mathrm{in}}(t)}
+\newcommand{\GamOu}  {\Gamma^{\mathrm{out}}}
+\newcommand{\GamOui}  {\Gamma^{\mathrm{out}}_0}
+\newcommand{\GamOut} {\Gamma^{\mathrm{out}}(t)}
+\newcommand{\GamFS}[1] {\Gamma(t^{#1})}
+\newcommand{\GamFSi} {\Gamma_0}
+\newcommand{\GamFSt} {\Gamma(t)}
+\newcommand{\hGamW}  {\Sigma_0}
+\newcommand{\Wall}   {\Sigma}
+\newcommand{\Wallt}  {\Sigma(t)}
+\newcommand{\hWall}  {\Sigma^s}
+%\newcommand{\ALE}[1]{{\CMcal A}_{#1}}
+\newcommand{\ALE}[1]{{\uu x^\mf_{#1}}}
+\newcommand{\diffALE}[1]{\left.\frac{\partial #1}{\partial t}\right|_{\uu x_0}}
+\newcommand{\In}{{\operatorname{in}}}
+\newcommand{\Out}{{\operatorname{out}}}
+\newcommand{\Fstress}[1][{ }] {\uu{\sigma}_\mf (\U^{#1}, p^{#1})}
+\newcommand{\Sstress}[1][{ }] {\uu{\sigma}_\ms}
+%
+% FSI operators
+%
+\newcommand{\Sf}{S_\mf}
+\newcommand{\Ss}{S_\ms}
+\newcommand{\SFprime}{S'_\mf}
+\newcommand{\SSprime}{S'_\ms}
+\newcommand{\DN}{S'_\ms(\lambda^k)}
+\newcommand{\ND}{S'_\mf(\lambda^k)}
+\newcommand{\NN}{S'_\mf(\lambda^k) + S'_\ms^{-1}(\lambda^k)}
+\newcommand{\invDN}{{S'}_\ms^{-1}(\lambda^k)}
+\newcommand{\invND}{{S'}_\mf^{-1}(\lambda^k)}
+\newcommand{\invNN}{{S'}_\mf^{-1}(\lambda^k) + S'_\ms^{-1}(\lambda^k)}
 
 
 \title{\lifetitle{LifeV Developer Manual}

@@ -45,9 +45,9 @@ MPILIBPATH       = -L<mpi lib directory path>
 MPILIBS          = -lmpi_cxx -lmpi
 MPIINCLUDEPATH   = -I<mpi include directory path>
 
-METISLIBPATH	 = -L<metis lib directory path>
+METISLIBPATH	 = -L<parmetis lib directory path>
 METISLIBS        = -lparmetis -lmetis
-METISINCLUDEPATH = -I<metis include directory path>
+METISINCLUDEPATH = -I<parmetis include directory path>
 
 
 # uncomment this part for optimized compilation
