@@ -8,7 +8,7 @@
 % E-MAIL:       foureste@iacspc.epfl.ch
 %
 % ORIG-DATE: 24-Nov-08 at 14:03:21
-% LAST-MOD:  4-Feb-09 at 12:51:49 by Gilles Fourestey
+% LAST-MOD:  4-Feb-09 at 16:44:45 by Gilles Fourestey
 %
 % DESCRIPTION:
 % DESCRIP-END.
@@ -20,7 +20,7 @@ and pressure $p$. Its flow can be described, at low reynolds number, by the Osee
 \begin{equation} \label{eqn-oseen}
 \left\{
 \begin{array}{lc}
-\displaystyle \alpha u + \beta \cdot \grad u - \nu \Delta u+
+\displaystyle \alpha u + \beta \cdot \nabla u - \nu \Delta u+
 \nabla p & = f \\
 \displaystyle \nabla \cdot u & = 0  \\
 \end{array}
@@ -28,7 +28,8 @@ and pressure $p$. Its flow can be described, at low reynolds number, by the Osee
 \end{equation}
 
 were $\nu$ is the kinematic viscosity of the fluid. If we set the convective
-acceleration $\beta$ and $\alpha$ to zero, we get the Stokes equations :
+acceleration $\beta$ and $\alpha$ to zero, we get the Stokes equations
+\ixv{Stokes problem} :
 
 \begin{equation} \label{eqn-stokes}
 \left\{
