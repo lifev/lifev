@@ -1,0 +1,196 @@
+%
+%
+% SUMMARY:
+% USAGE:
+%
+% AUTHOR:       Gilles Fourestey
+% ORG:          EPFL
+% E-MAIL:       foureste@iacspc.epfl.ch
+%
+% ORIG-DATE:  4-Feb-09 at 14:11:50
+% LAST-MOD:  4-Feb-09 at 16:45:01 by Gilles Fourestey
+%
+% DESCRIPTION:
+% DESCRIP-END.
+
+
+Now that we have decribed a simple stationary problem, let's have a look at the evolutionary
+case. In this example, we will consider the same domain, but this time we will solve the
+Navier-Stokes problem \ixv{Navier-Stokes Problem}. Starting from the Oseen problem (\ref{eqn-oseen})
+
+\begin{equation*}
+\left\{
+\begin{array}{lc}
+\displaystyle \alpha u + \beta \cdot \nabla u - \nu \Delta u+
+\nabla p & = f \\
+\displaystyle \nabla \cdot u & = 0  \\
+\end{array}
+\right.
+\end{equation*}
+
+We want to solve the instationary Navier-Stokes problem :
+
+\begin{equation*} \label{eqn-navierstokes}
+\left\{
+\begin{array}{lc}
+\displaystyle \frac{\partial u}{\partial t} + u \cdot \nabla u - \nu \Delta u+
+\nabla p & = f \\
+\displaystyle \nabla \cdot u & = 0  \\
+\end{array}
+\right.
+\end{equation*}
+
+which can be written, using a time semi-discretisation of the time partial derivative :
+
+\begin{equation*} \label{eqn-nsnl}
+\left\{
+\begin{array}{lc}
+\displaystyle \alpha u^{n+1} + u^{n+1} \cdot \nabla u^{n+1} - \nu \Delta u^{n+1}+
+\nabla p^{n+1} & = f^n  \\
+\displaystyle \nabla \cdot u & = 0  \\
+\end{array}
+\right.
+\end{equation*}
+
+Where $alpha$ is a constant which depends on the time discritization order, $\Delta t$ is the time step, $u^{n+1}$ and $p^{n+1}$ are the velocity and the pressure at the time $t^n = n\Delta t$.
+Note that $f^n$ now contains terms resulting from the time discretization.
+Using a linearaztion $\beta$ of (\ref{eqn-nsnl}) around $u^{n+1}$, we get the full semi-discretized linear Navier-Stokes
+equations :
+
+\begin{equation*} \label{eqn-ns}
+\left\{
+\begin{array}{rl}
+\displaystyle \alpha u^{n+1} + \beta \cdot \nabla u^{n+1} - \nu \Delta u^{n+1}+
+\nabla p^{n+1} & = f^n  \\
+\displaystyle \nabla \cdot u & = 0  \\
+\end{array}
+\right.
+\end{equation*}
+
+Solving (\ref{eqn-ns}) using the framework we used for the stationary driven cavity is not difficult :
+instead of setting $alpha$, $beta$ and $f^n$ to zero, we give them their proper values. For instance,
+is the consider the first order time discretization, we get :
+
+\begin{equation*} \label{eqn-nso1}
+\left\{
+\begin{array}{r;}
+\displaystyle \frac {u^{n+1}}{\Delta t} + u^n \cdot \nabla u^{n+1} - \nu \Delta u^{n+1}+
+\nabla p^{n+1} & = \displaystyle \frac{u^n}{\Delta t}  \\
+\displaystyle \nabla \cdot u & = 0  \\
+\end{array}
+\right.
+\end{equation*}
+
+The second order time discretization is :
+
+\begin{equation*} \label{eqn-nso2}
+\left\{
+\begin{array}{rl}
+\displaystyle \frac {3u^{n+1}}{2\Delta t} + u^n \cdot \nabla u^{n+1} - \nu \Delta u^{n+1}+
+\nabla p^{n+1} & = \displaystyle \frac{2u^n}{\Delta t} - \frac{u^{n-1}}{2\Delta t}  \\
+\displaystyle \nabla \cdot u & = 0  \\
+\end{array}
+\right.
+\end{equation*}
+
+Let's have a look at the code in \verb!testsuite/test\_cavity/main/cpp!.
+Until the first \verb!fluid.iterate()!, the code is the same as the one used to compute the Stokes problem.
+Now, we want to use this Stokes solution to initialize the our instationary Navier-Stokes problem, and be able
+to store a history of previous solution in order to be able to compute the discretized time derivative.
+This can be done by using the following object :
+\begin{verbatim}
+    // bdf initialization with the stokes problem solution
+    BdfTNS<vector_type> bdf(dataNavierStokes.order_bdf());
+\end{verbatim}
+The templated class \verb!BdfTNS! will store the previous solution $u^n$, $u^{n-1}$ ... so that
+they will always be accessible when we need them. All we have to do is to construct this class
+with the correct time discretization order given in the data file by the variable \verb!fluid/discretization/dbf_order!
+so that the storing vector will be resized correctly, and intialize it with our previously computed Stokes problem solution :
+
+\begin{verbatim}
+   bdf.bdf_u().initialize_unk( fluid.solution() );
+\end{verbatim}
+
+We are now ready to enter the time loop :
+
+\begin{verbatim}
+
+    Real dt     = dataNavierStokes.timestep();
+    Real t0     = dataNavierStokes.inittime();
+    Real tFinal = dataNavierStokes.endtime ();
+
+    int iter = 1;
+
+    for ( Real time = t0 + dt ; time <= tFinal + dt/2.; time += dt, iter++)
+    {
+        // inside the time loop, it's really like the initialization procedure,
+        // exept that we now have an advection velocity, rhs and the mass matrix
+        dataNavierStokes.setTime(time);
+
+        if (verbose)
+        {
+            std::cout << std::endl;
+            std::cout << "We are now at time "<< dataNavierStokes.time() << " s. " << std::endl;
+            std::cout << std::endl;
+        }
+
+        chrono.start();
+
+        // alpha coefficient for the mass matrix
+        double alpha = bdf.bdf_u().coeff_der( 0 ) / dataNavierStokes.timestep();
+
+        // extrapolation of the advection term
+        beta = bdf.bdf_u().extrap();
+
+        // rhs  part of the time-derivative
+        rhs  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes.timestep() );
+
+        // the we update the Oseen system
+        fluid.updateSystem( alpha, beta, rhs );
+
+        // and we solve it
+        fluid.iterate( bcH );
+
+        // shifting the previous solutions
+        bdf.bdf_u().shift_right( fluid.solution() );
+
+        // and we postprocess
+        *velAndPressure = fluid.solution();
+        ensight.postProcess( time );
+
+        // a barrier to make sure everyone is here, and we start again
+        MPI_Barrier(MPI_COMM_WORLD);
+
+        chrono.stop();
+        if (verbose) std::cout << "Total iteration time " << chrono.diff() << " s." << std::endl;
+    }
+
+\end{verbatim}
+
+The time step \verb!dt!, the initial time \verb!t0! and the final simulation time \verb!tFinal!
+are found in the data file variables respectively name \verb!fluid/discretization/timestep!,
+\verb!problem/Tstart! and \verb!fluid/physics/endtime!. As we can see, a time step can be describe
+as a follow up of several intuitive calls :
+\begin{itemize}
+\item computation of $\alpha$ ( which should is constant in most cases ),
+\item computation of $\beta$ using the \verb!Bdf! class,
+\item computation of the Right Hand Side $rhs$,
+\item update of the system using these three variables,
+\item resolution of the linear system.
+\end{itemize}
+After the system is solve, we simply update all time-depend variables such as the storage
+of the previous solutions, and we restart at the begining of the loop until all time steps are computed.
+
+
+%
+%%%%%%%%%%%%% Some Settings for emacs and auc-TeX
+% Local Variables:
+% TeX-master: t
+% TeX-command-default: "PDFLaTeX"
+% TeX-parse-self: t
+% TeX-auto-save: t
+% x-symbol-8bits: nil
+% TeX-auto-regexp-list: TeX-auto-full-regexp-list
+% eval: (ispell-change-dictionary "american")
+% End:
+%
