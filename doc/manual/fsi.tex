@@ -286,3 +286,321 @@ The second possible approach is a slight modification of the previous equation
 which is more suitable for setting up a Newton iterative method.
 Again, this is applied solely to the interface displacement,
 instead of the whole solid displacement as proposed.
+
+Let's have a look at the code located at \verb!testsuite/test_fsi/main.cpp!. The first interesting part
+is the problem definition part, starting from these lines :
+\begin{verbatim}
+    Problem( GetPot const& data_file, std::string _oper = "" )
+        {
+            using namespace LifeV;
+
+            Debug( 10000 ) << "creating FSISolver with operator :  " << _oper << "\n";
+
+            M_fsi = fsi_solver_ptr(  new FSISolver( data_file, _oper ) );
+            Debug( 10000 ) << _oper << " set \n";
+
+            MPI_Barrier(MPI_COMM_WORLD);
+\end{verbatim}
+
+This will create a new fluid/structure interaction problem that will be solved using a
+non-linear Richardson algorithm on the following interface equation :
+
+\begin{equation}{\label{eqn-interface}
+\lambda^{k+1} & = & \lambda^k + \omega^k f(\lambda^k),
+\end{equation}
+where $f$ depends on the chosen FSI method. If we look at the FSI problem constructor
+the file \verb!life/lifesolver/FSISolver.cpp!, we have :
+
+\begin{verbatim}
+FSISolver::FSISolver( GetPot const& data_file,
+                      std::string   __oper ):
+    M_lambda      (),
+    M_lambdaDot      (),
+    M_firstIter (true),
+    M_method    ( data_file("problem/method"     , "steklovPoincare") ),
+    M_maxpf     ( data_file("problem/maxSubIter" , 300) ),
+    M_defomega  ( data_file("problem/defOmega"   , 0.01) ),
+    M_abstol    ( data_file("problem/abstol"     , 1.e-07) ),
+    M_reltol    ( data_file("problem/reltol"     , 1.e-04) ),
+    M_etamax    ( data_file("problem/etamax"     , 1.e-03) ),
+    M_linesearch( data_file("problem/linesearch" , 0) ),
+    M_epetraComm(),
+    M_epetraWorldComm(),
+    M_localComm (new MPI_Comm),
+    M_interComm (new MPI_Comm),
+    out_iter    ("iter"),
+    out_res     ("res")
+\end{verbatim}
+
+
+where
+\begin{itemize}
+\item \verb!M_lambda! is the interface displacement as defined in (\ref{eq:condizioni}).
+\item \verb!M_lambdaDot! is the temporal derivative of \verb!M_lambda!.
+\end{itemize}
+See table \ref{table-fsiparams} for a complete of these options of options.
+
+\begin{table}[!h]
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+Name & Options & Description \\
+\hline \hline
+method & fixedPoint & FSI resolution method name\\
+& exactJacobian & \\
+\hline
+maxSubIter & 300 & maximum nonlinear Richardson iterations \\
+\hline
+defOmega & 0.01 & default step in (\ref{eqn-interface}) ( deprecated ) \\
+\hline
+abstol & 1e-07 & abstol and reltol define the stoping \\
+reltol & 1e-04 & criteria as abstol+reltol*norm(residual0) \\
+& & where residual0 is the first nonlinear Richardson \\
+& & FSI evaluation residual. \\
+\hline
+etamax & 1e-03 &  Maximum error tolerance for residual in the linear solver. \\
+\hline
+linesearch & 0 & nonlinear Richardson algorithm linesearch \\
+& & ( always use 0, i.e no line search, for now ).\\
+monolithic & 0 & monolithic description of the FSI problem \\
+& & ( under development )\\
+\hline
+
+\end{tabular}
+\end{center}
+\caption{ FSI problem data file parameters
+\ixt{FSI data parameters}{data parameters}}
+\label{table-fsiparams}
+\end{table}
+
+
+The \verb!monolithic! description of the FSI problem is still under  development and
+should not be used for now. Let's have the look at the rest of the FSI problem constructor code.
+
+\begin{verbatim}
+ MPI_Group  originGroup, newGroup;
+ MPI_Comm   newComm;
+
+ MPI_Comm_group(MPI_COMM_WORLD, &originGroup);
+
+ if (numtasks == 1)
+     {
+         std::cout << "Serial Fluid/Structure computation" << std::endl;
+         newComm = MPI_COMM_WORLD;
+         fluid = true;
+         solid = true;
+         fluidLeader = 0;
+         solidLeader = 0;
+
+         M_epetraWorldComm.reset(new Epetra_MpiComm(MPI_COMM_WORLD));
+         M_epetraComm = M_epetraWorldComm;
+
+     }
+ else
+     {
+         int members[numtasks];
+
+         solidLeader = 0;
+         fluidLeader = 1 - solidLeader;
+
+         if (rank == solidLeader)
+             {
+                 members[0] = solidLeader;
+                 int ierr;
+                 ierr = MPI_Group_incl(originGroup, 1, members, &newGroup);
+                 solid = true;
+             }
+         else
+             {
+                 for (int ii = 0; ii <= numtasks; ++ii)
+                     {
+                         if ( ii < solidLeader)
+                             members[ii] = ii;
+                         else if ( ii > solidLeader)
+                             members[ii - 1] = ii;
+                     }
+                 int ierr;
+                 ierr = MPI_Group_incl(originGroup,
+                                       numtasks - 1,
+                                       members,
+                                       &newGroup);
+                 fluid = true;
+             }
+
+         MPI_Comm* localComm = new MPI_Comm;
+         MPI_Comm_create(MPI_COMM_WORLD, newGroup, localComm);
+         M_localComm.reset(localComm);
+
+         M_epetraComm.reset(new Epetra_MpiComm(*M_localComm.get()));
+         M_epetraWorldComm.reset(new Epetra_MpiComm(MPI_COMM_WORLD));
+     }
+
+\end{verbatim}
+
+This part is dedicated at assigning jobs to the different processors. Since we have to deal
+with a separate structure and fluid problems, we define two MPI groups where for each problem.
+For now, by convention, and since the structure problem is resolved more easily than the
+fluid problem by far, the structure group has only the #0 (leader) processor, whereas the fluid group is
+composed of all the other processors. At the end of these lines, two MPI intracommunicators
+(communicator used in order to communicate within a single group of processes), one for the structure,
+one for the fuid, and one MPI intercommunicator (communicator in order to communicate within two or
+more groups of processes) are created. See \url{http://www.mpi-forum.org/docs/mpi-11-html/mpi-report.html}
+for more informations on intra and intercommunicators.
+
+From now on, each processor knows if it belongs to the structure or the fluid group. This is
+very important since each group will create its own problem, either stucture of fluid.
+Since the structure problem requires less ressources than the fluid problem, the FSI problem defined in (\ref{eqn-interface})
+will be solved on a lead structure processor (#0 processor within the structure intracommunicator).
+
+\begin{verbatim}
+
+
+    Preconditioner precond  = ( Preconditioner )
+                               data_file("problem/precond"   ,
+                               DIRICHLET_NEUMANN );
+
+    Debug( 6220 ) << "FSISolver::preconditioner: " << precond << "\n";
+
+    if ( !__oper.empty() )
+    {
+        M_method = __oper;
+    }
+
+    Debug( 6220 ) << "FSISolver::setFSIOperator " << M_method << "\n";
+
+    this->setFSIOperator( M_method );
+
+    M_oper->setFluid(fluid);
+    M_oper->setSolid(solid);
+
+    M_oper->setFluidLeader(fluidLeader);
+    M_oper->setSolidLeader(solidLeader);
+
+    Debug( 6220 ) << "FSISolver::setPreconditioner " << precond << "\n";
+
+    std::cout << std::flush;
+    M_oper->setComm(M_epetraComm, M_epetraWorldComm);
+
+    Debug( 6220 ) << "FSISolver::setDataFromGetPot " << precond << "\n";
+    std::cout << std::flush;
+
+    M_oper->setDataFromGetPot( data_file );
+
+
+    Debug( 6220 ) << "FSISolver::setPrecond " << precond << "\n";
+    std::cout << std::flush;
+
+    M_oper->setPreconditioner( precond );
+
+    M_oper->setup();
+
+    Debug( 6220 ) << "FSISolver:: variable setup " << precond << "\n";
+
+    M_oper->setUpSystem(data_file);
+
+    M_lambda.reset   (new vector_type(*M_oper->solidInterfaceMap()));
+    M_lambdaDot.reset(new vector_type(*M_oper->solidInterfaceMap()));
+    M_oper->buildSystem();
+
+\end{verbatim}
+
+This part will create the proper numerical FSI Operator (fixed point, exact jacobian, ...)
+for solving (\ref{eqn-interface}), that is the fluid and the structure operators ($S_f$, $S_s$ ... )
+defined previously, and set them up. You can have a look at the code which is in \verb!life/lifesolver/FSIOpertator.hpp,cpp!,
+\verb!life/lifesolver/exactJacobianBase.hpp,cpp! and \verb!life/lifesolver/fixedPointBase.hpp,cpp!.
+The last two classes, exactJacobian and fixedPoint, derive from the class FSIOperator, which only
+deals with passing information (displacement or constrain) from the solid or the fluid to the fluid or solid via
+the interface. The the specialized classes exactJacobian or fixedPoint evalute the interface residual
+and solve $f(\lambda)$ as defined in (\ref{eqn-interface}).
+The last interesting part in the \verb!FSISolver! classe it the \verb!iterate! member :
+\begin{verbatim}
+    M_oper->setTime(time);
+
+    fct_type fluidSource(zero_scalar);
+    fct_type solidSource(zero_scalar);
+
+    if(!M_monolithic)
+        M_oper->updateSystem(fluidSource, solidSource);
+    else
+        M_oper->updateSystem(*M_lambda);
+
+    // displacement prediction
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if (M_firstIter)
+    {
+        M_firstIter = false;
+
+        if(!M_monolithic)
+            {
+                *M_lambda      = M_oper->lambdaSolid();
+                *M_lambda     += timeStep()*M_oper->lambdaDotSolid();
+                *M_lambdaDot   = M_oper->lambdaDotSolid();
+            }
+    }
+    else
+    {
+
+        if(!M_monolithic)
+            {
+                *M_lambda      = M_oper->lambdaSolid();
+                *M_lambda     += 1.5*timeStep()*M_oper->lambdaDotSolid(); // *1.5
+                *M_lambda     -= timeStep()*0.5*(*M_lambdaDot);
+                *M_lambdaDot   = M_oper->lambdaDotSolid();
+            }
+    }
+
+
+    if (!M_monolithic)
+        {
+            M_oper->leaderPrint("norm( disp  ) init = ", M_lambda->NormInf() );
+            M_oper->leaderPrint("norm( velo )  init = ", M_lambdaDot->NormInf());
+        } else {
+            M_oper->leaderPrint("norm( solution ) init = ", M_lambda->NormInf() );
+        }
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    int maxiter = M_maxpf;
+
+    // the newton solver
+    UInt status = 1;
+    Debug( 6220 ) << "Calling non-linear Richardson \n";
+
+    status = nonLinRichardson(*M_lambda,
+                              *M_oper,
+                              norm_inf_adaptor(),
+                              M_abstol,
+                              M_reltol,
+                              maxiter,
+                              M_etamax,
+                              M_linesearch,
+                              out_res,
+                              time);
+
+    if(status == 1)
+    {
+        std::ostringstream __ex;
+        __ex << "FSISolver::iterate ( " << time << " )
+                 Inners iterations failed to converge\n";
+        throw std::logic_error( __ex.str() );
+    }
+    else
+    {
+        M_oper->leaderPrint("End of time " , time);
+        M_oper->leaderPrint("Number of inner iterations       : ", maxiter );
+        out_iter << time << " " << maxiter << " "
+                 << M_oper->nbEval() << std::endl;
+    }
+    if(!M_monolithic)
+        M_oper->shiftSolution();
+
+\end{verbatim}
+
+This code will perform one FSI time step. First, il will ``guess'' the interface
+displacement by interpolation of the previous displacement, then it will call the
+non-linear Richardson algorithm that will compute the new displacement by solving
+(\ref{eqn-interface}).
+
+
+
