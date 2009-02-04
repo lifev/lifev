@@ -8,7 +8,7 @@
 % E-MAIL:       foureste@iacspc.epfl.ch
 %
 % ORIG-DATE: 24-Nov-08 at 14:03:21
-% LAST-MOD: 28-Jan-09 at 17:05:35 by Gilles Fourestey
+% LAST-MOD:  4-Feb-09 at 12:51:49 by Gilles Fourestey
 %
 % DESCRIPTION:
 % DESCRIP-END.
@@ -370,8 +370,33 @@ to retreive all necessary informations in order to run the simulation.
 
 \end{verbatim}
 
+\begin{table}
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+Name & Options & Description \\
+\hline \hline
+mesh\_dir & & mesh directory path \\ \hline
+mesh\_name & & mesh file name \\ \hline
+timestep & & problem time step \\ \hline
+vel\_order & P1 & volicity discretization order \\ \
+& P1Bubble & \\
+& P2 & \\ \hline
+press\_order & P1 & pressure discretization order \\
+& P2 & \\ \hline
+order\_bdf & 1 & time discretization order \\
+& 2 & \\ \hline
+\end{tabular}
+\end{center}
+\caption{ Dluid discretization parameters description
+\ixt{Fluid discretization parameters}{Fluid discretization}}
+\label{table-bcparams}
+\end{table}
+
+
 \noident After this line, everything we need to know about our problem is stored
 in dataNavierStokes. It is time to proceed the solver definition. \\
+
 In order to build a FE solver to solve our cavity problem, we need :
 \begin{itemize}
 \item boundary conditions
@@ -431,7 +456,7 @@ and mode. Please refer to the table (\ref{table-bcparam) for a description of th
 \begin{center}
 \begin{tabular}{|l|l|l|}
 \hline
-name & options & Description \\
+Name & Options & Description \\
 \hline \hline
 type &  Natural & Neumann\\
 & Essential & dirichlet \\
