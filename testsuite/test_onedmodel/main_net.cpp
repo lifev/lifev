@@ -91,31 +91,35 @@ int main(int argc, char** argv)
   	if( onednet.tube_map().MyGID(1) )
     {
     	Debug( 6030 ) << "[main] process " << Comm.MyPID() << " setting BC for tube 1!\n";
-    	OneDBCFunctionPointer heart_pressure ( new Heart(  data_file,
-                                                       onednet.Param(1),
-                                                       onednet.Solver(1).Mesh(),
-                                                       onednet.Solver(1).FluxFun(), onednet.Solver(1).SourceFun(),
-                                                       onednet.Solver(1).U1_thistime(), onednet.Solver(1).U2_thistime(),
-                                                       onednet.Solver(1).W1_thistime(), onednet.Solver(1).W2_thistime(),
-                                                       onednet.Solver(1).timestep(),
-                                                       "left" /*border*/,
-                                                       "W1"  /*var*/,
-                                                      false /*type*/ ) );
-    	onednet.setBC( heart_pressure, 1, "left", "first", "Q" );
+//    	OneDBCFunctionPointer heart_pressure ( new Heart(  data_file,
+//                                                       onednet.Param(1),
+//                                                       onednet.Solver(1).Mesh(),
+//                                                       onednet.Solver(1).FluxFun(), onednet.Solver(1).SourceFun(),
+//                                                       onednet.Solver(1).U1_thistime(), onednet.Solver(1).U2_thistime(),
+//                                                       onednet.Solver(1).W1_thistime(), onednet.Solver(1).W2_thistime(),
+//                                                       onednet.Solver(1).timestep(),
+//                                                       "left" /*border*/,
+//                                                       "W1"  /*var*/,
+//                                                      false /*type*/ ) );
+//        onednet.setBC( heart_pressure, 1, "left", "first", "Q" );
+        //  necessario che sia OneDBCFunctionPointer
+        OneDBCFunctionPointer mysin( new Sin( 0, 1, 0.5 ) );
+        //OneDBCFunctionPointer mysinneg( new Sin( 0, -1, 0.5 ) );
+        onednet.setBC( mysin, 1, "left", "first", "Q" );
     }
     if( onednet.tube_map().MyGID(2) )
     {
     	Debug( 6030 ) << "[main] process " << Comm.MyPID() << " setting BC for tube 2!\n";
-    	OneDBCFunctionPointer resistence ( new Resistence( data_file("1dnetwork/tube2/parameters/R",0.),
-                                                       onednet.Param(2),
-                                                       onednet.Solver(2).Mesh(),
-                                                       onednet.Solver(2).FluxFun(), onednet.Solver(2).SourceFun(),
-                                                       onednet.Solver(2).U1_thistime(), onednet.Solver(2).U2_thistime(),
-                                                       onednet.Solver(2).W1_thistime(), onednet.Solver(2).W2_thistime(),
-                                                       onednet.Solver(2).timestep(),
-                                                       "right" /*border*/,
-                                                       "W2"  /*var*/) );
-    	onednet.setBC( resistence, 2, "right", "first", "W2" );
+//    	OneDBCFunctionPointer resistence ( new Resistence( data_file("1dnetwork/tube2/parameters/R",0.),
+//                                                       onednet.Param(2),
+//                                                       onednet.Solver(2).Mesh(),
+//                                                       onednet.Solver(2).FluxFun(), onednet.Solver(2).SourceFun(),
+//                                                       onednet.Solver(2).U1_thistime(), onednet.Solver(2).U2_thistime(),
+//                                                       onednet.Solver(2).W1_thistime(), onednet.Solver(2).W2_thistime(),
+//                                                       onednet.Solver(2).timestep(),
+//                                                       "right" /*border*/,
+//                                                       "W2"  /*var*/) );
+//    	onednet.setBC( resistence, 2, "right", "first", "W2" );
     }
 //	onednet.setBC( heart_pressure, 3, "left", "first", "Q" );
 //	onednet.setBC( heart_pressure, 5, "left", "first", "Q" );
@@ -151,7 +155,7 @@ int main(int argc, char** argv)
         if( !( static_cast<int>( std::floor( time/dt + 0.5 ) ) %
                static_cast<int>( std::floor( postprocess_dt/dt + 0.5 ) ) ) )
         {
-          std::cout << "[main] going to postprocess? " << std::flush;
+//          std::cout << "[main] going to postprocess? " << std::flush;
         	onednet.postProcess( time );
         }
 
