@@ -348,7 +348,8 @@ testML( bchandler_raw_type& bch )
 
                             this->resetPrec();
 
-                            const double* status =  this->M_linearSolver.getAztecStatus();
+                            /*const*/ double* status;
+                            this->M_linearSolver.getAztecStatus( status );
 
                             if( status[AZ_why] == AZ_normal         ) AZstatus = "N";
                             else if( status[AZ_why] == AZ_maxits    ) AZstatus = "M";
