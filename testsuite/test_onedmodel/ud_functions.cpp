@@ -30,15 +30,15 @@
 
 namespace LifeV
 {
-				
+
   PressureRamp::PressureRamp (const BasicOneDMesh& mesh,
   				const NonLinearFluxFun1D& fluxFun,
-  				const NonLinearSourceFun1D& sourceFun,	
-  				const ScalVec& U1_thistime, const ScalVec& U2_thistime,  
-  				const ScalVec& W1_thistime, const ScalVec& W2_thistime,  
+  				const NonLinearSourceFun1D& sourceFun,
+  				const ScalVec& U1_thistime, const ScalVec& U2_thistime,
+  				const ScalVec& W1_thistime, const ScalVec& W2_thistime,
 				const Real& dt, const std::string& border, const std::string & var,
 				const OneDNonLinModelParam& onedparam,
-				const Real& startT, const Real& duration, const Real& endvalue ) : 
+				const Real& startT, const Real& duration, const Real& endvalue ) :
     Compatibility( mesh, fluxFun, sourceFun, U1_thistime, U2_thistime, W1_thistime, W2_thistime, dt, border, var),
     _M_onedparam( onedparam ),
 	_M_startT( startT ),
@@ -56,36 +56,36 @@ namespace LifeV
 
 	Debug( 6030 ) << "[PressureRamp::evaluate] imposed pressure = " << _P << "\n";
 	Debug( 6030 ) << "[PressureRamp::evaluate] target pressure = " << _M_endvalue << "\n";
-					  			   
+
     switch( _M_oneDBCFunctionsMapStringValues[_M_var] )
       {
       case OneDBCW1:
-	W_out = extrapolate_W( time, OneDBCW2 );
+	W_out = extrapolate_W( OneDBCW2 );
 	result = _M_onedparam.W_from_P( _P, W_out, 2, _M_boundaryDof);
-	break;	
+	break;
       case OneDBCW2:
-	W_out = extrapolate_W( time, OneDBCW1 );
+	W_out = extrapolate_W( OneDBCW1 );
 	result = _M_onedparam.W_from_P( _P, W_out, 1, _M_boundaryDof);
-	break;	
+	break;
       default:
 	std::cout << "\n[PressureRamp::evaluate] incorrect variable identifier: " << _M_var << std::endl;
       }
 
 	Debug( 6030 ) << "[PressureRamp::evaluate] extrapolated exiting characteristic = " << W_out << "\n";
-					  			   
+
     return result;
-   
+
   }
 
 
   Heart::Heart ( const GetPot& data_file, const OneDNonLinModelParam& onedparam,
   				const BasicOneDMesh& mesh,
   				const NonLinearFluxFun1D& fluxFun,
-  				const NonLinearSourceFun1D& sourceFun,	
-  				const ScalVec& U1_thistime, const ScalVec& U2_thistime,  
-  				const ScalVec& W1_thistime, const ScalVec& W2_thistime,  
+  				const NonLinearSourceFun1D& sourceFun,
+  				const ScalVec& U1_thistime, const ScalVec& U2_thistime,
+  				const ScalVec& W1_thistime, const ScalVec& W2_thistime,
 				const Real& dt, const std::string& border, const std::string & var,
-				const bool type, const Real& startT ): 
+				const bool type, const Real& startT ):
     Compatibility( mesh, fluxFun, sourceFun, U1_thistime, U2_thistime, W1_thistime, W2_thistime, dt, border, var),
    _M_data_file(data_file),
    _M_onedparam( onedparam ),
@@ -100,11 +100,11 @@ namespace LifeV
     	// wrong if Heart is istantiated before solver initialization
 	    _M_Q_old=_M_U2_thistime(_M_boundaryDof);
 	Debug( 6030 ) << "[Heart::Heart] U1_thistime(_M_boundaryDof) = " << _M_U1_thistime(_M_boundaryDof) << "\n";
-	
+
     }
-				
-				
-				    
+
+
+
   Real Heart::evaluate( const Real& time )
   {
     Real W_out, result;
@@ -115,30 +115,30 @@ namespace LifeV
 
     Real T_reset( ( time - _M_startT ) );
     T_reset -= static_cast<int>( std::floor( (T_reset + _M_time_step/2) /_M_periodotot ) ) * _M_periodotot;
-    
+
     if (_M_type==0)
       Pv=PvFunc(T_reset);
     else
       Pv=PvCalc(T_reset);
-      
+
     switch( _M_oneDBCFunctionsMapStringValues[_M_var] )
       {
       case OneDBCW1:
-	W_out = extrapolate_W( time, OneDBCW2 );
+	W_out = extrapolate_W( OneDBCW2 );
 	W_out_id = 2;
-		break;	
+		break;
       case OneDBCW2:
-	W_out = extrapolate_W( time, OneDBCW1 );
+	W_out = extrapolate_W( OneDBCW1 );
 	W_out_id = 1;
-	break;	
+	break;
       default:
 	std::cout << "\n[Heart::evaluate] incorrect variable identifier: " << _M_var << std::endl;
       }
 
 	Debug( 6030 ) << "[Heart::evaluate] extrapolated exiting characteristic = " << W_out << "\n";
-	
+
     Pa=_M_onedparam.pressure(_M_U_boundary.first, _M_boundaryDof);
- 
+
     Debug(6030) << "[Heart::evaluate] imposed heart pressure = " << Pv
 		<< ",\taorta pressure = " << Pa
 		<< ",\ttime = " << time << "\n";
@@ -157,24 +157,24 @@ namespace LifeV
       }
 
     return result;
-   
+
   }
-  
-  
+
+
   Real Heart::PvFunc(const Real& T_reset) const
   {
 	Debug(6030)<<"[Heart::PvFunc] T_reset" << T_reset << "\n";
 	Debug(6030)<<"[Heart::PvFunc] _M_periodosis" << _M_periodosis << "\n";
    if (T_reset < _M_periodosis)
       return 160000 * std::sin(M_PI/_M_periodosis * T_reset);
-    else 
-      return 0; 
-  
+    else
+      return 0;
+
   }
 
   Real Heart::PvCalc(const Real& T_reset)
-  { 
-   
+  {
+
     El=Elastance(T_reset);
     Co=Compliance(T_reset);
     Debug(6030)<<"[Heart::PvCalc] Co = "<<Co<<"\n";
@@ -190,30 +190,30 @@ namespace LifeV
     Debug(6030)<< "[Heart::PvCalc] heart volume = " << _M_Vol_new << "\n";
     //return 1/Co*(_M_Vol_new-V0);
     return El*(_M_Vol_new-V0);
-  
+
   }
-  
-  
+
+
   Real Heart::Elastance(const Real& T_reset) const
-  {  
+  {
 
     if (T_reset< _M_periodosis)
       return 1333* ( 1 + 0.7 * std::sin(  3*M_PI/(2*_M_periodosis) * T_reset ) );//spiegare i numeri (LM 2006)
     else
-      return 0.3 + 0.7 * (T_reset - _M_periodosis)/(_M_periodotot-_M_periodosis); 
+      return 0.3 + 0.7 * (T_reset - _M_periodosis)/(_M_periodotot-_M_periodosis);
   }
-  
+
   Real Heart::Compliance(const Real& T_reset) const
-  {  
+  {
 
      if (T_reset< _M_periodosis)
       return 0.11*pow((0.00003/0.0146),((1.-exp(-T_reset/(0.0025*60.)))/(1.-exp(-_M_periodosis/(0.0025*60.)))));//spiegare i numeri
     else
       return 2.25e-4*pow((0.0146/0.00003),((1.-exp(-(T_reset-_M_periodosis)/(0.0075*60.)))/(1-exp(-(_M_periodotot-_M_periodosis)/(0.0075*60.)))));
 
-  }  
+  }
 
-    
+
 PhysiologicalFlux::PhysiologicalFlux( GetPot const& data_file )
 {
     _M_rampT = data_file("rampT",0.05);
@@ -224,7 +224,7 @@ PhysiologicalFlux::PhysiologicalFlux( GetPot const& data_file )
     Real PhysiologicalFlux::evaluate( const Real& time )
     {
     Real newtime;
-    
+
     Real strokes=72.0;
     Real percar=60.0/strokes;
     Real Tfin=percar;
@@ -245,23 +245,23 @@ PhysiologicalFlux::PhysiologicalFlux( GetPot const& data_file )
     Real flux = 0;
     Real Tcorr;
     Real Taux=Tfin;
-      
+
     if (time<_M_rampT)
       newtime=_M_time_step;
-    else 
+    else
       newtime=time+_M_time_step-_M_rampT;
-      
+
     while (Taux<newtime) Taux=Taux+Tfin;
-      
+
     Tcorr=newtime-Taux+Tfin;
     if (Tcorr==Tfin) Tcorr=0;
-      
-    if (Tcorr<=prefirst) 
+
+    if (Tcorr<=prefirst)
       {
 	a=pigreco2*Tcorr/first;
 	flux = coeff01+coeff02*cos(a);
       }
-    else if ((Tcorr>prefirst)&&(Tcorr<=first)) 
+    else if ((Tcorr>prefirst)&&(Tcorr<=first))
       {
 	b1=coeff01-coeff31;
 	b2=coeff02*pigreco2/first;
@@ -275,18 +275,18 @@ PhysiologicalFlux::PhysiologicalFlux( GetPot const& data_file )
 	coeff33=(a11*b2-a21*b1)/det;
 	ddtt=Tcorr-first;
 	flux=coeff32*ddtt*ddtt*ddtt*ddtt+coeff33*ddtt*ddtt+coeff31;
-      } 
-    else if ((Tcorr>first)&&(Tcorr<=presecond)) 
+      }
+    else if ((Tcorr>first)&&(Tcorr<=presecond))
       {
 	a=pigreco2*(Tcorr)/first;
 	flux = coeff41+coeff42*cos(a);
       }
-    else if ((Tcorr>presecond)&&(Tcorr<=second)) 
+    else if ((Tcorr>presecond)&&(Tcorr<=second))
       {
 	a=pigreco2*(Tcorr-first)/first;
 	flux = coeff11+coeff12*cos(a);
       }
-    else if (Tcorr>second) 
+    else if (Tcorr>second)
       {
 	a=pigreco2*(second-first)/first;
 	b1=coeff11+coeff12*cos(a)-coeff21;
@@ -304,10 +304,10 @@ PhysiologicalFlux::PhysiologicalFlux( GetPot const& data_file )
       }
 
     if (time<_M_rampT) flux=(time/_M_rampT)*flux;
-    
+
     return _M_scale*flux;
     }
-      
+
 
 
 Resistence::Resistence(  const Real & resistence,
@@ -315,13 +315,13 @@ Resistence::Resistence(  const Real & resistence,
   			const BasicOneDMesh& mesh,
     		const NonLinearFluxFun1D& fluxFun,
     		const NonLinearSourceFun1D& sourceFun,
-    		const ScalVec& U1_thistime, const ScalVec& U2_thistime,  
-    		const ScalVec& W1_thistime, const ScalVec& W2_thistime,  
+    		const ScalVec& U1_thistime, const ScalVec& U2_thistime,
+    		const ScalVec& W1_thistime, const ScalVec& W2_thistime,
 			const Real& dt, const std::string& border, const std::string & var ) :
     Compatibility( mesh, fluxFun, sourceFun, U1_thistime, U2_thistime, W1_thistime, W2_thistime, dt, border, var),
    _M_resistence(resistence),
-   _M_onedparam( onedparam )   
-{ 
+   _M_onedparam( onedparam )
+{
 	Debug( 6030 ) << "[Resistence::Resistence] resistence = " << _M_resistence << "\n";
 }
 
@@ -332,23 +332,23 @@ Resistence::Resistence(  const Real & resistence,
     //! Coefficients
     Real W_out, result;
     Real a1, a2, a11, a22, b1, b2, c1, c2;
-  	
+
 	update_U_boundary();
 	update_U_internalBd();
 
-	Debug( 6030 ) << "[Resistence::Resistence] at node " << _M_boundaryDof 
+	Debug( 6030 ) << "[Resistence::Resistence] at node " << _M_boundaryDof
 	<< ", A = " << _M_U_boundary.first << "( " << _M_U1_thistime[0] << " ) "
-	<< ", Q = " << _M_U_boundary.second 
-	<< ", W1 = " << _M_W_boundary.first 
-	<< ", W2 = " << _M_W_boundary.second 
+	<< ", Q = " << _M_U_boundary.second
+	<< ", W1 = " << _M_W_boundary.first
+	<< ", W2 = " << _M_W_boundary.second
 	<< "\n";
-      
+
 	computeEigenValuesVectors();
 
     a1 = _M_onedparam.pressure(_M_U_boundary.first, _M_boundaryDof); // pressure at previou time step
 
     a2 = _M_U_boundary.second; // flux at previous time step
-    
+
     b1 = _M_onedparam.pressure_WDiff( _M_W_boundary.first, _M_W_boundary.second, 1, _M_boundaryDof);  // dP / dW1
 
     b2 = _M_U_boundary.first / 2; // dQ / dW1
@@ -356,41 +356,41 @@ Resistence::Resistence(  const Real & resistence,
     c1 = _M_onedparam.pressure_WDiff( _M_W_boundary.first, _M_W_boundary.second, 2, _M_boundaryDof);  // dP / dW2
 
     c2 = b2; // dQ / dW2
-    
+
 	Debug( 6030 ) << "[Resistence::evaluate] P(A) = " << a1 << "\n";
 	Debug( 6030 ) << "[Resistence::evaluate] P(W1,W2) = "
 				<< _M_onedparam.pressure_W(_M_W_boundary.first, _M_W_boundary.second, _M_boundaryDof) << "\n";
-	
+
     a11 = a1 - b1*_M_W_boundary.first - c1*_M_W_boundary.second;
     a22 = a2 - b2*_M_W_boundary.first - c2*_M_W_boundary.second;
-    
+
     switch( _M_oneDBCFunctionsMapStringValues[_M_var] )
       {
       case OneDBCW1:
-	W_out = extrapolate_L_dot_U(_M_eigval2, _M_left_eigvec2) 
+	W_out = extrapolate_L_dot_U(_M_eigval2, _M_left_eigvec2)
 		- dot( _M_left_eigvec2, _M_U_boundary ) + _M_W_boundary.second;
 
-	break;	
+	break;
       case OneDBCW2:
-	W_out = extrapolate_L_dot_U(_M_eigval1, _M_left_eigvec1) 
+	W_out = extrapolate_L_dot_U(_M_eigval1, _M_left_eigvec1)
 		- dot( _M_left_eigvec1, _M_U_boundary ) + _M_W_boundary.first;
 
-	break;	
+	break;
       default:
 	std::cout << "\n[Resistence::evaluate] incorrect variable identifier: " << _M_border << std::endl;
       }
 
 	Debug( 6030 ) << "[Resistence::evaluate] extrapolated exiting characteristic = " << W_out << "\n";
-	
+
     result = W_out * ((b2*_M_resistence-b1)/(c1-c2*_M_resistence))
     + ((a22*_M_resistence-a11)/(c1-c2*_M_resistence));
 
 	Debug( 6030 ) << "[Resistence::evaluate] c1-c2*_M_resistence = " << c1-c2*_M_resistence << "\n";
-	
+
 	Debug( 6030 ) << "[Resistence::evaluate] c1 = " << c1 << "\n";
-	
+
 	Debug( 6030 ) << "[Resistence::evaluate] c2 = " << c2 << "\n";
-	
+
     return result;
   }
 
