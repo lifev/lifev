@@ -364,13 +364,13 @@ protected:
 
     bool                           M_updated;
 
-    //! boolean that indicates if le precond has to be recomputed
+    //! boolean that indicates if the precond has to be recomputed
 
     bool                           M_reusePrec;
     int                            M_maxIterForReuse;
     bool                           M_resetPrec;
 
-    //! interger storing the max number of solver iteration with prec recomputing
+    //! integer storing the max number of solver iteration with prec recomputing
 
     int                            M_maxIterSolver;
 
