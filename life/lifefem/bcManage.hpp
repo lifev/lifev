@@ -1387,7 +1387,7 @@ void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Do
                             bdfem.coorQuadPt( x, y, z, l ); // quadrature point coordinates
 
                             // Upper diagonal entry of the elementary boundary mass matrix
-			    sum += pBcF->coef( x, y, z, t, BCb.component( j )   ) * bdfem.phi( int( idofF - 1 ), l ) * bdfem.phi( int( k - 1 ), l ) *
+			    sum += pBcF->coef( t,  x, y, z, BCb.component( j )   ) * bdfem.phi( int( idofF - 1 ), l ) * bdfem.phi( int( k - 1 ), l ) *
 			      bdfem.weightMeas( l );
                         }
 
@@ -1548,7 +1548,7 @@ void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
                         bdfem.coorQuadPt( x, y, z, l ); // quadrature point coordinates
 
                         // Contribution to the diagonal entry of the elementary boundary mass matrix
-                        sum += pBcF->coef( t, x, y, z, j ) * bdfem.phi( int( idofF - 1 ), l ) * bdfem.phi( int( idofF - 1 ), l ) *
+                        sum += pBcF->coef( t, x, y, z, BCb.component(j) ) * bdfem.phi( int( idofF - 1 ), l ) * bdfem.phi( int( idofF - 1 ), l ) *
                                bdfem.weightMeas( l );
 
                         // Global Dof (Why inside this loop?? V. Martin)
@@ -1579,7 +1579,7 @@ void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
                             bdfem.coorQuadPt( x, y, z, l ); // quadrature point coordinates
 
                             // Upper diagonal entry of the elementary boundary mass matrix
-			    sum += pBcF->coef( x, y, z, t, BCb.component(j)  ) * bdfem.phi( int( idofF - 1 ), l ) * bdfem.phi( int( k - 1 ), l ) *
+			    sum += pBcF->coef( t, x, y, z, BCb.component( j )  ) * bdfem.phi( int( idofF - 1 ), l ) * bdfem.phi( int( k - 1 ), l ) *
 			      bdfem.weightMeas( l );
                         }
 
@@ -1762,7 +1762,7 @@ void bcMixteManage( MatrixType1& A, MatrixType2 & trD, VectorType& b,
                     bdfem.coorQuadPt( x, y, z, l ); // quadrature point coordinates
 
                     // Contribution to the diagonal entry of the elementary boundary mass matrix
-		    sum += pBcF->coef( t, x, y, z, BCb.component(j)  ) * bdfem.phi( int( i - 1 ), l ) * bdfem.phi( int( i - 1 ), l ) *
+		    sum += pBcF->coef( t, x, y, z, BCb.component( j )  ) * bdfem.phi( int( i - 1 ), l ) * bdfem.phi( int( i - 1 ), l ) *
 		      bdfem.weightMeas( l );
 
                     // Global Dof
@@ -1797,7 +1797,7 @@ void bcMixteManage( MatrixType1& A, MatrixType2 & trD, VectorType& b,
                         bdfem.coorQuadPt( x, y, z, l ); // quadrature point coordinates
 
                         // Upper diagonal entry of the elementary boundary mass matrix
-		        sum += pBcF->coef( x, y, z, t, BCb.component( j )  ) * bdfem.phi( int( i - 1 ), l ) * bdfem.phi( int( k - 1 ), l ) *
+		        sum += pBcF->coef( t, x, y, z, BCb.component( j )  ) * bdfem.phi( int( i - 1 ), l ) * bdfem.phi( int( k - 1 ), l ) *
 			  bdfem.weightMeas( l );
                     }
 
@@ -1903,7 +1903,7 @@ void bcMixteManage( MatrixType1& A, MatrixType2 & trD, MatrixType3 & D,
                         bdfem.coorQuadPt( x, y, z, l ); // quadrature point coordinates
 
                         // Upper diagonal entry of the elementary boundary mass matrix
-			sum += pBcF->coef( x, y, z, t, BCb.component( j ) ) * bdfem.phi( int( i - 1 ), l ) * bdfem.phi( int( k - 1 ), l ) *
+			sum += pBcF->coef( t, x, y, z, BCb.component( j ) ) * bdfem.phi( int( i - 1 ), l ) * bdfem.phi( int( k - 1 ), l ) *
 			  bdfem.weightMeas( l );
                     }
 
