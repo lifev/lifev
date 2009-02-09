@@ -67,12 +67,6 @@
 using namespace LifeV;
 
 
-const int INLET    = 2;
-const int WALL     = 1;
-const int SLIPWALL = 20;
-const int OUTLET   = 3;
-
-
 
 Real zero_scalar( const Real& /* t */,
                   const Real& /* x */,
