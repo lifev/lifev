@@ -348,7 +348,7 @@ testML( bchandler_raw_type& bch )
 
                             this->resetPrec();
 
-                            /*const*/ double* status;
+                            double status[AZ_STATUS_SIZE];
                             this->M_linearSolver.getAztecStatus( status );
 
                             if( status[AZ_why] == AZ_normal         ) AZstatus = "N";
