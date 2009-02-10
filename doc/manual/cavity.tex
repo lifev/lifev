@@ -8,7 +8,7 @@
 % E-MAIL:       foureste@iacspc.epfl.ch
 %
 % ORIG-DATE: 24-Nov-08 at 14:03:21
-% LAST-MOD:  4-Feb-09 at 16:44:45 by Gilles Fourestey
+% LAST-MOD: 10-Feb-09 at 14:18:08 by Gilles Fourestey
 %
 % DESCRIPTION:
 % DESCRIP-END.
@@ -20,7 +20,7 @@ and pressure $p$. Its flow can be described, at low reynolds number, by the Osee
 \begin{equation} \label{eqn-oseen}
 \left\{
 \begin{array}{lc}
-\displaystyle \alpha u + \beta \cdot \nabla u - \nu \Delta u+
+\displaystyle \alpha u + \beta \cdot \nabla u - \nu \Delta u +
 \nabla p & = f \\
 \displaystyle \nabla \cdot u & = 0  \\
 \end{array}
@@ -496,7 +496,8 @@ In order to set our third component (\verb!z!), we define the vector :
 \end{verbatim}
 Then, we call add an essential (Dirichlet) boundary condition on the z component by calling
 \begin{verbatim}
-    // this bc is imposed only on some compenants, that is the ones given in zComp
+    // this bc is imposed only on some compenants,
+    // that is the ones given in zComp
     // Here it's the thirs, ie z, in order to have u.n = 0
     bcH.addBC( "Slipwall", SLIPWALL, Essential, Component, uZero, zComp );
 \end{verbatim}
@@ -510,7 +511,8 @@ order to have the simulation running.
 \begin{verbatim}
 
     // partitioning the mesh
-    partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.mesh(), comm);
+    partitionMesh< RegionMesh3D<LinearTetra> >
+             meshPart(*dataNavierStokes.mesh(), comm);
 
 \end{verbatim}
 
@@ -734,12 +736,12 @@ drop\_tol & default : 0. \\
 
 \end{tabular}
 \end{center}
-\caption{Main parameters for the trilinos solver (see \url{
-http://trilinos.sandia.gov/packages/aztecoo/AztecOOUserGuide.pdf} for more informations )
-}
+\caption{Main parameters for the Trilinos solver}
 \label{table-solveroptions}
 \end{table}
 
+%See \url{
+%http://trilinos.sandia.gov/packages/aztecoo/AztecOOUserGuide.pdf} for more informations ).
 Now that the linear solver and the preconditioner are set, we can build the linear system by calling :
 \begin{verbatim}
     // the we build the constant matrices
@@ -776,7 +778,8 @@ we give references of the solution vector and that's it.
            ensight( dataFile, meshPart.mesh(), "cavity", comm.MyPID());
 
     // we have to define a variable that will store the solution
-    vector_ptrtype velAndPressure ( new vector_type(fluid.solution(), Repeated ) );
+    vector_ptrtype velAndPressure ( new vector_type(fluid.solution(),
+                                                    Repeated ) );
 
     // and we add the variables to be saved
     // the velocity
@@ -786,14 +789,15 @@ we give references of the solution vector and that's it.
     // and the pressure
     ensight.addVariable( ExporterData::Scalar, "pressure", velAndPressure,
                          UInt(3*uFESpace.dof().numTotalDof()),
-                         UInt(3*uFESpace.dof().numTotalDof() + pFESpace.dof().numTotalDof()) );
+                         UInt(3*uFESpace.dof().numTotalDof() +
+                                pFESpace.dof().numTotalDof()) );
 
     // everything is ready now
     // a little barrier to synchronize the processes
     MPI_Barrier(MPI_COMM_WORLD);
 \end{verbatim}
 
-Here is the occasion to introduce an important concept in \lifev/Trilinos (...).
+%Here is the occasion to introduce an important concept in \lifev/Trilinos (...).
 
 We are now set for the linear system resolution.
 
