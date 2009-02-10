@@ -1,10 +1,10 @@
-
-
-
 We now want to address the numerical solution of fluid-structure interaction problems.
 In order to address each problem in its natural setting, we
 choose to consider the fluid in an ALE (Arbitrary Lagrangian
 Eulerian) formulation and the structure in a pure Lagrangian framework.
+
+\ixn{Fluid-Structure Interactions}
+
 
 The system under investigation occupies a moving domain $\Omegat$
 in its actual configuration. It is made of a deformable structure
@@ -306,7 +306,7 @@ This will create a new fluid/structure interaction problem that will be solved u
 non-linear Richardson algorithm on the following interface equation :
 
 \begin{equation}{\label{eqn-interface}
-\lambda^{k+1} & = & \lambda^k + \omega^k f(\lambda^k),
+\lambda^{k+1} & = & \lambda^k + \omega^k f(\lambda^k)
 \end{equation}
 where $f$ depends on the chosen FSI method. If we look at the FSI problem constructor
 the file \verb!life/lifesolver/FSISolver.cpp!, we have :
@@ -351,7 +351,7 @@ method & fixedPoint & FSI resolution method name\\
 \hline
 maxSubIter & 300 & maximum nonlinear Richardson iterations \\
 \hline
-defOmega & 0.01 & default step in (\ref{eqn-interface}) ( deprecated ) \\
+defOmega & 0.01 & default step in (\ref{eqn-interface}) (deprecated) \\
 \hline
 abstol & 1e-07 & abstol and reltol define the stoping \\
 reltol & 1e-04 & criteria as abstol+reltol*norm(residual0) \\
@@ -361,9 +361,9 @@ reltol & 1e-04 & criteria as abstol+reltol*norm(residual0) \\
 etamax & 1e-03 &  Maximum error tolerance for residual in the linear solver. \\
 \hline
 linesearch & 0 & nonlinear Richardson algorithm linesearch \\
-& & ( always use 0, i.e no line search, for now ).\\
+& & (always use 0, i.e no line search, for now).\\
 monolithic & 0 & monolithic description of the FSI problem \\
-& & ( under development )\\
+& & (under development)\\
 \hline
 
 \end{tabular}

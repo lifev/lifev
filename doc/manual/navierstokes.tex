@@ -8,7 +8,7 @@
 % E-MAIL:       foureste@iacspc.epfl.ch
 %
 % ORIG-DATE:  4-Feb-09 at 14:11:50
-% LAST-MOD:  4-Feb-09 at 16:45:01 by Gilles Fourestey
+% LAST-MOD:  5-Feb-09 at 18:11:24 by Gilles Fourestey
 %
 % DESCRIPTION:
 % DESCRIP-END.
@@ -16,14 +16,14 @@
 
 Now that we have decribed a simple stationary problem, let's have a look at the evolutionary
 case. In this example, we will consider the same domain, but this time we will solve the
-Navier-Stokes problem \ixv{Navier-Stokes Problem}. Starting from the Oseen problem (\ref{eqn-oseen})
+Navier-Stokes problem \ixn{Navier-Stokes Problem}. Starting from the Oseen problem (\ref{eqn-oseen})
 
 \begin{equation*}
 \left\{
-\begin{array}{lc}
+\begin{array}{rl}
 \displaystyle \alpha u + \beta \cdot \nabla u - \nu \Delta u+
 \nabla p & = f \\
-\displaystyle \nabla \cdot u & = 0  \\
+\displaystyle \nabla \cdot u & = 0
 \end{array}
 \right.
 \end{equation*}
@@ -32,10 +32,10 @@ We want to solve the instationary Navier-Stokes problem :
 
 \begin{equation*} \label{eqn-navierstokes}
 \left\{
-\begin{array}{lc}
+\begin{array}{rl}
 \displaystyle \frac{\partial u}{\partial t} + u \cdot \nabla u - \nu \Delta u+
 \nabla p & = f \\
-\displaystyle \nabla \cdot u & = 0  \\
+\displaystyle \nabla \cdot u & = 0
 \end{array}
 \right.
 \end{equation*}
@@ -44,7 +44,7 @@ which can be written, using a time semi-discretisation of the time partial deriv
 
 \begin{equation*} \label{eqn-nsnl}
 \left\{
-\begin{array}{lc}
+\begin{array}{rl}
 \displaystyle \alpha u^{n+1} + u^{n+1} \cdot \nabla u^{n+1} - \nu \Delta u^{n+1}+
 \nabla p^{n+1} & = f^n  \\
 \displaystyle \nabla \cdot u & = 0  \\
@@ -54,13 +54,13 @@ which can be written, using a time semi-discretisation of the time partial deriv
 
 Where $alpha$ is a constant which depends on the time discritization order, $\Delta t$ is the time step, $u^{n+1}$ and $p^{n+1}$ are the velocity and the pressure at the time $t^n = n\Delta t$.
 Note that $f^n$ now contains terms resulting from the time discretization.
-Using a linearaztion $\beta$ of (\ref{eqn-nsnl}) around $u^{n+1}$, we get the full semi-discretized linear Navier-Stokes
+Using a linearaztion $\beta^n$ of (\ref{eqn-nsnl}) around $u^{n+1}$, we get the full semi-discretized linear Navier-Stokes
 equations :
 
 \begin{equation*} \label{eqn-ns}
 \left\{
 \begin{array}{rl}
-\displaystyle \alpha u^{n+1} + \beta \cdot \nabla u^{n+1} - \nu \Delta u^{n+1}+
+\displaystyle \alpha u^{n+1} + \beta^n \cdot \nabla u^{n+1} - \nu \Delta u^{n+1}+
 \nabla p^{n+1} & = f^n  \\
 \displaystyle \nabla \cdot u & = 0  \\
 \end{array}
@@ -93,7 +93,7 @@ The second order time discretization is :
 \right.
 \end{equation*}
 
-Let's have a look at the code in \verb!testsuite/test\_cavity/main/cpp!.
+Let's have a look at the code in \verb!testsuite/test_cavity/main.cpp!.
 Until the first \verb!fluid.iterate()!, the code is the same as the one used to compute the Stokes problem.
 Now, we want to use this Stokes solution to initialize the our instationary Navier-Stokes problem, and be able
 to store a history of previous solution in order to be able to compute the discretized time derivative.
@@ -102,9 +102,9 @@ This can be done by using the following object :
     // bdf initialization with the stokes problem solution
     BdfTNS<vector_type> bdf(dataNavierStokes.order_bdf());
 \end{verbatim}
-The templated class \verb!BdfTNS! will store the previous solution $u^n$, $u^{n-1}$ ... so that
+The Backward Differentiation Formula templated class \verb!BdfTNS! \ixn{Backward Differentiation Formula} will store the previous solution $u^n$, $u^{n-1}$ ... so that
 they will always be accessible when we need them. All we have to do is to construct this class
-with the correct time discretization order given in the data file by the variable \verb!fluid/discretization/dbf_order!
+with the correct time discretization order given in the data file by the variable \verb!fluid/discretization/bdf_order!
 so that the storing vector will be resized correctly, and intialize it with our previously computed Stokes problem solution :
 
 \begin{verbatim}
@@ -130,7 +130,8 @@ We are now ready to enter the time loop :
         if (verbose)
         {
             std::cout << std::endl;
-            std::cout << "We are now at time "<< dataNavierStokes.time() << " s. " << std::endl;
+            std::cout << "We are now at time " << dataNavierStokes.time()
+                      << " s. " << std::endl;
             std::cout << std::endl;
         }
 
@@ -162,7 +163,9 @@ We are now ready to enter the time loop :
         MPI_Barrier(MPI_COMM_WORLD);
 
         chrono.stop();
-        if (verbose) std::cout << "Total iteration time " << chrono.diff() << " s." << std::endl;
+        if (verbose) std::cout << "Total iteration time "
+                               << chrono.diff()
+                               << " s." << std::endl;
     }
 
 \end{verbatim}
