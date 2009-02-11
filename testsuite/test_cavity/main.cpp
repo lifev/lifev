@@ -192,26 +192,66 @@ main( int argc, char** argv )
     // partitioning the mesh
     partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.mesh(), comm);
 
-    // Now we proceed with the FESpace definition
-    // here we decided to use P2/P1 elements
+
+    std::string uOrder =  dataFile( "fluid/discretization/vel_order", "P1");
+
 
     const RefFE*    refFE_vel;
     const QuadRule* qR_vel;
     const QuadRule* bdQr_vel;
 
-    refFE_vel = &feTetraP2;
-    qR_vel    = &quadRuleTetra15pt; // DoE 5
-//     refFE_vel = &feTetraP1bubble;
-//     qR_vel    = &quadRuleTetra64pt;  // DoE 2
-    bdQr_vel  = &quadRuleTria3pt;   // DoE 2
-
     const RefFE*    refFE_press;
     const QuadRule* qR_press;
     const QuadRule* bdQr_press;
 
-    refFE_press = &feTetraP1;
-    qR_press    = &quadRuleTetra4pt;  // DoE 2
-    bdQr_press  = &quadRuleTria3pt;   // DoE 2
+    if ( uOrder.compare("P2") == 0 )
+    {
+        if (verbose) std::cout << "P2 velocity " << std::flush;
+        refFE_vel = &feTetraP2;
+        qR_vel    = &quadRuleTetra15pt; // DoE 5
+        bdQr_vel  = &quadRuleTria3pt;   // DoE 2
+    }
+    else
+        if ( uOrder.compare("P1") == 0 )
+        {
+            if (verbose) std::cout << "P1 velocity ";
+            refFE_vel = &feTetraP1;
+            qR_vel    = &quadRuleTetra4pt;  // DoE 2
+            bdQr_vel  = &quadRuleTria3pt;   // DoE 2
+        }
+        else
+            if ( uOrder.compare("P1Bubble") == 0 )
+            {
+                if (verbose) std::cout << "P1-bubble velocity " << std::flush;
+                refFE_vel = &feTetraP1bubble;
+                qR_vel    = &quadRuleTetra64pt;  // DoE 2
+                bdQr_vel  = &quadRuleTria3pt;   // DoE 2
+            }
+
+    Dof uDof(*dataNavierStokes.mesh(), *refFE_vel);
+
+    std::string pOrder =  dataFile( "fluid/discretization/press_order", "P1");
+    if ( pOrder.compare("P2") == 0 )
+    {
+        if (verbose) std::cout << "P2 pressure " << std::flush;
+        refFE_press = &feTetraP2;
+        qR_press    = &quadRuleTetra15pt; // DoE 5
+        bdQr_press  = &quadRuleTria3pt;   // DoE 2
+    }
+    else
+        if ( pOrder.compare("P1") == 0 )
+        {
+            if (verbose) std::cout << "P1 pressure";
+            refFE_press = &feTetraP1;
+            qR_press    = &quadRuleTetra4pt;  // DoE 2
+            bdQr_press  = &quadRuleTria3pt;   // DoE 2
+        }
+
+    if (verbose) std::cout << std::endl;
+    if (verbose) std::cout << "Time discretization order " << dataNavierStokes.order_bdf() << std::endl;
+
+    dataNavierStokes.setMesh(meshPart.mesh());
+
 
     // Everything is ready to build the FE space
 
