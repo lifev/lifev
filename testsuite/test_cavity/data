@@ -11,7 +11,7 @@ save       = 1
 [fluid]
 
 [./physics]
-endtime         = .2
+endtime         = 1.0
 density         = 1.0          # density
 viscosity       = 0.005         # viscosity
 
@@ -51,14 +51,16 @@ tol             = 1.e-5
 [../prec]
 prectype           = Ifpack
 reuse              = true
-overlap            = 1
 displayList        = true
-default_parameters = SA    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+
+[./ML]
+default_parameters = DD    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
 
 # Parameters for the Ifpack preconditioner
 
-[./ifpack]
+[../ifpack]
 prectype               = Amesos    # Amesos (does a local LU factorization), ILUT (not ILU)
+overlap                = 5
 
 [./relaxation]
 type                   = Jacobi
