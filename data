@@ -1,0 +1,201 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file for Fluid Structure Solver
+#-------------------------------------------------
+
+[problem]
+
+method     = monolithic # fixedPoint, steklovPoincare, monolithic, monolithic
+precond    = 0 #for Steklov-Poincare:
+               #     0 = lin fluid, 1 lin structure, 2 = both, 3 = DD-Newton
+               #for Monolithic:
+               #     0: full matrix passed to IFPACK, 1: block-diagonal passed to IFPACK
+DDNprecond = 1 # precond for DD-newton, 0 = lin fluid, 1 lin structure, 2 = both
+
+reducedFluid = 0 # 0 = exact, 1 = inexact
+defOmega   = 0.01 # usually 0.01 for precond = 0 or 1; -1 for precond = 2
+defOmegaS  = 0.01 # matters only with  precond = 2
+defOmegaF  = 0.01 # matters only with  precond = 2
+# only for fixed point and exactJacobian:
+# if updateEvery == 1, normal fixedPoint algorithm
+# if updateEvery  > 1, recompute computational domain every M_updateEvery iterations (transpiration)
+# if updateEvery <= 0, recompute computational domain and matrices only at first subiteration (semi-implicit).
+#                        Deprecated when using exactJacobian (better to set ifSemiImplicit=1)
+updateEvery = 1
+linesearch = 0
+# NonLinearRichardson: stop_tol  = abstol + reltol*normRes;
+abstol     =  1.e-10 # tolerance in nonLinearRichardson
+reltol     =  1.e-2 # tolerance in nonLinearRichardson
+etamax     = 1.e-3 # relarive tolerance of the nterface problem (solveJac) (GMRES),
+                    # if semiImplicit, set   etamax = 1.e-10,
+                    # else (e.g.)            etamax = 1.e-3
+restart    = 0
+maxSubIter = 20
+
+semiImplicit = true # (only valid for method = monolithic or monolithic).
+
+[exporter]
+multimesh  = false   # actually we export also the displacement
+start      = 0
+save       = 1
+
+[fluid]
+diagonalBlockPrec = false #
+useShapeDerivatives = false
+
+[./physics]
+endtime   = .01             # endtime
+density   = 1.0               # density
+viscosity = 0.03              # viscosity
+
+[../discretization]
+mesh_dir  = ./Mesh/ # the directory where the mesh file is
+#mesh_file = 179347_cm_fluid.mesh  # mesh file
+#mesh_file = tube20_ord.mesh  # mesh file
+mesh_file = tube20.mesh  # mesh file
+#mesh_file = tube_curve20.mesh  # mesh file
+timestep  = 0.001             # timestep
+vel_order       = P1            # P1, P1Bubble, P2
+press_order     = P1            # P1, P2
+order_bdf       = 1
+mesh_faces      = all                   # update all faces elements
+mesh_edges      = all                   # update all faces elements
+
+
+
+[../miscellaneous]
+verbose   = 1
+velname   = vel
+pressname = press
+steady    = 0
+factor    = 1
+
+#[../solver]
+#solver          = gmres
+#scaling         = none
+#output          = all_res  #none
+#conv            = rhs
+#max_iter        = 100
+#kspace          = 1000
+#tol             = 1.e-10    # AztecOO tolerance
+
+# see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/index.html
+#[../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
+#prectype        = Amesos # Amesos (does a local LU factorization), Amesos (not ILU)
+#reuse           = true
+#overlap         = 2
+#droptol         = 1.e-3
+#fill            = 4
+#athr            = 1.2500e-04 # ~h^2. for h=0.25: athr~1e-3
+#rthr            = 1
+#relax_value     = 1
+
+[../ipstab]
+gammaBeta  = 0.02
+gammaDiv   = 0.2
+gammaPress = 0.2
+#gammaBeta  = 0.125
+#gammaDiv   = 0.125
+#gammaPress = 0.03125
+reuse = false
+
+
+[interface] # mesh dependent flags for the interface.
+diagonalBlockPrec = true #
+DDBlockPrec = 1 #1: D-N, 2: R-R
+fluid_flag      =  1 # default: 1
+alphaf = 0.5
+alphas = 0.5 # parameters for Robin-Robin DDBlock preconditioner
+#solid_flag      =  1 # default: fluid_flag
+#structure_flag  =  1 # default: fluid_flag
+#harmonic_flag   =  1 # default: fluid_flag
+tolerance       =  0 # how far points are to be considered the same on the interface
+
+[solid]
+
+diagonalBlockPrec = false #
+
+[./physics]
+density   = 1.2               # density
+young     = 3.0E6
+poisson   = 0.30
+endtime   = .01
+
+[../discretization]
+mesh_dir  = ./Mesh/  # the directory where the mesh file is
+#mesh_file = 179347_cm_solid.mesh  # mesh file
+#mesh_file = vessel20_ord.mesh  # mesh file
+mesh_file = vessel20.mesh  # mesh file
+#mesh_file = vessel_curve20.mesh  # mesh file
+timestep  = 0.001             # timestep
+order     = P1
+mesh_faces      = all                   # update all faces elements
+mesh_edges      = all                   # update all faces elements
+
+
+[../miscellaneous]
+factor    = 12
+verbose   = 1
+depname   = dep
+
+
+[../newton]
+maxiter = 1
+abstol  = 1.e-8
+linesearch = 0
+
+
+[../solver]
+output          = all_res #all_res
+max_iter        = 1000
+poly_ord        = 5
+kspace          = 1000
+precond         = dom_decomp
+drop            = 1.00e-4
+ilut_fill       = 2
+tol             = 1.e-3
+
+
+[../prec]
+prectype        = Ifpack
+overlap         = 2
+rescale_factor = 1.e-2 # solid matrix rescale factor
+diagonalScaling = false
+
+[./ifpack]
+prectype        = Amesos
+
+[./fact]
+#level-of-fill                 = 10
+ilut_level-of-fill            = 4
+drop_tolerance                = 1.e-10
+relax_value                   = 0
+
+[../partitioner]
+#overlap =
+
+[../schwarz]
+reordering_type = none #metis, rcm, none
+filter_singletons = true
+
+# end of preconditioner part
+
+[mesh_motion]
+
+[./solver]
+output          = all_res
+max_iter        = 200
+poly_ord        = 5
+kspace          = 40
+precond         = dom_decomp
+drop            = 1.00e-4
+ilut_fill       = 4
+tol             = 1.e-10
+keep_info       = 1
+
+[jacobian]
+
+solver   = gmres;
+poly_ord = 5;
+kspace   = 40;
+conv     = rhs;
