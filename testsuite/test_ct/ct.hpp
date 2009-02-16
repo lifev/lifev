@@ -3,14 +3,14 @@
 
 #include <life/lifecore/application.hpp>
 
-enum TimeScheme { BDF_ORDER_ONE = 1, BDF_ORDER_TWO, BDF_ORDER_THREE };
-
 /*!
  * \class CT
- * \brief Test for Chorin Temam Method
+ * \brief Class for running Chorin-Temam / Projection methods. 
+ *        Uses opaque pointer to hide implementation of specific case study stuff
+ *        from the run itself. 
  *
- *  @author MG
- *  @see
+ * @author
+ * @see
  */
 class CT
 {
@@ -28,9 +28,9 @@ class CT
     //@{
 
     CT( int argc,
-              char** argv,
-              LifeV::AboutData const& ad,
-              LifeV::po::options_description const& od );
+        char** argv,
+        LifeV::AboutData const& ad,
+        LifeV::po::options_description const& od );
 
     ~CT()
         {}
@@ -55,7 +55,6 @@ class CT
      */
     //@{
 
-
     //@}
 
     /** @name  Methods
@@ -67,9 +66,11 @@ class CT
     //@}
 
 
-private:
-    struct Private;
-    boost::shared_ptr<Private> d;
+  private:
+    Epetra_Comm *M_comm;
+    struct CTcase;
+    boost::shared_ptr<CTcase> C_case;
+
 };
 
 #endif /* __CT_H */

@@ -1,9 +1,5 @@
-/**
- *  \file main.cpp
- *  NB : we follow the "test_cylinder" (ie mixt NS FEM test) structure :
- *      - short main
- *      - all problem defined in the xxx.{cpp,hpp,class} : elements, bdf, update params,
- *        bcs, ...
+/*!
+ * \file main.cpp
  */
 
 #include "Epetra_config.h"
@@ -41,13 +37,14 @@ makeAbout()
 using namespace LifeV;
 
 
-
+namespace LifeV
+{
 namespace
 {
 static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
-//static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
+static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
 }
-
+}
 
 
 int

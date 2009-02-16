@@ -9,227 +9,44 @@
 #include <life/lifemesh/partitionMesh.hpp>
 #include <life/lifesolver/dataNavierStokes.hpp>
 #include <life/lifefem/FESpace.hpp>
-#include <life/lifefem/bdfNS_template.hpp>
+#include <life/lifefem/bdf_template.hpp>
 #include <life/lifefilters/ensight.hpp>
 
 #include <ChorinTemam.hpp>
 
 #include <ct.hpp>
+#include <ctCase.hpp>
 #include <iostream>
 
 using namespace LifeV;
 
-/* References for tube3D_xxxM.mesh */
-const int INLET        = 2;
-const int OUTLET       = 3;
-const int WALL         = 1;
-/* Dimensions for tube3D_xxxM.mesh */
-const Real RADIUS      = 4.9;
-const Real HEIGHT      = 100.0;
-/* References for cylinder */
-const int CYL_INLET    = 40;
-const int CYL_WALL     = 60;
-const int CYL_SLIPWALL = 61;
-const int CYL_OUTLET   = 50;
-const int CYL_CYLINDER = 70;
-
-
-/* Define for different meshes, bcs */
-#undef __CT_VELOCITY_TUBE	/* for velocity excitation on tube */
-#undef __CT_PRESSURE_TUBE	/* for pressure excitation on tube */
-#undef __CT_CYLINDER_CASE	/* for cylinder to compare w/ Oseen */
-#undef __CT_AERO_CASE
-//#define __CT_CYLINDER_CASE 23
-#define __CT_CYLINDER_CASE 23
-
-/*
- * The CT::Private struct contains mainly the functions that will be used
- * for computing boundary conditions
- * We follow the encapsulating mechanism of test_cylinder.
- */
-
-struct CT::Private
-{
-    Private()
-	{}
-
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_type;
-
-    std::string data_file_name;
-
-    Epetra_Comm*   comm;
-
-    Real u3DIn( const Real& t,
-		const Real& x,
-		const Real& y,
-		const Real& z,
-		const ID& id ) const
-    {
-            Real ampl = 100.0;
-	    Real gap  = 0.0; 
-	    if ( id == 3 ) {
-                  return ampl * t + gap;
-		}
-            else {
-		  return 0.0;
-            }
-    }
-
-    fct_type get_u3DIn()
-        {
-            fct_type f;
-            f = boost::bind(&CT::Private::u3DIn, this, _1, _2, _3, _4, _5);
-            return f;
-        }
-
-    Real u3DZero( const Real& t,
-		  const Real& x,
-		  const Real& y,
-		  const Real& z,
-		  const ID&   id ) const
-    {
-                 return 0.0;
-    }
-
-    fct_type get_u3DZero()
-        {
-            fct_type f;
-            f = boost::bind(&CT::Private::u3DZero, this, _1, _2, _3, _4, _5);
-            return f;
-        }
-
-    Real p3DIn( const Real& t,
-		const Real& x,
-		const Real& y,
-		const Real& z,
-		const ID& id ) const
-    {
-	return -0.1 * cos(t) + 0.1;
-    }
-
-    fct_type get_p3DIn()
-	{
-	    fct_type f;
-	    f = boost::bind(&CT::Private::p3DIn, this, _1, _2, _3, _4, _5);
-	    return f;
-  	}
-
-    Real u3Dcyl( const Real& t,
-		 const Real& x,
-		 const Real& y,
-		 const Real& z,
-		 const ID& id ) const
-    {
-        Real ampl = 1.;
-        if ( id == 1 ) {
-            return ampl/(20.*20.)*(y + 20.)*(20. -y);
-        } else {
-            return 0.;
-        }
-    }
-
-    fct_type get_u3Dcyl()
-        {
-            fct_type f;
-            f = boost::bind(&CT::Private::u3Dcyl, this, _1, _2, _3, _4, _5);
-            return f;
-        }
-    
-    Real u3Dcyl_dyn( const Real& t,
-		     const Real& x,
-		     const Real& y,
-		     const Real& z,
-		     const ID& id) const 
-    {
-        Real ampl  = 100.0;
-	Real tampl = 2.0; 
-        if ( id == 1 ) {
-	    if ( t <= tampl ) { 
-	        return ampl*(t/tampl)/(20.*20.)*(y + 20.)*(20. -y);
-            } else {
-		return ampl/(20.*20.)*(y + 20.)*(20. -y);
-            }
-	} else {
-	    return 0.;
-        } 
-    }
-
-    fct_type get_u3Dcyl_dyn()
-    {
-        fct_type f;
-        f = boost::bind(&CT::Private::u3Dcyl_dyn, this, _1, _2, _3, _4, _5);
-        return f;
-    }
-
-#ifdef __CT_AERO_CASE
-    Real uInflow( const Real& t, const Real& x, const Real&y, const Real& z,
-		  const ID& id ) const
-    {
-        //profile spec
-	Real max_vel	= 200.0;
-        Real freq 	= 0.25;
-	Real twoPi 	= 2 * acos (-1.0);
-        //geometry spec
-        Real xc 	= 8.05;
-	Real yc 	= 1.70;
-	Real r		= 1.30 / 2.0;
-	Real c		= 0.94934;
-	Real s		= -0.31425;
-
-	Real profile 	= 1.0 - ((x-xc)*(x-xc) + (y-yc)*(y-yc)) / (r*r);
-	Real profile_vel = max_vel * sin(twoPi * freq * t) * profile;
-       
-        switch (id) {
-	    case 1:
-		return 0.0;
-		break;
-	    case 2:
-		return -s * profile_vel;
-		break;
-	    case 3:
-		return c * profile_vel;
-		break;
-        }
-	return 0.0; 
-    }
-
-    fct_type get_uInFlow()
-    {
-        fct_type f;
-        f = boost::bind(&CT::Private::uInflow, this, _1, _2, _3, _4, _5);
-	return f;
-    }
-#endif
-
-};
-
 CT::CT( int argc,
-                    char** argv,
-                    LifeV::AboutData const& /*ad*/,
-                    LifeV::po::options_description const& /*od*/ )
+        char** argv,
+        LifeV::AboutData const& /*ad*/,
+        LifeV::po::options_description const& /*od*/ )
     :
-    d( new Private )
+    C_case (new CTcase)
 {
     GetPot command_line(argc, argv);
     const char* data_file_name = command_line.follow("data", 2, "-f", "--file");
     GetPot dataFile( data_file_name );
-    d->data_file_name = data_file_name;
 
 #ifdef EPETRA_MPI
-    d->comm = new Epetra_MpiComm( MPI_COMM_WORLD );
+    M_comm = new Epetra_MpiComm( MPI_COMM_WORLD );
     int ntasks;
     int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
-    std::cout << "  t-  MPI Initialization from PID = " << d->comm->MyPID()
+    std::cout << "  t-  MPI Initialization from PID = " << M_comm->MyPID() 
 	<< " among " << ntasks << " running." << std::endl;
 #else
-    d->comm = new Epetra_SerialComm();
+    M_comm = new Epetra_SerialComm();
 #endif
-
+   
+    C_case->set_data(dataFile, M_comm);
+    C_case->set_bcs();
 }
 
 /*
- * CT::run()
- * Inspired from test_cylinder.
+ * CT::run() 
  */
 
 void
@@ -238,87 +55,18 @@ CT::run()
 
     typedef ChorinTemam< RegionMesh3D<LinearTetra> >::vector_type  vector_type;
     typedef boost::shared_ptr<vector_type> vector_ptrtype;
-
-
+    
     // Reading from data file
-    GetPot dataFile( d->data_file_name.c_str() );
+    GetPot dataFile( C_case->C_data );
 
     int save = dataFile("fluid/miscellaneous/save", 1);
+    
+    bool verbose = (M_comm->MyPID() == 0);
 
-    bool verbose = (d->comm->MyPID() == 0);
+    // retrieve boundary conditions from the CTcase 
+    BCHandler *bcHu = C_case->get_bcHu();
+    BCHandler *bcHp = C_case->get_bcHp();
 
-#ifdef __CT_VELOCITY_TUBE
-    // Boundary conditions for tube
-    BCHandler bcHu( 3, BCHandler::HINT_BC_NONE );
-    BCHandler bcHp( 3, BCHandler::HINT_BC_NONE );
-    BCFunctionBase uZero( d->get_u3DZero() );
-    BCFunctionBase uIn  ( d->get_u3DIn() );
-
-    // bc for the velocity
-    bcHu.addBC( "Inlet",    INLET,    Essential, Full,      uIn,   3 );
-    bcHu.addBC( "Outlet",   OUTLET,   Natural,   Full,      uZero, 3 );
-    bcHu.addBC( "Wall",     WALL,     Essential, Full,      uZero, 3 );
-    // bc for the pressure
-    bcHp.addBC( "Inlet",    INLET,    Natural,   Scalar,    uZero    );
-    bcHp.addBC( "Outlet",   OUTLET,   Essential, Scalar,    uZero    );
-    bcHp.addBC( "Wall",	    WALL,     Natural,   Scalar,    uZero    );
-#endif
-#ifdef __CT_PRESSURE_TUBE
-    // Boundary conditions for tube
-    BCHandler bcHu( 3, BCHandler::HINT_BC_NONE );
-    BCHandler bcHp( 3, BCHandler::HINT_BC_NONE );
-    BCFunctionBase uZero( d->get_u3DZero() );
-    BCFunctionBase pIn ( d->get_p3dIn() );
-
-    // bc for the velocity
-    bcHu.addBC ("Inlet",    INLET,    Natural,   Full,      uZero, 3);
-    bcHu.addBC ("Outlet",   OUTLET,   Natural,   Full,      uZero, 3);
-    bcHu.addBC ("Wall",     WALL,     Essential, Full,      uZero, 3);
-    // bc for the pressure
-    bcHp.addBC ("Inlet",    INLET,    Essential, Scalar,    pIn);
-    bcHp.addBC ("Outlet",   OUTLET,   Essential, Scalar,    uZero);
-    bcHp.addBC ("Wall",     WALL,     Natural,   Scalar,    uZero);
-#endif
-#ifdef __CT_CYLINDER_CASE
-    // Boundary conditions for cylinder (same as Oseen w/ test_cylinder)
-    BCHandler bcHu( 5, BCHandler::HINT_BC_NONE);
-    BCHandler bcHp( 5, BCHandler::HINT_BC_NONE);
-    BCFunctionBase uIn ( d->get_u3Dcyl_dyn() );
-    BCFunctionBase uZero ( d->get_u3DZero() );
-    std::vector<ID> zComp(1);
-    zComp[0] = 3;
-
-    // bc for the velocity
-    bcHu.addBC( "Inlet",    CYL_INLET,    Essential, Full,      uIn,   3);
-    bcHu.addBC( "Outlet",   CYL_OUTLET,   Natural,   Full,      uZero, 3);
-    bcHu.addBC( "Wall",     CYL_WALL,     Essential, Full,      uZero, 3);
-    bcHu.addBC( "SlipWall", CYL_SLIPWALL, Essential, Component, uZero, zComp);
-    bcHu.addBC( "Cylinder", CYL_CYLINDER, Essential, Full,      uZero, 3);
-    // bc for the pressure
-    bcHp.addBC( "Inlet",    CYL_INLET,    Natural,   Scalar,     uZero);
-    bcHp.addBC( "Outlet",   CYL_OUTLET,   Essential, Scalar,     uZero);
-    bcHp.addBC( "Wall",     CYL_WALL,     Natural,   Scalar,     uZero);
-    bcHp.addBC( "SlipWall", CYL_SLIPWALL, Natural,   Scalar,     uZero); 
-    bcHp.addBC( "Cylinder", CYL_CYLINDER, Natural,   Scalar,     uZero);
-#endif
-#ifdef __CT_AERO_CASE 
-    // Boundary conditions for aero case
-    BCHandler bcHu (4, BCHandler::HINT_BC_NONE);
-    BCHandler bcHp (4, BCHandler::HINT_BC_NONE);
-    BCFunctionBase uIn (d->get_uInFlow());
-    BCFunctionBase uZero (d->get_u3DZero());
-
-    // bc for the velocity
-    bcHu.addBC("Freeout", 1, Natural,   Full, uZero, 3);
-    bcHu.addBC("Wallin",  2, Essential, Full, uZero, 3);
-    bcHu.addBC("Inflow",  3, Essential, Full, uIn,   3);
-    bcHu.addBC("Wallout", 4, Essential, Full, uZero, 3);
-    // bc for the pressure
-    bcHp.addBC("Freeout", 1, Essential, Scalar, uZero);
-    bcHp.addBC("Wallin",  2, Natural,   Scalar, uZero);
-    bcHp.addBC("InFlow",  3, Natural,   Scalar, uZero);
-    bcHp.addBC("Wallout", 4, Natural,   Scalar, uZero);
-#endif
 
     // fluid solver
 
@@ -332,7 +80,7 @@ CT::run()
 
     DataNavierStokes<RegionMesh3D<LinearTetra> > dataNavierStokes( dataFile );
 
-    partitionMesh< RegionMesh3D<LinearTetra> > meshPart(*dataNavierStokes.mesh(), *d->comm);
+    partitionMesh< RegionMesh3D<LinearTetra> > meshPart(*dataNavierStokes.mesh(), *M_comm);
 
     // fill in the space and time discretization orders
     std::string uOrder = dataFile( "fluid/discretization/vel_order", "P1");
@@ -383,8 +131,14 @@ CT::run()
             bdQr_press  = bdQr_vel;	 // test purpose
         }
 
+    int uBdfOrder = dataFile( "fluid/discretization/vel_order_bdf", 1 );
+    int pBdfOrder = dataFile( "fluid/discretization/press_order_bdf", 1 );
+
     if (verbose) std::cout << std::endl;
-    if (verbose) std::cout << "  t-  Time discretization order : " << dataNavierStokes.order_bdf() << std::endl;
+    if (verbose) std::cout << "  t-  Velocity time discretization order : " 
+		<< uBdfOrder << std::endl;
+    if (verbose) std::cout << "  t-  Pressure time discretization order : " 
+		<< pBdfOrder << std::endl;
 
     dataNavierStokes.setMesh(meshPart.mesh());
 
@@ -396,7 +150,7 @@ CT::run()
                                                              *qR_vel,
                                                              *bdQr_vel,
                                                              3,
-                                                             *d->comm);
+                                                             *M_comm);
 
     if (verbose)
         std::cout << "ok." << std::endl;
@@ -409,7 +163,7 @@ CT::run()
                                                              *qR_press,
                                                              *bdQr_press,
                                                              1,
-                                                             *d->comm);
+                                                             *M_comm);
 
     if (verbose)
         std::cout << "ok." << std::endl;
@@ -426,11 +180,14 @@ CT::run()
     if (verbose) std::cout << "  t-  Calling the fluid constructor ... ";
 
     ChorinTemam< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
-                                                    uFESpace,
-                                                    pFESpace,
-                                                    bcHu,
-                                                    bcHp,
-                                                    *d->comm);
+                                              uFESpace,
+                                              pFESpace,
+                                              uBdfOrder,
+                                              pBdfOrder,
+                                              *bcHu,
+                      		              *bcHp,
+                                              *M_comm);
+
     EpetraMap fullMap_u(fluid.getMap_u());
     EpetraMap fullMap_p(fluid.getMap_p());
 
@@ -466,7 +223,7 @@ CT::run()
 
     fluid.initialize(init_u, init_p);
 
-    Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "tube", d->comm->MyPID());
+    Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "testCT", M_comm->MyPID());
 
     vector_ptrtype vel ( new vector_type(fluid.solution_u(), Repeated ) );
     vector_ptrtype press ( new vector_type(fluid.solution_p(), Repeated ) );
@@ -500,8 +257,8 @@ CT::run()
 
 	fluid.time_advance(time);
 
-        fluid.iterate_u(bcHu);
-	fluid.iterate_p(bcHp);
+        fluid.iterate_u(*bcHu);
+	fluid.iterate_p(*bcHp);
 
         *vel = fluid.solution_u();
         *press = fluid.solution_p();
@@ -514,3 +271,4 @@ CT::run()
     }
 
 }
+

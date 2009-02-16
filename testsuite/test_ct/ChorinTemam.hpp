@@ -1,6 +1,27 @@
-/*
+/**
+ * This file is part of the LifeV library
+ * Copyright (C) 2009 INRIA, EPFL, Politecnico Milano
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
+/*! 
  * \file ChorinTemam.hpp
- * \desc Chorim-Temam method w/, at the moment, first order Euler backward
+ * \desc Chorim-Temam methods including pressure-correction schemes.
+ * \see An Overview of projection methods for incompressible flows, Guermond & al, 
+ *      Inter. J. Numer. Methods Eng.
  */
 
 #ifndef _CHORIN_TEMAM_H_
@@ -22,18 +43,16 @@
 
 #include <life/lifefem/bcHandler.hpp>
 #include <life/lifecore/chrono.hpp>
-//#include <life/lifefem/sobolevNorms.hpp>
 #include <life/lifefem/geoMap.hpp>
-//#include <life/lifesolver/nsipterms.hpp>
 #include <life/lifesolver/dataNavierStokes.hpp>
 
 #include <boost/shared_ptr.hpp>
 
-#include "life/lifefem/FESpace.hpp"
-//#include <life/lifefem/bdf_template.hpp>
+#include <life/lifefem/FESpace.hpp>
+#include <life/lifefem/bdf_template.hpp>
 
-// header for streamline diffusion stabilization
 #include <sdStabilization.hpp>
+#include <elemOperCT.hpp>
 
 namespace LifeV
 {
@@ -65,18 +84,21 @@ public:
     typedef typename SolverType::prec_raw_type    prec_raw_type;
     typedef typename SolverType::prec_type        prec_type;
 
-    //! Constructor
+    //! Constructor 
     /*!
       \param dataType
-      \param localMap
       \param velocity FE space
       \param pressure FE space
+      \param bdf order for the velocity ( >=1 and <=3 as is for bdf_template)
+      \param bdf order for the pressure ( >=0 and <=3 as 0 is standard Chorin-Temam case)
       \param bcHu boundary conditions for the velocity
       \param bcHp boundary conditions for the pressure
     */
     ChorinTemam( const data_type&          dataType,
            FESpace<Mesh, EpetraMap>& uFESpace,
            FESpace<Mesh, EpetraMap>& pFESpace,
+	   int 			     uBdfOrder,
+	   int			     pBdfOrder,
            BCHandler&                bcHu,
 	   BCHandler& 		     bcHp,
            Epetra_Comm&              comm );
@@ -90,7 +112,7 @@ public:
     //! apply p bc's, solve p system
     virtual void iterate_p (bchandler_raw_type& bch_p);
 
-    //! update rhs for u system (i.e. < \nabla p^n | v>) and add M*u^n
+    //! update rhs for u system i.e. Chorin-Temam coupling and mass term
     void time_advance (const Real& time);
 
     //! setup physical and numerical parameters 
@@ -100,22 +122,12 @@ public:
     void initialize( const vector_type&, const vector_type& );
 
     //! returns the local solution vector
-
     const vector_type& solution_u() const {return M_sol_u;}
     const vector_type& solution_p() const {return M_sol_p;}
 
     //! returns the local residual vector
-
     const vector_type& residual_u() const {return M_residual_u;}
     const vector_type& residual_p() const {return M_residual_p;}
-
-    //TODO: we do not need these methods here
-    //! reduce the local solution solution in global vectors
-    void reduceSolution( Vector& u,
-                         Vector& p );
-
-    void reduceResidual( Vector& res);
-
 
     FESpace<Mesh, EpetraMap>& velFESpace()   {return M_uFESpace;}
     FESpace<Mesh, EpetraMap>& pressFESpace() {return M_pFESpace;}
@@ -130,6 +142,15 @@ public:
 	    M_BCh_fluid_p = &BCh_p;
 	    M_setBC = true;
         }
+
+    //! Resistance boundary conditions
+    /*!
+     * \param resFlag : boundary reference to which apply resistance
+     * \param resVal  : resistance values
+     * \param explRES : 1 for explicit resistance, 0 for implicit
+     */
+    void setRES(const std::vector<Real>& resVal, const std::vector<EntityFlag>& resFlag, 
+                const int explRES); 
 
     //! set the source term functor
     void setSourceTerm( source_type __s )
@@ -180,12 +201,16 @@ protected:
     void buildSystem_u_p	();
     // update convective term for u system
     void updateSystem_u (vector_type& betaVec);
-    // fill the p system matrix with pressure matrix (!)
-    void updateSystem_p ();
     // compute u system CT coupling term - < \nabla p^n  v >
     void computeCTRHS_u (vector_type& p_sol);
     // compute p system CT coupling term -\rho / dt < \nabla \cdot u^{n+1} | q >
     void computeCTRHS_p (vector_type& u_sol);    
+    // compute explicit resistance (rhs)
+    void computeRES_expl (Real resVal, EntityFlag resFlag, 
+                          vector_type& beta, vector_type& rhs);
+    // compute implicit resistance (lhs)
+    void computeRES_impl (Real resVal, EntityFlag resFlag, 
+                          matrix_type& matrix);    
 
     void solveSystem_u            ( matrix_ptrtype matrFull_u,
                                     vector_type&   rhsFull_u );
@@ -199,13 +224,15 @@ protected:
     void applyBC_p (matrix_type& matrix_p,
                     vector_type& rhs_p,
                     bchandler_raw_type& BCh_p );
-    
+    // apply all implicit resistance BC (rhs)
+    void applyRES_impl (matrix_type& matrix_u);   
+    // apply all explicit resistance BC (lhs)
+    void applyRES_expl (vector_type& rhs_u );
+ 
     void echo(std::string message);
 
     //! removes mean of component comp of vector x
     void removeMean( vector_type& x, UInt comp = 1 );
-
-    //private members
 
     //! data for NS solvers
     const data_type&               M_data;
@@ -227,36 +254,31 @@ protected:
     EpetraMap			   M_localMap_p;
 
     //! mass matrix
-    matrix_ptrtype                   M_matrMass;
+    matrix_ptrtype                 M_matrMass;
 
     //! Stokes matrix: mu*stiff
-    matrix_ptrtype                   M_matrStokes;
+    matrix_ptrtype                 M_matrStokes;
 
     //! pressure matrix 
-    matrix_ptrtype		    M_matrPress;
+    matrix_ptrtype		   M_matrPress;
 
     //! matrix without boundary conditions
-
     matrix_ptrtype                 M_matrNoBC_u;
     matrix_ptrtype		   M_matrNoBC_p;
     
     //! source term for NS
     source_type                    M_source;
 
-
     //! Right hand side for the velocity
     vector_type                    M_rhsNoBC_u;
     vector_type			   M_rhsNoBC_p;
 
-    //! Solutions _u and _p
+    //! Solutions _u and _p, and projector field
     vector_type                    M_sol_u;
     vector_type			   M_sol_p;
+    vector_type			   M_sol_p_phi;
 
-    // solution u at previous time
-    vector_type			   M_sol_u_prev;
-
-    //! residual
-
+    //! Residuals
     vector_type                    M_residual_u;
     vector_type			   M_residual_p;
 
@@ -270,36 +292,33 @@ protected:
 
     //! SD Stabilization
     bool                           M_stab;
-
     SDStabilization<Mesh, Dof>     M_sdStab;
-    
-//    details::
-//    IPStabilization<Mesh, Dof>     M_ipStab; 
     Real                           M_gammaBeta;
     Real                           M_gammaDiv;
-//    Real                           M_gammaPress;
 
+    // boolean indicating resistance bc's
+    bool                           M_hasRES;
+    // boolean indicating explicitness or implicitness in resistance bc application
+    bool			   M_hasRESexpl; 
+    // boolean indicating variational pressure term (velocity system RHS)
+    bool                           M_hasVariationalPressure;
 
     const Function*                M_betaFct;
 
     bool                           M_divBetaUv;
 
-    //
     double                         M_diagonalize_u;
     double 			   M_diagonalize_p;
 
     UInt                           M_count;
 
     //! boolean that indicates if output is sent to cout
-
     bool                           M_verbose;
 
     //! boolean that indicates if the matrix is updated for the current iteration
-
     bool                           M_updated;
 
-    //! boolean that indicates if le precond has to be recomputed
-
+    //! boolean that indicates if the precond has to be recomputed
     bool                           M_reusePrec_u;
     int                            M_maxIterForReuse_u;
     bool                           M_resetPrec_u;
@@ -307,13 +326,11 @@ protected:
     int				   M_maxIterForReuse_p;
     bool 			   M_resetPrec_p;
 
-    //! interger storing the max number of solver iteration with prec recomputing
-
+    //! integer storing the max number of solver iteration with prec recomputing
     int                            M_maxIterSolver_u;
     int 			   M_maxIterSolver_p;
 
     //!
-
     bool                           M_recomputeMatrix;
 
 private:
@@ -326,18 +343,30 @@ private:
     ElemVec			   M_elvec_p;         // Elementary pressure vector
     ElemVec			   M_elemrhs_u;
     ElemVec			   M_elemrhs_p;		 
+    ElemVec			   M_belvec_u;	      // useful for resistance expl
+    ElemVec			   M_bele_flow_u;     // elemental flow vector
+    ElemMat			   M_belmat_u;        // useful for resistance impl
 
+    //! Time related data
     Real			   M_time;	       // current time
     bool			   M_firstTimeStep; 
-//    BdfT<vector_type>		   M_bdf_u;	       // velocity bdf 
-//    BdfT<vector_type>		   M_bdf_p;              // pressure bdf
+    int 			   M_uBdfOrder;	       // bdf order for velocity
+    int 			   M_pBdfOrder;        // bdf order for pressure
+    BdfT<vector_type>		   M_bdf_u;	       // velocity bdf 
+    BdfT<vector_type>		   M_bdf_p;            // pressure bdf
+    BdfT<vector_type>              M_bdf_p_phi;        // projector field bdf
+
+    //! Resistance related data
+    std::vector<EntityFlag>	   M_resFlag;	       // resistance flags
+    std::vector<Real>		   M_resVal;           // resistance values
 }; // class ChorinTemam
 
 
-
-/* -------------------------------------------------------------- */
-/* IMPLEMENTATION						  */
-/* -------------------------------------------------------------- */
+/****************************************************************************
+ *
+ * Implementation
+ *
+ ****************************************************************************/
 
 
 template<typename Mesh, typename SolverType>
@@ -345,6 +374,8 @@ ChorinTemam<Mesh, SolverType>::
 ChorinTemam( const data_type&          dataType,
 	FESpace<Mesh, EpetraMap>& uFESpace,
 	FESpace<Mesh, EpetraMap>& pFESpace,
+	int uBdfOrder, 
+	int pBdfOrder,
 	BCHandler&                BCh_u,
 	BCHandler&	          BCh_p,
 	Epetra_Comm&              comm ):
@@ -373,10 +404,14 @@ ChorinTemam( const data_type&          dataType,
     M_elvec_p		     ( M_pFESpace.fe().nbNode, 1 ),
     M_elemrhs_u		     ( M_uFESpace.fe().nbNode, nDimensions ),
     M_elemrhs_p              ( M_pFESpace.fe().nbNode, 1 ),
+    M_belvec_u               ( M_uFESpace.feBd().nbNode, nDimensions ),
+    M_bele_flow_u            ( M_uFESpace.feBd().nbNode, nDimensions ),
+    M_belmat_u               ( M_uFESpace.feBd().nbNode, nDimensions, nDimensions ),
     M_rhsNoBC_u              ( M_localMap_u ),
     M_rhsNoBC_p		     ( M_localMap_p ),
     M_sol_u                  ( M_localMap_u ),
     M_sol_p		     ( M_localMap_p ),
+    M_sol_p_phi              ( M_localMap_p ),
     M_residual_u             ( M_localMap_u ),
     M_residual_p 	     ( M_localMap_p ), 
     M_stab                   ( false ),
@@ -387,13 +422,6 @@ ChorinTemam( const data_type&          dataType,
                                0., 0., 
                                M_data.viscosity()
                              ),
-
-/*    M_ipStab                 ( M_uFESpace.mesh(),
-                               M_uFESpace.dof(), M_uFESpace.refFE(),
-                               M_uFESpace.feBd(), M_uFESpace.qr(),
-                               0., 0., 0.,
-                               M_data.viscosity() ),
-*/ // mg: tbm
     M_betaFct                ( 0 ),
     M_count                  ( 0 ),
     M_verbose                ( M_me == 0),
@@ -409,10 +437,16 @@ ChorinTemam( const data_type&          dataType,
     M_recomputeMatrix        ( false ),
     M_time		     (0),
     M_firstTimeStep	     (1),
-//    M_bdf_u                  (1), 	  // first order time
-//    M_bdf_p                  (1)        // first order time
-    M_sol_u_prev             ( M_localMap_u )
-    
+    M_uBdfOrder		     ( uBdfOrder ),
+    M_pBdfOrder		     ( pBdfOrder ),
+    M_bdf_u                  ( M_uBdfOrder ),
+    M_bdf_p                  ( M_pBdfOrder ? M_pBdfOrder : 1),
+    M_bdf_p_phi              ( M_uBdfOrder ),
+    M_hasVariationalPressure ( false ),
+    M_hasRES                 ( false ),
+    M_hasRESexpl             ( false ),
+    M_resVal                 ( 0 ),
+    M_resFlag                ( 0 )
 {
     M_stab = (&M_uFESpace.refFE() == &M_pFESpace.refFE());
 }
@@ -421,7 +455,6 @@ template<typename Mesh, typename SolverType>
 ChorinTemam<Mesh, SolverType>::
 ~ChorinTemam()
 {
-
 }
 
 
@@ -429,26 +462,26 @@ template<typename Mesh, typename SolverType>
 void ChorinTemam<Mesh, SolverType>::setUp( const GetPot& dataFile )
 {
     M_steady      = dataFile( "fluid/miscellaneous/steady",        1  );
-//    M_gammaBeta   = dataFile( "fluid/ipstab/gammaBeta",            0. );
-//    M_gammaDiv    = dataFile( "fluid/ipstab/gammaDiv",             0. );
-//    M_gammaPress  = dataFile( "fluid/ipstab/gammaPress",           0. );
     M_gammaBeta   = dataFile ( "fluid/sdstab/gammaBeta", 0. );
     M_gammaDiv    = dataFile ( "fluid/sdstab/gammaDiv", 0.);
     M_divBetaUv   = dataFile( "fluid/discretization/div_beta_u_v", 0  );
     M_diagonalize_u = dataFile( "fluid/discretization/diagonalizeVel",  1. );
     M_diagonalize_p = dataFile( "fluid/discretization/diagonalizePress",  1. );
 
-// TODO modify the following two lines for handling different vel / press solvers ... 
+    M_hasVariationalPressure = dataFile( "fluid/discretization/variationalPn", false);
+    if (M_verbose) {
+      if (M_hasVariationalPressure)
+        std::cout << "\n  f- Chorin-Temam coupling : variational pressure" << std::endl;
+      else
+        std::cout << "\n  f- Chorin-Temam coupling : standard" << std::endl;
+    }
+
     M_linearSolver_u.setDataFromGetPot( dataFile, "fluid/solver" );
     M_linearSolver_p.setDataFromGetPot( dataFile, "fluid/solver" );
 
-//    M_ipStab.setGammaBeta (M_gammaBeta);
-//    M_ipStab.setGammaDiv  (M_gammaDiv);
-//    M_ipStab.setGammaPress(M_gammaPress);
     M_sdStab.setGammaBeta (M_gammaBeta);
     M_sdStab.setGammaDiv  (M_gammaDiv); 
 
-// TODO modify the following lines to handle different solvers for press and velocity ... 
     M_maxIterSolver_u   = dataFile( "fluid/solver/max_iter", -1);
     M_reusePrec_u       = dataFile( "fluid/prec/reuse", true);
     M_maxIterForReuse_u = dataFile( "fluid/prec/max_iter_reuse", M_maxIterSolver_u*8/10);
@@ -458,11 +491,9 @@ void ChorinTemam<Mesh, SolverType>::setUp( const GetPot& dataFile )
 
     std::string precType = dataFile( "fluid/prec/prectype", "Ifpack" );
 
-    std::cout << "  o-  Resetting preconditioner pointers ..." << std::endl;
     M_prec_u.reset( PRECFactory::instance().createObject(precType) );
     M_prec_p.reset( PRECFactory::instance().createObject(precType) );  
 
-    std::cout << "  o-  Fill in preconditioners types ..." << std::endl;  
     M_prec_u->setDataFromGetPot( dataFile, "fluid/prec" );
     M_prec_p->setDataFromGetPot( dataFile, "fluid/prec" );
 }
@@ -471,7 +502,7 @@ template<typename Mesh, typename SolverType>
 void ChorinTemam<Mesh, SolverType>::buildSystem_u_p()
 {
 
-    // NB: we compute u and p systems constant matrices at the same time
+    // We compute u and p systems _constant_ matrices at the same time
     // one loop on geom element w/ possibly different fe for u and p
 
     M_matrMass.reset  ( new matrix_type(M_localMap_u) );
@@ -508,7 +539,7 @@ void ChorinTemam<Mesh, SolverType>::buildSystem_u_p()
     // Loop on elements
 
     UInt velTotalDof   = M_uFESpace.dof().numTotalDof();
-//    UInt pressTotalDof = M_pFESpace.dof().numTotalDof();
+    //UInt pressTotalDof = M_pFESpace.dof().numTotalDof();
 
     chrono.start();
 
@@ -641,7 +672,24 @@ initialize( const vector_type& u0, const vector_type& p0 )
 
     M_sol_u = u0;
     M_sol_p = p0;
-    M_sol_u_prev *= 0.0; 	// for test purpose 
+    M_sol_p_phi *= 0;
+    
+    if (M_verbose)
+        std::cout << "  f-  Initializing velocity bdf object ..." << std::endl;
+    M_bdf_u.initialize_unk(M_sol_u);
+
+    if (M_verbose)
+        std::cout << "  f-  Initializing projector field bdf object ..." << std::endl;
+    M_bdf_p_phi.initialize_unk(M_sol_p_phi);
+
+    if (M_verbose) {
+        if (M_pBdfOrder > 0) 
+            std::cout << "  f-  Initializing pressure bdf object ..." << std::endl;
+        else 
+	    std::cout << "  f-  Standard Chorin-Temam projection ..." << std::endl;
+    }
+    if (M_pBdfOrder > 0)
+        M_bdf_p.initialize_unk(M_sol_p);
 
 }
 
@@ -649,9 +697,7 @@ template<typename Mesh, typename SolverType>
 void ChorinTemam<Mesh, SolverType>::updateSystem_u(vector_type& betaVec)
 {
 	
-    Real alpha = 1./M_data.timestep(); 
- 
-    /* copy matrices at the right place */     
+    Real alpha = M_bdf_u.coeff_der(0) / M_data.timestep();    
 
     if (M_recomputeMatrix)
         buildSystem_u_p();
@@ -670,7 +716,7 @@ void ChorinTemam<Mesh, SolverType>::updateSystem_u(vector_type& betaVec)
         *M_matrNoBC_u += *M_matrMass;
     }
 
-    /* Update convective term for velocity system */
+    // Update convective term for velocity system
 
     UInt nbCompU = nDimensions;
     UInt velTotalDof = M_uFESpace.dof().numTotalDof();
@@ -679,8 +725,9 @@ void ChorinTemam<Mesh, SolverType>::updateSystem_u(vector_type& betaVec)
     double normInf;
     betaVec.NormInf(&normInf);
 
-//    normInf = 0.; 	// remove this after debug
-			// just to prevent convective term in the absence of stabilization
+    if (normInf == 0.) 
+	std::cout << "\n  f-  Convective velocity is zero on process : " << 
+	M_me << std::endl;
 
     if (normInf != 0.)
     {
@@ -698,7 +745,7 @@ void ChorinTemam<Mesh, SolverType>::updateSystem_u(vector_type& betaVec)
         {
 
             M_uFESpace.fe().updateFirstDeriv( M_uFESpace.mesh()->volumeList( iVol ) );
-	    // reuse elmatStiff as space for storing elemtal convective matrix
+	    // reuse elmatStiff as space for storing elemental convective matrix
             M_elmatStiff.zero();
 
             UInt eleID = M_uFESpace.fe().currentLocalId();
@@ -747,21 +794,11 @@ void ChorinTemam<Mesh, SolverType>::updateSystem_u(vector_type& betaVec)
         if (M_verbose) std::cout << "done in " << chrono.diff() << " s.\n"
                                  << std::flush;
 
-// TODO Modify what follows for handling sd stab
-/* 
-        if (M_stab)
-        {  // if there is a problem of indeces here, you should use the repeated version of beta
-            //M_ipStab.applyPressure( *M_matrFull, betaVecRep, M_verbose );
-            M_ipStab.applyVelocity( *M_matrNoBC, betaVecRep, M_verbose );
-        }
-*/
-
-    // handles SD stabilization terms
-    //TODO : test wrt M_stab if we need to apply stab there  
+    // Handles SD stabilization terms
     if (M_verbose)
-	std::cout << "  f- Adding SD stabilization terms ..." << std::endl;
+	std::cout << "  f-  Adding SD stabilization terms ..." << std::endl;
 
-    //TODO: we must multiply betaVecRep by density before thi step
+    // We must multiply betaVecRep by density before this step
     betaVecRep *= M_data.density();
     M_sdStab.applyCT(M_data.timestep(), *M_matrNoBC_u, betaVecRep);
 
@@ -786,8 +823,6 @@ computeCTRHS_u(vector_type& p_sol)
 
     UInt velTotalDof   = M_uFESpace.dof().numTotalDof();
 
-//    M_updated = false;
-    
     if (M_verbose)
 	std::cout << "  f-  Updating velocity system Chorin-Temam couplings ...      " << std::flush;
 
@@ -796,10 +831,7 @@ computeCTRHS_u(vector_type& p_sol)
     // vector with repeated nodes over the processors
     vector_type press_sol (p_sol, Repeated);
 
-//    vector_type _rhsNoBC_u (M_rhsNoBC_u, Repeated);
-
     M_rhsNoBC_u *= 0.0;
-//    _rhsNoBC_u *= 0.0;			// try this for initialization
     vector_type _rhsNoBC_u ( M_rhsNoBC_u, Repeated, Zero);
 
     // loop on volumes
@@ -808,7 +840,7 @@ computeCTRHS_u(vector_type& p_sol)
 	M_uFESpace.fe().updateFirstDeriv( M_uFESpace.mesh()->volumeList (iVol) );
         M_pFESpace.fe().updateFirstDeriv( M_pFESpace.mesh()->volumeList (iVol) );
 	
-	// raz for elemental rhs in velocity/pressure
+	// zero for elemental rhs in velocity/pressure
 	M_elemrhs_u.zero();
 	UInt eleID_p = M_pFESpace.fe().currentLocalId();
 	M_elvec_p.zero();
@@ -821,26 +853,36 @@ computeCTRHS_u(vector_type& p_sol)
 	    M_elvec_p.vec()[ iloc ] = press_sol( ig );
 	} 
 
+        // case where variational pressure applies
+	// get local ( p^n | div v ) term (wrt velocity system) 
+        if (M_hasVariationalPressure) {
+            for ( UInt iComp = 0; iComp < nDimensions; ++iComp)
+            {
+	        source_pdivv( 1.0, M_elvec_p, M_elemrhs_u,
+		                M_pFESpace.fe(), M_uFESpace.fe(), iComp);
+		assembleVector( _rhsNoBC_u, M_elemrhs_u, M_uFESpace.fe(),
+		                    M_uFESpace.dof(), iComp, iComp*velTotalDof);
+	    }
+	} else {
+        // otherwise standard Chorin-Temam coupling
 	// get local ( grad p^n | v ) rhs term (wrt velocity system)
-	for ( UInt iComp = 0; iComp < nDimensions; ++iComp) 
-	{
-	    source_gradpv( -1.0, M_elvec_p, M_elemrhs_u, 
-				M_pFESpace.fe(), M_uFESpace.fe(), iComp);
+	    for ( UInt iComp = 0; iComp < nDimensions; ++iComp) 
+	    {
+	        source_gradpv( -1.0, M_elvec_p, M_elemrhs_u, 
+				    M_pFESpace.fe(), M_uFESpace.fe(), iComp);
 
-	    assembleVector( _rhsNoBC_u, M_elemrhs_u, M_uFESpace.fe(), 
-				M_uFESpace.dof(), iComp, iComp*velTotalDof); 
-
-	} 
-	
+	        assembleVector( _rhsNoBC_u, M_elemrhs_u, M_uFESpace.fe(), 
+				    M_uFESpace.dof(), iComp, iComp*velTotalDof); 
+	    } 
+        }	
     }
 
     // be sure assembling has completed
     M_comm->Barrier();
  
-    M_rhsNoBC_u = _rhsNoBC_u; 	// we mimic OseenShapeDerivative here, no += 
+    M_rhsNoBC_u = _rhsNoBC_u;
 
-    //M_rhsNoBC_u.GlobalAssemble();	// these 2 lines have no effect, and after all
-					// comm should be done after 
+    // note: communication, i.e. GlobalAssembling, will be done after.
     chronoCTrhs.stop();
 
     if (M_verbose)
@@ -851,21 +893,18 @@ template<typename Mesh, typename SolverType>
 void ChorinTemam<Mesh, SolverType>::computeCTRHS_p(vector_type& u_sol)
 {
     Chrono chronoCTrhs;
+    Real bdf_coeff = M_bdf_u.coeff_der(0);
 
     UInt velTotalDof   = M_uFESpace.dof().numTotalDof();
-//    UInt pressTotalDof = M_pFESpace.dof().numTotalDof();
 
     if (M_verbose)
-	std::cout << "  f-  Updating pressure system Chorin-Temam couplings ...      " << std::flush;
+	std::cout << "  f-  Updating pressure/projector system Chorin-Temam couplings ...      " << std::flush;
 
     chronoCTrhs.start(); 
 
     vector_type vel_sol( u_sol, Repeated );
 
-//    vector_type _rhsNoBC_p (M_rhsNoBC_p, Repeated);
-
     M_rhsNoBC_p *= 0.0;			// for test pupose
-//    _rhsNoBC_p *= 0.0;			// try this for initialization
     vector_type _rhsNoBC_p ( M_rhsNoBC_p, Repeated, Zero); 
     
     // loop on volumes
@@ -874,7 +913,7 @@ void ChorinTemam<Mesh, SolverType>::computeCTRHS_p(vector_type& u_sol)
         M_uFESpace.fe().updateFirstDeriv( M_uFESpace.mesh()->volumeList (iVol) );
         M_pFESpace.fe().updateFirstDeriv( M_pFESpace.mesh()->volumeList (iVol) );
 	
-	// raz for elemental rhs in velocity/pressure
+	// zero for elemental rhs in velocity/pressure
         M_elemrhs_p.zero();
 	UInt eleID_u = M_uFESpace.fe().currentLocalId();
 	M_elvec_u.zero();
@@ -895,8 +934,8 @@ void ChorinTemam<Mesh, SolverType>::computeCTRHS_p(vector_type& u_sol)
 	// get local -\rho/dt ( div \tilde u^{n+1} | q ) rhs term 
 	// (wrt pressure system)
 	
-	source_divuq( - M_data.density() / M_data.timestep(), M_elvec_u, M_elemrhs_p,
-				M_uFESpace.fe(), M_pFESpace.fe() );
+	source_divuq( - bdf_coeff * M_data.density() / M_data.timestep(), M_elvec_u, 
+                       M_elemrhs_p, M_uFESpace.fe(), M_pFESpace.fe() );
 	assembleVector ( _rhsNoBC_p, M_elemrhs_p, M_pFESpace.fe(), 
 			M_pFESpace.dof(),0);
 
@@ -905,9 +944,9 @@ void ChorinTemam<Mesh, SolverType>::computeCTRHS_p(vector_type& u_sol)
     // be sure assembling has completed
     M_comm->Barrier();
  
-    M_rhsNoBC_p = _rhsNoBC_p;		// taken from Oseen shape derivative
+    M_rhsNoBC_p = _rhsNoBC_p;
 
-    //M_rhsNoBC_p.GlobalAssemble();	// Z: all communication should be done later  
+    // note: all communication should be done later  
 
     chronoCTrhs.stop();
 
@@ -916,19 +955,255 @@ void ChorinTemam<Mesh, SolverType>::computeCTRHS_p(vector_type& u_sol)
 } // computeCTRHS_p
 
 template<typename Mesh, typename SolverType>
+void ChorinTemam<Mesh, SolverType>::setRES(const std::vector<Real>& resVal, const std::vector<EntityFlag>& resFlag, const int explRES)
+{
+    if (resVal.size() != resFlag.size()) {
+        if (M_verbose) {
+            std::cout << " -ERROR : wrong specification of resistance bc's" << std::endl;
+            std::cout << " ... Exiting" << std::endl;
+        }
+        exit(1);
+    }
+
+    if (M_verbose) 
+        std::cout << "  f-  Setting resistance(s) into fluid solver ..." << std::endl;
+
+    M_resVal = resVal;
+    M_resFlag = resFlag;
+    M_hasRES = true;
+
+    if (explRES == 1) {
+      if (M_verbose) {
+        std::cout << "       Resistance coupling is explicit." << std::endl;
+      }
+      M_hasRESexpl = true;
+    } else if (explRES == 0) {
+      if (M_verbose) {
+        std::cout << "       Resistance coupling is implicit." << std::endl;
+      }
+      M_hasRESexpl = false;
+    } else {
+      if (M_verbose) {
+        std::cout << "  -ERROR : wrong specification of resistance bc's" << std::endl;
+        std::cout << " ... Exiting" << std::endl;
+      }
+      exit(1);
+   }
+      
+} // setRES
+
+template<typename Mesh, typename SolverType>
+void ChorinTemam<Mesh, SolverType>::computeRES_expl(Real resVal, EntityFlag resFlag, vector_type& betaVec, vector_type& rhs)
+{
+    BCBase& bcB = M_BCh_fluid_u->GetBCWithFlag(resFlag);
+    vector_type betaVecRep (betaVec, Repeated); 
+    Real uLocalFlow = 0.0, uFlow = 0.0;
+    UInt nNode = M_uFESpace.feBd().nbNode;
+    // auxilliary map
+    EpetraMap fe_map (M_uFESpace.refFE(), *(M_uFESpace.mesh()), *M_comm);
+    // auxilliary (repeated) vector
+    vector_type uFlux(rhs, Repeated);
+    uFlux *= 0.0; 
+
+    // loop on (usually boundary) faces w/ resFlag as reference
+    for (UInt i=1; i <=  bcB.list_size(); i++)
+    {
+        // pointer to the ith identifier in the bc_base list
+        const IdentifierNatural* ptr_i = static_cast<const IdentifierNatural*> (bcB(i));
+        // index of corresponding face
+        UInt iFace = ptr_i->id();
+
+        // update current face 
+        M_uFESpace.feBd().updateMeasNormalQuadPt(M_uFESpace.mesh()->boundaryFace(iFace)); 
+        //UInt faceID = M_uFESpace.feBd().currentLocalId();
+        
+        // get local velocity vector
+        M_belvec_u.zero();
+        for (UInt iNode=0; iNode < nNode; ++iNode)
+        {
+            //UInt iloc = M_uFESpace.feBd().patternFirst(iNode);
+            int iloc = iNode;
+	    for (UInt iComp=0; iComp < nDimensions; ++iComp) 
+            {
+                UInt ilocg = ptr_i->bdLocalToGlobal(iloc+1); 
+                UInt ig = fe_map.getMap(Repeated)->MyGlobalElements()[ilocg];
+                ig += iComp*dim_u(); 
+                M_belvec_u.vec()[iloc + iComp*nNode] = betaVecRep[ig];
+            }
+        } 
+        
+        // get local flow through current face and compute local FE flow vector 
+        M_bele_flow_u.zero();
+        for (int iNode=0; iNode < nNode; ++iNode)
+        {
+            int iloc = iNode;
+	    for (int iComp=0; iComp < nDimensions; ++iComp)
+            {
+                for (int iQuad=0; iQuad < M_uFESpace.feBd().nbQuadPt; ++iQuad)
+                {
+                    M_bele_flow_u.vec() [iloc + iComp*nNode] += 
+                        M_uFESpace.feBd().phi(iNode, iQuad) * 
+                        M_uFESpace.feBd().normal(iComp, iQuad) * 
+                        M_uFESpace.feBd().weightMeas(iQuad);
+                    uLocalFlow += M_belvec_u.vec() [iloc + iComp*nNode] * 
+                                  M_bele_flow_u.vec() [iloc + iComp*nNode];
+                }
+            }    
+        }      
+
+        // assemble into global rhs vector 
+        // (no call to assembleVector here since we are on a boundary FE)
+        for (UInt iNode = 0; iNode < nNode; ++iNode)
+        {
+	    int iloc = iNode; 
+	    for (UInt iComp=0; iComp < nDimensions; ++iComp)
+	    {
+	        UInt ilocg = ptr_i->bdLocalToGlobal(iloc+1); //+ iComp * dim_u();
+		UInt ig =  fe_map.getMap(Repeated)->MyGlobalElements()[ilocg] + iComp * dim_u();
+                uFlux[ ig ] += M_bele_flow_u.vec() [iloc + iComp*nNode];
+	    }
+        }
+    }
+    // compute global flow
+    fe_map.Comm().SumAll(&uLocalFlow, &uFlow, 1);
+    // compute global flux vector
+    uFlux.GlobalAssemble();
+    // compute actual weak resistance term. Check sign.
+    uFlux *= (-resVal*uFlow);
+    // update rhs coupling 
+    rhs += uFlux;
+} //computeRES_expl
+
+template<typename Mesh, typename SolverType>
+void ChorinTemam<Mesh, SolverType>::computeRES_impl(Real resVal, EntityFlag resFlag, matrix_type& matrix)
+{
+    BCBase& bcB = M_BCh_fluid_u->GetBCWithFlag(resFlag);
+    UInt nNode = M_uFESpace.feBd().nbNode;
+    // auxilliary map
+    EpetraMap fe_map (M_uFESpace.refFE(), *(M_uFESpace.mesh()), *M_comm);
+    // FE flow vector
+    vector_type _flow_u (M_localMap_u);
+    _flow_u *= 0.0;
+
+    std::cout << "      RES: computing FE flow vector ..." << std::endl;
+
+    // loop on (usually boundary) faces w/ resFlag as reference
+    for (UInt i=1; i <= bcB.list_size(); ++i)
+    {
+        // pointer to the ith identifier in the bc_base list
+	const IdentifierNatural* ptr_i = static_cast<const IdentifierNatural*> (bcB(i));
+        // index of corresponding face
+	UInt iFace = ptr_i->id();
+
+	// update current face
+	M_uFESpace.feBd().updateMeasNormalQuadPt(M_uFESpace.mesh()->boundaryFace(iFace));
+	
+	// get local FE flow vector
+	M_bele_flow_u.zero();
+	for (int iNode = 0; iNode < nNode; ++iNode)
+	{
+	    //UInt iloc = M_uFESpace.feBd().patternFirst(iNode);
+	    UInt iloc = iNode; 
+	    for (int iComp = 0; iComp < nDimensions; ++iComp)
+	    {
+	        for (int iQuad=0; iQuad < M_uFESpace.feBd().nbQuadPt; ++iQuad)
+		{
+		    M_bele_flow_u.vec() [iloc + iComp*nNode] += 
+		        M_uFESpace.feBd().phi(iNode, iQuad) * 
+			M_uFESpace.feBd().normal(iComp, iQuad) * 
+			M_uFESpace.feBd().weightMeas(iQuad);
+		}
+	    }
+	}
+
+	// assemble into _flow_u 
+	// (no call to assembleVector since we are on a boundary FE)
+	for (UInt iNode = 0; iNode < nNode; ++iNode)
+	{
+	    //UInt iloc = M_uFESpace.feBd().patternFirst(iNode);
+	    UInt iloc = iNode;
+	    for (UInt iComp=0; iComp < nDimensions; ++iComp)
+	    {
+	        UInt ilocg = ptr_i->bdLocalToGlobal(iloc+1);
+                UInt ig = fe_map.getMap(Repeated)->MyGlobalElements()[ilocg];
+                ig += iComp * dim_u();
+		_flow_u[ ig ] += M_bele_flow_u.vec() [iloc + iComp*nNode]; 
+	    }
+	}
+    }
+
+    M_comm->Barrier();
+    // compute global FE flow vector
+    _flow_u.GlobalAssemble();
+
+    std::cout << "      RES: computing FE flow matrix" << std::endl;
+    std::cout << "      RES: __not implemented__ " << std::endl;
+
+    // __todo__ :
+    // now modify velocity matrix to add implicit resistance term: this will
+    // enlarge matrix profile (non local coupling between boundary dofs 
+    // flagged as resistance). 
+    // __note_for_later__ : do not know how to modify matrix/vector product
+    // with epetra things either. 
+
+    M_comm->Barrier();
+
+} // computeRES_impl
+
+template<typename Mesh, typename SolverType>
+void ChorinTemam<Mesh, SolverType>::applyRES_expl(vector_type& vector)
+{
+    int nRes = M_resFlag.size();
+    vector_type _u_extrap( M_localMap_u );
+    _u_extrap *= 0.;
+    _u_extrap = M_bdf_u.extrap();
+
+    for (int iRes=0; iRes < nRes; ++iRes)
+    {
+        computeRES_expl(M_resVal[iRes], M_resFlag[iRes], _u_extrap, vector);
+    }
+} // applyRES_expl
+
+
+template<typename Mesh, typename SolverType>
+void ChorinTemam<Mesh, SolverType>::applyRES_impl(matrix_type& matrix)
+{
+    int nRes = M_resFlag.size();
+    for (int iRes=0; iRes < nRes; ++iRes)
+    {
+        computeRES_impl(M_resVal[iRes], M_resFlag[iRes], matrix);
+    }
+} // applyRES_impl
+
+template<typename Mesh, typename SolverType>
 void ChorinTemam<Mesh, SolverType>::iterate_u( bchandler_raw_type& bch_u)
 {
 
     Chrono chrono;
 
-    // update convective terms
-//    vector_type beta(M_sol_u, Repeated);
-//    updateSystem_u(beta);
-    updateSystem_u(M_sol_u_prev);		// no pb for M_un init here since
-						// time_advance is called before
+    // update convective term with extrapolated velocity
+    // little bs as usual w/ epetra things
+    vector_type _u_extrap( M_localMap_u );
+    _u_extrap *= 0.;
+    _u_extrap = M_bdf_u.extrap();
+    updateSystem_u( _u_extrap );
+ 
+    // set resistance boundary conditions if any 
+    if (M_hasRES && M_hasRESexpl) {
+        if (M_verbose) {
+	    std::cout << "  f-  Applying resistance bc's (explicit)..." << std::endl;
+	}
+        applyRES_expl ( M_rhsNoBC_u );
+    }
+
+    if (M_hasRES && !M_hasRESexpl) {
+        if (M_verbose) {
+            std::cout << "  f-  Applying resistance bc's (implicit)..." << std::endl;
+        }
+        applyRES_impl (*M_matrNoBC_u);
+    }
 
     // matrix and vector assembling communication
-
     if (M_verbose)
         {
             std::cout << "  f-  Finalizing the velocity matrix and vectors ...    ";
@@ -976,6 +1251,9 @@ void ChorinTemam<Mesh, SolverType>::iterate_u( bchandler_raw_type& bch_u)
 
     // update RHS pressure term with new computed velocity 
     computeCTRHS_p(M_sol_u);
+
+    // update velocity bdf components
+    M_bdf_u.shift_right(M_sol_u); 
 
 } // iterate_u()
 
@@ -1029,7 +1307,20 @@ void ChorinTemam<Mesh, SolverType>::iterate_p(bchandler_raw_type& bch_p )
     solveSystem_p( matrFull_p, rhsFull_p );
 
     M_residual_p  = M_rhsNoBC_p;
-    M_residual_p -= *M_matrNoBC_p*M_sol_p; 
+    M_residual_p -= *M_matrNoBC_p*M_sol_p_phi;
+
+    // Compute physical pressure multiplier M_sol_p = M_sol_p_phi + M_sol_p_star 
+    // with M_sol_p_star = extrapolation of M_sol_p at current time.
+    // So we have M_sol_p = M_sol_p_phi for pBdfOrder = 0 (std Chorin-Temam projection)
+    M_sol_p *= 0;
+    M_sol_p += M_sol_p_phi; 
+    if (M_pBdfOrder > 0)
+        M_sol_p += M_bdf_p.extrap();
+
+    // update pressure and projector bdf
+    M_bdf_p_phi.shift_right(M_sol_p_phi);
+    if (M_pBdfOrder > 0)
+    	M_bdf_p.shift_right(M_sol_p); 
 
 } // iterate_p()
 
@@ -1042,8 +1333,8 @@ void ChorinTemam<Mesh, SolverType>::time_advance(Real const& time)
     // what to do at first time step
     if (M_firstTimeStep) 
     {
-	//XXX: must call initialize in the test_xxx.cpp for proper init
-        buildSystem_u_p();			// build contant matrices
+	// note: must call initialize() outside the solver for proper init
+        buildSystem_u_p();
         resetPrec_u();				
         resetPrec_p();
 	M_firstTimeStep = 0;
@@ -1051,20 +1342,28 @@ void ChorinTemam<Mesh, SolverType>::time_advance(Real const& time)
 
     // update velocity system rhs
     
-    // first update chorin-temam coupling term 
-    computeCTRHS_u(M_sol_p);
+    // compute pressure correction to velocity \tilde u equation
+    vector_type _p_corr( M_localMap_p );
+    _p_corr *= 0.;
+    if (M_pBdfOrder > 0)
+        _p_corr = M_bdf_p.extrap();
+    _p_corr += M_bdf_p_phi.time_der(1);
+    _p_corr *= 1./M_bdf_p_phi.coeff_der(0);
+
+    // compute Chorin-Temam coupling term 
+    computeCTRHS_u(_p_corr);
     
-    // then add the mass term rho/dt * u^n
+    // add the mass term rho/dt * u^n
     if (M_verbose) 
 	std::cout << "  f-  Adding velocity mass term on rhs ..." << std::endl;
     
-    M_rhsNoBC_u += *M_matrMass * M_sol_u;
+    // note: this is 1 and not M_data.timestep() as M_matrMass already contains 
+    // the timestep term to avoid recomputation (constant matrix) 
+    M_rhsNoBC_u += *M_matrMass * M_bdf_u.time_der( 1 );
 
-    // update old velocity
-    M_sol_u_prev = M_sol_u;
-  
+    // note: velocity updating is done in iterate_u method
+ 
 } // time_advance
-
 
 
 template<typename Mesh, typename SolverType>
@@ -1077,7 +1376,7 @@ void ChorinTemam<Mesh, SolverType>::solveSystem_u( matrix_ptrtype  matrFull,
         std::cout << "  f-  Setting up the velocity solver ...       ";
 
     chrono.start();
-//    assert (M_matrFull.get() != 0);
+    // assert (M_matrFull.get() != 0);
     M_linearSolver_u.setMatrix(*matrFull);
     chrono.stop();
 
@@ -1145,8 +1444,13 @@ void ChorinTemam<Mesh, SolverType>::solveSystem_u( matrix_ptrtype  matrFull,
 
         numIter = M_linearSolver_u.solve(M_sol_u, rhsFull);
 
-        if (numIter >= M_maxIterSolver_u && M_verbose)
-            std::cout << "  f- ERROR: Iterative velocity solver failed again.\n";
+        if (numIter >= M_maxIterSolver_u) {
+            if (M_verbose) { 
+              std::cout << "  f- ERROR: Iterative velocity solver failed again.\n";
+              std::cout << "  fx-  Exiting ..." << std::endl;
+            }
+            exit(1);
+        }
 
     }
 
@@ -1174,7 +1478,7 @@ void ChorinTemam<Mesh, SolverType>::solveSystem_p( matrix_ptrtype  matrFull,
         std::cout << "  f-  Setting up the pressure solver ...       ";
 
     chrono.start();
-//    assert (M_matrFull.get() != 0);
+    // assert (M_matrFull.get() != 0);
     M_linearSolver_p.setMatrix(*matrFull);
     chrono.stop();
 
@@ -1220,7 +1524,7 @@ std::flush;
     if (M_verbose)
         std::cout << "  f-  Solving pressure system ...                       ";
 
-    int numIter = M_linearSolver_p.solve(M_sol_p, rhsFull);
+    int numIter = M_linearSolver_p.solve(M_sol_p_phi, rhsFull);
 
     if (numIter >= M_maxIterSolver_p)
     {
@@ -1242,10 +1546,15 @@ std::flush;
             std::cout << "  f-      Estimated condition number = " << condest << "\n" << std::flush;
         }
 
-        numIter = M_linearSolver_p.solve(M_sol_p, rhsFull);
+        numIter = M_linearSolver_p.solve(M_sol_p_phi, rhsFull);
 
-        if (numIter >= M_maxIterSolver_p && M_verbose)
-            std::cout << "  f- ERROR: Iterative pressure solver failed again.\n";
+        if (numIter >= M_maxIterSolver_p) {
+            if (M_verbose) {
+              std::cout << "  f- ERROR: Iterative pressure solver failed again.\n";
+              std::cout << "  fx-  Exiting ..." << std::endl;
+            }
+            exit(1);
+        }
 
     }
 
@@ -1262,47 +1571,6 @@ std::flush;
     M_comm->Barrier();
 
 } // solveSystem_p
-
-template<typename Mesh, typename SolverType>
-void ChorinTemam<Mesh, SolverType>::reduceSolution( Vector& u,
-                                              Vector& p )
-{
-    // XXX: we keep this function but we donot need it, to be del
-    
-    vector_type vel(M_sol_u, 0);
-    vector_type press(M_sol_p, 0);
-
-    if (M_verbose)
-    {
-        for ( UInt iDof = 0; iDof < nDimensions*dim_u(); ++iDof )
-        {
-            u[ iDof ] = vel[ iDof + 1 ]; // BASEINDEX + 1
-        }
-
-        for ( UInt iDof = 0; iDof<dim_p(); ++iDof )
-        {
-//            p[ iDof ] = vel[ iDof + nDimensions*dim_u() + 1 ]; // BASEINDEX + 1
-	    p[ iDof ] = press[ iDof + 1 ];
-        }
-    }
-
-}
-
-template<typename Mesh, typename SolverType>
-void ChorinTemam<Mesh, SolverType>::reduceResidual( Vector& res )
-{
-    // same rk as in function reduceSolution above ...
-    vector_type vel(M_residual_u, 0);
-
-    if (M_verbose)
-    {
-        for ( UInt iDof = 0; iDof < nDimensions*dim_u(); ++iDof )
-        {
-            res[ iDof ] = vel[ iDof + 1 ]; // BASEINDEX + 1
-        }
-
-    }
-}
 
 
 template<typename Mesh, typename SolverType>
@@ -1386,130 +1654,7 @@ template <typename Mesh, typename SolverType>
 void
 ChorinTemam<Mesh, SolverType>::postProcess(bool _writeMesh)
 {
-    std::ostringstream index;
-    std::ostringstream indexMe;
-    std::string name;
-    std::string me;
-
-    M_count++;
-
-    indexMe << M_me;
-
-    switch ( indexMe.str().size() )
-    {
-        case 1:
-            me = "00" + indexMe.str();
-            break;
-        case 2:
-            me = "0" + indexMe.str();
-            break;
-        case 3:
-            me = indexMe.str();
-            break;
-    }
-
-
-//     if (_writeMesh || (M_count / M_data.verbose() == 0) )
-//         writeMesh  ("partedMesh." + me + ".mesh", M_pFESpace.mesh() );
-
-//    vector_type velAndPressure(M_sol,*M_localMap.getRepeatedEpetra_Map()); //mg
-//    vector_type res(M_residual,*M_localMap.getRepeatedEpetra_Map()); //mg
-    vector_type vel( M_sol_u, Repeated );
-    vector_type press( M_sol_p, Repeated );
-    vector_type res (M_residual_u, Repeated ); 
-
-//         if ( fmod( float( M_count ), float( M_data.verbose() ) ) == 0.0 )
-//         {
-    if (M_me == 0)
-        std::cout << "  F-  Post-processing " << std::flush;
-
-    index << std::setfill('0') << std::setw(3);
-    index << ( M_count / M_data.verbose() );
-    name = index.str();
-
-    PhysVectUnknown<Vector> u(nDimensions*dim_u());
-    ScalUnknown<Vector>     p(dim_p());
-
-    reduceSolution(u, p);
-
-    if (M_me == 0)
-    {
-        // postprocess data file for medit
-//         wr_medit_ascii_scalar( "vel_x." + name + ".bb", u.giveVec(),
-//                                M_data.mesh()->numGlobalVertices() );
-//         wr_medit_ascii_scalar( "vel_y." + name + ".bb", u.giveVec() + this->dim_u(),
-//                                M_data.mesh()->numGlobalVertices() );
-//         wr_medit_ascii_scalar( "vel_z." + name + ".bb", u.giveVec()+2*this->dim_u(),
-//                                M_data.mesh()->numGlobalVertices() );
-//         wr_medit_ascii_scalar( "press." + name + ".bb", p.giveVec(),
-//                                p.size() );
-
-        double dt = M_data.timestep();
-
-
-       writeMesh("vel_x." + me + "." + name + ".mesh", *M_uFESpace.mesh());
-       writeMesh("resf_x." + me +  "." + name + ".mesh", *M_uFESpace.mesh());
-
-       writeMesh("vel_y." + me + "." + name + ".mesh", *M_uFESpace.mesh());
-       writeMesh("resf_y." + me +  "." + name + ".mesh", *M_uFESpace.mesh());
-
-       writeMesh("vel_z." + me + "." + name + ".mesh", *M_uFESpace.mesh());
-       writeMesh("resf_z." + me +  "." + name + ".mesh", *M_uFESpace.mesh());
-
-       writeMesh("press." + me +  "." + name + ".mesh", *M_uFESpace.mesh());
-
-
-        meditSolutionWriter( "vel_x." + me + "." + name + ".bb",
-                             *M_uFESpace.mesh(), vel, M_uFESpace.dof().numTotalDof()*0);
-        meditSolutionWriter( "vel_y." + me + "." + name + ".bb",
-                             *M_uFESpace.mesh(), vel, M_uFESpace.dof().numTotalDof()*1);
-        meditSolutionWriter( "vel_z." + me + "." + name + ".bb",
-                             *M_uFESpace.mesh(), vel, M_uFESpace.dof().numTotalDof()*2);
-
-//         wr_medit_ascii2("vel_x." + me + "." + name + ".mesh",
-//                         *M_uFESpace.mesh(), disp, M_data.factor() );
-//         wr_medit_ascii2("vel_y." + me + "." + name + ".mesh",
-//                         *M_uFESpace.mesh(), disp, M_data.factor() );
-//         wr_medit_ascii2("vel_z." + me + "." + name + ".mesh",
-//                         *M_uFESpace.mesh(), disp, M_data.factor() );
-
-
-//         wr_medit_ascii2("resf_x." + me + "." + name + ".mesh",
-//                         *M_uFESpace.mesh(), disp, M_data.factor() );
-//         wr_medit_ascii2("resf_y." + me + "." + name + ".mesh",
-//                         *M_uFESpace.mesh(), disp, M_data.factor() );
-//         wr_medit_ascii2("resf_z." + me + "." + name + ".mesh",
-//                         *M_uFESpace.mesh(), disp, M_data.factor() );
-
-        meditSolutionWriter( "resf_x." + me + "." + name + ".bb",
-                             *M_uFESpace.mesh(), res, M_uFESpace.dof().numTotalDof()*0);
-        meditSolutionWriter( "resf_y." + me + "." + name + ".bb",
-                             *M_uFESpace.mesh(), res, M_uFESpace.dof().numTotalDof()*1);
-        meditSolutionWriter( "resf_z." + me + "." + name + ".bb",
-                             *M_uFESpace.mesh(), res, M_uFESpace.dof().numTotalDof()*2);
-
-
-        meditSolutionWriter( "press." + me + "." + name + ".bb",
-                             *M_pFESpace.mesh(), press, M_uFESpace.dof().numTotalDof()*3);
-
-
-//    cout << ( "should do ln -s -f " + M_data.meshDir() + M_data.meshFile() +
-//             " press." + name + "." + me + ".mesh" ).data()  ;
-
-//         system( ( "ln -s -f " + M_data.meshDir() + M_data.meshFile() +
-//                   " press." + name + ".mesh" ).data() );
-//         system( ( "ln -s -f " + M_data.meshDir() + M_data.meshFile() +
-//                   " vel_x." + name + ".mesh" ).data() );
-//         system( ( "ln -s -f " + M_data.meshDir() + M_data.meshFile() +
-//                   " vel_y." + name + ".mesh" ).data() );
-//         system( ( "ln -s -f " + M_data.meshDir() + M_data.meshFile() +
-//                   " vel_z." + name + ".mesh" ).data() );
-
-    }
-//    }
-
-
-
+	// maybe we will add something useful here
 }
 
 

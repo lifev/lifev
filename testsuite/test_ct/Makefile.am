@@ -32,8 +32,7 @@ test_ct_SOURCES = main.cpp ct.cpp
 EXTRA_DIST = data testsuite.at
 
 link:
-	test -a data_cyl || ln -s $(srcdir)/data_cyl
-	test -a data_tube | ln -s $(srcdir)/data_tube
+	test -a data || ln -s $(srcdir)/data
 	test -a Mesh || ln -s $(top_srcdir)/testsuite/data/mesh/inria/ Mesh
 
 clean-results:
