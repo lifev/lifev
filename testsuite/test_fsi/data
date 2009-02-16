@@ -18,12 +18,12 @@ defOmegaF  = 0.01 # matters only with  precond = 2
 # if updateEvery  > 1, recompute computational domain every M_updateEvery iterations (transpiration)
 # if updateEvery <= 0, recompute computational domain and matrices only at first subiteration (semi-implicit).
 #                        Deprecated when using exactJacobian (better to set ifSemiImplicit=1)
-updateEvery = 1
+updateEvery = -1
 linesearch = 0
 # NonLinearRichardson: stop_tol  = abstol + reltol*normRes;
-abstol     = 1.e-10
-reltol     = 1.e-6
-etamax     = 1.e-3 # tolerance of the interface problem (GMRES),
+abstol     = 1.e-5
+reltol     = 1.e-5
+etamax     = 1.e-5 # tolerance of the interface problem (GMRES),
                     # if semiImplicit, set   etamax = 1.e-10,
                     # else (e.g.)            etamax = 1.e-3
 semiImplicit = false # (only valid for method = exactJacobian or monolithic).
@@ -88,18 +88,27 @@ scaling         = none
 output          = all_res  #none
 conv            = rhs
 max_iter        = 100
+max_iter_reuse  = 100
 kspace          = 100
 tol             = 1.e-10    # AztecOO tolerance
+
+
+[../ipstab]
+gammaBeta  = 0.02
+gammaDiv   = 0.2
+gammaPress = 0.2
+reuse      = true
 
 # see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/index.html
 [../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
 prectype        = Ifpack
 reuse           = true
-overlap         = 1
-displayList     = true
+displayList     = false
 
 [./ifpack]
 prectype               = Amesos    # Amesos (does a local LU factorization), ILUT (not ILU)
+overlap         = 2
+
 
 [../relaxation]
 type                   = "Jacobi"
@@ -110,7 +119,7 @@ zero_starting_solution = true
 
 [../partitioner]
 type                   = metis
-overlap                = 0
+#overlap                = 0
 local_parts            = 1
 root_node              = 0
 use_symmetric_graph    = true
@@ -123,16 +132,21 @@ drop_tolerance         = 1.e-5
 level-of-fill          = 1
 ilut_level-of-fill     = 1
 absolute_threshold     = 0.
-relative_threshold     = 0. 
+relative_threshold     = 0.
 relax_value            = 0.
 
 [../schwarz]
 combine_mode           = true
 reordering_type        = none
 filter_singletons      = false
+<<<<<<< data
+# end of fluid preconditioner parameters
+
+=======
 
 
 
+>>>>>>> 1.27
 [lin_fluid]
 [./solver]
 solver          = gmres
@@ -141,19 +155,47 @@ output          = all_res  #none
 conv            = rhs
 max_iter        = 100
 kspace          = 100
-tol             = 1.e-10    # AztecOO tolerance
+tol             = 1.e-5    # AztecOO tolerance
 
-# see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/index.html
 [../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
-prectype        = Ifpack # Amesos (does a local LU factorization), ILUT (not ILU)
+prectype        = Ifpack
 reuse           = true
-overlap         = 2
-droptol         = 1.e-5
-fill            = 4
-athr            = 1.2500e-04 # ~h^2. for h=0.25: athr~1e-3
-rthr            = 1
-relax_value     = 1
+displayList     = false
 
+[./ifpack]
+prectype               = Amesos    # Amesos (does a local LU factorization), ILUT (not ILU)
+overlap         = 2
+
+[../relaxation]
+type                   = "Jacobi"
+damping_factor         = 1.
+sweeps                 = 1
+min_diagonal_value     = 0
+zero_starting_solution = true
+
+[../partitioner]
+type                   = metis
+#overlap                = 0
+local_parts            = 1
+root_node              = 0
+use_symmetric_graph    = true
+
+[../amesos]
+solvertype             = Amesos_KLU
+
+[../fact]
+drop_tolerance         = 1.e-5
+level-of-fill          = 1
+ilut_level-of-fill     = 1
+absolute_threshold     = 0.
+relative_threshold     = 0.
+relax_value            = 0.
+
+[../schwarz]
+combine_mode           = true
+reordering_type        = none
+filter_singletons      = false
+# end of fluid preconditioner parameters
 
 [solid]
 
@@ -220,13 +262,14 @@ keep_info       = 1
 [../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
 prectype        = Ifpack
 reuse           = true
-overlap         = 1
+
 [./ifpack]
 prectype        = Amesos    # Amesos (does a local LU factorization), ILUT (not ILU)
 solvertype      = Amesos_KLU
 droptol         = 1.e-5
 fill            = 4
 relax_value     = 1
+overlap         = 1
 
 
 [jacobian]
