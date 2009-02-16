@@ -190,7 +190,7 @@ void SolverTrilinos::setDataFromGetPot( const GetPot& dfile, const std::string& 
                              dfile( ( section + "/type_overlap" ).data(), AZ_standard ));
 
     M_TrilinosParameterList.set("kspace",
-                             dfile( ( section + "/kspace" ).data(), 100 ));
+                             dfile( ( section + "/kspace" ).data(), M_maxIter ));
 
     M_TrilinosParameterList.set("orthog",
                              dfile( ( section + "/orthog" ).data(), AZ_classic ));
