@@ -484,7 +484,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                     {
                         where = whereList[ i ];
                         switch ( where->type() )
-                        {
+                            {
                             case Essential:
                                 // Which kind of data ?
                                 if ( where->dataVector() )

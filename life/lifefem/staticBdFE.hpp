@@ -70,26 +70,26 @@ public:
                 const Real* refcoor, UInt currentid, Real _invarea = 1. );
     ~StaticBdFE();
 
-    const int nbGeoNode; //!< Number of geometrical nodes
-    const int nbNode; //!< Number of finite element node
-    const int nbCoor; //!< Number of coordinates
-    const int nbQuadPt; //!< Number of quadrature points
-    KNM<Real> point; //!< The point that define the geometry
-    const RefFE& refFE; //!< The reference finite element
-    const GeoMap& geoMap; //!< The geometical mapping
-    const QuadRule& qr; //!< The quadrature rule
+    const int       nbGeoNode; //!< Number of geometrical nodes
+    const int       nbNode;    //!< Number of finite element node
+    const int       nbCoor;    //!< Number of coordinates
+    const int       nbQuadPt;  //!< Number of quadrature points
+    KNM<Real>       point;     //!< The point that define the geometry
+    const RefFE&    refFE;     //!< The reference finite element
+    const GeoMap&   geoMap;    //!< The geometical mapping
+    const QuadRule& qr;        //!< The quadrature rule
 
-    KNM<Real> phi; //!< Values of the basis functions on quadrature points
-    KNMK<Real> dPhiRef; //! Values of the derivatives of the basis functions on quadrature points on the reference finite element
-    KNMK<Real> dPhi; //!<Values of the derivatives of the basis functions on quadrature points on the current finite element \warning NOT YET IMPLEMENTED
-    KNM<Real> phiGeo; //!<Values of the geometric basis functions on quadrature points
-    KNMK<Real> dPhiGeo; //!< Values of the derivatives of the geometric basis functions on quadrature points
-    KN<Real> weightMeas; //!< Values of the weight times the measure on the quadrature points
-    KN<Real> meas; //!< Values of the measures on the quadrature points
-    KNM<Real> normal; //!< Values of the normal on the quadrature points
-    KNMK<Real> tangent; //!< Values of the tangents on the quadrature points
-    KNMK<Real> metric; //!< Metric tensor on the quadrature points
-    KNM<Real> quadPt; //!< Coordinates of the quadrature points on the current element
+    KNM<Real>  phi;        //!< Values of the basis functions on quadrature points
+    KNMK<Real> dPhiRef;    //!< Values of the derivatives of the basis functions on quadrature points on the reference finite element
+    KNMK<Real> dPhi;       //!< Values of the derivatives of the basis functions on quadrature points on the current finite element \warning NOT YET IMPLEMENTED
+    KNM<Real>  phiGeo;     //!< Values of the geometric basis functions on quadrature points
+    KNMK<Real> dPhiGeo;    //!< Values of the derivatives of the geometric basis functions on quadrature points
+    KN<Real>   weightMeas; //!< Values of the weight times the measure on the quadrature points
+    KN<Real>   meas;       //!< Values of the measures on the quadrature points
+    KNM<Real>  normal;     //!< Values of the normal on the quadrature points
+    KNMK<Real> tangent;    //!< Values of the tangents on the quadrature points
+    KNMK<Real> metric;     //!< Metric tensor on the quadrature points
+    KNM<Real>  quadPt;     //!< Coordinates of the quadrature points on the current element
 
     const Real invArea; //!<  added for the treatment of hybrid hdiv fe
     //--------------------------------------------------------------------------

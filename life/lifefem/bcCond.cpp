@@ -53,9 +53,11 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag,
 }
 
 //! Constructor for BC without components for Scalar, Tangential or Normal  mode problems
-BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
-                  BCFunctionBase& bcf )
-    :
+BCBase::BCBase( const std::string& name,
+                const EntityFlag&  flag,
+                const BCType&      type,
+                const BCMode&      mode,
+                BCFunctionBase&    bcf ):
     _M_isUDep(false),
     _M_name( name ),
     _M_flag( flag ),
@@ -68,32 +70,37 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& t
 {
     UInt nComp;
     switch ( _M_mode = mode )
-    {
+        {
         case Scalar:
             nComp = 1;
             _M_comp.reserve( nComp );
             _M_comp.push_back( 1 );
             break;
         case Tangential:
-            nComp = nDimensions - 1;
+            nComp = nDimensions;
             _M_comp.reserve( nComp );
             for ( ID i = 1; i <= nComp; ++i )
                 _M_comp.push_back( i );
             break;
         case Normal:
-            nComp = 1;
+            nComp = nDimensions;
             _M_comp.reserve( nComp );
-            _M_comp.push_back( nDimensions );
+            for ( ID i = 1; i <= nComp; ++i )
+                _M_comp.push_back( i );
             break;
         default:
             ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
-    }
+        }
 }
 
 
 //! Constructor for BC without list of components for Full mode problems
-BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& type,
-                  const BCMode& mode, BCFunctionBase& bcf, const UInt& nComp )
+BCBase::BCBase( const std::string& name,
+                const EntityFlag&  flag,
+                const BCType&      type,
+                const BCMode&      mode,
+                BCFunctionBase&    bcf,
+                const UInt&        nComp )
 
     :
     _M_isUDep(false),
@@ -118,8 +125,12 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& t
 
 
 //! Constructor for BC with data vector
-BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
-                  BCVectorBase& bcv, const std::vector<ID>& comp )
+BCBase::BCBase( const std::string& name,
+                const EntityFlag& flag,
+                const BCType& type,
+                const BCMode& mode,
+                BCVectorBase& bcv,
+                const std::vector<ID>& comp )
     :
     _M_isUDep(false),
     _M_name( name ),
@@ -138,8 +149,11 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& t
 }
 
 //! Constructor for BC with data vector, without components for Scalar, Tangential or Normal  mode problems
-BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& type, const BCMode& mode,
-                  BCVectorBase& bcv )
+BCBase::BCBase( const std::string& name,
+                const EntityFlag& flag,
+                const BCType& type,
+                const BCMode& mode,
+                BCVectorBase& bcv )
     :
     _M_isUDep(false),
     _M_name( name ),
@@ -181,8 +195,12 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& t
 
 
 //! Constructor for BC with data vector, without list of components for Full mode problems
-BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& type,
-                  const BCMode& mode, BCVectorBase& bcv, const UInt& nComp )
+BCBase::BCBase( const std::string& name,
+                const EntityFlag& flag,
+                const BCType& type,
+                const BCMode& mode,
+                BCVectorBase& bcv,
+                const UInt& nComp )
     :
     _M_isUDep(false),
     _M_name( name ),
@@ -204,10 +222,12 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag, const BCType& t
         _M_comp.push_back( i );
 }
 
-BCBase::BCBase( const std::string& name, const EntityFlag& flag,
-        const BCType& type, const BCMode& mode,
-        BCFunctionUDepBase& bcf, const std::vector<ID>& comp )
-    :
+BCBase::BCBase( const std::string&     name,
+                const EntityFlag&      flag,
+                const BCType&          type,
+                const BCMode&          mode,
+                BCFunctionUDepBase&    bcf,
+                const std::vector<ID>& comp ):
     _M_isUDep(true),
     _M_name( name ),
     _M_flag( flag ),
@@ -222,10 +242,11 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag,
         ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
 }
-BCBase::BCBase( const std::string& name, const EntityFlag& flag,
-        const BCType& type, const BCMode& mode,
-        BCFunctionUDepBase& bcf)
-    :
+BCBase::BCBase( const std::string&  name,
+                const EntityFlag&   flag,
+                const BCType&       type,
+                const BCMode&       mode,
+                BCFunctionUDepBase& bcf):
     _M_isUDep(true),
     _M_name( name ),
     _M_flag( flag ),
@@ -236,6 +257,7 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag,
     _M_comp(),
     _M_finalised( false )
 {
+
     UInt nComp;
     switch ( _M_mode = mode )
     {
@@ -259,9 +281,12 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag,
             ERROR_MSG( "BCBase::BCBase: You should use a more specific constructor for this mode" );
     }
 }
-BCBase::BCBase( const std::string& name, const EntityFlag& flag,
-        const BCType& type, const BCMode& mode,
-        BCFunctionUDepBase& bcf, const UInt& nComp )
+BCBase::BCBase( const std::string&  name,
+                const EntityFlag&   flag,
+                const BCType&       type,
+                const BCMode&       mode,
+                BCFunctionUDepBase& bcf,
+                const UInt&         nComp )
     :
     _M_isUDep(true),
     _M_name( name ),
