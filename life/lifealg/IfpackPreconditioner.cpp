@@ -61,14 +61,14 @@ IfpackPreconditioner::setDataFromGetPot( const GetPot& dataFile,
     //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
     //! for more informations on the parameters
 
-    M_overlapLevel = dataFile((section + "/ifpack/overlap").data(),     0);
+    M_overlapLevel = dataFile((section + "/ifpack/overlap").data(),     4);
     M_precType     = dataFile((section + "/ifpack/prectype").data(),"Amesos");
 
-    Teuchos::ParameterList list;
+    //Teuchos::ParameterList list;
 
-    createIfpackList(dataFile, section, list);
+    createIfpackList(dataFile, section, M_List);
 
-    this->setList(list);
+    //this->setList(M_List);
 
 
 }
@@ -228,6 +228,7 @@ createIfpackList( const GetPot&              dataFile,
 
     bool displayList = dataFile((section + "/displayList").data(),     false);
 
+
     std::string relaxationType              = dataFile((section + "/ifpack/relaxation/type").data(), "Jacobi");
     int         relaxationSweeps            = dataFile((section + "/ifpack/relaxation/sweeps").data(), 1);
     double      relaxationDampingFactor     = dataFile((section + "/ifpack/relaxation/damping_factor").data(), 1.0);
@@ -300,7 +301,7 @@ createIfpackList( const GetPot&              dataFile,
 
     bool schwarzComputeCondest          = dataFile((section + "/ifpack/schwarz/compute_condest").data(),   true);
     std::string schwarzReorderingType   = dataFile((section + "/ifpack/schwarz/reordering_type").data(),      "none");
-    bool schwarzFilterSingletons        = dataFile((section + "/ifpack/schwarz/filter_singletons").data(), false);
+    bool schwarzFilterSingletons        = dataFile((section + "/ifpack/schwarz/filter_singletons").data(), true);
 
     list.set("schwarz: combine mode",       schwarzCombineMode);
     list.set("schwarz: compute condest",    schwarzComputeCondest);
