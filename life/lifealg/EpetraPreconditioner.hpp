@@ -116,10 +116,10 @@ protected:
 
     operator_type           M_Oper;
 
+    Teuchos::ParameterList  M_List;
 
 private:
 
-    Teuchos::ParameterList  M_List;
 
 
 };
