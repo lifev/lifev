@@ -112,6 +112,10 @@ public:
     //! returns true if prec exists
     /*const*/ bool  set() const {return M_Prec;}
 
+protected:
+
+    Teuchos::ParameterList  M_IFPACKSubList;
+
 private:
     prec_type               M_Prec;
 

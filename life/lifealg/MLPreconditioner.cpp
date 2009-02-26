@@ -56,11 +56,13 @@ void
 MLPreconditioner::setDataFromGetPot( const GetPot&          dataFile,
                                      const std::string&     section)
 {
-    Teuchos::ParameterList list;
-    createMLList(dataFile, section, list);
+    createMLList(dataFile, section, M_List);
 
-    this->setList(list);
+    std::string CT;
 
+    Teuchos::ParameterList& SmootherIFSubList = M_List.sublist("smoother: ifpack list");
+    createIfpackList(dataFile, section, SmootherIFSubList);
+    //    M_List.print(std::cout);
 }
 
 
@@ -162,8 +164,8 @@ createMLList( const GetPot&              dataFile,
     if (defList != "none")
         ML_Epetra::SetDefaults(defList, list);
 
-    int MLPrintParameterList = dataFile((section + "/ML/displayList").data(),      0, found);
-
+    int MLPrintParameterList = dataFile((section + "/displayList").data(),      0, found);
+    //    if (found) list.set("displayList", MLPrintParameterList);
 
     int MLOutput             = dataFile((section + "/ML/MLOuput").data(),       0, found);
     if (found) list.set("ML output",               MLOutput);
@@ -367,12 +369,6 @@ createMLList( const GetPot&              dataFile,
 //     list.set("smoother: ifpack overlap", M_overlapLevel);
 
 
-    if (SmootherType == "IFPACK")
-        {
-            list.set("smoother: ifpack overlap", 0);
-            //             Teuchos::ParameterList& IFPACKList = list.sublist("smoother: ifpack list");
-//             createIfpackList(dataFile, section, IFPACKList);
-        }
 
     //extra parameters:
 //     list.sublist("smoother: ifpack list").set("fact: drop tolerance",
@@ -397,12 +393,12 @@ createMLList( const GetPot&              dataFile,
 //                                                 false);
 
 
-    if (MLPrintParameterList) list.print(std::cout);
 
     //list.sublist("smoother: ifpack list").set("schwarz: filter singletons", true);
 
     //    list.sublist("smoother: ifpack list").set("amesos: solver type", "Amesos_Lapack");
 
+    if (MLPrintParameterList) list.print(std::cout);
 }
 
 
