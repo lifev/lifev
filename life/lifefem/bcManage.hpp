@@ -46,8 +46,10 @@
 
 #ifndef _BCMANAGE_
 #define _BCMANAGE_
+
 #include <life/lifefem/bcHandler.hpp>
 #include <life/lifefem/dof.hpp>
+#include "life/lifefem/FESpace.hpp"
 
 
 namespace LifeV
@@ -225,9 +227,13 @@ void bcManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& do
 //Version that treates only the matrix modifications
 //Miguel:10/02  - Mixte : V. Martin: 03/03 // I added the time t for the mixte case. V. Martin
 template <typename MatrixType, typename MeshType, typename DataType>
-void bcManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
+void bcManageMatrix( MatrixType&      A,
+                     const MeshType&  mesh,
+                     const Dof&       dof,
                      const BCHandler& BCh,
-                     CurrentBdFE& bdfem, const DataType& coef, const DataType& t = 0 )
+                     CurrentBdFE&     bdfem,
+                     const DataType&  coef,
+                     const DataType&  t = 0 )
 {
 
 
@@ -274,8 +280,13 @@ void bcManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
 //Version that treates only the vector modifications
 //Miguel:10/02  - Mixte : V. Martin: 03/03
 template <typename VectorType, typename MeshType, typename DataType>
-void bcManageVector( VectorType& b, const MeshType& mesh, const Dof& dof,
-                     const BCHandler& BCh, CurrentBdFE& bdfem, const DataType& t, const DataType& coef )
+void bcManageVector( VectorType&      b,
+                     const MeshType&  mesh,
+                     const Dof&       dof,
+                     const BCHandler& BCh,
+                     CurrentBdFE&     bdfem,
+                     const DataType&  t,
+                     const DataType&  coef )
 {
     VectorType bRepeated(b.getMap(),Repeated);
 
@@ -293,6 +304,42 @@ void bcManageVector( VectorType& b, const MeshType& mesh, const Dof& dof,
                     break;
                 case Mixte:  // Mixte boundary conditions (Robin)
                     bcMixteManageVector( bRepeated, mesh, dof, BCh[ i ], bdfem, t, BCh.offset() );
+                    break;
+                default:
+                    ERROR_MSG( "This BC type is not yet implemented" );
+                }
+        }
+
+    bRepeated.GlobalAssemble();
+
+    b += bRepeated;
+}
+
+// FESpace version of bcManageVector
+
+template <typename VectorType, typename DataType, typename Mesh, typename EpetraMap>
+void bcManageVector( VectorType&                     b,
+                     FESpace<Mesh, EpetraMap>&       fespace,
+                     const BCHandler&                BCh,
+                     const DataType&                 t,
+                     const DataType&                 coef )
+{
+    VectorType bRepeated(b.getMap(),Repeated);
+
+    // Loop on boundary conditions
+    for ( Index_t i = 0; i < BCh.size(); ++i )
+        {
+
+            switch ( BCh[ i ].type() )
+                {
+                case Essential:  // Essential boundary conditions (Dirichlet)
+                    bcEssentialManageVector( b, fespace.dof(), BCh[ i ], t, coef, BCh.offset() );
+                    break;
+                case Natural:  // Natural boundary conditions (Neumann)
+                    bcNaturalManage( b, *fespace.mesh(), fespace.dof(), BCh[ i ], fespace.feBd(), t, BCh.offset() );
+                    break;
+                case Mixte:  // Mixte boundary conditions (Robin)
+                    bcMixteManageVector( bRepeated, *fespace.mesh(), fespace.dof(), BCh[ i ], fespace.feBd(), t, BCh.offset() );
                     break;
                 default:
                     ERROR_MSG( "This BC type is not yet implemented" );
@@ -546,7 +593,12 @@ void bcEssentialManageMatrix( MatrixType& A, const Dof& dof, const BCBase& BCb, 
 //Version that treates only the vector modifications
 //Miguel:10/02
 template <typename VectorType, typename DataType>
-void bcEssentialManageVector( VectorType& b, const Dof& dof, const BCBase& BCb, const DataType& t, const DataType& coef, UInt offset )
+void bcEssentialManageVector( VectorType&     b,
+                              const Dof&      dof,
+                              const BCBase&   BCb,
+                              const DataType& t,
+                              const DataType& coef,
+                              UInt            offset )
 {
 
 
@@ -558,6 +610,9 @@ void bcEssentialManageVector( VectorType& b, const Dof& dof, const BCBase& BCb, 
 
     // Number of components involved in this boundary condition
     UInt nComp = BCb.numberOfComponents();
+
+//     std::cout << " totaldof = " << totalDof << std::endl;
+//     std::cout << " nComp    = " << nComp << std::endl;
 
     std::vector<int>   idDofVec(0);
     idDofVec.reserve(BCb.list_size()*nComp);
@@ -576,22 +631,16 @@ void bcEssentialManageVector( VectorType& b, const Dof& dof, const BCBase& BCb, 
 
                             // Global Dof
                             idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof + offset;
-                            //                 std::cout << "iDof = " << idDof << " -> " << std::flush;
-                            //                 std::cout << "  :-( " << std::endl;
-                            //                 std::cout <<  coef * BCb( BCb( i ) ->id(), BCb.component( j ) ); // BASEINDEX + 1;
-                            //                 std::cout << "  :-) " << std::endl;
-                            // Modifying right hand side
+                            std::cout << "idof = " << idDof << std::endl;
 
-                            /*
-                              { // for debugging purpuses: check that somebody owns this idDof:
-                              int pid, lid, dof(idDof);
-                              b.Map().RemoteIDList(1, &dof, &pid, &lid);
-                              std::cout << "iDof = " << idDof << " -> " << pid << " " << lid << std::endl;
-                              }
-                            */
+//                             std::cout <<  "comp = " << BCb.component( j ) << " idof = " << BCb(i)->id() << " -> ";
+//                             std::cout <<  BCb( BCb( i ) ->id(), BCb.component( j ) );
+//                             std::cout << " ." << std::endl;
 
-                            idDofVec.push_back(idDof);
+                            idDofVec.push_back( idDof );
                             datumVec.push_back( coef * BCb( BCb( i ) ->id(), BCb.component( j ) ) );
+
+                            //                             std::cout << "--" << std::endl;
                         }
                 }
         }
@@ -886,8 +935,13 @@ void bcNaturalManageUDep( Real (*mu)(Real t,Real x, Real y, Real z, Real u),
 
 
 template <typename VectorType, typename MeshType, typename DataType>
-void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const BCBase& BCb,
-                      CurrentBdFE& bdfem, const DataType& t, UInt offset )
+void bcNaturalManage( VectorType& b,
+                      const MeshType& mesh,
+                      const Dof& dof, const
+                      BCBase& BCb,
+                      CurrentBdFE& bdfem,
+                      const DataType& t,
+                      UInt offset )
 {
 
     // Number of local Dof (i.e. nodes) in this face
@@ -1145,11 +1199,11 @@ void bcNaturalManage( VectorType& b, const MeshType& mesh, const Dof& dof, const
                                                         bdfem.phi( int( idofF - 1 ), iq )*
                                                         bdfem.weightMeas( iq )*bdfem.normal( int(j - 1), iq );
                                                     break;
-                                                case Tangential:
-                                                    bRepeated[ idDof ] += sum*
-                                                        bdfem.phi( int( idofF - 1 ), iq )*
-                                                        bdfem.weightMeas( iq )*bdfem.tangent( 0, int( j ), iq );
-                                                    break;
+//                                                 case Tangential:
+//                                                     bRepeated[ idDof ] += sum*
+//                                                         bdfem.phi( int( idofF - 1 ), iq )*
+//                                                         bdfem.weightMeas( iq )*bdfem.tangent( 0, int( j ), iq );
+//                                                     break;
                                                 }
 //                                             bRepeated[ idDof ] += bdfem.phi( int( idofF - 1 ), iq ) * BCb( t, x, y, z, BCb.component( j ) ) *
 //                                                 bdfem.weightMeas( iq ); // BASEINDEX + 1
@@ -1617,8 +1671,13 @@ void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
 // Version that treates only the vector modifications
 // V. Martin 02/03/2003
 template <typename VectorType, typename DataType, typename MeshType>
-void bcMixteManageVector( VectorType& b, const MeshType& mesh, const Dof& dof,
-                          const BCBase& BCb, CurrentBdFE& bdfem, const DataType& t, UInt offset )
+void bcMixteManageVector( VectorType& b,
+                          const MeshType& mesh,
+                          const Dof& dof,
+                          const BCBase& BCb,
+                          CurrentBdFE& bdfem,
+                          const DataType& t,
+                          UInt offset )
 {
 
     // Number of local Dof in this face
