@@ -61,15 +61,10 @@ IfpackPreconditioner::setDataFromGetPot( const GetPot& dataFile,
     //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
     //! for more informations on the parameters
 
-    M_overlapLevel = dataFile((section + "/ifpack/overlap").data(),     4);
-    M_precType     = dataFile((section + "/ifpack/prectype").data(),"Amesos");
+    createIfpackList(dataFile, section, this->M_List);
 
-    //Teuchos::ParameterList list;
-
-    createIfpackList(dataFile, section, M_List);
-
-    //this->setList(M_List);
-
+    M_overlapLevel = this->M_List.get("overlap level", -1);
+    M_precType     = this->M_List.get("prectype", "Amesos");
 
 }
 
@@ -79,24 +74,26 @@ IfpackPreconditioner::buildPreconditioner(operator_type& oper)
     M_Oper = oper;
 
     //List.set("schwarz: combine mode", "Zero"); //
-    //M_List.set("schwarz: filter singletons", true);
+    //this->M_List.set("schwarz: filter singletons", true);
 
-//    List.set("amesos: solver type", "Amesos_Lapack");
+    //    List.set("amesos: solver type", "Amesos_Lapack");
 
-//     M_List.set("PrintTiming", true);
-//     M_List.set("PrintStatus", true);
+//     this->M_List.set("PrintTiming", true);
+//     this->M_List.set("PrintStatus", true);
+    M_overlapLevel = this->M_List.get("overlap level", -1);
+    M_precType     = this->M_List.get("prectype", "Amesos");
 
     Ifpack factory;
 
     //    M_Prec
-
     M_Prec.reset(factory.Create(M_precType, &M_Oper->getEpetraMatrix(), M_overlapLevel));
+
     //    M_Prec.reset(new prec_type(&A.getEpetraMatrix(), OverlapLevel));
     if ( !M_Prec.get() )
         { //! if not filled, I do not know how to diagonalize.
             ERROR_MSG( "Preconditioner not set, something went wrong in its computation\n" );
         }
-    IFPACK_CHK_ERR(M_Prec->SetParameters(M_List));
+    IFPACK_CHK_ERR(M_Prec->SetParameters(this->M_List));
     IFPACK_CHK_ERR(M_Prec->Initialize());
     IFPACK_CHK_ERR(M_Prec->Compute());
     return EXIT_SUCCESS;
@@ -226,7 +223,14 @@ createIfpackList( const GetPot&              dataFile,
     //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
     //! for more informations on the parameters
 
+    int overlapLevel = dataFile((section + "/ifpack/overlap").data(),     4);
+    std::string precType     = dataFile((section + "/ifpack/prectype").data(),"Amesos");
+
+    list.set("prectype", precType);
+    list.set("overlap level", overlapLevel);
+
     bool displayList = dataFile((section + "/displayList").data(),     false);
+    //    std::cout << section + "/displayList " << displayList <<std::endl;
 
 
     std::string relaxationType              = dataFile((section + "/ifpack/relaxation/type").data(), "Jacobi");

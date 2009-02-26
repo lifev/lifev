@@ -121,7 +121,7 @@ protected:
 //     operator_type          M_Oper;
 
 
-    Teuchos::ParameterList M_List;
+//    Teuchos::ParameterList M_List;
     std::string            M_precType;
     //    int                    M_overlapLevel;
 
