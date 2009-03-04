@@ -33,7 +33,7 @@ namespace LifeV
 {
 
 fullMonolithic::fullMonolithic():
-    supersuper(),
+    super(),
     M_mapWithoutMesh(),
     M_linearSolver()
     //    M_meshOld(new vector_type(M_mmFESpace->map()))
@@ -43,7 +43,7 @@ fullMonolithic::fullMonolithic():
 void
 fullMonolithic::setup()
 {
-    supersuper::setup();
+    super::setup();
     UInt offset = M_monolithicMap->getMap(Unique)->NumGlobalElements();
     M_mapWithoutMesh.reset(new EpetraMap(*M_monolithicMap));
     M_BCh_mesh->setOffset(offset);
@@ -71,13 +71,21 @@ fullMonolithic::setup()
                                                   *M_epetraComm,
                                                   *M_monolithicMap));
     offset = M_uFESpace->dof().numTotalDof()*nDimensions +  M_pFESpace->dof().numTotalDof();
-    M_solid.reset(new FSIOperator::solid_raw_type(dataSolid(),
-                                                  *M_dFESpace,
-                                                  *M_epetraComm,
-                                                  *M_monolithicMap,
-                                                  offset,
-                                                  M_uFESpace
-                                                  ));
+    //M_solid.reset(dynamic_cast<solidInterface*>(&(*M_solid)));
+//     *(dynamic_cast<solidInterface*>(&(*M_solid)))= solid_raw_type(dataSolid(),
+//                                                   *M_dFESpace,
+//                                                   *M_epetraComm,
+//                                                   *M_monolithicMap,
+//                                                   offset,
+//                                                   M_uFESpace
+//                                                   );
+     M_solid.reset(new solid_raw_type(dataSolid(),
+                                                   *M_dFESpace,
+                                                   *M_epetraComm,
+                                                   *M_monolithicMap,
+                                                   offset,
+                                                   M_uFESpace
+                                                   ));
 
 }
 
@@ -91,14 +99,14 @@ void
 fullMonolithic::updateSystem(const vector_type& solution)
 {
     //    M_meshVel.reset(new vector_type(M_meshMotion->dispDeltaDiff()));
-    supersuper::updateSystem(solution);
+    super::updateSystem(solution);
     M_uk.reset(new vector_type(solution));
 }
 
 void
-fullMonolithic::couplingMatrix(matrix_ptrtype         &fullMMatrix)
+fullMonolithic::couplingMatrix(matrix_ptrtype         &fullMMatrix, bool solidCoupling)
 {
-    supersuper::couplingMatrix(fullMMatrix);
+    super::couplingMatrix(fullMMatrix, solidCoupling);
     UInt offset(M_uFESpace->dof().numTotalDof()*nDimensions +  M_pFESpace->dof().numTotalDof());
     UInt solidFluidInterface(offset + M_dFESpace->dof().numTotalDof()*nDimensions + nDimensions*M_interface);
     std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
@@ -109,7 +117,7 @@ fullMonolithic::couplingMatrix(matrix_ptrtype         &fullMMatrix)
         {
             if(M_interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
                 {
-                    fullMMatrix->set_mat_inc(solidFluidInterface + ITrow->first + dim*M_mmFESpace->dof().numTotalDof() - 1, offset + ITrow->second-1 + dim* M_dFESpace->dof().numTotalDof(), (-1.0)*M_dataFluid->timestep()/**1.e-2*//*scaling of the solid matrix*/ );
+                    fullMMatrix->set_mat_inc(solidFluidInterface + ITrow->first + dim*M_mmFESpace->dof().numTotalDof() - 1, offset + ITrow->second-1 + dim* M_dFESpace->dof().numTotalDof(), (-1.0)*M_dataFluid->timestep()*M_solid->rescaleFactor()/**1.e-2*//*scaling of the solid matrix*/ );
                 }
         }
     }
@@ -118,7 +126,7 @@ fullMonolithic::couplingMatrix(matrix_ptrtype         &fullMMatrix)
 void
 fullMonolithic::buildSystem ()
 {
-    supersuper::buildSystem();
+    super::buildSystem();
     M_meshMotion->computeMatrix();
     //    double dt = M_dataFluid->timestep();
     //    M_meshMotion->rescaleMatrix(dt);
@@ -177,13 +185,13 @@ fullMonolithic::evalResidual( vector_type&       res,
             if(iter==0)
                 *this->M_rhs               += M_fluid->matrMass()*M_bdf->time_der( M_dataFluid->timestep() );
             M_monolithicMatrix.reset(new matrix_type(*M_monolithicMap/*, this->M_fluid->getMeanNumEntries()*/));
-            M_fluid->updateMatrix( *M_monolithicMatrix);//applies the stabilization terms
+            M_fluid->updateStab( *M_monolithicMatrix);//applies the stabilization terms
             M_fluid->getFluidMatrix( *M_monolithicMatrix);
 
             /*            if(firstIter)
                           {*/
             if(iter == 0)
-                supersuper::couplingRhs( this->M_rhs, this->M_un);
+                super::couplingRhs( this->M_rhs, this->M_un);
                     /*
                     M_solid->buildSystem();
                     M_solid->rescaleMatrices();
@@ -203,13 +211,14 @@ fullMonolithic::evalResidual( vector_type&       res,
                 }
             M_uk.reset(new vector_type(disp));
 
-            this->M_solid->evalResidual( *M_BCh_u, *M_BCh_d, disp, M_rhs, res);
+            this->M_solid->evalResidual( *M_BCh_u, *M_BCh_d, disp, M_rhs, res, false);
+            M_bigPrecPtr.reset(new matrix_type(*M_monolithicMap/*, M_solid->getMatrixPtr()->getMeanNumEntries()*/));
             //M_monolithicMatrix->spy("monolithicMatrix");
         }
-    else
-        {
-            this->M_solid->evalResidual( disp, M_rhs, res );
-        }
+    //else
+    //{
+    this->M_solid->evalResidual( disp,/* M_rhs,*/ res, false );
+            //}
 
 }
 
@@ -251,7 +260,19 @@ void fullMonolithic::solveJac(vector_type       &_muk,
             //            fluid().diagonalizeVec(*rhsShapeDer, M_FMOper->BCh_fluid(), rhs);
             //end of BC part
         }
-    supersuper::solveJac(_muk, *rhs, _linearRelTol);
+    switch(M_DDBlockPrec)
+        {
+        case 1:
+            {
+                M_meshMotion->setMatrix(M_bigPrecPtr);
+            }
+            break;
+        default:
+            {}
+            break;
+        }
+
+    super::solveJac(_muk, *rhs, _linearRelTol);
     //    *M_uk += _muk;
     //    UInt offset(uFESpace().dof().numTotalDof()*nDimensions +pFESpace().dof().numTotalDof() +dFESpace().map().getMap(Unique)->NumGlobalElements() + dimInterface());
     //    vector_type meshIncrement(M_mmFESpace->map());
@@ -274,7 +295,7 @@ int Epetra_FullMonolithic::Apply(const Epetra_MultiVector &X, Epetra_MultiVector
     //    std::cout<<x.getEpetraVector().NumGlobalElements()<<std::endl;
     //BCManage for the shape derivatives part of the matrix
     //    vector_ptrtype p;
-    //    M_FMOper->fluid().diagonalizeVec(x , M_FMOper->BCh_harmonicExtension()/*, p*/);
+    //    M_FMOper->fluid().diagonalizeVec(x , M_FMOper->BCh_solid()/*, p*/);
     //End of BCManage
     meshDeltaDisp->subset(x, offset);
     //    *meshDeltaDisp += M_FMOper->meshMotion().disp();
@@ -343,13 +364,13 @@ fullMonolithic::updateSystem(const vector_type& solution)
     UInt offset(M_uFESpace->dof().numTotalDof()*nDimensions +  M_pFESpace->dof().numTotalDof() + M_dFESpace->map().getMap(Unique)->NumGlobalElements() + nDimensions*M_interface);
     vector_type meshDisp(M_mmFESpace->map(), Repeated);
     M_meshMotion->initialize(meshDisp.subset(solution, offset));
-    supersuper::updateSystem(solution);
+    super::updateSystem(solution);
 }*/
-/*
-namespace
-{
-FSIOperator* createFM(){ return new fullMonolithic(); }
-}
-bool LifeV::fullMonolithic::reg = FSIFactory::instance().registerProduct( "fullMonolithic", &createFM );
-*/
+
+//  namespace
+//  {
+//   FSIOperator* createFM(){ return new fullMonolithic(); }
+//  }
+//   static bool reg = FSIFactory::instance().registerProduct( "fullMonolithic", &createFM );
+
 }

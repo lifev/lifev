@@ -39,7 +39,7 @@ class fullMonolithic : public Monolithic
 {
 public:
 
-    typedef Monolithic supersuper;
+    typedef Monolithic super;
 
     fullMonolithic();
     ///constructor
@@ -48,7 +48,7 @@ public:
     virtual ~fullMonolithic(){}
     ///destructor
 
-    void couplingMatrix(matrix_ptrtype & bigMatrix);
+    void couplingMatrix(matrix_ptrtype & bigMatrix, bool solidCoupling=true);
     void couplingRhs(vector_ptrtype rhs);
 
     void   evalResidual(vector_type&        res,
@@ -91,7 +91,7 @@ public:
     vector_type& meshVel();
     private:
     boost::shared_ptr<EpetraMap>   M_mapWithoutMesh;
-    LifeV::Epetra::SolverTrilinos        M_linearSolver;
+    LifeV::SolverTrilinos        M_linearSolver;
     boost::shared_ptr<Epetra_FullMonolithic> M_epetraOper;
     vector_ptrtype                       M_uk;
     vector_ptrtype                       M_meshVel;

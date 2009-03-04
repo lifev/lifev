@@ -36,9 +36,9 @@ class Monolithic : public FSIOperator
 
 public:
 
-
-    typedef FSIOperator                            super;
-    typedef FSIOperator::fluid_type::value_type::matrix_type   matrix_type;
+    typedef VenantKirchhofSolver   <mesh_type>     solid_raw_type;
+    typedef  FSIOperator    super;
+    typedef super::fluid_type::value_type::matrix_type   matrix_type;
     typedef boost::shared_ptr<matrix_type>                    matrix_ptrtype;
 
 
@@ -143,7 +143,7 @@ public:
     void setFluidPrecBC         (fluid_bchandler_type bc_fluid_prec);
     void setSolidPrecBC         (solid_bchandler_type bc_solid_prec);
     const UInt dimInterface() const {return nDimensions*M_interface ;}
-
+    void setUpSystem( GetPot const& data_file );
 
 protected:
 
@@ -194,12 +194,15 @@ protected:
     EpetraMap                                         M_interfaceMap;///the solid interface map
     boost::shared_ptr<vector_type>                    M_beta;///ALE relative velocity (u-w)
     matrix_ptrtype                                    M_monolithicMatrix;
+    matrix_ptrtype                                    M_bigPrecPtr;
+    int                                               M_DDBlockPrec;
+
     //    bool                                              firstIter;
 
 private:
 
     int                                               M_updateEvery;
-    bool                                              M_semiImplicit;
+    //bool                                              M_semiImplicit;
     boost::shared_ptr<vector_type>                    M_numerationInterface;
     boost::shared_ptr<vector_type>                    M_rhsShapeDerivatives;
     /**
@@ -208,13 +211,11 @@ vector containing the numeration of the coupling part of the monolithic map
 
     boost::shared_ptr<vector_type>                    M_rhsNew;
     bool                                              M_fullMonolithic;
-    matrix_ptrtype                                    M_bigPrecPtr;
     bool                                              M_recomputePrec;
-    fluid_bchandler_type                              M_BCh_uPrec;
-    solid_bchandler_type                              M_BCh_dPrec;
+    //fluid_bchandler_type                              M_BCh_uPrec;
+    //solid_bchandler_type                              M_BCh_dPrec;
     //bool                                              M_splitPrec;
     Real                                              M_entry;
-    int                                               M_DDBlockPrec;
     matrix_ptrtype                                    M_robinCoupling;
     matrix_ptrtype                                    M_robinCouplingInv;
     Real                                              M_alphaf;
@@ -223,6 +224,8 @@ vector containing the numeration of the coupling part of the monolithic map
     bool                                              M_diagonalScale;
     UInt                                              M_offset;
     UInt                                              M_solidAndFluidDim;
+protected:
+    //    boost::shared_ptr<solid_raw_type>                 M_solid;
     //    boost::shared_ptr<Epetra_IntVector>               M_numerationInterfaceInt;
     //    bool                                              M_isTangentProblem;
 
