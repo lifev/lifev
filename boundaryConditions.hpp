@@ -20,7 +20,7 @@
 // #include "life/lifesolver/steklovPoincareBase.hpp"
 #include "lifemc/lifesolver/Monolithic.hpp"
 #include "lifemc/lifesolver/fullMonolithic.hpp"
-#include "lifemc/lifesolver/fixedPointBase.hpp"
+#include "life/lifesolver/fixedPointBase.hpp"
 //#define BLUFF_CYLINDER
 //#define ANEURISM
 //#define ANEURISM100170
