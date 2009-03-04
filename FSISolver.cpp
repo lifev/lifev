@@ -28,7 +28,7 @@
  */
 #include <life/lifecore/life.hpp>
 
-#include <life/lifesolver/FSISolver.hpp>
+#include <lifemc/lifesolver/FSISolver.hpp>
 
 namespace LifeV
 {

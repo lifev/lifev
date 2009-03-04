@@ -36,7 +36,7 @@
 #ifndef _OSEENSD_H_
 #define _OSEENSD_H_
 
-#include <life/lifesolver/Oseen.hpp>
+#include <lifemc/lifesolver/Oseen.hpp>
 
 
 namespace LifeV

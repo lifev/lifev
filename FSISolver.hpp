@@ -30,12 +30,12 @@
 #define __FSISolver_H 1
 
 #include <life/lifearray/tab.hpp>
-#include <life/lifesolver/FSIOperator.hpp>
+#include <lifemc/lifesolver/FSIOperator.hpp>
 #include <life/lifealg/nonLinRichardson.hpp>
 #include <life/lifealg/newton.hpp>
 //#include <life/lifesolver/fixedPointBase.hpp>
 //#include <life/lifesolver/exactJacobianBase.hpp>
-#include <life/lifesolver/Monolithic.hpp>
+#include <lifemc/lifesolver/Monolithic.hpp>
 
 
 #include "Epetra_config.h"

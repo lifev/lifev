@@ -27,7 +27,7 @@
    \date (17/09/2008)
  */
 
-#include <life/lifesolver/fullMonolithic.hpp>
+#include <lifemc/lifesolver/fullMonolithic.hpp>
 
 namespace LifeV
 {

@@ -27,11 +27,11 @@
 
 #include <life/lifefem/dofInterface3Dto3D.hpp>
 #include <life/lifefem/dofInterface3Dto2D.hpp>
-#include <life/lifesolver/OseenShapeDerivative.hpp>
+#include <lifemc/lifesolver/OseenShapeDerivative.hpp>
 //#include <life/lifesolver/Oseen.hpp>
-#include <life/lifesolver/VenantKirchhofSolver.hpp>
-#include <life/lifesolver/HarmonicExtensionSolver.hpp>
-#include <life/lifemesh/regionMesh3D.hpp>
+#include <lifemc/lifesolver/VenantKirchhofSolver.hpp>
+#include <lifemc/lifesolver/HarmonicExtensionSolver.hpp>
+#include <lifemc/lifemesh/regionMesh3D.hpp>
 #include <life/lifealg/generalizedAitken.hpp>
 #include <life/lifefem/bcHandler.hpp>
 #include <life/lifefem/bcFunction.hpp>

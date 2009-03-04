@@ -17,7 +17,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include <life/lifesolver/Monolithic.hpp>
+#include <lifemc/lifesolver/Monolithic.hpp>
 #include "EpetraExt_MatrixMatrix.h"
 //#include <life/lifesolver/reducedLinFluid.hpp>
 
@@ -195,7 +195,7 @@ Monolithic::setDataFromGetPot( GetPot const& data_file )
 {
 //     M_solverTrilinos.setOptionsFromGetPot(data_file,"jacobian/aztec");
 
-  super::setDataFromGetPot(data_file);
+    //super::setDataFromGetPot(data_file);
 
     //  this->M_dataFluid.reset(new data_fluid(data_file));
     //    this->M_dataSolid.reset(new data_solid(data_file));

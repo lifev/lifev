@@ -25,7 +25,7 @@
 #define _MONOLITHIC_HPP
 
 
-#include <life/lifesolver/FSIOperator.hpp>
+#include <lifemc/lifesolver/FSIOperator.hpp>
 //#include <Epetra_IntVector.h>
 
 namespace LifeV

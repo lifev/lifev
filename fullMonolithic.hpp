@@ -29,7 +29,7 @@
 #ifndef _FULLMONOLITHIC_HPP
 #define _FULLMONOLITHIC_HPP
 
-#include <life/lifesolver/Monolithic.hpp>
+#include <lifemc/lifesolver/Monolithic.hpp>
 
 namespace LifeV
 {
