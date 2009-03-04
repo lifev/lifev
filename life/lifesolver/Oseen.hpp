@@ -217,7 +217,7 @@ public:
     //! Postprocessing
     void postProcess(bool _writeMesh = false);
 
-    void resetPrec() {M_resetPrec = true; M_resetStab = true;}
+    void resetPrec(bool reset = true) {M_resetPrec = reset; M_resetStab = reset;}
     // as for now resetting stabilization matrix at the same time as the preconditioner
     // void resetStab() {M_resetStab = true;}
 
@@ -265,7 +265,8 @@ protected:
                                    vector_type&   rhsFull,
                                    vector_type&    sol,
                                    SolverType&     linearSolver,
-                                   prec_type&      prec );
+                                   prec_type&      prec ,
+                                   bool reuse=true);
 
     void applyBoundaryConditions(  matrix_type&        matrix,
                                    vector_type&        rhs,
@@ -1172,7 +1173,7 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
     leaderPrintMax("done in " , chrono.diff());
     // solving the system
 
-    solveSystem( matrFull, rhsFull, M_sol, M_linearSolver, M_prec);
+    solveSystem( matrFull, rhsFull, M_sol, M_linearSolver, M_prec, M_reusePrec);
 
     M_residual  = M_rhsNoBC;
     M_residual -= *M_matrNoBC*M_sol;
@@ -1186,7 +1187,8 @@ void Oseen<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
                                            vector_type&    rhsFull,
                                            vector_type&    sol,
                                            SolverType&     linearSolver,
-                                           prec_type&      prec)
+                                           prec_type&      prec,
+                                           bool            reuse)
 {
     Chrono chrono;
 
@@ -1201,7 +1203,7 @@ void Oseen<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
 
     // overlapping schwarz preconditioner
 
-    if ( !M_reusePrec || M_resetPrec || !prec->set() )
+    if ( !reuse || M_resetPrec || !prec->set() )
     {
         chrono.start();
 
@@ -1224,23 +1226,9 @@ void Oseen<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
     }
 
 
-    chrono.start();
-
     leaderPrint("  f-  Solving system ...                                ");
 
     int numIter = linearSolver.solve(sol, rhsFull);
-
-    chrono.stop();
-    double time = chrono.diff();
-
-    double status[AZ_STATUS_SIZE];
-
-    if (M_me == 0)
-        {
-            linearSolver.getAztecStatus( status );
-
-            linearSolver.printStatus("  f- ", status, time, std::cout);
-        }
 
     if (numIter >= M_maxIterSolver)
     {
@@ -1260,7 +1248,6 @@ void Oseen<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
         leaderPrintMax( "done in " , chrono.diff() );
         leaderPrint("  f-       Estimated condition number = " , condest );
 
-        chrono.start();
         numIter = linearSolver.solve(sol, rhsFull);
 
         if (numIter >= M_maxIterSolver && M_verbose)
@@ -1498,8 +1485,8 @@ Oseen<Mesh, SolverType>::postProcess(bool /*_writeMesh*/)
     }
 
 
-//     if ( _writeMesh || ( M_count / M_data.verbose() == 0 ) )
-//         writeMesh  ( "partedMesh." + me + ".mesh", M_pFESpace.mesh() );
+//     if (_writeMesh || (M_count / M_data.verbose() == 0) )
+//         writeMesh  ("partedMesh." + me + ".mesh", M_pFESpace.mesh() );
 
     vector_type velAndPressure(M_sol, Repeated);
     vector_type res(M_residual, Repeated);
