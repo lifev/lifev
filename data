@@ -101,11 +101,12 @@ reuse = false
 
 
 [interface] # mesh dependent flags for the interface.
-diagonalBlockPrec = true #
+#diagonalBlockPrec = true #
 DDBlockPrec = 1 #1: D-N, 2: R-R
 fluid_flag      =  1 # default: 1
 alphaf = 0.5
 alphas = 0.5 # parameters for Robin-Robin DDBlock preconditioner
+fluid_flag      =  1 # default: 1
 #solid_flag      =  1 # default: fluid_flag
 #structure_flag  =  1 # default: fluid_flag
 #harmonic_flag   =  1 # default: fluid_flag
@@ -162,20 +163,44 @@ overlap         = 2
 rescale_factor = 1.e-2 # solid matrix rescale factor
 diagonalScaling = false
 
+# [./ML]
+# default_parameter_list = none    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+# prec_type = two-level-additive
+# displayList		= true
+
+# [./smoother]
+# type = IFPACK
+
+# [../Ifpack]
+# prectype        = Amesos
+
+# [./fact]
+# # #level-of-fill                 = 10
+# ilut_level-of-fill            = 4
+# drop_tolerance                = 1.e-10
+# relax_value                   = 0
+
+# [../partitioner]
+#  #overlap =
+
+# [../schwarz]
+# reordering_type = none #metis, rcm, none
+# filter_singletons = true
+
 [./ifpack]
-prectype        = Amesos
+prectype        = ILUT
 
 [./fact]
-#level-of-fill                 = 10
+# #level-of-fill                 = 10
 ilut_level-of-fill            = 4
 drop_tolerance                = 1.e-10
 relax_value                   = 0
 
 [../partitioner]
-#overlap =
+ #overlap =
 
 [../schwarz]
-reordering_type = none #metis, rcm, none
+reordering_type = metis #metis, rcm, none
 filter_singletons = true
 
 # end of preconditioner part

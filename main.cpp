@@ -22,12 +22,12 @@
 
 #include <boost/timer.hpp>
 
-#include <life/lifesolver/FSISolver.hpp>
-#include <life/lifesolver/FSIOperator.hpp>
-//#include <life/lifesolver/Monolithic.hpp>
-#include <life/lifesolver/fixedPointBase.hpp>
+#include <lifemc/lifesolver/FSISolver.hpp>
+#include <lifemc/lifesolver/FSIOperator.hpp>
 #include <life/lifesolver/dataNavierStokes.hpp>
+
 #include <life/lifefilters/ensight.hpp>
+
 
 #include <life/lifealg/IfpackPreconditioner.hpp>
 #include <life/lifealg/MLPreconditioner.hpp>
@@ -46,8 +46,8 @@
 
 
 
-
-//LifeV::FSIOperator* createM(){ return new LifeV::Monolithic(); }
+ LifeV::FSIOperator* createFM(){ return new LifeV::fullMonolithic(); }
+ LifeV::FSIOperator* createM(){ return new LifeV::Monolithic(); }
 class Problem
 {
 public:
@@ -71,9 +71,11 @@ public:
     Problem( GetPot const& data_file, std::string _oper = "" )
         {
             using namespace LifeV;
-            //            bool reg = FSIFactory::instance().registerProduct( "monolithic", &createM );
-
-            Debug( 10000 ) << "creating FSISolver with operator :  " << _oper << "\n";
+              if(!_oper.compare("monolithic"))
+                  FSIFactory::instance().registerProduct( "monolithic", &createM );
+              else if(!_oper.compare("fullMonolithic"))
+                  FSIFactory::instance().registerProduct( "fullMonolithic", &createFM );
+           Debug( 10000 ) << "creating FSISolver with operator :  " << _oper << "\n";
 //            DataNavierStokes< RegionMesh3D_ALE<LinearTetra> > M_dataNS(data_file);
 
             M_fsi = fsi_solver_ptr(  new FSISolver( data_file, _oper ) );
