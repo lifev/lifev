@@ -578,6 +578,12 @@ protected:
     void interpolateVelocity(const vector_type& _vec1,
                              vector_type& _vec2);
 
+    void interpolateInterfaceDofs(const FESpace<mesh_type, EpetraMap>& _fespace1,
+                                  const vector_type&                   _vec1,
+                                  const FESpace<mesh_type, EpetraMap>& _fespace2,
+                                  vector_type&                         _vec2,
+                                  dof_interface_type3D&                _dofInterface);
+
     boost::shared_ptr<FESpace<mesh_type, EpetraMap> > M_uFESpace;
     boost::shared_ptr<FESpace<mesh_type, EpetraMap> > M_pFESpace;
     boost::shared_ptr<FESpace<mesh_type, EpetraMap> > M_dFESpace;
