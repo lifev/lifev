@@ -631,7 +631,7 @@ void bcEssentialManageVector( VectorType&     b,
 
                             // Global Dof
                             idDof = BCb( i ) ->id() + ( BCb.component( j ) - 1 ) * totalDof + offset;
-                            std::cout << "idof = " << idDof << std::endl;
+                            //                            std::cout << "idof = " << idDof << std::endl;
 
 //                             std::cout <<  "comp = " << BCb.component( j ) << " idof = " << BCb(i)->id() << " -> ";
 //                             std::cout <<  BCb( BCb( i ) ->id(), BCb.component( j ) );
