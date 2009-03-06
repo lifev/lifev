@@ -722,7 +722,7 @@ assembleVector( EpetraVector&    vec,
     for ( i = 0 ; i < fe.nbNode ; i++ )
     {
         ig = dof.localToGlobal( eleID, i + 1 ) + ipos;/*+ iblock*totdof*/  // damned 1-base vs 0-base !
-            vec[ ig ] += vecView( i );
+            vec.sumIntoGlobalValues( ig, vecView( i ) );
     }
 
     if (verbose)
