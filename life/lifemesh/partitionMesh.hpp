@@ -354,7 +354,7 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
 
     // local mesh construction
 
-    if (!M_me) std::cout << "Building local mesh ... " << std::flush;
+    if (!M_me) std::cout << "Building local mesh ... \n" << std::flush;
 
     std::map<int, int>::iterator  im;
     std::set<int>::iterator       is;
