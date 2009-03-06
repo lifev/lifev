@@ -109,13 +109,13 @@ namespace LifeV
         */
         //!@{
         //! Points Container
-        typedef SimpleVect<PointType> Points;
+        typedef SimpleVect<PointType>   Points;
         //! Elements Container
         typedef SimpleVect<VolumeType > Volumes;
         //! Faces Container: it may contain only Boundary faces
-        typedef SimpleVect<FaceType> Faces;
+        typedef SimpleVect<FaceType>    Faces;
         //! Edges Container: it may be empty
-        typedef SimpleVect<EdgeType> Edges;
+        typedef SimpleVect<EdgeType>    Edges;
         //!@}
 
         /*! \name Generic_Types
@@ -666,8 +666,11 @@ namespace LifeV
 
         std::map<int, int>      M_globalToLocalNode;
         std::map<int, int>      M_localToGlobalNode;
+
         std::map<int, int>      M_globalToLocalEdge;
+
         std::map<int, int>      M_globalToLocalFace;
+
         std::map<int, int>      M_globalToLocalElem;
 
     };
@@ -2376,6 +2379,7 @@ namespace LifeV
                 }
             }
         }
+
         if ( ce )
         {
             M_numEdges = edgeList.size();
@@ -2384,13 +2388,27 @@ namespace LifeV
 
         UInt n = _be.maxId();
 
-        if ( M_numEdges == 0 || M_numEdges == M_numBEdges )
-            M_numEdges = n;
+        if (!ce)
+            {
+                if ( M_numEdges == 0 || M_numEdges == M_numBEdges )
+                    M_numEdges = n;
+            }
+        else
+            {
+                    M_numGlobalEdges = n;
+            }
+
+        std::cout << n << " edges ";
         ASSERT_POS( n == M_numEdges , "#Edges found is not equal to that in RegionMesh" << n << " " << M_numEdges ) ;
         setLinkSwitch( std::string( "HAS_VOLUME_TO_EDGES" ) );
 
         std::cout << " done." << std::endl;
     }
+
+
+//
+// Update element faces
+//
 
     template <typename GEOSHAPE, typename MC>
     void
@@ -2400,8 +2418,8 @@ namespace LifeV
         std::cout << "     Updating element faces ... " << std::flush;
 
         ASSERT0( ! cf || M_numBFaces > 0, std::stringstream( std::string("Boundary Faces Must have been set") +
-        std::string("in order to call updateElementFaces with createFaces=true") +
-        std::string("\nUse buildBoundaryFaces(..) from mesh_util.h") ).str().c_str() );
+                                                             std::string("in order to call updateElementFaces with createFaces=true") +
+                                                             std::string("\nUse buildBoundaryFaces(..) from mesh_util.h") ).str().c_str() );
         // If the counter is set we trust it! Otherwise we use Euler formula
 
         if ( cf && ef == 0 )
@@ -2425,20 +2443,14 @@ namespace LifeV
         GEOSHAPE ele;
         // If we have all faces and the faces store all adjacency info
         // everything is easier
-//        std::cout <<  (faceList.size() == numFaces()) <<  getLinkSwitch( "FACES_HAVE_ADIACENCY" ) <<  getLinkSwitch( "HAS_ALL_FACES" ) << std::endl;
         if ( (faceList.size() == numFaces()) & getLinkSwitch( "FACES_HAVE_ADIACENCY" ) & getLinkSwitch( "HAS_ALL_FACES" ) )
         {
             for ( typename Faces::iterator itf = faceList.begin();itf != faceList.end();++itf )
             {
-//@                 std::cout << "face " << itf->localId() << std::endl;
-//@                 std::cout << "  " << itf->ad_first() << " " << itf->pos_first() << std::endl;
-//@                 std::cout << "  " << itf->ad_second() << " " << itf->pos_second() << std::endl;
                 if ( itf->pos_first() != 0 )
                     _VToF( itf->pos_first() , itf->ad_first() ) = itf->localId();
                 if ( itf->pos_second() != 0 )
                     _VToF( itf->pos_second(), itf->ad_second() ) = itf->localId();
-//@                 std::cout << "  " << _VToF( itf->pos_first() , itf->ad_first() ) << " "
-//                           << _VToF( itf->pos_second() , itf->ad_second() ) << std::endl;
             }
             // we finish here
             setLinkSwitch( "HAS_VOLUME_TO_FACES" );
@@ -2482,20 +2494,14 @@ namespace LifeV
               iv != volumeList.end(); ++iv )
         {
             vid = iv->localId();
-//@            std::cout << "volume " << vid << " --- " << std::endl;
-            // REMEMBER: numbering from 1
             for ( UInt j = 1;j <= numLocalFaces();j++ )
             {
-//@                std::cout << "face " << j << " is " << std::endl;
                 i1 = ele.fToP( j, 1 );
                 i2 = ele.fToP( j, 2 );
                 i3 = ele.fToP( j, 3 );
-//@                std::cout << "  " << i1 << " " << i2 << " " << i3 << std::endl;
-                // go to global
                 i1 = ( iv->point( i1 ) ).localId();
                 i2 = ( iv->point( i2 ) ).localId();
                 i3 = ( iv->point( i3 ) ).localId();
-//@                std::cout << "  " << i1 << " " << i2 << " " << i3 << std::endl;
                 if ( FaceShape::numVertices == 4 )
                 {
                     i4 = ele.fToP( j, 4 );
@@ -2509,7 +2515,6 @@ namespace LifeV
 
                 e = _be.addIfNotThere( _face.first );
                 _VToF( j, vid ) = e.first;
-//@                std::cout << "VToF " << j << " " << vid << " " << e.first << std::endl;
                 if ( cf )
                 {
                     if ( e.second )
@@ -2525,7 +2530,6 @@ namespace LifeV
 
                         face.setMarker( this->marker() );
                         addFace( face, false ); //The id should be correct
-//@                        std::cout << " new face. ad_first = " << vid << " pos_first = " << j << std::endl;
                     }
                     else
                     {
@@ -2535,13 +2539,11 @@ namespace LifeV
                         {
                             faceList( e.first ).ad_second() = vid;
                             faceList( e.first ).pos_second() = j;
-//@                            std::cout << " old face. ad_second = " << vid << " pos_second = " << j << std::endl;
 
                         }
                         else
-                        {
-//@                            std::cout << "this is a boundary face" << std::endl;
-                        }
+                            {
+                            }
                     }
                 }
             }
@@ -2549,8 +2551,18 @@ namespace LifeV
 
         UInt n = _be.maxId();
         // Fix _numfaces if it was not set or set to just the # of Bfaces
-        if ( M_numFaces == 0 || M_numFaces == M_numBFaces )
-            M_numFaces = n;
+        if (!cf)
+            {
+                if ( M_numFaces == 0 || M_numFaces == M_numBFaces )
+                    M_numFaces = n;
+            }
+        else
+            {
+                    M_numGlobalFaces = n;
+            }
+
+
+        std::cout << n << " faces "
         ASSERT_POS( n == M_numFaces , "#Faces found inconsistent with that stored in RegionMesh" ) ;
         setLinkSwitch( "HAS_VOLUME_TO_FACES" );
         if ( cf )
