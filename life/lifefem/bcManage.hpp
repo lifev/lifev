@@ -970,7 +970,7 @@ void bcNaturalManage( VectorType& b,
                         idDofVec.reserve(BCb.list_size()*nComp);
                         std::vector<Real> datumVec(0);
                         datumVec.reserve(BCb.list_size()*nComp);
-                        double datum;
+                        // double datum;
 
                         // Loop on BC identifiers
                         for ( ID i = 1; i <= BCb.list_size(); ++i )
@@ -1164,7 +1164,7 @@ void bcNaturalManage( VectorType& b,
             VectorType bRepeated(b.getMap(),Repeated);
 
             // Loop on BC identifiers
-            for ( int i = 1; i <= BCb.list_size(); ++i )
+            for ( ID i = 1; i <= BCb.list_size(); ++i )
                 {
                     // Pointer to the i-th itdentifier in the list
                     pId = static_cast< const IdentifierNatural* >( BCb( i ) );
@@ -1173,7 +1173,7 @@ void bcNaturalManage( VectorType& b,
                     // Updating face stuff
                     bdfem.updateMeasNormalQuadPt( mesh.boundaryFace( ibF ) );
                     // Loop on total Dof per Face
-                    for ( int idofF = 1; idofF <= nDofF; ++idofF )
+                    for ( ID idofF = 1; idofF <= nDofF; ++idofF )
                         {  //! fixed a possible BUG(??): it was the same variable : i for list and nDofF! (V. Martin)
                             //! Checked only for RT0-Q0 fe. (to be tested with Q1 or Q2...)
                             // Loop on components involved in this boundary condition
@@ -1213,7 +1213,7 @@ void bcNaturalManage( VectorType& b,
                         }
                 }
             bRepeated.GlobalAssemble();
-            ASSERT( b.getMaptype() == Unique , "here b should passed as repeated, otherwise not sure of what happens at the cpu interfaces ." );
+            ASSERT( b.getMaptype() != Unique , "here b should passed as repeated, otherwise not sure of what happens at the cpu interfaces ." );
             //  b=bRepeated;
             b+= bRepeated;
         }
