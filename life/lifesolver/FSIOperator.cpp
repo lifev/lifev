@@ -449,9 +449,9 @@ FSIOperator::setup()
     M_epetraWorldComm->Barrier();
 
     leaderPrint(" done.\n");
-    M_dofStructureToHarmonicExtension->showMe(true, std::cout);
-    M_dofHarmonicExtensionToFluid->showMe(true, std::cout);
-    M_dofFluidToStructure->showMe(true, std::cout);
+//     M_dofStructureToHarmonicExtension->showMe(true, std::cout);
+//     M_dofHarmonicExtensionToFluid->showMe(true, std::cout);
+//     M_dofFluidToStructure->showMe(true, std::cout);
     //    M_dofStructureToReducedFluid->setup(uFESpace.refFE(), M_fluid->pressFESpace().dof(),
 //                                             dFESpace.refFE(), dFESpace.dof());
 //         M_dofStructureToReducedFluid->update(fluidMesh, 1,
