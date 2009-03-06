@@ -2562,7 +2562,7 @@ namespace LifeV
             }
 
 
-        std::cout << n << " faces "
+        std::cout << n << " faces ";
         ASSERT_POS( n == M_numFaces , "#Faces found inconsistent with that stored in RegionMesh" ) ;
         setLinkSwitch( "HAS_VOLUME_TO_FACES" );
         if ( cf )
