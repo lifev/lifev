@@ -568,7 +568,7 @@ buildSystem()
     UInt totalDof = M_FESpace.dof().numTotalDof();
 
     if (M_verbose)
-        std::cout << "S-  Building the system                       ... ";
+        std::cout << "S-  Building the system             ... ";
 
     Chrono chrono;
     chrono.start();
@@ -634,7 +634,7 @@ buildSystem()
     chrono.stop();
 
     if (M_verbose)
-        std::cout << " solid done in " << chrono.diff() << " s." << std::endl;
+        std::cout << " done in " << chrono.diff() << " s." << std::endl;
 
 
 }
@@ -700,7 +700,7 @@ updateSystem( vector_type & rhsFluidCoupling )
     M_rhsW  = coef*M_dispSolid;
     M_rhsW += M_vel;
 
-    if (M_verbose) std::cout << std::endl;
+    //    if (M_verbose) std::cout << std::endl;
 
 //     std::cout << "rhsWithoutBC norm = " << M_rhsNoBC.NormInf() << std::endl;
 //     std::cout << "M_rhsW norm       = " << M_rhsW.NormInf() << std::endl;
@@ -748,7 +748,7 @@ updateSystem( )
     M_rhsW  = coef*M_disp;
     M_rhsW += M_vel;
 
-    if (M_verbose) std::cout << std::endl;
+    //    if (M_verbose) std::cout << std::endl;
 
 //     std::cout << "rhsWithoutBC norm = " << M_rhsNoBC.NormInf() << std::endl;
 //     std::cout << "M_rhsW norm       = " << M_rhsW.NormInf() << std::endl;

@@ -357,7 +357,14 @@ template <typename Mesh, typename SolverType>
 void
 HarmonicExtensionSolver<Mesh, SolverType>::updateSystem()
 {
+    if (M_verbose)
+        std::cout << "  HE- Updating the system      ... " << std::flush;
+
     M_dispOld = M_disp;
+
+    if (M_verbose)
+        std::cout << "  ok." << std::flush;
+
 }
 
 
@@ -366,14 +373,16 @@ void
 HarmonicExtensionSolver<Mesh, SolverType>::iterate()
 {
     if (M_verbose)
-        std::cout << "  HE- Updating boundary conditions ... " << std::flush;
+        std::cout << "  HE- Updating boundary conditions : " << std::flush;
 
     if (  ! M_BCh->bdUpdateDone() )
     {
         // BC boundary information update
+        if (M_verbose) std::cout << "\n      - Updating the BC " << std::flush;
         M_BCh->bdUpdate( *M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
+        if (M_verbose) std::cout << "\n      - Filling the matrix " ;
         bcManageMatrix( *M_matrHE, *M_FESpace.mesh(), M_FESpace.dof(), *M_BCh, M_FESpace.feBd(), 1.0, 0. );
-
+        if (M_verbose) std::cout << "\n" << std::flush;
     }
 
     Chrono chrono;
@@ -382,8 +391,10 @@ HarmonicExtensionSolver<Mesh, SolverType>::iterate()
     // Initializations
     M_f    *= 0.;
 
-    bcManageVector(M_f, *M_FESpace.mesh(), M_FESpace.dof(), *M_BCh, M_FESpace.feBd(), 0., 1.0 );
-
+    if (M_verbose) std::cout << "\n  HE- Filling the rhs " << std::flush;
+    //    bcManageVector(M_f, *M_FESpace.mesh(), M_FESpace.dof(), *M_BCh, M_FESpace.feBd(), 0., 1.0 );
+    bcManageVector(M_f, M_FESpace, *M_BCh, 0., 1.0 );
+    if (M_verbose) std::cout << "\n" << std::flush;
 
     if ( !M_reusePrec || M_resetPrec || !M_prec->set() )
     {
@@ -402,7 +413,7 @@ HarmonicExtensionSolver<Mesh, SolverType>::iterate()
         if (M_verbose)
         {
             std::cout << "done in " << chrono.diff() << " s.\n";
-            std::cout << "  f-       Estimated condition number = " << condest << "\n" <<  std::flush;
+            std::cout << "  HE-       Estimated condition number = " << condest << "\n" <<  std::flush;
         }
 
 
@@ -410,7 +421,7 @@ HarmonicExtensionSolver<Mesh, SolverType>::iterate()
     else
     {
         if (M_verbose)
-            std::cout << "  f-  Reusing  precond ...                \n" <<  std::flush;
+            std::cout << "  HE-  Reusing  precond ...                \n" <<  std::flush;
     }
 
 

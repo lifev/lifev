@@ -129,7 +129,8 @@ void exactJacobian::eval(const vector_type& _disp,
     Chrono chronoFluid, chronoSolid, chronoInterface;
 
     bool recomputeMatrices ( iter == 0 || ( !this->M_dataFluid->isSemiImplicit() &&
-                                            ( M_updateEvery > 0 && (iter % M_updateEvery == 0) ) ) );
+                                            ( M_updateEvery > 0 &&
+                                              (iter % M_updateEvery == 0) ) ) );
 
     if(iter == 0)
         {
@@ -230,15 +231,23 @@ void exactJacobian::eval(const vector_type& _disp,
     if (this->isSolid())
     {
         this->M_solid->iterate( *M_BCh_d );
-        this->transferSolidOnInterface(this->M_solid->disp(),     lambdaSolidUnique);
-        this->transferSolidOnInterface(this->M_solid->vel(),      lambdaDotSolidUnique);
-        this->transferSolidOnInterface(this->M_solid->residual(), sigmaSolidUnique);
+//         this->transferSolidOnInterface(this->M_solid->disp(),     lambdaSolidUnique);
+//         this->transferSolidOnInterface(this->M_solid->vel(),      lambdaDotSolidUnique);
+//         this->transferSolidOnInterface(this->M_solid->residual(), sigmaSolidUnique);
     }
 
     M_epetraWorldComm->Barrier();
     chronoSolid.stop();
     this->leaderPrintMax( "Solid solution: total time : " , chronoSolid.diff() );
+
     chronoInterface.start();
+
+    if (this->isSolid())
+        {
+            this->transferSolidOnInterface(this->M_solid->disp(),     lambdaSolidUnique);
+            this->transferSolidOnInterface(this->M_solid->vel(),      lambdaDotSolidUnique);
+            this->transferSolidOnInterface(this->M_solid->residual(), sigmaSolidUnique);
+        }
 
     this->setLambdaSolid(    lambdaSolidUnique);
     this->setLambdaDotSolid( lambdaDotSolidUnique);
@@ -269,6 +278,7 @@ void exactJacobian::eval(const vector_type& _disp,
             this->leaderPrint( "NL2 DiplacementS     = " , M_solid->disp().Norm2() );
             this->leaderPrint( "Max ResidualS        = " , M_solid->residual().NormInf() );
         }
+
 }
 
 void exactJacobian::evalResidual(vector_type&       res,
@@ -305,6 +315,7 @@ void  exactJacobian::solveJac(vector_type         &_muk,
                               const vector_type   &_res,
                               const double         _linearRelTol)
 {
+    if (this->isFluid()) M_fluid->reusePrec();
     if (this->isFluid() && this->isLeader()) std::cout << "  f- ";
     if (this->isSolid() && this->isLeader()) std::cout << "  s- ";
 
@@ -435,7 +446,7 @@ int Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epetra_MultiVector 
                 if(true || ( !this->M_ej->dataFluid().isSemiImplicit() /*|| this->M_ej->dataFluid().semiImplicit()==-1*/))
                     {
                         M_ej->meshMotion().iterate();
-                        std::cout<<" mesh motion iterated!!!"<<std::endl;
+                        //std::cout<<" mesh motion iterated!!!"<<std::endl;
                     }
 
                 M_ej->leaderPrint( " norm inf dx = " , M_ej->meshMotion().disp().NormInf() );

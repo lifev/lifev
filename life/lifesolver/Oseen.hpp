@@ -26,6 +26,8 @@
 #ifndef _OSEEN_H_
 #define _OSEEN_H_
 
+
+
 #include <life/lifearray/elemMat.hpp>
 #include <life/lifearray/elemVec.hpp>
 #include <life/lifefem/elemOper.hpp>
@@ -216,6 +218,13 @@ public:
 
     //! Postprocessing
     void postProcess(bool _writeMesh = false);
+
+//     // Precond reset
+//     void resetPrec() {M_resetPrec = true; M_resetStab = true;}
+//     void reusePrec()
+//     {
+//         M_resetPrec = !M_reusePrec;
+//     }
 
     void resetPrec(bool reset = true) {M_resetPrec = reset; M_resetStab = reset;}
     // as for now resetting stabilization matrix at the same time as the preconditioner
@@ -662,7 +671,7 @@ void Oseen<Mesh, SolverType>::buildSystem()
 
 //    M_comm->Barrier();
 
-    leaderPrint("  f-  Computing constant matrices ...        ");
+    leaderPrint("  f-  Computing constant matrices ...          ");
 
     Chrono chrono;
 
@@ -837,7 +846,7 @@ void Oseen<Mesh, SolverType>::buildSystem()
     leaderPrintMax( "done in " , chrono.diff());
 
 
-    leaderPrint( "  f-  Finalizing the matrices     ...        ");
+    leaderPrint( "  f-  Finalizing the matrices ...              ");
     chrono.start();
 
     M_matrStokes->GlobalAssemble();
@@ -1178,6 +1187,7 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
     M_residual  = M_rhsNoBC;
     M_residual -= *M_matrNoBC*M_sol;
 
+    //M_residual.spy("residual");
 } // iterate()
 
 
@@ -1217,7 +1227,7 @@ void Oseen<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
 
         chrono.stop();
         leaderPrintMax( "done in " , chrono.diff() );
-	leaderPrint("  f-       Estimated condition number = " , condest );
+        leaderPrint("  f-       Estimated condition number = " , condest );
 
     }
     else
@@ -1228,7 +1238,22 @@ void Oseen<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
 
     leaderPrint("  f-  Solving system ...                                ");
 
+//     matrFull->spy("matrFull");
+//     rhsFull.spy("rhsFull");
+
     int numIter = linearSolver.solve(sol, rhsFull);
+
+    chrono.stop();
+    double time = chrono.diff();
+
+    double status[AZ_STATUS_SIZE];
+
+    if (M_me == 0)
+        {
+            linearSolver.getAztecStatus( status );
+            linearSolver.printStatus("  f- ", status, time, std::cout);
+        }
+
 
     if (numIter >= M_maxIterSolver)
     {
@@ -1254,9 +1279,6 @@ void Oseen<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
             std::cout << "  f- ERROR: Iterative solver failed again.\n" <<  std::flush;
 
         M_resetStab = true;
-
-
-
     }
 
     if (numIter >= M_maxIterForReuse)
