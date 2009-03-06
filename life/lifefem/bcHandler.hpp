@@ -33,6 +33,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #define __BCHandler_H 1
 
 #include <life/lifefem/bcCond.hpp>
+//#include <life/lifefem/FESpace.hpp>
 
 namespace LifeV
 {
@@ -400,11 +401,11 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
     typedef typename Mesh::VolumeShape GeoShape;
 
     // Some useful local variables, to save some typing
-    UInt nDofpV = dof.fe.nbDofPerVertex; // number of Dof per vertices
-    UInt nDofpE = dof.fe.nbDofPerEdge;   // number of Dof per edges
-    UInt nDofpF = dof.fe.nbDofPerFace;   // number of Dof per faces
+    UInt nDofPerVert = dof.fe.nbDofPerVertex; // number of Dof per vertices
+    UInt nDofPerEdge = dof.fe.nbDofPerEdge;   // number of Dof per edges
+    UInt nDofPerFace = dof.fe.nbDofPerFace;   // number of Dof per faces
 
-    UInt bdnF = mesh.numBFaces();    // number of faces on boundary
+    UInt numBFaces = mesh.numBFaces();    // number of faces on boundary
 
     EntityFlag marker; //will store the marker of each geometric entity
 
@@ -416,13 +417,13 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
     UInt nElemV = GeoShape::numVertices; // Number of element's vertices
     UInt nElemE = GeoShape::numEdges;    // Number of element's edges
 
-    UInt nDofFV = nDofpV * nFaceV; // number of vertex's Dof on a face
-    UInt nDofFE = nDofpE * nFaceE; // number of edge's Dof on a face
+    UInt nDofFV = nDofPerVert * nFaceV; // number of vertex's Dof on a face
+    UInt nDofFE = nDofPerEdge * nFaceE; // number of edge's Dof on a face
 
-    UInt nDofF = nDofFV + nDofFE + nDofpF; // number of total Dof on a face
+    UInt nDofF = nDofFV + nDofFE + nDofPerFace; // number of total Dof on a face
 
-    UInt nDofElemV = nElemV * nDofpV; // number of vertex's Dof on a Element
-    UInt nDofElemE = nElemE * nDofpE; // number of edge's Dof on a Element
+    UInt nDofElemV = nElemV * nDofPerVert; // number of vertex's Dof on a Element
+    UInt nDofElemE = nElemE * nDofPerEdge; // number of edge's Dof on a Element
 
     SimpleVect<ID> bdltg( nDofF );
     typedef std::vector<BCBase>::iterator Iterator;
@@ -438,24 +439,24 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
     // ===================================================
     // Loop on boundary faces
     // ===================================================
-    for ( ID ibF = 1 ; ibF <= bdnF; ++ibF )
+    for ( ID iBoundaryFace = 1 ; iBoundaryFace <= numBFaces; ++iBoundaryFace )
     {
 
-        iElAd = mesh.boundaryFace( ibF ).ad_first();  // id of the element adjacent to the face
-        iFaEl = mesh.boundaryFace( ibF ).pos_first(); // local id of the face in its adjacent element
-        feBd.updateMeas( mesh.boundaryFace( ibF ) );  // updating finite element information
+        iElAd = mesh.boundaryFace( iBoundaryFace ).ad_first();  // id of the element adjacent to the face
+        iFaEl = mesh.boundaryFace( iBoundaryFace ).pos_first(); // local id of the face in its adjacent element
+        feBd.updateMeas( mesh.boundaryFace( iBoundaryFace ) );  // updating finite element information
 
         // ===================================================
         // Vertex based Dof
         // ===================================================
-        if ( nDofpV )
+        if ( nDofPerVert )
         {
 
             // loop on face vertices
             for ( ID iVeFa = 1; iVeFa <= nFaceV; ++iVeFa )
             {
 
-                marker = mesh.boundaryFace( ibF ).point( iVeFa ).marker(); // vertex marker
+                marker = mesh.boundaryFace( iBoundaryFace ).point( iVeFa ).marker(); // vertex marker
                 iVeEl = GeoShape::fToP( iFaEl, iVeFa ); // local vertex number (in element)
 
                 // Finding this marker on the BC list
@@ -472,11 +473,11 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                 }
 
                 // Loop number of Dof per vertex
-                for ( ID l = 1; l <= nDofpV; ++l )
+                for ( ID l = 1; l <= nDofPerVert; ++l )
                 {
 
-                    lDof = ( iVeFa - 1 ) * nDofpV + l ; // local Dof
-                    gDof = dof.localToGlobal( iElAd, ( iVeEl - 1 ) * nDofpV + l ); // global Dof
+                    lDof = ( iVeFa - 1 ) * nDofPerVert + l ; // local Dof
+                    gDof = dof.localToGlobal( iElAd, ( iVeEl - 1 ) * nDofPerVert + l ); // global Dof
                     bdltg( lDof ) = gDof; // local to global on this face
 
                     // Adding identifier
@@ -536,14 +537,14 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
         // ===================================================
         // Edge based Dof
         // ===================================================
-        if ( nDofpE )
+        if ( nDofPerEdge )
         {
 
             // loop on face edges
-            for ( ID iEdFa = 1; iEdFa <= nFaceE; ++iEdFa )
+            for ( ID iLocalFace = 1; iLocalFace <= nFaceE; ++iLocalFace )
             {
 
-                iEdEl = GeoShape::fToE( iFaEl, iEdFa ).first; // local edge number (in element)
+                iEdEl = GeoShape::fToE( iFaEl, iLocalFace ).first; // local edge number (in element)
                 marker = mesh.boundaryEdge( mesh.localEdgeId( iElAd, iEdEl ) ).marker(); // edge marker
 
                 // Finding this marker on the BC list
@@ -560,11 +561,11 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                 }
 
                 // Loop number of Dof per edge
-                for ( ID l = 1; l <= nDofpE; ++l )
+                for ( ID l = 1; l <= nDofPerEdge; ++l )
                 {
 
-                    lDof = nDofFV + ( iEdFa - 1 ) * nDofpE + l ; // local Dof
-                    gDof = dof.localToGlobal( iElAd, nDofElemV + ( iEdEl - 1 ) * nDofpE + l ); // global Dof
+                    lDof = nDofFV + ( iLocalFace - 1 ) * nDofPerEdge + l ; // local Dof
+                    gDof = dof.localToGlobal( iElAd, nDofElemV + ( iEdEl - 1 ) * nDofPerEdge + l ); // global Dof
                     bdltg( lDof ) = gDof; // local to global on this face
 
                     // Adding identifier
@@ -625,7 +626,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
         // ===================================================
         // Face based Dof
         // ===================================================
-        marker = mesh.boundaryFace( ibF ).marker(); // edge marker
+        marker = mesh.boundaryFace( iBoundaryFace ).marker(); // edge marker
 
         // Finding this marker on the BC list
         whereList.clear();
@@ -648,10 +649,10 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
             {
                 case Essential:
                     // Loop on number of Dof per face
-                    for ( ID l = 1; l <= nDofpF; ++l )
+                    for ( ID l = 1; l <= nDofPerFace; ++l )
                     {
                         lDof = nDofFE + nDofFV + l; // local Dof
-                        gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iFaEl - 1 ) * nDofpF + l ); // global Dof
+                        gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iFaEl - 1 ) * nDofPerFace + l ); // global Dof
                         // Why kind of data ?
                         if ( where->dataVector() )
                         { // With data vector
@@ -674,23 +675,23 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                         if ( type == 0 )
                         {
                             // if the BC is a vector which values don't need to be integrated
-                            for ( ID l = 1; l <= nDofpF; ++l )
+                            for ( ID l = 1; l <= nDofPerFace; ++l )
                             {
                                 lDof = nDofFE + nDofFV + l; // local Dof
-                                gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iFaEl - 1 ) * nDofpF + l ); // global Dof
+                                gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iFaEl - 1 ) * nDofPerFace + l ); // global Dof
                                 where->addIdentifier( new IdentifierNatural( gDof ) );
                             }
                         }
                         else if ( (type == 1) || (type == 2) )
                         {
                             // Loop on number of Dof per face
-                            for ( ID l = 1; l <= nDofpF; ++l )
+                            for ( ID l = 1; l <= nDofPerFace; ++l )
                             {
                                 lDof = nDofFE + nDofFV + l; // local Dof
-                                gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iFaEl - 1 ) * nDofpF + l ); // global Dof
+                                gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iFaEl - 1 ) * nDofPerFace + l ); // global Dof
                                 bdltg( lDof ) = gDof; // local to global on this face
                             }
-                            where->addIdentifier( new IdentifierNatural( ibF, bdltg ) );
+                            where->addIdentifier( new IdentifierNatural( iBoundaryFace, bdltg ) );
                         }
 
                         else
@@ -700,34 +701,34 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                     else
                     {
                         // Loop on number of Dof per face
-                        for ( ID l = 1; l <= nDofpF; ++l )
+                        for ( ID l = 1; l <= nDofPerFace; ++l )
                         {
                             lDof = nDofFE + nDofFV + l; // local Dof
-                            gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iFaEl - 1 ) * nDofpF + l ); // global Dof
+                            gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iFaEl - 1 ) * nDofPerFace + l ); // global Dof
                             bdltg( lDof ) = gDof; // local to global on this face
                         }
-                        where->addIdentifier( new IdentifierNatural( ibF, bdltg ) );
+                        where->addIdentifier( new IdentifierNatural( iBoundaryFace, bdltg ) );
                     }
                     break;
                 case Mixte:
                     // Why kind of data ?
                     // vincent please check again for your Mixte-FE it doesn't work for Q1
                     // if ( where->dataVector()  ) { // With data vector
-                    //   for (ID l=1; l<=nDofpF; ++l) {
+                    //   for (ID l=1; l<=nDofPerFace; ++l) {
                     //     lDof = nDofFE + nDofFV + l; // local Dof
-                    //     gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + (iFaEl-1)*nDofpF + l); // global Dof
+                    //     gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + (iFaEl-1)*nDofPerFace + l); // global Dof
                     //     where->addIdentifier( new IdentifierNatural(gDof) );
                     //   }
                     // }
                     // else {
                     // Loop on number of Dof per face
-                    for ( ID l = 1; l <= nDofpF; ++l )
+                    for ( ID l = 1; l <= nDofPerFace; ++l )
                     {
                         lDof = nDofFE + nDofFV + l; // local Dof
-                        gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iFaEl - 1 ) * nDofpF + l ); // global Dof
+                        gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iFaEl - 1 ) * nDofPerFace + l ); // global Dof
                         bdltg( lDof ) = gDof; // local to global on this face
                     }
-                    where->addIdentifier( new IdentifierNatural( ibF, bdltg ) );
+                    where->addIdentifier( new IdentifierNatural( iBoundaryFace, bdltg ) );
                     // }
                     break;
                 default:
@@ -773,6 +774,9 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
 
     M_bdUpdateDone = true;
 } // bdUpdate
+
+
+
 
 } // namespace LifeV
 
