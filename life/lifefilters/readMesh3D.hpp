@@ -371,8 +371,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
                    std::string const & filename,
                    EntityFlag regionFlag,
                    bool verbose=false,
-                   InternalEntitySelector
-                   iSelect=InternalEntitySelector()
+                   InternalEntitySelector iSelect=InternalEntitySelector()
                    )
 {
     unsigned done = 0;
@@ -468,16 +467,16 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
             ERROR_MSG( "Current version of INRIA Mesh file reader only accepts TETRA and HEXA" );
     }
 
-    std::cout << "#Vertices = "          << std::setw(10) << nVe
+    oStr << "#Vertices = "          << std::setw(10) << nVe
               << "  #BVertices       = " << std::setw(10) << nBVe << std::endl;
-    std::cout << "#Faces    = "          << std::setw(10) << nFa
+    oStr << "#Faces    = "          << std::setw(10) << nFa
               << "  #Boundary Faces  = " << std::setw(10) << nBFa << std::endl
               << "#Stored Faces = " << std::setw(10) << numStoredFaces<< std::endl;
-    std::cout << "#Edges    = "          << std::setw(10) << nEd
+    oStr << "#Edges    = "          << std::setw(10) << nEd
               << "  #Boundary Edges  = " << std::setw(10) << nBEd << std::endl;
-    std::cout << "#Points   = "          << std::setw(10) << nPo
+    oStr << "#Points   = "          << std::setw(10) << nPo
               << "  #Boundary Points = " << std::setw(10) << nBPo << std::endl;
-    std::cout << "#Volumes  = "          << std::setw(10) << nVo  << std::endl;
+    oStr << "#Volumes  = "          << std::setw(10) << nVo  << std::endl;
 
     // Set all basic data structure
 
