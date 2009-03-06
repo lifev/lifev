@@ -221,10 +221,10 @@ public:
 
 //     // Precond reset
 //     void resetPrec() {M_resetPrec = true; M_resetStab = true;}
-//     void reusePrec()
-//     {
-//         M_resetPrec = !M_reusePrec;
-//     }
+    void reusePrec()
+    {
+        M_resetPrec = !M_reusePrec;
+    }
 
     void resetPrec(bool reset = true) {M_resetPrec = reset; M_resetStab = reset;}
     // as for now resetting stabilization matrix at the same time as the preconditioner
