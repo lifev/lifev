@@ -121,15 +121,8 @@ DataMesh( const GetPot& dfile, const std::string& section ):
     else
         ERROR_MSG( "Sorry, this mesh file can not be loaded" );
 
-    if ( M_mesh_edges == "all" )
-        M_mesh->updateElementEdges(true);
-    else
-        M_mesh->updateElementEdges();
-    if ( M_mesh_faces == "all" )
-        M_mesh->updateElementFaces(true);
-    else
-        M_mesh->updateElementFaces();
-
+    M_mesh->updateElementEdges(true);
+    M_mesh->updateElementFaces(true);
 }
 
 
