@@ -612,6 +612,9 @@ namespace LifeV
       sol_avg_scatter[ic] = 0.; sol_avg[ic] = 0.; sol_face[ic] = 0.;
     }
 
+    // The total area of the considered faces
+    Real area_scatter(0.), area;
+
     // I need the global Dof ID to query the Oseen solution vector
     // idLocalDof is the id of the dof in the data structure of PostProc class
     // idGlobalDof is the corresponding ID in the GLOBAL mesh (prior to partitioning)
@@ -633,13 +636,12 @@ namespace LifeV
       // Updating quadrature data on the current face
       _feBd[feSpace]->updateMeasNormalQuadPt(_mesh->bElement(*j));
 
-      // Quadrature formula
-      // Loop on quadrature points
-      for(int iq=0; iq< _feBd[feSpace]->nbQuadPt; ++iq) {
+      // Loop on components
+      for (UInt ic =0; ic<nDim; ++ic) {
 
-        // Dot product
-        // Loop on components
-        for (UInt ic =0; ic<nDim; ++ic) {
+        // Quadrature formula
+        // Loop on quadrature points
+        for(int iq=0; iq< _feBd[feSpace]->nbQuadPt; ++iq) {
 
           // Interpolation
           // Loop on local dof
@@ -649,25 +651,30 @@ namespace LifeV
             idLocalDof = _bdLtoG[feSpace][ ( UInt ) *j - 1 ][ idofF - 1 ];
             idGlobalDof = _fBdToIn[feSpace][idLocalDof-1]; // this is in the GLOBAL mesh
 
+            // basic policy for type V: operator[] available
             sol_localDof[idofF-1] = sol[ic*_M_nTotalDof[feSpace]+idGlobalDof];
 
             sol_face[ic] += _feBd[feSpace]->weightMeas(iq)
             * sol_localDof[idofF-1] * _feBd[feSpace]->phi(int(idofF-1),iq);
           }
         }
+        // Computing the sol integral over the boundary faces
+        sol_avg_scatter[ic] += sol_face[ic];
       }
-      // Normalization of the averaged value with the face area
 
-      // basic policy for type V: operator[] available
-      for( UInt ic=0; ic < nDim; ++ic )
-        sol_avg_scatter[ic] += sol_face[ic] / _feBd[feSpace]->measure();
+      // Computing the area
+      area_scatter += _feBd[feSpace]->measure();
     }
 
-    // Reducing per-processor values
-    for( UInt ic=0; ic < nDim; ++ic )
-      _epetraMap->Comm().SumAll( &sol_avg_scatter[ic], &sol_avg[ic], 1 );
+    _epetraMap->Comm().SumAll( &area_scatter, &area, 1 );
 
-    return sol_avg;
+    // Reducing per-processor values
+    for( UInt ic=0; ic < nDim; ++ic ) {
+//      sol_avg_scatter[ic] /= area;
+      _epetraMap->Comm().SumAll( &sol_avg_scatter[ic], &sol_avg[ic], 1 );
+    }
+
+    return sol_avg / area;
   }
 
 
