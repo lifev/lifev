@@ -6,28 +6,27 @@
 [exporter]
 multimesh  = false
 start      = 0
-save       = 1
+save       = 5
 
 [fluid]
 
 [./physics]
 endtime         = 2.0
 density         = 1.0       
-viscosity       = 0.005 
+viscosity       = 0.005 #0.005 
 
 
 [../discretization]
 mesh_dir        = ./Mesh/
-#mesh_file       = tube20.mesh		# "big file"
-#mesh_file       = cyl3D-2.mesh         # "big file"
-mesh_file       = cyl3D.2.2.00.mesh
-#mesh_file       = cyl2D.mesh           # "reasonable file"
+#mesh_file       = cyl3D-2.mesh         # approx. 140,000 tets
+mesh_file       = cyl3D.2.2.00.mesh	# approx. 29,000 tets
 
 mesh_type       = .mesh
 
 mesh_faces      = all                   # update all faces elements
 mesh_edges      = all                   # update all faces elements
-timestep        = 0.05                  # timestep
+timestep        = 0.035                 # timestep, e.g. 0.05 for implicit stabilization
+                                        #            and 0.035 for explicit stabilization
 verbose         = 0                     # verbose during mesh-reading
 linearized      = 0
 diagonalize     = 0		# weight, 0=off
@@ -56,10 +55,16 @@ overlap         = 2
 fill            = 4
 relax_value     = 1
 
+[../stabilization]
+stabtype	= ip_stab_expl	# sd_stab, ip_stab_impl, or ip_stab_expl
 
 [../sdstab]
-gammaBeta = 0.02
-gammaDiv  = 0.2
+gammaBeta	= 0.02		# 0.02 
+gammaDiv 	= 0.2 		# 0.2
+
+[../ipstab]
+gammaBeta	= 0.01 		# eg 0.02 for implicit and 0.01 for explicit
+gammaDiv	= 0.00 		# 0.2, not used in explicit
 
 [../miscellaneous]
 steady		= 0
