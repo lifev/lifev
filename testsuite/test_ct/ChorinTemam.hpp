@@ -19,7 +19,7 @@
 
 /*! 
  * \file ChorinTemam.hpp
- * \desc Chorim-Temam methods including pressure-correction schemes.
+ * \desc Chorin-Temam methods including pressure-correction schemes.
  * \see An Overview of projection methods for incompressible flows, Guermond & al, 
  *      Inter. J. Numer. Methods Eng.
  */
@@ -52,6 +52,7 @@
 #include <life/lifefem/bdf_template.hpp>
 
 #include <sdStabilization.hpp>
+#include <ipStabilization.hpp>
 #include <elemOperCT.hpp>
 
 namespace LifeV
@@ -83,6 +84,7 @@ public:
 
     typedef typename SolverType::prec_raw_type    prec_raw_type;
     typedef typename SolverType::prec_type        prec_type;
+    typedef enum {SD_STAB, IP_STAB_EXPL, IP_STAB_IMPL}   stab_type;
 
     //! Constructor 
     /*!
@@ -290,9 +292,14 @@ protected:
 
     bool                           M_steady;
 
-    //! SD Stabilization
+    //! Stabilization
     bool                           M_stab;
-    SDStabilization<Mesh, Dof>     M_sdStab;
+    stab_type                      M_stabType;
+    //! SD Stabilization
+    boost::shared_ptr< SDStabilization<Mesh, Dof> >     M_sdStab;
+    //! IP Stabilization
+    boost::shared_ptr< IPStabilization<Mesh, Dof> >     M_ipStab;
+    //! SD and/or IP stabilization parameters
     Real                           M_gammaBeta;
     Real                           M_gammaDiv;
 
@@ -415,6 +422,8 @@ ChorinTemam( const data_type&          dataType,
     M_residual_u             ( M_localMap_u ),
     M_residual_p 	     ( M_localMap_p ), 
     M_stab                   ( false ),
+    M_stabType               ( ),
+/*    
     M_sdStab                 ( M_uFESpace.mesh(), 
                                M_uFESpace.dof(),
                                M_uFESpace.refFE(),
@@ -422,6 +431,9 @@ ChorinTemam( const data_type&          dataType,
                                0., 0., 
                                M_data.viscosity()
                              ),
+*/
+    M_sdStab                 ( ),
+    M_ipStab                 ( ),
     M_betaFct                ( 0 ),
     M_count                  ( 0 ),
     M_verbose                ( M_me == 0),
@@ -448,7 +460,7 @@ ChorinTemam( const data_type&          dataType,
     M_resVal                 ( 0 ),
     M_resFlag                ( 0 )
 {
-    M_stab = (&M_uFESpace.refFE() == &M_pFESpace.refFE());
+     M_stab = (&M_uFESpace.refFE() == &M_pFESpace.refFE()); 
 }
 
 template<typename Mesh, typename SolverType>
@@ -462,8 +474,8 @@ template<typename Mesh, typename SolverType>
 void ChorinTemam<Mesh, SolverType>::setUp( const GetPot& dataFile )
 {
     M_steady      = dataFile( "fluid/miscellaneous/steady",        1  );
-    M_gammaBeta   = dataFile ( "fluid/sdstab/gammaBeta", 0. );
-    M_gammaDiv    = dataFile ( "fluid/sdstab/gammaDiv", 0.);
+//    M_gammaBeta   = dataFile ( "fluid/sdstab/gammaBeta", 0. );
+//    M_gammaDiv    = dataFile ( "fluid/sdstab/gammaDiv", 0.);
     M_divBetaUv   = dataFile( "fluid/discretization/div_beta_u_v", 0  );
     M_diagonalize_u = dataFile( "fluid/discretization/diagonalizeVel",  1. );
     M_diagonalize_p = dataFile( "fluid/discretization/diagonalizePress",  1. );
@@ -479,8 +491,48 @@ void ChorinTemam<Mesh, SolverType>::setUp( const GetPot& dataFile )
     M_linearSolver_u.setDataFromGetPot( dataFile, "fluid/solver" );
     M_linearSolver_p.setDataFromGetPot( dataFile, "fluid/solver" );
 
-    M_sdStab.setGammaBeta (M_gammaBeta);
-    M_sdStab.setGammaDiv  (M_gammaDiv); 
+    // Fill stabilization arguments
+    std::string _stabType = dataFile ( "fluid/stabilization/stabtype", "sd_stab" );
+    if (_stabType == "sd_stab")
+        M_stabType = SD_STAB;
+    else if (_stabType == "ip_stab_expl")
+        M_stabType = IP_STAB_EXPL;
+    else if (_stabType == "ip_stab_impl")
+        M_stabType = IP_STAB_IMPL;
+    else {
+       std::cout << "  -ERROR : Stabilization type undefined -> Exiting ..." << std::endl;
+       exit(1);
+    }
+
+    if (M_stabType == SD_STAB) {
+        M_sdStab.reset (new SDStabilization<Mesh, Dof>( M_uFESpace.mesh(), 
+	                                                M_uFESpace.dof(),
+					                M_uFESpace.refFE(),
+					                M_uFESpace.qr(),
+					                0., 0., M_data.viscosity()) );
+	M_gammaBeta = dataFile( "fluid/sdstab/gammaBeta", 0.);
+	M_gammaDiv  = dataFile( "fluid/sdstab/gammaDiv", 0.);
+	M_sdStab->setGammaBeta(M_gammaBeta);
+	M_sdStab->setGammaDiv(M_gammaDiv);
+	if (M_verbose)
+	    std::cout << "  -f SD stabilization is set" << std::endl;
+    }
+    if (M_stabType == IP_STAB_EXPL || M_stabType == IP_STAB_IMPL) {
+        M_ipStab.reset (new IPStabilization<Mesh, Dof>( M_uFESpace.mesh(), 
+	                                                M_uFESpace.dof(),
+					                M_uFESpace.refFE(),
+							M_uFESpace.feBd(),
+					                M_uFESpace.qr(),
+					                0., 0., 0., M_data.viscosity()) );
+	M_gammaBeta = dataFile( "fluid/ipstab/gammaBeta", 0.);
+	M_gammaDiv  = dataFile( "fluid/ipstab/gammaDiv", 0.);
+	M_ipStab->setGammaBeta(M_gammaBeta);
+	M_ipStab->setGammaDiv(M_gammaDiv);
+	M_ipStab->setGammaPress(0.);
+	if (M_verbose)
+	    std::cout << "  f- IP Stabilization is set" << std::endl;
+    }
+     
 
     M_maxIterSolver_u   = dataFile( "fluid/solver/max_iter", -1);
     M_reusePrec_u       = dataFile( "fluid/prec/reuse", true);
@@ -496,7 +548,7 @@ void ChorinTemam<Mesh, SolverType>::setUp( const GetPot& dataFile )
 
     M_prec_u->setDataFromGetPot( dataFile, "fluid/prec" );
     M_prec_p->setDataFromGetPot( dataFile, "fluid/prec" );
-}
+} // setUp
 
 template<typename Mesh, typename SolverType>
 void ChorinTemam<Mesh, SolverType>::buildSystem_u_p()
@@ -787,22 +839,33 @@ void ChorinTemam<Mesh, SolverType>::updateSystem_u(vector_type& betaVec)
 
             }
 
-        }
+        } // volume for loop
 
 
         chrono.stop();
         if (M_verbose) std::cout << "done in " << chrono.diff() << " s.\n"
                                  << std::flush;
 
-    // Handles SD stabilization terms
+    // Handles  stabilization terms
     if (M_verbose)
-	std::cout << "  f-  Adding SD stabilization terms ..." << std::endl;
+	std::cout << "  f-  Adding stabilization terms ..." << std::endl;
 
-    // We must multiply betaVecRep by density before this step
-    betaVecRep *= M_data.density();
-    M_sdStab.applyCT(M_data.timestep(), *M_matrNoBC_u, betaVecRep);
-
+    
+    if (M_stabType == SD_STAB) {
+        std::cout << "  f-  Adding SD stabilization (implicit) terms" << std::endl;
+        // We must multiply betaVecRep by density before this step
+        betaVecRep *= M_data.density();
+        M_sdStab->applyCT(M_data.timestep(), *M_matrNoBC_u, betaVecRep);
+    } else if (M_stabType == IP_STAB_EXPL) {
+        std::cout << "  f-  Adding IP stabilization (explicit) terms" << std::endl;
+        M_ipStab->apply_expl(M_rhsNoBC_u, betaVecRep);
+    } else if (M_stabType == IP_STAB_IMPL) {
+        // just to compare with previous code between implicit and explicit IP stab
+        std::cout << "  f-  Adding IP stabilization (implicit) terms" << std::endl;
+	M_ipStab->apply(*M_matrNoBC_u, betaVecRep, M_verbose);
     }
+
+    } // if (normInf != 0.)
 
     M_updated = true;
 
