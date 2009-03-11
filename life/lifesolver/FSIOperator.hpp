@@ -523,6 +523,8 @@ public:
     bc_vector_interface bcvDerFluidLoadToFluid()
         {return M_bcvDerFluidLoadToFluid;}
 
+  void setStructureToFluidParametres();
+
 //     void setDerReducedFluidLoadToStructure(vector_type &dload, UInt type = 0);
 //     bc_vector_interface bcvDerReducedFluidLoadToStructure()
 //         {return M_bcvDerReducedFluidLoadToStructure;}

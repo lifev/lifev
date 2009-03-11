@@ -1470,26 +1470,25 @@ void FSIOperator::setStructureToFluid(vector_type const&velo,  UInt type)
 			       M_fluid->velFESpace().dof().numTotalDof(),
                		       M_dofHarmonicExtensionToFluid,
 			       type);
-
-    this->setAlphafCoef();
-    this->setAlphaf();
-
-        if(this->algorithm()=="RobinNeumann")
-      {
-	 if(M_Alphaf.get()==0)
-	 {
-	 this->setAlphafCoef();
-	 M_bcvStructureToFluid->setMixteCoef(M_AlphafCoef);
-	 M_bcvStructureToFluid->setBetaCoef(M_AlphafCoef);
-	 }
-	 else
-	 {
-	   M_bcvStructureToFluid->setMixteVec(this->Alphaf());
-	   M_bcvStructureToFluid->setBetaVec(this->Alphaf());
-	 }
-      }
-
 }
+
+void FSIOperator::setStructureToFluidParametres()
+{  
+  this->setAlphafCoef();
+  this->setAlphaf();
+  if(M_Alphaf.get()==0)
+    {
+      this->setAlphafCoef();
+      M_bcvStructureToFluid->setMixteCoef(M_AlphafCoef);
+      M_bcvStructureToFluid->setBetaCoef(M_AlphafCoef);
+    }
+  else
+    {
+      M_bcvStructureToFluid->setMixteVec(this->Alphaf());
+      M_bcvStructureToFluid->setBetaVec(this->Alphaf());
+    }
+}
+
 
 void FSIOperator::setStructureDispToFluid(vector_type const&disp,  UInt type)
 {
@@ -1497,23 +1496,6 @@ void FSIOperator::setStructureDispToFluid(vector_type const&disp,  UInt type)
 				   M_fluid->velFESpace().dof().numTotalDof(),
 				   M_dofStructureToFluid,
 				   type);
-
-  if(this->algorithm()=="RobinNeumann")
-    {
-      if(M_Alphaf.get()==0)
-	{
-	  this->setAlphafCoef();
-	  M_bcvStructureToFluid->setMixteCoef(M_AlphafCoef);
-	  M_bcvStructureToFluid->setBetaCoef(M_AlphafCoef);
-	}
-      else
-	{
-	  this->setAlphafCoef();
-	  this->setAlphaf();
-	  M_bcvStructureToFluid->setMixteVec(this->Alphaf());
-	  M_bcvStructureToFluid->setBetaVec(this->Alphaf());
-	}
-    }
 }
 
 

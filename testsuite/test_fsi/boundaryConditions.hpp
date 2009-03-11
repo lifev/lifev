@@ -110,7 +110,9 @@ FSIOperator::fluid_bchandler_type BCh_fluid(FSIOperator &_oper)
     if(_oper.algorithm()=="RobinNeumann")
     {
         // _oper.setAlphafbcf(alpha); // if alpha is bcFunction define in ud_function.cpp
-        _oper.setSolidLoadToStructure( _oper.minusSigmaFluidRepeated());
+
+      _oper.setSolidLoadToStructure( _oper.minusSigmaFluidRepeated());
+      _oper.setStructureToFluidParametres();
 
         BCh_fluid->addBC("Interface",   1,  Mixte, Full,
                          *_oper.bcvStructureToFluid(),  3);
