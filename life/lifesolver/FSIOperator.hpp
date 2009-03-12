@@ -523,8 +523,8 @@ public:
     bc_vector_interface bcvDerFluidLoadToFluid()
         {return M_bcvDerFluidLoadToFluid;}
 
-  void setStructureToFluidParametres();
 
+    void setStructureToFluidParametres();
 //     void setDerReducedFluidLoadToStructure(vector_type &dload, UInt type = 0);
 //     bc_vector_interface bcvDerReducedFluidLoadToStructure()
 //         {return M_bcvDerReducedFluidLoadToStructure;}
@@ -579,6 +579,7 @@ protected:
 
     void interpolateVelocity(const vector_type& _vec1,
                              vector_type& _vec2);
+
 
     void interpolateInterfaceDofs(const FESpace<mesh_type, EpetraMap>& _fespace1,
                                   const vector_type&                   _vec1,

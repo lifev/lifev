@@ -45,7 +45,7 @@ FSIOperator::setup()
     std::string uOrder = M_dataFluid->uOrder();
 
     // int me       = M_epetraComm->MyPID();
-    leaderPrint("Fluid : " + uOrder);
+    leaderPrint("velocity order = " + uOrder);
 
     if ( uOrder.compare("P2") == 0 )
     {
@@ -110,7 +110,6 @@ FSIOperator::setup()
     const QuadRule* qR_struct(0);
     const QuadRule* bdQr_struct(0);
 
-    leaderPrint("Solid : " + uOrder);
     std::string dOrder = M_dataSolid->order();
     if ( dOrder.compare("P2") == 0 )
     {
@@ -449,17 +448,16 @@ FSIOperator::setup()
     M_epetraWorldComm->Barrier();
 
     leaderPrint(" done.\n");
-//     M_dofStructureToHarmonicExtension->showMe(true, std::cout);
-//     M_dofHarmonicExtensionToFluid->showMe(true, std::cout);
-//     M_dofFluidToStructure->showMe(true, std::cout);
-    //    M_dofStructureToReducedFluid->setup(uFESpace.refFE(), M_fluid->pressFESpace().dof(),
+//    M_dofStructureToHarmonicExtension->showMe(true, std::cout);
+//    M_dofHarmonicExtensionToFluid->showMe(true, std::cout);
+//    M_dofStructureToReducedFluid->setup(uFESpace.refFE(), M_fluid->pressFESpace().dof(),
 //                                             dFESpace.refFE(), dFESpace.dof());
 //         M_dofStructureToReducedFluid->update(fluidMesh, 1,
 //                                              solidMesh, 1,
 //                                              0.0);
 
-//     M_dofReducedFluidToStructure->setup(dFESpace.refFE(), dFESpace.dof(),
-//                                         uFESpace.refFE(), uFESpace.dof());
+//         M_dofReducedFluidToStructure->setup(dFESpace.refFE(), dFESpace.dof(),
+//                                             uFESpace.refFE(), uFESpace.dof());
 //         M_dofReducedFluidToStructure->update(solidMesh, 1,
 //                                              fluidMesh, 1,
 //                                              0.0);
@@ -592,7 +590,6 @@ void
 FSIOperator::updateSystem(fluid_source_type& /*fluidSource*/, solid_source_type& /*solidSource*/)
 {
 
-    std::cout << "FSI- Updating the system ... \n";
     shiftSolution();
 
     if (this->isFluid())
@@ -625,7 +622,6 @@ FSIOperator::updateSystem(fluid_source_type& /*fluidSource*/, solid_source_type&
     {
         this->M_solid->updateSystem();
     }
-    std::cout << "FSI- system updated" << std::endl;
 
 }
 
@@ -669,6 +665,61 @@ FSIOperator::displacementOnInterface()
 
 
 
+void
+FSIOperator::transferMeshMotionOnFluid(const vector_type &_vec1,
+                                       vector_type       &_vec2)
+{
+
+    //transferMeshMotionOnFluid should handle the repetition of the interface nodes.
+    if (_vec1.getMaptype() == Unique)
+        {
+            vector_type const  vec1Repeated(_vec1, Repeated);
+            transferMeshMotionOnFluid(vec1Repeated, _vec2);
+            return;
+        }
+
+    if (_vec2.getMaptype() == Repeated)
+        {
+            vector_type  vec2Unique(_vec2, Unique);
+            transferMeshMotionOnFluid(_vec1, vec2Unique);
+            _vec2 = vec2Unique;
+            return;
+        }
+
+    _vec2 *=0;
+
+    interpolateVelocity(_vec1, _vec2);
+    return;
+
+    /*
+
+    std::map<ID, ID> const& locDofMap = M_dofFluidToStructure->locDofMap();
+
+
+    int numTotalDofMesh  = M_mmFESpace->dof().numTotalDof();
+    int numTotalDofFluid = M_uFESpace->dof().numTotalDof();
+
+    typedef std::map<ID, ID>::iterator Iterator;
+
+    for (int dim = 0; dim < (int)nDimensions; ++dim)
+        for ( Iterator it = locDofMap.begin(); it != locDofMap.end(); ++it )
+            {
+//                 std::cout << " doing: for " << it->second << " to " << it->second
+//                           << " _vec1.Map().LID(it->second + dim*numTotalDofMesh) = " << _vec1.Map().LID(it->second + dim*numTotalDofMesh)
+//                           << " _vec2.Map().LID(it->second + dim*numTotalDofFluid) = " << _vec2.Map().LID(it->second + dim*numTotalDofFluid)
+//                           << std::endl;
+
+                if (_vec1.BlockMap().LID(it->second + dim*numTotalDofMesh) >= 0 )
+                {
+                    _vec2[it->second + dim*numTotalDofFluid] = _vec1[it->second + dim*numTotalDofMesh];
+                }
+//                 else
+//                 {
+//                     std::cout << " not done: from " << it->second << " to " << it->second << std::endl;
+//                 }
+            }
+    */
+}
 
 void
 FSIOperator::interpolateVelocity(const vector_type &_vec1,
@@ -711,8 +762,8 @@ FSIOperator::interpolateVelocity(const vector_type &_vec1,
 
 
         UInt elemId = M_uFESpace->mesh()->volume( iElem ).localId();
-//         if (elemId != iElem)
-//             std::cout << " elemId = " << elemId << " iElem = " << iElem << std::endl;
+        if (elemId != iElem)
+            std::cout << " elemId = " << elemId << " iElem = " << iElem << std::endl;
 
         // Updating the local mesh velocity in this mesh elment
         for ( UInt icmp = 0; icmp < nDimensions; ++icmp )
@@ -725,28 +776,32 @@ FSIOperator::interpolateVelocity(const vector_type &_vec1,
         // Vertex based Dof
         if ( nDofpV )
         {
+
             // loop on element vertices
             for ( ID iVe = 1; iVe <= nElemV; ++iVe )
             {
+
                 // Loop number of Dof per vertex
                 for ( ID l = 1; l <= nDofpV; ++l )
                 {
                     lDof = ( iVe - 1 ) * nDofpV + l; // Local dof in this element
+
                     // Nodal coordinates
                     x = M_uFESpace->refFE().xi( lDof - 1 );
                     y = M_uFESpace->refFE().eta( lDof - 1 );
                     z = M_uFESpace->refFE().zeta( lDof - 1 );
+
                     // Loop on data vector components
                     for ( UInt icmp = 0; icmp < nDimensions; ++icmp )
                     {
+
                         // Interpolating data at the nodal point
                         double __sum = 0;
                         for ( ID idof = 0; idof < nDofElemMesh; ++idof )  // Loop on local Dof on the element
                             __sum += wLoc( icmp * nDofElemMesh + idof ) * M_mmFESpace->refFE().phi( idof, x, y, z );
-                        // Updating interpolated mesh velocity
 
+                        // Updating interpolated mesh velocity
                         int iDof = icmp * M_uFESpace->dof().numTotalDof() + M_uFESpace->dof().localToGlobal( iElem, lDof  );
-                        //                        std::cout << " transfering " << __sum << " from P1 " << + M_uFESpace->dof().localToGlobal( iElem, lDof + 1) << " to P1 " << iDof  << std::endl;
                         _vec2.checkAndSet( iDof ,__sum);
 
                     }
@@ -817,6 +872,7 @@ FSIOperator::interpolateVelocity(const vector_type &_vec1,
                         double __sum = 0;
                         for ( ID idof = 0; idof < nDofElemMesh; ++idof )  // Loop on local Dof on the adjacent element
                             __sum += wLoc( icmp * nDofElemMesh + idof ) * M_mmFESpace->refFE().phi( idof, x, y, z ); // Problem here with P2
+
                         // Updating interpolating vector
                         int iDof = icmp * M_uFESpace->dof().numTotalDof() + M_uFESpace->dof().localToGlobal( iElem, lDof + 1);
                         _vec2.checkAndSet( iDof ,__sum);
@@ -856,6 +912,8 @@ FSIOperator::interpolateVelocity(const vector_type &_vec1,
     }
 
 }
+
+
 
 
 // this will interpolate dofs values from fespace1 to fespace2
@@ -1128,73 +1186,6 @@ FSIOperator::interpolateInterfaceDofs(const FESpace<mesh_type, EpetraMap>& _fesp
 }
 
 
-void
-FSIOperator::transferMeshMotionOnFluid(const vector_type &_vec1,
-                                       vector_type       &_vec2)
-{
-
-
-    //transferMeshMotionOnFluid should handle the repetition of the interface nodes.
-    if (_vec1.getMaptype() == Unique)
-        {
-            vector_type const  vec1Repeated(_vec1, Repeated);
-            transferMeshMotionOnFluid(vec1Repeated, _vec2);
-            return;
-        }
-
-    if (_vec2.getMaptype() == Repeated)
-        {
-            vector_type  vec2Unique(_vec2, Unique);
-            transferMeshMotionOnFluid(_vec1, vec2Unique);
-            _vec2 = vec2Unique;
-            return;
-        }
-
-    _vec2 *=0;
-
-#if 0
-    leaderPrint("transferMeshMotionOnFluid - interpolateInterfaceDofs\n");
-    interpolateInterfaceDofs(*M_mmFESpace, _vec1,
-                              *M_uFESpace,  _vec2,
-                              M_dofStructureToHarmonicExtension);
-
-
-#else
-    //    leaderPrint("transferMeshMotionOnFluid - interpolate velocity\n");
-    interpolateVelocity(_vec1, _vec2);
-#endif
-
-    return;
-
-    /*
-
-    std::map<ID, ID> const& locDofMap = M_dofFluidToStructure->locDofMap();
-
-
-    int numTotalDofMesh  = M_mmFESpace->dof().numTotalDof();
-    int numTotalDofFluid = M_uFESpace->dof().numTotalDof();
-
-    typedef std::map<ID, ID>::iterator Iterator;
-
-    for (int dim = 0; dim < (int)nDimensions; ++dim)
-        for ( Iterator it = locDofMap.begin(); it != locDofMap.end(); ++it )
-            {
-//                 std::cout << " doing: for " << it->second << " to " << it->second
-//                           << " _vec1.Map().LID(it->second + dim*numTotalDofMesh) = " << _vec1.Map().LID(it->second + dim*numTotalDofMesh)
-//                           << " _vec2.Map().LID(it->second + dim*numTotalDofFluid) = " << _vec2.Map().LID(it->second + dim*numTotalDofFluid)
-//                           << std::endl;
-
-                if (_vec1.BlockMap().LID(it->second + dim*numTotalDofMesh) >= 0 )
-                {
-                    _vec2[it->second + dim*numTotalDofFluid] = _vec1[it->second + dim*numTotalDofMesh];
-                }
-//                 else
-//                 {
-//                     std::cout << " not done: from " << it->second << " to " << it->second << std::endl;
-//                 }
-            }
-    */
-}
 
 
 
@@ -1204,8 +1195,6 @@ FSIOperator::transferFluidOnInterface(const vector_type &_vec1,
 {
     // e.g.: vec1=M_fluid->residual(), vec2=M_sigmaFluid
 //     _vec2 = ZeroVector(_vec2.size());
-
-    std::cout << "transferFluidOnInterface" << std::endl;
 
     if (_vec1.getMaptype() == Unique)
         {
@@ -1224,11 +1213,6 @@ FSIOperator::transferFluidOnInterface(const vector_type &_vec1,
 
     _vec2 *= 0;
 
-#if 1
-     interpolateInterfaceDofs(*M_uFESpace, _vec1,
-                              *M_dFESpace, _vec2,
-                              M_dofStructureToHarmonicExtension);
-#else
     std::map<ID, ID> const& locDofMap = M_dofFluidToStructure->locDofMap();
 
 
@@ -1237,26 +1221,24 @@ FSIOperator::transferFluidOnInterface(const vector_type &_vec1,
 
     typedef std::map<ID, ID>::const_iterator Iterator;
 
-    for (int dim = 0; dim < (int) nDimensions; ++dim)
+    for (int dim = 0; dim < (int)nDimensions; ++dim)
         for ( Iterator it = locDofMap.begin(); it != locDofMap.end(); ++it )
             {
-                std::cout <<  it->second + dim*numTotalDofFluid << " to "
-                          <<  it->first + dim*numTotalDofSolid << " : "
-                          << _vec1[it->second + dim*numTotalDofFluid] << std::endl;
+//                 std::cout <<  it->second + dim*numTotalDofFluid << " to "
+//                           <<  it->first + dim*numTotalDofSolid << " : "
+//                           << _vec1[it->second + dim*numTotalDofFluid] << std::endl;
                 _vec2.checkAndSet( it->first + dim*numTotalDofSolid,
                                    _vec1[it->second + dim*numTotalDofFluid] );
             }
-#endif
 }
 
+//works in serial but no yet in parallel
 void
 FSIOperator::transferSolidOnFluid(const vector_type &_vec1,//not working in parallel
-                                  vector_type       &_vec2)
+                                      vector_type       &_vec2)
 {
     //    e.g.: vec2=M_fluid->residual(), vec1=M_sigmaFluid
     //     _vec2 = ZeroVector(_vec2.size());
-
-    std::cout << "transferSolidOnFluid" << std::endl;
 
     if (_vec1.getMaptype() == Unique)
         {
@@ -1275,13 +1257,6 @@ FSIOperator::transferSolidOnFluid(const vector_type &_vec1,//not working in para
 
     _vec2 *= 0;
 
-
-#if 1
-     interpolateInterfaceDofs(*M_dFESpace, _vec1,
-                              *M_uFESpace, _vec2,
-                              M_dofFluidToStructure);
-
-#else
     std::map<ID, ID> const& locDofMap = M_dofFluidToStructure->locDofMap();
 
 
@@ -1297,7 +1272,6 @@ FSIOperator::transferSolidOnFluid(const vector_type &_vec1,//not working in para
                                    _vec1[it->first + dim*numTotalDofSolid]);
             }
 
-#endif
 }
 
 void
@@ -1464,6 +1438,7 @@ void FSIOperator:: setComm     (   boost::shared_ptr<Epetra_MpiComm> comm,
 
 
 //
+
 void FSIOperator::setStructureToFluid(vector_type const&velo,  UInt type)
 {
     M_bcvStructureToFluid->setup(velo,
@@ -1472,8 +1447,9 @@ void FSIOperator::setStructureToFluid(vector_type const&velo,  UInt type)
 			       type);
 }
 
+
 void FSIOperator::setStructureToFluidParametres()
-{  
+{
   this->setAlphafCoef();
   this->setAlphaf();
   if(M_Alphaf.get()==0)
@@ -1497,6 +1473,7 @@ void FSIOperator::setStructureDispToFluid(vector_type const&disp,  UInt type)
 				   M_dofStructureToFluid,
 				   type);
 }
+
 
 
 
