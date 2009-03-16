@@ -14,12 +14,17 @@ showlog(){
 }
 trap "showlog" 1 2 3 4 5 6 7 8 9 10 11
 
-TEXINPUTS=$srcdir:$top_srcdir/doc/tex//:$TEXINPUTS BIBINPUTS=$BIBINPUTS:$srcdir:$top_srcdir/doc/tex//:$BIBINPUTS 
+export TEXINPUTS=$srcdir:$top_srcdir/doc/tex//:$TEXINPUTS 
+export BIBINPUTS=$BIBINPUTS:$srcdir:$top_srcdir/doc/tex//:$BIBINPUTS 
+
+echo $TEXINPUTS
 
 prefix=`basename $1 .tex`
 
 #ltxcmdlines="--interaction nonstopmode --file-line-error-style"
 ltxcmdlines="--interaction nonstopmode"
+
+echo $prefix
 
 pdflatex $ltxcmdlines $prefix
 bibtex $prefix
