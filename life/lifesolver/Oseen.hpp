@@ -26,36 +26,38 @@
 #ifndef _OSEEN_H_
 #define _OSEEN_H_
 
-
-
-#include <life/lifearray/elemMat.hpp>
-#include <life/lifearray/elemVec.hpp>
-#include <life/lifefem/elemOper.hpp>
-#include <life/lifefem/values.hpp>
-#include <life/lifearray/pattern.hpp>
-#include <life/lifefem/assemb.hpp>
-#include <life/lifefem/bcManage.hpp>
 #include <life/lifefilters/medit_wrtrs.hpp>
-
 
 #include <life/lifealg/SolverTrilinos.hpp>
 #include <life/lifealg/EpetraPreconditioner.hpp>
 #include <life/lifealg/IfpackPreconditioner.hpp>
 #include <life/lifealg/EpetraMap.hpp>
+
+#include <life/lifearray/elemMat.hpp>
+#include <life/lifearray/elemVec.hpp>
+#include <life/lifearray/pattern.hpp>
 #include <life/lifearray/EpetraMatrix.hpp>
 #include <life/lifearray/EpetraVector.hpp>
 //
-#include <life/lifefem/bcHandler.hpp>
 #include <life/lifecore/chrono.hpp>
+
+#include <life/lifefem/assemb.hpp>
+#include <life/lifefem/bcManage.hpp>
+#include <life/lifefem/elemOper.hpp>
+#include <life/lifefem/values.hpp>
+#include <life/lifefem/bcHandler.hpp>
 #include <life/lifefem/sobolevNorms.hpp>
 #include <life/lifefem/geoMap.hpp>
+#include <life/lifefem/postProc.hpp>
+#include <life/lifefem/FESpace.hpp>
+
 #include <life/lifesolver/nsipterms.hpp>
 #include <life/lifesolver/dataNavierStokes.hpp>
-#include <life/lifefem/postProc.hpp>
+#include <life/lifesolver/Displayer.hpp>
+
 //
 #include <boost/shared_ptr.hpp>
 
-#include "life/lifefem/FESpace.hpp"
 
 #include <list>
 
@@ -236,15 +238,10 @@ public:
 
     const Epetra_Comm& comm() const {return *M_comm;}
 
-    bool isLeader() const
-    {
-        assert( M_comm  != 0);
-        return comm().MyPID() == 0;
-    }
 
-    void leaderPrint   (string const message, double const number) const;
-    void leaderPrint   (string const message) const;
-    void leaderPrintMax(string const message, double const number) const;
+//     void leaderPrint   (string const message, double const number) const;
+//     void leaderPrint   (string const message) const;
+//     void leaderPrintMax(string const message, double const number) const;
 
 
     void recomputeMatrix(bool const recomp){M_recomputeMatrix = recomp;}
@@ -263,6 +260,7 @@ public:
     void          getFluidMatrix( matrix_type& matrFull );
     void          updateUn( )                              {*M_un = M_sol;}
     void          updateUn(const vector_type& sol )        {*M_un = sol;}// for the monolithic
+    const Displayer& getDisplayer()const{return M_Displayer;}
 
 protected:
 
@@ -270,12 +268,12 @@ protected:
     UInt dim_p() const           { return M_pFESpace.dim(); }
 
 
-    void solveSystem            (  matrix_ptrtype matrFull,
-                                   vector_type&   rhsFull,
-                                   vector_type&    sol,
-                                   SolverType&     linearSolver,
-                                   prec_type&      prec ,
-                                   bool reuse=true);
+//     void solveSystem            (  matrix_ptrtype matrFull,
+//                                    vector_type&   rhsFull,
+//                                    vector_type&    sol,
+//                                    SolverType&     linearSolver,
+//                                    prec_type&      prec ,
+//                                    bool reuse=true);
 
     void applyBoundaryConditions(  matrix_type&        matrix,
                                    vector_type&        rhs,
@@ -297,7 +295,6 @@ protected:
 
     //! MPI communicator
     Epetra_Comm*                   M_comm;
-    int                            M_me;
 
     EpetraMap                      M_localMap;
 
@@ -368,7 +365,7 @@ protected:
 
     //! boolean that indicates if output is sent to cout
 
-    bool                           M_verbose;
+    //bool                           M_verbose;
 
     //! boolean that indicates if the matrix is updated for the current iteration
 
@@ -390,6 +387,7 @@ protected:
 
     //    int                           M_monolithic;
     bool                          M_isDiagonalBlockPrec;
+    Displayer                      M_Displayer;
 
 private:
 
@@ -419,11 +417,10 @@ Oseen( const data_type&          dataType,
        FESpace<Mesh, EpetraMap>& uFESpace,
        FESpace<Mesh, EpetraMap>& pFESpace,
        Epetra_Comm&              comm ):
-    M_data               ( dataType ),
+    M_data                   ( dataType ),
     M_uFESpace               ( uFESpace ),
     M_pFESpace               ( pFESpace ),
     M_comm                   ( &comm ),
-    M_me                     ( M_comm->MyPID() ),
     M_localMap               ( M_uFESpace.map() + M_pFESpace.map() ),
     M_matrMass               ( ),
     M_matrMassPr             ( ),
@@ -449,7 +446,6 @@ Oseen( const data_type&          dataType,
                                M_data.viscosity() ),
     M_betaFct                ( 0 ),
     M_count                  ( 0 ),
-    M_verbose                ( M_me == 0),
     M_updated                ( false ),
     M_reusePrec              ( true ),
     M_maxIterForReuse        ( -1 ),
@@ -465,7 +461,8 @@ Oseen( const data_type&          dataType,
     M_blockPrec              (),
     M_wLoc                   ( M_uFESpace.fe().nbNode, nDimensions ),
     M_uLoc                   ( M_uFESpace.fe().nbNode, nDimensions ),
-    M_un                     (new vector_type(M_localMap))
+    M_un                     (new vector_type(M_localMap)),
+    M_Displayer              ( comm )
 {
     M_stab = (&M_uFESpace.refFE() == &M_pFESpace.refFE());
     //    M_prec = prec_ptr( PRECFactory::instance().createObject
@@ -479,11 +476,10 @@ Oseen( const data_type&          dataType,
        Epetra_Comm&              comm ,
        EpetraMap                 monolithicMap,
        UInt                      /*offset*/):
-    M_data               ( dataType ),
+    M_data                   ( dataType ),
     M_uFESpace               ( uFESpace ),
     M_pFESpace               ( pFESpace ),
     M_comm                   ( &comm ),
-    M_me                     ( M_comm->MyPID() ),
     M_localMap               ( monolithicMap ),
     M_matrMass               ( ),
     M_matrStokes             ( ),
@@ -509,7 +505,6 @@ Oseen( const data_type&          dataType,
                                M_data.viscosity() ),
     M_betaFct                ( 0 ),
     M_count                  ( 0 ),
-    M_verbose                ( M_me == 0),
     M_updated                ( false ),
     M_reusePrec              ( true ),
     M_maxIterForReuse        ( -1 ),
@@ -525,9 +520,11 @@ Oseen( const data_type&          dataType,
     M_blockPrec              (),
     M_wLoc                   ( M_uFESpace.fe().nbNode, nDimensions ),
     M_uLoc                   ( M_uFESpace.fe().nbNode, nDimensions ),
-    M_un                     (new vector_type(M_localMap))
+    M_un                     (new vector_type(M_localMap)),
+    M_Displayer              ( comm )
 {
     M_stab = (&M_uFESpace.refFE() == &M_pFESpace.refFE());
+    this->M_comm=&comm;
 }
 
 template<typename Mesh, typename SolverType>
@@ -541,7 +538,6 @@ Oseen( const data_type&          dataType,
     M_uFESpace               ( uFESpace ),
     M_pFESpace               ( pFESpace ),
     M_comm                   ( &comm ),
-    M_me                     ( M_comm->MyPID() ),
     M_localMap               ( M_uFESpace.map() + M_pFESpace.map() + lagrangeMultipliers ),
     M_matrMass               ( ),
     M_matrStokes             ( ),
@@ -567,7 +563,6 @@ Oseen( const data_type&          dataType,
                                M_data.viscosity() ),
     M_betaFct                ( 0 ),
     M_count                  ( 0 ),
-    M_verbose                ( M_me == 0),
     M_updated                ( false ),
     M_reusePrec              ( true ),
     M_maxIterForReuse        ( -1 ),
@@ -583,7 +578,8 @@ Oseen( const data_type&          dataType,
     M_blockPrec              (),
     M_wLoc                   ( M_uFESpace.fe().nbNode, nDimensions ),
     M_uLoc                   ( M_uFESpace.fe().nbNode, nDimensions ),
-    M_un                     (new vector_type(M_localMap))
+    M_un                     (new vector_type(M_localMap)),
+    M_Displayer              ( &comm )
 {
     M_stab = (&M_uFESpace.refFE() == &M_pFESpace.refFE());
 }
@@ -595,38 +591,6 @@ Oseen<Mesh, SolverType>::
 
 }
 
-template<typename Mesh, typename SolverType>
-void Oseen<Mesh, SolverType>::
-leaderPrint(string const message, double const number) const
-{
-
-  M_comm->Barrier();
-  if ( isLeader() )
-    std::cout << message << number << std::endl;
-
-}
-
-template<typename Mesh, typename SolverType>
-void Oseen<Mesh, SolverType>::
-leaderPrint(string const message) const
-{
-  M_comm->Barrier();
-  if ( isLeader() )
-    std::cout << message << std::flush;
-
-}
-
-template<typename Mesh, typename SolverType>
-void Oseen<Mesh, SolverType>::
-leaderPrintMax(string const message, double const number) const
-{
-  double num(number);
-  double globalMax;
-  M_comm->MaxAll(&num, &globalMax, 1);
-
-  leaderPrint( message , globalMax );
-
-}
 
 
 
@@ -643,6 +607,8 @@ void Oseen<Mesh, SolverType>::setUp( const GetPot& dataFile )
     M_isDiagonalBlockPrec = dataFile( "fluid/diagonalBlockPrec",  false );
 
     M_linearSolver.setDataFromGetPot( dataFile, "fluid/solver" );
+
+    //    M_linearSolver.setAztecooPreconditioner( dataFile, "fluid/solver" );
 
     M_ipStab.setGammaBeta (M_gammaBeta);
     M_ipStab.setGammaDiv  (M_gammaDiv);
@@ -671,7 +637,7 @@ void Oseen<Mesh, SolverType>::buildSystem()
 
 //    M_comm->Barrier();
 
-    leaderPrint("  f-  Computing constant matrices ...          ");
+    M_Displayer.leaderPrint("  f-  Computing constant matrices ...        ");
 
     Chrono chrono;
 
@@ -843,17 +809,18 @@ void Oseen<Mesh, SolverType>::buildSystem()
     M_comm->Barrier();
 
     chrono.stop();
-    leaderPrintMax( "done in " , chrono.diff());
+    M_Displayer.leaderPrintMax( "done in " , chrono.diff());
 
 
-    leaderPrint( "  f-  Finalizing the matrices ...              ");
+    M_Displayer.leaderPrint( "  f-  Finalizing the matrices     ...        ");
+
     chrono.start();
 
     M_matrStokes->GlobalAssemble();
     M_matrMass->GlobalAssemble();
 
     chrono.stop();
-    leaderPrintMax("done in " , chrono.diff() );
+    M_Displayer.leaderPrintMax("done in " , chrono.diff() );
 
     if (false)
         std::cout << "partial times:  \n"
@@ -921,7 +888,7 @@ updateSystem(double       alpha,
     M_matrMassPr.reset( );
 
 
-    leaderPrint("  f-  Updating mass term on right hand side... ");
+    M_Displayer.leaderPrint("  f-  Updating mass term on right hand side... ");
 
     chrono.start();
 
@@ -934,7 +901,7 @@ updateSystem(double       alpha,
 
     chrono.stop();
 
-    leaderPrintMax("done in ", chrono.diff());
+    M_Displayer.leaderPrintMax("done in ", chrono.diff());
 
 
     M_updated = false;
@@ -944,7 +911,7 @@ updateSystem(double       alpha,
     if (M_recomputeMatrix)
         buildSystem();
 
-    leaderPrint( "  f-  Copying the matrices ...                 ");
+    M_Displayer.leaderPrint( "  f-  Copying the matrices ...                 ");
 
     chrono.start();
 
@@ -961,7 +928,7 @@ updateSystem(double       alpha,
 
 
     chrono.stop();
-    leaderPrintMax( "done in " , chrono.diff() );
+    M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
 
 
     UInt nbCompU       = nDimensions;
@@ -973,8 +940,7 @@ updateSystem(double       alpha,
 
     if (normInf != 0.)
     {
-
-        leaderPrint("  f-  Sharing convective term ...        ");
+        M_Displayer.leaderPrint("  f-  Sharing convective term ...        ");
         chrono.start();
 
         // vector with repeated nodes over the processors
@@ -983,9 +949,9 @@ updateSystem(double       alpha,
         vector_type unRep(*M_un, Repeated);
 
         chrono.stop();
-        leaderPrintMax( "done in " , chrono.diff() );
 
-        leaderPrint("  f-  Updating the convective terms ...        ");
+        M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
+        M_Displayer.leaderPrint("  f-  Updating the convective terms ...        ");
         chrono.start();
 
         for ( UInt iVol = 1; iVol<= M_uFESpace.mesh()->numVolumes(); ++iVol )
@@ -1050,18 +1016,18 @@ updateSystem(double       alpha,
         }
 
         chrono.stop();
-        leaderPrintMax( "done in " , chrono.diff() );
+        M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
 
         if ( M_stab && (!M_reuseStab || M_resetStab || (M_matrStab.get() == 0) ) )
         {
-            leaderPrint("  f-  Updating the stabilization terms ...    ");
+            M_Displayer.leaderPrint("  f-  Updating the stabilization terms ...    ");
             chrono.start();
             M_matrStab.reset  ( new matrix_type(M_localMap) );
-            M_ipStab.apply( *M_matrStab, betaVecRep, M_verbose );
+            M_ipStab.apply( *M_matrStab, betaVecRep, false/*S_verbose*/ );
             M_resetStab = false;
             M_matrStab->GlobalAssemble();
             chrono.stop();
-            leaderPrintMax( "done in " , chrono.diff() );
+            M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
         }
 
     }
@@ -1069,22 +1035,22 @@ updateSystem(double       alpha,
         {
             if (M_stab)
                 {
-                    leaderPrint("  f-  Updating the Stabilization terms ...    ");
+                    M_Displayer.leaderPrint("  f-  Updating the Stabilization terms ...    ");
                     chrono.start();
 
                     if ( !M_reuseStab || M_resetStab || (M_matrStab.get() == 0) )
                         {
                             M_matrStab.reset  ( new matrix_type(M_localMap) );
-                            M_ipStab.apply( *M_matrStab, betaVec, M_verbose );
+                            M_ipStab.apply( *M_matrStab, betaVec, false/*S_verbose*/ );
                             M_resetStab = false;
                             M_matrStab->GlobalAssemble();
                         }
                     else
                         {
-                            leaderPrint("reusing stab. ");
+                            M_Displayer.leaderPrint("reusing stab. ");
                         }
                     chrono.stop();
-                    leaderPrintMax( "done in " , chrono.diff() );
+                    M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
                 }
         }
 
@@ -1145,8 +1111,7 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
 
 
     // matrix and vector assembling communication
-
-    leaderPrint("  f-  Finalizing the matrix and vectors ...    ");
+    M_Displayer.leaderPrint("  f-  Finalizing the matrix and vectors ...    ");
 
     chrono.start();
 
@@ -1168,21 +1133,29 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
 
     chrono.stop();
 
-    leaderPrintMax("done in ", chrono.diff() );
+    M_Displayer.leaderPrintMax("done in ", chrono.diff() );
 
     // boundary conditions update
     M_comm->Barrier();
-    leaderPrint("  f-  Applying boundary conditions ...         ");
+    M_Displayer.leaderPrint("  f-  Applying boundary conditions ...         ");
 
     chrono.start();
     applyBoundaryConditions( *matrFull, rhsFull, bch);
 
     chrono.stop();
 
-    leaderPrintMax("done in " , chrono.diff());
+        M_Displayer.leaderPrintMax("done in " , chrono.diff());
     // solving the system
 
-    solveSystem( matrFull, rhsFull, M_sol, M_linearSolver, M_prec, M_reusePrec);
+    int numIter = M_linearSolver.solveSystem( matrFull, rhsFull, M_sol, M_prec, (M_reusePrec && !M_resetPrec));
+    if (numIter < 0 )
+        {
+            //            std::cout << "  Resetting the precond ... ";
+            M_resetStab = true;
+            if(numIter <= -M_maxIterForReuse)
+                resetPrec();
+        }
+
 
     M_residual  = M_rhsNoBC;
     M_residual -= *M_matrNoBC*M_sol;
@@ -1193,115 +1166,12 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
 
 
 template<typename Mesh, typename SolverType>
-void Oseen<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
-                                           vector_type&    rhsFull,
-                                           vector_type&    sol,
-                                           SolverType&     linearSolver,
-                                           prec_type&      prec,
-                                           bool            reuse)
-{
-    Chrono chrono;
-
-    leaderPrint("  f-  Setting up the solver ...                ");
-
-    chrono.start();
-//    assert (M_matrFull.get() != 0);
-    linearSolver.setMatrix(*matrFull);
-    chrono.stop();
-
-    leaderPrintMax("done in " , chrono.diff());
-
-    // overlapping schwarz preconditioner
-
-    if ( !reuse || M_resetPrec || !prec->set() )
-    {
-        chrono.start();
-
-        leaderPrint("  f-  Computing the precond ...                ");
-
-        prec->buildPreconditioner(matrFull);
-
-        double condest = prec->Condest();
-
-        linearSolver.setPreconditioner(prec);
-
-        chrono.stop();
-        leaderPrintMax( "done in " , chrono.diff() );
-        leaderPrint("  f-       Estimated condition number = " , condest );
-
-    }
-    else
-    {
-        leaderPrint("  f-  Reusing  precond ...                \n");
-    }
-
-
-    leaderPrint("  f-  Solving system ...                                ");
-
-//     matrFull->spy("matrFull");
-//     rhsFull.spy("rhsFull");
-
-    int numIter = linearSolver.solve(sol, rhsFull);
-
-    chrono.stop();
-    double time = chrono.diff();
-
-    double status[AZ_STATUS_SIZE];
-
-    if (M_me == 0)
-        {
-            linearSolver.getAztecStatus( status );
-            linearSolver.printStatus("  f- ", status, time, std::cout);
-        }
-
-
-    if (numIter >= M_maxIterSolver)
-    {
-        chrono.start();
-
-        leaderPrint("  f- Iterative solver failed, numiter = " , numIter);
-        leaderPrint("     maxIterSolver = " , M_maxIterSolver );
-        leaderPrint("     recomputing the precond ...            ");
-
-        prec->buildPreconditioner(matrFull);
-
-        double condest = prec->Condest();
-
-        linearSolver.setPreconditioner(prec);
-
-        chrono.stop();
-        leaderPrintMax( "done in " , chrono.diff() );
-        leaderPrint("  f-       Estimated condition number = " , condest );
-
-        numIter = linearSolver.solve(sol, rhsFull);
-
-        if (numIter >= M_maxIterSolver && M_verbose)
-            std::cout << "  f- ERROR: Iterative solver failed again.\n" <<  std::flush;
-
-        M_resetStab = true;
-    }
-
-    if (numIter >= M_maxIterForReuse)
-        {
-            //            std::cout << "  Resetting the precond ... ";
-            resetPrec();
-        }
-
-//     leaderPrintMax( "done in " , chrono.diff() );
-//     leaderPrint("  f- numiter = " , numIter);
-
-    M_comm->Barrier();
-
-}
-
-
-template<typename Mesh, typename SolverType>
 void Oseen<Mesh, SolverType>::reduceSolution( Vector& u,
                                               Vector& p )
 {
     vector_type vel(M_sol, 0);
 
-    if (M_verbose)
+    if (false/*S_verbose*/)
     {
         for ( UInt iDof = 0; iDof < nDimensions*dim_u(); ++iDof )
         {
@@ -1321,7 +1191,7 @@ void Oseen<Mesh, SolverType>::reduceResidual( Vector& res )
 {
     vector_type vel(M_residual, 0);
 
-    if (M_verbose)
+    if (false/*S_verbose*/)
     {
         for ( UInt iDof = 0; iDof < nDimensions*dim_u(); ++iDof )
         {
@@ -1491,7 +1361,7 @@ Oseen<Mesh, SolverType>::postProcess(bool /*_writeMesh*/)
     std::string me;
 
 
-    indexMe << M_me;
+    indexMe << M_Displayer.comm().MyPID();
 
     switch ( indexMe.str().size() )
     {
@@ -1516,8 +1386,7 @@ Oseen<Mesh, SolverType>::postProcess(bool /*_writeMesh*/)
 
 //         if ( fmod( float( M_count ), float( M_data.verbose() ) ) == 0.0 )
 //         {
-    if (M_me == 0)
-        std::cout << "  F-  Post-processing " << std::flush;
+    M_Displayer.leaderPrint( "  F-  Post-processing " );
 
     index << std::setfill('0') << std::setw(3);
     index << ( M_count / M_data.verbose() );

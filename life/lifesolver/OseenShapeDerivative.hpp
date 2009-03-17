@@ -38,7 +38,6 @@
 
 #include <life/lifesolver/Oseen.hpp>
 
-
 namespace LifeV
 {
 template< typename Mesh,
@@ -111,7 +110,7 @@ private:
     ElemVec                   M_d_loc;    // Elementary displacement for right hand side
     ElemVec                   M_dw_loc;   // Elementary mesh velocity for right hand side
     ElemVec                   M_u_loc;
-
+    bool                      M_reusePrecLin;
 
 };
 
@@ -140,7 +139,8 @@ OseenShapeDerivative( const data_type&          dataType,
     M_elvec          ( this->M_uFESpace.fe().nbNode, nDimensions ),
     M_d_loc          ( this->M_uFESpace.fe().nbNode, nDimensions ),
     M_dw_loc         ( this->M_uFESpace.fe().nbNode, nDimensions ),
-    M_u_loc          ( this->M_uFESpace.fe().nbNode, nDimensions )
+    M_u_loc          ( this->M_uFESpace.fe().nbNode, nDimensions ),
+    M_reusePrecLin   (true)
 {
 
 }
@@ -173,7 +173,8 @@ OseenShapeDerivative( const data_type&          dataType,
     M_elvec          ( this->M_uFESpace.fe().nbNode, nDimensions ),
     M_d_loc          ( this->M_uFESpace.fe().nbNode, nDimensions ),
     M_dw_loc         ( this->M_uFESpace.fe().nbNode, nDimensions ),
-    M_u_loc          ( this->M_uFESpace.fe().nbNode, nDimensions )
+    M_u_loc          ( this->M_uFESpace.fe().nbNode, nDimensions ),
+    M_reusePrecLin   (true)
 {
 
 }
@@ -189,13 +190,15 @@ OseenShapeDerivative<Mesh, SolverType>::
 template<typename Mesh, typename SolverType>
 void OseenShapeDerivative<Mesh, SolverType>::setUp( const GetPot& dataFile )
 {
-    super::setUp( dataFile );
+    //M_linearLinSolver.setDataFromGetPot( dataFile, "lin_fluid/solver" );
+    //    M_linearLinSolver.setAztecooPreconditioner( dataFile, "lin_fluid/solver" );
 
-    M_linearLinSolver.setDataFromGetPot( dataFile, "lin_fluid/solver" );
+    super::setUp( dataFile );
+    M_reusePrecLin = dataFile( "lin_fluid/prec/reuse", true);
 
     std::string precType = dataFile( "lin_fluid/prec/prectype", "Ifpack");
-    M_linPrec            = prec_ptr( PRECFactory::instance().createObject( precType ) );
 
+    M_linPrec            = prec_ptr( PRECFactory::instance().createObject( precType ) );
     M_linPrec->setDataFromGetPot( dataFile, "lin_fluid/prec" );
 
 }
@@ -206,13 +209,12 @@ template<typename Mesh, typename SolverType>
 void OseenShapeDerivative<Mesh, SolverType>::iterateLin( bchandler_raw_type& bch )
 {
     Chrono chrono;
-
+    if(M_reusePrecLin)
+        this->resetPrec(false); // I'd like to reuse the preconditioner already built, at least in the semi-implicit case
     // matrix and vector assembling communication
-
-    this->leaderPrint("  f-  Finalizing the matrix and vectors ...    ");
+    this->M_Displayer.leaderPrint("  f-  Finalizing the matrix and vectors ...    ");
 
     chrono.start();
-
 
     this->M_matrNoBC->GlobalAssemble();
     if (this->M_stab)
@@ -220,20 +222,23 @@ void OseenShapeDerivative<Mesh, SolverType>::iterateLin( bchandler_raw_type& bch
 
     M_rhsLinNoBC.GlobalAssemble();
 
-    matrix_ptrtype matrFull( new matrix_type( this->M_localMap, this->M_matrNoBC->getMeanNumEntries()));
-    *matrFull += *this->M_matrNoBC;
+
     if (this->M_stab)
-        *matrFull += *this->M_matrStab;
+        this->M_matrStab->GlobalAssemble();
+
+    matrix_ptrtype matrFull( new matrix_type( this->M_localMap, this->M_matrNoBC->getMeanNumEntries()));
+
+    updateStab(*matrFull);
+    getFluidMatrix(*matrFull);
 
     vector_type    rhsFull(M_rhsLinNoBC);
 
     chrono.stop();
-
-    this->leaderPrintMax("done in " , chrono.diff());
+    this->M_Displayer.leaderPrintMax("done in " , chrono.diff());
 
     // boundary conditions update
 
-    this->leaderPrint("  f-  Applying boundary conditions...          ");
+    this->M_Displayer.leaderPrint("  f-  Applying boundary conditions...          ");
 
 //    std::cout << "    norm_inf( rhsFullNoBC )     = " << rhsFull.NormInf() << std::endl;
 
@@ -246,20 +251,22 @@ void OseenShapeDerivative<Mesh, SolverType>::iterateLin( bchandler_raw_type& bch
 
 //    this->M_comm->Barrier();
 
-    this->leaderPrintMax("done in ", chrono.diff() );
+            this->M_Displayer.leaderPrintMax("done in ", chrono.diff() );
 
-    this->leaderPrint("    norm_inf( rhsFull )     = " , rhsFull.NormInf());
     // solving the system
 
     // using the same preconditioner as for the non linear problem (the matrix changes only in the
-    // boundary terms.
-    solveSystem( matrFull, rhsFull, M_linSol, M_linearLinSolver, this->M_prec);
+    // boundary terms).
+    this->M_linearSolver.solveSystem( matrFull, rhsFull, M_linSol, this->M_prec, (M_reusePrecLin && !this->M_resetPrec));
 
     this->M_residual  = M_rhsLinNoBC;
     this->M_residual -= *this->M_matrNoBC*this->M_linSol;
 
-    this->leaderPrintMax( "NormInf Residual Lin = " , this->M_residual.NormInf());
-    this->leaderPrintMax( "NormInf Solution Lin = " , this->M_linSol.NormInf());
+//     if(S_verbose)
+//         {
+//             this->M_Displayer.leaderPrintMax( "NormInf Residual Lin = " , this->M_residual.NormInf());
+//             this->M_Displayer.leaderPrintMax( "NormInf Solution Lin = " , this->M_linSol.NormInf());
+//         }
 } // iterateLin
 
 template<typename Mesh, typename SolverType>
@@ -273,7 +280,7 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& m
                                                             const vector_type& dw,
                                                             const vector_type& sourceVec)
 {
-    this->leaderPrint("  f-  LINEARIZED FLUID SYSTEM\n");
+    this->M_Displayer.leaderPrint("  f-  LINEARIZED FLUID SYSTEM\n");
 
     Chrono chrono;
 
@@ -285,7 +292,7 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& m
 
     if(this->M_data.useShapeDerivatives())
         {
-            this->leaderPrint("  f-  Updating right hand side... ");
+            this->M_Displayer.leaderPrint("  f-  Updating right hand side... ");
 
             //
             // RIGHT HAND SIDE FOR THE LINEARIZED ALE SYSTEM
@@ -412,13 +419,14 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& m
             rhsLinNoBC.GlobalAssemble();
             M_rhsLinNoBC += rhsLinNoBC;
             //            M_rhsLinNoBC *= -1.;
-            this->leaderPrint( "norm( M_rhsLinNoBC)  = " , M_rhsLinNoBC.NormInf() );
+//             if(S_verbose)
+//                 this->M_Displayer.leaderPrint( "norm( M_rhsLinNoBC)  = " , M_rhsLinNoBC.NormInf() );
 
         }
 
 
     chrono.stop();
-    this->leaderPrintMax("done in ", chrono.diff() );
+    this->M_Displayer.leaderPrintMax("done in ", chrono.diff() );
 
 }
 
