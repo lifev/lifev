@@ -33,7 +33,7 @@
 
 #include <life/lifecore/GetPot.hpp>
 
-#include "life/lifealg/SolverTrilinos.hpp"
+#include <life/lifealg/SolverTrilinos.hpp>
 #include "Epetra_Comm.h"
 
 
@@ -44,11 +44,20 @@ namespace LifeV
 // {
 
 
+SolverTrilinos::SolverTrilinos(Epetra_Comm& comm)
+    :
+    M_prec  (),
+    M_solver(),
+    M_TrilinosParameterList(),
+    M_Displayer(comm)
+{
+}
 SolverTrilinos::SolverTrilinos()
     :
     M_prec  (),
     M_solver(),
-    M_TrilinosParameterList()
+    M_TrilinosParameterList(),
+    M_Displayer()
 {
 }
 
@@ -252,6 +261,10 @@ void SolverTrilinos::setDataFromGetPot( const GetPot& dfile, const std::string& 
     M_TrilinosParameterList.set("update_reduction",
                              dfile( ( section + "/update_reduction" ).data(), 10e10 ));
 
+    M_maxIterSolver   = dfile(( section + "/max_iter").data(), -1);
+
+//     if(!S_verbose)
+//         SetVerbose(SUMMARY);
 
 }
 
@@ -301,13 +314,19 @@ SolverTrilinos::solve( vector_type& x, vector_type& b )
 //    M_TrilinosParameterList.set("kspace", 100);
 //    M_TrilinosParameterList.TrilinosParameterListShowMe();
 
-    if ( precSet() )
-        M_solver.SetPrecOperator(M_prec->getPrec());
-
     int    maxiter(M_maxIter);
     double mytol  (M_tol);
+    int status;
+     if ( precSet() )
+//         {
+        M_solver.SetPrecOperator(M_prec->getPrec());
 
-    int status = M_solver.Iterate(maxiter, mytol);
+     status = M_solver.Iterate(maxiter, mytol);
+     //        }
+//     else
+//         {
+//              status = M_solver.AdaptiveIterate(maxiter, 3, mytol);
+//         }
     /* if status:
        0  AZ_normal
        1  AZ_maxits
@@ -405,9 +424,114 @@ SolverTrilinos::printStatus(const std::string& message,
     stream << std::endl;
 }
 
-// } //namespace Epetra
+// void SolverTrilinos::setAztecooPreconditioner ( const GetPot& dataFile, const std::string& section)
+// {
+//     std::string prec_type     = dataFile((section + "/aztecoo/precond").data(), "dom_decomp");
+//     std::string subdomain_solve     = dataFile((section + "/aztecoo/subdomain_solve").data(), "ilut");
+//     //std::string solver_type              = dataFile((section + "/aztecoo/solver").data(), "dom_decomp");
+//     int         reordering            = dataFile((section + "/aztecoo/reordering").data(), 1);
+//     double      ilut_fill      = dataFile((section + "/aztecoo/ilut_fill").data(), 4.);
+//     double      drop = dataFile((section + "/aztecoo/drop").data(), 0.);
+//     double      atresh = dataFile((section + "/aztecoo/athresh").data(), 1.e-5);
+//     double      rtresh = dataFile((section + "/aztecoo/rthresh").data(), 1.e-5);
+//     std::string left_scaling = dataFile((section + "/aztecoo/left_scaling").data(), "AZ_row_sum");
+//     std::string pre_calc = dataFile((section + "/aztecoo/pre_calc").data(), "AZ_reuse");
+//     bool displayList = dataFile((section + "/aztecoo/displayList").data(),     false);
+
+//     //M_solver.SetAztecDefaults();
+//     M_TrilinosParameterList.set("precond",                    prec_type);
+//     M_TrilinosParameterList.set("subdomain_solve",                    subdomain_solve);
+//     M_TrilinosParameterList.set("reorder",          reordering);//rcm
+//     M_TrilinosParameterList.set("AZ_ilut_fill",      ilut_fill);
+//     M_TrilinosParameterList.set("drop",  drop);
+//     M_TrilinosParameterList.set("AZ_athresh",  atresh);
+//     M_TrilinosParameterList.set("AZ_rthresh",  rtresh);
+//     M_TrilinosParameterList.set("AZ_left_scaling",  left_scaling);
+//     M_TrilinosParameterList.set("AZ_pre_calc",  pre_calc);
+//     if (displayList)  M_TrilinosParameterList.print(std::cout);
+// }
+// // } //namespace Epetra
 
 
+int SolverTrilinos::solveSystem( matrix_ptrtype  matrFull,
+                                  EpetraVector&    rhsFull,
+                                  EpetraVector&    sol,
+                                  prec_type&      prec,
+                                  bool            reuse)
+{
+    Chrono chrono;
+    //if(S_verbose)
+        //        M_Displayer.leaderPrint(" Setting up the solver ...                ");
+
+    chrono.start();
+//    assert (M_matrFull.get() != 0);
+    setMatrix(*matrFull);
+    chrono.stop();
+
+    //    if(S_verbose)
+        //       M_Displayer.leaderPrintMax("done in " , chrono.diff());
+
+    // overlapping schwarz preconditioner
+
+    if ( prec->set() && !reuse/* || M_resetPrec*/  )
+    {
+        chrono.start();
+
+        //        M_Displayer.leaderPrint("  Computing the precond ...                ");
+
+        prec->buildPreconditioner(matrFull);
+
+        double condest = prec->Condest();
+
+        setPreconditioner(prec);
+
+        chrono.stop();
+        //        M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
+        //        if(S_verbose)
+            //            M_Displayer.leaderPrint("  Estimated condition number = " , condest );
+    }
+    else
+    {
+        //        M_Displayer.leaderPrint("  f-  Reusing  precond ...                \n");
+    }
+
+    //    if(S_verbose)
+        //        M_Displayer.leaderPrint("  f-  Solving system ...                                ");
+
+    int numIter = solve(sol, rhsFull);
+
+    if (numIter >= M_maxIterSolver)
+    {
+        chrono.start();
+
+        //        M_Displayer.leaderPrint("  f- Iterative solver failed, numiter = " , numIter);
+        //        M_Displayer.leaderPrint("     maxIterSolver = " , M_maxIterSolver );
+        //        M_Displayer.leaderPrint("     recomputing the precond ...            ");
+
+        if(prec.get())
+            {
+            prec->buildPreconditioner(matrFull);
+
+            double condest = prec->Condest();
+
+            setPreconditioner(prec);
+
+            chrono.stop();
+            //            M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
+            //            if(S_verbose)
+            //                M_Displayer.leaderPrint("  f-       Estimated condition number = " , condest );
+            }
+        numIter = solve(sol, rhsFull);
+
+        //        if (numIter >= M_maxIterSolver && S_verbose)
+            //            std::cout << "  f- ERROR: Iterative solver failed again.\n" <<  std::flush;
+
+        //M_resetStab = true;
+
+    return -numIter;
+    }
+    return numIter;
+}
 
 
 } // namespace LifeV

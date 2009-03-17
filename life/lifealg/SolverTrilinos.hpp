@@ -44,6 +44,10 @@
 #include "life/lifealg/EpetraPreconditioner.hpp"
 #include "life/lifealg/IfpackPreconditioner.hpp"
 
+#include <life/lifecore/chrono.hpp>
+
+#include <life/lifesolver/Displayer.hpp>
+
 class GetPot;
 
 namespace LifeV
@@ -79,6 +83,8 @@ public:
 
     typedef EpetraPreconditioner             prec_raw_type;
     typedef boost::shared_ptr<prec_raw_type> prec_type;
+    typedef boost::shared_ptr<matrix_type>   matrix_ptrtype;
+    typedef boost::shared_ptr<EpetraVector>  vector_ptrtype;
 
     //@}
 
@@ -89,6 +95,7 @@ public:
     //! default constructor
     //! @param filename GetPot data file containing options for solver in
     //!        section "aztec"
+    SolverTrilinos(Epetra_Comm&);
     SolverTrilinos();
 
     //@}
@@ -171,8 +178,14 @@ public:
     void getAztecStatus( double status[AZ_STATUS_SIZE])
     { M_solver.GetAllAztecStatus( status );}
 
-
     //@}
+    //void            setAztecooPreconditioner ( const GetPot& dataFile, const std::string& section);
+
+    int solveSystem( matrix_ptrtype  matrFull,
+                      vector_type&    rhsFull,
+                      vector_type&    sol,
+                      prec_type&      prec,
+                      bool            reuse);
 
 
 private:
@@ -185,7 +198,9 @@ private:
 
     int                    M_maxIter;
     double                 M_tol;
-
+    int                    M_maxIterSolver;
+    int                    M_maxIterForReuse;
+    Displayer              M_Displayer;
 };
 
 // } // namespace Epetra
