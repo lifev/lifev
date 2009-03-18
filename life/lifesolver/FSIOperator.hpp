@@ -567,13 +567,15 @@ public:
     solid_bchandler_type const& BCh_dz_inv(){return M_BCh_dz_inv;}
     void setBCh_solidDerInv(solid_bchandler_type BCh_solidDerInv){M_BCh_dz_inv = BCh_solidDerInv;}
 
-    //! relevant only for monolitic solver. re-Implemented there
 
     //! relevant only for monolitic solver. re-Implemented there
     virtual void updateSystem(const vector_type& /*displacement*/) { assert(false); }
 
     //! relevant only for monolitic solver. re-Implemented there
     virtual void iterateMesh(const vector_type& /*disp*/) { assert(false); }
+
+    //! relevant only for monolitic solver. re-Implemented there
+    virtual EpetraMap& monolithicMap() { assert(false); };
 
 protected:
 
