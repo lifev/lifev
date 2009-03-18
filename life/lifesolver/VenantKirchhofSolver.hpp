@@ -213,14 +213,11 @@ public:
                          Vector& vel );
 
     //Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getRepeatedEpetra_Map(); }
-    EpetraMap const& getMap() const { return M_localMap; }
+    EpetraMap   const& getMap()       const { return M_localMap; }
 
-    const Epetra_Comm& comm() const {return *M_comm;}
+    Epetra_Comm const& comm()         const {return *M_comm;}
 
-    bool isLeader() const
-    {
-        return comm().MyPID() == 0;
-    }
+    Displayer   const& getDisplayer() const { return M_Displayer; }
 
     void evalResidual(bchandler_raw_type & bcFluid, bchandler_raw_type & bcSolid, const vector_type& sol, vector_type& res/*, matrix_type& bigMatrix*/); // used for monolithic
 
@@ -228,13 +225,16 @@ public:
 
     void setDispSolid(const vector_type disp){M_dispSolid = disp;} // used for monolithic
 
-    void updateStuff(); // used for monolithic
-    void    updateMatrix(matrix_type & bigMatrixStokes); // used for monolithic
-    void    rescaleMatrices(); // used for monolithic
-    //    matrix_ptrtype getSolidBlockPtr(){return M_massStiff;}// used for monolithic
+    // the following are used for momolithic
+    void updateStuff();
+    void updateMatrix(matrix_type & bigMatrixStokes);
+    void rescaleMatrices();
+    //    matrix_ptrtype getSolidBlockPtr(){return M_massStiff;}
     void setBlockPreconditioner(matrix_ptrtype blockPrec){*blockPrec += *M_massStiff;}
     void setFullPreconditioner(matrix_ptrtype fullPrec){*fullPrec += *M_matrFull;}
-    matrix_ptrtype getMatrixPtr(){return M_matrFull;}// used for monolithic
+    matrix_ptrtype getMatrixPtr(){return M_matrFull;}
+    // end used for monolithic
+
 private:
 
     const data_type&               M_data;
@@ -242,6 +242,8 @@ private:
     FESpace<Mesh, EpetraMap>&      M_FESpace;
 
     Epetra_Comm*                   M_comm;
+    Displayer                      M_Displayer;
+
     int                            M_me;
     bool                           M_verbose;
 
@@ -356,6 +358,7 @@ VenantKirchhofSolver( const data_type&          data,
     M_FESpace                    ( dFESpace ),
     M_BCh                        ( &BCh ),
     M_comm                       ( &comm ),
+    M_Displayer                  ( &comm ),
     M_me                         ( comm.MyPID() ),
     M_verbose                    ( M_me == 0 ),
     M_linearSolver               ( ),
@@ -405,6 +408,7 @@ VenantKirchhofSolver( const data_type& data,
     M_data                       ( data ),
     M_FESpace                    ( dFESpace ),
     M_comm                       ( &comm ),
+    M_Displayer                  ( &comm ),
     M_me                         ( comm.MyPID() ),
     M_verbose                    ( M_me == 0 ),
     M_localMap                   ( M_FESpace.map() ),
@@ -457,6 +461,7 @@ VenantKirchhofSolver( const data_type& data,
     M_data                       ( data ),
     M_FESpace                    ( dFESpace ),
     M_comm                       ( &comm ),
+    M_Displayer                  ( &comm ),
     M_me                         ( comm.MyPID() ),
     M_verbose                    ( M_me == 0 ),
     M_linearSolver               ( ),
