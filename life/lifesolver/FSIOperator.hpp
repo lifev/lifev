@@ -31,8 +31,11 @@
 //#include <life/lifesolver/Oseen.hpp>
 #include <life/lifesolver/VenantKirchhofSolver.hpp>
 #include <life/lifesolver/HarmonicExtensionSolver.hpp>
+
 #include <life/lifemesh/regionMesh3D.hpp>
+
 #include <life/lifealg/generalizedAitken.hpp>
+
 #include <life/lifefem/bcHandler.hpp>
 #include <life/lifefem/bcFunction.hpp>
 #include <life/lifefem/bdf_template.hpp>
@@ -77,6 +80,7 @@ enum DDNPreconditioner
 };
 
 //class reducedLinFluid;
+
 
 class FSIOperator {
 
@@ -358,11 +362,11 @@ public:
         {
             if (M_fluid.get() == 0)
                 return (M_epetraComm->MyPID() == 0);
-            return M_fluid->isLeader();
+            return M_fluid->getDisplayer().isLeader();
         }
         if (M_solid.get() == 0)
             return (M_epetraComm->MyPID() == 0);
-        return M_solid->isLeader();
+        return M_solid->getDisplayer().isLeader();
     }
 
     void leaderPrint   (string const message, double const number) const;
@@ -564,7 +568,6 @@ public:
     void setBCh_solidDerInv(solid_bchandler_type BCh_solidDerInv){M_BCh_dz_inv = BCh_solidDerInv;}
 
     //! relevant only for monolitic solver. re-Implemented there
-    virtual EpetraMap& monolithicMap() { assert(false); };
 
     //! relevant only for monolitic solver. re-Implemented there
     virtual void updateSystem(const vector_type& /*displacement*/) { assert(false); }
@@ -610,6 +613,7 @@ protected:
     fluid_bchandler_type                              M_BCh_dp_inv;
 
     fluid_type                                        M_fluid;
+
     solid_type                                        M_solid;
 
 //     fluidlin_type                                     M_fluidLin;
@@ -744,9 +748,6 @@ private:
 
     int                                               M_fluidLeader;
     int                                               M_solidLeader;
-
-
-
 };
 
 typedef boost::shared_ptr<FSIOperator>                 oper_fsi_ptr_mpi;
@@ -792,6 +793,7 @@ typedef singleton<factory<FSIOperator,  std::string> > FSIFactory;
         }                                                           \
     }                                                               \
 }
+
 
 
 
