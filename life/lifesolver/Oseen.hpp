@@ -234,15 +234,11 @@ public:
 
     //Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getRepeatedEpetra_Map(); }
 
-    EpetraMap const& getMap() const { return M_localMap; }
+    EpetraMap   const& getMap()       const { return M_localMap; }
 
-    const Epetra_Comm& comm() const {return *M_comm;}
+    Epetra_Comm const& comm()         const {return *M_comm;}
 
-
-//     void leaderPrint   (string const message, double const number) const;
-//     void leaderPrint   (string const message) const;
-//     void leaderPrintMax(string const message, double const number) const;
-
+    Displayer   const& getDisplayer() const { return M_Displayer; }
 
     void recomputeMatrix(bool const recomp){M_recomputeMatrix = recomp;}
 
@@ -260,7 +256,6 @@ public:
     void          getFluidMatrix( matrix_type& matrFull );
     void          updateUn( )                              {*M_un = M_sol;}
     void          updateUn(const vector_type& sol )        {*M_un = sol;}// for the monolithic
-    const Displayer& getDisplayer()const{return M_Displayer;}
 
 protected:
 
@@ -295,6 +290,7 @@ protected:
 
     //! MPI communicator
     Epetra_Comm*                   M_comm;
+    Displayer                      M_Displayer;
 
     EpetraMap                      M_localMap;
 
@@ -387,7 +383,6 @@ protected:
 
     //    int                           M_monolithic;
     bool                          M_isDiagonalBlockPrec;
-    Displayer                      M_Displayer;
 
 private:
 
@@ -421,6 +416,7 @@ Oseen( const data_type&          dataType,
     M_uFESpace               ( uFESpace ),
     M_pFESpace               ( pFESpace ),
     M_comm                   ( &comm ),
+    M_Displayer              ( comm ),
     M_localMap               ( M_uFESpace.map() + M_pFESpace.map() ),
     M_matrMass               ( ),
     M_matrMassPr             ( ),
@@ -461,8 +457,7 @@ Oseen( const data_type&          dataType,
     M_blockPrec              (),
     M_wLoc                   ( M_uFESpace.fe().nbNode, nDimensions ),
     M_uLoc                   ( M_uFESpace.fe().nbNode, nDimensions ),
-    M_un                     (new vector_type(M_localMap)),
-    M_Displayer              ( comm )
+    M_un                     (new vector_type(M_localMap))
 {
     M_stab = (&M_uFESpace.refFE() == &M_pFESpace.refFE());
     //    M_prec = prec_ptr( PRECFactory::instance().createObject
@@ -480,6 +475,7 @@ Oseen( const data_type&          dataType,
     M_uFESpace               ( uFESpace ),
     M_pFESpace               ( pFESpace ),
     M_comm                   ( &comm ),
+    M_Displayer              ( comm ),
     M_localMap               ( monolithicMap ),
     M_matrMass               ( ),
     M_matrStokes             ( ),
@@ -520,8 +516,7 @@ Oseen( const data_type&          dataType,
     M_blockPrec              (),
     M_wLoc                   ( M_uFESpace.fe().nbNode, nDimensions ),
     M_uLoc                   ( M_uFESpace.fe().nbNode, nDimensions ),
-    M_un                     (new vector_type(M_localMap)),
-    M_Displayer              ( comm )
+    M_un                     (new vector_type(M_localMap))
 {
     M_stab = (&M_uFESpace.refFE() == &M_pFESpace.refFE());
     this->M_comm=&comm;
@@ -538,6 +533,7 @@ Oseen( const data_type&          dataType,
     M_uFESpace               ( uFESpace ),
     M_pFESpace               ( pFESpace ),
     M_comm                   ( &comm ),
+    M_Displayer              ( &comm ),
     M_localMap               ( M_uFESpace.map() + M_pFESpace.map() + lagrangeMultipliers ),
     M_matrMass               ( ),
     M_matrStokes             ( ),
@@ -578,8 +574,7 @@ Oseen( const data_type&          dataType,
     M_blockPrec              (),
     M_wLoc                   ( M_uFESpace.fe().nbNode, nDimensions ),
     M_uLoc                   ( M_uFESpace.fe().nbNode, nDimensions ),
-    M_un                     (new vector_type(M_localMap)),
-    M_Displayer              ( &comm )
+    M_un                     (new vector_type(M_localMap))
 {
     M_stab = (&M_uFESpace.refFE() == &M_pFESpace.refFE());
 }
