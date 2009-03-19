@@ -155,7 +155,7 @@ testML( bchandler_raw_type& bch )
     chrono.start();
 
 
-    this->getDisplayer().M_matrNoBC->GlobalAssemble();
+    this->M_matrNoBC->GlobalAssemble();
 
     if (this->M_stab)
         this->M_matrStab->GlobalAssemble();
@@ -343,7 +343,7 @@ testML( bchandler_raw_type& bch )
 
                             this->M_sol.getEpetraVector().Scale(0.);
 
-                            this->solveSystem(matrFull, rhsFull, this->M_sol, this->M_linearSolver, this->M_prec);
+                            this->M_linearSolver.solveSystem(matrFull, rhsFull, this->M_sol, this->M_prec, (this->M_reusePrec && !this->M_resetPrec));
 
 
                             this->resetPrec();
