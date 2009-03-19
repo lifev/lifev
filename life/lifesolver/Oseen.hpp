@@ -426,7 +426,7 @@ Oseen( const data_type&          dataType,
     M_rhsFull                ( M_localMap ),
     M_sol                    ( M_localMap ),
     M_residual               ( M_localMap ),
-    M_linearSolver           ( ),
+    M_linearSolver           ( comm ),
     M_prec                   ( ),
     M_post_proc              ( M_uFESpace.mesh(),
                                &M_uFESpace.feBd(), &M_uFESpace.dof(),
@@ -485,7 +485,7 @@ Oseen( const data_type&          dataType,
     M_rhsFull                ( M_localMap ),
     M_sol                    ( M_localMap ),
     M_residual               ( M_localMap ),
-    M_linearSolver           ( ),
+    M_linearSolver           ( comm ),
     M_prec                   ( ),
     M_post_proc              ( M_uFESpace.mesh(),
                                &M_uFESpace.feBd(), &M_uFESpace.dof(),
@@ -543,7 +543,7 @@ Oseen( const data_type&          dataType,
     M_rhsFull                ( M_localMap ),
     M_sol                    ( M_localMap ),
     M_residual               ( M_localMap ),
-    M_linearSolver           ( ),
+    M_linearSolver           ( comm ),
     M_prec                   ( ),
     M_post_proc              ( M_uFESpace.mesh(),
                                &M_uFESpace.feBd(), &M_uFESpace.dof(),
@@ -1265,8 +1265,8 @@ void Oseen<Mesh, SolverType>::applyBoundaryConditions( matrix_type&        matri
         BCh.bdUpdate( *M_uFESpace.mesh(), M_uFESpace.feBd(), M_uFESpace.dof() );
     }
 
-    vector_type rhsFull(rhs, Repeated, Zero); // ignoring non-local entries, Otherwise they are summed up lately
-    //vector_type rhsFull(rhs, Unique); // ignoring non-local entries, Otherwise they are summed up lately
+    //vector_type rhsFull(rhs, Repeated, Zero); // ignoring non-local entries, Otherwise they are summed up lately
+    vector_type rhsFull(rhs, Unique); // ignoring non-local entries, Otherwise they are summed up lately
 
     bcManage( matrix, rhsFull, *M_uFESpace.mesh(), M_uFESpace.dof(), BCh, M_uFESpace.feBd(), 1.,
               M_data.time() );

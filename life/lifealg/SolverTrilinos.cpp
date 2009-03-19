@@ -343,10 +343,10 @@ SolverTrilinos::solve( vector_type& x, vector_type& b )
             Comm->Barrier();
 
             if( Comm->MyPID() == 0 ) {
-                std::cout << "  o-  Solver performed " << M_solver.NumIters()
-                          << " iterations.\n";
-                std::cout << "  o-  Norm of the true residual = " << M_solver.TrueResidual() << std::endl;
-                std::cout << "  o-  Norm of the true ratio    = " << M_solver.ScaledResidual() << std::endl;
+                M_Displayer.leaderPrint( "  o-  Solver performed ", M_solver.NumIters());
+                M_Displayer.leaderPrint( " iterations.\n");
+                M_Displayer.leaderPrint( "  o-  Norm of the true residual = ", M_solver.TrueResidual());
+                M_Displayer.leaderPrint( "  o-  Norm of the true ratio    = ",  M_solver.ScaledResidual());
             }
         }
 //#endif
@@ -364,10 +364,10 @@ SolverTrilinos::solve( vector_type& x, vector_type& b )
             Comm->Barrier();
 
             if( Comm->MyPID() == 0 ) {
-                std::cout << "  o-  Second run: solver performed " << M_solver.NumIters()
-                          << " iterations.\n";
-                std::cout << "  o-  Norm of the true residual = " << M_solver.TrueResidual() << std::endl;
-                std::cout << "  o-  Norm of the true ratio    = " << M_solver.ScaledResidual() << std::endl;
+                M_Displayer.leaderPrint( "  o-  Second run: solver performed ", M_solver.NumIters());
+                M_Displayer.leaderPrint(" iterations.");
+                M_Displayer.leaderPrint("  o-  Norm of the true residual = ",  M_solver.TrueResidual());
+                M_Displayer.leaderPrint( "  o-  Norm of the true ratio    = ",  M_solver.ScaledResidual());
             }
         }
 //#endif
@@ -424,34 +424,6 @@ SolverTrilinos::printStatus(const std::string& message,
     stream << std::endl;
 }
 
-// void SolverTrilinos::setAztecooPreconditioner ( const GetPot& dataFile, const std::string& section)
-// {
-//     std::string prec_type     = dataFile((section + "/aztecoo/precond").data(), "dom_decomp");
-//     std::string subdomain_solve     = dataFile((section + "/aztecoo/subdomain_solve").data(), "ilut");
-//     //std::string solver_type              = dataFile((section + "/aztecoo/solver").data(), "dom_decomp");
-//     int         reordering            = dataFile((section + "/aztecoo/reordering").data(), 1);
-//     double      ilut_fill      = dataFile((section + "/aztecoo/ilut_fill").data(), 4.);
-//     double      drop = dataFile((section + "/aztecoo/drop").data(), 0.);
-//     double      atresh = dataFile((section + "/aztecoo/athresh").data(), 1.e-5);
-//     double      rtresh = dataFile((section + "/aztecoo/rthresh").data(), 1.e-5);
-//     std::string left_scaling = dataFile((section + "/aztecoo/left_scaling").data(), "AZ_row_sum");
-//     std::string pre_calc = dataFile((section + "/aztecoo/pre_calc").data(), "AZ_reuse");
-//     bool displayList = dataFile((section + "/aztecoo/displayList").data(),     false);
-
-//     //M_solver.SetAztecDefaults();
-//     M_TrilinosParameterList.set("precond",                    prec_type);
-//     M_TrilinosParameterList.set("subdomain_solve",                    subdomain_solve);
-//     M_TrilinosParameterList.set("reorder",          reordering);//rcm
-//     M_TrilinosParameterList.set("AZ_ilut_fill",      ilut_fill);
-//     M_TrilinosParameterList.set("drop",  drop);
-//     M_TrilinosParameterList.set("AZ_athresh",  atresh);
-//     M_TrilinosParameterList.set("AZ_rthresh",  rtresh);
-//     M_TrilinosParameterList.set("AZ_left_scaling",  left_scaling);
-//     M_TrilinosParameterList.set("AZ_pre_calc",  pre_calc);
-//     if (displayList)  M_TrilinosParameterList.print(std::cout);
-// }
-// // } //namespace Epetra
-
 
 int SolverTrilinos::solveSystem( matrix_ptrtype  matrFull,
                                   EpetraVector&    rhsFull,
@@ -460,16 +432,14 @@ int SolverTrilinos::solveSystem( matrix_ptrtype  matrFull,
                                   bool            reuse)
 {
     Chrono chrono;
-    //if(S_verbose)
-        //        M_Displayer.leaderPrint(" Setting up the solver ...                ");
+    M_Displayer.leaderPrint(" Setting up the solver ...                ");
 
     chrono.start();
 //    assert (M_matrFull.get() != 0);
     setMatrix(*matrFull);
     chrono.stop();
 
-    //    if(S_verbose)
-        //       M_Displayer.leaderPrintMax("done in " , chrono.diff());
+    M_Displayer.leaderPrintMax("done in " , chrono.diff());
 
     // overlapping schwarz preconditioner
 
@@ -477,7 +447,7 @@ int SolverTrilinos::solveSystem( matrix_ptrtype  matrFull,
     {
         chrono.start();
 
-        //        M_Displayer.leaderPrint("  Computing the precond ...                ");
+        M_Displayer.leaderPrint("  Computing the precond ...                ");
 
         prec->buildPreconditioner(matrFull);
 
@@ -486,17 +456,15 @@ int SolverTrilinos::solveSystem( matrix_ptrtype  matrFull,
         setPreconditioner(prec);
 
         chrono.stop();
-        //        M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
-        //        if(S_verbose)
-            //            M_Displayer.leaderPrint("  Estimated condition number = " , condest );
+        M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
+        M_Displayer.leaderPrint("  Estimated condition number = " , condest );
     }
     else
     {
-        //        M_Displayer.leaderPrint("  f-  Reusing  precond ...                \n");
+        M_Displayer.leaderPrint("  f-  Reusing  precond ...                \n");
     }
 
-    //    if(S_verbose)
-        //        M_Displayer.leaderPrint("  f-  Solving system ...                                ");
+    M_Displayer.leaderPrint("  f-  Solving system ...                                ");
 
     int numIter = solve(sol, rhsFull);
 
@@ -504,9 +472,9 @@ int SolverTrilinos::solveSystem( matrix_ptrtype  matrFull,
     {
         chrono.start();
 
-        //        M_Displayer.leaderPrint("  f- Iterative solver failed, numiter = " , numIter);
-        //        M_Displayer.leaderPrint("     maxIterSolver = " , M_maxIterSolver );
-        //        M_Displayer.leaderPrint("     recomputing the precond ...            ");
+        M_Displayer.leaderPrint("  f- Iterative solver failed, numiter = " , numIter);
+        M_Displayer.leaderPrint("     maxIterSolver = " , M_maxIterSolver );
+        M_Displayer.leaderPrint("     recomputing the precond ...            ");
 
         if(prec.get())
             {
@@ -517,14 +485,13 @@ int SolverTrilinos::solveSystem( matrix_ptrtype  matrFull,
             setPreconditioner(prec);
 
             chrono.stop();
-            //            M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
-            //            if(S_verbose)
-            //                M_Displayer.leaderPrint("  f-       Estimated condition number = " , condest );
+            M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
+            M_Displayer.leaderPrint("  f-       Estimated condition number = " , condest );
             }
         numIter = solve(sol, rhsFull);
 
-        //        if (numIter >= M_maxIterSolver && S_verbose)
-            //            std::cout << "  f- ERROR: Iterative solver failed again.\n" <<  std::flush;
+        if (numIter >= M_maxIterSolver)
+            M_Displayer.leaderPrint("  f- ERROR: Iterative solver failed again.\n");
 
         //M_resetStab = true;
 
