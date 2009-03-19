@@ -150,12 +150,12 @@ testML( bchandler_raw_type& bch )
 
     // matrix and vector assembling communication
 
-    this->leaderPrint("  f-  Finalizing the matrix and vectors ...    ");
+    this->getDisplayer().leaderPrint("  f-  Finalizing the matrix and vectors ...    ");
 
     chrono.start();
 
 
-    this->M_matrNoBC->GlobalAssemble();
+    this->getDisplayer().M_matrNoBC->GlobalAssemble();
 
     if (this->M_stab)
         this->M_matrStab->GlobalAssemble();
@@ -172,19 +172,19 @@ testML( bchandler_raw_type& bch )
 
     chrono.stop();
 
-    this->leaderPrintMax("done in ", chrono.diff() );
+    this->getDisplayer().leaderPrintMax("done in ", chrono.diff() );
 
     // boundary conditions update
     this->M_comm->Barrier();
 
-    this->leaderPrint("  f-  Applying boundary conditions ...         ");
+    this->getDisplayer().leaderPrint("  f-  Applying boundary conditions ...         ");
 
     chrono.start();
     applyBoundaryConditions( *matrFull, rhsFull, bch);
 
     chrono.stop();
 
-    this->leaderPrintMax("done in " , chrono.diff());
+    this->getDisplayer().leaderPrintMax("done in " , chrono.diff());
 
     // solving the system
 

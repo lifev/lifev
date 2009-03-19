@@ -379,8 +379,8 @@ Ethiersteinman::run()
 
         beta = fluid.solution();
 
-        fluid.leaderPrint("norm beta ", beta.Norm2());
-        fluid.leaderPrint("norm rhs  ", rhs.Norm2() );
+        fluid.getDisplayer().leaderPrint("norm beta ", beta.Norm2());
+        fluid.getDisplayer().leaderPrint("norm rhs  ", rhs.Norm2() );
 
 
         if (L2proj)
@@ -476,9 +476,9 @@ Ethiersteinman::run()
 //        rhs *= alpha;
 //        rhs  = bdf.bdf_u().time_der( dataNavierStokes.timestep() );
 
-        fluid.leaderPrint("alpha ", alpha);
-        fluid.leaderPrint("norm beta ", beta.Norm2());
-        fluid.leaderPrint("norm rhs  ", rhs.Norm2());
+        fluid.getDisplayer().leaderPrint("alpha ", alpha);
+        fluid.getDisplayer().leaderPrint("norm beta ", beta.Norm2());
+        fluid.getDisplayer().leaderPrint("norm rhs  ", rhs.Norm2());
 
         fluid.updateSystem( alpha, beta, rhs );
         fluid.iterate( bcH );
