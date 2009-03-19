@@ -1098,7 +1098,7 @@ void bcNaturalManage( VectorType& b,
                                     }
                             }
                         bRepeated.GlobalAssemble();
-                        ASSERT( b.getMaptype() == Unique , "here b should passed as repeated, otherwise not sure of what happens at the cpu interfaces ." );
+                        ASSERT( b.getMaptype() == Unique , "here b should passed as unique, otherwise not sure of what happens at the cpu interfaces ." );
                         b += bRepeated;
                     }
                     break;
@@ -1213,7 +1213,7 @@ void bcNaturalManage( VectorType& b,
                         }
                 }
             bRepeated.GlobalAssemble();
-            ASSERT( b.getMaptype() != Unique , "here b should passed as repeated, otherwise not sure of what happens at the cpu interfaces ." );
+            ASSERT( b.getMaptype() == Unique , "here b should passed as unique, otherwise not sure of what happens at the cpu interfaces ." );
             //  b=bRepeated;
             b+= bRepeated;
         }
