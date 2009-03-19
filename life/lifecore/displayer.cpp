@@ -26,7 +26,7 @@
    \author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
    \date 2009-03-10
  */
-#include<life/lifesolver/Displayer.hpp>
+#include<life/lifecore/displayer.hpp>
 
 namespace LifeV
 {

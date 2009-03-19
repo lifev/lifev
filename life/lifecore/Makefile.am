@@ -29,8 +29,8 @@ lib_LTLIBRARIES		= liblifecore.la
 liblifecore_la_SOURCES	=  about.cpp lifeversion.cpp\
 GetPot.cpp  dataString.cpp debug.cpp \
 switch.cpp util_string.cpp typeInfo.cpp\
-SmartAssert.cpp 
-liblifecore_la_LIBADD	= $(aztec_libs) 
+SmartAssert.cpp displayer.cpp
+liblifecore_la_LIBADD	= $(aztec_libs)
 
 if HAVE_BOOST_PROGRAM_OPTIONS
 liblifecore_la_SOURCES += application.cpp

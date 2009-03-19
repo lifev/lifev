@@ -53,7 +53,6 @@
 
 #include <life/lifesolver/nsipterms.hpp>
 #include <life/lifesolver/dataNavierStokes.hpp>
-#include <life/lifesolver/Displayer.hpp>
 
 //
 #include <boost/shared_ptr.hpp>

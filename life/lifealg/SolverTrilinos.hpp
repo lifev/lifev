@@ -45,8 +45,7 @@
 #include "life/lifealg/IfpackPreconditioner.hpp"
 
 #include <life/lifecore/chrono.hpp>
-
-#include <life/lifesolver/Displayer.hpp>
+#include <life/lifecore/displayer.hpp>
 
 class GetPot;
 
