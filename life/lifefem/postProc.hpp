@@ -86,7 +86,7 @@ namespace LifeV
     PostProc<Mesh>( mesh_ptrtype mesh,
         std::vector<CurrentBdFE* > feBd,
         std::vector<Dof* > dof,
-        const EpetraMap& _map, UInt nvar );
+        const EpetraMap& _map, UInt nvar = 1 );
 
     /*!
      \brief Constructor for the case in which we have only one feBd and dof
@@ -128,7 +128,7 @@ namespace LifeV
         across section "flag"
      */
     template< typename V >
-    Real flux( const V& sol, const EntityFlag& flag, UInt feSpace, UInt nDim );
+    Real flux( const V& sol, const EntityFlag& flag, UInt feSpace = 0, UInt nDim = nDimensions);
     /*!
       \tparam V Vector type. Basic policy for type V: operator[] available
 
@@ -138,7 +138,7 @@ namespace LifeV
        \return the averaged vector
      */
     template< typename V >
-    Vector average( const V& sol, const EntityFlag& flag, UInt feSpace, UInt nDim );
+    Vector average( const V& sol, const EntityFlag& flag, UInt feSpace = 0, UInt nDim = 1);
 
 // NOT READY!
 #if 0
@@ -255,7 +255,7 @@ namespace LifeV
   PostProc<Mesh>::PostProc( mesh_ptrtype mesh,
       std::vector<CurrentBdFE* > feBd,
       std::vector<Dof* > dof,
-      const EpetraMap& _map, UInt nvar = 1 )
+      const EpetraMap& _map, UInt nvar )
   : _nvar(nvar),
   _nBdDof(_nvar), _M_nDofpV(_nvar), _M_nDofpE(_nvar), _M_nDofpF(_nvar),
   _M_nDofFV(_nvar), _M_nDofFE(_nvar), _M_nDofF(_nvar),
@@ -540,8 +540,8 @@ namespace LifeV
   // flux of vector field "sol" through faces with a certain marker
   template<typename Mesh>
   template<typename V>
-  Real PostProc<Mesh>::flux( const V& sol, const EntityFlag& flag, UInt feSpace = 0,
-      UInt nDim = nDimensions )
+  Real PostProc<Mesh>::flux( const V& sol, const EntityFlag& flag, UInt feSpace,
+      UInt nDim )
   {
     // Each processor computes the flux across his own flagged faces --> flux_scatter
     // At the end I'll reduce the process fluxes --> flux
@@ -602,7 +602,7 @@ namespace LifeV
   template<typename Mesh>
   template<typename V>
   Vector PostProc<Mesh>::average( const V& sol, const EntityFlag& flag,
-      UInt feSpace = 1, UInt nDim = 1 )
+      UInt feSpace, UInt nDim )
   {
     // Each processor computes the average value on his own flagged faces --> sol_avg_scatter
     // At the end I'll reduce the process values --> sol_avg
