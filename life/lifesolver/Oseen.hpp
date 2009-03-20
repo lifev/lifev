@@ -1334,7 +1334,8 @@ Oseen<Mesh, SolverType>::pressure(const EntityFlag& flag){
   vector_type press(this->M_pFESpace.map(), Repeated);
   press.subset(velAndPressure, this->M_uFESpace.dim()*this->M_uFESpace.fieldDim());
 
-  return M_post_proc.average(press, flag)[0];
+  // third argument is 1, to use the pressure finite element space (see PostProc docs)
+  return M_post_proc.average(press, flag, 1)[0];
 }
 
 //! Computes the area on a given part of the boundary
