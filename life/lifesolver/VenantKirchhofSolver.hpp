@@ -955,7 +955,7 @@ iterateLin( bchandler_raw_type& bch )
 
     // boundary conditions update
     //M_comm->Barrier();
-    M_Displayer.leaderPrint("  S-  Applying boundary conditions ...         \;");
+    M_Displayer.leaderPrint("  S-  Applying boundary conditions ...         \n");
 
     chrono.start();
     applyBoundaryConditions( *matrFull, rhsFull, bch);
@@ -1315,7 +1315,7 @@ solveJac( vector_type&       step,
 
 //    M_linearSolver.setRecursionLevel( _recur );
 
-    M_Displayer.leaderPrintMax("   S-  Solving system                    ... ");
+    M_Displayer.leaderPrint("   S-  Solving system                    ... ");
     chrono.start();
 //    M_linearSolver.solve( step , _f);
     chrono.stop();
