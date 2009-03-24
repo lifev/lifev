@@ -212,7 +212,10 @@ void Ensight<Mesh>::M_wr_ascii(const ExporterData& dvar)
 template <typename Mesh>
 void Ensight<Mesh>::M_wr_ascii_scalar(const ExporterData& dvar)
 {
+    using std::setw;
+
 	std::ofstream sclf;
+
 	if (dvar.steady() )
 		sclf.open( (this->M_post_dir+dvar.prefix()+this->M_me+".scl").c_str() );
 	else
@@ -233,8 +236,7 @@ void Ensight<Mesh>::M_wr_ascii_scalar(const ExporterData& dvar)
         {
     	    // int id = this->M_mesh->pointList( i ).id();
             int id = this->M_LtGNodesMap[i];
-            sclf.width(12);
-            sclf << dvar(start+id) ;
+            sclf << setw(12) << dvar(start+id) ;
             ++count;
             if ( count == 6 )
                 {
@@ -243,11 +245,13 @@ void Ensight<Mesh>::M_wr_ascii_scalar(const ExporterData& dvar)
                 }
         }
     sclf << std::endl;
-    sclf.close();
 }
 
 template <typename Mesh> void Ensight<Mesh>::M_wr_ascii_vector(const ExporterData& dvar)
-{	std::ofstream vctf;
+{
+    using std::setw;
+
+	std::ofstream vctf;
 
 	if (dvar.steady() )
 		vctf.open( (this->M_post_dir+dvar.prefix()+this->M_me+".vct").c_str() );
@@ -272,8 +276,7 @@ template <typename Mesh> void Ensight<Mesh>::M_wr_ascii_vector(const ExporterDat
             {
                 // int id = this->M_mesh->pointList( i ).id();
                 int id = this->M_LtGNodesMap[i];
-                vctf.width(12);
-                vctf << dvar(start+j*dim+id) ;
+                vctf << setw(12) << dvar(start+j*dim+id) ;
                 ++count;
                 if ( count == 6 )
                     {
@@ -282,12 +285,13 @@ template <typename Mesh> void Ensight<Mesh>::M_wr_ascii_vector(const ExporterDat
                     }
             }
     vctf << std::endl;
-    vctf.close();
 }
 
 
 template <typename Mesh> void Ensight<Mesh>::M_wr_ascii_geo(const std::string geo_file)
 {
+    using std::setw;
+
     std::ofstream geof(geo_file.c_str() );
     ID nV = this->M_mesh->numVertices();
     ID nE = this->M_mesh->numVolumes();
@@ -299,41 +303,32 @@ template <typename Mesh> void Ensight<Mesh>::M_wr_ascii_geo(const std::string ge
     geof << "coordinates\n";
     geof.setf(std::ios::right | std::ios_base::scientific);
     geof.precision(5);
-    geof.width(8);
-    geof << nV << "\n";
+    geof << setw(8) <<  nV << "\n";
 
     for(ID i=1; i <= nV; ++i)
         {
-            geof.width(8);
-            geof << i ;
-            geof.width(12);
-            geof << this->M_mesh->pointList(i).x();
-            geof.width(12);
-            geof << this->M_mesh->pointList(i).y();
-            geof.width(12);
-            geof << this->M_mesh->pointList(i).z();
+            geof << setw(8) << i ;
+            geof << setw(12) << this->M_mesh->pointList(i).x();
+            geof << setw(12) << this->M_mesh->pointList(i).y();
+            geof << setw(12) << this->M_mesh->pointList(i).z();
             geof << "\n";
         }
 
     geof<< "part";
 
-    geof.width(8);
     ++part;
-    geof << part << "\n";
+    geof << setw(8) << part << "\n";
     geof << "full geometry\n";
     // elements
     geof << this->M_FEstr << "\n";
-    geof.width(8);
-    geof << nE << "\n";
+    geof << setw(8) << nE << "\n";
     for (ID i=1; i <= nE; ++i)
         {
-            geof.width(8);
-            geof << i ;
+            geof << setw(8) << i ;
             for (ID j=1; j<= this->M_nbLocalDof; ++j)
                 {
-                    geof.width(8);
                     //geof << M_mesh->volume(i).point(j).id();
-                    geof << this->M_mesh->volume(i).point(j).localId();
+                    geof << setw(8) << this->M_mesh->volume(i).point(j).localId();
                 }
             geof << "\n";
 
@@ -361,26 +356,22 @@ template <typename Mesh> void Ensight<Mesh>::M_wr_ascii_geo(const std::string ge
         {
             marker = *i;
             geof<< "part";
-            geof.width(8);
             ++part;
-            geof<< part << "\n";
+            geof<< setw(8) << part << "\n";
             geof<<"boundary ref "<< marker << "\n";
             __gnu_cxx::slist<ID>& faceList= faces[marker];
             geof<< M_bdFEstr << "\n";
-            geof.width(8);
-            geof<< faceList.size() << "\n";
+            geof<< setw(8) << faceList.size() << "\n";
             for (Iterator_face j=faceList.begin(); j!= faceList.end(); ++j)
                 {
                     for( ID k=1; k <= M_nbLocalBdDof; ++k)
                         {
-                            geof.width(8);
-                            geof << M_mesh->boundaryFace(*j).point(k).id();
+                            geof << setw(8) << M_mesh->boundaryFace(*j).point(k).id();
                         }
                     geof << "\n";
                 }
         }
 #endif
-    geof.close();
 }
 
 template
@@ -392,7 +383,6 @@ template
     M_case_mesh_section(casef);
     M_case_variable_section(casef);
     M_case_time_section(casef,time);
-    casef.close();
 }
 
 template <typename Mesh> void Ensight<Mesh>::M_case_mesh_section(std::ofstream& casef)
@@ -564,7 +554,6 @@ void Ensight<Mesh>::M_rd_ascii_scalar( ExporterData& dvar )
             */
         }
     ASSERT(!sclf.fail(), std::stringstream("There is an error while reading " + filename).str().c_str() );
-    sclf.close();
 }
 
 template <typename Mesh> void Ensight<Mesh>::M_rd_ascii_vector(ExporterData& dvar)
@@ -610,7 +599,6 @@ template <typename Mesh> void Ensight<Mesh>::M_rd_ascii_vector(ExporterData& dva
                 */
             }
     ASSERT(!vctf.fail(), std::stringstream("There is an error while reading " + filename).str().c_str() );
-    vctf.close();
 }
 
 
