@@ -223,7 +223,7 @@ public:
 
     void evalResidual( const vector_type& sol, vector_type& res); // used for monolithic
 
-    void setDispSolid(const vector_type disp){M_dispSolid = disp;} // used for monolithic
+    void setDispSolid(const vector_type& disp){M_dispSolid = disp;} // used for monolithic
 
     // the following are used for momolithic
     void updateStuff();
@@ -245,7 +245,6 @@ private:
     Displayer                      M_Displayer;
 
     int                            M_me;
-    bool                           M_verbose;
 
     BCHandler*                     M_BCh;
 
@@ -360,8 +359,7 @@ VenantKirchhofSolver( const data_type&          data,
     M_comm                       ( &comm ),
     M_Displayer                  ( comm ),
     M_me                         ( comm.MyPID() ),
-    M_verbose                    ( M_me == 0 ),
-    M_linearSolver               ( ),
+    M_linearSolver               ( comm ),
     M_prec                       ( ),//new prec_raw_type() ),
     M_localMap                   ( M_FESpace.map() ),
     M_mass                       ( new matrix_type(M_localMap) ),
@@ -410,7 +408,6 @@ VenantKirchhofSolver( const data_type& data,
     M_comm                       ( &comm ),
     M_Displayer                  ( comm ),
     M_me                         ( comm.MyPID() ),
-    M_verbose                    ( M_me == 0 ),
     M_localMap                   ( M_FESpace.map() ),
     M_mass                       ( new matrix_type(M_localMap) ),
     M_linearStiff                ( new matrix_type(M_localMap) ),
@@ -434,7 +431,7 @@ VenantKirchhofSolver( const data_type& data,
     M_szz                        ( M_localMap ),
     M_out_iter                   ( "out_iter_solid" ),
     M_out_res                    ( "out_res_solid" ),
-    M_linearSolver               ( ),
+    M_linearSolver               ( comm ),
     M_prec                       ( ),//new prec_raw_type() ),
     M_reusePrec                  ( true ),
     M_maxIterForReuse            ( -1 ),
@@ -463,8 +460,7 @@ VenantKirchhofSolver( const data_type& data,
     M_comm                       ( &comm ),
     M_Displayer                  ( comm ),
     M_me                         ( comm.MyPID() ),
-    M_verbose                    ( M_me == 0 ),
-    M_linearSolver               ( ),
+    M_linearSolver               ( comm ),
     M_prec                       ( ),//new prec_raw_type() ),
     M_elmatK                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
     M_elmatM                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
@@ -507,18 +503,12 @@ template <typename Mesh, typename SolverType>
 void VenantKirchhofSolver<Mesh, SolverType>::
 setUp( const GetPot& dataFile )
 {
-    if (M_verbose)
-    {
-        std::cout << std::endl;
-        std::cout << "S-  Displacement unknowns: " << M_FESpace.dof().numTotalDof() << std::endl;
-        std::cout << "S-  Computing mass and linear strain matrices ... ";
-    }
+    M_Displayer.leaderPrint("\n S-  Displacement unknowns: ",  M_FESpace.dof().numTotalDof() );
+    M_Displayer.leaderPrint(" S-  Computing mass and linear strain matrices ... \n");
 
     M_monolithic = dataFile("problem/monolithic"   , false );
     M_linearSolver.setDataFromGetPot( dataFile, "solid/solver" );
 //    M_linearSolver.setMatrix( M_jacobian );
-    if (M_verbose)
-        std::cout << "ok." << std::endl;
 
     M_reusePrec     = dataFile( "solid/prec/reuse", true);
     M_maxIterSolver = dataFile( "solid/solver/max_iter", -1);
@@ -572,8 +562,7 @@ buildSystem()
 {
     UInt totalDof = M_FESpace.dof().numTotalDof();
 
-    if (M_verbose)
-        std::cout << "S-  Building the system             ... ";
+    M_Displayer.leaderPrint( "S-  Building the system             ... ");
 
     Chrono chrono;
     chrono.start();
@@ -632,14 +621,9 @@ buildSystem()
     M_massStiff->GlobalAssemble();
     M_mass->GlobalAssemble();
 
-
-//      M_linearStiff->spy("linearStiff");
-//      M_massStiff->spy("massStiff");
-//      M_mass->spy("mass");
     chrono.stop();
 
-    if (M_verbose)
-        std::cout << " done in " << chrono.diff() << " s." << std::endl;
+    M_Displayer.leaderPrintMax( " done in ", chrono.diff() );
 
 
 }
@@ -675,10 +659,7 @@ updateSystem( vector_type & rhsFluidCoupling )
 {
 
 
-    if (M_verbose)
-    {
-        std::cout << "  s-  Updating mass term on right hand side... " << std::flush;
-    }
+    M_Displayer.leaderPrint("  S-  Updating mass term on right hand side... ");
 
     Chrono chrono;
     chrono.start();
@@ -705,8 +686,6 @@ updateSystem( vector_type & rhsFluidCoupling )
     M_rhsW  = coef*M_dispSolid;
     M_rhsW += M_vel;
 
-    //    if (M_verbose) std::cout << std::endl;
-
 //     std::cout << "rhsWithoutBC norm = " << M_rhsNoBC.NormInf() << std::endl;
 //     std::cout << "M_rhsW norm       = " << M_rhsW.NormInf() << std::endl;
 //     std::cout << "    _w norm       = " << M_vel.NormInf() << std::endl;
@@ -714,8 +693,7 @@ updateSystem( vector_type & rhsFluidCoupling )
     //
     chrono.stop();
 
-    if (M_verbose)
-        std::cout << "done in " << chrono.diff() << " s." << std::endl;
+    M_Displayer.leaderPrintMax("done in ", chrono.diff() );
 }
 
 
@@ -723,12 +701,7 @@ template <typename Mesh, typename SolverType>
 void VenantKirchhofSolver<Mesh, SolverType>::
 updateSystem( )
 {
-
-
-    if (M_verbose)
-    {
-        std::cout << "  s-  Updating mass term on right hand side... " << std::flush;
-    }
+    M_Displayer.leaderPrint("  S-  Updating mass term on right hand side... ");
 
     Chrono chrono;
     chrono.start();
@@ -753,8 +726,6 @@ updateSystem( )
     M_rhsW  = coef*M_disp;
     M_rhsW += M_vel;
 
-    //    if (M_verbose) std::cout << std::endl;
-
 //     std::cout << "rhsWithoutBC norm = " << M_rhsNoBC.NormInf() << std::endl;
 //     std::cout << "M_rhsW norm       = " << M_rhsW.NormInf() << std::endl;
 //     std::cout << "    _w norm       = " << M_vel.NormInf() << std::endl;
@@ -762,8 +733,7 @@ updateSystem( )
     //
     chrono.stop();
 
-    if (M_verbose)
-        std::cout << "done in " << chrono.diff() << " s." << std::endl;
+    M_Displayer.leaderPrintMax("done in ", chrono.diff());
 }
 
 
@@ -774,12 +744,10 @@ iterate( bchandler_raw_type& bch )
 {
     Chrono chrono;
 
-    std::cout << "  S-  Solving the system ... \n"  << std::flush;
-
-    std::cout << "  S-  Updating the boundary conditions ... " << std::flush;
+    // matrix and vector assembling communication
+    M_Displayer.leaderPrint("  S-  Solving the system ... \n");
 
     chrono.start();
-
 
     matrix_ptrtype matrFull( new matrix_type( M_localMap, M_massStiff->getMeanNumEntries()));
     *matrFull += *M_massStiff;
@@ -787,75 +755,42 @@ iterate( bchandler_raw_type& bch )
     M_rhsNoBC.GlobalAssemble();
     M_rhsW.GlobalAssemble();
 
-    vector_type rhs (M_rhsNoBC);
+    vector_type rhsFull (M_rhsNoBC);
 
-    applyBoundaryConditions( *matrFull, rhs, bch );
+    // boundary conditions update
+    //M_comm->Barrier();
+    M_Displayer.leaderPrint("  S-  Applying boundary conditions ...         ");
+
+    chrono.start();
+    applyBoundaryConditions( *matrFull, rhsFull, bch);
 
     chrono.stop();
-    std::cout << "done in " << chrono.diff() << " s \n" <<  std::flush;
 
-//    M_comm->Barrier();
+    M_Displayer.leaderPrintMax("done in " , chrono.diff());
 
-    M_linearSolver.setMatrix(*matrFull);
-
-    if ( !M_reusePrec || M_resetPrec || !M_prec->set() )
+    if (M_resetPrec)
     {
-        chrono.start();
-
-        if (M_verbose)
-            std::cout << "  S-  Computing the precond ...                " <<  std::flush;
-
-        M_prec->buildPreconditioner(matrFull);
-
-//    M_disp *= 0.;
-        double condest = M_prec->Condest();
-
-        M_linearSolver.setPreconditioner(M_prec);
-
-        chrono.stop();
-        if (M_verbose)
-        {
-            std::cout << "done in " << chrono.diff() << " s.\n";
-            std::cout << "         Estimated condition number = " << condest << "\n" <<  std::flush;
-        }
-
+        M_prec->precReset();
         M_resetPrec = false;
-
     }
-    else
+
+    // solving the system
+    int numIter = M_linearSolver.solveSystem( matrFull, rhsFull, M_disp, M_prec, M_reusePrec);
+
+    numIter = abs(numIter);
+
+    if(numIter >= M_maxIterForReuse || numIter >= M_maxIterSolver)
     {
-        if (M_verbose)
-            std::cout << "  S-  Reusing  precond ...                \n" <<  std::flush;
+        resetPrec();
     }
-
-    int numIter = M_linearSolver.solve(M_disp, rhs);
 
     M_vel  = ( 2.0 / M_data.timestep() ) * M_disp;
     M_vel -= M_rhsW;
 
     M_residual_d =  *M_massStiff * M_disp;
     M_residual_d -= M_rhsNoBC;
-//    reduceSolution(M_disp, M_vel);
 
-    std::cout << "  . " << std::endl;
-    if (M_verbose)
-    {
-        std::cout << "S- system solved in " << chrono.diff()
-                  << " s. ( " << numIter << "  iterations. ) \n"
-                  << std::flush;
-    }
-
-
-    if (numIter > M_maxIterSolver)
-    {
-        M_resetPrec = true;
-    }
-
-
-
-//    postProcess();
-
-}
+} // iterate()
 
 template <typename Mesh, typename SolverType> // for monolithic
 void VenantKirchhofSolver<Mesh, SolverType>::
@@ -890,7 +825,7 @@ evalResidual( bchandler_raw_type& bchFluid, bchandler_raw_type& bchSolid, const 
     bcManage( *M_matrFull, rhsFull, *M_uFESpace->mesh(), M_uFESpace->dof(), bchFluid, M_uFESpace->feBd(), 1.,
               M_data.time() );
 
-    std::cout << " rhs=> " << rhs.NormInf() << std::endl;
+    M_Displayer.leaderPrint("rhs norm = ", rhs.NormInf() );
 
     //    rhs.spy("rhs2");
     M_rhs=rhsFull;
@@ -909,34 +844,20 @@ iterateMonolithic(vector_type& rhs, vector_type& step, matrix_ptrtype prec)
 {
     Chrono chrono;
 
-    std::cout << "  S-  Solving the system ... " << std::endl << std::flush;
+    M_Displayer.leaderPrint("  S-  Solving the system ... \n" );
 
-    std::cout << "  S-  Updating the boundary conditions ... " << std::flush;
+    M_Displayer.leaderPrint("  S-  Updating the boundary conditions ... ");
 
     chrono.start();
 
     // boundary conditions applied in the residual evaluation
 
-    M_matrFull->spy("jacobian");
-    prec->spy("blockPreconditioner");
+    //M_matrFull->spy("jacobian");
+    //prec->spy("blockPreconditioner");
     chrono.stop();
-    std::cout << "done in " << chrono.diff() << " s \n";
+    M_Displayer.leaderPrintMax("done in ", chrono.diff() );
 
-    /*        for (UInt i = 7980; i < 9240; i++ )//lines to kill
-        {
-            double* tmp;
-            int err;
-            int entries;
-            err = M_matrFull->getEpetraMatrix().ExtractGlobalRowView(i, entries, tmp);
-            if(entries == 0)
-                {
-                    std::cout<<"ERROR in line " << i << " err " << err << std::endl;
-                    //                    break;
-                }
-            //            std::cout << "nonzero entries for row " << i << " ==> " << entries << std::endl;
-            }*/
-
-    M_comm->Barrier();
+    //M_comm->Barrier();
 
     M_linearSolver.setMatrix(*M_matrFull);
 
@@ -944,8 +865,7 @@ iterateMonolithic(vector_type& rhs, vector_type& step, matrix_ptrtype prec)
     {
         chrono.start();
 
-        if (M_verbose)
-            std::cout << "  S-  Computing the precond ...                ";
+        M_Displayer.leaderPrint("  S-  Computing the precond ...                ");
 
         M_prec->buildPreconditioner(prec/*M_matrFull*/);
 
@@ -955,19 +875,15 @@ iterateMonolithic(vector_type& rhs, vector_type& step, matrix_ptrtype prec)
         M_linearSolver.setPreconditioner(M_prec);
 
         chrono.stop();
-        if (M_verbose)
-        {
-            std::cout << "done in " << chrono.diff() << " s.\n";
-            std::cout << "         Estimated condition number = " << condest << "\n" <<  std::flush;
-        }
+        M_Displayer.leaderPrintMax("done in ", chrono.diff() );
+        M_Displayer.leaderPrint("  S-  Estimated condition number = ",  condest );
 
         M_resetPrec = false;
 
     }
     else
     {
-        if (M_verbose)
-            std::cout << "  S-  Reusing  precond ...                \n" <<  std::flush;
+        M_Displayer.leaderPrint("  S-  Reusing  precond ...                \n");
     }
     //    M_disp.spy("disp0");
     int numIter = M_linearSolver.solve(step, rhs);
@@ -976,7 +892,7 @@ iterateMonolithic(vector_type& rhs, vector_type& step, matrix_ptrtype prec)
     {
         chrono.start();
 
-        std::cout<<"  s- Iterative solver failed, numiter = " << numIter<<std::endl;
+        M_Displayer.leaderPrint("  s- Iterative solver failed, numiter = ", numIter );
 
         M_prec->buildPreconditioner(M_matrFull);
 
@@ -988,13 +904,13 @@ iterateMonolithic(vector_type& rhs, vector_type& step, matrix_ptrtype prec)
 
         numIter = M_linearSolver.solve(step, rhs);
 
-        if (numIter > M_maxIterSolver && M_verbose)
-            std::cout << "  s- ERROR: Iterative solver failed again.\n" <<  std::flush;
+        if (numIter > M_maxIterSolver)
+            M_Displayer.leaderPrint( "  s- ERROR: Iterative solver failed again.\n");
     }
 
     M_disp += step;
 
-    std::cout << "  S- system solved. " << std::endl;
+    M_Displayer.leaderPrint("  S- system solved.\n ");
 
     //    M_dispSolid.spy("dispSolid0");
 }
@@ -1024,80 +940,52 @@ iterateLin( bchandler_raw_type& bch )
 {
     Chrono chrono;
 
-    std::cout << "  S-  Solving the system ... " << std::endl << std::flush;
-
-    std::cout << "  S-  Updating the boundary conditions ... " << std::flush;
+    // matrix and vector assembling communication
+    M_Displayer.leaderPrint("  S-  Solving the linear system ... \n");
 
     chrono.start();
 
     matrix_ptrtype matrFull( new matrix_type( M_localMap, M_massStiff->getMeanNumEntries()));
     *matrFull += *M_massStiff;
 
-    vector_type rhs(M_FESpace.map());
-    rhs *= 0.;
+    M_rhsNoBC.GlobalAssemble();
+    M_rhsW.GlobalAssemble();
 
-    applyBoundaryConditions( *matrFull, rhs, bch );
+    vector_type rhsFull (M_rhsNoBC.getMap());
 
-    std::cout << "rhs_dz norm = " << rhs.NormInf() << std::endl;
+    // boundary conditions update
+    //M_comm->Barrier();
+    M_Displayer.leaderPrint("  S-  Applying boundary conditions ...         \;");
 
-    chrono.stop();
-    std::cout << "done in " << chrono.diff() << " s \n";
+    chrono.start();
+    applyBoundaryConditions( *matrFull, rhsFull, bch);
 
-//    M_comm->Barrier();
+    M_Displayer.leaderPrint("rhs_dz norm = ", rhsFull.NormInf() );
 
-    M_linearSolver.setMatrix(*matrFull);
+    M_Displayer.leaderPrintMax("done in " , chrono.diff());
 
-    if  ( !M_reusePrec || M_resetPrec )
+    if (M_resetPrec)
     {
-        chrono.start();
-
-        if (M_verbose)
-            std::cout << "  S-  Computing the precond ...                ";
-
-        M_prec->buildPreconditioner(matrFull);
-
-//    M_disp *= 0.;
-        double condest = M_prec->Condest();
-
-        M_linearSolver.setPreconditioner(M_prec);
-
-        chrono.stop();
-        if (M_verbose)
-        {
-            std::cout << "done in " << chrono.diff() << " s.\n";
-            std::cout << "         Estimated condition number = " << condest << "\n" <<  std::flush;
-        }
-
+        M_prec->precReset();
         M_resetPrec = false;
-
     }
-    else
+    // solving the system
+    int numIter = M_linearSolver.solveSystem( matrFull, rhsFull, M_disp, M_prec, M_reusePrec);
+
+    M_Displayer.leaderPrintMax("dz norm     = " , M_disp.NormInf() );
+
+    numIter = abs(numIter);
+
+    if(numIter >= M_maxIterForReuse || numIter >= M_maxIterSolver)
     {
-        if (M_verbose)
-            std::cout << "  S-  Reusing  precond ...                \n" <<  std::flush;
+        resetPrec();
     }
-
-    int numIter = M_linearSolver.solve(M_disp, rhs);
-
-    std::cout << "dz norm     = " << M_disp.NormInf() << std::endl;
 
 
     M_residual_d =  *M_massStiff*M_disp;
 //    M_residual_d -= M_rhsNoBC;
-//    reduceSolution(M_disp, M_vel);
 
-    std::cout << "  S- system solved. " << std::endl;
-
-    if (numIter > M_maxIterSolver)
-    {
-        M_resetPrec = true;
-    }
-
-
-
-//    postProcess();
-
-}
+} // end iterateLin
 
 
 
@@ -1123,7 +1011,7 @@ iterate(vector_type &_sol)
     M_vel  = ( 2.0 / M_data.timestep() ) * M_disp;
     M_vel -= M_rhsW;
 
-    std::cout << "sol norm = " << norm(this->sol) << std::endl;
+    M_Displayer.leaderPrint("sol norm = ", norm(this->sol));
 
     M_residual_d  = M_massStiff*sol;
     M_residual_d -= M_rhsNoBC;
@@ -1134,7 +1022,7 @@ template <typename Mesh, typename SolverType>
 void VenantKirchhofSolver<Mesh, SolverType>::
 evalResidual( vector_type &res, const vector_type& sol, int /*iter*/)
 {
-    std::cout << "    s-    Computing residual... ";
+    M_Displayer.leaderPrint( "    S-    Computing residual... \n");
     Chrono chrono;
     chrono.start();
 
@@ -1142,10 +1030,9 @@ evalResidual( vector_type &res, const vector_type& sol, int /*iter*/)
     M_stiff = M_massStiff;
 
 
-    std::cout << "updating the boundary conditions" << std::flush;
+    M_Displayer.leaderPrint("updating the boundary conditions ... ");
     if ( !M_BCh->bdUpdateDone() )
         M_BCh->bdUpdate( M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
-    std::cout << std::endl;
 
     bcManageMatrix( M_stiff, *M_FESpace.mesh(), M_FESpace.dof(), *M_BCh, M_FESpace.feBd(), 1.0 );
 
@@ -1157,7 +1044,7 @@ evalResidual( vector_type &res, const vector_type& sol, int /*iter*/)
 //    res -= M_rhs;
 
     chrono.stop();
-    std::cout << "done in " << chrono.diff() << " s." << std::endl;
+    M_Displayer.leaderPrintMax("done in ", chrono.diff() );
 }
 
 
@@ -1166,7 +1053,7 @@ template <typename Mesh, typename SolverType>
 void VenantKirchhofSolver<Mesh, SolverType>::
 updateJacobian( vector_type & sol, int iter )
 {
-    std::cout << "  S-  Solid: Updating JACOBIAN in iter " << iter << "  ... ";
+    M_Displayer.leaderPrint("  S-  Solid: Updating JACOBIAN in iter ", iter);
 
     Chrono chrono;
     chrono.start();
@@ -1222,7 +1109,7 @@ updateJacobian( vector_type & sol, int iter )
 //     }
 
     chrono.stop();
-    std::cout << "done in " << chrono.diff() << " s." << std::endl;
+    M_Displayer.leaderPrintMax("   ... done in ", chrono.diff() );
 }
 
 
@@ -1394,40 +1281,9 @@ evalConstraintTensor()
 template <typename Mesh, typename SolverType>
 void VenantKirchhofSolver<Mesh, SolverType>::
 //solveJac( const Vector& res, double& linear_rel_tol, Vector &step)
-solveJac( vector_type &step, const vector_type& res, double& /*linear_rel_tol*/)
+solveJac( vector_type &step, const vector_type& res, double& linear_rel_tol)
 {
-    Chrono chrono;
-
-    M_f = res;
-
-    // for BC treatment (done at each time-step)
-    Real tgv = 1.0;
-    std::cout << "   S-  Applying boundary conditions      ... ";
-    chrono.start();
-
-    // BC manage for the velocity
-    if ( !M_BCh->bdUpdateDone() )
-        M_BCh->bdUpdate( M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
-
-    bcManageMatrix( M_jacobian, *M_FESpace.mesh(), M_FESpace.dof(), *M_BCh, M_FESpace.feBd(), tgv );
-    chrono.stop();
-    std::cout << "done in " << chrono.diff() << "s." << std::endl;
-
-    M_jacobian.spy("jacobian");
-//    M_linearSolver.setRecursionLevel( _recur );
-
-    std::cout << "   S-  Solving system                    ... "<< std::flush;
-    chrono.start();
-    M_linearSolver.solve( step , M_f);
-    chrono.stop();
-    std::cout << "done in " << chrono.diff() << " s." << std::endl;
-
-    //--options[AZ_recursion_level];
-
-//    AZ_matrix_destroy( &J );
-//    AZ_precond_destroy( &precM_jacobian );
-
-    M_residual_d = M_massStiff*step;// - M_rhsNoBC;
+    solveJac( step,  res, linear_rel_tol, *M_BCh);
 }
 
 
@@ -1446,7 +1302,7 @@ solveJac( vector_type&       step,
     // for BC treatment (done at each time-step)
     Real tgv = 1.0;
 
-    std::cout << "   S-  Applying boundary conditions      ... ";
+    M_Displayer.leaderPrint("   S-  Applying boundary conditions      ... ");
     chrono.start();
 
     // BC manage for the velocity
@@ -1455,15 +1311,15 @@ solveJac( vector_type&       step,
 
     bcManageMatrix( M_jacobian, *M_FESpace.mesh(), M_FESpace.dof(), *BCh, M_FESpace.feBd(), tgv );
     chrono.stop();
-    std::cout << "done in " << chrono.diff() << "s." << std::endl;
+    M_Displayer.leaderPrintMax( "done in ", chrono.diff() );
 
 //    M_linearSolver.setRecursionLevel( _recur );
 
-    std::cout << "   S-  Solving system                    ... "<< std::flush;
+    M_Displayer.leaderPrintMax("   S-  Solving system                    ... ");
     chrono.start();
 //    M_linearSolver.solve( step , _f);
     chrono.stop();
-    std::cout << "done in " << chrono.diff() << " s." << std::endl;
+    M_residual_d = M_massStiff*step;// - M_rhsNoBC;
 
     //--options[AZ_recursion_level];
 
@@ -1606,7 +1462,7 @@ reduceSolution( Vector& disp,
     vector_type displacement(M_disp, 0);
     vector_type velocity    (M_vel , 0);
 
-    if (M_verbose)
+    if ( M_comm->MyPID() == 0 )
     {
             for ( UInt iDof = 0; iDof < nDimensions*dim(); ++iDof )
             {
@@ -1632,11 +1488,11 @@ VenantKirchhofSolver<Mesh, SolverType>::postProcess()
     M_count++;
 
 //    std::cout << "factor " << M_data.factor() << std::endl;
-     if (M_verbose)
+     if ( M_comm->MyPID() == 0)
      {
         if ( fmod( float( M_count ), float( M_data.verbose() ) ) == 0.0 )
         {
-            if (M_verbose) std::cout << "  S-  Post-processing \n";
+            std::cout << "  S-  Post-processing \n";
             index << ( M_count / M_data.verbose() );
 
             switch ( index.str().size() )

@@ -180,12 +180,23 @@ public:
     //@}
     //void            setAztecooPreconditioner ( const GetPot& dataFile, const std::string& section);
 
-    int solveSystem( matrix_ptrtype  matrFull,
-                      vector_type&    rhsFull,
-                      vector_type&    sol,
-                      prec_type&      prec,
-                      bool            reuse);
+    /** Solves the system and returns the number of iterations.
+        @param  matrFull,
+        @param  rhsFull,
+        @param  sol,
+        @param  prec,
+        @param  reuse,
+        @param  retry = true
 
+        returns number of iterations. If negative, the solver did not converge,
+        the preconditionar has been recomputed, and a second solution is tried
+    */
+    int solveSystem( matrix_ptrtype matrFull,
+                     vector_type&   rhsFull,
+                     vector_type&   sol,
+                     prec_type&     prec,
+                     bool const     reuse,
+                     bool const     retry = true);
 
 private:
 

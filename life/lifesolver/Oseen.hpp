@@ -227,9 +227,10 @@ public:
         M_resetPrec = !M_reusePrec;
     }
 
-    void resetPrec(bool reset = true) {M_resetPrec = reset; M_resetStab = reset;}
+    void resetPrec(bool reset = true) { M_prec->precReset(); resetStab(); }
     // as for now resetting stabilization matrix at the same time as the preconditioner
-    // void resetStab() {M_resetStab = true;}
+
+    void resetStab() { M_matrStab.reset(); }
 
     //Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getRepeatedEpetra_Map(); }
 
@@ -422,6 +423,7 @@ Oseen( const data_type&          dataType,
     M_matrStokes             ( ),
 //    M_matrFull               ( ),
     M_matrNoBC               ( ),
+    M_matrStab               ( ),
     M_rhsNoBC                ( M_localMap ),
     M_rhsFull                ( M_localMap ),
     M_sol                    ( M_localMap ),
@@ -1012,13 +1014,12 @@ updateSystem(double       alpha,
         chrono.stop();
         M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
 
-        if ( M_stab && (!M_reuseStab || M_resetStab || (M_matrStab.get() == 0) ) )
+        if ( M_stab && (!M_reuseStab || (M_matrStab.get() == 0) ) )
         {
             M_Displayer.leaderPrint("  f-  Updating the stabilization terms ...    ");
             chrono.start();
             M_matrStab.reset  ( new matrix_type(M_localMap) );
             M_ipStab.apply( *M_matrStab, betaVecRep, false/*S_verbose*/ );
-            M_resetStab = false;
             M_matrStab->GlobalAssemble();
             chrono.stop();
             M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
@@ -1032,11 +1033,10 @@ updateSystem(double       alpha,
                     M_Displayer.leaderPrint("  f-  Updating the Stabilization terms ...    ");
                     chrono.start();
 
-                    if ( !M_reuseStab || M_resetStab || (M_matrStab.get() == 0) )
+                    if ( !M_reuseStab || (M_matrStab.get() == 0) )
                         {
                             M_matrStab.reset  ( new matrix_type(M_localMap) );
                             M_ipStab.apply( *M_matrStab, betaVec, false/*S_verbose*/ );
-                            M_resetStab = false;
                             M_matrStab->GlobalAssemble();
                         }
                     else
@@ -1103,9 +1103,8 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
 
     Chrono chrono;
 
-
     // matrix and vector assembling communication
-    M_Displayer.leaderPrint("  f-  Finalizing the matrix and vectors ...    ");
+    M_Displayer.leaderPrint("  f-  Updating the boundary conditions ...    ");
 
     chrono.start();
 
@@ -1130,7 +1129,7 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
     M_Displayer.leaderPrintMax("done in ", chrono.diff() );
 
     // boundary conditions update
-    M_comm->Barrier();
+    //M_comm->Barrier();
     M_Displayer.leaderPrint("  f-  Applying boundary conditions ...         ");
 
     chrono.start();
@@ -1138,17 +1137,22 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
 
     chrono.stop();
 
-        M_Displayer.leaderPrintMax("done in " , chrono.diff());
-    // solving the system
+    M_Displayer.leaderPrintMax("done in " , chrono.diff());
 
-    int numIter = M_linearSolver.solveSystem( matrFull, rhsFull, M_sol, M_prec, (M_reusePrec && !M_resetPrec));
-    if (numIter < 0 )
-        {
-            //            std::cout << "  Resetting the precond ... ";
-            M_resetStab = true;
-            if(numIter <= -M_maxIterForReuse)
-                resetPrec();
-        }
+    // solving the system
+    int numIter = M_linearSolver.solveSystem( matrFull, rhsFull, M_sol, M_prec, M_reusePrec);
+
+    if (numIter < 0 ) // if the preconditioner has been reset, the stab terms are to be updated
+    {
+        resetStab();
+        numIter = - numIter;
+    }
+
+    if( numIter >= M_maxIterForReuse || numIter >= M_maxIterSolver)
+    {
+        resetPrec();
+        resetStab();
+    }
 
 
     M_residual  = M_rhsNoBC;

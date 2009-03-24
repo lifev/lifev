@@ -425,29 +425,24 @@ SolverTrilinos::printStatus(const std::string& message,
 }
 
 
-int SolverTrilinos::solveSystem( matrix_ptrtype  matrFull,
-                                  EpetraVector&    rhsFull,
-                                  EpetraVector&    sol,
-                                  prec_type&      prec,
-                                  bool            reuse)
+int SolverTrilinos::solveSystem( matrix_ptrtype matrFull,
+                                 EpetraVector&  rhsFull,
+                                 EpetraVector&  sol,
+                                 prec_type&     prec,
+                                 bool const     reuse,
+                                 bool const     retry)
 {
     Chrono chrono;
-    M_Displayer.leaderPrint(" Setting up the solver ...                ");
+    M_Displayer.leaderPrint("      Setting up the solver ...                \n");
 
-    chrono.start();
 //    assert (M_matrFull.get() != 0);
     setMatrix(*matrFull);
-    chrono.stop();
 
-    M_Displayer.leaderPrintMax("done in " , chrono.diff());
-
-    // overlapping schwarz preconditioner
-
-    if ( prec->set() && !reuse/* || M_resetPrec*/  )
+    if ( !prec->set() || !reuse  )
     {
         chrono.start();
 
-        M_Displayer.leaderPrint("  Computing the precond ...                ");
+        M_Displayer.leaderPrint("      Computing the precond ...                \n");
 
         prec->buildPreconditioner(matrFull);
 
@@ -457,47 +452,43 @@ int SolverTrilinos::solveSystem( matrix_ptrtype  matrFull,
 
         chrono.stop();
         M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
-        M_Displayer.leaderPrint("  Estimated condition number = " , condest );
+        M_Displayer.leaderPrint("      Estimated condition number = " , condest );
     }
     else
     {
-        M_Displayer.leaderPrint("  f-  Reusing  precond ...                \n");
+        M_Displayer.leaderPrint("      Reusing  precond ...                \n");
     }
 
-    M_Displayer.leaderPrint("  f-  Solving system ...                                ");
+    M_Displayer.leaderPrint("      Solving system ...                                \n");
 
+    chrono.start();
     int numIter = solve(sol, rhsFull);
+    chrono.stop();
+    M_Displayer.leaderPrintMax( "       ... done in " , chrono.diff() );
 
-    if (numIter >= M_maxIterSolver)
-    {
-        chrono.start();
+    if (numIter < M_maxIterSolver) return numIter;
 
-        M_Displayer.leaderPrint("  f- Iterative solver failed, numiter = " , numIter);
-        M_Displayer.leaderPrint("     maxIterSolver = " , M_maxIterSolver );
-        M_Displayer.leaderPrint("     recomputing the precond ...            ");
+    chrono.start();
 
-        if(prec.get())
-            {
-            prec->buildPreconditioner(matrFull);
+    M_Displayer.leaderPrint("      Iterative solver failed, numiter = " , numIter);
+    M_Displayer.leaderPrint("                         maxIterSolver = " , M_maxIterSolver );
 
-            double condest = prec->Condest();
+    // If we do not want to retry, return now.
+    if (!retry)     return numIter;
+    // otherwise rebuild the preconditioner and solve again
 
-            setPreconditioner(prec);
+    M_Displayer.leaderPrint("      retrying: solving again ...            ");
+    prec->precReset();
 
-            chrono.stop();
-            M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
-            M_Displayer.leaderPrint("  f-       Estimated condition number = " , condest );
-            }
-        numIter = solve(sol, rhsFull);
+    // Solving again, but only once (retry = false)
+    numIter = solveSystem( matrFull, rhsFull, sol,
+                               prec, reuse, false);
 
-        if (numIter >= M_maxIterSolver)
-            M_Displayer.leaderPrint("  f- ERROR: Iterative solver failed again.\n");
-
-        //M_resetStab = true;
+    if ( numIter >= M_maxIterSolver)
+        M_Displayer.leaderPrint("  ERROR: Iterative solver failed again.\n");
 
     return -numIter;
-    }
-    return numIter;
+
 }
 
 
