@@ -23,7 +23,7 @@
 */
 
 /**
-   \file MonolithicSolid.cpp
+   \file displayer.hpp
    \author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
    \date 2009-03-02
  */
