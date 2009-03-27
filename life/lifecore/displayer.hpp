@@ -21,11 +21,6 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-/**
-   \file MonolithicSolid.hpp
-   \author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
-   \date 2009-03-02
- */
 
 /**
    \file MonolithicSolid.cpp
@@ -46,11 +41,10 @@ namespace LifeV
 {
 
 /*!
-  \class MonolithicSolid
+  \class Displayer
   \brief
-  This class solves the linear elastodynamics equations for a (only linear right now)
-  St. Venant-Kirchoff material
-
+  This class is used to display messages in parallel simulations: if a communicator is passed to the constructor
+  only one processor (the leader) will print out the message. If no communicator is passed to the constructor every processor prints the messages.
 */
 class Displayer
 {
@@ -60,11 +54,20 @@ public:
     virtual ~Displayer(){}
 
     void    leaderPrint(string const message, double const number) const;
+    /*! to print one message and one real value
+      \param message message to print out
+      \param number Real value that we want to print
+    */
+
 
     void    leaderPrint(string const message) const;
 
     void    leaderPrintMax(string const message, double const number) const;
-
+    /*!
+      Take a Real input value from all processors in the communicator, computes the max, returns the max to all processors of the communicator. Then processor 0 of the communicator prints it.
+      \param message message to print out
+      \param number Real value that we want to print
+    */
     bool    isLeader() const
     {
         if( M_comm  != 0)
@@ -72,6 +75,9 @@ public:
         else
             return true;
     }
+    /*!
+      returns the processor 0 of the communicator
+    */
     const Epetra_Comm& comm() const {return *M_comm;}
 
 protected:
