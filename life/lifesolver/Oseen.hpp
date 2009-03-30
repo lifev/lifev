@@ -227,7 +227,7 @@ public:
         M_resetPrec = !M_reusePrec;
     }
 
-    void resetPrec(bool reset = true) { M_prec->precReset(); resetStab(); }
+    void resetPrec(bool reset = true) { if (reset) M_prec->precReset(); }
     // as for now resetting stabilization matrix at the same time as the preconditioner
 
     void resetStab() { M_matrStab.reset(); }
@@ -1110,9 +1110,6 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
 
 
     M_matrNoBC->GlobalAssemble();
-
-    if (M_stab)
-        M_matrStab->GlobalAssemble();
 
     matrix_ptrtype matrFull( new matrix_type( M_localMap, M_matrNoBC->getMeanNumEntries()));
 

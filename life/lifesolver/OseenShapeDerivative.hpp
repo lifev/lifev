@@ -217,14 +217,8 @@ void OseenShapeDerivative<Mesh, SolverType>::iterateLin( bchandler_raw_type& bch
     chrono.start();
 
     this->M_matrNoBC->GlobalAssemble();
-    if (this->M_stab)
-        this->M_matrStab->GlobalAssemble();
 
     M_rhsLinNoBC.GlobalAssemble();
-
-
-    if (this->M_stab)
-        this->M_matrStab->GlobalAssemble();
 
     matrix_ptrtype matrFull( new matrix_type( this->M_localMap, this->M_matrNoBC->getMeanNumEntries()));
 

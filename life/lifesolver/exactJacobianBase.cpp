@@ -135,7 +135,8 @@ void exactJacobian::eval(const vector_type& _disp,
     if(iter == 0)
         {
             M_nbEval = 0; // new time step
-            this->M_fluid->resetPrec();
+            if (isFluid())
+                this->M_fluid->resetPrec();
             //this->M_solid->resetPrec();
         }
 
