@@ -154,6 +154,7 @@ void exactJacobian::eval(const vector_type& _disp,
     if (this->isFluid())
     {
         this->M_meshMotion->iterate();
+        this->M_meshMotion->updateDispDiff();
 
         this->transferMeshMotionOnFluid(M_meshMotion->disp(),
                                         this->veloFluidMesh());
