@@ -152,8 +152,6 @@ FSIOperator::setup()
                                                             *M_epetraComm));
 
 
-        M_meshMotion.reset(new FSIOperator::meshmotion_raw_type(*M_mmFESpace,
-                                                                *M_epetraComm));
 
         M_uFESpace.reset( new FESpace<mesh_type, EpetraMap>(*M_fluidMeshPart,
                                                             *refFE_vel,
@@ -173,11 +171,6 @@ FSIOperator::setup()
 
         leaderPrint("fluid: ok.\n");
 
-        M_fluid.reset(new FSIOperator::fluid_raw_type(dataFluid(),
-                                                      *M_uFESpace,
-                                                      *M_pFESpace,
-                                                      *M_epetraComm));
-
 
 //         if (M_linearFluid)
 //             M_fluidLin.reset(new FSIOperator::fluidlin_raw_type(dataFluid(),
@@ -186,12 +179,7 @@ FSIOperator::setup()
 //                                                                 *M_epetraComm));
 
 
-        if(!M_monolithic)
-            {
-                vector_type u0(M_fluid->getMap());
-                M_bdf.reset(new BdfT<vector_type>(M_dataFluid->order_bdf()));
-                M_bdf->initialize_unk(u0);
-            }
+        resetHeAndFluid();
     }
     else
     {
@@ -203,7 +191,7 @@ FSIOperator::setup()
                                                             *M_epetraComm));
 
 
-        M_meshMotion.reset(new FSIOperator::meshmotion_raw_type(*M_mmFESpace,
+        M_meshMotion.reset(new meshmotion_raw_type(*M_mmFESpace,
                                                                 *M_epetraComm));
 
         M_uFESpace.reset( new FESpace<mesh_type, EpetraMap>(M_dataFluid->mesh(),
@@ -224,7 +212,7 @@ FSIOperator::setup()
 
         leaderPrint("fluid: ok.\n");
 
-        M_fluid.reset(new FSIOperator::fluid_raw_type(dataFluid(),
+        M_fluid.reset(new fluid_raw_type(dataFluid(),
                                                       *M_uFESpace,
                                                       *M_pFESpace,
                                                       *M_epetraComm));
@@ -244,36 +232,7 @@ FSIOperator::setup()
     if (this->isSolid())
     {
 
-        if(!M_monolithic)
-            {
-                M_solidMeshPart.reset( new  partitionMesh< FSIOperator::mesh_type > (*M_dataSolid->mesh(), *M_epetraComm));
-
-                M_dFESpace.reset(new FESpace<mesh_type, EpetraMap>(*M_solidMeshPart,
-                                                                   *refFE_struct,
-                                                                   *qR_struct,
-                                                                   *bdQr_struct,
-                                                                   3,
-                                                                   *M_epetraComm));
-
-                M_solid.reset(new FSIOperator::solid_raw_type(dataSolid(),
-                                                      *M_dFESpace,
-                                                      *M_epetraComm));
-
-//                 if (M_linearSolid)
-//                     M_solidLin.reset(new FSIOperator::solidlin_raw_type(dataSolid(),
-//                                                                         *M_dFESpace,
-//                                                                         *M_epetraComm));
-            }
-        if(M_monolithic)
-            {   // Monolitic: In the beginning I need a non-partitioned mesh. later we will do the partitioning
-                M_dFESpace.reset(new FESpace<mesh_type, EpetraMap>(M_dataSolid->mesh(),
-                                                                   *refFE_struct,
-                                                                   *qR_struct,
-                                                                   *bdQr_struct,
-                                                                   3,
-                                                                   *M_epetraComm));
-
-            }
+        solidInit(refFE_struct, bdQr_struct, qR_struct);
 
         leaderPrint("solid: ok.\n");
 
@@ -290,7 +249,7 @@ FSIOperator::setup()
         leaderPrint( "solid: ok.\n");
 
 
-        M_solid.reset(new FSIOperator::solid_raw_type(dataSolid(),
+        M_solid.reset(new solid_raw_type(dataSolid(),
                                                       *M_dFESpace,
                                                       *M_epetraComm));
 
@@ -306,14 +265,12 @@ FSIOperator::setup()
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    if(!M_monolithic)
-        {
-            M_dofFluidToStructure->setup(M_dFESpace->refFE(), dDof,
+    M_dofFluidToStructure->setup(M_dFESpace->refFE(), dDof,
                                          M_uFESpace->refFE(), M_uFESpace->dof());
-            M_dofFluidToStructure->update(*M_dataSolid->mesh(), M_fluidInterfaceFlag,
-                                          *M_uFESpace->mesh(),  M_structureInterfaceFlag,
-                                          M_interfaceTolerance);
-        }
+    M_dofFluidToStructure->update(*M_dataSolid->mesh(), M_fluidInterfaceFlag,
+                                  *M_uFESpace->mesh(),  M_structureInterfaceFlag,
+                                  M_interfaceTolerance);
+
     //here the solid mesh must be non partitioned in the monolithic case
     M_dofStructureToHarmonicExtension->setup(M_uFESpace->refFE(), M_uFESpace->dof(),
                                              M_dFESpace->refFE(), M_dFESpace->dof());
@@ -341,17 +298,6 @@ FSIOperator::setup()
                                           *M_dataFluid->mesh(), M_fluidInterfaceFlag,
                                           M_interfaceTolerance);
 
-    if(M_monolithic)// solid mesh partitioning for monolithic
-        {
-            M_solidMeshPart.reset( new  partitionMesh< FSIOperator::mesh_type > (*M_dataSolid->mesh(), *M_epetraComm));
-
-            M_dFESpace.reset(new FESpace<mesh_type, EpetraMap>(*M_solidMeshPart,
-                                                               *refFE_struct,
-                                                               *qR_struct,
-                                                               *bdQr_struct,
-                                                               3,
-                                                               *M_epetraComm));
-        }
     typedef std::map<ID, ID>::const_iterator Iterator;
 
     std::vector<int> dofInterfaceFluid;
@@ -411,40 +357,7 @@ FSIOperator::setup()
                                             pointerToDofs,
                                             1,
                                             *M_epetraWorldComm));
-    // INITIALIZATION OF THE VARIABLES
-    M_lambdaFluid.reset(new vector_type(*M_fluidInterfaceMap, Unique) );
-    M_lambdaFluidRepeated.reset(new vector_type(*M_fluidInterfaceMap, Repeated) );
-
-    if(!M_monolithic)//these vectors are not needed for the monolithic
-        {
-            if (this->isFluid())
-                {
-                    M_dispFluidMeshOld.reset(new vector_type(M_uFESpace->map(), Repeated) );
-                    M_veloFluidMesh.reset   (new vector_type(M_uFESpace->map(), Repeated) );
-                    M_Alphaf.reset          (new vector_type(M_uFESpace->map(), Repeated));
-
-                    if (M_linearFluid)
-                        M_derVeloFluidMesh.reset(new vector_type(this->M_uFESpace->map(), Repeated) );
-
-                    M_un.reset (new vector_type(M_fluid->getMap()));
-                    M_rhs.reset(new vector_type(M_fluid->getMap()));
-                }
-
-            M_sigmaFluid.reset (new vector_type(*M_fluidInterfaceMap, Unique) );
-            M_sigmaFluidRepeated.reset (new vector_type(*M_fluidInterfaceMap, Repeated) );
-            M_minusSigmaFluid.reset (new vector_type(*M_fluidInterfaceMap, Unique) );
-            M_minusSigmaFluidRepeated.reset (new vector_type(*M_fluidInterfaceMap, Repeated) );
-
-            M_lambdaSolid.reset   (new vector_type(*M_solidInterfaceMap, Unique) );
-            M_lambdaSolidOld.reset(new vector_type(*M_solidInterfaceMap, Unique) );
-            M_lambdaDotSolid.reset(new vector_type(*M_solidInterfaceMap, Unique) );
-            M_sigmaSolid.reset    (new vector_type(*M_solidInterfaceMap, Unique) );
-
-            M_lambdaSolidRepeated.reset   (new vector_type(*M_solidInterfaceMap, Repeated) );
-            M_lambdaDotSolidRepeated.reset(new vector_type(*M_solidInterfaceMap, Repeated) );
-            M_sigmaSolidRepeated.reset    (new vector_type(*M_solidInterfaceMap, Repeated) );
-        }
-
+    variablesInit( refFE_struct, bdQr_struct, qR_struct);
     M_epetraWorldComm->Barrier();
 
     leaderPrint(" done.\n");
@@ -545,6 +458,7 @@ FSIOperator::moveMesh(vector_type const &dep)
 }
 
 
+
 void
 FSIOperator::setUpSystem( GetPot const& data_file )
 {
@@ -585,9 +499,8 @@ FSIOperator::buildSystem()
     }
 }
 
-
 void
-FSIOperator::updateSystem(fluid_source_type& /*fluidSource*/, solid_source_type& /*solidSource*/)
+FSIOperator::updateSystem(const vector_type& /*lambda*/)
 {
 
     shiftSolution();
@@ -609,12 +522,12 @@ FSIOperator::updateSystem(fluid_source_type& /*fluidSource*/, solid_source_type&
         transferMeshMotionOnFluid(M_meshMotion->disp(),
                                   *this->M_dispFluidMeshOld);
 
-        *this->M_un                = M_fluid->solution();
+        *M_un                = M_fluid->solution();
 
         //*this->M_rhs               = M_fluid->matrMass()* (*this->M_un);
         //*this->M_rhs*=this->M_bdf->coeff_der( 0 ) / M_dataFluid->timestep();
 
-        *this->M_rhs               = M_fluid->matrMass()*M_bdf->time_der( M_dataFluid->timestep() );
+        *M_rhs               = M_fluid->matrMass()*M_bdf->time_der( M_dataFluid->timestep() );
 
     }
 
@@ -1585,7 +1498,7 @@ void  FSIOperator::setLambdaFluid(const vector_type& lambda)
     else // to be coded, I am not sure we need this functionality.
         assert(false); // if you get here, reformulate your problem in order to get a unique map as entry
 
-    *M_lambdaFluidRepeated = lambda;
+    *M_lambdaFluidRepeated = *M_lambdaFluid;
 
 }
 
@@ -1654,5 +1567,94 @@ void FSIOperator::setMinusSigmaFluid(const vector_type& sigma)
     *M_minusSigmaFluidRepeated = *M_minusSigmaFluid;
 }
 
+
+
+void FSIOperator::resetHeAndFluid()
+{
+    M_meshMotion.reset(new meshmotion_raw_type(*M_mmFESpace,
+                                               *M_epetraComm));
+    M_fluid.reset(new fluid_raw_type(dataFluid(),
+                                     *M_uFESpace,
+                                     *M_pFESpace,
+                                     *M_epetraComm));
+    vector_type u0(M_fluid->getMap());
+    M_bdf.reset(new BdfT<vector_type>(M_dataFluid->order_bdf()));
+    M_bdf->initialize_unk(u0);
+}
+
+void FSIOperator::solidInit(const RefFE* refFE_struct, const LifeV::QuadRule* bdQr_struct, const LifeV::QuadRule* qR_struct)
+{
+    M_solidMeshPart.reset( new  partitionMesh< mesh_type > (*M_dataSolid->mesh(), *M_epetraComm));
+    M_dFESpace.reset(new FESpace<mesh_type, EpetraMap>(*M_solidMeshPart,
+                                                       *refFE_struct,
+                                                       *qR_struct,
+                                                       *bdQr_struct,
+                                                       3,
+                                                       *M_epetraComm));
+
+    M_solid.reset(new solid_raw_type(dataSolid(),
+                                     *M_dFESpace,
+                                     *M_epetraComm));
+
+    //                 if (M_linearSolid)
+    //                     M_solidLin.reset(new FSIOperator::solidlin_raw_type(dataSolid(),
+    //                                                                         *M_dFESpace,
+    //                                                                         *M_epetraComm));
+}
+
+void FSIOperator::variablesInit(const RefFE* refFE_struct,const LifeV::QuadRule*  bdQr_struct, const LifeV::QuadRule* qR_struct)
+{
+    // INITIALIZATION OF THE VARIABLES
+    M_lambdaFluid.reset(new vector_type(*M_fluidInterfaceMap, Unique) );
+    M_lambdaFluidRepeated.reset(new vector_type(*M_fluidInterfaceMap, Repeated) );
+
+    if (this->isFluid())
+        {
+            M_dispFluidMeshOld.reset(new vector_type(M_uFESpace->map(), Repeated) );
+            M_veloFluidMesh.reset   (new vector_type(M_uFESpace->map(), Repeated) );
+            M_Alphaf.reset          (new vector_type(M_uFESpace->map(), Repeated));
+
+            if (M_linearFluid)
+                M_derVeloFluidMesh.reset(new vector_type(this->M_uFESpace->map(), Repeated) );
+
+            M_un.reset (new vector_type(M_fluid->getMap()));
+            M_rhs.reset(new vector_type(M_fluid->getMap()));
+        }
+
+    M_sigmaFluid.reset (new vector_type(*M_fluidInterfaceMap, Unique) );
+    M_sigmaFluidRepeated.reset (new vector_type(*M_fluidInterfaceMap, Repeated) );
+    M_minusSigmaFluid.reset (new vector_type(*M_fluidInterfaceMap, Unique) );
+    M_minusSigmaFluidRepeated.reset (new vector_type(*M_fluidInterfaceMap, Repeated) );
+
+    M_lambdaSolid.reset   (new vector_type(*M_solidInterfaceMap, Unique) );
+    M_lambdaSolidOld.reset(new vector_type(*M_solidInterfaceMap, Unique) );
+    M_lambdaDotSolid.reset(new vector_type(*M_solidInterfaceMap, Unique) );
+    M_sigmaSolid.reset    (new vector_type(*M_solidInterfaceMap, Unique) );
+
+    M_lambdaSolidRepeated.reset   (new vector_type(*M_solidInterfaceMap, Repeated) );
+    M_lambdaDotSolidRepeated.reset(new vector_type(*M_solidInterfaceMap, Repeated) );
+    M_sigmaSolidRepeated.reset    (new vector_type(*M_solidInterfaceMap, Repeated) );
+}
+
+void FSIOperator::couplingVariableExtrap(vector_ptrtype& lambda, vector_ptrtype& lambdaDot, bool& firstIter)
+{
+    *lambda      = lambdaSolid();
+   if (firstIter)
+    {
+        firstIter = false;
+
+        *lambda     += M_dataFluid->timestep()*lambdaDotSolid();
+    }
+    else
+    {
+        *lambda     += 1.5*M_dataFluid->timestep()*lambdaDotSolid(); // *1.5
+        *lambda     -= M_dataFluid->timestep()*0.5*(*lambdaDot);
+    }
+        *lambdaDot   = lambdaDotSolid();
+
+
+        leaderPrint("norm( disp  ) init = ", lambda->NormInf() );
+        leaderPrint("norm( velo )  init = ", lambdaDot->NormInf());
+}
 
 }

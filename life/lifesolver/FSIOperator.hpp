@@ -275,8 +275,7 @@ public:
     void updateJacobian (vector_type& sol,
                          int    iter);
 
-    void updateSystem(fluid_source_type &fluidSource, solid_source_type &solidSource);
-    void shiftSolution();
+    virtual void shiftSolution();
 
     void moveMesh(vector_type const &dep);
 
@@ -339,7 +338,7 @@ public:
     bool    isFluid() const {return M_isFluid;}
     bool    isSolid() const {return M_isSolid;}
 
-    void    setUpSystem( GetPot const& data_file );
+    virtual void    setUpSystem( GetPot const& data_file );
     virtual void buildSystem();
 
     void    setComm     (   boost::shared_ptr<Epetra_MpiComm> comm,
@@ -351,6 +350,7 @@ public:
 
     boost::shared_ptr<EpetraMap>& fluidInterfaceMap() {return M_fluidInterfaceMap;}
     boost::shared_ptr<EpetraMap>& solidInterfaceMap() {return M_solidInterfaceMap;}
+    virtual    boost::shared_ptr<EpetraMap>& couplingVariableMap(){return M_solidInterfaceMap;}
 
 
     void setFluidLeader(int fluidLeader){M_fluidLeader = fluidLeader;}
@@ -471,7 +471,6 @@ public:
     std::vector<int>& dofInterfaceFluid() {return M_dofInterfaceFluid;}
     std::vector<int>& dofInterfaceSolid() {return M_dofInterfaceSolid;}
 
-
 //     void setReducedLinFluidBC   (fluid_bchandler_type bc_dredfluid);
 
 //     void setInvReducedLinFluidBC(fluid_bchandler_type bc_invdredfluid);
@@ -567,17 +566,23 @@ public:
     solid_bchandler_type const& BCh_dz_inv(){return M_BCh_dz_inv;}
     void setBCh_solidDerInv(solid_bchandler_type BCh_solidDerInv){M_BCh_dz_inv = BCh_solidDerInv;}
 
-
-    //! relevant only for monolitic solver. re-Implemented there
-    virtual void updateSystem(const vector_type& /*displacement*/) { assert(false); }
+    virtual void updateSystem(const vector_type& /*displacement*/);
 
     //! relevant only for monolitic solver. re-Implemented there
     virtual void iterateMesh(const vector_type& /*disp*/) { assert(false); }
 
     //! relevant only for monolitic solver. re-Implemented there
-    virtual EpetraMap& monolithicMap() { assert(false); };
+    //virtual boost::shared_ptr<EpetraMap>& monolithicMap() { assert(false); };
+
+    virtual void couplingVariableExtrap(vector_ptrtype& lambda, vector_ptrtype& lambdaDot, bool& firstIter);
 
 protected:
+
+    virtual void resetHeAndFluid();
+
+    virtual void solidInit(const RefFE* refFE_struct, const LifeV::QuadRule* bdQr_struct, const LifeV::QuadRule* qR_struct);
+
+    virtual void variablesInit(const RefFE* refFE_struct,const LifeV::QuadRule*  bdQr_struct, const LifeV::QuadRule* qR_struct);
 
     void transferMeshMotionOnFluid(const vector_type &_vec1,
                                    vector_type       &_vec2);
@@ -676,14 +681,14 @@ protected:
     bc_vector_interface                               M_bcvDerStructureDispToSolid;
 //     bc_vector_interface       M_bcvDerReducedFluidLoadToStructure;
 //     bc_vector_interface       M_bcvDerStructureAccToReducedFluid;
+    boost::shared_ptr<vector_type>                    M_lambdaFluid;
+    boost::shared_ptr<vector_type>                    M_lambdaFluidRepeated;
 
 
 private:
     // displacement on the interface
-    boost::shared_ptr<vector_type>                    M_lambdaFluid;
     boost::shared_ptr<vector_type>                    M_lambdaSolid;
 
-    boost::shared_ptr<vector_type>                    M_lambdaFluidRepeated;
     boost::shared_ptr<vector_type>                    M_lambdaSolidRepeated;
 
     boost::shared_ptr<vector_type>                    M_lambdaDotSolid;
