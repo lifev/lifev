@@ -150,7 +150,6 @@ void SolverTrilinos::setReuse()
     M_TrilinosParameterList.set("pre_calc", "reuse");
 }
 
-
 void SolverTrilinos::setDataFromGetPot( const GetPot& dfile, const std::string& section )
 {
     //
@@ -425,12 +424,12 @@ SolverTrilinos::printStatus(const std::string& message,
 }
 
 
-int SolverTrilinos::solveSystem( matrix_ptrtype matrFull,
-                                 EpetraVector&  rhsFull,
-                                 EpetraVector&  sol,
-                                 prec_type&     prec,
-                                 bool const     reuse,
-                                 bool const     retry)
+int SolverTrilinos::solveSystem(  matrix_ptrtype    matrFull,
+                                  vector_type&      rhsFull,
+                                  vector_type&      sol,
+                                  matrix_ptrtype&   prec,
+                                  bool const        reuse,
+                                  bool const        retry)
 {
     Chrono chrono;
     M_Displayer.leaderPrint("      Setting up the solver ...                \n");
@@ -438,17 +437,17 @@ int SolverTrilinos::solveSystem( matrix_ptrtype matrFull,
 //    assert (M_matrFull.get() != 0);
     setMatrix(*matrFull);
 
-    if ( !prec->set() || !reuse  )
+    if ( !M_prec->set() || !reuse  )
     {
         chrono.start();
 
         M_Displayer.leaderPrint("      Computing the precond ...                \n");
 
-        prec->buildPreconditioner(matrFull);
+        M_prec->buildPreconditioner(prec);
 
-        double condest = prec->Condest();
+        double condest = M_prec->Condest();
 
-        setPreconditioner(prec);
+        setPreconditioner(M_prec);
 
         chrono.stop();
         M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
@@ -466,31 +465,51 @@ int SolverTrilinos::solveSystem( matrix_ptrtype matrFull,
     chrono.stop();
     M_Displayer.leaderPrintMax( "       ... done in " , chrono.diff() );
 
-    if (numIter < M_maxIterSolver) return numIter;
+    if (numIter < M_maxIterSolver || !retry) return numIter;
+    // If we do not want to retry, return now.
+    // otherwise rebuild the preconditioner and solve again
 
-    chrono.start();
 
     M_Displayer.leaderPrint("      Iterative solver failed, numiter = " , numIter);
     M_Displayer.leaderPrint("                         maxIterSolver = " , M_maxIterSolver );
 
-    // If we do not want to retry, return now.
-    if (!retry)     return numIter;
-    // otherwise rebuild the preconditioner and solve again
-
     M_Displayer.leaderPrint("      retrying: solving again ...            ");
-    prec->precReset();
+    M_prec->precReset();
 
+
+        if(M_prec.get())
+            {
+                chrono.start();
+                M_prec->buildPreconditioner(prec);
+
+                double condest = M_prec->Condest();
+
+                setPreconditioner(M_prec);
+
+                chrono.stop();
+                M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
+                M_Displayer.leaderPrint("  f-       Estimated condition number = " , condest );
+            }
     // Solving again, but only once (retry = false)
     numIter = solveSystem( matrFull, rhsFull, sol,
                                prec, reuse, false);
+        if (numIter >= M_maxIterSolver)
+            M_Displayer.leaderPrint("  f- ERROR: Iterative solver failed again.\n");
 
-    if ( numIter >= M_maxIterSolver)
-        M_Displayer.leaderPrint("  ERROR: Iterative solver failed again.\n");
 
     return -numIter;
-
 }
 
+void SolverTrilinos::setUpPrec(const GetPot& dataFile,  const std::string& section)
+{
+    std::string precType = dataFile( (section + "/prectype").data(), "Ifpack");
+    M_prec.reset( PRECFactory::instance().createObject( precType ) );
+    ASSERT(M_prec.get() != 0, "Oseen : Preconditioner not set");
+    M_prec->setDataFromGetPot( dataFile, section );
+}
+
+void SolverTrilinos::setPrec(prec_raw_type* prec)
+{M_prec.reset(prec);}
 
 } // namespace LifeV
 

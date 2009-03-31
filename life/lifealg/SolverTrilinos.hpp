@@ -134,7 +134,7 @@ public:
     void useDDPrec();
     void useNeumannPrec();
     void setReuse();
-    void setTolMaxiter(const double tol, const int maxiter=-1);
+   void setTolMaxiter(const double tol, const int maxiter=-1);
 
 
     //! describes the verobisty level
@@ -191,16 +191,21 @@ public:
         returns number of iterations. If negative, the solver did not converge,
         the preconditionar has been recomputed, and a second solution is tried
     */
-    int solveSystem( matrix_ptrtype matrFull,
-                     vector_type&   rhsFull,
-                     vector_type&   sol,
-                     prec_type&     prec,
-                     bool const     reuse,
-                     bool const     retry = true);
+    int solveSystem(  matrix_ptrtype   matrFull,
+                      vector_type&     rhsFull,
+                      vector_type&     sol,
+                      matrix_ptrtype&  prec,
+                      bool const       reuse,
+                      bool const       retry=true);
+
+    void setUpPrec(const GetPot& dataFile,  const std::string& section);
+    void setPrec(prec_raw_type* prec);
+
+    prec_type& getPrec(){return M_prec;}
 
 private:
 
-    prec_ptr               M_prec;
+    prec_type              M_prec;
 
     AztecOO                M_solver;
 
