@@ -128,7 +128,7 @@ private:
 
 // } // namespace Epetra
 
-typedef boost::shared_ptr<EpetraPreconditioner>                 prec_ptr;
+//typedef boost::shared_ptr<EpetraPreconditioner>                 prec_ptr;
 typedef singleton<factory<EpetraPreconditioner,  std::string> > PRECFactory;
 
 
