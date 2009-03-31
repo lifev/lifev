@@ -194,12 +194,12 @@ void OseenShapeDerivative<Mesh, SolverType>::setUp( const GetPot& dataFile )
     //    M_linearLinSolver.setAztecooPreconditioner( dataFile, "lin_fluid/solver" );
 
     super::setUp( dataFile );
-    M_reusePrecLin = dataFile( "lin_fluid/prec/reuse", true);
+    //M_reusePrecLin = dataFile( "lin_fluid/prec/reuse", true);
 
-    std::string precType = dataFile( "lin_fluid/prec/prectype", "Ifpack");
+    //std::string precType = dataFile( "lin_fluid/prec/prectype", "Ifpack");
 
-    M_linPrec            = prec_ptr( PRECFactory::instance().createObject( precType ) );
-    M_linPrec->setDataFromGetPot( dataFile, "lin_fluid/prec" );
+    //    M_linPrec            = prec_type( PRECFactory::instance().createObject( precType ) ); //linPrec is not used
+    //    M_linPrec->setDataFromGetPot( dataFile, "lin_fluid/prec" );
 
 }
 
@@ -243,15 +243,13 @@ void OseenShapeDerivative<Mesh, SolverType>::iterateLin( bchandler_raw_type& bch
 
     chrono.stop();
 
-//    this->M_comm->Barrier();
-
-            this->M_Displayer.leaderPrintMax("done in ", chrono.diff() );
+    this->M_Displayer.leaderPrintMax("done in ", chrono.diff() );
 
     // solving the system
 
     // using the same preconditioner as for the non linear problem (the matrix changes only in the
     // boundary terms).
-    this->M_linearSolver.solveSystem( matrFull, rhsFull, M_linSol, this->M_prec, (M_reusePrecLin && !this->M_resetPrec));
+    this->M_linearSolver.solveSystem( matrFull, rhsFull, M_linSol, matrFull, (M_reusePrecLin && !this->M_resetPrec));
 
     this->M_residual  = M_rhsLinNoBC;
     this->M_residual -= *this->M_matrNoBC*this->M_linSol;
