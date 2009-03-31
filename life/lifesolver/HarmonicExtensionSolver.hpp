@@ -99,7 +99,12 @@ public:
                              );
 
     HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
-                             Epetra_Comm&              comm
+                             Epetra_Comm&              comm);
+
+    HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
+                             Epetra_Comm&              comm,
+                             EpetraMap&                locMap  ,
+                             UInt                      offset =0
                              );
     //! operators overload
 
@@ -159,10 +164,15 @@ public:
 
     void resetPrec() {M_resetPrec = true;}
 
+    void rescaleMatrix(Real& dt){*M_matrHE *= dt;}
+    void setMatrix(matrix_ptrtype matr){*matr += *M_matrHE;}
+    void applyBoundaryConditions(vector_type& rhs);
+    void computeMatrix();
+    void updateDispDiff();
+    //vector_type& deltaDisp(){return *M_dispDeltaDiff;}
+    //void updateDeltaDisp(vector_type& deltaDisp){M_dispDeltaDiff.reset(new vector_type(deltaDisp));}
 
 private:
-
-    void computeMatrix( );
 
     //! Finite Element Space
 
@@ -214,7 +224,8 @@ private:
     //! Diffusion coefficient for the laplacian operator
     Real                           M_diffusion;
 
-
+    UInt                           M_offset;
+    //    boost::shared_ptr<vector_type>                 M_dispDeltaDiff; // useful for shape derivatives and Newton in general
 };
 
 
@@ -251,7 +262,8 @@ HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
     M_maxIterForReuse        ( -1 ),
     M_resetPrec              ( true ),
     M_BCh                   ( &bcHandler ),
-    M_diffusion             ( 1. )
+    M_diffusion             ( 1. ),
+    M_offset                (0)
 
 {
 }
@@ -272,11 +284,38 @@ HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
     M_dispOld               ( M_localMap ),
     M_dispDiff              ( M_localMap ),
     M_f                     ( M_localMap ),
-    M_prec                  ( ),
-    M_reusePrec             ( true ),
-    M_maxIterForReuse       ( -1 ),
-    M_resetPrec             ( true ),
-    M_diffusion             ( 1. )
+    M_prec                   (  ),
+    M_reusePrec              ( true ),
+    M_maxIterForReuse        ( -1 ),
+    M_resetPrec              ( true ),
+    M_diffusion             ( 1. ),
+    M_offset                (0)
+{
+}
+
+template <typename Mesh, typename SolverType>
+HarmonicExtensionSolver<Mesh, SolverType>::
+HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
+                         Epetra_Comm&              comm ,
+                         EpetraMap& localMap,
+                         UInt offset):
+    M_FESpace               ( mmFESpace ),
+    M_localMap              ( localMap),
+    M_matrHE                ( new matrix_type (M_localMap ) ),
+    M_comm                  ( &comm ),
+    M_me                    ( M_comm->MyPID() ),
+    M_verbose               ( M_me == 0 ),
+    M_elmat                 ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
+    M_disp                  ( mmFESpace.map() ),
+    M_dispOld               ( M_disp.getMap() ),
+    M_dispDiff              ( M_disp.getMap() ),
+    M_f                     ( M_disp.getMap() ),
+    M_prec                   ( ),
+    M_reusePrec              ( true ),
+    M_maxIterForReuse        ( -1 ),
+    M_resetPrec              ( true ),
+    M_diffusion             ( 1. ),
+    M_offset                (offset)
 {
 }
 
@@ -296,7 +335,7 @@ void HarmonicExtensionSolver<Mesh, SolverType>::setUp( const GetPot& dataFile )
 
     std::string precType = dataFile( "mesh_motion/prec/prectype", "Ifpack");
 
-    M_prec               = prec_ptr( PRECFactory::instance().createObject( precType ) );
+    M_prec               = prec_type( PRECFactory::instance().createObject( precType ) );
 
     ASSERT(M_prec.get() != 0, "HE : Preconditioner not set");
 
@@ -330,7 +369,7 @@ void HarmonicExtensionSolver<Mesh, SolverType>::computeMatrix( )
         // Assembling
         for ( UInt j = 0; j < M_FESpace.fieldDim(); ++j )
         {
-            assembleMatrix( *M_matrHE, M_elmat, M_FESpace.fe(), M_FESpace.dof(), j, j, j*totalDof, j*totalDof );
+            assembleMatrix( *M_matrHE, M_elmat, M_FESpace.fe(), M_FESpace.dof(), j, j, j*totalDof+M_offset, j*totalDof+M_offset );
         }
     }
 
@@ -375,26 +414,12 @@ HarmonicExtensionSolver<Mesh, SolverType>::iterate()
     if (M_verbose)
         std::cout << "  HE- Updating boundary conditions : " << std::flush;
 
-    if (  ! M_BCh->bdUpdateDone() )
-    {
-        // BC boundary information update
-        if (M_verbose) std::cout << "\n      - Updating the BC " << std::flush;
-        M_BCh->bdUpdate( *M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
-        if (M_verbose) std::cout << "\n      - Filling the matrix " ;
-        bcManageMatrix( *M_matrHE, *M_FESpace.mesh(), M_FESpace.dof(), *M_BCh, M_FESpace.feBd(), 1.0, 0. );
-        if (M_verbose) std::cout << "\n" << std::flush;
-    }
+    // Initializations
+    M_f    *= 0.;
+    applyBoundaryConditions(M_f);
 
     Chrono chrono;
 
-
-    // Initializations
-    M_f    *= 0.;
-
-    if (M_verbose) std::cout << "\n  HE- Filling the rhs " << std::flush;
-    //    bcManageVector(M_f, *M_FESpace.mesh(), M_FESpace.dof(), *M_BCh, M_FESpace.feBd(), 0., 1.0 );
-    bcManageVector(M_f, M_FESpace, *M_BCh, 0., 1.0 );
-    if (M_verbose) std::cout << "\n" << std::flush;
 
     if ( !M_reusePrec || M_resetPrec || !M_prec->set() )
     {
@@ -443,14 +468,46 @@ HarmonicExtensionSolver<Mesh, SolverType>::iterate()
                   << std::flush;
     }
 
-
-    M_dispDiff =  M_disp ;
-    M_dispDiff -= M_dispOld;
+    //    M_dispDiff =  M_disp ;
+    //    M_dispDiff -= M_dispOld;
 
 
 }
+    template <typename Mesh, typename SolverType>
+void
+HarmonicExtensionSolver<Mesh, SolverType>::updateDispDiff()
+{
+    M_dispDiff =  M_disp ;
+    M_dispDiff -= M_dispOld;
+}
 
 
+template <typename Mesh, typename SolverType>
+void
+HarmonicExtensionSolver<Mesh, SolverType>::applyBoundaryConditions(vector_type& rhs)
+{
+    if(M_offset)//mans that this is the fullMonolithic case
+        {
+            M_BCh->setOffset(M_offset);
+        }
+    else
+        {
+            if (M_verbose) std::cout << "\n  HE- Filling the rhs " << std::flush;
+            //    bcManageVector(M_f, *M_FESpace.mesh(), M_FESpace.dof(), *M_BCh, M_FESpace.feBd(), 0., 1.0 );
+            //bcManageVector(rhs, M_FESpace, *M_BCh, 0., 1.0 );
+            bcManageVector(rhs, *M_FESpace.mesh(), M_FESpace.dof(), *M_BCh, M_FESpace.feBd(), 0., 1.0);
+            if (M_verbose) std::cout << "\n" << std::flush;
+        }
+    if (  ! M_BCh->bdUpdateDone() )
+    {
+        // BC boundary information update
+        if (M_verbose) std::cout << "\n      - Updating the BC " << std::flush;
+        M_BCh->bdUpdate( *M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
+        if (M_verbose) std::cout << "\n      - Filling the matrix " ;
+        bcManageMatrix( *M_matrHE, *M_FESpace.mesh(), M_FESpace.dof(), *M_BCh, M_FESpace.feBd(), 1.0, 0. );
+        if (M_verbose) std::cout << "\n" << std::flush;
+    }
+}
 
 // This method updates the extension of the displacement, i.e. it solves the laplacian proglem
 // template <typename Mesh, typename SolverType>
