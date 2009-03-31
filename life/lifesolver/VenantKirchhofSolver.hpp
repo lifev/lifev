@@ -31,25 +31,30 @@
 
 #include <life/lifearray/elemMat.hpp>
 #include <life/lifearray/elemVec.hpp>
+#include <life/lifearray/EpetraMatrix.hpp>
+#include <life/lifearray/EpetraVector.hpp>
+
 #include <life/lifefem/elemOper.hpp>
 #include <life/lifefem/values.hpp>
 #include <life/lifearray/pattern.hpp>
 #include <life/lifefem/assemb.hpp>
 #include <life/lifefem/bcManage.hpp>
 #include <life/lifefem/bcHandler.hpp>
+#include <life/lifefem/FESpace.hpp>
+
 #include <life/lifecore/chrono.hpp>
+
 #include <life/lifealg/dataNewton.hpp>
 #include <life/lifealg/newton.hpp>
-//
 #include <life/lifealg/SolverTrilinos.hpp>
-#include <life/lifearray/EpetraMatrix.hpp>
-#include <life/lifearray/EpetraVector.hpp>
 
-//
-#include "life/lifefem/FESpace.hpp"
 #include <life/lifesolver/dataElasticStructure.hpp>
+#include <life/lifecore/displayer.hpp>
 
 
+
+#include "Epetra_Vector.h"
+#include "EpetraExt_MatrixMatrix.h"
 
 namespace LifeV
 {
@@ -81,6 +86,8 @@ public:
     typedef typename solver_type::matrix_type      matrix_type;
     typedef boost::shared_ptr<matrix_type>         matrix_ptrtype;
     typedef typename solver_type::vector_type      vector_type;
+    typedef boost::shared_ptr<vector_type>         vector_ptrtype;
+
 
     typedef typename SolverType::prec_raw_type    prec_raw_type;
     typedef typename SolverType::prec_type        prec_type;
@@ -120,8 +127,9 @@ public:
                           FESpace<Mesh, EpetraMap>&   dFESpace,
                           Epetra_Comm&     comm,
                           EpetraMap&       monolithicMap,
-                          UInt       offset=0,
-                          boost::shared_ptr<FESpace<Mesh, EpetraMap> >   uFESpace=0);
+                          UInt       offset=0
+                          //boost::shared_ptr<FESpace<Mesh, EpetraMap> >   uFESpace=0
+                          );
 
 
     //! Update the right  hand side  for time advancing
@@ -133,11 +141,11 @@ public:
     void updateSystem(vector_type& rhsFluidCoupling); // used for monolithic
     void updateSystem();
 
-    void buildSystem(matrix_type & bigMatrixStokes); // used for monolithic
+    //void buildSystem(matrix_type & bigMatrixStokes); // used for monolithic
     void buildSystem();
 
     //! Solve the non-linear system
-    void iterateMonolithic(vector_type& rhs, vector_type& sol, matrix_ptrtype prec); // used for monolithic
+
     void iterate( vector_type& sol );
     void iterate( bchandler_raw_type& bch );
     void iterateLin( bchandler_raw_type& bch );
@@ -146,23 +154,23 @@ public:
     //void showMe( std::ostream& c = std::cout ) const;
 
     //! getters
-
+    EpetraMap   const& getMap()       const { return M_localMap; }
+    Displayer   const& getDisplayer() const { return M_Displayer; }
+    matrix_ptrtype const getMassStiff() const {return M_massStiff; }
     //! BCHandler getter and setter
-
 //    LIFEV_DEPRECATED BCHandler const & BC_solid() const {return BCh_solid();}
-
     FESpace<Mesh, EpetraMap>& dFESpace(){return M_FESpace;}
-
-
     BCHandler const & BChandler() const {return M_BCh;}
-
-    void setBC(BCHandler& BCd)   {M_BCh = &BCd;}
-
     //! residual getter
-    vector_type& residual()             {return M_residual_d;}
+    vector_type& residual()             {return *M_residual_d;}
+    // end of getters
 
+    //!setters
+    void setBC(BCHandler& BCd)   {M_BCh = &BCd;}
+    void setSourceTerm( source_type const& __s ) { M_source = __s; }
+    void resetPrec() {M_resetPrec = true;}
+    void setDisp(const vector_type& disp){M_disp = disp;} // used for monolithic
     //! recur setter
-
     void setRecur(UInt recur) {_recur = recur;}
 
     void updateJacobian( vector_type& sol, int iter );
@@ -189,13 +197,12 @@ public:
 
     void evalConstraintTensor();
 
-    void setSourceTerm( source_type const& __s ) { M_source = __s; }
 
     source_type const& sourceTerm() const { return M_source; }
 
     vector_type& disp()        { return M_disp; }
     vector_type& vel()         { return M_vel; }
-    vector_type& rhsWithoutBC() { return M_rhsNoBC; }
+    vector_ptrtype& rhsWithoutBC() { return M_rhsNoBC; }
 
     void setUp( const GetPot& dataFile );
 
@@ -204,7 +211,6 @@ public:
 
     void postProcess();
 
-    void resetPrec() {M_resetPrec = true;}
 
     //const Dof& dDof() const { return M_FESpace.dof(); }
 
@@ -213,27 +219,15 @@ public:
                          Vector& vel );
 
     //Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getRepeatedEpetra_Map(); }
-    EpetraMap   const& getMap()       const { return M_localMap; }
 
     Epetra_Comm const& comm()         const {return *M_comm;}
 
-    Displayer   const& getDisplayer() const { return M_Displayer; }
-
-    void evalResidual(bchandler_raw_type & bcFluid, bchandler_raw_type & bcSolid, const vector_type& sol, vector_type& res/*, matrix_type& bigMatrix*/); // used for monolithic
-
-    void evalResidual( const vector_type& sol, vector_type& res); // used for monolithic
-
-    void setDispSolid(const vector_type& disp){M_dispSolid = disp;} // used for monolithic
-
-    // the following are used for momolithic
+    void rescaleMatrices(); // used for monolithic
+    //void updateMatrix(matrix_type & bigMatrixStokes);// used for monolithic
+    //void updateCoupling(matrix_type couplingMatrix);// used for monolithic
+    Real rescaleFactor(){return M_rescaleFactor;}
     void updateStuff();
-    void updateMatrix(matrix_type & bigMatrixStokes);
-    void rescaleMatrices();
-    //    matrix_ptrtype getSolidBlockPtr(){return M_massStiff;}
-    void setBlockPreconditioner(matrix_ptrtype blockPrec){*blockPrec += *M_massStiff;}
-    void setFullPreconditioner(matrix_ptrtype fullPrec){*fullPrec += *M_matrFull;}
-    matrix_ptrtype getMatrixPtr(){return M_matrFull;}
-    // end used for monolithic
+    UInt const offset()const{return M_offset;}
 
 private:
 
@@ -279,19 +273,19 @@ private:
     vector_type                    M_vel;
 
     //! right  hand  side displacement
-    vector_type                    M_rhs;
+    vector_ptrtype                    M_rhs;
 
     //! right  hand  side velocity
     vector_type                    M_rhsW;
 
     //! right  hand  side
-    vector_type                    M_rhsNoBC;
+    vector_ptrtype                    M_rhsNoBC;
 
     //! right  hand  side
-    vector_type                    M_f;
+    boost::shared_ptr<vector_type>                    M_f;
 
     //! residual
-    vector_type                    M_residual_d;
+    boost::shared_ptr<vector_type>                    M_residual_d;
 
 //    vector_type*                   M_sxx;
 
@@ -309,8 +303,8 @@ private:
     source_type                    M_source;
 
     //! data for solving tangent problem with aztec
-    solver_type                    M_linearSolver;
-    prec_type                      M_prec;
+    boost::shared_ptr<solver_type>                    M_linearSolver;
+    //    prec_type                      M_prec;
 
     bool                           M_reusePrec;
     int                            M_maxIterForReuse;
@@ -322,9 +316,8 @@ private:
 
     UInt                           M_offset;
     bool                           M_monolithic;
-    vector_type                    M_dispSolid;
-    boost::shared_ptr<FESpace<Mesh, EpetraMap> >      M_uFESpace;
-    //    bool                           M_isDiagonalBlockPrec;
+    Real                            M_rescaleFactor;
+
     //
     //! methods
     //
@@ -359,8 +352,8 @@ VenantKirchhofSolver( const data_type&          data,
     M_comm                       ( &comm ),
     M_Displayer                  ( comm ),
     M_me                         ( comm.MyPID() ),
-    M_linearSolver               ( comm ),
-    M_prec                       ( ),//new prec_raw_type() ),
+    M_linearSolver               ( new SolverType( comm ) ),
+    //    M_prec                       ( ),//new prec_raw_type() ),
     M_localMap                   ( M_FESpace.map() ),
     M_mass                       ( new matrix_type(M_localMap) ),
     M_linearStiff                ( new matrix_type(M_localMap) ),
@@ -372,13 +365,13 @@ VenantKirchhofSolver( const data_type&          data,
     M_elmatC                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
     M_elvec                      ( M_FESpace.fe().nbNode, nDimensions ),
     M_dk_loc                     ( M_FESpace.fe().nbNode, nDimensions ),
-    M_disp                       ( M_localMap ),
+    M_disp                       ( M_localMap),
     M_vel                        ( M_localMap ),
-    M_rhs                        ( M_localMap ),
+    M_rhs                        ( new vector_type(M_localMap) ),
     M_rhsW                       ( M_localMap ),
-    M_rhsNoBC               ( M_localMap ),
-    M_f                          ( M_localMap),
-    M_residual_d                 ( M_localMap ),
+    M_rhsNoBC               ( new vector_type(M_localMap) ),
+    M_f                          ( new vector_type(M_localMap)),
+    M_residual_d                 (  new vector_type(M_localMap)),
     M_sxx                        ( M_localMap ),
     M_syy                        ( M_localMap ),
     M_szz                        ( M_localMap ),
@@ -390,8 +383,8 @@ VenantKirchhofSolver( const data_type&          data,
     M_maxIterSolver              ( -1 ),
     M_count                      ( 0 ),
     M_offset                     (offset),
-    M_dispSolid                ( M_localMap ),
-    M_uFESpace                 ( )
+    M_rescaleFactor            (1.),
+    M_matrFull                   ( )
 {
     //    M_BCh->setOffset(M_offset);
 }
@@ -419,28 +412,28 @@ VenantKirchhofSolver( const data_type& data,
     M_elmatC                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
     M_elvec                      ( M_FESpace.fe().nbNode, nDimensions ),
     M_dk_loc                     ( M_FESpace.fe().nbNode, nDimensions ),
-    M_disp                       ( M_localMap ),
+    M_disp                       ( M_localMap),
     M_vel                        ( M_localMap ),
-    M_rhs                        ( M_localMap ),
+    M_rhs                        ( new vector_type(M_localMap) ),
     M_rhsW                       ( M_localMap ),
-    M_rhsNoBC                    ( M_localMap ),
-    M_f                          ( M_localMap),
-    M_residual_d                 ( M_localMap ),
+    M_rhsNoBC                    ( new vector_type(M_localMap) ),
+    M_f                          ( new vector_type(M_localMap)),
+    M_residual_d                 ( new vector_type(M_localMap)),
     M_sxx                        ( M_localMap ),
     M_syy                        ( M_localMap ),
     M_szz                        ( M_localMap ),
     M_out_iter                   ( "out_iter_solid" ),
     M_out_res                    ( "out_res_solid" ),
-    M_linearSolver               ( comm ),
-    M_prec                       ( ),//new prec_raw_type() ),
+    M_linearSolver               ( new SolverType( comm ) ),
+    //M_prec                       ( ),//new prec_raw_type() ),
     M_reusePrec                  ( true ),
     M_maxIterForReuse            ( -1 ),
     M_resetPrec                  ( true ),
     M_maxIterSolver              ( -1 ),
     M_count                      ( 0 ),
     M_offset                     ( 0 ),
-    M_dispSolid                ( M_localMap ),
-    M_uFESpace                 ( )
+    M_rescaleFactor            (1.),
+    M_matrFull                   ( )
 {
     //    M_BCh->setOffset(0);
 }
@@ -452,16 +445,16 @@ VenantKirchhofSolver( const data_type& data,
                       FESpace<Mesh, EpetraMap>&   dFESpace,
                       Epetra_Comm&     comm,
                       EpetraMap&      monolithicMap,
-                      UInt             offset,
-                      boost::shared_ptr<FESpace<Mesh, EpetraMap> >   uFESpace
+                      UInt             offset
+                      //boost::shared_ptr<FESpace<Mesh, EpetraMap> >   uFESpace
                       ):
     M_data                       ( data ),
     M_FESpace                    ( dFESpace ),
     M_comm                       ( &comm ),
     M_Displayer                  ( comm ),
     M_me                         ( comm.MyPID() ),
-    M_linearSolver               ( comm ),
-    M_prec                       ( ),//new prec_raw_type() ),
+    M_linearSolver               ( ),
+    //M_prec                      ( ),//new prec_raw_type() ),
     M_elmatK                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
     M_elmatM                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
     M_elmatC                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
@@ -478,20 +471,20 @@ VenantKirchhofSolver( const data_type& data,
     M_mass                       ( new matrix_type(M_localMap) ),
     M_linearStiff                ( new matrix_type(M_localMap) ),
     M_stiff                      ( new matrix_type(M_localMap) ),
-    M_jacobian                   ( M_localMap ),
-    M_disp                       ( M_localMap ),
+    M_jacobian                   (M_localMap),
+    M_disp                       ( M_localMap),
     M_vel                        ( M_localMap ),
-    M_rhs                        ( M_localMap ),
+    M_rhs                        ( /*new vector_type(M_localMap)*/),//useful
     M_rhsW                       ( M_localMap ),
-    M_rhsNoBC                    ( M_localMap ),
-    M_f                          ( M_localMap),
-    M_residual_d                 ( M_localMap ),
-    M_sxx                        ( M_localMap ),
-    M_syy                        ( M_localMap ),
-    M_szz                        ( M_localMap ),
+    M_rhsNoBC                    ( new vector_type(M_localMap) ),//useless
+    M_f                          (),//useless
+    M_residual_d                 ( ),//useless
+    M_sxx                        (M_localMap),//useless
+    M_syy                        (M_localMap),//useless
+    M_szz                        (M_localMap),//useless
     M_offset                     ( offset ),
-    M_dispSolid                  ( M_localMap ),
-    M_uFESpace                   ( (uFESpace) )
+    M_rescaleFactor            (1.),
+    M_matrFull                   ( )//useless
 {
 
     }
@@ -507,53 +500,34 @@ setUp( const GetPot& dataFile )
     M_Displayer.leaderPrint(" S-  Computing mass and linear strain matrices ... \n");
 
     M_monolithic = dataFile("problem/monolithic"   , false );
-    M_linearSolver.setDataFromGetPot( dataFile, "solid/solver" );
+    M_linearSolver->setDataFromGetPot( dataFile, "solid/solver" );
 //    M_linearSolver.setMatrix( M_jacobian );
 
     M_reusePrec     = dataFile( "solid/prec/reuse", true);
     M_maxIterSolver = dataFile( "solid/solver/max_iter", -1);
     M_maxIterForReuse = dataFile( "solid/solver/max_iter_reuse", M_maxIterSolver*8/10);
 
-    std::string precType = dataFile( "solid/prec/prectype", "Ifpack");
+    M_linearSolver->setUpPrec(dataFile, "solid/prec");
 
-    M_prec.reset( PRECFactory::instance().createObject( precType ) );
-    ASSERT(M_prec.get() != 0, "VenantKirchhof : Preconditioner not set");
-    //    M_prec               = prec_ptr( PRECFactory::instance().createObject( precType ) );
+    //    std::string precType = dataFile( "solid/prec/prectype", "Ifpack");
+//     M_prec.reset( PRECFactory::instance().createObject( precType ) );
+//     ASSERT(M_prec.get() != 0, "VenantKirchhof : Preconditioner not set");
+//     //    M_prec               = prec_ptr( PRECFactory::instance().createObject( precType ) );
 
-    M_prec->setDataFromGetPot( dataFile, "solid/prec" );
-
-
+//     M_prec->setDataFromGetPot( dataFile, "solid/prec" );
 }
 
-
-template <typename Mesh, typename SolverType>
-void
-VenantKirchhofSolver<Mesh, SolverType>::
-updateMatrix(matrix_type & bigMatrixStokes)
-{
-    //    M_massStiff->GlobalAssemble();
-    bigMatrixStokes.GlobalAssemble();
-    if(M_matrFull)
-        M_matrFull.reset(new matrix_type(M_localMap, M_matrFull->getMeanNumEntries()));
-    else
-        M_matrFull.reset(new matrix_type(M_localMap, M_massStiff->getMeanNumEntries()));
-    //    M_matrFull += M_massStiff;
-    //    M_matrFull->GlobalAssemble();
-    //    M_massStiff.reset(new matrix_type(M_localMap));
-    *M_matrFull += *M_massStiff;
-    *M_matrFull += bigMatrixStokes;
-
-}
 
 template <typename Mesh, typename SolverType>
 void
 VenantKirchhofSolver<Mesh, SolverType>::
 rescaleMatrices()
 {
-    *M_mass *=M_data.timestep();
-    *M_linearStiff *= M_data.timestep();
-    *M_massStiff *= M_data.timestep();
+    *M_mass *=(M_data.timestep()*M_rescaleFactor);
+    *M_linearStiff *= (M_data.timestep()*M_rescaleFactor);
+    *M_massStiff *= (M_data.timestep()*M_rescaleFactor);
 }
+
 
 template <typename Mesh, typename SolverType>
 void
@@ -628,8 +602,6 @@ buildSystem()
 
 }
 
-//
-
 
 template <typename Mesh, typename SolverType>
 void VenantKirchhofSolver<Mesh, SolverType>::
@@ -641,7 +613,6 @@ initialize( const vector_type& disp, const vector_type& vel)
 
 
 
-//
 template <typename Mesh, typename SolverType>
 void VenantKirchhofSolver<Mesh, SolverType>::
 initialize( const Function& d0, const Function& w0 )
@@ -653,48 +624,6 @@ initialize( const Function& d0, const Function& w0 )
 }
 
 
-template <typename Mesh, typename SolverType>
-void VenantKirchhofSolver<Mesh, SolverType>::
-updateSystem( vector_type & rhsFluidCoupling )
-{
-
-
-    M_Displayer.leaderPrint("  S-  Updating mass term on right hand side... ");
-
-    Chrono chrono;
-    chrono.start();
-
-    M_stiff = M_linearStiff;
-
-    // Number of displacement components
-    UInt nc = nDimensions;
-
-    double coef;
-
-    coef = (double) M_data.timestep();
-
-    //M_dispSolid already initiaalized
-    vector_type _z = M_dispSolid;
-    _z            += coef*M_vel;
-
-    M_rhsNoBC = rhsFluidCoupling;
-    M_rhsNoBC += *M_mass * _z ;
-    M_rhsNoBC -= *M_stiff*M_dispSolid;
-
-    coef = 2.0/M_data.timestep();
-
-    M_rhsW  = coef*M_dispSolid;
-    M_rhsW += M_vel;
-
-//     std::cout << "rhsWithoutBC norm = " << M_rhsNoBC.NormInf() << std::endl;
-//     std::cout << "M_rhsW norm       = " << M_rhsW.NormInf() << std::endl;
-//     std::cout << "    _w norm       = " << M_vel.NormInf() << std::endl;
-
-    //
-    chrono.stop();
-
-    M_Displayer.leaderPrintMax("done in ", chrono.diff() );
-}
 
 
 template <typename Mesh, typename SolverType>
@@ -718,19 +647,14 @@ updateSystem( )
     vector_type _z = M_disp;
     _z            += coef*M_vel;
 
-    M_rhsNoBC  = *M_mass*_z;
-    M_rhsNoBC -= *M_stiff*M_disp;
+    *M_rhsNoBC  = *M_mass*_z;
+    *M_rhsNoBC -= *M_stiff*(M_disp);
 
     coef = 2.0/M_data.timestep();
 
-    M_rhsW  = coef*M_disp;
+    M_rhsW  = coef*(M_disp);
     M_rhsW += M_vel;
 
-//     std::cout << "rhsWithoutBC norm = " << M_rhsNoBC.NormInf() << std::endl;
-//     std::cout << "M_rhsW norm       = " << M_rhsW.NormInf() << std::endl;
-//     std::cout << "    _w norm       = " << M_vel.NormInf() << std::endl;
-
-    //
     chrono.stop();
 
     M_Displayer.leaderPrintMax("done in ", chrono.diff());
@@ -752,10 +676,10 @@ iterate( bchandler_raw_type& bch )
     matrix_ptrtype matrFull( new matrix_type( M_localMap, M_massStiff->getMeanNumEntries()));
     *matrFull += *M_massStiff;
 
-    M_rhsNoBC.GlobalAssemble();
+    M_rhsNoBC->GlobalAssemble();
     M_rhsW.GlobalAssemble();
 
-    vector_type rhsFull (M_rhsNoBC);
+    vector_type rhsFull (*M_rhsNoBC);
 
     // boundary conditions update
     //M_comm->Barrier();
@@ -770,12 +694,12 @@ iterate( bchandler_raw_type& bch )
 
     if (M_resetPrec)
     {
-        M_prec->precReset();
+        M_linearSolver->precReset();
         M_resetPrec = false;
     }
 
     // solving the system
-    int numIter = M_linearSolver.solveSystem( matrFull, rhsFull, M_disp, M_prec, M_reusePrec);
+    int numIter = M_linearSolver->solveSystem( matrFull, rhsFull, M_disp, matrFull, M_reusePrec);
 
     numIter = abs(numIter);
 
@@ -784,152 +708,22 @@ iterate( bchandler_raw_type& bch )
         resetPrec();
     }
 
-    M_vel  = ( 2.0 / M_data.timestep() ) * M_disp;
+    M_vel  = ( 2.0 / M_data.timestep() ) * (M_disp);
     M_vel -= M_rhsW;
 
-    M_residual_d =  *M_massStiff * M_disp;
-    M_residual_d -= M_rhsNoBC;
+    *M_residual_d =  *M_massStiff * (M_disp);
+    *M_residual_d -= *M_rhsNoBC;
 
 } // iterate()
 
-template <typename Mesh, typename SolverType> // for monolithic
-void VenantKirchhofSolver<Mesh, SolverType>::
-evalResidual( const vector_type& sol,vector_type& res )
-{
-    res = *M_matrFull*sol;
-    res -= M_rhs;
-    //    res.spy("res");
-    // Ax-b
-}
-template <typename Mesh, typename SolverType> // for monolithic
-void VenantKirchhofSolver<Mesh, SolverType>::
-evalResidual( bchandler_raw_type& bchFluid, bchandler_raw_type& bchSolid, const vector_type& sol,vector_type& res/*, matrix_type& bigMatrixStokes*/ )
-{
 
-    //    M_matrFull.reset( new matrix_type(*M_massStiff) );
-
-    vector_type rhs (M_rhsNoBC);
-
-    //    rhs.spy("rhs0");
-
-    applyBoundaryConditions( *M_matrFull, rhs, bchSolid, M_offset );
-
-
-    //    applyBoundaryConditions( *M_matrFull, rhs, bchFluid, 0 );
-    if ( !bchFluid.bdUpdateDone() )
-        bchFluid.bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
-
-    //  vector_type rhsFull(rhs, Repeated/*Unique?*/, Zero); // ignoring non-local entries, Otherwise they are summed up lately
-    vector_type rhsFull(rhs, Unique);  // Why there is a ths, rhsFull, and a M_rhs, in this method?
-
-    bcManage( *M_matrFull, rhsFull, *M_uFESpace->mesh(), M_uFESpace->dof(), bchFluid, M_uFESpace->feBd(), 1.,
-              M_data.time() );
-
-    M_Displayer.leaderPrint("rhs norm = ", rhs.NormInf() );
-
-    //    rhs.spy("rhs2");
-    M_rhs=rhsFull;
-
-    res = *M_matrFull*sol;
-    res -= M_rhs;
-    //    res.spy("res");
-    //    M_rhs=res;
-}
-
-
-
-template <typename Mesh, typename SolverType> // for monolithic
-void VenantKirchhofSolver<Mesh, SolverType>::
-iterateMonolithic(vector_type& rhs, vector_type& step, matrix_ptrtype prec)
-{
-    Chrono chrono;
-
-    M_Displayer.leaderPrint("  S-  Solving the system ... \n" );
-
-    M_Displayer.leaderPrint("  S-  Updating the boundary conditions ... ");
-
-    chrono.start();
-
-    // boundary conditions applied in the residual evaluation
-
-    //M_matrFull->spy("jacobian");
-    //prec->spy("blockPreconditioner");
-    chrono.stop();
-    M_Displayer.leaderPrintMax("done in ", chrono.diff() );
-
-    //M_comm->Barrier();
-
-    M_linearSolver.setMatrix(*M_matrFull);
-
-    if  ( !M_reusePrec || M_resetPrec )
-    {
-        chrono.start();
-
-        M_Displayer.leaderPrint("  S-  Computing the precond ...                ");
-
-        M_prec->buildPreconditioner(prec/*M_matrFull*/);
-
-//    M_disp *= 0.;
-        double condest = M_prec->Condest();
-
-        M_linearSolver.setPreconditioner(M_prec);
-
-        chrono.stop();
-        M_Displayer.leaderPrintMax("done in ", chrono.diff() );
-        M_Displayer.leaderPrint("  S-  Estimated condition number = ",  condest );
-
-        M_resetPrec = false;
-
-    }
-    else
-    {
-        M_Displayer.leaderPrint("  S-  Reusing  precond ...                \n");
-    }
-    //    M_disp.spy("disp0");
-    int numIter = M_linearSolver.solve(step, rhs);
-
-    if (numIter > M_maxIterSolver)
-    {
-        chrono.start();
-
-        M_Displayer.leaderPrint("  s- Iterative solver failed, numiter = ", numIter );
-
-        M_prec->buildPreconditioner(M_matrFull);
-
-        double condest = M_prec->Condest();
-
-        M_linearSolver.setPreconditioner(M_prec);
-
-        chrono.stop();
-
-        numIter = M_linearSolver.solve(step, rhs);
-
-        if (numIter > M_maxIterSolver)
-            M_Displayer.leaderPrint( "  s- ERROR: Iterative solver failed again.\n");
-    }
-
-    M_disp += step;
-
-    M_Displayer.leaderPrint("  S- system solved.\n ");
-
-    //    M_dispSolid.spy("dispSolid0");
-}
 template <typename Mesh, typename SolverType> // for monolithic
 void VenantKirchhofSolver<Mesh, SolverType>::
 updateStuff()
 {
-    M_vel  = ( 2.0 / M_data.timestep() ) * M_dispSolid;
+    M_vel  = ( 2.0 / M_data.timestep() ) * (M_disp);
     M_vel -= M_rhsW;
-
-    M_residual_d =  *M_matrFull/**M_massStiff*/*M_disp;
-    M_residual_d -= M_rhsNoBC;
-//    reduceSolution(M_disp, M_vel);
-//    M_dispSolid.spy("dispSolid");
-//    M_disp.spy("disp");
-
-
 //    postProcess();
-
 }
 
 
@@ -948,10 +742,10 @@ iterateLin( bchandler_raw_type& bch )
     matrix_ptrtype matrFull( new matrix_type( M_localMap, M_massStiff->getMeanNumEntries()));
     *matrFull += *M_massStiff;
 
-    M_rhsNoBC.GlobalAssemble();
+    M_rhsNoBC->GlobalAssemble();
     M_rhsW.GlobalAssemble();
 
-    vector_type rhsFull (M_rhsNoBC.getMap());
+    vector_type rhsFull (M_rhsNoBC->getMap());
 
     // boundary conditions update
     //M_comm->Barrier();
@@ -966,37 +760,27 @@ iterateLin( bchandler_raw_type& bch )
 
     if (M_resetPrec)
     {
-        M_prec->precReset();
+        M_linearSolver->precReset();
         M_resetPrec = false;
     }
-    // solving the system
-    int numIter = M_linearSolver.solveSystem( matrFull, rhsFull, M_disp, M_prec, M_reusePrec);
+    int numIter = M_linearSolver->solveSystem(matrFull,  rhsFull, M_disp, matrFull, ( M_reusePrec && !M_resetPrec ));
 
     M_Displayer.leaderPrintMax("dz norm     = " , M_disp.NormInf() );
 
     numIter = abs(numIter);
 
-    if(numIter >= M_maxIterForReuse || numIter >= M_maxIterSolver)
+    if (numIter < 0)
     {
         resetPrec();
     }
 
+        if (numIter <= -M_maxIterSolver)
+            M_Displayer.leaderPrint( "  s- ERROR: Iterative solver failed twice.\n" );
 
-    M_residual_d =  *M_massStiff*M_disp;
+    *M_residual_d =  *M_massStiff*(M_disp);
 //    M_residual_d -= M_rhsNoBC;
 
 } // end iterateLin
-
-
-
-
-
-
-
-
-
-
-
 
 
 template <typename Mesh, typename SolverType>
@@ -1008,13 +792,13 @@ iterate(vector_type &_sol)
 
     vector_type sol(M_localMap);
 
-    M_vel  = ( 2.0 / M_data.timestep() ) * M_disp;
+    M_vel  = ( 2.0 / M_data.timestep() ) * (M_disp);
     M_vel -= M_rhsW;
 
     M_Displayer.leaderPrint("sol norm = ", norm(this->sol));
 
-    M_residual_d  = M_massStiff*sol;
-    M_residual_d -= M_rhsNoBC;
+    *M_residual_d  = M_massStiff*sol;
+    *M_residual_d -= *M_rhsNoBC;
 }
 
 
@@ -1036,9 +820,9 @@ evalResidual( vector_type &res, const vector_type& sol, int /*iter*/)
 
     bcManageMatrix( M_stiff, *M_FESpace.mesh(), M_FESpace.dof(), *M_BCh, M_FESpace.feBd(), 1.0 );
 
-    M_rhs = M_rhsNoBC;
+    *M_rhs = *M_rhsNoBC;
 
-    bcManageVector( M_rhs, *M_FESpace.mesh(), M_FESpace.dof(), *M_BCh, M_FESpace.feBd(), M_data.time(), 1.0 );
+    bcManageVector( *M_rhs, *M_FESpace.mesh(), M_FESpace.dof(), *M_BCh, M_FESpace.feBd(), M_data.time(), 1.0 );
 
     res  = M_stiff * sol;
 //    res -= M_rhs;
@@ -1146,17 +930,17 @@ evalConstraintTensor()
                 s+= (2*M_data.mu() + M_data.lambda())*
                     M_FESpace.fe().weightDet( ig )*
                     M_FESpace.fe().phiDer( k, 0 , ig )*
-                    M_disp[idof + 0*M_FESpace.dim()];
+                    (M_disp)[idof + 0*M_FESpace.dim()];
 
                 s+= M_data.lambda()*
                     M_FESpace.fe().weightDet( ig )*
                     M_FESpace.fe().phiDer( k, 1 , ig )*
-                    M_disp[idof + 1*M_FESpace.dim()];
+                    (M_disp)[idof + 1*M_FESpace.dim()];
 
                 s+= M_data.lambda()*
                     M_FESpace.fe().weightDet( ig )*
                     M_FESpace.fe().phiDer( k, 2 , ig )*
-                    M_disp[idof + 2*M_FESpace.dim()];
+                    (M_disp)[idof + 2*M_FESpace.dim()];
 
                 count[idof]++;
             }
@@ -1182,17 +966,17 @@ evalConstraintTensor()
                 s += M_data.lambda()*
                     M_FESpace.fe().weightDet( ig )*
                     M_FESpace.fe().phiDer( k, 0 , ig )*
-                    M_disp[idof + 0*M_FESpace.dim()];
+                    (M_disp)[idof + 0*M_FESpace.dim()];
 
                 s += (2*M_data.mu() + M_data.lambda())*
                     M_FESpace.fe().weightDet( ig )*
                     M_FESpace.fe().phiDer( k, 1 , ig )*
-                    M_disp[idof + 1*M_FESpace.dim()];
+                    (M_disp)[idof + 1*M_FESpace.dim()];
 
                 s += M_data.lambda()*
                     M_FESpace.fe().weightDet( ig )*
                     M_FESpace.fe().phiDer( k, 2 , ig )*
-                    M_disp[idof + 2*M_FESpace.dim()];
+                    (M_disp)[idof + 2*M_FESpace.dim()];
 //                         M_sxx[idof] += s;
 
 //                M_syy[idof] += s/volume;
@@ -1220,17 +1004,17 @@ evalConstraintTensor()
                 s += M_data.lambda()*
                     M_FESpace.fe().weightDet( ig )*
                     M_FESpace.fe().phiDer( k, 0 , ig )*
-                    M_disp[idof + 0*M_FESpace.dim()];
+                    (M_disp)[idof + 0*M_FESpace.dim()];
 
                 s += M_data.lambda()*
                     M_FESpace.fe().weightDet( ig )*
                     M_FESpace.fe().phiDer( k, 1 , ig )*
-                    M_disp[idof + 1*M_FESpace.dim()];
+                    (M_disp)[idof + 1*M_FESpace.dim()];
 
                 s += (2*M_data.mu() + M_data.lambda())*
                     M_FESpace.fe().weightDet( ig )*
                     M_FESpace.fe().phiDer( k, 2 , ig )*
-                    M_disp[idof + 2*M_FESpace.dim()];
+                    (M_disp)[idof + 2*M_FESpace.dim()];
 
 
 //                         M_sxx[idof] += s;
@@ -1297,7 +1081,7 @@ solveJac( vector_type&       step,
 {
     Chrono chrono;
 
-    M_f = res;
+    *M_f = res;
 
     // for BC treatment (done at each time-step)
     Real tgv = 1.0;
@@ -1319,14 +1103,13 @@ solveJac( vector_type&       step,
     chrono.start();
 //    M_linearSolver.solve( step , _f);
     chrono.stop();
-    M_residual_d = M_massStiff*step;// - M_rhsNoBC;
 
     //--options[AZ_recursion_level];
 
 //    AZ_matrix_destroy( &J );
 //    AZ_precond_destroy( &prec_J );
 
-    M_residual_d = M_massStiff*step;// - M_rhsNoBC;
+    *M_residual_d = M_massStiff*step;// - *M_rhsNoBC;
 }
 
 
@@ -1354,7 +1137,7 @@ solveJacobian( Real /*time*/ )
     if ( !M_BCh->bdUpdateDone() )
         M_BCh->bdUpdate( M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
 
-    bcManageVector(M_f,
+    bcManageVector(*M_f,
                    *M_FESpace.mesh(),
                    M_FESpace.dof(),
                    M_BCh,
@@ -1370,14 +1153,14 @@ solveJacobian( Real /*time*/ )
     std::cout << "  S-  Solving system                      ... " << std::flush;
     chrono.start();
 
-    M_linearSolver.solve( M_disp , M_f );
+    M_linearSolver->solve( M_disp , *M_f );
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
 
-    this->_w = ( 2.0 / M_data.timestep() ) * M_disp - M_rhsW;
+    this->_w = ( 2.0 / M_data.timestep() ) * (M_disp) - M_rhsW;
 
-    M_residual_d = M_massStiff*M_disp;
+    *M_residual_d = M_massStiff*(M_disp);
 }
 
 template <typename Mesh, typename SolverType>
@@ -1402,7 +1185,7 @@ solveJacobian( const Real /*time*/ , bchandler_type& BCd)
     if ( !(*BCd).bdUpdateDone() )
         (*BCd).bdUpdate( M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
 
-    bcManageVector(M_f,
+    bcManageVector(*M_f,
                    *M_FESpace.mesh(),
                    M_FESpace.dof(),
                    *BCd,
@@ -1422,9 +1205,9 @@ solveJacobian( const Real /*time*/ , bchandler_type& BCd)
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
-    this->_w = ( 2.0 / M_data.timestep() ) * M_disp - M_rhsW;
+    this->_w = ( 2.0 / M_data.timestep() ) * (M_disp) - M_rhsW;
 
-    M_residual_d = M_massStiff*M_disp;
+    *M_residual_d = M_massStiff*(M_disp);
 }
 
 template<typename Mesh, typename SolverType>
@@ -1537,9 +1320,9 @@ VenantKirchhofSolver<Mesh, SolverType>::postProcess()
 //             meditSolutionWriter( "res_y." + me + "." + name + ".bb", *M_FESpace.mesh(), M_syy, M_FESpace.dof().numTotalDof()*1);
 //             meditSolutionWriter( "res_z." + me + "." + name + ".bb", *M_FESpace.mesh(), M_szz, M_FESpace.dof().numTotalDof()*2);
 
-            meditSolutionWriter( "resd_x." + me + "." + name + ".bb", *M_FESpace.mesh(), M_residual_d, M_FESpace.dof().numTotalDof()*0);
-            meditSolutionWriter( "resd_y." + me + "." + name + ".bb", *M_FESpace.mesh(), M_residual_d, M_FESpace.dof().numTotalDof()*1);
-            meditSolutionWriter( "resd_z." + me + "." + name + ".bb", *M_FESpace.mesh(), M_residual_d, M_FESpace.dof().numTotalDof()*2);
+            meditSolutionWriter( "resd_x." + me + "." + name + ".bb", *M_FESpace.mesh(), *M_residual_d, M_FESpace.dof().numTotalDof()*0);
+            meditSolutionWriter( "resd_y." + me + "." + name + ".bb", *M_FESpace.mesh(), *M_residual_d, M_FESpace.dof().numTotalDof()*1);
+            meditSolutionWriter( "resd_z." + me + "." + name + ".bb", *M_FESpace.mesh(), *M_residual_d, M_FESpace.dof().numTotalDof()*2);
 
 //             wr_medit_ascii_scalar( "dep_x." + name + "." + me + ".bb", disp.getEpetraVector().Values() + 0*dim(), M_FESpace.mesh()->numVertices() );
 //             wr_medit_ascii_scalar( "dep_y." + name + "." + me + ".bb", disp.getEpetraVector().Values() + 1*dim(), M_FESpace.mesh()->numVertices() );
