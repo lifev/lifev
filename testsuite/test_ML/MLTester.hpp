@@ -336,14 +336,14 @@ testML( bchandler_raw_type& bch )
 
                             //MLList.print(std::cout);
 
-                            this->M_prec.reset( PRECFactory::instance().createObject( "ML" ) );
-                            this->M_prec->setList(MLList);
+                            this->M_linearSolver.setPrec( (PRECFactory::instance().createObject( "ML" ) ) );
+                            this->M_linearSolver.getPrec()->setList(MLList);
 
                             Epetra_Time Time(*this->M_comm);
 
                             this->M_sol.getEpetraVector().Scale(0.);
 
-                            this->M_linearSolver.solveSystem(matrFull, rhsFull, this->M_sol, this->M_prec, (this->M_reusePrec && !this->M_resetPrec));
+                            this->M_linearSolver.solveSystem(matrFull, rhsFull, this->M_sol, matrFull, (this->M_reusePrec && !this->M_resetPrec));
 
 
                             this->resetPrec();
