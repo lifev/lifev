@@ -227,7 +227,7 @@ public:
         M_resetPrec = !M_reusePrec;
     }
 
-    void resetPrec(bool reset = true) { if (reset) M_prec->precReset(); }
+    void resetPrec(bool reset = true) { if (reset) M_linearSolver.precReset(); }
     // as for now resetting stabilization matrix at the same time as the preconditioner
 
     void resetStab() { M_matrStab.reset(); }
@@ -332,7 +332,7 @@ protected:
 
     SolverType                     M_linearSolver;
 
-    boost::shared_ptr<EpetraPreconditioner> M_prec;
+    //    boost::shared_ptr<EpetraPreconditioner> M_prec;
 
     bool                           M_steady;
 
@@ -429,7 +429,7 @@ Oseen( const data_type&          dataType,
     M_sol                    ( M_localMap ),
     M_residual               ( M_localMap ),
     M_linearSolver           ( comm ),
-    M_prec                   ( ),
+    //    M_prec                   ( ),
     M_post_proc              ( M_uFESpace.mesh(),
                                &M_uFESpace.feBd(), &M_uFESpace.dof(),
                                &M_pFESpace.feBd(), &M_pFESpace.dof(), M_localMap ),
@@ -488,7 +488,6 @@ Oseen( const data_type&          dataType,
     M_sol                    ( M_localMap ),
     M_residual               ( M_localMap ),
     M_linearSolver           ( comm ),
-    M_prec                   ( ),
     M_post_proc              ( M_uFESpace.mesh(),
                                &M_uFESpace.feBd(), &M_uFESpace.dof(),
                                &M_pFESpace.feBd(), &M_pFESpace.dof(), M_localMap ),
@@ -546,7 +545,6 @@ Oseen( const data_type&          dataType,
     M_sol                    ( M_localMap ),
     M_residual               ( M_localMap ),
     M_linearSolver           ( comm ),
-    M_prec                   ( ),
     M_post_proc              ( M_uFESpace.mesh(),
                                &M_uFESpace.feBd(), &M_uFESpace.dof(),
                                &M_pFESpace.feBd(), &M_pFESpace.dof(), M_localMap ),
@@ -614,13 +612,14 @@ void Oseen<Mesh, SolverType>::setUp( const GetPot& dataFile )
     M_reusePrec       = dataFile( "fluid/prec/reuse", true);
     M_maxIterForReuse = dataFile( "fluid/prec/max_iter_reuse", M_maxIterSolver*8/10);
 
-    std::string precType = dataFile( "fluid/prec/prectype", "Ifpack");
+    //    std::string precType = dataFile( "fluid/prec/prectype", "Ifpack");
 
-    M_prec.reset( PRECFactory::instance().createObject( precType ) );
-    ASSERT(M_prec.get() != 0, "Oseen : Preconditioner not set");
+    M_linearSolver.setUpPrec(dataFile, "fluid/prec");
+    //    M_prec.reset( PRECFactory::instance().createObject( precType ) );
+    //ASSERT(M_prec.get() != 0, "Oseen : Preconditioner not set");
 
 
-    M_prec->setDataFromGetPot( dataFile, "fluid/prec" );
+    //M_prec->setDataFromGetPot( dataFile, "fluid/prec" );
 }
 
 template<typename Mesh, typename SolverType>
@@ -1137,7 +1136,7 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
     M_Displayer.leaderPrintMax("done in " , chrono.diff());
 
     // solving the system
-    int numIter = M_linearSolver.solveSystem( matrFull, rhsFull, M_sol, M_prec, M_reusePrec);
+    int numIter = M_linearSolver.solveSystem( matrFull, rhsFull, M_sol, matrFull, M_reusePrec );
 
     if (numIter < 0 ) // if the preconditioner has been reset, the stab terms are to be updated
     {
