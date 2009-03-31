@@ -151,13 +151,6 @@ FSISolver::FSISolver( GetPot const& data_file,
             M_epetraWorldComm.reset( new Epetra_MpiComm(MPI_COMM_WORLD));
             M_epetraComm = M_epetraWorldComm;
             std::cout << "% using MPI or not" << std::endl;
-            //                }
-            //            else
-            //                {
-            //                    Epetra_SerialComm M_epetraWorldComm.reset( new (Epetra_SerialComm()));
-            //                    M_epetraComm.reset(epetraWorldComm);
-            //                    std::cout << "% using serial Version" << std::endl;
-            //                }
             solidLeader = 0;
             fluidLeader = solidLeader;
             fluid = true;
@@ -260,15 +253,10 @@ FSISolver::FSISolver( GetPot const& data_file,
 
     M_oper->setUpSystem(data_file);
 
-    if(!M_monolithic)
-        {
-            M_lambda.reset   (new vector_type(*M_oper->solidInterfaceMap()));
-            M_lambdaDot.reset(new vector_type(*M_oper->solidInterfaceMap()));
-            //            *M_lambdaDot *= 0.;
-            M_oper->buildSystem();
-        }
-    else
-            M_lambda.reset   (new vector_type(M_oper->monolithicMap(), Unique));
+    M_lambda.reset   (new vector_type(*M_oper->couplingVariableMap())); // couplingVariableMap()
+    M_lambdaDot.reset(new vector_type(*M_oper->couplingVariableMap()));
+
+    M_oper->buildSystem();
 
 //     M_oper->
 //     if (fluid)
@@ -402,47 +390,16 @@ FSISolver::iterate( Real time )
     fct_type fluidSource(zero_scalar);
     fct_type solidSource(zero_scalar);
 
-    if(!M_monolithic)
-        M_oper->updateSystem(fluidSource, solidSource);
-    else
-        M_oper->updateSystem(*M_lambda);
+    M_oper->updateSystem(*M_lambda);
 
     // displacement prediction
     MPI_Barrier(MPI_COMM_WORLD);
 
-    if (M_firstIter)
-    {
-        M_firstIter = false;
-
-        if(!M_monolithic)
-            {
-                *M_lambda      = M_oper->lambdaSolid();
-                *M_lambda     += timeStep()*M_oper->lambdaDotSolid();
-                *M_lambdaDot   = M_oper->lambdaDotSolid();
-            }
-//         else
-//             *M_lambda *= 0;
-    }
-    else
-    {
-
-        if(!M_monolithic)
-            {
-                *M_lambda      = M_oper->lambdaSolid();
-                *M_lambda     += 1.5*timeStep()*M_oper->lambdaDotSolid(); // *1.5
-                *M_lambda     -= timeStep()*0.5*(*M_lambdaDot);
-                *M_lambdaDot   = M_oper->lambdaDotSolid();
-            }
-    }
+    // couplingVariable Extrapolation:
+    M_oper->couplingVariableExtrap(M_lambda, M_lambdaDot, M_firstIter);
 
 
-    if (!M_monolithic)
-        {
-            M_oper->leaderPrint("norm( disp  ) init = ", M_lambda->NormInf() );
-            M_oper->leaderPrint("norm( velo )  init = ", M_lambdaDot->NormInf());
-        } else {
-            M_oper->leaderPrint("norm( solution ) init = ", M_lambda->NormInf() );
-        }
+    // END OF couplingVariable Extrapolation
 
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -480,8 +437,7 @@ FSISolver::iterate( Real time )
 // 	if (M_oper->isSolid()) M_oper->solid().postProcess();
 //      if (M_oper->isFluid()) M_oper->fluid().postProcess();
     }
-    if(!M_monolithic)
-        M_oper->shiftSolution();
+    M_oper->shiftSolution();
 
 
     Debug( 6220 ) << "FSISolver iteration at time " << time << " done\n";
