@@ -27,7 +27,7 @@ AM_CPPFLAGS                 = -I$(top_srcdir)
 lib_LTLIBRARIES		= liblifecore.la
 
 liblifecore_la_SOURCES	=  about.cpp lifeversion.cpp\
-GetPot.cpp  dataString.cpp debug.cpp \
+dataString.cpp debug.cpp \
 switch.cpp util_string.cpp typeInfo.cpp\
 SmartAssert.cpp displayer.cpp
 liblifecore_la_LIBADD	= $(aztec_libs)
