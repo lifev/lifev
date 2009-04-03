@@ -79,7 +79,7 @@ int main(int argc, char** argv)
 
     // Reading from data file
     GetPot command_line(argc,argv);
-    const char* data_file_name = command_line.follow("datanet", 2, "-f","--file");
+    string data_file_name = command_line.follow("datanet", 2, "-f","--file");
     GetPot data_file(data_file_name);
 
     // Create a OneDNet variable
@@ -102,7 +102,7 @@ int main(int argc, char** argv)
 //                                                       "W1"  /*var*/,
 //                                                      false /*type*/ ) );
 //        onednet.setBC( heart_pressure, 1, "left", "first", "Q" );
-        // è necessario che sia OneDBCFunctionPointer
+        // ÔøΩ necessario che sia OneDBCFunctionPointer
         OneDBCFunctionPointer mysin( new Sin( 0, 1, 0.5 ) );
         //OneDBCFunctionPointer mysinneg( new Sin( 0, -1, 0.5 ) );
         onednet.setBC( mysin, 1, "left", "first", "Q" );

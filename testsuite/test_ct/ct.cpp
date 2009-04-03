@@ -17,6 +17,7 @@
 #include <ct.hpp>
 #include <ctCase.hpp>
 #include <iostream>
+#include <string>
 
 using namespace LifeV;
 
@@ -28,25 +29,25 @@ CT::CT( int argc,
     C_case (new CTcase)
 {
     GetPot command_line(argc, argv);
-    const char* data_file_name = command_line.follow("data", 2, "-f", "--file");
+    string data_file_name = command_line.follow("data", 2, "-f", "--file");
     GetPot dataFile( data_file_name );
 
 #ifdef EPETRA_MPI
     M_comm = new Epetra_MpiComm( MPI_COMM_WORLD );
     int ntasks;
     int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
-    std::cout << "  t-  MPI Initialization from PID = " << M_comm->MyPID() 
+    std::cout << "  t-  MPI Initialization from PID = " << M_comm->MyPID()
 	<< " among " << ntasks << " running." << std::endl;
 #else
     M_comm = new Epetra_SerialComm();
 #endif
-   
+
     C_case->set_data(dataFile, M_comm);
     C_case->set_bcs();
 }
 
 /*
- * CT::run() 
+ * CT::run()
  */
 
 void
@@ -55,15 +56,15 @@ CT::run()
 
     typedef ChorinTemam< RegionMesh3D<LinearTetra> >::vector_type  vector_type;
     typedef boost::shared_ptr<vector_type> vector_ptrtype;
-    
+
     // Reading from data file
     GetPot dataFile( C_case->C_data );
 
     int save = dataFile("fluid/miscellaneous/save", 1);
-    
+
     bool verbose = (M_comm->MyPID() == 0);
 
-    // retrieve boundary conditions from the CTcase 
+    // retrieve boundary conditions from the CTcase
     BCHandler *bcHu = C_case->get_bcHu();
     BCHandler *bcHp = C_case->get_bcHp();
 
@@ -125,7 +126,7 @@ CT::run()
             if (verbose) std::cout << "P1 pressure";
             refFE_press = &feTetraP1;
             // qR_press    = &quadRuleTetra4pt;  // DoE 2
-            qR_press    = qR_vel;    // test purpose 
+            qR_press    = qR_vel;    // test purpose
 	    // because we need same qrule for u and p wrt coupling CT terms
 	    // bdQr_press  = &quadRuleTria3pt;   // DoE 2
             bdQr_press  = bdQr_vel;	 // test purpose
@@ -135,9 +136,9 @@ CT::run()
     int pBdfOrder = dataFile( "fluid/discretization/press_order_bdf", 1 );
 
     if (verbose) std::cout << std::endl;
-    if (verbose) std::cout << "  t-  Velocity time discretization order : " 
+    if (verbose) std::cout << "  t-  Velocity time discretization order : "
 		<< uBdfOrder << std::endl;
-    if (verbose) std::cout << "  t-  Pressure time discretization order : " 
+    if (verbose) std::cout << "  t-  Pressure time discretization order : "
 		<< pBdfOrder << std::endl;
 
     dataNavierStokes.setMesh(meshPart.mesh());

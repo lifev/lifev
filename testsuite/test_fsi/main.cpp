@@ -88,12 +88,12 @@ public:
 //            DataNavierStokes< RegionMesh3D_ALE<LinearTetra> > M_dataNS(data_file);
 
             M_fsi = fsi_solver_ptr(  new FSISolver( data_file, _oper ) );
+
             Debug( 10000 ) << _oper << " set \n";
 
             MPI_Barrier(MPI_COMM_WORLD);
 
 //            M_fsi->setSourceTerms( fZero, fZero );
-
             Debug( 10000 ) << "Setting up the BC \n";
             M_fsi->setFluidBC(BCh_fluid(*M_fsi->operFSI()));
             M_fsi->setHarmonicExtensionBC (BCh_harmonicExtension(*M_fsi->operFSI()));
@@ -318,7 +318,7 @@ int main(int argc, char** argv)
     chrono.start();
 
     GetPot command_line(argc,argv);
-    const char* data_file_name = command_line.follow("data", 2, "-f","--file");
+    string data_file_name = command_line.follow("data", 2, "-f","--file");
     GetPot data_file(data_file_name);
 
 
@@ -335,7 +335,7 @@ int main(int argc, char** argv)
         LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 
         LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-
+        std::cout << "cazzo" << std::endl;
         FSIChecker _sp_check( data_file, "steklovPoincare" );
         _sp_check();
 
@@ -344,7 +344,7 @@ int main(int argc, char** argv)
         LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 
         double norm1 = LifeV::norm_2( _ej_check.disp - _sp_check.disp );
-
+        std::cout << "cazzo" << std::endl;
         std::cout << "norm_2(EJ displacement)          = " << LifeV::norm_2( _ej_check.disp ) << " \n"
                   << "norm_2(SP displacement)          = " << LifeV::norm_2( _sp_check.disp ) << " \n"
                   << "norm_2(displacement error EJ/SP) = " << norm1 << "\n";

@@ -160,7 +160,7 @@ main( int argc, char** argv )
     // By default, it's data.
 
     GetPot command_line(argc, argv);
-    const char* data_file_name = command_line.follow("data", 2, "-f", "--file");
+    string data_file_name = command_line.follow("data", 2, "-f", "--file");
     GetPot dataFile( data_file_name );
 
     // everything ( mesh included ) will be stored in a class
@@ -427,7 +427,7 @@ main( int argc, char** argv )
 
         // a barrier to make sure everyone is here, and we start again
 	MPI_Barrier(MPI_COMM_WORLD);
-	  
+
         chrono.stop();
         if (verbose) std::cout << "Total iteration time " << chrono.diff() << " s." << std::endl;
     }

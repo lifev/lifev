@@ -160,7 +160,7 @@ main( int argc, char** argv )
     // By default, it's data.
 
     GetPot command_line(argc, argv);
-    const char* data_file_name = command_line.follow("data", 2, "-f", "--file");
+    string data_file_name = command_line.follow("data", 2, "-f", "--file");
     GetPot dataFile( data_file_name );
 
     // everything ( mesh included ) will be stored in a class

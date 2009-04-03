@@ -297,7 +297,7 @@ Cylinder::Cylinder( int argc,
     d( new Private )
 {
     GetPot command_line(argc, argv);
-    const char* data_file_name = command_line.follow("data", 2, "-f", "--file");
+    string data_file_name = command_line.follow("data", 2, "-f", "--file");
     GetPot dataFile( data_file_name );
     d->data_file_name = data_file_name;
 
@@ -338,7 +338,7 @@ Cylinder::run()
     typedef boost::shared_ptr<vector_type> vector_ptrtype;
     // Reading from data file
     //
-    GetPot dataFile( d->data_file_name.c_str() );
+    GetPot dataFile( d->data_file_name );
 
 //    int save = dataFile("fluid/miscellaneous/save", 1);
 

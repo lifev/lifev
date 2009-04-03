@@ -30,10 +30,10 @@
 int main(int argc, char** argv)
 {
   using namespace LifeV;
-  
+
   // ********** Reading from data file ******************************************
   GetPot command_line(argc,argv);
-  const char* data_file_name = command_line.follow("data", 2, "-f","--file");
+  string data_file_name = command_line.follow("data", 2, "-f","--file");
   GetPot data_file(data_file_name);
 
   OneDNonLinModelParam onedparamNL(data_file);
@@ -50,21 +50,21 @@ int main(int argc, char** argv)
     //OneDModelSolver onedm(data_file, onedparamLin);
   OneDModelSolver onedm(data_file, onedparamNL );
 
-  OneDBCFunctionPointer sinusoidal_flux ( new Sin() );						
+  OneDBCFunctionPointer sinusoidal_flux ( new Sin() );
 
   OneDBCFunctionPointer resistence ( new Resistence( data_file("parameters/R",0.),
 								onedparamNL,
-								onedm.Mesh(), 
-  								onedm.FluxFun(), onedm.SourceFun(),	
-								onedm.U1_thistime(), onedm.U2_thistime(),  
-								onedm.W1_thistime(), onedm.W2_thistime(),  
+								onedm.Mesh(),
+  								onedm.FluxFun(), onedm.SourceFun(),
+								onedm.U1_thistime(), onedm.U2_thistime(),
+								onedm.W1_thistime(), onedm.W2_thistime(),
 								onedm.timestep(),
 								"right" /*border*/,
-								"W2"  /*var*/) );						
-  
+								"W2"  /*var*/) );
+
   //onedm.bcH().setBC( sinusoidal_flux, "left", "first", "Q" );
   //onedm.bcH().setBC( resistence, "right", "first", "W2" );
-	
+
   onedm.showMeData();
   //  onedm.showMeHandler(cout, 6);
 

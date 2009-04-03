@@ -237,7 +237,7 @@ int main(int argc, char** argv)
     const std::string check_name = command_line.follow("StraightTubeHexa", 2, "-c","--check");
 
     std::cout << "*** check_name " << check_name << std::endl;
-    
+
     if ( check_name == "AnalyticalHexa" ) {
         checkAnalyticalHexa();
     }
@@ -262,7 +262,7 @@ int main(int argc, char** argv)
 #if 0
     using namespace LifeV;
     GetPot command_line(argc,argv);
-    const char* data_file_name = command_line.follow("data", 2, "-f","--file");
+    string data_file_name = command_line.follow("data", 2, "-f","--file");
     GetPot data_file(data_file_name);
     if( command_line.search(2, "-i","--info") ) {
         data_file.print();

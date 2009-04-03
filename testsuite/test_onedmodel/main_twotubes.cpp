@@ -42,7 +42,7 @@ int main(int argc, char** argv)
 
     //! ********** Reading from data file ******************************************
     GetPot command_line(argc,argv);
-    /*const char* data_file_name = command_line.follow("data", 2, "-f","--file");
+    /*string data_file_name = command_line.follow("data", 2, "-f","--file");
       GetPot data_file(data_file_name);
     */
 
