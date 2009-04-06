@@ -424,7 +424,7 @@ SolverTrilinos::printStatus()
 int SolverTrilinos::solveSystem(  matrix_ptrtype    matrFull,
                                   vector_type&      rhsFull,
                                   vector_type&      sol,
-                                  matrix_ptrtype&   prec,
+                                  matrix_ptrtype&   basePrecMatrix,
                                   bool const        reuse,
                                   bool const        retry)
 {
@@ -440,7 +440,7 @@ int SolverTrilinos::solveSystem(  matrix_ptrtype    matrFull,
 
         M_Displayer.leaderPrint("      Computing the precond ...                \n");
 
-        M_prec->buildPreconditioner(prec);
+        M_prec->buildPreconditioner(basePrecMatrix);
 
         double condest = M_prec->Condest();
 
@@ -474,22 +474,22 @@ int SolverTrilinos::solveSystem(  matrix_ptrtype    matrFull,
     M_prec->precReset();
 
 
-        if(M_prec.get())
-            {
-                chrono.start();
-                M_prec->buildPreconditioner(prec);
+    if(M_prec.get())
+        {
+            chrono.start();
+            M_prec->buildPreconditioner(basePrecMatrix);
 
-                double condest = M_prec->Condest();
+            double condest = M_prec->Condest();
 
-                setPreconditioner(M_prec);
+            setPreconditioner(M_prec);
 
-                chrono.stop();
-                M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
-                M_Displayer.leaderPrint("  f-       Estimated condition number = " , condest );
-            }
+            chrono.stop();
+            M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
+            M_Displayer.leaderPrint("  f-       Estimated condition number = " , condest );
+        }
     // Solving again, but only once (retry = false)
     numIter = solveSystem( matrFull, rhsFull, sol,
-                               prec, reuse, false);
+                           basePrecMatrix, reuse, false);
     if (numIter >= M_maxIterSolver)
         M_Displayer.leaderPrint("  f- ERROR: Iterative solver failed again.\n");
 
