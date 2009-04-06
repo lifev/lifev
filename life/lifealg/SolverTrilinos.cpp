@@ -36,7 +36,7 @@
 #include <life/lifealg/SolverTrilinos.hpp>
 #include "Epetra_Comm.h"
 
-
+#include <iomanip>
 
 namespace LifeV
 {
@@ -396,31 +396,28 @@ SolverTrilinos::computeResidual( vector_type& x, vector_type& b )
 
 
 
-void
-SolverTrilinos::printStatus(const std::string& message,
-                            double             status[AZ_STATUS_SIZE],
-                            double             time,
-                            std::ostream&      stream)
+std::string
+SolverTrilinos::printStatus()
 {
-    stream.width(10); stream.setf(std::ios::left);
-    stream << message;
 
+    std::ostringstream stat;
+    std::string str;
 
-    if( status[AZ_why] == AZ_normal         ) stream << "Normal Convergence    ";
-    else if( status[AZ_why] == AZ_maxits    ) stream << "Maximum iters reached ";
-    else if( status[AZ_why] == AZ_loss      ) stream << "Accuracy loss         ";
-    else if( status[AZ_why] == AZ_ill_cond  ) stream << "Ill-conditioned       ";
-    else if( status[AZ_why] == AZ_breakdown ) stream << "Breakdown             ";
+    double status[AZ_STATUS_SIZE];
+    getAztecStatus( status );
 
-    stream << "res = " << status[AZ_scaled_r];
-    stream.width(12); stream.setf(std::ios::left);
-    stream.width(4); stream.setf(std::ios::left);
-    stream << " " << (int)status[AZ_its] << " iters. ";
-    stream.width(15); stream.setf(std::ios::left);
-    stream << " in " << time << " secs.";
+    if( status[AZ_why] == AZ_normal         ) stat << "Normal Convergence    ";
+    else if( status[AZ_why] == AZ_maxits    ) stat << "Maximum iters reached ";
+    else if( status[AZ_why] == AZ_loss      ) stat << "Accuracy loss         ";
+    else if( status[AZ_why] == AZ_ill_cond  ) stat << "Ill-conditioned       ";
+    else if( status[AZ_why] == AZ_breakdown ) stat << "Breakdown             ";
 
+    stat << setw(12) << "res = " << status[AZ_scaled_r];
+    stat << setw(4)  << " " << (int)status[AZ_its] << " iters. ";
+    stat << std::endl;
 
-    stream << std::endl;
+    str = stat.str();
+    return str;
 }
 
 
@@ -458,7 +455,7 @@ int SolverTrilinos::solveSystem(  matrix_ptrtype    matrFull,
         M_Displayer.leaderPrint("      Reusing  precond ...                \n");
     }
 
-    M_Displayer.leaderPrint("      Solving system ...                                \n");
+    M_Displayer.leaderPrint("      Solving system ...                       \n");
 
     chrono.start();
     int numIter = solve(sol, rhsFull);
@@ -493,8 +490,8 @@ int SolverTrilinos::solveSystem(  matrix_ptrtype    matrFull,
     // Solving again, but only once (retry = false)
     numIter = solveSystem( matrFull, rhsFull, sol,
                                prec, reuse, false);
-        if (numIter >= M_maxIterSolver)
-            M_Displayer.leaderPrint("  f- ERROR: Iterative solver failed again.\n");
+    if (numIter >= M_maxIterSolver)
+        M_Displayer.leaderPrint("  f- ERROR: Iterative solver failed again.\n");
 
 
     return -numIter;
