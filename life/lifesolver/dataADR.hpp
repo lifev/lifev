@@ -209,7 +209,7 @@ setup(  const GetPot& dfile )
     M_stab_method = ADRStabilization ( M_stabilization_list.value( dfile( "adr/discretization/stabilization", "none") ) );
 
     // IP needs boundary faces
-    bool ipfaces =  ( M_stab_method == IP_STABILIZATION ) && (this->meshFaces() != "all" ) ;
+    bool ipfaces =  ( M_stab_method == ADR_IP_STABILIZATION ) && (this->meshFaces() != "all" ) ;
     if ( ipfaces ) {
         ERROR_MSG("ERROR: IP requires boundary faces. Put mesh_faces = all in data file." ); }
 
