@@ -36,6 +36,7 @@ SUBDIRS		= data  \
               test_monolithic \
               test_meshReorder \
 	      test_ML \
+	      test_laplacian \
               $(DO_NOT_COMPILE)
 
 TESTSUITES=$(srcdir)/test_cylinder/testsuite.at \
