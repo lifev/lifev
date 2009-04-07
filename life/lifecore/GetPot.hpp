@@ -154,17 +154,21 @@ public:
     inline int                operator()(const char* VarName, int           Default) const;
     inline double             operator()(const char* VarName, const double& Default) const;
     inline const std::string  operator()(const char* VarName, const char*   Default) const;
+    //
+    inline int                operator()(const char* VarName, int           Default, bool& found) const;
+    inline double             operator()(const char* VarName, const double& Default, bool& found) const;
+    inline const std::string  operator()(const char* VarName, const char*   Default, bool& found) const;
     //     -- vectors
-    inline int                operator()(const char* VarName, int Default, unsigned Idx) const;
+    inline int                operator()(const char* VarName, int           Default, unsigned Idx) const;
     inline double             operator()(const char* VarName, const double& Default, unsigned Idx) const;
-    inline const std::string  operator()(const char* VarName, const char* Default, unsigned Idx) const;
+    inline const std::string  operator()(const char* VarName, const char*   Default, unsigned Idx) const;
 
     //     -- setting variables
     //                  i) from outside of GetPot (considering prefix etc.)
     //                  ii) from inside, use '__set_variable()' below
-    inline void            set(const char* VarName, const char* Value, const bool Requested = true);
+    inline void            set(const char* VarName, const char* Value,   const bool Requested = true);
     inline void            set(const char* VarName, const double& Value, const bool Requested = true);
-    inline void            set(const char* VarName, const int Value, const bool Requested = true);
+    inline void            set(const char* VarName, const int Value,     const bool Requested = true);
 
     // BEGIN Cristiano Malossi - 03/04/2009
     inline bool 	       checkVariable(const char* VarName) const;
@@ -1572,7 +1576,41 @@ GetPot::operator()(const char* VarName, const char* Default) const
     //    while 'sv' of course is delete at the end of the function.
     return sv->original;
 }
+//
+inline int
+GetPot::operator()(const char* VarName, int Default, bool& found) const
+{
+    // (*) recording of requested variables happens in '__find_variable()'
+    found = false;
+    const variable*  sv = __find_variable(VarName);
+    if( sv == 0 ) return Default;
+    found = true;
+    return __convert_to_type(sv->original, Default);
+}
 
+inline double
+GetPot::operator()(const char* VarName, const double& Default, bool& found) const
+{
+    // (*) recording of requested variables happens in '__find_variable()'
+    found = false;
+    const variable*  sv = __find_variable(VarName);
+    if( sv == 0 ) return Default;
+    found = true;
+    return __convert_to_type(sv->original, Default);
+}
+inline const std::string
+GetPot::operator()(const char* VarName, const char* Default, bool& found) const
+{
+    // (*) recording of requested variables happens in '__find_variable()'
+    found = false;
+    const variable*  sv = __find_variable(VarName);
+    if( sv == 0 ) return Default;
+    // -- returning a c_str() pointer is OK here, since the variable remains existant,
+    //    while 'sv' of course is delete at the end of the function.
+    found = true;
+    return sv->original;
+}
+//
 inline int
 GetPot::operator()(const char* VarName, int Default, unsigned Idx) const
 {
