@@ -554,10 +554,10 @@ buildSystem()
 
         M_FESpace.fe().updateFirstDerivQuadPt( M_FESpace.mesh()->volumeList( i ) );
 
-        // int marker    = M_FESpace.mesh()->volumeList( i ).marker();
+        int marker    = M_FESpace.mesh()->volumeList( i ).marker();
 
-        double lambda = M_data.lambda();
-        double mu     = M_data.mu    ();
+        double lambda = M_data.lambda(marker);
+        double mu     = M_data.mu    (marker);
 
         M_elmatK.zero();
         M_elmatM.zero();

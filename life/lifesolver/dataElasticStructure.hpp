@@ -70,14 +70,35 @@ public:
     /*const*/ UInt verbose() const {return _verbose;}
 
     /*const*/ double poisson(int mat) const
-        {return M_poisson.find(mat)->second;}
+        {
+            if (M_poisson.size() == 1)
+                return _nu;
+            else
+                return M_poisson.find(mat)->second;
+        }
+
     /*const*/ double young(int mat) const
-        {return M_young.find(mat)->second;}
+        {
+            if (M_young.size() == 1)
+                return _E;
+            else
+                return M_young.find(mat)->second;
+        }
 
     /*const*/ double lambda(int mat) const
-        {return M_lambda.find(mat)->second;}
+        {
+            if (M_lambda.size() == 1)
+                return _lambda;
+            else
+                return M_lambda.find(mat)->second;
+        }
     /*const*/ double mu(int mat) const
-        {return M_mu.find(mat)->second;}
+        {
+            if (M_mu.size() == 1)
+                return _mu;
+            else
+                return M_mu.find(mat)->second;
+        }
 
     /*const*/ double lambda() const {return _lambda;}
     /*const*/ double mu() const {return _mu;}
@@ -102,7 +123,6 @@ private:
     UInt _verbose; // temporal output verbose
     std::string M_order;
 
-
 };
 
 
@@ -116,13 +136,13 @@ private:
 template <typename Mesh>
 DataElasticStructure<Mesh>::
 DataElasticStructure( const GetPot& dfile ) :
-    DataMesh<Mesh>( dfile, "solid/discretization" ),
-    DataTime( dfile, "solid/discretization" )
+        DataMesh<Mesh>( dfile, "solid/discretization" ),
+        DataTime( dfile, "solid/discretization" )
 {
     // physics
     _rho     = dfile( "solid/physics/density", 1. );
-    _E       = dfile( "solid/physics/young" , 1. );
-    _nu      = dfile( "solid/physics/poisson" , 0.25 );
+//     _E       = dfile( "solid/physics/young" , 1. );
+//     _nu      = dfile( "solid/physics/poisson" , 0.25 );
     _endtime = dfile( "solid/physics/endtime", 1. );
 
     // miscellaneous
@@ -133,8 +153,8 @@ DataElasticStructure( const GetPot& dfile ) :
     M_order  = dfile( "solid/discretization/order", "P1");
 
     // Lame coefficients
-    _lambda  = _E * _nu / ( ( 1.0 + _nu ) * ( 1.0 - 2.0 * _nu ) );
-    _mu      = _E / ( 2.0 * ( 1.0 + _nu ) );
+//     _lambda  = _E * _nu / ( ( 1.0 + _nu ) * ( 1.0 - 2.0 * _nu ) );
+//     _mu      = _E / ( 2.0 * ( 1.0 + _nu ) );
 
     std::string flagList;
     flagList = dfile("solid/physics/material_flag", "0");
@@ -158,7 +178,10 @@ DataElasticStructure( const GetPot& dfile ) :
     std::list<double>::iterator yit = yList.begin();
     std::list<double>::iterator pit = pList.begin();
 
-    std::cout << "flag       young       poisson \\\\ flag    lambda     mu" << std::endl;
+    std::cout << std::endl;
+    std::cout << "flag         young       poisson \\\\       lambda           mu" << std::endl;
+
+
     for (fit = fList.begin(); fit != fList.end(); ++fit, ++yit, ++pit)
     {
         double young   = *yit;
@@ -167,7 +190,7 @@ DataElasticStructure( const GetPot& dfile ) :
         M_young.insert(make_pair(*fit, young));
         M_poisson.insert(make_pair(*fit, poisson));
 
-        std::cout << *fit << " " << young << " " << poisson << std::endl;
+        std::cout << std::setw(4) << *fit << "  " << std::setw(12) << young << "  " << std::setw(12) << poisson << " \\\\ ";
 
         double lambda = young*poisson/( ( 1.0 + poisson ) * ( 1.0 - 2.0 * poisson ) );
         M_lambda.insert(make_pair(*fit, lambda));
@@ -175,9 +198,19 @@ DataElasticStructure( const GetPot& dfile ) :
         double mu = young/( 2.0 * ( 1.0 + poisson ) );
         M_mu.insert(make_pair(*fit, mu));
 
-        std::cout << *fit << " " << lambda << " " << mu << std::endl;
+        std::cout << std::setw(12) << lambda << " " << std::setw(12) << mu << std::endl;
+
+        if (fList.size() == 1)
+            {
+                _E      = young;
+                _nu     = poisson;
+
+                _lambda = lambda;
+                _mu     = mu;
+            }
     }
 
+    std::cout << std::endl;
 }
 
 
