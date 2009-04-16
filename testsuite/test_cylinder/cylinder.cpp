@@ -64,18 +64,16 @@ using namespace LifeV;
 
 //cylinder
 
-// //#define CYL2D_MESH_SETTINGS
+//#define CYL2D_MESH_SETTINGS
+//#define CYL3D_MESH_SETTINGS
 #define TUBE20_MESH_SETTINGS
-//#define TUBE20_MESH_SETTINGS
 
 
-// #ifdef CYL2D_MESH_SETTINGS // cyl2D.mesh
-// const int INLET    = 1;
-// const int WALL     = 1;
-// const int SLIPWALL = 20;
-// const int OUTLET   = 0;
-// const int CYLINDER = 2;
-// #endif
+#ifdef CYL2D_MESH_SETTINGS // cyl2D.mesh
+const int INLET    = 1;
+const int SLIPWALL = 20;
+const int CYLINDER = 2;
+#endif
 #ifdef CYL3D_2_MESH_SETTINGS // cyl3D-2.mesh
 const int INLET    = 40;
 const int WALL     = 60;
@@ -84,10 +82,11 @@ const int OUTLET   = 50;
 const int CYLINDER = 70;
 #endif
 #ifdef TUBE20_MESH_SETTINGS
- const int INLET    = 2;
- const int WALL     = 1;
- const int SLIPWALL = 20;
- const int OUTLET   = 3;
+ const int INLET       = 2;
+ const int WALL        = 1;
+ const int RINGIN      = 20;
+ const int RINGOUT     = 30;
+ const int OUTLET      = 3;
 #endif
 
 
@@ -180,11 +179,13 @@ struct Cylinder::Private
 
     std::string data_file_name;
 
-    double nu;  /**< viscosity (in m^2/s) */
+    double      nu;  /**< viscosity (in m^2/s) */
     //const double rho; /**< density is constant (in kg/m^3) */
-    double H;   /**< height and width of the domain (in m) */
-    double D;   /**< diameter of the cylinder (in m) */
-    bool centered; /**< true if the cylinder is at the origin */
+    double      H;   /**< height and width of the domain (in m) */
+    double      D;   /**< diameter of the cylinder (in m) */
+    bool        centered; /**< true if the cylinder is at the origin */
+
+    std::string initial_sol;
 
     Epetra_Comm*   comm;
     /**
@@ -239,23 +240,51 @@ struct Cylinder::Private
      *
      * Define the velocity profile at the inlet for the 2D cylinder
      */
-    Real u2d( const Real& /*t*/,
-              const Real& /*x*/,
+    Real u2d( const Real& t,
+              const Real& x,
               const Real& y,
-              const Real& /*z*/,
+              const Real& z,
               const ID&   id ) const
         {
-             if ( id == 1 )
-              {
+
+#ifdef CYL2D_MESH_SETTINGS // cyl3D-2.mesh
+            if ( id == 1 )
+                {
+                  return 1.;
                   return 1./(20.*20.)*(y + 20.)*(20. - y);
-// 	         if ( centered ) {
+                  // 	         if ( centered ) {
 //                      return Um_2d() * (y+H)*(H-y) / (H*H);
 //                  } else {
 //                      return 4 * Um_2d() * y * (H-y) / (H*H);
 //                  }
-             } else {
-                 return 0;
-             }
+                }
+            else
+                {
+                    return 0.;
+                }
+#endif
+#ifdef TUBE20_MESH_SETTINGS
+            switch(id) {
+            case 1: // x component
+                return 0.0;
+                break;
+            case 3: // z component
+                if ( t <= 0.003 )
+                    return 1.3332e4;
+                //      return 0.01;
+                return 0.0;
+                break;
+            case 2: // y component
+                return 0.0;
+                //      return 1.3332e4;
+                //    else
+                //      return 0.0;
+                break;
+            }
+            return 0;
+#endif
+
+
         }
 
     fct_type getU_2d()
@@ -270,13 +299,38 @@ struct Cylinder::Private
      *
      * Define the velocity profile at the inlet for the 2D cylinder
      */
+    Real poiseuille( const Real& t,
+                      const Real& x,
+                      const Real& y,
+                      const Real& z,
+                      const ID&   id ) const
+    {
+        double r = std::sqrt(x*x + y*y);
+
+        if (id == 3)
+            return Um_2d()*2*((D/2.)*(D/2.) - r*r);
+
+        return 0.;
+    }
+
+    fct_type getU_pois()
+        {
+            fct_type f;
+            f = boost::bind(&Cylinder::Private::poiseuille, this, _1, _2, _3, _4, _5);
+            return f;
+        }
+
+
     Real oneU( const Real& /*t*/,
                const Real& /*x*/,
                const Real& /*y*/,
                const Real& /*z*/,
-               const ID&   /*id*/ ) const
+               const ID&   id ) const
         {
-            return 1.;
+            if (id == 3)
+                return 1.;
+
+            return 0.;
         }
 
     fct_type getU_one()
@@ -301,12 +355,14 @@ Cylinder::Cylinder( int argc,
     GetPot dataFile( data_file_name );
     d->data_file_name = data_file_name;
 
-    d->Re = dataFile( "fluid/problem/Re", 1. );
-    d->nu = dataFile( "fluid/physics/viscosity", 1. ) /
+    d->Re          = dataFile( "fluid/problem/Re", 1. );
+    d->nu          = dataFile( "fluid/physics/viscosity", 1. ) /
         dataFile( "fluid/physics/density", 1. );
-    d->H  = 20.;//dataFile( "fluid/problem/H", 20. );
-    d->D  = dataFile( "fluid/problem/D", 1. );
-    d->centered = (bool)dataFile( "fluid/problem/centered", 0 );
+    d->H           = 20.;//dataFile( "fluid/problem/H", 20. );
+    d->D           =               dataFile( "fluid/problem/D", 1. );
+    d->centered    = (bool)        dataFile( "fluid/problem/centered", 0 );
+    d->initial_sol = (std::string) dataFile( "fluid/problem/initial_sol", "stokes");
+    std::cout << d->initial_sol << std::endl;
 
 #ifdef EPETRA_MPI
     std::cout << "mpi initialization ... " << std::endl;
@@ -350,31 +406,33 @@ Cylinder::run()
     std::vector<ID> zComp(1);
     zComp[0] = 3;
 
-
-#ifdef CYL3D_2_MESH_SETTINGS // cyl3D-2.mesh
     BCFunctionBase uIn  (  d->getU_2d() );
+    BCFunctionBase uOne (  d->getU_one() );
+    BCFunctionBase uPois(  d->getU_pois() );
+
+
+#ifdef CYL2D_MESH_SETTINGS // cyl3D-2.mesh
 
     //cylinder
-    bcH.addBC( "Inlet",    INLET,    Essential,   Full,      uIn,   3 );
-    bcH.addBC( "Outlet",   OUTLET,   Natural,   Full,      uZero, 3 );
+    bcH.addBC( "Inlet",    INLET,    Essential, Full,      uIn,   3 );
 //     if ( WALL != INLET )
-    bcH.addBC( "Wall",     WALL,     Essential, Full,      uZero, 3 );
     bcH.addBC( "Slipwall", SLIPWALL, Essential, Component, uZero, zComp );
     bcH.addBC( "Cylinder", CYLINDER, Essential, Full,      uZero, 3 );
-//    bcH.addBC( "Slipwall", SLIPWALL, Essential, Full, uZero , 3 );
+    //    bcH.addBC( "Slipwall", SLIPWALL, Essential, Full, uZero , 3 );
 #endif
 #ifdef TUBE20_MESH_SETTINGS
-    BCFunctionBase uIn  (  d->getU_one() );
     //BCFunctionBase unormal(  d->get_normal() );
 
     //cylinder
-    bcH.addBC( "Inlet",    INLET,    Essential,   Full,      uIn, 3 );
-    bcH.addBC( "Outlet",   OUTLET,   Essential,   Full,      uIn, 3 );
 
+//     bcH.addBC( "Inlet",    INLET,    Essential,   Full,      uPois, 3 );
+    bcH.addBC( "Inlet",    INLET,    Essential,     Full,     uPois, 3 );
+    bcH.addBC( "Outlet",   OUTLET,   Natural,     Full,     uZero, 3 );
     //bcH.addBC( "Wall",     WALL,     Natural,     Full,      uNormal, 3 );
-    //    bcH.addBC( "Wall",     WALL,     Natural,     Full,      uZero, 3 );
-
-    bcH.addBC( "Slipwall", SLIPWALL, Essential,   Full,      uIn, 3 );
+    //bcH.addBC( "Wall",     WALL,     Natural,     Full,      uNormal, 3 );
+    bcH.addBC( "Wall",     WALL,     Essential,   Full,     uZero, 3 );
+    bcH.addBC( "RingIn",   RINGIN,  Essential,   Full,      uZero, 3 );
+    bcH.addBC( "RingOut",  RINGOUT, Essential,   Full,      uZero, 3 );
 #endif
 
 
@@ -487,35 +545,35 @@ Cylinder::run()
     EpetraMap fullMap(fluid.getMap());
 
 
-#ifdef TUBE20_MESH_SETTINGS
-    vector_type vec_lambda_aux(fullMap),	mixtevec_aux(fullMap);
-    vec_lambda_aux.getEpetraVector().PutScalar(1);
-    vec_lambda_aux.GlobalAssemble();
-    mixtevec_aux.getEpetraVector().PutScalar(1);
-    mixtevec_aux.GlobalAssemble();
+// #ifdef TUBE20_MESH_SETTINGS
+//     vector_type vec_lambda_aux(fullMap),	mixtevec_aux(fullMap);
+//     vec_lambda_aux.getEpetraVector().PutScalar(1);
+//     vec_lambda_aux.GlobalAssemble();
+//     mixtevec_aux.getEpetraVector().PutScalar(1);
+//     mixtevec_aux.GlobalAssemble();
 
-    vector_type vec_lambda(fluid.getMap(), Repeated), mixtevec(fluid.getMap(), Repeated);
+//     vector_type vec_lambda(fluid.getMap(), Repeated), mixtevec(fluid.getMap(), Repeated);
 
-    vec_lambda = vec_lambda_aux;
-    mixtevec = mixtevec_aux;
+//     vec_lambda = vec_lambda_aux;
+//     mixtevec = mixtevec_aux;
 
-    // Robin BC
-    BCVector robin_wall(vec_lambda, uFESpace.dof().numTotalDof());
+//     // Robin BC
+//     BCVector robin_wall(vec_lambda, uFESpace.dof().numTotalDof());
 
-    // Neumann BC, normal component
-    //BCVector robin_wall(vec_lambda, uFESpace.dof().numTotalDof(),1);
+//     // Neumann BC, normal component
+//     //BCVector robin_wall(vec_lambda, uFESpace.dof().numTotalDof(),1);
 
-    robin_wall.setMixteCoef(0);
-    robin_wall.setMixteVec(mixtevec);
+//     robin_wall.setMixteCoef(0);
+//     robin_wall.setMixteVec(mixtevec);
 
-    vec_lambda_aux.spy("lambda");
-    vec_lambda.spy("lambdaRep");
+//     vec_lambda_aux.spy("lambda");
+//     vec_lambda.spy("lambdaRep");
 
 
 
-    bcH.addBC( "Wall",      1, Mixte, Full,  robin_wall, 3 );
-    //bcH.addBC( "Wall",      1, Natural, Full,  robin_wall, 3 );
-#endif
+//     bcH.addBC( "Wall",      1, Mixte, Full,  robin_wall, 3 );
+//     //bcH.addBC( "Wall",      1, Natural, Full,  robin_wall, 3 );
+// #endif
 
 
 
@@ -538,33 +596,13 @@ Cylinder::run()
 
     BdfTNS<vector_type> bdf(dataNavierStokes.order_bdf());
 
-    // initialization with stokes solution
-
-    if (verbose) std::cout << std::endl;
-    if (verbose) std::cout << "Computing the stokes solution ... " << std::endl << std::endl;
-
-    dataNavierStokes.setTime(t0);
-
     vector_type beta( fullMap );
     vector_type rhs ( fullMap );
 
-    MPI_Barrier(MPI_COMM_WORLD);
-
-    beta *= 0.;
-    rhs  *= 0.;
-
-    fluid.updateSystem(0, beta, rhs );
-    fluid.iterate( bcH );
-
-
-//    fluid.postProcess();
-    bdf.bdf_u().initialize_unk( fluid.solution() );
-
-    fluid.resetPrec();
+    vector_ptrtype velAndPressure ( new vector_type(fluid.solution(), Repeated ) );
 
     Ensight<RegionMesh3D<LinearTetra> > ensight( dataFile, meshPart.mesh(), "cylinder", d->comm->MyPID());
 
-    vector_ptrtype velAndPressure ( new vector_type(fluid.solution(), Repeated ) );
 
     ensight.addVariable( ExporterData::Vector, "velocity", velAndPressure,
                          UInt(0), uFESpace.dof().numTotalDof() );
@@ -572,7 +610,33 @@ Cylinder::run()
     ensight.addVariable( ExporterData::Scalar, "pressure", velAndPressure,
                          UInt(3*uFESpace.dof().numTotalDof()),
                          UInt(3*uFESpace.dof().numTotalDof()+pFESpace.dof().numTotalDof()) );
-    ensight.postProcess( 0 );
+
+    // initialization with stokes solution
+
+    if (d->initial_sol == "stokes")
+        {
+            if (verbose) std::cout << std::endl;
+            if (verbose) std::cout << "Computing the stokes solution ... " << std::endl << std::endl;
+
+            dataNavierStokes.setTime(t0);
+
+            MPI_Barrier(MPI_COMM_WORLD);
+
+            beta *= 0.;
+            rhs  *= 0.;
+
+            fluid.updateSystem(0, beta, rhs );
+            fluid.iterate( bcH );
+
+//    fluid.postProcess();
+
+            *velAndPressure = fluid.solution();
+            ensight.postProcess( 0 );
+            fluid.postProcess();
+            fluid.resetPrec();
+        }
+
+    bdf.bdf_u().initialize_unk( fluid.solution() );
 
     // Temporal loop
 
@@ -608,9 +672,9 @@ Cylinder::run()
 //         {
         *velAndPressure = fluid.solution();
         ensight.postProcess( time );
-//        fluid.postProcess();
+        fluid.postProcess();
 //         }
-        postProcessFluxesPressures(fluid, bcH, time, verbose);
+//         postProcessFluxesPressures(fluid, bcH, time, verbose);
 
 
         MPI_Barrier(MPI_COMM_WORLD);

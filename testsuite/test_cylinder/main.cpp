@@ -104,12 +104,6 @@ main( int argc, char** argv )
 
 #ifdef HAVE_MPI
   MPI_Init(&argc, &argv);
-  Epetra_MpiComm Comm(MPI_COMM_WORLD);
-  if ( Comm.MyPID() == 0 )
-      cout << "% using MPI" << endl;
-#else
-  Epetra_SerialComm Comm;
-  cout << "% using serial Version" << endl;
 #endif
 
 //**************** cylinder

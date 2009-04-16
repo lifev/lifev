@@ -8,32 +8,44 @@ multimesh  = false
 start      = 0
 save       = 1
 
+
 [fluid]
 
-[./physics]
+[./problem]
+# for  cyl3D.2.2.00.mesh
+Re              = 1
+D               = 1.
+H               = 2.
+centered        = 1
+initial_sol     = stokes          # stokes, none
+
+
+[../physics]
 endtime         = .2
 density         = 1.0          # density
-viscosity       = 0.005         # viscosity
+viscosity       = 0.03         # viscosity
 
 
 [../discretization]
 mesh_dir        = ./Mesh/
-#mesh_file       = tube20.mesh          # "big file"
-#mesh_file       = cyl3D-2.mesh          # "big file"
+mesh_file       = tube20.mesh          # "big file"
+#mesh_file       = tube-test.mesh          # "big file"
+#mesh_file       = tube-r5.mesh          # "big file"
+#mesh_file       = cyl3D-1.mesh          # "big file"
 #mesh_file       = cyl3D.2.2.00.mesh
-mesh_file       = cyl2D.mesh             # "reasonable file"
+#mesh_file       = cyl2D.mesh             # "reasonable file"
 
 mesh_type       = .mesh
 
 mesh_faces      = all                   # update all faces elements
 mesh_edges      = all                   # update all faces elements
-timestep        = 0.1                   # timestep
+timestep        = 0.0001                   # timestep
 verbose         = 0                     # verbose during mesh-reading
 order_bdf       = 1
 linearized      = 0
 diagonalize     = 0 # weight, 0=off
-div_beta_u_v    = 1 # 1=on, 0=off
-vel_order       = P1		# P1, P1Bubble, P2
+div_beta_u_v    = 0 # 1=on, 0=off
+vel_order       = P1Bubble		# P1, P1Bubble, P2
 press_order     = P1		# P1, P2
 
 [../solver]
@@ -43,6 +55,8 @@ output          = all_res # all_res
 conv            = rhs
 max_iter        = 100
 kspace          = 100
+tol             = 1.e-10    # AztecOO tolerance
+
 
 [../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
 prectype        = Ifpack # Amesos (does a local LU factorization), ILUT (not ILU)
@@ -53,19 +67,11 @@ fill            = 4
 relax_value     = 1
 
 [../ipstab]
-gammaBeta  = 0.02
-gammaDiv   = 0.2
-gammaPress = 0.2
-#gammaBeta  = 0.125
-#gammaDiv   = 0.125
-#gammaPress = 0.03125
-reuse      = false
+#gammaBeta  = 0.02
+#gammaDiv   = 0.02
+#gammaPress = 0.02
+gammaBeta  = 0.125
+gammaDiv   = 0.125
+gammaPress = 0.03125
+reuse      = true
 
-[../problem]
-
-# for  cyl3D.2.2.00.mesh
-Re 	= 1.0
-nu 	= 1.5
-D  	= 1.
-H  	= 20.
-centered = 1
