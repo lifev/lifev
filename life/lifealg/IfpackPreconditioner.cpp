@@ -223,7 +223,7 @@ createIfpackList( const GetPot&              dataFile,
     //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
     //! for more informations on the parameters
 
-    int overlapLevel = dataFile((section + "/ifpack/overlap").data(),     4);
+    int overlapLevel = dataFile((section + "/ifpack/overlap").data(),     0);
     std::string precType     = dataFile((section + "/ifpack/prectype").data(),"Amesos");
 
     list.set("prectype", precType);
