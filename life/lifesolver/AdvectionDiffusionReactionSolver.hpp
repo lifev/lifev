@@ -1040,7 +1040,7 @@ void ADRSolver<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
 
     matrFull->GlobalAssemble();
 
-    matrFull->spy("laplacian");
+    //matrFull->spy("laplacian");
 
     chrono.stop();
 
