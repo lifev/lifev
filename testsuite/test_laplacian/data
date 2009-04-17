@@ -13,11 +13,14 @@ diffusivity     = 1.0           # diffusivity
 
 [../discretization]
 
-order     = P2
+order     = P1
 mesh_dir  = ./Mesh/  # the directory where the mesh file is
-# mesh_file = cube4x4.mesh        # mesh file
+#mesh_file = hexa32x32.mesh        # mesh file
+mesh_file = hexa16x16.mesh        # mesh file
+#mesh_file = hexa8x8.mesh        # mesh file
+#mesh_file = hexa4x4.mesh        # mesh file
 #mesh_file = cube8x8.mesh        # mesh file
- mesh_file = cube16x16.mesh      # mesh file
+# mesh_file = cube16x16.mesh      # mesh file
 #mesh_file = cube32x32.mesh      # mesh file
 
 [../prec]
@@ -25,8 +28,9 @@ prectype                = ML
 reuse                   = false
 
 [./ML]
-default_parameter_list = DD-ML    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+default_parameter_list = SA    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
 displayList             = true
+analyze_smoother	= false
 
 [./smoother]
 

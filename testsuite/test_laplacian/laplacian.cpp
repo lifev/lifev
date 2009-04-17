@@ -294,7 +294,7 @@ laplacian::run()
     MPI_Barrier(MPI_COMM_WORLD);
 
     boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
-    exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "rclux", Members->comm->MyPID()) );
+    exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "temperature", Members->comm->MyPID()) );
 
     dataADR.setTime(0);
 
