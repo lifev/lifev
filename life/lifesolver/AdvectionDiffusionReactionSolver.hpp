@@ -555,7 +555,7 @@ void ADRSolver<Mesh, SolverType>::buildSystem()
 
 //    M_comm->Barrier();
 
-    leaderPrint("  adr-  Computing constant matrices ...        ");
+    leaderPrint("  adr-  Computing constant matrices ...          ");
 
     Chrono chrono;
 
@@ -646,7 +646,7 @@ void ADRSolver<Mesh, SolverType>::buildSystem()
     leaderPrintMax( "done in " , chrono.diff());
 
 
-    leaderPrint( "  adr-  Finalizing the matrices     ...        ");
+    leaderPrint( "  adr-  Finalizing the matrices ...              ");
     chrono.start();
 
     M_matrStiff->GlobalAssemble();
@@ -989,12 +989,9 @@ updateSystem( double       alpha,
             }
         }
 
-
+        chrono.stop();
+        leaderPrintMax( "done in " , chrono.diff() );
     }
-
-
-    chrono.stop();
-    leaderPrintMax( "done in " , chrono.diff() );
 
 
     M_updated = true;
@@ -1042,6 +1039,8 @@ void ADRSolver<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
     applyBoundaryConditions( *matrFull, rhsFull, bch);
 
     matrFull->GlobalAssemble();
+
+    matrFull->spy("laplacian");
 
     chrono.stop();
 
@@ -1103,7 +1102,7 @@ void ADRSolver<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
 
     chrono.start();
 
-    leaderPrint("  adr-  Solving system ...                                ");
+    leaderPrint("  adr-  Solving system ...                       ");
 
     int numIter = linearSolver.solve(sol, rhsFull);
 
@@ -1123,7 +1122,7 @@ void ADRSolver<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
 
         chrono.stop();
         leaderPrintMax( "done in " , chrono.diff() );
-	leaderPrint("  adr-       Estimated condition number = " , condest );
+        leaderPrint("  adr-       Estimated condition number = " , condest );
 
         numIter = linearSolver.solve(sol, rhsFull);
 
@@ -1135,7 +1134,12 @@ void ADRSolver<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
     M_resetPrec = (numIter > M_maxIterForReuse);
 
     leaderPrintMax( "done in " , chrono.diff() );
-    leaderPrint("  adr- numiter = " , numIter);
+
+    std::string statusMessage;
+
+    statusMessage = linearSolver.printStatus();
+
+    leaderPrint("  adr-  " + statusMessage);
 
     M_comm->Barrier();
 
