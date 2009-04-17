@@ -324,8 +324,8 @@ int EpetraMatrix<DataType>::GlobalAssemble()
 {
     if ( M_epetraCrs.Filled ())
     {
-        if (M_epetraCrs.Comm().MyPID() == 0)
-            std::cout << "Matrix is already filled" << std::endl;
+//         if (M_epetraCrs.Comm().MyPID() == 0)
+//             std::cout << "Matrix is already filled" << std::endl;
         return -1;
     }
 
