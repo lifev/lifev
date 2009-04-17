@@ -36,7 +36,9 @@ namespace LifeV
 
 MLPreconditioner::MLPreconditioner():
         super(),
-        M_Prec()
+        M_Prec(),
+        M_precType(),
+        M_analyze(false)
 {}
 
 MLPreconditioner::~MLPreconditioner()
@@ -56,13 +58,17 @@ void
 MLPreconditioner::setDataFromGetPot( const GetPot&          dataFile,
                                      const std::string&     section)
 {
+    bool found;
+    M_analyze = dataFile((section + "/ML/analyze_smoother").data(), false, found);
+
     createMLList(dataFile, section, M_List);
 
     std::string CT;
 
     Teuchos::ParameterList& SmootherIFSubList = M_List.sublist("smoother: ifpack list");
     createIfpackList(dataFile, section, SmootherIFSubList);
-    //    M_List.print(std::cout);
+
+
 }
 
 
@@ -97,6 +103,19 @@ MLPreconditioner::buildPreconditioner(operator_type& oper)
     */
 
     M_Prec.reset(new prec_raw_type(M_Oper->getEpetraMatrix(), this->getList(), true));
+
+    if (M_analyze)
+        {
+            ML_Epetra::MultiLevelPreconditioner* prec;
+            prec = dynamic_cast<ML_Epetra::MultiLevelPreconditioner*> (M_Prec.get());
+            int NumPreCycles = 5;
+            int NumPostCycles = 1;
+            int NumMLCycles = 10;
+            prec->AnalyzeHierarchy(true, NumPreCycles, NumPostCycles, NumMLCycles);
+
+            //prec->TestSmoothers();
+        }
+
 
     //    ML_CHK_ERR(M_Prec->SetParameters(M_List));
 
@@ -156,7 +175,6 @@ createMLList( const GetPot&              dataFile,
 
 
 
-    bool found = false;
 
     list.setName("ML paramters list");
 
@@ -164,8 +182,9 @@ createMLList( const GetPot&              dataFile,
     if (defList != "none")
         ML_Epetra::SetDefaults(defList, list);
 
+    bool found;
+
     int MLPrintParameterList = dataFile((section + "/displayList").data(),      0, found);
-    //    if (found) list.set("displayList", MLPrintParameterList);
 
     int MLOutput             = dataFile((section + "/ML/MLOuput").data(),       0, found);
     if (found) list.set("ML output",               MLOutput);
