@@ -1012,35 +1012,55 @@ void ADRSolver<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
 
     chrono.start();
 
-
     M_matrNoBC->GlobalAssemble();
     M_matrStab->GlobalAssemble();
 
-//    M_matrNoBC->spy("full");
+    chrono.stop();
+    leaderPrintMax("done in ", chrono.diff() );
+
+    //
+
+    leaderPrint("  adr-  setting up the full matrix        ...    ");
+
+    chrono.start();
 
     matrix_ptrtype matrFull( new matrix_type( M_localMap, M_matrNoBC->getMeanNumEntries()));
 
     *matrFull += *M_matrNoBC;
     *matrFull += *M_matrStab;
 
+    chrono.stop();
+    leaderPrintMax("done in ", chrono.diff() );
+
+    //
+    leaderPrint("  adr-  setting up the full rhs           ...    ");
+
+    chrono.start();
+
+
 //    M_matrStab->spy("stab");
     vector_type    rhsFull = M_rhsNoBC;
 
     chrono.stop();
-
     leaderPrintMax("done in ", chrono.diff() );
 
     // boundary conditions update
-    M_comm->Barrier();
-    leaderPrint("  adr-  Applying boundary conditions ...         ");
 
+    leaderPrint("  adr-  Applying boundary conditions ...         ");
     chrono.start();
 
     applyBoundaryConditions( *matrFull, rhsFull, bch);
 
-    matrFull->GlobalAssemble();
+    M_comm->Barrier();
+    leaderPrintMax("done in " , chrono.diff());
 
-    //matrFull->spy("laplacian");
+    //
+
+    leaderPrint("  adr-  Finalizing the full matrix    ...         ");
+    chrono.start();
+
+
+    matrFull->GlobalAssemble();
 
     chrono.stop();
 
