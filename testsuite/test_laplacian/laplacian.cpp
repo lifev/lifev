@@ -56,8 +56,7 @@
 
 #include "laplacian.hpp"
 
-
-
+#define POSTPROCESS 0
 
 
 // ===================================================
@@ -293,8 +292,10 @@ laplacian::run()
 
     MPI_Barrier(MPI_COMM_WORLD);
 
+#if POSTPROCESS
     boost::shared_ptr< Exporter<RegionMesh3D<LinearTetra> > > exporter;
     exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "temperature", Members->comm->MyPID()) );
+#endif
 
     dataADR.setTime(0);
 
@@ -312,12 +313,15 @@ laplacian::run()
     adr.resetPrec();
 
     // post processing setup
+
     vector_type uComputed(adr.solution(), Repeated );
 
+#if POSTPROCESS
     vector_ptrtype temperature  ( new vector_type(adr.solution(), Repeated ) );
     exporter->addVariable( ExporterData::Scalar, "temperature", temperature,
                            UInt(0), UInt(adrFESpace.dof().numTotalDof()));
     exporter->postProcess( 0 );
+#endif
 
     // Error H1 Norm
     vector_type uExact ( fullAdrMap, Repeated );
