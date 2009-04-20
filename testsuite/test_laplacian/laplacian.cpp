@@ -283,6 +283,9 @@ laplacian::run()
                                                 u0FESpace,
                                                 *Members->comm);
 
+    Chrono chrono;
+
+    chrono.start();
     adr.setUp(dataFile);
     adr.buildSystem();
 
@@ -310,7 +313,10 @@ laplacian::run()
     adr.updateSystem(1., betaFluid, rhsADR);
     adr.iterate(bcADR);
 
-    adr.resetPrec();
+    chrono.stop();
+
+    if (verbose) std::cout << "\n \n -- Total time = " << chrono.diff() << std::endl << std::endl;
+    //adr.resetPrec();
 
     // post processing setup
 
@@ -330,5 +336,5 @@ laplacian::run()
 
     uExact -= uComputed;
     Real H1error = adrFESpace.H1Norm( uExact );
-    std::cout << "Error Norm H1: " << H1error << std::endl;
+    if (verbose) std::cout << "Error Norm H1: " << H1error << std::endl;
 }
