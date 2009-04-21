@@ -229,6 +229,15 @@ public:
     void updateStuff();
     UInt const offset()const{return M_offset;}
 
+
+    // Physic constant
+
+    double const thickness() const {return M_data.thickness();}
+    double const density()   const {return M_data.rho();}
+    double const young()     const {return M_data.young();}
+    double const poisson()   const {return M_data.poisson();}
+    double const rho()       const {return M_data.rho();}
+
 private:
 
     const data_type&               M_data;
