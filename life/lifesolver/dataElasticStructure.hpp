@@ -69,7 +69,7 @@ public:
 
     /*const*/ UInt verbose() const {return _verbose;}
 
-    /*const*/ double poisson(int mat) const
+    /*const*/ double poisson(int mat = 1) const
         {
             if (M_poisson.size() == 1)
                 return _nu;
@@ -77,7 +77,7 @@ public:
                 return M_poisson.find(mat)->second;
         }
 
-    /*const*/ double young(int mat) const
+    /*const*/ double young(int mat = 1) const
         {
             if (M_young.size() == 1)
                 return _E;
@@ -85,14 +85,14 @@ public:
                 return M_young.find(mat)->second;
         }
 
-    /*const*/ double lambda(int mat) const
+    /*const*/ double lambda(int mat = 1) const
         {
             if (M_lambda.size() == 1)
                 return _lambda;
             else
                 return M_lambda.find(mat)->second;
         }
-    /*const*/ double mu(int mat) const
+    /*const*/ double mu(int mat = 1) const
         {
             if (M_mu.size() == 1)
                 return _mu;
@@ -100,17 +100,22 @@ public:
                 return M_mu.find(mat)->second;
         }
 
-    /*const*/ double lambda() const {return _lambda;}
-    /*const*/ double mu() const {return _mu;}
+    /*const*/ double thickness() const {return M_thickness;}
 
-    std::string order() const {return M_order;}
+//     /*const*/ double lambda()    const {return _lambda;}
+//     /*const*/ double mu()        const {return _mu;}
+
+    std::string order()          const {return M_order;}
+
 private:
     //! Physics
-    Real _rho; // densisty
-    Real _E;  // Young modulus
-    Real _nu; // Poisson coeficient
-    Real _lambda, _mu; // Lame coefficients
-    Real _endtime; // end time
+    Real                   _rho; // densisty
+    Real                   _E;  // Young modulus
+    Real                   _nu; // Poisson coeficient
+    Real                   _lambda, _mu; // Lame coefficients
+    Real                   _endtime; // end time
+
+    Real                   M_thickness;
 
     std::map<int, double>  M_poisson;
     std::map<int, double>  M_young;
@@ -119,9 +124,9 @@ private:
     std::map<int, double>  M_mu;
 
     //! Miscellaneous
-    Real _factor; // amplification factor for deformed mesh
-    UInt _verbose; // temporal output verbose
-    std::string M_order;
+    Real                   _factor; // amplification factor for deformed mesh
+    UInt                   _verbose; // temporal output verbose
+    std::string            M_order;
 
 };
 
@@ -151,6 +156,8 @@ DataElasticStructure( const GetPot& dfile ) :
     _verbose = dfile( "solid/miscellaneous/verbose", 1 );
 
     M_order  = dfile( "solid/discretization/order", "P1");
+
+    M_thickness = dfile("solid/physics/thickness", 0.1);
 
     // Lame coefficients
 //     _lambda  = _E * _nu / ( ( 1.0 + _nu ) * ( 1.0 - 2.0 * _nu ) );
