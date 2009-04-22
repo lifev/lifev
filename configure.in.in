@@ -1,7 +1,7 @@
 # -*- autoconf -*-
 #
 #
-AC_INIT([lifev], [0.9.0], [lifev-dev@webmail.mate.polimi.it])
+AC_INIT([lifev], [0.9.0], [lifev-dev@googlegroups.com])
 
 LIFEV_VERSION_MAJOR=0
 LIFEV_VERSION_MINOR=9
@@ -115,10 +115,10 @@ AM_CONDITIONAL(HAVE_PETSC, test "x$petsc_libs" != "x" )
 dnl parmetis
 AC_CHECK_PARMETIS
 
-dnl grace
-AC_CHECK_HEADERS([grace_np.h])
-AC_CHECK_LIB([grace_np],GraceClose,[grace_libs="-lgrace_np"],[grace_libs=""])
-AC_SUBST(grace_libs)
+dnl grace, commented since not used any more
+dnl AC_CHECK_HEADERS([grace_np.h])
+dnl AC_CHECK_LIB([grace_np],GraceClose,[grace_libs="-lgrace_np"],[grace_libs=""])
+dnl AC_SUBST(grace_libs)
 
 dnl pvm
 dnl AC_CHECK_PVM
