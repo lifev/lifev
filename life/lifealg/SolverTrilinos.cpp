@@ -332,48 +332,36 @@ SolverTrilinos::solve( vector_type& x, vector_type& b )
        if < 0 see AztecOO.cpp
     */
 
-//#ifdef DEBUG
-    const Epetra_Comm* Comm(0);
-    if (M_solver.GetUserOperator()) Comm = &M_solver.GetUserOperator()->Comm();
-    else if (M_solver.GetUserMatrix()) Comm = &M_solver.GetUserMatrix()->Comm();
+#ifdef DEBUG
 
-    if (! Comm)
-        {
-            Comm->Barrier();
+     M_Displayer.comm().Barrier();
+     M_Displayer.leaderPrint( "  o-  Number of iterations = ", M_solver.NumIters());
+     M_Displayer.leaderPrint( "  o-  Norm of the true residual = ", M_solver.TrueResidual());
+     M_Displayer.leaderPrint( "  o-  Norm of the true ratio    = ",  M_solver.ScaledResidual());
+#endif
 
-            if( Comm->MyPID() == 0 ) {
-                M_Displayer.leaderPrint( "  o-  Solver performed ", M_solver.NumIters());
-                M_Displayer.leaderPrint( " iterations.\n");
-                M_Displayer.leaderPrint( "  o-  Norm of the true residual = ", M_solver.TrueResidual());
-                M_Displayer.leaderPrint( "  o-  Norm of the true ratio    = ",  M_solver.ScaledResidual());
-            }
-        }
-//#endif
+     /* try to solve again (reason may be:
+       -2 "Aztec status AZ_breakdown: numerical breakdown"
+       -3 "Aztec status AZ_loss: loss of precision"
+       -4 "Aztec status AZ_ill_cond: GMRES hessenberg ill-conditioned"
+     */
+     if (status <= -2 )
+     {
+         maxiter = M_maxIter;
+         mytol = M_tol;
+         int olditer = M_solver.NumIters();
+         status = M_solver.Iterate(maxiter, mytol);
 
-    if (status == -2 || status == -3 ) // try to solve again (reason may be:
-        {
-            maxiter = M_maxIter;
-            mytol = M_tol;
-            int olditer = M_solver.NumIters();
-            status = M_solver.Iterate(maxiter, mytol);
+#ifdef DEBUG
+         M_Displayer.comm().Barrier();
+         M_Displayer.leaderPrint( "  o-  Second run: number of iterations = ", M_solver.NumIters());
+         M_Displayer.leaderPrint( "  o-  Norm of the true residual = ",  M_solver.TrueResidual());
+         M_Displayer.leaderPrint( "  o-  Norm of the true ratio    = ",  M_solver.ScaledResidual());
+#endif
+         return(M_solver.NumIters() + olditer);
+     }
 
-//#ifdef DEBUG
-    if (! Comm)
-        {
-            Comm->Barrier();
-
-            if( Comm->MyPID() == 0 ) {
-                M_Displayer.leaderPrint( "  o-  Second run: solver performed ", M_solver.NumIters());
-                M_Displayer.leaderPrint(" iterations.");
-                M_Displayer.leaderPrint("  o-  Norm of the true residual = ",  M_solver.TrueResidual());
-                M_Displayer.leaderPrint( "  o-  Norm of the true ratio    = ",  M_solver.ScaledResidual());
-            }
-        }
-//#endif
-            return(M_solver.NumIters() + olditer);
-        }
-
-    return(M_solver.NumIters());
+     return(M_solver.NumIters());
 
 }
 
