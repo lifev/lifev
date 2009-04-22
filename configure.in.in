@@ -77,17 +77,6 @@ AC_CHECK_PROG(PDFLATEX, pdflatex,[pdflatex],[no])
 AC_CHECK_PROG(DOXYGEN, doxygen, [doxygen], [no-doxygen] )
 AC_CHECK_PROG(LIFE_HAS_DOT, dot, [yes] )
 
-
-AC_CHECK_BOOST
-AC_CHECK_BOOST_GRAPH
-AC_CHECK_BOOST_SIGNALS
-AC_CHECK_BOOST_REGEX
-AC_CHECK_BOOST_UNIT_TEST_FRAMEWORK
-
-AC_CHECK_BOOST_PROGRAM_OPTIONS
-AM_CONDITIONAL(HAVE_BOOST_PROGRAM_OPTIONS, test "x$boost_program_options_error" = "xno")
-
-
 dnl
 dnl checks for some scientific computing libraries
 dnl
@@ -119,6 +108,16 @@ dnl grace, commented since not used any more
 dnl AC_CHECK_HEADERS([grace_np.h])
 dnl AC_CHECK_LIB([grace_np],GraceClose,[grace_libs="-lgrace_np"],[grace_libs=""])
 dnl AC_SUBST(grace_libs)
+
+AC_CHECK_BOOST
+AC_CHECK_BOOST_GRAPH
+AC_CHECK_BOOST_SIGNALS
+AC_CHECK_BOOST_REGEX
+AC_CHECK_BOOST_UNIT_TEST_FRAMEWORK
+
+AC_CHECK_BOOST_PROGRAM_OPTIONS
+AM_CONDITIONAL(HAVE_BOOST_PROGRAM_OPTIONS, test "x$boost_program_options_error" = "xno")
+
 
 dnl pvm
 dnl AC_CHECK_PVM
