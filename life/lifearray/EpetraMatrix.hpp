@@ -34,6 +34,7 @@
 
 
 #include <lifeconfig.h>
+#include <Epetra_MpiComm.h>
 #include <Epetra_FECrsMatrix.h>
 #include <EpetraExt_MatrixMatrix.h>
 #include <EpetraExt_RowMatrixOut.h>
@@ -372,6 +373,7 @@ void EpetraMatrix<DataType>::diagonalize ( std::vector<UInt> rVec,
     int MyPID   (Comm.MyPID()   );
     int i;
 
+
     // Note: Epetra_Comm::broadcast does not support passing of uint, hence
     //       I define an int pointer to make the broadcast but then come back to an
     //       UInt pointer to insert the data
@@ -382,30 +384,30 @@ void EpetraMatrix<DataType>::diagonalize ( std::vector<UInt> rVec,
     // loop on all proc
     for ( int p(0); p < numProcs; p++)
     {
-	int sizeVec(rVec.size());
+        int sizeVec(rVec.size());
 
-	Comm.Broadcast(&sizeVec, 1, p);
+        Comm.Broadcast(&sizeVec, 1, p);
 
-	if ( p == MyPID )
-	{
-	    Ur    =  &rVec    .front();
-	}
-	else
-	{
-	    Ur    = new UInt    [sizeVec];
-	}
+        if ( p == MyPID )
+            {
+                Ur    =  &rVec    .front();
+            }
+        else
+            {
+                Ur    = new UInt    [sizeVec];
+            }
 
-	r     = (int*) Ur;
+        r     = (int*) Ur;
 
-	Comm.Broadcast(r,    sizeVec, p);
+        Comm.Broadcast(r,    sizeVec, p);
 
-	for (i=0; i < sizeVec; i++)
-	  diagonalize( Ur[i], coeff, offset);
+        for (i=0; i < sizeVec; i++)
+            diagonalize( Ur[i], coeff, offset);
 
-	if ( p != MyPID )
-	{
-	    delete[] Ur;
-	}
+        if ( p != MyPID )
+            {
+                delete[] Ur;
+            }
 
     }
 
@@ -469,6 +471,7 @@ void EpetraMatrix<DataType>::diagonalize( std::vector<UInt> rVec,
                                           UInt offset)
 {
 
+
     const Epetra_Comm&  Comm(M_epetraCrs.Comm());
     int numProcs(Comm.NumProc());
     int MyPID   (Comm.MyPID()   );
@@ -480,6 +483,208 @@ void EpetraMatrix<DataType>::diagonalize( std::vector<UInt> rVec,
     int*     r;
     UInt*    Ur;
     DataType* datum;
+
+#if 0
+    // 2 arrays to store le local and remote IDs
+
+    int me = Comm.MyPID();
+
+    std::vector<int> localIDs;
+    std::vector<int> remoteIDs;
+
+    std::vector<double> localData;
+    std::vector<double> remoteData;
+
+    std::map<int, double>           localBC;
+    std::map<int, double>::iterator im;
+
+    const Epetra_Map& rowMap(M_epetraCrs.RowMap());
+
+
+    Comm.Barrier();
+    // we want to know which IDs are our or not
+
+    for (int ii = 0; ii < rVec.size(); ++ii)
+        {
+            int lID = rowMap.LID(rVec[ii] + 1);
+            if (!(lID < 0))
+                {
+
+                    localIDs.push_back(rVec[ii] + 1);
+                    localData.push_back(datumVec[ii]);
+                    localBC.insert(pair<int, double>(rVec[ii] + 1, datumVec[ii]));
+                }
+                    else
+                {
+                    remoteIDs.push_back(rVec[ii] + 1);
+                    remoteData.push_back(datumVec[ii]);
+                }
+        }
+
+#if 0
+    Comm.Barrier();
+    if (MyPID == 0)
+        {
+            std::cout << "local map : " << std::endl;
+            for (int ii = 0; ii < localIDs.size(); ++ii)
+                std::cout << localIDs[ii] << std::endl;
+
+            std::cout << "remote map : " << std::endl;
+            for (int ii = 0; ii < remoteIDs.size(); ++ii)
+                std::cout << remoteIDs[ii] << std::endl;
+            std::cout << "done" << std::endl;
+        }
+
+    Comm.Barrier();
+
+    if (MyPID == 1)
+        {
+            std::cout << "local map : " << std::endl;
+            for (int ii = 0; ii < localIDs.size(); ++ii)
+                std::cout << localIDs[ii] << std::endl;
+
+            std::cout << "remote map : " << std::endl;
+            for (int ii = 0; ii < remoteIDs.size(); ++ii)
+                std::cout << remoteIDs[ii] << std::endl;
+            std::cout << "done" << std::endl;
+        }
+    Comm.Barrier();
+#endif
+
+    // now, we have to fill our localIDs with IDs from other processors
+    // first, we have to build the map of all the remoteIDs and their processor owner
+
+
+    int numIDs = remoteIDs.size();
+
+    int* PIDList = new int[numIDs];
+    int* LIDList = new int[numIDs];
+
+    rowMap.RemoteIDList( numIDs,
+                         &remoteIDs[0],
+                         PIDList,
+                         LIDList);
+
+
+    std::vector< std::vector<int> > procToID  (Comm.NumProc());
+    std::vector< std::vector<int> > procToData(Comm.NumProc());
+
+
+    for (int ii = 0; ii < numIDs; ++ii)
+        {
+            int pi = PIDList[ii];
+            procToID[pi].push_back(remoteIDs[ii]);
+            procToData[pi].push_back(remoteData[ii]);
+            //            procToID[PIDList[ii]].push_back(remoteIDs[ii]);
+        }
+
+    //std::cout << " --> " << procToID.size() << std::endl;
+    // then, we send all the nodes where they belong
+
+
+    const Epetra_MpiComm* comm = dynamic_cast<Epetra_MpiComm const*>(&Comm);
+
+    for (int ii = 0; ii < procToID.size(); ++ii)
+        {
+            if (ii != me)
+                {
+                    int* length = new int[1];
+                    *length = procToID[ii].size();
+                    //                    std::cout << me << " is sending " << *length << " to " << ii << std::endl;
+                    MPI_Send( &length[0], 1, MPI_INT, ii, 666, comm->Comm() );
+                    if (*length > 0)
+                        {
+                            MPI_Send( &procToID[ii][0], *length, MPI_INT, ii, 667, comm->Comm() );
+                            MPI_Send( &procToData[ii][0], *length, MPI_INT, ii, 668, comm->Comm() );
+                            //std::cout << me << " has sent to " << ii << " : ";
+
+                            //for (int jj = 0; jj < procToData[ii].size(); ++jj)
+                                //std::cout << procToID[ii][jj] << " ";
+                            //std::cout << " end sent" << std::endl;
+                        }
+                    delete[] length;
+                }
+
+        }
+
+    for (int ii = 0; ii < procToID.size(); ++ii)
+        {
+            if (ii != me)
+                {
+                    int* length = new int[1];
+                    MPI_Status* status;
+                    MPI_Recv( length, 1, MPI_INT, ii, 666, comm->Comm(), status );
+                    //std::cout << me << " received " << *length << " from " << ii << std::endl;
+
+
+                    if (*length > 0)
+                        {
+                            int* bufferID = new int[*length];
+                            int* ptrID    = new int[*length];
+
+                            MPI_Recv( bufferID, *length, MPI_INT, ii, 667, comm->Comm(), status );
+
+                            //std::cout << me << " has received ";
+                            ptrID = &bufferID[0];
+
+//                             for (int ii = 0; ii < *length; ++ii, ++ptrID)
+//                                 {
+//                                     std::cout << *ptrID << " ";
+//                                     localIDs.push_back(*ptrID);
+//                                 }
+
+                            //std::cout << me << " has received ";
+
+//                             for (int ii = 0; ii < *length; ++ii, ++ptr)
+//                                 {
+//                                     //std::cout << *ptr << " ";
+//                                     localIDs.push_back(*ptr);
+//                                 }
+                            //std::cout << std::endl;
+
+                            double* bufferData = new double[*length];
+                            double* ptrData;
+
+                            MPI_Recv( bufferData, *length, MPI_INT, ii, 668, comm->Comm(), status );
+
+//                             std::cout << me << " has received ";
+                            ptrData = &bufferData[0];
+
+                            for (int ii = 0; ii < *length; ++ii, ++ptrID, ++ptrData)
+                                {
+                                    localBC.insert(pair<int, double>
+                                                   (*ptrID, *ptrData));
+
+                                    //std::cout << *ptrID << " <-> " << *ptrData << std::endl;
+                                    //                                    std::cout << *ptr << " ";
+                                    //localData.push_back(*ptr);
+                                 }
+                            //std::cout << std::endl;
+
+                            delete[] bufferID;
+                            delete[] bufferData;
+
+                        }
+
+
+                    delete[] length;
+                }
+        }
+
+    delete[] PIDList;
+    delete[] LIDList;
+
+    for (im = localBC.begin(); im != localBC.end(); ++im)
+        {
+            //std::cout << me << " is filling " << im->first << " with ";
+            //std::cout << im->second << std::endl;
+            diagonalize( im->first - 1, coeff, b, im->second, offset);
+        }
+    //    std::cout << std::endl;
+
+
+    return;
+#endif
 
 
     // loop on all proc
