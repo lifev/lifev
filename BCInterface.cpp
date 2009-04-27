@@ -80,6 +80,9 @@ BCInterface::setHandlerParameters( const ID bcNumber, const BCHandler::BCHints h
 	M_bcNumber 	= bcNumber;
 	M_hint 		= hint;
 
+    Debug( 5020 ) << "BCInterface::setHandlerParameters          M_bcNumber: " << M_bcNumber << "\n";
+    Debug( 5020 ) << "                                               M_hint: " << M_hint << "\n";
+
 	M_autoSetParameters = false;
 }
 
@@ -96,6 +99,8 @@ BCInterface::setFSIOperator( const boost::shared_ptr<FSIOperator>& oper )
 void
 BCInterface::buildHandler( void )
 {
+	Debug( 5020 ) << "BCInterface::buildHandler         M_autoSetParameters: " << M_autoSetParameters << "\n";
+
 	if ( M_autoSetParameters )
 		autosetHandlerParameters();
 
@@ -159,6 +164,9 @@ BCInterface::autosetHandlerParameters( void )
 
 		M_bcNumber += M_dataFile.vector_variable_size((M_dataSection + M_list[i] + "/flag").c_str());
 	}
+
+    Debug( 5020 ) << "BCInterface::autosetHandlerParameters      M_bcNumber: " << M_bcNumber << "\n";
+    Debug( 5020 ) << "                                               M_hint: " << M_hint << "\n\n";
 }
 
 
@@ -170,8 +178,11 @@ BCInterface::readFlag( const char* flag )
 
 	M_flag.clear();
 	M_flag.reserve(flagSize);
+
     for (UInt j(0) ; j < flagSize ; ++j)
     	M_flag.push_back(M_dataFile(flag, 0, j));
+
+    Debug( 5020 ) << "BCInterface::readFlag                   M_flag.size(): " << M_flag.size() << "\n";
 }
 
 
@@ -180,6 +191,8 @@ inline void
 BCInterface::readType( const char* type )
 {
 	M_type = M_mapType[M_dataFile(type, "Essential")];
+
+	Debug( 5020 ) << "BCInterface::readType                          M_type: " << M_type << " " << M_dataFile(type, "Essential") << "\n";
 }
 
 
@@ -187,7 +200,9 @@ BCInterface::readType( const char* type )
 inline void
 BCInterface::readMode( const char* mode )
 {
-	 M_mode = M_mapMode[M_dataFile(mode, "Full")];
+	M_mode = M_mapMode[M_dataFile(mode, "Full")];
+
+	Debug( 5020 ) << "BCInterface::readMode                          M_mode: " << M_mode << " " << M_dataFile(mode, "Full") << "\n";
 }
 
 
@@ -196,6 +211,8 @@ inline void
 BCInterface::readComponentNumber( const char* component )
 {
 	M_comN = M_dataFile(component, 0);
+
+	Debug( 5020 ) << "BCInterface::readComponentNumber               M_comN: " << M_comN << "\n";
 }
 
 
@@ -207,8 +224,11 @@ BCInterface::readComponentVector( const char* component )
 
 	M_comV.clear();
     M_comV.reserve(componentSize);
+
     for (UInt j(0) ; j < componentSize ; ++j)
     	M_comV.push_back(M_dataFile(component, 0, j));
+
+    Debug( 5020 ) << "BCInterface::readComponentVector        M_comV.size(): " << M_comV.size() << "\n";
 }
 
 
@@ -220,6 +240,8 @@ BCInterface::readBase( const std::string base )
 		if ( isBase( (base + j->first).c_str() ) )
 		{
 			M_base = M_mapBase[j->first];
+
+			Debug( 5020 ) << "BCInterface::readBase                          M_base: " << M_base << " " << j->first << "\n";
 
 			break;
 		}

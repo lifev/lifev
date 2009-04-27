@@ -129,13 +129,13 @@ BCInterfaceFSIOperator::checkFSIList( void )
 
 		case StructureDispToSolid :
 
-			std::cout << "BUILD StructureDispToSolid" << std::endl;
+			Debug( 5022 ) << "BCInterfaceFSIOperator::checkFSIList        StructureDispToSolid" << "\n";
 
 			break;
 
 		case StructureToFluid :
 
-			std::cout << "BUILD StructureToFluid" << std::endl;
+			Debug( 5022 ) << "BCInterfaceFSIOperator::checkFSIList            StructureToFluid" << "\n";
 
 			M_FSIOperator->setStructureToFluid( M_FSIOperator->veloFluidMesh() );
 

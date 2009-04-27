@@ -278,6 +278,8 @@ void BCInterface::addBCManager( BCBase& base )
 		case Normal :
 		case Tangential :
 
+			Debug( 5020 ) << "BCInterface::addBCManager (Scalar, Normal, Tangential)" << "\n";
+
 			addBC( M_name, M_flag, M_type, M_mode, base);
 
 			break;
@@ -285,13 +287,20 @@ void BCInterface::addBCManager( BCBase& base )
 		case Full :
 
 			readComponentNumber( (M_dataSection + M_name + "/component").c_str() );
+
+			Debug( 5020 ) << "BCInterface::addBCManager (Full)" << "\n";
+
 			addBC( M_name, M_flag, M_type, M_mode, base, M_comN);
 
 			break;
 
 		case Component :
 
+
 			readComponentVector( (M_dataSection + M_name + "/component").c_str() );
+
+			Debug( 5020 ) << "BCInterface::addBCManager (Component)" << "\n";
+
 			addBC( M_name, M_flag, M_type, M_mode, base, M_comV);
 
 			break;
@@ -307,6 +316,7 @@ void BCInterface::addBC( 	const BCName& name,
 							const BCMode& mode,
 								  BCBase& base )
 {
+	Debug( 5020 ) << "BCInterface::addBC (without component)" << "\n\n";
 	for (UInt j(0) ; j < flag.size() ; ++j)
 		M_handler->addBC( name, flag[j], type, mode, base );
 }
@@ -321,6 +331,7 @@ void BCInterface::addBC( 	const BCName& name,
 								  BCBase& base,
 							const BCComp& comp )
 {
+	Debug( 5020 ) << "BCInterface::addBC (with component)" << "\n\n";
 	for (UInt j(0) ; j < flag.size() ; ++j)
 		M_handler->addBC( name, flag[j], type, mode, base, comp );
 }
