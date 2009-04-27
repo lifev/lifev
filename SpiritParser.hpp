@@ -58,10 +58,19 @@ using namespace LifeV;
 
 /*!
  * \class SpiritCalculator
- * \brief A string parser calculator based on boost spirit
+ * \brief A string parser calculator based on \c boost::spirit
  *
  *  @author Cristiano Malossi
  *  @see
+ *
+ *  \c SpiritCalculator is a \c boost::spirit based class to perform
+ *  evaluation of \c std::string expressions.
+ *
+ *  Currently it works with the following operators:
+ *  \verbatim
+ *  +, -, *, /, ^, sqrt(), sin(), cos(), tan(), exp(), log(), log10(), >, <.
+ *  \endverbatim
+ *
  */
 struct SpiritCalculator : boost::spirit::grammar<SpiritCalculator>
 //     :
@@ -251,7 +260,7 @@ private:
 
 /*!
  * \class SpiritParser
- * \brief LifeV interface with boost spirit
+ * \brief A LifeV interface for SpiritCalculator
  *
  *  @author Cristiano Malossi
  *  @see
@@ -270,13 +279,18 @@ public:
      */
     //@{
 
+	//! Empty string constructor (need a manual call to setString)
+	/*!
+	 * \param applyRules - use rules for notation
+     */
     //! Constructor
 	SpiritParser( const bool& applyRules=true );
 
 	//! Constructor
 	/*!
-      \param String to parse
-    */
+	 * \param string - expression to parse
+	 * \param applyRules - use rules for notation
+     */
 	SpiritParser( const std::string& string, const bool& applyRules=true );
 
     //! Destructor
@@ -288,12 +302,23 @@ public:
 
     /** @name Method
      */
-    //@{
 
+    //@{
+    /*! Set string function
+     *
+     * \param string - Expression to evaluate
+     */
     void setString( const std::string& string );
 
+    /*! Set/replace a variable
+     *
+     * \param name  - name of the parameter
+     * \param value - value of the parameter
+     */
     void setVariable( const std::string& name, const Real& value );
 
+    /*! Evaluate the expression
+     */
     Real& evaluate( void );
 
     //@}
@@ -319,6 +344,9 @@ private:
     /** @name Private functions
      */
     //@{
+
+	//! Set default variables
+	inline void setDefaultVariables( void );
 
 	//! Apply rules to the string
 	inline void ruleTheString( std::string& string );

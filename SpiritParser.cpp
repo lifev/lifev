@@ -44,8 +44,7 @@ SpiritParser::SpiritParser( const bool& applyRules ) :
 	M_applyRules				( applyRules )
 {
 	// Set default variables
-	M_variables["pi"] = 3.141592653589792;
-	M_variables["e"]  = 2.718281828459046;
+	setDefaultVariables();
 }
 
 
@@ -55,12 +54,11 @@ SpiritParser::SpiritParser( const std::string& string, const bool& applyRules ) 
 	M_calculator				( M_variables, M_result ),
 	M_applyRules				( applyRules )
 {
+	// Set default variables
+	setDefaultVariables();
+
 	// Set the string
 	setString( string );
-
-	// Set default variables
-	M_variables["pi"] = 3.141592653589792;
-	M_variables["e"]  = 2.718281828459046;
 }
 
 
@@ -74,6 +72,10 @@ void
 SpiritParser::setString( const std::string& string )
 {
 	M_string = string;
+
+    Debug( 5030 ) << "SpiritParser::setString:         M_string: " << M_string 	<< "\n";
+    Debug( 5030 ) << "                             M_applyRules: " << M_applyRules << "\n";
+
 	if ( M_applyRules )
 		ruleTheString( M_string );
 }
@@ -84,6 +86,9 @@ void
 SpiritParser::setVariable( const std::string& name, const Real& value )
 {
 	M_variables[name] = value;
+
+    Debug( 5030 ) << "SpiritParser::setVariable: M_variables[" << name << "]: " << value << "\n";
+
 }
 
 
@@ -92,6 +97,8 @@ Real&
 SpiritParser::evaluate( void )
 {
     boost::spirit::parse(M_string.begin(), M_string.end(), M_calculator, boost::spirit::space_p);
+
+    Debug( 5030 ) << "SpiritParser::evaluate:          M_result: " << M_result << "\n";
 
 	return M_result;
 }
@@ -104,8 +111,21 @@ SpiritParser::evaluate( void )
 //! Private functions
 // ===================================================
 inline void
+SpiritParser::setDefaultVariables( void )
+{
+	// Set default variables
+	M_variables["pi"] = 3.141592653589792;
+	M_variables["e"]  = 2.718281828459046;
+}
+
+
+
+inline void
 SpiritParser::ruleTheString( std::string& string )
 {
+	Debug( 5030 ) << "SpiritParser::ruleTheString: " << "\n";
+	Debug( 5030 ) << "                      (before) - M_string: " << M_string 	<< "\n";
+
 	// Convert the string to lower case
 	stringToLowerCase( string );
 
@@ -117,6 +137,8 @@ SpiritParser::ruleTheString( std::string& string )
 	replaceContent( string, "sin",   "S" );
 	replaceContent( string, "cos",   "C" );
 	replaceContent( string, "tan",   "T" );
+
+	Debug( 5030 ) << "                       (after) - M_string: " << M_string 	<< "\n";
 }
 
 inline void
