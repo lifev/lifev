@@ -28,6 +28,11 @@
    \date 2005-04-16
  */
 
+#ifdef TWODIM
+#error test_ethiersteinman cannot be compiled in 2D
+#endif
+
+
 #include "Epetra_config.h"
 #ifdef HAVE_MPI
 #include "Epetra_MpiComm.h"

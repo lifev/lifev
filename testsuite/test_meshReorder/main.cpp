@@ -1,3 +1,8 @@
+#ifdef TWODIM
+#error test_reorder cannot be compiled in 2D
+#endif
+
+
 #include "Epetra_config.h"
 #include <life/lifefilters/medit_wrtrs.hpp>
 #include<life/lifemesh/dataMesh.hpp>

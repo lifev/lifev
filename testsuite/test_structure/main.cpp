@@ -27,6 +27,10 @@
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
    \date 2005-04-16
  */
+#ifdef TWODIM
+#error test_structure cannot be compiled in 2D
+#endif
+
 
 #include "Epetra_config.h"
 #ifdef HAVE_MPI
@@ -119,5 +123,4 @@ main( int argc, char** argv )
 #endif
   return( EXIT_SUCCESS );
 }
-
 

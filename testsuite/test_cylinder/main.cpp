@@ -28,6 +28,10 @@
    \date 2005-04-16
  */
 
+#ifdef TWODIM
+#error test_cylinder cannot be compiled in 2D
+#endif
+
 #include "Epetra_config.h"
 #ifdef HAVE_MPI
 #include "Epetra_MpiComm.h"
@@ -101,7 +105,6 @@ static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ))
 int
 main( int argc, char** argv )
 {
-
 #ifdef HAVE_MPI
   MPI_Init(&argc, &argv);
 #endif
@@ -120,5 +123,6 @@ main( int argc, char** argv )
 #endif
   return( EXIT_SUCCESS );
 }
+
 
 

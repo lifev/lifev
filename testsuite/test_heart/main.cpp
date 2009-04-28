@@ -28,6 +28,10 @@
    \date 2005-04-16
  */
 
+#ifdef TWODIM
+#error test_heart cannot be compiled in 2D
+#endif
+
 #include "Epetra_config.h"
 
 #ifdef HAVE_MPI
@@ -102,7 +106,7 @@ main( int argc, char** argv )
     Heart heart( argc, argv, makeAbout(), desc );
     heart.run();
 
-//! Finalizing Epetra communicator    
+//! Finalizing Epetra communicator
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
