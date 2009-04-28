@@ -9,18 +9,31 @@
 [./physics]
 
 diffusivity     = 1.0           # diffusivity
+sigma		= 0.0		# reaction coefficient
 
+[../stab]
 
-[../discretization]
+type = none
+gammaBeta = 0.5
+
+[../discretization2D]
 
 order     = P1
-mesh_dir  = ./Mesh/  # the directory where the mesh file is
+mesh_dir  = ./Mesh/freefem/  # the directory where the mesh file is
+mesh_type = .msh
+mesh_file =  square20x20.msh  #square10x10.msh #square40x40   
+
+[../discretization3D]
+
+order     = P1
+mesh_dir  = ./Mesh/inria/  # the directory where the mesh file is
+mesh_type = .mesh
 #mesh_file = hexa32x32.mesh        # mesh file
 mesh_file = hexa16x16.mesh        # mesh file
 #mesh_file = hexa8x8.mesh        # mesh file
 #mesh_file = hexa4x4.mesh        # mesh file
 #mesh_file = cube8x8.mesh        # mesh file
-# mesh_file = cube16x16.mesh      # mesh file
+#mesh_file = cube16x16.mesh      # mesh file
 #mesh_file = cube32x32.mesh      # mesh file
 
 [../prec]

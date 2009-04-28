@@ -24,6 +24,34 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA
 */
+/* ========================================================
+
+Simple Laplacian test with Dirichlet Boundary condition
+
+Solve the problem
+
+               - \Delta u = f
+
+               u = 0 on the boundary
+
+
+ 3D: with the source term f = 12 \pi^2 sin(2 \pi x) sin(2 \pi y) sin (2 \pi z) on a cube
+ 2D: with the source term f = 8 \pi^2 sin(2 \pi x) sin(2 \pi y) on a square
+
+ the rhs is computed as rhs = Mass_Matrix * f_iterpolated
+
+
+ More generally this test can solve the problem:
+
+               - \nu \Delta u + \beta \nabla u + \sigma u = f
+
+               u = g on the boundary
+
+ being \nu and \sigma constants defined in the data file and \beta interpolated.
+
+*/
+
+
 /**
    \file main.hpp
    \author L. Iapichino <laura.iapichino@epfl.ch>, C. Malossi <cristiano.malossi@epfl.ch>, A. Manzoni <andrea.manzoni@epfl.ch>
