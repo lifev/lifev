@@ -35,10 +35,10 @@ namespace LifeV
 |
 | #Mesh readers
 |
-*----------------------------------------------------------------------*/ 
+*----------------------------------------------------------------------*/
 /*****************************************************************
      MESH READER form MESH2D files (unformatted)
-******************************************************************/ 
+******************************************************************/
 // Macros for Fortran interface
 
 SUBROUTINE_F77 F77NAME( readmesh2d ) ( I_F77 & ne, I_F77 & np,
@@ -136,7 +136,7 @@ readMesh2d( RegionMesh2D & mesh, const std::string & fname, EntityFlag regionFla
     nBVe = UInt( nb );
 
     /* I Assume that the mesh is OK, so the number of boundary vertices coincides
-       with the number of boundary sides: mesh checkers have still to be implemented */ 
+       with the number of boundary sides: mesh checkers have still to be implemented */
     // Do I want a P2 mesh?
     p2meshwanted = ( ElementShape::numPoints == 6 );
     // Do I have a P2 mesh?
@@ -276,7 +276,7 @@ readMesh2d( RegionMesh2D & mesh, const std::string & fname, EntityFlag regionFla
 
 /**
   read a gmsh mesh (2D) file and store it in a RegionMesh2D
- 
+
   @param mesh mesh data structure to fill in
   @param filename name of the gmsh mesh file  to read
   @param regionFlag identifier for the region
@@ -362,24 +362,21 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
 
     // Euler formulas
     UInt n_elements = __gt[2];
- 
+
     // Only Boundary Edges (in a next version I will allow for different choices)
     mesh.setMaxNumEdges( __gt[1] );
     // Here the REAL number of edges (all of them)
-    mesh.numEdges() = __gt[1]; 
+    mesh.numEdges() = __gt[1];
     mesh.setNumBEdges( __gt[1] );
 
     Debug() << "number of edges= " << __gt[1] << "\n";
-    
+
     // Only Boundary Faces
     mesh.setMaxNumFaces( n_elements);
-    
+
     // Here the REAL number of edges (all of them)
-    mesh.numFaces() = n_elements; 
+    mesh.numFaces() = n_elements;
     Debug() << "number of faces= " << n_elements << "\n";
-    
-//     mesh.setMaxNumVolumes( n_volumes, true );
-//     Debug() << "number of volumes= " << n_volumes << "\n";
 
     __isonboundary.assign( __n, false );
     __whichboundary.assign( __n, 0 );
@@ -404,7 +401,7 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
     typename RegionMesh2D<GeoShape, MC>::PointType * pp = 0;
 
     mesh.setMaxNumPoints( __n, true );
-    mesh.numVertices() = __n;
+    mesh.setNumVertices(__n);
     mesh.numBVertices() = std::count( __isonboundary.begin(), __isonboundary.end(), true );
     mesh.setNumBPoints( mesh.numBVertices() );
 
@@ -466,6 +463,181 @@ readGmshFile( RegionMesh2D<GeoShape, MC> & mesh,
 }
 
 
+
+  //
+  // FREEFEM
+  //
+
+  /**
+  read a freefem mesh (2D) file and store it in a RegionMesh2D
+
+  @param mesh mesh data structure to fill in
+  @param filename name of the freefem mesh file  to read
+  @param regionFlag identifier for the region
+  @return true if everything went fine, false otherwise
+   */
+template <typename GeoShape, typename MC>
+bool
+  readFreeFemFile( RegionMesh2D<GeoShape, MC> & mesh,
+      const std::string & filename,
+      EntityFlag regionFlag,
+      bool )
+  {
+    BareItemsHandler<BareEdge> _be;
+    pair<BareEdge, bool> _edge;
+
+    typename RegionMesh2D<GeoShape, MC>::PointType * pp = 0;
+    typename RegionMesh2D<GeoShape, MC>::EdgeType * pe = 0;
+    typename RegionMesh2D<GeoShape, MC>::FaceType * pf = 0;
+
+    std::ifstream __is ( filename.c_str() );
+
+    // first row: how many vertices, triangles, edges
+    UInt __nv, __nt, __ne, i1, i2, i3;
+    __is >> __nv >> __nt >> __ne;
+    Debug() << "number of vertices: "<< __nv << "\n";
+    Debug() << "number of triangles: "<< __nt << "\n";
+    Debug() << "number of edges: "<< __ne << "\n";
+
+    // first section: read the list of vertices
+    // on each row find the two coordinates and the label for each node
+    std::vector<double> __x(2*__nv);
+    std::vector<bool> __isonboundary(__nv);
+    std::vector<UInt> __whichboundary(__nv);
+    Debug() << "reading "<< __nv << " nodes\n";
+
+    // count the number of nodes on the boundary
+    UInt __nbv(0);
+    // reading vertices
+    for( UInt __i = 0; __i < __nv;++__i )
+      {
+        __is >> __x[2*__i] >> __x[2*__i+1] >> __whichboundary[__i];
+        __isonboundary[__i] = __whichboundary[__i];
+        __nbv += __isonboundary[__i];
+      }
+
+    // second section: read the list of triangles
+    // on each row find the three nodes and the label for each triangle
+    std::vector<int> __triangle_nodes(3*__nt);
+    std::vector<int> __triangle_label(__nt);
+    Debug() << "reading "<< __nt << " triangles\n";
+
+    std::map<UInt,UInt> edge_to_ad_first, edge_to_pos_first;
+
+    // reading vertices
+    for( UInt __i = 0; __i < __nt;++__i )
+      {
+        __is >> __triangle_nodes[3*__i]
+        >> __triangle_nodes[3*__i+1]
+        >> __triangle_nodes[3*__i+2]
+        >> __triangle_label[__i];
+        // dump first the existing edges, to maintain the correct numbering
+        // if everything is correct the numbering in the bareedge
+        // structure will reflect the actual edge numbering
+        pair<UInt, bool> _check;
+        i1 = __triangle_nodes[3*__i];
+        i2 = __triangle_nodes[3*__i+1];
+        i3 = __triangle_nodes[3*__i+2];
+
+        _edge = makeBareEdge( i1, i2 );
+        _check = _be.addIfNotThere( _edge.first );
+        edge_to_ad_first[_check.first] = __i+1;
+        edge_to_pos_first[_check.first] = 1;
+
+        _edge = makeBareEdge( i2, i3 );
+        _check = _be.addIfNotThere( _edge.first );
+        edge_to_ad_first[_check.first] = __i+1;
+        edge_to_pos_first[_check.first] = 2;
+
+        _edge = makeBareEdge( i3, i1 );
+        _check = _be.addIfNotThere( _edge.first );
+        edge_to_ad_first[_check.first] = __i+1;
+        edge_to_pos_first[_check.first] = 3;
+
+      }
+
+    //    (__triangle[3*i+2] > __triangle[3*i+1])
+
+    // third section: read the list of edges
+    // NOTE: only boundary edges are stored
+    // on each row find the two nodes and the label for each edge
+    std::vector<int> __edge_nodes(2*__ne);
+    std::vector<int> __edge_label(__ne);
+    // reading edges
+    for( UInt __i = 0; __i < __ne;++__i )
+      {
+        __is >> __edge_nodes[2*__i] >> __edge_nodes[2*__i+1] >> __edge_label[__i];
+      }
+
+    // Set mesh properties
+    // Add Marker to list of Markers
+    mesh.setMarker( regionFlag );
+
+    // Till now I only have information about boundary edges - I don't know the MAX num of edges
+    // Euler formula: ne = nv + nt -1
+    mesh.setMaxNumEdges( __nv + __nt - 1 );
+    mesh.setMaxNumGlobalEdges( __nv + __nt - 1 );
+    // Here the REAL number of edges (all of them)
+    mesh.numEdges() = __nv + __nt - 1;
+    mesh.setNumBEdges( __ne );
+
+    mesh.setMaxNumFaces( __nt );
+    mesh.setMaxNumGlobalFaces( __nt );
+    // Here the REAL number of edges (all of them)
+    mesh.numFaces() = __nt;
+
+    mesh.setMaxNumPoints( __nv, true );
+    mesh.setMaxNumGlobalPoints( __nv);
+    mesh.setNumVertices(__nv);
+    mesh.setNumGlobalVertices(__nv);
+    mesh.numBVertices() = __nbv;
+    mesh.setNumBPoints( mesh.numBVertices() );
+
+    Debug() << "number of points : " << mesh.numPoints() << "\n";
+    Debug() << "number of boundary points : " << mesh.numBPoints() << "\n";
+    Debug() << "number of vertices : " << mesh.numVertices() << "\n";
+    Debug() << "number of boundary vertices : " << mesh.numBVertices() << "\n";
+
+    for( UInt __i = 0; __i < __nv;++__i )
+      {
+        pp = &mesh.addPoint( __isonboundary[ __i ] );
+        pp->setMarker( __whichboundary[__i] );
+        pp->x() = __x[2*__i];
+        pp->y() = __x[2*__i+1];
+        pp->setId(__i+1 );
+        pp->setLocalId(__i+1 );
+
+        mesh.localToGlobalNode().insert(std::make_pair(__i+1, __i+1));
+        mesh.globalToLocalNode().insert(std::make_pair(__i+1, __i+1));
+      }
+
+    // add the edges to the mesh
+    for( UInt __i = 0; __i < __ne;++__i )
+      {
+        pe = &( mesh.addEdge( true ) );
+        pe->setMarker( EntityFlag( __edge_label[__i] ) );
+        pe->setPoint( 1, mesh.point( __edge_nodes[2*__i] ) );
+        pe->setPoint( 2, mesh.point( __edge_nodes[2*__i+1] ) );
+        _edge = makeBareEdge( __edge_nodes[2*__i], __edge_nodes[2*__i+1] );
+        UInt map_it( _be.id(_edge.first) );
+        pe->ad_first()=edge_to_ad_first[map_it];
+        pe->pos_first()=edge_to_pos_first[map_it];
+      }
+
+    // add the triangles to the mesh
+    for( uint __i = 0; __i < __nt;++__i )
+      {
+        pf = &( mesh.addFace() );
+        pf->setId     ( __i + 1 );
+        pf->setLocalId( __i + 1);
+        pf->setMarker( EntityFlag( __triangle_label[__i] ) );
+        pf->setPoint( 1, mesh.point( __triangle_nodes[3*__i] ) );
+        pf->setPoint( 2, mesh.point( __triangle_nodes[3*__i+1] ) );
+        pf->setPoint( 3, mesh.point( __triangle_nodes[3*__i+2] ) );
+      }
+
+    return true;
+  }
 
 }
 #endif

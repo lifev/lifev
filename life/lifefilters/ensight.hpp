@@ -138,21 +138,33 @@ void Ensight<Mesh>::setMeshProcId( mesh_ptrtype mesh , int const procId )
 
     initMeshProcId( mesh, procId );
 
-    typedef typename Mesh::VolumeShape ElementShape;
+    typedef typename Mesh::ElementShape ElementShape;
 
-    switch ( ElementShape::numPoints )
+    switch ( ElementShape::Shape )
         {
-        case 4:
+        case TETRA:
             this->M_FEstr = "tetra4";
             this->M_bdFEstr = "tria3";
             this->M_nbLocalBdDof = 3;
             this->M_nbLocalDof = 4;
             break;
-        case 8:
+        case HEXA:
             this->M_FEstr = "hexa8";
             this->M_bdFEstr = "quad4";
             this->M_nbLocalBdDof = 4;
             this->M_nbLocalDof = 8;
+            break;
+        case TRIANGLE:
+            this->M_FEstr = "tria3";
+            this->M_bdFEstr = "bar2";
+            this->M_nbLocalBdDof = 2;
+            this->M_nbLocalDof = 3;
+            break;
+        case QUAD:
+            this->M_FEstr = "quad4";
+            this->M_bdFEstr = "bar2";
+            this->M_nbLocalBdDof = 4;
+            this->M_nbLocalDof = 3;
             break;
         default:
             ERROR_MSG( "FE not allowed in Ensight writer" );
@@ -294,7 +306,7 @@ template <typename Mesh> void Ensight<Mesh>::M_wr_ascii_geo(const std::string ge
 
     std::ofstream geof(geo_file.c_str() );
     ID nV = this->M_mesh->numVertices();
-    ID nE = this->M_mesh->numVolumes();
+    ID nE = this->M_mesh->numElements();
     UInt part=0;
     geof << "Geometry file\n";
     geof << "Geometry file\n";
@@ -304,13 +316,11 @@ template <typename Mesh> void Ensight<Mesh>::M_wr_ascii_geo(const std::string ge
     geof.setf(std::ios::right | std::ios_base::scientific);
     geof.precision(5);
     geof << setw(8) <<  nV << "\n";
-
     for(ID i=1; i <= nV; ++i)
         {
             geof << setw(8) << i ;
-            geof << setw(12) << this->M_mesh->pointList(i).x();
-            geof << setw(12) << this->M_mesh->pointList(i).y();
-            geof << setw(12) << this->M_mesh->pointList(i).z();
+            for(UInt icoor=0; icoor<nDimensions; icoor++)
+            	geof << setw(12) << this->M_mesh->pointList(i).coor()[icoor];
             geof << "\n";
         }
 
@@ -328,7 +338,7 @@ template <typename Mesh> void Ensight<Mesh>::M_wr_ascii_geo(const std::string ge
             for (ID j=1; j<= this->M_nbLocalDof; ++j)
                 {
                     //geof << M_mesh->volume(i).point(j).id();
-                    geof << setw(8) << this->M_mesh->volume(i).point(j).localId();
+                    geof << setw(8) << this->M_mesh->element(i).point(j).localId();
                 }
             geof << "\n";
 

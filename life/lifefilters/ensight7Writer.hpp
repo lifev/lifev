@@ -96,8 +96,8 @@ bool fromensight7Mesh3D( UInt dimDof,
 		strcpy( buffer, "velocity field  timestep 1" );
 		FileU.read( ( char* ) & buf, sizeof( buffer ) );
 		// read the vector of coordinates
-		FileU.read( ( char* ) & velocity.front(), 
-		            3 * velocity.size() * sizeof( float ) );
+		FileU.read( ( char* ) & velocity.front(),
+		            nDimensions * velocity.size() * sizeof( float ) );
 
 		FileU.close();		
 	}
@@ -156,27 +156,11 @@ bool outensight7Mesh3D( RegionMesh3D const & mesh,
     grid.resize( mesh.numVertices() + mesh.numVolumes() );
     //  grid.resize(mesh.numVertices()+mesh.numEdges());
 
+
+
     for ( ID i = 0; i < mesh.numVertices(); i++ )
-    {
-        grid[ i ][ 0 ] = ( float ) mesh.point( i + 1 ).x();
-        grid[ i ][ 1 ] = ( float ) mesh.point( i + 1 ).y();
-        grid[ i ][ 2 ] = ( float ) mesh.point( i + 1 ).z();
-    }
-    //     std::cout << grid[i][0] << ", " << grid[i][1]  << ", " << grid[i][2] << std::endl; }
-
-    // 6 additional mesh points for Tetra P2 (mittle points of edges)
-    //  typename RegionMesh3D::EdgeType * pe=0;
-
-    //  ID i1,i2;
-
-    //  for(ID i=1; i <= mesh.numEdges(); i++){
-    //     pe=& mesh.edge(i);
-    //     i1=(pe->point(1)).id();
-    //     i2=(pe->point(2)).id();
-    //     grid[mesh.numVertices()+i-1][0]=(float)(mesh.point(i1).x()+mesh.point(i2).x())*0.5;
-    //     grid[mesh.numVertices()+i-1][1]=(float)(mesh.point(i1).y()+mesh.point(i2).y())*0.5;
-    //     grid[mesh.numVertices()+i-1][2]=(float)(mesh.point(i1).z()+mesh.point(i2).z())*0.5;}
-    //     std::cout << grid[i][0] << ", " << grid[i][1]  << ", " << grid[i][2] << std::endl;}
+    	for(UInt icoor=0; icoor<nDimensions; icoor++)
+    		grid[ i ][ icoor ] = ( float ) mesh.point( i + 1 ).coor()[icoor];
 
 
     char buffer[ 80 ];

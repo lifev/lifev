@@ -384,7 +384,7 @@ readINRIAMeshFile( RegionMesh3D<GeoShape, MC> & mesh,
     UInt nVo( 0 ), nBEd( 0 );
     UInt nEd;
     UInt i;
-    ReferenceShapes shape;
+    ReferenceShapes shape(NONE);
     std::vector<FiveNumbers> faceHelp;
     typename std::vector<FiveNumbers>::iterator faceHelpIterator;
     std::stringstream discardedLog;

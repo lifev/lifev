@@ -316,6 +316,8 @@ Real testClosedDomain( RegionMesh3D const & mesh,
  mesh is not modified .
 */
 
+
+#ifndef TWODIM
 template <typename RegionMesh3D>
 bool checkMesh3D( RegionMesh3D & mesh,
                   Switch & sw,
@@ -582,8 +584,8 @@ bool checkMesh3D( RegionMesh3D & mesh,
     UInt bEdgesFound = findBoundaryEdges( mesh, *bedges );
     EnquireBEdge<RegionMesh3D> enquireBEdge( mesh, *bedges );
 
-    UInt intedge (0);
-    UInt Ned = 0;
+    UInt intedge(0);
+    UInt Ned(0);
     TempEdgeContainer iedges;
 
     if ( mesh.storedEdges() == 0 ||
@@ -828,5 +830,6 @@ bool checkMesh3D( RegionMesh3D & mesh,
 
     return true;
 }
+#endif
 }
 #endif
