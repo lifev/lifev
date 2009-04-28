@@ -1993,7 +1993,7 @@ void stiff_sd( Real coef, const ElemVec& vec_loc, ElemMat& elmat, const CurrentF
     ElemMat::matrix_view mat = elmat.block( iblock, jblock );
     int iloc, jloc;
     int i, icoor, ig, jcoor;
-    double s, coef_s, coef_v[ 3 ];
+    double s, coef_s, coef_v[ nDimensions ];
     //    int nbN1=fe.nbNode;
     int nbN2 = fe2.nbNode;
     //
@@ -2005,7 +2005,7 @@ void stiff_sd( Real coef, const ElemVec& vec_loc, ElemMat& elmat, const CurrentF
         s = 0;
         for ( ig = 0;ig < fe.nbQuadPt;ig++ )
         {
-            for ( icoor = 0;icoor < NDIM;icoor++ )
+            for ( icoor = 0;icoor < nDimensions;icoor++ )
                 coef_v[ icoor ] = 0.;
 
             // computation of the convection term in the quadrature nodes
@@ -2036,7 +2036,7 @@ void stiff_sd( Real coef, const ElemVec& vec_loc, ElemMat& elmat, const CurrentF
         s = 0;
         for ( ig = 0;ig < fe.nbQuadPt;ig++ )
         {
-            for ( icoor = 0;icoor < NDIM;icoor++ )
+            for ( icoor = 0;icoor < nDimensions;icoor++ )
                 coef_v[ icoor ] = 0.;
 
             for ( icoor = 0;icoor < fe.nbCoor;icoor++ )

@@ -66,9 +66,9 @@ assemble( Oper oper, const RegionMesh& mesh, CurrentFE& fe,
     ElemMat elmat( fe.nbNode, nc, nc );
     ElemVec elvec( fe.nbNode, nc );
     //
-    for ( i = 1; i <= mesh.numVolumes(); ++i )
+    for ( i = 1; i <= mesh.numElements(); ++i )
     {
-        fe.updateFirstDeriv( mesh.volumeList( i ) ); // as updateFirstDer
+        fe.updateFirstDeriv( mesh.element( i ) ); // as updateFirstDer
         //
         elmat.zero();
         //
@@ -104,9 +104,9 @@ assemble( Oper oper, const RegionMesh& mesh, CurrentFE& fe, const DOF& dof,
     ElemMat elmat( fe.nbNode, nc, nc );
     ElemVec elvec( fe.nbNode, nc );
     //
-    for ( i = 1; i <= mesh.numVolumes(); ++i )
+    for ( i = 1; i <= mesh.numElements(); ++i )
     {
-        fe.updateFirstDeriv( mesh.volumeList( i ) ); // as updateFirstDer
+        fe.updateFirstDeriv( mesh.element( i ) ); // as updateFirstDer
         //
         elmat.zero();
         //
@@ -149,10 +149,10 @@ assemble_mixed( Oper oper, const RegionMesh& mesh, CurrentFE& fe1,
     UInt i, ic, jc;
     ElemMat elmat( fe1.nbNode, nc1, 0, fe2.nbNode, 0, nc2 );
     ElemVec elvec( fe1.nbNode, nc1 );
-    for ( i = 1; i <= mesh.numVolumes(); ++i )
+    for ( i = 1; i <= mesh.numElements(); ++i )
     {
-        fe1.updateFirstDeriv( mesh.volumeList( i ) ); // as updateFirstDer
-        fe2.updateFirstDeriv( mesh.volumeList( i ) ); // as updateFirstDer
+        fe1.updateFirstDeriv( mesh.element( i ) ); // as updateFirstDer
+        fe2.updateFirstDeriv( mesh.element( i ) ); // as updateFirstDer
         //
         elmat.zero();
         //
@@ -185,10 +185,10 @@ assemble_mixed( Oper oper, const RegionMesh& mesh, CurrentFE& fe1,
     UInt i, ic, jc;
     ElemMat elmat( fe1.nbNode, nc1, 0, fe2.nbNode, 0, nc2 );
     ElemVec elvec( fe1.nbNode, nc1 );
-    for ( i = 1; i <= mesh.numVolumes(); ++i )
+    for ( i = 1; i <= mesh.numElements(); ++i )
     {
-        fe1.updateFirstDeriv( mesh.volumeList( i ) ); // as updateFirstDer
-        fe2.updateFirstDeriv( mesh.volumeList( i ) ); // as updateFirstDer
+        fe1.updateFirstDeriv( mesh.element( i ) ); // as updateFirstDer
+        fe2.updateFirstDeriv( mesh.element( i ) ); // as updateFirstDer
         //
         elmat.zero();
         //
@@ -222,9 +222,9 @@ assemble_symm( Oper oper, const RegionMesh& mesh, CurrentFE& fe, const DOF& dof,
     ElemMat elmat( fe.nbNode, nc, nc );
     ElemVec elvec( fe.nbNode, nc );
     //
-    for ( i = 1; i <= mesh.numVolumes(); ++i )
+    for ( i = 1; i <= mesh.numElements(); ++i )
     {
-        fe.updateFirstDeriv( mesh.volumeList( i ) ); // as updateFirstDer
+        fe.updateFirstDeriv( mesh.element( i ) ); // as updateFirstDer
         //
         elmat.zero();
         //
@@ -259,9 +259,9 @@ assemble_symm_block_diagonal( Oper oper, const RegionMesh& mesh, CurrentFE& fe, 
     ElemMat elmat( fe.nbNode, nc, nc );
     ElemVec elvec( fe.nbNode, nc );
     //
-    for ( i = 1; i <= mesh.numVolumes(); ++i )
+    for ( i = 1; i <= mesh.numElements(); ++i )
     {
-        fe.updateFirstDeriv( mesh.volumeList( i ) ); // as updateFirstDer
+        fe.updateFirstDeriv( mesh.element( i ) ); // as updateFirstDer
         //
         elmat.zero();
         //
@@ -321,8 +321,8 @@ template<typename OperDG, typename OperDGIF, typename OperDGBF,
 /*   ElemMat::matrix_view matBF = bfmat.block(0, 0); */
 
   // Assembling volume integrals contributions
-  for(i = 1; i <= mesh.numVolumes(); ++i){
-    feDG.updateFirstDeriv(mesh.volumeList(i));
+  for(i = 1; i <= mesh.numElements(); ++i){
+    feDG.updateFirstDeriv(mesh.element(i));
 
     elmat.zero();
     elvec.zero();
@@ -343,7 +343,7 @@ template<typename OperDG, typename OperDGIF, typename OperDGBF,
 
     feBFDG.updateBCType(mesh.faceList(i), BCh);
     // The update member to call should be chosen according to the penalization method...
-    feBFDG.updateMeasNormalQuadPtFirstDerivAd(mesh.faceList(i), mesh.volumeList(iAd));
+    feBFDG.updateMeasNormalQuadPtFirstDerivAd(mesh.faceList(i), mesh.element(iAd));
 
     bfmat.zero();
     bfvec.zero();
@@ -369,8 +369,8 @@ template<typename OperDG, typename OperDGIF, typename OperDGBF,
     iAd = (UInt)mesh.faceList(i).ad_first();
     iOp = (UInt)mesh.faceList(i).ad_second();
 
-    feIFDG.updateMeasNormalQuadPtFirstDerivAd(mesh.faceList(i), mesh.volumeList(iAd));
-    feIFDG.updateMeasNormalQuadPtFirstDerivOp(mesh.faceList(i), mesh.volumeList(iOp));
+    feIFDG.updateMeasNormalQuadPtFirstDerivAd(mesh.faceList(i), mesh.element(iAd));
+    feIFDG.updateMeasNormalQuadPtFirstDerivOp(mesh.faceList(i), mesh.element(iOp));
 
     ifmat.zero();
     ifvec.zero();
@@ -415,8 +415,8 @@ template<typename OperDG,  typename OperDGIF, typename OperDGBF,
   ElemVec ifvec(feDG.nbNode, nc, feDG.nbNode, nc);
 
   // Assembling volume integrals contributions
-  for(i = 1; i <= mesh.numVolumes(); ++i){
-    feDG.updateFirstDerivQuadPtMass(mesh.volumeList(i));
+  for(i = 1; i <= mesh.numElements(); ++i){
+    feDG.updateFirstDerivQuadPtMass(mesh.element(i));
 
     elmat.zero();
     elvec.zero();
@@ -438,7 +438,7 @@ template<typename OperDG,  typename OperDGIF, typename OperDGBF,
     iAd = (UInt)mesh.faceList(i).ad_first();
 
     feBFDG.updateBCType(mesh.faceList(i), BCh);
-    feBFDG.updateMeasNormalQuadPtFirstDerivAd(mesh.faceList(i), mesh.volumeList(iAd));
+    feBFDG.updateMeasNormalQuadPtFirstDerivAd(mesh.faceList(i), mesh.element(iAd));
 
     bfmat.zero();
     bfvec.zero();
@@ -463,8 +463,8 @@ template<typename OperDG,  typename OperDGIF, typename OperDGBF,
     iAd = (UInt)mesh.faceList(i).ad_first();
     iOp = (UInt)mesh.faceList(i).ad_second();
 
-    feIFDG.updateMeasNormalQuadPtFirstDerivAd(mesh.faceList(i), mesh.volumeList(iAd));
-    feIFDG.updateMeasNormalQuadPtFirstDerivOp(mesh.faceList(i), mesh.volumeList(iOp));
+    feIFDG.updateMeasNormalQuadPtFirstDerivAd(mesh.faceList(i), mesh.element(iAd));
+    feIFDG.updateMeasNormalQuadPtFirstDerivOp(mesh.faceList(i), mesh.element(iOp));
 
     ifmat.zero();
     ifvec.zero();

@@ -75,6 +75,7 @@ void CurrentBdDG::_comp_inv_jacobian_ad()
   // Determinant on face quad points and inverse transposed jacobian
 #if defined(TWODIM)
   // *** 2D code ***
+  Real a,b,c,d,det;
   for(int ig = 0; ig < nbQuadPt; ig++){
   a = jacobianAd(0, 0, ig);
   b = jacobianAd(0, 1, ig);
@@ -87,6 +88,7 @@ void CurrentBdDG::_comp_inv_jacobian_ad()
   tInvJacAd(1, 0, ig) = - b / det;
   tInvJacAd(1, 1, ig) = a / det;
   }
+}
 #elif defined(THREEDIM)
   // *** 3D code ***
   Real a,b,c,d,e,f,g,h,i,ei,fh,bi,ch,bf,ce,det;

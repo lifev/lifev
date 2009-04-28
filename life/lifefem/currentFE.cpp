@@ -181,17 +181,14 @@ Real CurrentFE::measure() const
 //----------------------------------------------------------------------
 Real CurrentFE::diameter() const
 {
-    ASSERT_PRE( nbCoor == 3 ,
-                "diameter() cannot be called for a dimension != 3" );
-
-    int i, j, icoor;
+	int i, j, icoor;
     Real s, h = 0.;
     for ( i = 0;i < nbGeoNode - 1;i++ )
     {
         for ( j = i + 1;j < nbGeoNode;j++ )
         {
             s = 0.;
-            for ( icoor = 0;icoor < 3;icoor++ )
+            for ( icoor = 0;icoor < nDimensions; icoor++ )
             {
                 s += fabs( point( i, icoor ) - point( j, icoor ) );
             }

@@ -68,7 +68,7 @@ namespace LifeV
 
 
 inline Real
-elemL22( boost::function<double( double, double, double, double, UInt )> fct,
+elemL22( boost::function<Real( Real, Real, Real, Real, UInt )> fct,
          const CurrentFE& fe, const Real t, const UInt nbcomp )
 {
     int ig;
@@ -202,27 +202,33 @@ public:
     template<typename vector_type>
     void L2ScalarProduct( const Function& fct,
                        vector_type& vec,
-                       const double t
+                       const Real t
                        );
 
         template<typename vector_type>
-    double L20Error( const Function& fexact,
+    Real L20Error( const Function& fexact,
                      const vector_type& vec,
                      const Real time,
                      Real* relError = 0 );
 
-    template<typename vector_type>
-    double L2Error( const Function&                fexact,
+    template<typename function, typename vector_type>
+    Real L2Error( const function&                fexact,
                     const vector_type&             vec,
-                    const double                   time,
-                    double*                        relError=0 );
+                    const Real                   time,
+                    Real*                        relError=0 );
+
+    template<typename function, typename vector_type>
+    Real H1Error( const function&                fexact,
+                       const vector_type&             vec,
+                       const Real                   time,
+                       Real*                        relError=0 );
 
 
     template<typename vector_type>
-    double L2Norm( const vector_type& vec );
+    Real L2Norm( const vector_type& vec );
 
     template<typename vector_type>
-    double H1Norm( const vector_type& vec );
+    Real H1Norm( const vector_type& vec );
 
 
     BasePattern::PatternType patternType();
@@ -375,7 +381,7 @@ FESpace<Mesh, Map>::interpolate( const Function& fct,
                                  vector_type&    vect,
                                  const Real      time)
 {
-    typedef typename mesh_type::VolumeShape GeoShape ; // Element shape
+    typedef typename mesh_type::ElementShape GeoShape ; // Element shape
 
     UInt nDofpV    = refFE().nbDofPerVertex; // number of Dof per vertex
     UInt nDofpE    = refFE().nbDofPerEdge;   // number of Dof per edge
@@ -397,11 +403,11 @@ FESpace<Mesh, Map>::interpolate( const Function& fct,
     ID lDof;
 
     // Loop on elements of the mesh
-    for ( ID iElem = 1; iElem <= mesh()->numVolumes(); ++iElem )
+    for ( ID iElem = 1; iElem <= mesh()->numElements(); ++iElem )
     {
 
-        fe().updateJac( mesh()->volume( iElem ) );
-        int elemId = mesh()->volume( iElem ).localId();
+        fe().updateJac( mesh()->element( iElem ) );
+        int elemId = mesh()->element( iElem ).localId();
 
         // Vertex based Dof
         if ( nDofpV )
@@ -529,15 +535,15 @@ FESpace<Mesh, Map>::interpolateBC( BCHandler& BCh,
             for ( ID i = 1; i <= BCh[ibc].list_size(); ++i )
             {
                 // Coordinates of the node where we impose the value
-                double x = static_cast< const IdentifierEssential* >( BCh[ibc]( i ) ) ->x();
-                double y = static_cast< const IdentifierEssential* >( BCh[ibc]( i ) ) ->y();
-                double z = static_cast< const IdentifierEssential* >( BCh[ibc]( i ) ) ->z();
+                Real x = static_cast< const IdentifierEssential* >( BCh[ibc]( i ) ) ->x();
+                Real y = static_cast< const IdentifierEssential* >( BCh[ibc]( i ) ) ->y();
+                Real z = static_cast< const IdentifierEssential* >( BCh[ibc]( i ) ) ->z();
 
                 for ( ID j = 1; j <= nComp; ++j )
                 {
                     // Global Dof
                     idDof = BCh[ibc]( i ) ->id() + ( BCh[ibc].component( j ) - 1 ) * totalDof;
-                    double val = BCh[ibc]( time, x, y, z, BCh[ibc].component( j ) );
+                    Real val = BCh[ibc]( time, x, y, z, BCh[ibc].component( j ) );
 
                     vect.checkAndSet(idDof,val);
                 }
@@ -555,14 +561,14 @@ FESpace<Mesh, Map>::interpolateBC( BCHandler& BCh,
 template <typename Mesh, typename Map>
 template<typename vector_type>
 void
-FESpace<Mesh, Map>::L2ScalarProduct( const Function& fct, vector_type& vec, const double t)
+FESpace<Mesh, Map>::L2ScalarProduct( const Function& fct, vector_type& vec, const Real t)
 {
 
 
 
-    for ( UInt iVol = 1; iVol <= this->mesh()->numVolumes(); iVol++ )
+    for ( UInt iVol = 1; iVol <= this->mesh()->numElements(); iVol++ )
     {
-        this->fe().updateFirstDeriv( this->mesh()->volumeList( iVol ) );
+        this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
 
         Real f, x, y, z;
 
@@ -596,7 +602,7 @@ FESpace<Mesh, Map>::L2ScalarProduct( const Function& fct, vector_type& vec, cons
 
 template <typename Mesh, typename Map>
 template<typename vector_type>
-double
+Real
 FESpace<Mesh, Map>::L20Error( const Function& fexact,
                               const vector_type& vec,
                               const Real time,
@@ -608,9 +614,9 @@ FESpace<Mesh, Map>::L20Error( const Function& fexact,
     Real sumExact2 = 0.;
     Real sumExact1 = 0.;
 
-    for ( UInt iVol = 1; iVol <= this->mesh()->numVolumes(); iVol++ )
+    for ( UInt iVol = 1; iVol <= this->mesh()->numElements(); iVol++ )
     {
-        this->fe().updateFirstDeriv( this->mesh()->volumeList( iVol ) );
+        this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
         sum2 += elem_L2_diff_2( vec, fexact, this->fe(), this->dof(), time, M_fieldDim );
         sum1 += elem_integral_diff( vec, fexact, this->fe(), this->dof(), time, M_fieldDim );
         sum0 += this->fe().measure();
@@ -622,8 +628,8 @@ FESpace<Mesh, Map>::L20Error( const Function& fexact,
     }
 
 
-    double sendbuff[5] = {sum0, sum1, sum2, sumExact1, sumExact2};
-    double recvbuff[5];
+    Real sendbuff[5] = {sum0, sum1, sum2, sumExact1, sumExact2};
+    Real recvbuff[5];
 
     this->map().Comm().SumAll(&sendbuff[0], &recvbuff[0], 5);
 
@@ -650,47 +656,40 @@ FESpace<Mesh, Map>::L20Error( const Function& fexact,
 
 
 
-
-
-
-
-template <typename Mesh, typename Map>
-template<typename vector_type>
-double
-FESpace<Mesh, Map>::L2Error( const Function&    fexact,
-                             const vector_type& vec,
-                             const double       time,
-                             double*            relError )
-{
-    Real normU       = 0.;
-    Real sumExact    = 0.;
-
-    CurrentFE p1(feTetraP1, getGeoMap( *M_mesh ), M_Qr );
-
-    for ( UInt iVol  = 1; iVol <= this->mesh()->numVolumes(); iVol++ )
+    template <typename Mesh, typename Map>
+    template<typename function, typename vector_type>
+    Real
+    FESpace<Mesh, Map>::L2Error( const function&    fexact,
+                                 const vector_type& vec,
+                                 const Real       time,
+                                 Real*            relError )
     {
-        this->fe().updateFirstDeriv( this->mesh()->volumeList( iVol ) );
-        //p1.updateFirstDeriv( this->mesh()->volumeList( iVol ) );
+        Real normU       = 0.;
+        Real sumExact    = 0.;
 
-        normU += elem_L2_diff_2( vec, fexact,
-                                 this->fe(),
-                                 //p1,
-                                 this->dof(),
-                                 time,
-                                 M_fieldDim );
-        if (relError)
+        for ( UInt iVol  = 1; iVol <= this->mesh()->numElements(); iVol++ )
         {
-            sumExact += elemL22( fexact,
-                                 this->fe(),
-                                 //p1,
-                                 time,
-                                 M_fieldDim );
+            this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
+           
+            normU += elem_L2_diff_2( vec, fexact,
+                                     this->fe(),
+                                     //p1,
+                                     this->dof(),
+                                     time,
+                                     M_fieldDim );
+            if (relError)
+            {
+                sumExact += elemL22( fexact,
+                                     this->fe(),
+                                     //p1,
+                                     time,
+                                     M_fieldDim );
+            }
         }
-    }
 
 
-    double sendbuff[2] = {normU, sumExact};
-    double recvbuff[2];
+    Real sendbuff[2] = {normU, sumExact};
+    Real recvbuff[2];
 
     this->map().Comm().SumAll(&sendbuff[0], &recvbuff[0], 2);
 
@@ -712,25 +711,80 @@ FESpace<Mesh, Map>::L2Error( const Function&    fexact,
 }
 
 
+    template <typename Mesh, typename Map>
+     template<typename function, typename vector_type>
+     Real
+     FESpace<Mesh, Map>::H1Error( const function&    fexact,
+                                  const vector_type& vec,
+                                  const Real       time,
+                                  Real*            relError )
+     {
+         Real normU       = 0.;
+         Real sumExact    = 0.;
+
+         for ( UInt iVol  = 1; iVol <= this->mesh()->numElements(); iVol++ )
+         {
+             this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
+            
+             normU += elem_H1_diff_2( vec, fexact,
+                                      this->fe(),
+                                      //p1,
+                                      this->dof(),
+                                      time,
+                                      M_fieldDim );
+             if (relError)
+             {
+                 sumExact += elem_H1_2( fexact,
+                                      this->fe(),
+                                      //p1,
+                                      time,
+                                      M_fieldDim );
+             }
+         }
+
+
+     Real sendbuff[2] = {normU, sumExact};
+     Real recvbuff[2];
+
+     this->map().Comm().SumAll(&sendbuff[0], &recvbuff[0], 2);
+
+
+ //    int me = this->map().Comm().MyPID();
+
+ //     if (me == 0)
+ //     {
+     normU    = recvbuff[0];
+     sumExact = recvbuff[1];
+
+     if (relError)
+     {
+         *relError = sqrt( normU / sumExact );
+     }
+ //     }
+
+     return sqrt( normU );
+ }
+
+
 
 
 // template <typename Mesh, typename Map>
 // template<typename vector_type>
-// double
+// Real
 // FESpace<Mesh, Map>::L2Norm(vector_type vec)
 // {
 
-//     double norm = 0.;
-//     double tmp  = 0.;
+//     Real norm = 0.;
+//     Real tmp  = 0.;
 
-//    for ( UInt ielem = 1; ielem <= this->mesh()->numVolumes(); ielem++ )
+//    for ( UInt ielem = 1; ielem <= this->mesh()->numElements(); ielem++ )
 //     {
-//         //UInt elem = M_FESpace.mesh()->volumeList( ielem ).id();
-//         this->fe().updateFirstDerivQuadPt( M_FESpace.mesh()->volumeList( ielem ) );
+//         //UInt elem = M_FESpace.mesh()->element( ielem ).id();
+//         this->fe().updateFirstDerivQuadPt( M_FESpace.mesh()->element( ielem ) );
 
-//         //int    marker = M_FESpace.mesh()->volumeList( ielem ).marker();
-//         double s      = 0;
-//         double volume = M_FESpace.fe().detJac(0);
+//         //int    marker = M_FESpace.mesh()->element( ielem ).marker();
+//         Real s      = 0;
+//         Real volume = M_FESpace.fe().detJac(0);
 
 //         for ( int ig = 0; ig < M_FESpace.fe().nbQuadPt; ++ig )
 //         {
@@ -756,24 +810,24 @@ FESpace<Mesh, Map>::L2Error( const Function&    fexact,
 
 template <typename Mesh, typename Map>
 template<typename vector_type>
-double
+Real
 FESpace<Mesh, Map>::L2Norm( const vector_type& vec)
 {
 	//
     ID nbComp = M_fieldDim; // Number of components of the mesh velocity
     //
-	double norm = 0.;
+	Real norm = 0.;
 	//
-	for ( UInt ielem = 1; ielem <= this->mesh()->numVolumes(); ielem++ )
+	for ( UInt ielem = 1; ielem <= this->mesh()->numElements(); ielem++ )
 	{
-		//UInt elem = M_FESpace.mesh()->volumeList( ielem ).id();
-		this->fe().updateJacQuadPt( this->mesh()->volumeList( ielem ) );
+		//UInt elem = M_FESpace.mesh()->element( ielem ).id();
+		this->fe().updateJacQuadPt( this->mesh()->element( ielem ) );
 		//
 		norm += elem_L2_2( vec, this->fe(), this->dof(), nbComp );
 	}
 
-    double sendbuff[1] = {norm};
-    double recvbuff[1];
+    Real sendbuff[1] = {norm};
+    Real recvbuff[1];
 
     this->map().Comm().SumAll(&sendbuff[0], &recvbuff[0], 1);
 
@@ -786,25 +840,25 @@ FESpace<Mesh, Map>::L2Norm( const vector_type& vec)
 
 template <typename Mesh, typename Map>
 template<typename vector_type>
-double
+Real
 FESpace<Mesh, Map>::H1Norm(const vector_type& vec)
 {
 	//
     ID nbComp = M_fieldDim; // Number of components of the mesh velocity
     //
-	double norm = 0.;
+	Real norm = 0.;
 	//
-	for ( UInt ielem = 1; ielem <= this->mesh()->numVolumes(); ielem++ )
+	for ( UInt ielem = 1; ielem <= this->mesh()->numElements(); ielem++ )
 	{
-		//UInt elem = M_FESpace.mesh()->volumeList( ielem ).id();
-		this->fe().updateFirstDerivQuadPt( this->mesh()->volumeList( ielem ) );
+		//UInt elem = M_FESpace.mesh()->element( ielem ).id();
+		this->fe().updateFirstDerivQuadPt( this->mesh()->element( ielem ) );
 		//
 //		for ( UInt j = 0; j < nbComp; ++j)
 		norm += elem_H1_2( vec, this->fe(), this->dof(), nbComp );
 	}
 
-    double sendbuff[1] = {norm};
-    double recvbuff[1];
+    Real sendbuff[1] = {norm};
+    Real recvbuff[1];
 
     this->map().Comm().SumAll(&sendbuff[0], &recvbuff[0], 1);
 

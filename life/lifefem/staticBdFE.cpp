@@ -162,6 +162,7 @@ StaticBdFE::~StaticBdFE()
     DESTRUCTOR( "StaticBdFE" )
 }
 
+/*
 //----------------------------------------------------------------------
 void StaticBdFE::coorMap( Real& x, Real& y, Real& z,
                           const Real & xi, const Real & eta ) const
@@ -178,6 +179,19 @@ void StaticBdFE::coorMap( Real& x, Real& y, Real& z,
 
     }
 }
+*/
+
+
+void StaticBdFE::coorMap( Real& x, Real& y, Real& z,
+                          const Real & xi, const Real & eta ) const
+{
+	Vector coor = ZeroVector(3);
+	for( UInt icoor=0; icoor< nDimensions; icoor++)
+	        for ( UInt i = 0;i < ( int ) nbGeoNode;i++ )
+	        	coor[icoor] += point( i, icoor ) * geoMap.phi( i, xi, eta, 0. );
+    x = coor[0]; y=coor[1]; z=coor[2];
+}
+
 
 Real StaticBdFE::measure() const
 {

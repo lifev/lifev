@@ -186,7 +186,7 @@ template <typename Mesh>
 void Dof::update( Mesh& M )
 {
 
-    typedef typename Mesh::VolumeShape GeoShape;
+  typedef typename Mesh::ElementShape GeoShape;
 
     // Some useful local variables, to save some typing
     UInt nldpe = fe.nbDofPerEdge;
@@ -206,7 +206,6 @@ void Dof::update( Mesh& M )
     UInt nf = M.numGlobalFaces();
 
 //    std::cout << "Num global Edges = " << ne << std::endl;
-
 //    std::cout << M.numGlobalVolumes()  << std::endl;
 //    std::cout << M.numGlobalEdges()    << std::endl;
 //    std::cout << M.numGlobalVertices() << std::endl;
@@ -220,16 +219,19 @@ void Dof::update( Mesh& M )
 
     _totalDof = nV * nldpV + ne * nldpe + nv * nldpv + nf * nldpf;
 
-    _ltg.reshape( nldof, M.numVolumes() );
+    _ltg.reshape( nldof, _nEl );
 
     // Make sure the mesh has everything needed
     bool update_edges( nldpe != 0 && ! M.hasLocalEdges() );
-    bool update_faces( nldpf != 0 && ! M.hasLocalFaces() );
-
     if ( update_edges )
         M.updateElementEdges();
+
+#ifndef TWODIM
+    bool update_faces( nldpf != 0 && ! M.hasLocalFaces() );
     if ( update_faces )
         M.updateElementFaces();
+#endif
+
     //  ASSERT_PRE( !(nldpe !=0 && M.hasLocalEdges()) , "Element edges stuff have not been updated") ;
     //  ASSERT_PRE( !(nldpf !=0 && M.hasLocalFaces()) , "Element faces stuff have not been updated") ;
     //ASSERT_PRE( (nldpe == 0 || M.hasLocalEdges()) , "Element edges stuff have not been updated") ;
@@ -250,7 +252,7 @@ void Dof::update( Mesh& M )
                 for ( l = 0; l < nldpv; ++l )//for each degree of freedom per vertex
                     {
                         //                       label of the ith point of the mesh element-1
-                        _ltg( ++lc, ie ) = gcount + ( M.volume( ie ).point( i ).id() - 1 ) * nldpv + l;
+                        _ltg( ++lc, ie ) = gcount + ( M.element( ie ).point( i ).id() - 1 ) * nldpv + l;
                         //_ltg(++lc, ie) is the global label assigned to the ++lc dof of the element.
                     }
         }
@@ -284,12 +286,18 @@ void Dof::update( Mesh& M )
         for ( ie = 1; ie <= _nEl; ++ie )
         {
             lc = lcount;
+#ifdef TWODIM
+            // when working in 2D we simply iterate over the elements to have faces
+            for ( l = 0; l < nldpf; ++l )
+              _ltg( ++lc, ie ) = gcount + ( ie - 1 ) * nldpf + l;
+#elif defined THREEDIM
             for ( i = 1; i <= nlf; ++i )
                 for ( l = 0; l < nldpf; ++l )
                 {
                     UInt fID = M.faceList( M.localFaceId( ie, i ) ).id();
                     _ltg( ++lc, ie ) = gcount + ( fID - 1 ) * nldpf + l;
                 }
+#endif
         }
 
     // Volume  Based Dof
@@ -302,7 +310,7 @@ void Dof::update( Mesh& M )
             lc = lcount;
             for ( l = 0; l < nldpV; ++l )
                 {
-                    _ltg( ++lc, ie ) = gcount + (M.volume( ie ).id() - 1) * nldpv + l;
+                    _ltg( ++lc, ie ) = gcount + (M.element( ie ).id() - 1) * nldpv + l;
                 }
         }
     gcount += nV * nldpV;
@@ -311,8 +319,10 @@ void Dof::update( Mesh& M )
 
     if ( update_edges )
         M.cleanElementEdges();
+#ifndef TWODIM
     if ( update_faces )
-        M.cleanElementFaces();
+      M.cleanElementFaces();
+#endif
 }
 }
 #endif

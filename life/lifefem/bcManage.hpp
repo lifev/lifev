@@ -1019,7 +1019,7 @@ void bcNaturalManage( VectorType& b,
                                 ibF = pId->id();
 
                                 // Updating face stuff
-                                bdfem.updateMeasNormalQuadPt( mesh.boundaryFace( ibF ) );
+                                bdfem.updateMeasNormalQuadPt( mesh.bElement( ibF ) );
 
                                 // Loop on total Dof per Face
                                 for ( ID l = 1; l <= nDofF; ++l )
@@ -1068,7 +1068,7 @@ void bcNaturalManage( VectorType& b,
                                 ibF = pId->id();
 
                                 // Updating face stuff
-                                bdfem.updateMeasNormalQuadPt( mesh.boundaryFace( ibF ) );
+                                bdfem.updateMeasNormalQuadPt( mesh.bElement( ibF ) );
 
                                 // Loop on total Dof per Face
                                 for ( ID idofF = 1; idofF <= nDofF; ++idofF )
@@ -1135,7 +1135,7 @@ void bcNaturalManage( VectorType& b,
       ibF = pId->id();
 
       // Updating face stuff
-      bdfem.updateMeas( mesh.boundaryFace(ibF) );
+      bdfem.updateMeas( mesh.bElement(ibF) );
 
       // Loop on total Dof per Face
       for (ID idofF=1; idofF<= nDofF; ++idofF) {
@@ -1171,7 +1171,7 @@ void bcNaturalManage( VectorType& b,
                     // Number of the current boundary face
                     ibF = pId->id();
                     // Updating face stuff
-                    bdfem.updateMeasNormalQuadPt( mesh.boundaryFace( ibF ) );
+                    bdfem.updateMeasNormalQuadPt( mesh.bElement( ibF ) );
                     // Loop on total Dof per Face
                     for ( ID idofF = 1; idofF <= nDofF; ++idofF )
                         {  //! fixed a possible BUG(??): it was the same variable : i for list and nDofF! (V. Martin)
@@ -1265,7 +1265,7 @@ void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Do
                     ibF = pId->id();
 
                     // Updating face stuff
-                    bdfem.updateMeas( mesh.boundaryFace( ibF ) );
+                    bdfem.updateMeas( mesh.bElement( ibF ) );
 
                     // Loop on total Dof per Face
                     for ( ID idofF = 1; idofF <= nDofF; ++idofF )
@@ -1397,7 +1397,7 @@ void bcMixteManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Do
                     ibF = pId->id();
 
                     // Updating face stuff
-                    bdfem.updateMeas( mesh.boundaryFace( ibF ) );
+                    bdfem.updateMeas( mesh.bElement( ibF ) );
 
                     // Loop on total Dof per Face
                     for ( ID idofF = 1; idofF <= nDofF; ++idofF )
@@ -1514,7 +1514,7 @@ void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
                     ibF = pId->id();
 
                     // Updating face stuff
-                    bdfem.updateMeas( mesh.boundaryFace( ibF ) );
+                    bdfem.updateMeas( mesh.bElement( ibF ) );
 
                     // Loop on total Dof per Face
                     for ( ID idofF = 1; idofF <= nDofF; ++idofF )
@@ -1593,7 +1593,7 @@ void bcMixteManageMatrix( MatrixType& A, const MeshType& mesh, const Dof& dof,
                     ibF = pId->id();
 
                     // Updating face stuff
-                    bdfem.updateMeas( mesh.boundaryFace( ibF ) );
+                    bdfem.updateMeas( mesh.bElement( ibF ) );
 
                     // Loop on total Dof per Face
                     for ( ID idofF = 1; idofF <= nDofF; ++idofF )
@@ -1706,7 +1706,7 @@ void bcMixteManageVector( VectorType& b,
                     ibF = pId->id();
 
                     // Updating face stuff
-                    bdfem.updateMeas( mesh.boundaryFace( ibF ) );
+                    bdfem.updateMeas( mesh.bElement( ibF ) );
 
                     // Loop on total Dof per Face
                     for ( ID idofF = 1; idofF <= nDofF; ++idofF )
@@ -1747,7 +1747,7 @@ void bcMixteManageVector( VectorType& b,
                     ibF = pId->id();
 
                     // Updating face stuff
-                    bdfem.updateMeas( mesh.boundaryFace( ibF ) );
+                    bdfem.updateMeas( mesh.bElement( ibF ) );
 
                     // Loop on total Dof per Face
                     for ( ID idofF = 1; idofF <= nDofF; ++idofF )
@@ -1816,7 +1816,7 @@ void bcMixteManage( MatrixType1& A, MatrixType2 & trD, VectorType& b,
             ibF = pId->id();
 
             // Updating face stuff
-            bdfem.updateMeas( mesh.boundaryFace( ibF ) );
+            bdfem.updateMeas( mesh.bElement( ibF ) );
 
             // Loop on total Dof per Face
             for ( ID i = 1; i <= nDofF; ++i )
@@ -1922,7 +1922,7 @@ void bcMixteManage( MatrixType1& A, MatrixType2 & trD, MatrixType3 & D,
             ibF = pId->id();
 
             // Updating face stuff
-            bdfem.updateMeas( mesh.boundaryFace( ibF ) );
+            bdfem.updateMeas( mesh.bElement( ibF ) );
 
             // Loop on total Dof per Face
             for ( ID i = 1; i <= nDofF; ++i )

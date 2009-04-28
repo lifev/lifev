@@ -69,12 +69,9 @@ public:
 
         _currentId = geoele.id();
         // update the definition of the geo points
-        for ( int i = 0;i < nbGeoNode;i++ )
-        {
-            point( i, 0 ) = geoele.point( i + 1 ).x();
-            point( i, 1 ) = geoele.point( i + 1 ).y();
-            point( i, 2 ) = geoele.point( i + 1 ).z();
-        }
+        for ( UInt i = 0;i < nbGeoNode;i++ )
+        	for(UInt icoor=0; icoor<nDimensions; icoor++)
+        		point( i, icoor ) = geoele.point( i + 1 ).coor()[icoor];
     }
     /*!
       Compute the arrays meas, weightMeas, tangent
@@ -93,12 +90,11 @@ public:
 
         _currentId = geoele.id();
         // update the definition of the geo points
-        for ( int i = 0;i < nbGeoNode;i++ )
-        {
-            point( i, 0 ) = geoele.point( i + 1 ).x();
-            point( i, 1 ) = geoele.point( i + 1 ).y();
-            point( i, 2 ) = geoele.point( i + 1 ).z();
-        }
+
+        for ( UInt i = 0;i < nbGeoNode;i++ )
+        	for(UInt icoor=0; icoor<nDimensions; icoor++)
+        		point( i, icoor ) = geoele.point( i + 1 ).coor()[icoor];
+
         // compute the measure
         _comp_meas();
     }
@@ -119,12 +115,11 @@ public:
 
         _currentId = geoele.id();
         // update the definition of the geo points
-        for ( int i = 0;i < nbGeoNode;i++ )
-        {
-            point( i, 0 ) = geoele.point( i + 1 ).x();
-            point( i, 1 ) = geoele.point( i + 1 ).y();
-            point( i, 2 ) = geoele.point( i + 1 ).z();
-        }
+
+        for ( UInt i = 0;i < nbGeoNode;i++ )
+        	for(UInt icoor=0; icoor<nDimensions; icoor++)
+        		point( i, icoor ) = geoele.point( i + 1 ).coor()[icoor];
+
         // compute the measure
         _comp_meas();
         // compute the coordinates of the quad points
@@ -147,12 +142,11 @@ public:
 
         _currentId = geoele.id();
         // update the definition of the geo points
-        for ( int i = 0;i < nbGeoNode;i++ )
-        {
-            point( i, 0 ) = geoele.point( i + 1 ).x();
-            point( i, 1 ) = geoele.point( i + 1 ).y();
-            point( i, 2 ) = geoele.point( i + 1 ).z();
-        }
+
+        for ( UInt i = 0;i < nbGeoNode;i++ )
+        	for(UInt icoor=0; icoor<nDimensions; icoor++)
+        		point( i, icoor ) = geoele.point( i + 1 ).coor()[icoor];
+
         // compute the measure and the normal
         _comp_meas_normal();
     }
@@ -173,12 +167,11 @@ public:
 
         _currentId = geoele.id();
         // update the definition of the geo points
-        for ( int i = 0;i < nbGeoNode;i++ )
-        {
-            point( i, 0 ) = geoele.point( i + 1 ).x();
-            point( i, 1 ) = geoele.point( i + 1 ).y();
-            point( i, 2 ) = geoele.point( i + 1 ).z();
-        }
+
+        for ( UInt i = 0;i < nbGeoNode;i++ )
+        	for(UInt icoor=0; icoor<nDimensions; icoor++)
+        		point( i, icoor ) = geoele.point( i + 1 ).coor()[icoor];
+
         // compute the measure and the normal
         _comp_meas_normal();
         // compute the coordinates of the quad points

@@ -132,6 +132,7 @@ void CurrentIFDG::_comp_inv_jacobian_op()
   // Determinant on face quad points and inverse transposed jacobian
 #if defined(TWODIM)
   // *** 2D code ***
+  Real a,b,c,d,det;
   for(int ig = 0; ig < nbQuadPt; ig++){
   a = jacobianOp(0, 0, ig);
   b = jacobianOp(0, 1, ig);

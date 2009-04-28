@@ -113,6 +113,18 @@ const GeoMap& getGeoMap( RegionMesh & /*mesh*/ )
         else
             ERROR_MSG( "Geomap type not yet implemented" );
         break;
+    case TRIANGLE:
+            if ( ElementShape::numPoints == 3 )
+                return geoLinearTria;
+            else
+                ERROR_MSG( "Geomap type not yet implemented" );
+            break;
+    case QUAD:
+            if ( ElementShape::numPoints == 4 )
+                return geoBilinearQuad;
+            else
+                ERROR_MSG( "Geomap type not yet implemented" );
+            break;
     default:
         ERROR_MSG( "Geomap type not yet implemented" );
     }
