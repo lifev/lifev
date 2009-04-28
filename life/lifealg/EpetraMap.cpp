@@ -320,7 +320,7 @@ EpetraMap::setUp(const RefFE&               refFE,
                  std::vector<int>& repeatedNodeVector,
                  std::vector<int>& repeatedEdgeVector,
                  std::vector<int>& repeatedFaceVector,
-                 std::vector<int>& repeatedElemVector)
+                 std::vector<int>& repeatedVolumeVector)
 {
     int indexBase = 1;
 
@@ -340,15 +340,15 @@ EpetraMap::setUp(const RefFE&               refFE,
 
     if (refFE.nbDofPerFace)
     {
-        int numFace = repeatedFaceVector.size();
+    	int numFace = repeatedFaceVector.size();
         EpetraMap repeatedFaceMap(-1, numFace, &repeatedFaceVector[0], indexBase,  _comm);
         operator+=(repeatedFaceMap);
     }
 
     if (refFE.nbDofPerVolume)
     {
-        int numElem = repeatedElemVector.size();
-        EpetraMap repeatedElemMap(-1, numElem, &repeatedElemVector[0], indexBase,  _comm);
+    	int numElem = repeatedVolumeVector.size();
+        EpetraMap repeatedElemMap(-1, numElem, &repeatedVolumeVector[0], indexBase,  _comm);
         operator+=(repeatedElemMap);
     }
 

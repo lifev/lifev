@@ -178,7 +178,7 @@ private:
                std::vector<int>& repeatedNodeVector,
                std::vector<int>& repeatedEdgeVector,
                std::vector<int>& repeatedFaceVector,
-               std::vector<int>& repeatedElemVector);
+               std::vector<int>& repeatedVolumeVector);
 
     map_ptrtype        M_repeatedEpetra_Map;
     map_ptrtype        M_uniqueEpetraMap;
@@ -207,7 +207,7 @@ EpetraMap(const RefFE&               refFE,
            const_cast<std::vector<int>&>(meshPart.repeatedNodeVector()),
            const_cast<std::vector<int>&>(meshPart.repeatedEdgeVector()),
            const_cast<std::vector<int>&>(meshPart.repeatedFaceVector()),
-           const_cast<std::vector<int>&>(meshPart.repeatedElemVector()) );
+           const_cast<std::vector<int>&>(meshPart.repeatedVolumeVector()) );
 
 }
 
@@ -226,7 +226,7 @@ EpetraMap(const RefFE&               refFE,
     std::vector<int> repeatedNodeVector;
     std::vector<int> repeatedEdgeVector;
     std::vector<int> repeatedFaceVector;
-    std::vector<int> repeatedElemVector;
+    std::vector<int> repeatedVolumeVector;
 
     if (refFE.nbDofPerVertex)
     {
@@ -253,10 +253,10 @@ EpetraMap(const RefFE&               refFE,
 
     if (refFE.nbDofPerVolume)
     {
-        repeatedElemVector.reserve(mesh.numVolumes());
+        repeatedVolumeVector.reserve(mesh.numVolumes());
 
         for ( UInt ii = 1; ii <= mesh.numVolumes(); ii++ )
-            repeatedElemVector.push_back(mesh.volumeList( ii ).id());
+            repeatedVolumeVector.push_back(mesh.volumeList( ii ).id());
     }
 
 
@@ -265,7 +265,7 @@ EpetraMap(const RefFE&               refFE,
            repeatedNodeVector,
            repeatedEdgeVector,
            repeatedFaceVector,
-           repeatedElemVector );
+           repeatedVolumeVector );
 
     // Epetra_Map is "badly" coded, in fact its constructor needs a non-constant pointer to indices, but it
     // never modify them
