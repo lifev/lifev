@@ -832,15 +832,15 @@ void BidomainSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_type&    
         BCh.bdUpdate( *M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
     }
 
-    vector_type rhsFull(M_rhsNoBC,Repeated, Zero);
+  //  vector_type rhsFull(M_rhsNoBC,Repeated, Zero);
 
 
 //    rhsFull.Import(M_rhsNoBC, Zero); // ignoring non-local entries, Otherwise they are summed up lately
 
-    bcManage( matrix, rhsFull, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 1.,
+    bcManage( matrix, rhs, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 1.,
               M_data.time() );
 
-    rhs = rhsFull;
+  //  rhs = rhsFull;
 
 
     if ( BCh.hasOnlyEssential() && M_diagonalize )

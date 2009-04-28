@@ -26,6 +26,9 @@
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
    \date 2004-11-18
  */
+
+
+#ifndef TWODIM
 #ifndef __FSISolver_H
 #define __FSISolver_H 1
 
@@ -301,3 +304,4 @@ private:
 
 }
 #endif /* __FSISolver_H */
+#endif

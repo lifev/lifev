@@ -18,6 +18,7 @@
 */
 
 
+#ifndef TWODIM
 #ifndef _EJ_HPP
 #define _EJ_HPP
 
@@ -229,4 +230,5 @@ inline FSIOperator* createEJ(){ return new exactJacobian(); }
 
 }
 
+#endif
 #endif

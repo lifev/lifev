@@ -66,7 +66,7 @@ public:
 
     //! Constructor
 
-    DataADR( const GetPot& dfile );
+    DataADR( const GetPot& dfile, const std::string& discretization_section= "adr/discretization" );
 
     DataADR( const DataADR& dataNavierStokes );
 
@@ -150,19 +150,18 @@ private:
 // Constructor
 
 
-
-
-
 template <typename Mesh>
 DataADR<Mesh>::
-DataADR( const GetPot& dfile ) :
-    DataMesh<Mesh>      ( dfile, "adr/discretization" ),
-    DataTime            ( dfile, "adr/discretization" ),
-    M_semiImplicit      ( 0 ),
-    M_stabilization_list( "adr/discretization/stabilization" )
-{
-    setup(dfile);
-}
+DataADR( const GetPot& dfile, const std::string& discretization_section) :
+       DataMesh<Mesh>      ( dfile, discretization_section ),
+       DataTime            ( dfile, discretization_section ),
+       M_semiImplicit      ( 0 ),
+       M_stabilization_list( (discretization_section + "/stabilization").data() )
+       {
+            setup(dfile);
+       }
+
+
 
 template <typename Mesh>
 DataADR<Mesh>::

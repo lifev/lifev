@@ -17,6 +17,9 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+
+#ifndef TWODIM
+
 #include <life/lifesolver/Monolithic.hpp>
 //#include <life/lifesolver/reducedLinFluid.hpp>
 
@@ -730,3 +733,5 @@ FSIOperator* createM(){ return new Monolithic(); }
 static bool reg = FSIFactory::instance().registerProduct( "monolithic", &createM );
 
 }
+
+#endif

@@ -453,12 +453,12 @@ void ADRSolver<Mesh, SolverType>::buildSystem()
 
     chrono.start();
 
-    for ( UInt iVol = 1; iVol <= M_dataType.mesh().numVolumes(); iVol++ )
+    for ( UInt iVol = 1; iVol <= M_dataType.mesh().numElements(); iVol++ )
     {
         chronoDer.start();
-        M_pFESpace.fe().update( M_dataType.mesh().volumeList( iVol ) ); // just to provide the id number in the assem_mat_mixed
-//        M_pFESpace.fe().updateFirstDeriv( M_dataType.mesh().volumeList( iVol ) ); // just to provide the id number in the assem_mat_mixed
-        M_uFESpace.fe().updateFirstDeriv( M_dataType.mesh().volumeList( iVol ) );
+        M_pFESpace.fe().update( M_dataType.mesh().element( iVol ) ); // just to provide the id number in the assem_mat_mixed
+//        M_pFESpace.fe().updateFirstDeriv( M_dataType.mesh().element( iVol ) ); // just to provide the id number in the assem_mat_mixed
+        M_uFESpace.fe().updateFirstDeriv( M_dataType.mesh().element( iVol ) );
 
         M_elmatStiff.zero();
         M_elmatBdfMass.zero();
@@ -646,11 +646,11 @@ updateSystem()
     }
 
 
-    for ( UInt iVol = 1; iVol<= M_dataType.mesh().numVolumes(); ++iVol )
+    for ( UInt iVol = 1; iVol<= M_dataType.mesh().numElements(); ++iVol )
     {
 
-        M_pFESpace.fe().updateFirstDeriv( M_dataType.mesh().volumeList( iVol ) ); // just to provide the id number in the assem_mat_mixed
-        M_uFESpace.fe().updateFirstDeriv( M_dataType.mesh().volumeList( iVol ) ); //as updateFirstDer
+        M_pFESpace.fe().updateFirstDeriv( M_dataType.mesh().element( iVol ) ); // just to provide the id number in the assem_mat_mixed
+        M_uFESpace.fe().updateFirstDeriv( M_dataType.mesh().element( iVol ) ); //as updateFirstDer
 
         M_elmatStiff.zero();
 
@@ -732,10 +732,10 @@ timeAdvance( source_type const& source, Real const& time )
     M_rhsNoBC *= 0.;
 
     // loop on volumes: assembling source term
-    for ( UInt iVol = 1; iVol<= M_dataType.mesh().numVolumes(); ++iVol )
+    for ( UInt iVol = 1; iVol<= M_dataType.mesh().numElements(); ++iVol )
     {
         M_elvec.zero();
-        M_uFESpace.fe().updateJacQuadPt( M_dataType.mesh().volumeList( iVol ) );
+        M_uFESpace.fe().updateJacQuadPt( M_dataType.mesh().element( iVol ) );
 
         for ( UInt iComp = 0; iComp < nbCompU; ++iComp )
         {
@@ -1020,9 +1020,9 @@ void ADRSolver<Mesh, SolverType>::removeMean( vector_type& x, UInt comp )
     Real sum1 = 0.;
     Real sum0 = 0.;
 
-    for ( UInt iVol = 1; iVol <= M_dataType.mesh().numVolumes(); iVol++ )
+    for ( UInt iVol = 1; iVol <= M_dataType.mesh().numElements(); iVol++ )
     {
-        M_pFESpace.fe().updateFirstDeriv( M_dataType.mesh().volumeList( iVol ) );
+        M_pFESpace.fe().updateFirstDeriv( M_dataType.mesh().element( iVol ) );
         sum1 += elem_integral( x, M_pFESpace.fe(), M_pFESpace.dof(), comp );
         sum0 += M_pFESpace.fe().measure();
     }

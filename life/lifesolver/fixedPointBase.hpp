@@ -18,6 +18,7 @@
 */
 
 
+#ifndef TWODIM
 #ifndef _FP_HPP
 #define _FP_HPP
 
@@ -102,4 +103,5 @@ inline FSIOperator* createFP(){ return new fixedPoint();}
 
 }
 
+#endif
 #endif

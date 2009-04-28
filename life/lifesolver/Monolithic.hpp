@@ -17,6 +17,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#ifndef TWODIM
 #ifndef _MONOLITHIC_HPP
 #define _MONOLITHIC_HPP
 
@@ -206,4 +207,5 @@ iterateMonolithic(vector_type& rhs, vector_type& step, matrix_ptrtype prec, Solv
 
 
 }
+#endif
 #endif

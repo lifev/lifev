@@ -737,15 +737,16 @@ void MonodomainSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_type&  
         BCh.bdUpdate( *M_uFESpace.mesh(), M_uFESpace.feBd(), M_uFESpace.dof() );
     }
 
-    vector_type rhsFull(*M_localMap.getMap(Repeated));
+    //vector_type rhsFull(*M_localMap.getMap(Repeated));
 
 
-    rhsFull.Import(M_rhsNoBC, Zero); // ignoring non-local entries, Otherwise they are summed up lately
 
-    bcManage( matrix, rhsFull, *M_uFESpace.mesh(), M_uFESpace.dof(), BCh, M_uFESpace.feBd(), 1.,
-              M_data.time() );
+//    rhsFull.Import(M_rhsNoBC, Zero); // ignoring non-local entries, Otherwise they are summed up lately
 
-    rhs = rhsFull;
+    bcManage( matrix, rhs, *M_uFESpace.mesh(), M_uFESpace.dof(), BCh, M_uFESpace.feBd(), 1.,
+                 M_data.time() );
+
+   // rhs = rhsFull;
 
 
     if ( BCh.hasOnlyEssential() && M_diagonalize )

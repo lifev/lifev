@@ -19,6 +19,8 @@
 
 //! previously called operFS in the CVS repository
 
+#ifndef TWODIM
+
 #ifndef _OPERFS_H
 #define _OPERFS_H
 
@@ -847,4 +849,5 @@ typedef singleton<factory<FSIOperator,  std::string> > FSIFactory;
 
 }
 
+#endif
 #endif

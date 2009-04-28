@@ -18,6 +18,7 @@
 */
 
 
+#ifndef TWODIM
 #include <life/lifesolver/exactJacobianBase.hpp>
 #include <life/lifefilters/medit_wrtrs.hpp>
 //#include <life/lifesolver/reducedLinFluid.hpp>
@@ -511,3 +512,4 @@ int Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epetra_MultiVector 
 }
 
 }
+#endif

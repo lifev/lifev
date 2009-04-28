@@ -144,12 +144,12 @@ public:
         M_rhsNoBC.GlobalAssemble();
     }
 
-    virtual void updateSystem(double       alpha,
+    virtual void updateSystem(Real       alpha,
                               vector_type& betaVec,
                               vector_type& sourceVec
                               );
 
-//     void updateLinearSystem(double       alpha,
+//     void updateLinearSystem(Real       alpha,
 //                             vector_type& betaVec,
 //                             vector_type& sourceVec
 //                             );
@@ -226,9 +226,9 @@ public:
         return comm().MyPID() == 0;
     }
 
-    void leaderPrint   (string const message, double const number) const;
+    void leaderPrint   (string const message, Real const number) const;
     void leaderPrint   (string const message) const;
-    void leaderPrintMax(string const message, double const number) const;
+    void leaderPrintMax(string const message, Real const number) const;
 
 
     void recomputeMatrix(bool const recomp){M_recomputeMatrix = recomp;}
@@ -341,7 +341,7 @@ protected:
     bool                           M_divBetaUv;
 
     //
-    double                         M_diagonalize;
+    Real                         M_diagonalize;
 
     UInt                           M_count;
 
@@ -491,7 +491,7 @@ ADRSolver<Mesh, SolverType>::
 
 template<typename Mesh, typename SolverType>
 void ADRSolver<Mesh, SolverType>::
-leaderPrint(string const message, double const number) const
+leaderPrint(string const message, Real const number) const
 {
   if ( isLeader() )
     std::cout << message << number << std::endl;
@@ -509,10 +509,10 @@ leaderPrint(string const message) const
 
 template<typename Mesh, typename SolverType>
 void ADRSolver<Mesh, SolverType>::
-leaderPrintMax(string const message, double const number) const
+leaderPrintMax(string const message, Real const number) const
 {
-  double num(number);
-  double globalMax;
+  Real num(number);
+  Real globalMax;
   M_comm->MaxAll(&num, &globalMax, 1);
 
   leaderPrint( message , globalMax );
@@ -582,10 +582,10 @@ void ADRSolver<Mesh, SolverType>::buildSystem()
 
     chrono.start();
 
-    for ( UInt iVol = 1; iVol <= M_FESpace.mesh()->numVolumes(); iVol++ )
+    for ( UInt iVol = 1; iVol <= M_FESpace.mesh()->numElements(); iVol++ )
     {
         chronoDer.start();
-        M_FESpace.fe().updateFirstDeriv( M_FESpace.mesh()->volumeList( iVol ) );
+        M_FESpace.fe().updateFirstDeriv( M_FESpace.mesh()->element( iVol ) );
 
         chronoDer.stop();
 
@@ -693,7 +693,7 @@ initialize( const vector_type& u0 )
 
 template<typename Mesh, typename SolverType>
 void ADRSolver<Mesh, SolverType>::
-updateSystem( double       alpha,
+updateSystem( Real       alpha,
               vector_type& betaVec,
               vector_type& sourceVec
               )
@@ -750,7 +750,7 @@ updateSystem( double       alpha,
 
     //! managing the convective term
 
-    double normInf;
+    Real normInf;
     betaVec.NormInf(&normInf);
 
     if (normInf != 0.)
@@ -764,33 +764,32 @@ updateSystem( double       alpha,
         int uDim = betaVec.size()/nDimensions;
         chrono.start();
 
-        for ( UInt iVol = 1; iVol <= M_FESpace.mesh()->numVolumes(); ++iVol )
+        for ( UInt iVol = 1; iVol <= M_FESpace.mesh()->numElements(); ++iVol )
         {
 
-            M_FESpace.fe().updateFirstDeriv( M_FESpace.mesh()->volumeList( iVol ) ); //as updateFirstDer
-            M_betaFESpace.fe().updateFirstDeriv( M_FESpace.mesh()->volumeList( iVol ) ); //as updateFirstDer
+            M_FESpace.fe().updateFirstDeriv( M_FESpace.mesh()->element( iVol ) ); //as updateFirstDer
+            M_betaFESpace.fe().updateFirstDeriv( M_FESpace.mesh()->element( iVol ) ); //as updateFirstDer
 
             M_elmatAdv.zero();
 
-            UInt eleID = M_FESpace.fe().currentLocalId();
+            UInt eleID = M_betaFESpace.fe().currentLocalId();
             // Non linear term, Semi-implicit approach
             // M_elvec contains the velocity values in the nodes
-            for ( UInt iNode = 0 ; iNode < ( UInt ) M_FESpace.fe().nbNode ; iNode++ )
+            for ( UInt iNode = 0 ; iNode < ( UInt ) M_betaFESpace.fe().nbNode ; iNode++ )
             {
                 UInt  iloc = M_betaFESpace.fe().patternFirst( iNode );
                 for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
                 {
                     UInt ig = M_betaFESpace.dof().localToGlobal( eleID, iloc + 1 ) + iComp*uDim;
-                    M_elvec_u.vec()[ iloc + iComp*M_FESpace.fe().nbNode ] = betaVecRep[ig]; // BASEINDEX + 1
+                    M_elvec_u.vec()[ iloc + iComp*M_betaFESpace.fe().nbNode ] = betaVecRep[ig]; // BASEINDEX + 1
                 }
             }
 
 
             // compute local convective term and assembling
+            for(UInt iComp=0; iComp<nDimensions; iComp++)
+            	grad( iComp, M_elvec_u, M_elmatAdv, M_FESpace.fe(), M_FESpace.fe(), M_betaFESpace.fe());
 
-            grad( 0, M_elvec_u, M_elmatAdv, M_FESpace.fe(), M_FESpace.fe(), M_betaFESpace.fe());
-            grad( 1, M_elvec_u, M_elmatAdv, M_FESpace.fe(), M_FESpace.fe(), M_betaFESpace.fe());
-            grad( 2, M_elvec_u, M_elmatAdv, M_FESpace.fe(), M_FESpace.fe(), M_betaFESpace.fe());
 
 
 
@@ -815,13 +814,13 @@ updateSystem( double       alpha,
                 Real VLoc_mean  = 0.;
                 Real VLoc_c     = 0.;
 
-                for ( UInt ih_c = 0 ; ih_c < ( UInt ) this->M_FESpace.fe().nbNode ; ih_c++ )
+                for ( UInt ih_c = 0 ; ih_c < ( UInt ) this->M_betaFESpace.fe().nbNode ; ih_c++ )
                 {
-                    UInt iloc = this->M_FESpace.fe().patternFirst( ih_c );
+                    UInt iloc = this->M_betaFESpace.fe().patternFirst( ih_c );
                     for ( UInt iComp = 0; iComp < nDimensions; ++iComp)
                     {
-                        UInt ig = M_FESpace.dof().localToGlobal( eleID, iloc + 1 ) + iComp*uDim;
-                        M_elvec_u.vec()[ iloc + iComp * this->M_FESpace.fe().nbNode ] = betaVecRep[ ig ];
+                        UInt ig = M_betaFESpace.dof().localToGlobal( eleID, iloc + 1 ) + iComp*uDim;
+                        M_elvec_u.vec()[ iloc + iComp * this->M_betaFESpace.fe().nbNode ] = betaVecRep[ ig ];
                         VLoc_c += betaVecRep[ ig ] * betaVecRep[ ig ];
                     }
 
@@ -832,12 +831,12 @@ updateSystem( double       alpha,
                         VLoc_infty = VLoc_c;
                 }
 
-                VLoc_mean = VLoc_mean / this->M_FESpace.fe().nbNode;
+                VLoc_mean = VLoc_mean / this->M_betaFESpace.fe().nbNode;
 
                 Real coef_stab, Pe_loc = 0;
-                coef_stab=M_gammaBeta*this->M_FESpace.fe().diameter()*VLoc_infty; // Alessandro - method
+                coef_stab=M_gammaBeta*this->M_betaFESpace.fe().diameter()*VLoc_infty; // Alessandro - method
 
-                stiff_sd( coef_stab / ( VLoc_mean*VLoc_mean ), M_elvec_u, M_elmatStab, this->M_FESpace.fe(), this->M_FESpace.fe() );
+                stiff_sd( coef_stab / ( VLoc_mean*VLoc_mean ), M_elvec_u, M_elmatStab, this->M_FESpace.fe(), this->M_betaFESpace.fe() );
 
                 assembleMatrix( *M_matrStab,
                                 M_elmatStab,
@@ -846,13 +845,10 @@ updateSystem( double       alpha,
                                 M_FESpace.dof(),
                                 M_FESpace.dof(),
                                 0, 0, 0, 0 );
-
-            }
-
-
-
-
+				}
         }
+
+//TODO: check both the 2D and 3D implementation of ip-stabilization (on the Laplacian test doesn't work properly)
 
 
         if (M_stab == "ip")
@@ -861,9 +857,6 @@ updateSystem( double       alpha,
             if ( M_resetStab )
             {
                 const UInt nDof = M_betaFESpace.dof().numTotalDof();
-
-                typedef ID ( *FTOP )( ID const localFace, ID const point );
-                FTOP  fToP;
 
                 CurrentFE fe1(M_FESpace.refFE(),
                               getGeoMap(*M_FESpace.mesh()),
@@ -875,27 +868,92 @@ updateSystem( double       alpha,
                               getGeoMap(*M_betaFESpace.mesh()),
                               M_betaFESpace.qr());
 
-                switch( M_FESpace.fe().nbNode )
+
+#ifdef TWODIM
+                typedef ID ( *ETOP )( ID const localFace, ID const point );
+                ETOP  eToP;
+                switch( M_FESpace.fe().refFE.type )
                 {
-                    case 4:
-                        fToP = LinearTetra::fToP;
+                    case FE_P1_2D:
+                    	eToP = LinearTriangle::eToP;
                         break;
-                    case 5:
-                        fToP = LinearTetra::fToP;
+                    case FE_P2_2D:
+                    	eToP = QuadraticTriangle::eToP;
                         break;
-                    case 10:
-                        fToP = QuadraticTetra::fToP;
+                    case FE_Q1_2D:
+                        eToP = LinearQuad::eToP;
                         break;
-                    case 8:
-                        fToP = LinearHexa::fToP;
-                        break;
-                    case 20:
-                        fToP = QuadraticHexa::fToP;
+                    case FE_Q2_2D:
+                        eToP = QuadraticQuad::eToP;
                         break;
                     default:
-                        ERROR_MSG( "This refFE is not allowed with IP stabilisation" );
+                    	eToP=0;
+                        ERROR_MSG( "This refFE is not allowed with IP stabilization" );
                         break;
                 }
+                for ( UInt iEdge = M_FESpace.mesh()->numBEdges() + 1; iEdge <= M_FESpace.mesh()->numEdges();
+                      ++iEdge )
+                {
+                    const UInt iElAd1 = M_FESpace.mesh()->edge( iEdge ).ad_first();
+                    const UInt iElAd2 = M_FESpace.mesh()->edge( iEdge ).ad_second();
+
+                    if ( iElAd1 == iElAd2 || iElAd1 == 0 || iElAd2 == 0)
+                    {
+                        continue;
+                    }
+
+                    M_elmatStab.zero();
+
+                    M_betaFESpace.feBd().updateMeas( M_betaFESpace.mesh()->edge( iEdge ) );
+                    const Real hK2  = std::pow(M_betaFESpace.feBd().measure(), 2.);
+
+                    M_betaFESpace.feBd().updateMeasNormal( M_betaFESpace.mesh()->edge( iEdge ) );
+                    KNM<Real>& normal = M_betaFESpace.feBd().normal;
+
+                    fe1.updateFirstDeriv( M_FESpace.mesh()->element( iElAd1 ) );
+                    fe2.updateFirstDeriv( M_FESpace.mesh()->element( iElAd2 ) );
+
+                   ElemVec beta(M_betaFESpace.feBd().nbNode, nDimensions);
+
+                    // first, get the local trace of the velocity into beta
+                    // local id of the face in its adjacent element
+
+                    UInt iEdEl = M_betaFESpace.mesh()->edge( iEdge ).pos_first();
+                    for ( int iNode = 0; iNode < M_betaFESpace.feBd().nbNode; ++iNode )
+                    {
+                        UInt iloc = eToP( iEdEl, iNode+1 );
+                        for ( int iCoor = 0; iCoor < fe1.nbCoor; ++iCoor )
+                        {
+                            UInt ig = M_betaFESpace.dof().localToGlobal( iElAd1, iloc + 1 ) - 1 +iCoor*nDof;
+                            if (betaVecRep.BlockMap().LID(ig + 1) >= 0)
+                                beta.vec()[ iCoor*M_betaFESpace.feBd().nbNode + iNode ] = betaVecRep( ig + 1); // BASEINDEX + 1
+                        }
+                    }
+
+#elif defined THREEDIM
+                typedef ID ( *FTOP )( ID const localFace, ID const point );
+                 FTOP  fToP;
+                switch( M_FESpace.fe().refFE.type )
+                {
+                case FE_P1_3D:
+                case FE_P1bubble_3D:
+                	fToP = LinearTetra::fToP;
+                	break;
+                case FE_P2_3D:
+                	fToP = QuadraticTetra::fToP;
+                	break;
+                case FE_Q1_3D:
+					fToP = LinearHexa::fToP;
+					break;
+                case FE_Q2_3D:
+                	fToP = QuadraticHexa::fToP;
+                	break;
+				default:
+					fToP = 0;
+					ERROR_MSG( "This refFE is not allowed with IP stabilisation" );
+					break;
+                }
+
 
                 for ( UInt iFace = M_FESpace.mesh()->numBFaces() + 1; iFace <= M_FESpace.mesh()->numFaces();
                       ++iFace )
@@ -917,8 +975,8 @@ updateSystem( double       alpha,
                     M_betaFESpace.feBd().updateMeasNormal( M_betaFESpace.mesh()->face( iFace ) );
                     KNM<Real>& normal = M_betaFESpace.feBd().normal;
 
-                    fe1.updateFirstDeriv( M_FESpace.mesh()->volumeList( iElAd1 ) );
-                    fe2.updateFirstDeriv( M_FESpace.mesh()->volumeList( iElAd2 ) );
+                    fe1.updateFirstDeriv( M_FESpace.mesh()->element( iElAd1 ) );
+                    fe2.updateFirstDeriv( M_FESpace.mesh()->element( iElAd2 ) );
 
                     Real bn   = 0;
                     Real bmax = 0;
@@ -964,6 +1022,8 @@ updateSystem( double       alpha,
 
 //                    Real coeffBeta = hK2*M_gammaBeta*abs(bn);
 
+
+#endif
                     Real coeffBeta = M_gammaBeta;
 //                     std::cout << coeffBeta << std::endl;
 
@@ -1105,7 +1165,7 @@ void ADRSolver<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
 
         prec->buildPreconditioner(matrFull);
 
-        double condest = prec->Condest();
+        Real condest = prec->Condest();
 
         linearSolver.setPreconditioner(prec);
 
@@ -1136,7 +1196,7 @@ void ADRSolver<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
 
         prec->buildPreconditioner(matrFull);
 
-        double condest = prec->Condest();
+        Real condest = prec->Condest();
 
         linearSolver.setPreconditioner(prec);
 
@@ -1242,33 +1302,37 @@ ADRSolver<Mesh, SolverType>::flux(const EntityFlag& flag) {
 
   if (M_verbose)
   {
-	  typedef  typename Mesh::VolumeShape GeoShape;
-	  typedef  typename Mesh::FaceShape GeoBShape;
+	  typedef  typename Mesh::ElementShape GeoShape;
+	  typedef typename GeoShape::GeoBShape GeoBShape;
 
 	  // Some useful local variables, to save some typing
-	  UInt nDofpV = M_FESpace.refFE().nbDofPerVertex; // number of Dof per vertices
-	  UInt nDofpE = M_FESpace.refFE().nbDofPerEdge;   // number of Dof per edges
-	  UInt nDofpF = M_FESpace.refFE().nbDofPerFace;   // number of Dof per faces
+	  UInt nDofPerVert = M_FESpace.refFE().nbDofPerVertex; // number of Dof per vertices
+	  UInt nDofPerEdge = M_FESpace.refFE().nbDofPerEdge;   // number of Dof per edges
+	  UInt nDofPerFace = M_FESpace.refFE().nbDofPerFace;   // number of Dof per faces
 
-	  UInt nFaceV = GeoBShape::numVertices; // Number of face's vertices
-	  UInt nFaceE = GeoBShape::numEdges;    // Number of face's edges
+	  UInt nBElementV = GeoBShape::numVertices; // Number of face's vertices
+	  UInt nBElementE = GeoBShape::numEdges;    // Number of face's edges
 
 	  UInt nElemV = GeoShape::numVertices; // Number of element's vertices
 	  UInt nElemE = GeoShape::numEdges;    // Number of element's edges
 
-	  UInt nDofFV = nDofpV * nFaceV; // number of vertex's Dof on a face
-	  UInt nDofFE = nDofpE * nFaceE; // number of edge's Dof on a face
+	  UInt nDofBElV = nDofPerVert * nBElementV; // number of vertex's Dof on a face
+	  UInt nDofBElE = nDofPerEdge * nBElementE; // number of edge's Dof on a face
 
-	  UInt nDofF  = nDofFV+nDofFE+nDofpF; // number of total Dof on a face
+#ifdef TWODIM
+    UInt nDofBEl = nDofBElV + nDofBElE; // number of total Dof on a boundary element
+#elif defined THREEDIM
+    UInt nDofBEl = nDofBElV + nDofBElE + nDofPerFace; // number of total Dof on a boundary element
+#endif
 
-	  UInt nDofElemV = nElemV*nDofpV; // number of vertex's Dof on a Element
-	  UInt nDofElemE = nElemE*nDofpE; // number of edge's Dof on a Element
+	  UInt nDofElemV = nElemV*nDofPerVert; // number of vertex's Dof on a Element
+	  UInt nDofElemE = nElemE*nDofPerEdge; // number of edge's Dof on a Element
 
-	  UInt bdnF  = M_data.mesh()->numBFaces();    // number of faces on boundary
+	  UInt bdnF  = M_data.mesh()->numBElements();    // number of faces on boundary
 
 	  std::list<std::pair<ID, SimpleVect<ID> > > faces;
 	  ID ibF;
-	  UInt iElAd, iVeEl, iFaEl, iEdEl;
+	  UInt iElAd, iVeEl, iBElEl, iEdEl;
 	  ID lDof, gDof, numTotalDof=M_FESpace.dof().numTotalDof();
 
 	  EntityFlag marker;
@@ -1279,9 +1343,9 @@ ADRSolver<Mesh, SolverType>::flux(const EntityFlag& flag) {
 	  // with marker = flag
 	  //
 	  for (ID i=1 ; i<=bdnF; ++i) {
-	    marker = M_data.mesh()->boundaryFace(i).marker();
+	    marker = M_data.mesh()->bElement(i).marker();
 	    if ( marker == flag  ) {
-	      faces.push_front(make_pair(i,SimpleVect<ID>(nDofF)));
+	      faces.push_front(make_pair(i,SimpleVect<ID>(nDofBEl)));
 	    }
 	  }
 
@@ -1293,73 +1357,83 @@ ADRSolver<Mesh, SolverType>::flux(const EntityFlag& flag) {
 
 	    ibF = j->first;
 
-	    iElAd = M_data.mesh()->boundaryFace(ibF).ad_first();  // id of the element adjacent to the face
-	    iFaEl = M_data.mesh()->boundaryFace(ibF).pos_first(); // local id of the face in its adjacent element
+	    iElAd = M_data.mesh()->bElement(ibF).ad_first();  // id of the element adjacent to the face
+	    iBElEl = M_data.mesh()->bElement(ibF).pos_first(); // local id of the boundary Element in its adjacent element
 
 	    // Vertex based Dof
-	    if ( nDofpV ) {
+	    if ( nDofPerVert ) {
 
 	      // loop on face vertices
-	      for (ID iVeFa=1; iVeFa<=nFaceV; ++iVeFa){
+	      for (ID iVeBEl=1; iVeBEl<=nBElementV; ++iVeBEl){
 
-	      	iVeEl = GeoShape::fToP(iFaEl,iVeFa); // local vertex number (in element)
+
+#ifdef TWODIM
+				iVeEl = GeoShape::eToP( iBElEl, iVeBEl ); // local vertex number (in element)
+#elif defined THREEDIM
+                iVeEl = GeoShape::fToP( iBElEl, iVeBEl ); // local vertex number (in element)
+#endif
 
 	      	// Loop number of Dof per vertex
-	      	for (ID l=1; l<=nDofpV; ++l) {
-	      		lDof =   (iVeFa-1) * nDofpV + l ; // local Dof j-esimo grado di liberta' su una faccia
-	      		gDof =  M_FESpace.dof().localToGlobal( iElAd, (iVeEl-1)*nDofpV + l); // global Dof
+	      	for (ID l=1; l<=nDofPerVert; ++l) {
+	      		lDof =   (iVeBEl-1) * nDofPerVert + l ; // local Dof j-esimo grado di liberta' su una faccia
+	      		gDof =  M_FESpace.dof().localToGlobal( iElAd, (iVeEl-1)*nDofPerVert + l); // global Dof
 	      		j->second( lDof ) =  gDof; // local to global on this face
 	      	}
 	      }
 	    }
 
 	    // Edge based Dof
-	    if (nDofpE) {
+	    if (nDofPerEdge) {
 
-	      // loop on face edges
-	      for (ID iEdFa=1; iEdFa<=nFaceE; ++iEdFa) {
+	      // loop on boundary element edges
+	      for (ID iEdBEl=1; iEdBEl<=nBElementE; ++iEdBEl) {
+#ifdef TWODIM
+              iEdEl = iBElEl; // local edge number (in element)
+#elif defined THREEDIM
+                iEdEl = GeoShape::fToE( iBElEl, iEdBEl ).first; // local edge number (in element)
+#endif
+	      		// Loop number of Dof per edge
+	      	for (ID l=1; l<=nDofPerEdge; ++l) {
 
-	      	iEdEl  = GeoShape::fToE(iFaEl,iEdFa).first; // local edge number (in element)
-	      	// Loop number of Dof per edge
-	      	for (ID l=1; l<=nDofpE; ++l) {
-
-	      		lDof =  nDofFV + (iEdFa-1) * nDofpE + l ; // local Dof sono messi dopo gli lDof dei vertici
-	      		gDof =  M_FESpace.dof().localToGlobal( iElAd, nDofElemV + (iEdEl-1)*nDofpE + l); // global Dof
+	      		lDof =  nDofBElV + (iEdBEl-1) * nDofPerEdge + l ; // local Dof sono messi dopo gli lDof dei vertici
+	      		gDof =  M_FESpace.dof().localToGlobal( iElAd, nDofElemV + (iEdEl-1)*nDofPerEdge + l); // global Dof
 	      		j->second( lDof ) =  gDof; // local to global on this face
 	      	}
 	      }
 	    }
+#ifndef TWODIM
 	    // Face based Dof
-	    if (nDofpF) {
+	    if (nDofPerFace) {
 
 	      // Loop on number of Dof per face
-	      for (ID l=1; l<=nDofpF; ++l) {
-	      	lDof = nDofFE + nDofFV + l; // local Dof sono messi dopo gli lDof dei vertici e dopo quelli degli spigoli
-	      	gDof = M_FESpace.dof().localToGlobal( iElAd, nDofElemE + nDofElemV + (iFaEl-1)*nDofpF + l); // global Dof
+	      for (ID l=1; l<=nDofPerFace; ++l) {
+	      	lDof = nDofBElE + nDofBElV + l; // local Dof sono messi dopo gli lDof dei vertici e dopo quelli degli spigoli
+	      	gDof = M_FESpace.dof().localToGlobal( iElAd, nDofElemE + nDofElemV + (iBElEl-1)*nDofPerFace + l); // global Dof
 	      	j->second( lDof ) =  gDof; // local to global on this face
 	      }
 	    }
+#endif
 	  }
 
 	  // Number of velocity components
 	  UInt nc_u=nDimensions;
 
 	  // Nodal values of the velocity in the current face
-	  std::vector<Real> u_local(nc_u*nDofF);
+	  std::vector<Real> u_local(nc_u*nDofBEl);
 
 	  // Loop on faces
 	  for (Iterator j=faces.begin(); j != faces.end(); ++j) {
 
 	    // Extracting nodal values of the velocity in the current face
 	    for (UInt ic =0; ic<nc_u; ++ic) {
-	      for (ID l=1; l<=nDofF; ++l) {
+	      for (ID l=1; l<=nDofBEl; ++l) {
 	      	gDof = j->second(l);
-	      	u_local[ic*nDofF+l-1] = u(ic*numTotalDof+gDof-1);
+	      	u_local[ic*nDofBEl+l-1] = u(ic*numTotalDof+gDof-1);
 	      }
 	    }
 
 	    // Updating quadrature data on the current face
-	    M_FESpace.feBd().updateMeasNormalQuadPt(M_data.mesh()->boundaryFace(j->first));
+	    M_FESpace.feBd().updateMeasNormalQuadPt(M_data.mesh()->bElement(j->first));
 
 	    // Quadrature formula
 	    // Loop on quadrature points
@@ -1371,9 +1445,9 @@ ADRSolver<Mesh, SolverType>::flux(const EntityFlag& flag) {
 
 	      	// Interpolation
 	      	// Loop on local dof
-	      	for (ID l=1; l<=nDofF; ++l)
+	      	for (ID l=1; l<=nDofBEl; ++l)
 	      		flux += M_FESpace.feBd().weightMeas(iq)
-	      							* u_local[ic*nDofF+l-1]
+	      							* u_local[ic*nDofBEl+l-1]
 	      		          * M_FESpace.feBd().phi(int(l-1),iq)
 	      		          * M_FESpace.feBd().normal(int(ic),iq);
 	      	}
@@ -1393,7 +1467,7 @@ ADRSolver<Mesh, SolverType>::area(const EntityFlag& flag) {
   EpetraVector area( EpetraMap( M_comm->NumProc(), 1, &M_me, 0, *M_comm) );
   area *= 0.0;
 
-	UInt bdnF  = M_data.mesh()->numBFaces();    // number of faces on boundary
+	UInt bdnF  = M_data.mesh()->numBElements();    // number of faces on boundary
 
   std::list<ID> faces;
   typedef std::list<ID>::iterator Iterator;
@@ -1404,7 +1478,7 @@ ADRSolver<Mesh, SolverType>::area(const EntityFlag& flag) {
   // with marker = flag
   //
   for (ID i=1 ; i<=bdnF; ++i) {
-    marker = M_data.mesh()->boundaryFace(i).marker();
+    marker = M_data.mesh()->bElement(i).marker();
     if ( marker == flag  ) {
       faces.push_front(i);
     }
@@ -1415,7 +1489,7 @@ ADRSolver<Mesh, SolverType>::area(const EntityFlag& flag) {
   //
   for (Iterator j=faces.begin(); j != faces.end(); ++j) {
 
-    M_FESpace.feBd().updateMeas( M_data.mesh()->boundaryFace( *j ) );  // updating finite element information
+    M_FESpace.feBd().updateMeas( M_data.mesh()->bElement( *j ) );  // updating finite element information
 
     area[M_me] += M_FESpace.feBd().measure();
 
@@ -1489,7 +1563,7 @@ ADRSolver<Mesh, SolverType>::postProcess(bool /*_writeMesh*/)
 //         wr_medit_ascii_scalar( "press." + name + ".bb", p.giveVec(),
 //                                p.size() );
 
-    	// double dt = M_data.timestep();
+    	// Real dt = M_data.timestep();
 
 
     writeMesh("cc." + me + "." + name + ".mesh", *M_FESpace.mesh());

@@ -18,6 +18,7 @@
 */
 
 
+#ifndef TWODIM
 #include <life/lifesolver/fixedPointBase.hpp>
 #include <life/lifefilters/medit_wrtrs.hpp>
 
@@ -352,3 +353,4 @@ void  fixedPoint::solveJac(vector_type        &muk,
 // }
 
 }
+#endif

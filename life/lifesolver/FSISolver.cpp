@@ -26,6 +26,9 @@
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
    \date 2004-11-18
  */
+
+
+#ifndef TWODIM
 #include <life/lifecore/life.hpp>
 
 #include <life/lifesolver/FSISolver.hpp>
@@ -43,7 +46,7 @@ Real zero_scalar( const Real& /* t */,
 }
 
 //! constructors
-
+#ifndef TWODIM
 FSISolver::FSISolver( GetPot const& data_file,
                       std::string   __oper ):
 //     M_dataFluid ( data_file ),
@@ -293,7 +296,7 @@ FSISolver::FSISolver( GetPot const& data_file,
 
 //
 
-
+#endif
 void
 FSISolver::setFSIOperator( std::string const& __op )
 {
@@ -377,6 +380,7 @@ FSISolver::setInvLinSolidBC(solid_bchandler_type bc_dsolid_inv)
 void
 FSISolver::iterate( Real time )
 {
+#ifndef TWODIM
     Debug( 6220 ) << "============================================================\n";
     Debug( 6220 ) << "Solving FSI at time " << time << " with FSIOperator: " << M_method  << "\n";
     Debug( 6220 ) << "============================================================\n";
@@ -443,5 +447,8 @@ FSISolver::iterate( Real time )
     Debug( 6220 ) << "FSISolver iteration at time " << time << " done\n";
     Debug( 6220 ) << "============================================================\n";
     std::cout << std::flush;
+
+#endif
 }
 }
+#endif

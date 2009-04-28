@@ -16,7 +16,7 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-
+#ifndef TWODIM
 #include <life/lifesolver/FSIOperator.hpp>
 //#include <life/lifesolver/reducedLinFluid.hpp>
 
@@ -34,6 +34,7 @@ FSIOperator::~FSIOperator()
 void
 FSIOperator::setup()
 {
+#ifndef TWODIM
     const RefFE*    refFE_vel(0);
     const QuadRule* qR_vel(0);
     const QuadRule* bdQr_vel(0);
@@ -375,7 +376,7 @@ FSIOperator::setup()
 //                                              fluidMesh, 1,
 //                                              0.0);
 //     }
-
+#endif
 } // end setup
 
 //
@@ -1658,3 +1659,4 @@ void FSIOperator::couplingVariableExtrap(vector_ptrtype& lambda, vector_ptrtype&
 }
 
 }
+#endif
