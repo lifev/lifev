@@ -164,22 +164,23 @@ private:
 
 	std::vector<BCName>									M_list;
 	UInt												M_listSize;
+	bool												M_autoSetParameters;
 	ID													M_bcNumber;
 
 	// Handler and parameters
-	boost::shared_ptr<BCHandler> 						M_handler;
-	bool												M_autoSetParameters;
 	BCHandler::BCHints 									M_hint;
+	boost::shared_ptr<BCHandler> 						M_handler;
 
+	// Maps
 	std::map<std::string, BCType> 						M_mapType;
 	std::map<std::string, BCMode> 						M_mapMode;
 	std::map<std::string, BCBaseList> 					M_mapBase;
 
+	boost::shared_ptr<FSIOperator>						M_FSIOperator;
+
 	// Operators
 	std::vector< boost::shared_ptr<BCInterfaceFunction> > 		M_functionVector;
 	std::vector< boost::shared_ptr<BCInterfaceFSIOperator> > 	M_FSIOperatorVector;
-
-	boost::shared_ptr<FSIOperator>						M_FSIOperator;
 
 	// BC options
 	BCName												M_name;

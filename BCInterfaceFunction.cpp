@@ -37,10 +37,30 @@
 // ===================================================
 //! Constructor & Destructor
 // ===================================================
-BCInterfaceFunction::BCInterfaceFunction( const std::string& baseString ) :
-	M_parser					( baseString ),
+BCInterfaceFunction::BCInterfaceFunction( const std::string& baseString, const std::string& stringSeparator ) :
+	M_mapID						( ),
 	M_base						( )
 {
+	//Set default mapID
+	M_mapID[1] = 0;
+	M_mapID[2] = 0;
+	M_mapID[3] = 0;
+
+	std::vector<std::string> baseStringVector;
+	boost::split( baseStringVector, baseString, boost::is_any_of(stringSeparator) );
+
+    Debug( 5021 ) << "BCInterfaceFunction::BCInterfaceFunction: " << "\n";
+	for ( UInt i = 0 ; i < baseStringVector.size() ; ++i )
+	{
+		boost::shared_ptr<SpiritParser> parser( new SpiritParser( baseStringVector[i] ) );
+		M_parserVector.push_back( parser );
+
+		M_mapID[i+1] = i;
+
+	    Debug( 5021 ) << "                                          baseStringVector["<< i << "]: " << baseStringVector[i]  << "\n";
+	    Debug( 5021 ) << "                                                   M_mapID["<< i << "]: " << i 					<< "\n";
+	}
+
 	buildFunctionBase();
 }
 
@@ -68,12 +88,21 @@ BCInterfaceFunction::getFunction( void )
 
 
 Real
-BCInterfaceFunction::Function( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /* i */ )
+BCInterfaceFunction::Function( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id )
 {
-	M_parser.setVariable( "t", t );
-	M_parser.setVariable( "x", x );
-	M_parser.setVariable( "y", y );
-	M_parser.setVariable( "z", z );
+	UInt i = M_mapID[id];
 
-	return M_parser.evaluate();
+	M_parserVector[i]->setVariable( "t", t );
+	M_parserVector[i]->setVariable( "x", x );
+	M_parserVector[i]->setVariable( "y", y );
+	M_parserVector[i]->setVariable( "z", z );
+
+	Debug( 5021 ) << "BCInterfaceFunction::Function: " << "\n";
+	Debug( 5021 ) << "                                                  M_mapID["<< id << "]: " << i  << "\n";
+	Debug( 5021 ) << "                                                           x: " << x  << "\n";
+	Debug( 5021 ) << "                                                           y: " << y  << "\n";
+	Debug( 5021 ) << "                                                           z: " << z  << "\n";
+	Debug( 5021 ) << "                                                           t: " << t  << "\n";
+
+	return M_parserVector[i]->evaluate();
 }

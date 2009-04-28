@@ -42,10 +42,19 @@ BCInterface::BCInterface( GetPot const& dataFile, std::string dataSection ) :
 	M_dataSection				( "conditions/" + dataSection + "/" ),
 	M_list						( ),
 	M_listSize					( 0 ),
-	M_bcNumber					( 0 ),
-	M_handler					( ),
 	M_autoSetParameters			( true ),
-	M_hint						( BCHandler::HINT_BC_ONLY_ESSENTIAL )
+	M_bcNumber					( 0 ),
+	M_hint						( BCHandler::HINT_BC_ONLY_ESSENTIAL ),
+	M_handler					( ),
+	M_FSIOperator				( ),
+	M_name						( "undefined" ),
+	M_flag						( ),
+	M_type						( ),
+	M_mode						( ),
+	M_comN						( ),
+	M_comV						( ),
+	M_base						( ),
+	M_baseString				( "undefined" )
 {
 	//Set mapType
 	M_mapType["Essential"] 	= Essential;
@@ -62,6 +71,10 @@ BCInterface::BCInterface( GetPot const& dataFile, std::string dataSection ) :
 	//Set mapBase
 	M_mapBase["function"] 	= function;
 	M_mapBase["fsi"] 		= fsi;
+
+	//Operators
+	M_functionVector.clear();
+	M_FSIOperatorVector.clear();
 
 	//Set other parameters
 	setList( (M_dataSection + "list").c_str() );
@@ -242,6 +255,7 @@ BCInterface::readBase( const std::string base )
 			M_base = M_mapBase[j->first];
 
 			Debug( 5020 ) << "BCInterface::readBase                          M_base: " << M_base << " " << j->first << "\n";
+			Debug( 5020 ) << "                                         M_baseString: " << M_baseString << "\n";
 
 			break;
 		}

@@ -43,7 +43,7 @@
 
 #include <string>
 
-#include <lifemc/lifefem/SpiritParser.hpp>
+#include <lifemc/lifecore/SpiritParser.hpp>
 
 
 
@@ -60,7 +60,7 @@ using namespace LifeV;
 
 /*!
  * \class BCInterfaceFunction
- * \brief LifeV function parser based on boost::spirit
+ * \brief LifeV bcFunction wrapper for BCInterface.
  *
  *  @author Cristiano Malossi
  *  @see
@@ -79,7 +79,7 @@ public:
 									Real const& x,
 									Real const& y,
 									Real const& z,
-									ID 	 const& /* ID */)> 	function_type;
+									ID 	 const& id	)> 	function_type;
 
 
 
@@ -92,7 +92,7 @@ public:
     //@{
 
     //! Constructor
-	BCInterfaceFunction( const std::string& baseString );
+	BCInterfaceFunction( const std::string& baseString, const std::string& stringSeparator=";" );
 
     //! Destructor
     ~BCInterfaceFunction() {}
@@ -115,9 +115,9 @@ private:
 	//! Private variables
 	// ===================================================
 
-	SpiritParser										M_parser;
+	std::map<UInt,UInt>									M_mapID;
 	BCFunctionBase 										M_base;
-
+	std::vector< boost::shared_ptr<SpiritParser> >		M_parserVector;
 
 
 	// ===================================================
@@ -135,7 +135,7 @@ private:
     function_type getFunction( void );
 
     //! Function
-    Real Function( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /* i */ );
+    Real Function( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id );
 
     //@}
 };
