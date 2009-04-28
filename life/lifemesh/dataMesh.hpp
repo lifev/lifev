@@ -31,8 +31,13 @@
 #include <iostream>
 #include <life/lifecore/GetPot.hpp>
 #include <life/lifecore/life.hpp>
+#ifdef TWODIM
+#include <life/lifemesh/regionMesh2D.hpp>
+#include <life/lifefilters/readMesh2D.hpp>
+#elif defined THREEDIM
 #include <life/lifemesh/regionMesh3D.hpp>
 #include <life/lifefilters/readMesh3D.hpp>
+#endif
 
 namespace LifeV
 {
@@ -109,7 +114,16 @@ DataMesh( const GetPot& dfile, const std::string& section ):
     M_mesh_edges = dfile( ( section + "/mesh_edges" ).data(), "boundary" );
     bool verbose = dfile( ( section + "/verbose" ).data(), 0 );
 
+#ifdef TWODIM
+    if ( M_mesh_type == ".msh" )
+            readFreeFemFile( *M_mesh, M_mesh_dir + M_mesh_file, 1, verbose );
+    else
+            ERROR_MSG( "Sorry, this mesh file can not be loaded" );
+    M_mesh->updateElementEdges(true);
 
+
+
+#elif defined(THREEDIM)
     if ( M_mesh_type == ".mesh" )
         readINRIAMeshFile( *M_mesh, M_mesh_dir + M_mesh_file, 1, verbose );
     else if ( M_mesh_type == ".m++" )
@@ -123,6 +137,7 @@ DataMesh( const GetPot& dfile, const std::string& section ):
 
     M_mesh->updateElementEdges(true);
     M_mesh->updateElementFaces(true);
+#endif
 }
 
 

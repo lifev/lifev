@@ -51,7 +51,7 @@ public:
     const std::vector<int>&       repeatedNodeVector() const {return M_repeatedNodeVector;}
     const std::vector<int>&       repeatedEdgeVector() const {return M_repeatedEdgeVector;}
     const std::vector<int>&       repeatedFaceVector() const {return M_repeatedFaceVector;}
-    const std::vector<int>&       repeatedElemVector() const {return M_repeatedElemVector;}
+    const std::vector<int>&       repeatedVolumeVector() const {return M_repeatedVolumeVector;}
 
 //    void               createFullMap(const RefFE& refFE);
 
@@ -65,18 +65,22 @@ private:
 
     std::vector<int>        M_localNodes;
     std::set<int>           M_localEdges;
+#ifdef TWODIM
+    std::vector<int>        M_localFaces;
+#elif defined THREEDIM
     std::set<int>           M_localFaces;
-    std::vector<int>        M_localElements;
+#endif
+    std::vector<int>        M_localVolumes;
 
     std::vector<int>        M_repeatedNodeVector;
     std::vector<int>        M_repeatedEdgeVector;
     std::vector<int>        M_repeatedFaceVector;
-    std::vector<int>        M_repeatedElemVector;
+    std::vector<int>        M_repeatedVolumeVector;
 
     std::map<int, int>      M_globalToLocalNode;
     std::map<int, int>      M_globalToLocalEdge;
     std::map<int, int>      M_globalToLocalFace;
-    std::map<int, int>      M_globalToLocalElem;
+    std::map<int, int>      M_globalToLocalVolume;
 
     Epetra_Comm*       M_comm;
     UInt               M_me;
@@ -97,54 +101,52 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
     M_localNodes        (),
     M_localEdges        (),
     M_localFaces        (),
-    M_localElements     (),
+    M_localVolumes     (),
     M_repeatedNodeVector(),
     M_repeatedEdgeVector(),
     M_repeatedFaceVector(),
-    M_repeatedElemVector(),
+    M_repeatedVolumeVector(),
     M_globalToLocalNode (),
     M_globalToLocalEdge (),
     M_globalToLocalFace (),
-    M_globalToLocalElem (),
+    M_globalToLocalVolume (),
     M_comm              (&_comm)
 {
-    // First of all, we want to know which kind of elements the mesh is built of:
-    // How many nodes does each element hold?
-    UInt elementNodes;
 
-    typedef typename Mesh::VolumeShape ElementShape;
+    // First of all, we want to know which kind of elements the mesh is built of:
+    // How many nodes, faces, edges does each element hold?
+    UInt elementNodes, elementFaces, elementEdges;
+
+
+    typedef typename Mesh::ElementShape ElementShape;
 
     switch ( ElementShape::Shape )
     {
         case HEXA:
             elementNodes = 8;
+            elementFaces = 6;
+            elementEdges = 12;
             break;
         case TETRA:
             elementNodes = 4;
+            elementFaces = 4;
+            elementEdges = 6;
             break;
-        default:
-            ERROR_MSG( "Element shape not implement in partitionMesh" );
-    }
-
-    // How many faces does each element hold?
-    UInt elementFaces;
-
-    typedef typename Mesh::FaceShape FaceShape;
-
-    switch ( FaceShape::Shape )
-    {
         case QUAD:
-            elementFaces = 6;
+            elementNodes = 4;
+            elementEdges = 4;
+            elementFaces = 0;
             break;
         case TRIANGLE:
-            elementFaces = 4;
+           	elementNodes = 3;
+           	elementEdges = 3;
+           	elementFaces = 0;
             break;
         default:
             ERROR_MSG( "Face Shape not implemented in partitionMesh" );
     }
 
-    // How many edges does each element hold?
-    UInt elementEdges = 6;
+
 
     // ParMETIS is able to work in parallel: how many processors does it have at hand?
     int npes;
@@ -159,7 +161,7 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
 
     M_vertexDist[0] = 0;
 
-    UInt k = _mesh.numVolumes();
+    UInt k = _mesh.numElements();
 
     // Evenly distributed graph vertices
     for (int i = 0; i < npes; ++i)
@@ -185,20 +187,22 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
 
     UInt sum = 0;
 
+#ifdef TWODIM
+
     for ( UInt ie = localStart; ie < localEnd; ++ie )
     {
-        for (UInt iface = 1; iface <= elementFaces; ++iface)
+        for (UInt iedge = 1; iedge <= elementEdges; ++iedge)
         {
-            // global ID of the iface-th face in element ie
-            UInt face = _mesh.localFaceId( ie, iface );
-            // first adjacent element to face "face"
-            UInt vol  = _mesh.face(face).ad_first();
-            if (vol == ie) vol = _mesh.face(face).ad_second();
-            if (vol != 0)
+        	// global ID of the iedge-th edge in element ie
+            UInt edge = _mesh.localEdgeId( ie, iedge );
+            // first adjacent element to edge "edge"
+            UInt elem  = _mesh.edge(edge).ad_first();
+            if (elem == ie) elem = _mesh.edge(edge).ad_second();
+            if (elem != 0)
                 {
-                    // this is the list of adjacency
-                    // for each graph vertex, simply push back the ID of its neighbors
-                    M_jadj.push_back(vol - 1);
+            	    // this is the list of adjacency
+            	    // for each graph vertex, simply push back the ID of its neighbors
+                    M_jadj.push_back(elem - 1);
                     ++sum;
                 }
         }
@@ -207,6 +211,34 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
         // with M_iadj[i] <= k < M_iadj[i+1]
         M_iadj.push_back(sum);
     }
+
+#elif defined THREEDIM
+
+
+    for ( UInt ie = localStart; ie < localEnd; ++ie )
+    {
+        for (UInt iface = 1; iface <= elementFaces; ++iface)
+        {
+            // global ID of the iface-th face in element ie
+            UInt face = _mesh.localFaceId( ie, iface );
+            // first adjacent element to face "face"
+            UInt elem  = _mesh.face(face).ad_first();
+            if (elem == ie) elem = _mesh.face(face).ad_second();
+            if (elem != 0)
+                {
+                    // this is the list of adjacency
+                    // for each graph vertex, simply push back the ID of its neighbors
+                    M_jadj.push_back(elem - 1);
+                    ++sum;
+                }
+        }
+        // this is the list of "keys" to access M_jadj
+        // graph element i has neighbors M_jadj[ k ],
+        // with M_iadj[i] <= k < M_iadj[i+1]
+        M_iadj.push_back(sum);
+    }
+
+#endif
 
     //MPI_Barrier(MPI_COMM_WORLD);
 
@@ -283,8 +315,6 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
     // the list of vertices belonging to the specific subdomain
     std::vector< std::vector<int> > locProc(nProc);
 
-    std::vector<int>           locVolume(0);
-
     // cycling on locally stored vertices
     for (UInt ii = 0; ii < part.size(); ++ii)
     {
@@ -297,7 +327,7 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
     // (MPI_INT is not unsigned int)
     //int _exp(7*sizeof(MPI_INT));
     //int _max_int( std::ldexp(1., _exp-1) ); // taking a little less: 2^(exp-1) instead of 2^exp - 1
-    //int max_int (1000);
+    int max_int (1000);
 
     // cycling on subdomains
     // TODO: Matteo please comment this part :)
@@ -313,14 +343,14 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
             MPI_Send(&size, 1, MPI_INT, iproc, 10, MPIcomm);
 
             // workaround for huge data to be passed
-            if (size > 1000)
+            if (size > max_int)
             {
                 int incr = 1 ;
                 int pos = 0;
                 int size_part =size;
 
                 // divide the whole data set into smaller packets
-                while (size_part > 1000 )
+                while (size_part > max_int )
                 {
                     incr+=1;
                     size_part=size/incr;
@@ -362,7 +392,7 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
 
             std::vector<int> stack(size, 0);
 
-            if (size > 1000 )
+            if (size > max_int )
             {
                 int size_part, pos, incr;
 
@@ -410,10 +440,207 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
     UInt inode;
 
     // cycle on local element's ID
+#ifdef TWODIM
+
+    for (UInt jj = 0; jj < locProc[M_me].size(); ++jj)
+    {
+    	ielem = locProc[M_me][jj];
+        M_localFaces.push_back(ielem);
+
+        // cycle on element's nodes
+        for (UInt ii = 1; ii <= elementNodes; ++ii)
+        {
+        	inode = _mesh.face(ielem + 1).point(ii).id();
+        	im    = M_globalToLocalNode.find(inode);
+
+        	// if the node is not yet present in the list of local nodes, then add it
+        	// CAREFUL: also local numbering starts from 1 in RegionMesh
+        	if ( im == M_globalToLocalNode.end() )
+        	{
+        		M_globalToLocalNode.insert(std::make_pair(inode, count));
+        		++count;
+        		// store here the global numbering of the node
+        		M_localNodes.push_back(_mesh.face(ielem + 1).point(ii).id());
+			}
+		}
+
+        for (UInt ii = 1; ii <= elementEdges; ++ii)
+        	// store here the global numbering of the edge
+        	M_localEdges.insert(_mesh.localEdgeId(ielem + 1, ii));
+
+    }
+    std::vector<int>::iterator it;
+
+    // ******************
+    // nodes construction
+    // ******************
+
+    UInt nBoundaryPoint = 0;
+    M_mesh->pointList.reserve(M_localNodes.size());
+
+    // guessing how many boundary points on this processor.
+    M_mesh->_bPoints.reserve(M_localNodes.size()); // guessing how many boundary points on this processor.
+
+    inode = 1;
+
+    typename Mesh::PointType * pp = 0;
+
+    // loop in the list of local nodes:
+    // in this loop inode is the local numbering of the points
+    for (it = M_localNodes.begin(); it != M_localNodes.end(); ++it, ++inode)
+    {
+    	typename Mesh::PointType point = 0;
+
+    	// create a boundary point in the local mesh, if needed
+    	bool boundary = _mesh.isBoundaryPoint(*it);
+    	if (boundary)
+    	{
+    		++nBoundaryPoint;
+        }
+
+    	pp = &M_mesh->addPoint( boundary );
+    	pp->setMarker( _mesh.point(*it).marker() );
+    	pp->x() = _mesh.point(*it).x();
+    	pp->y() = _mesh.point(*it).y();
+
+    	UInt id = _mesh.point(*it).id();
+
+    	pp->setId(id);
+    	pp->setLocalId( inode );
+    	M_mesh->localToGlobalNode().insert(std::make_pair(inode, id));
+    	M_mesh->globalToLocalNode().insert(std::make_pair(id, inode));
+
+    }
+
+    // ******************
+    // faces construction
+    // ******************
+
+    count = 1;
+
+    typename Mesh::FaceType * pf = 0;
+    M_mesh->faceList.reserve(M_localFaces.size());
+
+    // loop in the list of local elements
+    // CAREFUL! in this loop inode is the global numbering of the points
+    // We insert the local numbering of the nodes in the local face list
+    for (it = M_localFaces.begin(); it != M_localFaces.end(); ++it, ++count)
+    {
+    	pf = &M_mesh->addFace();
+    	// CAREFUL! in ParMETIS data structures, numbering starts from 0
+    	pf->setId     ( _mesh.face(*it + 1).id() );
+    	pf->setLocalId( count );
+
+    	M_globalToLocalFace.insert(make_pair( _mesh.face(*it + 1).id(),  count ));
+
+    	for (ID id = 1; id <= elementNodes; ++id)
+    	{
+    		inode = _mesh.face(*it + 1).point(id).id();
+
+    		// im is an iterator to a map element
+    		// im->first is the key (i. e. the global ID "inode")
+    		// im->second is the value (i. e. the local ID "count")
+    		im    = M_globalToLocalNode.find(inode);
+    		pf->setPoint( id, M_mesh->pointList( (*im).second ) );
+		}
+
+    	int ibc = _mesh.face(*it + 1).marker();
+
+    	pf->setMarker( EntityFlag( ibc ) );
+    }
+
+
+    // ******************
+    // edges construction
+    // ******************
+
+    typename Mesh::EdgeType * pe = 0;
+
+    count = 1;
+
+    UInt nBoundaryEdges = 0;
+    M_mesh->edgeList.reserve(M_localEdges.size());
+
+    // loop in the list of local edges
+    for (is = M_localEdges.begin(); is != M_localEdges.end(); ++is, ++count)
+    {
+    	// create a boundary edge in the local mesh, if needed
+    	bool boundary = (_mesh.isBoundaryEdge(*is));
+        if (boundary)
+        {
+        	// create a boundary edge in the local mesh, if needed
+        	++nBoundaryEdges;
+        }
+
+        pe =  &M_mesh->addEdge( boundary );
+        pe->setId     (_mesh.edge(*is).id());
+        pe->setLocalId( count );
+
+        int elem1 =  _mesh.edge(*is).ad_first();
+        int elem2 =  _mesh.edge(*is).ad_second();
+
+       // find the mesh elements adjacent to the edge
+        im =  M_globalToLocalFace.find(elem1);
+
+        int localElem1;
+
+        if (im == M_globalToLocalFace.end())
+        	localElem1 = 0;
+        else
+        	localElem1 = (*im).second;
+
+		im =  M_globalToLocalFace.find(elem2);
+
+		int localElem2;
+
+		if (im == M_globalToLocalFace.end())
+			localElem2 = 0;
+		else
+			localElem2 = (*im).second;
+
+        // if this process does not own either of the adjacent elements
+		// then the two adjacent elements and the respective edge positions coincide in the local mesh
+		if ((localElem1 == 0) && ! boundary)
+		{
+			pe->ad_first() = localElem2;
+			pe->pos_first()=_mesh.edge(*is).pos_second();
+        }
+		else
+		{
+			pe->ad_first() = localElem1;
+			pe->pos_first() = _mesh.edge(*is).pos_first();
+        }
+
+		if ((localElem2 == 0) && ! boundary)
+		{
+			pe->ad_second() = localElem1;
+			pe->pos_second()=_mesh.edge(*is).pos_first();
+		}
+		else
+		{
+			pe->ad_second()  = localElem2;
+			pe->pos_second() = _mesh.edge(*is).pos_second();
+		}
+
+
+		for (ID id = 1; id <= _mesh.edge(*is).numLocalVertices; ++id)
+		{
+			inode =_mesh.edge(*is).point(id).id();
+			im = M_globalToLocalNode.find(inode);
+			pe->setPoint(id, M_mesh->pointList( (*im).second ));
+		}
+		pe->setMarker( _mesh.edge(*is).marker());
+
+		M_mesh->setLinkSwitch( "HAS_ALL_EDGES" );
+		M_mesh->setLinkSwitch( "EDGES_HAVE_ADIACENCY" );
+	}
+
+#elif defined THREEDIM
+
     for (UInt jj = 0; jj < locProc[M_me].size(); ++jj)
     {
         ielem = locProc[M_me][jj];
-        M_localElements.push_back(ielem);
+        M_localVolumes.push_back(ielem);
 
         // cycle on element's nodes
         for (UInt ii = 1; ii <= elementNodes; ++ii)
@@ -436,10 +663,9 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
 
         // cycle on element's edges
         for (UInt ii = 1; ii <= elementEdges; ++ii)
-        {
-          // store here the global numbering of the edge
-            M_localEdges.insert(_mesh.localEdgeId(ielem + 1, ii));
-        }
+        	// store here the global numbering of the edge
+          	M_localEdges.insert(_mesh.localEdgeId(ielem + 1, ii));
+
 
         // cycle on element's faces
         for (UInt ii = 1; ii <= elementFaces; ++ii)
@@ -519,12 +745,12 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
 
     typename Mesh::VolumeType * pv = 0;
 
-    M_mesh->volumeList.reserve(M_localElements.size());
+    M_mesh->volumeList.reserve(M_localVolumes.size());
 
     // loop in the list of local elements
     // CAREFUL! in this loop inode is the global numbering of the points
     // We insert the local numbering of the nodes in the local volume list
-    for (it = M_localElements.begin(); it != M_localElements.end(); ++it, ++count)
+    for (it = M_localVolumes.begin(); it != M_localVolumes.end(); ++it, ++count)
     {
         pv = &M_mesh->addVolume();
 //        std::cout << "volume " << _mesh.volume(*it + 1).id() << std::flush;
@@ -532,7 +758,7 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
         pv->setId     ( _mesh.volume(*it + 1).id() );
         pv->setLocalId( count );
 
-        M_globalToLocalElem.insert(make_pair( _mesh.volume(*it + 1).id(),  count ));
+        M_globalToLocalVolume.insert(make_pair( _mesh.volume(*it + 1).id(),  count ));
 
         for (ID id = 1; id <= elementNodes; ++id)
         {
@@ -551,14 +777,14 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
     }
 
 #if 0
-    for (UInt ii = 0; ii < M_localElements.size(); ++ii)
+    for (UInt ii = 0; ii < M_localVolumes.size(); ++ii)
     {
         for (UInt jj = 0; jj < 4; ++jj)
             std::cout << M_mesh->volume(ii + 1).point(jj + 1).id() << " " ;
         std::cout << std::endl;
     }
 
-    for (UInt ii = 0; ii < M_localElements.size(); ++ii)
+    for (UInt ii = 0; ii < M_localVolumes.size(); ++ii)
     {
         for (UInt jj = 0; jj < 4; ++jj)
             std::cout << M_mesh->volume(ii + 1).point(jj + 1).x() << " "
@@ -586,6 +812,7 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
         bool boundary = (_mesh.isBoundaryEdge(*is));
         if (boundary)
         {
+      		// create a boundary edge in the local mesh, if needed
             ++nBoundaryEdges;
         }
 
@@ -644,49 +871,67 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
         int elem2 =  _mesh.face(*is).ad_second();
 
         // find the mesh elements adjacent to the face
-        im =  M_globalToLocalElem.find(elem1);
+        im =  M_globalToLocalVolume.find(elem1);
 
         int localElem1;
 
-        if (im == M_globalToLocalElem.end()) localElem1 = 0;
+        if (im == M_globalToLocalVolume.end()) localElem1 = 0;
         else
             localElem1 = (*im).second;
 
-        im =  M_globalToLocalElem.find(elem2);
+        im =  M_globalToLocalVolume.find(elem2);
 
         int localElem2;
-
-        if (im == M_globalToLocalElem.end()) localElem2 = 0;
+        if (im == M_globalToLocalVolume.end()) localElem2 = 0;
         else
             localElem2 = (*im).second;
 
 
-//        UInt localElem2 = (*im).second;
+        // if ((localElem1 == 0) && ! boundary) localElem1 = localElem2;
+        // if ((localElem2 == 0) && ! boundary) localElem2 = localElem1;
+
+        // pf->ad_first() = localElem1;
+        // pf->pos_first() = _mesh.face(*is).pos_first();
+
+        // pf->ad_second()  = localElem2;
+        // pf->pos_second() = _mesh.face(*is).pos_second();
 
         // if this process does not own either of the adjacent elements
-        // then the two adjacent elements coincide in the local mesh
-        if ((localElem1 == 0) && ! boundary) localElem1 = localElem2;
-        if ((localElem2 == 0) && ! boundary) localElem2 = localElem1;
+        // then the two adjacent elements and the respective face positions coincide in the local mesh
+        //possible bug fixed: not only the two adjacent elements face, but also the face positions should coincide.
+        //otherwise it could happen that a pair(element, position) is associated to different faces.
+        //This can lead to a wrong treatment of the dofPerFace (in 2D of the dofPerEdge, as occurred with P2)
+        //
+        if ((localElem1 == 0) && ! boundary)
+        {
+        	pf->ad_first() = localElem2;
+        	pf->pos_first()=_mesh.face(*is).pos_second();
+        }
+        else
+        {
+        	pf->ad_first() = localElem1;
+        	pf->pos_first() = _mesh.face(*is).pos_first();
+        }
 
-//         std::cout << me << " : ";
-//         std::cout << elem1 << " -> ";
-//         std::cout << localElem1 << " ";
+        if ((localElem2 == 0) && ! boundary)
+        {
+        	pf->ad_second() = localElem1;
+        	pf->pos_second()=_mesh.face(*is).pos_first();
+        }
+        else
+        {
+        	pf->ad_second()  = localElem2;
+        	pf->pos_second() = _mesh.face(*is).pos_second();
+        }
 
-        pf->ad_first() = localElem1;
-        pf->pos_first() = _mesh.face(*is).pos_first();
 
-//         std::cout << elem2 << " -> ";
-//         std::cout << localElem2 << std::endl;
+        for (ID id = 1; id <= _mesh.face(*is).numLocalVertices; ++id)
+        {
+        	inode =_mesh.face(*is).point(id).id();
+        	im = M_globalToLocalNode.find(inode);
+        	pf->setPoint(id, M_mesh->pointList( (*im).second ));
+		}
 
-        pf->ad_second()  = localElem2;
-        pf->pos_second() = _mesh.face(*is).pos_second();
-
-        for (ID id = 1; id <= 3; ++id)
-            {
-                inode =_mesh.face(*is).point(id).id();
-                im = M_globalToLocalNode.find(inode);
-                pf->setPoint(id, M_mesh->pointList( (*im).second ));
-            }
         pf->setMarker( _mesh.face(*is).marker());
 
         M_mesh->setLinkSwitch( "HAS_ALL_FACES" );
@@ -694,12 +939,14 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
 
     }
 
+#endif
+
     // ******************
     // final setup
     // ******************
 
 
-    UInt nVolumes = M_localElements.size();
+    UInt nVolumes = M_localVolumes.size();
     UInt nNodes   = M_localNodes.size();
     UInt nEdges   = M_localEdges.size();
     UInt nFaces   = M_localFaces.size();
@@ -707,18 +954,19 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
     M_mesh->setMaxNumPoints ( nNodes, true );
     M_mesh->setMaxNumEdges  ( nEdges, true );
     M_mesh->setMaxNumFaces  ( nFaces, true );
+#ifndef TWODIM
     M_mesh->setMaxNumVolumes( nVolumes, true);
-
-//    std::cout << "num points " << _mesh.numPoints() << std::endl;
+#endif
 
     M_mesh->setMaxNumGlobalPoints ( _mesh.numPoints  () );
     M_mesh->setNumGlobalVertices  ( _mesh.numPoints  () );
     M_mesh->setMaxNumGlobalEdges  ( _mesh.numEdges   () );
     M_mesh->setMaxNumGlobalFaces  ( _mesh.numFaces   () );
+#ifndef TWODIM
     M_mesh->setMaxNumGlobalVolumes( _mesh.numVolumes () );
-
-    M_mesh->setNumBPoints   ( nBoundaryPoint );
     M_mesh->setNumBFaces    ( nBoundaryFace  );
+#endif
+    M_mesh->setNumBPoints   ( nBoundaryPoint );
     M_mesh->setNumBEdges    ( nBoundaryEdges );
 
     M_mesh->setNumVertices ( nNodes );
@@ -741,7 +989,10 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
 
 
     M_mesh->updateElementEdges();
+
+#ifndef TWODIM
     M_mesh->updateElementFaces();
+#endif
 
 //     Switch sw;
 //     if ( !checkMesh3D( *M_mesh, sw, false, true, std::cout, std::cerr, std::cout ) )
@@ -784,27 +1035,75 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
 
     // repeated element map creation
 
+#ifdef TWODIM
+
+    // use sets to store each entity only once
+    std::set<int>    repeatedNodeList;
+    std::set<int>    repeatedEdgeList;
+    for (UInt ii = 0; ii < elementList.size(); ++ii)
+     {
+         ielem = elementList[ii];
+         M_repeatedFaceVector.push_back(ielem + 1);
+         for (UInt jj = 1; jj <= elementNodes; ++jj)
+         {
+             inode = _mesh.element(ielem + 1).point(jj).id();
+             repeatedNodeList.insert(inode);
+         }
+         for (UInt jj = 1; jj <= elementEdges; ++jj)
+         {
+        	 UInt iedge = _mesh.localEdgeId(ielem + 1, jj);
+        	 repeatedEdgeList.insert(iedge);
+         }
+     }
+
+     // repeated node map creation
+
+     M_repeatedNodeVector.reserve(repeatedNodeList.size());
+
+     for (is = repeatedNodeList.begin(); is != repeatedNodeList.end(); ++is)
+     {
+         M_repeatedNodeVector.push_back(*is);
+     }
+
+     // repeated edge list creation
+
+     M_repeatedEdgeVector.reserve(repeatedEdgeList.size());
+
+     for (is = repeatedEdgeList.begin(); is != repeatedEdgeList.end(); ++is)
+     {
+         M_repeatedEdgeVector.push_back(*is);
+     }
+
+#elif defined THREEDIM
+
+    // use sets to store each entity only once
+    std::set<int>    repeatedNodeList;
+    std::set<int>    repeatedEdgeList;
+    std::set<int>    repeatedFaceList;
+
     for (UInt ii = 0; ii < elementList.size(); ++ii)
     {
         ielem = elementList[ii];
-        M_repeatedElemVector.push_back(ielem + 1);
+        M_repeatedVolumeVector.push_back(ielem + 1);
+        for (UInt jj = 1; jj <= elementNodes; ++jj)
+        {
+        	inode = _mesh.volume(ielem + 1).point(jj).id();
+        	repeatedNodeList.insert(inode);
+        }
+        for (UInt jj = 1; jj <= elementEdges; ++jj)
+        {
+             UInt iedge = _mesh.localEdgeId(ielem + 1, jj);
+             repeatedEdgeList.insert((int) iedge);
+        }
+        for (UInt jj = 1; jj <= elementFaces; ++jj)
+        {
+            UInt iface = _mesh.localFaceId(ielem + 1, jj);
+            repeatedFaceList.insert(iface);
+        }
     }
 
 
     // repeated node map creation
-
-    // use a set to store each node only once
-    std::set<int>    repeatedNodeList;
-    // cycle on the elements nodes
-    for (UInt ii = 0; ii < elementList.size(); ++ii)
-    {
-        ielem = elementList[ii];
-        for (UInt jj = 1; jj <= elementNodes; ++jj)
-        {
-            inode = _mesh.volume(ielem + 1).point(jj).id();
-            repeatedNodeList.insert(inode);
-        }
-    }
 
     M_repeatedNodeVector.reserve(repeatedNodeList.size());
 
@@ -814,52 +1113,19 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
     }
 
     // repeated edge list creation
-
-    // use a set to store each node only once
-    std::set<int>    repeatedEdgeList;
-
-    // cycle on the elements edges
-    for (UInt ii = 0; ii < elementList.size(); ++ii)
-    {
-        ielem = elementList[ii];
-        for (UInt jj = 0; jj < elementEdges; ++jj)
-        {
-            UInt iedge = _mesh.localEdgeId(ielem + 1, jj + 1);
-            repeatedEdgeList.insert((int) iedge);
-        }
-    }
-
     M_repeatedEdgeVector.reserve(repeatedEdgeList.size());
 
     for (is = repeatedEdgeList.begin(); is != repeatedEdgeList.end(); ++is)
-    {
-//        std::cout << *is << std::endl;
-        M_repeatedEdgeVector.push_back(*is);
-    }
+           M_repeatedEdgeVector.push_back(*is);
 
     // repeated face list creation
-
-    // use a set to store each node only once
-    std::set<int>    repeatedFaceList;
-
-    // cycle on the elements faces
-    for (UInt ii = 0; ii < elementList.size(); ++ii)
-    {
-        ielem = elementList[ii];
-        for (UInt jj = 1; jj <= elementFaces; ++jj)
-        {
-            UInt iface = _mesh.localFaceId(ielem + 1, jj);
-            repeatedFaceList.insert(iface);
-        }
-    }
-
-
     M_repeatedFaceVector.reserve(repeatedFaceList.size());
 
     for (is = repeatedFaceList.begin(); is != repeatedFaceList.end(); ++is)
     {
         M_repeatedFaceVector.push_back(*is);
     }
+#endif
 
     if (!M_me) std::cout << "ok." << std::endl;
 

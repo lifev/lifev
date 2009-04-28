@@ -671,7 +671,7 @@ namespace LifeV
 
         std::map<int, int>      M_globalToLocalFace;
 
-        std::map<int, int>      M_globalToLocalElem;
+        std::map<int, int>      M_globalToLocalVolume;
 
     };
 
@@ -699,7 +699,7 @@ namespace LifeV
         M_globalToLocalNode(),
         M_globalToLocalEdge(),
         M_globalToLocalFace(),
-        M_globalToLocalElem()
+        M_globalToLocalVolume()
     { //Modif Miguel:11/2002
         set_switches_for_regionmesh( switches );
     }

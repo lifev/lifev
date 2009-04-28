@@ -960,6 +960,8 @@ Possible values are
 \pre Boundary faces list must be properly set.
 */
 
+
+#ifndef TWODIM
 template <class RegionMesh3D>
 bool fixBoundaryFaces( RegionMesh3D & mesh,
                        std::ostream & clog,
@@ -1136,6 +1138,7 @@ bool fixBoundaryFaces( RegionMesh3D & mesh,
 
     return true;
 }
+#endif
 
 //! Builds faces
 /*! This function may alternatively be used to build the compulsory boundary
@@ -1168,6 +1171,8 @@ bool fixBoundaryFaces( RegionMesh3D & mesh,
   \note By setting buildinternal=true and buildboundary=true the function just fixes the counters
   with the number of faces in the mesh
  */
+
+#ifndef TWODIM
 template <class RegionMesh3D>
 bool buildFaces( RegionMesh3D & mesh,
                  std::ostream & clog,
@@ -1364,6 +1369,7 @@ bool buildFaces( RegionMesh3D & mesh,
     mesh.setLinkSwitch( std::string( "HAS_ALL_FACES" ) );
     return true;
 }
+#endif
 
 //! It builds edges.
 

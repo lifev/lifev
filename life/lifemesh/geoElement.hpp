@@ -18,7 +18,7 @@
 */
 /*! file geoElement.h
 \brief Geometric elements
-\version $Revision: 1.13 $ Luca Formaggia
+\version $Revision: 1.14 $ Luca Formaggia
 
   Introduces all the geometric elements
 */
@@ -285,7 +285,7 @@ GeoElement0D<MC>::operator = ( GeoElement0D<MC> const & g )
 template <typename GEOSHAPE, typename MC>
 GeoElement1D<GEOSHAPE, MC>::GeoElement1D( ID id ) :
     GeoND<GEOSHAPE, GeoElement0D<MC> >( id ),
-    MC::EdgeMarker                    ( geoElement1D ),
+    MC::EdgeMarker (),
     efirst   ( 0 ),
     esecond  ( 0 ),
     posfirst ( 0 ),
