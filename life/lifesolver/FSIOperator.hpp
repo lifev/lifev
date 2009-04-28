@@ -358,6 +358,10 @@ public:
     void setFluidLeader(int fluidLeader){M_fluidLeader = fluidLeader;}
     void setSolidLeader(int solidLeader){M_solidLeader = solidLeader;}
 
+    int getFluidLeaderId() const {return M_fluidLeader;}
+    int getSolidLeaderId() const {return M_solidLeader;}
+
+
     bool isLeader() const
     {
         if (isFluid())
