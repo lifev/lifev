@@ -37,25 +37,32 @@
 // ===================================================
 //! Constructor & Destructor
 // ===================================================
-BCInterfaceFSIOperator::BCInterfaceFSIOperator( const std::string& baseString, const boost::shared_ptr<FSIOperator>& oper ) :
+BCInterfaceFSIOperator::BCInterfaceFSIOperator( const std::string& baseString,
+												const boost::shared_ptr<FSIOperator>& oper ) :
 	M_baseString			( baseString ),
 	M_FSIOperator			( oper ),
 	M_base					( )
 {
-	//Set mapFSI
-	M_mapFSI["DerFluidLoadToFluid"]					= DerFluidLoadToFluid;
-	M_mapFSI["DerFluidLoadToStructure"]				= DerFluidLoadToStructure;
-	M_mapFSI["DerHarmonicExtensionVelToFluid"]		= DerHarmonicExtensionVelToFluid;
-	M_mapFSI["DerStructureDispToSolid"]				= DerStructureDispToSolid;
-	M_mapFSI["FluidInterfaceDisp"]					= FluidInterfaceDisp;
-	M_mapFSI["FluidLoadToStructure"]				= FluidLoadToStructure;
-	M_mapFSI["HarmonicExtensionVelToFluid"] 		= HarmonicExtensionVelToFluid;
-	M_mapFSI["SolidLoadToStructure"]				= SolidLoadToStructure;
-	M_mapFSI["StructureDispToHarmonicExtension"]	= StructureDispToHarmonicExtension;
-	M_mapFSI["StructureDispToSolid"]				= StructureDispToSolid;
-	M_mapFSI["StructureToFluid"]					= StructureToFluid;
+	//Set mapMethod
+	M_mapMethod["exactJacobian"]						= EXACTJACOBIAN;
+	M_mapMethod["fixedPoint"]							= FIXEDPOINT;
+	M_mapMethod["monolithic"]							= MONOLITHIC;
+	M_mapMethod["steklovPoincare"]						= STEKLOVPOINCARE;
 
-	checkFSIList( );
+	//Set mapFunction
+	M_mapFunction["DerFluidLoadToFluid"]				= DerFluidLoadToFluid;
+	M_mapFunction["DerFluidLoadToStructure"]			= DerFluidLoadToStructure;
+	M_mapFunction["DerHarmonicExtensionVelToFluid"]		= DerHarmonicExtensionVelToFluid;
+	M_mapFunction["DerStructureDispToSolid"]			= DerStructureDispToSolid;
+	M_mapFunction["FluidInterfaceDisp"]					= FluidInterfaceDisp;
+	M_mapFunction["FluidLoadToStructure"]				= FluidLoadToStructure;
+	M_mapFunction["HarmonicExtensionVelToFluid"] 		= HarmonicExtensionVelToFluid;
+	M_mapFunction["SolidLoadToStructure"]				= SolidLoadToStructure;
+	M_mapFunction["StructureDispToHarmonicExtension"]	= StructureDispToHarmonicExtension;
+	M_mapFunction["StructureDispToSolid"]				= StructureDispToSolid;
+	M_mapFunction["StructureToFluid"]					= StructureToFluid;
+
+	checkMethod( );
 }
 
 
@@ -66,81 +73,40 @@ BCInterfaceFSIOperator::BCInterfaceFSIOperator( const std::string& baseString, c
 //! Private functions
 // ===================================================
 inline void
-BCInterfaceFSIOperator::checkFSIList( void )
+BCInterfaceFSIOperator::checkMethod( void )
 {
-	switch ( M_mapFSI[M_baseString] )
+	switch ( M_mapMethod[M_FSIOperator->method()] )
 	{
-		case DerFluidLoadToFluid :
+			case EXACTJACOBIAN :
 
-			std::cout << "BUILD DerFluidLoadToFluid" << std::endl;
+				Debug( 5022 ) << "BCInterfaceFSIOperator::checkMethod   -> exactJacobian" << "\n";
 
-			break;
+				checkFunction<exactJacobian>();
 
-		case DerFluidLoadToStructure :
+				break;
 
-			std::cout << "BUILD DerFluidLoadToStructure" << std::endl;
+			case FIXEDPOINT :
 
-			break;
+				Debug( 5022 ) << "BCInterfaceFSIOperator::checkMethod   -> fixedPoint" << "\n";
 
-		case DerHarmonicExtensionVelToFluid :
+				checkFunction<fixedPoint>();
 
-			std::cout << "BUILD DerHarmonicExtensionVelToFluid" << std::endl;
+				break;
 
-			break;
+			case MONOLITHIC :
 
-		case DerStructureDispToSolid :
+				Debug( 5022 ) << "BCInterfaceFSIOperator::checkMethod   -> monolithic" << "\n";
 
-			std::cout << "BUILD DerStructureDispToSolid" << std::endl;
+				//checkFunction<monolithic>();
 
-			break;
+				break;
 
-		case FluidInterfaceDisp :
+			case STEKLOVPOINCARE :
 
-			std::cout << "BUILD FluidInterfaceDisp" << std::endl;
+				Debug( 5022 ) << "BCInterfaceFSIOperator::checkMethod   -> steklovPoincare" << "\n";
 
-			break;
+				//checkFunction<steklovPoincare>();
 
-		case FluidLoadToStructure :
-
-			std::cout << "BUILD FluidLoadToStructure" << std::endl;
-
-			break;
-
-		case HarmonicExtensionVelToFluid :
-
-			std::cout << "BUILD HarmonicExtensionVelToFluid" << std::endl;
-
-			break;
-
-		case SolidLoadToStructure :
-
-			std::cout << "BUILD SolidLoadToStructure" << std::endl;
-			M_FSIOperator->setSolidLoadToStructure( M_FSIOperator->minusSigmaFluidRepeated() );
-
-			M_base = M_FSIOperator->bcvSolidLoadToStructure();
-
-			break;
-
-		case StructureDispToHarmonicExtension :
-
-			std::cout << "BUILD StructureDispToHarmonicExtension" << std::endl;
-
-			break;
-
-		case StructureDispToSolid :
-
-			Debug( 5022 ) << "BCInterfaceFSIOperator::checkFSIList        StructureDispToSolid" << "\n";
-
-			break;
-
-		case StructureToFluid :
-
-			Debug( 5022 ) << "BCInterfaceFSIOperator::checkFSIList            StructureToFluid" << "\n";
-
-			M_FSIOperator->setStructureToFluid( M_FSIOperator->veloFluidMesh() );
-
-			M_base = M_FSIOperator->bcvStructureToFluid();
-
-			break;
+				break;
 	}
 }

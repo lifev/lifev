@@ -43,6 +43,7 @@
 
 #include <life/lifesolver/exactJacobianBase.hpp>
 #include <life/lifesolver/fixedPointBase.hpp>
+//#include <life/lifesolver/steklovPoincareBase.hpp>
 
 #include <string>
 
@@ -54,19 +55,29 @@
 //! Namespaces
 // ===================================================
 using namespace LifeV;
-enum FSIList{
-				DerFluidLoadToFluid,
-				DerFluidLoadToStructure,
-				DerHarmonicExtensionVelToFluid,
-				DerStructureDispToSolid,
-				FluidInterfaceDisp,
-				FluidLoadToStructure,
-				HarmonicExtensionVelToFluid,
-				SolidLoadToStructure,
-				StructureDispToHarmonicExtension,
-				StructureDispToSolid,
-				StructureToFluid
-			};
+
+enum FSIMethod
+{
+	EXACTJACOBIAN,
+	FIXEDPOINT,
+	MONOLITHIC,
+	STEKLOVPOINCARE
+};
+
+enum FSIFunction
+{
+	DerFluidLoadToFluid,
+	DerFluidLoadToStructure,
+	DerHarmonicExtensionVelToFluid,
+	DerStructureDispToSolid,
+	FluidInterfaceDisp,
+	FluidLoadToStructure,
+	HarmonicExtensionVelToFluid,
+	SolidLoadToStructure,
+	StructureDispToHarmonicExtension,
+	StructureDispToSolid,
+	StructureToFluid
+};
 
 
 
@@ -74,7 +85,7 @@ enum FSIList{
 
 /*!
  * \class BCInterfaceFSIOperator
- * \brief LifeV function parser based on boost::spirit
+ * \brief LifeV bcVector wrapper for BCInterface (FSI problems).
  *
  *  @author Cristiano Malossi
  *  @see
@@ -84,12 +95,6 @@ class BCInterfaceFSIOperator
 //     public LifeV::Application
 {
 public:
-
-	// ===================================================
-	//! Typedef
-	// ===================================================
-
-
 
 	// ===================================================
 	//! Public functions
@@ -127,7 +132,8 @@ private:
 	boost::shared_ptr<FSIOperator>						M_FSIOperator;
 	boost::shared_ptr<BCVectorInterface>				M_base;
 
-	std::map<std::string, FSIList> 						M_mapFSI;
+	std::map<std::string, FSIMethod> 					M_mapMethod;
+	std::map<std::string, FSIFunction> 					M_mapFunction;
 
 
 
@@ -139,13 +145,129 @@ private:
 	*/
 	//@{
 
-	//! checkFSIList
-	inline void checkFSIList( void );
+	//! checkMethod
+	inline void checkMethod( void );
 
-
-
+	template <class method>
+	inline void checkFunction( void );
 
     //@}
 };
+
+
+
+
+
+// ===================================================
+//! Template function
+// ===================================================
+template <class method>
+inline void
+BCInterfaceFSIOperator::checkFunction( void )
+{
+	method *operMethod = dynamic_cast<method *>(&*M_FSIOperator);
+
+	switch ( M_mapFunction[M_baseString] )
+	{
+		case DerFluidLoadToFluid :
+
+			Debug( 5022 ) << "BCInterfaceFSIOperator::checkFunction -> DerFluidLoadToFluid" << "\n";
+
+			break;
+
+		case DerFluidLoadToStructure :
+
+			Debug( 5022 ) << "BCInterfaceFSIOperator::checkFunction -> DerFluidLoadToStructure" << "\n";
+
+			operMethod->setDerFluidLoadToStructure( M_FSIOperator->sigmaSolidRepeated() );
+
+	        M_base = operMethod->bcvDerFluidLoadToStructure();
+
+			break;
+
+		case DerHarmonicExtensionVelToFluid :
+
+			Debug( 5022 ) << "BCInterfaceFSIOperator::checkFunction -> DerHarmonicExtensionVelToFluid" << "\n";
+
+			operMethod->setDerHarmonicExtensionVelToFluid( M_FSIOperator->derVeloFluidMesh() );
+
+	        M_base = operMethod->bcvDerHarmonicExtensionVelToFluid();
+
+			break;
+
+		case DerStructureDispToSolid :
+
+			Debug( 5022 ) << "BCInterfaceFSIOperator::checkFunction -> DerStructureDispToSolid" << "\n";
+
+			break;
+
+		case FluidInterfaceDisp :
+
+			Debug( 5022 ) << "BCInterfaceFSIOperator::checkFunction -> FluidInterfaceDisp" << "\n";
+
+			//operMethod->FluidInterfaceDisp( (LifeV::Vector&) M_FSIOperator->lambdaFluidRepeated() );
+
+	        //M_base = operMethod->bcvFluidInterfaceDisp();
+
+			break;
+
+		case FluidLoadToStructure :
+
+			Debug( 5022 ) << "BCInterfaceFSIOperator::checkFunction -> FluidLoadToStructure" << "\n";
+
+			operMethod->setFluidLoadToStructure( M_FSIOperator->sigmaSolidRepeated() );
+
+	        M_base = operMethod->bcvFluidLoadToStructure();
+
+			break;
+
+		case HarmonicExtensionVelToFluid :
+
+			Debug( 5022 ) << "BCInterfaceFSIOperator::checkFunction -> HarmonicExtensionVelToFluid" << "\n";
+
+			M_FSIOperator->setHarmonicExtensionVelToFluid( M_FSIOperator->veloFluidMesh() );
+
+			M_base = M_FSIOperator->bcvHarmonicExtensionVelToFluid();
+
+			break;
+
+		case SolidLoadToStructure :
+
+			Debug( 5022 ) << "BCInterfaceFSIOperator::checkFunction -> SolidLoadToStructure" << "\n";
+
+			M_FSIOperator->setSolidLoadToStructure( M_FSIOperator->minusSigmaFluidRepeated() );
+
+			M_base = M_FSIOperator->bcvSolidLoadToStructure();
+
+			break;
+
+		case StructureDispToHarmonicExtension :
+
+			Debug( 5022 ) << "BCInterfaceFSIOperator::checkFunction -> StructureDispToHarmonicExtension" << "\n";
+
+			operMethod->setStructureDispToHarmonicExtension( M_FSIOperator->lambdaFluidRepeated() );
+
+	        M_base = operMethod->bcvStructureDispToHarmonicExtension();
+
+			break;
+
+		case StructureDispToSolid :
+
+			Debug( 5022 ) << "BCInterfaceFSIOperator::checkFunction -> StructureDispToSolid" << "\n";
+
+			break;
+
+		case StructureToFluid :
+
+			Debug( 5022 ) << "BCInterfaceFSIOperator::checkFunction -> StructureToFluid" << "\n";
+
+			M_FSIOperator->setStructureToFluid( M_FSIOperator->veloFluidMesh() );
+			M_FSIOperator->setStructureToFluidParametres();
+
+			M_base = M_FSIOperator->bcvStructureToFluid();
+
+			break;
+	}
+}
 
 #endif /* __BCInterfaceFSIOperator_H */
