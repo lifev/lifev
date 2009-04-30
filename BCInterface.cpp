@@ -37,7 +37,7 @@
 // ===================================================
 //! Constructor
 // ===================================================
-BCInterface::BCInterface( GetPot const& dataFile, std::string dataSection ) :
+BCInterface::BCInterface( GetPot const& dataFile, const std::string dataSection ) :
 	M_dataFile					( dataFile ),
 	M_dataSection				( "conditions/" + dataSection + "/" ),
 	M_list						( ),

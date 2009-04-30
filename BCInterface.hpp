@@ -69,6 +69,82 @@ enum BCBaseList{function, fsi};
  *
  *  @author Cristiano Malossi
  *  @see
+ *
+ *  This class allow to impose boundary conditions completely from a file.
+ *
+ *
+ *
+ *  <b>EXAMPLE - DATA FILE</b>
+ *
+ *  In the GetPot data file BCInterface read a new section: [conditions].
+ *
+ *  Inside [conditions] the user can insert different sections for his problem such as:
+ *  [fluid], [structure], etc...
+ *
+ *  Inside each subsection there is a list of condition which correspond to other sub-section
+ *  with the same name. The list must be inside the apex '...'.
+ *
+ *  Each condition has a similar structure; here there is an example:
+ *
+ *  [InFlow]
+ *  type       = Essential
+ *  flag       = 2
+ *  mode       = Full
+ *  component  = 3
+ *  function   = '0; 0; 3*0.03*(1/4-(x^2+y^2))'
+ *
+ *  NOTE: All the parameters are case sensitive.
+ *
+ *  type - can be: Essential Natural Mixte
+ *  flag - contains the flag (or the list of flags inside apex '...')
+ *  mode - can be: Full Component Scalar Tangential Normal.
+ *  component - if mode is Scalar, Tangential or Normal it is missing.
+ *              if mode is Component it contains the ID of the component (or of the components list inside apex)
+ *              if mode is Full it contains the total number of components
+ *  function - contains the function. See BCInterfaceFunction for more details about the syntax.
+ *
+ *	In the case of FSI problems the syntax is exactly the same but function is replaced by fsi:
+ *
+ *	[../Interface]
+ *	type       = Essential
+ *	flag       = 1
+ *	mode       = Full
+ *	component  = 3
+ *	fsi	       = StructureToFluid
+ *
+ *	where fsi contains the fsi operator. See BCInterfaceFSIOperator for more details about the list of available operators.
+ *
+ *  NOTE:
+ *
+ *  To see some example look at test_cylinder and test_fsi.
+ *
+ *
+ *
+ *  <b>EXAMPLE - HOW TO USE</b>
+ *
+ *  Here there is a short example on how to use it.
+ *
+ *  1) You can define your BCInterface class in a shared pointer:
+ *     boost::shared_ptr<BCInterface> 	M_fluidBC;
+ *
+ *  2) You pass to the BCInterface the GetPot data file and the subsection to read inside [conditions]:
+ *     M_fluidBC.reset( new BCInterface(data_file, "fluid") );
+ *
+ *  3) If you have fsi conditions you have to add an operator
+ *     M_fluidBC->setFSIOperator( M_fsi->operFSI() );
+ *
+ *  4) Then you can build the handler
+ *     M_fluidBC->buildHandler();
+ *
+ *  5) Finally, to get the handler you can use:
+ *     M_fluidBC->Handler_ptr();
+ *
+ *  NOTE:
+ *
+ *  You can add manually more conditions by using addBC() after the call to buildHandler() function.
+ *  In this case you have to manually set the TOTAL number of boundary conditions
+ *  by using setHandlerParameters() function BEFORE building the handler.
+ *
  */
 class BCInterface
 //     :
@@ -97,10 +173,10 @@ public:
 
     //! Constructor
     /*!
-      \param GetPot data file
-      \param GetPot section
-    */
-	BCInterface( GetPot const& dataFile, std::string dataSection );
+     * \param dataFile    - GetPot data file
+     * \param dataSection - Subsection inside [conditions]
+     */
+	BCInterface( GetPot const& dataFile, const std::string dataSection );
 
     //! Destructor
     ~BCInterface() {}
@@ -124,13 +200,24 @@ public:
      */
     //@{
 
-	// Set Handler parameters
+	//! Set manually Handler parameters: you need it only if you are adding manually some parameters by calling addBC
+    /*!
+     * \param bcNumber - total number of the boundary conditions (files + added manually)
+     * \param hint     - hint
+     */
 	void setHandlerParameters( const ID bcNumber, const BCHandler::BCHints hint = BCHandler::HINT_BC_NONE );
 
-	// Build BChandler
+	//! Build the bcHandler
 	void buildHandler( void );
 
-	// Add BC
+	//! Add a Boundary Condition
+    /*!
+     * \param name - name of the condition
+     * \param flag - list of flags
+     * \param type - type of the condition
+     * \param mode - mode of the condition
+     * \param base - base of the condition
+     */
 	template <class BCBase>
 	void addBC( const BCName& name,
 				const BCFlag& flag,
@@ -138,15 +225,27 @@ public:
 				const BCMode& mode,
 					  BCBase& base );
 
+	//! Add a Boundary Condition
+    /*!
+     * \param name - name of the condition
+     * \param flag - list of flags
+     * \param type - type of the condition
+     * \param mode - mode of the condition
+     * \param base - base of the condition
+     * \param comp - component of the condition
+     */
 	template <class BCBase, class BCComp>
 	void addBC( const BCName& name,
 				const BCFlag& flag,
 				const BCType& type,
 				const BCMode& mode,
 					  BCBase& base,
-				const BCComp&  comp );
+				const BCComp& comp );
 
-	// Set FSI operator
+	//! Set an FSIOperator (need only for fsi BC)
+    /*!
+     * \param oper - FSIOperator
+     */
 	void setFSIOperator(const boost::shared_ptr<FSIOperator>& oper );
 
 
