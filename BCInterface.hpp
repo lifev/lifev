@@ -70,7 +70,7 @@ enum BCBaseList{function, fsi};
  *  @author Cristiano Malossi
  *  @see
  *
- *  This class allow to impose boundary conditions completely from a file.
+ *  This class allows to impose boundary conditions completely from a file.
  *
  *
  *

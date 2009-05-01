@@ -64,6 +64,35 @@ using namespace LifeV;
  *
  *  @author Cristiano Malossi
  *  @see
+ *
+ *  This class is an interface between BCInterface and SpiritParser. It allows to construct LifeV
+ *  functions type for boundary conditions, using a functions string loaded from a GetPot file.
+ *
+ *
+ *
+ *  <b>DETAILS:</b>
+ *
+ *  The constructor of the class takes a string contains the GetPot file function. By default the stringSeparator
+ *  is set to semicolon ";".
+ *
+ *  The function string has to be in this form:
+ *
+ *  function = 'u ; v ; w'
+ *
+ *  where u(x,y,z,t), v(x,y,z,t), w(x,y,z,t).
+ *  Here there is an example:
+ *
+ *  function = 'x^2 + y^2 ; 0 ; 2*sin(2*pi*t)'
+ *
+ *  If u = v = w it is possible to set just one argument, for example:
+ *
+ *  function = '0'
+ *
+ *  To set a constant for complicate expression it is possible to add them before the expression
+ *  using a comma ",":
+ *
+ *  function = 'x^2 + y^2 ; 0 ; C=5.67436, C*sin(2*pi*C*t)^C'
+ *
  */
 class BCInterfaceFunction
 //     :

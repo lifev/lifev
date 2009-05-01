@@ -89,6 +89,37 @@ enum FSIFunction
  *
  *  @author Cristiano Malossi
  *  @see
+ *
+ *  This class allows to use impose interface conditions for FSI problems.
+ *
+ *
+ *
+ *  <b>DETAILS:</b>
+ *
+ *  The constructor of the class takes a string contains the ID of the interface condition to impose,
+ *  and the FSIOperator. The list of available conditions is the FSIFunction variable. These are:
+ *
+ *	- DerFluidLoadToFluid,					(not implemented)
+ *	- DerFluidLoadToStructure,
+ *	- DerHarmonicExtensionVelToFluid,
+ *	- DerStructureDispToSolid,				(not implemented)
+ *	- FluidInterfaceDisp,					(not working)
+ *	- FluidLoadToStructure,
+ *	- HarmonicExtensionVelToFluid,
+ *	- SolidLoadToStructure,
+ *	- StructureDispToHarmonicExtension,
+ *	- StructureDispToSolid, 				(not implemented)
+ *	- StructureToFluid
+ *
+ *	The class automatically recognize which method is used among:
+ *
+ *	- EXACTJACOBIAN
+ *	- FIXEDPOINT
+ *	- MONOLITHIC		(not working)
+ *	- STEKLOVPOINCARE 	(not working)
+ *
+ *	To get the base for the boundary condition call the getBase function.
+ *
  */
 class BCInterfaceFSIOperator
 //     :
