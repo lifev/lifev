@@ -27,41 +27,40 @@ namespace LifeV
 Monolithic::Monolithic():
     super(),
     M_monolithicMap(),
-    M_interfaceMap(),
+    M_couplingMatrix(),
     M_interface(0),
+    M_interfaceMap(),
     M_beta(),
     M_monolithicMatrix(),
     M_bigPrecPtr(),
     M_DDBlockPrec(),
+    M_rhsFull(),
     //end of protected args
     M_updateEvery(0),
     M_numerationInterface(),
     M_rhsShapeDerivatives(),
     M_rhsNew(),
     M_fullMonolithic(false),
-    M_recomputePrec(true),
-    //    M_BCh_uPrec(),
-    //    M_BCh_dPrec(),
-    //M_splitPrec(false),
     M_entry(0.),
     M_robinCoupling(),
-    M_robinCouplingInv(),
-    M_alphaf(0),
-    M_alphas(0),
-    M_isDiagonalBlockPrec(false),
+    //    M_robinCouplingInv(),
+    M_alphaf(0.),
+    M_alphas(0.),
+    //    M_isDiagonalBlockPrec(false),
     M_diagonalScale(false),
     M_offset(0),
-    M_solidAndFluidDim(0)
-    //    M_isTangentProblem(false)
-
-    //    M_semiImplicit(1)
-    //    M_numerationInterfaceInt()
+    M_solidAndFluidDim(0),
+    M_reusePrec(true),
+    M_resetPrec(true),
+    M_maxIterSolver(-1),
+    M_linearSolver()
 {
 }
 // Destructor
 Monolithic::~Monolithic()
 {
 }
+
 
 void Monolithic::setup()
 {
@@ -77,6 +76,7 @@ void Monolithic::setup()
 
             std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
             std::map<ID, ID>::const_iterator ITrow;
+
             M_monolithicMap.reset(new EpetraMap(M_uFESpace->map()));
             *M_monolithicMap+= M_pFESpace->map();
             *M_monolithicMap+= M_dFESpace->map();
@@ -125,9 +125,9 @@ void Monolithic::setup()
                 }
 
             //          M_numerationInterface->spy("numeration");
-            std::vector<int> couplingVector;
 
-            couplingVector.reserve((int)(M_interfaceMap.getMap(Unique)->NumMyElements()/nDimensions));
+            std::vector<int> couplingVector;
+            couplingVector.reserve((int)(M_interfaceMap.getMap(Unique)->NumMyElements()));
 
             for(int dim=0; dim<nDimensions; ++dim)
                 {
@@ -164,44 +164,51 @@ void Monolithic::setup()
                 {
                     M_meshMotion.reset(new FSIOperator::meshmotion_raw_type(*M_mmFESpace,
                                                                             *M_epetraComm));
+            M_meshMotion.reset(new FSIOperator::meshmotion_raw_type(*M_mmFESpace,
+                                                                    *M_epetraComm));
 
-                    M_fluid.reset(new FSIOperator::fluid_raw_type(dataFluid(),
-                                                                  *M_uFESpace,
-                                                                  *M_pFESpace,
-                                                                  *M_epetraComm,
-                                                                  *M_monolithicMap));
+            M_fluid.reset(new FSIOperator::fluid_raw_type(dataFluid(),
+                                                         *M_uFESpace,
+                                                         *M_pFESpace,
+                                                         *M_epetraComm,
+                                                         *M_monolithicMap));
 
-                    vector_type u0(*M_monolithicMap);
-                    M_bdf.reset(new BdfT<vector_type>(M_dataFluid->order_bdf()));
-                    M_bdf->initialize_unk(u0);
+//             if (isLinearFluid())// to be implemented
+//                 M_fluidLin.reset(new FSIOperator::fluidlin_raw_type(dataFluid(),
+//                                                                    *M_uFESpace,
+//                                                                    *M_pFESpace,
+//                                                                    *M_epetraComm));
 
-                    M_rhs.reset(new vector_type(*this->M_monolithicMap));
-                    M_un.reset (new vector_type(*this->M_monolithicMap));
+            vector_type u0(*M_monolithicMap);
+            M_bdf.reset(new BdfT<vector_type>(M_dataFluid->order_bdf()));
+            M_bdf->initialize_unk(u0);
+            M_rhs.reset(new vector_type(*this->M_monolithicMap));
+            M_rhsFull.reset(new vector_type(*this->M_monolithicMap));
+            M_un.reset (new vector_type(*this->M_monolithicMap));
+            M_beta.reset  (new vector_type(/*M_monolithicMap*/M_uFESpace->map()));
 
-                    M_solid.reset( new solid_raw_type(dataSolid(),//changed
-                                                      *M_dFESpace,
-                                                      *M_epetraComm,
-                                                      *M_monolithicMap,
-                                                      M_offset,
-                                                      M_uFESpace
-                                                      ));
+            M_solid.reset(new FSIOperator::solid_raw_type(dataSolid(),
+                                                         *M_dFESpace,
+                                                         *M_epetraComm,
+                                                         *M_monolithicMap,
+                                                         M_offset
+                                                         ));
 
-
-                    //                    M_solid->updateCoupling(M_couplingMatrix);
+//             if (isLinearSolid())// to be implemented with the offset
+//                 M_solidLin.reset(new FSIOperator::solidlin_raw_type(dataSolid(),
+//                                                                    *M_dFESpace,
+//
+//                                                      *M_epetraComm));
                 }
 }//end setup
 
 void
 Monolithic::setDataFromGetPot( GetPot const& data_file )
 {
-//     M_solverTrilinos.setOptionsFromGetPot(data_file,"jacobian/aztec");
-
     super::setDataFromGetPot(data_file);
 
-    //  this->M_dataFluid.reset(new data_fluid(data_file));
-    //    this->M_dataSolid.reset(new data_solid(data_file));
     M_updateEvery = data_file("problem/updateEvery", 0);
-    this->M_dataFluid->setSemiImplicit( data_file("problem/semiImplicit", false) );
+    this->M_dataFluid->setSemiImplicit( data_file("problem/semiImplicit", true) );
     this->M_dataFluid->setUseShapeDerivatives( data_file("fluid/useShapeDerivatives", false) );
     M_DDBlockPrec = data_file( "interface/DDBlockPrec",  0 );
     //M_splitPrec = data_file( "interface/splitPrec",  false );
@@ -218,16 +225,11 @@ Monolithic::buildSystem()
     M_couplingMatrix.reset(new matrix_type(*M_monolithicMap/*, this->M_fluid->getMeanNumEntries()*/));
     this->couplingMatrix(M_couplingMatrix);
     M_couplingMatrix->GlobalAssemble();
-    //   *M_couplingMatrix *= 1e3;
-    //    M_couplingMatrix->spy("couplingMatrix");
 
     M_solid->buildSystem();
     M_solid->rescaleMatrices();
-    M_solid->updateCoupling(*M_couplingMatrix);
-
-    //    M_fluid->buildSystem);
+    updateCoupling(*M_couplingMatrix);
 }
-
 
 void
 Monolithic::couplingMatrix(matrix_ptrtype & bigMatrix, bool solidCoupling) // not working with non-matching grids
@@ -235,11 +237,6 @@ Monolithic::couplingMatrix(matrix_ptrtype & bigMatrix, bool solidCoupling) // no
 
     std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
     std::map<ID, ID>::const_iterator ITrow;
-
-    //    UInt solidDim=M_dFESpace->map().getMap(Unique)->NumGlobalElements()/nDimensions;
-
-    //    vector_type lambda(M_interfaceMap, Unique);
-    //    this->monolithicToInterface(lambda, *M_un);
 
     for(UInt dim = 0; dim < nDimensions; ++dim)
     {
@@ -336,15 +333,16 @@ void Monolithic::zeroBlock( matrix_ptrtype matrixPtr,vector_type& colNumeration 
     std::map<ID, ID> const& Map = M_dofStructureToHarmonicExtension->locDofMap();
     Real* entry(new Real(0.));
     std::map<ID, ID>::const_iterator ITrow;
-
+    int err;
     if(colOffset>=M_offset && colOffset<M_solidAndFluidDim && rowOffset<M_solidAndFluidDim)
         {
             for( ITrow=map.begin(); ITrow != map.end(); ++ITrow)// scalable loops,
                 {
-                    if(colNumeration.getMap().getMap(Unique)->LID(ITrow->second)>=0)
+                    //                    if(colNumeration.getMap().getMap(Unique)->LID(ITrow->second)>=0)
+                     if(M_interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
                         {
                             int index=(colOffset + ITrow->second);// second is column
-                            matrixPtr->getEpetraMatrix().ReplaceGlobalValues(rowOffset + ITrow->first,1, entry ,&index);
+                            err=matrixPtr->getEpetraMatrix().ReplaceGlobalValues(rowOffset + ITrow->first,1, entry ,&index);
                         }
                 }
             return;
@@ -353,10 +351,11 @@ void Monolithic::zeroBlock( matrix_ptrtype matrixPtr,vector_type& colNumeration 
         {
             for( ITrow=map.begin(); ITrow != map.end(); ++ITrow)// scalable loops,
                 {
-                    if(colNumeration.getMap().getMap(Unique)->LID(ITrow->second)>=0)
+                //                    if(colNumeration.getMap().getMap(Unique)->LID(ITrow->second)>=0)
+            if(M_interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
                         {
                             int index2= (colOffset + ITrow->first);
-                            matrixPtr->getEpetraMatrix().ReplaceGlobalValues(rowOffset + ITrow->second,1, entry ,&index2);
+                            err=matrixPtr->getEpetraMatrix().ReplaceGlobalValues(rowOffset + ITrow->second,1, entry ,&index2);
                         }
                 }
             return;
@@ -366,10 +365,11 @@ void Monolithic::zeroBlock( matrix_ptrtype matrixPtr,vector_type& colNumeration 
         {
             for( ITrow=map.begin(); ITrow != map.end(); ++ITrow)// scalable loops,
                 {
-                    if(colNumeration.getMap().getMap(Unique)->LID(ITrow->second)>=0)
+                    //if(colNumeration.getMap().getMap(Unique)->LID(ITrow->second)>=0)
+            if(M_interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
                         {
                             int* index(new int(colOffset + colNumeration[ITrow->second]));
-                            matrixPtr->getEpetraMatrix().ReplaceGlobalValues(rowOffset + ITrow->first,1, entry ,index);
+                           err= matrixPtr->getEpetraMatrix().ReplaceGlobalValues(rowOffset + ITrow->first,1, entry ,index);
 
                         }
                 }
@@ -380,11 +380,17 @@ void Monolithic::zeroBlock( matrix_ptrtype matrixPtr,vector_type& colNumeration 
         {
             for( ITrow=map.begin(); ITrow != map.end(); ++ITrow)// scalable loops,
                 {
-                    if(colNumeration.getMap().getMap(Unique)->LID(ITrow->second)>=0)
+                    //if(colNumeration.getMap().getMap(Unique)->LID(ITrow->second)>=0)
+            if(M_interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
                         {
                             int* index2(new int(colOffset + colNumeration[ITrow->second]));
-                            matrixPtr->getEpetraMatrix().ReplaceGlobalValues( rowOffset + ITrow->second,1, entry ,index2);
+                            err=matrixPtr->getEpetraMatrix().ReplaceGlobalValues( rowOffset + ITrow->second,1, entry ,index2);
                         }
+            if (err != 0)
+                {
+                    M_solid->getDisplayer().leaderPrint("error ", err);
+                    M_solid->getDisplayer().leaderPrint("Go to fill your matrix!!");
+                }
                 }
             return;
         }
@@ -394,7 +400,6 @@ void Monolithic::zeroBlock( matrix_ptrtype matrixPtr,vector_type& colNumeration 
 void
 Monolithic::couplingRhs(vector_ptrtype rhs, vector_ptrtype un) // not working with non-matching grids
 {
-
     std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
     std::map<ID, ID>::const_iterator ITrow;
     //    UInt solidDim=M_dFESpace->map().getMap(Unique)->NumGlobalElements()/nDimensions;
@@ -418,13 +423,14 @@ Monolithic::couplingRhs(vector_ptrtype rhs, vector_ptrtype un) // not working wi
     }
 }
 
+
 void
 Monolithic::addDiagonalEntries(Real entry, matrix_ptrtype bigMatrix, EpetraMap& Map, UInt offset, bool replace)
 {
     if(!replace)
-        for(UInt i=0 ; i<Map.getMap(Unique)->NumMyElements(); ++i)//num from 1
+        for(UInt i=0 ; i<Map.getMap(Repeated)->NumMyElements(); ++i)//num from 1
             {
-                bigMatrix->set_mat_inc(  offset + Map.getMap(Unique)->GID(i)-1 ,   offset + Map.getMap(Unique)->GID(i)-1, entry);
+                bigMatrix->set_mat_inc(  offset + Map.getMap(Repeated)->GID(i)-1 ,   offset + Map.getMap(Repeated)->GID(i)-1, entry);
             }
     else
         {
@@ -432,7 +438,7 @@ Monolithic::addDiagonalEntries(Real entry, matrix_ptrtype bigMatrix, EpetraMap& 
                 {
                     //diagonal[Map.getMap(Repeated)->GID(i)+offset]=entry;
                     int* index(new int(offset + Map.getMap(Unique)->GID(i)));
-                    bigMatrix->getEpetraMatrix().ReplaceGlobalValues(offset + Map.getMap(Unique)->GID(i), 1, &entry, index );
+                    bigMatrix->getEpetraMatrix().ReplaceGlobalValues(offset + Map.getMap(Repeated)->GID(i), 1, &entry, index );
                 }
         }
 }
@@ -444,7 +450,7 @@ Monolithic::addDiagonalEntries(Real entry,  matrix_ptrtype bigMatrix, std::map<I
         for(ITrow=Map.begin() ; ITrow != Map.end(); ++ITrow)
             {
                 if(M_interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
-                    bigMatrix->set_mat_inc(  offset + ITrow->first-1 ,   offset + ITrow->first-1, entry);
+                bigMatrix->set_mat_inc(  offset + (*M_numerationInterface)[ITrow->second]-1 ,   offset + (*M_numerationInterface)[ITrow->second]-1, entry);
             }
     else
         {
@@ -452,8 +458,13 @@ Monolithic::addDiagonalEntries(Real entry,  matrix_ptrtype bigMatrix, std::map<I
                 {
                     if(M_interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
                     {
-                        int* index(new int(offset + ITrow->first));
-                        bigMatrix->getEpetraMatrix().ReplaceGlobalValues(offset + ITrow->first, 1, &entry, index );
+                        int* index(new int(offset + (*M_numerationInterface)[ITrow->second]));
+                        int err = bigMatrix->getEpetraMatrix().ReplaceGlobalValues(offset + (*M_numerationInterface)[ITrow->second], 1, &entry, index );
+                        if (err != 0)
+                            {
+                                M_solid->getDisplayer().leaderPrint("error ", err);
+                                M_solid->getDisplayer().leaderPrint("Go to fill your matrix!!");
+                            }
                     }
                 }
         }
@@ -465,6 +476,7 @@ Monolithic::updateSystem(const vector_type& displacement)
 
     vector_type solution(*this->M_monolithicMap);
     monolithicToFluid(displacement, solution);
+    //*M_rhs *= 0.;//useless? (done in evalResidual)
 
     this->M_bdf->shift_right(solution);
 
@@ -474,7 +486,9 @@ Monolithic::updateSystem(const vector_type& displacement)
     //                                     *this->M_dispFluidMeshOld);
     *this->M_un                = displacement;
     this->fluid().updateUn(*this->M_un);
-    M_rhs.reset(new vector_type(*M_monolithicMap));
+    *M_rhs*=0;
+    *M_rhsFull*=0;
+    this->M_fluid->resetStab();
 //    this->setDispSolid();
 }
 
@@ -485,9 +499,10 @@ Monolithic::monolithicToFluid(const vector_type& disp, vector_type& dispFluid)
         {
             vector_type dispUnique(disp, Unique);
             monolithicToFluid(dispUnique, dispFluid);
+            dispFluid = dispUnique;
             return;
         }
-       if (dispFluid.getMaptype() == Unique)
+    //if (dispFluid.getMaptype() == Unique)
            /*        {
             vector_type  dispFluidRep(dispFluid.getMap(), Repeated);
             monolithicToFluid(disp, dispFluidRep);
@@ -531,7 +546,6 @@ Monolithic::monolithicToInterface(vector_type& lambdaSolid, const vector_type& d
        vector_type subDisp(subMap, Unique);
        subDisp.subset(disp, M_offset);
        lambdaSolid=subDisp;
-
 }
 
 
@@ -548,6 +562,7 @@ Monolithic::monolithicToSolid(const vector_type& disp, vector_type& dispSolid )/
         {
             vector_type  dispSolidUn(dispSolid.getMap(), Unique);
             monolithicToSolid( disp,  dispSolidUn);
+            dispSolid=dispSolidUn;
             return;
         }
 
@@ -569,9 +584,9 @@ Monolithic::monolithicToSolid(const vector_type& disp, vector_type& dispSolid )/
 
 void Monolithic::setDispSolid(const vector_type &sol)
 {
-    vector_type disp(*this->M_monolithicMap);
+    vector_type disp(*M_monolithicMap);
     monolithicToSolid(sol, disp);
-    this->M_solid->setDispSolid(disp);
+    this->M_solid->setDisp(disp);
 }
 
 void
@@ -583,10 +598,10 @@ Monolithic::evalResidual( vector_type&       res,
 
     Chrono chronoFluid, chronoSolid, chronoInterface;
 
-    setDispSolid(disp);
 
     if((iter==0)|| !this->M_dataFluid->isSemiImplicit())
         {
+            setDispSolid(disp);
             //            vector_ptrtype meshDeltaDisp;//is the meshDispOld used to calculate deltaDisp
             vector_type lambdaFluid(this->M_interfaceMap, Unique);
 
@@ -629,29 +644,32 @@ Monolithic::evalResidual( vector_type&       res,
 
             //            M_beta->GlobalAssemble();
 
-            M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs );//here it assembles the fluid matrices
+            M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs/*, M_monolithicMatrix*/ );//here it assembles the fluid matrices
+            M_monolithicMatrix.reset(new matrix_type(*M_monolithicMap));
 
             // coupling matrices assebling
 
-            M_monolithicMatrix.reset(new matrix_type(*M_monolithicMap/*, this->M_fluid->getMeanNumEntries()*/));
+            M_fluid->getFluidMatrix( *M_monolithicMatrix );
 
             M_fluid->updateStab( *M_monolithicMatrix);//applies the stabilization terms
 
-            M_fluid->getFluidMatrix( *M_monolithicMatrix);
-            this->M_solid->updateMatrix( *M_monolithicMatrix);
-
+            this->updateMatrix( *M_monolithicMatrix);
+            M_monolithicMatrix->GlobalAssemble();
+            //M_epetraWorldComm->Barrier();
             if(iter==0)
                 {
                     M_nbEval = 0; // new time step
-                    this->M_solid->resetPrec();
+                    M_resetPrec=true;
                     *this->M_rhs               += M_fluid->matrMass()*M_bdf->time_der( M_dataFluid->timestep() );
                     couplingRhs(this->M_rhs, M_un);
                     this->M_solid->updateStuff();
-                    this->M_solid->updateSystem(*this->M_rhs);
+                    updateSolidSystem(this->M_rhs);
                     //M_rhs.reset(new vector_type(*M_monolithicMap));
                 }
-                this->M_solid->evalResidual( *M_BCh_u, *M_BCh_d, disp, M_rhs, res, M_diagonalScale);
-            if(M_DDBlockPrec>=2)
+            M_rhsFull.reset(new vector_type(*M_rhs));
+            evalResidual( *M_BCh_u, *M_BCh_d, disp, M_rhsFull, res, M_diagonalScale);
+
+            if(M_DDBlockPrec>=2 && M_DDBlockPrec<5)
             {
                 if(!M_robinCoupling.get())
                     {
@@ -659,24 +677,23 @@ Monolithic::evalResidual( vector_type&       res,
                         robinCoupling(M_robinCoupling, M_alphaf, M_alphas);
                         M_robinCoupling->GlobalAssemble();
                     }
-                this->M_solid->applyPreconditioner(M_robinCoupling);
+                this->applyPreconditioner(M_robinCoupling);
                 //this->M_solid->evalResidual( disp, res, false);
             }
+
             if(M_DDBlockPrec<5)
-                    M_bigPrecPtr.reset(new matrix_type(*M_monolithicMap/*, M_solid->getMatrixPtr()->getMeanNumEntries()*/));
+                M_bigPrecPtr.reset(new matrix_type(*M_monolithicMap/*, M_solid->getMatrixPtr()->getMeanNumEntries()*/));
+
             M_nbEval++ ;
-
-
         }
     //else
     //{
-    this->M_solid->evalResidual( disp, /* M_rhs,*/ res, false);
+    evalResidual( disp,  M_rhsFull, res, false);
             //}
 }
 
 void Monolithic::shapeDerivatives(vector_ptrtype rhs, vector_ptrtype meshDeltaDisp, const vector_type& sol)
 {
-
     double alpha = 1./M_dataFluid->timestep();
     vector_type derVeloFluidMsh(*meshDeltaDisp, Repeated);
     derVeloFluidMsh *= alpha;
@@ -704,7 +721,7 @@ void Monolithic::shapeDerivatives(vector_ptrtype rhs, vector_ptrtype meshDeltaDi
     //    vfm.spy("velFluidMesh");
     //    dvfm.spy("derVelFluidMesh");
 
-    M_fluid->updateLinearSystem(*M_solid->getMatrixPtr(),
+    M_fluid->updateLinearSystem(*M_monolithicMatrix,
                                 0.,
                                 un,//un
                                 uk,//uk
@@ -720,217 +737,299 @@ void Monolithic::shapeDerivatives(vector_ptrtype rhs, vector_ptrtype meshDeltaDi
     std::cout<<"rhs lin no bc : "<<M_fluid->rhsLinNoBC().NormInf()<<std::endl;
 }
 
+void Monolithic::
+evalResidual( const vector_type& sol,const vector_ptrtype& rhs, vector_type& res, bool diagonalScaling)
+{
+    if(diagonalScaling)
+        diagonalScale(*rhs, M_monolithicMatrix);
+    res = *M_monolithicMatrix*sol;//solid->getMatrixPtr()*sol;
+    res -= *rhs;
+    //    rhs->spy("rhsAfter");
+    // Ax-b
+}
+
+void Monolithic::
+evalResidual( fluid_bchandler_raw_type& bchFluid, solid_bchandler_raw_type& bchSolid, const vector_type& sol, vector_ptrtype& rhs, vector_type& res, bool diagonalScaling, matrix_ptrtype preconditioner)
+{
+    //M_solid->getMatrixPtr()->GlobalAssemble();
+    M_monolithicMatrix->GlobalAssemble();
+    matrix_ptrtype tmpMatPtr(new matrix_type(*M_monolithicMatrix));
+    tmpMatPtr->GlobalAssemble();
+    //preconditioner->GlobalAssemble();
+    //M_solid->getMatrixPtr().reset(new matrix_type(M_solid->getMap()));
+    M_monolithicMatrix.reset(new matrix_type(M_solid->getMap()));
+    int err = EpetraExt::MatrixMatrix::Multiply( preconditioner->getEpetraMatrix(), false, tmpMatPtr->getEpetraMatrix(), false, M_monolithicMatrix->getEpetraMatrix());
+    *rhs = (*preconditioner)*(*rhs);
+    evalResidual( bchFluid, bchSolid, sol, rhs, res, diagonalScaling);
+}
+
+void Monolithic::
+evalResidual( fluid_bchandler_raw_type& bchFluid, solid_bchandler_raw_type& bchSolid, const vector_type& sol, vector_ptrtype& rhs, vector_type& res, bool diagonalScaling)
+{
+    vector_type rhsFullSolid(*rhs, Unique); // ignoring non-local entries, Otherwise they are summed up lately
+    //    applyBoundaryConditions( *M_solid->getMatrixPtr(), rhsFullSolid, bchSolid, M_solid->offset() );
+        if(M_solid->offset())
+            bchSolid.setOffset(M_solid->offset());
+        if ( !bchSolid.bdUpdateDone() )
+            bchSolid.bdUpdate( *M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
+
+        bcManage( *M_monolithicMatrix, rhsFullSolid, *M_dFESpace->mesh(), M_dFESpace->dof(), bchSolid, M_dFESpace->feBd(), 1.,
+                  dataSolid().time() );
+
+    // matrix is GlobalAssembled by  bcManage
+
+    if ( !bchFluid.bdUpdateDone() )
+        bchFluid.bdUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
+
+    //vector_type rhsFull(rhsFullSolid, Unique);
+    vector_type rhsFull(rhsFullSolid);
+    bcManage( *M_monolithicMatrix, rhsFull, *M_uFESpace->mesh(), M_uFESpace->dof(), bchFluid, M_uFESpace->feBd(), 1.,
+              dataSolid().time() );
+
+    M_solid->getDisplayer().leaderPrint("rhs norm = ", rhs->NormInf() );
+
+    *rhs = rhsFull;
+
+    evalResidual(sol,rhs, res, diagonalScaling);
+}
+
 
 void  Monolithic::solveJac(vector_type         &_step,
                            const vector_type   &_res,
                            const double         /*_linearRelTol*/)
 {
 
-    std::cout << "solveJac: NormInf res " << _res.NormInf() << std::endl;
-    _step *= 0.;
+    M_solid->getDisplayer().leaderPrint("solveJac: NormInf res ", _res.NormInf());
+    //_step *= 0.;
 
-    std::cout << "Solving Jacobian system... " << std::endl;
+     M_solid->getDisplayer().leaderPrint("Solving Jacobian system... \n" );
     //    M_epetraWorldComm->Barrier();
 
-    //    matrix_ptrtype M_bigPrecPtr;
-    //if(M_recomputePrec && !M_splitPrec)
-    //{
+     //    matrix_ptrtype bigPrecPtr;
 
-
-            if(this->M_fluid->getIsDiagonalBlockPrec()==true)
-                {
-
-                    this->M_fluid->setBlockPreconditioner(M_bigPrecPtr);
-                    ////*M_bigPrecPtr += *this->M_fluid->getBlockPrecPtr();
-                    this->M_fluid->updateStab(*M_bigPrecPtr);
-                    //Real entry(1.0);
-                    this->M_solid->setBlockPreconditioner(M_bigPrecPtr);
-                    addDiagonalEntries(M_entry, M_bigPrecPtr, M_interfaceMap, M_solidAndFluidDim);
-                    if(!M_isDiagonalBlockPrec)
-                        couplingMatrix(M_bigPrecPtr, true);
-                    M_bigPrecPtr->GlobalAssemble();
-                }
-            else
-                {
-                    switch(M_DDBlockPrec)
-                        {
-                        case 1:
+    if(this->M_fluid->getIsDiagonalBlockPrec()==true /*M_diagonalBlockPreconditioner*/)
+        {
+            M_bigPrecPtr.reset(new matrix_type(*M_monolithicMap/*, M_solid->getMatrixPtr()->getMeanNumEntries()*/));
+            this->M_fluid->setBlockPreconditioner(M_bigPrecPtr);
+                //            *bigPrecPtr += *this->M_fluid->getBlockPrecPtr();
+            this->M_fluid->updateStab(*M_bigPrecPtr);
+            Real entry(1.0);
+            this->setBlockPreconditioner(M_bigPrecPtr);
+            addDiagonalEntries(entry,M_bigPrecPtr, M_interfaceMap);
+            //if(!M_isDiagonalBlockPrec)
+            couplingMatrix(M_bigPrecPtr);
+            M_bigPrecPtr->GlobalAssemble();
+        }
+    else
+        {
+            if( !M_reusePrec || M_resetPrec )
+                        switch(M_DDBlockPrec)
                             {
-                                //M_bigPrecPtr.reset(new matrix_type(*M_monolithicMap/*, M_solid->getMatrixPtr()->getMeanNumEntries()*/));
-                            this->M_fluid->updateStab( *M_bigPrecPtr);//applies the stabilization terms
-                            couplingMatrix(M_bigPrecPtr, false);
-                            this->M_fluid->getFluidMatrix( *M_bigPrecPtr);
-                            this->M_solid->setBlockPreconditioner(M_bigPrecPtr);
-                            //this->M_solid->setFullPreconditioner(M_bigPrecPtr);
-                            //std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
-                            //for(short i=0; i<nDimensions; ++i)
-                            //    zeroBlock(M_bigPrecPtr, *M_numerationInterface, locDofMap, M_offset + i*M_dFESpace->dof().numTotalDof(), i*M_interface+M_solidAndFluidDim);//(4, 5)
-                            ////Real entry(0.0);
-
-                            addDiagonalEntries(M_entry,M_bigPrecPtr, M_interfaceMap, M_solidAndFluidDim);
-                            M_bigPrecPtr->GlobalAssemble();}
-                            break;
-                        case 2:
-                            {
-//                                 if(false && !M_robinCoupling.get())
-//                                 {
-//                                     ////Real factor=1/(1-M_alphaf*M_alphas);
-//                                     M_robinCoupling.reset( new matrix_type(*M_monolithicMap));
-//                                     robinCoupling(M_robinCoupling, M_alphaf, M_alphas);
-//                                     ////addDiagonalEntries((Real)1.0, M_robinCoupling, *M_monolithicMap, (UInt)0);
-//                                     M_robinCoupling->GlobalAssemble();
-//                                     M_robinCouplingInv.reset( new matrix_type(*M_monolithicMap/**M_robinCoupling*/));
-//                                     robinCouplingInv(M_robinCouplingInv, M_alphaf, M_alphas);
-
-//                                     ////addDiagonalEntries((Real)1.0/factor, M_robinCouplingInv, *M_fluidInterfaceMap, (UInt)0, true);
-//                                     ////addDiagonalEntries((Real)1.0/factor, M_robinCouplingInv, *M_solidInterfaceMap, M_offset, true);
-//                                     M_robinCouplingInv->GlobalAssemble();
-//                                     //TEST:
-//                                     matrix_ptrtype identity(new matrix_type(*M_monolithicMap));
-//                                     //addDiagonalEntries(1., identity, *M_monolithicMap, 0.);
-//                                     //identity->GlobalAssemble();
-//                                     //identity->spy("id");
-//                                     EpetraExt::MatrixMatrix::Multiply( M_robinCouplingInv->getEpetraMatrix(), false, M_robinCoupling->getEpetraMatrix(), false, identity->getEpetraMatrix());
-//                                     identity->spy("identity");
-//                                     //END TEST
-//                                 }
-//                             M_robinCoupling->spy("robinCoupling");
-//                             M_robinCouplingInv->spy("robinCouplingInv");
-//                             matrix_ptrtype tmpPrecPtr(new matrix_type(*M_monolithicMap));
-//                             M_bigPrecPtr.reset(new matrix_type(*M_monolithicMap));
-//                             this->M_solid->setFullPreconditioner(tmpPrecPtr);
-//                             tmpPrecPtr->getEpetraMatrix().FillComplete();
-//                             int err = EpetraExt::MatrixMatrix::Multiply( M_robinCoupling->getEpetraMatrix(), false, tmpPrecPtr->getEpetraMatrix(), false, M_bigPrecPtr->getEpetraMatrix()/*, false*/);
-//                             M_bigPrecPtr->spy("beforZeroBlock");
-
-//                             tmpPrecPtr.reset(new matrix_type(*M_bigPrecPtr));
-//                             //tmpPrecPtr->zeroBlock( 0, M_offset, M_offset, M_solidAndFluidDim);
-//                             std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
-//                             for(short i=0; i<nDimensions; ++i)
-//                                 {
-//                                     //zeroBlock(tmpPrecPtr, *M_numerationInterface, locDofMap, i*M_uFESpace->dof().numTotalDof(), i*M_dFESpace->dof().numTotalDof()+M_offset);
-//                                     //zeroBlock(tmpPrecPtr, *M_numerationInterface, locDofMap, i*M_dFESpace->dof().numTotalDof()+M_offset, i*M_uFESpace->dof().numTotalDof());
-//                                     ////M_bigPrecPtr->zeroBlock(locDofMap, i*M_uFESpace->dof().numTotalDof(), i*M_dFESpace->dof().numTotalDof()+M_offset);
-//                                     //zeroBlock(tmpPrecPtr, *M_numerationInterface, locDofMap, i*M_uFESpace->dof().numTotalDof(), i*M_interface+M_solidAndFluidDim);
-//                                     //zeroBlock(tmpPrecPtr, *M_numerationInterface, locDofMap, M_offset + i*M_dFESpace->dof().numTotalDof(), i*M_interface+M_solidAndFluidDim);
-//                                     ////M_bigPrecPtr->zeroBlock(*M_numerationInterface, locDofMap, i*M_uFESpace->dof().numTotalDof(), i*M_interface+M_solidAndFluidDim);
-//                                     //zeroBlock(tmpPrecPtr, *M_numerationInterface, locDofMap, M_solidAndFluidDim + i*M_interface, M_offset + i*M_dFESpace->dof().numTotalDof());
-
-//                                 }
-//                             tmpPrecPtr->GlobalAssemble();
-//                             M_bigPrecPtr->GlobalAssemble();
-//                             ////tmpPrecPtr->getEpetraMatrix().FillComplete();
-//                             tmpPrecPtr->spy("afterZeroBlock");
-//                             M_bigPrecPtr.reset(new matrix_type(*tmpPrecPtr/**M_monolithicMap*/));
-//                             ////M_bigPrecPtr.reset(new matrix_type(*tmpPrecPtr));
-//                             //err = EpetraExt::MatrixMatrix::Multiply( M_robinCouplingInv->getEpetraMatrix(), false, tmpPrecPtr->getEpetraMatrix(), false, M_bigPrecPtr->getEpetraMatrix());
-//                             M_bigPrecPtr->GlobalAssemble();
-//                             //M_solid->applyPreconditioner(*(const_cast<vector_type*>(&_res)), M_robinCoupling);
-
-                                //M_bigPrecPtr.reset(new matrix_type(*M_monolithicMap/*, M_solid->getMatrixPtr()->getMeanNumEntries()*/));
-                                this->M_solid->setFullPreconditioner(M_bigPrecPtr);
-                                //Real entry(0./*1.0e-5*/);
-                                addDiagonalEntries(M_entry,M_bigPrecPtr, M_interfaceMap, M_solidAndFluidDim);
-                                M_bigPrecPtr->GlobalAssemble();
-                            }
-                            break;
-                        case 3:
-                            {if(false && !M_robinCoupling.get())
+                            case 1:
                                 {
-                                    M_robinCoupling.reset( new matrix_type(*M_monolithicMap));
-                                    robinCoupling(M_robinCoupling, M_alphaf, M_alphas);
-                                    M_robinCoupling->GlobalAssemble();
-                                }
-                            //matrix_ptrtype tmpPrecPtr(new matrix_type(*M_monolithicMap));
-                            //M_bigPrecPtr.reset(new matrix_type(*M_monolithicMap));
-                            this->M_solid->setFullPreconditioner(M_bigPrecPtr/*tmpPrecPtr*/);
+                                    //M_bigPrecPtr.reset(new matrix_type(*M_monolithicMap/*, M_solid->getMatrixPtr()->getMeanNumEntries()*/));
+                                    this->M_fluid->getFluidMatrix( *M_bigPrecPtr);
+                                    this->M_fluid->updateStab( *M_bigPrecPtr);//applies the stabilization terms
+                                    if(!M_bigPrecPtr->getEpetraMatrix().Filled())
+                                    {
+                                        couplingMatrix(M_bigPrecPtr, false);
+                                        addDiagonalEntries(M_entry,M_bigPrecPtr, M_interfaceMap, M_solidAndFluidDim);
+                                    }
+                                    else
+                                        this->M_solid->getDisplayer().leaderPrint("ERROR: probably the tolerance fixed for Newton is too low. \n");
+                                    this->setBlockPreconditioner(M_bigPrecPtr);
+                                    //this->M_solid->setFullPreconditioner(M_bigPrecPtr);
+                                    //std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
+                                    //for(short i=0; i<nDimensions; ++i)
+                                    //    zeroBlock(M_bigPrecPtr, *M_numerationInterface, locDofMap, M_offset + i*M_dFESpace->dof().numTotalDof(), i*M_interface+M_solidAndFluidDim);//(4, 5)
+                                    ////Real entry(0.0);
 
-
-                            //this->M_fluid->setBlockPreconditioner(M_bigPrecPtr);
-                            ////*M_bigPrecPtr += *this->M_fluid->getBlockPrecPtr();
-                            //this->M_fluid->updateStab(*M_bigPrecPtr);
-                            //Real entry(1.0);
-                            //this->M_solid->setBlockPreconditioner(M_bigPrecPtr);
-                            //addDiagonalEntries(M_entry, M_bigPrecPtr, M_interfaceMap, M_solidAndFluidDim);
-
-
-                            //tmpPrecPtr->getEpetraMatrix().FillComplete();
-                            //int err = EpetraExt::MatrixMatrix::Multiply( M_robinCoupling->getEpetraMatrix(), false, tmpPrecPtr->getEpetraMatrix(), false, M_bigPrecPtr->getEpetraMatrix()/*, false*/);
-                            //M_bigPrecPtr->GlobalAssemble();
-                            //M_bigPrecPtr->spy("beforZeroBlock");
-
-                            //tmpPrecPtr.reset(new matrix_type(*M_bigPrecPtr));
-                            //tmpPrecPtr->zeroBlock( 0, M_offset, M_offset, M_solidAndFluidDim);
-                            std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
-                            for(short i=0; i<nDimensions; ++i)
+                                    M_bigPrecPtr->GlobalAssemble();}
+                                break;
+                            case 2:
                                 {
-                                    zeroBlock(M_bigPrecPtr/*tmpPrecPtr*/, *M_numerationInterface, locDofMap, i*M_uFESpace->dof().numTotalDof(), i*M_dFESpace->dof().numTotalDof()+M_offset); //(2, 4)
-                                    zeroBlock(M_bigPrecPtr/*tmpPrecPtr*/, *M_numerationInterface, locDofMap, i*M_uFESpace->dof().numTotalDof(), i*M_interface+M_solidAndFluidDim);//(2, 5)
+                                    //                                 if(false && !M_robinCoupling.get())
+                                    //                                 {
+                                    //                                     ////Real factor=1/(1-M_alphaf*M_alphas);
+                                    //                                     M_robinCoupling.reset( new matrix_type(*M_monolithicMap));
+                                    //                                     robinCoupling(M_robinCoupling, M_alphaf, M_alphas);
+                                    //                                     ////addDiagonalEntries((Real)1.0, M_robinCoupling, *M_monolithicMap, (UInt)0);
+                                    //                                     M_robinCoupling->GlobalAssemble();
+                                    //                                     M_robinCouplingInv.reset( new matrix_type(*M_monolithicMap/**M_robinCoupling*/));
+                                    //                                     robinCouplingInv(M_robinCouplingInv, M_alphaf, M_alphas);
+
+                                    //                                     ////addDiagonalEntries((Real)1.0/factor, M_robinCouplingInv, *M_fluidInterfaceMap, (UInt)0, true);
+                                    //                                     ////addDiagonalEntries((Real)1.0/factor, M_robinCouplingInv, *M_solidInterfaceMap, M_offset, true);
+                                    //                                     M_robinCouplingInv->GlobalAssemble();
+                                    //                                     //TEST:
+                                    //                                     matrix_ptrtype identity(new matrix_type(*M_monolithicMap));
+                                    //                                     //addDiagonalEntries(1., identity, *M_monolithicMap, 0.);
+                                    //                                     //identity->GlobalAssemble();
+                                    //                                     //identity->spy("id");
+                                    //                                     EpetraExt::MatrixMatrix::Multiply( M_robinCouplingInv->getEpetraMatrix(), false, M_robinCoupling->getEpetraMatrix(), false, identity->getEpetraMatrix());
+                                    //                                     identity->spy("identity");
+                                    //                                     //END TEST
+                                    //                                 }
+                                    //                             M_robinCoupling->spy("robinCoupling");
+                                    //                             M_robinCouplingInv->spy("robinCouplingInv");
+                                    //                             matrix_ptrtype tmpPrecPtr(new matrix_type(*M_monolithicMap));
+                                    //                             M_bigPrecPtr.reset(new matrix_type(*M_monolithicMap));
+                                    //                             this->M_solid->setFullPreconditioner(tmpPrecPtr);
+                                    //                             tmpPrecPtr->getEpetraMatrix().FillComplete();
+                                    //                             int err = EpetraExt::MatrixMatrix::Multiply( M_robinCoupling->getEpetraMatrix(), false, tmpPrecPtr->getEpetraMatrix(), false, M_bigPrecPtr->getEpetraMatrix()/*, false*/);
+                                    //                             M_bigPrecPtr->spy("beforZeroBlock");
+
+                                    //                             tmpPrecPtr.reset(new matrix_type(*M_bigPrecPtr));
+                                    //                             //tmpPrecPtr->zeroBlock( 0, M_offset, M_offset, M_solidAndFluidDim);
+                                    //                             std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
+                                    //                             for(short i=0; i<nDimensions; ++i)
+                                    //                                 {
+                                    //                                     //zeroBlock(tmpPrecPtr, *M_numerationInterface, locDofMap, i*M_uFESpace->dof().numTotalDof(), i*M_dFESpace->dof().numTotalDof()+M_offset);
+                                    //                                     //zeroBlock(tmpPrecPtr, *M_numerationInterface, locDofMap, i*M_dFESpace->dof().numTotalDof()+M_offset, i*M_uFESpace->dof().numTotalDof());
+                                    //                                     ////M_bigPrecPtr->zeroBlock(locDofMap, i*M_uFESpace->dof().numTotalDof(), i*M_dFESpace->dof().numTotalDof()+M_offset);
+                                    //                                     //zeroBlock(tmpPrecPtr, *M_numerationInterface, locDofMap, i*M_uFESpace->dof().numTotalDof(), i*M_interface+M_solidAndFluidDim);
+                                    //                                     //zeroBlock(tmpPrecPtr, *M_numerationInterface, locDofMap, M_offset + i*M_dFESpace->dof().numTotalDof(), i*M_interface+M_solidAndFluidDim);
+                                    //                                     ////M_bigPrecPtr->zeroBlock(*M_numerationInterface, locDofMap, i*M_uFESpace->dof().numTotalDof(), i*M_interface+M_solidAndFluidDim);
+                                    //                                     //zeroBlock(tmpPrecPtr, *M_numerationInterface, locDofMap, M_solidAndFluidDim + i*M_interface, M_offset + i*M_dFESpace->dof().numTotalDof());
+
+                                    //                                 }
+                                    //                             tmpPrecPtr->GlobalAssemble();
+                                    //                             M_bigPrecPtr->GlobalAssemble();
+                                    //                             ////tmpPrecPtr->getEpetraMatrix().FillComplete();
+                                    //                             tmpPrecPtr->spy("afterZeroBlock");
+                                    //                             M_bigPrecPtr.reset(new matrix_type(*tmpPrecPtr/**M_monolithicMap*/));
+                                    //                             ////M_bigPrecPtr.reset(new matrix_type(*tmpPrecPtr));
+                                    //                             //err = EpetraExt::MatrixMatrix::Multiply( M_robinCouplingInv->getEpetraMatrix(), false, tmpPrecPtr->getEpetraMatrix(), false, M_bigPrecPtr->getEpetraMatrix());
+                                    //                             M_bigPrecPtr->GlobalAssemble();
+                                    //                             //M_solid->applyPreconditioner(*(const_cast<vector_type*>(&_res)), M_robinCoupling);
+
+                                    //M_bigPrecPtr.reset(new matrix_type(*M_monolithicMap/*, M_solid->getMatrixPtr()->getMeanNumEntries()*/));
+                                    this->setFullPreconditioner(M_bigPrecPtr);
+                                    //Real entry(0./*1.0e-5*/);
+                                    //addDiagonalEntries(M_entry,M_bigPrecPtr, M_interfaceMap, M_solidAndFluidDim);
+                                    M_bigPrecPtr->GlobalAssemble();
                                 }
-                            //tmpPrecPtr->GlobalAssemble();
-                            //M_bigPrecPtr->GlobalAssemble();
-                            ////tmpPrecPtr->getEpetraMatrix().FillComplete();
-                            //tmpPrecPtr->spy("afterZeroBlock");
-                            //M_bigPrecPtr.reset(new matrix_type(*tmpPrecPtr/**M_monolithicMap*/));
-                            //M_bigPrecPtr.reset(new matrix_type(*tmpPrecPtr));
-                            //err = EpetraExt::MatrixMatrix::Multiply( M_robinCouplingInv->getEpetraMatrix(), false, tmpPrecPtr->getEpetraMatrix(), false, M_bigPrecPtr->getEpetraMatrix());
-                            M_bigPrecPtr->GlobalAssemble();
-                            //M_solid->applyPreconditioner(*(const_cast<vector_type*>(&_res)), M_robinCoupling);
-                            }
-                            break;
-                        case 4:
-                            {
+                                break;
+                            case 3:
+                                {if(false && !M_robinCoupling.get())
+                                    {
+                                        M_robinCoupling.reset( new matrix_type(*M_monolithicMap));
+                                        robinCoupling(M_robinCoupling, M_alphaf, M_alphas);
+                                        M_robinCoupling->GlobalAssemble();
+                                    }
+                                //matrix_ptrtype tmpPrecPtr(new matrix_type(*M_monolithicMap));
                                 //M_bigPrecPtr.reset(new matrix_type(*M_monolithicMap));
-                                this->M_solid->setFullPreconditioner(M_bigPrecPtr/*tmpPrecPtr*/);
+                                this->setFullPreconditioner(M_bigPrecPtr/*tmpPrecPtr*/);
 
 
-//                             this->M_fluid->updateStab(*M_bigPrecPtr);
-//                             this->M_fluid->getFluidMatrix( *M_bigPrecPtr);
-//                             this->M_solid->setBlockPreconditioner(M_bigPrecPtr);
-//                             addDiagonalEntries(M_entry, M_bigPrecPtr, M_interfaceMap, M_solidAndFluidDim);
-//                             couplingMatrix(M_bigPrecPtr, true);
-//                             M_bigPrecPtr->GlobalAssemble();
-//                             matrix_type tmpMatrix(*M_monolithicMap);
-//                             //tmpMatrix.GlobalAssemble();
-//                             EpetraExt::MatrixMatrix::Multiply( M_robinCoupling->getEpetraMatrix(), false, M_bigPrecPtr->getEpetraMatrix(), false, tmpMatrix.getEpetraMatrix());
-//                             M_bigPrecPtr.reset(new matrix_type(tmpMatrix));
-//                             M_bigPrecPtr->GlobalAssemble();
+                                //this->M_fluid->setBlockPreconditioner(M_bigPrecPtr);
+                                ////*M_bigPrecPtr += *this->M_fluid->getBlockPrecPtr();
+                                //this->M_fluid->updateStab(*M_bigPrecPtr);
+                                //Real entry(1.0);
+                                //this->M_solid->setBlockPreconditioner(M_bigPrecPtr);
+                                //addDiagonalEntries(M_entry, M_bigPrecPtr, M_interfaceMap, M_solidAndFluidDim);
 
 
+                                //tmpPrecPtr->getEpetraMatrix().FillComplete();
+                                //int err = EpetraExt::MatrixMatrix::Multiply( M_robinCoupling->getEpetraMatrix(), false, tmpPrecPtr->getEpetraMatrix(), false, M_bigPrecPtr->getEpetraMatrix()/*, false*/);
+                                //M_bigPrecPtr->GlobalAssemble();
+                                //M_bigPrecPtr->spy("beforZeroBlock");
+
+                                //tmpPrecPtr.reset(new matrix_type(*M_bigPrecPtr));
+                                //tmpPrecPtr->zeroBlock( 0, M_offset, M_offset, M_solidAndFluidDim);
                                 std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
                                 for(short i=0; i<nDimensions; ++i)
-                                {
-                                    //zeroBlock(M_bigPrecPtr, *M_numerationInterface, locDofMap, i*M_uFESpace->dof().numTotalDof(), i*M_dFESpace->dof().numTotalDof()+M_offset);//(2, 4)
-                                    //zeroBlock(M_bigPrecPtr, *M_numerationInterface, locDofMap, i*M_dFESpace->dof().numTotalDof()+M_offset, i*M_uFESpace->dof().numTotalDof());//(2, 5)
-                                    //zeroBlock(M_bigPrecPtr, *M_numerationInterface, locDofMap, i*M_uFESpace->dof().numTotalDof(), i*M_interface+M_solidAndFluidDim);//(4, 2)
-                                    zeroBlock(M_bigPrecPtr, *M_numerationInterface, locDofMap, M_offset + i*M_dFESpace->dof().numTotalDof(), i*M_interface+M_solidAndFluidDim);//(4, 5)
-                                }
-                            M_bigPrecPtr->GlobalAssemble();
-                            }
-                            break;
-                        case 5:
-                            {
-                            }
-                            break;
-                        default:
-                            {
-                                M_bigPrecPtr.reset(new matrix_type(*M_monolithicMap/*, M_solid->getMatrixPtr()->getMeanNumEntries()*/));
-                                this->M_solid->setFullPreconditioner(M_bigPrecPtr);
-                                //Real entry(0./*1.0e-5*/);
-                                addDiagonalEntries(M_entry,M_bigPrecPtr, M_interfaceMap, M_solidAndFluidDim);
+                                    {
+                                        zeroBlock(M_bigPrecPtr/*tmpPrecPtr*/, *M_numerationInterface, locDofMap, i*M_uFESpace->dof().numTotalDof(), i*M_dFESpace->dof().numTotalDof()+M_offset); //(2, 4)
+                                        zeroBlock(M_bigPrecPtr/*tmpPrecPtr*/, *M_numerationInterface, locDofMap, i*M_uFESpace->dof().numTotalDof(), i*M_interface+M_solidAndFluidDim);//(2, 5)
+                                    }
+                                //tmpPrecPtr->GlobalAssemble();
+                                //M_bigPrecPtr->GlobalAssemble();
+                                ////tmpPrecPtr->getEpetraMatrix().FillComplete();
+                                //tmpPrecPtr->spy("afterZeroBlock");
+                                //M_bigPrecPtr.reset(new matrix_type(*tmpPrecPtr/**M_monolithicMap*/));
+                                //M_bigPrecPtr.reset(new matrix_type(*tmpPrecPtr));
+                                //err = EpetraExt::MatrixMatrix::Multiply( M_robinCouplingInv->getEpetraMatrix(), false, tmpPrecPtr->getEpetraMatrix(), false, M_bigPrecPtr->getEpetraMatrix());
                                 M_bigPrecPtr->GlobalAssemble();
-                            }
-                            break;
-                        }
-                }
-            //}
-            std::cout<<"preconditioner assembled "<<std::endl;
+                                //M_solid->applyPreconditioner(*(const_cast<vector_type*>(&_res)), M_robinCoupling);
+                                }
+                                break;
+                            case 4:
+                                {
+                                    //M_bigPrecPtr.reset(new matrix_type(*M_monolithicMap));
+                                    this->setFullPreconditioner(M_bigPrecPtr/*tmpPrecPtr*/);
+
+
+                                    //                             this->M_fluid->updateStab(*M_bigPrecPtr);
+                                    //                             this->M_fluid->getFluidMatrix( *M_bigPrecPtr);
+                                    //                             this->M_solid->setBlockPreconditioner(M_bigPrecPtr);
+                                    //                             addDiagonalEntries(M_entry, M_bigPrecPtr, M_interfaceMap, M_solidAndFluidDim);
+                                    //                             couplingMatrix(M_bigPrecPtr, true);
+                                    //                             M_bigPrecPtr->GlobalAssemble();
+                                    //                             matrix_type tmpMatrix(*M_monolithicMap);
+                                    //                             //tmpMatrix.GlobalAssemble();
+                                    //                             EpetraExt::MatrixMatrix::Multiply( M_robinCoupling->getEpetraMatrix(), false, M_bigPrecPtr->getEpetraMatrix(), false, tmpMatrix.getEpetraMatrix());
+                                    //                             M_bigPrecPtr.reset(new matrix_type(tmpMatrix));
+                                    //                             M_bigPrecPtr->GlobalAssemble();
+                                    M_epetraComm->Barrier();
+                                    M_bigPrecPtr->GlobalAssemble();
+
+                                    std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
+                                    for(short i=0; i<nDimensions; ++i)
+                                        {
+                                            //zeroBlock(M_bigPrecPtr, *M_numerationInterface, locDofMap, i*M_uFESpace->dof().numTotalDof(), i*M_dFESpace->dof().numTotalDof()+M_offset);//(2, 4)
+                                            //zeroBlock(M_bigPrecPtr, *M_numerationInterface, locDofMap, i*M_dFESpace->dof().numTotalDof()+M_offset, i*M_uFESpace->dof().numTotalDof());//(2, 5)
+                                            //zeroBlock(M_bigPrecPtr, *M_numerationInterface, locDofMap, i*M_uFESpace->dof().numTotalDof(), i*M_interface+M_solidAndFluidDim);//(4, 2)
+                                            zeroBlock(M_bigPrecPtr, *M_numerationInterface, locDofMap, M_offset + i*M_dFESpace->dof().numTotalDof(), i*M_interface+M_solidAndFluidDim);//(4, 5)
+                                        }
+                                }
+                                break;
+                            case 5:
+                                {
+                                }
+                                break;
+                            default:
+                                {
+                                    M_bigPrecPtr.reset(new matrix_type(*M_monolithicMap/*, M_solid->getMatrixPtr()->getMeanNumEntries()*/));
+                                    Real entry(0./*1.0e-5*/);
+                                    for(short i=0; i<nDimensions; ++i)
+                                        //addDiagonalEntries(M_entry,M_bigPrecPtr, M_dofStructureToHarmonicExtension->locDofMap(), M_solidAndFluidDim+i*M_interface, false);
+                                    this->setFullPreconditioner(M_bigPrecPtr);
+                                    //for(short i=0; i<nDimensions; ++i)
+                                    //addDiagonalEntries(entry,M_bigPrecPtr, M_dofStructureToHarmonicExtension->locDofMap(), M_solidAndFluidDim+i*M_interface, true);
+                                }
+                                break;
+                             }
+        }
+//             if(M_isDiagonalBlockPrec)
+//                 {
+//                     bigPrecPtr.reset(new matrix_type(M_monolithicMap/*, M_solid->getMatrixPtr()->getMeanNumEntries()*/));
+//                     this->M_fluid->updateStab( *bigPrecPtr);//applies the stabilization terms
+//                     this->M_fluid->getFluidMatrix( *bigPrecPtr);
+//                     this->setBlockPreconditioner(bigPrecPtr);
+//                     Real entry(1.0);
+//                     addDiagonalEntries(entry,bigPrecPtr);
+//                     bigPrecPtr->GlobalAssemble();
+//                 }
+//             else
+//                 {
+//                     bigPrecPtr.reset(new matrix_type(M_monolithicMap/*, M_solid->getMatrixPtr()->getMeanNumEntries()*/));
+//                     this->setFullPreconditioner(bigPrecPtr);
+//                     Real entry(1.0);
+//                     addDiagonalEntries(entry,bigPrecPtr);
+//                    bigPrecPtr->GlobalAssemble();
+//                }
+
+    this->M_solid->getDisplayer().leaderPrint("preconditioner assembled \n");
     if(!M_dataFluid->useShapeDerivatives())
-        M_solid->setMatrix();
-    this->M_solid->iterateMonolithic(*(const_cast<vector_type*>(&_res)), _step, M_bigPrecPtr/*, M_robinCoupling*/);
-    M_recomputePrec = M_solid->recomputePrec();
-    std::cout << "done." << std::endl;
+        setMatrix();
+    this->iterateMonolithic(*(const_cast<vector_type*>(&_res))/*just to avoid the const type*/, _step, M_bigPrecPtr, M_linearSolver);
+
+    //setDispSolid();// to be done just if not semiImplicit (done once yet in updateSystem)
+    //this->M_solid->updateStuff();
+    this->M_solid->getDisplayer().leaderPrint("done.\n");
 }
+
 void
 Monolithic::iterateMesh(const vector_type& disp)
 {
@@ -946,17 +1045,116 @@ Monolithic::iterateMesh(const vector_type& disp)
 
 }
 
-void Monolithic::setUpSystem( GetPot const& data_file )
+void Monolithic::variablesInit(const RefFE* refFE_struct,const LifeV::QuadRule*  bdQr_struct, const LifeV::QuadRule* qR_struct)
 {
-    super::setUpSystem(data_file);
-    M_solid->setAztecooPreconditioner(data_file, "solid/solver");
+    EpetraMap interfaceMap(*M_solidInterfaceMap);
+    M_solidMeshPart.reset( new  partitionMesh< FSIOperator::mesh_type > (*M_dataSolid->mesh(), *M_epetraComm, M_solidInterfaceMap->getMap(Unique).get(), M_solidInterfaceMap->getMap(Repeated).get()));
+
+    //M_solidMeshPart.reset( new  partitionMesh< mesh_type > (*M_dataSolid->mesh(), *M_epetraComm));
+
+    M_dFESpace.reset(new FESpace<mesh_type, EpetraMap>(*M_solidMeshPart,
+                                                       *refFE_struct,
+                                                       *qR_struct,
+                                                       *bdQr_struct,
+                                                       3,
+                                                       *M_epetraComm));
+    // INITIALIZATION OF THE VARIABLES
+    M_lambdaFluid.reset(new vector_type(*M_fluidInterfaceMap, Unique) );
+    M_lambdaFluidRepeated.reset(new vector_type(*M_fluidInterfaceMap, Repeated) );
+
+}
+
+// void Monolithic::setUpSystem( GetPot const& data_file )
+// {
+//     super::setUpSystem(data_file);
+//     M_solid->setAztecooPreconditioner(data_file, "solid/solver");
+// }
+
+void Monolithic::
+updateCoupling(matrix_type couplingMatrix)//it works because it copies the matrix
+{
+    M_couplingMatrix.reset(new matrix_type(M_solid->getMap()));
+    *M_couplingMatrix += *M_solid->getMassStiff();
+    *M_couplingMatrix += couplingMatrix;
+    M_couplingMatrix->GlobalAssemble();
+    //M_massStiff.reset(new matrix_type(*tmp));
+}
+
+void Monolithic::
+applyPreconditioner( matrix_ptrtype robinCoupling)
+{
+    matrix_type tmpMatrix(*M_monolithicMatrix);
+    tmpMatrix.GlobalAssemble();
+    M_monolithicMatrix.reset(new matrix_type(M_solid->getMap()));
+    EpetraExt::MatrixMatrix::Multiply( robinCoupling->getEpetraMatrix(), false, tmpMatrix.getEpetraMatrix(), false, M_monolithicMatrix->getEpetraMatrix());
+    *M_rhs=*robinCoupling*(*M_rhs);
 }
 
 
-//  namespace
-//  {
-//  FSIOperator* createM(){ return new Monolithic(); }
-//  }
-//  static bool reg = FSIFactory::instance().registerProduct( "monolithic", &createM );
+void Monolithic::
+updateMatrix(matrix_type & bigMatrixStokes)
+{
+    bigMatrixStokes += *M_couplingMatrix;
+    //    bigMatrixStokes->GlobalAssemble();
+}
+
+void Monolithic::
+updateSolidSystem( vector_ptrtype & rhsFluidCoupling )
+{
+    M_solid->updateSystem();
+    *rhsFluidCoupling += *M_solid->rhsWithoutBC();
+}
+void
+Monolithic::setUpSystem( GetPot const& data_file )
+{
+        M_fluid->setUp(data_file);
+        M_meshMotion->setUp(data_file);
+        setUp(data_file);
+}
+
+void Monolithic::
+setUp( const GetPot& dataFile )
+{
+    M_solid->getDisplayer().leaderPrint("\n S-  Displacement unknowns: ",  M_dFESpace->dof().numTotalDof() );
+    M_solid->getDisplayer().leaderPrint(" S-  Computing mass and linear strain matrices ... \n");
+    M_linearSolver.reset(new SolverTrilinos(*M_epetraComm));
+    M_reusePrec     = dataFile( "solid/prec/reuse", true);
+    //M_maxIterSolver = dataFile( "solid/solver/max_iter", -1);
+
+    M_linearSolver->setDataFromGetPot( dataFile, "solid/solver" );
+    M_linearSolver->setUpPrec(dataFile, "solid/prec");
+    M_reusePrec     = dataFile( "solid/prec/reuse", true);
+    //    M_maxIterForReuse = data_file( "solid/solver/max_iter_reuse", M_maxIterSolver*8/10);
+    M_maxIterSolver = dataFile( "solid/solver/max_iter", -1);
+}
+
+void Monolithic::
+diagonalScale(vector_type& rhs, matrix_ptrtype matrFull)
+{
+    Epetra_Vector diagonal(*rhs.getMap().getMap(Unique));
+    //M_matrFull->getEpetraMatrix().InvRowSums(diagonal);
+    //M_matrFull->getEpetraMatrix().InvRowMaxs(diagonal);
+    //M_matrFull->getEpetraMatrix().InvColSums(diagonal);
+    matrFull->getEpetraMatrix().InvColMaxs(diagonal);
+    matrFull->getEpetraMatrix().LeftScale(diagonal);
+    rhs.getEpetraVector().Multiply(1, rhs.getEpetraVector(), diagonal,0);
+}
+
+
+void Monolithic::solidInit(const RefFE* refFE_struct,const LifeV::QuadRule*  bdQr_struct, const LifeV::QuadRule* qR_struct)
+{   // Monolitic: In the beginning I need a non-partitioned mesh. later we will do the partitioning
+    M_dFESpace.reset(new FESpace<mesh_type, EpetraMap>(M_dataSolid->mesh(),
+                                                       *refFE_struct,
+                                                       *qR_struct,
+                                                       *bdQr_struct,
+                                                       3,
+                                                       *M_epetraComm));
+}
+
+namespace
+{
+FSIOperator* createM(){ return new Monolithic(); }
+}
+static bool reg = FSIFactory::instance().registerProduct( "monolithic", &createM );
 
 }

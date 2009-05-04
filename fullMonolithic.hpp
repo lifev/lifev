@@ -22,7 +22,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 /**
-   \file MonolithicNewton.hpp
+   \file fullMonolithic.hpp
    \author crosetto <Paolo Crosetto>
    \date 18/09/2008
  */
@@ -87,6 +87,7 @@ public:
     void solveJac(vector_type       &_muk,
                   const vector_type &_res,
                   const double       _linearRelTol);
+    matrix_ptrtype getMatrixPtr(){return this->M_monolithicMatrix;}
     vector_ptrtype uk(){return M_uk;}
     vector_type& meshVel();
     private:
@@ -96,7 +97,7 @@ public:
     vector_ptrtype                       M_uk;
     vector_ptrtype                       M_meshVel;
     //    static bool              reg;
-
+    vector_ptrtype                       M_unOld;//****************************
 };
 
 class Epetra_FullMonolithic : public Epetra_Operator
@@ -109,8 +110,8 @@ public :
     Epetra_FullMonolithic(fullMonolithic& MOperator/*, Epetra_Map& Mappa*/):
         M_FMOper               (&MOperator),
         M_comm             (&M_FMOper->worldComm()),
-        M_operatorDomainMap(/*Mappa*/ *M_FMOper->monolithicMap()->getMap(Repeated)),
-        M_operatorRangeMap(/*Mappa*/ *M_FMOper->monolithicMap()->getMap(Repeated))
+        M_operatorDomainMap(/*Mappa*/ *M_FMOper->couplingVariableMap()->getMap(Repeated)),
+        M_operatorRangeMap(/*Mappa*/ *M_FMOper->couplingVariableMap()->getMap(Repeated))
     {
         std::cout << "M_FMOper->solidInterfaceMap() = " << M_FMOper->solidInterfaceMap() << std::endl;
         std::cout << "M_FMOper->solidInterfaceMap()->getMap(Repeated) = " << M_FMOper->solidInterfaceMap()->getMap(Repeated) << std::endl;

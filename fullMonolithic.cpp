@@ -58,8 +58,10 @@ fullMonolithic::setup()
     vector_type u0(*M_monolithicMap);
     M_bdf.reset(new BdfT<vector_type>(M_dataFluid->order_bdf()));
     M_bdf->initialize_unk(u0);
-    M_rhs.reset(new vector_type(*this->M_monolithicMap));
+    this->M_rhs.reset(new vector_type(*this->M_monolithicMap));
+    this->M_rhsFull.reset(new vector_type(*this->M_monolithicMap));
     M_un.reset (new vector_type(*this->M_monolithicMap));
+    M_unOld.reset(new vector_type(*this->M_monolithicMap));//*********************
     //    UInt offset = M_uFESpace->dof().numTotalDof()*nDimensions +  M_pFESpace->dof().numTotalDof();
     M_meshMotion.reset(new FSIOperator::meshmotion_raw_type(*M_mmFESpace,
                                                             *M_epetraComm,
@@ -83,8 +85,7 @@ fullMonolithic::setup()
                                                    *M_dFESpace,
                                                    *M_epetraComm,
                                                    *M_monolithicMap,
-                                                   offset,
-                                                   M_uFESpace
+                                                   offset
                                                    ));
 
 }
@@ -99,8 +100,15 @@ void
 fullMonolithic::updateSystem(const vector_type& solution)
 {
     //    M_meshVel.reset(new vector_type(M_meshMotion->dispDeltaDiff()));
+    *M_unOld=*M_un;
     super::updateSystem(solution);
     M_uk.reset(new vector_type(solution));
+
+//     UInt offset(M_uFESpace->dof().numTotalDof()*nDimensions +  M_pFESpace->dof().numTotalDof() + M_dFESpace->dof().numTotalDof()*nDimensions + nDimensions*M_interface);
+
+//     vector_ptrtype meshDispDiff(new vector_type(M_mmFESpace->map()));
+//     meshDispDiff->subset(solution, offset);
+//     M_meshMotion->initialize(*meshDispDiff);//M_disp is set to the total mesh disp.
 }
 
 void
@@ -153,18 +161,25 @@ fullMonolithic::evalResidual( vector_type&       res,
     if((iter==0)|| !this->M_dataFluid->isSemiImplicit())
         {
             this->M_beta.reset(new vector_type(M_uFESpace->map()));
-            if(iter == 0)
-                this->M_rhs.reset(new vector_type(*M_monolithicMap)) ;
+//             if(iter == 0)
+//                 {
+//                 this->M_rhs.reset(new vector_type(*M_monolithicMap)) ;
+//                 this->M_rhsFull.reset(new vector_type(*this->M_monolithicMap));
+//                }
 
             //            M_dispOld.reset(new vector_type(M_meshMotion->dispOld()));
             UInt offset(M_uFESpace->dof().numTotalDof()*nDimensions +  M_pFESpace->dof().numTotalDof() + M_dFESpace->dof().numTotalDof()*nDimensions + nDimensions*M_interface);
+            std::cout<<"offset: "<<offset<<std::endl;
 
             vector_ptrtype meshDispDiff(new vector_type(M_mmFESpace->map()));
+
+            meshDispDiff->subset(disp, offset); //if the conv. term is to be condidered implicitly
+            //meshDispDiff->subset(*M_uk, offset); //if the mesh motion is at the previous time step in the convective term
+            //meshDispDiff->subset(*M_un, offset); //if we linearize in a semi-implicit way
+
+            M_meshMotion->initialize(*meshDispDiff);//M_disp is set to the total mesh disp.
             double alpha = 1/M_dataFluid->timestep();
 
-            std::cout<<"offset: "<<offset<<std::endl;
-            meshDispDiff->subset(disp, offset);
-            M_meshMotion->initialize(*meshDispDiff);//M_disp is set to the total mesh disp.
 
             //meshDispDiff.reset(new vector_type(M_meshMotion->disp(), Repeated));//just to repeat it
 
@@ -172,21 +187,27 @@ fullMonolithic::evalResidual( vector_type&       res,
 
             vector_type mmRep(*meshDispDiff, Repeated);// just to repeat dispDiff. No way witout copying?
             this->moveMesh(mmRep);
+            //mmRep *= alpha;
+
+            //*************ADDED****************
+            mmRep.subset(*M_un, offset); //if the mesh motion is at the previous time step in the convective term
+            mmRep -= M_meshMotion->dispOld();
             mmRep *= alpha;
+            //****************END OF ADDED*********************
 
             this->interpolateVelocity(mmRep, *this->M_beta);
             //            *this->M_beta *= -alpha; //HE solution scaled!
             vector_ptrtype fluid(new vector_type(this->M_uFESpace->map()));
-            fluid->subset(*M_un, 0);
+            fluid->subset(/**M_un*/*M_unOld, 0);
             *this->M_beta += *fluid/*M_un*/;
             //          if(firstIter)
             M_fluid->recomputeMatrix(true);
             M_fluid->updateSystem(alpha, *this->M_beta, *this->M_rhs );//here it assembles the fluid matrices
             if(iter==0)
-                *this->M_rhs               += M_fluid->matrMass()*M_bdf->time_der( M_dataFluid->timestep() );
+                *this->M_rhs               += this->M_fluid->matrMass()*this->M_bdf->time_der( M_dataFluid->timestep() );
             M_monolithicMatrix.reset(new matrix_type(*M_monolithicMap/*, this->M_fluid->getMeanNumEntries()*/));
-            M_fluid->updateStab( *M_monolithicMatrix);//applies the stabilization terms
             M_fluid->getFluidMatrix( *M_monolithicMatrix);
+            M_fluid->updateStab( *M_monolithicMatrix);//applies the stabilization terms
 
             /*            if(firstIter)
                           {*/
@@ -201,23 +222,25 @@ fullMonolithic::evalResidual( vector_type&       res,
                     M_meshMotion->computeMatrix();
                     }*/
             //          M_meshMotion->rescaleMatrix(dt);
-            M_meshMotion->applyBoundaryConditions(*M_rhs);
-            M_meshMotion->setMatrix(M_monolithicMatrix);
-            this->M_solid->updateMatrix(*M_monolithicMatrix);
+            this->updateMatrix(*M_monolithicMatrix);
             //            this->setDispSolid(disp);
             if(iter == 0)
                 {
-                    this->M_solid->updateSystem(*this->M_rhs);
+                    super::updateSolidSystem(this->M_rhs);
                 }
             M_uk.reset(new vector_type(disp));
+            this->M_rhsFull.reset(new vector_type(*this->M_rhs));
+            M_meshMotion->applyBoundaryConditions(*M_rhsFull);
+            M_meshMotion->setMatrix(M_monolithicMatrix);
 
-            this->M_solid->evalResidual( *M_BCh_u, *M_BCh_d, disp, M_rhs, res, false);
-            M_bigPrecPtr.reset(new matrix_type(*M_monolithicMap/*, M_solid->getMatrixPtr()->getMeanNumEntries()*/));
+            super::evalResidual( *M_BCh_u, *M_BCh_d, disp, this->M_rhsFull, res, false);
+            if(M_DDBlockPrec<5)
+                M_bigPrecPtr.reset(new matrix_type(*M_monolithicMap/*, M_solid->getMatrixPtr()->getMeanNumEntries()*/));
             //M_monolithicMatrix->spy("monolithicMatrix");
         }
     //else
     //{
-    this->M_solid->evalResidual( disp,/* M_rhs,*/ res, false );
+    super::evalResidual( disp, M_rhsFull, res, false );
             //}
 
 }
@@ -238,7 +261,7 @@ void fullMonolithic::solveJac(vector_type       &_muk,
         {
             std::cout<<"this->solidInterfaceMap()->getMap(Repeated)"<<this->solidInterfaceMap()->getMap(Repeated)<<std::endl;
             M_epetraOper.reset( new Epetra_FullMonolithic(*this/*, *this->monolithicMap()->getMap(Unique)*/));
-            M_solid->setOperator(*M_epetraOper);
+            super::setOperator(*M_epetraOper);
             //            vector_type meshDeltaDisp(M_mmFESpace->map());
             //            UInt offset(uFESpace().dof().numTotalDof()*nDimensions +pFESpace().dof().numTotalDof() +dFESpace().map().getMap(Unique)->NumGlobalElements() + dimInterface());
             //            meshDeltaDisp.subset(*M_uk, offset);
@@ -283,15 +306,15 @@ void fullMonolithic::solveJac(vector_type       &_muk,
 int Epetra_FullMonolithic::Apply(const Epetra_MultiVector &X, Epetra_MultiVector &Y) const
 {
     //    Y=X;
-    vector_type x(X, M_FMOper->monolithicMap(), Unique);
-    vector_type y(*M_FMOper->monolithicMap(), Unique);
+    vector_type x(X, M_FMOper->couplingVariableMap(), Unique);
+    vector_type y(*M_FMOper->couplingVariableMap(), Unique);
     //    x.spy("x");
     //    Epetra_FEVector  dz(Y.Map());//Ax-b, that is Ax since b=0.
-    vector_ptrtype rhsShapeDer(new vector_type(*M_FMOper->monolithicMap(), Unique));
+    vector_ptrtype rhsShapeDer(new vector_type(*M_FMOper->couplingVariableMap(), Unique));
     vector_ptrtype meshDeltaDisp(new vector_type(M_FMOper->mmFESpace().map(), Unique));
     vector_type subX(M_FMOper->mapWithoutMesh());
     UInt offset(M_FMOper->uFESpace().dof().numTotalDof()*nDimensions +  M_FMOper->pFESpace().dof().numTotalDof() + M_FMOper->dFESpace().map().getMap(Unique)->NumGlobalElements() + M_FMOper->dimInterface());
-    y = (*M_FMOper->solid().getMatrixPtr())*x;
+    y = (*M_FMOper->getMatrixPtr())*x;
     //    std::cout<<x.getEpetraVector().NumGlobalElements()<<std::endl;
     //BCManage for the shape derivatives part of the matrix
     //    vector_ptrtype p;
@@ -327,13 +350,13 @@ fullMonolithic::meshVel()
 int Epetra_FullMonolithic::Apply(const Epetra_MultiVector &X, Epetra_MultiVector &Y) const
 {
     Y=X;
-    boost::shared_ptr<EpetraMap> mapPtr (new EpetraMap(*M_FMOper->monolithicMap()));
+    boost::shared_ptr<EpetraMap> mapPtr (new EpetraMap(*M_FMOper->couplingVariableMap()));
     vector_type x(X, mapPtr, Unique);
     vector_type y(x, Unique);
     //    Epetra_FEVector  dz(Y.Map());//Ax-b, that is Ax since b=0.
     vector_ptrtype rhsShapeDer(new vector_type(x, Unique));
     vector_ptrtype meshDeltaDisp(new vector_type(M_FMOper->meshMotion().getMap()));
-    vector_type subX(*M_FMOper->monolithicMap());//mapWithoutMesh());
+    vector_type subX(*M_FMOper->couplingVariableMap());//mapWithoutMesh());
     UInt offset(M_FMOper->uFESpace().dof().numTotalDof()*nDimensions +  M_FMOper->pFESpace().dof().numTotalDof() + M_FMOper->dFESpace().map().getMap(Unique)->NumGlobalElements() + M_FMOper->dimInterface());
     y = (*M_FMOper->solid().getMatrixPtr())*x;
     meshDeltaDisp->subset(x, offset);
