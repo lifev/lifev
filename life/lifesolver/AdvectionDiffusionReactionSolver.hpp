@@ -1116,7 +1116,7 @@ void ADRSolver<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
 
     //
 
-    leaderPrint("  adr-  Finalizing the full matrix    ...         ");
+    leaderPrint("  adr-  Finalizing the full matrix    ...        ");
     chrono.start();
 
 
@@ -1267,20 +1267,35 @@ void ADRSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_type&        m
     // M_rhsFull = M_rhsNoBC;
 
     // BC manage for the velocity
+    Chrono chrono;
+
     if ( !BCh.bdUpdateDone() )
     {
+
+        leaderPrint( "\n     - Updating the BC ... ");
+        chrono.start();
         BCh.bdUpdate( *M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
+        chrono.stop();
+        leaderPrintMax( "done in " , chrono.diff() );
+        leaderPrint( "\n");
     }
 
     vector_type rhsFull(rhs, Repeated, Zero); // ignoring non-local entries, Otherwise they are summed up lately
 
+
+    leaderPrint( "\n     - Managing the BC ... ");
+    chrono.start();
     bcManage( matrix, rhsFull, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 1.,
               M_data.time() );
+    chrono.stop();
+    leaderPrintMax( "done in " , chrono.diff() );
+
 
     rhs = rhsFull;
 
     if ( BCh.hasOnlyEssential() && M_diagonalize )
     {
+
         matrix.diagonalize( nDimensions*dim(),
                             M_diagonalize,
                             rhs,
