@@ -38,7 +38,9 @@ public:
 
     //constructors
     partitionMesh(Mesh           &_mesh,
-                  Epetra_Comm    &_comm);
+                  Epetra_Comm    &_comm,
+                  Epetra_Map* interfaceMap = 0, Epetra_Map* interfaceMapRep = 0
+                  );
     //destructor
     ~partitionMesh();
 
@@ -96,7 +98,9 @@ private:
 
 
 template<typename Mesh>
-partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
+partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm,
+                                    Epetra_Map* interfaceMap,
+                                    Epetra_Map* interfaceMapRep):
     M_mesh              (new Mesh),
     M_localNodes        (),
     M_localEdges        (),
@@ -116,7 +120,7 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
     // First of all, we want to know which kind of elements the mesh is built of:
     // How many nodes, faces, edges does each element hold?
     UInt elementNodes, elementFaces, elementEdges;
-
+    UInt faceNodes(0);
 
     typedef typename Mesh::ElementShape ElementShape;
 
@@ -126,11 +130,13 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
             elementNodes = 8;
             elementFaces = 6;
             elementEdges = 12;
+            faceNodes    = 4;
             break;
         case TETRA:
             elementNodes = 4;
             elementFaces = 4;
             elementEdges = 6;
+            faceNodes    = 3;
             break;
         case QUAD:
             elementNodes = 4;
@@ -182,6 +188,10 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
     UInt localEnd   = M_vertexDist[M_me + 1] + 1;
 
 
+    // this vector contains the weights for the edges of the graph,
+    // it is set to null if it is not used.
+    std::vector<int>        adjwgt;
+
     M_iadj.resize(0);
     M_iadj.push_back(0);
 
@@ -215,6 +225,85 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
 #elif defined THREEDIM
 
 
+    // In fluid-structure interaction:
+    // *    If the solid mesh is not partitioned the following part won't be
+    //      executed
+    // *    If the solid mesh is partitioned:
+    //      - The fluid is partitioned first
+    //      - The solid mesh partition tries to follow the partition of the fluid
+    //      This is achieved by specifying a weight to some edge of the graph.
+    //      The interface between two processors is the set of the nodes that for
+    //      at least one processor are on the repeated map and not on the unique map.
+    //      That's why the constructor needs both the unique and repeated maps
+    //      on the interface
+    //////////////////// BEGIN OF SOLID PARTITION PART ////////////////////////
+    boost::shared_ptr<std::vector<int> > repeatedFace;// used for the solid partitioning
+    std::vector<int> myRepeatedFace;// used for the solid partitioning
+    boost::shared_ptr<std::vector<int> >  myisOnProc;// used for the solid partitioning
+    boost::shared_ptr<std::vector<int> >  isOnProc;// used for the solid partitioning
+    if(interfaceMap)
+        {
+            myisOnProc.reset(new std::vector<int>(_mesh.numVolumes()));
+            bool myFaceRep;
+            bool myFace;
+            short count;
+            for(UInt h=0; h<_mesh.numVolumes(); ++h)
+                {
+                    //(*ordVolumeList)[h]=h;
+                    (*myisOnProc)[h]=-1;
+                }
+            k=0;
+            //order.reset(new std::vector<UInt>());
+            //order->reserve(localEnd-localStart);
+
+            // This loop is throughout the whole unpartitioned mesh,
+            // it is expensive and not scalable.
+            // Bad, this part should be done offline
+        for ( UInt ie = 1; ie <= _mesh.numVolumes(); ++ie )
+            {
+                for (UInt iface = 1; iface <= elementFaces; ++iface)
+                    {
+                        UInt face = _mesh.localFaceId( ie, iface );
+                        UInt vol  = _mesh.face(face).ad_first();
+                        if (vol == ie) vol = _mesh.face(face).ad_second();
+                        if (vol != 0)
+                            {
+                                myFace=false;
+                                myFaceRep=false;
+                                count=0;
+
+                                for(int ipoint=1; ipoint<=faceNodes; ++ipoint)//vertex-based dofs
+                                    {
+                                        myFaceRep = ((interfaceMap->LID(_mesh.face(face).point(ipoint).id()/*first is fluid*/) == -1)&&(interfaceMapRep->LID(_mesh.face(face).point(ipoint).id()/*first is fluid*/) != -1));//to avoid repeated
+                                        myFace = myFace ||(interfaceMap->LID(_mesh.face(face).point(ipoint).id()) != -1);
+                                        if(myFaceRep)
+                                            {++count;}
+                                    }
+                                if(count > 1)
+                                    {
+                                        myRepeatedFace.push_back(1);
+                                    }
+                                else
+                                    {
+                                        myRepeatedFace.push_back(0);
+                                    }
+                            }
+                        if(myFace)
+                            {
+                            (*myisOnProc)[ie-1]=M_me;
+                            }
+                    }
+            }
+
+        repeatedFace.reset(new std::vector<int>(myRepeatedFace.size()));
+        isOnProc.reset(new std::vector<int>(*myisOnProc));
+
+        // Lot of communication here!!
+        MPI_Allreduce( &myRepeatedFace[0], &(*repeatedFace)[0], myRepeatedFace.size(), MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+        MPI_Allreduce( &(*myisOnProc)[0], &(*isOnProc)[0], myisOnProc->size(), MPI_INT, MPI_MAX, MPI_COMM_WORLD);
+         }
+    //////////////////// END OF SOLID PARTITION PART ////////////////////////
+
     for ( UInt ie = localStart; ie < localEnd; ++ie )
     {
         for (UInt iface = 1; iface <= elementFaces; ++iface)
@@ -230,6 +319,15 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
                     // for each graph vertex, simply push back the ID of its neighbors
                     M_jadj.push_back(elem - 1);
                     ++sum;
+                    if(interfaceMap)// if I'm partitioning the solid in FSI
+                        {
+                            if((*repeatedFace)[sum])
+                                {
+                                    adjwgt.push_back(0);
+                                }
+                            else
+                                adjwgt.push_back(10);
+                        }
                 }
         }
         // this is the list of "keys" to access M_jadj
@@ -244,19 +342,19 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
 
     // **************
     // parMetis part
-    // **************
-    // Each processor has three lists: xadj, adjncy, vtxdist
-    std::vector<int> xadj;
-    std::vector<int> adjncy;
 
-    // these two arrays are to be used for weighted graphs:
-    // usually we will set them to NULL
+    // this array is to be used for weighted nodes on the graph:
+    // usually we will set it to NULL
+
     int*   vwgt    = 0;
-    int*   adjwgt  = 0;
 
-    int    wgtflag = 0; // 0 means the graphs is not weighted
-    int    ncon    = 1; // number of weights attached to each graph vertex
-    int    numflag = 0; // numbering scheme: 0 is C-style (arrays indexes starting from 0)
+    int    wgtflag;
+    if(interfaceMap)
+        wgtflag=1;
+    else
+        wgtflag=0;
+    int    ncon    = 1;
+    int    numflag = 0;
 
     int    edgecut; // here will be stored the number of edges cut in the partitioning process
 
@@ -297,10 +395,12 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
      on p processors using the multilevel k-way multi-constraint
      partitioning algorithm.
      */
+    int* adjwgtPtr(0);
+    if (adjwgt.size() > 0) adjwgtPtr = (int*) &adjwgt[0];
     ParMETIS_V3_PartKway((int*) &M_vertexDist[0],
                          (int*) &M_iadj[0],
                          (int*) &M_jadj[0],
-                         vwgt, adjwgt,
+                         vwgt,  adjwgtPtr,
                          &wgtflag,
                          &numflag, &ncon, &nparts,
                          &tpwgts[0], &ubvec[0], &options[0],
@@ -321,6 +421,165 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm):
         // here we are associating the vertex global ID to the subdomain ID
         locProc[part[ii]].push_back(ii + vertexDist()[M_me]);
     }
+
+    //////////////// BEGIN OF SOLID PARTITION PART ////////////////
+
+    if(interfaceMap)
+        {
+            int procOrder[nprocs];
+            std::vector<std::vector<UInt> > mymatchesForProc(nprocs);
+            std::vector<std::vector<UInt> > matchesForProc(nprocs);
+            bool orderingError[nprocs];
+            for(int i=0; i<nprocs ; ++i)
+                {
+                    orderingError[i]=false;
+                    for(int j=0; j<nprocs ; ++j)
+                        {
+                            mymatchesForProc[i].push_back(0);
+                            matchesForProc[i].push_back(0);
+                        }
+                }
+            for(UInt kk=0; kk<part.size(); ++kk)
+                {
+                    if((*isOnProc)[kk+M_vertexDist[M_me]]!=-1)
+                        ++mymatchesForProc[part[kk]][(*isOnProc)[kk+M_vertexDist[M_me]]];
+                }
+            for(UInt j=0; j<nprocs; ++j)
+                MPI_Allreduce( &mymatchesForProc[j][0], &matchesForProc[j][0], nprocs, MPI_INT, MPI_SUM, MPIcomm);
+            M_comm->Barrier();
+            for(UInt i=0; i<nprocs ; ++i)
+                for(UInt j=0; j<nprocs ; ++j)
+                {
+                    std::cout<<M_me<<" matchesForProc ["<<j<<"] ["<< i << "] "<<matchesForProc[j][i]<<std::endl;
+                    std::cout<<M_me<<" mymatchesForProc ["<<j<<"] ["<< i << "] "<<mymatchesForProc[j][i]<<std::endl;
+                }
+
+            int suitableProcess=-1;
+            UInt max=0;
+
+            for(int ii=0; ii<nprocs; ++ii)
+                {
+                    if(matchesForProc[M_me][ii]>max)
+                        {
+                            suitableProcess=ii;
+                            max=matchesForProc[M_me][ii];
+                        }
+                }
+
+
+// // TO ASSIGN A BAD PARTITON ==> to keep commented
+
+//             max=1000;
+//             for(int ii=0; ii<nprocs; ++ii)
+//                 {
+//                     if(matchesForProc[M_me][ii]<max)
+//                         {
+//                             suitableProcess=ii;
+//                             max=matchesForProc[M_me][ii];
+//                         }
+//                 }
+//  // END OF BAD PARTITION COMMENTED PART
+
+            //            int procOrder[nprocs];
+            ASSERT(suitableProcess!=-1, "one partition is without interface nodes!");
+            procOrder[M_me]= suitableProcess;
+
+            std::cout<<M_me<<" procorder(me) "<<procOrder[M_me]<<std::endl;
+            std::cout<<M_me<<" suitableProc "<<suitableProcess<<std::endl;
+            M_comm->Barrier();
+
+            std::vector<UInt> maxs(nprocs);
+            maxs[M_me]=max;
+            for(int j=0; j<nprocs ; ++j)//Allgather
+                MPI_Bcast( &maxs[j], 1, MPI_INT, j, MPIcomm);//perhaps generates errors
+
+            std::vector<pair<UInt, int> > procIndex(nprocs);
+            for(int k=0; k<nprocs; ++k)
+                {
+                    procIndex[k]=std::make_pair( maxs[k], k);
+                }
+
+struct booleanCondition
+{
+    const bool reordering( std::pair<UInt, int>& a, std::pair<UInt, int>& b)
+    {
+        return a.first>b.first;
+    }
+};
+
+
+// std::vector<int> procIndex(nprocs);
+            //std::vector<int>::const_iterator Iter1;
+            //bool (*function)( int, int );
+            //function = condition.condition;
+            //boost::shared_ptr<bool(int, int)> fctprtr;
+            //fctprtr.reset(&condition.condition);
+            //bool (booleanCondition::*function)(int, int)=&booleanCondition::condition;
+            //booleanCondition condition(maxs);
+
+// transformation=std::sort(maxs.begin(), maxs.end());
+ std::sort(procIndex.begin(), procIndex.end()/*, &booleanCondition::reordering*/);
+ for(int l=0;l<nprocs;++l)
+     std::cout<<M_me<< " :reordered maxs: " <<procIndex[l].first<<std::endl;
+ for(int l=0;l<nprocs;++l)
+     std::cout<<M_me<< " :reordered indices: " <<procIndex[l].second<<std::endl;
+            //std::vector newMaxs(nprocs);
+            //            max=0;
+            // for(int k=0; k<nprocs; ++k)
+//             for(int j=0; j<nprocs ; ++j)
+//                 {
+//                     if(maxs(j)>max)
+//                         {
+//                             max=maxs(j);
+//                             //newMaxs[k]=max;
+//                             loopIndex[k]=j;
+//                         }
+//                 }
+            for(int j=0; j<nprocs ; ++j)//Allgather
+                MPI_Bcast( &procOrder[j], 1, MPI_INT, j, MPIcomm);//perhaps generates errors
+            for(int j=0; j<nprocs ; ++j)
+                {
+                    std::cout<<"me: "<<M_me<<" j: "<< j <<" procorder2 "<<procOrder[j]<<std::endl;
+                }
+            std::vector< std::vector<int> > locProc2(locProc);
+            for(int j=nprocs; j>0 ; --j)
+                {
+                    //if(procOrder[nprocs-1 - procIndex[j].second]>nprocs-1 - procIndex[j].second)
+                    //if(orderingError[ procIndex[j-1].second]==false)
+                    //locProc[procOrder[ procIndex[j-1].second]].swap(locProc[procIndex[j-1].second]);
+
+                    if(orderingError[procOrder[procIndex[j-1].second]]==false)
+                        locProc[procOrder[ procIndex[j-1].second]]=  locProc2[procIndex[j-1].second];
+//                     if(j!=procOrder[j])
+//                         {
+//                             std::vector<int> tmp(locProc[j]);
+//                             locProc[j]=locProc[procOrder[j]];
+//                             locProc[procOrder[j]]=tmp;
+//                         }
+                    else
+                        {
+                            std::cout<<"Ordering error when assigning the processor"<<M_me<<" to the partition,"<<std::endl<<" parmetis did a bad job."<<std::endl;
+                            // j not assigned
+                            for(int i=nprocs; i>0 ; --i)
+                                {
+                                    if(orderingError[procIndex[i-1].second]==false)//means that i is the first proc not assigned
+                                        {
+                                            //locProc[procOrder[procIndex[j-1].second]].swap(locProc[/*nprocs-1 - procIndex[*/i/*].second*/]);
+                                            procOrder[procIndex[j-1].second]=procIndex[i-1].second;
+                                            locProc[procIndex[i-1].second]=locProc2[procIndex[j-1].second];
+                                            break;
+                                        }
+                                }
+
+                        }
+                    orderingError[procOrder[procIndex[j-1].second]]=true;
+                }
+            for(int j=0; j<nprocs ; ++j)
+                {
+                    std::cout<<"me: "<<M_me<<" j: "<< j <<" procorder3 "<<procOrder[j]<<std::endl;
+                }
+        }
+    ////////////////// END OF SOLID PARTITION PART /////////////////////
 
     // sizeof(MPI_INT) is expressed in bytes
     // MPI_INT range is ( -2^(7*sizeof(MPI_INT), 2^(7*sizeof(MPI_INT) - 1 )
