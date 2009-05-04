@@ -742,11 +742,11 @@ protected:
 
     boost::shared_ptr<Epetra_Comm>                    M_epetraComm;
     boost::shared_ptr<Epetra_Comm>                    M_epetraWorldComm;
+    std::string                                       M_method;
 
 private:
 
 //     UInt                      M_reducedFluid;
-    std::string                                       M_method;
     std::string                                       M_algorithm;
     bool                                              M_monolithic;
     Preconditioner                                    M_precond;
