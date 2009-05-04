@@ -141,7 +141,7 @@ FSIOperator::fluid_bchandler_type BCh_harmonicExtension(FSIOperator &_oper)
     else if (_oper.method() == "monolithic")
     {
         Debug(10000) << "EJ harmonic extension\n";
-        Monolithic *EJOper = dynamic_cast<Monolithic *>(&_oper);
+        FSIOperator *EJOper = /*dynamic_cast<Monolithic *>(*/&_oper;/*);*/
         EJOper->setStructureDispToHarmonicExtension(_oper.lambdaFluidRepeated());
         BCh_he->addBC("Interface", SOLIDINTERFACE, Essential, Full,
         *EJOper->bcvStructureDispToHarmonicExtension(), 3);

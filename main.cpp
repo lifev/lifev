@@ -22,8 +22,9 @@
 
 #include <boost/timer.hpp>
 
-#include <lifemc/lifesolver/FSISolver.hpp>
-#include <lifemc/lifesolver/FSIOperator.hpp>
+#include <life/lifesolver/FSISolver.hpp>
+#include <life/lifesolver/FSIOperator.hpp>
+//#include <lifemc/lifesolver/fullMonolithic.hpp>
 #include <life/lifesolver/dataNavierStokes.hpp>
 
 #include <life/lifefilters/ensight.hpp>
@@ -31,6 +32,10 @@
 
 #include <life/lifealg/IfpackPreconditioner.hpp>
 #include <life/lifealg/MLPreconditioner.hpp>
+
+//#include <lifemc/lifesolver/Monolithic.hpp>
+//// this is added just for mathcard,
+//// not necessary.
 
 #include "Epetra_config.h"
 #ifdef HAVE_MPI
@@ -71,10 +76,10 @@ public:
     Problem( GetPot const& data_file, std::string _oper = "" )
         {
             using namespace LifeV;
-              if(!_oper.compare("monolithic"))
-                  FSIFactory::instance().registerProduct( "monolithic", &createM );
-              else if(!_oper.compare("fullMonolithic"))
-                  FSIFactory::instance().registerProduct( "fullMonolithic", &createFM );
+            if(!_oper.compare("monolithic"))
+                FSIFactory::instance().registerProduct( "monolithic", &createM );
+            else if(!_oper.compare("fullMonolithic"))
+                FSIFactory::instance().registerProduct( "fullMonolithic", &createFM );
            Debug( 10000 ) << "creating FSISolver with operator :  " << _oper << "\n";
 //            DataNavierStokes< RegionMesh3D_ALE<LinearTetra> > M_dataNS(data_file);
 
@@ -323,7 +328,7 @@ int main(int argc, char** argv)
 #endif
 
     GetPot command_line(argc,argv);
-    const char* data_file_name = command_line.follow("data", 2, "-f","--file");
+    const std::string data_file_name = command_line.follow("data", 2, "-f","--file");
     GetPot data_file(data_file_name);
 
 
