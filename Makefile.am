@@ -26,7 +26,7 @@ AM_CPPFLAGS = -DNO_BLASLAPACK
 
 lib_LTLIBRARIES	= liblifemcsolver.la
 
-liblifemcsolver_la_SOURCES   = Monolithic.cpp, FSIOperator.hpp, FSIOperator.cpp, Oseen.hpp, FSISolver.cpp, HarmonicExtensionSolver.hpp, Monolithic.hpp, OseenShapeDerivative.hpp, VenantKirchhofSolver.hpp, fixedPointBase.cpp
+liblifemcsolver_la_SOURCES   = Monolithic.cpp, Monolithic.hpp, fullMonolithic.cpp, fullMonolithic.hpp
 
 liblifemcsolver_la_LIBADD    = -llifesolver
 
