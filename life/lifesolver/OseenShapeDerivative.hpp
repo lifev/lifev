@@ -249,7 +249,9 @@ void OseenShapeDerivative<Mesh, SolverType>::iterateLin( bchandler_raw_type& bch
 
     // using the same preconditioner as for the non linear problem (the matrix changes only in the
     // boundary terms).
-    this->M_linearSolver.solveSystem( matrFull, rhsFull, M_linSol, matrFull, (M_reusePrecLin && !this->M_resetPrec));
+    this->M_linearSolver.setMatrix(*matrFull);
+    this->M_linearSolver.solveSystem( rhsFull, M_linSol, matrFull, (M_reusePrecLin && !this->M_resetPrec));
+
 
     this->M_residual  = M_rhsLinNoBC;
     this->M_residual -= *this->M_matrNoBC*this->M_linSol;

@@ -180,7 +180,7 @@ iterateMonolithic(vector_type& rhs, vector_type& step, matrix_ptrtype prec, Solv
 
 
     //    M_disp.spy("disp0");
-    int numIter = M_linearSolver->solveSystem(M_monolithicMatrix, rhs, step, prec, (M_reusePrec)&&(!M_resetPrec));
+    int numIter = M_linearSolver->solveSystem(rhs, step, prec, (M_reusePrec)&&(!M_resetPrec));
 
     if (numIter < 0)
     {

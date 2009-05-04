@@ -343,7 +343,7 @@ void HarmonicExtensionSolver<Mesh, SolverType>::setUp( const GetPot& dataFile )
     M_prec->setDataFromGetPot( dataFile, "mesh_motion/prec" );
 
     computeMatrix( );
-
+    M_linearSolver.setMatrix( *M_matrHE );
 }
 
 

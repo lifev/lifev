@@ -343,7 +343,8 @@ testML( bchandler_raw_type& bch )
 
                             this->M_sol.getEpetraVector().Scale(0.);
 
-                            this->M_linearSolver.solveSystem(matrFull, rhsFull, this->M_sol, matrFull, (this->M_reusePrec && !this->M_resetPrec));
+                            this->M_linearSolver.setMatrix(*matrFull);
+                            this->M_linearSolver.solveSystem( rhsFull, this->M_sol, matrFull, (this->M_reusePrec && !this->M_resetPrec));
 
 
                             this->resetPrec();

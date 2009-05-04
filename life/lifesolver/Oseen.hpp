@@ -1136,7 +1136,8 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
     M_Displayer.leaderPrintMax("done in " , chrono.diff());
 
     // solving the system
-    int numIter = M_linearSolver.solveSystem( matrFull, rhsFull, M_sol, matrFull, M_reusePrec );
+    M_linearSolver.setMatrix(*matrFull);
+    int numIter = M_linearSolver.solveSystem(rhsFull, M_sol, matrFull, M_reusePrec );
 
     if (numIter < 0 ) // if the preconditioner has been reset, the stab terms are to be updated
     {

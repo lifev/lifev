@@ -175,7 +175,6 @@ public:
     { M_solver.GetAllAztecStatus( status );}
 
     //@}
-    //void            setAztecooPreconditioner ( const GetPot& dataFile, const std::string& section);
 
     /** Solves the system and returns the number of iterations.
         @param  matrFull,
@@ -188,8 +187,7 @@ public:
         returns number of iterations. If negative, the solver did not converge,
         the preconditionar has been recomputed, and a second solution is tried
     */
-    int solveSystem(  matrix_ptrtype   matrFull,
-                      vector_type&     rhsFull,
+    int solveSystem(  vector_type&     rhsFull,
                       vector_type&     sol,
                       matrix_ptrtype&  prec,
                       bool const       reuse,
