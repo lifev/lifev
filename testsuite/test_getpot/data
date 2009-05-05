@@ -1,0 +1,13 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file fortest_getpot
+#-------------------------------------------------
+
+
+[variables]
+
+A = 5        # Integer
+B = 5.12345  # Double
+C = true     # Bool  
+D = LifeV    # String
+E = 'Life V' # String list
