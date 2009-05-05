@@ -59,8 +59,10 @@ the files in the list.
 
 2) Also a new constructor, which accepts strings as input, has been created.
 
-3) Finally, a new function which returns if a variable is present or not in the GetPot data
+3) A new function which returns if a variable is present or not in the GetPot data
 file has been added.
+
+4) Some functions to support boolean variables have been added.
 
 FOR DEVELOPERS:
 In order to upgrade from a newer official version of GetPot, the same
@@ -151,14 +153,23 @@ public:
 
     // (*) variables -----------------------------------------------------------
     //     -- scalar values
+    // BEGIN Cristiano Malossi - 05/05/2009
+    inline bool               operator()(const char* VarName, bool          Default) const;
+    // END   Cristiano Malossi - 05/05/2009
     inline int                operator()(const char* VarName, int           Default) const;
     inline double             operator()(const char* VarName, const double& Default) const;
     inline const std::string  operator()(const char* VarName, const char*   Default) const;
     //
+    // BEGIN Cristiano Malossi - 05/05/2009
+    inline bool               operator()(const char* VarName, bool          Default, bool& found) const;
+    // END   Cristiano Malossi - 05/05/2009
     inline int                operator()(const char* VarName, int           Default, bool& found) const;
     inline double             operator()(const char* VarName, const double& Default, bool& found) const;
     inline const std::string  operator()(const char* VarName, const char*   Default, bool& found) const;
     //     -- vectors
+    // BEGIN Cristiano Malossi - 05/05/2009
+    inline bool               operator()(const char* VarName, bool          Default, unsigned Idx) const;
+    // END   Cristiano Malossi - 05/05/2009
     inline int                operator()(const char* VarName, int           Default, unsigned Idx) const;
     inline double             operator()(const char* VarName, const double& Default, unsigned Idx) const;
     inline const std::string  operator()(const char* VarName, const char*   Default, unsigned Idx) const;
@@ -338,6 +349,9 @@ private:
     //        * support search for flags in a specific argument
     inline bool               __check_flags(const std::string& Str, const char* FlagList) const;
     //        * type conversion if possible
+    // BEGIN Cristiano Malossi - 05/05/2009
+    inline bool               __convert_to_type(const std::string& String, bool Default) const;
+    // END   Cristiano Malossi - 05/05/2009
     inline int                __convert_to_type(const std::string& String, int Default) const;
     inline double             __convert_to_type(const std::string& String, double Default) const;
     //        * prefix extraction
@@ -894,6 +908,19 @@ GetPot::__process_section_label(const std::string& Section,
     return section;
 }
 
+// BEGIN Cristiano Malossi - 05/05/2009
+// convert string to BOOL, if not possible return Default
+inline bool
+GetPot::__convert_to_type(const std::string& String, bool Default) const
+{
+	if (String.compare( "false" ) == 0)
+		return false;
+	if (String.compare( "true" )  == 0)
+		return true;
+	else
+		return Default;
+}
+// END   Cristiano Malossi - 05/05/2009
 
 // convert string to DOUBLE, if not possible return Default
 inline double
@@ -1548,6 +1575,17 @@ GetPot::next_nominus()
 // (*) variables
 //.............................................................................
 //
+// BEGIN Cristiano Malossi - 05/05/2009
+inline bool
+GetPot::operator()(const char* VarName, bool Default) const
+{
+    // (*) recording of requested variables happens in '__find_variable()'
+    const variable*  sv = __find_variable(VarName);
+    if( sv == 0 ) return Default;
+    return __convert_to_type(sv->original, Default);
+}
+// END   Cristiano Malossi - 05/05/2009
+
 inline int
 GetPot::operator()(const char* VarName, int Default) const
 {
@@ -1577,6 +1615,19 @@ GetPot::operator()(const char* VarName, const char* Default) const
     return sv->original;
 }
 //
+// BEGIN Cristiano Malossi - 05/05/2009
+inline bool
+GetPot::operator()(const char* VarName, bool Default, bool& found) const
+{
+    // (*) recording of requested variables happens in '__find_variable()'
+    found = false;
+    const variable*  sv = __find_variable(VarName);
+    if( sv == 0 ) return Default;
+    found = true;
+    return __convert_to_type(sv->original, Default);
+}
+// END   Cristiano Malossi - 05/05/2009
+
 inline int
 GetPot::operator()(const char* VarName, int Default, bool& found) const
 {
@@ -1611,6 +1662,19 @@ GetPot::operator()(const char* VarName, const char* Default, bool& found) const
     return sv->original;
 }
 //
+// BEGIN Cristiano Malossi - 05/05/2009
+inline bool
+GetPot::operator()(const char* VarName, bool Default, unsigned Idx) const
+{
+    // (*) recording of requested variables happens in '__find_variable()'
+    const variable* sv = __find_variable(VarName);
+    if( sv == 0 ) return Default;
+    const std::string*  element = sv->get_element(Idx);
+    if( element == 0 ) return Default;
+    return __convert_to_type(*element, Default);
+}
+// END   Cristiano Malossi - 05/05/2009
+
 inline int
 GetPot::operator()(const char* VarName, int Default, unsigned Idx) const
 {
