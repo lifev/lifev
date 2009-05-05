@@ -99,9 +99,12 @@ public:
       \param mesh2 the mesh which provides de data at the interface
       \param flag2 the marker of the interface in the mesh2
       \param tol tolerance for connecting points of both meshes at the interface
+      \param flag3 the marker of a region of interface in the mesh1
+      \brief{The parameter flag3 is used in test_meshReorder to export the part of interface determined by flag3 on mesh2.}
      */
+
     template <typename Mesh>
-    void update( Mesh& mesh1, const EntityFlag& flag1, Mesh& mesh2, const EntityFlag& flag2, const Real& tol );
+    void update( Mesh& mesh1, const EntityFlag& flag1, Mesh& mesh2, const EntityFlag& flag2, const Real& tol, const EntityFlag* flag3 = 0 );
 
 
     //! This method interpolate data when using different FE
@@ -166,7 +169,6 @@ private:
     template <typename Mesh>
     void _updateFaceConnections( const Mesh& mesh1, const EntityFlag& flag1,
                                  const Mesh& mesh2, const EntityFlag& flag2, const Real& tol );
-
     //! This method builds the connections between Dof at the interface (_locDof container)
     /*!
       \param mesh1 the mesh in which we want to make the computations
@@ -177,7 +179,8 @@ private:
      */
     template <typename Mesh>
     void _updateDofConnections( const Mesh& mesh1, const Dof& dof1,
-                                const Mesh& mesh2, const Dof& dof2, const Real& tol );
+                                const Mesh& mesh2, const Dof& dof2, const Real& tol,
+                                const EntityFlag* flag1 = 0 );
 };
 
 
@@ -286,10 +289,13 @@ void DofInterface3Dto3D::_updateFaceConnections( const Mesh& mesh1, const Entity
   \param mesh2 the mesh which provides de data at the interface
   \param dof2 the Dof object of the mesh which provides de data at the interface
   \param tol tolerance for connecting points of both meshes at the interface
+  \param flag1 the marker of a region of interface in the mesh1
+  \brief{The parameter flag1 is used in test_meshReorder to export the part of interface determined by flag1 on mesh2.}
+
 */
 template <typename Mesh>
 void DofInterface3Dto3D::_updateDofConnections( const Mesh& mesh1, const Dof& dof1,
-        const Mesh& mesh2, const Dof& dof2, const Real& tol )
+        const Mesh& mesh2, const Dof& dof2, const Real& tol, const EntityFlag* flag1)
 {
 
     typedef typename Mesh::VolumeShape GeoShape;
@@ -352,6 +358,8 @@ void DofInterface3Dto3D::_updateDofConnections( const Mesh& mesh1, const Dof& do
             {
 
                 iVeEl1 = GeoShape::fToP( iFaEl1, iVeFa1 ); // local vertex number (in element)
+
+                if( flag1 != 0 && mesh1.boundaryFace(i->first).point(iVeFa1).marker() != *flag1) continue;
 
                 // Loop number of Dof per vertex (mesh1)
                 for ( ID l = 1; l <= nDofpV1; ++l )
@@ -485,11 +493,13 @@ void DofInterface3Dto3D::_updateDofConnections( const Mesh& mesh1, const Dof& do
   \param mesh2 the mesh which provides de data at the interface
   \param flag2 the marker of the interface in the mesh2
   \param tol tolerance for connecting points of both meshes at the interface
+  \param flag3 the marker of a region of interface in the mesh1
+  \brief{The parameter flag3 is used in test_meshReorder to export the part of interface determined by flag3 on mesh2.}
 */
 template <typename Mesh>
 void DofInterface3Dto3D::update( Mesh& mesh1, const EntityFlag& flag1,
                                  Mesh& mesh2, const EntityFlag& flag2,
-                                 const Real& tol )
+                                 const Real& tol, const EntityFlag* flag3 )
 {
 
     // Updating face connections at the interface
@@ -499,11 +509,11 @@ void DofInterface3Dto3D::update( Mesh& mesh1, const EntityFlag& flag1,
     {
         // Update of the Dof connections when we need interpolation
         _dof->update( mesh2 ); // Building auxiliary dof
-        _updateDofConnections( mesh1, *_dof1, mesh2, *_dof, tol ); // Update of the Dof connections
+        _updateDofConnections( mesh1, *_dof1, mesh2, *_dof, tol, flag3 ); // Update of the Dof connections
     }
     else
         // Update of the Dof connections without inperpolation
-        _updateDofConnections( mesh1, *_dof1, mesh2, *_dof2, tol );
+        _updateDofConnections( mesh1, *_dof1, mesh2, *_dof2, tol, flag3 );
 }
 
 
