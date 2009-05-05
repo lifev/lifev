@@ -1,8 +1,9 @@
 # -*- makefile -*-
 #
 # Author: Gilles Fourestey
+# Modified: Simone Deparis
 #
-# Copyright (C) 2004 @COPYRIGHT@
+# Copyright (C) 2009 @COPYRIGHT@
 #
 # Distributed under the GPL(GNU Public License):
 # This program is free software; you can redistribute it and/or modify
@@ -29,20 +30,20 @@ OBJECTS         = $(SOURCES:.cpp=.o)
 EXECUTABLE      = cavity
 
 
-
-LIFELIBPATH      = -L<lifev lib directory path>
+LIFEPATH         = <lifev directory path>
+LIFELIBPATH      = -L$(LIFEPATH)/lib
 LIFELIBS         = -llifefilters -llifesolver -llifefem \
                    -llifealg -llifearray -llifecore -llifemesh
-LIFEINCLUDEPATH  = -I<lifev include directory path>
+LIFEINCLUDEPATH  = -I$(LIFEPATH)/include
 
 TRILLIBPATH      = -L<trilinos lib directory path>
 TRILLIBS         = -laztecoo -laztecoo -ltriutils -lml \
                    -lifpack -lamesos -lepetraext -lepetra \
-                   -lteuchos  -llapack -lblas
+                   -lteuchos -lsuperlu -lumfpack -lamd -llapack -lblas
 TRILINCLUDEPATH  = -I<trilinos include directory path>
 
 MPILIBPATH       = -L<mpi lib directory path>
-MPILIBS          = -lmpi_cxx -lmpi
+MPILIBS          = -lmpi_cxx -lmpi -lopen-rte
 MPIINCLUDEPATH   = -I<mpi include directory path>
 
 METISLIBPATH	 = -L<parmetis lib directory path>
@@ -51,27 +52,27 @@ METISINCLUDEPATH = -I<parmetis include directory path>
 
 
 # uncomment this part for optimized compilation
-LDFLAGS         = -c -g0 -O2 -DTHREEDIM -lm
+#CXXFLAGS         = -DHAVE_CONFIG_H  -DLIFEV_CHECK_ALL  -DTHREEDIM  -O2
 # uncomment this part for debugging
-#LDFLAGS         = -c -g2 -O0 -DTHREEDIM -lm
+
+CXXFLAGS         = -DHAVE_CONFIG_H  -DLIFEV_CHECK_ALL  -DTHREEDIM   -g -O0
 
 
-all: $(OBJECTS) $(EXECUTABLE)
+LDFLAGS          = $(LIFELIBPATH) $(LIFELIBS) $(TRILLIBPATH) $(TRILLIBS) \
+                   $(METISPATH) $(METISLIBS) \
+	               $(MPILIBPATH) $(MPILIBS)
+
+
+all: $(EXECUTABLE)
 
 $(OBJECTS): $(SOURCES)
-	$(CC) $(LDFLAGS) \
+	$(CC) -c $(CXXFLAGS) \
 	$(MPIINCLUDEPATH) $(TRILINCLUDEPATH) $(LIFEINCLUDEPATH) \
 	$(SOURCES) -o $@
 
-$(EXECUTABLE): $(OBJECT)
-	echo "compiling the executable ... "
-	$(CC) $(CFLAGS) \
-	$(OBJECTS) $< -o $@ \
-	$(LIFELIBPATH) $(LIFELIBS) $(LIFEINCLUDEPATH) \
-	$(TRILLIBPATH) $(TRILLIBS) $(TRILINCLUDEPATH) \
-	$(METISPATH) $(METISLIBS) $(METISINCLUDE) \
-	$(MPILIBPATH) $(MPILIBS) $(MPIINCLUDEPATH) \
-
+$(EXECUTABLE): $(OBJECTS)
+	echo "Linking the executable ... "
+	$(CC) $< -o $@   $(LDFLAGS)
 
 clean:
 	rm -rf *o cavity
