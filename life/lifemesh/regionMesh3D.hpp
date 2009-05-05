@@ -609,6 +609,7 @@ namespace LifeV
         void orderMesh(MPI_Comm comm);
 #endif
         void printLtGMap(std::ostream & os);
+        void edgeMarkers(std::map<ID, ID> const& locDof, UInt newMarker);
 
     private:
 
@@ -2730,6 +2731,18 @@ orderMesh(MPI_Comm comm) // serial reordering:
                }*/
 
     }
+template <typename GEOSHAPE, typename MC>
+void
+RegionMesh3D<GEOSHAPE, MC>::
+edgeMarkers(std::map<ID, ID> const& locDof, UInt newMarker)
+{
+    std::map<ID, ID>::const_iterator IT;
+    for(IT=locDof.begin(); IT!=locDof.end(); ++IT)
+        {
+            pointList(IT->second).setMarker(newMarker);
+        }
+}
+
 #endif
 
     template <typename GEOSHAPE, typename MC>
