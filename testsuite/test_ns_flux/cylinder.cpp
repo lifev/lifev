@@ -159,16 +159,7 @@ struct Cylinder::Private
                  const Real& /* z */,
                  const ID&   id ) const
         {
-            switch(id) {
-            case 1:
-            case 2:
-                return 0.0;
-                break;
-            case 3:
-                return ( (*lambda)[id] );
-                break;
-            }
-            return 0;
+            return ( (*lambda)[0] );
         }
 
     fct_type get_lambda3d()
@@ -357,8 +348,10 @@ Cylinder::run()
     /*
     if  (d->comm->MyPID() == 0) // Adding lagrange multipliers in the first processor
         {
+    */
             lagrangeMultipliers.resize(1); // just one flux to impose (n);
             lagrangeMultipliers[0] = 1;    // just take a numbering of the lagrange multipliers [1:n];
+    /*
         }
     */
 
