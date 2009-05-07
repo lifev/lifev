@@ -54,7 +54,6 @@ fullMonolithic::setup()
             M_epetraOper.reset( new Epetra_FullMonolithic(this));
             M_solid->setOperator(*M_epetraOper);
             }*/
-    std::cout<<"map global elements : "<<M_monolithicMap->getMap(Unique)->NumGlobalElements()<<std::endl;
     vector_type u0(*M_monolithicMap);
     M_bdf.reset(new BdfT<vector_type>(M_dataFluid->order_bdf()));
     M_bdf->initialize_unk(u0);
@@ -169,7 +168,6 @@ fullMonolithic::evalResidual( vector_type&       res,
 
             //            M_dispOld.reset(new vector_type(M_meshMotion->dispOld()));
             UInt offset(M_uFESpace->dof().numTotalDof()*nDimensions +  M_pFESpace->dof().numTotalDof() + M_dFESpace->dof().numTotalDof()*nDimensions + nDimensions*M_interface);
-            std::cout<<"offset: "<<offset<<std::endl;
 
             vector_ptrtype meshDispDiff(new vector_type(M_mmFESpace->map()));
 
@@ -259,7 +257,6 @@ void fullMonolithic::solveJac(vector_type       &_muk,
 
     if(M_dataFluid->useShapeDerivatives())
         {
-            std::cout<<"this->solidInterfaceMap()->getMap(Repeated)"<<this->solidInterfaceMap()->getMap(Repeated)<<std::endl;
             M_epetraOper.reset( new Epetra_FullMonolithic(*this/*, *this->monolithicMap()->getMap(Unique)*/));
             super::setOperator(*M_epetraOper);
             //            vector_type meshDeltaDisp(M_mmFESpace->map());

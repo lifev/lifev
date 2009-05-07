@@ -109,12 +109,10 @@ public :
 
     Epetra_FullMonolithic(fullMonolithic& MOperator/*, Epetra_Map& Mappa*/):
         M_FMOper               (&MOperator),
-        M_comm             (&M_FMOper->worldComm()),
-        M_operatorDomainMap(/*Mappa*/ *M_FMOper->couplingVariableMap()->getMap(Repeated)),
-        M_operatorRangeMap(/*Mappa*/ *M_FMOper->couplingVariableMap()->getMap(Repeated))
+        M_operatorDomainMap(/*Mappa*/ *M_FMOper->couplingVariableMap()->getMap(Unique)),
+        M_operatorRangeMap(/*Mappa*/ *M_FMOper->couplingVariableMap()->getMap(Unique)),
+        M_comm             (&M_FMOper->worldComm())
     {
-        std::cout << "M_FMOper->solidInterfaceMap() = " << M_FMOper->solidInterfaceMap() << std::endl;
-        std::cout << "M_FMOper->solidInterfaceMap()->getMap(Repeated) = " << M_FMOper->solidInterfaceMap()->getMap(Repeated) << std::endl;
 
     };
     virtual ~Epetra_FullMonolithic(){};
@@ -143,49 +141,5 @@ private:
     Epetra_Comm* M_comm;
 };
 
-#ifdef UNDEFINED
-class Epetra_FullMonolithic : public Epetra_Operator
-{
-public :
-
-    typedef Monolithic::vector_type  vector_type;
-    typedef boost::shared_ptr<vector_type> vector_ptrtype;
-
-    Epetra_FullMonolithic(Monolithic* MOperator):
-        M_FMOper               (MOperator),
-        //        M_operatorDomainMap(*M_FMOper->solidInterfaceMap()->getMap(Repeated)),
-        //        M_operatorRangeMap(*M_FMOper->solidInterfaceMap()->getMap(Repeated)),
-        M_comm             (&M_FMOper->worldComm())
-    {
-        std::cout << "M_FMOper->solidInterfaceMap() = " << M_FMOper->solidInterfaceMap() << std::endl;
-        std::cout << "M_FMOper->solidInterfaceMap()->getMap(Repeated) = " << M_FMOper->solidInterfaceMap()->getMap(Repeated) << std::endl;
-
-    };
-    virtual ~Epetra_FullMonolithic(){};
-
-    int 	SetUseTranspose (bool  /*UseTranspose*/)
-        {std::cout << "********* EJ : transpose not available\n"; return -1;}
-    int Apply (const Epetra_MultiVector &X, Epetra_MultiVector &Y) const;
-    int 	ApplyInverse    (const Epetra_MultiVector &/*X*/, Epetra_MultiVector &/*Y*/) const
-        {std::cout << "********* EJ : inverse not available\n"; return -1;}
-    double 	NormInf         () const
-        {std::cout << "********* EJ : NormInf not available\n"; return 1.;}
-    const char * Label      () const {return "exactJacobian";}
-    bool 	UseTranspose    () const {return false;}
-    bool 	HasNormInf      () const {return false;}
-    const Epetra_Comm&  Comm () const { return *M_comm; }
-    const Epetra_Map & 	OperatorDomainMap () const {/*return M_operatorDomainMap;*/}
-    const Epetra_Map & 	OperatorRangeMap  () const {/*return M_operatorRangeMap;*/}
-
-    void setOperator( Monolithic* fm) {M_FMOper = fm;}
-
-private:
-
-    //    const Epetra_Map M_operatorDomainMap;
-    //    const Epetra_Map M_operatorRangeMap;
-    Monolithic* M_FMOper;
-    Epetra_Comm* M_comm;
-};
-#endif
 }
 #endif
