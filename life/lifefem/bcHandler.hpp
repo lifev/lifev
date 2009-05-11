@@ -308,9 +308,12 @@ public:
     //! output
     std::ostream& showMe( bool verbose = false, std::ostream & out = std::cout ) const;
 
-    //! the offset is used ...
-    void setOffset(UInt offset){M_offset=offset;}
-    UInt offset()const {return M_offset;}
+    //! the offset is used on all BCs
+  void setOffset(UInt offset){M_offset=offset;}
+  UInt offset()const {return M_offset;}
+  //! specific BC offset
+  void setOffset( std::string const& name, int offset );
+
     //@}
 
 private:
@@ -483,7 +486,9 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                 {
 
                     lDof = ( iVeBEl - 1 ) * nDofPerVert + l ; // local Dof
-                    gDof = dof.localToGlobal( iElAd, ( iVeEl - 1 ) * nDofPerVert + l ); // global Dof
+
+		    // global Dof
+                    gDof = dof.localToGlobal( iElAd, ( iVeEl - 1 ) * nDofPerVert + l );
                     bdltg( lDof ) = gDof; // local to global on this face
 
                     // Adding identifier
@@ -530,6 +535,10 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                                 //        where->addIdentifier( new IdentifierNatural(gDof) );
                                 //       }
                                 break;
+                            case Flux:
+
+
+			      break;
                             default:
                                 ERROR_MSG( "This boundary condition type is not yet implemented" );
                         }
@@ -621,6 +630,9 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                                     where->addIdentifier( new IdentifierNatural( gDof ) );
                                 }
                                 break;
+			case Flux:
+			  
+			  break;
                             default:
                                 ERROR_MSG( "This boundary condition type is not yet implemented" );
                         }
@@ -740,7 +752,27 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                     where->addIdentifier( new IdentifierNatural( iBoundaryElement, bdltg ) );
                     // }
                     break;
-                default:
+                 case Flux:
+                    // Loop on number of Dof per face
+                    for ( ID l = 1; l <= nDofPerFace; ++l )
+                    {
+                        lDof = nDofBElE + nDofBElV + l; // local Dof
+                        gDof = dof.localToGlobal( iElAd, nDofElemE + nDofElemV + ( iBElEl - 1 ) * nDofPerFace + l ); // global Dof
+                        // Why kind of data ?
+                        if ( where->dataVector() )
+                        { // With data vector
+                            where->addIdentifier( new IdentifierBase( gDof ) );
+                        }
+                        else
+                        { // With user defined functions
+                            feBd.coorMap( x, y, z, feBd.refFE.xi( lDof - 1 ), feBd.refFE.eta( lDof - 1 ) );
+                            where->addIdentifier( new IdentifierEssential( gDof, x, y, z ) );
+                        }
+                    }
+                    break; 
+
+
+	    default:
                     ERROR_MSG( "This boundary condition type is not yet implemented" );
             }
         }

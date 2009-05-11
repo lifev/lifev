@@ -193,6 +193,15 @@ BCHandler::findBC( int lab)
 }
 
 
+
+void 
+BCHandler::setOffset( std::string const& name, int offset )
+{
+  BCBase* bc = findBC( name );
+  
+  bc->setOffset(offset);
+}
+
 void
 BCHandler::modifyBC( std::string const& __name, BCFunctionBase& __bcf )
 {
