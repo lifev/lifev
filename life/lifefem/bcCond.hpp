@@ -70,7 +70,7 @@ namespace LifeV
 /** Boundary condition basic types
     Essential, Natural or Mixte
 */
-enum BCType{Essential, Natural, Mixte};
+  enum BCType{Essential, Natural, Mixte, Flux};
 //    ,UDepEssential,UDepNatural,UDepMixte};
 
 /** Type for boundary conditions application modes
@@ -408,6 +408,13 @@ public:
     //! Returns the liste size
     UInt list_size() const;
 
+  //! Set the offset
+  void setOffset(int offset) {_M_offset = offset;}
+  
+  //! Returns the offset
+  const int offset() const {return _M_offset;}
+
+  
     //! Output
     std::ostream & showMe( bool verbose = false, std::ostream & out = std::cout ) const;
 
@@ -424,34 +431,34 @@ public:
         }
 
 private:
-    bool _M_isUDep;
+    bool                                  _M_isUDep;
 
     //! name identifying a specific BC
-    std::string _M_name;
+    std::string                           _M_name;
 
     //! flag identifying a specific part of the mesh boundary
-    EntityFlag _M_flag;
+    EntityFlag                            _M_flag;
 
     //! the boundary condition type
-    BCType _M_type;
+    BCType                                _M_type;
 
     //! the boundary condition mode of application
-    BCMode _M_mode;
+    BCMode                                _M_mode;
 
     //! Pointer to a user defined functor
-    boost::shared_ptr<BCFunctionBase> _M_bcf;
+    boost::shared_ptr<BCFunctionBase>     _M_bcf;
 
     boost::shared_ptr<BCFunctionUDepBase> _M_bcfUDep;
 
 
     //! Pointer to a user given data vector
-    boost::shared_ptr<BCVectorBase > _M_bcv;
+    boost::shared_ptr<BCVectorBase >      _M_bcv;
 
     //! True is a data vector has been provided
-    bool _M_dataVector;
+    bool                                  _M_dataVector;
 
     //! the list of involved in this BC
-    std::vector<ID> _M_comp;
+    std::vector<ID>                       _M_comp;
 
     //! set of pointers to identifiers allowing the user to get hold the DOF
     //! to which the BC applies
@@ -463,8 +470,13 @@ private:
     //! true, when idlist updated
     bool _M_finalised;
 
+  //! BC offset
+  int _M_offset;
+
     //! Transfert between list and vector containers
     void finalise();
+
+
 };
 
 
