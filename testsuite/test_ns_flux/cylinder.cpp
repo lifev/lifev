@@ -52,6 +52,7 @@
 #include <iostream>
 #include <math.h>
 
+#define LM 0
 
 using namespace LifeV;
 
@@ -129,6 +130,33 @@ struct Cylinder::Private
      * @return the characteristic velocity
      */
     Real Ubar() const { return nu*Re/D; }
+
+    double Um_2d() const { return 3*Ubar()/2; }
+     /**
+     * Poiseuille inflow
+     *
+     * Define the velocity profile at the inlet for the 3D cylinder
+     */
+    Real poiseuille( const Real& t,
+                      const Real& x,
+                      const Real& y,
+                      const Real& z,
+                      const ID&   id ) const
+    {
+        double r = std::sqrt(x*x + y*y);
+
+        if (id == 3)
+            return Um_2d()*2*((D/2.)*(D/2.) - r*r);
+
+        return 0.;
+    }
+
+    fct_type getU_pois()
+        {
+            fct_type f;
+            f = boost::bind(&Cylinder::Private::poiseuille, this, _1, _2, _3, _4, _5);
+            return f;
+        }
 
 
     /**
@@ -229,6 +257,9 @@ Cylinder::run()
     std::vector<ID> zComp(1);
     zComp[0] = 3;
 
+    BCFunctionBase uPois(  d->getU_pois() );
+
+
     boost::shared_ptr< std::vector<Real> > lambda;
     lambda.reset( new std::vector<Real>(1) );
     (*lambda)[1] = INLET;
@@ -240,11 +271,16 @@ Cylinder::run()
 #ifdef TUBE20_MESH_SETTINGS
 
     //cylinder
-    bcH.addBC( "Inlet",    INLET,    Natural,   Full,      lambdaIn,   3 );
+#if LM
+    bcH.addBC( "Inlet",    INLET,    Flux,   Full,      lambdaIn, 3 );
+#else
+    bcH.addBC( "Inlet",    INLET,    Essential,   Full,      uPois, 3 );    
+#endif
     bcH.addBC( "Outlet",   OUTLET,   Natural,   Full,      uZero, 3 );
     bcH.addBC( "Wall",     WALL,     Essential,   Full,    uZero, 3 );
     bcH.addBC( "Slipwall", SLIPWALL, Essential,   Full,    uZero, 3 );
 
+    bcH.showMe();
 #endif
 
 
@@ -339,8 +375,11 @@ Cylinder::run()
 
 
 
-    UInt totalVelDof   = uFESpace.map().getMap(Unique)->NumGlobalElements();
-    UInt totalPressDof = pFESpace.map().getMap(Unique)->NumGlobalElements();
+    UInt totalVelDofs   = uFESpace.map().getMap(Unique)->NumGlobalElements();
+    UInt totalPressDofs = pFESpace.map().getMap(Unique)->NumGlobalElements();
+    UInt totalDofs      = totalVelDofs + totalPressDofs;
+
+    bcH.setOffset("Inlet", totalDofs);
 
     // Lagrange multipliers for flux imposition
     std::vector<int> lagrangeMultipliers(0);
@@ -355,20 +394,28 @@ Cylinder::run()
         }
     */
 
-    if (verbose) std::cout << "Total Velocity Dof = " << totalVelDof << std::endl;
-    if (verbose) std::cout << "Total Pressure Dof = " << totalPressDof << std::endl;
+    if (verbose) std::cout << "Total Velocity Dofs = " << totalVelDofs << std::endl;
+    if (verbose) std::cout << "Total Pressure Dofs = " << totalPressDofs << std::endl;
+    if (verbose) std::cout << "Total Dofs          = " << totalDofs << std::endl;
 
     if (verbose) std::cout << "Calling the fluid constructor ... ";
 
+#if LM
     Oseen< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
                                               uFESpace,
                                               pFESpace,
                                               lagrangeMultipliers,
                                               *d->comm);
-    EpetraMap fullMap(fluid.getMap());
-
+#else
+    Oseen< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
+                                              uFESpace,
+                                              pFESpace,
+                                              *d->comm);
+#endif
 
     if (verbose) std::cout << "ok." << std::endl;
+
+    EpetraMap fullMap(fluid.getMap());
 
     fluid.setUp(dataFile);
     fluid.buildSystem();

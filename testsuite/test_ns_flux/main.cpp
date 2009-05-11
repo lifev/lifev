@@ -39,6 +39,8 @@
 
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/application.hpp>
+#include <life/lifealg/IfpackPreconditioner.hpp>
+#include <life/lifealg/MLPreconditioner.hpp>
 
 #include <cylinder.hpp>
 #include "mpi.h"
@@ -80,6 +82,16 @@ std::set<UInt> parseList( const std::string& list )
     setList.insert( atoi( stringList.c_str() ) );
     return setList;
 }
+
+namespace LifeV
+{
+namespace
+{
+static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
+static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
+}
+}
+
 
 int
 main( int argc, char** argv )
