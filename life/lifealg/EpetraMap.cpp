@@ -53,7 +53,7 @@ EpetraMap::EpetraMap(std::vector<int> const& lagrangeMultipliers,
     int IndexBase = 1;
 
     for (int i(0); i < NumGlobalElements; ++i)
-        MyGlobalElements[i] = i;
+        MyGlobalElements[i] = i + 1;
 
 
     createMap( NumGlobalElements,
