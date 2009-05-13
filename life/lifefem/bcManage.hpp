@@ -69,7 +69,6 @@ void bcManage( Real (*mu)(Real t,Real x, Real y, Real z, Real u),
     // Loop on boundary conditions
     for ( Index_t i = 0; i < BCh.size(); ++i )
         {
-
             switch ( BCh[ i ].type() )
                 {
                 case Essential:  // Essential boundary conditions (Dirichlet)
@@ -112,7 +111,8 @@ void bcManage( Real (*mu)(Real t,Real x, Real y, Real z, Real u),
                     else
                         bcEssentialManage( A, b, mesh, dof, BCh[ i ], bdfem, coef, t, BCh.offset() );
                     break;
-                case Natural:  // Natural boundary conditions (Neumann)
+                case Natural:// Natural boundary conditions (Neumann)
+                    break;
                 case Mixte:  // Mixte boundary conditions (Robin)
                     break;
                 default:
@@ -186,7 +186,7 @@ void bcManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& do
     // Loop on boundary conditions
     for ( Index_t i = 0; i < BCh.size(); ++i )
         {
-
+//             std::cout << i << " " << BCh[i].type() << " " << Flux << std::endl;
             switch ( BCh[ i ].type() )
                 {
                 case Essential:  // Essential boundary conditions (Dirichlet)
@@ -196,6 +196,9 @@ void bcManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& do
                     break;
                 case Mixte:  // Mixte boundary conditions (Robin)
                     bcMixteManage( A, bRepeated, mesh, dof, BCh[ i ], bdfem, t, BCh.offset() );
+                    break;
+                case Flux:
+                    bcFluxManage( A, b, mesh, dof, BCh[ i ], bdfem, t, BCh.offset() );
                     break;
                 default:
                     ERROR_MSG( "This BC type is not yet implemented" );
@@ -1160,6 +1163,7 @@ void bcNaturalManage( VectorType& b,
     else
         {  //! If BC is given under a functionnal form
 
+            //std::cout << "BC Natural manage w/ function" << std::endl;
             DataType x, y, z;
             VectorType bRepeated(b.getMap(),Repeated);
 
@@ -1992,6 +1996,86 @@ void bcMixteManage( MatrixType1& A, MatrixType2 & trD, MatrixType3 & D,
                 }
         }
 }
-}
 
+
+
+// ===================================================
+// Flux BC
+// ===================================================
+
+template <typename MatrixType,
+          typename VectorType,
+          typename MeshType,
+          typename DataType>
+void bcFluxManage( MatrixType&     A,
+                    VectorType&     b,
+                   const MeshType& mesh,
+                   const Dof&      dof,
+                   const BCBase&   BCb,
+                   CurrentBdFE&    bdfem,
+                   const DataType& t,
+                   UInt            offset )
+
+{
+
+    std::cout << "Flux BC ... " << std::endl;
+    // Number of local Dof in this face
+    UInt nDofF = bdfem.nbNode;
+
+    offset += BCb.offset();
+    // Number of total scalar Dof
+    UInt totalDof = dof.numTotalDof();
+
+    // Number of components involved in this boundary condition
+    UInt nComp = BCb.numberOfComponents();
+
+    DataType sum;
+
+    const IdentifierNatural* pId;
+    ID ibF, idDof, jdDof, kdDof;
+
+    const BCFunctionMixte* pBcF = static_cast<const BCFunctionMixte*>( BCb.pointerToFunctor() );
+
+    b[offset + 1] = BCb(0., 0., 0., 0., t);
+
+
+    if ( !BCb.dataVector() )
+        {
+            DataType x = 0., y = 0., z = 0.;
+
+            for ( ID i = 1; i <= BCb.list_size(); ++i )
+                {
+                    pId = static_cast< const IdentifierNatural* >( BCb( i ) );
+
+                    // Number of the current boundary face
+                    ibF = pId->id();
+                    // Updating face stuff
+                    bdfem.updateMeasNormalQuadPt( mesh.bElement( ibF ) );
+
+                    for ( ID idofF = 1; idofF <= nDofF; ++idofF )
+                        {
+                            ID gDof = pId->bdLocalToGlobal( idofF );
+
+                            for ( int ic = 1; ic <= nComp; ++ic)
+                                {
+                                    idDof = pId->bdLocalToGlobal( idofF ) + (ic - 1)*totalDof;
+
+                                    sum = 0.;
+                                    for ( int iq = 0; iq < bdfem.nbQuadPt; ++iq )
+                                        {
+                                            sum += bdfem.phi( int( idofF - 1 ), iq )*
+                                                bdfem.normal(int(ic - 1), iq)*
+                                                bdfem.weightMeas(iq);
+                                        }
+
+                                    jdDof = offset;
+
+                                    A.set_mat_inc( idDof - 1, jdDof    , sum );
+                                    A.set_mat_inc( jdDof    , idDof - 1, sum );
+                                }
+                        }
+                }
+        }
+}
+}
 #endif
