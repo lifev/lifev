@@ -30,10 +30,7 @@
 namespace LifeV
 {
 //! constructor using a data file.
-DataOneDModel::DataOneDModel(const GetPot& dfile)//:
-//! boundcond
-//_M_bc_left(dfile, "left"),
-//_M_bc_right(dfile,"right")
+DataOneDModel::DataOneDModel(const GetPot& dfile)
 {
     //! Time
     _M_time_beg = dfile("time/timebeg",0.0);
@@ -53,8 +50,6 @@ DataOneDModel::DataOneDModel(const GetPot& dfile)//:
     _M_postProcessTimeStep = dfile("miscellaneous/postprocess_timestep",0.01);
 }
 
-// OneDBcType DataOneDModel::bc_left() const {return _M_bc_left;}
-// OneDBcType DataOneDModel::bc_right() const {return _M_bc_right;}
 
 Real const& DataOneDModel::timestep() const
 {
@@ -90,15 +85,14 @@ Real DataOneDModel::xRight() const
 {
     return _M_x_right;
 }
+Real DataOneDModel::nbElem() const
+{
+    return _M_nb_elem;
+}
 
 
 void DataOneDModel::showMeData(std::ostream& c) const
 {
-//    c << "\n*** Values for data [boundcond]\n";
-    //! boundcond
-//    c<< "left:\t"<<_M_bc_left;
-//    c<< "\nright:\t"<<_M_bc_right;  
-//    c<<"\n";
     //! Time
     c << "\n*** Values for data [time]\n";
     c << "time_beg = " << _M_time_beg << "\n";

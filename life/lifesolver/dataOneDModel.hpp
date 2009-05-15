@@ -31,7 +31,6 @@
 #include <iostream>
 #include <life/lifecore/life.hpp>
 #include <life/lifecore/GetPot.hpp>
-//#include <life/lifefem/oneDBcType.hpp>
 
 namespace LifeV
 {
@@ -61,23 +60,14 @@ public:
     // return the two extremal points
     Real xLeft() const;
     Real xRight() const;
+    Real nbElem() const;
 
     const std::string PostDirectory() const {return _M_post_dir;};
-
-    //! Return bctype left
-//    OneDBcType bc_left() const;
-    //! Return bctype right    
-//    OneDBcType bc_right() const;
 
     //! Output
     void showMeData(std::ostream& c=std::cout) const;
 
 protected:
-
-    //! Store bctype left
-//    OneDBcType _M_bc_left;
-    //! Store bctype right    
-//    OneDBcType _M_bc_right;
 
     //
     //! Time
@@ -99,10 +89,10 @@ protected:
     std::string _M_post_dir; //! full directory name (including path)
     std::string _M_post_file; //! output file name
     int _M_verbose;
-  /*!
-    Write down results to file each _M_postProcessTimeStep seconds
-  */
-  Real _M_postProcessTimeStep;
+    /*!
+      Write down results to file each _M_postProcessTimeStep seconds
+    */
+    Real _M_postProcessTimeStep;
 
 };
 
