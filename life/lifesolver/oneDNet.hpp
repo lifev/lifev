@@ -63,7 +63,7 @@ namespace LifeV
   The underlying data structure is a graph, so that
   one can regard the network as a set of vertices and edges
 */
-template< class SOLVER1D, class PARAM1D >
+template< class SOLVER1D >
 class OneDNet{
 
 public:
@@ -74,10 +74,7 @@ public:
     /*! \name Typedefs
      */
     //@{
-    //! Boost shared pointer to 1D parameter class
-    typedef typename boost::shared_ptr< PARAM1D > OneDParamPtr;
-    //! Map of pointers to 1D parameter class
-
+    typedef SOLVER1D SolverType;
     //! Boost shared pointer to 1D solver class
     typedef typename boost::shared_ptr< SOLVER1D > OneDSolverPtr;
 
@@ -128,9 +125,6 @@ public:
     //! Value type for solver map
     typedef typename MapSolver::value_type MapSolverValueType;
 
-    //! Pair type: 2-dimensional vector
-    typedef std::pair< Real, Real > Vec2D;
-
     //@}
 
     /*! \name Public Members
@@ -149,7 +143,8 @@ public:
         int index; /*!< numerical label */
         bool internal;  /*!< is it an internal interface? */
         int type; /*!< the type of the interface */
-//        boost::shared_ptr<LifeV::EpetraVector> values;
+        Real parameter; /*!< in case you need a numeric parameter */
+        bool parameter2; /*!< in case you need a bool parameter */
     };
 
     //! Edge properties
@@ -161,9 +156,7 @@ public:
     */
     struct OneDVessel{
         int index; /*!< numerical label */
-        OneDParamPtr onedparam; /*!< pointer to 1D parameter class */
         OneDSolverPtr onedsolver; /*!< pointer to 1D solver class */
-//        Vec2D;
     };
     //@}
 
@@ -180,6 +173,10 @@ public:
     //@{
     //! Gets a const reference to the data structure
     Network const& network();
+    //! Gets the number of vessels in the network
+    UInt getNumVessels(){ return _M_num_vessels; }
+    //! Gets the number of interfaces in the network
+    UInt getNumInterfaces(){ return _M_num_interfaces; }
 
 
     //! Returns the "out" degree of one vertex of the net
@@ -208,16 +205,10 @@ public:
     Edge_Iter Edge( const int& ind );
 
     //! Gets a reference to 1D Solver (associated to the edge) with specified index
-    SOLVER1D & Solver( const int& ind );
+    SOLVER1D & getSolver( const int& ind );
 
     //! Gets a pointer to 1D Solver (associated to the edge) with specified index
-    OneDSolverPtr SolverPtr( const int& ind );
-
-    //! Gets a reference to 1D Param (associated to the edge) with specified index
-    PARAM1D & Param( const int& ind );
-
-    //! Gets a reference to 1D Param (associated to the edge) with specified index
-    OneDParamPtr ParamPtr( const int& ind );
+    OneDSolverPtr getSolverPtr( const int& ind );
 
     //! Return the time step
     Real timestep() const;
@@ -254,7 +245,7 @@ public:
 
       Default: continuity of total pressure and mass conservation
     */
-    void computeInterfaceTubesValues( );
+    void computeInterfaceTubesValues( const Real& time );
 
     void updateInterfaces( );
 
@@ -406,9 +397,6 @@ private:
                  std::map< int, bool >& sign
                  );
 
-    //! Scalar product for 2D vectors
-    Real dot(const Vec2D& vec1, const Vec2D& vec2) const;
-
     //! Find the solution at the foot of the characteristic line
     /*!
       \param point_bound spatial coordinate for boundary node (first interpolation point)
@@ -419,9 +407,12 @@ private:
       \param U_intern solution at internal node (second interpolation value)
       \return Solution \f$U\f$ at the foot of the characteristic line
     */
-    Vec2D interpolLinear(const Real& point_bound, const Real& point_internal,
-                         const Real& deltaT, const Real& eigenvalue,
-                         const Vec2D& U_bound, const Vec2D& U_intern) const;
+    OneDModelHandler::Vec2D interpolLinear(const Real& point_bound,
+                                           const Real& point_internal,
+                                           const Real& deltaT,
+                                           const Real& eigenvalue,
+                                           const OneDModelHandler::Vec2D& U_bound,
+                                           const OneDModelHandler::Vec2D& U_intern) const;
 
     const UInt _M_num_vessels; //!< number of edges in the graph
     const UInt _M_num_interfaces; //!<  number of vertices in the graph
@@ -458,8 +449,8 @@ private:
 /*********** IMPLEMENTATION **************/
 
 
-template< class SOLVER1D, class PARAM1D >
-OneDNet< SOLVER1D, PARAM1D >::OneDNet( GetPot data_file ):
+template< class SOLVER1D >
+OneDNet< SOLVER1D >::OneDNet( GetPot data_file ):
     _M_num_vessels( data_file("1dnetwork/num_vessels", 1) ),
     _M_num_interfaces( data_file("1dnetwork/num_interfaces", 2) ),
     _M_network( _M_num_interfaces ),
@@ -473,24 +464,30 @@ OneDNet< SOLVER1D, PARAM1D >::OneDNet( GetPot data_file ):
 
     _M_comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
     int ntasks;
-    int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
+    MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
 #else
     _M_comm.reset( new Epetra_SerialComm() );
 #endif
 
     if (!_M_comm->MyPID())
-        std::cout << "My PID = " << _M_comm->MyPID() << " out of " << ntasks << " running." << std::endl;
+        std::cout << "My PID = " << _M_comm->MyPID() << " out of "
+        << ntasks << " running." << std::endl;
 
-    // build epetra map for graph edges
-//    _M_epetra_vessels.reset( new Epetra_Map( (int)_M_num_vessels, 0, *_M_comm ) );
     // build epetra map for graph vertices
-    _M_epetra_interfaces.reset( new Epetra_Map( (int)_M_num_interfaces, 1, *_M_comm) );
+    _M_epetra_interfaces.reset( new Epetra_Map( (int)_M_num_interfaces,
+                                                1, *_M_comm) );
 
     // debug: Epetra
-    Debug( 6030 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID() << "] interfaces (indices):\n";
+    Debug( 6330 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID()
+    << "] interfaces (indices):\n";
+
+    // debug: use a sstring to pass messages to cout
+     std::stringstream debug_sstr;
+
+    debug_sstr << "\t";
     for( int i = 0; i < _M_epetra_interfaces->NumMyElements(); ++i )
-        Debug( 6030 ) << *(_M_epetra_interfaces->MyGlobalElements() + i) << "\n\t";
-    Debug( 6030 ) << "\n";
+        debug_sstr << "\t" << *(_M_epetra_interfaces->MyGlobalElements() + i);
+    Debug( 6330 ) << debug_sstr.str() << "\n";
 
     _M_comm->Barrier();
 //    char ready;
@@ -501,25 +498,31 @@ OneDNet< SOLVER1D, PARAM1D >::OneDNet( GetPot data_file ):
     //    Vertex_Descr vd[ _M_epetra_interfaces->NumMyElements ];
 
     // vertex iterators (for visiting the graph)
-    std::pair< Vertex_Iter, Vertex_Iter > vertex_iter_pair;
+    std::pair< Vertex_Iter, Vertex_Iter > vip;
     // edge descriptors (for visiting the graph)
-    std::pair< Edge_Descr, bool > edge_descr_pair;
+    std::pair< Edge_Descr, bool > edp;
 
     // auxiliary variable for vertex indexes
     UInt i(0); // note that indexes start from 1
 
-    // auxiliary variable (will contain interface label)
-    std::string str;
+    // access to data file
+    /*
+      GetPot files can be accessed at different sections;
+      prefix contains the section name
+    */
+    std::string prefix( "1dnetwork/interfacemap/" );
+    std::string::iterator prefix_end = prefix.end(), section_end;
+    // auxiliary variables (will contain interface label
+    // and a specific data file section name, respectively)
+    std::string str, section;
+
     // point to the correct section in data file
-    data_file.set_prefix( "1dnetwork/interfacemap/" );
+    data_file.set_prefix( prefix.c_str() );
 
     // assign properties to vertices
-    for( vertex_iter_pair = vertices(_M_network);
-         vertex_iter_pair.first != vertex_iter_pair.second;
-         ++vertex_iter_pair.first, ++i ){
-        //    for( int i = 0; i < _M_epetra_vessels->NumMyElements(); ++i )
-
-        vd[i] = *vertex_iter_pair.first;
+    for( vip = vertices(_M_network); vip.first != vip.second;
+         ++vip.first, ++i ){
+        vd[i] = *vip.first;
         // set index for the vertex
         _M_network[ vd[i] ].index = i+1;
 
@@ -530,8 +533,8 @@ OneDNet< SOLVER1D, PARAM1D >::OneDNet( GetPot data_file ):
         }
         catch (boost::bad_lexical_cast &) {
             // conversion failed
-            std::cout << "\n[OneDNet::OneDNet]: lexical conversion failed!"
-                      << std::endl;
+            std::cout << "\n[OneDNet::OneDNet]My PID = " << _M_comm->MyPID()
+            << ": lexical conversion failed!" << std::endl;
         }
         // set type for the vertex
         _M_network[ vd[i] ].type = data_file(str.c_str(),1);
@@ -542,18 +545,18 @@ OneDNet< SOLVER1D, PARAM1D >::OneDNet( GetPot data_file ):
 
     // access to data file
     /*
-      GetPot files can be accessed at different sections;
-      prefix contains the section name and is modified at each iteration
+      now we read the data file sections corresponding to different tubes,
+      so prefix is modified at each iteration
       (last three letters must be substituted by str)
     */
-    std::string prefix("1dnetwork/tubenn/");
-    std::string::iterator prefix_end = prefix.end();
+    prefix = "1dnetwork/tubenn/";
+    prefix_end = prefix.end();
 
-    std::cout << "\n*** Class OneDNet ***\n" << std::flush;
+    if( !_M_comm->MyPID() ) std::cout << "\n*** Class OneDNet ***\n" << std::flush;
     // debug: did I read the data file properly?
-    Debug( 6030 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID() << "] The net contains "
-    							<< _M_num_vessels << " vessels and "
-                  << _M_num_interfaces << " interfaces.\n";
+    Debug( 6330 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID()
+    << "] The net contains " << _M_num_vessels << " vessels and "
+    << _M_num_interfaces << " interfaces.\n";
 
     for( i=0; i < _M_num_vessels; ++i ){
 
@@ -564,8 +567,9 @@ OneDNet< SOLVER1D, PARAM1D >::OneDNet( GetPot data_file ):
         }
         catch (boost::bad_lexical_cast &) {
             // conversion failed
-            std::cout << "\n[OneDNet::OneDNet proc " << _M_comm->MyPID() << "] lexical conversion failed!"
-                      << std::endl;
+            std::cout << "\n[OneDNet::OneDNet proc " << _M_comm->MyPID()
+            << "] lexical conversion failed!"
+            << std::endl;
         }
 
         // update prefix
@@ -577,20 +581,24 @@ OneDNet< SOLVER1D, PARAM1D >::OneDNet( GetPot data_file ):
         right = data_file("right_interface",1);
 
         // debug: did I read the data file properly?
-        Debug( 6030 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID() << "] Tube number " << str << "\n";
-        Debug( 6030 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID() << "]\t\tleft interface = " << left << "\n";
-        Debug( 6030 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID() << "]\t\tright interface = " << right << "\n";
+        Debug( 6330 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID()
+        << "] Tube number " << str << "\n";
+        Debug( 6330 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID()
+        << "]\t\tleft interface = " << left << "\n";
+        Debug( 6330 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID()
+        << "]\t\tright interface = " << right << "\n";
 
         // add (oriented) edge between connected vertices
-        edge_descr_pair = add_edge( vd[left-1], vd[right-1], _M_network);
+        edp = add_edge( vd[left-1], vd[right-1], _M_network);
 
         // check if add_edge failed
         std::stringstream assert_sstr;
-        assert_sstr << "\n[OneDNet::OneDNet process " << _M_comm->MyPID() << "] ERROR adding edge!";
-        LIFEV_ASSERT( edge_descr_pair.second == true ).error( assert_sstr.str().c_str() );
+        assert_sstr << "\n[OneDNet::OneDNet process " << _M_comm->MyPID()
+        << "] ERROR adding edge!";
+        LIFEV_ASSERT( edp.second == true ).error( assert_sstr.str().c_str() );
 
         // set label for the edge
-        _M_network[ edge_descr_pair.first ].index = i+1;
+        _M_network[ edp.first ].index = i+1;
 
         // reset prefix to initial value
         prefix = "1dnetwork/tubenn/";
@@ -607,95 +615,118 @@ OneDNet< SOLVER1D, PARAM1D >::OneDNet( GetPot data_file ):
     std::pair< In_Edge_Iter, In_Edge_Iter > in_edge_iter_pair;
     // pair of out-edge iterators
     std::pair< Out_Edge_Iter, Out_Edge_Iter > out_edge_iter_pair;
+    // hypothesis: linear distribution of elements in epetra map
     for( int i = 0; i < _M_epetra_interfaces->NumMyElements(); ++i ) {
-        Debug( 6030 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID() << "] consider vertex "
-        							<< *(_M_epetra_interfaces->MyGlobalElements() + i);
-        Debug( 6030 ) << "\n\t";
+        Debug( 6330 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID()
+        << "] consider vertex "
+        << *(_M_epetra_interfaces->MyGlobalElements() + i)
+        << "\n";
 
-    	for( in_edge_iter_pair = in_edges(vd[*(_M_epetra_interfaces->MyGlobalElements() + i) - 1], _M_network);
-         in_edge_iter_pair.first != in_edge_iter_pair.second;
-         ++in_edge_iter_pair.first )
+        // the processor has to take care of the vessels which are in-/out-edges
+        // for his own net vertices
+    	for( in_edge_iter_pair =
+    	  in_edges(vd[*(_M_epetra_interfaces->MyGlobalElements() + i) - 1], _M_network);
+    	  in_edge_iter_pair.first != in_edge_iter_pair.second;
+          ++in_edge_iter_pair.first )
         {
-    				Debug( 6030 ) << "\n\t[OneDNet::OneDNet process " << _M_comm->MyPID() << "] adding vessel "
-    											<< _M_network[ *(in_edge_iter_pair).first ].index
-    											<< " to my map";
-//            Debug( 6030 ) << "\n\t";
-    				my_vessels.insert( _M_network[ *(in_edge_iter_pair).first ].index );
-    				Debug( 6030 ) << "\n\t[OneDNet::OneDNet process " << _M_comm->MyPID() << "] adding interface vector indexes "
-    											<< 4 * (_M_network[ *(in_edge_iter_pair).first ].index - 1) + 1 << "\t"
-    											<< 4 * (_M_network[ *(in_edge_iter_pair).first ].index - 1) + 2 << "\t"
-    											<< 4 * (_M_network[ *(in_edge_iter_pair).first ].index - 1) + 3 << "\t"
-    											<< 4 * (_M_network[ *(in_edge_iter_pair).first ].index - 1) + 4 << "\t"
-    											<< " to my map";
-//    				Debug( 6030 ) << "\n\t";
-    				my_interface_values.insert( 4 * (_M_network[ *(in_edge_iter_pair).first ].index - 1) + 1 );
-    				my_interface_values.insert( 4 * (_M_network[ *(in_edge_iter_pair).first ].index - 1) + 2 );
-    				my_interface_values.insert( 4 * (_M_network[ *(in_edge_iter_pair).first ].index - 1) + 3 );
-    				my_interface_values.insert( 4 * (_M_network[ *(in_edge_iter_pair).first ].index - 1) + 4 );
+          Debug( 6330 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID()
+          << "] adding (to my map) vessel "
+          << _M_network[ *(in_edge_iter_pair).first ].index
+          << "\n";
+
+          my_vessels.insert( _M_network[ *(in_edge_iter_pair).first ].index );
+
+          debug_sstr.str("");
+          debug_sstr << "\t" << 4 * (_M_network[ *(in_edge_iter_pair).first ].index - 1) + 1 << "\t"
+          << 4 * (_M_network[ *(in_edge_iter_pair).first ].index - 1) + 2 << "\t"
+          << 4 * (_M_network[ *(in_edge_iter_pair).first ].index - 1) + 3 << "\t"
+          << 4 * (_M_network[ *(in_edge_iter_pair).first ].index - 1) + 4 << "\t";
+          Debug( 6330 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID()
+          << "] adding (to my map) interface vector indexes "
+          << debug_sstr.str() << "\n";
+
+          // each interface has 4 unknowns: the global set of interface unknowns
+          // is here distributed among processors
+          my_interface_values.insert( 4 * (_M_network[ *(in_edge_iter_pair).first ].index - 1) + 1 );
+          my_interface_values.insert( 4 * (_M_network[ *(in_edge_iter_pair).first ].index - 1) + 2 );
+          my_interface_values.insert( 4 * (_M_network[ *(in_edge_iter_pair).first ].index - 1) + 3 );
+          my_interface_values.insert( 4 * (_M_network[ *(in_edge_iter_pair).first ].index - 1) + 4 );
         }
-    for( out_edge_iter_pair = out_edges(vd[*(_M_epetra_interfaces->MyGlobalElements() + i) - 1], _M_network);
+
+    for( out_edge_iter_pair =
+         out_edges(vd[*(_M_epetra_interfaces->MyGlobalElements() + i) - 1], _M_network);
          out_edge_iter_pair.first != out_edge_iter_pair.second;
          ++out_edge_iter_pair.first )
         {
-    				Debug( 6030 ) << "\n\t[OneDNet::OneDNet process " << _M_comm->MyPID() << "] adding vessel "
-    											<< _M_network[ *(out_edge_iter_pair).first ].index
-    											<< " to my map";
-//            Debug( 6030 ) << "\n\t";
-						my_vessels.insert( _M_network[ *(out_edge_iter_pair).first ].index );
-    				Debug( 6030 ) << "\n\t[OneDNet::OneDNet process " << _M_comm->MyPID() << "] adding interface vector indexes "
-    											<< 4 * (_M_network[ *(out_edge_iter_pair).first ].index - 1) + 1 << "\t"
-    											<< 4 * (_M_network[ *(out_edge_iter_pair).first ].index - 1) + 2 << "\t"
-    											<< 4 * (_M_network[ *(out_edge_iter_pair).first ].index - 1) + 3 << "\t"
-    											<< 4 * (_M_network[ *(out_edge_iter_pair).first ].index - 1) + 4 << "\t"
-    											<< " to my map";
-//            Debug( 6030 ) << "\n\t";
-    				my_interface_values.insert( 4 * (_M_network[ *(out_edge_iter_pair).first ].index - 1) + 1 );
-    				my_interface_values.insert( 4 * (_M_network[ *(out_edge_iter_pair).first ].index - 1) + 2 );
-    				my_interface_values.insert( 4 * (_M_network[ *(out_edge_iter_pair).first ].index - 1) + 3 );
-    				my_interface_values.insert( 4 * (_M_network[ *(out_edge_iter_pair).first ].index - 1) + 4 );
+          Debug( 6330 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID()
+          << "] adding to my map vessel "
+          << _M_network[ *(out_edge_iter_pair).first ].index
+          << "\n";
+
+          my_vessels.insert( _M_network[ *(out_edge_iter_pair).first ].index );
+
+          debug_sstr.str("");
+          debug_sstr << "\t" << 4 * (_M_network[ *(out_edge_iter_pair).first ].index - 1) + 1 << "\t"
+          << 4 * (_M_network[ *(out_edge_iter_pair).first ].index - 1) + 2 << "\t"
+          << 4 * (_M_network[ *(out_edge_iter_pair).first ].index - 1) + 3 << "\t"
+          << 4 * (_M_network[ *(out_edge_iter_pair).first ].index - 1) + 4 << "\t";
+          Debug( 6330 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID()
+          << "] adding (to my map) interface vector indexes "
+          << debug_sstr.str() << "\n";
+
+          my_interface_values.insert( 4 * (_M_network[ *(out_edge_iter_pair).first ].index - 1) + 1 );
+          my_interface_values.insert( 4 * (_M_network[ *(out_edge_iter_pair).first ].index - 1) + 2 );
+          my_interface_values.insert( 4 * (_M_network[ *(out_edge_iter_pair).first ].index - 1) + 3 );
+          my_interface_values.insert( 4 * (_M_network[ *(out_edge_iter_pair).first ].index - 1) + 4 );
         }
     }
     int my_vessels_array[my_vessels.size()], num(0);
-		Debug( 6030 ) << "\n[OneDNet::OneDNet process " << _M_comm->MyPID()
-									<< "] this list should be non repeated (vessels index set, size "
-									<< my_vessels.size() << ")";
+
     for( std::set<int>::iterator it = my_vessels.begin();
     	it != my_vessels.end(); ++it, ++num )
     {
-    	Debug( 6030 ) << *it << " \t";
-    	my_vessels_array[num] = *it;
+      debug_sstr.str("");
+      debug_sstr << "\t" << *it;
+      my_vessels_array[num] = *it;
     }
+    Debug( 6330 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID()
+    << "] this list should be non repeated (vessels index set, size "
+    << my_vessels.size() << ") " << debug_sstr.str() << "\n";
+
     _M_epetra_vessels.reset( new EpetraMap( -1,
                                              my_vessels.size(),
                                              my_vessels_array,
                                              1, *_M_comm ) );
 
-    Debug( 6030 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID() << "] vessels indices (repeated map):\n";
     for( int i = 0; i < _M_epetra_vessels->getMap(Repeated)->NumMyElements(); ++i )
-        Debug( 6030 ) << *(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i) << "\n\t";
-    Debug( 6030 ) << "\n";
+      {
+        debug_sstr.str("");
+        debug_sstr << "\t" << *(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i);
+      }
+    Debug( 6330 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID()
+    << "] vessels indices (repeated map):\n" << debug_sstr.str() << "\n";
 
-    Debug( 6030 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID() << "] vessels indices (unique map):\n";
     for( int i = 0; i < _M_epetra_vessels->getMap(Unique)->NumMyElements(); ++i )
-        Debug( 6030 ) << *(_M_epetra_vessels->getMap(Unique)->MyGlobalElements() + i) << "\n\t";
-    Debug( 6030 ) << "\n";
+      {
+        debug_sstr.str("");
+        debug_sstr << "\t" << *(_M_epetra_vessels->getMap(Unique)->MyGlobalElements() + i);
+      }
+    Debug( 6330 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID()
+    << "] vessels indices (unique map):\n" << debug_sstr.str() << "\n";
 
     int my_interface_values_array[my_interface_values.size()];
     num = 0;
-		Debug( 6030 ) << "\n[OneDNet::OneDNet process " << _M_comm->MyPID()
-									<< "] this list should be non repeated (interface values index set, size "
-									<< my_interface_values.size() << ")";
+
     for( std::set<int>::iterator it = my_interface_values.begin();
     	it != my_interface_values.end(); ++it, ++num )
     {
-    	Debug( 6030 ) << *it << " \t";
-    	my_interface_values_array[num] = *it;
+      debug_sstr.str("");
+      debug_sstr << "\t" << *it;
+      my_interface_values_array[num] = *it;
     }
-    _M_epetra_map_interface_values.reset( new EpetraMap( -1,
-                                                         my_interface_values.size(),
-                                                         my_interface_values_array,
-                                                         1, *_M_comm ) );
-    _M_epetra_vector_interface_values.reset( new EpetraVector( *_M_epetra_map_interface_values ) );
+    Debug( 6330 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID()
+    << "] this list should be non repeated (interface values index set, size "
+    << my_interface_values.size() << ")" << debug_sstr.str() << "\n";
     // be careful, _M_epetra_interface_values has indexes starting from 1
     /*
      interface values for tube i are
@@ -704,15 +735,25 @@ OneDNet< SOLVER1D, PARAM1D >::OneDNet( GetPot data_file ):
      right A : _M_epetra_interface_values[4(i-1) + 3]
      right Q : _M_epetra_interface_values[4(i-1) + 4]
     */
+    _M_epetra_map_interface_values.reset( new EpetraMap( -1,
+                                                         my_interface_values.size(),
+                                                         my_interface_values_array,
+                                                         1, *_M_comm ) );
+    _M_epetra_vector_interface_values.reset( new EpetraVector( *_M_epetra_map_interface_values ) );
 
-    Debug( 6030 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID() << "] interface values (indices):\n";
-    for( int i = 0; i < _M_epetra_map_interface_values->getMap(Repeated)->NumMyElements(); ++i )
-        Debug( 6030 ) << *(_M_epetra_map_interface_values->getMap(Repeated)->MyGlobalElements() + i) << "\n\t";
-    Debug( 6030 ) << "\n";
+    for( int i = 0;
+         i < _M_epetra_map_interface_values->getMap(Repeated)->NumMyElements();
+         ++i )
+      {
+        debug_sstr.str("");
+        debug_sstr << *(_M_epetra_map_interface_values->getMap(Repeated)->MyGlobalElements() + i);
+      }
+    Debug( 6330 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID()
+    << "] interface values (indices): " << debug_sstr.str() << "\n";
 
     // debug: Epetra
     for( int i = 0; i < _M_epetra_vessels->getMap(Repeated)->NumMyElements(); ++i ) {
-//        Debug( 6030 ) << *(_M_epetra_vessels->MyGlobalElements() + i) << "\n\t";
+//        Debug( 6330 ) << *(_M_epetra_vessels->MyGlobalElements() + i) << "\n\t";
 
     		// Conversion using lexical_cast
       	try {
@@ -721,7 +762,8 @@ OneDNet< SOLVER1D, PARAM1D >::OneDNet( GetPot data_file ):
       	}
       	catch (boost::bad_lexical_cast &) {
           // conversion failed
-          std::cout << "\n[OneDNet::OneDNet proc " << _M_comm->MyPID() << "] lexical conversion failed!"
+          std::cout << "\n[OneDNet::OneDNet proc " << _M_comm->MyPID()
+          << "] lexical conversion failed!"
                     << std::endl;
       	}
 
@@ -730,32 +772,27 @@ OneDNet< SOLVER1D, PARAM1D >::OneDNet( GetPot data_file ):
       	// point to the correct section in data file
       	data_file.set_prefix( prefix.c_str() );
 
-            // allocate an object of class 1D param
-        typename OneDNet< SOLVER1D, PARAM1D >::OneDParamPtr
-            param ( new PARAM1D( data_file ) );
-
-        // attach 1D param pointer to network edge
-        _M_network[ *this->Edge(*(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i)) ].onedparam = param;
-
         // allocate an object of class 1D solver
-        typename OneDNet< SOLVER1D, PARAM1D >::OneDSolverPtr
-            solver( new SOLVER1D( data_file, *param ) );
+        typename OneDNet< SOLVER1D >::OneDSolverPtr
+            solver( new SOLVER1D( data_file ) );
 
         // attach 1D solver pointer to network edge
         _M_network[ *this->Edge(*(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i)) ].onedsolver = solver;
 
         if( _M_set_time_param ) /* if true the network sets time data */
             {
-                Debug( 6030 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID()
-                							<< "] 0- Setting time parameters for onedModelSolver "
-                              << *(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i) << "...\n";
+                Debug( 6330 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID()
+                << "] 0- Setting time parameters for onedModelSolver "
+                << *(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i)
+                << "...\n";
                 // set network time step in each solver
                 solver->settimestep( _M_time_step );
                 // set network end time in each solver
                 solver->setendtime( _M_time_end );
                 // set network initial time in each solver
                 solver->setinittime( _M_time_beg );
-                Debug( 6030 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID() << "]\t...done!\n";
+                Debug( 6330 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID()
+                << "]\t...done!\n";
             }
 
         /*
@@ -765,33 +802,36 @@ OneDNet< SOLVER1D, PARAM1D >::OneDNet( GetPot data_file ):
         */
         if( solver->timestep() != _M_time_step )
             {
-                std::cout << "\n[OneDNet::OneDNet process " << _M_comm->MyPID() << "]:\nWARNING! Different time step: "
-                          << "oneDNet dt != onedModelSolver (number "
-                          << *(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i) << ") dt."
-                          << " Not yet implemented!" << std::endl;
+                std::cout << "\n[OneDNet::OneDNet process " << _M_comm->MyPID()
+                << "]:\nWARNING! Different time step: "
+                << "oneDNet dt != onedModelSolver (number "
+                << *(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i)
+                << ") dt."
+                << " Not yet implemented!" << std::endl;
                 abort();
             }
 
         if( solver->endtime() != _M_time_end )
             {
-                std::cout << "\n[OneDNet::OneDNet process " << _M_comm->MyPID() << "]: WARNING! Different time end: "
-                          << "oneDNet T != onedModelSolver (number "
-                          << *(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i) << ")."
-                          << " Not yet implemented!" << std::endl;
+                std::cout << "\n[OneDNet::OneDNet process " << _M_comm->MyPID()
+                << "]: WARNING! Different time end: "
+                << "oneDNet T != onedModelSolver (number "
+                << *(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i) << ")."
+                << " Not yet implemented!" << std::endl;
                 abort();
             }
 
         if( solver->inittime() != _M_time_beg )
             {
-                std::cout << "\n[OneDNet::OneDNet process " << _M_comm->MyPID() << "]: WARNING! Different beginning time: "
-                          << "oneDNet t0 != onedModelSolver (number "
-                          << *(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i) << ")."
-                          << " Not yet implemented!" << std::endl;
+                std::cout << "\n[OneDNet::OneDNet process " << _M_comm->MyPID()
+                << "]: WARNING! Different beginning time: "
+                << "oneDNet t0 != onedModelSolver (number "
+                << *(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i) << ")."
+                << " Not yet implemented!" << std::endl;
                 abort();
             }
 
         // Print out to screen info on 1D model
-        param->showMeData(std::cout);
         solver->showMeData(std::cout);
 
 
@@ -824,34 +864,38 @@ OneDNet< SOLVER1D, PARAM1D >::OneDNet( GetPot data_file ):
             _M_network[ vd[i] ].internal = false;
             break;
         default: // internal vertex
-        		Debug( 6030 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID() << "] setting "
-        									<< _M_network[ vd[i] ].index << " as an internal interface \n";
+            Debug( 6330 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID()
+            << "] setting "
+            << _M_network[ vd[i] ].index << " as an internal interface \n";
             _M_network[ vd[i] ].internal = true;
             in_edges = inEdges( _M_network[ vd[i] ].index );
             for( UInt ii = 0; ii < in_edges.size(); ++ii )
             	if( _M_epetra_vessels->getMap(Repeated)->MyGID(_M_network[ *(in_edges[ii]) ].index) )
             	{
-                Debug( 6030 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID() << "] setting "
-                							<< _M_network[ *(in_edges[ii]) ].index << " as an internal right BC vessel \n";
+                Debug( 6330 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID()
+                << "] setting " << _M_network[ *(in_edges[ii]) ].index
+                << " as an internal right BC vessel \n";
                 _M_network[ *(in_edges[ii]) ].onedsolver->setBCRight_internalnode();
             	}
             out_edges = outEdges( _M_network[ vd[i] ].index );
             for( UInt oi = 0; oi < out_edges.size(); ++oi )
             	if( _M_epetra_vessels->getMap(Repeated)->MyGID(_M_network[ *(out_edges[oi]) ].index) )
             	{
-                Debug( 6030 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID() << "] setting "
-                							<< _M_network[ *(out_edges[oi]) ].index << " as an internal left BC vessel \n";
+                Debug( 6330 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID()
+                << "] setting " << _M_network[ *(out_edges[oi]) ].index
+                << " as an internal left BC vessel \n";
                 _M_network[ *out_edges[oi] ].onedsolver->setBCLeft_internalnode();
             	}
         }
     }
-    Debug( 6030 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID() << "] leaving constructor\n";
+    Debug( 6330 ) << "[OneDNet::OneDNet process " << _M_comm->MyPID()
+    << "] leaving constructor\n";
 }
 
 
-template< class SOLVER1D, class PARAM1D >
-typename OneDNet<SOLVER1D,PARAM1D>::Vertex_Iter
-OneDNet<SOLVER1D,PARAM1D>::Vertex( const int& ind )
+template< class SOLVER1D >
+typename OneDNet<SOLVER1D>::Vertex_Iter
+OneDNet<SOLVER1D>::Vertex( const int& ind )
 {
     // iterators to visit vertex list
     std::pair<Vertex_Iter, Vertex_Iter> vertex_iter_pair;
@@ -864,15 +908,16 @@ OneDNet<SOLVER1D,PARAM1D>::Vertex( const int& ind )
             return *vertex_iter_pair.first; // return a Vertex_Iter object
     }
     // the function failed if it's printing out this!
-    std::cout << "\n[OneDNet::Vertex] failed! Vertex " << ind << " not found..."
+    std::cout << "\n[OneDNet::Vertex] process " << _M_comm->MyPID()
+    << " failed! Vertex " << ind << " not found..."
               << std::endl;
     abort();
 }
 
 
-template< class SOLVER1D, class PARAM1D >
-typename OneDNet<SOLVER1D,PARAM1D>::Edge_Iter
-OneDNet<SOLVER1D,PARAM1D>::Edge( const int& ind )
+template< class SOLVER1D >
+typename OneDNet<SOLVER1D>::Edge_Iter
+OneDNet<SOLVER1D>::Edge( const int& ind )
 {
     // iterators to visit edge list
     std::pair<Edge_Iter, Edge_Iter> edge_iter_pair;
@@ -885,47 +930,31 @@ OneDNet<SOLVER1D,PARAM1D>::Edge( const int& ind )
             return edge_iter_pair.first; // return an Edge_Iter object
     }
     // the function failed if it's printing out this!
-    std::cout << "\n[OneDNet::Edge] failed! Edge " << ind << " not found..."
+    std::cout << "\n[OneDNet::Edge] process " << _M_comm->MyPID()
+    << " failed! Edge " << ind << " not found..."
               << std::endl;
     abort();
 }
 
 
-template< class SOLVER1D, class PARAM1D >
+template< class SOLVER1D >
 SOLVER1D &
-OneDNet<SOLVER1D,PARAM1D>::Solver( const int& ind )
+OneDNet<SOLVER1D>::getSolver( const int& ind )
 {
     return *_M_network[ *(this->Edge(ind)) ].onedsolver; // return a SOLVER1D object
 }
 
 
-template< class SOLVER1D, class PARAM1D >
-typename OneDNet<SOLVER1D, PARAM1D>::OneDSolverPtr
-OneDNet<SOLVER1D,PARAM1D>::SolverPtr( const int& ind )
+template< class SOLVER1D >
+typename OneDNet<SOLVER1D>::OneDSolverPtr
+OneDNet<SOLVER1D>::getSolverPtr( const int& ind )
 {
     return _M_network[ *(this->Edge(ind)) ].onedsolver; // return a OneDSolverPtr object
 }
 
-
-template< class SOLVER1D, class PARAM1D >
-PARAM1D &
-OneDNet<SOLVER1D,PARAM1D>::Param( const int& ind )
-{
-    return *_M_network[ *(this->Edge(ind)) ].onedparam; // return a PARAM1D object
-}
-
-
-template< class SOLVER1D, class PARAM1D >
-typename OneDNet<SOLVER1D, PARAM1D>::OneDParamPtr
-OneDNet<SOLVER1D,PARAM1D>::ParamPtr( const int& ind )
-{
-    return _M_network[ *(this->Edge(ind)) ].onedparam; // return a OneDParamPtr object
-}
-
-
-template< class SOLVER1D, class PARAM1D >
-std::vector<typename OneDNet<SOLVER1D,PARAM1D>::In_Edge_Iter>
-OneDNet<SOLVER1D,PARAM1D>::inEdges( const int& ind )
+template< class SOLVER1D >
+std::vector<typename OneDNet<SOLVER1D>::In_Edge_Iter>
+OneDNet<SOLVER1D>::inEdges( const int& ind )
 {
     // return parameter
     std::vector<In_Edge_Iter> in_edge_iter_vec;
@@ -945,9 +974,9 @@ OneDNet<SOLVER1D,PARAM1D>::inEdges( const int& ind )
 }
 
 
-template< class SOLVER1D, class PARAM1D >
-std::vector<typename OneDNet<SOLVER1D,PARAM1D>::Out_Edge_Iter>
-OneDNet<SOLVER1D,PARAM1D>::outEdges( const int& ind )
+template< class SOLVER1D >
+std::vector<typename OneDNet<SOLVER1D>::Out_Edge_Iter>
+OneDNet<SOLVER1D>::outEdges( const int& ind )
 {
     // return parameter
     std::vector<Out_Edge_Iter> out_edge_iter_vec;
@@ -976,9 +1005,9 @@ OneDNet<SOLVER1D,PARAM1D>::outEdges( const int& ind )
 }
 
 
-template< class SOLVER1D, class PARAM1D >
-typename OneDNet<SOLVER1D,PARAM1D>::Degree_Size
-OneDNet<SOLVER1D,PARAM1D>::outDegreeSize( const int& ind )
+template< class SOLVER1D >
+typename OneDNet<SOLVER1D>::Degree_Size
+OneDNet<SOLVER1D>::outDegreeSize( const int& ind )
 {
     // vertices() method returns a pair of vertex iterators (begin(), end())
     std::pair< Vertex_Iter, Vertex_Iter > vertex_iter_pair = vertices(_M_network);
@@ -993,16 +1022,16 @@ OneDNet<SOLVER1D,PARAM1D>::outDegreeSize( const int& ind )
             ++vertex_iter_pair.first;
         }
     // the function failed if it's printing out this!
-    std::cout << "\n[OneDNet::outDegreeSize] failed! Vertex "
-              << ind << " not found..."
-              << std::endl;
+    std::cout << "\n[OneDNet::outDegreeSize] process " << _M_comm->MyPID()
+    << " failed! Vertex " << ind << " not found..."
+    << std::endl;
     abort();
 }
 
 
-template< class SOLVER1D, class PARAM1D >
-typename OneDNet<SOLVER1D,PARAM1D>::Degree_Size
-OneDNet<SOLVER1D,PARAM1D>::degreeSize( const int& ind )
+template< class SOLVER1D >
+typename OneDNet<SOLVER1D>::Degree_Size
+OneDNet<SOLVER1D>::degreeSize( const int& ind )
 {
     // vertices() method returns a pair of vertex iterators (begin(), end())
     std::pair< Vertex_Iter, Vertex_Iter > vertex_iter_pair = vertices(_M_network);
@@ -1017,57 +1046,57 @@ OneDNet<SOLVER1D,PARAM1D>::degreeSize( const int& ind )
             ++vertex_iter_pair.first;
         }
     // the function failed if it's printing out this!
-    std::cout << "\n[OneDNet::degreeSize] failed! Vertex "
-              << ind << " not found..."
-              << std::endl;
+    std::cout << "\n[OneDNet::degreeSize] process " << _M_comm->MyPID()
+    << " failed! Vertex " << ind << " not found..."
+    << std::endl;
     abort();
 }
 
 
-template< class SOLVER1D, class PARAM1D >
-typename OneDNet<SOLVER1D,PARAM1D>::Network const&
-OneDNet<SOLVER1D,PARAM1D>::network()
+template< class SOLVER1D >
+typename OneDNet<SOLVER1D>::Network const&
+OneDNet<SOLVER1D>::network()
 {
     return _M_network;
 }
 
 
-template< class SOLVER1D, class PARAM1D >
-Real OneDNet<SOLVER1D,PARAM1D>::timestep() const
+template< class SOLVER1D >
+Real OneDNet<SOLVER1D>::timestep() const
 {
     return _M_time_step;
 }
 
 
-template< class SOLVER1D, class PARAM1D >
-Real OneDNet<SOLVER1D,PARAM1D>::inittime() const
+template< class SOLVER1D >
+Real OneDNet<SOLVER1D>::inittime() const
 {
     return _M_time_beg;
 }
 
 
-template< class SOLVER1D, class PARAM1D >
-Real OneDNet<SOLVER1D,PARAM1D>::endtime() const
+template< class SOLVER1D >
+Real OneDNet<SOLVER1D>::endtime() const
 {
     return _M_time_end;
 }
 
 
 // Call setBC() for each solver
-template< class SOLVER1D, class PARAM1D >
-void OneDNet<SOLVER1D,PARAM1D>::setBC( OneDBCFunctionPointer fun,
-                                       const int& ind,
-                                       std::string const& border,
-                                       std::string const& line,
-                                       std::string const& var )
+template< class SOLVER1D >
+void OneDNet<SOLVER1D>::setBC( OneDBCFunctionPointer fun,
+                               const int& ind,
+                               std::string const& border,
+                               std::string const& line,
+                               std::string const& var )
 {
-    this->Solver( ind ).bcH().setBC( fun, border, line, var );
+  	this->getSolver( ind ).bcH().setBC( fun, border, line, var );
 }
 
 
 // Call initialize() for each solver
-template< class SOLVER1D, class PARAM1D >
-void OneDNet<SOLVER1D,PARAM1D>::initialize( GetPot data_file )
+template< class SOLVER1D >
+void OneDNet<SOLVER1D>::initialize( GetPot data_file )
 {
     // read data file (at each 1D model section, see also OneDNet constructor)
     std::string str, init_var;
@@ -1084,8 +1113,8 @@ void OneDNet<SOLVER1D,PARAM1D>::initialize( GetPot data_file )
     // debug: Epetra
     for( int i = 0; i < _M_epetra_vessels->getMap(Repeated)->NumMyElements(); ++i ) {
         globalID = *(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i);
-        Debug( 6030 ) << "[OneDNet::initialize process " << _M_comm->MyPID() << "] initializing vessels:\n";
-        Debug( 6030 ) << globalID << "\n";
+        Debug( 6330 ) << "[OneDNet::initialize process " << _M_comm->MyPID()
+        << "] initializing vessels: " << globalID << "\n";
 
         // Conversion using lexical_cast
         try {
@@ -1094,8 +1123,8 @@ void OneDNet<SOLVER1D,PARAM1D>::initialize( GetPot data_file )
         }
         catch (boost::bad_lexical_cast &) {
             // conversion failed
-            std::cout << "\n[OneDNet::initialize process " << _M_comm->MyPID() << "] lexical conversion failed!"
-                      << std::endl;
+            std::cout << "\n[OneDNet::initialize process " << _M_comm->MyPID()
+            << "] lexical conversion failed!" << std::endl;
         }
 
         // update prefix
@@ -1103,8 +1132,9 @@ void OneDNet<SOLVER1D,PARAM1D>::initialize( GetPot data_file )
         // point to the correct section in data file
         data_file.set_prefix( prefix.c_str() );
 
-        Debug( 6030 ) << "[OneDNet::initialize process " << _M_comm->MyPID() << "] 0- Initializing tube "
-                      << _M_network[ *this->Edge(globalID) ].index << "\n";
+        Debug( 6330 ) << "[OneDNet::initialize process " << _M_comm->MyPID()
+        << "] 0- Initializing tube "
+        << _M_network[ *this->Edge(globalID) ].index << "\n";
 
         // call OneDModelSolver::initialize
         _M_network[ *this->Edge(globalID) ].onedsolver->initialize( data_file );
@@ -1119,13 +1149,14 @@ void OneDNet<SOLVER1D,PARAM1D>::initialize( GetPot data_file )
 }
 
 
-template< class SOLVER1D, class PARAM1D >
-void OneDNet<SOLVER1D,PARAM1D>::savesol(  )
+template< class SOLVER1D >
+void OneDNet<SOLVER1D>::savesol(  )
 {
   for( int i = 0; i < _M_epetra_vessels->getMap(Repeated)->NumMyElements(); ++i ) {
       int globalID = *(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i);
-      Debug( 6030 ) << "[OneDNet::savesol process " << _M_comm->MyPID() << "] saving sol for tube:\n";
-      Debug( 6030 ) << globalID << "\n";
+      Debug( 6330 ) << "[OneDNet::savesol process " << _M_comm->MyPID()
+      << "] saving sol for tube:\n";
+      Debug( 6330 ) << globalID << "\n";
 
         // call OneDModelSolver method
         _M_network[*this->Edge(globalID)].onedsolver->savesol();
@@ -1133,13 +1164,14 @@ void OneDNet<SOLVER1D,PARAM1D>::savesol(  )
 }
 
 
-template< class SOLVER1D, class PARAM1D >
-void OneDNet<SOLVER1D,PARAM1D>::loadsol(  )
+template< class SOLVER1D >
+void OneDNet<SOLVER1D>::loadsol(  )
 {
   for( int i = 0; i < _M_epetra_vessels->getMap(Repeated)->NumMyElements(); ++i ) {
       int globalID = *(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i);
-      Debug( 6030 ) << "[OneDNet::loadsol process " << _M_comm->MyPID() << "] loading sol for tube:\n";
-      Debug( 6030 ) << globalID << "\n";
+      Debug( 6330 ) << "[OneDNet::loadsol process " << _M_comm->MyPID()
+      << "] loading sol for tube:\n";
+      Debug( 6330 ) << globalID << "\n";
 
         // call OneDModelSolver method
         _M_network[*this->Edge(globalID)].onedsolver->loadsol();
@@ -1147,104 +1179,67 @@ void OneDNet<SOLVER1D,PARAM1D>::loadsol(  )
 }
 
 
-template< class SOLVER1D, class PARAM1D >
-void OneDNet<SOLVER1D,PARAM1D>::updateInterfaces( )
+template< class SOLVER1D >
+void OneDNet<SOLVER1D>::updateInterfaces( )
 {
-	_M_epetra_vector_interface_values->GlobalAssemble();
+  _M_epetra_vector_interface_values->GlobalAssemble();
 
-//	EpetraVector passaggio(*_M_epetra_map_interface_values);
-//	passaggio.Import( *_M_epetra_vector_interface_values, Insert );
-//	EpetraVector passaggio( *_M_epetra_vector_interface_values, _M_comm->MyPID() );
-		EpetraVector passaggio(*_M_epetra_vector_interface_values,
-		                               Repeated);
-		for( int i = 0; i < _M_epetra_map_interface_values->getMap(Repeated)->NumMyElements(); ++i ) {
-			int globalID = *(_M_epetra_map_interface_values->getMap(Repeated)->MyGlobalElements() + i);
-			Debug( 6030 ) << "\n[OneDNet::updateInterfaces process " << _M_comm->MyPID()
-			<< "] passaggio[ " << globalID << " ] = " << passaggio[globalID]; }
-	// pair of out-edge iterators
-//	std::pair<Out_Edge_Iter, Out_Edge_Iter> out_edge_iter_pair;
-	// pair of in-edge iterators
-//	std::pair<In_Edge_Iter, In_Edge_Iter> in_edge_iter_pair;
-	// you expect this interface to have both in-edges and out-edges
+  EpetraVector buffer(*_M_epetra_vector_interface_values, Repeated);
 
-//	for( int i = 0; i < _M_epetra_interfaces->NumMyElements(); ++i ) {
-//		int globalID = *(_M_epetra_interfaces->MyGlobalElements() + i);
-    _M_comm->Barrier();
+  // for debugging purposes
+  for( int i = 0; i < _M_epetra_map_interface_values->getMap(Repeated)->NumMyElements(); ++i ) {
+    int globalID = *(_M_epetra_map_interface_values->getMap(Repeated)->MyGlobalElements() + i);
+    Debug( 6330 ) << "[OneDNet::updateInterfaces process " << _M_comm->MyPID()
+    << "] buffer[ " << globalID << " ] = " << buffer[globalID] << "\n"; }
 
-		for( int i = 0; i < _M_epetra_vessels->getMap(Repeated)->NumMyElements(); ++i ) {
-			int globalID = *(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i);
+  _M_comm->Barrier();
 
-//		for( in_edge_iter_pair = in_edges(*this->Vertex(globalID), _M_network);
-//					in_edge_iter_pair.first != in_edge_iter_pair.second;
-//					++in_edge_iter_pair.first )
-//		{
-			int tubeIndex = _M_network[ *this->Edge(globalID) ].index;
+  // I'm working only on MY vessels
+  for( int i = 0; i < _M_epetra_vessels->getMap(Repeated)->NumMyElements(); ++i ) {
+    int globalID = *(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i);
 
-			Debug( 6030 ) << "[OneDNet::updateInterfaces process " << _M_comm->MyPID()
-										<< "] 0- Updating tube " << tubeIndex //<< " at interface " << globalID;
-										<< " with (indexes, value) "
-										<< 4*(tubeIndex-1) + 1 << ", "
-//										<< _M_epetra_vector_interface_values->operator[](4*(tubeIndex-1) + 1) << "; "
-										<< passaggio[4*(tubeIndex-1) + 1] << "; "
-										<< 4*(tubeIndex-1) + 2 << ", "
-//										<< _M_epetra_vector_interface_values->operator[](4*(tubeIndex-1) + 2) << "; "
-										<< passaggio[4*(tubeIndex-1) + 2] << "; "
-										<< 4*(tubeIndex-1) + 3 << ", "
-//										<< _M_epetra_vector_interface_values->operator[](4*(tubeIndex-1) + 3) << "; "
-										<< passaggio[4*(tubeIndex-1) + 3] << "; "
-										<< 4*(tubeIndex-1) + 4 << ", "
-//										<< _M_epetra_vector_interface_values->operator[](4*(tubeIndex-1) + 4) << "\n";
-										<< passaggio[4*(tubeIndex-1) + 4] << "\n";
+    int tubeIndex = _M_network[ *this->Edge(globalID) ].index;
 
-			_M_network[*this->Edge(globalID) ].onedsolver->setBCValuesLeft(
-//			                  _M_epetra_vector_interface_values->operator[](4*(tubeIndex-1) + 1),
-//			                  _M_epetra_vector_interface_values->operator[](4*(tubeIndex-1) + 2));
-			                  passaggio[4*(tubeIndex-1) + 1],
-							          passaggio[4*(tubeIndex-1) + 2]);
-			_M_network[*this->Edge(globalID) ].onedsolver->setBCValuesRight(
-//			                  _M_epetra_vector_interface_values->operator[](4*(tubeIndex-1) + 3),
-//			                  _M_epetra_vector_interface_values->operator[](4*(tubeIndex-1) + 4));
-			                                       passaggio[4*(tubeIndex-1) + 3],
-			                                       passaggio[4*(tubeIndex-1) + 4] );
+    Debug( 6330 ) << "[OneDNet::updateInterfaces process " << _M_comm->MyPID()
+    << "] 0- Updating tube " << tubeIndex //<< " at interface " << globalID;
+    << " with (indexes, value) "
+    << 4*(tubeIndex-1) + 1 << ", "
+    << buffer[4*(tubeIndex-1) + 1] << "; "
+    << 4*(tubeIndex-1) + 2 << ", "
+    << buffer[4*(tubeIndex-1) + 2] << "; "
+    << 4*(tubeIndex-1) + 3 << ", "
+    << buffer[4*(tubeIndex-1) + 3] << "; "
+    << 4*(tubeIndex-1) + 4 << ", "
+    << buffer[4*(tubeIndex-1) + 4] << "\n";
 
-//		}
-//		for( out_edge_iter_pair = out_edges(*this->Vertex(globalID), _M_network);
-//					out_edge_iter_pair.first != out_edge_iter_pair.second;
-//					++out_edge_iter_pair.first )
-//		{
-//			int tubeIndex = _M_network[ *(out_edge_iter_pair).first ].index;
-//
-//			Debug( 6030 ) << "[OneDNet::updateInterfaces process " << _M_comm->MyPID()
-//										<< "] 0- Updating tube " << tubeIndex << " at interface " << globalID;
-//			Debug( 6030 ) << " with values (indexes) " << 4*(tubeIndex-1) + 1
-//										<< ", "  << passaggio[4*(tubeIndex-1) + 1]
-//										<< "; " << 4*(tubeIndex-1) + 2
-//										<< ", "  << passaggio[4*(tubeIndex-1) + 2] << "\n";
-//
-//			_M_network[*(out_edge_iter_pair).first ].onedsolver->setBCValuesLeft(
-//          passaggio[4*(tubeIndex-1) + 1],
-//          passaggio[4*(tubeIndex-1) + 2]);
-//
-//		}
-	}
-    *(_M_epetra_vector_interface_values) *= 0; //->getEpetraVector().ReplaceGlobalValues( 2, comp, val );
+    _M_network[*this->Edge(globalID) ].onedsolver->setBCValuesLeft(
+        buffer[4*(tubeIndex-1) + 1],
+        buffer[4*(tubeIndex-1) + 2]);
+    _M_network[*this->Edge(globalID) ].onedsolver->setBCValuesRight(
+        buffer[4*(tubeIndex-1) + 3],
+        buffer[4*(tubeIndex-1) + 4] );
+
+  }
+  *(_M_epetra_vector_interface_values) *= 0;
 }
 
-template< class SOLVER1D, class PARAM1D >
-void OneDNet<SOLVER1D,PARAM1D>::timeAdvance( const Real& time_val )
+
+template< class SOLVER1D >
+void OneDNet<SOLVER1D>::timeAdvance( const Real& time_val )
 {
 		// impose interface conditions at internal vertices
-    computeInterfaceTubesValues();
+    computeInterfaceTubesValues( time_val );
 
     updateInterfaces();
 
     for( int i = 0; i < _M_epetra_vessels->getMap(Repeated)->NumMyElements(); ++i ) {
         int globalID = *(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i);
-        Debug( 6030 ) << "[OneDNet::timeAdvance process " << _M_comm->MyPID() << "]\n";
+        Debug( 6330 ) << "[OneDNet::timeAdvance process " << _M_comm->MyPID() << "]\n";
 
         // tell me what I am doing
-        Debug( 6030 ) << "[OneDNet::timeAdvance process " << _M_comm->MyPID() << "] 0- Time advancing tube "
-        							<< _M_network[ *this->Edge(globalID) ].index << "\n";
+        Debug( 6330 ) << "[OneDNet::timeAdvance process " << _M_comm->MyPID()
+        << "] 0- Time advancing tube "
+        << _M_network[ *this->Edge(globalID) ].index << "\n";
         // call OneDModelSolver method
         _M_network[*this->Edge(globalID)].onedsolver->timeAdvance(time_val);
 
@@ -1252,15 +1247,15 @@ void OneDNet<SOLVER1D,PARAM1D>::timeAdvance( const Real& time_val )
 }
 
 
-template< class SOLVER1D, class PARAM1D >
-void OneDNet<SOLVER1D,PARAM1D>::iterate( const Real& time_val , const int& count)
+template< class SOLVER1D >
+void OneDNet<SOLVER1D>::iterate( const Real& time_val , const int& count)
 {
   	for( int i = 0; i < _M_epetra_vessels->getMap(Repeated)->NumMyElements(); ++i ) {
       	int globalID = *(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i);
 
         // tell me what I am doing
-        Debug( 6030 ) << "[OneDNet::iterate process " << _M_comm->MyPID() << "] 0- Iterating tube "
-        							<< _M_network[ *this->Edge(globalID) ].index << "\n";
+        Debug( 6330 ) << "[OneDNet::iterate process " << _M_comm->MyPID()
+        << "] 0- Iterating tube " << _M_network[ *this->Edge(globalID) ].index << "\n";
         // call OneDModelSolver method
         _M_network[ *this->Edge(globalID) ].onedsolver->iterate(time_val, count);
 
@@ -1268,28 +1263,28 @@ void OneDNet<SOLVER1D,PARAM1D>::iterate( const Real& time_val , const int& count
 }
 
 
-template< class SOLVER1D, class PARAM1D >
-void OneDNet<SOLVER1D,PARAM1D>::postProcess( const Real& time_val )
+template< class SOLVER1D >
+void OneDNet<SOLVER1D>::postProcess( const Real& time_val )
 {
-		Debug( 6030 ) << "[OneDNet::postProcess process " << _M_comm->MyPID() << "] inside postprocessing ";
-		for( int i = 0; i < _M_epetra_vessels->getMap(Unique)->NumMyElements(); ++i ) {
-    		int globalID = *(_M_epetra_vessels->getMap(Unique)->MyGlobalElements() + i);
+  Debug( 6330 ) << "[OneDNet::postProcess process " << _M_comm->MyPID() << "] inside postprocessing ";
+  for( int i = 0; i < _M_epetra_vessels->getMap(Unique)->NumMyElements(); ++i ) {
+    int globalID = *(_M_epetra_vessels->getMap(Unique)->MyGlobalElements() + i);
 
         // tell me what I am doing
-        Debug( 6030 ) << "[OneDNet::postProcess process " << _M_comm->MyPID() << "] 0- Postprocessing tube "
-        							<< _M_network[ *this->Edge(globalID) ].index << "\n";
+        Debug( 6330 ) << "[OneDNet::postProcess process " << _M_comm->MyPID()
+        << "] 0- Postprocessing tube " << _M_network[ *this->Edge(globalID) ].index << "\n";
         // call OneDModelSolver method
         _M_network[ *this->Edge(globalID) ].onedsolver->postProcess(time_val);
     }
 }
 
 
-template< class SOLVER1D, class PARAM1D >
-void OneDNet<SOLVER1D,PARAM1D>::openFileBuffers()
+template< class SOLVER1D >
+void OneDNet<SOLVER1D>::openFileBuffers()
 {
-		for( int i = 0; i < _M_epetra_vessels->getMap(Repeated)->NumMyElements(); ++i ) {
-  			int globalID = *(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i);
-  			Debug( 6030 ) << "[OneDNet::openFileBuffers process " << _M_comm->MyPID() << "]\n";
+  for( int i = 0; i < _M_epetra_vessels->getMap(Repeated)->NumMyElements(); ++i ) {
+    int globalID = *(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i);
+    Debug( 6330 ) << "[OneDNet::openFileBuffers process " << _M_comm->MyPID() << "]\n";
 
         // call OneDModelSolver method
         _M_network[ *this->Edge(globalID) ].onedsolver->openFileBuffers();
@@ -1297,12 +1292,12 @@ void OneDNet<SOLVER1D,PARAM1D>::openFileBuffers()
 }
 
 
-template< class SOLVER1D, class PARAM1D >
-void OneDNet<SOLVER1D,PARAM1D>::output2FileBuffers( const Real& time_val )
+template< class SOLVER1D >
+void OneDNet<SOLVER1D>::output2FileBuffers( const Real& time_val )
 {
-		for( int i = 0; i < _M_epetra_vessels->getMap(Repeated)->NumMyElements(); ++i ) {
-				int globalID = *(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i);
-				Debug( 6030 ) << "[OneDNet::output2FileBuffers process " << _M_comm->MyPID() << "]\n";
+  for( int i = 0; i < _M_epetra_vessels->getMap(Repeated)->NumMyElements(); ++i ) {
+    int globalID = *(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i);
+    Debug( 6330 ) << "[OneDNet::output2FileBuffers process " << _M_comm->MyPID() << "]\n";
 
         // call OneDModelSolver method
         _M_network[ *this->Edge(globalID) ].onedsolver->output2FileBuffers( time_val );
@@ -1310,12 +1305,12 @@ void OneDNet<SOLVER1D,PARAM1D>::output2FileBuffers( const Real& time_val )
 }
 
 
-template< class SOLVER1D, class PARAM1D >
-void OneDNet<SOLVER1D,PARAM1D>::resetFileBuffers()
+template< class SOLVER1D >
+void OneDNet<SOLVER1D>::resetFileBuffers()
 {
-		for( int i = 0; i < _M_epetra_vessels->getMap(Repeated)->NumMyElements(); ++i ) {
-				int globalID = *(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i);
-				Debug( 6030 ) << "[OneDNet::resetFileBuffers process " << _M_comm->MyPID() << "]\n";
+  for( int i = 0; i < _M_epetra_vessels->getMap(Repeated)->NumMyElements(); ++i ) {
+    int globalID = *(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i);
+    Debug( 6330 ) << "[OneDNet::resetFileBuffers process " << _M_comm->MyPID() << "]\n";
 
         // call OneDModelSolver method
         _M_network[ *this->Edge(globalID) ].onedsolver->resetFileBuffers();
@@ -1323,12 +1318,12 @@ void OneDNet<SOLVER1D,PARAM1D>::resetFileBuffers()
 }
 
 
-template< class SOLVER1D, class PARAM1D >
-void OneDNet<SOLVER1D,PARAM1D>::seekpFileBuffers()
+template< class SOLVER1D >
+void OneDNet<SOLVER1D>::seekpFileBuffers()
 {
-		for( int i = 0; i < _M_epetra_vessels->getMap(Repeated)->NumMyElements(); ++i ) {
-				int globalID = *(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i);
-				Debug( 6030 ) << "[OneDNet::seekpFileBuffers process " << _M_comm->MyPID() << "]\n";
+  for( int i = 0; i < _M_epetra_vessels->getMap(Repeated)->NumMyElements(); ++i ) {
+    int globalID = *(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i);
+    Debug( 6330 ) << "[OneDNet::seekpFileBuffers process " << _M_comm->MyPID() << "]\n";
 
         // call OneDModelSolver method
         _M_network[ *this->Edge(globalID) ].onedsolver->seekpFileBuffers();
@@ -1336,12 +1331,12 @@ void OneDNet<SOLVER1D,PARAM1D>::seekpFileBuffers()
 }
 
 
-template< class SOLVER1D, class PARAM1D >
-void OneDNet<SOLVER1D,PARAM1D>::tellpFileBuffers()
+template< class SOLVER1D >
+void OneDNet<SOLVER1D>::tellpFileBuffers()
 {
-		for( int i = 0; i < _M_epetra_vessels->getMap(Repeated)->NumMyElements(); ++i ) {
-				int globalID = *(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i);
-				Debug( 6030 ) << "[OneDNet::tellpFileBuffers process " << _M_comm->MyPID() << "]\n";
+  for( int i = 0; i < _M_epetra_vessels->getMap(Repeated)->NumMyElements(); ++i ) {
+    int globalID = *(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i);
+    Debug( 6330 ) << "[OneDNet::tellpFileBuffers process " << _M_comm->MyPID() << "]\n";
 
         // call OneDModelSolver method
         _M_network[ *this->Edge(globalID) ].onedsolver->tellpFileBuffers();
@@ -1349,12 +1344,12 @@ void OneDNet<SOLVER1D,PARAM1D>::tellpFileBuffers()
 }
 
 
-template< class SOLVER1D, class PARAM1D >
-void OneDNet<SOLVER1D,PARAM1D>::closeFileBuffers()
+template< class SOLVER1D >
+void OneDNet<SOLVER1D>::closeFileBuffers()
 {
-		for( int i = 0; i < _M_epetra_vessels->getMap(Repeated)->NumMyElements(); ++i ) {
-				int globalID = *(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i);
-				Debug( 6030 ) << "[OneDNet::closeFileBuffers process " << _M_comm->MyPID() << "]\n";
+  for( int i = 0; i < _M_epetra_vessels->getMap(Repeated)->NumMyElements(); ++i ) {
+    int globalID = *(_M_epetra_vessels->getMap(Repeated)->MyGlobalElements() + i);
+    Debug( 6330 ) << "[OneDNet::closeFileBuffers process " << _M_comm->MyPID() << "]\n";
 
         // call OneDModelSolver method
         _M_network[ *this->Edge(globalID) ].onedsolver->closeFileBuffers();
@@ -1362,23 +1357,17 @@ void OneDNet<SOLVER1D,PARAM1D>::closeFileBuffers()
 }
 
 
-template< class SOLVER1D, class PARAM1D >
+template< class SOLVER1D >
 void
-OneDNet<SOLVER1D,PARAM1D>::computeInterfaceTubesValues( )
+OneDNet<SOLVER1D>::computeInterfaceTubesValues( const Real& /*time*/ )
 {
-//    // vertex iterators (for visiting the graph)
-//    std::pair< Vertex_Iter, Vertex_Iter > vertex_iter_pair;
-//    // visit vertex list
-//    for( vertex_iter_pair = vertices(_M_network);
-//         vertex_iter_pair.first != vertex_iter_pair.second;
-//         ++vertex_iter_pair.first ){
+    // I'm working only on MY interfaces
+    for( int i = 0; i < _M_epetra_interfaces->NumMyElements(); ++i ) {
+      int globalID = *(_M_epetra_interfaces->MyGlobalElements() + i);
 
-		for( int i = 0; i < _M_epetra_interfaces->NumMyElements(); ++i ) {
- 				int globalID = *(_M_epetra_interfaces->MyGlobalElements() + i);
-
- 				Debug( 6030 ) << "[OneDNet::computeInterfaceTubesValues process "
- 											<< _M_comm->MyPID() << "] 0- Computing Interface "
-                      << _M_network[ *this->Vertex(globalID) ].index << "\n";
+        Debug( 6330 ) << "[OneDNet::computeInterfaceTubesValues process "
+        << _M_comm->MyPID() << "] 0- Computing Interface "
+        << _M_network[ *this->Vertex(globalID) ].index << "\n";
         /*
           In principle, it is possible to implement different behaviour for
           interfaces (e. g. energy dissipation due to branching angles,
@@ -1405,7 +1394,8 @@ OneDNet<SOLVER1D,PARAM1D>::computeInterfaceTubesValues( )
                 // other cases can be added here!
 
             default:
-                std::cout << "\n[OneDNet::computeInterfaceTubesValues process " << _M_comm->MyPID() << "] Unknown type "
+                std::cout << "\n[OneDNet::computeInterfaceTubesValues process "
+                << _M_comm->MyPID() << "] Unknown type "
                           << _M_network[*this->Vertex(globalID)].type
                           << " for vertex " << _M_network[*this->Vertex(globalID)].index
                           << std::endl;
@@ -1416,9 +1406,9 @@ OneDNet<SOLVER1D,PARAM1D>::computeInterfaceTubesValues( )
 }
 
 
-template< class SOLVER1D, class PARAM1D >
+template< class SOLVER1D >
 void
-OneDNet<SOLVER1D,PARAM1D>::interface_continuity_conditions( Vertex_Iter const& vertex )
+OneDNet<SOLVER1D>::interface_continuity_conditions( Vertex_Iter const& vertex )
 {
     // pair of out-edge iterators
     std::pair<Out_Edge_Iter, Out_Edge_Iter> out_edge_iter_pair;
@@ -1452,6 +1442,37 @@ OneDNet<SOLVER1D,PARAM1D>::interface_continuity_conditions( Vertex_Iter const& v
     int NBU[1];
 
     // take into account interface type
+    // you expect this interface to have both in-edges and out-edges
+    for( in_edge_iter_pair = in_edges(*vertex, _M_network);
+         in_edge_iter_pair.first != in_edge_iter_pair.second;
+         ++in_edge_iter_pair.first )
+        {
+            // add edges to the list
+            interfaceTubes.insert
+                ( MapSolverValueType(i, _M_network[*(in_edge_iter_pair).first ].onedsolver ) );
+            // in-edges have "+" signum (boolean value true)
+            signum.insert( std::map< int, bool >::value_type(i, true) );
+            index.insert( std::map< int, int >::value_type(i, _M_network[*(in_edge_iter_pair).first ].index) );
+            Debug( 6330 ) << "[OneDNet::interface_continuity_conditions process "
+            << _M_comm->MyPID() << "] \ttube " << _M_network[*(in_edge_iter_pair).first ].index
+            << " has signum " << signum[i] << " (map index) " << i << "\n";
+            i++;
+        }
+    for( out_edge_iter_pair = out_edges(*vertex, _M_network);
+         out_edge_iter_pair.first != out_edge_iter_pair.second;
+         ++out_edge_iter_pair.first )
+        {
+            // add edges to the list
+            interfaceTubes.insert
+                ( MapSolverValueType(i, _M_network[ *(out_edge_iter_pair).first ].onedsolver ) );
+            // in-edges have "-" signum (boolean value false)
+            signum.insert( std::map< int, bool >::value_type(i, false) );
+            index.insert( std::map< int, int >::value_type(i, _M_network[*(out_edge_iter_pair).first ].index) );
+            Debug( 6330 ) << "[OneDNet::interface_continuity_conditions process "
+            << _M_comm->MyPID() << "] \ttube " << _M_network[*(out_edge_iter_pair).first ].index
+            << " has signum " << signum[i] << " (map index) " << i << "\n";
+            i++;
+        }
 
     // each edge (1D solver) needs 2 boundary conditions
     f_size = 2 * degree(*vertex, _M_network);
@@ -1466,58 +1487,20 @@ OneDNet<SOLVER1D,PARAM1D>::interface_continuity_conditions( Vertex_Iter const& v
     */
     x.resize( f_size );
     x.clear();
-    Debug( 6030 ) << "[OneDNet::interface_continuity_conditions process " << _M_comm->MyPID()
-    							<< "] before newton iterations x =\n" ;
-
-    // you expect this interface to have both in-edges and out-edges
-    for( in_edge_iter_pair = in_edges(*vertex, _M_network);
-         in_edge_iter_pair.first != in_edge_iter_pair.second;
-         ++in_edge_iter_pair.first )
-        {
-    				// this piece of code is executed only for my vertices, for which I have all inedges and outedges
-
-    				// add edges to the list
-            interfaceTubes.insert
-                ( MapSolverValueType(i, _M_network[*(in_edge_iter_pair).first ].onedsolver ) );
-            // in-edges have "+" signum (boolean value true)
-            signum.insert( std::map< int, bool >::value_type(i, true) );
-            index.insert( std::map< int, int >::value_type(i, _M_network[*(in_edge_iter_pair).first ].index) );
-            Debug( 6030 ) << "[OneDNet::interface_continuity_conditions process " << _M_comm->MyPID()
-            							<< "] \ttube " << _M_network[*(in_edge_iter_pair).first ].index
-                          << " has signum " << signum[i] << " (map index) " << i << "\n";
-            i++;
-        }
-    for( out_edge_iter_pair = out_edges(*vertex, _M_network);
-         out_edge_iter_pair.first != out_edge_iter_pair.second;
-         ++out_edge_iter_pair.first )
-        {
-            // add edges to the list
-            interfaceTubes.insert
-                ( MapSolverValueType(i, _M_network[ *(out_edge_iter_pair).first ].onedsolver ) );
-            // in-edges have "-" signum (boolean value false)
-            signum.insert( std::map< int, bool >::value_type(i, false) );
-            index.insert( std::map< int, int >::value_type(i, _M_network[*(out_edge_iter_pair).first ].index) );
-            Debug( 6030 ) << "[OneDNet::interface_continuity_conditions process " << _M_comm->MyPID()
-            							<< "] \ttube " << _M_network[*(out_edge_iter_pair).first ].index
-                          << " has signum " << signum[i] << " (map index) " << i << "\n";
-            i++;
-        }
-
-//    M_matrMass.reset(new EpetraVector(M_localMap));
-
+    Debug( 6330 ) << "[OneDNet::interface_continuity_conditions] before newton iterations x =\n" ;
     // i goes from 0 to the number of considered edges (n_edges)
     for( i = 0; i < interfaceTubes.size(); ++i )
         {
             // first value: A at the boundary for i-th edge
-            x[2*i] = signum[i] ? interfaceTubes[i]->BCValuesRight().first :
-                interfaceTubes[i]->BCValuesLeft().first;
+            x[2*i] = signum[i] ? interfaceTubes[i]->BCValuesRight()[0] :
+                interfaceTubes[i]->BCValuesLeft()[0];
             // second value: Q at the boundary for i-th edge
-            x[2*i+1] = signum[i] ? interfaceTubes[i]->BCValuesRight().second :
-                interfaceTubes[i]->BCValuesLeft().second;
-            Debug( 6030 ) << "[OneDNet::interface_continuity_conditions process " << _M_comm->MyPID()
-            							<< "] \tcomponent " << 2*i << " " << x[2*i] << "\n";
-            Debug( 6030 ) << "[OneDNet::interface_continuity_conditions process " << _M_comm->MyPID()
-            							<< "] \tcomponent " << 2*i+1 << " " << x[2*i+1] << "\n";
+            x[2*i+1] = signum[i] ? interfaceTubes[i]->BCValuesRight()[1] :
+                interfaceTubes[i]->BCValuesLeft()[1];
+            Debug( 6330 ) << "[OneDNet::interface_continuity_conditions] \tcomponent "
+            << 2*i << " " << x[2*i] << "\n";
+            Debug( 6330 ) << "[OneDNet::interface_continuity_conditions] \tcomponent "
+            << 2*i+1 << " " << x[2*i+1] << "\n";
         }
     /*
       prepare the data structures needed for solving non linear equations
@@ -1562,7 +1545,8 @@ OneDNet<SOLVER1D,PARAM1D>::interface_continuity_conditions( Vertex_Iter const& v
     // no convergence
     if( niter == 100 )
         {
-            std::cout << "\nOneDNet::computeInterfaceTubesValues process " << _M_comm->MyPID() << ": newton iterations"
+            std::cout << "\nOneDNet::computeInterfaceTubesValues process "
+            << _M_comm->MyPID() << ": newton iterations"
                       << " did not converge after " << niter << " iterations."
                       << " Expected tolerance for mass flow balance = " << 1e-12
                       << ", error = " << std::fabs( f(0) )
@@ -1571,15 +1555,18 @@ OneDNet<SOLVER1D,PARAM1D>::interface_continuity_conditions( Vertex_Iter const& v
             abort();
         }
 
-    Debug( 6030 ) << "[OneDNet::interface_continuity_conditions process " << _M_comm->MyPID()
-            							<< "] after newton iterations x =\n" ;
+    // debug: use a sstring to pass messages to cout
+     std::stringstream debug_sstr;
+
+    Debug( 6330 ) << "[OneDNet::interface_continuity_conditions process "
+    << _M_comm->MyPID() << "] after newton iterations x =\n" ;
     // i goes from 0 to the number of considered edges (n_edges)
     for( i = 0; i < interfaceTubes.size(); ++i )
         {
-            Debug( 6030 ) << "[OneDNet::interface_continuity_conditions process " << _M_comm->MyPID()
-            							<< "] \tcomponent " << 2*i << " " << x[2*i] << "\n";
-            Debug( 6030 ) << "[OneDNet::interface_continuity_conditions process " << _M_comm->MyPID()
-            							<< "] \tcomponent " << 2*i+1 << " " << x[2*i+1] << "\n";
+            Debug( 6330 ) << "[OneDNet::interface_continuity_conditions process "
+            << _M_comm->MyPID() << "] \tcomponent " << 2*i << " " << x[2*i] << "\n";
+            Debug( 6330 ) << "[OneDNet::interface_continuity_conditions process "
+            << _M_comm->MyPID() << "] \tcomponent " << 2*i+1 << " " << x[2*i+1] << "\n";
         }
 
     // be careful, _M_epetra_interface_values has indexes starting from 1
@@ -1591,75 +1578,69 @@ OneDNet<SOLVER1D,PARAM1D>::interface_continuity_conditions( Vertex_Iter const& v
      right Q : _M_epetra_interface_values[4(i-1) + 4]
     */
 
-// 		EpetraVector passaggio(*_M_epetra_map_interface_values);
-
-		for( int i = 0; i < _M_epetra_vector_interface_values->getMap().getMap(Repeated)->NumMyElements(); ++i ) {
- 				Debug( 6030 ) << "\n[OneDNet::interface_continuity_conditions process " << _M_comm->MyPID()
-				<< "] show epetra vector interface values "
-				<< *(_M_epetra_vector_interface_values->getMap().getMap(Repeated)->MyGlobalElements() + i); }
-
+    for( int i = 0; i < _M_epetra_vector_interface_values->getMap().getMap(Repeated)->NumMyElements(); ++i ) {
+      debug_sstr.str("");
+      debug_sstr << "\t"
+      << *(_M_epetra_vector_interface_values->getMap().getMap(Repeated)->MyGlobalElements() + i); }
+    Debug( 6330 ) << "[OneDNet::interface_continuity_conditions process " << _M_comm->MyPID()
+          << "] show epetra vector interface values "
+          << debug_sstr.str() << "\n";
     // set boundary conditions to 1D solvers
     for( i = 0; i < interfaceTubes.size(); ++i )
-        {
-			int comp[2];
-			double val[2];
-            // in-edges need conditions to the right boundary
-            if( signum[i] )
-                {
-//                    interfaceTubes[i]->setBCValuesRight( x[2*i], x[2*i+1] );
-            				comp[0] = 4*(index[i]-1) + 3;
-            				comp[1] = 4*(index[i]-1) + 4;
-            				val[0] = x[2*i];
-            				val[1] = x[2*i+1];
-                    Debug( 6030 ) << "\n[OneDNet::interface_continuity_conditions process " << _M_comm->MyPID()
-                    							<< "] modifying epetra vector interface for tube "
-                    							<< index[i] << " (component, value) "
-                    							<< comp[0] << ", " << val[0]
-//                    Debug( 6030 ) << _M_epetra_vector_interface_values->operator()(4*(index[i]-1) + 3)
-                    							<< "; " << comp[1] << ", " << val[1]; // << ", "
-//                    							<< _M_epetra_vector_interface_values->operator()(4*(index[i]-1) + 4) << "\n";
-                }
-            // out-edges need conditions to the left boundary
-            else
-                {
-//                    interfaceTubes[i]->setBCValuesLeft( x[2*i], x[2*i+1] );
-            				comp[0] = 4*(index[i]-1) + 1;
-            				comp[1] = 4*(index[i]-1) + 2;
-            				val[0] = x[2*i];
-            				val[1] = x[2*i+1];
-                    Debug( 6030 ) << "\n[OneDNet::interface_continuity_conditions process " << _M_comm->MyPID()
-                    							<< "] modifying epetra vector interface for tube "
-                    							<< index[i] << " (component, value) "
-                    							<< comp[0] << ", " << val[0]
-//                    Debug( 6030 ) << _M_epetra_vector_interface_values->operator()(4*(index[i]-1) + 1)
-                    							<< "; " << comp[1] << ", " << val[1]; // << ", "
-//                    							<< _M_epetra_vector_interface_values->operator()(4*(index[i]-1) + 2) << "\n";
-//                    _M_epetra_vector_interface_values->operator()(4*(index[i]-1) + 1) = x[2*i];
-//                    _M_epetra_vector_interface_values->operator()(4*(index[i]-1) + 2) = x[2*i+1];
-                }
-          _M_epetra_vector_interface_values->getEpetraVector().ReplaceGlobalValues( 2, comp, val );
-        }
-//    _M_epetra_vector_interface_values->Import( passaggio, Insert );
+      {
+        int comp[2];
+        double val[2];
+        // in-edges need conditions to the right boundary
+        if( signum[i] )
+          {
+            //                    interfaceTubes[i]->setBCValuesRight( x[2*i], x[2*i+1] );
+            comp[0] = 4*(index[i]-1) + 3;
+            comp[1] = 4*(index[i]-1) + 4;
+            val[0] = x[2*i];
+            val[1] = x[2*i+1];
+            Debug( 6330 ) << "[OneDNet::interface_continuity_conditions process " << _M_comm->MyPID()
+            << "] modifying epetra vector interface for tube "
+            << index[i] << " (component, value) "
+            << comp[0] << ", " << val[0]
+            << "; " << comp[1] << ", " << val[1] << "\n"; // << ", "
+          }
+        // out-edges need conditions to the left boundary
+        else
+          {
+            //                    interfaceTubes[i]->setBCValuesLeft( x[2*i], x[2*i+1] );
+            comp[0] = 4*(index[i]-1) + 1;
+            comp[1] = 4*(index[i]-1) + 2;
+            val[0] = x[2*i];
+            val[1] = x[2*i+1];
+            Debug( 6330 ) << "[OneDNet::interface_continuity_conditions process " << _M_comm->MyPID()
+            << "] modifying epetra vector interface for tube "
+            << index[i] << " (component, value) "
+            << comp[0] << ", " << val[0]
+            << "; " << comp[1] << ", " << val[1] << "\n"; // << ", "
+          }
+        _M_epetra_vector_interface_values->getEpetraVector().ReplaceGlobalValues( 2, comp, val );
+      }
 }
 
 
-template< class SOLVER1D, class PARAM1D >
+
+template< class SOLVER1D >
 void
-OneDNet<SOLVER1D,PARAM1D>::f_jac( const Vector& x, Vector& f, Matrix& jac,
-                                  typename OneDNet<SOLVER1D,PARAM1D>::MapSolver& intTubes,
-                                  std::map< int, bool >& sign )
+OneDNet<SOLVER1D>::f_jac( const Vector& x, Vector& f, Matrix& jac,
+                          typename OneDNet<SOLVER1D>::MapSolver& intTubes,
+                          std::map< int, bool >& sign )
 {
     // eigen values of the jacobian diffFlux (= dF/dU)
     Real  eigval1, eigval2, eigval;
     // left eigen vectors for the eigen values eigval1 and eigval2
-    Vec2D left_eigvec1, left_eigvec2, left_eigvec;
+    OneDModelHandler::Vec2D left_eigvec1(2), left_eigvec2(2), left_eigvec(2);
     // right hand side for the 2x2 linear system to be solved for each 1D solver
     Real rhsBC = 0.;
     // quasi linear source term
-    Vec2D qlSource;
+    OneDModelHandler::Vec2D qlSource(2);
     // value of U at the boundary, at the neighboring internal node
     //            and at the foot of the characteristics line
-    Vec2D U_boundary, U_internalBd, U_charact_pt;
+    OneDModelHandler::Vec2D U_boundary(2), U_internalBd(2), U_charact_pt(2);
     // axial coordinate of boundary and neighboring internal node
     Real  boundaryPoint, internalBdPoint;
     // number of degrees of freedom
@@ -1678,6 +1659,8 @@ OneDNet<SOLVER1D,PARAM1D>::f_jac( const Vector& x, Vector& f, Matrix& jac,
             // the derivative if trivial (+1 for in-edges, -1 for out-edges)
             jac( 0, 2*i+1 ) =  sign[i] ? 1 : ( - 1 );
         }
+
+    Debug( 6330 ) << "[f_jac] f( 0 ) is computed.\n";
 
     /***** f(1) ... f(n_edges-1): set of non linear equations
            Total pressure conservation                        *****/
@@ -1720,6 +1703,9 @@ OneDNet<SOLVER1D,PARAM1D>::f_jac( const Vector& x, Vector& f, Matrix& jac,
                                                                          sign[i] ?
                                                                          intTubes[i]->RightNodeId() :
                                                                          intTubes[i]->LeftNodeId() );
+
+            Debug( 6330 ) << "[f_jac] f( " << i << " ) is computed.\n";
+
         }
 
     /***** f(n_edges) ... f(2*n_edges -1): set of non linear equations
@@ -1734,32 +1720,32 @@ OneDNet<SOLVER1D,PARAM1D>::f_jac( const Vector& x, Vector& f, Matrix& jac,
                     boundaryPoint = intTubes[i]->RightEdge().pt2().x();
                     internalBdPoint = intTubes[i]->RightEdge().pt1().x();
                     // store solution values at those nodes
-                    U_boundary   = Vec2D ( intTubes[i]->BCValuesRight() );
-                    U_internalBd = Vec2D ( intTubes[i]->BCValuesInternalRight() );
+                    U_boundary   = OneDModelHandler::Vec2D ( intTubes[i]->BCValuesRight() );
+                    U_internalBd = OneDModelHandler::Vec2D ( intTubes[i]->BCValuesInternalRight() );
                     // store the label of the boundary node
                     dof = intTubes[i]->RightNodeId();
                 }
-            // out-edges --> right boundary
+            // out-edges --> left boundary
             else
                 {
                     // store coordinates of boundary and internal neighbouring node
                     boundaryPoint = intTubes[i]->LeftEdge().pt1().x();
                     internalBdPoint = intTubes[i]->LeftEdge().pt2().x();
                     // store solution values at those nodes
-                    U_boundary   = Vec2D ( intTubes[i]->BCValuesLeft() );
-                    U_internalBd = Vec2D ( intTubes[i]->BCValuesInternalLeft() );
+                    U_boundary   = OneDModelHandler::Vec2D ( intTubes[i]->BCValuesLeft() );
+                    U_internalBd = OneDModelHandler::Vec2D ( intTubes[i]->BCValuesInternalLeft() );
                     // store the label of the boundary node
                     dof = intTubes[i]->LeftNodeId();
                 }
             // compute eigenvalues and eigenvectors at boundary node
             intTubes[i]->FluxFun().jacobian_EigenValues_Vectors(
-                                                                U_boundary.first,
-                                                                U_boundary.second,
+                                                                U_boundary[0],
+                                                                U_boundary[1],
                                                                 eigval1, eigval2,
-                                                                left_eigvec1.first,
-                                                                left_eigvec1.second,
-                                                                left_eigvec2.first,
-                                                                left_eigvec2.second,
+                                                                left_eigvec1[0],
+                                                                left_eigvec1[1],
+                                                                left_eigvec2[0],
+                                                                left_eigvec2[1],
                                                                 dof);
             ASSERT( eigval1 > 0. && eigval2 < 0. ,
                     "The eigenvalues do not have the expected signs.");
@@ -1787,45 +1773,41 @@ OneDNet<SOLVER1D,PARAM1D>::f_jac( const Vector& x, Vector& f, Matrix& jac,
             // find the pseudo-characteristic associated to U_charact_pt
             rhsBC = dot( left_eigvec , U_charact_pt );
             // compute the (linearized) source term of Euler equations
-            qlSource.first = intTubes[i]->SourceFun().QuasiLinearSource(
-                                                                        U_charact_pt.first,
-                                                                        U_charact_pt.second,
-                                                                        1, dof);
-            qlSource.second = intTubes[i]->SourceFun().QuasiLinearSource(
-                                                                         U_charact_pt.first,
-                                                                         U_charact_pt.second,
-                                                                         2, dof);
+            qlSource[0] = intTubes[i]->SourceFun().QuasiLinearSource(
+                                                                     U_charact_pt[0],
+                                                                     U_charact_pt[1],
+                                                                     1, dof);
+            qlSource[1] = intTubes[i]->SourceFun().QuasiLinearSource(
+                                                                     U_charact_pt[0],
+                                                                     U_charact_pt[1],
+                                                                     2, dof);
             // extrapolate the pseudo-characteristic along (exiting) characteristic line
             rhsBC -= _M_time_step * dot( left_eigvec , qlSource );
 
             // f( n_edges+i ): compatibility condition
-            f( intTubes.size()+i ) = left_eigvec.first * x[2*i]
-                + left_eigvec.second * x[2*i+1] - rhsBC;
+            f( intTubes.size()+i ) = left_eigvec[0] * x[2*i]
+                + left_eigvec[1] * x[2*i+1] - rhsBC;
 
             // Jacobian
             // the only non-zero values are the following
-            jac( intTubes.size()+i, 2*i ) =  left_eigvec.first; //< df_(n_edges-1+i)/dA_(2*i)
-            jac( intTubes.size()+i, 2*i+1 ) =  left_eigvec.second;//< df_(n_edges-1+i)/dQ_(2*1+i)
+            jac( intTubes.size()+i, 2*i ) =  left_eigvec[0]; //< df_(n_edges-1+i)/dA_(2*i)
+            jac( intTubes.size()+i, 2*i+1 ) =  left_eigvec[1];//< df_(n_edges-1+i)/dQ_(2*1+i)
+
+            Debug( 6330 ) << "[f_jac] f( " << intTubes.size()+i << " ) is computed.\n";
+
         }
+
 }
 
 
-template< class SOLVER1D, class PARAM1D >
-Real OneDNet<SOLVER1D,PARAM1D>::dot(const Vec2D& vec1, const Vec2D& vec2) const
-{
-    // scalar product of 2D vectors
-    return vec1.first * vec2.first + vec1.second * vec2.second;
-}
-
-
-template< class SOLVER1D, class PARAM1D >
-typename OneDNet<SOLVER1D,PARAM1D>::Vec2D
-OneDNet<SOLVER1D,PARAM1D>::interpolLinear(const Real& point_bound,
-                                          const Real& point_internal,
-                                          const Real& deltaT,
-                                          const Real& eigenvalue,
-                                          const Vec2D& U_bound,
-                                          const Vec2D& U_intern) const
+template< class SOLVER1D >
+OneDModelHandler::Vec2D
+OneDNet<SOLVER1D>::interpolLinear(const Real& point_bound,
+                                  const Real& point_internal,
+                                  const Real& deltaT,
+                                  const Real& eigenvalue,
+                                  const OneDModelHandler::Vec2D& U_bound,
+                                  const OneDModelHandler::Vec2D& U_intern) const
 {
     // size of space interval
     Real deltaX = std::abs(point_bound - point_internal);
@@ -1849,8 +1831,10 @@ OneDNet<SOLVER1D,PARAM1D>::interpolLinear(const Real& point_bound,
         weight = cfl;
     }
     // convex linear combination
-    Vec2D u_interp( ( 1 - weight ) * U_bound.first  + weight * U_intern.first ,
-                    ( 1 - weight ) * U_bound.second + weight * U_intern.second );
+    OneDModelHandler::Vec2D u_interp( 2 );
+    u_interp[0] = ( 1 - weight ) * U_bound[0] + weight * U_intern[0];
+    u_interp[1] = ( 1 - weight ) * U_bound[1] + weight * U_intern[1];
+
     return u_interp;
 }
 
