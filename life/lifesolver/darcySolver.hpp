@@ -4,7 +4,7 @@
    Author(s): Vincent Martin <vincent.martin@mate.polimi.it>
    Date: 2004-10-11
 
-   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politechnico di Milano
+   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politecnico di Milano
 
    This program is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public License
