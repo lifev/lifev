@@ -15,12 +15,40 @@ post_dir = ./
 test_case   = 2                  # in particular for b.c. condition
 ion_model = 2		# 1: RM 	2: LR
 
-Chi		= 1e3 #originale: 1e3 		#cm^-1
+Chi		= 500 #1e3 #originale: 1e3 		#cm^-1
 Cm		= 1e-3 #funz:10 #originale: 1e-3 //con 1 e mesh vecchia non esplode		#mF/cm^2
 #D       = 0.001 #LR=0.001 RM=0.05 #0.005 #0.001 è per luorudy; 0.05 #funz: 1e3 #originale: 1e-3// "   1e3	 "	#per il momento caso isotropo
 
 #sigmal		= 1.2e-1 #1.2e-3 #1.2e-3 è per luorudy 1.2e-1  #0.2 #0.12 #1 #1.2e-1 #funz:1.2e3 #originale: 1.2e-3	#O^-1cm^-1
 #sigmat		= 2.5562e-2 #2.5562e-4 # 2.5562e-4 è per luorudy 2.5562e-2 #0.01 #0.025 #1.2 #2.5562e-2 #funz:2.5e2 #originale: 2.5562e-4	#O^-1cm^-1
+
+sigmal_i                = 3.0e-3 #1.2e-3 #1.2e-3 è per luorudy 1.2e-1  #0.2 #0.12 #1 #1.2e-1 #funz:1.2e3 #originale: 1.2e-3     #O^-1cm^-1
+sigmal_e                = 3.0e-3
+sigmat_i                = 3.0e-4 #2.5562e-4 # 2.5562e-4 è per luorudy 2.5562e-2 #0.01 #0.025 #1.2 #2.5562e-2 #funz:2.5e2 #originale: 2.5562e-4  #O^-1cm^-1
+sigmat_e                = 1.2e-3
+
+##***********************************************************************##
+#REO_CASE
+REO = 0   # case 0 Iapp / case 1 IappZygote
+
+#Mitchell & Schaeffer
+tau_in    = 0.8
+tau_out   = 18.0
+tau_open  = 100.0
+tau_close = 100.0
+vcrit     =  -67.0
+v_min     =  -80.0
+v_max     =  20.0
+reac_amp  =  0.2        #0.05
+
+Time_period       = 700.0
+Iapp_RV_angle     = 360.0
+Iapp_LV_angle     = 360.0
+Iapp_stim_time_RV = 6.0
+Iapp_stim_time_LV = 10.0
+Ventricular_Fibrillation = 0
+nb_fibrillation_sources  = 20
+##*****************************************************************##
 
 heart_diff_fct = 0
 
@@ -48,7 +76,7 @@ sphere_radius = 0.5
 
 
 
-endtime         = 0.4
+endtime         = 10 #0.25 #0.4
 density         = 1.0          # density
 viscosity       = 0.005         # viscosity
 init_data = 0
@@ -56,47 +84,49 @@ uinit = 0
 
 [../discretization]
 mesh_dir        = ./Mesh/
-mesh_file       = ellissoide29560.mesh #ellissoide39850.mesh #ellissoide12586.mesh  #ellissoide12586.mesh #slab5849.mesh #ventricolosx66769.mesh # realgeomsize91111.mesh #ventricolosx66769.mesh #2ellissoidi02.mesh #ventricolosx66769.mesh #ventricolosx5923.mesh #slabmini.mesh #ventricolosx66769.mesh #ventricolosx21602.mesh #slabprova.mesh #ventricolosx21602.mesh #ventricolosx5923.mesh #ventricolosx64665.mesh #ventricolosx21602.mesh #ventricolosx5923.mesh #-3.51 slabprova.mesh #cubo_regina.vol #ventricolosx5923.mesh # heartvol_cut_77354.vol #ventricolosx64665.mesh
+mesh_file       = heart_ref_fine.mesh #ellissoide39850.mesh #ellissoide12586.mesh  #ellissoide12586.mesh #slab5849.mesh #ventricolosx66769.mesh # realgeomsize91111.mesh #ventricolosx66769.mesh #2ellissoidi02.mesh #ventricolosx66769.mesh #ventricolosx5923.mesh #slabmini.mesh #ventricolosx66769.mesh #ventricolosx21602.mesh #slabprova.mesh #ventricolosx21602.mesh #ventricolosx5923.mesh #ventricolosx64665.mesh #ventricolosx21602.mesh #ventricolosx5923.mesh #-3.51 slabprova.mesh #cubo_regina.vol #ventricolosx5923.mesh # heartvol_cut_77354.vol #ventricolosx64665.mesh
 mesh_type       = .mesh
 
 mesh_faces      = all                   # update all faces elements
 mesh_edges      = all                   # update all faces elements
-timestep        = 0.1                	# timestep
+timestep        = 0.25 #0.1                	# timestep
 verbose         = 1                     # verbose during mesh-reading
 
 has_fibers = 1
-
+fibers_dir = ./Mesh/
+fibers_file = fibers_ref_fine #ZygHeart20Fib6040.vct #ellissoide29560fibers
+fibers_format =  1  # 1 Ensight 0 BB
 
 order_bdf       = 1
 linearized      = 0
-diagonalize     = 0 # weight, 0=off
+diagonalize     = 1 #0 # weight, 0=off
 
 [../miscellaneous]
 verbose         = 1
 
 
 [../solver]
-solver          = cg    #cg , gmres, cgs, tfqmr, bicgstab, slu, symmlq, fixed_pt, lu
+solver          = gmres    #cg , gmres, cgs, tfqmr, bicgstab, slu, symmlq, fixed_pt, lu
 scaling         = none
 output          = all_res # all_res, warnings , none , all, all_res, last
 conv            = rhs
 max_iter        = 100
-kspace          = 100
-precond         = dom_decomp #none,jacobi,sym_gs,neumann,ls,smoother,dom_decomp
+kspace          = 200 #100
+#precond         = dom_decomp #none,jacobi,sym_gs,neumann,ls,smoother,dom_decomp
 subdomain_solve = icc #ilu, ilut
 overlap         = 1
-ilut_fill       = 2
+ilut_fill       = 5 #2
 graph_fill      = 0
-drop            = 1.e-4
-tol             = 1.00e-5 
+drop            = 1.e-5 #1.e-4
+tol             = 1.00e-7 #1.00e-5 
 keep_info       = 1
 
 [../prec]
 
 reuse           = true
 overlap         = 1
-droptol         = 1.e-5
-fill 		= 1
-
+droptol         = 1.e-7 #1.e-5
+fill 		= 2 #1
+prectype        = Ifpack
 
 
