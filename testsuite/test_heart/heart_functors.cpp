@@ -5,6 +5,7 @@ using namespace LifeV;
 
 HeartFunctors::HeartFunctors( GetPot& dataFile ):	
 	_dataFile(dataFile),
+    stim_source (dataFile("electric/physics/stim_source",1)),
     stim_period_1 (dataFile("electric/physics/stim_period_1",200.)),
     stim_period_2 (dataFile("electric/physics/stim_period_2",200.)),	
     stim_period_3 (dataFile("electric/physics/stim_period_3",200.)),	
@@ -60,7 +61,16 @@ HeartFunctors::HeartFunctors( GetPot& dataFile ):
     zmin_box(dataFile("electric/physics/box_vertex_min",0.,2)),
     xmax_box(dataFile("electric/physics/box_vertex_max",0.,0)),
     ymax_box(dataFile("electric/physics/box_vertex_max",0.,1)),
-    zmax_box(dataFile("electric/physics/box_vertex_max",0.,2))
+    zmax_box(dataFile("electric/physics/box_vertex_max",0.,2)),
+    //parametre Iapp IappZygote REO
+    G_Time_period (dataFile("electric/physics/Time_period",700.0)),
+    G_Iapp_RV_angle (dataFile("electric/physics/Iapp_RV_angle",360.)),
+    G_Iapp_LV_angle (dataFile("electric/physics/Iapp_LV_angle",360.)),
+    G_Iapp_stim_time_RV (dataFile("electric/physics/Iapp_stim_time_RV",6.)),
+    G_Iapp_stim_time_LV (dataFile("electric/physics/Iapp_stim_time_LV",10.)),
+    G_Ventricular_Fibrillation (dataFile("electric/physics/Ventricular_Fibrillation",0)),
+    G_nb_fibrillation_sources (dataFile("electric/physics/nb_fibrillation_sources",20)),
+    G_fibrillation_sources (dataFile("electric/physics/fibrillation_sources",0))
     {
 	sigma_reduction(0) = dataFile("electric/physics/sigma_reduction",1.,0);
 	sigma_reduction(1) = dataFile("electric/physics/sigma_reduction",1.,1);
