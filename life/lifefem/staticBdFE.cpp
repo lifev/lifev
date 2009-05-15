@@ -187,7 +187,7 @@ void StaticBdFE::coorMap( Real& x, Real& y, Real& z,
 {
 	Vector coor = ZeroVector(3);
 	for( UInt icoor=0; icoor< nDimensions; icoor++)
-	        for ( UInt i = 0;i < ( int ) nbGeoNode;i++ )
+	        for ( UInt i = 0;i < (UInt)nbGeoNode;i++ )
 	        	coor[icoor] += point( i, icoor ) * geoMap.phi( i, xi, eta, 0. );
     x = coor[0]; y=coor[1]; z=coor[2];
 }

@@ -188,7 +188,7 @@ Real CurrentFE::diameter() const
         for ( j = i + 1;j < nbGeoNode;j++ )
         {
             s = 0.;
-            for ( icoor = 0;icoor < nDimensions; icoor++ )
+            for ( icoor = 0;icoor < (int)nDimensions; icoor++ )
             {
                 s += fabs( point( i, icoor ) - point( j, icoor ) );
             }

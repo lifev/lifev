@@ -40,13 +40,13 @@ namespace LifeV
 BCVectorBase::BCVectorBase()
     :
    _M_mixteCoef( 0.0 ),
-   _M_type( 0 ),
    _M_betaCoef(1.0),
    _M_gammaCoef(1.0),
-   _M_finalized( false ),
    _M_ismixteVec( false ),
    _M_isbetaVec( false  ),
-   _M_isgammaVec( false )
+   _M_isgammaVec( false ),
+   _M_type( 0 ),
+   _M_finalized( false )
 {}
 
 //! Constructor
@@ -57,10 +57,10 @@ BCVectorBase::BCVectorBase( const EpetraVector& vec, const UInt nbTotalDof, UInt
     _M_mixteCoef ( 0.0 ),
     _M_betaCoef(1.0),
     _M_gammaCoef(1.0),
-    _M_type      ( type ),
     _M_ismixteVec( false ),
     _M_isbetaVec( false  ),
     _M_isgammaVec( false ),
+    _M_type      ( type ),
     _M_finalized ( false )
 {}
 
