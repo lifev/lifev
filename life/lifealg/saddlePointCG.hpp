@@ -1,6 +1,6 @@
 /*
  This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
+ Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -23,44 +23,44 @@
 namespace LifeV
 {
 /*----------------------------------------------------------------------
- 
+
   A class to deal with the following saddle point problem:
- 
+
   [ A  B^T ] [ x ]    [ f ]
   [        ] [   ]  = [   ]
   [ B  0   ] [ y ]    [ g ]
- 
- 
+
+
   The Schur complement (dual problem) B A^{-1} B^T y = B A^{-1} f  -  g
   is solved by preconditionned conjugate gradient.
- 
+
                                            J.-F. Gerbeau, 01/2000
-  ----------------------------------------------------------------------*/ 
+  ----------------------------------------------------------------------*/
 /*
   Methods required for the template classes:
- 
+
   *** OpA:
- 
+
       1) Vector operator*(const Vector& u) const ;
          --> compute and return A*x
- 
+
       2) int solve(Vector& x,const Vector& f) const;
          --> solve Ax=f with initial guess x. Return 0 if ok, 1 if ko.
- 
+
       3) Vector solve(const Vector& f) const;
          --> solve Ax=f and return x
- 
+
   *** OpB:
- 
+
       1) Vector operator*(const Vector& x) const ;
          --> compute and return Bx
       2) Vector trans_mul(const Vector& y) const ;
          --> compute and return B^{T}y
- 
+
   *** Prec: (it is the preconditionner class for the Schur complement problem)
- 
+
       1) Vector solve(const Vector& f) const;
- 
+
 */
 
 template <class OpA, class OpB, class Prec, class Vector>

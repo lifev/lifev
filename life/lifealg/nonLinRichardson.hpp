@@ -1,6 +1,6 @@
 /*
  This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
+ Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -89,7 +89,7 @@ int nonLinRichardson( VectorType& sol,
 
     Real normResOld = 1;
 
-    if (verbose) 
+    if (verbose)
     {
         std::cout << "------------------------------------------------------------------" << std::endl;
 	std::cout << "  NonLinRichardson: starting " << std::endl;
@@ -119,7 +119,7 @@ int nonLinRichardson( VectorType& sol,
 
     while ( normRes > stop_tol && iter < maxit )
     {
-        if (verbose) 
+        if (verbose)
 	{
 	    std::cout << std::endl;
 	    std::cout << "------------------------------------------------------------------" << std::endl;
@@ -184,7 +184,7 @@ int nonLinRichardson( VectorType& sol,
             linearRelTol = std::min<Real>( eta_max,
                                              std::max<Real>( linearRelTol,
                                                              .5 * stop_tol / normRes ) );
-            if (verbose) 
+            if (verbose)
 	        std::cout << "    Newton: forcing term eta = " << linearRelTol << std::endl;
         }
 
@@ -192,14 +192,14 @@ int nonLinRichardson( VectorType& sol,
 
     if ( normRes > stop_tol )
     {
-        if (verbose) 
+        if (verbose)
 	    std::cout << "!!! NonLinRichardson: convergence fails" << std::endl;
         maxit = iter;
         return 1;
     }
 
     //f.displacementOnInterface();
-    if (verbose) 
+    if (verbose)
     {
 	std::cout << "------------------------------------------------------------------" << std::endl;
 	std::cout << "--- NonLinRichardson: convergence (" << normRes

@@ -1,6 +1,6 @@
 /*
  This file is part of the LifeV library
- Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politechnico di Milano
+ Copyright (C) 2001,2002,2003,2004 EPFL, INRIA and Politecnico di Milano
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -22,23 +22,23 @@
 namespace LifeV
 {
 /*----------------------------------------------------------------------
- 
+
   A class to manage the three steps of the resolution of the problem
- 
+
   [ A  B^T ] [ x ]    [ f ]
   [        ] [   ]  = [   ]
   [ B  0   ] [ y ]    [ g ]
- 
+
   by inexact LU factorization.
- 
+
   We denote by A1, \tilde A and A2 three approximations of A
- 
+
   Step 1:                   A1 x0 = f
   Step 2: B (\tilde A)^{-1} B^T y = B x0 - g
   Step 3:                       x = x0 +  A2^{-1} B^T y
- 
+
   The operator of Step 2 is a class "SaddlePoint" (see saddlePointCG.h)
- 
+
   (
   ! Example:
   ! if A = 1/dt M + K (M: mass, K: stiffness + advection)
@@ -49,30 +49,30 @@ namespace LifeV
   )
   Remark: the Uzawa algorithm can be performed directly on the class
           SaddlePoint.
- 
+
                                            J.-F. Gerbeau, 01/2000
-  ----------------------------------------------------------------------*/ 
+  ----------------------------------------------------------------------*/
 /*
   Methods required for the template classes:
- 
+
   *** OpA1 and OpA2:
- 
+
       1) int solve(Vector& x,const Vector& f) const;
          --> solve Ax=f with initial guess x. Return 0 if ok, 1 if ko.
- 
+
   *** SaddlePoint
- 
+
       1)   int solveDual(Vector& y,const Vector& x,const Vector& g) const;
          --->  B (\tilde A)^{-1} B^T y = B x0 - g
- 
+
       2)    int solveDual(Vector& y,const Vector& x) const;
          --->  B (\tilde A)^{-1} B^T y = B x0
- 
+
   *** OpB:
- 
+
       1) Vector trans_mul(const Vector& y) const ;
          --> compute and return B^{T}y
- 
+
 */
 template <class OpA1, class OpA2, class SaddlePoint, class OpB, class Vector>
 class InexactLU
