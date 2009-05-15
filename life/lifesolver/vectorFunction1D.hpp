@@ -89,8 +89,6 @@ private:
 
 public:
 
-  typedef std::pair< Real, Real > Vec2D;
-
     //! constructor
     NonLinearFluxFun1D(const OneDNonLinModelParam& onedparam);
 
@@ -125,7 +123,7 @@ public:
                                       Real& lefteigvec21, Real& lefteigvec22,
                                       const UInt& indz = 0 ) const;
 
- //! Second derivative tensor d2Fi/(dxj dxk)
+    //! Second derivative tensor d2Fi/(dxj dxk)
     Real diff2(const Real& _A, const Real& _Q,
                const ID& ii, const ID& jj, const ID& kk,
                const UInt& indz = 0) const;
@@ -157,14 +155,14 @@ public:
 
     /*! B = [0, B2]^T
 
-    with B2 such that
-    B2 =   Kr*Q/A
-    - beta1 * beta0/( rho*(beta1+1) ) * (A/A0)^(beta1+1)  * dA0/dz
-    + A0/rho * [ 1/(beta1+1) * (A/A0)^(beta1+1) - A/A0 ]  * dbeta0/dz
-    + A0    * beta0/( rho*(beta1+1) ) * (A/A0)^(beta1+1)
-    * [ log(A/A0) - 1/(beta1+1) ]                       * dbeta1/dz
+      with B2 such that
+      B2 =   Kr*Q/A
+      - beta1 * beta0/( rho*(beta1+1) ) * (A/A0)^(beta1+1)  * dA0/dz
+      + A0/rho * [ 1/(beta1+1) * (A/A0)^(beta1+1) - A/A0 ]  * dbeta0/dz
+      + A0    * beta0/( rho*(beta1+1) ) * (A/A0)^(beta1+1)
+      * [ log(A/A0) - 1/(beta1+1) ]                       * dbeta1/dz
 
-    \param indz : is the index position for the parameter
+      \param indz : is the index position for the parameter
     */
     Real operator()(const Real& _A, const Real& _Q,
                     const ID& ii,
@@ -182,12 +180,12 @@ public:
 
     /*! Sql = [Sql1, Sql2]^T
 
-    Sql source term of the equation under its quasi-linear
-    formulation :
+      Sql source term of the equation under its quasi-linear
+      formulation :
 
-    dU/dt + H(U) dU/dz + Sql(U) = 0
+      dU/dt + H(U) dU/dz + Sql(U) = 0
 
-    \param indz : is the index position for the parameter
+      \param indz : is the index position for the parameter
     */
     Real QuasiLinearSource(const Real& _U1, const Real& _U2,
                            const ID& ii,
@@ -210,27 +208,28 @@ public:
   Fij are constant.
 
 */
+template< class PARAM >
 class LinearSimpleFluxFun1D
 {
 
 private:
     //! the parameters that are used in the function
-    const LinearSimpleParam& _M_oneDParam;
+    const PARAM& _M_oneDParam;
 
 public:
 
     //! constructor
-    LinearSimpleFluxFun1D(const LinearSimpleParam& onedparam);
+    LinearSimpleFluxFun1D(const PARAM& onedparam);
 
     //! do nothing destructor
     // ~LinearSimpleFluxFun1D() {}
 
     /*! F = F(U) = [F11 U1 + F12 U2 , F21 U1 + F22 U2]^T
 
-    \param indz : is the index position for the parameters
-    when they are space dependent.
-    This is NOT pretty. I should try to
-    remove this dependency. VM 09/04
+      \param indz : is the index position for the parameters
+      when they are space dependent.
+      This is NOT pretty. I should try to
+      remove this dependency. VM 09/04
     */
     Real operator()(const Real& _U1, const Real& _U2,
                     const ID& ii,
@@ -266,27 +265,28 @@ public:
 
   with U=[U1,U2]^T
 */
+template< class PARAM >
 class LinearSimpleSourceFun1D
 {
 
 private:
     //! the parameters that are used in the function
-    const LinearSimpleParam& _M_oneDParam;
+    const PARAM& _M_oneDParam;
 
 public:
 
     //! constructor
-    LinearSimpleSourceFun1D(const LinearSimpleParam& onedparam);
+    LinearSimpleSourceFun1D(const PARAM& onedparam);
 
     //! do nothing destructor
     // ~LinearSimpleSourceFun1D() {}
 
     /*! S = [S1, S2]^T
 
-    S1 = S10 + S11 U1 + S12 U2
-    S2 = S20 + S21 U1 + S22 U2
+      S1 = S10 + S11 U1 + S12 U2
+      S2 = S20 + S21 U1 + S22 U2
 
-    \param indz : is the index position for the parameter
+      \param indz : is the index position for the parameter
     */
     Real operator()(const Real& _U1, const Real& _U2,
                     const ID& ii,
@@ -304,16 +304,16 @@ public:
 
     /*! Sql = [Sql1, Sql2]^T
 
-    Sql source term of the equation under its quasi-linear
-    formulation :
+      Sql source term of the equation under its quasi-linear
+      formulation :
 
-    dU/dt + H(U) dU/dz + Sql(U) = 0
+      dU/dt + H(U) dU/dz + Sql(U) = 0
 
-    Here H is constant w.r. to U.
-    And Sql = S(U), because there is no variation of
-    the coefficients.
+      Here H is constant w.r. to U.
+      And Sql = S(U), because there is no variation of
+      the coefficients.
 
-    \param indz : is the index position for the parameter
+      \param indz : is the index position for the parameter
     */
     Real QuasiLinearSource(const Real& _U1, const Real& _U2,
                            const ID& ii,
@@ -321,6 +321,170 @@ public:
 
 };
 //+++++++++++++++++++++++++++++++++++++++++++++++++++
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++
+//---------------------------------------------
+//! SIMPLE FLUX FUNCTION AND DERIVATIVES
+//---------------------------------------------
+template< class PARAM >
+LinearSimpleFluxFun1D<PARAM>::LinearSimpleFluxFun1D(const PARAM& onedparam) :
+    _M_oneDParam(onedparam)
+{}
+
+//! ii=1 -> F1, ii=2 -> F2
+template< class PARAM >
+Real LinearSimpleFluxFun1D<PARAM>::operator()(const Real& _U1, const Real& _U2,
+                                              const ID& ii,
+                                              const UInt& indz) const
+{
+    if( ii == 1 ) { //! F1
+        return _M_oneDParam.Flux11( indz ) * _U1 + _M_oneDParam.Flux12( indz ) * _U2;
+    }
+    if( ii == 2 ) { //! F2
+        return _M_oneDParam.Flux21( indz ) * _U1 + _M_oneDParam.Flux22( indz ) * _U2;
+    }
+    ERROR_MSG("The flux function has only 2 components.");
+    return -1.;
+}
+
+/*! Jacobian matrix dFi/dxj :
+  diff(1,1) = dF1/dx1    diff(1,2) = dF1/dx2
+  diff(2,1) = dF2/dx1    diff(2,2) = dF2/dx2
+*/
+template< class PARAM >
+Real LinearSimpleFluxFun1D<PARAM>::diff(const Real& /*_U1*/, const Real& /*_U2*/,
+                                        const ID& ii, const ID& jj,
+                                        const UInt& indz) const
+{
+    if( ii == 1 && jj == 1 ) { //! dF1/dU1
+        return _M_oneDParam.Flux11( indz );
+    }
+    if( ii == 1 && jj == 2 ) { //! dF1/dU2
+        return _M_oneDParam.Flux12( indz );
+    }
+    if( ii == 2 && jj == 1 ) { //! dF2/dU1
+        return _M_oneDParam.Flux21( indz );
+    }
+    if( ii == 2 && jj == 2 ) { //! dF2/dU2
+        return _M_oneDParam.Flux22( indz );
+    }
+
+    ERROR_MSG("Flux's differential function has only 4 components.");
+    return -1.;
+}
+
+//! Eigenvalues and eigenvectors of the Jacobian matrix dFi/dxj :
+template< class PARAM >
+void LinearSimpleFluxFun1D<PARAM>::
+jacobian_EigenValues_Vectors(const Real& /*_U1*/, const Real& /*_U2*/,
+                             Real& eig1, Real& eig2,
+                             Real& lefteigvec11, Real& lefteigvec12,
+                             Real& lefteigvec21, Real& lefteigvec22,
+                             const UInt& indz ) const
+{
+    //! eigen values
+    eig1 = _M_oneDParam.Celerity1( indz );
+    eig2 = _M_oneDParam.Celerity2( indz );
+
+    //! eigen vectors
+    lefteigvec11 = _M_oneDParam.LeftEigenVector11( indz );
+    lefteigvec12 = _M_oneDParam.LeftEigenVector12( indz );
+    lefteigvec21 = _M_oneDParam.LeftEigenVector21( indz );
+    lefteigvec22 = _M_oneDParam.LeftEigenVector22( indz );
+
+}
+
+/*! Second derivative tensor d2Fi/(dxj dxk)
+  diff2(1,1,1) = d2F1/dx1dx1    diff2(1,1,2) = d2F1/dx1dx2
+  diff2(1,2,1) = d2F1/dx2dx1    diff2(1,2,2) = d2F1/dx2dx2
+
+  diff2(2,1,1) = d2F2/dx1dx1    diff2(2,1,2) = d2F2/dx1dx2
+  diff2(2,2,1) = d2F2/dx2dx1    diff2(2,2,2) = d2F2/dx2dx2
+
+  with d2Fi/dx1dx2 = d2Fi/dx2dx1 .
+*/
+template< class PARAM >
+Real LinearSimpleFluxFun1D<PARAM>::diff2(const Real& /*_U1*/, const Real& /*_U2*/,
+                                         const ID& ii, const ID& jj, const ID& kk,
+                                         const UInt& /*indz*/) const
+{
+    if( (0 < ii && ii < 3) && (0 < jj && jj < 3) && (0 < kk && kk < 3) ) {
+        return 0.;
+    }
+    ERROR_MSG("Flux's second differential function has only 8 components.");
+    return -1.;
+}
+
+
+//---------------------------------------------
+//! SIMPLE SOURCE FUNCTION AND DERIVATIVES
+//---------------------------------------------
+template< class PARAM >
+LinearSimpleSourceFun1D<PARAM>::LinearSimpleSourceFun1D(const PARAM& onedparam) :
+    _M_oneDParam(onedparam)
+{}
+
+//! i=1 -> F1, i=2 -> F2
+template< class PARAM >
+Real LinearSimpleSourceFun1D<PARAM>::operator()(const Real& _U1, const Real& _U2,
+                                                const ID& ii,
+                                                const UInt& indz) const
+{
+    if( ii == 1 ) { //! S1
+        return _M_oneDParam.Source10( indz ) +
+            _M_oneDParam.Source11( indz ) * _U1 + _M_oneDParam.Source12( indz ) * _U2;
+    }
+    if( ii == 2 ) { //! S2
+        return _M_oneDParam.Source20( indz ) +
+            _M_oneDParam.Source21( indz ) * _U1 + _M_oneDParam.Source22( indz ) * _U2;
+    }
+    ERROR_MSG("The flux function has only 2 components.");
+    return -1.;
+}
+
+//! Jacobian matrix dSi/dxj
+template< class PARAM >
+Real LinearSimpleSourceFun1D<PARAM>::diff(const Real& /*_U1*/, const Real& /*_U2*/,
+                                          const ID& ii, const ID& jj,
+                                          const UInt& indz) const
+{
+    if( ii == 1 && jj == 1) { //! dS1/dU1 = 0
+        return _M_oneDParam.Source11( indz );
+    }
+    if( ii == 1 && jj == 2) { //! dS1/dU2 = 0
+        return _M_oneDParam.Source12( indz );
+    }
+    if( ii == 2 && jj == 1 ) { //! dS2/dU1
+        return _M_oneDParam.Source21( indz );
+    }
+    if( ii == 2 && jj == 2 ) { //! dS2/dU2
+        return  _M_oneDParam.Source22( indz );
+    }
+    ERROR_MSG("Source's differential function has only 4 components.");
+    return -1.;
+}
+
+//! Second derivative tensor d2Si/(dxj dxk)
+template< class PARAM >
+Real LinearSimpleSourceFun1D<PARAM>::diff2(const Real& /*_U1*/, const Real& /*_U2*/,
+                                           const ID& ii, const ID& jj, const ID& kk,
+                                           const UInt& /*indz*/) const
+{
+    if( (0 < ii && ii < 3) && (0 < jj && jj < 3) && (0 < kk && kk < 3) ) {
+        return 0.;
+    }
+    ERROR_MSG("Source's second differential function has only 8 components.");
+    return -1.;
+}
+
+template< class PARAM >
+Real LinearSimpleSourceFun1D<PARAM>::
+QuasiLinearSource(const Real& _U1, const Real& _U2,
+                  const ID& ii,
+                  const UInt& indz) const
+{
+    return this->operator()(_U1, _U2, ii, indz);
+}
 
 }
 
