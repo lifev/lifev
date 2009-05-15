@@ -625,7 +625,7 @@ bool
       }
 
     // add the triangles to the mesh
-    for( uint __i = 0; __i < __nt;++__i )
+    for( UInt __i = 0; __i < __nt;++__i )
       {
         pf = &( mesh.addFace() );
         pf->setId     ( __i + 1 );
