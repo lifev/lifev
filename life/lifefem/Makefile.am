@@ -36,8 +36,7 @@ localDofPattern.cpp quadRule.cpp refEle.cpp refFE.cpp \
 refHdivFE.cpp refHybridFE.cpp staticBdFE.cpp regionMesh3D_ALE.cpp v2elemVec.cpp \
 refEleDG.cpp geoMapDG.cpp refFEDG.cpp \
 currentFEDG.cpp currentBdDG.cpp currentBFDG.cpp currentIFDG.cpp \
-dofDG.cpp dofByFace.cpp \
-oneDBCFunctions.cpp oneDBCHandler.cpp
+dofDG.cpp dofByFace.cpp 
 
 liblifefem_la_LIBADD	= ../lifemesh/liblifemesh.la ../lifealg/liblifealg.la
 
