@@ -28,9 +28,9 @@
 namespace LifeV
 {
 //! returns the square of the L2 norm of u on the current element
-template <typename VectorType>
+template <typename VectorType, typename DofType>
 Real
-elem_L2_2( const VectorType & u, const CurrentFE& fe, const Dof& dof )
+elem_L2_2( const VectorType & u, const CurrentFE& fe, const DofType& dof )
 {
     int i, inod, ig;
     UInt eleID = fe.currentLocalId();
