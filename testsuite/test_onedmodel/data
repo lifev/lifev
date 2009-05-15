@@ -6,34 +6,29 @@
 [parameters]
 use_physical_values = 0
 Area0 = 1
-# alphaCor	= 1 		# coriolis coeff
+# alphaCor	= 1 	# coriolis coeff
 # alphaCor	= 1.333333333		# coriolis coeff
-beta0	= -3.5e6		# pressure law exponent
-beta1	= -0.5		# pressure law exponent
-# Kr	= 2.419026343 		# friction parameter (source term)
-Kr	= 0.		# friction parameter (source term)
-# Pa0 = 106400
-# R = 20000
-# ramp_length = 0.1
-# preload_length = 0.2
+beta0	= 1.e6		# pressure law exponent
+beta1	= 0.5		# pressure law exponent
+Kr	= 2.419026343 	# friction parameter (source term)
+# Kr	= 0.		# friction parameter (source term)
+R = 2.e4            # terminal resistence
 
 [time]
 timebeg	 = 0.0		# inittime
-timeend	 = 2.		# endtime
-timestep = 1e-6		# timestep
-sysperiod = 0.3
-cycleperiod = 0.9
+timeend	 = 0.02		# endtime
+timestep = 1e-5		# timestep
 
 [initialize]
-var = W1
-value = 1
+var = Q
+value = 0
 firstnode = 51
 lastnode = 101
 multiplier = 0
 
 [discretization]
 x_left	= 0.
-x_right	= 1.
+x_right	= 10.
 nb_elem	= 100	#   number of elements
 
 [miscellaneous]
@@ -42,4 +37,4 @@ post_file = sol                  # the file name
 verbose = 100
 show_graceplot = 0                # 0: no grace plot, 1: show grace plots
 postprocess_timestep = 0.01
-showCFL = 1
+showCFL = 0

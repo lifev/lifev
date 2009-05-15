@@ -7,7 +7,7 @@
 num_vessels = 6
 num_interfaces = 7
 timebeg	 = 0.0
-timeend	 = 1
+timeend	 = 2e-2
 timestep = 1e-5
 postprocess_timestep = 0.01
 setparam = 1
@@ -23,14 +23,7 @@ left_interface = 1
 right_interface = 2
 
 [./parameters]
-use_physical_values = 0
-Area0 = 1
-alphaCor	= 1 		# coriolis coeff
-# alphaCor	= 1.333333333		# coriolis coeff
-beta0	= -3.5e6		# pressure law exponent
-beta1	= -0.5		# pressure law exponent
-Kr	= 2.419026343 		# friction parameter (source term)
-# Kr	= 0.879645943		# friction parameter (source term)
+use_physical_values = 1
 
 [../1d_physics]
 young	= 1.e6
@@ -43,8 +36,8 @@ ksi = 0.5
 [../initialize]
 
 [../inflow]
-signal_amplitude = 1 # 0.00314159265358979
-signal_rest_value = 0. # 3.14159265358979
+signal_amplitude = 1.
+signal_rest_value = 0.
 # step
 step_start_time = .05
 step_duration = 0.1
@@ -52,10 +45,6 @@ step_smooth_interval = .01
 # sin: use defaults
 # sin_period = 
 # sin_phase =
-
-[../time]
-sysperiod = 0.3
-cycleperiod = 0.9
 
 [../discretization]
 x_left	= 0.
@@ -78,19 +67,16 @@ left_interface = 2
 right_interface = 3
 
 [./parameters]
-use_physical_values = 0
-Area0 = 1
-alphaCor	= 1 		# coriolis coeff
-# alphaCor	= 1.333333333		# coriolis coeff
-beta0	= -3.5e6		# pressure law exponent
-beta1	= -0.5		# pressure law exponent
-Kr	= 2.419026343 		# friction parameter (source term)
-# Kr	= 0.879645943		# friction parameter (source term)
-R = 20000
+use_physical_values = 1
+R = 2.e4
 
-[../time]
-sysperiod = 0.3
-cycleperiod = 0.9
+[../1d_physics]
+young	= 1.e6
+thickness = 0.05
+radius	= 0.5
+density = 1.
+viscosity = 0.035
+ksi = 0.5
 
 [../discretization]
 x_left	= 0.
@@ -113,18 +99,15 @@ left_interface = 4
 right_interface = 2
 
 [./parameters]
-use_physical_values = 0
-Area0 = 1
-alphaCor	= 1 		# coriolis coeff
-# alphaCor	= 1.333333333		# coriolis coeff
-beta0	= -3.5e6		# pressure law exponent
-beta1	= -0.5		# pressure law exponent
-Kr	= 2.419026343 		# friction parameter (source term)
-# Kr	= 0.879645943		# friction parameter (source term)
+use_physical_values = 1
 
-[../time]
-sysperiod = 0.3
-cycleperiod = 0.9
+[../1d_physics]
+young	= 1.e6
+thickness = 0.05
+radius	= 0.5
+density = 1.
+viscosity = 0.035
+ksi = 0.5
 
 [../discretization]
 x_left	= 0.
@@ -147,19 +130,15 @@ left_interface = 2
 right_interface = 5
 
 [./parameters]
-use_physical_values = 0
-Area0 = 1
-alphaCor	= 1 		# coriolis coeff
-# alphaCor	= 1.333333333		# coriolis coeff
-beta0	= -3.5e6		# pressure law exponent
-beta1	= -0.5		# pressure law exponent
-Kr	= 2.419026343 		# friction parameter (source term)
-# Kr	= 0.879645943		# friction parameter (source term)
-R = 20000
+use_physical_values = 1
 
-[../time]
-sysperiod = 0.3
-cycleperiod = 0.9
+[../1d_physics]
+young	= 1.e6
+thickness = 0.05
+radius	= 0.5
+density = 1.
+viscosity = 0.035
+ksi = 0.5
 
 [../discretization]
 x_left	= 0.
@@ -182,18 +161,15 @@ left_interface = 6
 right_interface = 2
 
 [./parameters]
-use_physical_values = 0
-Area0 = 1
-alphaCor	= 1 		# coriolis coeff
-# alphaCor	= 1.333333333		# coriolis coeff
-beta0	= -3.5e6		# pressure law exponent
-beta1	= -0.5		# pressure law exponent
-Kr	= 2.419026343 		# friction parameter (source term)
-# Kr	= 0.879645943		# friction parameter (source term)
+use_physical_values = 1
 
-[../time]
-sysperiod = 0.3
-cycleperiod = 0.9
+[../1d_physics]
+young	= 1.e6
+thickness = 0.05
+radius	= 0.5
+density = 1.
+viscosity = 0.035
+ksi = 0.5
 
 [../discretization]
 x_left	= 0.
@@ -216,19 +192,15 @@ left_interface = 2
 right_interface = 7
 
 [./parameters]
-use_physical_values = 0
-Area0 = 1
-alphaCor	= 1 		# coriolis coeff
-# alphaCor	= 1.333333333		# coriolis coeff
-beta0	= -3.5e6		# pressure law exponent
-beta1	= -0.5		# pressure law exponent
-Kr	= 2.419026343 		# friction parameter (source term)
-# Kr	= 0.879645943		# friction parameter (source term)
-R = 20000
+use_physical_values = 1
 
-[../time]
-sysperiod = 0.3
-cycleperiod = 0.9
+[../1d_physics]
+young	= 1.e6
+thickness = 0.05
+radius	= 0.5
+density = 1.
+viscosity = 0.035
+ksi = 0.5
 
 [../discretization]
 x_left	= 0.
@@ -240,5 +212,3 @@ post_dir = ./
 post_file = sol6
 verbose = 100
 show_graceplot = 0
-
-

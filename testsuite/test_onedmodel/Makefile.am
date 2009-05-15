@@ -27,37 +27,19 @@ AM_CPPFLAGS	= -DNO_BLASLAPACK
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-check_PROGRAMS = test_onedmodel test_onednet # test_twotubes 
+check_PROGRAMS = test_onedmodel test_onednet test_linearized 
 
 noinst_HEADERS = interface2Vessels.hpp ud_functions.hpp
 
-test_onedmodel_SOURCES = ud_functions.cpp main.cpp 
-
-#	$(top_srcdir)/life/lifefem/oneDBCFunctions.cpp \
-#	$(top_srcdir)/life/lifefem/oneDBCHandler.cpp \
-#	$(top_srcdir)/life/lifesolver/dataOneDModel.cpp \
-#	$(top_srcdir)/life/lifesolver/oneDModelHandler.cpp \
-#	$(top_srcdir)/life/lifesolver/oneDModelSolver.cpp \
-#	$(top_srcdir)/life/lifesolver/oneDNonLinModelParam.cpp \
-#	$(top_srcdir)/life/lifesolver/vectorFunction1D.cpp 
-
-# test_twotubes_SOURCES = interface2Vessels.cpp main_twotubes.cpp
-
-test_onednet_SOURCES = ud_functions.cpp main_net.cpp
-
-#	$(top_srcdir)/life/lifefem/oneDBCFunctions.cpp \
-#	$(top_srcdir)/life/lifefem/oneDBCHandler.cpp \
-#	$(top_srcdir)/life/lifesolver/dataOneDModel.cpp \
-#	$(top_srcdir)/life/lifesolver/oneDModelHandler.cpp \
-#	$(top_srcdir)/life/lifesolver/oneDModelSolver.cpp \
-#	$(top_srcdir)/life/lifesolver/oneDNonLinModelParam.cpp \
-#	$(top_srcdir)/life/lifesolver/vectorFunction1D.cpp 
+test_onedmodel_SOURCES = main.cpp 
+test_onednet_SOURCES = main_net.cpp
+test_linearized_SOURCES = main_lin.cpp
 
 test_onedmodel_LDADD    = $(grace_libs) $(life_libs)
-# test_twotubes_LDADD     = $(grace_libs) $(life_libs)
 test_onednet_LDADD     = $(grace_libs) $(life_libs)
+test_linearized_LDADD     = $(grace_libs) $(life_libs)
 
-EXTRA_DIST = data datalin2 datalin3 datanl datanl2 datanet testsuite.at 
+EXTRA_DIST = data datanet data_lin testsuite.at 
 
 MOSTLYCLEANFILES = *.res* *.mesh *.bb *.geo *.out *.m *.mtv *.scl *.case *.lbm *.mesh *.scl *.geo
 
