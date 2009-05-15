@@ -32,39 +32,51 @@ namespace LifeV
 {
 //! Constructor
 OneDModelHandler::OneDModelHandler(const GetPot& data_file):
-     DataOneDModel(data_file),
-     _M_nbCoor(1),
-     _M_adaptiveMesh(data_file("problem/adaptiveMesh",0)),
-     _M_mesh(_M_x_left,_M_x_right,_M_nb_elem,
-	     data_file("problem/alpha",50),
-	     data_file("problem/delta",10),
-	     data_file("problem/order",5),
-	     data_file("problem/minDeltaX",1.),
-	    _M_adaptiveMesh),
-     _M_geoMap(geoLinearSeg),
-     _M_qr(quadRuleSeg3pt),
-     _M_refFE(feSegP1),
-     _M_dof1D(_M_mesh.numVertices()),
-     _M_dimDof(_M_dof1D.numTotalDof()),
-     _M_fe(_M_refFE,_M_geoMap,_M_qr),
-     _M_GracePlot( data_file )
+    DataOneDModel(data_file),
+    _M_nbCoor(1),
+    _M_adaptiveMesh(data_file("problem/adaptiveMesh",0)),
+    _M_mesh(_M_x_left,_M_x_right,_M_nb_elem,
+            data_file("problem/alpha",50),
+            data_file("problem/delta",10),
+            data_file("problem/order",5),
+            data_file("problem/minDeltaX",1.),
+            _M_adaptiveMesh),
+    _M_geoMap(geoLinearSeg),
+    _M_qr(quadRuleSeg3pt),
+    _M_refFE(feSegP1),
+    _M_dof1D(_M_mesh.numVertices()),
+    _M_dimDof(_M_dof1D.numTotalDof()),
+    _M_fe(_M_refFE,_M_geoMap,_M_qr),
+    _M_bcDirLeft(2),
+    _M_bcDirRight(2),
+    _M_GracePlot( data_file )
 {
-  /* Useless as long as we don't have a 1d mesh reader and handler...
-  //! read mesh
-  readINRIAMeshFile(_M_mesh,_M_mesh_dir+"/"+_M_mesh_file,1);
-  //  _M_mesh.check(true,true);
-  _M_mesh.updateElementEdges();
+    /* Useless as long as we don't have a 1d mesh reader and handler...
+    //! read mesh
+    readINRIAMeshFile(_M_mesh,_M_mesh_dir+"/"+_M_mesh_file,1);
+    //  _M_mesh.check(true,true);
+    _M_mesh.updateElementEdges();
 
-  _M_dimDof = _M_dof1D.numTotalDof();
-  */
+    _M_dimDof = _M_dof1D.numTotalDof();
+    */
 }
 
 void OneDModelHandler::showMeHandler(std::ostream& c, UInt verbose)
 {
-  c << "\n--- One Dimensional Model Handler\n";
-  _M_mesh.showMe(c, verbose);
-  c << "--- End of One Dimensional Model Handler\n";
+    c << "\n--- One Dimensional Model Handler\n";
+    _M_mesh.showMe(c, verbose);
+    c << "--- End of One Dimensional Model Handler\n";
 
 }
+
+
+Real dot(const OneDModelHandler::Vec2D& vec1,
+         const OneDModelHandler::Vec2D& vec2)
+{
+    ASSERT_PRE( vec1.size() == 2 && vec2.size() == 2,
+                "dot works only for 2D vectors" )
+        return vec1[0] * vec2[0] + vec1[1] * vec2[1];
+}
+
 
 }

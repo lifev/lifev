@@ -33,7 +33,6 @@
 #include <cmath>
 #include <utility>
 
-#include <life/lifecore/life.hpp>
 #include <life/lifesolver/dataOneDModel.hpp>
 #include <life/lifemesh/basicOneDMesh.hpp>
 #include <life/lifefem/geoMap.hpp>
@@ -47,76 +46,92 @@
 
 namespace LifeV
 {
+namespace ublas = boost::numeric::ublas;
+
 /*!
   \class OneDModelHandler
 
 */
-
-class OneDModelHandler:
-  public DataOneDModel
+class OneDModelHandler :
+        public DataOneDModel
 {
 public:
 
-  typedef pair< Real, Real > Vec2D;
+    //! 2D vector
+    //  typedef std::pair< Real, Real > Vec2D;
+    typedef ublas::bounded_array<Real, 2> Vec2D;
+    //! Vector containing the nodal values of the scalar unknown
+    typedef ScalUnknown<Vector> ScalVec;
+    //! ublas::vector of Vectors
+    typedef ublas::vector<ScalVec > ScalVec_vector;
+    //! ublas::vector_range of ScalVec_vector
+    typedef ublas::vector_range<ScalVec_vector > ScalVec_vector_range;
 
+    typedef Real (*Function)(const Real&, const Real&, const Real&, const Real&, const ID&);
 
-  typedef Real (*Function)(const Real&, const Real&, const Real&, const Real&, const ID&);
+    //! Constructor
+    /*!
+      \param data_file GetPot data file
+    */
+    OneDModelHandler(const GetPot& data_file);
 
-  //! Constructor
-  /*!
-    \param data_file GetPot data file
-    \param refFE reference FE
-    \param Qr volumic quadrature rule
-    \param bdQr surface quadrature rule
-    \param BCh boundary conditions
-  */
-  OneDModelHandler(const GetPot& data_file);
-
-  //! Do nothing destructor
-  ~OneDModelHandler() {};
+    //! Do nothing destructor
+    ~OneDModelHandler() {};
 
     //! get the mesh handler
     BasicOneDMesh const& Mesh() const{ return _M_mesh; }
 
-  //! Update the right  hand side  for time advancing
-  /*!
-    \param source volumic source
-    \param time present time
-  */
-  // virtual void timeAdvance(const Function source, const Real& time) = 0;
+    //! get the fe handler
+    CurrentFE& fe() { return _M_fe; }
 
-  //! Update convective term, bc treatment and solve the linearized cdr system
-  //  virtual void iterate(const Real& time, PhysVectUnknown<Vector> & u) = 0;
+    //! Returns the Dof class
+    const DofOneD& dof() const {return _M_dof1D;}
+    DofOneD& dof() {return _M_dof1D;}
 
-   //! Output
-  void showMeHandler(std::ostream& c=std::cout, UInt verbose=0);
+    //! Update the right  hand side  for time advancing
+    /*!
+      \param source volumic source
+      \param time present time
+    */
+    // virtual void timeAdvance(const Function source, const Real& time) = 0;
+
+    //! Update convective term, bc treatment and solve the linearized cdr system
+    //  virtual void iterate(const Real& time, PhysVectUnknown<Vector> & u) = 0;
+
+    //! Output
+    void showMeHandler(std::ostream& c=std::cout, UInt verbose=0);
 
 protected:
 
-  const UInt _M_nbCoor; //!< := 1 (ONE dimensional model...)
+    const UInt _M_nbCoor; //!< := 1 (ONE dimensional model...)
 
-  const UInt _M_adaptiveMesh;
+    const UInt _M_adaptiveMesh;
 
-  BasicOneDMesh _M_mesh;
+    BasicOneDMesh _M_mesh;
 
-  const GeoMap&   _M_geoMap;
-  const QuadRule& _M_qr;   //!< Quadrature rule for segment elementary computations
+    const GeoMap&   _M_geoMap;
+    const QuadRule& _M_qr;   //!< Quadrature rule for segment elementary computations
 
-  const RefFE& _M_refFE;   //!< Reference Finite Element
+    const RefFE& _M_refFE;   //!< Reference Finite Element
 
-  DofOneD _M_dof1D; //!< the simplified degrees of freedom
-  const UInt _M_dimDof;   //!< number of dof  := nb of vertices
+    DofOneD _M_dof1D; //!< the simplified degrees of freedom
+    const UInt _M_dimDof;   //!< number of dof  := nb of vertices
 
-  CurrentFE _M_fe;     //!< current finite element
+    CurrentFE _M_fe;     //!< current finite element
 
 
-  //! Dirichlet boundary value at left and right boundaries (NO BCHandler)
-  Vec2D _M_bcDirLeft; //! first -> U1, second ->U2
-  Vec2D _M_bcDirRight;
+    //! Dirichlet boundary value at left and right boundaries (NO BCHandler)
+    Vec2D _M_bcDirLeft; //! first -> U1, second ->U2
+    Vec2D _M_bcDirRight;
 
-  GracePlot _M_GracePlot; //!< for plotting
+    GracePlot _M_GracePlot; //!< for plotting
 
 };
+
+//! 2D dot product
+Real dot(const OneDModelHandler::Vec2D& vec1,
+         const OneDModelHandler::Vec2D& vec2);
+
 }
 
 #endif
