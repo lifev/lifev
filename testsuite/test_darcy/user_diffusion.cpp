@@ -1,6 +1,6 @@
 /* -*- mode: c++ -*-
    This program is part of the LifeV library 
-   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politechnico di Milano
+   Copyright (C) 2001,2002,2003,2004 EPFL, INRIA, Politecnico di Milano
 
    This program is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public License
