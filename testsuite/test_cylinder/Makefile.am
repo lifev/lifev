@@ -35,5 +35,9 @@ link:
 	test -a data || ln -s $(srcdir)/data
 	test -a Mesh || ln -s $(top_srcdir)/testsuite/data/mesh/inria/ Mesh
 
+MOSTLYCLEANFILES = *.vct *.scl *.case *.geo *.m *.res* *.map
+
 clean-results:
-	-rm *.vct *.scl *.case *.geo
+	for dustfile in $(MOSTLYCLEANFILES); do \
+	!( \test -e $$dustfile ) || \rm $$dustfile; \
+	done
