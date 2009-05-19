@@ -80,8 +80,13 @@ public:
 
     typedef DataNavierStokes<Mesh> data_type;
 
-    typedef Real ( *Function ) ( const Real&, const Real&, const Real&,
-                                 const Real&, const ID& );
+//     typedef Real ( *Function ) ( const Real&, const Real&, const Real&,
+//                                  const Real&, const ID& );
+
+    typedef boost::function<Real ( Real const&, Real const&, Real const&,
+                                   Real const&, ID const& )> Function;
+
+
     typedef boost::function<Real ( Real const&, Real const&, Real const&,
                                    Real const&, ID const& )> source_type;
 
@@ -109,7 +114,8 @@ public:
     Oseen( const data_type&          dataType,
            FESpace<Mesh, EpetraMap>& uFESpace,
            FESpace<Mesh, EpetraMap>& pFESpace,
-           Epetra_Comm&              comm );
+           Epetra_Comm&              comm,
+           const int                 lagrangeMultiplier = 0);
 
     Oseen( const data_type&          dataType,
            FESpace<Mesh, EpetraMap>& uFESpace,
@@ -411,13 +417,14 @@ Oseen<Mesh, SolverType>::
 Oseen( const data_type&          dataType,
        FESpace<Mesh, EpetraMap>& uFESpace,
        FESpace<Mesh, EpetraMap>& pFESpace,
-       Epetra_Comm&              comm ):
+       Epetra_Comm&              comm,
+       const int                 lagrangeMultiplier):
     M_data                   ( dataType ),
     M_uFESpace               ( uFESpace ),
     M_pFESpace               ( pFESpace ),
     M_comm                   ( &comm ),
     M_Displayer              ( comm ),
-    M_localMap               ( M_uFESpace.map() + M_pFESpace.map() ),
+    M_localMap               ( M_uFESpace.map() + M_pFESpace.map() + lagrangeMultiplier),
     M_matrMass               ( ),
     M_matrMassPr             ( ),
     M_matrStokes             ( ),
@@ -582,7 +589,6 @@ template<typename Mesh, typename SolverType>
 Oseen<Mesh, SolverType>::
 ~Oseen()
 {
-
 }
 
 
@@ -621,6 +627,9 @@ void Oseen<Mesh, SolverType>::setUp( const GetPot& dataFile )
 
     //M_prec->setDataFromGetPot( dataFile, "fluid/prec" );
 }
+
+
+
 
 template<typename Mesh, typename SolverType>
 void Oseen<Mesh, SolverType>::buildSystem()
@@ -791,6 +800,9 @@ void Oseen<Mesh, SolverType>::buildSystem()
             chronoDivAssemble.stop();
         }
     }
+
+
+
 
 
     for (UInt ii = nDimensions*dim_u(); ii < nDimensions*dim_u() + dim_p(); ++ii)
@@ -1103,7 +1115,7 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
     Chrono chrono;
 
     // matrix and vector assembling communication
-    M_Displayer.leaderPrint("  f-  Updating the boundary conditions ...    ");
+    M_Displayer.leaderPrint("  f-  Updating the boundary conditions ...     ");
 
     chrono.start();
 
@@ -1135,8 +1147,14 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
 
     M_Displayer.leaderPrintMax("done in " , chrono.diff());
 
-    // solving the system
+
+//    matrFull->spy("matrFull");
+//    rhsFull.spy("rhsFull");
     M_linearSolver.setMatrix(*matrFull);
+
+    // solving the system
+    //int numIter = M_linearSolver.solveSystem( matrFull, rhsFull, M_sol, matrFull, M_reusePrec );
+    //int numIter = M_linearSolver.solveSystem( matrFull, rhsFull, M_sol, M_matrNoBC, M_reusePrec );
     int numIter = M_linearSolver.solveSystem(rhsFull, M_sol, matrFull, M_reusePrec );
 
     if (numIter < 0 ) // if the preconditioner has been reset, the stab terms are to be updated
@@ -1150,7 +1168,6 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
         resetPrec();
         resetStab();
     }
-
 
     M_residual  = M_rhsNoBC;
     M_residual -= *M_matrNoBC*M_sol;
