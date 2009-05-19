@@ -24,10 +24,10 @@ SUFFIXES	= .cpp .hpp .idl .c .h .f .F .o .moc
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-check_HEADERS =
+check_HEADERS = 
 
 check_PROGRAMS = test_spiritParser
-test_spiritParser_SOURCES = main.cpp
+test_spiritParser_SOURCES = main.cpp 
 
 EXTRA_DIST = testsuite.at
 

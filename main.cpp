@@ -101,7 +101,7 @@ main( int argc, char** argv )
 	SpiritParser parser;
 
 	// TEST 1:
-	expression = "1 + 1";
+	expression = "(1+1)";
 	parser.setString(expression);
 	result = parser.evaluate();
 	std::cout << expression << " = " << result << std::endl;
@@ -119,10 +119,17 @@ main( int argc, char** argv )
 	std::cout << expression << " = " << result << std::endl;
 
 	// TEST 4:
-	expression = "x=1, y=2, 5 * (x^2 + y^2)";
+	expression = "(0, 0, x^2+y^2)))";
 	parser.setString(expression);
-	result = parser.evaluate();
-	std::cout << expression << " = " << result << std::endl;
+	parser.setVariable("x", 1);
+	parser.setVariable("y", 2);
+	std::cout << "x = " << 1 << ", y = " << 2 << " ==> ";
+	std::cout << expression << " = (" << parser.evaluate(1) << ", " << parser.evaluate(2) << ", " << parser.evaluate(3) << ")" << std::endl;
+	parser.setString(expression);
+	parser.setVariable("x", 4);
+	parser.setVariable("y", 5);
+	std::cout << "x = " << 4 << ", y = " << 5 << " ==> ";
+	std::cout << expression << " = (" << parser.evaluate(1) << ", " << parser.evaluate(2) << ", " << parser.evaluate(3) << ")" << std::endl;
 
 	// TEST 5:
 	expression = "sin(3/4*pi) * sin(3/4*pi) + cos(3/4*pi)^2";
@@ -135,6 +142,11 @@ main( int argc, char** argv )
 	parser.setString(expression);
 	result = parser.evaluate();
 	std::cout << expression << " = " << result << std::endl;
+
+	// TEST 7:
+	expression = "c=2; (0., c, c*c, c*c*c)";
+	parser.setString(expression);
+	std::cout << expression << " = (" << parser.evaluate(1) << ", " << parser.evaluate(2) << ", " << parser.evaluate(3) << ", " << parser.evaluate(4) << ")" << std::endl;
 
 	#ifdef HAVE_MPI
 		std::cout << std::endl << "MPI Finalization" << std::endl;
