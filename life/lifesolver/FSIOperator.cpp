@@ -213,10 +213,10 @@ FSIOperator::setup()
 
         leaderPrint("fluid: ok.\n");
 
-        M_fluid.reset(new fluid_raw_type(dataFluid(),
-                                                      *M_uFESpace,
-                                                      *M_pFESpace,
-                                                      *M_epetraComm));
+//         M_fluid.reset(new fluid_raw_type(dataFluid(),
+//                                          *M_uFESpace,
+//                                          *M_pFESpace,
+//                                          *M_epetraComm));
 
 //         if (M_linearFluid)
 //             M_fluidLin.reset(new FSIOperator::fluidlin_raw_type(dataFluid(),
@@ -1574,10 +1574,12 @@ void FSIOperator::resetHeAndFluid()
 {
     M_meshMotion.reset(new meshmotion_raw_type(*M_mmFESpace,
                                                *M_epetraComm));
+    UInt numLM = dataFluid().numLM();
     M_fluid.reset(new fluid_raw_type(dataFluid(),
                                      *M_uFESpace,
                                      *M_pFESpace,
-                                     *M_epetraComm));
+                                     *M_epetraComm,
+                                     numLM));
     vector_type u0(M_fluid->getMap());
     M_bdf.reset(new BdfT<vector_type>(M_dataFluid->order_bdf()));
     M_bdf->initialize_unk(u0);
