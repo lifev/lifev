@@ -501,7 +501,7 @@ void EpetraMatrix<DataType>::diagonalize( std::vector<UInt> rVec,
     const Epetra_Map& rowMap(M_epetraCrs.RowMap());
 
 
-    Comm.Barrier();
+    //Comm.Barrier();
     // we want to know which IDs are our or not
 
     for (int ii = 0; ii < rVec.size(); ++ii)
