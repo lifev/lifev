@@ -2,7 +2,8 @@
 
   This file is part of the LifeV Applications.
 
-  Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+  Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>,
+			 Gilles Fourestey  <gilles.fourestey@epfl.ch>
        Date: 2009-04-07
 
   Copyright (C) 2009 EPFL
@@ -25,6 +26,7 @@
 /**
    \file SpiritParser.hpp
    \author Cristiano Malossi <cristiano.malossi@epfl.ch>
+   \author Gilles Fourestey  <gilles.fourestey@epfl.ch>
    \date 2009-04-07
  */
 
@@ -53,6 +55,10 @@
 // ===================================================
 using namespace LifeV;
 
+typedef std::map<std::string, Real>		variables_type;
+typedef std::vector<Real>				results_type;
+typedef std::vector<std::string>        string_type;
+
 
 
 
@@ -61,16 +67,40 @@ using namespace LifeV;
  * \class SpiritCalculator
  * \brief A string parser calculator based on \c boost::spirit
  *
- *  @author Cristiano Malossi
+ *  @author(s) Cristiano Malossi
+ *             Gilles Fourestey
  *  @see
  *
  *  \c SpiritCalculator is a \c boost::spirit based class to perform
  *  evaluation of \c std::string expressions.
  *
- *  Currently it works with the following operators:
+ *  <b>EXAMPLE - HOW TO USE</b>
+ *	Let's look at an example: suppose that you have this function:
+ *
+ *	[u,v,w] = f(x,y,z,t)
+ *
+ *	where
+ *
+ *	u(x)   = a*b*x
+ *	v(x,y) = a/b*sqrt(x^2 + y^2)
+ *	w(t)   = b*t;
+ *
+ *	with "a" and "b" constants such that a=5.12345, b=9.999999.
+ *	You can use this syntax to implement it inside the spiritParser:
+ *
+ *	string = "a=5.12345 ; b=9.999999 ; (a*b*x, a/b*sqrt(x^2 + y^2), b*t)"
+ *
+ *	where semicolons (";") separate constants and commas (",") separate output functions.
+ *
+ *	NOTE:
+ *  Currently SpiritParser works with the following operators:
  *  \verbatim
  *  +, -, *, /, ^, sqrt(), sin(), cos(), tan(), exp(), log(), log10(), >, <.
  *  \endverbatim
+ *
+ *  \TODO Fix a problem when calling destructors;
+ *  \TODO Find a better way to manage results (M_results, M_nResults, setResult(), ...)
+ *  \TODO Avoid the use of ruleTheString( )
  *
  */
 struct SpiritCalculator : boost::spirit::grammar<SpiritCalculator>
@@ -79,25 +109,34 @@ struct SpiritCalculator : boost::spirit::grammar<SpiritCalculator>
 {
 public:
 
-	SpiritCalculator( std::map<std::string, Real>& variables, Real& result ) :
-		M_variables	( variables ),
-		M_result 	( result )
-	{}
+	SpiritCalculator( variables_type& variables, results_type& results, UInt& nResults ) :
+		M_variables	( &variables ),
+		M_results 	( &results ),
+		M_nResults 	( nResults )
+	{
+	}
 
 	SpiritCalculator( const SpiritCalculator& calculator ) :
 		M_variables ( calculator.M_variables ),
-		M_result 	( calculator.M_result )
-	{}
+		M_results 	( calculator.M_results ),
+		M_nResults 	( calculator.M_nResults )
+	{
+	}
 
 	SpiritCalculator& operator=( const SpiritCalculator& calculator )
 	{
 	    if ( this != &calculator )
 	    {
 	    	M_variables		= calculator.M_variables;
-	    	M_result 		= calculator.M_result;
+	    	M_results 		= calculator.M_results;
+	    	M_nResults 		= calculator.M_nResults;
 	    }
 
 		return *this;
+	}
+
+	~SpiritCalculator()
+	{
 	}
 
 	// Closures
@@ -135,6 +174,10 @@ public:
     			][identifier.name = construct_<std::string>(arg1, arg2)]
     			;
 
+    		command
+				= as_lower_d["showmevariables"][bind(&SpiritCalculator::showMeVariables)(self)]
+				;
+
     		group
     			=  '('
     			>> expression[group.value = arg1]
@@ -148,10 +191,11 @@ public:
 				;
 
     		statement
-    			= (   assignment
-    				| expression[bind(&SpiritCalculator::setResult)(self, arg1)]
+    			= ( assignment
+    			|	exprVectors
+    			|	expression[bind(&SpiritCalculator::setResult)(self, arg1)]
     			  )
-    			  >> (end_p | ',')
+    			  >> (end_p | ';')
     			;
 
     		literal
@@ -189,6 +233,16 @@ public:
     				)
     			;
 
+            exprVectors
+				=
+				'(' >>
+					(
+					expression[bind(&SpiritCalculator::setResult)(self, arg1)]
+					>> *(',' >>  expression[bind(&SpiritCalculator::setResult)(self, arg1)])
+					)
+					>> ')'
+				;
+
     		expression
     			= term[expression.value = arg1]
     			>> *( ('+' >> term[expression.value += arg1])
@@ -200,27 +254,38 @@ public:
         boost::spirit::rule<ScannerT> const&
         start() const { return statement; }
 
-        boost::spirit::rule<ScannerT> statement;
+        boost::spirit::rule<ScannerT> 								 command, statement, exprVectors;
         boost::spirit::rule<ScannerT, assignment_closure::context_t> assignment;
-        boost::spirit::rule<ScannerT, string_closure::context_t> identifier;
-        boost::spirit::rule<ScannerT,  value_closure::context_t> expression, term, factor, function, literal, group;
+        boost::spirit::rule<ScannerT,	  string_closure::context_t> identifier;
+        boost::spirit::rule<ScannerT,	   value_closure::context_t> expression, term, factor, function, literal, group;
     };
 
     // Member functions that are called in semantic actions.
     void define(const std::string& name, const Real value) const
     {
-    	M_variables[name] = value;
+    	M_variables->operator[](name) = value;
+    }
+
+    void showMeVariables() const
+    {
+    	variables_type::const_iterator it;
+
+    	std::cout << "SpiritParser showMeVariables: " << M_variables << std::endl;
+    	for (it = M_variables->begin(); it != M_variables->end(); ++it)
+    		std::cout << it->first << " = " << it->second << std::endl;
+
+    	std::cout << M_variables << std::endl;
     }
 
     Real lookup(const std::string& name) const
     {
-    	if (M_variables.find(name) == M_variables.end())
+    	if (M_variables->find(name) == M_variables->end())
     	{
-    	    std::cerr << "undefined name: " << name << '\n';
+    	    std::cerr << "!!! Warning: SpiritParser has undefined name " << name << " !!!" << std::endl;
     	    return 0.0;
     	}
     	else
-    	   return (*M_variables.find(name)).second;
+    	   return (M_variables->find(name))->second;
     }
 
     Real pow( const Real a, const Real b ) const
@@ -273,16 +338,17 @@ public:
     	return std::tan(a);
     }
 
-    void setResult( const Real R) const
+    void setResult( const Real result) const
     {
-    	M_result = R;
+    	M_results->operator[]( M_nResults ) = result;
+    	M_nResults++;
     }
 
 private:
 
-    std::map<std::string, Real>&						M_variables;
-	Real&												M_result;
-
+	boost::shared_ptr<variables_type>						M_variables;
+	boost::shared_ptr<results_type>							M_results;
+	UInt&													M_nResults;
 };
 
 
@@ -293,7 +359,8 @@ private:
  * \class SpiritParser
  * \brief A LifeV interface for SpiritCalculator
  *
- *  @author Cristiano Malossi
+ *  @author(s) Cristiano Malossi
+ *             Gilles Fourestey
  *  @see
  */
 class SpiritParser
@@ -310,7 +377,7 @@ public:
      */
     //@{
 
-	//! Empty string constructor (need a manual call to setString)
+	//! Empty string constructor (it needs a manual call to setString)
 	/*!
 	 * \param applyRules - use rules for notation
      */
@@ -337,7 +404,9 @@ public:
 	SpiritParser& operator=( const SpiritParser& parser );
 
     //! Destructor
-    ~SpiritParser() {}
+    ~SpiritParser()
+    {
+    }
 
     //@}
 
@@ -350,9 +419,9 @@ public:
     /*! Set string function
      *
      * \param string          - Expression to evaluate
-     * \param stringSeparator - Separator identifier (default -> ",")
+     * \param stringSeparator - Separator identifier (default -> ";")
      */
-    void setString( const std::string& string,  const std::string& stringSeparator="," );
+    void setString( const std::string& string,  const std::string& stringSeparator = ";" );
 
     /*! Set/replace a variable
      *
@@ -361,9 +430,11 @@ public:
      */
     void setVariable( const std::string& name, const Real& value );
 
+    void showMeVariables( void ) const { M_calculator.showMeVariables(); }
+
     /*! Evaluate the expression
      */
-    Real& evaluate( void );
+    Real& evaluate( const UInt& ID = 1 );
 
     //@}
 
@@ -373,9 +444,10 @@ private:
 	//! Private variables
 	// ===================================================
 
-	std::vector<std::string>							M_strings;
-    std::map<std::string, Real>							M_variables;
-	Real												M_result;
+	string_type											M_strings;
+	boost::shared_ptr<variables_type>					M_variables;
+	boost::shared_ptr<results_type>						M_results;
+	UInt												M_nResults;
 	SpiritCalculator									M_calculator;
 	bool												M_applyRules;
 
@@ -388,6 +460,9 @@ private:
     /** @name Private functions
      */
     //@{
+
+	//! Setup results
+	inline void setupResults( const std::string& stringSeparator = "," );
 
 	//! Set default variables
 	inline void setDefaultVariables( void );
