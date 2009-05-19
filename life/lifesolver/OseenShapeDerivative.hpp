@@ -62,7 +62,8 @@ public:
     OseenShapeDerivative( const data_type&          dataType,
                           FESpace<Mesh, EpetraMap>& uFESpace,
                           FESpace<Mesh, EpetraMap>& pFESpace,
-                          Epetra_Comm&              comm );
+                          Epetra_Comm&              comm,
+                          const int                 lagrangeMultiplier = 0);
 
     OseenShapeDerivative( const data_type&          dataType,
                           FESpace<Mesh, EpetraMap>& uFESpace,
@@ -120,11 +121,13 @@ OseenShapeDerivative<Mesh, SolverType>::
 OseenShapeDerivative( const data_type&          dataType,
                       FESpace<Mesh, EpetraMap>& uFESpace,
                       FESpace<Mesh, EpetraMap>& pFESpace,
-                      Epetra_Comm&              comm ):
+                      Epetra_Comm&              comm,
+                      const int                 lagrangeMultiplier):
     super            (dataType,
                       uFESpace,
                       pFESpace,
-                      comm),
+                      comm,
+                      lagrangeMultiplier),
     M_rhsLinNoBC     ( this->getMap()),
     M_rhsLinFull     ( this->getMap()),
     M_linSol         ( this->getMap()),
@@ -286,7 +289,7 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& m
 
     if(this->M_data.useShapeDerivatives())
         {
-            this->M_Displayer.leaderPrint("  f-  Updating right hand side... ");
+            this->M_Displayer.leaderPrint("  f-  Updating the right hand side          ... ");
 
             //
             // RIGHT HAND SIDE FOR THE LINEARIZED ALE SYSTEM
@@ -301,9 +304,9 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& m
             vector_type wRep   ( w   , Repeated );
             vector_type dwRep  ( dw  , Repeated );
 
-//     std::cout << wRep.NormInf() << std::endl;
-//     std::cout << dwRep.NormInf() << std::endl;
-//     std::cout << dispRep.NormInf() << std::endl;
+            //     std::cout << wRep.NormInf() << std::endl;
+            //     std::cout << dwRep.NormInf() << std::endl;
+            //     std::cout << dispRep.NormInf() << std::endl;
 
             vector_type rhsLinNoBC( M_rhsLinNoBC.getMap(), Repeated);
 
@@ -332,14 +335,14 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& m
                                     M_dw_loc.vec( ) [ iloc + ic*this->M_uFESpace.fe().nbNode ] = dwRep( ig );            // dw local
                                     M_u_loc.vec()   [ iloc + ic*this->M_uFESpace.fe().nbNode ] = unRep( ig );            // un local
                                 }
-                       }
+                        }
                     /*
-                    std::cout << M_elvec.vec() << std::endl;
-                    std::cout << M_w_loc.vec() << std::endl;
-                    std::cout << M_uk_loc.vec() << std::endl;
-                    std::cout << M_d_loc.vec() << std::endl;
-                    std::cout << M_dw_loc.vec() << std::endl;
-                    std::cout << M_u_loc.vec() << std::endl;
+                      std::cout << M_elvec.vec() << std::endl;
+                      std::cout << M_w_loc.vec() << std::endl;
+                      std::cout << M_uk_loc.vec() << std::endl;
+                      std::cout << M_d_loc.vec() << std::endl;
+                      std::cout << M_dw_loc.vec() << std::endl;
+                      std::cout << M_u_loc.vec() << std::endl;
                     */
                     for ( UInt k = 0 ; k < ( UInt ) this->M_pFESpace.fe().nbNode ; k++ )
                         {
@@ -394,15 +397,15 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& m
                     // Assembling
                     //
                     /*
-         std::cout << "debut ====================" << std::endl;
-         M_elvec_dp.showMe(std::cout);
-         M_elvec_du.showMe(std::cout);
-         std::cout << "fin   ====================" << std::endl;
+                      std::cout << "debut ====================" << std::endl;
+                      M_elvec_dp.showMe(std::cout);
+                      M_elvec_du.showMe(std::cout);
+                      std::cout << "fin   ====================" << std::endl;
                     */
                     // assembling presssure right hand side
                     assembleVector( rhsLinNoBC, M_elvec_dp, this->M_pFESpace.fe(), this->M_pFESpace.dof(), 0, nbCompU*this->dim_u() );
 
-           // loop on velocity components
+                    // loop on velocity components
                     for ( int ic = 0; ic < nbCompU; ic++ )
                         {
                             // assembling velocity right hand side
