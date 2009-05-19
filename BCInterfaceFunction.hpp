@@ -77,21 +77,17 @@ using namespace LifeV;
  *
  *  The function string has to be in this form:
  *
- *  function = 'u ; v ; w'
+ *  function = '(u, v, w)'
  *
  *  where u(x,y,z,t), v(x,y,z,t), w(x,y,z,t).
  *  Here there is an example:
  *
- *  function = 'x^2 + y^2 ; 0 ; 2*sin(2*pi*t)'
- *
- *  If u = v = w it is possible to set just one argument, for example:
- *
- *  function = '0'
+ *  function = '(x^2 + y^2, 0, 2*sin(2*pi*t))'
  *
  *  To set a constant for complicate expression it is possible to add them before the expression
- *  using a comma ",":
+ *  using a semicolon ";":
  *
- *  function = 'x^2 + y^2 ; 0 ; C=5.67436, C*sin(2*pi*C*t)^C'
+ *  function = 'a=5.67436; (x^2+y^2,0,c*sin(2*pi*C*t)^C)'
  *
  */
 class BCInterfaceFunction
@@ -121,7 +117,23 @@ public:
     //@{
 
     //! Constructor
-	BCInterfaceFunction( const std::string& baseString, const std::string& stringSeparator=";" );
+	/*!
+	 * \param baseString      - function string
+	 * \param stringSeparator - Separator identifier (default -> ",")
+	 */
+	BCInterfaceFunction( const std::string& baseString );
+
+	//! Copy constructor
+	/*!
+	 * \param function - BCInterfaceFunction
+	 */
+	BCInterfaceFunction( const BCInterfaceFunction& function );
+
+	//! Operator =
+	/*!
+	 * \param function - BCInterfaceFunction
+	 */
+	BCInterfaceFunction& operator=( const BCInterfaceFunction& function );
 
     //! Destructor
     ~BCInterfaceFunction() {}
@@ -144,9 +156,8 @@ private:
 	//! Private variables
 	// ===================================================
 
-	std::map<UInt,UInt>									M_mapID;
 	BCFunctionBase 										M_base;
-	std::vector< boost::shared_ptr<SpiritParser> >		M_parserVector;
+	boost::shared_ptr<SpiritParser>						M_parser;
 
 
 	// ===================================================
@@ -154,7 +165,7 @@ private:
 	// ===================================================
 
 	/** @name Private functions
-	*/
+	 */
 	//@{
 
     //! buildFunctionBase

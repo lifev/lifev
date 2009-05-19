@@ -67,6 +67,34 @@ BCInterfaceFSIOperator::BCInterfaceFSIOperator( const std::string& baseString,
 
 
 
+BCInterfaceFSIOperator::BCInterfaceFSIOperator( const BCInterfaceFSIOperator& fsiOperator ) :
+	M_baseString	( fsiOperator.M_baseString ),
+	M_FSIOperator	( fsiOperator.M_FSIOperator ),
+	M_base			( fsiOperator.M_base ),
+	M_mapMethod		( fsiOperator.M_mapMethod ),
+	M_mapFunction	( fsiOperator.M_mapFunction )
+{
+}
+
+
+
+BCInterfaceFSIOperator&
+BCInterfaceFSIOperator::operator=( const BCInterfaceFSIOperator& fsiOperator )
+{
+    if ( this != &fsiOperator )
+    {
+    	M_baseString	= fsiOperator.M_baseString;
+    	M_FSIOperator	= fsiOperator.M_FSIOperator;
+    	M_base			= fsiOperator.M_base;
+    	M_mapMethod		= fsiOperator.M_mapMethod;
+    	M_mapFunction	= fsiOperator.M_mapFunction;
+    }
+
+	return *this;
+}
+
+
+
 
 
 // ===================================================

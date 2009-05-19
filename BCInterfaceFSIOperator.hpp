@@ -136,7 +136,23 @@ public:
     //@{
 
     //! Constructor
+	/*!
+	 * functionString - interface condition ID
+	 * oper           - fsiOperator
+	 */
 	BCInterfaceFSIOperator( const std::string& functionString, const boost::shared_ptr<FSIOperator>& oper );
+
+	//! Copy constructor
+	/*!
+	 * \param fsiOperator - BCInterfaceFSIOperator
+	 */
+	BCInterfaceFSIOperator( const BCInterfaceFSIOperator& fsiOperator );
+
+	//! Operator =
+	/*!
+	 * \param fsiOperator - BCInterfaceFSIOperator
+	 */
+	BCInterfaceFSIOperator& operator=( const BCInterfaceFSIOperator& fsiOperator );
 
     //! Destructor
     ~BCInterfaceFSIOperator() {}

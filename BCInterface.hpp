@@ -91,7 +91,7 @@ enum BCBaseList{function, fsi};
  *  flag       = 2
  *  mode       = Full
  *  component  = 3
- *  function   = '0; 0; 3*0.03*(1/4-(x^2+y^2))'
+ *  function   = '(0, 0, 3*0.03*(1/4-(x^2+y^2))'
  *
  *  NOTE: All the parameters are case sensitive.
  *
@@ -145,6 +145,8 @@ enum BCBaseList{function, fsi};
  *  In this case you have to manually set the TOTAL number of boundary conditions
  *  by using setHandlerParameters() function BEFORE building the handler.
  *
+ *  \TODO Make static BCInterfaceFunction, to have just one class (and hence one Parser) for the same function strings.
+ *  \TODO Find a way to impose component in a more general way (actually to impose 3rd component, we have to provide also the first two: (0,0,'3rd component')
  */
 class BCInterface
 //     :
@@ -380,7 +382,7 @@ void BCInterface::addBCManager( BCBase& base )
 
 			Debug( 5020 ) << "BCInterface::addBCManager (Scalar, Normal, Tangential)" << "\n";
 
-			addBC( M_name, M_flag, M_type, M_mode, base);
+			addBC( M_name, M_flag, M_type, M_mode, base );
 
 			break;
 
@@ -390,7 +392,7 @@ void BCInterface::addBCManager( BCBase& base )
 
 			Debug( 5020 ) << "BCInterface::addBCManager (Full)" << "\n";
 
-			addBC( M_name, M_flag, M_type, M_mode, base, M_comN);
+			addBC( M_name, M_flag, M_type, M_mode, base, M_comN );
 
 			break;
 
@@ -401,7 +403,7 @@ void BCInterface::addBCManager( BCBase& base )
 
 			Debug( 5020 ) << "BCInterface::addBCManager (Component)" << "\n";
 
-			addBC( M_name, M_flag, M_type, M_mode, base, M_comV);
+			addBC( M_name, M_flag, M_type, M_mode, base, M_comV );
 
 			break;
 	}
@@ -417,7 +419,7 @@ void BCInterface::addBC( 	const BCName& name,
 								  BCBase& base )
 {
 	Debug( 5020 ) << "BCInterface::addBC (without component)" << "\n\n";
-	for (UInt j(0) ; j < flag.size() ; ++j)
+	for ( UInt j(0) ; j < flag.size() ; ++j )
 		M_handler->addBC( name, flag[j], type, mode, base );
 }
 
@@ -432,7 +434,7 @@ void BCInterface::addBC( 	const BCName& name,
 							const BCComp& comp )
 {
 	Debug( 5020 ) << "BCInterface::addBC (with component)" << "\n\n";
-	for (UInt j(0) ; j < flag.size() ; ++j)
+	for ( UInt j(0) ; j < flag.size() ; ++j )
 		M_handler->addBC( name, flag[j], type, mode, base, comp );
 }
 

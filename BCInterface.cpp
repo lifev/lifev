@@ -39,7 +39,7 @@
 // ===================================================
 BCInterface::BCInterface( GetPot const& dataFile, const std::string dataSection ) :
 	M_dataFile					( dataFile ),
-	M_dataSection				( "conditions/" + dataSection + "/" ),
+	M_dataSection				( "boundary_conditions/" + dataSection + "/" ),
 	M_list						( ),
 	M_listSize					( 0 ),
 	M_autoSetParameters			( true ),
@@ -119,15 +119,16 @@ BCInterface::buildHandler( void )
 
 	M_handler.reset( new BCHandler ( M_bcNumber, M_hint ) );
 
-	for (UInt i(0) ; i < M_listSize ; ++i)
+	for ( UInt i(0) ; i < M_listSize ; ++i )
 	{
-		M_name =  M_list[i];
+		M_name = M_list[i];
 
 		readFlag( (M_dataSection + M_name + "/flag").c_str() );
 		readType( (M_dataSection + M_name + "/type").c_str() );
 		readMode( (M_dataSection + M_name + "/mode").c_str() );
 
 		readBase(  M_dataSection + M_name + "/" );
+
 		switch ( M_base )
 		{
 			case function :
@@ -157,10 +158,10 @@ BCInterface::buildHandler( void )
 inline void
 BCInterface::setList( const char* conditions )
 {
-    M_listSize = M_dataFile.vector_variable_size(conditions);
+    M_listSize = M_dataFile.vector_variable_size( conditions );
 
-    M_list.reserve(M_listSize);
-    for (UInt i(0) ; i < M_listSize ; ++i)
+    M_list.reserve( M_listSize );
+    for ( UInt i(0) ; i < M_listSize ; ++i )
     	M_list.push_back(M_dataFile(conditions, " ", i));
 }
 
@@ -169,7 +170,7 @@ BCInterface::setList( const char* conditions )
 inline void
 BCInterface::autosetHandlerParameters( void )
 {
-	for (UInt i(0) ; i < M_listSize ; ++i)
+	for ( UInt i(0) ; i < M_listSize ; ++i )
 	{
 		readType( (M_dataSection + M_list[i] + "/type").c_str() );
 		if ( M_type != Essential )
@@ -190,12 +191,12 @@ BCInterface::readFlag( const char* flag )
     UInt flagSize = M_dataFile.vector_variable_size(flag);
 
 	M_flag.clear();
-	M_flag.reserve(flagSize);
+	M_flag.reserve( flagSize );
 
-    for (UInt j(0) ; j < flagSize ; ++j)
-    	M_flag.push_back(M_dataFile(flag, 0, j));
+    for ( UInt j(0) ; j < flagSize ; ++j )
+    	M_flag.push_back( M_dataFile(flag, 0, j) );
 
-    Debug( 5020 ) << "BCInterface::readFlag                   M_flag.size(): " << M_flag.size() << "\n";
+    Debug( 5020 ) << "BCInterface::readFlag                   M_flag.size(): " << Real(M_flag.size()) << "\n";
 }
 
 
@@ -223,7 +224,7 @@ BCInterface::readMode( const char* mode )
 inline void
 BCInterface::readComponentNumber( const char* component )
 {
-	M_comN = M_dataFile(component, 0);
+	M_comN = M_dataFile( component, 0 );
 
 	Debug( 5020 ) << "BCInterface::readComponentNumber               M_comN: " << M_comN << "\n";
 }
@@ -236,12 +237,12 @@ BCInterface::readComponentVector( const char* component )
     UInt componentSize = M_dataFile.vector_variable_size(component);
 
 	M_comV.clear();
-    M_comV.reserve(componentSize);
+    M_comV.reserve( componentSize );
 
     for (UInt j(0) ; j < componentSize ; ++j)
-    	M_comV.push_back(M_dataFile(component, 0, j));
+    	M_comV.push_back( M_dataFile(component, 0, j) );
 
-    Debug( 5020 ) << "BCInterface::readComponentVector        M_comV.size(): " << M_comV.size() << "\n";
+    Debug( 5020 ) << "BCInterface::readComponentVector        M_comV.size(): " << Real(M_comV.size()) << "\n";
 }
 
 
@@ -249,7 +250,7 @@ BCInterface::readComponentVector( const char* component )
 inline void
 BCInterface::readBase( const std::string base )
 {
-	for (std::map<std::string, BCBaseList>::iterator j = M_mapBase.begin() ; j != M_mapBase.end() ; ++j)
+	for ( std::map<std::string, BCBaseList>::iterator j = M_mapBase.begin() ; j != M_mapBase.end() ; ++j )
 		if ( isBase( (base + j->first).c_str() ) )
 		{
 			M_base = M_mapBase[j->first];
