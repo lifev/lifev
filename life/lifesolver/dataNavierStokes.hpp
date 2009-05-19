@@ -97,6 +97,7 @@ public:
 
     NSStabilization stabilization() const;
 
+    int             numLM() const;
     //! a way to obtain the Mean Flux, Mean Pressure and
     //! Mean Area at a section defined by z=z_data.
     UInt computeMeanValuesPerSection() const;
@@ -113,22 +114,26 @@ public:
 
 protected:
     //! Physics
-    Real _rho; // density
-    Real _mu; // viscosity
-    Real _inittime; // initial time (Alex December 2003)
-    Real _endtime; // end time
+    Real             _rho;         // density
+    Real             _mu;          // viscosity
+    Real             _inittime;    // initial time (Alex December 2003)
+    Real             _endtime;     // end time
 
     //! Miscellaneous
-    UInt _verbose; // temporal output verbose
-    Real _dump_init; // time for starting the dumping of the results (Alex December 2003)
-    UInt _dump_period; // frequency of the dumping (one dump after _dump_period time steps) (Alex December 2003)
-    Real M_factor; // amplification factor for moving domains
+    UInt             _verbose;     // temporal output verbose
+    Real             _dump_init;   // time for starting the dumping of the results (Alex December 2003)
+    UInt             _dump_period; // frequency of the dumping (one dump after _dump_period time steps) (Alex December 2003)
+    Real            M_factor;      // amplification factor for moving domains
 
-    std::string  M_uOrder;
-    std::string  M_pOrder;
+    std::string     M_uOrder;
+    std::string     M_pOrder;
 
     //! Discretization
     NSStabilization M_stab_method;
+
+    //! Lagrange Multipliers numbers
+
+    int             M_numLM;
 
 private:
 
@@ -186,6 +191,7 @@ DataNavierStokes( const DataNavierStokes& dataNavierStokes ) :
     M_uOrder                     (dataNavierStokes.M_uOrder),
     M_pOrder                     (dataNavierStokes.M_pOrder),
     M_stab_method                (dataNavierStokes.M_stab_method),
+    M_numLM                      (dataNavierStokes.M_numLM),
     M_computeMeanValuesPerSection(dataNavierStokes.M_computeMeanValuesPerSection),
     M_NbZSections                (dataNavierStokes.M_NbZSections),
     M_ToleranceSection           (dataNavierStokes.M_ToleranceSection),
@@ -213,21 +219,23 @@ setup(  const GetPot& dfile )
 
 
     // physics
-    _rho = dfile( "fluid/physics/density", 1. );
-    _mu = dfile( "fluid/physics/viscosity", 1. );
-    _inittime = dfile( "fluid/physics/inittime", 0. );
-    _endtime = dfile( "fluid/physics/endtime", 1. );
+    _rho          = dfile( "fluid/physics/density", 1. );
+    _mu           = dfile( "fluid/physics/viscosity", 1. );
+    _inittime     = dfile( "fluid/physics/inittime", 0. );
+    _endtime      = dfile( "fluid/physics/endtime", 1. );
 
     //miscellaneous
-    _verbose = dfile( "fluid/miscellaneous/verbose", 1 );
-    _dump_init = dfile( "fluid/miscellaneous/dump_init", _inittime );
-    _dump_period = dfile( "fluid/miscellaneous/dump_period", 1 );
-    M_factor = dfile( "fluid/miscellaneous/factor", 0. );
+    _verbose      = dfile( "fluid/miscellaneous/verbose", 1 );
+    _dump_init    = dfile( "fluid/miscellaneous/dump_init", _inittime );
+    _dump_period  = dfile( "fluid/miscellaneous/dump_period", 1 );
+    M_factor      = dfile( "fluid/miscellaneous/factor", 0. );
 
-    M_uOrder = dfile( "fluid/discretization/vel_order", "P1");
-    M_pOrder = dfile( "fluid/discretization/press_order", "P1");
+    M_uOrder      = dfile( "fluid/discretization/vel_order", "P1");
+    M_pOrder      = dfile( "fluid/discretization/press_order", "P1");
 
     M_stab_method = NSStabilization ( M_stabilization_list.value( dfile( "fluid/discretization/stabilization", "none") ) );
+
+    M_numLM       = dfile( "fluid/discretization/numLM", 0);
 
     // IP needs boundary faces
     bool ipfaces =  ( M_stab_method == IP_STABILIZATION ) && (this->meshFaces() != "all" ) ;
@@ -399,6 +407,13 @@ NSStabilization DataNavierStokes<Mesh>::stabilization() const
     return M_stab_method;
 }
 
+
+// Lagrange Multipliers number
+template <typename Mesh>
+int  DataNavierStokes<Mesh>::numLM() const
+{
+    return M_numLM;
+}
 
 //! Mean Values per Sections
 //! compute (0) or not (1) the mean values per sections
