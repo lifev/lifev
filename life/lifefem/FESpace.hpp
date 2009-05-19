@@ -94,11 +94,16 @@ class FESpace
 
 public:
 
-    typedef Real ( *Function ) ( const Real&, const Real&, const Real&,
-                                 const Real&, const ID& );
-    typedef Mesh mesh_type;
+//     typedef Real ( *Function ) ( const Real&, const Real&, const Real&,
+//                                  const Real&, const ID& );
+
+    typedef boost::function<Real ( Real const&, Real const&, Real const&,
+                                   Real const&, ID const& )> Function;
+
+
+    typedef Mesh                         mesh_type;
     typedef boost::shared_ptr<mesh_type> mesh_ptrtype;
-    typedef Map  map_type;
+    typedef Map                          map_type;
 
 //    typedef typename NSStabilization NSStabilization;
     //! Constructors
