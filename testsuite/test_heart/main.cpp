@@ -45,7 +45,8 @@
 #include <life/lifecore/application.hpp>
 #include <heart.hpp>
 #include "mpi.h"
-
+#include <life/lifealg/IfpackPreconditioner.hpp>
+#include <life/lifealg/MLPreconditioner.hpp>
 
 LifeV::AboutData
 makeAbout()
@@ -62,6 +63,16 @@ makeAbout()
     return about;
 
 }
+
+
+namespace LifeV
+{
+namespace
+{
+static bool regIF = PRECFactory::instance().registerProduct( "Ifpack", &createIfpack );
+static bool regML = PRECFactory::instance().registerProduct( "ML", &createML );
+}}
+
 
 
 using namespace LifeV;
