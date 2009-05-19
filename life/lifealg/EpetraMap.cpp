@@ -65,6 +65,32 @@ EpetraMap::EpetraMap(std::vector<int> const& lagrangeMultipliers,
 }
 
 
+EpetraMap::EpetraMap(const int          size,
+                     const Epetra_Comm& Comm):
+    M_repeatedEpetra_Map(),
+    M_uniqueEpetraMap(),
+    M_exporter(),
+    M_importer()
+{
+    int NumGlobalElements(size);
+    int NumMyElements    (NumGlobalElements);
+    std::vector<int>  MyGlobalElements(size);
+    int IndexBase = 1;
+
+    for (int i(0); i < NumGlobalElements; ++i)
+        MyGlobalElements[i] = i + 1;
+
+
+    createMap( NumGlobalElements,
+               NumMyElements,
+               &MyGlobalElements[0],
+               IndexBase,
+               Comm);
+
+}
+
+
+
 EpetraMap::map_ptrtype const &
 EpetraMap::getMap( EpetraMapType maptype)   const
 {
@@ -204,6 +230,10 @@ EpetraMap::operator += (const EpetraMap& _epetraMap)
     return *this;
 }
 
+
+//
+
+
 EpetraMap &
 EpetraMap::operator += (std::vector<int> const& lagrangeMultipliers)
 {
@@ -218,6 +248,26 @@ EpetraMap::operator += (std::vector<int> const& lagrangeMultipliers)
 
     return *this;
 }
+
+
+//
+
+EpetraMap &
+EpetraMap::operator += (int const size)
+{
+
+    EpetraMap  lagrMap(size, Comm());
+
+    ASSERT(this->getUniqueMap(), "operator+=(const int) works only for an existing EpetraMap");
+
+//     if ( size <= 0)
+//         return *this;
+
+    this->operator+=(lagrMap);
+    return *this;
+}
+
+//
 
 
 EpetraMap::EpetraMap(const EpetraMap& _epetraMap):

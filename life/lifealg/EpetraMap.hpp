@@ -82,7 +82,11 @@ public:
     //! Again: it is not necessary that the lagrangeMltiplier vector is the same on all
     //!       processors nor that it is different
     EpetraMap(std::vector<int> const& lagrangeMultipliers,
-              const Epetra_Comm& Comm);
+              const Epetra_Comm&      Comm);
+
+    //!
+    EpetraMap(const int               size,
+              const Epetra_Comm&      Comm);
 
     // Calls createImportExport from setUp()
     template<typename Mesh>
@@ -131,6 +135,19 @@ public:
             createImportExport();
             return map;
         }
+
+    EpetraMap&         operator += (int const size);
+    EpetraMap          operator +  (int const size)
+        {
+            int me =  M_uniqueEpetraMap->Comm().MyPID();
+            EpetraMap map( *this );
+            map += size;
+            createImportExport();
+            return map;
+        }
+
+
+
 
 
     Epetra_Comm const& Comm() const { return M_uniqueEpetraMap->Comm(); }
