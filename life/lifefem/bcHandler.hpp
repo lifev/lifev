@@ -518,7 +518,7 @@ BCHandler::bdUpdate( Mesh& mesh, CurrentBdFE& feBd, const Dof& dof )
                                                                 case 0:
                                                                     // if the BC is a function or a vector which values
                                                                     // don't need to be integrated
-                                                                    std::cout << "adding natural identifier" << std::endl;
+                                                                    //std::cout << "adding natural identifier" << std::endl;
                                                                     where->addIdentifier( new IdentifierNatural( gDof ) );
                                                                     break;
                                                                 case 1:  // if the BC is a vector of values to be integrated
