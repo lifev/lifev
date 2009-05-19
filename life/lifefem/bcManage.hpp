@@ -2008,7 +2008,7 @@ template <typename MatrixType,
           typename MeshType,
           typename DataType>
 void bcFluxManage( MatrixType&     A,
-                    VectorType&     b,
+                    VectorType&    b,
                    const MeshType& mesh,
                    const Dof&      dof,
                    const BCBase&   BCb,
@@ -2018,7 +2018,6 @@ void bcFluxManage( MatrixType&     A,
 
 {
 
-    std::cout << "Flux BC ... " << std::endl;
     // Number of local Dof in this face
     UInt nDofF = bdfem.nbNode;
 
@@ -2036,7 +2035,9 @@ void bcFluxManage( MatrixType&     A,
 
     const BCFunctionMixte* pBcF = static_cast<const BCFunctionMixte*>( BCb.pointerToFunctor() );
 
-    b[offset + 1] = BCb(0., 0., 0., 0., t);
+
+
+    b.checkAndSet(offset + 1,BCb(t, 0., 0., 0., 1));
 
 
     if ( !BCb.dataVector() )
