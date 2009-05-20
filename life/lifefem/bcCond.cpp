@@ -45,6 +45,7 @@ BCBase::BCBase( const std::string& name, const EntityFlag& flag,
     _M_bcf( FactoryCloneBCFunction::instance().createObject( &bcf ) ),
     _M_dataVector( false ),
     _M_comp( comp ),
+    _M_offset( -1 ),
     _M_finalised( false )
 {
     if ( _M_mode != Component ) {
@@ -66,6 +67,7 @@ BCBase::BCBase( const std::string& name,
     _M_bcf( FactoryCloneBCFunction::instance().createObject( &bcf ) ),
     _M_dataVector( false ),
     _M_comp(),
+    _M_offset( -1 ),
     _M_finalised( false )
 {
     UInt nComp;
@@ -111,6 +113,7 @@ BCBase::BCBase( const std::string& name,
     _M_bcf( FactoryCloneBCFunction::instance().createObject( &bcf ) ),
     _M_dataVector( false ),
     _M_comp(),
+    _M_offset( -1 ),
     _M_finalised( false )
 {
     if ( _M_mode != Full ) {
@@ -141,6 +144,7 @@ BCBase::BCBase( const std::string& name,
     _M_bcv( FactoryCloneBCVector::instance().createObject( &bcv )  ),
     _M_dataVector( true ),
     _M_comp(comp),
+    _M_offset( -1 ),
     _M_finalised( false )
 {
     if ( mode != Component ) {
@@ -211,6 +215,7 @@ BCBase::BCBase( const std::string& name,
     _M_bcv( FactoryCloneBCVector::instance().createObject( &bcv ) ),
     _M_dataVector( true ),
     _M_comp(),
+    _M_offset( -1 ),
     _M_finalised( false )
 {
     if ( mode != Full ) {
@@ -255,6 +260,7 @@ BCBase::BCBase( const std::string&  name,
     _M_bcfUDep( FactoryCloneBCFunctionUDep::instance().createObject( &bcf ) ),
     _M_dataVector( false ),
     _M_comp(),
+    _M_offset( -1 ),
     _M_finalised( false )
 {
 
@@ -296,6 +302,7 @@ BCBase::BCBase( const std::string&  name,
     _M_bcfUDep( FactoryCloneBCFunctionUDep::instance().createObject( &bcf ) ),
     _M_dataVector( false ),
     _M_comp(),
+    _M_offset( -1 ),
     _M_finalised( false )
 {
     if ( _M_mode != Full ) {
@@ -333,7 +340,7 @@ BCBase & BCBase::operator=( const BCBase& BCb )
     _M_bcfUDep=BCb._M_bcfUDep;
     _M_bcv = BCb._M_bcv;
     _M_bcf = BCb._M_bcf;
-
+    _M_offset  = BCb._M_offset;
     _M_comp = BCb._M_comp;
     _M_isUDep=BCb._M_isUDep;
 
@@ -362,6 +369,7 @@ BCBase::BCBase( const BCBase& BCb )
     _M_bcv( BCb._M_bcv ),
     _M_dataVector( BCb._M_dataVector ),
     _M_comp( BCb._M_comp ),
+    _M_offset   ( BCb._M_offset ),
     _M_finalised( BCb._M_finalised )
 {
     // Important!!: The set member list0 is always empty at this point, it is just
@@ -677,15 +685,16 @@ std::ostream&
 BCBase::showMe( bool verbose, std::ostream & out ) const
 {
     out << "********************************" << std::endl;
-    out << "BC Name: " << _M_name << std::endl;
-    out << "Flag: " << _M_flag << std::endl;
-    out << "Type: " << _M_type << std::endl;
-    out << "Mode: " << _M_mode << std::endl;
-    out << "Number of components: " << _M_comp.size() << std::endl;
-    out << "List of components: ";
+    out << "BC Name              : " << _M_name << std::endl;
+    out << "Flag                 : " << _M_flag << std::endl;
+    out << "Type                 : " << _M_type << std::endl;
+    out << "Mode                 : " << _M_mode << std::endl;
+    out << "Number of components : " << _M_comp.size() << std::endl;
+    out << "List of components   : ";
     for ( Index_t i = 0; i < _M_comp.size(); ++i )
         out << _M_comp[ i ] << " ";
     out << std::endl;
+    out << "Offset               : " << _M_offset << std::endl;
     out << "Number of stored ID's: " << _M_idList.size() << std::endl;
 
     if ( verbose && _M_finalised )

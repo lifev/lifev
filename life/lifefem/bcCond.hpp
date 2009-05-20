@@ -408,13 +408,13 @@ public:
     //! Returns the liste size
     UInt list_size() const;
 
-  //! Set the offset
-  void setOffset(int offset) {_M_offset = offset;}
-  
-  //! Returns the offset
-  const int offset() const {return _M_offset;}
+    //! Set the offset
+    void setOffset(int offset) {_M_offset = offset;}
 
-  
+    //! Returns the offset
+    const int offset() const {return _M_offset;}
+
+
     //! Output
     std::ostream & showMe( bool verbose = false, std::ostream & out = std::cout ) const;
 
@@ -470,8 +470,8 @@ private:
     //! true, when idlist updated
     bool _M_finalised;
 
-  //! BC offset
-  int _M_offset;
+    //! BC offset
+    int _M_offset;
 
     //! Transfert between list and vector containers
     void finalise();
