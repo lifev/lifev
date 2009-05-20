@@ -196,7 +196,7 @@ fullMonolithic::evalResidual( vector_type&       res,
             this->interpolateVelocity(mmRep, *this->M_beta);
             //            *this->M_beta *= -alpha; //HE solution scaled!
             vector_ptrtype fluid(new vector_type(this->M_uFESpace->map()));
-            fluid->subset(/**M_un*/*M_unOld, 0);
+            fluid->subset(*M_un/**M_unOld*/, 0);
             *this->M_beta += *fluid/*M_un*/;
             //          if(firstIter)
             M_fluid->recomputeMatrix(true);
@@ -232,6 +232,20 @@ fullMonolithic::evalResidual( vector_type&       res,
             M_meshMotion->setMatrix(M_monolithicMatrix);
 
             super::evalResidual( *M_BCh_u, *M_BCh_d, disp, this->M_rhsFull, res, false);
+            //////////////////Part under development////////////////////
+//            if(M_DDBlockPrec>=2 && M_DDBlockPrec<5)
+//             {
+//                 if(!M_robinCoupling.get())
+//                     {
+//                         M_robinCoupling.reset( new matrix_type(*M_monolithicMap));
+//                         super::robinCoupling(M_robinCoupling, M_alphaf, M_alphas);
+//                         M_robinCoupling->GlobalAssemble();
+//                     }
+//                 super::applyPreconditioner(M_robinCoupling);
+//                 //this->M_solid->evalResidual( disp, res, false);
+//            }
+             ///////////////// end///////////////////
+
             if(M_DDBlockPrec<5)
                 M_bigPrecPtr.reset(new matrix_type(*M_monolithicMap/*, M_solid->getMatrixPtr()->getMeanNumEntries()*/));
             //M_monolithicMatrix->spy("monolithicMatrix");
@@ -257,6 +271,7 @@ void fullMonolithic::solveJac(vector_type       &_muk,
 
     if(M_dataFluid->useShapeDerivatives())
         {
+            //std::cout<<"this->solidInterfaceMap()->getMap(Repeated)"<<this->solidInterfaceMap()->getMap(Repeated)<<std::endl;
             M_epetraOper.reset( new Epetra_FullMonolithic(*this/*, *this->monolithicMap()->getMap(Unique)*/));
             super::setOperator(*M_epetraOper);
             //            vector_type meshDeltaDisp(M_mmFESpace->map());
@@ -285,6 +300,9 @@ void fullMonolithic::solveJac(vector_type       &_muk,
         case 1:
             {
                 M_meshMotion->setMatrix(M_bigPrecPtr);
+            }
+        case 2:
+            {
             }
             break;
         default:
@@ -343,29 +361,6 @@ fullMonolithic::meshVel()
     return meshv;
 }
 */
-#ifdef UNDEFINED
-int Epetra_FullMonolithic::Apply(const Epetra_MultiVector &X, Epetra_MultiVector &Y) const
-{
-    Y=X;
-    boost::shared_ptr<EpetraMap> mapPtr (new EpetraMap(*M_FMOper->couplingVariableMap()));
-    vector_type x(X, mapPtr, Unique);
-    vector_type y(x, Unique);
-    //    Epetra_FEVector  dz(Y.Map());//Ax-b, that is Ax since b=0.
-    vector_ptrtype rhsShapeDer(new vector_type(x, Unique));
-    vector_ptrtype meshDeltaDisp(new vector_type(M_FMOper->meshMotion().getMap()));
-    vector_type subX(*M_FMOper->couplingVariableMap());//mapWithoutMesh());
-    UInt offset(M_FMOper->uFESpace().dof().numTotalDof()*nDimensions +  M_FMOper->pFESpace().dof().numTotalDof() + M_FMOper->dFESpace().map().getMap(Unique)->NumGlobalElements() + M_FMOper->dimInterface());
-    y = (*M_FMOper->solid().getMatrixPtr())*x;
-    meshDeltaDisp->subset(x, offset);
-    subX.subset(x, 0);
-    M_FMOper->shapeDerivatives(rhsShapeDer , meshDeltaDisp, subX);
-    y += *rhsShapeDer;
-    Y=y.getEpetraVector();
-    //    Y=X;
-    //    Y.Update(1., X, 1.);
-    return 0;
-}
-#endif
 
 /*
 void
