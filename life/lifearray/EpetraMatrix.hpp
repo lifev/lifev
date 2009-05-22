@@ -484,7 +484,7 @@ void EpetraMatrix<DataType>::diagonalize( std::vector<UInt> rVec,
     UInt*    Ur;
     DataType* datum;
 
-#if 0
+#if 1
     // 2 arrays to store le local and remote IDs
 
     int me = Comm.MyPID();
