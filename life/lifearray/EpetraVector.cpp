@@ -120,6 +120,7 @@ EpetraVector::EpetraVector( const EpetraVector& _vector, const int reduceToProc)
     M_epetraMap   (),
     M_maptype     (Unique)
 {
+    assert(false); // Need to code M_eptraMap initialization first. Then remove assert.
     operator = (_vector);
 }
 
@@ -172,6 +173,7 @@ EpetraVector::operator [] ( const UInt row ) const
     {
         std::cout << M_epetraVector.Comm().MyPID() << " " << row << " " << lrow << std::endl;
         ERROR_MSG( "EpetraVector::operator () ERROR : !! lrow < 0\n" );
+
     }
 
     return (M_epetraVector[0][lrow]);
@@ -336,9 +338,9 @@ EpetraVector::NormInf(double* res) const
 void EpetraVector::spy( std::string const &filename ) const
 {
     // Purpose: Matlab dumping and spy
-    std::string nome = filename;
+    std::string name = filename;
 
-    EpetraVector redVec(*this,0); // reduced vector (all at proc 0)
+    EpetraVector redVec(*this, 0); // reduced vector (all at proc 0)
 
     int  me    = redVec.M_epetraVector.Comm().MyPID();
 
@@ -351,10 +353,11 @@ void EpetraVector::spy( std::string const &filename ) const
     std::ostringstream myStream;
     myStream << me;
 
-    nome = "load" + filename + ".m";
+    name = filename + ".m";
 
-    std::ofstream file_out( nome.c_str() );
+    std::ofstream file_out( name.c_str() );
     ASSERT( file_out, "Error: Output Vector (Values) file cannot be open" );
+
 
     file_out << filename << " =  [";
 
