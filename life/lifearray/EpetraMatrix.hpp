@@ -521,36 +521,6 @@ void EpetraMatrix<DataType>::diagonalize( std::vector<UInt> rVec,
                 }
         }
 
-#if 0
-    Comm.Barrier();
-    if (MyPID == 0)
-        {
-            std::cout << "local map : " << std::endl;
-            for (int ii = 0; ii < localIDs.size(); ++ii)
-                std::cout << localIDs[ii] << std::endl;
-
-            std::cout << "remote map : " << std::endl;
-            for (int ii = 0; ii < remoteIDs.size(); ++ii)
-                std::cout << remoteIDs[ii] << std::endl;
-            std::cout << "done" << std::endl;
-        }
-
-    Comm.Barrier();
-
-    if (MyPID == 1)
-        {
-            std::cout << "local map : " << std::endl;
-            for (int ii = 0; ii < localIDs.size(); ++ii)
-                std::cout << localIDs[ii] << std::endl;
-
-            std::cout << "remote map : " << std::endl;
-            for (int ii = 0; ii < remoteIDs.size(); ++ii)
-                std::cout << remoteIDs[ii] << std::endl;
-            std::cout << "done" << std::endl;
-        }
-    Comm.Barrier();
-#endif
-
     // now, we have to fill our localIDs with IDs from other processors
     // first, we have to build the map of all the remoteIDs and their processor owner
 
@@ -575,34 +545,33 @@ void EpetraMatrix<DataType>::diagonalize( std::vector<UInt> rVec,
             int pi = PIDList[ii];
             procToID[pi].push_back(remoteIDs[ii]);
             procToData[pi].push_back(remoteData[ii]);
-            //            procToID[PIDList[ii]].push_back(remoteIDs[ii]);
         }
 
-    //std::cout << " --> " << procToID.size() << std::endl;
     // then, we send all the nodes where they belong
 
 
     const Epetra_MpiComm* comm = dynamic_cast<Epetra_MpiComm const*>(&Comm);
 
+    assert(comm != 0);
+
     for (int ii = 0; ii < procToID.size(); ++ii)
         {
             if (ii != me)
                 {
-                    int* length = new int[1];
-                    *length = procToID[ii].size();
+                    int length;
+                    length = procToID[ii].size();
                     //                    std::cout << me << " is sending " << *length << " to " << ii << std::endl;
-                    MPI_Send( &length[0], 1, MPI_INT, ii, 666, comm->Comm() );
-                    if (*length > 0)
+                    MPI_Send( &length, 1, MPI_INT, ii, 666, comm->Comm() );
+                    if (length > 0)
                         {
-                            MPI_Send( &procToID[ii][0], *length, MPI_INT, ii, 667, comm->Comm() );
-                            MPI_Send( &procToData[ii][0], *length, MPI_INT, ii, 668, comm->Comm() );
+                            MPI_Send( &procToID[ii][0], length, MPI_INT, ii, 667, comm->Comm() );
+                            MPI_Send( &procToData[ii][0], length, MPI_INT, ii, 668, comm->Comm() );
                             //std::cout << me << " has sent to " << ii << " : ";
 
                             //for (int jj = 0; jj < procToData[ii].size(); ++jj)
                                 //std::cout << procToID[ii][jj] << " ";
                             //std::cout << " end sent" << std::endl;
                         }
-                    delete[] length;
                 }
 
         }
@@ -611,21 +580,21 @@ void EpetraMatrix<DataType>::diagonalize( std::vector<UInt> rVec,
         {
             if (ii != me)
                 {
-                    int* length = new int[1];
-                    MPI_Status* status;
-                    MPI_Recv( length, 1, MPI_INT, ii, 666, comm->Comm(), status );
+                    int length;
+                    MPI_Status status;
+                    MPI_Recv( &length, 1, MPI_INT, ii, 666, comm->Comm(), &status );
                     //std::cout << me << " received " << *length << " from " << ii << std::endl;
 
 
-                    if (*length > 0)
+                    if (length > 0)
                         {
-                            int* bufferID = new int[*length];
-                            int* ptrID    = new int[*length];
+                            int* bufferID = new int[length];
+                            int* ptrID(0);//    = new int[length];
 
-                            MPI_Recv( bufferID, *length, MPI_INT, ii, 667, comm->Comm(), status );
+                            MPI_Recv( bufferID, length, MPI_INT, ii, 667, comm->Comm(), &status );
 
                             //std::cout << me << " has received ";
-                            ptrID = &bufferID[0];
+                            ptrID = bufferID;
 
 //                             for (int ii = 0; ii < *length; ++ii, ++ptrID)
 //                                 {
@@ -642,15 +611,15 @@ void EpetraMatrix<DataType>::diagonalize( std::vector<UInt> rVec,
 //                                 }
                             //std::cout << std::endl;
 
-                            double* bufferData = new double[*length];
-                            double* ptrData;
+                            double* bufferData = new double[length];
+                            double* ptrData(0);
 
-                            MPI_Recv( bufferData, *length, MPI_INT, ii, 668, comm->Comm(), status );
+                            MPI_Recv( bufferData, length, MPI_INT, ii, 668, comm->Comm(), &status );
 
 //                             std::cout << me << " has received ";
-                            ptrData = &bufferData[0];
+                            ptrData = bufferData;
 
-                            for (int ii = 0; ii < *length; ++ii, ++ptrID, ++ptrData)
+                            for (int ii = 0; ii < length; ++ii, ++ptrID, ++ptrData)
                                 {
                                     localBC.insert(pair<int, double>
                                                    (*ptrID, *ptrData));
@@ -666,8 +635,6 @@ void EpetraMatrix<DataType>::diagonalize( std::vector<UInt> rVec,
 
                         }
 
-
-                    delete[] length;
                 }
         }
 
