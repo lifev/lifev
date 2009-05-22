@@ -48,9 +48,10 @@ FSIOperator::fluid_bchandler_type BCh_harmonicExtension(FSIOperator &_oper)
 
     FSISolver::fluid_bchandler_type BCh_he(new FSIOperator::fluid_bchandler_raw_type );
 
-    BCh_he->addBC("Top",       3, Essential, Full, bcf,   3);
-    BCh_he->addBC("Base",      2, Essential, Full, bcf,   3);
-    BCh_he->addBC("Edges",    20, Essential, Full, bcf,   3);
+    BCh_he->addBC("Top",         3, Essential, Full, bcf,   3);
+    BCh_he->addBC("Base",        2, Essential, Full, bcf,   3);
+    BCh_he->addBC("EdgesIn",     20, Essential, Full, bcf,   3);
+    //BCh_he->addBC("EdgesOut",    30, Essential, Full, bcf,   3);
 
 
     if (_oper.method() == "steklovPoincare")
@@ -95,14 +96,26 @@ FSIOperator::fluid_bchandler_type BCh_fluid(FSIOperator &_oper)
 
     FSIOperator::fluid_bchandler_type BCh_fluid( new FSIOperator::fluid_bchandler_raw_type );
 
-    BCFunctionBase bcf      (fZero);
-    BCFunctionBase in_flow  (u2);
-    BCFunctionBase out_flow (fZero);
+    BCFunctionBase bcf           (fZero);
+    BCFunctionBase in_flow       (u2);
+    BCFunctionBase in_flow_flux  (PhysFlux);
+    BCFunctionBase out_flow      (fZero);
 
 
-    BCh_fluid->addBC("InFlow" , 2,  Natural,   Full, in_flow, 3);
-    BCh_fluid->addBC("OutFlow", 3,  Natural,   Full, out_flow, 3);
-    BCh_fluid->addBC("Edges",  20, Essential, Full, bcf,  3);
+    //BCh_fluid->addBC("InFlow" , 2,  Natural,   Full, in_flow, 3);
+    BCh_fluid->addBC("InFlow" ,   2,  Flux,   Full, in_flow_flux, 3);
+    BCh_fluid->addBC("OutFlow",   3,  Natural,   Full, out_flow, 3);
+    BCh_fluid->addBC("EdgesIn",  20, Essential, Full, bcf,  3);
+    //BCh_fluid->addBC("EdgesOut", 30, Essential, Full, bcf,  3);
+
+    int numTotalDofs = _oper.uFESpace().map().getMap(Unique)->NumGlobalElements() +
+        _oper.pFESpace().map().getMap(Unique)->NumGlobalElements();
+
+
+    std::cout << "numTotalDofs = " << numTotalDofs << std::endl;
+    BCh_fluid->setOffset("InFlow", numTotalDofs);
+
+    //    BCh_fluid->showMe();
 
     _oper.setStructureToFluid(_oper.veloFluidMesh());
     // _oper.setHarmonicExtensionVelToFluid(_oper.veloFluidMesh());
@@ -142,7 +155,8 @@ FSIOperator::fluid_bchandler_type BCh_fluidInv(FSIOperator &_oper)
     BCFunctionBase in_flow(u2);
 
     BCh_fluidInv->addBC("InFlow", 2,  Natural,   Full, in_flow, 3);
-    BCh_fluidInv->addBC("Edges",  20, Essential, Full, bcf,     3);
+    BCh_fluidInv->addBC("EdgesIn",  20, Essential, Full, bcf,     3);
+    //BCh_fluidInv->addBC("EdgesOut",  30, Essential, Full, bcf,     3);
 
     return BCh_fluidInv;
 }
@@ -162,9 +176,17 @@ FSIOperator::fluid_bchandler_type BCh_fluidLin(FSIOperator &_oper)
     BCFunctionBase bcf(fZero);
     BCFunctionBase in_flow(u2);
 
-    BCh_fluidLin->addBC("InFlow",  2,  Natural,   Full, bcf,     3);
-    BCh_fluidLin->addBC("outFlow", 3,  Natural,   Full, bcf,     3);
-    BCh_fluidLin->addBC("Edges",  20,  Essential,   Full, bcf,     3);//this condition must be equal to the one
+    //BCh_fluidLin->addBC("InFlow",  2,  Natural,   Full, bcf,     3);
+    BCh_fluidLin->addBC("InFlow",   2,       Flux, Full, bcf,     3);
+    BCh_fluidLin->addBC("outFlow",  3,    Natural, Full, bcf,     3);
+    BCh_fluidLin->addBC("Edges",   20,  Essential, Full, bcf,     3);//this condition must be equal to the one
+
+    int numTotalDofs = _oper.uFESpace().map().getMap(Unique)->NumGlobalElements() +
+        _oper.pFESpace().map().getMap(Unique)->NumGlobalElements();
+
+    BCh_fluidLin->setOffset("InFlow", numTotalDofs);
+
+    //BCh_fluidLin->addBC("Edges",  30,  Essential, Full, bcf,     3);//this condition must be equal to the one
     //in BCh_fluid. Now it is set to 0 because the mesh displacement is zero in this part of the boundary
 
 //    BCh_fluidLin->addBC("interface",  1,  Essential,   Full, bcf,     3);
@@ -202,9 +224,15 @@ FSIOperator::solid_bchandler_type BCh_solid(FSIOperator &_oper)
 
     BCFunctionBase bcf(fZero);
 
-    BCh_solid->addBC("Top",       3, Essential, Full, bcf,  3);
+
+    //    BCh_solid->addBC("Top",       3, Essential, Full, bcf,  3);
     BCh_solid->addBC("Base",      2, Essential, Full, bcf,  3);
-    BCh_solid->addBC("Edges",    20, Essential, Full, bcf,  3);
+    BCh_solid->addBC("EdgesIn",    20, Essential, Full, bcf,  3);
+
+    std::vector<ID> zComp(1);
+    zComp[0] = 3;
+    //    BCh_solid->addBC("Edges",    30, Essential, Component, bcf,  zComp);
+    //BCh_solid->addBC("EdgesOut",    30, Essential, Full, bcf,  3);
 
 //     Debug(10000) << "SP harmonic extension\n";
 
@@ -249,9 +277,15 @@ FSIOperator::solid_bchandler_type BCh_solidLin(FSIOperator &_oper)
 
     BCFunctionBase bcf(fZero);
 
-    BCh_solidLin->addBC("Top",       3, Essential, Full, bcf,  3);
+    //BCh_solidLin->addBC("Top",       3, Essential, Full, bcf,  3);
     BCh_solidLin->addBC("Base",      2, Essential, Full, bcf,  3);
-    BCh_solidLin->addBC("Edges",    20, Essential, Full, bcf,  3);
+    BCh_solidLin->addBC("EdgesIn",    20, Essential, Full, bcf,  3);
+
+    std::vector<ID> zComp(1);
+    zComp[0] = 3;
+
+    //    BCh_solidLin->addBC("Edges",    30, Essential, Component, bcf,  zComp);
+    //BCh_solidLin->addBC("EdgesOut",    30, Essential, Full, bcf,  3);
 
     if (_oper.method() == "steklovPoincare")
     {
@@ -284,9 +318,10 @@ FSIOperator::solid_bchandler_type BCh_solidInvLin(FSIOperator &_oper)
 
     BCFunctionBase bcf(fZero);
 
-    BCh_solidLinInv->addBC("Top",       3, Essential, Full, bcf,  3);
+    //BCh_solidLinInv->addBC("Top",       3, Essential, Full, bcf,  3);
     BCh_solidLinInv->addBC("Base",      2, Essential, Full, bcf,  3);
-    BCh_solidLinInv->addBC("Edges",    20, Essential, Full, bcf,  3);
+    BCh_solidLinInv->addBC("EdgesIn",    20, Essential, Full, bcf,  3);
+    //BCh_solidLinInv->addBC("EdgesOut",    30, Essential, Full, bcf,  3);
 
 //     if (_oper.method() == "steklovPoincare")
 //     {
@@ -309,51 +344,8 @@ FSIOperator::solid_bchandler_type BCh_solidInvLin(FSIOperator &_oper)
 
 
 
-FSIOperator::fluid_bchandler_type BCh_reducedFluid(FSIOperator &_oper)
-{
-
-    if (! _oper.isFluid() )
-        return FSIOperator::solid_bchandler_type();
-
-    Debug( 10000 ) << "Boundary condition for the reduced fluid\n";
-    FSISolver::fluid_bchandler_type BCh_reducedFluid(new FSIOperator::fluid_bchandler_raw_type );
-    BCFunctionBase bcf(fZero);
-
-    BCh_reducedFluid->addBC("Wall_Edges", 20, Essential, Scalar, bcf);
-    BCh_reducedFluid->addBC("InFlow",      2, Essential, Scalar, bcf);
-    BCh_reducedFluid->addBC("OutFlow",     3, Essential, Scalar, bcf);
-
-//     steklovPoincare *SPOper = dynamic_cast<steklovPoincare *>(&_oper);
-//     SPOper->setReducedFluidInterfaceAcc(SPOper->getReducedLinFluid()->dacc(), 2);
-
-//     BCh_reducedFluid->addBC("Wall",        1, Natural,   Scalar,
-//                             *SPOper->bcvReducedFluidInterfaceAcc());
-
-    return BCh_reducedFluid;
-}
 
 
-FSIOperator::fluid_bchandler_type BCh_reducedFluidInv(FSIOperator &_oper)
-{
-    if (! _oper.isFluid() )
-        return FSIOperator::solid_bchandler_type();
-
-    FSISolver::fluid_bchandler_type BCh_reducedFluidInv( new FSIOperator::fluid_bchandler_raw_type );
-    BCFunctionBase bcf(fZero);
-    BCh_reducedFluidInv->addBC("Wall_Edges", 20, Essential, Scalar, bcf);
-    BCh_reducedFluidInv->addBC("InFlow",      2, Essential, Scalar, bcf);
-    BCh_reducedFluidInv->addBC("OutFlow",     3, Essential, Scalar, bcf);
-
-    // the following not correct: this should be strong residual. However, strong residual
-    // computation is false at the moment
-//     _oper.setDerReducedFluidLoadToStructure(_oper.fluid().residual());
-
-//     BCh_reducedFluidInv->addBC("Wall",        1, Essential, Scalar,//dr_wall);
-//                         *_oper.bcvDerReducedFluidLoadToStructure());
-
-    return BCh_reducedFluidInv;
-
-}
 
 
 

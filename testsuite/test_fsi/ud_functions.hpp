@@ -41,6 +41,9 @@ Real u2(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
 Real d0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
 Real w0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+Real PhysFlux(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
+Real aortaPhysPress(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
+
 }
 
 #endif

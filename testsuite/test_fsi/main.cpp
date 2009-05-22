@@ -64,6 +64,81 @@ static bool regEJ = FSIFactory::instance().registerProduct( "exactJacobian", &cr
 }
 
 
+#define PI 3.14159265358979323846
+
+
+class bc_adaptor
+{
+public:
+
+    bc_adaptor( LifeV::FSIOperator &_oper ):
+            M_oper   ( _oper ),
+            //M_area0  ( M_oper.fluid().area(3) ),
+            M_area0  ( 0.785400 ),
+            M_beta   (( M_oper.solid().thickness()*M_oper.solid().young())/
+                      (1 - M_oper.solid().poisson()*M_oper.solid().poisson())*
+                      PI/M_area0),
+            M_rhos   ( M_oper.solid().rho() )
+    {
+        std::cout << "  Abs. boudary condition --------------- " << std::endl;
+        std::cout << "  Outflow BC : thickness = " << M_oper.solid().thickness() << std::endl;
+        std::cout << "  Outflow BC : young     = " << M_oper.solid().young() << std::endl;
+        std::cout << "  Outflow BC : poisson   = " << M_oper.solid().poisson() << std::endl;
+        std::cout << "  Outflow BC : area0     = " << M_area0 << std::endl;
+        std::cout << "  Outflow BC : radius    = " << std::sqrt(M_area0/PI) << std::endl;
+        std::cout << "  Outflow BC : beta      = " << M_beta << std::endl;
+
+        double qn        = M_oper.fluid().flux(3);
+        //double area      = M_oper.fluid().area(3);
+        double area = M_area0;
+
+        M_outflow = pow((sqrt(M_rhos)/(2.*sqrt(2))*qn/area + sqrt(M_beta*sqrt(M_area0))),2)
+            - M_beta*sqrt(M_area0);
+
+        std::cout << "  Flow rate  = " << qn << std::endl;
+        std::cout << "  outflow    = " << M_outflow << std::endl;
+
+        //std::cout << "  eigenvalue = " << qn/area - 2.*sqrt(2.)/sqrt(M_rhos)*(sqrt(
+    }
+
+    LifeV::Real operator()(LifeV::Real __time,
+                           LifeV::Real __x,
+                           LifeV::Real __y,
+                           LifeV::Real __z,
+                           LifeV::ID   __i)
+    {
+        switch(__i)
+        {
+            case 1:
+                return 0.;
+                break;
+            case 2:
+                return 0.;
+                break;
+            case 3:
+                //return 0.;
+                return -M_outflow;
+                break;
+            default:
+                ERROR_MSG("This entrie is not allowed: disp_adatptor");
+                break;
+        }
+    }
+private:
+
+    LifeV::FSIOperator& M_oper;
+    LifeV::Real         M_outflow;
+
+    double              M_area0;
+    double              M_beta;
+    double              M_rhos;
+
+};
+
+
+
+
+
 
 
 class Problem
@@ -94,23 +169,33 @@ public:
 //            DataNavierStokes< RegionMesh3D_ALE<LinearTetra> > M_dataNS(data_file);
 
             M_fsi = fsi_solver_ptr(  new FSISolver( data_file, _oper ) );
+            //            M_fsi = fsi_solver_ptr(  new FSISolver( _oper ) );
 
             Debug( 10000 ) << _oper << " set \n";
+//             M_fsi->setup( data_file );
 
             MPI_Barrier(MPI_COMM_WORLD);
 
 //            M_fsi->setSourceTerms( fZero, fZero );
             Debug( 10000 ) << "Setting up the BC \n";
+
             M_fsi->setFluidBC(BCh_fluid(*M_fsi->operFSI()));
             M_fsi->setHarmonicExtensionBC (BCh_harmonicExtension(*M_fsi->operFSI()));
             M_fsi->setSolidBC(BCh_solid(*M_fsi->operFSI()));
             M_fsi->setLinFluidBC(BCh_fluidLin(*M_fsi->operFSI()));
             M_fsi->setLinSolidBC(BCh_solidLin(*M_fsi->operFSI()));
+
+            M_absorbingBC = data_file("fluid/absorbing_bc", false);
+            std::cout << "   absorbing BC = " << M_absorbingBC << std::endl;
+
             Debug( 10000 ) << "BC set\n";
 
+            //            Debug( 10000 ) << "Setting up the FSISolver \n";
 
             bool restart = data_file("problem/restart",false);
             M_Tstart = 0.;
+
+            //            M_fsi->resetFSISolvers();
 
             if (M_fsi->isFluid())
                 {
@@ -198,28 +283,67 @@ public:
     void
     run( double dt, double T)
         {
-//            std::ofstream ofile( "fluxes.res" );
+
+            std::ofstream ofile;
+
+            bool const isFluidLeader( M_fsi->operFSI()->isFluid() && M_fsi->operFSI()->isLeader() );
+            if (isFluidLeader) ofile.open("fluxes.res");
 
             boost::timer _overall_timer;
 
-            //if (M_Tstart != 0.) M_Tstart -= dt;
-
+            double flux;
             int _i = 1;
 
-            for (double time=M_Tstart + dt; time <= T; time += dt, ++_i)
+            double time=M_Tstart;
+
+//             if ( M_fsi->isFluid() )
+//                 {
+
+//                     if (isFluidLeader) ofile << time << " ";
+//                     flux = M_fsi->operFSI()->fluid().flux(2);
+//                     if (isFluidLeader) ofile << flux << " ";
+//                     flux = M_fsi->operFSI()->fluid().flux(3);
+//                     if (isFluidLeader) ofile << flux << " ";
+//                     flux = M_fsi->operFSI()->fluid().pressure(2);
+//                     if (isFluidLeader) ofile << flux << " ";
+//                     flux = M_fsi->operFSI()->fluid().pressure(3);
+//                     if (isFluidLeader) ofile << flux << " " << std::endl;
+
+//                     *M_velAndPressure = M_fsi->FSIOper()->fluid().solution();
+//                     *M_fluidDisp      = M_fsi->FSIOper()->meshMotion().disp();
+
+//                     M_ensightFluid->postProcess( time );
+//                 }
+
+
+
+            for (double time = M_Tstart + dt; time <= T; time += dt, ++_i)
             {
                 boost::timer _timer;
 
+                if (M_absorbingBC && M_fsi->isFluid())
+                    {
+                        LifeV::BCFunctionBase outFlow;
+                        outFlow.setFunction(bc_adaptor(*M_fsi->operFSI()));
+                        M_fsi->operFSI()->BCh_fluid()->modifyBC(3, outFlow);
+                    }
+
                 M_fsi->iterate( time );
 
-//                 ofile << time << " ";
-//                 ofile << M_fsi->operFSI()->fluid().flux(2) << " ";
-//                 ofile << M_fsi->operFSI()->fluid().flux(3) << " ";
-//                 ofile << std::endl;
 
 
                 if ( M_fsi->isFluid() )
                     {
+                        if (isFluidLeader) ofile << time << " ";
+                        flux = M_fsi->operFSI()->fluid().flux(2);
+                        if (isFluidLeader) ofile << flux << " ";
+                        flux = M_fsi->operFSI()->fluid().flux(3);
+                        if (isFluidLeader) ofile << flux << " ";
+                        flux = M_fsi->operFSI()->fluid().pressure(2);
+                        if (isFluidLeader) ofile << flux << " ";
+                        flux = M_fsi->operFSI()->fluid().pressure(3);
+                        if (isFluidLeader) ofile << flux << " " << std::endl;
+
                         *M_velAndPressure = M_fsi->FSIOper()->fluid().solution();
                         *M_fluidDisp      = M_fsi->FSIOper()->meshMotion().disp();
                         M_ensightFluid->postProcess( time );
@@ -238,7 +362,7 @@ public:
             std::cout << "Total computation time = "
                       << _overall_timer.elapsed() << "s" << "\n";
 
-//            ofile.close();
+            ofile.close();
         }
 
 private:
@@ -248,6 +372,8 @@ private:
 //    LifeV::DataNavierStokes< LifeV::RegionMesh3D<LifeV::LinearTetra> > M_dataNS;
 
     MPI_Comm*      M_comm;
+
+    bool           M_absorbingBC;
 
     filter_ptrtype M_ensightFluid;
     filter_ptrtype M_ensightSolid;
@@ -376,4 +502,5 @@ int main(int argc, char** argv)
     return 0;
 
 }
+
 
