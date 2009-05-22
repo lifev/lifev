@@ -39,6 +39,7 @@ EpetraMap::EpetraMap(int                NumGlobalElements,
                Comm);
 }
 
+/*
 //! construct a map with entries [1:lagrangeMultipliers] distributed on all the processors
 EpetraMap::EpetraMap(std::vector<int> const& lagrangeMultipliers,
                      const Epetra_Comm& Comm):
@@ -63,6 +64,7 @@ EpetraMap::EpetraMap(std::vector<int> const& lagrangeMultipliers,
                Comm);
 
 }
+*/
 
 
 EpetraMap::EpetraMap(const int          size,
@@ -80,12 +82,29 @@ EpetraMap::EpetraMap(const int          size,
     for (int i(0); i < NumGlobalElements; ++i)
         MyGlobalElements[i] = i + 1;
 
-
+    /*
     createMap( NumGlobalElements,
                NumMyElements,
                &MyGlobalElements[0],
                IndexBase,
                Comm);
+    */
+
+    M_repeatedEpetra_Map.reset( new Epetra_Map(NumGlobalElements,
+                                               NumMyElements,
+                                               &MyGlobalElements[0],
+                                               IndexBase,
+                                               Comm) );
+
+    if (Comm.MyPID() != 0) NumMyElements = 0;
+
+    M_uniqueEpetraMap.reset( new Epetra_Map(NumGlobalElements,
+                                               NumMyElements,
+                                               &MyGlobalElements[0],
+                                               IndexBase,
+                                               Comm) );
+
+
 
 }
 
@@ -234,6 +253,7 @@ EpetraMap::operator += (const EpetraMap& _epetraMap)
 //
 
 
+/*
 EpetraMap &
 EpetraMap::operator += (std::vector<int> const& lagrangeMultipliers)
 {
@@ -248,7 +268,7 @@ EpetraMap::operator += (std::vector<int> const& lagrangeMultipliers)
 
     return *this;
 }
-
+*/
 
 //
 

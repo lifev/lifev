@@ -81,8 +81,10 @@ public:
     //! Repeated lagrange multipliers will be repeated on the repeatedmap
     //! Again: it is not necessary that the lagrangeMltiplier vector is the same on all
     //!       processors nor that it is different
+    /*
     EpetraMap(std::vector<int> const& lagrangeMultipliers,
               const Epetra_Comm&      Comm);
+    */
 
     //!
     EpetraMap(const int               size,
@@ -127,6 +129,7 @@ public:
             return map;
         }
 
+    /*
     EpetraMap&         operator += (std::vector<int> const&   lagrangeMultipliers);
     EpetraMap          operator +  (std::vector<int> const&   lagrangeMultipliers)
         {
@@ -135,11 +138,12 @@ public:
             createImportExport();
             return map;
         }
+    */
 
     EpetraMap&         operator += (int const size);
     EpetraMap          operator +  (int const size)
         {
-            int me =  M_uniqueEpetraMap->Comm().MyPID();
+            //int me =  M_uniqueEpetraMap->Comm().MyPID();
             EpetraMap map( *this );
             map += size;
             createImportExport();
