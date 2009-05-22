@@ -125,15 +125,15 @@ void fixedPoint::eval( const vector_type& _disp,
               << "; iter = " << iter
               << "; M_updateEvery = " << M_updateEvery << std::endl;
 
-    if (iter == 0)
+    if (iter == 0 & this->isFluid())
         {
-            M_nbEval = 0; // new time step
-            this->M_fluid->resetPrec();
+	    M_nbEval = 0; // new time step
+	    this->M_fluid->resetPrec();
             //this->M_solid->resetPrec();
         }
 
     M_nbEval++ ;
-
+    
 
     MPI_Barrier(MPI_COMM_WORLD);
 
