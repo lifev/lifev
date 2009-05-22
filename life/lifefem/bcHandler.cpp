@@ -194,11 +194,14 @@ BCHandler::findBC( int lab)
 
 
 
-void 
+void
 BCHandler::setOffset( std::string const& name, int offset )
 {
   BCBase* bc = findBC( name );
-  
+
+  if (bc == 0)
+      std::cout << "BCHandler::setOffset : BC " << name << " not found ... ";
+
   bc->setOffset(offset);
 }
 

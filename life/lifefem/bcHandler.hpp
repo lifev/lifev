@@ -309,8 +309,8 @@ public:
     std::ostream& showMe( bool verbose = false, std::ostream & out = std::cout ) const;
 
     //! the offset is used on all BCs
-    void setOffset(UInt offset){M_offset=offset;}
-    UInt offset()const {return M_offset;}
+    void setOffset(UInt offset){M_offset = offset;}
+    UInt offset() const {return M_offset;}
     //! specific BC offset
     void setOffset( std::string const& name, int offset );
 
