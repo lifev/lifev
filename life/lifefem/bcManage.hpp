@@ -219,6 +219,7 @@ void bcManage( MatrixType& A, VectorType& b, const MeshType& mesh, const Dof& do
                     break;
                 case Natural:  // Natural boundary conditions (Neumann)
                 case Mixte:  // Mixte boundary conditions (Robin)
+                case Flux:
                     break;
                 default:
                     ERROR_MSG( "This BC type is not yet implemented" );
@@ -2035,10 +2036,7 @@ void bcFluxManage( MatrixType&     A,
 
     const BCFunctionMixte* pBcF = static_cast<const BCFunctionMixte*>( BCb.pointerToFunctor() );
 
-
-
     b.checkAndSet(offset + 1,BCb(t, 0., 0., 0., 1));
-
 
     if ( !BCb.dataVector() )
         {
