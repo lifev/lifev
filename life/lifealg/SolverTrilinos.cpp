@@ -452,7 +452,7 @@ int SolverTrilinos::solveSystem(  vector_type&      rhsFull,
 
         M_Displayer.leaderPrint("     Iterative solver failed, numiter = " , numIter);
         M_Displayer.leaderPrint("     maxIterSolver = " , M_maxIterSolver );
-        M_Displayer.leaderPrint("      retrying: solving again ...            ");
+        M_Displayer.leaderPrint("     retrying: rebuilding prec ...          ");
 
         if (basePrecMatrix.get())
         {
