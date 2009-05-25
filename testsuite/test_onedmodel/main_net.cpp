@@ -59,7 +59,8 @@ makeAbout()
                             LifeV::AboutData::License_GPL,
                             "Copyright (c) 2005 EPFL");
 
-    about.addAuthor("Tiziano Passerini", "developer", "christophe.prudhomme@epfl.ch", "");
+    about.addAuthor("Tiziano Passerini", "developer",
+        "tiziano@mathcs.emory.edu", "");
     return about;
 
 }
