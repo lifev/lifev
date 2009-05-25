@@ -139,11 +139,11 @@ public:
 };
 
 
-Real source( const Real& /* t */,
-             const Real& x,
-             const Real& y,
-             const Real& /*z*/,
-             const ID&  )
+Real source_in( const Real& /* t */,
+                const Real& x,
+                const Real& y,
+                const Real& /*z*/,
+                const ID&   icomp)
 {
     return 8*Pi*Pi*sin(2*Pi*x)*sin(2*Pi*y);
 }
@@ -204,16 +204,17 @@ Real g( const Real& /* t */,
            const Real& x,
            const Real& y,
            const Real& z,
-           const ID&   )
+           const ID&   icomp)
 {
     return sin(2*Pi*x)*sin(2*Pi*y)*sin(2*Pi*z);
 }
 
-Real source( const Real& /* t */,
-             const Real& x,
-             const Real& y,
-             const Real& z,
-             const ID&  )
+
+Real source_in( const Real& /* t */,
+                const Real& x,
+                const Real& y,
+                const Real& z,
+                const ID&  icomp)
 {
     return 12*Pi*Pi*sin(2*Pi*x)*sin(2*Pi*y)*sin(2*Pi*z);
 }
@@ -237,6 +238,7 @@ Real beta( const Real& /* t */,
 	}
 }
 #endif
+
 
 Real UOne( const Real& /* t */,
            const Real& ,
@@ -330,7 +332,7 @@ void
 laplacian::run()
 {
 	typedef ADRSolver< RegionMesh >::vector_type  vector_type;
-    typedef boost::shared_ptr<vector_type>                   vector_ptrtype;
+    typedef boost::shared_ptr<vector_type>        vector_ptrtype;
 
     // Reading from data file
     //
@@ -374,6 +376,7 @@ laplacian::run()
 
     partitionMesh< RegionMesh>   meshPart(* dataADR.mesh(), *Members->comm);
     dataADR.setMesh(meshPart.mesh());
+
     if(verbose) dataADR.showMe();
 
     // Advection coefficient Space: P1 interpolation
@@ -449,9 +452,9 @@ laplacian::run()
     //instantiation of the AdvectionDiffusionReactionSolver class
 
     ADRSolver< RegionMesh > adr (dataADR,
-                              adrFESpace,
-                              betaFESpace,
-                              *Members->comm);
+                                 adrFESpace,
+                                 betaFESpace,
+                                 *Members->comm);
 
     Chrono chrono;
 
@@ -476,8 +479,9 @@ laplacian::run()
 
     //computing the rhs
     vector_type rhsADR ( fullAdrMap );
-    adrFESpace.interpolate(source, rhsADR);
+    adrFESpace.interpolate(source_in, rhsADR);
     rhsADR = adr.matrMass()*rhsADR;
+
 
     //updating the system with the reaction and advection terms and the rhs
     //(including the treatment of the boundary conditions)

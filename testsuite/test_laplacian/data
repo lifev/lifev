@@ -6,112 +6,72 @@
 
 [adr]
 
-[./physics]
+	[./physics]
+	diffusivity     = 1.0           # diffusivity
 
-diffusivity     = 1.0           # diffusivity
-sigma		= 0.0		# reaction coefficient
-
-[../stab]
-
-type = none
-gammaBeta = 0.5
-
-[../discretization2D]
-
-order     = P1
-mesh_dir  = ./Mesh/freefem/  # the directory where the mesh file is
-mesh_type = .msh
-mesh_file =  square20x20.msh  #square10x10.msh #square40x40   
-
-[../discretization3D]
-
-order     = P1
-mesh_dir  = ./Mesh/inria/  # the directory where the mesh file is
-mesh_type = .mesh
-#mesh_file = hexa32x32.mesh        # mesh file
-mesh_file = hexa16x16.mesh        # mesh file
-#mesh_file = hexa8x8.mesh        # mesh file
-#mesh_file = hexa4x4.mesh        # mesh file
-#mesh_file = cube8x8.mesh        # mesh file
-#mesh_file = cube16x16.mesh      # mesh file
-#mesh_file = cube32x32.mesh      # mesh file
-
-[../prec]
-prectype                = ML
-reuse                   = false
-
-[./ML]
-default_parameter_list = SA    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
-displayList             = true
-analyze_smoother	= false
-
-[./smoother]
-
-type                    = IFPACK
-pre_or_post             = both
-sweeps                  = 3
-damping_factor          = 1
-
-[../coarse]
-
-type                    = Gauss-Seidel
-sweeps                  = 1
-pre_or_post             = both
-#max_size                = 64
-
-[../repartition]
-enable                  = 0
-partitioner             = ParMETIS
-max_min_ration          = 1.3
-min_per_proc            = 500
+	[../discretization2D]
+	order     = P1
+	mesh_dir  = ./Mesh/freefem/  # the directory where the mesh file is
+	mesh_type = .msh
+	mesh_file =  square20x20.msh  #square10x10.msh #square40x40
 
 
-# Parameters for the Ifpack preconditioner
+	[../discretization3D]
+	order     = P2
+	mesh_dir  = ./Mesh/  # the directory where the mesh file is
+	# mesh_file = cube4x4.mesh        # mesh file
+	#mesh_file = cube8x8.mesh        # mesh file
+	mesh_file = hexa16x16.mesh      # mesh file
+	#mesh_file = cube32x32.mesh      # mesh file
 
-[../]
-[../ifpack]
-Prectype               = Amesos    # Amesos (does a local LU factorization), ILUT (not ILU)
+	[../prec]
+	prectype                = ML
+	reuse                   = false
+	displayList             = 1
 
-[./relaxation]
-type                   = Jacobi
-damping_factor         = 1.
-sweeps                 = 1
-min_diagonal_value     = 0
-zero_starting_solution = true
+		[./ML]	
+		analyze_smoother        = false
+		default_parameter_list 	= none    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
 
-[../partitioner]
-type                   = parmetis
-overlap                = 0
-local_parts            = 1
-root_node              = 0
-use_symmetric_graph    = true
+			[./smoother]
+			# smoother type
+			# Aztec, IFPACK, Jacobi, ML symmetric Gauss-Seidel, symmetric Gauss-Seidel, 
+			# ML Gauss-Seidel, Gauss-Seidel, Chebyshev, MLS, Hiptmair, Amesos-KLU, 
+			# Amesos-Superlu, Amesos-UMFPACK, Amesos-Superludist, Amesos-MUMPS, 
+			# user-defined, SuperLU, IFPACK-Chebyshev, self, do-nothing, 
+			# IC, ICT, ILU, ILUT 
+			type                    = Gauss-Seidel
+			pre_or_post             = both
+			sweeps                  = 3
+			damping_factor          = 1
 
-[../amesos]
-solvertype             = Amesos_KLU
+			[../coarse]
+			type                    = Amesos-Superlu
+			sweeps                  = 2
+			pre_or_post             = both
+			max_size                = 64
+	
+			[../repartition]
+			enable                  = 1
+			partitioner             = ParMETIS
+			max_min_ration          = 1.3
+			min_per_proc            = 500
 
-[../fact]
-drop_tolerance         = 1.e-5
-level-of-fill          = 1
-ilut_level-of-fill     = 1
-absolute_threshold     = 0.
-relative_threshold     = 0.
-relax_value            = 0.
+			[../energy_minimization]
+			enable			= true
+			type			= 3
+	
+			[../]
+		[../]
+        [../solver]
+        solver          = gmres
+        scaling         = none
+        output          = all_res  # all_res none
+        conv            = rhs
+        max_iter        = 100
+        kspace          = 100
+        tol             = 1.e-10    # AztecOO tolerance
 
-[../schwarz]
-combine_mode           = true
-reordering_type        = none
-filter_singletons      = false
-
-[../]
-[../]
-[../solver]
-solver          = gmres
-scaling         = none
-output          = none  # all_res none
-conv            = rhs
-max_iter        = 100
-kspace          = 100
-tol             = 1.e-10    # AztecOO tolerance
 
 
 [exporter]
