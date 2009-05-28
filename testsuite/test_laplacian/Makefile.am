@@ -33,7 +33,7 @@ EXTRA_DIST = data
 
 link:
 	test -a data || ln -s $(srcdir)/data
-	test -a Mesh || ln -s $(top_srcdir)/testsuite/data/mesh/inria Mesh
+	test -a Mesh || ln -s $(top_srcdir)/testsuite/data/mesh Mesh
 
 clean-results:
 	-rm *.vct *.scl *.case *.geo
