@@ -41,10 +41,13 @@
 // ===================================================
 SpiritParser::SpiritParser( const bool& applyRules ) :
 	M_strings 					( ),
-	M_variables					( new variables_type ),
-	M_results					( new results_type ),
+	//M_variables					( new variables_type ),
+	//M_results					( new results_type ),
+	M_variables					( ),
+	M_results					( ),
 	M_nResults					( 0 ),
-	M_calculator				( *M_variables, *M_results, M_nResults ),
+	//M_calculator				( *M_variables, *M_results, M_nResults ),
+	M_calculator				( M_variables, M_results, M_nResults ),
 	M_applyRules				( applyRules )
 {
 	// Set default variables
@@ -55,10 +58,13 @@ SpiritParser::SpiritParser( const bool& applyRules ) :
 
 SpiritParser::SpiritParser( const std::string& string, const bool& applyRules ) :
 	M_strings 					( ),
-	M_variables					( new variables_type ),
-	M_results					( new results_type ),
+	//M_variables					( new variables_type ),
+	//M_results					( new results_type ),
+	M_variables					( ),
+	M_results					( ),
 	M_nResults					( M_nResults ),
-	M_calculator				( *M_variables, *M_results, M_nResults ),
+	//M_calculator				( *M_variables, *M_results, M_nResults ),
+	M_calculator				( M_variables, M_results, M_nResults ),
 	M_applyRules				( applyRules )
 {
 	// Set default variables
@@ -127,7 +133,8 @@ SpiritParser::setVariable( const std::string& name, const Real& value )
 {
 	Debug( 5030 ) << "SpiritParser::setVariable: M_variables[" << name << "]: " << value << "\n";
 
-	M_variables->operator[](name) = value;
+	//M_variables->operator[](name) = value;
+	M_variables[name] = value;
 }
 
 
@@ -138,10 +145,12 @@ SpiritParser::evaluate( const UInt& ID )
 	for (UInt i = 0; i < M_strings.size(); ++i)
 		boost::spirit::parse(M_strings[i].begin(), M_strings[i].end(), M_calculator, boost::spirit::space_p);
 
-    Debug( 5030 ) << "SpiritParser::evaluate:       M_results[ "<< (ID - 1) << "]: " << M_results->operator[](ID - 1) << "\n";
+    //Debug( 5030 ) << "SpiritParser::evaluate:       M_results[ "<< (ID - 1) << "]: " << M_results->operator[](ID - 1) << "\n";
+    Debug( 5030 ) << "SpiritParser::evaluate:       M_results[ "<< (ID - 1) << "]: " << M_results[ID - 1] << "\n";
 
     M_nResults = 0; //Reset for next evaluation
-	return M_results->operator[](ID - 1);
+	//return M_results->operator[](ID - 1);
+	return M_results[ID - 1];
 }
 
 
@@ -168,7 +177,8 @@ SpiritParser::setupResults( const std::string& stringSeparator )
 	//Reserve the space for results
 	std::vector<std::string> tempVectorString;
 	boost::split( tempVectorString, M_strings.back(), boost::is_any_of(stringSeparator) );
-	(*M_results).reserve( tempVectorString.size() );
+	//(*M_results).reserve( tempVectorString.size() );
+	M_results.reserve( tempVectorString.size() );
 }
 
 

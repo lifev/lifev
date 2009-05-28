@@ -98,9 +98,9 @@ typedef std::vector<std::string>        string_type;
  *  +, -, *, /, ^, sqrt(), sin(), cos(), tan(), exp(), log(), log10(), >, <.
  *  \endverbatim
  *
- *  \TODO Fix a problem when calling destructors;
+ *  \TODO Fix a problem when calling destructors - NOW FIXED USING REFERENCE INSTEAD OF SHARED_PTR;
  *  \TODO Find a better way to manage results (M_results, M_nResults, setResult(), ...)
- *  \TODO Avoid the use of ruleTheString( )
+ *  \TODO Avoid the use of ruleTheString (if possible)!
  *
  */
 struct SpiritCalculator : boost::spirit::grammar<SpiritCalculator>
@@ -110,8 +110,10 @@ struct SpiritCalculator : boost::spirit::grammar<SpiritCalculator>
 public:
 
 	SpiritCalculator( variables_type& variables, results_type& results, UInt& nResults ) :
-		M_variables	( &variables ),
-		M_results 	( &results ),
+		//M_variables	( &variables ),
+		//M_results 	( &results ),
+		M_variables	( variables ),
+		M_results 	( results ),
 		M_nResults 	( nResults )
 	{
 	}
@@ -263,29 +265,35 @@ public:
     // Member functions that are called in semantic actions.
     void define(const std::string& name, const Real value) const
     {
-    	M_variables->operator[](name) = value;
+    	//M_variables->operator[](name) = value;
+    	M_variables[name] = value;
     }
 
     void showMeVariables() const
     {
     	variables_type::const_iterator it;
 
-    	std::cout << "SpiritParser showMeVariables: " << M_variables << std::endl;
-    	for (it = M_variables->begin(); it != M_variables->end(); ++it)
+    	//std::cout << "SpiritParser showMeVariables: " << M_variables << std::endl;
+    	std::cout << "SpiritParser showMeVariables: " << &M_variables << std::endl;
+    	//for (it = M_variables->begin(); it != M_variables->end(); ++it)
+    	for (it = M_variables.begin(); it != M_variables.end(); ++it)
     		std::cout << it->first << " = " << it->second << std::endl;
 
-    	std::cout << M_variables << std::endl;
+    	//std::cout << M_variables << std::endl;
+    	std::cout << &M_variables << std::endl;
     }
 
     Real lookup(const std::string& name) const
     {
-    	if (M_variables->find(name) == M_variables->end())
+    	//if (M_variables->find(name) == M_variables->end())
+    	if (M_variables.find(name) == M_variables.end())
     	{
     	    std::cerr << "!!! Warning: SpiritParser has undefined name " << name << " !!!" << std::endl;
     	    return 0.0;
     	}
     	else
-    	   return (M_variables->find(name))->second;
+    	   //return (M_variables->find(name))->second;
+    		return M_variables.find(name)->second;
     }
 
     Real pow( const Real a, const Real b ) const
@@ -340,14 +348,17 @@ public:
 
     void setResult( const Real result) const
     {
-    	M_results->operator[]( M_nResults ) = result;
+    	//M_results->operator[]( M_nResults ) = result;
+    	M_results[M_nResults] = result;
     	M_nResults++;
     }
 
 private:
 
-	boost::shared_ptr<variables_type>						M_variables;
-	boost::shared_ptr<results_type>							M_results;
+	//boost::shared_ptr<variables_type>						M_variables;
+	//boost::shared_ptr<results_type>							M_results;
+	variables_type&											M_variables;
+	results_type&											M_results;
 	UInt&													M_nResults;
 };
 
@@ -445,8 +456,10 @@ private:
 	// ===================================================
 
 	string_type											M_strings;
-	boost::shared_ptr<variables_type>					M_variables;
-	boost::shared_ptr<results_type>						M_results;
+	//boost::shared_ptr<variables_type>					M_variables;
+	//boost::shared_ptr<results_type>						M_results;
+	variables_type										M_variables;
+	results_type										M_results;
 	UInt												M_nResults;
 	SpiritCalculator									M_calculator;
 	bool												M_applyRules;
