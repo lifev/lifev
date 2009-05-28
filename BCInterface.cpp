@@ -39,7 +39,7 @@
 // ===================================================
 BCInterface::BCInterface( GetPot const& dataFile, const std::string dataSection ) :
 	M_dataFile					( dataFile ),
-	M_dataSection				( "boundary_conditions/" + dataSection + "/" ),
+	M_dataSection				( dataSection + "/boundary_conditions/" ),
 	M_list						( ),
 	M_listSize					( 0 ),
 	M_autoSetParameters			( true ),
@@ -60,6 +60,7 @@ BCInterface::BCInterface( GetPot const& dataFile, const std::string dataSection 
 	M_mapType["Essential"] 	= Essential;
 	M_mapType["Natural"] 	= Natural;
 	M_mapType["Mixte"] 		= Mixte;
+	//M_mapType["Flux"] 		= Flux;
 
 	//Set mapMode
 	M_mapMode["Scalar"] 	= Scalar;

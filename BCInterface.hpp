@@ -76,13 +76,10 @@ enum BCBaseList{function, fsi};
  *
  *  <b>EXAMPLE - DATA FILE</b>
  *
- *  In the GetPot data file BCInterface read a new section: [conditions].
+ *  In the GetPot data file, inside each subsection ([fluid], [solid], etc...) BCInterface reads a new section: [boundary_conditions].
  *
- *  Inside [conditions] the user can insert different sections for his problem such as:
- *  [fluid], [structure], etc...
- *
- *  Inside each subsection there is a list of condition which correspond to other sub-section
- *  with the same name. The list must be inside the apex '...'.
+ *  Inside the new section there is a list of condition which correspond to other sub-section
+ *  with the same name. The list must be inside the apex ' '.
  *
  *  Each condition has a similar structure; here there is an example:
  *
@@ -127,7 +124,7 @@ enum BCBaseList{function, fsi};
  *  1) You can define your BCInterface class in a shared pointer:
  *     boost::shared_ptr<BCInterface> 	M_fluidBC;
  *
- *  2) You pass to the BCInterface the GetPot data file and the subsection to read inside [conditions]:
+ *  2) You pass to the BCInterface the GetPot data file and the subsection to read inside [boundary_conditions]:
  *     M_fluidBC.reset( new BCInterface(data_file, "fluid") );
  *
  *  3) If you have fsi conditions you have to add an operator
