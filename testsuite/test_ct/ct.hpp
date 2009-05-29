@@ -12,6 +12,9 @@
  * @author
  * @see
  */
+
+struct CTcaseBase;
+
 class CT
 {
   public:
@@ -68,8 +71,7 @@ class CT
 
   private:
     Epetra_Comm *M_comm;
-    struct CTcase;
-    boost::shared_ptr<CTcase> C_case;
+    boost::shared_ptr<CTcaseBase> C_case;
 
 };
 

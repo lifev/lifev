@@ -15,9 +15,11 @@
 #include <ChorinTemam.hpp>
 
 #include <ct.hpp>
-#include <ctCase.hpp>
 #include <iostream>
 #include <string>
+
+// Include user specific test study
+#include <ctUserCase.hpp>
 
 using namespace LifeV;
 
@@ -26,7 +28,7 @@ CT::CT( int argc,
         LifeV::AboutData const& /*ad*/,
         LifeV::po::options_description const& /*od*/ )
     :
-    C_case (new CTcase)
+    C_case (new CTcaseUser)
 {
     GetPot command_line(argc, argv);
     string data_file_name = command_line.follow("data", 2, "-f", "--file");
@@ -42,7 +44,9 @@ CT::CT( int argc,
     M_comm = new Epetra_SerialComm();
 #endif
 
-    C_case->set_data(dataFile, M_comm);
+    C_case->set_base_data(dataFile, M_comm);
+    C_case->set_user_data();
+    C_case->create_bcs();
     C_case->set_bcs();
 }
 
@@ -58,15 +62,15 @@ CT::run()
     typedef boost::shared_ptr<vector_type> vector_ptrtype;
 
     // Reading from data file
-    GetPot dataFile( C_case->C_data );
+    GetPot dataFile( C_case->get_data_hdl() );
 
     int save = dataFile("fluid/miscellaneous/save", 1);
 
     bool verbose = (M_comm->MyPID() == 0);
 
     // retrieve boundary conditions from the CTcase
-    BCHandler *bcHu = C_case->get_bcHu();
-    BCHandler *bcHp = C_case->get_bcHp();
+    boost::shared_ptr<BCHandler> bcHu = C_case->get_bcHu();
+    boost::shared_ptr<BCHandler> bcHp = C_case->get_bcHp();
 
 
     // fluid solver
