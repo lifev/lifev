@@ -334,7 +334,7 @@ struct norm_inf_adaptor
     template<typename E>
     Real operator()( E const& __v ) const
         {
-            return  __v.NormInf()
+	  return  __v.NormInf();
         }
 };
 
