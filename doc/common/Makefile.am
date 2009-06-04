@@ -1,6 +1,6 @@
 # -*- makefile -*-
 #
-# Copyright (C) 2004 EPFL, INRIA, Politechnico di Milano
+# Copyright (C) 2004 EPFL, INRIA, Politecnico di Milano
 #
 #  Distributed under the GPL(GNU Public License):
 #  This program is free software; you can redistribute it and/or modify
