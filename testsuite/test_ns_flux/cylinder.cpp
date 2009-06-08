@@ -52,7 +52,7 @@
 #include <iostream>
 #include <math.h>
 
-#define LM 0
+#define LM 1
 
 using namespace LifeV;
 
@@ -187,7 +187,8 @@ struct Cylinder::Private
                  const Real& /* z */,
                  const ID&   id ) const
         {
-            return ( (*lambda)[0] );
+            return ( 1.33333 );
+            //            return ( (*lambda)[0] );
         }
 
     fct_type get_lambda3d()
@@ -249,7 +250,8 @@ Cylinder::run()
     //
     GetPot dataFile( d->data_file_name.c_str() );
 
-    bool verbose = (d->comm->MyPID() == 0);
+    int me       = d->comm->MyPID();
+    bool verbose = (me == 0);
 
     // Boundary conditions
     BCHandler bcH( 4, BCHandler::HINT_BC_NONE );
@@ -260,27 +262,27 @@ Cylinder::run()
     BCFunctionBase uPois(  d->getU_pois() );
 
 
-    boost::shared_ptr< std::vector<Real> > lambda;
-    lambda.reset( new std::vector<Real>(1) );
-    (*lambda)[1] = INLET;
-    d-> setLambda(lambda);
+//     boost::shared_ptr< std::vector<Real> > lambda;
+//     lambda.reset( new std::vector<Real>(1) );
+//     (*lambda)[1] = INLET;
+//     d-> setLambda(lambda);
 
     BCFunctionBase lambdaIn  (  d->get_lambda3d() );
 
 
 #ifdef TUBE20_MESH_SETTINGS
-
     //cylinder
 #if LM
-    bcH.addBC( "Inlet",    INLET,    Flux,   Full,      lambdaIn, 3 );
+    //bcH.addBC( "InletLM",    INLET,    Flux,        Full,   lambdaIn, 3 );
+    bcH.addBC( "InletLM",    INLET,    Flux,   Full,      lambdaIn, 3 );
 #else
-    bcH.addBC( "Inlet",    INLET,    Essential,   Full,      uPois, 3 );    
+    bcH.addBC( "Inlet",    INLET,    Essential,   Full,      uPois, 3 );
 #endif
-    bcH.addBC( "Outlet",   OUTLET,   Natural,   Full,      uZero, 3 );
+    bcH.addBC( "Outlet",   OUTLET,   Natural,     Full,    uZero, 3 );
+    //bcH.addBC( "Outlet",   OUTLET,   Flux,     Full,    lambdaIn, 3 );
     bcH.addBC( "Wall",     WALL,     Essential,   Full,    uZero, 3 );
     bcH.addBC( "Slipwall", SLIPWALL, Essential,   Full,    uZero, 3 );
 
-    bcH.showMe();
 #endif
 
 
@@ -299,6 +301,16 @@ Cylinder::run()
     partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.mesh(), *d->comm);
 
     std::string uOrder =  dataFile( "fluid/discretization/vel_order", "P1");
+
+
+    if (verbose)
+        {
+            std::cout << "\n";
+            std::cout << "  Problem : \n";
+            std::cout << "    Space discretization order: ";
+        }
+
+
 
     if ( uOrder.compare("P2") == 0 )
     {
@@ -344,7 +356,7 @@ Cylinder::run()
         }
 
     if (verbose) std::cout << std::endl;
-    if (verbose) std::cout << "Time discretization order " << dataNavierStokes.order_bdf() << std::endl;
+    if (verbose) std::cout << "    Time discretization order " << dataNavierStokes.order_bdf() << std::endl;
 
     dataNavierStokes.setMesh(meshPart.mesh());
 
@@ -379,33 +391,47 @@ Cylinder::run()
     UInt totalPressDofs = pFESpace.map().getMap(Unique)->NumGlobalElements();
     UInt totalDofs      = totalVelDofs + totalPressDofs;
 
-    bcH.setOffset("Inlet", totalDofs);
+
+#if LM
+    bcH.setOffset("InletLM", totalDofs);
+    //bcH.setOffset("Outlet", totalDofs + 1);
+#endif
 
     // Lagrange multipliers for flux imposition
     std::vector<int> lagrangeMultipliers(0);
 
-    /*
+
     if  (d->comm->MyPID() == 0) // Adding lagrange multipliers in the first processor
         {
-    */
+
             lagrangeMultipliers.resize(1); // just one flux to impose (n);
             lagrangeMultipliers[0] = 1;    // just take a numbering of the lagrange multipliers [1:n];
-    /*
+            //            lagrangeMultipliers[1] = 2;    // just take a numbering of the lagrange multipliers [1:n];
+
         }
-    */
+
 
     if (verbose) std::cout << "Total Velocity Dofs = " << totalVelDofs << std::endl;
     if (verbose) std::cout << "Total Pressure Dofs = " << totalPressDofs << std::endl;
     if (verbose) std::cout << "Total Dofs          = " << totalDofs << std::endl;
 
-    if (verbose) std::cout << "Calling the fluid constructor ... ";
+    UInt myTotalVelDofs   = uFESpace.map().getMap(Unique)->NumMyElements();
+    UInt myTotalPressDofs = pFESpace.map().getMap(Unique)->NumMyElements();
+    UInt myTotalDofs      = myTotalVelDofs + myTotalPressDofs;
+
+
+    MPI_Barrier(MPI_COMM_WORLD);
+    std::cout << "        " << me << " has " << myTotalDofs << " dofs " << std::endl;
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if (verbose) std::cout << "Calling the fluid constructor  ... " << std::flush;
 
 #if LM
     Oseen< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
                                               uFESpace,
                                               pFESpace,
-                                              lagrangeMultipliers,
-                                              *d->comm);
+                                              *d->comm,
+                                              lagrangeMultipliers.size());
 #else
     Oseen< RegionMesh3D<LinearTetra> > fluid (dataNavierStokes,
                                               uFESpace,
@@ -416,6 +442,12 @@ Cylinder::run()
     if (verbose) std::cout << "ok." << std::endl;
 
     EpetraMap fullMap(fluid.getMap());
+
+
+    // intialization
+
+    Chrono chrono;
+    chrono.start();
 
     fluid.setUp(dataFile);
     fluid.buildSystem();
@@ -451,8 +483,22 @@ Cylinder::run()
     fluid.updateSystem(0, beta, rhs );
     fluid.iterate( bcH );
 
+    chrono.stop();
+    if (verbose) std::cout << "\n \n -- Total time = " << chrono.diff() << std::endl << std::endl;
+
+
+    double fluxin  = fluid.flux(2);
+    double fluxout = fluid.flux(3);
+
+    if (verbose)
+        {
+            std::cout << " Inlet Flux  = " << fluxin  << std::endl;
+            std::cout << " Outlet Flux = " << fluxout << std::endl;
+        }
 
 //    fluid.postProcess();
+
+
     bdf.bdf_u().initialize_unk( fluid.solution() );
 
     fluid.resetPrec();
@@ -471,7 +517,6 @@ Cylinder::run()
 
     // Temporal loop
 
-    Chrono chrono;
     int iter = 1;
 
     for ( Real time = t0 + dt ; time <= tFinal + dt/2.; time += dt, iter++)
@@ -508,6 +553,7 @@ Cylinder::run()
 
 
         MPI_Barrier(MPI_COMM_WORLD);
+
 
         chrono.stop();
         if (verbose) std::cout << "Total iteration time " << chrono.diff() << " s." << std::endl;

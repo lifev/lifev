@@ -21,14 +21,14 @@ initial_sol     = stokes          # stokes, none
 
 
 [../physics]
-endtime         = .2
+endtime         = .0
 density         = 1.0          # density
 viscosity       = 0.03         # viscosity
 
 
 [../discretization]
 mesh_dir        = ./Mesh/
-mesh_file       = tube20.mesh          # "big file"
+mesh_file       = tube40.mesh          # "big file"
 #mesh_file       = tube-test.mesh          # "big file"
 #mesh_file       = tube-r5.mesh          # "big file"
 #mesh_file       = cyl3D-1.mesh          # "big file"
@@ -53,25 +53,53 @@ solver          = gmres
 scaling         = none
 output          = all_res # all_res
 conv            = rhs
-max_iter        = 100
-kspace          = 100
+max_iter        = 200
+kspace          = 200
 tol             = 1.e-10    # AztecOO tolerance
 
 
 [../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
-prectype        = Ifpack # Amesos (does a local LU factorization), ILUT (not ILU)
+prectype        = ML
 reuse           = true
-overlap         = 2
-#droptol         = 1.e-5 ??
-fill            = 4
-relax_value     = 1
+displayList	= 0
+                [./ML]
+                analyze_smoother        = false
+                default_parameter_list  = none    	# for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+		max_levels		= 3
+		prec_type 		= MGV		# two-level-additive
+		inc_or_dec		= increasing	 # decreasing increasing
+
+
+			[./smoother]
+			type                    = IFPACK
+			pre_or_post             = post
+			sweeps                  = 1
+			damping_factor          = 1.333
+
+			[../coarse]
+			#type                    = Gauss-Seidel
+			type                    = Amesos-Superlu
+			sweeps			= 1
+			pre_or_post   		= post
+			max_size                = 128
+
+
+		[../ifpack]
+		prectype        = Amesos    # Amesos (does a local LU factorization), ILUT (not ILU)
+		droptol         = 1.e-5
+		fill            = 4
+		relax_value     = 1
+		overlap         = 1
+
+			[./amesos]
+			solvertype      = Amesos_Umfpack
 
 [../ipstab]
 #gammaBeta  = 0.02
 #gammaDiv   = 0.02
 #gammaPress = 0.02
-gammaBeta  = 0.125
-gammaDiv   = 0.125
-gammaPress = 0.03125
+#gammaBeta  = 0.125
+#gammaDiv   = 0.125
+#gammaPress = 0.03125
 reuse      = true
 
