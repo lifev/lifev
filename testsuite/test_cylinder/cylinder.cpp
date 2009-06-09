@@ -59,6 +59,8 @@
 #include <cylinder.hpp>
 #include <iostream>
 
+
+
 using namespace LifeV;
 
 
@@ -364,18 +366,14 @@ Cylinder::Cylinder( int argc,
     d->initial_sol = (std::string) dataFile( "fluid/problem/initial_sol", "stokes");
     std::cout << d->initial_sol << std::endl;
 
+
 #ifdef EPETRA_MPI
     std::cout << "mpi initialization ... " << std::endl;
 
     //    MPI_Init(&argc,&argv);
 
+    int ntasks = 0;
     d->comm = new Epetra_MpiComm( MPI_COMM_WORLD );
-    int ntasks;
-//    int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
-#else
-    d->comm = new Epetra_SerialComm();
-#endif
-
     if (!d->comm->MyPID()) {
         std::cout << "My PID = " << d->comm->MyPID() << " out of " << ntasks << " running." << std::endl;
         std::cout << "Re = " << d->Re << std::endl
@@ -383,6 +381,11 @@ Cylinder::Cylinder( int argc,
                   << "H  = " << d->H  << std::endl
                   << "D  = " << d->D  << std::endl;
     }
+//    int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
+#else
+    d->comm = new Epetra_SerialComm();
+#endif
+
 }
 
 void
@@ -632,7 +635,6 @@ Cylinder::run()
 
             *velAndPressure = fluid.solution();
             ensight.postProcess( 0 );
-            fluid.postProcess();
             fluid.resetPrec();
         }
 
@@ -672,7 +674,6 @@ Cylinder::run()
 //         {
         *velAndPressure = fluid.solution();
         ensight.postProcess( time );
-        fluid.postProcess();
 //         }
 //         postProcessFluxesPressures(fluid, bcH, time, verbose);
 
