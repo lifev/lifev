@@ -140,7 +140,7 @@ FSIOperator::setup()
     if (this->isFluid())
     {
 
-        M_fluidMeshPart.reset(new  partitionMesh< FSIOperator::mesh_type > (*M_dataFluid->mesh(), *M_epetraComm));
+        M_fluidMeshPart.reset(new  partitionMesh< mesh_type > (*M_dataFluid->mesh(), *M_epetraComm));
 
 
 
@@ -396,7 +396,6 @@ FSIOperator::setDataFromGetPot( GetPot const& data_file )
 
     M_dataFluid.reset(new data_fluid(data_file));
     M_dataSolid.reset(new data_solid(data_file));
-    M_monolithic  = !(M_method.compare("monolithic"));
 }
 
 

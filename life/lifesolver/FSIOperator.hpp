@@ -685,6 +685,7 @@ protected:
     bc_vector_interface                               M_bcvDerFluidLoadToStructure;
     bc_vector_interface                               M_bcvDerFluidLoadToFluid;
     bc_vector_interface                               M_bcvDerStructureDispToSolid;
+
 //     bc_vector_interface       M_bcvDerReducedFluidLoadToStructure;
 //     bc_vector_interface       M_bcvDerStructureAccToReducedFluid;
     boost::shared_ptr<vector_type>                    M_lambdaFluid;
@@ -748,7 +749,6 @@ private:
 
 //     UInt                      M_reducedFluid;
     std::string                                       M_algorithm;
-    bool                                              M_monolithic;
     Preconditioner                                    M_precond;
     DDNPreconditioner                                 M_DDNprecond;
 
