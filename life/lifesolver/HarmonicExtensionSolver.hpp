@@ -312,7 +312,7 @@ HarmonicExtensionSolver( FESpace<Mesh, EpetraMap>& mmFESpace,
     M_dispOld               ( M_disp.getMap() ),
     M_dispDiff              ( M_disp.getMap() ),
     M_f                     ( M_disp.getMap() ),
-    M_linearSolver          ( comm ),
+    M_linearSolver          ( ),
     M_prec                   ( ),
     M_reusePrec              ( true ),
     M_maxIterForReuse        ( -1 ),
@@ -386,8 +386,6 @@ void HarmonicExtensionSolver<Mesh, SolverType>::computeMatrix( )
 
     // Initializations
     //M_disp = ZeroVector( _disp.size() );
-
-    M_linearSolver.setMatrix( *M_matrHE );
 
 
 }
