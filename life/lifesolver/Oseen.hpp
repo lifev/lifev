@@ -160,6 +160,11 @@ public:
                               vector_type& betaVec,
                               const vector_type& sourceVec
                               );
+    virtual void updateSystem(double       alpha,
+                              vector_type& betaVec,
+                              const vector_type& sourceVec,
+                              matrix_ptrtype matrix
+                              );
 
     void updateStab( matrix_type& matrFull );
 
@@ -551,7 +556,7 @@ Oseen( const data_type&          dataType,
     M_rhsFull                ( M_localMap ),
     M_sol                    ( M_localMap ),
     M_residual               ( M_localMap ),
-    M_linearSolver           ( comm ),
+    M_linearSolver           ( ),
     M_post_proc              ( M_uFESpace.mesh(),
                                &M_uFESpace.feBd(), &M_uFESpace.dof(),
                                &M_pFESpace.feBd(), &M_pFESpace.dof(), M_localMap ),
@@ -589,6 +594,7 @@ template<typename Mesh, typename SolverType>
 Oseen<Mesh, SolverType>::
 ~Oseen()
 {
+
 }
 
 
@@ -752,7 +758,8 @@ void Oseen<Mesh, SolverType>::buildSystem()
                                 iComp*velTotalDof, iComp*velTotalDof);
                 chronoStiffAssemble.stop();
 
-                        //             }
+                        //             } //to use if stiff_strain(...) is called instead of stiff(...)
+
 
             if ( !M_steady )
                 {
@@ -881,6 +888,8 @@ initialize( const vector_type& velAndPressure)
 
 }
 
+
+
 template<typename Mesh, typename SolverType>
 void Oseen<Mesh, SolverType>::
 updateSystem(double       alpha,
@@ -888,7 +897,23 @@ updateSystem(double       alpha,
              const vector_type& sourceVec
              )
 {
+    if (M_matrNoBC.get())
+        M_matrNoBC.reset(new matrix_type(M_localMap, M_matrNoBC->getMeanNumEntries() ));
+    else
+        M_matrNoBC.reset(new matrix_type(M_localMap, M_matrStokes->getMeanNumEntries() ));
+    updateSystem( alpha, betaVec, sourceVec, M_matrNoBC);
+    if(alpha != 0.)
+        M_matrNoBC->GlobalAssemble();
 
+}
+
+template<typename Mesh, typename SolverType>
+void Oseen<Mesh, SolverType>::
+updateSystem(double       alpha,
+             vector_type& betaVec,
+             const vector_type& sourceVec,
+             matrix_ptrtype matrNoBC)
+{
     Chrono chrono;
 
     // clearing pressure mass matrix in case we need it in removeMean;
@@ -922,10 +947,6 @@ updateSystem(double       alpha,
 
     chrono.start();
 
-    if (M_matrNoBC)
-        M_matrNoBC.reset(new matrix_type(M_localMap, M_matrNoBC->getMeanNumEntries() ));
-    else
-        M_matrNoBC.reset(new matrix_type(M_localMap, M_matrStokes->getMeanNumEntries() ));
     if(M_isDiagonalBlockPrec == true)
         {
             matrix_ptrtype tmp(M_blockPrec);
@@ -1008,7 +1029,7 @@ updateSystem(double       alpha,
                 grad( 1, M_elvec, M_elmatStiff, M_uFESpace.fe(), M_uFESpace.fe(), iComp, iComp );
                 grad( 2, M_elvec, M_elmatStiff, M_uFESpace.fe(), M_uFESpace.fe(), iComp, iComp );
 
-                assembleMatrix( *M_matrNoBC,
+                assembleMatrix( *matrNoBC,
                                 M_elmatStiff,
                                 M_uFESpace.fe(),
                                 M_uFESpace.fe(),
@@ -1030,7 +1051,7 @@ updateSystem(double       alpha,
             M_Displayer.leaderPrint("  f-  Updating the stabilization terms ...    ");
             chrono.start();
             M_matrStab.reset  ( new matrix_type(M_localMap) );
-            M_ipStab.apply( *M_matrStab, betaVecRep, false/*S_verbose*/ );
+            M_ipStab.apply( *M_matrStab, betaVecRep, false );
             M_matrStab->GlobalAssemble();
             chrono.stop();
             M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
@@ -1047,7 +1068,7 @@ updateSystem(double       alpha,
                     if ( !M_reuseStab || (M_matrStab.get() == 0) )
                         {
                             M_matrStab.reset  ( new matrix_type(M_localMap) );
-                            M_ipStab.apply( *M_matrStab, betaVec, false/*S_verbose*/ );
+                            M_ipStab.apply( *M_matrStab, betaVec, false );
                             M_matrStab->GlobalAssemble();
                         }
                     else
@@ -1061,28 +1082,22 @@ updateSystem(double       alpha,
 
     if (alpha != 0. )
         {
-            *M_matrNoBC += *M_matrMass*alpha;
+            *matrNoBC += *M_matrMass*alpha;
             if(M_isDiagonalBlockPrec == true)
                 {
-                    M_matrNoBC->GlobalAssemble();
-                    *M_blockPrec += *M_matrNoBC;
-                    matrix_type tmp(*M_matrNoBC);
-                    M_matrNoBC.reset(new matrix_type(M_localMap, tmp.getMeanNumEntries()));
-                    *M_matrNoBC += tmp;
+                    matrNoBC->GlobalAssemble();
+                    *M_blockPrec += *matrNoBC;
+                    matrix_type tmp(*matrNoBC);
+                    matrNoBC.reset(new matrix_type(M_localMap, tmp.getMeanNumEntries()));
+                    *matrNoBC += tmp;
                     M_blockPrec->GlobalAssemble();
                 }
         }
-    *M_matrNoBC += *M_matrStokes;
+    *matrNoBC += *M_matrStokes;
 
-    if(alpha != 0.)
-        {
-            //            if(!Monolithic())
-            {
-                M_matrNoBC->GlobalAssemble();
-            }
-        }
 
 }
+
 
 template<typename Mesh, typename SolverType>
 void Oseen<Mesh, SolverType>::setBlockPreconditioner( matrix_ptrtype blockPrec )
@@ -1105,6 +1120,7 @@ void Oseen<Mesh, SolverType>::updateStab( matrix_type& matrFull )
 template<typename Mesh, typename SolverType>
 void Oseen<Mesh, SolverType>::getFluidMatrix( matrix_type& matrFull )
 {
+    M_matrNoBC->GlobalAssemble();
     matrFull += *M_matrNoBC;
 }
 
@@ -1115,7 +1131,7 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
     Chrono chrono;
 
     // matrix and vector assembling communication
-    M_Displayer.leaderPrint("  f-  Updating the boundary conditions ...     ");
+    M_Displayer.leaderPrint("  f-  Updating the boundary conditions ...    ");
 
     chrono.start();
 
@@ -1147,16 +1163,10 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
 
     M_Displayer.leaderPrintMax("done in " , chrono.diff());
 
-
-//    matrFull->spy("matrFull");
-//    rhsFull.spy("rhsFull");
-    M_linearSolver.setMatrix(*matrFull);
-
     // solving the system
-    //int numIter = M_linearSolver.solveSystem( matrFull, rhsFull, M_sol, matrFull, M_reusePrec );
-    //int numIter = M_linearSolver.solveSystem( matrFull, rhsFull, M_sol, M_matrNoBC, M_reusePrec );
-    int numIter = M_linearSolver.solveSystem(rhsFull, M_sol, matrFull, M_reusePrec );
-
+    M_linearSolver.setMatrix(*matrFull);
+    int numIter = M_linearSolver.solveSystem( rhsFull, M_sol, matrFull, M_reusePrec );
+    std::cout<<numIter <<" iterazioni "<<std::endl;
     if (numIter < 0 ) // if the preconditioner has been reset, the stab terms are to be updated
     {
         resetStab();
