@@ -83,7 +83,7 @@ timestep		= 0.001
 BDF_order		= 1
 
 [../discretization]
-mesh_dir  = ./Mesh/ # the directory where the mesh file is
+mesh_dir  = ./ # the directory where the mesh file is
 #mesh_file = 179347_cm_fluid.mesh  # mesh file
 mesh_file = tube20.mesh  # mesh file
 #mesh_file = tube_curve20.mesh  # mesh file
@@ -132,7 +132,7 @@ reuse = false
 
 
 [interface] # mesh dependent flags for the interface.
-diagonalBlockPrec = false #
+diagonalBlockPrec = false
 fluid_flag      =  1 # default: 1
 #solid_flag      =  1 # default: fluid_flag
 #structure_flag  =  1 # default: fluid_flag
@@ -141,7 +141,7 @@ tolerance       =  0 # how far points are to be considered the same on the inter
 
 [solid]
 
-diagonalBlockPrec = false #
+diagonalBlockPrec = false
 
 [./physics]
 density   = 1.2               # density
@@ -154,7 +154,7 @@ endtime			= .01
 timestep		= 0.001
 
 [../discretization]
-mesh_dir  = ./Mesh/  # the directory where the mesh file is
+mesh_dir  = ./  # the directory where the mesh file is
 #mesh_file = 179347_cm_solid.mesh  # mesh file
 mesh_file = vessel20.mesh  # mesh file
 #mesh_file = vessel_curve20.mesh  # mesh file
