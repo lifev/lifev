@@ -72,6 +72,8 @@ public:
 
     EpetraVector( const EpetraMap& _map, EpetraMapType maptype = Unique );
 
+    EpetraVector( const boost::shared_ptr<EpetraMap>& _map, EpetraMapType maptype = Unique );
+
     // The following constructor does not use the EpetraMap.
     //EpetraVector( const Epetra_BlockMap&    _map );
 

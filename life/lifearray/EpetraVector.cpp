@@ -41,18 +41,24 @@ namespace LifeV
 // CSR - VALUES
 //------------------------------------------------------------------------------------------------------
 
-EpetraVector::EpetraVector( const EpetraVector& _vector):
-    M_epetraVector(_vector.M_epetraVector),
-    M_epetraMap   (_vector.M_epetraMap),
-    M_maptype     (_vector.M_maptype)
-{
-}
-
-
 EpetraVector::EpetraVector( const EpetraMap& _map, EpetraMapType maptype ):
     M_epetraVector(*_map.getMap(maptype)),
     M_epetraMap   (new EpetraMap(_map)),
     M_maptype     (maptype)
+{
+}
+
+EpetraVector::EpetraVector( const boost::shared_ptr<EpetraMap>& _map, EpetraMapType maptype ):
+    M_epetraVector(*_map->getMap(maptype)),
+    M_epetraMap   (_map),
+    M_maptype     (maptype)
+{
+}
+
+EpetraVector::EpetraVector( const EpetraVector& _vector):
+    M_epetraVector(_vector.M_epetraVector),
+    M_epetraMap   (_vector.M_epetraMap),
+    M_maptype     (_vector.M_maptype)
 {
 }
 
