@@ -417,7 +417,13 @@ createMLList( const GetPot&              dataFile,
 
     //    list.sublist("smoother: ifpack list").set("amesos: solver type", "Amesos_Lapack");
 
-    if (MLPrintParameterList) list.print(std::cout);
+
+    if (MLPrintParameterList)
+        {
+            std::cout << "  Parameters List: " << std::endl;
+            list.print(std::cout);
+            std::cout << std::endl;
+        }
 }
 
 
