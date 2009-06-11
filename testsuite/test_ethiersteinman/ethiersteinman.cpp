@@ -267,7 +267,7 @@ Ethiersteinman::run()
         }
 
     if (verbose) std::cout << std::endl;
-    if (verbose) std::cout << "Time discretization order " << dataNavierStokes.order_bdf() << std::endl;
+    if (verbose) std::cout << "Time discretization order " << dataNavierStokes.getBDF_order() << std::endl;
 
     dataNavierStokes.setMesh(meshPart.mesh());
 
@@ -323,14 +323,14 @@ Ethiersteinman::run()
 
     // Initialization
 
-    Real dt     = dataNavierStokes.timestep();
-    Real t0     = dataNavierStokes.inittime();
-    Real tFinal = dataNavierStokes.endtime ();
+    Real dt     = dataNavierStokes.getTimeStep();
+    Real t0     = dataNavierStokes.getInitialTime();
+    Real tFinal = dataNavierStokes.getEndTime ();
 
 
     // bdf object to store the previous solutions
 
-    BdfTNS<vector_type> bdf(dataNavierStokes.order_bdf());
+    BdfTNS<vector_type> bdf(dataNavierStokes.getBDF_order());
 
     // initialization with exact solution: either interpolation or "L2-NS"-projection
     t0 -= dt * bdf.bdf_u().order();
@@ -361,7 +361,7 @@ Ethiersteinman::run()
     double pl2error;
 
     Real time = t0 + dt;
-    for (  ; time <=  dataNavierStokes.inittime() + dt/2.; time += dt)
+    for (  ; time <=  dataNavierStokes.getInitialTime() + dt/2.; time += dt)
     {
 
         dataNavierStokes.setTime(time);
@@ -462,19 +462,19 @@ Ethiersteinman::run()
         if (verbose)
         {
             std::cout << std::endl;
-            std::cout << "We are now at time "<< dataNavierStokes.time() << " s. " << std::endl;
+            std::cout << "We are now at time "<< dataNavierStokes.getTime() << " s. " << std::endl;
             std::cout << std::endl;
         }
 
         chrono.start();
 
-        double alpha = bdf.bdf_u().coeff_der( 0 ) / dataNavierStokes.timestep();
+        double alpha = bdf.bdf_u().coeff_der( 0 ) / dataNavierStokes.getTimeStep();
 
         beta = bdf.bdf_u().extrap();
 
-        rhs  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes.timestep() );
+        rhs  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes.getTimeStep() );
 //        rhs *= alpha;
-//        rhs  = bdf.bdf_u().time_der( dataNavierStokes.timestep() );
+//        rhs  = bdf.bdf_u().time_der( dataNavierStokes.getTimeStep() );
 
         fluid.getDisplayer().leaderPrint("alpha ", alpha);
         fluid.getDisplayer().leaderPrint("norm beta ", beta.Norm2());

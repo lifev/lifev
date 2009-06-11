@@ -15,13 +15,16 @@ save       = 1
 density   = 1.2               # density
 young     = 3.0E6
 poisson   = 0.3
-endtime   = .02
+
+[../time]
+initialtime		= 0.
+endtime			= 0.02
+timestep		= 0.001
 
 [../discretization]
 mesh_dir  = Mesh/     # the directory where the mesh file is
 mesh_file = vessel2x4x20.mesh # mesh file
 #mesh_file = hexa2x2.mesh # mesh file
-timestep  = 0.001                   # timestep
 order     = P1
 mesh_faces      = all                   # update all faces elements
 mesh_edges      = all                   # update all faces elements

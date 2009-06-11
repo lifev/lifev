@@ -54,9 +54,14 @@ useShapeDerivatives = true
 absorbing_bc		= true
 
 [./physics]
-endtime   = .79             # endtime
 density   = 1.0               # density
 viscosity = 0.03              # viscosity
+
+[../time]
+initialtime		= 0.
+endtime			= 0.79
+timestep		= 0.0001
+BDF_order		= 1
 
 # end of fluid preconditioner parameters
 [../ipstab]
@@ -70,10 +75,8 @@ mesh_dir  = ./Mesh/ # the directory where the mesh file is
 #mesh_file = stent-fluid-coarse.mesh  # mesh file
 mesh_file = tube20.mesh  # mesh file
 #mesh_file = tube.mesh  # mesh file
-timestep  = 0.0001             # timestep
 vel_order       = P1Bubble            # P1, P1Bubble, P2
 press_order     = P1            # P1, P2
-order_bdf       = 1
 mesh_faces      = all                   # update all faces elements
 mesh_edges      = all                   # update all faces elements
 numLM 		= 1
@@ -198,13 +201,14 @@ thickness	= 0.1
 #young           = 3.0E6
 #poisson         = 0.30
 
+[../time]
+timestep		= 0.0001
 
 [../discretization]
 mesh_dir  = ./Mesh/  # the directory where the mesh file is
 #mesh_file = stent-solid-coarse.mesh  # mesh file
 mesh_file = vessel20.mesh  # mesh file
 #mesh_file = vessel.mesh  # mesh file
-timestep  = 0.0001             # timestep
 order     = P1
 mesh_faces      = all                   # update all faces elements
 mesh_edges      = all                   # update all faces elements

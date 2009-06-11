@@ -136,8 +136,8 @@ CT::run()
             bdQr_press  = bdQr_vel;	 // test purpose
         }
 
-    int uBdfOrder = dataFile( "fluid/discretization/vel_order_bdf", 1 );
-    int pBdfOrder = dataFile( "fluid/discretization/press_order_bdf", 1 );
+    int uBdfOrder = dataFile( "fluid/time/BDF_order_vel", 1 );
+    int pBdfOrder = dataFile( "fluid/time/BDF_order_press", 1 );
 
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "  t-  Velocity time discretization order : "
@@ -206,9 +206,9 @@ CT::run()
     MPI_Barrier(MPI_COMM_WORLD);
 
     // Initialization
-    Real dt     = dataNavierStokes.timestep();
-    Real t0     = dataNavierStokes.inittime();
-    Real tFinal = dataNavierStokes.endtime ();
+    Real dt     = dataNavierStokes.getTimeStep();
+    Real t0     = dataNavierStokes.getInitialTime();
+    Real tFinal = dataNavierStokes.getEndTime();
 
 
     // initialization with stokes solution
@@ -254,7 +254,7 @@ CT::run()
         if (verbose)
         {
             std::cout << std::endl;
-            std::cout << "l-  We are now at time "<< dataNavierStokes.time() << " s. " << std::endl;
+            std::cout << "l-  We are now at time "<< dataNavierStokes.getTime() << " s. " << std::endl;
             std::cout << std::endl;
         }
 

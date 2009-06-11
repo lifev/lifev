@@ -11,10 +11,16 @@ save       = 5
 [fluid]
 
 [./physics]
-endtime         = 2.0
 density         = 1.0       
 viscosity       = 0.005 #0.005 
 
+[../time]
+initialtime		= 0.
+endtime			= 2.0
+timestep		= 0.035                 # timestep, e.g. 0.05 for implicit stabilization
+                                        #            and 0.035 for explicit stabilization
+BDF_order_vel	= 1		# 1, 2, 3
+BDF_order_press = 0		# 0 (standard Chorin-Temam), 1, 2, 3
 
 [../discretization]
 mesh_dir        = ./Mesh/
@@ -25,8 +31,6 @@ mesh_type       = .mesh
 
 mesh_faces      = all                   # update all faces elements
 mesh_edges      = all                   # update all faces elements
-timestep        = 0.035                 # timestep, e.g. 0.05 for implicit stabilization
-                                        #            and 0.035 for explicit stabilization
 verbose         = 0                     # verbose during mesh-reading
 linearized      = 0
 diagonalize     = 0		# weight, 0=off
@@ -34,8 +38,6 @@ div_beta_u_v    = 0 		# 1=on, 0=off
 vel_order       = P1		# P1, P1Bubble, P2
 press_order     = P1		# P1, P2
 variationalPn	= 0		# 0: standard (v|grad p) couling, 1: (div v|p) coupling 
-vel_order_bdf	= 1		# 1, 2, 3
-press_order_bdf	= 0		# 0 (standard Chorin-Temam), 1, 2, 3
 
 
 [../solver]

@@ -38,13 +38,16 @@ AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 density   = 1.2               # density
 young     = 3.0E6
 poisson   = 0.3
-endtime   = .01
+
+[../time]
+initialtime		= 0.
+endtime			= 0.01
+timestep		= 0.001
 
 [../discretization]
 mesh_dir  = ./     # the directory where the mesh file is
 mesh_file = vessel20.mesh # mesh file
 #mesh_file = hexa2x2.mesh # mesh file
-timestep  = 0.001                   # timestep
 order     = P1
 mesh_faces      = all                   # update all faces elements
 mesh_edges      = all                   # update all faces elements

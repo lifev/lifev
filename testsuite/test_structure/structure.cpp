@@ -306,8 +306,8 @@ Structure::run3d()
     //
     // Temporal data and initial conditions
     //
-    Real dt = dataStructure.timestep();
-    Real T  = dataStructure.endtime();
+    Real dt = dataStructure.getTimeStep();
+    Real T  = dataStructure.getEndTime();
 
     EpetraVector disp(solid.disp(), Unique);
     EpetraVector vel (solid.vel(), Unique);
@@ -351,7 +351,7 @@ Structure::run3d()
         if (verbose)
             {
                 std::cout << std::endl;
-                std::cout << "S- Now we are at time " << dataStructure.time() << " s." << std::endl;
+                std::cout << "S- Now we are at time " << dataStructure.getTime() << " s." << std::endl;
             }
 
         //solid.updateSystem(dZero);    // Computes the rigth hand side

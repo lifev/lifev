@@ -48,17 +48,20 @@ save       = 1
 [fluid]
 
 [./physics]
-endtime   = .1             # endtime
 density   = 1.0               # density
 viscosity = 6.e-6              # viscosity
+
+[../time]
+initialtime		= 0.
+endtime			= 0.1
+timestep		= 0.001
+BDF_order		= 1
 
 [../discretization]
 mesh_dir  = ./Mesh/ # the directory where the mesh file is
 mesh_file = tube20.mesh  # mesh file
-timestep  = 0.001             # timestep
 vel_order       = P1Bubble # P1, P1Bubble, P2
 press_order     = P1            # P1, P2
-order_bdf       = 1
 mesh_faces      = all                   # update all faces elements
 mesh_edges      = all                   # update all faces elements
 
@@ -109,11 +112,13 @@ centered = 1
 diffusivity     = 1.e-5           # diffusivity
 react           = 0.0               # reaction coefficient
 
+[../time]
+timestep		= 0.001
+
 [../discretization]
 order     = P1
 mesh_dir  = ../data/mesh/inria/  # the directory where the mesh file is
 mesh_file = cyltetra.mesh     # mesh file
-timestep  = 0.001              # timestep
 
 [../solver]
 solver          = gmres

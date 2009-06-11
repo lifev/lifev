@@ -347,7 +347,7 @@ MassTransport::run()
         }
 
     if (verbose) std::cout << std::endl;
-    if (verbose) std::cout << "Time discretization order " << dataNavierStokes.order_bdf() << std::endl;
+    if (verbose) std::cout << "Time discretization order " << dataNavierStokes.getBDF_order() << std::endl;
 
     dataNavierStokes.setMesh(meshPart.mesh());
 
@@ -446,7 +446,7 @@ MassTransport::run()
     dataADR.setMesh(meshPart.mesh());
 
     if (verbose) std::cout << std::endl;
-    if (verbose) std::cout << "Time discretization order " << dataADR.order_bdf() << std::endl;
+    if (verbose) std::cout << "Time discretization order " << dataADR.getBDF_order() << std::endl;
 
     FESpace< RegionMesh3D<LinearTetra>, EpetraMap > adrFESpace(meshPart,
                                                                *refFE_adr,
@@ -472,14 +472,14 @@ MassTransport::run()
     if (verbose) std::cout << "\n*********************** solutions initialization \n\n" << std::flush;
 
 
-    Real dt     = dataNavierStokes.timestep();
-    Real t0     = dataNavierStokes.inittime();
-    Real tFinal = dataNavierStokes.endtime ();
+    Real dt     = dataNavierStokes.getTimeStep();
+    Real t0     = dataNavierStokes.getInitialTime();
+    Real tFinal = dataNavierStokes.getEndTime();
 
 
     // bdf object to store the previous solutions
 
-    BdfTNS<vector_type> bdf(dataNavierStokes.order_bdf());
+    BdfTNS<vector_type> bdf(dataNavierStokes.getBDF_order());
 
     // initialization with stokes solution
 
@@ -594,18 +594,18 @@ MassTransport::run()
         if (verbose)
         {
             std::cout << "\n\n*********************** Temporal loop : " << std::flush;
-            std::cout << "we are now at time "<< dataNavierStokes.time() << " s. " << std::endl;
+            std::cout << "we are now at time "<< dataNavierStokes.getTime() << " s. " << std::endl;
             std::cout << std::endl;
         }
 
         chrono.start();
 
-        double alphaNS = bdf.bdf_u().coeff_der( 0 ) / dataNavierStokes.timestep();
+        double alphaNS = bdf.bdf_u().coeff_der( 0 ) / dataNavierStokes.getTimeStep();
 
 //         betaFluid = bdf.bdf_u().extrap();
 
         betaFluid.subset(bdf.bdf_u().extrap());
-        rhsFluid  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes.timestep() );
+        rhsFluid  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes.getTimeStep() );
 
 
 //         std::cout << "alphaNS " << alphaNS << std::endl;
@@ -626,11 +626,11 @@ MassTransport::run()
 //        press.subset(velpressure, uFESpace.dim()*uFESpace.fieldDim());
 
 
-        double alphaADR = 1./dataNavierStokes.timestep();
+        double alphaADR = 1./dataNavierStokes.getTimeStep();
 
 //        adrFESpace.interpolateBC(bcADR, rhsADR, 0.);
         rhsADR  = adr.matrMass()*adr.solution();
-        rhsADR *= 1./dataNavierStokes.timestep();
+        rhsADR *= 1./dataNavierStokes.getTimeStep();
 
 //        betaFluid *= 0.;
         adr.updateSystem( alphaADR, betaFluid, rhsADR );

@@ -268,9 +268,9 @@ else	{	// IappZygote
     //! Building time-independent part of the system
     electricModel.buildSystem( );std::cout<<"buildsystem ok"<<std::endl;
     //! Initialization
-    Real dt     = _data.timestep();
+    Real dt     = _data.getTimeStep();
     Real t0     = 0;
-    Real tFinal = _data.endtime ();
+    Real tFinal = _data.getEndTime ();
     MPI_Barrier(MPI_COMM_WORLD);
 
     if (verbose) std::cout << "Setting the initial solution ... " << std::endl << std::endl;
@@ -325,13 +325,13 @@ else	{	// IappZygote
         if (verbose)
         {
             std::cout << std::endl;
-            std::cout << "We are now at time "<< _data.time() << " s. " << std::endl;
+            std::cout << "We are now at time "<< _data.getTime() << " s. " << std::endl;
             std::cout << std::endl;
         }
 
         chrono.start();
         MPI_Barrier(MPI_COMM_WORLD);
-        ionicModel->ionModelSolve( electricModel.solution_u(), _data.timestep() );
+        ionicModel->ionModelSolve( electricModel.solution_u(), _data.getTimeStep() );
         rhs*=0;
         computeRhs( rhs, electricModel, ionicModel, _data );
         //! Updating the PDE system
@@ -417,8 +417,8 @@ void Heart::computeRhs( vector_type& rhs, MonodomainSolver< RegionMesh3D<LinearT
 		ionicModel->computeIion(data.Cm(), elvec_Iion, elvec_u, electricModel.potentialFESpace());
 
 		//! Computing the current source of the righthand side
-		source(d->get_stim(), elvec_Iapp, electricModel.potentialFESpace().fe(), data.time(), 0);
-		source(d->get_stim(), elvec_Iapp, electricModel.potentialFESpace().fe(), data.time(), 1);
+		source(d->get_stim(), elvec_Iapp, electricModel.potentialFESpace().fe(), data.getTime(), 0);
+		source(d->get_stim(), elvec_Iapp, electricModel.potentialFESpace().fe(), data.getTime(), 1);
 
 		//! Assembling the righthand side
         for ( int i = 0 ; i < electricModel.potentialFESpace().fe().nbNode ; i++ )
@@ -429,7 +429,7 @@ void Heart::computeRhs( vector_type& rhs, MonodomainSolver< RegionMesh3D<LinearT
 
 	}
     rhs.GlobalAssemble();
-    Real coeff= 1.0/ data.timestep();
+    Real coeff= 1.0/ data.getTimeStep();
     vector_type tmpvec(electricModel.solution_u());
     tmpvec*=coeff;
     rhs+=electricModel.matrMass()*tmpvec;
@@ -490,10 +490,10 @@ void Heart::computeRhs( vector_type& rhs, BidomainSolver< RegionMesh3D<LinearTet
 			/*switch (REO)
 				{
 				case 0:*/ //Iapp
-				elvec_Iapp[iNode] = d->get_Iapp()(x, y, z, data.time(), ref);
+				elvec_Iapp[iNode] = d->get_Iapp()(x, y, z, data.getTime(), ref);
 				/*break;
 				case 1: //IappZygote
-				elvec_Iapp[iNode] = d->get_IappZygote()(data.time(), x, y, z, id, ref);
+				elvec_Iapp[iNode] = d->get_IappZygote()(data.getTime(), x, y, z, id, ref);
 				break;
 				}*/
 			#endif
@@ -503,8 +503,8 @@ void Heart::computeRhs( vector_type& rhs, BidomainSolver< RegionMesh3D<LinearTet
 		ionicModel->updateElvec(eleID);
 		ionicModel->computeIion(data.Cm(), elvec_Iion, elvec_u, electricModel.potentialFESpace());
 		#ifdef EPFL_CASE
-		source(d->get_stim(), elvec_Iapp, electricModel.potentialFESpace().fe(), data.time(), 0);
-                source(d->get_stim(), elvec_Iapp, electricModel.potentialFESpace().fe(), data.time(), 1);
+		source(d->get_stim(), elvec_Iapp, electricModel.potentialFESpace().fe(), data.getTime(), 0);
+                source(d->get_stim(), elvec_Iapp, electricModel.potentialFESpace().fe(), data.getTime(), 1);
 		UInt totalUDof  = electricModel.potentialFESpace().map().getMap(Unique)->NumGlobalElements();
 		#endif
 		for ( UInt iNode = 0 ; iNode < nbNode ; iNode++ )
@@ -521,7 +521,7 @@ void Heart::computeRhs( vector_type& rhs, BidomainSolver< RegionMesh3D<LinearTet
                 }
 	}
 
-	Real coeff= data.Chi()*data.Cm()/data.timestep();
+	Real coeff= data.Chi()*data.Cm()/data.getTimeStep();
         vector_type tmpvec(electricModel.solution_uiue());
         tmpvec*=coeff;
 #ifdef EPFL_CASE

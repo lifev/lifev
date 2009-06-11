@@ -303,13 +303,13 @@ main( int argc, char** argv )
     // Initialization
 
 
-    Real dt     = dataNavierStokes.timestep();
-    Real t0     = dataNavierStokes.inittime();
-    Real tFinal = dataNavierStokes.endtime ();
+    Real dt     = dataNavierStokes.getTimeStep();
+    Real t0     = dataNavierStokes.getInitialTime();
+    Real tFinal = dataNavierStokes.getEndTime();
 
     // bdf object to store the previous solutions
 
-    BdfTNS<vector_type> bdf(dataNavierStokes.order_bdf());
+    BdfTNS<vector_type> bdf(dataNavierStokes.getBDF_order());
 
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Computing the stokes solution ... " << std::endl << std::endl;

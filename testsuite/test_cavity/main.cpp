@@ -248,7 +248,7 @@ main( int argc, char** argv )
         }
 
     if (verbose) std::cout << std::endl;
-    if (verbose) std::cout << "Time discretization order " << dataNavierStokes.order_bdf() << std::endl;
+    if (verbose) std::cout << "Time discretization order " << dataNavierStokes.getBDF_order() << std::endl;
 
     dataNavierStokes.setMesh(meshPart.mesh());
 
@@ -342,7 +342,7 @@ main( int argc, char** argv )
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Computing the stokes solution ... " << std::endl << std::endl;
 
-    Real t0     = dataNavierStokes.inittime();
+    Real t0     = dataNavierStokes.getInitialTime();
     dataNavierStokes.setTime(t0);
 
     // advection speed (beta) and rhs definition using the full map
@@ -367,7 +367,7 @@ main( int argc, char** argv )
     ensight.postProcess( 0 );
 
     // bdf object to store the previous solutions
-    BdfTNS<vector_type> bdf(dataNavierStokes.order_bdf());
+    BdfTNS<vector_type> bdf(dataNavierStokes.getBDF_order());
     // bdf initialization with the stokes problem solution
     bdf.bdf_u().initialize_unk( fluid.solution() );
 
@@ -381,8 +381,8 @@ main( int argc, char** argv )
 
     // Initialization of the time loop
 
-    Real dt     = dataNavierStokes.timestep();
-    Real tFinal = dataNavierStokes.endtime ();
+    Real dt     = dataNavierStokes.getTimeStep();
+    Real tFinal = dataNavierStokes.getEndTime();
 
 
     int iter = 1;
@@ -396,20 +396,20 @@ main( int argc, char** argv )
         if (verbose)
         {
             std::cout << std::endl;
-            std::cout << "We are now at time "<< dataNavierStokes.time() << " s. " << std::endl;
+            std::cout << "We are now at time "<< dataNavierStokes.getTime() << " s. " << std::endl;
             std::cout << std::endl;
         }
 
         chrono.start();
 
         // alpha coefficient for the mass matrix
-        double alpha = bdf.bdf_u().coeff_der( 0 ) / dataNavierStokes.timestep();
+        double alpha = bdf.bdf_u().coeff_der( 0 ) / dataNavierStokes.getTimeStep();
 
         // extrapolation of the advection term
         beta = bdf.bdf_u().extrap();
 
         // rhs  part of the time-derivative
-        rhs  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes.timestep() );
+        rhs  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes.getTimeStep() );
 
         // the we update the Oseen system
         fluid.updateSystem( alpha, beta, rhs );

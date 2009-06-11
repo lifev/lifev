@@ -76,11 +76,16 @@ sphere_radius = 0.5
 
 
 
-endtime         = 10 #0.25 #0.4
 density         = 1.0          # density
 viscosity       = 0.005         # viscosity
 init_data = 0
 uinit = 0
+
+[../time]
+initialtime		= 0.
+endtime			= 10
+timestep		= 0.25
+BDF_order		= 1
 
 [../discretization]
 mesh_dir        = ./Mesh/
@@ -89,7 +94,6 @@ mesh_type       = .mesh
 
 mesh_faces      = all                   # update all faces elements
 mesh_edges      = all                   # update all faces elements
-timestep        = 0.25 #0.1                	# timestep
 verbose         = 1                     # verbose during mesh-reading
 
 has_fibers = 1
@@ -97,7 +101,6 @@ fibers_dir = ./Mesh/
 fibers_file = fibers_ref_fine #ZygHeart20Fib6040.vct #ellissoide29560fibers
 fibers_format =  1  # 1 Ensight 0 BB
 
-order_bdf       = 1
 linearized      = 0
 diagonalize     = 1 #0 # weight, 0=off
 

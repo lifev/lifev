@@ -12,18 +12,20 @@ save       = 1
 [fluid]
 
 [./physics]
-endtime         = 0.04          # endtime
 density         = 1.0          # density
 viscosity       = .01       # viscosity
 
+[../time]
+initialtime		= 0.
+endtime			= 0.04
+timestep		= 0.01
+BDF_order		= 1
 
 [../discretization]
 mesh_dir        = ./Mesh/   # the directory where the mesh file is
 mesh_file       = cube4x4.mesh          # mesh file
 mesh_faces      = all                   # update all faces elements
-timestep        = 0.01                   # timestep
 verbose         = 0
-order_bdf       = 1
 linearized      = 0
 diagonalize     = 1 # weight, 0=off
 div_beta_u_v    = 0 # 1=on, 0=off

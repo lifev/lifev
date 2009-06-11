@@ -77,11 +77,16 @@ sphere_radius = 0.5
 
 
 
-endtime         = 0.4
 density         = 1.0          # density
 viscosity       = 0.005         # viscosity
 init_data = 0
 uinit = 0
+
+[../time]
+initialtime		= 0.
+endtime			= 0.4
+timestep        = 0.1
+BDF_order		= 1
 
 [../discretization]
 mesh_dir        = ./
@@ -90,13 +95,11 @@ mesh_type       = .mesh
 
 mesh_faces      = all                   # update all faces elements
 mesh_edges      = all                   # update all faces elements
-timestep        = 0.1                	# timestep
 verbose         = 1                     # verbose during mesh-reading
 
 has_fibers = 1
 
 
-order_bdf       = 1
 linearized      = 0
 diagonalize     = 0 # weight, 0=off
 
