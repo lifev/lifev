@@ -40,10 +40,14 @@ save       = 1
 [fluid]
 
 [./physics]
-endtime         = .2
 density         = 1.0          # density
 viscosity       = 0.005         # viscosity
 
+[../time]
+initialtime		= 0.
+endtime			= 0.2
+timestep		= 0.1
+BDF_order		= 1
 
 [../discretization]
 mesh_dir        = ./Mesh/
@@ -53,9 +57,7 @@ mesh_type       = .mesh
 
 mesh_faces      = all                   # update all faces elements
 mesh_edges      = all                   # update all faces elements
-timestep        = 0.1                   # timestep
 verbose         = 0                     # verbose during mesh-reading
-order_bdf       = 1
 linearized      = 0
 diagonalize     = 0 # weight, 0=off
 div_beta_u_v    = 1 # 1=on, 0=off

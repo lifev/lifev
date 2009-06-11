@@ -32,83 +32,112 @@ AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 #      Data file for cylinder test with Navier-Stokes IP Solver
 #----------------------------------------------------------------
 
-[ensight]
-multimesh  = false
-save       = 1
+[exporter]
+start           = 0             # start index for filenames
+save            = 1             # how many time steps per posptrocessing
+multimesh       = false         # true if the mesh has to be saved at each post-processing step
+
+
 
 [fluid]
+useShapeDerivatives = false
+
+	[./physics]
+	density         = 1.0           # density   [kg/m^3]
+	viscosity       = 0.03			# viscosity [kg/m/s]
+
+	[../miscellaneous]
+	verbose         = 0
+	
+	[../time]
+	initialtime		= 0.
+	endtime			= 0.001
+	timestep		= 0.0001
+	BDF_order		= 1
+
+	[../discretization]
+	mesh_dir        = ./Mesh/
+	mesh_file       = tube20.mesh
+	mesh_type       = .mesh
+	mesh_faces      = all           # update all faces elements
+	mesh_edges      = all           # update all faces elements
+	verbose         = 0             # verbose during mesh-reading
+
+	vel_order       = P1Bubble	     	# P1, P1Bubble, P2
+	press_order     = P1		    # P1, P2
+	div_beta_u_v    = 1             # 1=on, 0=off
+	diagonalize     = 0             # weight, 0=off
+
+	[../ipstab]
+	gammaBeta       = 0.125
+	gammaDiv        = 0.125
+	gammaPress      = 0.03125
+	reuse           = true
+
+	[../solver]                     # Solver Parameters
+	solver          = gmres
+	scaling         = none
+	output          = all_res # all_res
+	conv            = rhs
+	max_iter        = 100
+	kspace          = 100
+
+	[../prec]                       # Preconditioner Parameters
+	prectype        = Ifpack # Amesos (does a local LU factorization), ILUT (not ILU)
+	reuse           = true
+	overlap         = 2
+	#droptol         = 1.e-5 ??
+	fill            = 4
+	relax_value     = 1
 
 
 
+	[../boundary_conditions]
+	list = 'Inlet Outlet Wall Ring' # use apex to create the list; use spaces to separe members
+	#list = 'InletXY InletZ Outlet Wall Ring' # use apex to create the list; use spaces to separe members
 
-[./physics]
-endtime         = 1.0
-density         = 1.0          # density
-viscosity       = 0.005         # viscosity
+		[./Inlet]
+		type       = Essential
+		flag       = 2
+		mode       = Full
+		component  = 3
+		function   = '(0., 0., 3*0.03*(1/4-(x^2+y^2)))' # Poiseuille - viscosity = 0.03
 
+		[../InletXY]
+		type       = Essential
+		flag       = 2
+		mode       = Component
+		component  = '1 2' # use apex to create the list; use spaces to separe members
+		function   = '(0., 0., 0.)'
 
-[../discretization]
-mesh_dir        = ./
-mesh_file       = cyl2D.mesh
+		[../InletZ]
+		type       = Essential
+		flag       = 2
+		mode       = Component
+		component  = 3
+		function   = '(0., 0., 3*0.03*(1/4-(x^2+y^2)))' # Poiseuille - viscosity = 0.03
 
-mesh_type       = .mesh
+		[../Outlet]
+		type       = Natural
+		flag       = 3
+		mode       = Full
+		component  = 3
+		function   = '(0., 0., 0.)'
 
-mesh_faces      = all                   # update all faces elements
-mesh_edges      = all                   # update all faces elements
-timestep        = 0.1                   # timestep
-verbose         = 0                     # verbose during mesh-reading
-order_bdf       = 1
-linearized      = 0
-diagonalize     = 0 # weight, 0=off
-div_beta_u_v    = 1 # 1=on, 0=off
-vel_order       = P1Bubble		# P1, P1Bubble, P2
-press_order     = P1		# P1, P2
+		[../Wall]
+		type       = Essential
+		flag       = 1
+		mode       = Full
+		component  = 3
+		function   = '(0., 0., 0.)'
 
-[../miscellaneous]
-verbose         = 1
-save            = 1
-steady          = 0
+		[../Ring]
+		type       = Essential
+		flag       = 20
+		mode       = Full
+		component  = 3
+		function   = '(0., 0., 0.)'
 
-[../solver]
-solver          = gmres
-scaling         = none
-output          = all_res # all_res
-conv            = rhs
-max_iter        = 100
-kspace          = 100
-precond         = dom_decomp #none,jacobi,sym_gs,neumann,ls,smoother,dom_decomp
-subdomain_solve = ilut
-overlap         = 1
-ilut_fill       = 2
-graph_fill      = 0
-drop            = 1.e-4
-tol             = 1.00e-9
-keep_info       = 1
-
-[../prec]
-
-reuse           = true
-overlap         = 10
-droptol         = 1.e-5
-fill 		= 2
-
-
-[../ipstab]
-gammaBeta  = 0.125
-gammaDiv   = 0.125
-gammaPress = 0.03125
-#gammaBeta  = 0.125
-#gammaDiv   = 0.125
-#gammaPress = 0.03125
-
-[./problem]
-
-# for  cyl3D.2.2.00.mesh
-Re 	= 1.0
-nu 	= 1.5
-D  	= 1.
-H  	= 20.
-centered = 1
 ]])
 
 

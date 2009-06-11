@@ -21,10 +21,14 @@ initial_sol     = stokes          # stokes, none
 
 
 [../physics]
-endtime         = .0
 density         = 1.0          # density
 viscosity       = 0.03         # viscosity
 
+[../time]
+initialtime		= 0.
+endtime			= 0.0
+timestep		= 0.0001
+BDF_order		= 1
 
 [../discretization]
 mesh_dir        = ./Mesh/
@@ -39,9 +43,7 @@ mesh_type       = .mesh
 
 mesh_faces      = all                   # update all faces elements
 mesh_edges      = all                   # update all faces elements
-timestep        = 0.0001                   # timestep
 verbose         = 0                     # verbose during mesh-reading
-order_bdf       = 1
 linearized      = 0
 diagonalize     = 0 # weight, 0=off
 div_beta_u_v    = 0 # 1=on, 0=off
@@ -59,7 +61,7 @@ tol             = 1.e-10    # AztecOO tolerance
 
 
 [../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
-prectype        = ML
+prectype        = ML # Amesos (does a local LU factorization), ILUT (not ILU)
 reuse           = true
 displayList	= 0
                 [./ML]

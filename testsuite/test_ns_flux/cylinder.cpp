@@ -356,7 +356,7 @@ Cylinder::run()
         }
 
     if (verbose) std::cout << std::endl;
-    if (verbose) std::cout << "    Time discretization order " << dataNavierStokes.order_bdf() << std::endl;
+    if (verbose) std::cout << "    Time discretization order " << dataNavierStokes.getBDF_order() << std::endl;
 
     dataNavierStokes.setMesh(meshPart.mesh());
 
@@ -456,14 +456,14 @@ Cylinder::run()
 
     // Initialization
 
-    Real dt     = dataNavierStokes.timestep();
-    Real t0     = dataNavierStokes.inittime();
-    Real tFinal = dataNavierStokes.endtime ();
+    Real dt     = dataNavierStokes.getTimeStep();
+    Real t0     = dataNavierStokes.getInitialTime();
+    Real tFinal = dataNavierStokes.getEndTime();
 
 
     // bdf object to store the previous solutions
 
-    BdfTNS<vector_type> bdf(dataNavierStokes.order_bdf());
+    BdfTNS<vector_type> bdf(dataNavierStokes.getBDF_order());
 
     // initialization with stokes solution
 
@@ -527,17 +527,17 @@ Cylinder::run()
         if (verbose)
         {
             std::cout << std::endl;
-            std::cout << "We are now at time "<< dataNavierStokes.time() << " s. " << std::endl;
+            std::cout << "We are now at time "<< dataNavierStokes.getTime() << " s. " << std::endl;
             std::cout << std::endl;
         }
 
         chrono.start();
 
-        Real alpha = bdf.bdf_u().coeff_der( 0 ) / dataNavierStokes.timestep();
+        Real alpha = bdf.bdf_u().coeff_der( 0 ) / dataNavierStokes.getTimeStep();
 
         beta = bdf.bdf_u().extrap();
 
-        rhs  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes.timestep() );
+        rhs  = fluid.matrMass()*bdf.bdf_u().time_der( dataNavierStokes.getTimeStep() );
 
         fluid.updateSystem( alpha, beta, rhs );
         fluid.iterate( bcH );
