@@ -195,9 +195,9 @@ public:
             return *__it;
         }
 
-    Real timestep() const { return _M_solver->timestep();}
-    Real inittime() const { return _M_solver->inittime();}
-    Real endtime() const { return _M_solver->endtime();}
+    Real timestep() const { return _M_solver->getTimeStep();}
+    Real inittime() const { return _M_solver->getInitialTime();}
+    Real endtime() const { return _M_solver->getEndTime();}
 
     /** @ mean normal stress on section gamma where is imposed
 	the flux Q (iterate_one_flux)
@@ -382,7 +382,7 @@ NavierStokesWithFlux<NSSolver>::initialize_one_flux( const Function& u0, const F
 
     _M_solver->initialize(u0o,p0,0.0,dt);
 
-    Real startT = _M_solver->inittime();
+    Real startT = _M_solver->getInitialTime();
     Real time=startT+dt;
     _M_solver->timeAdvance( _M_solver->sourceTerm(), time );
     _M_solver->iterate( time );
@@ -441,7 +441,7 @@ NavierStokesWithFlux<NSSolver>::initialize_two_fluxes_inexact( const Function& u
     //
     _M_solver->initialize(u0o,p0,0.0,dt);
 
-    Real startT = _M_solver->inittime();
+    Real startT = _M_solver->getInitialTime();
     Real time=startT+dt;
     _M_solver->timeAdvance( _M_solver->sourceTerm(), time );
 

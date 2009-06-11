@@ -63,7 +63,7 @@ namespace LifeV {
         DataNS2Fluids(const GetPot& datafile)
             :
             DataMesh<mesh_type>( datafile, "navier-stokes/discretization" ),
-            DataTime( datafile, "navier-stokes/discretization" )
+            DataTime( datafile, "navier-stokes/time" )
         {
             // Physics
 
@@ -72,11 +72,6 @@ namespace LifeV {
 
             _M_rho_2 = datafile("navier-stokes/physics/fluid_2/density", 1.);
             _M_mu_2 = datafile("navier-stokes/physics/fluid_2/viscosity", 1.);
-
-            // Time discretization
-
-            _M_inittime = datafile( "navier-stokes/time-discretization/inittime", 0. );
-            _M_endtime = datafile( "navier-stokes/time-discretization/endtime", 1. );
 
             // Miscellaneous
 
@@ -104,20 +99,6 @@ namespace LifeV {
 
         inline Real viscosity(fluid_type fluid_id) const {
             return (fluid_id == 1) ? _M_mu_1 : _M_mu_2;
-        }
-
-        /**
-           \Return the initial time
-        */
-        Real inittime() const {
-            return _M_inittime;
-        }
-
-        /**
-           \Return the end time
-        */
-        Real endtime() const {
-            return _M_endtime;
         }
 
         /**
@@ -174,11 +155,6 @@ namespace LifeV {
         Real _M_rho_2;
         Real _M_mu_2;
 
-        //! Time discretization
-
-        Real _M_inittime;
-        Real _M_endtime;
-
         //! Miscellaneous
 
         bool _M_verbose;
@@ -206,8 +182,8 @@ namespace LifeV {
         ostr << "--------------------------------------------------" << std::endl;
         ostr << "Time span" << std::endl;
         ostr << "--------------------------------------------------" << std::endl;
-        ostr << " t0    = " << d.inittime() << std::endl;
-        ostr << " T     = " << d.endtime() << std::endl;
+        ostr << " t0    = " << d.getInitialTime() << std::endl;
+        ostr << " T     = " << d.getEndTime() << std::endl;
         ostr << "--------------------------------------------------" << std::endl;
         ostr << "Miscellaneous" << std::endl;
         ostr << "--------------------------------------------------" << std::endl;

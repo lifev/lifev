@@ -123,21 +123,21 @@ public:
     //! Builds time independent parts of PDE system
     virtual void buildSystem();
 
-    //! Updates time dependent parts of PDE system    
+    //! Updates time dependent parts of PDE system
     virtual void updatePDESystem(double       alpha,
                               vector_type& sourceVec
                               );
-    
-    //! Updates time dependent parts of PDE system    
+
+    //! Updates time dependent parts of PDE system
     virtual void updatePDESystem( vector_type& sourceVec );
-    
+
     //! Initialize
     void initialize( const Function&  );
     void initialize( const vector_type& );
 
     //! Returns the local solution vector
     const vector_type& solution_u() const {return M_sol_u;}
-    
+
     const vector_type& fiber_vector() const {return M_fiber_vector;}
 
     //! Returns the local residual vector
@@ -162,7 +162,7 @@ public:
 
     //! Return maps
     Epetra_Map const& getRepeatedEpetraMap() const { return *M_localMap.getMap(Repeated); }
-    
+
     Epetra_Map const& getRepeatedEpetraMapVec() const { return *M_localMapVec.getMap(Repeated); }
 
     EpetraMap const& getMap() const { return M_localMap; }
@@ -199,7 +199,7 @@ protected:
     //! Monodomain BC
     BCHandler*                     M_BCh_electric;
     bool                           M_setBC;
-    
+
     //! Map
     EpetraMap                      M_localMap;
     EpetraMap                      M_localMapVec;
@@ -215,12 +215,12 @@ protected:
     //! Right hand side for the PDE
     vector_type                    M_rhsNoBC;
 
-    //! Global solution _u 
+    //! Global solution _u
     vector_type                    M_sol_u;
 
-    //! Local fibers vector 
+    //! Local fibers vector
     vector_type                    M_fiber_vector;
-    
+
     //! residual
     vector_type                    M_residual;
 
@@ -251,11 +251,11 @@ private:
 
     //! Elementary matrices
     ElemMat                        M_elmatStiff;
-    ElemMat                        M_elmatMass; 
+    ElemMat                        M_elmatMass;
     Real 						   massCoeff;
     UInt dim_u() const           { return M_uFESpace.dim(); }
 
-}; // class MonodomainSolver 
+}; // class MonodomainSolver
 
 
 
@@ -296,23 +296,23 @@ MonodomainSolver( const data_type&          dataType,
     M_maxIterSolver          ( -1 ),
     M_recomputeMatrix        ( false )
 {
-	
+
 	if (M_data.has_fibers() )
-	    {   
+	    {
 	    	std::stringstream MyPID;
 	        ifstream fibers(M_data.fibers_file().c_str());
-	        
+
 	        std::cout << "fiber_file: " <<  M_data.fibers_file().c_str() << std::endl;
 	        UInt NumGlobalElements= M_localMapVec.getMap(Repeated)->NumGlobalElements();
 	        std::vector<Real> fiber_global_vector(NumGlobalElements);
-	                
+
 	        for( UInt i=0; i< NumGlobalElements; ++i)
 	    		fibers>>fiber_global_vector[i];
-	    	 UInt NumMyElements = M_localMapVec.getMap(Repeated)->NumMyElements();    	 
+	    	 UInt NumMyElements = M_localMapVec.getMap(Repeated)->NumMyElements();
 	    	for(UInt j=0; j< NumMyElements; ++j)
 	    	{
 	    		UInt ig= M_localMapVec.getMap(Repeated)->MyGlobalElements()[j];
-	    		M_fiber_vector[ig]= fiber_global_vector[ig-1]; 
+	    		M_fiber_vector[ig]= fiber_global_vector[ig-1];
 	    		}
 	    	std::cout << std::endl;
 	    	fiber_global_vector.clear();
@@ -366,21 +366,21 @@ void MonodomainSolver<Mesh, SolverType>::buildSystem()
     M_comm->Barrier();
 
     chrono.start();
-    
+
     //! Elementary computation and matrix assembling
     //! Loop on elements
-    
+
     for ( UInt iVol = 1; iVol <= M_uFESpace.mesh()->numVolumes(); iVol++ )
     {
         chronoDer.start();
-      //  M_uFESpace.fe().update( M_uFESpace.mesh()->volumeList( iVol ) ); 
-        
-        
+      //  M_uFESpace.fe().update( M_uFESpace.mesh()->volumeList( iVol ) );
+
+
       //  M_uFESpace.fe().updateFirstDerivQuadPt( M_uFESpace.mesh()->volumeList( iVol ) );
         chronoDer.stop();
-        
+
         chronoZero.start();
-        
+
         M_elmatStiff.zero();
         M_elmatMass.zero();
 
@@ -400,7 +400,7 @@ void MonodomainSolver<Mesh, SolverType>::buildSystem()
         			stiff( M_data.D(), M_elmatStiff,  M_uFESpace.fe(), 0, 0 );
         		}
 	        break;
-	        
+
         	case 1:
         		M_uFESpace.fe().updateFirstDerivQuadPt( M_uFESpace.mesh()->volumeList( iVol ) );
         	    if (M_data.has_fibers() )
@@ -467,8 +467,8 @@ void MonodomainSolver<Mesh, SolverType>::buildSystem()
 
     }
 
-    massCoeff = 1.0 / M_data.timestep();
-    
+    massCoeff = 1.0 / M_data.getTimeStep();
+
     M_comm->Barrier();
 
     chrono.stop();
@@ -481,15 +481,15 @@ void MonodomainSolver<Mesh, SolverType>::buildSystem()
     M_matrMass->GlobalAssemble();
 
     M_comm->Barrier();
-    
+
     M_matrNoBC.reset(new matrix_type(M_localMap, M_matrStiff->getMeanNumEntries() ));
 
     //! Computing 1/dt * M + K
-    
+
     *M_matrNoBC += *M_matrStiff;
 
     *M_matrNoBC += *M_matrMass*massCoeff;
-    
+
     M_matrNoBC->GlobalAssemble();
 
     chrono.stop();
@@ -705,7 +705,7 @@ void MonodomainSolver<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
     int numIter = M_linearSolver.solve(M_sol_u, rhsFull);
 
     chrono.stop();
-    
+
     if (M_verbose)
     {
         std::cout << "\ndone in " << chrono.diff()

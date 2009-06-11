@@ -543,7 +543,7 @@ void BidomainSolver<Mesh, SolverType>::buildSystem()
 
     }
 
-    massCoeff = 1.0/ M_data.timestep();
+    massCoeff = 1.0/ M_data.getTimeStep();
 
     M_comm->Barrier();
 
@@ -838,7 +838,7 @@ void BidomainSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_type&    
 //    rhsFull.Import(M_rhsNoBC, Zero); // ignoring non-local entries, Otherwise they are summed up lately
 
     bcManage( matrix, rhs, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 1.,
-              M_data.time() );
+              M_data.getTime() );
 
   //  rhs = rhsFull;
 

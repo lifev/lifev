@@ -68,7 +68,9 @@ public:
 
     //! Constructor
 
-    DataNavierStokes( const GetPot& dfile );
+    DataNavierStokes( 	const GetPot& dfile,
+						const std::string& mesh_section= "fluid/discretization",
+						const std::string& time_section= "fluid/time" );
 
     DataNavierStokes( const DataNavierStokes& dataNavierStokes );
 
@@ -84,8 +86,6 @@ public:
     Real density() const;
     Real viscosity() const;
     void viscosity( Real mu );
-    Real inittime() const;
-    Real endtime() const;
 
     UInt verbose() const;
     Real dump_init() const;
@@ -116,8 +116,6 @@ protected:
     //! Physics
     Real             _rho;         // density
     Real             _mu;          // viscosity
-    Real             _inittime;    // initial time (Alex December 2003)
-    Real             _endtime;     // end time
 
     //! Miscellaneous
     UInt             _verbose;     // temporal output verbose
@@ -165,9 +163,9 @@ private:
 
 template <typename Mesh>
 DataNavierStokes<Mesh>::
-DataNavierStokes( const GetPot& dfile ) :
-    DataMesh<Mesh>( dfile, "fluid/discretization" ),
-    DataTime( dfile, "fluid/discretization" ),
+DataNavierStokes( const GetPot& dfile, const std::string& mesh_section, const std::string& time_section ) :
+    DataMesh<Mesh>( dfile, mesh_section ),
+    DataTime( dfile, time_section ),
     M_semiImplicit(false),
     M_shapeDerivatives           (false),
     M_stabilization_list( "fluid/discretization/stabilization" )
@@ -182,8 +180,6 @@ DataNavierStokes( const DataNavierStokes& dataNavierStokes ) :
     DataTime                     ( dataNavierStokes ),
     _rho                         (dataNavierStokes._rho),
     _mu                          (dataNavierStokes._mu),
-    _inittime                    (dataNavierStokes._inittime),
-    _endtime                     (dataNavierStokes._endtime),
     _verbose                     (dataNavierStokes._verbose),
     _dump_init                   (dataNavierStokes._dump_init),
     _dump_period                 (dataNavierStokes._dump_period),
@@ -217,16 +213,13 @@ setup(  const GetPot& dfile )
     M_stabilization_list.add( "sd", SD_STABILIZATION, "stream-line difussion" );
     M_stabilization_list.add( "none", NO_STABILIZATION,  "none (default)" );
 
-
     // physics
     _rho          = dfile( "fluid/physics/density", 1. );
     _mu           = dfile( "fluid/physics/viscosity", 1. );
-    _inittime     = dfile( "fluid/physics/inittime", 0. );
-    _endtime      = dfile( "fluid/physics/endtime", 1. );
 
     //miscellaneous
     _verbose      = dfile( "fluid/miscellaneous/verbose", 1 );
-    _dump_init    = dfile( "fluid/miscellaneous/dump_init", _inittime );
+    _dump_init    = dfile( "fluid/miscellaneous/dump_init", getInitialTime() );
     _dump_period  = dfile( "fluid/miscellaneous/dump_period", 1 );
     M_factor      = dfile( "fluid/miscellaneous/factor", 0. );
 
@@ -272,13 +265,11 @@ showMe( std::ostream& c )
 {
     // physics
     c << "\n*** Values for data [fluid/physics]\n\n";
-    c << "density   = " << _rho << std::endl;
-    c << "viscosity = " << _mu << std::endl;
-    c << "initial time = " << _inittime << std::endl;
-    c << "endtime   = " << _endtime << std::endl;
+    c << "density     = " << _rho << std::endl;
+    c << "viscosity   = " << _mu << std::endl;
 
     c << "\n*** Values for data [fluid/miscellaneous]\n\n";
-    c << "verbose   = " << _verbose << std::endl;
+    c << "verbose     = " << _verbose << std::endl;
     c << "initial time for writing solution  = " << _dump_init << std::endl;
     c << "number of time steps between two consecutive dumps of the solution = " << _dump_period << std::endl;
     c << "amplification factor = " << M_factor << std::endl;
@@ -286,6 +277,7 @@ showMe( std::ostream& c )
 
     c << "\n*** Values for data [fluid/discretization]\n\n";
     DataMesh<Mesh>::showMe( c );
+    c << "\n*** Values for data [fluid/time]\n\n";
     DataTime::showMe( c );
     c << "stabilization = ";
     switch( M_stab_method )
@@ -306,12 +298,12 @@ showMe( std::ostream& c )
     c << "\n*** Values for data [fluid/valuespersection]\n\n";
     c << "computeMeanValuesPerSection (switch 0: don't compute, 1: compute)  = "
       << M_computeMeanValuesPerSection << std::endl;
-    c << "nb_z_section  = " << M_NbZSections << std::endl;
-    c << "tol_section  = " << M_ToleranceSection << std::endl;
-    c << "x_section_frontier  = " << M_XSectionFrontier << std::endl;
-    c << "z_section_init  = " << M_ZSectionInit << std::endl;
-    c << "z_section_final  = " << M_ZSectionFinal << std::endl;
-    c << "nb_polygon_edges  = " << M_NbPolygonEdges << std::endl;
+    c << "nb_z_section       = " << M_NbZSections << std::endl;
+    c << "tol_section        = " << M_ToleranceSection << std::endl;
+    c << "x_section_frontier = " << M_XSectionFrontier << std::endl;
+    c << "z_section_init     = " << M_ZSectionInit << std::endl;
+    c << "z_section_final    = " << M_ZSectionFinal << std::endl;
+    c << "nb_polygon_edges   = " << M_NbPolygonEdges << std::endl;
 
 }
 ////////////////////
@@ -336,23 +328,6 @@ void DataNavierStokes<Mesh>::
 viscosity( Real mu )
 {
     _mu = mu;
-}
-
-
-// The initial time
-template <typename Mesh>
-Real DataNavierStokes<Mesh>::
-inittime() const
-{
-    return _inittime;
-}
-
-// The end time
-template <typename Mesh>
-Real DataNavierStokes<Mesh>::
-endtime() const
-{
-    return _endtime;
 }
 ////////////////
 
@@ -493,8 +468,3 @@ isSemiImplicit() const
 
 } // end namespace LifeV
 #endif
-
-
-
-
-

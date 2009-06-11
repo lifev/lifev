@@ -507,10 +507,10 @@ FSIOperator::updateSystem(const vector_type& /*lambda*/)
 
     if (this->isFluid())
     {
-//        double alpha = this->M_bdf->coeff_der( 0 ) / M_dataFluid->timestep();
+//        double alpha = this->M_bdf->coeff_der( 0 ) / M_dataFluid->getTimeStep();
 
 //         vector_type beta = M_bdf->extrap();
-//         vector_type rhs  = M_bdf->time_der( M_dataFluid->timestep() );
+//         vector_type rhs  = M_bdf->time_der( M_dataFluid->getTimeStep() );
 
 //        this->M_fluid->updateSystem( alpha, beta, rhs );
 
@@ -525,9 +525,9 @@ FSIOperator::updateSystem(const vector_type& /*lambda*/)
         *M_un                = M_fluid->solution();
 
         //*this->M_rhs               = M_fluid->matrMass()* (*this->M_un);
-        //*this->M_rhs*=this->M_bdf->coeff_der( 0 ) / M_dataFluid->timestep();
+        //*this->M_rhs*=this->M_bdf->coeff_der( 0 ) / M_dataFluid->getTimeStep();
 
-        *M_rhs               = M_fluid->matrMass()*M_bdf->time_der( M_dataFluid->timestep() );
+        *M_rhs               = M_fluid->matrMass()*M_bdf->time_der( M_dataFluid->getTimeStep() );
 
     }
 
@@ -1276,8 +1276,8 @@ FSIOperator::setAlphafCoef( )
     Real pi=3.1459265358979;
     Real h=0.1, R=0.5;
 
-    M_AlphafCoef  = 2*(this->dataSolid().rho()*h)/this->dataFluid().timestep();
-    M_AlphafCoef += h*this->dataSolid().young(0)*this->dataFluid().timestep() /
+    M_AlphafCoef  = 2*(this->dataSolid().rho()*h)/this->dataFluid().getTimeStep();
+    M_AlphafCoef += h*this->dataSolid().young(0)*this->dataFluid().getTimeStep() /
                     (2*pow(R,2) *(1-pow(dataSolid().poisson(0),2)));
 }
 
@@ -1580,7 +1580,7 @@ void FSIOperator::resetHeAndFluid()
                                      *M_epetraComm,
                                      numLM));
     vector_type u0(M_fluid->getMap());
-    M_bdf.reset(new BdfT<vector_type>(M_dataFluid->order_bdf()));
+    M_bdf.reset(new BdfT<vector_type>(M_dataFluid->getBDF_order()));
     M_bdf->initialize_unk(u0);
 }
 
@@ -1645,12 +1645,12 @@ void FSIOperator::couplingVariableExtrap(vector_ptrtype& lambda, vector_ptrtype&
     {
         firstIter = false;
 
-        *lambda     += M_dataFluid->timestep()*lambdaDotSolid();
+        *lambda     += M_dataFluid->getTimeStep()*lambdaDotSolid();
     }
     else
     {
-        *lambda     += 1.5*M_dataFluid->timestep()*lambdaDotSolid(); // *1.5
-        *lambda     -= M_dataFluid->timestep()*0.5*(*lambdaDot);
+        *lambda     += 1.5*M_dataFluid->getTimeStep()*lambdaDotSolid(); // *1.5
+        *lambda     -= M_dataFluid->getTimeStep()*0.5*(*lambdaDot);
     }
         *lambdaDot   = lambdaDotSolid();
 

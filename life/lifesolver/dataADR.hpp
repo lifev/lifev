@@ -66,7 +66,8 @@ public:
 
     //! Constructor
 
-    DataADR( const GetPot& dfile, const std::string& discretization_section= "adr/discretization" );
+    DataADR( const GetPot& dfile, 	const std::string& mesh_section= "adr/discretization",
+									const std::string& time_section= "adr/time" );
 
     DataADR( const DataADR& dataNavierStokes );
 
@@ -82,8 +83,6 @@ public:
     Real density() const;
     Real diffusivity() const;
     Real reaction() const;
-    Real inittime() const;
-    Real endtime() const;
 
     UInt verbose() const;
     Real dump_init() const;
@@ -111,9 +110,6 @@ protected:
 
     Real M_diffusivity; // Diffusivity
     Real M_react; // Reaction coefficient
-
-    Real M_inittime; // initial time (Alex December 2003)
-    Real M_endtime; // end time
 
     //! Miscellaneous
     UInt M_verbose; // temporal output verbose
@@ -152,11 +148,11 @@ private:
 
 template <typename Mesh>
 DataADR<Mesh>::
-DataADR( const GetPot& dfile, const std::string& discretization_section) :
-       DataMesh<Mesh>      ( dfile, discretization_section ),
-       DataTime            ( dfile, discretization_section ),
+DataADR( const GetPot& dfile, const std::string& mesh_section, const std::string& time_section ) :
+       DataMesh<Mesh>      ( dfile, mesh_section ),
+       DataTime            ( dfile, time_section ),
        M_semiImplicit      ( 0 ),
-       M_stabilization_list( (discretization_section + "/stabilization").data() )
+       M_stabilization_list( (mesh_section + "/stabilization").data() )
        {
             setup(dfile);
        }
@@ -170,8 +166,6 @@ DataADR( const DataADR& dataADR ) :
     DataTime                     ( dataADR ),
     M_diffusivity                ( dataADR.M_diffusivity),
     M_react                      ( dataADR.M_react),
-    M_inittime                   ( dataADR.M_inittime),
-    M_endtime                    ( dataADR.M_endtime),
     M_verbose                    ( dataADR.M_verbose),
     M_factor                     ( dataADR.M_factor),
     M_order                      ( dataADR.M_order),
@@ -194,12 +188,10 @@ setup(  const GetPot& dfile )
     // physics
     M_diffusivity = dfile( "adr/physics/diffusivity", 1. );
     M_react = dfile( "adr/physics/react", 1. );
-    M_inittime = dfile( "adr/physics/inittime", 0. );
-    M_endtime = dfile( "adr/physics/endtime", 1. );
 
     //miscellaneous
     M_verbose = dfile( "adr/miscellaneous/verbose", 1 );
-    _dump_init = dfile( "adr/miscellaneous/dump_init", M_inittime );
+    _dump_init = dfile( "adr/miscellaneous/dump_init", getInitialTime() );
     _dump_period = dfile( "adr/miscellaneous/dump_period", 1 );
     M_factor = dfile( "adr/miscellaneous/factor", 0. );
 
@@ -235,12 +227,8 @@ void DataADR<Mesh>::
 showMe( std::ostream& c )
 {
     // physics
-    c << "\n*** Values for data [adr/physics]\n\n";
-    c << "initial time = " << M_inittime << std::endl;
-    c << "endtime   = " << M_endtime << std::endl;
-
     c << "\n*** Values for data [adr/miscellaneous]\n\n";
-    c << "verbose   = " << M_verbose << std::endl;
+    c << "verbose     = " << M_verbose << std::endl;
     c << "initial time for writing solution  = " << _dump_init << std::endl;
     c << "number of time steps between two consecutive dumps of the solution = " << _dump_period << std::endl;
     c << "amplification factor = " << M_factor << std::endl;
@@ -248,6 +236,7 @@ showMe( std::ostream& c )
 
     c << "\n*** Values for data [adr/discretization]\n\n";
     DataMesh<Mesh>::showMe( c );
+    c << "\n*** Values for data [adr/time]\n\n";
     DataTime::showMe( c );
     c << "stabilization = ";
     switch( M_stab_method )
@@ -268,12 +257,12 @@ showMe( std::ostream& c )
     c << "\n*** Values for data [adr/valuespersection]\n\n";
     c << "computeMeanValuesPerSection (switch 0: don't compute, 1: compute)  = "
       << M_computeMeanValuesPerSection << std::endl;
-    c << "nb_z_section  = " << M_NbZSections << std::endl;
-    c << "tol_section  = " << M_ToleranceSection << std::endl;
+    c << "nb_z_section        = " << M_NbZSections << std::endl;
+    c << "tol_section         = " << M_ToleranceSection << std::endl;
     c << "x_section_frontier  = " << M_XSectionFrontier << std::endl;
-    c << "z_section_init  = " << M_ZSectionInit << std::endl;
-    c << "z_section_final  = " << M_ZSectionFinal << std::endl;
-    c << "nb_polygon_edges  = " << M_NbPolygonEdges << std::endl;
+    c << "z_section_init      = " << M_ZSectionInit << std::endl;
+    c << "z_section_final     = " << M_ZSectionFinal << std::endl;
+    c << "nb_polygon_edges    = " << M_NbPolygonEdges << std::endl;
 
 }
 
@@ -292,23 +281,6 @@ Real DataADR<Mesh>::
 reaction() const
 {
     return M_react;
-}
-
-
-// The initial time
-template <typename Mesh>
-Real DataADR<Mesh>::
-inittime() const
-{
-    return M_inittime;
-}
-
-// The end time
-template <typename Mesh>
-Real DataADR<Mesh>::
-endtime() const
-{
-    return M_endtime;
 }
 ////////////////
 

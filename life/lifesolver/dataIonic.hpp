@@ -64,13 +64,10 @@ public:
     //! external setup
     void setup( const GetPot& dfile );
 
-    //! End time
-    Real endtime() const;
-
     //! FE space order
     std::string wOrder() const;
 
-    UInt verbose; 
+    UInt verbose;
     string mesh_file;
     Real a;
     Real b;
@@ -82,8 +79,8 @@ public:
     Real u0;
     Real winit;
     string mesh_dir;
-        
-    
+
+
 private:
 
 
@@ -100,7 +97,7 @@ template <typename Mesh>
 DataIonic<Mesh>::
 DataIonic( const GetPot& dfile ) :
     DataMesh<Mesh>( dfile, "electric/discretization" ),
-    DataTime( dfile, "electric/discretization" )
+    DataTime( dfile, "electric/time" )
 {
     setup(dfile);
 }
@@ -117,7 +114,7 @@ DataIonic( const DataIonic& dataIonic ) :
     d(dataIonic.d),
     T(dataIonic.T),
     A(dataIonic.A),
-    u0(dataIonic.u0),   
+    u0(dataIonic.u0),
     winit(dataIonic.winit)
 {
 }
@@ -136,9 +133,10 @@ setup(  const GetPot& dfile )
     T   		= dfile("electric/physics/T",0.63);    //0.63ms    //RogersMcCulloch1994
     A   		= dfile("electric/physics/A",130);    //130mV    //RogersMcCulloch1994
     u0   		= dfile("electric/physics/u0",-84.0);	  //-84mV    //RogersMcCulloch1994
-    winit		= dfile("electric/physics/winit", 0);  
-    
+    winit		= dfile("electric/physics/winit", 0);
+
 }
+
 
 // Output
 template <typename Mesh>

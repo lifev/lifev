@@ -54,9 +54,6 @@ public:
     //! Ouptut
     void showMe( std::ostream& c = std::cout ) const;
 
-    //! End time
-    Real endtime() const;
-
     //! getters
 
     /*const*/ Real rho()     const {return _rho;}
@@ -113,7 +110,6 @@ private:
     Real                   _E;  // Young modulus
     Real                   _nu; // Poisson coeficient
     Real                   _lambda, _mu; // Lame coefficients
-    Real                   _endtime; // end time
 
     Real                   M_thickness;
 
@@ -142,13 +138,12 @@ template <typename Mesh>
 DataElasticStructure<Mesh>::
 DataElasticStructure( const GetPot& dfile ) :
         DataMesh<Mesh>( dfile, "solid/discretization" ),
-        DataTime( dfile, "solid/discretization" )
+        DataTime( dfile, "solid/time" )
 {
     // physics
     _rho     = dfile( "solid/physics/density", 1. );
 //     _E       = dfile( "solid/physics/young" , 1. );
 //     _nu      = dfile( "solid/physics/poisson" , 0.25 );
-    _endtime = dfile( "solid/physics/endtime", 1. );
 
     // miscellaneous
     _factor  = dfile( "solid/miscellaneous/factor", 1.0 );
@@ -231,7 +226,6 @@ DataElasticStructure( const DataElasticStructure& dataElasticStructure ):
     _nu                          ( dataElasticStructure._nu ),
     _lambda                      ( dataElasticStructure._lambda ),
     _mu                          ( dataElasticStructure._mu ),
-    _endtime                     ( dataElasticStructure._endtime ),
     M_young                      ( dataElasticStructure.M_young ),
     M_poisson                    ( dataElasticStructure.M_poisson ),
     M_lambda                     ( dataElasticStructure.M_lambda ),
@@ -256,7 +250,6 @@ showMe( std::ostream& c ) const
     c << "young                            = " << _E << std::endl;
     c << "poisson                          = " << _nu << std::endl;
     c << "lame constants (lambda, mu)      = " << _lambda << " " << _mu << std::endl;
-    c << "endtime                          = " << _endtime << std::endl;
 
     c << "\n*** Values for data [solid/miscellaneous]\n\n";
     c << "deformation factor               = " << _factor << std::endl;
@@ -264,17 +257,10 @@ showMe( std::ostream& c ) const
 
     c << "\n*** Values for data [solid/discretization]\n\n";
     DataMesh<Mesh>::showMe();
+    c << "\n*** Values for data [solid/time]\n\n";
     DataTime::showMe( c );
 }
 
-
-// The end time
-template <typename Mesh>
-Real DataElasticStructure<Mesh>::
-endtime() const
-{
-    return _endtime;
-}
 }
 
 #endif

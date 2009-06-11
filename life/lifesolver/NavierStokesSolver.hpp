@@ -443,7 +443,7 @@ void NavierStokesSolver<Mesh, SolverType>::buildSystem()
     // Number of velocity components
     UInt nbCompU = this->u().nbcomp();
 
-    Real bdfCoeff = M_bdf.bdf_u().coeff_der( 0 ) / M_dataType.timestep();
+    Real bdfCoeff = M_bdf.bdf_u().coeff_der( 0 ) / M_dataType.getTimeStep();
     // Elementary computation and matrix assembling
     // Loop on elements
 
@@ -605,7 +605,7 @@ updateSystem()
 
     chrono.start();
 
-    Real bdfCoeff = M_bdf.bdf_u().coeff_der( 0 ) / M_dataType.timestep();
+    Real bdfCoeff = M_bdf.bdf_u().coeff_der( 0 ) / M_dataType.getTimeStep();
 
     M_matrFull  = new matrix_type(M_localMap);
 
@@ -740,7 +740,7 @@ timeAdvance( source_type const& source, Real const& time )
         for ( UInt iComp = 0; iComp < nbCompU; ++iComp )
         {
             // compute local vector
-            compute_vec( source, M_elvec, M_uFESpace.fe(), M_dataType.time(), iComp );
+            compute_vec( source, M_elvec, M_uFESpace.fe(), M_dataType.getTime(), iComp );
 
             // assemble local vector into global one
             assembleVector( M_rhsNoBC, M_elvec,
@@ -751,7 +751,7 @@ timeAdvance( source_type const& source, Real const& time )
 
     if ( !M_steady )
     {
-         M_rhsNoBC += *M_matrMass * M_bdf.bdf_u().time_der( M_dataType.timestep() );
+         M_rhsNoBC += *M_matrMass * M_bdf.bdf_u().time_der( M_dataType.getTimeStep() );
     }
 
     chrono.stop();
@@ -1046,7 +1046,7 @@ void NavierStokesSolver<Mesh, SolverType>::applyBoundaryConditions(matrix_type &
         this->bcHandler().bdUpdate( M_dataType.mesh(), M_uFESpace.feBd(), M_uFESpace.dof() );
 
     bcManage( _csr, M_rhsFull, M_dataType.mesh(), M_uFESpace.dof(), this->bcHandler(), M_uFESpace.feBd(), 1.,
-               M_dataType.time() );
+               M_dataType.getTime() );
 
     if ( this->bcHandler().hasOnlyEssential() && M_diagonalize )
     {

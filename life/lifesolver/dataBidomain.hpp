@@ -58,7 +58,7 @@ public:
     DataBidomain( boost::shared_ptr<HeartFunctors> heart_fct );
 
     DataBidomain( const DataBidomain& dataBidomain );
-    
+
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const&, Real const&)> fct_type;
 
 
@@ -69,33 +69,30 @@ public:
     //! external setup
     void setup( const GetPot& dfile );
 
-    //! End time
-    Real endtime() const{return M_endtime;};
-    
     //! verbose
-    Real verbose() const {return M_verbose;};  
-        
-        
+    Real verbose() const {return M_verbose;};
+
+
     //! FE space order
     std::string uOrder() const{return M_uOrder;};
     //! Chi
 	inline   Real Chi() const {return M_Chi;}
 	 //! Chi
 	inline   string fibers_file() const {return M_fibers_file;}
-	
+
 	inline int heart_diff_fct() const {return M_heart_diff_fct;}
-	
+
 	inline bool has_fibers() const {return M_has_fibers;}
-    
+
 	//! sigma_l
 	inline   Real sigmal_i() const 	{return M_sigmal_i;}
 	inline   Real sigmal_e() const 	{return M_sigmal_e;}
-	
-	    
+
+
 	//! sigma_t
 	inline   Real sigmat_i() const 	{return M_sigmat_i;}
 	inline   Real sigmat_e() const 	{return M_sigmat_e;}
-	
+
 	//! Cm
 	inline   Real Cm() const 	{return M_Cm;}
 	//! D
@@ -108,11 +105,11 @@ public:
 	fct_type red_sigma_sphere;
 	fct_type red_sigma_cyl;
 	fct_type red_sigma_box;
-    
+
 protected:
 
     std::string  M_uOrder;
-    string M_fibers_file;        
+    string M_fibers_file;
     Real M_Chi;
     Real M_Cm;
     Real M_D_i;
@@ -121,13 +118,12 @@ protected:
     Real M_sigmat_i;
     Real M_sigmal_e;
     Real M_sigmat_e;
-    int M_heart_diff_fct;     
+    int M_heart_diff_fct;
     UInt M_verbose;
-    string M_post_dir; //! full name (including path)  
-    Real M_endtime;
+    string M_post_dir; //! full name (including path)
     string M_fibers_dir;
     bool M_has_fibers;
-    
+
 private:
 
 
@@ -143,7 +139,7 @@ template <typename Mesh>
 DataBidomain<Mesh>::
 DataBidomain( boost::shared_ptr<HeartFunctors> heart_fct ) :
     DataMesh<Mesh>( heart_fct->_dataFile, "electric/discretization" ),
-    DataTime( heart_fct->_dataFile, "electric/discretization" ),
+    DataTime( heart_fct->_dataFile, "electric/time" ),
     red_sigma_sphere(heart_fct->get_reduced_sigma_sphere() ),
     red_sigma_cyl(heart_fct->get_reduced_sigma_cylinder() ),
     red_sigma_box(heart_fct->get_reduced_sigma_box() )
@@ -164,9 +160,8 @@ DataBidomain( const DataBidomain& dataBidomain ) :
     M_sigmal_i(dataBidomain.M_sigmal_i),
     M_sigmat_i(dataBidomain.M_sigmat_i),
     M_sigmal_e(dataBidomain.M_sigmal_e),
-    M_sigmat_e(dataBidomain.M_sigmat_e),    
+    M_sigmat_e(dataBidomain.M_sigmat_e),
     M_heart_diff_fct(dataBidomain.M_heart_diff_fct),
-    M_endtime(dataBidomain.M_endtime),
     M_verbose(dataBidomain.M_verbose),
     M_post_dir(dataBidomain.M_post_dir),
     M_uOrder(dataBidomain.M_uOrder),
@@ -181,7 +176,7 @@ template <typename Mesh>
 void
 DataBidomain<Mesh>::
 setup(  const GetPot& dfile )
-{	
+{
 	M_Chi = dfile("electric/physics/Chi",1e3); 	// [1e-3 1/cm]   ColliPavarinoTaccardi2005
     M_Cm = dfile("electric/physics/Cm",1e-3);  	// [1e-3 mF/cm2]   ColliPavarinoTaccardi2005
     if(dfile("electric/physics/ion_model",1) == 1)
@@ -201,20 +196,19 @@ setup(  const GetPot& dfile )
 		M_sigmat_i   = dfile("electric/physics/sigmat_i", 3.1525e-4)/M_Chi/M_Cm; 	// 3.1525e-4 [1/Ohm/cm]   ColliPavarinoTaccardi2005
 		M_sigmal_e =  dfile("electric/physics/sigmal_e", 2e-3)/M_Chi/M_Cm; 		// 2e-3      [1/Ohm/cm]   ColliPavarinoTaccardi2005
 		M_sigmat_e   = dfile("electric/physics/sigmat_e",1.3514e-3)/M_Chi/M_Cm; 	// 1.3514e-3 [1/Ohm/cm]   ColliPavarinoTaccardi2005
-	}	        
-    M_heart_diff_fct = dfile("electric/physics/heart_diff_fct",0);    
-    M_endtime = dfile( "electric/physics/endtime", 300. );
+	}
+    M_heart_diff_fct = dfile("electric/physics/heart_diff_fct",0);
     M_verbose = dfile( "electric/miscellaneous/verbose", 1 );
     M_post_dir  = dfile("electric/miscellaneous/post_dir","./");
     M_uOrder = dfile( "electric/discretization/u_order", "P1");
     M_has_fibers = dfile( "electric/discretization/has_fibers", 0);
     if (M_has_fibers)
-    {	
+    {
     	std::string fibers_dir = dfile( "electric/discretization/fibers_dir", this->meshDir().c_str() );
     	std::string fibers_file = this->meshFile();
     	fibers_file.replace(fibers_file.find(".mesh"), 5, "fibers");
     	M_fibers_file = fibers_dir + dfile( "electric/discretization/fibers_file", fibers_file.c_str() );
-      	std::cout<<"Fibers File: "<<M_fibers_file<<std::endl;    	
+      	std::cout<<"Fibers File: "<<M_fibers_file<<std::endl;
     }
     else
     {
@@ -229,7 +223,7 @@ void DataBidomain<Mesh>::
 showMe( std::ostream& c )
 {
     c << "\n*** Values for data [fluid/physics]\n\n";
-    c << "endtime   = " << M_endtime << std::endl;
+    c << "endtime   = " << getEndTime() << std::endl;
     c << "\n*** Values for data [fluid/miscellaneous]\n\n";
     c << "verbose   = " << M_verbose << std::endl;
 }

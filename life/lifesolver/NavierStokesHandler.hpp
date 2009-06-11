@@ -187,14 +187,14 @@ public:
     std::string meshDir() {return M_dataType.meshDir();}
     std::string meshFile(){return M_dataType.meshFile();}
 
-    Real        dt()   {return M_dataType.timestep();}
-    Real  timestep()   {return M_dataType.timestep();}
-    Real  inittime()   {return M_dataType.inittime();}
-    Real   endtime()   {return M_dataType.endtime();}
+    Real        dt()   {return M_dataType.getTimeStep();}
+    Real  timestep()   {return M_dataType.getTimeStep();}
+    Real  inittime()   {return M_dataType.getInitialTime();}
+    Real   endtime()   {return M_dataType.getEndTime();}
     Real   density()   {return M_dataType.density();}
     Real viscosity()   {return M_dataType.viscosity();}
 
-    unsigned int order_bdf() const {return M_dataType.order_bdf();}
+    unsigned int order_bdf() const {return M_dataType.getBDF_order();}
 
     void showMe()  {return M_dataType.showMe();}
     UInt verbose() {return M_dataType.verbose();}

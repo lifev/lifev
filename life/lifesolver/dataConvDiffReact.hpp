@@ -56,17 +56,12 @@ public:
     Real diffusivity() const;
     //! Reaction coefficient
     Real react() const;
-    //! time variables
-    Real inittime() const;
-    Real endtime() const;
     int stationary() const;
 
 protected:
     //! Physics
     Real _diffusivity; // Diffusivity
     Real _react; // Reaction coefficient
-    Real _inittime; // initialisation time
-    Real _endtime; // end time
     int _stationary; // switch stationary/instationary calculation
 };
 
@@ -81,14 +76,12 @@ template <typename Mesh>
 DataConvDiffReact<Mesh>::
 DataConvDiffReact( const GetPot& dfile ) :
         DataMesh<Mesh>( dfile, "masstransport/discretization" ),
-        DataTime( dfile, "masstransport/discretization" )
+        DataTime( dfile, "masstransport/time" )
 {
 
     // physics
     _diffusivity = dfile( "masstransport/physics/diffusivity", 1. );
     _react = dfile( "masstransport/physics/react", 1. );
-    _inittime = dfile( "masstransport/physics/inittime", 0. );
-    _endtime = dfile( "masstransport/physics/endtime", 1. );
     _stationary = dfile( "masstransport/physics/stationary", 0 );
 }
 
@@ -101,12 +94,11 @@ showMe( std::ostream& c )
     c << "\n*** Values for data [masstransport/physics]\n\n";
     c << "diffusivity   = " << _diffusivity << std::endl;
     c << "reaction coefficient  = " << _react << std::endl;
-    c << "initialisation time = " << _inittime << std::endl;
-    c << "endtime = " << _endtime << std::endl;
     c << "stationary = " << _stationary << std::endl;
 
     c << "\n*** Values for data [masstransport/discretization]\n\n";
     DataMesh<Mesh>::showMe( c );
+    c << "\n*** Values for data [masstransport/time]\n\n";
     DataTime::showMe( c );
 
 }
@@ -125,22 +117,6 @@ Real DataConvDiffReact<Mesh>::
 react() const
 {
     return _react;
-}
-
-// The initialisation time
-template <typename Mesh>
-Real DataConvDiffReact<Mesh>::
-inittime() const
-{
-    return _inittime;
-}
-
-// The end time
-template <typename Mesh>
-Real DataConvDiffReact<Mesh>::
-endtime() const
-{
-    return _endtime;
 }
 
 // The switch stationary/unstationary

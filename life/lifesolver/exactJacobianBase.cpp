@@ -161,7 +161,7 @@ void exactJacobian::eval(const vector_type& _disp,
                                         this->veloFluidMesh());
 
         this->veloFluidMesh()    -= dispFluidMeshOld();
-        this->veloFluidMesh()    *= 1./(M_dataFluid->timestep());
+        this->veloFluidMesh()    *= 1./(M_dataFluid->getTimeStep());
 
         if( iter==0 || !this->M_dataFluid->isSemiImplicit() )
             {
@@ -177,13 +177,13 @@ void exactJacobian::eval(const vector_type& _disp,
 
                 this->interpolateVelocity(meshDispDiff, *M_beta);
 
-                *M_beta *= -1./M_dataFluid->timestep();
+                *M_beta *= -1./M_dataFluid->getTimeStep();
 
                 *M_beta  += *this->M_un;
 
                 if(recomputeMatrices)
                     {
-                        double alpha = 1./M_dataFluid->timestep();
+                        double alpha = 1./M_dataFluid->getTimeStep();
                         this->M_fluid->updateSystem( alpha, *M_beta, *M_rhs );
                     }
                 else
@@ -341,7 +341,7 @@ void  exactJacobian::solveJac(vector_type         &_muk,
 void  exactJacobian::solveLinearFluid()
 {
 
-    double alpha = this->M_bdf->coeff_der( 0 ) / M_dataFluid->timestep();
+    double alpha = this->M_bdf->coeff_der( 0 ) / M_dataFluid->getTimeStep();
 
     vector_type dispFluidMesh(this->derVeloFluidMesh().getMap(), Repeated);
 //if statement: in order not to iterate the mesh for each linear residual calculation, needed just for exact Jac case.
@@ -367,7 +367,7 @@ void  exactJacobian::solveLinearFluid()
 
     this->derVeloFluidMesh() = dispFluidMesh;
 
-    this->derVeloFluidMesh() *= 1./(M_dataFluid->timestep());
+    this->derVeloFluidMesh() *= 1./(M_dataFluid->getTimeStep());
 
     this->leaderPrint( " norm inf dw = " , this->derVeloFluidMesh().NormInf() );
 

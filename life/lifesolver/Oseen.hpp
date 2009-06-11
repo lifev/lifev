@@ -857,10 +857,10 @@ void Oseen<Mesh, SolverType>::
 initialize( const Function& u0, const Function& p0 )
 {
      vector_type u(M_uFESpace.map());
-     M_uFESpace.interpolate(u0, u, M_data.time());
+     M_uFESpace.interpolate(u0, u, M_data.getTime());
 
      vector_type p(M_pFESpace.map());
-     M_pFESpace.interpolate(p0, p, M_data.time());
+     M_pFESpace.interpolate(p0, p, M_data.getTime());
 
      initialize(u, p);
 }
@@ -1297,7 +1297,7 @@ void Oseen<Mesh, SolverType>::applyBoundaryConditions( matrix_type&        matri
     vector_type rhsFull(rhs, Unique); // ignoring non-local entries, Otherwise they are summed up lately
 
     bcManage( matrix, rhsFull, *M_uFESpace.mesh(), M_uFESpace.dof(), BCh, M_uFESpace.feBd(), 1.,
-              M_data.time() );
+              M_data.getTime() );
 
     rhs = rhsFull;
 
@@ -1432,7 +1432,7 @@ Oseen<Mesh, SolverType>::postProcess(bool /*_writeMesh*/)
 //         wr_medit_ascii_scalar( "press." + name + ".bb", p.giveVec(),
 //                                p.size() );
 
-    	// double dt = M_data.timestep();
+    	// double dt = M_data.getTimeStep();
 
 
        writeMesh("vel_x." + me + "." + name + ".mesh", *M_uFESpace.mesh());

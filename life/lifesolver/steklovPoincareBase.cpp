@@ -137,7 +137,7 @@ void steklovPoincare::eval(const vector_type& disp,
                                         *this->M_veloFluidMesh);
 
         *this->M_veloFluidMesh    -= *M_dispFluidMeshOld;
-        *this->M_veloFluidMesh    *= 1./(M_dataFluid->timestep());
+        *this->M_veloFluidMesh    *= 1./(M_dataFluid->getTimeStep());
 
         // copying displacement to a repeated indeces displacement, otherwise the mesh wont know
         // the value of the displacement for some points
@@ -150,11 +150,11 @@ void steklovPoincare::eval(const vector_type& disp,
 
         this->interpolateVelocity(meshDispDiff, *M_beta);
 
-        *M_beta *= -1./M_dataFluid->timestep();
+        *M_beta *= -1./M_dataFluid->getTimeStep();
 
         *M_beta  += *this->M_un;
 
-        double alpha = 1./M_dataFluid->timestep();
+        double alpha = 1./M_dataFluid->getTimeStep();
 
         *M_rhsNew   = *this->M_rhs;
         *M_rhsNew  *= alpha;
@@ -377,7 +377,7 @@ void  steklovPoincare::invSfPrime(const vector_type& res,
 
     //Vector deltaLambda = this->M_fluid->getDeltaLambda();
 
-    double dt  = this->M_fluid->timestep();
+    double dt  = this->M_fluid->getTimeStep();
     double rho = this->M_fluid->density();
 
     vector_type deltaLambda = dt*dt/rho*M_reducedLinFluid->residual();
@@ -532,7 +532,7 @@ void my_matvecSfSsPrime(double *z, double *Jz, AZ_MATRIX *J, int proc_config[])
         else
         {
             vector_type da(dim);
-            double dt = my_data->M_pFS->fluid().timestep();
+            double dt = my_data->M_pFS->fluid().getTimeStep();
             double dti2 = 1.0/(dt*dt) ;
 
             vector_type zSolidPrec(dim);
@@ -596,7 +596,7 @@ vector_type steklovPoincare::DDNprecond(vector_type const &_z)
 
                 //Vector deltaLambda = this->M_fluid->getDeltaLambda();
 
-                double dt  = this->M_fluid->timestep();
+                double dt  = this->M_fluid->getTimeStep();
                 double rho = this->M_fluid->density();
 
                 vector_type deltaLambda = dt*dt/rho*M_reducedLinFluid->residual();

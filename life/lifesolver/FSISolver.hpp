@@ -134,10 +134,10 @@ public:
     //@{
 
     //! get the time step
-    Real timeStep() const { return M_oper->dataFluid().timestep(); }
+    Real timeStep() const { return M_oper->dataFluid().getTimeStep(); }
 
     //! get the final time
-    Real timeEnd() const { return M_oper->dataFluid().endtime(); }
+    Real timeEnd() const { return M_oper->dataFluid().getEndTime(); }
 
     //! get the FSI operator
     oper_fsi_ptr_mpi const& operFSI() const { return M_oper; }

@@ -1286,7 +1286,7 @@ void ADRSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_type&        m
     leaderPrint( "\n     - Managing the BC ... ");
     chrono.start();
     bcManage( matrix, rhsFull, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 1.,
-              M_data.time() );
+              M_data.getTime() );
     chrono.stop();
     leaderPrintMax( "done in " , chrono.diff() );
 
@@ -1578,7 +1578,7 @@ ADRSolver<Mesh, SolverType>::postProcess(bool /*_writeMesh*/)
 //         wr_medit_ascii_scalar( "press." + name + ".bb", p.giveVec(),
 //                                p.size() );
 
-    	// Real dt = M_data.timestep();
+    	// Real dt = M_data.getTimeStep();
 
 
     writeMesh("cc." + me + "." + name + ".mesh", *M_FESpace.mesh());

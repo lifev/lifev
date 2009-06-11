@@ -157,7 +157,7 @@ void Monolithic::setup()
 //                                                                    *M_epetraComm));
 
             vector_type u0(*M_monolithicMap);
-            M_bdf.reset(new BdfT<vector_type>(M_dataFluid->order_bdf()));
+            M_bdf.reset(new BdfT<vector_type>(M_dataFluid->getBDF_order()));
             M_bdf->initialize_unk(u0);
 
             M_rhs.reset(new vector_type(*this->M_monolithicMap));
@@ -217,7 +217,7 @@ Monolithic::couplingMatrix(matrix_ptrtype & bigMatrix) // not working with non-m
             if(M_interfaceMap.getMap(Unique)->LID(ITrow->second /*+ dim*solidDim*/) >= 0 )//to avoid repeated stuff
                 {
                     bigMatrix->set_mat_inc( offset + ITrow->second-1 + dim* M_dFESpace->dof().numTotalDof(),(int)(*this->M_numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*M_interface + solidAndFluidDim, (1.) );//right low
-                    bigMatrix->set_mat_inc( (int)(*this->M_numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*M_interface + solidAndFluidDim, (offset + ITrow->second)-1 + dim* M_dFESpace->dof().numTotalDof(), (-1.*M_solid->rescaleFactor()/*/M_dataFluid->timestep()*/));//low right
+                    bigMatrix->set_mat_inc( (int)(*this->M_numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*M_interface + solidAndFluidDim, (offset + ITrow->second)-1 + dim* M_dFESpace->dof().numTotalDof(), (-1.*M_solid->rescaleFactor()/*/M_dataFluid->getTimeStep()*/));//low right
                     bigMatrix->set_mat_inc( ITrow->first-1 + dim* M_uFESpace->dof().numTotalDof(), (int)(*this->M_numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*M_interface + solidAndFluidDim, (-1.) );//right up
                     bigMatrix->set_mat_inc( (int)(*this->M_numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] - 1 + dim*M_interface + solidAndFluidDim, (ITrow->first)-1 + dim* M_uFESpace->dof().numTotalDof(), 1.);//low left
                 }
@@ -246,7 +246,7 @@ Monolithic::couplingRhs(vector_ptrtype rhs, vector_ptrtype un) // not working wi
                 {
 
                     if(rhs.get() != 0)
-                        (*rhs)[  (int)(*this->M_numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] + dim*M_interface +solidAndFluidDim ] = -lambda( ITrow->second + dim*M_dFESpace->dof().numTotalDof()/*M_dFESpace->dof().numTotalDof()*/ )*(M_solid->rescaleFactor())/*/M_dataFluid->timestep()*/;
+                        (*rhs)[  (int)(*this->M_numerationInterface)[ITrow->second/*+ dim*solidDim*/ ] + dim*M_interface +solidAndFluidDim ] = -lambda( ITrow->second + dim*M_dFESpace->dof().numTotalDof()/*M_dFESpace->dof().numTotalDof()*/ )*(M_solid->rescaleFactor())/*/M_dataFluid->getTimeStep()*/;
                     //                    std::cout<<(int)(*this->M_numerationInterface)[ITrow->second/*+dim*solidDim*/] - 1 + dim*M_interface<<std::endl;
 
                 }
@@ -404,7 +404,7 @@ Monolithic::evalResidual( vector_type&       res,
 
                 monolithicToInterface(lambdaFluid, disp);
 
-                lambdaFluid *= M_dataFluid->timestep();
+                lambdaFluid *= M_dataFluid->getTimeStep();
 
                 this->setLambdaFluid(lambdaFluid); // it must be _disp restricted to the interface
 
@@ -417,7 +417,7 @@ Monolithic::evalResidual( vector_type&       res,
                 //                                        this->veloFluidMesh());
 
                 //                this->veloFluidMesh()    -= dispFluidMeshOld();
-                //                this->veloFluidMesh()    *= 1./(M_dataFluid->timestep());
+                //                this->veloFluidMesh()    *= 1./(M_dataFluid->getTimeStep());
 
                 // copying displacement to a repeated indeces displacement, otherwise the mesh wont know
                 // the value of the displacement for some points
@@ -430,12 +430,12 @@ Monolithic::evalResidual( vector_type&       res,
 
                 this->interpolateVelocity(meshDispDiff, *this->M_beta);
 
-                *this->M_beta *= -1./M_dataFluid->timestep();
+                *this->M_beta *= -1./M_dataFluid->getTimeStep();
                 vector_ptrtype fluid(new vector_type(this->M_uFESpace->map()));
                 fluid->subset(*M_un, 0);
                 *this->M_beta += *fluid/*M_un*/;
 
-                double alpha = 1./M_dataFluid->timestep();
+                double alpha = 1./M_dataFluid->getTimeStep();
 
                 M_monolithicMatrix.reset(new matrix_type(*M_monolithicMap/*, this->M_fluid->getMeanNumEntries()*/));
 
@@ -448,7 +448,7 @@ Monolithic::evalResidual( vector_type&       res,
                 if(iter==0)
                     {
                         M_nbEval = 0; // new time step
-                        *this->M_rhs   += M_fluid->matrMass()*M_bdf->time_der( M_dataFluid->timestep() );
+                        *this->M_rhs   += M_fluid->matrMass()*M_bdf->time_der( M_dataFluid->getTimeStep() );
                         couplingRhs( this->M_rhs, M_un);
                         this->M_solid->updateStuff();
                         updateSolidSystem(this->M_rhs);
@@ -514,7 +514,7 @@ evalResidual( fluid_bchandler_raw_type& bchFluid, solid_bchandler_raw_type& bchS
             bchSolid.bdUpdate( *M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
 
         bcManage( *M_monolithicMatrix, rhsFullSolid, *M_dFESpace->mesh(), M_dFESpace->dof(), bchSolid, M_dFESpace->feBd(), 1.,
-                  dataSolid().time() );
+                  dataSolid().getTime() );
 
     // matrix should be GlobalAssembled by  bcManage
 
@@ -523,7 +523,7 @@ evalResidual( fluid_bchandler_raw_type& bchFluid, solid_bchandler_raw_type& bchS
 
     vector_type rhsFull(rhsFullSolid, Unique);
     bcManage( *M_monolithicMatrix, rhsFull, *M_uFESpace->mesh(), M_uFESpace->dof(), bchFluid, M_uFESpace->feBd(), 1.,
-              dataSolid().time() );
+              dataSolid().getTime() );
 
     M_solid->getDisplayer().leaderPrint("rhs norm = ", rhs->NormInf() );
 
@@ -597,7 +597,7 @@ Monolithic::iterateMesh(const vector_type& disp)
 
                 monolithicToInterface(lambdaFluid, disp);
 
-                lambdaFluid *= M_dataFluid->timestep();
+                lambdaFluid *= M_dataFluid->getTimeStep();
 
                 this->setLambdaFluid(lambdaFluid); // it must be _disp restricted to the interface
 
@@ -609,7 +609,7 @@ Monolithic::iterateMesh(const vector_type& disp)
                 //                                        this->veloFluidMesh());
 
                 //                this->veloFluidMesh()    -= dispFluidMeshOld();
-                //                this->veloFluidMesh()    *= 1./(M_dataFluid->timestep());
+                //                this->veloFluidMesh()    *= 1./(M_dataFluid->getTimeStep());
 
                 // copying displacement to a repeated indeces displacement, otherwise the mesh wont know
                 // the value of the displacement for some points

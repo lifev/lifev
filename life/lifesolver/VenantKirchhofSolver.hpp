@@ -138,11 +138,10 @@ public:
       \param time present time
     */
 //    void updateSystem( source_type const& source );
-
+    void updateSystem(vector_type& rhsFluidCoupling); // used for monolithic
     void updateSystem();
 
     //void buildSystem(matrix_type & bigMatrixStokes); // used for monolithic
-    void buildSystem(matrix_ptrtype matrix);
     void buildSystem();
 
     //! Solve the non-linear system
@@ -268,14 +267,14 @@ private:
     matrix_ptrtype                    M_massStiff;
 
     //! Matrix J: jacobian
-    matrix_ptrtype                    M_jacobian;
+    matrix_type                    M_jacobian;
 
     //! Elementary matrices and vectors
     ElemMat                        M_elmatK; // stiffnes
     ElemMat                        M_elmatM; // mass
     ElemMat                        M_elmatC; // mass + stiffness
-    //    ElemVec                        M_elvec;  // Elementary right hand side
-    //    ElemVec                        M_dk_loc; // Local displacement
+    ElemVec                        M_elvec;  // Elementary right hand side
+    ElemVec                        M_dk_loc; // Local displacement
 
     //! linearized velocity
 
@@ -299,9 +298,9 @@ private:
 
 //    vector_type*                   M_sxx;
 
-    vector_ptrtype                    M_sxx;
-    vector_ptrtype                    M_syy;
-    vector_ptrtype                    M_szz;
+    vector_type                    M_sxx;
+    vector_type                    M_syy;
+    vector_type                    M_szz;
 
     //! files for lists of iterations and residuals per timestep
     std::ofstream                  M_out_iter;
@@ -369,12 +368,12 @@ VenantKirchhofSolver( const data_type&          data,
     M_linearStiff                ( new matrix_type(M_localMap) ),
     M_stiff                      ( new matrix_type(M_localMap) ),
     M_massStiff                  ( new matrix_type(M_localMap) ),
-    M_jacobian                   ( new matrix_type(M_localMap) ),
+    M_jacobian                   ( M_localMap ),
     M_elmatK                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
     M_elmatM                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
     M_elmatC                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
-    //    M_elvec                      ( M_FESpace.fe().nbNode, nDimensions ),
-    //    M_dk_loc                     ( M_FESpace.fe().nbNode, nDimensions ),
+    M_elvec                      ( M_FESpace.fe().nbNode, nDimensions ),
+    M_dk_loc                     ( M_FESpace.fe().nbNode, nDimensions ),
     M_disp                       ( M_localMap),
     M_vel                        ( M_localMap ),
     M_rhs                        ( new vector_type(M_localMap) ),
@@ -382,9 +381,9 @@ VenantKirchhofSolver( const data_type&          data,
     M_rhsNoBC               ( new vector_type(M_localMap) ),
     M_f                          ( new vector_type(M_localMap)),
     M_residual_d                 (  new vector_type(M_localMap)),
-    M_sxx                        ( new vector_type(M_localMap) ),
-    M_syy                        ( new vector_type(M_localMap) ),
-    M_szz                        ( new vector_type(M_localMap) ),
+    M_sxx                        ( M_localMap ),
+    M_syy                        ( M_localMap ),
+    M_szz                        ( M_localMap ),
     M_out_iter                   ( "out_iter_solid" ),
     M_out_res                    ( "out_res_solid" ),
     M_reusePrec                  ( true ),
@@ -416,12 +415,12 @@ VenantKirchhofSolver( const data_type& data,
     M_linearStiff                ( new matrix_type(M_localMap) ),
     M_stiff                      ( new matrix_type(M_localMap) ),
     M_massStiff                  ( new matrix_type(M_localMap) ),
-    M_jacobian                   ( new matrix_type(M_localMap) ),
+    M_jacobian                   ( M_localMap ),
     M_elmatK                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
     M_elmatM                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
     M_elmatC                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
-    //    M_elvec                      ( M_FESpace.fe().nbNode, nDimensions ),
-    //    M_dk_loc                     ( M_FESpace.fe().nbNode, nDimensions ),
+    M_elvec                      ( M_FESpace.fe().nbNode, nDimensions ),
+    M_dk_loc                     ( M_FESpace.fe().nbNode, nDimensions ),
     M_disp                       ( M_localMap),
     M_vel                        ( M_localMap ),
     M_rhs                        ( new vector_type(M_localMap) ),
@@ -429,9 +428,9 @@ VenantKirchhofSolver( const data_type& data,
     M_rhsNoBC                    ( new vector_type(M_localMap) ),
     M_f                          ( new vector_type(M_localMap)),
     M_residual_d                 ( new vector_type(M_localMap)),
-    M_sxx                        ( new vector_type(M_localMap) ),
-    M_syy                        ( new vector_type(M_localMap) ),
-    M_szz                        ( new vector_type(M_localMap) ),
+    M_sxx                        ( M_localMap ),
+    M_syy                        ( M_localMap ),
+    M_szz                        ( M_localMap ),
     M_out_iter                   ( "out_iter_solid" ),
     M_out_res                    ( "out_res_solid" ),
     M_linearSolver               ( new SolverType( comm ) ),
@@ -468,32 +467,32 @@ VenantKirchhofSolver( const data_type& data,
     M_elmatK                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
     M_elmatM                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
     M_elmatC                     ( M_FESpace.fe().nbNode, nDimensions, nDimensions ),
-    //    M_elvec                      ( M_FESpace.fe().nbNode, nDimensions ),
-    //    M_dk_loc                     ( M_FESpace.fe().nbNode, nDimensions ),
+    M_elvec                      ( M_FESpace.fe().nbNode, nDimensions ),
+    M_dk_loc                     ( M_FESpace.fe().nbNode, nDimensions ),
+    M_out_iter                   ( "out_iter_solid" ),
+    M_out_res                    ( "out_res_solid" ),
+    M_reusePrec                  ( true ),
+    M_resetPrec                  ( true ),
+    M_maxIterSolver              ( -1 ),
+    M_count                      ( 0 ),
+    M_massStiff                  ( new matrix_type(monolithicMap) ),
+    M_localMap                   ( monolithicMap ),
+    M_mass                       ( new matrix_type(M_localMap) ),
+    M_linearStiff                ( new matrix_type(M_localMap) ),
+    M_stiff                      ( new matrix_type(M_localMap) ),
+    M_jacobian                   (M_localMap),
     M_disp                       ( M_localMap),
     M_vel                        ( M_localMap ),
     M_rhs                        ( /*new vector_type(M_localMap)*/),//useful
     M_rhsW                       ( M_localMap ),
-    M_rhsNoBC                    ( new vector_type(M_localMap) ),
+    M_rhsNoBC                    ( new vector_type(M_localMap) ),//useless
     M_f                          (),//useless
     M_residual_d                 ( ),//useless
-    M_sxx                        (/*M_localMap*/),//useless
-    M_syy                        (/*M_localMap*/),//useless
-    M_szz                        (/*M_localMap*/),//useless
-    M_out_iter                   ( "out_iter_solid" ),
-    M_out_res                    ( "out_res_solid" ),
-    M_reusePrec                  ( true ),//useless
-    M_resetPrec                  ( true ),//useless
-    M_maxIterSolver              ( -1 ),//useless
-    M_count                      ( 0 ),//useless
-    M_massStiff                  ( /*new matrix_type(monolithicMap) */),//constructed outside
-    M_localMap                   ( monolithicMap ),
-    M_mass                       ( new matrix_type(M_localMap) ),
-    M_linearStiff                ( new matrix_type(M_localMap) ),
-    M_stiff                      ( /*new matrix_type(M_localMap)*/ ),
-    M_jacobian                   (/*M_localMap*/),
+    M_sxx                        (M_localMap),//useless
+    M_syy                        (M_localMap),//useless
+    M_szz                        (M_localMap),//useless
     M_offset                     ( offset ),
-    M_rescaleFactor              (1.),
+    M_rescaleFactor            (1.),
     M_matrFull                   ( )//useless
 {
 
@@ -533,26 +532,15 @@ void
 VenantKirchhofSolver<Mesh, SolverType>::
 rescaleMatrices()
 {
-    *M_mass *=(M_data.timestep()*M_rescaleFactor);
-    *M_linearStiff *= (M_data.timestep()*M_rescaleFactor);
+    *M_mass *=(M_data.getTimeStep()*M_rescaleFactor);
+    *M_linearStiff *= (M_data.getTimeStep()*M_rescaleFactor);
 }
-
 
 
 template <typename Mesh, typename SolverType>
 void
 VenantKirchhofSolver<Mesh, SolverType>::
 buildSystem()
-{
-    M_massStiff.reset(new matrix_type(M_localMap));
-    buildSystem(M_massStiff);
-    M_massStiff->GlobalAssemble();
-}
-
-template <typename Mesh, typename SolverType>
-void
-VenantKirchhofSolver<Mesh, SolverType>::
-buildSystem(matrix_ptrtype massStiff)
 {
     UInt totalDof = M_FESpace.dof().numTotalDof();
 
@@ -565,7 +553,7 @@ buildSystem(matrix_ptrtype massStiff)
     UInt nc = nDimensions;
 
     //inverse of dt:
-    Real dti2 = 2.0 / ( M_data.timestep() * M_data.timestep() );
+    Real dti2 = 2.0 / ( M_data.getTimeStep() * M_data.getTimeStep() );
 
     // Elementary computation and matrix assembling
     // Loop on elements
@@ -601,7 +589,7 @@ buildSystem(matrix_ptrtype massStiff)
             {
                 assembleMatrix( *M_linearStiff, M_elmatK, M_FESpace.fe(), M_FESpace.fe(), M_FESpace.dof(), M_FESpace.dof(),  ic,  jc,  M_offset +ic*totalDof, M_offset + jc*totalDof );
 
-                assembleMatrix( *massStiff  , M_elmatC, M_FESpace.fe(), M_FESpace.fe(), M_FESpace.dof(), M_FESpace.dof(),  ic,jc, M_offset +ic*totalDof,M_offset + jc*totalDof );
+                assembleMatrix( *M_massStiff  , M_elmatC, M_FESpace.fe(), M_FESpace.fe(), M_FESpace.dof(), M_FESpace.dof(),  ic,jc, M_offset +ic*totalDof,M_offset + jc*totalDof );
             }
 
             //mass
@@ -612,6 +600,7 @@ buildSystem(matrix_ptrtype massStiff)
     M_comm->Barrier();
 
     M_linearStiff->GlobalAssemble();
+    M_massStiff->GlobalAssemble();
     M_mass->GlobalAssemble();
 
     chrono.stop();
@@ -654,22 +643,22 @@ updateSystem( )
     Chrono chrono;
     chrono.start();
 
-    //M_stiff = M_linearStiff;
+    M_stiff = M_linearStiff;
 
     // Number of displacement components
 //    UInt nc = nDimensions;
 
     double coef;
 
-    coef = (double) M_data.timestep();
+    coef = (double) M_data.getTimeStep();
 
     vector_type _z = M_disp;
     _z            += coef*M_vel;
 
     *M_rhsNoBC  = *M_mass*_z;
-    *M_rhsNoBC -= *M_linearStiff*(M_disp);
+    *M_rhsNoBC -= *M_stiff*(M_disp);
 
-    coef = 2.0/M_data.timestep();
+    coef = 2.0/M_data.getTimeStep();
 
     M_rhsW  = coef*(M_disp);
     M_rhsW += M_vel;
@@ -728,7 +717,7 @@ iterate( bchandler_raw_type& bch )
         resetPrec();
     }
 
-    M_vel  = ( 2.0 / M_data.timestep() ) * (M_disp);
+    M_vel  = ( 2.0 / M_data.getTimeStep() ) * (M_disp);
     M_vel -= M_rhsW;
 
     *M_residual_d =  *M_massStiff * (M_disp);
@@ -741,7 +730,7 @@ template <typename Mesh, typename SolverType> // for monolithic
 void VenantKirchhofSolver<Mesh, SolverType>::
 updateStuff()
 {
-    M_vel  = ( 2.0 / M_data.timestep() ) * (M_disp);
+    M_vel  = ( 2.0 / M_data.getTimeStep() ) * (M_disp);
     M_vel -= M_rhsW;
 //    postProcess();
 }
@@ -814,7 +803,7 @@ iterate(vector_type &_sol)
 
     vector_type sol(M_localMap);
 
-    M_vel  = ( 2.0 / M_data.timestep() ) * (M_disp);
+    M_vel  = ( 2.0 / M_data.getTimeStep() ) * (M_disp);
     M_vel -= M_rhsW;
 
     M_Displayer.leaderPrint("sol norm = ", norm(this->sol));
@@ -844,7 +833,7 @@ evalResidual( vector_type &res, const vector_type& sol, int /*iter*/)
 
     *M_rhs = *M_rhsNoBC;
 
-    bcManageVector( *M_rhs, *M_FESpace.mesh(), M_FESpace.dof(), *M_BCh, M_FESpace.feBd(), M_data.time(), 1.0 );
+    bcManageVector( *M_rhs, *M_FESpace.mesh(), M_FESpace.dof(), *M_BCh, M_FESpace.feBd(), M_data.getTime(), 1.0 );
 
     res  = M_stiff * sol;
 //    res -= M_rhs;
@@ -929,9 +918,9 @@ evalConstraintTensor()
 
     vector_type count(M_localMap);
 
-    *M_sxx *= 0.;
-    *M_syy *= 0.;
-    *M_szz *= 0.;
+    M_sxx *= 0.;
+    M_syy *= 0.;
+    M_szz *= 0.;
 
    for ( UInt ielem = 1; ielem <= M_FESpace.mesh()->numVolumes(); ielem++ )
     {
@@ -973,7 +962,7 @@ evalConstraintTensor()
             int i    = M_FESpace.fe().patternFirst(k);
             int idof = M_FESpace.dof().localToGlobal(M_FESpace.fe().currentLocalId(), i + 1);
 
-            (*M_sxx)[idof] += s/M_FESpace.fe().detJac(0);
+            M_sxx[idof] += s/M_FESpace.fe().detJac(0);
         }
 
         s = 0;
@@ -1010,7 +999,7 @@ evalConstraintTensor()
              int i    = M_FESpace.fe().patternFirst(k);
              int idof = M_FESpace.dof().localToGlobal(M_FESpace.fe().currentLocalId(), i + 1);
 
-             (*M_syy)[idof] += s/volume;
+             M_syy[idof] += s/volume;
          }
 
 
@@ -1048,16 +1037,16 @@ evalConstraintTensor()
             int i    = M_FESpace.fe().patternFirst(k);
             int idof = M_FESpace.dof().localToGlobal(M_FESpace.fe().currentLocalId(), i + 1);
 
-            (*M_szz)[idof] += s/M_FESpace.fe().detJac(0);
+            M_szz[idof] += s/M_FESpace.fe().detJac(0);
         }
 
     }
 
     for (int ii = 1; ii <= (int)M_FESpace.dim(); ++ii)
     {
-        (*M_sxx)[ii] /= count[ii];
-        (*M_syy)[ii] /= count[ii];
-        (*M_szz)[ii] /= count[ii];
+        M_sxx[ii] /= count[ii];
+        M_syy[ii] /= count[ii];
+        M_szz[ii] /= count[ii];
     }
 
 
@@ -1180,7 +1169,7 @@ solveJacobian( Real /*time*/ )
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
 
-    this->_w = ( 2.0 / M_data.timestep() ) * (M_disp) - M_rhsW;
+    this->_w = ( 2.0 / M_data.getTimeStep() ) * (M_disp) - M_rhsW;
 
     *M_residual_d = M_massStiff*(M_disp);
 }
@@ -1227,7 +1216,7 @@ solveJacobian( const Real /*time*/ , bchandler_type& BCd)
     chrono.stop();
     std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
-    this->_w = ( 2.0 / M_data.timestep() ) * (M_disp) - M_rhsW;
+    this->_w = ( 2.0 / M_data.getTimeStep() ) * (M_disp) - M_rhsW;
 
     *M_residual_d = M_massStiff*(M_disp);
 }
@@ -1250,7 +1239,7 @@ applyBoundaryConditions(matrix_type&        matrix,
     vector_type rhsFull(rhs, Unique);  // bcManages now manages the also repeated parts
 
     bcManage( matrix, rhsFull, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 1.,
-              M_data.time() );
+              M_data.getTime() );
 
     // matrix should be GlobalAssembled by  bcManage
 
