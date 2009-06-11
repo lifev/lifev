@@ -56,7 +56,7 @@ useShapeDerivatives = false
 	BDF_order		= 1
 
 	[../discretization]
-	mesh_dir        = ./Mesh/
+	mesh_dir        = ./
 	mesh_file       = tube20.mesh
 	mesh_type       = .mesh
 	mesh_faces      = all           # update all faces elements
@@ -141,7 +141,7 @@ useShapeDerivatives = false
 ]])
 
 
-AT_CHECK([ln -sf ../../data/mesh/inria/cyl2D.mesh;
+AT_CHECK([ln -sf ../../data/mesh/inria/tube20.mesh;
           mpirun -np 2 ../../test_cylinder/test_cylinder -c],[0],[ignore],[ignore])
 AT_CLEANUP([out_res_solid iter num_iter out_iter_solid res])
 
