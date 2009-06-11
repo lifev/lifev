@@ -180,7 +180,7 @@ void Monolithic::setup()
 //                                                                    *M_epetraComm));
 
             vector_type u0(*M_monolithicMap);
-            M_bdf.reset(new BdfT<vector_type>(M_dataFluid->order_bdf()));
+            M_bdf.reset(new BdfT<vector_type>(M_dataFluid->getBDF_order()));
             M_bdf->initialize_unk(u0);
             M_rhs.reset(new vector_type(*this->M_monolithicMap));
             M_rhsFull.reset(new vector_type(*this->M_monolithicMap));
@@ -607,7 +607,7 @@ Monolithic::evalResidual( vector_type&       res,
 
             monolithicToInterface(lambdaFluid, disp);
 
-            lambdaFluid *= (M_dataFluid->timestep()*(M_solid->rescaleFactor()));//because of the matrix scaling
+            lambdaFluid *= (M_dataFluid->getTimeStep()*(M_solid->rescaleFactor()));//because of the matrix scaling
 
             this->setLambdaFluid(lambdaFluid); // it must be _disp restricted to the interface
 
@@ -635,7 +635,7 @@ Monolithic::evalResidual( vector_type&       res,
 
             this->interpolateVelocity(meshDispDiff, *this->M_beta);
 
-            double alpha = 1./M_dataFluid->timestep();
+            double alpha = 1./M_dataFluid->getTimeStep();
 
             *this->M_beta *= -alpha;
             vector_ptrtype fluid(new vector_type(this->M_uFESpace->map()));
@@ -660,7 +660,7 @@ Monolithic::evalResidual( vector_type&       res,
                 {
                     M_nbEval = 0; // new time step
                     M_resetPrec=true;
-                    *this->M_rhs               += M_fluid->matrMass()*M_bdf->time_der( M_dataFluid->timestep() );
+                    *this->M_rhs               += M_fluid->matrMass()*M_bdf->time_der( M_dataFluid->getTimeStep() );
                     couplingRhs(this->M_rhs, M_un);
                     this->M_solid->updateStuff();
                     updateSolidSystem(this->M_rhs);
@@ -694,7 +694,7 @@ Monolithic::evalResidual( vector_type&       res,
 
 void Monolithic::shapeDerivatives(vector_ptrtype rhs, vector_ptrtype meshDeltaDisp, const vector_type& sol)
 {
-    double alpha = 1./M_dataFluid->timestep();
+    double alpha = 1./M_dataFluid->getTimeStep();
     vector_type derVeloFluidMsh(*meshDeltaDisp, Repeated);
     derVeloFluidMsh *= alpha;
     vector_ptrtype rhsNew(new vector_type(*M_monolithicMap));
@@ -774,7 +774,7 @@ evalResidual( fluid_bchandler_raw_type& bchFluid, solid_bchandler_raw_type& bchS
             bchSolid.bdUpdate( *M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
 
         bcManage( *M_monolithicMatrix, rhsFullSolid, *M_dFESpace->mesh(), M_dFESpace->dof(), bchSolid, M_dFESpace->feBd(), 1.,
-                  dataSolid().time() );
+                  dataSolid().getTime() );
 
     // matrix is GlobalAssembled by  bcManage
 
@@ -784,7 +784,7 @@ evalResidual( fluid_bchandler_raw_type& bchFluid, solid_bchandler_raw_type& bchS
     //vector_type rhsFull(rhsFullSolid, Unique);
     vector_type rhsFull(rhsFullSolid);
     bcManage( *M_monolithicMatrix, rhsFull, *M_uFESpace->mesh(), M_uFESpace->dof(), bchFluid, M_uFESpace->feBd(), 1.,
-              dataSolid().time() );
+              dataSolid().getTime() );
 
     M_solid->getDisplayer().leaderPrint("rhs norm = ", rhs->NormInf() );
 
@@ -1037,7 +1037,7 @@ Monolithic::iterateMesh(const vector_type& disp)
 
                 monolithicToInterface(lambdaFluid, disp);
 
-                lambdaFluid *= (M_dataFluid->timestep()*(M_solid->rescaleFactor()));
+                lambdaFluid *= (M_dataFluid->getTimeStep()*(M_solid->rescaleFactor()));
 
                 this->setLambdaFluid(lambdaFluid); // it must be _disp restricted to the interface
 

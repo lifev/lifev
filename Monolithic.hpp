@@ -195,9 +195,9 @@ void iterateMonolithic(vector_type& rhs, vector_type& step, matrix_ptrtype prec,
     void setBlockPreconditioner(matrix_ptrtype blockPrec){
 *blockPrec += *M_solid->getMassStiff();
  bcManageMatrix( *blockPrec, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d, M_dFESpace->feBd(), 1.,
-                  dataSolid().time() );
+                  dataSolid().getTime() );
  bcManageMatrix( *blockPrec, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BCh_u, M_uFESpace->feBd(), 1.,
-              dataSolid().time() );
+              dataSolid().getTime() );
 
 }
     void setFullPreconditioner(matrix_ptrtype fullPrec){
