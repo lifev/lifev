@@ -562,9 +562,11 @@ Monolithic::monolithicToSolid(const vector_type& disp, vector_type& dispSolid )/
         {
             vector_type  dispSolidUn(dispSolid.getMap(), Unique);
             monolithicToSolid( disp,  dispSolidUn);
-            dispSolid=dispSolidUn;
+            dispSolid = dispSolidUn;
             return;
         }
+
+    ASSERT( &disp != &dispSolid, "Calling monolithicToSolid with the same two arguments");
 
     dispSolid *= 0.;
     UInt k = 0;
