@@ -315,6 +315,7 @@ public:
     void setOffset( std::string const& name, int offset );
 
     //@}
+    static UInt M_fluxes;
 
 private:
     //! number of BC to be stored

@@ -37,6 +37,7 @@
 
 namespace LifeV
 {
+UInt BCHandler::M_fluxes=0;
 
 BCHandler::BCHandler( const ID& nbc, BCHints hint ):
     M_bdUpdateDone( 0 ),
@@ -81,6 +82,8 @@ void BCHandler::addBC( const std::string& name,
     // Adding BC
     M_bcList.push_back( BCBase( name, flag, type, mode, bcf, comp ) );
     std::sort( M_bcList.begin(), M_bcList.end() );
+    if(type==3)//Flux
+        ++BCHandler::M_fluxes;
 }
 
 
@@ -93,6 +96,8 @@ void BCHandler::addBC( const std::string& name,
     // Adding BC
     M_bcList.push_back( BCBase( name, flag, type, mode, bcf ) );
     std::sort( M_bcList.begin(), M_bcList.end() );
+    if(type==3)//Flux
+        ++BCHandler::M_fluxes;
 }
 
 void BCHandler::addBC( const std::string& name,
@@ -105,6 +110,8 @@ void BCHandler::addBC( const std::string& name,
     // Adding BC
     M_bcList.push_back( BCBase( name, flag, type, mode, bcf, nComp ) );
     std::sort( M_bcList.begin(), M_bcList.end() );
+    if(type==3)//Flux
+        ++BCHandler::M_fluxes;
 }
 
 
@@ -128,6 +135,8 @@ void BCHandler::addBC( const std::string& name,
     // Adding BC
     M_bcList.push_back( BCBase( name, flag, type, mode, bcv ) );
     std::sort( M_bcList.begin(), M_bcList.end() );
+    if(type==3)//Flux
+        ++BCHandler::M_fluxes;
 }
 
 
@@ -142,6 +151,8 @@ BCHandler::addBC( const std::string& name,
     // Adding BC
     M_bcList.push_back( BCBase( name, flag, type, mode, bcv, nComp ) );
     std::sort( M_bcList.begin(), M_bcList.end() );
+    if(type==3)//Flux
+        ++BCHandler::M_fluxes;
 }
 void BCHandler::addBC( const std::string& name,
                        const EntityFlag& flag,
@@ -152,6 +163,8 @@ void BCHandler::addBC( const std::string& name,
     // Adding BC
     M_bcList.push_back( BCBase( name, flag, type, mode, bcf ) );
     std::sort( M_bcList.begin(), M_bcList.end() );
+    if(type==3)//Flux
+        ++BCHandler::M_fluxes;
 }
 
 
