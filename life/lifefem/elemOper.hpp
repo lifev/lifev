@@ -241,6 +241,20 @@ void ipstab_bagrad( const Real           coef,
                      ElemVec& elvec,
                      const CurrentFE& fe );
 
+  void source_mass1( Real coef,
+                     const ElemVec& uk_loc,
+                     const ElemVec& wk_loc,
+                     const ElemVec& convect_loc,
+                     ElemMat& elmat,
+                     const CurrentFE& fe );
+
+  void source_mass11( Real coef,
+                     const ElemVec& uk_loc,
+                     const ElemVec& wk_loc,
+                     const ElemVec& convect_loc,
+                     ElemMat& elmat,
+                     const CurrentFE& fe );
+
 
   //
   // coef * ( \grad u^k dw, v  ) for Newton FSI
@@ -249,9 +263,17 @@ void ipstab_bagrad( const Real           coef,
   void source_mass2( Real coef, const ElemVec& uk_loc, const ElemVec& dw_loc,
 		     ElemVec& elvec, const CurrentFE& fe );
 
+  void source_mass2( Real coef, const ElemVec& uk_loc,
+		     ElemMat& elmat, const CurrentFE& fe , double& alpha);
+  void source_mass22( Real coef, const ElemVec& uk_loc,
+                      ElemMat& elmat, const CurrentFE& fe , double& alpha);
+
 
   void  source_mass3( Real coef, const ElemVec& un_loc, const ElemVec& uk_loc, const ElemVec& d_loc,
 		      ElemVec& elvec, const CurrentFE& fe );
+
+void  source_mass3( Real coef, const ElemVec& un_loc, const ElemVec& uk_loc,
+                    ElemMat& elmat, const CurrentFE& fe );
 
 
 
@@ -264,16 +286,28 @@ void ipstab_bagrad( const Real           coef,
 		      const ElemVec& d_loc, ElemVec& elvec, const CurrentFE& fe_u,
 		      const CurrentFE& fe_p );
 
+  void source_stress( Real coef, Real mu, const ElemVec& uk_loc, const ElemVec& pk_loc,
+		      ElemMat& elmat, const CurrentFE& fe_u,
+		      const CurrentFE& fe_p );
+
   //
   // + \mu ( \grad u^k \grad d + [\grad d]^T[\grad u^k]^T : \grad v )
   //
   void source_stress2( Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, ElemVec& elvec, const CurrentFE& fe_u );
+
+  void source_stress2( Real coef, const ElemVec& uk_loc, ElemMat& elmat, const CurrentFE& fe_u );
 
 
   //
   // coef * (  (\grad u^k):[I\div d - (\grad d)^T] , q  ) for Newton FSI
   //
   void source_press( Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, ElemVec& elvec,
+                   const CurrentFE& fe_u, const CurrentFE& fe_p, int iblock=0 );
+
+  void source_press( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
+                   const CurrentFE& fe_u, const CurrentFE& fe_p, int iblock=0 );
+
+  void source_presss( Real coef, const ElemVec& uk_loc, ElemMat& elmat,
                    const CurrentFE& fe_u, const CurrentFE& fe_p, int iblock=0 );
 
   void source_press2( Real coef, const ElemVec& p_loc, const ElemVec& d_loc, ElemVec& elvec,
