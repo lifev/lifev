@@ -72,6 +72,14 @@ public:
                           const EpetraMap           bigMap,
                           const UInt                offset=0);
 
+    OseenShapeDerivative( const data_type&          dataType,
+                          FESpace<Mesh, EpetraMap>& uFESpace,
+                          FESpace<Mesh, EpetraMap>& pFESpace,
+                          FESpace<Mesh, EpetraMap>& mmFESpace,
+                          Epetra_Comm&              comm,
+                          const EpetraMap           bigMap,
+                          const UInt                offset=0);
+
     ~OseenShapeDerivative();
 
     void setUp( const GetPot& dataFile );
@@ -79,7 +87,7 @@ public:
     void iterateLin( bchandler_raw_type& bch );
 
     void updateLinearSystem( const matrix_type& matrNoBC,
-                             double       alpha,
+                             double&       alpha,
                              const vector_type& un,
                              const vector_type& uk,
                              const vector_type& disp,
@@ -88,6 +96,18 @@ public:
                              const vector_type& sourceVec);
     //getter
     vector_type rhsLinNoBC() {return M_rhsLinNoBC;}
+
+    void updateShapeDerivatives(
+                                matrix_type& matrNoBC,
+                                double&       alpha,
+                                const vector_type& un,
+                                const vector_type& uk,
+                                //                                const vector_type& disp,
+                                const vector_type& w,
+                                UInt offset,
+                                FESpace<Mesh, EpetraMap>& dFESpace
+                                );
+
 
 private:
 
@@ -103,7 +123,9 @@ private:
 
 //    ElemVec                   M_elvec_du; // Elementary right hand side for the linearized velocity
     ElemVec                   M_elvec_du; // Elementary right hand side for the linearized pressure
+    boost::shared_ptr<ElemMat>                   M_elmat_du;
     ElemVec                   M_elvec_dp; // Elementary right hand side for the linearized pressure
+    boost::shared_ptr<ElemMat>                   M_elmat_dp;    // Elementary displacement for right hand side
     ElemVec                   M_w_loc;    // Elementary mesh velocity
     ElemVec                   M_uk_loc;   // Elementary velocity
     ElemVec                   M_pk_loc;   // Elementary pressure
@@ -112,7 +134,7 @@ private:
     ElemVec                   M_dw_loc;   // Elementary mesh velocity for right hand side
     ElemVec                   M_u_loc;
     bool                      M_reusePrecLin;
-
+    FESpace<Mesh, EpetraMap>* M_mmFESpace;
 };
 
 
@@ -178,6 +200,44 @@ OseenShapeDerivative( const data_type&          dataType,
     M_dw_loc         ( this->M_uFESpace.fe().nbNode, nDimensions ),
     M_u_loc          ( this->M_uFESpace.fe().nbNode, nDimensions ),
     M_reusePrecLin   (true)
+{
+
+}
+
+template<typename Mesh, typename SolverType>
+OseenShapeDerivative<Mesh, SolverType>::
+OseenShapeDerivative( const data_type&          dataType,
+                      FESpace<Mesh, EpetraMap>& uFESpace,
+                      FESpace<Mesh, EpetraMap>& pFESpace,
+                      FESpace<Mesh, EpetraMap>& mmFESpace,
+                      Epetra_Comm&              comm,
+                      const EpetraMap           bigMap,
+                      const UInt                offset):
+    super            (dataType,
+                      uFESpace,
+                      pFESpace,
+                      comm,
+                      bigMap,
+                      offset),
+    M_rhsLinNoBC     ( this->getMap()),
+    M_rhsLinFull     ( this->getMap()),
+    M_linSol         ( this->getMap()),
+    M_linearLinSolver( ),
+    M_linPrec        ( ),
+    M_elvec_du       ( this->M_uFESpace.fe().nbNode, nDimensions ),
+    M_elmat_du       ( new ElemMat(this->M_uFESpace.fe().nbNode, nDimensions, 0, mmFESpace.fe().nbNode, 0, nDimensions )),
+    M_elvec_dp       ( this->M_pFESpace.fe().nbNode, 1 ),
+    M_elmat_dp       ( new ElemMat(this->M_pFESpace.fe().nbNode, 1, 0, mmFESpace.fe().nbNode, 0, nDimensions )),
+//    M_elvec_dp       ( this->M_pFESpace.fe().nbNode, nDimensions ),
+    M_w_loc          ( this->M_uFESpace.fe().nbNode, nDimensions ),
+    M_uk_loc         ( this->M_uFESpace.fe().nbNode, nDimensions ),
+    M_pk_loc         ( this->M_pFESpace.fe().nbNode, 1 ),
+    M_elvec          ( this->M_uFESpace.fe().nbNode, nDimensions ),
+    M_d_loc          ( this->M_uFESpace.fe().nbNode, nDimensions ),
+    M_dw_loc         ( this->M_uFESpace.fe().nbNode, nDimensions ),
+    M_u_loc          ( this->M_uFESpace.fe().nbNode, nDimensions ),
+    M_reusePrecLin   (true),
+        M_mmFESpace  (&mmFESpace)
 {
 
 }
@@ -269,7 +329,7 @@ void OseenShapeDerivative<Mesh, SolverType>::iterateLin( bchandler_raw_type& bch
 template<typename Mesh, typename SolverType>
 void
 OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& matrNoBC,
-                                                            double       /*alpha*/,
+                                                            double&       alpha,
                                                             const vector_type& un,
                                                             const vector_type& uk,
                                                             const vector_type& disp,
@@ -280,8 +340,6 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& m
     this->M_Displayer.leaderPrint("  f-  LINEARIZED FLUID SYSTEM\n");
 
     Chrono chrono;
-
-    //     this->M_matrNoBC.reset( new matrix_type(matrNoBC)); //WHY this line???
 
     int nbCompU = nDimensions;
 
@@ -426,6 +484,181 @@ OseenShapeDerivative<Mesh, SolverType>::updateLinearSystem( const matrix_type& m
     this->M_Displayer.leaderPrintMax("done in ", chrono.diff() );
 
 }
+
+
+//#if UNDEF
+template<typename Mesh, typename SolverType>
+void
+OseenShapeDerivative<Mesh, SolverType>::updateShapeDerivatives( matrix_type& M_matr,
+                                                                double&       alpha,
+                                                                const vector_type& un,
+                                                                const vector_type& uk,
+                                                                //const vector_type& disp,
+                                                                const vector_type& w,
+                                                                UInt offset,
+                                                                FESpace<Mesh, EpetraMap>& dFESpace
+                                                                )
+{
+    this->M_Displayer.leaderPrint("  f-  LINEARIZED FLUID SYSTEM\n");
+
+    Chrono chrono;
+
+    int nbCompU = nDimensions;
+
+    //    M_rhsLinNoBC = sourceVec;//which is usually zero
+
+    if(this->M_data.useShapeDerivatives())
+        {
+
+            this->M_Displayer.leaderPrint("  f-  updating SD matrix... ");
+
+            //
+            // RIGHT HAND SIDE FOR THE LINEARIZED ALE SYSTEM
+            //
+            chrono.start();
+
+            // Loop on elements
+
+            vector_type unRep  ( un  , Repeated );
+            vector_type ukRep  ( uk  , Repeated );
+            //vector_type dispRep( disp, Repeated );
+            vector_type wRep   ( w   , Repeated );
+            //            vector_type dwRep  ( dw  , Repeated );
+
+//     std::cout << wRep.NormInf() << std::endl;
+//     std::cout << dwRep.NormInf() << std::endl;
+//     std::cout << dispRep.NormInf() << std::endl;
+
+            vector_type rhsLinNoBC( M_rhsLinNoBC.getMap(), Repeated);
+
+            for ( UInt i = 1; i <= this->M_uFESpace.mesh()->numVolumes(); i++ )
+                {
+
+
+
+                    this->M_pFESpace.fe().update( this->M_pFESpace.mesh()->volumeList( i ) );
+                    this->M_uFESpace.fe().updateFirstDerivQuadPt( this->M_uFESpace.mesh()->volumeList( i ) );
+                    this->M_pFESpace.fe().updateFirstDerivQuadPt( this->M_uFESpace.mesh()->volumeList( i ) );
+
+                    //this->M_pFESpace.fe().updateFirstDeriv( this->M_uFESpace.mesh()->volumeList( i ) ); // just to provide the id number in the assem_mat_mixed
+                    //this->M_uFESpace.fe().updateFirstDeriv( this->M_uFESpace.mesh()->volumeList( i ) ); //as updateFirstDer
+                    dFESpace.fe().updateFirstDerivQuadPt( dFESpace.mesh()->volumeList( i ) );
+
+                    // initialization of elementary vectors
+                    M_elmat_dp->zero();
+                    M_elmat_du->zero();
+
+                    for ( UInt k = 0 ; k < ( UInt ) this->M_uFESpace.fe().nbNode ; k++ )
+                        {
+                            UInt iloc = this->M_uFESpace.fe().patternFirst( k ); // iloc = k
+
+                            for ( int ic = 0; ic < nbCompU; ++ic )
+                                {
+                                    UInt ig    = this->M_uFESpace.dof().localToGlobal( i, iloc + 1 ) + ic * this->dim_u();
+
+                                    M_elvec.vec( )  [ iloc + ic*this->M_uFESpace.fe().nbNode ] = unRep(ig) - wRep( ig ); // u^n - w^k local
+                                    M_w_loc.vec( )  [ iloc + ic*this->M_uFESpace.fe().nbNode ] = wRep( ig );             // w^k local
+                                    M_uk_loc.vec( ) [ iloc + ic*this->M_uFESpace.fe().nbNode ] = ukRep( ig );            // u^k local
+                                    //M_d_loc.vec( )  [ iloc + ic*this->M_uFESpace.fe().nbNode ] = dispRep( ig );          // d local
+                                    //                                    M_dw_loc.vec( ) [ iloc + ic*this->M_uFESpace.fe().nbNode ] = dwRep( ig );            // dw local
+                                    M_u_loc.vec()   [ iloc + ic*this->M_uFESpace.fe().nbNode ] = unRep( ig );            // un local
+                                }
+                       }
+                    /*
+                    std::cout << M_elvec.vec() << std::endl;
+                    std::cout << M_w_loc.vec() << std::endl;
+                    std::cout << M_uk_loc.vec() << std::endl;
+                    std::cout << M_d_loc.vec() << std::endl;
+                    std::cout << M_dw_loc.vec() << std::endl;
+                    std::cout << M_u_loc.vec() << std::endl;
+                    */
+                    for ( UInt k = 0 ; k < ( UInt ) this->M_pFESpace.fe().nbNode ; k++ )
+                        {
+                            UInt iloc = this->M_pFESpace.fe().patternFirst( k ); // iloc = k
+                            UInt ig   = this->M_pFESpace.dof().localToGlobal( i, iloc + 1 ) + nbCompU*this->dim_u();
+                            M_pk_loc[ iloc ] = ukRep[ ig ];  // p^k local
+                        }
+
+        //
+        // Elementary vectors
+        //
+                    //commented the code to print out the elementary data. Useful for debugging.
+
+                    //  - \rho ( \grad( u^n-w^k ):[I\div d - (\grad d)^T] u^k + ( u^n-w^k )^T[I\div d - (\grad d)^T] (\grad u^k)^T , v  )
+                    source_mass11( this->M_data.density(), M_uk_loc, M_w_loc, M_elvec, *M_elmat_du, this->M_uFESpace.fe() );
+                    /*
+                    std::cout << "source_mass1 -> norm_inf(M_elvec_du)" << std::endl;
+                    M_elvec_du.showMe(std::cout);
+                    */
+                    //  + \rho * ( \grad u^k dw, v  )
+                    source_mass2( -this->M_data.density(), M_uk_loc, *M_elmat_du, this->M_uFESpace.fe(), alpha );
+                    /*
+                    std::cout << "source_mass2 -> norm_inf(M_elvec_du)" << std::endl;
+                    M_elvec_du.showMe(std::cout);
+                    */
+                    //  - \rho/2 ( \nabla u^n:[2 * I\div d - (\grad d)^T]  u^k , v  )
+                    //source_mass3( 0.5*this->M_data.density(), M_u_loc, M_uk_loc, *M_elmat_du, this->M_uFESpace.fe() );
+                    /*
+                    std::cout << "source_mass3 -> norm_inf(M_elvec_du)" << std::endl;
+                    M_elvec_du.showMe(std::cout);
+                    */
+                    //  - ( [-p^k I + 2*mu e(u^k)] [I\div d - (\grad d)^T] , \grad v  )
+                    source_stress( 1.0, this->M_data.viscosity(), M_uk_loc, M_pk_loc,  *M_elmat_du, this->M_uFESpace.fe(), this->M_pFESpace.fe() );
+                    /*
+                    std::cout << "source_stress -> norm_inf(M_elvec_du)" << std::endl;
+                    M_elvec_du.showMe(std::cout);
+                    */
+                    // + \mu ( \grad u^k \grad d + [\grad d]^T[\grad u^k]^T : \grad v )
+                    source_stress2( this->M_data.viscosity(), M_uk_loc, *M_elmat_du, this->M_uFESpace.fe() );
+                    /*
+                    std::cout << "source_stress2 -> norm_inf(M_elvec_du)" << std::endl;
+                    M_elvec_du.showMe(std::cout);
+                    */
+                    //  + ( (\grad u^k):[I\div d - (\grad d)^T] , q  )
+                    source_press( 1.0, M_uk_loc,*M_elmat_dp, this->M_uFESpace.fe(), this->M_pFESpace.fe() );
+                      /*
+                    std::cout << "source_press -> norm_inf(M_elvec_du)"  << std::endl;
+                    M_elvec_dp.showMe(std::cout);
+                    */
+                    //
+                    // Assembling
+                    //
+                    /*
+         std::cout << "debut ====================" << std::endl;
+         M_elvec_dp.showMe(std::cout);
+         M_elvec_du.showMe(std::cout);
+         std::cout << "fin   ====================" << std::endl;
+                    */
+                    UInt const velTotalDof (this->M_uFESpace.dof().numTotalDof());
+                    for(UInt icomp=0; icomp<nbCompU; ++icomp)
+                        {
+                            for(UInt jcomp=0; jcomp<nbCompU; ++jcomp)
+                                assembleMatrix( M_matr,
+                                                *M_elmat_du,
+                                                this->M_uFESpace.fe(),
+                                                dFESpace.fe(),
+                                                this->M_uFESpace.dof(),
+                                                dFESpace.dof(),
+                                                icomp, jcomp,
+                                                icomp*velTotalDof, offset+jcomp*velTotalDof
+                                                );
+                            assembleMatrix( M_matr,
+                                            *M_elmat_dp,
+                                            this->M_pFESpace.fe(),
+                                            dFESpace.fe(),
+                                            this->M_pFESpace.dof(),
+                                            dFESpace.dof(),
+                                            (UInt)0, icomp,
+                                            (UInt)nbCompU*velTotalDof, offset+icomp*velTotalDof
+                                            );
+                        }
+                }
+
+        }
+    chrono.stop();
+    this->M_Displayer.leaderPrintMax("done in ", chrono.diff() );
+}
+//#endif
 
 }
 
