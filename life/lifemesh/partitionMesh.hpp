@@ -447,12 +447,12 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm,
             for(UInt j=0; j<nprocs; ++j)
                 MPI_Allreduce( &mymatchesForProc[j][0], &matchesForProc[j][0], nprocs, MPI_INT, MPI_SUM, MPIcomm);
             M_comm->Barrier();
-            for(UInt i=0; i<nprocs ; ++i)
-                for(UInt j=0; j<nprocs ; ++j)
-                {
-                    std::cout<<M_me<<" matchesForProc ["<<j<<"] ["<< i << "] "<<matchesForProc[j][i]<<std::endl;
-                    std::cout<<M_me<<" mymatchesForProc ["<<j<<"] ["<< i << "] "<<mymatchesForProc[j][i]<<std::endl;
-                }
+//             for(UInt i=0; i<nprocs ; ++i)
+//                 for(UInt j=0; j<nprocs ; ++j)
+//                 {
+//                     std::cout<<M_me<<" matchesForProc ["<<j<<"] ["<< i << "] "<<matchesForProc[j][i]<<std::endl;
+//                     std::cout<<M_me<<" mymatchesForProc ["<<j<<"] ["<< i << "] "<<mymatchesForProc[j][i]<<std::endl;
+//                 }
 
             int suitableProcess=-1;
             UInt max=0;
@@ -484,8 +484,8 @@ partitionMesh<Mesh>::partitionMesh( Mesh &_mesh, Epetra_Comm &_comm,
             ASSERT(suitableProcess!=-1, "one partition is without interface nodes!");
             procOrder[M_me]= suitableProcess;
 
-            std::cout<<M_me<<" procorder(me) "<<procOrder[M_me]<<std::endl;
-            std::cout<<M_me<<" suitableProc "<<suitableProcess<<std::endl;
+//             std::cout<<M_me<<" procorder(me) "<<procOrder[M_me]<<std::endl;
+//             std::cout<<M_me<<" suitableProc "<<suitableProcess<<std::endl;
             M_comm->Barrier();
 
             std::vector<UInt> maxs(nprocs);
@@ -520,9 +520,9 @@ struct booleanCondition
 // transformation=std::sort(maxs.begin(), maxs.end());
  std::sort(procIndex.begin(), procIndex.end()/*, &booleanCondition::reordering*/);
  for(int l=0;l<nprocs;++l)
-     std::cout<<M_me<< " :reordered maxs: " <<procIndex[l].first<<std::endl;
+     //     std::cout<<M_me<< " :reordered maxs: " <<procIndex[l].first<<std::endl;
  for(int l=0;l<nprocs;++l)
-     std::cout<<M_me<< " :reordered indices: " <<procIndex[l].second<<std::endl;
+     //     std::cout<<M_me<< " :reordered indices: " <<procIndex[l].second<<std::endl;
             //std::vector newMaxs(nprocs);
             //            max=0;
             // for(int k=0; k<nprocs; ++k)
@@ -537,10 +537,10 @@ struct booleanCondition
 //                 }
             for(int j=0; j<nprocs ; ++j)//Allgather
                 MPI_Bcast( &procOrder[j], 1, MPI_INT, j, MPIcomm);//perhaps generates errors
-            for(int j=0; j<nprocs ; ++j)
-                {
-                    std::cout<<"me: "<<M_me<<" j: "<< j <<" procorder2 "<<procOrder[j]<<std::endl;
-                }
+//             for(int j=0; j<nprocs ; ++j)
+//                 {
+//                     std::cout<<"me: "<<M_me<<" j: "<< j <<" procorder2 "<<procOrder[j]<<std::endl;
+//                }
             std::vector< std::vector<int> > locProc2(locProc);
             for(int j=nprocs; j>0 ; --j)
                 {
@@ -574,10 +574,10 @@ struct booleanCondition
                         }
                     orderingError[procOrder[procIndex[j-1].second]]=true;
                 }
-            for(int j=0; j<nprocs ; ++j)
-                {
-                    std::cout<<"me: "<<M_me<<" j: "<< j <<" procorder3 "<<procOrder[j]<<std::endl;
-                }
+//             for(int j=0; j<nprocs ; ++j)
+//                 {
+//                     std::cout<<"me: "<<M_me<<" j: "<< j <<" procorder3 "<<procOrder[j]<<std::endl;
+//                 }
         }
     ////////////////// END OF SOLID PARTITION PART /////////////////////
 
