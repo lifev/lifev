@@ -222,6 +222,9 @@ public:
     // compute area on a boundary face with given flag
     Real area(const EntityFlag& flag);
 
+    // compute flux on a boundary face with given flag and a given solution
+    Real flux(const EntityFlag& flag, const vector_type& sol);
+
     // compute flux on a boundary face with given flag
     Real flux(const EntityFlag& flag);
 
@@ -900,7 +903,7 @@ updateSystem(double       alpha,
     if (M_matrNoBC.get())
         M_matrNoBC.reset(new matrix_type(M_localMap, M_matrNoBC->getMeanNumEntries() ));
     else
-        M_matrNoBC.reset(new matrix_type(M_localMap, M_matrStokes->getMeanNumEntries() ));
+        M_matrNoBC.reset(new matrix_type(M_localMap));
     updateSystem( alpha, betaVec, sourceVec, M_matrNoBC);
     if(alpha != 0.)
         M_matrNoBC->GlobalAssemble();
@@ -1342,11 +1345,20 @@ Oseen<Mesh, SolverType>::post_proc_set_phi()
   M_post_proc.set_phi();
 }
 
+
+
 //! Computes the flux on a given part of the boundary
 template<typename Mesh, typename SolverType> Real
-Oseen<Mesh, SolverType>::flux(const EntityFlag& flag){
+Oseen<Mesh, SolverType>::flux(const EntityFlag& flag)
+{
+    return flux(flag, M_sol);
+}
 
-  vector_type velAndPressure(M_sol, Repeated);
+//! Computes the flux on a given part of the boundary
+template<typename Mesh, typename SolverType> Real
+Oseen<Mesh, SolverType>::flux(const EntityFlag& flag, const vector_type& sol)
+{
+  vector_type velAndPressure(sol, Repeated);
   vector_type vel(this->M_uFESpace.map(), Repeated);
   vel.subset(velAndPressure);
 
