@@ -237,7 +237,7 @@ OseenShapeDerivative( const data_type&          dataType,
     M_dw_loc         ( this->M_uFESpace.fe().nbNode, nDimensions ),
     M_u_loc          ( this->M_uFESpace.fe().nbNode, nDimensions ),
     M_reusePrecLin   (true),
-        M_mmFESpace  (&mmFESpace)
+    M_mmFESpace  (&mmFESpace)
 {
 
 }
