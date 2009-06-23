@@ -92,6 +92,7 @@ public:
 
     //! Read  only last timestep
     void import(const Real& Tstart);
+    void M_rd_ascii       ( ExporterData& dvar );
 
 private:
 
@@ -105,7 +106,6 @@ private:
     void M_case_variable_section(std::ofstream& casef);
     void M_case_time_section(std::ofstream& casef, const Real& time);
 
-    void M_rd_ascii       ( ExporterData& dvar );
     void M_rd_ascii_scalar( ExporterData& dvar );
     void M_rd_ascii_vector( ExporterData& dvar );
 

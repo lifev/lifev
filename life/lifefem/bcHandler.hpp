@@ -314,6 +314,9 @@ public:
     //! specific BC offset
     void setOffset( std::string const& name, int offset );
 
+    //! returns a copy of the number of fluxes imposed
+    const UInt getFluxes( )const {return BCHandler::M_fluxes;}
+
     //@}
     static UInt M_fluxes;
 
