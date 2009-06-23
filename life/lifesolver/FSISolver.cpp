@@ -81,7 +81,7 @@ FSISolver::FSISolver( GetPot const& data_file,
 //     Debug( 6220 ) << "FSISolver::M_lambda: " << M_lambda.size() << "\n";
 //     Debug( 6220 ) << "FSISolver::M_lambdaDot: " << M_lambdaDot.size() << "\n";
     int rank, numtasks;
-    M_monolithic = !(M_method.compare("monolithic"));
+    M_monolithic  = !(M_method.compare("monolithic") && M_method.compare("fullMonolithic"));
 
 
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);

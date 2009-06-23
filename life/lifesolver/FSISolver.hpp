@@ -229,6 +229,7 @@ public:
     bool isSolid(){return M_oper->isSolid();}
 //     bool setFluid(bool fluid){M_fluid = fluid; M_oper->set}
 //     bool setSolid(bool solid){M_solid = solid;}
+    void initSol(vector_type& solInit){*M_lambda=solInit;}
 
 private:
 
