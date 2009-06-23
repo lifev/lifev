@@ -460,8 +460,8 @@ public:
     const FESpace<mesh_type, EpetraMap>& dFESpace()  const {return *M_dFESpace;}
     const FESpace<mesh_type, EpetraMap>& mmFESpace() const {return *M_mmFESpace;}
 
-    const vector_type& veloFluidMesh() const {return *M_veloFluidMesh;}
-    vector_type& veloFluidMesh() {return *M_veloFluidMesh;}
+    virtual const vector_type& veloFluidMesh() const {return *M_veloFluidMesh;}
+    virtual vector_type& veloFluidMesh() {return *M_veloFluidMesh;}
     const vector_type& dispFluidMeshOld() const {return *M_dispFluidMeshOld;}
 
     const vector_type& derVeloFluidMesh() const {return *M_derVeloFluidMesh;}
@@ -532,6 +532,10 @@ public:
     bc_vector_interface bcvDerFluidLoadToFluid()
         {return M_bcvDerFluidLoadToFluid;}
 
+    void setMixteOuterWall(function_type const& dload, function_type const& E);
+    BCFunctionMixte& bcfMixteOuterWall()
+        {return M_bcfMixteOuterWall;}
+
 
     void setStructureToFluidParametres();
 //     void setDerReducedFluidLoadToStructure(vector_type &dload, UInt type = 0);
@@ -572,6 +576,7 @@ public:
     solid_bchandler_type const& BCh_dz_inv(){return M_BCh_dz_inv;}
     void setBCh_solidDerInv(solid_bchandler_type BCh_solidDerInv){M_BCh_dz_inv = BCh_solidDerInv;}
 
+
     virtual void updateSystem(const vector_type& /*displacement*/);
 
     //! relevant only for monolitic solver. re-Implemented there
@@ -581,6 +586,9 @@ public:
     //virtual boost::shared_ptr<EpetraMap>& monolithicMap() { assert(false); };
 
     virtual void couplingVariableExtrap(vector_ptrtype& lambda, vector_ptrtype& lambdaDot, bool& firstIter);
+
+    virtual  const vector_type& meshDisp()const{return M_meshMotion->disp();}
+
 
 protected:
 
@@ -685,6 +693,7 @@ protected:
     bc_vector_interface                               M_bcvDerFluidLoadToStructure;
     bc_vector_interface                               M_bcvDerFluidLoadToFluid;
     bc_vector_interface                               M_bcvDerStructureDispToSolid;
+    BCFunctionMixte                                   M_bcfMixteOuterWall;
 
 //     bc_vector_interface       M_bcvDerReducedFluidLoadToStructure;
 //     bc_vector_interface       M_bcvDerStructureAccToReducedFluid;

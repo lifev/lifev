@@ -1471,6 +1471,11 @@ void FSIOperator::setDerFluidLoadToFluid(vector_type const& dload,
                                     M_dofHarmonicExtensionToFluid,
                                     type);
 }
+void FSIOperator::setMixteOuterWall(function_type const& dload, function_type const& E)
+{
+    M_bcfMixteOuterWall.setFunctions_Mixte(dload,
+                                           E);
+}
 
 // void FSIOperator::setDerReducedFluidLoadToStructure(Vector &dload,
 //                                                        UInt type)
