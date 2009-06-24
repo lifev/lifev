@@ -46,21 +46,17 @@ useShapeDerivatives = false
 density   = 1.0               # density
 viscosity = 0.03              # viscosity
 
-[../time]
+[../time_discretization]
 initialtime		= 0.
 endtime			= 0.01
 timestep		= 0.001
 BDF_order		= 1
 
-[../discretization]
+[../space_discretization]
 mesh_dir  = ./Mesh/
 mesh_file = tube20.mesh
-timestep  = 0.001
 vel_order       = P1            # P1, P1Bubble, P2
 press_order     = P1            # P1, P2
-order_bdf       = 1
-mesh_faces      = all                   # update all faces elements
-mesh_edges      = all                   # update all faces elements
 
 [../miscellaneous]
 verbose   = 1
@@ -124,12 +120,12 @@ density   = 1.2               # density
 young     = 3.0E6
 poisson   = 0.30
 
-[../time]
+[../time_discretization]
 initialtime		= 0.
 endtime			= 0.01
 timestep		= 0.001
 
-[../discretization]
+[../space_discretization]
 mesh_dir  = ./Mesh/ #test_tubes/  # the directory where the mesh file is
 #mesh_file = 179347_cm_solid.mesh  # mesh file
 #mesh_file = vessel20_ord.mesh  # mesh file
@@ -137,10 +133,7 @@ mesh_file = vessel20.mesh  # mesh file
 #mesh_file = test_tubes/solid_0_001_ord_properUnit.mesh  # mesh file
 #mesh_file = vessel_curve20.mesh  # mesh file
 #mesh_file = solid02.mesh  # mesh file
-timestep  = 0.001             # timestep
 order     = P1
-mesh_faces      = all                   # update all faces elements
-mesh_edges      = all                   # update all faces elements
 
 
 [../miscellaneous]
