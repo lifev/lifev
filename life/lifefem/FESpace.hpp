@@ -18,9 +18,14 @@
 */
 /*!
   \file FESpace.hpp
+
+  \version 1.0
   \author Gilles Fourestey
   \date 06/2007
-  \version 1.0
+
+  \version 1.2 - Added new constructors for "Standard FE Spaces" and some other minor changes.
+  \author Cristiano Malossi<cristiano.malossi@epfl.ch>
+  \date 06/2009
 
   \brief This file contains an abstract class for NavierStokes solvers.
 
@@ -29,28 +34,29 @@
 #ifndef _FESPACE_H_
 #define _FESPACE_H_
 
+#include <cmath>
+#include <ext/slist>
+#include <iomanip>
 #include <sstream>
+#include <utility>
 
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include <life/lifearray/pattern.hpp>
+#include <life/lifearray/SimpleVect.hpp>
 
 #include <life/lifecore/life.hpp>
-#include <life/lifefem/refFE.hpp>
-#include <life/lifefem/dof.hpp>
-#include <life/lifefem/geoMap.hpp>
+
 #include <life/lifefem/bcHandler.hpp>
-#include <life/lifearray/pattern.hpp>
-#include <cmath>
-#include <sstream>
-#include <iomanip>
-#include <ext/slist>
-#include <life/lifearray/SimpleVect.hpp>
-#include <utility>
-#include <life/lifemesh/partitionMesh.hpp>
 #include <life/lifefem/currentFE.hpp>
 #include <life/lifefem/currentBdFE.hpp>
+#include <life/lifefem/dof.hpp>
+#include <life/lifefem/geoMap.hpp>
+#include <life/lifefem/refFE.hpp>
 #include <life/lifefem/sobolevNorms.hpp>
+
+#include <life/lifemesh/partitionMesh.hpp>
 
 using std::pair;
 
@@ -71,7 +77,7 @@ inline Real
 elemL22( boost::function<Real( Real, Real, Real, Real, UInt )> fct,
          const CurrentFE& fe, const Real t, const UInt nbcomp )
 {
-    int ig;
+    Int ig;
     UInt ic;
     Real s = 0., f, x, y, z;
     for ( ig = 0;ig < fe.nbQuadPt;ig++ )
@@ -94,9 +100,6 @@ class FESpace
 
 public:
 
-//     typedef Real ( *Function ) ( const Real&, const Real&, const Real&,
-//                                  const Real&, const ID& );
-
     typedef boost::function<Real ( Real const&, Real const&, Real const&,
                                    Real const&, ID const& )> Function;
 
@@ -105,8 +108,10 @@ public:
     typedef boost::shared_ptr<mesh_type> mesh_ptrtype;
     typedef Map                          map_type;
 
-//    typedef typename NSStabilization NSStabilization;
-    //! Constructors
+    /** @name Constructors, Destructor
+     */
+	//@{
+
     /*!
       \param data_file GetPot data file
       \param refFE_u reference FE for the velocity
@@ -119,68 +124,84 @@ public:
       \param ord_bdf order of the bdf time advancing scheme and incremental pressure approach (default: Backward Euler)
     */
 
-    FESpace(  partitionMesh<Mesh>&  mesh,
-              const RefFE&     refFE,
-              const QuadRule&  Qr,
-              const QuadRule&  bdQr,
-              const int        fDim,
-              Epetra_Comm&     comm
-              );
+    FESpace(	partitionMesh<Mesh>&	mesh,
+				const RefFE&			refFE,
+				const QuadRule&			Qr,
+				const QuadRule&			bdQr,
+				const Int				fDim,
+				Epetra_Comm&			comm
+			);
 
-    FESpace(  mesh_ptrtype            mesh,
-              const RefFE&     refFE,
-              const QuadRule&  Qr,
-              const QuadRule&  bdQr,
-              const int        fDim,
-              Epetra_Comm&     comm
-              );
+    FESpace(	partitionMesh<Mesh>&	mesh,
+				const std::string&		space,
+				const Int				fDim,
+				Epetra_Comm&			comm
+			);
 
-    void initMap( const int    fDim,
-                  Epetra_Comm& comm );
+    FESpace(	mesh_ptrtype			mesh,
+				const RefFE&			refFE,
+				const QuadRule&			Qr,
+				const QuadRule&			bdQr,
+				const Int				fDim,
+				Epetra_Comm&			comm
+			);
 
-//    const mesh_type& mesh()       {return M_mesh;}
-//    const mesh_type& mesh() const {return *M_mesh;}
-//    mesh_type& mesh() {return *M_mesh;}
+    FESpace(	mesh_ptrtype			mesh,
+				const std::string&		space,
+				const Int				fDim,
+				Epetra_Comm&			comm
+			);
 
-    const mesh_ptrtype mesh() const {return M_mesh;}
-    mesh_ptrtype mesh() {return M_mesh;}
+    //! Do nothing destructor
+    virtual ~FESpace() {}
 
-//    NSStabilization stabilization(){return M_dataType.stabilization();}
+    //@}
 
 
 
-    //! Returns the velocity dof
-    const Dof& dof() const;
-    Dof& dof();
+    /** @name Get Functions
+     */
+	//@{
 
-    //! returns the res FE
+    //    const mesh_type& mesh()       {return M_mesh;}
+    //    const mesh_type& mesh() const {return *M_mesh;}
+    //    mesh_type& mesh() {return *M_mesh;}
 
-//    RefFE& refFE()             {return M_refFE;}
-    const RefFE& refFE() const {return M_refFE;}
+    const mesh_ptrtype 	mesh()	const { return M_mesh; }
+    mesh_ptrtype 		mesh()		  { return M_mesh; }
 
-    //! returns the current FE
-    CurrentFE&   fe()   {return M_fe;}
-    const CurrentFE&   fe() const  {return M_fe;}
+    //! Returns map
+    const map_type&		map()	const { return M_map; }
+    map_type&			map()		  { return M_map; }
 
-    //! returns the current boundary FE
-    CurrentBdFE& feBd() {return M_feBd;}
+	//! Returns the velocity dof
+	const Dof&			dof()	const { return *M_dof; }
+	Dof&				dof() 		  { return *M_dof; }
 
-    //! returns the volumic quadratic rule
+	//! Returns the current FE
+	const CurrentFE&	fe()	const { return *M_fe; }
+	CurrentFE& 			fe()		  { return *M_fe; }
 
-    const QuadRule& qr() {return M_Qr;}
+	//! Returns the current boundary FE
+	CurrentBdFE&		feBd()		  { return *M_feBd; }
 
-    //! returns the surfasic quadratic rule
+	//! Returns the res FE
+	const RefFE&		refFE()	const { return *M_refFE; }
 
-    const QuadRule& bdQr() {return M_bdQr;}
+	//! Returns the volumic quadratic rule
+	const QuadRule&		qr() 	const { return *M_Qr; }
 
-    //! FE space dimension
+	//! Returns the surfasic quadratic rule
+	const QuadRule&		bdQr()	const { return *M_bdQr; }
 
-    /*const*/ UInt dim()      const {return M_dim;}
-    /*const*/ UInt fieldDim() const {return M_fieldDim;}
-    //! map getter
+	//! Returns FE space dimension
+    /*const*/ UInt		dim()      const { return M_dim; }
+    /*const*/ UInt		fieldDim() const { return M_fieldDim; }
 
-    const map_type& map() const {return M_map;}
-    map_type& map() {return M_map;}
+    //@}
+
+
+	void initMap( const Int fDim, Epetra_Comm& comm );
 
     //! Interpolate a given velocity function nodally onto a velocity vector
     template<typename vector_type>
@@ -205,28 +226,28 @@ public:
 
     // this computes vec = \int fct phi_i
     template<typename vector_type>
-    void L2ScalarProduct( const Function& fct,
-                       vector_type& vec,
-                       const Real t
-                       );
+    void L2ScalarProduct(	const Function&		fct,
+							vector_type&		vec,
+							const Real			t
+						);
 
-        template<typename vector_type>
-    Real L20Error( const Function& fexact,
-                     const vector_type& vec,
-                     const Real time,
-                     Real* relError = 0 );
-
-    template<typename function, typename vector_type>
-    Real L2Error( const function&                fexact,
-                    const vector_type&             vec,
-                    const Real                   time,
-                    Real*                        relError=0 );
+    template<typename vector_type>
+    Real L20Error(			const Function& 	fexact,
+							const vector_type& 	vec,
+							const Real 			time,
+							Real* 				relError = 0 );
 
     template<typename function, typename vector_type>
-    Real H1Error( const function&                fexact,
-                       const vector_type&             vec,
-                       const Real                   time,
-                       Real*                        relError=0 );
+    Real L2Error(			const function&		fexact,
+							const vector_type&	vec,
+							const Real			time,
+							Real*				relError=0 );
+
+    template<typename function, typename vector_type>
+    Real H1Error(			const function&		fexact,
+							const vector_type&	vec,
+							const Real			time,
+							Real*				relError=0 );
 
 
     template<typename vector_type>
@@ -238,55 +259,45 @@ public:
 
     BasePattern::PatternType patternType();
 
-
-    //! Do nothing destructor
-    virtual ~FESpace()
-    {}
-
 private:
 
     //! copy constructor
-
     FESpace( const FESpace& fespace );
 
+    //! Set space
+    inline void setSpace( const std::string& space );
+
+    //! Set space Map (useful for switch syntax with strings)
+    enum spaceData{P1, P1_HIGH, P1Bubble, P2, P2_HIGH};
+    std::map<std::string, spaceData>	M_spaceMap;
 
     //! reference to the mesh
-    mesh_ptrtype           M_mesh;
+    mesh_ptrtype						M_mesh;
 
     //! Reference FE for the velocity
-    const RefFE&    M_refFE;
-
-    //! The Dof object
-    Dof             M_dof;
-
-    //! The number of total dofs
-    UInt            M_dim;
-
-    //! dimention of the field variable ( scalar/vector field)
-    UInt            M_fieldDim;
+    const RefFE*    					M_refFE;
 
     //! Quadrature rule for volumic elementary computations
-    const QuadRule& M_Qr;
+    const QuadRule* 					M_Qr;
 
     //! Quadrature rule for surface elementary computations
-    const QuadRule& M_bdQr;
+    const QuadRule* 					M_bdQr;
 
+    //! dimention of the field variable ( scalar/vector field)
+    UInt								M_fieldDim;
+
+    //! A shared pointer to the Dof object
+    boost::shared_ptr<Dof>				M_dof;
+
+    //! The number of total dofs
+    UInt								M_dim;
 
     //! Current FE
-    CurrentFE       M_fe;
-    CurrentBdFE     M_feBd;
+    boost::shared_ptr<CurrentFE>		M_fe;
+    boost::shared_ptr<CurrentBdFE>		M_feBd;
 
     //! Map
-
-    map_type        M_map;
-//     //! MPI communicator
-//     Epetra_Comm*    M_comm;
-
-
-
-
-//     BasePattern::PatternType M_patternType;
-
+    map_type							M_map;
 
 };
 
@@ -300,83 +311,206 @@ private:
 // Constructors
 template <typename Mesh, typename Map>
 FESpace<Mesh, Map>::
-FESpace( partitionMesh<Mesh>& mesh,
-         const RefFE&         refFE,
-         const QuadRule&      Qr,
-         const QuadRule&      bdQr,
-         const int            fDim,
-         Epetra_Comm&         comm
-         ):
-    M_mesh                             ( mesh.mesh() ),
-    M_refFE                            ( refFE ),
-    M_dof                              ( *M_mesh, refFE ),
-    M_dim                              ( M_dof.numTotalDof() ),
-    M_fieldDim                         ( fDim ),
-    M_Qr                               ( Qr ),
-    M_bdQr                             ( bdQr ),
-    M_fe                               ( M_refFE,
-                                         getGeoMap( *M_mesh ),
-                                         M_Qr ),
-    M_feBd                             ( refFE.boundaryFE(),
-                                         getGeoMap( *M_mesh ).boundaryMap(),
-                                         M_bdQr ),
-    M_map                              ()
+FESpace(	partitionMesh<Mesh>& 	mesh,
+			const RefFE&         	refFE,
+			const QuadRule&      	Qr,
+			const QuadRule&      	bdQr,
+			const Int            	fDim,
+			Epetra_Comm&         	comm
+		) :
+    M_mesh			( mesh.mesh() ),
+    M_refFE			( &refFE ),
+    M_Qr			( &Qr ),
+    M_bdQr			( &bdQr ),
+    M_fieldDim		( fDim ),
+    M_dof			( new Dof( *M_mesh, *M_refFE ) ),
+    M_dim			( M_dof->numTotalDof() ),
+    M_fe			( new CurrentFE( *M_refFE, getGeoMap( *M_mesh ), *M_Qr ) ),
+    M_feBd			( new CurrentBdFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) ),
+    M_map			( )
 {
-    Map map( M_refFE, mesh, comm );
-    for (int ii = 0; ii < fDim; ++ii)
-        M_map += map;
+	Map map( *M_refFE, *M_mesh, comm );
+	for ( UInt ii = 0; ii < M_fieldDim; ++ii )
+		M_map += map;
 }
-
 
 template <typename Mesh, typename Map>
 FESpace<Mesh, Map>::
-FESpace( mesh_ptrtype         mesh,
-         const RefFE&         refFE,
-         const QuadRule&      Qr,
-         const QuadRule&      bdQr,
-         const int            fDim,
-         Epetra_Comm&         comm
-         ):
-    M_mesh                             ( mesh ),
-    M_refFE                            ( refFE ),
-    M_dof                              ( *M_mesh, refFE ),
-    M_dim                              ( M_dof.numTotalDof() ),
-    M_fieldDim                         ( fDim ),
-    M_Qr                               ( Qr ),
-    M_bdQr                             ( bdQr ),
-    M_fe                               ( M_refFE,
-                                         getGeoMap( *M_mesh ),
-                                         M_Qr ),
-    M_feBd                             ( refFE.boundaryFE(),
-                                         getGeoMap( *M_mesh ).boundaryMap(),
-                                         M_bdQr ),
-    M_map                              ()
-
+FESpace(	partitionMesh<Mesh>&	mesh,
+			const std::string&		space,
+			const Int				fDim,
+			Epetra_Comm&			comm
+		) :
+	M_mesh			( mesh.mesh() ),
+    M_fieldDim		( fDim ),
+    M_dof			( ),
+    M_fe			( ),
+    M_feBd			( ),
+    M_map			( )
 {
-    Map map( M_refFE, *M_mesh, comm );
-    for (int ii = 0; ii < fDim; ++ii)
+	// Set spaceMap
+	M_spaceMap["P1"]		= P1;
+	M_spaceMap["P1_HIGH"]	= P1_HIGH;
+	M_spaceMap["P1Bubble"]	= P1Bubble;
+	M_spaceMap["P2"]		= P2;
+	M_spaceMap["P2_HIGH"]	= P2_HIGH;
+
+	// Set space
+	setSpace( space );
+
+	// Set other quantities
+	M_dof.reset( new Dof( *M_mesh, *M_refFE ) );
+	M_dim = M_dof->numTotalDof();
+	M_fe.reset( new CurrentFE( *M_refFE, getGeoMap( *M_mesh ), *M_Qr ) );
+	M_feBd.reset( new CurrentBdFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
+
+	// Build Map
+	Map map( *M_refFE, *M_mesh, comm );
+	for ( UInt ii = 0; ii < M_fieldDim; ++ii )
+		M_map += map;
+}
+
+template <typename Mesh, typename Map>
+FESpace<Mesh, Map>::
+FESpace(	mesh_ptrtype			mesh,
+			const RefFE&			refFE,
+			const QuadRule&			Qr,
+			const QuadRule&			bdQr,
+			const Int				fDim,
+			Epetra_Comm&			comm
+		) :
+    M_mesh			( mesh ),
+    M_refFE			( &refFE ),
+    M_Qr			( &Qr ),
+    M_bdQr			( &bdQr ),
+    M_fieldDim		( fDim ),
+    M_dof			( new Dof( *M_mesh, *M_refFE ) ),
+    M_dim			( M_dof->numTotalDof() ),
+    M_fe			( new CurrentFE( *M_refFE, getGeoMap( *M_mesh ), *M_Qr ) ),
+    M_feBd			( new CurrentBdFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) ),
+    M_map			( )
+{
+	Map map( *M_refFE, *M_mesh, comm );
+	for ( UInt ii = 0; ii < M_fieldDim; ++ii )
+		M_map += map;
+}
+
+template <typename Mesh, typename Map>
+FESpace<Mesh, Map>::
+FESpace(	mesh_ptrtype			mesh,
+			const std::string&		space,
+			const Int				fDim,
+			Epetra_Comm&			comm
+		) :
+	M_mesh			( mesh ),
+    M_fieldDim		( fDim ),
+    M_dof			( ),
+    M_fe			( ),
+    M_feBd			( ),
+    M_map			( )
+{
+	// Set spaceMap
+	M_spaceMap["P1"]		= P1;
+	M_spaceMap["P1_HIGH"]	= P1_HIGH;
+	M_spaceMap["P1Bubble"]	= P1Bubble;
+	M_spaceMap["P2"]		= P2;
+	M_spaceMap["P2_HIGH"]	= P2_HIGH;
+
+	// Set space
+	setSpace( space );
+
+	// Set other quantities
+	M_dof.reset( new Dof( *M_mesh, *M_refFE ) );
+	M_dim = M_dof->numTotalDof();
+	M_fe.reset( new CurrentFE( *M_refFE, getGeoMap( *M_mesh ), *M_Qr ) );
+	M_feBd.reset( new CurrentBdFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
+
+	// Build Map
+	Map map( *M_refFE, *M_mesh, comm );
+	for ( UInt ii = 0; ii < M_fieldDim; ++ii )
         M_map += map;
 }
 
-
-// Returns the velocity Dof
+// Set FE space (default standard parameters)
 template <typename Mesh, typename Map>
-const Dof&
-FESpace<Mesh, Map>::dof() const
+inline void
+FESpace<Mesh, Map>::setSpace( const std::string& space )
 {
-    return M_dof;
+	switch ( M_spaceMap[space] )
+	{
+		case P1 :
+
+			#ifdef TWODIM
+				M_refFE = &feTriaP1;
+				M_Qr    = &quadRuleTria6pt;
+				M_bdQr  = &quadRuleSeg3pt;
+			#elif defined THREEDIM
+				M_refFE = &feTetraP1;
+				M_Qr    = &quadRuleTetra4pt;
+				M_bdQr	= &quadRuleTria3pt;
+			#endif
+
+			break;
+
+		case P1_HIGH :
+
+			#ifdef TWODIM
+				M_refFE = &feTriaP1;
+				M_Qr    = &quadRuleTria6pt;
+				M_bdQr  = &quadRuleSeg3pt;
+			#elif defined THREEDIM
+				M_refFE = &feTetraP1;
+				M_Qr    = &quadRuleTetra15pt;
+				M_bdQr	= &quadRuleTria4pt;
+			#endif
+
+			break;
+
+		case P1Bubble :
+
+			#ifdef TWODIM
+
+				break;
+
+			#elif defined THREEDIM
+				M_refFE = &feTetraP1bubble;
+				M_Qr    = &quadRuleTetra64pt;
+				M_bdQr	= &quadRuleTria3pt;
+			#endif
+
+			break;
+
+		case P2 :
+
+			#ifdef TWODIM
+				M_refFE = &feTriaP2;
+				M_Qr    = &quadRuleTria6pt;
+				M_bdQr  = &quadRuleSeg3pt;
+			#elif defined THREEDIM
+				M_refFE = &feTetraP2;
+				M_Qr    = &quadRuleTetra15pt;
+				M_bdQr	= &quadRuleTria3pt;
+			#endif
+
+		case P2_HIGH :
+
+			#ifdef TWODIM
+				M_refFE = &feTriaP2;
+				M_Qr    = &quadRuleTria6pt;
+				M_bdQr  = &quadRuleSeg3pt;
+			#elif defined THREEDIM
+				M_refFE = &feTetraP2;
+				M_Qr    = &quadRuleTetra64pt;
+				M_bdQr	= &quadRuleTria4pt;
+			#endif
+
+			break;
+
+		default :
+
+			std::cout << "!!! WARNING: Space " << space << "not implemented in FESpace class !!!" << std::endl;
+	}
 }
-
-template <typename Mesh, typename Map>
-Dof&
-FESpace<Mesh, Map>::dof()
-{
-    return M_dof;
-}
-
-
-
-
 
 
 template <typename Mesh, typename Map>
@@ -412,7 +546,7 @@ FESpace<Mesh, Map>::interpolate( const Function& fct,
     {
 
         fe().updateJac( mesh()->element( iElem ) );
-        int elemId = mesh()->element( iElem ).localId();
+        ID elemId = mesh()->element( iElem ).localId();
 
         // Vertex based Dof
         if ( nDofpV )
@@ -431,7 +565,7 @@ FESpace<Mesh, Map>::interpolate( const Function& fct,
                     // Loop on data vector components
                     for ( UInt icmp = 0; icmp < nbComp; ++icmp )
                     {
-                        int iDof = icmp * dim() + dof().localToGlobal( elemId, lDof  );
+                        UInt iDof = icmp * dim() + dof().localToGlobal( elemId, lDof  );
                         vect.checkAndSet( iDof, fct( time, x, y, z, icmp + 1 ));
                     }
                 }
@@ -456,7 +590,7 @@ FESpace<Mesh, Map>::interpolate( const Function& fct,
                     // Loop on data vector components
                     for ( UInt icmp = 0; icmp < nbComp; ++icmp )
                     {
-                        int iDof = icmp * dim() + dof().localToGlobal( elemId, lDof  );
+                        UInt iDof = icmp * dim() + dof().localToGlobal( elemId, lDof  );
                         vect.checkAndSet( iDof, fct( time, x, y, z, icmp + 1 ));
                     }
                 }
@@ -577,7 +711,7 @@ FESpace<Mesh, Map>::L2ScalarProduct( const Function& fct, vector_type& vec, cons
 
         Real f, x, y, z;
 
-        int i, inod, ig;
+        Int i, inod, ig;
         UInt eleID = this->fe().currentLocalId();
         UInt ic;
         Real u_ig;
@@ -675,7 +809,7 @@ FESpace<Mesh, Map>::L20Error( const Function& fexact,
         for ( UInt iVol  = 1; iVol <= this->mesh()->numElements(); iVol++ )
         {
             this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
-           
+
             normU += elem_L2_diff_2( vec, fexact,
                                      this->fe(),
                                      //p1,
@@ -730,7 +864,7 @@ FESpace<Mesh, Map>::L20Error( const Function& fexact,
          for ( UInt iVol  = 1; iVol <= this->mesh()->numElements(); iVol++ )
          {
              this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
-            
+
              normU += elem_H1_diff_2( vec, fexact,
                                       this->fe(),
                                       //p1,
