@@ -95,7 +95,7 @@ using namespace LifeV;
 
     typedef RegionMesh2D<LinearTriangle> RegionMesh;
 
-    const std::string discretization_section="adr/discretization2D";
+    const std::string discretization_section="adr/space_discretization2D";
 
 #elif defined THREEDIM
 
@@ -108,7 +108,7 @@ using namespace LifeV;
 
     typedef RegionMesh3D<LinearTetra> RegionMesh;
 
-    const std::string discretization_section="adr/discretization3D";
+    const std::string discretization_section="adr/space_discretization3D";
 
 
 #endif
@@ -379,75 +379,14 @@ laplacian::run()
 
     if(verbose) dataADR.showMe();
 
-    // Advection coefficient Space: P1 interpolation
-
-    const RefFE*    refFE_beta  (0);
-    const QuadRule* qR_beta     (0);
-    const QuadRule* bdQr_beta   (0);
-#ifdef TWODIM
-    refFE_beta = &feTriaP1;
-    qR_beta    = &quadRuleTria6pt;  // DoE 2
-    bdQr_beta  = &quadRuleSeg3pt;   // DoE 2
-#elif defined THREEDIM
-    refFE_beta = &feTetraP1;
-    qR_beta    = &quadRuleTetra4pt;  // DoE 2
-    bdQr_beta  = &quadRuleTria3pt;   // DoE 2
-#endif
-
-    // Scalar Solution Space:
-
-    std::string adrOrder =  dataFile( (discretization_section+"/order").data(), "P1");
-    const RefFE*    refFE_adr(0);
-    const QuadRule* qR_adr(0);
-    const QuadRule* bdQr_adr(0);
-
-    if ( adrOrder.compare("P1") == 0 )
-        {
-            if (verbose) std::cout << "  Space order : P1" << std::flush;
-#ifdef TWODIM
-            refFE_adr = &feTriaP1;
-            qR_adr    = &quadRuleTria6pt;
-            bdQr_adr  = &quadRuleSeg3pt;
-#elif defined THREEDIM
-            refFE_adr = &feTetraP1;
-            qR_adr    = &quadRuleTetra15pt; // DoE 5
-            bdQr_adr  = &quadRuleTria4pt;   // DoE 2
-#endif
-        }
-    else
-        if ( adrOrder.compare("P2") == 0 )
-            {
-                if (verbose) std::cout << " Space order : P2";
-#ifdef TWODIM
-            refFE_adr = &feTriaP2;
-            qR_adr    = &quadRuleTria6pt;
-            bdQr_adr  = &quadRuleSeg3pt;
-#elif defined THREEDIM
-            refFE_adr = &feTetraP2;
-            qR_adr    = &quadRuleTetra64pt; // DoE 6
-            bdQr_adr  = &quadRuleTria4pt;   // DoE 2
-#endif
-            }
-    if (verbose) std::cout << std::endl;
-
-
     //finite element space of the solution
 
-    FESpace< RegionMesh, EpetraMap > adrFESpace(meshPart,
-												*refFE_adr,
-                                                *qR_adr,
-                                                *bdQr_adr,
-                                                1,
-                                                *Members->comm);
+    std::string adrOrder =  dataFile( (discretization_section+"/order").data(), "P1");
+    FESpace< RegionMesh, EpetraMap > adrFESpace(meshPart,adrOrder,1,*Members->comm);
 
     //finite element space of the advection term
-
-    FESpace< RegionMesh, EpetraMap > betaFESpace(meshPart,
-                                                *refFE_beta,
-                                                *qR_beta,
-                                                *bdQr_beta,
-                                                nDimensions,
-                                                *Members->comm);
+    std::string betaOrder = "P1_HIGH";
+    FESpace< RegionMesh, EpetraMap > betaFESpace(meshPart,betaOrder,nDimensions,*Members->comm);
 
     //instantiation of the AdvectionDiffusionReactionSolver class
 

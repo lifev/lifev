@@ -24,13 +24,13 @@ initial_sol     = stokes          # stokes, none
 density         = 1.0          # density
 viscosity       = 0.03         # viscosity
 
-[../time]
+[../time_discretization]
 initialtime		= 0.
 endtime			= .2
 timestep		= 0.0001
 BDF_order		= 1
 
-[../discretization]
+[../space_discretization]
 mesh_dir        = ./Mesh/
 mesh_file       = tube20.mesh          # "big file"
 #mesh_file       = tube-test.mesh          # "big file"
@@ -40,13 +40,11 @@ mesh_file       = tube20.mesh          # "big file"
 #mesh_file       = cyl2D.mesh             # "reasonable file"
 mesh_type       = .mesh
 
-mesh_faces      = all                   # update all faces elements
-mesh_edges      = all                   # update all faces elements
 verbose         = 0                     # verbose during mesh-reading
 linearized      = 0
 diagonalize     = 0 # weight, 0=off
 div_beta_u_v    = 0 # 1=on, 0=off
-vel_order       = P1Bubble		# P1, P1Bubble, P2
+vel_order       = P1Bubble	# P1, P1Bubble, P2
 press_order     = P1		# P1, P2
 
 [../solver]

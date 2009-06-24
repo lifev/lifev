@@ -82,19 +82,17 @@ viscosity       = 0.005         # viscosity
 init_data = 0
 uinit = 0
 
-[../time]
+[../time_discretization]
 initialtime		= 0.
 endtime			= 0.4
 timestep        = 0.1
 BDF_order		= 1
 
-[../discretization]
+[../space_discretization]
 mesh_dir        = ./
 mesh_file       = ellissoide29560.mesh 
 mesh_type       = .mesh
 
-mesh_faces      = all                   # update all faces elements
-mesh_edges      = all                   # update all faces elements
 verbose         = 1                     # verbose during mesh-reading
 
 has_fibers = 1

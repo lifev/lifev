@@ -20,29 +20,23 @@
 # the first mesh is the one reordered. The second mesh is the one where the new marker is added
 # (not read when create_edge=false).
 
-[discretization]
+[space_discretization]
 mesh_dir  = ./Mesh/ # the directory where the mesh file is
 #mesh_file = aorta_fluid_scaled.mesh  # mesh file
 mesh_file = tube20.mesh  # mesh file
 vel_order       = P1            # P1, P1Bubble, P2
 press_order     = P1            # P1, P2
-order_bdf       = 1
-mesh_faces      = all                   # update all faces elements
-mesh_edges      = all                   # update all faces elements
 mesh_type       = .mesh
 ordering        = false
 output_mesh_file = output.mesh
 
 [second_mesh]
-[./discretization]
+[./space_discretization]
 mesh_dir  = ./Mesh/ # the directory where the mesh file is
 #mesh_file = aorta_solid_scaled.mesh  # mesh file
 mesh_file = vessel20.mesh  # mesh file
 vel_order       = P1            # P1, P1Bubble, P2
 press_order     = P1            # P1, P2
-order_bdf       = 1
-mesh_faces      = all                   # update all faces elements
-mesh_edges      = all                   # update all faces elements
 mesh_type       = .mesh
 ordering = false
 

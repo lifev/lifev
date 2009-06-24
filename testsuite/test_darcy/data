@@ -5,14 +5,13 @@
 
 [darcy]
 
-[./discretization]
+[./space_discretization]
 mesh_dir    = ../data/mesh/inria/ # the directory where the mesh file is
 #mesh_file   = hexahexa10x10x10.mesh  
 mesh_file   = cylhexa.mesh      #
 #mesh_file   = cyltetra.mesh    
 #mesh_file   = piece-of-tube-wall-tetra.mesh     #
 mesh_type   = .mesh
-mesh_faces   = all      # OBLIGATORY! we need all faces!
 
 [../linearsolver]
 theLinearSolver   = 0    # 0: Aztec, 1: UMFPack (UMFPack not implemented yet)

@@ -27,12 +27,12 @@ int main(int argc, char** argv)
     GetPot command_line(argc,argv);
     std::string data_file_name = command_line.follow("data", 2, "-f","--file");
     GetPot data_file(data_file_name);
-    DataMesh<RegionMesh3D<LinearTetra> > mesh_data(data_file, "discretization");
-    //DataMesh<RegionMesh3D<LinearTetra> > solidData(data_file, "solid/discretization");
-    //const char* mesh_input = command_line.follow(data_file("fluid/discretization/mesh_file", "mesh", 0), 2, "-i","--input");
+    DataMesh<RegionMesh3D<LinearTetra> > mesh_data(data_file, "space_discretization");
+    //DataMesh<RegionMesh3D<LinearTetra> > solidData(data_file, "solid/space_discretization");
+    //const char* mesh_input = command_line.follow(data_file("fluid/space_discretization/mesh_file", "mesh", 0), 2, "-i","--input");
 
-    const std::string mesh_output = command_line.follow((data_file("discretization/output_mesh_file", "mesh").c_str()), 2, "-o", "--output");
-    bool ordering = data_file("discretization/ordering", false);
+    const std::string mesh_output = command_line.follow((data_file("space_discretization/output_mesh_file", "mesh").c_str()), 2, "-o", "--output");
+    bool ordering = data_file("space_discretization/ordering", false);
     bool create_edge = data_file("interface/create_edge", true);
     UInt newMarker = data_file("interface/edgeMarker", 20);
 
@@ -67,23 +67,13 @@ int main(int argc, char** argv)
                 EntityFlag edgeFlag               = data_file("interface/edgeFlag",      2 );
 
                 boost::shared_ptr<Epetra_Comm> uselessComm(new Epetra_MpiComm(MPI_COMM_WORLD));
-                DataMesh<RegionMesh3D<LinearTetra> > mesh_data2(data_file, "second_mesh/discretization");
+                DataMesh<RegionMesh3D<LinearTetra> > mesh_data2(data_file, "second_mesh/space_discretization");
 
                 boost::shared_ptr<FESpace<RegionMesh3D<LinearTetra>, EpetraMap> > firstFESpace;
-                firstFESpace.reset(new FESpace<RegionMesh3D<LinearTetra>, EpetraMap>(mesh_data.mesh(),
-                                                                   feTetraP1,
-                                                                   quadRuleTetra4pt,
-                                                                   quadRuleTria3pt,
-                                                                   3,
-                                                                   *uselessComm));
+                firstFESpace.reset(new FESpace<RegionMesh3D<LinearTetra>, EpetraMap>(mesh_data.mesh(),"P1",3,*uselessComm));
 
                 boost::shared_ptr<FESpace<RegionMesh3D<LinearTetra>, EpetraMap> > secondFESpace;
-                secondFESpace.reset(new FESpace<RegionMesh3D<LinearTetra>, EpetraMap>(mesh_data2.mesh(),
-                                                                   feTetraP1,
-                                                                   quadRuleTetra4pt,
-                                                                   quadRuleTria3pt,
-                                                                   3,
-                                                                   *uselessComm));
+                secondFESpace.reset(new FESpace<RegionMesh3D<LinearTetra>, EpetraMap>(mesh_data2.mesh(),"P1",3,*uselessComm));
 
 
                 boost::shared_ptr<DofInterface3Dto3D>  dofEdgeFluidToEdgeSolid( new DofInterface3Dto3D );

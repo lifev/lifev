@@ -15,11 +15,10 @@ diffusion_tensor  = '1. 0. 0.  0. 1. 0  0. 0. 1.' # diffusion tensor
 [../linearsolver]
 theLinearSolver   = 1    # 0: Aztec, 1: UMFPack (UMFPack not implemented yet)
 
-[../discretization]
+[../space_discretization]
 mesh_dir    = ../data/mesh/inria/ # the directory where the mesh file is
 mesh_file   = piece-of-tube-wall-tetra.mesh     #
 mesh_type   = .mesh
-mesh_faces   = all      # OBLIGATORY! we need all faces!
 element_shape = 0       # 0: tetra; 1: hexa
 
 [../miscellaneous]

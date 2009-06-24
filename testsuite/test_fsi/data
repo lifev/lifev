@@ -57,7 +57,7 @@ absorbing_bc		= true
 density   = 1.0               # density
 viscosity = 0.03              # viscosity
 
-[../time]
+[../time_discretization]
 initialtime		= 0.
 endtime			= 0.79
 timestep		= 0.0001
@@ -70,15 +70,14 @@ gammaDiv   = 0.2
 gammaPress = 0.2
 reuse      = true
 
-[../discretization]
+[../space_discretization]
 mesh_dir  = ./Mesh/ # the directory where the mesh file is
 #mesh_file = stent-fluid-coarse.mesh  # mesh file
 mesh_file = tube20.mesh  # mesh file
 #mesh_file = tube.mesh  # mesh file
+
 vel_order       = P1Bubble            # P1, P1Bubble, P2
 press_order     = P1            # P1, P2
-mesh_faces      = all                   # update all faces elements
-mesh_edges      = all                   # update all faces elements
 numLM 		= 1
 
 [../miscellaneous]
@@ -201,18 +200,15 @@ thickness	= 0.1
 #young           = 3.0E6
 #poisson         = 0.30
 
-[../time]
+[../time_discretization]
 timestep		= 0.0001
 
-[../discretization]
+[../space_discretization]
 mesh_dir  = ./Mesh/  # the directory where the mesh file is
 #mesh_file = stent-solid-coarse.mesh  # mesh file
 mesh_file = vessel20.mesh  # mesh file
 #mesh_file = vessel.mesh  # mesh file
 order     = P1
-mesh_faces      = all                   # update all faces elements
-mesh_edges      = all                   # update all faces elements
-
 
 [../miscellaneous]
 factor    = 12

@@ -195,49 +195,19 @@ main( int argc, char** argv )
     // Now we proceed with the FESpace definition
     // here we decided to use P2/P1 elements
 
-    const RefFE*    refFE_vel;
-    const QuadRule* qR_vel;
-    const QuadRule* bdQr_vel;
-
-    refFE_vel = &feTetraP2;
-    qR_vel    = &quadRuleTetra15pt; // DoE 5
-//     refFE_vel = &feTetraP1bubble;
-//     qR_vel    = &quadRuleTetra64pt;  // DoE 2
-    bdQr_vel  = &quadRuleTria3pt;   // DoE 2
-
-    const RefFE*    refFE_press;
-    const QuadRule* qR_press;
-    const QuadRule* bdQr_press;
-
-    refFE_press = &feTetraP1;
-    qR_press    = &quadRuleTetra4pt;  // DoE 2
-    bdQr_press  = &quadRuleTria3pt;   // DoE 2
-
-    // Everything is ready to build the FE space
-
     // first the velocity FE space
 
     if (verbose)
         std::cout << "Building the velocity FE space ... " << std::flush;
 
-    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > uFESpace(meshPart,
-                                                             *refFE_vel,
-                                                             *qR_vel,
-                                                             *bdQr_vel,
-                                                             3,
-                                                             comm);
+    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > uFESpace(meshPart,"P2",3,comm);
 
     // then the pressure FE space
 
     if (verbose)
         std::cout << "Building the pressure FE space ... " << std::flush;
 
-    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > pFESpace(meshPart,
-                                                             *refFE_press,
-                                                             *qR_press,
-                                                             *bdQr_press,
-                                                             1,
-                                                             comm);
+    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > pFESpace(meshPart,"P1",1,comm);
 
 
     if (verbose)

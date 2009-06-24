@@ -192,61 +192,6 @@ main( int argc, char** argv )
     // partitioning the mesh
     partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*dataNavierStokes.mesh(), comm);
 
-
-    std::string uOrder =  dataFile( "fluid/discretization/vel_order", "P1");
-
-
-    const RefFE*    refFE_vel;
-    const QuadRule* qR_vel;
-    const QuadRule* bdQr_vel;
-
-    const RefFE*    refFE_press;
-    const QuadRule* qR_press;
-    const QuadRule* bdQr_press;
-
-    if ( uOrder.compare("P2") == 0 )
-    {
-        if (verbose) std::cout << "P2 velocity " << std::flush;
-        refFE_vel = &feTetraP2;
-        qR_vel    = &quadRuleTetra15pt; // DoE 5
-        bdQr_vel  = &quadRuleTria3pt;   // DoE 2
-    }
-    else
-        if ( uOrder.compare("P1") == 0 )
-        {
-            if (verbose) std::cout << "P1 velocity ";
-            refFE_vel = &feTetraP1;
-            qR_vel    = &quadRuleTetra4pt;  // DoE 2
-            bdQr_vel  = &quadRuleTria3pt;   // DoE 2
-        }
-        else
-            if ( uOrder.compare("P1Bubble") == 0 )
-            {
-                if (verbose) std::cout << "P1-bubble velocity " << std::flush;
-                refFE_vel = &feTetraP1bubble;
-                qR_vel    = &quadRuleTetra64pt;  // DoE 2
-                bdQr_vel  = &quadRuleTria3pt;   // DoE 2
-            }
-
-    Dof uDof(*dataNavierStokes.mesh(), *refFE_vel);
-
-    std::string pOrder =  dataFile( "fluid/discretization/press_order", "P1");
-    if ( pOrder.compare("P2") == 0 )
-    {
-        if (verbose) std::cout << "P2 pressure " << std::flush;
-        refFE_press = &feTetraP2;
-        qR_press    = &quadRuleTetra15pt; // DoE 5
-        bdQr_press  = &quadRuleTria3pt;   // DoE 2
-    }
-    else
-        if ( pOrder.compare("P1") == 0 )
-        {
-            if (verbose) std::cout << "P1 pressure";
-            refFE_press = &feTetraP1;
-            qR_press    = &quadRuleTetra4pt;  // DoE 2
-            bdQr_press  = &quadRuleTria3pt;   // DoE 2
-        }
-
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "Time discretization order " << dataNavierStokes.getBDF_order() << std::endl;
 
@@ -260,10 +205,9 @@ main( int argc, char** argv )
     if (verbose)
         std::cout << "Building the velocity FE space ... " << std::flush;
 
+    std::string uOrder =  dataFile( "fluid/space_discretization/vel_order", "P1");
     FESpace< RegionMesh3D<LinearTetra>, EpetraMap > uFESpace(meshPart,
-                                                             *refFE_vel,
-                                                             *qR_vel,
-                                                             *bdQr_vel,
+                                                             uOrder,
                                                              3,
                                                              comm);
 
@@ -272,10 +216,9 @@ main( int argc, char** argv )
     if (verbose)
         std::cout << "Building the pressure FE space ... " << std::flush;
 
+    std::string pOrder =  dataFile( "fluid/space_discretization/press_order", "P1");
     FESpace< RegionMesh3D<LinearTetra>, EpetraMap > pFESpace(meshPart,
-                                                             *refFE_press,
-                                                             *qR_press,
-                                                             *bdQr_press,
+                                                             pOrder,
                                                              1,
                                                              comm);
 

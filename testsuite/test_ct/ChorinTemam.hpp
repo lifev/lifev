@@ -476,11 +476,11 @@ void ChorinTemam<Mesh, SolverType>::setUp( const GetPot& dataFile )
     M_steady      = dataFile( "fluid/miscellaneous/steady",        1  );
 //    M_gammaBeta   = dataFile ( "fluid/sdstab/gammaBeta", 0. );
 //    M_gammaDiv    = dataFile ( "fluid/sdstab/gammaDiv", 0.);
-    M_divBetaUv   = dataFile( "fluid/discretization/div_beta_u_v", 0  );
-    M_diagonalize_u = dataFile( "fluid/discretization/diagonalizeVel",  1. );
-    M_diagonalize_p = dataFile( "fluid/discretization/diagonalizePress",  1. );
+    M_divBetaUv   = dataFile( "fluid/space_discretization/div_beta_u_v", 0  );
+    M_diagonalize_u = dataFile( "fluid/space_discretization/diagonalizeVel",  1. );
+    M_diagonalize_p = dataFile( "fluid/space_discretization/diagonalizePress",  1. );
 
-    M_hasVariationalPressure = dataFile( "fluid/discretization/variationalPn", false);
+    M_hasVariationalPressure = dataFile( "fluid/space_discretization/variationalPn", false);
     if (M_verbose) {
       if (M_hasVariationalPressure)
         std::cout << "\n  f- Chorin-Temam coupling : variational pressure" << std::endl;

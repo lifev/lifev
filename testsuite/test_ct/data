@@ -14,7 +14,7 @@ save       = 5
 density         = 1.0       
 viscosity       = 0.005 #0.005 
 
-[../time]
+[../time_discretization]
 initialtime		= 0.
 endtime			= 2.0
 timestep		= 0.035                 # timestep, e.g. 0.05 for implicit stabilization
@@ -22,15 +22,12 @@ timestep		= 0.035                 # timestep, e.g. 0.05 for implicit stabilizati
 BDF_order_vel	= 1		# 1, 2, 3
 BDF_order_press = 0		# 0 (standard Chorin-Temam), 1, 2, 3
 
-[../discretization]
+[../space_discretization]
 mesh_dir        = ./Mesh/
 #mesh_file       = cyl3D-2.mesh         # approx. 140,000 tets
 mesh_file       = cyl3D.2.2.00.mesh	# approx. 29,000 tets
-
 mesh_type       = .mesh
 
-mesh_faces      = all                   # update all faces elements
-mesh_edges      = all                   # update all faces elements
 verbose         = 0                     # verbose during mesh-reading
 linearized      = 0
 diagonalize     = 0		# weight, 0=off

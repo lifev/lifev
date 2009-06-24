@@ -85,19 +85,17 @@ useShapeDerivatives = true
 density   = 1.0               # density
 viscosity = 0.03              # viscosity
 
-[../time]
+[../time_discretization]
 initialtime		= 0
 endtime			= 0.01
 timestep		= 0.001
 BDF_order		= 1
 
-[../discretization]
+[../space_discretization]
 mesh_dir  = ./ # the directory where the mesh file is
 mesh_file = tube20.mesh  # mesh file
 vel_order       = P1            # P1, P1Bubble, P2
 press_order     = P1            # P1, P2
-mesh_faces      = all                   # update all faces elements
-mesh_edges      = all                   # update all faces elements
 
 
 
@@ -163,17 +161,15 @@ density   = 1.2               # density
 young     = 3.0E6
 poisson   = 0.30
 
-[../time]
+[../time_discretization]
 initialtime		= 0.
 endtime			= 0.01
 timestep		= 0.001
 
-[../discretization]
+[../space_discretization]
 mesh_dir  = ./  # the directory where the mesh file is
 mesh_file = vessel20.mesh  # mesh file
 order     = P1
-mesh_faces      = all                   # update all faces elements
-mesh_edges      = all                   # update all faces elements
 
 
 [../miscellaneous]

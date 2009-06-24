@@ -251,38 +251,14 @@ Structure::run3d()
 
 
 //    exit(0);
-    const RefFE*    refFE(0);
-    const QuadRule* qR(0);
-    const QuadRule* bdQr(0);
-
-    std::string pOrder =  dataFile( "solid/discretization/order", "P1");
-    if ( pOrder.compare("P2") == 0 )
-    {
-        if (verbose) std::cout << "P2 displacement " << std::flush;
-        refFE = &feTetraP2;
-        qR    = &quadRuleTetra15pt; // DoE 5
-        bdQr  = &quadRuleTria3pt;   // DoE 2
-    }
-    else
-        if ( pOrder.compare("P1") == 0 )
-        {
-            if (verbose) std::cout << "P1 displacement";
-            refFE = &feTetraP1;
-            qR    = &quadRuleTetra4pt;  // DoE 2
-            bdQr  = &quadRuleTria3pt;   // DoE 2
-        }
 
     dataStructure.setMesh(meshPart.mesh());
 
-    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > dFESpace(meshPart,
-                                                             *refFE,
-                                                             *qR,
-                                                             *bdQr,
-                                                             3,
-                                                             *d->comm);
+    std::string dOrder =  dataFile( "solid/space_discretization/order", "P1");
+    FESpace< RegionMesh3D<LinearTetra>, EpetraMap > dFESpace(meshPart,dOrder,3,*d->comm);
     if (verbose) std::cout << std::endl;
 
-    EpetraMap structMap(*refFE, meshPart, *d->comm);
+    EpetraMap structMap(dFESpace.refFE(), meshPart, *d->comm);
 
     EpetraMap fullMap;
 

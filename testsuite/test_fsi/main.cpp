@@ -467,7 +467,7 @@ int main(int argc, char** argv)
         LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 
         LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-        std::cout << "cazzo" << std::endl;
+
         FSIChecker _sp_check( data_file, "steklovPoincare" );
         _sp_check();
 
@@ -476,7 +476,7 @@ int main(int argc, char** argv)
         LifeV::Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 
         double norm1 = LifeV::norm_2( _ej_check.disp - _sp_check.disp );
-        std::cout << "cazzo" << std::endl;
+
         std::cout << "norm_2(EJ displacement)          = " << LifeV::norm_2( _ej_check.disp ) << " \n"
                   << "norm_2(SP displacement)          = " << LifeV::norm_2( _sp_check.disp ) << " \n"
                   << "norm_2(displacement error EJ/SP) = " << norm1 << "\n";

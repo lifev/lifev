@@ -35,7 +35,7 @@ AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 #-------------------------------------------------
 
 
-[discretization]
+[space_discretization]
 mesh_dir  = ./Mesh/ # the directory where the mesh file is
 #mesh_file = 179347_cm_fluid.mesh  # mesh file
 mesh_file = tube20.mesh  # mesh file
@@ -43,9 +43,6 @@ mesh_file = tube20.mesh  # mesh file
 timestep  = 0.001             # timestep
 vel_order       = P1            # P1, P1Bubble, P2
 press_order     = P1            # P1, P2
-order_bdf       = 1
-mesh_faces      = all                   # update all faces elements
-mesh_edges      = all                   # update all faces elements
 mesh_type       = .mesh
 ordering = true
 ]])

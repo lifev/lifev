@@ -34,7 +34,6 @@ AT_DATA([data],[[# -*- getpot -*- (GetPot mode activation for emacs)
 
 mesh_dir = ./
 mesh_file  = 'cube_384.m++'       # mesh file
-mesh_faces = all                    # update all faces elements
 ]])
 AT_CHECK([ln -sf $top_builddir/testsuite/'data/mesh/mesh++/'/'cube_384.m++' &&  $top_builddir/testsuite/test_essentialbc/test_essentialbc],[0],[ignore],[ignore])
 AT_CLEANUP

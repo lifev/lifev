@@ -49,20 +49,18 @@ useShapeDerivatives = false
 	[../miscellaneous]
 	verbose         = 0
 	
-	[../time]
+	[../time_discretization]
 	initialtime		= 0.
 	endtime			= 0.001
 	timestep		= 0.0001
 	BDF_order		= 1
 
-	[../discretization]
+	[../space_discretization]
 	mesh_dir        = ./
 	mesh_file       = tube20.mesh
 	mesh_type       = .mesh
-	mesh_faces      = all           # update all faces elements
-	mesh_edges      = all           # update all faces elements
+	
 	verbose         = 0             # verbose during mesh-reading
-
 	vel_order       = P1Bubble	     	# P1, P1Bubble, P2
 	press_order     = P1		    # P1, P2
 	div_beta_u_v    = 1             # 1=on, 0=off

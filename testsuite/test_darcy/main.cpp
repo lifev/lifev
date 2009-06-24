@@ -282,7 +282,7 @@ int main(int argc, char** argv)
     enum MeshElementShape{ TetraElt, HexaElt };
 
     MeshElementShape elemshape = (MeshElementShape)
-        data_file( "darcy/discretization/element_shape", TetraElt );
+        data_file( "darcy/space_discretization/element_shape", TetraElt );
 
     std::cout << "*** shape " << elemshape << std::endl;
 

@@ -160,7 +160,7 @@ else	{	// IappZygote
     //! Construction of the partitioned mesh
     partitionMesh< RegionMesh3D<LinearTetra> >   meshPart(*_data.mesh(), *d->comm);
 
-    std::string uOrder =  d->_dataFile( "electric/discretization/u_order", "P1");
+    std::string uOrder =  d->_dataFile( "electric/space_discretization/u_order", "P1");
 
     //! Initialization of the FE type and quadrature rules for both the variables
     if ( uOrder.compare("P1") == 0 )
@@ -178,7 +178,7 @@ else	{	// IappZygote
 
     Dof uDof(*_data.mesh(), *refFE_u);
 
-    std::string wOrder =  d->_dataFile( "electric/discretization/w_order", "P1");
+    std::string wOrder =  d->_dataFile( "electric/space_discretization/w_order", "P1");
     if ( wOrder.compare("P1") == 0 )
     {
         if (verbose) std::cout << "P1 recovery variable " << std::flush;

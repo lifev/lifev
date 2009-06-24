@@ -9,15 +9,15 @@
 	[./physics]
 	diffusivity     = 1.0           # diffusivity
 
-	[../discretization2D]
+	[../space_discretization2D]
 	order     = P1
 	mesh_dir  = ./Mesh/freefem/  # the directory where the mesh file is
 	mesh_type = .msh
 	mesh_file =  square20x20.msh  #square10x10.msh #square40x40
 
 
-	[../discretization3D]
-	order     = P2
+	[../space_discretization3D]
+	order     = P2_HIGH
 	mesh_dir  = ./Mesh/inria/  # the directory where the mesh file is
 	# mesh_file = cube4x4.mesh        # mesh file
 	#mesh_file = cube8x8.mesh        # mesh file

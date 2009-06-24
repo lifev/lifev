@@ -6,7 +6,6 @@
 mesh_type  = INRIA
 mesh_dir   = ../data/mesh/inria/  # the directory where the mesh file is
 mesh_file  = cube_6007.mesh       # mesh file
-mesh_faces = all                  # update all faces elements
 
 [bdf]
     endtime  = 10

@@ -14,20 +14,17 @@ save       = 1
 density         = 1.0          # density
 viscosity       = 0.005         # viscosity
 
-[../time]
+[../time_discretization]
 initialtime		= 0.
 endtime			= 1.0
 timestep        = 0.01
 BDF_order		= 1
 
-[../discretization]
+[../space_discretization]
 mesh_dir        = ./Mesh/
 mesh_file       = lid16.mesh
-
 mesh_type       = .mesh
 
-mesh_faces      = all                   # update all faces elements
-mesh_edges      = all                   # update all faces elements
 verbose         = 0                     # verbose during mesh-reading
 linearized      = 0
 diagonalize     = 0 # weight, 0=off
