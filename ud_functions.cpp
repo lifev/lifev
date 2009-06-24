@@ -279,8 +279,8 @@ Real u2(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, 
     return 0.0;
     break;
   case 3:
-      if ( t <= 0.01 )
-          return 2.3332e4;
+      if ( t <= 0.003 )
+          return 1.3332e5;
 //      return 0.01;
       return 0.0;
       break;
