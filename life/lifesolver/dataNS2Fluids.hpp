@@ -62,8 +62,8 @@ namespace LifeV {
         //@{
         DataNS2Fluids(const GetPot& datafile)
             :
-            DataMesh<mesh_type>( datafile, "navier-stokes/discretization" ),
-            DataTime( datafile, "navier-stokes/time" )
+            DataMesh<mesh_type>( datafile, "navier-stokes/space_discretization" ),
+            DataTime( datafile, "navier-stokes/time_discretization" )
         {
             // Physics
 

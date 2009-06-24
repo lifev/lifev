@@ -1849,7 +1849,7 @@ void NavierStokesHandler<Mesh, DataType>::initializeMeanValuesPerSection()
     //---------------
 
     if ( ! this->mesh().hasInternalFaces() )
-        ERROR_MSG("The mesh must have all internal faces built up. Check that 'mesh_faces = all' in the data file.");
+        ERROR_MSG("The mesh must have all internal faces built up.");// Check that 'mesh_faces = all' in the data file.");
     if ( M_nb_sections < 2 )
         ERROR_MSG("We can't compute the mean values on less than 2 sections.");
     ASSERT( this->ZSectionFinal() - this->ZSectionInit() > 0,
@@ -1906,7 +1906,7 @@ void NavierStokesHandler<Mesh, DataType>::initializeSectionsBifurc()
     //---------------
 
     if ( ! this->mesh().hasInternalFaces() )
-        ERROR_MSG("The mesh must have all internal faces built up. Check that 'mesh_faces = all' in the data file.");
+        ERROR_MSG("The mesh must have all internal faces built up.");// Check that 'mesh_faces = all' in the data file."); Check that 'mesh_faces = all' in the data file.");
     if ( M_nb_sections != 3 )
         ERROR_MSG("We a priori know that the stent lives on 3 planar sections.");
 

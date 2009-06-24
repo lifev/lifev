@@ -69,8 +69,8 @@ public:
     //! Constructor
 
     DataNavierStokes( 	const GetPot& dfile,
-						const std::string& mesh_section= "fluid/discretization",
-						const std::string& time_section= "fluid/time" );
+						const std::string& mesh_section= "fluid/space_discretization",
+						const std::string& time_section= "fluid/time_discretization" );
 
     DataNavierStokes( const DataNavierStokes& dataNavierStokes );
 
@@ -168,7 +168,7 @@ DataNavierStokes( const GetPot& dfile, const std::string& mesh_section, const st
     DataTime( dfile, time_section ),
     M_semiImplicit(false),
     M_shapeDerivatives           (false),
-    M_stabilization_list( "fluid/discretization/stabilization" )
+    M_stabilization_list( "fluid/space_discretization/stabilization" )
 {
     setup(dfile);
 }
@@ -223,17 +223,12 @@ setup(  const GetPot& dfile )
     _dump_period  = dfile( "fluid/miscellaneous/dump_period", 1 );
     M_factor      = dfile( "fluid/miscellaneous/factor", 0. );
 
-    M_uOrder      = dfile( "fluid/discretization/vel_order", "P1");
-    M_pOrder      = dfile( "fluid/discretization/press_order", "P1");
+    M_uOrder      = dfile( "fluid/space_discretization/vel_order", "P1");
+    M_pOrder      = dfile( "fluid/space_discretization/press_order", "P1");
 
-    M_stab_method = NSStabilization ( M_stabilization_list.value( dfile( "fluid/discretization/stabilization", "none") ) );
+    M_stab_method = NSStabilization ( M_stabilization_list.value( dfile( "fluid/space_discretization/stabilization", "none") ) );
 
-    M_numLM       = dfile( "fluid/discretization/numLM", 0);
-
-    // IP needs boundary faces
-    bool ipfaces =  ( M_stab_method == IP_STABILIZATION ) && (this->meshFaces() != "all" ) ;
-    if ( ipfaces ) {
-        ERROR_MSG("ERROR: IP requires boundary faces. Put mesh_faces = all in data file." ); }
+    M_numLM       = dfile( "fluid/space_discretization/numLM", 0);
 
     // semi-implicit and shape derivatives
     M_semiImplicit = dfile("problem/semiImplicit", false) ;
@@ -275,9 +270,9 @@ showMe( std::ostream& c )
     c << "amplification factor = " << M_factor << std::endl;
 
 
-    c << "\n*** Values for data [fluid/discretization]\n\n";
+    c << "\n*** Values for data [fluid/space_discretization]\n\n";
     DataMesh<Mesh>::showMe( c );
-    c << "\n*** Values for data [fluid/time]\n\n";
+    c << "\n*** Values for data [fluid/time_discretization]\n\n";
     DataTime::showMe( c );
     c << "stabilization = ";
     switch( M_stab_method )

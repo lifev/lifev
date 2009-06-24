@@ -75,8 +75,8 @@ protected:
 template <typename Mesh>
 DataConvDiffReact<Mesh>::
 DataConvDiffReact( const GetPot& dfile ) :
-        DataMesh<Mesh>( dfile, "masstransport/discretization" ),
-        DataTime( dfile, "masstransport/time" )
+        DataMesh<Mesh>( dfile, "masstransport/space_discretization" ),
+        DataTime( dfile, "masstransport/time_discretization" )
 {
 
     // physics
@@ -96,9 +96,9 @@ showMe( std::ostream& c )
     c << "reaction coefficient  = " << _react << std::endl;
     c << "stationary = " << _stationary << std::endl;
 
-    c << "\n*** Values for data [masstransport/discretization]\n\n";
+    c << "\n*** Values for data [masstransport/space_discretization]\n\n";
     DataMesh<Mesh>::showMe( c );
-    c << "\n*** Values for data [masstransport/time]\n\n";
+    c << "\n*** Values for data [masstransport/time_discretization]\n\n";
     DataTime::showMe( c );
 
 }

@@ -75,7 +75,7 @@ protected:
 template <typename Mesh>
 DataSimplifiedStructure<Mesh>::
 DataSimplifiedStructure( const GetPot& dfile ) :
-        DataMesh<Mesh>( dfile, "solid/discretization" )
+        DataMesh<Mesh>( dfile, "solid/space_discretization" )
 {
     // physics
     _rho = dfile( "solid/physics/density", 1. );
@@ -98,7 +98,7 @@ showMe( std::ostream& c ) const
     c << "young     = " << _E << std::endl;
     c << "poisson   = " << _nu << std::endl;
     c << "radius    = " << _R0 << std::endl;
-    c << "\n*** Values for data [solid/discretization]\n\n";
+    c << "\n*** Values for data [solid/space_discretization]\n\n";
     DataMesh<Mesh>::showMe();
 }
 }

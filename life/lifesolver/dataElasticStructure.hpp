@@ -137,8 +137,8 @@ private:
 template <typename Mesh>
 DataElasticStructure<Mesh>::
 DataElasticStructure( const GetPot& dfile ) :
-        DataMesh<Mesh>( dfile, "solid/discretization" ),
-        DataTime( dfile, "solid/time" )
+        DataMesh<Mesh>( dfile, "solid/space_discretization" ),
+        DataTime( dfile, "solid/time_discretization" )
 {
     // physics
     _rho     = dfile( "solid/physics/density", 1. );
@@ -150,7 +150,7 @@ DataElasticStructure( const GetPot& dfile ) :
 //    std::cout << "factor " << _factor << std::endl;
     _verbose = dfile( "solid/miscellaneous/verbose", 1 );
 
-    M_order  = dfile( "solid/discretization/order", "P1");
+    M_order  = dfile( "solid/space_discretization/order", "P1");
 
     M_thickness = dfile("solid/physics/thickness", 0.1);
 
@@ -255,9 +255,9 @@ showMe( std::ostream& c ) const
     c << "deformation factor               = " << _factor << std::endl;
     c << "verbose                          = " << _verbose << std::endl;
 
-    c << "\n*** Values for data [solid/discretization]\n\n";
+    c << "\n*** Values for data [solid/space_discretization]\n\n";
     DataMesh<Mesh>::showMe();
-    c << "\n*** Values for data [solid/time]\n\n";
+    c << "\n*** Values for data [solid/time_discretization]\n\n";
     DataTime::showMe( c );
 }
 

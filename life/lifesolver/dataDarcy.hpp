@@ -86,7 +86,7 @@ protected:
 //! constructor using a data file.
 template <typename Mesh>
 DataDarcy<Mesh>::DataDarcy(const GetPot& dfile):
-    DataMesh<Mesh>( dfile, "darcy/discretization" ),
+    DataMesh<Mesh>( dfile, "darcy/space_discretization" ),
     diffusion_tensor(3,3)
 {
     // physics

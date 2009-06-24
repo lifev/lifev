@@ -594,9 +594,11 @@ protected:
 
     virtual void resetHeAndFluid();
 
-    virtual void solidInit(const RefFE* refFE_struct, const LifeV::QuadRule* bdQr_struct, const LifeV::QuadRule* qR_struct);
+    //virtual void solidInit(const RefFE* refFE_struct, const LifeV::QuadRule* bdQr_struct, const LifeV::QuadRule* qR_struct);
+    virtual void solidInit(const std::string dOrder);
 
-    virtual void variablesInit(const RefFE* refFE_struct,const LifeV::QuadRule*  bdQr_struct, const LifeV::QuadRule* qR_struct);
+    //virtual void variablesInit(const RefFE* refFE_struct,const LifeV::QuadRule*  bdQr_struct, const LifeV::QuadRule* qR_struct);
+    virtual void variablesInit(const std::string dOrder);
 
     void transferMeshMotionOnFluid(const vector_type &_vec1,
                                    vector_type       &_vec2);

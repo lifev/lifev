@@ -66,8 +66,8 @@ public:
 
     //! Constructor
 
-    DataADR( const GetPot& dfile, 	const std::string& mesh_section= "adr/discretization",
-									const std::string& time_section= "adr/time" );
+    DataADR( const GetPot& dfile, 	const std::string& mesh_section= "adr/space_discretization",
+									const std::string& time_section= "adr/time_discretization" );
 
     DataADR( const DataADR& dataNavierStokes );
 
@@ -195,14 +195,9 @@ setup(  const GetPot& dfile )
     _dump_period = dfile( "adr/miscellaneous/dump_period", 1 );
     M_factor = dfile( "adr/miscellaneous/factor", 0. );
 
-    M_order = dfile( "adr/discretization/order", "P1");
+    M_order = dfile( "adr/space_discretization/order", "P1");
 
-    M_stab_method = ADRStabilization ( M_stabilization_list.value( dfile( "adr/discretization/stabilization", "none") ) );
-
-    // IP needs boundary faces
-    bool ipfaces =  ( M_stab_method == ADR_IP_STABILIZATION ) && (this->meshFaces() != "all" ) ;
-    if ( ipfaces ) {
-        ERROR_MSG("ERROR: IP requires boundary faces. Put mesh_faces = all in data file." ); }
+    M_stab_method = ADRStabilization ( M_stabilization_list.value( dfile( "adr/space_discretization/stabilization", "none") ) );
 
     //mean values per section
     M_computeMeanValuesPerSection =
@@ -234,9 +229,9 @@ showMe( std::ostream& c )
     c << "amplification factor = " << M_factor << std::endl;
 
 
-    c << "\n*** Values for data [adr/discretization]\n\n";
+    c << "\n*** Values for data [adr/space_discretization]\n\n";
     DataMesh<Mesh>::showMe( c );
-    c << "\n*** Values for data [adr/time]\n\n";
+    c << "\n*** Values for data [adr/time_discretization]\n\n";
     DataTime::showMe( c );
     c << "stabilization = ";
     switch( M_stab_method )

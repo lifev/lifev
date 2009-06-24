@@ -35,6 +35,14 @@ void
 FSIOperator::setup()
 {
 #ifndef TWODIM
+
+	std::string uOrder = M_dataFluid->uOrder();
+	std::string pOrder = M_dataFluid->pOrder();
+	std::string dOrder = M_dataSolid->order();
+
+	//int me       = M_epetraComm->MyPID();
+
+	/*
     const RefFE*    refFE_vel(0);
     const QuadRule* qR_vel(0);
     const QuadRule* bdQr_vel(0);
@@ -43,9 +51,6 @@ FSIOperator::setup()
     const QuadRule* qR_press(0);
     const QuadRule* bdQr_press(0);
 
-    std::string uOrder = M_dataFluid->uOrder();
-
-    // int me       = M_epetraComm->MyPID();
     leaderPrint("velocity order = " + uOrder);
 
     if ( uOrder.compare("P2") == 0 )
@@ -77,10 +82,8 @@ FSIOperator::setup()
                 exit(0);
             }
 
+	//Dof uDof(dataNavierStokes.mesh(), *refFE_vel);
 
-//    Dof uDof(dataNavierStokes.mesh(), *refFE_vel);
-
-    std::string pOrder =  M_dataFluid->pOrder();
     if ( pOrder.compare("P2") == 0 )
     {
         leaderPrint("P2 pressure ");
@@ -104,14 +107,10 @@ FSIOperator::setup()
 
     leaderPrint("\n");
 
-    Dof uDof(*M_dataFluid->mesh(), *refFE_vel);
-    Dof pDof(*M_dataFluid->mesh(), *refFE_press);
-
     const RefFE*    refFE_struct(0);
     const QuadRule* qR_struct(0);
     const QuadRule* bdQr_struct(0);
 
-    std::string dOrder = M_dataSolid->order();
     if ( dOrder.compare("P2") == 0 )
     {
         leaderPrint("P2 displacement ");
@@ -128,10 +127,9 @@ FSIOperator::setup()
     }
 
     leaderPrint("\n");
+	*/
 
     MPI_Barrier(MPI_COMM_WORLD);
-
-    Dof dDof(*M_dataSolid->mesh(), *refFE_struct);
 
 
     leaderPrint("fluid: building the FE space ... " );
@@ -146,27 +144,30 @@ FSIOperator::setup()
 
 
         M_mmFESpace.reset(new FESpace<mesh_type, EpetraMap>(*M_fluidMeshPart,
-                                                            *refFE_struct,
-                                                            *qR_struct,
-                                                            *bdQr_struct,
+															dOrder,
+															//*refFE_struct,
+                                                            //*qR_struct,
+                                                            //*bdQr_struct,
                                                             3,
                                                             *M_epetraComm));
 
 
 
         M_uFESpace.reset( new FESpace<mesh_type, EpetraMap>(*M_fluidMeshPart,
-                                                            *refFE_vel,
-                                                            *qR_vel,
-                                                            *bdQr_vel,
+															uOrder,
+                                                            //*refFE_vel,
+                                                            //*qR_vel,
+                                                            //*bdQr_vel,
                                                             3,
                                                             *M_epetraComm));
 
 
 
         M_pFESpace.reset( new FESpace<mesh_type, EpetraMap>(*M_fluidMeshPart,
-                                                            *refFE_press,
-                                                            *qR_press,
-                                                            *bdQr_press,
+															pOrder,
+                                                            //*refFE_press,
+                                                            //*qR_press,
+                                                            //*bdQr_press,
                                                             1,
                                                             *M_epetraComm));
 
@@ -185,9 +186,10 @@ FSIOperator::setup()
     else
     {
         M_mmFESpace.reset(new FESpace<mesh_type, EpetraMap>(M_dataFluid->mesh(),
-                                                            *refFE_struct,
-                                                            *qR_struct,
-                                                            *bdQr_struct,
+															dOrder,
+															//*refFE_struct,
+                                                            //*qR_struct,
+                                                            //*bdQr_struct,
                                                             3,
                                                             *M_epetraComm));
 
@@ -196,18 +198,20 @@ FSIOperator::setup()
                                                                 *M_epetraComm));
 
         M_uFESpace.reset( new FESpace<mesh_type, EpetraMap>(M_dataFluid->mesh(),
-                                                            *refFE_vel,
-                                                            *qR_vel,
-                                                            *bdQr_vel,
+															uOrder,
+                                                            //*refFE_vel,
+                                                            //*qR_vel,
+                                                            //*bdQr_vel,
                                                             3,
                                                             *M_epetraComm));
 
 
 
         M_pFESpace.reset( new FESpace<mesh_type, EpetraMap>(M_dataFluid->mesh(),
-                                                            *refFE_press,
-                                                            *qR_press,
-                                                            *bdQr_press,
+															pOrder,
+                                                            //*refFE_press,
+                                                            //*qR_press,
+                                                            //*bdQr_press,
                                                             1,
                                                             *M_epetraComm));
 
@@ -233,7 +237,8 @@ FSIOperator::setup()
     if (this->isSolid())
     {
 
-        solidInit(refFE_struct, bdQr_struct, qR_struct);
+        //solidInit(refFE_struct, bdQr_struct, qR_struct);
+    	solidInit(dOrder);
 
         leaderPrint("solid: ok.\n");
 
@@ -241,9 +246,10 @@ FSIOperator::setup()
     else
     {
         M_dFESpace.reset(new FESpace<mesh_type, EpetraMap>(M_dataSolid->mesh(),
-                                                           *refFE_struct,
-                                                           *qR_struct,
-                                                           *bdQr_struct,
+															dOrder,
+                                                           //*refFE_struct,
+                                                           //*qR_struct,
+                                                           //*bdQr_struct,
                                                            3,
                                                            *M_epetraComm));
 
@@ -262,7 +268,12 @@ FSIOperator::setup()
 
     }
 
-
+    //Dof uDof(*M_dataFluid->mesh(), *refFE_vel);
+    //Dof pDof(*M_dataFluid->mesh(), *refFE_press);
+    //Dof dDof(*M_dataSolid->mesh(), *refFE_struct);
+    Dof uDof(*M_dataFluid->mesh(), M_uFESpace->refFE());
+    Dof pDof(*M_dataFluid->mesh(), M_pFESpace->refFE());
+    Dof dDof(*M_dataSolid->mesh(), M_dFESpace->refFE());
 
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -358,7 +369,8 @@ FSIOperator::setup()
                                             pointerToDofs,
                                             1,
                                             *M_epetraWorldComm));
-    variablesInit( refFE_struct, bdQr_struct, qR_struct);
+    //variablesInit( refFE_struct, bdQr_struct, qR_struct);
+    variablesInit(dOrder);
     M_epetraWorldComm->Barrier();
 
     leaderPrint(" done.\n");
@@ -1589,13 +1601,15 @@ void FSIOperator::resetHeAndFluid()
     M_bdf->initialize_unk(u0);
 }
 
-void FSIOperator::solidInit(const RefFE* refFE_struct, const LifeV::QuadRule* bdQr_struct, const LifeV::QuadRule* qR_struct)
+//void FSIOperator::solidInit(const RefFE* refFE_struct, const LifeV::QuadRule* bdQr_struct, const LifeV::QuadRule* qR_struct)
+void FSIOperator::solidInit(const std::string dOrder)
 {
     M_solidMeshPart.reset( new  partitionMesh< mesh_type > (*M_dataSolid->mesh(), *M_epetraComm));
     M_dFESpace.reset(new FESpace<mesh_type, EpetraMap>(*M_solidMeshPart,
-                                                       *refFE_struct,
-                                                       *qR_struct,
-                                                       *bdQr_struct,
+														dOrder,
+                                                       //*refFE_struct,
+                                                       //*qR_struct,
+                                                       //*bdQr_struct,
                                                        3,
                                                        *M_epetraComm));
 
@@ -1609,7 +1623,8 @@ void FSIOperator::solidInit(const RefFE* refFE_struct, const LifeV::QuadRule* bd
     //                                                                         *M_epetraComm));
 }
 
-void FSIOperator::variablesInit(const RefFE* refFE_struct,const LifeV::QuadRule*  bdQr_struct, const LifeV::QuadRule* qR_struct)
+//void FSIOperator::variablesInit(const RefFE* refFE_struct,const LifeV::QuadRule*  bdQr_struct, const LifeV::QuadRule* qR_struct)
+void FSIOperator::variablesInit(const std::string dOrder)
 {
     // INITIALIZATION OF THE VARIABLES
     M_lambdaFluid.reset(new vector_type(*M_fluidInterfaceMap, Unique) );

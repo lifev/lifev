@@ -689,17 +689,20 @@ diagonalScale(vector_type& rhs, matrix_ptrtype matrFull)
 }
 
 
-void Monolithic::solidInit(const RefFE* refFE_struct,const LifeV::QuadRule*  bdQr_struct, const LifeV::QuadRule* qR_struct)
+//void Monolithic::solidInit(const RefFE* refFE_struct,const LifeV::QuadRule*  bdQr_struct, const LifeV::QuadRule* qR_struct)
+void Monolithic::solidInit(const std::string dOrder)
 {   // Monolitic: In the beginning I need a non-partitioned mesh. later we will do the partitioning
     M_dFESpace.reset(new FESpace<mesh_type, EpetraMap>(M_dataSolid->mesh(),
-                                                       *refFE_struct,
-                                                       *qR_struct,
-                                                       *bdQr_struct,
+														dOrder,
+                                                       //*refFE_struct,
+                                                       //*qR_struct,
+                                                       //*bdQr_struct,
                                                        3,
                                                        *M_epetraComm));
 }
 
-void Monolithic::variablesInit(const RefFE* refFE_struct,const LifeV::QuadRule*  bdQr_struct, const LifeV::QuadRule* qR_struct)
+//void Monolithic::variablesInit(const RefFE* refFE_struct,const LifeV::QuadRule*  bdQr_struct, const LifeV::QuadRule* qR_struct)
+void Monolithic::variablesInit(const std::string dOrder)
 {
     //EpetraMap interfaceMap(*M_solidInterfaceMap);
     //   M_solidMeshPart.reset( new  partitionMesh< FSIOperator::mesh_type > (*M_dataSolid->mesh(), *M_epetraComm, M_solidInterfaceMap->getMap(Unique).get(), M_solidInterfaceMap->getMap(Repeated).get()));
@@ -714,9 +717,10 @@ void Monolithic::variablesInit(const RefFE* refFE_struct,const LifeV::QuadRule* 
     M_solidMeshPart.reset( new  partitionMesh< mesh_type > (*M_dataSolid->mesh(), *M_epetraComm));
 
     M_dFESpace.reset(new FESpace<mesh_type, EpetraMap>(*M_solidMeshPart,
-                                                       *refFE_struct,
-                                                       *qR_struct,
-                                                       *bdQr_struct,
+														dOrder,
+                                                       //*refFE_struct,
+                                                       //*qR_struct,
+                                                       //*bdQr_struct,
                                                        3,
                                                        *M_epetraComm));
     // INITIALIZATION OF THE VARIABLES

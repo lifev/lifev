@@ -378,7 +378,7 @@ template<typename Mesh, typename SolverType>
 void BidomainSolver<Mesh, SolverType>::setUp( const GetPot& dataFile )
 {
 
-    M_diagonalize = dataFile( "electric/discretization/diagonalize",  1. );
+    M_diagonalize = dataFile( "electric/space_discretization/diagonalize",  1. );
 
     M_reusePrec   = dataFile( "electric/prec/reuse", true);
 

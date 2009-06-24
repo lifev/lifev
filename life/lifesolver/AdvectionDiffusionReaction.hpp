@@ -395,8 +395,8 @@ void ADRSolver<Mesh, SolverType>::setUp( const GetPot& dataFile )
     M_gammaBeta   = dataFile( "fluid/ipstab/gammaBeta", 0. );
     M_gammaDiv    = dataFile( "fluid/ipstab/gammaDiv", 0. );
     M_gammaPress  = dataFile( "fluid/ipstab/gammaPress", 0. );
-    M_divBetaUv   = dataFile( "fluid/discretization/div_beta_u_v", 0);
-    M_diagonalize = dataFile( "fluid/discretization/diagonalize", 1.);
+    M_divBetaUv   = dataFile( "fluid/space_discretization/div_beta_u_v", 0);
+    M_diagonalize = dataFile( "fluid/space_discretization/diagonalize", 1.);
 
     M_linearSolver.setDataFromGetPot( dataFile, "fluid" );
 

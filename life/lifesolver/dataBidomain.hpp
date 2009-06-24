@@ -138,8 +138,8 @@ private:
 template <typename Mesh>
 DataBidomain<Mesh>::
 DataBidomain( boost::shared_ptr<HeartFunctors> heart_fct ) :
-    DataMesh<Mesh>( heart_fct->_dataFile, "electric/discretization" ),
-    DataTime( heart_fct->_dataFile, "electric/time" ),
+    DataMesh<Mesh>( heart_fct->_dataFile, "electric/space_discretization" ),
+    DataTime( heart_fct->_dataFile, "electric/time_discretization" ),
     red_sigma_sphere(heart_fct->get_reduced_sigma_sphere() ),
     red_sigma_cyl(heart_fct->get_reduced_sigma_cylinder() ),
     red_sigma_box(heart_fct->get_reduced_sigma_box() )
@@ -200,14 +200,14 @@ setup(  const GetPot& dfile )
     M_heart_diff_fct = dfile("electric/physics/heart_diff_fct",0);
     M_verbose = dfile( "electric/miscellaneous/verbose", 1 );
     M_post_dir  = dfile("electric/miscellaneous/post_dir","./");
-    M_uOrder = dfile( "electric/discretization/u_order", "P1");
-    M_has_fibers = dfile( "electric/discretization/has_fibers", 0);
+    M_uOrder = dfile( "electric/space_discretization/u_order", "P1");
+    M_has_fibers = dfile( "electric/space_discretization/has_fibers", 0);
     if (M_has_fibers)
     {
-    	std::string fibers_dir = dfile( "electric/discretization/fibers_dir", this->meshDir().c_str() );
+    	std::string fibers_dir = dfile( "electric/space_discretization/fibers_dir", this->meshDir().c_str() );
     	std::string fibers_file = this->meshFile();
     	fibers_file.replace(fibers_file.find(".mesh"), 5, "fibers");
-    	M_fibers_file = fibers_dir + dfile( "electric/discretization/fibers_file", fibers_file.c_str() );
+    	M_fibers_file = fibers_dir + dfile( "electric/space_discretization/fibers_file", fibers_file.c_str() );
       	std::cout<<"Fibers File: "<<M_fibers_file<<std::endl;
     }
     else

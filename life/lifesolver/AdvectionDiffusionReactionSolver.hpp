@@ -528,7 +528,7 @@ void ADRSolver<Mesh, SolverType>::setUp( const GetPot& dataFile )
     M_stab        = dataFile( "adr/stab/type",                   "ip");
     M_gammaBeta   = dataFile( "adr/stab/gammaBeta",              0. );
     M_reuseStab   = dataFile( "adr/stab/reuse",                  true);
-    M_diagonalize = dataFile( "adr/discretization/diagonalize",  0. );
+    M_diagonalize = dataFile( "adr/space_discretization/diagonalize",  0. );
 
 
     M_linearSolver.setDataFromGetPot( dataFile, "adr/solver" );

@@ -243,7 +243,7 @@ template <typename Mesh>
 IndependentRing<Mesh>::
 IndependentRing( const GetPot& dfile, const EntityFlag& marker ) :
         DataSimplifiedStructure<Mesh>( dfile ),
-        DataTime( dfile, "solid/time" ),
+        DataTime( dfile, "solid/time_discretization" ),
         _marker( marker ),
         _dof( _mesh, _mesh.getRefFE() ),
         _eta_nplus1( _dof.numTotalDof() ),

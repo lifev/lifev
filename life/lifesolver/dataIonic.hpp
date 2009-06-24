@@ -96,8 +96,8 @@ private:
 template <typename Mesh>
 DataIonic<Mesh>::
 DataIonic( const GetPot& dfile ) :
-    DataMesh<Mesh>( dfile, "electric/discretization" ),
-    DataTime( dfile, "electric/time" )
+    DataMesh<Mesh>( dfile, "electric/space_discretization" ),
+    DataTime( dfile, "electric/time_discretization" )
 {
     setup(dfile);
 }
