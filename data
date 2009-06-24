@@ -74,7 +74,7 @@ factor    = 1
 #scaling         = none
 #output          = all_res  #none
 #conv            = rhs
-#max_iter        = 100
+max_iter        = 100
 #kspace          = 100
 #tol             = 1.e-10    # AztecOO tolerance
 
@@ -90,13 +90,13 @@ factor    = 1
 #relax_value     = 1
 
 [../ipstab]
-gammaBeta  = 0.02
-gammaDiv   = 0.2
-gammaPress = 0.2
+gammaBeta  = 0.5
+gammaDiv   = 0.5
+gammaPress = 0.5
+reuse = true
 #gammaBeta  = 0.125
 #gammaDiv   = 0.125
 #gammaPress = 0.03125
-reuse = true
 
 
 [interface] # mesh dependent flags for the interface.
