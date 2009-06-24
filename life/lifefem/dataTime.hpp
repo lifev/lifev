@@ -55,7 +55,7 @@ public:
      */
 	//@{
 
-    DataTime( const GetPot& dfile, const std::string& section = "time" );
+    DataTime( const GetPot& dfile, const std::string& section = "time_discretization" );
 
     DataTime( const DataTime& dataTime);
 
@@ -102,8 +102,15 @@ public:
 
 
 
-    //! Ouptut
+    /** @name General Functions
+     */
+	//@{
+
+    void updateTime() { M_time += M_timeStep; }
+
     virtual void showMe( std::ostream& output = std::cout ) const;
+
+    //@}
 
 private:
 

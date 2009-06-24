@@ -27,7 +27,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
   \date 06/2009
   \author Cristiano Malossi<cristiano.malossi@epfl.ch>
 
-  \brief File containing a class for handling temporal discretization
+  \brief File containing a class for handling temporal discretization.
 */
 #include <life/lifefem/dataTime.hpp>
 
@@ -38,13 +38,13 @@ namespace LifeV
 DataTime::DataTime( const GetPot& dfile, const std::string& section ) :
 	M_initialTime	( dfile(( section + "/initialtime" 	).data(), 0.) ),
 	M_endTime		( dfile(( section + "/endtime" 		).data(), 1.) ),
-	M_time			( 0. ),
+	M_time			( M_initialTime ),
 	M_timeStep		( dfile(( section + "/timestep" ).data(), 1.) ),
 	M_BDF_order		( dfile(( section + "/BDF_order" ).data(), 1 ) )
 {
 }
 
-DataTime::DataTime(const DataTime& dataTime)
+DataTime::DataTime( const DataTime& dataTime )
 {
 	M_initialTime	= dataTime.M_initialTime;
 	M_endTime		= dataTime.M_endTime;
@@ -59,7 +59,7 @@ void DataTime::showMe( std::ostream& output ) const
 	output << "Initial time = " << M_initialTime	<< std::endl;
 	output << "End time     = " << M_endTime		<< std::endl;
 	output << "Time         = " << M_time			<< std::endl;
-	output << "Timestep     = " << M_timeStep		<< std::endl;
+	output << "TimeStep     = " << M_timeStep		<< std::endl;
 	output << "BDF order    = " << M_BDF_order  	<< std::endl;
 }
 
