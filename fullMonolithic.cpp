@@ -233,14 +233,14 @@ fullMonolithic::evalResidual( vector_type&       res,
             M_meshMotion->setMatrix(M_monolithicMatrix);
 
             super::evalResidual( *M_BCh_u, *M_BCh_d, disp, this->M_rhsFull, res, false);
-            if(M_DDBlockPrec>=2 /*&& M_DDBlockPrec!=5*/)
+            if(M_DDBlockPrec>=2 && M_DDBlockPrec!=5)
             {
                 if(!M_robinCoupling.get())
                     {
                         M_robinCoupling.reset( new matrix_type(*M_monolithicMap));
                         super::robinCoupling(M_robinCoupling, M_alphaf, M_alphas);
                         M_robinCoupling->GlobalAssemble();
-                        //M_robinCoupling->spy("robinCoupling");
+                        M_robinCoupling->spy("robinCoupling");
                     }
                 //super::applyPreconditioner(M_robinCoupling);
                 //this->M_solid->evalResidual( disp, res, false);
@@ -274,7 +274,7 @@ void fullMonolithic::solveJac(vector_type       &_muk,
             if(M_DDBlockPrec==6)
                 {
                     M_bigPrecPtr.reset(new matrix_type(*M_monolithicMatrix));
-                    M_bigPrecPtr->GlobalAssemble();
+                    //bigPrecPtr->GlobalAssemble();
                 }
             matrix_ptrtype monolithicMatrix(new matrix_type(*M_monolithicMap));
             *monolithicMatrix+=*M_monolithicMatrix;
@@ -307,6 +307,7 @@ void fullMonolithic::solveJac(vector_type       &_muk,
             {
                 super::applyPreconditioner(M_robinCoupling, rhs);
                 super::applyPreconditioner(M_robinCoupling, M_bigPrecPtr);
+		M_bigPrecPtr->GlobalAssemble();
             }
             break;
 

@@ -78,13 +78,13 @@ void Monolithic::setup()
 
             M_monolithicMap.reset(new EpetraMap(M_uFESpace->map()));
             *M_monolithicMap+= M_pFESpace->map();
-            std::vector<int> lagrangeMult(0);
-            if(M_BCh_u->getFluxes())
-// if we impose the fluxes we need to modify the map
-                for(UInt i=0; i<M_BCh_u->getFluxes(); ++i)
-                    lagrangeMult.push_back(i);
-            EpetraMap newMap = EpetraMap(-1, lagrangeMult.size(), &lagrangeMult[0], M_monolithicMap->getMap(Repeated)->IndexBase()/*1*/, *M_epetraWorldComm);
-	    *M_monolithicMap+= newMap;
+//             std::vector<int> lagrangeMult(0);
+//             if(M_BCh_u->getFluxes())
+// // if we impose the fluxes we need to modify the map
+//                 for(UInt i=0; i<M_BCh_u->getFluxes(); ++i)
+//                     lagrangeMult.push_back(i);
+//             EpetraMap newMap = EpetraMap(-1, lagrangeMult.size(), &lagrangeMult[0], M_monolithicMap->getMap(Repeated)->IndexBase()/*1*/, *M_epetraWorldComm);
+// 	    *M_monolithicMap+= newMap;
 
             *M_monolithicMap+= M_dFESpace->map();
 
@@ -147,7 +147,7 @@ void Monolithic::setup()
                         }
                 }// so the map for the coupling part of the matrix is just Unique
 
-            newMap = EpetraMap(-1, couplingVector.size(), &couplingVector[0], M_monolithicMap->getMap(Repeated)->IndexBase()/*1*/, *M_epetraWorldComm);
+            EpetraMap newMap = EpetraMap(-1, couplingVector.size(), &couplingVector[0], M_monolithicMap->getMap(Repeated)->IndexBase()/*1*/, *M_epetraWorldComm);
             *M_monolithicMap  += newMap;
 
             //            std::cout<<"map global elements : "<<M_monolithicMap.getMap(Unique)->NumGlobalElements()<<std::endl;
@@ -611,7 +611,7 @@ Monolithic::evalResidual( vector_type&       res,
             M_rhsFull.reset(new vector_type(*M_rhs));
             evalResidual( *M_BCh_u, *M_BCh_d, disp, M_rhsFull, res, M_diagonalScale);
 
-            if(M_DDBlockPrec>=2 && M_DDBlockPrec<6)
+            if(M_DDBlockPrec>=2 && M_DDBlockPrec!=5)
             {
                 if(!M_robinCoupling.get())
                     {
@@ -622,7 +622,7 @@ Monolithic::evalResidual( vector_type&       res,
                 this->applyPreconditioner(M_robinCoupling, M_rhs);
             }
 
-            if(M_DDBlockPrec<5)
+            if(M_DDBlockPrec!=5)
                 M_bigPrecPtr.reset(new matrix_type(*M_monolithicMap));
             M_nbEval++ ;
         }
@@ -896,7 +896,7 @@ applyPreconditioner( matrix_ptrtype robinCoupling, vector_ptrtype& rhs)
 }
 
 void Monolithic::
-applyPreconditioner( matrix_ptrtype robinCoupling, matrix_ptrtype prec )
+applyPreconditioner( matrix_ptrtype robinCoupling, matrix_ptrtype& prec )
 {
     matrix_type tmpMatrix(*prec);
     tmpMatrix.GlobalAssemble();

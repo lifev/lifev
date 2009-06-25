@@ -256,7 +256,7 @@ void iterateMonolithic(vector_type& rhs, vector_type& step, matrix_ptrtype prec,
     //!\small left-multiply both the monolithic matrix and the rhs times a preconditioner matrix
     void applyPreconditioner(matrix_ptrtype robinCoupling, vector_ptrtype& rhs);
     //!\small left-multiply the monolithic matrix, the rhs and the preconditioner times a preconditioner matrix
-    void applyPreconditioner( matrix_ptrtype robinCoupling, matrix_ptrtype prec );
+    void applyPreconditioner( matrix_ptrtype robinCoupling, matrix_ptrtype& prec );
     //void setAztecooPreconditioner(const GetPot& dataFile, const std::string& section){M_linearSolver->setAztecooPreconditioner( dataFile, section);}
 
     //!\small adds the constant part to the monolithic matrix
@@ -341,7 +341,8 @@ iterateMonolithic(vector_type& rhs, vector_type& step, matrix_ptrtype prec, Solv
     chrono.start();
 
     // boundary conditions applied in the residual evaluation
-    M_monolithicMatrix->spy("j");
+    //M_monolithicMatrix->spy("j");
+    //prec->spy("p");
 
     chrono.stop();
     M_solid->getDisplayer().leaderPrintMax("done in ", chrono.diff() );
