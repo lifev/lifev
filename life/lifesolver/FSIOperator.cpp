@@ -42,7 +42,7 @@ FSIOperator::setup()
 
 	//int me       = M_epetraComm->MyPID();
 
-	/*
+
     const RefFE*    refFE_vel(0);
     const QuadRule* qR_vel(0);
     const QuadRule* bdQr_vel(0);
@@ -127,7 +127,7 @@ FSIOperator::setup()
     }
 
     leaderPrint("\n");
-	*/
+
 
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -144,30 +144,30 @@ FSIOperator::setup()
 
 
         M_mmFESpace.reset(new FESpace<mesh_type, EpetraMap>(*M_fluidMeshPart,
-															dOrder,
-															//*refFE_struct,
-                                                            //*qR_struct,
-                                                            //*bdQr_struct,
+															//dOrder,
+															*refFE_struct,
+                                                            *qR_struct,
+                                                            *bdQr_struct,
                                                             3,
                                                             *M_epetraComm));
 
 
 
         M_uFESpace.reset( new FESpace<mesh_type, EpetraMap>(*M_fluidMeshPart,
-															uOrder,
-                                                            //*refFE_vel,
-                                                            //*qR_vel,
-                                                            //*bdQr_vel,
+															//uOrder,
+                                                            *refFE_vel,
+                                                            *qR_vel,
+                                                            *bdQr_vel,
                                                             3,
                                                             *M_epetraComm));
 
 
 
         M_pFESpace.reset( new FESpace<mesh_type, EpetraMap>(*M_fluidMeshPart,
-															pOrder,
-                                                            //*refFE_press,
-                                                            //*qR_press,
-                                                            //*bdQr_press,
+															//pOrder,
+                                                            *refFE_press,
+                                                            *qR_press,
+                                                            *bdQr_press,
                                                             1,
                                                             *M_epetraComm));
 
@@ -186,10 +186,10 @@ FSIOperator::setup()
     else
     {
         M_mmFESpace.reset(new FESpace<mesh_type, EpetraMap>(M_dataFluid->mesh(),
-															dOrder,
-															//*refFE_struct,
-                                                            //*qR_struct,
-                                                            //*bdQr_struct,
+															//dOrder,
+															*refFE_struct,
+                                                            *qR_struct,
+                                                            *bdQr_struct,
                                                             3,
                                                             *M_epetraComm));
 
@@ -198,20 +198,20 @@ FSIOperator::setup()
                                                                 *M_epetraComm));
 
         M_uFESpace.reset( new FESpace<mesh_type, EpetraMap>(M_dataFluid->mesh(),
-															uOrder,
-                                                            //*refFE_vel,
-                                                            //*qR_vel,
-                                                            //*bdQr_vel,
+															//uOrder,
+                                                            *refFE_vel,
+                                                            *qR_vel,
+                                                            *bdQr_vel,
                                                             3,
                                                             *M_epetraComm));
 
 
 
         M_pFESpace.reset( new FESpace<mesh_type, EpetraMap>(M_dataFluid->mesh(),
-															pOrder,
-                                                            //*refFE_press,
-                                                            //*qR_press,
-                                                            //*bdQr_press,
+															//pOrder,
+                                                            *refFE_press,
+                                                            *qR_press,
+                                                            *bdQr_press,
                                                             1,
                                                             *M_epetraComm));
 
@@ -246,10 +246,10 @@ FSIOperator::setup()
     else
     {
         M_dFESpace.reset(new FESpace<mesh_type, EpetraMap>(M_dataSolid->mesh(),
-															dOrder,
-                                                           //*refFE_struct,
-                                                           //*qR_struct,
-                                                           //*bdQr_struct,
+                                                           //dOrder,
+                                                           *refFE_struct,
+                                                           *qR_struct,
+                                                           *bdQr_struct,
                                                            3,
                                                            *M_epetraComm));
 
@@ -257,8 +257,8 @@ FSIOperator::setup()
 
 
         M_solid.reset(new solid_raw_type(dataSolid(),
-                                                      *M_dFESpace,
-                                                      *M_epetraComm));
+                                         *M_dFESpace,
+                                         *M_epetraComm));
 
 
 //         if (M_linearSolid)
@@ -1591,6 +1591,8 @@ void FSIOperator::resetHeAndFluid()
     M_meshMotion.reset(new meshmotion_raw_type(*M_mmFESpace,
                                                *M_epetraComm));
     UInt numLM = dataFluid().numLM();
+
+    std::cout << " numLM = " << numLM << std::endl;
     M_fluid.reset(new fluid_raw_type(dataFluid(),
                                      *M_uFESpace,
                                      *M_pFESpace,
