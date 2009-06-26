@@ -22,6 +22,8 @@
 #include "life/lifesolver/fixedPointBase.hpp"
 
 
+//#define FLUX
+
 namespace LifeV
 {
 
@@ -51,7 +53,7 @@ FSIOperator::fluid_bchandler_type BCh_harmonicExtension(FSIOperator &_oper)
     BCh_he->addBC("Top",         3, Essential, Full, bcf,   3);
     BCh_he->addBC("Base",        2, Essential, Full, bcf,   3);
     BCh_he->addBC("EdgesIn",     20, Essential, Full, bcf,   3);
-    //BCh_he->addBC("EdgesOut",    30, Essential, Full, bcf,   3);
+    BCh_he->addBC("EdgesOut",    30, Essential, Full, bcf,   3);
 
 
     if (_oper.method() == "steklovPoincare")
@@ -102,18 +104,22 @@ FSIOperator::fluid_bchandler_type BCh_fluid(FSIOperator &_oper)
     BCFunctionBase out_flow      (fZero);
 
 
-    //BCh_fluid->addBC("InFlow" , 2,  Natural,   Full, in_flow, 3);
-    BCh_fluid->addBC("InFlow" ,   2,  Flux,   Full, in_flow_flux, 3);
-    BCh_fluid->addBC("OutFlow",   3,  Natural,   Full, out_flow, 3);
-    BCh_fluid->addBC("EdgesIn",  20, Essential, Full, bcf,  3);
-    //BCh_fluid->addBC("EdgesOut", 30, Essential, Full, bcf,  3);
-
+#ifdef FLUX
     int numTotalDofs = _oper.uFESpace().map().getMap(Unique)->NumGlobalElements() +
         _oper.pFESpace().map().getMap(Unique)->NumGlobalElements();
-
-
+    BCh_fluid->addBC("InFlow" ,   2,  Flux,   Full, in_flow_flux, 3);
     std::cout << "numTotalDofs = " << numTotalDofs << std::endl;
     BCh_fluid->setOffset("InFlow", numTotalDofs);
+#else
+    BCh_fluid->addBC("InFlow" , 2,  Natural,   Full, in_flow, 3);
+#endif
+
+    BCh_fluid->addBC("OutFlow",   3,  Natural,   Full, out_flow, 3);
+    BCh_fluid->addBC("EdgesIn",  20, Essential, Full, bcf,  3);
+    BCh_fluid->addBC("EdgesOut", 30, Essential, Full, bcf,  3);
+
+
+
 
     //    BCh_fluid->showMe();
 
@@ -156,7 +162,7 @@ FSIOperator::fluid_bchandler_type BCh_fluidInv(FSIOperator &_oper)
 
     BCh_fluidInv->addBC("InFlow", 2,  Natural,   Full, in_flow, 3);
     BCh_fluidInv->addBC("EdgesIn",  20, Essential, Full, bcf,     3);
-    //BCh_fluidInv->addBC("EdgesOut",  30, Essential, Full, bcf,     3);
+    BCh_fluidInv->addBC("EdgesOut",  30, Essential, Full, bcf,     3);
 
     return BCh_fluidInv;
 }
@@ -176,20 +182,22 @@ FSIOperator::fluid_bchandler_type BCh_fluidLin(FSIOperator &_oper)
     BCFunctionBase bcf(fZero);
     BCFunctionBase in_flow(u2);
 
-    //BCh_fluidLin->addBC("InFlow",  2,  Natural,   Full, bcf,     3);
+#ifdef FLUX
     BCh_fluidLin->addBC("InFlow",   2,       Flux, Full, bcf,     3);
-    BCh_fluidLin->addBC("outFlow",  3,    Natural, Full, bcf,     3);
-    BCh_fluidLin->addBC("Edges",   20,  Essential, Full, bcf,     3);//this condition must be equal to the one
-
     int numTotalDofs = _oper.uFESpace().map().getMap(Unique)->NumGlobalElements() +
         _oper.pFESpace().map().getMap(Unique)->NumGlobalElements();
 
     BCh_fluidLin->setOffset("InFlow", numTotalDofs);
+#else
+    //BCh_fluidLin->addBC("InFlow",  2,  Natural,   Full, bcf,     3);
+#endif
 
-    //BCh_fluidLin->addBC("Edges",  30,  Essential, Full, bcf,     3);//this condition must be equal to the one
-    //in BCh_fluid. Now it is set to 0 because the mesh displacement is zero in this part of the boundary
+    BCh_fluidLin->addBC("outFlow",  3,    Natural, Full, bcf,     3);
+    BCh_fluidLin->addBC("Edges",   20,  Essential, Full, bcf,     3);//this condition must be equal to the one
 
-//    BCh_fluidLin->addBC("interface",  1,  Essential,   Full, bcf,     3);
+    BCh_fluidLin->addBC("Edges",  30,  Essential, Full, bcf,     3);//this condition must be equal to the one
+
+    //BCh_fluidLin->addBC("ainterface",  1,  Essential,   Full, bcf,     3);
 
 
     if (_oper.method() == "steklovPoincare")
@@ -231,8 +239,8 @@ FSIOperator::solid_bchandler_type BCh_solid(FSIOperator &_oper)
 
     std::vector<ID> zComp(1);
     zComp[0] = 3;
-    //    BCh_solid->addBC("Edges",    30, Essential, Component, bcf,  zComp);
-    //BCh_solid->addBC("EdgesOut",    30, Essential, Full, bcf,  3);
+    //BCh_solid->addBC("Edges",    30, Essential, Component, bcf,  zComp);
+    BCh_solid->addBC("EdgesOut",    30, Essential, Full, bcf,  3);
 
 //     Debug(10000) << "SP harmonic extension\n";
 
@@ -284,8 +292,8 @@ FSIOperator::solid_bchandler_type BCh_solidLin(FSIOperator &_oper)
     std::vector<ID> zComp(1);
     zComp[0] = 3;
 
-    //    BCh_solidLin->addBC("Edges",    30, Essential, Component, bcf,  zComp);
-    //BCh_solidLin->addBC("EdgesOut",    30, Essential, Full, bcf,  3);
+    //BCh_solidLin->addBC("Edges",    30, Essential, Component, bcf,  zComp);
+    BCh_solidLin->addBC("EdgesOut",    30, Essential, Full, bcf,  3);
 
     if (_oper.method() == "steklovPoincare")
     {
