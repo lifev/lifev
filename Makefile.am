@@ -26,7 +26,7 @@ AM_CPPFLAGS = -DNO_BLASLAPACK
 
 lib_LTLIBRARIES	= liblifemcsolver.la
 
-liblifemcsolver_la_SOURCES   = Monolithic.cpp, fullMonolithic.cpp
+liblifemcsolver_la_SOURCES   = Monolithic.cpp fullMonolithic.cpp
 
 liblifemcsolver_la_LIBADD    = -llifesolver
 
