@@ -51,9 +51,9 @@
 
 
 // ===================================================
-//! Namespaces
+//! Namespaces & Enums
 // ===================================================
-using namespace LifeV;
+namespace LifeV {
 
 typedef std::map<std::string, Real>		variables_type;
 typedef std::vector<Real>				results_type;
@@ -486,5 +486,7 @@ private:
     //@}
 
 };
+
+} // Namespace LifeV
 
 #endif /* __SpiritParser_H */

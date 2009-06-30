@@ -32,9 +32,7 @@
 
 #include <lifemc/lifecore/SpiritParser.hpp>
 
-
-
-
+namespace LifeV {
 
 // ===================================================
 //! Constructor & Destructor
@@ -206,3 +204,5 @@ SpiritParser::ruleTheString( std::string& string )
 
 	Debug( 5030 ) << "                       (after) - M_string: " << string 	<< "\n";
 }
+
+} // Namespace LifeV
