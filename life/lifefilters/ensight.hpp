@@ -185,7 +185,7 @@ void Ensight<Mesh>::postProcess(const Real& time)
 
     if ( this->M_postfix != "***" )
         {
-            if (!this->M_procId) std::cout << "  x-  Ensight post-processing..."<< std::endl;
+            if (!this->M_procId) std::cout << "  x-  Ensight post-processing ...        " << std::flush;
             Chrono chrono;
             chrono.start();
             for (Iterator i=this->M_listData.begin(); i != this->M_listData.end(); ++i)
@@ -237,7 +237,7 @@ void Ensight<Mesh>::M_wr_ascii_scalar(const ExporterData& dvar)
 
     UInt start = dvar.start();
     //    UInt nVert = this->M_mesh->numVertices();
-    UInt nVert = this->M_LtGNodesMap.size();
+    UInt nVert = static_cast<UInt> (this->M_LtGNodesMap.size());
     sclf<<"Scalar per node\n";
     //for (UInt i=start;i<dim;++i)
 
@@ -275,7 +275,7 @@ template <typename Mesh> void Ensight<Mesh>::M_wr_ascii_vector(const ExporterDat
     UInt dim   = dvar.dim();
     UInt start = dvar.start();
     //    UInt nVert = this->M_mesh->numVertices();
-    UInt nVert = this->M_LtGNodesMap.size();
+    UInt nVert = static_cast<UInt> (this->M_LtGNodesMap.size());
 
     vctf<<"Vector per node\n";
     //for (UInt i=start;i<dim;++i)
@@ -535,7 +535,7 @@ void Ensight<Mesh>::M_rd_ascii_scalar( ExporterData& dvar )
 //    UInt dim = dvar.dim();
     UInt start = dvar.start();
     //    UInt nVert = this->M_mesh->numVertices();
-    UInt nVert = this->M_LtGNodesMap.size();
+    UInt nVert = static_cast<UInt> (this->M_LtGNodesMap.size());
 
     std::string trashcan;
 
@@ -581,7 +581,7 @@ template <typename Mesh> void Ensight<Mesh>::M_rd_ascii_vector(ExporterData& dva
     UInt dim   = dvar.dim();
     UInt start = dvar.start();
     //    UInt nVert = this->M_mesh->numVertices();
-    UInt nVert = this->M_LtGNodesMap.size();
+    UInt nVert = static_cast<UInt> (this->M_LtGNodesMap.size());
 
     std::string trashcan;
 
