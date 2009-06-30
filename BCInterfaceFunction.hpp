@@ -50,9 +50,9 @@
 
 
 // ===================================================
-//! Namespaces
+//! Namespaces & Enums
 // ===================================================
-using namespace LifeV;
+namespace LifeV {
 
 
 
@@ -179,5 +179,7 @@ private:
 
     //@}
 };
+
+} // Namespace LifeV
 
 #endif /* __BCInterfaceFunction_H */

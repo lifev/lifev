@@ -30,9 +30,7 @@
 
 #include <lifemc/lifefem/BCInterfaceFunction.hpp>
 
-
-
-
+namespace LifeV {
 
 // ===================================================
 //! Constructor & Destructor
@@ -105,3 +103,5 @@ BCInterfaceFunction::Function( const Real& t, const Real& x, const Real& y, cons
 
 	return M_parser->evaluate( id );
 }
+
+} // Namespace LifeV

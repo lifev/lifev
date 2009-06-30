@@ -30,9 +30,7 @@
 
 #include <lifemc/lifefem/BCInterface.hpp>
 
-
-
-
+namespace LifeV {
 
 // ===================================================
 //! Constructor
@@ -272,3 +270,5 @@ BCInterface::isBase( const char* base )
 
 	return M_dataFile.checkVariable( base );
 }
+
+} // Namespace LifeV

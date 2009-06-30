@@ -53,9 +53,10 @@
 
 
 // ===================================================
-//! Namespaces
+//! Namespaces & Enums
 // ===================================================
-using namespace LifeV;
+namespace LifeV {
+
 enum BCBaseList{function, fsi};
 
 
@@ -434,5 +435,7 @@ void BCInterface::addBC( 	const BCName& name,
 	for ( UInt j(0) ; j < flag.size() ; ++j )
 		M_handler->addBC( name, flag[j], type, mode, base, comp );
 }
+
+} // Namespace LifeV
 
 #endif /* __BCInterface_H */

@@ -30,9 +30,7 @@
 
 #include <lifemc/lifefem/BCInterfaceFSIOperator.hpp>
 
-
-
-
+namespace LifeV {
 
 // ===================================================
 //! Constructor & Destructor
@@ -138,3 +136,5 @@ BCInterfaceFSIOperator::checkMethod( void )
 				break;
 	}
 }
+
+} // Namespace LifeV

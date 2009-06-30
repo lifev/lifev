@@ -52,9 +52,9 @@
 
 
 // ===================================================
-//! Namespaces
+//! Namespaces & Enums
 // ===================================================
-using namespace LifeV;
+namespace LifeV {
 
 enum FSIMethod
 {
@@ -316,5 +316,7 @@ BCInterfaceFSIOperator::checkFunction( void )
 			break;
 	}
 }
+
+} // Namespace LifeV
 
 #endif /* __BCInterfaceFSIOperator_H */
