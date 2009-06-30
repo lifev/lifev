@@ -265,7 +265,7 @@ public:
             return *M_matrMass;
         }
 
-    const bool    getIsDiagonalBlockPrec() {return M_isDiagonalBlockPrec;}
+    bool          getIsDiagonalBlockPrec() {return M_isDiagonalBlockPrec;}
     void          setBlockPreconditioner(matrix_ptrtype blockPrec);
     void          getFluidMatrix( matrix_type& matrFull );
     void          updateUn( )                              {*M_un = M_sol;}
@@ -650,7 +650,7 @@ void Oseen<Mesh, SolverType>::buildSystem()
 
 //    M_comm->Barrier();
 
-    M_Displayer.leaderPrint("  f-  Computing constant matrices ...        ");
+    M_Displayer.leaderPrint("  f-  Computing constant matrices ...          ");
 
     Chrono chrono;
 
@@ -829,7 +829,7 @@ void Oseen<Mesh, SolverType>::buildSystem()
     M_Displayer.leaderPrintMax( "done in " , chrono.diff());
 
 
-    M_Displayer.leaderPrint( "  f-  Finalizing the matrices     ...        ");
+    M_Displayer.leaderPrint( "  f-  Finalizing the matrices ...              ");
 
     chrono.start();
 
@@ -971,7 +971,7 @@ updateSystem(double       alpha,
 
     if (normInf != 0.)
     {
-        M_Displayer.leaderPrint("  f-  Sharing convective term ...        ");
+        M_Displayer.leaderPrint("  f-  Sharing convective term ...              ");
         chrono.start();
 
         // vector with repeated nodes over the processors
@@ -1134,7 +1134,7 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
     Chrono chrono;
 
     // matrix and vector assembling communication
-    M_Displayer.leaderPrint("  f-  Updating the boundary conditions ...    ");
+    M_Displayer.leaderPrint("  f-  Updating the boundary conditions ...     ");
 
     chrono.start();
 
@@ -1168,8 +1168,9 @@ void Oseen<Mesh, SolverType>::iterate( bchandler_raw_type& bch )
 
     // solving the system
     M_linearSolver.setMatrix(*matrFull);
-    int numIter = M_linearSolver.solveSystem( rhsFull, M_sol, matrFull, M_reusePrec );
-    std::cout<<numIter <<" iterazioni "<<std::endl;
+
+    Int numIter = M_linearSolver.solveSystem( rhsFull, M_sol, matrFull, M_reusePrec );
+    //std::cout << numIter <<" iterations " << std::endl;
     if (numIter < 0 ) // if the preconditioner has been reset, the stab terms are to be updated
     {
         resetStab();

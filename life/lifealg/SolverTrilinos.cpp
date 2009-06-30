@@ -413,14 +413,14 @@ int SolverTrilinos::solveSystem(  vector_type&      rhsFull,
                                   bool const        retry)
 {
     Chrono chrono;
-    M_Displayer.leaderPrint("      Setting up the solver ...                \n");
+    //M_Displayer.leaderPrint("      Setting up the solver ...                \n");
 
     double condest(-1);
     if ( !M_prec->set() || !reuse  )
     {
         chrono.start();
 
-        M_Displayer.leaderPrint("      Computing the precond ...                \n");
+        M_Displayer.leaderPrint("      Computing the precond ...                ");
 
         M_prec->buildPreconditioner(basePrecMatrix);
 
@@ -430,7 +430,7 @@ int SolverTrilinos::solveSystem(  vector_type&      rhsFull,
 
         chrono.stop();
         M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
-        M_Displayer.leaderPrint("      Estimated condition number = " , condest );
+        M_Displayer.leaderPrint("      Condition number (estimated):            " , condest );
     }
     else
     {
