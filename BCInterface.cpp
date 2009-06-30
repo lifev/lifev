@@ -195,7 +195,7 @@ BCInterface::readFlag( const char* flag )
     for ( UInt j(0) ; j < flagSize ; ++j )
     	M_flag.push_back( M_dataFile(flag, 0, j) );
 
-    Debug( 5020 ) << "BCInterface::readFlag                   M_flag.size(): " << Real(M_flag.size()) << "\n";
+    Debug( 5020 ) << "BCInterface::readFlag                   M_flag.size(): " << static_cast<Real>(M_flag.size()) << "\n";
 }
 
 
@@ -241,7 +241,7 @@ BCInterface::readComponentVector( const char* component )
     for (UInt j(0) ; j < componentSize ; ++j)
     	M_comV.push_back( M_dataFile(component, 0, j) );
 
-    Debug( 5020 ) << "BCInterface::readComponentVector        M_comV.size(): " << Real(M_comV.size()) << "\n";
+    Debug( 5020 ) << "BCInterface::readComponentVector        M_comV.size(): " << static_cast<Real>(M_comV.size()) << "\n";
 }
 
 
