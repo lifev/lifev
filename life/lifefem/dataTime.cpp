@@ -39,7 +39,7 @@ DataTime::DataTime( const GetPot& dfile, const std::string& section ) :
 	M_initialTime	( dfile(( section + "/initialtime" 	).data(), 0.) ),
 	M_endTime		( dfile(( section + "/endtime" 		).data(), 1.) ),
 	M_time			( M_initialTime ),
-	M_timeStep		( dfile(( section + "/timestep" ).data(), 1.) ),
+	M_timeStep		( dfile(( section + "/timestep" ).data(), M_endTime ) ),
 	M_BDF_order		( dfile(( section + "/BDF_order" ).data(), 1 ) )
 {
 }

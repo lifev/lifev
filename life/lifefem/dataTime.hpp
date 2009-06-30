@@ -106,8 +106,19 @@ public:
      */
 	//@{
 
-    void updateTime() { M_time += M_timeStep; }
+	//! Update the time by a timestep.
+    void updateTime()		{ M_time += M_timeStep; }
 
+    //! Return true if time < endTime, false viceversa.
+    bool canAdvance()		{ return M_time < M_endTime; }
+
+    //! Return true if time = initialTime, false viceversa.
+    bool isFirstTimeStep()	{ return M_time == M_initialTime; }
+
+    //! Return true if time + timestep > endTime, false viceversa.
+    bool isLastTimeStep()	{ return M_time + M_timeStep >= M_endTime; }
+
+    //! Display private variable values.
     virtual void showMe( std::ostream& output = std::cout ) const;
 
     //@}
