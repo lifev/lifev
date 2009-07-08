@@ -110,8 +110,6 @@ struct SpiritCalculator : boost::spirit::grammar<SpiritCalculator>
 public:
 
 	SpiritCalculator( variables_type& variables, results_type& results, UInt& nResults ) :
-		//M_variables	( &variables ),
-		//M_results 	( &results ),
 		M_variables	( variables ),
 		M_results 	( results ),
 		M_nResults 	( nResults )
@@ -265,7 +263,6 @@ public:
     // Member functions that are called in semantic actions.
     void define(const std::string& name, const Real value) const
     {
-    	//M_variables->operator[](name) = value;
     	M_variables[name] = value;
     }
 
@@ -273,26 +270,22 @@ public:
     {
     	variables_type::const_iterator it;
 
-    	//std::cout << "SpiritParser showMeVariables: " << M_variables << std::endl;
     	std::cout << "SpiritParser showMeVariables: " << &M_variables << std::endl;
-    	//for (it = M_variables->begin(); it != M_variables->end(); ++it)
+
     	for (it = M_variables.begin(); it != M_variables.end(); ++it)
     		std::cout << it->first << " = " << it->second << std::endl;
 
-    	//std::cout << M_variables << std::endl;
     	std::cout << &M_variables << std::endl;
     }
 
     Real lookup(const std::string& name) const
     {
-    	//if (M_variables->find(name) == M_variables->end())
     	if (M_variables.find(name) == M_variables.end())
     	{
     	    std::cerr << "!!! Warning: SpiritParser has undefined name " << name << " !!!" << std::endl;
     	    return 0.0;
     	}
     	else
-    	   //return (M_variables->find(name))->second;
     		return M_variables.find(name)->second;
     }
 
@@ -348,15 +341,12 @@ public:
 
     void setResult( const Real result) const
     {
-    	//M_results->operator[]( M_nResults ) = result;
     	M_results[M_nResults] = result;
     	M_nResults++;
     }
 
 private:
 
-	//boost::shared_ptr<variables_type>						M_variables;
-	//boost::shared_ptr<results_type>							M_results;
 	variables_type&											M_variables;
 	results_type&											M_results;
 	UInt&													M_nResults;
@@ -423,7 +413,7 @@ public:
 
 
 
-    /** @name Method
+    /** @name Methods
      */
 
     //@{
@@ -447,6 +437,12 @@ public:
      */
     Real& evaluate( const UInt& ID = 1 );
 
+    /*! Count how many times a substring is present in the string (utility for BCInterfaceFunction)
+     *
+     * \param substring - Stringa da cercare
+     */
+	UInt countSubstring( const std::string& substring );
+
     //@}
 
 private:
@@ -456,8 +452,6 @@ private:
 	// ===================================================
 
 	string_type											M_strings;
-	//boost::shared_ptr<variables_type>					M_variables;
-	//boost::shared_ptr<results_type>						M_results;
 	variables_type										M_variables;
 	results_type										M_results;
 	UInt												M_nResults;
@@ -475,7 +469,7 @@ private:
     //@{
 
 	//! Setup results
-	inline void setupResults( const std::string& stringSeparator = "," );
+	inline void setupResults( void );
 
 	//! Set default variables
 	inline void setDefaultVariables( void );
