@@ -106,6 +106,7 @@ public:
 									Real const& z,
 									ID 	 const& id	)> 	function_type;
 
+	typedef std::vector<ID>								BCComV;
 
 
 	// ===================================================
@@ -121,7 +122,7 @@ public:
 	 * \param baseString      - function string
 	 * \param stringSeparator - Separator identifier (default -> ",")
 	 */
-	BCInterfaceFunction( const std::string& baseString );
+	BCInterfaceFunction( const std::string& baseString, const BCComV& comV );
 
 	//! Copy constructor
 	/*!
@@ -158,6 +159,7 @@ private:
 
 	BCFunctionBase 										M_base;
 	boost::shared_ptr<SpiritParser>						M_parser;
+	std::map<ID, ID>									M_mapID;
 
 
 	// ===================================================
@@ -168,14 +170,11 @@ private:
 	 */
 	//@{
 
-    //! buildFunctionBase
-    void buildFunctionBase( void );
-
-    //! getFunction
-    function_type getFunction( void );
-
     //! Function
-    Real Function( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id );
+    Real Function( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/ );
+
+    //! FunctionID
+    Real FunctionID( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id );
 
     //@}
 };

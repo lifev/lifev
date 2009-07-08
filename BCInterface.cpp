@@ -49,7 +49,7 @@ BCInterface::BCInterface( GetPot const& dataFile, const std::string dataSection 
 	M_flag						( ),
 	M_type						( ),
 	M_mode						( ),
-	M_comN						( ),
+	//M_comN						( ),
 	M_comV						( ),
 	M_base						( ),
 	M_baseString				( "undefined" )
@@ -80,6 +80,67 @@ BCInterface::BCInterface( GetPot const& dataFile, const std::string dataSection 
 }
 
 
+BCInterface::BCInterface( const BCInterface& interface ) :
+	M_dataFile			( interface.M_dataFile ),
+	M_dataSection		( interface.M_dataSection ),
+	M_list				( interface.M_list ),
+	M_listSize			( interface.M_listSize ),
+	M_autoSetParameters	( interface.M_autoSetParameters ),
+	M_bcNumber			( interface.M_bcNumber ),
+	M_hint				( interface.M_hint ),
+	M_handler			( interface.M_handler ),
+	M_mapType			( interface.M_mapType ),
+	M_mapMode			( interface.M_mapMode ),
+	M_mapBase			( interface.M_mapBase ),
+	M_FSIOperator		( interface.M_FSIOperator ),
+	M_functionVector	( interface.M_functionVector ),
+	M_FSIOperatorVector	( interface.M_FSIOperatorVector ),
+	M_name				( interface.M_name ),
+	M_flag				( interface.M_flag ),
+	M_type				( interface.M_type ),
+	M_mode				( interface.M_mode ),
+	//M_comN			( interface.M_comN ),
+	M_comV				( interface.M_comV ),
+	M_base				( interface.M_base ),
+	M_baseString		( interface.M_baseString )
+{
+}
+
+
+
+BCInterface&
+BCInterface::operator=( const BCInterface& interface )
+{
+    if ( this != &interface )
+    {
+    	M_dataFile			= interface.M_dataFile;
+    	M_dataSection		= interface.M_dataSection;
+    	M_list				= interface.M_list;
+    	M_listSize			= interface.M_listSize;
+    	M_autoSetParameters	= interface.M_autoSetParameters;
+    	M_bcNumber			= interface.M_bcNumber;
+    	M_hint				= interface.M_hint;
+    	M_handler			= interface.M_handler;
+    	M_mapType			= interface.M_mapType;
+    	M_mapMode			= interface.M_mapMode;
+    	M_mapBase			= interface.M_mapBase;
+    	M_FSIOperator		= interface.M_FSIOperator;
+    	M_functionVector	= interface.M_functionVector;
+    	M_FSIOperatorVector	= interface.M_FSIOperatorVector;
+    	M_name				= interface.M_name;
+    	M_flag				= interface.M_flag;
+    	M_type				= interface.M_type;
+    	M_mode				= interface.M_mode;
+    	//M_comN			= interface.M_comN;
+    	M_comV				= interface.M_comV;
+    	M_base				= interface.M_base;
+    	M_baseString		= interface.M_baseString;
+    }
+
+	return *this;
+}
+
+
 
 
 
@@ -92,8 +153,10 @@ BCInterface::setHandlerParameters( const ID bcNumber, const BCHandler::BCHints h
 	M_bcNumber 	= bcNumber;
 	M_hint 		= hint;
 
+#ifdef DEBUG
     Debug( 5020 ) << "BCInterface::setHandlerParameters          M_bcNumber: " << M_bcNumber << "\n";
     Debug( 5020 ) << "                                               M_hint: " << M_hint << "\n";
+#endif
 
 	M_autoSetParameters = false;
 }
@@ -101,17 +164,12 @@ BCInterface::setHandlerParameters( const ID bcNumber, const BCHandler::BCHints h
 
 
 void
-BCInterface::setFSIOperator( const boost::shared_ptr<FSIOperator>& oper )
-{
-	M_FSIOperator = oper;
-}
-
-
-
-void
 BCInterface::buildHandler( void )
 {
+
+#ifdef DEBUG
 	Debug( 5020 ) << "BCInterface::buildHandler         M_autoSetParameters: " << M_autoSetParameters << "\n";
+#endif
 
 	if ( M_autoSetParameters )
 		autosetHandlerParameters();
@@ -125,6 +183,7 @@ BCInterface::buildHandler( void )
 		readFlag( (M_dataSection + M_name + "/flag").c_str() );
 		readType( (M_dataSection + M_name + "/type").c_str() );
 		readMode( (M_dataSection + M_name + "/mode").c_str() );
+		readComponentVector( (M_dataSection + M_name + "/component").c_str() );
 
 		readBase(  M_dataSection + M_name + "/" );
 
@@ -132,7 +191,7 @@ BCInterface::buildHandler( void )
 		{
 			case function :
 
-				addBase( M_functionVector );
+				addBase( M_functionVector, M_comV );
 				addBCManager( M_functionVector.back()->getBase() );
 
 				break;
@@ -178,8 +237,11 @@ BCInterface::autosetHandlerParameters( void )
 		M_bcNumber += M_dataFile.vector_variable_size((M_dataSection + M_list[i] + "/flag").c_str());
 	}
 
+#ifdef DEBUG
     Debug( 5020 ) << "BCInterface::autosetHandlerParameters      M_bcNumber: " << M_bcNumber << "\n";
     Debug( 5020 ) << "                                               M_hint: " << M_hint << "\n\n";
+#endif
+
 }
 
 
@@ -195,7 +257,10 @@ BCInterface::readFlag( const char* flag )
     for ( UInt j(0) ; j < flagSize ; ++j )
     	M_flag.push_back( M_dataFile(flag, 0, j) );
 
+#ifdef DEBUG
     Debug( 5020 ) << "BCInterface::readFlag                   M_flag.size(): " << static_cast<Real>(M_flag.size()) << "\n";
+#endif
+
 }
 
 
@@ -205,7 +270,10 @@ BCInterface::readType( const char* type )
 {
 	M_type = M_mapType[M_dataFile(type, "Essential")];
 
+#ifdef DEBUG
 	Debug( 5020 ) << "BCInterface::readType                          M_type: " << M_type << " " << M_dataFile(type, "Essential") << "\n";
+#endif
+
 }
 
 
@@ -215,19 +283,25 @@ BCInterface::readMode( const char* mode )
 {
 	M_mode = M_mapMode[M_dataFile(mode, "Full")];
 
+#ifdef DEBUG
 	Debug( 5020 ) << "BCInterface::readMode                          M_mode: " << M_mode << " " << M_dataFile(mode, "Full") << "\n";
+#endif
+
 }
 
 
-
+/*
 inline void
 BCInterface::readComponentNumber( const char* component )
 {
 	M_comN = M_dataFile( component, 0 );
 
+#ifdef DEBUG
 	Debug( 5020 ) << "BCInterface::readComponentNumber               M_comN: " << M_comN << "\n";
-}
+#endif
 
+}
+*/
 
 
 inline void
@@ -241,7 +315,10 @@ BCInterface::readComponentVector( const char* component )
     for (UInt j(0) ; j < componentSize ; ++j)
     	M_comV.push_back( M_dataFile(component, 0, j) );
 
+#ifdef DEBUG
     Debug( 5020 ) << "BCInterface::readComponentVector        M_comV.size(): " << static_cast<Real>(M_comV.size()) << "\n";
+#endif
+
 }
 
 
@@ -254,8 +331,10 @@ BCInterface::readBase( const std::string base )
 		{
 			M_base = M_mapBase[j->first];
 
+#ifdef DEBUG
 			Debug( 5020 ) << "BCInterface::readBase                          M_base: " << M_base << " " << j->first << "\n";
 			Debug( 5020 ) << "                                         M_baseString: " << M_baseString << "\n";
+#endif
 
 			break;
 		}

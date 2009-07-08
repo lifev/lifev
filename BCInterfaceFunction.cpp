@@ -35,20 +35,42 @@ namespace LifeV {
 // ===================================================
 //! Constructor & Destructor
 // ===================================================
-BCInterfaceFunction::BCInterfaceFunction( const std::string& baseString ) :
+BCInterfaceFunction::BCInterfaceFunction( const std::string& baseString, const BCComV& comV ) :
 	M_base						( ),
 	M_parser					( new SpiritParser( baseString ) )
 {
-    Debug( 5021 ) << "BCInterfaceFunction::BCInterfaceFunction: " << "\n";
+#ifdef DEBUG
+	Debug( 5021 ) << "BCInterfaceFunction::BCInterfaceFunction: " << "\n";
+#endif
 
-	buildFunctionBase();
+	UInt arguments = M_parser->countSubstring( "," ) + 1;
+
+#ifdef DEBUG
+	Debug( 5021 ) << "                                                   arguments: " << arguments  << "\n";
+#endif
+
+	if ( arguments == 1 )
+		M_base.setFunction( boost::bind(&BCInterfaceFunction::Function, this, _1, _2, _3, _4, _5) );
+	else
+	{
+		//Create the ID map
+		if ( comV.size() > 1 )	// Component
+			for ( ID i(0) ; i < static_cast<ID>( comV.size() ) ; ++i )
+				M_mapID[ comV[i] ] = i+1;
+		else					// if ( comV.front() == arguments )  Full
+			for ( ID i(1) ; i <= comV.front() ; ++i )
+				M_mapID[ i ] = i;
+
+		M_base.setFunction( boost::bind(&BCInterfaceFunction::FunctionID, this, _1, _2, _3, _4, _5) );
+	}
 }
 
 
 
 BCInterfaceFunction::BCInterfaceFunction( const BCInterfaceFunction& function ) :
 	M_base		( function.M_base ),
-	M_parser	( function.M_parser )
+	M_parser	( function.M_parser ),
+	M_mapID		( function.M_mapID )
 {
 }
 
@@ -61,6 +83,7 @@ BCInterfaceFunction::operator=( const BCInterfaceFunction& function )
     {
     	M_base		= function.M_base;
     	M_parser 	= function.M_parser;
+    	M_mapID		= function.M_mapID;
     }
 
 	return *this;
@@ -70,38 +93,45 @@ BCInterfaceFunction::operator=( const BCInterfaceFunction& function )
 // ===================================================
 //! Private functions
 // ===================================================
-void
-BCInterfaceFunction::buildFunctionBase( void )
-{
-	M_base.setFunction( getFunction() );
-}
-
-
-
-BCInterfaceFunction::function_type
-BCInterfaceFunction::getFunction( void )
-{
-	return boost::bind(&BCInterfaceFunction::Function, this, _1, _2, _3, _4, _5);
-}
-
-
-
 Real
-BCInterfaceFunction::Function( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id )
+BCInterfaceFunction::Function( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/ )
 {
 	M_parser->setVariable( "t", t );
 	M_parser->setVariable( "x", x );
 	M_parser->setVariable( "y", y );
 	M_parser->setVariable( "z", z );
 
+#ifdef DEBUG
 	Debug( 5021 ) << "BCInterfaceFunction::Function: " << "\n";
 	Debug( 5021 ) << "                                                           x: " << x  << "\n";
 	Debug( 5021 ) << "                                                           y: " << y  << "\n";
 	Debug( 5021 ) << "                                                           z: " << z  << "\n";
 	Debug( 5021 ) << "                                                           t: " << t  << "\n";
-	Debug( 5021 ) << "                                                evaluate(" << id<< ") : " << M_parser->evaluate( id )  << "\n";
+#endif
 
-	return M_parser->evaluate( id );
+	return M_parser->evaluate( 1 );
+}
+
+
+
+Real
+BCInterfaceFunction::FunctionID( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id )
+{
+	M_parser->setVariable( "t", t );
+	M_parser->setVariable( "x", x );
+	M_parser->setVariable( "y", y );
+	M_parser->setVariable( "z", z );
+
+#ifdef DEBUG
+	Debug( 5021 ) << "BCInterfaceFunction::FunctionID: " << "\n";
+	Debug( 5021 ) << "                                                           x: " << x  << "\n";
+	Debug( 5021 ) << "                                                           y: " << y  << "\n";
+	Debug( 5021 ) << "                                                           z: " << z  << "\n";
+	Debug( 5021 ) << "                                                           t: " << t  << "\n";
+	Debug( 5021 ) << "                                                evaluate(" << id<< ") : " << M_parser->evaluate( id )  << "\n";
+#endif
+
+	return M_parser->evaluate( M_mapID[id] );
 }
 
 } // Namespace LifeV

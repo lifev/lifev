@@ -158,7 +158,7 @@ public:
 
 	typedef std::string									BCName;
 	typedef std::vector<EntityFlag>						BCFlag;
-	typedef UInt										BCComN;
+	//typedef UInt										BCComN;
 	typedef std::vector<ID>								BCComV;
 
 
@@ -177,6 +177,18 @@ public:
      * \param dataSection - Subsection inside [conditions]
      */
 	BCInterface( GetPot const& dataFile, const std::string dataSection );
+
+	//! Copy constructor
+	/*!
+	 * \param interface - BCInterface
+	 */
+	BCInterface( const BCInterface& interface );
+
+	//! Operator =
+	/*!
+	 * \param interface - BCInterface
+	 */
+	BCInterface& operator=( const BCInterface& interface );
 
     //! Destructor
     ~BCInterface() {}
@@ -246,7 +258,7 @@ public:
     /*!
      * \param oper - FSIOperator
      */
-	void setFSIOperator(const boost::shared_ptr<FSIOperator>& oper );
+	void setFSIOperator( const boost::shared_ptr<FSIOperator>& oper ) { M_FSIOperator = oper; }
 
 
     //@}
@@ -286,7 +298,7 @@ private:
 	BCFlag 												M_flag;
 	BCType 												M_type;
 	BCMode 												M_mode;
-	BCComN 												M_comN;
+	//BCComN 												M_comN;
 	BCComV 												M_comV;
 
 	BCBaseList 											M_base;
@@ -302,13 +314,15 @@ private:
      */
     //@{
 
+	/*
 	//! addBase
 	template <class BCInterfaceBase>
 	inline void addBase( std::vector< boost::shared_ptr<BCInterfaceBase> >& baseVector );
+	*/
 
 	//! addBase
-	template <class BCInterfaceBase, class BCOperator>
-	inline void addBase( std::vector< boost::shared_ptr<BCInterfaceBase> >& baseVector, BCOperator& Operator );
+	template <class BCInterfaceBase, class BCparameter>
+	inline void addBase( std::vector< boost::shared_ptr<BCInterfaceBase> >& baseVector, BCparameter& p );
 
 	//! addBCManager
 	template <class BCBase>
@@ -330,7 +344,7 @@ private:
     inline void readMode( const char* mode );
 
     //! readComponentNumber
-    inline void readComponentNumber( const char* component );
+    //inline void readComponentNumber( const char* component );
 
     //! readComponentVector
     inline void readComponentVector( const char* component );
@@ -349,6 +363,7 @@ private:
 // ===================================================
 //! Template function
 // ===================================================
+/*
 template <class BCInterfaceBase>
 inline void
 BCInterface::addBase( std::vector< boost::shared_ptr<BCInterfaceBase> >& baseVector )
@@ -356,14 +371,14 @@ BCInterface::addBase( std::vector< boost::shared_ptr<BCInterfaceBase> >& baseVec
 	boost::shared_ptr<BCInterfaceBase> Function( new BCInterfaceBase( M_baseString ) );
 	baseVector.push_back( Function );
 }
+*/
 
 
-
-template <class BCInterfaceBase, class BCOperator>
+template <class BCInterfaceBase, class BCparameter>
 inline void
-BCInterface::addBase( std::vector< boost::shared_ptr<BCInterfaceBase> >& baseVector, BCOperator& Operator )
+BCInterface::addBase( std::vector< boost::shared_ptr<BCInterfaceBase> >& baseVector, BCparameter& p )
 {
-	boost::shared_ptr<BCInterfaceBase> Function( new BCInterfaceBase( M_baseString, Operator ) );
+	boost::shared_ptr<BCInterfaceBase> Function( new BCInterfaceBase( M_baseString, p ) );
 	baseVector.push_back( Function );
 }
 
@@ -378,7 +393,9 @@ void BCInterface::addBCManager( BCBase& base )
 		case Normal :
 		case Tangential :
 
+#ifdef DEBUG
 			Debug( 5020 ) << "BCInterface::addBCManager (Scalar, Normal, Tangential)" << "\n";
+#endif
 
 			addBC( M_name, M_flag, M_type, M_mode, base );
 
@@ -386,20 +403,24 @@ void BCInterface::addBCManager( BCBase& base )
 
 		case Full :
 
-			readComponentNumber( (M_dataSection + M_name + "/component").c_str() );
+			//readComponentNumber( (M_dataSection + M_name + "/component").c_str() );
+			//readComponentVector( (M_dataSection + M_name + "/component").c_str() );
 
+#ifdef DEBUG
 			Debug( 5020 ) << "BCInterface::addBCManager (Full)" << "\n";
+#endif
 
-			addBC( M_name, M_flag, M_type, M_mode, base, M_comN );
+			addBC( M_name, M_flag, M_type, M_mode, base, M_comV.front() );
 
 			break;
 
 		case Component :
 
+			//readComponentVector( (M_dataSection + M_name + "/component").c_str() );
 
-			readComponentVector( (M_dataSection + M_name + "/component").c_str() );
-
+#ifdef DEBUG
 			Debug( 5020 ) << "BCInterface::addBCManager (Component)" << "\n";
+#endif
 
 			addBC( M_name, M_flag, M_type, M_mode, base, M_comV );
 
@@ -416,7 +437,11 @@ void BCInterface::addBC( 	const BCName& name,
 							const BCMode& mode,
 								  BCBase& base )
 {
+
+#ifdef DEBUG
 	Debug( 5020 ) << "BCInterface::addBC (without component)" << "\n\n";
+#endif
+
 	for ( UInt j(0) ; j < flag.size() ; ++j )
 		M_handler->addBC( name, flag[j], type, mode, base );
 }
@@ -431,7 +456,11 @@ void BCInterface::addBC( 	const BCName& name,
 								  BCBase& base,
 							const BCComp& comp )
 {
+
+#ifdef DEBUG
 	Debug( 5020 ) << "BCInterface::addBC (with component)" << "\n\n";
+#endif
+
 	for ( UInt j(0) ; j < flag.size() ; ++j )
 		M_handler->addBC( name, flag[j], type, mode, base, comp );
 }
