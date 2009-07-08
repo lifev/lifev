@@ -105,7 +105,9 @@ BCInterfaceFSIOperator::checkMethod( void )
 	{
 			case EXACTJACOBIAN :
 
+#ifdef DEBUG
 				Debug( 5022 ) << "BCInterfaceFSIOperator::checkMethod   -> exactJacobian" << "\n";
+#endif
 
 				checkFunction<exactJacobian>();
 
@@ -113,7 +115,9 @@ BCInterfaceFSIOperator::checkMethod( void )
 
 			case FIXEDPOINT :
 
+#ifdef DEBUG
 				Debug( 5022 ) << "BCInterfaceFSIOperator::checkMethod   -> fixedPoint" << "\n";
+#endif
 
 				checkFunction<fixedPoint>();
 
@@ -121,7 +125,9 @@ BCInterfaceFSIOperator::checkMethod( void )
 
 			case MONOLITHIC :
 
+#ifdef DEBUG
 				Debug( 5022 ) << "BCInterfaceFSIOperator::checkMethod   -> monolithic" << "\n";
+#endif
 
 				//checkFunction<monolithic>();
 
@@ -129,7 +135,9 @@ BCInterfaceFSIOperator::checkMethod( void )
 
 			case STEKLOVPOINCARE :
 
+#ifdef DEBUG
 				Debug( 5022 ) << "BCInterfaceFSIOperator::checkMethod   -> steklovPoincare" << "\n";
+#endif
 
 				//checkFunction<steklovPoincare>();
 
