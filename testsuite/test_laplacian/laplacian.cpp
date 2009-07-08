@@ -58,6 +58,7 @@ Solve the problem
 */
 
 
+
 // ===================================================
 //! Includes
 // ===================================================
@@ -95,7 +96,7 @@ using namespace LifeV;
 
     typedef RegionMesh2D<LinearTriangle> RegionMesh;
 
-    const std::string discretization_section="adr/space_discretization2D";
+    const std::string discretization_section="adr/discretization2D";
 
 #elif defined THREEDIM
 
@@ -108,7 +109,7 @@ using namespace LifeV;
 
     typedef RegionMesh3D<LinearTetra> RegionMesh;
 
-    const std::string discretization_section="adr/space_discretization3D";
+    const std::string discretization_section="adr/discretization3D";
 
 
 #endif
@@ -271,7 +272,7 @@ struct laplacian::Private
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_type;
 
     std::string    data_file_name;
-    Epetra_Comm*   comm;
+    Epetra_MpiComm*   comm;
 
     /**
      *
@@ -314,7 +315,6 @@ laplacian::laplacian( int argc,
 
 	#ifdef EPETRA_MPI
 		std::cout << "Epetra Initialization" << std::endl;
-
 		Members->comm = new Epetra_MpiComm( MPI_COMM_WORLD );
 	#else
 		Members->comm = new Epetra_SerialComm();
@@ -331,8 +331,11 @@ laplacian::laplacian( int argc,
 void
 laplacian::run()
 {
-	typedef ADRSolver< RegionMesh >::vector_type  vector_type;
-    typedef boost::shared_ptr<vector_type>        vector_ptrtype;
+    typedef SolverTrilinos                                     solver_type;
+    //typedef SolverAmesos                                     solver_type;
+    typedef ADRSolver< RegionMesh, solver_type >             adr;
+	typedef adr::vector_type                                 vector_type;
+    typedef boost::shared_ptr<vector_type>                   vector_ptrtype;
 
     // Reading from data file
     //
@@ -374,32 +377,95 @@ laplacian::run()
 
     DataADR<RegionMesh> dataADR( dataFile, discretization_section);
 
+    //dataADR.mesh()->orderMesh( Members->comm->Comm() );
     partitionMesh< RegionMesh>   meshPart(* dataADR.mesh(), *Members->comm);
     dataADR.setMesh(meshPart.mesh());
 
     if(verbose) dataADR.showMe();
 
-    //finite element space of the solution
+    // Advection coefficient Space: P1 interpolation
+
+    const RefFE*    refFE_beta  (0);
+    const QuadRule* qR_beta     (0);
+    const QuadRule* bdQr_beta   (0);
+
+#ifdef TWODIM
+    refFE_beta = &feTriaP1;
+    qR_beta    = &quadRuleTria6pt;  // DoE 2
+    bdQr_beta  = &quadRuleSeg3pt;   // DoE 2
+#elif defined THREEDIM
+    refFE_beta = &feTetraP1;
+    qR_beta    = &quadRuleTetra4pt;  // DoE 2
+    bdQr_beta  = &quadRuleTria3pt;   // DoE 2
+#endif
+
+    // Scalar Solution Space:
 
     std::string adrOrder =  dataFile( (discretization_section+"/order").data(), "P1");
-    FESpace< RegionMesh, EpetraMap > adrFESpace(meshPart,adrOrder,1,*Members->comm);
+    const RefFE*    refFE_adr(0);
+    const QuadRule* qR_adr(0);
+    const QuadRule* bdQr_adr(0);
+
+    if ( adrOrder.compare("P1") == 0 )
+        {
+            if (verbose) std::cout << "  Space order : P1" << std::flush;
+#ifdef TWODIM
+            refFE_adr = &feTriaP1;
+            qR_adr    = &quadRuleTria6pt;
+            bdQr_adr  = &quadRuleSeg3pt;
+#elif defined THREEDIM
+            refFE_adr = &feTetraP1;
+            qR_adr    = &quadRuleTetra15pt; // DoE 5
+            bdQr_adr  = &quadRuleTria4pt;   // DoE 2
+#endif
+        }
+    else
+        if ( adrOrder.compare("P2") == 0 )
+            {
+                if (verbose) std::cout << " Space order : P2";
+#ifdef TWODIM
+                refFE_adr = &feTriaP2;
+                qR_adr    = &quadRuleTria6pt;
+                bdQr_adr  = &quadRuleSeg3pt;
+#elif defined THREEDIM
+                refFE_adr = &feTetraP2;
+                qR_adr    = &quadRuleTetra64pt; // DoE 6
+                bdQr_adr  = &quadRuleTria4pt;   // DoE 2
+#endif
+            }
+    if (verbose) std::cout << std::endl;
+
+
+    //finite element space of the solution
+
+    FESpace< RegionMesh, EpetraMap > adrFESpace(meshPart,
+												*refFE_adr,
+                                                *qR_adr,
+                                                *bdQr_adr,
+                                                1,
+                                                *Members->comm);
 
     //finite element space of the advection term
-    std::string betaOrder = "P1_HIGH";
-    FESpace< RegionMesh, EpetraMap > betaFESpace(meshPart,betaOrder,nDimensions,*Members->comm);
+
+    FESpace< RegionMesh, EpetraMap > betaFESpace(meshPart,
+                                                *refFE_beta,
+                                                *qR_beta,
+                                                *bdQr_beta,
+                                                nDimensions,
+                                                *Members->comm);
 
     //instantiation of the AdvectionDiffusionReactionSolver class
 
-    ADRSolver< RegionMesh > adr (dataADR,
-                                 adrFESpace,
-                                 betaFESpace,
-                                 *Members->comm);
+    adr laplacian (dataADR,
+                   adrFESpace,
+                   betaFESpace,
+                   *Members->comm);
 
     Chrono chrono;
 
     chrono.start();
-    adr.setUp(dataFile);
-    adr.buildSystem();
+    laplacian.setUp(dataFile);
+    laplacian.buildSystem();
 
     // Laplacian Solver
 
@@ -410,25 +476,27 @@ laplacian::run()
 
     dataADR.setTime(0);
 
-    EpetraMap fullAdrMap(adr.getMap());
+    EpetraMap fullAdrMap(laplacian.getMap());
 
+    if (verbose) std::cout << "  Number of unknowns : " << adrFESpace.map().getMap(Unique)->NumGlobalElements() << std::endl;
     //computing the iterpolation of the advection vector
+
     vector_type betaFluid( betaFESpace.map() );
     betaFESpace.interpolate(beta, betaFluid);
 
     //computing the rhs
     vector_type rhsADR ( fullAdrMap );
     adrFESpace.interpolate(source_in, rhsADR);
-    rhsADR = adr.matrMass()*rhsADR;
+    rhsADR = laplacian.matrMass()*rhsADR;
 
 
     //updating the system with the reaction and advection terms and the rhs
     //(including the treatment of the boundary conditions)
     Real sigma = dataFile( "adr/physics/sigma", 0);
-    adr.updateSystem(sigma, betaFluid, rhsADR);
+    laplacian.updateSystem(sigma, betaFluid, rhsADR);
 
     //solve the linear system
-    adr.iterate(bcADR);
+    laplacian.iterate(bcADR);
 
     chrono.stop();
 
@@ -437,7 +505,7 @@ laplacian::run()
     // post processing setup
 
 #if POSTPROCESS
-    vector_ptrtype temperature  ( new vector_type(adr.solution(), Repeated ) );
+    vector_ptrtype temperature  ( new vector_type(laplacian.solution(), Repeated ) );
     exporter->addVariable( ExporterData::Scalar, "temperature", temperature,
                            UInt(0), UInt(adrFESpace.dof().numTotalDof()));
     exporter->postProcess( 0 );
@@ -446,7 +514,7 @@ laplacian::run()
     // Error L2 and H1 Norms
 
     AnalyticalSol uExact;
-    vector_type uComputed(adr.solution(), Repeated );
+    vector_type uComputed(laplacian.solution(), Repeated );
 
     Real H1_Error, H1_RelError, L2_Error, L2_RelError;
 
