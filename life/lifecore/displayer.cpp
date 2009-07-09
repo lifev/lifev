@@ -31,48 +31,16 @@
 namespace LifeV
 {
 
-
-Displayer::Displayer(Epetra_Comm& comm):
-    M_comm                   ( &comm ),
-    M_me                     (M_comm->MyPID())
-{
-}
 Displayer::Displayer():
-    M_comm                   ( 0 ),
-    M_me                     ( 0 )
+	M_comm					( 0 ),
+	M_verbose				( true )
 {
 }
 
-
-void Displayer::
-leaderPrint(string const message, double const number) const
+Displayer::Displayer( Epetra_Comm& comm ):
+	M_comm					( &comm ),
+	M_verbose				( M_comm->MyPID() == 0 )
 {
-    if(M_comm)
-        M_comm->Barrier();
-    if ( isLeader() )
-        std::cout << message << number << std::endl;
 }
 
-void Displayer::
-leaderPrint(string const message) const
-{
-    if(M_comm)
-        M_comm->Barrier();
-    if ( isLeader() )
-        std::cout << message << std::flush;
-
-}
-
-void Displayer::
-leaderPrintMax(string const message, double const number) const
-{
-  double num(number);
-  double globalMax;
-  if(M_comm)
-      M_comm->MaxAll(&num, &globalMax, 1);
-
-  leaderPrint( message , globalMax );
-
-}
-
-}
+} // Namespace LifeV

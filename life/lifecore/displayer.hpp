@@ -21,21 +21,31 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-
 /**
    \file displayer.hpp
-   \author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
-   \date 2009-03-02
- */
 
-#ifdef HAVE_MPI
-#include "Epetra_MpiComm.h"
-#else
-#include "Epetra_SerialComm.h"
-#endif
+   \version 1.0
+   \date 2009-03-02
+   \author Paolo Crosetto <crosetto@iacspc70.epfl.ch>
+
+   \version 1.4
+   \date 2009-03-02
+   \author Cristiano Malossi <cristiano.malossi@epfl.ch>
+
+   \brief Template input variables for more general output messages:
+   now it is possible to display not only strings but also Int, Real, etc..
+ */
 
 #ifndef _DISPLAYER_H_
 #define _DISPLAYER_H_
+
+#ifdef HAVE_MPI
+	#include "Epetra_MpiComm.h"
+#else
+	#include "Epetra_SerialComm.h"
+#endif
+
+#include <life/lifecore/life.hpp>
 
 namespace LifeV
 {
@@ -49,43 +59,106 @@ namespace LifeV
 class Displayer
 {
 public:
-    Displayer( Epetra_Comm& comm);
-    Displayer();
-    virtual ~Displayer(){}
+	Displayer();
+    Displayer( Epetra_Comm& comm );
+    virtual ~Displayer() {}
 
-    void    leaderPrint(string const message, double const number) const;
-    /*! to print one message and one real value
-      \param message message to print out
-      \param number Real value that we want to print
+    /*! To print one message.
+      \param message1 message to print out
     */
+    template <typename T1>
+    void leaderPrint( const T1& message1 ) const;
 
+    /*! To print two messages.
+      \param message1 first message to print out
+      \param message2 second message to print out
+    */
+    template <typename T1, typename T2>
+    void leaderPrint( const T1& message1, const T2& message2 ) const;
 
-    void    leaderPrint(string const message) const;
+    /*! To print three messages.
+      \param message1 first message to print out
+      \param message2 second message to print out
+      \param message3 third message to print out
+    */
+    template <typename T1, typename T2, typename T3>
+    void leaderPrint( const T1& message1, const T2& message2, const T3& message3 ) const;
 
-    void    leaderPrintMax(string const message, double const number) const;
     /*!
-      Take a Real input value from all processors in the communicator, computes the max, returns the max to all processors of the communicator. Then processor 0 of the communicator prints it.
-      \param message message to print out
-      \param number Real value that we want to print
+      Take a Real input value from all processors in the communicator, computes the max, returns the max to all processors of the communicator.
+      Then processor 0 of the communicator prints it.
+      \param message1 message to print out
+      \param localMax Int or Real local maximum value that we want to print
     */
-    bool    isLeader() const
-    {
-        if( M_comm  != 0)
-            return M_comm->MyPID() == 0;
-        else
-            return true;
-    }
+    template <typename T1, typename T2>
+    void leaderPrintMax( const T1& message1, const T2& localMax ) const;
+
     /*!
-      returns the processor 0 of the communicator
+      Return true if it is process 0 of the communicator
     */
-    const Epetra_Comm& comm() const {return *M_comm;}
+    inline bool isLeader() const { return M_verbose; }
+
+    /*!
+      Return the communicator
+    */
+    const Epetra_Comm& comm() const { return *M_comm; }
 
 protected:
 
-    Epetra_Comm*                    M_comm;
-    int                             M_me;
+	Epetra_Comm*								M_comm;
+    bool										M_verbose;
 
 };
 
+
+
+// IMPLEMENTATION
+
+
+
+template <typename T1>
+void Displayer::
+leaderPrint( const T1& message1 ) const
+{
+	if ( M_comm )
+		M_comm->Barrier();
+	if ( M_verbose )
+		std::cout << message1 << std::flush;
 }
+
+template <typename T1, typename T2>
+void Displayer::
+leaderPrint( const T1& message1, const T2& message2 ) const
+{
+	if ( M_comm )
+		M_comm->Barrier();
+	if ( M_verbose )
+		std::cout << message1 << message2 << std::flush;
+}
+
+template <typename T1, typename T2, typename T3>
+void Displayer::
+leaderPrint( const T1& message1, const T2& message2, const T3& message3 ) const
+{
+	if ( M_comm )
+		M_comm->Barrier();
+	if ( M_verbose )
+		std::cout << message1 << message2 << message3 << std::flush;
+}
+
+template <typename T1, typename T2>
+void Displayer::
+leaderPrintMax( const T1& message1, const T2& localMax ) const
+{
+	Real num( static_cast<Real>(localMax) );
+	Real globalMax;
+
+	if ( M_comm )
+		M_comm->MaxAll( &num, &globalMax, 1 );
+	if ( M_verbose )
+		std::cout << message1 << globalMax << std::endl;
+}
+
+} // Namespace LifeV
+
 #endif
