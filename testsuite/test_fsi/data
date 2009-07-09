@@ -6,7 +6,7 @@
 [problem]
 
 method     = exactJacobian # fixedPoint, steklovPoincare, exactJacobian
-algorithm  = DirichletNeumann # Dirichletneuman, RobinNeumann, for fixedPoint method
+algorithm  = DirichletNeumann # DirichletNeumann, RobinNeumann, for fixedPoint method
 precond    = 1 # 0 = lin fluid, 1 lin structure, 2 = both, 3 = DD-Newton
 DDNprecond = 1 # precond for DD-newton, 0 = lin fluid, 1 lin structure, 2 = both
 reducedFluid = 0 # 0 = exact, 1 = inexact
@@ -76,9 +76,9 @@ mesh_dir  = ./Mesh/ # the directory where the mesh file is
 mesh_file = tube20.mesh  # mesh file
 #mesh_file = tube.mesh  # mesh file
 
-vel_order       = P1Bubble            # P1, P1Bubble, P2
-press_order     = P1            # P1, P2
-numLM 		= 1
+vel_order		= P1Bubble		# P1, P1Bubble, P2
+press_order		= P1			# P1, P2
+numLM			= 1				# Lagrange Multipliers
 
 [../miscellaneous]
 verbose   = 1
@@ -90,7 +90,7 @@ factor    = 1
 [../solver]
 solver          = gmres
 scaling         = none
-output          = all_res  #none
+output          = all  #none
 conv            = rhs
 max_iter        = 100
 max_iter_reuse  = 100
@@ -138,10 +138,11 @@ filter_singletons      = false
 # end of fluid preconditioner parameters
 
 [lin_fluid]
+
 [./solver]
 solver          = gmres
 scaling         = none
-output          = all_res  #none
+output          = all  #none
 conv            = rhs
 max_iter        = 100
 kspace          = 100
@@ -194,11 +195,8 @@ material_flag   = 1 #,2
 young           = 3.0E6 #,1.9E9
 poisson         = 0.30 #,0.30
 
-density         = 1.2               # density
-thickness	= 0.1
-
-#young           = 3.0E6
-#poisson         = 0.30
+density         = 1.2					# density
+thickness		= 0.1
 
 [../time_discretization]
 timestep		= 0.0001
@@ -222,7 +220,7 @@ abstol  = 1.e-8
 linesearch = 0
 
 [../solver]
-output          = all_res #all_res
+output          = all
 max_iter        = 100
 poly_ord        = 5
 kspace          = 100
@@ -250,7 +248,7 @@ solvertype      = Amesos_Umfpack
 [mesh_motion]
 
 [./solver]
-output          = all_res
+output          = all
 max_iter        = 300
 poly_ord        = 5
 kspace          = 40

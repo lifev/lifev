@@ -430,19 +430,19 @@ int SolverTrilinos::solveSystem(  vector_type&      rhsFull,
 
         chrono.stop();
         M_Displayer.leaderPrintMax( "done in " , chrono.diff() );
-        M_Displayer.leaderPrint("      Condition number (estimated):            " , condest );
+        M_Displayer.leaderPrint("      Condition number (estimated):            " , condest, "\n" );
     }
     else
     {
         M_Displayer.leaderPrint("      Reusing  precond ...                \n");
     }
 
-    M_Displayer.leaderPrint("      Solving system ...                       \n");
+    M_Displayer.leaderPrint("      Solving system ...                 ");
 
     chrono.start();
     int numIter = solve(sol, rhsFull);
     chrono.stop();
-    M_Displayer.leaderPrintMax( "       ... done in " , chrono.diff() );
+    M_Displayer.leaderPrintMax( "      done in " , chrono.diff() );
 
     // If we do not want to retry, return now.
     // otherwise rebuild the preconditioner and solve again:

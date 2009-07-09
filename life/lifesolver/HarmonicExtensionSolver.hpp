@@ -403,7 +403,7 @@ HarmonicExtensionSolver<Mesh, SolverType>::updateSystem()
     M_dispOld = M_disp;
 
     if (M_verbose)
-        std::cout << "  ok." << std::flush;
+        std::cout << "  ok." << std::endl;
 
 }
 
