@@ -89,6 +89,18 @@ namespace LifeV {
  *
  *  function = 'a=5.67436; (x^2+y^2,0,c*sin(2*pi*C*t)^C)'
  *
+ *  NOTE:
+ *  In the boundary condition file, if you have three component with the same expression
+ *  (the same function) you can both write:
+ *
+ *  function = '(0, 0, 0)'
+ *
+ *  and
+ *
+ *  function = 0
+ *
+ *  The only difference is that the second kind of instruction is more efficient during execution.
+ *
  */
 class BCInterfaceFunction
 //     :
@@ -130,14 +142,29 @@ public:
 	 */
 	BCInterfaceFunction( const BCInterfaceFunction& function );
 
-	//! Operator =
-	/*!
-	 * \param function - BCInterfaceFunction
-	 */
-	BCInterfaceFunction& operator=( const BCInterfaceFunction& function );
-
     //! Destructor
     ~BCInterfaceFunction() {}
+
+    //@}
+
+
+
+    /** @name Methods
+     */
+    //@{
+
+    //! Operator =
+    /*!
+     * \param function - BCInterfaceFunction
+     */
+    BCInterfaceFunction& operator=( const BCInterfaceFunction& function );
+
+    //! Compare function
+    /*!
+     * \param baseString
+     * \param comV
+     */
+    bool compare( const std::string& baseString, const BCComV& comV );
 
     //@}
 
@@ -157,6 +184,8 @@ private:
 	//! Private variables
 	// ===================================================
 
+	std::string											M_baseString;
+	BCComV												M_comV;
 	BCFunctionBase 										M_base;
 	boost::shared_ptr<SpiritParser>						M_parser;
 	std::map<ID, ID>									M_mapID;

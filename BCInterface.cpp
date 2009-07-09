@@ -32,10 +32,14 @@
 
 namespace LifeV {
 
+// Initialize static variables
+std::vector< boost::shared_ptr<BCInterfaceFunction> >	BCInterface::M_functionVector;
+std::map<std::string,size_type>							BCInterface::M_mapFunction;
+
 // ===================================================
 //! Constructor
 // ===================================================
-BCInterface::BCInterface( GetPot const& dataFile, const std::string dataSection ) :
+BCInterface::BCInterface( const GetPot& dataFile, const std::string& dataSection ) :
 	M_dataFile					( dataFile ),
 	M_dataSection				( dataSection + "/boundary_conditions/" ),
 	M_list						( ),
@@ -45,6 +49,8 @@ BCInterface::BCInterface( GetPot const& dataFile, const std::string dataSection 
 	M_hint						( BCHandler::HINT_BC_ONLY_ESSENTIAL ),
 	M_handler					( ),
 	M_FSIOperator				( ),
+	//M_mapFunction				( ),
+	//M_functionVector			( ),
 	M_name						( "undefined" ),
 	M_flag						( ),
 	M_type						( ),
@@ -72,7 +78,7 @@ BCInterface::BCInterface( GetPot const& dataFile, const std::string dataSection 
 	M_mapBase["fsi"] 		= fsi;
 
 	//Operators
-	M_functionVector.clear();
+	//M_functionVector.clear();
 	M_FSIOperatorVector.clear();
 
 	//Set other parameters
@@ -93,8 +99,9 @@ BCInterface::BCInterface( const BCInterface& interface ) :
 	M_mapMode			( interface.M_mapMode ),
 	M_mapBase			( interface.M_mapBase ),
 	M_FSIOperator		( interface.M_FSIOperator ),
-	M_functionVector	( interface.M_functionVector ),
 	M_FSIOperatorVector	( interface.M_FSIOperatorVector ),
+	//M_mapFunction		( interface.M_mapFunction ),
+	//M_functionVector	( interface.M_functionVector ),
 	M_name				( interface.M_name ),
 	M_flag				( interface.M_flag ),
 	M_type				( interface.M_type ),
@@ -125,8 +132,9 @@ BCInterface::operator=( const BCInterface& interface )
     	M_mapMode			= interface.M_mapMode;
     	M_mapBase			= interface.M_mapBase;
     	M_FSIOperator		= interface.M_FSIOperator;
-    	M_functionVector	= interface.M_functionVector;
     	M_FSIOperatorVector	= interface.M_FSIOperatorVector;
+    	//M_mapFunction		= interface.M_mapFunction;
+    	//M_functionVector	= interface.M_functionVector;
     	M_name				= interface.M_name;
     	M_flag				= interface.M_flag;
     	M_type				= interface.M_type;
@@ -148,7 +156,7 @@ BCInterface::operator=( const BCInterface& interface )
 //! Members functions
 // ===================================================
 void
-BCInterface::setHandlerParameters( const ID bcNumber, const BCHandler::BCHints hint )
+BCInterface::setHandlerParameters( const ID& bcNumber, const BCHandler::BCHints& hint )
 {
 	M_bcNumber 	= bcNumber;
 	M_hint 		= hint;
@@ -191,8 +199,10 @@ BCInterface::buildHandler( void )
 		{
 			case function :
 
-				addBase( M_functionVector, M_comV );
-				addBCManager( M_functionVector.back()->getBase() );
+				if ( newBase() )
+					addBase( M_functionVector, M_comV );
+
+				addBCManager( M_functionVector[M_mapFunction[M_baseString]]->getBase() );
 
 				break;
 
@@ -239,7 +249,7 @@ BCInterface::autosetHandlerParameters( void )
 
 #ifdef DEBUG
     Debug( 5020 ) << "BCInterface::autosetHandlerParameters      M_bcNumber: " << M_bcNumber << "\n";
-    Debug( 5020 ) << "                                               M_hint: " << M_hint << "\n\n";
+    Debug( 5020 ) << "BCInterface::autosetHandlerParameters          M_hint: " << M_hint << "\n\n";
 #endif
 
 }
@@ -324,16 +334,19 @@ BCInterface::readComponentVector( const char* component )
 
 
 inline void
-BCInterface::readBase( const std::string base )
+BCInterface::readBase( const std::string& base )
 {
 	for ( std::map<std::string, BCBaseList>::iterator j = M_mapBase.begin() ; j != M_mapBase.end() ; ++j )
 		if ( isBase( (base + j->first).c_str() ) )
 		{
 			M_base = M_mapBase[j->first];
 
+			// Remove spaces from the string
+			boost::replace_all( M_baseString, " ",  "" );
+
 #ifdef DEBUG
 			Debug( 5020 ) << "BCInterface::readBase                          M_base: " << M_base << " " << j->first << "\n";
-			Debug( 5020 ) << "                                         M_baseString: " << M_baseString << "\n";
+			Debug( 5020 ) << "BCInterface::readBase                    M_baseString: " << M_baseString << "\n";
 #endif
 
 			break;
@@ -348,6 +361,38 @@ BCInterface::isBase( const char* base )
 	M_baseString = M_dataFile( base, " " );
 
 	return M_dataFile.checkVariable( base );
+}
+
+
+
+inline bool
+BCInterface::newBase( void )
+{
+	//Check if the baseString has been already used
+	for ( std::map<std::string, size_type>::iterator j = M_mapFunction.begin() ; j != M_mapFunction.end() ; ++j )
+		if( M_functionVector[j->second]->compare( M_baseString, M_comV ) )
+		{
+
+#ifdef DEBUG
+			Debug( 5020 ) << "BCInterface::newBase              Reuse previous base! " << "\n";
+			Debug( 5020 ) << "BCInterface::newBase                         old base: " << j->first << "\n";
+			Debug( 5020 ) << "BCInterface::newBase                         new base: " << M_baseString << "\n";
+#endif
+
+			return false;
+		}
+
+	//Add baseString to the map
+	size_type size = M_mapFunction.size();
+	M_mapFunction[M_baseString] = size;
+
+#ifdef DEBUG
+	Debug( 5020 ) << "BCInterface::newBase                Create a new base! " << "\n";
+	Debug( 5020 ) << "BCInterface::newBase             M_mapFunction.size(): " << static_cast<Real> (M_mapFunction.size()) << "\n";
+	Debug( 5020 ) << "BCInterface::newBase      M_mapFunction[M_baseString]: " << static_cast<Real> (M_mapFunction[M_baseString]) << "\n";
+#endif
+
+	return true;
 }
 
 } // Namespace LifeV

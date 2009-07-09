@@ -143,8 +143,6 @@ enum BCBaseList{function, fsi};
  *  In this case you have to manually set the TOTAL number of boundary conditions
  *  by using setHandlerParameters() function BEFORE building the handler.
  *
- *  \TODO Make static BCInterfaceFunction, to have just one class (and hence one Parser) for the same function strings.
- *  \TODO Find a way to impose component in a more general way (actually to impose 3rd component, we have to provide also the first two: (0,0,'3rd component')
  */
 class BCInterface
 //     :
@@ -176,7 +174,7 @@ public:
      * \param dataFile    - GetPot data file
      * \param dataSection - Subsection inside [conditions]
      */
-	BCInterface( GetPot const& dataFile, const std::string dataSection );
+	BCInterface( const GetPot& dataFile, const std::string& dataSection );
 
 	//! Copy constructor
 	/*!
@@ -217,7 +215,7 @@ public:
      * \param bcNumber - total number of the boundary conditions (files + added manually)
      * \param hint     - hint
      */
-	void setHandlerParameters( const ID bcNumber, const BCHandler::BCHints hint = BCHandler::HINT_BC_NONE );
+	void setHandlerParameters( const ID& bcNumber, const BCHandler::BCHints& hint = BCHandler::HINT_BC_NONE );
 
 	//! Build the bcHandler
 	void buildHandler( void );
@@ -260,7 +258,6 @@ public:
      */
 	void setFSIOperator( const boost::shared_ptr<FSIOperator>& oper ) { M_FSIOperator = oper; }
 
-
     //@}
 
 private:
@@ -287,11 +284,13 @@ private:
 	std::map<std::string, BCMode> 						M_mapMode;
 	std::map<std::string, BCBaseList> 					M_mapBase;
 
-	boost::shared_ptr<FSIOperator>						M_FSIOperator;
-
 	// Operators
-	std::vector< boost::shared_ptr<BCInterfaceFunction> > 		M_functionVector;
-	std::vector< boost::shared_ptr<BCInterfaceFSIOperator> > 	M_FSIOperatorVector;
+	boost::shared_ptr<FSIOperator>								M_FSIOperator;
+	std::vector< boost::shared_ptr<BCInterfaceFSIOperator> >	M_FSIOperatorVector;
+
+	// Function
+	static std::map<std::string,size_type>							M_mapFunction;
+	static std::vector< boost::shared_ptr<BCInterfaceFunction> >	M_functionVector;
 
 	// BC options
 	BCName												M_name;
@@ -350,10 +349,13 @@ private:
     inline void readComponentVector( const char* component );
 
     //! readBase
-    inline void readBase( const std::string base );
+    inline void readBase( const std::string& base );
 
     //! isBase
     inline bool isBase( const char* base );
+
+    //! newBase
+    inline bool newBase( void );
 
     //@}
 };
@@ -403,9 +405,6 @@ void BCInterface::addBCManager( BCBase& base )
 
 		case Full :
 
-			//readComponentNumber( (M_dataSection + M_name + "/component").c_str() );
-			//readComponentVector( (M_dataSection + M_name + "/component").c_str() );
-
 #ifdef DEBUG
 			Debug( 5020 ) << "BCInterface::addBCManager (Full)" << "\n";
 #endif
@@ -415,8 +414,6 @@ void BCInterface::addBCManager( BCBase& base )
 			break;
 
 		case Component :
-
-			//readComponentVector( (M_dataSection + M_name + "/component").c_str() );
 
 #ifdef DEBUG
 			Debug( 5020 ) << "BCInterface::addBCManager (Component)" << "\n";
