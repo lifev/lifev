@@ -35,49 +35,35 @@ namespace LifeV {
 // ===================================================
 //! Constructor & Destructor
 // ===================================================
-BCInterfaceFunction::BCInterfaceFunction( const std::string& baseString, const BCComV& comV ) :
-	M_baseString				( baseString ),
+BCInterfaceFunction::BCInterfaceFunction( const BCComV& comV ) :
+	M_baseString				( "undefined" ),
 	M_comV						( comV ),
 	M_base						( ),
-	M_parser					( new SpiritParser( baseString ) )
+	M_parser					( new SpiritParser( ) ),
+	M_mapID						( )
 {
-
-	/*
-	 * MODE          COMPONENT     FUNCTION      |      COMV.SIZE     ARGUMENTS     INTERFACEFUNCTION
-	 * ------------------------------------------|---------------------------------------------------
-	 *                                           |
-	 * COMPONENT     2             x*y*z         |      1             1             Function
-	 * FULL          3             x*y*z         |      1             1             Function
-	 * FULL          1             x*y*z         |      1             1             Function
-	 * FULL          3             (y*z,x*z,x*y) |      1             3             FunctionID
-	 * FULL          2             (x,y)         |      1             2             FunctionID
-	 * COMPONENT     '1 3'         (x,y)         |      2             2             FunctionID
-	 */
 
 #ifdef DEBUG
 	Debug( 5021 ) << "BCInterfaceFunction::BCInterfaceFunction: " << "\n";
 #endif
 
-	UInt arguments = M_parser->countSubstring( "," ) + 1;
+}
+
+
+
+BCInterfaceFunction::BCInterfaceFunction( const std::string& baseString, const BCComV& comV ) :
+	M_baseString				( baseString ),
+	M_comV						( comV ),
+	M_base						( ),
+	M_parser					( new SpiritParser( baseString ) ),
+	M_mapID						( )
+{
 
 #ifdef DEBUG
-	Debug( 5021 ) << "                                                   arguments: " << arguments  << "\n";
+	Debug( 5021 ) << "BCInterfaceFunction::BCInterfaceFunction: " << "\n";
 #endif
 
-	if ( arguments == 1 )
-		M_base.setFunction( boost::bind(&BCInterfaceFunction::Function, this, _1, _2, _3, _4, _5) );
-	else
-	{
-		//Create the ID map
-		if ( comV.size() > 1 )	// Component
-			for ( ID i(0) ; i < static_cast<ID>( comV.size() ) ; ++i )
-				M_mapID[ comV[i] ] = i+1;
-		else					// if ( comV.front() == arguments )  Full
-			for ( ID i(1) ; i <= comV.front() ; ++i )
-				M_mapID[ i ] = i;
-
-		M_base.setFunction( boost::bind(&BCInterfaceFunction::FunctionID, this, _1, _2, _3, _4, _5) );
-	}
+	setFunction();
 }
 
 
@@ -115,6 +101,17 @@ BCInterfaceFunction::operator=( const BCInterfaceFunction& function )
 
 
 
+void
+BCInterfaceFunction::setBaseString( const std::string& baseString )
+{
+	M_baseString = baseString;
+	M_parser->setString( M_baseString );
+
+	setFunction();
+}
+
+
+
 bool
 BCInterfaceFunction::compare( const std::string& baseString, const BCComV& comV )
 {
@@ -128,6 +125,45 @@ BCInterfaceFunction::compare( const std::string& baseString, const BCComV& comV 
 // ===================================================
 //! Private functions
 // ===================================================
+void
+BCInterfaceFunction::setFunction( void )
+{
+	/*
+	 * MODE          COMPONENT     FUNCTION      |      COMV.SIZE     ARGUMENTS     INTERFACEFUNCTION
+	 * ------------------------------------------|---------------------------------------------------
+	 *                                           |
+	 * COMPONENT     2             x*y*z         |      1             1             Function
+	 * FULL          3             x*y*z         |      1             1             Function
+	 * FULL          1             x*y*z         |      1             1             Function
+	 * FULL          3             (y*z,x*z,x*y) |      1             3             FunctionID
+	 * FULL          2             (x,y)         |      1             2             FunctionID
+	 * COMPONENT     '1 3'         (x,y)         |      2             2             FunctionID
+	 */
+
+	UInt arguments = M_parser->countSubstring( "," ) + 1;
+
+#ifdef DEBUG
+	Debug( 5021 ) << "                                                   arguments: " << arguments  << "\n";
+#endif
+
+	if ( arguments == 1 )
+		M_base.setFunction( boost::bind(&BCInterfaceFunction::Function, this, _1, _2, _3, _4, _5) );
+	else
+	{
+		//Create the ID map
+		if ( M_comV.size() > 1 )	// Component
+			for ( ID i(0) ; i < static_cast<ID>( M_comV.size() ) ; ++i )
+				M_mapID[ M_comV[i] ] = i+1;
+		else					// if ( M_comV.front() == arguments )  Full
+			for ( ID i(1) ; i <= M_comV.front() ; ++i )
+				M_mapID[ i ] = i;
+
+		M_base.setFunction( boost::bind(&BCInterfaceFunction::FunctionID, this, _1, _2, _3, _4, _5) );
+	}
+}
+
+
+
 Real
 BCInterfaceFunction::Function( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/ )
 {
@@ -135,6 +171,8 @@ BCInterfaceFunction::Function( const Real& t, const Real& x, const Real& y, cons
 	M_parser->setVariable( "x", x );
 	M_parser->setVariable( "y", y );
 	M_parser->setVariable( "z", z );
+
+	this->dataInterpolation();
 
 #ifdef DEBUG
 	Debug( 5021 ) << "BCInterfaceFunction::Function: " << "\n";
@@ -156,6 +194,8 @@ BCInterfaceFunction::FunctionID( const Real& t, const Real& x, const Real& y, co
 	M_parser->setVariable( "x", x );
 	M_parser->setVariable( "y", y );
 	M_parser->setVariable( "z", z );
+
+	this->dataInterpolation();
 
 #ifdef DEBUG
 	Debug( 5021 ) << "BCInterfaceFunction::FunctionID: " << "\n";

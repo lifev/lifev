@@ -121,6 +121,7 @@ public:
 	typedef std::vector<ID>								BCComV;
 
 
+
 	// ===================================================
 	//! Public functions
 	// ===================================================
@@ -129,10 +130,16 @@ public:
      */
     //@{
 
+	//! Constructor
+	/*!
+	 * \param comV 			- vector of components
+	 */
+	BCInterfaceFunction( const BCComV& comV );
+
     //! Constructor
 	/*!
-	 * \param baseString      - function string
-	 * \param stringSeparator - Separator identifier (default -> ",")
+	 * \param baseString	- function string
+	 * \param comV 			- vector of components
 	 */
 	BCInterfaceFunction( const std::string& baseString, const BCComV& comV );
 
@@ -159,12 +166,18 @@ public:
      */
     BCInterfaceFunction& operator=( const BCInterfaceFunction& function );
 
+    //! SetBaseString - Need to be called if the class has been created with the one argument constructor!
+    /*!
+	 * \param baseString	- function string
+	 */
+    void setBaseString( const std::string& baseString );
+
     //! Compare function
     /*!
      * \param baseString
      * \param comV
      */
-    bool compare( const std::string& baseString, const BCComV& comV );
+    virtual bool compare( const std::string& baseString, const BCComV& comV );
 
     //@}
 
@@ -178,7 +191,7 @@ public:
 
     //@}
 
-private:
+protected:
 
 	// ===================================================
 	//! Private variables
@@ -191,6 +204,7 @@ private:
 	std::map<ID, ID>									M_mapID;
 
 
+
 	// ===================================================
 	//! Private functions
 	// ===================================================
@@ -198,6 +212,12 @@ private:
 	/** @name Private functions
 	 */
 	//@{
+
+	//! dataInterpolation
+	virtual inline void dataInterpolation( void ) {}
+
+    //! SetFunction
+    void setFunction( void );
 
     //! Function
     Real Function( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/ );
