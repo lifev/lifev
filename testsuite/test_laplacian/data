@@ -88,7 +88,7 @@
         [../solver]
         solver          = gmres
         scaling         = none
-        output          = all_res  # all_res none
+        output          = all # none
         conv            = rhs
         max_iter        = 100
         kspace          = 100

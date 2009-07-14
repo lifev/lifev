@@ -75,7 +75,7 @@ useShapeDerivatives = false
 	[../solver]                     # Solver Parameters
 	solver          = gmres
 	scaling         = none
-	output          = all_res # all_res
+	output          = all # none
 	conv            = rhs
 	max_iter        = 100
 	kspace          = 100

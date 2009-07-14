@@ -73,7 +73,7 @@ factor    = 1
 #[../solver]
 #solver          = gmres
 #scaling         = none
-#output          = all_res  #none
+#output          = all # none
 #conv            = rhs
 #max_iter        = 100
 #kspace          = 100
@@ -150,7 +150,7 @@ droptol         = 1.e-5
 fill            = 2
 
 [../solver]
-output          = all_res #all_res
+output          = all # none
 max_iter        = 1000
 poly_ord        = 5
 kspace          = 30
@@ -163,7 +163,7 @@ tol             = 1.e-10
 [mesh_motion]
 
 [./solver]
-output          = all_res
+output          = all # none
 max_iter        = 200
 poly_ord        = 5
 kspace          = 40

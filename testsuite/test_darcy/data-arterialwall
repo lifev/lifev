@@ -31,5 +31,5 @@ post_proc_format = medit          # vtk or medit
 solver = cg  #cg , gmres, cgs, tfqmr, bicgstab, slu, symmlq, fixed_pt, lu
 precond = dom_decomp
 subdomain_solve = icc
-output = warnings    #warnings , none , all, all_res, last
+output = warnings    #warnings , none , all, all, last
 tol = 1e-20

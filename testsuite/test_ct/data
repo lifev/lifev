@@ -40,7 +40,7 @@ variationalPn	= 0		# 0: standard (v|grad p) couling, 1: (div v|p) coupling
 [../solver]
 solver          = gmres
 scaling         = none
-output          = all_res	# all_res
+output          = all # none
 conv            = rhs
 max_iter        = 100
 kspace          = 100

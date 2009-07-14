@@ -52,7 +52,7 @@ post_proc_format = medit          # vtk or medit
 solver = cg  #cg , gmres, cgs, tfqmr, bicgstab, slu, symmlq, fixed_pt, lu
 precond = dom_decomp
 subdomain_solve = icc
-output = warnings    #warnings , none , all, all_res, last
+output = warnings    #warnings , none , all, all, last
 tol = 1e-8
 ]])
 AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria/cylhexa.mesh && $top_builddir/testsuite/test_darcy/test_darcy -c StraightTubeHexa],[0],[ignore],[ignore])
@@ -86,7 +86,7 @@ post_proc_format = medit          # vtk or medit
 solver = cg  #cg , gmres, cgs, tfqmr, bicgstab, slu, symmlq, fixed_pt, lu
 precond = dom_decomp
 subdomain_solve = icc
-output = warnings    #warnings , none , all, all_res, last
+output = warnings    #warnings , none , all, all, last
 tol = 1e-8
 ]])
 AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria/cyltetra.mesh && $top_builddir/testsuite/test_darcy/test_darcy -c StraightTubeTetra],[0],[ignore],[ignore])
@@ -119,7 +119,7 @@ post_proc_format = medit          # vtk or medit
 solver = cg  #cg , gmres, cgs, tfqmr, bicgstab, slu, symmlq, fixed_pt, lu
 precond = dom_decomp
 subdomain_solve = icc
-output = warnings    #warnings , none , all, all_res, last
+output = warnings    #warnings , none , all, all, last
 tol = 1e-8
 ]])
 AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria/hexahexa10x10x10.mesh && $top_builddir/testsuite/test_darcy/test_darcy -c AnalyticalHexa],[0],[ignore],[ignore])
@@ -153,7 +153,7 @@ post_proc_format = medit          # vtk or medit
 solver = cg  #cg , gmres, cgs, tfqmr, bicgstab, slu, symmlq, fixed_pt, lu
 precond = dom_decomp
 subdomain_solve = icc
-output = warnings    #warnings , none , all, all_res, last
+output = warnings    #warnings , none , all, all, last
 tol = 1e-8
 ]])
 AT_CHECK([ln -sf $top_builddir/testsuite/data/mesh/inria/piece-of-tube-wall-tetra.mesh && $top_builddir/testsuite/test_darcy/test_darcy -c ArterialWallTetra],[0],[ignore],[ignore])

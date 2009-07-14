@@ -50,7 +50,7 @@ press_order     = P1		# P1, P2
 [../solver]
 solver          = gmres
 scaling         = none
-output          = all_res # all_res
+output          = all # none
 conv            = rhs
 max_iter        = 200
 kspace          = 200

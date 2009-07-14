@@ -62,7 +62,7 @@ reltol  = 1.e-8
 
 
 [../solver]
-output          = all_res
+output          = all # none
 max_iter        = 100
 poly_ord        = 5
 drop            = 1.00e-4

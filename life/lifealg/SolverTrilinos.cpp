@@ -176,7 +176,7 @@ void SolverTrilinos::setDataFromGetPot( const GetPot& dfile, const std::string& 
     // output
     //
     M_TrilinosParameterList.set("output",
-                             dfile( ( section + "/output" ).data(), "all_res" ));
+                             dfile( ( section + "/output" ).data(), "all" ));
 
     //
     // other variables

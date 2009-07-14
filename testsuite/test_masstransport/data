@@ -75,7 +75,7 @@ factor    = 1
 [../solver]
 solver          = gmres
 scaling         = none
-output          = all_res  #none
+output          = all # none
 conv            = rhs
 max_iter        = 100
 kspace          = 100
@@ -121,17 +121,8 @@ mesh_file = cyltetra.mesh     # mesh file
 [../solver]
 solver          = gmres
 scaling         = none
-output          = all_res  #none
+output          = all # none
 conv            = rhs
-max_iter        = 100
-kspace          = 100
-tol             = 1.e-10    # AztecOO tolerance
-
-[../solver]
-solver          = gmres
-scaling         = none
-output          = all_res  #none
-conv            = r0
 max_iter        = 100
 kspace          = 100
 tol             = 1.e-10    # AztecOO tolerance

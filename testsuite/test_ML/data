@@ -34,7 +34,7 @@ press_order     = P1		# P1, P2
 
 [../solver]
 solver          = gmres
-output          = all_res # all_res
+output          = all # none
 conv            = r0
 max_iter        = 100
 kspace          = 100

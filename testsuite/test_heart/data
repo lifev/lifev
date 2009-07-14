@@ -109,7 +109,7 @@ verbose         = 1
 [../solver]
 solver          = gmres    #cg , gmres, cgs, tfqmr, bicgstab, slu, symmlq, fixed_pt, lu
 scaling         = none
-output          = all_res # all_res, warnings , none , all, all_res, last
+output          = all # all, warnings , none , last
 conv            = rhs
 max_iter        = 100
 kspace          = 200 #100

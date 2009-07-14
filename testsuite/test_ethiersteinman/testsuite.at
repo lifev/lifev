@@ -72,7 +72,7 @@ steady          = 0
 [../solver]
 solver          = gmres
 scaling         = none
-output          = all_res # all_res
+output          = all # none
 conv            = r0
 max_iter        = 100
 kspace          = 100
