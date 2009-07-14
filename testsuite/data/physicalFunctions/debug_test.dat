@@ -1,0 +1,21 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+# -------------------------------------------------
+#                   SIMPLE TEST
+#
+# author: 	Cristiano Malossi
+# email:	<cristiano.malossi@epfl.ch>
+# data:		2009-07-14
+# -------------------------------------------------
+
+function	= 'm = 2 ; a*m + b'
+#function	= 'm = 2 ; (0,0,a*m + b)'
+
+variables	=   't			a		b'
+scale		= 	'1			1.1		10'
+
+# Items must be sorted by the first column value!
+data		= 	'0.1		1		10
+				 0.2		2		20
+				 0.3		3		30
+				 0.4		4		40
+				 0.5		5		50'
