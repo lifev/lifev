@@ -55,7 +55,7 @@ SpiritParser::SpiritParser( const std::string& string, const bool& applyRules ) 
 	M_strings 					( ),
 	M_variables					( ),
 	M_results					( ),
-	M_nResults					( M_nResults ),
+	M_nResults					( 0 ),
 	M_calculator				( M_variables, M_results, M_nResults ),
 	M_applyRules				( applyRules )
 {
@@ -132,6 +132,18 @@ SpiritParser::setVariable( const std::string& name, const Real& value )
 #endif
 
 	M_variables[name] = value;
+}
+
+
+
+Real
+SpiritParser::getVariable( const std::string& name )
+{
+#ifdef DEBUG
+	Debug( 5030 ) << "SpiritParser::getVariable: M_variables[" << name << "]: " << M_variables[name] << "\n";
+#endif
+
+	return M_variables[name];
 }
 
 

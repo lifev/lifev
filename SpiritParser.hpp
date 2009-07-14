@@ -431,6 +431,12 @@ public:
      */
     void setVariable( const std::string& name, const Real& value );
 
+    /*! Get variable
+     *
+     * \param name  - name of the parameter
+     */
+    Real getVariable( const std::string& name );
+
     void showMeVariables( void ) const { M_calculator.showMeVariables(); }
 
     /*! Evaluate the expression
