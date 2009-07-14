@@ -33,8 +33,11 @@
 namespace LifeV {
 
 // Initialize static variables
-std::vector< boost::shared_ptr<BCInterfaceFunction> >	BCInterface::M_functionVector;
+std::vector< boost::shared_ptr<BCInterfaceFunction> >	BCInterface::M_vectorFunction;
 std::map<std::string,size_type>							BCInterface::M_mapFunction;
+
+std::vector< boost::shared_ptr<BCInterfaceFunctionFile> >	BCInterface::M_vectorFunctionFile;
+std::map<std::string,size_type>								BCInterface::M_mapFunctionFile;
 
 // ===================================================
 //! Constructor
@@ -50,7 +53,9 @@ BCInterface::BCInterface( const GetPot& dataFile, const std::string& dataSection
 	M_handler					( ),
 	M_FSIOperator				( ),
 	//M_mapFunction				( ),
-	//M_functionVector			( ),
+	//M_vectorFunction			( ),
+	//M_mapFunctionFile			( ),
+	//M_vectorFunctionFile		( ),
 	M_name						( "undefined" ),
 	M_flag						( ),
 	M_type						( ),
@@ -74,11 +79,12 @@ BCInterface::BCInterface( const GetPot& dataFile, const std::string& dataSection
 	M_mapMode["Tangential"] = Tangential;
 
 	//Set mapBase
-	M_mapBase["function"] 	= function;
-	M_mapBase["fsi"] 		= fsi;
+	M_mapBase["fsi"] 			= fsi;
+	M_mapBase["function"] 		= function;
+	M_mapBase["functionFile"] 	= functionFile;
 
 	//Operators
-	//M_functionVector.clear();
+	//M_vectorFunction.clear();
 	M_FSIOperatorVector.clear();
 
 	//Set other parameters
@@ -87,29 +93,31 @@ BCInterface::BCInterface( const GetPot& dataFile, const std::string& dataSection
 
 
 BCInterface::BCInterface( const BCInterface& interface ) :
-	M_dataFile			( interface.M_dataFile ),
-	M_dataSection		( interface.M_dataSection ),
-	M_list				( interface.M_list ),
-	M_listSize			( interface.M_listSize ),
-	M_autoSetParameters	( interface.M_autoSetParameters ),
-	M_bcNumber			( interface.M_bcNumber ),
-	M_hint				( interface.M_hint ),
-	M_handler			( interface.M_handler ),
-	M_mapType			( interface.M_mapType ),
-	M_mapMode			( interface.M_mapMode ),
-	M_mapBase			( interface.M_mapBase ),
-	M_FSIOperator		( interface.M_FSIOperator ),
-	M_FSIOperatorVector	( interface.M_FSIOperatorVector ),
-	//M_mapFunction		( interface.M_mapFunction ),
-	//M_functionVector	( interface.M_functionVector ),
-	M_name				( interface.M_name ),
-	M_flag				( interface.M_flag ),
-	M_type				( interface.M_type ),
-	M_mode				( interface.M_mode ),
-	//M_comN			( interface.M_comN ),
-	M_comV				( interface.M_comV ),
-	M_base				( interface.M_base ),
-	M_baseString		( interface.M_baseString )
+	M_dataFile				( interface.M_dataFile ),
+	M_dataSection			( interface.M_dataSection ),
+	M_list					( interface.M_list ),
+	M_listSize				( interface.M_listSize ),
+	M_autoSetParameters		( interface.M_autoSetParameters ),
+	M_bcNumber				( interface.M_bcNumber ),
+	M_hint					( interface.M_hint ),
+	M_handler				( interface.M_handler ),
+	M_mapType				( interface.M_mapType ),
+	M_mapMode				( interface.M_mapMode ),
+	M_mapBase				( interface.M_mapBase ),
+	M_FSIOperator			( interface.M_FSIOperator ),
+	M_FSIOperatorVector		( interface.M_FSIOperatorVector ),
+	//M_mapFunction			( interface.M_mapFunction ),
+	//M_vectorFunction		( interface.M_vectorFunction ),
+	//M_mapFunctionFile		( interface.M_mapFunctionFile ),
+	//M_vectorFunctionFile	( interface.M_vectorFunctionFile ),
+	M_name					( interface.M_name ),
+	M_flag					( interface.M_flag ),
+	M_type					( interface.M_type ),
+	M_mode					( interface.M_mode ),
+	//M_comN				( interface.M_comN ),
+	M_comV					( interface.M_comV ),
+	M_base					( interface.M_base ),
+	M_baseString			( interface.M_baseString )
 {
 }
 
@@ -120,29 +128,31 @@ BCInterface::operator=( const BCInterface& interface )
 {
     if ( this != &interface )
     {
-    	M_dataFile			= interface.M_dataFile;
-    	M_dataSection		= interface.M_dataSection;
-    	M_list				= interface.M_list;
-    	M_listSize			= interface.M_listSize;
-    	M_autoSetParameters	= interface.M_autoSetParameters;
-    	M_bcNumber			= interface.M_bcNumber;
-    	M_hint				= interface.M_hint;
-    	M_handler			= interface.M_handler;
-    	M_mapType			= interface.M_mapType;
-    	M_mapMode			= interface.M_mapMode;
-    	M_mapBase			= interface.M_mapBase;
-    	M_FSIOperator		= interface.M_FSIOperator;
-    	M_FSIOperatorVector	= interface.M_FSIOperatorVector;
-    	//M_mapFunction		= interface.M_mapFunction;
-    	//M_functionVector	= interface.M_functionVector;
-    	M_name				= interface.M_name;
-    	M_flag				= interface.M_flag;
-    	M_type				= interface.M_type;
-    	M_mode				= interface.M_mode;
-    	//M_comN			= interface.M_comN;
-    	M_comV				= interface.M_comV;
-    	M_base				= interface.M_base;
-    	M_baseString		= interface.M_baseString;
+    	M_dataFile				= interface.M_dataFile;
+    	M_dataSection			= interface.M_dataSection;
+    	M_list					= interface.M_list;
+    	M_listSize				= interface.M_listSize;
+    	M_autoSetParameters		= interface.M_autoSetParameters;
+    	M_bcNumber				= interface.M_bcNumber;
+    	M_hint					= interface.M_hint;
+    	M_handler				= interface.M_handler;
+    	M_mapType				= interface.M_mapType;
+    	M_mapMode				= interface.M_mapMode;
+    	M_mapBase				= interface.M_mapBase;
+    	M_FSIOperator			= interface.M_FSIOperator;
+    	M_FSIOperatorVector		= interface.M_FSIOperatorVector;
+    	//M_mapFunction			= interface.M_mapFunction;
+    	//M_vectorFunction		= interface.M_vectorFunction;
+    	//M_mapFunctionFile		= interface.M_mapFunctionFile;
+    	//M_vectorFunctionFile	= interface.M_vectorFunctionFile;
+    	M_name					= interface.M_name;
+    	M_flag					= interface.M_flag;
+    	M_type					= interface.M_type;
+    	M_mode					= interface.M_mode;
+    	//M_comN				= interface.M_comN;
+    	M_comV					= interface.M_comV;
+    	M_base					= interface.M_base;
+    	M_baseString			= interface.M_baseString;
     }
 
 	return *this;
@@ -199,10 +209,10 @@ BCInterface::buildHandler( void )
 		{
 			case function :
 
-				if ( newBase() )
-					addBase( M_functionVector, M_comV );
+				if ( newBase( M_mapFunction, M_vectorFunction) )
+					addBase( M_vectorFunction, M_comV );
 
-				addBCManager( M_functionVector[M_mapFunction[M_baseString]]->getBase() );
+				addBCManager( M_vectorFunction[M_mapFunction[M_baseString]]->getBase() );
 
 				break;
 
@@ -210,6 +220,15 @@ BCInterface::buildHandler( void )
 
 				addBase( M_FSIOperatorVector, M_FSIOperator );
 				addBCManager( M_FSIOperatorVector.back()->getBase() );
+
+				break;
+
+			case functionFile :
+
+				if ( newBase( M_mapFunctionFile, M_vectorFunctionFile) )
+					addBase( M_vectorFunctionFile, M_comV );
+
+				addBCManager( M_vectorFunctionFile[M_mapFunctionFile[M_baseString]]->getBase() );
 
 				break;
 		}
@@ -361,38 +380,6 @@ BCInterface::isBase( const char* base )
 	M_baseString = M_dataFile( base, " " );
 
 	return M_dataFile.checkVariable( base );
-}
-
-
-
-inline bool
-BCInterface::newBase( void )
-{
-	//Check if the baseString has been already used
-	for ( std::map<std::string, size_type>::iterator j = M_mapFunction.begin() ; j != M_mapFunction.end() ; ++j )
-		if( M_functionVector[j->second]->compare( M_baseString, M_comV ) )
-		{
-
-#ifdef DEBUG
-			Debug( 5020 ) << "BCInterface::newBase              Reuse previous base! " << "\n";
-			Debug( 5020 ) << "BCInterface::newBase                         old base: " << j->first << "\n";
-			Debug( 5020 ) << "BCInterface::newBase                         new base: " << M_baseString << "\n";
-#endif
-
-			return false;
-		}
-
-	//Add baseString to the map
-	size_type size = M_mapFunction.size();
-	M_mapFunction[M_baseString] = size;
-
-#ifdef DEBUG
-	Debug( 5020 ) << "BCInterface::newBase                Create a new base! " << "\n";
-	Debug( 5020 ) << "BCInterface::newBase             M_mapFunction.size(): " << static_cast<Real> (M_mapFunction.size()) << "\n";
-	Debug( 5020 ) << "BCInterface::newBase      M_mapFunction[M_baseString]: " << static_cast<Real> (M_mapFunction[M_baseString]) << "\n";
-#endif
-
-	return true;
 }
 
 } // Namespace LifeV

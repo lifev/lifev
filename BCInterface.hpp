@@ -45,8 +45,9 @@
 #include <string>
 #include <vector>
 
-#include <lifemc/lifefem/BCInterfaceFunction.hpp>
 #include <lifemc/lifefem/BCInterfaceFSIOperator.hpp>
+#include <lifemc/lifefem/BCInterfaceFunction.hpp>
+#include <lifemc/lifefem/BCInterfaceFunctionFile.hpp>
 
 
 
@@ -57,7 +58,7 @@
 // ===================================================
 namespace LifeV {
 
-enum BCBaseList{function, fsi};
+enum BCBaseList{fsi, function, functionFile};
 
 
 
@@ -285,12 +286,15 @@ private:
 	std::map<std::string, BCBaseList> 					M_mapBase;
 
 	// Operators
-	boost::shared_ptr<FSIOperator>								M_FSIOperator;
-	std::vector< boost::shared_ptr<BCInterfaceFSIOperator> >	M_FSIOperatorVector;
+	boost::shared_ptr<FSIOperator>										M_FSIOperator;
+	std::vector< boost::shared_ptr<BCInterfaceFSIOperator> >			M_FSIOperatorVector;
 
 	// Function
-	static std::map<std::string,size_type>							M_mapFunction;
-	static std::vector< boost::shared_ptr<BCInterfaceFunction> >	M_functionVector;
+	static std::map<std::string,size_type>								M_mapFunction;
+	static std::vector< boost::shared_ptr<BCInterfaceFunction> >		M_vectorFunction;
+
+	static std::map<std::string,size_type>								M_mapFunctionFile;
+	static std::vector< boost::shared_ptr<BCInterfaceFunctionFile> >	M_vectorFunctionFile;
 
 	// BC options
 	BCName												M_name;
@@ -313,6 +317,10 @@ private:
      */
     //@{
 
+    //! newBase
+    template <class BCInterfaceBase>
+    inline bool newBase( std::map<std::string,size_type>& map, const std::vector< boost::shared_ptr<BCInterfaceBase> >& vector );
+
 	/*
 	//! addBase
 	template <class BCInterfaceBase>
@@ -321,7 +329,7 @@ private:
 
 	//! addBase
 	template <class BCInterfaceBase, class BCparameter>
-	inline void addBase( std::vector< boost::shared_ptr<BCInterfaceBase> >& baseVector, BCparameter& p );
+	inline void addBase( std::vector< boost::shared_ptr<BCInterfaceBase> >& baseVector, const BCparameter& p );
 
 	//! addBCManager
 	template <class BCBase>
@@ -354,9 +362,6 @@ private:
     //! isBase
     inline bool isBase( const char* base );
 
-    //! newBase
-    inline bool newBase( void );
-
     //@}
 };
 
@@ -365,6 +370,37 @@ private:
 // ===================================================
 //! Template function
 // ===================================================
+template <class BCInterfaceBase>
+inline bool
+BCInterface::newBase( std::map<std::string,size_type>& map, const std::vector< boost::shared_ptr<BCInterfaceBase> >& vector )
+{
+	//Check if the baseString has been already used
+	for ( std::map<std::string, size_type>::iterator j = map.begin() ; j != map.end() ; ++j )
+		if( vector[j->second]->compare( M_baseString, M_comV ) )
+		{
+
+#ifdef DEBUG
+			Debug( 5020 ) << "BCInterface::newBase              Reuse previous base! " << "\n";
+			Debug( 5020 ) << "BCInterface::newBase                         old base: " << j->first << "\n";
+			Debug( 5020 ) << "BCInterface::newBase                         new base: " << M_baseString << "\n";
+#endif
+
+			return false;
+		}
+
+	//Add baseString to the map
+	size_type size = map.size();
+	map[M_baseString] = size;
+
+#ifdef DEBUG
+	Debug( 5020 ) << "BCInterface::newBase                Create a new base! " << "\n";
+	Debug( 5020 ) << "BCInterface::newBase             M_mapFunction.size(): " << static_cast<Real> (map.size()) << "\n";
+	Debug( 5020 ) << "BCInterface::newBase      M_mapFunction[M_baseString]: " << static_cast<Real> (map[M_baseString]) << "\n";
+#endif
+
+	return true;
+}
+
 /*
 template <class BCInterfaceBase>
 inline void
@@ -378,7 +414,7 @@ BCInterface::addBase( std::vector< boost::shared_ptr<BCInterfaceBase> >& baseVec
 
 template <class BCInterfaceBase, class BCparameter>
 inline void
-BCInterface::addBase( std::vector< boost::shared_ptr<BCInterfaceBase> >& baseVector, BCparameter& p )
+BCInterface::addBase( std::vector< boost::shared_ptr<BCInterfaceBase> >& baseVector, const BCparameter& p )
 {
 	boost::shared_ptr<BCInterfaceBase> Function( new BCInterfaceBase( M_baseString, p ) );
 	baseVector.push_back( Function );
