@@ -97,7 +97,7 @@ factor    = 1
 #[../solver]
 #solver          = gmres
 #scaling         = none
-#output          = all_res  #none
+#output          = all # none
 #conv            = rhs
 #max_iter        = 100
 #kspace          = 100
@@ -178,7 +178,7 @@ linesearch = 0
 
 
 [../solver]
-output          = all_res #all_res
+output          = all # none
 max_iter        = 100
 poly_ord        = 5
 kspace          = 100
@@ -267,7 +267,7 @@ type = IFPACK
 [mesh_motion]
 
 [./solver]
-output          = all_res
+output          = all # none
 max_iter        = 200
 poly_ord        = 5
 kspace          = 40
