@@ -23,7 +23,9 @@
   \version 1.0
 
   \brief File containing a class for handling Monodomain data with GetPot
-
+	
+	\modif J.Castelneau (INRIA)
+	\date 06/09
 */
 #ifndef _DATAIONIC_H_
 #define _DATAIONIC_H_
@@ -36,6 +38,11 @@
 #include <life/lifecore/dataString.hpp>
 #include <life/lifearray/tab.hpp>
 
+#undef REO_CASE
+//#define REO_CASE
+#ifdef REO_CASE
+	#include "heartCaseBase.hpp"
+#endif
 namespace LifeV
 {
 using namespace std;
@@ -53,9 +60,13 @@ class DataIonic:
 {
 public:
 
+    typedef boost::function<Real (const EntityFlag&, const Real&, const Real&, const Real&, const ID&)> func_type2;
+
     //! Constructors
     DataIonic( const GetPot& dfile );
-
+#ifdef REO_CASE
+    DataIonic( boost::shared_ptr<HeartCaseBase> M_fct );
+#endif
     DataIonic( const DataIonic& dataIonic );
 
     //! Ouptut
@@ -64,10 +75,19 @@ public:
     //! external setup
     void setup( const GetPot& dfile );
 
+    //! End time
+    Real endtime() const;
+
     //! FE space order
     std::string wOrder() const;
 
-    UInt verbose;
+#ifdef REO_CASE
+    //! fct Tau_Close or scalar Tau_close
+    void setHeteroTauClose(func_type2 ) ; 
+#endif
+    //Real fct_Tau_Close(const EntityFlag&, const Real&, const Real&, const Real&, const ID&) const; 
+
+    UInt verbose; 
     string mesh_file;
     Real a;
     Real b;
@@ -79,8 +99,20 @@ public:
     Real u0;
     Real winit;
     string mesh_dir;
-
-
+	//Mitchell & Schaeffer
+	Real		tau_in;   // = 0.8
+	Real		tau_out;  // = 18.0
+	Real		tau_open; // = 300.0
+	Real		tau_close;// = 100.0
+	Real		vcrit;    // =  -67.0
+	Real 		v_min;
+	Real 		v_max;
+	Real 		reac_amp;
+	Real 		tinit;
+	Real 		tend;
+	Real 		order_bdf;       //= 1  
+        bool		has_HeteroTauClose;
+	func_type2 	M_TauClose;
 private:
 
 
@@ -101,6 +133,18 @@ DataIonic( const GetPot& dfile ) :
 {
     setup(dfile);
 }
+#ifdef REO_CASE
+template <typename Mesh>
+DataIonic<Mesh>::
+DataIonic( boost::shared_ptr<HeartCaseBase> M_fct ) :
+    DataMesh<Mesh>( M_fct->get_data_hdl(), "electric/space_discretization" ),
+    DataTime( M_fct->get_data_hdl(), "electric/time_discretization" )
+{
+    setup(M_fct->get_data_hdl());
+    setHeteroTauClose(M_fct->get_heterotauclose());
+}
+#endif
+
 
 template <typename Mesh>
 DataIonic<Mesh>::
@@ -114,8 +158,21 @@ DataIonic( const DataIonic& dataIonic ) :
     d(dataIonic.d),
     T(dataIonic.T),
     A(dataIonic.A),
-    u0(dataIonic.u0),
-    winit(dataIonic.winit)
+    u0(dataIonic.u0),   
+    winit(dataIonic.winit),
+	// Mitchell & Schaeffer
+    tau_in(dataIonic.tau_in),
+    v_min(dataIonic.v_min),
+    v_max(dataIonic.v_max),
+    reac_amp(dataIonic.reac_amp),
+    tau_out(dataIonic.tau_out),
+    tau_open(dataIonic.tau_open),
+    tau_close(dataIonic.M_tau_close),
+    vcrit(dataIonic.vcrit),
+    tinit(dataIonic.tinit),
+    tend(dataIonic.tend),
+    order_bdf(dataIonic.order_bdf),
+    has_HeteroTauClose(dataIonic.has_HeteroTauClose)	
 {
 }
 
@@ -133,10 +190,21 @@ setup(  const GetPot& dfile )
     T   		= dfile("electric/physics/T",0.63);    //0.63ms    //RogersMcCulloch1994
     A   		= dfile("electric/physics/A",130);    //130mV    //RogersMcCulloch1994
     u0   		= dfile("electric/physics/u0",-84.0);	  //-84mV    //RogersMcCulloch1994
-    winit		= dfile("electric/physics/winit", 0);
-
+    winit		= dfile("electric/physics/winit", 0);  
+	// Mitchell & Schaeffer
+    tau_in    = dfile("electric/physics/tau_in",0.8);
+    v_min    = dfile("electric/physics/v_min",-80.0);
+    v_max    = dfile("electric/physics/v_max", 20.0);
+    reac_amp    = dfile("electric/physics/reac_amp", 0.2);
+    tau_out   = dfile("electric/physics/tau_out",18.0);
+    tau_open  = dfile("electric/physics/tau_open",100.0);
+    tau_close = dfile("electric/physics/tau_close",100.0);
+    vcrit     = dfile("electric/physics/vcrit",-67.0);
+    tinit     = dfile("electric/physics/init_time",0.0);
+    tend      = dfile("electric/physics/end_time",1000.0);
+    order_bdf       = dfile("electric/discretization/order_bdf",1);
+    has_HeteroTauClose = dfile("electric/physics/hasHeteroTauClose",1);
 }
-
 
 // Output
 template <typename Mesh>
@@ -146,6 +214,14 @@ showMe( std::ostream& c )
 
 }
 
+#ifdef REO_CASE
+template <typename Mesh>
+void DataIonic<Mesh>::
+setHeteroTauClose(func_type2 fct) 
+{
+M_TauClose = fct;
+}
+#endif
 
 }
 #endif

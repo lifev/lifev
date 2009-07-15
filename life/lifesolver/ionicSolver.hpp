@@ -27,6 +27,10 @@
   \author L. Mirabella M. Perego
   \date 11/2007
 
+ \file ionicSolver.hpp
+  \modif J.Castelneau
+  \date 01/2009
+
   \brief This file contains a Oseen equation solver class
 */
 #ifndef _IONICSOLVER_H_
@@ -51,6 +55,9 @@
 #include <life/lifesolver/dataIonic.hpp>
 #include <boost/shared_ptr.hpp>
 #include <life/lifefem/FESpace.hpp>
+#include <life/lifefem/bdf_template.hpp>
+#include <fstream>
+
 
 namespace LifeV
 {
@@ -77,6 +84,8 @@ public:
 
     typedef boost::function<Real ( Real const&, Real const&, Real const&,
                                    Real const&, ID const& )> source_type;
+
+    typedef boost::function<Real (const EntityFlag&, const Real&, const Real&, const Real&, const ID&)> fct_TauClose;
 
     typedef Mesh mesh_type;
 
@@ -135,7 +144,6 @@ return 0.;
     //! Initialize
     virtual void initialize( )=0;
 
-    //! Data
     const data_type&               M_data;
 
     // FE space
@@ -151,6 +159,7 @@ return 0.;
 
     //! Boolean that indicates if output is sent to cout
     bool                           M_verbose;
+
 
 protected:
 
@@ -184,7 +193,173 @@ IonicSolver<Mesh, SolverType>::
 {
 }
 
+////////////////////////////
+template< typename Mesh,
+	  typename SolverType = LifeV::SolverTrilinos >
+class Mitchell_Schaeffer : public virtual IonicSolver<Mesh, SolverType>
+{
+public:
+	typedef typename IonicSolver<Mesh, SolverType>::data_type data_type;
+	typedef typename IonicSolver<Mesh, SolverType>::vector_type vector_type;
+	typedef typename IonicSolver<Mesh, SolverType>::Function Function;
 
+    Mitchell_Schaeffer( const data_type&          dataType,
+           FESpace<Mesh, EpetraMap>& uFEspace,
+           Epetra_Comm&              comm );
+    virtual ~Mitchell_Schaeffer();
+
+    //! Update the ionic model elvecs
+    void updateRepeated( );
+
+    //! Update the ionic model elvecs
+    void updateElvec( UInt eleID );
+
+    //! Solves the ionic model
+    void ionModelSolve( const vector_type& u, const Real timestep );
+    
+    //! Computes the term -1/ \Cm u^n (G (1-u^n/vp) (1-u^n/v_th) + eta_1 v^{n+1}) for the PDE righthand side
+    void computeIion( Real Cm, ElemVec& elvec, ElemVec& elvec_u, FESpace<Mesh, EpetraMap>& uFESpace );
+
+    //! Returns the local solution vector
+    const vector_type& solution_w() const {return M_sol_w;}
+
+    //! Initialize
+    void initialize( );
+//    void initialize( const vector_type& );
+    
+    Real fct_Tau_Close(const EntityFlag& ref, const Real& x, const Real& y, const Real& z, const ID& i) const;
+
+
+
+protected:
+
+    //! Global solution _w 
+    vector_type                    	M_sol_w;
+    vector_type				M_wVecRep;
+    ElemVec 				M_elvec;
+    UInt				order_bdf;
+    BdfT<vector_type> 			bdf_w;
+private:
+};
+
+
+//
+// IMPLEMENTATION
+//
+
+//! Constructor
+template<typename Mesh, typename SolverType>
+Mitchell_Schaeffer<Mesh, SolverType>::
+Mitchell_Schaeffer( const data_type&          dataType,
+       FESpace<Mesh, EpetraMap>& uFEspace,
+       Epetra_Comm&              comm ):
+    	   IonicSolver<Mesh, SolverType>( dataType, uFEspace, comm),
+    	   M_sol_w                  ( IonicSolver<Mesh, SolverType>::M_localMap ),
+    	   M_wVecRep( M_sol_w, Repeated ),
+    	   M_elvec ( IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbNode, 1 ),
+	   order_bdf ( IonicSolver<Mesh, SolverType>::M_data.order_bdf ),
+	   bdf_w( order_bdf )
+{
+}
+
+
+
+
+template<typename Mesh, typename SolverType>
+Mitchell_Schaeffer<Mesh, SolverType>::
+~Mitchell_Schaeffer()
+{
+}
+
+template<typename Mesh, typename SolverType>
+void Mitchell_Schaeffer<Mesh, SolverType>::updateRepeated( )
+{
+	M_wVecRep=M_sol_w;
+}
+
+template<typename Mesh, typename SolverType>
+void Mitchell_Schaeffer<Mesh, SolverType>::updateElvec( UInt eleID )
+{
+	M_elvec.zero();
+	UInt ig;
+		//! Filling local elvec_w with recovery variable values in the nodes
+		for ( UInt iNode = 0 ; iNode < ( UInt ) IonicSolver<Mesh, SolverType>::M_uFESpace.fe().nbNode ; iNode++ )
+		{
+			ig = IonicSolver<Mesh, SolverType>::M_uFESpace.dof().localToGlobal( eleID, iNode + 1 );
+			M_elvec.vec()[ iNode ] = M_wVecRep[ig]; 
+		} 
+}
+
+template<typename Mesh, typename SolverType>
+Real Mitchell_Schaeffer<Mesh, SolverType>::fct_Tau_Close(const EntityFlag& ref, const Real& x, const Real& y, const Real& z, const ID& i) const
+{
+        return this->M_data.M_TauClose(ref, x, y, z, i);
+}
+
+template<typename Mesh, typename SolverType>
+void Mitchell_Schaeffer<Mesh, SolverType>::ionModelSolve( const vector_type& u, const Real timestep )
+{
+        // Solving :
+	////           ((v_max-v_min)^{-2}  - w )/tau_open  if u < vcrit 
+	// dw/dt ={         
+	//            -w/tau_close   if u > vcrit  
+	//	
+	Real aux1 = 1.0 / (bdf_w.coeff_der(0)/timestep  + 1.0/this->M_data.tau_open );
+	Real aux = 1.0/((this->M_data.v_max - this->M_data.v_min)*(this->M_data.v_max- this->M_data.v_min)* this->M_data.tau_open);
+	Real aux2 = 1.0 / (bdf_w.coeff_der(0)/timestep  + 1.0/this->M_data.tau_close);
+	vector_type M_time_der=bdf_w.time_der(timestep);
+	
+	IonicSolver<Mesh, SolverType>::M_comm->Barrier(); //    MPI_Barrier(MPI_COMM_WORLD);	
+	Real x, y, z;
+	EntityFlag ref;
+	UInt ID;
+	for ( int i = 0 ; i < u.getEpetraVector().MyLength() ; ++i )
+	{
+                int ig=u.BlockMap().MyGlobalElements()[i];
+		ID 	= ig;
+		ref 	= this->M_data.mesh()->point(ig).marker();//->point(i+1)
+		x 	= this->M_data.mesh()->point(ig).x();//->point(i+1)
+	        y 	= this->M_data.mesh()->point(ig).y();//->point(i+1)
+        	z 	= this->M_data.mesh()->point(ig).z();//->point(i+1)
+   		if (u[ig] < this->M_data.vcrit)
+			M_sol_w[ig] = aux1 * (aux + M_time_der[ig]);
+   			else if (this->M_data.has_HeteroTauClose)
+				{M_sol_w[ig] = (1.0 / (bdf_w.coeff_der(0)/timestep  + 1.0/fct_Tau_Close(ref,x,y,z,ID))) *  M_time_der[ig];//aux2 * M_time_der[ig];
+				std::cout<<"tau_close = "<<fct_Tau_Close(ref,x,y,z,ID)<<std::endl;}
+			else
+				M_sol_w[ig] = aux2 *  M_time_der[ig];
+	}
+	bdf_w.shift_right(M_sol_w);	
+
+	IonicSolver<Mesh, SolverType>::M_comm->Barrier(); //    MPI_Barrier(MPI_COMM_WORLD);
+}
+
+template<typename Mesh, typename SolverType>
+void Mitchell_Schaeffer<Mesh, SolverType>::computeIion(  Real /*Chi*/, ElemVec& elvec, ElemVec& elvec_u, FESpace<Mesh, EpetraMap>& uFESpace )
+{
+	for ( int i = 0;i < uFESpace.fe().nbNode;i++ )
+        {
+          elvec( i ) =  this->M_data.reac_amp*(((M_elvec( i ) / this->M_data.tau_in)
+                                                * (elvec_u( i ) - this->M_data.v_min)
+                                                * (elvec_u( i ) - this->M_data.v_min)
+                                                * (this->M_data.v_max - elvec_u( i ))
+                                                / (this->M_data.v_max - this->M_data.v_min) )
+                                               - (( elvec_u( i ) - this->M_data.v_min )
+                                                  /(  this->M_data.tau_out * (this->M_data.v_max - this->M_data.v_min)))) ;
+        }
+}
+
+template<typename Mesh, typename SolverType>
+void Mitchell_Schaeffer<Mesh, SolverType>::
+initialize( )
+{
+	M_sol_w.getEpetraVector().PutScalar (1.0/((this->M_data.v_max-this->M_data.v_min)*(this->M_data.v_max-this->M_data.v_min)));
+	bdf_w.initialize_unk(M_sol_w);
+	std::cout<<"bdf Omega :"<<std::endl;
+	bdf_w.showMe();
+}
+
+///////////////////////
 
 template< typename Mesh,
           typename SolverType = LifeV::SolverTrilinos >
@@ -294,8 +469,6 @@ void Rogers_McCulloch<Mesh, SolverType>::ionModelSolve( const vector_type& u, co
 	M_sol_w+= G*u;
 	M_sol_w-= temp;
 	M_sol_w*=1/alpha;
-
-
 	M_sol_w.GlobalAssemble();
 	IonicSolver<Mesh, SolverType>::M_comm->Barrier(); //    MPI_Barrier(MPI_COMM_WORLD);
 
@@ -322,7 +495,7 @@ void Rogers_McCulloch<Mesh, SolverType>::computeIion(  Real /*Cm*/, ElemVec& elv
             elvec( i ) -= (G1*(u_ig- this->M_data.u0)*(u_ig - this->M_data.u0 - this->M_data.a*this->M_data.A)*(u_ig - this->M_data.u0 - this->M_data.A) + G2 * (u_ig - this->M_data.u0) * w_ig) * uFESpace.fe().phi( i, ig ) * uFESpace.fe().weightDet( ig );
         }
     }
-
+//std::cout<<"******************elemvec ="<<elvec<<"********************\n"<<std::flush;
 }
 
 template<typename Mesh, typename SolverType>
