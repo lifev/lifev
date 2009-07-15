@@ -27,6 +27,9 @@
   \author L. Mirabella M. Perego
   \date 11/2007
 
+	\modif J.Castelneau (INRIA)
+        \date 06/09
+
   \brief This file contains a Oseen equation solver class
 */
 #ifndef _BIDOMAINSOLVER_H_
@@ -52,7 +55,8 @@
 #include <boost/shared_ptr.hpp>
 #include <life/lifefem/FESpace.hpp>
 #include "testsuite/test_heart/stiffness_fibers.hpp"
-
+#include <life/lifefem/bdf_template.hpp>
+#include <fstream> 
 namespace LifeV
 {
 /*!
@@ -74,8 +78,8 @@ public:
 
     typedef Real ( *Function ) ( const Real&, const Real&, const Real&,
                                  const Real&, const ID& );
-    typedef boost::function<Real ( Real const&, Real const&, Real const&,
-                                   Real const&, ID const& )> source_type;
+    typedef boost::function<Real ( const Real&, const Real&, const Real&,
+                                   const Real&, const ID& )> source_type;
 
     typedef Mesh mesh_type;
 
@@ -134,13 +138,14 @@ public:
     virtual void updatePDESystem( vector_type& sourceVec );
 
     //! Initialize
+    void initialize( const source_type&, const source_type&  );
     void initialize( const Function&, const Function&  );
     void initialize( const vector_type&, const vector_type& );
 
     //! Returns the local solution vector
     const vector_type& solution_u() const {return M_sol_u;}
     const vector_type& solution_uiue() const {return M_sol_uiue;}
-
+    const vector_type& solution_u_extrap() const {return M_sol_u_extrap;}
     const vector_type& fiber_vector() const {return M_fiber_vector;}
 
     //! Returns the local residual vector
@@ -177,6 +182,7 @@ public:
             return *M_matrMass;
         }
 
+    BdfT<vector_type>& bdf_u() {return M_bdf_u;} 
 
 protected:
 
@@ -225,6 +231,10 @@ protected:
 
     vector_type                    M_sol_u;
 
+    vector_type                    M_sol_uiue_extrap;
+
+    vector_type                    M_sol_u_extrap;
+
     //! Local fibers vector
     vector_type                    M_fiber_vector;
 
@@ -254,14 +264,15 @@ protected:
     //! Boolean that indicates if the matrix has to be recomputed
     bool                           M_recomputeMatrix;
 
+    BdfT<vector_type>		M_bdf_u;
 private:
 
     //! Elementary matrices
     ElemMat                        M_elmatStiff;
     ElemMat                        M_elmatMass;
-    Real 						   massCoeff;
+    Real 			   massCoeff;
+    UInt                       	   M_CalCoef;
     UInt dim_u() const           { return M_uFESpace.dim(); }
-
 }; // class BidomainSolver
 
 
@@ -296,8 +307,10 @@ BidomainSolver( const data_type&          dataType,
     M_elmatStiff             ( M_FESpace.fe().nbNode, 2, 2 ),
     M_elmatMass              ( M_FESpace.fe().nbNode, 2, 2 ),
     M_rhsNoBC                ( M_localMap ),
-    M_sol_uiue                ( M_localMap ),
+    M_sol_uiue               ( M_localMap ),
+    M_sol_uiue_extrap        ( M_localMap ),
     M_sol_u                  ( M_localMap_u ),
+    M_sol_u_extrap           ( M_localMap_u ),
     M_fiber_vector           ( M_localMapVec, Repeated ),
     M_residual               ( M_localMap ),
     M_verbose                ( M_me == 0),
@@ -305,27 +318,35 @@ BidomainSolver( const data_type&          dataType,
     M_reusePrec              ( true ),
     M_resetPrec              ( true ),
     M_maxIterSolver          ( -1 ),
-    M_recomputeMatrix        ( false )
+    M_recomputeMatrix        ( false ),
+    M_bdf_u                  ( M_data.order_bdf()),
+    M_CalCoef                ( M_data.CalCoef())
 {
-
 	if (M_data.has_fibers() )
 	    {
 	    	std::stringstream MyPID;
 	        ifstream fibers(M_data.fibers_file().c_str());
-
-	        UInt NumGlobalElements= M_localMapVec.getMap(Repeated)->NumGlobalElements();
-	        std::vector<Real> fiber_global_vector(NumGlobalElements);
-
-	        for( UInt i=0; i< NumGlobalElements; ++i)
-	    		fibers>>fiber_global_vector[i];
-	    	 UInt NumMyElements = M_localMapVec.getMap(Repeated)->NumMyElements();
-	    	for(UInt j=0; j< NumMyElements; ++j)
-	    	{
-	    		UInt ig= M_localMapVec.getMap(Repeated)->MyGlobalElements()[j];
-	    		M_fiber_vector[ig]= fiber_global_vector[ig-1];
-	    		}
-	    	std::cout << std::endl;
-	    	fiber_global_vector.clear();
+		char line[1024];
+		UInt NumPoints = M_localMap_u.getMap(Unique)->NumGlobalElements();
+		UInt NumGlobalElements= M_localMapVec.getMap(Unique)->NumGlobalElements();
+		std::vector<Real> fiber_global_vector(NumGlobalElements);
+		if (M_data.fibers_format() ){
+			fibers.getline(line,1024);
+			for( UInt i=0; i< NumPoints; ++i)
+				for (UInt k=0; k < 3; ++k)
+					fibers>>fiber_global_vector[i+k*NumPoints];
+		}
+		else{
+			for (UInt i=0 ; i< NumGlobalElements; ++i)
+				fibers>>fiber_global_vector[i];
+		}
+			UInt NumMyElements = M_localMapVec.getMap(Repeated)->NumMyElements();
+			for(UInt j=0; j< NumMyElements; ++j){
+				UInt ig= M_localMapVec.getMap(Repeated)->MyGlobalElements()[j];
+				M_fiber_vector[ig]= fiber_global_vector[ig-1];
+			}
+			std::cout << std::endl;
+			fiber_global_vector.clear();
 	    }
 };
 
@@ -354,7 +375,7 @@ BidomainSolver( const data_type&          dataType,
     M_elmatMass             ( M_FESpace.fe().nbNode, 2, 2 ),
     M_rhsNoBC               ( M_localMap ),
     M_residual              ( M_localMap ),
-    M_sol_uiue               ( M_localMap ),
+    M_sol_uiue              ( M_localMap ),
     M_sol_u                 ( M_localMap_u ),
     M_verbose               ( M_me == 0),
     M_updated               ( false ),
@@ -427,8 +448,6 @@ void BidomainSolver<Mesh, SolverType>::buildSystem()
     {
 
 
-
-
         chronoZero.start();
 
         M_elmatStiff.zero();
@@ -445,7 +464,7 @@ void BidomainSolver<Mesh, SolverType>::buildSystem()
         		chronoDer.stop();
         		if (M_data.has_fibers() )
         		{
-        			stiff( M_data.sigmal_i(), M_data.sigmat_i(), M_fiber_vector, M_elmatStiff, M_FESpace.fe(), M_FESpace.dof(), 0, 0);
+				stiff( M_data.sigmal_i(), M_data.sigmat_i(), M_fiber_vector, M_elmatStiff, M_FESpace.fe(), M_FESpace.dof(), 0, 0);
         			stiff( M_data.sigmal_e(), M_data.sigmat_e(), M_fiber_vector, M_elmatStiff, M_FESpace.fe(), M_FESpace.dof(), 1, 1);
         		}
         		else
@@ -509,10 +528,8 @@ void BidomainSolver<Mesh, SolverType>::buildSystem()
         mass( 1., M_elmatMass, M_FESpace.fe(), 1, 1 );
         chronoMass.stop();
 
-
         chronoStiffAssemble.start();
         for ( UInt iComp = 0; iComp < nbComp; iComp++ ){
-
         	assembleMatrix( *M_matrStiff,
         	                        M_elmatStiff,
         	                        M_FESpace.fe(),
@@ -526,7 +543,6 @@ void BidomainSolver<Mesh, SolverType>::buildSystem()
 
 
         chronoMassAssemble.start();
-
         for ( UInt iComp = 0; iComp < nbComp; iComp++ ){
         	for ( UInt jComp = 0; jComp < nbComp; jComp++ ){
         		assembleMatrix( *M_matrMass,
@@ -543,36 +559,39 @@ void BidomainSolver<Mesh, SolverType>::buildSystem()
 
     }
 
-    massCoeff = 1.0/ M_data.getTimeStep();
+if (M_CalCoef)
+       massCoeff = 1.0/ M_data.getTimeStep();
+else
+       massCoeff = M_data.Chi() * M_data.Cm() * M_bdf_u.coeff_der(0) / M_data.getTimeStep();
+	
+	M_comm->Barrier();
 
-    M_comm->Barrier();
+	chrono.stop();
+    
+	if (M_verbose) std::cout << "done in " << chrono.diff() << " s.\n" << std::flush;
 
-    chrono.stop();
-    if (M_verbose) std::cout << "done in " << chrono.diff() << " s.\n" << std::flush;
+	if (M_verbose) std::cout << "  f-  Finalizing the matrices     ...        " << std::flush;
+	chrono.start();
 
-    if (M_verbose) std::cout << "  f-  Finalizing the matrices     ...        " << std::flush;
-    chrono.start();
+    	M_matrStiff->GlobalAssemble();
+    	M_matrMass->GlobalAssemble();
+    	M_comm->Barrier();
 
-    M_matrStiff->GlobalAssemble();
-    M_matrMass->GlobalAssemble();
-
-    M_comm->Barrier();
-
-    M_matrNoBC.reset(new matrix_type(M_localMap, M_matrStiff->getMeanNumEntries() ));
+    	M_matrNoBC.reset(new matrix_type(M_localMap, M_matrStiff->getMeanNumEntries() ));
 
     //! Computing 1.0/dt * M + K
 
-    *M_matrNoBC += *M_matrStiff;
+    	*M_matrNoBC += *M_matrStiff;
 
-    *M_matrNoBC += *M_matrMass*massCoeff;
+    	*M_matrNoBC += *M_matrMass*massCoeff;
 
-    M_matrNoBC->GlobalAssemble();
+    	M_matrNoBC->GlobalAssemble();
 
-    chrono.stop();
-    if (M_verbose) std::cout << "done in " << chrono.diff() << " s." << std::endl;
+    	chrono.stop();
+    	if (M_verbose) std::cout << "done in " << chrono.diff() << " s." << std::endl;
 
-    if (false)
-        std::cout << "partial times:  \n"
+    	if (false)
+        	std::cout << "partial times:  \n"
                   << " Der            " << chronoDer.diff_cumul() << " s.\n"
                   << " Zero           " << chronoZero.diff_cumul() << " s.\n"
                   << " Stiff          " << chronoStiff.diff_cumul() << " s.\n"
@@ -583,6 +602,19 @@ void BidomainSolver<Mesh, SolverType>::buildSystem()
 
 }
 
+template<typename Mesh, typename SolverType>
+void BidomainSolver<Mesh, SolverType>::
+initialize( const source_type& ui0, const source_type& ue0 )
+{
+
+     vector_type ui(M_uFESpace.map());
+     vector_type ue(M_uFESpace.map());
+    
+     M_uFESpace.interpolate(ui0, ui, 0.);
+     M_uFESpace.interpolate(ue0, ue, 0.);
+    
+     initialize(ui, ue);
+}
 
 template<typename Mesh, typename SolverType>
 void BidomainSolver<Mesh, SolverType>::
@@ -605,11 +637,17 @@ initialize( const vector_type& ui0, const vector_type& ue0 )
 {
    M_sol_uiue = ui0;
    M_sol_uiue.add(ue0, M_uFESpace.dof().numTotalDof());
+
     for ( int i = 0 ; i < M_sol_u.getEpetraVector().MyLength() ; i++ )
    	{
-   		int ig=M_sol_u.BlockMap().MyGlobalElements()[i];
+	int ig=M_sol_u.BlockMap().MyGlobalElements()[i];
         M_sol_u[ig] = M_sol_uiue[ig] - M_sol_uiue[ig+dim_u()]; // BASEINDEX + 1
-               }
+	}
+   M_sol_uiue_extrap = M_sol_uiue;
+   M_sol_u_extrap = M_sol_u;
+   M_bdf_u.initialize_unk(M_sol_uiue);
+   std::cout<<"bdf Potentiel: "<<std::endl;
+   M_bdf_u.showMe();
 }
 
 
@@ -739,6 +777,10 @@ void BidomainSolver<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
                                            vector_type&    rhsFull )
 {
     Chrono chrono;
+for ( int i = 0 ; i < rhsFull.getEpetraVector().MyLength() ; i++ )
+        {
+        int ig=rhsFull.BlockMap().MyGlobalElements()[i];
+	}
 
     if (M_verbose)
         std::cout << "  f-  Setting up the solver ...                ";
@@ -789,6 +831,7 @@ void BidomainSolver<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
 
     int numIter = M_linearSolver.solve(M_sol_uiue, rhsFull);
 
+
     chrono.stop();
 
     if (M_verbose)
@@ -803,18 +846,19 @@ void BidomainSolver<Mesh, SolverType>::solveSystem( matrix_ptrtype  matrFull,
     {
         M_resetPrec = true;
     }
-
-
-
     for ( UInt i = 0 ; i < M_sol_u.getEpetraVector().MyLength() ; i++ )
        	{
-       		UInt ig=M_sol_u.BlockMap().MyGlobalElements()[i];
-            M_sol_u[ig] = M_sol_uiue[ig] - M_sol_uiue[ig+dim_u()]; // BASEINDEX + 1
-                   }
-
-
-
-    M_comm->Barrier();
+	UInt ig=M_sol_u.BlockMap().MyGlobalElements()[i];
+        M_sol_u[ig] = M_sol_uiue[ig] - M_sol_uiue[ig+dim_u()]; // BASEINDEX + 1
+	}
+    M_bdf_u.shift_right(M_sol_uiue);
+    M_sol_uiue_extrap = M_bdf_u.extrap();
+    M_bdf_u.showMe(); 
+    for ( UInt i = 0 ; i < M_sol_u.getEpetraVector().MyLength() ; i++ )
+        {
+        UInt ig=M_sol_u.BlockMap().MyGlobalElements()[i];
+        M_sol_u_extrap[ig] = M_sol_uiue_extrap[ig] - M_sol_uiue_extrap[ig+dim_u()]; // BASEINDEX + 1
+        } 
 
 }
 
@@ -832,7 +876,7 @@ void BidomainSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_type&    
         BCh.bdUpdate( *M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
     }
 
-  //  vector_type rhsFull(M_rhsNoBC,Repeated, Zero);
+    vector_type rhsFull(M_rhsNoBC,Repeated, Zero);
 
 
 //    rhsFull.Import(M_rhsNoBC, Zero); // ignoring non-local entries, Otherwise they are summed up lately
@@ -840,7 +884,7 @@ void BidomainSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_type&    
     bcManage( matrix, rhs, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 1.,
               M_data.getTime() );
 
-  //  rhs = rhsFull;
+    rhs = rhsFull;
 
 
     if ( BCh.hasOnlyEssential() && M_diagonalize )
@@ -852,6 +896,7 @@ void BidomainSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_type&    
     }
 
 } // applyBoundaryCondition
+
 
 
 } // namespace LifeV
