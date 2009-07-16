@@ -646,7 +646,6 @@ initialize( const vector_type& ui0, const vector_type& ue0 )
    M_sol_uiue_extrap = M_sol_uiue;
    M_sol_u_extrap = M_sol_u;
    M_bdf_u.initialize_unk(M_sol_uiue);
-   std::cout<<"bdf Potentiel: "<<std::endl;
    M_bdf_u.showMe();
 }
 
