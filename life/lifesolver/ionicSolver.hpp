@@ -58,7 +58,6 @@
 #include <life/lifefem/bdf_template.hpp>
 #include <fstream>
 
-
 namespace LifeV
 {
 /*!
@@ -95,7 +94,6 @@ public:
 
     typedef typename SolverType::prec_raw_type    prec_raw_type;
     typedef typename SolverType::prec_type        prec_type;
-
 
     Real zero_scalar( const Real& /* t */,
     const Real& /* x */,
@@ -199,13 +197,15 @@ template< typename Mesh,
 class Mitchell_Schaeffer : public virtual IonicSolver<Mesh, SolverType>
 {
 public:
-	typedef typename IonicSolver<Mesh, SolverType>::data_type data_type;
-	typedef typename IonicSolver<Mesh, SolverType>::vector_type vector_type;
-	typedef typename IonicSolver<Mesh, SolverType>::Function Function;
+	typedef typename IonicSolver<Mesh, SolverType>::data_type	data_type;
+	typedef typename IonicSolver<Mesh, SolverType>::vector_type	vector_type;
+	typedef typename IonicSolver<Mesh, SolverType>::Function 	Function;
+	typedef typename IonicSolver<Mesh, SolverType>::fct_TauClose	fct_TauClose;
 
     Mitchell_Schaeffer( const data_type&          dataType,
            FESpace<Mesh, EpetraMap>& uFEspace,
            Epetra_Comm&              comm );
+
     virtual ~Mitchell_Schaeffer();
 
     //! Update the ionic model elvecs
@@ -226,10 +226,10 @@ public:
     //! Initialize
     void initialize( );
 //    void initialize( const vector_type& );
-    
+
+    void setHeteroTauClose(fct_TauClose);
+ 
     Real fct_Tau_Close(const EntityFlag& ref, const Real& x, const Real& y, const Real& z, const ID& i) const;
-
-
 
 protected:
 
@@ -239,6 +239,8 @@ protected:
     ElemVec 				M_elvec;
     UInt				order_bdf;
     BdfT<vector_type> 			bdf_w;
+    fct_TauClose			M_TauClose;
+
 private:
 };
 
@@ -260,6 +262,7 @@ Mitchell_Schaeffer( const data_type&          dataType,
 	   order_bdf ( IonicSolver<Mesh, SolverType>::M_data.order_bdf ),
 	   bdf_w( order_bdf )
 {
+	setHeteroTauClose(this->M_data.M_ShdPtr->get_heterotauclose());	
 }
 
 
@@ -291,9 +294,16 @@ void Mitchell_Schaeffer<Mesh, SolverType>::updateElvec( UInt eleID )
 }
 
 template<typename Mesh, typename SolverType>
+void Mitchell_Schaeffer<Mesh, SolverType>::setHeteroTauClose(fct_TauClose fct)
+{
+M_TauClose = fct;
+}
+
+
+template<typename Mesh, typename SolverType>
 Real Mitchell_Schaeffer<Mesh, SolverType>::fct_Tau_Close(const EntityFlag& ref, const Real& x, const Real& y, const Real& z, const ID& i) const
 {
-        return this->M_data.M_TauClose(ref, x, y, z, i);
+        return M_TauClose(ref, x, y, z, i);
 }
 
 template<typename Mesh, typename SolverType>
@@ -322,10 +332,9 @@ void Mitchell_Schaeffer<Mesh, SolverType>::ionModelSolve( const vector_type& u, 
 	        y 	= this->M_data.mesh()->point(ig).y();//->point(i+1)
         	z 	= this->M_data.mesh()->point(ig).z();//->point(i+1)
    		if (u[ig] < this->M_data.vcrit)
-			M_sol_w[ig] = aux1 * (aux + M_time_der[ig]);
+				M_sol_w[ig] = aux1 * (aux + M_time_der[ig]);
    			else if (this->M_data.has_HeteroTauClose)
-				{M_sol_w[ig] = (1.0 / (bdf_w.coeff_der(0)/timestep  + 1.0/fct_Tau_Close(ref,x,y,z,ID))) *  M_time_der[ig];//aux2 * M_time_der[ig];
-				std::cout<<"tau_close = "<<fct_Tau_Close(ref,x,y,z,ID)<<std::endl;}
+				M_sol_w[ig] = (1.0 / (bdf_w.coeff_der(0)/timestep  + 1.0/fct_Tau_Close(ref,x,y,z,ID))) *  M_time_der[ig];//aux2 * M_time_der[ig];
 			else
 				M_sol_w[ig] = aux2 *  M_time_der[ig];
 	}
@@ -355,7 +364,6 @@ initialize( )
 {
 	M_sol_w.getEpetraVector().PutScalar (1.0/((this->M_data.v_max-this->M_data.v_min)*(this->M_data.v_max-this->M_data.v_min)));
 	bdf_w.initialize_unk(M_sol_w);
-	std::cout<<"bdf Omega :"<<std::endl;
 	bdf_w.showMe();
 }
 
