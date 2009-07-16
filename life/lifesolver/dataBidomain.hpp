@@ -39,7 +39,7 @@
 #include <life/lifearray/tab.hpp>
 
 #undef INRIA_CASE
-//#define INRIA_CASE
+#define INRIA_CASE
 #ifdef INRIA_CASE
 	#include "heartCaseBase.hpp" 
 #else
@@ -252,7 +252,7 @@ setup(  const GetPot& dfile )
     M_uOrder 		= dfile( "electric/space_discretization/u_order", "P1");
     M_fibers_format 	= dfile("electric/space_discretization/fibers_format",0);
     M_has_fibers 	= dfile( "electric/space_discretization/has_fibers", 0);
-    M_order_bdf       	= dfile("electric/time_discretization/order_bdf",1);
+    M_order_bdf       	= dfile("electric/time_discretization/BDF_order",1);
     CalCoeff          	= dfile("electric/physics/CalCoeff",1);
 	if (M_has_fibers)
     	{
