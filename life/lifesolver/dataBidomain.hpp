@@ -39,7 +39,7 @@
 #include <life/lifearray/tab.hpp>
 
 #undef INRIA_CASE
-#define INRIA_CASE
+//#define INRIA_CASE
 #ifdef INRIA_CASE
 	#include "heartCaseBase.hpp" 
 #else

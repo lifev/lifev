@@ -59,8 +59,9 @@ class DataIonic:
         public DataTime
 {
 public:
-
+#ifdef REO_CASE
     typedef boost::shared_ptr<HeartCaseBase>	Shared_Ptr;
+#endif
     //! Constructors
     DataIonic( const GetPot& dfile );
 
@@ -107,7 +108,9 @@ public:
 	Real 		tend;
 	Real 		order_bdf;       //= 1  
         bool		has_HeteroTauClose;
+#ifdef REO_CASE
 	Shared_Ptr	M_ShdPtr;
+#endif
 private:
 
 
