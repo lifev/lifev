@@ -60,13 +60,14 @@ class DataIonic:
 {
 public:
 
-    typedef boost::function<Real (const EntityFlag&, const Real&, const Real&, const Real&, const ID&)> func_type2;
-
+    typedef boost::shared_ptr<HeartCaseBase>	Shared_Ptr;
     //! Constructors
     DataIonic( const GetPot& dfile );
+
 #ifdef REO_CASE
-    DataIonic( boost::shared_ptr<HeartCaseBase> M_fct );
+    DataIonic( Shared_Ptr M_fct );
 #endif
+
     DataIonic( const DataIonic& dataIonic );
 
     //! Ouptut
@@ -80,12 +81,6 @@ public:
 
     //! FE space order
     std::string wOrder() const;
-
-#ifdef REO_CASE
-    //! fct Tau_Close or scalar Tau_close
-    void setHeteroTauClose(func_type2 ) ; 
-#endif
-    //Real fct_Tau_Close(const EntityFlag&, const Real&, const Real&, const Real&, const ID&) const; 
 
     UInt verbose; 
     string mesh_file;
@@ -112,7 +107,7 @@ public:
 	Real 		tend;
 	Real 		order_bdf;       //= 1  
         bool		has_HeteroTauClose;
-	func_type2 	M_TauClose;
+	Shared_Ptr	M_ShdPtr;
 private:
 
 
@@ -136,12 +131,12 @@ DataIonic( const GetPot& dfile ) :
 #ifdef REO_CASE
 template <typename Mesh>
 DataIonic<Mesh>::
-DataIonic( boost::shared_ptr<HeartCaseBase> M_fct ) :
+DataIonic( Shared_Ptr M_fct ) :
     DataMesh<Mesh>( M_fct->get_data_hdl(), "electric/space_discretization" ),
-    DataTime( M_fct->get_data_hdl(), "electric/time_discretization" )
+    DataTime( M_fct->get_data_hdl(), "electric/time_discretization" ),
+    M_ShdPtr(M_fct)
 {
     setup(M_fct->get_data_hdl());
-    setHeteroTauClose(M_fct->get_heterotauclose());
 }
 #endif
 
@@ -202,7 +197,7 @@ setup(  const GetPot& dfile )
     vcrit     = dfile("electric/physics/vcrit",-67.0);
     tinit     = dfile("electric/physics/init_time",0.0);
     tend      = dfile("electric/physics/end_time",1000.0);
-    order_bdf       = dfile("electric/discretization/order_bdf",1);
+    order_bdf       = dfile("electric/time_discretization/BDF_order",1);
     has_HeteroTauClose = dfile("electric/physics/hasHeteroTauClose",1);
 }
 
@@ -213,15 +208,6 @@ showMe( std::ostream& c )
 {
 
 }
-
-#ifdef REO_CASE
-template <typename Mesh>
-void DataIonic<Mesh>::
-setHeteroTauClose(func_type2 fct) 
-{
-M_TauClose = fct;
-}
-#endif
 
 }
 #endif
