@@ -598,7 +598,7 @@ void ADRSolver<Mesh, SolverType>::buildSystem()
         // stiffness strain
         chronoStiff.start();
         //stiff_strain( 2.0*M_data.viscosity(), M_elmatStiff, M_FESpace.fe() );
-        stiff( M_data.diffusivity(), M_elmatStiff,  M_FESpace.fe(), 0, 0, 1 );
+        stiff( M_data.diffusivity(), M_elmatStiff,  M_FESpace.fe(), 0, 0 );
         //stiff_div( 0.5*M_FESpace.fe().diameter(), M_elmatStiff, M_FESpace.fe() );
         chronoStiff.stop();
 
@@ -606,7 +606,7 @@ void ADRSolver<Mesh, SolverType>::buildSystem()
         if ( !M_steady )
         {
             chronoMass.start();
-            mass( 1., M_elmatMass, M_FESpace.fe(), 0, 0, 1 );
+            mass( 1., M_elmatMass, M_FESpace.fe(), 0, 0);
             chronoMass.stop();
         }
 
@@ -1280,7 +1280,8 @@ void ADRSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_type&        m
         leaderPrint( "\n");
     }
 
-    vector_type rhsFull(rhs, Repeated, Zero); // ignoring non-local entries, Otherwise they are summed up lately
+    //    vector_type rhsFull(rhs, Repeated, Zero); // ignoring non-local entries, Otherwise they are summed up lately
+    vector_type rhsFull(rhs, Unique); // ignoring non-local entries, Otherwise they are summed up lately
 
 
     leaderPrint( "\n     - Managing the BC ... ");
@@ -1293,14 +1294,6 @@ void ADRSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_type&        m
 
     rhs = rhsFull;
 
-    if ( BCh.hasOnlyEssential() && M_diagonalize )
-    {
-
-        matrix.diagonalize( nDimensions*dim(),
-                            M_diagonalize,
-                            rhs,
-                            0.);
-    }
 
 } // applyBoundaryCondition
 
