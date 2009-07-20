@@ -1,0 +1,74 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#----------------------------------------------------------------
+#      Data file for cylinder test with Chorin-Temam 
+#----------------------------------------------------------------
+
+[exporter]
+multimesh  = false
+start      = 0
+save       = 1
+
+[fluid]
+
+[./physics]
+density         = 1.0       
+viscosity       = 0.005 
+
+[../time_discretization]
+initialtime	= 0.0
+endtime		= 0.2
+timestep	= 0.05
+
+
+[../space_discretization]
+mesh_dir        = ./Mesh/
+#mesh_file       = tube20.mesh		# "big file"
+#mesh_file       = cyl3D-2.mesh         # approx. 140,000 tets
+mesh_file       = cyl3D.2.2.00.mesh     # approc. 29,000 tets
+#mesh_file       = cyl2D.mesh           # "reasonable file"
+
+mesh_type       = .mesh
+
+mesh_faces      = all                   # update all faces elements
+mesh_edges      = all                   # update all faces elements
+verbose         = 0                     # verbose during mesh-reading
+linearized      = 0
+diagonalize     = 0		# weight, 0=off
+div_beta_u_v    = 0 		# 1=on, 0=off
+vel_order       = P1		# P1, P1Bubble, P2
+press_order     = P1		# P1, P2
+variationalPn	= 0		# 0: standard (v|grad p) couling, 1: (div v|p) coupling 
+
+
+[../solver]
+solver          = gmres
+scaling         = none
+output          = all_res	# all_res
+conv            = rhs
+max_iter        = 100
+kspace          = 100
+
+# see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
+[../prec]
+prectype        = Ifpack	# Ifpack or ML 
+reuse           = true
+overlap         = 2
+#droptol         = 1.e-5 
+fill            = 4
+relax_value     = 1
+
+[../../../ipstab]
+gammaBeta	= 0.015
+gammaDiv	= 0.2		# not used
+
+[../miscellaneous]
+steady		= 0
+
+[../problem]
+Re		= 1.0
+nu		= 1.5
+D		= 1.0
+H		= 20.0
+centered	= 1
+amplitude	= 1.0
+tamplitude	= 2.0
