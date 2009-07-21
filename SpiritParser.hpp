@@ -46,6 +46,8 @@
 #include <boost/spirit.hpp>
 #include <boost/spirit/phoenix/binders.hpp>
 
+#include <iomanip>
+
 
 
 
@@ -175,7 +177,7 @@ public:
     			;
 
     		command
-				= as_lower_d["showmevariables"][bind(&SpiritCalculator::showMeVariables)(self)]
+				= as_lower_d["showme"][bind(&SpiritCalculator::showMeVariables)(self)]
 				;
 
     		group
@@ -192,6 +194,7 @@ public:
 
     		statement
     			= ( assignment
+    	    	|	command
     			|	exprVectors
     			|	expression[bind(&SpiritCalculator::setResult)(self, arg1)]
     			  )
@@ -270,12 +273,11 @@ public:
     {
     	variables_type::const_iterator it;
 
-    	std::cout << "SpiritParser showMeVariables: " << &M_variables << std::endl;
+    	std::cout << "SpiritParser showMe: " << std::setprecision(15) <<std::endl;
 
     	for (it = M_variables.begin(); it != M_variables.end(); ++it)
-    		std::cout << it->first << " = " << it->second << std::endl;
-
-    	std::cout << &M_variables << std::endl;
+    		std::cout << "                     " << it->first << " = " << it->second << std::endl;
+    	std::cout << std::endl;
     }
 
     Real lookup(const std::string& name) const
