@@ -40,6 +40,7 @@
 	#include <mpi.h>
 #endif
 
+#include <iomanip>
 #include <string>
 
 #include <life/lifecore/application.hpp>
@@ -96,10 +97,20 @@ main( int argc, char** argv )
 	std::string expression;
 	Real result;
 
-	std::cout << std::setprecision(15) << std::endl;
+	std::cout << std::setprecision(30) << std::endl;
 
 	// Initialization of the parser
 	SpiritParser parser;
+
+	// TEST 0:
+	expression = "-sqrt(4)";
+	parser.setString(expression);
+	result = parser.evaluate();
+	std::cout << expression << " = " << result << std::endl;
+	if (result != -2)
+		return( EXIT_FAILURE );
+
+
 
 	// TEST 1:
 	expression = "(1+1)"; // = 2
@@ -161,23 +172,23 @@ main( int argc, char** argv )
 
 
 	// TEST 7:
-	expression = "(0, 0, x^2+y^2)))";
+	expression = "(0, 0, -x^2+y^2)))";
 	parser.setString(expression);
 	parser.setVariable("x", 1);
-	parser.setVariable("y", 2); // (0, 0, 5)
+	parser.setVariable("y", 2); // (0, 0, -5)
 	std::cout << "x = " << 1 << ", y = " << 2 << " ==> ";
 	std::cout << expression << " = (" << parser.evaluate(1) << ", " << parser.evaluate(2) << ", " << parser.evaluate(3) << ")" << std::endl;
-	if ( parser.evaluate(1) != 0 || parser.evaluate(2) != 0 || parser.evaluate(3) != 5 )
+	if ( parser.evaluate(1) != 0 || parser.evaluate(2) != 0 || parser.evaluate(3) != -5 )
 		return( EXIT_FAILURE );
 
 
 
 	parser.setString(expression);
 	parser.setVariable("x", 4);
-	parser.setVariable("y", 5); // (0, 0, 41)
+	parser.setVariable("y", 5); // (0, 0, -41)
 	std::cout << "x = " << 4 << ", y = " << 5 << " ==> ";
 	std::cout << expression << " = (" << parser.evaluate(1) << ", " << parser.evaluate(2) << ", " << parser.evaluate(3) << ")" << std::endl;
-	if ( parser.evaluate(1) != 0 || parser.evaluate(2) != 0 || parser.evaluate(3) != 41 )
+	if ( parser.evaluate(1) != 0 || parser.evaluate(2) != 0 || parser.evaluate(3) != -41 )
 		return( EXIT_FAILURE );
 
 
