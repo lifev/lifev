@@ -35,35 +35,35 @@ namespace LifeV {
 // ===================================================
 //! Constructor & Destructor
 // ===================================================
-BCInterfaceFunction::BCInterfaceFunction( const BCComV& comV ) :
-	M_baseString				( "undefined" ),
-	M_comV						( comV ),
+BCInterfaceFunction::BCInterfaceFunction( ) :
+	M_baseString				( ),
+	M_comV						( ),
 	M_base						( ),
-	M_parser					( new SpiritParser( ) ),
+	M_parser					( ),
 	M_mapID						( )
 {
 
 #ifdef DEBUG
-	Debug( 5021 ) << "BCInterfaceFunction::BCInterfaceFunction: " << "\n";
+	Debug( 5021 ) << "BCInterfaceFunction::BCInterfaceFunction( void )" << "\n";
 #endif
 
 }
 
 
 
-BCInterfaceFunction::BCInterfaceFunction( const std::string& baseString, const BCComV& comV ) :
-	M_baseString				( baseString ),
-	M_comV						( comV ),
+BCInterfaceFunction::BCInterfaceFunction( const BCInterfaceData& data ) :
+	M_baseString				( ),
+	M_comV						( ),
 	M_base						( ),
-	M_parser					( new SpiritParser( baseString ) ),
+	M_parser					( ),
 	M_mapID						( )
 {
 
 #ifdef DEBUG
-	Debug( 5021 ) << "BCInterfaceFunction::BCInterfaceFunction: " << "\n";
+	Debug( 5021 ) << "BCInterfaceFunction::BCInterfaceFunction" << "\n";
 #endif
 
-	setFunction();
+	this->setData( data );
 }
 
 
@@ -102,10 +102,22 @@ BCInterfaceFunction::operator=( const BCInterfaceFunction& function )
 
 
 void
-BCInterfaceFunction::setBaseString( const std::string& baseString )
+BCInterfaceFunction::setData( const BCInterfaceData& data )
 {
-	M_baseString = baseString;
-	M_parser->setString( M_baseString );
+
+#ifdef DEBUG
+	Debug( 5022 ) << "BCInterfaceFunction::setData" << "\n";
+#endif
+
+	M_comV			= data.get_comV();
+	M_baseString	= data.get_baseString();
+
+	//boost::shared_ptr<SpiritParser> emptyParser( );
+	//if ( M_parser == emptyParser )
+	if ( M_parser )
+		M_parser->setString( M_baseString );
+	else
+		M_parser.reset( new SpiritParser( M_baseString ) ); // INVERTITI
 
 	setFunction();
 }
@@ -113,9 +125,9 @@ BCInterfaceFunction::setBaseString( const std::string& baseString )
 
 
 bool
-BCInterfaceFunction::compare( const std::string& baseString, const BCComV& comV )
+BCInterfaceFunction::compare( const BCInterfaceData& data )
 {
-	return M_baseString.compare( baseString ) == 0 && M_comV == comV;
+	return M_baseString.compare( data.get_baseString() ) == 0 && M_comV == data.get_comV();
 }
 
 
@@ -143,7 +155,7 @@ BCInterfaceFunction::setFunction( void )
 	UInt arguments = M_parser->countSubstring( "," ) + 1;
 
 #ifdef DEBUG
-	Debug( 5021 ) << "                                                   arguments: " << arguments  << "\n";
+	Debug( 5021 ) << "BCInterfaceFunction::setFunction            arguments: " << arguments  << "\n";
 #endif
 
 	if ( arguments == 1 )
@@ -174,6 +186,8 @@ BCInterfaceFunction::Function( const Real& t, const Real& x, const Real& y, cons
 
 	this->dataInterpolation();
 
+	this->addFSIVariables( t );
+
 #ifdef DEBUG
 	Debug( 5021 ) << "BCInterfaceFunction::Function: " << "\n";
 	Debug( 5021 ) << "                                                           x: " << x  << "\n";
@@ -197,13 +211,16 @@ BCInterfaceFunction::FunctionID( const Real& t, const Real& x, const Real& y, co
 
 	this->dataInterpolation();
 
+	this->addFSIVariables( t );
+
 #ifdef DEBUG
 	Debug( 5021 ) << "BCInterfaceFunction::FunctionID: " << "\n";
 	Debug( 5021 ) << "                                                           x: " << x  << "\n";
 	Debug( 5021 ) << "                                                           y: " << y  << "\n";
 	Debug( 5021 ) << "                                                           z: " << z  << "\n";
 	Debug( 5021 ) << "                                                           t: " << t  << "\n";
-	Debug( 5021 ) << "                                                evaluate(" << id<< ") : " << M_parser->evaluate( id )  << "\n";
+	Debug( 5021 ) << "                                                          id: " << id  << "\n";
+	Debug( 5021 ) << "                                                evaluate(" << M_mapID[id] << ") : " << M_parser->evaluate( M_mapID[id] )  << "\n";
 #endif
 
 	return M_parser->evaluate( M_mapID[id] );

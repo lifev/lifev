@@ -45,20 +45,20 @@
 #include <string>
 #include <vector>
 
-#include <lifemc/lifefem/BCInterfaceFSIOperator.hpp>
+#include <lifemc/lifefem/BCInterfaceData.hpp>
 #include <lifemc/lifefem/BCInterfaceFunction.hpp>
 #include <lifemc/lifefem/BCInterfaceFunctionFile.hpp>
+#include <lifemc/lifefem/BCInterfaceFSI.hpp>
+#include <lifemc/lifefem/BCInterfaceFSIFunction.hpp>
 
 
 
 
 
 // ===================================================
-//! Namespaces & Enums
+//! Namespaces & Typedef
 // ===================================================
 namespace LifeV {
-
-enum BCBaseList{fsi, function, functionFile};
 
 
 
@@ -95,7 +95,7 @@ enum BCBaseList{fsi, function, functionFile};
  *  NOTE: All the parameters are case sensitive.
  *
  *  type - can be: Essential Natural Mixte
- *  flag - contains the flag (or the list of flags inside apex '...')
+ *  flag - contains the flag
  *  mode - can be: Full Component Scalar Tangential Normal.
  *  component - if mode is Scalar, Tangential or Normal it is missing.
  *              if mode is Component it contains the ID of the component (or of the components list inside apex)
@@ -152,17 +152,6 @@ class BCInterface
 public:
 
 	// ===================================================
-	//! Typedef
-	// ===================================================
-
-	typedef std::string									BCName;
-	typedef std::vector<EntityFlag>						BCFlag;
-	//typedef UInt										BCComN;
-	typedef std::vector<ID>								BCComV;
-
-
-
-	// ===================================================
 	//! Public functions
 	// ===================================================
 
@@ -172,20 +161,20 @@ public:
 
     //! Constructor
     /*!
-     * \param dataFile    - GetPot data file
-     * \param dataSection - Subsection inside [conditions]
+     * \param dataFile		- GetPot data file
+     * \param dataSection 	- Subsection inside [conditions]
      */
 	BCInterface( const GetPot& dataFile, const std::string& dataSection );
 
 	//! Copy constructor
 	/*!
-	 * \param interface - BCInterface
+	 * \param interface		- BCInterface
 	 */
 	BCInterface( const BCInterface& interface );
 
 	//! Operator =
 	/*!
-	 * \param interface - BCInterface
+	 * \param interface		- BCInterface
 	 */
 	BCInterface& operator=( const BCInterface& interface );
 
@@ -201,7 +190,7 @@ public:
     //@{
 
 	const BCHandler& 						Handler() 		const { return *M_handler; }
-	const boost::shared_ptr<BCHandler>& 	Handler_ptr() 	const { return  M_handler; }
+	const boost::shared_ptr<BCHandler>& 	Handler_ptr() 	const { return  M_handler; } //Remove & ??
 
     //@}
 
@@ -211,23 +200,37 @@ public:
      */
     //@{
 
+	//! Set an FSIOperator (need only for FSI and FSIFunction boundary conditions)
+    /*!
+     * \param oper			- FSIOperator
+     */
+	void setFSIOperator( const boost::shared_ptr<FSIOperator>& oper ) { M_FSIOperator = oper; }
+
 	//! Set manually Handler parameters: you need it only if you are adding manually some parameters by calling addBC
     /*!
-     * \param bcNumber - total number of the boundary conditions (files + added manually)
-     * \param hint     - hint
+     * \param bcNumber		- total number of the boundary conditions (files + added manually)
+     * \param hint			- hint
      */
 	void setHandlerParameters( const ID& bcNumber, const BCHandler::BCHints& hint = BCHandler::HINT_BC_NONE );
 
 	//! Build the bcHandler
 	void buildHandler( void );
 
+    //@}
+
+
+
+	/** @name External interface for BCHandler functions
+	 */
+	//@{
+
 	//! Add a Boundary Condition
     /*!
-     * \param name - name of the condition
-     * \param flag - list of flags
-     * \param type - type of the condition
-     * \param mode - mode of the condition
-     * \param base - base of the condition
+     * \param name			- name of the condition
+     * \param flag			- list of flags
+     * \param type			- type of the condition
+     * \param mode			- mode of the condition
+     * \param base			- base of the condition
      */
 	template <class BCBase>
 	void addBC( const BCName& name,
@@ -238,12 +241,12 @@ public:
 
 	//! Add a Boundary Condition
     /*!
-     * \param name - name of the condition
-     * \param flag - list of flags
-     * \param type - type of the condition
-     * \param mode - mode of the condition
-     * \param base - base of the condition
-     * \param comp - component of the condition
+     * \param name			- name of the condition
+     * \param flag			- list of flags
+     * \param type			- type of the condition
+     * \param mode			- mode of the condition
+     * \param base			- base of the condition
+     * \param comp			- component of the condition
      */
 	template <class BCBase, class BCComp>
 	void addBC( const BCName& name,
@@ -253,15 +256,11 @@ public:
 					  BCBase& base,
 				const BCComp& comp );
 
-	//! Set an FSIOperator (need only for fsi BC)
-    /*!
-     * \param oper - FSIOperator
-     */
-	void setFSIOperator( const boost::shared_ptr<FSIOperator>& oper ) { M_FSIOperator = oper; }
-
     //@}
 
 private:
+
+	enum BCBaseList{ function, functionFile, FSI, FSIfunction };
 
 	// ===================================================
 	//! Private variables
@@ -285,27 +284,27 @@ private:
 	std::map<std::string, BCMode> 						M_mapMode;
 	std::map<std::string, BCBaseList> 					M_mapBase;
 
-	// Operators
-	boost::shared_ptr<FSIOperator>										M_FSIOperator;
-	std::vector< boost::shared_ptr<BCInterfaceFSIOperator> >			M_FSIOperatorVector;
+	// Data
+	BCInterfaceData										M_data;
 
-	// Function
+	// Base
+	BCBaseList 											M_base;
+
+	// Simple Function
 	static std::map<std::string,size_type>								M_mapFunction;
 	static std::vector< boost::shared_ptr<BCInterfaceFunction> >		M_vectorFunction;
 
 	static std::map<std::string,size_type>								M_mapFunctionFile;
 	static std::vector< boost::shared_ptr<BCInterfaceFunctionFile> >	M_vectorFunctionFile;
 
-	// BC options
-	BCName												M_name;
-	BCFlag 												M_flag;
-	BCType 												M_type;
-	BCMode 												M_mode;
-	//BCComN 												M_comN;
-	BCComV 												M_comV;
+	// FSIOperator
+	boost::shared_ptr<FSIOperator>										M_FSIOperator;
 
-	BCBaseList 											M_base;
-	std::string											M_baseString;
+	// FSI Function
+	std::vector< boost::shared_ptr<BCInterfaceFSI> >					M_vectorFSI;
+
+	static std::map<std::string,size_type>								M_mapFSIFunction;
+	static std::vector< boost::shared_ptr<BCInterfaceFSIFunction> >		M_vectorFSIFunction;
 
 
 
@@ -321,11 +320,11 @@ private:
     template <class BCInterfaceBase>
     inline bool newBase( std::map<std::string,size_type>& map, const std::vector< boost::shared_ptr<BCInterfaceBase> >& vector );
 
-	/*
+
 	//! addBase
 	template <class BCInterfaceBase>
 	inline void addBase( std::vector< boost::shared_ptr<BCInterfaceBase> >& baseVector );
-	*/
+
 
 	//! addBase
 	template <class BCInterfaceBase, class BCparameter>
@@ -354,7 +353,7 @@ private:
     //inline void readComponentNumber( const char* component );
 
     //! readComponentVector
-    inline void readComponentVector( const char* component );
+    inline void readComV( const char* component );
 
     //! readBase
     inline void readBase( const std::string& base );
@@ -376,13 +375,11 @@ BCInterface::newBase( std::map<std::string,size_type>& map, const std::vector< b
 {
 	//Check if the baseString has been already used
 	for ( std::map<std::string, size_type>::iterator j = map.begin() ; j != map.end() ; ++j )
-		if( vector[j->second]->compare( M_baseString, M_comV ) )
+		if( vector[j->second]->compare( M_data ) )
 		{
 
 #ifdef DEBUG
-			Debug( 5020 ) << "BCInterface::newBase              Reuse previous base! " << "\n";
-			Debug( 5020 ) << "BCInterface::newBase                         old base: " << j->first << "\n";
-			Debug( 5020 ) << "BCInterface::newBase                         new base: " << M_baseString << "\n";
+			Debug( 5020 ) << "BCInterface::newBase                                   NO" << "\n";
 #endif
 
 			return false;
@@ -390,33 +387,31 @@ BCInterface::newBase( std::map<std::string,size_type>& map, const std::vector< b
 
 	//Add baseString to the map
 	size_type size = map.size();
-	map[M_baseString] = size;
+	map[M_data.get_baseString()] = size;
 
 #ifdef DEBUG
-	Debug( 5020 ) << "BCInterface::newBase                Create a new base! " << "\n";
-	Debug( 5020 ) << "BCInterface::newBase             M_mapFunction.size(): " << static_cast<Real> (map.size()) << "\n";
-	Debug( 5020 ) << "BCInterface::newBase      M_mapFunction[M_baseString]: " << static_cast<Real> (map[M_baseString]) << "\n";
+	Debug( 5020 ) << "BCInterface::newBase                                   YES" << "\n";
 #endif
 
 	return true;
 }
 
-/*
+
 template <class BCInterfaceBase>
 inline void
 BCInterface::addBase( std::vector< boost::shared_ptr<BCInterfaceBase> >& baseVector )
 {
-	boost::shared_ptr<BCInterfaceBase> Function( new BCInterfaceBase( M_baseString ) );
+	boost::shared_ptr<BCInterfaceBase> Function( new BCInterfaceBase( M_data ) );
 	baseVector.push_back( Function );
 }
-*/
+
 
 
 template <class BCInterfaceBase, class BCparameter>
 inline void
 BCInterface::addBase( std::vector< boost::shared_ptr<BCInterfaceBase> >& baseVector, const BCparameter& p )
 {
-	boost::shared_ptr<BCInterfaceBase> Function( new BCInterfaceBase( M_baseString, p ) );
+	boost::shared_ptr<BCInterfaceBase> Function( new BCInterfaceBase( M_data, p ) );
 	baseVector.push_back( Function );
 }
 
@@ -425,37 +420,37 @@ BCInterface::addBase( std::vector< boost::shared_ptr<BCInterfaceBase> >& baseVec
 template <class BCBase>
 void BCInterface::addBCManager( BCBase& base )
 {
-	switch ( M_mode )
+	switch ( M_data.get_mode() )
 	{
 		case Scalar :
 		case Normal :
 		case Tangential :
 
 #ifdef DEBUG
-			Debug( 5020 ) << "BCInterface::addBCManager (Scalar, Normal, Tangential)" << "\n";
+			Debug( 5020 ) << "BCInterface::addBCManager                              Scalar, Normal, Tangential" << "\n\n";
 #endif
 
-			addBC( M_name, M_flag, M_type, M_mode, base );
+			M_handler->addBC( M_data.get_name(), M_data.get_flag(), M_data.get_type(), M_data.get_mode(), base );
 
 			break;
 
 		case Full :
 
 #ifdef DEBUG
-			Debug( 5020 ) << "BCInterface::addBCManager (Full)" << "\n";
+			Debug( 5020 ) << "BCInterface::addBCManager                              Full" << "\n\n";
 #endif
 
-			addBC( M_name, M_flag, M_type, M_mode, base, M_comV.front() );
+			M_handler->addBC( M_data.get_name(), M_data.get_flag(), M_data.get_type(), M_data.get_mode(), base, M_data.get_comN() );
 
 			break;
 
 		case Component :
 
 #ifdef DEBUG
-			Debug( 5020 ) << "BCInterface::addBCManager (Component)" << "\n";
+			Debug( 5020 ) << "BCInterface::addBCManager                              Component" << "\n\n";
 #endif
 
-			addBC( M_name, M_flag, M_type, M_mode, base, M_comV );
+			M_handler->addBC( M_data.get_name(), M_data.get_flag(), M_data.get_type(), M_data.get_mode(), base, M_data.get_comV() );
 
 			break;
 	}
@@ -475,8 +470,7 @@ void BCInterface::addBC( 	const BCName& name,
 	Debug( 5020 ) << "BCInterface::addBC (without component)" << "\n\n";
 #endif
 
-	for ( UInt j(0) ; j < flag.size() ; ++j )
-		M_handler->addBC( name, flag[j], type, mode, base );
+		M_handler->addBC( name, flag, type, mode, base );
 }
 
 
@@ -494,8 +488,7 @@ void BCInterface::addBC( 	const BCName& name,
 	Debug( 5020 ) << "BCInterface::addBC (with component)" << "\n\n";
 #endif
 
-	for ( UInt j(0) ; j < flag.size() ; ++j )
-		M_handler->addBC( name, flag[j], type, mode, base, comp );
+		M_handler->addBC( name, flag, type, mode, base, comp );
 }
 
 } // Namespace LifeV

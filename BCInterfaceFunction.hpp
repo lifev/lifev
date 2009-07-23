@@ -43,6 +43,7 @@
 
 #include <string>
 
+#include <lifemc/lifefem/BCInterfaceData.hpp>
 #include <lifemc/lifecore/SpiritParser.hpp>
 
 
@@ -118,8 +119,6 @@ public:
 									Real const& z,
 									ID 	 const& id	)> 	function_type;
 
-	typedef std::vector<ID>								BCComV;
-
 
 
 	// ===================================================
@@ -130,22 +129,18 @@ public:
      */
     //@{
 
+	//! Empty Constructor
+	BCInterfaceFunction( void );
+
 	//! Constructor
 	/*!
-	 * \param comV 			- vector of components
+	 * \param data				- BC data loaded from GetPot file
 	 */
-	BCInterfaceFunction( const BCComV& comV );
-
-    //! Constructor
-	/*!
-	 * \param baseString	- function string
-	 * \param comV 			- vector of components
-	 */
-	BCInterfaceFunction( const std::string& baseString, const BCComV& comV );
+	BCInterfaceFunction( const BCInterfaceData& data );
 
 	//! Copy constructor
 	/*!
-	 * \param function - BCInterfaceFunction
+	 * \param function			- BCInterfaceFunction
 	 */
 	BCInterfaceFunction( const BCInterfaceFunction& function );
 
@@ -162,22 +157,21 @@ public:
 
     //! Operator =
     /*!
-     * \param function - BCInterfaceFunction
+     * \param function			- BCInterfaceFunction
      */
     BCInterfaceFunction& operator=( const BCInterfaceFunction& function );
 
-    //! SetBaseString - Need to be called if the class has been created with the one argument constructor!
+    //! Set data
     /*!
-	 * \param baseString	- function string
+	 * \param data				- BC data loaded from GetPot file
 	 */
-    void setBaseString( const std::string& baseString );
+    virtual void setData( const BCInterfaceData& data );
 
-    //! Compare function
-    /*!
-     * \param baseString
-     * \param comV
-     */
-    virtual bool compare( const std::string& baseString, const BCComV& comV );
+	//! Compare function
+	/*!
+	 * \param data				- BC data loaded from GetPot file
+	 */
+    virtual bool compare( const BCInterfaceData& data );
 
     //@}
 
@@ -215,6 +209,9 @@ protected:
 
 	//! dataInterpolation
 	virtual inline void dataInterpolation( void ) {}
+
+	//! addFSIVariables
+	virtual inline void addFSIVariables( const Real& /*t*/ ) {}
 
     //! SetFunction
     void setFunction( void );

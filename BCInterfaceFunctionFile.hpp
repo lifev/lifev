@@ -104,7 +104,7 @@ namespace LifeV {
  *  				1.000000000		4.00'
  *
  */
-class BCInterfaceFunctionFile : public BCInterfaceFunction
+class BCInterfaceFunctionFile : public virtual BCInterfaceFunction
 //     :
 //     public LifeV::Application
 {
@@ -118,16 +118,18 @@ public:
      */
     //@{
 
+	//! Empty Constructor
+	BCInterfaceFunctionFile( void );
+
     //! Constructor
 	/*!
-	 * \param baseString	- function string
-	 * \param comV 			- vector of components
+	 * \param data				- BC data loaded from GetPot file
 	 */
-	BCInterfaceFunctionFile( const std::string& baseString, const BCComV& comV );
+	BCInterfaceFunctionFile( const BCInterfaceData& data );
 
 	//! Copy constructor
 	/*!
-	 * \param function		- BCInterfaceFunctionFile
+	 * \param function			- BCInterfaceFunctionFile
 	 */
 	BCInterfaceFunctionFile( const BCInterfaceFunctionFile& function );
 
@@ -144,23 +146,25 @@ public:
 
     //! Operator =
     /*!
-     * \param function - BCInterfaceFunctionFile
+     * \param function			- BCInterfaceFunctionFile
      */
     BCInterfaceFunctionFile& operator=( const BCInterfaceFunctionFile& function );
 
-    //! Compare function
+    //! Set data
     /*!
-     * \param fileName
-     * \param comV
-     */
-    bool compare( const std::string& fileName, const BCComV& comV );
+	 * \param data				- BC data loaded from GetPot file
+	 */
+    void setData( const BCInterfaceData& data );
 
-    //! loadData
-    void loadData( void );
+	//! Compare function
+	/*!
+	 * \param data				- BC data loaded from GetPot file
+	 */
+    bool compare( const BCInterfaceData& data );
 
     //@}
 
-private:
+protected:
 
 	// ===================================================
 	//! Private variables
@@ -182,8 +186,11 @@ private:
 	 */
 	//@{
 
+    //! loadData
+    void loadData( const GetPot& dataFile );
+
 	//! Linear interpolation (extrapolation) between two values of the data.
-	inline void dataInterpolation( void );
+	void dataInterpolation( void );
 
     //@}
 };

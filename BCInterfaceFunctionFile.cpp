@@ -35,9 +35,9 @@ namespace LifeV {
 // ===================================================
 //! Constructor & Destructor
 // ===================================================
-BCInterfaceFunctionFile::BCInterfaceFunctionFile( const std::string& fileName, const BCComV& comV ) :
-	BCInterfaceFunction			( comV ),
-	M_fileName					( fileName ),
+BCInterfaceFunctionFile::BCInterfaceFunctionFile( ) :
+	BCInterfaceFunction			( ),
+	M_fileName					( ),
 	M_variables					( ),
 	M_scale						( ),
 	M_data						( ),
@@ -45,14 +45,25 @@ BCInterfaceFunctionFile::BCInterfaceFunctionFile( const std::string& fileName, c
 {
 
 #ifdef DEBUG
-	Debug( 5023 ) << "BCInterfaceFunctionFile::BCInterfaceFunctionFile: " << "\n";
+	Debug( 5022 ) << "BCInterfaceFunctionFile::BCInterfaceFunctionFile( void )" << "\n";
 #endif
 
-	//Load data from file
-	loadData();
+}
 
-	//Select the function to load
-	setFunction();
+BCInterfaceFunctionFile::BCInterfaceFunctionFile( const BCInterfaceData& data ) :
+	BCInterfaceFunction			( ),
+	M_fileName					( ),
+	M_variables					( ),
+	M_scale						( ),
+	M_data						( ),
+	M_dataIterator				( )
+{
+
+#ifdef DEBUG
+	Debug( 5022 ) << "BCInterfaceFunctionFile::BCInterfaceFunctionFile" << "\n";
+#endif
+
+	this->setData( data );
 }
 
 
@@ -92,42 +103,44 @@ BCInterfaceFunctionFile::operator=( const BCInterfaceFunctionFile& function )
 
 
 
-bool
-BCInterfaceFunctionFile::compare( const std::string& fileName, const BCComV& comV )
+void
+BCInterfaceFunctionFile::setData( const BCInterfaceData& data )
 {
-	return M_fileName.compare( fileName ) == 0 && M_comV == comV;
+	M_fileName = data.get_baseString();	//The base string contains the file name
+
+	//Load data from file
+	GetPot dataFile( M_fileName );
+	loadData( dataFile );
+
+#ifdef DEBUG
+	Debug( 5022 ) << "BCInterfaceFunctionFile::setData             fileName: " << M_fileName  << "\n";
+	Debug( 5022 ) << "                                             function: " << data.get_baseString()  << "\n";
+#endif
+
+	//Create a new data container with the correct base string
+	BCInterfaceData newData = data;
+	newData.set_baseString( dataFile( "function", "Undefined" ) ); // Now it contains the real base string
+	BCInterfaceFunction::setData( newData );
 }
 
 
 
-void
-BCInterfaceFunctionFile::loadData( void )
+bool
+BCInterfaceFunctionFile::compare( const BCInterfaceData& data )
 {
-
-#ifdef DEBUG
-	Debug( 5023 ) << "BCInterfaceFunctionFile::loadData " << "\n";
-	std::stringstream output;
-#endif
+	return M_fileName.compare( data.get_baseString() ) == 0 && M_comV == data.get_comV();
+}
 
 
 
-	//Open GetPot file
-	GetPot dataFile( M_fileName );
-
-#ifdef DEBUG
-	Debug( 5023 ) << "                                                    fileName: " << M_fileName << "\n";
-#endif
 
 
-
-	//Set parser function
-	setBaseString( dataFile( "function", "Undefined" ) );
-
-#ifdef DEBUG
-	Debug( 5023 ) << "                                                    function: " << dataFile( "function", "Undefined" )  << "\n";
-#endif
-
-
+// ===================================================
+//! Private functions
+// ===================================================
+void
+BCInterfaceFunctionFile::loadData( const GetPot& dataFile )
+{
 
 	//Set variables
 	UInt variablesNumber = dataFile.vector_variable_size( "variables" );
@@ -145,15 +158,16 @@ BCInterfaceFunctionFile::loadData( void )
 	}
 
 #ifdef DEBUG
-	output << "                                                   variables: ";
+	std::stringstream output;
+	output << "BCInterfaceFunctionFile::loadData           variables: ";
 	for ( UInt j(0) ; j < variablesNumber ; ++j )
 		output << M_variables[j] << "  ";
 
-	output << "\n                                                                  scale: ";
+	output << "\n                                                           scale: ";
 	for ( UInt j(0) ; j < variablesNumber ; ++j )
 		output << M_scale[j] << "  ";
 
-	Debug( 5023 ) << output.str() << "\n";
+	Debug( 5022 ) << output.str() << "\n";
 #endif
 
 
@@ -171,14 +185,17 @@ BCInterfaceFunctionFile::loadData( void )
 
 #ifdef DEBUG
 	output.str("");
-	output << "                                                        data: ";
+	output << "                                                 data:";
 	for ( UInt i(0) ; i < dataLines ; ++i )
 	{
+		if (i > 0)
+			output << "                                                                 ";
+
 		for ( UInt j(0) ; j < variablesNumber ; ++j )
-			output << M_data[ M_variables[j] ][i] << " ";
-		output << "\n                                                                         ";
+			output << " " << M_data[ M_variables[j] ][i];
+		output << "\n";
 	}
-	Debug( 5023 ) << output.str() << "\n";
+	Debug( 5022 ) << output.str();
 #endif
 
 
@@ -191,9 +208,6 @@ BCInterfaceFunctionFile::loadData( void )
 
 
 
-// ===================================================
-//! Private functions
-// ===================================================
 inline void
 BCInterfaceFunctionFile::dataInterpolation( void )
 {
@@ -201,7 +215,7 @@ BCInterfaceFunctionFile::dataInterpolation( void )
 	Real X = M_parser->getVariable( M_variables[0] );
 
 #ifdef DEBUG
-	Debug( 5023 ) << "                                                    variable: " << X  << "\n";
+	Debug( 5022 ) << "                                                    variable: " << X  << "\n";
 #endif
 
 
@@ -211,9 +225,9 @@ BCInterfaceFunctionFile::dataInterpolation( void )
 	{
 
 #ifdef DEBUG
-		Debug( 5023 ) << "                                       iterator  position   : " << static_cast<Real> ( M_dataIterator - M_data[ M_variables[0] ].begin() )  << "\n";
-		Debug( 5023 ) << "                                       variable (position)  : " << *M_dataIterator << "\n";
-		Debug( 5023 ) << "                                       variable (position+1): " << *(M_dataIterator+1) << "\n";
+		Debug( 5022 ) << "                                       iterator  position   : " << static_cast<Real> ( M_dataIterator - M_data[ M_variables[0] ].begin() )  << "\n";
+		Debug( 5022 ) << "                                       variable (position)  : " << *M_dataIterator << "\n";
+		Debug( 5022 ) << "                                       variable (position+1): " << *(M_dataIterator+1) << "\n";
 #endif
 
 		if (X >= *M_dataIterator && X <= *(M_dataIterator+1) )
@@ -249,7 +263,7 @@ BCInterfaceFunctionFile::dataInterpolation( void )
 		M_parser->setVariable( M_variables[j], A+(B-A)/(xB-xA)*(X-xA) );
 
 #ifdef DEBUG
-		Debug( 5023 ) << "                                                          " << M_variables[j] << " = " << A+(B-A)/(xB-xA)*(X-xA) << "\n";
+		Debug( 5022 ) << "                                                          " << M_variables[j] << " = " << A+(B-A)/(xB-xA)*(X-xA) << "\n";
 #endif
 	}
 }

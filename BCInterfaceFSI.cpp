@@ -23,24 +23,28 @@
   USA
 */
 /**
-   \file BCInterfaceFSIOperator.cpp
+   \file BCInterfaceFSI.cpp
    \author Cristiano Malossi <cristiano.malossi@epfl.ch>
    \date 2009-04-23
  */
 
-#include <lifemc/lifefem/BCInterfaceFSIOperator.hpp>
+#include <lifemc/lifefem/BCInterfaceFSI.hpp>
 
 namespace LifeV {
 
 // ===================================================
 //! Constructor & Destructor
 // ===================================================
-BCInterfaceFSIOperator::BCInterfaceFSIOperator( const std::string& baseString,
-												const boost::shared_ptr<FSIOperator>& oper ) :
-	M_baseString			( baseString ),
+BCInterfaceFSI::BCInterfaceFSI( const BCInterfaceData& data,
+								const boost::shared_ptr<FSIOperator>& oper ) :
+	M_baseString			( data.get_baseString() ),
 	M_FSIOperator			( oper ),
 	M_base					( )
 {
+#ifdef DEBUG
+	Debug( 5023 ) << "BCInterfaceFSI::BCInterfaceFSI" << "\n";
+#endif
+
 	//Set mapMethod
 	M_mapMethod["exactJacobian"]						= EXACTJACOBIAN;
 	M_mapMethod["fixedPoint"]							= FIXEDPOINT;
@@ -65,7 +69,7 @@ BCInterfaceFSIOperator::BCInterfaceFSIOperator( const std::string& baseString,
 
 
 
-BCInterfaceFSIOperator::BCInterfaceFSIOperator( const BCInterfaceFSIOperator& fsiOperator ) :
+BCInterfaceFSI::BCInterfaceFSI( const BCInterfaceFSI& fsiOperator ) :
 	M_baseString	( fsiOperator.M_baseString ),
 	M_FSIOperator	( fsiOperator.M_FSIOperator ),
 	M_base			( fsiOperator.M_base ),
@@ -76,8 +80,8 @@ BCInterfaceFSIOperator::BCInterfaceFSIOperator( const BCInterfaceFSIOperator& fs
 
 
 
-BCInterfaceFSIOperator&
-BCInterfaceFSIOperator::operator=( const BCInterfaceFSIOperator& fsiOperator )
+BCInterfaceFSI&
+BCInterfaceFSI::operator=( const BCInterfaceFSI& fsiOperator )
 {
     if ( this != &fsiOperator )
     {
@@ -99,14 +103,14 @@ BCInterfaceFSIOperator::operator=( const BCInterfaceFSIOperator& fsiOperator )
 //! Private functions
 // ===================================================
 inline void
-BCInterfaceFSIOperator::checkMethod( void )
+BCInterfaceFSI::checkMethod( void )
 {
 	switch ( M_mapMethod[M_FSIOperator->method()] )
 	{
 			case EXACTJACOBIAN :
 
 #ifdef DEBUG
-				Debug( 5022 ) << "BCInterfaceFSIOperator::checkMethod   -> exactJacobian" << "\n";
+				Debug( 5023 ) << "BCInterfaceFSI::checkMethod                            exactJacobian" << "\n";
 #endif
 
 				checkFunction<exactJacobian>();
@@ -116,7 +120,7 @@ BCInterfaceFSIOperator::checkMethod( void )
 			case FIXEDPOINT :
 
 #ifdef DEBUG
-				Debug( 5022 ) << "BCInterfaceFSIOperator::checkMethod   -> fixedPoint" << "\n";
+				Debug( 5023 ) << "BCInterfaceFSI::checkMethod                            fixedPoint" << "\n";
 #endif
 
 				checkFunction<fixedPoint>();
@@ -126,7 +130,7 @@ BCInterfaceFSIOperator::checkMethod( void )
 			case MONOLITHIC :
 
 #ifdef DEBUG
-				Debug( 5022 ) << "BCInterfaceFSIOperator::checkMethod   -> monolithic" << "\n";
+				Debug( 5023 ) << "BCInterfaceFSI::checkMethod                            monolithic" << "\n";
 #endif
 
 				//checkFunction<monolithic>();
@@ -136,7 +140,7 @@ BCInterfaceFSIOperator::checkMethod( void )
 			case STEKLOVPOINCARE :
 
 #ifdef DEBUG
-				Debug( 5022 ) << "BCInterfaceFSIOperator::checkMethod   -> steklovPoincare" << "\n";
+				Debug( 5023 ) << "BCInterfaceFSI::checkMethod                            steklovPoincare" << "\n";
 #endif
 
 				//checkFunction<steklovPoincare>();

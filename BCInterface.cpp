@@ -39,6 +39,9 @@ std::map<std::string,size_type>							BCInterface::M_mapFunction;
 std::vector< boost::shared_ptr<BCInterfaceFunctionFile> >	BCInterface::M_vectorFunctionFile;
 std::map<std::string,size_type>								BCInterface::M_mapFunctionFile;
 
+std::vector< boost::shared_ptr<BCInterfaceFSIFunction> >	BCInterface::M_vectorFSIFunction;
+std::map<std::string,size_type>								BCInterface::M_mapFSIFunction;
+
 // ===================================================
 //! Constructor
 // ===================================================
@@ -51,20 +54,20 @@ BCInterface::BCInterface( const GetPot& dataFile, const std::string& dataSection
 	M_bcNumber					( 0 ),
 	M_hint						( BCHandler::HINT_BC_ONLY_ESSENTIAL ),
 	M_handler					( ),
-	M_FSIOperator				( ),
-	//M_mapFunction				( ),
-	//M_vectorFunction			( ),
-	//M_mapFunctionFile			( ),
-	//M_vectorFunctionFile		( ),
-	M_name						( "undefined" ),
-	M_flag						( ),
-	M_type						( ),
-	M_mode						( ),
-	//M_comN						( ),
-	M_comV						( ),
+	M_mapType					( ),
+	M_mapMode					( ),
+	M_mapBase					( ),
+	M_data						( ),
 	M_base						( ),
-	M_baseString				( "undefined" )
+	M_FSIOperator				( ),
+	M_vectorFSI					( )
+
 {
+
+#ifdef DEBUG
+	    Debug( 5020 ) << "BCInterface::BCInterface------------------------------" << "\n";
+#endif
+
 	//Set mapType
 	M_mapType["Essential"] 	= Essential;
 	M_mapType["Natural"] 	= Natural;
@@ -79,13 +82,13 @@ BCInterface::BCInterface( const GetPot& dataFile, const std::string& dataSection
 	M_mapMode["Tangential"] = Tangential;
 
 	//Set mapBase
-	M_mapBase["fsi"] 			= fsi;
 	M_mapBase["function"] 		= function;
 	M_mapBase["functionFile"] 	= functionFile;
+	M_mapBase["FSI"] 			= FSI;
+	M_mapBase["FSIfunction"] 	= FSIfunction;
 
-	//Operators
-	//M_vectorFunction.clear();
-	M_FSIOperatorVector.clear();
+	//Clear non-static vectors
+	M_vectorFSI.clear();
 
 	//Set other parameters
 	setList( (M_dataSection + "list").c_str() );
@@ -104,20 +107,10 @@ BCInterface::BCInterface( const BCInterface& interface ) :
 	M_mapType				( interface.M_mapType ),
 	M_mapMode				( interface.M_mapMode ),
 	M_mapBase				( interface.M_mapBase ),
-	M_FSIOperator			( interface.M_FSIOperator ),
-	M_FSIOperatorVector		( interface.M_FSIOperatorVector ),
-	//M_mapFunction			( interface.M_mapFunction ),
-	//M_vectorFunction		( interface.M_vectorFunction ),
-	//M_mapFunctionFile		( interface.M_mapFunctionFile ),
-	//M_vectorFunctionFile	( interface.M_vectorFunctionFile ),
-	M_name					( interface.M_name ),
-	M_flag					( interface.M_flag ),
-	M_type					( interface.M_type ),
-	M_mode					( interface.M_mode ),
-	//M_comN				( interface.M_comN ),
-	M_comV					( interface.M_comV ),
+	M_data					( interface.M_data ),
 	M_base					( interface.M_base ),
-	M_baseString			( interface.M_baseString )
+	M_FSIOperator			( interface.M_FSIOperator ),
+	M_vectorFSI				( interface.M_vectorFSI )
 {
 }
 
@@ -139,20 +132,10 @@ BCInterface::operator=( const BCInterface& interface )
     	M_mapType				= interface.M_mapType;
     	M_mapMode				= interface.M_mapMode;
     	M_mapBase				= interface.M_mapBase;
-    	M_FSIOperator			= interface.M_FSIOperator;
-    	M_FSIOperatorVector		= interface.M_FSIOperatorVector;
-    	//M_mapFunction			= interface.M_mapFunction;
-    	//M_vectorFunction		= interface.M_vectorFunction;
-    	//M_mapFunctionFile		= interface.M_mapFunctionFile;
-    	//M_vectorFunctionFile	= interface.M_vectorFunctionFile;
-    	M_name					= interface.M_name;
-    	M_flag					= interface.M_flag;
-    	M_type					= interface.M_type;
-    	M_mode					= interface.M_mode;
-    	//M_comN				= interface.M_comN;
-    	M_comV					= interface.M_comV;
+    	M_data					= interface.M_data;
     	M_base					= interface.M_base;
-    	M_baseString			= interface.M_baseString;
+    	M_FSIOperator			= interface.M_FSIOperator;
+    	M_vectorFSI				= interface.M_vectorFSI;
     }
 
 	return *this;
@@ -196,39 +179,47 @@ BCInterface::buildHandler( void )
 
 	for ( UInt i(0) ; i < M_listSize ; ++i )
 	{
-		M_name = M_list[i];
+		M_data.set_name( M_list[i] );
 
-		readFlag( (M_dataSection + M_name + "/flag").c_str() );
-		readType( (M_dataSection + M_name + "/type").c_str() );
-		readMode( (M_dataSection + M_name + "/mode").c_str() );
-		readComponentVector( (M_dataSection + M_name + "/component").c_str() );
-
-		readBase(  M_dataSection + M_name + "/" );
+		readFlag( (M_dataSection + M_data.get_name() + "/flag").c_str() );
+		readType( (M_dataSection + M_data.get_name() + "/type").c_str() );
+		readMode( (M_dataSection + M_data.get_name() + "/mode").c_str() );
+		readComV( (M_dataSection + M_data.get_name() + "/component").c_str() );
+		readBase(  M_dataSection + M_data.get_name() + "/" );
 
 		switch ( M_base )
 		{
 			case function :
 
-				if ( newBase( M_mapFunction, M_vectorFunction) )
-					addBase( M_vectorFunction, M_comV );
+				if ( newBase( M_mapFunction, M_vectorFunction ) )
+					addBase( M_vectorFunction );
 
-				addBCManager( M_vectorFunction[M_mapFunction[M_baseString]]->getBase() );
-
-				break;
-
-			case fsi :
-
-				addBase( M_FSIOperatorVector, M_FSIOperator );
-				addBCManager( M_FSIOperatorVector.back()->getBase() );
+				addBCManager( M_vectorFunction[M_mapFunction[M_data.get_baseString()]]->getBase() );
 
 				break;
 
 			case functionFile :
 
-				if ( newBase( M_mapFunctionFile, M_vectorFunctionFile) )
-					addBase( M_vectorFunctionFile, M_comV );
+				if ( newBase( M_mapFunctionFile, M_vectorFunctionFile ) )
+					addBase( M_vectorFunctionFile );
 
-				addBCManager( M_vectorFunctionFile[M_mapFunctionFile[M_baseString]]->getBase() );
+				addBCManager( M_vectorFunctionFile[M_mapFunctionFile[M_data.get_baseString()]]->getBase() );
+
+				break;
+
+			case FSI :
+
+				addBase( M_vectorFSI, M_FSIOperator );
+				addBCManager( M_vectorFSI.back()->getBase() );
+
+				break;
+
+			case FSIfunction :
+
+				if ( newBase( M_mapFSIFunction, M_vectorFSIFunction ) )
+					addBase( M_vectorFSIFunction, M_FSIOperator );
+
+				addBCManager( M_vectorFSIFunction.back()->getBase() );
 
 				break;
 		}
@@ -260,7 +251,7 @@ BCInterface::autosetHandlerParameters( void )
 	for ( UInt i(0) ; i < M_listSize ; ++i )
 	{
 		readType( (M_dataSection + M_list[i] + "/type").c_str() );
-		if ( M_type != Essential )
+		if ( M_data.get_type() != Essential )
 			M_hint = BCHandler::HINT_BC_NONE;
 
 		M_bcNumber += M_dataFile.vector_variable_size((M_dataSection + M_list[i] + "/flag").c_str());
@@ -268,7 +259,7 @@ BCInterface::autosetHandlerParameters( void )
 
 #ifdef DEBUG
     Debug( 5020 ) << "BCInterface::autosetHandlerParameters      M_bcNumber: " << M_bcNumber << "\n";
-    Debug( 5020 ) << "BCInterface::autosetHandlerParameters          M_hint: " << M_hint << "\n\n";
+    Debug( 5020 ) << "                                               M_hint: " << M_hint << "\n\n";
 #endif
 
 }
@@ -278,18 +269,11 @@ BCInterface::autosetHandlerParameters( void )
 inline void
 BCInterface::readFlag( const char* flag )
 {
-    UInt flagSize = M_dataFile.vector_variable_size(flag);
-
-	M_flag.clear();
-	M_flag.reserve( flagSize );
-
-    for ( UInt j(0) ; j < flagSize ; ++j )
-    	M_flag.push_back( M_dataFile(flag, 0, j) );
+	M_data.set_flag( M_dataFile(flag, 0) );
 
 #ifdef DEBUG
-    Debug( 5020 ) << "BCInterface::readFlag                   M_flag.size(): " << static_cast<Real>(M_flag.size()) << "\n";
+    Debug( 5020 ) << "BCInterface::readFlag                            flag: " << static_cast<Real>(M_data.get_flag()) << "\n";
 #endif
-
 }
 
 
@@ -297,12 +281,11 @@ BCInterface::readFlag( const char* flag )
 inline void
 BCInterface::readType( const char* type )
 {
-	M_type = M_mapType[M_dataFile(type, "Essential")];
+	M_data.set_type( M_mapType[M_dataFile(type, "Essential")] );
 
 #ifdef DEBUG
-	Debug( 5020 ) << "BCInterface::readType                          M_type: " << M_type << " " << M_dataFile(type, "Essential") << "\n";
+	Debug( 5020 ) << "BCInterface::readType                            type: " << M_data.get_type() << " (" << M_dataFile(type, "Essential") << ")\n";
 #endif
-
 }
 
 
@@ -310,42 +293,30 @@ BCInterface::readType( const char* type )
 inline void
 BCInterface::readMode( const char* mode )
 {
-	M_mode = M_mapMode[M_dataFile(mode, "Full")];
+	M_data.set_mode( M_mapMode[M_dataFile(mode, "Full")] );
 
 #ifdef DEBUG
-	Debug( 5020 ) << "BCInterface::readMode                          M_mode: " << M_mode << " " << M_dataFile(mode, "Full") << "\n";
+	Debug( 5020 ) << "BCInterface::readMode                            mode: " << M_data.get_mode() << " (" << M_dataFile(mode, "Full") << ")\n";
 #endif
-
 }
 
 
-/*
 inline void
-BCInterface::readComponentNumber( const char* component )
-{
-	M_comN = M_dataFile( component, 0 );
-
-#ifdef DEBUG
-	Debug( 5020 ) << "BCInterface::readComponentNumber               M_comN: " << M_comN << "\n";
-#endif
-
-}
-*/
-
-
-inline void
-BCInterface::readComponentVector( const char* component )
+BCInterface::readComV( const char* component )
 {
     UInt componentSize = M_dataFile.vector_variable_size(component);
 
-	M_comV.clear();
-    M_comV.reserve( componentSize );
+    M_data.reset_comV( componentSize );
 
     for (UInt j(0) ; j < componentSize ; ++j)
-    	M_comV.push_back( M_dataFile(component, 0, j) );
+    	M_data.set_comV( M_dataFile(component, 0, j) );
 
 #ifdef DEBUG
-    Debug( 5020 ) << "BCInterface::readComponentVector        M_comV.size(): " << static_cast<Real>(M_comV.size()) << "\n";
+    std::stringstream output;
+    output << "BCInterface::readComV                            comV: ";
+    for (UInt i(0) ; i < static_cast<UInt>(M_data.get_comV().size()) ; ++i )
+    	output << M_data.get_comV()[i] << " ";
+    Debug( 5020 ) << output.str() << "\n";
 #endif
 
 }
@@ -360,12 +331,9 @@ BCInterface::readBase( const std::string& base )
 		{
 			M_base = M_mapBase[j->first];
 
-			// Remove spaces from the string
-			boost::replace_all( M_baseString, " ",  "" );
-
 #ifdef DEBUG
-			Debug( 5020 ) << "BCInterface::readBase                          M_base: " << M_base << " " << j->first << "\n";
-			Debug( 5020 ) << "BCInterface::readBase                    M_baseString: " << M_baseString << "\n";
+			Debug( 5020 ) << "BCInterface::readBase                            base: " << M_base << " (" << j->first << ")\n";
+			Debug( 5020 ) << "                                           baseString: " << M_data.get_baseString() << "\n";
 #endif
 
 			break;
@@ -377,7 +345,7 @@ BCInterface::readBase( const std::string& base )
 inline bool
 BCInterface::isBase( const char* base )
 {
-	M_baseString = M_dataFile( base, " " );
+	M_data.set_baseString( M_dataFile( base, " " ) );
 
 	return M_dataFile.checkVariable( base );
 }
