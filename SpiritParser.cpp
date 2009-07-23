@@ -45,6 +45,11 @@ SpiritParser::SpiritParser( const bool& applyRules ) :
 	M_calculator				( M_variables, M_results, M_nResults ),
 	M_applyRules				( applyRules )
 {
+
+#ifdef DEBUG
+    Debug( 5030 ) << "SpiritParser::SpiritParser"<< "\n";
+#endif
+
 	// Set default variables
 	setDefaultVariables();
 }
@@ -59,6 +64,11 @@ SpiritParser::SpiritParser( const std::string& string, const bool& applyRules ) 
 	M_calculator				( M_variables, M_results, M_nResults ),
 	M_applyRules				( applyRules )
 {
+
+#ifdef DEBUG
+    Debug( 5030 ) << "SpiritParser::SpiritParser"<< "\n";
+#endif
+
 	// Set default variables
 	setDefaultVariables();
 
@@ -110,9 +120,10 @@ SpiritParser::setString( const std::string& string, const std::string& stringSep
     Debug( 5030 ) << "SpiritParser::setString:          strings: " << string 		<< "\n";
 #endif
 
+    M_strings.clear();
     boost::split( M_strings, string, boost::is_any_of(stringSeparator) );
 #ifdef DEBUG
-    Debug( 5030 ) << "                             M_applyRules: " << M_applyRules 	<< "\n";
+    Debug( 5030 ) << "                               applyRules: " << M_applyRules 	<< "\n";
 #endif
 
 	if ( M_applyRules )
@@ -128,7 +139,7 @@ void
 SpiritParser::setVariable( const std::string& name, const Real& value )
 {
 #ifdef DEBUG
-	Debug( 5030 ) << "SpiritParser::setVariable: M_variables[" << name << "]: " << value << "\n";
+	Debug( 5030 ) << "SpiritParser::setVariable    variables[" << name << "]: " << value << "\n";
 #endif
 
 	M_variables[name] = value;
@@ -136,11 +147,11 @@ SpiritParser::setVariable( const std::string& name, const Real& value )
 
 
 
-Real
+const Real&
 SpiritParser::getVariable( const std::string& name )
 {
 #ifdef DEBUG
-	Debug( 5030 ) << "SpiritParser::getVariable: M_variables[" << name << "]: " << M_variables[name] << "\n";
+	Debug( 5030 ) << "SpiritParser::getVariable    variables[" << name << "]: " << M_variables[name] << "\n";
 #endif
 
 	return M_variables[name];
@@ -148,14 +159,14 @@ SpiritParser::getVariable( const std::string& name )
 
 
 
-Real&
+const Real&
 SpiritParser::evaluate( const UInt& ID )
 {
 	for ( UInt i = 0; i < M_strings.size(); ++i )
 		boost::spirit::parse(M_strings[i].begin(), M_strings[i].end(), M_calculator, boost::spirit::space_p);
 
 #ifdef DEBUG
-    Debug( 5030 ) << "SpiritParser::evaluate:       M_results[ "<< (ID - 1) << "]: " << M_results[ID - 1] << "\n";
+    Debug( 5030 ) << "SpiritParser::evaluate          results[ "<< (ID - 1) << "]: " << M_results[ID - 1] << "\n";
 #endif
 
     M_nResults = 0; //Reset for next evaluation
@@ -195,8 +206,9 @@ SpiritParser::countSubstring( const std::string& substring )
 inline void
 SpiritParser::setDefaultVariables( void )
 {
-	setVariable( "pi", 3.141592653589792 );
+	setVariable( "pi", 3.141592653589793 );
 	setVariable( "e" , 2.718281828459046 );
+	//setVariable( "pi", 3.1415926535897932384626433832795 ); //Better only with long double!
 }
 
 
@@ -207,7 +219,12 @@ SpiritParser::setupResults( void )
 	M_nResults = 0;
 
 	//Reserve the space for results
+	M_results.clear();
 	M_results.reserve( countSubstring( "," ) + 1 );
+
+#ifdef DEBUG
+	Debug( 5030 ) << "SpiritParser::setupResults      dimension: " << countSubstring( "," ) + 1 << "\n";
+#endif
 
 	//std::vector<std::string> tempVectorString;
 	//boost::split( tempVectorString, M_strings.back(), boost::is_any_of(stringSeparator) );
@@ -220,8 +237,8 @@ inline void
 SpiritParser::ruleTheString( std::string& string )
 {
 #ifdef DEBUG
-	Debug( 5030 ) << "SpiritParser::ruleTheString: " << "\n";
-	Debug( 5030 ) << "                      (before) - M_string: " << string 	<< "\n";
+	Debug( 5030 ) << "SpiritParser::ruleTheString" << "\n";
+	Debug( 5030 ) << "                        (before) - string: " << string 	<< "\n";
 #endif
 
 	// Remove spaces from the string
@@ -240,7 +257,7 @@ SpiritParser::ruleTheString( std::string& string )
 	boost::replace_all( string, "tan",   "T" );
 
 #ifdef DEBUG
-	Debug( 5030 ) << "                       (after) - M_string: " << string 	<< "\n";
+	Debug( 5030 ) << "                         (after) - string: " << string 	<< "\n";
 #endif
 }
 
