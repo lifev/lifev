@@ -24,6 +24,7 @@
 #include <boost/timer.hpp>
 
 #include <cassert>
+#include <iomanip>
 
 #include <life/lifealg/IfpackPreconditioner.hpp>
 #include <life/lifealg/MLPreconditioner.hpp>
@@ -60,39 +61,39 @@ namespace
 }
 }
 
-#define PI 3.14159265358979323846
+
+#define PI 3.141592653589793
 class bc_adaptor
 {
 public:
 
     bc_adaptor( LifeV::FSIOperator &_oper ):
-            M_oper   ( _oper ),
-            //M_area0  ( M_oper.fluid().area(3) ),
-            M_area0  ( 0.785400 ),
-            M_beta   (( M_oper.solid().thickness()*M_oper.solid().young())/
-                      (1 - M_oper.solid().poisson()*M_oper.solid().poisson())*
-                      PI/M_area0),
-            M_rhos   ( M_oper.solid().rho() )
+            M_oper   ( _oper )
     {
-        std::cout << "  Abs. boudary condition --------------- " << std::endl;
+    	LifeV::Real area0	= 0.78540;
+    	//LifeV::Real area0	= M_oper.fluid().area(3);
+        LifeV::Real area	= area0;
+
+        LifeV::Real beta	= M_oper.solid().thickness()*M_oper.solid().young() /
+							(1 - M_oper.solid().poisson()*M_oper.solid().poisson()) * PI/area0;
+
+        LifeV::Real qn		= M_oper.fluid().flux(3);
+
+    	M_outflow			= std::pow(std::sqrt(M_oper.solid().rho())/(2*std::sqrt(2))*qn/area + std::sqrt(beta*std::sqrt(area0)), 2)
+							- beta*std::sqrt(area0);
+
+        std::cout << "--------------- Absorbing boundary condition ---------------" << std::endl;
+        std::cout << "  Outflow BC : density   = " << M_oper.solid().rho() << std::endl;
         std::cout << "  Outflow BC : thickness = " << M_oper.solid().thickness() << std::endl;
         std::cout << "  Outflow BC : young     = " << M_oper.solid().young() << std::endl;
         std::cout << "  Outflow BC : poisson   = " << M_oper.solid().poisson() << std::endl;
-        std::cout << "  Outflow BC : area0     = " << M_area0 << std::endl;
-        std::cout << "  Outflow BC : radius    = " << std::sqrt(M_area0/PI) << std::endl;
-        std::cout << "  Outflow BC : beta      = " << M_beta << std::endl;
-
-        double qn        = M_oper.fluid().flux(3);
-        //double area      = M_oper.fluid().area(3);
-        double area = M_area0;
-
-        M_outflow = pow((sqrt(M_rhos)/(2.*sqrt(2))*qn/area + sqrt(M_beta*sqrt(M_area0))),2)
-            - M_beta*sqrt(M_area0);
-
-        std::cout << "  Flow rate  = " << qn << std::endl;
-        std::cout << "  outflow    = " << M_outflow << std::endl;
-
-        //std::cout << "  eigenvalue = " << qn/area - 2.*sqrt(2.)/sqrt(M_rhos)*(sqrt(
+        std::cout << "  Outflow BC : area0     = " << area0 << std::endl;
+        std::cout << "  Outflow BC : area      = " << M_oper.fluid().area(3) << std::endl;
+        std::cout << "  Outflow BC : radius    = " << std::sqrt(area0/PI) << std::endl;
+        std::cout << "  Outflow BC : beta      = " << beta << std::endl;
+        std::cout << "  Outflow BC : Flow rate = " << qn << std::endl;
+        std::cout << "  Outflow BC : outflow   = " << M_outflow << std::endl;
+        std::cout << "------------------------------------------------------------" << std::endl;
     }
 
     LifeV::Real operator()(LifeV::Real /*__time*/,
@@ -107,7 +108,7 @@ public:
                 return 0.;
                 break;
             case 2:
-                return 0.;
+            	return 0.;
                 break;
             case 3:
                 //return 0.;
@@ -122,13 +123,8 @@ public:
     }
 private:
 
-    LifeV::FSIOperator& M_oper;
-    LifeV::Real         M_outflow;
-
-    double              M_area0;
-    double              M_beta;
-    double              M_rhos;
-
+    LifeV::FSIOperator&		M_oper;
+    LifeV::Real				M_outflow;
 };
 
 class Problem
