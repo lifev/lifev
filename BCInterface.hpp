@@ -50,6 +50,7 @@
 #include <lifemc/lifefem/BCInterfaceFunctionFile.hpp>
 #include <lifemc/lifefem/BCInterfaceFSI.hpp>
 #include <lifemc/lifefem/BCInterfaceFSIFunction.hpp>
+#include <lifemc/lifefem/BCInterfaceFSIFunctionFile.hpp>
 
 
 
@@ -260,7 +261,7 @@ public:
 
 private:
 
-	enum BCBaseList{ function, functionFile, FSI, FSIfunction };
+	enum BCBaseList{ function, functionFile, FSI, FSIfunction, FSIfunctionFile };
 
 	// ===================================================
 	//! Private variables
@@ -291,20 +292,23 @@ private:
 	BCBaseList 											M_base;
 
 	// Simple Function
-	static std::map<std::string,size_type>								M_mapFunction;
-	static std::vector< boost::shared_ptr<BCInterfaceFunction> >		M_vectorFunction;
+	static std::map<std::string,size_type>									M_mapFunction;
+	static std::vector< boost::shared_ptr<BCInterfaceFunction> >			M_vectorFunction;
 
-	static std::map<std::string,size_type>								M_mapFunctionFile;
-	static std::vector< boost::shared_ptr<BCInterfaceFunctionFile> >	M_vectorFunctionFile;
+	static std::map<std::string,size_type>									M_mapFunctionFile;
+	static std::vector< boost::shared_ptr<BCInterfaceFunctionFile> >		M_vectorFunctionFile;
 
 	// FSIOperator
-	boost::shared_ptr<FSIOperator>										M_FSIOperator;
+	boost::shared_ptr<FSIOperator>											M_FSIOperator;
 
 	// FSI Function
-	std::vector< boost::shared_ptr<BCInterfaceFSI> >					M_vectorFSI;
+	std::vector< boost::shared_ptr<BCInterfaceFSI> >						M_vectorFSI;
 
-	static std::map<std::string,size_type>								M_mapFSIFunction;
-	static std::vector< boost::shared_ptr<BCInterfaceFSIFunction> >		M_vectorFSIFunction;
+	static std::map<std::string,size_type>									M_mapFSIFunction;
+	static std::vector< boost::shared_ptr<BCInterfaceFSIFunction> >			M_vectorFSIFunction;
+
+	static std::map<std::string,size_type>									M_mapFSIFunctionFile;
+	static std::vector< boost::shared_ptr<BCInterfaceFSIFunctionFile> >		M_vectorFSIFunctionFile;
 
 
 
@@ -348,9 +352,6 @@ private:
 
     //! readMode
     inline void readMode( const char* mode );
-
-    //! readComponentNumber
-    //inline void readComponentNumber( const char* component );
 
     //! readComponentVector
     inline void readComV( const char* component );

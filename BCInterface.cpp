@@ -33,14 +33,17 @@
 namespace LifeV {
 
 // Initialize static variables
-std::vector< boost::shared_ptr<BCInterfaceFunction> >	BCInterface::M_vectorFunction;
-std::map<std::string,size_type>							BCInterface::M_mapFunction;
+std::vector< boost::shared_ptr<BCInterfaceFunction> >			BCInterface::M_vectorFunction;
+std::map<std::string,size_type>									BCInterface::M_mapFunction;
 
-std::vector< boost::shared_ptr<BCInterfaceFunctionFile> >	BCInterface::M_vectorFunctionFile;
-std::map<std::string,size_type>								BCInterface::M_mapFunctionFile;
+std::vector< boost::shared_ptr<BCInterfaceFunctionFile> >		BCInterface::M_vectorFunctionFile;
+std::map<std::string,size_type>									BCInterface::M_mapFunctionFile;
 
-std::vector< boost::shared_ptr<BCInterfaceFSIFunction> >	BCInterface::M_vectorFSIFunction;
-std::map<std::string,size_type>								BCInterface::M_mapFSIFunction;
+std::vector< boost::shared_ptr<BCInterfaceFSIFunction> >		BCInterface::M_vectorFSIFunction;
+std::map<std::string,size_type>									BCInterface::M_mapFSIFunction;
+
+std::vector< boost::shared_ptr<BCInterfaceFSIFunctionFile> >	BCInterface::M_vectorFSIFunctionFile;
+std::map<std::string,size_type>									BCInterface::M_mapFSIFunctionFile;
 
 // ===================================================
 //! Constructor
@@ -69,23 +72,24 @@ BCInterface::BCInterface( const GetPot& dataFile, const std::string& dataSection
 #endif
 
 	//Set mapType
-	M_mapType["Essential"] 	= Essential;
-	M_mapType["Natural"] 	= Natural;
-	M_mapType["Mixte"] 		= Mixte;
-	//M_mapType["Flux"] 		= Flux;
+	M_mapType["Essential"] 			= Essential;
+	M_mapType["Natural"] 			= Natural;
+	M_mapType["Mixte"] 				= Mixte;
+	//M_mapType["Flux"] 			= Flux;
 
 	//Set mapMode
-	M_mapMode["Scalar"] 	= Scalar;
-	M_mapMode["Full"] 		= Full;
-	M_mapMode["Component"] 	= Component;
-	M_mapMode["Normal"] 	= Normal;
-	M_mapMode["Tangential"] = Tangential;
+	M_mapMode["Scalar"] 			= Scalar;
+	M_mapMode["Full"] 				= Full;
+	M_mapMode["Component"] 			= Component;
+	M_mapMode["Normal"] 			= Normal;
+	M_mapMode["Tangential"] 		= Tangential;
 
 	//Set mapBase
-	M_mapBase["function"] 		= function;
-	M_mapBase["functionFile"] 	= functionFile;
-	M_mapBase["FSI"] 			= FSI;
-	M_mapBase["FSIfunction"] 	= FSIfunction;
+	M_mapBase["function"] 			= function;
+	M_mapBase["functionFile"] 		= functionFile;
+	M_mapBase["FSI"]				= FSI;
+	M_mapBase["FSIfunction"]		= FSIfunction;
+	M_mapBase["FSIfunctionFile"]	= FSIfunctionFile;
 
 	//Clear non-static vectors
 	M_vectorFSI.clear();
@@ -220,6 +224,15 @@ BCInterface::buildHandler( void )
 					addBase( M_vectorFSIFunction, M_FSIOperator );
 
 				addBCManager( M_vectorFSIFunction.back()->getBase() );
+
+				break;
+
+			case FSIfunctionFile :
+
+				if ( newBase( M_mapFSIFunctionFile, M_vectorFSIFunctionFile ) )
+					addBase( M_vectorFSIFunctionFile, M_FSIOperator );
+
+				addBCManager( M_vectorFSIFunctionFile.back()->getBase() );
 
 				break;
 		}
