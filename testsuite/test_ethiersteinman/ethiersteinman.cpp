@@ -368,7 +368,7 @@ Ethiersteinman::run()
     std::string const exporterType =  dataFile( "exporter/type", "ensight");
 
 #ifdef HAVE_HDF5
-    if (exporterType.compare("hdf5"))
+    if (exporterType.compare("hdf5") == 0)
     {
         exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
         velAndPressure.reset( new vector_type(fluid.solution(), Unique ) );
@@ -377,7 +377,7 @@ Ethiersteinman::run()
 #endif
     {
         velAndPressure.reset( new vector_type(fluid.solution(), Repeated ) );
-        if (exporterType.compare("none"))
+        if (exporterType.compare("none") == 0)
         {
             exporter.reset( new NoExport<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
         } else {
