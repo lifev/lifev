@@ -24,7 +24,8 @@ BDF_order		= 1
 
 [../space_discretization]
 mesh_dir        = ./Mesh/   # the directory where the mesh file is
-mesh_file       = cube4x4.mesh          # mesh file
+#mesh_file       = cube4x4.mesh          # mesh file
+mesh_file       = cube8x8.mesh          # mesh file
 
 verbose         = 0
 linearized      = 0
@@ -40,26 +41,77 @@ initialization  = interp                # initialize using proj: L2 projection
 verbose         = 1
 steady          = 0
 
-[../solver]
-solver          = gmres
-scaling         = none
-output          = all # none
-conv            = r0
-max_iter        = 100
-kspace          = 100
-tol             = 1.00e-10
+	[../prec]
+	prectype                = ML # Ifpack or ML
+	reuse                   = false
+	displayList             = true
 
+		[./ML]
+		analyze_smoother        = false
+		default_parameter_list 	= DD-ML    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
 
-[../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
-prectype        = Ifpack   # Amesos (does a local LU factorization), ILUT (not ILU)
-reuse           = true
-overlap         = 2
-droptol         = 1.e-10 # ??
-fill            = 4
-athr            = 1e-3 # ~h^2. for h=0.25: athr~1e-3
-rthr            = 1
-relax_value     = 1
+			[./smoother]
+			# smoother type
+			# Aztec, IFPACK, Jacobi, ML symmetric Gauss-Seidel, symmetric Gauss-Seidel,
+			# ML Gauss-Seidel, Gauss-Seidel, Chebyshev, MLS, Hiptmair, Amesos-KLU,
+			# Amesos-Superlu, Amesos-UMFPACK, Amesos-Superludist, Amesos-MUMPS,
+			# user-defined, SuperLU, IFPACK-Chebyshev, self, do-nothing,
+			# IC, ICT, ILU, ILUT
+			type                    = IFPACK
+			pre_or_post             = pre
+			sweeps                  = 3
+			damping_factor          = 1
 
+			[../coarse]
+			type                    = Amesos-UMFPACK
+			#type                    = Amesos-KLU
+			sweeps                  = 1
+			pre_or_post             = both
+			max_size                = 200
+
+			[../repartition]
+			enable                  = 1
+			partitioner             = ParMETIS
+			max_min_ration          = 1.3
+			min_per_proc            = 500
+
+			[../energy_minimization]
+			enable			= true
+			type			= 3
+			[../]
+
+        # ifpack
+        [../ifpack]
+		overlap		= 2
+
+           	[./fact]
+           	ilut_level-of-fill            = 1
+           	drop_tolerance                = 1.e-5
+           	relax_value                   = 0
+
+           	[../amesos]
+           	solvertype =  Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
+
+           	[../partitioner]
+           	overlap = 2
+
+           	[../schwarz]
+           	reordering_type = none #metis, rcm, none
+           	filter_singletons = true
+
+			[../]
+		[../]
+
+   [../solver]
+   solver          = gmres
+   scaling         = none
+   output          = all # none
+   conv            = rhs
+   max_iter        = 100
+   kspace          = 100
+   tol             = 1.e-10    # AztecOO tolerance
+
+   [../]
 
 [../ipstab]
 gammaBeta  = 0.02
