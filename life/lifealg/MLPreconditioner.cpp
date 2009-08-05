@@ -78,30 +78,6 @@ MLPreconditioner::buildPreconditioner(operator_type& oper)
 
     M_Oper = oper;
 
-    /*
-    //List.set("schwarz: combine mode", "Zero"); //
-    M_List.set("schwarz: filter singletons", true);
-
-//    List.set("amesos: solver type", "Amesos_Lapack");
-
-//     M_List.set("PrintTiming", true);
-//     M_List.set("PrintStatus", true);
-
-
-    Ifpack factory;
-
-    M_Prec.reset(factory.Create(M_precType, &M_Oper->getEpetraMatrix(), M_overlapLevel));
-//    M_Prec.reset(new prec_type(&A.getEpetraMatrix(), OverlapLevel));
-    if ( !M_Prec.get() )
-    { //! if not filled, I do not know how to diagonalize.
-      ERROR_MSG( "Preconditioner not setted, something went wrong in its computation\n" );
-    }
-
-    IFPACK_CHK_ERR(M_Prec->SetParameters(M_List));
-    IFPACK_CHK_ERR(M_Prec->Initialize());
-    IFPACK_CHK_ERR(M_Prec->Compute());
-    */
-
     M_Prec.reset(new prec_raw_type(M_Oper->getEpetraMatrix(), this->getList(), true));
 
     if (M_analyze)
@@ -123,24 +99,6 @@ MLPreconditioner::buildPreconditioner(operator_type& oper)
 //     M_Prec->Compute();
 
     return EXIT_SUCCESS;
-
-
-
-//     Teuchos::ParameterList MLTestList;
-//     ML_Epetra::SetDefaults("SA",MLTestList);
-    //    MLTestList.set("test: Jacobi", false);
-//     MLTestList.set("test: Gauss-Seidel", false);
-//     MLTestList.set("test: block Gauss-Seidel", false);
-//     MLTestList.set("test: symmetric Gauss-Seidel", false);
-//     MLTestList.set("test: ParaSails", false);
-//     MLTestList.set("test: IFPACK", false);
-//     MLTestList.set("test: Aztec", false);
-//     MLTestList.set("test: ML", false);
-//     int NumPreCycles = 5;
-//     int NumPostCycles = 1;
-//     int NumMLCycles = 10;
-//     M_Prec->AnalyzeHierarchy(true, NumPreCycles, NumPostCycles, NumMLCycles);
-//    M_Prec->TestSmoothers(MLTestList);
 }
 
 double
@@ -362,60 +320,6 @@ createMLList( const GetPot&              dataFile,
     int RepartitionZoltanDimensions    = dataFile((section + "/ML/repartition/Zoltan_dimensions").data(), 2, found);
     if (found) list.set("repartition: Zoltan dimensions",  RepartitionZoltanDimensions);
 
-
-    // use Uncoupled scheme to create the aggregate
-    //    list.set("aggregation: type", "Uncoupled");
-
-    // fix the smoother
-    //    list.set("smoother: type","symmetric Gauss-Seidel");
-
-    //    list.set("output", 10);
-    //    list.set("print unused", 1);
-
-//     list.set("smoother: pre or post", "both");
-//     list.set("PDE equations", 1);
-
-    // fix the smoother to be IFPACK; can be set using (level X) syntax
-    //    list.set("smoother: type", "Aztec");
-
-    // now we have to specify which IFPACK preconditioner should be
-    // built. Any value that is valid for the IFPACK factory. We also need
-    // to define the overlap (>= 0).
-
-    //list.set("smoother: type (level 0)","IFPACK");
-
-    //    list.set("smoother: ifpack type", "Aztec");
-//     list.set("smoother: ifpack overlap", M_overlapLevel);
-
-
-
-    //extra parameters:
-//     list.sublist("smoother: ifpack list").set("fact: drop tolerance",
-//                                                 dropTolerance);
-//     list.sublist("smoother: ifpack list").set("fact: ilut level-of-fill",
-//                                                 levelOfFill);
-//     list.sublist("smoother: ifpack list").set("fact: absolute threshold",
-//                                                 athr);
-//     list.sublist("smoother: ifpack list").set("fact: relative threshold",
-//                                                 rthr);
-
-//     list.sublist("smoother: ifpack list").set("partitioner: type",
-//                                                 "user");
-
-//     list.sublist("smoother: ifpack list").set("relaxation: type",
-//                                                 "symmetric Gauss-Seidel");
-//     list.sublist("smoother: ifpack list").set("relaxation: damping factor",
-//                                                 omega);
-//     list.sublist("smoother: ifpack list").set("relaxation: sweeps",
-//                                                 1);
-//     list.sublist("smoother: ifpack list").set("relaxation: zero starting solution",
-//                                                 false);
-
-
-
-    //list.sublist("smoother: ifpack list").set("schwarz: filter singletons", true);
-
-    //    list.sublist("smoother: ifpack list").set("amesos: solver type", "Amesos_Lapack");
 
 
     if (MLPrintParameterList)
