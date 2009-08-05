@@ -37,3 +37,7 @@ link:
 
 clean-results:
 	-rm velocity*.vct displacement*.vct structure.*.case structure.*.geo
+
+recheck:
+	-rm $(check_PROGRAMS)
+	make check
