@@ -32,6 +32,9 @@
 #define __Ethiersteinman_H 1
 
 #include <life/lifecore/application.hpp>
+#include <life/lifesolver/Oseen.hpp>
+#include <life/lifemesh/regionMesh3D.hpp>
+#include <life/lifemesh/basisElSh.hpp>
 
 enum TimeScheme { BDF_ORDER_ONE = 1, BDF_ORDER_TWO, BDF_ORDER_THREE };
 
@@ -47,6 +50,9 @@ class Ethiersteinman
 //     public LifeV::Application
 {
 public:
+    typedef LifeV::RegionMesh3D<LifeV::LinearTetra> mesh_type;
+    typedef LifeV::Oseen< mesh_type >::vector_type  vector_type;
+    typedef boost::shared_ptr<vector_type> vector_ptrtype;
 
 
     /** @name Typedefs

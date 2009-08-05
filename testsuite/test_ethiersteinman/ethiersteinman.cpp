@@ -54,8 +54,8 @@
 #include <life/lifefem/bdfNS_template.hpp>
 #include <life/lifefilters/ensight.hpp>
 #include <life/lifefilters/hdf5exporter.hpp>
+#include <life/lifefilters/noexport.hpp>
 
-#include <life/lifesolver/Oseen.hpp>
 
 #include <iostream>
 
@@ -167,8 +167,6 @@ Ethiersteinman::Ethiersteinman( int argc,
 void
 Ethiersteinman::run()
 {
-    typedef Oseen< RegionMesh3D<LinearTetra> >::vector_type  vector_type;
-    typedef boost::shared_ptr<vector_type> vector_ptrtype;
     // Reading from data file
     //
     GetPot dataFile( d->data_file_name.c_str() );
@@ -291,9 +289,12 @@ Ethiersteinman::run()
     std::string const proj =  dataFile( "fluid/space_discretization/initialization", "proj");
     bool const L2proj( !proj.compare("proj") );
 
-    std::ofstream out_norm("norm.txt");
+    std::ofstream out_norm;
     if (verbose)
+    {
+        out_norm.open("norm.txt");
         out_norm << "% time / u L2 error / L2 rel error   p L2 error / L2 rel error \n" << std::flush;
+    }
 
     double urelerr;
     double prelerr;
@@ -364,21 +365,25 @@ Ethiersteinman::run()
 
     vector_ptrtype velAndPressure;
 
-#ifdef HAVE_HDF5
     std::string const exporterType =  dataFile( "exporter/type", "ensight");
 
-    if (!exporterType.compare("ensight"))
+#ifdef HAVE_HDF5
+    if (exporterType.compare("hdf5"))
     {
         exporter.reset( new Hdf5exporter<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
         velAndPressure.reset( new vector_type(fluid.solution(), Unique ) );
-    } else {
-        exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
-        velAndPressure.reset( new vector_type(fluid.solution(), Repeated ) );
     }
-#else
-    exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
-    velAndPressure.reset( new vector_type(fluid.solution(), Repeated ) );
+    else
 #endif
+    {
+        velAndPressure.reset( new vector_type(fluid.solution(), Repeated ) );
+        if (exporterType.compare("none"))
+        {
+            exporter.reset( new NoExport<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
+        } else {
+            exporter.reset( new Ensight<RegionMesh3D<LinearTetra> > ( dataFile, meshPart.mesh(), "ethiersteinman", d->comm->MyPID()) );
+        }
+    }
 
     exporter->addVariable( ExporterData::Vector, "velocity", velAndPressure,
                          UInt(0), uFESpace.dof().numTotalDof() );
