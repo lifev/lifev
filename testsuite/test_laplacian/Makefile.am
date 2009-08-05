@@ -24,7 +24,7 @@ SUFFIXES        = .cpp .hpp .idl .c .h .f .F .o .moc
 
 include $(top_srcdir)/testsuite/Makefile.testsuite
 
-check_HEADERS = laplacian.hpp 
+check_HEADERS = laplacian.hpp
 check_PROGRAMS = test_laplacian
 
 test_laplacian_SOURCES = main.cpp laplacian.cpp
@@ -33,7 +33,7 @@ EXTRA_DIST = data
 
 link:
 	test -a data || ln -s $(srcdir)/data
-	test -a Mesh || ln -s $(top_srcdir)/testsuite/data/mesh Mesh
+	test -a Mesh || ln -s $(top_srcdir)/testsuite/data/mesh/inria Mesh
 
 clean-results:
 	-rm *.vct *.scl *.case *.geo
