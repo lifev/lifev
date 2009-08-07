@@ -88,22 +88,22 @@ public:
     //! \name Markers_Types
     /*! From Marker Common (MC) template parameter */
     //@{
-    typedef typename MC::PointMarker PointMarker;
-    typedef typename MC::EdgeMarker EdgeMarker;
+    typedef typename MC::PointMarker  PointMarker;
+    typedef typename MC::EdgeMarker   EdgeMarker;
     typedef typename MC::RegionMarker RegionMarker;
     typedef typename MC::RegionMarker Marker;
     //@}
 
     //! \name Basic_Element_Shapes_Types
     //@{
-    typedef GEOSHAPE EdgeShape;
+    typedef GEOSHAPE                     EdgeShape;
     typedef typename GEOSHAPE::GeoBShape PointShape;
     //@}
 
     //! \name Geometric_Element_Types
     //@{
     typedef GeoElement1D<EdgeShape, MC> EdgeType;
-    typedef GeoElement0D<MC> PointType;
+    typedef GeoElement0D<MC>            PointType;
     //@}
 
     //! \name GeoElement_Container_Types
@@ -113,7 +113,7 @@ public:
     //! Points Container
     typedef SimpleVect<PointType> Points;
     //! Edges Container: at least boundary edges
-    typedef SimpleVect<EdgeType> Edges;
+    typedef SimpleVect<EdgeType>  Edges;
     //@}
     /*! \name Generic_Types
      * Generic types for all regionmeshXX These are part
@@ -121,12 +121,12 @@ public:
      * 1D).
      */
     //@{
-    typedef GEOSHAPE ElementShape;
+    typedef GEOSHAPE                     ElementShape;
     typedef typename GEOSHAPE::GeoBShape BElementShape;
-    typedef GeoElement1D<GEOSHAPE, MC> ElementType;
-    typedef GeoElement0D<MC> BElementType;
-    typedef SimpleVect<EdgeType > Elements;
-    typedef SimpleVect<PointType> BElements;
+    typedef GeoElement1D<GEOSHAPE, MC>   ElementType;
+    typedef GeoElement0D<MC>             BElementType;
+    typedef SimpleVect<EdgeType >        Elements;
+    typedef SimpleVect<PointType>        BElements;
     //@}
 
     /*! \name Switches_Methods

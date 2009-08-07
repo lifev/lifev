@@ -79,7 +79,7 @@ public:
 
 //                   *********** BASIS REFERENCE SHAPES ****************
 
-enum ReferenceShapes {NONE, POINT, LINE, TRIANGLE, QUAD, HEXA, PRISM, TETRA};
+enum ReferenceShapes   {NONE, POINT, LINE, TRIANGLE, QUAD, HEXA, PRISM, TETRA};
 enum ReferenceGeometry {VERTEX = 0, EDGE = 1, FACE = 2, VOLUME = 3};
 //! \defgroup BasRefSha   Basis Reference Shapes
 
@@ -87,12 +87,12 @@ enum ReferenceGeometry {VERTEX = 0, EDGE = 1, FACE = 2, VOLUME = 3};
 class Point
 {
 public:
-    static const ReferenceShapes Shape = POINT; //!< Identify the shape
+    static const ReferenceShapes Shape      = POINT; //!< Identify the shape
     static const ReferenceGeometry Geometry = VERTEX;
-    static const UInt nDim = 0;   //!< Dimensionality
-    static const UInt numFaces = 0; //!< Number of faces
-    static const UInt numEdges = 0; //!< Number of faces
-    static const UInt numVertices = 1; //!< Number of vertices.
+    static const UInt nDim                  = 0;     //!< Dimensionality
+    static const UInt numFaces              = 0;     //!< Number of faces
+    static const UInt numEdges              = 0;     //!< Number of faces
+    static const UInt numVertices           = 1;     //!< Number of vertices.
 };
 
 //! \ingroup BasRefSha
