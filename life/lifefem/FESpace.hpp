@@ -318,16 +318,16 @@ FESpace(	partitionMesh<Mesh>& 	mesh,
 			const Int            	fDim,
 			Epetra_Comm&         	comm
 		) :
-    M_mesh			( mesh.mesh() ),
-    M_refFE			( &refFE ),
-    M_Qr			( &Qr ),
-    M_bdQr			( &bdQr ),
-    M_fieldDim		( fDim ),
-    M_dof			( new Dof( *M_mesh, *M_refFE ) ),
-    M_dim			( M_dof->numTotalDof() ),
-    M_fe			( new CurrentFE( *M_refFE, getGeoMap( *M_mesh ), *M_Qr ) ),
-    M_feBd			( new CurrentBdFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) ),
-    M_map			( )
+        M_mesh			( mesh.mesh() ),
+        M_refFE			( &refFE ),
+        M_Qr			( &Qr ),
+        M_bdQr			( &bdQr ),
+        M_fieldDim		( fDim ),
+        M_dof			( new Dof( *M_mesh, *M_refFE ) ),
+        M_dim			( M_dof->numTotalDof() ),
+        M_fe			( new CurrentFE  ( *M_refFE,              getGeoMap( *M_mesh ),               *M_Qr ) ),
+        M_feBd			( new CurrentBdFE( M_refFE->boundaryFE(), getGeoMap( *M_mesh ).boundaryMap(), *M_bdQr ) ),
+        M_map			( )
 {
 	Map map( *M_refFE, *M_mesh, comm );
 	for ( UInt ii = 0; ii < M_fieldDim; ++ii )

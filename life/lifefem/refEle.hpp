@@ -162,6 +162,43 @@ public:
 };
 
 
+
+
+
+
+//======================================================================
+//
+//                            P0  (0D)
+//
+//======================================================================
+/*
+                           1
+*/
+
+Real fct1_P0_0D( cRRef , cRRef, cRRef );
+Real derfct1_P0_0D( cRRef, cRRef, cRRef );
+Real der2fct1_P0_0D( cRRef, cRRef, cRRef );
+
+static const Real refcoor_P0_0D[ 3 ] =
+    {
+        1. , 0. , 0.
+    };
+
+static const Fct fct_P0_0D[ 1 ] =
+    {
+        fct1_P0_0D
+    };
+
+static const Fct derfct_P0_0D[ 1 ] =
+    {
+        derfct1_P0_0D
+    };
+
+static const Fct der2fct_P0_0D[ 1 ] =
+    {
+        der2fct1_P0_0D
+    };
+
 //======================================================================
 //
 //                            P1  (1D)

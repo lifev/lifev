@@ -26,19 +26,24 @@ namespace LifeV
 */
 StaticBdFE::StaticBdFE( const RefFE& _refFE, const GeoMap& _geoMap,
                         const QuadRule& _qr ) :
-        nbGeoNode( _geoMap.nbDof ), nbNode( _refFE.nbDof ), nbCoor( _refFE.nbCoor ),
-        nbQuadPt( _qr.nbQuadPt ), point( nbGeoNode, nbCoor + 1 ),
-        refFE( _refFE ), geoMap( _geoMap ), qr( _qr ),
-        phi( ( int ) nbNode, ( int ) nbQuadPt ), dPhiRef( ( int ) nbNode, ( int ) nbCoor,
-                ( int ) nbQuadPt ),
-        dPhi( ( int ) nbNode, ( int ) nbCoor, ( int ) nbQuadPt ),
-        phiGeo( ( int ) nbGeoNode, ( int ) nbQuadPt ),
-        dPhiGeo( ( int ) nbGeoNode, ( int ) nbCoor, ( int ) nbQuadPt ),
+        nbGeoNode ( _geoMap.nbDof ),
+        nbNode    ( _refFE.nbDof ),
+        nbCoor    ( _refFE.nbCoor ),
+        nbQuadPt  ( _qr.nbQuadPt ),
+        point     ( nbGeoNode, nbCoor + 1 ),
+        refFE     ( _refFE ),
+        geoMap    ( _geoMap ), qr( _qr ),
+        phi       ( ( int ) nbNode,( int ) nbQuadPt ),
+        dPhiRef   ( ( int ) nbNode, ( int ) nbCoor,( int ) nbQuadPt ),
+        dPhi      ( ( int ) nbNode, ( int ) nbCoor, ( int ) nbQuadPt ),
+        phiGeo    ( ( int ) nbGeoNode, ( int ) nbQuadPt ),
+        dPhiGeo   ( ( int ) nbGeoNode, ( int ) nbCoor, ( int ) nbQuadPt ),
         weightMeas( ( int ) nbQuadPt ), meas( ( int ) nbQuadPt ),
-        normal( ( int ) nbCoor + 1, ( int ) nbQuadPt ),
-        tangent( ( int ) nbCoor, ( int ) nbCoor + 1, ( int ) nbQuadPt ),
-        metric( ( int ) nbCoor, ( int ) nbCoor, ( int ) nbQuadPt ), quadPt( ( int ) nbQuadPt, 3 ),
-        invArea( 1. )
+        normal    ( ( int ) nbCoor + 1, ( int ) nbQuadPt ),
+        tangent   ( ( int ) nbCoor, ( int ) nbCoor + 1, ( int ) nbQuadPt ),
+        metric    ( ( int ) nbCoor, ( int ) nbCoor, ( int ) nbQuadPt ),
+        quadPt    ( ( int ) nbQuadPt, 3 ),
+        invArea   ( 1. )
 {
     CONSTRUCTOR( "StaticBdFE" );
     for ( int ig = 0;ig < nbQuadPt;ig++ )

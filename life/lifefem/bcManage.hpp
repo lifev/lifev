@@ -2023,6 +2023,7 @@ void bcFluxManage( MatrixType&     A,
     UInt nDofF = bdfem.nbNode;
 
     offset += BCb.offset();
+
     // Number of total scalar Dof
     UInt totalDof = dof.numTotalDof();
 
@@ -2069,6 +2070,8 @@ void bcFluxManage( MatrixType&     A,
 
                                     jdDof = offset;
 
+//                                     std::cout << jdDof + 1 << " " << idDof << " " << sum
+//                                               << " " << b.checkLID(jdDof+1) << std::endl;
                                     A.set_mat_inc( idDof - 1, jdDof    , sum );
                                     A.set_mat_inc( jdDof    , idDof - 1, sum );
                                 }

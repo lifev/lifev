@@ -43,7 +43,7 @@ namespace LifeV
 */
 
 class GeoMap:
-            public RefEle
+        public RefEle
 {
     const GeoMap* _boundaryMap;
 public:
@@ -71,10 +71,19 @@ public:
 
        bdMap : a pointer on the natural associated mapping for the boundary of the element
      */
-    GeoMap( std::string _name, ReferenceShapes _shape, int _nbDof, int _nbCoor,
-            const Fct* phi, const Fct* dPhi, const Fct* d2Phi,
-            const Real* _refCoor, const SetOfQuadRule& sqr, const GeoMap* bdMap );
+    GeoMap( std::string          _name,
+            ReferenceShapes      _shape,
+            int                  _nbDof,
+            int                  _nbCoor,
+            const Fct*           phi,
+            const Fct*           dPhi,
+            const Fct*           d2Phi,
+            const Real*          _refCoor,
+            const SetOfQuadRule& sqr,
+            const GeoMap*        bdMap );
+
     ~GeoMap();
+
     friend std::ostream& operator << ( std:: ostream& f, const GeoMap& geomap );
     //! return the natural mapping for the boundary of the element
     inline const GeoMap& boundaryMap() const
@@ -85,6 +94,7 @@ public:
 };
 
 //--------------------------------------------------
+extern const GeoMap geoLinearNode;
 extern const GeoMap geoLinearSeg;
 extern const GeoMap geoLinearTria;
 extern const GeoMap geoBilinearQuad;
@@ -98,28 +108,54 @@ extern const GeoMap geoBilinearHexa;
 template <typename RegionMesh>
 const GeoMap& getGeoMap( RegionMesh & /*mesh*/ )
 {
+
     typedef typename RegionMesh::ElementShape ElementShape;
+
+//     std::cout << "element shape = " << ElementShape::Shape << std::endl;
+
+//     typedef typename RegionMesh::BElementShape BElementShape;
+
+//     std::cout << "element shape = " << BElementShape::Shape << std::endl;
+
     switch ( ElementShape::Shape )
     {
+    case POINT:
+        //        std::cout << "POINT" << std::endl;
+        if ( ElementShape::numPoints == 1 )
+            return geoLinearNode;
+        else
+            ERROR_MSG( "Geomap type not yet implemented" );
+        break;
+    case LINE:
+        //std::cout << "LINE" << std::endl;
+        if ( ElementShape::numPoints == 2 )
+            return geoLinearSeg;
+        else
+            ERROR_MSG( "Geomap type not yet implemented" );
+        break;
     case HEXA:
+        //std::cout << "HEXA" << std::endl;
         if ( ElementShape::numPoints == 8 )
             return geoBilinearHexa;
         else
             ERROR_MSG( "Geomap type not yet implemented" );
         break;
     case TETRA:
+        //std::cout << "TETRA" << std::endl;
         if ( ElementShape::numPoints == 4 )
             return geoLinearTetra;
         else
             ERROR_MSG( "Geomap type not yet implemented" );
         break;
     case TRIANGLE:
+        //std::cout << "TRIANGLE" << std::endl;
             if ( ElementShape::numPoints == 3 )
                 return geoLinearTria;
             else
                 ERROR_MSG( "Geomap type not yet implemented" );
             break;
     case QUAD:
+        //std::cout << "TQUAD" << std::endl;
             if ( ElementShape::numPoints == 4 )
                 return geoBilinearQuad;
             else

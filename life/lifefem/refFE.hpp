@@ -62,6 +62,7 @@ namespace LifeV
 /* Unique FE identifier*/
 enum FE_TYPE
 {
+    FE_P0_0D = 0,
     FE_P1_1D = 1,
     FE_P2_1D = 2,
 
@@ -128,12 +129,25 @@ public:
       code it in refFE.cc following the example of P1ISOP2_TRIA_PATTERN)
       \param bdRefFE  a pointer on the associated reference finite element on the boundary
     */
-    RefFE( std::string _name, int _type, ReferenceShapes _shape,
-           int _nbDofPerVertex, int _nbDofPerEdge, int _nbDofPerFace, int _nbDofPerVolume,
-           int _nbDof, int _nbCoor, const Fct* phi, const Fct* dPhi, const Fct* d2Phi,
-           const Real* _refCoor, const SetOfQuadRule& sqr, PatternType _patternType,
-           const RefFE* bdRefFE );
+    RefFE( std::string          _name,
+           int                  _type,
+           ReferenceShapes      _shape,
+           int                  _nbDofPerVertex,
+           int                  _nbDofPerEdge,
+           int                  _nbDofPerFace,
+           int                  _nbDofPerVolume,
+           int                  _nbDof,
+           int                  _nbCoor,
+           const Fct*           phi,
+           const Fct*           dPhi,
+           const Fct*           d2Phi,
+           const Real*          _refCoor,
+           const SetOfQuadRule& sqr,
+           PatternType          _patternType,
+           const RefFE*         bdRefFE );
+
     ~RefFE();
+
     friend std::ostream& operator << ( std::ostream& f, const RefFE& fe );
     //! return the natural reference finite element for the boundary
     inline const RefFE& boundaryFE() const

@@ -27,6 +27,30 @@ namespace LifeV
 //! UNKNOWN means: replace me with the degree of exactness of the quadrature rule !
 const size_t UNKNOWN = size_t( -1 );
 
+
+
+
+/*======================================================================
+ *
+ *                          Quadrature Rules on Nodes
+ *
+ *=======================================================================*/
+//! total number of quadrature rules on segments
+
+const size_t NB_QUAD_RULE_NODE = 3;
+//! id of the quadrature rules on nodes
+const size_t QUAD_RULE_NODE_1PT = 1;
+
+
+static const QuadPoint pt_node_1pt[ 1 ] =
+    {
+        QuadPoint( 0., 1. )
+    };
+const QuadRule quadRuleNode1pt( pt_node_1pt,
+                                QUAD_RULE_NODE_1PT,
+                                "Gauss Legendre 1 point on a node", POINT, 1, 1 );
+
+
 /*======================================================================
  *
  *                          Quadrature Rules on segments
@@ -102,7 +126,7 @@ const SetOfQuadRule allQuadRuleSeg( quad_rule_seg, NB_QUAD_RULE_SEG );
 
 static const QuadPoint pt_tria_1pt[ 1 ] =
     {
-        QuadPoint( 1. / 3., 1. / 3., 1. / 2. )
+        QuadPoint( 1./3., 1./3., 1./2. )
     };
 const QuadRule quadRuleTria1pt( pt_tria_1pt,
                                 QUAD_RULE_TRIA_1PT,
@@ -120,10 +144,10 @@ const QuadRule quadRuleTria3pt( pt_tria_3pt,
 //----------------------------------------------------------------------
 // 4 points Integration rule for triangle (Ref. e.g. Comincioli pag. 234) D of Ex = 3
 const Real t4pt_xb1 = 3. / 5.,
-                      t4pt_xb2 = 1. / 5.,
-                                 t4pt_w1 = 25. / 96.,
-                                           t4pt_w2 = -9. / 32.,
-                                                     t4pt_a = 1. / 3.;
+    t4pt_xb2 =  1. / 5.,
+    t4pt_w1  = 25. / 96.,
+    t4pt_w2  = -9. / 32.,
+    t4pt_a   =  1. / 3.;
 
 static const QuadPoint pt_tria_4pt[ 4 ] =
     {
@@ -159,7 +183,7 @@ const QuadRule quadRuleTria6pt( pt_tria_6pt, QUAD_RULE_TRIA_6PT,
                                 TRIANGLE, 6, 4 );
 //----------------------------------------------------------------------
 // 7 points Integration rule for triangle (Ref. Stroud) D of Ex = 5
-const Real t7pt_x0 = 1. / 3.;
+const Real t7pt_x0 = 1./3.;
 const Real t7pt_x1 = 0.10128650732345633;
 const Real t7pt_x2 = 0.47014206410511508;
 const Real t7pt_w0 = 0.1125;
@@ -535,6 +559,26 @@ static const QuadRule quad_rule_hexa[ NB_QUAD_RULE_HEXA ] =
 const SetOfQuadRule allQuadRuleHexa( quad_rule_hexa, NB_QUAD_RULE_HEXA );
 //======================================================================
 //
+//                            P0  (0D)
+//
+//======================================================================
+/*
+                           1
+*/
+Real fct1_P0_0D( cRRef , cRRef, cRRef )
+{
+    return 1.;
+}
+Real derfct1_P0_0D( cRRef, cRRef, cRRef )
+{
+    return 0.;
+}
+Real der2fct1_P0_0D( cRRef, cRRef, cRRef )
+{
+    return 0.;
+}
+//======================================================================
+//
 //                            P1  (1D)
 //
 //======================================================================
@@ -543,7 +587,7 @@ const SetOfQuadRule allQuadRuleHexa( quad_rule_hexa, NB_QUAD_RULE_HEXA );
 */
 Real fct1_P1_1D( cRRef x, cRRef, cRRef )
 {
-    return 1 -x;
+    return 1 - x;
 }
 Real fct2_P1_1D( cRRef x, cRRef, cRRef )
 {
@@ -3378,7 +3422,31 @@ Real fct4_DIV_RT0_3D_TETRA( cRRef, cRRef, cRRef )
     return 6 ;
 }
 
+//======================================================================
+//
+//                            P0  (0D)
+//
+//======================================================================
+/*
+                           1
+*/
 
+const RefFE fePointP0( "Lagrange P0 on a point",
+                       FE_P0_0D,
+                       POINT,
+                       1,                           // nb dof per vertex
+                       0,                           // nb dof per edge
+                       0,                           // nb dof per face
+                       0,                           // nb dof per volume
+                       1,                           // nb dof
+                       1,                           // nb coor
+                       fct_P0_0D,
+                       derfct_P0_0D,
+                       der2fct_P0_0D,
+                       refcoor_P0_0D,
+                       allQuadRuleSeg,
+                       STANDARD_PATTERN,
+                       ( RefFE* ) NULL );
 
 //======================================================================
 //
@@ -3388,9 +3456,10 @@ Real fct4_DIV_RT0_3D_TETRA( cRRef, cRRef, cRRef )
 /*
                            1-----2
 */
+
 const RefFE feSegP1( "Lagrange P1 on a segment", FE_P1_1D, LINE, 1, 0, 0, 0, 2, 1,
                      fct_P1_1D, derfct_P1_1D, der2fct_P1_1D, refcoor_P1_1D,
-                     allQuadRuleSeg, STANDARD_PATTERN, ( RefFE* ) NULL );
+                     allQuadRuleSeg, STANDARD_PATTERN, ( RefFE* ) &fePointP0 );
 
 //======================================================================
 //
@@ -3400,6 +3469,7 @@ const RefFE feSegP1( "Lagrange P1 on a segment", FE_P1_1D, LINE, 1, 0, 0, 0, 2, 
 /*
                            1--3--2
 */
+
 const RefFE feSegP2( "Lagrange P2 on a segment", FE_P2_1D, LINE, 1, 1, 0, 0, 3, 1,
                      fct_P2_1D, derfct_P2_1D, der2fct_P2_1D, refcoor_P2_1D, allQuadRuleSeg,
                      STANDARD_PATTERN, ( RefFE* ) NULL );
@@ -3416,6 +3486,7 @@ const RefFE feSegP2( "Lagrange P2 on a segment", FE_P2_1D, LINE, 1, 1, 0, 0, 3, 
                            | 1\
                             ---
 */
+
 const RefFE feTriaP0( "Lagrange P0 on a triangle", FE_P0_2D, TRIANGLE, 0, 0, 0, 1, 1, 2,
                       fct_P0_2D, derfct_P0_2D, der2fct_P0_2D, refcoor_P0_2D, allQuadRuleTria,
                       STANDARD_PATTERN, ( RefFE* ) NULL );
@@ -3432,6 +3503,7 @@ const RefFE feTriaP0( "Lagrange P0 on a triangle", FE_P0_2D, TRIANGLE, 0, 0, 0, 
                            |  \
                            1---2
 */
+
 const RefFE feTriaP1( "Lagrange P1 on a triangle", FE_P1_2D, TRIANGLE, 1, 0, 0, 0, 3, 2,
                       fct_P1_2D, derfct_P1_2D, der2fct_P1_2D, refcoor_P1_2D, allQuadRuleTria,
                       STANDARD_PATTERN, &feSegP1 );
@@ -3683,18 +3755,26 @@ const RefHdivFE feTetraRT0( "RT0 on a tetra", FE_RT0_TETRA_3D, TETRA, 0, 0, 1, 0
 //
 //----------------------------------------------------------------------
 
+const GeoMap geoLinearPoint( "Linear mapping on a segment", POINT, 1, 1,
+                             fct_P0_0D, derfct_P0_0D, der2fct_P0_0D,
+                             refcoor_P0_0D, allQuadRuleSeg, ( GeoMap* ) NULL );
+
 const GeoMap geoLinearSeg( "Linear mapping on a segment", LINE, 2, 1,
                            fct_P1_1D, derfct_P1_1D, der2fct_P1_1D,
-                           refcoor_P1_1D, allQuadRuleSeg, ( GeoMap* ) NULL );
+                           refcoor_P1_1D, allQuadRuleSeg, ( GeoMap* ) &geoLinearPoint );
+
 const GeoMap geoBilinearQuad( "Bilinear mapping on a quadrangle", QUAD, 4, 2,
                               fct_Q1_2D, derfct_Q1_2D, der2fct_Q1_2D,
                               refcoor_Q1_2D, allQuadRuleQuad, ( GeoMap* ) NULL );
+
 const GeoMap geoLinearTria( "Linear mapping on a triangle", TRIANGLE, 3, 2,
                             fct_P1_2D, derfct_P1_2D, der2fct_P1_2D,
                             refcoor_P1_2D, allQuadRuleTria, &geoLinearSeg );
+
 const GeoMap geoLinearTetra( "Linear mapping on a tetraedra", TETRA, 4, 3,
                              fct_P1_3D, derfct_P1_3D, der2fct_P1_3D,
                              refcoor_P1_3D, allQuadRuleTetra, &geoLinearTria );
+
 const GeoMap geoBilinearHexa( "Bilinear mapping on an hexaedra", HEXA, 8, 3,
                               fct_Q1_3D, derfct_Q1_3D, der2fct_Q1_3D,
                               refcoor_Q1_3D, allQuadRuleHexa, &geoBilinearQuad );

@@ -172,8 +172,15 @@ private:
 
 //! Constructor that builds the localToglobal table
 template <typename Mesh>
-Dof::Dof( Mesh& mesh, const LocalDofPattern& _fe, UInt off ) : fe( _fe ), _offset( off ), _totalDof( 0 ),
-                                                               _nEl( 0 ), nlv( 0 ), nle( 0 ), nlf( 0 ), _ltg()
+Dof::Dof( Mesh& mesh, const LocalDofPattern& _fe, UInt off ) :
+        fe       ( _fe ),
+        _offset  ( off ),
+        _totalDof( 0 ),
+        _nEl     ( 0 ),
+        nlv      ( 0 ),
+        nle      ( 0 ),
+        nlf      ( 0 ),
+        _ltg     ()
 {
     for ( UInt i = 0; i < 5; ++i )
         _ncount[ i ] = 0;

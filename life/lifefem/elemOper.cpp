@@ -1097,6 +1097,7 @@ void stiff( Real coef, ElemMat& elmat, const CurrentFE& fe,
     ASSERT_PRE( fe.hasFirstDeriv(),
                 "Stiffness (vect) matrix needs at least the first derivatives" );
     ASSERT_PRE( nb > 1, "if nb = 1, use the other stiff function" );
+
     Tab2d mat_tmp( fe.nbNode, fe.nbNode );
     mat_tmp = ZeroMatrix( fe.nbNode, fe.nbNode );
 
@@ -4238,7 +4239,7 @@ void source_press( Real coef, const ElemVec& uk_loc, const ElemVec& d_loc, ElemV
         s = 0;
         for ( ig = 0;ig < fe_u.nbQuadPt;ig++ )
         {
-            //            std::cout << ig << " " << fe_p.phi(i, ig) << std::endl;
+            //std::cout << i << " " << ig << " " << fe_p.phi(i, ig) << " " << aux[ig] << std::endl;
             s += aux[ ig ] * fe_p.phi( i, ig ) * fe_u.weightDet( ig );
         }
         vec [ i ] += coef * s;
