@@ -381,7 +381,7 @@ void Monolithic::setDispSolid(const vector_type &sol)
 void
 Monolithic::evalResidual( vector_type&       res,
                           const vector_type& disp,
-                          const int          iter )
+                          const UInt          iter )
 {
 
             //            eval(disp, iter);

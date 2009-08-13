@@ -165,11 +165,11 @@ public:
 		//M_fsi->setSourceTerms( fZero, fZero );
     	Debug( 10000 ) << "Setting up the BC \n";
 
-    	M_fsi->setFluidBC(BCh_fluid(*M_fsi->operFSI()));
-    	M_fsi->setHarmonicExtensionBC (BCh_harmonicExtension(*M_fsi->operFSI()));
-    	M_fsi->setSolidBC(BCh_solid(*M_fsi->operFSI()));
-    	M_fsi->setLinFluidBC(BCh_fluidLin(*M_fsi->operFSI()));
-    	M_fsi->setLinSolidBC(BCh_solidLin(*M_fsi->operFSI()));
+    	M_fsi->setFluidBC(BCh_fluid(*M_fsi->FSIOper()));
+    	M_fsi->setHarmonicExtensionBC (BCh_harmonicExtension(*M_fsi->FSIOper()));
+    	M_fsi->setSolidBC(BCh_solid(*M_fsi->FSIOper()));
+    	M_fsi->setLinFluidBC(BCh_fluidLin(*M_fsi->FSIOper()));
+    	M_fsi->setLinSolidBC(BCh_solidLin(*M_fsi->FSIOper()));
 
     	M_absorbingBC = data_file("fluid/absorbing_bc", false);
     	std::cout << "   absorbing BC = " << M_absorbingBC << std::endl;
@@ -257,7 +257,7 @@ public:
 	{
     	std::ofstream ofile;
 
-    	bool const isFluidLeader( M_fsi->operFSI()->isFluid() && M_fsi->operFSI()->isLeader() );
+    	bool const isFluidLeader( M_fsi->FSIOper()->isFluid() && M_fsi->FSIOper()->isLeader() );
     	if (isFluidLeader) ofile.open("fluxes.res");
 
     	boost::timer _overall_timer;
@@ -270,13 +270,13 @@ public:
 		//if ( M_fsi->isFluid() )
     	//{
 			//if (isFluidLeader) ofile << time << " ";
-			//flux = M_fsi->operFSI()->fluid().flux(2);
+			//flux = M_fsi->FSIOper()->fluid().flux(2);
 			//if (isFluidLeader) ofile << flux << " ";
-			//flux = M_fsi->operFSI()->fluid().flux(3);
+			//flux = M_fsi->FSIOper()->fluid().flux(3);
 			//if (isFluidLeader) ofile << flux << " ";
-			//flux = M_fsi->operFSI()->fluid().pressure(2);
+			//flux = M_fsi->FSIOper()->fluid().pressure(2);
 			//if (isFluidLeader) ofile << flux << " ";
-			//flux = M_fsi->operFSI()->fluid().pressure(3);
+			//flux = M_fsi->FSIOper()->fluid().pressure(3);
 			//if (isFluidLeader) ofile << flux << " " << std::endl;
 
 			//*M_velAndPressure = M_fsi->FSIOper()->fluid().solution();
@@ -292,8 +292,8 @@ public:
     		if (M_absorbingBC && M_fsi->isFluid())
 			{
 				LifeV::BCFunctionBase outFlow;
-				outFlow.setFunction(bc_adaptor(*M_fsi->operFSI()));
-				M_fsi->operFSI()->BCh_fluid()->modifyBC(3, outFlow);
+				outFlow.setFunction(bc_adaptor(*M_fsi->FSIOper()));
+				M_fsi->FSIOper()->BCh_fluid()->modifyBC(3, outFlow);
 			}
 
     		M_fsi->iterate( time );
@@ -301,13 +301,13 @@ public:
     		if ( M_fsi->isFluid() )
             {
 				if (isFluidLeader) ofile << time << " ";
-    			flux = M_fsi->operFSI()->fluid().flux(2);
+    			flux = M_fsi->FSIOper()->fluid().flux(2);
 				if (isFluidLeader) ofile << flux << " ";
-				flux = M_fsi->operFSI()->fluid().flux(3);
+				flux = M_fsi->FSIOper()->fluid().flux(3);
 				if (isFluidLeader) ofile << flux << " ";
-				flux = M_fsi->operFSI()->fluid().pressure(2);
+				flux = M_fsi->FSIOper()->fluid().pressure(2);
 				if (isFluidLeader) ofile << flux << " ";
-				flux = M_fsi->operFSI()->fluid().pressure(3);
+				flux = M_fsi->FSIOper()->fluid().pressure(3);
 				if (isFluidLeader) ofile << flux << " " << std::endl;
 
 				*M_velAndPressure = M_fsi->FSIOper()->fluid().solution();
@@ -352,14 +352,14 @@ struct FSIChecker
 {
     FSIChecker( GetPot const& _data_file ):
         data_file( _data_file ),
-        oper     ( _data_file( "problem/method", "exactJacobian" ) ),
+        Oper     ( _data_file( "problem/method", "exactJacobian" ) ),
         prec     ( ( LifeV::Preconditioner )_data_file( "problem/precond", LifeV::NEUMANN_NEUMANN ) )
         {}
 
     FSIChecker( GetPot const& _data_file,
                 std::string _oper):
         data_file( _data_file ),
-        oper     ( _oper ),
+        Oper     ( _oper ),
         prec     ( ( LifeV::Preconditioner )_data_file( "problem/precond", LifeV::NEUMANN_NEUMANN ) )
         {}
 
@@ -370,18 +370,18 @@ struct FSIChecker
     	try
     	{
     		std::cout << "calling problem constructor ... " << std::flush;
-    		fsip = boost::shared_ptr<Problem>( new Problem( data_file, oper ) );
+    		fsip = boost::shared_ptr<Problem>( new Problem( data_file, Oper ) );
     		std::cout << "problem set" << std::endl;
 
     		//fsip->fsiSolver()->FSIOperator()->setDataFromGetPot( data_file );
     		//std::cout << "in operator 1" << std::endl;
-    		//fsip->fsiSolver()->operFSI()->fluid().postProcess();
-			//fsip->fsiSolver()->operFSI()->solid().postProcess();
+    		//fsip->fsiSolver()->FSIOper()->fluid().postProcess();
+			//fsip->fsiSolver()->FSIOper()->solid().postProcess();
 
-    		fsip->fsiSolver()->operFSI()->setPreconditioner( prec );
+    		fsip->fsiSolver()->FSIOper()->setPreconditioner( prec );
 
 			//std::cout << "in operator 2" << std::endl;
-			//fsip->fsiSolver()->operFSI()->fluid().postProcess();
+			//fsip->fsiSolver()->FSIOper()->fluid().postProcess();
     		fsip->run( fsip->fsiSolver()->timeStep(), fsip->fsiSolver()->timeEnd() );
     	}
     	catch ( std::exception const& _ex )
@@ -389,11 +389,11 @@ struct FSIChecker
     		std::cout << "caught exception :  " << _ex.what() << "\n";
     	}
 
-    	//@disp = fsip->fsiSolver()->operFSI()->displacementOnInterface();
+    	//@disp = fsip->fsiSolver()->FSIOper()->displacementOnInterface();
 	}
 
 	GetPot                data_file;
-	std::string           oper;
+	std::string           Oper;
 	LifeV::Preconditioner prec;
 	LifeV::Vector         disp;
 };

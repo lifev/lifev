@@ -48,7 +48,7 @@ public:
 
     void   evalResidual(vector_type&        res,
                         const vector_type& _disp,
-                        const int          _iter);
+                        const UInt          _iter);
 
     void   solveJac(vector_type&       _muk,
                     const vector_type& _res,
@@ -104,7 +104,7 @@ public:
     void shiftSolution(){}
 
     void couplingVariableExtrap(vector_type& lambda, vector_type& /*lambdaDot*/, bool& /*firstIter*/)
-{    leaderPrint("norm( solution ) init = ", lambda.NormInf() );};
+{    displayer().leaderPrint("norm( solution ) init = ", lambda.NormInf(), "\n" );};
 
 protected:
 

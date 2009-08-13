@@ -50,7 +50,7 @@ public:
 
     void evalResidual(vector_type&        _res,
                       const vector_type&  _disp,
-                      const int           _iter);
+                      const UInt           _iter);
 
     void solveJac     (vector_type&       _muk,
                        const vector_type& _res,

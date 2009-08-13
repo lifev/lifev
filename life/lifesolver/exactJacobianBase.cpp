@@ -200,7 +200,7 @@ void exactJacobian::eval(const vector_type& _disp,
 
     M_epetraWorldComm->Barrier();
     chronoFluid.stop();
-    this->leaderPrintMax( "Fluid solution: total time : " , chronoFluid.diff() );
+    this->displayer().leaderPrintMax( "Fluid solution: total time : " , chronoFluid.diff() );
 
     if ( false && this->isFluid() )
     {
@@ -241,7 +241,7 @@ void exactJacobian::eval(const vector_type& _disp,
 
     M_epetraWorldComm->Barrier();
     chronoSolid.stop();
-    this->leaderPrintMax( "Solid solution: total time : " , chronoSolid.diff() );
+    this->displayer().leaderPrintMax( "Solid solution: total time : " , chronoSolid.diff() );
 
     chronoInterface.start();
 
@@ -257,7 +257,7 @@ void exactJacobian::eval(const vector_type& _disp,
     this->setSigmaSolid(     sigmaSolidUnique);
 
     chronoInterface.stop();
-    this->leaderPrintMax( "Interface transfer: total time : " , chronoInterface.diff_cumul() );
+    this->displayer().leaderPrintMax( "Interface transfer: total time : " , chronoInterface.diff_cumul() );
 
     if ( false && this->isSolid() )
     {
@@ -268,25 +268,25 @@ void exactJacobian::eval(const vector_type& _disp,
 
 
 
-    this->leaderPrint( " ::: norm(disp     )    = ", _disp.NormInf());
-    this->leaderPrint( " ::: norm(dispNew  )    = " , this->lambdaSolid().NormInf() );
-    this->leaderPrint( " ::: norm(velo     )    = " , this->lambdaDotSolid().NormInf() );
-    this->leaderPrint( " ::: max Residual Fluid = " , this->sigmaFluid().NormInf() );
-    this->leaderPrint( " ::: max Residual Solid = " , this->sigmaSolid().NormInf() );
+    this->displayer().leaderPrint( " ::: norm(disp     )    = ", _disp.NormInf(), "\n");
+    this->displayer().leaderPrint( " ::: norm(dispNew  )    = " , this->lambdaSolid().NormInf(), "\n" );
+    this->displayer().leaderPrint( " ::: norm(velo     )    = " , this->lambdaDotSolid().NormInf(), "\n" );
+    this->displayer().leaderPrint( " ::: max Residual Fluid = " , this->sigmaFluid().NormInf(), "\n" );
+    this->displayer().leaderPrint( " ::: max Residual Solid = " , this->sigmaSolid().NormInf(), "\n" );
 
     if (this->isFluid())
-        this->leaderPrint( "Max ResidualF        = " , M_fluid->residual().NormInf() );
+        this->displayer().leaderPrint( "Max ResidualF        = " , M_fluid->residual().NormInf(), "\n" );
     if (this->isSolid())
         {
-            this->leaderPrint( "NL2 DiplacementS     = " , M_solid->disp().Norm2() );
-            this->leaderPrint( "Max ResidualS        = " , M_solid->residual().NormInf() );
+            this->displayer().leaderPrint( "NL2 DiplacementS     = " , M_solid->disp().Norm2(), "\n" );
+            this->displayer().leaderPrint( "Max ResidualS        = " , M_solid->residual().NormInf(), "\n" );
         }
 
 }
 
 void exactJacobian::evalResidual(vector_type&       res,
                                  const vector_type& disp,
-                                 const int          iter)
+                                 const UInt          iter)
 {
     if (this->isSolid())
     {
@@ -303,8 +303,8 @@ void exactJacobian::evalResidual(vector_type&       res,
     res  = this->lambdaSolid();
     res -=  disp;
 
-    this->leaderPrint( "NormInf res   " , res.NormInf() );
-    this->leaderPrint( "NormInf res_d " , this->solid().residual().NormInf() );
+    this->displayer().leaderPrint( "NormInf res   " , res.NormInf(), "\n" );
+    this->displayer().leaderPrint( "NormInf res_d " , this->solid().residual().NormInf(), "\n" );
 
 }
 
@@ -322,7 +322,7 @@ void  exactJacobian::solveJac(vector_type         &_muk,
     if (this->isFluid() && this->isLeader()) std::cout << "  f- ";
     if (this->isSolid() && this->isLeader()) std::cout << "  s- ";
 
-    this->leaderPrint( "solveJac: NormInf res " , _res.NormInf() );
+    this->displayer().leaderPrint( "solveJac: NormInf res " , _res.NormInf(), "\n" );
     _muk *= 0.;
 
     M_linearSolver.setTolMaxiter(_linearRelTol, 100);
@@ -331,10 +331,10 @@ void  exactJacobian::solveJac(vector_type         &_muk,
 
     M_linearSolver.setOperator(*M_epetraOper);
 
-    this->leaderPrint( "Solving Jacobian system... " );
+    this->displayer().leaderPrint( "Solving Jacobian system... " );
     M_linearSolver.solve(_muk, res);
 
-    this->leaderPrint( "done.\n" );
+    this->displayer().leaderPrint( "done.\n" );
 }
 
 
@@ -369,7 +369,7 @@ void  exactJacobian::solveLinearFluid()
 
     this->derVeloFluidMesh() *= 1./(M_dataFluid->getTimeStep());
 
-    this->leaderPrint( " norm inf dw = " , this->derVeloFluidMesh().NormInf() );
+    this->displayer().leaderPrint( " norm inf dw = " , this->derVeloFluidMesh().NormInf(), "\n" );
 
     *M_rhsNew *= 0.;
 
@@ -421,7 +421,7 @@ int Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epetra_MultiVector 
     {
         FSIOperator::vector_type const z(X,  M_ej->solidInterfaceMap(), Unique);
 
-        M_ej->leaderPrint( "NormInf res   " , z.NormInf() );
+        M_ej->displayer().leaderPrint( "NormInf res   " , z.NormInf(), "\n" );
 
         //M_ej->solid().residual() *= 0.;
         //M_ej->transferInterfaceOnSolid(z, M_ej->solid().residual());
@@ -452,7 +452,7 @@ int Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epetra_MultiVector 
                         //std::cout<<" mesh motion iterated!!!"<<std::endl;
                     }
 
-                M_ej->leaderPrint( " norm inf dx = " , M_ej->meshMotion().disp().NormInf() );
+                M_ej->displayer().leaderPrint( " norm inf dx = " , M_ej->meshMotion().disp().NormInf(), "\n" );
 
                 M_ej->solveLinearFluid();
 
@@ -463,7 +463,7 @@ int Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epetra_MultiVector 
 
         M_comm->Barrier();
         chronoFluid.stop();
-        M_ej->leaderPrintMax( "Fluid linear solution: total time : ", chronoFluid.diff() );
+        M_ej->displayer().leaderPrintMax( "Fluid linear solution: total time : ", chronoFluid.diff() );
 
 
         chronoInterface.start();
@@ -485,13 +485,13 @@ int Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, Epetra_MultiVector 
 
         M_comm->Barrier();
         chronoSolid.stop();
-        M_ej->leaderPrintMax( "Solid linear solution: total time : " , chronoSolid.diff() );
+        M_ej->displayer().leaderPrintMax( "Solid linear solution: total time : " , chronoSolid.diff() );
 
         chronoInterface.start();
         M_ej->setLambdaSolid(lambdaSolidUnique);
 
         chronoInterface.stop();
-        M_ej->leaderPrintMax( "Interface linear transfer: total time : " , chronoInterface.diff_cumul() );
+        M_ej->displayer().leaderPrintMax( "Interface linear transfer: total time : " , chronoInterface.diff_cumul() );
 
         dz = lambdaSolidUnique.getEpetraVector();
 

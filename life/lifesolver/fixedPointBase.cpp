@@ -125,7 +125,7 @@ void fixedPoint::eval( const vector_type& _disp,
               << "; iter = " << iter
               << "; M_updateEvery = " << M_updateEvery << std::endl;
 
-    if (iter == 0 & this->isFluid())
+    if (iter == 0 && this->isFluid())
         {
 	    M_nbEval = 0; // new time step
 	    this->M_fluid->resetPrec();
@@ -297,7 +297,7 @@ void fixedPoint::eval( const vector_type& _disp,
 
 // Residual evaluation
 //
-void fixedPoint::evalResidual(vector_type &res, const vector_type& disp, int iter)
+void fixedPoint::evalResidual(vector_type &res, const vector_type& disp, UInt iter)
 {
 
 
