@@ -59,7 +59,7 @@ namespace LifeV
 class Displayer
 {
 public:
-	Displayer();
+	Displayer( const bool verbose = true );
     Displayer( Epetra_Comm& comm );
     virtual ~Displayer() {}
 

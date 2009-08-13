@@ -31,9 +31,9 @@
 namespace LifeV
 {
 
-Displayer::Displayer():
+Displayer::Displayer( const bool verbose ):
 	M_comm					( 0 ),
-	M_verbose				( true )
+	M_verbose				( verbose )
 {
 }
 
