@@ -57,7 +57,7 @@ public:
     */
     void   evalResidual(vector_type&        res,
                         const vector_type& _sol,
-                        const int          _iter);
+                        const UInt          _iter);
 
 
 
@@ -273,7 +273,7 @@ void iterateMonolithic(vector_type& rhs, vector_type& step, matrix_ptrtype prec,
     void shiftSolution(){}
 
     void couplingVariableExtrap(vector_ptrtype& lambda, vector_ptrtype& /*lambdaDot*/, bool& /*firstIter*/)
-{    leaderPrint("norm( solution ) init = ", lambda->NormInf() );}
+{    displayer().leaderPrint("norm( solution ) init = ", lambda->NormInf() );}
 
 virtual  const vector_type& meshDisp()const{return this->M_meshMotion->disp();}
 virtual  const vector_type&  veloFluidMesh() const;
