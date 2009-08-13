@@ -29,9 +29,11 @@
 
 
 #ifndef TWODIM
+
 #ifndef __FSISolver_H
 #define __FSISolver_H 1
 
+#include <life/lifecore/life.hpp>
 #include <life/lifearray/tab.hpp>
 #include <life/lifesolver/FSIOperator.hpp>
 #include <life/lifealg/nonLinRichardson.hpp>
@@ -39,16 +41,15 @@
 //#include <life/lifesolver/fixedPointBase.hpp>
 //#include <life/lifesolver/exactJacobianBase.hpp>
 
-
 #include "Epetra_config.h"
 #ifdef HAVE_MPI
-#include "Epetra_MpiComm.h"
+	#include "Epetra_MpiComm.h"
 #else
-#include "Epetra_SerialComm.h"
+	#include "Epetra_SerialComm.h"
 #endif
 
-namespace LifeV
-{
+namespace LifeV {
+
 /*!
   \class FSISolver
   \brief solver for Fluid-Structure Interaction
@@ -70,8 +71,6 @@ namespace LifeV
   @author Christophe Prud'homme
   @see FSIOperator
 */
-
-
 class FSISolver
 {
 public:
@@ -80,56 +79,51 @@ public:
      */
     //@{
 
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_type;
+    typedef FSIOperator::mesh_type									mesh_type;
 
-    typedef FSIOperator::mesh_type mesh_type;
+    typedef FSIOperator::fluid_type::value_type						fluid_value_type;
+    typedef FSIOperator::solid_type::value_type						solid_value_type;
 
-    typedef FSIOperator::fluid_type::value_type::source_type fluid_source_type;
-    typedef FSIOperator::solid_type::value_type::source_type solid_source_type;
+    typedef fluid_value_type::Function								fluid_function;
+    typedef solid_value_type::Function								solid_function;
 
-    typedef FSIOperator::fluid_bchandler_type fluid_bchandler_type;
-    typedef FSIOperator::solid_bchandler_type solid_bchandler_type;
+    typedef fluid_value_type::source_type							fluid_source_type;
+    typedef solid_value_type::source_type							solid_source_type;
 
-    typedef FSIOperator::fluid_bchandler_raw_type fluid_bchandler_raw_type;
-    typedef FSIOperator::solid_bchandler_raw_type solid_bchandler_raw_type;
+    typedef FSIOperator::fluid_bchandler_type						fluid_bchandler_type;
+    typedef FSIOperator::solid_bchandler_type						solid_bchandler_type;
 
-    typedef FSIOperator::fluid_type::value_type::data_type    data_fluid;
-    typedef FSIOperator::solid_type::value_type::data_type    data_solid;
+    typedef FSIOperator::fluid_bchandler_raw_type					fluid_bchandler_raw_type;
+    typedef FSIOperator::solid_bchandler_raw_type					solid_bchandler_raw_type;
 
-    typedef FSIOperator::vector_type                          vector_type;
+    typedef fluid_value_type::data_type								data_fluid;
+    typedef solid_value_type::data_type								data_solid;
+
+    typedef FSIOperator::vector_type								vector_type;
+
     //@}
 
     /** @name Constructors, destructor
      */
     //@{
 
-    /*!
-      \brief default/only constructor for the FSI solver
-
-      \attention the last argument of the constructor gives a
-      possibility to override the operator that is given by the \c
-      data_file. An empty string (default) means that it uses the
-      operator defined in \c data_file
-      \todo allow to change the FSI operator on the fly
+    //! default/only constructor for the FSI solver
+    /*! \attention the last argument of the constructor gives a
+     *  possibility to override the operator that is given by the \c
+     *  data_file. An empty string (default) means that it uses the
+     *  operator defined in \c data_file
+     *  \todo allow to change the FSI operator on the fly
      */
+    FSISolver( const GetPot& datafile, const std::string& method = "" );
 
-    FSISolver( GetPot const& datafile,
-               std::string    __oper = "" );
-    //@}
-
-    /** @name Operator overloads
-     */
-    //@{
-
-    ~FSISolver()
-        {
-        }
-    //@}
-
+    //! default/only destructor for the FSI solver
+    ~FSISolver() {}
 
     //@}
 
-    /** @name Accessors
+
+
+    /** @name Get Functions
      */
     //@{
 
@@ -140,7 +134,8 @@ public:
     Real timeEnd() const { return M_oper->dataFluid().getEndTime(); }
 
     //! get the FSI operator
-    oper_fsi_ptr_mpi const& operFSI() const { return M_oper; }
+    oper_fsi_ptr_mpi const& FSIOper() const { return M_oper; }
+    //oper_fsi_ptr_mpi FSIOper() const { return M_oper; }
 
     //! get the displacement, which will be on the solidInterfaceMap
     vector_type const& displacement() const { return *M_lambda; }
@@ -154,82 +149,65 @@ public:
     //! get access to the \c bchandler_type for the displacement
 //    solid_bchandler_type const& bcHandlerD() const { return M_BCh_d; }
 
+    bool isFluid() { return M_oper->isFluid(); }
+    bool isSolid() { return M_oper->isSolid(); }
+
     //@}
 
-    /** @name  Mutators
+
+
+    /** @name  Set Functions
      */
     //@{
 
-    void setSourceTerms( fluid_source_type const& __f, solid_source_type const& __s )
-        {
-            M_oper->fluid().setSourceTerm( __f );
-            M_oper->solid().setSourceTerm( __s );
-        }
+    //     bool setFluid				(bool fluid) { M_fluid = fluid; M_oper->set }
+    //     bool setSolid				(bool solid) { M_solid = solid; }
+    void initSol                 ( const vector_type& solInit ) { *M_lambda = solInit; }
 
+    void setSourceTerms          ( const fluid_source_type& fluidSource,
+                                   const solid_source_type& solidSource );
+
+    //! set the FSI operator to be used to couple the fluid and the structure
     /*!
-      \brief set the FSI operator to be used to couple the fluid and the structure
+     * \param __op FSI operator name
+     */
+    void setFSIOperator          ( const std::string& __op );
 
-      The name of the operator has to be passed as an argument
+    void setFluidBC              ( const fluid_bchandler_type& bc_fluid );
+    void setLinFluidBC           ( const fluid_bchandler_type& bc_dfluid );
+    void setInvLinFluidBC        ( const fluid_bchandler_type& bc_dfluid_inv );
+    void setHarmonicExtensionBC  ( const fluid_bchandler_type& bc_he );
+    void setSolidBC              ( const solid_bchandler_type& bc_solid );
+    void setLinSolidBC           ( const solid_bchandler_type& bc_dsolid );
+    void setInvLinSolidBC        ( const solid_bchandler_type& bc_dsolid_inv );
+//     void setReducedLinFluidBC    ( const fluid_bchandler_type& bc_dredfluid );
+//     void setInvReducedLinFluidBC ( const fluid_bchandler_type& bc_dredfluid_inv );
 
-      \param __op FSI operator name
-    */
-    void setFSIOperator( std::string const& __op );
-    oper_fsi_ptr_mpi FSIOper(){ return M_oper; }
     //@}
 
-    void setFluidBC             (fluid_bchandler_type bc_fluid);
-    void setLinFluidBC          (fluid_bchandler_type bc_dfluid);
-    void setInvLinFluidBC       (fluid_bchandler_type bc_dfluid_inv);
-    void setHarmonicExtensionBC (fluid_bchandler_type bc_he);
-    void setSolidBC             (solid_bchandler_type bc_solid);
-    void setLinSolidBC          (solid_bchandler_type bc_dsolid);
-    void setInvLinSolidBC       (solid_bchandler_type bc_dsolid_inv);
-//     void setReducedLinFluidBC   (fluid_bchandler_type bc_dredfluid);
-//     void setInvReducedLinFluidBC(fluid_bchandler_type bc_dredfluid_inv);
+
 
     /** @name  Methods
      */
     //@{
 
-    void initialize( FSIOperator::fluid_type::value_type::Function const& u0,
-                     FSIOperator::solid_type::value_type::Function const& p0,
-                     FSIOperator::solid_type::value_type::Function const& d0,
-                     FSIOperator::solid_type::value_type::Function const& w0 )
-        {
-            Debug( 6220 ) << "FSISover:: solid init \n";
-            if (this->isSolid())
-                M_oper->solid().initialize(d0, w0);
-            Debug( 6220 ) << "FSISover:: fluid init \n";
-            if (this->isFluid())
-                M_oper->fluid().initialize(u0, p0);
-        }
+    void initialize( const fluid_function& u0,
+                     const fluid_function& p0,
+                     const solid_function& d0,
+                     const solid_function& w0 );
 
-    void initialize( std::string /*velFName*/,
-                     std::string /*pressName*/,
-                     std::string /*velwName*/,
-                     std::string /*depName*/,
-                     std::string /*velSName*/,
-                     double      /*Tstart = 0.*/)
-        {
-//             M_oper->fluid().initialize(velFName, pressName, velwName, Tstart);
-//             M_oper->solid().initialize(depName, velSName, Tstart);
-        }
+    void initialize( const std::string& /*velFName*/,
+                     const std::string& /*pressName*/,
+                     const std::string& /*velwName*/,
+                     const std::string& /*depName*/,
+                     const std::string& /*velSName*/,
+                     const Real&        /*Tstart = 0.*/);
 
-    void iterate( Real time );
+    void iterate( const Real& time );
 
-    void showMe()
-        {
-//             M_fluid->showMe();
-//             M_solid->showMe();
-        }
+    void showMe() {}
 
     //@}
-
-    bool isFluid(){return M_oper->isFluid();}
-    bool isSolid(){return M_oper->isSolid();}
-//     bool setFluid(bool fluid){M_fluid = fluid; M_oper->set}
-//     bool setSolid(bool solid){M_solid = solid;}
-    void initSol(vector_type& solInit){*M_lambda=solInit;}
 
 private:
 
@@ -242,6 +220,36 @@ private:
     //! forbid copy operator
     FSISolver& operator=( FSISolver const& );
 
+    //Private members
+    oper_fsi_ptr_mpi							M_oper;
+
+    boost::shared_ptr<vector_type>				M_lambda;
+    boost::shared_ptr<vector_type>				M_lambdaDot;
+
+    bool										M_firstIter;
+    std::string									M_method;
+    UInt										M_maxpf;
+    Real										M_defomega;
+
+    Real										M_abstol;
+    Real										M_reltol;
+    Real										M_etamax;
+
+    Int											M_linesearch;
+
+    bool										M_monolithic;
+
+    boost::shared_ptr<EpetraMap>				M_fluidInterfaceMap;
+    boost::shared_ptr<EpetraMap>				M_solidInterfaceMap;
+
+    boost::shared_ptr<Epetra_MpiComm>			M_epetraComm;
+    boost::shared_ptr<Epetra_MpiComm>			M_epetraWorldComm;
+    boost::shared_ptr<MPI_Comm>					M_localComm;
+    boost::shared_ptr<MPI_Comm>					M_interComm;
+
+    std::ofstream								M_out_iter;
+    std::ofstream								M_out_res;
+
 //     data_fluid           M_dataFluid;
 //     data_solid           M_dataSolid;
 
@@ -252,8 +260,6 @@ private:
 
 //     fluid_bchandler_type       M_BCh_du;
 //     fluid_bchandler_type       M_BCh_dz;
-
-    oper_fsi_ptr_mpi           M_oper;
 
 
 //     FESpace<mesh_type, EpetraMap>* M_uFESpace;
@@ -271,37 +277,9 @@ private:
 //     bool                       M_fluid;
 //     bool                       M_solid;
 
-    boost::shared_ptr<vector_type>               M_lambda;
-    boost::shared_ptr<vector_type>               M_lambdaDot;
-
-    /* data */
-    bool                       M_firstIter;
-    std::string                M_method;
-    UInt                       M_maxpf;
-    Real                       M_defomega;
-
-    Real                       M_abstol;
-    Real                       M_reltol;
-    Real                       M_etamax;
-
-    int                        M_linesearch;
-
-    boost::shared_ptr<EpetraMap>      M_fluidInterfaceMap;
-    boost::shared_ptr<EpetraMap>      M_solidInterfaceMap;
-
-    boost::shared_ptr<Epetra_MpiComm> M_epetraComm;
-    boost::shared_ptr<Epetra_MpiComm> M_epetraWorldComm;
-    boost::shared_ptr<MPI_Comm>       M_localComm;
-    boost::shared_ptr<MPI_Comm>       M_interComm;
-
 //    Epetra_MpiComm*               M_epetraSolidComm;
-    /* streams */
-    std::ofstream out_iter;
-    std::ofstream out_res;
-    bool M_monolithic;
-
 };
 
-}
+} // Namespace LifeV
 #endif /* __FSISolver_H */
-#endif
+#endif /* TWODIM */
