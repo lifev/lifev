@@ -101,12 +101,12 @@ public:
 
             Debug( 10000 ) << "Setting up the BC \n";
             //if(!_oper.compare("fullMonolithic"))
-                //M_fsi->setBCh_HEInterface(BCh_HEInterface(*M_fsi->operFSI()));
-            M_fsi->setFluidBC(BCh_monolithicFluid(*M_fsi->operFSI()));
-            M_fsi->setHarmonicExtensionBC (BCh_harmonicExtension(*M_fsi->operFSI()));
-            M_fsi->setSolidBC(BCh_monolithicSolid(*M_fsi->operFSI()));
-            //            M_fsi->setLinFluidBC(BCh_fluidLin(*M_fsi->operFSI()));
-            //            M_fsi->setLinSolidBC(BCh_solidLin(*M_fsi->operFSI()));
+                //M_fsi->setBCh_HEInterface(BCh_HEInterface(*M_fsi->FSIOper()));
+            M_fsi->setFluidBC(BCh_monolithicFluid(*M_fsi->FSIOper()));
+            M_fsi->setHarmonicExtensionBC (BCh_harmonicExtension(*M_fsi->FSIOper()));
+            M_fsi->setSolidBC(BCh_monolithicSolid(*M_fsi->FSIOper()));
+            //            M_fsi->setLinFluidBC(BCh_fluidLin(*M_fsi->FSIOper()));
+            //            M_fsi->setLinSolidBC(BCh_solidLin(*M_fsi->FSIOper()));
             Debug( 10000 ) << "BC set\n";
 
 
@@ -133,11 +133,11 @@ public:
 
             //FC1=FlowConditions();
             //FC1.setParamsFromGetPot( data_file );
-            //FC1.initParameters( *M_fsi->operFSI(), 2, 3 );
+            //FC1.initParameters( *M_fsi->FSIOper(), 2, 3 );
 
             MPI_Barrier(MPI_COMM_WORLD);// to kill
 //             FlowConditions::setParamsFromGetPot( data_file );
-//             FlowConditions::initParameters( *M_fsi->operFSI(), 2, 3 );
+//             FlowConditions::initParameters( *M_fsi->FSIOper(), 2, 3 );
 
             if (M_fsi->isFluid())
                 {
@@ -268,8 +268,8 @@ public:
                 M_fsi->iterate( time );
 
 //                 ofile << time << " ";
-//                 ofile << M_fsi->operFSI()->fluid().flux(2) << " ";
-//                 ofile << M_fsi->operFSI()->fluid().flux(3) << " ";
+//                 ofile << M_fsi->FSIOper()->fluid().flux(2) << " ";
+//                 ofile << M_fsi->FSIOper()->fluid().flux(3) << " ";
 //                 ofile << std::endl;
                         *M_fluidDisp      = M_fsi->FSIOper()->meshDisp();
 
@@ -348,13 +348,13 @@ struct FSIChecker
 
 //                fsip->fsiSolver()->FSIOperator()->setDataFromGetPot( data_file );
 //                 std::cout << "in operator 1" << std::endl;
-//                 fsip->fsiSolver()->operFSI()->fluid().postProcess();
-//                 fsip->fsiSolver()->operFSI()->solid().postProcess();
+//                 fsip->fsiSolver()->FSIOper()->fluid().postProcess();
+//                 fsip->fsiSolver()->FSIOper()->solid().postProcess();
 
-                fsip->fsiSolver()->operFSI()->setPreconditioner( prec );
+                fsip->fsiSolver()->FSIOper()->setPreconditioner( prec );
 
 //                std::cout << "in operator 2" << std::endl;
-//                fsip->fsiSolver()->operFSI()->fluid().postProcess();
+//                fsip->fsiSolver()->FSIOper()->fluid().postProcess();
                 fsip->run( fsip->fsiSolver()->timeStep(), fsip->fsiSolver()->timeEnd() );
             }
             catch ( std::exception const& _ex )
@@ -362,7 +362,7 @@ struct FSIChecker
                 std::cout << "caught exception :  " << _ex.what() << "\n";
             }
 
-            //@disp = fsip->fsiSolver()->operFSI()->displacementOnInterface();
+            //@disp = fsip->fsiSolver()->FSIOper()->displacementOnInterface();
         }
 
     GetPot                data_file;
