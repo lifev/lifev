@@ -46,7 +46,7 @@ namespace LifeV
 
 template <class Fct, class Vector, class Real, class Norm>
 void lineSearch_parab( Fct& f, Norm& /*norm*/, Vector& residual, Vector& sol, Vector& step, Real& normRes,
-                       Real& lambda, int iter )
+                       Real& lambda, UInt iter )
 {
     //----------------------------------------------------------------------
     std::cout << "Parabolic line search ..." << std::endl;

@@ -30,14 +30,14 @@
 namespace LifeV
 {
 template <class Fct, class VectorType, class Real, class Norm>
-int nonLinRichardson( VectorType& sol,
+Int nonLinRichardson( VectorType& sol,
                       Fct& f,
                       const Norm& norm,
                       Real abstol,
                       Real reltol,
-                      int& maxit,
+                      UInt& maxit,
                       Real eta_max,
-                      int linesearch,
+                      Int linesearch,
                       std::ofstream& out_res,
                       const Real& time )
 //                      const Real omega )
@@ -68,7 +68,7 @@ int nonLinRichardson( VectorType& sol,
       before failure is reported
     */
 
-//    const int max_increase_res = 5;
+//    const Int max_increase_res = 5;
 
     /*
       Parameters for the linear solver, gamma: Default value = 0.9
@@ -80,7 +80,7 @@ int nonLinRichardson( VectorType& sol,
 
     bool const verbose(sol.Comm().MyPID() == 0);
 
-    int iter = 0;
+    UInt iter = 0;
 
     VectorType residual ( sol.getMap() );
     VectorType step     ( sol.getMap() );
