@@ -388,8 +388,11 @@ FSIOperator::setup()
 
 
 
+    Dof uDof(*M_dataFluid->mesh(), M_uFESpace->refFE());
+    //Dof pDof(*M_dataFluid->mesh(), M_pFESpace->refFE());
+    Dof dDof(*M_dataSolid->mesh(), M_dFESpace->refFE());
 
-    M_dofFluidToStructure->setup(M_dFESpace->refFE(), M_dFESpace->dof(),
+    M_dofFluidToStructure->setup(M_dFESpace->refFE(), dDof, //M_dFESpace->dof()
                                  M_uFESpace->refFE(), M_uFESpace->dof());
     M_dofFluidToStructure->update(*M_dataSolid->mesh(), M_fluidInterfaceFlag,
                                   *M_uFESpace->mesh(),  M_structureInterfaceFlag,
@@ -416,8 +419,8 @@ FSIOperator::setup()
                                   *M_dataSolid->mesh(), M_fluidInterfaceFlag,
                                   M_interfaceTolerance);
 
-    M_dofHarmonicExtensionToFluid->setup(M_uFESpace->refFE(),  M_uFESpace->dof(),
-                                         M_uFESpace->refFE(),  M_uFESpace->dof());
+    M_dofHarmonicExtensionToFluid->setup(M_uFESpace->refFE(),  uDof,//M_uFESpace->dof(),
+                                         M_uFESpace->refFE(),  uDof);//M_uFESpace->dof());
     M_dofHarmonicExtensionToFluid->update(*M_dataFluid->mesh(), M_harmonicInterfaceFlag,
                                           *M_dataFluid->mesh(), M_fluidInterfaceFlag,
                                           M_interfaceTolerance);
