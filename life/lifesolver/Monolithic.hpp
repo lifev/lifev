@@ -110,9 +110,9 @@ protected:
 
     void resetHeAndFluid(){}
     //void solidInit(const RefFE* refFE_struct, const LifeV::QuadRule* bdQr_struct, const LifeV::QuadRule* qR_struct);
-    void solidInit(const std::string dOrder);
+    void solidInit(const std::string& dOrder);
     //void variablesInit(const RefFE* refFE_struct,const LifeV::QuadRule*  bdQr_struct, const LifeV::QuadRule* qR_struct);
-    void variablesInit(const std::string dOrder);
+    void variablesInit(const std::string& dOrder);
 
 private:
 
