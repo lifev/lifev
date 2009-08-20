@@ -95,7 +95,7 @@ namespace LifeV {
  *
  *  NOTE: All the parameters are case sensitive.
  *
- *  type - can be: Essential Natural Mixte
+ *  type - can be: Essential Natural Mixte Flux
  *  flag - contains the flag
  *  mode - can be: Full Component Scalar Tangential Normal.
  *  component - if mode is Scalar, Tangential or Normal it is missing.
@@ -131,7 +131,7 @@ namespace LifeV {
  *     M_fluidBC.reset( new BCInterface(data_file, "fluid") );
  *
  *  3) If you have fsi conditions you have to add an operator
- *     M_fluidBC->setFSIOperator( M_fsi->operFSI() );
+ *     M_fluidBC->setFSIOperator( M_fsi->FSIOper() );
  *
  *  4) Then you can build the handler
  *     M_fluidBC->buildHandler();
@@ -203,9 +203,9 @@ public:
 
 	//! Set an FSIOperator (need only for FSI and FSIFunction boundary conditions)
     /*!
-     * \param oper			- FSIOperator
+     * \param Oper			- FSIOperator
      */
-	void setFSIOperator( const boost::shared_ptr<FSIOperator>& oper ) { M_FSIOperator = oper; }
+	void setFSIOperator( const boost::shared_ptr<FSIOperator>& Oper ) { M_FSIOperator = Oper; }
 
 	//! Set manually Handler parameters: you need it only if you are adding manually some parameters by calling addBC
     /*!

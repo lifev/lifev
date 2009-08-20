@@ -75,7 +75,7 @@ BCInterface::BCInterface( const GetPot& dataFile, const std::string& dataSection
 	M_mapType["Essential"] 			= Essential;
 	M_mapType["Natural"] 			= Natural;
 	M_mapType["Mixte"] 				= Mixte;
-	//M_mapType["Flux"] 			= Flux;
+	M_mapType["Flux"] 				= Flux;
 
 	//Set mapMode
 	M_mapMode["Scalar"] 			= Scalar;
