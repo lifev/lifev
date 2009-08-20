@@ -128,6 +128,8 @@ public:
     typedef FSIOperator::fluid_type::value_type::data_type    data_fluid;
     typedef FSIOperator::solid_type::value_type::data_type    data_solid;
 
+    typedef std::map<ID, ID>::const_iterator                        Iterator;
+
 //     typedef boost::shared_ptr<reducedLinFluid>    quasi_newton_type;
 
     //@}
@@ -146,52 +148,35 @@ public:
 
 
 
-    /** @name  Virtual Methods
+    /** @name Methods
      */
     //@{
 
     virtual void setDataFromGetPot( const GetPot& data );
 
-    virtual void setUpSystem( const GetPot& data_file );
+    virtual void setupFEspace();
 
-    virtual void setup();
+            void setupDOF();
+
+    virtual void setupFluidSolid();
+
+    virtual void setupSystem();
 
     virtual void buildSystem();
 
     virtual void updateSystem( const vector_type& /*displacement*/ );
 
+    virtual void couplingVariableExtrap( vector_ptrtype& lambda, vector_ptrtype& lambdaDot, bool& firstIter );
+
     virtual void solveJac( vector_type&       _muk,
                            const vector_type& _res,
-                           const Real       _linearRelTol ) = 0;
+                           const Real         _linearRelTol ) = 0;
 
     virtual void evalResidual( vector_type&        res,
                                const vector_type& _disp,
                                const UInt         _iter ) = 0;
 
     virtual void shiftSolution();
-
-    virtual void couplingVariableExtrap( vector_ptrtype& lambda, vector_ptrtype& lambdaDot, bool& firstIter );
-
-    // Virtual method with short implementation
-    virtual vector_type& veloFluidMesh()                        { return *M_veloFluidMesh; }
-
-    virtual boost::shared_ptr<EpetraMap>& couplingVariableMap() { return M_solidInterfaceMap; }
-
-    virtual const vector_type& meshDisp()                 const { return M_meshMotion->disp(); }
-
-    //! relevant only for monolitic solver. re-Implemented there
-//     virtual boost::shared_ptr<EpetraMap>& monolithicMap()        { assert(false); };
-
-    //! relevant only for monolitic solver. re-Implemented there
-    virtual void iterateMesh( const vector_type& /*disp*/ )     { assert(false); }
-
-    //@}
-
-
-
-    /** @name  Methods
-     */
-    //@{
 
     void initializeFluid( const vector_type& velAndPressure,
                           const vector_type& displacement );
@@ -203,16 +188,20 @@ public:
 
     void moveMesh       ( const vector_type& dep );
 
-    void solveLinearFluid();
-    void solveLinearSolid();
+//     void solveLinearFluid();
+//     void solveLinearSolid();
 
-    void transferFluidOnInterface ( const vector_type& _vec1, vector_type& _vec2 );
+    void transferFluidOnInterface( const vector_type& _vec1, vector_type& _vec2 );
 
     //works in serial but no yet in parallel
-    void transferSolidOnFluid     ( const vector_type& _vec1, vector_type& _vec2 );
-    void transferSolidOnInterface ( const vector_type& _vec1, vector_type& _vec2 );
-//     void transferInterfaceOnFluid ( const vector_type& _vec1, vector_type& _vec2 );
-    void transferInterfaceOnSolid ( const vector_type& _vec1, vector_type& _vec2 );
+    void transferSolidOnFluid    ( const vector_type& _vec1, vector_type& _vec2 );
+    void transferSolidOnInterface( const vector_type& _vec1, vector_type& _vec2 );
+//     void transferInterfaceOnFluid( const vector_type& _vec1, vector_type& _vec2 );
+    void transferInterfaceOnSolid( const vector_type& _vec1, vector_type& _vec2 );
+
+    //! MONOLITHIC Solver methods - Implemented there
+//     virtual boost::shared_ptr<EpetraMap>& monolithicMap()        { assert(false); };
+    virtual void iterateMesh( const vector_type& /*disp*/ )     { assert(false); }
 
     //@}
 
@@ -298,8 +287,10 @@ public:
     const FESpace<mesh_type, EpetraMap>& pFESpace()               const { return *M_pFESpace; }
     const FESpace<mesh_type, EpetraMap>& dFESpace()               const { return *M_dFESpace; }
     const FESpace<mesh_type, EpetraMap>& mmFESpace()              const { return *M_mmFESpace; }
-    const vector_type& dispFluidMeshOld()                         const { return *M_dispFluidMeshOld; }
-          vector_type& derVeloFluidMesh()                               { return *M_derVeloFluidMesh; }
+    virtual const vector_type& meshDisp()                         const { return M_meshMotion->disp(); }
+    const         vector_type& dispFluidMeshOld()                 const { return *M_dispFluidMeshOld; }
+    virtual       vector_type& veloFluidMesh()                          { return *M_veloFluidMesh; }
+                  vector_type& derVeloFluidMesh()                       { return *M_derVeloFluidMesh; }
 
     //const dof_interface_type3D& dofStructureToFluid()             const { return M_dofSolidToFluid; }
     const dof_interface_type3D& dofFluidToStructure()             const { return M_dofFluidToStructure; }
@@ -311,8 +302,9 @@ public:
 //     std::vector<int>& dofInterfaceFluid()                               { return M_dofInterfaceFluid; }
 //     std::vector<int>& dofInterfaceSolid()                               { return M_dofInterfaceSolid; }
 
-    boost::shared_ptr<EpetraMap>& fluidInterfaceMap()                   { return M_fluidInterfaceMap; }
-    boost::shared_ptr<EpetraMap>& solidInterfaceMap()                   { return M_solidInterfaceMap; }
+            boost::shared_ptr<EpetraMap>& fluidInterfaceMap()              { return M_fluidInterfaceMap; }
+            boost::shared_ptr<EpetraMap>& solidInterfaceMap()              { return M_solidInterfaceMap; }
+    virtual boost::shared_ptr<EpetraMap>& couplingVariableMap()            { return M_solidInterfaceMap; }
 
     //vector_type displacementOnInterface();
 //     BCFunctionMixte& bcfMixteOuterWall()                                { return M_bcfMixteOuterWall; }
@@ -353,8 +345,8 @@ public:
 
     void setComm( const boost::shared_ptr<Epetra_MpiComm>& comm, const boost::shared_ptr<Epetra_MpiComm>& worldComm );
 
-    void setPreconditioner   ( const Preconditioner&    _p ) { M_precond    = _p; }
-    void setDDNPreconditioner( const DDNPreconditioner& _p ) { M_DDNprecond = _p; }
+    void setPreconditioner   ( const Preconditioner&    P ) { M_precond    = P; }
+    void setDDNPreconditioner( const DDNPreconditioner& P ) { M_DDNprecond = P; }
 
     void setTime( const Real& time );
 
@@ -373,12 +365,12 @@ public:
 //     void setBC( fluid_bchandler_type& bc_u, solid_bchandler_type& bc_d, fluid_bchandler_type& bc_m );
 
     void setFluidBC             ( const fluid_bchandler_type& bc_fluid );
-    void setLinFluidBC          ( const fluid_bchandler_type& bc_dfluid )     { M_BCh_du = bc_dfluid; }
+    void setLinFluidBC          ( const fluid_bchandler_type& bc_dfluid )     { M_BCh_du     = bc_dfluid; }
     void setInvLinFluidBC       ( const fluid_bchandler_type& bc_dfluid_inv ) { M_BCh_du_inv = bc_dfluid_inv; }
     void setHarmonicExtensionBC ( const fluid_bchandler_type& bc_he );
 
     void setSolidBC             ( const solid_bchandler_type& bc_solid );
-    void setLinSolidBC          ( const solid_bchandler_type& bc_dsolid )     { M_BCh_dz = bc_dsolid; }
+    void setLinSolidBC          ( const solid_bchandler_type& bc_dsolid )     { M_BCh_dz     = bc_dsolid; }
     void setInvLinSolidBC       ( const solid_bchandler_type& bc_dsolid_inv ) { M_BCh_dz_inv = bc_dsolid_inv; }
 
     void setLambdaFluid         ( const vector_type& lambda );
@@ -424,20 +416,17 @@ public:
 //     void setReducedLinFluidBC                (fluid_bchandler_type bc_dredfluid);
 //     void setInvReducedLinFluidBC             (fluid_bchandler_type bc_invdredfluid);
 
-    void setBCh_fluid             ( const fluid_bchandler_type& BCh_fluid)       { M_BCh_u      = BCh_fluid; }
-    void setBCh_HarmonicExtension ( const fluid_bchandler_type& BCh_mesh)        { M_BCh_mesh   = BCh_mesh; }
-    void setBCh_fluidDer          ( const fluid_bchandler_type& BCh_fluidDer)    { M_BCh_du     = BCh_fluidDer; }
-    void setBCh_fluidDerInv       ( const fluid_bchandler_type& BCh_fluidDerInv) { M_BCh_du_inv = BCh_fluidDerInv; }
-    void setBCh_solid             ( const solid_bchandler_type& BCh_solid)       { M_BCh_d      = BCh_solid; }
-    void setBCh_solidDer          ( const solid_bchandler_type& BCh_solidDer)    { M_BCh_dz     = BCh_solidDer; }
-    void setBCh_solidDerInv       ( const solid_bchandler_type& BCh_solidDerInv) { M_BCh_dz_inv = BCh_solidDerInv; }
+//     void setBCh_fluid             ( const fluid_bchandler_type& BCh_fluid)       { M_BCh_u      = BCh_fluid; }
+//     void setBCh_HarmonicExtension ( const fluid_bchandler_type& BCh_mesh)        { M_BCh_mesh   = BCh_mesh; }
+//     void setBCh_fluidDer          ( const fluid_bchandler_type& BCh_fluidDer)    { M_BCh_du     = BCh_fluidDer; }
+//     void setBCh_fluidDerInv       ( const fluid_bchandler_type& BCh_fluidDerInv) { M_BCh_du_inv = BCh_fluidDerInv; }
+//     void setBCh_solid             ( const solid_bchandler_type& BCh_solid)       { M_BCh_d      = BCh_solid; }
+//     void setBCh_solidDer          ( const solid_bchandler_type& BCh_solidDer)    { M_BCh_dz     = BCh_solidDer; }
+//     void setBCh_solidDerInv       ( const solid_bchandler_type& BCh_solidDerInv) { M_BCh_dz_inv = BCh_solidDerInv; }
 
 protected:
 
-    virtual void resetHeAndFluid();
-
-    //virtual void solidInit( const RefFE* refFE_struct, const LifeV::QuadRule* bdQr_struct, const LifeV::QuadRule* qR_struct);
-    virtual void solidInit( const std::string& dOrder );
+    virtual UInt imposeFlux();
 
     //virtual void variablesInit(const RefFE* refFE_struct,const LifeV::QuadRule*  bdQr_struct, const LifeV::QuadRule* qR_struct);
     virtual void variablesInit( const std::string& dOrder );
@@ -486,6 +475,7 @@ protected:
 
     boost::shared_ptr<BdfT<vector_type> >             M_bdf;
 
+    GetPot                                            M_dataFile;
     boost::shared_ptr<data_fluid>                     M_dataFluid;
     boost::shared_ptr<data_solid>                     M_dataSolid;
 
