@@ -69,7 +69,7 @@ public:
     */
     virtual void   solveJac(vector_type&       _muk,
                     const vector_type& _res,
-                    const double       _linearRelTol);
+                    const Real       _linearRelTol);
 
 
     /**
@@ -121,9 +121,14 @@ public:
     void buildSystem();
 
     /**
+       create FEspace
+    */
+    void setupFEspace();
+
+    /**
        assigns each mesh partition to the corresponding processor, builds the monolithic map
     */
-    virtual void setup();
+    virtual void setupFluidSolid();
 
     /** returns the monolithic map*/
     virtual    boost::shared_ptr<EpetraMap>& couplingVariableMap(){return M_monolithicMap;}
@@ -155,7 +160,7 @@ public:
     //!get the total dimension of the FS interface
     const UInt dimInterface() const {return nDimensions*M_interface ;}
 
-    void setUpSystem( GetPot const& data_file );
+    void setupSystem( );
     void setUp( const GetPot& dataFile );
 
 protected:
@@ -280,9 +285,6 @@ virtual  const vector_type&  veloFluidMesh() const;
 virtual vector_type& veloFluidMesh();
 
 protected:
-
-    //void solidInit(const RefFE* refFE_struct, const LifeV::QuadRule* bdQr_struct, const LifeV::QuadRule* qR_struct);
-	void solidInit(const std::string& dOrder);
 
 	//void variablesInit(const RefFE* refFE_struct,const LifeV::QuadRule*  bdQr_struct, const LifeV::QuadRule* qR_struct);
 	void variablesInit(const std::string& dOrder);

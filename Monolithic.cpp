@@ -60,10 +60,24 @@ Monolithic::~Monolithic()
 {
 }
 
-
-void Monolithic::setup()
+void
+Monolithic::setupFEspace()
 {
-    super::setup();
+	super::setupFEspace();
+
+	// Monolitic: In the beginning I need a non-partitioned mesh. later we will do the partitioning
+    M_dFESpace.reset( new FESpace<mesh_type, EpetraMap>( M_dataSolid->mesh(),
+                                                         M_dataSolid->order(),
+														 //*refFE_struct,
+                                                         //*qR_struct,
+                                                         //*bdQr_struct,
+                                                         3,
+                                                         *M_epetraComm));
+}
+
+void Monolithic::setupFluidSolid()
+{
+    super::setupFluidSolid();
 
 
             // Added here the code to build the monolithicMap!!
@@ -163,7 +177,8 @@ void Monolithic::setup()
             //the map for the interface coupling matrices should be done with respect to the coarser mesh.
             M_beta.reset  (new vector_type(/*M_monolithicMap*/M_uFESpace->map()));
 
-            M_offset = M_uFESpace->dof().numTotalDof()*nDimensions + M_BCh_u->getFluxes() +  M_pFESpace->dof().numTotalDof();
+            std::cout << "Fluxes number: " << M_BCh_u->getNumberBCWithType( Flux ) << std::endl;
+            M_offset = M_uFESpace->dof().numTotalDof()*nDimensions + M_BCh_u->getNumberBCWithType( Flux ) +  M_pFESpace->dof().numTotalDof();
             M_solidAndFluidDim= M_offset + M_dFESpace->dof().numTotalDof()*nDimensions;
             M_BCh_d->setOffset(M_offset);
             if(!M_fullMonolithic)
@@ -558,7 +573,7 @@ Monolithic::evalResidual( vector_type&       res,
 
             //                M_epetraWorldComm->Barrier();
             chronoFluid.start();
-            M_meshMotion->iterate();
+            M_meshMotion->iterate(*M_BCh_mesh);
             M_meshMotion->updateDispDiff();
 
             M_beta.reset(new vector_type(M_uFESpace->map()));
@@ -753,7 +768,7 @@ evalResidual( fluid_bchandler_raw_type& bchFluid, solid_bchandler_raw_type& bchS
 
 void  Monolithic::solveJac(vector_type         &_step,
                            const vector_type   &_res,
-                           const double         /*_linearRelTol*/)
+                           const Real         /*_linearRelTol*/)
 {
 
     M_solid->getDisplayer().leaderPrint("solveJac: NormInf res ", _res.NormInf());
@@ -862,14 +877,14 @@ Monolithic::iterateMesh(const vector_type& disp)
 
                 this->setLambdaFluid(lambdaFluid); // it must be _disp restricted to the interface
 
-                M_meshMotion->iterate();
+                M_meshMotion->iterate(*M_BCh_mesh);
 
 }
 
 //void Monolithic::variablesInit(const RefFE* refFE_struct,const LifeV::QuadRule*  bdQr_struct, const LifeV::QuadRule* qR_struct)
 void Monolithic::variablesInit(const std::string& dOrder)
 {
-    EpetraMap interfaceMap(*M_solidInterfaceMap);
+	//EpetraMap interfaceMap(*M_solidInterfaceMap);
     M_solidMeshPart.reset( new  partitionMesh< FSIOperator::mesh_type > (*M_dataSolid->mesh(), *M_epetraComm, M_solidInterfaceMap->getMap(Unique).get(), M_solidInterfaceMap->getMap(Repeated).get()));
 
     M_dFESpace.reset(new FESpace<mesh_type, EpetraMap>(*M_solidMeshPart,
@@ -919,15 +934,15 @@ updateSolidSystem( vector_ptrtype & rhsFluidCoupling )
     *rhsFluidCoupling += *M_solid->rhsWithoutBC();
 }
 void
-Monolithic::setUpSystem( GetPot const& data_file )
+Monolithic::setupSystem( )
 {
-        M_fluid->setUp(data_file);
-        M_meshMotion->setUp(data_file);
-        setUp(data_file);
+        M_fluid->setUp( M_dataFile );
+        M_meshMotion->setUp( M_dataFile );
+        setUp( M_dataFile );
 }
 
-void Monolithic::
-setUp( const GetPot& dataFile )
+void
+Monolithic::setUp( const GetPot& dataFile )
 {
     M_solid->getDisplayer().leaderPrint("\n S-  Displacement unknowns: ",  M_dFESpace->dof().numTotalDof() );
     M_solid->getDisplayer().leaderPrint(" S-  Computing mass and linear strain matrices ... \n");
@@ -954,18 +969,6 @@ diagonalScale(vector_type& rhs, matrix_ptrtype matrFull)
     rhs.getEpetraVector().Multiply(1, rhs.getEpetraVector(), diagonal,0);
 }
 
-
-//void Monolithic::solidInit(const RefFE* refFE_struct,const LifeV::QuadRule*  bdQr_struct, const LifeV::QuadRule* qR_struct)
-void Monolithic::solidInit(const std::string& dOrder)
-{   // Monolitic: In the beginning I need a non-partitioned mesh. later we will do the partitioning
-    M_dFESpace.reset(new FESpace<mesh_type, EpetraMap>(M_dataSolid->mesh(),
-														dOrder,
-														//*refFE_struct,
-                                                       //*qR_struct,
-                                                       //*bdQr_struct,
-                                                       3,
-                                                       *M_epetraComm));
-}
 
 Monolithic::vector_type& Monolithic::veloFluidMesh()
 {

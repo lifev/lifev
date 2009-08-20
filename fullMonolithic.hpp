@@ -72,7 +72,12 @@ public:
     */
     //    void   updateSystem(const vector_type&       solution);
 
-    void setup();
+    /**
+       create FEspace
+    */
+    void setupFEspace();
+
+    void setupFluidSolid();
     //    void updateSystem(const vector_type& _sol);
 
     /**
@@ -86,7 +91,7 @@ public:
 
     void solveJac(vector_type       &_muk,
                   const vector_type &_res,
-                  const double       _linearRelTol);
+                  const Real       _linearRelTol);
     matrix_ptrtype getMatrixPtr(){return this->M_monolithicMatrix;}
     vector_ptrtype uk(){return M_uk;}
     vector_type& meshVel();

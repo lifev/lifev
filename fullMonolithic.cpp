@@ -38,9 +38,15 @@ fullMonolithic::fullMonolithic():
 {}
 
 void
-fullMonolithic::setup()
+fullMonolithic::setupFEspace()
 {
-    super::setup();
+	super::setupFEspace();
+}
+
+void
+fullMonolithic::setupFluidSolid()
+{
+    super::setupFluidSolid();
     UInt offset = M_monolithicMap->getMap(Unique)->NumGlobalElements();
     M_mapWithoutMesh.reset(new EpetraMap(*M_monolithicMap));
     M_BCh_mesh->setOffset(offset);
@@ -229,7 +235,7 @@ fullMonolithic::evalResidual( vector_type&       res,
                 }
             M_uk.reset(new vector_type(disp));
             this->M_rhsFull.reset(new vector_type(*this->M_rhs));
-            M_meshMotion->applyBoundaryConditions(*M_rhsFull);
+            M_meshMotion->applyBoundaryConditions(*M_rhsFull, *M_BCh_mesh);
             M_meshMotion->setMatrix(M_monolithicMatrix);
 
             super::evalResidual( *M_BCh_u, *M_BCh_d, disp, this->M_rhsFull, res, false);
@@ -260,7 +266,7 @@ fullMonolithic::evalResidual( vector_type&       res,
 
 void fullMonolithic::solveJac(vector_type       &_muk,
               const vector_type &_res,
-              const double       _linearRelTol)
+              const Real       _linearRelTol)
 {
     /*    this->M_solid->setFullPreconditioner(M_bigPrecPtr);
     Real entry(1.e-3);
@@ -268,7 +274,6 @@ void fullMonolithic::solveJac(vector_type       &_muk,
     M_bigPrecPtr->GlobalAssemble();
     M_bigPrecPtr->spy("bigPrecPtr");*/
     vector_ptrtype rhs(new vector_type(_res));
-
     if(M_dataFluid->useShapeDerivatives())
         {
             if(M_DDBlockPrec==6)
