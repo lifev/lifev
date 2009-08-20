@@ -53,7 +53,7 @@ public:
 
     void   evalResidual(vector_type&        res,
                         const vector_type& _sol,
-                        const int          _iter);
+                        const UInt          _iter);
     /**
        evaluates the residual b-Ax
        \param res: output

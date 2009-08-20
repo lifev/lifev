@@ -137,7 +137,7 @@ fullMonolithic::buildSystem ()
 void
 fullMonolithic::evalResidual( vector_type&       res,
                                 const vector_type& disp,
-                                const int          iter )
+                                const UInt          iter )
 {
     /**
        Here I calculate the solution of the monolithic given the harmonic extension sol, then I solve the harmonic extension problem. The residual is the difference between the new found domain displacement and the old one.
