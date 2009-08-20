@@ -37,8 +37,7 @@ namespace LifeV {
 // ===================================================
 //! Constructors
 // ===================================================
-FSISolver::FSISolver( const GetPot&      data_file,
-                      const std::string& method ):
+FSISolver::FSISolver( const std::string& method ):
 //     M_dataFluid         ( data_file ),
 //     M_dataSolid         ( data_file ),
 //     M_BCh_u             (new fluid_bchandler_raw_type),
@@ -46,17 +45,17 @@ FSISolver::FSISolver( const GetPot&      data_file,
 //     M_BCh_d             (new fluid_bchandler_raw_type),
 //     M_BCh_mesh          (new fluid_bchandler_raw_type),
     M_oper              ( ),
+    M_method            ( method ),
+    M_monolithic	    ( !( M_method.compare("monolithic") && M_method.compare("fullMonolithic") ) ),
     M_lambda            ( ),
     M_lambdaDot         ( ),
     M_firstIter         ( true ),
-    M_method            ( data_file("problem/method"     , "steklovPoincare") ),
-    M_maxpf             ( data_file("problem/maxSubIter" , 300) ),
-    M_defomega          ( data_file("problem/defOmega"   , 0.01) ),
-    M_abstol            ( data_file("problem/abstol"     , 1.e-07) ),
-    M_reltol            ( data_file("problem/reltol"     , 1.e-04) ),
-    M_etamax            ( data_file("problem/etamax"     , 1.e-03) ),
-    M_linesearch        ( static_cast<Int> (data_file("problem/linesearch" , 0)) ),
-    M_monolithic	    ( !( M_method.compare("monolithic") && M_method.compare("fullMonolithic") ) ),
+	M_maxpf             ( ),
+    M_defomega          ( ),
+    M_abstol            ( ),
+    M_reltol            ( ),
+    M_etamax            ( ),
+    M_linesearch        ( ),
     M_fluidInterfaceMap ( ),
     M_solidInterfaceMap ( ),
     M_epetraComm        ( ),
@@ -66,13 +65,9 @@ FSISolver::FSISolver( const GetPot&      data_file,
     M_out_iter          ( "iter" ),
     M_out_res           ( "res" )
 {
-    Debug( 6220 ) << "FSISolver::FSISolver starts\n";
-
-//     M_lambda   = ZeroVector( M_lambda.size() );
-//     M_lambdaDot   = ZeroVector( M_lambdaDot.size() );
-
-//     Debug( 6220 ) << "FSISolver::M_lambda: " << M_lambda.size() << "\n";
-//     Debug( 6220 ) << "FSISolver::M_lambdaDot: " << M_lambdaDot.size() << "\n";
+#ifdef DEBUG
+    Debug( 6220 ) << "FSISolver::FSISolver constructor starts\n";
+#endif
 
     int rank, numtasks;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -158,7 +153,6 @@ FSISolver::FSISolver( const GetPot&      data_file,
                   << " out of " << M_epetraComm->NumProc()
                   << " ( " << numtasks << " ) "
                   << " is fluid." << std::endl;
-        //partitionMesh< RegionMesh3D<LinearTetra> >  meshPart(M_dataFluid.mesh(), *M_epetraComm);
     }
     if ( solid )
     {
@@ -169,7 +163,7 @@ FSISolver::FSISolver( const GetPot&      data_file,
                   << " is solid." << std::endl;
     }
 
-    MPI_Barrier(MPI_COMM_WORLD);
+    M_epetraWorldComm->Barrier();
 
     /*
     if (solid)
@@ -200,18 +194,11 @@ FSISolver::FSISolver( const GetPot&      data_file,
     MPI_Barrier(MPI_COMM_WORLD);
     */
 
-    Preconditioner precond  = ( Preconditioner ) data_file("problem/precond"   , DIRICHLET_NEUMANN );
-
-    Debug( 6220 ) << "FSISolver::preconditioner: " << precond << "\n";
-
-    if ( !method.empty() )
-        M_method = method;
-
+#ifdef DEBUG
     Debug( 6220 ) << "FSISolver::setFSIOperator " << M_method << "\n";
+#endif
 
     this->setFSIOperator( M_method );
-
-//    M_oper = oper_fsi_ptr_mpi(new fixedPoint);
 
     M_oper->setFluid( fluid );
     M_oper->setSolid( solid );
@@ -220,49 +207,21 @@ FSISolver::FSISolver( const GetPot&      data_file,
     M_oper->setSolidLeader( solidLeader );
 
     M_oper->setComm( M_epetraComm, M_epetraWorldComm );
-    M_oper->setDataFromGetPot( data_file );
 
-    M_oper->setPreconditioner( precond );
+    M_epetraWorldComm->Barrier();
 
-    M_oper->setup();
-
-    M_oper->setUpSystem( data_file );
-
-    M_lambda.reset   ( new vector_type(*M_oper->couplingVariableMap()) ); // couplingVariableMap()
-    M_lambdaDot.reset( new vector_type(*M_oper->couplingVariableMap()) );
-
-    M_oper->buildSystem();
-
-//     M_oper->
-//     if (fluid)
-//         {
-//             M_oper->fluid().setUp(data_file);
-// //            M_oper->fluidLin().setUp(data_file);
-//             M_oper->meshMotion().setUp(data_file);
-//         }
-//     if (solid)
-//         M_oper->solid().setUp(data_file);
-
-//    Debug( 6220 ) << "FSISolver:: building the fluid and solid systems " << precond << "\n";
-
-//     if (fluid)
-//     {
-//         M_oper->fluid().buildSystem();
-//     }
-
-//     if (solid)
-//     {
-//         M_oper->solid().buildSystem();
-//     }
-
-
-    MPI_Barrier(MPI_COMM_WORLD);
-
-
+#ifdef DEBUG
     Debug( 6220 ) << "FSISolver constructor ends\n";
+#endif
 
 //@     M_lambda.resize(M_oper->displacement().size());
 //@     M_lambdaDot.resize(M_oper->velocity().size());
+
+//     M_lambda   = ZeroVector( M_lambda.size() );
+//     M_lambdaDot   = ZeroVector( M_lambdaDot.size() );
+
+//     Debug( 6220 ) << "FSISolver::M_lambda: " << M_lambda.size() << "\n";
+//     Debug( 6220 ) << "FSISolver::M_lambdaDot: " << M_lambdaDot.size() << "\n";
 }
 
 
@@ -272,6 +231,45 @@ FSISolver::FSISolver( const GetPot&      data_file,
 // ===================================================
 //! Methods
 // ===================================================
+void
+FSISolver::setDataFromGetPot( const GetPot& dataFile )
+{
+    M_maxpf      = dataFile( "problem/maxSubIter", 300 );
+    M_defomega   = dataFile( "problem/defOmega"  , 0.01 );
+    M_abstol     = dataFile( "problem/abstol"    , 1.e-07 );
+    M_reltol     = dataFile( "problem/reltol"    , 1.e-04 );
+    M_etamax     = dataFile( "problem/etamax"    , 1.e-03 );
+    M_linesearch = static_cast<Int> ( dataFile( "problem/linesearch" , 0 ) );
+
+    M_oper->setDataFromGetPot( dataFile );
+
+#ifdef DEBUG
+    Debug( 6220 ) << "FSISolver::preconditioner: " << precond << "\n";
+#endif
+    M_oper->setPreconditioner( static_cast<Preconditioner> ( dataFile( "problem/precond", DIRICHLET_NEUMANN ) ) );
+
+    M_oper->setupFEspace();
+
+    M_oper->setupDOF();
+}
+
+
+
+void
+FSISolver::setup( void )
+{
+    M_oper->setupFluidSolid();
+
+    M_oper->setupSystem();
+
+    M_lambda.reset   ( new vector_type( *M_oper->couplingVariableMap() ) );
+    M_lambdaDot.reset( new vector_type( *M_oper->couplingVariableMap() ) );
+
+    M_oper->buildSystem();
+}
+
+
+
 void
 FSISolver::initialize( const std::string& /*velFName*/,
                        const std::string& /*pressName*/,
@@ -283,6 +281,8 @@ FSISolver::initialize( const std::string& /*velFName*/,
 //             M_oper->fluid().initialize(velFName, pressName, velwName, Tstart);
 //             M_oper->solid().initialize(depName, velSName, Tstart);
 }
+
+
 
 void
 FSISolver::initialize( const fluid_function& u0,
@@ -298,6 +298,8 @@ FSISolver::initialize( const fluid_function& u0,
 	if ( this->isFluid() )
 		M_oper->fluid().initialize(u0, p0);
 }
+
+
 
 void
 FSISolver::iterate( const Real& time )
@@ -330,16 +332,16 @@ FSISolver::iterate( const Real& time )
     UInt status = 1;
     Debug( 6220 ) << "Calling non-linear Richardson \n";
 
-    status = nonLinRichardson(*M_lambda,
-                              *M_oper,
-                              norm_inf_adaptor(),
-                              M_abstol,
-                              M_reltol,
-                              maxiter,
-                              M_etamax,
-                              M_linesearch,
-                              M_out_res,
-                              time);
+    status = nonLinRichardson( *M_lambda,
+                               *M_oper,
+                               norm_inf_adaptor(),
+                               M_abstol,
+                               M_reltol,
+                               maxiter,
+                               M_etamax,
+                               M_linesearch,
+                               M_out_res,
+                               time );
 
     if(status == 1)
     {

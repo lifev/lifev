@@ -114,7 +114,7 @@ public:
      *  operator defined in \c data_file
      *  \todo allow to change the FSI operator on the fly
      */
-    FSISolver( const GetPot& datafile, const std::string& method = "" );
+    FSISolver( const std::string& method = "" );
 
     //! default/only destructor for the FSI solver
     ~FSISolver() {}
@@ -191,6 +191,10 @@ public:
      */
     //@{
 
+    void setDataFromGetPot( const GetPot& dataFile );
+
+    void setup( );
+
     void initialize( const fluid_function& u0,
                      const fluid_function& p0,
                      const solid_function& d0,
@@ -223,11 +227,13 @@ private:
     //Private members
     oper_fsi_ptr_mpi							M_oper;
 
+    std::string									M_method;
+    bool										M_monolithic;
+
     boost::shared_ptr<vector_type>				M_lambda;
     boost::shared_ptr<vector_type>				M_lambdaDot;
 
     bool										M_firstIter;
-    std::string									M_method;
     UInt										M_maxpf;
     Real										M_defomega;
 
@@ -236,8 +242,6 @@ private:
     Real										M_etamax;
 
     Int											M_linesearch;
-
-    bool										M_monolithic;
 
     boost::shared_ptr<EpetraMap>				M_fluidInterfaceMap;
     boost::shared_ptr<EpetraMap>				M_solidInterfaceMap;
